@@ -1,0 +1,5 @@
+		 AssetImporter
+		---------------
+To use the asset importer lbrary just compile it with visual-c++ 8.0 (at this 
+moment no other build enviroments are supported).
+	

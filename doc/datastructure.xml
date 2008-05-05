@@ -1,0 +1,83 @@
+<importedScene alias data alias Model?>
+  <version 1.2 />   <smiley code=":-)" />
+  <frame alias object>
+    <name/>
+    <transformation matrix4x4 />
+
+    <mesh id="1" />
+    <mesh ... />
+    
+    <childframe alias childobject as type frame alias object />
+    <childframe... />
+  </frame>
+  <meshes>
+    <mesh id="1">
+      <meshheader with MatID, Vertexcount, Facecount, a.s.o. />
+      <vertice>
+          <vertex xyzw />
+          <vertex ... />
+      </vertice>
+      <texturecoords>
+          <texturecoord uv />
+          <texturecoord ... />
+      </texturcoords>
+      <vertexcolors>
+          <color rgba />
+          <color ... />
+      </vertexcolors>
+      <normals>
+          <normal xyz />
+          <normal ... />
+      </normals>
+      <faces>
+          <face p1, p2, p3 />
+          <face ... />
+      </faces>      
+      <bones>
+        <bone>
+          <name />
+          <weights>
+            <weight v, w />
+            <weight... />
+          </weights>
+        </bone>
+        <bone ... />
+      </bones>      
+    </mesh>
+    <mesh id="x" ... />
+  </meshes>
+  <anims>
+    <anim name="rudern" duration="4500" ticksPerSecond="50">
+      <animbone name="bla">
+        <rotation>
+          <rotkey time="0" rot="xyzw" />
+          <rotkey time="100" rot="xyzw" />
+          ...
+        </rotation>
+        <translation>
+          <transkey time="0" trans="xyz" />
+          <transkey time="100" trans="xyz" />
+          ...
+        </translation>
+        <scaling>
+          <scalekey time="0" scale="xyz" />
+          <scalekey time="100" scale="xyz" />
+          ...
+        <scaling>
+      </animbone>
+      <animbone name="blubb">
+        ...
+      </animbone>
+    </anim>
+    <anim ... />
+  </anims>
+  <materials>
+    <material>
+       <param>
+          <name/>
+          <value/>
+       </param>
+    </material>
+    <material ... />
+  </materials>
+</importedScene alias data alias model?>

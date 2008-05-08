@@ -235,6 +235,18 @@
 					</File>
 				</Filter>
 			</Filter>
+			<Filter
+				Name="Logger"
+				>
+				<File
+					RelativePath="..\..\include\Logger.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\LogStream.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="headers"
@@ -415,6 +427,22 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Logger"
+				>
+				<File
+					RelativePath="..\..\code\DefaultLogger.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\FileLogStream.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\Win32DebugLogStream.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="sources"
@@ -560,6 +588,14 @@
 				</File>
 				<File
 					RelativePath="..\..\code\PlyParser.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Logger"
+				>
+				<File
+					RelativePath="..\..\code\DefaultLogger.cpp"
 					>
 				</File>
 			</Filter>

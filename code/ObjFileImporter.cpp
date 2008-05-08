@@ -7,7 +7,7 @@
 #include "../include/aiScene.h"
 #include "aiAssert.h"
 #include "MaterialSystem.h"
-
+#include "DefaultLogger.h"
 #include <boost/scoped_ptr.hpp>
 #include <boost/format.hpp>
 
@@ -26,7 +26,8 @@ ObjFileImporter::ObjFileImporter() :
 	m_pRootObject(NULL),
 	m_strAbsPath("\\")
 {
-	// empty
+	DefaultLogger::create( "test.log", DefaultLogger::VERBOSE );
+	DefaultLogger::get()->info("Start logging");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -39,6 +40,8 @@ ObjFileImporter::~ObjFileImporter()
 		delete m_pRootObject;
 		m_pRootObject = NULL;
 	}
+
+	DefaultLogger::kill();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -48,6 +51,7 @@ bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) c
 	if (pFile.empty())
 		return false;
 
+	DefaultLogger::get()->info("ObjFileImporter::CanRead");
 	string::size_type pos = pFile.find_last_of(".");
 	if (string::npos == pos)
 		return false;

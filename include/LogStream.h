@@ -1,6 +1,8 @@
 #ifndef AI_LOGSTREAM_H_INC
 #define AI_LOGSTREAM_H_INC
 
+#include <string>
+
 namespace Assimp
 {
 // ---------------------------------------------------------------------------

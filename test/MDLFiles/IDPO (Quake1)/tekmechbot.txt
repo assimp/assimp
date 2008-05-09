@@ -1,0 +1,33 @@
+
++)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)
+
+teckmechbot animated .mdl
+
+This model was created for the FMP, because I believe
+that the FMP is a great concept !!
+
+There is some movement in the model.
+The legs can be animated for walking, stomping, or running
+around ! 
+Ok, it's my first model, so I will work on less polygony
+in the future ;-)
+
+
+Created By:    Curiel7
+Contact:       ebuy@optelnow.net  (E-MAIL)
+Date Created:  7/07/2000
+======================================================
+
+This model can be used or modified for any purpose 
+as long as this text document is included with it
+and all modelers listed in this document are 
+listed wherever credits are appropriate for that
+purpose.
+
+
+The Free Models Project can use your help with
+game-oriented models and other areas
+
+WWW:     http://www.planetquake.com/simitar
+E-mail:  sgalbrai@linknet.kitsap.lib.wa.us
+

@@ -1,3 +1,44 @@
+/*
+---------------------------------------------------------------------------
+Free Asset Import Library (ASSIMP)
+---------------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the following 
+conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------------
+*/
+
 /** @file Implementation of the MD2 importer class */
 #include "MD2Loader.h"
 #include "MaterialSystem.h"
@@ -150,11 +191,11 @@ void MD2Importer::InternReadFile(
 	std::vector<aiVector3D> vTexCoords;
 	std::vector<aiVector3D> vNormals;
 
-	vPositions.resize(this->m_pcHeader->numVertices,aiVector3D());
-	vTexCoords.resize(this->m_pcHeader->numVertices,aiVector3D(
+	vPositions.resize(pScene->mMeshes[0]->mNumFaces*3,aiVector3D());
+	vTexCoords.resize(pScene->mMeshes[0]->mNumFaces*3,aiVector3D(
 		std::numeric_limits<float>::quiet_NaN(),
 		std::numeric_limits<float>::quiet_NaN(),0.0f));
-	vNormals.resize(this->m_pcHeader->numVertices,aiVector3D());
+	vNormals.resize(pScene->mMeshes[0]->mNumFaces*3,aiVector3D());
 
 	// not sure whether there are MD2 files without texture coordinates
 	if (0 != this->m_pcHeader->numTexCoords && 0 != this->m_pcHeader->numSkins)
@@ -198,32 +239,9 @@ void MD2Importer::InternReadFile(
 		pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_AMBIENT);
 	}
 
-	// now read all vertices of the frame
-	for (unsigned int i = 0; i < (unsigned int)this->m_pcHeader->numVertices;++i)
-	{
-		// read x,y, and z component of the vertex
-
-		aiVector3D& vec = vPositions[i];
-
-		vec.x = (float)pcVerts[i].vertex[0] * pcFrame->scale[0];
-		vec.x += pcFrame->translate[0];
-
-		// (flip z and y component)
-		vec.z = (float)pcVerts[i].vertex[1] * pcFrame->scale[1];
-		vec.z += pcFrame->translate[1];
-
-		vec.y = (float)pcVerts[i].vertex[2] * pcFrame->scale[2];
-		vec.y += pcFrame->translate[2];
-
-		// read the normal vector from the precalculated normal table
-		vNormals[i] = *((const aiVector3D*)(&g_avNormals[std::min(
-			int(pcVerts[i].lightNormalIndex),
-			int(sizeof(g_avNormals) / sizeof(g_avNormals[0]))-1)]));
-
-		std::swap ( vNormals[i].y,vNormals[i].z );
-	}
 
 	// now read all triangles of the first frame, apply scaling and translation
+	unsigned int iCurrent = 0;
 	if (0 != this->m_pcHeader->numTexCoords)
 	{
 		for (unsigned int i = 0; i < (unsigned int)this->m_pcHeader->numTriangles;++i)
@@ -235,40 +253,47 @@ void MD2Importer::InternReadFile(
 			// copy texture coordinates
 			// check whether they are different from the previous value at this index.
 			// In this case, create a full separate set of vertices/normals/texcoords
-			for (unsigned int c = 0; c < 3;++c)
+			for (unsigned int c = 0; c < 3;++c,++iCurrent)
 			{
+				pScene->mMeshes[0]->mFaces[i].mIndices[c] = iCurrent;
+
 				// validate vertex indices
 				if (pcTriangles[i].vertexIndices[c] >= this->m_pcHeader->numVertices)
 					pcTriangles[i].vertexIndices[c] = this->m_pcHeader->numVertices-1;
 
 				// copy face indices
-				pScene->mMeshes[0]->mFaces[i].mIndices[c] = (unsigned int)pcTriangles[i].vertexIndices[c];
+				unsigned int iIndex = (unsigned int)pcTriangles[i].vertexIndices[c];
+
+				// read x,y, and z component of the vertex
+				aiVector3D& vec = vPositions[iCurrent];
+
+				vec.x = (float)pcVerts[iIndex].vertex[0] * pcFrame->scale[0];
+				vec.x += pcFrame->translate[0];
+
+				// (flip z and y component)
+				vec.z = (float)pcVerts[iIndex].vertex[1] * pcFrame->scale[1];
+				vec.z += pcFrame->translate[1];
+
+				vec.y = (float)pcVerts[iIndex].vertex[2] * pcFrame->scale[2];
+				vec.y += pcFrame->translate[2];
+
+				// read the normal vector from the precalculated normal table
+				vNormals[iCurrent] = *((const aiVector3D*)(&g_avNormals[std::min(
+					int(pcVerts[iIndex].lightNormalIndex),
+					int(sizeof(g_avNormals) / sizeof(g_avNormals[0]))-1)]));
+
+				std::swap ( vNormals[iCurrent].y,vNormals[iCurrent].z );
 
 				// validate texture coordinates
-				if (pcTriangles[i].textureIndices[c] >= this->m_pcHeader->numTexCoords)
-					pcTriangles[i].textureIndices[c] = this->m_pcHeader->numTexCoords-1;
+				if (pcTriangles[iIndex].textureIndices[c] >= this->m_pcHeader->numTexCoords)
+					pcTriangles[iIndex].textureIndices[c] = this->m_pcHeader->numTexCoords-1;
 
-				aiVector3D* pcOut = &vTexCoords[pScene->mMeshes[0]->mFaces[i].mIndices[c]];
+				aiVector3D* pcOut = &vTexCoords[iCurrent];
 				float u,v;
 				u = (float)pcTexCoords[pcTriangles[i].textureIndices[c]].s / this->m_pcHeader->skinWidth;
 				v = (float)pcTexCoords[pcTriangles[i].textureIndices[c]].t / this->m_pcHeader->skinHeight;
-
-				if ( is_not_qnan ( pcOut->x ) && (pcOut->x != u || pcOut->y != v))
-				{
-					// generate a separate vertex/index set
-					vTexCoords.push_back(aiVector3D(u,v,0.0f));
-					vPositions.push_back(vPositions[pcTriangles[i].vertexIndices[c]]);
-					vNormals.push_back(vPositions[pcTriangles[i].vertexIndices[c]]);
-					unsigned int iPos = vTexCoords.size()-1;
-
-					pScene->mMeshes[0]->mFaces[i].mIndices[c] = iPos;
-				}
-				else
-				{
-					pcOut->x = u;
-					pcOut->y = v;
-			
-				}
+				pcOut->x = u;
+				pcOut->y = v;
 			}
 		}
 	}
@@ -280,18 +305,44 @@ void MD2Importer::InternReadFile(
 			pScene->mMeshes[0]->mFaces[i].mIndices = new unsigned int[3];
 			pScene->mMeshes[0]->mFaces[i].mNumIndices = 3;
 
-			// validate vertex indices
-			if (pcTriangles[i].vertexIndices[0] >= this->m_pcHeader->numVertices)
-				pcTriangles[i].vertexIndices[0] = this->m_pcHeader->numVertices-1;
-			if (pcTriangles[i].vertexIndices[1] >= this->m_pcHeader->numVertices)
-				pcTriangles[i].vertexIndices[1] = this->m_pcHeader->numVertices-1;
-			if (pcTriangles[i].vertexIndices[2] >= this->m_pcHeader->numVertices)
-				pcTriangles[i].vertexIndices[2] = this->m_pcHeader->numVertices-1;
+			// copy texture coordinates
+			// check whether they are different from the previous value at this index.
+			// In this case, create a full separate set of vertices/normals/texcoords
+			for (unsigned int c = 0; c < 3;++c,++iCurrent)
+			{
+				pScene->mMeshes[0]->mFaces[i].mIndices[c] = iCurrent;
 
-			// copy face indices
-			pScene->mMeshes[0]->mFaces[i].mIndices[0] = (unsigned int)pcTriangles[i].vertexIndices[0];
-			pScene->mMeshes[0]->mFaces[i].mIndices[1] = (unsigned int)pcTriangles[i].vertexIndices[1];
-			pScene->mMeshes[0]->mFaces[i].mIndices[2] = (unsigned int)pcTriangles[i].vertexIndices[2];
+				// validate vertex indices
+				if (pcTriangles[i].vertexIndices[c] >= this->m_pcHeader->numVertices)
+					pcTriangles[i].vertexIndices[c] = this->m_pcHeader->numVertices-1;
+
+				// copy face indices
+				unsigned int iIndex = (unsigned int)pcTriangles[i].vertexIndices[c];
+
+				// read x,y, and z component of the vertex
+				aiVector3D& vec = vPositions[iCurrent];
+
+				vec.x = (float)pcVerts[iIndex].vertex[0] * pcFrame->scale[0];
+				vec.x += pcFrame->translate[0];
+
+				// (flip z and y component)
+				vec.z = (float)pcVerts[iIndex].vertex[1] * pcFrame->scale[1];
+				vec.z += pcFrame->translate[1];
+
+				vec.y = (float)pcVerts[iIndex].vertex[2] * pcFrame->scale[2];
+				vec.y += pcFrame->translate[2];
+
+				// read the normal vector from the precalculated normal table
+				vNormals[iCurrent] = *((const aiVector3D*)(&g_avNormals[std::min(
+					int(pcVerts[iIndex].lightNormalIndex),
+					int(sizeof(g_avNormals) / sizeof(g_avNormals[0]))-1)]));
+
+				std::swap ( vNormals[iCurrent].y,vNormals[iCurrent].z );
+			
+				aiVector3D* pcOut = &vTexCoords[iCurrent];
+				pcOut->x = (float)pcTexCoords[pcTriangles[i].textureIndices[c]].s / this->m_pcHeader->skinWidth;
+				pcOut->y = (float)pcTexCoords[pcTriangles[i].textureIndices[c]].t / this->m_pcHeader->skinHeight;
+			}
 		}
 	}
 
@@ -302,9 +353,16 @@ void MD2Importer::InternReadFile(
 	pScene->mMeshes[0]->mTextureCoords[0] = new aiVector3D[vPositions.size()];
 
 	// memcpy() the data to the c-syle arrays
-	memcpy(pScene->mMeshes[0]->mVertices,			&vPositions[0],	vPositions.size() * sizeof(aiVector3D));
-	memcpy(pScene->mMeshes[0]->mNormals,			&vNormals[0],	vPositions.size() * sizeof(aiVector3D));
-	memcpy(pScene->mMeshes[0]->mTextureCoords[0],	&vTexCoords[0],	vPositions.size() * sizeof(aiVector3D));
+	memcpy(pScene->mMeshes[0]->mVertices,	&vPositions[0],	
+		vPositions.size() * sizeof(aiVector3D));
+	memcpy(pScene->mMeshes[0]->mNormals,	&vNormals[0],	
+		vPositions.size() * sizeof(aiVector3D));
+	
+	if (0 != this->m_pcHeader->numTexCoords)
+	{
+		memcpy(pScene->mMeshes[0]->mTextureCoords[0],	&vTexCoords[0],	
+			vPositions.size() * sizeof(aiVector3D));
+	}
 
 	return;
 }

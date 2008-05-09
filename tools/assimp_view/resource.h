@@ -20,6 +20,23 @@
 #define IDB_MAXCIRCLE                   142
 #define IDR_HUD                         143
 #define IDR_HUDMASK                     144
+#define IDB_BANIM                       145
+#define IDB_BITMAP4                     146
+#define IDB_BDISPLAY                    146
+#define IDB_BITMAP5                     147
+#define IDB_BINTER                      147
+#define IDB_BITMAP6                     148
+#define IDB_BRENDERING                  148
+#define IDB_BITMAP7                     149
+#define IDB_BSTATS                      149
+#define IDB_BTX                         150
+#define IDB_BITMAP8                     151
+#define IDB_BFX                         151
+#define IDB_BITMAP9                     152
+#define IDB_BNODE                       152
+#define IDB_BITMAP10                    153
+#define IDB_BROOT                       153
+#define IDD_LOGVIEW                     154
 #define IDC_CHECK1                      1000
 #define IDC_TOGGLEMS                    1000
 #define IDC_CHECK2                      1001
@@ -61,6 +78,12 @@
 #define IDC_SSPEED                      1029
 #define IDC_SANIM                       1030
 #define IDC_SANIMGB                     1031
+#define IDC_ENODE                       1031
+#define IDC_ESHADER2                    1032
+#define IDC_ETEX                        1032
+#define IDC_TREE1                       1033
+#define IDC_EDIT1                       1034
+#define IDC_BLUBB                       1037
 #define ID_VIEWER_OPEN                  32771
 #define ID_VIEWER_CLOSETHIS             32772
 #define ID_VIEWER_CLOSEASSET            32773
@@ -75,6 +98,9 @@
 #define ID_Menu                         32782
 #define ID_BACKGROUND_LOADSKYBOX        32783
 #define ID_VIEWER_H                     32784
+#define ID_TOOLS_LOGWINDOW              32785
+#define ID_TOOLS_SAVELOGTOFILE          32786
+#define ID_TOOLS_CLEARLOG               32787
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -82,9 +108,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        145
-#define _APS_NEXT_COMMAND_VALUE         32785
-#define _APS_NEXT_CONTROL_VALUE         1032
+#define _APS_NEXT_RESOURCE_VALUE        155
+#define _APS_NEXT_COMMAND_VALUE         32788
+#define _APS_NEXT_CONTROL_VALUE         1038
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

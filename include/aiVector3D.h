@@ -4,15 +4,13 @@
 
 #include <math.h>
 
-#include "aiAssert.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // ---------------------------------------------------------------------------
 /** Represents a three-dimensional vector. */
-typedef struct aiVector3D
+struct aiVector3D
 {
 #ifdef __cplusplus
 	aiVector3D () : x(0.0f), y(0.0f), z(0.0f) {}
@@ -33,7 +31,7 @@ typedef struct aiVector3D
 #endif // __cplusplus
 
 	float x, y, z;	
-} aiVector3D_t;
+};
 
 #ifdef __cplusplus
 } // end extern "C"
@@ -71,16 +69,15 @@ inline aiVector3D operator * ( const aiVector3D& v, float f)
 // scalar division
 inline aiVector3D operator / ( const aiVector3D& v, float f)
 {
-	//ai_assert(0.0f != f);
+	
 	return v * (1/f);
 }
 
 // vector division
 inline aiVector3D operator / ( const aiVector3D& v, const aiVector3D& v2)
-	{
-	//ai_assert(0.0f != v2.x && 0.0f != v2.y && 0.0f != v2.z);
+{
 	return aiVector3D(v.x / v2.x,v.y / v2.y,v.z / v2.z);
-	}
+}
 
 // cross product
 inline aiVector3D operator ^ ( const aiVector3D& v1, const aiVector3D& v2)

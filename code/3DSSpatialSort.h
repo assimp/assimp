@@ -1,10 +1,55 @@
-/** Small helper classes to optimise finding vertizes close to a given location */
+/*
+Free Asset Import Library (ASSIMP)
+----------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the 
+following conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------------------------------------
+*/
+
+/** Small helper classes to optimise finding vertizes close to a given location
+ */
 #ifndef AI_D3DSSPATIALSORT_H_INC
 #define AI_D3DSSPATIALSORT_H_INC
 
 #include <vector>
 #include "../include/aiVector3D.h"
-#include "3DSHelper.h"
+
+
+#if (!defined AI_BUILD_NO_ASE_IMPORTER)
+#	include "3DSHelper.h"
+#endif
 
 namespace Assimp
 {
@@ -19,28 +64,30 @@ class D3DSSpatialSorter
 {
 public:
 
-	D3DSSpatialSorter() {/* This is unintialized. This is evil. This is OK. */}
+	D3DSSpatialSorter();
 
-	/** Constructs a spatially sorted representation from the given position array.
-	 * Supply the positions in its layout in memory, the class will only refer to them
-	 * by index.
-	 * @param pPositions Pointer to the first position vector of the array.
-	 * @param pNumPositions Number of vectors to expect in that array.
-	 * @param pElementOffset Offset in bytes from the beginning of one vector in memory to the beginning of the next vector.
-	 * @note Smoothing groups are ignored
-	 */
-	D3DSSpatialSorter( const aiVector3D* pPositions,
-		unsigned int pNumPositions, unsigned int pElementOffset);
-
+	// -------------------------------------------------------------------
 	/** Construction from a given face array, handling smoothing groups properly
-	 * @param p_pcMesh Input mesh.
 	 */
-	D3DSSpatialSorter( const Dot3DS::Mesh* p_pcMesh);
+	D3DSSpatialSorter(const std::vector<aiVector3D>& vPositions);
 
+	// -------------------------------------------------------------------
+	/** Add a face to the spatial sorter
+	 * @param pcFace Face to be added
+	 * @param vPositions Input position list
+	 */
+	void AddFace(const Dot3DS::Face* pcFace,
+		const std::vector<aiVector3D>& vPositions);
+
+	// -------------------------------------------------------------------
+	/** Prepare the spatial sorter for use
+	 */
+	void Prepare();
 
 	/** Destructor */
 	~D3DSSpatialSorter();
 
+	// -------------------------------------------------------------------
 	/** Returns an iterator for all positions close to the given position.
 	 * @param pPosition The position to look for vertices.
 	 * @param pSG Only included vertices with at least one shared smooth group
@@ -56,6 +103,7 @@ protected:
 	/** Normal of the sorting plane, normalized. The center is always at (0, 0, 0) */
 	aiVector3D mPlaneNormal;
 
+	// -------------------------------------------------------------------
 	/** An entry in a spatially sorted position array. Consists of a vertex index,
 	 * its position and its precalculated distance from the reference plane */
 	struct Entry

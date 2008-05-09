@@ -195,6 +195,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\tools\assimp_view\Display.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tools\assimp_view\HelpDialog.cpp"
 				>
 			</File>
@@ -204,6 +208,10 @@
 			</File>
 			<File
 				RelativePath="..\..\tools\assimp_view\LogDisplay.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\LogWindow.cpp"
 				>
 			</File>
 			<File
@@ -265,7 +273,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\tools\assimp_view\Display.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tools\assimp_view\LogDisplay.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\LogWindow.h"
 				>
 			</File>
 			<File
@@ -303,6 +319,30 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\tools\assimp_view\base_anim.bmp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\base_display.bmp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\base_inter.bmp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\base_rendering.bmp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\base_stats.bmp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\fx.bmp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tools\assimp_view\HUD.png"
 				>
 			</File>
@@ -311,11 +351,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\tools\assimp_view\n.bmp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\root.bmp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tools\assimp_view\small.ico"
 				>
 			</File>
 			<File
 				RelativePath="..\..\tools\assimp_view\text1.bin"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\tx.bmp"
 				>
 			</File>
 		</Filter>

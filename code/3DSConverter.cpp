@@ -1,3 +1,44 @@
+/*
+---------------------------------------------------------------------------
+Free Asset Import Library (ASSIMP)
+---------------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the following 
+conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------------
+*/
+
 /** @file Implementation of the 3ds importer class */
 #include "3DSLoader.h"
 #include "MaterialSystem.h"
@@ -207,48 +248,67 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 	}
 	mat.AddProperty<int>( (int*)&eShading,1,AI_MATKEY_SHADING_MODEL);
 
+	if (Dot3DS::Dot3DSFile::Wire == oldMat.mShading)
+	{
+		// set the wireframe flag
+		unsigned int iWire = 1;
+		mat.AddProperty<int>( (int*)&iWire,1,AI_MATKEY_ENABLE_WIREFRAME);
+	}
+
 	// texture, if there is one
 	if( oldMat.sTexDiffuse.mMapName.length() > 0)
 	{
 		aiString tex;
 		tex.Set( oldMat.sTexDiffuse.mMapName);
 		mat.AddProperty( &tex, AI_MATKEY_TEXTURE_DIFFUSE(0));
-		mat.AddProperty<float>( &oldMat.sTexDiffuse.mTextureBlend, 1, AI_MATKEY_TEXBLEND_DIFFUSE(0));
+
+		if (is_not_qnan(oldMat.sTexDiffuse.mTextureBlend))
+			mat.AddProperty<float>( &oldMat.sTexDiffuse.mTextureBlend, 1, AI_MATKEY_TEXBLEND_DIFFUSE(0));
 	}
 	if( oldMat.sTexSpecular.mMapName.length() > 0)
 	{
 		aiString tex;
 		tex.Set( oldMat.sTexSpecular.mMapName);
 		mat.AddProperty( &tex, AI_MATKEY_TEXTURE_SPECULAR(0));
-		mat.AddProperty<float>( &oldMat.sTexSpecular.mTextureBlend, 1, AI_MATKEY_TEXBLEND_SPECULAR(0));
+
+		if (is_not_qnan(oldMat.sTexSpecular.mTextureBlend))
+			mat.AddProperty<float>( &oldMat.sTexSpecular.mTextureBlend, 1, AI_MATKEY_TEXBLEND_SPECULAR(0));
 	}
 	if( oldMat.sTexOpacity.mMapName.length() > 0)
 	{
 		aiString tex;
 		tex.Set( oldMat.sTexOpacity.mMapName);
 		mat.AddProperty( &tex, AI_MATKEY_TEXTURE_OPACITY(0));
-		mat.AddProperty<float>( &oldMat.sTexOpacity.mTextureBlend, 1,AI_MATKEY_TEXBLEND_OPACITY(0));
+
+		if (is_not_qnan(oldMat.sTexOpacity.mTextureBlend))
+			mat.AddProperty<float>( &oldMat.sTexOpacity.mTextureBlend, 1,AI_MATKEY_TEXBLEND_OPACITY(0));
 	}
 	if( oldMat.sTexEmissive.mMapName.length() > 0)
 	{
 		aiString tex;
 		tex.Set( oldMat.sTexEmissive.mMapName);
 		mat.AddProperty( &tex, AI_MATKEY_TEXTURE_EMISSIVE(0));
-		mat.AddProperty<float>( &oldMat.sTexEmissive.mTextureBlend, 1, AI_MATKEY_TEXBLEND_EMISSIVE(0));
+
+		if (is_not_qnan(oldMat.sTexEmissive.mTextureBlend))
+			mat.AddProperty<float>( &oldMat.sTexEmissive.mTextureBlend, 1, AI_MATKEY_TEXBLEND_EMISSIVE(0));
 	}
 	if( oldMat.sTexBump.mMapName.length() > 0)
 	{
 		aiString tex;
 		tex.Set( oldMat.sTexBump.mMapName);
-		mat.AddProperty( &tex, AI_MATKEY_TEXTURE_BUMP(0));
-		mat.AddProperty<float>( &oldMat.sTexBump.mTextureBlend, 1, AI_MATKEY_TEXBLEND_BUMP(0));
+		mat.AddProperty( &tex, AI_MATKEY_TEXTURE_HEIGHT(0));
+
+		if (is_not_qnan(oldMat.sTexBump.mTextureBlend))
+			mat.AddProperty<float>( &oldMat.sTexBump.mTextureBlend, 1, AI_MATKEY_TEXBLEND_HEIGHT(0));
 	}
 	if( oldMat.sTexShininess.mMapName.length() > 0)
 	{
 		aiString tex;
 		tex.Set( oldMat.sTexShininess.mMapName);
 		mat.AddProperty( &tex, AI_MATKEY_TEXTURE_SHININESS(0));
-		mat.AddProperty<float>( &oldMat.sTexBump.mTextureBlend, 1, AI_MATKEY_TEXBLEND_SHININESS(0));
+
+		if (is_not_qnan(oldMat.sTexShininess.mTextureBlend))
+			mat.AddProperty<float>( &oldMat.sTexShininess.mTextureBlend, 1, AI_MATKEY_TEXBLEND_SHININESS(0));
 	}
 
 	// store the name of the material itself, too
@@ -267,7 +327,7 @@ void SetupMatUVSrc (aiMaterial* pcMat, const Dot3DS::Material* pcMatIn)
 	pcHelper->AddProperty<int>(&pcMatIn->sTexDiffuse.iUVSrc,1,AI_MATKEY_UVWSRC_DIFFUSE(0));
 	pcHelper->AddProperty<int>(&pcMatIn->sTexSpecular.iUVSrc,1,AI_MATKEY_UVWSRC_SPECULAR(0));
 	pcHelper->AddProperty<int>(&pcMatIn->sTexEmissive.iUVSrc,1,AI_MATKEY_UVWSRC_EMISSIVE(0));
-	pcHelper->AddProperty<int>(&pcMatIn->sTexBump.iUVSrc,1,AI_MATKEY_UVWSRC_BUMP(0));
+	pcHelper->AddProperty<int>(&pcMatIn->sTexBump.iUVSrc,1,AI_MATKEY_UVWSRC_HEIGHT(0));
 	pcHelper->AddProperty<int>(&pcMatIn->sTexShininess.iUVSrc,1,AI_MATKEY_UVWSRC_SHININESS(0));
 	pcHelper->AddProperty<int>(&pcMatIn->sTexOpacity.iUVSrc,1,AI_MATKEY_UVWSRC_OPACITY(0));
 	}
@@ -331,14 +391,16 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 				p_pcOut->mNumVertices = aiSplit[p].size()*3;
 				p_pcOut->mNumFaces = aiSplit[p].size();
 
+				// allocate enough storage for faces
+				p_pcOut->mFaces = new aiFace[p_pcOut->mNumFaces];
 				iFaceCnt += p_pcOut->mNumFaces;
+
 				if (p_pcOut->mNumVertices != 0)
 				{
 					p_pcOut->mVertices = new aiVector3D[p_pcOut->mNumVertices];
 					p_pcOut->mNormals = new aiVector3D[p_pcOut->mNumVertices];
 					unsigned int iBase = 0;
 
-					p_pcOut->mFaces = new aiFace[p_pcOut->mNumFaces];
 					for (unsigned int q = 0; q < aiSplit[p].size();++q)
 					{
 						unsigned int iIndex = aiSplit[p][q];
@@ -617,8 +679,8 @@ void Dot3DSImporter::BakeScaleNOffset(
 			{
 			for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
 				{
-				pcMesh->mTextureCoords[0][i].x *= pcSrc->pcSingleTexture->mScaleU;
-				pcMesh->mTextureCoords[0][i].y *= pcSrc->pcSingleTexture->mScaleV;
+				pcMesh->mTextureCoords[0][i].x /= pcSrc->pcSingleTexture->mScaleU;
+				pcMesh->mTextureCoords[0][i].y /= pcSrc->pcSingleTexture->mScaleV;
 
 				pcMesh->mTextureCoords[0][i].x += pcSrc->pcSingleTexture->mOffsetU;
 				pcMesh->mTextureCoords[0][i].y += pcSrc->pcSingleTexture->mOffsetV;
@@ -630,8 +692,8 @@ void Dot3DSImporter::BakeScaleNOffset(
 			const float fCos = cosf(pcSrc->pcSingleTexture->mRotation);
 			for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
 				{
-				pcMesh->mTextureCoords[0][i].x *= pcSrc->pcSingleTexture->mScaleU;
-				pcMesh->mTextureCoords[0][i].y *= pcSrc->pcSingleTexture->mScaleV;
+				pcMesh->mTextureCoords[0][i].x /= pcSrc->pcSingleTexture->mScaleU;
+				pcMesh->mTextureCoords[0][i].y /= pcSrc->pcSingleTexture->mScaleV;
 
 				pcMesh->mTextureCoords[0][i].x *= fCos;
 				pcMesh->mTextureCoords[0][i].y *= fSin;
@@ -694,8 +756,8 @@ void Dot3DSImporter::BakeScaleNOffset(
 				{
 				for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
 					{
-					pcMesh->mTextureCoords[iCnt][n].x = pvBase->x * (*i).fScaleU;
-					pcMesh->mTextureCoords[iCnt][n].y = pvBase->y * (*i).fScaleV;
+					pcMesh->mTextureCoords[iCnt][n].x = pvBase->x / (*i).fScaleU;
+					pcMesh->mTextureCoords[iCnt][n].y = pvBase->y / (*i).fScaleV;
 
 					pcMesh->mTextureCoords[iCnt][n].x += (*i).fOffsetU;
 					pcMesh->mTextureCoords[iCnt][n].y += (*i).fOffsetV;
@@ -709,8 +771,8 @@ void Dot3DSImporter::BakeScaleNOffset(
 				const float fCos = cosf((*i).fRotation);
 				for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
 					{
-					pcMesh->mTextureCoords[iCnt][n].x = pvBase->x * (*i).fScaleU;
-					pcMesh->mTextureCoords[iCnt][n].y = pvBase->y * (*i).fScaleV;
+					pcMesh->mTextureCoords[iCnt][n].x = pvBase->x / (*i).fScaleU;
+					pcMesh->mTextureCoords[iCnt][n].y = pvBase->y / (*i).fScaleV;
 
 					pcMesh->mTextureCoords[iCnt][n].x *= fCos;
 					pcMesh->mTextureCoords[iCnt][n].y *= fSin;

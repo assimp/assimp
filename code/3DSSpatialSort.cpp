@@ -1,67 +1,64 @@
-/** @file Implementation of the helper class to quickly find vertices close to a given position */
+/*
+---------------------------------------------------------------------------
+Free Asset Import Library (ASSIMP)
+---------------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the following 
+conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------------
+*/
+
+/** @file Implementation of the helper class to quickly find 
+ vertices close to a given position. Special implementation for 
+ the 3ds loader handling smooth groups correctly  */
+
 #include <algorithm>
 #include "3DSSpatialSort.h"
+
+#include "aiAssert.h"
 
 using namespace Assimp;
 using namespace Assimp::Dot3DS;
 
+
 // ------------------------------------------------------------------------------------------------
-// Constructs a spatially sorted representation from the given position array.
-D3DSSpatialSorter::D3DSSpatialSorter( const aiVector3D* pPositions,
-									 unsigned int pNumPositions, unsigned int pElementOffset)
+D3DSSpatialSorter::D3DSSpatialSorter()
 	{
 	// define the reference plane. We choose some arbitrary vector away from all basic axises 
 	// in the hope that no model spreads all its vertices along this plane.
 	mPlaneNormal.Set( 0.8523f, 0.34321f, 0.5736f);
 	mPlaneNormal.Normalize();
-
-	// store references to all given positions along with their distance to the reference plane
-	mPositions.reserve( pNumPositions);
-	for( unsigned int a = 0; a < pNumPositions; a++)
-		{
-		const char* tempPointer = reinterpret_cast<const char*> (pPositions);
-		const aiVector3D* vec = reinterpret_cast<const aiVector3D*> (tempPointer + a * pElementOffset);
-
-		// store position by index and distance
-		float distance = *vec * mPlaneNormal;
-		mPositions.push_back( Entry( a, *vec, distance,0));
-		}
-
-	// now sort the array ascending by distance.
-	std::sort( mPositions.begin(), mPositions.end());
-	}
-// ------------------------------------------------------------------------------------------------
-D3DSSpatialSorter::D3DSSpatialSorter( const Dot3DS::Mesh* p_pcMesh)
-	{
-	// define the reference plane. We choose some arbitrary vector away from all basic axises 
-	// in the hope that no model spreads all its vertices along this plane.
-	mPlaneNormal.Set( 0.8523f, 0.34321f, 0.5736f);
-	mPlaneNormal.Normalize();
-
-	// store references to all given positions along with their distance to the reference plane
-	mPositions.reserve( p_pcMesh->mPositions.size());
-	for( std::vector<Dot3DS::Face>::const_iterator
-		i =  p_pcMesh->mFaces.begin();
-		i != p_pcMesh->mFaces.end();++i)
-		{
-		// store position by index and distance
-		float distance = p_pcMesh->mPositions[(*i).i1] * mPlaneNormal;
-		mPositions.push_back( Entry( (*i).i1, p_pcMesh->mPositions[(*i).i1], 
-			distance, (*i).iSmoothGroup));
-
-		// triangle vertex 2
-		distance = p_pcMesh->mPositions[(*i).i2] * mPlaneNormal;
-		mPositions.push_back( Entry( (*i).i2, p_pcMesh->mPositions[(*i).i2], 
-			distance, (*i).iSmoothGroup));
-
-		// triangle vertex 3
-		distance = p_pcMesh->mPositions[(*i).i3] * mPlaneNormal;
-		mPositions.push_back( Entry( (*i).i3, p_pcMesh->mPositions[(*i).i3], 
-			distance, (*i).iSmoothGroup));
-		}
-
-	// now sort the array ascending by distance.
-	std::sort( this->mPositions.begin(), this->mPositions.end());
 	}
 // ------------------------------------------------------------------------------------------------
 // Destructor
@@ -69,11 +66,39 @@ D3DSSpatialSorter::~D3DSSpatialSorter()
 	{
 	// nothing to do here, everything destructs automatically
 	}
+// ------------------------------------------------------------------------------------------------
+void D3DSSpatialSorter::AddFace(const Dot3DS::Face* pcFace,
+	const std::vector<aiVector3D>& vPositions)
+{
+	ai_assert(NULL != pcFace);
 
+	// store position by index and distance
+	float distance = vPositions[pcFace->i1] * mPlaneNormal;
+	mPositions.push_back( Entry( pcFace->i1, vPositions[pcFace->i1], 
+		distance, pcFace->iSmoothGroup));
+
+	// triangle vertex 2
+	distance = vPositions[pcFace->i2] * mPlaneNormal;
+	mPositions.push_back( Entry( pcFace->i2, vPositions[pcFace->i2], 
+		distance, pcFace->iSmoothGroup));
+
+	// triangle vertex 3
+	distance = vPositions[pcFace->i3] * mPlaneNormal;
+	mPositions.push_back( Entry( pcFace->i3, vPositions[pcFace->i3], 
+		distance, pcFace->iSmoothGroup));
+}
+// ------------------------------------------------------------------------------------------------
+void D3DSSpatialSorter::Prepare()
+{
+	// now sort the array ascending by distance.
+	std::sort( this->mPositions.begin(), this->mPositions.end());
+}
 // ------------------------------------------------------------------------------------------------
 // Returns an iterator for all positions close to the given position.
 void D3DSSpatialSorter::FindPositions( const aiVector3D& pPosition, 
-									  uint32_t pSG,float pRadius, std::vector<unsigned int>& poResults) const
+	uint32_t pSG,
+	float pRadius,
+	std::vector<unsigned int>& poResults) const
 	{
 	float dist = pPosition * mPlaneNormal;
 	float minDist = dist - pRadius, maxDist = dist + pRadius;
@@ -113,10 +138,10 @@ void D3DSSpatialSorter::FindPositions( const aiVector3D& pPosition,
 	// Mow start iterating from there until the first position lays outside of the distance range.
 	// Add all positions inside the distance range within the given radius to the result aray
 
+	float squareEpsilon = pRadius * pRadius;
+	std::vector<Entry>::const_iterator it = mPositions.begin() + index;
 	if (0 == pSG)
 		{
-		std::vector<Entry>::const_iterator it = mPositions.begin() + index;
-		float squareEpsilon = pRadius * pRadius;
 		while( it->mDistance < maxDist)
 			{
 			if((it->mPosition - pPosition).SquareLength() < squareEpsilon)
@@ -130,8 +155,6 @@ void D3DSSpatialSorter::FindPositions( const aiVector3D& pPosition,
 		}
 	else
 		{
-		std::vector<Entry>::const_iterator it = mPositions.begin() + index;
-		float squareEpsilon = pRadius * pRadius;
 		while( it->mDistance < maxDist)
 			{
 			if((it->mPosition - pPosition).SquareLength() < squareEpsilon &&
@@ -144,5 +167,6 @@ void D3DSSpatialSorter::FindPositions( const aiVector3D& pPosition,
 				break;
 			}
 		}
+	return;
 	}
 

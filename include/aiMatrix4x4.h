@@ -23,7 +23,7 @@ struct aiMatrix3x3;
 *  use this for homogenious coordinates 
 */
 // ---------------------------------------------------------------------------
-typedef struct aiMatrix4x4
+struct aiMatrix4x4
 {
 #ifdef __cplusplus
 	aiMatrix4x4 () :	
@@ -60,7 +60,7 @@ typedef struct aiMatrix4x4
 	float c1, c2, c3, c4;
 	float d1, d2, d3, d4;
 
-} PACK_STRUCT aiMatrix4x4_t;
+} PACK_STRUCT;
 
 
 // Reset packing

@@ -1,3 +1,43 @@
+/*
+Free Asset Import Library (ASSIMP)
+----------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the 
+following conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------------------------------------
+*/
+
 /** @file Defines the helper data structures for importing MD3 files  */
 #ifndef AI_MD3FILEHELPER_H_INC
 #define AI_MD3FILEHELPER_H_INC
@@ -43,51 +83,51 @@ namespace MD3
 #define AI_MD3_XYZ_SCALE		(1.0f/64.0f)
 
 // ---------------------------------------------------------------------------
-/**	\brief Data structure for the MD3 main header
+/** \brief Data structure for the MD3 main header
  */
 // ---------------------------------------------------------------------------
 struct Header
 {
-	// magic number
+	//! magic number
 	int32_t IDENT;
 
-	// file format version
+	//! file format version
 	int32_t VERSION;
 
-	// original name in .pak archive
+	//! original name in .pak archive
 	unsigned char NAME[ AI_MD3_MAXQPATH ];
 
-	// unknown
+	//! unknown
 	int32_t FLAGS;
 
-	// number of frames in the file
+	//! number of frames in the file
 	int32_t NUM_FRAMES;
 
-	// number of tags in the file
+	//! number of tags in the file
 	int32_t NUM_TAGS;
 
-	// number of surfaces in the file
+	//! number of surfaces in the file
 	int32_t NUM_SURFACES;
 
-	// number of skins in the file
+	//! number of skins in the file
 	int32_t NUM_SKINS;
 
-	// offset of the first frame
+	//! offset of the first frame
 	int32_t OFS_FRAMES;
 
-	// offset of the first tag
+	//! offset of the first tag
 	int32_t OFS_TAGS;
 
-	// offset of the first surface
+	//! offset of the first surface
 	int32_t OFS_SURFACES;
 
-	// end of file
+	//! end of file
 	int32_t OFS_EOF;
 } PACK_STRUCT;
 
 
 // ---------------------------------------------------------------------------
-/**	\brief Data structure for the frame header
+/** \brief Data structure for the frame header
  */
 // ---------------------------------------------------------------------------
 struct Frame
@@ -97,7 +137,7 @@ struct Frame
 
 
 // ---------------------------------------------------------------------------
-/**	\brief Data structure for the tag header
+/** \brief Data structure for the tag header
  */
 // ---------------------------------------------------------------------------
 struct Tag
@@ -107,95 +147,95 @@ struct Tag
 
 
 // ---------------------------------------------------------------------------
-/**	\brief Data structure for the surface header
+/** \brief Data structure for the surface header
  */
 // ---------------------------------------------------------------------------
 struct Surface
 {
-	// magic number
+	//! magic number
 	int32_t IDENT;
 
-	// original name of the surface
+	//! original name of the surface
 	unsigned char NAME[ AI_MD3_MAXQPATH ];
 
-	// unknown
+	//! unknown
 	int32_t FLAGS;
 
-	// number of frames in the surface
+	//! number of frames in the surface
 	int32_t NUM_FRAMES;
 
-	// number of shaders in the surface
+	//! number of shaders in the surface
 	int32_t NUM_SHADER;
 
-	// number of vertices in the surface
+	//! number of vertices in the surface
 	int32_t NUM_VERTICES;
 
-	// number of triangles in the surface
+	//! number of triangles in the surface
 	int32_t NUM_TRIANGLES;
 
 
-	// offset to the triangle data 
+	//! offset to the triangle data 
 	int32_t OFS_TRIANGLES;
 
-	// offset to the shader data
+	//! offset to the shader data
 	int32_t OFS_SHADERS;
 
-	// offset to the texture coordinate data
+	//! offset to the texture coordinate data
 	int32_t OFS_ST;
 
-	// offset to the vertex/normal data
+	//! offset to the vertex/normal data
 	int32_t OFS_XYZNORMAL;
 
-	// offset to the end of the Surface object
+	//! offset to the end of the Surface object
 	int32_t OFS_END;
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
-/**	\brief Data structure for a shader
+/** \brief Data structure for a shader
  */
 // ---------------------------------------------------------------------------
 struct Shader
 {
-	// filename of the shader
+	//! filename of the shader
 	unsigned char NAME[ AI_MD3_MAXQPATH ];
 
-	// index of the shader
+	//! index of the shader
 	int32_t SHADER_INDEX;
 } PACK_STRUCT;
 
 
 // ---------------------------------------------------------------------------
-/**	\brief Data structure for a triangle
+/** \brief Data structure for a triangle
  */
 // ---------------------------------------------------------------------------
 struct Triangle
 {
-	// triangle indices
+	//! triangle indices
 	int32_t INDEXES[3];
 } PACK_STRUCT;
 
 
 // ---------------------------------------------------------------------------
-/**	\brief Data structure for an UV coord
+/** \brief Data structure for an UV coord
  */
 // ---------------------------------------------------------------------------
 struct TexCoord
 {
-	// UV coordinates
+	//! UV coordinates
 	float U,V;
 } PACK_STRUCT;
 
 
 // ---------------------------------------------------------------------------
-/**	\brief Data structure for a vertex
+/** \brief Data structure for a vertex
  */
 // ---------------------------------------------------------------------------
 struct Vertex
 {
-	// X/Y/Z coordinates
+	//! X/Y/Z coordinates
 	int16_t X,Y,Z;
 
-	// encoded normal vector
+	//! encoded normal vector
 	int16_t  NORMAL;
 } PACK_STRUCT;
 

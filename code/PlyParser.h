@@ -1,3 +1,44 @@
+/*
+Free Asset Import Library (ASSIMP)
+----------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the 
+following conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------------------------------------
+*/
+
+
 /** @file Defines the helper data structures for importing PLY files  */
 #ifndef AI_PLYFILEHELPER_H_INC
 #define AI_PLYFILEHELPER_H_INC
@@ -54,9 +95,9 @@ enum EDataType
 };
 
 // ---------------------------------------------------------------------------------
-/**	\brief Specifies semantics for PLY element properties
+/** \brief Specifies semantics for PLY element properties
  *
- *	Semantics define the usage of a property, e.g. x coordinate
+ * Semantics define the usage of a property, e.g. x coordinate
 */
 enum ESemantic
 {
@@ -73,6 +114,11 @@ enum ESemantic
 	EST_YNormal,
 	//! vertex normal z coordinate
 	EST_ZNormal,
+
+	//! u texture coordinate
+	EST_UTextureCoord,
+	//! v texture coordinate
+	EST_VTextureCoord,
 	
 	//! vertex colors, red channel
 	EST_Red,		
@@ -133,9 +179,9 @@ enum ESemantic
 };
 
 // ---------------------------------------------------------------------------------
-/**	\brief Specifies semantics for PLY elements
+/** \brief Specifies semantics for PLY elements
  *
- *	Semantics define the usage of an element, e.g. vertex or material
+ * Semantics define the usage of an element, e.g. vertex or material
 */
 enum EElementSemantic
 {
@@ -159,9 +205,9 @@ enum EElementSemantic
 };
 
 // ---------------------------------------------------------------------------------
-/**	\brief Helper class for a property in a PLY file.
+/** \brief Helper class for a property in a PLY file.
  *
- *	This can e.g. be a part of the vertex declaration
+ * This can e.g. be a part of the vertex declaration
  */
 class Property
 {
@@ -187,6 +233,7 @@ public:
 	bool bIsList;
 	EDataType eFirstType;
 
+	// -------------------------------------------------------------------
 	//! Parse a property from a string. The end of the
 	//! string is either '\n', '\r' or '\0'. Return valie is false
 	//! if the input string is NOT a valid property (E.g. does
@@ -194,18 +241,20 @@ public:
 	static bool ParseProperty (const char* p_szIn, const char** p_szOut, 
 		Property* pOut);
 
+	// -------------------------------------------------------------------
 	//! Parse a data type from a string
 	static EDataType ParseDataType(const char* p_szIn,const char** p_szOut);
 
+	// -------------------------------------------------------------------
 	//! Parse a semantic from a string
 	static ESemantic ParseSemantic(const char* p_szIn,const char** p_szOut);
 };
 
 // ---------------------------------------------------------------------------------
-/**	\brief Helper class for an element in a PLY file.
+/** \brief Helper class for an element in a PLY file.
  *
- *	This can e.g. be the vertex declaration. Elements contain a
- *	well-defined number of properties.
+ * This can e.g. be the vertex declaration. Elements contain a
+ * well-defined number of properties.
  */
 class Element
 {
@@ -216,9 +265,22 @@ public:
 		: NumOccur(0), eSemantic (EEST_INVALID)
 	{}
 
+	//! Destructor. Dallocates all storage
+	~Element()
+	{
+		// delete all elements
+		for (std::vector<Property*>::const_iterator
+			i =  this->alProperties.begin();
+			i != this->alProperties.end();++i)
+		{
+			delete (*i);
+		}
+		return;
+	}
+
 	//! List of properties assigned to the element
 	//! std::vector to support operator[]
-	std::vector<Property> alProperties;
+	std::vector<Property*> alProperties;
 
 	//! Semantic of the element
 	EElementSemantic eSemantic;
@@ -230,19 +292,22 @@ public:
 	//! How many times will the element occur?
 	unsigned int NumOccur;
 
+
+	// -------------------------------------------------------------------
 	//! Parse an element from a string. 
 	//! The function will parse all properties contained in the
 	//! element, too.
 	static bool ParseElement (const char* p_szIn, const char** p_szOut, 
 		Element* pOut);
 
+	// -------------------------------------------------------------------
 	//! Parse a semantic from a string
 	static EElementSemantic ParseSemantic(const char* p_szIn,
 		const char** p_szOut);
 };
 
 // ---------------------------------------------------------------------------------
-/**	\brief Instance of a property in a PLY file
+/** \brief Instance of a property in a PLY file
  */
 class PropertyInstance 
 {
@@ -271,36 +336,43 @@ public:
 
 	};
 
+	// -------------------------------------------------------------------
 	//! List of all values parsed. Contains only one value
 	// for non-list propertys
 	std::list<ValueUnion> avList;
 
+	// -------------------------------------------------------------------
 	//! Parse a property instance 
 	static bool ParseInstance (const char* p_szIn,const char** p_szOut,
 		const Property* prop, PropertyInstance* p_pcOut);
 
+	// -------------------------------------------------------------------
 	//! Parse a property instance in binary format
 	static bool ParseInstanceBinary (const char* p_szIn,const char** p_szOut,
 		const Property* prop, PropertyInstance* p_pcOut,bool p_bBE);
 
+	// -------------------------------------------------------------------
 	//! Get the default value for a given data type
 	static ValueUnion DefaultValue(EDataType eType);
 
+	// -------------------------------------------------------------------
 	//! Parse a value
 	static bool ParseValue(const char* p_szIn,const char** p_szOut,
 		EDataType eType,ValueUnion* out);
 
+	// -------------------------------------------------------------------
 	//! Parse a binary value
 	static bool ParseValueBinary(const char* p_szIn,const char** p_szOut,
 		EDataType eType,ValueUnion* out,bool p_bBE);
 
+	// -------------------------------------------------------------------
 	//! Convert a property value to a given type TYPE
 	template <typename TYPE>
 	static TYPE ConvertTo(ValueUnion v, EDataType eType);
 };
 
 // ---------------------------------------------------------------------------------
-/**	\brief Class for an element instance in a PLY file
+/** \brief Class for an element instance in a PLY file
  */
 class ElementInstance 
 {
@@ -313,17 +385,19 @@ public:
 	//! List of all parsed properties
 	std::vector< PropertyInstance > alProperties;
 
+	// -------------------------------------------------------------------
 	//! Parse an element instance
 	static bool ParseInstance (const char* p_szIn,const char** p_szOut,
 		const Element* pcElement, ElementInstance* p_pcOut);
 
+	// -------------------------------------------------------------------
 	//! Parse a binary element instance
 	static bool ParseInstanceBinary (const char* p_szIn,const char** p_szOut,
 		const Element* pcElement, ElementInstance* p_pcOut,bool p_bBE);
 };
 
 // ---------------------------------------------------------------------------------
-/**	\brief Class for an element instance list in a PLY file
+/** \brief Class for an element instance list in a PLY file
  */
 class ElementInstanceList 
 {
@@ -333,25 +407,42 @@ public:
 	ElementInstanceList ()
 	{}
 
+	//! Construction from a given element description
 	ElementInstanceList (const Element* pc)
 	{
+		// reserve enough storage to speedup the process
 		alInstances.reserve(pc->NumOccur);
 	}
 
-	//! List of all element instances
-	std::vector< ElementInstance > alInstances;
+	//! Destructor. Dallocates all storage
+	~ElementInstanceList()
+	{
+		// delete all elements
+		for (std::vector<ElementInstance*>::const_iterator
+			i =  this->alInstances.begin();
+			i != this->alInstances.end();++i)
+		{
+			delete (*i);
+		}
+		return;
+	}
 
+	//! List of all element instances
+	std::vector< ElementInstance* > alInstances;
+
+	// -------------------------------------------------------------------
 	//! Parse an element instance list
 	static bool ParseInstanceList (const char* p_szIn,const char** p_szOut,
 		const Element* pcElement, ElementInstanceList* p_pcOut);
 
+	// -------------------------------------------------------------------
 	//! Parse a binary element instance list
 	static bool ParseInstanceListBinary (const char* p_szIn,const char** p_szOut,
 		const Element* pcElement, ElementInstanceList* p_pcOut,bool p_bBE);
 };
 // ---------------------------------------------------------------------------------
-/**	\brief Class to represent the document object model of an ASCII or binary 
- *		  (both little and big-endian) PLY file
+/** \brief Class to represent the document object model of an ASCII or binary 
+ * (both little and big-endian) PLY file
  */
 class DOM
 {
@@ -361,9 +452,30 @@ public:
 	DOM()
 	{}
 
+	//! Destructor. Dallocates all storage
+	~DOM()
+	{
+		// delete all elements
+		for (std::vector<Element*>::const_iterator
+			i =  this->alElements.begin();
+			i != this->alElements.end();++i)
+		{
+			delete (*i);
+		}
+		// delete all instance lists
+		for (std::vector<ElementInstanceList*>::const_iterator
+			i =  this->alElementData.begin();
+			i != this->alElementData.end();++i)
+		{
+			delete (*i);
+		}
+		return;
+	}
 
-	std::vector<Element> alElements;
-	std::vector<ElementInstanceList> alElementData;
+	//! Contains all elements of the file format
+	std::vector<Element*> alElements;
+	//! Contains the real data of each element's instance list
+	std::vector<ElementInstanceList*> alElementData;
 
 	//! Parse the DOM for a PLY file. The input string is assumed
 	//! to be terminated with zero
@@ -376,19 +488,22 @@ public:
 
 private:
 
+	// -------------------------------------------------------------------
 	//! Handle the file header and read all element descriptions
 	bool ParseHeader (const char* p_szIn,const char** p_szOut);
 
+	// -------------------------------------------------------------------
 	//! Read in all element instance lists
 	bool ParseElementInstanceLists (const char* p_szIn,const char** p_szOut);
 
+	// -------------------------------------------------------------------
 	//! Read in all element instance lists for a binary file format
 	bool ParseElementInstanceListsBinary (const char* p_szIn,
 		const char** p_szOut,bool p_bBE);
 };
 
 // ---------------------------------------------------------------------------------
-/**	\brief Helper class to represent a loaded face
+/** \brief Helper class to represent a loaded PLY face
  */
 class Face
 {
@@ -434,6 +549,8 @@ TYPE PLY::PropertyInstance::ConvertTo(
 	};
 	return (TYPE)0;
 }
+};
+
 // ---------------------------------------------------------------------------------
 inline bool IsSpace( const char in)
 {
@@ -476,8 +593,6 @@ inline void SkipSpacesAndLineEnd( const char* in, const char** out)
 	while (*in == ' ' || *in == '\t' || *in == '\r' || *in == '\n')in++;
 	*out = in;
 }
-
-};
 };
 
 #endif // !! include guard

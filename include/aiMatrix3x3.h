@@ -12,7 +12,7 @@ struct aiMatrix4x4;
 /** Represents a column-major 3x3 matrix 
 */
 // ---------------------------------------------------------------------------
-typedef struct aiMatrix3x3
+struct aiMatrix3x3
 {
 #ifdef __cplusplus
 	aiMatrix3x3 () :	
@@ -41,7 +41,7 @@ typedef struct aiMatrix3x3
 	float a1, a2, a3;
 	float b1, b2, b3;
 	float c1, c2, c3;
-} aiMatrix3x3_t;
+};
 
 #ifdef __cplusplus
 } // end of extern C

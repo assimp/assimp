@@ -1,3 +1,44 @@
+/*
+---------------------------------------------------------------------------
+Free Asset Import Library (ASSIMP)
+---------------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the following 
+conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------------
+*/
+
 /** @file Implementation of the 3ds importer class */
 #include "3DSLoader.h"
 #include "MaterialSystem.h"
@@ -14,7 +55,6 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::GenNormals(Dot3DS::Mesh* sMesh)
 {
-	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// First generate face normals
 	sMesh->mNormals.resize(sMesh->mPositions.size(),aiVector3D());
 	for( unsigned int a = 0; a < sMesh->mFaces.size(); a++)
@@ -29,17 +69,12 @@ void Dot3DSImporter::GenNormals(Dot3DS::Mesh* sMesh)
 		aiVector3D pDelta1 = *pV2 - *pV1;
 		aiVector3D pDelta2 = *pV3 - *pV1;
 		aiVector3D vNor = pDelta1 ^ pDelta2;
-		
-		//float fLength = vNor.Length();
-		//if (0.0f != fLength)vNor /= fLength;
-
 
 		sMesh->mNormals[face.i1] = vNor;
 		sMesh->mNormals[face.i2] = vNor;
 		sMesh->mNormals[face.i3] = vNor;
 	}
 
-	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// calculate the position bounds so we have a reliable epsilon to 
 	// check position differences against 
 	// @Schrompf: This is the 6th time this snippet is repeated!
@@ -54,81 +89,48 @@ void Dot3DSImporter::GenNormals(Dot3DS::Mesh* sMesh)
 		maxVec.z = std::max( maxVec.z, sMesh->mPositions[a].z);
 	}
 	const float posEpsilon = (maxVec - minVec).Length() * 1e-5f;
-
-
 	std::vector<aiVector3D> avNormals;
 	avNormals.resize(sMesh->mNormals.size());
 	
-	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// now generate the spatial sort tree
-	D3DSSpatialSorter sSort(sMesh);
+	D3DSSpatialSorter sSort;
+	for( std::vector<Dot3DS::Face>::iterator
+		i =  sMesh->mFaces.begin();
+		i != sMesh->mFaces.end();++i)
+	{
+		sSort.AddFace(&(*i),sMesh->mPositions);
+	}
+	sSort.Prepare();
 
 	for( std::vector<Dot3DS::Face>::iterator
 		i =  sMesh->mFaces.begin();
 		i != sMesh->mFaces.end();++i)
-		{
+	{
 		std::vector<unsigned int> poResult;
-		// need to repeat the code for all three vertices of the triangle
 
-		// vertex 1
-		sSort.FindPositions(sMesh->mPositions[(*i).i1],(*i).iSmoothGroup,
-			posEpsilon,poResult);
+		for (unsigned int c = 0; c < 3;++c)
+		{
 
-		aiVector3D vNormals;
-		float fDiv = 0.0f;
-		for (std::vector<unsigned int>::const_iterator
-			a =  poResult.begin();
-			a != poResult.end();++a)
+			sSort.FindPositions(sMesh->mPositions[(*i).mIndices[c]],(*i).iSmoothGroup,
+				posEpsilon,poResult);
+
+			aiVector3D vNormals;
+			float fDiv = 0.0f;
+			for (std::vector<unsigned int>::const_iterator
+				a =  poResult.begin();
+				a != poResult.end();++a)
 			{
-			vNormals += sMesh->mNormals[(*a)];
-			fDiv += 1.0f;
+				vNormals += sMesh->mNormals[(*a)];
+				fDiv += 1.0f;
 			}
-		vNormals.x /= fDiv;
-		vNormals.y /= fDiv;
-		vNormals.z /= fDiv;
-		vNormals.Normalize();
-		avNormals[(*i).i1] = vNormals;
-		poResult.clear();
-
-		// vertex 2
-		sSort.FindPositions(sMesh->mPositions[(*i).i2],(*i).iSmoothGroup,
-			posEpsilon,poResult);
-
-		vNormals = aiVector3D();
-		fDiv = 0.0f;
-		for (std::vector<unsigned int>::const_iterator
-			a =  poResult.begin();
-			a != poResult.end();++a)
-			{
-			vNormals += sMesh->mNormals[(*a)];
-			fDiv += 1.0f;
-			}
-		vNormals.x /= fDiv;
-		vNormals.y /= fDiv;
-		vNormals.z /= fDiv;
-		vNormals.Normalize();
-		avNormals[(*i).i2] = vNormals;
-		poResult.clear();
-
-		// vertex 3
-		sSort.FindPositions(sMesh->mPositions[(*i).i3],(*i).iSmoothGroup,
-			posEpsilon ,poResult);
-
-		vNormals = aiVector3D();
-		fDiv = 0.0f;
-		for (std::vector<unsigned int>::const_iterator
-			a =  poResult.begin();
-			a != poResult.end();++a)
-			{
-			vNormals += sMesh->mNormals[(*a)];
-			fDiv += 1.0f;
-			}
-		vNormals.x /= fDiv;
-		vNormals.y /= fDiv;
-		vNormals.z /= fDiv;
-		vNormals.Normalize();
-		avNormals[(*i).i3] = vNormals;
+			vNormals.x /= fDiv;
+			vNormals.y /= fDiv;
+			vNormals.z /= fDiv;
+			vNormals.Normalize();
+			avNormals[(*i).mIndices[c]] = vNormals;
+			poResult.clear();
 		}
+	}
 	sMesh->mNormals = avNormals;
 	return;
 }

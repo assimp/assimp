@@ -161,7 +161,7 @@ void ObjFileParser::copyNextLine(char *pBuffer, size_t length)
 
 // -------------------------------------------------------------------
 //	Get values for a new 3D vector instance
-void ObjFileParser::getVector3(std::vector<aiVector3D_t*> &point3d_array)
+void ObjFileParser::getVector3(std::vector<aiVector3D*> &point3d_array)
 {
 	float x, y, z;
 	copyNextWord(m_buffer, BUFFERSIZE);
@@ -179,7 +179,7 @@ void ObjFileParser::getVector3(std::vector<aiVector3D_t*> &point3d_array)
 
 // -------------------------------------------------------------------
 //	Get values for a new 2D vector instance
-void ObjFileParser::getVector2(std::vector<aiVector2D_t*> &point2d_array)
+void ObjFileParser::getVector2(std::vector<aiVector2D*> &point2d_array)
 {
 	float x, y;
 	copyNextWord(m_buffer, BUFFERSIZE);

@@ -1,6 +1,49 @@
+/*
+---------------------------------------------------------------------------
+Free Asset Import Library (ASSIMP)
+---------------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the following 
+conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------------
+*/
+
 /** @file Defines the C-API to the Asset Import Library. */
 #ifndef AI_ASSIMP_H_INC
 #define AI_ASSIMP_H_INC
+
+#include "aiTypes.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -8,7 +51,8 @@ extern "C" {
 
 struct aiScene;
 struct aiFileIO;
-//enum aiOrigin;
+struct aiString;
+
 
 // ---------------------------------------------------------------------------
 /** Reads the given file and returns its content.
@@ -20,14 +64,14 @@ struct aiFileIO;
 * this file. If the import fails, NULL is returned instead. Call 
 * aiGetErrorString() to retrieve a human-readable error text.
 * @param pFile Path and filename of the file to be imported, 
-*        expected to be a null-terminated c-string.
+*   expected to be a null-terminated c-string. NULL is not a valid value.
 * @param pFlags Optional post processing steps to be executed after 
 *   a successful import. Provide a bitwise combination of the #aiPostProcessSteps
 *   flags.
 * @return Pointer to the imported data or NULL if the import failed. 
 */
 // ---------------------------------------------------------------------------
-const aiScene* aiImportFile( const char* pFile, unsigned int pFlags);
+const C_STRUCT aiScene* aiImportFile( const char* pFile, unsigned int pFlags);
 
 
 // ---------------------------------------------------------------------------
@@ -41,13 +85,16 @@ const aiScene* aiImportFile( const char* pFile, unsigned int pFlags);
 * this file. If the import fails, NULL is returned instead. Call 
 * aiGetErrorString() to retrieve a human-readable error text.
 * @param pFile aiFileIO structure.  All functions pointers must be
-*        initialized. aiFileIO::OpenFunc() and aiFileIO::CloseFunc()
-*        will be used to open other files in the fs if the asset to be 
-*        loaded depends on them.
+*   initialized. aiFileIO::OpenFunc() and aiFileIO::CloseFunc()
+*   will be used to open other files in the fs if the asset to be 
+*   loaded depends on them. NULL is not a valid value.
 * @return Pointer to the imported data or NULL if the import failed. 
+*
+* @note The C-API creates a new Importer instance internally for each call 
+* to this function. Therefore the C-API is thread-safe. 
 */
 // ---------------------------------------------------------------------------
-const aiScene* aiImportFileEx( const aiFileIO* pFile);
+const C_STRUCT aiScene* aiImportFileEx( const C_STRUCT aiFileIO* pFile);
 
 
 
@@ -55,10 +102,10 @@ const aiScene* aiImportFileEx( const aiFileIO* pFile);
 /** Releases all resources associated with the given import process.
 *
 * Call this function after you're done with the imported data.
-* @param pScene The imported data to release.
+* @param pScene The imported data to release. NULL is a valid value.
 */
 // ---------------------------------------------------------------------------
-void aiReleaseImport( const aiScene* pScene);
+void aiReleaseImport( const C_STRUCT aiScene* pScene);
 
 
 // ---------------------------------------------------------------------------
@@ -69,6 +116,29 @@ void aiReleaseImport( const aiScene* pScene);
 */
 // ---------------------------------------------------------------------------
 const char* aiGetErrorString();
+
+
+// ---------------------------------------------------------------------------
+/** Returns whether a given file extension is supported by ASSIMP
+*
+* @param szExtension Extension for which the function queries support.
+* Must include a leading dot '.'. Example: ".3ds", ".md3"
+* @return 1 if the extension is supported, 0 otherwise
+*/
+// ---------------------------------------------------------------------------
+int aiIsExtensionSupported(const char* szExtension);
+
+
+// ---------------------------------------------------------------------------
+/** Get a full list of all file extensions generally supported by ASSIMP.
+ *
+ * If a file extension is contained in the list this does, of course, not
+ * mean that ASSIMP is able to load all files with this extension.
+ * @param szOut String to receive the extension list.
+ * Format of the list: "*.3ds;*.obj;*.dae". NULL is not a valid parameter.
+*/
+// ---------------------------------------------------------------------------
+void aiGetExtensionList(C_STRUCT aiString* szOut);
 
 #ifdef __cplusplus
 }

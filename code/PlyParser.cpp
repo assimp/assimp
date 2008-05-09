@@ -1,4 +1,46 @@
+/*
+---------------------------------------------------------------------------
+Free Asset Import Library (ASSIMP)
+---------------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the following 
+conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------------
+*/
+
 /** @file Implementation of the PLY parser class */
+
 #include "PLYLoader.h"
 #include "MaterialSystem.h"
 #include "fast_atof.h"
@@ -12,7 +54,6 @@
 #include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
-
 
 // ------------------------------------------------------------------------------------------------
 PLY::EDataType PLY::Property::ParseDataType(const char* p_szIn,const char** p_szOut)
@@ -100,22 +141,7 @@ PLY::EDataType PLY::Property::ParseDataType(const char* p_szIn,const char** p_sz
 PLY::ESemantic PLY::Property::ParseSemantic(const char* p_szIn,const char** p_szOut)
 {
 	PLY::ESemantic eOut = PLY::EST_INVALID;
-	if (0 == ASSIMP_strincmp(p_szIn,"x",1))
-	{
-		p_szIn++;
-		eOut = PLY::EST_XCoord;
-	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"y",1))
-	{
-		p_szIn++;
-		eOut = PLY::EST_YCoord;
-	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"z",1))
-	{
-		p_szIn++;
-		eOut = PLY::EST_ZCoord;
-	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"red",3))
+	if (0 == ASSIMP_strincmp(p_szIn,"red",3))
 	{
 		p_szIn+=3;
 		eOut = PLY::EST_Red;
@@ -235,6 +261,41 @@ PLY::ESemantic PLY::Property::ParseSemantic(const char* p_szIn,const char** p_sz
 		p_szIn++;
 		eOut = PLY::EST_Blue;
 	}
+	else if (0 == ASSIMP_strincmp(p_szIn,"tx",2))
+	{
+		p_szIn+=2;
+		eOut = PLY::EST_UTextureCoord;
+	}
+	else if (0 == ASSIMP_strincmp(p_szIn,"ty",2))
+	{
+		p_szIn+=2;
+		eOut = PLY::EST_VTextureCoord;
+	}
+	else if (0 == ASSIMP_strincmp(p_szIn,"u",1))
+	{
+		p_szIn++;
+		eOut = PLY::EST_UTextureCoord;
+	}
+	else if (0 == ASSIMP_strincmp(p_szIn,"v",1))
+	{
+		p_szIn++;
+		eOut = PLY::EST_VTextureCoord;
+	}
+	else if (0 == ASSIMP_strincmp(p_szIn,"x",1))
+	{
+		p_szIn++;
+		eOut = PLY::EST_XCoord;
+	}
+	else if (0 == ASSIMP_strincmp(p_szIn,"y",1))
+	{
+		p_szIn++;
+		eOut = PLY::EST_YCoord;
+	}
+	else if (0 == ASSIMP_strincmp(p_szIn,"z",1))
+	{
+		p_szIn++;
+		eOut = PLY::EST_ZCoord;
+	}
 	else
 	{
 		// ... find the next space or new line
@@ -250,7 +311,9 @@ PLY::ESemantic PLY::Property::ParseSemantic(const char* p_szIn,const char** p_sz
 	return eOut;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::Property::ParseProperty (const char* p_szIn, const char** p_szOut, PLY::Property* pOut)
+bool PLY::Property::ParseProperty (const char* p_szIn,
+	const char** p_szOut,
+	PLY::Property* pOut)
 {
 	// Forms supported:
 	// "property float x"
@@ -320,7 +383,8 @@ bool PLY::Property::ParseProperty (const char* p_szIn, const char** p_szOut, PLY
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
-PLY::EElementSemantic PLY::Element::ParseSemantic(const char* p_szIn,const char** p_szOut)
+PLY::EElementSemantic PLY::Element::ParseSemantic(const char* p_szIn,
+	const char** p_szOut)
 {
 	PLY::EElementSemantic eOut = PLY::EEST_INVALID;
 	if (0 == ASSIMP_strincmp(p_szIn,"vertex",6))
@@ -365,8 +429,9 @@ PLY::EElementSemantic PLY::Element::ParseSemantic(const char* p_szIn,const char*
 	return eOut;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::Element::ParseElement (const char* p_szIn, const char** p_szOut,
-								 PLY::Element* pOut)
+bool PLY::Element::ParseElement (const char* p_szIn, 
+	const char** p_szOut,
+	PLY::Element* pOut)
 {
 	// Example format: "element vertex 8"
 	*p_szOut = p_szIn;
@@ -410,8 +475,8 @@ bool PLY::Element::ParseElement (const char* p_szIn, const char** p_szOut,
 		// skip all comments
 		PLY::DOM::SkipComments(p_szIn,&p_szIn);
 
-		Property prop;
-		if(!PLY::Property::ParseProperty(p_szIn,&p_szIn,&prop))break;
+		PLY::Property* prop = new PLY::Property();
+		if(!PLY::Property::ParseProperty(p_szIn,&p_szIn,prop))break;
 
 		// add the property to the property list
 		pOut->alProperties.push_back(prop);
@@ -420,7 +485,8 @@ bool PLY::Element::ParseElement (const char* p_szIn, const char** p_szOut,
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::DOM::SkipComments (const char* p_szIn,const char** p_szOut)
+bool PLY::DOM::SkipComments (const char* p_szIn,
+	const char** p_szOut)
 {
 	*p_szOut = p_szIn;
 
@@ -451,8 +517,8 @@ bool PLY::DOM::ParseHeader (const char* p_szIn,const char** p_szOut)
 		// skip all comments
 		PLY::DOM::SkipComments(p_szIn,&p_szIn);
 
-		Element out;
-		if(PLY::Element::ParseElement(p_szIn,&p_szIn,&out))
+		PLY::Element* out = new PLY::Element();
+		if(PLY::Element::ParseElement(p_szIn,&p_szIn,out))
 		{
 			// add the element to the list of elements
 			this->alElements.push_back(out);
@@ -470,34 +536,39 @@ bool PLY::DOM::ParseHeader (const char* p_szIn,const char** p_szOut)
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::DOM::ParseElementInstanceLists (const char* p_szIn,const char** p_szOut)
+bool PLY::DOM::ParseElementInstanceLists (
+	const char* p_szIn,
+	const char** p_szOut)
 {
 	this->alElementData.resize(this->alElements.size());
 
-	std::vector<PLY::Element>::const_iterator i			=  this->alElements.begin();
-	std::vector<PLY::ElementInstanceList>::iterator a	=  this->alElementData.begin();
+	std::vector<PLY::Element*>::const_iterator i = this->alElements.begin();
+	std::vector<PLY::ElementInstanceList*>::iterator a = this->alElementData.begin();
 
 	// parse all element instances
 	for (;i != this->alElements.end();++i,++a)
 	{
-		*a = PLY::ElementInstanceList(&(*i)); // reserve enough storage
-		PLY::ElementInstanceList::ParseInstanceList(p_szIn,&p_szIn,&(*i),&(*a));
+		*a = new PLY::ElementInstanceList((*i)); // reserve enough storage
+		PLY::ElementInstanceList::ParseInstanceList(p_szIn,&p_szIn,(*i),(*a));
 	}
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::DOM::ParseElementInstanceListsBinary (const char* p_szIn,const char** p_szOut,bool p_bBE)
+bool PLY::DOM::ParseElementInstanceListsBinary (
+	const char* p_szIn,
+	const char** p_szOut,
+	bool p_bBE)
 {
 	this->alElementData.resize(this->alElements.size());
 
-	std::vector<PLY::Element>::const_iterator i			=  this->alElements.begin();
-	std::vector<PLY::ElementInstanceList>::iterator a	=  this->alElementData.begin();
+	std::vector<PLY::Element*>::const_iterator i = this->alElements.begin();
+	std::vector<PLY::ElementInstanceList*>::iterator a = this->alElementData.begin();
 
 	// parse all element instances
 	for (;i != this->alElements.end();++i,++a)
 	{
-		*a = PLY::ElementInstanceList(&(*i)); // reserve enough storage
-		PLY::ElementInstanceList::ParseInstanceListBinary(p_szIn,&p_szIn,&(*i),&(*a),p_bBE);
+		*a = new PLY::ElementInstanceList((*i)); // reserve enough storage
+		PLY::ElementInstanceList::ParseInstanceListBinary(p_szIn,&p_szIn,(*i),(*a),p_bBE);
 	}
 	return true;
 }
@@ -549,8 +620,8 @@ bool PLY::ElementInstanceList::ParseInstanceList (const char* p_szIn,const char*
 		{
 			PLY::DOM::SkipComments(p_szIn,&p_szIn);
 
-			PLY::ElementInstance out;
-			PLY::ElementInstance::ParseInstance(p_szIn, &p_szIn,pcElement, &out);
+			PLY::ElementInstance* out = new PLY::ElementInstance();
+			PLY::ElementInstance::ParseInstance(p_szIn, &p_szIn,pcElement, out);
 			// add it to the list
 			p_pcOut->alInstances[i] = out;
 		}
@@ -559,8 +630,12 @@ bool PLY::ElementInstanceList::ParseInstanceList (const char* p_szIn,const char*
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::ElementInstanceList::ParseInstanceListBinary (const char* p_szIn,const char** p_szOut,
-	 const PLY::Element* pcElement, PLY::ElementInstanceList* p_pcOut,bool p_bBE)
+bool PLY::ElementInstanceList::ParseInstanceListBinary (
+	const char* p_szIn,
+	const char** p_szOut,
+	const PLY::Element* pcElement,
+	PLY::ElementInstanceList* p_pcOut,
+	bool p_bBE /* = false */)
 {
 	// we can add special handling code for unknown element semantics since
 	// we can't skip it as a whole block (we don't know its exact size
@@ -568,8 +643,8 @@ bool PLY::ElementInstanceList::ParseInstanceListBinary (const char* p_szIn,const
 	// of the unknown element)
 	for (unsigned int i = 0; i < pcElement->NumOccur;++i)
 	{
-		PLY::ElementInstance out;
-		PLY::ElementInstance::ParseInstanceBinary(p_szIn, &p_szIn,pcElement, &out, p_bBE);
+		PLY::ElementInstance* out = new PLY::ElementInstance();
+		PLY::ElementInstance::ParseInstanceBinary(p_szIn, &p_szIn,pcElement, out, p_bBE);
 		// add it to the list
 		p_pcOut->alInstances[i] = out;
 	}
@@ -577,24 +652,28 @@ bool PLY::ElementInstanceList::ParseInstanceListBinary (const char* p_szIn,const
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::ElementInstance::ParseInstance (const char* p_szIn,const char** p_szOut,
-	const PLY::Element* pcElement, PLY::ElementInstance* p_pcOut)
+bool PLY::ElementInstance::ParseInstance (
+	const char* p_szIn,
+	const char** p_szOut,
+	const PLY::Element* pcElement,
+	PLY::ElementInstance* p_pcOut)
 {
 	if (!SkipSpaces(p_szIn, &p_szIn))return false;
 
+	// allocate enough storage
 	p_pcOut->alProperties.resize(pcElement->alProperties.size());
 
 	*p_szOut = p_szIn;
-	std::vector<PLY::PropertyInstance>::iterator		i =  p_pcOut->alProperties.begin();
-	std::vector<PLY::Property>::const_iterator			a =  pcElement->alProperties.begin();
+	std::vector<PLY::PropertyInstance>::iterator i = p_pcOut->alProperties.begin();
+	std::vector<PLY::Property*>::const_iterator a = pcElement->alProperties.begin();
 	for (;i != p_pcOut->alProperties.end();++i,++a)
 	{
-		if(!(PLY::PropertyInstance::ParseInstance(p_szIn, &p_szIn,&(*a),&(*i))))
+		if(!(PLY::PropertyInstance::ParseInstance(p_szIn, &p_szIn,(*a),&(*i))))
 		{
 			// skip the rest of the instance
 			SkipLine(p_szIn, &p_szIn);
 
-			PLY::PropertyInstance::ValueUnion v = PLY::PropertyInstance::DefaultValue((*a).eType);
+			PLY::PropertyInstance::ValueUnion v = PLY::PropertyInstance::DefaultValue((*a)->eType);
 			(*i).avList.push_back(v);
 		}
 	}
@@ -602,19 +681,24 @@ bool PLY::ElementInstance::ParseInstance (const char* p_szIn,const char** p_szOu
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::ElementInstance::ParseInstanceBinary (const char* p_szIn,const char** p_szOut,
-	const PLY::Element* pcElement, PLY::ElementInstance* p_pcOut, bool p_bBE)
+bool PLY::ElementInstance::ParseInstanceBinary (
+	const char* p_szIn,
+	const char** p_szOut,
+	const PLY::Element* pcElement,
+	PLY::ElementInstance* p_pcOut,
+	bool p_bBE /* = false */)
 {
+	// allocate enough storage
 	p_pcOut->alProperties.resize(pcElement->alProperties.size());
 
 	*p_szOut = p_szIn;
-	std::vector<PLY::PropertyInstance>::iterator		i =  p_pcOut->alProperties.begin();
-	std::vector<PLY::Property>::const_iterator			a =  pcElement->alProperties.begin();
+	std::vector<PLY::PropertyInstance>::iterator i =  p_pcOut->alProperties.begin();
+	std::vector<PLY::Property*>::const_iterator a =  pcElement->alProperties.begin();
 	for (;i != p_pcOut->alProperties.end();++i,++a)
 	{
-		if(!(PLY::PropertyInstance::ParseInstance(p_szIn, &p_szIn,&(*a),&(*i))))
+		if(!(PLY::PropertyInstance::ParseInstance(p_szIn, &p_szIn,(*a),&(*i))))
 		{
-			PLY::PropertyInstance::ValueUnion v = PLY::PropertyInstance::DefaultValue((*a).eType);
+			PLY::PropertyInstance::ValueUnion v = PLY::PropertyInstance::DefaultValue((*a)->eType);
 			(*i).avList.push_back(v);
 		}
 	}

@@ -1,4 +1,43 @@
+/*
+---------------------------------------------------------------------------
+Free Asset Import Library (ASSIMP)
+---------------------------------------------------------------------------
 
+Copyright (c) 2006-2008, ASSIMP Development Team
+
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the following 
+conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------------
+*/
 
 /** @file Defines the material system of the library
  *
@@ -24,56 +63,50 @@ enum aiPropertyTypeInfo
 	*/
 	aiPTI_Float = 0x1,
 
-
 	/** aiString data structure
 	*/
 	aiPTI_String = 0x3,
 
-
 	/** Array of Integers
 	*/
 	aiPTI_Integer = 0x4,
-
 
 	/** Simple binary buffer
 	*/
 	aiPTI_Buffer = 0x5,
 };
 
-
 // ---------------------------------------------------------------------------
-/** Defines algorithms for generating UVW-coords (for texture sampling)
-*  procedurally.
+/** Defines texture operations like add, mul ...
+*
 */
 // ---------------------------------------------------------------------------
-enum aiTexUVWGen
+enum aiTextureOp
 {
-	/** The view vector will be reflected to a pixel's normal. 
-	*
-	*  The result is used as UVW-coordinate for 
-	*  accessing a cubemap
-	*/
-	aiTexUVWGen_VIEWREFLEFT = 0x800001,
+	/** T = T1 * T2
+	 */
+	aiTextureOp_Multiply = 0x0,
 
+	/** T = T1 + T2
+	 */
+	aiTextureOp_Add = 0x1,
 
-	/** The view vector will be used as UVW-src
-	*
-	*  The view vector is used as UVW-coordinate for 
-	*  accessing a cubemap
-	*/
-	aiTexUVWGen_VIEW = 0x800002,
+	/** T = T1 - T2
+	 */
+	aiTextureOp_Subtract = 0x2,
 
+	/** T = T1 / T2
+	 */
+	aiTextureOp_Divide = 0x3,
 
-	/** The view vector will be refracted to the pixel's normal. 
-	*
-	*  If this is used, the refraction index to be applied should
-	*  also be contained in the material description.
-	*  The result is used as UVW-coordinate for 
-	*  accessing a cubemap.
-	*/
-	aiTexUVWGen_VIEWREFRACT = 0x800003
+	/** T = (T1 + T2) - (T1 * T2)
+	 */
+	aiTextureOp_SmoothAdd = 0x4,
+
+	/** T = T1 + (T2-0.5)
+	 */
+	aiTextureOp_SignedAdd = 0x5
 };
-
 
 // ---------------------------------------------------------------------------
 /** Defines all shading models supported by the library
@@ -92,11 +125,9 @@ enum aiShadingMode
 	*/
 	aiShadingMode_Flat = 0x1,
 
-
 	/** Diffuse gouraud shading. Shading on per-vertex base
 	*/
 	aiShadingMode_Gouraud =	0x2,
-
 
 	/** Diffuse/Specular Phong-Shading
 	*
@@ -104,7 +135,6 @@ enum aiShadingMode
 	*  slowest algorithm, but generates the best results.
 	*/
 	aiShadingMode_Phong = 0x3,
-
 
 	/** Diffuse/Specular Phong-Blinn-Shading
 	*
@@ -114,14 +144,12 @@ enum aiShadingMode
 	*/
 	aiShadingMode_Blinn	= 0x4,
 
-
 	/** Toon-Shading per pixel
 	*
 	*  Shading is applied on per-pixel base. The output looks
 	*  like a comic. Often combined with edge detection.
 	*/
 	aiShadingMode_Toon = 0x5,
-
 
 	/** OrenNayar-Shading per pixel
 	*
@@ -131,7 +159,6 @@ enum aiShadingMode
 	*/
 	aiShadingMode_OrenNayar = 0x6,
 
-
 	/** Minnaert-Shading per pixel
 	*
 	*  Extension to standard lambertian shading, taking the
@@ -139,11 +166,9 @@ enum aiShadingMode
 	*/
 	aiShadingMode_Minnaert = 0x7,
 
-
 	/** CookTorrance-Shading per pixel
 	*/
 	aiShadingMode_CookTorrance = 0x8,
-
 
 	/** No shading at all
 	*/
@@ -163,13 +188,11 @@ struct aiMaterialProperty
 	*
 	*	Keys are case insensitive.
 	*/
-	aiString* mKey;
-
+	C_STRUCT aiString* mKey;
 
 	/**	Size of the buffer mData is pointing to, in bytes
 	*/
 	unsigned int mDataLength;
-
 
 	/** Type information for the property.
 	*
@@ -178,7 +201,6 @@ struct aiMaterialProperty
 	*  internally to perform debug checks.
 	*/
 	aiPropertyTypeInfo mType;
-
 
 	/**	Binary buffer to hold the property's value
 	*
@@ -199,19 +221,17 @@ struct aiMaterialProperty
 *  for nearly all purposes. 
 */
 // ---------------------------------------------------------------------------
-#ifdef __cplusplus
-class aiMaterial
+struct aiMaterial
 {
+#ifdef __cplusplus
 protected:
 	aiMaterial() {}
 public:
-#else
-struct aiMaterial
-{
 #endif // __cplusplus
+
 	/** List of all material properties loaded.
 	*/
-	aiMaterialProperty** mProperties;
+	C_STRUCT aiMaterialProperty** mProperties;
 
 	/** Number of properties loaded
 	*/
@@ -230,6 +250,11 @@ struct aiMaterial
 *  Defines the shading model to use (aiShadingMode)
 */
 #define AI_MATKEY_SHADING_MODEL "$mat.shadingm"
+
+/** @def AI_MATKEY_ENABLE_WIREFRAM
+*  Integer property. 1 to enable wireframe for rendering
+*/
+#define AI_MATKEY_ENABLE_WIREFRAME "$mat.wireframe"
 
 /** @def AI_MATKEY_OPACITY
 *  Defines the base opacity of the material
@@ -297,15 +322,15 @@ struct aiMaterial
 #define AI_MATKEY_TEXTURE_NORMALS(N) "$tex.file.normals["#N"]"
 #define AI_MATKEY_TEXTURE_NORMALS_   "$tex.file.normals"
 
-/** @def AI_MATKEY_TEXTURE_BUMP
+/** @def AI_MATKEY_TEXTURE_HEIGHT
 * Defines a specified bumpmap texture (=heightmap) channel of the material
 * This is very similar to #AI_MATKEY_TEXTURE_NORMALS. It is provided
 * to allow applications to determine whether the input data for
-* normal mapping is already a normal map or needs to be converted to
-* a heightmap.
+* normal mapping is already a normal map or needs to be converted from
+* a heightmap to a normal map.
 */
-#define AI_MATKEY_TEXTURE_BUMP(N) "$tex.file.bump["#N"]"
-#define AI_MATKEY_TEXTURE_BUMP_   "$tex.file.bump"
+#define AI_MATKEY_TEXTURE_HEIGHT(N) "$tex.file.bump["#N"]"
+#define AI_MATKEY_TEXTURE_HEIGHT_   "$tex.file.bump"
 
 /** @def AI_MATKEY_TEXTURE_SHININESS
 *  Defines a specified shininess texture channel of the material
@@ -325,36 +350,54 @@ struct aiMaterial
 #define AI_MATKEY_TEXOP_SPECULAR(N)		"$tex.op.specular["#N"]"
 #define AI_MATKEY_TEXOP_EMISSIVE(N)		"$tex.op.emissive["#N"]"
 #define AI_MATKEY_TEXOP_NORMALS(N)		"$tex.op.normals["#N"]"
-#define AI_MATKEY_TEXOP_BUMP(N)			"$tex.op.bump["#N"]"
+#define AI_MATKEY_TEXOP_HEIGHT(N)			"$tex.op.bump["#N"]"
 #define AI_MATKEY_TEXOP_SHININESS(N)	"$tex.op.shininess["#N"]"
 #define AI_MATKEY_TEXOP_OPACITY(N)		"$tex.op.opacity["#N"]"
+
+#define AI_MATKEY_TEXOP_DIFFUSE_		"$tex.op.diffuse"
+#define AI_MATKEY_TEXOP_AMBIENT_		"$tex.op.ambient"
+#define AI_MATKEY_TEXOP_SPECULAR_		"$tex.op.specular"
+#define AI_MATKEY_TEXOP_EMISSIVE_		"$tex.op.emissive"
+#define AI_MATKEY_TEXOP_NORMALS_		"$tex.op.normals"
+#define AI_MATKEY_TEXOP_HEIGHT_			"$tex.op.bump"
+#define AI_MATKEY_TEXOP_SHININESS_		"$tex.op.shininess"
+#define AI_MATKEY_TEXOP_OPACITY_		"$tex.op.opacity"
 
 #define AI_MATKEY_UVWSRC_DIFFUSE(N)		"$tex.uvw.diffuse["#N"]"
 #define AI_MATKEY_UVWSRC_AMBIENT(N)		"$tex.uvw.ambient["#N"]"
 #define AI_MATKEY_UVWSRC_SPECULAR(N)	"$tex.uvw.specular["#N"]"
 #define AI_MATKEY_UVWSRC_EMISSIVE(N)	"$tex.uvw.emissive["#N"]"
 #define AI_MATKEY_UVWSRC_NORMALS(N)		"$tex.uvw.normals["#N"]"
-#define AI_MATKEY_UVWSRC_BUMP(N)		"$tex.uvw.bump["#N"]"
+#define AI_MATKEY_UVWSRC_HEIGHT(N)		"$tex.uvw.bump["#N"]"
 #define AI_MATKEY_UVWSRC_SHININESS(N)	"$tex.uvw.shininess["#N"]"
 #define AI_MATKEY_UVWSRC_OPACITY(N)		"$tex.uvw.opacity["#N"]"
 
-#define AI_MATKEY_REFRACTI_DIFFUSE(N)	"$tex.refracti.diffuse["#N"]"
-#define AI_MATKEY_REFRACTI_AMBIENT(N)	"$tex.refracti.ambient["#N"]"
-#define AI_MATKEY_REFRACTI_SPECULAR(N)	"$tex.refracti.specular["#N"]"
-#define AI_MATKEY_REFRACTI_EMISSIVE(N)	"$tex.refracti.emissive["#N"]"
-#define AI_MATKEY_REFRACTI_NORMALS(N)	"$tex.refracti.normals["#N"]"
-#define AI_MATKEY_REFRACTI_BUMP(N)		"$tex.refracti.bump["#N"]"
-#define AI_MATKEY_REFRACTI_SHININESS(N)	"$tex.refracti.shininess["#N"]"
-#define AI_MATKEY_REFRACTI_OPACITY(N)	"$tex.refracti.opacity["#N"]"
+#define AI_MATKEY_UVWSRC_DIFFUSE_		"$tex.uvw.diffuse"
+#define AI_MATKEY_UVWSRC_AMBIENT_		"$tex.uvw.ambient"
+#define AI_MATKEY_UVWSRC_SPECULAR_		"$tex.uvw.specular"
+#define AI_MATKEY_UVWSRC_EMISSIVE_		"$tex.uvw.emissive"
+#define AI_MATKEY_UVWSRC_NORMALS_		"$tex.uvw.normals"
+#define AI_MATKEY_UVWSRC_HEIGHT_			"$tex.uvw.bump"
+#define AI_MATKEY_UVWSRC_SHININESS_		"$tex.uvw.shininess"
+#define AI_MATKEY_UVWSRC_OPACITY_		"$tex.uvw.opacity"
 
 #define AI_MATKEY_TEXBLEND_DIFFUSE(N)	"$tex.blend.diffuse["#N"]"
 #define AI_MATKEY_TEXBLEND_AMBIENT(N)	"$tex.blend.ambient["#N"]"
 #define AI_MATKEY_TEXBLEND_SPECULAR(N)	"$tex.blend.specular["#N"]"
 #define AI_MATKEY_TEXBLEND_EMISSIVE(N)	"$tex.blend.emissive["#N"]"
 #define AI_MATKEY_TEXBLEND_NORMALS(N)	"$tex.blend.normals["#N"]"
-#define AI_MATKEY_TEXBLEND_BUMP(N)		"$tex.blend.bump["#N"]"
+#define AI_MATKEY_TEXBLEND_HEIGHT(N)		"$tex.blend.bump["#N"]"
 #define AI_MATKEY_TEXBLEND_SHININESS(N)	"$tex.blend.shininess["#N"]"
 #define AI_MATKEY_TEXBLEND_OPACITY(N)	"$tex.blend.opacity["#N"]"
+
+#define AI_MATKEY_TEXBLEND_DIFFUSE_		"$tex.blend.diffuse"
+#define AI_MATKEY_TEXBLEND_AMBIENT_		"$tex.blend.ambient"
+#define AI_MATKEY_TEXBLEND_SPECULAR_	"$tex.blend.specular"
+#define AI_MATKEY_TEXBLEND_EMISSIVE_	"$tex.blend.emissive"
+#define AI_MATKEY_TEXBLEND_NORMALS_		"$tex.blend.normals"
+#define AI_MATKEY_TEXBLEND_HEIGHT_		"$tex.blend.bump"
+#define AI_MATKEY_TEXBLEND_SHININESS_	"$tex.blend.shininess"
+#define AI_MATKEY_TEXBLEND_OPACITY_		"$tex.blend.opacity"
 
 
 #define AI_MATKEY_ORENNAYAR_ROUGHNESS	 "$shading.orennayar.roughness"
@@ -379,9 +422,9 @@ struct aiMaterial
 *         structure or NULL if the key has not been found. 
 */
 // ---------------------------------------------------------------------------
-aiReturn aiGetMaterialProperty(const aiMaterial* pMat, 
-							   const char* pKey,
-							   const aiMaterialProperty** pPropOut);
+aiReturn aiGetMaterialProperty(const C_STRUCT aiMaterial* pMat, 
+	const char* pKey,
+	const C_STRUCT aiMaterialProperty** pPropOut);
 
 
 // ---------------------------------------------------------------------------
@@ -395,16 +438,16 @@ aiReturn aiGetMaterialProperty(const aiMaterial* pMat,
 *        Receives the number of values (not bytes!) read. 
 */
 // ---------------------------------------------------------------------------
-aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat, 
-								 const char* pKey,
-								 float* pOut,
-								 unsigned int* pMax);
+aiReturn aiGetMaterialFloatArray(const C_STRUCT aiMaterial* pMat, 
+	const char* pKey,
+	float* pOut,
+	unsigned int* pMax);
 
 #ifdef __cplusplus
 // inline it
-inline aiReturn aiGetMaterialFloat(const aiMaterial* pMat, 
-								   const char* pKey,
-								   float* pOut)
+inline aiReturn aiGetMaterialFloat(const C_STRUCT aiMaterial* pMat, 
+	 const char* pKey,
+	 float* pOut)
 	{return aiGetMaterialFloatArray(pMat,pKey,pOut,(unsigned int*)0x0);}
 #else 
 // use our friend, the C preprocessor
@@ -424,16 +467,16 @@ inline aiReturn aiGetMaterialFloat(const aiMaterial* pMat,
 *        Receives the number of values (not bytes!) read. 
 */
 // ---------------------------------------------------------------------------
-aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat, 
-								   const char* pKey,
-								   int* pOut,
-								   unsigned int* pMax);
+aiReturn aiGetMaterialIntegerArray(const C_STRUCT aiMaterial* pMat, 
+	const char* pKey,
+	int* pOut,
+	unsigned int* pMax);
 
 #ifdef __cplusplus
 // inline it
-inline aiReturn aiGetMaterialInteger(const aiMaterial* pMat, 
-									 const char* pKey,
-									 int* pOut)
+inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial* pMat, 
+	const char* pKey,
+	int* pOut)
 	{return aiGetMaterialIntegerArray(pMat,pKey,pOut,(unsigned int*)0x0);}
 #else 
 // use our friend, the C preprocessor
@@ -451,9 +494,9 @@ inline aiReturn aiGetMaterialInteger(const aiMaterial* pMat,
 *	@param pOut Pointer to a buffer to receive the result. 
 */
 // ---------------------------------------------------------------------------
-aiReturn aiGetMaterialColor(const aiMaterial* pMat, 
-							const char* pKey,
-							aiColor4D* pOut);
+aiReturn aiGetMaterialColor(const C_STRUCT aiMaterial* pMat, 
+	const char* pKey,
+	aiColor4D* pOut);
 
 
 // ---------------------------------------------------------------------------
@@ -464,9 +507,46 @@ aiReturn aiGetMaterialColor(const aiMaterial* pMat,
 *	@param pOut Pointer to a buffer to receive the result. 
 */
 // ---------------------------------------------------------------------------
-aiReturn aiGetMaterialString(const aiMaterial* pMat, 
-							 const char* pKey,
-							 aiString* pOut);
+aiReturn aiGetMaterialString(const C_STRUCT aiMaterial* pMat, 
+	const char* pKey,
+	aiString* pOut);
+
+
+#define AI_TEXTYPE_DIFFUSE		0x0
+#define AI_TEXTYPE_SPECULAR		0x1
+#define AI_TEXTYPE_AMBIENT		0x2
+#define AI_TEXTYPE_EMISSIVE		0x3
+#define AI_TEXTYPE_HEIGHT		0x4
+#define AI_TEXTYPE_NORMALS		0x5
+#define AI_TEXTYPE_SHININESS	0x6
+
+// ---------------------------------------------------------------------------
+/** Helper function to get a diffuse texture from a material
+ *
+ *  This function is provided just for convinience. 
+ *  @param pMat Pointer to the input material. May not be NULL
+ *  @param iIndex Index of the texture to retrieve. If the index is too 
+ *     large the function fails.
+ *  @param iTexType One of the AI_TEXTYPE constants. Specifies the type of
+ *     the texture to retrieve (e.g. diffuse, specular, height map ...)
+ *  @param szPath Receives the output path
+ *     NULL is no allowed as value
+ *  @param piUVIndex Receives the UV index of the texture. 
+ *     NULL is allowed as value.
+ *  @param pfBlendFactor Receives the blend factor for the texture
+ *     NULL is allowed as value.
+ *  @param peTextureOp Receives the texture operation to perform between
+ *     this texture and the previous texture.
+ *     NULL is allowed as value.
+ */
+// ---------------------------------------------------------------------------
+aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* pMat,
+	unsigned int iIndex,
+	unsigned int iTexType,
+	C_STRUCT aiString* szPath,
+	unsigned int* piUVIndex,
+	float* pfBlendFactor,
+	aiTextureOp* peTextureOp); 
 
 
 #ifdef __cplusplus

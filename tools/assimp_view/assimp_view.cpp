@@ -67,7 +67,7 @@ AssetHelper *g_pcAsset				= NULL;
 unsigned char* g_szImageMask		= NULL;
 
 //-------------------------------------------------------------------------------
-// table of colors used for normal vectors. 
+// Table of colors used for normal vectors. 
 //-------------------------------------------------------------------------------
 D3DXVECTOR4 g_aclNormalColors[14] = 
 	{
@@ -94,27 +94,41 @@ D3DXVECTOR4 g_aclNormalColors[14] =
 
 
 //-------------------------------------------------------------------------------
-//!	\brief Entry point for loader thread
+// Entry point for the loader thread
+// The laoder thread loads the asset while the progress dialog displays the
+// smart progress bar
 //-------------------------------------------------------------------------------
 DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 	{
 	UNREFERENCED_PARAMETER(lpParameter);
+
+	// get current time
 	double fCur = (double)timeGetTime();
 
+	// call ASSIMPs C-API to load the file
 	g_pcAsset->pcScene = aiImportFile(g_szFileName,
-		aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices | aiProcess_Triangulate |
-		aiProcess_GenSmoothNormals | aiProcess_ConvertToLeftHanded	 | aiProcess_SplitLargeMeshes);
+		aiProcess_CalcTangentSpace		| // calculate tangents and bitangents
+		aiProcess_JoinIdenticalVertices | // join identical vertices
+		aiProcess_Triangulate			| // triangulate n-polygons
+		aiProcess_GenSmoothNormals		| // generate smooth normal vectors if not existing
+		aiProcess_ConvertToLeftHanded	| // convert everything to D3D left handed space
+		aiProcess_SplitLargeMeshes);      // split large, unrenderable meshes into submeshes
 
+	// get the end time of zje operation, calculate delta t
 	double fEnd = (double)timeGetTime();
 	double dTime = (fEnd - fCur) / 1000;
 	char szTemp[128];
 	sprintf(szTemp,"%.5f",(float)dTime);
 	SetDlgItemText(g_hDlg,IDC_ELOAD,szTemp);
 	g_bLoadingFinished = true;
+
+	// check whether the loading process has failed ...
 	if (NULL == g_pcAsset->pcScene)
 		{
 		CLogDisplay::Instance().AddEntry("[ERROR] Unable to load this asset:",
 			D3DCOLOR_ARGB(0xFF,0xFF,0,0));
+
+		// print ASSIMPs error string to the log display
 		CLogDisplay::Instance().AddEntry(aiGetErrorString(),
 			D3DCOLOR_ARGB(0xFF,0xFF,0,0));
 		return 1;
@@ -123,42 +137,72 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 	}
 
 //-------------------------------------------------------------------------------
+// Recursivly count the number of nodes in an asset's node graph
+// Used by LoadAsset()
+//-------------------------------------------------------------------------------
+void GetNodeCount(aiNode* pcNode, unsigned int* piCnt)
+{
+	*piCnt = *piCnt+1;
+	for (unsigned int i = 0; i < pcNode->mNumChildren;++i)
+		GetNodeCount(pcNode->mChildren[i],piCnt);
+}
+
+//-------------------------------------------------------------------------------
+// load the current asset
+// THe path to the asset is specified in the global path variable
 //-------------------------------------------------------------------------------
 int LoadAsset(void)
-	{
+{
+	// set the world and world rotation matrices to the identuty
 	g_mWorldRotate = aiMatrix4x4();
 	g_mWorld = aiMatrix4x4();
 
+	// create a helper thread to load the asset
 	DWORD dwID;
 	g_bLoadingCanceled = false;
 	g_pcAsset = new AssetHelper();
 	g_hThreadHandle = CreateThread(NULL,0,&LoadThreadProc,NULL,0,&dwID);
+
+	if (!g_hThreadHandle)
+	{
+		CLogDisplay::Instance().AddEntry(
+			"[ERROR] Unable to create helper thread for loading",
+			D3DCOLOR_ARGB(0xFF,0xFF,0,0));
+		return 0;
+	}
+
+	// show the progress bar dialog
 	DialogBox(g_hInstance,MAKEINTRESOURCE(IDD_LOADDIALOG),
 		g_hDlg,&ProgressMessageProc);
 
+	// now we should have loaded the asset. Check this ...
 	g_bLoadingFinished = false;
 	if (!g_pcAsset || !g_pcAsset->pcScene)
-		{
+	{
 		if (g_pcAsset)
-			{
+		{
 			delete g_pcAsset;
 			g_pcAsset = NULL;
-			}
-		return 0;
 		}
+		return 0;
+	}
 
+	// allocate a new MeshHelper array and build a new instance
+	// for each mesh in the original asset
 	g_pcAsset->apcMeshes = new AssetHelper::MeshHelper*[
 		g_pcAsset->pcScene->mNumMeshes]();
 
+	// get the number of vertices/faces in the model
 	unsigned int iNumVert = 0;
 	unsigned int iNumFaces = 0;
 	for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
-		{
+	{
 		iNumVert += g_pcAsset->pcScene->mMeshes[i]->mNumVertices;
 		iNumFaces += g_pcAsset->pcScene->mMeshes[i]->mNumFaces;
 		g_pcAsset->apcMeshes[i] = new AssetHelper::MeshHelper();
-		}
-	char szOut[120];
+	}
+	// and fill the statistic edit controls
+	char szOut[1024];
 	sprintf(szOut,"%i",(int)iNumVert);
 	SetDlgItemText(g_hDlg,IDC_EVERT,szOut);
 	sprintf(szOut,"%i",(int)iNumFaces);
@@ -166,25 +210,41 @@ int LoadAsset(void)
 	sprintf(szOut,"%i",(int)g_pcAsset->pcScene->mNumMaterials);
 	SetDlgItemText(g_hDlg,IDC_EMAT,szOut);
 
+	// need to get the number of nodes
+	iNumVert = 0;
+	GetNodeCount(g_pcAsset->pcScene->mRootNode,&iNumVert);
+	sprintf(szOut,"%i",(int)iNumVert);
+	SetDlgItemText(g_hDlg,IDC_ENODE,szOut);
+
+	// build a new caption string for the viewer
+	sprintf(szOut,AI_VIEW_CAPTION_BASE " [%s]",g_szFileName);
+	SetWindowText(g_hDlg,szOut);
+
+	// scale the asset vertices to fit into the viewer window
 	ScaleAsset();
 
+	// reset the camera view to the default position
 	g_sCamera.vPos = aiVector3D(0.0f,0.0f,-10.0f);
 	g_sCamera.vLookAt = aiVector3D(0.0f,0.0f,1.0f);
 	g_sCamera.vUp = aiVector3D(0.0f,1.0f,0.0f);
 	g_sCamera.vRight = aiVector3D(0.0f,1.0f,0.0f);
 
+	// build native D3D vertex/index buffers, textures, materials
 	return CreateAssetData();
-	}
+}
 
 
 //-------------------------------------------------------------------------------
+// Delete the loaded asset
 //-------------------------------------------------------------------------------
 int DeleteAsset(void)
 	{
 	if (!g_pcAsset)return 0;
 
+	// don't anymore know why this was necessary ...
 	Render();
 
+	// delete everything
 	DeleteAssetData();
 	for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
 		{
@@ -195,9 +255,16 @@ int DeleteAsset(void)
 	delete g_pcAsset;
 	g_pcAsset = NULL;
 
+	// clear all stats edit controls
 	SetDlgItemText(g_hDlg,IDC_EVERT,"0");
 	SetDlgItemText(g_hDlg,IDC_EFACE,"0");
 	SetDlgItemText(g_hDlg,IDC_EMAT,"0");
+	SetDlgItemText(g_hDlg,IDC_ENODE,"0");
+	SetDlgItemText(g_hDlg,IDC_ESHADER,"0");
+	SetDlgItemText(g_hDlg,IDC_ETEX,"0");
+
+	// reset the caption of the viewer window
+	SetWindowText(g_hDlg,AI_VIEW_CAPTION_BASE);
 	return 1;
 	}
 
@@ -357,12 +424,12 @@ int GenerateNormalsAsLineList(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSo
 // The animations are added in order
 //-------------------------------------------------------------------------------
 int FillAnimList(void)
-	{
+{
 	// clear the combo box
 	SendDlgItemMessage(g_hDlg,IDC_COMBO1,CB_RESETCONTENT,0,0);
 
 	if (0 == g_pcAsset->pcScene->mNumAnimations)
-		{
+	{
 		// disable all UI components related to animations
 		EnableWindow(GetDlgItem(g_hDlg,IDC_PLAYANIM),FALSE);
 		EnableWindow(GetDlgItem(g_hDlg,IDC_SPEED),FALSE);
@@ -374,7 +441,7 @@ int FillAnimList(void)
 		EnableWindow(GetDlgItem(g_hDlg,IDC_COMBO1),FALSE);
 		}
 	else
-		{
+	{
 		// reenable all animation components if they have been
 		// disabled for a previous mesh
 		EnableWindow(GetDlgItem(g_hDlg,IDC_PLAYANIM),TRUE);
@@ -388,13 +455,276 @@ int FillAnimList(void)
 
 		// now fill in all animation names
 		for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumAnimations;++i)
-			{
+		{
 			SendDlgItemMessage(g_hDlg,IDC_COMBO1,CB_ADDSTRING,0,
 				( LPARAM ) g_pcAsset->pcScene->mAnimations[i]->mName.data);
-			}
 		}
-	return 1;
 	}
+	return 1;
+}
+
+
+//-------------------------------------------------------------------------------
+// Add a node to the display list
+// Recusrivly add all subnodes
+// iNode - Index of the node image in the tree view's image lust
+// iIndex - Index of the node in the parent's child list
+// iDepth - Current depth of the node
+// pcNode - Node object
+// hRoot - Parent tree view node
+//-------------------------------------------------------------------------------
+int AddNodeToDisplayList(unsigned int iNode,
+	unsigned int iIndex, 
+	unsigned int iDepth,
+	const aiNode* pcNode,
+	HTREEITEM hRoot)
+{
+	ai_assert(NULL != pcNode);
+
+	char chTemp[512];
+
+	if(0 == pcNode->mName.length)
+	{
+		if (iNode >= 100)
+		{
+			iNode += iDepth  * 1000;
+		}
+		else if (iNode >= 10)
+		{
+			iNode += iDepth  * 100;
+		}
+		else iNode += iDepth  * 10;
+		sprintf(chTemp,"Node %i",iNode);
+	}
+	else strcpy(chTemp,pcNode->mName.data);
+
+	TVITEMEX tvi; 
+	TVINSERTSTRUCT sNew;
+	tvi.pszText = chTemp;
+	tvi.cchTextMax = (int)strlen(chTemp);
+	tvi.mask = TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_IMAGE | TVIF_HANDLE;
+	tvi.iImage = iNode;
+	tvi.iSelectedImage = iNode;
+	tvi.lParam = (LPARAM)0; 
+
+	sNew.itemex = tvi; 
+	sNew.hInsertAfter = TVI_LAST; 
+	sNew.hParent = hRoot;
+
+	// add the item to the list
+	HTREEITEM hTexture = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1), 
+		TVM_INSERTITEM, 
+		0,
+		(LPARAM)(LPTVINSERTSTRUCT)&sNew);
+
+	// recursively add all child nodes
+	++iDepth;
+	for (unsigned int i = 0; i< pcNode->mNumChildren;++i)
+	{
+		AddNodeToDisplayList(iNode,i,iDepth,pcNode->mChildren[i],hTexture);
+	}
+	return 1;
+}
+
+
+//-------------------------------------------------------------------------------
+// Add a texture to the display list
+// pcMat - material containing the texture
+// hTexture - Handle to the material tree item
+// iTexture - Index of the texture image in the image list of the tree view
+// szPath - Path to the texture
+// iUVIndex - UV index to be used for the texture
+// fBlendFactor - Blend factor to be used for the texture
+// eTextureOp - texture operation to be used for the texture
+//-------------------------------------------------------------------------------
+int AddTextureToDisplayList(unsigned int iType,
+	unsigned int iIndex,
+	const aiString* szPath,
+	HTREEITEM hFX, 
+	const aiMaterial* pcMat,
+	unsigned int iTexture = 0,
+	unsigned int iUVIndex = 0,
+	const float fBlendFactor = 0.0f,
+	aiTextureOp eTextureOp = aiTextureOp_Multiply)
+{
+	char chTemp[512];
+	const char* sz = strrchr(szPath->data,'\\');
+	if (!sz)sz = strrchr(szPath->data,'/');
+	if (!sz)sz = szPath->data;
+
+	const char* szType;
+	switch (iType)
+	{
+	case AI_TEXTYPE_DIFFUSE:
+		szType = "Diffuse";break;
+	case AI_TEXTYPE_SPECULAR:
+		szType = "Specular";break;
+	case AI_TEXTYPE_AMBIENT:
+		szType = "Ambient";break;
+	case AI_TEXTYPE_EMISSIVE:
+		szType = "Emissive";break;
+	case AI_TEXTYPE_HEIGHT:
+		szType = "HeightMap";break;
+	case AI_TEXTYPE_NORMALS:
+		szType = "NormalMap";break;
+	case AI_TEXTYPE_SHININESS:
+		szType = "Shininess";break;
+	};
+	sprintf(chTemp,"%s %i (%s)",szType,iIndex+1,sz);
+
+	TVITEMEX tvi; 
+	TVINSERTSTRUCT sNew;
+	tvi.pszText = chTemp;
+	tvi.cchTextMax = (int)strlen(chTemp);
+	tvi.mask = TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_IMAGE | TVIF_HANDLE;
+	tvi.iImage = iTexture;
+	tvi.iSelectedImage = iTexture;
+	tvi.lParam = (LPARAM)0; 
+
+	sNew.itemex = tvi; 
+	sNew.hInsertAfter = TVI_LAST; 
+	sNew.hParent = hFX;
+
+	// add the item to the list
+	HTREEITEM hTexture = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1), 
+		TVM_INSERTITEM, 
+		0,
+		(LPARAM)(LPTVINSERTSTRUCT)&sNew);
+	return 1;
+}
+
+
+//-------------------------------------------------------------------------------
+// Add a material and all sub textures to the display mode list
+// pcMat - material to be added
+// hRoot - Handle to the root of the tree view
+// iFX - Index of the material image in the image list of the tree view
+// iTexture - Index of the texture image in the image list of the tree view
+// iIndex - Material index
+//-------------------------------------------------------------------------------
+int AddMaterialToDisplayList(HTREEITEM hRoot, const aiMaterial* pcMat,
+	unsigned int iFX, unsigned int iTexture, unsigned int iIndex)
+{
+	// use the name of the material, if possible
+	char chTemp[512];
+	aiString szOut;
+	if (AI_SUCCESS != aiGetMaterialString(pcMat,AI_MATKEY_NAME,&szOut))
+	{
+		sprintf(chTemp,"Material %i",iIndex+1);
+	}
+	else
+	{
+		sprintf(chTemp,"%s (%i)",szOut.data,iIndex+1);
+	}
+	TVITEMEX tvi; 
+	TVINSERTSTRUCT sNew;
+	tvi.pszText = chTemp;
+	tvi.cchTextMax = (int)strlen(chTemp);
+	tvi.mask = TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_IMAGE | TVIF_HANDLE | TVIF_STATE;
+	tvi.iImage = iFX;
+	tvi.iSelectedImage = iFX;
+	tvi.lParam = (LPARAM)0; 
+	tvi.state = TVIS_EXPANDED | TVIS_EXPANDEDONCE ;
+
+	sNew.itemex = tvi; 
+	sNew.hInsertAfter = TVI_LAST; 
+	sNew.hParent = hRoot;
+
+	// add the item to the list
+	HTREEITEM hTexture = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1), 
+		TVM_INSERTITEM, 
+		0,
+		(LPARAM)(LPTVINSERTSTRUCT)&sNew);
+
+	// for each texture in the list ... add it
+	unsigned int iUV;
+	float fBlend;
+	aiTextureOp eOp;
+	aiString szPath;
+	for (unsigned int i = 0; i < 7;++i)
+	{
+		unsigned int iNum = 0;
+		while (true)
+		{
+			if (AI_SUCCESS != aiGetMaterialTexture(pcMat,iNum,i,
+				&szPath,&iUV,&fBlend,&eOp))
+			{
+				break;
+			}
+			AddTextureToDisplayList(i,iNum,&szPath,hTexture,
+				pcMat,iTexture,iUV,fBlend,eOp);
+			++iNum;
+		}
+	}
+	return 1;
+}
+
+//-------------------------------------------------------------------------------
+// Fill the UI combobox with a list of all supported view modi
+//
+// The display modes are added in order
+//-------------------------------------------------------------------------------
+int FillDisplayList(void)
+{
+	// Initialize the tree view window.
+
+	// First, create the image list we will need.
+#define NUM_BITMAPS 4
+	HIMAGELIST hIml = ImageList_Create( 16,16,ILC_COLOR24, NUM_BITMAPS, 0 );
+
+
+	// Load the bitmaps and add them to the image lists.
+	HBITMAP hBmp = LoadBitmap(g_hInstance, MAKEINTRESOURCE(IDB_BFX));
+	int iFX = ImageList_Add(hIml, hBmp, NULL);
+	DeleteObject(hBmp);
+
+	hBmp = LoadBitmap(g_hInstance, MAKEINTRESOURCE(IDB_BNODE));
+	int iNode = ImageList_Add(hIml, hBmp, NULL);
+	DeleteObject(hBmp);
+
+	hBmp = LoadBitmap(g_hInstance, MAKEINTRESOURCE(IDB_BTX));
+	int iTexture = ImageList_Add(hIml, hBmp, NULL);
+	DeleteObject(hBmp);
+
+	hBmp = LoadBitmap(g_hInstance, MAKEINTRESOURCE(IDB_BROOT));
+	int iRoot = ImageList_Add(hIml, hBmp, NULL);
+	DeleteObject(hBmp);
+
+	// Associate the image list with the tree.
+	TreeView_SetImageList(GetDlgItem(g_hDlg,IDC_TREE1), hIml, TVSIL_NORMAL);
+
+	// fill in the first entry
+	TVITEMEX tvi; 
+	TVINSERTSTRUCT sNew;
+	tvi.pszText = "Model";
+	tvi.cchTextMax = (int)strlen(tvi.pszText);
+	tvi.mask = TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_IMAGE | TVIF_HANDLE | TVIF_STATE;
+	tvi.state = TVIS_EXPANDED ;
+	tvi.iImage = iRoot;
+	tvi.iSelectedImage = iRoot;
+	tvi.lParam = (LPARAM)0; 
+
+	sNew.itemex = tvi; 
+    sNew.hInsertAfter = TVI_ROOT; 
+	sNew.hParent = 0;
+
+	HTREEITEM hRoot = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1), 
+		TVM_INSERTITEM, 
+		0,
+		(LPARAM)(LPTVINSERTSTRUCT)&sNew);
+
+
+	// add each loaded material
+	for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMaterials;++i)
+	{
+		AddMaterialToDisplayList(hRoot,g_pcAsset->pcScene->mMaterials[i],
+			iFX,iTexture,i);
+	}
+
+	// now add all loaded nodes recursively
+	AddNodeToDisplayList(iNode,0,0,g_pcAsset->pcScene->mRootNode,hRoot);
+	return 1;
+}
 
 //-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
@@ -416,29 +746,59 @@ int CreateAssetData(void)
 			MessageBox(g_hDlg,"Failed to create vertex buffer",
 				"ASSIMP Viewer Utility",MB_OK);
 			return 2;
-			}
-		// create index buffer
-		if(FAILED( g_piDevice->CreateIndexBuffer( 4 *
-			g_pcAsset->pcScene->mMeshes[i]->mNumFaces * 3,
-			D3DUSAGE_WRITEONLY,
-			D3DFMT_INDEX32,
-			D3DPOOL_DEFAULT, &g_pcAsset->apcMeshes[i]->piIB,NULL)))
+		}
+
+		// check whether we can use 16 bit indices
+		if (g_pcAsset->pcScene->mMeshes[i]->mNumFaces * 3 >= 65536)
+		{
+			// create 32 bit index buffer
+			if(FAILED( g_piDevice->CreateIndexBuffer( 4 *
+				g_pcAsset->pcScene->mMeshes[i]->mNumFaces * 3,
+				D3DUSAGE_WRITEONLY,
+				D3DFMT_INDEX32,
+				D3DPOOL_DEFAULT, &g_pcAsset->apcMeshes[i]->piIB,NULL)))
 			{
-			MessageBox(g_hDlg,"Failed to create index buffer",
-				"ASSIMP Viewer Utility",MB_OK);
-			return 2;
+				MessageBox(g_hDlg,"Failed to create 32 Bit index buffer",
+					"ASSIMP Viewer Utility",MB_OK);
+				return 2;
 			}
 
-		// now fill the index buffer
-		unsigned int* pbData;
-		g_pcAsset->apcMeshes[i]->piIB->Lock(0,0,(void**)&pbData,0);
-		for (unsigned int x = 0; x < g_pcAsset->pcScene->mMeshes[i]->mNumFaces;++x)
+			// now fill the index buffer
+			unsigned int* pbData;
+			g_pcAsset->apcMeshes[i]->piIB->Lock(0,0,(void**)&pbData,0);
+			for (unsigned int x = 0; x < g_pcAsset->pcScene->mMeshes[i]->mNumFaces;++x)
 			{
-			for (unsigned int a = 0; a < 3;++a)
+				for (unsigned int a = 0; a < 3;++a)
 				{
-				*pbData++ = g_pcAsset->pcScene->mMeshes[i]->mFaces[x].mIndices[a];
+					*pbData++ = g_pcAsset->pcScene->mMeshes[i]->mFaces[x].mIndices[a];
 				}
 			}
+		}
+		else
+		{
+			// create 16 bit index buffer
+			if(FAILED( g_piDevice->CreateIndexBuffer( 2 *
+				g_pcAsset->pcScene->mMeshes[i]->mNumFaces * 3,
+				D3DUSAGE_WRITEONLY,
+				D3DFMT_INDEX16,
+				D3DPOOL_DEFAULT, &g_pcAsset->apcMeshes[i]->piIB,NULL)))
+			{
+				MessageBox(g_hDlg,"Failed to create 16 Bit index buffer",
+					"ASSIMP Viewer Utility",MB_OK);
+				return 2;
+			}
+
+			// now fill the index buffer
+			uint16_t* pbData;
+			g_pcAsset->apcMeshes[i]->piIB->Lock(0,0,(void**)&pbData,0);
+			for (unsigned int x = 0; x < g_pcAsset->pcScene->mMeshes[i]->mNumFaces;++x)
+			{
+				for (unsigned int a = 0; a < 3;++a)
+				{
+					*pbData++ = (uint16_t)g_pcAsset->pcScene->mMeshes[i]->mFaces[x].mIndices[a];
+				}
+			}
+		}
 		g_pcAsset->apcMeshes[i]->piIB->Unlock();
 
 		// now fill the vertex buffer
@@ -504,6 +864,7 @@ int CreateAssetData(void)
 	sprintf(szTemp,"%i", g_iShaderCount);
 	SetDlgItemText(g_hDlg,IDC_ESHADER,szTemp);
 
+	FillDisplayList();
 	return FillAnimList();
 	}
 
@@ -755,6 +1116,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 	{
 	D3DDEVTYPE eType = bHW ? D3DDEVTYPE_HAL : D3DDEVTYPE_REF;
 
+	// get the client rectangle of the window.
 	RECT sRect;
 	GetWindowRect(GetDlgItem(g_hDlg,IDC_RT),&sRect);
 	sRect.right -= sRect.left;
@@ -763,17 +1125,26 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 	D3DPRESENT_PARAMETERS sParams;
 	memset(&sParams,0,sizeof(D3DPRESENT_PARAMETERS));
 
+	// get the current display mode
 	D3DDISPLAYMODE sMode;
 	g_piD3D->GetAdapterDisplayMode(0,&sMode);
 
-	sParams.Windowed = TRUE;
-	sParams.hDeviceWindow = GetDlgItem( g_hDlg, IDC_RT );
-	sParams.EnableAutoDepthStencil = TRUE;
-	sParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-	sParams.BackBufferWidth = (UINT)sRect.right;
-	sParams.BackBufferHeight = (UINT)sRect.bottom;
-	sParams.AutoDepthStencilFormat = D3DFMT_D24X8;
-	sParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	// fill the presentation parameter structure
+	sParams.Windowed				= TRUE;
+	sParams.hDeviceWindow			= GetDlgItem( g_hDlg, IDC_RT );
+	sParams.EnableAutoDepthStencil	= TRUE;
+	sParams.PresentationInterval	= D3DPRESENT_INTERVAL_ONE;
+	sParams.BackBufferWidth			= (UINT)sRect.right;
+	sParams.BackBufferHeight		= (UINT)sRect.bottom;
+	sParams.SwapEffect				= D3DSWAPEFFECT_DISCARD;
+
+	// check whether we can use a D32 depth buffer format
+	if (SUCCEEDED ( g_piD3D->CheckDepthStencilMatch(0,eType,
+		D3DFMT_X8R8G8B8,D3DFMT_X8R8G8B8,D3DFMT_D32)))
+	{
+		sParams.AutoDepthStencilFormat = D3DFMT_D32;
+	}
+	else sParams.AutoDepthStencilFormat = D3DFMT_D24X8;
 
 	// find the highest multisample type available on this device
 	D3DMULTISAMPLE_TYPE sMS = D3DMULTISAMPLE_2_SAMPLES;
@@ -797,6 +1168,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 		sParams.MultiSampleType = sMSOut;
 		}
 
+	// create the D3D9 device object
 	if(FAILED(g_piD3D->CreateDevice(0,eType,
 		g_hDlg,D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,&sParams,&g_piDevice)))
 		{
@@ -810,6 +1182,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 		}
 	g_piDevice->SetFVF(AssetHelper::Vertex::GetFVF());
 
+	// compile the default material shader (gray gouraud/phong)
 	ID3DXBuffer* piBuffer = NULL;
 	if(FAILED( D3DXCreateEffect(g_piDevice,
 		g_szDefaultShader.c_str(),
@@ -833,6 +1206,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 		piBuffer = NULL;
 		}
 
+	// create the shader used to draw the HUD
 	if(FAILED( D3DXCreateEffect(g_piDevice,
 		g_szPassThroughShader.c_str(),(UINT)g_szPassThroughShader.length(),
 		NULL,NULL,D3DXSHADER_USE_LEGACY_D3DX9_31_DLL,NULL,&g_piPassThroughEffect,&piBuffer)))
@@ -850,6 +1224,8 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 		piBuffer->Release();
 		piBuffer = NULL;
 		}
+
+	// create the shader used to visualize normal vectors
 	if(FAILED( D3DXCreateEffect(g_piDevice,
 		g_szNormalsShader.c_str(),(UINT)g_szNormalsShader.length(),
 		NULL,NULL,D3DXSHADER_USE_LEGACY_D3DX9_31_DLL,NULL,&g_piNormalsEffect, &piBuffer)))
@@ -868,6 +1244,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 		piBuffer = NULL;
 		}
 
+	// get the capabilities of the device object
 	g_piDevice->GetDeviceCaps(&g_sCaps);
 	if(g_sCaps.PixelShaderVersion < D3DPS_VERSION(3,0))
 		{

@@ -1,12 +1,43 @@
-//-------------------------------------------------------------------------------
-/**
-*	This program is distributed under the terms of the GNU Lesser General
-*	Public License (LGPL). 
-*
-*	ASSIMP Viewer Utility
-*
+/*
+---------------------------------------------------------------------------
+Free Asset Import Library (ASSIMP)
+---------------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the following 
+conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------------
 */
-//-------------------------------------------------------------------------------
 
 #include "stdafx.h"
 #include "assimp_view.h"
@@ -15,9 +46,7 @@
 namespace AssimpView {
 
 // Static array to keep custom color values
-COLORREF g_aclCustomColors[16] =
-	{0};
-
+COLORREF g_aclCustomColors[16] = {0};
 
 //-------------------------------------------------------------------------------
 // Setup file associations for all formats supported by the library
@@ -27,12 +56,6 @@ COLORREF g_aclCustomColors[16] =
 //-------------------------------------------------------------------------------
 void MakeFileAssociations()
 	{
-	/*
-	; .wscript
-	root: HKCR; Flags: deletekey; Subkey: ".uscript";  ValueType: string; ValueData: "UE_WSCRIPT_CLASS"; Components: rt
-	root: HKCR; Flags: deletekey; Subkey: "UE_WSCRIPT_CLASS";  ValueName:; ValueType: string; ValueData: "UtopicEngine Console Script"; Components: rt
-	root: HKCR; Flags: deletekey; Subkey: "UE_WSCRIPT_CLASS\shell\open\command";   ValueName:; ValueType: string; ValueData: "notepad.exe %1"; Components: rt
-	*/
 	char szTemp2[MAX_PATH];
 	char szTemp[MAX_PATH + 10];
 
@@ -45,129 +68,104 @@ void MakeFileAssociations()
 	// .3ds
 	// -------------------------------------------------
 	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.3ds",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"AV3DSCLASS",(DWORD)strlen("AV3DSCLASS")+1);
+	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
 	RegCloseKey(hTemp);
 
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AV3DSCLASS",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegCloseKey(hTemp);
-
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AV3DSCLASS\\shell\\open\\command",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)szTemp,(DWORD)strlen(szTemp)+1);
-	RegCloseKey(hTemp);
 
 	// ------------------------------------------------- 
 	// .x
 	// -------------------------------------------------
 	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.x",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"AVXCLASS",(DWORD)strlen("AVXCLASS")+1);
-	RegCloseKey(hTemp);
-
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AVXCLASS",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegCloseKey(hTemp);
-
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AVXCLASS\\shell\\open\\command",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)szTemp,(DWORD)strlen(szTemp)+1);
+	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
 	RegCloseKey(hTemp);
 
 	// ------------------------------------------------- 
 	// .obj
 	// -------------------------------------------------
 	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.obj",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"AVOBJCLASS",(DWORD)strlen("AVOBJCLASS")+1);
-	RegCloseKey(hTemp);
-
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AVOBJCLASS",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegCloseKey(hTemp);
-
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AVOBJCLASS\\shell\\open\\command",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)szTemp,(DWORD)strlen(szTemp)+1);
+	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
 	RegCloseKey(hTemp);
 
 	// ------------------------------------------------- 
 	// .ms3d
 	// -------------------------------------------------
 	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.ms3d",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"AVMS3DCLASS",(DWORD)strlen("AVMS3DCLASS")+1);
-	RegCloseKey(hTemp);
-
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AVMS3DCLASS",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegCloseKey(hTemp);
-
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AVMS3DCLASS\\shell\\open\\command",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)szTemp,(DWORD)strlen(szTemp)+1);
+	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
 	RegCloseKey(hTemp);
 
 	// ------------------------------------------------- 
 	// .md3
 	// -------------------------------------------------
 	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.md3",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"AVMD3CLASS",(DWORD)strlen("AVMD3CLASS")+1);
-	RegCloseKey(hTemp);
-
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AVMD3CLASS",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegCloseKey(hTemp);
-
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AVMD3CLASS\\shell\\open\\command",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)szTemp,(DWORD)strlen(szTemp)+1);
+	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
 	RegCloseKey(hTemp);
 
 	// ------------------------------------------------- 
 	// .md2
 	// -------------------------------------------------
 	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.md2",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"AVMD2CLASS",(DWORD)strlen("AVMD2CLASS")+1);
-	RegCloseKey(hTemp);
-
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AVMD3CLASS",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegCloseKey(hTemp);
-
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AVMD2CLASS\\shell\\open\\command",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)szTemp,(DWORD)strlen(szTemp)+1);
+	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
 	RegCloseKey(hTemp);
 
 	// ------------------------------------------------- 
-	// .md4
+	// .md4/mdr
 	// -------------------------------------------------
 	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.md4",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"AVMD4CLASS",(DWORD)strlen("AVMD4CLASS")+1);
+	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
 	RegCloseKey(hTemp);
 
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AVMD4CLASS",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegCloseKey(hTemp);
-
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AVMD4CLASS\\shell\\open\\command",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)szTemp,(DWORD)strlen(szTemp)+1);
+	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.mdr",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
+	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
 	RegCloseKey(hTemp);
 
 	// ------------------------------------------------- 
 	// .md5
 	// -------------------------------------------------
 	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.md5",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"AVMD5CLASS",(DWORD)strlen("AVMD5CLASS")+1);
+	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
 	RegCloseKey(hTemp);
 
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AVMD5CLASS",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
+	// ------------------------------------------------- 
+	// .mdl
+	// -------------------------------------------------
+	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.mdl",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
+	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
 	RegCloseKey(hTemp);
 
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AVMD5CLASS\\shell\\open\\command",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)szTemp,(DWORD)strlen(szTemp)+1);
-	RegCloseKey(hTemp);
 
 	// ------------------------------------------------- 
 	// .ply
 	// -------------------------------------------------
 	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.ply",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
-	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"AVPLYCLASS",(DWORD)strlen("AVPLYCLASS")+1);
+	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
 	RegCloseKey(hTemp);
 
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AVPLYCLASS",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
+
+	// ------------------------------------------------- 
+	// .ase/.ask
+	// -------------------------------------------------
+	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.ase",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
+	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
+	RegCloseKey(hTemp);
+	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.ask",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
+	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
 	RegCloseKey(hTemp);
 
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\AVPLYCLASS\\shell\\open\\command",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
+
+
+	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\ASSIMPVIEW_CLASS",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
+	RegCloseKey(hTemp);
+
+	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\ASSIMPVIEW_CLASS\\shell\\open\\command",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
 	RegSetValueEx(hTemp,"",0,REG_SZ,(const BYTE*)szTemp,(DWORD)strlen(szTemp)+1);
 	RegCloseKey(hTemp);
 
 	CLogDisplay::Instance().AddEntry("[OK] File assocations have been registered",
+		D3DCOLOR_ARGB(0xFF,0,0xFF,0));
+
+	aiString sz;
+	aiGetExtensionList(&sz);
+	CLogDisplay::Instance().AddEntry(sz.data,
 		D3DCOLOR_ARGB(0xFF,0,0xFF,0));
 	}
 
@@ -248,6 +246,47 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 			SetDlgItemText(hwndDlg,IDC_EFACE,"0");
 			SetDlgItemText(hwndDlg,IDC_EMAT,"0");
 			SetDlgItemText(hwndDlg,IDC_ESHADER,"0");
+			SetDlgItemText(hwndDlg,IDC_ENODE,"0");
+			SetDlgItemText(hwndDlg,IDC_ETEX,"0");
+
+			// setup the default window title
+			SetWindowText(hwndDlg,AI_VIEW_CAPTION_BASE);
+			{
+			// read some UI properties from the registry and apply them
+			DWORD dwValue;
+			DWORD dwTemp = sizeof( DWORD );
+			HKEY hTemp;
+			RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\ASSIMP\\Viewer",
+				NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
+
+			if(ERROR_SUCCESS != RegQueryValueEx(hTemp,"LastUIState",NULL,NULL,
+				(BYTE*)&dwValue,&dwTemp))
+			{
+				dwValue = 1;
+			}
+			if (0 == dwValue)
+			{
+				// collapse the viewer
+				// adjust the size
+				RECT sRect;
+				GetWindowRect(hwndDlg,&sRect);
+				sRect.right -= sRect.left;
+				sRect.bottom -= sRect.top;
+
+				RECT sRect2;
+				GetWindowRect(GetDlgItem ( hwndDlg, IDC_BLUBB ),&sRect2);
+				sRect2.left -= sRect.left;
+				sRect2.top -= sRect.top;
+
+				SetWindowPos(hwndDlg,NULL,0,0,sRect.right-188,sRect.bottom,
+						SWP_NOMOVE | SWP_NOZORDER);
+				SetWindowText(GetDlgItem(hwndDlg,IDC_BLUBB),">>");
+			}
+			else
+			{
+				CheckDlgButton(hwndDlg,IDC_BLUBB,BST_CHECKED);
+			}
+			RegCloseKey(hTemp);}
 			return TRUE;
 
 		case WM_MOUSEWHEEL:
@@ -365,34 +404,6 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 					g_eClick = EClickPos_CircleVert;
 					}
 				}
-
-			// OLD version of this code. Not using a texture lookup to
-			// determine the exact position, but using maths and the fact
-			// that we have a circle f(x) = m +rx ;-)
-#if 0
-			g_eClick = EClickPos_Circle;
-			if (yPos < 10 && yPos > -10)
-				{
-				if ((xPos2 > fHalfX-5 && xPos2 < fHalfX+15) ||
-					(xPos2 > fHalfX+(int)sDesc.Width-10 && xPos2 < fHalfX+(int)sDesc.Width+10))
-					{
-					g_eClick = EClickPos_CircleHor;
-					}
-				}
-			else if (xPos < 10 && xPos > -10)
-				{
-				if ((yPos2 > fHalfY-5 && yPos2 < fHalfY+15) ||
-					(yPos2 > fHalfY+(int)sDesc.Height-10 && yPos2 < fHalfY+(int)sDesc.Height+10))
-					{
-					g_eClick = EClickPos_CircleVert;
-					}
-				}
-			else if (sqrtf((float)(xPos * xPos  + yPos * yPos)) > (float)(sDesc.Width/2))
-				{
-				g_eClick = EClickPos_Outside;
-				}
-#endif
-
 			return TRUE;
 
 		case WM_RBUTTONDOWN:
@@ -466,6 +477,10 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 				{
 				DialogBox(g_hInstance,MAKEINTRESOURCE(IDD_ABOUTBOX),
 					hwndDlg,&AboutMessageProc);
+				}
+			else if (ID_TOOLS_LOGWINDOW == LOWORD(wParam))
+				{
+					CLogWindow::Instance().Show();
 				}
 			else if (ID_VIEWER_H == LOWORD(wParam))
 				{
@@ -657,10 +672,24 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 					if (!sz)sz = strrchr(szFileName,'/');
 					if (!sz)*sz = 0;
 					}
+
+				// get a list of all file extensions supported by ASSIMP
+				aiString sz;
+				aiGetExtensionList(&sz);
+
+				char szList[MAXLEN + 100];
+				strcpy(szList,"ASSIMP assets");
+				char* szCur = szList + 14;
+				strcpy(szCur,sz.data);
+				szCur += sz.length+1;
+				strcpy(szCur,"All files");
+				szCur += 10;
+				strcpy(szCur,"*.*");
+				szCur[4] = 0;
+
 				OPENFILENAME sFilename1 = {
 					sizeof(OPENFILENAME),
-					g_hDlg,GetModuleHandle(NULL), 
-					"ASSIMP assets\0*.x;*.obj;*.ms3d;*.3ds;*.md3;*.md1;*.md2;*.md4;*.md5;*.ply\0All files\0*.*", NULL, 0, 1, 
+					g_hDlg,GetModuleHandle(NULL), szList, NULL, 0, 1, 
 					szFileName, MAX_PATH, NULL, 0, NULL, 
 					"Import Asset into ASSIMP",
 					OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR, 
@@ -727,6 +756,44 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 					g_bFPSView = !g_bFPSView;
 
 					SetupFPSView();
+					}
+				else if (IDC_BLUBB == LOWORD(wParam))
+					{
+					// adjust the size
+					RECT sRect;
+					GetWindowRect(hwndDlg,&sRect);
+					sRect.right -= sRect.left;
+					sRect.bottom -= sRect.top;
+
+					RECT sRect2;
+					GetWindowRect(GetDlgItem ( hwndDlg, IDC_BLUBB ),&sRect2);
+					sRect2.left -= sRect.left;
+					sRect2.top -= sRect.top;
+
+					HKEY hTemp;
+					DWORD dwValue;
+					RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\ASSIMP\\Viewer",
+						NULL,NULL,0,KEY_ALL_ACCESS, NULL, &hTemp,NULL);
+
+					if (BST_UNCHECKED == IsDlgButtonChecked(hwndDlg,IDC_BLUBB))
+						{
+						SetWindowPos(hwndDlg,NULL,0,0,sRect.right-188,sRect.bottom,
+							SWP_NOMOVE | SWP_NOZORDER);
+
+						dwValue = 0;
+						SetWindowText(GetDlgItem(hwndDlg,IDC_BLUBB),">>");
+						RegSetValueExA(hTemp,"LastUIState",0,REG_DWORD,(const BYTE*)&dwValue,4);
+						}
+					else
+						{
+						SetWindowPos(hwndDlg,NULL,0,0,sRect.right+188,sRect.bottom,
+							SWP_NOMOVE | SWP_NOZORDER);
+
+						dwValue = 1;
+						SetWindowText(GetDlgItem(hwndDlg,IDC_BLUBB),"<<");
+						RegSetValueExA(hTemp,"LastUIState",0,REG_DWORD,(const BYTE*)&dwValue,4);
+						}
+					RegCloseKey(hTemp);
 					}
 				else if (IDC_TOGGLENORMALS == LOWORD(wParam))
 					{
@@ -897,6 +964,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		}
 
 	CLogDisplay::Instance().AddEntry("[OK] The viewer has been initialized successfully");
+
+	// create the log window
+	CLogWindow::Instance().Init();
+	// set the focus to the main window
+	SetFocus(g_hDlg);
 
 	// recover background skyboxes/textures from the last session
 	HKEY hTemp;

@@ -1,3 +1,43 @@
+/*
+Free Asset Import Library (ASSIMP)
+----------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the 
+following conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------------------------------------
+*/
+
 /** @file Defines the helper data structures for importing XFiles */
 #ifndef AI_3DSFILEHELPER_H_INC
 #define AI_3DSFILEHELPER_H_INC
@@ -35,27 +75,30 @@ class Dot3DSFile
 public:
 	inline Dot3DSFile() {}
 
-	// data structure for a single chunk in a .3ds file
+	//! data structure for a single chunk in a .3ds file
 	struct Chunk
 	{
 		unsigned short	Flag;
 		long			Size;
 	} PACK_STRUCT;
 
-	// source for this used own structures,
-	// replaced it with out standard math helpers
+	//! source for this used own structures,
+	//! replaced it with out standard math helpers
 	typedef aiMatrix3x3 MatTransform;
 	typedef aiVector3D MatTranslate;
 
-	// Used for shading field in material3ds structure
-	// From AutoDesk 3ds SDK
+	//! Used for shading field in material3ds structure
+	//! From AutoDesk 3ds SDK
 	typedef enum
 	{
 		Wire = 0,
 		Flat = 1,
 		Gouraud = 2,
 		Phong = 3,
-		Metal = 4
+		Metal = 4,
+
+		// required by the ASE loader
+		Blinn = 5
 	} shadetype3ds;
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -261,30 +304,38 @@ public:
 /** Helper structure representing a 3ds mesh face */
 struct Face
 {
-	Face() : iSmoothGroup(0), bDirection(true)
+	Face() : iSmoothGroup(0), bDirection(true), i1(0), i2(0), i3(0)
 	{
 		// let the rest uninitialized for performance
 	}
 
 	
-	// Indices. .3ds is using uint16. However, after
-	// an unique vrtex set has been geneerated it might
-	// be an index becomes > 2^16
-	uint32_t i1;
-	uint32_t i2;
-	uint32_t i3;
+	//! Indices. .3ds is using uint16. However, after
+	//! an unique vrtex set has been geneerated it might
+	//! be an index becomes > 2^16
+	union
+	{
+		struct
+		{
+			uint32_t i1;
+			uint32_t i2;
+			uint32_t i3;
+		};
+		uint32_t mIndices[3];
+	};
 
-	// specifies to which smoothing group the face belongs to
+	//! specifies to which smoothing group the face belongs to
 	uint32_t iSmoothGroup;
 
-	// Direction the normal vector of the face 
-	// will be pointing to
+	//! Direction the normal vector of the face 
+	//! will be pointing to
 	bool bDirection;
 };
 // ---------------------------------------------------------------------------
 /** Helper structure representing a texture */
 struct Texture
 {
+	//! Default constructor
 	Texture()
 		: 
 		mScaleU(1.0f),
@@ -296,20 +347,20 @@ struct Texture
 	{
 		mTextureBlend = std::numeric_limits<float>::quiet_NaN();
 	}
-	// Specifies the blending factor for the texture
+	//! Specifies the blending factor for the texture
 	float mTextureBlend;
 
-	// Specifies the filename of the texture
+	//! Specifies the filename of the texture
 	std::string mMapName;
 
-	// Specifies texture coordinate offsets/scaling/rotations
+	//! Specifies texture coordinate offsets/scaling/rotations
 	float mScaleU;
 	float mScaleV;
 	float mOffsetU;
 	float mOffsetV;
 	float mRotation;
 
-	// Used internally
+	//! Used internally
 	bool bPrivate;
 	int iUVSrc;
 };
@@ -317,6 +368,7 @@ struct Texture
 /** Helper structure representing a 3ds material */
 struct Material
 {
+	//! Default constructor. Builds a default name for the material
 	Material()
 		: 
 	mSpecularExponent	(0.0f),
@@ -331,27 +383,32 @@ struct Material
 		ss << "%%_UNNAMED_" << iCnt++ << "_%%"; 
 	}
 
-	// Name of the material
+	//! Name of the material
 	std::string mName;
-	// Diffuse color of the material
+	//! Diffuse color of the material
 	aiColor3D mDiffuse;
-	// Specular exponent
+	//! Specular exponent
 	float mSpecularExponent;
-	// Specular color of the material
+	//! Specular color of the material
 	aiColor3D mSpecular;
-	// Ambient color of the material
+	//! Ambient color of the material
 	aiColor3D mAmbient;
-	// Shading type to be used
+	//! Shading type to be used
 	Dot3DSFile::shadetype3ds mShading;
-	// Opacity of the material
+	//! Opacity of the material
 	float mTransparency;
 
-	// Different texture channels
+	//! Diffuse texture channel
 	Texture sTexDiffuse;
+	//! Opacity texture channel
 	Texture sTexOpacity;
+	//! Specular texture channel
 	Texture sTexSpecular;
+	//! Bump texture channel
 	Texture sTexBump;
+	//! Emissive texture channel
 	Texture sTexEmissive;
+	//! Shininess texture channel
 	Texture sTexShininess;
 	
 	/*
@@ -360,10 +417,10 @@ struct Material
 	*/
 	float mBumpHeight;
 
-	// Emissive color
+	//! Emissive color
 	aiColor3D mEmissive;
 
-	// Used internally
+	//! Used internally
 	unsigned int iBakeUVTransform;
 	Texture* pcSingleTexture;
 };
@@ -371,28 +428,33 @@ struct Material
 /** Helper structure to represent a 3ds file mesh */
 struct Mesh
 {
+	//! Default constructor
 	Mesh()
 	{
 		static int iCnt = 0;
 		std::stringstream ss(mName);
 		ss << "%%_UNNAMED_" << iCnt++ << "_%%"; 
-#if 0
-		for (unsigned int i = 0; i < 32;++i)
-			bSmoothGroupRequired[i] = false;
-#endif
 	}
+
+	//! Name of the mesh
 	std::string mName;
 
+	//! Vertex positions
 	std::vector<aiVector3D> mPositions;
+
+	//! Face lists
 	std::vector<Face> mFaces;
+
+	//! Texture coordinates
 	std::vector<aiVector2D> mTexCoords;
+
+	//! Face materials
 	std::vector<unsigned int> mFaceMaterials;
+
+	//! Normal vectors
 	std::vector<aiVector3D> mNormals;
 
-#if 0
-	bool bSmoothGroupRequired[32];
-#endif
-
+	//! Local transformation matrix
 	aiMatrix4x4 mMat;
 };
 // ---------------------------------------------------------------------------
@@ -412,10 +474,19 @@ struct Node
 		mHierarchyIndex = 0;
 	}
 
+	//! Pointer to the parent node
 	Node* mParent;
+
+	//! Holds all child nodes
 	std::vector<Node*> mChildren;
+
+	//! Name of the node
 	std::string mName;
+
+	//! Position of the node in the hierarchy (tree depth)
 	int16_t mHierarchyPos;
+
+	//! Index of the node
 	int16_t mHierarchyIndex;
 
 #if 0
@@ -425,6 +496,8 @@ struct Node
 	aiVector3D vPosition;
 #endif
 
+	//! Add a child node, setup the right parent node for it
+	//! \param pc Node to be 'adopted'
 	inline Node& push_back(Node* pc)
 	{
 		mChildren.push_back(pc);
@@ -438,10 +511,14 @@ struct Node
 struct Scene
 {
 
-	// NOTE: 3ds references materials globally
+	//! List of all materials loaded
+	//! NOTE: 3ds references materials globally
 	std::vector<Material> mMaterials;
+
+	//! List of all meshes loaded
 	std::vector<Mesh> mMeshes;
 
+	//! Pointer to the root node of the scene
 	Node* pcRootNode;
 };
 

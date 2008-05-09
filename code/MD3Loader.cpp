@@ -1,3 +1,44 @@
+/*
+---------------------------------------------------------------------------
+Free Asset Import Library (ASSIMP)
+---------------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the following 
+conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------------
+*/
+
 /** @file Implementation of the MD3 importer class */
 #include "MD3Loader.h"
 #include "MaterialSystem.h"
@@ -142,7 +183,7 @@ void MD3Importer::InternReadFile(
 		pScene->mMeshes[iNum] = new aiMesh();
 		aiMesh* pcMesh = pScene->mMeshes[iNum];
 
-		pcMesh->mNumVertices = pcSurfaces->NUM_VERTICES;
+		pcMesh->mNumVertices = pcSurfaces->NUM_TRIANGLES*3;
 		pcMesh->mNumBones = 0;
 		pcMesh->mColors[0] = pcMesh->mColors[1] = pcMesh->mColors[2] = pcMesh->mColors[3] = NULL;
 		pcMesh->mNumFaces = pcSurfaces->NUM_TRIANGLES;
@@ -153,35 +194,32 @@ void MD3Importer::InternReadFile(
 		pcMesh->mTextureCoords[1] = pcMesh->mTextureCoords[2] = pcMesh->mTextureCoords[3] = NULL;
 		pcMesh->mNumUVComponents[0] = 2;
 
-		// fill in all vertices and normals
-		// fill in all texture coordinates
-		for (unsigned int i = 0; i < (unsigned int)pcSurfaces->NUM_VERTICES;++i)
-		{
-			pcMesh->mVertices[i].x = pcVertices->X;
-			pcMesh->mVertices[i].y = pcVertices->Y;
-			pcMesh->mVertices[i].z = -1.0f*pcVertices->Z;
-
-			// convert the normal vector to uncompressed float3 format
-			LatLngNormalToVec3(pcVertices->NORMAL,(float*)&pcMesh->mNormals[i]);
-
-			// read texture coordinates
-			pcMesh->mTextureCoords[0][i].x = pcUVs->U;
-			pcMesh->mTextureCoords[0][i].y = 1.0f - pcUVs->V;
-
-			pcVertices++;
-			pcUVs++;
-		}
-
 		// fill in all triangles
+		unsigned int iCurrent = 0;
 		for (unsigned int i = 0; i < (unsigned int)pcSurfaces->NUM_TRIANGLES;++i)
 		{
 			pcMesh->mFaces[i].mIndices = new unsigned int[3];
 			pcMesh->mFaces[i].mNumIndices = 3;
 
-			pcMesh->mFaces[i].mIndices[0] = pcTriangles->INDEXES[0];
-			pcMesh->mFaces[i].mIndices[1] = pcTriangles->INDEXES[1];
-			pcMesh->mFaces[i].mIndices[2] = pcTriangles->INDEXES[2];
+			for (unsigned int c = 0; c < 3;++c,++iCurrent)
+			{
+				pcMesh->mFaces[i].mIndices[c] = iCurrent;
 
+				// read vertices
+				pcMesh->mVertices[iCurrent].x = pcVertices[ pcTriangles->INDEXES[c]].X;
+				pcMesh->mVertices[iCurrent].y = pcVertices[ pcTriangles->INDEXES[c]].Y;
+				pcMesh->mVertices[iCurrent].z = pcVertices[ pcTriangles->INDEXES[c]].Z * -1.0f;
+
+				// convert the normal vector to uncompressed float3 format
+				LatLngNormalToVec3(pcVertices[pcTriangles->INDEXES[c]].NORMAL,
+					(float*)&pcMesh->mNormals[iCurrent]);
+
+				std::swap ( pcMesh->mNormals[iCurrent].y,pcMesh->mNormals[iCurrent].z );
+
+				// read texture coordinates
+				pcMesh->mTextureCoords[0][iCurrent].x = pcUVs[ pcTriangles->INDEXES[c]].U;
+				pcMesh->mTextureCoords[0][iCurrent].y = 1.0f - pcUVs[ pcTriangles->INDEXES[c]].V;
+			}
 			pcTriangles++;
 		}
 
@@ -250,12 +288,15 @@ void MD3Importer::InternReadFile(
 			{
 				MaterialHelper* pcHelper = new MaterialHelper();
 
-				aiString szString;
-				const size_t iLen = strlen(szEndDir2);
-				memcpy(szString.data,szEndDir2,iLen+1);
-				szString.length = iLen-1;
+				if (szEndDir2)
+				{
+					aiString szString;
+					const size_t iLen = strlen(szEndDir2);
+					memcpy(szString.data,szEndDir2,iLen+1);
+					szString.length = iLen-1;
 
-				pcHelper->AddProperty(&szString,AI_MATKEY_TEXTURE_DIFFUSE(0));
+					pcHelper->AddProperty(&szString,AI_MATKEY_TEXTURE_DIFFUSE(0));
+				}
 
 				int iMode = (int)aiShadingMode_Gouraud;
 				pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);

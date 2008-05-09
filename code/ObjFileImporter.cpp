@@ -260,7 +260,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 	
 	// Copy all stored vertices, normals and so on
 	pMesh->mNumVertices = pModel->m_Vertices.size();
-	pMesh->mVertices = new aiVector3D_t[pMesh->mNumVertices];
+	pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
 	for (size_t index=0; index < pModel->m_Vertices.size(); index++)
 	{
 		pMesh->mVertices[ index ] = *pModel->m_Vertices[ index ];
@@ -268,7 +268,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 	
 	if (!pModel->m_Normals.empty())
 	{
-		pMesh->mNormals = new aiVector3D_t[pModel->m_Normals.size()];
+		pMesh->mNormals = new aiVector3D[pModel->m_Normals.size()];
 		for (size_t index = 0; index < pModel->m_Normals.size(); index++)
 		{
 			pMesh->mNormals[ index ] = *pModel->m_Normals[ index ];

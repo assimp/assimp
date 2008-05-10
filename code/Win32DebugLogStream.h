@@ -3,13 +3,15 @@
 
 #include "LogStream.h"
 
-#ifdef _MSC_VER
+//#ifdef _MSC_VER
+#ifdef WIN32
 #include "Windows.h"
 #endif
 
 namespace Assimp
 {
-#ifdef _MSC_VER
+//#ifdef _MSC_VER
+#ifdef WIN32
 
 // ---------------------------------------------------------------------------
 /**	@class	Win32DebugLogStream

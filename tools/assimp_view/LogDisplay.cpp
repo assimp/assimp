@@ -83,7 +83,8 @@ void CLogDisplay::RecreateNativeResource()
                      false,					//Italic
                      DEFAULT_CHARSET,		//CharSet
                      OUT_DEFAULT_PRECIS,	//OutputPrecision
-					 CLEARTYPE_QUALITY,	//Quality
+					 //CLEARTYPE_QUALITY,	//Quality
+					 5,	//Quality
                      DEFAULT_PITCH|FF_DONTCARE,	//PitchAndFamily
                      "Verdana",					//pFacename,
 					 &this->piFont)))

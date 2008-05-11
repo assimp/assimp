@@ -103,6 +103,10 @@ void XFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, I
 
 	// and create the proper return structures out of it
 	CreateDataRepresentationFromImport( pScene, parser.GetImportedData());
+
+  // if nothing came from it, report it as error
+  if( !pScene->mRootNode)
+    throw new ImportErrorException( "XFile is ill-formatted - no content imported.");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -136,7 +140,8 @@ void XFileImporter::CreateDataRepresentationFromImport( aiScene* pScene, const X
 	}
 
 	// convert the root node's transformation to OGL coords
-	ConvertToLHProcess::ConvertToOGL( pScene->mRootNode->mTransformation);
+  if( pScene->mRootNode)
+  	ConvertToLHProcess::ConvertToOGL( pScene->mRootNode->mTransformation);
 
 	// finally: create a dummy material if not material was imported
 	if( pScene->mNumMaterials == 0)

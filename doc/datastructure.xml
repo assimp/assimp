@@ -1,41 +1,52 @@
-<importedScene alias data alias Model?>
+<importedScene>
   <version 1.2 />   <smiley code=":-)" />
-  <frame alias object>
+  <node>
     <name/>
     <transformation matrix4x4 />
 
-    <mesh id="1" />
+    <mesh refid="0" />
     <mesh ... />
     
-    <childframe alias childobject as type frame alias object />
-    <childframe... />
-  </frame>
+    <childnode/>
+    <childnode... />
+  </node>
   <meshes>
-    <mesh id="1">
-      <meshheader with MatID, Vertexcount, Facecount, a.s.o. />
-      <vertice>
-          <vertex xyzw />
+    <mesh id="0">
+      <meshheader MatID, Vertexcount, Facecount, a.s.o. />
+      <vertices>
+          <vertex xyz />
           <vertex ... />
-      </vertice>
-      <texturecoords>
+      </vertices>
+      <texturecoords index="0">
           <texturecoord uv />
           <texturecoord ... />
-      </texturcoords>
-      <vertexcolors>
+      </texturecoords>
+      <texturecoords index="..." />
+      <vertexcolors index="0">
           <color rgba />
           <color ... />
       </vertexcolors>
+      <vertexcolors index="..." />
       <normals>
           <normal xyz />
           <normal ... />
       </normals>
+      <tangents>
+        <tangent xyz />
+        <tangent ... />
+      </tangents>
+      <bitangents>
+        <bitangent xyz />
+        <bitangent ... />
+      </tangents>
       <faces>
-          <face p1, p2, p3 />
+          <face numIndices="3" indices="p1, p2, p3" />
           <face ... />
       </faces>      
       <bones>
         <bone>
           <name />
+          <offset matrix4x4 />
           <weights>
             <weight v, w />
             <weight... />
@@ -48,7 +59,7 @@
   </meshes>
   <anims>
     <anim name="rudern" duration="4500" ticksPerSecond="50">
-      <animbone name="bla">
+      <animbone nameOfAnimatedNode="bla">
         <rotation>
           <rotkey time="0" rot="xyzw" />
           <rotkey time="100" rot="xyzw" />
@@ -65,7 +76,7 @@
           ...
         <scaling>
       </animbone>
-      <animbone name="blubb">
+      <animbone nameOfAnimatedNode="blubb">
         ...
       </animbone>
     </anim>
@@ -80,4 +91,10 @@
     </material>
     <material ... />
   </materials>
-</importedScene alias data alias model?>
+  <textures>
+    </texture width, height, formatHint>
+      <data />
+    </texture>
+    <texture ... />
+  </textures>
+</importedScene>

@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * normals for all imported faces.
 */
 #include "GenFaceNormalsProcess.h"
+#include "DefaultLogger.h"
 #include "../include/aiPostProcess.h"
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
@@ -71,23 +72,35 @@ bool GenFaceNormalsProcess::IsActive( unsigned int pFlags) const
 // Executes the post processing step on the given imported data.
 void GenFaceNormalsProcess::Execute( aiScene* pScene)
 {
+	DefaultLogger::get()->debug("GenFaceNormalsProcess begin");
+
+	bool bHas = false;
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-		this->GenMeshFaceNormals( pScene->mMeshes[a]);
+	{
+		if(this->GenMeshFaceNormals( pScene->mMeshes[a]))
+			bHas = true;
+	}
+	if (bHas)
+	{
+		DefaultLogger::get()->info("GenFaceNormalsProcess finished. "
+			"Face normals have been calculated");
+	}
+	else DefaultLogger::get()->debug("GenFaceNormalsProcess finished. "
+		"There was nothing to do");
 }
 
 // -------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
+bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
 {
-	if (NULL != pMesh->mNormals)return;
+	if (NULL != pMesh->mNormals)return false;
 
 	pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
 
 	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
 	{
 		const aiFace& face = pMesh->mFaces[a];
-		
-		// assume it is a triangle
+
 		aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
 		aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
 		aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[2]];
@@ -95,14 +108,11 @@ void GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
 		aiVector3D pDelta1 = *pV2 - *pV1;
 		aiVector3D pDelta2 = *pV3 - *pV1;
 		aiVector3D vNor = pDelta1 ^ pDelta2;
-		
-		// NOTE: Never normalize here. Causes problems ...
-		//float fLength = vNor.Length();
-		//if (0.0f != fLength)vNor /= fLength;
 
-		pMesh->mNormals[face.mIndices[0]] = vNor;
-		pMesh->mNormals[face.mIndices[1]] = vNor;
-		pMesh->mNormals[face.mIndices[2]] = vNor;
+		for (unsigned int i = 0;i < face.mNumIndices;++i)
+		{
+			pMesh->mNormals[face.mIndices[i]] = vNor;
+		}
 	}
-	return;
+	return true;
 }

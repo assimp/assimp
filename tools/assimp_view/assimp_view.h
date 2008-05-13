@@ -58,6 +58,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IOStream.h"
 #include "assimp.h"
 #include "assimp.hpp"
+#include "LogStream.h"
+#include "DefaultLogger.h"
+#include "MaterialSystem.h"
 
 // in order for std::min and std::max to behave properly
 #ifdef min 
@@ -79,6 +82,9 @@ namespace AssimpView {
 #include "Background.h"
 #include "LogDisplay.h"
 #include "LogWindow.h"
+#include "Display.h"
+#include "MeshRenderer.h"
+#include "MaterialManager.h"
 
 //-------------------------------------------------------------------------------
 // Function prototypes
@@ -87,15 +93,15 @@ namespace AssimpView {
 	int ShutdownD3D(void);
 	int CreateDevice (bool p_bMultiSample,bool p_bSuperSample, bool bHW = true);
 	int CreateDevice (void);
-	int Render (void);
 	int ShutdownDevice(void);
 	int GetProjectionMatrix (aiMatrix4x4& p_mOut);
 	int LoadAsset(void);
 	int CreateAssetData(void);
-	int DeleteAssetData(void);
+	int DeleteAssetData(bool bNoMaterials = false);
 	int ScaleAsset(void);
 	int DeleteAsset(void);
 	int SetupFPSView();
+	
 	aiVector3D GetCameraMatrix (aiMatrix4x4& p_mOut);
 	int CreateMaterial(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource);
 
@@ -105,6 +111,8 @@ namespace AssimpView {
 	void HandleKeyboardInputFPS( void );
 	void HandleMouseInputLightIntensityAndColor( void );
 	void HandleMouseInputSkyBox( void );
+	void HandleKeyboardInputTextureView( void );
+	void HandleMouseInputTextureView( void );
 
 
 //-------------------------------------------------------------------------------
@@ -141,32 +149,6 @@ INT_PTR CALLBACK AboutMessageProc(HWND hwndDlg,UINT uMsg,
 //-------------------------------------------------------------------------------
 INT_PTR CALLBACK HelpDialogProc(HWND hwndDlg,UINT uMsg,
 	WPARAM wParam,LPARAM lParam);
-
-
-//-------------------------------------------------------------------------------
-// find a valid path to a texture file
-//
-// Handle 8.3 syntax correctly, search the environment of the
-// executable and the asset for a texture with a name very similar to a given one
-//-------------------------------------------------------------------------------
-int FindValidPath(aiString* p_szString);
-
-
-//-------------------------------------------------------------------------------
-// Delete all resources of a given material
-//
-// Must be called before CreateMaterial() to prevent memory leaking
-//-------------------------------------------------------------------------------
-void DeleteMaterial(AssetHelper::MeshHelper* pcIn);
-
-
-//-------------------------------------------------------------------------------
-// Recreate all specular materials depending on the current specularity settings
-//
-// Diffuse-only materials are ignored.
-// Must be called after specular highlights have been toggled
-//-------------------------------------------------------------------------------
-void UpdateSpecularMaterials();
 
 
 //-------------------------------------------------------------------------------
@@ -209,6 +191,7 @@ enum EClickPos
 	extern ID3DXEffect* g_piDefaultEffect		/*= NULL*/;
 	extern ID3DXEffect* g_piNormalsEffect		/*= NULL*/;
 	extern ID3DXEffect* g_piPassThroughEffect	/*= NULL*/;
+	extern ID3DXEffect* g_piPatternEffect		/*= NULL*/;
 	extern bool g_bMousePressed					/*= false*/;
 	extern bool g_bMousePressedR				/*= false*/;
 	extern bool g_bMousePressedM				/*= false*/;
@@ -237,8 +220,13 @@ enum EClickPos
 	extern EClickPos g_eClick;
 	extern unsigned int g_iCurrentColor			/*= 0*/;
 
+	// NOTE: The light intensity is separated from the color, it can
+	// directly be manipulated using the middle mouse button.
+	// When the user chooses a color from the palette the intensity
+	// is reset to 1.0
+	// index[2] is the ambient color
 	extern float g_fLightIntensity				/*=0.0f*/;
-	extern float g_fLightColor					/*=0.0f*/;
+	extern D3DCOLOR g_avLightColors[3];
 
 	extern RenderOptions g_sOptions;
 	extern Camera g_sCamera;
@@ -253,14 +241,6 @@ enum EClickPos
 	// HUD texture
 	//
 	extern unsigned char* g_szImageMask			/*= NULL*/;
-
-	
-	//
-	// Specifies the number of different shaders generated for
-	// the current asset. This number is incremented by CreateMaterial()
-	// each time a shader isn't found in cache and needs to be created
-	//
-	extern unsigned int g_iShaderCount			/* = 0 */;
 	};
 
 #endif // !! AV_MAIN_H_INCLUDED

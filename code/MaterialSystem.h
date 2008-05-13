@@ -60,6 +60,11 @@ namespace Assimp
 // ---------------------------------------------------------------------------
 inline int ASSIMP_stricmp(const char *s1, const char *s2)
 {
+#if (defined _MSC_VER)
+
+	return _stricmp(s1,s2);
+
+#else
 	const char *a1, *a2;
 	a1 = s1;
 	a2 = s2;
@@ -74,6 +79,7 @@ inline int ASSIMP_stricmp(const char *s1, const char *s2)
 		++a1; 
 		++a2;
 	}
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -90,6 +96,11 @@ inline int ASSIMP_stricmp(const char *s1, const char *s2)
 // ---------------------------------------------------------------------------
 inline int ASSIMP_strincmp(const char *s1, const char *s2, unsigned int n)
 {
+#if (defined _MSC_VER)
+
+	return _strnicmp(s1,s2,n);
+
+#else
 	const char *a1, *a2;
 	a1 = s1;
 	a2 = s2;
@@ -109,6 +120,7 @@ inline int ASSIMP_strincmp(const char *s1, const char *s2, unsigned int n)
 		++a2;
 		++p;
 	}
+#endif
 }
 
 
@@ -158,6 +170,15 @@ public:
 	aiReturn AddProperty (const TYPE* pInput,
 		const unsigned int pNumValues,
 		const char* pKey);
+
+
+	// -------------------------------------------------------------------
+	/** Remove a given key from the list
+	 *  The function fails if the key isn't found
+	 *
+	 *  \param pKey Key/Usage to be deleted
+	 */
+	aiReturn RemoveProperty (const char* pKey);
 
 	// -------------------------------------------------------------------
 	/** Copy the property list of a material

@@ -38,59 +38,91 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines a post processing step to triangulate all faces 
-          with more than three vertices.
- */
-#ifndef AI_TRIANGULATEPROCESS_H_INC
-#define AI_TRIANGULATEPROCESS_H_INC
+/** @file Helper class tp perform various byte oder swappings 
+   (e.g. little to big endian) */
+#ifndef AI_BYTESWAP_H_INC
+#define AI_BYTESWAP_H_INC
 
-#include "BaseProcess.h"
-
-struct aiMesh;
+#include "..\include\aiAssert.h"
 
 namespace Assimp
 {
 
 // ---------------------------------------------------------------------------
-/** The TriangulateProcess splits up all faces with more than three indices
- * into triangles. You usually want this to happen because the graphics cards
- * need their data as triangles.
+/** \brief Defines some useful byte order swap routines.
+ * 
+ * This can e.g. be used for the conversion from and to littel and big endian.
+ * This is required by some loaders since some model formats
  */
-class TriangulateProcess : public BaseProcess
+class ByteSwap
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
-	TriangulateProcess();
-
-	/** Destructor, private as well */
-	~TriangulateProcess();
+	ByteSwap() {}
 
 public:
-	// -------------------------------------------------------------------
-	/** Returns whether the processing step is present in the given flag field.
-	 * @param pFlags The processing flags the importer was called with. A bitwise
-	 *   combination of #aiPostProcessSteps.
-	 * @return true if the process is present in this flag fields, false if not.
-	*/
-	bool IsActive( unsigned int pFlags) const;
+	//! Swap the byte oder of 2 byte of data
+	//! \param szOut Buffer to be swapped
+	static inline void Swap2(char* szOut)
+	{
+		ai_assert(NULL != szOut);
+		std::swap(szOut[0],szOut[1]);
+	}
 
-	// -------------------------------------------------------------------
-	/** Executes the post processing step on the given imported data.
-	* At the moment a process is not supposed to fail.
-	* @param pScene The imported data to work at.
-	*/
-	void Execute( aiScene* pScene);
+	//! Swap the byte oder of 4 byte of data
+	//! \param szOut Buffer to be swapped
+	static inline void Swap4(char* szOut)
+	{
+		ai_assert(NULL != szOut);
+		std::swap(szOut[0],szOut[3]);
+		std::swap(szOut[1],szOut[2]);
+	}
 
-protected:
-	// -------------------------------------------------------------------
-	/** Triangulates the given mesh.
-	 * @param pMesh The mesh to triangulate.
-	 */
-	bool TriangulateMesh( aiMesh* pMesh);
+	//! Swap the byte oder of 8 byte of data
+	//! \param szOut Buffer to be swapped
+	static inline void Swap8(char* szOut)
+	{
+		ai_assert(NULL != szOut);
+		std::swap(szOut[0],szOut[7]);
+		std::swap(szOut[1],szOut[6]);
+		std::swap(szOut[2],szOut[5]);
+		std::swap(szOut[3],szOut[4]);
+	}
+
+	//! Swap a single precision float
+	//! \param fOut Float value to be swapped
+	static inline void Swap(float* fOut)
+	{
+		Swap4((char*)fOut);
+	}
+
+	//! Swap a double precision float
+	//! \param fOut Double value to be swapped
+	static inline void Swap(double* fOut)
+	{
+		Swap8((char*)fOut);
+	}
+
+	//! Swap a 16 bit integer
+	//! \param fOut Integer to be swapped
+	static inline void Swap(int16_t* fOut)
+	{
+		Swap2((char*)fOut);
+	}
+
+	//! Swap a 32 bit integer
+	//! \param fOut Integer to be swapped
+	static inline void Swap(int32_t* fOut)	
+	{
+		Swap4((char*)fOut);
+	}
+
+	//! Swap a 64 bit integer
+	//! \param fOut Integer to be swapped
+	static inline void Swap(int64_t* fOut)
+	{
+		Swap8((char*)fOut);
+	}
+};
 };
 
-} // end of namespace Assimp
 
-#endif // AI_TRIANGULATEPROCESS_H_INC
+#endif //!! AI_BYTESWAP_H_INC

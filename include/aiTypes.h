@@ -144,6 +144,7 @@ struct aiString
 		// empty
 	}
 
+	//! construction from a given std::string
 	inline aiString(const aiString& rOther) : 
 		length(rOther.length) 
 	{
@@ -151,6 +152,7 @@ struct aiString
 		this->data[this->length] = '\0';
 	}
 
+	//! copy a std::string to the aiString
 	void Set( const std::string& pString)
 	{
 		if( pString.length() > MAXLEN - 1)
@@ -159,6 +161,22 @@ struct aiString
 		memcpy( data, pString.c_str(), length);
 		data[length] = 0;
 	}
+
+	//! comparison operator
+	bool operator==(const aiString& other) const
+	{
+		return  (this->length == other.length &&
+				 0 == strcmp(this->data,other.data));
+	}
+
+	//! inverse comparison operator
+	bool operator!=(const aiString& other) const
+	{
+		return  (this->length != other.length ||
+				 0 != strcmp(this->data,other.data));
+	}
+
+
 #endif // !__cplusplus
 
 	//! Length of the string excluding the terminal 0

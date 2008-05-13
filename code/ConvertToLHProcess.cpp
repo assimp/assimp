@@ -2,6 +2,7 @@
  * to a left-handed coordinate system.
  */
 #include "ConvertToLHProcess.h"
+#include "DefaultLogger.h"
 #include "../include/aiPostProcess.h"
 #include "../include/aiMesh.h"
 #include "../include/aiAnim.h"
@@ -46,7 +47,12 @@ void ConvertToLHProcess::Execute( aiScene* pScene)
 {
 	// Check for an existent root node to proceed
 	if (NULL == pScene->mRootNode)
+	{
+		DefaultLogger::get()->error("ConvertToLHProcess fails, there is no root node");
 		return;
+	}
+
+	DefaultLogger::get()->debug("ConvertToLHProcess begin");
 
 	// transform the root node of the scene, the other nodes will follow then
 	ConvertToDX( pScene->mRootNode->mTransformation);
@@ -66,6 +72,7 @@ void ConvertToLHProcess::Execute( aiScene* pScene)
 				ProcessAnimation( boneAnim);
 		}
 	}
+	DefaultLogger::get()->debug("ConvertToLHProcess finished");
 }
 
 // ------------------------------------------------------------------------------------------------

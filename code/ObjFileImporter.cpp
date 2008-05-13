@@ -26,8 +26,6 @@ ObjFileImporter::ObjFileImporter() :
 	m_pRootObject(NULL),
 	m_strAbsPath("\\")
 {
-	DefaultLogger::create( "test.log", DefaultLogger::VERBOSE );
-	DefaultLogger::get()->info("Start logging");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -40,8 +38,6 @@ ObjFileImporter::~ObjFileImporter()
 		delete m_pRootObject;
 		m_pRootObject = NULL;
 	}
-
-	DefaultLogger::kill();
 }
 
 // ------------------------------------------------------------------------------------------------

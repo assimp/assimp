@@ -55,7 +55,7 @@ class GenFaceNormalsProcess : public BaseProcess
 {
 	friend class Importer;
 
-protected:
+public:
 	/** Constructor to be privately used by Importer */
 	GenFaceNormalsProcess();
 
@@ -80,7 +80,7 @@ public:
 
 
 private:
-	void GenMeshFaceNormals (aiMesh* pcMesh);
+	bool GenMeshFaceNormals (aiMesh* pcMesh);
 };
 
 } // end of namespace Assimp

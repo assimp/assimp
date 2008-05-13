@@ -52,7 +52,6 @@ namespace AssimpView {
 //-------------------------------------------------------------------------------
 void HandleMouseInputFPS( void )
 	{
-
 	POINT mousePos;
 	GetCursorPos( &mousePos );
 	ScreenToClient( GetDlgItem(g_hDlg,IDC_RT), &mousePos );
@@ -72,6 +71,8 @@ void HandleMouseInputFPS( void )
 			D3DXMatrixRotationAxis( &matRotation, (D3DXVECTOR3*)& g_sCamera.vRight, D3DXToRadian((float)nYDiff / 3.0f));
 			D3DXVec3TransformCoord( (D3DXVECTOR3*)&g_sCamera.vLookAt, (D3DXVECTOR3*)& g_sCamera.vLookAt, &matRotation );
 			D3DXVec3TransformCoord( (D3DXVECTOR3*)&g_sCamera.vUp, (D3DXVECTOR3*)&g_sCamera.vUp, &matRotation );
+			
+			CMeshRenderer::Instance().SetRotationChangedFlag();
 			}
 
 		if( 0 != nXDiff )
@@ -80,6 +81,8 @@ void HandleMouseInputFPS( void )
 			D3DXMatrixRotationAxis( &matRotation, (D3DXVECTOR3*)&v, D3DXToRadian((float)nXDiff / 3.0f) );
 			D3DXVec3TransformCoord( (D3DXVECTOR3*)&g_sCamera.vLookAt, (D3DXVECTOR3*)&g_sCamera.vLookAt, &matRotation );
 			D3DXVec3TransformCoord( (D3DXVECTOR3*)&g_sCamera.vUp,(D3DXVECTOR3*) &g_sCamera.vUp, &matRotation );
+			
+			CMeshRenderer::Instance().SetRotationChangedFlag();
 			}
 		}
 
@@ -87,6 +90,32 @@ void HandleMouseInputFPS( void )
 	g_LastmousePos.y = g_mousePos.y;
 	}
 
+
+//-------------------------------------------------------------------------------
+// Handle mouse input for the FPS input behaviour
+//
+// Movement in x and y axis is possible
+//-------------------------------------------------------------------------------
+void HandleMouseInputTextureView( void )
+	{
+	POINT mousePos;
+	GetCursorPos( &mousePos );
+	ScreenToClient( GetDlgItem(g_hDlg,IDC_RT), &mousePos );
+
+	g_mousePos.x = mousePos.x;
+	g_mousePos.y = mousePos.y;
+
+	D3DXMATRIX matRotation;
+
+	if (g_bMousePressed)
+		{
+		CDisplay::Instance().SetTextureViewOffsetX((float)(g_mousePos.x - g_LastmousePos.x));
+		CDisplay::Instance().SetTextureViewOffsetY((float)(g_mousePos.y - g_LastmousePos.y));
+		}
+
+	g_LastmousePos.x = g_mousePos.x;
+	g_LastmousePos.y = g_mousePos.y;
+	}
 
 //-------------------------------------------------------------------------------
 // handle mouse input for the light rotation
@@ -186,7 +215,6 @@ void HandleMouseInputLightIntensityAndColor( void )
 		int nYDiff = -(g_mousePos.y - g_LastmousePos.y);
 
 		g_fLightIntensity -= (float)nXDiff / 400.0f;
-
 		if ((nYDiff > 2 || nYDiff < -2) && (nXDiff < 20 && nXDiff > -20))
 		{
 			if (!g_bFPSView)
@@ -228,6 +256,8 @@ void HandleMouseInputLocal( void )
 				aiVector3D v = aiVector3D(1.0f,0.0f,0.0f);
 				D3DXMatrixRotationAxis( (D3DXMATRIX*) &matWorld, (D3DXVECTOR3*)&v, D3DXToRadian((float)nYDiff / 2.0f));
 				g_mWorldRotate = g_mWorldRotate * matWorld;
+
+				CMeshRenderer::Instance().SetRotationChangedFlag();
 				}
 
 			if( 0 != nXDiff && g_eClick != EClickPos_CircleVert)
@@ -235,6 +265,8 @@ void HandleMouseInputLocal( void )
 				aiVector3D v = aiVector3D(0.0f,1.0f,0.0f);
 				D3DXMatrixRotationAxis( (D3DXMATRIX*)&matWorld, (D3DXVECTOR3*)&v, D3DXToRadian((float)nXDiff / 2.0f) );
 				g_mWorldRotate = g_mWorldRotate * matWorld;
+
+				CMeshRenderer::Instance().SetRotationChangedFlag();
 				}
 			}
 		else
@@ -296,6 +328,8 @@ void HandleKeyboardInputFPS( void )
 	aiVector3D tmpLook  = g_sCamera.vLookAt;
 	aiVector3D tmpRight = g_sCamera.vRight;
 
+	aiVector3D vOldPos = g_sCamera.vPos;
+
 	// Up Arrow Key - View moves forward
 	if( keys[VK_UP] & 0x80 )
 		g_sCamera.vPos -= (tmpLook*-MOVE_SPEED)*g_fElpasedTime;
@@ -319,5 +353,33 @@ void HandleKeyboardInputFPS( void )
 	// End Key - View elevates down
 	if( keys[VK_END] & 0x80 )
 		g_sCamera.vPos.y -= MOVE_SPEED*g_fElpasedTime;
+
+	if (vOldPos != g_sCamera.vPos)
+		CMeshRenderer::Instance().SetRotationChangedFlag();
+	}
+
+
+//-------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
+void HandleKeyboardInputTextureView( void )
+	{
+	unsigned char keys[256];
+	GetKeyboardState( keys );
+
+	// Up Arrow Key 
+	if( keys[VK_UP] & 0x80 )
+		CDisplay::Instance().SetTextureViewOffsetY ( g_fElpasedTime * 150.0f );
+
+	// Down Arrow Key 
+	if( keys[VK_DOWN] & 0x80 )
+		CDisplay::Instance().SetTextureViewOffsetY ( -g_fElpasedTime * 150.0f );
+
+	// Left Arrow Key 
+	if( keys[VK_LEFT] & 0x80 )
+		CDisplay::Instance().SetTextureViewOffsetX ( g_fElpasedTime * 150.0f );
+
+	// Right Arrow Key 
+	if( keys[VK_RIGHT] & 0x80 )
+		CDisplay::Instance().SetTextureViewOffsetX ( -g_fElpasedTime * 150.0f );
 	}
 };

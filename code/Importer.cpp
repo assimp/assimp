@@ -86,6 +86,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "GenVertexNormalsProcess.h"
 #include "KillNormalsProcess.h"
 #include "SplitLargeMeshes.h"
+#include "DefaultLogger.h"
 
 using namespace Assimp;
 
@@ -96,6 +97,10 @@ Importer::Importer() :
 	mScene(NULL),
 	mErrorString("")	
 {
+	// construct a new logger
+	/*DefaultLogger::create( "test.log", DefaultLogger::VERBOSE );
+	DefaultLogger::get()->info("Start logging");*/
+
 	// allocate a default IO handler
 	mIOHandler = new DefaultIOSystem;
 
@@ -181,6 +186,7 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 	if( !mIOHandler->Exists( pFile))
 	{
 		mErrorString = "Unable to open file \"" + pFile + "\".";
+		DefaultLogger::get()->error(mErrorString);
 		return NULL;
 	}
 
@@ -199,6 +205,7 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 	if( !imp)
 	{
 		mErrorString = "No suitable reader found for the file format of file \"" + pFile + "\".";
+		DefaultLogger::get()->error(mErrorString);
 		return NULL;
 	}
 

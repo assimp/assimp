@@ -26,4 +26,7 @@ extern std::string  g_szMaterialShader;
 // Shader used to draw the yellow circle on top of everything
 extern std::string  g_szPassThroughShader;
 
+// Shader used to draw the checker pattern background for the texture view
+extern std::string  g_szCheckerBackgroundShader;
+
 #endif // !! AV_SHADERS_H_INCLUDED

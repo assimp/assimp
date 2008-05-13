@@ -41,11 +41,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "stdafx.h"
 #include "assimp_view.h"
-
+#include "RichEdit.h"
 
 namespace AssimpView {
 
 /* extern */ CLogWindow CLogWindow::s_cInstance;
+extern HKEY g_hRegistry;
+
+// header for the RTF log file
+static const char* AI_VIEW_RTF_LOG_HEADER =
+	"{\\rtf1" 
+		"\\ansi" 
+		"\\deff0"
+		"{" 
+			"\\fonttbl{\\f0 Courier New;}"
+		"}" 
+	"{\\colortbl;" 
+		"\\red255\\green0\\blue0;" 	  // red for errors
+		"\\red255\\green120\\blue0;"  // orange for warnings
+		"\\red0\\green150\\blue0;" 	  // green for infos
+		"\\red0\\green0\\blue180;" 	  // blue for debug messages
+		"\\red0\\green0\\blue0;" 	  // black for everything else
+	"}}";
 
 //-------------------------------------------------------------------------------
 // Message procedure for the log window
@@ -68,12 +85,14 @@ INT_PTR CALLBACK LogDialogProc(HWND hwndDlg,UINT uMsg,
 			int y = HIWORD(lParam);
 
 			SetWindowPos(GetDlgItem(hwndDlg,IDC_EDIT1),NULL,0,0,
-				x,y,SWP_NOMOVE|SWP_NOZORDER);
+				x-10,y-12,SWP_NOMOVE|SWP_NOZORDER);
 
 			return TRUE;
 			}
 		case WM_CLOSE:
 			EndDialog(hwndDlg,0);
+
+			CLogWindow::Instance().bIsVisible = false;
 			return TRUE;
 		};
 	return FALSE;
@@ -90,6 +109,10 @@ void CLogWindow::Init ()
 		CLogDisplay::Instance().AddEntry("[ERROR] Unable to create logger window",
 			D3DCOLOR_ARGB(0xFF,0,0xFF,0));
 	}
+
+	// setup the log text
+	this->szText = AI_VIEW_RTF_LOG_HEADER;;
+	this->szPlainText = "";
 }
 //-------------------------------------------------------------------------------
 void CLogWindow::Show()
@@ -97,7 +120,133 @@ void CLogWindow::Show()
 	if (this->hwnd)
 	{
 		ShowWindow(this->hwnd,SW_SHOW);
+		this->bIsVisible = true;
+
+		// contents aren't updated while the logger isn't displayed
+		this->Update();
 	}
+}
+//-------------------------------------------------------------------------------
+void CMyLogStream::write(const std::string &message)
+{
+	CLogWindow::Instance().WriteLine(message);
+}
+//-------------------------------------------------------------------------------
+void CLogWindow::Clear()
+{
+	this->szText = AI_VIEW_RTF_LOG_HEADER;;
+	this->szPlainText = "";
+	
+	this->Update();
+}
+//-------------------------------------------------------------------------------
+void CLogWindow::Update()
+{
+	if (this->bIsVisible)
+	{
+		SETTEXTEX sInfo;
+		sInfo.flags = ST_DEFAULT;
+		sInfo.codepage = CP_ACP;
+
+		SendDlgItemMessage(this->hwnd,IDC_EDIT1,
+			EM_SETTEXTEX,(WPARAM)&sInfo,( LPARAM)this->szText.c_str());
+	}
+}
+//-------------------------------------------------------------------------------
+void CLogWindow::Save()
+{
+	char szFileName[MAX_PATH];
+
+	DWORD dwTemp = MAX_PATH;
+	if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"LogDestination",NULL,NULL,
+		(BYTE*)szFileName,&dwTemp))
+	{
+		// Key was not found. Use C:
+		strcpy(szFileName,"");
+	}
+	else
+	{
+		// need to remove the file name
+		char* sz = strrchr(szFileName,'\\');
+		if (!sz)sz = strrchr(szFileName,'/');
+		if (!sz)*sz = 0;
+	}
+	OPENFILENAME sFilename1 = {
+		sizeof(OPENFILENAME),
+		g_hDlg,GetModuleHandle(NULL), 
+		"Log files\0*.txt", NULL, 0, 1, 
+		szFileName, MAX_PATH, NULL, 0, NULL, 
+		"Save log to file",
+		OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR, 
+		0, 1, ".txt", 0, NULL, NULL
+	};
+	if(GetSaveFileName(&sFilename1) == 0) return;
+
+	// Now store the file in the registry
+	RegSetValueExA(g_hRegistry,"LogDestination",0,REG_SZ,(const BYTE*)szFileName,MAX_PATH);
+
+	FILE* pFile = fopen(szFileName,"wt");
+	fprintf(pFile,this->szPlainText.c_str());
+	fclose(pFile);
+
+	CLogDisplay::Instance().AddEntry("[INFO] The log file has been saved",
+			D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
+}
+//-------------------------------------------------------------------------------
+void CLogWindow::WriteLine(const std::string& message)
+{
+	this->szPlainText.append(message);
+	this->szPlainText.append("\r\n");
+
+	this->szText.resize(this->szText.length()-1);
+
+	switch (message.c_str()[0])
+	{
+	case 'e': 
+	case 'E':
+		this->szText.append("{\\pard \\cf1 \\b \\fs18 ");
+		break;
+	case 'w': 
+	case 'W':
+		this->szText.append("{\\pard \\cf2 \\b \\fs18 ");
+		break;
+	case 'i': 
+	case 'I':
+		this->szText.append("{\\pard \\cf3 \\b \\fs18 ");
+		break;
+	case 'd': 
+	case 'D':
+		this->szText.append("{\\pard \\cf4 \\b \\fs18 ");
+		break;
+	default:
+		this->szText.append("{\\pard \\cf5 \\b \\fs18 ");
+		break;
+	}
+
+	std::string _message = message;
+	for (unsigned int i = 0; i < _message.length();++i)
+	{
+		if ('\\' == _message[i] ||
+			'}'  == _message[i] ||
+			'{'  == _message[i])
+		{
+			_message.insert(i++,"\\");
+		}
+	}
+
+	this->szText.append(_message);
+	this->szText.append("\\par}}");
+
+	if (this->bIsVisible && this->bUpdate)
+	{
+		SETTEXTEX sInfo;
+		sInfo.flags = ST_DEFAULT;
+		sInfo.codepage = CP_ACP;
+
+		SendDlgItemMessage(this->hwnd,IDC_EDIT1,
+			EM_SETTEXTEX,(WPARAM)&sInfo,( LPARAM)this->szText.c_str());
+	}
+	return;
 }
 
 }; //! AssimpView

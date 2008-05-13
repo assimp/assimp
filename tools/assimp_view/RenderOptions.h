@@ -34,7 +34,8 @@ class RenderOptions
 			bLightRotate	(false),
 			bRotate			(true),
 			bLowQuality		(false),
-			bNoSpecular		(false) {}
+			bNoSpecular		(false),
+			bStereoView		(false)	{}
 
 		bool bMultiSample;
 
@@ -61,6 +62,9 @@ class RenderOptions
 
 		// disable specular lighting got all elements in the scene
 		bool bNoSpecular;
+
+		// enable stereo view
+		bool bStereoView;
 
 		// wireframe or solid rendering?
 		DrawMode eDrawMode;

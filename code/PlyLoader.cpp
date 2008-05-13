@@ -108,7 +108,9 @@ void PLYImporter::InternReadFile(
 
 	// allocate storage and copy the contents of the file to a memory buffer
 	// (terminate it with zero)
-	this->mBuffer = new unsigned char[fileSize+1];
+	// FIX: Allocate an extra buffer of 12.5% to be sure we won't crash
+	// if an overrun occurs.
+	this->mBuffer = new unsigned char[fileSize+1 + (fileSize>>3)];
 	file->Read( (void*)mBuffer, 1, fileSize);
 	this->mBuffer[fileSize] = '\0';
 
@@ -131,7 +133,7 @@ void PLYImporter::InternReadFile(
 		{
 			szMe += 6;
 			SkipLine(szMe,(const char**)&szMe);
-			if(!PLY::DOM::ParseInstance(szMe,&sPlyDom))
+			if(!PLY::DOM::ParseInstance(szMe,&sPlyDom, fileSize))
 			{
 				throw new ImportErrorException( "Invalid .ply file: Unable to build DOM (#1)");
 			}
@@ -151,7 +153,7 @@ void PLYImporter::InternReadFile(
 
 			// skip the line, parse the rest of the header and build the DOM
 			SkipLine(szMe,(const char**)&szMe);
-			if(!PLY::DOM::ParseInstanceBinary(szMe,&sPlyDom,bIsBE))
+			if(!PLY::DOM::ParseInstanceBinary(szMe,&sPlyDom,bIsBE, fileSize))
 			{
 				throw new ImportErrorException( "Invalid .ply file: Unable to build DOM (#2)");
 			}

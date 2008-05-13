@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MaterialSystem.h"
 #include "MDLLoader.h"
 #include "MDLDefaultColorMap.h"
+#include "DefaultLogger.h"
 
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
@@ -640,7 +641,8 @@ void MDLImporter::InternReadFile_Quake1( )
 			if (iIndex >= (unsigned int)this->m_pcHeader->num_verts)
 			{
 				iIndex = this->m_pcHeader->num_verts-1;
-				// LOG
+				
+				DefaultLogger::get()->warn("Index overflow in Q1-MDL vertex list.");
 			}
 
 			aiVector3D& vec = pcMesh->mVertices[iCurrent];
@@ -809,7 +811,7 @@ void MDLImporter::InternReadFile_GameStudio( )
 				if (iIndex >= (unsigned int)this->m_pcHeader->num_verts)
 				{
 					iIndex = this->m_pcHeader->num_verts-1;
-					// LOG
+					DefaultLogger::get()->warn("Index overflow in MDL3/4/5/6 vertex list");
 				}
 
 				aiVector3D& vec = vPositions[iCurrent];
@@ -838,7 +840,7 @@ void MDLImporter::InternReadFile_GameStudio( )
 				if (iIndex >= (unsigned int)this->m_pcHeader->synctype)
 				{
 					iIndex = this->m_pcHeader->synctype-1;
-					// LOG
+					DefaultLogger::get()->warn("Index overflow in MDL3/4/5/6 UV coord list");
 				}
 
 				float s = (float)pcTexCoords[iIndex].u;
@@ -886,7 +888,7 @@ void MDLImporter::InternReadFile_GameStudio( )
 				if (iIndex >= (unsigned int)this->m_pcHeader->num_verts)
 				{
 					iIndex = this->m_pcHeader->num_verts-1;
-					// LOG
+					DefaultLogger::get()->warn("Index overflow in MDL3/4/5/6 vertex list");
 				}
 
 				aiVector3D& vec = vPositions[iCurrent];
@@ -914,7 +916,7 @@ void MDLImporter::InternReadFile_GameStudio( )
 				if (iIndex >= (unsigned int) this->m_pcHeader->synctype)
 				{
 					iIndex = this->m_pcHeader->synctype-1;
-					// LOG
+					DefaultLogger::get()->warn("Index overflow in MDL3/4/5/6 UV coord list");
 				}
 
 				float s = (float)pcTexCoords[iIndex].u;
@@ -1029,7 +1031,8 @@ void MDLImporter::ParseSkinLump_GameStudioA7(
 		// ***** EMBEDDED DDS FILE *****
 		if (1 != pcSkin->height)
 		{
-			// LOG
+			DefaultLogger::get()->warn("Found a reference to an embedded DDS texture, "
+				"but texture height is not equal to 1, which is not supported by MED");
 		}
 
 		pcNew = new aiTexture();
@@ -1048,7 +1051,8 @@ void MDLImporter::ParseSkinLump_GameStudioA7(
 		// ***** REFERENCE TO EXTERNAL FILE FILE *****
 		if (1 != pcSkin->height)
 		{
-			// LOG
+			DefaultLogger::get()->warn("Found a reference to an external texture, "
+				"but texture height is not equal to 1, which is not supported by MED");
 		}
 
 		aiString szFile;
@@ -1058,29 +1062,52 @@ void MDLImporter::ParseSkinLump_GameStudioA7(
 		memcpy(szFile.data,(const char*)szCurrent,iLen2);
 		szFile.length = iLen;
 
+		szCurrent += iLen2;
+
 		// place this as diffuse texture
-		pcMatOut->AddProperty<aiString>(&szFile,1,AI_MATKEY_TEXTURE_DIFFUSE(0));
+		pcMatOut->AddProperty(&szFile,AI_MATKEY_TEXTURE_DIFFUSE(0));
 	}
-	else if (0 != iMasked)
+	else if (0 != iMasked || 0 == pcSkin->typ)
 	{
 		// ***** STANDARD COLOR TEXTURE *****
+		pcNew = new aiTexture();
 		if (0 == pcSkin->height || 0 == pcSkin->width)
 		{
-			// LOG
+			DefaultLogger::get()->warn("Found embedded texture, but its width "
+				"an height are both 0. Is this a joke?");
+
+			// generate an empty chess pattern
+			pcNew->mWidth = pcNew->mHeight = 8;
+			pcNew->pcData = new aiTexel[64];
+			for (unsigned int x = 0; x < 8;++x)
+			{
+				for (unsigned int y = 0; y < 8;++y)
+				{
+					bool bSet = false;
+					if (0 == x % 2 && 0 != y % 2 ||
+						0 != x % 2 && 0 == y % 2)bSet = true;
+				
+					aiTexel* pc = &pcNew->pcData[y * 8 + x];
+					if (bSet)pc->r = pc->b = pc->g = 0xFF;
+					else pc->r = pc->b = pc->g = 0;
+					pc->a = 0xFF;
+				}
+			}
 		}
+		else
+		{
+			// it is a standard color texture. Fill in width and height
+			// and call the same function we used for loading MDL5 files
 
-		// it is a standard color texture. Fill in width and height
-		// and call the same function we used for loading MDL5 files
+			pcNew->mWidth = pcSkin->width;
+			pcNew->mHeight = pcSkin->height;
 
-		pcNew = new aiTexture();
-		pcNew->mWidth = pcSkin->width;
-		pcNew->mHeight = pcSkin->height;
+			unsigned int iSkip = 0;
+			this->ParseTextureColorData(szCurrent,iMasked,&iSkip,pcNew);
 
-		unsigned int iSkip = 0;
-		this->ParseTextureColorData(szCurrent,iMasked,&iSkip,pcNew);
-
-		// skip length of texture data
-		szCurrent += iSkip;
+			// skip length of texture data
+			szCurrent += iSkip;
+		}
 	}
 	
 	// check whether a material definition is contained in the skin
@@ -1169,6 +1196,17 @@ void MDLImporter::ParseSkinLump_GameStudioA7(
 		delete[] pc;
 	}
 
+	// place the name of the skin in the material
+	const size_t iLen = strlen(pcSkin->texture_name); 
+	if (0 != iLen)
+	{
+		aiString szFile;
+		memcpy(szFile.data,pcSkin->texture_name,sizeof(pcSkin->texture_name));
+		szFile.length = iLen;
+
+		pcMatOut->AddProperty(&szFile,AI_MATKEY_NAME);
+	}
+
 	*szCurrentOut = szCurrent;
 	return;
 }
@@ -1243,7 +1281,8 @@ void MDLImporter::InternReadFile_GameStudioA7( )
 		if (1 != pcGroup->typ)
 		{
 			// Not a triangle-based mesh
-			// LOGWRITE("[3DGS MDL7] Mesh group is no basing in triangles. Continuing happily");
+			DefaultLogger::get()->warn("[3DGS MDL7] Mesh group is not basing on"
+				"triangles. Continuing happily");
 		}
 
 		// read all skins
@@ -1315,6 +1354,8 @@ void MDLImporter::InternReadFile_GameStudioA7( )
 				{
 					// LOG
 					iIndex = pcGroup->numverts-1;
+
+					DefaultLogger::get()->warn("Index overflow in MDL7 vertex list");
 				}
 				unsigned int iOutIndex = iTriangle * 3 + c;
 
@@ -1439,7 +1480,10 @@ void MDLImporter::InternReadFile_GameStudioA7( )
 					// use the last material instead
 					aiSplit[iNumMaterials-1]->push_back(iFace);
 
-					// LOG
+					// sometimes MED writes -1, but normally only if there is only
+					// one skin assigned. No warning in this case
+					if(0xFFFFFFFF != pcFaces[iFace].iMatIndex[0])
+						DefaultLogger::get()->warn("Index overflow in MDL7 material list [#0]");
 				}
 				else aiSplit[pcFaces[iFace].iMatIndex[0]]->push_back(iFace);
 			}
@@ -1464,13 +1508,19 @@ void MDLImporter::InternReadFile_GameStudioA7( )
 				if (iMatIndex >= iNumMaterials)
 				{
 					iMatIndex = iNumMaterials-1;
-					// LOG
+
+					// sometimes MED writes -1, but normally only if there is only
+					// one skin assigned. No warning in this case
+					if(0xFFFFFFFF != iMatIndex)
+						DefaultLogger::get()->warn("Index overflow in MDL7 material list [#1]");
 				}
 				unsigned int iMatIndex2 = pcFaces[iFace].iMatIndex[1];
 				if (iMatIndex2 >= iNumMaterials)
 				{
-					iMatIndex2 = iNumMaterials-1;
-					// LOG
+					// sometimes MED writes -1, but normally only if there is only
+					// one skin assigned. No warning in this case
+					if(0xFFFFFFFF != iMatIndex2)
+						DefaultLogger::get()->warn("Index overflow in MDL7 material list [#2]");
 				}
 
 				// do a slow O(log(n)*n) seach in the list ...
@@ -1563,7 +1613,7 @@ void MDLImporter::InternReadFile_GameStudioA7( )
 
 			if (((unsigned int)szCurrent -  (unsigned int)pcHeader) + iAdd > (unsigned int)pcHeader->data_size)
 			{
-				// LOG
+				DefaultLogger::get()->warn("Index overflow in frame area. Ignoring frames");
 				// don't parse more groups if we can't even read one
 				goto __BREAK_OUT;
 			}

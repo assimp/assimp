@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the post processing step tokill mesh normals
 */
 #include "KillNormalsProcess.h"
+#include "DefaultLogger.h"
 #include "../include/aiPostProcess.h"
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
@@ -69,15 +70,25 @@ bool KillNormalsProcess::IsActive( unsigned int pFlags) const
 // Executes the post processing step on the given imported data.
 void KillNormalsProcess::Execute( aiScene* pScene)
 {
+	DefaultLogger::get()->debug("KillNormalsProcess begin");
+
+	bool bHas = false;
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-		this->KillMeshNormals( pScene->mMeshes[a]);
+	{
+		if(	this->KillMeshNormals( pScene->mMeshes[a]))
+			bHas = true;
+	}
+	if (bHas)DefaultLogger::get()->info("KillNormalsProcess finished. Found normals to kill");
+	else DefaultLogger::get()->debug("KillNormalsProcess finished. There was nothing to do.");
+
 }
 
 // -------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void KillNormalsProcess::KillMeshNormals(aiMesh* pMesh)
+bool KillNormalsProcess::KillMeshNormals(aiMesh* pMesh)
 {
+	if (!pMesh->mNormals)return false;
 	delete[] pMesh->mNormals;
 	pMesh->mNormals = NULL;
-	return;
+	return true;
 }

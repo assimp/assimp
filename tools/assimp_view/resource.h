@@ -37,6 +37,9 @@
 #define IDB_BITMAP10                    153
 #define IDB_BROOT                       153
 #define IDD_LOGVIEW                     154
+#define IDB_BTXI                        155
+#define IDR_TXPOPUP                     156
+#define IDR_MATPOPUP                    157
 #define IDC_CHECK1                      1000
 #define IDC_TOGGLEMS                    1000
 #define IDC_CHECK2                      1001
@@ -67,8 +70,10 @@
 #define IDC_CHECK8                      1020
 #define IDC_LOWQUALITY                  1020
 #define IDC_NUMMATS2                    1021
+#define IDC_NUMSHADERS                  1021
 #define IDC_ESHADER                     1022
 #define IDC_RICHEDIT21                  1023
+#define IDC_EMESH                       1023
 #define IDC_CHECK9                      1024
 #define IDC_NOSPECULAR                  1024
 #define IDC_PLAYANIM                    1025
@@ -84,6 +89,14 @@
 #define IDC_TREE1                       1033
 #define IDC_EDIT1                       1034
 #define IDC_BLUBB                       1037
+#define IDC_BLABLA                      1038
+#define IDC_NUMNODES                    1038
+#define IDC_LCOLOR1                     1041
+#define IDC_LCOLOR2                     1042
+#define IDC_ENODEWND                    1043
+#define IDC_LCOLOR3                     1044
+#define IDC_LRESET                      1046
+#define IDC_NUMMESHES                   1047
 #define ID_VIEWER_OPEN                  32771
 #define ID_VIEWER_CLOSETHIS             32772
 #define ID_VIEWER_CLOSEASSET            32773
@@ -101,6 +114,41 @@
 #define ID_TOOLS_LOGWINDOW              32785
 #define ID_TOOLS_SAVELOGTOFILE          32786
 #define ID_TOOLS_CLEARLOG               32787
+#define ID_VIEWER_RECENTFILES           32788
+#define ID_VIEWER_MEMORYCONSUMATION     32789
+#define ID_VIEWER_CLEARHISTORY          32790
+#define ID_TOOLS_ORIGINALNORMALS        32791
+#define ID_TOOLS_SMOOTHNORMALS          32792
+#define ID_TOOLS_HARDNORMALS            32793
+#define ID_TOOLS_FLIPNORMALS            32794
+#define ID__S                           32795
+#define ID__FEEDBACK                    32796
+#define ID_FEEDBACK_GH                  32797
+#define ID_FEEDBACK_FEATUREREQUEST      32798
+#define ID_FEEDBACK_DONATE              32799
+#define ID_ANIMATION_PLAYALLINORDER     32800
+#define ID_TOOLS_STEREOVIEW             32801
+#define ID_EGNEKLGEG_EGEG               32802
+#define ID_HEY_REPLACE                  32803
+#define ID_HEY_EXPORT                   32804
+#define ID_HEY_REMOVE                   32805
+#define ID_SOLONG_ADDDIFFUSETEXTURE     32806
+#define ID_SOLONG_ADDSPECULARTEXTURE    32807
+#define ID_SOLONG_ADDAMBIENTTEXTURE     32808
+#define ID_SOLONG_ADDEMISSIVETEXTURE    32809
+#define ID_SOLONG_ADDOPACITYTEXTURE     32810
+#define ID_SOLONG_ADDNORMAL             32811
+#define ID_SOLONG_ADDSHININESSTEXTURE   32812
+#define ID_SOLONG_CLEARDIFFUSECOLOR     32813
+#define ID_SOLONG_CLEARSPECULARCOLOR    32814
+#define ID_SOLONG_CLEARAMBIENTCOLOR     32815
+#define ID_SOLONG_CLEAREMISSIVECOLOR    32816
+#define ID_SOLONG_CLEARTRANSPARENCY     32817
+#define ID_SOLONG_MAKEDEFAULTMATERIAL   32818
+#define ID_HEY_RESETTEXTURE             32819
+#define ID_SOLONG_SETSHADINGMODE        32820
+#define ID_SETSHADINGMODE_GOURAUD       32821
+#define ID_SETSHADINGMODE_PHONG         32822
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -108,9 +156,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        155
-#define _APS_NEXT_COMMAND_VALUE         32788
-#define _APS_NEXT_CONTROL_VALUE         1038
+#define _APS_NEXT_RESOURCE_VALUE        158
+#define _APS_NEXT_COMMAND_VALUE         32823
+#define _APS_NEXT_CONTROL_VALUE         1048
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

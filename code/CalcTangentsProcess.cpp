@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 #include <assert.h>
+#include "DefaultLogger.h"
 #include "CalcTangentsProcess.h"
 #include "SpatialSort.h"
 #include "../include/aiPostProcess.h"
@@ -78,8 +79,12 @@ bool CalcTangentsProcess::IsActive( unsigned int pFlags) const
 // Executes the post processing step on the given imported data.
 void CalcTangentsProcess::Execute( aiScene* pScene)
 {
+	DefaultLogger::get()->debug("CalcTangentsProcess begin");
+
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 		ProcessMesh( pScene->mMeshes[a]);
+
+	DefaultLogger::get()->debug("CalcTangentsProcess finished");
 }
 
 // ------------------------------------------------------------------------------------------------

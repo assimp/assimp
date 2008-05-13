@@ -57,6 +57,7 @@ END
 
 IDD_DIALOGMAIN DIALOGEX 0, 0, 594, 384
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_ACCEPTFILES
 CAPTION "Free Asset Import Library - ModelViewer "
 MENU IDR_MENU1
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
@@ -65,59 +66,63 @@ BEGIN
     CONTROL         "MultiSample image",IDC_TOGGLEMS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,173,80,10
     CONTROL         "Toggle Wireframe",IDC_TOGGLEWIRE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,183,73,10
     CONTROL         "Disable Materials",IDC_TOGGLEMAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,193,69,10
-    LTEXT           "Verts:",IDC_NUMVERTS,475,15,47,8
-    LTEXT           "Faces:\t",IDC_NUMFACES,475,27,45,8
-    LTEXT           "Mats:",IDC_NUMMATS,540,27,26,8
-    LTEXT           "FPS:",IDC_FPS,475,65,21,8
+    LTEXT           "Verts:",IDC_NUMVERTS,475,14,47,8
+    LTEXT           "Faces:\t",IDC_NUMFACES,475,26,45,8
+    LTEXT           "Mats:",IDC_NUMMATS,540,26,26,8
+    LTEXT           "FPS:",IDC_FPS,540,51,21,8
     CONTROL         "Display Normals",IDC_TOGGLENORMALS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,203,66,10
     CONTROL         "Toggle AutoRotate",IDC_AUTOROTATE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,257,74,10
-    CONTROL         130,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,0,360,600,25
-    EDITTEXT        IDC_EVERT,504,12,32,12,ES_AUTOHSCROLL | ES_READONLY
-    EDITTEXT        IDC_EFACE,504,25,32,12,ES_AUTOHSCROLL | ES_READONLY
-    EDITTEXT        IDC_EMAT,564,25,27,12,ES_AUTOHSCROLL | ES_READONLY
-    EDITTEXT        IDC_EFPS,504,63,32,12,ES_AUTOHSCROLL | ES_READONLY
+    CONTROL         130,IDC_STATIC,"Static",SS_BITMAP,0,360,600,25
+    EDITTEXT        IDC_EVERT,504,11,32,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EFACE,504,24,32,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EMAT,564,24,27,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EFPS,564,50,27,12,ES_AUTOHSCROLL | ES_READONLY
     CONTROL         "Rotate light sources",IDC_LIGHTROTATE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,276,74,10
     CONTROL         "2 directional lights",IDC_3LIGHTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,213,73,10
-    LTEXT           "Time:",IDC_LOADTIME,475,76,46,8
-    EDITTEXT        IDC_ELOAD,504,75,32,12,ES_AUTOHSCROLL | ES_READONLY
-    CONTROL         "Zoom/Rotate",IDC_ZOOM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,266,58,10
+    LTEXT           "Time:",IDC_LOADTIME,475,51,46,8
+    EDITTEXT        IDC_ELOAD,504,50,32,12,ES_AUTOHSCROLL | ES_READONLY
+    CONTROL         "Zoom/Rotate",IDC_ZOOM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,267,58,10
     CONTROL         "Low quality lighting",IDC_LOWQUALITY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,223,74,10
     CONTROL         "No specular lighting",IDC_NOSPECULAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,233,74,10
     CONTROL         "Play [OK]",IDC_PLAYANIM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,480,297,42,10
     CONTROL         "",IDC_SPEED,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | TBS_TOOLTIPS | WS_TABSTOP,480,309,90,12
     LTEXT           "Speed: [+/-]",IDC_SSPEED,526,297,42,8
-    LTEXT           "Shd:",IDC_NUMMATS2,476,41,23,8
-    EDITTEXT        IDC_ESHADER,504,39,32,12,ES_AUTOHSCROLL | ES_READONLY
-    LTEXT           "[M]",IDC_STATIC,570,173,11,8
-    LTEXT           "[W]",IDC_STATIC,570,183,11,8
-    LTEXT           "[D]",IDC_STATIC,570,193,11,8
-    LTEXT           "[N]",IDC_STATIC,570,203,11,8
-    LTEXT           "[L]",IDC_STATIC,570,213,11,8
-    LTEXT           "[P]",IDC_STATIC,570,223,11,8
-    LTEXT           "[S]",IDC_STATIC,570,233,11,8
-    LTEXT           "[A]",IDC_STATIC,569,257,11,8
-    LTEXT           "[Z]",IDC_STATIC,569,267,11,8
-    LTEXT           "[R]",IDC_STATIC,569,276,11,8
+    LTEXT           "Shd:",IDC_NUMSHADERS,476,40,23,8
+    EDITTEXT        IDC_ESHADER,504,37,32,12,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "[M]",IDC_STATIC,553,173,11,8
+    LTEXT           "[W]",IDC_STATIC,553,183,11,8
+    LTEXT           "[D]",IDC_STATIC,553,193,11,8
+    LTEXT           "[N]",IDC_STATIC,553,203,11,8
+    LTEXT           "[L]",IDC_STATIC,553,213,11,8
+    LTEXT           "[P]",IDC_STATIC,553,223,11,8
+    LTEXT           "[S]",IDC_STATIC,553,233,11,8
+    LTEXT           "[A]",IDC_STATIC,552,257,11,8
+    LTEXT           "[Z]",IDC_STATIC,552,267,11,8
+    LTEXT           "[R]",IDC_STATIC,552,276,11,8
     COMBOBOX        IDC_COMBO1,480,331,90,30,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Anim: [Pg up/Pg down]",IDC_SANIM,483,320,74,8
-    CONTROL         "Play all in order [O]",IDC_PINORDER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,479,346,77,10
     CONTROL         149,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,470,0,114,9
     CONTROL         148,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,470,161,114,9
     CONTROL         147,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,470,245,114,9
     CONTROL         145,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,470,287,114,9
-    CONTROL         146,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,470,89,114,9
+    CONTROL         146,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,470,65,114,9
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDVERT,469,0,1,360
     CONTROL         "<<",IDC_BLUBB,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | WS_TABSTOP,439,367,27,10
     CONTROL         149,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,584,0,10,9
-    CONTROL         149,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,584,89,10,9
+    CONTROL         149,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,584,65,10,9
     CONTROL         149,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,583,161,10,9
     CONTROL         149,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,584,245,10,9
     CONTROL         149,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,584,287,10,9
-    LTEXT           "Nodes:",IDC_STATIC,540,14,24,8
-    EDITTEXT        IDC_ENODE,564,12,27,12,ES_AUTOHSCROLL | ES_READONLY
-    CONTROL         "",IDC_TREE1,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | WS_BORDER | WS_TABSTOP,470,98,123,64
-    LTEXT           "Tex:",IDC_STATIC,476,53,16,8
-    EDITTEXT        IDC_ETEX,504,51,32,12,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Nodes:",IDC_NUMNODES,540,13,24,8
+    EDITTEXT        IDC_ENODEWND,564,11,27,12,ES_AUTOHSCROLL | ES_READONLY
+    CONTROL         "",IDC_TREE1,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,470,74,123,88
+    LTEXT           "Mesh:",IDC_NUMMESHES,540,39,20,8
+    EDITTEXT        IDC_EMESH,564,37,27,12,ES_AUTOHSCROLL | ES_READONLY
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDVERT,567,170,1,75
+    CONTROL         "Button1",IDC_LCOLOR1,"Button",BS_OWNERDRAW | WS_TABSTOP,570,174,21,17
+    CONTROL         "Button1",IDC_LCOLOR2,"Button",BS_OWNERDRAW | WS_TABSTOP,570,194,21,17
+    CONTROL         "Button1",IDC_LCOLOR3,"Button",BS_OWNERDRAW | WS_TABSTOP,570,214,21,17
+    PUSHBUTTON      "R",IDC_LRESET,576,232,15,11,BS_BOTTOM
 END
 
 IDD_LOADDIALOG DIALOGEX 0, 0, 278, 99
@@ -146,7 +151,7 @@ EXSTYLE WS_EX_TOPMOST | WS_EX_WINDOWEDGE
 CAPTION "AssimpView Log Output"
 FONT 8, "Courier New", 400, 0, 0x0
 BEGIN
-    EDITTEXT        IDC_EDIT1,0,0,365,181,ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | WS_VSCROLL
+    CONTROL         "",IDC_EDIT1,"RichEdit20A",ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | ES_NUMBER | WS_VSCROLL | WS_TABSTOP,3,4,358,174,WS_EX_STATICEDGE
 END
 
 
@@ -272,6 +277,7 @@ IDB_BTX                 BITMAP                  "tx.bmp"
 IDB_BFX                 BITMAP                  "fx.bmp"
 IDB_BNODE               BITMAP                  "n.bmp"
 IDB_BROOT               BITMAP                  "root.bmp"
+IDB_BTXI                BITMAP                  "txi.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -287,8 +293,12 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Screenshot",                  ID_VIEWER_SAVESCREENSHOTTOFILE
         MENUITEM "Reset view",                  ID_VIEWER_RESETVIEW
+        MENUITEM "Memory consumption",          ID_VIEWER_MEMORYCONSUMATION
         MENUITEM SEPARATOR
         MENUITEM "Setup file associations",     ID_VIEWER_H
+        MENUITEM SEPARATOR
+        MENUITEM "Recent files ",               ID_VIEWER_RECENTFILES
+        MENUITEM "Clear history",               ID_VIEWER_CLEARHISTORY
         MENUITEM SEPARATOR
         MENUITEM "Quit",                        ID_VIEWER_QUIT
     END
@@ -297,6 +307,14 @@ BEGIN
         MENUITEM "Log window",                  ID_TOOLS_LOGWINDOW
         MENUITEM "Save log to file",            ID_TOOLS_SAVELOGTOFILE
         MENUITEM "Clear log",                   ID_TOOLS_CLEARLOG
+        MENUITEM SEPARATOR
+        MENUITEM "Original normals",            ID_TOOLS_ORIGINALNORMALS, CHECKED
+        MENUITEM "Smooth normals",              ID_TOOLS_SMOOTHNORMALS
+        MENUITEM "Hard normals",                ID_TOOLS_HARDNORMALS
+        MENUITEM SEPARATOR
+        MENUITEM "Flip normals",                ID_TOOLS_FLIPNORMALS
+        MENUITEM SEPARATOR
+        MENUITEM "Stereo view",                 ID_TOOLS_STEREOVIEW
     END
     POPUP "Background"
     BEGIN
@@ -308,9 +326,56 @@ BEGIN
     END
     POPUP "?"
     BEGIN
-        MENUITEM "About",                       ID__ABOUT
+        POPUP "Feedback"
+        BEGIN
+            MENUITEM "Report bug",                  ID_FEEDBACK_GH
+            MENUITEM "Feature request",             ID_FEEDBACK_FEATUREREQUEST
+        END
         MENUITEM "Help",                        ID__HELP
+        MENUITEM SEPARATOR
+        MENUITEM "About",                       ID__ABOUT
     END
+END
+
+IDR_TXPOPUP MENU 
+BEGIN
+    POPUP "Hey"
+    BEGIN
+        MENUITEM "Replace texture",             ID_HEY_REPLACE
+        MENUITEM "Export texture",              ID_HEY_EXPORT
+        MENUITEM "Remove texture",              ID_HEY_REMOVE
+        MENUITEM SEPARATOR
+        MENUITEM "Reset texture",               ID_HEY_RESETTEXTURE
+    END
+    MENUITEM "This is not an easter egg",   0
+END
+
+IDR_MATPOPUP MENU 
+BEGIN
+    POPUP "So long"
+    BEGIN
+        MENUITEM "Add diffuse texture",         ID_SOLONG_ADDDIFFUSETEXTURE
+        MENUITEM "Add specular texture",        ID_SOLONG_ADDSPECULARTEXTURE
+        MENUITEM "Add ambient texture",         ID_SOLONG_ADDAMBIENTTEXTURE
+        MENUITEM "Add emissive texture",        ID_SOLONG_ADDEMISSIVETEXTURE
+        MENUITEM "Add opacity texture",         ID_SOLONG_ADDOPACITYTEXTURE
+        MENUITEM "Add normal/height texture",   ID_SOLONG_ADDNORMAL
+        MENUITEM "Add shininess texture",       ID_SOLONG_ADDSHININESSTEXTURE
+        MENUITEM SEPARATOR
+        MENUITEM "Set diffuse color",           ID_SOLONG_CLEARDIFFUSECOLOR
+        MENUITEM "Set specular color",          ID_SOLONG_CLEARSPECULARCOLOR
+        MENUITEM "Set ambient color",           ID_SOLONG_CLEARAMBIENTCOLOR
+        MENUITEM "Set emissive color",          ID_SOLONG_CLEAREMISSIVECOLOR
+        MENUITEM "Set transparency",            ID_SOLONG_CLEARTRANSPARENCY
+        MENUITEM SEPARATOR
+        MENUITEM "Make default material",       ID_SOLONG_MAKEDEFAULTMATERIAL
+        POPUP "Set shading mode"
+        BEGIN
+            MENUITEM "Gouraud",                     ID_SETSHADINGMODE_GOURAUD
+            MENUITEM "Phong (specular)",            ID_SETSHADINGMODE_PHONG
+        END
+    END
+    MENUITEM "and thanks for all the fish", 0
 END
 
 

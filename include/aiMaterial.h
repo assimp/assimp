@@ -512,13 +512,14 @@ aiReturn aiGetMaterialString(const C_STRUCT aiMaterial* pMat,
 	aiString* pOut);
 
 
-#define AI_TEXTYPE_DIFFUSE		0x0
+#define AI_TEXTYPE_OPACITY		0x0
 #define AI_TEXTYPE_SPECULAR		0x1
 #define AI_TEXTYPE_AMBIENT		0x2
 #define AI_TEXTYPE_EMISSIVE		0x3
 #define AI_TEXTYPE_HEIGHT		0x4
 #define AI_TEXTYPE_NORMALS		0x5
 #define AI_TEXTYPE_SHININESS	0x6
+#define AI_TEXTYPE_DIFFUSE		0x7
 
 // ---------------------------------------------------------------------------
 /** Helper function to get a diffuse texture from a material

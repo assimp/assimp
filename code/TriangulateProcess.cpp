@@ -4,6 +4,7 @@
 #include <vector>
 #include <assert.h>
 #include "TriangulateProcess.h"
+#include "DefaultLogger.h"
 #include "../include/aiPostProcess.h"
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
@@ -35,14 +36,33 @@ bool TriangulateProcess::IsActive( unsigned int pFlags) const
 // Executes the post processing step on the given imported data.
 void TriangulateProcess::Execute( aiScene* pScene)
 {
+	DefaultLogger::get()->debug("TriangulateProcess begin");
+
+	bool bHas = false;
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-		TriangulateMesh( pScene->mMeshes[a]);
+	{
+		if(	TriangulateMesh( pScene->mMeshes[a]))
+			bHas = true;
+	}
+	if (bHas)DefaultLogger::get()->info("TriangulateProcess finished. Found polygons to triangulate");
+	else DefaultLogger::get()->debug("TriangulateProcess finished. There was nothing to do.");
 }
 
 // ------------------------------------------------------------------------------------------------
 // Triangulates the given mesh.
-void TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
+bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 {
+	// check whether we will need to do something ...
+	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
+	{
+		const aiFace& face = pMesh->mFaces[a];
+		if( face.mNumIndices != 3)
+		{
+			break;
+		}
+		return false;
+	}
+
 	std::vector<aiFace> newFaces;
 	newFaces.reserve( pMesh->mNumFaces*2);
 	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
@@ -57,7 +77,8 @@ void TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 			nface.mNumIndices = face.mNumIndices;
 			nface.mIndices = new unsigned int[nface.mNumIndices];
 			memcpy( nface.mIndices, face.mIndices, nface.mNumIndices * sizeof( unsigned int));
-		} else
+		} 
+		else
 		{
 			assert( face.mNumIndices > 3);
 			for( unsigned int b = 0; b < face.mNumIndices - 2; b++)
@@ -80,4 +101,6 @@ void TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 	pMesh->mFaces = new aiFace[pMesh->mNumFaces];
 	for( unsigned int a = 0; a < newFaces.size(); a++)
 		pMesh->mFaces[a] = newFaces[a];
+
+	return true;
 }

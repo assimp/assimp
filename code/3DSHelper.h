@@ -380,7 +380,7 @@ struct Material
 	{
 		static int iCnt = 0;
 		std::stringstream ss(mName);
-		ss << "%%_UNNAMED_" << iCnt++ << "_%%"; 
+		ss << "$$_UNNAMED_" << iCnt++ << "_$$"; 
 	}
 
 	//! Name of the material
@@ -433,7 +433,7 @@ struct Mesh
 	{
 		static int iCnt = 0;
 		std::stringstream ss(mName);
-		ss << "%%_UNNAMED_" << iCnt++ << "_%%"; 
+		ss << "$$_UNNAMED_" << iCnt++ << "_$$"; 
 	}
 
 	//! Name of the mesh
@@ -468,7 +468,7 @@ struct Node
 	{
 		static int iCnt = 0;
 		std::stringstream ss(mName);
-		ss << "%%_UNNAMED_" << iCnt++ << "_%%"; 
+		ss << "$$_UNNAMED_" << iCnt++ << "_$$"; 
 
 		mHierarchyPos = 0;
 		mHierarchyIndex = 0;

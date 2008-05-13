@@ -60,7 +60,7 @@ class BaseProcess
 {
 	friend class Importer;
 
-protected:
+public:
 	/** Constructor to be privately used by Importer */
 	BaseProcess();
 

@@ -95,6 +95,12 @@ namespace MDL
 #define AI_MDL_MAGIC_NUMBER_BE_GS7	'MDL7'
 #define AI_MDL_MAGIC_NUMBER_LE_GS7	'7LDM'
 
+// magic bytes used in Half Life 2 MDL models
+#define AI_MDL_MAGIC_NUMBER_BE_HL2a	'IDST'
+#define AI_MDL_MAGIC_NUMBER_LE_HL2a	'TSDI'
+#define AI_MDL_MAGIC_NUMBER_BE_HL2b	'IDSQ'
+#define AI_MDL_MAGIC_NUMBER_LE_HL2b	'QSDI'
+
 // common limitations for Quake1 meshes. The loader does not check them,
 // but models should not exceed these limits.
 #if (!defined AI_MDL_VERSION)
@@ -208,6 +214,87 @@ struct Header_MDL7
 	uint16_t framevertex_stc_size;
 	uint16_t bonetrans_stc_size;
 	uint16_t frame_stc_size;
+} PACK_STRUCT;
+
+
+// ---------------------------------------------------------------------------
+/** \struct Header_HL2
+ *  \brief Data structure for the HL2 main header
+ */
+// ---------------------------------------------------------------------------
+struct Header_HL2 
+{
+	//! magic number: "IDST"/"IDSQ"
+	char	ident[4];		
+
+	//! Version number
+	int32_t	version;
+
+	//! Original file name in pak ?
+	char		name[64];
+
+	//! Length of file name/length of file?
+	int32_t		length;
+
+	//! For viewer, ignored
+	aiVector3D		eyeposition;	
+	aiVector3D		min;			
+	aiVector3D		max;			
+
+	//! AABB of the model
+	aiVector3D		bbmin;			
+	aiVector3D		bbmax;		
+
+	// File flags
+	int32_t			flags;
+
+	//! NUmber of bones contained in the file
+	int32_t			numbones;			
+	int32_t			boneindex;
+
+	//! Number of bone controllers for bone animation
+	int32_t			numbonecontrollers;		
+	int32_t			bonecontrollerindex;
+
+	//! More bounding boxes ...
+	int32_t			numhitboxes;			
+	int32_t			hitboxindex;			
+	
+	//! Animation sequences in the file
+	int32_t			numseq;				
+	int32_t			seqindex;
+
+	//! Loaded sequences. Ignored
+	int32_t			numseqgroups;		
+	int32_t			seqgroupindex;
+
+	//! Raw texture data
+	int32_t			numtextures;		
+	int32_t			textureindex;
+	int32_t			texturedataindex;
+
+	//! Number of skins (=textures?)
+	int32_t			numskinref;			
+	int32_t			numskinfamilies;
+	int32_t			skinindex;
+
+	//! Number of parts
+	int32_t			numbodyparts;		
+	int32_t			bodypartindex;
+
+	//! attachable points for gameplay and physics
+	int32_t			numattachments;		
+	int32_t			attachmentindex;
+
+	//! Table of sound effects associated with the model
+	int32_t			soundtable;
+	int32_t			soundindex;
+	int32_t			soundgroups;
+	int32_t			soundgroupindex;
+
+	//! Number of animation transitions
+	int32_t			numtransitions;		
+	int32_t			transitionindex;
 } PACK_STRUCT;
 
 #define AI_MDL7_MAX_BONENAMESIZE	20 

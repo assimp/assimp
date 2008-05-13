@@ -39,7 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-/** @file Defines a post processing step to calculate tangents and bitangents on all imported meshes.*/
+/** @file Defines a post processing step to calculate tangents and 
+    bitangents on all imported meshes.*/
 #ifndef AI_CALCTANGENTSPROCESS_H_INC
 #define AI_CALCTANGENTSPROCESS_H_INC
 
@@ -53,14 +54,14 @@ namespace Assimp
 // ---------------------------------------------------------------------------
 /** The CalcTangentsProcess calculates the tangent and bitangent for any vertex
  * of all meshes. It is expected to be run before the JoinVerticesProcess runs
- * because the joining of vertices also considers tangents and bitangents for uniqueness.
-
+ * because the joining of vertices also considers tangents and bitangents for 
+ * uniqueness.
  */
 class CalcTangentsProcess : public BaseProcess
 {
 	friend class Importer;
 
-protected:
+public:
 	/** Constructor to be privately used by Importer */
 	CalcTangentsProcess();
 

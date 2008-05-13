@@ -561,8 +561,13 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, const std::vector<XFile::
 		aiString name;
 		name.Set( oldMat.mName);
 		mat->AddProperty( &name, AI_MATKEY_NAME);
+
 		// Shading model: hardcoded to PHONG, there is no such information in an XFile
-		int shadeMode = (int) aiShadingMode_Phong;
+		// FIX (aramis): If the specular exponent is 0, use gouraud shading. This is a bugfix
+		// for some models in the SDK (e.g. good old tiny.x)
+		int shadeMode = (int)oldMat.mSpecularExponent == 0.0f 
+			? aiShadingMode_Gouraud : aiShadingMode_Phong;
+
 		mat->AddProperty<int>( &shadeMode, 1, AI_MATKEY_SHADING_MODEL);
 		// material colours
 		mat->AddProperty( &oldMat.mEmissive, 1, AI_MATKEY_COLOR_EMISSIVE);

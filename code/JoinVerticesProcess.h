@@ -38,9 +38,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines a post processing step to join identical vertices on all imported meshes.*/
+/** @file Defines a post processing step to join identical vertices 
+    on all imported meshes.*/
 #ifndef AI_JOINVERTICESPROCESS_H_INC
-#define AI_CALCTANGENTSPROCESS_H_INC
+#define AI_JOINVERTICESPROCESS_H_INC
 
 #include "BaseProcess.h"
 #include "../include/aiTypes.h"
@@ -62,7 +63,7 @@ class JoinVerticesProcess : public BaseProcess
 {
 	friend class Importer;
 
-protected:
+public:
 	/** Constructor to be privately used by Importer */
 	JoinVerticesProcess();
 
@@ -90,12 +91,19 @@ protected:
 	/** Unites identical vertices in the given mesh.
 	 * @param pMesh The mesh to process.
 	 */
-	void ProcessMesh( aiMesh* pMesh);
+	bool ProcessMesh( aiMesh* pMesh);
 
-	/** Little helper function to calculate the quadratic difference of two colours. */
+	// -------------------------------------------------------------------
+	/** Little helper function to calculate the quadratic difference 
+	 * of two colours. 
+	 * @param pColor1 First color
+	 * @param pColor2 second color
+	 * @return Quadratic color difference
+	 */
 	float GetColorDifference( const aiColor4D& pColor1, const aiColor4D& pColor2) const
 	{
-		aiColor4D c( pColor1.r - pColor2.r, pColor1.g - pColor2.g, pColor1.b - pColor2.b, pColor1.a - pColor2.a);
+		aiColor4D c(	pColor1.r - pColor2.r, pColor1.g - pColor2.g, 
+						pColor1.b - pColor2.b, pColor1.a - pColor2.a);
 		return c.r*c.r + c.g*c.g + c.b*c.b + c.a*c.a;
 	}
 };

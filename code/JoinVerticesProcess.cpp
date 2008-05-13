@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assert.h>
 #include "JoinVerticesProcess.h"
 #include "SpatialSort.h"
+#include "DefaultLogger.h"
 #include "../include/aiPostProcess.h"
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
@@ -78,13 +79,21 @@ bool JoinVerticesProcess::IsActive( unsigned int pFlags) const
 // Executes the post processing step on the given imported data.
 void JoinVerticesProcess::Execute( aiScene* pScene)
 {
+	DefaultLogger::get()->debug("JoinVerticesProcess begin");
+
+	bool bHas = false;
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-		ProcessMesh( pScene->mMeshes[a]);
+	{
+		if(	this->ProcessMesh( pScene->mMeshes[a]))
+			bHas = true;
+	}
+	if (bHas)DefaultLogger::get()->info("JoinVerticesProcess finished. Found vertices to join");
+	else DefaultLogger::get()->debug("JoinVerticesProcess finished. There was nothing to do.");
 }
 
 // ------------------------------------------------------------------------------------------------
 // Unites identical vertices in the given mesh
-void JoinVerticesProcess::ProcessMesh( aiMesh* pMesh)
+bool JoinVerticesProcess::ProcessMesh( aiMesh* pMesh)
 {
 	// helper structure to hold all the data a single vertex can possibly have
 	typedef struct Vertex vertex;
@@ -99,6 +108,8 @@ void JoinVerticesProcess::ProcessMesh( aiMesh* pMesh)
 	};
 	std::vector<Vertex> uniqueVertices;
 	uniqueVertices.reserve( pMesh->mNumVertices);
+
+	unsigned int iOldVerts = pMesh->mNumVertices;
 
 	// For each vertex the index of the vertex it was replaced by. 
 	std::vector<unsigned int> replaceIndex( pMesh->mNumVertices, 0xffffffff);
@@ -300,4 +311,5 @@ void JoinVerticesProcess::ProcessMesh( aiMesh* pMesh)
 		bone->mWeights = new aiVertexWeight[bone->mNumWeights];
 		memcpy( bone->mWeights, &newWeights[0], bone->mNumWeights * sizeof( aiVertexWeight));
 	}
+	return (iOldVerts != pMesh->mNumVertices);
 }

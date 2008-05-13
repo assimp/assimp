@@ -45,12 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace AssimpView {
 
-//
-// Specifies the number of different shaders generated for
-// the current asset. This number is incremented by CreateMaterial()
-// each time a shader isn't found in cache and needs to be created
-//
-unsigned int g_iShaderCount			 = 0 ;
+
+/*static */ CMaterialManager CMaterialManager::s_cInstance;
 
 //-------------------------------------------------------------------------------
 // Compiler idependent stricmp() function.
@@ -116,11 +112,23 @@ VOID WINAPI FillFunc(D3DXVECTOR4* pOut,
 }
 
 //-------------------------------------------------------------------------------
-// Setup the default texture for a texture channel
-//
-// Generates a default checker pattern for a texture
+int CMaterialManager::UpdateSpecularMaterials()
+	{
+	if (g_pcAsset && g_pcAsset->pcScene)
+		{
+		for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
+			{
+			if (aiShadingMode_Phong == g_pcAsset->apcMeshes[i]->eShadingMode)
+				{
+				this->DeleteMaterial(g_pcAsset->apcMeshes[i]);
+				this->CreateMaterial(g_pcAsset->apcMeshes[i],g_pcAsset->pcScene->mMeshes[i]);
+				}
+			}
+		}
+	return 1;
+	}
 //-------------------------------------------------------------------------------
-int SetDefaultTexture(IDirect3DTexture9** p_ppiOut)
+int CMaterialManager::SetDefaultTexture(IDirect3DTexture9** p_ppiOut)
 {
 	if(FAILED(g_piDevice->CreateTexture(
 		256,
@@ -134,19 +142,22 @@ int SetDefaultTexture(IDirect3DTexture9** p_ppiOut)
 	{
 		CLogDisplay::Instance().AddEntry("[ERROR] Unable to create default texture",
 			D3DCOLOR_ARGB(0xFF,0xFF,0,0));
+
+		*p_ppiOut = NULL;
 	}
 	D3DXFillTexture(*p_ppiOut,&FillFunc,NULL);
+
+	// {9785DA94-1D96-426b-B3CB-BADC36347F5E}
+	static const GUID guidPrivateData = 
+		{ 0x9785da94, 0x1d96, 0x426b, 
+		{ 0xb3, 0xcb, 0xba, 0xdc, 0x36, 0x34, 0x7f, 0x5e } };
+
+	uint32_t iData = 0xFFFFFFFF;
+	(*p_ppiOut)->SetPrivateData(guidPrivateData,&iData,4,0);
 	return 1;
 }
-
-
 //-------------------------------------------------------------------------------
-// find a valid path to a texture file
-//
-// Handle 8.3 syntax correctly, search the environment of the
-// executable and the asset for a texture with a name very similar to a given one
-//-------------------------------------------------------------------------------
-bool TryLongerPath(char* szTemp,aiString* p_szString)
+bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
 {
 	char szTempB[MAX_PATH];
 
@@ -225,15 +236,11 @@ bool TryLongerPath(char* szTemp,aiString* p_szString)
 	}
 	return false;
 }
-
 //-------------------------------------------------------------------------------
-// find a valid path to a texture file
-//
-// Handle 8.3 syntax correctly, search the environment of the
-// executable and the asset for a texture with a name very similar to a given one
-//-------------------------------------------------------------------------------
-int FindValidPath(aiString* p_szString)
+int CMaterialManager::FindValidPath(aiString* p_szString)
 {
+	ai_assert(NULL != p_szString);
+
 	if ('*' ==  p_szString->data[0])
 	{
 		// '*' as first character indicates an embedded file
@@ -313,14 +320,12 @@ int FindValidPath(aiString* p_szString)
 	}
 	return 1;
 }
-
 //-------------------------------------------------------------------------------
-// Load a texture into memory and create a native D3D texture resource
-//
-// The function tries to find a valid path for a texture
-//-------------------------------------------------------------------------------
-int LoadTexture(IDirect3DTexture9** p_ppiOut,aiString* szPath)
+int CMaterialManager::LoadTexture(IDirect3DTexture9** p_ppiOut,aiString* szPath)
 {
+	ai_assert(NULL != p_ppiOut);
+	ai_assert(NULL != szPath);
+
 	*p_ppiOut = NULL;
 
 	// first get a valid path to the texture
@@ -354,7 +359,7 @@ int LoadTexture(IDirect3DTexture9** p_ppiOut,aiString* szPath)
 					sz.append(szPath->data);
 					CLogDisplay::Instance().AddEntry(sz,D3DCOLOR_ARGB(0xFF,0xFF,0x0,0x0));
 
-					SetDefaultTexture(p_ppiOut);
+					this->SetDefaultTexture(p_ppiOut);
 					return 1;
 				}
 			}
@@ -370,7 +375,7 @@ int LoadTexture(IDirect3DTexture9** p_ppiOut,aiString* szPath)
 					sz.append(szPath->data);
 					CLogDisplay::Instance().AddEntry(sz,D3DCOLOR_ARGB(0xFF,0xFF,0x0,0x0));
 
-					SetDefaultTexture(p_ppiOut);
+					this->SetDefaultTexture(p_ppiOut);
 					return 1;
 				}
 
@@ -425,19 +430,12 @@ int LoadTexture(IDirect3DTexture9** p_ppiOut,aiString* szPath)
 		sz.append(szPath->data);
 		CLogDisplay::Instance().AddEntry(sz,D3DCOLOR_ARGB(0xFF,0xFF,0x0,0x0));
 
-		SetDefaultTexture(p_ppiOut);
+		this->SetDefaultTexture(p_ppiOut);
 	}
 	return 1;
 }
-
-
-
 //-------------------------------------------------------------------------------
-// Delete all resources of a given material
-//
-// Must be called before CreateMaterial() to prevent memory leaking
-//-------------------------------------------------------------------------------
-void DeleteMaterial(AssetHelper::MeshHelper* pcIn)
+void CMaterialManager::DeleteMaterial(AssetHelper::MeshHelper* pcIn)
 {
 	if (!pcIn || !pcIn->piEffect)return;
 	pcIn->piEffect->Release();
@@ -474,17 +472,15 @@ void DeleteMaterial(AssetHelper::MeshHelper* pcIn)
 		pcIn->piNormalTexture = NULL;
 	}
 }
-
-
 //-------------------------------------------------------------------------------
-// Convert a height map to a normal map if necessary
-//
-// The function tries to detect the type of a texture automatically.
-// However, this wont work in every case.
-//-------------------------------------------------------------------------------
-void HMtoNMIfNecessary(IDirect3DTexture9* piTexture,IDirect3DTexture9** piTextureOut,
-					   bool bWasOriginallyHM = true)
+void CMaterialManager::HMtoNMIfNecessary(
+	IDirect3DTexture9* piTexture,
+	IDirect3DTexture9** piTextureOut,
+	bool bWasOriginallyHM)
 {
+	ai_assert(NULL != piTexture);
+	ai_assert(NULL != piTextureOut);
+
 	bool bMustConvert = false;
 	uintptr_t iElement = 3;
 
@@ -664,15 +660,11 @@ void HMtoNMIfNecessary(IDirect3DTexture9* piTexture,IDirect3DTexture9** piTextur
 		piTexture->Release();
 	}
 }
-
-
 //-------------------------------------------------------------------------------
-// Search for non-opaque pixels in a texture
-//
-// A pixel is considered to be non-opaque if its alpha value s less than 255
-//-------------------------------------------------------------------------------
-bool HasAlphaPixels(IDirect3DTexture9* piTexture)
+bool CMaterialManager::HasAlphaPixels(IDirect3DTexture9* piTexture)
 {
+	ai_assert(NULL != piTexture);
+
 	D3DLOCKED_RECT sRect;
 	D3DSURFACE_DESC sDesc;
 	piTexture->GetLevelDesc(0,&sDesc);
@@ -710,20 +702,16 @@ bool HasAlphaPixels(IDirect3DTexture9* piTexture)
 	piTexture->UnlockRect(0);
 	return false;
 }
-
-
 //-------------------------------------------------------------------------------
-// Create the material for a mesh.
-//
-// The function checks whether an identical shader is already in use.
-// A shader is considered to be identical if it has the same input signature
-// and takes the same number of texture channels.
-//-------------------------------------------------------------------------------
-int CreateMaterial(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource)
+int CMaterialManager::CreateMaterial(
+	AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource)
 {
+	ai_assert(NULL != pcMesh);
+	ai_assert(NULL != pcSource);
+
 	ID3DXBuffer* piBuffer;
 
-	D3DXMACRO sMacro[32];
+	D3DXMACRO sMacro[64];
 
 	// extract all properties from the ASSIMP material structure
 	const aiMaterial* pcMat = g_pcAsset->pcScene->mMaterials[pcSource->mMaterialIndex];
@@ -830,11 +818,18 @@ int CreateMaterial(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource)
 	else
 	{
 		// try to find out whether the diffuse texture has any
-		// non-opaque pixels. If we find a few use it as opacity texture
+		// non-opaque pixels. If we find a few, use it as opacity texture
 		if (pcMesh->piDiffuseTexture && HasAlphaPixels(pcMesh->piDiffuseTexture))
 		{
-			pcMesh->piOpacityTexture = pcMesh->piDiffuseTexture;
-			pcMesh->piOpacityTexture->AddRef();
+			int iVal;
+
+			// NOTE: This special value is set by the tree view if the user
+			// manually removes the alpha texture from the view ...
+			if (AI_SUCCESS != aiGetMaterialInteger(pcMat,"no_a_from_d",&iVal))
+			{
+				pcMesh->piOpacityTexture = pcMesh->piDiffuseTexture;
+				pcMesh->piOpacityTexture->AddRef();
+			}
 		}
 	}
 
@@ -855,6 +850,14 @@ int CreateMaterial(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource)
 	}
 
 	//
+	// Shininess TEXTURE ------------------------------------------------
+	//
+	if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_SHININESS(0),&szPath))
+	{
+		LoadTexture(&pcMesh->piShininessTexture,&szPath);
+	}
+
+	//
 	// NORMAL/HEIGHT MAP ------------------------------------------------
 	//
 	bool bHM = false;
@@ -870,6 +873,7 @@ int CreateMaterial(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource)
 		}
 		bHM = true;
 	}
+
 	// normal/height maps are sometimes mixed up. Try to detect the type
 	// of the texture automatically
 	if (pcMesh->piNormalTexture)
@@ -886,6 +890,8 @@ int CreateMaterial(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource)
 
 	// BUGFIX: If the shininess is 0.0f disable phong lighting
 	// This is a workaround for some meshes in the DX SDK (e.g. tiny.x)
+	// FIX: Added this check to the x-loader, but the line remains to
+	// catch other loader doing the same ...
 	if (0.0f == pcMesh->fShininess)
 	{
 		pcMesh->eShadingMode = aiShadingMode_Gouraud;
@@ -919,6 +925,9 @@ int CreateMaterial(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource)
 		if  ((pcMesh->piOpacityTexture != NULL ? true : false) != 
 			(pc->piOpacityTexture != NULL ? true : false))
 			continue;
+		if  ((pcMesh->piShininessTexture != NULL ? true : false) != 
+			(pc->piShininessTexture != NULL ? true : false))
+			continue;
 		if ((pcMesh->eShadingMode != aiShadingMode_Gouraud ? true : false) != 
 			(pc->eShadingMode != aiShadingMode_Gouraud ? true : false))
 			continue;
@@ -935,7 +944,7 @@ int CreateMaterial(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource)
 			return 2;
 		}
 	}
-	g_iShaderCount++;
+	this->m_iShaderCount++;
 
 	// build macros for the HLSL compiler
 	unsigned int iCurrent = 0;
@@ -989,12 +998,18 @@ int CreateMaterial(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource)
 		}
 	}
 
-
 	if (pcMesh->eShadingMode  != aiShadingMode_Gouraud  && !g_sOptions.bNoSpecular)
 	{
 		sMacro[iCurrent].Name = "AV_SPECULAR_COMPONENT";
 		sMacro[iCurrent].Definition = "1";
 		++iCurrent;
+
+		if (pcMesh->piShininessTexture)
+		{
+			sMacro[iCurrent].Name = "AV_SHININESS_TEXTURE";
+			sMacro[iCurrent].Definition = "1";
+			++iCurrent;
+		}
 	}
 	if (1.0f != pcMesh->fOpacity)
 	{
@@ -1002,8 +1017,6 @@ int CreateMaterial(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource)
 		sMacro[iCurrent].Definition = "1";
 		++iCurrent;
 	}
-
-
 
 	// If a cubemap is active, we'll need to lookup it for calculating
 	// a physically correct reflection
@@ -1079,6 +1092,8 @@ int CreateMaterial(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource)
 		pcMesh->piEffect->SetTexture("EMISSIVE_TEXTURE",pcMesh->piEmissiveTexture);
 	if (pcMesh->piNormalTexture)
 		pcMesh->piEffect->SetTexture("NORMAL_TEXTURE",pcMesh->piNormalTexture);
+	if (pcMesh->piShininessTexture)
+		pcMesh->piEffect->SetTexture("SHININESS_TEXTURE",pcMesh->piShininessTexture);
 
 	if (CBackgroundPainter::TEXTURE_CUBE == CBackgroundPainter::Instance().GetMode())
 	{
@@ -1086,4 +1101,139 @@ int CreateMaterial(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource)
 	}
 	return 1;
 }
-};
+//-------------------------------------------------------------------------------
+int CMaterialManager::SetupMaterial (
+	AssetHelper::MeshHelper* pcMesh,
+	const aiMatrix4x4& pcProj,
+	const aiMatrix4x4& aiMe,
+	const aiMatrix4x4& pcCam,
+	const aiVector3D& vPos)
+{
+	ai_assert(NULL != pcMesh);
+	if (!pcMesh->piEffect)return 0;
+
+	ID3DXEffect* piEnd = pcMesh->piEffect;
+
+	piEnd->SetMatrix("WorldViewProjection",
+		(const D3DXMATRIX*)&pcProj);
+
+	piEnd->SetMatrix("World",(const D3DXMATRIX*)&aiMe);
+	piEnd->SetMatrix("WorldInverseTranspose",
+		(const D3DXMATRIX*)&pcCam);
+
+	D3DXVECTOR4 apcVec[5];
+	memset(apcVec,0,sizeof(apcVec));
+	apcVec[0].x = g_avLightDirs[0].x;
+	apcVec[0].y = g_avLightDirs[0].y;
+	apcVec[0].z = g_avLightDirs[0].z;
+	apcVec[1].x = g_avLightDirs[0].x * -1.0f;
+	apcVec[1].y = g_avLightDirs[0].y * -1.0f;
+	apcVec[1].z = g_avLightDirs[0].z * -1.0f;
+	D3DXVec4Normalize(&apcVec[0],&apcVec[0]);
+	D3DXVec4Normalize(&apcVec[1],&apcVec[1]);
+	piEnd->SetVectorArray("afLightDir",apcVec,5);
+
+	apcVec[0].x = ((g_avLightColors[0] >> 16)	& 0xFF) / 255.0f;
+	apcVec[0].y = ((g_avLightColors[0] >> 8)	& 0xFF) / 255.0f;
+	apcVec[0].z = ((g_avLightColors[0])			& 0xFF) / 255.0f;
+	apcVec[0].w = 1.0f;
+
+	apcVec[1].x = ((g_avLightColors[1] >> 16)	& 0xFF) / 255.0f;
+	apcVec[1].y = ((g_avLightColors[1] >> 8)	& 0xFF) / 255.0f;
+	apcVec[1].z = ((g_avLightColors[1])			& 0xFF) / 255.0f;
+	apcVec[1].w = 0.0f;
+
+	apcVec[0] *= g_fLightIntensity;
+	apcVec[1] *= g_fLightIntensity;
+	piEnd->SetVectorArray("afLightColor",apcVec,5);
+
+	apcVec[0].x = ((g_avLightColors[2] >> 16)	& 0xFF) / 255.0f;
+	apcVec[0].y = ((g_avLightColors[2] >> 8)	& 0xFF) / 255.0f;
+	apcVec[0].z = ((g_avLightColors[2])			& 0xFF) / 255.0f;
+	apcVec[0].w = 1.0f;
+
+	apcVec[1].x = ((g_avLightColors[2] >> 16)	& 0xFF) / 255.0f;
+	apcVec[1].y = ((g_avLightColors[2] >> 8)	& 0xFF) / 255.0f;
+	apcVec[1].z = ((g_avLightColors[2])			& 0xFF) / 255.0f;
+	apcVec[1].w = 0.0f;
+
+	// FIX: light intensity doesn't apply to ambient color
+	//apcVec[0] *= g_fLightIntensity;
+	//apcVec[1] *= g_fLightIntensity;
+	piEnd->SetVectorArray("afLightColorAmbient",apcVec,5);
+
+
+	apcVec[0].x = vPos.x;
+	apcVec[0].y = vPos.y;
+	apcVec[0].z = vPos.z;
+	piEnd->SetVector( "vCameraPos",&apcVec[0]);
+
+	// if the effect instance is shared by multiple materials we need to
+	// recommit its whole state once per frame ...
+	if (pcMesh->bSharedFX)
+	{
+		// now commit all constants to the shader
+		if (1.0f != pcMesh->fOpacity)
+			pcMesh->piEffect->SetFloat("TRANSPARENCY",pcMesh->fOpacity);
+		if (pcMesh->eShadingMode  != aiShadingMode_Gouraud)
+			pcMesh->piEffect->SetFloat("SPECULARITY",pcMesh->fShininess);
+
+		pcMesh->piEffect->SetVector("DIFFUSE_COLOR",&pcMesh->vDiffuseColor);
+		pcMesh->piEffect->SetVector("SPECULAR_COLOR",&pcMesh->vSpecularColor);
+		pcMesh->piEffect->SetVector("AMBIENT_COLOR",&pcMesh->vAmbientColor);
+		pcMesh->piEffect->SetVector("EMISSIVE_COLOR",&pcMesh->vEmissiveColor);
+
+		if (pcMesh->piOpacityTexture)
+			pcMesh->piEffect->SetTexture("OPACITY_TEXTURE",pcMesh->piOpacityTexture);
+		if (pcMesh->piDiffuseTexture)
+			pcMesh->piEffect->SetTexture("DIFFUSE_TEXTURE",pcMesh->piDiffuseTexture);
+		if (pcMesh->piSpecularTexture)
+			pcMesh->piEffect->SetTexture("SPECULAR_TEXTURE",pcMesh->piSpecularTexture);
+		if (pcMesh->piAmbientTexture)
+			pcMesh->piEffect->SetTexture("AMBIENT_TEXTURE",pcMesh->piAmbientTexture);
+		if (pcMesh->piEmissiveTexture)
+			pcMesh->piEffect->SetTexture("EMISSIVE_TEXTURE",pcMesh->piEmissiveTexture);
+		if (pcMesh->piNormalTexture)
+			pcMesh->piEffect->SetTexture("NORMAL_TEXTURE",pcMesh->piNormalTexture);
+		if (pcMesh->piShininessTexture)
+			pcMesh->piEffect->SetTexture("SHININESS_TEXTURE",pcMesh->piShininessTexture);
+
+		if (CBackgroundPainter::TEXTURE_CUBE == CBackgroundPainter::Instance().GetMode())
+		{
+			piEnd->SetTexture("lw_tex_envmap",CBackgroundPainter::Instance().GetTexture());
+		}
+	}
+
+	// setup the correct shader technique to be used for drawing
+	if (g_sCaps.PixelShaderVersion < D3DPS_VERSION(3,0) || g_sOptions.bLowQuality)
+	{
+		if (g_sOptions.b3Lights)
+			piEnd->SetTechnique("MaterialFXSpecular_PS20_D2");
+		else piEnd->SetTechnique("MaterialFXSpecular_PS20_D1");
+	}
+	else
+	{
+		if (g_sOptions.b3Lights)
+			piEnd->SetTechnique("MaterialFXSpecular_D2");
+		else piEnd->SetTechnique("MaterialFXSpecular_D1");
+	}
+
+	// activate the effect
+	UINT dwPasses = 0;
+	piEnd->Begin(&dwPasses,0);
+	piEnd->BeginPass(0);
+	return 1;
+}
+//-------------------------------------------------------------------------------
+int CMaterialManager::EndMaterial (AssetHelper::MeshHelper* pcMesh)
+{
+	ai_assert(NULL != pcMesh);
+	if (!pcMesh->piEffect)return 0;
+
+	// end the effect
+	pcMesh->piEffect->EndPass();
+	pcMesh->piEffect->End();
+
+	return 1;
+}
+}; // end namespace AssimpView

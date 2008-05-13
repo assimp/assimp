@@ -28,6 +28,13 @@ struct aiVector3D
 
 	inline float operator[](unsigned int i) const {return *(&x + i);}
 	inline float& operator[](unsigned int i) {return *(&x + i);}
+
+	inline bool operator== (const aiVector3D& other) const
+		{return x == other.x && y == other.y && z == other.z;}
+
+	inline bool operator!= (const aiVector3D& other) const
+		{return x != other.x || y != other.y || z != other.z;}
+
 #endif // __cplusplus
 
 	float x, y, z;	

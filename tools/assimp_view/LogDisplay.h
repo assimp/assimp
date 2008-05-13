@@ -91,7 +91,6 @@ private:
 
 	std::list<SEntry> asEntries;
 	ID3DXFont* piFont;
-
 	};
 
 #endif // AV_LOG_DISPLAY_H_INCLUDE

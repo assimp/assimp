@@ -232,6 +232,34 @@ aiReturn aiGetMaterialString(const aiMaterial* pMat,
 	return AI_FAILURE;
 }
 // ------------------------------------------------------------------------------------------------
+aiReturn MaterialHelper::RemoveProperty (const char* pKey)
+{
+	ai_assert(NULL != pKey);
+
+	for (unsigned int i = 0; i < this->mNumProperties;++i)
+	{
+		if (NULL != this->mProperties[i])
+		{
+			if (0 == ASSIMP_stricmp( this->mProperties[i]->mKey->data, pKey ))
+			{
+				// delete this entry
+				delete[] this->mProperties[i]->mData;
+				delete this->mProperties[i];
+				
+				// collapse the array behind --.
+				--this->mNumProperties;
+				for (unsigned int a = i; a < this->mNumProperties;++a)
+				{
+					this->mProperties[a] = this->mProperties[a+1];
+				}
+				return AI_SUCCESS;
+			}
+		}
+	}
+
+	return AI_FAILURE;
+}
+// ------------------------------------------------------------------------------------------------
 aiReturn MaterialHelper::AddBinaryProperty (const void* pInput,
 	const unsigned int pSizeInBytes,
 	const char* pKey,
@@ -240,6 +268,23 @@ aiReturn MaterialHelper::AddBinaryProperty (const void* pInput,
 	ai_assert (pInput != NULL);
 	ai_assert (pKey != NULL);
 	ai_assert (0 != pSizeInBytes);
+
+	// first search the list whether there is already an entry
+	// with this name.
+	unsigned int iOutIndex = 0xFFFFFFFF;
+	for (unsigned int i = 0; i < this->mNumProperties;++i)
+	{
+		if (NULL != this->mProperties[i])
+		{
+			if (0 == ASSIMP_stricmp( this->mProperties[i]->mKey->data, pKey ))
+			{
+				// delete this entry
+				delete[] this->mProperties[i]->mData;
+				delete this->mProperties[i];
+				iOutIndex = i;
+			}
+		}
+	}
 
 	aiMaterialProperty* pcNew = new aiMaterialProperty();
 
@@ -254,6 +299,12 @@ aiReturn MaterialHelper::AddBinaryProperty (const void* pInput,
 	pcNew->mKey->length = strlen(pKey);
 	ai_assert ( MAXLEN > pcNew->mKey->length);
 	strcpy( pcNew->mKey->data, pKey );
+
+	if (0xFFFFFFFF != iOutIndex)
+	{
+		this->mProperties[iOutIndex] = pcNew;
+		return AI_SUCCESS;
+	}
 
 	// resize the array ... allocate
 	// storage for 5 other properties
@@ -373,6 +424,12 @@ aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 		szBlendBase = AI_MATKEY_TEXBLEND_SHININESS_;
 		szOpBase = AI_MATKEY_TEXOP_SHININESS_;
 		break;
+	case AI_TEXTYPE_OPACITY:
+		szPathBase = AI_MATKEY_TEXTURE_OPACITY_;
+		szUVBase = AI_MATKEY_UVWSRC_OPACITY_;
+		szBlendBase = AI_MATKEY_TEXBLEND_OPACITY_;
+		szOpBase = AI_MATKEY_TEXOP_OPACITY_;
+		break;
 	default: return AI_FAILURE;
 	};
 
@@ -404,6 +461,7 @@ aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 
 		*pfBlendFactor = fBlend;
 	}
+
 	// get the texture operation of the texture
 	if (peTextureOp)
 	{

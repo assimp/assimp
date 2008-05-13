@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the SplitLargeMeshes postprocessing step
 */
 #include "SplitLargeMeshes.h"
+#include "DefaultLogger.h"
 #include "../include/aiPostProcess.h"
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
@@ -63,6 +64,7 @@ aiReturn aiSetVertexSplitLimit(unsigned int pLimit)
 	}
 
 	SplitLargeMeshesProcess_Vertex::LIMIT = pLimit;
+	//DefaultLogger::get()->debug("aiSetVertexSplitLimit() - vertex split limit was changed");
 	return AI_SUCCESS;
 }
 // ------------------------------------------------------------------------------------------------
@@ -75,6 +77,7 @@ aiReturn aiSetTriangleSplitLimit(unsigned int pLimit)
 	}
 
 	SplitLargeMeshesProcess_Triangle::LIMIT = pLimit;
+	//DefaultLogger::get()->debug("aiSetTriangleSplitLimit() - triangle split limit was changed");
 	return AI_SUCCESS;
 }
 }; //! extern "C"
@@ -99,6 +102,7 @@ bool SplitLargeMeshesProcess_Triangle::IsActive( unsigned int pFlags) const
 // Executes the post processing step on the given imported data.
 void SplitLargeMeshesProcess_Triangle::Execute( aiScene* pScene)
 {
+	DefaultLogger::get()->debug("SplitLargeMeshesProcess_Triangle begin");
 	std::vector<std::pair<aiMesh*, unsigned int> > avList;
 
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
@@ -116,7 +120,9 @@ void SplitLargeMeshesProcess_Triangle::Execute( aiScene* pScene)
 
 		// now we need to update all nodes
 		this->UpdateNode(pScene->mRootNode,avList);
+		DefaultLogger::get()->info("SplitLargeMeshesProcess_Triangle finished. Meshes have been splitted");
 	}
+	else DefaultLogger::get()->debug("SplitLargeMeshesProcess_Triangle finished. There was nothing to do");
 	return;
 }
 // ------------------------------------------------------------------------------------------------
@@ -160,8 +166,10 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
 	aiMesh* pMesh,
 	std::vector<std::pair<aiMesh*, unsigned int> >& avList)
 {
-	if (pMesh->mNumFaces > LIMIT)
+	if (pMesh->mNumFaces > SplitLargeMeshesProcess_Triangle::LIMIT)
 	{
+		DefaultLogger::get()->info("Mesh exceeds the triangle limit. It will be split ...");
+
 		// we need to split this mesh into sub meshes
 		// determine the size of a submesh
 		const unsigned int iSubMeshes = (pMesh->mNumFaces / LIMIT) + 1;
@@ -318,6 +326,7 @@ void SplitLargeMeshesProcess_Vertex::Execute( aiScene* pScene)
 {
 	std::vector<std::pair<aiMesh*, unsigned int> > avList;
 
+	DefaultLogger::get()->debug("SplitLargeMeshesProcess_Vertex begin");
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 		this->SplitMesh(a, pScene->mMeshes[a],avList);
 
@@ -333,7 +342,9 @@ void SplitLargeMeshesProcess_Vertex::Execute( aiScene* pScene)
 
 		// now we need to update all nodes
 		SplitLargeMeshesProcess_Triangle::UpdateNode(pScene->mRootNode,avList);
+		DefaultLogger::get()->info("SplitLargeMeshesProcess_Vertex finished. Meshes have been splitted");
 	}
+	else DefaultLogger::get()->debug("SplitLargeMeshesProcess_Vertex finished. There was nothing to do");
 	return;
 }
 // ------------------------------------------------------------------------------------------------
@@ -510,7 +521,8 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
 
 		// now delete the old mesh data
 		delete pMesh;
+		return;
 	}
-	else avList.push_back(std::pair<aiMesh*, unsigned int>(pMesh,a));
+	avList.push_back(std::pair<aiMesh*, unsigned int>(pMesh,a));
 	return;
 }

@@ -1213,7 +1213,7 @@ void Dot3DSImporter::ParseTextureChunk(int* piRemaining,Dot3DS::Texture* pcOut)
 		break;
 	// manually parse the blend factor
 	case Dot3DSFile::CHUNK_PERCENTW:
-		pcOut->mTextureBlend = (float)(*((short*)this->mCurrent)) / (float)0xFFFF;
+		pcOut->mTextureBlend = (float)(*((short*)this->mCurrent)) / (float)100;
 		break;
 
 	case Dot3DSFile::CHUNK_MAT_MAP_USCALE:

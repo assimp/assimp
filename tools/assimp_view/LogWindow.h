@@ -42,6 +42,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AV_LOG_WINDOW_H_INCLUDED)
 #define AV_LOG_WINDOW_H_INCLUDE
 
+
+//-------------------------------------------------------------------------------
+/**	\brief Subclass of Assimp::LogStream used to add all log messages to the
+ *         log window.
+*/
+//-------------------------------------------------------------------------------
+class CMyLogStream : Assimp::LogStream
+{
+public:
+	/**	@brief	Implementation of the abstract method	*/
+	void write(const std::string &message);
+};
+
+
 //-------------------------------------------------------------------------------
 /**	\brief Class to display log strings in a separate window
 */
@@ -50,7 +64,11 @@ class CLogWindow
 	{
 private:
 
-	CLogWindow() : hwnd(NULL)  {}
+	friend class CMyLogStream;
+	friend INT_PTR CALLBACK LogDialogProc(HWND hwndDlg,UINT uMsg,
+		WPARAM wParam,LPARAM lParam);
+
+	CLogWindow() : hwnd(NULL),  bIsVisible(false), bUpdate(true) {}
 
 public:
 
@@ -68,11 +86,43 @@ public:
 	// Shows the log window
 	void Show();
 
+	// Clears the log window
+	void Clear();
+
+	// Save the log window to an user-defined file
+	void Save();
+
+	// write a line to the log window
+	void WriteLine(const std::string& message);
+
+	// Set the bUpdate member
+	inline void SetAutoUpdate(bool b)
+	{
+		this->bUpdate = b;
+	}
+
+	// updates the log file
+	void Update();
+
 private:
 
 	// Window handle
 	HWND hwnd;
 
+	// current text of the window (contains RTF tags)
+	std::string szText;
+	std::string szPlainText;
+
+	// is the log window currently visible?
+	bool bIsVisible;
+
+	// Specified whether each new log message updates the log automatically
+	bool bUpdate;
+
+
+public:
+	// associated log stream
+	CMyLogStream pcStream;
 	};
 
 #endif // AV_LOG_DISPLA

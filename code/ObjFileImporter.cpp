@@ -1,13 +1,14 @@
 #include "ObjFileImporter.h"
 #include "ObjFileParser.h"
 #include "ObjFileData.h"
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
+#include "IOStream.h"
+#include "IOSystem.h"
+#include "aiMesh.h"
+#include "aiScene.h"
 #include "aiAssert.h"
 #include "MaterialSystem.h"
 #include "DefaultLogger.h"
+
 #include <boost/scoped_ptr.hpp>
 #include <boost/format.hpp>
 
@@ -47,7 +48,6 @@ bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) c
 	if (pFile.empty())
 		return false;
 
-	DefaultLogger::get()->info("ObjFileImporter::CanRead");
 	string::size_type pos = pFile.find_last_of(".");
 	if (string::npos == pos)
 		return false;

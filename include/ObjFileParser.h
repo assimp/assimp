@@ -81,7 +81,6 @@ private:
 	void copyNextLine(char *pBuffer, size_t length);
 	void getVector3(std::vector<aiVector3D*> &point3d_array);
 	void getVector2(std::vector<aiVector2D*> &point2d_array);
-	void skipLine();
 	void getFace();
 	void getMaterialDesc();
 	void getComment();

@@ -78,7 +78,7 @@ inline Char_T getNextWord(Char_T pBuffer, Char_T pEnd)
  *	@param	pBuffer	Pointer to data buffer
  *	@param	pEnd	Pointer to end of buffer
  *	@return	Pointer to next token
-*/
+ */
 template<class Char_T>
 inline Char_T getNextToken(Char_T pBuffer, Char_T pEnd)
 {
@@ -90,6 +90,65 @@ inline Char_T getNextToken(Char_T pBuffer, Char_T pEnd)
 	}
 	return getNextWord(pBuffer, pEnd);
 }
+
+/**	@brief	Skips a line
+ *	@param	Iterator set to current position
+ *	@param	Iterator set to end of scratch buffer for readout
+ *	@param	Current linenumber in format
+ *	@return	Current-iterator with new position
+ */
+template<class char_t>
+inline char_t skipLine(char_t it, char_t end, unsigned int &uiLine)
+{
+	while ( it != end && *it != '\n' )
+		++it;
+	if ( it != end )
+	{
+		++it;
+		++uiLine;
+	}
+	return it;
+}
+
+template<class char_t>
+inline char_t getName( char_t it, char_t end, std::string &name )
+{
+	name = "";
+	it = getNextToken<char_t>( it, end );
+	if ( it == end )
+		return end;
+	
+	char *pStart = &(*it);
+	while ( !isSpace(*it) && it != end )
+		++it;
+
+	// Get name
+	std::string strName(pStart, &(*it));
+	if ( strName.empty() )
+		return it;
+	else
+		name = strName;
+	
+	return it;
+}
+
+template<class char_t>
+inline char_t CopyNextWord( char_t it, char_t end, char *pBuffer, size_t length )
+{
+	size_t index = 0;
+	it = getNextWord<char_t>( it, end );
+	while (!isSpace( *it ) && it != end )
+	{
+		pBuffer[index] = *it ;
+		index++;
+		if (index == length-1)
+			break;
+		++it;
+	}
+	pBuffer[index] = '\0';
+	return it;
+}
+
 
 } // Namespace Assimp
 

@@ -118,7 +118,7 @@ void ObjFileParser::parseFile()
 		
 		default:
 			{
-				skipLine();
+				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 			}
 			break;
 		}
@@ -174,12 +174,13 @@ void ObjFileParser::getVector3(std::vector<aiVector3D*> &point3d_array)
 	z = (float) fast_atof(m_buffer);
 
 	point3d_array.push_back(new aiVector3D(x,y,z));
-	skipLine();
+	//skipLine();
+	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
 // -------------------------------------------------------------------
 //	Get values for a new 2D vector instance
-void ObjFileParser::getVector2(std::vector<aiVector2D*> &point2d_array)
+void ObjFileParser::getVector2( std::vector<aiVector2D*> &point2d_array )
 {
 	float x, y;
 	copyNextWord(m_buffer, BUFFERSIZE);
@@ -189,20 +190,8 @@ void ObjFileParser::getVector2(std::vector<aiVector2D*> &point2d_array)
 	y = (float) fast_atof(m_buffer);
 
 	point2d_array.push_back(new aiVector2D(x, y));
-	skipLine();
-}
 
-// -------------------------------------------------------------------
-//	Skips a line
-void ObjFileParser::skipLine()
-{
-	while (m_DataIt != m_DataItEnd && *m_DataIt != '\n')
-		++m_DataIt;
-	if (m_DataIt != m_DataItEnd)
-	{
-		++m_DataIt;
-		++m_uiLine;
-	}
+	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
 // -------------------------------------------------------------------
@@ -212,6 +201,7 @@ void ObjFileParser::getFace()
 	copyNextLine(m_buffer, BUFFERSIZE);
 	if (m_DataIt == m_DataItEnd)
 		return;
+
 	char *pPtr = m_buffer;
 	char *pEnd = &pPtr[BUFFERSIZE];
 	pPtr = getNextToken<char*>(pPtr, pEnd);
@@ -296,7 +286,7 @@ void ObjFileParser::getFace()
 	m_pModel->m_pCurrent->m_Faces.push_back(face);
 	
 	// Skip the rest of the line
-	skipLine();
+	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
 // -------------------------------------------------------------------
@@ -319,14 +309,14 @@ void ObjFileParser::getMaterialDesc()
 
 	// Search for material
 	std::string strFile;
-	std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find(strName);
+	std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( strName );
 	if (it == m_pModel->m_MaterialMap.end())
 	{
 		m_pModel->m_pCurrentMaterial = new ObjFile::Material();
-		m_pModel->m_MaterialMap[strName] = m_pModel->m_pCurrentMaterial;
+		m_pModel->m_MaterialMap[ strName ] = m_pModel->m_pCurrentMaterial;
 	}
 
-	skipLine();
+	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
 // -------------------------------------------------------------------
@@ -366,7 +356,7 @@ void ObjFileParser::getMaterialLib()
 	std::string absName = m_strAbsPath + IOSystem.getOsSeparator() + strMatName;
 	if (!IOSystem.Exists(absName))
 	{
-		skipLine();
+		m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 		return;
 	}
 
@@ -379,20 +369,20 @@ void ObjFileParser::getMaterialLib()
 	if (0L != pFile)
 	{
 		size_t size = pFile->FileSize();
-		char *pBuffer = new char[size];
-		size_t read_size = pFile->Read(pBuffer, sizeof(char), size);
-		FileSystem.Close(pFile);
+		std::vector<char> buffer;
+		buffer.resize( size );
+		
+		size_t read_size = pFile->Read( &buffer[ 0 ], sizeof(char), size );
+		FileSystem.Close( pFile );
 
 		// TODO: Load mtl file
 		
-		delete [] pBuffer;
-	
 	}
 
 	// Load material library (all materials will be created)
 	m_pModel->m_MaterialLib.push_back(strMatName);
 	
-	skipLine();
+	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
 // -------------------------------------------------------------------
@@ -421,7 +411,7 @@ void ObjFileParser::getNewMaterial()
 		m_pModel->m_pCurrentMaterial = (*it).second;
 	}
 
-	skipLine();
+	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
 // -------------------------------------------------------------------
@@ -458,16 +448,16 @@ void ObjFileParser::getGroupName()
 		}
 		m_pModel->m_strActiveGroup = strGroupName;
 	}
-	skipLine();
+	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
 // -------------------------------------------------------------------
 //	Not supported
 void ObjFileParser::getGroupNumber()
 {
-	// TODO: Implement this
+	// Not used
 
-	skipLine();
+	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
 // -------------------------------------------------------------------
@@ -509,7 +499,7 @@ void ObjFileParser::getObjectName()
 			m_pModel->m_Objects.push_back(m_pModel->m_pCurrent);*/
 		}
 	}
-	skipLine();
+	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 // -------------------------------------------------------------------
 //	Creates a new object instance
@@ -528,7 +518,8 @@ void ObjFileParser::createObject(const std::string &strObjectName)
 void ObjFileParser::reportErrorTokenInFace()
 {		
 	std::string strErr("");
-	skipLine();
+	
+	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 	std::cerr <<  "Not supported token in face desc. detected : " << strErr << std::endl;
 }
 

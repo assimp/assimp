@@ -35,15 +35,24 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-----------------------------------------------------------------------
-*/
-
-
+----------------------------------------------------------------------*/
 #ifndef OBJFILEMTLIMPORTER_H_INC
 #define OBJFILEMTLIMPORTER_H_INC
 
+#include <vector>
+
+struct aiColor3D;
+
 namespace Assimp
 {
+
+namespace ObjFile
+{
+struct Model;
+struct Material;
+
+}
+
 
 /**
  *	@class	ObjFileMtlImporter
@@ -52,8 +61,15 @@ namespace Assimp
 class ObjFileMtlImporter
 {
 public:
+	static const size_t BUFFERSIZE = 1024;
+	typedef std::vector<char> DataArray;
+	typedef std::vector<char>::iterator DataArrayIt;
+	typedef std::vector<char>::const_iterator ConstDataArrayIt;
+
+public:
 	//!	\brief	Default constructor
-	ObjFileMtlImporter();
+	ObjFileMtlImporter( std::vector<char> &buffer, const std::string &strAbsPath, 
+		ObjFile::Model *pModel );
 	
 	//!	\brief	DEstructor
 	~ObjFileMtlImporter();
@@ -65,11 +81,20 @@ private:
 	//!	\brief	Assignment operator, returns only a reference of this instance.
 	ObjFileMtlImporter &operator = (const ObjFileMtlImporter &rOther);
 
-	void getColorRGBA();
-	void getIlluminationModel();
-	void getFloatValue();
+	void load();
+	void getColorRGBA( aiColor3D *pColor);
+	void getIlluminationModel( int &illum_model );
+	void getFloatValue( float &value );
 	void createMaterial();
 	void getTexture();
+
+private:
+	std::string m_strAbsPath;
+	DataArrayIt m_DataIt;
+	DataArrayIt m_DataItEnd;
+	ObjFile::Model *m_pModel;
+	unsigned int m_uiLine;
+	char m_buffer[BUFFERSIZE];
 };
 
 } // Namespace Assimp

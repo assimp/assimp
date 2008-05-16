@@ -38,7 +38,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-
 #ifndef OBJ_FILEDATA_H_INC
 #define OBJ_FILEDATA_H_INC
 
@@ -174,6 +173,7 @@ struct Model
 	std::vector<aiVector3D*> m_Normals;
 	//!	Groupmap
 	GroupMap m_Groups;
+	//!	Group to face id assignment
 	std::vector<unsigned int> *m_pGroupFaceIDs;
 	//!	Active group
 	std::string m_strActiveGroup;

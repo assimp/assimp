@@ -1263,9 +1263,9 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
 				if(IDC_LCOLOR1 == pcStruct->CtlID)
 				{
-					unsigned char r = unsigned char((g_avLightColors[0] >> 16) & 0xFF);
-					unsigned char g = unsigned char((g_avLightColors[0] >> 8) & 0xFF);
-					unsigned char b = unsigned char((g_avLightColors[0]) & 0xFF);
+					unsigned char r = (unsigned char)((g_avLightColors[0] >> 16) & 0xFF);
+					unsigned char g = (unsigned char)((g_avLightColors[0] >> 8) & 0xFF);
+					unsigned char b = (unsigned char)((g_avLightColors[0]) & 0xFF);
 					HBRUSH hbr = CreateSolidBrush(RGB(r,g,b));
 
 					FillRect(pcStruct->hDC,&sRect,hbr);
@@ -1278,9 +1278,9 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 				}
 				else if(IDC_LCOLOR2 == pcStruct->CtlID)
 				{
-					unsigned char r = unsigned char((g_avLightColors[1] >> 16) & 0xFF);
-					unsigned char g = unsigned char((g_avLightColors[1] >> 8) & 0xFF);
-					unsigned char b = unsigned char((g_avLightColors[1]) & 0xFF);
+					unsigned char r = (unsigned char)((g_avLightColors[1] >> 16) & 0xFF);
+					unsigned char g = (unsigned char)((g_avLightColors[1] >> 8) & 0xFF);
+					unsigned char b = (unsigned char)((g_avLightColors[1]) & 0xFF);
 					HBRUSH hbr = CreateSolidBrush(RGB(r,g,b));
 					FillRect(pcStruct->hDC,&sRect,hbr);
 
@@ -1291,9 +1291,9 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 				}
 				else if(IDC_LCOLOR3 == pcStruct->CtlID)
 				{
-					unsigned char r = unsigned char((g_avLightColors[2] >> 16) & 0xFF);
-					unsigned char g = unsigned char((g_avLightColors[2] >> 8) & 0xFF);
-					unsigned char b = unsigned char((g_avLightColors[2]) & 0xFF);
+					unsigned char r = (unsigned char)((g_avLightColors[2] >> 16) & 0xFF);
+					unsigned char g = (unsigned char)((g_avLightColors[2] >> 8) & 0xFF);
+					unsigned char b = (unsigned char)((g_avLightColors[2]) & 0xFF);
 					HBRUSH hbr = CreateSolidBrush(RGB(r,g,b));
 
 					FillRect(pcStruct->hDC,&sRect,hbr);

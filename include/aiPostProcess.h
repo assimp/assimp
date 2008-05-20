@@ -51,7 +51,7 @@ extern "C" {
 /** Defines the flags for all possible post processing steps. */
 enum aiPostProcessSteps
 {
-	/** Calculates the binormals and tangents for the imported meshes. Does nothing
+	/** Calculates the tangents and bitangents for the imported meshes. Does nothing
 	 * if a mesh does not have normals. You might want this post processing step to be
 	 * executed if you plan to use tangent space calculations such as normal mapping 
 	 * applied to the meshes.
@@ -66,10 +66,10 @@ enum aiPostProcessSteps
 
 	/** Converts all the imported data to a left-handed coordinate space such as 
 	 * the DirectX coordinate system. By default the data is returned in a right-handed
-	 * coordinate space which for example OpenGL preferres. In this space, +X points to the
-	 * right, +Y points upwards and +Z points to the viewer. In the DirectX coordinate space
-	 * +X points to the right, +Y points upwards and +Z points away from the viewer 
-	 * into the screen.
+	 * coordinate space which for example OpenGL prefers. In this space, +X points to the
+	 * right, +Y points towards the viewer and and +Z points upwards. In the DirectX 
+   * coordinate space +X points to the right, +Y points upwards and +Z points 
+   * away from the viewer.
 	 */
 	aiProcess_ConvertToLeftHanded = 4,
 
@@ -80,13 +80,11 @@ enum aiPostProcessSteps
 	 */
 	aiProcess_Triangulate = 8,
 
-
 	/** Omits all normals found in the file. This can be used together
 	 * with either the aiProcess_GenNormals or the aiProcess_GenSmoothNormals
 	 * flag to force the recomputation of the normals.
 	 */
 	aiProcess_KillNormals = 0x10,
-
 
 	/** Generates normals for all faces of all meshes. The normals are shared
 	* between the three vertices of a face. This is ignored
@@ -95,13 +93,11 @@ enum aiPostProcessSteps
 	*/
 	aiProcess_GenNormals = 0x20,
 
-
 	/** Generates smooth normals for all vertices in the mesh. This is ignored
 	* if normals are already existing. This flag may not be specified together
 	* with aiProcess_GenNormals
 	*/
 	aiProcess_GenSmoothNormals = 0x40,
-
 
 	/** Splits large meshes into submeshes
 	* This is quite useful for realtime rendering where the number of vertices

@@ -804,6 +804,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\doc\dox.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\doc\ImporterNotes.rtf"
 				>
 			</File>

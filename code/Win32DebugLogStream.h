@@ -1,7 +1,7 @@
 #ifndef AI_WIN32DEBUGLOGSTREAM_H_INC
 #define AI_WIN32DEBUGLOGSTREAM_H_INC
 
-#include "LogStream.h"
+#include "../include/LogStream.h"
 
 //#ifdef _MSC_VER
 #ifdef WIN32

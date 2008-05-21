@@ -1,8 +1,8 @@
 #ifndef ASSIMP_FILELOGSTREAM_H_INC
 #define ASSIMP_FILELOGSTREAM_H_INC
 
-#include "LogStream.h"
-#include "IOStream.h"
+#include "../include/LogStream.h"
+#include "../include/IOStream.h"
 
 namespace Assimp
 {

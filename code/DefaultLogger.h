@@ -38,7 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "Logger.h"
+#include "../include/Logger.h"
 #include <vector>
 
 namespace Assimp

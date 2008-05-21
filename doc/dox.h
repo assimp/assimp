@@ -73,6 +73,24 @@ the ASSIMP linker lib accordingly.
 
 @section install_own Building the library from scratch
 
+To build the library on your own you first have to get hold of the dependencies. Fortunately, special attention was paid to 
+keep the list of dependencies short. Unfortunately, the only dependency is <a href="http://www.boost.org">boost</a> which 
+can be a bit painful to set up for certain development environments. Boost is a widely used collection of classes and 
+functions for various purposes. Chances are that it was already installed along with your compiler. If not, you have to install 
+it for yourself. Read the "Getting Started" section of the Boost documentation for how to setup boost. VisualStudio users 
+can use a comfortable installer from <a href="http://www.boost-consulting.com/products/free">
+http://www.boost-consulting.com/products/free</a>. Choose the appropriate version of boost for your runtime of choice.
+
+Once boost is working, you have to set up a project for the ASSIMP library in your favourite IDE. If you use VC2005 or
+VC2008, you can simply load the solution or project files in the workspaces/ folder, otherwise you have to create a new 
+package and add all the headers and source files from the include/ and code/ directories. Set the temporary output folder
+to obj/, for example, and redirect the output folder to bin/. The build the library - it should compile and link fine.
+
+The last step is to integrate the library into your project. This is basically the same task as described in the 
+"Using prebuild libs" section above: add the include/ and bin/ directories to your IDE's paths so that the compiler can find
+the library files. Alternatively you can simply add the ASSIMP project to your project's overall solution and build it inside
+your solution.
+
 */
 
 /** 

@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "DefaultLogger.h"
 #include "../include/aiScene.h"
-#include "aiAssert.h"
+#include "../include/aiAssert.h"
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------

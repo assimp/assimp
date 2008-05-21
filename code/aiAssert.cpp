@@ -1,5 +1,5 @@
 #include <iostream>
-#include "aiAssert.h"
+#include "../include/aiAssert.h"
 #ifdef _WIN32
 #ifndef __GNUC__
 #  include "crtdbg.h"

@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 #include <stdio.h>
-#include "IOStream.h"
+#include "../include/IOStream.h"
 
 namespace Assimp
 {

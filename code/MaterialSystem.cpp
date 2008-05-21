@@ -38,9 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "assimp.h"
-#include "aiMaterial.h"
-#include "assimp.hpp"
+#include "../include/aiMaterial.h"
 #include "MaterialSystem.h"
 
 

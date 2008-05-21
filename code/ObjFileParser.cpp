@@ -2,10 +2,9 @@
 #include "ObjTools.h"
 #include "ObjFileData.h"
 #include "DefaultIOSystem.h"
-#include "IOStream.h"
-#include "aiTypes.h"
-#include "aiVector3D.h"
-#include "aiAssert.h"
+#include "../include/IOStream.h"
+#include "../include/aiTypes.h"
+#include "../include/aiAssert.h"
 #include "fast_atof.h"
 
 #include <iostream>

@@ -1,8 +1,8 @@
 #include "ObjFileMtlImporter.h"
-#include "aiTypes.h"
+#include "../include/aiTypes.h"
+#include "../include/aiAssert.h"
 #include "ObjTools.h"
 #include "ObjFileData.h"
-#include "aiAssert.h"
 #include "fast_atof.h"
 
 

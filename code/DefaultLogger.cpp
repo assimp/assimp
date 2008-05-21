@@ -40,10 +40,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "DefaultLogger.h"
-#include "aiAssert.h"
+#include "../include/aiAssert.h"
 #include "DefaultIOSystem.h"
 #include "Win32DebugLogStream.h"
-#include "IOStream.h"
+#include "../include/IOStream.h"
 #include "FileLogStream.h"
 
 #include <iostream>

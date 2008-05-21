@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 #include <string>
-#include "aiTypes.h"
+#include "../include/aiTypes.h"
 
 /*struct aiVector2D_t;
 struct aiVector3D_t;*/

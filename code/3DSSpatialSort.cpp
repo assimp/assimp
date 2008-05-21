@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include "3DSSpatialSort.h"
 
-#include "aiAssert.h"
+#include "../include/aiAssert.h"
 
 using namespace Assimp;
 using namespace Assimp::Dot3DS;

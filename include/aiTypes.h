@@ -61,7 +61,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #	define C_STRUCT
 #else
-#	define C_STRUCT struct
+#	if (defined ASSIMP_DOXYGEN_BUILD)
+#		define C_STRUCT
+#	else
+#		define C_STRUCT struct
+#	endif
 #endif
 
 /** Maximum dimension for strings, ASSIMP strings are zero terminated */

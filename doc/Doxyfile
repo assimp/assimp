@@ -1,4 +1,4 @@
-# Doxyfile 1.5.4
+# Doxyfile 1.5.3
 
 #---------------------------------------------------------------------------
 # Project related configuration options
@@ -11,9 +11,9 @@ CREATE_SUBDIRS         = YES
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
 REPEAT_BRIEF           = YES
-ABBREVIATE_BRIEF       = "The $name class  " \
-                         "The $name widget  " \
-                         "The $name file  " \
+ABBREVIATE_BRIEF       = "The $name class   " \
+                         "The $name widget   " \
+                         "The $name file   " \
                          is \
                          provides \
                          specifies \
@@ -40,10 +40,8 @@ OPTIMIZE_OUTPUT_FOR_C  = NO
 OPTIMIZE_OUTPUT_JAVA   = NO
 BUILTIN_STL_SUPPORT    = YES
 CPP_CLI_SUPPORT        = NO
-SIP_SUPPORT            = NO
 DISTRIBUTE_GROUP_DOC   = NO
 SUBGROUPING            = YES
-TYPEDEF_HIDES_STRUCT   = NO
 #---------------------------------------------------------------------------
 # Build related configuration options
 #---------------------------------------------------------------------------
@@ -82,7 +80,7 @@ WARNINGS               = YES
 WARN_IF_UNDOCUMENTED   = YES
 WARN_IF_DOC_ERROR      = YES
 WARN_NO_PARAMDOC       = NO
-WARN_FORMAT            = "$file:$line: $text  "
+WARN_FORMAT            = "$file:$line: $text   "
 WARN_LOGFILE           = 
 #---------------------------------------------------------------------------
 # configuration options related to the input files
@@ -222,13 +220,13 @@ PERLMOD_MAKEVAR_PREFIX =
 # Configuration options related to the preprocessor   
 #---------------------------------------------------------------------------
 ENABLE_PREPROCESSING   = YES
-MACRO_EXPANSION        = NO
-EXPAND_ONLY_PREDEF     = NO
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = YES
 SEARCH_INCLUDES        = YES
 INCLUDE_PATH           = 
 INCLUDE_FILE_PATTERNS  = 
-PREDEFINED             = 
-EXPAND_AS_DEFINED      = 
+PREDEFINED             = ASSIMP_DOXYGEN_BUILD=1
+EXPAND_AS_DEFINED      = C_STRUCT
 SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------
 # Configuration::additions related to external references   

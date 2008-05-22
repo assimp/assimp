@@ -1,5 +1,5 @@
 /*
-Free Asset Import Library (ASSIMP)
+Open Asset Import Library (ASSIMP)
 ----------------------------------------------------------------------
 
 Copyright (c) 2006-2008, ASSIMP Development Team
@@ -118,6 +118,11 @@ protected:
 	void InternReadFile_GameStudioA7( );
 
 	// -------------------------------------------------------------------
+	/** Import a CS:S/HL2 MDL file
+	*/
+	void InternReadFile_HL2( );
+
+	// -------------------------------------------------------------------
 	/** Load a paletized texture from the file and convert it to 32bpp
 	*/
 	void CreateTextureARGB8(const unsigned char* szData);
@@ -215,6 +220,15 @@ protected:
 	/** Free a palette created with a previous call to SearchPalette()
 	 */
 	void FreePalette(const unsigned char* pszColorMap);
+
+	// -------------------------------------------------------------------
+	/** Try to determine whether the normals of the model are flipped
+	 *  Some MDL7 models seem to have flipped normals (and there is also 
+	 *  an option "flip normals" in MED). However, I don't see a proper
+	 *  way to read from the file whether all normals are correctly 
+	 *  facing outwards ...
+	 */
+	void FlipNormals(aiMesh* pcMesh);
 
 private:
 

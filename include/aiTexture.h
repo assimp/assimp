@@ -1,6 +1,6 @@
 
 /** 
- ** This file is part of the Free Asset Import Library ASSIMP.
+ ** This file is part of the Open Asset Import Library ASSIMP.
  ** -------------------------------------------------------------------------
  **
  ** ASSIMP is free software: you can redistribute it and/or modify it 

@@ -1,6 +1,6 @@
 /*
 ---------------------------------------------------------------------------
-Free Asset Import Library (ASSIMP)
+Open Asset Import Library (ASSIMP)
 ---------------------------------------------------------------------------
 
 Copyright (c) 2006-2008, ASSIMP Development Team
@@ -147,12 +147,14 @@ void MDLImporter::InternReadFile(
 	if (AI_MDL_MAGIC_NUMBER_BE == this->m_pcHeader->ident ||
 		AI_MDL_MAGIC_NUMBER_LE == this->m_pcHeader->ident)
 	{
+		DefaultLogger::get()->debug("MDL subtype: Quake 1, magic word is IDPO");
 		this->InternReadFile_Quake1();
 	}
 	// GameStudio A4 MDL3 format
 	else if (AI_MDL_MAGIC_NUMBER_BE_GS4 == this->m_pcHeader->ident ||
 			 AI_MDL_MAGIC_NUMBER_LE_GS4 == this->m_pcHeader->ident)
 	{
+		DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A4, magic word is MDL3");
 		this->iGSFileVersion = 3;
 		this->InternReadFile_GameStudio();
 	}
@@ -160,6 +162,7 @@ void MDLImporter::InternReadFile(
 	else if (AI_MDL_MAGIC_NUMBER_BE_GS5a == this->m_pcHeader->ident ||
 			 AI_MDL_MAGIC_NUMBER_LE_GS5a == this->m_pcHeader->ident)
 	{
+		DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A4, magic word is MDL4");
 		this->iGSFileVersion = 4;
 		this->InternReadFile_GameStudio();
 	}
@@ -167,6 +170,7 @@ void MDLImporter::InternReadFile(
 	else if (AI_MDL_MAGIC_NUMBER_BE_GS5b == this->m_pcHeader->ident ||
 			 AI_MDL_MAGIC_NUMBER_LE_GS5b == this->m_pcHeader->ident)
 	{
+		DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A5, magic word is MDL5");
 		this->iGSFileVersion = 5;
 		this->InternReadFile_GameStudio();
 	}
@@ -174,6 +178,7 @@ void MDLImporter::InternReadFile(
 	else if (AI_MDL_MAGIC_NUMBER_BE_GS6 == this->m_pcHeader->ident ||
 			 AI_MDL_MAGIC_NUMBER_LE_GS6 == this->m_pcHeader->ident)
 	{
+		DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A6, magic word is MDL6");
 		this->iGSFileVersion = 6;
 		this->InternReadFile_GameStudio();
 	}
@@ -181,8 +186,18 @@ void MDLImporter::InternReadFile(
 	else if (AI_MDL_MAGIC_NUMBER_BE_GS7 == this->m_pcHeader->ident ||
 			 AI_MDL_MAGIC_NUMBER_LE_GS7 == this->m_pcHeader->ident)
 	{
+		DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A7, magic word is MDL7");
 		this->iGSFileVersion = 7;
 		this->InternReadFile_GameStudioA7();
+	}
+	// IDST/IDSQ Format (CS:S/HL², etc ...)
+	else if (AI_MDL_MAGIC_NUMBER_BE_HL2a == this->m_pcHeader->ident ||
+			 AI_MDL_MAGIC_NUMBER_LE_HL2a == this->m_pcHeader->ident ||
+			 AI_MDL_MAGIC_NUMBER_BE_HL2b == this->m_pcHeader->ident ||
+			 AI_MDL_MAGIC_NUMBER_LE_HL2b == this->m_pcHeader->ident)
+	{
+		DefaultLogger::get()->debug("MDL subtype: CS:S\\HL², magic word is IDST/IDSQ");
+		this->InternReadFile_HL2();
 	}
 	else
 	{
@@ -190,6 +205,10 @@ void MDLImporter::InternReadFile(
 		throw new ImportErrorException( "Unknown MDL subformat " + pFile +
 			". Magic word is not known");
 	}
+
+	// make sure that the normals are facing outwards
+	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+		this->FlipNormals(pScene->mMeshes[i]);
 
 	// delete the file buffer
 	delete[] this->mBuffer;
@@ -208,6 +227,9 @@ void MDLImporter::SearchPalette(const unsigned char** pszColorMap)
 		{
 			szColorMap = new unsigned char[256*3];
 			pcStream->Read(const_cast<unsigned char*>(szColorMap),256*3,1);
+
+			DefaultLogger::get()->info("Found valid colormap.lmp in directory. "
+				"It will be used to decode embedded textures in palletized formats.");
 		}
 		delete pcStream;
 		pcStream = NULL;
@@ -861,7 +883,7 @@ void MDLImporter::InternReadFile_GameStudio( )
 		}
 
 	}
-	// short packed vertices
+	// short packed vertices (duplicating the code is smaller than using templates ....)
 	else
 	{
 		// now get a pointer to the first frame in the file
@@ -970,7 +992,7 @@ void MDLImporter::InternReadFile_GameStudio( )
 			{
 				(*i).x /= iWidth;
 				(*i).y /= iHeight;
-				(*i).y = 1.0f- (*i).y;
+				(*i).y = 1.0f- (*i).y; // DX to OGL
 			}
 		}
 	}
@@ -1048,7 +1070,7 @@ void MDLImporter::ParseSkinLump_GameStudioA7(
 	}
 	if (0x7 == iMasked)
 	{
-		// ***** REFERENCE TO EXTERNAL FILE FILE *****
+		// ***** REFERENCE TO EXTERNAL FILE *****
 		if (1 != pcSkin->height)
 		{
 			DefaultLogger::get()->warn("Found a reference to an external texture, "
@@ -1147,6 +1169,8 @@ void MDLImporter::ParseSkinLump_GameStudioA7(
 		pcMatOut->AddProperty<aiColor4D>(&clrTemp,1,AI_MATKEY_COLOR_EMISSIVE);
 
 		// FIX: Take the opacity from the ambient color
+		// the doc says something else, but it is fact that MED exports the
+		// opacity like this .... ARRRGGHH!
 		clrTemp.a = pcMatIn->Ambient.a;
 		pcMatOut->AddProperty<float>(&clrTemp.a,1,AI_MATKEY_OPACITY);
 
@@ -1677,6 +1701,9 @@ void MDLImporter::GenerateOutputMeshes_GameStudioA7(
 	const std::vector<aiVector3D>& vTextureCoords1,
 	const std::vector<aiVector3D>& vTextureCoords2)
 {
+	ai_assert(NULL != aiSplit);
+	ai_assert(NULL != pcFaces);
+
 	for (unsigned int i = 0; i < pcMats.size();++i)
 	{
 		if (!aiSplit[i]->empty())
@@ -1761,5 +1788,61 @@ void MDLImporter::JoinSkins_GameStudioA7(
 		pcMatOut->AddProperty<int>(&iVal,1,AI_MATKEY_UVWSRC_DIFFUSE(1));
 		pcMatOut->AddProperty(&sString,AI_MATKEY_TEXTURE_DIFFUSE(1));
 	}
+	return;
+}
+// ------------------------------------------------------------------------------------------------
+void MDLImporter::FlipNormals(aiMesh* pcMesh)
+{
+	ai_assert(NULL != pcMesh);
+
+	// compute the bounding box of both the model vertices + normals and
+	// the umodified model vertices. Then check whether the first BB
+	// is smaller than the second. In this case we can assume that the
+	// normals need to be flipped, although there are a few special cases ..
+	// convex, concave, planar models ...
+
+	aiVector3D vMin0(1e10f,1e10f,1e10f);
+	aiVector3D vMin1(1e10f,1e10f,1e10f);
+	aiVector3D vMax0(-1e10f,-1e10f,-1e10f);
+	aiVector3D vMax1(-1e10f,-1e10f,-1e10f);
+
+	for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
+	{
+		vMin1.x = std::min(vMin1.x,pcMesh->mVertices[i].x);
+		vMin1.y = std::min(vMin1.y,pcMesh->mVertices[i].y);
+		vMin1.z = std::min(vMin1.z,pcMesh->mVertices[i].z);
+
+		vMax1.x = std::max(vMax1.x,pcMesh->mVertices[i].x);
+		vMax1.y = std::max(vMax1.y,pcMesh->mVertices[i].y);
+		vMax1.z = std::max(vMax1.z,pcMesh->mVertices[i].z);
+
+		aiVector3D vWithNormal = pcMesh->mVertices[i] + pcMesh->mNormals[i];
+
+		vMin0.x = std::min(vMin0.x,vWithNormal.x);
+		vMin0.y = std::min(vMin0.y,vWithNormal.y);
+		vMin0.z = std::min(vMin0.z,vWithNormal.z);
+
+		vMax0.x = std::max(vMax0.x,vWithNormal.x);
+		vMax0.y = std::max(vMax0.y,vWithNormal.y);
+		vMax0.z = std::max(vMax0.z,vWithNormal.z);
+	}
+
+	if (fabsf((vMax0.x - vMin0.x) * (vMax0.y - vMin0.y) * (vMax0.z - vMin0.z)) <= 
+		fabsf((vMax1.x - vMin1.x) * (vMax1.y - vMin1.y) * (vMax1.z - vMin1.z)))
+	{
+		DefaultLogger::get()->info("The models normals are facing inwards "
+			"(or the model is too planar or concave). Flipping the normal set ...");
+
+		for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
+		{
+			pcMesh->mNormals[i] *= -1.0f;
+		}
+	}
+	return;
+}
+// ------------------------------------------------------------------------------------------------
+void MDLImporter::InternReadFile_HL2( )
+{
+	const MDL::Header_HL2* pcHeader = (const MDL::Header_HL2*)this->mBuffer;
 	return;
 }

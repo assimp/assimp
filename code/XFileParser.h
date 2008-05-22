@@ -1,5 +1,5 @@
 /*
-Free Asset Import Library (ASSIMP)
+Open Asset Import Library (ASSIMP)
 ----------------------------------------------------------------------
 
 Copyright (c) 2006-2008, ASSIMP Development Team

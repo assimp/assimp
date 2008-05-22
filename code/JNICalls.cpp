@@ -1,13 +1,15 @@
 /*
+---------------------------------------------------------------------------
 Open Asset Import Library (ASSIMP)
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 Copyright (c) 2006-2008, ASSIMP Development Team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
-following conditions are met:
+with or without modification, are permitted provided that the following 
+conditions are met:
 
 * Redistributions of source code must retain the above
   copyright notice, this list of conditions and the
@@ -34,47 +36,14 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 */
 
-/** @file Default implementation of IOSystem using the standard C file functions */
-#ifndef AI_DEFAULTIOSYSTEM_H_INC
-#define AI_DEFAULTIOSYSTEM_H_INC
+/** @file Implementation of the JNI API for jAssimp */
 
-#include "../include/IOSystem.h"
+#if (defined ASSIMP_JNI_EXPORT)
 
-namespace Assimp
-{
+// include the JNI API
+#include <jni.h>
 
-// ---------------------------------------------------------------------------
-/** Default implementation of IOSystem using the standard C file functions */
-class DefaultIOSystem : public IOSystem
-{
-public:
-	/** Constructor. */
-    DefaultIOSystem();
-
-	/** Destructor. */
-	~DefaultIOSystem();
-
-	// -------------------------------------------------------------------
-	/** Tests for the existence of a file at the given path. */
-	bool Exists( const std::string& pFile) const;
-
-	// -------------------------------------------------------------------
-	/** Returns the directory separator. */
-	std::string getOsSeparator() const;
-
-	// -------------------------------------------------------------------
-	/** Open a new file with a given path. */
-	IOStream* Open( const std::string& pFile, const std::string& pMode = std::string("rb"));
-
-	// -------------------------------------------------------------------
-	/** Closes the given file and releases all resources associated with it. */
-	void Close( IOStream* pFile);
-};
-
-} //!ns Assimp
-
-#endif //AI_DEFAULTIOSYSTEM_H_INC
+#endif // !ASSIMP_JNI_EXPORT

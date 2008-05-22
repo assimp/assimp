@@ -1,35 +1,49 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual C++ Express 2005
+# Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimp_view", "assimp_view.vcproj", "{B17B959B-BB8A-4596-AF0F-A8C8DBBC3C5E}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 	ProjectSection(ProjectDependencies) = postProject
 		{5691E159-2D9B-407F-971F-EA5C592DC524} = {5691E159-2D9B-407F-971F-EA5C592DC524}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimp", "assimp.vcproj", "{5691E159-2D9B-407F-971F-EA5C592DC524}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimp", "assimp.vcproj", "{5691E159-2D9B-407F-971F-EA5C592DC524}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug_DLL_Java|Win32 = Debug_DLL_Java|Win32
 		Debug_DLL|Win32 = Debug_DLL|Win32
 		Debug|Win32 = Debug|Win32
+		Release_DLL_Java|Win32 = Release_DLL_Java|Win32
 		Release_DLL|Win32 = Release_DLL|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B17B959B-BB8A-4596-AF0F-A8C8DBBC3C5E}.Debug_DLL_Java|Win32.ActiveCfg = Debug|Win32
+		{B17B959B-BB8A-4596-AF0F-A8C8DBBC3C5E}.Debug_DLL_Java|Win32.Build.0 = Debug|Win32
 		{B17B959B-BB8A-4596-AF0F-A8C8DBBC3C5E}.Debug_DLL|Win32.ActiveCfg = Debug|Win32
 		{B17B959B-BB8A-4596-AF0F-A8C8DBBC3C5E}.Debug|Win32.ActiveCfg = Debug|Win32
 		{B17B959B-BB8A-4596-AF0F-A8C8DBBC3C5E}.Debug|Win32.Build.0 = Debug|Win32
+		{B17B959B-BB8A-4596-AF0F-A8C8DBBC3C5E}.Release_DLL_Java|Win32.ActiveCfg = Release|Win32
+		{B17B959B-BB8A-4596-AF0F-A8C8DBBC3C5E}.Release_DLL_Java|Win32.Build.0 = Release|Win32
 		{B17B959B-BB8A-4596-AF0F-A8C8DBBC3C5E}.Release_DLL|Win32.ActiveCfg = Release|Win32
 		{B17B959B-BB8A-4596-AF0F-A8C8DBBC3C5E}.Release|Win32.ActiveCfg = Release|Win32
 		{B17B959B-BB8A-4596-AF0F-A8C8DBBC3C5E}.Release|Win32.Build.0 = Release|Win32
+		{5691E159-2D9B-407F-971F-EA5C592DC524}.Debug_DLL_Java|Win32.ActiveCfg = Debug_DLL_Java|Win32
+		{5691E159-2D9B-407F-971F-EA5C592DC524}.Debug_DLL_Java|Win32.Build.0 = Debug_DLL_Java|Win32
 		{5691E159-2D9B-407F-971F-EA5C592DC524}.Debug_DLL|Win32.ActiveCfg = Debug_DLL|Win32
 		{5691E159-2D9B-407F-971F-EA5C592DC524}.Debug_DLL|Win32.Build.0 = Debug_DLL|Win32
 		{5691E159-2D9B-407F-971F-EA5C592DC524}.Debug|Win32.ActiveCfg = Debug|Win32
 		{5691E159-2D9B-407F-971F-EA5C592DC524}.Debug|Win32.Build.0 = Debug|Win32
+		{5691E159-2D9B-407F-971F-EA5C592DC524}.Release_DLL_Java|Win32.ActiveCfg = Release_DLL_Java|Win32
+		{5691E159-2D9B-407F-971F-EA5C592DC524}.Release_DLL_Java|Win32.Build.0 = Release_DLL_Java|Win32
 		{5691E159-2D9B-407F-971F-EA5C592DC524}.Release_DLL|Win32.ActiveCfg = Release_DLL|Win32
 		{5691E159-2D9B-407F-971F-EA5C592DC524}.Release_DLL|Win32.Build.0 = Release_DLL|Win32
 		{5691E159-2D9B-407F-971F-EA5C592DC524}.Release|Win32.ActiveCfg = Release|Win32

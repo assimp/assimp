@@ -1,6 +1,6 @@
 /*
 ---------------------------------------------------------------------------
-Free Asset Import Library (ASSIMP)
+Open Asset Import Library (ASSIMP)
 ---------------------------------------------------------------------------
 
 Copyright (c) 2006-2008, ASSIMP Development Team
@@ -42,31 +42,244 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package assimp;
 
+import java.util.Vector;
+
 /**
+ * Main class of jAssimp. The class is a simple wrapper for the native
+ * Assimp::Importer and aiScene classes.
+ * If multiple threads are used to load assets, each thread should manage its
+ * own instance of this class to avoid threading issues. The class requires
+ * the native jAssimp library to work. It must be named "jassimpNN.EXT", where
+ * NN is the platform's default int size, e.g. 32 for the x86 architecture.
+ * EXT is the default extension for program libraries on the system, .DLL for
+ * Windows, .SO for Linux derivates.
  *
+ * @author Aramis (Alexander Gessler)
+ * @version 1.0
  */
 public class Importer {
 
-    public Importer() {
+    /**
+     * List of all postprocess steps to apply to the model
+     * Empty by default.
+     */
+    private Vector<PostProcessStep> m_vPPSteps = new Vector<PostProcessStep>();
+
+    /**
+     * Unique number representing the address of the internal
+     * Assimp::Importer object.
+     */
+    private int m_iNativeHandle = 0xffffffff;
+
+    /**
+     * Loaded scene. It can't be used after the Importer class instance
+     * has been finalized!
+     */
+    private Scene scene = null;
+
+    /**
+     * Path to the scene loaded
+     */
+    private String path = null;
+
+    /**
+     * Public constructor. Initialises the JNI bridge to the native
+     * ASSIMP library. A native Assimp::Importer object is constructed and
+     * initialized. The flag list is set to zero, a default I/O handler
+     * is constructed.
+     * @throws NativeError Thrown if the jassimp library could not be loaded
+     * or if the entry point to the module wasn't found. if this exception
+     * is not thrown, you can assume that jAssimp is fully available.
+     */
+    public Importer() throws NativeError {
         /** try to load the jassimp library. First try to load the
          * x64 version, in case of failure the x86 version
          */
         try {
-            System.loadLibrary("jassimp_x64");
+            System.loadLibrary("jassimp64");
         }
         catch (UnsatisfiedLinkError exc) {
             try {
-                System.loadLibrary("jassimp_x86");
+                System.loadLibrary("jassimp32");
             }
             catch (UnsatisfiedLinkError exc2) {
-
-                /** Seems we're definitely unable to load the assimp library
-                 *  This doesn't make life easier btw ...
-                 */
-
+                throw new NativeError("Unable to load the jassimp library");
             }
         }
+        // now create the native Importer class and setup our internal
+        // data structures outside the VM.
+        try {
+            if (0xffffffff == (this.m_iNativeHandle = _NativeInitContext())) {
+                throw new NativeError(
+                        "Unable to initialize the native library context." +
+                        "The initialization routine has failed");
+            }
+        }
+        catch (UnsatisfiedLinkError exc) {
+            throw new NativeError(
+                    "Unable to initialize the native library context." +
+                    "The initialization routine has not been found");
+        }
+        return;
     }
 
 
+    /**
+     * Add a postprocess step to the list of steps to be executed on
+     * the model. Postprocess steps are applied to the model after it
+     * has been loaded. They are implemented in C/C++, this is only a wrapper.
+     *
+     * @param p_Step Postprocess step to be added
+     * @return true if the step has been added successfully
+     * @see PostProcessStep
+     */
+    public boolean addPostProcessStep(PostProcessStep p_Step) {
+
+        if (isPostProcessStepActive(p_Step)) return false;
+        this.m_vPPSteps.add(p_Step);
+        return true;
+    }
+
+
+    /**
+     * Check whether a given postprocess step is existing in the list
+     * of all steps to be executed on the model. Postprocess steps are
+     * applied to the model after it has been loaded. They are implemented
+     * in C/C++, this is only a wrapper.
+     *
+     * @param p_Step Postprocess step to be queried
+     * @return true if the step is active
+     * @see PostProcessStep
+     */
+    public boolean isPostProcessStepActive(PostProcessStep p_Step) {
+
+        for (PostProcessStep step : m_vPPSteps) {
+            if (step.equals(p_Step)) return true;
+        }
+        return false;
+    }
+
+
+    /**
+     * Remove a postprocess step from the list of steps to be executed
+     * on the model. Postprocess steps are applied to the model after it
+     * has been loaded. They are implemented in C/C++, this is only a wrapper.
+     *
+     * @param p_Step Postprocess step to be removed
+     * @return true if the step has been removed successfully, false if
+     *         it was not existing
+     * @see PostProcessStep
+     */
+    public boolean removePostProcessStep(PostProcessStep p_Step) {
+
+        return this.m_vPPSteps.remove(p_Step);
+    }
+
+
+    /**
+     * Load a model from a file using the current list of postprocess steps
+     * and the current I/O handler. If no custom I/O handler was provided,
+     * a default implementation is used. This implementation uses fopen()/
+     * fread()/fwrite()/fclose()/ftell()/fseek() and provides no support
+     * for archives like ZIP or PAK.
+     * @param path Path to the file to be read
+     * @return null if the import failed, otherwise a valid Scene instance
+     */
+    public Scene readFile(String path) {
+        this.scene = new Scene(this);
+        this.path = path;
+
+        // we need to build a path that is valid for the current OS
+        char sep = System.getProperty("file.separator").charAt(0);
+        if(sep != '\\') this.path.replace('\\',sep);
+        if(sep != '/') this.path.replace('/',sep);
+
+        // now load the mesh
+        if(0xffffffff == this._NativeLoad(this.path,this.m_vPPSteps) || ! this.scene.construct()) {
+            this.scene = null;
+            this.path = null;
+            return null;
+        }
+        return this.scene;
+    }
+
+
+    /**
+     * Implementation of <code>java.lang.Object.equals()</code>
+     *
+     * @param o Object to be compred with *this*
+     * @return true if *this* is equal to o
+     */
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final Importer importer = (Importer) o;
+
+        if (m_iNativeHandle != importer.m_iNativeHandle) return false;
+
+        return true;
+    }
+
+    /**
+     * Implementation of <code>java.lang.Object.finalize()</code>
+     * We override this to make sure that all native resources are
+     * deleted properly. This will free the native Assimp::Importer object
+     * and its associated aiScene instance. A NativeError is thrown
+     * if the destruction failed. This means that not all resources have
+     * been deallocated and memory leaks are remaining.
+     */
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+
+        // be sure that native resources are deallocated properly
+        if (0xffffffff == _NativeFreeContext()) {
+            throw new NativeError("Unable to destroy the native library context");
+        }
+        return;
+    }
+
+    /**
+     * Implementation of <code>java.lang.Object.hashCode()</code>
+     *
+     * The native handle obtained from the JNI bridge is used as hash code.
+     * It is assumed to be unique, in fact it is normall the address of
+     * the native Assimp::Importer object.
+     * @return An unique value representing the object
+     */
+    @Override
+    public int hashCode() {
+        return m_iNativeHandle;
+    }
+
+    /**
+     * JNI bridge call. For internal use only
+     * The method initializes the ASSIMP-JNI bridge for use. No native
+     * function call to assimp will be successful unless this function has
+     * been called. If the function is found by the Java VM (and no <code>
+     * UnsatisfiedLinkError</code> is thrown), jAssimp assumes that all other
+     * library functions are available, too. If they are not, an <code>
+     * UnsatisfiedLinkError</code> will be thrown during model loading.
+     *
+     * @return Unique handle for the class or 0xffffffff if an error occured
+     */
+    private native int _NativeInitContext();
+
+    /**
+     * JNI bridge call. For internal use only
+     * The method destroys the ASSIMP-JNI bridge. No native function call
+     * to assimp will be successful after this method has been called.
+     * @return 0xffffffff if an error occured
+     */
+    private native int _NativeFreeContext();
+
+    /**
+     * JNI bridge call. For internal use only
+     * The method loads the model into memory, but does not map it into the VM
+     * @param path Path (valid separators for the OS) to the model to be loaded
+     * @param steps List of postprocess steps to be executed
+     * @return 0xffffffff if an error occured
+     */
+    private native int _NativeLoad(String path,Vector< PostProcessStep > steps);
 }

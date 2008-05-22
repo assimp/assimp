@@ -241,10 +241,153 @@ Auch das Logging noch erklären?
 /** 
 @page data Data Structures
 
-Grundlegend: Koordinatensystem, aiScene (Link), Erklärung Hierarchie, Nodes, Verweis auf Meshes, Mesh-Sammlung, 
-Einzel-Mesh, Mesh-Komponentenbauweise, Verweis auf Material, Material-Sammlung, Erklärung Material-Tags, 
-Animations-Sammlung, Einzel-Animation, Interpretation der Keyframes.
-Bones: Finden und Zuordnen der Bone-Hierarchie zu Meshes.
+The ASSIMP library returns the imported data in a collection of structures. aiScene forms the root
+of the data, from here you gain access to all the nodes, meshes, materials, animations or textures
+that were read from the imported file. The aiScene is returned from a successful call to 
+Assimp::Importer::ReadFile(), aiImportFile() or aiImportFileEx() - see the @link usage Usage page @endlink
+for further information on how to use the library.
+
+By default, all 3D data is provided in a right-handed coordinate system such as OpenGL uses. In
+this coordinate system, +X points to the right, +Y points away from the viewer into the screen and
++Z points upwards. Several modelling packages such as 3D Studio Max use this coordinate system as well.
+By contrast, some other environments use left-handed coordinate systems, a prominent example being
+DirectX. If you need the imported data to be in a left-handed coordinate system, supply the
+aiProcess_ConvertToLeftHanded flag to the ReadFile() function call.
+
+All matrices in the library are row-major. That means that the matrices are stored row by row in memory,
+which is similar to the OpenGL matrix layout. A typical 4x4 matrix including a translational part looks like this:
+@code
+X1  Y1  Z1  T1
+X2  Y2  Z2  T2
+X3  Y3  Z3  T3
+0   0   0   1
+@endcode
+
+... with (X1, X2, X3) being the X base vector, (Y1, Y2, Y3) being the Y base vector, (Z1, Z2, Z3) 
+being the Z base vector and (T1, T2, T3) being the translation part. If you want to use thess matrices
+in DirectX functions, you have to transpose them.
+
+@section hierarchy The Node Hierarchy
+
+Nodes are little named entities in the scene that have a place and orientation relative to their parents.
+Starting from the scene's root node all nodes can have 0 to x child nodes, thus forming a hierarchy. 
+They form the base on which the scene is built on: a node can refer to 0..x meshes, can be referred to
+by a bone of a mesh or can be animated by a key sequence of an animation. DirectX calls them "frames",
+others call them "objects", we call them aiNode. 
+
+A node can potentially refer to single or multiple meshes. The meshes are not stored inside the node, but
+instead in an array of aiMesh inside the aiScene. A node only refers to them by their array index. This also means
+that multiple nodes can refer to the same mesh, which provides a simple form of instancing. A mesh referred to
+by this way lives in the node's local coordinate system. If you want the mesh's orientation in global
+space, you'd have to concatenate the transformations from the referring node and all of its parents. 
+
+Most of the file formats don't really support complex scenes, though, but a single model only. But there are
+more complex formats such as .3ds, .x or .collada scenes which may contain an arbitrary complex
+hierarchy of nodes and meshes. I for myself would suggest a recursive filter function such as the
+following pseudocode:
+
+@code
+void CopyNodesWithMeshes( aiNode node, SceneObject targetParent, Matrix4x4 accTransform)
+{
+  SceneObject parent;
+  Matrix4x4 transform;
+
+  // if node has meshes, create a new scene object for it
+  if( node.mNumMeshes > 0)
+  {
+    SceneObjekt newObject = new SceneObject;
+    targetParent.addChild( newObject);
+    // copy the meshes
+    CopyMeshes( node, newObject);
+
+    // the new object is the parent for all child nodes
+    parent = newObject;
+    transform.SetUnity();
+  } else
+  {
+    // if no meshes, skip the node, but keep its transformation
+    parent = targetParent;
+    transform = node.mTransformation * accTransform;
+  }
+
+  // continue for all child nodes
+  for( all node.mChildren)
+    CopyNodesWithMeshes( node.mChildren[a], parent, transform);
+}
+@endcode
+
+This function copies a node into the scene graph if it has children. If yes, a new scene object
+is created for the import node and the node's meshes are copied over. If not, no object is created.
+Potential child objects will be added to the old targetParent, but there transformation will be correct
+in respect to the global space. This function also works great in filtering the bone nodes - nodes
+that form the bone hierarchy for another mesh/node, but don't have any mesh themselfes.
+
+@section meshes Meshes
+
+All meshes of an imported scene are stored in an array of aiMesh* inside the aiScene. Nodes refer
+to them by their index in the array and provide the coordinate system for them. One mesh uses
+only a single material everywhere - if parts of the model use a different material, this part is
+moved to a separate mesh at the same node. The mesh refers to its material in the same way as the
+node refers to its meshes: materials are stored in an array inside aiScene, the mesh stores only
+an index into this array.
+
+An aiMesh is defined by a series of data channels. The presence of these data channels is defined
+by the contents of the imported file: by default there are only those data channels present in the mesh
+that were also found in the file. The only channels guarenteed to be always present are aiMesh::mVertices
+and aiMesh::mFaces. You can test for the presence of other data by testing the pointers against NULL
+or use the helper functions provided by aiMesh. You may also specify several post processing flags 
+at Importer::ReadFile() to let ASSIMP calculate or recalculate additional data channels for you.
+
+At the moment, a single aiMesh may contain a set of triangles and polygons. A single vertex does always
+have a position. In addition it may have one normal, one tangent and bitangent, zero to AI_MAX_NUMBER_OF_TEXTURECOORDS
+(4 at the moment) texture coords and zero to AI_MAX_NUMBER_OF_COLOR_SETS (4) vertex colors. In addition
+a mesh may or may not have a set of bones described by an array of aiBone structures. How to interpret
+the bone information is described later on.
+
+@section material Materials
+
+All materials are stored in an array of aiMaterial inside the aiScene. Each aiMesh refers to one 
+material by its index in the array. Due to the vastly diverging definitions and usages of material
+parameters there is no hard definition of a material structure. Instead a material is defined by
+a set of properties accessible by their names. Have a look at aiMaterial.h to see what types of 
+properties are defined. In this file there are also various functions defined to test for the
+presence of certain properties in a material and retrieve their values.
+
+@section bones Bones
+
+A mesh may have a set of bones. Bones are a means to deform a mesh according to the movement of
+a skeleton. Each bone has a name and a set of vertices on which it has influence. Its offset matrix
+declares the transformation needed to transform from mesh space to the local space of this bone. 
+
+Using the bones name you can find the corresponding node in the node hierarchy. This node in relation
+to the other bones' nodes defines the skeleton of the mesh. Unfortunately there might also be
+nodes which are not used by a bone in the mesh, but still affect the pose of the skeleton because
+they have child nodes which are bones. So when creating the skeleton hierarchy for a mesh I
+suggest the following method:
+
+a) Create a map or a similar container to store which nodes are necessary for the skeleton. 
+Preinitialise it for all nodes with a "no". <br>
+b) For each bone in the mesh: <br>
+b1) Find the corresponding node in the scene's hierarchy by comparing names. <br>
+b2) Mark this node as "yes" in the necessityMap. <br>
+b3) Mark all of its parents the same way until you 1) find the mesh's node or 2) the parent of the mesh's node. <br>
+c) Recursively iterate over the node hierarchy <br>
+c1) If the node is marked as necessary, copy it into the skeleton and check its children <br>
+c2) If the node is market as not necessary, skip it and do not iterate over its children. <br>
+
+Reasons: you need all the parent nodes to keep the transformation chain intact. Depending on the
+file format and the modelling package the node hierarchy of the skeleton is either a child
+of the mesh node or a sibling of the mesh node. Therefore b3) stops at both the mesh's node and
+the mesh's node's parent. The node closest to the root node is your skeleton root, from there you
+start copying the hierarchy. You can skip every branch without a node being a bone in the mesh - 
+that's why the algorithm skips the whole branch if the node is marked as "not necessary".
+
+You should now have a mesh in your engine with a skeleton that is a subset of the imported hierarchy.
+
+@section anims Animations
+
+@section textures Textures
+
 */
 
 /** 

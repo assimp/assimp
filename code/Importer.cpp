@@ -44,7 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 
 #include "../include/assimp.hpp"
+#include "../include/aiAssert.h"
 #include "../include/aiScene.h"
+#include "../include/aiPostProcess.h"
 #include "BaseImporter.h"
 #include "BaseProcess.h"
 #include "DefaultIOStream.h"
@@ -177,11 +179,27 @@ void Importer::SetIOHandler( IOSystem* pIOHandler)
 	}
 	return;
 }
+// ------------------------------------------------------------------------------------------------
+// Validate post process step flags 
+bool ValidateFlags(unsigned int pFlags)
+{
+	if (pFlags & aiProcess_GenSmoothNormals &&
+		pFlags & aiProcess_GenNormals)
+	{
+		DefaultLogger::get()->error("aiProcess_GenSmoothNormals and aiProcess_GenNormals "
+			"may not be specified together");
+		return false;
+	}
 
+	return true;
+}
 // ------------------------------------------------------------------------------------------------
 // Reads the given file and returns its contents if successful. 
 const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags)
 {
+	// validate the flags
+	ai_assert(ValidateFlags(pFlags));
+
 	// first check if the file is accessable at all
 	if( !mIOHandler->Exists( pFile))
 	{

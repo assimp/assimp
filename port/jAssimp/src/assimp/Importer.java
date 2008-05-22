@@ -67,7 +67,8 @@ public class Importer {
 
     /**
      * Unique number representing the address of the internal
-     * Assimp::Importer object.
+     * Assimp::Importer object. For 64 bit platforms it is something else ..
+     * at least it is guaranted to be unique ;-)
      */
     private int m_iNativeHandle = 0xffffffff;
 
@@ -191,11 +192,28 @@ public class Importer {
 
         // we need to build a path that is valid for the current OS
         char sep = System.getProperty("file.separator").charAt(0);
-        if(sep != '\\') this.path.replace('\\',sep);
-        if(sep != '/') this.path.replace('/',sep);
+        if(sep != '\\') this.path = this.path.replace('\\',sep);
+        if(sep != '/') this.path = this.path.replace('/',sep);
+
+        // need to build a list of postprocess step as bitflag combination
+        // Of course, this could have been implemented directly. However,
+        // I've used the PostProcessStep enumeration to make debugging easier.
+        int flags = 0;
+
+        for (PostProcessStep step : m_vPPSteps) {
+            if (step.equals(PostProcessStep.CalcTangentSpace)) flags |= 0x1;
+            else if (step.equals(PostProcessStep.JoinIdenticalVertices)) flags |= 0x2;
+            else if (step.equals(PostProcessStep.ConvertToLeftHanded)) flags |= 0x4;
+            else if (step.equals(PostProcessStep.Triangulate)) flags |= 0x8;
+            else if (step.equals(PostProcessStep.KillNormals)) flags |= 0x10;
+            else if (step.equals(PostProcessStep.GenFaceNormals)) flags |= 0x20;
+            else if (step.equals(PostProcessStep.GenSmoothNormals)) flags |= 0x40;
+            else if (step.equals(PostProcessStep.SplitLargeMeshes)) flags |= 0x80;
+        }
 
         // now load the mesh
-        if(0xffffffff == this._NativeLoad(this.path,this.m_vPPSteps) || ! this.scene.construct()) {
+        if(0xffffffff == this._NativeLoad(this.path,flags,this.m_iNativeHandle) ||
+                ! this.scene.construct()) {
             this.scene = null;
             this.path = null;
             return null;
@@ -234,7 +252,7 @@ public class Importer {
         super.finalize();
 
         // be sure that native resources are deallocated properly
-        if (0xffffffff == _NativeFreeContext()) {
+        if (0xffffffff == _NativeFreeContext(this.m_iNativeHandle)) {
             throw new NativeError("Unable to destroy the native library context");
         }
         return;
@@ -272,14 +290,14 @@ public class Importer {
      * to assimp will be successful after this method has been called.
      * @return 0xffffffff if an error occured
      */
-    private native int _NativeFreeContext();
+    private native int _NativeFreeContext(int iContext);
 
     /**
      * JNI bridge call. For internal use only
      * The method loads the model into memory, but does not map it into the VM
      * @param path Path (valid separators for the OS) to the model to be loaded
-     * @param steps List of postprocess steps to be executed
+     * @param flags List of postprocess steps to be executed
      * @return 0xffffffff if an error occured
      */
-    private native int _NativeLoad(String path,Vector< PostProcessStep > steps);
+    private native int _NativeLoad(String path,int flags, int iContext);
 }

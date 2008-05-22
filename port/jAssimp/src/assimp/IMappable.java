@@ -44,25 +44,57 @@ package assimp;
 
 
 /**
- * Class to wrap materials. Materials are represented in ASSIMP as a list of
- * key/value pairs, the key being a <code>String</code> and the value being
- * a binary buffer.
+ * Defines base behaviour for all sub objects of <code>Mesh</code>.
  *
  * @author Aramis (Alexander Gessler)
  * @version 1.0
  */
-public class Material extends IMappable {
+public abstract class IMappable {
+
+    /**
+     * Index of the mapped object in the parent Mesh
+     */
+    private int m_iArrayIndex = 0;
+
+    /**
+     * Reference to the parent of the object
+     */
+    private Object m_parent = null;
+
+
     /**
      * Construction from a given parent object and array index
-     *
      * @param parent Must be valid, null is not allowed
-     * @param index  Valied index in the parent's list
+     * @param index Valied index in the parent's list
      */
-    public Material(Object parent, int index) {
-        super(parent, index);
+    public IMappable(Object parent, int index) {
+        m_parent = parent;
+        m_iArrayIndex = index;
     }
 
-    protected void OnMap() throws NativeError {
+    /**
+     * Called as a request to the object to map all of its
+     * data into the address space of the Java virtual machine.
+     * After this method has been called the class instance must
+     * be ready to be used without an underyling native aiScene
+     * @throws NativeError
+     */
+    protected abstract void OnMap() throws NativeError;
 
+
+    /**
+     * Retrieve the index ofthe mappable object in the parent mesh
+     * @return Value between 0 and n-1
+     */
+    public int getArrayIndex() {
+        return m_iArrayIndex;
+    }
+
+    /**
+     * Provide access to the parent
+     * @return Never null ...
+     */
+    public Object getParent() {
+        return m_parent;
     }
 }

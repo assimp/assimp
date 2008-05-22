@@ -42,7 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package assimp;
 
-import java.util.Vector;
 import java.awt.*;
 
 /**
@@ -57,12 +56,23 @@ import java.awt.*;
  * @author Aramis (Alexander Gessler)
  * @version 1.0
  */
-public class Texture {
+public class Texture extends IMappable {
 
     private int width = 0;
     private int height = 0;
 
     private Color[] data = null;
+
+    /**
+     * Construction from a given parent object and array index
+     *
+     * @param parent Must be valid, null is not allowed
+     * @param index  Valied index in the parent's list
+     */
+    public Texture(Object parent, int index) {
+        super(parent, index);
+    }
+
 
     /**
      * Retrieve the height of the texture image
@@ -96,7 +106,7 @@ public class Texture {
         // map the color data in memory if required ...
         if (null == data) {
             try {
-                this.MapColorData();
+                this.OnMap();
             } catch (NativeError nativeError) {
                 return Color.black;
             }
@@ -108,7 +118,8 @@ public class Texture {
      * Internal helper function to map the native texture data into
      * a <code>java.awt.Color</code> array
      */
-    private void MapColorData() throws NativeError {
+    @Override
+    protected void OnMap() throws NativeError {
         final int iNumPixels = width * height;
 
         // first allocate the output array
@@ -119,7 +130,7 @@ public class Texture {
 
         // and copy the native color data to it
         if (0xffffffff == this._NativeMapColorData(temp)) {
-           throw new NativeError("Unable to map aiTexture into Java-VM");
+           throw new NativeError("Unable to map aiTexture into the Java-VM");
         }
 
         // now convert the temporary representation to a Color array

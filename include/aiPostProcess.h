@@ -68,8 +68,8 @@ enum aiPostProcessSteps
 	 * the DirectX coordinate system. By default the data is returned in a right-handed
 	 * coordinate space which for example OpenGL prefers. In this space, +X points to the
 	 * right, +Y points towards the viewer and and +Z points upwards. In the DirectX 
-   * coordinate space +X points to the right, +Y points upwards and +Z points 
-   * away from the viewer.
+     * coordinate space +X points to the right, +Y points upwards and +Z points 
+     * away from the viewer.
 	 */
 	aiProcess_ConvertToLeftHanded = 4,
 

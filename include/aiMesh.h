@@ -218,6 +218,15 @@ struct aiBone
 */
 #define AI_MAX_NUMBER_OF_TEXTURECOORDS 0x4
 
+// NOTE (Aramis): If you change these values, make sure that you also
+// change the corresponding values in all Assimp ports.
+
+// **********************************************************
+// Java: Mesh.java, 
+//  Mesh.MAX_NUMBER_OF_TEXTURECOORDS
+//  Mesh.MAX_NUMBER_OF_COLOR_SETS
+// **********************************************************
+
 #endif // !! AI_MAX_NUMBER_OF_TEXTURECOORDS
 
 // ---------------------------------------------------------------------------

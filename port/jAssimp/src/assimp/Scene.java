@@ -49,7 +49,7 @@ import java.util.Vector;
  * multiple meshes, animations, materials and embedded textures.
  * And it defines the scenegraph of the asset (the hierarchy of all
  * meshes, ...).
- *
+ * <p/>
  * An instance of this class is returned by Importer.readFile().
  *
  * @author Aramis (Alexander Gessler)
@@ -57,52 +57,155 @@ import java.util.Vector;
  */
 public class Scene {
 
+    // NOTE: use Vector's to be able to use the constructor for initialisation
     private Vector<Mesh> m_vMeshes;
     private Vector<Texture> m_vTextures;
     private Vector<Material> m_vMaterials;
     private Vector<Animation> m_vAnimations;
-    private Node m_rootNode;
+    private Node m_rootNode = null;
+    private Importer imp = null;
 
-    /** Get the mesh list
+    private Scene() {
+    }
+
+    protected Scene(Importer imp) {
+        this.imp = imp;
+    }
+
+    public final Importer getImporter() {
+        return this.imp;
+    }
+
+    /**
+     * Get the mesh list
      *
      * @return mesh list
      */
-    public Vector<Mesh> getMeshes() {
+    public final Vector<Mesh> getMeshes() {
         return m_vMeshes;
     }
 
-    /** Get the texture list
+    /**
+     * Get the texture list
      *
      * @return Texture list
      */
-    public Vector<Texture> getTextures() {
+    public final Vector<Texture> getTextures() {
         return m_vTextures;
     }
 
-    /** Get the material list
+    /**
+     * Get the material list
      *
      * @return Material list
      */
-    public Vector<Material> getMaterials() {
+    public final Vector<Material> getMaterials() {
         return m_vMaterials;
     }
 
-    /** Get the animation list
+    /**
+     * Get the animation list
      *
      * @return Animation list
      */
-    public Vector<Animation> getAnimations() {
+    public final Vector<Animation> getAnimations() {
         return m_vAnimations;
     }
 
-    /** Get the root node of the scenegraph
+    /**
+     * Get the root node of the scenegraph
      *
      * @return Root node
      */
-    public Node getRootNode() {
+    public final Node getRootNode() {
         return m_rootNode;
     }
 
+    /**
+     * Used to initialize the class instance. Called by Importer. Will maybe
+     * be replaced with a RAII solution ...
+     * @return true if we're successful
+     */
     protected boolean construct() {
+
+        int i;
+
+        // load all meshes
+        int iTemp = this._NativeGetNumMeshes(imp.hashCode());
+        if (0xffffffff == iTemp) return false;
+        this.m_vMeshes.setSize(iTemp);
+
+        // Mesh, Animation, Texture, Material and Node constructors
+        // throw exceptions if they fail
+        try {
+
+            for (i = 0; i < iTemp; ++i) {
+                this.m_vMeshes.set(i, new Mesh(this, i));
+            }
+
+            // load all animations
+            iTemp = this._NativeGetNumAnimations(imp.hashCode());
+            if (0xffffffff == iTemp) return false;
+            this.m_vAnimations.setSize(iTemp);
+
+            for (i = 0; i < iTemp; ++i) {
+                this.m_vAnimations.set(i, new Animation(this, i));
+            }
+
+            // load all textures
+            iTemp = this._NativeGetNumTextures(imp.hashCode());
+            if (0xffffffff == iTemp) return false;
+            this.m_vTextures.setSize(iTemp);
+
+            for (i = 0; i < iTemp; ++i) {
+                this.m_vTextures.set(i, new Texture(this, i));
+            }
+
+            // load all materials
+            iTemp = this._NativeGetNumMaterials(imp.hashCode());
+            if (0xffffffff == iTemp) return false;
+            this.m_vMaterials.setSize(iTemp);
+
+            for (i = 0; i < iTemp; ++i) {
+                this.m_vMaterials.set(i, new Material(this, i));
+            }
+
+            // now load all nodes
+            //this.m_rootNode = new Node(this, 0xffffffff);
+
+        }
+        catch (Exception ex) {
+            // LOG
+            return false;
+        }
+        return true;
     }
+
+    /** JNI bridge function - for internal use only
+     * Retrieve the number of meshes in a scene
+     * @param context Current importer context (imp.hashCode)
+     * @return  Number of meshes in the scene that belongs to the context
+     */
+    private native int _NativeGetNumMeshes(int context);
+
+    /** JNI bridge function - for internal use only
+     * Retrieve the number of animations in a scene
+     * @param context Current importer context (imp.hashCode)
+     * @return  Number of animations in the scene that belongs to the context
+     */
+    private native int _NativeGetNumAnimations(int context);
+
+    /** JNI bridge function - for internal use only
+     * Retrieve the number of textures in a scene
+     * @param context Current importer context (imp.hashCode)
+     * @return  Number of textures in the scene that belongs to the context
+     */
+    private native int _NativeGetNumTextures(int context);
+
+    /** JNI bridge function - for internal use only
+     * Retrieve the number of materials in a scene
+     * @param context Current importer context (imp.hashCode)
+     * @return  Number of materials in the scene that belongs to the context
+     */
+    private native int _NativeGetNumMaterials(int context);
 }

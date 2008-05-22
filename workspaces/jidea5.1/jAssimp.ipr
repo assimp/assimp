@@ -178,10 +178,10 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://J:/Programmieren/ASSIMP/ASSIMP/port/jAssimp/assimp.iml" filepath="J:/Programmieren/ASSIMP/ASSIMP/port/jAssimp/assimp.iml" />
+      <module fileurl="file://J:/Programmieren/ASSIMP/assimp2/port/jAssimp/assimp.iml" filepath="J:/Programmieren/ASSIMP/assimp2/port/jAssimp/assimp.iml" />
     </modules>
   </component>
-  <component name="ProjectRootManager" version="2" assert-keyword="false" jdk-15="false" project-jdk-name="1.6" />
+  <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" />
   <component name="RmicSettings">
     <option name="IS_EANABLED" value="false" />
     <option name="DEBUGGING_INFO" value="true" />

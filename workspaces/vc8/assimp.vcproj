@@ -763,6 +763,30 @@
 			<Filter
 				Name="jAssimp"
 				>
+				<File
+					RelativePath="..\..\code\jAssimp\assimp_Importer.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\jAssimp\assimp_Material.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\jAssimp\assimp_Mesh.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\jAssimp\assimp_Node.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\jAssimp\assimp_Scene.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\jAssimp\assimp_Texture.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -948,7 +972,7 @@
 				Name="jAssimp"
 				>
 				<File
-					RelativePath="..\..\code\JNICalls.cpp"
+					RelativePath="..\..\code\jAssimp\JNICalls.cpp"
 					>
 				</File>
 			</Filter>

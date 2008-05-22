@@ -84,7 +84,7 @@ http://www.boost-consulting.com/products/free</a>. Choose the appropriate versio
 Once boost is working, you have to set up a project for the ASSIMP library in your favourite IDE. If you use VC2005 or
 VC2008, you can simply load the solution or project files in the workspaces/ folder, otherwise you have to create a new 
 package and add all the headers and source files from the include/ and code/ directories. Set the temporary output folder
-to obj/, for example, and redirect the output folder to bin/. The build the library - it should compile and link fine.
+to obj/, for example, and redirect the output folder to bin/. Then build the library - it should compile and link fine.
 
 The last step is to integrate the library into your project. This is basically the same task as described in the 
 "Using prebuild libs" section above: add the include/ and bin/ directories to your IDE's paths so that the compiler can find
@@ -96,9 +96,146 @@ your solution.
 /** 
 @page usage Usage
 
-Erklärung: C++-Schnittstelle für C++, C-Schnittstelle für alle anderen. Grundsätzlicher Ablauf Einrichten - Benutzung - Ergebnistest - Abräumen. Mögliche Nachbearbeitungs-Flags.
-Beispiel C++: Importer-Instanz anlegen, ReadFile() aufrufen, Ergebnis prüfen, Daten auslesen
-Beispiel C: Init() aufrufen, ReadFile() aufrufen, Ergebnis prüfen, Release() aufrufen.
+@section access_cpp Access by class interface
+
+The ASSIMP library can be accessed by both a class or flat function interface. The C++ class
+interface is the preferred way of interaction: you create an instance of class Assimp::Importer, 
+maybe adjust some settings of it and then call Assimp::Importer::ReadFile(). The class will
+read the files and process its data, handing back the imported data as a pointer to an aiScene 
+to you. You can now extract the data you need from the file. The importer manages all the resources
+for itsself. If the importer is destroyed, all the data that was created/read by it will be 
+destroyed, too. So the easiest way to use the Importer is to create an instance locally, use its
+results and then simply let it go out of scope. 
+
+C++ example:
+@code
+#include <assimp.hpp>  // C++ importer interface
+#include <aiScene.h>   // root structure of the imported data
+#include <aiMesh.h>    // example: mesh data structures. you'll propably need other includes, too
+
+bool DoTheImportThing( const std::string& pFile)
+{
+  // create an instance of the Importer class
+  Assimp::Importer importer;
+
+  // and have it read the given file with some example postprocessing
+  aiScene* scene = importer.ReadFile( pFile, aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
+  
+  // if the import failed, report it
+  if( !scene)
+  {
+    DoTheErrorLogging( importer.GetErrorText());
+    return false;
+  }
+
+  // now we can access the file's contents
+  DoTheSceneProcessing( scene);
+
+  // we're done. Everything will be cleaned up by the importer destructor
+  return true;
+}
+@endcode
+
+What exactly is read from the files and how you interpret it is described at the @link data Data 
+Structures page. @endlink The post processing steps that the ASSIMP library can apply to the
+imported data are listed at #aiPostProcessSteps.
+
+@section access_c Access by function interface
+
+The plain function interface is just as simple, but requires you to manually call the clean-up
+after you're done with the imported data. To start the import process, call aiImportFile()
+with the filename in question and the desired postprocessing flags like above. If the call
+is successful, an aiScene pointer with the imported data is handed back to you. When you're
+done with the extraction of the data you're interested in, call aiReleaseImport() on the
+imported scene to clean up all resources associated with the import.
+
+C example:
+@code
+#include <assimp.h>  // Plain C importer interface
+#include <aiScene.h> // root structure of the imported data
+#include <aiMesh.h>  // example: mesh data structures. you'll propably need other includes, too
+
+bool DoTheImportThing( const char* pFile)
+{
+  // start the import on the given file with some example postprocessing
+  aiScene* scene = aiImportFile( pFile, aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
+
+  // if the import failed, report it
+  if( !scene)
+  {
+    DoTheErrorLogging( aiGetErrorString());
+    return false;
+  }
+
+  // now we can access the file's contents
+  DoTheSceneProcessing( scene);
+
+  // we're done. Release all resources associated with this import
+  aiReleaseImport( scene);
+  return true;
+}
+@endcode
+
+@section custom_io Using custom IO logic
+
+The ASSIMP library needs to access files internally. This of course applies to the file you want
+to read, but also to additional files in the same folder for certain file formats. By default,
+standard C/C++ IO logic is used to access these files. If your application works in a special
+environment where custom logic is needed to access the specified files, you have to supply 
+custom implementations of IOStream and IOSystem. A shortened example might look like this:
+
+@code
+#include <IOStream.h>
+#include <IOSystem.h>
+
+// My own implementation of IOStream
+class MyIOStream : public Assimp::IOStream
+{
+  friend class MyIOSystem;
+
+protected:
+  // Constructor protected for private usage by MyIOSystem
+  MyIOStream(void);
+
+public:
+  ~MyIOStream(void);
+  size_t Read( void* pvBuffer, size_t pSize, size_t pCount) { ... }
+  size_t Write( const void* pvBuffer, size_t pSize, size_t pCount) { ... }
+  aiReturn Seek( size_t pOffset, aiOrigin pOrigin) { ... }
+  size_t Tell() const { ... }
+  size_t FileSize() const { ... }
+};
+
+// Fisher Price - My First Filesystem
+class MyIOSystem : public Assimp::IOSystem
+{
+  MyIOSystem() { ... }
+  ~MyIOSystem() { ... }
+
+  bool Exists( const std::string& pFile) const { ... }
+  std::string getOsSeparator() const { return "/"; }
+  IOStream* Open( const std::string& pFile, const std::string& pMode = std::string("rb")) { return new MyIOStream( ... ); }
+  void Close( IOStream* pFile) { delete pFile; }
+};
+@endcode
+
+Now that your IO system is implemented, supply an instance of it to the Importer object by calling 
+Assimp::Importer::SetIOHandler(). 
+
+@code
+void DoTheImportThing( const std::string& pFile)
+{
+  Assimp::Importer importer;
+  // put my custom IO handling in place
+  importer.SetIOHandler( new MyIOSystem());
+
+  // the import process will now use this implementation to access any file
+  importer.ReadFile( pFile, SomeFlag | SomeOtherFlag);
+}
+@endcode
+
+Auch das Logging noch erklären?
+
 */
 
 /** 

@@ -319,7 +319,7 @@ void CopyNodesWithMeshes( aiNode node, SceneObject targetParent, Matrix4x4 accTr
 This function copies a node into the scene graph if it has children. If yes, a new scene object
 is created for the import node and the node's meshes are copied over. If not, no object is created.
 Potential child objects will be added to the old targetParent, but there transformation will be correct
-in respect to the global space. This function also works great in filtering the bone nodes - nodes
+in respect to the global space. This function also works great in filtering the bone nodes - nodes 
 that form the bone hierarchy for another mesh/node, but don't have any mesh themselfes.
 
 @section meshes Meshes
@@ -352,6 +352,48 @@ parameters there is no hard definition of a material structure. Instead a materi
 a set of properties accessible by their names. Have a look at aiMaterial.h to see what types of 
 properties are defined. In this file there are also various functions defined to test for the
 presence of certain properties in a material and retrieve their values.
+
+Example to convert from an Assimp material to a Direct3D 9 material for use with the fixed 
+function pipeline. Textures are not handled, only colors and the specular power:
+@code
+
+void ConvertColor ( const aiColor4D& clrIn, D3DCOLORVALUE& clrOut )
+{
+   clrOut.r = clrIn.r;
+   clrOut.g = clrIn.g;
+   clrOut.b = clrIn.b;
+   clrOut.a = clrIn.a;
+}
+
+void ConvertMaterial( aiMaterial* matIn, D3DMATERIAL9* matOut )
+{ 
+   // ***** DIFFUSE MATERIAL COLOR
+   aiColor4D clr(0.0f,0.0f,0.0f,1.0f);
+   // if the material property is not existing, the passed color pointer
+   // won't be modified, therefore the diffuse color would be BLACK in this case
+   aiGetMaterialColor(matIn,AI_MATKEY_COLOR_DIFFUSE,&clr);
+   ConvertColor ( clr, matOut.Diffuse ); 
+
+   // ***** SPECULAR MATERIAL COLOR
+   clr = aiColor4D(1.0f,1.0f,1.0f,1.0f);
+   aiGetMaterialColor(matIn,AI_MATKEY_COLOR_SPECULAR,&clr);
+   ConvertColor ( clr, matOut.Specular ); 
+
+   // ***** AMBIENT MATERIAL COLOR
+   clr = aiColor4D(0.0f,0.0f,0.0f,1.0f);
+   aiGetMaterialColor(matIn,AI_MATKEY_COLOR_AMBIENT,&clr);
+   ConvertColor ( clr, matOut.Ambient ); 
+
+   // ***** EMISIVE MATERIAL COLOR (Self illumination)
+   clr = aiColor4D(0.0f,0.0f,0.0f,1.0f);
+   aiGetMaterialColor(matIn,AI_MATKEY_COLOR_EMISSIVE,&clr);
+   ConvertColor ( clr, matOut.Emissive ); 
+
+   // ***** SHININESS (Phong power)  
+   matOut.Power = 0.0f;
+   aiGetMaterialFloat(matIn,AI_MATKEY_COLOR_EMISSIVE,&matOut.Power);
+}
+@endcode
 
 @section bones Bones
 

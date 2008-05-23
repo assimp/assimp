@@ -131,6 +131,19 @@ inline const float* aiMatrix4x4::operator[](unsigned int p_iIndex) const
 {
 	return &this->a1 + p_iIndex * 4;
 }
+// ---------------------------------------------------------------------------
+inline bool aiMatrix4x4::operator== (const aiMatrix4x4 m) const
+{
+	return (a1 == m.a1 && a2 == m.a2 && a3 == m.a3 && a4 == m.a4 &&
+		b1 == m.b1 && b2 == m.b2 && b3 == m.b3 && b4 == m.b4 &&
+		c1 == m.c1 && c2 == m.c2 && c3 == m.c3 && c4 == m.c4 &&
+		d1 == m.d1 && d2 == m.d2 && d3 == m.d3 && d4 == m.d4);
+}
+// ---------------------------------------------------------------------------
+inline bool aiMatrix4x4::operator!= (const aiMatrix4x4 m) const
+{
+	return !(*this == m);
+}
 
 #endif // __cplusplus
 #endif // AI_MATRIX4x4_INL_INC

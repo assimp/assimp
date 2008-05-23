@@ -53,6 +53,10 @@ struct aiMatrix4x4
 
 	float* operator[](unsigned int p_iIndex);
 	const float* operator[](unsigned int p_iIndex) const;
+
+	inline bool operator== (const aiMatrix4x4 m) const;
+	inline bool operator!= (const aiMatrix4x4 m) const;
+
 #endif // __cplusplus
 
 	float a1, a2, a3, a4;

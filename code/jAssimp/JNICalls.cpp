@@ -136,8 +136,6 @@ Assimp::Importer* jGetValidImporterScenePair (JASSIMP_CONTEXT jvmcontext)
 JNIEXPORT jlong JNICALL Java_assimp_Importer__1NativeInitContext
   (JNIEnv * jvmenv, jobject jvmthis)
 {
-	ai_assert(NULL != jvmenv && NULL != jvmthis);
-
 	// 2^64-1 indicates error
 	JASSIMP_CONTEXT context = 0xffffffffffffffffL;
 
@@ -159,7 +157,6 @@ JNIEXPORT jlong JNICALL Java_assimp_Importer__1NativeInitContext
 JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeFreeContext
   (JNIEnv * jvmenv, jobject jvmthis, jlong jvmcontext)
 {
-	ai_assert(NULL != jvmenv && NULL != jvmthis);
 
 #if (defined _DEBUG)
 	if (!jValidateContext((JASSIMP_CONTEXT)jvmcontext))return AI_JNI_ERROR_RETURN;
@@ -183,7 +180,6 @@ JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeFreeContext
 JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeLoad
   (JNIEnv *jvmenv, jobject jvmthis, jstring jvmpath, jint jvmflags, jlong jvmcontext)
 {
-	ai_assert(NULL != jvmenv && NULL != jvmthis);
 	jint iRet = 0;
 
 #if (defined _DEBUG)
@@ -214,6 +210,31 @@ JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeLoad
 	jvmenv->ReleaseStringUTFChars(jvmpath,szPath);
 	return iRet;
 }
+
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_PostProcessStep
+ * Method:    _NativeSetVertexSplitLimit
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_assimp_PostProcessStep__1NativeSetVertexSplitLimit
+  (JNIEnv *jvmenv, jclass jvmthis, jint jvmlimit)
+{
+	aiSetVertexSplitLimit(jvmlimit);
+}
+
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_PostProcessStep
+ * Method:    _NativeSetTriangleSplitLimit
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_assimp_PostProcessStep__1NativeSetTriangleSplitLimit
+  (JNIEnv *jvmenv, jclass jvmthis, jint jvmlimit)
+{
+	aiSetTriangleSplitLimit(jvmlimit);
+}
+
 // ------------------------------------------------------------------------------------------------
 /*
  * Class:     assimp_Scene
@@ -223,7 +244,6 @@ JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeLoad
 JNIEXPORT jint JNICALL Java_assimp_Scene__1NativeGetNumMeshes
   (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext)
 {
-	ai_assert(NULL != jvmenv && NULL != jvmthis);
 	// we need a valid scene for this
 	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
 	if (!pcImp)return AI_JNI_ERROR_RETURN;
@@ -238,8 +258,6 @@ JNIEXPORT jint JNICALL Java_assimp_Scene__1NativeGetNumMeshes
 JNIEXPORT jint JNICALL Java_assimp_Scene__1NativeGetNumAnimations
   (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext)
 {
-	
-	ai_assert(NULL != jvmenv && NULL != jvmthis);
 	// we need a valid scene for this
 	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
 	if (!pcImp)return AI_JNI_ERROR_RETURN;
@@ -254,7 +272,6 @@ JNIEXPORT jint JNICALL Java_assimp_Scene__1NativeGetNumAnimations
 JNIEXPORT jint JNICALL Java_assimp_Scene__1NativeGetNumTextures
   (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext)
 {
-	ai_assert(NULL != jvmenv && NULL != jvmthis);
 	// we need a valid scene for this
 	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
 	if (!pcImp)return AI_JNI_ERROR_RETURN;
@@ -269,12 +286,411 @@ JNIEXPORT jint JNICALL Java_assimp_Scene__1NativeGetNumTextures
 JNIEXPORT jint JNICALL Java_assimp_Scene__1NativeGetNumMaterials
   (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext)
 {
-	ai_assert(NULL != jvmenv && NULL != jvmthis);
 	// we need a valid scene for this
 	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
 	if (!pcImp)return AI_JNI_ERROR_RETURN;
 	return (jint)pcImp->GetScene()->mNumMaterials;
 }
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_Mesh
+ * Method:    _NativeGetPresenceFlags
+ * Signature: (JJ)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Mesh__1NativeGetPresenceFlags
+  (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext, jlong jvmindex)
+{
+	// we need a valid scene for this
+	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
+	if (!pcImp)return AI_JNI_ERROR_RETURN;
+
+	// get the corresponding mesh
+	ai_assert(jvmindex < pcImp->GetScene()->mNumMeshes);
+	aiMesh* pcMesh = pcImp->GetScene()->mMeshes[jvmindex];
+
+	// now build the flag list
+	jint iRet = 0;
+	if (pcMesh->HasPositions())
+		iRet |= assimp_Mesh_PF_POSITION;
+	if (pcMesh->HasBones())
+		iRet |= assimp_Mesh_PF_BONES;
+	if (pcMesh->HasNormals())
+		iRet |= assimp_Mesh_PF_NORMAL;
+	if (pcMesh->HasTangentsAndBitangents())
+		iRet |= assimp_Mesh_PF_TANGENTBITANGENT;
+
+	unsigned int i = 0;
+	while (pcMesh->HasTextureCoords(i))
+		iRet |= assimp_Mesh_PF_UVCOORD << i++;
+	i = 0;
+	while (pcMesh->HasVertexColors(i))
+		iRet |= assimp_Mesh_PF_VERTEXCOLOR << i++;
+
+	return iRet;
+}
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_Mesh
+ * Method:    _NativeGetNumVertices
+ * Signature: (JJ)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Mesh__1NativeGetNumVertices
+  (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext, jlong jvmindex)
+{
+	// we need a valid scene for this
+	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
+	if (!pcImp)return AI_JNI_ERROR_RETURN;
+
+	// get the corresponding mesh
+	ai_assert(jvmindex < pcImp->GetScene()->mNumMeshes);
+	return pcImp->GetScene()->mMeshes[jvmindex]->mNumVertices;
+}
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_Mesh
+ * Method:    _NativeGetNumFaces
+ * Signature: (JJ)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Mesh__1NativeGetNumFaces
+  (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext, jlong jvmindex)
+{
+	// we need a valid scene for this
+	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
+	if (!pcImp)return AI_JNI_ERROR_RETURN;
+
+	// get the corresponding mesh
+	ai_assert(jvmindex < pcImp->GetScene()->mNumMeshes);
+	return pcImp->GetScene()->mMeshes[jvmindex]->mNumFaces;
+}
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_Mesh
+ * Method:    _NativeGetNumBones
+ * Signature: (JJ)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Mesh__1NativeGetNumBones
+  (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext, jlong jvmindex)
+{
+	// we need a valid scene for this
+	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
+	if (!pcImp)return AI_JNI_ERROR_RETURN;
+
+	// get the corresponding mesh
+	ai_assert(jvmindex < pcImp->GetScene()->mNumMeshes);
+	return pcImp->GetScene()->mMeshes[jvmindex]->mNumBones;
+}
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_Mesh
+ * Method:    _NativeGetMaterialIndex
+ * Signature: (JJ)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Mesh__1NativeGetMaterialIndex
+  (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext, jlong jvmindex)
+{
+	// we need a valid scene for this
+	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
+	if (!pcImp)return AI_JNI_ERROR_RETURN;
+
+	// get the corresponding mesh
+	ai_assert(jvmindex < pcImp->GetScene()->mNumMeshes);
+	return pcImp->GetScene()->mMeshes[jvmindex]->mMaterialIndex;
+}
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_Mesh
+ * Method:    _NativeGetNumUVComponents
+ * Signature: (JJ[I)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Mesh__1NativeGetNumUVComponents
+  (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext, jlong jvmindex, jintArray jvmout)
+{
+	ai_assert(AI_MAX_NUMBER_OF_TEXTURECOORDS == jvmenv->GetArrayLength(jvmout) );
+
+	// we need a valid scene for this
+	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
+	if (!pcImp)return AI_JNI_ERROR_RETURN;
+
+	// get the corresponding mesh
+	ai_assert(jvmindex < pcImp->GetScene()->mNumMeshes);
+	const unsigned int* piArray = pcImp->GetScene()->mMeshes[jvmindex]->mNumUVComponents;
+
+	jint* pArray = jvmenv->GetIntArrayElements(jvmout,NULL);
+	if (NULL == pArray)return AI_JNI_ERROR_RETURN;
+
+	for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
+		pArray[i] = piArray[i];
+
+	jvmenv->ReleaseIntArrayElements(jvmout,pArray,0);
+	return 0;
+}
+// ------------------------------------------------------------------------------------------------
+void CpyVectorToFloatArray(jfloat* pDest, const aiVector3D* pSource, unsigned int iNum)
+{
+	jfloat* pCursor = pDest;
+	const aiVector3D* const pvEnd = pSource + iNum;
+	while (pvEnd != pSource)
+	{
+		*pCursor++ = pSource->x;
+		*pCursor++ = pSource->y;
+		*pCursor++ = pSource->z;
+		++pSource;
+	}
+	return;
+}
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_Mesh
+ * Method:    _NativeMapVertices
+ * Signature: (JJ[F)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Mesh__1NativeMapVertices
+  (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext, jlong jvmindex, jfloatArray jvmout)
+{
+	// we need a valid scene for this
+	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
+	if (!pcImp)return AI_JNI_ERROR_RETURN;
+
+	// get the corresponding mesh
+	ai_assert(jvmindex < pcImp->GetScene()->mNumMeshes);
+	aiMesh* pcMesh =  (aiMesh*)pcImp->GetScene()->mMeshes[jvmindex];
+	ai_assert(jvmenv->GetArrayLength(jvmout) == pcMesh->mNumVertices * 3);
+	const aiVector3D* pcData = pcMesh->mVertices;
+
+	// now copy the data to the java array
+	jfloat* pArray = jvmenv->GetFloatArrayElements(jvmout,NULL);
+	CpyVectorToFloatArray(pArray,pcData,pcMesh->mNumVertices);
+	jvmenv->ReleaseFloatArrayElements(jvmout,pArray,0);
+
+	// delete the original data
+	delete[] pcMesh->mVertices;
+	pcMesh->mVertices = NULL;
+	return 0;
+}
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_Mesh
+ * Method:    _NativeMapNormals
+ * Signature: (JJ[F)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Mesh__1NativeMapNormals
+  (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext, jlong jvmindex, jfloatArray jvmout)
+{
+	// we need a valid scene for this
+	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
+	if (!pcImp)return AI_JNI_ERROR_RETURN;
+
+	// get the corresponding mesh
+	ai_assert(jvmindex < pcImp->GetScene()->mNumMeshes);
+	aiMesh* pcMesh =  (aiMesh*)pcImp->GetScene()->mMeshes[jvmindex];
+	ai_assert(jvmenv->GetArrayLength(jvmout) == pcMesh->mNumVertices * 3);
+	const aiVector3D* pcData = pcMesh->mNormals;
+
+	// now copy the data to the java array
+	jfloat* pArray = jvmenv->GetFloatArrayElements(jvmout,NULL);
+	CpyVectorToFloatArray(pArray,pcData,pcMesh->mNumVertices);
+	jvmenv->ReleaseFloatArrayElements(jvmout,pArray,0);
+
+	// delete the original data
+	delete[] pcMesh->mNormals;
+	pcMesh->mNormals = NULL;
+	return 0;
+}
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_Mesh
+ * Method:    _NativeMapTangents
+ * Signature: (JJ[F)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Mesh__1NativeMapTangents
+  (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext, jlong jvmindex, jfloatArray jvmout)
+{
+	// we need a valid scene for this
+	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
+	if (!pcImp)return AI_JNI_ERROR_RETURN;
+
+	// get the corresponding mesh
+	ai_assert(jvmindex < pcImp->GetScene()->mNumMeshes);
+	aiMesh* pcMesh =  (aiMesh*)pcImp->GetScene()->mMeshes[jvmindex];
+	ai_assert(jvmenv->GetArrayLength(jvmout) == pcMesh->mNumVertices * 3);
+	const aiVector3D* pcData = pcMesh->mTangents;
+
+	// now copy the data to the java array
+	jfloat* pArray = jvmenv->GetFloatArrayElements(jvmout,NULL);
+	CpyVectorToFloatArray(pArray,pcData,pcMesh->mNumVertices);
+	jvmenv->ReleaseFloatArrayElements(jvmout,pArray,0);
+
+	// delete the original data
+	delete[] pcMesh->mNormals;
+	pcMesh->mNormals = NULL;
+	return 0;
+}
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_Mesh
+ * Method:    _NativeMapBitangents
+ * Signature: (JJ[F)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Mesh__1NativeMapBitangents
+  (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext, jlong jvmindex, jfloatArray jvmout)
+{
+	// we need a valid scene for this
+	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
+	if (!pcImp)return AI_JNI_ERROR_RETURN;
+
+	// get the corresponding mesh
+	ai_assert(jvmindex < pcImp->GetScene()->mNumMeshes);
+	aiMesh* pcMesh =  (aiMesh*)pcImp->GetScene()->mMeshes[jvmindex];
+	ai_assert(jvmenv->GetArrayLength(jvmout) == pcMesh->mNumVertices * 3);
+	const aiVector3D* pcData = pcMesh->mBitangents;
+
+	// now copy the data to the java array
+	jfloat* pArray = jvmenv->GetFloatArrayElements(jvmout,NULL);
+	CpyVectorToFloatArray(pArray,pcData,pcMesh->mNumVertices);
+	jvmenv->ReleaseFloatArrayElements(jvmout,pArray,0);
+
+	// delete the original data
+	delete[] pcMesh->mBitangents;
+	pcMesh->mBitangents = NULL;
+	return 0;
+}
+// ------------------------------------------------------------------------------------------------
+void CpyColorToFloatArray(jfloat* pDest, const aiColor4D* pSource, unsigned int iNum)
+{
+	jfloat* pCursor = pDest;
+	const aiColor4D* const pvEnd = pSource + iNum;
+	while (pvEnd != pSource)
+	{
+		*pCursor++ = pSource->r;
+		*pCursor++ = pSource->g;
+		*pCursor++ = pSource->b;
+		*pCursor++ = pSource->a;
+		++pSource;
+	}
+	return;
+}
+// ------------------------------------------------------------------------------------------------
+void CpyVectorToFloatArray(jfloat* pDest, const aiVector3D* pSource,
+						   unsigned int iNum, unsigned int iNumComponents)
+{
+	jfloat* pCursor = pDest;
+	const aiVector3D* const pvEnd = pSource + iNum;
+	while (pvEnd != pSource)
+	{
+		if (iNumComponents >= 1)*pCursor++ = pSource->x;
+		if (iNumComponents >= 2)*pCursor++ = pSource->y;
+		if (iNumComponents >= 3)*pCursor++ = pSource->z;
+		++pSource;
+	}
+	return;
+}
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_Mesh
+ * Method:    _NativeMapUVs
+ * Signature: (JJI[F)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Mesh__1NativeMapUVs
+  (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext, jlong jvmindex,
+  jint jvmchannel, jfloatArray jvmout)
+{
+	// we need a valid scene for this
+	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
+	if (!pcImp)return AI_JNI_ERROR_RETURN;
+
+	// get the corresponding mesh
+	ai_assert(jvmindex < pcImp->GetScene()->mNumMeshes);
+	aiMesh* pcMesh =  (aiMesh*)pcImp->GetScene()->mMeshes[jvmindex];
+	ai_assert(jvmenv->GetArrayLength(jvmout) == pcMesh->mNumVertices*pcMesh->mNumUVComponents[jvmchannel]);
+	const aiVector3D* pcData = pcMesh->mTextureCoords[jvmchannel];
+
+	// now copy the data to the java array
+	jfloat* pArray = jvmenv->GetFloatArrayElements(jvmout,NULL);
+	CpyVectorToFloatArray(pArray,pcData,pcMesh->mNumVertices,pcMesh->mNumUVComponents[jvmchannel]);
+	jvmenv->ReleaseFloatArrayElements(jvmout,pArray,0);
+
+	// delete the original data
+	delete[] pcMesh->mTextureCoords[jvmchannel];
+	pcMesh->mTextureCoords[jvmchannel] = NULL;
+	return 0;
+}
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_Mesh
+ * Method:    _NativeMapColors
+ * Signature: (JJI[F)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Mesh__1NativeMapColors
+  (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext, jlong jvmindex, 
+  jint jvmchannel, jfloatArray jvmout)
+{
+	// we need a valid scene for this
+	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
+	if (!pcImp)return AI_JNI_ERROR_RETURN;
+
+	// get the corresponding mesh
+	ai_assert(jvmindex < pcImp->GetScene()->mNumMeshes);
+	aiMesh* pcMesh =  (aiMesh*)pcImp->GetScene()->mMeshes[jvmindex];
+	ai_assert(jvmenv->GetArrayLength(jvmout) == pcMesh->mNumVertices*4);
+	const aiColor4D* pcData = pcMesh->mColors[jvmchannel];
+
+	// now copy the data to the java array
+	jfloat* pArray = jvmenv->GetFloatArrayElements(jvmout,NULL);
+	CpyColorToFloatArray(pArray,pcData,pcMesh->mNumVertices);
+	jvmenv->ReleaseFloatArrayElements(jvmout,pArray,0);
+
+	// delete the original data
+	delete[] pcMesh->mColors[jvmchannel];
+	pcMesh->mColors[jvmchannel] = NULL;
+	return 0;
+}
+// ------------------------------------------------------------------------------------------------
+void CpyFacesToIntArray(jint* pDest, const aiFace* pSource, unsigned int iNum)
+{
+	// assume that all faces are triangles
+	jint* pCursor = pDest;
+	const aiFace* const pvEnd = pSource + iNum;
+	while (pvEnd != pSource)
+	{
+		*pCursor++ = pSource->mIndices[0];
+		*pCursor++ = pSource->mIndices[1];
+		*pCursor++ = pSource->mIndices[2];
+		++pSource;
+	}
+	return;
+}
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_Mesh
+ * Method:    _NativeMapFaces
+ * Signature: (JJ[I)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Mesh__1NativeMapFaces
+  (JNIEnv *jvmenv, jobject jvmthis, jlong jvmcontext, jlong jvmindex, jintArray jvmout)
+{
+	// we need a valid scene for this
+	Assimp::Importer* pcImp = jGetValidImporterScenePair(jvmcontext);
+	if (!pcImp)return AI_JNI_ERROR_RETURN;
+
+	// get the corresponding mesh
+	ai_assert(jvmindex < pcImp->GetScene()->mNumMeshes);
+	aiMesh* pcMesh =  (aiMesh*)pcImp->GetScene()->mMeshes[jvmindex];
+	ai_assert(jvmenv->GetArrayLength(jvmout) == pcMesh->mNumFaces*3);
+	const aiFace* pcData = pcMesh->mFaces;
+
+	// now copy the data to the java array
+	jint* pArray = jvmenv->GetIntArrayElements(jvmout,NULL);
+	CpyFacesToIntArray(pArray,pcData,pcMesh->mNumFaces);
+	jvmenv->ReleaseIntArrayElements(jvmout,pArray,0);
+
+	// delete the original data
+	for (unsigned int i = 0; i < pcMesh->mNumFaces;++i)
+		delete[] pcMesh->mFaces[i].mIndices;
+	delete[] pcMesh->mFaces;
+	pcMesh->mFaces = NULL;
+	return 0;
+}
+
 
 }; //! namespace JNIBridge
 }; //! namespace Assimp

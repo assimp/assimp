@@ -202,13 +202,12 @@ public class Importer {
         // need to build a list of postprocess step as bitflag combination
         // Of course, this could have been implemented directly. However,
         // I've used the PostProcessStep enumeration to make debugging easier.
-        int flags = 0;
+        int flags = 0x8; // always apply the triangulation step
 
         for (PostProcessStep step : m_vPPSteps) {
             if (step.equals(PostProcessStep.CalcTangentSpace)) flags |= 0x1;
             else if (step.equals(PostProcessStep.JoinIdenticalVertices)) flags |= 0x2;
             else if (step.equals(PostProcessStep.ConvertToLeftHanded)) flags |= 0x4;
-            else if (step.equals(PostProcessStep.Triangulate)) flags |= 0x8;
             else if (step.equals(PostProcessStep.KillNormals)) flags |= 0x10;
             else if (step.equals(PostProcessStep.GenFaceNormals)) flags |= 0x20;
             else if (step.equals(PostProcessStep.GenSmoothNormals)) flags |= 0x40;

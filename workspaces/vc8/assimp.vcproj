@@ -780,6 +780,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\jAssimp\assimp_PostProcessStep.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\jAssimp\assimp_Scene.h"
 					>
 				</File>

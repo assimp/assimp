@@ -10,9 +10,45 @@ storing it in a engine-specific format for easy and fast every-day-loading. ASSI
 processing steps to the imported data such as conversion to indexed meshes, calculation of normals or tangents/bitangents
 or conversion from right-handed to left-handed coordinate systems.
 
-At the moment ASSIMP is able to read Lightwave Object files (.obj), Milkshape3D scene (.ms3d), DirectX scenes (.x), 
-old 3D Studio Max scene files (.3ds), Doom/Quake model files (.md1 to .md7), 3D Game Studio models (.mdl) and 
-PLY files (.ply). ASSIMP is independent of the Operating System by nature, providing a C++ interface for easy integration 
+ASSIMP is able to import the following file formats into your application:
+
+<b>AutoDesk 3D Studio 4/5 (.3ds).</b> The old native format of 3DS max, now still supported and
+widely used.
+<br>
+<b>AutoDesk 3D Studio ASCII Export (.ase).</b> Text format used by 3DS max. Supports bone animations
+and highly complex materials.
+<br>
+<b>DirectX (.x)</b> A file format that can easily be read by D3DX and that is supported 
+as export format by most 3D modellers. ASSIMP supports both binary and ASCII X-Files.
+<br>
+<b>Stanford Polygon (.ply)</b> File format developed by the university of
+stanford. Thanks to its flexibility it often used for scientific purposes. Supported by ASSIMP
+are ASCII and binary PLY files, both LittleEndian and BigEndian.
+<br>
+<b>WaveFront Object (.obj)</b> File format that is widely used to exchange asset data
+between different applications.
+<br>
+<b>Milkshape 3D (.ms3d)</b> Native file format of the well-known modeller Milkshape 3D. 
+ASSIMP provides full support for bone animations contained in ms3d files.
+<br>
+<b>Quake I (.mdl)</b> The file format that was once used by the first part of the
+quake series. ASSIMP provides full support for loading embedded textures from Quake models.
+<br>
+<b>3D GameStudio (.mdl)</b> The file format of Conitecs 3D GameStudio tool suite.
+Used by the freeware modelling tool MED. ASSIMP provides full support for all types of
+3D GameStudio MDL files: <i>MDL3, MDL4, MDL5, MDL6, MDL7</i>. Bone animations are supported.
+<br>
+<b>Half-Life/CS:S (.mdl, .smd)</b> The file formats used in half life.
+<b>Quake II (.md2)/ Quake III (.md3)</b> Used by many free models on the web, support for
+Quake 2's and Quake 3's file formats is a must-have for each game engine. Quake 4 is
+existing but not widely used. However, it is supported by ASSIMP (and RavenSoft .mdr is supported, too)
+<br>
+<b>Doom 3 (.md5)</b> The well-known native file format of the Doom 3 engine, used in
+many games. Supports bone animation and advanced material settings.
+
+
+
+ASSIMP is independent of the Operating System by nature, providing a C++ interface for easy integration 
 with game engines and a C interface to allow bindings to other programming languages. At the moment the library runs 
 on any little-endian platform including X86/Windows/Linux/Mac and X64/Windows/Linux/Mac. Big endian systems such as 
 PPC-Macs or PPC-Linux systems are not supported at the moment, but this might change later on. Special attention 
@@ -443,7 +479,8 @@ properties are defined. In this file there are also various functions defined to
 presence of certain properties in a material and retrieve their values.
 
 Example to convert from an Assimp material to a Direct3D 9 material for use with the fixed 
-function pipeline. Textures are not handled, only colors and the specular power:
+function pipeline. Textures are not handled, only colors and the specular power, sometimes
+also refered to as "shininess":
 @code
 
 void ConvertColor ( const aiColor4D& clrIn, D3DCOLORVALUE& clrOut )
@@ -483,6 +520,86 @@ void ConvertMaterial( aiMaterial* matIn, D3DMATERIAL9* matOut )
    aiGetMaterialFloat(matIn,AI_MATKEY_COLOR_EMISSIVE,&matOut.Power);
 }
 @endcode
+
+Textures:
+
+Textures can have various types and purposes. Sometimes ASSIMP is not able to
+determine the exact purpose of a texture. Normally it will assume diffuse as default
+purpose. Possible purposes for a texture:
+
+<b>1. Diffuse textures.</b> Diffuse textures are combined with the result of the diffuse lighting term.
+<br>
+<b>2. Specular textures.</b> Specular textures are combined with the result of the specular lighting term.
+Generally speaking, they can be used to map a texture onto specular highlights.
+<br>
+<b>3. Ambient textures.</b> Ambient textures are combined with the result of the ambient lighting term. 
+<br>
+<b>4. Emissive textures.</b> Emissive textures are combined with the emissive base color of the material. 
+The result is then added to the final pixel color. Emissive textures are sometimes called
+"Self ilumination maps".
+<br>
+<b>5. Opacity textures.</b> Opacity textures specify the opacity of a texel. They are 
+normally grayscale images, black stands for fully transparent, white for fully opaque.
+<br>
+<b>6. Height maps.</b> Height maps specify the relative height of a point on a triangle on a
+per-texel base. Normally height maps (sometimes called "Bump maps") are converted to normal
+maps before rendering. Height maps are normally grayscale textures. Height maps could also
+be used as displacement maps on a highly tesselated surface.
+<br>
+<b>7. Normal maps.</b> Normal maps contain normal vectors for a single texel, in tangent space.
+They are not bound to an object. However, all lighting omputations must be done in tangent space. 
+There are many resources on Normal Mapping on the internet.
+<br>
+<b>8. Shininess maps</b> Shininess maps (sometimes called "Gloss" or "SpecularMap") specify
+the shininess of a texel mapped on a surface. They are normally used together with normal maps
+to make flat surfaces look as if they were real 3d objects.
+<br>
+
+Textures are generally defined by a set of parameters, including
+<br>
+<b>1. The path to the texture.</b>  This property is always set. If it is not set, a texture 
+is not existing. This can either be a valid path (beware, sometimes
+it could be a 8.3 file name!) or an asterisk (*) suceeded by a zero-based index, the latter being
+a reference to an embedded texture (@link textures more details @endlink). I suggest using code
+like this to find out whether a texture is embedded:
+@code
+aiString path; // contains the path obtained via aiGetMaterialString()
+const aiScene* scene; // valid aiScene instance
+
+const char* szData = path.data;
+if ('*' == *szData)
+{
+   int index = atoi(szData+1);
+   ai_assert(index < scene->mNumTextures);
+
+   // your loading code for loading from aiTexture's ...
+}
+else // your loading code to load from a path ...
+@endcode
+<br>
+<b>2. An UV coordinate index.</b> This is an index into the UV coordinate set list of the
+corresponding mesh. Note: Some formats don't define this, so beware, it could be that
+a second diffuse texture in a mesh was originally intended to use a second UV channel although
+ASSIMP states it uses the first one. UV coordinate source indices are defined by the
+<i>AI_MATKEY_UVWSRC_<textype>(<texindex>)</i> material property. Assume 0 as default value if
+this property is not set.
+<br>
+<b>3. A blend factor.</b> This is used if multiple textures are assigned to a slot, e.g. two
+or more textures on the diffuse channel. A texture's color value is multiplied with its
+blend factor before it is combined with the previous color value (from the last texture) using
+a specific blend operation (see 4.). Blend factor are defined by the
+<i>AI_MATKEY_TEXBLEND_<textype>(<texindex>)</i> material property. Assume 1.0f as default value 
+if this property is not set.
+<br>
+<b>4. A blend operation.</b> This is used if multiple textures are assigned to a slot, e.g. two
+or more textures on the diffuse channel. After a texture's color value has been multiplied
+with its blend factor, the blend operation is used to combine it with the previous color value.
+Blend operations are stored as integer property, however their type is aiTextureOp.
+Blend factor are defined by the <i>AI_TEXOP_BLEND_<textype>(<texindex>)</i> material property. Assume
+aiTextureOp_Multiply as default value if this property is not set. The blend operation for
+the first texture in a texture slot (e.g. diffuse 0) specifies how the diffuse base color/
+vertex color have to be combined with the texture color value.
+<br>
 
 @section bones Bones
 

@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module version="4" relativePaths="true" type="JAVA_MODULE">
   <component name="BuildJarSettings">
-    <containerInfo />
+    <containerInfo>
+      <containerElement type="module" name="assimp">
+        <attribute name="method" value="1" />
+        <attribute name="URI" value="/" />
+      </containerElement>
+    </containerInfo>
     <setting name="jarPath" value="J:\Programmieren\ASSIMP\assimp2\port\jAssimp\assimp.jar" />
     <setting name="buildJar" value="true" />
     <setting name="mainClass" value="" />

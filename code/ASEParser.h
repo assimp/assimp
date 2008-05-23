@@ -109,8 +109,6 @@ struct Face : public Dot3DS::Face
 	static const unsigned int DEFAULT_MATINDEX = 0xFFFFFFFF;
 
 
-	//! Indices into the list of vertices
-	unsigned int mIndices[3];
 
 	//! Indices into each list of texture coordinates
 	unsigned int amUVIndices[AI_MAX_NUMBER_OF_TEXTURECOORDS][3];
@@ -141,6 +139,9 @@ struct Mesh
 		// use 2 texture vertex components by default
 		for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS;++c)
 			this->mNumUVComponents[c] = 2;
+
+		// setup the default material index by default
+		iMaterialIndex = Face::DEFAULT_MATINDEX;
 	}
 	std::string mName;
 

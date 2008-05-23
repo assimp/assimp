@@ -10,10 +10,18 @@ extern "C" {
 /*
  * Class:     assimp_Texture
  * Method:    _NativeMapColorData
- * Signature: ([B)I
+ * Signature: (JJ[B)I
  */
 JNIEXPORT jint JNICALL Java_assimp_Texture__1NativeMapColorData
-  (JNIEnv *, jobject, jbyteArray);
+  (JNIEnv *, jobject, jlong, jlong, jbyteArray);
+
+/*
+ * Class:     assimp_Texture
+ * Method:    _NativeGetTextureInfo
+ * Signature: (JJ)J
+ */
+JNIEXPORT jlong JNICALL Java_assimp_Texture__1NativeGetTextureInfo
+  (JNIEnv *, jobject, jlong, jlong);
 
 #ifdef __cplusplus
 }

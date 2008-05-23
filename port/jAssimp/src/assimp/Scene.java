@@ -124,8 +124,6 @@ public class Scene {
     /**
      * Used to initialize the class instance. Called by Importer. Will maybe
      * be replaced with a RAII solution ...
-     *
-     * @return true if we're successful
      */
     protected void construct() throws NativeError {
 

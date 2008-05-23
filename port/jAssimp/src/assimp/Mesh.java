@@ -42,6 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package assimp;
 
+import java.lang.ref.Reference;
+import java.awt.*;
+
 
 /**
  * A mesh represents a geometry or model with a single material.
@@ -86,6 +89,7 @@ public class Mesh extends IMappable {
     private static final int PF_POSITION = 0x1;
     private static final int PF_NORMAL = 0x2;
     private static final int PF_TANGENTBITANGENT = 0x4;
+    private static final int PF_BONES = 0x8;
     private static final int PF_VERTEXCOLOR = 0x1000;
     private static final int PF_UVCOORD = 0x10000;
 
@@ -142,9 +146,30 @@ public class Mesh extends IMappable {
     private float[][] m_avColors = new float[MAX_NUMBER_OF_COLOR_SETS][];
 
     /**
+     * Contains a list of all faces of the mesh. each face consists of
+     * three indices into the vertex buffer.
+     */
+    private int[] m_vFaces = null;
+
+    /**
      * Number of vertices in the mesh
      */
     private int m_iNumVertices;
+
+    /**
+     * Number of faces in the mesh
+     */
+    private int m_iNumFaces;
+
+    /**
+     * Number of bones in the mesh
+     */
+    private int m_iNumBones;
+
+    /**
+     * Material index of the mesh
+     */
+    private int m_iMaterialIndex;
 
 
     /**
@@ -160,15 +185,27 @@ public class Mesh extends IMappable {
 
         Scene sc = (Scene) parent;
         if (0xffffffff == (this.m_iPresentFlags = this._NativeGetPresenceFlags(
-                sc.getImporter().getContext()))) {
+                sc.getImporter().getContext(), this.getArrayIndex()))) {
             throw new NativeError("Unable to obtain a list of vertex presence flags");
         }
         if (0xffffffff == (this.m_iNumVertices = this._NativeGetNumVertices(
-                sc.getImporter().getContext()))) {
+                sc.getImporter().getContext(), this.getArrayIndex()))) {
             throw new NativeError("Unable to obtain the number of vertices in the mesh");
         }
+        if (0xffffffff == (this.m_iNumFaces = this._NativeGetNumFaces(
+                sc.getImporter().getContext(), this.getArrayIndex()))) {
+            throw new NativeError("Unable to obtain the number of faces in the mesh");
+        }
+        if (0xffffffff == (this.m_iNumBones = this._NativeGetNumBones(
+                sc.getImporter().getContext(), this.getArrayIndex()))) {
+            throw new NativeError("Unable to obtain the number of bones in the mesh");
+        }
+        if (0xffffffff == (this.m_iMaterialIndex = this._NativeGetMaterialIndex(
+                sc.getImporter().getContext(), this.getArrayIndex()))) {
+            throw new NativeError("Unable to obtain the material index of the mesh");
+        }
         if (0xffffffff == this._NativeGetNumUVComponents(
-                sc.getImporter().getContext(), this.m_aiNumUVComponents)) {
+                sc.getImporter().getContext(), this.getArrayIndex(), this.m_aiNumUVComponents)) {
             throw new NativeError("Unable to obtain the number of UV components");
         }
     }
@@ -191,6 +228,16 @@ public class Mesh extends IMappable {
      */
     public boolean hasNormals() {
         return 0 != (this.m_iPresentFlags & PF_NORMAL);
+    }
+
+    /**
+     * Check whether there are bones in the model
+     * <code>getBone()</code> will assert this.
+     *
+     * @return true if vertex normals are available.
+     */
+    public boolean hasBones() {
+        return 0 != (this.m_iPresentFlags & PF_BONES);
     }
 
     /**
@@ -229,11 +276,40 @@ public class Mesh extends IMappable {
     /**
      * Get the number of vertices in the model
      *
-     * @return Number of vertices in the asset. This could be 0 in some
+     * @return Number of vertices in the model. This could be 0 in some
      *         extreme cases although loaders should filter such cases out
      */
     public int getNumVertices() {
         return m_iNumVertices;
+    }
+
+
+    /**
+     * Get the number of faces in the model
+     *
+     * @return Number of faces in the model. This could be 0 in some
+     *         extreme cases although loaders should filter such cases out
+     */
+    public int getNumFaces() {
+        return m_iNumFaces;
+    }
+
+    /**
+     * Get the number of bones in the model
+     *
+     * @return Number of bones in the model.
+     */
+    public int getNumBones() {
+        return m_iNumBones;
+    }
+
+    /**
+     * Get the material index of the mesh
+     *
+     * @return Zero-based material index
+     */
+    public int getMaterialIndex() {
+        return m_iMaterialIndex;
     }
 
     /**
@@ -456,14 +532,15 @@ public class Mesh extends IMappable {
         return this.m_vBitangents;
     }
 
+
     /**
      * Get a vertex texture coordinate in the mesh
      *
      * @param channel Texture coordinate channel
      * @param iIndex  Zero-based index of the vertex
      * @param afOut   Output array, size must at least be equal to the value
-     * <code>getNumUVComponents</code> returns for <code>channel</code>
-     * Receives the vertex texture coordinate, components are in u,v,w order
+     *                <code>getNumUVComponents</code> returns for <code>channel</code>
+     *                Receives the vertex texture coordinate, components are in u,v,w order
      */
     public void getTexCoord(int channel, int iIndex, float[] afOut) {
         assert(this.hasUVCoords(channel));
@@ -473,19 +550,19 @@ public class Mesh extends IMappable {
         if (null == this.m_avUVs[channel]) this.mapUVs(channel);
 
         iIndex *= this.m_aiNumUVComponents[channel];
-        for (int i = 0; i < this.m_aiNumUVComponents[channel];++i) {
-            afOut[i] = this.m_avUVs[channel][iIndex+i];
+        for (int i = 0; i < this.m_aiNumUVComponents[channel]; ++i) {
+            afOut[i] = this.m_avUVs[channel][iIndex + i];
         }
     }
 
     /**
      * Get a vertex texture coordinate in the mesh
      *
-     * @param channel Texture coordinate channel
-     * @param iIndex  Zero-based index of the vertex
-     * @param afOut   Output array, size must at least be equal to the value
-     * <code>getNumUVComponents</code> returns for <code>channel</code>
-     * Receives the vertex texture coordinate, components are in u,v,w order
+     * @param channel  Texture coordinate channel
+     * @param iIndex   Zero-based index of the vertex
+     * @param afOut    Output array, size must at least be equal to the value
+     *                 <code>getNumUVComponents</code> returns for <code>channel</code>
+     *                 Receives the vertex texture coordinate, components are in u,v,w order
      * @param iOutBase Start index in the output array
      */
     public void getTexCoord(int channel, int iIndex, float[] afOut, int iOutBase) {
@@ -497,8 +574,8 @@ public class Mesh extends IMappable {
         if (null == this.m_avUVs[channel]) this.mapUVs(channel);
 
         iIndex *= this.m_aiNumUVComponents[channel];
-        for (int i = 0; i < this.m_aiNumUVComponents[channel];++i) {
-            afOut[i+iOutBase] = this.m_avUVs[channel][iIndex+i];
+        for (int i = 0; i < this.m_aiNumUVComponents[channel]; ++i) {
+            afOut[i + iOutBase] = this.m_avUVs[channel][iIndex + i];
         }
     }
 
@@ -507,7 +584,7 @@ public class Mesh extends IMappable {
      * This is the recommended way of accessing the data.
      *
      * @return Array of floats, size is numverts * <code>getNumUVComponents
-     * (channel)</code>. Component ordering is uvw.
+     *         (channel)</code>. Component ordering is uvw.
      */
     public float[] getTexCoordArray(int channel) {
         assert(this.hasUVCoords(channel));
@@ -515,11 +592,221 @@ public class Mesh extends IMappable {
         return this.m_avUVs[channel];
     }
 
+    /**
+     * Get a vertex color in the mesh
+     *
+     * @param channel Vertex color channel
+     * @param iIndex  Zero-based index of the vertex
+     * @param afOut   Output array, size must at least be 4
+     *                Receives the vertex color components in r,g,b,a order
+     */
+    public void getVertexColor(int channel, int iIndex, float[] afOut) {
+        assert(this.hasVertexColors(channel));
+        assert(afOut.length >= 4);
+        assert(iIndex < this.getNumVertices()); // explicitly assert here, no AIOOBE
+
+        if (null == this.m_avColors[channel]) this.mapColors(channel);
+
+        iIndex *= 4;   // RGBA order
+        afOut[0] = this.m_avColors[channel][iIndex];
+        afOut[1] = this.m_avColors[channel][iIndex + 1];
+        afOut[2] = this.m_avColors[channel][iIndex + 2];
+        afOut[3] = this.m_avColors[channel][iIndex + 3];
+    }
+
+    /**
+     * Get a vertex color as <code>java.awt.Color</code> in the mesh
+     *
+     * @param channel Vertex color channel
+     * @param iIndex  Zero-based index of the vertex
+     * @return Vertex color value packed as <code>java.awt.Color</code>
+     */
+    public Color getVertexColor(int channel, int iIndex) {
+
+        float[] afColor = new float[4];
+        this.getVertexColor(channel, iIndex, afColor);
+        return new Color(afColor[0], afColor[1], afColor[2], afColor[3]);
+    }
+
+    /**
+     * Get a vertex color in the mesh
+     *
+     * @param channel  Vertex color channel
+     * @param iIndex   Zero-based index of the vertex
+     * @param afOut    Output array, size must at least be 4
+     *                 Receives the vertex color components in r,g,b,a order
+     * @param iOutBase Start index in the output array
+     */
+    public void getVertexColor(int channel, int iIndex, float[] afOut, int iOutBase) {
+        assert(this.hasVertexColors(channel));
+        assert(afOut.length >= 4);
+        assert(iOutBase + 4 <= afOut.length);
+        assert(iIndex < this.getNumVertices()); // explicitly assert here, no AIOOBE
+
+        if (null == this.m_avColors[channel]) this.mapColors(channel);
+
+        iIndex *= 4;   // RGBA order
+        afOut[iOutBase] = this.m_avColors[channel][iIndex];
+        afOut[iOutBase + 1] = this.m_avColors[channel][iIndex + 1];
+        afOut[iOutBase + 2] = this.m_avColors[channel][iIndex + 2];
+        afOut[iOutBase + 3] = this.m_avColors[channel][iIndex + 3];
+    }
+
+    /**
+     * Provides direct access to the vertex bitangent array of the mesh
+     * This is the recommended way of accessing the data.
+     *
+     * @return Array of floats, size is numverts * 3. Component ordering
+     *         is xyz.
+     */
+    public float[] getVertexColorArray(int channel) {
+        assert(this.hasVertexColors(channel));
+        if (null == this.m_avColors[channel]) this.mapColors(channel);
+        return this.m_avColors[channel];
+    }
+
+
+    /**
+     * Get a single face of the mesh
+     *
+     * @param iIndex Index of the face. Must be smaller than the value
+     *               returned by <code>getNumFaces()</code>
+     * @param aiOut  Output array, size must at least be 3
+     */
+    public void getFace(int iIndex, int[] aiOut) {
+        assert(aiOut.length >= 3);
+        if (null == this.m_vFaces) this.mapFaces();
+        iIndex *= 3;
+        aiOut[0] = this.m_vFaces[iIndex];
+        aiOut[1] = this.m_vFaces[iIndex + 1];
+        aiOut[2] = this.m_vFaces[iIndex + 2];
+    }
+
+    /**
+     * Get a single face of the mesh
+     *
+     * @param iIndex   Index of the face. Must be smaller than the value
+     *                 returned by <code>getNumFaces()</code>
+     * @param aiOut    Output array, size must at least be 3
+     * @param iOutBase Start index in the output array
+     */
+    public void getFace(int iIndex, int[] aiOut, int iOutBase) {
+        assert(aiOut.length >= 3);
+        if (null == this.m_vFaces) this.mapFaces();
+        iIndex *= 3;
+        aiOut[0] = this.m_vFaces[iIndex];
+        aiOut[iOutBase + 1] = this.m_vFaces[iIndex + 1];
+        aiOut[iOutBase + 2] = this.m_vFaces[iIndex + 2];
+    }
+
+
+    /**
+     * Provides direct access to the face array of the mesh
+     * This is the recommended way of accessing the data.
+     *
+     * @return Array of ints, size is numfaces * 3. Each face consists
+     *         of three indices (higher level polygons are automatically
+     *         triangulated by the library)
+     */
+    public int[] getFaceArray() {
+        if (null == this.m_vFaces) this.mapFaces();
+        return this.m_vFaces;
+    }
+
 
     protected void OnMap() throws NativeError {
+        // map all vertex component arrays into JVM memory
+        if (this.hasPositions()) this.mapVertices();
+        if (this.hasNormals()) this.mapNormals();
+        if (this.hasTangentsAndBitangents()) {
+            this.mapTangents();
+            this.mapBitangents();
+        }
+        for (int i = 0; i < MAX_NUMBER_OF_COLOR_SETS; ++i) {
+            if (this.hasVertexColors(i)) this.mapColors(i);
+        }
+        for (int i = 0; i < MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+            if (this.hasUVCoords(i)) this.mapUVs(i);
+        }
+        // LOG
+    }
 
-        // map all vertex component arrays into our memory
 
+    private void mapVertices() {
+        this.m_vVertices = new float[this.getNumVertices() * 3];
+        if (0xffffffff == this._NativeMapVertices(((Scene) this.getParent()).
+                getImporter().getContext(), this.getArrayIndex(),
+                this.m_vVertices)) {
+            // this should occur rarely. No need to throw an exception,
+            // simply write to log and let the array at 0.0f
+            // LOG
+        }
+    }
+
+    private void mapNormals() {
+        this.m_vNormals = new float[this.getNumVertices() * 3];
+        if (0xffffffff == this._NativeMapNormals(((Scene) this.getParent()).
+                getImporter().getContext(), this.getArrayIndex(),
+                this.m_vNormals)) {
+            // this should occur rarely. No need to throw an exception,
+            // simply write to log and let the array at 0.0f
+            // LOG
+        }
+    }
+
+    private void mapTangents() {
+        this.m_vTangents = new float[this.getNumVertices() * 3];
+        if (0xffffffff == this._NativeMapTangents(((Scene) this.getParent()).
+                getImporter().getContext(), this.getArrayIndex(),
+                this.m_vTangents)) {
+            // this should occur rarely. No need to throw an exception,
+            // simply write to log and let the array at 0.0f
+            // LOG
+        }
+    }
+
+    private void mapBitangents() {
+        this.m_vBitangents = new float[this.getNumVertices() * 3];
+        if (0xffffffff == this._NativeMapBitangents(((Scene) this.getParent()).
+                getImporter().getContext(), this.getArrayIndex(),
+                this.m_vBitangents)) {
+            // this should occur rarely. No need to throw an exception,
+            // simply write to log and let the array at 0.0f
+            // LOG
+        }
+    }
+
+    private void mapFaces() {
+        this.m_vFaces = new int[this.getNumFaces() * 3];
+        if (0xffffffff == this._NativeMapFaces(((Scene) this.getParent()).
+                getImporter().getContext(), this.getArrayIndex(),
+                this.m_vFaces)) {
+            // this should occur rarely. No need to throw an exception,
+            // simply write to log and let the array at 0
+            // LOG
+        }
+    }
+
+    private void mapUVs(int channel) {
+        this.m_avUVs[channel] = new float[this.getNumVertices() * this.m_aiNumUVComponents[channel]];
+        if (0xffffffff == this._NativeMapUVs(((Scene) this.getParent()).
+                getImporter().getContext(), this.getArrayIndex(),
+                channel, this.m_avUVs[channel])) {
+            // this should occur rarely. No need to throw an exception,
+            // simply write to log and let the array at 0.0f
+            // LOG
+        }
+    }
+
+    private void mapColors(int channel) {
+        this.m_avColors[channel] = new float[this.getNumVertices() * 4];
+        if (0xffffffff == this._NativeMapColors(((Scene) this.getParent()).
+                getImporter().getContext(), this.getArrayIndex(),
+                channel, this.m_avColors[channel])) {
+            // this should occur rarely. No need to throw an exception,
+            // simply write to log and let the array at 0.0f
+            // LOG
+        }
     }
 
 
@@ -531,7 +818,7 @@ public class Mesh extends IMappable {
      * @param context Current importer context (imp.hashCode)
      * @return Combination of the PF_XXX constants
      */
-    private native int _NativeGetPresenceFlags(long context);
+    private native int _NativeGetPresenceFlags(long context, long index);
 
     /**
      * JNI bridge function - for internal use only
@@ -540,15 +827,43 @@ public class Mesh extends IMappable {
      * @param context Current importer context (imp.hashCode)
      * @return Number of vertices in the mesh
      */
-    private native int _NativeGetNumVertices(long context);
+    private native int _NativeGetNumVertices(long context, long index);
+
+    private native int _NativeGetNumFaces(long context, long index);
+
+    private native int _NativeGetNumBones(long context, long index);
+
+    private native int _NativeGetMaterialIndex(long context, long index);
 
     /**
      * JNI bridge function - for internal use only
      * Retrieve the number of uvw components for a channel
      *
      * @param context Current importer context (imp.hashCode)
-     * @param out Output array. Size must be MAX_NUMBER_OF_TEXTURECOORDS.
+     * @param out     Output array. Size must be MAX_NUMBER_OF_TEXTURECOORDS.
      * @return 0xffffffff if an error occured
      */
-     private native int _NativeGetNumUVComponents(long context, int[] out);
+    private native int _NativeGetNumUVComponents(long context, long index, int[] out);
+
+    /**
+     * JNI bridge function - for internal use only
+     * Map the position component of the mesh's vertices into memory
+     *
+     * @param context Current importer context (imp.hashCode)
+     * @param out     Output array. Must be large enough
+     * @return 0xffffffff if an error occured
+     */
+    private native int _NativeMapVertices(long context, long index, float[] out);
+
+    private native int _NativeMapNormals(long context, long index, float[] out);
+
+    private native int _NativeMapTangents(long context, long index, float[] out);
+
+    private native int _NativeMapBitangents(long context, long index, float[] out);
+
+    private native int _NativeMapUVs(long context, long index, int channel, float[] out);
+
+    private native int _NativeMapColors(long context, long index, int channel, float[] out);
+
+    private native int _NativeMapFaces(long context, long index, int[] out);
 }

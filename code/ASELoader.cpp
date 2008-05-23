@@ -145,12 +145,64 @@ void ASEImporter::BuildNodes(aiScene* pcScene)
 	ai_assert(NULL != pcScene);
 
 	pcScene->mRootNode = new aiNode();
-	pcScene->mRootNode->mNumMeshes = pcScene->mNumMeshes;
-	pcScene->mRootNode->mMeshes = new unsigned int[pcScene->mRootNode->mNumMeshes];
+	pcScene->mRootNode->mNumMeshes = 0;
+	pcScene->mRootNode->mMeshes = 0;
 
-	for (unsigned int i = 0; i < pcScene->mRootNode->mNumMeshes;++i)
-		pcScene->mRootNode->mMeshes[i] = i;
+	ai_assert(4 <= AI_MAX_NUMBER_OF_COLOR_SETS);
+	std::vector<std::pair<aiMatrix4x4,std::list<unsigned int> > > stack;
+	stack.reserve(pcScene->mNumMeshes);
+	for (unsigned int i = 0; i < pcScene->mNumMeshes;++i)
+	{
+		// get the transformation matrix of the node
+		aiMatrix4x4* pmTransform = (aiMatrix4x4*)pcScene->mMeshes[i]->mColors[2];
+		
+		// search for an identical matrix in our list
+		for (std::vector<std::pair<aiMatrix4x4,std::list<unsigned int> > >::iterator
+			a =  stack.begin();
+			a != stack.end();++a)
+		{
+			if ((*a).first == *pmTransform)
+			{
+				(*a).second.push_back(i);
+				pmTransform->a1 = std::numeric_limits<float>::quiet_NaN();
+				break;
+			}
+		}
+		if (is_not_qnan(pmTransform->a1))
+		{
+			// add a new entry ...
+			stack.push_back(std::pair<aiMatrix4x4,std::list<unsigned int> >(
+				*pmTransform,std::list<unsigned int>()));
+			stack.back().second.push_back(i);
+		}
+		// delete the matrix
+		delete pmTransform;
+		pcScene->mMeshes[i]->mColors[2] = NULL;
+	}
 
+	// allocate enough space for the child nodes
+	pcScene->mRootNode->mNumChildren = stack.size();
+	pcScene->mRootNode->mChildren = new aiNode*[stack.size()];
+
+	// now build all nodes
+	for (std::vector<std::pair<aiMatrix4x4,std::list<unsigned int> > >::iterator
+		a =  stack.begin();
+		a != stack.end();++a)
+	{
+		aiNode* pcNode = new aiNode();
+		pcNode->mNumMeshes = (*a).second.size();
+		pcNode->mMeshes = new unsigned int[pcNode->mNumMeshes];
+		for (std::list<unsigned int>::const_iterator
+			i =  (*a).second.begin();
+			i != (*a).second.end();++i)
+		{
+			*pcNode->mMeshes++ = *i;
+		}
+		pcNode->mMeshes -= pcNode->mNumMeshes;
+		pcNode->mTransformation = (*a).first;
+		*pcScene->mRootNode->mChildren++ = pcNode;
+	}
+	pcScene->mRootNode->mChildren -= stack.size();
 	return;
 }
 // ------------------------------------------------------------------------------------------------
@@ -225,6 +277,18 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 
 	for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS;++c)
 		mesh.amTexCoords[c] = amTexCoords[c];
+
+	// now need to transform all vertices with the inverse of their
+	// transformation matrix ...
+	aiMatrix4x4 mInverse = mesh.mTransform;
+	mInverse.Inverse();
+
+	for (std::vector<aiVector3D>::iterator
+		i =  mesh.mPositions.begin();
+		i != mesh.mPositions.end();++i)
+	{
+		(*i) = mInverse * (*i);
+	}
 
 	return;
 }
@@ -415,8 +479,10 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, aiScene* pcScene)
 				// we will need this material
 				this->mParser->m_vMaterials[mesh.iMaterialIndex].avSubMaterials[p].bNeed = true;
 
-				// store the real index here ...
+				// store the real index here ... color channel 3
 				p_pcOut->mColors[3] = (aiColor4D*)(uintptr_t)mesh.iMaterialIndex;
+				// store the real transformation matrix in color channel 2
+				p_pcOut->mColors[2] = (aiColor4D*) new aiMatrix4x4(mesh.mTransform);
 				avOutMeshes.push_back(p_pcOut);
 
 				// convert vertices
@@ -495,8 +561,10 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, aiScene* pcScene)
 		p_pcOut->mMaterialIndex = ASE::Face::DEFAULT_MATINDEX;
 		this->mParser->m_vMaterials[mesh.iMaterialIndex].bNeed = true;
 
-		// store the real index here ...
+		// store the real index here ... in color channel 3
 		p_pcOut->mColors[3] = (aiColor4D*)(uintptr_t)mesh.iMaterialIndex;
+		// store the transformation matrix in color channel 2
+		p_pcOut->mColors[2] = (aiColor4D*) new aiMatrix4x4(mesh.mTransform);
 		avOutMeshes.push_back(p_pcOut);
 
 		// convert vertices

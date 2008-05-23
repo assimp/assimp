@@ -63,17 +63,6 @@ public class PostProcessStep {
     private static int s_iVertexSplitLimit = DEFAULT_VERTEX_SPLIT_LIMIT;
     private static int s_iTriangleSplitLimit = DEFAULT_TRIANGLE_SPLIT_LIMIT;
 
-
-    /**
-     * Triangulates all faces of all meshes. By default the imported
-     * mesh data might contain faces with more than 3 indices. For
-     * rendering a mesh you usually need all faces to be triangles. This
-     * post processing step splits up all higher faces to triangles.
-     */
-    public static final PostProcessStep Triangulate =
-            new PostProcessStep("Triangulate");
-
-
     /**
      * Identifies and joins identical vertex data sets within all imported
      * meshes. After this step is run each mesh does contain only unique
@@ -155,7 +144,9 @@ public class PostProcessStep {
      * Set the vertex split limit for the "SplitLargeMeshes" process
      * If a mesh exceeds this limit it will be splitted
      *
-     * @param limit New vertex split limit
+     * @param limit New vertex split limit. Pass 0xffffffff to disable
+     * a vertex split limit. However, splitting by triangles is still active
+     * then.
      * @return Old vertex split limit
      */
     public static synchronized int setVertexSplitLimit(int limit) {
@@ -171,7 +162,9 @@ public class PostProcessStep {
      * Set the triangle split limit for the "SplitLargeMeshes" process
      * If a mesh exceeds this limit it will be splitted
      *
-     * @param limit new triangle split limit
+     * @param limit new triangle split limit. Pass 0xffffffff to disable
+     * a triangle split limit. However, splitting by vertices is still active
+     * then.
      * @return Old triangle split limit
      */
     public static synchronized int setTriangleSplitLimit(int limit) {

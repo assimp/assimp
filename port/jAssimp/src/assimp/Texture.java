@@ -69,8 +69,16 @@ public class Texture extends IMappable {
      * @param parent Must be valid, null is not allowed
      * @param index  Valied index in the parent's list
      */
-    public Texture(Object parent, int index) {
+    public Texture(Object parent, int index) throws NativeError {
         super(parent, index);
+
+        long lTemp;
+        if (0x0 == (lTemp = this._NativeGetTextureInfo(((Scene)this.getParent()).
+                getImporter().getContext(),this.getArrayIndex()))) {
+            throw new NativeError("Unable to get the width and height of the texture");
+        }
+        this.width = (int)(lTemp);
+        this.height = (int)(lTemp >> 32);
     }
 
 
@@ -115,6 +123,23 @@ public class Texture extends IMappable {
     }
 
     /**
+     * Get a pointer to the color buffer of the texture
+     * @return Array of <code>java.awt.Color</code>, size: width * height
+     */
+    public Color[] getColorArray() {
+
+         // map the color data in memory if required ...
+        if (null == data) {
+            try {
+                this.OnMap();
+            } catch (NativeError nativeError) {
+                return null;
+            }
+        }
+        return data;
+    }
+
+    /**
      * Internal helper function to map the native texture data into
      * a <code>java.awt.Color</code> array
      */
@@ -129,7 +154,8 @@ public class Texture extends IMappable {
         byte[] temp = new byte[(iNumPixels) << 2];
 
         // and copy the native color data to it
-        if (0xffffffff == this._NativeMapColorData(temp)) {
+        if (0xffffffff == this._NativeMapColorData(((Scene)this.getParent()).getImporter().getContext(),
+                this.getArrayIndex(),temp)) {
            throw new NativeError("Unable to map aiTexture into the Java-VM");
         }
 
@@ -146,8 +172,22 @@ public class Texture extends IMappable {
      * The method maps the contents of the native aiTexture object into memory
      * the native memory area will be deleted afterwards.
      *
+     * @param context Current importer context (imp.hashCode)
+     * @param index Index of the texture in the scene
      * @param temp Output array. Assumed to be width * height * 4 in size
      * @return 0xffffffff if an error occured
      */
-    private native int _NativeMapColorData(byte[] temp);
+    private native int _NativeMapColorData(long context, long index, byte[] temp);
+
+    /**
+     * JNI bridge call. For internal use only
+     * The method retrieves information on the underlying texture
+     *
+     * @param context Current importer context (imp.hashCode)
+     * @param index Index of the texture in the scene
+     * @return 0x0 if an error occured, otherwise the width in the lower 32 bits
+     * and the height in the higher 32 bits
+     *
+     */
+    private native long _NativeGetTextureInfo(long context, long index);
 }

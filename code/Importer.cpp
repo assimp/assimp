@@ -200,6 +200,14 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 	// validate the flags
 	ai_assert(ValidateFlags(pFlags));
 
+	// check whether this Importer instance has already loaded
+	// a scene. In this case we need to delete the old one
+	if (this->mScene)
+	{
+		delete mScene;
+		this->mScene = NULL;
+	}
+
 	// first check if the file is accessable at all
 	if( !mIOHandler->Exists( pFile))
 	{

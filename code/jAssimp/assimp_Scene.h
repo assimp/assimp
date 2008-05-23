@@ -10,34 +10,34 @@ extern "C" {
 /*
  * Class:     assimp_Scene
  * Method:    _NativeGetNumMeshes
- * Signature: (I)I
+ * Signature: (J)I
  */
 JNIEXPORT jint JNICALL Java_assimp_Scene__1NativeGetNumMeshes
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jobject, jlong);
 
 /*
  * Class:     assimp_Scene
  * Method:    _NativeGetNumAnimations
- * Signature: (I)I
+ * Signature: (J)I
  */
 JNIEXPORT jint JNICALL Java_assimp_Scene__1NativeGetNumAnimations
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jobject, jlong);
 
 /*
  * Class:     assimp_Scene
  * Method:    _NativeGetNumTextures
- * Signature: (I)I
+ * Signature: (J)I
  */
 JNIEXPORT jint JNICALL Java_assimp_Scene__1NativeGetNumTextures
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jobject, jlong);
 
 /*
  * Class:     assimp_Scene
  * Method:    _NativeGetNumMaterials
- * Signature: (I)I
+ * Signature: (J)I
  */
 JNIEXPORT jint JNICALL Java_assimp_Scene__1NativeGetNumMaterials
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jobject, jlong);
 
 #ifdef __cplusplus
 }

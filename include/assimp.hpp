@@ -161,6 +161,15 @@ public:
 	*/
 	void GetExtensionList(std::string& szOut);
 
+
+	// -------------------------------------------------------------------
+	/** Returns the scene loaded by the last successful call to ReadFile()
+	*
+	* @return Current scene or NULL if there is currently no scene loaded
+	*/
+	inline const aiScene* GetScene()
+		{return this->mScene;}
+
 private:
 	/** Empty copy constructor. */
 	Importer(const Importer &other);

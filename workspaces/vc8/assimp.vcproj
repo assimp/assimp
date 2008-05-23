@@ -307,7 +307,7 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;C:\Program Files\Java\jdk1.6.0_01\include&quot;;&quot;C:\Program Files\Java\jdk1.6.0_01\include\win32&quot;"
+				AdditionalIncludeDirectories="&quot;$(JAVA_HOME)\include&quot;;&quot;$(JAVA_HOME)\include\win32&quot;"
 				PreprocessorDefinitions="NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_JNI_EXPORT"
 				StringPooling="true"
 				BufferSecurityCheck="false"
@@ -377,7 +377,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\Program Files\Java\jdk1.6.0_01\include&quot;;&quot;C:\Program Files\Java\jdk1.6.0_01\include\win32&quot;"
+				AdditionalIncludeDirectories="&quot;$(JAVA_HOME)\include&quot;;&quot;$(JAVA_HOME)\include\win32&quot;"
 				PreprocessorDefinitions="DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_JNI_EXPORT"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"

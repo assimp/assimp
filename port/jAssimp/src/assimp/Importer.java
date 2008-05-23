@@ -70,7 +70,7 @@ public class Importer {
      * Assimp::Importer object. For 64 bit platforms it is something else ..
      * at least it is guaranted to be unique ;-)
      */
-    private int m_iNativeHandle = 0xffffffff;
+    private long m_iNativeHandle = 0xffffffffffffffffl;
 
     /**
      * Loaded scene. It can't be used after the Importer class instance
@@ -88,9 +88,10 @@ public class Importer {
      * ASSIMP library. A native Assimp::Importer object is constructed and
      * initialized. The flag list is set to zero, a default I/O handler
      * is constructed.
+     *
      * @throws NativeError Thrown if the jassimp library could not be loaded
-     * or if the entry point to the module wasn't found. if this exception
-     * is not thrown, you can assume that jAssimp is fully available.
+     *                     or if the entry point to the module wasn't found. if this exception
+     *                     is not thrown, you can assume that jAssimp is fully available.
      */
     public Importer() throws NativeError {
         /** try to load the jassimp library. First try to load the
@@ -110,16 +111,16 @@ public class Importer {
         // now create the native Importer class and setup our internal
         // data structures outside the VM.
         try {
-            if (0xffffffff == (this.m_iNativeHandle = _NativeInitContext())) {
+            if (0xffffffffffffffffl == (this.m_iNativeHandle = _NativeInitContext())) {
                 throw new NativeError(
                         "Unable to initialize the native library context." +
-                        "The initialization routine has failed");
+                                "The initialization routine has failed");
             }
         }
         catch (UnsatisfiedLinkError exc) {
             throw new NativeError(
                     "Unable to initialize the native library context." +
-                    "The initialization routine has not been found");
+                            "The initialization routine has not been found");
         }
         return;
     }
@@ -183,17 +184,20 @@ public class Importer {
      * a default implementation is used. This implementation uses fopen()/
      * fread()/fwrite()/fclose()/ftell()/fseek() and provides no support
      * for archives like ZIP or PAK.
+     *
      * @param path Path to the file to be read
      * @return null if the import failed, otherwise a valid Scene instance
+     * @throws NativeError This exception is thrown when an unknown error
+     * occurs in the JNI bridge module.
      */
-    public Scene readFile(String path) {
+    public Scene readFile(String path) throws NativeError {
         this.scene = new Scene(this);
         this.path = path;
 
         // we need to build a path that is valid for the current OS
         char sep = System.getProperty("file.separator").charAt(0);
-        if(sep != '\\') this.path = this.path.replace('\\',sep);
-        if(sep != '/') this.path = this.path.replace('/',sep);
+        if (sep != '\\') this.path = this.path.replace('\\', sep);
+        if (sep != '/') this.path = this.path.replace('/', sep);
 
         // need to build a list of postprocess step as bitflag combination
         // Of course, this could have been implemented directly. However,
@@ -212,11 +216,20 @@ public class Importer {
         }
 
         // now load the mesh
-        if(0xffffffff == this._NativeLoad(this.path,flags,this.m_iNativeHandle) ||
-                ! this.scene.construct()) {
+        if (0xffffffff == this._NativeLoad(this.path, flags, this.m_iNativeHandle)) {
             this.scene = null;
             this.path = null;
-            return null;
+            throw new NativeError("Failed to load the mesh");
+        }
+        // and setup our Scene object
+        try {
+          this.scene.construct();
+        }
+        catch (NativeError exc) {
+
+            this.scene = null;
+            this.path = null;
+            throw exc;
         }
         return this.scene;
     }
@@ -260,16 +273,28 @@ public class Importer {
 
     /**
      * Implementation of <code>java.lang.Object.hashCode()</code>
-     *
+     * <p/>
      * The native handle obtained from the JNI bridge is used as hash code.
-     * It is assumed to be unique, in fact it is normall the address of
+     * It is assumed to be unique, in fact it is normally the address of
      * the native Assimp::Importer object.
+     *
      * @return An unique value representing the object
      */
     @Override
     public int hashCode() {
+        return (int) (m_iNativeHandle >> 32) ^ (int) (m_iNativeHandle);
+    }
+
+
+    /**
+     * Retrieves the native context of the class. This is normally the
+     * address of the native Importer object.
+     * @return Native context
+     */
+    public long getContext() {
         return m_iNativeHandle;
     }
+
 
     /**
      * JNI bridge call. For internal use only
@@ -288,16 +313,18 @@ public class Importer {
      * JNI bridge call. For internal use only
      * The method destroys the ASSIMP-JNI bridge. No native function call
      * to assimp will be successful after this method has been called.
+     *
      * @return 0xffffffff if an error occured
      */
-    private native int _NativeFreeContext(int iContext);
+    private native int _NativeFreeContext(long iContext);
 
     /**
      * JNI bridge call. For internal use only
      * The method loads the model into memory, but does not map it into the VM
-     * @param path Path (valid separators for the OS) to the model to be loaded
+     *
+     * @param path  Path (valid separators for the OS) to the model to be loaded
      * @param flags List of postprocess steps to be executed
      * @return 0xffffffff if an error occured
      */
-    private native int _NativeLoad(String path,int flags, int iContext);
+    private native int _NativeLoad(String path, int flags, long iContext);
 }

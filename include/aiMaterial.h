@@ -522,7 +522,7 @@ aiReturn aiGetMaterialString(const C_STRUCT aiMaterial* pMat,
 #define AI_TEXTYPE_DIFFUSE		0x7
 
 // ---------------------------------------------------------------------------
-/** Helper function to get a diffuse texture from a material
+/** Helper function to get a texture from a material
  *
  *  This function is provided just for convinience. 
  *  @param pMat Pointer to the input material. May not be NULL

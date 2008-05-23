@@ -18,18 +18,18 @@ JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeInitContext
 /*
  * Class:     assimp_Importer
  * Method:    _NativeFreeContext
- * Signature: (I)I
+ * Signature: (J)I
  */
 JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeFreeContext
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jobject, jlong);
 
 /*
  * Class:     assimp_Importer
  * Method:    _NativeLoad
- * Signature: (Ljava/lang/String;II)I
+ * Signature: (Ljava/lang/String;IJ)I
  */
 JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeLoad
-  (JNIEnv *, jobject, jstring, jint, jint);
+  (JNIEnv *, jobject, jstring, jint, jlong);
 
 #ifdef __cplusplus
 }

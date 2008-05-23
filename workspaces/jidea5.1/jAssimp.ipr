@@ -49,18 +49,18 @@
     <option name="MAXIMUM_HEAP_SIZE" value="128" />
   </component>
   <component name="JavadocGenerationManager">
-    <option name="OUTPUT_DIRECTORY" />
-    <option name="OPTION_SCOPE" value="protected" />
+    <option name="OUTPUT_DIRECTORY" value="J:/Programmieren/ASSIMP/assimp2/doc/javadoc" />
+    <option name="OPTION_SCOPE" value="package" />
     <option name="OPTION_HIERARCHY" value="true" />
     <option name="OPTION_NAVIGATOR" value="true" />
     <option name="OPTION_INDEX" value="true" />
     <option name="OPTION_SEPARATE_INDEX" value="true" />
     <option name="OPTION_DOCUMENT_TAG_USE" value="false" />
     <option name="OPTION_DOCUMENT_TAG_AUTHOR" value="false" />
-    <option name="OPTION_DOCUMENT_TAG_VERSION" value="false" />
+    <option name="OPTION_DOCUMENT_TAG_VERSION" value="true" />
     <option name="OPTION_DOCUMENT_TAG_DEPRECATED" value="true" />
     <option name="OPTION_DEPRECATED_LIST" value="true" />
-    <option name="OTHER_OPTIONS" value="" />
+    <option name="OTHER_OPTIONS" />
     <option name="HEAP_SIZE" />
     <option name="OPEN_IN_BROWSER" value="true" />
   </component>

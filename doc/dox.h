@@ -234,7 +234,96 @@ void DoTheImportThing( const std::string& pFile)
 }
 @endcode
 
-Auch das Logging noch erklären?
+@section  logging Logging in the AssetImporter
+
+The ASSIMP library provides an easy mechanism to log messages. For instance if you want to check the state of your 
+import and you just want to check, after which preprocessing step the import-process was aborted you can take a look 
+at the log. 
+Per default the ASSIMP-library provides a default log implementation, where you can log your user specific message
+by calling it as a singleton with the requested logging-type:
+
+@code
+
+// Create a logger instance 
+Assimp::DefaultLogger::create("",Assimp::Logger::VERBOSE);
+
+// Now I am ready for logging my stuff
+Assimp::DefaultLogger::get()->info("this is my info-call");
+
+// Kill it after the work is done
+Assimp::DefaultLogger::kill();
+@endcode
+
+At first you have to create the default-logger-instance (create). Now you are ready to rock and can log a 
+little bit around. After that you should kill it to release the default-singleton-instance.
+
+If you want to integrate the ASSIMP-log into your own GUI it my be helpful to have a mechanism writing
+the logs into your own log windows. The logger-interface provides this by implementing an interface called LogStream.
+You can attach and detach this logstream to the default-logger instance or any implementation derived from Logger. 
+Just derivate your own logger from the abstract baseclass LogStream and overwrite the write-method:
+
+@code
+class myStream :
+	public LogStream
+{
+public:
+	myStream()
+	{
+		// empty
+	}
+	
+	~myStream()
+	{
+		// empty
+	}
+
+	void write(const std::string &message)
+	{
+		printf("%s\n", message.c_str();
+	}
+};
+
+// Attaching it to the default logger insstance:
+unsigned int severity = 0;
+severity |= Logger::DEBUGGING;
+severity |= Logger::INFO;
+severity |= Logger::WARN;
+severity |= Logger::ERR;
+
+// Attaching it to the default logger
+Assimp::DefaultLogger::get()->attachStream( new myStream(), severity );
+
+@endcode
+
+The severity level controls the kind of message which will be written into
+the attached stream. If you just want to log errors and warnings set the warn 
+and error severity flag for the requested severity. It is also possible to remove 
+an self defined logstream from a error severity by detaching it with the severity flag set:
+
+@code
+
+unsigned int severity = 0;
+severity |= Logger::DEBUGGING;
+
+// Detach debug messages from you self defined stream
+Assimp::DefaultLogger::get()->attachStream( new myStream(), severity );
+
+@endcode
+
+If you want to implement your own loger just build a derivate from the abstract base class 
+Logger and overwrite the methods debug, info, warn and error. 
+
+If you ust want to see the debug-messages in a debug-configurised build the Logger-interface 
+provides an logging severity. You can set it calling the method:
+
+@code
+
+Logger::setLogSeverity( LogSeverity log_severity );
+
+@endcode
+
+The normal logging severity supports just the basic stuff like, info, warnings and errors. 
+In the verbose level debug messages will be logged, too.
 
 */
 

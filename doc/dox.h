@@ -397,9 +397,9 @@ void ConvertMaterial( aiMaterial* matIn, D3DMATERIAL9* matOut )
 
 @section bones Bones
 
-A mesh may have a set of bones. Bones are a means to deform a mesh according to the movement of
-a skeleton. Each bone has a name and a set of vertices on which it has influence. Its offset matrix
-declares the transformation needed to transform from mesh space to the local space of this bone. 
+A mesh may have a set of bones in the form of aiBone structures.. Bones are a means to deform a mesh 
+according to the movement of a skeleton. Each bone has a name and a set of vertices on which it has influence. 
+Its offset matrix declares the transformation needed to transform from mesh space to the local space of this bone. 
 
 Using the bones name you can find the corresponding node in the node hierarchy. This node in relation
 to the other bones' nodes defines the skeleton of the mesh. Unfortunately there might also be
@@ -415,7 +415,7 @@ b2) Mark this node as "yes" in the necessityMap. <br>
 b3) Mark all of its parents the same way until you 1) find the mesh's node or 2) the parent of the mesh's node. <br>
 c) Recursively iterate over the node hierarchy <br>
 c1) If the node is marked as necessary, copy it into the skeleton and check its children <br>
-c2) If the node is market as not necessary, skip it and do not iterate over its children. <br>
+c2) If the node is marked as not necessary, skip it and do not iterate over its children. <br>
 
 Reasons: you need all the parent nodes to keep the transformation chain intact. Depending on the
 file format and the modelling package the node hierarchy of the skeleton is either a child
@@ -427,6 +427,37 @@ that's why the algorithm skips the whole branch if the node is marked as "not ne
 You should now have a mesh in your engine with a skeleton that is a subset of the imported hierarchy.
 
 @section anims Animations
+
+An imported scene may contain zero to x aiAnimation entries. An animation in this context is a set
+of keyframe sequences where each sequence describes the orientation of a single node in the hierarchy
+over a limited time span. Animations of this kind are usually used to animate the skeleton of
+a skinned mesh, but there are other uses as well.
+
+An aiAnimation has a duration. The duration as well as all time stamps are given in ticks. To get
+the correct timing, all time stamp thus have to be divided by aiAnimation::mTicksPerSecond. Beware,
+though, that certain combinations of file format and exporter don't always store this information
+in the exported file. In this case, mTicksPerSecond is set to 0 to indicate the lack of knowledge.
+
+The aiAnimation consists of a series of aiBoneAnims. Each bone animation affects a single node in
+the node hierarchy only, the name specifying which node is affected. For this node the structure 
+stores three separate key sequences: a vector key sequence for the position, a quaternion key sequence
+for the rotation and another vector key sequence for the scaling. All 3d data is local to the
+coordinate space of the node's parent, that means in the same space as the node's transformation matrix.
+There might be cases where animation tracks refer to a non-existent node by their name, but this
+should not be the case in your every-day data. 
+
+To apply such an animation you need to identify the animation tracks that refer to actual bones
+in your mesh. Then for every track: <br>
+a) Find the keys that lay right before the current anim time. <br>
+b) Optional: interpolate between these and the following keys. <br>
+c) Combine the calculated position, rotation and scaling to a tranformation matrix <br>
+d) Set the affected node's transformation to the calculated matrix. <br>
+
+If you need hints on how to convert to or from quaternions, have a look at the 
+<a href="http://www.j3d.org/matrix_faq/matrfaq_latest.html">Matrix&Quaternion FAQ</a>. I suggest
+using logarithmic interpolation for the scaling keys if you happen to need them - usually you don't
+need them at all.
+
 
 @section textures Textures
 

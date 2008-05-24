@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBJFILEMTLIMPORTER_H_INC
 
 #include <vector>
+#include <string>
 
 struct aiColor3D;
 

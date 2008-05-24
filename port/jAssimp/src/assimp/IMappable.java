@@ -49,7 +49,7 @@ package assimp;
  * @author Aramis (Alexander Gessler)
  * @version 1.0
  */
-public abstract class IMappable {
+public abstract class Mappable {
 
     /**
      * Index of the mapped object in the parent Mesh
@@ -67,7 +67,7 @@ public abstract class IMappable {
      * @param parent Must be valid, null is not allowed
      * @param index Valied index in the parent's list
      */
-    public IMappable(Object parent, int index) {
+    public Mappable(Object parent, int index) {
         m_parent = parent;
         m_iArrayIndex = index;
     }

@@ -57,7 +57,20 @@ class CDisplay
 	{
 private:
 
-	// default constructor
+	// helper class
+	struct Info
+	{
+		Info(	D3DXVECTOR4* p1,
+				AssetHelper::MeshHelper* p2,
+				const char* p3)
+				: pclrColor(p1),pMesh(p2),szShaderParam(p3) {}
+
+		D3DXVECTOR4* pclrColor;
+		AssetHelper::MeshHelper* pMesh;
+		const char* szShaderParam;
+	};
+
+// default constructor
 	CDisplay() 
 		:	m_iViewMode(VIEWMODE_FULL), 
 			m_pcCurrentTexture(NULL),

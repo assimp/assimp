@@ -109,6 +109,9 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
 		aiVector3D pDelta2 = *pV3 - *pV1;
 		aiVector3D vNor = pDelta1 ^ pDelta2;
 
+		if (face.mIndices[1] > face.mIndices[2])
+			vNor *= -1.0f;
+
 		for (unsigned int i = 0;i < face.mNumIndices;++i)
 		{
 			pMesh->mNormals[face.mIndices[i]] = vNor;

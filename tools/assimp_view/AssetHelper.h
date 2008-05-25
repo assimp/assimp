@@ -178,6 +178,9 @@ class AssetHelper
 				// shininess for the material
 				float fShininess;
 
+				// strength of the specular highlight
+				float fSpecularStrength;
+
 				// Stores a pointer to the original normal set of the asset
 				aiVector3D* pvOriginalNormals;
 			};

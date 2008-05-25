@@ -51,7 +51,7 @@ package assimp;
  * @author Aramis (Alexander Gessler)
  * @version 1.0
  */
-public class Material extends IMappable {
+public class Material extends Mappable {
     /**
      * Construction from a given parent object and array index
      *

@@ -99,10 +99,6 @@ Importer::Importer() :
 	mScene(NULL),
 	mErrorString("")	
 {
-	// construct a new logger
-	/*DefaultLogger::create( "test.log", DefaultLogger::VERBOSE );
-	DefaultLogger::get()->info("Start logging");*/
-
 	// allocate a default IO handler
 	mIOHandler = new DefaultIOSystem;
 

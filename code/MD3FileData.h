@@ -254,7 +254,7 @@ struct Vertex
  *	\note This has been taken from q3 source (misc_model.c)
  */
 // ---------------------------------------------------------------------------
-inline void LatLngNormalToVec3(uint16_t p_iNormal, float* p_afOut)
+inline void LatLngNormalToVec3(int16_t p_iNormal, float* p_afOut)
 {
 	float lat = (float)(( p_iNormal >> 8 ) & 0xff);
 	float lng = (float)(( p_iNormal & 0xff ));

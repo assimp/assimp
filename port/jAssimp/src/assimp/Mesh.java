@@ -42,7 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package assimp;
 
-import java.lang.ref.Reference;
 import java.awt.*;
 
 
@@ -61,7 +60,7 @@ import java.awt.*;
  * @author Aramis (Alexander Gessler)
  * @version 1.0
  */
-public class Mesh extends IMappable {
+public class Mesh extends Mappable {
 
     /**
      * Defines the maximum number of UV(W) channels that are available

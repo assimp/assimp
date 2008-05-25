@@ -161,6 +161,16 @@ void HandleCommandLine(char* p_szCommand);
 
 
 //-------------------------------------------------------------------------------
+template <class type, class intype>
+type clamp(intype in)
+{
+	// for unsigned types only ...
+	intype mask = (0x1u << (sizeof(type)*8))-1;
+	return (type)std::max((intype)0,std::min(in,mask));
+}
+
+
+//-------------------------------------------------------------------------------
 // Position of the cursor relative to the 3ds max' like control circle
 //-------------------------------------------------------------------------------
 enum EClickPos

@@ -269,8 +269,14 @@ public:
 
 /** @def AI_MATKEY_SHININESS
 *  Defines the base shininess of the material
+*  This is the exponent of the phong shading equation.
 */
 #define AI_MATKEY_SHININESS "$mat.shininess"
+
+/** @def AI_MATKEY_SHININESS_STRENGTH
+*  Defines the strength of the specular highlight.
+*/
+#define AI_MATKEY_SHININESS_STRENGTH "$mat.shinpercent"
 
 /** @def AI_MATKEY_COLOR_DIFFUSE
 *  Defines the diffuse base color of the material

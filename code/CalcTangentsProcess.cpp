@@ -81,24 +81,39 @@ void CalcTangentsProcess::Execute( aiScene* pScene)
 {
 	DefaultLogger::get()->debug("CalcTangentsProcess begin");
 
+	bool bHas = false;
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-		ProcessMesh( pScene->mMeshes[a]);
+		if(ProcessMesh( pScene->mMeshes[a]))bHas = true;
 
-	DefaultLogger::get()->debug("CalcTangentsProcess finished");
+	if (bHas)DefaultLogger::get()->debug("CalcTangentsProcess finished. There was much work to do ...");
+	else DefaultLogger::get()->debug("CalcTangentsProcess finished");
 }
 
 // ------------------------------------------------------------------------------------------------
 // Calculates tangents and bitangents for the given mesh
-void CalcTangentsProcess::ProcessMesh( aiMesh* pMesh)
+bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh)
 {
 	// we assume that the mesh is still in the verbose vertex format where each face has its own set
 	// of vertices and no vertices are shared between faces. Sadly I don't know any quick test to 
 	// assert() it here.
     //assert( must be verbose, dammit);
 
+	// TODO (Aramis)
+	// If we had a model format in the lib which has native support for
+	// tangents and bitangents, it would be necessary to add a
+	// "KillTangentsAndBitangents" flag ...
+	if (pMesh->mTangents && pMesh->mBitangents)
+	{
+		return false;
+	}
+
 	// what we can check, though, is if the mesh has normals and texture coord. That's a requirement
 	if( pMesh->mNormals == NULL || pMesh->mTextureCoords[0] == NULL)
-		return;
+	{
+		DefaultLogger::get()->error("Normal vectors and at least one "
+			"texture coordinate set are required to calculate tangents. ");
+		return false;
+	}
 
 	// calculate the position bounds so we have a reliable epsilon to check position differences against 
 	aiVector3D minVec( 1e10f, 1e10f, 1e10f), maxVec( -1e10f, -1e10f, -1e10f);
@@ -229,4 +244,5 @@ void CalcTangentsProcess::ProcessMesh( aiMesh* pMesh)
 			meshBitang[ closeVertices[b] ] = smoothBitangent;
 		}
 	}
+	return true;
 }

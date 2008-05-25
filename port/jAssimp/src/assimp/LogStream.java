@@ -42,26 +42,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package assimp;
 
-
 /**
- * An animation consists of keyframe data for a number of bones. For each
- * bone affected by the animation a separate series of data is given.
+ * Output stream for the logger. Directly corresponding with the native
+ * LoggStream interface
+ * <br>
+ * For direct output to a <code>java.io.Stream</code> you can use the
+ * DefaultLogStream class.
  *
  * @author Aramis (Alexander Gessler)
  * @version 1.0
  */
-public class Animation extends Mappable {
-    /**
-     * Construction from a given object and array index
-     *
-     * @param parent Must be valid, null is not allowed
-     * @param index  Valied index in the parent's list
-     */
-    public Animation(Object parent, int index) {
-        super(parent, index);
-    }
+public interface LogStream {
 
-    protected void OnMap() throws NativeError {
-        
-    }
+    /**
+     * Override this for your own output implementations
+     * @param message Message to be written to the log stream
+     */
+    public void write(String message);
 }

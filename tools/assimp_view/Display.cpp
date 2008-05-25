@@ -235,7 +235,6 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 		g_pcAsset->pcScene->mMaterials[this->m_pcCurrentTexture->iMatIndex];
  	
 	// update all meshes referencing this material
-	this->m_pcCurrentTexture->piTexture = piTexture;
 	for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
 	{
 		if (this->m_pcCurrentTexture->iMatIndex != g_pcAsset->pcScene->mMeshes[i]->mMaterialIndex)
@@ -249,6 +248,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 			{
 				pcMesh->piDiffuseTexture->Release();
 				pcMesh->piDiffuseTexture = piTexture;
+				this->m_pcCurrentTexture->piTexture = &pcMesh->piDiffuseTexture;
 
 				if (!pcMesh->bSharedFX)
 				{
@@ -261,6 +261,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 			{
 				pcMesh->piAmbientTexture->Release();
 				pcMesh->piAmbientTexture = piTexture;
+				this->m_pcCurrentTexture->piTexture = &pcMesh->piAmbientTexture;
 
 				if (!pcMesh->bSharedFX)
 				{
@@ -273,6 +274,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 			{
 				pcMesh->piSpecularTexture->Release();
 				pcMesh->piSpecularTexture = piTexture;
+				this->m_pcCurrentTexture->piTexture = &pcMesh->piSpecularTexture;
 
 				if (!pcMesh->bSharedFX)
 				{
@@ -285,6 +287,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 			{
 				pcMesh->piEmissiveTexture->Release();
 				pcMesh->piEmissiveTexture = piTexture;
+				this->m_pcCurrentTexture->piTexture = &pcMesh->piEmissiveTexture;
 
 				if (!pcMesh->bSharedFX)
 				{
@@ -297,6 +300,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 			{
 				pcMesh->piShininessTexture->Release();
 				pcMesh->piShininessTexture = piTexture;
+				this->m_pcCurrentTexture->piTexture = &pcMesh->piShininessTexture;
 
 				if (!pcMesh->bSharedFX)
 				{
@@ -310,6 +314,9 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 			{
 				pcMesh->piNormalTexture->Release();
 				pcMesh->piNormalTexture = piTexture;
+				CMaterialManager::Instance().HMtoNMIfNecessary(pcMesh->piNormalTexture,
+					&pcMesh->piNormalTexture,true);
+				this->m_pcCurrentTexture->piTexture = &pcMesh->piNormalTexture;
 
 				if (!pcMesh->bSharedFX)
 				{
@@ -322,6 +329,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 			{
 				pcMesh->piOpacityTexture->Release();
 				pcMesh->piOpacityTexture = piTexture;
+				this->m_pcCurrentTexture->piTexture = &pcMesh->piOpacityTexture;
 
 				if (!pcMesh->bSharedFX)
 				{
@@ -414,32 +422,32 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
 
 	bool bIsExtraOpacity = 0 != (iType & 0x40000000);
 	const char* szType;
-	IDirect3DTexture9* piTexture;
+	IDirect3DTexture9** piTexture;
 	switch (iType)
 	{
 	case AI_TEXTYPE_DIFFUSE:
-		piTexture = g_pcAsset->apcMeshes[iMesh]->piDiffuseTexture;
+		piTexture = &g_pcAsset->apcMeshes[iMesh]->piDiffuseTexture;
 		szType = "Diffuse";break;
 	case AI_TEXTYPE_SPECULAR:
-		piTexture = g_pcAsset->apcMeshes[iMesh]->piSpecularTexture;
+		piTexture = &g_pcAsset->apcMeshes[iMesh]->piSpecularTexture;
 		szType = "Specular";break;
 	case AI_TEXTYPE_AMBIENT:
-		piTexture = g_pcAsset->apcMeshes[iMesh]->piAmbientTexture;
+		piTexture = &g_pcAsset->apcMeshes[iMesh]->piAmbientTexture;
 		szType = "Ambient";break;
 	case AI_TEXTYPE_EMISSIVE:
-		piTexture = g_pcAsset->apcMeshes[iMesh]->piEmissiveTexture;
+		piTexture = &g_pcAsset->apcMeshes[iMesh]->piEmissiveTexture;
 		szType = "Emissive";break;
 	case AI_TEXTYPE_HEIGHT:
-		piTexture = g_pcAsset->apcMeshes[iMesh]->piNormalTexture;
+		piTexture = &g_pcAsset->apcMeshes[iMesh]->piNormalTexture;
 		szType = "HeightMap";break;
 	case AI_TEXTYPE_NORMALS:
-		piTexture = g_pcAsset->apcMeshes[iMesh]->piNormalTexture;
+		piTexture = &g_pcAsset->apcMeshes[iMesh]->piNormalTexture;
 		szType = "NormalMap";break;
 	case AI_TEXTYPE_SHININESS:
-		piTexture = g_pcAsset->apcMeshes[iMesh]->piShininessTexture;
+		piTexture = &g_pcAsset->apcMeshes[iMesh]->piShininessTexture;
 		szType = "Shininess";break;
 	default: // opacity + opacity | mask
-		piTexture = g_pcAsset->apcMeshes[iMesh]->piOpacityTexture;
+		piTexture = &g_pcAsset->apcMeshes[iMesh]->piOpacityTexture;
 		szType = "Opacity";break;
 	};
 	if (bIsExtraOpacity)
@@ -466,7 +474,7 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
 
 		uint32_t iData = 0;
 		DWORD dwSize = 4;
-		piTexture->GetPrivateData(guidPrivateData,&iData,&dwSize);
+		(*piTexture)->GetPrivateData(guidPrivateData,&iData,&dwSize);
 
 		if (0xFFFFFFFF == iData)
 		{
@@ -583,13 +591,27 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
 		}
 	}
 
-	AssetHelper::MeshHelper* pcMesh = g_pcAsset->apcMeshes[iIndex];
+	AssetHelper::MeshHelper* pcMesh = g_pcAsset->apcMeshes[iMesh];
+
 	if (pcMesh->piDiffuseTexture && pcMesh->piDiffuseTexture == pcMesh->piOpacityTexture && bNoOpacity)
 	{
-		// seems the diffuse texture contains alpha, therefore it has been
-		// added to the opacity channel, too. Add a special value ...
-		AddTextureToDisplayList(AI_TEXTYPE_OPACITY | 0x40000000,
-			0,&szPath,hTexture,iUV,fBlend,eOp,iMesh);
+		// check whether the diffuse texture is not a default texture
+
+		// {9785DA94-1D96-426b-B3CB-BADC36347F5E}
+		static const GUID guidPrivateData = 
+			{ 0x9785da94, 0x1d96, 0x426b, 
+			{ 0xb3, 0xcb, 0xba, 0xdc, 0x36, 0x34, 0x7f, 0x5e } };
+
+		uint32_t iData = 0;
+		DWORD dwSize = 4;
+		if(FAILED( pcMesh->piDiffuseTexture->GetPrivateData(guidPrivateData,&iData,&dwSize) ||
+			0xffffffff == iData))
+		{
+			// seems the diffuse texture contains alpha, therefore it has been
+			// added to the opacity channel, too. Add a special value ...
+			AddTextureToDisplayList(AI_TEXTYPE_OPACITY | 0x40000000,
+				0,&szPath,hTexture,iUV,fBlend,eOp,iMesh);
+		}
 	}
 
 	// add the material to the list
@@ -785,6 +807,17 @@ int CDisplay::Reset(void)
 	return this->OnSetupNormalView();
 }
 //-------------------------------------------------------------------------------
+void UpdateColorFieldsInUI()
+{
+	InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR1),NULL,TRUE);
+	InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR2),NULL,TRUE);
+	InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR3),NULL,TRUE);
+
+	UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR1));
+	UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR2));
+	UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR3));
+}
+//-------------------------------------------------------------------------------
 int CDisplay::OnSetupNormalView()
 {
 	// now ... change the meaning of the statistics fields back
@@ -804,6 +837,8 @@ int CDisplay::OnSetupNormalView()
 	this->m_pcCurrentTexture = NULL;
 	this->m_pcCurrentNode = NULL;
 
+	// redraw the color fields in the UI --- their purpose has possibly changed
+	UpdateColorFieldsInUI();
 	UpdateWindow(g_hDlg);
 	return 1;
 }
@@ -829,6 +864,10 @@ int CDisplay::OnSetupMaterialView(MaterialInfo* pcNew)
 	this->m_pcCurrentMaterial = pcNew;
 	this->SetViewMode(VIEWMODE_MATERIAL);
 
+
+	// redraw the color fields in the UI --- their purpose has possibly changed
+	UpdateColorFieldsInUI();
+	UpdateWindow(g_hDlg);
 	return 1;
 }
 //-------------------------------------------------------------------------------
@@ -844,6 +883,14 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
 			"original mesh",D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
 		CLogDisplay::Instance().AddEntry("It is a copy of the alpha channel of the first "
 			"diffuse texture",D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
+	}
+
+	// check whether the pattern background effect is supported
+	if (g_sCaps.PixelShaderVersion < D3DPS_VERSION(3,0))
+	{
+		CLogDisplay::Instance().AddEntry("[WARN] The background shader won't work "
+			"on your system, it required PS 3.0 hardware. A default color is used ...",
+			D3DCOLOR_ARGB(0xFF,0xFF,0x00,0));
 	}
 
 	this->m_fTextureZoom = 1000.0f;
@@ -863,7 +910,7 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
 
 	// and fill them with data
 	D3DSURFACE_DESC sDesc;
-	pcNew->piTexture->GetLevelDesc(0,&sDesc);
+	(*pcNew->piTexture)->GetLevelDesc(0,&sDesc);
 	char szTemp[128];
 
 	sprintf(szTemp,"%i",sDesc.Width);
@@ -872,7 +919,7 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
 	sprintf(szTemp,"%i",sDesc.Height);
 	SetWindowText(GetDlgItem(g_hDlg,IDC_ENODEWND),szTemp);
 
-	sprintf(szTemp,"%i",pcNew->piTexture->GetLevelCount());
+	sprintf(szTemp,"%i",(*pcNew->piTexture)->GetLevelCount());
 	SetWindowText(GetDlgItem(g_hDlg,IDC_ESHADER),szTemp);
 
 	sprintf(szTemp,"%i",pcNew->iUV);
@@ -899,7 +946,7 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
 	SetWindowText(GetDlgItem(g_hDlg,IDC_ELOAD),szOp);
 
 	// NOTE: Format is always ARGB8888 since other formats are
-	// convert to this format ...
+	// converted to this format ...
 	SetWindowText(GetDlgItem(g_hDlg,IDC_EFACE),"ARGB8");
 
 	// check whether this is the default texture
@@ -912,7 +959,7 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
 
 		uint32_t iData = 0;
 		DWORD dwSize = 4;
-		pcNew->piTexture->GetPrivateData(guidPrivateData,&iData,&dwSize);
+		(*pcNew->piTexture)->GetPrivateData(guidPrivateData,&iData,&dwSize);
 
 		if (0xFFFFFFFF == iData)
 		{
@@ -922,6 +969,8 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
 			return 0;
 		}
 	}
+	// redraw the color fields in the UI --- their purpose has possibly changed
+	UpdateColorFieldsInUI();
 	UpdateWindow(g_hDlg);
 	return 1;
 }
@@ -1045,14 +1094,6 @@ int CDisplay::ShowTreeViewContextMenu(HTREEITEM hItem)
 			g_hDlg,NULL);
 	}
 	return 1;
-}
-//-------------------------------------------------------------------------------
-template <class type, class intype>
-type clamp(intype in)
-{
-	// for unsigned types only ...
-	intype mask = (0x1u << (sizeof(type)*8))-1;
-	return (type)std::max((intype)0,std::min(in,mask));
 }
 //-------------------------------------------------------------------------------
 int CDisplay::HandleTreeViewPopup(WPARAM wParam,LPARAM lParam)
@@ -1259,7 +1300,7 @@ int CDisplay::HandleTreeViewPopup2(WPARAM wParam,LPARAM lParam)
 
 		// get a pointer to the first surface of the current texture
 		IDirect3DSurface9* pi = NULL;
-		this->m_pcCurrentTexture->piTexture->GetSurfaceLevel(0,&pi);
+		(*this->m_pcCurrentTexture->piTexture)->GetSurfaceLevel(0,&pi);
 		if(!pi || FAILED(D3DXSaveSurfaceToFile(szFileName,eFormat,pi,NULL,NULL)))
 		{
 			CLogDisplay::Instance().AddEntry("[ERROR] Unable to export texture",
@@ -1880,39 +1921,52 @@ int CDisplay::RenderPatternBG()
 {
 	if (!g_piPatternEffect)
 	{
-		// seems we have not yet compiled this shader.
-		// and NOW is the best time to do that ...
-		ID3DXBuffer* piBuffer = NULL;
-		if(FAILED( D3DXCreateEffect(g_piDevice,
-			g_szCheckerBackgroundShader.c_str(),
-			(UINT)g_szCheckerBackgroundShader.length(),
-			NULL,
-			NULL,
-			D3DXSHADER_USE_LEGACY_D3DX9_31_DLL,
-			NULL,
-			&g_piPatternEffect,&piBuffer)))
+		// the pattern effect won't work on ps_2_0 cards
+		if (g_sCaps.PixelShaderVersion >= D3DPS_VERSION(3,0))
 		{
+			// seems we have not yet compiled this shader.
+			// and NOW is the best time to do that ...
+			ID3DXBuffer* piBuffer = NULL;
+			if(FAILED( D3DXCreateEffect(g_piDevice,
+				g_szCheckerBackgroundShader.c_str(),
+				(UINT)g_szCheckerBackgroundShader.length(),
+				NULL,
+				NULL,
+				D3DXSHADER_USE_LEGACY_D3DX9_31_DLL,
+				NULL,
+				&g_piPatternEffect,&piBuffer)))
+			{
+				if( piBuffer) 
+				{
+					MessageBox(g_hDlg,(LPCSTR)piBuffer->GetBufferPointer(),"HLSL",MB_OK);
+					piBuffer->Release();
+				}
+				return 0;
+			}
 			if( piBuffer) 
 			{
-				MessageBox(g_hDlg,(LPCSTR)piBuffer->GetBufferPointer(),"HLSL",MB_OK);
 				piBuffer->Release();
+				piBuffer = NULL;
 			}
-			return 0;
 		}
-		if( piBuffer) 
+		else
 		{
-			piBuffer->Release();
-			piBuffer = NULL;
+			// clear the color buffer in magenta
+			// (hopefully this is ugly enough that every ps_2_0 cards owner
+			//  runs to the next shop to buy himself a new card ...)
+			g_piDevice->Clear(0,NULL,D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER,
+				D3DCOLOR_ARGB(0xFF,0xFF,0,0xFF), 1.0f,0 );
+			return 1;
 		}
 	}
-	// clear the color buffer in magenta
-	g_piDevice->Clear(0,NULL,D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER,
+
+	// clear the depth buffer only
+	g_piDevice->Clear(0,NULL,D3DCLEAR_ZBUFFER,
 		D3DCOLOR_ARGB(0xFF,0xFF,0,0xFF), 1.0f,0 );
 
-	if (!g_piPatternEffect)
-	{
-		return 0;
-	}
+	// setup the colors to be used ...
+	g_piPatternEffect->SetVector("COLOR_ONE",&this->m_avCheckerColors[0]);
+	g_piPatternEffect->SetVector("COLOR_TWO",&this->m_avCheckerColors[1]);
 
 	// setup the shader
 	UINT dw;
@@ -1990,7 +2044,7 @@ int CDisplay::RenderTextureView()
 	sRect.bottom -= sRect.top;
 
 	// commit the texture to the shader
-	g_piPassThroughEffect->SetTexture("TEXTURE_2D",this->m_pcCurrentTexture->piTexture);
+	g_piPassThroughEffect->SetTexture("TEXTURE_2D",*this->m_pcCurrentTexture->piTexture);
 
 	if (AI_TEXTYPE_OPACITY == this->m_pcCurrentTexture->iType)
 	{
@@ -2016,7 +2070,7 @@ int CDisplay::RenderTextureView()
 	// build a rectangle which centers the texture
 	// scaling is OK, but no stretching
 	D3DSURFACE_DESC sDesc;
-	this->m_pcCurrentTexture->piTexture->GetLevelDesc(0,&sDesc);
+	(*this->m_pcCurrentTexture->piTexture)->GetLevelDesc(0,&sDesc);
 
 	struct SVertex{float x,y,z,w,u,v;};
 	SVertex as[4];

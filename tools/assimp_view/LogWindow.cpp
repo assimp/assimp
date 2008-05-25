@@ -198,7 +198,10 @@ void CLogWindow::WriteLine(const std::string& message)
 	this->szPlainText.append(message);
 	this->szPlainText.append("\r\n");
 
-	this->szText.resize(this->szText.length()-1);
+	if (0 != this->szText.length())
+	{
+		this->szText.resize(this->szText.length()-1);
+	}
 
 	switch (message.c_str()[0])
 	{

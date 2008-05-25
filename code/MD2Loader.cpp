@@ -244,6 +244,7 @@ void MD2Importer::InternReadFile(
 	unsigned int iCurrent = 0;
 	if (0 != this->m_pcHeader->numTexCoords)
 	{
+
 		for (unsigned int i = 0; i < (unsigned int)this->m_pcHeader->numTriangles;++i)
 		{
 			// allocate the face
@@ -253,10 +254,9 @@ void MD2Importer::InternReadFile(
 			// copy texture coordinates
 			// check whether they are different from the previous value at this index.
 			// In this case, create a full separate set of vertices/normals/texcoords
+			unsigned int iTemp = iCurrent;
 			for (unsigned int c = 0; c < 3;++c,++iCurrent)
 			{
-				pScene->mMeshes[0]->mFaces[i].mIndices[c] = iCurrent;
-
 				// validate vertex indices
 				if (pcTriangles[i].vertexIndices[c] >= this->m_pcHeader->numVertices)
 					pcTriangles[i].vertexIndices[c] = this->m_pcHeader->numVertices-1;
@@ -295,6 +295,9 @@ void MD2Importer::InternReadFile(
 				pcOut->x = u;
 				pcOut->y = v;
 			}
+			pScene->mMeshes[0]->mFaces[i].mIndices[0] = iTemp+2;
+			pScene->mMeshes[0]->mFaces[i].mIndices[1] = iTemp+1;
+			pScene->mMeshes[0]->mFaces[i].mIndices[2] = iTemp+0;
 		}
 	}
 	else
@@ -308,10 +311,9 @@ void MD2Importer::InternReadFile(
 			// copy texture coordinates
 			// check whether they are different from the previous value at this index.
 			// In this case, create a full separate set of vertices/normals/texcoords
+			unsigned int iTemp = iCurrent;
 			for (unsigned int c = 0; c < 3;++c,++iCurrent)
 			{
-				pScene->mMeshes[0]->mFaces[i].mIndices[c] = iCurrent;
-
 				// validate vertex indices
 				if (pcTriangles[i].vertexIndices[c] >= this->m_pcHeader->numVertices)
 					pcTriangles[i].vertexIndices[c] = this->m_pcHeader->numVertices-1;
@@ -343,6 +345,9 @@ void MD2Importer::InternReadFile(
 				pcOut->x = (float)pcTexCoords[pcTriangles[i].textureIndices[c]].s / this->m_pcHeader->skinWidth;
 				pcOut->y = (float)pcTexCoords[pcTriangles[i].textureIndices[c]].t / this->m_pcHeader->skinHeight;
 			}
+			pScene->mMeshes[0]->mFaces[i].mIndices[0] = iTemp+2;
+			pScene->mMeshes[0]->mFaces[i].mIndices[1] = iTemp+1;
+			pScene->mMeshes[0]->mFaces[i].mIndices[2] = iTemp+0;
 		}
 	}
 

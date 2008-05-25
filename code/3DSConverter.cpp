@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the 3ds importer class */
 #include "3DSLoader.h"
 #include "MaterialSystem.h"
+#include "DefaultLogger.h"
 
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
@@ -98,10 +99,17 @@ void Dot3DSImporter::ReplaceDefaultMaterial()
 		{
 			// NOTE: The additional check seems to be necessary,
 			// some exporters seem to generate invalid data here
-			if (0xcdcdcdcd == (*a) || (*a) >= this->mScene->mMaterials.size())
+			if (0xcdcdcdcd == (*a))
 			{
 				(*a) = iIndex;
 				++iCnt;
+			}
+			else if ( (*a) >= this->mScene->mMaterials.size())
+			{
+				(*a) = iIndex;
+				++iCnt;
+				DefaultLogger::get()->warn("Material index overflow in 3DS file. Assigning "
+					"default material ...");
 			}
 		}
 	}
@@ -125,14 +133,17 @@ void Dot3DSImporter::CheckIndices(Dot3DS::Mesh* sMesh)
 		// check whether all indices are in range
 		if ((*i).i1 >= sMesh->mPositions.size())
 		{
+			DefaultLogger::get()->warn("Face index overflow in 3DS file (#1)");
 			(*i).i1 = sMesh->mPositions.size()-1;
 		}
 		if ((*i).i2 >= sMesh->mPositions.size())
 		{
+			DefaultLogger::get()->warn("Face index overflow in 3DS file (#2)");
 			(*i).i2 = sMesh->mPositions.size()-1;
 		}
 		if ((*i).i3 >= sMesh->mPositions.size())
 		{
+			DefaultLogger::get()->warn("Face index overflow in 3DS file (#3)");
 			(*i).i3 = sMesh->mPositions.size()-1;
 		}
 	}
@@ -155,31 +166,55 @@ void Dot3DSImporter::MakeUnique(Dot3DS::Mesh* sMesh)
 		vNew2.resize(sMesh->mFaces.size() * 3);
 		for (unsigned int i = 0; i < sMesh->mFaces.size();++i)
 		{
+			uint32_t iTemp1,iTemp2;
+
 			// position and texture coordinates
-			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].i1];
-			vNew2[iBase]   = sMesh->mTexCoords[sMesh->mFaces[i].i1];
-			sMesh->mFaces[i].i1 = iBase++;
+			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].i3];
+			vNew2[iBase]   = sMesh->mTexCoords[sMesh->mFaces[i].i3];
+			iTemp1 = iBase++;
 
 			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].i2];
 			vNew2[iBase]   = sMesh->mTexCoords[sMesh->mFaces[i].i2];
-			sMesh->mFaces[i].i2 = iBase++;
+			iTemp2 = iBase++;
 
-			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].i3];
-			vNew2[iBase]   = sMesh->mTexCoords[sMesh->mFaces[i].i3];
+			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].i1];
+			vNew2[iBase]   = sMesh->mTexCoords[sMesh->mFaces[i].i1];
 			sMesh->mFaces[i].i3 = iBase++;
+
+			sMesh->mFaces[i].i1 = iTemp1;
+			sMesh->mFaces[i].i2 = iTemp2;
+
+			// handle the face order ...
+			/*if (iTemp1 > iTemp2)
+			{
+				sMesh->mFaces[i].bFlipped = true;
+			}*/
 		}
 	}
 	else
 	{
 		for (unsigned int i = 0; i < sMesh->mFaces.size();++i)
 		{
+			uint32_t iTemp1,iTemp2;
+
 			// position only
-			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].i1];
-			sMesh->mFaces[i].i1 = iBase++;
-			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].i2];
-			sMesh->mFaces[i].i2 = iBase++;
 			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].i3];
+			iTemp1 = iBase++;
+
+			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].i2];
+			iTemp2 = iBase++;
+
+			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].i1];
 			sMesh->mFaces[i].i3 = iBase++;
+
+			sMesh->mFaces[i].i1 = iTemp1;
+			sMesh->mFaces[i].i2 = iTemp2;
+
+			// handle the face order ...
+			/*if (iTemp1 > iTemp2)
+			{
+				sMesh->mFaces[i].bFlipped = true;
+			}*/
 		}
 	}
 	sMesh->mPositions = vNew;
@@ -216,8 +251,15 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 	mat.AddProperty( &oldMat.mAmbient, 1, AI_MATKEY_COLOR_AMBIENT);
 	mat.AddProperty( &oldMat.mDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
 	mat.AddProperty( &oldMat.mSpecular, 1, AI_MATKEY_COLOR_SPECULAR);
-	mat.AddProperty( &oldMat.mSpecularExponent, 1, AI_MATKEY_SHININESS);
 	mat.AddProperty( &oldMat.mEmissive, 1, AI_MATKEY_COLOR_EMISSIVE);
+
+	// phong shininess and shininess strength
+	if (Dot3DS::Dot3DSFile::Phong == oldMat.mShading || 
+		Dot3DS::Dot3DSFile::Metal == oldMat.mShading)
+	{
+		mat.AddProperty( &oldMat.mSpecularExponent, 1, AI_MATKEY_SHININESS);
+		mat.AddProperty( &oldMat.mShininessStrength, 1, AI_MATKEY_SHININESS_STRENGTH);
+	}
 
 	// opacity
 	mat.AddProperty<float>( &oldMat.mTransparency,1,AI_MATKEY_OPACITY);
@@ -231,8 +273,6 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 	{
 		case Dot3DS::Dot3DSFile::Flat:
 			eShading = aiShadingMode_Flat; break;
-		case Dot3DS::Dot3DSFile::Phong :
-			eShading = aiShadingMode_Phong; break;
 
 		// I don't know what "Wire" shading should be,
 		// assume it is simple lambertian diffuse (L dot N) shading
@@ -243,6 +283,9 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 		// assume cook-torrance shading for metals.
 		// NOTE: I assume the real shader inside 3ds max is an anisotropic
 		// Phong-Blinn shader, but this is a good approximation too
+		case Dot3DS::Dot3DSFile::Phong :
+			eShading = aiShadingMode_Phong; break;
+
 		case Dot3DS::Dot3DSFile::Metal :
 			eShading = aiShadingMode_CookTorrance; break;
 	}
@@ -361,9 +404,8 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 		else aiSplit[*a].push_back(iNum);
 		}
 		// now generate submeshes
-#if 0
+
 		bool bFirst = true;
-#endif
 		for (unsigned int p = 0; p < this->mScene->mMaterials.size();++p)
 		{
 			if (aiSplit[p].size() != 0)
@@ -377,7 +419,7 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 				p_pcOut->mColors[0] = (aiColor4D*)new std::string((*i).mName);
 				avOutMeshes.push_back(p_pcOut);
 
-#if 0
+
 				if (bFirst)
 				{
 					p_pcOut->mColors[1] = (aiColor4D*)new aiMatrix4x4();
@@ -385,7 +427,7 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 					*((aiMatrix4x4*)p_pcOut->mColors[1]) = (*i).mMat;
 					bFirst = false;
 				}
-#endif
+
 
 				// convert vertices
 				p_pcOut->mNumVertices = aiSplit[p].size()*3;
@@ -408,7 +450,7 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 						p_pcOut->mFaces[q].mIndices = new unsigned int[3];
 						p_pcOut->mFaces[q].mNumIndices = 3;
 
-						p_pcOut->mFaces[q].mIndices[0] = iBase;
+						p_pcOut->mFaces[q].mIndices[2] = iBase;
 						p_pcOut->mVertices[iBase] = (*i).mPositions[(*i).mFaces[iIndex].i1];
 						p_pcOut->mNormals[iBase++] = (*i).mNormals[(*i).mFaces[iIndex].i1];
 
@@ -416,7 +458,7 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 						p_pcOut->mVertices[iBase] = (*i).mPositions[(*i).mFaces[iIndex].i2];
 						p_pcOut->mNormals[iBase++] = (*i).mNormals[(*i).mFaces[iIndex].i2];
 
-						p_pcOut->mFaces[q].mIndices[2] = iBase;
+						p_pcOut->mFaces[q].mIndices[0] = iBase;
 						p_pcOut->mVertices[iBase] = (*i).mPositions[(*i).mFaces[iIndex].i3];
 						p_pcOut->mNormals[iBase++] = (*i).mNormals[(*i).mFaces[iIndex].i3];
 					}
@@ -505,7 +547,7 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 	for (unsigned int i = 0;i < iArray.size();++i)
 	{
 		const unsigned int iIndex = iArray[i];
-#if 0
+
 		if (NULL != pcSOut->mMeshes[iIndex]->mColors[1])
 		{
 			pcOut->mTransformation = *((aiMatrix4x4*)
@@ -514,13 +556,11 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 			delete (aiMatrix4x4*)pcSOut->mMeshes[iIndex]->mColors[1];
 			pcSOut->mMeshes[iIndex]->mColors[1] = NULL;
 		}
-#endif
+
 		pcOut->mMeshes[i] = iIndex;
 	}
 
-	// NOTE: Not necessary. We can use the given transformation matrix.
-	// However, we'd need it if we wanted to implement keyframe animation
-
+	// (code for keyframe animation. however, this is currently not supported by Assimp)
 #if 0
 	// build the scaling matrix. Toggle y and z axis
 	aiMatrix4x4 mS;
@@ -536,11 +576,34 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 
 	// build the pivot matrix. Toggle y and z axis
 	aiMatrix4x4 mP;
-	mP.a4 = pcIn->vPivot.x;
-	mP.b4 = pcIn->vPivot.z;
-	mP.c4 = pcIn->vPivot.y;
+	mP.a4 = -pcIn->vPivot.x;
+	mP.b4 = -pcIn->vPivot.z;
+	mP.c4 = -pcIn->vPivot.y;
+
+
 #endif
-	pcOut->mTransformation = aiMatrix4x4(); //  mT * pcIn->mRotation * mS * mP * pcOut->mTransformation.Inverse(); 
+	// build a matrix to flip the z coordinate of the vertices
+	aiMatrix4x4 mF;
+	mF.c3 = -1.0f;
+
+
+	// build the final matrix
+	// NOTE: This should be the identity. Theoretically. In reality
+	// there are many models with very funny local matrices and
+	// very different keyframe values ... this is the only reason
+	// why we extract the data from the first keyframe. 
+	pcOut->mTransformation = mF; /*   mF * mT * pcIn->mRotation * mS *  mP * 
+		pcOut->mTransformation.Inverse(); */
+
+	// (code for keyframe animation. however, this is currently not supported by Assimp)
+#if 0
+	if (pcOut->mTransformation != mF) 
+	{
+		DefaultLogger::get()->warn("The local transformation matrix of the "
+			"3ds file does not match the first keyframe. Using the "
+			"information from the keyframe.");
+	}
+#endif
 
 	pcOut->mNumChildren = pcIn->mChildren.size();
 	pcOut->mChildren = new aiNode*[pcIn->mChildren.size()];
@@ -748,6 +811,10 @@ void Dot3DSImporter::BakeScaleNOffset(
 					{
 					(*a)->iUVSrc = 0;
 					}
+				DefaultLogger::get()->error("There are too many "
+					"combinations of different UV scaling/offset/rotation operations "
+					"to generate an UV channel for each (maximum is 4). Using the "
+					"first UV channel ...");
 				continue;
 				}
 			const aiVector3D* pvBase = _pvBase;
@@ -815,6 +882,9 @@ void Dot3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 		//
 		unsigned int iCnt = 0;
 
+		DefaultLogger::get()->warn("No hierarchy information has been "
+			"found in the file. A flat hierarchy tree is built ...");
+
 		pcOut->mRootNode->mNumChildren = pcOut->mNumMeshes;
 		pcOut->mRootNode->mChildren = new aiNode* [ pcOut->mNumMeshes ];
 
@@ -827,7 +897,12 @@ void Dot3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 			pcNode->mMeshes = new unsigned int[1];
 			pcNode->mMeshes[0] = i;
 			pcNode->mNumMeshes = 1;
-			pcNode->mName.Set("UNNAMED");
+
+			std::string s;
+			std::stringstream ss(s);
+			ss << "UNNAMED[" << i << + "]"; 
+
+			pcNode->mName.Set(s);
 
 			// add the new child to the parent node
 			pcOut->mRootNode->mChildren[i] = pcNode;
@@ -860,6 +935,7 @@ void Dot3DSImporter::ConvertScene(aiScene* pcOut)
 	this->ConvertMeshes(pcOut);
 	return;
 }
+#if 0
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::GenTexCoord (Dot3DS::Texture* pcTexture,
 	const std::vector<aiVector2D>& p_vIn,
@@ -887,3 +963,4 @@ void Dot3DSImporter::GenTexCoord (Dot3DS::Texture* pcTexture,
 	}
 	return;
 }
+#endif

@@ -590,9 +590,10 @@ int DeleteAssetData(bool bNoMaterials)
 			g_pcAsset->apcMeshes[i]->piIB = NULL;
 		}
 
-		//// delete storage eventually allocated to hold a copy
-		//// of the original vertex normals
-		//if (AssetHelper::ORIGINAL != g_pcAsset->iNormalSet)
+		// TODO ... unfixed memory leak
+		// delete storage eventually allocated to hold a copy
+		// of the original vertex normals
+		//if (g_pcAsset->apcMeshes[i]->pvOriginalNormals)
 		//{
 		//	delete[] g_pcAsset->apcMeshes[i]->pvOriginalNormals;
 		//}
@@ -628,6 +629,11 @@ int DeleteAssetData(bool bNoMaterials)
 			{
 				g_pcAsset->apcMeshes[i]->piEmissiveTexture->Release();
 				g_pcAsset->apcMeshes[i]->piEmissiveTexture = NULL;
+			}
+			if(g_pcAsset->apcMeshes[i]->piOpacityTexture)
+			{
+				g_pcAsset->apcMeshes[i]->piOpacityTexture->Release();
+				g_pcAsset->apcMeshes[i]->piOpacityTexture = NULL;
 			}
 			if(g_pcAsset->apcMeshes[i]->piShininessTexture)
 			{

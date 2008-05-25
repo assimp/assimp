@@ -570,7 +570,8 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, const std::vector<XFile::
 
 		mat->AddProperty<int>( &shadeMode, 1, AI_MATKEY_SHADING_MODEL);
 		// material colours
-		mat->AddProperty( &oldMat.mEmissive, 1, AI_MATKEY_COLOR_EMISSIVE);
+		// FIX: Setup this as ambient not as emissive color
+		mat->AddProperty( &oldMat.mEmissive, 1, AI_MATKEY_COLOR_AMBIENT);
 		mat->AddProperty( &oldMat.mDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
 		mat->AddProperty( &oldMat.mSpecular, 1, AI_MATKEY_COLOR_SPECULAR);
 		mat->AddProperty( &oldMat.mSpecularExponent, 1, AI_MATKEY_SHININESS);

@@ -45,23 +45,22 @@ package assimp;
 import java.awt.*;
 
 /**
- * Represents an embedded texture. Sometimes textures are not referenced
- * with a path, instead they are directly embedded into the model file.
- * Example file formats doing this include MDL3, MDL5 and MDL7 (3D GameStudio).
- * Embedded textures are converted to an array of color values (RGBA).
+ * Represents an embedded compressed texture that is stored in a format
+ * like JPEG or PNG. See the documentation of <code>Texture</code>
+ * for more details on this class. Use <code>instanceof</code> to
+ * determine whether a particular <code>Texture</code> in the list
+ * returned by <code>Scene.getTextures()</code> is a compressed texture.
  * <p/>
- * Compressed textures (textures that are stored in a format like png or jpg)
- * are represented by the <code><CompressedTexture/code> class.
  *
  * @author Aramis (Alexander Gessler)
  * @version 1.0
  */
-public class Texture extends Mappable {
+public class CompressedTexture extends Texture {
 
-    protected int width = 0;
-    protected int height = 0;
+    private String m_format = "";
+    private byte[] m_data;
+    private int m_length = 0;
 
-    protected Color[] data = null;
 
     /**
      * Construction from a given parent object and array index
@@ -69,18 +68,24 @@ public class Texture extends Mappable {
      * @param parent Must be valid, null is not allowed
      * @param index  Valied index in the parent's list
      */
-    public Texture(Object parent, int index) throws NativeError {
+    public CompressedTexture(Object parent, int index) throws NativeError {
         super(parent, index);
-
-        long lTemp;
-        if (0x0 == (lTemp = this._NativeGetTextureInfo(((Scene)this.getParent()).
-                getImporter().getContext(),this.getArrayIndex()))) {
-            throw new NativeError("Unable to get the width and height of the texture");
-        }
-        this.width = (int)(lTemp);
-        this.height = (int)(lTemp >> 32);
     }
 
+    /**
+     * Retrieves the format of the texture data. This is
+     * the most common file extension of the format (without a
+     * dot at the beginning). Examples include dds, png, jpg ...
+     * @return Extension string or null if the format of the texture
+     * data is not known to ASSIMP.
+     */
+    public String getFormat() {
+        return m_format;
+    }
+
+    public byte[] getData() {
+        return m_data;
+    }
 
     /**
      * Retrieve the height of the texture image
@@ -88,6 +93,7 @@ public class Texture extends Mappable {
      * @return Height, in pixels
      */
     public int getHeight() {
+        DefaultLogger.get()
         return height;
     }
 
@@ -101,51 +107,11 @@ public class Texture extends Mappable {
     }
 
     /**
-     * Get the color at a given position of the texture
-     *
-     * @param x X coordinate, zero based
-     * @param y Y coordinate, zero based
-     * @return Color at this position
-     */
-    public Color getPixel(int x, int y) {
-
-        assert(x < width && y < height);
-
-        // map the color data in memory if required ...
-        if (null == data) {
-            try {
-                this.OnMap();
-            } catch (NativeError nativeError) {
-                return Color.black;
-            }
-        }
-        return data[y * width + x];
-    }
-
-    /**
-     * Get a pointer to the color buffer of the texture
-     * @return Array of <code>java.awt.Color</code>, size: width * height
-     */
-    public Color[] getColorArray() {
-
-         // map the color data in memory if required ...
-        if (null == data) {
-            try {
-                this.OnMap();
-            } catch (NativeError nativeError) {
-                return null;
-            }
-        }
-        return data;
-    }
-
-    /**
      * Internal helper function to map the native texture data into
-     * a <code>java.awt.Color</code> array
+     * a <code>byte</code> array in the memory of the JVM
      */
     @Override
     protected void OnMap() throws NativeError {
-        final int iNumPixels = width * height;
 
         // first allocate the output array
         data = new Color[iNumPixels];
@@ -166,28 +132,4 @@ public class Texture extends Mappable {
         }
         return;
     }
-
-    /**
-     * JNI bridge call. For internal use only
-     * The method maps the contents of the native aiTexture object into memory
-     * the native memory area will be deleted afterwards.
-     *
-     * @param context Current importer context (imp.hashCode)
-     * @param index Index of the texture in the scene
-     * @param temp Output array. Assumed to be width * height * 4 in size
-     * @return 0xffffffff if an error occured
-     */
-    private native int _NativeMapColorData(long context, long index, byte[] temp);
-
-    /**
-     * JNI bridge call. For internal use only
-     * The method retrieves information on the underlying texture
-     *
-     * @param context Current importer context (imp.hashCode)
-     * @param index Index of the texture in the scene
-     * @return 0x0 if an error occured, otherwise the width in the lower 32 bits
-     * and the height in the higher 32 bits
-     *
-     */
-    private native long _NativeGetTextureInfo(long context, long index);
 }

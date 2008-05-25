@@ -50,6 +50,8 @@ class CMaterialManager
 {
 private:
 
+	friend class CDisplay;
+
 	// default constructor
 	CMaterialManager() 
 		:	m_iShaderCount (0) {}

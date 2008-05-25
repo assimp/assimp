@@ -471,6 +471,11 @@ void CMaterialManager::DeleteMaterial(AssetHelper::MeshHelper* pcIn)
 		pcIn->piNormalTexture->Release();
 		pcIn->piNormalTexture = NULL;
 	}
+	if (pcIn->piShininessTexture)
+	{
+		pcIn->piShininessTexture->Release();
+		pcIn->piShininessTexture = NULL;
+	}
 }
 //-------------------------------------------------------------------------------
 void CMaterialManager::HMtoNMIfNecessary(
@@ -790,6 +795,16 @@ int CMaterialManager::CreateMaterial(
 	}
 	else if (bDefault)pcMesh->eShadingMode  = aiShadingMode_Phong;
 
+
+	//
+	// Shininess strength ------------------------------------------------------
+	//
+	if(AI_SUCCESS != aiGetMaterialFloat(pcMat,AI_MATKEY_SHININESS_STRENGTH,&pcMesh->fSpecularStrength))
+	{
+		// assume 1.0 as default shininess strength
+		pcMesh->fSpecularStrength = 1.0f;
+	}
+
 	aiString szPath;
 
 	//
@@ -1073,7 +1088,10 @@ int CMaterialManager::CreateMaterial(
 	if (1.0f != pcMesh->fOpacity)
 		pcMesh->piEffect->SetFloat("TRANSPARENCY",pcMesh->fOpacity);
 	if (pcMesh->eShadingMode  != aiShadingMode_Gouraud && !g_sOptions.bNoSpecular)
+	{
 		pcMesh->piEffect->SetFloat("SPECULARITY",pcMesh->fShininess);
+		pcMesh->piEffect->SetFloat("SPECULAR_STRENGTH",pcMesh->fSpecularStrength);
+	}
 
 	pcMesh->piEffect->SetVector("DIFFUSE_COLOR",&pcMesh->vDiffuseColor);
 	pcMesh->piEffect->SetVector("SPECULAR_COLOR",&pcMesh->vSpecularColor);
@@ -1176,7 +1194,10 @@ int CMaterialManager::SetupMaterial (
 		if (1.0f != pcMesh->fOpacity)
 			pcMesh->piEffect->SetFloat("TRANSPARENCY",pcMesh->fOpacity);
 		if (pcMesh->eShadingMode  != aiShadingMode_Gouraud)
+		{
 			pcMesh->piEffect->SetFloat("SPECULARITY",pcMesh->fShininess);
+			pcMesh->piEffect->SetFloat("SPECULAR_STRENGTH",pcMesh->fSpecularStrength);
+		}
 
 		pcMesh->piEffect->SetVector("DIFFUSE_COLOR",&pcMesh->vDiffuseColor);
 		pcMesh->piEffect->SetVector("SPECULAR_COLOR",&pcMesh->vSpecularColor);

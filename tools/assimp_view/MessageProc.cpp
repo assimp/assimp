@@ -237,6 +237,35 @@ void SaveLightColors()
 	RegSetValueExA(g_hRegistry,"LightColor2",0,REG_DWORD,(const BYTE*)&g_avLightColors[2],4);
 }
 
+
+//-------------------------------------------------------------------------------
+// Save the checker pattern colors to the registry
+//-------------------------------------------------------------------------------
+void SaveCheckerPatternColors()
+{
+	// we have it as float4. save it as binary value --.
+	RegSetValueExA(g_hRegistry,"CheckerPattern0",0,REG_BINARY,
+		(const BYTE*)CDisplay::Instance().GetFirstCheckerColor(),
+		sizeof(D3DXVECTOR3));
+
+	RegSetValueExA(g_hRegistry,"CheckerPattern1",0,REG_BINARY,
+		(const BYTE*)CDisplay::Instance().GetSecondCheckerColor(),
+		sizeof(D3DXVECTOR3));
+}
+
+//-------------------------------------------------------------------------------
+// Load the checker pattern colors from the registry
+//-------------------------------------------------------------------------------
+void LoadCheckerPatternColors()
+{
+	DWORD dwTemp = sizeof(D3DXVECTOR3);
+	RegQueryValueEx(g_hRegistry,"CheckerPattern0",NULL,NULL,
+		(BYTE*) /* jep, this is evil */ CDisplay::Instance().GetFirstCheckerColor(),&dwTemp);
+
+	RegQueryValueEx(g_hRegistry,"CheckerPattern1",NULL,NULL,
+		(BYTE*) /* jep, this is evil */ CDisplay::Instance().GetSecondCheckerColor(),&dwTemp);
+}
+
 //-------------------------------------------------------------------------------
 // Toggle the "Display Normals" state
 //-------------------------------------------------------------------------------
@@ -515,7 +544,7 @@ void DisplayColorDialog(D3DCOLOR* pclrResult)
 	clr.lStructSize = sizeof(CHOOSECOLOR);
 	clr.hwndOwner = g_hDlg;
 	clr.Flags = CC_RGBINIT | CC_FULLOPEN;
-	clr.rgbResult = RGB(100,100,100);
+	clr.rgbResult = RGB((*pclrResult >> 16) & 0xff,(*pclrResult >> 8) & 0xff,*pclrResult & 0xff);
 	clr.lpCustColors = g_aclCustomColors;
 	clr.lpfnHook = NULL;
 	clr.lpTemplateName = NULL;
@@ -527,6 +556,32 @@ void DisplayColorDialog(D3DCOLOR* pclrResult)
 		GetRValue(clr.rgbResult),
 		GetGValue(clr.rgbResult),
 		GetBValue(clr.rgbResult));
+	return;
+}
+
+
+//-------------------------------------------------------------------------------
+// Let the user choose a color in a windows standard color dialog
+//-------------------------------------------------------------------------------
+void DisplayColorDialog(D3DXVECTOR4* pclrResult)
+{
+	CHOOSECOLOR clr;
+	clr.lStructSize = sizeof(CHOOSECOLOR);
+	clr.hwndOwner = g_hDlg;
+	clr.Flags = CC_RGBINIT | CC_FULLOPEN;
+	clr.rgbResult = RGB(clamp<unsigned char>(pclrResult->x * 255.0f),
+		clamp<unsigned char>(pclrResult->y * 255.0f),
+		clamp<unsigned char>(pclrResult->z * 255.0f));
+	clr.lpCustColors = g_aclCustomColors;
+	clr.lpfnHook = NULL;
+	clr.lpTemplateName = NULL;
+	clr.lCustData = NULL;
+
+	ChooseColor(&clr);
+
+	pclrResult->x = GetRValue(clr.rgbResult) / 255.0f;
+	pclrResult->y = GetGValue(clr.rgbResult) / 255.0f;
+	pclrResult->z = GetBValue(clr.rgbResult) / 255.0f;
 	return;
 }
 
@@ -961,7 +1016,7 @@ void InitUI()
 	SetDlgItemText(g_hDlg,IDC_EFACE,"0");
 	SetDlgItemText(g_hDlg,IDC_EMAT,"0");
 	SetDlgItemText(g_hDlg,IDC_ESHADER,"0");
-	SetDlgItemText(g_hDlg,IDC_ENODE,"0");
+	SetDlgItemText(g_hDlg,IDC_ENODEWND,"0");
 	SetDlgItemText(g_hDlg,IDC_ETEX,"0");
 	SetDlgItemText(g_hDlg,IDC_EMESH,"0");
 
@@ -1143,6 +1198,7 @@ void InitUI()
 		g_sOptions.eDrawMode = RenderOptions::WIREFRAME;
 		CheckDlgButton(g_hDlg,IDC_TOGGLEWIRE,BST_CHECKED);
 	}
+	LoadCheckerPatternColors();
 	return;
 }
 
@@ -1263,9 +1319,23 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
 				if(IDC_LCOLOR1 == pcStruct->CtlID)
 				{
-					unsigned char r = (unsigned char)((g_avLightColors[0] >> 16) & 0xFF);
-					unsigned char g = (unsigned char)((g_avLightColors[0] >> 8) & 0xFF);
-					unsigned char b = (unsigned char)((g_avLightColors[0]) & 0xFF);
+					unsigned char r,g,b;
+					const char* szText;
+					if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
+						CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
+					{
+						r = (unsigned char)(CDisplay::Instance().GetFirstCheckerColor()->x * 255.0f);
+						g = (unsigned char)(CDisplay::Instance().GetFirstCheckerColor()->y * 255.0f);
+						b = (unsigned char)(CDisplay::Instance().GetFirstCheckerColor()->z * 255.0f);
+						szText = "B0";
+					}
+					else
+					{
+						r = (unsigned char)((g_avLightColors[0] >> 16) & 0xFF);
+						g = (unsigned char)((g_avLightColors[0] >> 8) & 0xFF);
+						b = (unsigned char)((g_avLightColors[0]) & 0xFF);
+						szText = "L0";
+					}
 					HBRUSH hbr = CreateSolidBrush(RGB(r,g,b));
 
 					FillRect(pcStruct->hDC,&sRect,hbr);
@@ -1273,34 +1343,59 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
 					SetTextColor(pcStruct->hDC,RGB(0xFF-r,0xFF-g,0xFF-b));
 					SetBkMode(pcStruct->hDC,TRANSPARENT);
-					TextOut(pcStruct->hDC,4,1,"L0",2);
+					TextOut(pcStruct->hDC,4,1,szText,2);
 					bDraw = true;
 				}
 				else if(IDC_LCOLOR2 == pcStruct->CtlID)
 				{
-					unsigned char r = (unsigned char)((g_avLightColors[1] >> 16) & 0xFF);
-					unsigned char g = (unsigned char)((g_avLightColors[1] >> 8) & 0xFF);
-					unsigned char b = (unsigned char)((g_avLightColors[1]) & 0xFF);
+					unsigned char r,g,b;
+					const char* szText;
+					if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
+						CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
+					{
+						r = (unsigned char)(CDisplay::Instance().GetSecondCheckerColor()->x * 255.0f);
+						g = (unsigned char)(CDisplay::Instance().GetSecondCheckerColor()->y * 255.0f);
+						b = (unsigned char)(CDisplay::Instance().GetSecondCheckerColor()->z * 255.0f);
+						szText = "B1";
+					}
+					else
+					{
+						r = (unsigned char)((g_avLightColors[1] >> 16) & 0xFF);
+						g = (unsigned char)((g_avLightColors[1] >> 8) & 0xFF);
+						b = (unsigned char)((g_avLightColors[1]) & 0xFF);
+						szText = "L1";
+					}
 					HBRUSH hbr = CreateSolidBrush(RGB(r,g,b));
 					FillRect(pcStruct->hDC,&sRect,hbr);
 
 					SetTextColor(pcStruct->hDC,RGB(0xFF-r,0xFF-g,0xFF-b));
 					SetBkMode(pcStruct->hDC,TRANSPARENT);
-					TextOut(pcStruct->hDC,4,1,"L1",2);
+					TextOut(pcStruct->hDC,4,1,szText,2);
 					bDraw = true;
 				}
 				else if(IDC_LCOLOR3 == pcStruct->CtlID)
 				{
-					unsigned char r = (unsigned char)((g_avLightColors[2] >> 16) & 0xFF);
-					unsigned char g = (unsigned char)((g_avLightColors[2] >> 8) & 0xFF);
-					unsigned char b = (unsigned char)((g_avLightColors[2]) & 0xFF);
+					unsigned char r,g,b;
+					const char* szText;
+					if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
+						CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
+					{
+						r = g = b = 0;
+						szText = "-";
+					}
+					else
+					{
+						r = (unsigned char)((g_avLightColors[2] >> 16) & 0xFF);
+						g = (unsigned char)((g_avLightColors[2] >> 8) & 0xFF);
+						b = (unsigned char)((g_avLightColors[2]) & 0xFF);
+						szText = "A0";
+					}
 					HBRUSH hbr = CreateSolidBrush(RGB(r,g,b));
-
 					FillRect(pcStruct->hDC,&sRect,hbr);
 				
 					SetTextColor(pcStruct->hDC,RGB(0xFF-r,0xFF-g,0xFF-b));
 					SetBkMode(pcStruct->hDC,TRANSPARENT);
-					TextOut(pcStruct->hDC,4,1,"A0",2);
+					TextOut(pcStruct->hDC,4,1,szText,2);
 					bDraw = true;
 				}
 				// draw the black border around the rects
@@ -1460,14 +1555,8 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
 				char szFile[MAX_PATH];
 				DragQueryFile(hDrop,0,szFile,sizeof(szFile));
-				if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode())
-				{
-					// replace the selected texture with the new one ...
-					CDisplay::Instance().ReplaceCurrentTexture(szFile);
-				}
-				else
-				{
-					const char* sz = strrchr(szFile,'.');
+
+				const char* sz = strrchr(szFile,'.');
 					if (sz && 0 != aiIsExtensionSupported(sz))
 					{
 						strcpy(g_szFileName,szFile);
@@ -1476,6 +1565,11 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 						LoadAsset();
 						UpdateHistory();
 						SaveHistory();
+					}
+					else if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode())
+					{
+						// replace the selected texture with the new one ...
+						CDisplay::Instance().ReplaceCurrentTexture(szFile);
 					}
 					else
 					{
@@ -1535,13 +1629,12 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 						else
 						{
 __DRUNKEN_ALIEN_FROM_MARS:
-						CLogDisplay::Instance().AddEntry(
-							"[ERROR] File extension is not supported. E.T. can read this.",
-							D3DCOLOR_ARGB(0xFF,0xFF,0,0));
+							CLogDisplay::Instance().AddEntry(
+								"[ERROR] File extension is not supported. E.T. can read this.",
+								D3DCOLOR_ARGB(0xFF,0xFF,0,0));
 						}
 					}
-				}
-				DragFinish(hDrop);
+					DragFinish(hDrop);
 			}
 			return TRUE;
 
@@ -1713,17 +1806,38 @@ __DRUNKEN_ALIEN_FROM_MARS:
 					}
 				else if (IDC_LCOLOR1 == LOWORD(wParam))
 					{
-					DisplayColorDialog(&g_avLightColors[0]);
+
+					if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
+						CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
+					{
+						// hey, I'm tired and yes, I KNOW IT IS EVIL!
+						DisplayColorDialog(const_cast<D3DXVECTOR4*>(CDisplay::Instance().GetFirstCheckerColor()));
+						SaveCheckerPatternColors();
+					}
+					else
+					{
+						DisplayColorDialog(&g_avLightColors[0]);
+						SaveLightColors();
+					}
 					InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR1),NULL,TRUE);
 					UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR1));
-					SaveLightColors();
 					}
 				else if (IDC_LCOLOR2 == LOWORD(wParam))
 					{
-					DisplayColorDialog(&g_avLightColors[1]);
+					if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
+						CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
+					{
+						// hey, I'm tired and yes, I KNOW IT IS EVIL!
+						DisplayColorDialog(const_cast<D3DXVECTOR4*>(CDisplay::Instance().GetSecondCheckerColor()));
+						SaveCheckerPatternColors();
+					}
+					else
+					{
+						DisplayColorDialog(&g_avLightColors[1]);
+						SaveLightColors();
+					}
 					InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR2),NULL,TRUE);
 					UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR2));
-					SaveLightColors();
 					}
 				else if (IDC_LCOLOR3 == LOWORD(wParam))
 					{
@@ -1734,9 +1848,20 @@ __DRUNKEN_ALIEN_FROM_MARS:
 				}
 				else if (IDC_LRESET == LOWORD(wParam))
 				{
-					g_avLightColors[0] = D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0xFF);
-					g_avLightColors[1] = D3DCOLOR_ARGB(0xFF,0xFF,0x00,0x00);
-					g_avLightColors[2] = D3DCOLOR_ARGB(0xFF,0x05,0x05,0x05);
+					if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
+						CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
+					{
+						CDisplay::Instance().SetFirstCheckerColor(D3DXVECTOR4(0.4f,0.4f,0.4f,1.0f));
+						CDisplay::Instance().SetSecondCheckerColor(D3DXVECTOR4(0.6f,0.6f,0.6f,1.0f));
+						SaveCheckerPatternColors();
+					}
+					else
+					{
+						g_avLightColors[0] = D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0xFF);
+						g_avLightColors[1] = D3DCOLOR_ARGB(0xFF,0xFF,0x00,0x00);
+						g_avLightColors[2] = D3DCOLOR_ARGB(0xFF,0x05,0x05,0x05);
+						SaveLightColors();
+					}
 
 					InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR1),NULL,TRUE);
 					UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR1));
@@ -1744,7 +1869,6 @@ __DRUNKEN_ALIEN_FROM_MARS:
 					UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR2));
 					InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR3),NULL,TRUE);
 					UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR3));
-					SaveLightColors();
 					}
 				else if (IDC_NOSPECULAR == LOWORD(wParam))
 					{

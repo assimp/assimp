@@ -51,7 +51,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp
 {
 // ---------------------------------------------------------------------------
-DefaultLogger *DefaultLogger::m_pLogger = NULL;
+NullLogger DefaultLogger::s_pNullLogger;
+Logger *DefaultLogger::m_pLogger = &DefaultLogger::s_pNullLogger;
 
 // ---------------------------------------------------------------------------
 //
@@ -72,17 +73,29 @@ struct LogStreamInfo
 //	Creates the only singleton instance
 Logger *DefaultLogger::create(const std::string &name, LogSeverity severity)
 {
-	ai_assert (NULL == m_pLogger);
 	m_pLogger = new DefaultLogger( name, severity );
 	
 	return m_pLogger;
 }
-
+// ---------------------------------------------------------------------------
+void DefaultLogger::set (Logger *logger)
+{
+	if (!logger)
+	{
+		 DefaultLogger::m_pLogger = &s_pNullLogger;
+		 return;
+	}
+	DefaultLogger::m_pLogger = logger;
+}
+// ---------------------------------------------------------------------------
+bool DefaultLogger::isNullLogger()
+{
+	return m_pLogger == &s_pNullLogger;
+}
 // ---------------------------------------------------------------------------
 //	Singleton getter
 Logger *DefaultLogger::get()
 {
-	ai_assert (NULL != m_pLogger);
 	return m_pLogger;
 }
 
@@ -92,7 +105,7 @@ void DefaultLogger::kill()
 {
 	ai_assert (NULL != m_pLogger);
 	delete m_pLogger;
-	m_pLogger = NULL;
+	m_pLogger = &s_pNullLogger;
 }
 
 // ---------------------------------------------------------------------------
@@ -142,6 +155,22 @@ void DefaultLogger::setLogSeverity( LogSeverity log_severity )
 void DefaultLogger::attachStream( LogStream *pStream, unsigned int severity )
 {
 	ai_assert ( NULL != pStream );
+
+	// fix (Aramis)
+	if (0 == severity)
+	{
+		severity = Logger::INFO | Logger::ERR | Logger::WARN | Logger::DEBUGGING;
+	}
+
+	for ( StreamIt it = m_StreamArray.begin();
+		it != m_StreamArray.end();
+		++it )
+	{
+		if ( (*it)->m_pStream == pStream )
+		{
+			(*it)->m_uiErrorSeverity |= severity;
+		}
+	}
 	
 	LogStreamInfo *pInfo = new LogStreamInfo( severity, pStream );
 	m_StreamArray.push_back( pInfo );
@@ -152,6 +181,12 @@ void DefaultLogger::attachStream( LogStream *pStream, unsigned int severity )
 void DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
 {
 	ai_assert ( NULL != pStream );
+
+	// fix (Aramis)
+	if (0 == severity)
+	{
+		severity = Logger::INFO | Logger::ERR | Logger::WARN | Logger::DEBUGGING;
+	}
 	
 	for ( StreamIt it = m_StreamArray.begin();
 		it != m_StreamArray.end();
@@ -166,6 +201,9 @@ void DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
 				uiSev &= ( ~Logger::WARN );
 			if ( severity & Logger::ERR ) 
 				uiSev &= ( ~Logger::ERR );
+			// fix (Aramis)
+			if ( severity & Logger::DEBUGGING ) 
+				uiSev &= ( ~Logger::DEBUGGING );
 
 			(*it)->m_uiErrorSeverity = uiSev;
 			

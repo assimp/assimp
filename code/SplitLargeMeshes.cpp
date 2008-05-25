@@ -64,7 +64,7 @@ aiReturn aiSetVertexSplitLimit(unsigned int pLimit)
 	}
 
 	SplitLargeMeshesProcess_Vertex::LIMIT = pLimit;
-	//DefaultLogger::get()->debug("aiSetVertexSplitLimit() - vertex split limit was changed");
+	DefaultLogger::get()->debug("aiSetVertexSplitLimit() - vertex split limit was changed");
 	return AI_SUCCESS;
 }
 // ------------------------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ aiReturn aiSetTriangleSplitLimit(unsigned int pLimit)
 	}
 
 	SplitLargeMeshesProcess_Triangle::LIMIT = pLimit;
-	//DefaultLogger::get()->debug("aiSetTriangleSplitLimit() - triangle split limit was changed");
+	DefaultLogger::get()->debug("aiSetTriangleSplitLimit() - triangle split limit was changed");
 	return AI_SUCCESS;
 }
 }; //! extern "C"

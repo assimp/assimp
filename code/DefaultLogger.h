@@ -38,6 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
+#if (!defined AI_DEFAULTLOGGER_H_INCLUDED)
+#define AI_DEFAULTLOGGER_H_INCLUDED
+
 #include "../include/Logger.h"
 #include <vector>
 
@@ -46,6 +49,39 @@ namespace Assimp
 // ---------------------------------------------------------------------------
 class IOStream;
 struct LogStreamInfo;
+
+
+// ---------------------------------------------------------------------------
+/**	@class	NullLogger
+ *	@brief	Empty logging implementation. Does nothing. Used by default
+ *  if the application hasn't specified a custom logger (or DefaultLogger)
+ *  via DefaultLogger::set() or DefaultLogger::create();
+ */
+class NullLogger : public Logger 
+{
+public:
+	/**	@brief	Logs a debug message */
+	void debug(const std::string &message) {}
+
+	/**	@brief	Logs an info message */
+	void info(const std::string &message) {}
+
+	/**	@brief	Logs a warning message */
+	void warn(const std::string &message) {}
+	
+	/**	@brief	Logs an error message */
+	void error(const std::string &message) {}
+
+	/** @brief Log severity setter */
+	void setLogSeverity(LogSeverity log_severity) {}
+
+	/**	@brief	Detach a still attached stream from logger */
+	void attachStream(LogStream *pStream, unsigned int severity) {}
+
+	/**	@brief	Detach a still attached stream from logger */
+	void detatchStream(LogStream *pStream, unsigned int severity) {}
+};
+
 
 // ---------------------------------------------------------------------------
 /**	@class	DefaultLogger
@@ -57,18 +93,39 @@ class DefaultLogger :
 	public Logger
 {
 public:
-	/**	@brief	Creates the only logging instance
+	/**	@brief	Creates a custom logging instance (DefaultLogger)
 	 *	@param	name		Name for logfile
 	 *	@param	severity	Log severity, VERBOSE will activate debug messages
+	 *
+	 * This replaces the default NullLogger with a DefaultLogger instance.
 	 */
 	static Logger *create(const std::string &name, LogSeverity severity);
+
+	/** @brief	Setup a custom implementation of the Logger interface as
+	 *  default logger. 
+	 *
+	 *  Use this if the provided DefaultLogger class doesn't fit into
+	 *  your needs. If the provided message formatting is OK for you,
+	 *  it is easier to use create() to create a DefaultLogger and to attach
+	 *  your own custom output streams to it than using this method.
+	 *  @param logger Pass NULL to setup a default NullLogger
+	 */
+	static void set (Logger *logger);
 	
 	/**	@brief	Getter for singleton instance
-	 *	@return	Only instance
+	 *	@return	Only instance. This is never null, but it could be a 
+	 *  NullLogger. Use isNullLogger to check this.
 	 */
 	static Logger *get();
+
+	/** @brief  Return whether a default NullLogger is currently active
+	 *  @return true if the current logger id a NullLogger.
+	 *  Use create() or set() to setup a custom logger.
+	 */
+	static bool isNullLogger();
 	
-	/**	@brief	Will kill the singleton instance	*/
+	/**	@brief	Will kill the singleton instance and setup a NullLogger as
+        logger	*/
 	static void kill();
 
 	/**	@brief	Logs debug infos, only been written when severity level VERBOSE is set */
@@ -112,7 +169,9 @@ private:
 	typedef std::vector<LogStreamInfo*>::const_iterator ConstStreamIt;
 
 	//!	only logging instance
-	static DefaultLogger *m_pLogger;
+	static Logger *m_pLogger;
+	static NullLogger s_pNullLogger;
+
 	//!	Logger severity
 	LogSeverity m_Severity;
 	//!	Attached streams
@@ -123,3 +182,5 @@ private:
 // ---------------------------------------------------------------------------
 
 } // Namespace Assimp
+
+#endif // !! AI_DEFAULTLOGGER_H_INCLUDED

@@ -199,6 +199,7 @@ public:
 			// Specifies the shininess of the material
 			// followed by percentage chunk
 			CHUNK_MAT_SHININESS  = 0xA040, 
+			CHUNK_MAT_SHININESS_PERCENT  = 0xA041 ,
 
 			// Specifies the shading mode to be used
 			// followed by a short
@@ -304,7 +305,7 @@ public:
 /** Helper structure representing a 3ds mesh face */
 struct Face
 {
-	Face() : iSmoothGroup(0), bDirection(true), i1(0), i2(0), i3(0)
+	Face() : iSmoothGroup(0), i1(0), i2(0), i3(0), bFlipped(false)
 	{
 		// let the rest uninitialized for performance
 	}
@@ -327,9 +328,8 @@ struct Face
 	//! specifies to which smoothing group the face belongs to
 	uint32_t iSmoothGroup;
 
-	//! Direction the normal vector of the face 
-	//! will be pointing to
-	bool bDirection;
+	//! Specifies that the face normal must be flipped
+	bool bFlipped;
 };
 // ---------------------------------------------------------------------------
 /** Helper structure representing a texture */
@@ -376,7 +376,8 @@ struct Material
 	mTransparency		(1.0f),
 	mBumpHeight			(1.0f),
 	iBakeUVTransform	(0),
-	pcSingleTexture		(NULL)
+	pcSingleTexture		(NULL),
+	mShininessStrength	(1.0f)
 	{
 		static int iCnt = 0;
 		std::stringstream ss(mName);
@@ -389,6 +390,8 @@ struct Material
 	aiColor3D mDiffuse;
 	//! Specular exponent
 	float mSpecularExponent;
+	//! Shininess strength, in percent
+	float mShininessStrength;
 	//! Specular color of the material
 	aiColor3D mSpecular;
 	//! Ambient color of the material
@@ -462,9 +465,12 @@ struct Mesh
 struct Node
 {
 	Node()
+
+	// (code for keyframe animation. however, this is currently not supported by Assimp)
 #if 0
 		: vScaling(1.0f,1.0f,1.0f)
 #endif
+
 	{
 		static int iCnt = 0;
 		std::stringstream ss(mName);
@@ -489,6 +495,7 @@ struct Node
 	//! Index of the node
 	int16_t mHierarchyIndex;
 
+// (code for keyframe animation. however, this is currently not supported by Assimp)
 #if 0
 	aiVector3D vPivot;
 	aiVector3D vScaling;
@@ -502,7 +509,7 @@ struct Node
 	{
 		mChildren.push_back(pc);
 		pc->mParent = this;
-		pc->mHierarchyPos = this->mHierarchyPos+1;
+		//pc->mHierarchyPos = this->mHierarchyPos+1;
 		return *this;
 	}
 };

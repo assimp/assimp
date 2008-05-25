@@ -201,25 +201,28 @@ void MD3Importer::InternReadFile(
 			pcMesh->mFaces[i].mIndices = new unsigned int[3];
 			pcMesh->mFaces[i].mNumIndices = 3;
 
+			unsigned int iTemp = iCurrent;
 			for (unsigned int c = 0; c < 3;++c,++iCurrent)
 			{
-				pcMesh->mFaces[i].mIndices[c] = iCurrent;
-
 				// read vertices
 				pcMesh->mVertices[iCurrent].x = pcVertices[ pcTriangles->INDEXES[c]].X;
 				pcMesh->mVertices[iCurrent].y = pcVertices[ pcTriangles->INDEXES[c]].Y;
-				pcMesh->mVertices[iCurrent].z = pcVertices[ pcTriangles->INDEXES[c]].Z * -1.0f;
+				pcMesh->mVertices[iCurrent].z = pcVertices[ pcTriangles->INDEXES[c]].Z*-1.0f;
 
 				// convert the normal vector to uncompressed float3 format
 				LatLngNormalToVec3(pcVertices[pcTriangles->INDEXES[c]].NORMAL,
 					(float*)&pcMesh->mNormals[iCurrent]);
 
-				std::swap ( pcMesh->mNormals[iCurrent].y,pcMesh->mNormals[iCurrent].z );
+				//std::swap(pcMesh->mNormals[iCurrent].z,pcMesh->mNormals[iCurrent].y);
+				pcMesh->mNormals[iCurrent].z *= -1.0f;
 
 				// read texture coordinates
 				pcMesh->mTextureCoords[0][iCurrent].x = pcUVs[ pcTriangles->INDEXES[c]].U;
 				pcMesh->mTextureCoords[0][iCurrent].y = 1.0f - pcUVs[ pcTriangles->INDEXES[c]].V;
 			}
+			pcMesh->mFaces[i].mIndices[0] = iTemp+2;
+			pcMesh->mFaces[i].mIndices[1] = iTemp+1;
+			pcMesh->mFaces[i].mIndices[2] = iTemp+0;
 			pcTriangles++;
 		}
 

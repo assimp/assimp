@@ -38,44 +38,55 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-
-/** @file Defines a post processing step to calculate tangents and 
-    bitangents on all imported meshes.*/
-#ifndef AI_CALCTANGENTSPROCESS_H_INC
-#define AI_CALCTANGENTSPROCESS_H_INC
+/** @file Defines a post processing step to bring a given scene
+ into the verbose format that is expected by most postprocess steps. 
+ This is the inverse of the "JoinIdenticalVertices" steps */
+#ifndef AI_MAKEVERBOSEFORMAT_H_INC
+#define AI_MAKEVERBOSEFORMAT_H_INC
 
 #include "BaseProcess.h"
-
-struct aiMesh;
-
+#include "../include/aiMesh.h"
 namespace Assimp
-{
+	{
 
 // ---------------------------------------------------------------------------
-/** The CalcTangentsProcess calculates the tangent and bitangent for any vertex
- * of all meshes. It is expected to be run before the JoinVerticesProcess runs
- * because the joining of vertices also considers tangents and bitangents for 
- * uniqueness.
- */
-class CalcTangentsProcess : public BaseProcess
+/** MakeVerboseFormatProcess: Class to convert an asset to the verbose 
+ *  format which is expected by most postprocess steps.
+ *
+ * This is the inverse of what the "JoinIdenticalVertices" step is doing. 
+ * This step has no official flag (since it wouldn't make sense to run it 
+ * during import). It is intended for applications intending to modify the 
+ * returned aiScene. After this step has been executed, they can execute
+ * other postprocess steps on the data.
+ * The step has been added because it was required by the viewer, however
+ * it has been moved to the main library since others might find it
+ * useful, too.
+*/
+class MakeVerboseFormatProcess : public BaseProcess
 {
 	friend class Importer;
 
 public:
-	/** Constructor to be privately used by Importer */
-	CalcTangentsProcess();
+	/** Constructor to be privately used by Importer, or by applications
+	which know what they are doing if they modify the aiScene object */
+	MakeVerboseFormatProcess();
 
 	/** Destructor, private as well */
-	~CalcTangentsProcess();
+	~MakeVerboseFormatProcess();
 
 public:
 	// -------------------------------------------------------------------
 	/** Returns whether the processing step is present in the given flag field.
-	 * @param pFlags The processing flags the importer was called with. A bitwise
-	 *   combination of #aiPostProcessSteps.
-	 * @return true if the process is present in this flag fields, false if not.
+	* @param pFlags The processing flags the importer was called with. A bitwise
+	*   combination of #aiPostProcessSteps.
+	* @return true if the process is present in this flag fields, false if not.
 	*/
-	bool IsActive( unsigned int pFlags) const;
+	bool IsActive( unsigned int pFlags) const 
+	{
+		// NOTE: There is no direct flag that corresponds to
+		// this postprocess step.
+		return false;
+	}
 
 	// -------------------------------------------------------------------
 	/** Executes the post processing step on the given imported data.
@@ -84,14 +95,12 @@ public:
 	*/
 	void Execute( aiScene* pScene);
 
-protected:
-	// -------------------------------------------------------------------
-	/** Calculates tangents and bitangents for the given mesh
-	 * @param pMesh The mesh to process.
-	 */
-	bool ProcessMesh( aiMesh* pMesh);
+
+private:
+
+	//! Apply the postprocess step to a given submesh
+	bool MakeVerboseFormat (aiMesh* pcMesh);
 };
+}; // end of namespace Assimp
 
-} // end of namespace Assimp
-
-#endif // AI_CALCTANGENTSPROCESS_H_INC
+#endif // !!AI_KILLNORMALPROCESS_H_INC

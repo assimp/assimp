@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the 3ds importer class */
 #include "3DSLoader.h"
 #include "MaterialSystem.h"
+#include "DefaultLogger.h"
 
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
@@ -57,7 +58,6 @@ using namespace Assimp;
 	"WARNING: Size of chunk data plus size of "		\
 	"subordinate chunks is larger than the size "	\
 	"specified in the higher-level chunk header."	\
-
 
 
 // ------------------------------------------------------------------------------------------------
@@ -145,6 +145,7 @@ void Dot3DSImporter::InternReadFile(
 	this->mMasterScale = 1.0f;
 	this->mBackgroundImage = "";
 	this->bHasBG = false;
+	this->mErrorText = "";
 
 	int iRemaining = (unsigned int)fileSize;
 	this->ParseMainChunk(&iRemaining);
@@ -170,31 +171,10 @@ void Dot3DSImporter::InternReadFile(
 	// Generate it if no material containing DEFAULT in its name has been
 	// found in the file
 	this->ReplaceDefaultMaterial();
-
-	try 
-		{
-		// Convert the scene from our internal representation to an aiScene object
-		this->ConvertScene(pScene);
-		}
-	catch (ImportErrorException ex)
-		{
-		// delete the scene itself
-		if (pScene->mMeshes)
-			{
-			for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-				delete pScene->mMeshes[i];
-			delete[] pScene->mMeshes;
-			}
-		if (pScene->mMaterials)
-			{
-			for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
-				delete pScene->mMaterials[i];
-			delete[] pScene->mMaterials;
-			}
-		// there are no animations
-		if (pScene->mRootNode)DeleteNodeRecursively(pScene->mRootNode);
-		throw ex;
-		}
+	
+	// Convert the scene from our internal representation to an aiScene object
+	this->ConvertScene(pScene);
+	
 
 	// Generate the node graph for the scene. This is a little bit
 	// tricky since we'll need to split some meshes into submeshes
@@ -205,6 +185,12 @@ void Dot3DSImporter::InternReadFile(
 
 	delete[] this->mBuffer;
 	delete this->mScene;
+
+	// check whether an error occured during reading ... set it as warning
+	if ("" != this->mErrorText) 
+	{
+		DefaultLogger::get()->warn(this->mErrorText);
+	}
 	return;
 }
 // ------------------------------------------------------------------------------------------------
@@ -532,7 +518,7 @@ void Dot3DSImporter::ParseHierarchyChunk(int* piRemaining)
 	const unsigned char* sz = (unsigned char*)this->mCurrent;
 	unsigned int iCnt = 0;
 	uint16_t iHierarchy;
-	//uint16_t iTemp;
+//	uint16_t iTemp;
 	Dot3DS::Node* pcNode;
 	switch (psChunk->Flag)
 	{
@@ -554,20 +540,28 @@ void Dot3DSImporter::ParseHierarchyChunk(int* piRemaining)
 		iHierarchy++;
 		pcNode->mHierarchyPos = iHierarchy;
 		pcNode->mHierarchyIndex = this->mLastNodeIndex;
-		if (iHierarchy > this->mLastNodeIndex)
+		if (this->mCurrentNode && this->mCurrentNode->mHierarchyPos == iHierarchy) 
+		{
+			// add to the parent of the last touched node
+			this->mCurrentNode->mParent->push_back(pcNode);
+			this->mLastNodeIndex++;	
+		}
+		else if(iHierarchy >= this->mLastNodeIndex)
 		{
 			// place it at the current position in the hierarchy
 			this->mCurrentNode->push_back(pcNode);
+			this->mLastNodeIndex = iHierarchy;
 		}
 		else
 		{
 			// need to go back to the specified position in the hierarchy.
 			this->InverseNodeSearch(pcNode,this->mCurrentNode);
+			this->mLastNodeIndex++;	
 		}
-		this->mLastNodeIndex++;
 		this->mCurrentNode = pcNode;
 		break;
 
+	// (code for keyframe animation. however, this is currently not supported by Assimp)
 #if 0
 
 	case Dot3DSFile::CHUNK_TRACKPIVOT:
@@ -651,42 +645,33 @@ void Dot3DSImporter::ParseHierarchyChunk(int* piRemaining)
 					if (0.0f != fRadians)
 						{
 
-						// if the radians go beyond PI then the rotations 
-						// thereafter must be inversed
-#if 0
-						if (neg)fRadians *= -1.0f;
-						if ((fRadians >= 3.1415926f || fRadians <= -3.1415926f))
-							{
-							neg = !neg;
-							}
-#endif 
-
-
 						// get the rotation matrix around the axis
 						const float fSin = sinf(-fRadians);
 						const float fCos = cosf(-fRadians);
 						const float fOneMinusCos = 1.0f - fCos;
 
 						std::swap(vAxis.z,vAxis.y);
-						vAxis.Normalize();
+						//vAxis.z *= -1.0f;
+						//vAxis.Normalize();
 
 						aiMatrix4x4 mRot = aiMatrix4x4(
 							(vAxis.x * vAxis.x) * fOneMinusCos + fCos,
-							(vAxis.x * vAxis.y) * fOneMinusCos - (vAxis.z * fSin),
-							(vAxis.x * vAxis.z) * fOneMinusCos + (vAxis.y * fSin),
+							(vAxis.x * vAxis.y) * fOneMinusCos /*-*/- (vAxis.z * fSin),
+							(vAxis.x * vAxis.z) * fOneMinusCos /*+*/+ (vAxis.y * fSin),
 							0.0f,
-							(vAxis.y * vAxis.x) * fOneMinusCos + (vAxis.z * fSin),
+							(vAxis.y * vAxis.x) * fOneMinusCos /*+*/+ (vAxis.z * fSin),
 							(vAxis.y * vAxis.y) * fOneMinusCos + fCos,
-							(vAxis.y * vAxis.z) * fOneMinusCos - (vAxis.x * fSin),
+							(vAxis.y * vAxis.z) * fOneMinusCos /*-*/- (vAxis.x * fSin),
 							0.0f,
-							(vAxis.z * vAxis.x) * fOneMinusCos - (vAxis.y * fSin),
-							(vAxis.z * vAxis.y) * fOneMinusCos + (vAxis.x * fSin),
+							(vAxis.z * vAxis.x) * fOneMinusCos /*-*/- (vAxis.y * fSin),
+							(vAxis.z * vAxis.y) * fOneMinusCos /*+*/+ (vAxis.x * fSin),
 							(vAxis.z * vAxis.z) * fOneMinusCos + fCos,
 							0.0f,0.0f,0.0f,0.0f,1.0f);
-						//mRot.Transpose();
+						mRot.Transpose();
 
 						// build a chain of concatenated rotation matrix'
 						// if there are multiple track chunks for the same frame
+						// (there are some silly files usinf this ...)
 						if (0 != iNum0)
 							{
 							this->mCurrentNode->mRotation = this->mCurrentNode->mRotation * mRot;
@@ -739,14 +724,19 @@ void Dot3DSImporter::ParseHierarchyChunk(int* piRemaining)
 						this->mCurrentNode->vScaling.y *= vMe.y;
 						this->mCurrentNode->vScaling.z *= vMe.z;
 						}
+					else
+					{
+						DefaultLogger::get()->warn("Found zero scaling factors. "
+							"This will be ignored.");
+					}
 					this->mCurrent += sizeof(aiVector3D);
 					}
 				else this->mCurrent += sizeof(uint32_t) + sizeof(aiVector3D);
 				}
 			}
 		break;
+#endif // end keyframe animation code
 
-#endif // 0
 	};
 	if ((unsigned int)pcCurNext < (unsigned int)this->mCurrent)
 	{
@@ -790,13 +780,6 @@ void Dot3DSImporter::ParseFaceChunk(int* piRemaining)
 		{
 			// nth bit is set for nth smoothing group
 			(*i).iSmoothGroup = *((uint32_t*)this->mCurrent);
-#if 0
-			for (unsigned int x = 0, a = 1; x < 32;++x,a <<= 1)
-			{
-				if ((*i).iSmoothGroup & a)
-					mMesh.bSmoothGroupRequired[x] = true;
-			}
-#endif
 			this->mCurrent += sizeof(uint32_t);
 		}
 		break;
@@ -955,10 +938,10 @@ void Dot3DSImporter::ParseMeshChunk(int* piRemaining)
 
 			aiMatrix4x4 mMe = mMesh.mMat;
 			mMe.a1 *= -1.0f;
-			mMe.a2 *= -1.0f;
-			mMe.a3 *= -1.0f;
-			mMe.a4 *= -1.0f;
-			mInv = mMe * mInv;
+			mMe.b1 *= -1.0f;
+			mMe.c1 *= -1.0f;
+			mMe.d1 *= -1.0f;
+			mInv = mInv * mMe;
 			for (register unsigned int i = 0; i < mMesh.mPositions.size();++i)
 				{
 				aiVector3D a,c;
@@ -1007,8 +990,6 @@ void Dot3DSImporter::ParseMeshChunk(int* piRemaining)
 			sFace.i3 = *((uint16_t*)this->mCurrent);
 			this->mCurrent += 2*sizeof(uint16_t);
 			mMesh.mFaces.push_back(sFace);
-
-			//if (sFace.i1 < sFace.i2)sFace.bDirection = false;
 		}
 
 		// resize the material array (0xcdcdcdcd marks the
@@ -1129,6 +1110,14 @@ void Dot3DSImporter::ParseMaterialChunk(int* piRemaining)
 		if (is_qnan(*pcf))
 			*pcf = 0.0f;
 		else *pcf *= (float)0xFFFF;
+		break;
+
+	case Dot3DSFile::CHUNK_MAT_SHININESS_PERCENT:
+		pcf = &this->mScene->mMaterials.back().mShininessStrength;
+		*pcf = this->ParsePercentageChunk();
+		if (is_qnan(*pcf))
+			*pcf = 0.0f;
+		else *pcf *= (float)0xffff / 100.0f;
 		break;
 
 	case Dot3DSFile::CHUNK_MAT_SELF_ILPCT:

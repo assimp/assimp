@@ -85,6 +85,9 @@ private:
 		this->m_aiImageList[2] = 2;
 		this->m_aiImageList[3] = 3;
 		this->m_aiImageList[4] = 4;
+
+		this->m_avCheckerColors[0].x = this->m_avCheckerColors[0].y = this->m_avCheckerColors[0].z = 0.4f;
+		this->m_avCheckerColors[0].x = this->m_avCheckerColors[1].y = this->m_avCheckerColors[2].z = 0.6f;
 	}
 
 public:
@@ -112,7 +115,7 @@ public:
 	struct TextureInfo
 	{
 		// texture info
-		IDirect3DTexture9* piTexture;
+		IDirect3DTexture9** piTexture;
 
 		// Blend factor of the texture
 		float fBlend;
@@ -350,6 +353,34 @@ public:
 		this->m_asMaterials.push_back(info);
 	}
 
+	//------------------------------------------------------------------
+	// set the primary color of the checker pattern background
+	inline void SetFirstCheckerColor(D3DXVECTOR4 c)
+	{
+		this->m_avCheckerColors[0] = c;
+	}
+
+	//------------------------------------------------------------------
+	// set the secondary color of the checker pattern background
+	inline void SetSecondCheckerColor(D3DXVECTOR4 c)
+	{
+		this->m_avCheckerColors[1] = c;
+	}
+
+	//------------------------------------------------------------------
+	// get the primary color of the checker pattern background
+	inline const D3DXVECTOR4* GetFirstCheckerColor() const
+	{
+		return &this->m_avCheckerColors[0];
+	}
+
+	//------------------------------------------------------------------
+	// get the secondary color of the checker pattern background
+	inline const D3DXVECTOR4* GetSecondCheckerColor() const
+	{
+		return &this->m_avCheckerColors[1];
+	}
+
 private:
 
 	//------------------------------------------------------------------
@@ -450,6 +481,10 @@ private:
 
 	// Current offset (in pixels) of the texture viewer
 	aiVector2D m_vTextureOffset;
+
+	// Colors used to draw the checker pattern (for the
+	// texture viewer as background )
+	D3DXVECTOR4 m_avCheckerColors[2];
 	};
 
 #endif // AV_DISPLAY_H_INCLUDE

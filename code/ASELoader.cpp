@@ -507,10 +507,12 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, aiScene* pcScene)
 
 						for (unsigned int t = 0; t < 3;++t)
 						{
-							p_pcOut->mFaces[q].mIndices[t] = iBase;
 							p_pcOut->mVertices[iBase] = mesh.mPositions[mesh.mFaces[iIndex].mIndices[t]];
 							p_pcOut->mNormals[iBase++] = mesh.mNormals[mesh.mFaces[iIndex].mIndices[t]];
 						}
+						p_pcOut->mFaces[q].mIndices[0] = iBase-2;
+						p_pcOut->mFaces[q].mIndices[1] = iBase-1;
+						p_pcOut->mFaces[q].mIndices[2] = iBase;
 					}
 				}
 				// convert texture coordinates

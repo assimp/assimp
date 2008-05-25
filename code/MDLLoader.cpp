@@ -654,6 +654,7 @@ void MDLImporter::InternReadFile_Quake1( )
 		pcMesh->mFaces[i].mIndices = new unsigned int[3];
 		pcMesh->mFaces[i].mNumIndices = 3;
 
+		unsigned int iTemp = iCurrent;
 		for (unsigned int c = 0; c < 3;++c,++iCurrent)
 		{
 			pcMesh->mFaces[i].mIndices[c] = iCurrent;
@@ -705,6 +706,9 @@ void MDLImporter::InternReadFile_Quake1( )
 			pcMesh->mTextureCoords[0][iCurrent].y = 1.0f-(t + 0.5f) / this->m_pcHeader->skinheight;
 
 		}
+		pcMesh->mFaces[i].mIndices[0] = iTemp+2;
+		pcMesh->mFaces[i].mIndices[1] = iTemp+1;
+		pcMesh->mFaces[i].mIndices[2] = iTemp+0;
 		pcTriangles++;
 	}
 	return;
@@ -824,10 +828,9 @@ void MDLImporter::InternReadFile_GameStudio( )
 			pcMesh->mFaces[i].mIndices = new unsigned int[3];
 			pcMesh->mFaces[i].mNumIndices = 3;
 
+			unsigned int iTemp = iCurrent;
 			for (unsigned int c = 0; c < 3;++c,++iCurrent)
 			{
-				pcMesh->mFaces[i].mIndices[c] = iCurrent;
-
 				// read vertices
 				unsigned int iIndex = pcTriangles->index_xyz[c];
 				if (iIndex >= (unsigned int)this->m_pcHeader->num_verts)
@@ -879,6 +882,9 @@ void MDLImporter::InternReadFile_GameStudio( )
 				vTexCoords[iCurrent].x = s;
 				vTexCoords[iCurrent].y = t;
 			}
+			pcMesh->mFaces[i].mIndices[0] = iTemp+2;
+			pcMesh->mFaces[i].mIndices[1] = iTemp+1;
+			pcMesh->mFaces[i].mIndices[2] = iTemp+0;
 			pcTriangles++;
 		}
 
@@ -901,10 +907,9 @@ void MDLImporter::InternReadFile_GameStudio( )
 			pcMesh->mFaces[i].mIndices = new unsigned int[3];
 			pcMesh->mFaces[i].mNumIndices = 3;
 
+			unsigned int iTemp = iCurrent;
 			for (unsigned int c = 0; c < 3;++c,++iCurrent)
 			{
-				pcMesh->mFaces[i].mIndices[c] = iCurrent;
-
 				// read vertices
 				unsigned int iIndex = pcTriangles->index_xyz[c];
 				if (iIndex >= (unsigned int)this->m_pcHeader->num_verts)
@@ -956,6 +961,9 @@ void MDLImporter::InternReadFile_GameStudio( )
 				vTexCoords[iCurrent].x = s;
 				vTexCoords[iCurrent].y = t;
 			}
+			pcMesh->mFaces[i].mIndices[0] = iTemp+2;
+			pcMesh->mFaces[i].mIndices[1] = iTemp+1;
+			pcMesh->mFaces[i].mIndices[2] = iTemp+0;
 			pcTriangles++;
 		}
 	}
@@ -1384,7 +1392,7 @@ void MDLImporter::InternReadFile_GameStudioA7( )
 				unsigned int iOutIndex = iTriangle * 3 + c;
 
 				// write the output face index
-				pcFaces[iTriangle].mIndices[c] = iOutIndex;
+				pcFaces[iTriangle].mIndices[c] = iTriangle * 3 + (2-c);
 
 				// swap z and y axis
 				vPositions[iOutIndex].x = _AI_MDL7_ACCESS_VERT(pcGroupVerts,iIndex,pcHeader->mainvertex_stc_size) .x;

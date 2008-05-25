@@ -59,7 +59,7 @@ void Dot3DSImporter::GenNormals(Dot3DS::Mesh* sMesh)
 	sMesh->mNormals.resize(sMesh->mPositions.size(),aiVector3D());
 	for( unsigned int a = 0; a < sMesh->mFaces.size(); a++)
 	{
-		const Dot3DS::Face& face = sMesh->mFaces[a];
+		Dot3DS::Face& face = sMesh->mFaces[a];
 
 		// assume it is a triangle
 		aiVector3D* pV1 = &sMesh->mPositions[face.i1];

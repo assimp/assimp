@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "GenVertexNormalsProcess.h"
 #include "JoinVerticesProcess.h"
 #include "CalcTangentsProcess.h"
+#include "MakeVerboseFormat.h"
 
 namespace AssimpView {
 
@@ -81,82 +82,24 @@ void AssetHelper::SetNormalSet(unsigned int iSet)
 	if (this->iNormalSet == iSet)return;
 
 	// we need to build an unique set of vertices for this ...
-	for (unsigned int i = 0; i < this->pcScene->mNumMeshes;++i)
 	{
-		aiMesh* pcMesh = this->pcScene->mMeshes[i];
-		const unsigned int iNumVerts = pcMesh->mNumFaces*3;
+		Assimp::MakeVerboseFormatProcess* pcProcess = new Assimp::MakeVerboseFormatProcess();
+		pcProcess->Execute(this->pcScene);
+		delete pcProcess;
 
-		aiVector3D* pvPositions = new aiVector3D[iNumVerts];
-		aiVector3D* pvNormals = new aiVector3D[iNumVerts];
-		aiVector3D* pvTangents(NULL), *pvBitangents(NULL);
-
-		ai_assert(AI_MAX_NUMBER_OF_TEXTURECOORDS == 4);
-		ai_assert(AI_MAX_NUMBER_OF_COLOR_SETS == 4);
-		aiVector3D* apvTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS] = {NULL,NULL,NULL,NULL};
-		aiColor4D* apvColorSets[AI_MAX_NUMBER_OF_COLOR_SETS] = {NULL,NULL,NULL,NULL};
-
-
-		unsigned int p = 0;
-		while (pcMesh->HasTextureCoords(p))
-			apvTextureCoords[p++] = new aiVector3D[iNumVerts];
-
-		p = 0;
-		while (pcMesh->HasVertexColors(p))
-			apvColorSets[p++] = new aiColor4D[iNumVerts];
-
-		// iterate through all faces and build a clean list
-		unsigned int iIndex = 0;
-		for (unsigned int a = 0; a< pcMesh->mNumFaces;++a)
+		for (unsigned int i = 0; i < this->pcScene->mNumMeshes;++i)
 		{
-			aiFace* pcFace = &pcMesh->mFaces[a];
-			for (unsigned int q = 0; q < 3;++q,++iIndex)
+			if (!this->apcMeshes[i]->pvOriginalNormals)
 			{
-				pvPositions[iIndex] = pcMesh->mVertices[pcFace->mIndices[q]];
-				pvNormals[iIndex] = pcMesh->mNormals[pcFace->mIndices[q]];
-
-				unsigned int p = 0;
-				while (pcMesh->HasTextureCoords(p))
-				{
-					apvTextureCoords[p][iIndex] = pcMesh->mTextureCoords[p][pcFace->mIndices[q]];
-					++p;
-				}
-				p = 0;
-				while (pcMesh->HasVertexColors(p))
-				{
-					apvColorSets[p][iIndex] = pcMesh->mColors[p][pcFace->mIndices[q]];
-					++p;
-				}
-				pcFace->mIndices[q] = iIndex;
+				this->apcMeshes[i]->pvOriginalNormals = new aiVector3D[this->pcScene->mMeshes[i]->mNumVertices];
+				memcpy( this->apcMeshes[i]->pvOriginalNormals,this->pcScene->mMeshes[i]->mNormals,
+					this->pcScene->mMeshes[i]->mNumVertices * sizeof(aiVector3D));
 			}
+			delete[] this->pcScene->mMeshes[i]->mNormals;
+			this->pcScene->mMeshes[i]->mNormals = NULL;
 		}
-
-		// delete the old members
-		delete[] pcMesh->mVertices;
-		pcMesh->mVertices = pvPositions;
-
-		p = 0;
-		while (pcMesh->HasTextureCoords(p))
-		{
-			delete pcMesh->mTextureCoords[p];
-			pcMesh->mTextureCoords[p] = apvTextureCoords[p];
-			++p;
-		}
-		p = 0;
-		while (pcMesh->HasVertexColors(p))
-		{
-			delete pcMesh->mColors[p];
-			pcMesh->mColors[p] = apvColorSets[p];
-			++p;
-		}
-		pcMesh->mNumVertices = iNumVerts;
-
-		// keep the pointer to the normals 
-		delete[] pcMesh->mNormals;
-		pcMesh->mNormals = NULL;
-
-		if (!this->apcMeshes[i]->pvOriginalNormals)
-			this->apcMeshes[i]->pvOriginalNormals = pvNormals;
 	}
+
 
 	// now we can start to calculate a new set of normals
 	if (HARD == iSet)
@@ -175,7 +118,12 @@ void AssetHelper::SetNormalSet(unsigned int iSet)
 	{
 		for (unsigned int i = 0; i < this->pcScene->mNumMeshes;++i)
 		{
-			this->pcScene->mMeshes[i]->mNormals = this->apcMeshes[i]->pvOriginalNormals;
+			if (this->apcMeshes[i]->pvOriginalNormals)
+			{
+				delete[] this->pcScene->mMeshes[i]->mNormals;
+				this->pcScene->mMeshes[i]->mNormals = this->apcMeshes[i]->pvOriginalNormals;
+				this->apcMeshes[i]->pvOriginalNormals = NULL;
+			}
 		}
 	}
 
@@ -191,7 +139,7 @@ void AssetHelper::SetNormalSet(unsigned int iSet)
 
 	this->iNormalSet = iSet;
 
-	if (g_bWasFlipped && ORIGINAL != iSet)
+	if (g_bWasFlipped)
 	{
 		// invert all normal vectors
 		for (unsigned int i = 0; i < this->pcScene->mNumMeshes;++i)

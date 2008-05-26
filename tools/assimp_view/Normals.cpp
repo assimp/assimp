@@ -47,9 +47,48 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "GenVertexNormalsProcess.h"
 #include "JoinVerticesProcess.h"
 #include "CalcTangentsProcess.h"
-#include "MakeVerboseFormat.h"
+#include "unused/MakeVerboseFormat.h"
 
 namespace AssimpView {
+
+
+// NOTE: These classes are necessary since the c'tors of all
+// postprocess steps are protected. Generally they're not 
+// intended to be used directly by applications.
+//
+// However, the viewer is an exception. It does nothing than
+// displaxing the aiScene, so it wouldn't make sense to copy
+// the data to another data structure.
+//
+class MyGenFaceNormalsProcess : public Assimp::GenFaceNormalsProcess
+{
+public:
+	MyGenFaceNormalsProcess() {}
+};
+
+class MyGenVertexNormalsProcess : public Assimp::GenVertexNormalsProcess
+{
+public:
+	MyGenVertexNormalsProcess() {}
+};
+
+class MyMakeVerboseFormatProcess : public Assimp::MakeVerboseFormatProcess
+{
+public:
+	MyMakeVerboseFormatProcess() {}
+};
+
+class MyCalcTangentsProcess : public Assimp::CalcTangentsProcess
+{
+public:
+	MyCalcTangentsProcess() {}
+};
+
+class MyJoinVerticesProcess : public Assimp::JoinVerticesProcess
+{
+public:
+	MyJoinVerticesProcess() {}
+};
 
 
 bool g_bWasFlipped = false;
@@ -83,7 +122,7 @@ void AssetHelper::SetNormalSet(unsigned int iSet)
 
 	// we need to build an unique set of vertices for this ...
 	{
-		Assimp::MakeVerboseFormatProcess* pcProcess = new Assimp::MakeVerboseFormatProcess();
+		MyMakeVerboseFormatProcess* pcProcess = new MyMakeVerboseFormatProcess();
 		pcProcess->Execute(this->pcScene);
 		delete pcProcess;
 
@@ -104,13 +143,13 @@ void AssetHelper::SetNormalSet(unsigned int iSet)
 	// now we can start to calculate a new set of normals
 	if (HARD == iSet)
 	{
-		Assimp::GenFaceNormalsProcess* pcProcess = new Assimp::GenFaceNormalsProcess();
+		MyGenFaceNormalsProcess* pcProcess = new MyGenFaceNormalsProcess();
 		pcProcess->Execute(this->pcScene);
 		delete pcProcess;
 	}
 	else if (SMOOTH == iSet)
 	{
-		Assimp::GenVertexNormalsProcess* pcProcess = new Assimp::GenVertexNormalsProcess();
+		MyGenVertexNormalsProcess* pcProcess = new MyGenVertexNormalsProcess();
 		pcProcess->Execute(this->pcScene);
 		delete pcProcess;
 	}
@@ -128,12 +167,12 @@ void AssetHelper::SetNormalSet(unsigned int iSet)
 	}
 
 	// recalculate tangents and bitangents
-	Assimp::BaseProcess* pcProcess = new Assimp::CalcTangentsProcess();
+	Assimp::BaseProcess* pcProcess = new MyCalcTangentsProcess();
 	pcProcess->Execute(this->pcScene);
 	delete pcProcess;
 
 	// join the mesh vertices again
-	pcProcess = new Assimp::JoinVerticesProcess();
+	pcProcess = new MyJoinVerticesProcess();
 	pcProcess->Execute(this->pcScene);
 	delete pcProcess;
 

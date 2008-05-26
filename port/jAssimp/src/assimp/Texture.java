@@ -61,7 +61,7 @@ public class Texture extends Mappable {
     protected int width = 0;
     protected int height = 0;
 
-    protected Color[] data = null;
+    protected Object data = null;
 
     /**
      * Construction from a given parent object and array index
@@ -114,12 +114,12 @@ public class Texture extends Mappable {
         // map the color data in memory if required ...
         if (null == data) {
             try {
-                this.OnMap();
+                this.onMap();
             } catch (NativeError nativeError) {
                 return Color.black;
             }
         }
-        return data[y * width + x];
+        return ((Color[])data)[y * width + x];
     }
 
     /**
@@ -131,12 +131,12 @@ public class Texture extends Mappable {
          // map the color data in memory if required ...
         if (null == data) {
             try {
-                this.OnMap();
+                this.onMap();
             } catch (NativeError nativeError) {
                 return null;
             }
         }
-        return data;
+        return (Color[])data;
     }
 
     /**
@@ -144,7 +144,7 @@ public class Texture extends Mappable {
      * a <code>java.awt.Color</code> array
      */
     @Override
-    protected void OnMap() throws NativeError {
+    protected void onMap() throws NativeError {
         final int iNumPixels = width * height;
 
         // first allocate the output array
@@ -159,10 +159,12 @@ public class Texture extends Mappable {
            throw new NativeError("Unable to map aiTexture into the Java-VM");
         }
 
+        DefaultLogger.get().debug("Texture.onMap successful");
+
         // now convert the temporary representation to a Color array
         // (data is given in BGRA order, we need RGBA)
         for (int i = 0, iBase = 0; i < iNumPixels; ++i, iBase += 4) {
-            data[i] = new Color(temp[iBase + 2], temp[iBase + 1], temp[iBase], temp[iBase + 3]);
+            ((Color[])data)[i] = new Color(temp[iBase + 2], temp[iBase + 1], temp[iBase], temp[iBase + 3]);
         }
         return;
     }
@@ -177,7 +179,7 @@ public class Texture extends Mappable {
      * @param temp Output array. Assumed to be width * height * 4 in size
      * @return 0xffffffff if an error occured
      */
-    private native int _NativeMapColorData(long context, long index, byte[] temp);
+    protected native int _NativeMapColorData(long context, long index, byte[] temp);
 
     /**
      * JNI bridge call. For internal use only

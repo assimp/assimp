@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 #include <assert.h>
-#include "DefaultLogger.h"
+#include "../include/DefaultLogger.h"
 #include "CalcTangentsProcess.h"
 #include "SpatialSort.h"
 #include "../include/aiPostProcess.h"

@@ -55,7 +55,7 @@ class GenFaceNormalsProcess : public BaseProcess
 {
 	friend class Importer;
 
-public:
+protected:
 	/** Constructor to be privately used by Importer */
 	GenFaceNormalsProcess();
 

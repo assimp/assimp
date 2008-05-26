@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ASELoader.h"
 #include "MaterialSystem.h"
-#include "DefaultLogger.h"
+#include "../include/DefaultLogger.h"
 #include "fast_atof.h"
 
 #include "../include/IOStream.h"

@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the 3ds importer class */
 #include "3DSLoader.h"
 #include "MaterialSystem.h"
-#include "DefaultLogger.h"
+#include "../include/DefaultLogger.h"
 
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"

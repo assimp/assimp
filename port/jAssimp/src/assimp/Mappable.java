@@ -79,7 +79,7 @@ public abstract class Mappable {
      * be ready to be used without an underyling native aiScene
      * @throws NativeError
      */
-    protected abstract void OnMap() throws NativeError;
+    protected abstract void onMap() throws NativeError;
 
 
     /**

@@ -58,8 +58,6 @@ import java.awt.*;
 public class CompressedTexture extends Texture {
 
     private String m_format = "";
-    private byte[] m_data;
-    private int m_length = 0;
 
 
     /**
@@ -70,6 +68,12 @@ public class CompressedTexture extends Texture {
      */
     public CompressedTexture(Object parent, int index) throws NativeError {
         super(parent, index);
+
+        // need to get the format of the texture via the JNI
+         if ((m_format = this._NativeGetCTextureFormat(((Scene) this.getParent()).
+                 getImporter().getContext(), this.getArrayIndex())).equals("")) {
+            throw new NativeError("Unable to get the format of the compressed texture");
+        }
     }
 
     /**
@@ -83,53 +87,89 @@ public class CompressedTexture extends Texture {
         return m_format;
     }
 
+    /**
+     * Get a pointer to the data of the compressed texture
+     * @return Data poiner
+     */
     public byte[] getData() {
-        return m_data;
+        if (null == data) {
+            try {
+                this.onMap();
+            } catch (NativeError nativeError) {
+                DefaultLogger.get().error(nativeError.getMessage());
+                return null;
+            }
+        }
+        return (byte[])data;
     }
 
     /**
-     * Retrieve the height of the texture image
-     *
-     * @return Height, in pixels
+     * Get the length of the data of the compressed texture
+     * @return Data poiner
      */
-    public int getHeight() {
-        DefaultLogger.get()
-        return height;
-    }
-
-    /**
-     * Retrieve the width of the texture image
-     *
-     * @return Width, in pixels
-     */
-    public int getWidth() {
+    public int getLength() {
         return width;
     }
+
+    /**
+     * Returns 0 for compressed textures
+     * @return n/a
+     */
+     @Override
+    public int getHeight() {
+        return 0;
+    }
+
+    /**
+     * Returns 0 for compressed textures
+     * @return n/a
+     */
+     @Override
+    public int getWidth() {
+        return 0;
+    }
+
+    /**
+     * Returns null for compressed textures
+     * @return n/a
+     */
+     @Override
+     public Color getPixel(int x, int y) {
+        return null;
+     }
+
+    /**
+     * Returns null for compressed textures
+     * @return n/a
+     */
+    @Override
+    public Color[] getColorArray() {
+         return null;
+     }
 
     /**
      * Internal helper function to map the native texture data into
      * a <code>byte</code> array in the memory of the JVM
      */
     @Override
-    protected void OnMap() throws NativeError {
+    protected void onMap() throws NativeError {
 
         // first allocate the output array
-        data = new Color[iNumPixels];
+        data = new byte[this.width];
 
         // now allocate a temporary output array
-        byte[] temp = new byte[(iNumPixels) << 2];
+        byte[] temp = new byte[this.width];
 
         // and copy the native color data to it
-        if (0xffffffff == this._NativeMapColorData(((Scene)this.getParent()).getImporter().getContext(),
+        if (0xffffffff == this._NativeMapColorData(
+                ((Scene)this.getParent()).getImporter().getContext(),
                 this.getArrayIndex(),temp)) {
-           throw new NativeError("Unable to map aiTexture into the Java-VM");
+           throw new NativeError("Unable to map compressed aiTexture into the Java-VM");
         }
+        DefaultLogger.get().debug("CompressedTexture.onMap successful");
 
-        // now convert the temporary representation to a Color array
-        // (data is given in BGRA order, we need RGBA)
-        for (int i = 0, iBase = 0; i < iNumPixels; ++i, iBase += 4) {
-            data[i] = new Color(temp[iBase + 2], temp[iBase + 1], temp[iBase], temp[iBase + 3]);
-        }
         return;
     }
+
+     private native String _NativeGetCTextureFormat(long context, int arrayIndex);
 }

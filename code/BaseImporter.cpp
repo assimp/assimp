@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the few default functions of the base importer class */
 #include "BaseImporter.h"
-#include "DefaultLogger.h"
+#include "../include/DefaultLogger.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
 using namespace Assimp;

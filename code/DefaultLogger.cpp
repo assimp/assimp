@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "DefaultLogger.h"
+#include "../include/DefaultLogger.h"
 #include "../include/aiAssert.h"
 #include "DefaultIOSystem.h"
 #include "Win32DebugLogStream.h"

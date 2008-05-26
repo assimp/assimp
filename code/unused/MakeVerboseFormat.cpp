@@ -41,11 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the post processing step "MakeVerboseFormat"
 */
 #include "MakeVerboseFormat.h"
-#include "DefaultLogger.h"
+#include "../../include/DefaultLogger.h"
 
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
+#include "../../include/aiMesh.h"
+#include "../../include/aiScene.h"
+#include "../../include/aiAssert.h"
 
 using namespace Assimp;
 

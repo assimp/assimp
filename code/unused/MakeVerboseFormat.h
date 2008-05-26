@@ -44,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MAKEVERBOSEFORMAT_H_INC
 #define AI_MAKEVERBOSEFORMAT_H_INC
 
-#include "BaseProcess.h"
-#include "../include/aiMesh.h"
+#include "../BaseProcess.h"
+#include "../../include/aiMesh.h"
 namespace Assimp
 	{
 
@@ -66,7 +66,7 @@ class MakeVerboseFormatProcess : public BaseProcess
 {
 	friend class Importer;
 
-public:
+protected:
 	/** Constructor to be privately used by Importer, or by applications
 	which know what they are doing if they modify the aiScene object */
 	MakeVerboseFormatProcess();

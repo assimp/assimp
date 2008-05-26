@@ -713,7 +713,7 @@ public class Mesh extends Mappable {
     }
 
 
-    protected void OnMap() throws NativeError {
+    protected void onMap() throws NativeError {
         // map all vertex component arrays into JVM memory
         if (this.hasPositions()) this.mapVertices();
         if (this.hasNormals()) this.mapNormals();
@@ -727,7 +727,7 @@ public class Mesh extends Mappable {
         for (int i = 0; i < MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
             if (this.hasUVCoords(i)) this.mapUVs(i);
         }
-        // LOG
+        DefaultLogger.get().debug("Mesh.onMap successful");
     }
 
 
@@ -738,7 +738,7 @@ public class Mesh extends Mappable {
                 this.m_vVertices)) {
             // this should occur rarely. No need to throw an exception,
             // simply write to log and let the array at 0.0f
-            // LOG
+            DefaultLogger.get().error("Unable to map vertices into JVM memory");
         }
     }
 
@@ -749,7 +749,7 @@ public class Mesh extends Mappable {
                 this.m_vNormals)) {
             // this should occur rarely. No need to throw an exception,
             // simply write to log and let the array at 0.0f
-            // LOG
+            DefaultLogger.get().error("Unable to map normals into JVM memory");
         }
     }
 
@@ -760,7 +760,7 @@ public class Mesh extends Mappable {
                 this.m_vTangents)) {
             // this should occur rarely. No need to throw an exception,
             // simply write to log and let the array at 0.0f
-            // LOG
+            DefaultLogger.get().error("Unable to map tangents into JVM memory");
         }
     }
 
@@ -771,7 +771,7 @@ public class Mesh extends Mappable {
                 this.m_vBitangents)) {
             // this should occur rarely. No need to throw an exception,
             // simply write to log and let the array at 0.0f
-            // LOG
+            DefaultLogger.get().error("Unable to map bitangents into JVM memory");
         }
     }
 
@@ -782,7 +782,7 @@ public class Mesh extends Mappable {
                 this.m_vFaces)) {
             // this should occur rarely. No need to throw an exception,
             // simply write to log and let the array at 0
-            // LOG
+             DefaultLogger.get().error("Unable to map faces into JVM memory");
         }
     }
 
@@ -793,7 +793,7 @@ public class Mesh extends Mappable {
                 channel, this.m_avUVs[channel])) {
             // this should occur rarely. No need to throw an exception,
             // simply write to log and let the array at 0.0f
-            // LOG
+             DefaultLogger.get().error("Unable to map UV coordinate set " + channel + " into JVM memory");
         }
     }
 
@@ -804,7 +804,7 @@ public class Mesh extends Mappable {
                 channel, this.m_avColors[channel])) {
             // this should occur rarely. No need to throw an exception,
             // simply write to log and let the array at 0.0f
-            // LOG
+             DefaultLogger.get().error("Unable to map vertex color channel " + channel + " into JVM memory");
         }
     }
 

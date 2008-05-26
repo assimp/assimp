@@ -60,7 +60,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../include/aiPostProcess.h"
 #include "../../include/assimp.hpp"
 
-#include "../DefaultLogger.h"
+#include "../../include/DefaultLogger.h"
+
+#include "JNIEnvironment.h"
+#include "JNILogger.h"
 
 using namespace Assimp;
 
@@ -146,6 +149,24 @@ JNIEXPORT jlong JNICALL Java_assimp_Importer__1NativeInitContext
 #if (defined _DEBUG)
 	g_listActiveContexts.push_back(context);
 #endif // ! ASSIMP_DEBUG
+
+	// need to setup the logger
+	JNILogDispatcher* pcLogger;
+	if (DefaultLogger::isNullLogger())
+	{
+		pcLogger = new JNILogDispatcher();
+		DefaultLogger::set (pcLogger);
+	}
+	else
+	{
+		JNILogDispatcher* pcLogger = ( JNILogDispatcher* )DefaultLogger::get();
+		pcLogger->AddRef();
+	}
+
+	// setup the JNI environment  ...
+	// simply setup the newest JNIEnv*
+	JNIEnvironment::Get()->AttachToCurrentThread(jvmenv);
+
 	return context;
 }
 // ------------------------------------------------------------------------------------------------
@@ -169,6 +190,8 @@ JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeFreeContext
 #if (defined _DEBUG)
 	g_listActiveContexts.remove(jvmcontext);
 #endif // ! ASSIMP_DEBUG
+
+	JNIEnvironment::Get()->DetachFromCurrentThread();
 	return 0;
 }
 // ------------------------------------------------------------------------------------------------
@@ -187,7 +210,7 @@ JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeLoad
 #endif // ! ASSIMP_DEBUG
 
 	// get the path from the jstring
-	const char* szPath = jvmenv->GetStringUTFChars(jvmpath,NULL);
+	const char* szPath = JNU_GetStringNativeChars(jvmenv,jvmpath);
 	if (!szPath)
 	{
 		DefaultLogger::get()->error("[jnibridge] Unable to get path string from the java vm");
@@ -203,11 +226,11 @@ JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeLoad
 		DefaultLogger::get()->error("[jnibridge] Unable to load asset");
 
 		// release the path again
-		jvmenv->ReleaseStringUTFChars(jvmpath,szPath);
+		free((void*)szPath);
 		return AI_JNI_ERROR_RETURN;
 	}
 	// release the path again
-	jvmenv->ReleaseStringUTFChars(jvmpath,szPath);
+	free((void*)szPath);
 	return iRet;
 }
 

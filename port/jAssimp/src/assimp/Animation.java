@@ -61,7 +61,7 @@ public class Animation extends Mappable {
         super(parent, index);
     }
 
-    protected void OnMap() throws NativeError {
+    protected void onMap() throws NativeError {
         
     }
 }

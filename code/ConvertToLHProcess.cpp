@@ -2,7 +2,7 @@
  * to a left-handed coordinate system.
  */
 #include "ConvertToLHProcess.h"
-#include "DefaultLogger.h"
+#include "../include/DefaultLogger.h"
 #include "../include/aiPostProcess.h"
 #include "../include/aiMesh.h"
 #include "../include/aiAnim.h"

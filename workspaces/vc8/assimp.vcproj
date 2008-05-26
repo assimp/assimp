@@ -585,10 +585,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\MakeVerboseFormat.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\code\MaterialSystem.h"
 				>
 			</File>
@@ -796,7 +792,19 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\jAssimp\JNIEnvironment.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\jAssimp\JNILogger.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="extra"
+				>
+				<File
+					RelativePath="..\..\code\unused\MakeVerboseFormat.h"
 					>
 				</File>
 			</Filter>
@@ -850,10 +858,6 @@
 			</File>
 			<File
 				RelativePath="..\..\code\KillNormalsProcess.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\MakeVerboseFormat.cpp"
 				>
 			</File>
 			<File
@@ -992,7 +996,19 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\jAssimp\JNIEnvironment.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\jAssimp\JNILogger.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="extra"
+				>
+				<File
+					RelativePath="..\..\code\unused\MakeVerboseFormat.cpp"
 					>
 				</File>
 			</Filter>

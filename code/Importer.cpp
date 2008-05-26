@@ -88,7 +88,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "GenVertexNormalsProcess.h"
 #include "KillNormalsProcess.h"
 #include "SplitLargeMeshes.h"
-#include "DefaultLogger.h"
+#include "../include/DefaultLogger.h"
 
 using namespace Assimp;
 

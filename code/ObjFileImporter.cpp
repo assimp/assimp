@@ -7,7 +7,7 @@
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
 #include "MaterialSystem.h"
-#include "DefaultLogger.h"
+#include "../include/DefaultLogger.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/format.hpp>

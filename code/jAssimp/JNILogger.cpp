@@ -53,8 +53,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../include/aiPostProcess.h"
 #include "../../include/assimp.hpp"
 
-#include "../DefaultLogger.h"
+#include "../../include/DefaultLogger.h"
 
+#include "JNIEnvironment.h"
 #include "JNILogger.h"
 
 using namespace Assimp;
@@ -65,67 +66,98 @@ namespace JNIBridge		{
 
 
 // ------------------------------------------------------------------------------------------------
-void JNILogDispatcher::SetJNIEnvironment(JNIEnv* ptr) 
+bool JNILogDispatcher::OnAttachToCurrentThread(JNIThreadData* pcData)
 {
+	ai_assert(NULL != pcData);
+	//this->AddRef(); - done at another position
+
 	// there is much error handling code in this function.
 	// However, it is not impossible that the jAssimp package 
 	// loaded by the JVM is incomplete ...
-
-	jclass java_lang_Exception = this->GetJNIEnv()->FindClass("java.lang.Exception");
+	JNIEnv* jvmenv = JNIEnvironment::Get()->GetThread()->m_pcEnv;
 
 	// get a handle to the assimp.DefaultLogger class
-	this->m_pcJNIEnv = ptr;
-	if( NULL == (this->m_pcClass = this->GetJNIEnv()->FindClass("assimp.DefaultLogger")))
+	if (NULL == this->m_pcClass)
 	{
-		this->GetJNIEnv()->ThrowNew(java_lang_Exception,
-			"Unable to get class handle to assimp.DefaultLogger");
-		return;
+		if( NULL == (this->m_pcClass = jvmenv->FindClass("assimp.DefaultLogger")))
+		{
+			return false;
+		}
 	}
 	// get handles to the logging functions
-	if( NULL == (this->m_pcMethodError = this->GetJNIEnv()->GetStaticMethodID(
-		this->m_pcClass,"_NativeCallWriteError","(Ljava/lang/String;)V")))
+	if (NULL == this->m_pcMethodError)
 	{
-		this->GetJNIEnv()->ThrowNew(java_lang_Exception,
-			"Unable to get class handle to assimp.DefaultLogger._NativeCallWriteError()");
-		return;
+		if( NULL == (this->m_pcMethodError = jvmenv->GetStaticMethodID(
+			this->m_pcClass,"_NativeCallWriteError","(Ljava/lang/String;)V")))
+		{
+			return false;
+		}
 	}
-	if( NULL == (this->m_pcMethodWarn = this->GetJNIEnv()->GetStaticMethodID(
-		this->m_pcClass,"_NativeCallWriteWarn","(Ljava/lang/String;)V")))
+	if (NULL == this->m_pcMethodWarn)
 	{
-		this->GetJNIEnv()->ThrowNew(java_lang_Exception,
-			"Unable to get class handle to assimp.DefaultLogger._NativeCallWriteWarn()");
-		return;
+		if( NULL == (this->m_pcMethodWarn = jvmenv->GetStaticMethodID(
+			this->m_pcClass,"_NativeCallWriteWarn","(Ljava/lang/String;)V")))
+		{
+			return false;
+		}
 	}
-	if( NULL == (this->m_pcMethodInfo = this->GetJNIEnv()->GetStaticMethodID(
-		this->m_pcClass,"_NativeCallWriteInfo","(Ljava/lang/String;)V")))
+	if (NULL == this->m_pcMethodInfo)
 	{
-		this->GetJNIEnv()->ThrowNew(java_lang_Exception,
-			"Unable to get class handle to assimp.DefaultLogger._NativeCallWriteInfo()");
-		return;
+		if( NULL == (this->m_pcMethodInfo = jvmenv->GetStaticMethodID(
+			this->m_pcClass,"_NativeCallWriteInfo","(Ljava/lang/String;)V")))
+		{
+			return false;
+		}
 	}
-	if( NULL == (this->m_pcMethodDebug = this->GetJNIEnv()->GetStaticMethodID(
-		this->m_pcClass,"_NativeCallWriteDebug","(Ljava/lang/String;)V")))
+	if (NULL == this->m_pcMethodDebug)
 	{
-		this->GetJNIEnv()->ThrowNew(java_lang_Exception,
-			"Unable to get class handle to assimp.DefaultLogger._NativeCallWriteDebug()");
+		if( NULL == (this->m_pcMethodDebug = jvmenv->GetStaticMethodID(
+			this->m_pcClass,"_NativeCallWriteDebug","(Ljava/lang/String;)V")))
+		{
+			return false;
+		}
 	}
+	return true;
+}
+// ------------------------------------------------------------------------------------------------
+bool JNILogDispatcher::OnDetachFromCurrentThread(JNIThreadData* pcData)
+{
+	ai_assert(NULL != pcData);
+
+	this->Release();
+	return true;
 }
 // ------------------------------------------------------------------------------------------------
 void JNILogDispatcher::debug(const std::string &message)
 {
-	
+	JNIEnv* jvmenv = JNIEnvironment::Get()->GetThread()->m_pcEnv;
+	jstring jstr = JNU_NewStringNative(jvmenv,message.c_str());
+	jvmenv->CallStaticVoidMethod(this->m_pcClass,this->m_pcMethodDebug,jstr);
+	jvmenv->DeleteLocalRef(jstr);
 }
 // ------------------------------------------------------------------------------------------------
 void JNILogDispatcher::info(const std::string &message)
 {
+	JNIEnv* jvmenv = JNIEnvironment::Get()->GetThread()->m_pcEnv;
+	jstring jstr = JNU_NewStringNative(jvmenv,message.c_str());
+	jvmenv->CallStaticVoidMethod(this->m_pcClass,this->m_pcMethodInfo,jstr);
+	jvmenv->DeleteLocalRef(jstr);
 }
 // ------------------------------------------------------------------------------------------------
 void JNILogDispatcher::warn(const std::string &message)
 {
+	JNIEnv* jvmenv = JNIEnvironment::Get()->GetThread()->m_pcEnv;
+	jstring jstr = JNU_NewStringNative(jvmenv,message.c_str());
+	jvmenv->CallStaticVoidMethod(this->m_pcClass,this->m_pcMethodWarn,jstr);
+	jvmenv->DeleteLocalRef(jstr);
 }	
 // ------------------------------------------------------------------------------------------------
 void JNILogDispatcher::error(const std::string &message)
 {
+	JNIEnv* jvmenv = JNIEnvironment::Get()->GetThread()->m_pcEnv;
+	jstring jstr = JNU_NewStringNative(jvmenv,message.c_str());
+	jvmenv->CallStaticVoidMethod(this->m_pcClass,this->m_pcMethodError,jstr);
+	jvmenv->DeleteLocalRef(jstr);
 }
 
 

@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MaterialSystem.h"
 #include "MDLLoader.h"
 #include "MDLDefaultColorMap.h"
-#include "DefaultLogger.h"
+#include "../include/DefaultLogger.h"
 
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"

@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "../../include/Logger.h"
+#include "../../include/DefaultLogger.h"
 #include <vector>
 
 #include <jni.h>
@@ -62,7 +63,13 @@ struct LogStreamInfo;
  */
 class JNILogDispatcher : public Logger 
 {
+	friend class JNIEnvironment;
+
 public:
+
+	//! Default constructor
+	JNILogDispatcher() : m_iRefCnt(1) {}
+
 	/**	@brief	Logs a debug message */
 	void debug(const std::string &message);
 
@@ -84,22 +91,32 @@ public:
 	/**	@brief	Detach a still attached stream from logger */
 	void detatchStream(LogStream *pStream, unsigned int severity) {}
 
-	//! Setup the JNI environment to use
-	//! (must be attached to the thread)
-	//! \param ptr Java environment to be used. != 0
-	void SetJNIEnvironment(JNIEnv* ptr);
-
-	//! Get the current JNI environment
-	inline JNIEnv* GetJNIEnv() 
+	//! COM-style reference counting mechanism
+	unsigned int AddRef()
 	{
-		ai_assert(NULL != m_pcJNIEnv);
-		return m_pcJNIEnv;
+		return ++this->m_iRefCnt;
+	}
+
+	//! COM-style reference counting mechanism
+	unsigned int Release()
+	{
+		unsigned int iNew = --this->m_iRefCnt;
+		if (0 == iNew)
+		{
+			delete this;
+			// don't forget to reset the logger to the default implementation
+			DefaultLogger::set(NULL);
+		}
+		return iNew;
 	}
 
 private:
 
-	//! JNI environment pointer
-	JNIEnv* m_pcJNIEnv;
+	//! Called by JNIEnvironment
+	bool OnAttachToCurrentThread(JNIThreadData* pcData);
+	bool OnDetachFromCurrentThread(JNIThreadData* pcData);
+
+private:
 
 	//! Handle to assimp.DefaultLogger class
 	jclass m_pcClass;
@@ -115,6 +132,9 @@ private:
 
 	//! Handle to the static assimp.DefaultLogger._NativeCallWriteWarn() method
 	jmethodID m_pcMethodWarn;
+
+	//! Reference counter of the logger
+	unsigned int m_iRefCnt;
 };
 
 };};

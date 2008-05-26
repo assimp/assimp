@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PLYLoader.h"
 #include "MaterialSystem.h"
 #include "fast_atof.h"
-#include "DefaultLogger.h"
+#include "../include/DefaultLogger.h"
 #include "ByteSwap.h"
 
 #include "../include/IOStream.h"

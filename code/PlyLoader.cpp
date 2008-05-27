@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Implementation of the PLY importer class */
-#include "PLYLoader.h"
+#include "PlyLoader.h"
 #include "MaterialSystem.h"
 
 #include "../include/IOStream.h"

@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp.h"
 #include "../include/assimp.hpp"
 
-#include "../include/aiassert.h"
+#include "../include/aiAssert.h"
 using namespace Assimp;
 
 #if (defined AI_C_THREADSAFE)

@@ -221,9 +221,11 @@ void DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
 DefaultLogger::DefaultLogger( const std::string &name, LogSeverity severity ) :
 	m_Severity( severity )
 {
+#ifdef WIN32
 	m_Streams.push_back( new Win32DebugLogStream() );
 	if (name.empty())
 		return;
+#endif
 	
 	m_Streams.push_back( new FileLogStream( name ) );
 }

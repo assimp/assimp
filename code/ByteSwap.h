@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BYTESWAP_H_INC
 #define AI_BYTESWAP_H_INC
 
-#include "..\include\aiAssert.h"
+#include "../include/aiAssert.h"
 
 namespace Assimp
 {

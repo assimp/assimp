@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the PLY parser class */
 
-#include "PLYLoader.h"
+#include "PlyLoader.h"
 #include "MaterialSystem.h"
 #include "fast_atof.h"
 #include "../include/DefaultLogger.h"

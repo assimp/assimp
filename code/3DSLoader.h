@@ -246,7 +246,7 @@ protected:
 	// -------------------------------------------------------------------
 	/** Clamp all indices in the file to a valid range
 	*/
-	void Dot3DSImporter::CheckIndices(Dot3DS::Mesh* sMesh);
+	void CheckIndices(Dot3DS::Mesh* sMesh);
 
 
 protected:

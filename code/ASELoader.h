@@ -109,6 +109,13 @@ protected:
 	void BuildUniqueRepresentation(ASE::Mesh& mesh);
 
 	// -------------------------------------------------------------------
+	/** Transform all vertices with the inverse transformation
+	 *  matrix of the mesh
+	 * \param mesh Mesh to work on
+	 */
+	void TransformVertices(ASE::Mesh& mesh);
+
+	// -------------------------------------------------------------------
 	/** Create one-material-per-mesh meshes ;-)
 	 * \param mesh Mesh to work with
 	 *  \param pcScene Scene object to be filled
@@ -140,6 +147,9 @@ protected:
 
 	/** Buffer to hold the loaded file */
 	unsigned char* mBuffer;
+
+	/** true if this is an .ask file */
+	bool mIsAsk;
 };
 
 } // end of namespace Assimp

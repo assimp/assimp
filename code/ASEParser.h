@@ -126,6 +126,36 @@ struct Face : public Dot3DS::Face
 };
 
 // ---------------------------------------------------------------------------
+/** Helper structure to represent an ASE file bone */
+struct Bone
+{
+	//! Constructor
+	Bone()
+	{
+		static int iCnt = 0;
+		std::stringstream ss(mName);
+		ss << "%%_UNNAMED_" << iCnt++ << "_%%"; 
+		ss.flush();
+	}
+
+	//! Name of the bone
+	std::string mName;
+};
+
+// ---------------------------------------------------------------------------
+/** Helper structure to represent an ASE file bone vertex */
+struct BoneVertex
+{
+	//! Bone and corresponding vertex weight.
+	//! -1 for unrequired bones ....
+	std::vector<std::pair<int,float> > mBoneWeights;
+
+	//! Position of the bone vertex.
+	//! MUST be identical to the vertex position
+	//aiVector3D mPosition;
+};
+
+// ---------------------------------------------------------------------------
 /** Helper structure to represent an ASE file mesh */
 struct Mesh
 {
@@ -135,6 +165,7 @@ struct Mesh
 		static int iCnt = 0;
 		std::stringstream ss(mName);
 		ss << "%%_UNNAMED_" << iCnt++ << "_%%"; 
+		ss.flush();
 
 		// use 2 texture vertex components by default
 		for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS;++c)
@@ -143,7 +174,13 @@ struct Mesh
 		// setup the default material index by default
 		iMaterialIndex = Face::DEFAULT_MATINDEX;
 	}
+
+	//! Name of the mesh
 	std::string mName;
+
+	//! Name of the parent of the mesh
+	//! "" if there is no parent ...
+	std::string mParent;
 
 	//! vertex positions
 	std::vector<aiVector3D> mPositions;
@@ -159,6 +196,12 @@ struct Mesh
 
 	//! List of normal vectors
 	std::vector<aiVector3D> mNormals;
+
+	//! List of all bone vertices
+	std::vector<BoneVertex> mBoneVertices;
+
+	//! List of all bones
+	std::vector<Bone> mBones;
 
 	//! Transformation matrix of the mesh
 	aiMatrix4x4 mTransform;
@@ -296,6 +339,23 @@ private:
 	void ParseLV3MeshNormalListBlock(Mesh& mesh);
 
 	// -------------------------------------------------------------------
+	//! Parse a *MESH_WEIGHTSblock in a file
+	//! \param mesh Mesh object to be filled
+	void ParseLV3MeshWeightsBlock(Mesh& mesh);
+
+	// -------------------------------------------------------------------
+	//! Parse the bone list of a file
+	//! \param mesh Mesh object to be filled
+	//! \param iNumBones Number of bones in the mesh
+	void ParseLV4MeshBones(unsigned int iNumBones,Mesh& mesh);
+
+	// -------------------------------------------------------------------
+	//! Parse the bone vertices list of a file
+	//! \param mesh Mesh object to be filled
+	//! \param iNumVertices Number of vertices to be parsed
+	void ParseLV4MeshBonesVertices(unsigned int iNumVertices,Mesh& mesh);
+
+	// -------------------------------------------------------------------
 	//! Parse a *MESH_FACE block in a file
 	//! \param out receive the face data
 	void ParseLV4MeshFace(ASE::Face& out);
@@ -358,6 +418,14 @@ private:
 	//! Output an error to the logger
 	//! \param szWarn Error message
 	void LogError(const char* szWarn);
+
+	// -------------------------------------------------------------------
+	//! Parse a string, enclosed in double quotation marks
+	//! \param out Output string
+	//! \param szName Name of the enclosing element -> used in error
+	//! messages.
+	//! \return false if an error occured
+	bool Parser::ParseString(std::string& out,const char* szName);
 
 public:
 

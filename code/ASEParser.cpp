@@ -204,12 +204,7 @@ void Parser::Parse()
 		if ('{' == *this->m_szFile)iDepth++;
 		if ('}' == *this->m_szFile)
 		{
-			if (0 == --iDepth)
-			{
-				++this->m_szFile;
-				this->SkipToNextToken();
-				return;
-			}
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
 		if ('\0' == *this->m_szFile)
 		{
@@ -249,12 +244,7 @@ void Parser::ParseLV1SceneBlock()
 		if ('{' == *this->m_szFile)iDepth++;
 		if ('}' == *this->m_szFile)
 		{
-			if (0 == --iDepth)
-			{
-				++this->m_szFile;
-				this->SkipToNextToken();
-				return;
-			}
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
 		else if ('\0' == *this->m_szFile)
 		{
@@ -310,12 +300,7 @@ void Parser::ParseLV1MaterialListBlock()
 		if ('{' == *this->m_szFile)iDepth++;
 		if ('}' == *this->m_szFile)
 		{
-			if (0 == --iDepth)
-			{
-				++this->m_szFile;
-				this->SkipToNextToken();
-				return;
-			}
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
 		else if ('\0' == *this->m_szFile)
 		{
@@ -437,6 +422,13 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				this->ParseLV4MeshFloat(mat.mSpecularExponent);
 				mat.mSpecularExponent *= 15;
 			}
+			// material shininess strength
+			if (0 == strncmp(this->m_szFile,"*MATERIAL_SHINESTRENGTH",23) &&
+				IsSpaceOrNewLine(*(this->m_szFile+23)))
+			{
+				this->m_szFile+=24;
+				this->ParseLV4MeshFloat(mat.mShininessStrength);
+			}
 			// diffuse color map
 			if (0 == strncmp(this->m_szFile,"*MAP_DIFFUSE",12) &&
 				IsSpaceOrNewLine(*(this->m_szFile+12)))
@@ -546,12 +538,7 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 		if ('{' == *this->m_szFile)iDepth++;
 		if ('}' == *this->m_szFile)
 		{
-			if (0 == --iDepth)
-			{
-				++this->m_szFile;
-				this->SkipToNextToken();
-				return;
-			}
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
 		else if ('\0' == *this->m_szFile)
 		{
@@ -649,12 +636,7 @@ void Parser::ParseLV3MapBlock(Texture& map)
 		if ('{' == *this->m_szFile)iDepth++;
 		if ('}' == *this->m_szFile)
 		{
-			if (0 == --iDepth)
-			{
-				++this->m_szFile;
-				this->SkipToNextToken();
-				return;
-			}
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
 		else if ('\0' == *this->m_szFile)
 		{
@@ -665,6 +647,47 @@ void Parser::ParseLV3MapBlock(Texture& map)
 		++this->m_szFile;
 	}
 	return;
+}
+// ------------------------------------------------------------------------------------------------
+bool Parser::ParseString(std::string& out,const char* szName)
+{
+	char szBuffer[1024];
+	ai_assert(strlen(szName < 750));
+
+	// NOTE: The name could also be the texture in some cases
+	// be prepared that this might occur ...
+	if (!SkipSpaces(this->m_szFile,&this->m_szFile))
+	{
+		sprintf(szBuffer,"Unable to parse %s block: Unexpected EOL",szName);
+		this->LogWarning(szBuffer);
+		return false;
+	}
+	// there must be "
+	if ('\"' != *this->m_szFile)
+	{
+		sprintf(szBuffer,"Unable to parse %s block: String is expected "
+			"to be enclosed in double quotation marks",szName);
+		this->LogWarning(szBuffer);
+		return false;
+	}
+	++this->m_szFile;
+	const char* sz = this->m_szFile;
+	while (true)
+	{
+		if ('\"' == *sz)break;
+		else if ('\0' == sz)
+		{
+			sprintf(szBuffer,"Unable to parse %s block: String is expected to be "
+				"enclosed in double quotation marks but EOF was reached before a closing "
+				"quotation mark was found",szName);
+			this->LogWarning(szBuffer);
+			return false;
+		}
+		sz++;
+	}
+	out = std::string(this->m_szFile,(uintptr_t)sz-(uintptr_t)this->m_szFile);
+	this->m_szFile = sz;
+	return true;
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV1GeometryObjectBlock(ASE::Mesh& mesh)
@@ -679,31 +702,22 @@ void Parser::ParseLV1GeometryObjectBlock(ASE::Mesh& mesh)
 				IsSpaceOrNewLine(*(this->m_szFile+10)))
 			{
 				this->m_szFile+=11;
-
-				// NOTE: The name could also be the texture in some cases
-				// be prepared that this might occur ...
-				if (!SkipSpaces(this->m_szFile,&this->m_szFile))
-					BLUBB("Unable to parse *NODE_NAME block: Unexpected EOL")
-
-				// there must be "
-				if ('\"' != *this->m_szFile)
-					BLUBB("Unable to parse *NODE_NAME block: Name is expected to be enclosed in double quotation marks")
-
-				++this->m_szFile;
-				const char* sz = this->m_szFile;
-				while (true)
+				if(!this->ParseString(mesh.mName,"*NODE_NAME"))
 				{
-					if ('\"' == *sz)break;
-					else if ('\0' == sz)
-					{
-						BLUBB("Unable to parse *NODE_NAME block: Name is expected to be enclosed in double quotation marks \
-							  but EOF was reached before a closing quotation mark was found")
-					}
-					sz++;
+					this->SkipToNextToken();
+					continue;
 				}
-
-				mesh.mName = std::string(this->m_szFile,(uintptr_t)sz-(uintptr_t)this->m_szFile);
-				this->m_szFile = sz;
+			}
+			// name of the parent of the node
+			if (0 == strncmp(this->m_szFile,"*NODE_PARENT" ,12) &&
+				IsSpaceOrNewLine(*(this->m_szFile+12)))
+			{
+				this->m_szFile+=13;
+				if(!this->ParseString(mesh.mParent,"*NODE_PARENT"))
+				{
+					this->SkipToNextToken();
+					continue;
+				}
 			}
 			// transformation matrix of the node
 			if (0 == strncmp(this->m_szFile,"*NODE_TM" ,8) &&
@@ -719,16 +733,18 @@ void Parser::ParseLV1GeometryObjectBlock(ASE::Mesh& mesh)
 				this->m_szFile+=6;
 				this->ParseLV2MeshBlock(mesh);
 			}
+			// mesh material index
+			else if (0 == strncmp(this->m_szFile,"*MATERIAL_REF" ,13) &&
+				IsSpaceOrNewLine(*(this->m_szFile+13)))
+			{
+				this->m_szFile+=14;
+				this->ParseLV4MeshLong(mesh.iMaterialIndex);
+			}
 		}
 		if ('{' == *this->m_szFile)iDepth++;
 		if ('}' == *this->m_szFile)
 		{
-			if (0 == --iDepth)
-			{
-				++this->m_szFile;
-				this->SkipToNextToken();
-				return;
-			}
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
 		else if ('\0' == *this->m_szFile)
 		{
@@ -780,12 +796,7 @@ void Parser::ParseLV2NodeTransformBlock(ASE::Mesh& mesh)
 		if ('{' == *this->m_szFile)iDepth++;
 		if ('}' == *this->m_szFile)
 		{
-			if (0 == --iDepth)
-			{
-				++this->m_szFile;
-				this->SkipToNextToken();
-				return;
-			}
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
 		else if ('\0' == *this->m_szFile)
 		{
@@ -932,28 +943,201 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 					this->ParseLV3MappingChannel(iIndex-1,mesh);
 				}
 			}
-			// mesh material index
-			else if (0 == strncmp(this->m_szFile,"*MATERIAL_REF" ,13) &&
+			// mesh animation keyframe. Not supported
+			else if (0 == strncmp(this->m_szFile,"*MESH_ANIMATION" ,15) &&
+				IsSpaceOrNewLine(*(this->m_szFile+15)))
+			{
+				this->m_szFile+=16;
+				
+				this->LogWarning("Found *MESH_ANIMATION element in ASE/ASK file. "
+					"Keyframe animation is not supported by Assimp, this element "
+					"will be ignored");
+			}
+			// mesh animation keyframe. Not supported
+			else if (0 == strncmp(this->m_szFile,"*MESH_WEIGHTS" ,13) &&
 				IsSpaceOrNewLine(*(this->m_szFile+13)))
 			{
 				this->m_szFile+=14;
-				this->ParseLV4MeshLong(mesh.iMaterialIndex);
+				this->ParseLV3MeshWeightsBlock(mesh);
 			}
 		}
 		if ('{' == *this->m_szFile)iDepth++;
 		if ('}' == *this->m_szFile)
 		{
-			if (0 == --iDepth)
-			{
-				++this->m_szFile;
-				this->SkipToNextToken();
-				return;
-			}
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
 		else if ('\0' == *this->m_szFile)
 		{
 			// END OF FILE ... this is a level2 block, this can't be
 			BLUBB("Unable to finish parsing a lv2 mesh block. Unexpected EOF")
+		}
+		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
+		++this->m_szFile;
+	}
+	return;
+}
+// ------------------------------------------------------------------------------------------------
+void Parser::ParseLV3MeshWeightsBlock(ASE::Mesh& mesh)
+{
+	unsigned int iNumVertices = 0;
+	unsigned int iNumBones = 0;
+	int iDepth = 0;
+	while (true)
+	{
+		if ('*' == *this->m_szFile)
+		{
+			// Number of bone vertices ...
+			if (0 == strncmp(this->m_szFile,"*MESH_NUMVERTEX" ,15) &&
+				IsSpaceOrNewLine(*(this->m_szFile+15)))
+			{
+				this->m_szFile+=16;
+				this->ParseLV4MeshLong(iNumVertices);
+			}
+			// Number of bones
+			if (0 == strncmp(this->m_szFile,"*MESH_NUMBONE" ,13) &&
+				IsSpaceOrNewLine(*(this->m_szFile+13)))
+			{
+				this->m_szFile+=14;
+				this->ParseLV4MeshLong(iNumBones);
+			}
+			// parse the list of bones
+			if (0 == strncmp(this->m_szFile,"*MESH_BONE_LIST" ,15) &&
+				IsSpaceOrNewLine(*(this->m_szFile+15)))
+			{
+				this->m_szFile+=16;
+				this->SkipOpeningBracket();
+				this->ParseLV4MeshBones(iNumBones,mesh);
+			}
+			// parse the list of bones vertices
+			if (0 == strncmp(this->m_szFile,"*MESH_BONE_VERTEX_LIST" ,22) &&
+				IsSpaceOrNewLine(*(this->m_szFile+22)))
+			{
+				this->m_szFile+=23;
+				this->SkipOpeningBracket();
+				this->ParseLV4MeshBonesVertices(iNumVertices,mesh);
+			}
+		}
+		if ('{' == *this->m_szFile)iDepth++;
+		if ('}' == *this->m_szFile)
+		{
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
+		}
+		else if ('\0' == *this->m_szFile)
+		{
+			// END OF FILE ... this is a level2 block, this can't be
+			BLUBB("Unable to finish parsing a lv2 *MESH_WEIGHTS block. Unexpected EOF")
+		}
+		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
+		++this->m_szFile;
+	}
+	return;
+}
+// ------------------------------------------------------------------------------------------------
+void Parser::ParseLV4MeshBones(unsigned int iNumBones,ASE::Mesh& mesh)
+{
+	mesh.mBones.resize(iNumBones);
+	int iDepth = 0;
+	while (true)
+	{
+		if ('*' == *this->m_szFile)
+		{
+			// Mesh bone with name ...
+			if (0 == strncmp(this->m_szFile,"*MESH_BONE_NAME" ,17) &&
+				IsSpaceOrNewLine(*(this->m_szFile+17)))
+			{
+				this->m_szFile+=18;
+
+				// parse an index ...
+				if(SkipSpaces(this->m_szFile,&this->m_szFile))
+				{
+					unsigned int iIndex = strtol10(this->m_szFile,&this->m_szFile);
+					if (iIndex >= iNumBones)
+					{
+						iIndex = iNumBones-1;
+						this->LogWarning("Bone index is out of bounds. Using the largest valid "
+							"bone index instead");
+					}
+					if (!this->ParseString(mesh.mBones[iIndex].mName,"*MESH_BONE_NAME"))						
+					{
+						this->SkipToNextToken();
+						continue;
+					}
+				}
+			}
+		}
+		if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
+		{
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
+		}
+		else if ('\0' == *this->m_szFile)
+		{
+			// END OF FILE ... this is a level4 block, this can't be
+			BLUBB("Unable to finish parsing a lv4 *MESH_BONE_LIST block. Unexpected EOF")
+		}
+		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
+		++this->m_szFile;
+	}
+}
+// ------------------------------------------------------------------------------------------------
+void Parser::ParseLV4MeshBonesVertices(unsigned int iNumVertices,ASE::Mesh& mesh)
+{
+	mesh.mBoneVertices.resize(iNumVertices);
+	int iDepth = 0;
+	while (true)
+	{
+		if ('*' == *this->m_szFile)
+		{
+			// Mesh bone vertex
+			if (0 == strncmp(this->m_szFile,"*MESH_BONE_VERTEX" ,17) &&
+				IsSpaceOrNewLine(*(this->m_szFile+17)))
+			{
+				this->m_szFile+=18;
+
+				// read the vertex index
+				unsigned int iIndex = strtol10(this->m_szFile,&this->m_szFile);
+				if (iIndex >= mesh.mPositions.size())
+				{
+					iIndex = mesh.mPositions.size()-1;
+					this->LogWarning("Bone vertex index is out of bounds. Using the largest valid "
+						"bone vertex index instead");
+				}
+
+				// now there there are 3 normal floats, the
+				// should be identical to the vertex positions
+				// contained in the *VERTEX_LIST block. Well, we check this
+				// in debug builds to be sure ;-)
+				float afVert[3];
+				this->ParseLV4MeshFloatTriple(afVert);
+
+				std::pair<int,float> pairOut;
+				while (true)
+				{
+					// first parse the bone index ...
+					if (!SkipSpaces(this->m_szFile,&this->m_szFile))break;
+					pairOut.first = strtol10(this->m_szFile,&this->m_szFile);
+
+					// then parse the vertex weight
+					if (!SkipSpaces(this->m_szFile,&this->m_szFile))break;
+					this->m_szFile = fast_atof_move(this->m_szFile,pairOut.second);
+
+					// -1 designates unused entries
+					if (-1 != pairOut.first)
+					{
+						mesh.mBoneVertices[iIndex].mBoneWeights.push_back(pairOut);
+					}
+				}
+			}
+		}
+		if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
+		{
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
+		}
+		else if ('\0' == *this->m_szFile)
+		{
+			// END OF FILE ... this is a level4 block, this can't be
+			BLUBB("Unable to finish parsing a lv4 *MESH_BONE_VERTEX_LIST block. Unexpected EOF")
 		}
 		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
 		++this->m_szFile;
@@ -989,14 +1173,9 @@ void Parser::ParseLV3MeshVertexListBlock(
 			}
 		}
 		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('}' == *this->m_szFile)
 		{
-			if (0 == --iDepth)
-			{
-				++this->m_szFile;
-				this->SkipToNextToken();
-				return;
-			}
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
 		else if ('\0' == *this->m_szFile)
 		{
@@ -1037,12 +1216,7 @@ void Parser::ParseLV3MeshFaceListBlock(unsigned int iNumFaces, ASE::Mesh& mesh)
 		if ('{' == *this->m_szFile)iDepth++;
 		if ('}' == *this->m_szFile)
 		{
-			if (0 == --iDepth)
-			{
-				++this->m_szFile;
-				this->SkipToNextToken();
-				return;
-			}
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
 		else if ('\0' == *this->m_szFile)
 		{
@@ -1091,12 +1265,7 @@ void Parser::ParseLV3MeshTListBlock(unsigned int iNumVertices,
 		if ('{' == *this->m_szFile)iDepth++;
 		if ('}' == *this->m_szFile)
 		{
-			if (0 == --iDepth)
-			{
-				++this->m_szFile;
-				this->SkipToNextToken();
-				return;
-			}
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
 		else if ('\0' == *this->m_szFile)
 		{
@@ -1143,12 +1312,7 @@ void Parser::ParseLV3MeshTFaceListBlock(unsigned int iNumFaces,
 		if ('{' == *this->m_szFile)iDepth++;
 		if ('}' == *this->m_szFile)
 		{
-			if (0 == --iDepth)
-			{
-				++this->m_szFile;
-				this->SkipToNextToken();
-				return;
-			}
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
 		else if ('\0' == *this->m_szFile)
 		{
@@ -1205,12 +1369,7 @@ void Parser::ParseLV3MappingChannel(unsigned int iChannel, ASE::Mesh& mesh)
 		if ('{' == *this->m_szFile)iDepth++;
 		if ('}' == *this->m_szFile)
 		{
-			if (0 == --iDepth)
-			{
-				++this->m_szFile;
-				this->SkipToNextToken();
-				return;
-			}
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
 		else if ('\0' == *this->m_szFile)
 		{
@@ -1253,12 +1412,7 @@ void Parser::ParseLV3MeshCListBlock(unsigned int iNumVertices, ASE::Mesh& mesh)
 		if ('{' == *this->m_szFile)iDepth++;
 		if ('}' == *this->m_szFile)
 		{
-			if (0 == --iDepth)
-			{
-				++this->m_szFile;
-				this->SkipToNextToken();
-				return;
-			}
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
 		else if ('\0' == *this->m_szFile)
 		{
@@ -1304,12 +1458,7 @@ void Parser::ParseLV3MeshCFaceListBlock(unsigned int iNumFaces, ASE::Mesh& mesh)
 		if ('{' == *this->m_szFile)iDepth++;
 		if ('}' == *this->m_szFile)
 		{
-			if (0 == --iDepth)
-			{
-				++this->m_szFile;
-				this->SkipToNextToken();
-				return;
-			}
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
 		else if ('\0' == *this->m_szFile)
 		{
@@ -1356,12 +1505,7 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 		if ('{' == *this->m_szFile)iDepth++;
 		if ('}' == *this->m_szFile)
 		{
-			if (0 == --iDepth)
-			{
-				++this->m_szFile;
-				this->SkipToNextToken();
-				return;
-			}
+			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
 		// seems we have reached the end of the file ... 
 		else if ('\0' == *this->m_szFile)
@@ -1432,7 +1576,7 @@ __EARTHQUAKE_XXL:
 		if ('*' == *this->m_szFile)break;
 		if (IsLineEnd(*this->m_szFile))
 		{
-			this->iLineNumber++;
+			//this->iLineNumber++;
 			return;
 		}
 		this->m_szFile++;
@@ -1446,9 +1590,13 @@ __EARTHQUAKE_XXL:
 			BLUBB("Unable to parse *MESH_SMOOTHING Element: Unexpected EOL. Smoothing group(s) expected [#5]")
 		
 		// parse smoothing groups until we don_t anymore see commas
+		// FIX: There needn't always be a value, sad but true
 		while (true)
 		{
-			out.iSmoothGroup |= (1 << strtol10(this->m_szFile,&this->m_szFile));
+			if (*this->m_szFile < '9' && *this->m_szFile >= '0')
+			{
+				out.iSmoothGroup |= (1 << strtol10(this->m_szFile,&this->m_szFile));
+			}
 			SkipSpaces(this->m_szFile,&this->m_szFile);
 			if (',' != *this->m_szFile)
 			{
@@ -1465,7 +1613,7 @@ __EARTHQUAKE_XXL:
 		if ('*' == *this->m_szFile)break;
 		if (IsLineEnd(*this->m_szFile))
 		{
-			this->iLineNumber++;
+			//this->iLineNumber++;
 			return;
 		}
 		this->m_szFile++;
@@ -1478,7 +1626,7 @@ __EARTHQUAKE_XXL:
 			BLUBB("Unable to parse *MESH_MTLID Element: Unexpected EOL. Material index expected [#6]")
 		out.iMaterial = strtol10(this->m_szFile,&this->m_szFile);
 	}
-	this->SkipToNextToken();
+	//this->SkipToNextToken();
 	return;
 }
 // ------------------------------------------------------------------------------------------------
@@ -1519,7 +1667,7 @@ void Parser::ParseLV4MeshLongTriple(unsigned int* apOut)
 	}
 	apOut[2] = strtol10(this->m_szFile,&this->m_szFile);
 	// go to the next valid sequence
-	SkipSpacesAndLineEnd(this->m_szFile,&this->m_szFile);
+	//SkipSpacesAndLineEnd(this->m_szFile,&this->m_szFile);
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshLongTriple(unsigned int* apOut, unsigned int& rIndexOut)
@@ -1603,7 +1751,7 @@ void Parser::ParseLV4MeshFloatTriple(float* apOut)
 	// parse the third float
 	this->m_szFile = fast_atof_move(this->m_szFile,apOut[2]);
 	// go to the next valid sequence
-	this->SkipToNextToken();
+	//this->SkipToNextToken();
 	return;
 }
 // ------------------------------------------------------------------------------------------------
@@ -1621,7 +1769,7 @@ void Parser::ParseLV4MeshFloat(float& fOut)
 	// parse the first float
 	this->m_szFile = fast_atof_move(this->m_szFile,fOut);
 	// go to the next valid sequence
-	this->SkipToNextToken();
+	//this->SkipToNextToken();
 	return;
 }
 // ------------------------------------------------------------------------------------------------
@@ -1639,6 +1787,6 @@ void Parser::ParseLV4MeshLong(unsigned int& iOut)
 	// parse the value
 	iOut = strtol10(this->m_szFile,&this->m_szFile);
 	// go to the next valid sequence
-	this->SkipToNextToken();
+	//this->SkipToNextToken();
 	return;
 }

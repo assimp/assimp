@@ -49,13 +49,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
+#include "../include/DefaultLogger.h"
 
 #include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 using namespace Assimp::ASE;
 
-#define LOGOUT_WARN(x)
+#define LOGOUT_WARN(x) DefaultLogger::get()->warn(x);
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -85,6 +86,8 @@ bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	if (extension[2] != 's' && extension[2] != 'S')return false;
 
 	// NOTE: Sometimes the extension .ASK is also used
+	// however, often it only contains static animation skeletons
+	// without the real animations.
 	if (extension[3] != 'e' && extension[3] != 'E' &&
 		extension[3] != 'k' && extension[3] != 'K')return false;
 
@@ -105,6 +108,14 @@ void ASEImporter::InternReadFile(
 
 	size_t fileSize = file->FileSize();
 
+	std::string::size_type pos = pFile.find_last_of('.');
+	std::string extension = pFile.substr( pos);
+	if(extension[3] == 'k' || extension[3] == 'K')
+	{
+		this->mIsAsk = true;
+	}
+	else this->mIsAsk = false;
+
 	// allocate storage and copy the contents of the file to a memory buffer
 	// (terminate it with zero)
 	this->mBuffer = new unsigned char[fileSize+1];
@@ -120,12 +131,19 @@ void ASEImporter::InternReadFile(
 		i =  this->mParser->m_vMeshes.begin();
 		i != this->mParser->m_vMeshes.end();++i)
 	{
-		// need to generate proper vertex normals if necessary
-		this->GenerateNormals(*i);
+		// transform all vertices into worldspace
+		// world2obj transform is specified in the
+		// transformation matrix of a scenegraph node
+		this->TransformVertices(*i);
 
 		// now we need to create proper meshes from the import
 		// we need to split them by materials, build valid vertex/face lists ...
 		this->BuildUniqueRepresentation(*i);
+
+		// need to generate proper vertex normals if necessary
+		this->GenerateNormals(*i);
+
+		// convert all meshes to aiMesh objects
 		this->ConvertMeshes(*i,pScene);
 	}
 	// buil final material indices (remove submaterials and make the final list)
@@ -206,6 +224,23 @@ void ASEImporter::BuildNodes(aiScene* pcScene)
 	return;
 }
 // ------------------------------------------------------------------------------------------------
+void ASEImporter::TransformVertices(ASE::Mesh& mesh)
+{
+	// the matrix data is stored in column-major format,
+	// but we need row major
+	mesh.mTransform.Transpose();
+
+	aiMatrix4x4 m = mesh.mTransform;
+	m.Inverse();
+
+	for (std::vector<aiVector3D>::iterator
+		i =  mesh.mPositions.begin();
+		i != mesh.mPositions.end();++i)
+	{
+		(*i) = m * (*i);
+	}
+}
+// ------------------------------------------------------------------------------------------------
 void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 {
 	// allocate output storage
@@ -213,6 +248,7 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 	std::vector<aiVector3D> amTexCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 	std::vector<aiColor4D> mVertexColors;
 	std::vector<aiVector3D> mNormals;
+	std::vector<BoneVertex> mBoneVertices;
 
 	unsigned int iSize = mesh.mFaces.size() * 3;
 	mPositions.resize(iSize);
@@ -235,6 +271,11 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 	if (!mesh.mNormals.empty())
 	{
 		mNormals.resize(iSize);
+	}
+	// bone vertices. There is no need to change the bone list
+	if (!mesh.mBoneVertices.empty())
+	{
+		mBoneVertices.resize(iSize);
 	}
 
 	// iterate through all faces in the mesh
@@ -265,6 +306,16 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 			{
 				mNormals[iCurrent] = mesh.mNormals[(*i).mIndices[n]];
 			}
+
+			// handle bone vertices
+			if ((*i).mIndices[n] < mesh.mBoneVertices.size())
+			{
+				// (sometimes this will cause bone verts to be duplicated
+				//  however, I' quite sure Schrompf' JoinVerticesStep
+				//  will fix that again ...)
+				mBoneVertices[iCurrent] =  mesh.mBoneVertices[(*i).mIndices[n]];
+			}
+
 			// assign a new valid index to the face
 			(*i).mIndices[n] = iCurrent;
 		}
@@ -312,8 +363,20 @@ void ASEImporter::ConvertMaterial(ASE::Material& mat)
 	mat.pcInstance->AddProperty( &mat.mAmbient, 1, AI_MATKEY_COLOR_AMBIENT);
 	mat.pcInstance->AddProperty( &mat.mDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
 	mat.pcInstance->AddProperty( &mat.mSpecular, 1, AI_MATKEY_COLOR_SPECULAR);
-	mat.pcInstance->AddProperty( &mat.mSpecularExponent, 1, AI_MATKEY_SHININESS);
 	mat.pcInstance->AddProperty( &mat.mEmissive, 1, AI_MATKEY_COLOR_EMISSIVE);
+
+	// shininess
+	if (0.0f != mat.mSpecularExponent && 0.0f != mat.mShininessStrength)
+	{
+		mat.pcInstance->AddProperty( &mat.mSpecularExponent, 1, AI_MATKEY_SHININESS);
+		mat.pcInstance->AddProperty( &mat.mShininessStrength, 1, AI_MATKEY_SHININESS_STRENGTH);
+	}
+	// if there is no shininess, we can disable phong lighting
+	else if (Dot3DS::Dot3DSFile::Metal == mat.mShading ||
+		Dot3DS::Dot3DSFile::Phong == mat.mShading)
+	{
+		mat.mShading = Dot3DS::Dot3DSFile::Gouraud;
+	}
 
 	// opacity
 	mat.pcInstance->AddProperty<float>( &mat.mTransparency,1,AI_MATKEY_OPACITY);
@@ -489,6 +552,13 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, aiScene* pcScene)
 				p_pcOut->mNumVertices = aiSplit[p].size()*3;
 				p_pcOut->mNumFaces = aiSplit[p].size();
 
+				// receive output vertex weights
+				std::vector<std::pair<unsigned int, float>>* avOutputBones;
+				if (!mesh.mBones.empty())
+				{
+					avOutputBones = new std::vector<std::pair<unsigned int, float>>[mesh.mBones.size()];
+				}
+				
 				// allocate enough storage for faces
 				p_pcOut->mFaces = new aiFace[p_pcOut->mNumFaces];
 
@@ -507,8 +577,29 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, aiScene* pcScene)
 
 						for (unsigned int t = 0; t < 3;++t)
 						{
-							p_pcOut->mVertices[iBase] = mesh.mPositions[mesh.mFaces[iIndex].mIndices[t]];
-							p_pcOut->mNormals[iBase++] = mesh.mNormals[mesh.mFaces[iIndex].mIndices[t]];
+							const uint32_t iIndex2 = mesh.mFaces[iIndex].mIndices[t];
+
+							p_pcOut->mVertices[iBase] = mesh.mPositions[iIndex2];
+							p_pcOut->mNormals[iBase] = mesh.mNormals[iIndex2];
+
+							// convert bones, if existing
+							if (!mesh.mBones.empty())
+							{
+								// check whether there is a vertex weight that is using
+								// this vertex index ...
+								if (iIndex2 < mesh.mBoneVertices.size())
+								{
+									for (std::vector<std::pair<int,float>>::const_iterator
+										blubb =  mesh.mBoneVertices[iIndex2].mBoneWeights.begin();
+										blubb != mesh.mBoneVertices[iIndex2].mBoneWeights.end();++blubb)
+									{
+										// NOTE: illegal cases have already been filtered out
+										avOutputBones[(*blubb).first].push_back(std::pair<unsigned int, float>(
+											iBase,(*blubb).second));
+									}
+								}
+							}
+							++iBase;
 						}
 						p_pcOut->mFaces[q].mIndices[0] = iBase-2;
 						p_pcOut->mFaces[q].mIndices[1] = iBase-1;
@@ -548,6 +639,38 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, aiScene* pcScene)
 							p_pcOut->mColors[0][iBase++] = mesh.mVertexColors[mesh.mFaces[iIndex].mIndices[t]];
 						}
 					}
+				}
+				if (!mesh.mBones.empty())
+				{
+					p_pcOut->mNumBones = 0;
+					for (unsigned int mrspock = 0; mrspock < mesh.mBones.size();++mrspock)
+						if (!avOutputBones[mrspock].empty())p_pcOut->mNumBones++;
+
+					p_pcOut->mBones = new aiBone* [ p_pcOut->mNumBones ];
+					aiBone** pcBone = &p_pcOut->mBones[0];
+					for (unsigned int mrspock = 0; mrspock < mesh.mBones.size();++mrspock)
+					{
+						if (!avOutputBones[mrspock].empty())
+						{
+							// we will need this bone. add it to the output mesh and
+							// add all per-vertex weights
+							*pcBone = new aiBone();
+							(**pcBone).mName.Set(mesh.mBones[mrspock].mName);
+
+							(**pcBone).mNumWeights = avOutputBones[mrspock].size();
+							(**pcBone).mWeights = new aiVertexWeight[(**pcBone).mNumWeights];
+
+							for (unsigned int captainkirk = 0; captainkirk < (**pcBone).mNumWeights;++captainkirk)
+							{
+								const std::pair<unsigned int,float>& ref = avOutputBones[mrspock][captainkirk];
+								(**pcBone).mWeights[captainkirk].mVertexId = ref.first;
+								(**pcBone).mWeights[captainkirk].mWeight = ref.second;
+							}
+							++pcBone;
+						}
+					}
+					// delete allocated storage
+					delete[] avOutputBones;
 				}
 			}
 		}
@@ -618,6 +741,51 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, aiScene* pcScene)
 			p_pcOut->mFaces[iFace].mIndices[0] = mesh.mFaces[iFace].mIndices[0];
 			p_pcOut->mFaces[iFace].mIndices[1] = mesh.mFaces[iFace].mIndices[1];
 			p_pcOut->mFaces[iFace].mIndices[2] = mesh.mFaces[iFace].mIndices[2];
+		}
+
+		// copy vertex bones
+		if (!mesh.mBones.empty() && !mesh.mBoneVertices.empty())
+		{
+			std::vector<aiVertexWeight>* avBonesOut = new
+				std::vector<aiVertexWeight>[mesh.mBones.size()];
+
+			// find all vertex weights for this bone
+			unsigned int quak = 0;
+			for (std::vector<BoneVertex>::const_iterator
+				harrypotter =  mesh.mBoneVertices.begin();
+				harrypotter != mesh.mBoneVertices.end();++harrypotter,++quak)
+			{
+				for (std::vector<std::pair<int,float>>::const_iterator
+					ronaldweasley  = (*harrypotter).mBoneWeights.begin();
+					ronaldweasley != (*harrypotter).mBoneWeights.end();++ronaldweasley)
+				{
+					aiVertexWeight weight;
+					weight.mVertexId = quak;
+					weight.mWeight = (*ronaldweasley).second;
+					avBonesOut[(*ronaldweasley).first].push_back(weight);
+				}
+			}
+
+			// now build a final bone list
+			p_pcOut->mNumBones = 0;
+			for (unsigned int jfkennedy = 0; jfkennedy < mesh.mBones.size();++jfkennedy)
+				if (!avBonesOut[jfkennedy].empty())p_pcOut->mNumBones++;
+
+			p_pcOut->mBones = new aiBone*[p_pcOut->mNumBones];
+			aiBone** pcBone = &p_pcOut->mBones[0];
+			for (unsigned int jfkennedy = 0; jfkennedy < mesh.mBones.size();++jfkennedy)
+			{
+				if (!avBonesOut[jfkennedy].empty())
+				{
+					*pcBone = new aiBone();
+					(**pcBone).mName.Set(mesh.mBones[jfkennedy].mName);
+					(**pcBone).mNumWeights = avBonesOut[jfkennedy].size();
+					(**pcBone).mWeights = new aiVertexWeight[(**pcBone).mNumWeights];
+					memcpy((**pcBone).mWeights,&avBonesOut[jfkennedy][0],
+						sizeof(aiVertexWeight) * (**pcBone).mNumWeights);
+					++pcBone;
+				}
+			}
 		}
 	}
 

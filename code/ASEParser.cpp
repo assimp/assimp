@@ -1567,7 +1567,7 @@ __EARTHQUAKE_XXL:
 		if(!SkipSpaces(this->m_szFile,&this->m_szFile))
 			BLUBB("Unable to parse *MESH_FACE Element: Unexpected EOL. Vertex index ecpected [#4]")
 
-		out.mIndices[iIndex] = strtol10(this->m_szFile,&this->m_szFile);
+		out.a.mIndices[iIndex] = strtol10(this->m_szFile,&this->m_szFile);
 	}
 
 	// now we need to skip the AB, BC, CA blocks. 

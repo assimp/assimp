@@ -62,17 +62,17 @@ void Dot3DSImporter::GenNormals(Dot3DS::Mesh* sMesh)
 		Dot3DS::Face& face = sMesh->mFaces[a];
 
 		// assume it is a triangle
-		aiVector3D* pV1 = &sMesh->mPositions[face.i1];
-		aiVector3D* pV2 = &sMesh->mPositions[face.i2];
-		aiVector3D* pV3 = &sMesh->mPositions[face.i3];
+		aiVector3D* pV1 = &sMesh->mPositions[face.a.b.i1];
+		aiVector3D* pV2 = &sMesh->mPositions[face.a.b.i2];
+		aiVector3D* pV3 = &sMesh->mPositions[face.a.b.i3];
 
 		aiVector3D pDelta1 = *pV2 - *pV1;
 		aiVector3D pDelta2 = *pV3 - *pV1;
 		aiVector3D vNor = pDelta1 ^ pDelta2;
 
-		sMesh->mNormals[face.i1] = vNor;
-		sMesh->mNormals[face.i2] = vNor;
-		sMesh->mNormals[face.i3] = vNor;
+		sMesh->mNormals[face.a.b.i1] = vNor;
+		sMesh->mNormals[face.a.b.i2] = vNor;
+		sMesh->mNormals[face.a.b.i3] = vNor;
 	}
 
 	// calculate the position bounds so we have a reliable epsilon to 
@@ -111,7 +111,7 @@ void Dot3DSImporter::GenNormals(Dot3DS::Mesh* sMesh)
 		for (unsigned int c = 0; c < 3;++c)
 		{
 
-			sSort.FindPositions(sMesh->mPositions[(*i).mIndices[c]],(*i).iSmoothGroup,
+			sSort.FindPositions(sMesh->mPositions[(*i).a.mIndices[c]],(*i).iSmoothGroup,
 				posEpsilon,poResult);
 
 			aiVector3D vNormals;
@@ -127,7 +127,7 @@ void Dot3DSImporter::GenNormals(Dot3DS::Mesh* sMesh)
 			vNormals.y /= fDiv;
 			vNormals.z /= fDiv;
 			vNormals.Normalize();
-			avNormals[(*i).mIndices[c]] = vNormals;
+			avNormals[(*i).a.mIndices[c]] = vNormals;
 			poResult.clear();
 		}
 	}

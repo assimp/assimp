@@ -305,9 +305,12 @@ public:
 /** Helper structure representing a 3ds mesh face */
 struct Face
 {
-	Face() : iSmoothGroup(0), i1(0), i2(0), i3(0), bFlipped(false)
+	Face() : iSmoothGroup(0), bFlipped(false)
 	{
 		// let the rest uninitialized for performance
+		this->a.b.i1 = 0;
+		this->a.b.i2 = 0;
+		this->a.b.i3 = 0;
 	}
 
 	
@@ -321,9 +324,9 @@ struct Face
 			uint32_t i1;
 			uint32_t i2;
 			uint32_t i3;
-		};
+		} b; // DUMMY NAME
 		uint32_t mIndices[3];
-	};
+	} a; // DUMMY NAME
 
 	//! specifies to which smoothing group the face belongs to
 	uint32_t iSmoothGroup;

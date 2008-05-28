@@ -188,25 +188,25 @@ imported scene to clean up all resources associated with the import.
 C example:
 @code
 #include <assimp.h>  // Plain C importer interface
-#include <aiScene.h> // root structure of the imported data
-#include <aiMesh.h>  // example: mesh data structures. you'll propably need other includes, too
+#include <aiScene.h> // Root structure of the imported data
+#include <aiMesh.h>  // Example: mesh data structures. you'll propably need other includes, too
 
 bool DoTheImportThing( const char* pFile)
 {
-  // start the import on the given file with some example postprocessing
+  // Start the import on the given file with some example postprocessing
   aiScene* scene = aiImportFile( pFile, aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
 
-  // if the import failed, report it
+  // If the import failed, report it
   if( !scene)
   {
     DoTheErrorLogging( aiGetErrorString());
     return false;
   }
 
-  // now we can access the file's contents
+  // Now we can access the file's contents
   DoTheSceneProcessing( scene);
 
-  // we're done. Release all resources associated with this import
+  // We're done. Release all resources associated with this import
   aiReleaseImport( scene);
   return true;
 }
@@ -273,10 +273,10 @@ void DoTheImportThing( const std::string& pFile)
 @section  logging Logging in the AssetImporter
 
 The ASSIMP library provides an easy mechanism to log messages. For instance if you want to check the state of your 
-import and you just want to check, after which preprocessing step the import-process was aborted you can take a look 
-at the log. 
+import and you just want to see, after which preprocessing step the import-process was aborted you can take a look 
+into the log. 
 Per default the ASSIMP-library provides a default log implementation, where you can log your user specific message
-by calling it as a singleton with the requested logging-type:
+by calling it as a singleton with the requested logging-type. To see how this works take a look to this:
 
 @code
 
@@ -291,35 +291,39 @@ Assimp::DefaultLogger::kill();
 @endcode
 
 At first you have to create the default-logger-instance (create). Now you are ready to rock and can log a 
-little bit around. After that you should kill it to release the default-singleton-instance.
+little bit around. After that you should kill it to release the singleton instance.
 
 If you want to integrate the ASSIMP-log into your own GUI it my be helpful to have a mechanism writing
-the logs into your own log windows. The logger-interface provides this by implementing an interface called LogStream.
+the logs into your own log windows. The logger interface provides this by implementing an interface called LogStream.
 You can attach and detach this logstream to the default-logger instance or any implementation derived from Logger. 
 Just derivate your own logger from the abstract baseclass LogStream and overwrite the write-method:
 
 @code
+// Example stream
 class myStream :
 	public LogStream
 {
 public:
+	// Constructor
 	myStream()
 	{
 		// empty
 	}
 	
+	// Destructor
 	~myStream()
 	{
 		// empty
 	}
 
+	// Write womethink using your own functionality
 	void write(const std::string &message)
 	{
 		printf("%s\n", message.c_str();
 	}
 };
 
-// Attaching it to the default logger insstance:
+// Attaching it to the default logger instance:
 unsigned int severity = 0;
 severity |= Logger::DEBUGGING;
 severity |= Logger::INFO;
@@ -333,8 +337,9 @@ Assimp::DefaultLogger::get()->attachStream( new myStream(), severity );
 
 The severity level controls the kind of message which will be written into
 the attached stream. If you just want to log errors and warnings set the warn 
-and error severity flag for the requested severity. It is also possible to remove 
-an self defined logstream from a error severity by detaching it with the severity flag set:
+and error severity flag for those severities. It is also possible to remove 
+a self defined logstream from an error severity by detaching it with the severity 
+flag set:
 
 @code
 
@@ -346,11 +351,11 @@ Assimp::DefaultLogger::get()->attachStream( new myStream(), severity );
 
 @endcode
 
-If you want to implement your own loger just build a derivate from the abstract base class 
+If you want to implement your own logger just build a derivate from the abstract base class 
 Logger and overwrite the methods debug, info, warn and error. 
 
-If you ust want to see the debug-messages in a debug-configurised build the Logger-interface 
-provides an logging severity. You can set it calling the method:
+If you ust want to see the debug-messages in a debug-configured build the Logger-interface 
+provides a logging-severity. You can set it calling the following method:
 
 @code
 
@@ -450,7 +455,7 @@ that form the bone hierarchy for another mesh/node, but don't have any mesh them
 @section meshes Meshes
 
 All meshes of an imported scene are stored in an array of aiMesh* inside the aiScene. Nodes refer
-to them by their index in the array and provide the coordinate system for them. One mesh uses
+to them by their index in the array and providing the coordinate system for them, too. One mesh uses
 only a single material everywhere - if parts of the model use a different material, this part is
 moved to a separate mesh at the same node. The mesh refers to its material in the same way as the
 node refers to its meshes: materials are stored in an array inside aiScene, the mesh stores only
@@ -616,7 +621,7 @@ suggest the following method:
 a) Create a map or a similar container to store which nodes are necessary for the skeleton. 
 Preinitialise it for all nodes with a "no". <br>
 b) For each bone in the mesh: <br>
-b1) Find the corresponding node in the scene's hierarchy by comparing names. <br>
+b1) Find the corresponding node in the scene's hierarchy by comparing their names. <br>
 b2) Mark this node as "yes" in the necessityMap. <br>
 b3) Mark all of its parents the same way until you 1) find the mesh's node or 2) the parent of the mesh's node. <br>
 c) Recursively iterate over the node hierarchy <br>

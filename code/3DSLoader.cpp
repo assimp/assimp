@@ -983,11 +983,11 @@ void Dot3DSImporter::ParseMeshChunk(int* piRemaining)
 		while (iNum-- > 0)
 		{
 			Dot3DS::Face sFace;
-			sFace.a.b.i1 = *((uint16_t*)this->mCurrent);
+			sFace.mIndices[0] = *((uint16_t*)this->mCurrent);
 			this->mCurrent += sizeof(uint16_t);
-			sFace.a.b.i2 = *((uint16_t*)this->mCurrent);
+			sFace.mIndices[1] = *((uint16_t*)this->mCurrent);
 			this->mCurrent += sizeof(uint16_t);
-			sFace.a.b.i3 = *((uint16_t*)this->mCurrent);
+			sFace.mIndices[2] = *((uint16_t*)this->mCurrent);
 			this->mCurrent += 2*sizeof(uint16_t);
 			mMesh.mFaces.push_back(sFace);
 		}

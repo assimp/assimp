@@ -286,7 +286,7 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 	{
 		for (unsigned int n = 0; n < 3;++n,++iCurrent)
 		{
-			mPositions[iCurrent] = mesh.mPositions[(*i).a.mIndices[n]];
+			mPositions[iCurrent] = mesh.mPositions[(*i).mIndices[n]];
 
 			// add texture coordinates
 			for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS;++c)
@@ -304,20 +304,20 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 			// add normal vectors
 			if (!mesh.mNormals.empty())
 			{
-				mNormals[iCurrent] = mesh.mNormals[(*i).a.mIndices[n]];
+				mNormals[iCurrent] = mesh.mNormals[(*i).mIndices[n]];
 			}
 
 			// handle bone vertices
-			if ((*i).a.mIndices[n] < mesh.mBoneVertices.size())
+			if ((*i).mIndices[n] < mesh.mBoneVertices.size())
 			{
 				// (sometimes this will cause bone verts to be duplicated
 				//  however, I' quite sure Schrompf' JoinVerticesStep
 				//  will fix that again ...)
-				mBoneVertices[iCurrent] =  mesh.mBoneVertices[(*i).a.mIndices[n]];
+				mBoneVertices[iCurrent] =  mesh.mBoneVertices[(*i).mIndices[n]];
 			}
 
 			// assign a new valid index to the face
-			(*i).a.mIndices[n] = iCurrent;
+			(*i).mIndices[n] = iCurrent;
 		}
 	}
 
@@ -577,7 +577,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, aiScene* pcScene)
 
 						for (unsigned int t = 0; t < 3;++t)
 						{
-							const uint32_t iIndex2 = mesh.mFaces[iIndex].a.mIndices[t];
+							const uint32_t iIndex2 = mesh.mFaces[iIndex].mIndices[t];
 
 							p_pcOut->mVertices[iBase] = mesh.mPositions[iIndex2];
 							p_pcOut->mNormals[iBase] = mesh.mNormals[iIndex2];
@@ -618,7 +618,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, aiScene* pcScene)
 							unsigned int iIndex = aiSplit[p][q];
 							for (unsigned int t = 0; t < 3;++t)
 							{
-								p_pcOut->mTextureCoords[c][iBase++] = mesh.amTexCoords[c][mesh.mFaces[iIndex].a.mIndices[t]];
+								p_pcOut->mTextureCoords[c][iBase++] = mesh.amTexCoords[c][mesh.mFaces[iIndex].mIndices[t]];
 							}
 						}
 						// setup the number of valid vertex components
@@ -636,7 +636,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, aiScene* pcScene)
 						unsigned int iIndex = aiSplit[p][q];
 						for (unsigned int t = 0; t < 3;++t)
 						{
-							p_pcOut->mColors[0][iBase++] = mesh.mVertexColors[mesh.mFaces[iIndex].a.mIndices[t]];
+							p_pcOut->mColors[0][iBase++] = mesh.mVertexColors[mesh.mFaces[iIndex].mIndices[t]];
 						}
 					}
 				}
@@ -738,9 +738,9 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, aiScene* pcScene)
 			p_pcOut->mFaces[iFace].mIndices = new unsigned int[3];
 
 			// copy indices
-			p_pcOut->mFaces[iFace].mIndices[0] = mesh.mFaces[iFace].a.mIndices[0];
-			p_pcOut->mFaces[iFace].mIndices[1] = mesh.mFaces[iFace].a.mIndices[1];
-			p_pcOut->mFaces[iFace].mIndices[2] = mesh.mFaces[iFace].a.mIndices[2];
+			p_pcOut->mFaces[iFace].mIndices[0] = mesh.mFaces[iFace].mIndices[0];
+			p_pcOut->mFaces[iFace].mIndices[1] = mesh.mFaces[iFace].mIndices[1];
+			p_pcOut->mFaces[iFace].mIndices[2] = mesh.mFaces[iFace].mIndices[2];
 		}
 
 		// copy vertex bones
@@ -889,17 +889,17 @@ void ASEImporter::GenerateNormals(ASE::Mesh& mesh)
 			const ASE::Face& face = mesh.mFaces[a];
 
 			// assume it is a triangle
-			aiVector3D* pV1 = &mesh.mPositions[face.a.b.i1];
-			aiVector3D* pV2 = &mesh.mPositions[face.a.b.i2];
-			aiVector3D* pV3 = &mesh.mPositions[face.a.b.i3];
+			aiVector3D* pV1 = &mesh.mPositions[face.mIndices[0]];
+			aiVector3D* pV2 = &mesh.mPositions[face.mIndices[1]];
+			aiVector3D* pV3 = &mesh.mPositions[face.mIndices[2]];
 
 			aiVector3D pDelta1 = *pV2 - *pV1;
 			aiVector3D pDelta2 = *pV3 - *pV1;
 			aiVector3D vNor = pDelta1 ^ pDelta2;
 
-			mesh.mNormals[face.a.b.i1] = vNor;
-			mesh.mNormals[face.a.b.i2] = vNor;
-			mesh.mNormals[face.a.b.i3] = vNor;
+			mesh.mNormals[face.mIndices[0]] = vNor;
+			mesh.mNormals[face.mIndices[1]] = vNor;
+			mesh.mNormals[face.mIndices[2]] = vNor;
 		}
 
 		// calculate the position bounds so we have a reliable epsilon to 
@@ -934,7 +934,7 @@ void ASEImporter::GenerateNormals(ASE::Mesh& mesh)
 			std::vector<unsigned int> poResult;
 			for (unsigned int c = 0; c < 3;++c)
 			{
-				sSort.FindPositions(mesh.mPositions[(*i).a.mIndices[c]],(*i).iSmoothGroup,
+				sSort.FindPositions(mesh.mPositions[(*i).mIndices[c]],(*i).iSmoothGroup,
 					posEpsilon,poResult);
 
 				aiVector3D vNormals;
@@ -948,7 +948,7 @@ void ASEImporter::GenerateNormals(ASE::Mesh& mesh)
 				}
 				vNormals.x /= fDiv;vNormals.y /= fDiv;vNormals.z /= fDiv;
 				vNormals.Normalize();
-				avNormals[(*i).a.mIndices[c]] = vNormals;
+				avNormals[(*i).mIndices[c]] = vNormals;
 				poResult.clear();
 			}
 		}

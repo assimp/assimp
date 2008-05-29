@@ -308,25 +308,16 @@ struct Face
 	Face() : iSmoothGroup(0), bFlipped(false)
 	{
 		// let the rest uninitialized for performance
-		this->a.b.i1 = 0;
-		this->a.b.i2 = 0;
-		this->a.b.i3 = 0;
+		this->mIndices[0] = 0;
+		this->mIndices[1] = 0;
+		this->mIndices[2] = 0;
 	}
 
 	
 	//! Indices. .3ds is using uint16. However, after
 	//! an unique vrtex set has been geneerated it might
 	//! be an index becomes > 2^16
-	union
-	{
-		struct
-		{
-			uint32_t i1;
-			uint32_t i2;
-			uint32_t i3;
-		} b; // DUMMY NAME
-		uint32_t mIndices[3];
-	} a; // DUMMY NAME
+	uint32_t mIndices[3];
 
 	//! specifies to which smoothing group the face belongs to
 	uint32_t iSmoothGroup;

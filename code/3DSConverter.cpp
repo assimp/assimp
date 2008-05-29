@@ -131,20 +131,20 @@ void Dot3DSImporter::CheckIndices(Dot3DS::Mesh* sMesh)
 		 i != sMesh->mFaces.end();++i)
 	{
 		// check whether all indices are in range
-		if ((*i).a.b.i1 >= sMesh->mPositions.size())
+		if ((*i).mIndices[0] >= sMesh->mPositions.size())
 		{
 			DefaultLogger::get()->warn("Face index overflow in 3DS file (#1)");
-			(*i).a.b.i1 = sMesh->mPositions.size()-1;
+			(*i).mIndices[0] = sMesh->mPositions.size()-1;
 		}
-		if ((*i).a.b.i2 >= sMesh->mPositions.size())
+		if ((*i).mIndices[1] >= sMesh->mPositions.size())
 		{
 			DefaultLogger::get()->warn("Face index overflow in 3DS file (#2)");
-			(*i).a.b.i2 = sMesh->mPositions.size()-1;
+			(*i).mIndices[1] = sMesh->mPositions.size()-1;
 		}
-		if ((*i).a.b.i3 >= sMesh->mPositions.size())
+		if ((*i).mIndices[2] >= sMesh->mPositions.size())
 		{
 			DefaultLogger::get()->warn("Face index overflow in 3DS file (#3)");
-			(*i).a.b.i3 = sMesh->mPositions.size()-1;
+			(*i).mIndices[2] = sMesh->mPositions.size()-1;
 		}
 	}
 	return;
@@ -169,20 +169,20 @@ void Dot3DSImporter::MakeUnique(Dot3DS::Mesh* sMesh)
 			uint32_t iTemp1,iTemp2;
 
 			// position and texture coordinates
-			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].a.b.i3];
-			vNew2[iBase]   = sMesh->mTexCoords[sMesh->mFaces[i].a.b.i3];
+			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[2]];
+			vNew2[iBase]   = sMesh->mTexCoords[sMesh->mFaces[i].mIndices[2]];
 			iTemp1 = iBase++;
 
-			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].a.b.i2];
-			vNew2[iBase]   = sMesh->mTexCoords[sMesh->mFaces[i].a.b.i2];
+			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[1]];
+			vNew2[iBase]   = sMesh->mTexCoords[sMesh->mFaces[i].mIndices[1]];
 			iTemp2 = iBase++;
 
-			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].a.b.i1];
-			vNew2[iBase]   = sMesh->mTexCoords[sMesh->mFaces[i].a.b.i1];
-			sMesh->mFaces[i].a.b.i3 = iBase++;
+			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[0]];
+			vNew2[iBase]   = sMesh->mTexCoords[sMesh->mFaces[i].mIndices[0]];
+			sMesh->mFaces[i].mIndices[2] = iBase++;
 
-			sMesh->mFaces[i].a.b.i1 = iTemp1;
-			sMesh->mFaces[i].a.b.i2 = iTemp2;
+			sMesh->mFaces[i].mIndices[0] = iTemp1;
+			sMesh->mFaces[i].mIndices[1] = iTemp2;
 
 			// handle the face order ...
 			/*if (iTemp1 > iTemp2)
@@ -198,17 +198,17 @@ void Dot3DSImporter::MakeUnique(Dot3DS::Mesh* sMesh)
 			uint32_t iTemp1,iTemp2;
 
 			// position only
-			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].a.b.i3];
+			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[2]];
 			iTemp1 = iBase++;
 
-			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].a.b.i2];
+			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[1]];
 			iTemp2 = iBase++;
 
-			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].a.b.i1];
-			sMesh->mFaces[i].a.b.i3 = iBase++;
+			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[0]];
+			sMesh->mFaces[i].mIndices[2] = iBase++;
 
-			sMesh->mFaces[i].a.b.i1 = iTemp1;
-			sMesh->mFaces[i].a.b.i2 = iTemp2;
+			sMesh->mFaces[i].mIndices[0] = iTemp1;
+			sMesh->mFaces[i].mIndices[1] = iTemp2;
 
 			// handle the face order ...
 			/*if (iTemp1 > iTemp2)
@@ -451,16 +451,16 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 						p_pcOut->mFaces[q].mNumIndices = 3;
 
 						p_pcOut->mFaces[q].mIndices[2] = iBase;
-						p_pcOut->mVertices[iBase] = (*i).mPositions[(*i).mFaces[iIndex].a.b.i1];
-						p_pcOut->mNormals[iBase++] = (*i).mNormals[(*i).mFaces[iIndex].a.b.i1];
+						p_pcOut->mVertices[iBase] = (*i).mPositions[(*i).mFaces[iIndex].mIndices[0]];
+						p_pcOut->mNormals[iBase++] = (*i).mNormals[(*i).mFaces[iIndex].mIndices[0]];
 
 						p_pcOut->mFaces[q].mIndices[1] = iBase;
-						p_pcOut->mVertices[iBase] = (*i).mPositions[(*i).mFaces[iIndex].a.b.i2];
-						p_pcOut->mNormals[iBase++] = (*i).mNormals[(*i).mFaces[iIndex].a.b.i2];
+						p_pcOut->mVertices[iBase] = (*i).mPositions[(*i).mFaces[iIndex].mIndices[1]];
+						p_pcOut->mNormals[iBase++] = (*i).mNormals[(*i).mFaces[iIndex].mIndices[1]];
 
 						p_pcOut->mFaces[q].mIndices[0] = iBase;
-						p_pcOut->mVertices[iBase] = (*i).mPositions[(*i).mFaces[iIndex].a.b.i3];
-						p_pcOut->mNormals[iBase++] = (*i).mNormals[(*i).mFaces[iIndex].a.b.i3];
+						p_pcOut->mVertices[iBase] = (*i).mPositions[(*i).mFaces[iIndex].mIndices[2]];
+						p_pcOut->mNormals[iBase++] = (*i).mNormals[(*i).mFaces[iIndex].mIndices[2]];
 					}
 				}
 				// convert texture coordinates
@@ -473,15 +473,15 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 					{
 						unsigned int iIndex2 = aiSplit[p][q];
 
-						unsigned int iIndex = (*i).mFaces[iIndex2].a.b.i1;
+						unsigned int iIndex = (*i).mFaces[iIndex2].mIndices[0];
 						aiVector2D& pc = (*i).mTexCoords[iIndex];
 						p_pcOut->mTextureCoords[0][iBase++] = aiVector3D(pc.x,pc.y,0.0f);
 
-						iIndex = (*i).mFaces[iIndex2].a.b.i2;
+						iIndex = (*i).mFaces[iIndex2].mIndices[1];
 						pc = (*i).mTexCoords[iIndex];
 						p_pcOut->mTextureCoords[0][iBase++] = aiVector3D(pc.x,pc.y,0.0f);
 
-						iIndex = (*i).mFaces[iIndex2].a.b.i3;
+						iIndex = (*i).mFaces[iIndex2].mIndices[2];
 						pc = (*i).mTexCoords[iIndex];
 						p_pcOut->mTextureCoords[0][iBase++] = aiVector3D(pc.x,pc.y,0.0f);
 					}

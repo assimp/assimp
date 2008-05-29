@@ -73,18 +73,18 @@ void D3DSSpatialSorter::AddFace(const Dot3DS::Face* pcFace,
 	ai_assert(NULL != pcFace);
 
 	// store position by index and distance
-	float distance = vPositions[pcFace->a.b.i1] * mPlaneNormal;
-	mPositions.push_back( Entry( pcFace->a.b.i1, vPositions[pcFace->a.b.i1], 
+	float distance = vPositions[pcFace->mIndices[0]] * mPlaneNormal;
+	mPositions.push_back( Entry( pcFace->mIndices[0], vPositions[pcFace->mIndices[0]], 
 		distance, pcFace->iSmoothGroup));
 
 	// triangle vertex 2
-	distance = vPositions[pcFace->a.b.i2] * mPlaneNormal;
-	mPositions.push_back( Entry( pcFace->a.b.i2, vPositions[pcFace->a.b.i2], 
+	distance = vPositions[pcFace->mIndices[1]] * mPlaneNormal;
+	mPositions.push_back( Entry( pcFace->mIndices[1], vPositions[pcFace->mIndices[1]], 
 		distance, pcFace->iSmoothGroup));
 
 	// triangle vertex 3
-	distance = vPositions[pcFace->a.b.i3] * mPlaneNormal;
-	mPositions.push_back( Entry( pcFace->a.b.i3, vPositions[pcFace->a.b.i3], 
+	distance = vPositions[pcFace->mIndices[2]] * mPlaneNormal;
+	mPositions.push_back( Entry( pcFace->mIndices[2], vPositions[pcFace->mIndices[2]], 
 		distance, pcFace->iSmoothGroup));
 }
 // ------------------------------------------------------------------------------------------------

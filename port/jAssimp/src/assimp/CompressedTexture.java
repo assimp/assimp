@@ -70,8 +70,8 @@ public class CompressedTexture extends Texture {
         super(parent, index);
 
         // need to get the format of the texture via the JNI
-         if ((m_format = this._NativeGetCTextureFormat(((Scene) this.getParent()).
-                 getImporter().getContext(), this.getArrayIndex())).equals("")) {
+        if ((m_format = this._NativeGetCTextureFormat(((Scene) this.getParent()).
+                getImporter().getContext(), this.getArrayIndex())).equals("")) {
             throw new NativeError("Unable to get the format of the compressed texture");
         }
     }
@@ -80,8 +80,9 @@ public class CompressedTexture extends Texture {
      * Retrieves the format of the texture data. This is
      * the most common file extension of the format (without a
      * dot at the beginning). Examples include dds, png, jpg ...
+     *
      * @return Extension string or null if the format of the texture
-     * data is not known to ASSIMP.
+     *         data is not known to ASSIMP.
      */
     public String getFormat() {
         return m_format;
@@ -89,6 +90,7 @@ public class CompressedTexture extends Texture {
 
     /**
      * Get a pointer to the data of the compressed texture
+     *
      * @return Data poiner
      */
     public byte[] getData() {
@@ -100,11 +102,12 @@ public class CompressedTexture extends Texture {
                 return null;
             }
         }
-        return (byte[])data;
+        return (byte[]) data;
     }
 
     /**
      * Get the length of the data of the compressed texture
+     *
      * @return Data poiner
      */
     public int getLength() {
@@ -113,39 +116,43 @@ public class CompressedTexture extends Texture {
 
     /**
      * Returns 0 for compressed textures
+     *
      * @return n/a
      */
-     @Override
+    @Override
     public int getHeight() {
         return 0;
     }
 
     /**
      * Returns 0 for compressed textures
+     *
      * @return n/a
      */
-     @Override
+    @Override
     public int getWidth() {
         return 0;
     }
 
     /**
      * Returns null for compressed textures
+     *
      * @return n/a
      */
-     @Override
-     public Color getPixel(int x, int y) {
+    @Override
+    public Color getPixel(int x, int y) {
         return null;
-     }
+    }
 
     /**
      * Returns null for compressed textures
+     *
      * @return n/a
      */
     @Override
     public Color[] getColorArray() {
-         return null;
-     }
+        return null;
+    }
 
     /**
      * Internal helper function to map the native texture data into
@@ -162,14 +169,14 @@ public class CompressedTexture extends Texture {
 
         // and copy the native color data to it
         if (0xffffffff == this._NativeMapColorData(
-                ((Scene)this.getParent()).getImporter().getContext(),
-                this.getArrayIndex(),temp)) {
-           throw new NativeError("Unable to map compressed aiTexture into the Java-VM");
+                ((Scene) this.getParent()).getImporter().getContext(),
+                this.getArrayIndex(), temp)) {
+            throw new NativeError("Unable to map compressed aiTexture into the Java-VM");
         }
         DefaultLogger.get().debug("CompressedTexture.onMap successful");
 
         return;
     }
 
-     private native String _NativeGetCTextureFormat(long context, int arrayIndex);
+    private native String _NativeGetCTextureFormat(long context, int arrayIndex);
 }

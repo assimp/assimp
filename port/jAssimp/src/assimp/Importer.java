@@ -188,7 +188,7 @@ public class Importer {
      * @param path Path to the file to be read
      * @return null if the import failed, otherwise a valid Scene instance
      * @throws NativeError This exception is thrown when an unknown error
-     * occurs in the JNI bridge module.
+     *                     occurs in the JNI bridge module.
      */
     public Scene readFile(String path) throws NativeError {
         this.scene = new Scene(this);
@@ -212,6 +212,7 @@ public class Importer {
             else if (step.equals(PostProcessStep.GenFaceNormals)) flags |= 0x20;
             else if (step.equals(PostProcessStep.GenSmoothNormals)) flags |= 0x40;
             else if (step.equals(PostProcessStep.SplitLargeMeshes)) flags |= 0x80;
+            else if (step.equals(PostProcessStep.PreTransformVertices)) flags |= 0x100;
         }
 
         // now load the mesh
@@ -222,7 +223,7 @@ public class Importer {
         }
         // and setup our Scene object
         try {
-          this.scene.construct();
+            this.scene.construct();
         }
         catch (NativeError exc) {
 
@@ -288,6 +289,7 @@ public class Importer {
     /**
      * Retrieves the native context of the class. This is normally the
      * address of the native Importer object.
+     *
      * @return Native context
      */
     public long getContext() {

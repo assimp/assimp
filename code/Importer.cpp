@@ -88,6 +88,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "GenVertexNormalsProcess.h"
 #include "KillNormalsProcess.h"
 #include "SplitLargeMeshes.h"
+#include "PretransformVertices.h"
 #include "../include/DefaultLogger.h"
 
 using namespace Assimp;
@@ -133,6 +134,7 @@ Importer::Importer() :
 
 	// add an instance of each post processing step here in the order of sequence it is executed
 	mPostProcessingSteps.push_back( new TriangulateProcess());
+	mPostProcessingSteps.push_back( new PretransformVertices());
 	mPostProcessingSteps.push_back( new SplitLargeMeshesProcess_Triangle());
 	mPostProcessingSteps.push_back( new KillNormalsProcess());
 	mPostProcessingSteps.push_back( new GenFaceNormalsProcess());

@@ -175,6 +175,7 @@ void Parser::Parse()
 					this->LogWarning("Unknown file format version: *3DSMAX_ASCIIEXPORT should \
 						be 200. Continuing happily ...");
 				}
+				continue;
 			}
 			// main scene information
 			if (0 == strncmp(this->m_szFile,"*SCENE",6) &&
@@ -182,6 +183,7 @@ void Parser::Parse()
 			{
 				this->m_szFile+=7;
 				this->ParseLV1SceneBlock();
+				continue;
 			}
 			// material list
 			if (0 == strncmp(this->m_szFile,"*MATERIAL_LIST",14) &&
@@ -189,24 +191,25 @@ void Parser::Parse()
 			{
 				this->m_szFile+=15;
 				this->ParseLV1MaterialListBlock();
+				continue;
 			}
 			// geometric object (mesh)
 			if (0 == strncmp(this->m_szFile,"*GEOMOBJECT",11) &&
 				IsSpaceOrNewLine(*(this->m_szFile+11)))
 			{
 				this->m_szFile+=12;
-
 				this->m_vMeshes.push_back(Mesh());
 				this->ParseLV1GeometryObjectBlock(this->m_vMeshes.back());
+				continue;
 			}
 			// ignore comments, lights and cameras
 		}
-		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
-		if ('\0' == *this->m_szFile)
+		else if ('\0' == *this->m_szFile)
 		{
 			// END OF FILE ... why not?
 			return;
@@ -231,6 +234,7 @@ void Parser::ParseLV1SceneBlock()
 
 				// parse a color triple and assume it is really the bg color
 				this->ParseLV4MeshFloatTriple( &this->m_clrBackground.r );
+				continue;
 			}
 			if (0 == strncmp(this->m_szFile,"*SCENE_AMBIENT_STATIC",21) &&
 				IsSpaceOrNewLine(*(this->m_szFile+21)))
@@ -239,10 +243,11 @@ void Parser::ParseLV1SceneBlock()
 
 				// parse a color triple and assume it is really the bg color
 				this->ParseLV4MeshFloatTriple( &this->m_clrAmbient.r );
+				continue;
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
@@ -261,6 +266,7 @@ void Parser::ParseLV1MaterialListBlock()
 {
 	int iDepth = 0;
 	unsigned int iMaterialCount = 0;
+	unsigned int iOldMaterialCount = this->m_vMaterials.size();
 	while (true)
 	{
 		if ('*' == *this->m_szFile)
@@ -272,7 +278,8 @@ void Parser::ParseLV1MaterialListBlock()
 				this->ParseLV4MeshLong(iMaterialCount);
 
 				// now allocate enough storage to hold all materials
-				this->m_vMaterials.resize(iMaterialCount);
+				this->m_vMaterials.resize(iOldMaterialCount+iMaterialCount);
+				continue;
 			}
 			if (0 == strncmp(this->m_szFile,"*MATERIAL",9) &&
 				IsSpaceOrNewLine(*(this->m_szFile+9)))
@@ -288,17 +295,18 @@ void Parser::ParseLV1MaterialListBlock()
 				}
 
 				// get a reference to the material
-				Material& sMat = this->m_vMaterials[iIndex];
+				Material& sMat = this->m_vMaterials[iIndex+iOldMaterialCount];
 
 				// skip the '{'
 				this->SkipOpeningBracket();
 
 				// parse the material block
 				this->ParseLV2MaterialBlock(sMat);
+				continue;
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
@@ -326,36 +334,29 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 			{
 				this->m_szFile+=15;
 			
-				// NOTE: The name could also be the texture in some cases
-				// be prepared that this might occur ...
-				if (!SkipSpaces(this->m_szFile,&this->m_szFile))
-					BLUBB("Unable to parse *MATERIAL_NAME block: Unexpected EOL")
-
-				const char* sz = this->m_szFile;
-				while (!IsSpaceOrNewLine(*sz))sz++;
-				mat.mName = std::string(this->m_szFile,(uintptr_t)sz-(uintptr_t)this->m_szFile);
-				this->m_szFile = sz;
+				if (!this->ParseString(mat.mName,"*MATERIAL_NAME"))this->SkipToNextToken();
+				continue;
 			}
 			// ambient material color
 			if (0 == strncmp(this->m_szFile,"*MATERIAL_AMBIENT",17) &&
 				IsSpaceOrNewLine(*(this->m_szFile+17)))
 			{
 				this->m_szFile+=18;
-				this->ParseLV4MeshFloatTriple(&mat.mAmbient.r);
+				this->ParseLV4MeshFloatTriple(&mat.mAmbient.r);continue;
 			}
 			// diffuse material color
 			if (0 == strncmp(this->m_szFile,"*MATERIAL_DIFFUSE",17) &&
 				IsSpaceOrNewLine(*(this->m_szFile+17)))
 			{
 				this->m_szFile+=18;
-				this->ParseLV4MeshFloatTriple(&mat.mDiffuse.r);
+				this->ParseLV4MeshFloatTriple(&mat.mDiffuse.r);continue;
 			}
 			// specular material color
 			if (0 == strncmp(this->m_szFile,"*MATERIAL_SPECULAR",18) &&
 				IsSpaceOrNewLine(*(this->m_szFile+18)))
 			{
 				this->m_szFile+=19;
-				this->ParseLV4MeshFloatTriple(&mat.mSpecular.r);
+				this->ParseLV4MeshFloatTriple(&mat.mSpecular.r);continue;
 			}
 			// material shading type
 			if (0 == strncmp(this->m_szFile,"*MATERIAL_SHADING",17) &&
@@ -393,6 +394,7 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 					mat.mShading = Dot3DSFile::Gouraud;
 					this->SkipToNextToken();
 				}
+				continue;
 			}
 			// material transparency
 			if (0 == strncmp(this->m_szFile,"*MATERIAL_TRANSPARENCY",22) &&
@@ -400,7 +402,7 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 			{
 				this->m_szFile+=23;
 				this->ParseLV4MeshFloat(mat.mTransparency);
-				mat.mTransparency = 1.0f - mat.mTransparency;
+				mat.mTransparency = 1.0f - mat.mTransparency;continue;
 			}
 			// material self illumination
 			if (0 == strncmp(this->m_szFile,"*MATERIAL_SELFILLUM",19) &&
@@ -413,6 +415,7 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				mat.mEmissive.r = f;
 				mat.mEmissive.g = f;
 				mat.mEmissive.b = f;
+				continue;
 			}
 			// material shininess
 			if (0 == strncmp(this->m_szFile,"*MATERIAL_SHINE",15) &&
@@ -420,14 +423,14 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 			{
 				this->m_szFile+=16;
 				this->ParseLV4MeshFloat(mat.mSpecularExponent);
-				mat.mSpecularExponent *= 15;
+				mat.mSpecularExponent *= 15;continue;
 			}
 			// material shininess strength
 			if (0 == strncmp(this->m_szFile,"*MATERIAL_SHINESTRENGTH",23) &&
 				IsSpaceOrNewLine(*(this->m_szFile+23)))
 			{
 				this->m_szFile+=24;
-				this->ParseLV4MeshFloat(mat.mShininessStrength);
+				this->ParseLV4MeshFloat(mat.mShininessStrength);continue;
 			}
 			// diffuse color map
 			if (0 == strncmp(this->m_szFile,"*MAP_DIFFUSE",12) &&
@@ -437,7 +440,7 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				// skip the opening bracket
 				this->SkipOpeningBracket();
 				// parse the texture block
-				this->ParseLV3MapBlock(mat.sTexDiffuse);
+				this->ParseLV3MapBlock(mat.sTexDiffuse);continue;
 			}
 			// ambient color map
 			if (0 == strncmp(this->m_szFile,"*MAP_AMBIENT",12) &&
@@ -447,7 +450,7 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				// skip the opening bracket
 				this->SkipOpeningBracket();
 				// parse the texture block
-				this->ParseLV3MapBlock(mat.sTexAmbient);
+				this->ParseLV3MapBlock(mat.sTexAmbient);continue;
 			}
 			// specular color map
 			if (0 == strncmp(this->m_szFile,"*MAP_SPECULAR",13) &&
@@ -457,7 +460,7 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				// skip the opening bracket
 				this->SkipOpeningBracket();
 				// parse the texture block
-				this->ParseLV3MapBlock(mat.sTexSpecular);
+				this->ParseLV3MapBlock(mat.sTexSpecular);continue;
 			}
 			// opacity map
 			if (0 == strncmp(this->m_szFile,"*MAP_OPACITY",12) &&
@@ -467,7 +470,7 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				// skip the opening bracket
 				this->SkipOpeningBracket();
 				// parse the texture block
-				this->ParseLV3MapBlock(mat.sTexOpacity);
+				this->ParseLV3MapBlock(mat.sTexOpacity);continue;
 			}
 			// emissive map
 			if (0 == strncmp(this->m_szFile,"*MAP_SELFILLUM",14) &&
@@ -477,7 +480,7 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				// skip the opening bracket
 				this->SkipOpeningBracket();
 				// parse the texture block
-				this->ParseLV3MapBlock(mat.sTexEmissive);
+				this->ParseLV3MapBlock(mat.sTexEmissive);continue;
 			}
 			// bump map
 			if (0 == strncmp(this->m_szFile,"*MAP_BUMP",9) &&
@@ -497,7 +500,7 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				// skip the opening bracket
 				this->SkipOpeningBracket();
 				// parse the texture block
-				this->ParseLV3MapBlock(mat.sTexShininess);
+				this->ParseLV3MapBlock(mat.sTexShininess);continue;
 			}
 			// number of submaterials
 			if (0 == strncmp(this->m_szFile,"*NUMSUBMTLS",11) &&
@@ -532,11 +535,11 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 
 				// parse the material block
 				this->ParseLV2MaterialBlock(sMat);
+				continue;
 			}
-
 		}
-		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
@@ -564,77 +567,54 @@ void Parser::ParseLV3MapBlock(Texture& map)
 				IsSpaceOrNewLine(*(this->m_szFile+7)))
 			{
 				this->m_szFile+=8;
-
-				// NOTE: The name could also be the texture in some cases
-				// be prepared that this might occur ...
-				if (!SkipSpaces(this->m_szFile,&this->m_szFile))
-					BLUBB("Unable to parse *BITMAP block: Unexpected EOL")
-
-				// there must be "
-				if ('\"' != *this->m_szFile)
-					BLUBB("Unable to parse *BITMAP block: Path is expected to be enclosed in double quotation marks")
-
-				++this->m_szFile;
-				const char* sz = this->m_szFile;
-				while (true)
-				{
-					if ('\"' == *sz)break;
-					else if ('\0' == sz)
-					{
-						BLUBB("Unable to parse *BITMAP block: Path is expected to be enclosed in double quotation marks \
-							  but EOF was reached before a closing quotation mark was found")
-					}
-					sz++;
-				}
-
-				map.mMapName = std::string(this->m_szFile,(uintptr_t)sz-(uintptr_t)this->m_szFile);
-				this->m_szFile = sz;
+				if(!this->ParseString(map.mMapName,"*BITMAP"))SkipToNextToken();
+				continue;
 			}
 			// offset on the u axis
 			if (0 == strncmp(this->m_szFile,"*UVW_U_OFFSET" ,13) &&
 				IsSpaceOrNewLine(*(this->m_szFile+13)))
 			{
 				this->m_szFile+=14;
-				this->ParseLV4MeshFloat(map.mOffsetU);
+				this->ParseLV4MeshFloat(map.mOffsetU);continue;
 			}
 			// offset on the v axis
 			if (0 == strncmp(this->m_szFile,"*UVW_V_OFFSET" ,13) &&
 				IsSpaceOrNewLine(*(this->m_szFile+13)))
 			{
 				this->m_szFile+=14;
-				this->ParseLV4MeshFloat(map.mOffsetV);
+				this->ParseLV4MeshFloat(map.mOffsetV);continue;
 			}
 			// tiling on the u axis
 			if (0 == strncmp(this->m_szFile,"*UVW_U_TILING" ,13) &&
 				IsSpaceOrNewLine(*(this->m_szFile+13)))
 			{
 				this->m_szFile+=14;
-				this->ParseLV4MeshFloat(map.mScaleU);
+				this->ParseLV4MeshFloat(map.mScaleU);continue;
 			}
 			// tiling on the v axis
 			if (0 == strncmp(this->m_szFile,"*UVW_V_TILING" ,13) &&
 				IsSpaceOrNewLine(*(this->m_szFile+13)))
 			{
 				this->m_szFile+=14;
-				this->ParseLV4MeshFloat(map.mScaleV);
+				this->ParseLV4MeshFloat(map.mScaleV);continue;
 			}
 			// rotation around the z-axis
 			if (0 == strncmp(this->m_szFile,"*UVW_ANGLE" ,10) &&
 				IsSpaceOrNewLine(*(this->m_szFile+10)))
 			{
 				this->m_szFile+=11;
-				this->ParseLV4MeshFloat(map.mRotation);
+				this->ParseLV4MeshFloat(map.mRotation);continue;
 			}
 			// map blending factor
 			if (0 == strncmp(this->m_szFile,"*MAP_AMOUNT" ,11) &&
 				IsSpaceOrNewLine(*(this->m_szFile+11)))
 			{
 				this->m_szFile+=12;
-				this->ParseLV4MeshFloat(map.mTextureBlend);
+				this->ParseLV4MeshFloat(map.mTextureBlend);continue;
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
@@ -652,7 +632,7 @@ void Parser::ParseLV3MapBlock(Texture& map)
 bool Parser::ParseString(std::string& out,const char* szName)
 {
 	char szBuffer[1024];
-	ai_assert(strlen(szName < 750));
+	ai_assert(strlen(szName) < 750);
 
 	// NOTE: The name could also be the texture in some cases
 	// be prepared that this might occur ...
@@ -702,47 +682,41 @@ void Parser::ParseLV1GeometryObjectBlock(ASE::Mesh& mesh)
 				IsSpaceOrNewLine(*(this->m_szFile+10)))
 			{
 				this->m_szFile+=11;
-				if(!this->ParseString(mesh.mName,"*NODE_NAME"))
-				{
-					this->SkipToNextToken();
-					continue;
-				}
+				if(!this->ParseString(mesh.mName,"*NODE_NAME"))this->SkipToNextToken();
+				continue;
 			}
 			// name of the parent of the node
 			if (0 == strncmp(this->m_szFile,"*NODE_PARENT" ,12) &&
 				IsSpaceOrNewLine(*(this->m_szFile+12)))
 			{
 				this->m_szFile+=13;
-				if(!this->ParseString(mesh.mParent,"*NODE_PARENT"))
-				{
-					this->SkipToNextToken();
-					continue;
-				}
+				if(!this->ParseString(mesh.mParent,"*NODE_PARENT"))this->SkipToNextToken();
+				continue;
 			}
 			// transformation matrix of the node
 			if (0 == strncmp(this->m_szFile,"*NODE_TM" ,8) &&
 				IsSpaceOrNewLine(*(this->m_szFile+8)))
 			{
 				this->m_szFile+=9;
-				this->ParseLV2NodeTransformBlock(mesh);
+				this->ParseLV2NodeTransformBlock(mesh);continue;
 			}
 			// mesh data
 			if (0 == strncmp(this->m_szFile,"*MESH" ,5) &&
 				IsSpaceOrNewLine(*(this->m_szFile+5)))
 			{
 				this->m_szFile+=6;
-				this->ParseLV2MeshBlock(mesh);
+				this->ParseLV2MeshBlock(mesh);continue;
 			}
 			// mesh material index
-			else if (0 == strncmp(this->m_szFile,"*MATERIAL_REF" ,13) &&
+			if (0 == strncmp(this->m_szFile,"*MATERIAL_REF" ,13) &&
 				IsSpaceOrNewLine(*(this->m_szFile+13)))
 			{
 				this->m_szFile+=14;
-				this->ParseLV4MeshLong(mesh.iMaterialIndex);
+				this->ParseLV4MeshLong(mesh.iMaterialIndex);continue;
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
@@ -769,32 +743,32 @@ void Parser::ParseLV2NodeTransformBlock(ASE::Mesh& mesh)
 				IsSpaceOrNewLine(*(this->m_szFile+8)))
 			{
 				this->m_szFile+=9;
-				this->ParseLV4MeshFloatTriple(mesh.mTransform[0]);
+				this->ParseLV4MeshFloatTriple(mesh.mTransform[0]);continue;
 			}
 			// second row of the transformation matrix
 			if (0 == strncmp(this->m_szFile,"*TM_ROW1" ,8) &&
 				IsSpaceOrNewLine(*(this->m_szFile+8)))
 			{
 				this->m_szFile+=9;
-				this->ParseLV4MeshFloatTriple(mesh.mTransform[1]);
+				this->ParseLV4MeshFloatTriple(mesh.mTransform[1]);continue;
 			}
 			// third row of the transformation matrix
 			if (0 == strncmp(this->m_szFile,"*TM_ROW2" ,8) &&
 				IsSpaceOrNewLine(*(this->m_szFile+8)))
 			{
 				this->m_szFile+=9;
-				this->ParseLV4MeshFloatTriple(mesh.mTransform[2]);
+				this->ParseLV4MeshFloatTriple(mesh.mTransform[2]);continue;
 			}
 			// fourth row of the transformation matrix
 			if (0 == strncmp(this->m_szFile,"*TM_ROW3" ,8) &&
 				IsSpaceOrNewLine(*(this->m_szFile+8)))
 			{
 				this->m_szFile+=9;
-				this->ParseLV4MeshFloatTriple(mesh.mTransform[3]);
+				this->ParseLV4MeshFloatTriple(mesh.mTransform[3]);continue;
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
@@ -827,42 +801,44 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 				IsSpaceOrNewLine(*(this->m_szFile+15)))
 			{
 				this->m_szFile+=16;
-				this->ParseLV4MeshLong(iNumVertices);
+				this->ParseLV4MeshLong(iNumVertices);continue;
 			}
 			// Number of texture coordinates in the mesh
 			if (0 == strncmp(this->m_szFile,"*MESH_NUMTVERTEX" ,16) &&
 				IsSpaceOrNewLine(*(this->m_szFile+16)))
 			{
 				this->m_szFile+=17;
-				this->ParseLV4MeshLong(iNumTVertices);
+				this->ParseLV4MeshLong(iNumTVertices);continue;
 			}
 			// Number of vertex colors in the mesh
 			if (0 == strncmp(this->m_szFile,"*MESH_NUMCVERTEX" ,16) &&
 				IsSpaceOrNewLine(*(this->m_szFile+16)))
 			{
 				this->m_szFile+=17;
-				this->ParseLV4MeshLong(iNumCVertices);
+				this->ParseLV4MeshLong(iNumCVertices);continue;
 			}
 			// Number of regular faces in the mesh
 			if (0 == strncmp(this->m_szFile,"*MESH_NUMFACES" ,14) &&
 				IsSpaceOrNewLine(*(this->m_szFile+14)))
 			{
 				this->m_szFile+=15;
-				this->ParseLV4MeshLong(iNumFaces);
+				this->ParseLV4MeshLong(iNumFaces);continue;
+				// fix ...
+				//mesh.mFaces.resize(iNumFaces);
 			}
 			// Number of UVWed faces in the mesh
 			if (0 == strncmp(this->m_szFile,"*MESH_NUMTVFACES" ,16) &&
 				IsSpaceOrNewLine(*(this->m_szFile+16)))
 			{
 				this->m_szFile+=17;
-				this->ParseLV4MeshLong(iNumTFaces);
+				this->ParseLV4MeshLong(iNumTFaces);continue;
 			}
 			// Number of colored faces in the mesh
 			if (0 == strncmp(this->m_szFile,"*MESH_NUMCVFACES" ,16) &&
 				IsSpaceOrNewLine(*(this->m_szFile+16)))
 			{
 				this->m_szFile+=17;
-				this->ParseLV4MeshLong(iNumCFaces);
+				this->ParseLV4MeshLong(iNumCFaces);continue;
 			}
 			// mesh vertex list block
 			if (0 == strncmp(this->m_szFile,"*MESH_VERTEX_LIST" ,17) &&
@@ -870,6 +846,7 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 			{
 				this->m_szFile+=18;
 				this->ParseLV3MeshVertexListBlock(iNumVertices,mesh);
+				continue;
 			}
 			// mesh face list block
 			if (0 == strncmp(this->m_szFile,"*MESH_FACE_LIST" ,15) &&
@@ -877,7 +854,7 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 			{
 				this->m_szFile+=16;
 				this->SkipOpeningBracket();
-				this->ParseLV3MeshFaceListBlock(iNumFaces,mesh);
+				this->ParseLV3MeshFaceListBlock(iNumFaces,mesh);continue;
 			}
 			// mesh texture vertex list block
 			if (0 == strncmp(this->m_szFile,"*MESH_TVERTLIST" ,15) &&
@@ -885,7 +862,7 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 			{
 				this->m_szFile+=16;
 				this->SkipOpeningBracket();
-				this->ParseLV3MeshTListBlock(iNumTVertices,mesh);
+				this->ParseLV3MeshTListBlock(iNumTVertices,mesh);continue;
 			}
 			// mesh texture face block
 			if (0 == strncmp(this->m_szFile,"*MESH_TFACELIST" ,15) &&
@@ -893,7 +870,7 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 			{
 				this->m_szFile+=16;
 				this->SkipOpeningBracket();
-				this->ParseLV3MeshTFaceListBlock(iNumTFaces,mesh);
+				this->ParseLV3MeshTFaceListBlock(iNumTFaces,mesh);continue;
 			}
 			// mesh color vertex list block
 			if (0 == strncmp(this->m_szFile,"*MESH_CVERTLIST" ,15) &&
@@ -901,7 +878,7 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 			{
 				this->m_szFile+=16;
 				this->SkipOpeningBracket();
-				this->ParseLV3MeshCListBlock(iNumCVertices,mesh);
+				this->ParseLV3MeshCListBlock(iNumCVertices,mesh);continue;
 			}
 			// mesh color face block
 			if (0 == strncmp(this->m_szFile,"*MESH_CFACELIST" ,15) &&
@@ -909,7 +886,7 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 			{
 				this->m_szFile+=16;
 				this->SkipOpeningBracket();
-				this->ParseLV3MeshCFaceListBlock(iNumCFaces,mesh);
+				this->ParseLV3MeshCFaceListBlock(iNumCFaces,mesh);continue;
 			}
 			// another mesh UV channel ...
 			if (0 == strncmp(this->m_szFile,"*MESH_MAPPINGCHANNEL" ,20) &&
@@ -942,9 +919,10 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 					// parse the mapping channel
 					this->ParseLV3MappingChannel(iIndex-1,mesh);
 				}
+				continue;
 			}
 			// mesh animation keyframe. Not supported
-			else if (0 == strncmp(this->m_szFile,"*MESH_ANIMATION" ,15) &&
+			if (0 == strncmp(this->m_szFile,"*MESH_ANIMATION" ,15) &&
 				IsSpaceOrNewLine(*(this->m_szFile+15)))
 			{
 				this->m_szFile+=16;
@@ -952,17 +930,18 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 				this->LogWarning("Found *MESH_ANIMATION element in ASE/ASK file. "
 					"Keyframe animation is not supported by Assimp, this element "
 					"will be ignored");
+				continue;
 			}
 			// mesh animation keyframe. Not supported
-			else if (0 == strncmp(this->m_szFile,"*MESH_WEIGHTS" ,13) &&
+			if (0 == strncmp(this->m_szFile,"*MESH_WEIGHTS" ,13) &&
 				IsSpaceOrNewLine(*(this->m_szFile+13)))
 			{
 				this->m_szFile+=14;
-				this->ParseLV3MeshWeightsBlock(mesh);
+				this->ParseLV3MeshWeightsBlock(mesh);continue;
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
@@ -991,14 +970,14 @@ void Parser::ParseLV3MeshWeightsBlock(ASE::Mesh& mesh)
 				IsSpaceOrNewLine(*(this->m_szFile+15)))
 			{
 				this->m_szFile+=16;
-				this->ParseLV4MeshLong(iNumVertices);
+				this->ParseLV4MeshLong(iNumVertices);continue;
 			}
 			// Number of bones
 			if (0 == strncmp(this->m_szFile,"*MESH_NUMBONE" ,13) &&
 				IsSpaceOrNewLine(*(this->m_szFile+13)))
 			{
 				this->m_szFile+=14;
-				this->ParseLV4MeshLong(iNumBones);
+				this->ParseLV4MeshLong(iNumBones);continue;
 			}
 			// parse the list of bones
 			if (0 == strncmp(this->m_szFile,"*MESH_BONE_LIST" ,15) &&
@@ -1006,7 +985,7 @@ void Parser::ParseLV3MeshWeightsBlock(ASE::Mesh& mesh)
 			{
 				this->m_szFile+=16;
 				this->SkipOpeningBracket();
-				this->ParseLV4MeshBones(iNumBones,mesh);
+				this->ParseLV4MeshBones(iNumBones,mesh);continue;
 			}
 			// parse the list of bones vertices
 			if (0 == strncmp(this->m_szFile,"*MESH_BONE_VERTEX_LIST" ,22) &&
@@ -1015,10 +994,11 @@ void Parser::ParseLV3MeshWeightsBlock(ASE::Mesh& mesh)
 				this->m_szFile+=23;
 				this->SkipOpeningBracket();
 				this->ParseLV4MeshBonesVertices(iNumVertices,mesh);
+				continue;
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
@@ -1058,14 +1038,12 @@ void Parser::ParseLV4MeshBones(unsigned int iNumBones,ASE::Mesh& mesh)
 							"bone index instead");
 					}
 					if (!this->ParseString(mesh.mBones[iIndex].mName,"*MESH_BONE_NAME"))						
-					{
 						this->SkipToNextToken();
-						continue;
-					}
+					continue;
 				}
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
+		else if ('{' == *this->m_szFile)iDepth++;
 		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
@@ -1127,9 +1105,10 @@ void Parser::ParseLV4MeshBonesVertices(unsigned int iNumVertices,ASE::Mesh& mesh
 						mesh.mBoneVertices[iIndex].mBoneWeights.push_back(pairOut);
 					}
 				}
+				continue;
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
+		else if ('{' == *this->m_szFile)iDepth++;
 		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
@@ -1170,9 +1149,10 @@ void Parser::ParseLV3MeshVertexListBlock(
 					this->LogWarning("Vertex has an invalid index. It will be ignored");
 				}
 				else mesh.mPositions[iIndex] = vTemp;
+				continue;
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
+		else if ('{' == *this->m_szFile)iDepth++;
 		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
@@ -1211,10 +1191,11 @@ void Parser::ParseLV3MeshFaceListBlock(unsigned int iNumFaces, ASE::Mesh& mesh)
 					this->LogWarning("Face has an invalid index. It will be ignored");
 				}
 				else mesh.mFaces[mFace.iFace] = mFace;
+				continue;
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
@@ -1260,10 +1241,11 @@ void Parser::ParseLV3MeshTListBlock(unsigned int iNumVertices,
 					// we need 3 coordinate channels
 					mesh.mNumUVComponents[iChannel] = 3;
 				}
+				continue;
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
@@ -1307,10 +1289,11 @@ void Parser::ParseLV3MeshTFaceListBlock(unsigned int iNumFaces,
 					mesh.mFaces[iIndex].amUVIndices[iChannel][1] = aiValues[1];
 					mesh.mFaces[iIndex].amUVIndices[iChannel][2] = aiValues[2];
 				}
+				continue;
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
@@ -1340,14 +1323,14 @@ void Parser::ParseLV3MappingChannel(unsigned int iChannel, ASE::Mesh& mesh)
 				IsSpaceOrNewLine(*(this->m_szFile+16)))
 			{
 				this->m_szFile+=17;
-				this->ParseLV4MeshLong(iNumTVertices);
+				this->ParseLV4MeshLong(iNumTVertices);continue;
 			}
 			// Number of UVWed faces in the mesh
 			if (0 == strncmp(this->m_szFile,"*MESH_NUMTVFACES" ,16) &&
 				IsSpaceOrNewLine(*(this->m_szFile+16)))
 			{
 				this->m_szFile+=17;
-				this->ParseLV4MeshLong(iNumTFaces);
+				this->ParseLV4MeshLong(iNumTFaces);continue;
 			}
 			// mesh texture vertex list block
 			if (0 == strncmp(this->m_szFile,"*MESH_TVERTLIST" ,15) &&
@@ -1356,6 +1339,7 @@ void Parser::ParseLV3MappingChannel(unsigned int iChannel, ASE::Mesh& mesh)
 				this->m_szFile+=16;
 				this->SkipOpeningBracket();
 				this->ParseLV3MeshTListBlock(iNumTVertices,mesh,iChannel);
+				continue;
 			}
 			// mesh texture face block
 			if (0 == strncmp(this->m_szFile,"*MESH_TFACELIST" ,15) &&
@@ -1364,10 +1348,11 @@ void Parser::ParseLV3MappingChannel(unsigned int iChannel, ASE::Mesh& mesh)
 				this->m_szFile+=16;
 				this->SkipOpeningBracket();
 				this->ParseLV3MeshTFaceListBlock(iNumTFaces,mesh, iChannel);
+				continue;
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
@@ -1407,10 +1392,11 @@ void Parser::ParseLV3MeshCListBlock(unsigned int iNumVertices, ASE::Mesh& mesh)
 					this->LogWarning("Vertex color has an invalid index. It will be ignored");
 				}
 				else mesh.mVertexColors[iIndex] = vTemp;
+				continue;
 			}
 		}
 		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
@@ -1453,10 +1439,11 @@ void Parser::ParseLV3MeshCFaceListBlock(unsigned int iNumFaces, ASE::Mesh& mesh)
 					mesh.mFaces[iIndex].mColorIndices[1] = aiValues[1];
 					mesh.mFaces[iIndex].mColorIndices[2] = aiValues[2];
 				}
+				continue;
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}
@@ -1500,10 +1487,11 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 
 				// important: this->m_szFile might now point to '}' ...
 				sMesh.mNormals[iIndex] = vNormal;
+				continue;
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
-		if ('}' == *this->m_szFile)
+		else if ('{' == *this->m_szFile)iDepth++;
+		else if ('}' == *this->m_szFile)
 		{
 			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
 		}

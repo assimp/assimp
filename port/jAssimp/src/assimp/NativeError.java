@@ -48,10 +48,10 @@ package assimp;
 public class NativeError extends Exception {
 
     public NativeError() {
-      super("Unknown error");
+        super("Unknown error");
     }
 
     public NativeError(String sz) {
-       super(sz);
+        super(sz);
     }
 }

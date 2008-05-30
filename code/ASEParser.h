@@ -160,7 +160,7 @@ struct BoneVertex
 struct Mesh
 {
 	//! Constructor. Creates a default name for the mesh
-	Mesh()
+	Mesh() : bSkip(false)
 	{
 		static int iCnt = 0;
 		std::stringstream ss(mName);
@@ -211,6 +211,9 @@ struct Mesh
 
 	//! Number of vertex components for each UVW set
 	unsigned int mNumUVComponents[AI_MAX_NUMBER_OF_TEXTURECOORDS];
+
+	//! used internally
+	bool bSkip;
 };
 
 // ---------------------------------------------------------------------------------

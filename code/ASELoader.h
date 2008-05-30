@@ -116,11 +116,18 @@ protected:
 	void TransformVertices(ASE::Mesh& mesh);
 
 	// -------------------------------------------------------------------
+	/** The ASK file format contains LOD nodes.
+	 *  We do only use the highest level of detail, all others
+	 *  are skipped.
+	 */
+	void AskFilterLOD(std::vector<ASE::Mesh>& meshes);
+
+	// -------------------------------------------------------------------
 	/** Create one-material-per-mesh meshes ;-)
 	 * \param mesh Mesh to work with
-	 *  \param pcScene Scene object to be filled
+	 *  \param Receives the list of all created meshes
 	 */
-	void ConvertMeshes(ASE::Mesh& mesh, aiScene* pcScene);
+	void ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOut);
 
 	// -------------------------------------------------------------------
 	/** Convert a material to a MaterialHelper object
@@ -139,6 +146,15 @@ protected:
 	 *  \param pcScene Scene object to be filled
 	 */
 	void BuildNodes(aiScene* pcScene);
+
+	// -------------------------------------------------------------------
+	/** Add sub nodes to a node
+	 *  \param pcScene Scene object to be filled
+	 *  \param pcParent parent node to be filled
+	 *  \param szName Name of the parent node
+	 */
+	void AddNodes(aiScene* pcScene,aiNode* pcParent,
+		const char* szName);
 
 protected:
 

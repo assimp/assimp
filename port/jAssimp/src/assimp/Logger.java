@@ -54,63 +54,69 @@ public interface Logger {
     /**
      * Debug log message
      */
-    public static final int ERRORSEVERITY_DEBUGGING	= 0x1;
+    public static final int ERRORSEVERITY_DEBUGGING = 0x1;
 
-     /**
+    /**
      * Information log message
      */
-    public static final int ERRORSEVERITY_INFO		= 0x2;
+    public static final int ERRORSEVERITY_INFO = 0x2;
 
-     /**
+    /**
      * Warn log message
      */
-    public static final int ERRORSEVERITY_WARN		= 0x4;
+    public static final int ERRORSEVERITY_WARN = 0x4;
 
-     /**
+    /**
      * Error log message
      */
-    public static final int ERRORSEVERITY_ERR		= 0x8;
+    public static final int ERRORSEVERITY_ERR = 0x8;
 
 
     /**
      * Write a debug message to the log
+     *
      * @param message Message to be logged
      */
     public void debug(String message);
 
     /**
      * Write an error message to the log
+     *
      * @param message Message to be logged
      */
     public void error(String message);
 
     /**
      * Write a warn message to the log
+     *
      * @param message Message to be logged
      */
     public void warn(String message);
 
     /**
      * Write an info message to the log
+     *
      * @param message Message to be logged
      */
     public void info(String message);
 
     /**
      * Attach a logstream to the logger
-     * @param stream Log stream instance
+     *
+     * @param stream   Log stream instance
      * @param severity Error severity. Bitwise combination of the
-     * ERRORSEVERITY_XXX constants. Specify 0 to attach the
-     * stream to all types of log messages.
+     *                 ERRORSEVERITY_XXX constants. Specify 0 to attach the
+     *                 stream to all types of log messages.
      */
     public void attachStream(LogStream stream, int severity);
 
     /**
      * Detach a logstream from the logger
-     * @param stream Log stream instance
+     *
+     * @param stream   Log stream instance
      * @param severity Error severities to detach the stream from.
-     * Bitwise combination of the ERRORSEVERITY_XXX constants.
-     * Specify 0 to detach the stream from all types of log messages.
+     *                 Bitwise combination of the ERRORSEVERITY_XXX constants.
+     *                 Specify 0 to detach the stream from all types of log messages.
      */
     public void detachStream(LogStream stream, int severity);
 }

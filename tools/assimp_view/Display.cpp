@@ -139,6 +139,7 @@ int CDisplay::ClearDisplayList(void)
 {
 	// clear the combo box
 	TreeView_DeleteAllItems(GetDlgItem(g_hDlg,IDC_TREE1));
+	this->Reset();
 	return 1;
 }
 //-------------------------------------------------------------------------------
@@ -756,8 +757,31 @@ int CDisplay::OnRender()
 	return 1;
 }	
 //-------------------------------------------------------------------------------
+void UpdateColorFieldsInUI()
+{
+	InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR1),NULL,TRUE);
+	InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR2),NULL,TRUE);
+	InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR3),NULL,TRUE);
+
+	UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR1));
+	UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR2));
+	UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR3));
+}
+//-------------------------------------------------------------------------------
 int CDisplay::FillDefaultStatistics(void)
 {
+	if (!g_pcAsset)
+	{
+		// clear all stats edit controls
+		SetDlgItemText(g_hDlg,IDC_EVERT,"0");
+		SetDlgItemText(g_hDlg,IDC_EFACE,"0");
+		SetDlgItemText(g_hDlg,IDC_EMAT,"0");
+		SetDlgItemText(g_hDlg,IDC_ENODE,"0");
+		SetDlgItemText(g_hDlg,IDC_ESHADER,"0");
+		SetDlgItemText(g_hDlg,IDC_ETEX,"0");
+		return 1;
+	}
+
 	// get the number of vertices/faces in the model
 	unsigned int iNumVert = 0;
 	unsigned int iNumFaces = 0;
@@ -791,6 +815,7 @@ int CDisplay::FillDefaultStatistics(void)
 	sprintf(szOut,"%.5f",(float)g_fLoadTime);
 	SetDlgItemText(g_hDlg,IDC_ELOAD,szOut);
 
+	UpdateColorFieldsInUI();
 	UpdateWindow(g_hDlg);
 	return 1;
 }
@@ -807,19 +832,24 @@ int CDisplay::Reset(void)
 	return this->OnSetupNormalView();
 }
 //-------------------------------------------------------------------------------
-void UpdateColorFieldsInUI()
+void ShowNormalUIComponents()
 {
-	InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR1),NULL,TRUE);
-	InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR2),NULL,TRUE);
-	InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR3),NULL,TRUE);
-
-	UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR1));
-	UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR2));
-	UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR3));
+	ShowWindow(GetDlgItem(g_hDlg,IDC_NUMNODES),SW_SHOW);
+	ShowWindow(GetDlgItem(g_hDlg,IDC_ENODEWND),SW_SHOW);
+	ShowWindow(GetDlgItem(g_hDlg,IDC_NUMSHADERS),SW_SHOW);
+	ShowWindow(GetDlgItem(g_hDlg,IDC_LOADTIME),SW_SHOW);
+	ShowWindow(GetDlgItem(g_hDlg,IDC_ESHADER),SW_SHOW);
+	ShowWindow(GetDlgItem(g_hDlg,IDC_ELOAD),SW_SHOW);
+	ShowWindow(GetDlgItem(g_hDlg,IDC_VIEWMATRIX),SW_HIDE);
 }
 //-------------------------------------------------------------------------------
 int CDisplay::OnSetupNormalView()
 {
+	if (VIEWMODE_NODE == this->m_iViewMode)
+	{
+		ShowNormalUIComponents();
+	}
+
 	// now ... change the meaning of the statistics fields back
 	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMVERTS),"Verts:");
 	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMNODES),"Nodes:");
@@ -848,6 +878,41 @@ int CDisplay::OnSetupNodeView(NodeInfo* pcNew)
 	ai_assert(NULL != pcNew);
 
 	if (this->m_pcCurrentNode == pcNew)return 2;
+	
+	// now ... change the meaning of the statistics fields back
+	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMVERTS),"Verts:");
+	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMFACES),"Faces:");
+	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMMATS),"Mats:");
+	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMMESHES),"Mesh:");
+
+	ShowWindow(GetDlgItem(g_hDlg,IDC_NUMNODES),SW_HIDE);
+	ShowWindow(GetDlgItem(g_hDlg,IDC_ENODEWND),SW_HIDE);
+	ShowWindow(GetDlgItem(g_hDlg,IDC_NUMSHADERS),SW_HIDE);
+	ShowWindow(GetDlgItem(g_hDlg,IDC_LOADTIME),SW_HIDE);
+	ShowWindow(GetDlgItem(g_hDlg,IDC_ESHADER),SW_HIDE);
+	ShowWindow(GetDlgItem(g_hDlg,IDC_ELOAD),SW_HIDE);
+	ShowWindow(GetDlgItem(g_hDlg,IDC_VIEWMATRIX),SW_SHOW);
+
+	char szTemp[1024];
+	sprintf(szTemp,
+		"%.2f %.2f %.2f\r\n"
+		"%.2f %.2f %.2f\r\n"
+		"%.2f %.2f %.2f\r\n"
+		"%.2f %.2f %.2f\r\n",
+		pcNew->psNode->mTransformation.a1,
+		pcNew->psNode->mTransformation.b1,
+		pcNew->psNode->mTransformation.c1,
+		pcNew->psNode->mTransformation.a2,
+		pcNew->psNode->mTransformation.b2,
+		pcNew->psNode->mTransformation.c2,
+		pcNew->psNode->mTransformation.a3,
+		pcNew->psNode->mTransformation.b3,
+		pcNew->psNode->mTransformation.c3,
+		pcNew->psNode->mTransformation.a4,
+		pcNew->psNode->mTransformation.b4,
+		pcNew->psNode->mTransformation.c4);
+	SetWindowText(GetDlgItem(g_hDlg,IDC_VIEWMATRIX),szTemp);
+
 
 	this->m_pcCurrentNode = pcNew;
 	this->SetViewMode(VIEWMODE_NODE);
@@ -860,6 +925,11 @@ int CDisplay::OnSetupMaterialView(MaterialInfo* pcNew)
 	ai_assert(NULL != pcNew);
 
 	if (this->m_pcCurrentMaterial == pcNew)return 2;
+
+	if (VIEWMODE_NODE == this->m_iViewMode)
+	{
+		ShowNormalUIComponents();
+	}
 
 	this->m_pcCurrentMaterial = pcNew;
 	this->SetViewMode(VIEWMODE_MATERIAL);
@@ -876,6 +946,12 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
 	ai_assert(NULL != pcNew);
 
 	if (this->m_pcCurrentTexture == pcNew)return 2;
+
+	if (VIEWMODE_NODE == this->m_iViewMode)
+	{
+		ShowNormalUIComponents();
+	}
+
 	if ((AI_TEXTYPE_OPACITY | 0x40000000) == pcNew->iType)
 	{
 		// for opacity textures display a warn message

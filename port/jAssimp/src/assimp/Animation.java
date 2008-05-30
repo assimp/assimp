@@ -62,6 +62,6 @@ public class Animation extends Mappable {
     }
 
     protected void onMap() throws NativeError {
-        
+
     }
 }

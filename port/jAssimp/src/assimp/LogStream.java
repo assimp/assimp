@@ -56,6 +56,7 @@ public interface LogStream {
 
     /**
      * Override this for your own output implementations
+     *
      * @param message Message to be written to the log stream
      */
     public void write(String message);

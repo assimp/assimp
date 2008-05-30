@@ -73,12 +73,12 @@ public class Texture extends Mappable {
         super(parent, index);
 
         long lTemp;
-        if (0x0 == (lTemp = this._NativeGetTextureInfo(((Scene)this.getParent()).
-                getImporter().getContext(),this.getArrayIndex()))) {
+        if (0x0 == (lTemp = this._NativeGetTextureInfo(((Scene) this.getParent()).
+                getImporter().getContext(), this.getArrayIndex()))) {
             throw new NativeError("Unable to get the width and height of the texture");
         }
-        this.width = (int)(lTemp);
-        this.height = (int)(lTemp >> 32);
+        this.width = (int) (lTemp);
+        this.height = (int) (lTemp >> 32);
     }
 
 
@@ -119,16 +119,17 @@ public class Texture extends Mappable {
                 return Color.black;
             }
         }
-        return ((Color[])data)[y * width + x];
+        return ((Color[]) data)[y * width + x];
     }
 
     /**
      * Get a pointer to the color buffer of the texture
+     *
      * @return Array of <code>java.awt.Color</code>, size: width * height
      */
     public Color[] getColorArray() {
 
-         // map the color data in memory if required ...
+        // map the color data in memory if required ...
         if (null == data) {
             try {
                 this.onMap();
@@ -136,7 +137,7 @@ public class Texture extends Mappable {
                 return null;
             }
         }
-        return (Color[])data;
+        return (Color[]) data;
     }
 
     /**
@@ -154,9 +155,9 @@ public class Texture extends Mappable {
         byte[] temp = new byte[(iNumPixels) << 2];
 
         // and copy the native color data to it
-        if (0xffffffff == this._NativeMapColorData(((Scene)this.getParent()).getImporter().getContext(),
-                this.getArrayIndex(),temp)) {
-           throw new NativeError("Unable to map aiTexture into the Java-VM");
+        if (0xffffffff == this._NativeMapColorData(((Scene) this.getParent()).getImporter().getContext(),
+                this.getArrayIndex(), temp)) {
+            throw new NativeError("Unable to map aiTexture into the Java-VM");
         }
 
         DefaultLogger.get().debug("Texture.onMap successful");
@@ -164,7 +165,7 @@ public class Texture extends Mappable {
         // now convert the temporary representation to a Color array
         // (data is given in BGRA order, we need RGBA)
         for (int i = 0, iBase = 0; i < iNumPixels; ++i, iBase += 4) {
-            ((Color[])data)[i] = new Color(temp[iBase + 2], temp[iBase + 1], temp[iBase], temp[iBase + 3]);
+            ((Color[]) data)[i] = new Color(temp[iBase + 2], temp[iBase + 1], temp[iBase], temp[iBase + 3]);
         }
         return;
     }
@@ -175,8 +176,8 @@ public class Texture extends Mappable {
      * the native memory area will be deleted afterwards.
      *
      * @param context Current importer context (imp.hashCode)
-     * @param index Index of the texture in the scene
-     * @param temp Output array. Assumed to be width * height * 4 in size
+     * @param index   Index of the texture in the scene
+     * @param temp    Output array. Assumed to be width * height * 4 in size
      * @return 0xffffffff if an error occured
      */
     protected native int _NativeMapColorData(long context, long index, byte[] temp);
@@ -186,10 +187,9 @@ public class Texture extends Mappable {
      * The method retrieves information on the underlying texture
      *
      * @param context Current importer context (imp.hashCode)
-     * @param index Index of the texture in the scene
+     * @param index   Index of the texture in the scene
      * @return 0x0 if an error occured, otherwise the width in the lower 32 bits
-     * and the height in the higher 32 bits
-     *
+     *         and the height in the higher 32 bits
      */
     private native long _NativeGetTextureInfo(long context, long index);
 }

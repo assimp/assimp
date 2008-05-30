@@ -52,11 +52,13 @@ package assimp;
  */
 public class PostProcessStep {
 
-    /** Default vertex split limit for the SplitLargeMeshes process
+    /**
+     * Default vertex split limit for the SplitLargeMeshes process
      */
     public static final int DEFAULT_VERTEX_SPLIT_LIMIT = 1000000;
 
-    /** Default triangle split limit for the SplitLargeMeshes process
+    /**
+     * Default triangle split limit for the SplitLargeMeshes process
      */
     public static final int DEFAULT_TRIANGLE_SPLIT_LIMIT = 1000000;
 
@@ -141,12 +143,25 @@ public class PostProcessStep {
 
 
     /**
+     * Removes the node graph and pretransforms all vertices with the local
+     * transformation matrices of their nodes. The output scene does still
+     * contain nodes, however, there is only a root node with childs, each
+     * one referencing only one mesh, each mesh referencing one material.
+     * For rendering, you can simply render all meshes in order, you don't
+     * need to pay attention to local transformations and the node hierarchy.
+     * Animations are removed during this step.
+     */
+    public static final PostProcessStep PreTransformVertices =
+            new PostProcessStep("PreTransformVertices");
+
+
+    /**
      * Set the vertex split limit for the "SplitLargeMeshes" process
      * If a mesh exceeds this limit it will be splitted
      *
      * @param limit New vertex split limit. Pass 0xffffffff to disable
-     * a vertex split limit. However, splitting by triangles is still active
-     * then.
+     *              a vertex split limit. However, splitting by triangles is still active
+     *              then.
      * @return Old vertex split limit
      */
     public static synchronized int setVertexSplitLimit(int limit) {
@@ -163,8 +178,8 @@ public class PostProcessStep {
      * If a mesh exceeds this limit it will be splitted
      *
      * @param limit new triangle split limit. Pass 0xffffffff to disable
-     * a triangle split limit. However, splitting by vertices is still active
-     * then.
+     *              a triangle split limit. However, splitting by vertices is still active
+     *              then.
      * @return Old triangle split limit
      */
     public static synchronized int setTriangleSplitLimit(int limit) {

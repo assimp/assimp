@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "GenVertexNormalsProcess.h"
 #include "JoinVerticesProcess.h"
 #include "CalcTangentsProcess.h"
-#include "unused/MakeVerboseFormat.h"
+#include "extra/MakeVerboseFormat.h"
 
 namespace AssimpView {
 

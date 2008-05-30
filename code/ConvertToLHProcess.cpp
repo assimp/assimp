@@ -24,7 +24,7 @@ const aiMatrix3x3 Assimp::ConvertToLHProcess::sToDXTransform(
 // Constructor to be privately used by Importer
 ConvertToLHProcess::ConvertToLHProcess()
 {
-	// nothing to do here
+	bTransformVertices = false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -38,7 +38,13 @@ ConvertToLHProcess::~ConvertToLHProcess()
 // Returns whether the processing step is present in the given flag field.
 bool ConvertToLHProcess::IsActive( unsigned int pFlags) const
 {
-	return (pFlags & aiProcess_ConvertToLeftHanded) != 0;
+	if (pFlags & aiProcess_ConvertToLeftHanded)
+	{
+		if (pFlags & aiProcess_PreTransformVertices)
+			this->bTransformVertices = true;
+		return true;
+	}
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -54,8 +60,34 @@ void ConvertToLHProcess::Execute( aiScene* pScene)
 
 	DefaultLogger::get()->debug("ConvertToLHProcess begin");
 
-	// transform the root node of the scene, the other nodes will follow then
-	ConvertToDX( pScene->mRootNode->mTransformation);
+	// transform vertex by vertex or change the root transform?
+	if (this->bTransformVertices)
+	{
+		this->bTransformVertices = false;
+		aiMatrix4x4 mTransform;
+		this->ConvertToDX(mTransform);
+		for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+		{
+			aiMesh* pcMesh = pScene->mMeshes[i];
+			for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
+			{
+				pcMesh->mVertices[n] = mTransform * pcMesh->mVertices[n];
+			}
+			if (pcMesh->HasNormals())
+			{
+				mTransform.Inverse().Transpose();
+				for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
+				{
+					pcMesh->mNormals[n] = mTransform * pcMesh->mNormals[n];
+				}
+			}
+		}
+	}
+	else
+	{
+		// transform the root node of the scene, the other nodes will follow then
+		ConvertToDX( pScene->mRootNode->mTransformation);
+	}
 
 	// transform all meshes accordingly
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)

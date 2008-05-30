@@ -1091,9 +1091,9 @@ void Dot3DSImporter::ParseMaterialChunk(int* piRemaining)
 		pcf = &this->mScene->mMaterials.back().mTransparency;
 		*pcf = this->ParsePercentageChunk();
 		// NOTE: transparency, not opacity
-		*pcf = 1.0f - *pcf;
 		if (is_qnan(*pcf))
-			*pcf = 0.0f;
+			*pcf = 1.0f;
+		else *pcf = 1.0f - *pcf * (float)0xFFFF / 100.0f;
 		break;
 
 	case Dot3DSFile::CHUNK_MAT_SHADING:
@@ -1121,10 +1121,12 @@ void Dot3DSImporter::ParseMaterialChunk(int* piRemaining)
 		break;
 
 	case Dot3DSFile::CHUNK_MAT_SELF_ILPCT:
+		// TODO: need to multiply with emissive base color?
 		pcf = &this->mScene->mMaterials.back().sTexEmissive.mTextureBlend;
 		*pcf = this->ParsePercentageChunk();
 		if (is_qnan(*pcf))
-			*pcf = 1.0f;
+			*pcf = 0.0f;
+		else *pcf = *pcf * (float)0xFFFF / 100.0f;
 		break;
 
 	// parse texture chunks

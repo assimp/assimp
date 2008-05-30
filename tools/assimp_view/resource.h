@@ -97,6 +97,8 @@
 #define IDC_LCOLOR3                     1044
 #define IDC_LRESET                      1046
 #define IDC_NUMMESHES                   1047
+#define IDC_VIEWMAT                     1048
+#define IDC_VIEWMATRIX                  1048
 #define ID_VIEWER_OPEN                  32771
 #define ID_VIEWER_CLOSETHIS             32772
 #define ID_VIEWER_CLOSEASSET            32773
@@ -158,7 +160,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        158
 #define _APS_NEXT_COMMAND_VALUE         32823
-#define _APS_NEXT_CONTROL_VALUE         1048
+#define _APS_NEXT_CONTROL_VALUE         1049
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

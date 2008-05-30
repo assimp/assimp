@@ -565,8 +565,8 @@ Textures are generally defined by a set of parameters, including
 <b>1. The path to the texture.</b>  This property is always set. If it is not set, a texture 
 is not existing. This can either be a valid path (beware, sometimes
 it could be a 8.3 file name!) or an asterisk (*) suceeded by a zero-based index, the latter being
-a reference to an embedded texture (@link textures more details @endlink). I suggest using code
-like this to find out whether a texture is embedded:
+a reference to an embedded texture (see the "Textures" section for more details). I suggest using code
+like this to find out whether a texture is embedded or not:
 @code
 aiString path; // contains the path obtained via aiGetMaterialString()
 const aiScene* scene; // valid aiScene instance
@@ -605,6 +605,26 @@ aiTextureOp_Multiply as default value if this property is not set. The blend ope
 the first texture in a texture slot (e.g. diffuse 0) specifies how the diffuse base color/
 vertex color have to be combined with the texture color value.
 <br>
+
+You can use the aiGetMaterialTexture() function to read all texture parameters at once (maybe
+if you're too lazy to read 4 or 5 values manually if there's a smart helper function 
+doing all the work for you ...).
+
+@code
+if (AI_SUCCESS != aiGetMaterialTexture(
+   pcMat,               // Material object
+   0,                   // first texture in the diffuse slot
+   AI_TEXTYPE_DIFFUSE,  // purpose of texture is diffuse
+   &path,               // receives the path of the texture
+   &uv,                 // receives the UV index of the texture
+   &blend,              // receives the blend factor of the texture
+   &op,                 // receives the blend operation of the texture
+   // (you may also specify 0 for a parameter if you don't need it)
+   )) 
+{
+   // cry, jump out of the window, but don't take drugs if this occurs!
+}
+@endcode
 
 @section bones Bones
 
@@ -672,6 +692,28 @@ need them at all.
 
 @section textures Textures
 
+Normally textures used by assets are stored in separate files, however,
+there are file formats embedding their textures directly into the model file.
+Such textures are loaded into an aiTexture structure. 
+<br>
+There are two cases:
+<br>
+<b>1)</b> The texture is NOT compressed. Its color data is directly stored
+in the aiTexture structure as an array of aiTexture::mWidth * aiTexture::mHeight aiTexel structures. Each aiTexel represents a pixel (or "texel") of the texture
+image. The color data is stored in an unsigned RGBA8888 format, which can be easily used for
+both Direct3D and OpenGL (swizzling the order of the color components might be necessary).
+RGBA8888 has been chosen because it is well-known, easy to use and natively
+supported by nearly all graphics APIs.
+<br>
+<b>2)</b> This is the case for aiTexture::mHeight == 0. The texture is stored in a
+"compressed" format such as DDS or PNG. The term "compressed" does not mean that the
+texture data must actually be compressed, however the texture was stored in the
+model file as if it was stored in a separate file on the harddisk. Appropriate
+decoders (such as libjpeg, libpng, D3DX, DevIL) are required to load theses textures.
+aiTexture::mWidth specifies the size of the texture data in bytes, aiTexture::pcData is
+a pointer to the raw image data and aiTexture::achFormatHint is either zeroed or
+containing the file extension of the format of the embedded texture. This is only
+set if ASSIMP is able to determine the file format.
 */
 
 /** 

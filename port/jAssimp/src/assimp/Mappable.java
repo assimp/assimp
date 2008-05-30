@@ -64,8 +64,9 @@ public abstract class Mappable {
 
     /**
      * Construction from a given parent object and array index
+     *
      * @param parent Must be valid, null is not allowed
-     * @param index Valied index in the parent's list
+     * @param index  Valied index in the parent's list
      */
     public Mappable(Object parent, int index) {
         m_parent = parent;
@@ -77,6 +78,7 @@ public abstract class Mappable {
      * data into the address space of the Java virtual machine.
      * After this method has been called the class instance must
      * be ready to be used without an underyling native aiScene
+     *
      * @throws NativeError
      */
     protected abstract void onMap() throws NativeError;
@@ -84,6 +86,7 @@ public abstract class Mappable {
 
     /**
      * Retrieve the index ofthe mappable object in the parent mesh
+     *
      * @return Value between 0 and n-1
      */
     public int getArrayIndex() {
@@ -92,6 +95,7 @@ public abstract class Mappable {
 
     /**
      * Provide access to the parent
+     *
      * @return Never null ...
      */
     public Object getParent() {

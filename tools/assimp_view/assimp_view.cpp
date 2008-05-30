@@ -268,14 +268,6 @@ int DeleteAsset(void)
 	delete g_pcAsset;
 	g_pcAsset = NULL;
 
-	// clear all stats edit controls
-	SetDlgItemText(g_hDlg,IDC_EVERT,"0");
-	SetDlgItemText(g_hDlg,IDC_EFACE,"0");
-	SetDlgItemText(g_hDlg,IDC_EMAT,"0");
-	SetDlgItemText(g_hDlg,IDC_ENODE,"0");
-	SetDlgItemText(g_hDlg,IDC_ESHADER,"0");
-	SetDlgItemText(g_hDlg,IDC_ETEX,"0");
-
 	// reset the caption of the viewer window
 	SetWindowText(g_hDlg,AI_VIEW_CAPTION_BASE);
 
@@ -284,6 +276,7 @@ int DeleteAsset(void)
 	CDisplay::Instance().ClearDisplayList();
 
 	CMaterialManager::Instance().Reset();
+	UpdateWindow(g_hDlg);
 	return 1;
 }
 

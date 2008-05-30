@@ -108,7 +108,23 @@ enum aiPostProcessSteps
 	* in the internal SplitLargeMeshes.h header as AI_SLM_DEFAULT_MAX_VERTICES
 	* and AI_SLM_DEFAULT_MAX_TRIANGLES. 
 	*/
-	aiProcess_SplitLargeMeshes = 0x80
+	aiProcess_SplitLargeMeshes = 0x80,
+
+	/** Removes the node graph and pretransforms all vertices with
+	* the local transformation matrices of their nodes. The output
+	* scene does still contain nodes, however, there is only a
+	* root node with childs, each one referencing only one mesh,
+	* each mesh referencing one material. For rendering, you can
+	* simply render all meshes in order, you don't need to pay
+	* attention to local transformations and the node hierarchy.
+	* Animations are removed during this step. 
+	* This step is intended for applications that have no scenegraph.
+	* The step CAN cause some problems: if e.g. a mesh of the asset
+	* contains normals and another, using the same material index, does not, 
+	* they will be brought together, but the first meshes's part of
+	* the normal list will be zeroed.
+	*/
+	aiProcess_PreTransformVertices = 0x100,
 };
 
 // ---------------------------------------------------------------------------

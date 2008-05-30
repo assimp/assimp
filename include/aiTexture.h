@@ -87,7 +87,7 @@ struct aiTexture
 {
 	/** Width of the texture, in pixels
 	 *
-	 * If mHeight is zero the texture is compressedin a format
+	 * If mHeight is zero the texture is compressed in a format
 	 * like JPEG. In this case mWidth specifies the size of the
 	 * memory area pcData is pointing to, in bytes.
 	 */

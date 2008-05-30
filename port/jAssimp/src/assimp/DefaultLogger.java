@@ -390,12 +390,15 @@ public class DefaultLogger implements Logger {
     public static void _NativeCallWriteError(String message) {
         DefaultLogger.get().error(message);
     }
+
     public static void _NativeCallWriteWarn(String message) {
         DefaultLogger.get().warn(message);
     }
+
     public static void _NativeCallWriteInfo(String message) {
         DefaultLogger.get().info(message);
     }
+
     public static void _NativeCallWriteDebug(String message) {
         DefaultLogger.get().debug(message);
     }

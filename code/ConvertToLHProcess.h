@@ -116,6 +116,10 @@ protected:
 	 */
 	void ProcessAnimation( aiBoneAnim* pAnim);
 
+	//! true if the transformation matrix for the OGL-to-DX is 
+	//! directly used to transform all vertices.
+	mutable bool bTransformVertices;
+
 public:
 	/** The transformation matrix to convert from DirectX coordinates to OpenGL coordinates. */
 	static const aiMatrix3x3 sToOGLTransform;

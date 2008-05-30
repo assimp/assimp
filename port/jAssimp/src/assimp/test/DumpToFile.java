@@ -67,8 +67,7 @@ public class DumpToFile {
             arguments = new String[2];
             arguments[0] = s;
             arguments[1] = "output.txt";
-        }
-        else if (2 != arguments.length)return;
+        } else if (2 != arguments.length) return;
 
         FileWriter stream;
         try {
@@ -136,10 +135,10 @@ public class DumpToFile {
              * at the moment!
              */
             float[] positions = mesh.getPositionArray();
-            float[] normals =  mesh.getNormalArray();
+            float[] normals = mesh.getNormalArray();
             float[] tangents = mesh.getTangentArray();
             float[] bitangents = mesh.getBitangentArray();
-            for (int i = 0;i < mesh.getNumVertices();++i) {
+            for (int i = 0; i < mesh.getNumVertices(); ++i) {
 
                 // format: "Vertex pos(x|y|z) nor(x|y|z) tan(x|y|) bit(x|y|z)"
                 // great that this IDE is automatically able to replace + with append ... ;-)
@@ -167,7 +166,7 @@ public class DumpToFile {
             /* Now write a list of all faces in this model
              */
             int[] faces = mesh.getFaceArray();
-            for (int i = 0; i < mesh.getNumFaces();++i) {
+            for (int i = 0; i < mesh.getNumFaces(); ++i) {
                 stream.write(new StringBuilder().append("\tFace (").
                         append(faces[i * 3]).append("|").
                         append(faces[i * 3 + 1]).append("|").

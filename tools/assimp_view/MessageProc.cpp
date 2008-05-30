@@ -1329,6 +1329,10 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 						b = (unsigned char)(CDisplay::Instance().GetFirstCheckerColor()->z * 255.0f);
 						szText = "B0";
 					}
+					else if (!g_pcAsset)
+					{
+						r = g = b = 150;szText = "-";
+					}
 					else
 					{
 						r = (unsigned char)((g_avLightColors[0] >> 16) & 0xFF);
@@ -1358,6 +1362,10 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 						b = (unsigned char)(CDisplay::Instance().GetSecondCheckerColor()->z * 255.0f);
 						szText = "B1";
 					}
+					else if (!g_pcAsset)
+					{
+						r = g = b = 150;szText = "-";
+					}
 					else
 					{
 						r = (unsigned char)((g_avLightColors[1] >> 16) & 0xFF);
@@ -1382,6 +1390,10 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 					{
 						r = g = b = 0;
 						szText = "-";
+					}
+					else if (!g_pcAsset)
+					{
+						r = g = b = 150;szText = "-";
 					}
 					else
 					{

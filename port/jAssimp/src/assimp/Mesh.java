@@ -782,7 +782,7 @@ public class Mesh extends Mappable {
                 this.m_vFaces)) {
             // this should occur rarely. No need to throw an exception,
             // simply write to log and let the array at 0
-             DefaultLogger.get().error("Unable to map faces into JVM memory");
+            DefaultLogger.get().error("Unable to map faces into JVM memory");
         }
     }
 
@@ -793,7 +793,7 @@ public class Mesh extends Mappable {
                 channel, this.m_avUVs[channel])) {
             // this should occur rarely. No need to throw an exception,
             // simply write to log and let the array at 0.0f
-             DefaultLogger.get().error("Unable to map UV coordinate set " + channel + " into JVM memory");
+            DefaultLogger.get().error("Unable to map UV coordinate set " + channel + " into JVM memory");
         }
     }
 
@@ -804,7 +804,7 @@ public class Mesh extends Mappable {
                 channel, this.m_avColors[channel])) {
             // this should occur rarely. No need to throw an exception,
             // simply write to log and let the array at 0.0f
-             DefaultLogger.get().error("Unable to map vertex color channel " + channel + " into JVM memory");
+            DefaultLogger.get().error("Unable to map vertex color channel " + channel + " into JVM memory");
         }
     }
 

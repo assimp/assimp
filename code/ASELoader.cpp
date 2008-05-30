@@ -553,10 +553,10 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, aiScene* pcScene)
 				p_pcOut->mNumFaces = aiSplit[p].size();
 
 				// receive output vertex weights
-				std::vector<std::pair<unsigned int, float>>* avOutputBones;
+				std::vector<std::pair<unsigned int, float> >* avOutputBones;
 				if (!mesh.mBones.empty())
 				{
-					avOutputBones = new std::vector<std::pair<unsigned int, float>>[mesh.mBones.size()];
+					avOutputBones = new std::vector<std::pair<unsigned int, float> >[mesh.mBones.size()];
 				}
 				
 				// allocate enough storage for faces
@@ -589,7 +589,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, aiScene* pcScene)
 								// this vertex index ...
 								if (iIndex2 < mesh.mBoneVertices.size())
 								{
-									for (std::vector<std::pair<int,float>>::const_iterator
+									for (std::vector<std::pair<int,float> >::const_iterator
 										blubb =  mesh.mBoneVertices[iIndex2].mBoneWeights.begin();
 										blubb != mesh.mBoneVertices[iIndex2].mBoneWeights.end();++blubb)
 									{
@@ -755,7 +755,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, aiScene* pcScene)
 				harrypotter =  mesh.mBoneVertices.begin();
 				harrypotter != mesh.mBoneVertices.end();++harrypotter,++quak)
 			{
-				for (std::vector<std::pair<int,float>>::const_iterator
+				for (std::vector<std::pair<int,float> >::const_iterator
 					ronaldweasley  = (*harrypotter).mBoneWeights.begin();
 					ronaldweasley != (*harrypotter).mBoneWeights.end();++ronaldweasley)
 				{

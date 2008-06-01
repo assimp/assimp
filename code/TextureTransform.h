@@ -125,7 +125,7 @@ public:
 	/** Returns true if a texture requires UV transformations
 	 * \param rcIn Input texture
 	*/
-	inline static bool TextureTransform::HasUVTransform(
+	inline static bool HasUVTransform(
 		const Dot3DS::Texture& rcIn)
 	{
 		return (rcIn.mOffsetU || rcIn.mOffsetV ||

@@ -430,7 +430,7 @@ private:
 	//! \param szName Name of the enclosing element -> used in error
 	//! messages.
 	//! \return false if an error occured
-	bool Parser::ParseString(std::string& out,const char* szName);
+	bool ParseString(std::string& out,const char* szName);
 
 public:
 

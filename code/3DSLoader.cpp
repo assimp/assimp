@@ -42,8 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the 3ds importer class */
 #include "3DSLoader.h"
 #include "MaterialSystem.h"
-#include "../include/DefaultLogger.h"
+#include "TextureTransform.h"
 
+#include "../include/DefaultLogger.h"
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
 #include "../include/aiMesh.h"
@@ -58,7 +59,6 @@ using namespace Assimp;
 	"WARNING: Size of chunk data plus size of "		\
 	"subordinate chunks is larger than the size "	\
 	"specified in the higher-level chunk header."	\
-
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -145,7 +145,6 @@ void Dot3DSImporter::InternReadFile(
 	this->mMasterScale = 1.0f;
 	this->mBackgroundImage = "";
 	this->bHasBG = false;
-	this->mErrorText = "";
 
 	int iRemaining = (unsigned int)fileSize;
 	this->ParseMainChunk(&iRemaining);
@@ -165,7 +164,7 @@ void Dot3DSImporter::InternReadFile(
 	}
 
 	// Apply scaling and offsets to all texture coordinates
-	this->ApplyScaleNOffset();
+	TextureTransform::ApplyScaleNOffset(this->mScene->mMaterials);
 
 	// Replace all occurences of the default material with a valid material.
 	// Generate it if no material containing DEFAULT in its name has been
@@ -174,7 +173,6 @@ void Dot3DSImporter::InternReadFile(
 	
 	// Convert the scene from our internal representation to an aiScene object
 	this->ConvertScene(pScene);
-	
 
 	// Generate the node graph for the scene. This is a little bit
 	// tricky since we'll need to split some meshes into submeshes
@@ -185,12 +183,6 @@ void Dot3DSImporter::InternReadFile(
 
 	delete[] this->mBuffer;
 	delete this->mScene;
-
-	// check whether an error occured during reading ... set it as warning
-	if ("" != this->mErrorText) 
-	{
-		DefaultLogger::get()->warn(this->mErrorText);
-	}
 	return;
 }
 // ------------------------------------------------------------------------------------------------
@@ -216,12 +208,12 @@ void Dot3DSImporter::ReadChunk(const Dot3DSFile::Chunk** p_ppcOut)
 	ai_assert(p_ppcOut != NULL);
 
 	// read chunk
-	if ((unsigned int)this->mCurrent >= (unsigned int)this->mLast)
+	if (this->mCurrent >= this->mLast)
 	{
 		*p_ppcOut = NULL;
 		return;
 	}
-	const unsigned int iDiff = (unsigned int)this->mLast - (unsigned int)this->mCurrent;
+	const uintptr_t iDiff = this->mLast - this->mCurrent;
 	if (iDiff < sizeof(Dot3DSFile::Chunk)) 
 	{
 		*p_ppcOut = NULL;
@@ -254,11 +246,11 @@ void Dot3DSImporter::ParseMainChunk(int* piRemaining)
 		this->ParseEditorChunk(&iRemaining);
 		break;
 	};
-	if ((unsigned int)pcCurNext < (unsigned int)this->mCurrent)
+	if (pcCurNext < this->mCurrent)
 	{
 		// place an error message. If we crash the programmer
 		// will be able to find it
-		this->mErrorText = ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG;
+		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
 		pcCurNext = this->mCurrent;
 	}
 	// Go to the starting position of the next top-level chunk
@@ -295,11 +287,11 @@ void Dot3DSImporter::ParseEditorChunk(int* piRemaining)
 		this->ParseKeyframeChunk(&iRemaining);
 		break;
 	};
-	if ((unsigned int)pcCurNext < (unsigned int)this->mCurrent)
+	if (pcCurNext < this->mCurrent)
 	{
 		// place an error message. If we crash the programmer
 		// will be able to find it
-		this->mErrorText = ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG;
+		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
 		pcCurNext = this->mCurrent;
 	}
 	// Go to the starting position of the next top-level chunk
@@ -393,11 +385,11 @@ void Dot3DSImporter::ParseObjectChunk(int* piRemaining)
 		break;
 
 	};
-	if ((unsigned int)pcCurNext < (unsigned int)this->mCurrent)
+	if (pcCurNext < this->mCurrent)
 	{
 		// place an error message. If we crash the programmer
 		// will be able to find it
-		this->mErrorText = ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG;
+		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
 		pcCurNext = this->mCurrent;
 	}
 	// Go to the starting position of the next top-level chunk
@@ -436,11 +428,11 @@ void Dot3DSImporter::ParseChunk(int* piRemaining)
 		this->ParseMeshChunk(&iRemaining);
 		break;
 	};
-	if ((unsigned int)pcCurNext < (unsigned int)this->mCurrent)
+	if (pcCurNext < this->mCurrent)
 	{
 		// place an error message. If we crash the programmer
 		// will be able to find it
-		this->mErrorText = ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG;
+		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
 		pcCurNext = this->mCurrent;
 	}
 	// Go to the starting position of the next top-level chunk
@@ -471,11 +463,11 @@ void Dot3DSImporter::ParseKeyframeChunk(int* piRemaining)
 		this->ParseHierarchyChunk(&iRemaining);
 		break;
 	};
-	if ((unsigned int)pcCurNext < (unsigned int)this->mCurrent)
+	if (pcCurNext < this->mCurrent)
 	{
 		// place an error message. If we crash the programmer
 		// will be able to find it
-		this->mErrorText = ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG;
+		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
 		pcCurNext = this->mCurrent;
 	}
 	// Go to the starting position of the next top-level chunk
@@ -738,11 +730,11 @@ void Dot3DSImporter::ParseHierarchyChunk(int* piRemaining)
 #endif // end keyframe animation code
 
 	};
-	if ((unsigned int)pcCurNext < (unsigned int)this->mCurrent)
+	if (pcCurNext < this->mCurrent)
 	{
 		// place an error message. If we crash the programmer
 		// will be able to find it
-		this->mErrorText = ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG;
+		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
 		pcCurNext = this->mCurrent;
 	}
 	// Go to the starting position of the next top-level chunk
@@ -837,11 +829,11 @@ void Dot3DSImporter::ParseFaceChunk(int* piRemaining)
 
 		break;
 	};
-	if ((unsigned int)pcCurNext < (unsigned int)this->mCurrent)
+	if (pcCurNext < this->mCurrent)
 	{
 		// place an error message. If we crash the programmer
 		// will be able to find it
-		this->mErrorText = ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG;
+		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
 		pcCurNext = this->mCurrent;
 	}
 	// Go to the starting position of the next chunk on this level
@@ -997,16 +989,16 @@ void Dot3DSImporter::ParseMeshChunk(int* piRemaining)
 		// by a material $$DEFAULT will be assigned to it)
 		mMesh.mFaceMaterials.resize(mMesh.mFaces.size(),0xcdcdcdcd);
 
-		iRemaining = (int)pcCurNext - (int)this->mCurrent;
+		iRemaining = (int)(pcCurNext - this->mCurrent);
 		if (iRemaining > 0)this->ParseFaceChunk(&iRemaining);
 		break;
 
 	};
-	if ((unsigned int)pcCurNext < (unsigned int)this->mCurrent)
+	if (pcCurNext < this->mCurrent)
 	{
 		// place an error message. If we crash the programmer
 		// will be able to find it
-		this->mErrorText = ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG;
+		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
 		pcCurNext = this->mCurrent;
 	}
 	// Go to the starting position of the next chunk on this level
@@ -1155,11 +1147,11 @@ void Dot3DSImporter::ParseMaterialChunk(int* piRemaining)
 		this->ParseTextureChunk(&iRemaining,&this->mScene->mMaterials.back().sTexEmissive);
 		break;
 	};
-	if ((unsigned int)pcCurNext < (unsigned int)this->mCurrent)
+	if (pcCurNext < this->mCurrent)
 	{
 		// place an error message. If we crash the programmer
 		// will be able to find it
-		this->mErrorText = ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG;
+		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
 		pcCurNext = this->mCurrent;
 	}
 	// Go to the starting position of the next chunk on this level
@@ -1204,14 +1196,28 @@ void Dot3DSImporter::ParseTextureChunk(int* piRemaining,Dot3DS::Texture* pcOut)
 		break;
 	// manually parse the blend factor
 	case Dot3DSFile::CHUNK_PERCENTW:
-		pcOut->mTextureBlend = (float)(*((short*)this->mCurrent)) / (float)100;
+		pcOut->mTextureBlend = (float)(*((short*)this->mCurrent)) / 100.0f;
 		break;
 
 	case Dot3DSFile::CHUNK_MAT_MAP_USCALE:
 		pcOut->mScaleU = *((float*)this->mCurrent);
+		if (0.0f == pcOut->mScaleU)
+		{
+			DefaultLogger::get()->warn("Inverse texture coordinate scaling in the "
+				"x direction is zero. This would be a division through zero. ");
+			pcOut->mScaleU = 1.0f;
+		}
+		pcOut->mScaleU = 1.0f / pcOut->mScaleU;
 		break;
 	case Dot3DSFile::CHUNK_MAT_MAP_VSCALE:
 		pcOut->mScaleV = *((float*)this->mCurrent);
+		if (0.0f == pcOut->mScaleV)
+		{
+			DefaultLogger::get()->warn("Inverse texture coordinate scaling in the "
+				"y direction is zero. This would be a division through zero. ");
+			pcOut->mScaleV = 1.0f;
+		}
+		pcOut->mScaleV = 1.0f / pcOut->mScaleV;
 		break;
 	case Dot3DSFile::CHUNK_MAT_MAP_UOFFSET:
 		pcOut->mOffsetU = *((float*)this->mCurrent);

@@ -184,7 +184,7 @@ aiNode* XFileImporter::CreateNodes( aiScene* pScene, aiNode* pParent, const XFil
 	// handle childs
 	if( pNode->mChildren.size() > 0)
 	{
-		node->mNumChildren = pNode->mChildren.size();
+		node->mNumChildren = (unsigned int)pNode->mChildren.size();
 		node->mChildren = new aiNode* [node->mNumChildren];
 
 		for( unsigned int a = 0; a < pNode->mChildren.size(); a++)
@@ -209,7 +209,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 		// first convert its materials so that we can find them when searching by name afterwards
 		ConvertMaterials( pScene, sourceMesh->mMaterials);
 
-		unsigned int numMaterials = std::max( sourceMesh->mMaterials.size(), 1u);
+		unsigned int numMaterials = std::max( (unsigned int)sourceMesh->mMaterials.size(), 1u);
 		for( unsigned int b = 0; b < numMaterials; b++)
 		{
 			// collect the faces belonging to this material
@@ -223,7 +223,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 					if( sourceMesh->mFaceMaterials[c] == b)
 					{
 						faces.push_back( c);
-						numVertices += sourceMesh->mPosFaces[c].mIndices.size();
+						numVertices += (unsigned int)sourceMesh->mPosFaces[c].mIndices.size();
 					}
 				}
 			} else
@@ -232,7 +232,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 				for( unsigned int c = 0; c < sourceMesh->mPosFaces.size(); c++)
 				{
 					faces.push_back( c);
-					numVertices += sourceMesh->mPosFaces[c].mIndices.size();
+					numVertices += (unsigned int)sourceMesh->mPosFaces[c].mIndices.size();
 				}
 			}
 
@@ -262,7 +262,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 			// as specified 
 			mesh->mNumVertices = numVertices;
 			mesh->mVertices = new aiVector3D[numVertices];
-			mesh->mNumFaces = faces.size();
+			mesh->mNumFaces = (unsigned int)faces.size();
 			mesh->mFaces = new aiFace[mesh->mNumFaces];
 
 			// normals?
@@ -293,7 +293,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 
 				// create face. either triangle or triangle fan depending on the index count
 				aiFace& df = mesh->mFaces[c]; // destination face
-				df.mNumIndices = pf.mIndices.size();
+				df.mNumIndices = (unsigned int)pf.mIndices.size();
 				df.mIndices = new unsigned int[ df.mNumIndices];
 
 				// collect vertex data for indices of this face
@@ -360,14 +360,14 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 				// copy name and matrix
 				nbone->mName.Set( obone.mName);
 				nbone->mOffsetMatrix = obone.mOffsetMatrix;
-				nbone->mNumWeights = newWeights.size();
+				nbone->mNumWeights = (unsigned int)newWeights.size();
 				nbone->mWeights = new aiVertexWeight[nbone->mNumWeights];
 				for( unsigned int d = 0; d < newWeights.size(); d++)
 					nbone->mWeights[d] = newWeights[d];
 			}
 
 			// store the bones in the mesh
-			mesh->mNumBones = newBones.size();
+			mesh->mNumBones = (unsigned int)newBones.size();
 			mesh->mBones = new aiBone*[mesh->mNumBones];
 			for( unsigned int c = 0; c < newBones.size(); c++)
 				mesh->mBones[c] = newBones[c];
@@ -384,7 +384,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 	}
 
 	// allocate mesh index array in the node
-	pNode->mNumMeshes = meshes.size();
+	pNode->mNumMeshes = (unsigned int)meshes.size();
 	pNode->mMeshes = new unsigned int[pNode->mNumMeshes];
 
 	// store all meshes in the mesh library of the scene and store their indices in the node
@@ -412,7 +412,7 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 		// duration will be determined by the maximum length
 		nanim->mDuration = 0;
 		nanim->mTicksPerSecond = pData->mAnimTicksPerSecond;
-		nanim->mNumBones = anim->mAnims.size();
+		nanim->mNumBones = (unsigned int)anim->mAnims.size();
 		nanim->mBones = new aiBoneAnim*[nanim->mNumBones];
 
 		for( unsigned int b = 0; b < anim->mAnims.size(); b++)
@@ -428,11 +428,11 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 			// keyframes are given as combined transformation matrix keys
 			if( bone->mTrafoKeys.size() > 0)
 			{
-				nbone->mNumPositionKeys = bone->mTrafoKeys.size();
+				nbone->mNumPositionKeys = (unsigned int)bone->mTrafoKeys.size();
 				nbone->mPositionKeys = new aiVectorKey[nbone->mNumPositionKeys];
-				nbone->mNumRotationKeys = bone->mTrafoKeys.size();
+				nbone->mNumRotationKeys = (unsigned int)bone->mTrafoKeys.size();
 				nbone->mRotationKeys = new aiQuatKey[nbone->mNumRotationKeys];
-				nbone->mNumScalingKeys = bone->mTrafoKeys.size();
+				nbone->mNumScalingKeys = (unsigned int)bone->mTrafoKeys.size();
 				nbone->mScalingKeys = new aiVectorKey[nbone->mNumScalingKeys];
 
 				for( unsigned int c = 0; c < bone->mTrafoKeys.size(); c++)
@@ -476,7 +476,7 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 			} else
 			{
 				// separate key sequences for position, rotation, scaling
-				nbone->mNumPositionKeys = bone->mPosKeys.size(); 
+				nbone->mNumPositionKeys = (unsigned int)bone->mPosKeys.size(); 
 				nbone->mPositionKeys = new aiVectorKey[nbone->mNumPositionKeys];
 				for( unsigned int c = 0; c < nbone->mNumPositionKeys; c++)
 				{
@@ -489,7 +489,7 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 				}
 
 				// rotation
-				nbone->mNumRotationKeys = bone->mRotKeys.size(); 
+				nbone->mNumRotationKeys = (unsigned int)bone->mRotKeys.size(); 
 				nbone->mRotationKeys = new aiQuatKey[nbone->mNumRotationKeys];
 				for( unsigned int c = 0; c < nbone->mNumRotationKeys; c++)
 				{
@@ -502,7 +502,7 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 				}
 
 				// scaling
-				nbone->mNumScalingKeys = bone->mScaleKeys.size(); 
+				nbone->mNumScalingKeys = (unsigned int)bone->mScaleKeys.size(); 
 				nbone->mScalingKeys = new aiVectorKey[nbone->mNumScalingKeys];
 				for( unsigned int c = 0; c < nbone->mNumScalingKeys; c++)
 					nbone->mScalingKeys[c] = bone->mScaleKeys[c];
@@ -521,7 +521,7 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 	// store all converted animations in the scene
 	if( newAnims.size() > 0)
 	{
-		pScene->mNumAnimations = newAnims.size();
+		pScene->mNumAnimations = (unsigned int)newAnims.size();
 		pScene->mAnimations = new aiAnimation* [pScene->mNumAnimations];
 		for( unsigned int a = 0; a < newAnims.size(); a++)
 			pScene->mAnimations[a] = newAnims[a];

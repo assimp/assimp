@@ -166,7 +166,7 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 	// Create all nodes from the subobjects stored in the current object
 	if (!pData->m_SubObjects.empty())
 	{
-		pNode->mNumChildren = pData->m_SubObjects.size();
+		pNode->mNumChildren = (unsigned int)pData->m_SubObjects.size();
 		pNode->mChildren = new aiNode*[pData->m_SubObjects.size()];
 		pNode->mNumMeshes = 1;
 		pNode->mMeshes = new unsigned int[1];
@@ -217,12 +217,12 @@ void ObjFileImporter::createTopology(const ObjFile::Model* pModel, const ObjFile
 	createVertexArray(pModel, pData, pMesh);
 
 	// Create faces
-	pMesh->mNumFaces = pData->m_Faces.size();
+	pMesh->mNumFaces = (unsigned int)pData->m_Faces.size();
 	pMesh->mFaces = new aiFace[pMesh->mNumFaces];
 	for (size_t index = 0; index < pMesh->mNumFaces; index++)
 	{
 		aiFace *pFace = &pMesh->mFaces[ index ];
-		pFace->mNumIndices = pData->m_Faces[index]->m_pVertices->size();
+		pFace->mNumIndices = (unsigned int)pData->m_Faces[index]->m_pVertices->size();
 		if (pFace->mNumIndices > 0)
 		{
 			pFace->mIndices = new unsigned int[pMesh->mFaces[index].mNumIndices];
@@ -255,7 +255,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 		return;
 	
 	// Copy all stored vertices, normals and so on
-	pMesh->mNumVertices = pModel->m_Vertices.size();
+	pMesh->mNumVertices = (unsigned int)pModel->m_Vertices.size();
 	pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
 	for (size_t index=0; index < pModel->m_Vertices.size(); index++)
 	{
@@ -284,7 +284,7 @@ void ObjFileImporter::countObjects(const std::vector<ObjFile::Object*> &rObjects
 	if (rObjects.empty())	
 		return;
 
-	iNumMeshes += rObjects.size();
+	iNumMeshes += (unsigned int)rObjects.size();
 	for (std::vector<ObjFile::Object*>::const_iterator it = rObjects.begin();
 		it != rObjects.end(); 
 		++it)

@@ -352,7 +352,7 @@ void MD2Importer::InternReadFile(
 	}
 
 	// allocate output storage
-	pScene->mMeshes[0]->mNumVertices = vPositions.size();
+	pScene->mMeshes[0]->mNumVertices = (unsigned int)vPositions.size();
 	pScene->mMeshes[0]->mVertices = new aiVector3D[vPositions.size()];
 	pScene->mMeshes[0]->mNormals = new aiVector3D[vPositions.size()];
 	pScene->mMeshes[0]->mTextureCoords[0] = new aiVector3D[vPositions.size()];

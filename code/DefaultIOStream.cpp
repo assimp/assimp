@@ -82,7 +82,7 @@ aiReturn DefaultIOStream::Seek(size_t pOffset,
 {
 	if (!this->mFile)return AI_FAILURE;
 
-	return (0 == fseek(this->mFile, pOffset,
+	return (0 == fseek(this->mFile, (long)pOffset,
 		(aiOrigin_CUR == pOrigin ? SEEK_CUR :
 		(aiOrigin_END == pOrigin ? SEEK_END : SEEK_SET))) 
 		? AI_SUCCESS : AI_FAILURE);

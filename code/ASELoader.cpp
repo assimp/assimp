@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ASELoader.h"
 #include "3DSSpatialSort.h"
 #include "MaterialSystem.h"
+#include "TextureTransform.h"
 #include "fast_atof.h"
 
 #include "../include/IOStream.h"
@@ -127,14 +128,6 @@ void ASEImporter::InternReadFile(
 	this->mParser = new ASE::Parser((const char*)this->mBuffer);
 	this->mParser->Parse();
 
-	// the .ask file format contains normally three LODs of
-	// a single object. Named <name>n, where n = 1 designates
-	// the highest level of detail.
-	if (this->mIsAsk)
-	{
-		this->AskFilterLOD(this->mParser->m_vMeshes);
-	}
-
 	// process all meshes
 	std::vector<aiMesh*> avOutMeshes;
 	avOutMeshes.reserve(this->mParser->m_vMeshes.size()*2);
@@ -161,7 +154,7 @@ void ASEImporter::InternReadFile(
 	}
 	
 	// now build the output mesh list
-	pScene->mNumMeshes = avOutMeshes.size();
+	pScene->mNumMeshes = (unsigned int)avOutMeshes.size();
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
 		pScene->mMeshes[i] = avOutMeshes[i];
@@ -181,6 +174,8 @@ void ASEImporter::InternReadFile(
 void ASEImporter::AddNodes(aiScene* pcScene,aiNode* pcParent,
 	const char* szName)
 {
+	const size_t len = szName ? strlen(szName) : 0;
+
 	ai_assert(4 <= AI_MAX_NUMBER_OF_COLOR_SETS);
 	std::vector<aiNode*> apcNodes;
 	for (unsigned int i = 0; i < pcScene->mNumMeshes;++i)
@@ -193,8 +188,11 @@ void ASEImporter::AddNodes(aiScene* pcScene,aiNode* pcParent,
 		}
 		if (szName)
 		{
-			if(0 != ASSIMP_stricmp ( szName, szMyName[1].c_str() ))
+			if( len != szMyName[1].length() ||
+				0 != ASSIMP_stricmp ( szName, szMyName[1].c_str() ))
+			{
 				continue;
+			}
 		} 
 		else if ('\0' != szMyName[1].c_str()[0])continue;
 
@@ -223,7 +221,7 @@ void ASEImporter::AddNodes(aiScene* pcScene,aiNode* pcParent,
 	}
 
 	// allocate enough space for the child nodes
-	pcParent->mNumChildren = apcNodes.size();
+	pcParent->mNumChildren = (unsigned int)apcNodes.size();
 	pcParent->mChildren = new aiNode*[apcNodes.size()];
 
 	// now build all nodes
@@ -247,12 +245,83 @@ void ASEImporter::BuildNodes(aiScene* pcScene)
 	// add all nodes
 	this->AddNodes(pcScene,pcScene->mRootNode,NULL);
 
+	// now iterate through al meshes and find those that have not yet
+	// been added to the nodegraph (= their parent could not be recognized)
+	std::vector<unsigned int> aiList;
+	for (unsigned int i = 0; i < pcScene->mNumMeshes;++i)
+	{
+		// get the name of the mesh ([0] = name, [1] = parent)
+		std::string* szMyName = (std::string*)pcScene->mMeshes[i]->mColors[1];
+		if (!szMyName)
+		{
+			continue;
+		}
+
+		// check whether our parent is known
+		bool bKnowParent = false;
+		for (unsigned int i2 = 0; i2 < pcScene->mNumMeshes;++i2)
+		{
+			if (i2 == i)continue;
+			// get the name of the mesh ([0] = name, [1] = parent)
+			std::string* szMyName2 = (std::string*)pcScene->mMeshes[i2]->mColors[1];
+			if (!szMyName2)
+			{
+				continue;
+			}
+			if (szMyName[0].length() == szMyName2[1].length() &&
+				0 == ASSIMP_stricmp ( szMyName[1].c_str(), szMyName2[0].c_str()))
+			{
+				bKnowParent = true;
+				break;
+			}
+		}
+		if (!bKnowParent)
+		{
+			aiList.push_back(i);
+		}
+	}
+	if (!aiList.empty())
+	{
+		std::vector<aiNode*> apcNodes;
+		apcNodes.reserve(aiList.size() + pcScene->mRootNode->mNumChildren);
+
+		for (unsigned int i = 0; i < pcScene->mRootNode->mNumChildren;++i)
+			apcNodes.push_back(pcScene->mRootNode->mChildren[i]);
+
+		delete[] pcScene->mRootNode->mChildren;
+		for (std::vector<unsigned int>::const_iterator
+			i =  aiList.begin();
+			i != aiList.end();++i)
+		{
+			std::string* szMyName = (std::string*)pcScene->mMeshes[*i]->mColors[1];
+			if (!szMyName)continue;
+
+			// the parent is not known, so we can assume that we must add 
+			// this node to the root node of the whole scene
+			aiNode* pcNode = new aiNode();
+			pcNode->mParent = pcScene->mRootNode;
+			pcNode->mName.Set(szMyName[1]);
+			this->AddNodes(pcScene,pcNode,szMyName[1].c_str());
+			apcNodes.push_back(pcNode);
+		}
+		pcScene->mRootNode->mChildren = new aiNode*[apcNodes.size()];
+		for (unsigned int i = 0; i < apcNodes.size();++i)
+			pcScene->mRootNode->mChildren[i] = apcNodes[i];
+
+		pcScene->mRootNode->mNumChildren = (unsigned int)apcNodes.size();
+	}
+
 	// if there is only one subnode, set it as root node
 	if (1 == pcScene->mRootNode->mNumChildren)
 	{
 		aiNode* pc = pcScene->mRootNode;
 		pcScene->mRootNode = pcScene->mRootNode->mChildren[0];
 		pcScene->mRootNode->mParent = NULL;
+
+		// make sure the destructor won't delete us ...
+		delete[] pc->mChildren;
+		pc->mChildren = NULL;
+		pc->mNumChildren = 0;
 		delete pc;
 	}
 	else if (0 == pcScene->mRootNode->mNumChildren)
@@ -278,7 +347,7 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 	std::vector<aiVector3D> mNormals;
 	std::vector<BoneVertex> mBoneVertices;
 
-	unsigned int iSize = mesh.mFaces.size() * 3;
+	unsigned int iSize = (unsigned int)mesh.mFaces.size() * 3;
 	mPositions.resize(iSize);
 
 	// optional texture coordinates
@@ -527,7 +596,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 	// validate the material index of the mesh
 	if (mesh.iMaterialIndex >= this->mParser->m_vMaterials.size())
 	{
-		mesh.iMaterialIndex = this->mParser->m_vMaterials.size()-1;
+		mesh.iMaterialIndex = (unsigned int)this->mParser->m_vMaterials.size()-1;
 		LOGOUT_WARN("Material index is out of range");
 	}
 
@@ -585,8 +654,8 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 				avOutMeshes.push_back(p_pcOut);
 
 				// convert vertices
-				p_pcOut->mNumVertices = aiSplit[p].size()*3;
-				p_pcOut->mNumFaces = aiSplit[p].size();
+				p_pcOut->mNumVertices = (unsigned int)aiSplit[p].size()*3;
+				p_pcOut->mNumFaces = (unsigned int)aiSplit[p].size();
 
 				// receive output vertex weights
 				std::vector<std::pair<unsigned int, float> >* avOutputBones;
@@ -693,7 +762,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 							aiBone* pc = *pcBone = new aiBone();
 							pc->mName.Set(mesh.mBones[mrspock].mName);
 
-							pc->mNumWeights = avOutputBones[mrspock].size();
+							pc->mNumWeights = (unsigned int)avOutputBones[mrspock].size();
 							pc->mWeights = new aiVertexWeight[pc->mNumWeights];
 
 							for (unsigned int captainkirk = 0; captainkirk < pc->mNumWeights;++captainkirk)
@@ -736,8 +805,8 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 		((std::string*)p_pcOut->mColors[1])[1] = mesh.mParent;
 
 		// convert vertices
-		p_pcOut->mNumVertices = mesh.mPositions.size();
-		p_pcOut->mNumFaces = mesh.mFaces.size();
+		p_pcOut->mNumVertices = (unsigned int)mesh.mPositions.size();
+		p_pcOut->mNumFaces = (unsigned int)mesh.mFaces.size();
 
 		// allocate enough storage for faces
 		p_pcOut->mFaces = new aiFace[p_pcOut->mNumFaces];
@@ -822,7 +891,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 				{
 					aiBone* pc = *pcBone = new aiBone();
 					pc->mName.Set(mesh.mBones[jfkennedy].mName);
-					pc->mNumWeights = avBonesOut[jfkennedy].size();
+					pc->mNumWeights = (unsigned int)avBonesOut[jfkennedy].size();
 					pc->mWeights = new aiVertexWeight[pc->mNumWeights];
 					memcpy(pc->mWeights,&avBonesOut[jfkennedy][0],
 						sizeof(aiVertexWeight) * pc->mNumWeights);
@@ -834,39 +903,23 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 	return;
 }
 // ------------------------------------------------------------------------------------------------
-void ASEImporter::AskFilterLOD(std::vector<ASE::Mesh>& meshes)
+void ComputeBounds(ASE::Mesh& mesh,aiVector3D& minVec, aiVector3D& maxVec,
+				   aiMatrix4x4& matrix)
 {
-	for (std::vector<ASE::Mesh>::iterator
-		i =  meshes.begin();
-		i != meshes.end();++i)
+	minVec = aiVector3D( 1e10f, 1e10f, 1e10f);
+	maxVec = aiVector3D( -1e10f, -1e10f, -1e10f);
+	for( std::vector<aiVector3D>::const_iterator
+		i =  mesh.mPositions.begin();
+		i != mesh.mPositions.end();++i)
 	{
-		if ((*i).bSkip)continue;
+		aiVector3D v = matrix*(*i);
 
-		// search for a number in the name of the node
-		const char* sz = (*i).mName.c_str();
-		while (*sz)
-		{
-			if (*sz >= '0' && *sz <= '9')
-			{
-				// check whether there is another mesh with exactly
-				// the same name, but a lower number out there ...
-				unsigned int iLen = (unsigned int)(sz - (*i).mName.c_str());
-				unsigned int iMyNum = strtol10(sz,NULL);
-				for (std::vector<ASE::Mesh>::iterator
-					f =  meshes.begin();
-					f != meshes.end();++f)
-				{
-					const char* sz = (*f).mName.c_str();
-					if (i != f && !(*f).bSkip && 
-						0 == memcmp(sz,(*i).mName.c_str(),iLen) &&
-						iMyNum > strtol10(sz))
-					{	
-						(*f).bSkip = true;
-					}
-				}
-				break;
-			}++sz;
-		}
+		minVec.x = std::min( minVec.x, v.x);
+		minVec.y = std::min( minVec.y, v.y);
+		minVec.z = std::min( minVec.z, v.z);
+		maxVec.x = std::max( maxVec.x, v.x);
+		maxVec.y = std::max( maxVec.y, v.y);
+		maxVec.z = std::max( maxVec.z, v.z);
 	}
 	return;
 }

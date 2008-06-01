@@ -1006,7 +1006,7 @@ void MDLImporter::InternReadFile_GameStudio( )
 	}
 
 	// allocate output storage
-	pScene->mMeshes[0]->mNumVertices = vPositions.size();
+	pScene->mMeshes[0]->mNumVertices = (unsigned int)vPositions.size();
 	pScene->mMeshes[0]->mVertices = new aiVector3D[vPositions.size()];
 	pScene->mMeshes[0]->mNormals = new aiVector3D[vPositions.size()];
 	pScene->mMeshes[0]->mTextureCoords[0] = new aiVector3D[vPositions.size()];
@@ -1498,7 +1498,7 @@ void MDLImporter::InternReadFile_GameStudioA7( )
 
 			// allocate the array
 			aiSplit = new std::vector<unsigned int>*[pcMats.size()];
-			iNumMaterials = pcMats.size();
+			iNumMaterials = (unsigned int)pcMats.size();
 
 			for (unsigned int m = 0; m < pcMats.size();++m)
 				aiSplit[m] = new std::vector<unsigned int>();
@@ -1581,7 +1581,7 @@ void MDLImporter::InternReadFile_GameStudioA7( )
 
 					// and add it to the list
 					avMats.push_back(sHelper);
-					iNum = avMats.size()-1;
+					iNum = (unsigned int)avMats.size()-1;
 				}
 				// adjust the size of the file array
 				if (iNum == aiTempSplit.size())
@@ -1601,12 +1601,12 @@ void MDLImporter::InternReadFile_GameStudioA7( )
 			else
 			{
 				// TODO: This might result in redundant materials ...
-				unsigned int iOld = pcMats.size();
+				unsigned int iOld = (unsigned int)pcMats.size();
 				pcMats.resize(pcMats.size() + avMats.size());
 				for (unsigned int o = iOld; o < avMats.size();++o)
 					pcMats[o] = avMats[o].pcMat;
 			}
-			iNumMaterials = pcMats.size();
+			iNumMaterials = (unsigned int)pcMats.size();
 
 			// and build the final face-to-material array
 			aiSplit = new std::vector<unsigned int>*[aiTempSplit.size()];
@@ -1617,7 +1617,7 @@ void MDLImporter::InternReadFile_GameStudioA7( )
 		}
 
 		// now generate output meshes
-		unsigned int iOldSize = avOutList.size();
+		unsigned int iOldSize = (unsigned int)avOutList.size();
 		this->GenerateOutputMeshes_GameStudioA7(
 			(const std::vector<unsigned int>**)aiSplit,pcMats,
 			avOutList,pcFaces,vPositions,vNormals, vTextureCoords1,vTextureCoords2);
@@ -1656,7 +1656,7 @@ void MDLImporter::InternReadFile_GameStudioA7( )
 __BREAK_OUT: // EVIL ;-)
 
 	// now we need to build a final mesh list
-	this->pScene->mNumMeshes = avOutList.size();
+	this->pScene->mNumMeshes = (unsigned int)avOutList.size();
 	this->pScene->mMeshes = new aiMesh*[avOutList.size()];
 
 	for (unsigned int i = 0; i < avOutList.size();++i)
@@ -1665,7 +1665,7 @@ __BREAK_OUT: // EVIL ;-)
 	}
 
 	// build a final material list. Offset all mesh material indices
-	this->pScene->mNumMaterials = pcMats.size();
+	this->pScene->mNumMaterials = (unsigned int)pcMats.size();
 	this->pScene->mMaterials = new aiMaterial*[this->pScene->mNumMaterials];
 	for (unsigned int i = 0; i < this->pScene->mNumMaterials;++i)
 		this->pScene->mMaterials[i] = pcMats[i];
@@ -1722,7 +1722,7 @@ void MDLImporter::GenerateOutputMeshes_GameStudioA7(
 			pcMesh->mMaterialIndex = i;
 
 			// allocate output storage
-			pcMesh->mNumFaces = aiSplit[i]->size();
+			pcMesh->mNumFaces = (unsigned int)aiSplit[i]->size();
 			pcMesh->mFaces = new aiFace[pcMesh->mNumFaces];
 
 			pcMesh->mNumVertices = pcMesh->mNumFaces*3;

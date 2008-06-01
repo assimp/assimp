@@ -138,7 +138,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 	// kill the old faces
 	delete [] pMesh->mFaces;
 	// and insert our newly generated faces
-	pMesh->mNumFaces = newFaces.size();
+	pMesh->mNumFaces = (unsigned int)newFaces.size();
 	pMesh->mFaces = new aiFace[pMesh->mNumFaces];
 	for( unsigned int a = 0; a < newFaces.size(); a++)
 		pMesh->mFaces[a] = newFaces[a];

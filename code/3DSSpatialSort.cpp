@@ -116,8 +116,8 @@ void D3DSSpatialSorter::FindPositions( const aiVector3D& pPosition,
 		return;
 
 	// do a binary search for the minimal distance to start the iteration there
-	unsigned int index = mPositions.size() / 2;
-	unsigned int binaryStepSize = mPositions.size() / 4;
+	unsigned int index = (unsigned int)mPositions.size() / 2;
+	unsigned int binaryStepSize = (unsigned int)mPositions.size() / 4;
 	while( binaryStepSize > 1)
 		{
 		if( mPositions[index].mDistance < minDist)

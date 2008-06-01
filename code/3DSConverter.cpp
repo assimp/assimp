@@ -42,8 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the 3ds importer class */
 #include "3DSLoader.h"
 #include "MaterialSystem.h"
-#include "../include/DefaultLogger.h"
+#include "TextureTransform.h"
 
+#include "../include/DefaultLogger.h"
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
 #include "../include/aiMesh.h"
@@ -84,7 +85,7 @@ void Dot3DSImporter::ReplaceDefaultMaterial()
 
 	iIndex = i;
 	}
-	if (0xcdcdcdcd == iIndex)iIndex = this->mScene->mMaterials.size();
+	if (0xcdcdcdcd == iIndex)iIndex = (unsigned int)this->mScene->mMaterials.size();
 
 	// now iterate through all meshes and through all faces and
 	// find all faces that are using the default material
@@ -134,17 +135,17 @@ void Dot3DSImporter::CheckIndices(Dot3DS::Mesh* sMesh)
 		if ((*i).mIndices[0] >= sMesh->mPositions.size())
 		{
 			DefaultLogger::get()->warn("Face index overflow in 3DS file (#1)");
-			(*i).mIndices[0] = sMesh->mPositions.size()-1;
+			(*i).mIndices[0] = (uint32_t)sMesh->mPositions.size()-1;
 		}
 		if ((*i).mIndices[1] >= sMesh->mPositions.size())
 		{
 			DefaultLogger::get()->warn("Face index overflow in 3DS file (#2)");
-			(*i).mIndices[1] = sMesh->mPositions.size()-1;
+			(*i).mIndices[1] = (uint32_t)sMesh->mPositions.size()-1;
 		}
 		if ((*i).mIndices[2] >= sMesh->mPositions.size())
 		{
 			DefaultLogger::get()->warn("Face index overflow in 3DS file (#3)");
-			(*i).mIndices[2] = sMesh->mPositions.size()-1;
+			(*i).mIndices[2] = (uint32_t)sMesh->mPositions.size()-1;
 		}
 	}
 	return;
@@ -364,17 +365,6 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 	return;
 }
 // ------------------------------------------------------------------------------------------------
-void SetupMatUVSrc (aiMaterial* pcMat, const Dot3DS::Material* pcMatIn)
-	{
-	MaterialHelper* pcHelper = (MaterialHelper*)pcMat;
-	pcHelper->AddProperty<int>(&pcMatIn->sTexDiffuse.iUVSrc,1,AI_MATKEY_UVWSRC_DIFFUSE(0));
-	pcHelper->AddProperty<int>(&pcMatIn->sTexSpecular.iUVSrc,1,AI_MATKEY_UVWSRC_SPECULAR(0));
-	pcHelper->AddProperty<int>(&pcMatIn->sTexEmissive.iUVSrc,1,AI_MATKEY_UVWSRC_EMISSIVE(0));
-	pcHelper->AddProperty<int>(&pcMatIn->sTexBump.iUVSrc,1,AI_MATKEY_UVWSRC_HEIGHT(0));
-	pcHelper->AddProperty<int>(&pcMatIn->sTexShininess.iUVSrc,1,AI_MATKEY_UVWSRC_SHININESS(0));
-	pcHelper->AddProperty<int>(&pcMatIn->sTexOpacity.iUVSrc,1,AI_MATKEY_UVWSRC_OPACITY(0));
-	}
-// ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 {
 	std::vector<aiMesh*> avOutMeshes;
@@ -430,8 +420,8 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 
 
 				// convert vertices
-				p_pcOut->mNumVertices = aiSplit[p].size()*3;
-				p_pcOut->mNumFaces = aiSplit[p].size();
+				p_pcOut->mNumVertices = (unsigned int)aiSplit[p].size()*3;
+				p_pcOut->mNumFaces = (unsigned int)aiSplit[p].size();
 
 				// allocate enough storage for faces
 				p_pcOut->mFaces = new aiFace[p_pcOut->mNumFaces];
@@ -486,7 +476,7 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 						p_pcOut->mTextureCoords[0][iBase++] = aiVector3D(pc.x,pc.y,0.0f);
 					}
 					// apply texture coordinate scalings
-					this->BakeScaleNOffset ( p_pcOut, &this->mScene->mMaterials[
+					TextureTransform::BakeScaleNOffset ( p_pcOut, &this->mScene->mMaterials[
 						p_pcOut->mMaterialIndex] );
 					
 					// setup bitflags to indicate which texture coordinate
@@ -503,7 +493,7 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 		}
 		delete[] aiSplit;
 	}
-	pcOut->mNumMeshes = avOutMeshes.size();
+	pcOut->mNumMeshes = (unsigned int)avOutMeshes.size();
 	pcOut->mMeshes = new aiMesh*[pcOut->mNumMeshes]();
 	for (unsigned int a = 0; a < pcOut->mNumMeshes;++a)
 	{
@@ -519,7 +509,7 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 	// set for each texture
 	for (unsigned int a = 0; a < pcOut->mNumMaterials;++a)
 	{
-		SetupMatUVSrc( pcOut->mMaterials[a], &this->mScene->mMaterials[a] );
+		TextureTransform::SetupMatUVSrc( pcOut->mMaterials[a], &this->mScene->mMaterials[a] );
 	}
 	return;
 }
@@ -541,7 +531,7 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 		}
 	}
 	pcOut->mName.Set(pcIn->mName);
-	pcOut->mNumMeshes = iArray.size();
+	pcOut->mNumMeshes = (unsigned int)iArray.size();
 	pcOut->mMeshes = new unsigned int[iArray.size()];
 	
 	for (unsigned int i = 0;i < iArray.size();++i)
@@ -605,7 +595,7 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 	}
 #endif
 
-	pcOut->mNumChildren = pcIn->mChildren.size();
+	pcOut->mNumChildren = (unsigned int)pcIn->mChildren.size();
 	pcOut->mChildren = new aiNode*[pcIn->mChildren.size()];
 	for (unsigned int i = 0; i < pcIn->mChildren.size();++i)
 	{
@@ -616,254 +606,6 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 	}
 	return;
 }
-// ------------------------------------------------------------------------------------------------
-inline bool HasUVTransform(const Dot3DS::Texture& rcIn)
-	{
-	return (0.0f != rcIn.mOffsetU ||
-			0.0f != rcIn.mOffsetV ||
-			1.0f != rcIn.mScaleU  ||
-			1.0f != rcIn.mScaleV  ||
-			0.0f != rcIn.mRotation);
-	}
-// ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ApplyScaleNOffset()
-	{
-	unsigned int iNum = 0;
-	for (std::vector<Dot3DS::Material>::iterator
-		i =  this->mScene->mMaterials.begin();
-		i != this->mScene->mMaterials.end();++i,++iNum)
-		{
-		unsigned int iCnt = 0;
-		Dot3DS::Texture* pcTexture = NULL;
-		if (HasUVTransform((*i).sTexDiffuse))
-			{
-			(*i).sTexDiffuse.bPrivate = true;
-			pcTexture = &(*i).sTexDiffuse;
-			++iCnt;
-			}
-		if (HasUVTransform((*i).sTexSpecular))
-			{
-			(*i).sTexSpecular.bPrivate = true;
-			pcTexture = &(*i).sTexSpecular;
-			++iCnt;
-			}
-		if (HasUVTransform((*i).sTexOpacity))
-			{
-			(*i).sTexOpacity.bPrivate = true;
-			pcTexture = &(*i).sTexOpacity;
-			++iCnt;
-			}
-		if (HasUVTransform((*i).sTexEmissive))
-			{
-			(*i).sTexEmissive.bPrivate = true;
-			pcTexture = &(*i).sTexEmissive;
-			++iCnt;
-			}
-		if (HasUVTransform((*i).sTexBump))
-			{
-			(*i).sTexBump.bPrivate = true;
-			pcTexture = &(*i).sTexBump;
-			++iCnt;
-			}
-		if (HasUVTransform((*i).sTexShininess))
-			{
-			(*i).sTexShininess.bPrivate = true;
-			pcTexture = &(*i).sTexShininess;
-			++iCnt;
-			}
-		if (0 != iCnt)
-			{
-			// if only one texture needs scaling/offset operations
-			// we can apply them directly to the first texture
-			// coordinate sets of all meshes referencing *this* material
-			// However, we can't do it  now. We need to wait until
-			// everything is sorted by materials.
-			if (1 == iCnt)
-				{
-				(*i).iBakeUVTransform = 1;
-				(*i).pcSingleTexture = pcTexture;
-				}
-			// we will need to generate a separate new texture channel
-			// for each texture. 
-			// However, we can't do it  now. We need to wait until
-			// everything is sorted by materials.
-			else (*i).iBakeUVTransform = 2;
-			}
-		}
-	}
-// ------------------------------------------------------------------------------------------------
-struct STransformVecInfo 
-	{
-	float fScaleU;
-	float fScaleV;
-	float fOffsetU;
-	float fOffsetV;
-	float fRotation;
-
-	std::vector<Dot3DS::Texture*> pcTextures; 
-	};
-// ------------------------------------------------------------------------------------------------
-void AddToList(std::vector<STransformVecInfo>& rasVec,Dot3DS::Texture* pcTex)
-	{
-	if (0 == pcTex->mMapName.length())return;
-
-	for (std::vector<STransformVecInfo>::iterator
-		i =  rasVec.begin();
-		i != rasVec.end();++i)
-		{
-		if ((*i).fOffsetU == pcTex->mOffsetU &&
-			(*i).fOffsetV == pcTex->mOffsetV && 
-			(*i).fScaleU  == pcTex->mScaleU  &&
-			(*i).fScaleV  == pcTex->mScaleV  &&
-			(*i).fRotation == pcTex->mRotation)
-			{
-			(*i).pcTextures.push_back(pcTex);
-			return;
-			}
-		}
-	STransformVecInfo sInfo;
-	sInfo.fScaleU = pcTex->mScaleU;
-	sInfo.fScaleV = pcTex->mScaleV;
-	sInfo.fOffsetU = pcTex->mOffsetU;
-	sInfo.fOffsetV = pcTex->mOffsetV;
-	sInfo.fRotation = pcTex->mRotation;
-	sInfo.pcTextures.push_back(pcTex);
-
-	rasVec.push_back(sInfo);
-	}
-// ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::BakeScaleNOffset(
-	aiMesh* pcMesh, Dot3DS::Material* pcSrc)
-	{
-	if (!pcMesh->mTextureCoords[0])return;
-	if (1 == pcSrc->iBakeUVTransform)
-		{
-		if (0.0f == pcSrc->pcSingleTexture->mRotation)
-			{
-			for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
-				{
-				pcMesh->mTextureCoords[0][i].x /= pcSrc->pcSingleTexture->mScaleU;
-				pcMesh->mTextureCoords[0][i].y /= pcSrc->pcSingleTexture->mScaleV;
-
-				pcMesh->mTextureCoords[0][i].x += pcSrc->pcSingleTexture->mOffsetU;
-				pcMesh->mTextureCoords[0][i].y += pcSrc->pcSingleTexture->mOffsetV;
-				}
-			}
-		else
-			{
-			const float fSin = sinf(pcSrc->pcSingleTexture->mRotation);
-			const float fCos = cosf(pcSrc->pcSingleTexture->mRotation);
-			for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
-				{
-				pcMesh->mTextureCoords[0][i].x /= pcSrc->pcSingleTexture->mScaleU;
-				pcMesh->mTextureCoords[0][i].y /= pcSrc->pcSingleTexture->mScaleV;
-
-				pcMesh->mTextureCoords[0][i].x *= fCos;
-				pcMesh->mTextureCoords[0][i].y *= fSin;
-
-				pcMesh->mTextureCoords[0][i].x += pcSrc->pcSingleTexture->mOffsetU;
-				pcMesh->mTextureCoords[0][i].y += pcSrc->pcSingleTexture->mOffsetV;
-				}
-			}
-		}
-	else if (2 == pcSrc->iBakeUVTransform)
-		{
-		// now we need to find all textures in the material
-		// which require scaling/offset operations
-		std::vector<STransformVecInfo> sOps;
-		AddToList(sOps,&pcSrc->sTexDiffuse);
-		AddToList(sOps,&pcSrc->sTexSpecular);
-		AddToList(sOps,&pcSrc->sTexEmissive);
-		AddToList(sOps,&pcSrc->sTexOpacity);
-		AddToList(sOps,&pcSrc->sTexBump);
-		AddToList(sOps,&pcSrc->sTexShininess);
-
-		const aiVector3D* _pvBase;
-		if (0.0f == sOps[0].fOffsetU && 0.0f == sOps[0].fOffsetV &&
-			1.0f == sOps[0].fScaleU  && 1.0f == sOps[0].fScaleV &&
-			0.0f == sOps[0].fRotation)
-			{
-			// we'll have an unmodified set, so we can use *this* one
-			_pvBase = pcMesh->mTextureCoords[0];
-			}
-		else
-			{
-			_pvBase = new aiVector3D[pcMesh->mNumVertices];
-			memcpy(const_cast<aiVector3D*>(_pvBase),pcMesh->mTextureCoords[0],
-				pcMesh->mNumVertices * sizeof(aiVector3D));
-			}
-
-		unsigned int iCnt = 0;
-		for (std::vector<STransformVecInfo>::iterator
-			i =  sOps.begin();
-			i != sOps.end();++i,++iCnt)
-			{
-			if (!pcMesh->mTextureCoords[iCnt])
-				{
-				pcMesh->mTextureCoords[iCnt] = new aiVector3D[pcMesh->mNumVertices];
-				}
-			// more than 4 UV texture channels are not available
-			if (iCnt > 3)
-				{
-				for (std::vector<Dot3DS::Texture*>::iterator
-					a =  (*i).pcTextures.begin();
-					a != (*i).pcTextures.end();++a)
-					{
-					(*a)->iUVSrc = 0;
-					}
-				DefaultLogger::get()->error("There are too many "
-					"combinations of different UV scaling/offset/rotation operations "
-					"to generate an UV channel for each (maximum is 4). Using the "
-					"first UV channel ...");
-				continue;
-				}
-			const aiVector3D* pvBase = _pvBase;
-
-			if (0.0f == (*i).fRotation)
-				{
-				for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
-					{
-					pcMesh->mTextureCoords[iCnt][n].x = pvBase->x / (*i).fScaleU;
-					pcMesh->mTextureCoords[iCnt][n].y = pvBase->y / (*i).fScaleV;
-
-					pcMesh->mTextureCoords[iCnt][n].x += (*i).fOffsetU;
-					pcMesh->mTextureCoords[iCnt][n].y += (*i).fOffsetV;
-
-					pvBase++;
-					}
-				}
-			else
-				{
-				const float fSin = sinf((*i).fRotation);
-				const float fCos = cosf((*i).fRotation);
-				for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
-					{
-					pcMesh->mTextureCoords[iCnt][n].x = pvBase->x / (*i).fScaleU;
-					pcMesh->mTextureCoords[iCnt][n].y = pvBase->y / (*i).fScaleV;
-
-					pcMesh->mTextureCoords[iCnt][n].x *= fCos;
-					pcMesh->mTextureCoords[iCnt][n].y *= fSin;
-
-					pcMesh->mTextureCoords[iCnt][n].x += (*i).fOffsetU;
-					pcMesh->mTextureCoords[iCnt][n].y += (*i).fOffsetV;
-
-					pvBase++;
-					}
-				}
-			// setup UV source
-			for (std::vector<Dot3DS::Texture*>::iterator
-				a =  (*i).pcTextures.begin();
-				a != (*i).pcTextures.end();++a)
-				{
-				(*a)->iUVSrc = iCnt;
-				}
-			}
-
-		// release temporary storage
-		if (_pvBase != pcMesh->mTextureCoords[0])
-			delete[] _pvBase;
-		}
-	}
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 {
@@ -923,7 +665,7 @@ void Dot3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ConvertScene(aiScene* pcOut)
 {
-	pcOut->mNumMaterials = this->mScene->mMaterials.size();
+	pcOut->mNumMaterials = (unsigned int)this->mScene->mMaterials.size();
 	pcOut->mMaterials = new aiMaterial*[pcOut->mNumMaterials];
 
 	for (unsigned int i = 0; i < pcOut->mNumMaterials;++i)
@@ -935,32 +677,3 @@ void Dot3DSImporter::ConvertScene(aiScene* pcOut)
 	this->ConvertMeshes(pcOut);
 	return;
 }
-#if 0
-// ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::GenTexCoord (Dot3DS::Texture* pcTexture,
-	const std::vector<aiVector2D>& p_vIn,
-	std::vector<aiVector2D>& p_vOut)
-{
-	p_vOut.resize(p_vIn.size());
-
-	std::vector<aiVector2D>::const_iterator i =  p_vIn.begin();
-	std::vector<aiVector2D>::iterator		a =  p_vOut.begin();
-	for(;i != p_vOut.end();++i,++a)
-	{
-		// TODO: Find out in which order 3ds max is performing
-		// scaling and translation. However it seems reasonable to
-		// scale first.
-		//
-		// TODO: http://www.jalix.org/ressources/graphics/3DS/_specifications/3ds-0.1.htm
-		// says it is not u and v scale but 1/u and 1/v scale. Other sources
-		// tell different things. Believe this one, the author seems to be funny
-		// or drunken or both ;-)
-		(*a) = (*i);
-		(*a).x /= pcTexture->mScaleU;
-		(*a).y /= pcTexture->mScaleV;
-		(*a).x += pcTexture->mOffsetU;
-		(*a).y += pcTexture->mOffsetV;
-	}
-	return;
-}
-#endif

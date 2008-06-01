@@ -116,13 +116,6 @@ protected:
 	void TransformVertices(ASE::Mesh& mesh);
 
 	// -------------------------------------------------------------------
-	/** The ASK file format contains LOD nodes.
-	 *  We do only use the highest level of detail, all others
-	 *  are skipped.
-	 */
-	void AskFilterLOD(std::vector<ASE::Mesh>& meshes);
-
-	// -------------------------------------------------------------------
 	/** Create one-material-per-mesh meshes ;-)
 	 * \param mesh Mesh to work with
 	 *  \param Receives the list of all created meshes

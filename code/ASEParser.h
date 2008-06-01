@@ -74,9 +74,6 @@ struct Material : public Dot3DS::Material
 	Material() : pcInstance(NULL), bNeed (false)
 	{}
 
-	//! Ambient texture channel
-	Texture sTexAmbient;
-
 	//! Contains all sub materials of this material
 	std::vector<Material> avSubMaterials;
 
@@ -416,6 +413,11 @@ private:
 	//! Output a warning to the logger
 	//! \param szWarn Warn message
 	void LogWarning(const char* szWarn);
+
+	// -------------------------------------------------------------------
+	//! Output a message to the logger
+	//! \param szWarn Message
+	void LogInfo(const char* szWarn);
 
 	// -------------------------------------------------------------------
 	//! Output an error to the logger

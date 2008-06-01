@@ -337,7 +337,7 @@ void PretransformVertices::Execute( aiScene* pScene)
 	if (apcOutMeshes.size() != pScene->mNumMeshes)
 	{
 		delete[] pScene->mMeshes;
-		pScene->mNumMeshes = apcOutMeshes.size();
+		pScene->mNumMeshes = (unsigned int)apcOutMeshes.size();
 		pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 	}
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)

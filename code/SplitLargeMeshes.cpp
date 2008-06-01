@@ -112,7 +112,7 @@ void SplitLargeMeshesProcess_Triangle::Execute( aiScene* pScene)
 	{
 		// it seems something has been splitted. rebuild the mesh list
 		delete[] pScene->mMeshes;
-		pScene->mNumMeshes = avList.size();
+		pScene->mNumMeshes = (unsigned int)avList.size();
 		pScene->mMeshes = new aiMesh*[avList.size()];
 
 		for (unsigned int i = 0; i < avList.size();++i)
@@ -146,7 +146,7 @@ void SplitLargeMeshesProcess_Triangle::UpdateNode(aiNode* pcNode,
 
 	// now build the new list
 	delete pcNode->mMeshes;
-	pcNode->mNumMeshes = aiEntries.size();
+	pcNode->mNumMeshes = (unsigned int)aiEntries.size();
 	pcNode->mMeshes = new unsigned int[pcNode->mNumMeshes];
 
 	for (unsigned int b = 0; b < pcNode->mNumMeshes;++b)
@@ -334,7 +334,7 @@ void SplitLargeMeshesProcess_Vertex::Execute( aiScene* pScene)
 	{
 		// it seems something has been splitted. rebuild the mesh list
 		delete[] pScene->mMeshes;
-		pScene->mNumMeshes = avList.size();
+		pScene->mNumMeshes = (unsigned int)avList.size();
 		pScene->mMeshes = new aiMesh*[avList.size()];
 
 		for (unsigned int i = 0; i < avList.size();++i)
@@ -504,7 +504,7 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
 			}
 			// copy the face list to the mesh
 			pcMesh->mFaces = new aiFace[vFaces.size()];
-			pcMesh->mNumFaces = vFaces.size();
+			pcMesh->mNumFaces = (unsigned int)vFaces.size();
 
 			for (unsigned int p = 0; p < pcMesh->mNumFaces;++p)
 				pcMesh->mFaces[p] = vFaces[p];

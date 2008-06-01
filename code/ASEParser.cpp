@@ -41,8 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the ASE parser class */
 
+#include "TextureTransform.h"
 #include "ASELoader.h"
 #include "MaterialSystem.h"
+
 #include "../include/DefaultLogger.h"
 #include "fast_atof.h"
 
@@ -82,10 +84,22 @@ void Parser::LogWarning(const char* szWarn)
 	ai_assert(strlen(szWarn) < 950);
 
 	char szTemp[1024];
-	sprintf(szTemp,"Line %i: %s",this->iLineNumber,szWarn);
+	sprintf(szTemp,"Line %i: %s",this->iLineNumber/2 /* fixme */,szWarn);
 
 	// output the warning to the logger ...
 	DefaultLogger::get()->warn(szTemp);
+}
+// ------------------------------------------------------------------------------------------------
+void Parser::LogInfo(const char* szWarn)
+{
+	ai_assert(NULL != szWarn);
+	ai_assert(strlen(szWarn) < 950);
+
+	char szTemp[1024];
+	sprintf(szTemp,"Line %i: %s",this->iLineNumber/2 /* fixme */,szWarn);
+
+	// output the information to the logger ...
+	DefaultLogger::get()->info(szTemp);
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::LogError(const char* szWarn)
@@ -94,7 +108,7 @@ void Parser::LogError(const char* szWarn)
 	ai_assert(strlen(szWarn) < 950);
 
 	char szTemp[1024];
-	sprintf(szTemp,"Line %i: %s",this->iLineNumber,szWarn);
+	sprintf(szTemp,"Line %i: %s",this->iLineNumber/2 /* fixme */,szWarn);
 
 	// throw an exception
 	throw new ImportErrorException(szTemp);
@@ -203,6 +217,30 @@ void Parser::Parse()
 				continue;
 			}
 			// ignore comments, lights and cameras
+			// (display comments on the console)
+			if (0 == strncmp(this->m_szFile,"*LIGHTOBJECT",12) &&
+				IsSpaceOrNewLine(*(this->m_szFile+12)))
+			{
+				this->m_szFile+=13;
+				this->LogInfo("Found light source (*LIGHTOBJECT chunk). It will be ignored");
+				continue;
+			}
+			if (0 == strncmp(this->m_szFile,"*CAMERAOBJECT",13) &&
+				IsSpaceOrNewLine(*(this->m_szFile+13)))
+			{
+				this->m_szFile+=14;
+				this->LogInfo("Found virtual camera (*CAMERAOBJECT chunk). It will be ignored");
+				continue;
+			}
+			if (0 == strncmp(this->m_szFile,"*COMMENT",8) &&
+				IsSpaceOrNewLine(*(this->m_szFile+8)))
+			{
+				this->m_szFile+=9;
+				std::string out = "<unknown>";
+				this->ParseString(out,"*COMMENT");
+				this->LogInfo(("Comment: " + out).c_str());
+				continue;
+			}
 		}
 		else if ('{' == *this->m_szFile)iDepth++;
 		else if ('}' == *this->m_szFile)
@@ -266,7 +304,7 @@ void Parser::ParseLV1MaterialListBlock()
 {
 	int iDepth = 0;
 	unsigned int iMaterialCount = 0;
-	unsigned int iOldMaterialCount = this->m_vMaterials.size();
+	unsigned int iOldMaterialCount = (unsigned int)this->m_vMaterials.size();
 	while (true)
 	{
 		if ('*' == *this->m_szFile)
@@ -1076,7 +1114,7 @@ void Parser::ParseLV4MeshBonesVertices(unsigned int iNumVertices,ASE::Mesh& mesh
 				unsigned int iIndex = strtol10(this->m_szFile,&this->m_szFile);
 				if (iIndex >= mesh.mPositions.size())
 				{
-					iIndex = mesh.mPositions.size()-1;
+					iIndex = (unsigned int)mesh.mPositions.size()-1;
 					this->LogWarning("Bone vertex index is out of bounds. Using the largest valid "
 						"bone vertex index instead");
 				}
@@ -1482,7 +1520,7 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 				if (iIndex >= sMesh.mNormals.size())
 				{
 					this->LogWarning("Normal index is too large");
-					iIndex = sMesh.mNormals.size()-1;
+					iIndex = (unsigned int)sMesh.mNormals.size()-1;
 				}
 
 				// important: this->m_szFile might now point to '}' ...

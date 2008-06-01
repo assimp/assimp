@@ -161,12 +161,6 @@ protected:
 	void ParseMaterialChunk(int* piRemaining);
 
 	// -------------------------------------------------------------------
-	/** Apply texture coordinate offsets
-	*/
-	void ApplyScaleNOffset();
-	void BakeScaleNOffset(aiMesh* pcMesh, Dot3DS::Material* pcSrc);
-
-	// -------------------------------------------------------------------
 	/** Parse a mesh chunk in the file
 	*/
 	void ParseMeshChunk(int* piRemaining);
@@ -207,23 +201,14 @@ protected:
 	void ConvertScene(aiScene* pcOut);
 
 	// -------------------------------------------------------------------
-	/** U/V Scaling/Offset handling
-	*/
-	void GenTexCoord (Dot3DS::Texture* pcTexture,
-		const std::vector<aiVector2D>& p_vIn,
-		std::vector<aiVector2D>& p_vOut);
-
-	// -------------------------------------------------------------------
 	/** generate normal vectors for a given mesh
 	*/
 	void GenNormals(Dot3DS::Mesh* sMesh);
-
 
 	// -------------------------------------------------------------------
 	/** generate unique vertices for a mesh
 	*/
 	void MakeUnique(Dot3DS::Mesh* sMesh);
-
 
 	// -------------------------------------------------------------------
 	/** Add a node to the node graph
@@ -236,12 +221,10 @@ protected:
 	*/
 	void InverseNodeSearch(Dot3DS::Node* pcNode,Dot3DS::Node* pcCurrent);
 
-
 	// -------------------------------------------------------------------
 	/** Apply the master scaling factor to the mesh
 	*/
 	void ApplyMasterScale(aiScene* pScene);
-
 
 	// -------------------------------------------------------------------
 	/** Clamp all indices in the file to a valid range

@@ -133,7 +133,7 @@ void PLYImporter::InternReadFile(
 		{
 			szMe += 6;
 			SkipLine(szMe,(const char**)&szMe);
-			if(!PLY::DOM::ParseInstance(szMe,&sPlyDom, fileSize))
+			if(!PLY::DOM::ParseInstance(szMe,&sPlyDom, (unsigned int)fileSize))
 			{
 				throw new ImportErrorException( "Invalid .ply file: Unable to build DOM (#1)");
 			}
@@ -153,7 +153,7 @@ void PLYImporter::InternReadFile(
 
 			// skip the line, parse the rest of the header and build the DOM
 			SkipLine(szMe,(const char**)&szMe);
-			if(!PLY::DOM::ParseInstanceBinary(szMe,&sPlyDom,bIsBE, fileSize))
+			if(!PLY::DOM::ParseInstanceBinary(szMe,&sPlyDom,bIsBE, (unsigned int)fileSize))
 			{
 				throw new ImportErrorException( "Invalid .ply file: Unable to build DOM (#2)");
 			}
@@ -196,7 +196,7 @@ void PLYImporter::InternReadFile(
 				"a face list. ");
 		}
 
-		unsigned int iNum = avPositions.size() / 3;
+		unsigned int iNum = (unsigned int)avPositions.size() / 3;
 		for (unsigned int i = 0; i< iNum;++i)
 		{
 			PLY::Face sFace;
@@ -233,13 +233,13 @@ void PLYImporter::InternReadFile(
 	}
 
 	// now generate the output scene object. Fill the material list
-	pScene->mNumMaterials = avMaterials.size();
+	pScene->mNumMaterials = (unsigned int)avMaterials.size();
 	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
 	for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
 		pScene->mMaterials[i] = avMaterials[i];
 
 	// fill the mesh list
-	pScene->mNumMeshes = avMeshes.size();
+	pScene->mNumMeshes = (unsigned int)avMeshes.size();
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
 		pScene->mMeshes[i] = avMeshes[i];
@@ -292,14 +292,14 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
 			aiMesh* p_pcOut = new aiMesh();
 			p_pcOut->mMaterialIndex = p;
 
-			p_pcOut->mNumFaces = aiSplit[p].size();
+			p_pcOut->mNumFaces = (unsigned int)aiSplit[p].size();
 			p_pcOut->mFaces = new aiFace[aiSplit[p].size()];
 
 			// at first we need to determine the size of the output vector array
 			unsigned int iNum = 0;
 			for (unsigned int i = 0; i < aiSplit[p].size();++i)
 			{
-				iNum += (*avFaces)[aiSplit[p][i]].mIndices.size();
+				iNum += (unsigned int)(*avFaces)[aiSplit[p][i]].mIndices.size();
 			}
 			p_pcOut->mNumVertices = iNum;
 			p_pcOut->mVertices = new aiVector3D[iNum];
@@ -321,7 +321,7 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
 				i =  aiSplit[p].begin();
 				i != aiSplit[p].end();++i,++iNum)
 			{
-				p_pcOut->mFaces[iNum].mNumIndices = (*avFaces)[*i].mIndices.size(); 
+				p_pcOut->mFaces[iNum].mNumIndices = (unsigned int)(*avFaces)[*i].mIndices.size(); 
 				p_pcOut->mFaces[iNum].mIndices = new unsigned int[p_pcOut->mFaces[iNum].mNumIndices];
 
 				// build an unique set of vertices/colors for this face
@@ -365,12 +365,12 @@ void PLYImporter::ReplaceDefaultMaterial(std::vector<PLY::Face>* avFaces,
 		if (0xFFFFFFFF == (*i).iMaterialIndex)
 		{
 			bNeedDefaultMat = true;
-			(*i).iMaterialIndex = avMaterials->size();
+			(*i).iMaterialIndex = (unsigned int)avMaterials->size();
 		}
 		else if ((*i).iMaterialIndex >= avMaterials->size() )
 		{
 			// clamp the index
-			(*i).iMaterialIndex = avMaterials->size()-1;
+			(*i).iMaterialIndex = (unsigned int)avMaterials->size()-1;
 		}
 	}
 
@@ -796,7 +796,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 				// parse the list of vertex indices
 				if (0xFFFFFFFF != iProperty)
 				{
-					const unsigned int iNum = (*i)->alProperties[iProperty].avList.size();
+					const unsigned int iNum = (unsigned int)(*i)->alProperties[iProperty].avList.size();
 					sFace.mIndices.resize(iNum);
 
 					if (3 > iNum)

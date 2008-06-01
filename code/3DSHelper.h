@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiQuaternion.h"
 #include "../include/aiMesh.h"
 #include "../include/aiAnim.h"
+
 #include "SpatialSort.h"
 
 namespace Assimp
@@ -408,14 +409,15 @@ struct Material
 	//! Shininess texture channel
 	Texture sTexShininess;
 	
-	/*
-	float mReflectionTextureBlend;
-	std::string mReflectionTexture;
-	*/
+	//! Scaling factor for the bump values
 	float mBumpHeight;
 
 	//! Emissive color
 	aiColor3D mEmissive;
+
+	//! Ambient texture channel
+	//! (used by the ASE format)
+	Texture sTexAmbient;
 
 	//! Used internally
 	unsigned int iBakeUVTransform;

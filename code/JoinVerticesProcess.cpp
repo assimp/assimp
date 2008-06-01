@@ -211,14 +211,14 @@ bool JoinVerticesProcess::ProcessMesh( aiMesh* pMesh)
 		} else
 		{
 			// no unique vertex matches it upto now -> so add it
-			replaceIndex[a] = uniqueVertices.size();
+			replaceIndex[a] = (unsigned int)uniqueVertices.size();
 			uniqueVertices.push_back( v);
 			isVertexUnique[a] = true;
 		}
 	}
 
 	// replace vertex data with the unique data sets
-	pMesh->mNumVertices = uniqueVertices.size();
+	pMesh->mNumVertices = (unsigned int)uniqueVertices.size();
 	// Position
 	delete [] pMesh->mVertices;
 	pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
@@ -307,7 +307,7 @@ bool JoinVerticesProcess::ProcessMesh( aiMesh* pMesh)
 
 		// kill the old and replace them with the translated weights
 		delete [] bone->mWeights;
-		bone->mNumWeights = newWeights.size();
+		bone->mNumWeights = (unsigned int)newWeights.size();
 		bone->mWeights = new aiVertexWeight[bone->mNumWeights];
 		memcpy( bone->mWeights, &newWeights[0], bone->mNumWeights * sizeof( aiVertexWeight));
 	}

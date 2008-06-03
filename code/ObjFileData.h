@@ -50,7 +50,7 @@ namespace Assimp
 
 namespace ObjFile
 {
-
+// ------------------------------------------------------------------------------------------------
 struct Object;
 struct Face;
 struct Material;
@@ -134,14 +134,37 @@ struct Object
 //!	\brief	Data structure to store all material specific data
 struct Material
 {
+	//!	NAme of material description
 	aiString MaterialName;
+	//!	Name of used texture
 	aiString texture;
+	//!	Ambient color 
 	aiColor3D ambient;
+	//!	Diffuse color
 	aiColor3D diffuse;
+	//!	Speculao color
 	aiColor3D specular;
+	//!	Alpha value
 	float alpha;
+	//!	Shineness factor
 	float shineness;
+	//!	Illumination model 
 	int illumination_model;
+};
+
+// ------------------------------------------------------------------------------------------------
+//!	\struct	Mesh
+//!	\brief	Data structure to store a mesh
+struct Mesh
+{
+	std::vector<Face*> m_Faces;
+	Material *m_pMaterial;
+
+	Mesh() :
+		m_pMaterial(NULL)
+	{
+		// empty
+	}
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -179,8 +202,13 @@ struct Model
 	std::string m_strActiveGroup;
 	//!	Vector with generated texture coordinates
 	std::vector<aiVector2D*> m_TextureCoord;
+	//!	Current mesh instance
+	Mesh *m_pCurrentMesh;
+	//!	Vector with stored meshes
+	std::vector<Mesh*> m_Meshes;
 	//!	Material map
 	std::map<std::string, Material*> m_MaterialMap;
+
 
 	//!	\brief	Default constructor
 	Model() :
@@ -188,20 +216,30 @@ struct Model
 		m_pCurrent(NULL),
 		m_pCurrentMaterial(NULL),
 		m_pDefaultMaterial(NULL),
-		m_strActiveGroup("")
+		m_strActiveGroup(""),
+		m_pCurrentMesh(NULL)
 	{
 		// empty
 	}
 	
-	//!	\brief	DEstructor
+	//!	\brief	Destructor
 	~Model()
 	{
+		// Clear all stored object instances
 		for (std::vector<Object*>::iterator it = m_Objects.begin();
-		it != m_Objects.end(); ++it)
+			it != m_Objects.end(); ++it)
 		{
 			delete *it;
 		}
 		m_Objects.clear();
+		
+		// Clear all stored mesh instances
+		for (std::vector<Mesh*>::iterator it = m_Meshes.begin();
+			it != m_Meshes.end(); ++it)
+		{
+			delete *it;
+		}
+		m_Meshes.clear();
 	}
 };
 

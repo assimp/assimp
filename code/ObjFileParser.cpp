@@ -1,4 +1,5 @@
 #include "ObjFileParser.h"
+#include "ObjFileMtlImporter.h"
 #include "ObjTools.h"
 #include "ObjFileData.h"
 #include "DefaultIOSystem.h"
@@ -15,7 +16,9 @@ namespace Assimp
 {
 
 // -------------------------------------------------------------------
-ObjFileParser::ObjFileParser(std::vector<char> &Data, const std::string &strAbsPath, const std::string &strModelName) :
+ObjFileParser::ObjFileParser(std::vector<char> &Data, 
+							 const std::string &strAbsPath, 
+							 const std::string &strModelName) :
 	m_strAbsPath(strAbsPath),
 	m_DataIt(Data.begin()),
 	m_DataItEnd(Data.end()),
@@ -284,6 +287,9 @@ void ObjFileParser::getFace()
 	// Store the new instance
 	m_pModel->m_pCurrent->m_Faces.push_back(face);
 	
+	// Assign face to mesh
+	m_pModel->m_pCurrentMesh->m_Faces.push_back( face );
+	
 	// Skip the rest of the line
 	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
@@ -298,23 +304,33 @@ void ObjFileParser::getMaterialDesc()
 		return;
 
 	char *pStart = &(*m_DataIt);
-	while (!isSpace(*m_DataIt) && m_DataIt != m_DataItEnd)
-		m_DataIt++;
+	while ( !isSpace(*m_DataIt) && m_DataIt != m_DataItEnd )
+		++m_DataIt;
 
 	// Get name
 	std::string strName(pStart, &(*m_DataIt));
-	if (strName.empty())
+	if ( strName.empty() )
 		return;
 
 	// Search for material
-	std::string strFile;
 	std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( strName );
-	if (it == m_pModel->m_MaterialMap.end())
+	if ( it == m_pModel->m_MaterialMap.end() )
 	{
-		m_pModel->m_pCurrentMaterial = new ObjFile::Material();
-		m_pModel->m_MaterialMap[ strName ] = m_pModel->m_pCurrentMaterial;
+		// Not found, use default material
+		m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
+		m_pModel->m_MaterialMap[ strName ] = m_pModel->m_pCurrentMaterial;			
+	}
+	else
+	{
+		// Found, using detected material
+		m_pModel->m_pCurrentMaterial = (*it).second;
+
+		// Create a new mesh for a new material
+		m_pModel->m_pCurrentMesh = new ObjFile::Mesh();
+		m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
 	}
 
+	// Skip rest of line
 	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
@@ -337,7 +353,7 @@ void ObjFileParser::getComment()
 }
 
 // -------------------------------------------------------------------
-//	
+//	Get material library from file.
 void ObjFileParser::getMaterialLib()
 {
 	// Translate tuple
@@ -353,16 +369,18 @@ void ObjFileParser::getMaterialLib()
 	DefaultIOSystem IOSystem;
 	std::string strMatName(pStart, &(*m_DataIt));
 	std::string absName = m_strAbsPath + IOSystem.getOsSeparator() + strMatName;
-	if (!IOSystem.Exists(absName))
+	if ( !IOSystem.Exists(absName) )
 	{
 		m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 		return;
 	}
 
+	// Extract the extention
 	std::string strExt("");
 	extractExtension(strMatName, strExt);
 	std::string mat = "mtl";
 
+	// Load the material library
 	DefaultIOSystem FileSystem;
 	IOStream *pFile = FileSystem.Open(absName);
 	if (0L != pFile)
@@ -371,21 +389,20 @@ void ObjFileParser::getMaterialLib()
 		std::vector<char> buffer;
 		buffer.resize( size );
 		
-		size_t read_size = pFile->Read( &buffer[ 0 ], sizeof(char), size );
+		size_t read_size = pFile->Read( &buffer[ 0 ], sizeof( char ), size );
 		FileSystem.Close( pFile );
 
-		// TODO: Load mtl file
-		
+		// Importing the material library 
+		ObjFileMtlImporter mtlImporter( buffer, absName, m_pModel );			
+		m_pModel->m_MaterialLib.push_back( strMatName );
 	}
-
-	// Load material library (all materials will be created)
-	m_pModel->m_MaterialLib.push_back(strMatName);
 	
+	// Skip rest of line
 	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
 // -------------------------------------------------------------------
-//	
+//	Set a new material definition as the current material.
 void ObjFileParser::getNewMaterial()
 {
 	m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
@@ -414,7 +431,7 @@ void ObjFileParser::getNewMaterial()
 }
 
 // -------------------------------------------------------------------
-//	
+//	Getter for a group name.  
 void ObjFileParser::getGroupName()
 {
 	// Get next word from data buffer

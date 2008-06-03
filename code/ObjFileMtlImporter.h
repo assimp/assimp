@@ -82,7 +82,10 @@ private:
 	//!	\brief	Assignment operator, returns only a reference of this instance.
 	ObjFileMtlImporter &operator = (const ObjFileMtlImporter &rOther);
 
+	//!	\brief	Load the whole material description
 	void load();
+	
+	//!	
 	void getColorRGBA( aiColor3D *pColor);
 	void getIlluminationModel( int &illum_model );
 	void getFloatValue( float &value );
@@ -90,11 +93,17 @@ private:
 	void getTexture();
 
 private:
+	//!	Absolute pathname
 	std::string m_strAbsPath;
+	//!	Data iterator showing to the current position in data buffer
 	DataArrayIt m_DataIt;
+	//!	Data iterator to end of buffer
 	DataArrayIt m_DataItEnd;
+	//!	USed model instance
 	ObjFile::Model *m_pModel;
+	//!	Current line in file
 	unsigned int m_uiLine;
+	//!	Helper buffer
 	char m_buffer[BUFFERSIZE];
 };
 

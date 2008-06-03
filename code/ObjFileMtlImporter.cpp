@@ -16,14 +16,13 @@ ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer,
 	m_DataIt( buffer.begin() ),
 	m_DataItEnd( buffer.end() ),
 	m_uiLine( 0 ),
-	m_pModel( NULL )
+	m_pModel( pModel )
 {
 	ai_assert ( NULL != m_pModel );
 	if ( NULL == m_pModel->m_pDefaultMaterial )
 	{
 		m_pModel->m_pDefaultMaterial = new ObjFile::Material();
-		
-		//m_pModel->m_pDefaultMaterial->
+		m_pModel->m_pDefaultMaterial->MaterialName.Set( "default" );
 	}
 	load();
 }
@@ -155,29 +154,26 @@ void ObjFileMtlImporter::getFloatValue( float &value )
 
 // -------------------------------------------------------------------
 void ObjFileMtlImporter::createMaterial()
-{
-	m_pModel->m_pCurrentMaterial = new ObjFile::Material();
-	
-	/*m_DataIt = getNextToken<DataArrayIt>( m_DataIt, m_DataItEnd );
-	if (m_DataIt == m_DataItEnd)
-		return;
-	
-	char *pStart = &(*m_DataIt);
-	while ( !isSpace(*m_DataIt) && m_DataIt != m_DataItEnd )
-		++m_DataIt;
-
-	// Get name
-	std::string strName(pStart, &(*m_DataIt));
-	if ( strName.empty() )
-		return;*/
+{	
 	std::string strName;
 	m_DataIt = getName<DataArrayIt>( m_DataIt, m_DataItEnd, strName );
 	if ( m_DataItEnd == m_DataIt )
 		return;
 
-	m_pModel->m_pCurrentMaterial->MaterialName.Set( strName );
-	m_pModel->m_MaterialLib.push_back( strName );
-	m_pModel->m_MaterialMap[ strName ] = m_pModel->m_pCurrentMaterial;
+	std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( strName );
+	if ( m_pModel->m_MaterialMap.end() == it)
+	{
+		// New Material created
+		m_pModel->m_pCurrentMaterial = new ObjFile::Material();	
+		m_pModel->m_pCurrentMaterial->MaterialName.Set( strName );
+		m_pModel->m_MaterialLib.push_back( strName );
+		m_pModel->m_MaterialMap[ strName ] = m_pModel->m_pCurrentMaterial;
+	}
+	else
+	{
+		// Use older material
+		m_pModel->m_pCurrentMaterial = (*it).second;
+	}
 }
 
 // -------------------------------------------------------------------

@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 #include <string>
+#include <map>
 #include "../include/aiTypes.h"
 
 /*struct aiVector2D_t;
@@ -62,6 +63,8 @@ struct Point2;
 }
 class ObjFileImporter;
 
+///	\class	ObjFileParser
+///	\brief	Parser for a obj waveform file
 class ObjFileParser
 {
 public:
@@ -94,13 +97,18 @@ private:
 	void extractExtension(const std::string strFile, std::string &strExt);
 
 private:
+	//!	Absolute filepath to model
 	std::string m_strAbsPath;
+	//!	Iterator to current position in buffer
 	DataArrayIt m_DataIt;
+	//!	Iterator to end position of buffer
 	DataArrayIt m_DataItEnd;
+	//!	Pointer to model instance
 	ObjFile::Model *m_pModel;
+	//!	Current line (for debugging)
 	unsigned int m_uiLine;
+	//!	Helper buffer
 	char m_buffer[BUFFERSIZE];
-
 };
 
 }	// Namespace Assimp

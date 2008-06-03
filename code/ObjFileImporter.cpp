@@ -159,9 +159,13 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 	if (pParent != NULL)
 		this->appendChildToParentNode(pParent, pNode);
 
+	for (int meshIndex = 0; meshIndex < pModel->m_Meshes.size(); meshIndex++)
+	{
+	
+	}
 	aiMesh *pMesh = new aiMesh();
-	MeshArray.push_back(pMesh);
-	createTopology(pModel, pData, pMesh);
+	MeshArray.push_back( pMesh );
+	createTopology( pModel, pData, pMesh );
 
 	// Create all nodes from the subobjects stored in the current object
 	if (!pData->m_SubObjects.empty())
@@ -175,13 +179,12 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 		for (size_t index = 0; index < pData->m_SubObjects.size(); index++)
 		{
 			// Create all child nodes
-			pNode->mChildren[index] = createNodes(pModel, pData, pNode, pScene, MeshArray);
+			pNode->mChildren[ index ] = createNodes( pModel, pData, pNode, pScene, MeshArray );
 			
-			// Create meshes of this object
 			pMesh = new aiMesh();
-			MeshArray.push_back(pMesh);
-			createTopology(pModel, pData->m_SubObjects[ index ], pMesh);
-
+			MeshArray.push_back( pMesh );
+			createTopology( pModel, pData, pMesh );
+			
 			// Create material of this object
 			createMaterial(pModel, pData->m_SubObjects[ index ], pScene);
 		}
@@ -208,7 +211,7 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 // ------------------------------------------------------------------------------------------------
 //	Create topology data
 void ObjFileImporter::createTopology(const ObjFile::Model* pModel, const ObjFile::Object* pData, 
-									 aiMesh* pMesh)
+									 aiMesh* pMesh )
 {
 	if (NULL == pData)
 		return;
@@ -218,14 +221,15 @@ void ObjFileImporter::createTopology(const ObjFile::Model* pModel, const ObjFile
 
 	// Create faces
 	pMesh->mNumFaces = (unsigned int)pData->m_Faces.size();
-	pMesh->mFaces = new aiFace[pMesh->mNumFaces];
+	pMesh->mFaces = new aiFace[ pMesh->mNumFaces ];
+	//pMesh->mMaterialIndex = pMode;
 	for (size_t index = 0; index < pMesh->mNumFaces; index++)
 	{
 		aiFace *pFace = &pMesh->mFaces[ index ];
 		pFace->mNumIndices = (unsigned int)pData->m_Faces[index]->m_pVertices->size();
 		if (pFace->mNumIndices > 0)
 		{
-			pFace->mIndices = new unsigned int[pMesh->mFaces[index].mNumIndices];
+			pFace->mIndices = new unsigned int[ pMesh->mFaces[ index ].mNumIndices ];
 			ObjFile::Face::IndexArray *pArray = pData->m_Faces[index]->m_pVertices;
 			
 			// TODO:	Should be implement much better
@@ -254,18 +258,19 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 	if (pCurrentObject->m_Faces.empty())
 		return;
 	
-	// Copy all stored vertices, normals and so on
+	// Copy vertices of this mesh instance
 	pMesh->mNumVertices = (unsigned int)pModel->m_Vertices.size();
-	pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
-	for (size_t index=0; index < pModel->m_Vertices.size(); index++)
+	pMesh->mVertices = new aiVector3D[ pMesh->mNumVertices ];
+	for ( size_t index=0; index < pModel->m_Vertices.size(); index++ )
 	{
 		pMesh->mVertices[ index ] = *pModel->m_Vertices[ index ];
 	}
 	
-	if (!pModel->m_Normals.empty())
+	// Copy normals for this mesh
+	if ( !pModel->m_Normals.empty() )
 	{
 		pMesh->mNormals = new aiVector3D[pModel->m_Normals.size()];
-		for (size_t index = 0; index < pModel->m_Normals.size(); index++)
+		for ( size_t index = 0; index < pModel->m_Normals.size(); index++ )
 		{
 			pMesh->mNormals[ index ] = *pModel->m_Normals[ index ];
 		}
@@ -273,7 +278,19 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 
 	if (!pModel->m_TextureCoord.empty())
 	{
-		// TODO: Implement texture coodinates
+		pMesh->mTextureCoords[ 0 ] = new aiVector3D[ pModel->m_TextureCoord.size() ];
+
+		for( unsigned int e = 0; e < AI_MAX_NUMBER_OF_TEXTURECOORDS; e++)
+		{
+			if( pMesh->HasTextureCoords( e ))
+			{
+				for (unsigned int index = 0; index < pModel->m_TextureCoord.size(); index++ )
+				{
+					aiVector2D *tex = pModel->m_TextureCoord[ index ];
+					pMesh->mTextureCoords[ e ][ index ] = aiVector3D( tex->x, tex->y, 0.0f);
+				}
+			}
+		}
 	}
 }
 
@@ -304,13 +321,37 @@ void ObjFileImporter::createMaterial(const ObjFile::Model* pModel, const ObjFile
 	if (NULL == pData)
 		return;
 
-	// Create only a dumy material to enshure a running viewer
-	pScene->mNumMaterials = 1;
-	Assimp::MaterialHelper* mat = new Assimp::MaterialHelper;
+	const unsigned int numMaterials = (unsigned int) pModel->m_MaterialLib.size();
+	pScene->mNumMaterials = 0;
+	if ( pModel->m_MaterialLib.empty() )
+		return;
 	
-	// Create a new material
-	pScene->mMaterials = new aiMaterial*[1];
-	pScene->mMaterials[0] = mat;
+	pScene->mMaterials = new aiMaterial*[ numMaterials ];
+	for ( unsigned int matIndex = 0; matIndex < numMaterials; matIndex++ )
+	{
+		Assimp::MaterialHelper* mat = new Assimp::MaterialHelper();
+		
+		// Store material name
+		std::map<std::string, ObjFile::Material*>::const_iterator it = pModel->m_MaterialMap.find( pModel->m_MaterialLib[ matIndex ] );
+		if ( pModel->m_MaterialMap.end() == it)
+			continue;
+		ObjFile::Material *pCurrentMaterial = (*it).second;
+		mat->AddProperty( &pCurrentMaterial->MaterialName, AI_MATKEY_NAME );
+		
+		// Adding material colors
+		mat->AddProperty( &pCurrentMaterial->ambient, 1, AI_MATKEY_COLOR_AMBIENT);
+		mat->AddProperty( &pCurrentMaterial->diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
+		mat->AddProperty( &pCurrentMaterial->specular, 1, AI_MATKEY_COLOR_SPECULAR);
+		mat->AddProperty( &pCurrentMaterial->shineness, 1, AI_MATKEY_SHININESS);
+
+		// Adding textures
+		if ( 0 != pCurrentMaterial->texture.length )
+			mat->AddProperty( &pCurrentMaterial->texture, AI_MATKEY_TEXTURE_DIFFUSE(0));
+		
+		// Store material property info in material array in scene
+		pScene->mMaterials[ pScene->mNumMaterials ] = mat;
+		pScene->mNumMaterials++;
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -346,7 +387,6 @@ void ObjFileImporter::appendChildToParentNode(aiNode *pParent, aiNode *pChild)
 		pParent->mChildren[ index ] = temp [ index ];
 	}
 	pParent->mChildren[ pParent->mNumChildren-1 ] = pChild;
-
 }
 
 // ------------------------------------------------------------------------------------------------

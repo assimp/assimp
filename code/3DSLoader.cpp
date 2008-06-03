@@ -1096,6 +1096,10 @@ void Dot3DSImporter::ParseMaterialChunk(int* piRemaining)
 		this->mCurrent += sizeof(uint16_t);
 		break;
 
+	case Dot3DSFile::CHUNK_MAT_TWO_SIDE:
+		this->mScene->mMaterials.back().mTwoSided = true;
+		break;
+
 	case Dot3DSFile::CHUNK_MAT_SHININESS:
 		pcf = &this->mScene->mMaterials.back().mSpecularExponent;
 		*pcf = this->ParsePercentageChunk();
@@ -1203,21 +1207,23 @@ void Dot3DSImporter::ParseTextureChunk(int* piRemaining,Dot3DS::Texture* pcOut)
 		pcOut->mScaleU = *((float*)this->mCurrent);
 		if (0.0f == pcOut->mScaleU)
 		{
-			DefaultLogger::get()->warn("Inverse texture coordinate scaling in the "
-				"x direction is zero. This would be a division through zero. ");
+			DefaultLogger::get()->warn("Texture coordinate scaling in the "
+				"x direction is zero. Assuming this should be 1.0 ... ");
 			pcOut->mScaleU = 1.0f;
 		}
-		pcOut->mScaleU = 1.0f / pcOut->mScaleU;
+		// NOTE: some docs state it is 1/u, others say it is u ... ARGHH!
+		//pcOut->mScaleU = 1.0f / pcOut->mScaleU;
 		break;
 	case Dot3DSFile::CHUNK_MAT_MAP_VSCALE:
 		pcOut->mScaleV = *((float*)this->mCurrent);
 		if (0.0f == pcOut->mScaleV)
 		{
-			DefaultLogger::get()->warn("Inverse texture coordinate scaling in the "
-				"y direction is zero. This would be a division through zero. ");
+			DefaultLogger::get()->warn("Texture coordinate scaling in the "
+				"y direction is zero. Assuming this should be 1.0 ... ");
 			pcOut->mScaleV = 1.0f;
 		}
-		pcOut->mScaleV = 1.0f / pcOut->mScaleV;
+		// NOTE: some docs state it is 1/v, others say it is v ... ARGHH!
+		//pcOut->mScaleV = 1.0f / pcOut->mScaleV;
 		break;
 	case Dot3DSFile::CHUNK_MAT_MAP_UOFFSET:
 		pcOut->mOffsetU = *((float*)this->mCurrent);
@@ -1227,6 +1233,20 @@ void Dot3DSImporter::ParseTextureChunk(int* piRemaining,Dot3DS::Texture* pcOut)
 		break;
 	case Dot3DSFile::CHUNK_MAT_MAP_ANG:
 		pcOut->mRotation = *((float*)this->mCurrent);
+		break;
+	case Dot3DSFile::CHUNK_MAT_MAP_TILING:
+		uint16_t iFlags = *((uint16_t*)this->mCurrent);
+
+		// check whether the mirror flag is set
+		if (iFlags & 0x2u)
+		{
+			pcOut->mMapMode = aiTextureMapMode_Mirror;
+		}
+		// assume that "decal" means clamping ...
+		else if (iFlags & 0x10u && iFlags & 0x1u)
+		{
+			pcOut->mMapMode = aiTextureMapMode_Clamp;
+		}
 		break;
 	};
 

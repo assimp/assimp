@@ -369,7 +369,8 @@ aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 	aiString* szOut,
 	unsigned int* piUVIndex,
 	float* pfBlendFactor,
-	aiTextureOp* peTextureOp)
+	aiTextureOp* peTextureOp,
+	aiTextureMapMode* peMapMode)
 {
 	ai_assert(NULL != pcMat);
 	ai_assert(NULL != szOut);
@@ -378,55 +379,80 @@ aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 	const char* szUVBase;
 	const char* szBlendBase;
 	const char* szOpBase;
+	const char* aszMapModeBase[3];
 	switch (iTexType)
 	{
 	case AI_TEXTYPE_DIFFUSE:
-		szPathBase = AI_MATKEY_TEXTURE_DIFFUSE_;
-		szUVBase = AI_MATKEY_UVWSRC_DIFFUSE_;
+		szPathBase	= AI_MATKEY_TEXTURE_DIFFUSE_;
+		szUVBase	= AI_MATKEY_UVWSRC_DIFFUSE_;
 		szBlendBase = AI_MATKEY_TEXBLEND_DIFFUSE_;
-		szOpBase = AI_MATKEY_TEXOP_DIFFUSE_;
+		szOpBase	= AI_MATKEY_TEXOP_DIFFUSE_;
+		aszMapModeBase[0] = AI_MATKEY_MAPPINGMODE_U_DIFFUSE_;
+		aszMapModeBase[1] = AI_MATKEY_MAPPINGMODE_V_DIFFUSE_;
+		aszMapModeBase[2] = AI_MATKEY_MAPPINGMODE_W_DIFFUSE_;
 		break;
 	case AI_TEXTYPE_SPECULAR:
-		szPathBase = AI_MATKEY_TEXTURE_SPECULAR_;
-		szUVBase = AI_MATKEY_UVWSRC_SPECULAR_;
+		szPathBase	= AI_MATKEY_TEXTURE_SPECULAR_;
+		szUVBase	= AI_MATKEY_UVWSRC_SPECULAR_;
 		szBlendBase = AI_MATKEY_TEXBLEND_SPECULAR_;
-		szOpBase = AI_MATKEY_TEXOP_SPECULAR_;
+		szOpBase	= AI_MATKEY_TEXOP_SPECULAR_;
+		aszMapModeBase[0] = AI_MATKEY_MAPPINGMODE_U_SPECULAR_;
+		aszMapModeBase[1] = AI_MATKEY_MAPPINGMODE_V_SPECULAR_;
+		aszMapModeBase[2] = AI_MATKEY_MAPPINGMODE_W_SPECULAR_;
 		break;
 	case AI_TEXTYPE_AMBIENT:
-		szPathBase = AI_MATKEY_TEXTURE_AMBIENT_;
-		szUVBase = AI_MATKEY_UVWSRC_AMBIENT_;
+		szPathBase	= AI_MATKEY_TEXTURE_AMBIENT_;
+		szUVBase	= AI_MATKEY_UVWSRC_AMBIENT_;
 		szBlendBase = AI_MATKEY_TEXBLEND_AMBIENT_;
-		szOpBase = AI_MATKEY_TEXOP_AMBIENT_;
+		szOpBase	= AI_MATKEY_TEXOP_AMBIENT_;
+		aszMapModeBase[0] = AI_MATKEY_MAPPINGMODE_U_AMBIENT_;
+		aszMapModeBase[1] = AI_MATKEY_MAPPINGMODE_V_AMBIENT_;
+		aszMapModeBase[2] = AI_MATKEY_MAPPINGMODE_W_AMBIENT_;
 		break;
 	case AI_TEXTYPE_EMISSIVE:
-		szPathBase = AI_MATKEY_TEXTURE_EMISSIVE_;
-		szUVBase = AI_MATKEY_UVWSRC_EMISSIVE_;
+		szPathBase	= AI_MATKEY_TEXTURE_EMISSIVE_;
+		szUVBase	= AI_MATKEY_UVWSRC_EMISSIVE_;
 		szBlendBase = AI_MATKEY_TEXBLEND_EMISSIVE_;
-		szOpBase = AI_MATKEY_TEXOP_EMISSIVE_;
+		szOpBase	= AI_MATKEY_TEXOP_EMISSIVE_;
+		aszMapModeBase[0] = AI_MATKEY_MAPPINGMODE_U_EMISSIVE_;
+		aszMapModeBase[1] = AI_MATKEY_MAPPINGMODE_V_EMISSIVE_;
+		aszMapModeBase[2] = AI_MATKEY_MAPPINGMODE_W_EMISSIVE_;
 		break;
 	case AI_TEXTYPE_HEIGHT:
-		szPathBase = AI_MATKEY_TEXTURE_HEIGHT_;
-		szUVBase = AI_MATKEY_UVWSRC_HEIGHT_;
+		szPathBase	= AI_MATKEY_TEXTURE_HEIGHT_;
+		szUVBase	= AI_MATKEY_UVWSRC_HEIGHT_;
 		szBlendBase = AI_MATKEY_TEXBLEND_HEIGHT_;
-		szOpBase = AI_MATKEY_TEXOP_HEIGHT_;
+		szOpBase	= AI_MATKEY_TEXOP_HEIGHT_;
+		aszMapModeBase[0] = AI_MATKEY_MAPPINGMODE_U_HEIGHT_;
+		aszMapModeBase[1] = AI_MATKEY_MAPPINGMODE_V_HEIGHT_;
+		aszMapModeBase[2] = AI_MATKEY_MAPPINGMODE_W_HEIGHT_;
 		break;
 	case AI_TEXTYPE_NORMALS:
-		szPathBase = AI_MATKEY_TEXTURE_NORMALS_;
-		szUVBase = AI_MATKEY_UVWSRC_NORMALS_;
+		szPathBase	= AI_MATKEY_TEXTURE_NORMALS_;
+		szUVBase	= AI_MATKEY_UVWSRC_NORMALS_;
 		szBlendBase = AI_MATKEY_TEXBLEND_NORMALS_;
-		szOpBase = AI_MATKEY_TEXOP_NORMALS_;
+		szOpBase	= AI_MATKEY_TEXOP_NORMALS_;
+		aszMapModeBase[0] = AI_MATKEY_MAPPINGMODE_U_NORMALS_;
+		aszMapModeBase[1] = AI_MATKEY_MAPPINGMODE_V_NORMALS_;
+		aszMapModeBase[2] = AI_MATKEY_MAPPINGMODE_W_NORMALS_;
 		break;
 	case AI_TEXTYPE_SHININESS:
-		szPathBase = AI_MATKEY_TEXTURE_SHININESS_;
-		szUVBase = AI_MATKEY_UVWSRC_SHININESS_;
+		szPathBase	= AI_MATKEY_TEXTURE_SHININESS_;
+		szUVBase	= AI_MATKEY_UVWSRC_SHININESS_;
 		szBlendBase = AI_MATKEY_TEXBLEND_SHININESS_;
-		szOpBase = AI_MATKEY_TEXOP_SHININESS_;
+		szOpBase	= AI_MATKEY_TEXOP_SHININESS_;
+		aszMapModeBase[0] = AI_MATKEY_MAPPINGMODE_U_SHININESS_;
+		aszMapModeBase[1] = AI_MATKEY_MAPPINGMODE_V_SHININESS_;
+		aszMapModeBase[2] = AI_MATKEY_MAPPINGMODE_W_SHININESS_;
 		break;
 	case AI_TEXTYPE_OPACITY:
-		szPathBase = AI_MATKEY_TEXTURE_OPACITY_;
-		szUVBase = AI_MATKEY_UVWSRC_OPACITY_;
+		szPathBase	= AI_MATKEY_TEXTURE_OPACITY_;
+		szUVBase	= AI_MATKEY_UVWSRC_OPACITY_;
 		szBlendBase = AI_MATKEY_TEXBLEND_OPACITY_;
-		szOpBase = AI_MATKEY_TEXOP_OPACITY_;
+		szOpBase	= AI_MATKEY_TEXOP_OPACITY_;
+		aszMapModeBase[0] = AI_MATKEY_MAPPINGMODE_U_OPACITY_;
+		aszMapModeBase[1] = AI_MATKEY_MAPPINGMODE_V_OPACITY_;
+		aszMapModeBase[2] = AI_MATKEY_MAPPINGMODE_W_OPACITY_;
 		break;
 	default: return AI_FAILURE;
 	};
@@ -469,6 +495,21 @@ aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 			op = aiTextureOp_Multiply;
 
 		*peTextureOp = op;
+	}
+
+	// get the texture mapping modes for the texture
+	if (peMapMode)
+	{
+		aiTextureMapMode eMode;
+		for (unsigned int q = 0; q < 3;++q)
+		{
+			sprintf(szKey,"%s[%i]",aszMapModeBase[q],iIndex);
+			if (AI_SUCCESS != aiGetMaterialInteger(pcMat,szKey,(int*)&eMode))
+			{
+				eMode = aiTextureMapMode_Wrap;
+			}
+			peMapMode[q] = eMode;
+		}
 	}
 	return AI_SUCCESS;
 }

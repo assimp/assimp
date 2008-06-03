@@ -212,6 +212,14 @@ protected:
 
 
 	// -------------------------------------------------------------------
+	/** Calculate absolute bone animation matrices for each bone
+	 * \param pcBones Pointer to the bone section in the file
+	 * \param apcOutBones Output bones array
+	 */
+	void CalculateAbsBoneAnimMatrices(const MDL::Bone_MDL7* pcBones,
+		aiBone** apcOutBones);
+
+	// -------------------------------------------------------------------
 	/** Try to load a  palette from the current directory (colormap.lmp)
 	 *  If it is not found the default palette of Quake1 is returned
 	 */

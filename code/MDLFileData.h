@@ -548,7 +548,7 @@ struct Vertex_MDL4
 struct Vertex_MDL7
 {
 	float	x,y,z;
-	uint16_t vertindex;	
+	uint16_t vertindex;	// = bone index
 	union {
 		uint16_t norm162index;
 		float norm[3];

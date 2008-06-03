@@ -1282,6 +1282,72 @@ void MDLImporter::ValidateHeader_GameStudioA7(const MDL::Header_MDL7* pcHeader)
 	return;
 }
 // ------------------------------------------------------------------------------------------------
+void MDLImporter::CalculateAbsBoneAnimMatrices(const MDL::Bone_MDL7* pcBones,
+	aiBone** apcOutBones)
+{
+	ai_assert(NULL != pcBones);
+	ai_assert(NULL != apcOutBones);
+
+	const MDL::Header_MDL7* pcHeader = (const MDL::Header_MDL7*)this->m_pcHeader;
+
+	// first find the bone that has NO parent, calculate the
+	// animation matrix for it, then go on and search for the next parent
+	// index (0) and so on until we can't find a new node.
+
+	std::vector<bool> abHadMe;
+	abHadMe.resize(pcHeader->bones_num,false);
+
+	uint16_t iParent = 0xffff;
+	int32_t iIterations = 0;
+	while (iIterations++ < pcHeader->bones_num)
+	{
+		for (int32_t iBone = 0; iBone < pcHeader->bones_num;++iBone)
+		{
+			if (abHadMe[iBone])continue;
+			const MDL::Bone_MDL7* pcBone = &pcBones[iBone];
+			abHadMe[iBone] = true;
+	
+			if (iParent == pcBone->parent_index)
+			{
+				// yeah, calculate my matrix! I'm happy now
+
+				/************************************************************
+				The animation matrix is then calculated the following way:
+
+				vector3 bPos = <absolute bone position>
+				matrix44 laM;   // local animation matrix
+				sphrvector key_rotate = <bone rotation>
+		
+				matrix44 m1,m2;
+				create_trans_matrix(m1, -bPos.x, -bPos.y, -bPos.z);
+				create_trans_matrix(m2, -bPos.x, -bPos.y, -bPos.z);
+
+				create_rotation_matrix(laM,key_rotate);
+
+				laM = sm1 * laM;
+				laM = laM * sm2;
+			    *************************************************************/
+				aiVector3D vAbsPos;
+				if (0xffff != iParent)
+				{
+					const aiBone* pcParentBone = apcOutBones[iParent];
+					vAbsPos.x = pcParentBone->mOffsetMatrix.a3;
+					vAbsPos.y = pcParentBone->mOffsetMatrix.b3;
+					vAbsPos.z = pcParentBone->mOffsetMatrix.c3;
+				}
+				vAbsPos.x -= pcBone->x; // TODO: + or -?
+				vAbsPos.y -= pcBone->y;
+				vAbsPos.z -= pcBone->z;
+				aiBone* pcOutBone = apcOutBones[iBone];
+				pcOutBone->mOffsetMatrix.a3 = vAbsPos.x;
+				pcOutBone->mOffsetMatrix.b3 = vAbsPos.y;
+				pcOutBone->mOffsetMatrix.c3 = vAbsPos.z;
+			}
+		}
+		++iParent;
+	}
+}
+// ------------------------------------------------------------------------------------------------
 void MDLImporter::InternReadFile_GameStudioA7( )
 {
 	ai_assert(NULL != pScene);
@@ -1294,8 +1360,30 @@ void MDLImporter::InternReadFile_GameStudioA7( )
 	// sizes that are expected by the loader to be constant 
 	this->ValidateHeader_GameStudioA7(pcHeader);
 
-	// skip all bones
-	szCurrent += sizeof(MDL::Bone_MDL7) * pcHeader->bones_num;
+	// load all bones (they are shared by all groups, so
+	// we'll need to add them to all groups later)
+	const MDL::Bone_MDL7* pcBones = (const MDL::Bone_MDL7*)szCurrent;
+	szCurrent += pcHeader->bones_num * pcHeader->bone_stc_size;
+
+	aiBone** apcBonesOut = NULL;
+	unsigned int iNumBonesOut = 0;
+	if (pcHeader->bone_stc_size != sizeof(MDL::Bone_MDL7))
+	{
+		DefaultLogger::get()->warn("[3DGS MDL7] Unknown size of bone data structure. "
+			"Ignoring bones ...");
+	}
+	else
+	{
+		// create an output bone array
+		iNumBonesOut = pcHeader->bones_num;
+		apcBonesOut = new aiBone*[iNumBonesOut];
+		for (unsigned int crank = 0; crank < iNumBonesOut;++crank)
+			apcBonesOut[crank] = new aiBone();
+
+		// and calculate absolute bone animation matrices
+		// aiBone.mTransformation member
+		this->CalculateAbsBoneAnimMatrices(pcBones,apcBonesOut);
+	}
 
 	// allocate a material list
 	std::vector<MaterialHelper*> pcMats;

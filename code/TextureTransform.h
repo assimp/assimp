@@ -61,6 +61,15 @@ using namespace Assimp::Dot3DS;
 */
 struct STransformVecInfo 
 {
+	//! Construction. The resulting matrix is the identity
+	STransformVecInfo ()
+		: 
+		fScaleU(1.0f),fScaleV(1.0f),
+		fOffsetU(0.0f),fOffsetV(0.0f),
+		fRotation(0.0f),
+		iUVIndex(0)
+	{}
+
 	//! Texture coordinate scaling in the x-direction 
 	float fScaleU;
 	//! Texture coordinate scaling in the y-direction 
@@ -72,10 +81,23 @@ struct STransformVecInfo
 	//! Texture coordinate rotation, clockwise, in radians
 	float fRotation;
 
+	//! Source texture coordinate index
+	unsigned int iUVIndex;
+
+
 	//! List of all textures that use this texture
 	//! coordinate transformations
 	std::vector<Dot3DS::Texture*> pcTextures; 
 
+
+	// -------------------------------------------------------------------
+	/** Returns whether this is an untransformed texture coordinate set
+	*/
+	inline bool IsUntransformed() const
+	{
+		return 1.0f == fScaleU && 1.0f == fScaleV &&
+			!fOffsetU && !fOffsetV && !fRotation;
+	}
 
 	// -------------------------------------------------------------------
 	/** Build a 3x3 matrix from the transformations
@@ -153,7 +175,7 @@ public:
 	 *  for a material
 	 * \param materials List of materials to be processed
 	*/
-	static void ApplyScaleNOffset(std::vector<Dot3DS::Material> materials);
+	static void ApplyScaleNOffset(std::vector<Dot3DS::Material>& materials);
 
 	// -------------------------------------------------------------------
 	/** Get a full list of all texture coordinate offsets required

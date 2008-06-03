@@ -185,6 +185,20 @@ struct aiBone
 		mNumWeights = 0; mWeights = NULL;
 	}
 
+	//! Copy constructor
+	aiBone(const aiBone& other)
+	{
+		mNumWeights = other.mNumWeights;
+		mOffsetMatrix = other.mOffsetMatrix;
+		mName = other.mName;
+
+		if (other.mWeights && other.mNumWeights)
+		{
+			mWeights = new aiVertexWeight[mNumWeights];
+			memcpy(mWeights,other.mWeights,mNumWeights * sizeof(aiVertexWeight));
+		}
+	}
+
 	//! Destructor to delete the array of vertex weights
 	~aiBone()
 	{

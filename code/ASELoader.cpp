@@ -128,6 +128,13 @@ void ASEImporter::InternReadFile(
 	this->mParser = new ASE::Parser((const char*)this->mBuffer);
 	this->mParser->Parse();
 
+	// if absolutely no material has been loaded from the file
+	// we need to generate a default material
+	if (this->mParser->m_vMaterials.empty())
+	{
+		this->GenerateDefaultMaterial();
+	}
+
 	// process all meshes
 	std::vector<aiMesh*> avOutMeshes;
 	avOutMeshes.reserve(this->mParser->m_vMeshes.size()*2);
@@ -169,6 +176,21 @@ void ASEImporter::InternReadFile(
 	delete this->mParser;
 	this->mParser = NULL;
 	return;
+}
+// ------------------------------------------------------------------------------------------------
+void ASEImporter::GenerateDefaultMaterial()
+{
+	ai_assert(NULL != this->mParser);
+
+	// add a simple material without sub materials to the parser's list
+	this->mParser->m_vMaterials.push_back ( ASE::Material() );
+	ASE::Material& mat = this->mParser->m_vMaterials.back();
+
+	mat.mDiffuse = aiColor3D(0.5f,0.5f,0.5f);
+	mat.mSpecular = aiColor3D(1.0f,1.0f,1.0f);
+	mat.mAmbient = aiColor3D(0.05f,0.05f,0.05f);
+	mat.mShading = Dot3DSFile::Gouraud;
+	mat.mName = "$$$ASE_DEFAULT";
 }
 // ------------------------------------------------------------------------------------------------
 void ASEImporter::AddNodes(aiScene* pcScene,aiNode* pcParent,
@@ -953,6 +975,7 @@ void ASEImporter::BuildMaterialIndices(aiScene* pcScene)
 	// allocate the output material array
 	pcScene->mNumMaterials = iNum;
 	pcScene->mMaterials = new aiMaterial*[pcScene->mNumMaterials];
+	Dot3DS::Material** pcIntMaterials = new Dot3DS::Material*[pcScene->mNumMaterials];
 
 	iNum = 0;
 	for (unsigned int iMat = 0; iMat < this->mParser->m_vMaterials.size();++iMat)
@@ -961,6 +984,9 @@ void ASEImporter::BuildMaterialIndices(aiScene* pcScene)
 		{
 			ai_assert(NULL != this->mParser->m_vMaterials[iMat].pcInstance);
 			pcScene->mMaterials[iNum] = this->mParser->m_vMaterials[iMat].pcInstance;
+
+			// store the internal material, too
+			pcIntMaterials[iNum] = &this->mParser->m_vMaterials[iMat];
 
 			// iterate through all meshes and search for one which is using
 			// this top-level material index
@@ -983,6 +1009,9 @@ void ASEImporter::BuildMaterialIndices(aiScene* pcScene)
 				pcScene->mMaterials[iNum] = this->mParser->m_vMaterials[iMat].
 					avSubMaterials[iSubMat].pcInstance;
 
+				// store the internal material, too
+				pcIntMaterials[iNum] = &this->mParser->m_vMaterials[iMat].avSubMaterials[iSubMat];
+
 				// iterate through all meshes and search for one which is using
 				// this sub-level material index
 				for (unsigned int iMesh = 0; iMesh < pcScene->mNumMeshes;++iMesh)
@@ -998,6 +1027,29 @@ void ASEImporter::BuildMaterialIndices(aiScene* pcScene)
 			}
 		}
 	}
+	// prepare for the next step
+	for (unsigned int hans = 0; hans < pcScene->mNumMaterials;++hans)
+	{
+		TextureTransform::ApplyScaleNOffset(this->mParser->m_vMaterials[hans]);
+	}
+
+	// now we need to iterate through all meshes,
+	// generating correct texture coordinates and material uv indices
+	for (unsigned int curie = 0; curie < pcScene->mNumMeshes;++curie)
+	{
+		aiMesh* pcMesh = pcScene->mMeshes[curie];
+
+		// apply texture coordinate transformations
+		TextureTransform::BakeScaleNOffset(pcMesh,pcIntMaterials[pcMesh->mMaterialIndex]);
+	}
+	for (unsigned int hans = 0; hans < pcScene->mNumMaterials;++hans)
+	{
+		// setup the correct UV indices for each material
+		TextureTransform::SetupMatUVSrc(pcScene->mMaterials[hans],
+			pcIntMaterials[hans]);
+	}
+	delete[] pcIntMaterials;
+
 	// finished!
 	return;
 }

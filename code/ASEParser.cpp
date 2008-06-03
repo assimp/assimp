@@ -1544,20 +1544,30 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshFace(ASE::Face& out)
-{
+{	
 	// skip spaces and tabs
 	if(!SkipSpaces(this->m_szFile,&this->m_szFile))
-		BLUBB("Unable to parse *MESH_FACE Element: Unexpected EOL [#1]")
+	{
+		this->LogWarning("Unable to parse *MESH_FACE Element: Unexpected EOL [#1]");
+		this->SkipToNextToken();
+		return;
+	}
 
 	// parse the face index
 	out.iFace = strtol10(this->m_szFile,&this->m_szFile);
 
 	// next character should be ':'
-	if(!SkipSpaces(this->m_szFile,&this->m_szFile) || ':' != *this->m_szFile)
-		BLUBB("Unable to parse *MESH_FACE Element: Unexpected EOL. \':\' expected [#2]")
+	if(!SkipSpaces(this->m_szFile,&this->m_szFile))
+	{
+		// FIX: there are some ASE files which haven't got : here ....
+		this->LogWarning("Unable to parse *MESH_FACE Element: Unexpected EOL. \':\' expected [#2]");
+		this->SkipToNextToken();
+		return;
+	}
+	// FIX: there are some ASE files which haven't got : here ....
+	if(':' == *this->m_szFile)++this->m_szFile;
 
 	// parse all mesh indices
-	++this->m_szFile;
 	for (unsigned int i = 0; i < 3;++i)
 	{
 		unsigned int iIndex = 0;
@@ -1565,7 +1575,10 @@ void Parser::ParseLV4MeshFace(ASE::Face& out)
 		{
 			// LOG 
 __EARTHQUAKE_XXL:
-			BLUBB("Unable to parse *MESH_FACE Element: Unexpected EOL. A,B or C expected [#3]")
+			this->LogWarning("Unable to parse *MESH_FACE Element: Unexpected EOL. "
+				"A,B or C expected [#3]");
+			this->SkipToNextToken();
+			return;
 		}
 		switch (*this->m_szFile)
 		{
@@ -1586,13 +1599,21 @@ __EARTHQUAKE_XXL:
 
 		// next character should be ':'
 		if(!SkipSpaces(this->m_szFile,&this->m_szFile) || ':' != *this->m_szFile)
-			BLUBB("Unable to parse *MESH_FACE Element: Unexpected EOL. \':\' expected [#2]")
+		{
+			this->LogWarning("Unable to parse *MESH_FACE Element: "
+				"Unexpected EOL. \':\' expected [#2]");
+			this->SkipToNextToken();
+			return;
+		}
 
 		++this->m_szFile;
-
 		if(!SkipSpaces(this->m_szFile,&this->m_szFile))
-			BLUBB("Unable to parse *MESH_FACE Element: Unexpected EOL. Vertex index ecpected [#4]")
-
+		{
+			this->LogWarning("Unable to parse *MESH_FACE Element: Unexpected EOL. "
+				"Vertex index ecpected [#4]");
+			this->SkipToNextToken();
+			return;
+		}
 		out.mIndices[iIndex] = strtol10(this->m_szFile,&this->m_szFile);
 	}
 
@@ -1609,11 +1630,17 @@ __EARTHQUAKE_XXL:
 	}
 
 	// parse the smoothing group of the face
-	if (0 == strncmp(this->m_szFile,"*MESH_SMOOTHING",15) && IsSpaceOrNewLine(*(this->m_szFile+15)))
+	if (0 == strncmp(this->m_szFile,"*MESH_SMOOTHING",15) && 
+		IsSpaceOrNewLine(*(this->m_szFile+15)))
 	{
 		this->m_szFile+=16;
 		if(!SkipSpaces(this->m_szFile,&this->m_szFile))
-			BLUBB("Unable to parse *MESH_SMOOTHING Element: Unexpected EOL. Smoothing group(s) expected [#5]")
+		{
+			this->LogWarning("Unable to parse *MESH_SMOOTHING Element: "
+				"Unexpected EOL. Smoothing group(s) expected [#5]");
+			this->SkipToNextToken();
+			return;
+		}
 		
 		// parse smoothing groups until we don_t anymore see commas
 		// FIX: There needn't always be a value, sad but true
@@ -1649,10 +1676,14 @@ __EARTHQUAKE_XXL:
 	{
 		this->m_szFile+=12;
 		if(!SkipSpaces(this->m_szFile,&this->m_szFile))
-			BLUBB("Unable to parse *MESH_MTLID Element: Unexpected EOL. Material index expected [#6]")
+		{
+			this->LogWarning("Unable to parse *MESH_MTLID Element: Unexpected EOL. "
+				"Material index expected [#6]");
+			this->SkipToNextToken();
+			return;
+		}
 		out.iMaterial = strtol10(this->m_szFile,&this->m_szFile);
 	}
-	//this->SkipToNextToken();
 	return;
 }
 // ------------------------------------------------------------------------------------------------

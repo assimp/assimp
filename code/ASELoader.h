@@ -149,6 +149,13 @@ protected:
 	void AddNodes(aiScene* pcScene,aiNode* pcParent,
 		const char* szName);
 
+	// -------------------------------------------------------------------
+	/** Generate a default material and add it to the parser's list
+	 *  Called if no material has been found in the file (rare for ASE,
+	 *  but not impossible)
+	 */
+	void GenerateDefaultMaterial();
+
 protected:
 
 	/** Parser instance */

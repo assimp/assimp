@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiQuaternion.h"
 #include "../include/aiMesh.h"
 #include "../include/aiAnim.h"
+#include "../include/aiMaterial.h"
 
 #include "SpatialSort.h"
 
@@ -263,8 +264,14 @@ public:
 			// Assumed to be in radians.
 			CHUNK_MAT_MAP_ANG = 0xA35C,
 
+			// Tiling flags for 3DS files
+			CHUNK_MAT_MAP_TILING = 0xa351,
+
 			// Specifies the file name of a texture
 			CHUNK_MAPFILE   = 0xA300,
+
+			// Specifies whether a materail requires two-sided rendering
+			CHUNK_MAT_TWO_SIDE = 0xA081,  
 		// **************************************************************
 
 		// Main keyframer chunk. Contains translation/rotation/scaling data
@@ -338,7 +345,8 @@ struct Texture
 		mOffsetU(0.0f),
 		mOffsetV(0.0f),
 		mRotation(0.0f),
-		iUVSrc(0)
+		iUVSrc(0),
+		mMapMode(aiTextureMapMode_Wrap)
 	{
 		mTextureBlend = std::numeric_limits<float>::quiet_NaN();
 	}
@@ -354,6 +362,9 @@ struct Texture
 	float mOffsetU;
 	float mOffsetV;
 	float mRotation;
+
+	//! Specifies the mapping mode to be used for the texture
+	aiTextureMapMode mMapMode;
 
 	//! Used internally
 	bool bPrivate;
@@ -372,11 +383,13 @@ struct Material
 	mBumpHeight			(1.0f),
 	iBakeUVTransform	(0),
 	pcSingleTexture		(NULL),
-	mShininessStrength	(1.0f)
+	mShininessStrength	(1.0f),
+	mTwoSided			(false)
 	{
 		static int iCnt = 0;
-		std::stringstream ss(mName);
+		std::stringstream ss;
 		ss << "$$_UNNAMED_" << iCnt++ << "_$$"; 
+		ss >> mName;
 	}
 
 	//! Name of the material
@@ -395,7 +408,6 @@ struct Material
 	Dot3DSFile::shadetype3ds mShading;
 	//! Opacity of the material
 	float mTransparency;
-
 	//! Diffuse texture channel
 	Texture sTexDiffuse;
 	//! Opacity texture channel
@@ -408,16 +420,15 @@ struct Material
 	Texture sTexEmissive;
 	//! Shininess texture channel
 	Texture sTexShininess;
-	
 	//! Scaling factor for the bump values
 	float mBumpHeight;
-
 	//! Emissive color
 	aiColor3D mEmissive;
-
 	//! Ambient texture channel
 	//! (used by the ASE format)
 	Texture sTexAmbient;
+	//! True if the material must be rendered from two sides
+	bool mTwoSided;
 
 	//! Used internally
 	unsigned int iBakeUVTransform;
@@ -431,8 +442,9 @@ struct Mesh
 	Mesh()
 	{
 		static int iCnt = 0;
-		std::stringstream ss(mName);
+		std::stringstream ss;
 		ss << "$$_UNNAMED_" << iCnt++ << "_$$"; 
+		ss >> mName;
 	}
 
 	//! Name of the mesh
@@ -469,8 +481,9 @@ struct Node
 
 	{
 		static int iCnt = 0;
-		std::stringstream ss(mName);
+		std::stringstream ss;
 		ss << "$$_UNNAMED_" << iCnt++ << "_$$"; 
+		ss >> mName;
 
 		mHierarchyPos = 0;
 		mHierarchyIndex = 0;

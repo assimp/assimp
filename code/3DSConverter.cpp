@@ -258,8 +258,15 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 	if (Dot3DS::Dot3DSFile::Phong == oldMat.mShading || 
 		Dot3DS::Dot3DSFile::Metal == oldMat.mShading)
 	{
-		mat.AddProperty( &oldMat.mSpecularExponent, 1, AI_MATKEY_SHININESS);
-		mat.AddProperty( &oldMat.mShininessStrength, 1, AI_MATKEY_SHININESS_STRENGTH);
+		if (!oldMat.mSpecularExponent || !oldMat.mShininessStrength)
+		{
+			oldMat.mShading = Dot3DS::Dot3DSFile::Gouraud;
+		}
+		else
+		{
+			mat.AddProperty( &oldMat.mSpecularExponent, 1, AI_MATKEY_SHININESS);
+			mat.AddProperty( &oldMat.mShininessStrength, 1, AI_MATKEY_SHININESS_STRENGTH);
+		}
 	}
 
 	// opacity
@@ -267,6 +274,13 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 
 	// bump height scaling
 	mat.AddProperty<float>( &oldMat.mBumpHeight,1,AI_MATKEY_BUMPSCALING);
+
+	// two sided rendering?
+	if (oldMat.mTwoSided)
+	{
+		int i = 0;
+		mat.AddProperty<int>(&i,1,AI_MATKEY_TWOSIDED);
+	}
 
 	// shading mode
 	aiShadingMode eShading = aiShadingMode_NoShading;
@@ -308,6 +322,13 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 
 		if (is_not_qnan(oldMat.sTexDiffuse.mTextureBlend))
 			mat.AddProperty<float>( &oldMat.sTexDiffuse.mTextureBlend, 1, AI_MATKEY_TEXBLEND_DIFFUSE(0));
+
+		if (aiTextureMapMode_Clamp != oldMat.sTexDiffuse.mMapMode)
+		{
+			int i = (int)oldMat.sTexSpecular.mMapMode;
+			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_U_DIFFUSE(0));
+			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_DIFFUSE(0));
+		}
 	}
 	if( oldMat.sTexSpecular.mMapName.length() > 0)
 	{
@@ -317,6 +338,13 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 
 		if (is_not_qnan(oldMat.sTexSpecular.mTextureBlend))
 			mat.AddProperty<float>( &oldMat.sTexSpecular.mTextureBlend, 1, AI_MATKEY_TEXBLEND_SPECULAR(0));
+
+		if (aiTextureMapMode_Clamp != oldMat.sTexSpecular.mMapMode)
+		{
+			int i = (int)oldMat.sTexSpecular.mMapMode;
+			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_U_SPECULAR(0));
+			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_SPECULAR(0));
+		}
 	}
 	if( oldMat.sTexOpacity.mMapName.length() > 0)
 	{
@@ -326,6 +354,12 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 
 		if (is_not_qnan(oldMat.sTexOpacity.mTextureBlend))
 			mat.AddProperty<float>( &oldMat.sTexOpacity.mTextureBlend, 1,AI_MATKEY_TEXBLEND_OPACITY(0));
+		if (aiTextureMapMode_Clamp != oldMat.sTexOpacity.mMapMode)
+		{
+			int i = (int)oldMat.sTexOpacity.mMapMode;
+			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_U_OPACITY(0));
+			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_OPACITY(0));
+		}
 	}
 	if( oldMat.sTexEmissive.mMapName.length() > 0)
 	{
@@ -335,6 +369,12 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 
 		if (is_not_qnan(oldMat.sTexEmissive.mTextureBlend))
 			mat.AddProperty<float>( &oldMat.sTexEmissive.mTextureBlend, 1, AI_MATKEY_TEXBLEND_EMISSIVE(0));
+		if (aiTextureMapMode_Clamp != oldMat.sTexEmissive.mMapMode)
+		{
+			int i = (int)oldMat.sTexEmissive.mMapMode;
+			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_U_EMISSIVE(0));
+			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_EMISSIVE(0));
+		}
 	}
 	if( oldMat.sTexBump.mMapName.length() > 0)
 	{
@@ -344,6 +384,12 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 
 		if (is_not_qnan(oldMat.sTexBump.mTextureBlend))
 			mat.AddProperty<float>( &oldMat.sTexBump.mTextureBlend, 1, AI_MATKEY_TEXBLEND_HEIGHT(0));
+		if (aiTextureMapMode_Clamp != oldMat.sTexBump.mMapMode)
+		{
+			int i = (int)oldMat.sTexBump.mMapMode;
+			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_U_HEIGHT(0));
+			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_HEIGHT(0));
+		}
 	}
 	if( oldMat.sTexShininess.mMapName.length() > 0)
 	{
@@ -353,6 +399,12 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 
 		if (is_not_qnan(oldMat.sTexShininess.mTextureBlend))
 			mat.AddProperty<float>( &oldMat.sTexShininess.mTextureBlend, 1, AI_MATKEY_TEXBLEND_SHININESS(0));
+		if (aiTextureMapMode_Clamp != oldMat.sTexShininess.mMapMode)
+		{
+			int i = (int)oldMat.sTexShininess.mMapMode;
+			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_U_SHININESS(0));
+			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_SHININESS(0));
+		}
 	}
 
 	// store the name of the material itself, too

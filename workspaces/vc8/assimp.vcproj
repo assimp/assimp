@@ -48,6 +48,7 @@
 				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -1013,6 +1014,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\LimitBoneWeightsProcess.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\MaterialSystem.h"
 				>
 			</File>
@@ -1298,6 +1303,10 @@
 			</File>
 			<File
 				RelativePath="..\..\code\KillNormalsProcess.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\LimitBoneWeightsProcess.cpp"
 				>
 			</File>
 			<File

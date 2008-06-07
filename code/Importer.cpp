@@ -89,6 +89,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "KillNormalsProcess.h"
 #include "SplitLargeMeshes.h"
 #include "PretransformVertices.h"
+#include "LimitBoneWeightsProcess.h"
 #include "../include/DefaultLogger.h"
 
 using namespace Assimp;
@@ -143,6 +144,7 @@ Importer::Importer() :
 	mPostProcessingSteps.push_back( new JoinVerticesProcess());
 	mPostProcessingSteps.push_back( new SplitLargeMeshesProcess_Vertex());
 	mPostProcessingSteps.push_back( new ConvertToLHProcess());
+	mPostProcessingSteps.push_back( new LimitBoneWeightsProcess());
 }
 
 // ------------------------------------------------------------------------------------------------

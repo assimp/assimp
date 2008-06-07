@@ -79,7 +79,7 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 	else if( strncmp( P + 8, "bin ", 4) == 0)
 		mIsBinaryFormat = true;
 	else
-		ThrowException( "Unsupported xfile format");
+    ThrowException( boost::str( boost::format( "Unsupported xfile format '%c%c%c%c'") % P[8] % P[9] % P[10] % P[11]));
 
 	// float size
 	mBinaryFloatSize = (unsigned int)(P[12] - 48) * 1000

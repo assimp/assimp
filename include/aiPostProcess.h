@@ -125,6 +125,17 @@ enum aiPostProcessSteps
 	* the normal list will be zeroed.
 	*/
 	aiProcess_PreTransformVertices = 0x100,
+
+	/** Limits the number of bones simultaneously affecting a single vertex
+	* to a maximum value. If any vertex is affected by more than that number
+	* of bones, the least important vertex weights are removed and the remaining
+	* vertex weights are renormalized so that the weights still sum up to 1.
+	* At the moment the maximum bone count is hardcoded to 4.
+	*
+	* If you intend to perform the skinning in hardware, this post processing step
+	* might be of interest for you.
+	*/
+	aiProcess_LimitBoneWeights = 0x200
 };
 
 // ---------------------------------------------------------------------------

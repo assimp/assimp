@@ -49,28 +49,27 @@ inline aiQuaternion::aiQuaternion( const aiMatrix3x3 &pRotMatrix)
 	{	
 		// Column 0: 
 		float s = sqrt( 1.0f + pRotMatrix.a1 - pRotMatrix.b2 - pRotMatrix.c3) * 2.0f;
-		x = 0.25f * s;
+		x = -0.25f * s;
 		y = (pRotMatrix.a2 + pRotMatrix.b1) / s;
 		z = (pRotMatrix.c1 + pRotMatrix.a3) / s;
-		w = (pRotMatrix.b3 - pRotMatrix.c2) / s;
+		w = (pRotMatrix.c2 - pRotMatrix.b3) / s;
 	} 
 	else if( pRotMatrix.b2 > pRotMatrix.c3) 
 	{ 
 		// Column 1: 
 		float s = sqrt( 1.0f + pRotMatrix.b2 - pRotMatrix.a1 - pRotMatrix.c3) * 2.0f;
 		x = (pRotMatrix.a2 + pRotMatrix.b1) / s;
-		y = 0.25f * s;
+		y = -0.25f * s;
 		z = (pRotMatrix.b3 + pRotMatrix.c2) / s;
-		w = (pRotMatrix.c1 - pRotMatrix.a3) / s;
-	} 
-	else 
+		w = (pRotMatrix.a3 - pRotMatrix.c1) / s;
+	} else 
 	{ 
 		// Column 2:
 		float s = sqrt( 1.0f + pRotMatrix.c3 - pRotMatrix.a1 - pRotMatrix.b2) * 2.0f;
 		x = (pRotMatrix.c1 + pRotMatrix.a3) / s;
 		y = (pRotMatrix.b3 + pRotMatrix.c2) / s;
-		z = 0.25f * s;
-		w = (pRotMatrix.a2 - pRotMatrix.b1) / s;
+		z = -0.25f * s;
+		w = (pRotMatrix.b1 - pRotMatrix.a2) / s;
 	}
 }
 

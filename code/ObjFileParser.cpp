@@ -28,7 +28,12 @@ ObjFileParser::ObjFileParser(std::vector<char> &Data,
 	// Create the model instance to store all the data
 	m_pModel = new ObjFile::Model();
 	m_pModel->m_ModelName = strModelName;
-		
+	
+	const std::string DEFAULT_MATERIAL = "defaultmaterial";
+	m_pModel->m_pDefaultMaterial = new ObjFile::Material();
+	m_pModel->m_MaterialLib.push_back( DEFAULT_MATERIAL );
+	m_pModel->m_MaterialMap[ DEFAULT_MATERIAL ] = m_pModel->m_pDefaultMaterial;
+	
 	// Start parsing the file
 	parseFile();
 }
@@ -288,6 +293,11 @@ void ObjFileParser::getFace()
 	m_pModel->m_pCurrent->m_Faces.push_back(face);
 	
 	// Assign face to mesh
+	if ( NULL == m_pModel->m_pCurrentMesh )
+	{
+		m_pModel->m_pCurrentMesh = new ObjFile::Mesh();
+		m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
+	}
 	m_pModel->m_pCurrentMesh->m_Faces.push_back( face );
 	
 	// Skip the rest of the line

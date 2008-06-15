@@ -83,6 +83,9 @@ class IOSystem;
 */
 class Importer
 {
+	// used internally
+	friend class BaseProcess;
+
 public:
 
 	// -------------------------------------------------------------------

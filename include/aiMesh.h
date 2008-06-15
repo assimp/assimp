@@ -395,7 +395,7 @@ struct aiMesh
 
 	//! Check whether the mesh contains a vertex color set
 	//! \param pIndex Index of the vertex color set
-	inline bool HasVertexColors( unsigned int pIndex) 
+	inline bool HasVertexColors( unsigned int pIndex) const
 	{ 
 		if( pIndex >= AI_MAX_NUMBER_OF_COLOR_SETS) 
 			return false; 
@@ -405,7 +405,7 @@ struct aiMesh
 
 	//! Check whether the mesh contains a texture coordinate set
 	//! \param pIndex Index of the texture coordinates set
-	inline bool HasTextureCoords( unsigned int pIndex) 
+	inline bool HasTextureCoords( unsigned int pIndex) const
 	{ 
 		if( pIndex > AI_MAX_NUMBER_OF_TEXTURECOORDS) 
 			return false; 

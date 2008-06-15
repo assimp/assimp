@@ -81,10 +81,14 @@ Parser::Parser (const char* szFile)
 void Parser::LogWarning(const char* szWarn)
 {
 	ai_assert(NULL != szWarn);
-	ai_assert(strlen(szWarn) < 950);
 
 	char szTemp[1024];
-	sprintf(szTemp,"Line %i: %s",this->iLineNumber/2 /* fixme */,szWarn);
+#if _MSC_VER >= 1400
+	sprintf_s(szTemp,"Line %i: %s",this->iLineNumber,szWarn);
+#else
+	ai_assert(strlen(szWarn) < 950);
+	sprintf(szTemp,"Line %i: %s",this->iLineNumber,szWarn);
+#endif
 
 	// output the warning to the logger ...
 	DefaultLogger::get()->warn(szTemp);
@@ -93,10 +97,14 @@ void Parser::LogWarning(const char* szWarn)
 void Parser::LogInfo(const char* szWarn)
 {
 	ai_assert(NULL != szWarn);
-	ai_assert(strlen(szWarn) < 950);
 
 	char szTemp[1024];
-	sprintf(szTemp,"Line %i: %s",this->iLineNumber/2 /* fixme */,szWarn);
+#if _MSC_VER >= 1400
+	sprintf_s(szTemp,"Line %i: %s",this->iLineNumber,szWarn);
+#else
+	ai_assert(strlen(szWarn) < 950);
+	sprintf(szTemp,"Line %i: %s",this->iLineNumber,szWarn);
+#endif
 
 	// output the information to the logger ...
 	DefaultLogger::get()->info(szTemp);
@@ -105,10 +113,14 @@ void Parser::LogInfo(const char* szWarn)
 void Parser::LogError(const char* szWarn)
 {
 	ai_assert(NULL != szWarn);
-	ai_assert(strlen(szWarn) < 950);
 
 	char szTemp[1024];
-	sprintf(szTemp,"Line %i: %s",this->iLineNumber/2 /* fixme */,szWarn);
+#if _MSC_VER >= 1400
+	sprintf_s(szTemp,"Line %i: %s",this->iLineNumber,szWarn);
+#else
+	ai_assert(strlen(szWarn) < 950);
+	sprintf(szTemp,"Line %i: %s",this->iLineNumber,szWarn);
+#endif
 
 	// throw an exception
 	throw new ImportErrorException(szTemp);
@@ -118,8 +130,12 @@ bool Parser::SkipToNextToken()
 {
 	while (true)
 	{
-		if ('*' == *this->m_szFile || '}' == *this->m_szFile || '{' == *this->m_szFile)return true;
-		if ('\0' == *this->m_szFile)return false;
+		char me = *this->m_szFile;
+
+		// increase the line number counter if necessary
+		if (IsLineEnd(me))++this->iLineNumber;
+		else if ('*' == me || '}' == me || '{' == me)return true;
+		else if ('\0' == me)return false;
 
 		++this->m_szFile;
 	}
@@ -670,21 +686,33 @@ void Parser::ParseLV3MapBlock(Texture& map)
 bool Parser::ParseString(std::string& out,const char* szName)
 {
 	char szBuffer[1024];
+
+#if (!defined _MSC_VER) || ( _MSC_VER < 1400)
 	ai_assert(strlen(szName) < 750);
+#endif
 
 	// NOTE: The name could also be the texture in some cases
 	// be prepared that this might occur ...
 	if (!SkipSpaces(this->m_szFile,&this->m_szFile))
 	{
+#if _MSC_VER >= 1400
+		sprintf_s(szBuffer,"Unable to parse %s block: Unexpected EOL",szName);
+#else
 		sprintf(szBuffer,"Unable to parse %s block: Unexpected EOL",szName);
+#endif
 		this->LogWarning(szBuffer);
 		return false;
 	}
 	// there must be "
 	if ('\"' != *this->m_szFile)
 	{
+#if _MSC_VER >= 1400
+		sprintf_s(szBuffer,"Unable to parse %s block: String is expected "
+			"to be enclosed in double quotation marks",szName);
+#else
 		sprintf(szBuffer,"Unable to parse %s block: String is expected "
 			"to be enclosed in double quotation marks",szName);
+#endif
 		this->LogWarning(szBuffer);
 		return false;
 	}
@@ -695,9 +723,15 @@ bool Parser::ParseString(std::string& out,const char* szName)
 		if ('\"' == *sz)break;
 		else if ('\0' == sz)
 		{
+#if _MSC_VER >= 1400
+			sprintf_s(szBuffer,"Unable to parse %s block: String is expected to be "
+				"enclosed in double quotation marks but EOF was reached before a closing "
+				"quotation mark was found",szName);
+#else
 			sprintf(szBuffer,"Unable to parse %s block: String is expected to be "
 				"enclosed in double quotation marks but EOF was reached before a closing "
 				"quotation mark was found",szName);
+#endif
 			this->LogWarning(szBuffer);
 			return false;
 		}
@@ -968,6 +1002,7 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 				this->LogWarning("Found *MESH_ANIMATION element in ASE/ASK file. "
 					"Keyframe animation is not supported by Assimp, this element "
 					"will be ignored");
+				//this->SkipSection();
 				continue;
 			}
 			// mesh animation keyframe. Not supported
@@ -1538,6 +1573,7 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 		{
 			BLUBB("Unable to parse *MESH_NORMALS Element: Unexpected EOL [#1]")
 		}
+		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
 		this->m_szFile++;
 	}
 	return;

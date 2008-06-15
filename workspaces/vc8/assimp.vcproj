@@ -1034,11 +1034,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\StringComparison.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\TextureTransform.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\code\TriangulateProcess.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\ValidateDataStructure.h"
 				>
 			</File>
 			<Filter
@@ -1331,6 +1339,10 @@
 			</File>
 			<File
 				RelativePath="..\..\code\TriangulateProcess.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\ValidateDataStructure.cpp"
 				>
 			</File>
 			<Filter

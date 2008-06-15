@@ -38,10 +38,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "../include/aiMaterial.h"
 #include "MaterialSystem.h"
+#include "StringComparison.h"
 
-
+#include "../include/aiMaterial.h"
 #include "../include/aiAssert.h"
 
 using namespace Assimp;
@@ -363,6 +363,13 @@ void MaterialHelper::CopyPropertyList(MaterialHelper* pcDest,
 	return;
 }
 // ------------------------------------------------------------------------------------------------
+// we need this dummy because the compiler would otherwise complain about
+// empty, but controlled statements ...
+void DummyAssertFunction()
+{
+	ai_assert(false);
+}
+// ------------------------------------------------------------------------------------------------
 aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 	unsigned int iIndex,
 	unsigned int iTexType,
@@ -460,7 +467,12 @@ aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 	char szKey[256];
 
 	// get the path to the texture
-	sprintf(szKey,"%s[%i]",szPathBase,iIndex);
+#if _MSC_VER >= 1400
+	if(0 >= sprintf_s(szKey,"%s[%i]",szPathBase,iIndex))DummyAssertFunction();
+#else
+	if(0 >= sprintf(szKey,"%s[%i]",szPathBase,iIndex))DummyAssertFunction();
+#endif
+
 	if (AI_SUCCESS != aiGetMaterialString(pcMat,szKey,szOut))
 	{
 		return AI_FAILURE;
@@ -469,7 +481,11 @@ aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 	if (piUVIndex)
 	{
 		int iUV;
-		sprintf(szKey,"%s[%i]",szUVBase,iIndex);
+#if _MSC_VER >= 1400
+		if(0 >= sprintf_s(szKey,"%s[%i]",szUVBase,iIndex))DummyAssertFunction();
+#else
+		if(0 >= sprintf(szKey,"%s[%i]",szUVBase,iIndex))DummyAssertFunction();
+#endif
 		if (AI_SUCCESS != aiGetMaterialInteger(pcMat,szKey,&iUV))
 			iUV = 0;
 
@@ -479,7 +495,11 @@ aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 	if (pfBlendFactor)
 	{
 		float fBlend;
-		sprintf(szKey,"%s[%i]",szBlendBase,iIndex);
+#if _MSC_VER >= 1400
+		if(0 >= sprintf_s(szKey,"%s[%i]",szBlendBase,iIndex))DummyAssertFunction();
+#else
+		if(0 >= sprintf(szKey,"%s[%i]",szBlendBase,iIndex))DummyAssertFunction();
+#endif
 		if (AI_SUCCESS != aiGetMaterialFloat(pcMat,szKey,&fBlend))
 			fBlend = 1.0f;
 
@@ -490,7 +510,11 @@ aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 	if (peTextureOp)
 	{
 		aiTextureOp op;
-		sprintf(szKey,"%s[%i]",szOpBase,iIndex);
+#if _MSC_VER >= 1400
+		if(0 >= sprintf_s(szKey,"%s[%i]",szOpBase,iIndex))DummyAssertFunction();
+#else
+		if(0 >= sprintf(szKey,"%s[%i]",szOpBase,iIndex))DummyAssertFunction();
+#endif
 		if (AI_SUCCESS != aiGetMaterialInteger(pcMat,szKey,(int*)&op))
 			op = aiTextureOp_Multiply;
 
@@ -503,7 +527,11 @@ aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 		aiTextureMapMode eMode;
 		for (unsigned int q = 0; q < 3;++q)
 		{
-			sprintf(szKey,"%s[%i]",aszMapModeBase[q],iIndex);
+#if _MSC_VER >= 1400
+			if(0 >= sprintf_s(szKey,"%s[%i]",aszMapModeBase[q],iIndex))DummyAssertFunction();
+#else
+			if(0 >= sprintf(szKey,"%s[%i]",aszMapModeBase[q],iIndex))DummyAssertFunction();
+#endif
 			if (AI_SUCCESS != aiGetMaterialInteger(pcMat,szKey,(int*)&eMode))
 			{
 				eMode = aiTextureMapMode_Wrap;

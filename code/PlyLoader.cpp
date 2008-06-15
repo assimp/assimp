@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the PLY importer class */
 #include "PlyLoader.h"
 #include "MaterialSystem.h"
+#include "StringComparison.h"
 
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
@@ -1063,7 +1064,7 @@ void PLYImporter::LoadMaterial(std::vector<MaterialHelper*>* pvOut)
 
 				// if shininess is 0 (and the pow() calculation would therefore always
 				// become 1, not depending on the angle) use gouraud lighting
-				if (0.0f != fSpec)
+				if (fSpec)
 				{
 
 					// scale this with 15 ... hopefully this is correct

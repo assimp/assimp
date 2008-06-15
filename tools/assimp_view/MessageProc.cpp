@@ -1589,14 +1589,14 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
 						// check whether it is a typical texture file format ...
 						++sz;
-						if (0 == Assimp::ASSIMP_stricmp(sz,"png") ||
-							0 == Assimp::ASSIMP_stricmp(sz,"bmp") ||
-							0 == Assimp::ASSIMP_stricmp(sz,"jpg") ||
-							0 == Assimp::ASSIMP_stricmp(sz,"tga") ||
-							0 == Assimp::ASSIMP_stricmp(sz,"tif") ||
-							0 == Assimp::ASSIMP_stricmp(sz,"hdr") ||
-							0 == Assimp::ASSIMP_stricmp(sz,"ppm") ||
-							0 == Assimp::ASSIMP_stricmp(sz,"pfm"))
+						if (0 == ASSIMP_stricmp(sz,"png") ||
+							0 == ASSIMP_stricmp(sz,"bmp") ||
+							0 == ASSIMP_stricmp(sz,"jpg") ||
+							0 == ASSIMP_stricmp(sz,"tga") ||
+							0 == ASSIMP_stricmp(sz,"tif") ||
+							0 == ASSIMP_stricmp(sz,"hdr") ||
+							0 == ASSIMP_stricmp(sz,"ppm") ||
+							0 == ASSIMP_stricmp(sz,"pfm"))
 						{
 							CBackgroundPainter::Instance().SetTextureBG(szFile);
 						}

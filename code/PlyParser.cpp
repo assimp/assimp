@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PlyLoader.h"
 #include "MaterialSystem.h"
 #include "fast_atof.h"
-#include "../include/DefaultLogger.h"
+#include "StringComparison.h"
 #include "ByteSwap.h"
 
 #include "../include/IOStream.h"
@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
+#include "../include/DefaultLogger.h"
 
 #include <boost/scoped_ptr.hpp>
 

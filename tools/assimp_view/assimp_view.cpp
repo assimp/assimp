@@ -132,7 +132,8 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 		aiProcess_Triangulate			| // triangulate n-polygons
 		aiProcess_GenSmoothNormals		| // generate smooth normal vectors if not existing
 		aiProcess_ConvertToLeftHanded	| // convert everything to D3D left handed space
-		aiProcess_SplitLargeMeshes);      // split large, unrenderable meshes into submeshes
+		aiProcess_SplitLargeMeshes      | // split large, unrenderable meshes into submeshes
+		aiProcess_ValidateDataStructure); // validate the output data structure
 
 	// get the end time of zje operation, calculate delta t
 	double fEnd = (double)timeGetTime();

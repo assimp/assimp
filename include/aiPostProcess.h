@@ -135,7 +135,16 @@ enum aiPostProcessSteps
 	* If you intend to perform the skinning in hardware, this post processing step
 	* might be of interest for you.
 	*/
-	aiProcess_LimitBoneWeights = 0x200
+	aiProcess_LimitBoneWeights = 0x200,
+
+	/** Validates the aiScene data structure before it is returned.
+	 * This makes sure that all indices are valid, all animations and
+	 * bones are linked correctly, all material are correct and so on ...
+	 * This is primarily intended for our internal debugging stuff,
+	 * however, it could be of interest for applications like editors
+	 * where stability is more important than loading performance.
+	*/
+	aiProcess_ValidateDataStructure = 0x400
 };
 
 // ---------------------------------------------------------------------------

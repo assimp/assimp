@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ASELoader.h"
 #include "3DSSpatialSort.h"
 #include "MaterialSystem.h"
+#include "StringComparison.h"
 #include "TextureTransform.h"
 #include "fast_atof.h"
 
@@ -57,8 +58,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 using namespace Assimp::ASE;
-
-#define LOGOUT_WARN(x) DefaultLogger::get()->warn(x);
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -619,7 +618,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 	if (mesh.iMaterialIndex >= this->mParser->m_vMaterials.size())
 	{
 		mesh.iMaterialIndex = (unsigned int)this->mParser->m_vMaterials.size()-1;
-		LOGOUT_WARN("Material index is out of range");
+		DefaultLogger::get()->warn("Material index is out of range");
 	}
 
 
@@ -640,7 +639,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 			// check range
 			if (mesh.mFaces[i].iMaterial >= vSubMaterials.size())
 				{
-					LOGOUT_WARN("Submaterial index is out of range");
+					DefaultLogger::get()->warn("Submaterial index is out of range");
 
 					// use the last material instead
 					aiSplit[vSubMaterials.size()-1].push_back(i);

@@ -41,9 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the few default functions of the base importer class */
 #include "BaseImporter.h"
+#include "BaseProcess.h"
+
 #include "../include/DefaultLogger.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
+#include "../include/assimp.hpp"
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
@@ -87,4 +90,29 @@ aiScene* BaseImporter::ReadFile( const std::string& pFile, IOSystem* pIOHandler)
 
 	// return what we gathered from the import. 
 	return scene;
+}
+
+// ------------------------------------------------------------------------------------------------
+void BaseProcess::ExecuteOnScene( Importer* pImp)
+{
+	ai_assert(NULL != pImp && NULL != pImp->mScene);
+
+	// catch exceptions thrown inside the PostProcess-Step
+	try
+	{
+		this->Execute(pImp->mScene);
+
+	} catch( ImportErrorException* exception)
+	{
+		// extract error description
+		pImp->mErrorString = exception->GetErrorText();
+
+		DefaultLogger::get()->error(pImp->mErrorString);
+
+		delete exception;
+
+		// and kill the partially imported data
+		delete pImp->mScene;
+		pImp->mScene = NULL;
+	}
 }

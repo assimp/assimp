@@ -46,21 +46,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "resource.h"
 
 // Include ASSIMP headers
-#include "aiAnim.h"
 #include "aiAssert.h"
 #include "aiFileIO.h"
-#include "aiMaterial.h"
 #include "aiPostProcess.h"
-#include "aiMesh.h"
 #include "aiScene.h"
-#include "aiTypes.h"
 #include "IOSystem.h"
 #include "IOStream.h"
 #include "assimp.h"
 #include "assimp.hpp"
 #include "LogStream.h"
 #include "DefaultLogger.h"
-#include "MaterialSystem.h"
+ 
+#include "MaterialSystem.h"   // MaterialHelper clas
+#include "StringComparison.h" // ASSIMP_stricmp and ASSIMP_strincmp
 
 // in order for std::min and std::max to behave properly
 #ifdef min 
@@ -72,6 +70,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // default movement speed 
 #define MOVE_SPEED 10.0f
+
+using namespace Assimp;
 
 namespace AssimpView {
 

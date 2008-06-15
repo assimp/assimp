@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "3DSLoader.h"
 #include "MaterialSystem.h"
 #include "TextureTransform.h"
+#include "StringComparison.h"
 
 #include "../include/DefaultLogger.h"
 #include "../include/IOStream.h"

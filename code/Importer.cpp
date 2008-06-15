@@ -47,6 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiAssert.h"
 #include "../include/aiScene.h"
 #include "../include/aiPostProcess.h"
+#include "../include/DefaultLogger.h"
+
 #include "BaseImporter.h"
 #include "BaseProcess.h"
 #include "DefaultIOStream.h"
@@ -90,7 +92,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SplitLargeMeshes.h"
 #include "PretransformVertices.h"
 #include "LimitBoneWeightsProcess.h"
-#include "../include/DefaultLogger.h"
+#include "ValidateDataStructure.h"
 
 using namespace Assimp;
 
@@ -134,6 +136,7 @@ Importer::Importer() :
 #endif
 
 	// add an instance of each post processing step here in the order of sequence it is executed
+	mPostProcessingSteps.push_back( new ValidateDSProcess());
 	mPostProcessingSteps.push_back( new TriangulateProcess());
 	mPostProcessingSteps.push_back( new PretransformVertices());
 	mPostProcessingSteps.push_back( new SplitLargeMeshesProcess_Triangle());
@@ -237,10 +240,7 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 
 	// dispatch the reading to the worker class for this format
 	mScene = imp->ReadFile( pFile, mIOHandler);
-	// if failed, extract the error string
-	if( !mScene)
-		mErrorString = imp->GetErrorText();
-
+	
 	// if successful, apply all active post processing steps to the imported data
 	if( mScene)
 	{
@@ -248,8 +248,17 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 		{
 			BaseProcess* process = mPostProcessingSteps[a];
 			if( process->IsActive( pFlags))
-				process->Execute( mScene);
+			{
+				process->ExecuteOnScene( this );
+			}
+			if( !mScene)break; // error string has already been set ...
 		}
+	}
+
+	// if failed, extract the error string
+	else if( !mScene)
+	{
+		mErrorString = imp->GetErrorText();
 	}
 
 	// either successful or failure - the pointer expresses it anyways

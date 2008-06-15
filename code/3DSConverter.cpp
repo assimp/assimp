@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "3DSLoader.h"
 #include "MaterialSystem.h"
 #include "TextureTransform.h"
+#include "StringComparison.h"
 
 #include "../include/DefaultLogger.h"
 #include "../include/IOStream.h"
@@ -114,7 +115,7 @@ void Dot3DSImporter::ReplaceDefaultMaterial()
 			}
 		}
 	}
-	if (0 != iCnt && iIndex == this->mScene->mMaterials.size())
+	if (iCnt && iIndex == this->mScene->mMaterials.size())
 	{
 		// we need to create our own default material
 		Dot3DS::Material sMat;
@@ -184,12 +185,6 @@ void Dot3DSImporter::MakeUnique(Dot3DS::Mesh* sMesh)
 
 			sMesh->mFaces[i].mIndices[0] = iTemp1;
 			sMesh->mFaces[i].mIndices[1] = iTemp2;
-
-			// handle the face order ...
-			/*if (iTemp1 > iTemp2)
-			{
-				sMesh->mFaces[i].bFlipped = true;
-			}*/
 		}
 	}
 	else
@@ -210,12 +205,6 @@ void Dot3DSImporter::MakeUnique(Dot3DS::Mesh* sMesh)
 
 			sMesh->mFaces[i].mIndices[0] = iTemp1;
 			sMesh->mFaces[i].mIndices[1] = iTemp2;
-
-			// handle the face order ...
-			/*if (iTemp1 > iTemp2)
-			{
-				sMesh->mFaces[i].bFlipped = true;
-			}*/
 		}
 	}
 	sMesh->mPositions = vNew;

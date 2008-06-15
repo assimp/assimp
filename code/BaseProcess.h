@@ -78,7 +78,16 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Executes the post processing step on the given imported data.
-	* At the moment a process is not supposed to fail.
+	* The function deletes the scene if the postprocess step fails (
+	* the object pointer will be set to NULL).
+	* @param pImp Importer instance (pImp->mScene must be valid)
+	*/
+	void ExecuteOnScene( Importer* pImp);
+
+	// -------------------------------------------------------------------
+	/** Executes the post processing step on the given imported data.
+	* A process should throw an ImportErrorException* if it fails.
+	* This method must be implemented by deriving classes.
 	* @param pScene The imported data to work at.
 	*/
 	virtual void Execute( aiScene* pScene) = 0;

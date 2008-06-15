@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the MD3 importer class */
 #include "MD3Loader.h"
 #include "MaterialSystem.h"
+#include "StringComparison.h"
 
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"

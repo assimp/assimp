@@ -384,7 +384,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 		pcMat->AddProperty(&szOld,szBuffer );
 	}
 	else if (szString.length == szOld.length && 
-		0 == Assimp::ASSIMP_stricmp(szString.data,szOld.data))
+		0 == ASSIMP_stricmp(szString.data,szOld.data))
 	{
 		pcMat->RemoveProperty(szBuffer);
 	}

@@ -208,27 +208,29 @@ struct aiMaterialProperty
 {
     /** Specifies the name of the property (key)
     *
-    *	Keys are case insensitive.
+    * Keys are case insensitive.
     */
     C_STRUCT aiString* mKey;
 
     /**	Size of the buffer mData is pointing to, in bytes
+	* This value may not be 0.
     */
     unsigned int mDataLength;
 
     /** Type information for the property.
     *
-    *  Defines the data layout inside the
-    *  data buffer. This is used by the library
-    *  internally to perform debug checks.
+    * Defines the data layout inside the
+    * data buffer. This is used by the library
+    * internally to perform debug checks.
     */
     aiPropertyTypeInfo mType;
 
     /**	Binary buffer to hold the property's value
     *
-    *  The buffer has no terminal character. However,
-    *  if a string is stored inside it may use 0 as terminal,
-    *  but it would be contained in mDataLength.
+    * The buffer has no terminal character. However,
+    * if a string is stored inside it may use 0 as terminal,
+    * but it would be contained in mDataLength. This member
+	* is never 0
     */
     char* mData;
 };
@@ -239,8 +241,8 @@ struct aiMaterialProperty
 *
 *  Material data is stored using a key-value structure, called property
 *  (to guarant that the system is maximally flexible).
-*  The library defines a set of standard keys, which should be enough
-*  for nearly all purposes. 
+*  The library defines a set of standard keys (AI_MATKEY) which should be 
+*  enough for nearly all purposes. 
 */
 // ---------------------------------------------------------------------------
 struct aiMaterial
@@ -260,6 +262,54 @@ public:
     unsigned int mNumProperties;
     unsigned int mNumAllocated;
 };
+
+// ---------------------------------------------------------------------------
+/** @def AI_BUILD_KEY
+ * Builds a material texture key with a dynamic index.
+ * Applications <b>could</b> do this (C-example):
+ * @code
+ * int i;
+ * struct aiMaterial* pMat = .... 
+ * for (i = 0;true;++i) {
+ *    if (AI_SUCCESS != aiGetMaterialFloat(pMat,AI_MATKEY_TEXTURE_DIFFUSE(i),...)) {
+ *       ...
+ *    }
+ * }
+ * @endcode 
+ * However, this is wrong because AI_MATKEY_TEXTURE_DIFFUSE() builds the key 
+ * string at <b>compile time</b>. <br>
+ * Therefore, the dynamic indexing results in a
+ * material key like this : "$tex.file.diffuse[i]" - and it is not very
+ * propable that there is a key with this name ... (except the programmer
+ * of an ASSIMP loader has made the same mistake :-) ).<br>
+ * This is the right way:
+ * @code
+ * int i;
+ * char szBuffer[512];
+ * struct aiMaterial* pMat = .... 
+ * for (i = 0;true;++i) {
+ *    AI_BUILD_KEY(AI_MATKEY_TEXTURE_DIFFUSE_,i,szBuffer);
+ *    if (AI_SUCCESS != aiGetMaterialFloat(pMat,szBuffer,...)) {
+ *       ...
+ *    }
+ * }
+ * @endcode 
+ * @param base Base material key. This is the same key you'd have used
+ *   normally with an underscore as suffix (e.g. AI_MATKEY_TEXTURE_DIFFUSE_)
+ * @param index Index to be used. Here you may pass a variable!
+ * @param out Array of chars to receive the output value. It must be 
+ *  sufficiently large. This will be checked via a static assertion for
+ *  C++0x. For MSVC8 and later versions the security enhanced version of
+ *  sprintf() will be used. However, if your buffer is at least 512 bytes
+ *  long you'll never overrun.
+*/
+#if _MSC_VER >= 1400
+#	define AI_BUILD_KEY(base,index,out) \
+	::sprintf_s(out,"%s[%i]",base,index);
+#else
+#	define AI_BUILD_KEY(base,index,out) \
+	::sprintf(out,"%s[%i]",base,index);
+#endif
 
 
 // ---------------------------------------------------------------------------
@@ -370,6 +420,10 @@ public:
  *  <br>
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> none <br>
+ * @note The key string is built at compile time, therefore it is not 
+ * posible  to use this macro in a loop with varying values for N. 
+ * However, you can  use the macro suffixed with '_' to build the key 
+ * dynamically. The AI_BUILD_KEY()-macro can be used to do this.
 */
 #define AI_MATKEY_TEXTURE_DIFFUSE(N) "$tex.file.diffuse["#N"]"
 #define AI_MATKEY_TEXTURE_DIFFUSE_  "$tex.file.diffuse"
@@ -379,6 +433,10 @@ public:
  *  <br>
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> none <br>
+ * @note The key string is built at compile time, therefore it is not 
+ * posible  to use this macro in a loop with varying values for N. 
+ * However, you can  use the macro suffixed with '_' to build the key 
+ * dynamically. The AI_BUILD_KEY()-macro can be used to do this.
 */
 #define AI_MATKEY_TEXTURE_AMBIENT(N) "$tex.file.ambient["#N"]"
 #define AI_MATKEY_TEXTURE_AMBIENT_   "$tex.file.ambient"
@@ -388,6 +446,10 @@ public:
  *  <br>
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> none <br>
+ * @note The key string is built at compile time, therefore it is not 
+ * posible  to use this macro in a loop with varying values for N. 
+ * However, you can  use the macro suffixed with '_' to build the key 
+ * dynamically. The AI_BUILD_KEY()-macro can be used to do this.
 */
 #define AI_MATKEY_TEXTURE_SPECULAR(N) "$tex.file.specular["#N"]"
 #define AI_MATKEY_TEXTURE_SPECULAR_   "$tex.file.specular"
@@ -397,6 +459,10 @@ public:
  *  <br>
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> none <br>
+ * @note The key string is built at compile time, therefore it is not 
+ * posible  to use this macro in a loop with varying values for N. 
+ * However, you can  use the macro suffixed with '_' to build the key 
+ * dynamically. The AI_BUILD_KEY()-macro can be used to do this.
 */
 #define AI_MATKEY_TEXTURE_EMISSIVE(N) "$tex.file.emissive["#N"]"
 #define AI_MATKEY_TEXTURE_EMISSIVE_   "$tex.file.emissive"
@@ -406,6 +472,10 @@ public:
  *  <br>
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> none <br>
+ * @note The key string is built at compile time, therefore it is not 
+ * posible  to use this macro in a loop with varying values for N. 
+ * However, you can  use the macro suffixed with '_' to build the key 
+ * dynamically. The AI_BUILD_KEY()-macro can be used to do this.
 */
 #define AI_MATKEY_TEXTURE_NORMALS(N) "$tex.file.normals["#N"]"
 #define AI_MATKEY_TEXTURE_NORMALS_   "$tex.file.normals"
@@ -419,15 +489,23 @@ public:
  * <br>
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> none <br>
+ * @note The key string is built at compile time, therefore it is not 
+ * posible  to use this macro in a loop with varying values for N. 
+ * However, you can  use the macro suffixed with '_' to build the key 
+ * dynamically. The AI_BUILD_KEY()-macro can be used to do this.
 */
-#define AI_MATKEY_TEXTURE_HEIGHT(N) "$tex.file.bump["#N"]"
-#define AI_MATKEY_TEXTURE_HEIGHT_   "$tex.file.bump"
+#define AI_MATKEY_TEXTURE_HEIGHT(N) "$tex.file.height["#N"]"
+#define AI_MATKEY_TEXTURE_HEIGHT_   "$tex.file.height"
 
 /** @def AI_MATKEY_TEXTURE_SHININESS
  *  Defines a specified shininess texture channel of the material
  *  <br>
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> none <br>
+ * @note The key string is built at compile time, therefore it is not 
+ * posible  to use this macro in a loop with varying values for N. 
+ * However, you can  use the macro suffixed with '_' to build the key 
+ * dynamically. The AI_BUILD_KEY()-macro can be used to do this.
 */
 #define AI_MATKEY_TEXTURE_SHININESS(N) "$tex.file.shininess["#N"]"
 #define AI_MATKEY_TEXTURE_SHININESS_   "$tex.file.shininess"
@@ -437,9 +515,14 @@ public:
  *  <br>
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> none <br>
+ * @note The key string is built at compile time, therefore it is not 
+ * posible  to use this macro in a loop with varying values for N. 
+ * However, you can  use the macro suffixed with '_' to build the key 
+ * dynamically. The AI_BUILD_KEY()-macro can be used to do this.
 */
 #define AI_MATKEY_TEXTURE_OPACITY(N) "$tex.file.opacity["#N"]"
 #define AI_MATKEY_TEXTURE_OPACITY_   "$tex.file.opacity"
+
 
 // ---------------------------------------------------------------------------
 /** @def AI_MATKEY_TEXOP_DIFFUSE
@@ -450,8 +533,10 @@ public:
  * <b>Type:</b> int (aiTextureOp)<br>
  * <b>Default value:</b> 0<br>
  * <b>Requires:</b> AI_MATKEY_TEXTURE_DIFFUSE(0)<br>
- * @note Never use an non-numeric index (like a variable) for this.
- * Remember, the key string is built by the preprocessor
+ * @note The key string is built at compile time, therefore it is not posible 
+ * to use this macro in a loop with varying values for N. However, you can 
+ * use the macro suffixed with '_' to build the key dynamically. The 
+ * AI_BUILD_KEY()-macro can be used to do this.
  */
 #define AI_MATKEY_TEXOP_DIFFUSE(N)	"$tex.op.diffuse["#N"]"
 /** @see AI_MATKEY_TEXOP_DIFFUSE */
@@ -485,8 +570,10 @@ public:
  * <b>Type:</b> int<br>
  * <b>Default value:</b> 0<br>
  * <b>Requires:</b> AI_MATKEY_TEXTURE_DIFFUSE(0)<br>
- * @note Never use an non-numeric index (like a variable) for this.
- * Remember, the key string is built by the preprocessor
+ * @note The key string is built at compile time, therefore it is not posible 
+ * to use this macro in a loop with varying values for N. However, you can 
+ * use the macro suffixed with '_' to build the key dynamically. The 
+ * AI_BUILD_KEY()-macro can be used to do this.
  */
 #define AI_MATKEY_UVWSRC_DIFFUSE(N)		"$tex.uvw.diffuse["#N"]"
 /** @see AI_MATKEY_UVWSRC_DIFFUSE */
@@ -520,8 +607,10 @@ public:
  * <b>Type:</b> float<br>
  * <b>Default value:</b> 1.0f<br>
  * <b>Requires:</b> AI_MATKEY_TEXTURE_DIFFUSE(0)<br>
- * @note Never use an non-numeric index (like a variable) for this.
- * Remember, the key string is built by the preprocessor
+ * @note The key string is built at compile time, therefore it is not posible 
+ * to use this macro in a loop with varying values for N. However, you can 
+ * use the macro suffixed with '_' to build the key dynamically. The 
+ * AI_BUILD_KEY()-macro can be used to do this.
  */
 #define AI_MATKEY_TEXBLEND_DIFFUSE(N)	"$tex.blend.diffuse["#N"]"
 /** @see AI_MATKEY_TEXBLEND_DIFFUSE */
@@ -556,8 +645,10 @@ public:
  * <b>Type:</b> int (aiTextureMapMode)<br>
  * <b>Default value:</b> aiTextureMapMode_Wrap<br>
  * <b>Requires:</b> AI_MATKEY_TEXTURE_DIFFUSE(0)<br>
- * @note Never use an non-numeric index (like a variable) for this.
- * Remember, the key string is built by the preprocessor
+ * @note The key string is built at compile time, therefore it is not posible 
+ * to use this macro in a loop with varying values for N. However, you can 
+ * use the macro suffixed with '_' to build the key dynamically. The 
+ * AI_BUILD_KEY()-macro can be used to do this.
  */
 #define AI_MATKEY_MAPPINGMODE_U_DIFFUSE(N)	"$tex.mapmodeu.diffuse["#N"]"
 /** @see AI_MATKEY_MAPPINGMODE_U_DIFFUSE */
@@ -592,8 +683,10 @@ public:
  * <b>Type:</b> int (aiTextureMapMode)<br>
  * <b>Default value:</b> aiTextureMapMode_Wrap<br>
  * <b>Requires:</b> AI_MATKEY_TEXTURE_DIFFUSE(0)<br>
- * @note Never use an non-numeric index (like a variable) for this.
- * Remember, the key string is built by the preprocessor
+ * @note The key string is built at compile time, therefore it is not posible 
+ * to use this macro in a loop with varying values for N. However, you can 
+ * use the macro suffixed with '_' to build the key dynamically. The 
+ * AI_BUILD_KEY()-macro can be used to do this.
  */
 #define AI_MATKEY_MAPPINGMODE_V_DIFFUSE(N)	"$tex.mapmodev.diffuse["#N"]"
 /** @see AI_MATKEY_MAPPINGMODE_V_DIFFUSE */
@@ -628,8 +721,10 @@ public:
  * <b>Type:</b> int (aiTextureMapMode)<br>
  * <b>Default value:</b> aiTextureMapMode_Wrap<br>
  * <b>Requires:</b> AI_MATKEY_TEXTURE_DIFFUSE(0)<br>
- * @note Never use an non-numeric index (like a variable) for this.
- * Remember, the key string is built by the preprocessor
+ * @note The key string is built at compile time, therefore it is not posible 
+ * to use this macro in a loop with varying values for N. However, you can 
+ * use the macro suffixed with '_' to build the key dynamically. The 
+ * AI_BUILD_KEY()-macro can be used to do this.
  */
 #define AI_MATKEY_MAPPINGMODE_W_DIFFUSE(N)	"$tex.mapmodew.diffuse["#N"]"
 /** @see AI_MATKEY_MAPPINGMODE_W_DIFFUSE */

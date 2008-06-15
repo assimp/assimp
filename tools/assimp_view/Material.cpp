@@ -49,29 +49,6 @@ namespace AssimpView {
 /*static */ CMaterialManager CMaterialManager::s_cInstance;
 
 //-------------------------------------------------------------------------------
-// Compiler idependent stricmp() function.
-//
-// Used for case insensitive string comparison
-//-------------------------------------------------------------------------------
-inline int ASSIMP_stricmp(const char *s1, const char *s2)
-{
-	const char *a1, *a2;
-	a1 = s1;
-	a2 = s2;
-
-	while (true)
-	{
-		char c1 = (char)tolower(*a1); 
-		char c2 = (char)tolower(*a2);
-		if ((0 == c1) && (0 == c2)) return 0;
-		if (c1 < c2) return-1;
-		if (c1 > c2) return 1;
-		++a1; 
-		++a2;
-	}
-}
-
-//-------------------------------------------------------------------------------
 // D3DX callback function to fill a texture with a checkers pattern
 //
 // This pattern is used to mark textures which could not be loaded

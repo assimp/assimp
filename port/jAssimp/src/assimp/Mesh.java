@@ -183,29 +183,9 @@ public class Mesh extends Mappable {
         assert (parent instanceof Scene);
 
         Scene sc = (Scene) parent;
-        if (0xffffffff == (this.m_iPresentFlags = this._NativeGetPresenceFlags(
-                sc.getImporter().getContext(), this.getArrayIndex()))) {
-            throw new NativeError("Unable to obtain a list of vertex presence flags");
-        }
-        if (0xffffffff == (this.m_iNumVertices = this._NativeGetNumVertices(
-                sc.getImporter().getContext(), this.getArrayIndex()))) {
-            throw new NativeError("Unable to obtain the number of vertices in the mesh");
-        }
-        if (0xffffffff == (this.m_iNumFaces = this._NativeGetNumFaces(
-                sc.getImporter().getContext(), this.getArrayIndex()))) {
-            throw new NativeError("Unable to obtain the number of faces in the mesh");
-        }
-        if (0xffffffff == (this.m_iNumBones = this._NativeGetNumBones(
-                sc.getImporter().getContext(), this.getArrayIndex()))) {
-            throw new NativeError("Unable to obtain the number of bones in the mesh");
-        }
-        if (0xffffffff == (this.m_iMaterialIndex = this._NativeGetMaterialIndex(
-                sc.getImporter().getContext(), this.getArrayIndex()))) {
-            throw new NativeError("Unable to obtain the material index of the mesh");
-        }
-        if (0xffffffff == this._NativeGetNumUVComponents(
-                sc.getImporter().getContext(), this.getArrayIndex(), this.m_aiNumUVComponents)) {
-            throw new NativeError("Unable to obtain the number of UV components");
+        if (0xffffffff == this._NativeInitMembers(
+                sc.getImporter().getContext(), this.getArrayIndex())) {
+            throw new NativeError("Unable to intiailise class members via JNI");
         }
     }
 
@@ -821,18 +801,12 @@ public class Mesh extends Mappable {
 
     /**
      * JNI bridge function - for internal use only
-     * Retrieve the number of vertices in the mesh
+     * Initialise class members
      *
      * @param context Current importer context (imp.hashCode)
      * @return Number of vertices in the mesh
      */
-    private native int _NativeGetNumVertices(long context, long index);
-
-    private native int _NativeGetNumFaces(long context, long index);
-
-    private native int _NativeGetNumBones(long context, long index);
-
-    private native int _NativeGetMaterialIndex(long context, long index);
+    private native int _NativeInitMembers(long context, long index);
 
     /**
      * JNI bridge function - for internal use only

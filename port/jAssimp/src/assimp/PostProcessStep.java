@@ -45,7 +45,7 @@ package assimp;
 /**
  * Enumeration class that defines postprocess steps that can be executed on a model
  * after it has been loaded. All PPSteps are implemented in C++, so their performance
- * is awesome. Most steps are O(n * log(n)).
+ * is awesome. Most steps are O(n * log(n)). ;-)
  *
  * @author Aramis (Alexander Gessler)
  * @version 1.0
@@ -62,8 +62,15 @@ public class PostProcessStep {
      */
     public static final int DEFAULT_TRIANGLE_SPLIT_LIMIT = 1000000;
 
+    /**
+     * Default bone weight limit for the LimitBoneWeight process
+     */
+    public static final int DEFAULT_BONE_WEIGHT_LIMIT = 4;
+
+
     private static int s_iVertexSplitLimit = DEFAULT_VERTEX_SPLIT_LIMIT;
     private static int s_iTriangleSplitLimit = DEFAULT_TRIANGLE_SPLIT_LIMIT;
+    private static int s_iBoneWeightLimit = DEFAULT_BONE_WEIGHT_LIMIT;
 
     /**
      * Identifies and joins identical vertex data sets within all imported
@@ -154,6 +161,31 @@ public class PostProcessStep {
     public static final PostProcessStep PreTransformVertices =
             new PostProcessStep("PreTransformVertices");
 
+    /**
+     * Limits the number of bones simultaneously affecting a single vertex
+     * to a maximum value. If any vertex is affected by more than that number
+     * of bones, the least important vertex weights are removed and the remaining
+     * vertex weights are renormalized so that the weights still sum up to 1.
+     * The default bone weight limit is 4 (DEFAULT_BONE_WEIGHT_LIMIT).
+     * However, you can use setBoneWeightLimit() to supply your own limit.
+     * If you intend to perform the skinning in hardware, this post processing step
+     * might be of interest for you.
+     */
+    public static final PostProcessStep LimitBoneWeights =
+            new PostProcessStep("LimitBoneWeights");
+
+
+    /**
+     * Validates the aiScene data structure before it is returned.
+     * This makes sure that all indices are valid, all animations and
+     * bones are linked correctly, all material are correct and so on ...
+     * This is primarily intended for our internal debugging stuff,
+     * however, it could be of interest for applications like editors
+     * where stability is more important than loading performance.
+     */
+    public static final PostProcessStep ValidateDataStructure =
+            new PostProcessStep("ValidateDataStructure");
+
 
     /**
      * Set the vertex split limit for the "SplitLargeMeshes" process
@@ -192,6 +224,22 @@ public class PostProcessStep {
     }
 
     /**
+     * Set the bone weight limit for the "LimitBoneWeights" process
+     * If a mesh exceeds this limit it will be splitted
+     *
+     * @param limit new bone weight limit. Pass 0xffffffff to disable it.
+     * @return Old bone weight limit
+     */
+    public static synchronized int setSetBoneWeightLimit(int limit) {
+        if (s_iBoneWeightLimit != limit) {
+            // send to the JNI bridge ...
+            s_iBoneWeightLimit = limit;
+            _NativeSetBoneWeightLimit(limit);
+        }
+        return limit;
+    }
+
+    /**
      * JNI bridge call. For internal use only
      *
      * @param limit New vertex split limit
@@ -204,6 +252,13 @@ public class PostProcessStep {
      * @param limit New triangle split limit
      */
     private native static void _NativeSetTriangleSplitLimit(int limit);
+
+    /**
+     * JNI bridge call. For internal use only
+     *
+     * @param limit New bone weight limit
+     */
+    private native static void _NativeSetBoneWeightLimit(int limit);
 
 
     private final String myName; // for debug only

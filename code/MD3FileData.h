@@ -89,10 +89,10 @@ namespace MD3
 struct Header
 {
 	//! magic number
-	int32_t IDENT;
+	uint32_t IDENT;
 
 	//! file format version
-	int32_t VERSION;
+	uint32_t VERSION;
 
 	//! original name in .pak archive
 	unsigned char NAME[ AI_MD3_MAXQPATH ];
@@ -101,28 +101,28 @@ struct Header
 	int32_t FLAGS;
 
 	//! number of frames in the file
-	int32_t NUM_FRAMES;
+	uint32_t NUM_FRAMES;
 
 	//! number of tags in the file
-	int32_t NUM_TAGS;
+	uint32_t NUM_TAGS;
 
 	//! number of surfaces in the file
-	int32_t NUM_SURFACES;
+	uint32_t NUM_SURFACES;
 
 	//! number of skins in the file
-	int32_t NUM_SKINS;
+	uint32_t NUM_SKINS;
 
 	//! offset of the first frame
-	int32_t OFS_FRAMES;
+	uint32_t OFS_FRAMES;
 
 	//! offset of the first tag
-	int32_t OFS_TAGS;
+	uint32_t OFS_TAGS;
 
 	//! offset of the first surface
-	int32_t OFS_SURFACES;
+	uint32_t OFS_SURFACES;
 
 	//! end of file
-	int32_t OFS_EOF;
+	uint32_t OFS_EOF;
 } PACK_STRUCT;
 
 
@@ -162,29 +162,29 @@ struct Surface
 	int32_t FLAGS;
 
 	//! number of frames in the surface
-	int32_t NUM_FRAMES;
+	uint32_t NUM_FRAMES;
 
 	//! number of shaders in the surface
-	int32_t NUM_SHADER;
+	uint32_t NUM_SHADER;
 
 	//! number of vertices in the surface
-	int32_t NUM_VERTICES;
+	uint32_t NUM_VERTICES;
 
 	//! number of triangles in the surface
-	int32_t NUM_TRIANGLES;
+	uint32_t NUM_TRIANGLES;
 
 
 	//! offset to the triangle data 
-	int32_t OFS_TRIANGLES;
+	uint32_t OFS_TRIANGLES;
 
 	//! offset to the shader data
-	int32_t OFS_SHADERS;
+	uint32_t OFS_SHADERS;
 
 	//! offset to the texture coordinate data
-	int32_t OFS_ST;
+	uint32_t OFS_ST;
 
 	//! offset to the vertex/normal data
-	int32_t OFS_XYZNORMAL;
+	uint32_t OFS_XYZNORMAL;
 
 	//! offset to the end of the Surface object
 	int32_t OFS_END;
@@ -200,7 +200,7 @@ struct Shader
 	unsigned char NAME[ AI_MD3_MAXQPATH ];
 
 	//! index of the shader
-	int32_t SHADER_INDEX;
+	uint32_t SHADER_INDEX;
 } PACK_STRUCT;
 
 
@@ -211,7 +211,7 @@ struct Shader
 struct Triangle
 {
 	//! triangle indices
-	int32_t INDEXES[3];
+	uint32_t INDEXES[3];
 } PACK_STRUCT;
 
 
@@ -236,7 +236,7 @@ struct Vertex
 	int16_t X,Y,Z;
 
 	//! encoded normal vector
-	int16_t  NORMAL;
+	uint16_t  NORMAL;
 } PACK_STRUCT;
 
 // reset packing to the original value
@@ -254,9 +254,9 @@ struct Vertex
  *	\note This has been taken from q3 source (misc_model.c)
  */
 // ---------------------------------------------------------------------------
-inline void LatLngNormalToVec3(int16_t p_iNormal, float* p_afOut)
+inline void LatLngNormalToVec3(uint16_t p_iNormal, float* p_afOut)
 {
-	float lat = (float)(( p_iNormal >> 8 ) & 0xff);
+	float lat = (float)(( p_iNormal >> 8u ) & 0xff);
 	float lng = (float)(( p_iNormal & 0xff ));
 	lat *= 3.141926f/128.0f;
 	lng *= 3.141926f/128.0f;

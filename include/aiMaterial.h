@@ -52,6 +52,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
+// Default material name
+#define AI_DEFAULT_MATERIAL_NAME "aiDefaultMat"
+
 // ---------------------------------------------------------------------------
 /** Defines type identifiers for use within the material system.
 *
@@ -235,6 +238,18 @@ struct aiMaterialProperty
     char* mData;
 };
 
+#ifdef __cplusplus
+} // need to end extern C block to allow template member functions
+#endif
+
+#define AI_TEXTYPE_OPACITY		0x0
+#define AI_TEXTYPE_SPECULAR		0x1
+#define AI_TEXTYPE_AMBIENT		0x2
+#define AI_TEXTYPE_EMISSIVE		0x3
+#define AI_TEXTYPE_HEIGHT		0x4
+#define AI_TEXTYPE_NORMALS		0x5
+#define AI_TEXTYPE_SHININESS	0x6
+#define AI_TEXTYPE_DIFFUSE		0x7
 
 // ---------------------------------------------------------------------------
 /** Data structure for a material
@@ -245,13 +260,67 @@ struct aiMaterialProperty
 *  enough for nearly all purposes. 
 */
 // ---------------------------------------------------------------------------
-struct aiMaterial
+struct ASSIMP_API aiMaterial
 {
 #ifdef __cplusplus
 protected:
     aiMaterial() {}
 public:
-#endif // __cplusplus
+
+	// -------------------------------------------------------------------
+    /** Retrieve an array of Type values with a specific key 
+     *  from the material
+     *
+     * @param pKey Key to search for. One of the AI_MATKEY_XXX constants.
+     * @param pOut Pointer to a buffer to receive the result. 
+     * @param pMax Specifies the size of the given buffer, in Type's.
+     * Receives the number of values (not bytes!) read. 
+     * NULL is a valid value for this parameter.
+     */
+    template <typename Type>
+    inline aiReturn Get(const char* pKey,Type* pOut,
+        unsigned int* pMax);
+
+    // -------------------------------------------------------------------
+    /** Retrieve a Type value with a specific key 
+     *  from the material
+	 *
+	 * @param pKey Key to search for. One of the AI_MATKEY_XXX constants.
+	 * @param pOut Reference to receive the output value
+	 */
+	template <typename Type>
+	inline aiReturn Get(const char* pKey,Type& pOut);
+
+	// -------------------------------------------------------------------
+	/** Helper function to get a texture from a material
+	*
+	*  This function is provided just for convinience. 
+	*  @param iIndex Index of the texture to retrieve. If the index is too 
+	*		large the function fails.
+	*  @param iTexType One of the AI_TEXTYPE constants. Specifies the type of
+	*		the texture to retrieve (e.g. diffuse, specular, height map ...)
+	*  @param szPath Receives the output path
+	*		NULL is no allowed as value
+	*  @param piUVIndex Receives the UV index of the texture. 
+	*		NULL is allowed as value.
+	*  @param pfBlendFactor Receives the blend factor for the texture
+	*		NULL is allowed as value.
+	*  @param peTextureOp Receives the texture operation to perform between
+	*		this texture and the previous texture. NULL is allowed as value.
+	*  @param peMapMode Receives the mapping modes to be used for the texture.
+	*      The parameter may be NULL but if it is a valid pointer it MUST
+	*      point to an array of 3 aiTextureMapMode variables (one for each
+	*      axis: UVW order (=XYZ)). 
+	*/
+	// -------------------------------------------------------------------
+	inline aiReturn GetTexture(unsigned int iIndex,
+		unsigned int iTexType,
+		C_STRUCT aiString* szPath,
+		unsigned int* piUVIndex		= NULL,
+		float* pfBlendFactor		= NULL,
+		aiTextureOp* peTextureOp	= NULL,
+		aiTextureMapMode* peMapMode = NULL); 
+#endif
 
     /** List of all material properties loaded.
     */
@@ -262,6 +331,11 @@ public:
     unsigned int mNumProperties;
     unsigned int mNumAllocated;
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 // ---------------------------------------------------------------------------
 /** @def AI_BUILD_KEY
@@ -300,13 +374,27 @@ public:
  * @param out Array of chars to receive the output value. It must be 
  *  sufficiently large. This will be checked via a static assertion for
  *  C++0x. For MSVC8 and later versions the security enhanced version of
- *  sprintf() will be used. However, if your buffer is at least 512 bytes
+ *  sprintf() will be used. However, if your buffer is at least 256 bytes
  *  long you'll never overrun.
 */
+// ---------------------------------------------------------------------------
 #if _MSC_VER >= 1400
+
+	// MSVC 8+. Use the sprintf_s function with security enhancements
 #	define AI_BUILD_KEY(base,index,out) \
 	::sprintf_s(out,"%s[%i]",base,index);
+
+#elif (defined ASSIMP_BUILD_CPP_09)
+
+	// C++09 compiler. Use a static assertion to validate the size
+	// of the output buffer
+#	define AI_BUILD_KEY(base,index,out) \
+	static_assert(sizeof(out) >= 180,"Output buffer is too small");  \
+	::sprintf(out,"%s[%i]",base,index); 
+
 #else
+
+	// otherwise ... simply hope the buffer is large enough :-)
 #	define AI_BUILD_KEY(base,index,out) \
 	::sprintf(out,"%s[%i]",base,index);
 #endif
@@ -416,7 +504,7 @@ public:
 
 // ---------------------------------------------------------------------------
 /** @def AI_MATKEY_TEXTURE_DIFFUSE
-*  Defines a specified diffuse texture channel of the material
+*  Defines a specific diffuse texture channel of the material
  *  <br>
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> none <br>
@@ -429,7 +517,7 @@ public:
 #define AI_MATKEY_TEXTURE_DIFFUSE_  "$tex.file.diffuse"
 
 /** @def AI_MATKEY_TEXTURE_AMBIENT
- *  Defines a specified ambient texture channel of the material
+ *  Defines a specific ambient texture channel of the material
  *  <br>
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> none <br>
@@ -442,7 +530,7 @@ public:
 #define AI_MATKEY_TEXTURE_AMBIENT_   "$tex.file.ambient"
 
 /** @def AI_MATKEY_TEXTURE_SPECULAR
- *  Defines a specified specular texture channel of the material
+ *  Defines a specific specular texture channel of the material
  *  <br>
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> none <br>
@@ -455,7 +543,7 @@ public:
 #define AI_MATKEY_TEXTURE_SPECULAR_   "$tex.file.specular"
 
 /** @def AI_MATKEY_TEXTURE_EMISSIVE
- *  Defines a specified emissive texture channel of the material
+ *  Defines a specific emissive texture channel of the material
  *  <br>
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> none <br>
@@ -468,7 +556,7 @@ public:
 #define AI_MATKEY_TEXTURE_EMISSIVE_   "$tex.file.emissive"
 
 /** @def AI_MATKEY_TEXTURE_NORMALS
- *  Defines a specified normal texture channel of the material
+ *  Defines a specific normal texture channel of the material
  *  <br>
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> none <br>
@@ -498,7 +586,7 @@ public:
 #define AI_MATKEY_TEXTURE_HEIGHT_   "$tex.file.height"
 
 /** @def AI_MATKEY_TEXTURE_SHININESS
- *  Defines a specified shininess texture channel of the material
+ *  Defines a specific shininess texture channel of the material
  *  <br>
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> none <br>
@@ -511,7 +599,7 @@ public:
 #define AI_MATKEY_TEXTURE_SHININESS_   "$tex.file.shininess"
 
 /** @def AI_MATKEY_TEXTURE_OPACITY
- *  Defines a specified opacity texture channel of the material
+ *  Defines a specific opacity texture channel of the material
  *  <br>
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> none <br>
@@ -772,7 +860,7 @@ public:
 *         structure or NULL if the key has not been found. 
 */
 // ---------------------------------------------------------------------------
-aiReturn aiGetMaterialProperty(const C_STRUCT aiMaterial* pMat, 
+ASSIMP_API aiReturn aiGetMaterialProperty(const C_STRUCT aiMaterial* pMat, 
     const char* pKey,
     const C_STRUCT aiMaterialProperty** pPropOut);
 
@@ -788,7 +876,7 @@ aiReturn aiGetMaterialProperty(const C_STRUCT aiMaterial* pMat,
 *        Receives the number of values (not bytes!) read. 
 */
 // ---------------------------------------------------------------------------
-aiReturn aiGetMaterialFloatArray(const C_STRUCT aiMaterial* pMat, 
+ASSIMP_API aiReturn aiGetMaterialFloatArray(const C_STRUCT aiMaterial* pMat, 
     const char* pKey,
     float* pOut,
     unsigned int* pMax);
@@ -817,7 +905,7 @@ inline aiReturn aiGetMaterialFloat(const C_STRUCT aiMaterial* pMat,
 *        Receives the number of values (not bytes!) read. 
 */
 // ---------------------------------------------------------------------------
-aiReturn aiGetMaterialIntegerArray(const C_STRUCT aiMaterial* pMat, 
+ASSIMP_API aiReturn aiGetMaterialIntegerArray(const C_STRUCT aiMaterial* pMat, 
     const char* pKey,
     int* pOut,
     unsigned int* pMax);
@@ -844,7 +932,7 @@ inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial* pMat,
 *	@param pOut Pointer to a buffer to receive the result. 
 */
 // ---------------------------------------------------------------------------
-aiReturn aiGetMaterialColor(const C_STRUCT aiMaterial* pMat, 
+ASSIMP_API aiReturn aiGetMaterialColor(const C_STRUCT aiMaterial* pMat, 
     const char* pKey,
     aiColor4D* pOut);
 
@@ -857,19 +945,10 @@ aiReturn aiGetMaterialColor(const C_STRUCT aiMaterial* pMat,
 *	@param pOut Pointer to a buffer to receive the result. 
 */
 // ---------------------------------------------------------------------------
-aiReturn aiGetMaterialString(const C_STRUCT aiMaterial* pMat, 
+ASSIMP_API aiReturn aiGetMaterialString(const C_STRUCT aiMaterial* pMat, 
     const char* pKey,
     aiString* pOut);
 
-
-#define AI_TEXTYPE_OPACITY		0x0
-#define AI_TEXTYPE_SPECULAR		0x1
-#define AI_TEXTYPE_AMBIENT		0x2
-#define AI_TEXTYPE_EMISSIVE		0x3
-#define AI_TEXTYPE_HEIGHT		0x4
-#define AI_TEXTYPE_NORMALS		0x5
-#define AI_TEXTYPE_SHININESS	0x6
-#define AI_TEXTYPE_DIFFUSE		0x7
 
 // ---------------------------------------------------------------------------
 /** Helper function to get a texture from a material
@@ -895,7 +974,7 @@ aiReturn aiGetMaterialString(const C_STRUCT aiMaterial* pMat,
  */
 // ---------------------------------------------------------------------------
 #ifdef __cplusplus
-aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* pMat,
+ASSIMP_API aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* pMat,
     unsigned int iIndex,
     unsigned int iTexType,
     C_STRUCT aiString* szPath,
@@ -920,5 +999,4 @@ aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* pMat,
 #include "aiMaterial.inl"
 
 #endif //!__cplusplus
-
 #endif //!!AI_MATERIAL_H_INC

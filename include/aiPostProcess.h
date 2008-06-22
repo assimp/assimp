@@ -130,8 +130,10 @@ enum aiPostProcessSteps
 	* to a maximum value. If any vertex is affected by more than that number
 	* of bones, the least important vertex weights are removed and the remaining
 	* vertex weights are renormalized so that the weights still sum up to 1.
-	* At the moment the maximum bone count is hardcoded to 4.
-	*
+	* The default bone weight limit is 4 (defined as AI_LMW_MAX_WEIGHTS in
+	* LimitBoneWeightsProcess.h), but you can use the aiSetBoneWeightLimit
+	* function to supply your own limit to the post processing step.
+	* 
 	* If you intend to perform the skinning in hardware, this post processing step
 	* might be of interest for you.
 	*/
@@ -156,8 +158,7 @@ enum aiPostProcessSteps
  * \note The default value is AI_SLM_DEFAULT_MAX_VERTICES, defined in
  *       the internal header file SplitLargeMeshes.h
  */
-aiReturn aiSetVertexSplitLimit(unsigned int pLimit);
-
+ASSIMP_API aiReturn aiSetVertexSplitLimit(unsigned int pLimit);
 
 // ---------------------------------------------------------------------------
 /** \brief Set the maximum number of triangles in a mesh.
@@ -168,7 +169,17 @@ aiReturn aiSetVertexSplitLimit(unsigned int pLimit);
  * \note The default value is AI_SLM_DEFAULT_MAX_TRIANGLES, defined in
  *       the internal header file SplitLargeMeshes.h
  */
-aiReturn aiSetTriangleSplitLimit(unsigned int pLimit);
+ASSIMP_API aiReturn aiSetTriangleSplitLimit(unsigned int pLimit);
+
+// ---------------------------------------------------------------------------
+/** \brief Set the maximum number of bones affecting a single vertex
+ *
+ * This is used by the aiProcess_LimitBoneWeights PostProcess-Step.
+ * \param pLimit Bone limit
+ * \note The default value is AI_LMW_MAX_WEIGHTS, defined in
+ *       the internal header file LimitBoneWeightsProcess.h
+ */
+ASSIMP_API aiReturn aiSetBoneWeightLimit(unsigned int pLimit);
 
 #ifdef __cplusplus
 } // end of extern "C"

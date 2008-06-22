@@ -7,7 +7,7 @@
         <attribute name="URI" value="/" />
       </containerElement>
     </containerInfo>
-    <setting name="jarPath" value="J:\Programmieren\ASSIMP\assimp2\port\jAssimp\assimp.jar" />
+    <setting name="jarPath" value="J:\Programmieren\ASSIMP\assimp\port\jAssimp\assimp.jar" />
     <setting name="buildJar" value="true" />
     <setting name="mainClass" value="" />
   </component>

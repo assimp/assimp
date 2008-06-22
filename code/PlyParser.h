@@ -48,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <list>
 #include <sstream>
 
+#include "ParsingUtils.h"
+
 #include "../include/aiTypes.h"
 #include "../include/aiMesh.h"
 #include "../include/aiAnim.h"
@@ -551,48 +553,6 @@ TYPE PLY::PropertyInstance::ConvertTo(
 }
 };
 
-// ---------------------------------------------------------------------------------
-inline bool IsSpace( const char in)
-{
-	return (in == ' ' || in == '\t');
-}
-// ---------------------------------------------------------------------------------
-inline bool IsLineEnd( const char in)
-{
-	return (in == '\r' || in == '\n' || in == '\0');
-}
-// ---------------------------------------------------------------------------------
-inline bool IsSpaceOrNewLine( const char in)
-{
-	return IsSpace(in) || IsLineEnd(in);
-}
-// ---------------------------------------------------------------------------------
-inline bool SkipSpaces( const char* in, const char** out)
-{
-	while (*in == ' ' || *in == '\t')in++;
-	*out = in;
-	return !IsLineEnd(*in);
-}
-// ---------------------------------------------------------------------------------
-inline bool SkipLine( const char* in, const char** out)
-{
-	while (*in != '\r' && *in != '\n' && *in != '\0')in++;
-
-	if (*in == '\0')
-	{
-		*out = in;
-		return false;
-	}
-	in++;
-	*out = in;
-	return true;
-}
-// ---------------------------------------------------------------------------------
-inline void SkipSpacesAndLineEnd( const char* in, const char** out)
-{
-	while (*in == ' ' || *in == '\t' || *in == '\r' || *in == '\n')in++;
-	*out = in;
-}
 };
 
 #endif // !! include guard

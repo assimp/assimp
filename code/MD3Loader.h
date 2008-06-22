@@ -96,6 +96,13 @@ protected:
 	void InternReadFile( const std::string& pFile, aiScene* pScene, 
 		IOSystem* pIOHandler);
 
+
+	// -------------------------------------------------------------------
+	/** Validate offsets in the header
+	*/
+	void ValidateHeaderOffsets();
+	void ValidateSurfaceHeaderOffsets(const MD3::Surface* pcSurfHeader);
+
 protected:
 
 	/** Header of the MD3 file */
@@ -103,6 +110,9 @@ protected:
 
 	/** Buffer to hold the loaded file */
 	const unsigned char* mBuffer;
+
+	/** Size of the file, in bytes */
+	unsigned int fileSize;
 	};
 
 } // end of namespace Assimp

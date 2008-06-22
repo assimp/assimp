@@ -55,8 +55,7 @@ namespace Assimp
 void TextureTransform::PreProcessUVTransform(
 	Dot3DS::Texture& rcIn)
 {
-	std::string s;
-	std::stringstream ss;
+	char szTemp[512];
 	int iField;
 
 	if (rcIn.mOffsetU)
@@ -66,10 +65,10 @@ void TextureTransform::PreProcessUVTransform(
 			if (aiTextureMapMode_Wrap == rcIn.mMapMode)
 			{
 				float fNew = rcIn.mOffsetU-(float)iField;
-				ss << "[wrap] Found texture coordinate U offset " << rcIn.mOffsetU << ". "
-					"This can be optimized to " << fNew;
-				ss >> s;
-				DefaultLogger::get()->info(s);
+				sprintf(szTemp,"[wrap] Found texture coordinate U offset %f. "
+					"This can be optimized to %f",rcIn.mOffsetU,fNew);
+	
+				DefaultLogger::get()->info(szTemp);
 				rcIn.mOffsetU = fNew;
 			}
 			else if (aiTextureMapMode_Mirror == rcIn.mMapMode)
@@ -77,18 +76,18 @@ void TextureTransform::PreProcessUVTransform(
 				if (0 != (iField % 2))iField--;
 				float fNew = rcIn.mOffsetU-(float)iField;
 
-				ss << "[mirror] Found texture coordinate U offset " << rcIn.mOffsetU << ". "
-					"This can be optimized to " << fNew;
-				ss >> s;
-				DefaultLogger::get()->info(s);
+				sprintf(szTemp,"[mirror] Found texture coordinate U offset %f. "
+					"This can be optimized to %f",rcIn.mOffsetU,fNew);
+
+				DefaultLogger::get()->info(szTemp);
 				rcIn.mOffsetU = fNew;
 			}
 			else if (aiTextureMapMode_Clamp == rcIn.mMapMode)
 			{
-				ss << "[clamp] Found texture coordinate U offset " << rcIn.mOffsetU << ". "
-					"This can be clamped to 1.0f";
-				ss >> s;
-				DefaultLogger::get()->info(s);
+				sprintf(szTemp,"[clamp] Found texture coordinate U offset %f. "
+					"This can be clamped to 1.0f",rcIn.mOffsetU);
+
+				DefaultLogger::get()->info(szTemp);
 				rcIn.mOffsetU = 1.0f;
 			}
 		}
@@ -100,10 +99,10 @@ void TextureTransform::PreProcessUVTransform(
 			if (aiTextureMapMode_Wrap == rcIn.mMapMode)
 			{
 				float fNew = rcIn.mOffsetV-(float)iField;
-				ss << "[wrap] Found texture coordinate V offset " << rcIn.mOffsetV << ". "
-					"This can be optimized to " << fNew;
-				ss >> s;
-				DefaultLogger::get()->info(s);
+				sprintf(szTemp,"[wrap] Found texture coordinate V offset %f. "
+					"This can be optimized to %f",rcIn.mOffsetV,fNew);
+
+				DefaultLogger::get()->info(szTemp);
 				rcIn.mOffsetV = fNew;
 			}
 			else if (aiTextureMapMode_Mirror == rcIn.mMapMode)
@@ -111,18 +110,18 @@ void TextureTransform::PreProcessUVTransform(
 				if (0 != (iField % 2))iField--;
 				float fNew = rcIn.mOffsetV-(float)iField;
 
-				ss << "[mirror] Found texture coordinate V offset " << rcIn.mOffsetV << ". "
-					"This can be optimized to " << fNew;
-				ss >> s;
-				DefaultLogger::get()->info(s);
+				sprintf(szTemp,"[mirror] Found texture coordinate V offset %f. "
+					"This can be optimized to %f",rcIn.mOffsetV,fNew);
+				
+				DefaultLogger::get()->info(szTemp);
 				rcIn.mOffsetV = fNew;
 			}
 			else if (aiTextureMapMode_Clamp == rcIn.mMapMode)
 			{
-				ss << "[clamp] Found texture coordinate V offset " << rcIn.mOffsetV << ". "
-					"This can be clamped to 1.0f";
-				ss >> s;
-				DefaultLogger::get()->info(s);
+				sprintf(szTemp,"[clamp] Found texture coordinate U offset %f. "
+					"This can be clamped to 1.0f",rcIn.mOffsetV);
+
+				DefaultLogger::get()->info(szTemp);
 				rcIn.mOffsetV = 1.0f;
 			}
 		}
@@ -132,9 +131,11 @@ void TextureTransform::PreProcessUVTransform(
 		if (iField = (int)(rcIn.mRotation / 3.141592654f))
 		{
 			float fNew = rcIn.mRotation-(float)iField*3.141592654f;
-			ss << "[wrap] Found texture coordinate rotation " << rcIn.mRotation << ". "
-				"This can be optimized to " << fNew;
-			DefaultLogger::get()->info(s);
+
+			sprintf(szTemp,"[wrap] Found texture coordinate rotation %f. "
+				"This can be optimized to %f",rcIn.mRotation,fNew);
+			DefaultLogger::get()->info(szTemp);
+
 			rcIn.mRotation = fNew;
 		}
 	}
@@ -300,10 +301,16 @@ void TextureTransform::BakeScaleNOffset(
 	// it is more efficient this way ... 
 
 	if (!pcMesh->mTextureCoords[0])return;
-	if (1 == pcSrc->iBakeUVTransform)
+	if (0x1 == pcSrc->iBakeUVTransform)
 	{
 		char szTemp[512];
-		sprintf(szTemp,"Transforming existing UV channel. Source UV: %i" 
+		int iLen;
+#if _MSC_VER >= 1400
+		iLen = ::sprintf_s(szTemp,
+#else
+		iLen = ::sprintf(szTemp,
+#endif
+			"Transforming existing UV channel. Source UV: %i" 
 			" OffsetU: %f" 
 			" OffsetV: %f" 
 			" ScaleU: %f" 
@@ -314,7 +321,9 @@ void TextureTransform::BakeScaleNOffset(
 			pcSrc->pcSingleTexture->mScaleU,
 			pcSrc->pcSingleTexture->mScaleV,
 			pcSrc->pcSingleTexture->mRotation);
-		DefaultLogger::get()->info(std::string(szTemp));
+
+		ai_assert(0 < iLen);
+		DefaultLogger::get()->info(std::string(szTemp,iLen));
 
 		if (!pcSrc->pcSingleTexture->mRotation)
 		{
@@ -349,7 +358,7 @@ void TextureTransform::BakeScaleNOffset(
 			}
 		}
 	}
-	else if (2 == pcSrc->iBakeUVTransform)
+	else if (0x2 == pcSrc->iBakeUVTransform)
 	{
 		// first save all texture coordinate sets
 		aiVector3D* apvOriginalSets[AI_MAX_NUMBER_OF_TEXTURECOORDS];
@@ -367,13 +376,14 @@ void TextureTransform::BakeScaleNOffset(
 		// now we need to find all textures in the material
 		// which require scaling/offset operations
 		std::vector<STransformVecInfo> sOps;
-		AddToList(sOps,&pcSrc->sTexDiffuse);
-		AddToList(sOps,&pcSrc->sTexSpecular);
-		AddToList(sOps,&pcSrc->sTexEmissive);
-		AddToList(sOps,&pcSrc->sTexOpacity);
-		AddToList(sOps,&pcSrc->sTexBump);
-		AddToList(sOps,&pcSrc->sTexShininess);
-		AddToList(sOps,&pcSrc->sTexAmbient);
+		sOps.reserve(10);
+		TextureTransform::AddToList(sOps,&pcSrc->sTexDiffuse);
+		TextureTransform::AddToList(sOps,&pcSrc->sTexSpecular);
+		TextureTransform::AddToList(sOps,&pcSrc->sTexEmissive);
+		TextureTransform::AddToList(sOps,&pcSrc->sTexOpacity);
+		TextureTransform::AddToList(sOps,&pcSrc->sTexBump);
+		TextureTransform::AddToList(sOps,&pcSrc->sTexShininess);
+		TextureTransform::AddToList(sOps,&pcSrc->sTexAmbient);
 
 		// check the list and find out how many we won't be able
 		// to generate.
@@ -446,7 +456,13 @@ void TextureTransform::BakeScaleNOffset(
 			pcMesh->mTextureCoords[iNum] = _pvOut;
 
 			char szTemp[512];
-			sprintf(szTemp,"Generating additional UV channel. Source UV: %i" 
+			int iLen;
+#if _MSC_VER >= 1400
+			iLen = ::sprintf_s(szTemp,
+#else
+			iLen = ::sprintf(szTemp,
+#endif
+				"Generating additional UV channel. Source UV: %i" 
 				" OffsetU: %f" 
 				" OffsetV: %f" 
 				" ScaleU: %f" 
@@ -457,7 +473,8 @@ void TextureTransform::BakeScaleNOffset(
 				(**i).fScaleU,
 				(**i).fScaleV,
 				(**i).fRotation);
-			DefaultLogger::get()->info(std::string(szTemp));
+			ai_assert(0 < iLen);
+			DefaultLogger::get()->info(std::string(szTemp,iLen));
 
 			const aiVector3D* pvBase = _pvBase;
 			aiVector3D* pvOut = _pvOut;
@@ -516,6 +533,12 @@ void TextureTransform::BakeScaleNOffset(
 			if (apvOriginalSets[iNum])delete[] apvOriginalSets[iNum];
 		}
 	}
+
+	// setup bitflags to indicate which texture coordinate
+	// channels are used (this class works for 2d texture coordinates only)
+
+	unsigned int iIndex = 0;
+	while (pcMesh->HasTextureCoords(iIndex))pcMesh->mNumUVComponents[iIndex++] = 2;
 	return;
 }
 // ------------------------------------------------------------------------------------------------

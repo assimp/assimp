@@ -40,13 +40,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Implementation of the ASE importer class */
+
+// internal headers
 #include "ASELoader.h"
 #include "3DSSpatialSort.h"
 #include "MaterialSystem.h"
 #include "StringComparison.h"
 #include "TextureTransform.h"
-#include "fast_atof.h"
 
+// utilities
+#include "fast_atof.h"
+#include "qnan.h"
+
+// ASSIMP public headers
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
 #include "../include/aiMesh.h"

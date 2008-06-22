@@ -111,7 +111,7 @@ public:
 	// -------------------------------------------------------------------
 	/** Imports the given file and returns the imported data.
 	* If the import succeeds, ownership of the data is transferred to 
-	* the caller. If the import failes, NULL is returned. The function
+	* the caller. If the import fails, NULL is returned. The function
 	* takes care that any partially constructed data is destroyed
 	* beforehand.
 	*
@@ -154,7 +154,15 @@ protected:
 	 * an error. If it terminates normally, the data in aiScene is 
 	 * expected to be correct. Override this function to implement the 
 	 * actual importing.
-	 * 
+	 * <br>
+	 * The output scene must meet the following conditions:<br>
+	 * - at least one mesh must be there<br>
+	 * - at least a root node must be there<br>
+	 * - at least one material must be there<br>
+	 * - there may be no meshes with 0 vertices or faces<br>
+	 * This won't be checked (except by the validation step), Assimp will
+	 * crash if one of the conditions is not met!
+	 *
 	 * @param pFile Path of the file to be imported.
 	 * @param pScene The scene object to hold the imported data.
 	 * NULL is not a valid parameter.

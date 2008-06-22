@@ -16,8 +16,12 @@ struct aiQuaternion
 #ifdef __cplusplus
 	aiQuaternion() : w(0.0f), x(0.0f), y(0.0f), z(0.0f) {}
 	aiQuaternion(float _w, float _x, float _y, float _z) : w(_w), x(_x), y(_y), z(_z) {}
+
 	/** Construct from rotation matrix. Result is undefined if the matrix is not orthonormal. */
 	aiQuaternion( const aiMatrix3x3& pRotMatrix);
+
+	/** Construct from euler angles */
+	aiQuaternion( float rotx, float roty, float rotz);
 
 	/** Returns a matrix representation of the quaternion */
 	aiMatrix3x3 GetMatrix() const;
@@ -74,6 +78,24 @@ inline aiQuaternion::aiQuaternion( const aiMatrix3x3 &pRotMatrix)
 }
 
 // ---------------------------------------------------------------------------
+// Construction from euler angles
+inline aiQuaternion::aiQuaternion( float fPitch, float fYaw, float fRoll )
+{
+	const float fSinPitch(sin(fPitch*0.5F));
+	const float fCosPitch(cos(fPitch*0.5F));
+	const float fSinYaw(sin(fYaw*0.5F));
+	const float fCosYaw(cos(fYaw*0.5F));
+	const float fSinRoll(sin(fRoll*0.5F));
+	const float fCosRoll(cos(fRoll*0.5F));
+	const float fCosPitchCosYaw(fCosPitch*fCosYaw);
+	const float fSinPitchSinYaw(fSinPitch*fSinYaw);
+	x = fSinRoll * fCosPitchCosYaw     - fCosRoll * fSinPitchSinYaw;
+	y = fCosRoll * fSinPitch * fCosYaw + fSinRoll * fCosPitch * fSinYaw;
+	z = fCosRoll * fCosPitch * fSinYaw - fSinRoll * fSinPitch * fCosYaw;
+	w = fCosRoll * fCosPitchCosYaw     + fSinRoll * fSinPitchSinYaw;
+}
+
+// ---------------------------------------------------------------------------
 // Returns a matrix representation of the quaternion
 inline aiMatrix3x3 aiQuaternion::GetMatrix() const
 {
@@ -90,6 +112,8 @@ inline aiMatrix3x3 aiQuaternion::GetMatrix() const
 
 	return resMatrix;
 }
+
+
 
 } // end extern "C"
 #endif // __cplusplus

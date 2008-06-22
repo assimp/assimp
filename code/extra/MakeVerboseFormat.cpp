@@ -49,17 +49,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-
+// ------------------------------------------------------------------------------------------------
 MakeVerboseFormatProcess::MakeVerboseFormatProcess()
 {
 	// nothing to do here
 }
-
+// ------------------------------------------------------------------------------------------------
 MakeVerboseFormatProcess::~MakeVerboseFormatProcess()
 {
 	// nothing to do here
 }
-// -------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void MakeVerboseFormatProcess::Execute( aiScene* pScene)
 {
@@ -76,8 +76,7 @@ void MakeVerboseFormatProcess::Execute( aiScene* pScene)
 	else DefaultLogger::get()->debug("MakeVerboseFormatProcess. There was nothing to do.");
 
 }
-
-// -------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
 {

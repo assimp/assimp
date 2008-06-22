@@ -45,10 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/types.h>
 #include <memory.h>
 
-#if (defined _MSC_VER)
-#	include "Compiler/VisualStudio/stdint.h"
-#endif // (defined _MSC_VER)
+#include "aiDefines.h"
 
+// include math helper classes and their implementations
 #include "aiVector3D.h"
 #include "aiMatrix3x3.h"
 #include "aiMatrix4x4.h"
@@ -59,13 +58,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef __cplusplus
 #	include <string>
 extern "C" {
-#	define C_STRUCT
-#else
-#	if (defined ASSIMP_DOXYGEN_BUILD)
-#		define C_STRUCT
-#	else
-#		define C_STRUCT struct
-#	endif
 #endif
 
 /** Maximum dimension for strings, ASSIMP strings are zero terminated */
@@ -145,14 +137,14 @@ struct aiString
 	inline aiString() :
 		length(0) 
 	{
-		// empty
+		data[0] = '\0';
 	}
 
 	//! construction from a given std::string
 	inline aiString(const aiString& rOther) : 
 		length(rOther.length) 
 	{
-		memcpy( data, rOther.data, rOther.length);
+		::memcpy( data, rOther.data, rOther.length);
 		this->data[this->length] = '\0';
 	}
 
@@ -162,7 +154,7 @@ struct aiString
 		if( pString.length() > MAXLEN - 1)
 			return;
 		length = pString.length();
-		memcpy( data, pString.c_str(), length);
+		::memcpy( data, pString.c_str(), length);
 		data[length] = 0;
 	}
 
@@ -177,7 +169,7 @@ struct aiString
 	bool operator!=(const aiString& other) const
 	{
 		return  (this->length != other.length ||
-				 0 != strcmp(this->data,other.data));
+				 0 != ::strcmp(this->data,other.data));
 	}
 
 
@@ -194,11 +186,10 @@ struct aiString
 // ---------------------------------------------------------------------------
 /**	Standard return type for all library functions.
 *
-* To check whether a function failed or not check against
-* AI_SUCCESS.
+* To check whether or not a function failed check against
+* AI_SUCCESS. The error codes are mainly used by the C-API.
 */
 // ---------------------------------------------------------------------------
-
 enum aiReturn
 {
 	//! Indicates that a function was successful

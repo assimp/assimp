@@ -50,5 +50,6 @@ inline aiMatrix3x3& aiMatrix3x3::Transpose()
 }
 
 
+
 #endif // __cplusplus
 #endif // AI_MATRIX3x3_INL_INC

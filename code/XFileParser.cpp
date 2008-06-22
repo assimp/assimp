@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "XFileHelper.h"
 #include "BaseImporter.h"
 #include "fast_atof.h"
+#include "../include/DefaultLogger.h"
 
 #include <boost/format.hpp>
 
@@ -150,11 +151,11 @@ void XFileParser::ParseFile()
 		if( objectName == "}")
 		{
 			// whatever?
-			// os::Printer::log("} found in dataObject", ELL_WARNING);
+			DefaultLogger::get()->warn("} found in dataObject");
 		} else
 		{
 			// unknown format
-			//os::Printer::log("Unknown data object in animation of .x file", objectName.c_str(), ELL_WARNING);
+			DefaultLogger::get()->warn("Unknown data object in animation of .x file");
 			ParseUnknownDataObject();
 		}
 	}
@@ -248,7 +249,7 @@ void XFileParser::ParseDataObjectFrame( Node* pParent)
 			ParseDataObjectMesh( mesh);
 		} else
 		{
-			// os::Printer::log("Unknown data object in frame in x file", objectName.c_str(), ELL_WARNING);
+			DefaultLogger::get()->warn("Unknown data object in frame in x file");
 			ParseUnknownDataObject();
 		}
 	}
@@ -338,7 +339,7 @@ void XFileParser::ParseDataObjectMesh( Mesh* pMesh)
 			ParseDataObjectSkinWeights( pMesh);
 		else
 		{
-			//os::Printer::log("Unknown data object in mesh in x file", objectName.c_str(), ELL_WARNING);
+			DefaultLogger::get()->warn("Unknown data object in mesh in x file");
 			ParseUnknownDataObject();
 		}
 	}
@@ -533,7 +534,7 @@ void XFileParser::ParseDataObjectMeshMaterialList( Mesh* pMesh)
 			// ignore
 		} else
 		{
-			// os::Printer::log("Unknown data object in material list in x file", objectName.c_str(), ELL_WARNING);
+			DefaultLogger::get()->warn("Unknown data object in material list in x file");
 			ParseUnknownDataObject();
 		}
 	}
@@ -571,7 +572,7 @@ void XFileParser::ParseDataObjectMaterial( Material* pMaterial)
 			pMaterial->mTextures.push_back( texname);
 		} else
 		{
-			// os::Printer::log("Unknown data object in material in .x file", objectName.c_str(), ELL_WARNING);
+			DefaultLogger::get()->warn("Unknown data object in material in x file");
 			ParseUnknownDataObject();
 		}
 	}
@@ -608,7 +609,7 @@ void XFileParser::ParseDataObjectAnimationSet()
 			ParseDataObjectAnimation( anim);
 		else
 		{
-			// os::Printer::log("Unknown data object in animation set in x file", objectName.c_str(), ELL_WARNING);
+			DefaultLogger::get()->warn("Unknown data object in animation set in x file");
 			ParseUnknownDataObject();
 		}
 	}
@@ -644,7 +645,7 @@ void XFileParser::ParseDataObjectAnimation( Animation* pAnim)
 			CheckForClosingBrace();
 		} else
 		{
-			//os::Printer::log("Unknown data object in animation in x file", objectName.c_str(), ELL_WARNING);
+			DefaultLogger::get()->warn("Unknown data object in animation in x file");
 			ParseUnknownDataObject();
 		}
 	}
@@ -748,6 +749,12 @@ void XFileParser::ParseDataObjectTextureFilename( std::string& pName)
 	readHeadOfDataObject();
 	GetNextTokenAsString( pName);
 	CheckForClosingBrace();
+
+	// FIX: some files (e.g. AnimationTest.x) have "" as texture file name
+	if (!pName.length())
+	{
+		DefaultLogger::get()->warn("Length of texture file name is zero. Skipping this texture.");
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

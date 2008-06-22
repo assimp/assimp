@@ -43,6 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package assimp;
 
 import java.util.Vector;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.File;
+import java.lang.ref.Reference;
 
 /**
  * Main class of jAssimp. The class is a simple wrapper for the native
@@ -58,6 +63,65 @@ import java.util.Vector;
  * @version 1.0
  */
 public class Importer {
+
+    /**
+     * Default implementation of <code>IOStream</code>.
+     * <br>
+     * This might become a performance bottleneck: The application
+     * needs to map the data read by this interface into a C-style
+     * array. For every single read operation! Therefore it is a good
+     * optimization to use the default C IOStream handler if no custom
+     * java handler was specified. Assuming that the Java Runtime is using
+     * the fXXX-family of functions internally too, the result should be
+     * the same. The problem is: we can't be sure we'll be able to open
+     * the file for reading from both Java and native code. Therefore we
+     * need to close our Java <code>FileReader</code> handle before
+     * control is given to native code.
+     */
+    private class DefaultIOStream implements IOStream {
+
+        private FileReader reader = null;
+
+        /**
+         * Construction with a given path
+         * @param file Path to the file to be opened
+         * @throws FileNotFoundException If the file isn't accessible at all
+         */
+        public DefaultIOStream(final String file) throws FileNotFoundException {
+            reader = new FileReader(file);
+        }
+
+    }
+
+    /**
+     * Default implementation of <code>IOSystem</code>.
+     */
+    private class DefaultIOSystem implements IOSystem {
+
+        /**
+         * Called to check whether a file is existing
+         *
+         * @param file Filename
+         * @return true if the file is existing and accessible
+         */
+        public boolean Exists(String file) {
+            File f = new File(file);
+            return f.exists();
+        }
+
+        /**
+         * Open a file and return an <code> IOStream </code> interface
+         * to access it.
+         *
+         * @param file File name of the file to be opened
+         * @return A valid IOStream interface
+         * @throws FileNotFoundException if the file can't be accessed
+         */
+        public IOStream Open(String file) throws FileNotFoundException {
+            return new DefaultIOStream(file);
+        }
+    }
+
 
     /**
      * List of all postprocess steps to apply to the model
@@ -84,16 +148,26 @@ public class Importer {
     private String path = null;
 
     /**
+     * I/O system to be used
+     */
+    private IOSystem ioSystem = null;
+
+    /**
      * Public constructor. Initialises the JNI bridge to the native
      * ASSIMP library. A native Assimp::Importer object is constructed and
      * initialized. The flag list is set to zero, a default I/O handler
-     * is constructed.
+     * is initialized.
      *
+     * @param iVersion Version of the JNI interface to be used.
      * @throws NativeError Thrown if the jassimp library could not be loaded
      *                     or if the entry point to the module wasn't found. if this exception
      *                     is not thrown, you can assume that jAssimp is fully available.
      */
-    public Importer() throws NativeError {
+    public Importer(int iVersion) throws NativeError {
+
+        // allocate a default I/O system
+        ioSystem = new DefaultIOSystem();
+
         /** try to load the jassimp library. First try to load the
          * x64 version, in case of failure the x86 version
          */
@@ -111,7 +185,7 @@ public class Importer {
         // now create the native Importer class and setup our internal
         // data structures outside the VM.
         try {
-            if (0xffffffffffffffffl == (this.m_iNativeHandle = _NativeInitContext())) {
+            if (0xffffffffffffffffl == (this.m_iNativeHandle = _NativeInitContext(iVersion))) {
                 throw new NativeError(
                         "Unable to initialize the native library context." +
                                 "The initialization routine has failed");
@@ -125,6 +199,32 @@ public class Importer {
         return;
     }
 
+    public Importer() throws NativeError {
+        this(0);
+    }
+
+    /**
+     * Get the I/O system (<code>IOSystem</code>) to be used for loading
+     * assets. If no custom implementation was provided via <code>setIoSystem()</code>
+     * a default implementation will be used. Use <code>isDefaultIoSystem()</code>
+     * to check this.
+     * @return Always a valid <code>IOSystem</code> object, never null.
+     */
+    public IOSystem getIoSystem() {
+        return ioSystem;
+    }
+
+    
+    /**
+     * Checks whether a default IO system is currently being used to load
+     * assets. Using the default IO system has many performance benefits,
+     * but it is possible to provide a custom IO system (<code>setIoSystem()</code>).
+     * This allows applications to add support for archives like ZIP.
+     * @return true if a default <code>IOSystem</code> is active,
+     */
+    public boolean isDefaultIoSystem() {
+        return ioSystem instanceof DefaultIOSystem;
+    }
 
     /**
      * Add a postprocess step to the list of steps to be executed on
@@ -213,6 +313,8 @@ public class Importer {
             else if (step.equals(PostProcessStep.GenSmoothNormals)) flags |= 0x40;
             else if (step.equals(PostProcessStep.SplitLargeMeshes)) flags |= 0x80;
             else if (step.equals(PostProcessStep.PreTransformVertices)) flags |= 0x100;
+            else if (step.equals(PostProcessStep.LimitBoneWeights)) flags |= 0x200;
+            else if (step.equals(PostProcessStep.ValidateDataStructure)) flags |= 0x400;
         }
 
         // now load the mesh
@@ -227,6 +329,7 @@ public class Importer {
         }
         catch (NativeError exc) {
 
+            // delete everything ...
             this.scene = null;
             this.path = null;
             throw exc;
@@ -247,9 +350,8 @@ public class Importer {
 
         final Importer importer = (Importer) o;
 
-        if (m_iNativeHandle != importer.m_iNativeHandle) return false;
+        return m_iNativeHandle == importer.m_iNativeHandle;
 
-        return true;
     }
 
     /**
@@ -268,7 +370,6 @@ public class Importer {
         if (0xffffffff == _NativeFreeContext(this.m_iNativeHandle)) {
             throw new NativeError("Unable to destroy the native library context");
         }
-        return;
     }
 
     /**
@@ -306,9 +407,10 @@ public class Importer {
      * library functions are available, too. If they are not, an <code>
      * UnsatisfiedLinkError</code> will be thrown during model loading.
      *
+     * @param version Version of the JNI bridge requested
      * @return Unique handle for the class or 0xffffffff if an error occured
      */
-    private native int _NativeInitContext();
+    private native int _NativeInitContext(int version);
 
     /**
      * JNI bridge call. For internal use only

@@ -68,6 +68,21 @@ struct aiTexel
 	unsigned char g;
 	unsigned char r;
 	unsigned char a;
+
+	//! Comparison operator
+	bool operator== (const aiTexel& other) const
+	{
+		return b == other.b && r == other.r &&
+			g == other.g && a == other.a;
+	}
+
+	//! Negative comparison operator
+	bool operator!= (const aiTexel& other) const
+	{
+		return b != other.b || r != other.r ||
+			g != other.g || a != other.a;
+	}
+
 } PACK_STRUCT;
 
 // reset packing to the original value

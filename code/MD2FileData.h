@@ -80,34 +80,33 @@ namespace MD2
 // ---------------------------------------------------------------------------
 /**	\brief Data structure for the MD2 main header
  */
-// ---------------------------------------------------------------------------
 struct Header
 {
-	int32_t magic; 
-	int32_t version; 
-	int32_t skinWidth; 
-	int32_t skinHeight; 
-	int32_t frameSize; 
-	int32_t numSkins; 
-	int32_t numVertices; 
-	int32_t numTexCoords; 
-	int32_t numTriangles; 
-	int32_t numGlCommands; 
-	int32_t numFrames; 
-	int32_t offsetSkins; 
-	int32_t offsetTexCoords; 
-	int32_t offsetTriangles; 
-	int32_t offsetFrames; 
-	int32_t offsetGlCommands; 
-	int32_t offsetEnd; 
+	uint32_t magic; 
+	uint32_t version; 
+	uint32_t skinWidth; 
+	uint32_t skinHeight; 
+	uint32_t frameSize; 
+	uint32_t numSkins; 
+	uint32_t numVertices; 
+	uint32_t numTexCoords; 
+	uint32_t numTriangles; 
+	uint32_t numGlCommands; 
+	uint32_t numFrames; 
+	uint32_t offsetSkins; 
+	uint32_t offsetTexCoords; 
+	uint32_t offsetTriangles; 
+	uint32_t offsetFrames; 
+	uint32_t offsetGlCommands; 
+	uint32_t offsetEnd; 
 
 } PACK_STRUCT;
+
 
 
 // ---------------------------------------------------------------------------
 /**	\brief Data structure for a MD2 OpenGl draw command
  */
-// ---------------------------------------------------------------------------
 struct GLCommand
 {
    float s, t;
@@ -117,7 +116,6 @@ struct GLCommand
 // ---------------------------------------------------------------------------
 /**	\brief Data structure for a MD2 triangle
  */
-// ---------------------------------------------------------------------------
 struct Triangle
 {
 	uint16_t vertexIndices[3];
@@ -127,7 +125,6 @@ struct Triangle
 // ---------------------------------------------------------------------------
 /**	\brief Data structure for a MD2 vertex
  */
-// ---------------------------------------------------------------------------
 struct Vertex
 {
 	uint8_t vertex[3];
@@ -137,7 +134,6 @@ struct Vertex
 // ---------------------------------------------------------------------------
 /**	\brief Data structure for a MD2 frame
  */
-// ---------------------------------------------------------------------------
 struct Frame
 {
 	float scale[3];
@@ -149,7 +145,6 @@ struct Frame
 // ---------------------------------------------------------------------------
 /**	\brief Data structure for a MD2 texture coordinate
  */
-// ---------------------------------------------------------------------------
 struct TexCoord
 {
 	int16_t s;
@@ -159,7 +154,6 @@ struct TexCoord
 // ---------------------------------------------------------------------------
 /**	\brief Data structure for a MD2 skin
  */
-// ---------------------------------------------------------------------------
 struct Skin
 {
 	char name[AI_MD2_MAXQPATH];              /* texture file name */
@@ -170,6 +164,14 @@ struct Skin
 #	pragma pack( pop )
 #endif
 #undef PACK_STRUCT
+
+
+// ---------------------------------------------------------------------------
+//! Lookup a normal vector from Quake's normal lookup table
+//! \param index Input index (0-161)
+//! \param vOut Receives the output normal
+void LookupNormalIndex(uint8_t index,aiVector3D& vOut);
+
 
 };
 };

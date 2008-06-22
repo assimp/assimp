@@ -94,6 +94,7 @@ struct aiNode
 	/** Constructor */
 	aiNode() 
 	{ 
+		// set all members to zero by default
 		mParent = NULL; 
 		mNumChildren = 0; mChildren = NULL;
 		mNumMeshes = 0; mMeshes = NULL;
@@ -102,6 +103,7 @@ struct aiNode
 	/** Destructor */
 	~aiNode()
 	{
+		// delete al children recursively
 		for( unsigned int a = 0; a < mNumChildren; a++)
 			delete mChildren[a];
 		delete [] mChildren;
@@ -127,6 +129,8 @@ struct aiScene
 	*/
 	C_STRUCT aiNode* mRootNode;
 
+
+
 	/** The number of meshes in the scene. */
 	unsigned int mNumMeshes;
 
@@ -136,6 +140,8 @@ struct aiScene
 	* this array. The array is mNumMeshes in size.
 	*/
 	C_STRUCT aiMesh** mMeshes;
+
+
 
 	/** The number of materials in the scene. */
 	unsigned int mNumMaterials;
@@ -147,6 +153,8 @@ struct aiScene
 	*/
 	C_STRUCT aiMaterial** mMaterials;
 
+
+
 	/** The number of animations in the scene. */
 	unsigned int mNumAnimations; 
 
@@ -157,20 +165,25 @@ struct aiScene
 	*/
 	C_STRUCT aiAnimation** mAnimations;
 
+
+
 	/** The number of textures embedded into the file */
 	unsigned int mNumTextures;
 
 	/** The array of embedded textures.
 	* 
 	* Not many file formats embedd their textures into the file.
-	* Examples include Quake's MDL format (which is also used by
+	* An example is Quake's MDL format (which is also used by
 	* some GameStudio™ versions)
 	*/
 	C_STRUCT aiTexture** mTextures;
 
 #ifdef __cplusplus
+
+	//! Default constructor
 	aiScene()
 	{
+		// set all members to zero by default
 		mRootNode = NULL;
 		mNumMeshes = 0; mMeshes = NULL;
 		mNumMaterials = 0; mMaterials = NULL;
@@ -178,8 +191,10 @@ struct aiScene
 		mNumTextures = 0; mTextures = NULL;
 	}
 
+	//! Destructor
 	~aiScene()
 	{
+		// delete all subobjects recursively
 		delete mRootNode;
 		for( unsigned int a = 0; a < mNumMeshes; a++)
 			delete mMeshes[a];

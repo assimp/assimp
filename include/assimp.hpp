@@ -50,6 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
+#include "aiDefines.h"
+
 struct aiScene;
 
 namespace Assimp
@@ -81,7 +83,7 @@ class IOSystem;
 * @note One Importer instance is not thread-safe. If you use multiple
 * threads for loading each thread should manage its own Importer instance.
 */
-class Importer
+class ASSIMP_API Importer
 {
 	// used internally
 	friend class BaseProcess;
@@ -101,6 +103,7 @@ public:
 	 */
 	~Importer();
 
+
 	// -------------------------------------------------------------------
 	/** Supplies a custom IO handler to the importer to use to open and
 	 * access files. If you need the importer to use custion IO logic to 
@@ -112,9 +115,30 @@ public:
 	 * afterwards. The previously assigned handler will be deleted.
 	 *
 	 * @param pIOHandler The IO handler to be used in all file accesses 
-	 * of the Importer. NULL resets it to the default handler.
+	 *   of the Importer. NULL resets it to the default handler.
 	 */
 	void SetIOHandler( IOSystem* pIOHandler);
+
+
+	// -------------------------------------------------------------------
+	/** Retrieves the IO handler that is currently set.
+	 * You can use IsDefaultIOHandler() to check whether the returned
+	 * interface is the default IO handler provided by ASSIMP. The default
+	 * handler is active as long the application doesn't supply its own
+	 * custom IO handler via SetIOHandler().
+	 * @return A valid IOSystem interface
+	 */
+	IOSystem* GetIOHandler();
+
+
+	// -------------------------------------------------------------------
+	/** Checks whether a default IO handler is active 
+	 * A default handler is active as long the application doesn't 
+	 * supply its own custom IO handler via SetIOHandler().
+	 * @return true by default
+	 */
+	bool IsDefaultIOHandler();
+
 
 	// -------------------------------------------------------------------
 	/** Reads the given file and returns its contents if successful. 
@@ -127,18 +151,19 @@ public:
 	* GetErrorString().
 	* @param pFile Path and filename to the file to be imported.
 	* @param pFlags Optional post processing steps to be executed after 
-	*   a successful import. Provide a bitwise combination of the #aiPostProcessSteps
-	*   flags.
+	*   a successful import. Provide a bitwise combination of the 
+	*   #aiPostProcessSteps flags.
 	* @return A pointer to the imported data, NULL if the import failed.
 	*/
 	const aiScene* ReadFile( const std::string& pFile, unsigned int pFlags);
+
 
 	// -------------------------------------------------------------------
 	/** Returns an error description of an error that occured in ReadFile(). 
 	*
 	* Returns an empty string if no error occured.
 	* @return A description of the last error, an empty string if no 
-	*         error occured.
+	*   error occured.
 	*/
 	inline const std::string& GetErrorString() const 
 		{ return mErrorString; }
@@ -147,20 +172,20 @@ public:
 	// -------------------------------------------------------------------
 	/** Returns whether a given file extension is supported by ASSIMP
 	*
-	* @param szExtension Extension for which the function queries support.
-	* Must include a leading dot '.'. Example: ".3ds", ".md3"
+	* @param szExtension Extension to be checked.
+	*   Must include a leading dot '.'. Example: ".3ds", ".md3"
 	* @return true if the extension is supported, false otherwise
 	*/
 	bool IsExtensionSupported(const std::string& szExtension);
 
 
 	// -------------------------------------------------------------------
-	/** Get a full list of all file extensions generally supported by ASSIMP.
+	/** Get a full list of all file extensions supported by ASSIMP.
 	*
 	* If a file extension is contained in the list this does, of course, not
 	* mean that ASSIMP is able to load all files with this extension.
 	* @param szOut String to receive the extension list.
-	* Format of the list: "*.3ds;*.obj;*.dae". NULL is not a valid parameter.
+	*   Format of the list: "*.3ds;*.obj;*.dae". 
 	*/
 	void GetExtensionList(std::string& szOut);
 
@@ -174,12 +199,15 @@ public:
 		{return this->mScene;}
 
 private:
+
 	/** Empty copy constructor. */
 	Importer(const Importer &other);
 
 protected:
+
 	/** IO handler to use for all file accesses. */
 	IOSystem* mIOHandler;
+	bool mIsDefaultHandler;
 
 	/** Format-specific importer worker objects - 
 	 * one for each format we can read. */

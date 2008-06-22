@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DefaultIOStream.h"
 #include "DefaultIOSystem.h"
 
+// Importers
 #if (!defined AI_BUILD_NO_X_IMPORTER)
 #	include "XFileImporter.h"
 #endif
@@ -81,18 +82,47 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AI_BUILD_NO_OBJ_IMPORTER)
 #	include "ObjFileImporter.h"
 #endif
+#if (!defined AI_BUILD_NO_HMP_IMPORTER)
+#	include "HMPLoader.h"
+#endif
+#if (!defined AI_BUILD_NO_SMD_IMPORTER)
+#	include "SMDLoader.h"
+#endif
 
-#include "CalcTangentsProcess.h"
-#include "JoinVerticesProcess.h"
-#include "ConvertToLHProcess.h"
-#include "TriangulateProcess.h"
-#include "GenFaceNormalsProcess.h"
-#include "GenVertexNormalsProcess.h"
-#include "KillNormalsProcess.h"
-#include "SplitLargeMeshes.h"
-#include "PretransformVertices.h"
-#include "LimitBoneWeightsProcess.h"
-#include "ValidateDataStructure.h"
+// PostProcess-Steps
+#if (!defined AI_BUILD_NO_CALCTANGENTS_PROCESS)
+#	include "CalcTangentsProcess.h"
+#endif
+#if (!defined AI_BUILD_NO_JOINVERTICES_PROCESS)
+#	include "JoinVerticesProcess.h"
+#endif
+#if (!defined AI_BUILD_NO_CONVERTTOLH_PROCESS)
+#	include "ConvertToLHProcess.h"
+#endif
+#if (!defined AI_BUILD_NO_TRIANGULATE_PROCESS)
+#	include "TriangulateProcess.h"
+#endif
+#if (!defined AI_BUILD_NO_GENFACENORMALS_PROCESS)
+#	include "GenFaceNormalsProcess.h"
+#endif
+#if (!defined AI_BUILD_NO_GENVERTEXNORMALS_PROCESS)
+#	include "GenVertexNormalsProcess.h"
+#endif
+#if (!defined AI_BUILD_NO_KILLNORMALS_PROCESS)
+#	include "KillNormalsProcess.h"
+#endif
+#if (!defined AI_BUILD_NO_SPLITLARGEMESHES_PROCESS)
+#	include "SplitLargeMeshes.h"
+#endif
+#if (!defined AI_BUILD_NO_PRETRANSFORMVERTICES_PROCESS)
+#	include "PretransformVertices.h"
+#endif
+#if (!defined AI_BUILD_NO_LIMITBONEWEIGHTS_PROCESS)
+#	include "LimitBoneWeightsProcess.h"
+#endif
+#if (!defined AI_BUILD_NO_VALIDATEDS_PROCESS)
+#	include "ValidateDataStructure.h"
+#endif
 
 using namespace Assimp;
 
@@ -105,6 +135,7 @@ Importer::Importer() :
 {
 	// allocate a default IO handler
 	mIOHandler = new DefaultIOSystem;
+	mIsDefaultHandler = true;
 
 	// add an instance of each worker class here
 #if (!defined AI_BUILD_NO_X_IMPORTER)
@@ -134,20 +165,51 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_ASE_IMPORTER)
 	mImporter.push_back( new ASEImporter());
 #endif
+	#if (!defined AI_BUILD_NO_HMP_IMPORTER)
+	mImporter.push_back( new HMPImporter());
+#endif
+	#if (!defined AI_BUILD_NO_SMD_IMPORTER)
+	mImporter.push_back( new SMDImporter());
+#endif
 
-	// add an instance of each post processing step here in the order of sequence it is executed
+	// add an instance of each post processing step here in the order 
+	// of sequence it is executed
+#if (!defined AI_BUILD_NO_VALIDATEDS_PROCESS)
 	mPostProcessingSteps.push_back( new ValidateDSProcess());
+#endif
+#if (!defined AI_BUILD_NO_TRIANGULATE_PROCESS)
 	mPostProcessingSteps.push_back( new TriangulateProcess());
+#endif
+#if (!defined AI_BUILD_NO_PRETRANSFORMVERTICES_PROCESS)
 	mPostProcessingSteps.push_back( new PretransformVertices());
+#endif
+#if (!defined AI_BUILD_NO_SPLITLARGEMESHES_PROCESS)
 	mPostProcessingSteps.push_back( new SplitLargeMeshesProcess_Triangle());
+#endif
+#if (!defined AI_BUILD_NO_KILLNORMALS_PROCESS)
 	mPostProcessingSteps.push_back( new KillNormalsProcess());
+#endif
+#if (!defined AI_BUILD_NO_GENFACENORMALS_PROCESS)
 	mPostProcessingSteps.push_back( new GenFaceNormalsProcess());
+#endif
+#if (!defined AI_BUILD_NO_GENVERTEXNORMALS_PROCESS)
 	mPostProcessingSteps.push_back( new GenVertexNormalsProcess());
+#endif
+#if (!defined AI_BUILD_NO_CALCTANGENTS_PROCESS)
 	mPostProcessingSteps.push_back( new CalcTangentsProcess());
+#endif
+#if (!defined AI_BUILD_NO_JOINVERTICES_PROCESS)
 	mPostProcessingSteps.push_back( new JoinVerticesProcess());
+#endif
+#if (!defined AI_BUILD_NO_SPLITLARGEMESHES_PROCESS)
 	mPostProcessingSteps.push_back( new SplitLargeMeshesProcess_Vertex());
+#endif
+#if (!defined AI_BUILD_NO_CONVERTTOLH_PROCESS)
 	mPostProcessingSteps.push_back( new ConvertToLHProcess());
+#endif
+#if (!defined AI_BUILD_NO_LIMITBONEWEIGHTS_PROCESS)
 	mPostProcessingSteps.push_back( new LimitBoneWeightsProcess());
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -170,17 +232,29 @@ Importer::~Importer()
 // Supplies a custom IO handler to the importer to open and access files.
 void Importer::SetIOHandler( IOSystem* pIOHandler)
 {
-	if (NULL == pIOHandler)
+	if (!pIOHandler)
 	{
 		delete mIOHandler;
 		mIOHandler = new DefaultIOSystem();
+		mIsDefaultHandler = true;
 	}
 	else if (mIOHandler != pIOHandler)
 	{
 		delete mIOHandler;
 		mIOHandler = pIOHandler;
+		mIsDefaultHandler = false;
 	}
 	return;
+}
+// ------------------------------------------------------------------------------------------------
+IOSystem* Importer::GetIOHandler()
+{
+	return mIOHandler;
+}
+// ------------------------------------------------------------------------------------------------
+bool Importer::IsDefaultIOHandler()
+{
+	return mIsDefaultHandler;
 }
 // ------------------------------------------------------------------------------------------------
 // Validate post process step flags 

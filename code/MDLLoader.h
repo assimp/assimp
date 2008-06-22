@@ -61,6 +61,11 @@ class MaterialHelper;
 
 using namespace MDL;
 
+
+#if (!defined VALIDATE_FILE_SIZE)
+#	define VALIDATE_FILE_SIZE(msg) this->SizeCheck(msg,__FILE__,__LINE__)
+#endif
+
 // ---------------------------------------------------------------------------
 /** Used to load MDL files
 */
@@ -104,120 +109,57 @@ protected:
 protected:
 
 	// -------------------------------------------------------------------
-	/** Import a quake 1 MDL file
+	/** Import a quake 1 MDL file (IDPO)
 	*/
 	void InternReadFile_Quake1( );
 
 	// -------------------------------------------------------------------
-	/** Import a GameStudio A4/A5 file
+	/** Import a GameStudio A4/A5 file (MDL 3,4,5)
 	*/
-	void InternReadFile_GameStudio( );
+	void InternReadFile_3DGS_MDL345( );
 
 	// -------------------------------------------------------------------
-	/** Import a GameStudio A7 file
+	/** Import a GameStudio A7 file (MDL 7)
 	*/
-	void InternReadFile_GameStudioA7( );
+	void InternReadFile_3DGS_MDL7( );
 
 	// -------------------------------------------------------------------
-	/** Import a CS:S/HL2 MDL file
+	/** Import a CS:S/HL2 MDL file (not fully implemented)
 	*/
 	void InternReadFile_HL2( );
 
+
+	// *******************************************************************
+	// Debugging/validation functions
+
+
 	// -------------------------------------------------------------------
-	/** Load a paletized texture from the file and convert it to 32bpp
+	/** Check whether a given position is inside the valid range
+	 *  Throw a new ImportErrorException if it is not
+	 * \param szPos Cursor position
+	 * \param szFile Name of the source file from which the function was called
+	 * \param iLine Source code line from which the function was called
 	*/
-	void CreateTextureARGB8(const unsigned char* szData);
+	void SizeCheck(const void* szPos);
+	void SizeCheck(const void* szPos, const char* szFile, unsigned int iLine);
 
-
-	// -------------------------------------------------------------------
-	/** Used to load textures from MDL3/4
-	 * \param szData Input data
-	 * \param iType Color data type
-	 * \param piSkip Receive: Size to skip
-	*/
-	void CreateTextureARGB8_GS4(const unsigned char* szData, 
-		unsigned int iType,
-		unsigned int* piSkip);
-
-	// -------------------------------------------------------------------
-	/** Used to load textures from MDL5
-	 * \param szData Input data
-	 * \param iType Color data type
-	 * \param piSkip Receive: Size to skip
-	*/
-	void CreateTextureARGB8_GS5(const unsigned char* szData, 
-		unsigned int iType,
-		unsigned int* piSkip);
-
-	// -------------------------------------------------------------------
-	/** Parse a skin lump in a MDL7 file with all of its features
-	 * \param szCurrent Current data pointer
-	 * \param szCurrentOut Output data pointer
-	 * \param pcMats Material list for this group. To be filled ...
-	 */
-	void ParseSkinLump_GameStudioA7(
-		const unsigned char* szCurrent,
-		const unsigned char** szCurrentOut,
-		std::vector<MaterialHelper*>& pcMats);
-
-	// -------------------------------------------------------------------
-	/** Parse texture color data for MDL5, MDL6 and MDL7 formats
-	 * \param szData Current data pointer
-	 * \param iType type of the texture data. No DDS or external
-	 * \param piSkip Receive the number of bytes to skip
-	 * \param pcNew Must point to fully initialized data. Width and 
-	 *        height must be set.
-	 */
-	void ParseTextureColorData(const unsigned char* szData, 
-		unsigned int iType,
-		unsigned int* piSkip,
-		aiTexture* pcNew);
 
 	// -------------------------------------------------------------------
 	/** Validate the header data structure of a game studio MDL7 file
 	 * \param pcHeader Input header to be validated
 	 */
-	void ValidateHeader_GameStudioA7(const MDL::Header_MDL7* pcHeader);
+	void ValidateHeader_3DGS_MDL7(const MDL::Header_MDL7* pcHeader);
 
 	// -------------------------------------------------------------------
-	/** Join two materials / skins. Setup UV source ... etc
-	 * \param pcMat1 First input material
-	 * \param pcMat2 Second input material
-	 * \param pcMatOut Output material instance to be filled. Must be empty
+	/** Validate the header data structure of a Quake 1 model
+	 * \param pcHeader Input header to be validated
 	 */
-	void JoinSkins_GameStudioA7(MaterialHelper* pcMat1,
-		MaterialHelper* pcMat2,
-		MaterialHelper* pcMatOut);
-
-	// -------------------------------------------------------------------
-	/** Generate the final output meshes for a7 models
-	 * \param aiSplit Face-per-material list
-	 * \param pcMats List of all materials
-	 * \param avOutList Output: List of all meshes
-	 * \param pcFaces List of all input faces
-	 * \param vPositions List of all input vectors
-	 * \param vNormals List of all input normal vectors
-	 * \param vTextureCoords1 List of all input UV coords #1
-	 * \param vTextureCoords2 List of all input UV coords #2
-	 */
-	void GenerateOutputMeshes_GameStudioA7(
-		const std::vector<unsigned int>** aiSplit,
-		const std::vector<MaterialHelper*>& pcMats,
-		std::vector<aiMesh*>& avOutList,
-		const MDL::IntFace_MDL7* pcFaces,
-		const std::vector<aiVector3D>& vPositions,
-		const std::vector<aiVector3D>& vNormals, 
-		const std::vector<aiVector3D>& vTextureCoords1,
-		const std::vector<aiVector3D>& vTextureCoords2);
+	void ValidateHeader_Quake1(const MDL::Header* pcHeader);
 
 
-	// -------------------------------------------------------------------
-	/** Calculate absolute bone animation matrices for each bone
-	 * \param pcBones Pointer to the bone section in the file
-	 * \param apcOutBones Output bones array
-	 */
-	void CalculateAbsBoneAnimMatrices(const MDL::Bone_MDL7* pcBones,
-		aiBone** apcOutBones);
+	// *******************************************************************
+	// Material import
+
 
 	// -------------------------------------------------------------------
 	/** Try to load a  palette from the current directory (colormap.lmp)
@@ -230,6 +172,262 @@ protected:
 	 */
 	void FreePalette(const unsigned char* pszColorMap);
 
+
+	// -------------------------------------------------------------------
+	/** Load a paletized texture from the file and convert it to 32bpp
+	*/
+	void CreateTextureARGB8_3DGS_MDL3(const unsigned char* szData);
+
+	// -------------------------------------------------------------------
+	/** Used to load textures from MDL3/4
+	 * \param szData Input data
+	 * \param iType Color data type
+	 * \param piSkip Receive: Size to skip, in bytes
+	*/
+	void CreateTexture_3DGS_MDL4(const unsigned char* szData, 
+		unsigned int iType,
+		unsigned int* piSkip);
+
+	// -------------------------------------------------------------------
+	/** Used to load textures from MDL5
+	 * \param szData Input data
+	 * \param iType Color data type
+	 * \param piSkip Receive: Size to skip, in bytes
+	*/
+	void CreateTexture_3DGS_MDL5(const unsigned char* szData, 
+		unsigned int iType,
+		unsigned int* piSkip);
+
+
+	// -------------------------------------------------------------------
+	/** Checks whether a texture can be replaced with a single color
+	 * This is useful for all file formats before MDL7 (all those
+	 * that are not containing material colors separate from textures).
+	 * MED seems to write dummy 8x8 monochrome images instead.
+	 * \param pcTexture Input texture
+	 * \return aiColor.r is set to qnan if the function fails and no
+	 *   color can be found.
+	*/
+	aiColor4D ReplaceTextureWithColor(const aiTexture* pcTexture);
+
+
+	// *******************************************************************
+	// Quake1, MDL 3,4,5 import
+
+
+	// -------------------------------------------------------------------
+	/** Converts the absolute texture coordinates in MDL5 files to
+	 *  relative in a range between 0 and 1
+	*/
+	void CalculateUVCoordinates_MDL5();
+
+	// -------------------------------------------------------------------
+	/** Read an UV coordinate from the file. If the file format is not
+	 * MDL5, the function calculates relative texture coordinates
+	 * \param vOut Receives the output UV coord
+	 * \param pcSrc UV coordinate buffer
+	 * \param UV coordinate index
+	*/
+	void ImportUVCoordinate_3DGS_MDL345( aiVector3D& vOut,
+		const MDL::TexCoord_MDL3* pcSrc, 
+		unsigned int iIndex);
+
+	// -------------------------------------------------------------------
+	/** Setup the material properties for Quake and MDL<7 models.
+	 * These formats don't support more than one material per mesh,
+	 * therefore the method processes only ONE skin and removes
+	 * all others.
+	 */
+	void SetupMaterialProperties_3DGS_MDL5_Quake1( );
+
+
+	// *******************************************************************
+	// MDL7 import
+
+	// -------------------------------------------------------------------
+	/** Parse a skin lump in a MDL7/HMP7 file with all of its features
+	 *  variant 1: Current cursor position is the beginning of the skin header 
+	 * \param szCurrent Current data pointer
+	 * \param szCurrentOut Output data pointer
+	 * \param pcMats Material list for this group. To be filled ...
+	 */
+	void ParseSkinLump_3DGS_MDL7(
+		const unsigned char* szCurrent,
+		const unsigned char** szCurrentOut,
+		std::vector<MaterialHelper*>& pcMats);
+
+	// -------------------------------------------------------------------
+	/** Parse a skin lump in a MDL7/HMP7 file with all of its features
+	 *  variant 2: Current cursor position is the beginning of the skin data
+	 * \param szCurrent Current data pointer
+	 * \param szCurrentOut Output data pointer
+	 * \param pcMatOut Output material
+	 * \param iType header.typ
+	 * \param iWidth header.width
+	 * \param iHeight header.height
+	 */
+	void ParseSkinLump_3DGS_MDL7(
+		const unsigned char* szCurrent,
+		const unsigned char** szCurrentOut,
+		MaterialHelper* pcMatOut,
+		unsigned int iType,
+		unsigned int iWidth,
+		unsigned int iHeight);
+
+	// -------------------------------------------------------------------
+	/** Skip a skin lump in a MDL7/HMP7 file 
+	 * \param szCurrent Current data pointer
+	 * \param szCurrentOut Output data pointer. Points to the byte just
+	 * behind the last byte of the skin.
+	 * \param iType header.typ
+	 * \param iWidth header.width
+	 * \param iHeight header.height
+	 */
+	void SkipSkinLump_3DGS_MDL7(const unsigned char* szCurrent,
+		const unsigned char** szCurrentOut,
+		unsigned int iType,
+		unsigned int iWidth,
+		unsigned int iHeight);
+
+	// -------------------------------------------------------------------
+	/** Parse texture color data for MDL5, MDL6 and MDL7 formats
+	 * \param szData Current data pointer
+	 * \param iType type of the texture data. No DDS or external
+	 * \param piSkip Receive the number of bytes to skip
+	 * \param pcNew Must point to fully initialized data. Width and 
+	 *        height must be set. If pcNew->pcData is set to 0xffffffff,
+	 *        piSkip will receive the size of the texture, in bytes, but no
+	 *        color data will be read.
+	 */
+	void ParseTextureColorData(const unsigned char* szData, 
+		unsigned int iType,
+		unsigned int* piSkip,
+		aiTexture* pcNew);
+
+	// -------------------------------------------------------------------
+	/** Join two materials / skins. Setup UV source ... etc
+	 * \param pcMat1 First input material
+	 * \param pcMat2 Second input material
+	 * \param pcMatOut Output material instance to be filled. Must be empty
+	 */
+	void JoinSkins_3DGS_MDL7(MaterialHelper* pcMat1,
+		MaterialHelper* pcMat2,
+		MaterialHelper* pcMatOut);
+
+	// -------------------------------------------------------------------
+	/** Add a bone transformation key to an animation
+	 * \param iTrafo Index of the transformation (always==frame index?)
+	 * No need to validate this index, it is always valid.
+	 * \param pcBoneTransforms Bone transformation for this index
+	 * \param apcOutBones Output bones array
+	 */
+	void AddAnimationBoneTrafoKey_3DGS_MDL7(unsigned int iTrafo,
+		const MDL::BoneTransform_MDL7* pcBoneTransforms,
+		MDL::IntBone_MDL7** apcBonesOut);
+
+	// -------------------------------------------------------------------
+	/** Load the bone list of a MDL7 file
+	 * \return If the bones could be loaded successfully, a valid
+	 *   array containing pointers to a temporary bone
+	 *   representation. NULL if the bones could not be loaded.
+	 */
+	MDL::IntBone_MDL7** LoadBones_3DGS_MDL7();
+
+	// -------------------------------------------------------------------
+	/** Load bone transformation keyframes from a file chunk
+	 * \param groupInfo -> doc of data structure
+	 * \param frame -> doc of data structure
+	 * \param shared -> doc of data structure
+	 */
+	void ParseBoneTrafoKeys_3DGS_MDL7(
+		const MDL::IntGroupInfo_MDL7& groupInfo,
+		IntFrameInfo_MDL7& frame,
+		MDL::IntSharedData_MDL7& shared);
+
+	// -------------------------------------------------------------------
+	/** Calculate absolute bone animation matrices for each bone
+	 * \param pcBones Pointer to the bone section in the file
+	 * \param apcOutBones Output bones array
+	 */
+	void CalcAbsBoneMatrices_3DGS_MDL7(const MDL::Bone_MDL7* pcBones,
+		MDL::IntBone_MDL7** apcOutBones);
+
+	// -------------------------------------------------------------------
+	/** Add all bones to the nodegraph (as children of the root node)
+	 * \param apcBonesOut List of bones
+	 * \param pcParent Parent node. New nodes will be added to this node
+	 * \param iParentIndex Index of the parent bone
+	 */
+	void AddBonesToNodeGraph_3DGS_MDL7(const MDL::IntBone_MDL7** apcBonesOut,
+		aiNode* pcParent,uint16_t iParentIndex);
+
+	// -------------------------------------------------------------------
+	/** Build output animations
+	 * \param apcBonesOut List of bones
+	 */
+	void BuildOutputAnims_3DGS_MDL7(const MDL::IntBone_MDL7** apcBonesOut);
+
+	// -------------------------------------------------------------------
+	/** Handles materials that are just referencing another material
+	 * There is no test file for this feature, but Conitec's doc
+	 * say it is used.
+	 */
+	void HandleMaterialReferences_3DGS_MDL7();
+
+	// -------------------------------------------------------------------
+	/** Copies only the material that are referenced by at least one
+	 * mesh to the final output material list. All other materials
+	 * will be discarded.
+	 * \param shared -> doc of data structure
+	 */
+	void CopyMaterials_3DGS_MDL7(MDL::IntSharedData_MDL7 &shared);
+
+	// -------------------------------------------------------------------
+	/** Process the frame section at the end of a group
+	 * \param groupInfo -> doc of data structure
+	 * \param shared -> doc of data structure
+	 * \param szCurrent Pointer to the start of the frame section
+	 * \param szCurrentOut Receives a pointer to the first byte of the
+	 *   next data section.
+	 * \return false to read no further groups (a small workaround for
+	 *   some tiny and unsolved problems ... )
+	 */
+	bool ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7& groupInfo,
+		MDL::IntSharedData_MDL7& shared,
+		const unsigned char* szCurrent,
+		const unsigned char** szCurrentOut);
+
+	// -------------------------------------------------------------------
+	/** Sort all faces by their materials. If the mesh is using
+	 * multiple materials per face (that are blended together) the function
+	 * might create new materials.
+	 * \param groupInfo -> doc of data structure
+	 * \param groupData -> doc of data structure
+	 * \param splittedGroupData -> doc of data structure
+	 */
+	void SortByMaterials_3DGS_MDL7(
+		const MDL::IntGroupInfo_MDL7& groupInfo,
+		MDL::IntGroupData_MDL7& groupData,
+		MDL::IntSplittedGroupData_MDL7& splittedGroupData);
+	
+	// -------------------------------------------------------------------
+	/** Read all faces and vertices from a MDL7 group. The function fills
+	 *  preallocated memory buffers.
+	 * \param groupInfo -> doc of data structure
+	 * \param groupData -> doc of data structure
+	 */
+	void ReadFaces_3DGS_MDL7(const MDL::IntGroupInfo_MDL7& groupInfo,
+		MDL::IntGroupData_MDL7& groupData);
+
+	// -------------------------------------------------------------------
+	/** Generate the final output meshes for a7 models
+	 * \param groupData -> doc of data structure
+	 * \param splittedGroupData -> doc of data structure
+	 */
+	void GenerateOutputMeshes_3DGS_MDL7(
+		MDL::IntGroupData_MDL7& groupData,
+		MDL::IntSplittedGroupData_MDL7& splittedGroupData);
+
 	// -------------------------------------------------------------------
 	/** Try to determine whether the normals of the model are flipped
 	 *  Some MDL7 models seem to have flipped normals (and there is also 
@@ -239,16 +437,13 @@ protected:
 	 */
 	void FlipNormals(aiMesh* pcMesh);
 
-private:
-
-	/** Header of the MDL file */
-	const MDL::Header* m_pcHeader;
+protected:
 
 	/** Buffer to hold the loaded file */
 	unsigned char* mBuffer;
 
-	/** For GameStudio MDL files: The number in the magic 
-	word, either 3,4 or 5*/
+	/** For GameStudio MDL files: The number in the magic word, either 3,4 or 5 
+	 * (MDL7 doesn't need this, the format has a separate loader) */
 	unsigned int iGSFileVersion;
 
 	/** Output I/O handler. used to load external lmp files
@@ -258,6 +453,10 @@ private:
 	/** Output scene to be filled
 	*/
 	aiScene* pScene;
+
+	/** Size of the input file in bytes
+	 */
+	unsigned int iFileSize;
 };
 }; // end of namespace Assimp
 

@@ -465,6 +465,7 @@ aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 	};
 
 	char szKey[256];
+	if (iIndex > 100)return AI_FAILURE;
 
 	// get the path to the texture
 #if _MSC_VER >= 1400

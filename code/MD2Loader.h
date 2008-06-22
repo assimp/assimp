@@ -93,6 +93,12 @@ protected:
 	void InternReadFile( const std::string& pFile, aiScene* pScene, 
 		IOSystem* pIOHandler);
 
+
+	// -------------------------------------------------------------------
+	/** Validate the header of the file
+	*/
+	void ValidateHeader();
+
 protected:
 
 	/** Header of the MD2 file */
@@ -100,6 +106,9 @@ protected:
 
 	/** Buffer to hold the loaded file */
 	const unsigned char* mBuffer;
+
+	/** Size of the file, in bytes */
+	unsigned int fileSize;
 };
 
 } // end of namespace Assimp

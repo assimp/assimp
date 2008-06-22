@@ -27,7 +27,7 @@ namespace Assimp
 * implementation for IOSystem that creates instances of your custom IO class.
 */
 // ---------------------------------------------------------------------------
-class IOStream 
+class ASSIMP_API IOStream 
 {
 protected:
 	/** Constructor protected, use IOSystem::Open() to create an instance. */

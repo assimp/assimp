@@ -11,6 +11,9 @@
 #include <limits>
 #include <math.h>
 
+#include "aiAssert.h"
+#include "aiQuaternion.h"
+
 // ---------------------------------------------------------------------------
 inline aiMatrix4x4::aiMatrix4x4( const aiMatrix3x3& m)
 {
@@ -143,6 +146,96 @@ inline bool aiMatrix4x4::operator== (const aiMatrix4x4 m) const
 inline bool aiMatrix4x4::operator!= (const aiMatrix4x4 m) const
 {
 	return !(*this == m);
+}
+// ---------------------------------------------------------------------------
+inline void aiMatrix4x4::Decompose (aiVector3D& scaling, aiQuaternion& rotation,
+	aiVector3D& position) const
+{
+	const aiMatrix4x4& _this = *this;
+
+	// extract translation
+	position.x = _this[0][3];
+	position.y = _this[1][3];
+	position.z = _this[2][3];
+
+	// extract the rows of the matrix
+	aiVector3D vRows[3] = {
+		aiVector3D(_this[0][0],_this[1][1],_this[2][0]),
+		aiVector3D(_this[0][1],_this[1][1],_this[2][1]),
+		aiVector3D(_this[0][2],_this[1][2],_this[2][2])
+	};
+
+	// extract the scaling factors
+	scaling.x = vRows[0].Length();
+	scaling.y = vRows[1].Length();
+	scaling.z = vRows[2].Length();
+
+	// and remove all scaling from the matrix
+	if(scaling.x)
+	{
+		vRows[0].x /= scaling.x;
+		vRows[0].y /= scaling.x;
+		vRows[0].z /= scaling.x;
+	}
+	if(scaling.y)
+	{
+		vRows[1].x /= scaling.y;
+		vRows[1].y /= scaling.y;
+		vRows[1].z /= scaling.y;
+	}
+	if(scaling.z)
+	{
+		vRows[2].x /= scaling.z;
+		vRows[2].y /= scaling.z;
+		vRows[2].z /= scaling.z;
+	}
+
+	// build a 3x3 rotation matrix
+	aiMatrix3x3 m(vRows[0].x,vRows[0].y,vRows[0].z,
+		vRows[1].x,vRows[1].y,vRows[1].z,
+		vRows[2].x,vRows[2].y,vRows[2].z);
+
+	// and generate the rotation quaternion from it
+	rotation = aiQuaternion(m);
+}
+// ---------------------------------------------------------------------------
+inline void aiMatrix4x4::DecomposeNoScaling (aiQuaternion& rotation,
+	aiVector3D& position) const
+{
+	const aiMatrix4x4& _this = *this;
+
+	// extract translation
+	position.x = _this[0][3];
+	position.y = _this[1][3];
+	position.z = _this[2][3];
+
+	// extract rotation
+	rotation = aiQuaternion((aiMatrix3x3)_this);
+}
+// ---------------------------------------------------------------------------
+inline void aiMatrix4x4::FromEulerAngles(float x, float y, float z)
+{
+	aiMatrix4x4& _this = *this;
+
+	const float A       = ::cosf(x);
+    const float B       = ::sinf(x);
+    const float C       = ::cosf(y);
+    const float D       = ::sinf(y);
+    const float E       = ::cosf(z);
+    const float F       = ::sinf(z);
+    const float AD      =   A * D;
+    const float BD      =   B * D;
+    _this.a1  =   C * E;
+    _this.a2  =  -C * F;
+    _this.a3  =   D;
+    _this.b1  =  BD * E + A * F;
+    _this.b2  = -BD * F + A * E;
+    _this.b3  =  -B * C;
+    _this.c1  = -AD * E + B * F;
+    _this.c2  =  AD * F + B * E;
+    _this.c3 =   A * C;
+    _this.a4 = _this.b4 = _this.c4 = _this.d1 = _this.d2 = _this.d3 =  0.0f;
+    _this.d4 = 1.0f;
 }
 
 #endif // __cplusplus

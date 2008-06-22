@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package assimp;
 
 
+
 /**
  * Class to wrap materials. Materials are represented in ASSIMP as a list of
  * key/value pairs, the key being a <code>String</code> and the value being
@@ -52,6 +53,74 @@ package assimp;
  * @version 1.0
  */
 public class Material extends Mappable {
+
+
+    public static final String MATKEY_NAME = "$mat.name";
+
+
+    /**
+     * Specifies the blend operation to be used to combine the Nth
+     * diffuse texture with the (N-1)th diffuse texture (or the diffuse
+     * base color for the first diffuse texture)
+     * <br>
+     * <b>Type:</b> int (TextureOp)<br>
+     * <b>Default value:</b> 0<br>
+     * <b>Requires:</b> MATKEY_TEXTURE_DIFFUSE(0)<br>
+     */
+    public static String MATKEY_TEXOP_DIFFUSE(int N) {
+        return "$tex.op.diffuse[" + N + "]";
+    }
+
+    /**
+     * @see MATKEY_TEXOP_DIFFUSE()
+     */
+    public static String MATKEY_TEXOP_SPECULAR(int N) {
+        return "$tex.op.specular[" + N + "]";
+    }
+
+    /**
+     * @see MATKEY_TEXOP_DIFFUSE()
+     */
+    public static String MATKEY_TEXOP_AMBIENT(int N) {
+        return "$tex.op.ambient[" + N + "]";
+    }
+
+    /**
+     * @see MATKEY_TEXOP_DIFFUSE()
+     */
+    public static String MATKEY_TEXOP_EMISSIVE(int N) {
+        return "$tex.op.emissive[" + N + "]";
+    }
+
+    /**
+     * @see MATKEY_TEXOP_DIFFUSE()
+     */
+    public static String MATKEY_TEXOP_NORMALS(int N) {
+        return "$tex.op.normals[" + N + "]";
+    }
+
+    /**
+     * @see MATKEY_TEXOP_DIFFUSE()
+     */
+    public static String MATKEY_TEXOP_HEIGHT(int N) {
+        return "$tex.op.height[" + N + "]";
+    }
+
+    /**
+     * @see MATKEY_TEXOP_DIFFUSE()
+     */
+    public static String MATKEY_TEXOP_SHININESS(int N) {
+        return "$tex.op.shininess[" + N + "]";
+    }
+
+    /**
+     * @see MATKEY_TEXOP_DIFFUSE()
+     */
+    public static String MATKEY_TEXOP_OPACITY(int N) {
+        return "$tex.op.opacity[" + N + "]";
+    }
+
+
     /**
      * Construction from a given parent object and array index
      *

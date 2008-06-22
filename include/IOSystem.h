@@ -11,6 +11,8 @@
 
 #include <string>
 
+#include "aiDefines.h"
+
 namespace Assimp
 {
 
@@ -23,7 +25,7 @@ class IOStream;
 * to the importer library. If you implement this interface, you also want to
 * supply a custom implementation for IOStream.
 */
-class IOSystem
+class ASSIMP_API IOSystem
 {
 public:
 	/** Constructor. Create an instance of your derived class and assign it to 

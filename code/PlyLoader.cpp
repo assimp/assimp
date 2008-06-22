@@ -120,6 +120,7 @@ void PLYImporter::InternReadFile(
 		this->mBuffer[1] != 'L' && this->mBuffer[1] != 'l' ||
 		this->mBuffer[2] != 'Y' && this->mBuffer[2] != 'y')
 	{
+		delete[] this->mBuffer;
 		throw new ImportErrorException( "Invalid .ply file: Magic number \'ply\' is no there");
 	}
 	char* szMe = (char*)&this->mBuffer[3];
@@ -136,6 +137,7 @@ void PLYImporter::InternReadFile(
 			SkipLine(szMe,(const char**)&szMe);
 			if(!PLY::DOM::ParseInstance(szMe,&sPlyDom, (unsigned int)fileSize))
 			{
+				delete[] this->mBuffer;
 				throw new ImportErrorException( "Invalid .ply file: Unable to build DOM (#1)");
 			}
 		}
@@ -156,16 +158,19 @@ void PLYImporter::InternReadFile(
 			SkipLine(szMe,(const char**)&szMe);
 			if(!PLY::DOM::ParseInstanceBinary(szMe,&sPlyDom,bIsBE, (unsigned int)fileSize))
 			{
+				delete[] this->mBuffer;
 				throw new ImportErrorException( "Invalid .ply file: Unable to build DOM (#2)");
 			}
 		}
 		else
 		{
+			delete[] this->mBuffer;
 			throw new ImportErrorException( "Invalid .ply file: Unknown file format");
 		}
 	}
 	else
 	{
+		delete[] this->mBuffer;
 		throw new ImportErrorException( "Invalid .ply file: Missing format specification");
 	}
 	this->pcDOM = &sPlyDom;
@@ -193,6 +198,7 @@ void PLYImporter::InternReadFile(
 	{
 		if (avPositions.size() < 3)
 		{
+			delete[] this->mBuffer;
 			throw new ImportErrorException( "Invalid .ply file: Not enough vertices to build "
 				"a face list. ");
 		}
@@ -230,6 +236,7 @@ void PLYImporter::InternReadFile(
 
 	if (avMeshes.empty())
 	{
+		delete[] this->mBuffer;
 		throw new ImportErrorException( "Invalid .ply file: Unable to extract mesh data ");
 	}
 

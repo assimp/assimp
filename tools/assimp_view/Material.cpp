@@ -137,7 +137,6 @@ int CMaterialManager::SetDefaultTexture(IDirect3DTexture9** p_ppiOut)
 bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
 {
 	char szTempB[MAX_PATH];
-
 	strcpy(szTempB,szTemp);
 
 	// go to the beginning of the file name
@@ -146,7 +145,9 @@ bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
 
 	char* szFile2 = szTemp + (szFile - szTempB)+1;
 	szFile++;
-	char* szExt = strrchr(szFile,'.')+1;
+	char* szExt = strrchr(szFile,'.');
+	if (!szExt)return false;
+	szExt++;
 	*szFile = 0;
 
 	strcat(szTempB,"*.*");
@@ -163,9 +164,10 @@ bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
 		{
 			if (!(strcmp(info.cFileName, ".") == 0 || strcmp(info.cFileName, "..") == 0))
 			{
-				char* szExtFound = strrchr(info.cFileName, '.')+1;
-				if ((char*)0x1 != szExtFound)
+				char* szExtFound = strrchr(info.cFileName, '.');
+				if (szExtFound)
 				{
+					++szExtFound;
 					if (0 == ASSIMP_stricmp(szExtFound,szExt))
 					{
 						const unsigned int iSizeFound = (const unsigned int) ( 

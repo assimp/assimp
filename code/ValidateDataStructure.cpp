@@ -342,6 +342,8 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 void ValidateDSProcess::Validate( const aiMesh* pMesh,
 	const aiBone* pBone)
 {
+	this->Validate(&pBone->mName);
+
 	// check whether all vertices affected by this bone are valid
 	for (unsigned int i = 0; i < pBone->mNumWeights;++i)
 	{
@@ -359,6 +361,8 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh,
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::Validate( const aiAnimation* pAnimation)
 {
+	this->Validate(&pAnimation->mName);
+
 	// validate all materials
 	if (pAnimation->mNumBones)
 	{
@@ -480,7 +484,7 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 	// check whether there are material keys that are obviously not legal
 	for (unsigned int i = 0; i < pMaterial->mNumProperties;++i)
 	{
-		aiMaterialProperty* prop = pMaterial->mProperties[i];
+		const aiMaterialProperty* prop = pMaterial->mProperties[i];
 		if (!prop)
 		{
 			this->ReportError("aiMaterial::mProperties[%i] is NULL (aiMaterial::mNumProperties is %i)",
@@ -491,9 +495,39 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 			this->ReportError("aiMaterial::mProperties[%i].mDataLength or "
 				"aiMaterial::mProperties[%i].mData is 0",i,i);
 		}
+		// check all predefined types
+		if (aiPTI_String == prop->mType)
+		{
+			if (prop->mDataLength < sizeof(aiString))
+			{
+				this->ReportError("aiMaterial::mProperties[%i].mDataLength is "
+					"too small to contain a string (%i, needed: %i)",
+					i,prop->mDataLength,sizeof(aiString));
+			}
+			this->Validate((const aiString*)prop->mData);
+		}
+		else if (aiPTI_Float == prop->mType)
+		{
+			if (prop->mDataLength < sizeof(float))
+			{
+				this->ReportError("aiMaterial::mProperties[%i].mDataLength is "
+					"too small to contain a float (%i, needed: %i)",
+					i,prop->mDataLength,sizeof(float));
+			}
+		}
+		else if (aiPTI_Integer == prop->mType)
+		{
+			if (prop->mDataLength < sizeof(int))
+			{
+				this->ReportError("aiMaterial::mProperties[%i].mDataLength is "
+					"too small to contain an integer (%i, needed: %i)",
+					i,prop->mDataLength,sizeof(int));
+			}
+		}
 		// TODO: check whether there is a key with an unknown name ...
 	}
 
+	// make some more specific tests 
 	float fTemp;
 	int iShading;
 	if (AI_SUCCESS == aiGetMaterialInteger( pMaterial,AI_MATKEY_SHADING_MODEL,&iShading))
@@ -517,7 +551,6 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 			break;
 		};
 	}
-
 
 	// check whether there are invalid texture keys
 	SearchForInvalidTextures(pMaterial,"diffuse");
@@ -563,6 +596,8 @@ void ValidateDSProcess::Validate( const aiTexture* pTexture)
 void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 	 const aiBoneAnim* pBoneAnim)
 {
+	this->Validate(&pBoneAnim->mBoneName);
+
 	// check whether there is a bone with this name ...
 	unsigned int i = 0;
 	for (; i < this->mScene->mNumMeshes;++i)
@@ -649,6 +684,8 @@ void ValidateDSProcess::Validate( const aiNode* pNode)
 	if (pNode != this->mScene->mRootNode && !pNode->mParent)
 		this->ReportError("A node has no valid parent (aiNode::mParent is NULL)");
 
+	this->Validate(&pNode->mName);
+
 	// validate all meshes
 	if (pNode->mNumMeshes)
 	{
@@ -685,5 +722,27 @@ void ValidateDSProcess::Validate( const aiNode* pNode)
 		{
 			this->Validate(pNode->mChildren[i]);
 		}
+	}
+}
+// ------------------------------------------------------------------------------------------------
+void ValidateDSProcess::Validate( const aiString* pString)
+{
+	if (pString->length > MAXLEN)
+	{
+		this->ReportError("aiString::length is too large (%i, maximum is %i)",
+			pString->length,MAXLEN);
+	}
+	const char* sz = pString->data;
+	while (true)
+	{
+		if ('\0' == *sz)
+		{
+			if (pString->length != (unsigned int)(sz-pString->data))
+				this->ReportError("aiString::data is invalid: the terminal zero is at a wrong offset");
+			break;
+		}
+		else if (sz >= &pString->data[MAXLEN])
+			this->ReportError("aiString::data is invalid. There is no terminal character");
+		++sz;
 	}
 }

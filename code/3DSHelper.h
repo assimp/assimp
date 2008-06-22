@@ -93,10 +93,22 @@ public:
 	//! From AutoDesk 3ds SDK
 	typedef enum
 	{
+		// translated to gouraud shading with wireframe active
 		Wire = 0,
+
+		// if this material is set, no vertex normals will
+		// be calculated for the model. Face normals + gouraud
 		Flat = 1,
+
+		// standard gouraud shading
 		Gouraud = 2,
+
+		// phong shading
 		Phong = 3,
+
+		// cooktorrance or anistropic phong shading ...
+		// the exact meaning is unknown, if you know it
+		// feel free to tell me ;-)
 		Metal = 4,
 
 		// required by the ASE loader
@@ -127,7 +139,8 @@ public:
 		CHUNK_PERCENTF	= 0x0031,		// float4  percentage
 		// **************************************************************
 
-		// Unknown and ignored
+		// Unknown and ignored. Possibly a chunk used by PROJ (
+		// Discreet 3DS max Project File)?
 		CHUNK_PRJ       = 0xC23D,
 
 		// Unknown. Possibly a reference to an external .mli file?
@@ -387,9 +400,10 @@ struct Material
 	mTwoSided			(false)
 	{
 		static int iCnt = 0;
-		std::stringstream ss;
-		ss << "$$_UNNAMED_" << iCnt++ << "_$$"; 
-		ss >> mName;
+		
+		char szTemp[128];
+		sprintf(szTemp,"$$_UNNAMED_%i_$$",iCnt++);
+		mName = szTemp;
 	}
 
 	//! Name of the material
@@ -442,9 +456,10 @@ struct Mesh
 	Mesh()
 	{
 		static int iCnt = 0;
-		std::stringstream ss;
-		ss << "$$_UNNAMED_" << iCnt++ << "_$$"; 
-		ss >> mName;
+		
+		char szTemp[128];
+		sprintf(szTemp,"$$_UNNAMED_%i_$$",iCnt++);
+		mName = szTemp;
 	}
 
 	//! Name of the mesh
@@ -481,9 +496,10 @@ struct Node
 
 	{
 		static int iCnt = 0;
-		std::stringstream ss;
-		ss << "$$_UNNAMED_" << iCnt++ << "_$$"; 
-		ss >> mName;
+		
+		char szTemp[128];
+		sprintf(szTemp,"$$_UNNAMED_%i_$$",iCnt++);
+		mName = szTemp;
 
 		mHierarchyPos = 0;
 		mHierarchyIndex = 0;
@@ -538,26 +554,6 @@ struct Scene
 	Node* pcRootNode;
 };
 
-// ---------------------------------------------------------------------------
-inline bool is_qnan(float p_fIn)
-{
-	// NOTE: Comparison against qnan is generally problematic
-	// because qnan == qnan is false AFAIK
-	union FTOINT
-	{
-		float fFloat;
-		int32_t iInt;
-	} one, two;
-	one.fFloat = std::numeric_limits<float>::quiet_NaN();
-	two.fFloat = p_fIn;
-
-	return (one.iInt == two.iInt);
-}
-// ---------------------------------------------------------------------------
-inline bool is_not_qnan(float p_fIn)
-{
-	return !is_qnan(p_fIn);
-}
 
 } // end of namespace Dot3DS
 } // end of namespace Assimp

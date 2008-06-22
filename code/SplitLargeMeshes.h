@@ -54,8 +54,8 @@ namespace Assimp
 class SplitLargeMeshesProcess_Triangle; 
 class SplitLargeMeshesProcess_Vertex; 
 
-// NOTE: If you change these limits, don't forget to also change the
-// corresponding values in the Assimp ports
+// NOTE: If you change these limits, don't forget to change the
+// corresponding values in all Assimp ports
 
 // **********************************************************
 // Java: PostProcessStep.java, 
@@ -64,10 +64,14 @@ class SplitLargeMeshesProcess_Vertex;
 // **********************************************************
 
 // default limit for vertices
-#define AI_SLM_DEFAULT_MAX_VERTICES		1000000
+#if (!defined AI_SLM_DEFAULT_MAX_VERTICES)
+#	define AI_SLM_DEFAULT_MAX_VERTICES		1000000
+#endif
 
 // default limit for triangles
-#define AI_SLM_DEFAULT_MAX_TRIANGLES	1000000
+#if (!defined AI_SLM_DEFAULT_MAX_TRIANGLES)
+#	define AI_SLM_DEFAULT_MAX_TRIANGLES		1000000
+#endif
 
 // ---------------------------------------------------------------------------
 /** Postprocessing filter to split large meshes into submeshes

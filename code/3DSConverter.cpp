@@ -40,11 +40,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Implementation of the 3ds importer class */
+
+// internal headers
 #include "3DSLoader.h"
 #include "MaterialSystem.h"
 #include "TextureTransform.h"
 #include "StringComparison.h"
+#include "qnan.h"
 
+// public ASSIMP headers
 #include "../include/DefaultLogger.h"
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
@@ -52,7 +56,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
 
-#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 
@@ -427,10 +430,12 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 			a != (*i).mFaceMaterials.end();++a,++iNum)
 		{
 		// check range
-		if ((*a) >= this->mScene->mMaterials.size())
+			if ((*a) >= this->mScene->mMaterials.size())
 			{
-			// use the last material instead
-			aiSplit[this->mScene->mMaterials.size()-1].push_back(iNum);
+				DefaultLogger::get()->error("Face material index is out of range");
+
+				// use the last material instead
+				aiSplit[this->mScene->mMaterials.size()-1].push_back(iNum);
 			}
 		else aiSplit[*a].push_back(iNum);
 		}
@@ -450,15 +455,15 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 				p_pcOut->mColors[0] = (aiColor4D*)new std::string((*i).mName);
 				avOutMeshes.push_back(p_pcOut);
 
-
+// (code for keyframe animation. however, this is currently not supported by Assimp)
+#if 0
 				if (bFirst)
 				{
 					p_pcOut->mColors[1] = (aiColor4D*)new aiMatrix4x4();
-
 					*((aiMatrix4x4*)p_pcOut->mColors[1]) = (*i).mMat;
 					bFirst = false;
 				}
-
+#endif
 
 				// convert vertices
 				p_pcOut->mNumVertices = (unsigned int)aiSplit[p].size()*3;
@@ -519,16 +524,6 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 					// apply texture coordinate scalings
 					TextureTransform::BakeScaleNOffset ( p_pcOut, &this->mScene->mMaterials[
 						p_pcOut->mMaterialIndex] );
-					
-					// setup bitflags to indicate which texture coordinate
-					// channels are used
-					p_pcOut->mNumUVComponents[0] = 2;
-					if (p_pcOut->HasTextureCoords(1))
-						p_pcOut->mNumUVComponents[1] = 2;
-					if (p_pcOut->HasTextureCoords(2))
-						p_pcOut->mNumUVComponents[2] = 2;
-					if (p_pcOut->HasTextureCoords(3))
-						p_pcOut->mNumUVComponents[3] = 2;
 				}
 			}
 		}
@@ -579,6 +574,8 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 	{
 		const unsigned int iIndex = iArray[i];
 
+// (code for keyframe animation. however, this is currently not supported by Assimp)
+#if 0
 		if (NULL != pcSOut->mMeshes[iIndex]->mColors[1])
 		{
 			pcOut->mTransformation = *((aiMatrix4x4*)
@@ -587,7 +584,7 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 			delete (aiMatrix4x4*)pcSOut->mMeshes[iIndex]->mColors[1];
 			pcSOut->mMeshes[iIndex]->mColors[1] = NULL;
 		}
-
+#endif
 		pcOut->mMeshes[i] = iIndex;
 	}
 
@@ -681,11 +678,17 @@ void Dot3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 			pcNode->mMeshes[0] = i;
 			pcNode->mNumMeshes = 1;
 
-			std::string s;
-			std::stringstream ss(s);
-			ss << "UNNAMED[" << i << + "]"; 
-
-			pcNode->mName.Set(s);
+			char szBuffer[128];
+			int iLen;
+#if _MSC_VER >= 1400
+			iLen = sprintf_s(szBuffer,"UNNAMED_%i",i);
+#else
+			iLen = sprintf(szBuffer,"UNNAMED_%i",i);
+#endif
+			ai_assert(0 < iLen);
+			::memcpy(pcNode->mName.data,szBuffer,iLen);
+			pcNode->mName.data[iLen] = '\0';
+			pcNode->mName.length = iLen;
 
 			// add the new child to the parent node
 			pcOut->mRootNode->mChildren[i] = pcNode;

@@ -109,7 +109,7 @@ void MD4Importer::InternReadFile(
 	size_t fileSize = file->FileSize();
 	if( fileSize < sizeof(MD4::Header))
 	{
-		throw new ImportErrorException( ".mdd File is too small.");
+		throw new ImportErrorException( ".md4 File is too small.");
 	}
 	return;
 }

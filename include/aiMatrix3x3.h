@@ -9,7 +9,7 @@ extern "C" {
 struct aiMatrix4x4;
 
 // ---------------------------------------------------------------------------
-/** Represents a column-major 3x3 matrix 
+/** Represents a row-major 3x3 matrix 
 */
 // ---------------------------------------------------------------------------
 struct aiMatrix3x3
@@ -28,7 +28,8 @@ struct aiMatrix3x3
 		c1(_c1), c2(_c2), c3(_c3)
 	{}
 
-	/** Construction from a 4x4 matrix. The remaining parts of the matrix are ignored. */
+	/** Construction from a 4x4 matrix. The remaining parts of the 
+	    matrix are ignored. */
 	explicit aiMatrix3x3( const aiMatrix4x4& pMatrix);
 
 	aiMatrix3x3& operator *= (const aiMatrix3x3& m);

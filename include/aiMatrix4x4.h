@@ -7,6 +7,7 @@ extern "C" {
 #endif
 
 struct aiMatrix3x3;
+struct aiQuaternion;
 
 // Set packing to 4
 #if defined(_MSC_VER) ||  defined(__BORLANDC__) ||	defined (__BCPLUSPLUS__)
@@ -19,7 +20,7 @@ struct aiMatrix3x3;
 #endif
 
 // ---------------------------------------------------------------------------
-/** Represents a column-major 4x4 matrix, 
+/** Represents a row-major 4x4 matrix, 
 *  use this for homogenious coordinates 
 */
 // ---------------------------------------------------------------------------
@@ -56,6 +57,35 @@ struct aiMatrix4x4
 
 	inline bool operator== (const aiMatrix4x4 m) const;
 	inline bool operator!= (const aiMatrix4x4 m) const;
+
+
+	/** \brief Decompose a trafo matrix into its original components
+	 * \param scaling Receives the output scaling for the x,y,z axes
+	 * \param rotation Receives the output rotation as a hamilton
+	 *   quaternion 
+	 * \param position Receives the output position for the x,y,z axes
+	 */
+	inline void Decompose (aiVector3D& scaling, aiQuaternion& rotation,
+		aiVector3D& position) const;
+
+
+	/** \brief Decompose a trafo matrix with no scaling into its 
+	 *  original components
+	 *  \param rotation Receives the output rotation as a hamilton
+	 *  quaternion 
+	 *  \param position Receives the output position for the x,y,z axes
+	 */
+	inline void DecomposeNoScaling (aiQuaternion& rotation,
+		aiVector3D& position) const;
+
+
+	/** \brief Creates a trafo matrix from a set of euler angles
+	 *  \param x Rotation angle for the x-axis, in radians
+	 *  \param y Rotation angle for the y-axis, in radians
+	 *  \param z Rotation angle for the z-axis, in radians
+	 */
+	inline void FromEulerAngles(float x, float y, float z);
+
 
 #endif // __cplusplus
 

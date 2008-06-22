@@ -53,7 +53,7 @@ DefaultIOStream::~DefaultIOStream()
 {
 	if (this->mFile)
 	{
-		fclose(this->mFile);
+		::fclose(this->mFile);
 	}	
 }
 // ---------------------------------------------------------------------------
@@ -61,20 +61,24 @@ size_t DefaultIOStream::Read(void* pvBuffer,
 								size_t pSize, 
 								size_t pCount)
 {
+	ai_assert(NULL != pvBuffer && 0 != pSize && 0 != pCount);
+
 	if (!this->mFile)
 		return 0;
 
-	return fread(pvBuffer, pSize, pCount, this->mFile);
+	return ::fread(pvBuffer, pSize, pCount, this->mFile);
 }
 // ---------------------------------------------------------------------------
 size_t DefaultIOStream::Write(const void* pvBuffer, 
 								 size_t pSize,
 								 size_t pCount)
 {
+	ai_assert(NULL != pvBuffer && 0 != pSize && 0 != pCount);
+
 	if (!this->mFile)return 0;
 
-	fseek(mFile, 0, SEEK_SET);
-	return fwrite(pvBuffer, pSize, pCount, this->mFile);
+	::fseek(mFile, 0, SEEK_SET);
+	return ::fwrite(pvBuffer, pSize, pCount, this->mFile);
 }
 // ---------------------------------------------------------------------------
 aiReturn DefaultIOStream::Seek(size_t pOffset,
@@ -82,7 +86,7 @@ aiReturn DefaultIOStream::Seek(size_t pOffset,
 {
 	if (!this->mFile)return AI_FAILURE;
 
-	return (0 == fseek(this->mFile, (long)pOffset,
+	return (0 == ::fseek(this->mFile, (long)pOffset,
 		(aiOrigin_CUR == pOrigin ? SEEK_CUR :
 		(aiOrigin_END == pOrigin ? SEEK_END : SEEK_SET))) 
 		? AI_SUCCESS : AI_FAILURE);
@@ -92,7 +96,7 @@ size_t DefaultIOStream::Tell() const
 {
 	if (!this->mFile)return 0;
 
-	return ftell(this->mFile);
+	return ::ftell(this->mFile);
 }
 // ---------------------------------------------------------------------------
 size_t DefaultIOStream::FileSize() const

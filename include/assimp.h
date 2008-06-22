@@ -71,7 +71,8 @@ struct aiString;
 * @return Pointer to the imported data or NULL if the import failed. 
 */
 // ---------------------------------------------------------------------------
-const C_STRUCT aiScene* aiImportFile( const char* pFile, unsigned int pFlags);
+ASSIMP_API const C_STRUCT aiScene* aiImportFile( const char* pFile, 
+	unsigned int pFlags);
 
 
 // ---------------------------------------------------------------------------
@@ -94,8 +95,8 @@ const C_STRUCT aiScene* aiImportFile( const char* pFile, unsigned int pFlags);
 * to this function. Therefore the C-API is thread-safe. 
 */
 // ---------------------------------------------------------------------------
-const C_STRUCT aiScene* aiImportFileEx( const C_STRUCT aiFileIO* pFile);
-
+ASSIMP_API const C_STRUCT aiScene* aiImportFileEx( 
+	const C_STRUCT aiFileIO* pFile);
 
 
 // ---------------------------------------------------------------------------
@@ -105,7 +106,7 @@ const C_STRUCT aiScene* aiImportFileEx( const C_STRUCT aiFileIO* pFile);
 * @param pScene The imported data to release. NULL is a valid value.
 */
 // ---------------------------------------------------------------------------
-void aiReleaseImport( const C_STRUCT aiScene* pScene);
+ASSIMP_API void aiReleaseImport( const C_STRUCT aiScene* pScene);
 
 
 // ---------------------------------------------------------------------------
@@ -115,7 +116,7 @@ void aiReleaseImport( const C_STRUCT aiScene* pScene);
 * import process. NULL if there was no error.
 */
 // ---------------------------------------------------------------------------
-const char* aiGetErrorString();
+ASSIMP_API const char* aiGetErrorString();
 
 
 // ---------------------------------------------------------------------------
@@ -126,7 +127,7 @@ const char* aiGetErrorString();
 * @return 1 if the extension is supported, 0 otherwise
 */
 // ---------------------------------------------------------------------------
-int aiIsExtensionSupported(const char* szExtension);
+ASSIMP_API int aiIsExtensionSupported(const char* szExtension);
 
 
 // ---------------------------------------------------------------------------
@@ -138,7 +139,7 @@ int aiIsExtensionSupported(const char* szExtension);
  * Format of the list: "*.3ds;*.obj;*.dae". NULL is not a valid parameter.
 */
 // ---------------------------------------------------------------------------
-void aiGetExtensionList(C_STRUCT aiString* szOut);
+ASSIMP_API void aiGetExtensionList(C_STRUCT aiString* szOut);
 
 #ifdef __cplusplus
 }

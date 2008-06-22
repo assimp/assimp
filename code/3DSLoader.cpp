@@ -40,11 +40,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Implementation of the 3ds importer class */
+
+// internal headers
 #include "3DSLoader.h"
 #include "MaterialSystem.h"
 #include "TextureTransform.h"
 #include "StringComparison.h"
+#include "qnan.h"
 
+// public ASSIMP headers
 #include "../include/DefaultLogger.h"
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
@@ -52,14 +56,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
 
+// boost headers
 #include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 
-#define ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG			\
-	"WARNING: Size of chunk data plus size of "		\
-	"subordinate chunks is larger than the size "	\
-	"specified in the higher-level chunk header."	\
+#if (!defined ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG)
+#	define ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG			\
+	"WARNING: Size of chunk data plus size of "			\
+	"subordinate chunks is larger than the size "		\
+	"specified in the top-level chunk header."			
+#endif
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -92,22 +99,6 @@ bool Dot3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) co
 	return false;
 }
 // ------------------------------------------------------------------------------------------------
-// recursively delete a given node
-void DeleteNodeRecursively (aiNode* p_piNode)
-{
-	if (!p_piNode)return;
-
-	if (p_piNode->mChildren)
-	{
-		for (unsigned int i = 0 ; i < p_piNode->mNumChildren;++i)
-		{
-			DeleteNodeRecursively(p_piNode->mChildren[i]);
-		}
-	}
-	delete p_piNode;
-	return;
-}
-// ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void Dot3DSImporter::InternReadFile( 
 	const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
@@ -125,7 +116,7 @@ void Dot3DSImporter::InternReadFile(
 	size_t fileSize = file->FileSize();
 	if( fileSize < 16)
 	{
-		throw new ImportErrorException( ".3ds File is too small.");
+		throw new ImportErrorException( "3DS File is too small.");
 	}
 
 	this->mScene = new Dot3DS::Scene();
@@ -780,8 +771,9 @@ void Dot3DSImporter::ParseFaceChunk(int* piRemaining)
 	case Dot3DSFile::CHUNK_FACEMAT:
 
 		// at fist an asciiz with the material name
-		while (*sz++ != '\0')
+		while (*sz++)
 		{
+			// make sure we don't run over the end of the chunk
 			if (sz > pcCurNext-1)break;
 		}
 
@@ -800,7 +792,7 @@ void Dot3DSImporter::ParseFaceChunk(int* piRemaining)
 			break;
 			}
 		}
-		if (iIndex == 0xFFFFFFFF)
+		if (0xFFFFFFFF == iIndex)
 		{
 			// this material is not known. Ignore this. We will later
 			// assign the default material to all faces using *this*
@@ -818,13 +810,14 @@ void Dot3DSImporter::ParseFaceChunk(int* piRemaining)
 
 			// check range
 			if (iTemp >= mMesh.mFaceMaterials.size())
-				{
+			{
+				DefaultLogger::get()->error("Invalid face index in face material list");
 				mMesh.mFaceMaterials[mMesh.mFaceMaterials.size()-1] = iIndex;
-				}
+			}
 			else
-				{
+			{
 				mMesh.mFaceMaterials[iTemp] = iIndex;
-				}
+			}
 			this->mCurrent += sizeof(uint16_t);
 		}
 
@@ -959,8 +952,7 @@ void Dot3DSImporter::ParseMeshChunk(int* piRemaining)
 		}
 		break;
 
-#if (defined _DEBUG)
-
+#if 0
 	case Dot3DSFile::CHUNK_TXTINFO:
 
 		// for debugging purposes. Read two bytes to determine the mapping type

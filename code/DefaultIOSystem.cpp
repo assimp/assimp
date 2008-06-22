@@ -65,11 +65,11 @@ DefaultIOSystem::~DefaultIOSystem()
 // Tests for the existence of a file at the given path.
 bool DefaultIOSystem::Exists( const std::string& pFile) const
 {
-	FILE* file = fopen( pFile.c_str(), "rb");
+	FILE* file = ::fopen( pFile.c_str(), "rb");
 	if( !file)
 		return false;
 
-	fclose( file);
+	::fclose( file);
 	return true;
 }
 
@@ -77,7 +77,7 @@ bool DefaultIOSystem::Exists( const std::string& pFile) const
 // Open a new file with a given path.
 IOStream* DefaultIOSystem::Open( const std::string& strFile, const std::string& strMode)
 {
-	FILE* file = fopen( strFile.c_str(), strMode.c_str());
+	FILE* file = ::fopen( strFile.c_str(), strMode.c_str());
 	if( NULL == file) 
 		return NULL;
 

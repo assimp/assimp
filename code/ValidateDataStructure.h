@@ -53,6 +53,7 @@ struct aiBoneAnim;
 struct aiTexture;
 struct aiMaterial;
 struct aiNode;
+struct aiString;
 
 namespace Assimp
 {
@@ -157,6 +158,12 @@ protected:
 	 * @param Node Input node
 	 */
 	void Validate( const aiNode* pNode);
+
+	// -------------------------------------------------------------------
+	/** Validates a string
+	 * @param pString Input string
+	 */
+	void Validate( const aiString* pString);
 
 private:
 

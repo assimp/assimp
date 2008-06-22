@@ -528,9 +528,9 @@ void ConvertMaterial( aiMaterial* matIn, D3DMATERIAL9* matOut )
 
 Textures:
 
-Textures can have various types and purposes. Sometimes ASSIMP is not able to
-determine the exact purpose of a texture. Normally it will assume diffuse as default
-purpose. Possible purposes for a texture:
+Textures can have various types and intended purposes. Sometimes ASSIMP is not able to
+determine the exact designated use of a texture. Normally it will assume a texture to be
+a diffuse color map by default. Texture types:
 
 <b>1. Diffuse textures.</b> Diffuse textures are combined with the result of the diffuse lighting term.
 <br>
@@ -549,10 +549,10 @@ normally grayscale images, black stands for fully transparent, white for fully o
 <b>6. Height maps.</b> Height maps specify the relative height of a point on a triangle on a
 per-texel base. Normally height maps (sometimes called "Bump maps") are converted to normal
 maps before rendering. Height maps are normally grayscale textures. Height maps could also
-be used as displacement maps on a highly tesselated surface.
+be used as displacement maps on highly tesselated surfaces.
 <br>
 <b>7. Normal maps.</b> Normal maps contain normal vectors for a single texel, in tangent space.
-They are not bound to an object. However, all lighting omputations must be done in tangent space. 
+They are not bound to an object. However, all lighting computations must be done in tangent space. 
 There are many resources on Normal Mapping on the internet.
 <br>
 <b>8. Shininess maps</b> Shininess maps (sometimes called "Gloss" or "SpecularMap") specify
@@ -560,7 +560,7 @@ the shininess of a texel mapped on a surface. They are normally used together wi
 to make flat surfaces look as if they were real 3d objects.
 <br>
 
-Textures are generally defined by a set of parameters, including
+Textures are generally defined by a set of parameters including
 <br>
 <b>1. The path to the texture.</b>  This property is always set. If it is not set, a texture 
 is not existing. This can either be a valid path (beware, sometimes
@@ -585,26 +585,31 @@ else // your loading code to load from a path ...
 <b>2. An UV coordinate index.</b> This is an index into the UV coordinate set list of the
 corresponding mesh. Note: Some formats don't define this, so beware, it could be that
 a second diffuse texture in a mesh was originally intended to use a second UV channel although
-ASSIMP states it uses the first one. UV coordinate source indices are defined by the
+ASSIMP says it uses the first one. UV coordinate source indices are defined by the
 <i>AI_MATKEY_UVWSRC_<textype>(<texindex>)</i> material property. Assume 0 as default value if
 this property is not set.
 <br>
 <b>3. A blend factor.</b> This is used if multiple textures are assigned to a slot, e.g. two
 or more textures on the diffuse channel. A texture's color value is multiplied with its
-blend factor before it is combined with the previous color value (from the last texture) using
-a specific blend operation (see 4.). Blend factor are defined by the
+blend factor before it is combined with the previous color value (from the last texture or the 
+diffuse/specular/ambient/emissive base color) using
+a blend operation (see 4.). Blend factor are defined by the
 <i>AI_MATKEY_TEXBLEND_<textype>(<texindex>)</i> material property. Assume 1.0f as default value 
 if this property is not set.
 <br>
 <b>4. A blend operation.</b> This is used if multiple textures are assigned to a slot, e.g. two
 or more textures on the diffuse channel. After a texture's color value has been multiplied
-with its blend factor, the blend operation is used to combine it with the previous color value.
+with its blend factor, the blend operation is used to combine it with the previous color value 
+(from the last texture or the diffuse/specular/ambient/emissive base color).
 Blend operations are stored as integer property, however their type is aiTextureOp.
 Blend factor are defined by the <i>AI_TEXOP_BLEND_<textype>(<texindex>)</i> material property. Assume
-aiTextureOp_Multiply as default value if this property is not set. The blend operation for
-the first texture in a texture slot (e.g. diffuse 0) specifies how the diffuse base color/
-vertex color have to be combined with the texture color value.
+aiTextureOp_Multiply as default value if this property is not set.
 <br>
+<b>5. Mapping modes for all axes </b> The mapping mode for an axis specifies how the rendering
+system should deal with UV coordinates beyond the 0-1 range. Mapping modes are
+defined by the <i>AI_MATKEY_MAPPINGMODE_<axis>_<textype>(<texindex>)</i> material property.
+<axis> is either U,V or W. The data type is int, however the real type is aiTextureMapMode.
+The default value is aiTextureMapMode_Wrap.
 
 You can use the aiGetMaterialTexture() function to read all texture parameters at once (maybe
 if you're too lazy to read 4 or 5 values manually if there's a smart helper function 
@@ -612,19 +617,32 @@ doing all the work for you ...).
 
 @code
 if (AI_SUCCESS != aiGetMaterialTexture(
-   pcMat,               // Material object
-   0,                   // first texture in the diffuse slot
-   AI_TEXTYPE_DIFFUSE,  // purpose of texture is diffuse
+   pcMat,               // aiMaterial structure
+   0,                   // we want the first diffuse texture
+   AI_TEXTYPE_DIFFUSE,  // we want the first diffuse texture
    &path,               // receives the path of the texture
    &uv,                 // receives the UV index of the texture
    &blend,              // receives the blend factor of the texture
    &op,                 // receives the blend operation of the texture
+   &mmodes,				// receives an array of three aiMappingMode's, each specifying
+	                    // the mapping mode for a particular axis. Order: UV(W)
    // (you may also specify 0 for a parameter if you don't need it)
    )) 
 {
    // cry, jump out of the window, but don't take drugs if this occurs!
 }
 @endcode
+
+<br>
+As you can see, there's much undefined and subject to speculations. When implementing
+ASSIMP's material system the most important point was to keep it as flexible as possible.
+The first step you should do when you implement ASSIMP materials into your application is
+to make a list of all material properties your rendering engine supports, too. Then I suggest
+you to take a look at the remaining material properties: many of them can be simplified and replaced
+with other properties, e.g. a diffuse texture blend factor can often be premultiplied 
+with the diffuse base color! At last a few properties you do not support will remain. Forget them.
+Most models won't look worse if only small details of its material cannot be rendered as it was intended
+by the artist.
 
 @section bones Bones
 

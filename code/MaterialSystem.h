@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp
 {
 
+
 // ---------------------------------------------------------------------------
 /** Internal material helper class. Can be used to fill an aiMaterial
     structure easily. */

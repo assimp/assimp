@@ -91,6 +91,7 @@ private:
 	void getNewMaterial();
 	void getGroupName();
 	void getGroupNumber();
+	int getMaterialIndex( const std::string &strMaterialName );
 	void getObjectName();
 	void createObject(const std::string &strObjectName);
 	void reportErrorTokenInFace();

@@ -71,11 +71,13 @@ void ObjFileParser::parseFile()
 				else if (*m_DataIt == 't')
 				{
 					// Read in texture coordinate (2D)
+					++m_DataIt;
 					getVector2(m_pModel->m_TextureCoord);
 				}
 				else if (*m_DataIt == 'n')
 				{
 					// Read in normal vector definition
+					++m_DataIt;
 					getVector3(m_pModel->m_Normals);
 				}
 			}
@@ -286,7 +288,7 @@ void ObjFileParser::getFace()
 		face->m_pMaterial = m_pModel->m_pDefaultMaterial;
 
 	// Create a default object, if nothing there
-	if (NULL == m_pModel->m_pCurrent)
+	if ( NULL == m_pModel->m_pCurrent )
 		createObject("defaultobject");
 
 	// Store the new instance
@@ -299,6 +301,8 @@ void ObjFileParser::getFace()
 		m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
 	}
 	m_pModel->m_pCurrentMesh->m_Faces.push_back( face );
+	if ( !face->m_pVertices->empty() )
+		m_pModel->m_pCurrentMesh->m_uiNumIndices += face->m_pVertices->size();
 	
 	// Skip the rest of the line
 	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
@@ -338,6 +342,7 @@ void ObjFileParser::getMaterialDesc()
 		// Create a new mesh for a new material
 		m_pModel->m_pCurrentMesh = new ObjFile::Mesh();
 		m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
+		m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( strName );
 	}
 
 	// Skip rest of line
@@ -387,24 +392,23 @@ void ObjFileParser::getMaterialLib()
 
 	// Extract the extention
 	std::string strExt("");
-	extractExtension(strMatName, strExt);
-	std::string mat = "mtl";
+	extractExtension( strMatName, strExt );
+	static const std::string mat = "mtl";
 
 	// Load the material library
 	DefaultIOSystem FileSystem;
 	IOStream *pFile = FileSystem.Open(absName);
 	if (0L != pFile)
 	{
+		// Import material library data from file
 		size_t size = pFile->FileSize();
 		std::vector<char> buffer;
 		buffer.resize( size );
-		
 		size_t read_size = pFile->Read( &buffer[ 0 ], sizeof( char ), size );
 		FileSystem.Close( pFile );
 
 		// Importing the material library 
 		ObjFileMtlImporter mtlImporter( buffer, absName, m_pModel );			
-		m_pModel->m_MaterialLib.push_back( strMatName );
 	}
 	
 	// Skip rest of line
@@ -422,7 +426,7 @@ void ObjFileParser::getNewMaterial()
 	std::string strMat(pStart, *m_DataIt);
 	while (isSpace(*m_DataIt))
 		m_DataIt++;
-	std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find(strMat);
+	std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( strMat );
 	if (it == m_pModel->m_MaterialMap.end())
 	{
 		// Show a warning, if material was not found
@@ -435,9 +439,27 @@ void ObjFileParser::getNewMaterial()
 	{
 		// Set new material
 		m_pModel->m_pCurrentMaterial = (*it).second;
+		m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( strMat );
 	}
 
 	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
+}
+
+// -------------------------------------------------------------------
+int ObjFileParser::getMaterialIndex( const std::string &strMaterialName )
+{
+	int mat_index = -1;
+	if ( strMaterialName.empty() )
+		return mat_index;
+		for (size_t index = 0; index < m_pModel->m_MaterialLib.size(); ++index)
+		{
+			if ( strMaterialName == m_pModel->m_MaterialLib[ index ])
+			{
+				mat_index = index;
+				break;
+			}
+		}
+	return mat_index;
 }
 
 // -------------------------------------------------------------------

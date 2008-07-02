@@ -80,11 +80,11 @@ struct Face
 	Face(std::vector<unsigned int> *pVertices, 
 			std::vector<unsigned int> *pNormals, 
 			std::vector<unsigned int> *pTexCoords) : 
-		m_PrimitiveType(2), 
-		m_pVertices(pVertices), 
-		m_pNormals(pNormals),
-		m_pTexturCoords(pTexCoords), 
-		m_pMaterial(0L)
+		m_PrimitiveType( 2 ), 
+		m_pVertices( pVertices ), 
+		m_pNormals( pNormals ),
+		m_pTexturCoords( pTexCoords ), 
+		m_pMaterial( 0L )
 	{
 		// empty
 	}
@@ -150,6 +150,14 @@ struct Material
 	float shineness;
 	//!	Illumination model 
 	int illumination_model;
+
+	Material()
+	{
+	}
+
+	~Material()
+	{
+	}
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -159,9 +167,18 @@ struct Mesh
 {
 	std::vector<Face*> m_Faces;
 	Material *m_pMaterial;
+	unsigned int m_uiNumIndices;
+	unsigned int m_uiMaterialIndex;
 
 	Mesh() :
-		m_pMaterial(NULL)
+		m_pMaterial(NULL),
+		m_uiNumIndices(0),
+		m_uiMaterialIndex(0)
+	{
+		// empty
+	}
+
+	~Mesh() 
 	{
 		// empty
 	}

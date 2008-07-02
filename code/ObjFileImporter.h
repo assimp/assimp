@@ -96,11 +96,11 @@ private:
 
 	//!	\brief	Creates topology data like faces and meshes for the geometry.
 	void createTopology(const ObjFile::Model* pModel, const ObjFile::Object* pData,
-		aiMesh* pMesh);	
+		unsigned int uiMeshIndex, aiMesh* pMesh);	
 	
 	//!	\brief	Creates vertices from model.
-	void createVertexArray(const ObjFile::Model* pModel, 
-		const ObjFile::Object* pCurrentObject, aiMesh* pMesh);
+	void createVertexArray(const ObjFile::Model* pModel, const ObjFile::Object* pCurrentObject,
+		unsigned int uiMeshIndex, aiMesh* pMesh);
 
 	//!	\brief	Object counter helper method.
 	void countObjects(const std::vector<ObjFile::Object*> &rObjects, int &iNumMeshes);
@@ -111,6 +111,9 @@ private:
 
 	//!	\brief	Appends a child node to a parentnode and updates the datastructures.
 	void appendChildToParentNode(aiNode *pParent, aiNode *pChild);
+
+	//!	\brief
+	void createAnimations();
 
 private:
 	//!	Data buffer

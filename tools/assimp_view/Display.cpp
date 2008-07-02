@@ -428,34 +428,43 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
 	{
 	case AI_TEXTYPE_DIFFUSE:
 		piTexture = &g_pcAsset->apcMeshes[iMesh]->piDiffuseTexture;
-		szType = "Diffuse";break;
+		szType = "Diffuse";
+		break;
 	case AI_TEXTYPE_SPECULAR:
 		piTexture = &g_pcAsset->apcMeshes[iMesh]->piSpecularTexture;
-		szType = "Specular";break;
+		szType = "Specular";
+		break;
 	case AI_TEXTYPE_AMBIENT:
 		piTexture = &g_pcAsset->apcMeshes[iMesh]->piAmbientTexture;
-		szType = "Ambient";break;
+		szType = "Ambient";
+		break;
 	case AI_TEXTYPE_EMISSIVE:
 		piTexture = &g_pcAsset->apcMeshes[iMesh]->piEmissiveTexture;
-		szType = "Emissive";break;
+		szType = "Emissive";
+		break;
 	case AI_TEXTYPE_HEIGHT:
 		piTexture = &g_pcAsset->apcMeshes[iMesh]->piNormalTexture;
-		szType = "HeightMap";break;
+		szType = "HeightMap";
+		break;
 	case AI_TEXTYPE_NORMALS:
 		piTexture = &g_pcAsset->apcMeshes[iMesh]->piNormalTexture;
-		szType = "NormalMap";break;
+		szType = "NormalMap";
+		break;
 	case AI_TEXTYPE_SHININESS:
 		piTexture = &g_pcAsset->apcMeshes[iMesh]->piShininessTexture;
-		szType = "Shininess";break;
+		szType = "Shininess";
+		break;
 	default: // opacity + opacity | mask
 		piTexture = &g_pcAsset->apcMeshes[iMesh]->piOpacityTexture;
-		szType = "Opacity";break;
+		szType = "Opacity";
+		break;
 	};
 	if (bIsExtraOpacity)
 	{
 		sprintf(chTemp,"%s %i (<copy of diffuse #1>)",szType,iIndex+1);
 	}
-	else sprintf(chTemp,"%s %i (%s)",szType,iIndex+1,sz);
+	else 
+		sprintf(chTemp,"%s %i (%s)",szType,iIndex+1,sz);
 
 	TVITEMEX tvi; 
 	TVINSERTSTRUCT sNew;

@@ -14,6 +14,8 @@
 
 namespace Assimp
 {
+// -------------------------------------------------------------------
+const std::string ObjFileParser::DEFAULT_MATERIAL = "defaultmaterial";
 
 // -------------------------------------------------------------------
 ObjFileParser::ObjFileParser(std::vector<char> &Data, 
@@ -29,8 +31,8 @@ ObjFileParser::ObjFileParser(std::vector<char> &Data,
 	m_pModel = new ObjFile::Model();
 	m_pModel->m_ModelName = strModelName;
 	
-	const std::string DEFAULT_MATERIAL = "defaultmaterial";
 	m_pModel->m_pDefaultMaterial = new ObjFile::Material();
+	m_pModel->m_pDefaultMaterial->MaterialName.Set( DEFAULT_MATERIAL );
 	m_pModel->m_MaterialLib.push_back( DEFAULT_MATERIAL );
 	m_pModel->m_MaterialMap[ DEFAULT_MATERIAL ] = m_pModel->m_pDefaultMaterial;
 	
@@ -332,7 +334,9 @@ void ObjFileParser::getMaterialDesc()
 	{
 		// Not found, use default material
 		m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
-		m_pModel->m_MaterialMap[ strName ] = m_pModel->m_pCurrentMaterial;			
+		m_pModel->m_pCurrentMesh = new ObjFile::Mesh();
+		m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
+		m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( DEFAULT_MATERIAL );
 	}
 	else
 	{

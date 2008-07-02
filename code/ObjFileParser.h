@@ -98,6 +98,7 @@ private:
 	void extractExtension(const std::string strFile, std::string &strExt);
 
 private:
+	static const std::string DEFAULT_MATERIAL;/* = "defaultmaterial";*/
 	//!	Absolute filepath to model
 	std::string m_strAbsPath;
 	//!	Iterator to current position in buffer

@@ -138,52 +138,52 @@ protected:
 	// -------------------------------------------------------------------
 	/** Parse a main top-level chunk in the file
 	*/
-	void ParseMainChunk(int* piRemaining);
+	void ParseMainChunk(int& piRemaining);
 
 	// -------------------------------------------------------------------
 	/** Parse a top-level chunk in the file
 	*/
-	void ParseChunk(int* piRemaining);
+	void ParseChunk(int& piRemaining);
 
 	// -------------------------------------------------------------------
 	/** Parse a top-level editor chunk in the file
 	*/
-	void ParseEditorChunk(int* piRemaining);
+	void ParseEditorChunk(int& piRemaining);
 
 	// -------------------------------------------------------------------
 	/** Parse a top-level object chunk in the file
 	*/
-	void ParseObjectChunk(int* piRemaining);
+	void ParseObjectChunk(int& piRemaining);
 
 	// -------------------------------------------------------------------
 	/** Parse a material chunk in the file
 	*/
-	void ParseMaterialChunk(int* piRemaining);
+	void ParseMaterialChunk(int& piRemaining);
 
 	// -------------------------------------------------------------------
 	/** Parse a mesh chunk in the file
 	*/
-	void ParseMeshChunk(int* piRemaining);
+	void ParseMeshChunk(int& piRemaining);
 
 	// -------------------------------------------------------------------
 	/** Parse a face list chunk in the file
 	*/
-	void ParseFaceChunk(int* piRemaining);
+	void ParseFaceChunk(int& piRemaining);
 
 	// -------------------------------------------------------------------
 	/** Parse a keyframe chunk in the file
 	*/
-	void ParseKeyframeChunk(int* piRemaining);
+	void ParseKeyframeChunk(int& piRemaining);
 
 	// -------------------------------------------------------------------
 	/** Parse a hierarchy chunk in the file
 	*/
-	void ParseHierarchyChunk(int* piRemaining);
+	void ParseHierarchyChunk(int& piRemaining);
 
 	// -------------------------------------------------------------------
 	/** Parse a texture chunk in the file
 	*/
-	void ParseTextureChunk(int* piRemaining,Dot3DS::Texture* pcOut);
+	void ParseTextureChunk(int& piRemaining,Dot3DS::Texture* pcOut);
 
 	// -------------------------------------------------------------------
 	/** Convert the meshes in the file

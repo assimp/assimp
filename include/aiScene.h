@@ -112,6 +112,12 @@ struct aiNode
 #endif // __cplusplus
 };
 
+//! @def AI_SCENE_FLAGS_ANIM_SKELETON_ONLY
+//! Specifies that no model but only an animation skeleton has been
+//! imported. There are no materials in this case. There are no
+//! textures in this case. But there is a node graph, animation channels
+//! and propably meshes with bones.
+#define AI_SCENE_FLAGS_ANIM_SKELETON_ONLY	0x1
 
 // ---------------------------------------------------------------------------
 /** The root structure of the imported data. 
@@ -121,6 +127,11 @@ struct aiNode
 // ---------------------------------------------------------------------------
 struct aiScene
 {
+
+	/** Any combination of the AI_SCENE_FLAGS_XXX flags */
+	unsigned int mFlags;
+
+
 	/** The root node of the hierarchy. 
 	* 
 	* There will always be at least the root node if the import
@@ -189,6 +200,7 @@ struct aiScene
 		mNumMaterials = 0; mMaterials = NULL;
 		mNumAnimations = 0; mAnimations = NULL;
 		mNumTextures = 0; mTextures = NULL;
+		mFlags = 0;
 	}
 
 	//! Destructor
@@ -196,18 +208,30 @@ struct aiScene
 	{
 		// delete all subobjects recursively
 		delete mRootNode;
-		for( unsigned int a = 0; a < mNumMeshes; a++)
-			delete mMeshes[a];
-		delete [] mMeshes;
-		for( unsigned int a = 0; a < mNumMaterials; a++)
-			delete mMaterials[a];
-		delete [] mMaterials;
-		for( unsigned int a = 0; a < mNumAnimations; a++)
-			delete mAnimations[a];
-		delete [] mAnimations;
-		for( unsigned int a = 0; a < mNumTextures; a++)
-			delete mTextures[a];
-		delete [] mTextures;
+		if (mNumMeshes) // fix to make the d'tor work for invalid scenes, too
+		{
+			for( unsigned int a = 0; a < mNumMeshes; a++)
+				delete mMeshes[a];
+			delete [] mMeshes;
+		}
+		if (mNumMaterials) // fix to make the d'tor work for invalid scenes, too
+		{
+			for( unsigned int a = 0; a < mNumMaterials; a++)
+				delete mMaterials[a];
+			delete [] mMaterials;
+		}
+		if (mNumAnimations) // fix to make the d'tor work for invalid scenes, too
+		{
+			for( unsigned int a = 0; a < mNumAnimations; a++)
+				delete mAnimations[a];
+			delete [] mAnimations;
+		}
+		if (mNumTextures) // fix to make the d'tor work for invalid scenes, too
+		{
+			for( unsigned int a = 0; a < mNumTextures; a++)
+				delete mTextures[a];
+			delete [] mTextures;
+		}
 	}
 #endif // __cplusplus
 };

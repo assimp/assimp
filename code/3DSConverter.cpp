@@ -429,10 +429,10 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 			a =  (*i).mFaceMaterials.begin();
 			a != (*i).mFaceMaterials.end();++a,++iNum)
 		{
-		// check range
+			// check range
 			if ((*a) >= this->mScene->mMaterials.size())
 			{
-				DefaultLogger::get()->error("Face material index is out of range");
+				DefaultLogger::get()->error("3DS face material index is out of range");
 
 				// use the last material instead
 				aiSplit[this->mScene->mMaterials.size()-1].push_back(iNum);
@@ -440,7 +440,6 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 		else aiSplit[*a].push_back(iNum);
 		}
 		// now generate submeshes
-
 		bool bFirst = true;
 		for (unsigned int p = 0; p < this->mScene->mMaterials.size();++p)
 		{
@@ -452,19 +451,9 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 				p_pcOut->mMaterialIndex = p;
 
 				// use the color data as temporary storage
-				p_pcOut->mColors[0] = (aiColor4D*)new std::string((*i).mName);
+				p_pcOut->mColors[0] = (aiColor4D*)(&*i);
 				avOutMeshes.push_back(p_pcOut);
-
-// (code for keyframe animation. however, this is currently not supported by Assimp)
-#if 0
-				if (bFirst)
-				{
-					p_pcOut->mColors[1] = (aiColor4D*)new aiMatrix4x4();
-					*((aiMatrix4x4*)p_pcOut->mColors[1]) = (*i).mMat;
-					bFirst = false;
-				}
-#endif
-
+				
 				// convert vertices
 				p_pcOut->mNumVertices = (unsigned int)aiSplit[p].size()*3;
 				p_pcOut->mNumFaces = (unsigned int)aiSplit[p].size();
@@ -552,87 +541,72 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* pcIn)
 {
-	// find the corresponding mesh indices
 	std::vector<unsigned int> iArray;
+	iArray.reserve(3);
 
 	if (pcIn->mName != "$$$DUMMY")
 	{		
 		for (unsigned int a = 0; a < pcSOut->mNumMeshes;++a)
 		{
-			if (0 == ASSIMP_stricmp(pcIn->mName.c_str(),
-				((std::string*)pcSOut->mMeshes[a]->mColors[0])->c_str()))
+			const Dot3DS::Mesh* pcMesh = (const Dot3DS::Mesh*)pcSOut->mMeshes[a]->mColors[0];
+			ai_assert(NULL != pcMesh);
+
+			if (0 == ASSIMP_stricmp(pcIn->mName.c_str(),pcMesh->mName.c_str()))
 			{
 				iArray.push_back(a);
 			}
 		}
-	}
-	pcOut->mName.Set(pcIn->mName);
-	pcOut->mNumMeshes = (unsigned int)iArray.size();
-	pcOut->mMeshes = new unsigned int[iArray.size()];
-	
-	for (unsigned int i = 0;i < iArray.size();++i)
-	{
-		const unsigned int iIndex = iArray[i];
-
-// (code for keyframe animation. however, this is currently not supported by Assimp)
-#if 0
-		if (NULL != pcSOut->mMeshes[iIndex]->mColors[1])
+		if (!iArray.empty())
 		{
-			pcOut->mTransformation = *((aiMatrix4x4*)
-				(pcSOut->mMeshes[iIndex]->mColors[1]));
+			aiMatrix4x4& mTrafo = ((Dot3DS::Mesh*)pcSOut->mMeshes[iArray[0]]->mColors[0])->mMat;
+			aiMatrix4x4 mInv = mTrafo;
+			mInv.Inverse();
 
-			delete (aiMatrix4x4*)pcSOut->mMeshes[iIndex]->mColors[1];
-			pcSOut->mMeshes[iIndex]->mColors[1] = NULL;
+			pcOut->mName.Set(pcIn->mName);
+			pcOut->mNumMeshes = (unsigned int)iArray.size();
+			pcOut->mMeshes = new unsigned int[iArray.size()];
+			for (unsigned int i = 0;i < iArray.size();++i)
+			{
+				const unsigned int iIndex = iArray[i];
+				aiMesh* const mesh = pcSOut->mMeshes[iIndex];
+
+				// http://www.zfx.info/DisplayThread.php?MID=235690#235690
+				const aiVector3D& pivot = pcIn->vPivot;
+				const aiVector3D* const pvEnd = mesh->mVertices+mesh->mNumVertices;
+				aiVector3D* pvCurrent = mesh->mVertices;
+
+				if(pivot.x || pivot.y || pivot.z)
+				{
+					while (pvCurrent != pvEnd)
+					{
+						*pvCurrent = mInv * (*pvCurrent);
+						pvCurrent->x -= pivot.x;
+						pvCurrent->y -= pivot.y;
+						pvCurrent->z -= pivot.z;
+						*pvCurrent = mTrafo * (*pvCurrent);
+						std::swap( pvCurrent->y, pvCurrent->z );
+						++pvCurrent;
+					}
+				}
+				else
+				{
+					while (pvCurrent != pvEnd)
+					{
+						std::swap( pvCurrent->y, pvCurrent->z );
+						pvCurrent->y *= -1.0f;
+						++pvCurrent;
+					}
+				}
+				pcOut->mMeshes[i] = iIndex;
+			}
 		}
-#endif
-		pcOut->mMeshes[i] = iIndex;
+		/*else
+		{
+			DefaultLogger::get()->warn("A node that is not a dummy does not "
+				"reference a valid mesh.");
+		}*/
 	}
-
-	// (code for keyframe animation. however, this is currently not supported by Assimp)
-#if 0
-	// build the scaling matrix. Toggle y and z axis
-	aiMatrix4x4 mS;
-	mS.a1 = pcIn->vScaling.x;
-	mS.b2 = pcIn->vScaling.z;
-	mS.c3 = pcIn->vScaling.y;
-
-	// build the translation matrix. Toggle y and z axis
-	aiMatrix4x4 mT;
-	mT.a4 = pcIn->vPosition.x;
-	mT.b4 = pcIn->vPosition.z;
-	mT.c4 = pcIn->vPosition.y;
-
-	// build the pivot matrix. Toggle y and z axis
-	aiMatrix4x4 mP;
-	mP.a4 = -pcIn->vPivot.x;
-	mP.b4 = -pcIn->vPivot.z;
-	mP.c4 = -pcIn->vPivot.y;
-
-
-#endif
-	// build a matrix to flip the z coordinate of the vertices
-	aiMatrix4x4 mF;
-	mF.c3 = -1.0f;
-
-
-	// build the final matrix
-	// NOTE: This should be the identity. Theoretically. In reality
-	// there are many models with very funny local matrices and
-	// very different keyframe values ... this is the only reason
-	// why we extract the data from the first keyframe. 
-	pcOut->mTransformation = mF; /*   mF * mT * pcIn->mRotation * mS *  mP * 
-		pcOut->mTransformation.Inverse(); */
-
-	// (code for keyframe animation. however, this is currently not supported by Assimp)
-#if 0
-	if (pcOut->mTransformation != mF) 
-	{
-		DefaultLogger::get()->warn("The local transformation matrix of the "
-			"3ds file does not match the first keyframe. Using the "
-			"information from the keyframe.");
-	}
-#endif
-
+	pcOut->mTransformation = aiMatrix4x4(); 
 	pcOut->mNumChildren = (unsigned int)pcIn->mChildren.size();
 	pcOut->mChildren = new aiNode*[pcIn->mChildren.size()];
 	for (unsigned int i = 0; i < pcIn->mChildren.size();++i)
@@ -697,13 +671,22 @@ void Dot3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 	else this->AddNodeToGraph(pcOut,  pcOut->mRootNode, this->mRootNode);
 
 	for (unsigned int a = 0; a < pcOut->mNumMeshes;++a)
-	{
-		delete (std::string*)pcOut->mMeshes[a]->mColors[0];
 		pcOut->mMeshes[a]->mColors[0] = NULL;
 
-		// may be NULL
-		delete (aiMatrix4x4*)pcOut->mMeshes[a]->mColors[1];
-		pcOut->mMeshes[a]->mColors[1] = NULL;
+	// if the root node has only one child ... set the child as root node
+	if (1 == pcOut->mRootNode->mNumChildren)
+	{
+		aiNode* pcOld = pcOut->mRootNode;
+		pcOut->mRootNode = pcOut->mRootNode->mChildren[0];
+		pcOut->mRootNode->mParent = NULL;
+		pcOld->mChildren[0] = NULL;
+		delete pcOld;
+	}
+
+	// if the root node is a default node setup a name for it
+	if (pcOut->mRootNode->mName.data[0] == '$' && pcOut->mRootNode->mName.data[1] == '$')
+	{
+		pcOut->mRootNode->mName.Set("<root>");
 	}
 }
 // ------------------------------------------------------------------------------------------------

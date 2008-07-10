@@ -1,0 +1,112 @@
+/*
+Open Asset Import Library (ASSIMP)
+----------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the 
+following conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------------------------------------
+*/
+
+/** @file Defines a helper class, "CommentRemover", which can be
+ *  used to remove comments (single and multi line) from a text file.
+ */
+#include "../include/aiTypes.h"
+#include "../include/DefaultLogger.h"
+#include "../include/aiAssert.h"
+
+#include "RemoveComments.h"
+
+namespace Assimp
+{
+
+// ------------------------------------------------------------------------------------------------
+void CommentRemover::RemoveLineComments(const char* szComment,
+	char* szBuffer, char chReplacement /* = ' ' */)
+{
+	// validate parameters
+	ai_assert(NULL != szComment && NULL != szBuffer && *szComment);
+
+	while (*szBuffer)
+	{
+		if (*szBuffer == *szComment)
+		{
+			if (0 == ::strcmp(szBuffer+1,szComment+1))
+			{
+				while (*szBuffer != '\r' && *szBuffer != '\n' && *szBuffer)
+					*szBuffer++ = chReplacement;
+			}
+		}
+		++szBuffer;
+	}
+}
+// ------------------------------------------------------------------------------------------------
+void CommentRemover::RemoveMultiLineComments(const char* szCommentStart,
+	const char* szCommentEnd,char* szBuffer,
+	char chReplacement)
+{
+	// validate parameters
+	ai_assert(NULL != szCommentStart && NULL != szCommentEnd &&
+		NULL != szBuffer && '\0' != *szCommentStart && '\0' != *szCommentEnd);
+
+	const size_t len = ::strlen(szCommentEnd);
+
+	while (*szBuffer)
+	{
+		if (*szBuffer == *szCommentStart)
+		{
+			if (0 == ::strcmp(szBuffer+1,szCommentStart+1))
+			{
+				while (*szBuffer)
+				{
+					if (*szBuffer == *szCommentEnd)
+					{
+						if (0 == ::strcmp(szBuffer+1,szCommentEnd+1))
+						{
+							for (unsigned int i = 0; i < len;++i)
+								*szBuffer++ = chReplacement;
+							goto __continue_outer; // WUHHHAAAAHHAA!
+						}
+					}
+					*szBuffer++ = chReplacement;
+				}
+				return;
+			}
+		}
+		++szBuffer;
+__continue_outer:
+		int i = 4; // NOP dummy
+	}
+}
+
+}; // !! Assimp

@@ -135,7 +135,7 @@ void PLYImporter::InternReadFile(
 		{
 			szMe += 6;
 			SkipLine(szMe,(const char**)&szMe);
-			if(!PLY::DOM::ParseInstance(szMe,&sPlyDom, (unsigned int)fileSize))
+			if(!PLY::DOM::ParseInstance(szMe,&sPlyDom))
 			{
 				delete[] this->mBuffer;
 				throw new ImportErrorException( "Invalid .ply file: Unable to build DOM (#1)");
@@ -156,7 +156,7 @@ void PLYImporter::InternReadFile(
 
 			// skip the line, parse the rest of the header and build the DOM
 			SkipLine(szMe,(const char**)&szMe);
-			if(!PLY::DOM::ParseInstanceBinary(szMe,&sPlyDom,bIsBE, (unsigned int)fileSize))
+			if(!PLY::DOM::ParseInstanceBinary(szMe,&sPlyDom,bIsBE))
 			{
 				delete[] this->mBuffer;
 				throw new ImportErrorException( "Invalid .ply file: Unable to build DOM (#2)");

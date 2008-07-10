@@ -106,9 +106,12 @@ struct aiBoneAnim
 
 	~aiBoneAnim()
 	{
-		delete [] mPositionKeys;
-		delete [] mRotationKeys;
-		delete [] mScalingKeys;
+		if (mNumPositionKeys)
+			delete [] mPositionKeys;
+		if (mNumRotationKeys)
+			delete [] mRotationKeys;
+		if (mNumScalingKeys)
+			delete [] mScalingKeys;
 	}
 #endif // __cplusplus
 };
@@ -145,9 +148,12 @@ struct aiAnimation
 
 	~aiAnimation()
 	{
-		for( unsigned int a = 0; a < mNumBones; a++)
-			delete mBones[a];
-		delete [] mBones;
+		if (mNumBones)
+		{
+			for( unsigned int a = 0; a < mNumBones; a++)
+				delete mBones[a];
+			delete [] mBones;
+		}
 	}
 #endif // __cplusplus
 };

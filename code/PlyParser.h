@@ -481,9 +481,9 @@ public:
 
 	//! Parse the DOM for a PLY file. The input string is assumed
 	//! to be terminated with zero
-	static bool ParseInstance (const char* p_szIn,DOM* p_pcOut, unsigned int iLen);
+	static bool ParseInstance (const char* p_szIn,DOM* p_pcOut);
 	static bool ParseInstanceBinary (const char* p_szIn,
-		DOM* p_pcOut,bool p_bBE,  unsigned int iLen);
+		DOM* p_pcOut,bool p_bBE);
 
 	//! Skip all comment lines after this
 	static bool SkipComments (const char* p_szIn,const char** p_szOut);

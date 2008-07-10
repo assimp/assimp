@@ -41,11 +41,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the SMD importer class */
 
+// internal headers
 #include "MaterialSystem.h"
 #include "SMDLoader.h"
 #include "StringComparison.h"
 #include "fast_atof.h"
 
+// public headers
 #include "../include/DefaultLogger.h"
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
@@ -53,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
 
+// boost headers
 #include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
@@ -105,7 +108,7 @@ bool SMDImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 void SMDImporter::InternReadFile( 
 	const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rt"));
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
@@ -123,6 +126,9 @@ void SMDImporter::InternReadFile(
 	this->bHasUVs = true;
 	this->iLineNumber = 1;
 
+	// append a terminal 0
+	this->mBuffer[this->iFileSize] = '\0';
+
 	// reserve enough space for ... hm ... 10 textures
 	this->aszTextures.reserve(10);
 
@@ -137,14 +143,48 @@ void SMDImporter::InternReadFile(
 		// parse the file ...
 		this->ParseFile();
 
-		// now fix invalid time values and make sure the animation starts at frame 0
-		this->FixTimeValues();
+		// if there are no triangles it seems to be an animation SMD,
+		// containing only the animation skeleton.
+		if (this->asTriangles.empty())
+		{
+			if (this->asBones.empty())
+			{
+				throw new ImportErrorException("No triangles and no bones have "
+					"been found in the file. This file seems to be invalid.");
+			}
+			// set the flag in the scene structure which indicates
+			// that there is nothing than an animation skeleton
+			pScene->mFlags |= AI_SCENE_FLAGS_ANIM_SKELETON_ONLY;
+		}
+		
+		if (!this->asBones.empty())
+		{
+			// check whether all bones have been initialized
+			for (std::vector<SMD::Bone>::const_iterator
+				i =  this->asBones.begin();
+				i != this->asBones.end();++i)
+			{
+				if (!(*i).mName.length())
+				{
+					DefaultLogger::get()->warn("Not all bones have been initialized");
+					break;
+				}
+			}
 
-		// compute absolute bone transformation matrices
-		this->ComputeAbsoluteBoneTransformations();
+			// now fix invalid time values and make sure the animation starts at frame 0
+			this->FixTimeValues();
 
-		// create output meshes
-		this->CreateOutputMeshes();
+			// compute absolute bone transformation matrices
+			this->ComputeAbsoluteBoneTransformations();
+		}
+		if (!(pScene->mFlags & AI_SCENE_FLAGS_ANIM_SKELETON_ONLY))
+		{
+			// create output meshes
+			this->CreateOutputMeshes();
+
+			// build an output material list
+			this->CreateOutputMaterials();
+		}
 
 		// build the output animation
 		this->CreateOutputAnimations();
@@ -292,7 +332,7 @@ void SMDImporter::CreateOutputMeshes()
 
 			*pcVerts++ = face.avVertices[0].pos;
 			*pcVerts++ = face.avVertices[1].pos;
-			*pcVerts++ = face.avVertices[2].pos;
+			*pcVerts++ = face.avVertices[2].pos; 
 
 			// fill the normals
 			*pcNormals++ = face.avVertices[0].nor;
@@ -310,10 +350,9 @@ void SMDImporter::CreateOutputMeshes()
 			for (unsigned int iVert = 0; iVert < 3;++iVert)
 			{
 				float fSum = 0.0f;
-				for (unsigned int iBone = 0;iBone < face.avVertices[0].aiBoneLinks.size();++iBone)
+				for (unsigned int iBone = 0;iBone < face.avVertices[iVert].aiBoneLinks.size();++iBone)
 				{
 					TempWeightListEntry& pairval = face.avVertices[iVert].aiBoneLinks[iBone];
-					
 					if (pairval.first >= this->asBones.size())
 					{
 						DefaultLogger::get()->error("[SMD/VTA] Bone index overflow. "
@@ -322,16 +361,35 @@ void SMDImporter::CreateOutputMeshes()
 						continue;
 					}
 					aaiBones[pairval.first].push_back(TempWeightListEntry(iNum,pairval.second));
-
 					fSum += pairval.second;
 				}
 				// if the sum of all vertex weights is not 1.0 we must assign 
 				// the rest to the vertex' parent node. Well, at least the doc says 
 				// we should ...
-				if (fSum <= 0.995f)
+				if (fSum <= 1.0f)
 				{
-					aaiBones[face.avVertices[iVert].iParentNode].push_back(
-						TempWeightListEntry(iNum,1.0f-fSum));
+					if (face.avVertices[iVert].iParentNode >= this->asBones.size())
+					{
+						DefaultLogger::get()->error("[SMD/VTA] Bone index overflow. "
+							"The index of the vertex parent bone is invalid. "
+							"The remaining weights will be normalized to 1.0");
+
+						if (fSum)
+						{
+							fSum = 1 / fSum;
+							for (unsigned int iBone = 0;iBone < face.avVertices[iVert].aiBoneLinks.size();++iBone)
+							{
+								TempWeightListEntry& pairval = face.avVertices[iVert].aiBoneLinks[iBone];
+								if (pairval.first >= this->asBones.size())continue;
+								aaiBones[pairval.first].back().second *= fSum;
+							}
+						}
+					}
+					else
+					{
+						aaiBones[face.avVertices[iVert].iParentNode].push_back(
+							TempWeightListEntry(iNum,1.0f-fSum));
+					}
 				}
 
 				pcMesh->mFaces[iFace].mIndices[iVert] = iNum++;
@@ -375,7 +433,7 @@ void SMDImporter::CreateOutputMeshes()
 // add bone child nodes
 void SMDImporter::AddBoneChildren(aiNode* pcNode, uint32_t iParent)
 {
-	ai_assert(NULL != pcNode && 0 != pcNode->mNumChildren && NULL != pcNode->mChildren);
+	ai_assert(NULL != pcNode && 0 == pcNode->mNumChildren && NULL == pcNode->mChildren);
 
 	// first count ...
 	for (unsigned int i = 0; i < this->asBones.size();++i)
@@ -399,42 +457,72 @@ void SMDImporter::AddBoneChildren(aiNode* pcNode, uint32_t iParent)
 
 		// store the local transformation matrix of the bind pose
 		pc->mTransformation = bone.sAnim.asKeys[bone.sAnim.iFirstTimeKey].matrix;
+		pc->mParent = pcNode;
+
+		// add children to this node, too
+		AddBoneChildren(pc,i);
 	}
 }
 // ------------------------------------------------------------------------------------------------
 // create output nodes
 void SMDImporter::CreateOutputNodes()
 {
-	// create one root node that renders all meshes
 	this->pScene->mRootNode = new aiNode();
-	::strcpy(this->pScene->mRootNode->mName.data, "SMD_root");
-	this->pScene->mRootNode->mName.length = 8;
-	this->pScene->mRootNode->mNumMeshes = this->pScene->mNumMeshes;
-	this->pScene->mRootNode->mMeshes = new unsigned int[this->pScene->mNumMeshes];
-	for (unsigned int i = 0; i < this->pScene->mNumMeshes;++i)
-		this->pScene->mRootNode->mMeshes[i] = i;
+	if (!(this->pScene->mFlags & AI_SCENE_FLAGS_ANIM_SKELETON_ONLY))
+	{
+		// create one root node that renders all meshes
+		this->pScene->mRootNode->mNumMeshes = this->pScene->mNumMeshes;
+		this->pScene->mRootNode->mMeshes = new unsigned int[this->pScene->mNumMeshes];
+		for (unsigned int i = 0; i < this->pScene->mNumMeshes;++i)
+			this->pScene->mRootNode->mMeshes[i] = i;
+	}
 
 	// now add all bones as dummy sub nodes to the graph
 	this->AddBoneChildren(this->pScene->mRootNode,(uint32_t)-1);
+
+	// if we have only one bone we can even remove the root node
+	if (this->pScene->mFlags & AI_SCENE_FLAGS_ANIM_SKELETON_ONLY && 
+		1 == this->pScene->mRootNode->mNumChildren)
+	{
+		aiNode* pcOldRoot = this->pScene->mRootNode;
+		this->pScene->mRootNode = pcOldRoot->mChildren[0];
+		pcOldRoot->mChildren[0] = NULL;
+		delete pcOldRoot;
+
+		this->pScene->mRootNode->mParent = NULL;
+	}
+	else
+	{
+		::strcpy(this->pScene->mRootNode->mName.data, "<SMD_root>");
+		this->pScene->mRootNode->mName.length = 10;
+	}
 }
 // ------------------------------------------------------------------------------------------------
 // create output animations
 void SMDImporter::CreateOutputAnimations()
 {
+	unsigned int iNumBones = 0;
+	for (std::vector<SMD::Bone>::const_iterator
+		i =  this->asBones.begin();
+		i != this->asBones.end();++i)
+	{
+		if ((*i).bIsUsed)++iNumBones;
+	}
+	if (!iNumBones)
+	{
+		// just make sure this case doesn't occur ... (it could occur
+		// if the file was invalid)
+		return;
+	}
+
 	this->pScene->mNumAnimations = 1;
 	this->pScene->mAnimations = new aiAnimation*[1];
 	aiAnimation*& anim = this->pScene->mAnimations[0] = new aiAnimation();
 
 	anim->mDuration = this->dLengthOfAnim;
+	anim->mNumBones = iNumBones;
 	anim->mTicksPerSecond = 25.0; // FIXME: is this correct?
 
-	// this->pScene->mAnimations[0]->mNumBones = 0;
-	for (std::vector<SMD::Bone>::const_iterator
-		i =  this->asBones.begin();
-		i != this->asBones.end();++i)
-	{
-		if ((*i).bIsUsed)++anim->mNumBones;
-	}
 	aiBoneAnim** pp = anim->mBones = new aiBoneAnim*[anim->mNumBones];
 	
 	// now build valid keys
@@ -492,8 +580,10 @@ void SMDImporter::ComputeAbsoluteBoneTransformations()
 		for (unsigned int i = 0; i < bone.sAnim.asKeys.size();++i)
 		{
 			double d = std::min(bone.sAnim.asKeys[i].dTime,dMin);
-			if (d < dMin)	{
-				dMin = d; iIndex = i;
+			if (d < dMin)	
+			{
+				dMin = d;
+				iIndex = i;
 			}
 		}
 		bone.sAnim.iFirstTimeKey = iIndex;
@@ -541,7 +631,7 @@ void SMDImporter::ComputeAbsoluteBoneTransformations()
 void SMDImporter::CreateOutputMaterials()
 {
 	this->pScene->mNumMaterials = (unsigned int)this->aszTextures.size();
-	this->pScene->mMaterials = new aiMaterial*[std::min(1u, this->pScene->mNumMaterials)];
+	this->pScene->mMaterials = new aiMaterial*[std::max(1u, this->pScene->mNumMaterials)];
 
 	for (unsigned int iMat = 0; iMat < this->pScene->mNumMaterials;++iMat)
 	{
@@ -556,7 +646,7 @@ void SMDImporter::CreateOutputMaterials()
 #endif
 		pcMat->AddProperty(&szName,AI_MATKEY_NAME);
 
-		strcpy(szName.data, this->aszTextures[iMat].c_str() );
+		::strcpy(szName.data, this->aszTextures[iMat].c_str() );
 		szName.length = this->aszTextures[iMat].length();
 		pcMat->AddProperty(&szName,AI_MATKEY_TEXTURE_DIFFUSE(0));
 	}
@@ -594,7 +684,7 @@ void SMDImporter::ParseFile()
 	// read line per line ...
 	while (true)
 	{
-		if(!SkipSpaces(szCurrent,&szCurrent)) break;
+		if(!SkipSpacesAndLineEnd(szCurrent,&szCurrent)) break;
 
 		// "version <n> \n", <n> should be 1 for hl and hl² SMD files
 		if (0 == ASSIMP_strincmp(szCurrent,"version",7) &&
@@ -607,54 +697,42 @@ void SMDImporter::ParseFile()
 				DefaultLogger::get()->warn("SMD.version is not 1. This "
 					"file format is not known. Continuing happily ...");
 			}
+			//continue;
 		}
 		// "nodes\n" - Starts the node section
-		else if (0 == ASSIMP_strincmp(szCurrent,"nodes",5) &&
+		if (0 == ASSIMP_strincmp(szCurrent,"nodes",5) &&
 			IsSpaceOrNewLine(*(szCurrent+5)))
 		{
 			szCurrent += 6;
 			this->ParseNodesSection(szCurrent,&szCurrent);
+			//continue;
 		}
 		// "triangles\n" - Starts the triangle section
-		else if (0 == ASSIMP_strincmp(szCurrent,"triangles",9) &&
+		if (0 == ASSIMP_strincmp(szCurrent,"triangles",9) &&
 			IsSpaceOrNewLine(*(szCurrent+9)))
 		{
 			szCurrent += 10;
 			this->ParseTrianglesSection(szCurrent,&szCurrent);
+			//continue;
 		}
 		// "vertexanimation\n" - Starts the vertex animation section
-		else if (0 == ASSIMP_strincmp(szCurrent,"vertexanimation",15) &&
+		if (0 == ASSIMP_strincmp(szCurrent,"vertexanimation",15) &&
 			IsSpaceOrNewLine(*(szCurrent+15)))
 		{
 			this->bHasUVs = false;
 			szCurrent += 16;
 			this->ParseVASection(szCurrent,&szCurrent);
+			//continue;
 		}
 		// "skeleton\n" - Starts the skeleton section
-		else if (0 == ASSIMP_strincmp(szCurrent,"skeleton",8) &&
+		if (0 == ASSIMP_strincmp(szCurrent,"skeleton",8) &&
 			IsSpaceOrNewLine(*(szCurrent+8)))
 		{
 			szCurrent += 9;
 			this->ParseSkeletonSection(szCurrent,&szCurrent);
+			//continue;
 		}
 		else SkipLine(szCurrent,&szCurrent);
-	}
-
-	// if there are no triangles, we can't load the model
-	if (this->asTriangles.empty())
-	{
-		throw new ImportErrorException("No triangles have been found in the file");
-	}
-	// check whether all bones have been initialized
-	for (std::vector<SMD::Bone>::const_iterator
-		i =  this->asBones.begin();
-		i != this->asBones.end();++i)
-	{
-		if (!(*i).mName.length())
-		{
-			DefaultLogger::get()->warn("Not all bones have been initialized");
-			break;
-		}
 	}
 	return;
 }
@@ -701,6 +779,8 @@ void SMDImporter::ParseTrianglesSection(const char* szCurrent,
 	// and so on until we reach a token that looks quite similar to "end"
 	while (true)
 	{
+		if(!SkipSpacesAndLineEnd(szCurrent,&szCurrent)) break;
+
 		// "end\n" - Ends the triangles section
 		if (0 == ASSIMP_strincmp(szCurrent,"end",3) &&
 			IsSpaceOrNewLine(*(szCurrent+3)))
@@ -721,6 +801,8 @@ void SMDImporter::ParseVASection(const char* szCurrent,
 	unsigned int iCurIndex = 0;
 	while (true)
 	{
+		if(!SkipSpacesAndLineEnd(szCurrent,&szCurrent)) break;
+
 		// "end\n" - Ends the "vertexanimation" section
 		if (0 == ASSIMP_strincmp(szCurrent,"end",3) &&
 			IsSpaceOrNewLine(*(szCurrent+3)))
@@ -730,7 +812,7 @@ void SMDImporter::ParseVASection(const char* szCurrent,
 			break;
 		}
 		// "time <n>\n" 
-		else if (0 == ASSIMP_strincmp(szCurrent,"time",4) &&
+		if (0 == ASSIMP_strincmp(szCurrent,"time",4) &&
 			IsSpaceOrNewLine(*(szCurrent+4)))
 		{
 			szCurrent += 5;
@@ -767,6 +849,8 @@ void SMDImporter::ParseSkeletonSection(const char* szCurrent,
 	int iTime = 0;
 	while (true)
 	{
+		if(!SkipSpacesAndLineEnd(szCurrent,&szCurrent)) break;
+
 		// "end\n" - Ends the skeleton section
 		if (0 == ASSIMP_strincmp(szCurrent,"end",3) &&
 			IsSpaceOrNewLine(*(szCurrent+3)))
@@ -796,6 +880,7 @@ void SMDImporter::ParseNodeInfo(const char* szCurrent,
 	const char** szCurrentOut)
 {
 	unsigned int iBone  = 0;
+	SkipSpacesAndLineEnd(szCurrent,&szCurrent);
 	if(!this->ParseUnsignedInt(szCurrent,&szCurrent,iBone) || !SkipSpaces(szCurrent,&szCurrent))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing bone index");
@@ -836,6 +921,8 @@ void SMDImporter::ParseNodeInfo(const char* szCurrent,
 		++szEnd;
 	}
 	bone.mName = std::string(szCurrent,iBone);
+	szCurrent = szEnd;
+
 	// the only negative bone parent index that could occur is -1 AFAIK
 	if(!this->ParseSignedInt(szCurrent,&szCurrent,(int&)bone.iParent))
 	{
@@ -933,11 +1020,13 @@ void SMDImporter::ParseTriangle(const char* szCurrent,
 	}
 
 	// read the texture file name
-	const char* szEnd = szCurrent;
-	while (!IsSpaceOrNewLine(*szEnd++));
+	const char* szLast = szCurrent;
+	while (!IsSpaceOrNewLine(*szCurrent++));
 
-	face.iTexture = this->GetTextureIndex(std::string(szCurrent,
-		(uintptr_t)szEnd-(uintptr_t)szCurrent));
+	face.iTexture = this->GetTextureIndex(std::string(szLast,
+		(uintptr_t)szCurrent-(uintptr_t)szLast));
+
+	this->SkipLine(szCurrent,&szCurrent);
 
 	// load three vertices
 	for (unsigned int iVert = 0; iVert < 3;++iVert)
@@ -945,6 +1034,7 @@ void SMDImporter::ParseTriangle(const char* szCurrent,
 		this->ParseVertex(szCurrent,&szCurrent,
 			face.avVertices[iVert]);
 	}
+	*szCurrentOut = szCurrent;
 }
 // ------------------------------------------------------------------------------------------------
 // Parse a float

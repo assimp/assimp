@@ -41,19 +41,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the ASE parser class */
 
+// internal headers
 #include "TextureTransform.h"
 #include "ASELoader.h"
 #include "MaterialSystem.h"
-
-#include "../include/DefaultLogger.h"
 #include "fast_atof.h"
 
+// public ASSIMP headers
+#include "../include/DefaultLogger.h"
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
 
+// boost headers
 #include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
@@ -134,7 +136,7 @@ bool Parser::SkipToNextToken()
 
 		// increase the line number counter if necessary
 		if (IsLineEnd(me))++this->iLineNumber;
-		else if ('*' == me || '}' == me || '{' == me)return true;
+		if ('*' == me || '}' == me || '{' == me)return true;
 		else if ('\0' == me)return false;
 
 		++this->m_szFile;

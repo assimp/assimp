@@ -155,7 +155,10 @@ void ValidateDSProcess::Execute( aiScene* pScene)
 			this->Validate(pScene->mMeshes[i]);
 		}
 	}
-	else this->ReportError("aiScene::mNumMeshes is 0. At least one mesh must be there");
+	else if (!(this->mScene->mFlags & AI_SCENE_FLAGS_ANIM_SKELETON_ONLY))
+	{
+		this->ReportError("aiScene::mNumMeshes is 0. At least one mesh must be there");
+	}
 
 	// validate all animations
 	if (pScene->mNumAnimations)
@@ -184,6 +187,11 @@ void ValidateDSProcess::Execute( aiScene* pScene)
 				}
 			}
 		}
+	}
+	else if (this->mScene->mFlags & AI_SCENE_FLAGS_ANIM_SKELETON_ONLY)
+	{
+		this->ReportError("aiScene::mNumAnimations is 0 and the "
+			"AI_SCENE_FLAGS_ANIM_SKELETON_ONLY flag is set.");
 	}
 
 	// validate all textures
@@ -240,71 +248,83 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 			pMesh->mMaterialIndex,this->mScene->mNumMaterials-1);
 	}
 
-	// positions must always be there ...
-	if (!pMesh->mNumVertices || !pMesh->mVertices)
+	if (this->mScene->mFlags & AI_SCENE_FLAGS_ANIM_SKELETON_ONLY)
 	{
-		this->ReportError("The mesh contains no vertices");
-	}
-
-	// faces, too
-	if (!pMesh->mNumFaces || !pMesh->mFaces)
-	{
-		this->ReportError("The mesh contains no faces");
-	}
-
-	// now check whether the face indexing layout is correct:
-	// unique vertices, pseudo-indexed.
-	std::vector<bool> abRefList;
-	abRefList.resize(pMesh->mNumVertices,false);
-	for (unsigned int i = 0; i < pMesh->mNumFaces;++i)
-	{
-		aiFace& face = pMesh->mFaces[i];
-		if (!face.mIndices)this->ReportError("aiMesh::mFaces[%i].mIndices is NULL",i);
-		if (face.mNumIndices < 3)this->ReportError(
-			"aiMesh::mFaces[%i].mIndices is not a triangle or polygon",i);
-
-		for (unsigned int a = 0; a < face.mNumIndices;++a)
+		if (pMesh->mNumVertices || pMesh->mVertices ||
+			pMesh->mNumFaces || pMesh->mFaces)
 		{
-			if (face.mIndices[a] >= pMesh->mNumVertices)
-			{
-				this->ReportError("aiMesh::mFaces[%i]::mIndices[%a] is out of range",i,a);
-			}
-			if (abRefList[face.mIndices[a]])
-			{
-				this->ReportError("aiMesh::mVertices[%i] is referenced twice - second "
-					"time by aiMesh::mFaces[%i]::mIndices[%i]",face.mIndices[a],i,a);
-			}
-			abRefList[face.mIndices[a]] = true;
+			this->ReportWarning("The mesh contains vertices and faces although "
+				"the AI_SCENE_FLAGS_ANIM_SKELETON_ONLY flag is set");
 		}
 	}
-	abRefList.clear();
-
-	// texture channel 2 may not be set if channel 1 is zero ...
+	else
 	{
-	unsigned int i = 0;
-	for (;i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
-	{
-		if (!pMesh->HasTextureCoords(i))break;
-	}
-	for (;i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
-		if (pMesh->HasTextureCoords(i))
+		// positions must always be there ...
+		if (!pMesh->mNumVertices || !pMesh->mVertices)
 		{
-			this->ReportError("Texture coordinate channel %i is existing, "
-				"although the previous channel was NULL.",i);
+			this->ReportError("The mesh contains no vertices");
 		}
-	}
-	// the same for the vertex colors
-	{
-	unsigned int i = 0;
-	for (;i < AI_MAX_NUMBER_OF_COLOR_SETS;++i)
-	{
-		if (!pMesh->HasVertexColors(i))break;
-	}
-	for (;i < AI_MAX_NUMBER_OF_COLOR_SETS;++i)
-		if (pMesh->HasVertexColors(i))
+
+		// faces, too
+		if (!pMesh->mNumFaces || !pMesh->mFaces)
 		{
-			this->ReportError("Vertex color channel %i is existing, "
-				"although the previous channel was NULL.",i);
+			this->ReportError("The mesh contains no faces");
+		}
+
+		// now check whether the face indexing layout is correct:
+		// unique vertices, pseudo-indexed.
+		std::vector<bool> abRefList;
+		abRefList.resize(pMesh->mNumVertices,false);
+		for (unsigned int i = 0; i < pMesh->mNumFaces;++i)
+		{
+			aiFace& face = pMesh->mFaces[i];
+			if (!face.mIndices)this->ReportError("aiMesh::mFaces[%i].mIndices is NULL",i);
+			if (face.mNumIndices < 3)this->ReportError(
+				"aiMesh::mFaces[%i].mIndices is not a triangle or polygon",i);
+
+			for (unsigned int a = 0; a < face.mNumIndices;++a)
+			{
+				if (face.mIndices[a] >= pMesh->mNumVertices)
+				{
+					this->ReportError("aiMesh::mFaces[%i]::mIndices[%a] is out of range",i,a);
+				}
+				if (abRefList[face.mIndices[a]])
+				{
+					this->ReportError("aiMesh::mVertices[%i] is referenced twice - second "
+						"time by aiMesh::mFaces[%i]::mIndices[%i]",face.mIndices[a],i,a);
+				}
+				abRefList[face.mIndices[a]] = true;
+			}
+		}
+		abRefList.clear();
+
+		// texture channel 2 may not be set if channel 1 is zero ...
+		{
+			unsigned int i = 0;
+			for (;i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
+			{
+				if (!pMesh->HasTextureCoords(i))break;
+			}
+			for (;i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
+				if (pMesh->HasTextureCoords(i))
+				{
+					this->ReportError("Texture coordinate channel %i is existing, "
+						"although the previous channel was NULL.",i);
+				}
+		}
+		// the same for the vertex colors
+		{
+			unsigned int i = 0;
+			for (;i < AI_MAX_NUMBER_OF_COLOR_SETS;++i)
+			{
+				if (!pMesh->HasVertexColors(i))break;
+			}
+			for (;i < AI_MAX_NUMBER_OF_COLOR_SETS;++i)
+				if (pMesh->HasVertexColors(i))
+				{
+					this->ReportError("Vertex color channel %i is existing, "
+						"although the previous channel was NULL.",i);
+				}
 		}
 	}
 
@@ -316,6 +336,13 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 			this->ReportError("aiMesh::mBones is NULL (aiMesh::mNumBones is %i)",
 				pMesh->mNumBones);
 		}
+		float* afSum = NULL;
+		if (pMesh->mNumVertices)
+		{
+			afSum = new float[pMesh->mNumVertices];
+			for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
+				afSum[i] = 0.0f;
+		}
 
 		// check whether there are duplicate bone names
 		for (unsigned int i = 0; i < pMesh->mNumBones;++i)
@@ -325,7 +352,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 				this->ReportError("aiMesh::mBones[%i] is NULL (aiMesh::mNumBones is %i)",
 					i,pMesh->mNumBones);
 			}
-			this->Validate(pMesh,pMesh->mBones[i]);
+			this->Validate(pMesh,pMesh->mBones[i],afSum);
 
 			for (unsigned int a = i+1; a < pMesh->mNumBones;++a)
 			{
@@ -336,11 +363,22 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 				}
 			}
 		}
+		// check whether all bone weights for a vertex sum to 1.0 ...
+		for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
+		{
+			if (afSum[i] && (afSum[i] <= 0.995 || afSum[i] >= 1.005))
+			{
+				delete[] afSum;
+				this->ReportError("aiMesh::mVertices[%i]: The sum of all bone "
+					"weights isn't 1.0f (sum is %f)",i,afSum[i]);
+			}
+		}
+		delete[] afSum;
 	}
 }
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::Validate( const aiMesh* pMesh,
-	const aiBone* pBone)
+	const aiBone* pBone,float* afSum)
 {
 	this->Validate(&pBone->mName);
 
@@ -355,8 +393,8 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh,
 		{
 			this->ReportWarning("aiBone::mWeights[%i].mWeight has an invalid value",i);
 		}
+		afSum[pBone->mWeights[i].mVertexId] += pBone->mWeights[i].mWeight;
 	}
-	// TODO: check whether all bone weights for a vertex sum to 1.0 ...
 }
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::Validate( const aiAnimation* pAnimation)
@@ -606,9 +644,10 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 		for (unsigned int a = 0; a < mesh->mNumBones;++a)
 		{
 			if (mesh->mBones[a]->mName == pBoneAnim->mBoneName)
-				break;
+				goto __break_out;
 		}
 	}
+__break_out:
 	if (i == this->mScene->mNumMeshes)
 	{
 		this->ReportWarning("aiBoneAnim::mBoneName is %s. However, no bone with this name was found",

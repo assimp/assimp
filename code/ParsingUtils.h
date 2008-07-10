@@ -81,14 +81,10 @@ inline bool SkipLine( const char_t* in, const char_t** out)
 {
 	while (*in != (char_t)'\r' && *in != (char_t)'\n' && *in != (char_t)'\0')in++;
 
-	if (*in == (char_t)'\0')
-	{
-		*out = in;
-		return false;
-	}
-	in++;
+	// files are opened in binary mode. Ergo there are both NL and CR
+	while (*in == (char_t)'\r' || *in == (char_t)'\n')in++;
 	*out = in;
-	return true;
+	return *in != (char_t)'\0';
 }
 // ---------------------------------------------------------------------------------
 template <class char_t>
@@ -98,11 +94,12 @@ inline bool SkipLine( const char_t** inout)
 }
 // ---------------------------------------------------------------------------------
 template <class char_t>
-inline void SkipSpacesAndLineEnd( const char_t* in, const char_t** out)
+inline bool SkipSpacesAndLineEnd( const char_t* in, const char_t** out)
 {
 	while (*in == (char_t)' ' || *in == (char_t)'\t' ||
 		*in == (char_t)'\r' || *in == (char_t)'\n')in++;
 	*out = in;
+	return *in != '\0';
 }
 // ---------------------------------------------------------------------------------
 template <class char_t>

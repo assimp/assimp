@@ -458,7 +458,11 @@ struct Mesh
 		static int iCnt = 0;
 		
 		char szTemp[128];
-		sprintf(szTemp,"$$_UNNAMED_%i_$$",iCnt++);
+#if _MSC_VER >= 1400
+		::sprintf_s(szTemp,"$$_UNNAMED_%i_$$",iCnt++);
+#else
+		::sprintf(szTemp,"$$_UNNAMED_%i_$$",iCnt++);
+#endif
 		mName = szTemp;
 	}
 
@@ -489,20 +493,24 @@ struct Node
 {
 	Node()
 
-	// (code for keyframe animation. however, this is currently not supported by Assimp)
-#if 0
-		: vScaling(1.0f,1.0f,1.0f)
-#endif
+		: mHierarchyPos(0),mHierarchyIndex(0)
 
 	{
 		static int iCnt = 0;
 		
 		char szTemp[128];
-		sprintf(szTemp,"$$_UNNAMED_%i_$$",iCnt++);
+#if _MSC_VER >= 1400
+		::sprintf_s(szTemp,"$$_UNNAMED_%i_$$",iCnt++);
+#else
+		::sprintf(szTemp,"$$_UNNAMED_%i_$$",iCnt++);
+#endif
 		mName = szTemp;
 
-		mHierarchyPos = 0;
-		mHierarchyIndex = 0;
+#ifdef AI_3DS_KEYFRAME_ANIMATION
+		aRotationKeys.reserve(10);
+		aPositionKeys.reserve(10);
+		aScalingKeys.reserve(10);
+#endif
 	}
 
 	//! Pointer to the parent node
@@ -520,13 +528,19 @@ struct Node
 	//! Index of the node
 	int16_t mHierarchyIndex;
 
-// (code for keyframe animation. however, this is currently not supported by Assimp)
-#if 0
-	aiVector3D vPivot;
-	aiVector3D vScaling;
-	aiMatrix4x4 mRotation;
-	aiVector3D vPosition;
+#ifdef AI_3DS_KEYFRAME_ANIMATION
+	//! Rotation keys loaded from the file
+	std::vector<aiQuatKey> aRotationKeys;
+
+	//! Position keys loaded from the file
+	std::vector<aiVectorKey> aPositionKeys;
+
+	//! Scaling keys loaded from the file
+	std::vector<aiVectorKey> aScalingKeys;
 #endif
+
+	//! Pivot position loaded from the file
+	aiVector3D vPivot;
 
 	//! Add a child node, setup the right parent node for it
 	//! \param pc Node to be 'adopted'

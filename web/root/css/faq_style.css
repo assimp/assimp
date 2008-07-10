@@ -1,0 +1,177 @@
+body {
+	margin: 0;
+	padding: 0;
+	background: #777777;
+	font: normal 11px Tahoma, Arial, Helvetica, sans-serif;
+	color: #666666;
+}
+
+h1, h2, h3{
+	margin: 0;
+	padding: 0;
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+	color: #F49500;
+}
+
+
+h4 {
+	font-size: 12px;
+}
+
+p, blockquote, ul, ol {
+	line-height: 18px;
+	text-align: justify;
+}
+
+blockquote {
+	padding-left: 20px;
+	background: url(../images/img05.gif) repeat-y;
+}
+
+a {
+	color: #F49500;
+}
+
+a:hover {
+	text-decoration: none;
+}
+
+/* Header */
+
+#header {
+	width: 760px;
+	height: 180px;
+	margin: 0 auto;
+}
+
+#header h1, #header h2 {
+	/*text-transform: lowercase;*/
+	font-weight: normal;
+	color: #ffffff; //#FFFFFF;
+}
+
+#header h1 {
+	float: left;
+	padding: 120px 0 0 20px;
+	font-size: 36px;
+}
+
+#header h2 {
+	float: right;
+	padding: 134px 20px 0 0;
+	font-size: 22px;
+}
+
+/* Menu */
+
+#menu {
+	width: 760px;
+	height: 50px;
+	margin: 0 auto;
+}
+
+#menu ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+#menu li {
+	display: inline;
+}
+
+#menu a {
+	display: block;
+	float: left;
+	padding: 17px 20px 0 20px;
+	background: url(../images/img03.gif) no-repeat;
+	text-transform: uppercase;
+	text-decoration: none;
+	font: bold 12px "Trebuchet MS", Arial, Helvetica, sans-serif;
+	color: #D8D8D8;
+}
+
+#menu a:hover {
+	color: #FFFFFF;
+}
+
+#menu .first a {
+	background: none;
+}
+
+/* Content */
+
+#content {
+	width: 720px;
+	margin: 0 auto 20px auto;
+	padding: 20px;
+	background: #FFFFFF url(../images/img04.jpg) repeat-x left bottom;
+}
+
+/* Posts */
+
+#posts {
+	float: left;
+	width: 480px;
+}
+
+/* Posts - full length */
+
+#posts_fl {
+	float: center;
+	width: 680px;
+}
+
+/* Links */
+
+#links {
+	float: right;
+	width: 200px;
+	padding-left: 20px;
+	background: url(../images/img05.gif) repeat-y;
+}
+
+#links ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+#links li ul {
+	padding: 5px 0 30px 0;
+}
+
+#links li li {
+	padding: 7px 10px;
+	background: url(../images/img06.gif) repeat-x left bottom;
+}
+
+#links li a {
+	text-decoration: none;
+}
+
+#links li a:hover {
+	text-decoration: underline;
+}
+
+#links li i {
+	font-style: normal;
+	font-size: 9px;
+}
+
+#links li h2 {
+	font-size: 14px;
+}
+
+/* Footer */
+
+#footer {
+	height: 100px;
+	padding: 20px;
+	background: #2D2D2D url(../images/img07.gif) repeat-x;
+}
+
+#footer p {
+	text-align: center;
+	color: #999999;
+}

@@ -139,7 +139,17 @@ void Dot3DSImporter::InternReadFile(
 	this->bHasBG = false;
 
 	int iRemaining = (unsigned int)fileSize;
-	this->ParseMainChunk(&iRemaining);
+
+	// parse the file
+	try
+	{
+		this->ParseMainChunk(iRemaining);
+	}
+	catch ( ImportErrorException* ex)
+	{
+		delete[] this->mBuffer;
+		throw ex;
+	};
 
 	// Generate an unique set of vertices/indices for
 	// all meshes contained in the file
@@ -202,8 +212,7 @@ void Dot3DSImporter::ReadChunk(const Dot3DSFile::Chunk** p_ppcOut)
 	// read chunk
 	if (this->mCurrent >= this->mLast)
 	{
-		*p_ppcOut = NULL;
-		return;
+		throw new ImportErrorException("Unexpected end of file, can't read chunk header");
 	}
 	const uintptr_t iDiff = this->mLast - this->mCurrent;
 	if (iDiff < sizeof(Dot3DSFile::Chunk)) 
@@ -211,18 +220,21 @@ void Dot3DSImporter::ReadChunk(const Dot3DSFile::Chunk** p_ppcOut)
 		*p_ppcOut = NULL;
 		return;
 	}
-
 	*p_ppcOut = (const Dot3DSFile::Chunk*) this->mCurrent;
+	if ((**p_ppcOut).Size + this->mCurrent > this->mLast)
+	{
+		throw new ImportErrorException("Unexpected end of file, can't read chunk footer");
+	}
 	this->mCurrent += sizeof(Dot3DSFile::Chunk);
 	return;
 }
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseMainChunk(int* piRemaining)
+void Dot3DSImporter::ParseMainChunk(int& piRemaining)
 {
 	const Dot3DSFile::Chunk* psChunk;
 
 	this->ReadChunk(&psChunk);
-	if (NULL == psChunk)return;
+	
 
 	const unsigned char* pcCur = this->mCurrent;
 	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
@@ -235,7 +247,7 @@ void Dot3DSImporter::ParseMainChunk(int* piRemaining)
 	case Dot3DSFile::CHUNK_MAIN:
 	//case 0x444d: // bugfix
 
-		this->ParseEditorChunk(&iRemaining);
+		this->ParseEditorChunk(iRemaining);
 		break;
 	};
 	if (pcCurNext < this->mCurrent)
@@ -247,17 +259,17 @@ void Dot3DSImporter::ParseMainChunk(int* piRemaining)
 	}
 	// Go to the starting position of the next top-level chunk
 	this->mCurrent = pcCurNext;
-	*piRemaining -= psChunk->Size;
-	if (0 >= *piRemaining)return;
+	piRemaining -= psChunk->Size;
+	if (0 >= piRemaining)return;
 	return this->ParseMainChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseEditorChunk(int* piRemaining)
+void Dot3DSImporter::ParseEditorChunk(int& piRemaining)
 {
 	const Dot3DSFile::Chunk* psChunk;
 
 	this->ReadChunk(&psChunk);
-	if (NULL == psChunk)return;
+	
 
 	const unsigned char* pcCur = this->mCurrent;
 	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
@@ -269,14 +281,35 @@ void Dot3DSImporter::ParseEditorChunk(int* piRemaining)
 	{
 	case Dot3DSFile::CHUNK_OBJMESH:
 
-		this->ParseObjectChunk(&iRemaining);
+		this->ParseObjectChunk(iRemaining);
 		break;
 
 	// NOTE: In several documentations in the internet this
 	// chunk appears at different locations
 	case Dot3DSFile::CHUNK_KEYFRAMER:
 
-		this->ParseKeyframeChunk(&iRemaining);
+		this->ParseKeyframeChunk(iRemaining);
+		break;
+
+	case Dot3DSFile::CHUNK_VERSION:
+
+		if (psChunk->Size >= 2+sizeof(Dot3DSFile::Chunk))
+		{
+			// print the version number
+			char szBuffer[128];
+#if _MSC_VER >= 1400
+			::sprintf_s(szBuffer,"3DS file version chunk: %i",
+				(int) *((uint16_t*)this->mCurrent));
+#else
+			::sprintf(szBuffer,"3DS file version chunk: %i",
+				(int) *((uint16_t*)this->mCurrent));
+#endif
+			DefaultLogger::get()->info(szBuffer);
+		}
+		else
+		{
+			DefaultLogger::get()->warn("Invalid version chunk in 3DS file");
+		}
 		break;
 	};
 	if (pcCurNext < this->mCurrent)
@@ -288,17 +321,17 @@ void Dot3DSImporter::ParseEditorChunk(int* piRemaining)
 	}
 	// Go to the starting position of the next top-level chunk
 	this->mCurrent = pcCurNext;
-	*piRemaining -= psChunk->Size;
-	if (0 >= *piRemaining)return;
+	piRemaining -= psChunk->Size;
+	if (0 >= piRemaining)return;
 	return this->ParseEditorChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseObjectChunk(int* piRemaining)
+void Dot3DSImporter::ParseObjectChunk(int& piRemaining)
 {
 	const Dot3DSFile::Chunk* psChunk;
 
 	this->ReadChunk(&psChunk);
-	if (NULL == psChunk)return;
+	
 
 	const unsigned char* pcCur = this->mCurrent;
 	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
@@ -329,13 +362,13 @@ void Dot3DSImporter::ParseObjectChunk(int* piRemaining)
 
 		this->mCurrent += iCnt;
 		iRemaining -= iCnt;
-		this->ParseChunk(&iRemaining);
+		this->ParseChunk(iRemaining);
 		break;
 
 	case Dot3DSFile::CHUNK_MAT_MATERIAL:
 
 		this->mScene->mMaterials.push_back(Dot3DS::Material());
-		this->ParseMaterialChunk(&iRemaining);
+		this->ParseMaterialChunk(iRemaining);
 		break;
 
 	case Dot3DSFile::CHUNK_AMBCOLOR:
@@ -373,7 +406,7 @@ void Dot3DSImporter::ParseObjectChunk(int* piRemaining)
 	// chunk appears at different locations
 	case Dot3DSFile::CHUNK_KEYFRAMER:
 
-		this->ParseKeyframeChunk(&iRemaining);
+		this->ParseKeyframeChunk(iRemaining);
 		break;
 
 	};
@@ -386,8 +419,8 @@ void Dot3DSImporter::ParseObjectChunk(int* piRemaining)
 	}
 	// Go to the starting position of the next top-level chunk
 	this->mCurrent = pcCurNext;
-	*piRemaining -= psChunk->Size;
-	if (0 >= *piRemaining)return;
+	piRemaining -= psChunk->Size;
+	if (0 >= piRemaining)return;
 	return this->ParseObjectChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
@@ -395,17 +428,17 @@ void Dot3DSImporter::SkipChunk()
 {
 	const Dot3DSFile::Chunk* psChunk;
 	this->ReadChunk(&psChunk);
-	if (NULL == psChunk)return;
+	
 	this->mCurrent += psChunk->Size - sizeof(Dot3DSFile::Chunk);
 	return;
 }
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseChunk(int* piRemaining)
+void Dot3DSImporter::ParseChunk(int& piRemaining)
 {
 	const Dot3DSFile::Chunk* psChunk;
 
 	this->ReadChunk(&psChunk);
-	if (NULL == psChunk)return;
+	
 
 	const unsigned char* pcCur = this->mCurrent;
 	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
@@ -417,7 +450,7 @@ void Dot3DSImporter::ParseChunk(int* piRemaining)
 	{
 	case Dot3DSFile::CHUNK_TRIMESH:
 		// this starts a new mesh
-		this->ParseMeshChunk(&iRemaining);
+		this->ParseMeshChunk(iRemaining);
 		break;
 	};
 	if (pcCurNext < this->mCurrent)
@@ -430,17 +463,17 @@ void Dot3DSImporter::ParseChunk(int* piRemaining)
 	// Go to the starting position of the next top-level chunk
 	this->mCurrent = pcCurNext;
 
-	*piRemaining -= psChunk->Size;
-	if (0 >= *piRemaining)return;
+	piRemaining -= psChunk->Size;
+	if (0 >= piRemaining)return;
 	return this->ParseChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseKeyframeChunk(int* piRemaining)
+void Dot3DSImporter::ParseKeyframeChunk(int& piRemaining)
 {
 	const Dot3DSFile::Chunk* psChunk;
 
 	this->ReadChunk(&psChunk);
-	if (NULL == psChunk)return;
+	
 
 	const unsigned char* pcCur = this->mCurrent;
 	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
@@ -452,7 +485,7 @@ void Dot3DSImporter::ParseKeyframeChunk(int* piRemaining)
 	{
 	case Dot3DSFile::CHUNK_TRACKINFO:
 		// this starts a new mesh
-		this->ParseHierarchyChunk(&iRemaining);
+		this->ParseHierarchyChunk(iRemaining);
 		break;
 	};
 	if (pcCurNext < this->mCurrent)
@@ -465,8 +498,8 @@ void Dot3DSImporter::ParseKeyframeChunk(int* piRemaining)
 	// Go to the starting position of the next top-level chunk
 	this->mCurrent = pcCurNext;
 
-	*piRemaining -= psChunk->Size;
-	if (0 >= *piRemaining)return;
+	piRemaining -= psChunk->Size;
+	if (0 >= piRemaining)return;
 	return this->ParseKeyframeChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
@@ -487,12 +520,12 @@ void Dot3DSImporter::InverseNodeSearch(Dot3DS::Node* pcNode,Dot3DS::Node* pcCurr
 	return this->InverseNodeSearch(pcNode,pcCurrent->mParent);
 }
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseHierarchyChunk(int* piRemaining)
+void Dot3DSImporter::ParseHierarchyChunk(int& piRemaining)
 {
 	const Dot3DSFile::Chunk* psChunk;
 
 	this->ReadChunk(&psChunk);
-	if (NULL == psChunk)return;
+	
 
 	const unsigned char* pcCur = this->mCurrent;
 	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
@@ -545,15 +578,14 @@ void Dot3DSImporter::ParseHierarchyChunk(int* piRemaining)
 		this->mCurrentNode = pcNode;
 		break;
 
-	// (code for keyframe animation. however, this is currently not supported by Assimp)
-#if 0
-
 	case Dot3DSFile::CHUNK_TRACKPIVOT:
 
-		this->mCurrentNode->vPivot = *((aiVector3D*)this->mCurrent);
+		// pivot = origin of rotation and scaling
+		this->mCurrentNode->vPivot = *((const aiVector3D*)this->mCurrent);
 		this->mCurrent += sizeof(aiVector3D);
 		break;
 
+#ifdef AI_3DS_KEYFRAME_ANIMATION
 
 	case Dot3DSFile::CHUNK_TRACKPOS:
 
@@ -569,26 +601,32 @@ void Dot3DSImporter::ParseHierarchyChunk(int* piRemaining)
 		}  pos[keys]; 	
 		*/
 		this->mCurrent += 10;
-		iTemp = *((uint16_t*)mCurrent);
+		iTemp = *((const uint16_t*)mCurrent);
 
 		this->mCurrent += sizeof(uint16_t) * 2;
 
-		if (0 != iTemp)
-			{
-			for (unsigned int i = 0; i < (unsigned int)iTemp;++i)
-				{
-				uint16_t sNum = *((uint16_t*)mCurrent);
-				this->mCurrent += sizeof(uint16_t);
+		for (unsigned int i = 0; i < (unsigned int)iTemp;++i)
+		{
+			uint16_t sNum = *((const uint16_t*)mCurrent);
+			this->mCurrent += sizeof(uint16_t);
 
-				if (0 == sNum)
-					{
-					this->mCurrent += sizeof(uint32_t);
-					this->mCurrentNode->vPosition = *((aiVector3D*)this->mCurrent);
-					this->mCurrent += sizeof(aiVector3D);
-					}
-				else this->mCurrent += sizeof(uint32_t) + sizeof(aiVector3D);
-				}
+			aiVectorKey v;
+			v.mTime = (double)sNum;
+
+			this->mCurrent += sizeof(uint32_t);
+			v.mValue =  *((const aiVector3D*)this->mCurrent);
+			this->mCurrent += sizeof(aiVector3D);
+
+			// check whether we do already have this keyframe
+			for (std::vector<aiVectorKey>::const_iterator
+				i =  this->mCurrentNode->aPositionKeys.begin();
+				i != this->mCurrentNode->aPositionKeys.end();++i)
+			{
+				if ((*i).mTime == v.mTime){v.mTime = -10e10f;break;}
 			}
+			// add the new keyframe
+			if (v.mTime != -10e10f)this->mCurrentNode->aPositionKeys.push_back(v);
+		}
 		break;
 
 	case Dot3DSFile::CHUNK_TRACKROTATE:
@@ -605,72 +643,39 @@ void Dot3DSImporter::ParseHierarchyChunk(int* piRemaining)
 		}  pos[keys]; 	
 		*/
 		this->mCurrent += 10;
-		iTemp = *((uint16_t*)mCurrent);
+		iTemp = *((const uint16_t*)mCurrent);
 
 		this->mCurrent += sizeof(uint16_t) * 2;
-		if (0 != iTemp)
+
+		for (unsigned int i = 0; i < (unsigned int)iTemp;++i)
+		{
+			uint16_t sNum = *((const uint16_t*)mCurrent);
+			this->mCurrent += sizeof(uint16_t);
+
+			aiQuatKey v;
+			v.mTime = (double)sNum;
+
+			this->mCurrent += sizeof(uint32_t);
+
+			float fRadians = *((const float*)this->mCurrent);
+			this->mCurrent += sizeof(float);
+
+			aiVector3D vAxis = *((const aiVector3D*)this->mCurrent);
+			this->mCurrent += sizeof(aiVector3D);
+
+			// construct a rotation quaternion from the axis-angle pair
+			v.mValue = aiQuaternion(vAxis,fRadians);
+
+			// check whether we do already have this keyframe
+			for (std::vector<aiQuatKey>::const_iterator
+				i =  this->mCurrentNode->aRotationKeys.begin();
+				i != this->mCurrentNode->aRotationKeys.end();++i)
 			{
-			bool neg = false;
-			unsigned int iNum0 = 0;
-			for (unsigned int i = 0; i < (unsigned int)iTemp;++i)
-				{
-				uint16_t sNum = *((uint16_t*)mCurrent);
-				this->mCurrent += sizeof(uint16_t);
-
-				if (0 == sNum)
-					{
-					this->mCurrent		+= sizeof(uint32_t);
-					float fRadians		= *((float*)this->mCurrent);
-					this->mCurrent		+= sizeof(float);
-					aiVector3D vAxis	= *((aiVector3D*)this->mCurrent);
-					this->mCurrent		+= sizeof(aiVector3D);
-
-					// some idiotic files have rotations with fRadians = 0 ...
-					if (0.0f != fRadians)
-						{
-
-						// get the rotation matrix around the axis
-						const float fSin = sinf(-fRadians);
-						const float fCos = cosf(-fRadians);
-						const float fOneMinusCos = 1.0f - fCos;
-
-						std::swap(vAxis.z,vAxis.y);
-						//vAxis.z *= -1.0f;
-						//vAxis.Normalize();
-
-						aiMatrix4x4 mRot = aiMatrix4x4(
-							(vAxis.x * vAxis.x) * fOneMinusCos + fCos,
-							(vAxis.x * vAxis.y) * fOneMinusCos /*-*/- (vAxis.z * fSin),
-							(vAxis.x * vAxis.z) * fOneMinusCos /*+*/+ (vAxis.y * fSin),
-							0.0f,
-							(vAxis.y * vAxis.x) * fOneMinusCos /*+*/+ (vAxis.z * fSin),
-							(vAxis.y * vAxis.y) * fOneMinusCos + fCos,
-							(vAxis.y * vAxis.z) * fOneMinusCos /*-*/- (vAxis.x * fSin),
-							0.0f,
-							(vAxis.z * vAxis.x) * fOneMinusCos /*-*/- (vAxis.y * fSin),
-							(vAxis.z * vAxis.y) * fOneMinusCos /*+*/+ (vAxis.x * fSin),
-							(vAxis.z * vAxis.z) * fOneMinusCos + fCos,
-							0.0f,0.0f,0.0f,0.0f,1.0f);
-						mRot.Transpose();
-
-						// build a chain of concatenated rotation matrix'
-						// if there are multiple track chunks for the same frame
-						// (there are some silly files usinf this ...)
-						if (0 != iNum0)
-							{
-							this->mCurrentNode->mRotation = this->mCurrentNode->mRotation * mRot;
-							}
-						else
-							{
-							// for the first time simply set the rotation matrix
-							this->mCurrentNode->mRotation = mRot;
-							}
-						iNum0++;
-						}
-					}
-				else this->mCurrent += sizeof(uint32_t) + sizeof(aiVector3D) + sizeof(float);
-				}
+				if ((*i).mTime == v.mTime){v.mTime = -10e10f;break;}
 			}
+			// add the new keyframe
+			if (v.mTime != -10e10f)this->mCurrentNode->aRotationKeys.push_back(v);
+		}
 		break;
 
 	case Dot3DSFile::CHUNK_TRACKSCALE:
@@ -687,40 +692,45 @@ void Dot3DSImporter::ParseHierarchyChunk(int* piRemaining)
 		}  pos[keys]; 	
 		*/
 		this->mCurrent += 10;
-		iTemp = *((uint16_t*)mCurrent);
+		iTemp = *((const uint16_t*)mCurrent);
 
 		this->mCurrent += sizeof(uint16_t) * 2;
+		for (unsigned int i = 0; i < (unsigned int)iTemp;++i)
+		{
+			uint16_t sNum = *((const uint16_t*)mCurrent);
+			this->mCurrent += sizeof(uint16_t);
 
-		if (0 != iTemp)
+			aiVectorKey v;
+			v.mTime = (double)sNum;
+
+			this->mCurrent += sizeof(uint32_t);
+			v.mValue =  *((const aiVector3D*)this->mCurrent);
+			this->mCurrent += sizeof(aiVector3D);
+
+			// check whether we do already have this keyframe
+			for (std::vector<aiVectorKey>::const_iterator
+				i =  this->mCurrentNode->aScalingKeys.begin();
+				i != this->mCurrentNode->aScalingKeys.end();++i)
 			{
-			for (unsigned int i = 0; i < (unsigned int)iTemp;++i)
-				{
-				uint16_t sNum = *((uint16_t*)mCurrent);
-				this->mCurrent += sizeof(uint16_t);
-				if (0 == sNum)
-					{
-					this->mCurrent += sizeof(uint32_t);
-					aiVector3D vMe = *((aiVector3D*)this->mCurrent);
-					// ignore zero scalings
-					if (0.0f != vMe.x && 0.0f != vMe.y && 0.0f != vMe.z)
-						{
-						this->mCurrentNode->vScaling.x *= vMe.x;
-						this->mCurrentNode->vScaling.y *= vMe.y;
-						this->mCurrentNode->vScaling.z *= vMe.z;
-						}
-					else
-					{
-						DefaultLogger::get()->warn("Found zero scaling factors. "
-							"This will be ignored.");
-					}
-					this->mCurrent += sizeof(aiVector3D);
-					}
-				else this->mCurrent += sizeof(uint32_t) + sizeof(aiVector3D);
-				}
+				if ((*i).mTime == v.mTime){v.mTime = -10e10f;break;}
 			}
-		break;
-#endif // end keyframe animation code
+			// add the new keyframe
+			if (v.mTime != -10e10f)this->mCurrentNode->aScalingKeys.push_back(v);
 
+			if (v.mValue.x && v.mValue.y && v.mValue.z)
+			{
+				DefaultLogger::get()->warn("Found zero scaled axis in scaling keyframe");
+				++iCnt;
+			}
+		}
+		// there are 3DS files that have only zero scalings
+		if (iTemp == iCnt)
+		{
+			DefaultLogger::get()->warn("All scaling keys are zero. They will be removed");
+			this->mCurrentNode->aScalingKeys.clear();
+		}
+		break;
+#endif
 	};
 	if (pcCurNext < this->mCurrent)
 	{
@@ -732,19 +742,19 @@ void Dot3DSImporter::ParseHierarchyChunk(int* piRemaining)
 	// Go to the starting position of the next top-level chunk
 	this->mCurrent = pcCurNext;
 
-	*piRemaining -= psChunk->Size;
-	if (0 >= *piRemaining)return;
+	piRemaining -= psChunk->Size;
+	if (0 >= piRemaining)return;
 	return this->ParseHierarchyChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseFaceChunk(int* piRemaining)
+void Dot3DSImporter::ParseFaceChunk(int& piRemaining)
 {
 	const Dot3DSFile::Chunk* psChunk;
 
 	Dot3DS::Mesh& mMesh = this->mScene->mMeshes.back();
 
 	this->ReadChunk(&psChunk);
-	if (NULL == psChunk)return;
+	
 
 	const unsigned char* pcCur = this->mCurrent;
 	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
@@ -833,19 +843,19 @@ void Dot3DSImporter::ParseFaceChunk(int* piRemaining)
 	// Go to the starting position of the next chunk on this level
 	this->mCurrent = pcCurNext;
 
-	*piRemaining -= psChunk->Size;
-	if (0 >= *piRemaining)return;
+	piRemaining -= psChunk->Size;
+	if (0 >= piRemaining)return;
 	return ParseFaceChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseMeshChunk(int* piRemaining)
+void Dot3DSImporter::ParseMeshChunk(int& piRemaining)
 {
 	const Dot3DSFile::Chunk* psChunk;
 
 	Dot3DS::Mesh& mMesh = this->mScene->mMeshes.back();
 
 	this->ReadChunk(&psChunk);
-	if (NULL == psChunk)return;
+	
 
 	const unsigned char* pcCur = this->mCurrent;
 	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
@@ -866,11 +876,12 @@ void Dot3DSImporter::ParseMeshChunk(int* piRemaining)
 		while (iNum-- > 0)
 		{
 			mMesh.mPositions.push_back(*((aiVector3D*)this->mCurrent));
-			mMesh.mPositions.back().z *= -1.0f;
+			aiVector3D& v = mMesh.mPositions.back();
+			//std::swap( v.y, v.z);
+			//v.y *= -1.0f;
 			this->mCurrent += sizeof(aiVector3D);
 		}
 		break;
-
 	case Dot3DSFile::CHUNK_TRMATRIX:
 		{
 		// http://www.gamedev.net/community/forums/topic.asp?topic_id=263063
@@ -879,43 +890,21 @@ void Dot3DSImporter::ParseMeshChunk(int* piRemaining)
 		this->mCurrent += 12 * sizeof(float);
 
 		mMesh.mMat.a1 = pf[0];
-		mMesh.mMat.a2 = pf[1];
-		mMesh.mMat.a3 = pf[2];
-		mMesh.mMat.b1 = pf[3];
+		mMesh.mMat.b1 = pf[1];
+		mMesh.mMat.c1 = pf[2];
+		mMesh.mMat.a2 = pf[3];
 		mMesh.mMat.b2 = pf[4];
-		mMesh.mMat.b3 = pf[5];
-		mMesh.mMat.c1 = pf[6];
-		mMesh.mMat.c2 = pf[7];
+		mMesh.mMat.c2 = pf[5];
+		mMesh.mMat.a3 = pf[6];
+		mMesh.mMat.b3 = pf[7];
 		mMesh.mMat.c3 = pf[8];
-		mMesh.mMat.d1 = pf[9];
-		mMesh.mMat.d2 = pf[10];
-		mMesh.mMat.d3 = pf[11];
-
-		std::swap((float&)mMesh.mMat.d2, (float&)mMesh.mMat.d3);
-		std::swap((float&)mMesh.mMat.a2, (float&)mMesh.mMat.a3);
-		std::swap((float&)mMesh.mMat.b1, (float&)mMesh.mMat.c1);
-		std::swap((float&)mMesh.mMat.c2, (float&)mMesh.mMat.b3);
-		std::swap((float&)mMesh.mMat.b2, (float&)mMesh.mMat.c3);
-
-		mMesh.mMat.Transpose();
-
-		//aiMatrix4x4 mInv = mMesh.mMat;
-		//mInv.Inverse();
-
-		//// invert the matrix and transform all vertices with it
-		//// (the origin of all vertices is 0|0|0 now)
-		//for (register unsigned int i = 0; i < mMesh.mPositions.size();++i)
-		//	{
-		//	aiVector3D a,c;
-		//	a = mMesh.mPositions[i];
-		//	c[0]= mInv[0][0]*a[0] + mInv[1][0]*a[1] + mInv[2][0]*a[2] + mInv[3][0];
-		//	c[1]= mInv[0][1]*a[0] + mInv[1][1]*a[1] + mInv[2][1]*a[2] + mInv[3][1];
-		//	c[2]= mInv[0][2]*a[0] + mInv[1][2]*a[1] + mInv[2][2]*a[2] + mInv[3][2];
-		//	mMesh.mPositions[i] = c;
-		//	}
+		mMesh.mMat.a4 = pf[9];
+		mMesh.mMat.b4 = pf[10];
+		mMesh.mMat.c4 = pf[11];
+		//mMesh.mMat.Transpose(); // todo ----
 
 		// now check whether the matrix has got a negative determinant
-		// If yes, we need to flip all vertices x axis ....
+		// If yes, we need to flip all vertices' x axis ....
 		// From lib3ds, mesh.c
 		if (mMesh.mMat.Determinant() < 0.0f)
 			{
@@ -938,9 +927,9 @@ void Dot3DSImporter::ParseMeshChunk(int* piRemaining)
 				mMesh.mPositions[i] = c;
 				}
 			}
+			
 		}
 		break;
-
 	case Dot3DSFile::CHUNK_MAPLIST:
 
 		iNum = *((uint16_t*)this->mCurrent);
@@ -983,7 +972,7 @@ void Dot3DSImporter::ParseMeshChunk(int* piRemaining)
 		mMesh.mFaceMaterials.resize(mMesh.mFaces.size(),0xcdcdcdcd);
 
 		iRemaining = (int)(pcCurNext - this->mCurrent);
-		if (iRemaining > 0)this->ParseFaceChunk(&iRemaining);
+		if (iRemaining > 0)this->ParseFaceChunk(iRemaining);
 		break;
 
 	};
@@ -997,17 +986,17 @@ void Dot3DSImporter::ParseMeshChunk(int* piRemaining)
 	// Go to the starting position of the next chunk on this level
 	this->mCurrent = pcCurNext;
 
-	*piRemaining -= psChunk->Size;
-	if (0 >= *piRemaining)return;
+	piRemaining -= psChunk->Size;
+	if (0 >= piRemaining)return;
 	return ParseMeshChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseMaterialChunk(int* piRemaining)
+void Dot3DSImporter::ParseMaterialChunk(int& piRemaining)
 {
 	const Dot3DSFile::Chunk* psChunk;
 
 	this->ReadChunk(&psChunk);
-	if (NULL == psChunk)return;
+	
 
 	const unsigned char* pcCur = this->mCurrent;
 	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
@@ -1121,27 +1110,27 @@ void Dot3DSImporter::ParseMaterialChunk(int* piRemaining)
 	// parse texture chunks
 	case Dot3DSFile::CHUNK_MAT_TEXTURE:
 		iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-		this->ParseTextureChunk(&iRemaining,&this->mScene->mMaterials.back().sTexDiffuse);
+		this->ParseTextureChunk(iRemaining,&this->mScene->mMaterials.back().sTexDiffuse);
 		break;
 	case Dot3DSFile::CHUNK_MAT_BUMPMAP:
 		iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-		this->ParseTextureChunk(&iRemaining,&this->mScene->mMaterials.back().sTexBump);
+		this->ParseTextureChunk(iRemaining,&this->mScene->mMaterials.back().sTexBump);
 		break;
 	case Dot3DSFile::CHUNK_MAT_OPACMAP:
 		iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-		this->ParseTextureChunk(&iRemaining,&this->mScene->mMaterials.back().sTexOpacity);
+		this->ParseTextureChunk(iRemaining,&this->mScene->mMaterials.back().sTexOpacity);
 		break;
 	case Dot3DSFile::CHUNK_MAT_MAT_SHINMAP:
 		iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-		this->ParseTextureChunk(&iRemaining,&this->mScene->mMaterials.back().sTexShininess);
+		this->ParseTextureChunk(iRemaining,&this->mScene->mMaterials.back().sTexShininess);
 		break;
 	case Dot3DSFile::CHUNK_MAT_SPECMAP:
 		iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-		this->ParseTextureChunk(&iRemaining,&this->mScene->mMaterials.back().sTexSpecular);
+		this->ParseTextureChunk(iRemaining,&this->mScene->mMaterials.back().sTexSpecular);
 		break;
 	case Dot3DSFile::CHUNK_MAT_SELFIMAP:
 		iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-		this->ParseTextureChunk(&iRemaining,&this->mScene->mMaterials.back().sTexEmissive);
+		this->ParseTextureChunk(iRemaining,&this->mScene->mMaterials.back().sTexEmissive);
 		break;
 	};
 	if (pcCurNext < this->mCurrent)
@@ -1154,17 +1143,17 @@ void Dot3DSImporter::ParseMaterialChunk(int* piRemaining)
 	// Go to the starting position of the next chunk on this level
 	this->mCurrent = pcCurNext;
 
-	*piRemaining -= psChunk->Size;
-	if (0 >= *piRemaining)return;
+	piRemaining -= psChunk->Size;
+	if (0 >= piRemaining)return;
 	return ParseMaterialChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseTextureChunk(int* piRemaining,Dot3DS::Texture* pcOut)
+void Dot3DSImporter::ParseTextureChunk(int& piRemaining,Dot3DS::Texture* pcOut)
 {
 	const Dot3DSFile::Chunk* psChunk;
 
 	this->ReadChunk(&psChunk);
-	if (NULL == psChunk)return;
+	
 
 	const unsigned char* pcCur = this->mCurrent;
 	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
@@ -1246,8 +1235,8 @@ void Dot3DSImporter::ParseTextureChunk(int* piRemaining,Dot3DS::Texture* pcOut)
 	// Go to the starting position of the next chunk on this level
 	this->mCurrent = pcCurNext;
 
-	*piRemaining -= psChunk->Size;
-	if (0 >= *piRemaining)return;
+	piRemaining -= psChunk->Size;
+	if (0 >= piRemaining)return;
 	return ParseTextureChunk(piRemaining,pcOut);
 }
 // ------------------------------------------------------------------------------------------------

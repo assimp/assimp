@@ -1043,6 +1043,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\RemoveComments.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\SpatialSort.h"
 				>
 			</File>
@@ -1356,6 +1360,10 @@
 			</File>
 			<File
 				RelativePath="..\..\code\PretransformVertices.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\RemoveComments.cpp"
 				>
 			</File>
 			<File

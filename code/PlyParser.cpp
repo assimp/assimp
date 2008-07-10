@@ -57,23 +57,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
-
-// ------------------------------------------------------------------------------------------------
-void ValidateOut(const char* szCur, const char* szMax)
-{
-	if (szCur > szMax)
-	{
-		throw new ImportErrorException("Buffer overflow. PLY file contains invalid indices");
-	}
-	return;
-}
 // ------------------------------------------------------------------------------------------------
 PLY::EDataType PLY::Property::ParseDataType(const char* p_szIn,const char** p_szOut)
 {
 	ai_assert(NULL != p_szIn);
 	ai_assert(NULL != p_szOut);
 
-	const char* szMax = *p_szOut;
 
 	PLY::EDataType eOut = PLY::EDT_INVALID;
 
@@ -156,7 +145,6 @@ PLY::EDataType PLY::Property::ParseDataType(const char* p_szIn,const char** p_sz
 		DefaultLogger::get()->info("Found unknown data type in PLY file. This is OK");
 	}
 	*p_szOut = p_szIn;
-	ValidateOut(p_szIn,szMax);
 	return eOut;
 }
 // ------------------------------------------------------------------------------------------------
@@ -164,8 +152,6 @@ PLY::ESemantic PLY::Property::ParseSemantic(const char* p_szIn,const char** p_sz
 {
 	ai_assert(NULL != p_szIn);
 	ai_assert(NULL != p_szOut);
-
-	const char* szMax = *p_szOut;
 
 	PLY::ESemantic eOut = PLY::EST_INVALID;
 	if (0 == ASSIMP_strincmp(p_szIn,"red",3))
@@ -336,7 +322,6 @@ PLY::ESemantic PLY::Property::ParseSemantic(const char* p_szIn,const char** p_sz
 	{
 		eOut = PLY::EST_INVALID;
 	}
-	ValidateOut(p_szIn,szMax);
 	*p_szOut = p_szIn;
 	return eOut;
 }
@@ -351,7 +336,6 @@ bool PLY::Property::ParseProperty (const char* p_szIn,
 	// Forms supported:
 	// "property float x"
 	// "property list uchar int vertex_index"
-	const char* szMax = *p_szOut;
 	*p_szOut = p_szIn;
 
 	// skip leading spaces
@@ -373,44 +357,36 @@ bool PLY::Property::ParseProperty (const char* p_szIn,
 
 		// seems to be a list.
 		p_szIn += 5;
-		const char* szPass = szMax;
-		if(EDT_INVALID == (pOut->eFirstType = PLY::Property::ParseDataType(p_szIn, &szPass)))
+		if(EDT_INVALID == (pOut->eFirstType = PLY::Property::ParseDataType(p_szIn, &p_szIn)))
 		{
 			// unable to parse list size data type
 			SkipLine(p_szIn,&p_szIn);
 			*p_szOut = p_szIn;
 			return false;
 		}
-		p_szIn = szPass;
 		if (!SkipSpaces(p_szIn,&p_szIn))return false;
-		szPass = szMax;
-		if(EDT_INVALID == (pOut->eType = PLY::Property::ParseDataType(p_szIn, &szPass)))
+		if(EDT_INVALID == (pOut->eType = PLY::Property::ParseDataType(p_szIn, &p_szIn)))
 		{
 			// unable to parse list data type
 			SkipLine(p_szIn,&p_szIn);
 			*p_szOut = p_szIn;
 			return false;
 		}
-		p_szIn = szPass;
 	}
 	else
 	{
-		const char* szPass = szMax;
-		if(EDT_INVALID == (pOut->eType = PLY::Property::ParseDataType(p_szIn, &szPass)))
+		if(EDT_INVALID == (pOut->eType = PLY::Property::ParseDataType(p_szIn, &p_szIn)))
 		{
 			// unable to parse data type. Skip the property
 			SkipLine(p_szIn,&p_szIn);
 			*p_szOut = p_szIn;
 			return false;
 		}
-		p_szIn = szPass;
 	}
 	
 	if (!SkipSpaces(p_szIn,&p_szIn))return false;
 	const char* szCur = p_szIn;
-	const char* szPass = szMax;
-	pOut->Semantic = PLY::Property::ParseSemantic(p_szIn, &szPass);
-	p_szIn = szPass;
+	pOut->Semantic = PLY::Property::ParseSemantic(p_szIn, &p_szIn);
 
 	if (PLY::EST_INVALID == pOut->Semantic)
 	{
@@ -422,7 +398,6 @@ bool PLY::Property::ParseProperty (const char* p_szIn,
 	}
 
 	SkipSpacesAndLineEnd(p_szIn,&p_szIn);
-	ValidateOut(p_szIn,szMax);
 	*p_szOut = p_szIn;
 	return true;
 }
@@ -432,8 +407,6 @@ PLY::EElementSemantic PLY::Element::ParseSemantic(const char* p_szIn,
 {
 	ai_assert(NULL != p_szIn);
 	ai_assert(NULL != p_szOut);
-
-	const char* szMax = *p_szOut;
 
 	PLY::EElementSemantic eOut = PLY::EEST_INVALID;
 	if (0 == ASSIMP_strincmp(p_szIn,"vertex",6))
@@ -474,7 +447,6 @@ PLY::EElementSemantic PLY::Element::ParseSemantic(const char* p_szIn,
 	{
 		eOut = PLY::EEST_INVALID;
 	}
-	ValidateOut(p_szIn,szMax);
 	*p_szOut = p_szIn;
 	return eOut;
 }
@@ -488,7 +460,6 @@ bool PLY::Element::ParseElement (const char* p_szIn,
 	ai_assert(NULL != pOut);
 
 	// Example format: "element vertex 8"
-	const char* szMax = *p_szOut;
 	*p_szOut = p_szIn;
 
 	// skip leading spaces
@@ -506,10 +477,7 @@ bool PLY::Element::ParseElement (const char* p_szIn,
 
 	// parse the semantic of the element
 	const char* szCur = p_szIn;
-	const char* szPass = szMax;
-	pOut->eSemantic = PLY::Element::ParseSemantic(p_szIn,&szPass);
-	p_szIn = szPass;
-
+	pOut->eSemantic = PLY::Element::ParseSemantic(p_szIn,&p_szIn);
 	if (PLY::EEST_INVALID == pOut->eSemantic)
 	{
 		// store the name of the semantic
@@ -534,14 +502,11 @@ bool PLY::Element::ParseElement (const char* p_szIn,
 
 		PLY::Property* prop = new PLY::Property();
 
-		const char* szPass = szMax;
-		if(!PLY::Property::ParseProperty(p_szIn,&szPass,prop))break;
-		p_szIn = szPass;
+		if(!PLY::Property::ParseProperty(p_szIn,&p_szIn,prop))break;
 
 		// add the property to the property list
 		pOut->alProperties.push_back(prop);
 	}
-	ValidateOut(p_szIn,szMax);
 	*p_szOut = p_szIn;
 	return true;
 }
@@ -552,7 +517,6 @@ bool PLY::DOM::SkipComments (const char* p_szIn,
 	ai_assert(NULL != p_szIn);
 	ai_assert(NULL != p_szOut);
 
-	const char* szMax = *p_szOut;
 	*p_szOut = p_szIn;
 
 	// skip spaces
@@ -568,7 +532,6 @@ bool PLY::DOM::SkipComments (const char* p_szIn,
 		*p_szOut = p_szIn;
 		return true;
 	}
-	ValidateOut(p_szIn,szMax);
 	*p_szOut = p_szIn;
 	return false;
 }
@@ -591,11 +554,8 @@ bool PLY::DOM::ParseHeader (const char* p_szIn,const char** p_szOut)
 		PLY::DOM::SkipComments(p_szIn,&p_szIn);
 
 		PLY::Element* out = new PLY::Element();
-		const char* szPass = szMax;
-		if(PLY::Element::ParseElement(p_szIn,&szPass,out))
+		if(PLY::Element::ParseElement(p_szIn,&p_szIn,out))
 		{
-			p_szIn = szPass;
-
 			// add the element to the list of elements
 			this->alElements.push_back(out);
 		}
@@ -608,7 +568,6 @@ bool PLY::DOM::ParseHeader (const char* p_szIn,const char** p_szOut)
 		// ignore unknown header elements
 	}
 	SkipSpacesAndLineEnd(p_szIn,&p_szIn);
-	ValidateOut(p_szIn,szMax);
 	*p_szOut = p_szIn;
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseHeader() succeeded");
@@ -636,14 +595,10 @@ bool PLY::DOM::ParseElementInstanceLists (
 	for (;i != this->alElements.end();++i,++a)
 	{
 		*a = new PLY::ElementInstanceList((*i)); // reserve enough storage
-
-		const char* szPass = szMax;
-		PLY::ElementInstanceList::ParseInstanceList(p_szIn,&szPass,(*i),(*a));
-		p_szIn = szPass;
+		PLY::ElementInstanceList::ParseInstanceList(p_szIn,&p_szIn,(*i),(*a));
 	}
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseElementInstanceLists() succeeded");
-	ValidateOut(p_szIn,szMax);
 	*p_szOut = p_szIn;
 	return true;
 }
@@ -657,8 +612,6 @@ bool PLY::DOM::ParseElementInstanceListsBinary (
 	ai_assert(NULL != p_szOut);
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseElementInstanceListsBinary() begin");
-
-	const char* szMax = *p_szOut;
 	*p_szOut = p_szIn;
 	
 	this->alElementData.resize(this->alElements.size());
@@ -670,34 +623,27 @@ bool PLY::DOM::ParseElementInstanceListsBinary (
 	for (;i != this->alElements.end();++i,++a)
 	{
 		*a = new PLY::ElementInstanceList((*i)); // reserve enough storage
-		const char* szPass = szMax;
-		PLY::ElementInstanceList::ParseInstanceListBinary(p_szIn,&szPass,(*i),(*a),p_bBE);
-		p_szIn = szPass;
+		PLY::ElementInstanceList::ParseInstanceListBinary(p_szIn,&p_szIn,(*i),(*a),p_bBE);
 	}
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseElementInstanceListsBinary() succeeded");
-	ValidateOut(p_szIn,szMax);
 	*p_szOut = p_szIn;
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::DOM::ParseInstanceBinary (const char* p_szIn,DOM* p_pcOut,bool p_bBE,unsigned int iSize)
+bool PLY::DOM::ParseInstanceBinary (const char* p_szIn,DOM* p_pcOut,bool p_bBE)
 {
 	ai_assert(NULL != p_szIn);
 	ai_assert(NULL != p_pcOut);
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseInstanceBinary() begin");
 
-	const char* szMax = p_szIn + iSize;
-	const char* szPass = szMax;
-	if(!p_pcOut->ParseHeader(p_szIn,&szPass))
+	if(!p_pcOut->ParseHeader(p_szIn,&p_szIn))
 	{
 		DefaultLogger::get()->debug("PLY::DOM::ParseInstanceBinary() failure");
 		return false;
 	}
-	p_szIn = szPass;
-	szPass = szMax;
-	if(!p_pcOut->ParseElementInstanceListsBinary(p_szIn,&szPass,p_bBE))
+	if(!p_pcOut->ParseElementInstanceListsBinary(p_szIn,&p_szIn,p_bBE))
 	{
 		DefaultLogger::get()->debug("PLY::DOM::ParseInstanceBinary() failure");
 		return false;
@@ -706,23 +652,20 @@ bool PLY::DOM::ParseInstanceBinary (const char* p_szIn,DOM* p_pcOut,bool p_bBE,u
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::DOM::ParseInstance (const char* p_szIn,DOM* p_pcOut,unsigned int iSize)
+bool PLY::DOM::ParseInstance (const char* p_szIn,DOM* p_pcOut)
 {
 	ai_assert(NULL != p_szIn);
 	ai_assert(NULL != p_pcOut);
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseInstance() begin");
 
-	const char* szMax = p_szIn + iSize;
-	const char* szPass = szMax;
-	if(!p_pcOut->ParseHeader(p_szIn,&szPass))
+
+	if(!p_pcOut->ParseHeader(p_szIn,&p_szIn))
 	{
 		DefaultLogger::get()->debug("PLY::DOM::ParseInstance() failure");
 		return false;
 	}
-	p_szIn = szPass;
-	szPass = szMax;
-	if(!p_pcOut->ParseElementInstanceLists(p_szIn,&szPass))
+	if(!p_pcOut->ParseElementInstanceLists(p_szIn,&p_szIn))
 	{
 		DefaultLogger::get()->debug("PLY::DOM::ParseInstance() failure");
 		return false;
@@ -763,15 +706,11 @@ bool PLY::ElementInstanceList::ParseInstanceList (
 			PLY::DOM::SkipComments(p_szIn,&p_szIn);
 
 			PLY::ElementInstance* out = new PLY::ElementInstance();
-
-			const char* szPass = szMax;
-			PLY::ElementInstance::ParseInstance(p_szIn, &szPass,pcElement, out);
-			p_szIn = szPass;
+			PLY::ElementInstance::ParseInstance(p_szIn, &p_szIn,pcElement, out);
 			// add it to the list
 			p_pcOut->alInstances[i] = out;
 		}
 	}
-	ValidateOut(p_szIn,szMax);
 	*p_szOut = p_szIn;
 	return true;
 }
@@ -788,9 +727,6 @@ bool PLY::ElementInstanceList::ParseInstanceListBinary (
 	ai_assert(NULL != pcElement);
 	ai_assert(NULL != p_pcOut);
 
-	const char* szMax = *p_szOut;
-	*p_szOut = p_szIn;
-
 	// we can add special handling code for unknown element semantics since
 	// we can't skip it as a whole block (we don't know its exact size
 	// due to the fact that lists could be contained in the property list 
@@ -798,13 +734,10 @@ bool PLY::ElementInstanceList::ParseInstanceListBinary (
 	for (unsigned int i = 0; i < pcElement->NumOccur;++i)
 	{
 		PLY::ElementInstance* out = new PLY::ElementInstance();
-		const char* szPass = szMax;
 		PLY::ElementInstance::ParseInstanceBinary(p_szIn, &p_szIn,pcElement, out, p_bBE);
-		p_szIn = szPass;
 		// add it to the list
 		p_pcOut->alInstances[i] = out;
 	}
-	ValidateOut(p_szIn,szMax);
 	*p_szOut = p_szIn;
 	return true;
 }
@@ -825,15 +758,11 @@ bool PLY::ElementInstance::ParseInstance (
 	// allocate enough storage
 	p_pcOut->alProperties.resize(pcElement->alProperties.size());
 
-	const char* szMax = *p_szOut;
-	*p_szOut = p_szIn;
-
 	std::vector<PLY::PropertyInstance>::iterator i = p_pcOut->alProperties.begin();
 	std::vector<PLY::Property*>::const_iterator a = pcElement->alProperties.begin();
 	for (;i != p_pcOut->alProperties.end();++i,++a)
 	{
-		const char* szPass = szMax;
-		if(!(PLY::PropertyInstance::ParseInstance(p_szIn, &szPass,(*a),&(*i))))
+		if(!(PLY::PropertyInstance::ParseInstance(p_szIn, &p_szIn,(*a),&(*i))))
 		{
 			DefaultLogger::get()->warn("Unable to parse property instance. "
 				"Skipping this element instance");
@@ -844,9 +773,7 @@ bool PLY::ElementInstance::ParseInstance (
 			PLY::PropertyInstance::ValueUnion v = PLY::PropertyInstance::DefaultValue((*a)->eType);
 			(*i).avList.push_back(v);
 		}
-		p_szIn = szPass;
 	}
-	ValidateOut(p_szIn,szMax);
 	*p_szOut = p_szIn;
 	return true;
 }
@@ -863,9 +790,6 @@ bool PLY::ElementInstance::ParseInstanceBinary (
 	ai_assert(NULL != pcElement);
 	ai_assert(NULL != p_pcOut);
 
-	const char* szMax = *p_szOut;
-	*p_szOut = p_szIn;
-
 	// allocate enough storage
 	p_pcOut->alProperties.resize(pcElement->alProperties.size());
 
@@ -873,8 +797,7 @@ bool PLY::ElementInstance::ParseInstanceBinary (
 	std::vector<PLY::Property*>::const_iterator a =  pcElement->alProperties.begin();
 	for (;i != p_pcOut->alProperties.end();++i,++a)
 	{
-		const char* szPass = szMax;
-		if(!(PLY::PropertyInstance::ParseInstanceBinary(p_szIn, &szPass,(*a),&(*i),p_bBE)))
+		if(!(PLY::PropertyInstance::ParseInstanceBinary(p_szIn, &p_szIn,(*a),&(*i),p_bBE)))
 		{
 			DefaultLogger::get()->warn("Unable to parse binary property instance. "
 				"Skipping this element instance");
@@ -882,9 +805,7 @@ bool PLY::ElementInstance::ParseInstanceBinary (
 			PLY::PropertyInstance::ValueUnion v = PLY::PropertyInstance::DefaultValue((*a)->eType);
 			(*i).avList.push_back(v);
 		}
-		p_szIn = szPass;
 	}
-	ValidateOut(p_szIn,szMax);
 	*p_szOut = p_szIn;
 	return true;
 }
@@ -897,7 +818,6 @@ bool PLY::PropertyInstance::ParseInstance (const char* p_szIn,const char** p_szO
 	ai_assert(NULL != prop);
 	ai_assert(NULL != p_pcOut);
 
-	const char* szMax = *p_szOut;
 	*p_szOut = p_szIn;
 
 	// skip spaces at the beginning
@@ -907,10 +827,7 @@ bool PLY::PropertyInstance::ParseInstance (const char* p_szIn,const char** p_szO
 	{
 		// parse the number of elements in the list
 		PLY::PropertyInstance::ValueUnion v;
-
-		const char* szPass = szMax;
-		PLY::PropertyInstance::ParseValue(p_szIn, &szPass,prop->eFirstType,&v);
-		p_szIn = szPass;
+		PLY::PropertyInstance::ParseValue(p_szIn, &p_szIn,prop->eFirstType,&v);
 
 		// convert to unsigned int
 		unsigned int iNum = PLY::PropertyInstance::ConvertTo<unsigned int>(v,prop->eFirstType);
@@ -919,10 +836,7 @@ bool PLY::PropertyInstance::ParseInstance (const char* p_szIn,const char** p_szO
 		for (unsigned int i = 0; i < iNum;++i)
 		{
 			if (!SkipSpaces(p_szIn, &p_szIn))return false;
-
-			const char* szPass = szMax;
-			PLY::PropertyInstance::ParseValue(p_szIn, &szPass,prop->eType,&v);
-			p_szIn = szPass;
+			PLY::PropertyInstance::ParseValue(p_szIn, &p_szIn,prop->eType,&v);
 			p_pcOut->avList.push_back(v);
 		}
 	}
@@ -931,13 +845,10 @@ bool PLY::PropertyInstance::ParseInstance (const char* p_szIn,const char** p_szO
 		// parse the property
 		PLY::PropertyInstance::ValueUnion v;
 
-		const char* szPass = szMax;
-		PLY::PropertyInstance::ParseValue(p_szIn, &szPass,prop->eType,&v);
-		p_szIn = szPass;
+		PLY::PropertyInstance::ParseValue(p_szIn, &p_szIn,prop->eType,&v);
 		p_pcOut->avList.push_back(v);
 	}
 	SkipSpacesAndLineEnd(p_szIn, &p_szIn);
-	ValidateOut(p_szIn,szMax);
 	*p_szOut = p_szIn;
 	return true;
 }
@@ -950,16 +861,11 @@ bool PLY::PropertyInstance::ParseInstanceBinary (const char* p_szIn,const char**
 	ai_assert(NULL != prop);
 	ai_assert(NULL != p_pcOut);
 
-	const char* szMax = *p_szOut;
-	*p_szOut = p_szIn;
-
 	if (prop->bIsList)
 	{
 		// parse the number of elements in the list
 		PLY::PropertyInstance::ValueUnion v;
-		const char* szPass = szMax;
-		PLY::PropertyInstance::ParseValueBinary(p_szIn, &szPass,prop->eFirstType,&v,p_bBE);
-		p_szIn = szPass;
+		PLY::PropertyInstance::ParseValueBinary(p_szIn, &p_szIn,prop->eFirstType,&v,p_bBE);
 
 		// convert to unsigned int
 		unsigned int iNum = PLY::PropertyInstance::ConvertTo<unsigned int>(v,prop->eFirstType);
@@ -967,9 +873,7 @@ bool PLY::PropertyInstance::ParseInstanceBinary (const char* p_szIn,const char**
 		// parse all list elements
 		for (unsigned int i = 0; i < iNum;++i)
 		{
-			const char* szPass = szMax;
-			PLY::PropertyInstance::ParseValueBinary(p_szIn, &szPass,prop->eType,&v,p_bBE);
-			p_szIn = szPass;
+			PLY::PropertyInstance::ParseValueBinary(p_szIn, &p_szIn,prop->eType,&v,p_bBE);
 			p_pcOut->avList.push_back(v);
 		}
 	}
@@ -977,12 +881,9 @@ bool PLY::PropertyInstance::ParseInstanceBinary (const char* p_szIn,const char**
 	{
 		// parse the property
 		PLY::PropertyInstance::ValueUnion v;
-		const char* szPass = szMax;
-		PLY::PropertyInstance::ParseValueBinary(p_szIn, &szPass,prop->eType,&v,p_bBE);
-		p_szIn = szPass;
+		PLY::PropertyInstance::ParseValueBinary(p_szIn, &p_szIn,prop->eType,&v,p_bBE);
 		p_pcOut->avList.push_back(v);
 	}
-	ValidateOut(p_szIn,szMax);
 	*p_szOut = p_szIn;
 	return true;
 }
@@ -1012,9 +913,6 @@ bool PLY::PropertyInstance::ParseValue(const char* p_szIn,const char** p_szOut,
 	ai_assert(NULL != p_szIn);
 	ai_assert(NULL != p_szOut);
 	ai_assert(NULL != out);
-
-	const char* szMax = *p_szOut;
-	*p_szOut = p_szIn;
 
 	switch (eType)
 	{
@@ -1060,9 +958,9 @@ bool PLY::PropertyInstance::ParseValue(const char* p_szIn,const char** p_szOut,
 		out->fDouble = (double)f;
 
 	default:
+		*p_szOut = p_szIn;
 		return false;
 	}
-	ValidateOut(p_szIn,szMax);
 	*p_szOut = p_szIn;
 	return true;
 }
@@ -1077,9 +975,6 @@ bool PLY::PropertyInstance::ParseValueBinary(
 	ai_assert(NULL != p_szIn);
 	ai_assert(NULL != p_szOut);
 	ai_assert(NULL != out);
-
-	const char* szMax = *p_szOut;
-	*p_szOut = p_szIn;
 
 	switch (eType)
 	{
@@ -1163,9 +1058,9 @@ bool PLY::PropertyInstance::ParseValueBinary(
 		break;
 		}
 	default:
+		*p_szOut = p_szIn;
 		return false;
 	}
-	ValidateOut(p_szIn,szMax);
 	*p_szOut = p_szIn;
 	return true;
 }

@@ -355,16 +355,16 @@ protected:
 		return true;
 	}
 	// -------------------------------------------------------------------
-	inline void SkipSpacesAndLineEnd( const char* in, const char** out)
+	inline bool SkipSpacesAndLineEnd( const char* in, const char** out)
 	{
-		::SkipSpacesAndLineEnd(in,out);
 		++iLineNumber;
+		return ::SkipSpacesAndLineEnd(in,out);
 	}
 
 private:
 
 	/** Buffer to hold the loaded file */
-	const char* mBuffer;
+	char* mBuffer;
 
 	/** Output scene to be filled
 	*/

@@ -78,7 +78,8 @@ struct aiFace
 	//! Default destructor. Delete the index array
 	~aiFace()
 	{
-		delete [] mIndices;
+		if (mNumIndices)
+			delete [] mIndices;
 	}
 
 	//! Copy constructor. Copy the index array
@@ -202,7 +203,7 @@ struct aiBone
 	//! Destructor to delete the array of vertex weights
 	~aiBone()
 	{
-		delete [] mWeights;
+		if (mNumWeights)delete [] mWeights;
 	}
 #endif // __cplusplus
 };
@@ -367,18 +368,27 @@ struct aiMesh
 
 	~aiMesh()
 	{
-		delete [] mVertices; 
-		delete [] mFaces;
-		delete [] mNormals;
-		delete [] mTangents;
-		delete [] mBitangents;
-		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
-			delete [] mTextureCoords[a];
-		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
-			delete [] mColors[a];
-		for( unsigned int a = 0; a < mNumBones; a++)
-			delete mBones[a];
-		delete [] mBones;
+		if ( mNumVertices) // fix to make this work for invalid scenes, too
+		{
+			delete [] mVertices; 
+			delete [] mNormals;
+			delete [] mTangents;
+			delete [] mBitangents;
+			for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
+				delete [] mTextureCoords[a];
+			for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
+				delete [] mColors[a];
+		}
+		if ( mNumBones) // fix to make this work for invalid scenes, too
+		{
+			for( unsigned int a = 0; a < mNumBones; a++)
+				delete mBones[a];
+			delete [] mBones;
+		}
+		if ( mNumFaces) // fix to make this work for invalid scenes, too
+		{
+			delete [] mFaces;
+		}
 	}
 
 	//! Check whether the mesh contains positions. Should always return true

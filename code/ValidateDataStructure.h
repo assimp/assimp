@@ -115,7 +115,7 @@ protected:
 	 * @param pMesh Input mesh
 	 * @param pBone Input bone
 	 */
-	void Validate( const aiMesh* pMesh,const aiBone* pBone);
+	void Validate( const aiMesh* pMesh,const aiBone* pBone,float* afSum);
 
 	// -------------------------------------------------------------------
 	/** Validates an animation

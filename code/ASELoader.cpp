@@ -105,7 +105,7 @@ bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 void ASEImporter::InternReadFile( 
 	const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rt"));
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
@@ -195,7 +195,7 @@ void ASEImporter::GenerateDefaultMaterial()
 	mat.mSpecular = aiColor3D(1.0f,1.0f,1.0f);
 	mat.mAmbient = aiColor3D(0.05f,0.05f,0.05f);
 	mat.mShading = Dot3DSFile::Gouraud;
-	mat.mName = "$$$ASE_DEFAULT";
+	mat.mName = AI_DEFAULT_MATERIAL_NAME;
 }
 // ------------------------------------------------------------------------------------------------
 void ASEImporter::AddNodes(aiScene* pcScene,aiNode* pcParent,

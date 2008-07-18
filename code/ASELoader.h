@@ -130,24 +130,28 @@ protected:
 
 	// -------------------------------------------------------------------
 	/** Setup the final material indices for each mesh
-	 *  \param pcScene Scene object to be filled
 	 */
-	void BuildMaterialIndices(aiScene* pcScene);
+	void BuildMaterialIndices();
 
 	// -------------------------------------------------------------------
 	/** Build the node graph
-	 *  \param pcScene Scene object to be filled
 	 */
-	void BuildNodes(aiScene* pcScene);
+	void BuildNodes();
+
+	// -------------------------------------------------------------------
+	/** Build output animations
+	 */
+	void BuildAnimations();
 
 	// -------------------------------------------------------------------
 	/** Add sub nodes to a node
-	 *  \param pcScene Scene object to be filled
 	 *  \param pcParent parent node to be filled
 	 *  \param szName Name of the parent node
+	 *  \param decompTrafo Decomposed absolute parent transformation mat
 	 */
-	void AddNodes(aiScene* pcScene,aiNode* pcParent,
-		const char* szName);
+	void AddNodes(aiNode* pcParent,const char* szName);
+	void AddNodes(aiNode* pcParent,const char* szName,
+		const ASE::DecompTransform& decompTrafo);
 
 	// -------------------------------------------------------------------
 	/** Generate a default material and add it to the parser's list
@@ -166,6 +170,9 @@ protected:
 
 	/** true if this is an .ask file */
 	bool mIsAsk;
+
+	/** Scene to be filled */
+	aiScene* pcScene;
 };
 
 } // end of namespace Assimp

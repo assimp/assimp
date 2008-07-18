@@ -110,8 +110,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh)
 	// what we can check, though, is if the mesh has normals and texture coord. That's a requirement
 	if( pMesh->mNormals == NULL || pMesh->mTextureCoords[0] == NULL)
 	{
-		DefaultLogger::get()->error("Normal vectors and at least one "
-			"texture coordinate set are required to calculate tangents. ");
+		DefaultLogger::get()->error("Unable to compute tangents: UV0 and normals must be there ");
 		return false;
 	}
 

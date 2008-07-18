@@ -66,9 +66,12 @@ struct aiQuatKey
 	C_STRUCT aiQuaternion mValue; ///< The value of this key
 };
 
-/** Describes the animation of a single bone. The name specifies the bone which is affected by this
+/** Describes the animation of a single node. The name specifies the bone/node which is affected by this
  * animation channel. The keyframes are given in three separate series of values, one each for
  * position, rotation and scaling.
+ * <br>
+ * NOTE: The name "BoneAnim" is misleading. This structure is also used to describe
+ * the animation of regular nodes on the node graph. They needn't be nodes.
  */
 struct aiBoneAnim
 {

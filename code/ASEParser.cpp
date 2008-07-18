@@ -67,6 +67,44 @@ using namespace Assimp::ASE;
 #define BLUBB(_message_) \
 	{this->LogError(_message_);return;}
 
+
+#define AI_ASE_HANDLE_TOP_LEVEL_SECTION(iDepth) \
+	else if ('{' == *this->m_szFile)iDepth++; \
+	else if ('}' == *this->m_szFile) \
+	{ \
+		if (0 == --iDepth) \
+		{ \
+			++this->m_szFile; \
+			this->SkipToNextToken(); \
+			return; \
+		} \
+	} \
+	else if ('\0' == *this->m_szFile) \
+	{ \
+		return; \
+	} \
+	else if(IsLineEnd(*this->m_szFile))++this->iLineNumber; \
+	++this->m_szFile; 
+
+#define AI_ASE_HANDLE_SECTION(iDepth, level, msg) \
+	else if ('{' == *this->m_szFile)iDepth++; \
+	else if ('}' == *this->m_szFile) \
+	{ \
+		if (0 == --iDepth) \
+		{ \
+			++this->m_szFile; \
+			this->SkipToNextToken(); \
+			return; \
+		} \
+	} \
+	else if ('\0' == *this->m_szFile) \
+	{ \
+		this->LogError("Encountered unexpected EOL while parsing a " msg \
+		" chunk (Level " level ")"); \
+	} \
+	else if(IsLineEnd(*this->m_szFile))++this->iLineNumber; \
+	++this->m_szFile; 
+
 // ------------------------------------------------------------------------------------------------
 Parser::Parser (const char* szFile)
 {
@@ -78,6 +116,10 @@ Parser::Parser (const char* szFile)
 	this->m_clrAmbient.r = std::numeric_limits<float>::quiet_NaN();
 
 	this->iLineNumber = 0;
+	this->iFirstFrame = 0;
+	this->iLastFrame = 0;
+	this->iFrameSpeed = 30;    // use 30 as default value for this property
+	this->iTicksPerFrame = 1;  // use 1 as default value for this property
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::LogWarning(const char* szWarn)
@@ -234,6 +276,15 @@ void Parser::Parse()
 				this->ParseLV1GeometryObjectBlock(this->m_vMeshes.back());
 				continue;
 			}
+			// helper object = dummy in the hierarchy
+			if (0 == strncmp(this->m_szFile,"*HELPEROBJECT",13) &&
+				IsSpaceOrNewLine(*(this->m_szFile+13)))
+			{
+				this->m_szFile+=14;
+				this->m_vMeshes.push_back(Mesh());
+				this->ParseLV1GeometryObjectBlock(this->m_vMeshes.back());
+				continue;
+			}
 			// ignore comments, lights and cameras
 			// (display comments on the console)
 			if (0 == strncmp(this->m_szFile,"*LIGHTOBJECT",12) &&
@@ -260,18 +311,7 @@ void Parser::Parse()
 				continue;
 			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... why not?
-			return;
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_TOP_LEVEL_SECTION(iDepth);
 	}
 	return;
 }
@@ -301,19 +341,36 @@ void Parser::ParseLV1SceneBlock()
 				this->ParseLV4MeshFloatTriple( &this->m_clrAmbient.r );
 				continue;
 			}
+			if (0 == strncmp(this->m_szFile,"*SCENE_FIRSTFRAME",17) &&
+				IsSpaceOrNewLine(*(this->m_szFile+17)))
+			{
+				this->m_szFile+=18;
+				this->ParseLV4MeshLong(this->iFirstFrame);
+				continue;
+			}
+			if (0 == strncmp(this->m_szFile,"*SCENE_LASTFRAME",16) &&
+				IsSpaceOrNewLine(*(this->m_szFile+16)))
+			{
+				this->m_szFile+=17;
+				this->ParseLV4MeshLong(this->iLastFrame);
+				continue;
+			}
+			if (0 == strncmp(this->m_szFile,"*SCENE_FRAMESPEED",17) &&
+				IsSpaceOrNewLine(*(this->m_szFile+17)))
+			{
+				this->m_szFile+=18;
+				this->ParseLV4MeshLong(this->iFrameSpeed);
+				continue;
+			}
+			if (0 == strncmp(this->m_szFile,"*SCENE_TICKSPERFRAME",20) &&
+				IsSpaceOrNewLine(*(this->m_szFile+20)))
+			{
+				this->m_szFile+=21;
+				this->ParseLV4MeshLong(this->iTicksPerFrame);
+				continue;
+			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... why not?
-			return;
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_TOP_LEVEL_SECTION(iDepth);
 	}
 	return;
 }
@@ -361,18 +418,7 @@ void Parser::ParseLV1MaterialListBlock()
 				continue;
 			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... why not?
-			return;
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_TOP_LEVEL_SECTION(iDepth);
 	}
 	return;
 }
@@ -594,18 +640,7 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				continue;
 			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... this is a level2 block, this can't be
-			BLUBB("Unable to finish parsing a lv2 material block. Unexpected EOF")
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_SECTION(iDepth,"2","*MATERIAL");
 	}
 	return;
 }
@@ -669,18 +704,7 @@ void Parser::ParseLV3MapBlock(Texture& map)
 				this->ParseLV4MeshFloat(map.mTextureBlend);continue;
 			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... this is a level3 block, this can't be
-			BLUBB("Unable to finish parsing a lv3 map block. Unexpected EOF")
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_SECTION(iDepth,"3","*MAP_XXXXXX");
 	}
 	return;
 }
@@ -788,21 +812,97 @@ void Parser::ParseLV1GeometryObjectBlock(ASE::Mesh& mesh)
 				this->m_szFile+=14;
 				this->ParseLV4MeshLong(mesh.iMaterialIndex);continue;
 			}
+			// animation data of the node
+			if (0 == strncmp(this->m_szFile,"*TM_ANIMATION" ,13) &&
+				IsSpaceOrNewLine(*(this->m_szFile+13)))
+			{
+				this->m_szFile+=14;
+				this->ParseLV2AnimationBlock(mesh);continue;
+			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... this is a level1 block, this can be
-			return;
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_TOP_LEVEL_SECTION(iDepth);
 	}
 	return;
+}
+// ------------------------------------------------------------------------------------------------
+void Parser::ParseLV2AnimationBlock(ASE::Mesh& mesh)
+{
+	int iDepth = 0;
+	while (true)
+	{
+		if ('*' == *this->m_szFile)
+		{
+			// position keyframes
+			if (0 == strncmp(this->m_szFile,"*CONTROL_POS_TRACK" ,18) &&
+				IsSpaceOrNewLine(*(this->m_szFile+18)))
+			{
+				this->m_szFile+=19;
+				this->ParseLV3PosAnimationBlock(mesh);continue;
+			}
+			// rotation keyframes
+			if (0 == strncmp(this->m_szFile,"*CONTROL_ROT_TRACK" ,18) &&
+				IsSpaceOrNewLine(*(this->m_szFile+18)))
+			{
+				this->m_szFile+=19;
+				this->ParseLV3RotAnimationBlock(mesh);continue;
+			}
+		}
+		AI_ASE_HANDLE_SECTION(iDepth,"2","TM_ANIMATION");
+	}
+}
+// ------------------------------------------------------------------------------------------------
+void Parser::ParseLV3PosAnimationBlock(ASE::Mesh& mesh)
+{
+	int iDepth = 0;
+	while (true)
+	{
+		if ('*' == *this->m_szFile)
+		{
+			// position keyframe
+			if (0 == strncmp(this->m_szFile,"*CONTROL_POS_SAMPLE" ,19) &&
+				IsSpaceOrNewLine(*(this->m_szFile+19)))
+			{
+				this->m_szFile+=20;
+				
+				unsigned int iIndex;
+				mesh.mAnim.akeyPositions.push_back(aiVectorKey());
+				aiVectorKey& key = mesh.mAnim.akeyPositions.back();
+
+				this->ParseLV4MeshFloatTriple(&key.mValue.x,iIndex);
+				key.mTime = (double)iIndex;
+			}
+		}
+		AI_ASE_HANDLE_SECTION(iDepth,"3","*CONTROL_POS_TRACK");
+	}
+}
+// ------------------------------------------------------------------------------------------------
+void Parser::ParseLV3RotAnimationBlock(ASE::Mesh& mesh)
+{
+	int iDepth = 0;
+	while (true)
+	{
+		if ('*' == *this->m_szFile)
+		{
+			// rotation keyframe
+			if (0 == strncmp(this->m_szFile,"*CONTROL_ROT_SAMPLE" ,19) &&
+				IsSpaceOrNewLine(*(this->m_szFile+19)))
+			{
+				this->m_szFile+=20;
+
+				unsigned int iIndex;
+				mesh.mAnim.akeyRotations.push_back(aiQuatKey());
+				aiQuatKey& key = mesh.mAnim.akeyRotations.back();
+
+				// first read the axis, then the angle in radians
+				aiVector3D v;float f;
+				this->ParseLV4MeshFloatTriple(&v.x,iIndex);
+				this->ParseLV4MeshFloat(f);
+				key.mTime = (double)iIndex;
+				key.mValue = aiQuaternion(v,f);
+			}
+		}
+		AI_ASE_HANDLE_SECTION(iDepth,"3","*CONTROL_ROT_TRACK");
+	}
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV2NodeTransformBlock(ASE::Mesh& mesh)
@@ -840,19 +940,44 @@ void Parser::ParseLV2NodeTransformBlock(ASE::Mesh& mesh)
 				this->m_szFile+=9;
 				this->ParseLV4MeshFloatTriple(mesh.mTransform[3]);continue;
 			}
+			// inherited position axes
+			if (0 == strncmp(this->m_szFile,"*INHERIT_POS" ,12) &&
+				IsSpaceOrNewLine(*(this->m_szFile+12)))
+			{
+				this->m_szFile+=13;
+				unsigned int aiVal[3];
+				this->ParseLV4MeshLongTriple(aiVal);
+				
+				for (unsigned int i = 0; i < 3;++i)
+					mesh.inherit.abInheritPosition[i] = aiVal[i] != 0;
+				continue;
+			}
+			// inherited rotation axes
+			if (0 == strncmp(this->m_szFile,"*INHERIT_ROT" ,12) &&
+				IsSpaceOrNewLine(*(this->m_szFile+12)))
+			{
+				this->m_szFile+=13;
+				unsigned int aiVal[3];
+				this->ParseLV4MeshLongTriple(aiVal);
+				
+				for (unsigned int i = 0; i < 3;++i)
+					mesh.inherit.abInheritRotation[i] = aiVal[i] != 0;
+				continue;
+			}
+			// inherited scaling axes
+			if (0 == strncmp(this->m_szFile,"*INHERIT_SCL" ,12) &&
+				IsSpaceOrNewLine(*(this->m_szFile+12)))
+			{
+				this->m_szFile+=13;
+				unsigned int aiVal[3];
+				this->ParseLV4MeshLongTriple(aiVal);
+				
+				for (unsigned int i = 0; i < 3;++i)
+					mesh.inherit.abInheritScaling[i] = aiVal[i] != 0;
+				continue;
+			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... this is a level2 block, this can't be
-			BLUBB("Unable to finish parsing a lv2 node transform block. Unexpected EOF")
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_SECTION(iDepth,"2","*NODE_TM");
 	}
 	return;
 }
@@ -1015,18 +1140,7 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 				this->ParseLV3MeshWeightsBlock(mesh);continue;
 			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... this is a level2 block, this can't be
-			BLUBB("Unable to finish parsing a lv2 mesh block. Unexpected EOF")
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_SECTION(iDepth,"2","*MESH");
 	}
 	return;
 }
@@ -1072,18 +1186,7 @@ void Parser::ParseLV3MeshWeightsBlock(ASE::Mesh& mesh)
 				continue;
 			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... this is a level2 block, this can't be
-			BLUBB("Unable to finish parsing a lv2 *MESH_WEIGHTS block. Unexpected EOF")
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_SECTION(iDepth,"3","*MESH_WEIGHTS");
 	}
 	return;
 }
@@ -1118,18 +1221,7 @@ void Parser::ParseLV4MeshBones(unsigned int iNumBones,ASE::Mesh& mesh)
 				}
 			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... this is a level4 block, this can't be
-			BLUBB("Unable to finish parsing a lv4 *MESH_BONE_LIST block. Unexpected EOF")
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_SECTION(iDepth,"3","*MESH_BONE_LIST");
 	}
 }
 // ------------------------------------------------------------------------------------------------
@@ -1183,18 +1275,7 @@ void Parser::ParseLV4MeshBonesVertices(unsigned int iNumVertices,ASE::Mesh& mesh
 				continue;
 			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... this is a level4 block, this can't be
-			BLUBB("Unable to finish parsing a lv4 *MESH_BONE_VERTEX_LIST block. Unexpected EOF")
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_SECTION(iDepth,"4","*MESH_BONE_VERTEX");
 	}
 	return;
 }
@@ -1227,18 +1308,7 @@ void Parser::ParseLV3MeshVertexListBlock(
 				continue;
 			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... this is a level3 block, this can't be
-			BLUBB("Unable to finish parsing a lv3 vertex list block. Unexpected EOF")
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_SECTION(iDepth,"3","*MESH_VERTEX_LIST");
 	}
 	return;
 }
@@ -1269,18 +1339,7 @@ void Parser::ParseLV3MeshFaceListBlock(unsigned int iNumFaces, ASE::Mesh& mesh)
 				continue;
 			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... this is a level3 block, this can't be
-			BLUBB("Unable to finish parsing LV3 *MESH_FACE_LIST block. Unexpected EOF")
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_SECTION(iDepth,"3","*MESH_FACE_LIST");
 	}
 	return;
 }
@@ -1319,18 +1378,7 @@ void Parser::ParseLV3MeshTListBlock(unsigned int iNumVertices,
 				continue;
 			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... this is a level3 block, this can't be
-			BLUBB("Unable to finish parsing LV3 *MESH_VERTEX_LIST block. Unexpected EOF")
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_SECTION(iDepth,"3","*MESH_TVERT_LIST");
 	}
 	return;
 }
@@ -1367,18 +1415,7 @@ void Parser::ParseLV3MeshTFaceListBlock(unsigned int iNumFaces,
 				continue;
 			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... this is a level3 block, this can't be
-			BLUBB("Unable to finish parsing LV3 *MESH_TFACELIST block. Unexpected EOF")
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_SECTION(iDepth,"3","*MESH_TFACE_LIST");
 	}
 	return;
 }
@@ -1426,18 +1463,7 @@ void Parser::ParseLV3MappingChannel(unsigned int iChannel, ASE::Mesh& mesh)
 				continue;
 			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... this is a level2 block, this can't be
-			BLUBB("Unable to finish parsing a LV3 *MESH_MAPPINGCHANNEL block. Unexpected EOF")
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_SECTION(iDepth,"3","*MESH_MAPPING_CHANNEL");
 	}
 	return;
 }
@@ -1470,18 +1496,7 @@ void Parser::ParseLV3MeshCListBlock(unsigned int iNumVertices, ASE::Mesh& mesh)
 				continue;
 			}
 		}
-		if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... this is a level3 block, this can't be
-			BLUBB("Unable to finish parsing LV3 *MESH_CVERTLIST block. Unexpected EOF")
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_SECTION(iDepth,"3","*MESH_CVERTEX_LIST");
 	}
 	return;
 }
@@ -1517,18 +1532,7 @@ void Parser::ParseLV3MeshCFaceListBlock(unsigned int iNumFaces, ASE::Mesh& mesh)
 				continue;
 			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		else if ('\0' == *this->m_szFile)
-		{
-			// END OF FILE ... this is a level3 block, this can't be
-			BLUBB("Unable to finish parsing LV3 *MESH_CFACELIST block. Unexpected EOF")
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		++this->m_szFile;
+		AI_ASE_HANDLE_SECTION(iDepth,"3","*MESH_CFACE_LIST");
 	}
 	return;
 }
@@ -1545,7 +1549,8 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 	{
 		if ('*' == *this->m_szFile)
 		{
-			if (0 == strncmp(this->m_szFile,"*MESH_VERTEXNORMAL",18) && IsSpaceOrNewLine(*(this->m_szFile+18)))
+			if (0 == strncmp(this->m_szFile,"*MESH_VERTEXNORMAL",18) && 
+				IsSpaceOrNewLine(*(this->m_szFile+18)))
 			{
 				this->m_szFile += 19;
 
@@ -1565,18 +1570,7 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 				continue;
 			}
 		}
-		else if ('{' == *this->m_szFile)iDepth++;
-		else if ('}' == *this->m_szFile)
-		{
-			if (0 == --iDepth){++this->m_szFile;this->SkipToNextToken();return;}
-		}
-		// seems we have reached the end of the file ... 
-		else if ('\0' == *this->m_szFile)
-		{
-			BLUBB("Unable to parse *MESH_NORMALS Element: Unexpected EOL [#1]")
-		}
-		else if(IsLineEnd(*this->m_szFile))++this->iLineNumber;
-		this->m_szFile++;
+		AI_ASE_HANDLE_SECTION(iDepth,"3","*MESH_NORMALS");
 	}
 	return;
 }
@@ -1729,40 +1723,19 @@ void Parser::ParseLV4MeshLongTriple(unsigned int* apOut)
 {
 	ai_assert(NULL != apOut);
 
-	// skip spaces and tabs
-	if(!SkipSpaces(this->m_szFile,&this->m_szFile))
+	for (unsigned int i = 0; i < 3;++i)
 	{
-		// LOG 
-		this->LogWarning("Unable to parse indexable long triple: unexpected EOL [#1]");
-		++this->iLineNumber;
-		apOut[0] = apOut[1] = apOut[2] = 0;
-		return;
+		// skip spaces and tabs
+		if(!SkipSpaces(this->m_szFile,&this->m_szFile))
+		{
+			// LOG 
+			this->LogWarning("Unable to parse indexable long triple: unexpected EOL [#1]");
+			++this->iLineNumber;
+			apOut[0] = apOut[1] = apOut[2] = 0;
+			return;
+		}
+		apOut[i] = strtol10(this->m_szFile,&this->m_szFile);
 	}
-	apOut[0] = strtol10(this->m_szFile,&this->m_szFile);
-
-	// skip spaces and tabs
-	if(!SkipSpaces(this->m_szFile,&this->m_szFile))
-	{
-		// LOG 
-		this->LogWarning("Unable to parse indexable long triple: unexpected EOL [#2]");
-		++this->iLineNumber;
-		apOut[1] = apOut[2] = 0;
-		return;
-	}
-	apOut[1] = strtol10(this->m_szFile,&this->m_szFile);
-
-	// skip spaces and tabs
-	if(!SkipSpaces(this->m_szFile,&this->m_szFile))
-	{
-		// LOG 
-		this->LogWarning("Unable to parse indexable long triple: unexpected EOL [#3]");
-		apOut[2] = 0;
-		++this->iLineNumber;
-		return;
-	}
-	apOut[2] = strtol10(this->m_szFile,&this->m_szFile);
-	// go to the next valid sequence
-	//SkipSpacesAndLineEnd(this->m_szFile,&this->m_szFile);
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshLongTriple(unsigned int* apOut, unsigned int& rIndexOut)
@@ -1773,7 +1746,7 @@ void Parser::ParseLV4MeshLongTriple(unsigned int* apOut, unsigned int& rIndexOut
 	if(!SkipSpaces(this->m_szFile,&this->m_szFile))
 	{
 		// LOG 
-		this->LogWarning("Unable to parse indexable long triple: unexpected EOL [#4]");
+		this->LogWarning("Unable to parse indexed long triple: unexpected EOL [#4]");
 		rIndexOut = 0;
 		apOut[0] = apOut[1] = apOut[2] = 0;
 		++this->iLineNumber;
@@ -1795,7 +1768,7 @@ void Parser::ParseLV4MeshFloatTriple(float* apOut, unsigned int& rIndexOut)
 	if(!SkipSpaces(this->m_szFile,&this->m_szFile))
 	{
 		// LOG 
-		this->LogWarning("Unable to parse indexable float triple: unexpected EOL [#1]");
+		this->LogWarning("Unable to parse indexed float triple: unexpected EOL [#1]");
 		rIndexOut = 0;
 		apOut[0] = apOut[1] = apOut[2] = 0.0f;
 		++this->iLineNumber;
@@ -1812,41 +1785,21 @@ void Parser::ParseLV4MeshFloatTriple(float* apOut, unsigned int& rIndexOut)
 void Parser::ParseLV4MeshFloatTriple(float* apOut)
 {
 	ai_assert(NULL != apOut);
-	// skip spaces and tabs
-	if(!SkipSpaces(this->m_szFile,&this->m_szFile))
+
+	for (unsigned int i = 0; i < 3;++i)
 	{
-		// LOG 
-		this->LogWarning("Unable to parse float triple: unexpected EOL [#5]");
-		apOut[0] = apOut[1] = apOut[2] = 0.0f;
-		++this->iLineNumber;
-		return;
+		// skip spaces and tabs
+		if(!SkipSpaces(this->m_szFile,&this->m_szFile))
+		{
+			// LOG 
+			this->LogWarning("Unable to parse float triple: unexpected EOL [#5]");
+			apOut[0] = apOut[1] = apOut[2] = 0.0f;
+			++this->iLineNumber;
+			return;
+		}
+		// parse the float
+		this->m_szFile = fast_atof_move(this->m_szFile,apOut[i]);
 	}
-	// parse the first float
-	this->m_szFile = fast_atof_move(this->m_szFile,apOut[0]);
-	// skip spaces and tabs
-	if(!SkipSpaces(this->m_szFile,&this->m_szFile))
-	{
-		// LOG 
-		this->LogWarning("Unable to parse float triple: unexpected EOL [#6]");
-		apOut[1] = apOut[2] = 0.0f;
-		++this->iLineNumber;
-		return;
-	}
-	// parse the second float
-	this->m_szFile = fast_atof_move(this->m_szFile,apOut[1]);
-	// skip spaces and tabs
-	if(!SkipSpaces(this->m_szFile,&this->m_szFile))
-	{
-		// LOG 
-		this->LogWarning("Unable to parse float triple: unexpected EOL [#7]");
-		apOut[2] = 0.0f;
-		++this->iLineNumber;
-		return;
-	}
-	// parse the third float
-	this->m_szFile = fast_atof_move(this->m_szFile,apOut[2]);
-	// go to the next valid sequence
-	//this->SkipToNextToken();
 	return;
 }
 // ------------------------------------------------------------------------------------------------

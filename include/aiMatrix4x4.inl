@@ -237,6 +237,65 @@ inline void aiMatrix4x4::FromEulerAngles(float x, float y, float z)
     _this.a4 = _this.b4 = _this.c4 = _this.d1 = _this.d2 = _this.d3 =  0.0f;
     _this.d4 = 1.0f;
 }
+// ---------------------------------------------------------------------------
+inline bool aiMatrix4x4::IsIdentity() const
+{
+	return !(a1 != 1.0f || a2 || a3 || a4 ||
+		b1 || b2 != 1.0f || b3 || b4 ||
+		c1 || c2 || c3 != 1.0f || a4 ||
+		d1 || d2 || d3 || d4 != 1.0f);
+}
+// ---------------------------------------------------------------------------
+inline aiMatrix4x4& aiMatrix4x4::RotationX(float a, aiMatrix4x4& out)
+{
+	/*
+	     |  1  0       0       0 |
+     M = |  0  cos(A) -sin(A)  0 |
+         |  0  sin(A)  cos(A)  0 |
+         |  0  0       0       1 |	*/
+	out.aiMatrix4x4::aiMatrix4x4();
+	out.b2 = out.c3 = cos(a);
+	out.b3 = -(out.c2 = sin(a));
+	return out;
+}
+// ---------------------------------------------------------------------------
+inline aiMatrix4x4& aiMatrix4x4::RotationY(float a, aiMatrix4x4& out)
+{
+	/*
+	     |  cos(A)  0   sin(A)  0 |
+     M = |  0       1   0       0 |
+         | -sin(A)  0   cos(A)  0 |
+         |  0       0   0       1 |
+		*/
+	out.aiMatrix4x4::aiMatrix4x4();
+	out.a1 = out.c3 = cos(a);
+	out.c1 = -(out.a3 = sin(a));
+	return out;
+}
+
+// ---------------------------------------------------------------------------
+inline aiMatrix4x4& aiMatrix4x4::RotationZ(float a, aiMatrix4x4& out)
+{
+	/*
+	     |  cos(A)  -sin(A)   0   0 |
+     M = |  sin(A)   cos(A)   0   0 |
+         |  0        0        1   0 |
+         |  0        0        0   1 |	*/
+	out.aiMatrix4x4::aiMatrix4x4();
+	out.a1 = out.b2 = cos(a);
+	out.a2 = -(out.b1 = sin(a));
+	return out;
+}
+// ---------------------------------------------------------------------------
+inline aiMatrix4x4& aiMatrix4x4::Translation(aiVector3D v, aiMatrix4x4& out)
+{
+	out.aiMatrix4x4::aiMatrix4x4();
+	out.d1 = v.x;
+	out.d2 = v.y;
+	out.d3 = v.z;
+	return out;
+}
+
 
 #endif // __cplusplus
 #endif // AI_MATRIX4x4_INL_INC

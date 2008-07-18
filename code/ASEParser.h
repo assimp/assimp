@@ -43,17 +43,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_ASEFILEHELPER_H_INC
 #define AI_ASEFILEHELPER_H_INC
 
+// STL/CRT headers
 #include <string>
 #include <vector>
 #include <list>
-#include <sstream>
 
+// public ASSIMP headers
 #include "../include/aiTypes.h"
 #include "../include/aiMesh.h"
 #include "../include/aiAnim.h"
 
 // for some helper routines like IsSpace()
 #include "PlyParser.h"
+#include "qnan.h"
 
 // ASE is quite similar to 3ds. We can reuse some structures
 #include "3DSLoader.h"
@@ -130,9 +132,10 @@ struct Bone
 	Bone()
 	{
 		static int iCnt = 0;
-		std::stringstream ss(mName);
-		ss << "%%_UNNAMED_" << iCnt++ << "_%%"; 
-		ss.flush();
+		
+		char szTemp[128];
+		::sprintf(szTemp,"UNNAMED_%i",iCnt++);
+		mName = szTemp;
 	}
 
 	//! Name of the bone
@@ -153,6 +156,73 @@ struct BoneVertex
 };
 
 // ---------------------------------------------------------------------------
+/** Helper structure to represent an ASE file animation */
+struct Animation
+{
+	//! List of rotation keyframes
+	std::vector< aiQuatKey > akeyRotations;
+
+	//! List of position keyframes
+	std::vector< aiVectorKey > akeyPositions;
+
+};
+
+// ---------------------------------------------------------------------------
+/** Helper structure to represent the inheritance information of an ASE node */
+struct InheritanceInfo
+{
+	//! Default constructor
+	InheritanceInfo()
+	{
+		// set the inheritance flag for all axes by default to true
+		for (unsigned int i = 0; i < 3;++i)
+			abInheritPosition[i] = abInheritRotation[i] = abInheritScaling[i] = true;
+	}
+
+	//! Inherit the parent's position?, axis order is x,y,z
+	bool abInheritPosition[3];
+
+	//! Inherit the parent's rotation?, axis order is x,y,z
+	bool abInheritRotation[3];
+
+	//! Inherit the parent's scaling?, axis order is x,y,z
+	bool abInheritScaling[3];
+};
+
+// ---------------------------------------------------------------------------
+/** Stores a decomposed transformation matrix */
+struct DecompTransform
+{
+	//! Construction from a reference to an existing matrix
+	DecompTransform(aiMatrix4x4& ref) 
+		: vScaling(1.0f,1.0f,1.0f)
+		, vPosition(std::numeric_limits<float>::quiet_NaN(),0.0f,0.0f)
+		, mMatrix(ref)
+	{}
+
+	//! Translational component
+	mutable aiVector3D vPosition;
+
+	//! Rotational component
+	mutable aiQuaternion qRotation;
+
+	//! Scaling component
+	mutable aiVector3D vScaling;
+
+	//! Reference to the matrix being decomposed
+	const aiMatrix4x4& mMatrix;
+
+	//! Decomposes the matrix if this has not yet been done
+	inline void NeedDecomposedMatrixNOW() const
+	{
+		if (is_qnan(vPosition.x))
+		{
+			mMatrix.Decompose(vScaling,qRotation,vPosition);
+		}
+	}
+};
+
+// ---------------------------------------------------------------------------
 /** Helper structure to represent an ASE file mesh */
 struct Mesh
 {
@@ -160,9 +230,9 @@ struct Mesh
 	Mesh() : bSkip(false)
 	{
 		static int iCnt = 0;
-		std::stringstream ss(mName);
-		ss << "%%_UNNAMED_" << iCnt++ << "_%%"; 
-		ss.flush();
+		char szTemp[128];
+		::sprintf(szTemp,"UNNAMED_%i",iCnt++);
+		mName = szTemp;
 
 		// use 2 texture vertex components by default
 		for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS;++c)
@@ -203,6 +273,9 @@ struct Mesh
 	//! Transformation matrix of the mesh
 	aiMatrix4x4 mTransform;
 
+	//! Animation channels for the node
+	Animation mAnim;
+
 	//! Material index of the mesh
 	unsigned int iMaterialIndex;
 
@@ -211,6 +284,10 @@ struct Mesh
 
 	//! used internally
 	bool bSkip;
+
+	//! Specifies which axes transformations a node inherits
+	//! from its parent ...
+	InheritanceInfo inherit;
 };
 
 // ---------------------------------------------------------------------------------
@@ -258,6 +335,13 @@ private:
 	//! Parse a *NODE_TM block in a file
 	//! \param mesh Mesh object to be filled
 	void ParseLV2NodeTransformBlock(Mesh& mesh);
+
+	// -------------------------------------------------------------------
+	//! Parse a *TM_ANIMATION block in a file
+	//! \param mesh Mesh object to be filled
+	void ParseLV2AnimationBlock(Mesh& mesh);
+	void ParseLV3PosAnimationBlock(Mesh& mesh);
+	void ParseLV3RotAnimationBlock(Mesh& mesh);
 
 	// -------------------------------------------------------------------
 	//! Parse a *MESH block in a file
@@ -453,6 +537,19 @@ public:
 
 	//! Current line in the file
 	unsigned int iLineNumber;
+
+
+	//! First frame
+	unsigned int iFirstFrame;
+
+	//! Last frame
+	unsigned int iLastFrame;
+
+	//! Frame speed - frames per second
+	unsigned int iFrameSpeed;
+
+	//! Ticks per frame
+	unsigned int iTicksPerFrame;
 };
 
 

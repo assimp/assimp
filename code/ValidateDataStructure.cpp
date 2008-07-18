@@ -42,20 +42,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the post processing step to validate 
  * the data structure returned by Assimp
  */
+
+// STL headers
 #include <vector>
 #include <assert.h>
 
+// internal headers
 #include "ValidateDataStructure.h"
 #include "BaseImporter.h"
 #include "StringComparison.h"
 #include "fast_atof.h"
 
+// public ASSIMP headers
 #include "../include/DefaultLogger.h"
 #include "../include/aiPostProcess.h"
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
 
+// CRT headers
 #include <stdarg.h>
 
 using namespace Assimp;
@@ -128,7 +133,7 @@ void ValidateDSProcess::ReportWarning(const char* msg,...)
 		throw new ImportErrorException("Idiot ... learn coding!");
 	}
 	va_end(args);
-	DefaultLogger::get()->warn("Validation failed: " + std::string(szBuffer,iLen));
+	DefaultLogger::get()->warn("Validation warning: " + std::string(szBuffer,iLen));
 }
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
@@ -286,7 +291,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 			{
 				if (face.mIndices[a] >= pMesh->mNumVertices)
 				{
-					this->ReportError("aiMesh::mFaces[%i]::mIndices[%a] is out of range",i,a);
+					this->ReportError("aiMesh::mFaces[%i]::mIndices[%i] is out of range",i,a);
 				}
 				if (abRefList[face.mIndices[a]])
 				{
@@ -636,6 +641,7 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 {
 	this->Validate(&pBoneAnim->mBoneName);
 
+#if 0
 	// check whether there is a bone with this name ...
 	unsigned int i = 0;
 	for (; i < this->mScene->mNumMeshes;++i)
@@ -650,14 +656,14 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 __break_out:
 	if (i == this->mScene->mNumMeshes)
 	{
-		this->ReportWarning("aiBoneAnim::mBoneName is %s. However, no bone with this name was found",
+		this->ReportWarning("aiBoneAnim::mBoneName is \"%s\". However, no bone with this name was found",
 			pBoneAnim->mBoneName.data);
 	}
 	if (!pBoneAnim->mNumPositionKeys && !pBoneAnim->mNumRotationKeys && !pBoneAnim->mNumScalingKeys)
 	{
 		this->ReportWarning("A bone animation channel has no keys");
 	}
-
+#endif
 	// otherwise check whether one of the keys exceeds the total duration of the animation
 	if (pBoneAnim->mNumPositionKeys)
 	{

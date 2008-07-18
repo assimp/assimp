@@ -119,6 +119,7 @@ struct aiNode
 //! and propably meshes with bones.
 #define AI_SCENE_FLAGS_ANIM_SKELETON_ONLY	0x1
 
+
 // ---------------------------------------------------------------------------
 /** The root structure of the imported data. 
 * 

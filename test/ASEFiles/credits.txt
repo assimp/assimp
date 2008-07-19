@@ -1,2 +1,2 @@
-Both models created by Marius Schröder
-They are free for any purpose but credits are highly appreciated
+"würfel.ase" - Made by Marius Schröder, free for any purpose
+"MotionCaptureROM.ase" - Recorded at the HTW Aalen using LycosIQ. Free for any purpose

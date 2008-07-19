@@ -1,3 +1,21 @@
+
+
+/**
+
+
+-----------------------------------------------------------------------------------
+
+Open Asset Import Library (http:\\assimp.sourceforge.net)
+Website design: Alexander Christoph Gessler aka Aramis_acg
+
+
+SLIGHTLY modified version of the main stylesheet. Used for the FAQ
+
+-----------------------------------------------------------------------------------
+
+*/
+
+
 body {
 	margin: 0;
 	padding: 0;
@@ -47,7 +65,7 @@ a:hover {
 #header h1, #header h2 {
 	/*text-transform: lowercase;*/
 	font-weight: normal;
-	color: #ffffff; //#FFFFFF;
+	color: #ffffff; 
 }
 
 #header h1 {

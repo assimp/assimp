@@ -1,101 +1,120 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<title>Open Asset Import Library</title>
-<meta name="keywords" content="ASSIMP Open Asset Import Library free Open Source 3d Model Import Library C C++ Java MDL X OBJ MD2 MD3 PLY " />
-<meta name="description" content="Open Asset Import Library" />
-<link href="css/style.css" rel="stylesheet" type="text/css" media="screen"/>
-<script src="js/prototype.js" type="text/javascript"></script>
-	<script src="js/scriptaculous.js?load=effects,builder" type="text/javascript"></script>
-	<script src="js/lightbox.js" type="text/javascript"></script>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>Open Asset Import Library</title>
+    <meta name="keywords" content="ASSIMP Open Asset Import Library free Open Source 3d Model Import Library C C++ Java MDL X OBJ MD2 MD3 PLY " />
+    <meta name="description" content="Open Asset Import Library" />
+    <link href="css/style.css" rel="stylesheet" type="text/css" media="screen" />
+
+    <script src="js/prototype.js" type="text/javascript"></script>
+
+    <script src="js/scriptaculous.js?load=effects,builder" type="text/javascript"></script>
+
+    <script src="js/lightbox.js" type="text/javascript"></script>
 
 </head>
 <body>
-<div id="header">
-	
-	
-</div>
-<!-- end #header -->
-<div id="menu">
-	<ul>
-		<li class="first"><a href="#" accesskey="1" title="">About</a></li>
-		<li><a href="main_features.html" accesskey="2" title="">Features</a></li>
-		<li><a href="main_viewer.html" accesskey="7" title="">Viewer</a></li>
-		<li><a href="main_doc.html" accesskey="3" title="">Documentation</a></li>
-		<li><a href="main_downloads.html" accesskey="4" title="">Downloads</a></li>
-		<li><a href="main_license.html" accesskey="8" title="">License</a></li>
-		<li><a href="main_contact.html" accesskey="5" title="">Contact</a></li>
-	</ul>
-</div>
-<!-- end #menu -->
-<div id="content">
-	<div id="posts">
-		<div class="post">
-			<h2 class="title">Welcome</h2>
-			<div class="story">
-				<p>The <strong>Open Asset Import Library</strong> (Short name: ASSIMP) is a free library to import various well-known 3D model formats into applications. The library has been designed for maximum stability and efficiency. Written in C++, it is licensed under a <strong>modified BSD license</strong>. The API is provided for both C and C++, ports for other languages like Java, C# and Python are also available or in development. </p>
-
-			<p>The library is developed and maintained by Alexander "Aramis" Gessler, Thomas "Schrompf" Schulze, Kim "Kimmi" Kulling and Rainer "Guru" Schmidt.</p>
-
-			<p>Current version: <strong>1.0 beta</strong></p>
-
-			<p><a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=226462&amp;type=2" width="125" height="37" border="0" alt="SourceForge.net Logo" 
-/></a></p>
-
-			</div>
-		</div>
-		<div class="post">
-			<h2 class="title">Feature overview</h2>
-			<div class="story">
-				<ul>
-					<li>Imports all model formats in a shared in-memory data format which can easily be read and processed by applications. </li>
-					<li>PostProcessingSteps: Transform the imported models in the form that fits best to your needs (e.g. vertex layout optimization, tangent space calculation ...)</li>					<li>Fully featured model viewer (<a href="main_viewer.html">more</a>) included with the library</li>
-					<li>
-					No external dependencies except boost. All loaders are stand-alone implementations, no external format libs are required.
-					</li>
-				</ul>
-
-				<p>Supported file formats (see the <a href="main_features.html">Features</a> page for a complete list):</p>
-				<ul>
-					<li>Wavefront OBJ</li>
-					<li>Quake I MDL</li>
-					<li>3D Studio Max 3DS</li>
-					<li>3D Studio Max ASE</li>
-					<li>DirectX X</li>
-					<li>Conitec 3D GameStudio MDL (MDL2, MDl3, MDL4, MDL5, MDL7)</li>
-					<li>Conitec 3D GameStudio HMP (HMP4, HMP5, HMP7)</li>
-					<li>Quake II MD2</li>
-					<li>Quake III MD3</li>
-					<li>Return To Castle Wolfenstein MDC</li>
-					<li>Ravensoft MDR</li>
-					<li>Valve SMD</li>
-					<li>Stanford PLY</li>
-				</ul>
-			</div>
-		</div>
-	</div>
-	<!-- end #posts -->
-	<div id="links">
-		<ul>
-			<li>
-				<h2>Screenshots</h2>
-				<ul>
-					<li><a href="screenshots/sshot1.png" title="A futuristic weapon, modelled in 3ds max and exported to ASE" rel="lightbox"><img src="screenshots/sshot1s.png"> </a></li>
-					<li><a href="screenshots/sshot2.png" title="A low-poly tree in Conitec's MDL7 file format. Model by Rainer Prokein (http://reinerstileset.4players.de)" rel="lightbox"><img src="screenshots/sshot2s.png"> </a></li>
-					<li><a href="screenshots/sshot3.png"  title="Stanford dragon with 0.8 mio triangles loaded from a PLY file" rel="lightbox"><img src="screenshots/sshot3s.png"> </a></li>
-				</ul>
-			</li>
+    <div id="header">
+    </div>
+    <!-- end #header -->
+    <div id="menu">
+        <ul>
+            <li class="first"><a href="#" accesskey="1" title="">About</a></li>
+            <li><a href="main_features.html" accesskey="2" title="">Features</a></li>
+            <li><a href="main_viewer.html" accesskey="7" title="">Viewer</a></li>
+            <li><a href="main_doc.html" accesskey="3" title="">Documentation</a></li>
+            <li><a href="main_downloads.html" accesskey="4" title="">Downloads</a></li>
+            <li><a href="main_license.html" accesskey="8" title="">License</a></li>
+            <li><a href="main_contact.html" accesskey="5" title="">Contact</a></li>
+        </ul>
+    </div>
+    <!-- end #menu -->
+    <div id="content">
+        <div id="posts">
+            <div class="post">
+                <h2 class="title">
+                    Welcome</h2>
+                <div class="story">
+                    <p>
+                        The <strong>Open Asset Import Library</strong> (Short name: ASSIMP) is a free library
+                        to import various well-known 3D model formats into applications. The library has
+                        been designed for maximum stability and efficiency. Written in C++, it is licensed
+                        under a <strong>modified BSD license</strong>. The API is provided for both C and
+                        C++, ports for other languages like Java, C# and Python are also available or in
+                        development.
+                    </p>
+                    <p>
+                        The library is developed and maintained by Alexander "Aramis" Gessler, Thomas "Schrompf"
+                        Schulze, Kim "Kimmi" Kulling and Rainer "Guru" Schmidt.</p>
+                    <p>
+                        Current version: <strong>1.0 beta</strong>
+                        <a href="http://www.sourceforge.net/projects/assimp"> (Sourceforge Project Page) </a>
+                        </p>
+                    <p>
+                        <a href="http://sourceforge.net">
+                            <img src="http://sflogo.sourceforge.net/sflogo.php?group_id=226462&amp;type=2" width="125"
+                                height="37" border="0" alt="SourceForge.net Logo" /></a></p>
+                </div>
+            </div>
+         
+            <div class="post">
+                <h2 class="title">
+                    Feature overview</h2>
+                <div class="story">
+                    <ul>
+                        <li>Supports over 15 3D formats, including <b>X, 3DS, OBJ, MS3D, PLY, ASE</b></li>
+                        <li>Imports all model formats in a shared in-memory data format which can easily be
+                            read and processed by applications. </li>
+                        <li>PostProcessingSteps: Transform the imported models in the form that fits best to
+                            your needs (e.g. vertex layout optimization, tangent space calculation ...)</li>
+                        <li>Fully featured model viewer (<a href="main_viewer.html">more</a>) included with
+                            the library</li>
+                        <li>No external dependencies except boost. All loaders are stand-alone implementations,
+                            no external format libs are required. </li>
+                    </ul>
+                    <p>
+                        See the <a href="main_features.html">Features</a> page for a complete list of all
+                        supported file formats and post-process steps</p>
+                </div>
+            </div>
+        </div>
+        <!-- end #posts -->
+        <div id="links">
+            <ul>
+                <li>
+                    <h2>
+                        Screenshots</h2>
+                    <ul>
+			<li><a href="screenshots/sshot8.png" title="A model of Dreamworlds Development (www.dreamworlds.de) for their upcoming game, Splitterwelten" rel="lightbox"><img src="screenshots/sshot8s.png"> </a></li>
+                  
+                        <li><a href="screenshots/sshot2.png" title="A low-poly tree in Conitec's MDL7 file format. Model by Rainer Prokein (http://reinerstileset.4players.de)"
+                            rel="lightbox">
+                            <img src="screenshots/sshot2s.png"/>
+                        </a></li>
+                        <li><a href="screenshots/sshot3.png" title="Stanford dragon with 0.8 mio triangles loaded from a PLY file"
+                            rel="lightbox">
+                            <img src="screenshots/sshot3s.png"/>
+                        </a></li>
+			<li><a href="screenshots/sshot1.png" title="A futuristic weapon, modelled in 3ds max and exported to ASE"
+                            rel="lightbox">
+                            <img src="screenshots/sshot1s.png"/>
+                        </a></li>
 			
-		</ul>
-	</div>
-	<!-- end #links -->
-	<div style="clear: both;">&nbsp;</div>
-</div>
-<!-- end #content -->
-<div id="footer">
-	<p id="legal">Copyright &copy; 2008 ASSIMP Team. Design template by <a href="http://www.freecsstemplates.org/">Free CSS Templates</a></p>
-</div>
-<!-- end #footer -->
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <!-- end #links -->
+        <div style="clear: both;">
+            &nbsp;</div>
+    </div>
+    <!-- end #content -->
+    <div id="footer">
+        <p id="legal">
+            Copyright &copy; 2008 ASSIMP Team. Design template by <a href="http://www.freecsstemplates.org/">
+                Free CSS Templates</a></p>
+    </div>
+    <!-- end #footer -->
 </body>
 </html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Open Asset Import Library</title>
+<meta name="keywords" content="ASSIMP Open Asset Import Library free Open Source 3d Model Import Library C C++ Java MDL X OBJ MD2 MD3 PLY " />
+<meta name="description" content="Open Asset Import Library" />
+<link href="css/style.css" rel="stylesheet" type="text/css" media="screen"/>
+<script src="js/prototype.js" type="text/javascript"></script>
+	<script src="js/scriptaculous.js?load=effects,builder" type="text/javascript"></script>
+	<script src="js/lightbox.js" type="text/javascript"></script>
+
+</head>
+<body>
+<div id="header">
+	
+	
+</div>
+<!-- end #header -->
+<div id="menu">
+	<ul>
+		<li class="first"><a href="index.html" accesskey="1" title="">About</a></li>
+		<li><a href="main_features.html" accesskey="2" title="">Features</a></li>
+		<li><a href="main_viewer.html" accesskey="7" title="">Viewer</a></li>
+		<li><a href="main_doc.html" accesskey="3" title="">Documentation</a></li>
+		<li><a href="main_downloads.html" accesskey="4" title="">Downloads</a></li>
+		<li><a href="main_license.html" accesskey="8" title="">License</a></li>
+		<li><a href="main_contact.html" accesskey="5" title="">Contact</a></li>
+	</ul>
+</div>
+<!-- end #menu -->
+<div id="content">
+	<div id="posts">
+		<div class="post">
+			<h2 class="title">File formats</h2>
+			<div class="story">
+				<p><strong>ASSIMP</strong> currently supports the following file formats. Note that the library does not always support all
+features of a format. </p>
+
+					<h3>CAD/3D Modelling file formats</h3>
+
+			<ul>
+					
+					<li><b>3D Studio Max 3DS</b> ( <i>*.3ds</i> ) </li>
+					<li><b>3D Studio Max ASE</b> ( <i>*.ase</i> ) </li>
+					<li><b>Wavefront Object</b> ( <i>*.obj</i> ) </li>
+					<li><b>Milkshape 3D</b> ( <i>*.ms3d</i> ) </li>
+					<li><b>Polygon Library</b> ( <i>*.ply</i> ) </li>
+</ul>
+
+			<h3>Game file formats</h3>
+			<ul>
+					<li><b>Valve StudioModel</b> ( <i>*.smd,*.vta</i> ) </li>
+					<li><b>Quake I</b> ( <i>*.mdl</i> ) </li>
+					<li><b>Quake II</b> ( <i>*.md2</i> ) </li>
+					<li><b>Quake III</b> ( <i>*.md3</i> ) </li>
+					<li><b>Return to Castle Wolfenstein</b> ( <i>*.mdc</i> )</li>
+					<li><b>EliteForce II</b> ( <i>*.mdr</i> ) </li>
+					<li><b>Doom 3</b> ( <i>*.md5</i> ) </li>
+						
+</ul>
+			<h3>Other file formats</h3>
+		
+			<ul>
+			<li><b>DirectX X </b> ( <i>*.x</i> ). </li>
+				
+			<li><b>3D GameStudio </b> ( <i>*.mdl</i> ) </li> 
+			<li><b>3D GameStudio Terrain</b> ( <i>*.hmp</i> )<br>(<i>All sub versions of 3D GameStudio models/terrains are supported: mdl2, mdl3, mdl4, mdl5, mdl7, hmp4, hmp5, hmp7</i>)</li> 
+							<br>
+</ul>
+			</div>
+		</div>
+		<div class="post">
+			<h2 class="title">Post-process Steps</h2>
+			<div class="story">
+				<h3>Real-time rendering</h3>
+
+			<ul>
+					
+					<li><b>OpenGL to DirectX conventions</b>. </li>
+					<li><b>Limit bone weights per vertex</b>. Useful for hardware skinning  </li>
+					<li><b>Triangulate higher-level polygons</b>. (*)  </li>
+					<li><b>Remove redundant vertices</b>.   </li>
+					
+			</ul>
+
+			<h3>Compute Vertex components</h3>
+
+			<ul>
+					
+					<li><b>Per-face normal vectors</b>. "Flat shading"  </li>
+					<li><b>Per-vertex normal vectors</b>. "Smooth shading"  </li>
+					<li><b>Tangents and bitangents</b>. Required for Normal Mapping </li>
+					
+			</ul>
+
+			<h3>Scenegraph</h3>
+
+			<ul>
+					
+					<li><b>Remove scenegraph</b>. Transform all vertices into worldspace </li>
+					<li><b>Optimize the graph</b>. Remove small nodes and too deep hierarchies  </li>
+					
+			</ul>
+
+			<h3>Other</h3>
+
+			<ul>
+					
+					
+					<li><b>Validate the output structure</b>. For extra stability  </li>
+					<li><b>Check for infacing normals</b>.  </li>
+					<li><b>Kill imported normals</b>. Force a recomputation. </li>
+					<li><b>Split large meshes</b>. Both a vertex and a triangle limit can be set.  </li>					
+			</ul>
+
+			<p>(*) = Always active in jAssimp. There is no support for polygons in this port.</p>
+
+			</div>
+		</div>
+	</div>
+	<!-- end #posts -->
+	<div id="links">
+		<ul>
+			<li>
+				<h2>Screenshots</h2>
+				<ul>
+					<li><a href="screenshots/sshot4.png" title="A free model from www.meshfactory.com" rel="lightbox"><img src="screenshots/sshot4s.png"> </a></li>
+					<li><a href="screenshots/sshot6.png"><img src="screenshots/sshot6s.png"> </a></li>
+					<li><a href="screenshots/sshot7.png" title="Model by Rainer Prokein (http://reinerstileset.4players.de)" rel="lightbox"><img src="screenshots/sshot7s.png"> </a></li>
+					<li><a href="screenshots/sshot9.png" title="A model of Dreamworlds Development (www.dreamworlds.de) for their upcoming game, Splitterwelten" rel="lightbox"><img src="screenshots/sshot9s.png"> </a></li>
+					<li><a href="screenshots/sshot10.png" title="A screenshot from the ZFXC team (http://zfxce.sourceforge.net)" rel="lightbox"><img src="screenshots/sshot10s.png"> </a></li>
+				</ul>
+			</li>
+			
+		</ul>
+	</div>
+	<!-- end #links -->
+	<div style="clear: both;">&nbsp;</div>
+</div>
+<!-- end #content -->
+<div id="footer">
+	<p id="legal">Copyright &copy; 2008 ASSIMP Team. Design template by <a href="http://www.freecsstemplates.org/">Free CSS Templates</a></p>
+</div>
+<!-- end #footer -->
+</body>
+</html>

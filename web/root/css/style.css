@@ -1,3 +1,27 @@
+
+
+/**
+
+
+-----------------------------------------------------------------------------------
+
+Open Asset Import Library (http:\\assimp.sourceforge.net)
+Website design: Alexander Christoph Gessler aka Aramis_acg
+
+
+MAIN STYLESHEET
+
+-----------------------------------------------------------------------------------
+
+*/
+
+
+
+/*
+ CSS additions for the lightbox 2 control
+*/
+
+
 #lightbox{	position: absolute;	left: 0; width: 100%; z-index: 100; text-align: center; line-height: 0;}
 #lightbox img{ width: auto; height: auto;}
 #lightbox a img{ border: none; }
@@ -27,7 +51,7 @@
 #overlay{ position: absolute; top: 0; left: 0; z-index: 90; width: 100%; height: 500px; background-color: #000; }
 
 /*
-Design by Free CSS Templates
+ORIGINAL Design by Free CSS Templates
 http://www.freecsstemplates.org
 Released for free under a Creative Commons Attribution 2.5 License
 */
@@ -35,7 +59,7 @@ Released for free under a Creative Commons Attribution 2.5 License
 body {
 	margin: 0;
 	padding: 0;
-	background: #777777 url(../images/img01.jpg) repeat-x;
+	background: #777777 url(../images/img01.png) repeat-x;
 	font: normal 11px Tahoma, Arial, Helvetica, sans-serif;
 	color: #666666;
 }
@@ -79,7 +103,7 @@ a:hover {
 /* Header */
 
 #header {
-	width: 760px;
+	width: 863px;
 	height: 180px;
 	margin: 0 auto;
 	background: url(../images/img02.png);

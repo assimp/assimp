@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8,00"
-	Name="assimp"
+	Name="Assimp"
 	ProjectGUID="{5691E159-2D9B-407F-971F-EA5C592DC524}"
 	RootNamespace="assimp"
 	>
@@ -1015,6 +1015,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\ImproveCacheLocality.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\JoinVerticesProcess.h"
 				>
 			</File>
@@ -1068,6 +1072,10 @@
 			</File>
 			<File
 				RelativePath="..\..\code\ValidateDataStructure.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\VertexTriangleAdjacency.h"
 				>
 			</File>
 			<Filter
@@ -1343,6 +1351,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\ImproveCacheLocality.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\JoinVerticesProcess.cpp"
 				>
 			</File>
@@ -1384,6 +1396,10 @@
 			</File>
 			<File
 				RelativePath="..\..\code\ValidateDataStructure.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\VertexTriangleAdjacency.cpp"
 				>
 			</File>
 			<Filter

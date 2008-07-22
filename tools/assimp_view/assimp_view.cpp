@@ -133,7 +133,7 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 		aiProcess_GenSmoothNormals		| // generate smooth normal vectors if not existing
 		aiProcess_ConvertToLeftHanded	| // convert everything to D3D left handed space
 		aiProcess_SplitLargeMeshes      | // split large, unrenderable meshes into submeshes
-		aiProcess_ValidateDataStructure); // validate the output data structure
+		aiProcess_ValidateDataStructure | aiProcess_ImproveCacheLocality); // validate the output data structure
 
 	// get the end time of zje operation, calculate delta t
 	double fEnd = (double)timeGetTime();
@@ -871,6 +871,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 	sParams.BackBufferWidth			= (UINT)sRect.right;
 	sParams.BackBufferHeight		= (UINT)sRect.bottom;
 	sParams.SwapEffect				= D3DSWAPEFFECT_DISCARD;
+	sParams.BackBufferCount			= 1;
 
 	// check whether we can use a D32 depth buffer format
 	if (SUCCEEDED ( g_piD3D->CheckDepthStencilMatch(0,eType,

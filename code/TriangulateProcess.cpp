@@ -94,15 +94,16 @@ void TriangulateProcess::Execute( aiScene* pScene)
 bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 {
 	// check whether we will need to do something ...
+	bool bNeed = false;
 	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
 	{
 		const aiFace& face = pMesh->mFaces[a];
 		if( face.mNumIndices != 3)
 		{
-			break;
+			bNeed = true;
 		}
-		return false;
 	}
+	if (!bNeed)return false;
 
 	std::vector<aiFace> newFaces;
 	newFaces.reserve( pMesh->mNumFaces*2);

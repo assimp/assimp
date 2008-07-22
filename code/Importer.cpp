@@ -40,15 +40,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Implementation of the CPP-API class #Importer */
+
+// STL/CSL heades
 #include <fstream>
 #include <string>
 
+// public Assimp API
 #include "../include/assimp.hpp"
 #include "../include/aiAssert.h"
 #include "../include/aiScene.h"
 #include "../include/aiPostProcess.h"
 #include "../include/DefaultLogger.h"
 
+// internal headers
 #include "BaseImporter.h"
 #include "BaseProcess.h"
 #include "DefaultIOStream.h"
@@ -122,6 +126,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #if (!defined AI_BUILD_NO_VALIDATEDS_PROCESS)
 #	include "ValidateDataStructure.h"
+#endif
+#if (!defined AI_BUILD_NO_IMPROVECACHELOCALITY_PROCESS)
+#	include "ImproveCacheLocality.h"
 #endif
 
 using namespace Assimp;
@@ -209,6 +216,9 @@ Importer::Importer() :
 #endif
 #if (!defined AI_BUILD_NO_LIMITBONEWEIGHTS_PROCESS)
 	mPostProcessingSteps.push_back( new LimitBoneWeightsProcess());
+#endif
+#if (!defined AI_BUILD_NO_IMPROVECACHELOCALITY_PROCESS)
+	mPostProcessingSteps.push_back( new ImproveCacheLocalityProcess());
 #endif
 }
 

@@ -56,6 +56,8 @@ std::vector<std::string> g_aPreviousFiles;
 // history menu item
 HMENU g_hHistoryMenu = NULL;
 
+float g_fACMR = 3.0f;
+
 #define AI_VIEW_NUM_RECENT_FILES 0x8
 #define AI_VIEW_RECENT_FILE_ID(_n_) (5678 + _n_)
 
@@ -2252,8 +2254,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				}
 			}
 
+	
 		// render the scene
 		CDisplay::Instance().OnRender();
+
 
 		g_dCurTime     = timeGetTime();
 		g_fElpasedTime = (float)((g_dCurTime - g_dLastTime) * 0.001);

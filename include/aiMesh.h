@@ -391,9 +391,15 @@ struct aiMesh
 		}
 	}
 
-	//! Check whether the mesh contains positions. Should always return true
+	//! Check whether the mesh contains positions. If no special scene flags
+	//! are set this should always return true
 	inline bool HasPositions() const 
 		{ return mVertices != NULL; }
+
+	//! Check whether the mesh contains faces. If no special scene flags
+	//! are set this should always return true
+	inline bool HasFaces() const 
+		{ return mFaces != NULL; }
 
 	//! Check whether the mesh contains normal vectors
 	inline bool HasNormals() const 

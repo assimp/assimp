@@ -44,7 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include <vector>
-#include <assert.h>
 #include "JoinVerticesProcess.h"
 #include "SpatialSort.h"
 #include "../include/DefaultLogger.h"
@@ -177,7 +176,7 @@ bool JoinVerticesProcess::ProcessMesh( aiMesh* pMesh)
 			if( (uv.mBitangent - v.mBitangent).SquareLength() > squareEpsilon)
 				continue;
 			// manually unrolled because continue wouldn't work as desired in an inner loop
-			assert( AI_MAX_NUMBER_OF_COLOR_SETS == 4);
+			ai_assert( AI_MAX_NUMBER_OF_COLOR_SETS == 4);
 			if( GetColorDifference( uv.mColors[0], v.mColors[0]) > squareEpsilon)
 				continue;
 			if( GetColorDifference( uv.mColors[1], v.mColors[1]) > squareEpsilon)
@@ -187,7 +186,7 @@ bool JoinVerticesProcess::ProcessMesh( aiMesh* pMesh)
 			if( GetColorDifference( uv.mColors[3], v.mColors[3]) > squareEpsilon)
 				continue;
 			// texture coord matching manually unrolled as well
-			assert( AI_MAX_NUMBER_OF_TEXTURECOORDS == 4);
+			ai_assert( AI_MAX_NUMBER_OF_TEXTURECOORDS == 4);
 			if( (uv.mTexCoords[0] - v.mTexCoords[0]).SquareLength() > squareEpsilon)
 				continue;
 			if( (uv.mTexCoords[1] - v.mTexCoords[1]).SquareLength() > squareEpsilon)
@@ -303,7 +302,7 @@ bool JoinVerticesProcess::ProcessMesh( aiMesh* pMesh)
 		}
 
 		// there should be some. At least I think there should be some
-		assert( newWeights.size() > 0);
+		ai_assert( newWeights.size() > 0);
 
 		// kill the old and replace them with the translated weights
 		delete [] bone->mWeights;

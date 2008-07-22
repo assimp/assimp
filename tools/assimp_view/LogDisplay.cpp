@@ -107,14 +107,17 @@ void CLogDisplay::OnRender()
 
 	unsigned int iCnt = 0;
 	RECT sRect;
-	sRect.left = 0;
+	sRect.left = 10;
 	sRect.top = 10;
-	
+
 	RECT sWndRect;
 	GetWindowRect(GetDlgItem(g_hDlg,IDC_RT),&sWndRect);
 	sWndRect.right -= sWndRect.left;
 	sWndRect.bottom -= sWndRect.top;
 	sWndRect.left = sWndRect.top = 0;
+
+	sRect.right = sWndRect.right - 30;
+	sRect.bottom = sWndRect.bottom;
 
 	// if no asset is loaded draw a "no asset loaded" text in the center
 	if (!g_pcAsset)
@@ -152,9 +155,6 @@ void CLogDisplay::OnRender()
 		this->piFont->DrawText(NULL,szText ,
 			-1,&sWndRect,DT_CENTER | DT_VCENTER,D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0xFF));
 		}
-
-	sRect.right = sWndRect.right - 30;
-	sRect.bottom = sWndRect.bottom;
 
 	// update all elements in the queue and render them
 	for (std::list<SEntry>::iterator

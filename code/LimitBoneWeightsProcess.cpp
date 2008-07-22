@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiPostProcess.h"
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
+#include "../include/aiAssert.h"
 #include "../include/DefaultLogger.h"
 
 using namespace Assimp;
@@ -122,10 +123,13 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
 	}
 
 	// now cut the weight count if it exceeds the maximum
+	bool bChanged = false;
 	for( WeightsPerVertex::iterator vit = vertexWeights.begin(); vit != vertexWeights.end(); ++vit)
 	{
 		if( vit->size() <= mMaxWeights)
 			continue;
+
+		bChanged = true;
 
 		// more than the defined maximum -> first sort by weight in descending order. That's 
 		// why we defined the < operator in such a weird way.
@@ -142,28 +146,71 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
 			it->mWeight /= sum;
 	}
 
-	// rebuild the vertex weight array for all bones 
-	typedef std::vector< std::vector< aiVertexWeight > > WeightsPerBone;
-	WeightsPerBone boneWeights( pMesh->mNumBones);
-	for( unsigned int a = 0; a < vertexWeights.size(); a++)
+	if (bChanged)
 	{
-		const std::vector<Weight>& vw = vertexWeights[a];
-		for( std::vector<Weight>::const_iterator it = vw.begin(); it != vw.end(); ++it)
-			boneWeights[it->mBone].push_back( aiVertexWeight( a, it->mWeight));
-	}
 
-	// and finally copy the vertex weight list over to the mesh's bones
-	for( unsigned int a = 0; a < pMesh->mNumBones; a++)
-	{
-		const std::vector<aiVertexWeight>& bw = boneWeights[a];
-		aiBone* bone = pMesh->mBones[a];
-		// ignore the bone if no vertex weights were removed there
-		if( bw.size() == bone->mNumWeights)
-			continue;
+		// rebuild the vertex weight array for all bones 
+		typedef std::vector< std::vector< aiVertexWeight > > WeightsPerBone;
+		WeightsPerBone boneWeights( pMesh->mNumBones);
+		for( unsigned int a = 0; a < vertexWeights.size(); a++)
+		{
+			const std::vector<Weight>& vw = vertexWeights[a];
+			for( std::vector<Weight>::const_iterator it = vw.begin(); it != vw.end(); ++it)
+				boneWeights[it->mBone].push_back( aiVertexWeight( a, it->mWeight));
+		}
 
-		// copy the weight list. should always be less weights than before, so we don't need a new allocation
-		assert( bw.size() < bone->mNumWeights);
-		bone->mNumWeights = (unsigned int) bw.size();
-		memcpy( bone->mWeights, &bw[0], bw.size() * sizeof( aiVertexWeight));
+		// and finally copy the vertex weight list over to the mesh's bones
+		std::vector<bool> abNoNeed(pMesh->mNumBones,false);
+		bChanged = false;
+
+		for( unsigned int a = 0; a < pMesh->mNumBones; a++)
+		{
+			const std::vector<aiVertexWeight>& bw = boneWeights[a];
+			aiBone* bone = pMesh->mBones[a];
+
+			// ignore the bone if no vertex weights were removed there
+
+			// FIX (Aramis, 07|22|08)
+			// NO! we can't ignore it in this case ... it is possible that
+			// the number of weights did not change, but the weight values did.
+
+			// if( bw.size() == bone->mNumWeights)
+			//	continue;
+
+			// FIX (Aramis, 07|21|08)
+			// It is possible that all weights of a bone have been removed.
+			// This would naturally cause an exception in &bw[0].
+			if ( bw.empty() )
+			{
+				abNoNeed[a] = bChanged = true;
+				continue;
+			}
+
+			// copy the weight list. should always be less weights than before, so we don't need a new allocation
+			ai_assert( bw.size() <= bone->mNumWeights);
+			bone->mNumWeights = (unsigned int) bw.size();
+			::memcpy( bone->mWeights, &bw[0], bw.size() * sizeof( aiVertexWeight));
+		}
+
+		if (bChanged)
+		{
+			// the number of new bones is smaller than before, so we can
+			// reuse the old array, too.
+			aiBone** ppcCur = pMesh->mBones;
+			aiBone** ppcSrc = ppcCur;
+
+			for (std::vector<bool>::const_iterator
+				iter  = abNoNeed.begin();
+				iter != abNoNeed.end()  ;++iter)
+			{
+				if (*iter)
+				{
+					delete *ppcSrc;
+					--pMesh->mNumBones;
+				}
+				else *ppcCur++ = *ppcSrc;
+				++ppcSrc;
+			}
+		}
 	}
 }

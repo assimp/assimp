@@ -146,7 +146,15 @@ enum aiPostProcessSteps
 	 * however, it could be of interest for applications like editors
 	 * where stability is more important than loading performance.
 	*/
-	aiProcess_ValidateDataStructure = 0x400
+	aiProcess_ValidateDataStructure = 0x400,
+
+	/** Reorders triangles for vertex cache locality and thus better performance.
+	 * The step tries to improve the ACMR (average post-transform vertex cache
+	 * miss ratio) for all meshes. The step runs in O(n) and is roughly
+	 * basing on the algorithm described in this paper:
+	 * http://www.cs.princeton.edu/gfx/pubs/Sander_2007_%3ETR/tipsy.pdf
+	 */
+	aiProcess_ImproveCacheLocality = 0x1600
 };
 
 // ---------------------------------------------------------------------------

@@ -251,6 +251,10 @@ enum EClickPos
 	// HUD texture
 	//
 	extern unsigned char* g_szImageMask			/*= NULL*/;
+
+
+	extern float g_fACMR /*= 3.0f*/;
+	extern IDirect3DQuery9* g_piQuery;
 	};
 
 #endif // !! AV_MAIN_H_INCLUDED

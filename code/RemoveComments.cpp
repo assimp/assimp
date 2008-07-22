@@ -57,15 +57,14 @@ void CommentRemover::RemoveLineComments(const char* szComment,
 	// validate parameters
 	ai_assert(NULL != szComment && NULL != szBuffer && *szComment);
 
+	const size_t len = ::strlen(szComment);
+
 	while (*szBuffer)
 	{
-		if (*szBuffer == *szComment)
+		if (0 == ::strncmp(szBuffer,szComment,len))
 		{
-			if (0 == ::strcmp(szBuffer+1,szComment+1))
-			{
-				while (*szBuffer != '\r' && *szBuffer != '\n' && *szBuffer)
-					*szBuffer++ = chReplacement;
-			}
+			while (*szBuffer != '\r' && *szBuffer != '\n' && *szBuffer)
+				*szBuffer++ = chReplacement;
 		}
 		++szBuffer;
 	}
@@ -80,28 +79,24 @@ void CommentRemover::RemoveMultiLineComments(const char* szCommentStart,
 		NULL != szBuffer && '\0' != *szCommentStart && '\0' != *szCommentEnd);
 
 	const size_t len = ::strlen(szCommentEnd);
+	const size_t len2 = ::strlen(szCommentStart);
 
 	while (*szBuffer)
 	{
-		if (*szBuffer == *szCommentStart)
+		if (0 == ::strncmp(szBuffer,szCommentStart,len2))
 		{
-			if (0 == ::strcmp(szBuffer+1,szCommentStart+1))
+			while (*szBuffer)
 			{
-				while (*szBuffer)
+					
+				if (0 == ::strncmp(szBuffer,szCommentEnd,len))
 				{
-					if (*szBuffer == *szCommentEnd)
-					{
-						if (0 == ::strcmp(szBuffer+1,szCommentEnd+1))
-						{
-							for (unsigned int i = 0; i < len;++i)
-								*szBuffer++ = chReplacement;
-							goto __continue_outer; // WUHHHAAAAHHAA!
-						}
-					}
-					*szBuffer++ = chReplacement;
+					for (unsigned int i = 0; i < len;++i)
+						*szBuffer++ = chReplacement;
+					goto __continue_outer; // WUHHHAAAAHHAA!
 				}
-				return;
+			*szBuffer++ = chReplacement;
 			}
+			return;
 		}
 		++szBuffer;
 __continue_outer:

@@ -57,7 +57,7 @@ namespace Assimp
  *
  *  @note The input data is expected to be triangulated.
  */
-class VertexTriangleAdjacency
+class ASSIMP_API VertexTriangleAdjacency
 {
 public:
 

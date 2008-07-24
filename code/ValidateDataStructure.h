@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_VALIDATEPROCESS_H_INC
 #define AI_VALIDATEPROCESS_H_INC
 
+#include "../include/aiTypes.h"
 #include "BaseProcess.h"
 
 struct aiBone;
@@ -61,7 +62,7 @@ namespace Assimp
 // ---------------------------------------------------------------------------
 /** Validates the ASSIMP data structure
  */
-class ValidateDSProcess : public BaseProcess
+class ASSIMP_API ValidateDSProcess : public BaseProcess
 {
 	friend class Importer;
 

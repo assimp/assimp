@@ -56,7 +56,7 @@ namespace Assimp
  * into triangles. You usually want this to happen because the graphics cards
  * need their data as triangles.
  */
-class TriangulateProcess : public BaseProcess
+class ASSIMP_API TriangulateProcess : public BaseProcess
 {
 	friend class Importer;
 

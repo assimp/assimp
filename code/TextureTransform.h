@@ -136,7 +136,7 @@ struct STransformVecInfo
 /** Helper class used by the ASE/ASK and 3DS loaders to handle texture
  *  coordinate transformations correctly (such as offsets, scaling)
 */
-class TextureTransform
+class ASSIMP_API TextureTransform
 {
 	//! Constructor, it is not possible to create instances of this class
 	TextureTransform() {}

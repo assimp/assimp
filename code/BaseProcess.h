@@ -42,6 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BASEPROCESS_H_INC
 #define AI_BASEPROCESS_H_INC
 
+
+#include "../include/aiTypes.h"
+
 struct aiScene;
 
 namespace Assimp
@@ -56,7 +59,7 @@ namespace Assimp
  * and calls IsActive() on each process to evaluate if the step should be executed.
  * If the function returns true, the class' Execute() function is called subsequently.
  */
-class BaseProcess
+class ASSIMP_API BaseProcess
 {
 	friend class Importer;
 

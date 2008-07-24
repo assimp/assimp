@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 #include "BaseProcess.h"
+
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 
@@ -58,9 +59,9 @@ class SplitLargeMeshesProcess_Vertex;
 // corresponding values in all Assimp ports
 
 // **********************************************************
-// Java: PostProcessStep.java, 
-//  PostProcessStep.DEFAULT_VERTEX_SPLIT_LIMIT
-//  PostProcessStep.DEFAULT_TRIANGLE_SPLIT_LIMIT
+// Java: ConfigProperty.java, 
+//  ConfigProperty.DEFAULT_VERTEX_SPLIT_LIMIT
+//  ConfigProperty.DEFAULT_TRIANGLE_SPLIT_LIMIT
 // **********************************************************
 
 // default limit for vertices
@@ -79,7 +80,7 @@ class SplitLargeMeshesProcess_Vertex;
  * Applied BEFORE the JoinVertices-Step occurs.
  * Returns NON-UNIQUE vertices, splits by triangle number.
 */
-class SplitLargeMeshesProcess_Triangle : public BaseProcess
+class ASSIMP_API SplitLargeMeshesProcess_Triangle : public BaseProcess
 {
 	friend class Importer;
 	friend class SplitLargeMeshesProcess_Vertex;
@@ -130,7 +131,7 @@ public:
  * Applied AFTER the JoinVertices-Step occurs.
  * Returns UNIQUE vertices, splits by vertex number.
 */
-class SplitLargeMeshesProcess_Vertex : public BaseProcess
+class ASSIMP_API SplitLargeMeshesProcess_Vertex : public BaseProcess
 {
 	friend class Importer;
 

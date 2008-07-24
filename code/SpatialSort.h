@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_SPATIALSORT_H_INC
 
 #include <vector>
-#include "../include/aiVector3D.h"
+#include "../include/aiTypes.h"
 
 namespace Assimp
 {
@@ -56,7 +56,7 @@ namespace Assimp
  * time, with O(n) worst case complexity when all vertices lay on the plane. The plane is chosen
  * so that it avoids common planes in usual data sets.
  */
-class SpatialSort
+class ASSIMP_API SpatialSort
 {
 public:
 

@@ -50,7 +50,7 @@ namespace Assimp
 // ---------------------------------------------------------------------------
 /** KillNormalsProcess: Class to kill all normals loaded
 */
-class KillNormalsProcess : public BaseProcess
+class ASSIMP_API KillNormalsProcess : public BaseProcess
 {
 	friend class Importer;
 

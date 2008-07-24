@@ -51,7 +51,7 @@ namespace Assimp
 // ---------------------------------------------------------------------------
 /** Internal material helper class. Can be used to fill an aiMaterial
     structure easily. */
-class MaterialHelper : public ::aiMaterial
+class ASSIMP_API MaterialHelper : public ::aiMaterial
 {
 public:
 

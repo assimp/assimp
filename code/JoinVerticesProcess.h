@@ -59,7 +59,7 @@ namespace Assimp
  * erases all but one of the copies. This usually reduces the number of vertices
  * in a mesh by a serious amount and is the standard form to render a mesh.
  */
-class JoinVerticesProcess : public BaseProcess
+class ASSIMP_API JoinVerticesProcess : public BaseProcess
 {
 	friend class Importer;
 

@@ -51,7 +51,7 @@ namespace Assimp
 // ---------------------------------------------------------------------------
 /** The GenFaceNormalsProcess computes face normals for all faces of all meshes
 */
-class GenFaceNormalsProcess : public BaseProcess
+class ASSIMP_API GenFaceNormalsProcess : public BaseProcess
 {
 	friend class Importer;
 

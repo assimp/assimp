@@ -56,9 +56,9 @@ namespace Assimp
  *  cache locality. It tries to arrange all faces to fans and to render
  *  faces which share vertices directly one after the other.
  *
- *  @note This step expects the triagulated input data.
+ *  @note This step expects triagulated input data.
  */
-class ImproveCacheLocalityProcess : public BaseProcess
+class ASSIMP_API ImproveCacheLocalityProcess : public BaseProcess
 {
 	friend class Importer;
 

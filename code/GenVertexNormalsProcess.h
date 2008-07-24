@@ -50,7 +50,7 @@ namespace Assimp
 // ---------------------------------------------------------------------------
 /** The GenFaceNormalsProcess computes vertex normals for all vertizes of all meshes
 */
-class GenVertexNormalsProcess : public BaseProcess
+class ASSIMP_API GenVertexNormalsProcess : public BaseProcess
 {
 	friend class Importer;
 

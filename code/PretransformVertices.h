@@ -54,7 +54,7 @@ namespace Assimp
  *  and removes the whole graph. The output is a list of meshes, one for
  *  each material.
 */
-class PretransformVertices : public BaseProcess
+class ASSIMP_API PretransformVertices : public BaseProcess
 {
 	friend class Importer;
 

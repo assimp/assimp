@@ -754,6 +754,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\test\unit\utSplitLargeMeshes.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\test\unit\utVertexTriangleAdjacency.h"
 				>
 			</File>

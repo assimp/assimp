@@ -7,9 +7,15 @@
 #include <cppunit/TestRunner.h>
 #include <cppunit/BriefTestProgressListener.h>
 
+#include <math.h>
+#include <time.h>
 
 int main (int argc, char* argv[])
 {
+	// seed the randomizer with the current system time
+	time_t t;time(&t);
+	srand((unsigned int)t);
+
     // Informiert Test-Listener ueber Testresultate
     CPPUNIT_NS :: TestResult testresult;
 

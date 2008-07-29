@@ -2,17 +2,12 @@
 
 
 #include "utVertexTriangleAdjacency.h"
-#include <math.h>
-#include <time.h>
+
 
 CPPUNIT_TEST_SUITE_REGISTRATION (VTAdjacency);
 
 void VTAdjacency :: setUp (void)
 {
-	// seed the randomizer
-	time_t t;time(&t);
-	srand((unsigned int)t);
-
 	// build a test mesh with randomized input data
 	// *******************************************************************************
 	pMesh = new aiMesh();

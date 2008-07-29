@@ -234,6 +234,56 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
 				}
 			}
 
+			if (pMesh->HasBones())
+			{
+				// assume the number of bones won't change in most cases
+				pcMesh->mBones = new aiBone*[pMesh->mNumBones];
+
+				// iterate through all bones of the mesh and find those which
+				// need to be copied to the splitted mesh
+				std::vector<aiVertexWeight> avTempWeights;
+				for (unsigned int p = 0; p < pcMesh->mNumBones;++p)
+				{
+					aiBone* const bone = pcMesh->mBones[p];
+					avTempWeights.clear();
+					avTempWeights.reserve(bone->mNumWeights / iSubMeshes);
+
+					for (unsigned int q = 0; q < bone->mNumWeights;++q)
+					{
+						aiVertexWeight& weight = bone->mWeights[q];
+						if(weight.mVertexId >= iBase && weight.mVertexId < iBase + iOutVertexNum)
+						{
+							avTempWeights.push_back(weight);
+							weight = avTempWeights.back();
+							weight.mVertexId -= iBase;
+						}
+					}
+
+					if (!avTempWeights.empty())
+					{
+						// we'll need this bone. Copy it ...
+						aiBone* pc = new aiBone();
+						pcMesh->mBones[pcMesh->mNumBones++] = pc;
+						pc->mName = aiString(bone->mName);
+						pc->mNumWeights = avTempWeights.size();
+						pc->mOffsetMatrix = bone->mOffsetMatrix;
+
+						// no need to reallocate the array for the last submesh.
+						// Here we can reuse the (large) source array, although
+						// we'll waste some memory
+						if (iSubMeshes-1 == i)
+						{
+							pc->mWeights = bone->mWeights;
+							bone->mWeights = NULL;
+						}
+						else pc->mWeights = new aiVertexWeight[pc->mNumWeights];
+
+						// copy the weights
+						::memcpy(pc->mWeights,&avTempWeights[0],sizeof(aiVertexWeight)*pc->mNumWeights);
+					}
+				}
+			}
+
 			// (we will also need to copy the array of indices)
 			unsigned int iCurrent = 0;
 			for (unsigned int p = 0; p < pcMesh->mNumFaces;++p)
@@ -356,6 +406,25 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
 {
 	if (pMesh->mNumVertices > SplitLargeMeshesProcess_Vertex::LIMIT)
 	{
+		typedef std::vector< std::pair<unsigned int,float> > VertexWeightTable;
+		VertexWeightTable* avPerVertexWeights = NULL;
+
+		// build a per-vertex weight list if necessary
+		if (pMesh->HasBones())
+		{
+			avPerVertexWeights = new VertexWeightTable[pMesh->mNumVertices];
+			for (unsigned int i = 0; i < pMesh->mNumBones;++i)
+			{
+				aiBone* bone = pMesh->mBones[i];
+				for (unsigned int a = 0; a < bone->mNumWeights;++a)
+				{
+					aiVertexWeight& weight = bone->mWeights[a];
+					avPerVertexWeights[weight.mVertexId].push_back( 
+						std::pair<unsigned int,float>(a,weight.mWeight));
+				}
+			}
+		}
+
 		// we need to split this mesh into sub meshes
 		// determine the estimated size of a submesh
 		// (this could be too large. Max waste is a single digit percentage)
@@ -381,6 +450,13 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
 			aiMesh* pcMesh			= new aiMesh;			
 			pcMesh->mNumVertices	= 0;
 			pcMesh->mMaterialIndex	= pMesh->mMaterialIndex;
+
+			typedef std::vector<aiVertexWeight> BoneWeightList;
+			if (pMesh->HasBones())
+			{
+				pcMesh->mBones = new aiBone*[pMesh->mNumBones];
+				::memset(pcMesh->mBones,0,sizeof(void*)*pMesh->mNumBones);
+			}
 
 			// clear the temporary helper array
 			if (0 != iBase)
@@ -491,7 +567,28 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
 							pcMesh->mColors[c][pcMesh->mNumVertices] = pMesh->mColors[c][iIndex];
 						}
 					}
+					// check whether we have bone weights assigned to this vertex
 					rFace.mIndices[v] = pcMesh->mNumVertices;
+					if (avPerVertexWeights)
+					{
+						VertexWeightTable& table = avPerVertexWeights[ pcMesh->mNumVertices ];
+						if( !table.empty() )
+						{
+							for (VertexWeightTable::const_iterator
+								iter =  table.begin();
+								iter != table.end();++iter)
+							{
+								// allocate the bone weight array if necessary
+								BoneWeightList* pcWeightList = (BoneWeightList*)pcMesh->mBones[(*iter).first];
+								if (!pcWeightList)
+								{
+									pcMesh->mBones[(*iter).first] = (aiBone*)(pcWeightList = new BoneWeightList());
+								}
+								pcWeightList->push_back(aiVertexWeight(pcMesh->mNumVertices,(*iter).second));
+							}
+						}
+					}
+
 					avWasCopied[iIndex] = pcMesh->mNumVertices;
 					pcMesh->mNumVertices++;
 				}
@@ -502,6 +599,36 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
 					break;
 				}
 			}
+
+			// check which bones we'll need to create for this submesh
+			if (pMesh->HasBones())
+			{
+				aiBone** ppCurrent = pcMesh->mBones;
+				for (unsigned int k = 0; k < pMesh->mNumBones;++k)
+				{
+					// check whether the bone is existing
+					BoneWeightList* pcWeightList;
+					if (pcWeightList = (BoneWeightList*)pcMesh->mBones[k])
+					{
+						aiBone* pcOldBone = pMesh->mBones[k];
+						aiBone* pcOut;
+						*ppCurrent++ = pcOut = new aiBone();
+						pcOut->mName = aiString(pcOldBone->mName);
+						pcOut->mOffsetMatrix = pcOldBone->mOffsetMatrix;
+						pcOut->mNumWeights = pcWeightList->size();
+						pcOut->mWeights = new aiVertexWeight[pcOut->mNumWeights];
+
+						// copy the vertex weights
+						::memcpy(pcOut->mWeights,&pcWeightList->operator[](0),
+							pcOut->mNumWeights * sizeof(aiVertexWeight));
+
+						// delete the temporary bone weight list
+						delete pcWeightList;
+						pcMesh->mNumBones++;
+					}
+				}
+			}
+
 			// copy the face list to the mesh
 			pcMesh->mFaces = new aiFace[vFaces.size()];
 			pcMesh->mNumFaces = (unsigned int)vFaces.size();
@@ -518,6 +645,9 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
 				break;
 			}
 		}
+
+		// delete the per-vertex weight list again
+		delete[] avPerVertexWeights;
 
 		// now delete the old mesh data
 		delete pMesh;

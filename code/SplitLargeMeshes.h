@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 
+class SplitLargeMeshesTest;
 namespace Assimp
 {
 
@@ -84,6 +85,7 @@ class ASSIMP_API SplitLargeMeshesProcess_Triangle : public BaseProcess
 {
 	friend class Importer;
 	friend class SplitLargeMeshesProcess_Vertex;
+	friend class ::SplitLargeMeshesTest;
 
 protected:
 	/** Constructor to be privately used by Importer */
@@ -134,6 +136,7 @@ public:
 class ASSIMP_API SplitLargeMeshesProcess_Vertex : public BaseProcess
 {
 	friend class Importer;
+	friend class ::SplitLargeMeshesTest;
 
 protected:
 	/** Constructor to be privately used by Importer */

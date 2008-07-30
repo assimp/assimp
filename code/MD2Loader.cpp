@@ -344,16 +344,18 @@ void MD2Importer::InternReadFile(
 				vec.x += pcFrame->translate[0];
 
 				// (flip z and y component)
-				vec.z = (float)pcVerts[iIndex].vertex[1] * pcFrame->scale[1];
-				vec.z += pcFrame->translate[1];
+				// FIX: no .... invert y instead
+				vec.y = (float)pcVerts[iIndex].vertex[1] * pcFrame->scale[1];
+				vec.y += pcFrame->translate[1];
+				vec.y *= -1.0f;
 
-				vec.y = (float)pcVerts[iIndex].vertex[2] * pcFrame->scale[2];
-				vec.y += pcFrame->translate[2];
+				vec.z = (float)pcVerts[iIndex].vertex[2] * pcFrame->scale[2];
+				vec.z += pcFrame->translate[2];
 
 				// read the normal vector from the precalculated normal table
 				aiVector3D& vNormal = pcMesh->mNormals[iCurrent];
 				LookupNormalIndex(pcVerts[iIndex].lightNormalIndex,vNormal);
-				std::swap ( vNormal.y,vNormal.z );
+				vNormal.y *= -1.0f;
 
 				// validate texture coordinates
 				if (pcTriangles[iIndex].textureIndices[c] >= this->m_pcHeader->numTexCoords)
@@ -407,18 +409,16 @@ void MD2Importer::InternReadFile(
 
 				vec.x = (float)pcVerts[iIndex].vertex[0] * pcFrame->scale[0];
 				vec.x += pcFrame->translate[0];
-
-				// (flip z and y component)
 				vec.z = (float)pcVerts[iIndex].vertex[1] * pcFrame->scale[1];
 				vec.z += pcFrame->translate[1];
-
 				vec.y = (float)pcVerts[iIndex].vertex[2] * pcFrame->scale[2];
 				vec.y += pcFrame->translate[2];
+				vec.y *= -1.f;
 
 				// read the normal vector from the precalculated normal table
 				aiVector3D& vNormal = pcMesh->mNormals[iCurrent];
 				LookupNormalIndex(pcVerts[iIndex].lightNormalIndex,vNormal);
-				std::swap ( vNormal.y,vNormal.z );
+				vNormal.y *= -1.0f;
 			}
 			// FIX: flip the face order for use with OpenGL
 			pScene->mMeshes[0]->mFaces[i].mIndices[0] = iTemp+2;

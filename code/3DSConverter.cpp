@@ -593,7 +593,7 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 					while (pvCurrent != pvEnd)
 					{
 						std::swap( pvCurrent->y, pvCurrent->z );
-						pvCurrent->y *= -1.0f;
+						//pvCurrent->y *= -1.0f;
 						++pvCurrent;
 					}
 				}

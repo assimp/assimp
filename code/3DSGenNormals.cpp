@@ -66,8 +66,9 @@ void Dot3DSImporter::GenNormals(Dot3DS::Mesh* sMesh)
 		aiVector3D* pV2 = &sMesh->mPositions[face.mIndices[1]];
 		aiVector3D* pV3 = &sMesh->mPositions[face.mIndices[2]];
 
-		aiVector3D pDelta1 = *pV2 - *pV1;
-		aiVector3D pDelta2 = *pV3 - *pV1;
+		// FIX invert all vertex normals
+		aiVector3D pDelta1 = *pV3 - *pV1;
+		aiVector3D pDelta2 = *pV2 - *pV1;
 		aiVector3D vNor = pDelta1 ^ pDelta2;
 
 		sMesh->mNormals[face.mIndices[0]] = vNor;
@@ -127,6 +128,10 @@ void Dot3DSImporter::GenNormals(Dot3DS::Mesh* sMesh)
 			vNormals.y /= fDiv;
 			vNormals.z /= fDiv;
 			vNormals.Normalize();
+
+			// do the common coordinate system adjustment
+			std::swap(vNormals.y,vNormals.z);
+
 			avNormals[(*i).mIndices[c]] = vNormals;
 			poResult.clear();
 		}

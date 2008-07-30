@@ -251,19 +251,18 @@ void MD3Importer::InternReadFile(
 			{
 				// read vertices
 				pcMesh->mVertices[iCurrent].x = pcVertices[ pcTriangles->INDEXES[c]].X;
-				pcMesh->mVertices[iCurrent].y = pcVertices[ pcTriangles->INDEXES[c]].Y;
-				pcMesh->mVertices[iCurrent].z = pcVertices[ pcTriangles->INDEXES[c]].Z*-1.0f;
+				pcMesh->mVertices[iCurrent].y = pcVertices[ pcTriangles->INDEXES[c]].Y*-1.0f;
+				pcMesh->mVertices[iCurrent].z = pcVertices[ pcTriangles->INDEXES[c]].Z;
 
 				// convert the normal vector to uncompressed float3 format
 				LatLngNormalToVec3(pcVertices[pcTriangles->INDEXES[c]].NORMAL,
 					(float*)&pcMesh->mNormals[iCurrent]);
 
-				//std::swap(pcMesh->mNormals[iCurrent].z,pcMesh->mNormals[iCurrent].y);
-				pcMesh->mNormals[iCurrent].z *= -1.0f;
+				pcMesh->mNormals[iCurrent].y *= -1.0f;
 
 				// read texture coordinates
 				pcMesh->mTextureCoords[0][iCurrent].x = pcUVs[ pcTriangles->INDEXES[c]].U;
-				pcMesh->mTextureCoords[0][iCurrent].y = 1.0f - pcUVs[ pcTriangles->INDEXES[c]].V;
+				pcMesh->mTextureCoords[0][iCurrent].y = 1.0f-pcUVs[ pcTriangles->INDEXES[c]].V;
 			}
 			// FIX: flip the face ordering for use with OpenGL
 			pcMesh->mFaces[i].mIndices[0] = iTemp+2;

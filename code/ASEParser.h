@@ -550,6 +550,9 @@ public:
 
 	//! Ticks per frame
 	unsigned int iTicksPerFrame;
+
+	//! true if the last character read was an end-line character
+	bool bLastWasEndLine;
 };
 
 

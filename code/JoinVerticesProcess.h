@@ -90,8 +90,9 @@ protected:
 	// -------------------------------------------------------------------
 	/** Unites identical vertices in the given mesh.
 	 * @param pMesh The mesh to process.
+	 * @param meshIndex Index of the mesh to process
 	 */
-	bool ProcessMesh( aiMesh* pMesh);
+	int ProcessMesh( aiMesh* pMesh, unsigned int meshIndex);
 
 	// -------------------------------------------------------------------
 	/** Little helper function to calculate the quadratic difference 

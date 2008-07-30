@@ -38,43 +38,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines a post processing step to reorder faces for 
- better cache locality*/
-#ifndef AI_IMPROVECACHELOCALITY_H_INC
-#define AI_IMPROVECACHELOCALITY_H_INC
+/** @file Defines a post processing step to remove redundant materials */
+#ifndef AI_REMOVEREDUNDANTMATERIALS_H_INC
+#define AI_REMOVEREDUNDANTMATERIALS_H_INC
 
 #include "BaseProcess.h"
-#include "../include/aiTypes.h"
+#include "../include/aiMesh.h"
 
-struct aiMesh;
-
+class RemoveRedundantMatsTest;
 namespace Assimp
-{
+	{
 
 // ---------------------------------------------------------------------------
-/** The ImproveCacheLocalityProcess reorders all faces for improved vertex
- *  cache locality. It tries to arrange all faces to fans and to render
- *  faces which share vertices directly one after the other.
- *
- *  @note This step expects triagulated input data.
- */
-class ASSIMP_API ImproveCacheLocalityProcess : public BaseProcess
+/** RemoveRedundantMatsProcess: Class to remove redundant materials
+*/
+class ASSIMP_API RemoveRedundantMatsProcess : public BaseProcess
 {
 	friend class Importer;
+	friend class ::RemoveRedundantMatsTest; // grant the unit test full access to us
 
 protected:
 	/** Constructor to be privately used by Importer */
-	ImproveCacheLocalityProcess();
+	RemoveRedundantMatsProcess();
 
 	/** Destructor, private as well */
-	~ImproveCacheLocalityProcess();
+	~RemoveRedundantMatsProcess();
 
 public:
 	// -------------------------------------------------------------------
 	/** Returns whether the processing step is present in the given flag field.
-	 * @param pFlags The processing flags the importer was called with. A bitwise
-	 *   combination of #aiPostProcessSteps.
-	 * @return true if the process is present in this flag fields, false if not.
+	* @param pFlags The processing flags the importer was called with. A bitwise
+	*   combination of #aiPostProcessSteps.
+	* @return true if the process is present in this flag fields, false if not.
 	*/
 	bool IsActive( unsigned int pFlags) const;
 
@@ -84,21 +79,7 @@ public:
 	* @param pScene The imported data to work at.
 	*/
 	void Execute( aiScene* pScene);
-
-protected:
-	// -------------------------------------------------------------------
-	/** Executes the postprocessing step on the given mesh
-	 * @param pMesh The mesh to process.
-	 * @param meshNum Index of the mesh to process
-	 */
-	void ProcessMesh( aiMesh* pMesh, unsigned int meshNum);
-
-
-	//! Configuration parameter: specifies the size of the cache to
-	//! optimize the vertex data for.
-	unsigned int configCacheDepth;
 };
+}; // end of namespace Assimp
 
-} // end of namespace Assimp
-
-#endif // AI_IMPROVECACHELOCALITY_H_INC
+#endif // !!AI_REMOVEREDUNDANTMATERIALS_H_INC

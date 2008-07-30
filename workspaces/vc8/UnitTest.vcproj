@@ -676,14 +676,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\test\unit\ut3DSLoader.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\test\unit\utASELoader.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\test\unit\utFixInfacingNormals.cpp"
 				>
 			</File>
@@ -709,14 +701,6 @@
 			</File>
 			<File
 				RelativePath="..\..\test\unit\utMaterialSystem.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\test\unit\utMDLLoader.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\test\unit\utOBJLoader.cpp"
 				>
 			</File>
 			<File

@@ -83,7 +83,11 @@ using namespace Assimp::ASE;
 	{ \
 		return; \
 	} \
-	else if(IsLineEnd(*this->m_szFile))++this->iLineNumber; \
+	if(IsLineEnd(*this->m_szFile) && !bLastWasEndLine) \
+	{ \
+		++this->iLineNumber; \
+		bLastWasEndLine = true; \
+	} else bLastWasEndLine = false; \
 	++this->m_szFile; 
 
 #define AI_ASE_HANDLE_SECTION(iDepth, level, msg) \
@@ -102,7 +106,11 @@ using namespace Assimp::ASE;
 		this->LogError("Encountered unexpected EOL while parsing a " msg \
 		" chunk (Level " level ")"); \
 	} \
-	else if(IsLineEnd(*this->m_szFile))++this->iLineNumber; \
+	if(IsLineEnd(*this->m_szFile) && !bLastWasEndLine) \
+		{ \
+		++this->iLineNumber; \
+		bLastWasEndLine = true; \
+	} else bLastWasEndLine = false; \
 	++this->m_szFile; 
 
 // ------------------------------------------------------------------------------------------------
@@ -120,6 +128,7 @@ Parser::Parser (const char* szFile)
 	this->iLastFrame = 0;
 	this->iFrameSpeed = 30;    // use 30 as default value for this property
 	this->iTicksPerFrame = 1;  // use 1 as default value for this property
+	this->bLastWasEndLine = false; // need to handle \r\n seqs due to binary file mapping
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::LogWarning(const char* szWarn)
@@ -177,7 +186,12 @@ bool Parser::SkipToNextToken()
 		char me = *this->m_szFile;
 
 		// increase the line number counter if necessary
-		if (IsLineEnd(me))++this->iLineNumber;
+		if (IsLineEnd(me) && !bLastWasEndLine)
+		{
+			++this->iLineNumber;
+			bLastWasEndLine = true;
+		}
+		else bLastWasEndLine = false;
 		if ('*' == me || '}' == me || '{' == me)return true;
 		else if ('\0' == me)return false;
 

@@ -655,6 +655,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\DefaultLogger.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\IOStream.h"
 				>
 			</File>
@@ -760,6 +764,10 @@
 			</File>
 			<File
 				RelativePath="..\..\code\RemoveComments.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\RemoveRedundantMaterials.h"
 				>
 			</File>
 			<File
@@ -1088,6 +1096,10 @@
 			</File>
 			<File
 				RelativePath="..\..\code\RemoveComments.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\RemoveRedundantMaterials.cpp"
 				>
 			</File>
 			<File

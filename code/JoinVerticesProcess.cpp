@@ -53,6 +53,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+#if _MSC_VER >= 1400
+#	define sprintf sprintf_s
+#endif
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 JoinVerticesProcess::JoinVerticesProcess()
@@ -80,22 +84,44 @@ void JoinVerticesProcess::Execute( aiScene* pScene)
 {
 	DefaultLogger::get()->debug("JoinVerticesProcess begin");
 
-	bool bHas = false;
+	// get the total number of vertices BEFORE the step is executed
+	int iNumOldVertices = 0;
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 	{
-		if(	this->ProcessMesh( pScene->mMeshes[a]))
-			bHas = true;
+		iNumOldVertices +=	pScene->mMeshes[a]->mNumVertices;
 	}
-	if (bHas)DefaultLogger::get()->info("JoinVerticesProcess finished. Found vertices to join");
-	else DefaultLogger::get()->debug("JoinVerticesProcess finished. There was nothing to do.");
+
+	// execute the step
+	int iNumVertices = 0;
+	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
+	{
+		iNumVertices +=	this->ProcessMesh( pScene->mMeshes[a],a);
+	}
+	// if logging is active, print detailled statistics
+	if (!DefaultLogger::isNullLogger())
+	{
+		if (iNumOldVertices == iNumVertices)DefaultLogger::get()->debug("JoinVerticesProcess finished ");
+		else
+		{
+			char szBuff[128]; // should be sufficiently large in every case
+			sprintf(szBuff,"JoinVerticesProcess finished | Verts in: %i out: %i | ~%.1f%%",
+				iNumOldVertices,
+				iNumVertices,
+				((iNumOldVertices - iNumVertices) / (float)iNumOldVertices) * 100.f);
+			DefaultLogger::get()->info(szBuff);
+		}
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
 // Unites identical vertices in the given mesh
-bool JoinVerticesProcess::ProcessMesh( aiMesh* pMesh)
+int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 {
 	// helper structure to hold all the data a single vertex can possibly have
 	typedef struct Vertex vertex;
+
+	if (!pMesh->HasPositions() || !pMesh->HasFaces())
+		return 0;
 	
 	struct Vertex
 	{
@@ -216,6 +242,17 @@ bool JoinVerticesProcess::ProcessMesh( aiMesh* pMesh)
 		}
 	}
 
+	if (!DefaultLogger::isNullLogger())
+	{
+		char szBuff[128]; // should be sufficiently large in every case
+		sprintf(szBuff,"Mesh %i | Verts in: %i out: %i | ~%.1f%%",
+			meshIndex,
+			pMesh->mNumVertices,
+			uniqueVertices.size(),
+			((pMesh->mNumVertices - uniqueVertices.size()) / (float)pMesh->mNumVertices) * 100.f);
+		DefaultLogger::get()->info(szBuff);
+	}
+
 	// replace vertex data with the unique data sets
 	pMesh->mNumVertices = (unsigned int)uniqueVertices.size();
 	// Position
@@ -310,5 +347,5 @@ bool JoinVerticesProcess::ProcessMesh( aiMesh* pMesh)
 		bone->mWeights = new aiVertexWeight[bone->mNumWeights];
 		memcpy( bone->mWeights, &newWeights[0], bone->mNumWeights * sizeof( aiVertexWeight));
 	}
-	return (iOldVerts != pMesh->mNumVertices);
+	return pMesh->mNumVertices;
 }

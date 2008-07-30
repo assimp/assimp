@@ -130,6 +130,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AI_BUILD_NO_IMPROVECACHELOCALITY_PROCESS)
 #	include "ImproveCacheLocality.h"
 #endif
+#if (!defined AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
+#	include "RemoveRedundantMaterials.h"
+#endif
+
 
 using namespace Assimp;
 
@@ -142,7 +146,8 @@ Importer::Importer() :
 {
 	// allocate a default IO handler
 	mIOHandler = new DefaultIOSystem;
-	mIsDefaultHandler = true;
+	mIsDefaultHandler = true; 
+	bExtraVerbose = false; // disable extra verbose mode by default
 
 	// add an instance of each worker class here
 #if (!defined AI_BUILD_NO_X_IMPORTER)
@@ -182,7 +187,10 @@ Importer::Importer() :
 	// add an instance of each post processing step here in the order 
 	// of sequence it is executed
 #if (!defined AI_BUILD_NO_VALIDATEDS_PROCESS)
-	mPostProcessingSteps.push_back( new ValidateDSProcess());
+	mPostProcessingSteps.push_back( new ValidateDSProcess()); // must be first
+#endif
+#if (!defined AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
+	mPostProcessingSteps.push_back( new RemoveRedundantMatsProcess());
 #endif
 #if (!defined AI_BUILD_NO_TRIANGULATE_PROCESS)
 	mPostProcessingSteps.push_back( new TriangulateProcess());
@@ -328,6 +336,14 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 	// if successful, apply all active post processing steps to the imported data
 	if( mScene)
 	{
+		if (bExtraVerbose)
+		{
+			pFlags |= aiProcess_ValidateDataStructure;
+
+			// use the MSB to tell the ValidateDS-Step that e're in extra verbose mode
+			// TODO: temporary solution, clean up later
+			mScene->mFlags |= 0x80000000; 
+		}
 		for( unsigned int a = 0; a < mPostProcessingSteps.size(); a++)
 		{
 			BaseProcess* process = mPostProcessingSteps[a];
@@ -336,7 +352,21 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 				process->ExecuteOnScene( this );
 			}
 			if( !mScene)break; // error string has already been set ...
+
+			// if the extra verbose mode is active execute the
+			// VaidateDataStructureStep again after each step
+			if (bExtraVerbose && a)
+			{
+				DefaultLogger::get()->debug("Extra verbose: revalidating data structures");
+				((ValidateDSProcess*)mPostProcessingSteps[0])->ExecuteOnScene (this);
+				if( !mScene)
+				{
+					DefaultLogger::get()->error("Extra verbose: failed to revalidate data structures");
+					break; // error string has already been set ...
+				}
+			}
 		}
+		if (bExtraVerbose)mScene->mFlags &= ~0x80000000; 
 	}
 
 	// if failed, extract the error string

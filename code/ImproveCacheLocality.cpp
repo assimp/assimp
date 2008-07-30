@@ -63,6 +63,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+#if _MSC_VER >= 1400
+#	define sprintf sprintf_s
+#endif
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ImproveCacheLocalityProcess::ImproveCacheLocalityProcess()
@@ -93,14 +97,14 @@ void ImproveCacheLocalityProcess::Execute( aiScene* pScene)
 
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 	{
-		this->ProcessMesh( pScene->mMeshes[a]);
+		this->ProcessMesh( pScene->mMeshes[a],a);
 	}
 	DefaultLogger::get()->debug("ImproveCacheLocalityProcess finished. ");
 }
 
 // ------------------------------------------------------------------------------------------------
 // Improves the cache coherency of a specific mesh
-void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh)
+void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshNum)
 {
 	ai_assert(NULL != pMesh);
 
@@ -162,12 +166,7 @@ void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh)
 		}
 	}
 	delete[] piFIFOStack;
-
 	float fACMR = (float)iCacheMisses / pMesh->mNumFaces;
-	char szBuff[16];
-	sprintf(szBuff,"%f",fACMR);
-	DefaultLogger::get()->debug("Input ACMR: " + std::string(szBuff));
-
 
 	// first we need to build a vertex-triangle adjacency list
 	VertexTriangleAdjacency adj(pMesh->mFaces,pMesh->mNumFaces, pMesh->mNumVertices,true);
@@ -347,11 +346,15 @@ void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh)
 			}
 		}
 	}
+	if (!DefaultLogger::isNullLogger())
+	{
+		char szBuff[128]; // should be sufficiently large in every case
+		float fACMR2 = (float)iCacheMisses / pMesh->mNumFaces;
 
-	fACMR = (float)iCacheMisses / pMesh->mNumFaces;
-	sprintf(szBuff,"%f",fACMR);
-	DefaultLogger::get()->debug("Output ACMR: " + std::string(szBuff));
-
+		sprintf(szBuff,"Mesh %i | ACMR in: %f out: %f | ~%.1f%%",meshNum,fACMR,fACMR2,
+			((fACMR - fACMR2) / fACMR) * 100.f);
+		DefaultLogger::get()->info(szBuff);
+	}
 	// sort the output index buffer back to the input array
 	piCSIter = piIBOutput;
 

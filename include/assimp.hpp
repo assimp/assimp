@@ -198,6 +198,16 @@ public:
 	inline const aiScene* GetScene()
 		{return this->mScene;}
 
+
+	// -------------------------------------------------------------------
+	/** Enables the "extra verbose" mode. In this mode the data 
+	* structure is validated after each post-process step to make sure
+	* all steps behave consequently in the same manner when modifying
+	* data structures.
+	*/
+	inline void SetExtraVerbose(bool bDo)
+		{this->bExtraVerbose = bDo;}
+
 private:
 
 	/** Empty copy constructor. */
@@ -222,6 +232,9 @@ protected:
 
 	/** The error description, if there was one. */
 	std::string mErrorString;
+
+	/** Used for testing */
+	bool bExtraVerbose;
 };
 
 } // End of namespace Assimp

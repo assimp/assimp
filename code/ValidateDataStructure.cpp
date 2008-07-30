@@ -293,7 +293,10 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 				{
 					this->ReportError("aiMesh::mFaces[%i]::mIndices[%i] is out of range",i,a);
 				}
-				if (abRefList[face.mIndices[a]])
+				// the MSB flag is temporarily used by the extra verbose
+				// mode to tell us that the JoinVerticesProcess might have 
+				// been executed already.
+				if ( !(this->mScene->mFlags & 0x80000000 ) && abRefList[face.mIndices[a]])
 				{
 					this->ReportError("aiMesh::mVertices[%i] is referenced twice - second "
 						"time by aiMesh::mFaces[%i]::mIndices[%i]",face.mIndices[a],i,a);

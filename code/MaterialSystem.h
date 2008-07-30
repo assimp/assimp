@@ -104,6 +104,17 @@ public:
 	 */
 	aiReturn RemoveProperty (const char* pKey);
 
+
+	// -------------------------------------------------------------------
+	/** Computes a hash (hopefully unique) from all material properties
+	 *  The hash value must be updated after material properties have
+	 *  been changed.
+	 *
+	 *  \return Unique hash
+	 */
+	uint32_t ComputeHash();
+
+
 	// -------------------------------------------------------------------
 	/** Copy the property list of a material
 	 *  \param pcDest Destination material

@@ -105,7 +105,7 @@ bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 void ASEImporter::InternReadFile( 
 	const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rt"));
+	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
@@ -846,9 +846,9 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 							}
 							++iBase;
 						}
-						p_pcOut->mFaces[q].mIndices[0] = iBase-2;
-						p_pcOut->mFaces[q].mIndices[1] = iBase-1;
-						p_pcOut->mFaces[q].mIndices[2] = iBase;
+						p_pcOut->mFaces[q].mIndices[0] = iBase-3;
+						p_pcOut->mFaces[q].mIndices[1] = iBase-2;
+						p_pcOut->mFaces[q].mIndices[2] = iBase-1;
 					}
 				}
 				// convert texture coordinates
@@ -1071,14 +1071,13 @@ void ASEImporter::BuildMaterialIndices()
 	ai_assert(NULL != pcScene);
 
 	// iterate through all materials and check whether we need them
-	unsigned int iNum = 0;
 	for (unsigned int iMat = 0; iMat < this->mParser->m_vMaterials.size();++iMat)
 	{
 		if (this->mParser->m_vMaterials[iMat].bNeed)
 		{
 			// convert it to the aiMaterial layout
 			this->ConvertMaterial(this->mParser->m_vMaterials[iMat]);
-			iNum++;
+			++pcScene->mNumMaterials;
 		}
 		for (unsigned int iSubMat = 0; iSubMat < this->mParser->m_vMaterials[
 			iMat].avSubMaterials.size();++iSubMat)
@@ -1087,17 +1086,16 @@ void ASEImporter::BuildMaterialIndices()
 			{
 				// convert it to the aiMaterial layout
 				this->ConvertMaterial(this->mParser->m_vMaterials[iMat].avSubMaterials[iSubMat]);
-				iNum++;
+				++pcScene->mNumMaterials;
 			}
 		}
 	}
 
 	// allocate the output material array
-	pcScene->mNumMaterials = iNum;
 	pcScene->mMaterials = new aiMaterial*[pcScene->mNumMaterials];
 	Dot3DS::Material** pcIntMaterials = new Dot3DS::Material*[pcScene->mNumMaterials];
 
-	iNum = 0;
+	unsigned int iNum = 0;
 	for (unsigned int iMat = 0; iMat < this->mParser->m_vMaterials.size();++iMat)
 	{
 		if (this->mParser->m_vMaterials[iMat].bNeed)

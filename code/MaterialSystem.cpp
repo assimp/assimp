@@ -48,6 +48,67 @@ using namespace Assimp;
 
 
 // ------------------------------------------------------------------------------------------------
+// hashing function taken from 
+// http://www.azillionmonkeys.com/qed/hash.html
+// (incremental version of the hashing function)
+// (stdint.h should have been been included here)
+#undef get16bits
+#if (defined(__GNUC__) && defined(__i386__)) || defined(__WATCOMC__) \
+  || defined(_MSC_VER) || defined (__BORLANDC__) || defined (__TURBOC__)
+#define get16bits(d) (*((const uint16_t *) (d)))
+#endif
+
+#if !defined (get16bits)
+#define get16bits(d) ((((uint32_t)(((const uint8_t *)(d))[1])) << 8)\
+                       +(uint32_t)(((const uint8_t *)(d))[0]) )
+#endif
+
+// ------------------------------------------------------------------------------------------------
+uint32_t SuperFastHash (const char * data, int len, uint32_t hash = 0) {
+uint32_t tmp;
+int rem;
+
+    if (len <= 0 || data == NULL) return 0;
+
+    rem = len & 3;
+    len >>= 2;
+
+    /* Main loop */
+    for (;len > 0; len--) {
+        hash  += get16bits (data);
+        tmp    = (get16bits (data+2) << 11) ^ hash;
+        hash   = (hash << 16) ^ tmp;
+        data  += 2*sizeof (uint16_t);
+        hash  += hash >> 11;
+    }
+
+    /* Handle end cases */
+    switch (rem) {
+        case 3: hash += get16bits (data);
+                hash ^= hash << 16;
+                hash ^= data[sizeof (uint16_t)] << 18;
+                hash += hash >> 11;
+                break;
+        case 2: hash += get16bits (data);
+                hash ^= hash << 11;
+                hash += hash >> 17;
+                break;
+        case 1: hash += *data;
+                hash ^= hash << 10;
+                hash += hash >> 1;
+    }
+
+    /* Force "avalanching" of final 127 bits */
+    hash ^= hash << 3;
+    hash += hash >> 5;
+    hash ^= hash << 4;
+    hash += hash >> 17;
+    hash ^= hash << 25;
+    hash += hash >> 6;
+
+    return hash;
+}
+// ------------------------------------------------------------------------------------------------
 aiReturn aiGetMaterialProperty(const aiMaterial* pMat, 
 	const char* pKey,
 	const aiMaterialProperty** pPropOut)
@@ -230,13 +291,30 @@ aiReturn aiGetMaterialString(const aiMaterial* pMat,
 	return AI_FAILURE;
 }
 // ------------------------------------------------------------------------------------------------
+uint32_t MaterialHelper::ComputeHash()
+{
+	uint32_t hash = 1503; // magic start value, choosen to be my birthday :-)
+	for (unsigned int i = 0; i < this->mNumProperties;++i)
+	{
+		aiMaterialProperty* prop;
+
+		// NOTE: We need to exclude the material name from the hash
+		if ((prop = this->mProperties[i]) && 0 != ::strcmp(prop->mKey->data,AI_MATKEY_NAME)) 
+		{
+			hash = SuperFastHash(prop->mKey->data,prop->mKey->length,hash);
+			hash = SuperFastHash(prop->mData,prop->mDataLength,hash);
+		}
+	}
+	return hash;
+}
+// ------------------------------------------------------------------------------------------------
 aiReturn MaterialHelper::RemoveProperty (const char* pKey)
 {
 	ai_assert(NULL != pKey);
 
 	for (unsigned int i = 0; i < this->mNumProperties;++i)
 	{
-		if (NULL != this->mProperties[i])
+		if (this->mProperties[i]) // just for safety
 		{
 			if (0 == ASSIMP_stricmp( this->mProperties[i]->mKey->data, pKey ))
 			{
@@ -272,7 +350,7 @@ aiReturn MaterialHelper::AddBinaryProperty (const void* pInput,
 	unsigned int iOutIndex = 0xFFFFFFFF;
 	for (unsigned int i = 0; i < this->mNumProperties;++i)
 	{
-		if (NULL != this->mProperties[i])
+		if (this->mProperties[i])
 		{
 			if (0 == ASSIMP_stricmp( this->mProperties[i]->mKey->data, pKey ))
 			{
@@ -304,8 +382,7 @@ aiReturn MaterialHelper::AddBinaryProperty (const void* pInput,
 		return AI_SUCCESS;
 	}
 
-	// resize the array ... allocate
-	// storage for 5 other properties
+	// resize the array ... allocate storage for 5 other properties
 	if (this->mNumProperties == this->mNumAllocated)
 	{
 		unsigned int iOld = this->mNumAllocated;

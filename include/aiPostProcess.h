@@ -154,7 +154,15 @@ enum aiPostProcessSteps
 	 * basing on the algorithm described in this paper:
 	 * http://www.cs.princeton.edu/gfx/pubs/Sander_2007_%3ETR/tipsy.pdf
 	 */
-	aiProcess_ImproveCacheLocality = 0x1600
+	aiProcess_ImproveCacheLocality = 0x800,
+
+	/** Searches for redundant materials and removes them.
+	 *
+	 * This is especially useful in combination with the PretransformVertices 
+	 * and OptimizeGraph steps. Both steps join small meshes, but they
+	 * can't do that if two meshes have different materials.
+	 */
+	aiProcess_RemoveRedundantMaterials = 0x1000,
 };
 
 // ---------------------------------------------------------------------------

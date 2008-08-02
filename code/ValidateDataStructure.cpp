@@ -428,7 +428,9 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation)
 		}
 	}
 	else this->ReportError("aiAnimation::mNumBones is 0. At least one bone animation channel must be there.");
-	if (!pAnimation->mDuration)this->ReportError("aiAnimation::mDuration is zero");
+
+	// Animation duration is allowed to be zero in cases where the anim contains only a single key frame.
+	// if (!pAnimation->mDuration)this->ReportError("aiAnimation::mDuration is zero");
 }
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,

@@ -466,9 +466,9 @@ void XFileParser::ParseDataObjectMeshVertexColors( Mesh* pMesh)
 			ThrowException( "Vertex color index out of bounds");
 
 		colors[index] = ReadRGBA();
+		CheckForSeparator();
 	}
 
-	CheckForSemicolon();
 	CheckForClosingBrace();
 }
 
@@ -569,7 +569,14 @@ void XFileParser::ParseDataObjectMaterial( Material* pMaterial)
 			// some exporters write "TextureFileName" instead.
 			std::string texname;
 			ParseDataObjectTextureFilename( texname);
-			pMaterial->mTextures.push_back( texname);
+			pMaterial->mTextures.push_back( TexEntry( texname));
+		} else
+		if( objectName == "NormalmapFilename" || objectName == "NormalmapFileName")
+		{
+			// one exporter writes out the normal map in a separate filename tag
+			std::string texname;
+			ParseDataObjectTextureFilename( texname);
+			pMaterial->mTextures.push_back( TexEntry( texname, true));
 		} else
 		{
 			DefaultLogger::get()->warn("Unknown data object in material in x file");
@@ -755,6 +762,10 @@ void XFileParser::ParseDataObjectTextureFilename( std::string& pName)
 	{
 		DefaultLogger::get()->warn("Length of texture file name is zero. Skipping this texture.");
 	}
+
+	// some exporters write double backslash paths out. We simply replace them if we find them
+	while( pName.find( "\\\\") != std::string::npos)
+		pName.replace( pName.find( "\\\\"), 2, "\\");
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -62,6 +62,18 @@ struct Face
 	std::vector<unsigned int> mIndices;
 };
 
+/** Helper structure representing a texture filename inside a material and its potential source */
+struct TexEntry
+{
+	std::string mName;
+	bool mIsNormalMap; // true if the texname was specified in a NormalmapFilename tag
+
+	TexEntry() { mIsNormalMap = false; }
+	TexEntry( const std::string& pName, bool pIsNormalMap = false) 
+		: mName( pName), mIsNormalMap( pIsNormalMap) 
+	{ /* done */ }
+};
+
 /** Helper structure representing a XFile material */
 struct Material
 {
@@ -71,7 +83,7 @@ struct Material
 	float mSpecularExponent;
 	aiColor3D mSpecular;
 	aiColor3D mEmissive;
-	std::vector<std::string> mTextures;
+	std::vector<TexEntry> mTextures;
 
 	Material() { mIsReference = false; }
 };

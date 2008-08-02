@@ -580,12 +580,15 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, const std::vector<XFile::
 		// texture, if there is one
 		if (1 == oldMat.mTextures.size())
 		{
-			if (oldMat.mTextures[0].length())
+			const XFile::TexEntry& otex = oldMat.mTextures.back();
+			if (otex.mName.length())
 			{
 				// if there is only one texture assume it contains the diffuse color
-				aiString tex;
-				tex.Set( oldMat.mTextures[0]);
-				mat->AddProperty( &tex, AI_MATKEY_TEXTURE_DIFFUSE(0));
+				aiString tex( otex.mName);
+				if( otex.mIsNormalMap)
+					mat->AddProperty( &tex, AI_MATKEY_TEXTURE_NORMALS(0));
+				else
+					mat->AddProperty( &tex, AI_MATKEY_TEXTURE_DIFFUSE(0));
 			}
 		}
 		else
@@ -595,7 +598,8 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, const std::vector<XFile::
 			unsigned int iHM = 0,iNM = 0,iDM = 0,iSM = 0,iAM = 0,iEM = 0;
 			for( unsigned int b = 0; b < oldMat.mTextures.size(); b++)
 			{
-				std::string sz = oldMat.mTextures[b];
+				const XFile::TexEntry& otex = oldMat.mTextures[b];
+				std::string sz = otex.mName;
 				if (!sz.length())continue;
 
 				char key[256];
@@ -616,151 +620,67 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, const std::vector<XFile::
 					sz[sExt] = '\0';
 				}
 
+				// convert to lower case for easier comparision
+				for( unsigned int c = 0; c < sz.length(); c++)
+					if( isalpha( sz[c]))
+						sz[c] = tolower( sz[c]);
+
 				// bump map
-				std::string::size_type s2 = sz.find("bump",s);
-				if (std::string::npos == s2)
-				{
-					if (std::string::npos == (s2 = sz.find("BUMP",s)))
-					{
-						if (std::string::npos == (s2 = sz.find("Bump",s)))
-						{
-							if (std::string::npos == (s2 = sz.find("height",s)))
-							{
-								if (std::string::npos == (s2 = sz.find("HEIGHT",s)))
-								{
-									s2 = sz.find("Height",s);
-								}
-							}
-						}
-					}
-				}
-				if (std::string::npos != s2)
+				if (std::string::npos != sz.find("bump", s) || std::string::npos != sz.find("height", s))
 				{
 #if _MSC_VER >= 1400
 					::sprintf_s(key,AI_MATKEY_TEXTURE_HEIGHT_ "[%i]",iHM++);
 #else
 					::sprintf(key,AI_MATKEY_TEXTURE_HEIGHT_ "[%i]",iHM++);
 #endif
-				}
-				else
+				} else
+				if (otex.mIsNormalMap || std::string::npos != sz.find( "normal", s) || std::string::npos != sz.find("nm", s))
 				{
-					// Normal map
-					std::string::size_type s2 = sz.find("normal",s);
-					if (std::string::npos == s2)
-					{
-						if (std::string::npos == (s2 = sz.find("NORMAL",s)))
-						{
-							if (std::string::npos == (s2 = sz.find("nm",s)))
-							{ 
-								if (std::string::npos == (s2 = sz.find("Normal",s)))
-								{
-									s2 = sz.find("NM",s); 
-								}
-							}
-						}
-					}
-					if (std::string::npos != s2)
-					{
 #if _MSC_VER >= 1400
-						::sprintf_s(key,AI_MATKEY_TEXTURE_NORMALS_ "[%i]",iNM++);
+					::sprintf_s(key,AI_MATKEY_TEXTURE_NORMALS_ "[%i]",iNM++);
 #else
-						::sprintf(key,AI_MATKEY_TEXTURE_NORMALS_ "[%i]",iNM++);
+					::sprintf(key,AI_MATKEY_TEXTURE_NORMALS_ "[%i]",iNM++);
 #endif
-					}
-					else
-					{
-
-						// specular color texture (not unique, too. Could
-						// also be the material's shininess)
-						std::string::size_type s2 = sz.find("spec",s);
-						if (std::string::npos == s2)
-						{
-							if (std::string::npos == (s2 = sz.find("Spec",s)))
-							{
-								if (std::string::npos == (sz.find("SPEC",s)))
-								{
-									if (std::string::npos == (s2 = sz.find("Glanz",s)))
-									{
-										s2 = sz.find("glanz",s);
-									}
-								}
-							}
-						}
-						if (std::string::npos != s2)
-						{
+				} else
+				if (std::string::npos != sz.find( "spec", s) || std::string::npos != sz.find( "glanz", s))
+				{
 #if _MSC_VER >= 1400
-							::sprintf_s(key,AI_MATKEY_TEXTURE_SPECULAR_ "[%i]",iSM++);
+					::sprintf_s(key,AI_MATKEY_TEXTURE_SPECULAR_ "[%i]",iSM++);
 #else
-							::sprintf(key,AI_MATKEY_TEXTURE_SPECULAR_ "[%i]",iSM++);
+					::sprintf(key,AI_MATKEY_TEXTURE_SPECULAR_ "[%i]",iSM++);
 #endif
-						}
-						else
-						{
-							// ambient color texture
-							std::string::size_type s2 = sz.find("ambi",s);
-							if (std::string::npos == s2)
-							{
-								if (std::string::npos == (s2 = sz.find("AMBI",s)))
-								{
-									if (std::string::npos == (s2 = sz.find("env",s)))
-									{
-										s2 = sz.find("Ambi",s);
-									}
-								}
-							}
-							if (std::string::npos != s2)
-							{
+				} else
+				if (std::string::npos != sz.find( "ambi", s) || std::string::npos != sz.find( "env", s))
+				{
 #if _MSC_VER >= 1400
-								::sprintf_s(key,AI_MATKEY_TEXTURE_AMBIENT_ "[%i]",iAM++);
+					::sprintf_s(key,AI_MATKEY_TEXTURE_AMBIENT_ "[%i]",iAM++);
 #else
-								::sprintf(key,AI_MATKEY_TEXTURE_AMBIENT_ "[%i]",iAM++);
+					::sprintf(key,AI_MATKEY_TEXTURE_AMBIENT_ "[%i]",iAM++);
 #endif
-							}
-							else
-							{
-								// emissive color texture
-								std::string::size_type s2 = sz.find("emissive",s);
-								if (std::string::npos == s2)
-								{
-									s2 = sz.find("EMISSIVE",s);
-									if (std::string::npos == s2)
-									{
-										// self illumination
-										if (std::string::npos == (s2 = sz.find("self",s)))
-										{
-											s2 = sz.find("Emissive",s);
-										}
-									}
-								}
-								if (std::string::npos != s2)
-								{
+				} else
+				if (std::string::npos != sz.find( "emissive", s) || std::string::npos != sz.find( "self", s))
+				{
 #if _MSC_VER >= 1400
-									::sprintf_s(key,AI_MATKEY_TEXTURE_EMISSIVE_ "[%i]",iEM++);
+					::sprintf_s(key,AI_MATKEY_TEXTURE_EMISSIVE_ "[%i]",iEM++);
 #else
-									::sprintf(key,AI_MATKEY_TEXTURE_EMISSIVE_ "[%i]",iEM++);
+					::sprintf(key,AI_MATKEY_TEXTURE_EMISSIVE_ "[%i]",iEM++);
 #endif
-								}
-								else
-								{
-									// assume it is a diffuse texture
+				} else
+				{
+				// assume it is a diffuse texture
 #if _MSC_VER >= 1400
-									::sprintf_s(key,AI_MATKEY_TEXTURE_DIFFUSE_ "[%i]",iDM++);
+					::sprintf_s(key,AI_MATKEY_TEXTURE_DIFFUSE_ "[%i]",iDM++);
 #else
-									::sprintf(key,AI_MATKEY_TEXTURE_DIFFUSE_ "[%i]",iDM++);
+					::sprintf(key,AI_MATKEY_TEXTURE_DIFFUSE_ "[%i]",iDM++);
 #endif
-								}
-							}
-						}
-					}
 				}
 
-				aiString tex;
-				tex.Set( oldMat.mTextures[b] );
-
+				// place texture filename property under the corresponding name
+				aiString tex( oldMat.mTextures[b].mName);
 				mat->AddProperty( &tex, key);
 			}
-
 		}
+
 		pScene->mMaterials[pScene->mNumMaterials] = mat;
 		mImportedMats[oldMat.mName] = pScene->mNumMaterials;
 		pScene->mNumMaterials++;

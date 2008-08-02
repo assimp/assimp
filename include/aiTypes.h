@@ -140,12 +140,20 @@ struct aiString
 		data[0] = '\0';
 	}
 
-	//! construction from a given std::string
+	//! Copy constructor
 	inline aiString(const aiString& rOther) : 
 		length(rOther.length) 
 	{
 		::memcpy( data, rOther.data, rOther.length);
 		this->data[this->length] = '\0';
+	}
+
+	//! Constructor from std::string
+	inline aiString(const std::string& pString) : 
+		length(pString.length()) 
+	{
+		memcpy( data, pString.c_str(), length);
+		data[length] = '\0';
 	}
 
 	//! copy a std::string to the aiString

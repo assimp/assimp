@@ -70,6 +70,16 @@ class MaterialHelper;
 namespace HMP
 {
 
+// ugly compiler dependent packing stuff
+#if defined(_MSC_VER) ||  defined(__BORLANDC__) ||	defined (__BCPLUSPLUS__)
+#	pragma pack(push,1)
+#	define PACK_STRUCT
+#elif defined( __GNUC__ )
+#	define PACK_STRUCT	__attribute__((packed))
+#else
+#	error Compiler not supported. Never do this again.
+#endif
+
 // ---------------------------------------------------------------------------
 /** Data structure for the header of a HMP5 file.
  *  This is also used by HMP4 and HMP7, but with modifications
@@ -111,8 +121,27 @@ struct Header_HMP5
 	int32_t		num_stverts;	
 	int32_t		flags;
 	float	size;
-};
+} PACK_STRUCT;
 
+// ---------------------------------------------------------------------------
+/** Data structure for a terrain vertex in a HMP4 file 
+*/
+struct Vertex_HMP4
+{
+	uint16_t p_pos[3];		
+	uint8_t normals162index;	
+	uint8_t pad;				
+} PACK_STRUCT;
+
+// ---------------------------------------------------------------------------
+/** Data structure for a terrain vertex in a HMP5 file 
+*/
+struct Vertex_HMP5
+{
+	uint16_t z;	
+	uint8_t normals162index;	
+	uint8_t pad;				
+} PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
 /** Data structure for a terrain vertex in a HMP7 file 
@@ -121,7 +150,13 @@ struct Vertex_HMP7
 {
 	uint16_t	 z;				
 	int8_t normal_x,normal_y;
-};
+} PACK_STRUCT;
+
+// reset packing to the original value
+#if defined(_MSC_VER) ||  defined(__BORLANDC__) || defined (__BCPLUSPLUS__)
+#	pragma pack( pop )
+#endif
+#undef PACK_STRUCT
 
 }; //! namespace HMP
 
@@ -182,6 +217,25 @@ protected:
 	*/
 	void InternReadFile_HMP7( );
 
+	// -------------------------------------------------------------------
+	/** Validate a HMP 5,4,7 file header
+	*/
+	void ValidateHeader_HMP457( );
+
+	// -------------------------------------------------------------------
+	/** Try to load one material from the file, if this fails create
+	 * a default material
+	*/
+	void CreateMaterial(const unsigned char* szCurrent,
+		const unsigned char** szCurrentOut);
+
+	// -------------------------------------------------------------------
+	/** Build a list of output faces and vertices. The function 
+	 *  triangulates the height map read from the file
+	 * \param width Width of the height field
+	 * \param width Height of the height field
+	*/
+	void CreateOutputFaceList(unsigned int width,unsigned int height);
 
 	// -------------------------------------------------------------------
 	/** Generate planar texture coordinates for a terrain

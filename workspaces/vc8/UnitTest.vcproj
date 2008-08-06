@@ -684,10 +684,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\test\unit\utGenSmoothNormals.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\test\unit\utImproveCacheLocality.cpp"
 				>
 			</File>
@@ -712,6 +708,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\test\unit\utRemoveRedundantMaterials.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\test\unit\utSplitLargeMeshes.cpp"
 				>
 			</File>
@@ -730,11 +730,27 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\..\test\unit\utGenNormals.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\test\unit\utLimitBoneWeights.h"
 				>
 			</File>
 			<File
+				RelativePath="..\..\test\unit\utMaterialSystem.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utPretransformVertices.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\test\unit\utRemoveComments.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utRemoveRedundantMaterials.h"
 				>
 			</File>
 			<File

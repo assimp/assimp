@@ -393,6 +393,7 @@ protected:
 	 *   some tiny and unsolved problems ... )
 	 */
 	bool ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7& groupInfo,
+		MDL::IntGroupData_MDL7& groupData,
 		MDL::IntSharedData_MDL7& shared,
 		const unsigned char* szCurrent,
 		const unsigned char** szCurrentOut);
@@ -428,16 +429,10 @@ protected:
 		MDL::IntGroupData_MDL7& groupData,
 		MDL::IntSplittedGroupData_MDL7& splittedGroupData);
 
-	// -------------------------------------------------------------------
-	/** Try to determine whether the normals of the model are flipped
-	 *  Some MDL7 models seem to have flipped normals (and there is also 
-	 *  an option "flip normals" in MED). However, I don't see a proper
-	 *  way to read from the file whether all normals are correctly 
-	 *  facing outwards ...
-	 */
-	void FlipNormals(aiMesh* pcMesh);
-
 protected:
+
+	/** Configuration option: frame to be loaded */
+	unsigned int configFrameID;
 
 	/** Buffer to hold the loaded file */
 	unsigned char* mBuffer;

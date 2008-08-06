@@ -565,7 +565,9 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	// sometimes there are MDL7 files which have a monochrome
 	// texture instead of material colors ... posssible they have
 	// been converted to MDL7 from other formats, such as MDL5
-	aiColor4D clrTexture = this->ReplaceTextureWithColor(pcNew);
+	aiColor4D clrTexture;
+	if (pcNew)clrTexture = this->ReplaceTextureWithColor(pcNew);
+	else clrTexture.r = std::numeric_limits<float>::quiet_NaN();
 	
 	// check whether a material definition is contained in the skin
 	if (iType & AI_MDL7_SKINTYPE_MATERIAL)
@@ -654,21 +656,27 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	// data structures in the aiScene instance
 	if (pcNew && this->pScene->mNumTextures <= 999)
 	{
-		
-			// place this as diffuse texture
-			char szCurrent[5];
-			::sprintf(szCurrent,"*%i",this->pScene->mNumTextures);
 
-			aiString szFile;
-			const size_t iLen = strlen((const char*)szCurrent);
-			size_t iLen2 = iLen+1;
-			iLen2 = iLen2 > MAXLEN ? MAXLEN : iLen2;
-			::memcpy(szFile.data,(const char*)szCurrent,iLen2);
-			szFile.length = iLen;
+		// place this as diffuse texture
+		char szCurrent[5];
+		::sprintf(szCurrent,"*%i",this->pScene->mNumTextures);
 
-			pcMatOut->AddProperty(&szFile,AI_MATKEY_TEXTURE_DIFFUSE(0));
+		aiString szFile;
+		const size_t iLen = strlen((const char*)szCurrent);
+		::memcpy(szFile.data,(const char*)szCurrent,iLen+1);
+		szFile.length = iLen;
 
-			// store the texture
+		pcMatOut->AddProperty(&szFile,AI_MATKEY_TEXTURE_DIFFUSE(0));
+
+		// store the texture
+		if (!this->pScene->mNumTextures)
+		{
+			this->pScene->mNumTextures = 1;
+			this->pScene->mTextures = new aiTexture*[1];
+			this->pScene->mTextures[0] = pcNew;
+		}
+		else
+		{
 			aiTexture** pc = this->pScene->mTextures;
 			this->pScene->mTextures = new aiTexture*[this->pScene->mNumTextures+1];
 			for (unsigned int i = 0; i < this->pScene->mNumTextures;++i)
@@ -677,7 +685,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 			this->pScene->mTextures[this->pScene->mNumTextures] = pcNew;
 			this->pScene->mNumTextures++;
 			delete[] pc;
-		
+		}
 	}
 	VALIDATE_FILE_SIZE(szCurrent);
 	*szCurrentOut = szCurrent;
@@ -715,6 +723,9 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
 			tex.mHeight = iHeight;
 			tex.mWidth = iWidth;
 			this->ParseTextureColorData(szCurrent,iMasked,&iSkip,&tex);
+
+			// FIX: Important, otherwise the destructor will crash
+			tex.pcData = NULL;
 
 			// skip length of texture data
 			szCurrent += iSkip;
@@ -761,12 +772,13 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 		pcSkin->typ,pcSkin->width,pcSkin->height);
 	
 	// place the name of the skin in the material
-	const size_t iLen = strlen(pcSkin->texture_name); 
-	if (0 != iLen)
+	if (pcSkin->texture_name[0])
 	{
+		// the 0 termination could be there or not - we can't know
 		aiString szFile;
-		memcpy(szFile.data,pcSkin->texture_name,sizeof(pcSkin->texture_name));
-		szFile.length = iLen;
+		::memcpy(szFile.data,pcSkin->texture_name,sizeof(pcSkin->texture_name));
+		szFile.data[sizeof(pcSkin->texture_name)] = '\0';
+		szFile.length = ::strlen(szFile.data);
 
 		pcMatOut->AddProperty(&szFile,AI_MATKEY_NAME);
 	}

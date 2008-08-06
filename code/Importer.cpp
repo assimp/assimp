@@ -92,6 +92,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AI_BUILD_NO_SMD_IMPORTER)
 #	include "SMDLoader.h"
 #endif
+#if (!defined AI_BUILD_NO_MD5_IMPORTER)
+#	include "MD5Loader.h"
+#endif
+#if (!defined AI_BUILD_NO_STL_IMPORTER)
+#	include "STLLoader.h"
+#endif
 
 // PostProcess-Steps
 #if (!defined AI_BUILD_NO_CALCTANGENTS_PROCESS)
@@ -177,11 +183,17 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_ASE_IMPORTER)
 	mImporter.push_back( new ASEImporter());
 #endif
-	#if (!defined AI_BUILD_NO_HMP_IMPORTER)
+#if (!defined AI_BUILD_NO_HMP_IMPORTER)
 	mImporter.push_back( new HMPImporter());
 #endif
-	#if (!defined AI_BUILD_NO_SMD_IMPORTER)
+#if (!defined AI_BUILD_NO_SMD_IMPORTER)
 	mImporter.push_back( new SMDImporter());
+#endif
+#if (!defined AI_BUILD_NO_MD5_IMPORTER)
+	mImporter.push_back( new MD5Importer());
+#endif
+#if (!defined AI_BUILD_NO_STL_IMPORTER)
+	mImporter.push_back( new STLImporter());
 #endif
 
 	// add an instance of each post processing step here in the order 

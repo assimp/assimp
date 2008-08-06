@@ -66,6 +66,9 @@ struct aiQuaternion
 	/** Construct from an axis angle pair */
 	aiQuaternion( aiVector3D axis, float angle);
 
+	/** Construct from a normalized quaternion stored in a vec3 */
+	aiQuaternion( aiVector3D normalized);
+
 	/** Returns a matrix representation of the quaternion */
 	aiMatrix3x3 GetMatrix() const;
 
@@ -170,7 +173,22 @@ inline aiQuaternion::aiQuaternion( aiVector3D axis, float angle)
     z    = axis.z * sin_a;
     w    = cos_a;
 }
+// ---------------------------------------------------------------------------
+// Construction from am existing, normalized quaternion
+inline aiQuaternion::aiQuaternion( aiVector3D normalized)
+{
+	x = normalized.x;
+	y = normalized.y;
+	z = normalized.z;
 
+	float t = 1.0f - (normalized.x * normalized.x) - 
+		(normalized.y * normalized.y) - (normalized.z * normalized.z);
+
+	if (t < 0.0f)
+		w = 0.0f;
+	else w = sqrt (t);
+
+}
 
 
 

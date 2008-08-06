@@ -731,6 +731,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\Hash.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\ImproveCacheLocality.h"
 				>
 			</File>
@@ -799,7 +803,7 @@
 				>
 			</File>
 			<Filter
-				Name="ObjLoader"
+				Name="Obj"
 				>
 				<File
 					RelativePath="..\..\code\ObjFileData.h"
@@ -823,7 +827,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="3DSLoader"
+				Name="3DS"
 				>
 				<File
 					RelativePath="..\..\code\3DSHelper.h"
@@ -839,7 +843,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="MD3Loader"
+				Name="MD3"
 				>
 				<File
 					RelativePath="..\..\code\MD3FileData.h"
@@ -851,7 +855,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="MD2Loader"
+				Name="MD2"
 				>
 				<File
 					RelativePath="..\..\code\MD2FileData.h"
@@ -867,7 +871,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="MD4Loader"
+				Name="MD4"
 				>
 				<File
 					RelativePath="..\..\code\MD4FileData.h"
@@ -879,7 +883,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="XLoader"
+				Name="X"
 				>
 				<File
 					RelativePath="..\..\code\XFileHelper.h"
@@ -895,7 +899,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="PlyLoader"
+				Name="Ply"
 				>
 				<File
 					RelativePath="..\..\code\PlyLoader.h"
@@ -907,15 +911,19 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="MD5Loader"
+				Name="MD5"
 				>
 				<File
 					RelativePath="..\..\code\MD5Loader.h"
 					>
 				</File>
+				<File
+					RelativePath="..\..\code\MD5Parser.h"
+					>
+				</File>
 			</Filter>
 			<Filter
-				Name="MDLLoader"
+				Name="MDL"
 				>
 				<File
 					RelativePath="..\..\code\HalfLifeFileData.h"
@@ -935,7 +943,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="ASELoader"
+				Name="ASE"
 				>
 				<File
 					RelativePath="..\..\code\ASELoader.h"
@@ -1019,10 +1027,18 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="SMDLoader"
+				Name="SMD"
 				>
 				<File
 					RelativePath="..\..\code\SMDLoader.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="STL"
+				>
+				<File
+					RelativePath="..\..\code\STLLoader.h"
 					>
 				</File>
 			</Filter>
@@ -1127,7 +1143,7 @@
 				>
 			</File>
 			<Filter
-				Name="ObjLoader"
+				Name="Obj"
 				>
 				<File
 					RelativePath="..\..\code\ObjFileImporter.cpp"
@@ -1143,7 +1159,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="3DSLoader"
+				Name="3DS"
 				>
 				<File
 					RelativePath="..\..\code\3DSConverter.cpp"
@@ -1163,7 +1179,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="MD3Loader"
+				Name="MD3"
 				>
 				<File
 					RelativePath="..\..\code\MD3Loader.cpp"
@@ -1171,7 +1187,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="MD2Loader"
+				Name="MD2"
 				>
 				<File
 					RelativePath="..\..\code\MD2Loader.cpp"
@@ -1179,7 +1195,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="MD4Loader"
+				Name="MD4"
 				>
 				<File
 					RelativePath="..\..\code\MD4Loader.cpp"
@@ -1187,7 +1203,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="XLoader"
+				Name="X"
 				>
 				<File
 					RelativePath="..\..\code\XFileImporter.cpp"
@@ -1199,7 +1215,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="PlyLoader"
+				Name="Ply"
 				>
 				<File
 					RelativePath="..\..\code\PlyLoader.cpp"
@@ -1211,7 +1227,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="MDLLoader.cpp"
+				Name="MDL"
 				>
 				<File
 					RelativePath="..\..\code\MDLLoader.cpp"
@@ -1223,7 +1239,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="ASELoader"
+				Name="ASE"
 				>
 				<File
 					RelativePath="..\..\code\ASELoader.cpp"
@@ -1267,7 +1283,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="HMPLoader"
+				Name="HMP"
 				>
 				<File
 					RelativePath="..\..\code\HMPLoader.cpp"
@@ -1275,10 +1291,30 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="SMDLoader"
+				Name="SMD"
 				>
 				<File
 					RelativePath="..\..\code\SMDLoader.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="MD5"
+				>
+				<File
+					RelativePath="..\..\code\MD5Loader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\MD5Parser.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="STL"
+				>
+				<File
+					RelativePath="..\..\code\STLLoader.cpp"
 					>
 				</File>
 			</Filter>

@@ -55,8 +55,8 @@ class ASSIMP_API MaterialHelper : public ::aiMaterial
 {
 public:
 
-	inline MaterialHelper();
-	inline ~MaterialHelper();
+	MaterialHelper();
+	~MaterialHelper();
 
 	// -------------------------------------------------------------------
 	/** Add a property with a given key and type info to the material
@@ -123,36 +123,6 @@ public:
 	static void CopyPropertyList(MaterialHelper* pcDest, 
 		const MaterialHelper* pcSrc);
 };
-
-
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-inline MaterialHelper::MaterialHelper()
-	{
-	// allocate 5 entries by default
-	this->mNumProperties = 0;
-	this->mNumAllocated = 5;
-	this->mProperties = new aiMaterialProperty*[5];
-	return;
-	}
-
-
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-inline MaterialHelper::~MaterialHelper()
-	{
-	for (unsigned int i = 0; i < this->mNumProperties;++i)
-		{
-		// be careful ...
-		if(NULL != this->mProperties[i])
-			{
-			delete[] this->mProperties[i]->mKey;
-			delete[] this->mProperties[i]->mData;
-			delete this->mProperties[i];
-			}
-		}
-	return;
-	}
 
 
 // ---------------------------------------------------------------------------

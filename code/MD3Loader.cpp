@@ -90,11 +90,20 @@ bool MD3Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 // ------------------------------------------------------------------------------------------------
 void MD3Importer::ValidateHeaderOffsets()
 {
+	// check file format version
+	if (this->m_pcHeader->VERSION > 15)
+		DefaultLogger::get()->warn( "Unsupported md3 file version. Continuing happily ...");
+
+	// check some values whether they are valid
+	if (0 == this->m_pcHeader->NUM_FRAMES)
+		throw new ImportErrorException( "Invalid md3 file: NUM_FRAMES is 0");
+	if (0 == this->m_pcHeader->NUM_SURFACES)
+		throw new ImportErrorException( "Invalid md3 file: NUM_SURFACES is 0");
+
 	if (this->m_pcHeader->OFS_FRAMES	>= this->fileSize ||
 		this->m_pcHeader->OFS_SURFACES	>= this->fileSize || 
 		this->m_pcHeader->OFS_EOF		> this->fileSize)
 	{
-		delete[] this->mBuffer;
 		throw new ImportErrorException("Invalid MD3 header: some offsets are outside the file");
 	}
 }
@@ -109,7 +118,6 @@ void MD3Importer::ValidateSurfaceHeaderOffsets(const MD3::Surface* pcSurf)
 		pcSurf->OFS_ST			+ ofs + pcSurf->NUM_VERTICES * sizeof(MD3::TexCoord)	> this->fileSize ||
 		pcSurf->OFS_XYZNORMAL	+ ofs + pcSurf->NUM_VERTICES * sizeof(MD3::Vertex)		> this->fileSize)
 	{
-		delete[] this->mBuffer;
 		throw new ImportErrorException("Invalid MD3 surface header: some offsets are outside the file");
 	}
 
@@ -147,277 +155,259 @@ void MD3Importer::InternReadFile(
 	this->mBuffer = new unsigned char[fileSize];
 	file->Read( (void*)mBuffer, 1, fileSize);
 
-	this->m_pcHeader = (const MD3::Header*)this->mBuffer;
-
-	// check magic number
-	if (this->m_pcHeader->IDENT != AI_MD3_MAGIC_NUMBER_BE &&
-		this->m_pcHeader->IDENT != AI_MD3_MAGIC_NUMBER_LE)
+	try
 	{
-		delete[] this->mBuffer;
-		throw new ImportErrorException( "Invalid md3 file: Magic bytes not found");
-	}
 
-	// check file format version
-	if (this->m_pcHeader->VERSION > 15)
-	{
-		DefaultLogger::get()->warn( "Unsupported md3 file version. Continuing happily ...");
-	}
+		this->m_pcHeader = (const MD3::Header*)this->mBuffer;
 
-	// check some values whether they are valid
-	if (0 == this->m_pcHeader->NUM_FRAMES)
-	{
-		delete[] this->mBuffer;
-		throw new ImportErrorException( "Invalid md3 file: NUM_FRAMES is 0");
-	}
-	if (0 == this->m_pcHeader->NUM_SURFACES)
-	{
-		delete[] this->mBuffer;
-		throw new ImportErrorException( "Invalid md3 file: NUM_SURFACES is 0");
-	}
-	this->ValidateHeaderOffsets();
-
-	// now navigate to the list of surfaces
-	const MD3::Surface* pcSurfaces = (const MD3::Surface*)
-		(this->mBuffer + this->m_pcHeader->OFS_SURFACES);
-
-	// allocate output storage
-	pScene->mNumMeshes = this->m_pcHeader->NUM_SURFACES;
-	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
-
-	pScene->mNumMaterials = this->m_pcHeader->NUM_SURFACES;
-	pScene->mMaterials = new aiMaterial*[pScene->mNumMeshes];
-
-	// if an exception is thrown before the meshes are allocated ->
-	// otherwise the pointer value would be invalid and delete would crash
-	::memset(pScene->mMeshes,0,pScene->mNumMeshes*sizeof(aiMesh*));
-	::memset(pScene->mMaterials,0,pScene->mNumMaterials*sizeof(aiMaterial*));
-
-	unsigned int iNum = this->m_pcHeader->NUM_SURFACES;
-	unsigned int iNumMaterials = 0;
-	unsigned int iDefaultMatIndex = 0xFFFFFFFF;
-	while (iNum-- > 0)
-	{
-		// validate the surface
-		this->ValidateSurfaceHeaderOffsets(pcSurfaces);
-
-		// navigate to the vertex list of the surface
-		const MD3::Vertex* pcVertices = (const MD3::Vertex*)
-			(((unsigned char*)pcSurfaces) + pcSurfaces->OFS_XYZNORMAL);
-
-		// navigate to the triangle list of the surface
-		const MD3::Triangle* pcTriangles = (const MD3::Triangle*)
-			(((unsigned char*)pcSurfaces) + pcSurfaces->OFS_TRIANGLES);
-
-		// navigate to the texture coordinate list of the surface
-		const MD3::TexCoord* pcUVs = (const MD3::TexCoord*)
-			(((unsigned char*)pcSurfaces) + pcSurfaces->OFS_ST);
-
-		// navigate to the shader list of the surface
-		const MD3::Shader* pcShaders = (const MD3::Shader*)
-			(((unsigned char*)pcSurfaces) + pcSurfaces->OFS_SHADERS);
-
-		// if the submesh is empty ignore it
-		if (0 == pcSurfaces->NUM_VERTICES || 0 == pcSurfaces->NUM_TRIANGLES)
+		// check magic number
+		if (this->m_pcHeader->IDENT != AI_MD3_MAGIC_NUMBER_BE &&
+			this->m_pcHeader->IDENT != AI_MD3_MAGIC_NUMBER_LE)
 		{
-			pcSurfaces = (const MD3::Surface*)(((unsigned char*)pcSurfaces) + pcSurfaces->OFS_END);
-			pScene->mNumMeshes--;
-			continue;
+			throw new ImportErrorException( "Invalid md3 file: Magic bytes not found");
 		}
+		// validate the header
+		this->ValidateHeaderOffsets();
 
-		// allocate the output mesh
-		pScene->mMeshes[iNum] = new aiMesh();
-		aiMesh* pcMesh = pScene->mMeshes[iNum];
+		// now navigate to the list of surfaces
+		const MD3::Surface* pcSurfaces = (const MD3::Surface*)
+			(this->mBuffer + this->m_pcHeader->OFS_SURFACES);
 
-		pcMesh->mNumVertices = pcSurfaces->NUM_TRIANGLES*3;
-		//pcMesh->mNumBones = 0;
-		//pcMesh->mColors[0] = pcMesh->mColors[1] = pcMesh->mColors[2] = pcMesh->mColors[3] = NULL;
-		pcMesh->mNumFaces = pcSurfaces->NUM_TRIANGLES;
-		pcMesh->mFaces = new aiFace[pcSurfaces->NUM_TRIANGLES];
-		pcMesh->mNormals = new aiVector3D[pcMesh->mNumVertices];
-		pcMesh->mVertices = new aiVector3D[pcMesh->mNumVertices];
-		pcMesh->mTextureCoords[0] = new aiVector3D[pcMesh->mNumVertices];
-		//pcMesh->mTextureCoords[1] = pcMesh->mTextureCoords[2] = pcMesh->mTextureCoords[3] = NULL;
-		pcMesh->mNumUVComponents[0] = 2;
+		// allocate output storage
+		pScene->mNumMeshes = this->m_pcHeader->NUM_SURFACES;
+		pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 
-		// fill in all triangles
-		unsigned int iCurrent = 0;
-		for (unsigned int i = 0; i < (unsigned int)pcSurfaces->NUM_TRIANGLES;++i)
+		pScene->mNumMaterials = this->m_pcHeader->NUM_SURFACES;
+		pScene->mMaterials = new aiMaterial*[pScene->mNumMeshes];
+
+		// if an exception is thrown before the meshes are allocated ->
+		// otherwise the pointer value would be invalid and delete would crash
+		::memset(pScene->mMeshes,0,pScene->mNumMeshes*sizeof(aiMesh*));
+		::memset(pScene->mMaterials,0,pScene->mNumMaterials*sizeof(aiMaterial*));
+
+		unsigned int iNum = this->m_pcHeader->NUM_SURFACES;
+		unsigned int iNumMaterials = 0;
+		unsigned int iDefaultMatIndex = 0xFFFFFFFF;
+		while (iNum-- > 0)
 		{
-			pcMesh->mFaces[i].mIndices = new unsigned int[3];
-			pcMesh->mFaces[i].mNumIndices = 3;
+			// validate the surface
+			this->ValidateSurfaceHeaderOffsets(pcSurfaces);
 
-			unsigned int iTemp = iCurrent;
-			for (unsigned int c = 0; c < 3;++c,++iCurrent)
+			// navigate to the vertex list of the surface
+			const MD3::Vertex* pcVertices = (const MD3::Vertex*)
+				(((unsigned char*)pcSurfaces) + pcSurfaces->OFS_XYZNORMAL);
+
+			// navigate to the triangle list of the surface
+			const MD3::Triangle* pcTriangles = (const MD3::Triangle*)
+				(((unsigned char*)pcSurfaces) + pcSurfaces->OFS_TRIANGLES);
+
+			// navigate to the texture coordinate list of the surface
+			const MD3::TexCoord* pcUVs = (const MD3::TexCoord*)
+				(((unsigned char*)pcSurfaces) + pcSurfaces->OFS_ST);
+
+			// navigate to the shader list of the surface
+			const MD3::Shader* pcShaders = (const MD3::Shader*)
+				(((unsigned char*)pcSurfaces) + pcSurfaces->OFS_SHADERS);
+
+			// if the submesh is empty ignore it
+			if (0 == pcSurfaces->NUM_VERTICES || 0 == pcSurfaces->NUM_TRIANGLES)
 			{
-				// read vertices
-				pcMesh->mVertices[iCurrent].x = pcVertices[ pcTriangles->INDEXES[c]].X;
-				pcMesh->mVertices[iCurrent].y = pcVertices[ pcTriangles->INDEXES[c]].Y*-1.0f;
-				pcMesh->mVertices[iCurrent].z = pcVertices[ pcTriangles->INDEXES[c]].Z;
-
-				// convert the normal vector to uncompressed float3 format
-				LatLngNormalToVec3(pcVertices[pcTriangles->INDEXES[c]].NORMAL,
-					(float*)&pcMesh->mNormals[iCurrent]);
-
-				pcMesh->mNormals[iCurrent].y *= -1.0f;
-
-				// read texture coordinates
-				pcMesh->mTextureCoords[0][iCurrent].x = pcUVs[ pcTriangles->INDEXES[c]].U;
-				pcMesh->mTextureCoords[0][iCurrent].y = 1.0f-pcUVs[ pcTriangles->INDEXES[c]].V;
-			}
-			// FIX: flip the face ordering for use with OpenGL
-			pcMesh->mFaces[i].mIndices[0] = iTemp+2;
-			pcMesh->mFaces[i].mIndices[1] = iTemp+1;
-			pcMesh->mFaces[i].mIndices[2] = iTemp+0;
-			pcTriangles++;
-		}
-
-		// get the first shader (= texture?) assigned to the surface
-		if (0 != pcSurfaces->NUM_SHADER)
-		{
-			// make a relative path.
-			// if the MD3's internal path itself and the given path are using
-			// the same directory remove it
-			const char* szEndDir1 = ::strrchr((const char*)this->m_pcHeader->NAME,'\\');
-			if (!szEndDir1)szEndDir1 = ::strrchr((const char*)this->m_pcHeader->NAME,'/');
-
-			const char* szEndDir2 = ::strrchr((const char*)pcShaders->NAME,'\\');
-			if (!szEndDir2)szEndDir2 = ::strrchr((const char*)pcShaders->NAME,'/');
-
-			if (szEndDir1 && szEndDir2)
-			{
-				// both of them are valid
-				const unsigned int iLen1 = (unsigned int)(szEndDir1 - (const char*)this->m_pcHeader->NAME);
-				const unsigned int iLen2 = std::min (iLen1, (unsigned int)(szEndDir2 - (const char*)pcShaders->NAME) );
-
-				bool bSuccess = true;
-				for (unsigned int a = 0; a  < iLen2;++a)
-				{
-					char sz = tolower ( pcShaders->NAME[a] );
-					char sz2 = tolower ( this->m_pcHeader->NAME[a] );
-					if (sz != sz2)
-					{
-						bSuccess = false;
-						break;
-					}
-				}
-				if (bSuccess)
-				{
-					// use the file name only
-					szEndDir2++;
-				}
-				else
-				{
-					// use the full path
-					szEndDir2 = (const char*)pcShaders->NAME;
-				}
+				pcSurfaces = (const MD3::Surface*)(((unsigned char*)pcSurfaces) + pcSurfaces->OFS_END);
+				pScene->mNumMeshes--;
+				continue;
 			}
 
-			// now try to find out whether we have this shader already
-			bool bHave = false;
-			for (unsigned int p = 0; p < iNumMaterials;++p)
-			{
-				if (iDefaultMatIndex == p)continue;
+			// allocate the output mesh
+			pScene->mMeshes[iNum] = new aiMesh();
+			aiMesh* pcMesh = pScene->mMeshes[iNum];
 
-				aiString szOut;
-				if(AI_SUCCESS == aiGetMaterialString ( (aiMaterial*)pScene->mMaterials[p],
-					AI_MATKEY_TEXTURE_DIFFUSE(0),&szOut))
+			pcMesh->mNumVertices		= pcSurfaces->NUM_TRIANGLES*3;
+			pcMesh->mNumFaces			= pcSurfaces->NUM_TRIANGLES;
+			pcMesh->mFaces				= new aiFace[pcSurfaces->NUM_TRIANGLES];
+			pcMesh->mNormals			= new aiVector3D[pcMesh->mNumVertices];
+			pcMesh->mVertices			= new aiVector3D[pcMesh->mNumVertices];
+			pcMesh->mTextureCoords[0]	= new aiVector3D[pcMesh->mNumVertices];
+			pcMesh->mNumUVComponents[0] = 2;
+
+			// fill in all triangles
+			unsigned int iCurrent = 0;
+			for (unsigned int i = 0; i < (unsigned int)pcSurfaces->NUM_TRIANGLES;++i)
+			{
+				pcMesh->mFaces[i].mIndices = new unsigned int[3];
+				pcMesh->mFaces[i].mNumIndices = 3;
+
+				unsigned int iTemp = iCurrent;
+				for (unsigned int c = 0; c < 3;++c,++iCurrent)
 				{
-					if (0 == ASSIMP_stricmp(szOut.data,szEndDir2))
-					{
-						// equal. reuse this material (texture)
-						bHave = true;
-						pcMesh->mMaterialIndex = p;
-						break;
-					}
+					// read vertices
+					pcMesh->mVertices[iCurrent].x = pcVertices[ pcTriangles->INDEXES[c]].X;
+					pcMesh->mVertices[iCurrent].y = pcVertices[ pcTriangles->INDEXES[c]].Y*-1.0f;
+					pcMesh->mVertices[iCurrent].z = pcVertices[ pcTriangles->INDEXES[c]].Z;
+
+					// convert the normal vector to uncompressed float3 format
+					LatLngNormalToVec3(pcVertices[pcTriangles->INDEXES[c]].NORMAL,
+						(float*)&pcMesh->mNormals[iCurrent]);
+
+					pcMesh->mNormals[iCurrent].y *= -1.0f;
+
+					// read texture coordinates
+					pcMesh->mTextureCoords[0][iCurrent].x = pcUVs[ pcTriangles->INDEXES[c]].U;
+					pcMesh->mTextureCoords[0][iCurrent].y = 1.0f-pcUVs[ pcTriangles->INDEXES[c]].V;
 				}
+				// FIX: flip the face ordering for use with OpenGL
+				pcMesh->mFaces[i].mIndices[0] = iTemp+2;
+				pcMesh->mFaces[i].mIndices[1] = iTemp+1;
+				pcMesh->mFaces[i].mIndices[2] = iTemp+0;
+				pcTriangles++;
 			}
 
-			if (!bHave)
+			// get the first shader (= texture?) assigned to the surface
+			if (0 != pcSurfaces->NUM_SHADER)
 			{
-				MaterialHelper* pcHelper = new MaterialHelper();
+				// make a relative path.
+				// if the MD3's internal path itself and the given path are using
+				// the same directory remove it
+				const char* szEndDir1 = ::strrchr((const char*)this->m_pcHeader->NAME,'\\');
+				if (!szEndDir1)szEndDir1 = ::strrchr((const char*)this->m_pcHeader->NAME,'/');
 
-				if (szEndDir2)
+				const char* szEndDir2 = ::strrchr((const char*)pcShaders->NAME,'\\');
+				if (!szEndDir2)szEndDir2 = ::strrchr((const char*)pcShaders->NAME,'/');
+
+				if (szEndDir1 && szEndDir2)
 				{
-					if (szEndDir2[0])
-					{
-						aiString szString;
-						const size_t iLen = ::strlen(szEndDir2);
-						::memcpy(szString.data,szEndDir2,iLen);
-						szString.data[iLen] = '\0';
-						szString.length = iLen;
+					// both of them are valid
+					const unsigned int iLen1 = (unsigned int)(szEndDir1 - (const char*)this->m_pcHeader->NAME);
+					const unsigned int iLen2 = std::min (iLen1, (unsigned int)(szEndDir2 - (const char*)pcShaders->NAME) );
 
-						pcHelper->AddProperty(&szString,AI_MATKEY_TEXTURE_DIFFUSE(0));
-					}
-					else 
+					bool bSuccess = true;
+					for (unsigned int a = 0; a  < iLen2;++a)
 					{
-						DefaultLogger::get()->warn("Texture file name has zero length. "
-							"It will be skipped.");
+						char sz = ::tolower ( pcShaders->NAME[a] );
+						char sz2 = ::tolower ( this->m_pcHeader->NAME[a] );
+						if (sz != sz2)
+						{
+							bSuccess = false;
+							break;
+						}
+					}
+					if (bSuccess)
+					{
+						// use the file name only
+						szEndDir2++;
+					}
+					else
+					{
+						// use the full path
+						szEndDir2 = (const char*)pcShaders->NAME;
 					}
 				}
 
-				int iMode = (int)aiShadingMode_Gouraud;
-				pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
+				// now try to find out whether we have this shader already
+				bool bHave = false;
+				for (unsigned int p = 0; p < iNumMaterials;++p)
+				{
+					if (iDefaultMatIndex == p)continue;
 
-				// add a small ambient color value - Quake 3 seems to have one
-				aiColor3D clr;
-				clr.b = clr.g = clr.r = 0.05f;
-				pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_AMBIENT);
+					aiString szOut;
+					if(AI_SUCCESS == aiGetMaterialString ( (aiMaterial*)pScene->mMaterials[p],
+						AI_MATKEY_TEXTURE_DIFFUSE(0),&szOut))
+					{
+						if (0 == ASSIMP_stricmp(szOut.data,szEndDir2))
+						{
+							// equal. reuse this material (texture)
+							bHave = true;
+							pcMesh->mMaterialIndex = p;
+							break;
+						}
+					}
+				}
 
-				aiString szName;
-				szName.Set(AI_DEFAULT_MATERIAL_NAME);
-				pcHelper->AddProperty(&szName,AI_MATKEY_NAME);
+				if (!bHave)
+				{
+					MaterialHelper* pcHelper = new MaterialHelper();
 
-				pScene->mMaterials[iNumMaterials] = (aiMaterial*)pcHelper;
-				pcMesh->mMaterialIndex = iNumMaterials++;
-			}
-		}
-		else
-		{
-			if (0xFFFFFFFF != iDefaultMatIndex)
-			{
-				pcMesh->mMaterialIndex = iDefaultMatIndex;
+					if (szEndDir2)
+					{
+						if (szEndDir2[0])
+						{
+							aiString szString;
+							const size_t iLen = ::strlen(szEndDir2);
+							::memcpy(szString.data,szEndDir2,iLen);
+							szString.data[iLen] = '\0';
+							szString.length = iLen;
+
+							pcHelper->AddProperty(&szString,AI_MATKEY_TEXTURE_DIFFUSE(0));
+						}
+						else 
+						{
+							DefaultLogger::get()->warn("Texture file name has zero length. "
+								"It will be skipped.");
+						}
+					}
+
+					int iMode = (int)aiShadingMode_Gouraud;
+					pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
+
+					// add a small ambient color value - Quake 3 seems to have one
+					aiColor3D clr;
+					clr.b = clr.g = clr.r = 0.05f;
+					pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_AMBIENT);
+
+					aiString szName;
+					szName.Set(AI_DEFAULT_MATERIAL_NAME);
+					pcHelper->AddProperty(&szName,AI_MATKEY_NAME);
+
+					pScene->mMaterials[iNumMaterials] = (aiMaterial*)pcHelper;
+					pcMesh->mMaterialIndex = iNumMaterials++;
+				}
 			}
 			else
 			{
-				MaterialHelper* pcHelper = new MaterialHelper();
+				if (0xFFFFFFFF != iDefaultMatIndex)
+				{
+					pcMesh->mMaterialIndex = iDefaultMatIndex;
+				}
+				else
+				{
+					MaterialHelper* pcHelper = new MaterialHelper();
 
-				// fill in a default material
-				int iMode = (int)aiShadingMode_Gouraud;
-				pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
+					// fill in a default material
+					int iMode = (int)aiShadingMode_Gouraud;
+					pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
 
-				aiColor3D clr;
-				clr.b = clr.g = clr.r = 0.6f;
-				pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_DIFFUSE);
-				pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_SPECULAR);
+					aiColor3D clr;
+					clr.b = clr.g = clr.r = 0.6f;
+					pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_DIFFUSE);
+					pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_SPECULAR);
 
-				clr.b = clr.g = clr.r = 0.05f;
-				pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_AMBIENT);
+					clr.b = clr.g = clr.r = 0.05f;
+					pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_AMBIENT);
 
-				pScene->mMaterials[iNumMaterials] = (aiMaterial*)pcHelper;
-				pcMesh->mMaterialIndex = iNumMaterials++;
+					pScene->mMaterials[iNumMaterials] = (aiMaterial*)pcHelper;
+					pcMesh->mMaterialIndex = iNumMaterials++;
+				}
 			}
+			// go to the next surface
+			pcSurfaces = (const MD3::Surface*)(((unsigned char*)pcSurfaces) + pcSurfaces->OFS_END);
 		}
-		// go to the next surface
-		pcSurfaces = (const MD3::Surface*)(((unsigned char*)pcSurfaces) + pcSurfaces->OFS_END);
-	}
 
-	if (0 == pScene->mNumMeshes)
+		if (0 == pScene->mNumMeshes)
+			throw new ImportErrorException( "Invalid md3 file: File contains no valid mesh");
+		pScene->mNumMaterials = iNumMaterials;
+
+		// now we need to generate an empty node graph
+		pScene->mRootNode = new aiNode();
+		pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
+		pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
+
+		for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+			pScene->mRootNode->mMeshes[i] = i;
+
+	}
+	catch (ImportErrorException* ex)
 	{
-		// cleanup before returning
-		delete[] this->mBuffer;
-		throw new ImportErrorException( "Invalid md3 file: File contains no valid mesh");
+		delete[] this->mBuffer; AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
+		throw ex;
 	}
-	pScene->mNumMaterials = iNumMaterials;
-
-	// now we need to generate an empty node graph
-	pScene->mRootNode = new aiNode();
-	pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
-	pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
-
-	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-		pScene->mRootNode->mMeshes[i] = i;
-
-	// delete the file buffer and return
-	delete[] this->mBuffer;
-	return;
+	delete[] this->mBuffer; AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 }

@@ -40,74 +40,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "MaterialSystem.h"
 #include "StringComparison.h"
+#include "Hash.h"
 
 #include "../include/aiMaterial.h"
 #include "../include/aiAssert.h"
 
 using namespace Assimp;
 
-
-// ------------------------------------------------------------------------------------------------
-// hashing function taken from 
-// http://www.azillionmonkeys.com/qed/hash.html
-// (incremental version of the hashing function)
-// (stdint.h should have been been included here)
-#undef get16bits
-#if (defined(__GNUC__) && defined(__i386__)) || defined(__WATCOMC__) \
-  || defined(_MSC_VER) || defined (__BORLANDC__) || defined (__TURBOC__)
-#define get16bits(d) (*((const uint16_t *) (d)))
+// we are using sprintf only on fixed-size buffers, so the
+// compiler should automatically expand the template sprintf_s<>
+#if _MSC_VER >= 1400
+#	define sprintf sprintf_s
 #endif
 
-#if !defined (get16bits)
-#define get16bits(d) ((((uint32_t)(((const uint8_t *)(d))[1])) << 8)\
-                       +(uint32_t)(((const uint8_t *)(d))[0]) )
-#endif
-
-// ------------------------------------------------------------------------------------------------
-uint32_t SuperFastHash (const char * data, int len, uint32_t hash = 0) {
-uint32_t tmp;
-int rem;
-
-    if (len <= 0 || data == NULL) return 0;
-
-    rem = len & 3;
-    len >>= 2;
-
-    /* Main loop */
-    for (;len > 0; len--) {
-        hash  += get16bits (data);
-        tmp    = (get16bits (data+2) << 11) ^ hash;
-        hash   = (hash << 16) ^ tmp;
-        data  += 2*sizeof (uint16_t);
-        hash  += hash >> 11;
-    }
-
-    /* Handle end cases */
-    switch (rem) {
-        case 3: hash += get16bits (data);
-                hash ^= hash << 16;
-                hash ^= data[sizeof (uint16_t)] << 18;
-                hash += hash >> 11;
-                break;
-        case 2: hash += get16bits (data);
-                hash ^= hash << 11;
-                hash += hash >> 17;
-                break;
-        case 1: hash += *data;
-                hash ^= hash << 10;
-                hash += hash >> 1;
-    }
-
-    /* Force "avalanching" of final 127 bits */
-    hash ^= hash << 3;
-    hash += hash >> 5;
-    hash ^= hash << 4;
-    hash += hash >> 17;
-    hash ^= hash << 25;
-    hash += hash >> 6;
-
-    return hash;
-}
 // ------------------------------------------------------------------------------------------------
 aiReturn aiGetMaterialProperty(const aiMaterial* pMat, 
 	const char* pKey,
@@ -121,7 +66,7 @@ aiReturn aiGetMaterialProperty(const aiMaterial* pMat,
 		{
 		if (NULL != pMat->mProperties[i])
 			{
-			if (0 == ASSIMP_stricmp( pMat->mProperties[i]->mKey->data, pKey ))
+			if (0 == ASSIMP_stricmp( pMat->mProperties[i]->mKey.data, pKey ))
 				{
 				*pPropOut = pMat->mProperties[i];
 				return AI_SUCCESS;
@@ -145,14 +90,13 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
 	{
 		if (NULL != pMat->mProperties[i])
 		{
-			if (0 == ASSIMP_stricmp( pMat->mProperties[i]->mKey->data, pKey ))
+			if (0 == ASSIMP_stricmp( pMat->mProperties[i]->mKey.data, pKey ))
 			{
 				// data is given in floats, simply copy it
 				if( aiPTI_Float == pMat->mProperties[i]->mType ||
 					aiPTI_Buffer == pMat->mProperties[i]->mType)
 				{
-					unsigned int iWrite = pMat->mProperties[i]->
-						mDataLength / sizeof(float);
+					unsigned int iWrite = pMat->mProperties[i]->mDataLength / sizeof(float);
 
 					if (NULL != pMax)
 						iWrite = *pMax < iWrite ? *pMax : iWrite;
@@ -204,7 +148,7 @@ aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat,
 	{
 		if (NULL != pMat->mProperties[i])
 		{
-			if (0 == ASSIMP_stricmp( pMat->mProperties[i]->mKey->data, pKey ))
+			if (0 == ASSIMP_stricmp( pMat->mProperties[i]->mKey.data, pKey ))
 			{
 				// data is given in ints, simply copy it
 				if( aiPTI_Integer == pMat->mProperties[i]->mType ||
@@ -275,12 +219,12 @@ aiReturn aiGetMaterialString(const aiMaterial* pMat,
 	{
 		if (NULL != pMat->mProperties[i])
 		{
-			if (0 == ASSIMP_stricmp( pMat->mProperties[i]->mKey->data, pKey ))
+			if (0 == ASSIMP_stricmp( pMat->mProperties[i]->mKey.data, pKey ))
 			{
 				if( aiPTI_String == pMat->mProperties[i]->mType)
 				{
-					memcpy (pOut, pMat->mProperties[i]->mData, 
-						sizeof(aiString));
+					const aiString* pcSrc = (const aiString*)pMat->mProperties[i]->mData; 
+					::memcpy (pOut->data, pcSrc->data, (pOut->length = pcSrc->length)+1);
 				}
 				// wrong type
 				else return AI_FAILURE;
@@ -291,6 +235,29 @@ aiReturn aiGetMaterialString(const aiMaterial* pMat,
 	return AI_FAILURE;
 }
 // ------------------------------------------------------------------------------------------------
+MaterialHelper::MaterialHelper()
+{
+	// allocate 5 entries by default
+	this->mNumProperties = 0;
+	this->mNumAllocated = 5;
+	this->mProperties = new aiMaterialProperty*[5];
+	return;
+}
+// ------------------------------------------------------------------------------------------------
+MaterialHelper::~MaterialHelper()
+{
+	for (unsigned int i = 0; i < this->mNumProperties;++i)
+	{
+		// be careful ...
+		if(NULL != this->mProperties[i])
+		{
+			delete[] this->mProperties[i]->mData;
+			delete this->mProperties[i];
+		}
+	}
+	return;
+}
+// ------------------------------------------------------------------------------------------------
 uint32_t MaterialHelper::ComputeHash()
 {
 	uint32_t hash = 1503; // magic start value, choosen to be my birthday :-)
@@ -299,9 +266,9 @@ uint32_t MaterialHelper::ComputeHash()
 		aiMaterialProperty* prop;
 
 		// NOTE: We need to exclude the material name from the hash
-		if ((prop = this->mProperties[i]) && 0 != ::strcmp(prop->mKey->data,AI_MATKEY_NAME)) 
+		if ((prop = this->mProperties[i]) && 0 != ::strcmp(prop->mKey.data,AI_MATKEY_NAME)) 
 		{
-			hash = SuperFastHash(prop->mKey->data,prop->mKey->length,hash);
+			hash = SuperFastHash(prop->mKey.data,prop->mKey.length,hash);
 			hash = SuperFastHash(prop->mData,prop->mDataLength,hash);
 		}
 	}
@@ -316,7 +283,7 @@ aiReturn MaterialHelper::RemoveProperty (const char* pKey)
 	{
 		if (this->mProperties[i]) // just for safety
 		{
-			if (0 == ASSIMP_stricmp( this->mProperties[i]->mKey->data, pKey ))
+			if (0 == ASSIMP_stricmp( this->mProperties[i]->mKey.data, pKey ))
 			{
 				// delete this entry
 				delete[] this->mProperties[i]->mData;
@@ -352,7 +319,7 @@ aiReturn MaterialHelper::AddBinaryProperty (const void* pInput,
 	{
 		if (this->mProperties[i])
 		{
-			if (0 == ASSIMP_stricmp( this->mProperties[i]->mKey->data, pKey ))
+			if (0 == ASSIMP_stricmp( this->mProperties[i]->mKey.data, pKey ))
 			{
 				// delete this entry
 				delete[] this->mProperties[i]->mData;
@@ -365,16 +332,15 @@ aiReturn MaterialHelper::AddBinaryProperty (const void* pInput,
 	aiMaterialProperty* pcNew = new aiMaterialProperty();
 
 	// fill this
-	pcNew->mKey = new aiString();
 	pcNew->mType = pType;
 
 	pcNew->mDataLength = pSizeInBytes;
 	pcNew->mData = new char[pSizeInBytes];
 	memcpy (pcNew->mData,pInput,pSizeInBytes);
 
-	pcNew->mKey->length = strlen(pKey);
-	ai_assert ( MAXLEN > pcNew->mKey->length);
-	strcpy( pcNew->mKey->data, pKey );
+	pcNew->mKey.length = ::strlen(pKey);
+	ai_assert ( MAXLEN > pcNew->mKey.length);
+	::strcpy( pcNew->mKey.data, pKey );
 
 	if (0xFFFFFFFF != iOutIndex)
 	{
@@ -391,7 +357,7 @@ aiReturn MaterialHelper::AddBinaryProperty (const void* pInput,
 		aiMaterialProperty** ppTemp = new aiMaterialProperty*[this->mNumAllocated];
 		if (NULL == ppTemp)return AI_OUTOFMEMORY;
 
-		memcpy (ppTemp,this->mProperties,iOld * sizeof(void*));
+		::memcpy (ppTemp,this->mProperties,iOld * sizeof(void*));
 
 		delete[] this->mProperties;
 		this->mProperties = ppTemp;
@@ -404,8 +370,10 @@ aiReturn MaterialHelper::AddBinaryProperty (const void* pInput,
 aiReturn MaterialHelper::AddProperty (const aiString* pInput,
 	const char* pKey)
 {
+	// fix ... don't keep the whole string buffer
 	return this->AddBinaryProperty(pInput,
-		sizeof(aiString),pKey,aiPTI_String);
+		pInput->length+1+ (size_t)((uint8_t*)&pInput->data - (uint8_t*)&pInput->length),
+		pKey,aiPTI_String);
 }
 // ------------------------------------------------------------------------------------------------
 void MaterialHelper::CopyPropertyList(MaterialHelper* pcDest, 
@@ -421,21 +389,41 @@ void MaterialHelper::CopyPropertyList(MaterialHelper* pcDest,
 	aiMaterialProperty** pcOld = pcDest->mProperties;
 	pcDest->mProperties = new aiMaterialProperty*[pcDest->mNumAllocated];
 
-	if (pcOld)
+	if (iOldNum && pcOld)
 	{
 		for (unsigned int i = 0; i < iOldNum;++i)
 			pcDest->mProperties[i] = pcOld[i];
 
-		delete[] pcDest->mProperties;
+		delete[] pcOld;
 	}
 	for (unsigned int i = iOldNum; i< pcDest->mNumProperties;++i)
 	{
-		pcDest->mProperties[i]->mKey = new aiString(*pcSrc->mProperties[i]->mKey);
-		pcDest->mProperties[i]->mDataLength = pcSrc->mProperties[i]->mDataLength;
-		pcDest->mProperties[i]->mType = pcSrc->mProperties[i]->mType;
-		pcDest->mProperties[i]->mData = new char[pcDest->mProperties[i]->mDataLength];
-		memcpy(pcDest->mProperties[i]->mData,pcSrc->mProperties[i]->mData,
-			pcDest->mProperties[i]->mDataLength);
+		aiMaterialProperty* propSrc = pcSrc->mProperties[i];
+
+		// search whether we have already a property with this name
+		// (if yes we overwrite the old one)
+		aiMaterialProperty* prop;
+		for (unsigned int q = 0; q < iOldNum;++q)
+		{
+			prop = pcDest->mProperties[q];
+			if (propSrc->mKey.length == prop->mKey.length && 
+				!ASSIMP_stricmp(propSrc->mKey.data,prop->mKey.data))
+			{
+				delete prop;
+
+				// collapse the whole array ...
+				::memmove(&pcDest->mProperties[q],&pcDest->mProperties[q+1],i-q);
+				i--;
+				pcDest->mNumProperties--;
+			}
+		}
+
+		prop = pcDest->mProperties[i] = new aiMaterialProperty();
+		prop->mKey = propSrc->mKey;
+		prop->mDataLength = propSrc->mDataLength;
+		prop->mType = propSrc->mType;
+		prop->mData = new char[propSrc->mDataLength];
+		::memcpy(prop->mData,propSrc->mData,prop->mDataLength);
 	}
 	return;
 }
@@ -545,12 +533,7 @@ aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 	if (iIndex > 100)return AI_FAILURE;
 
 	// get the path to the texture
-#if _MSC_VER >= 1400
-	if(0 >= sprintf_s(szKey,"%s[%i]",szPathBase,iIndex))DummyAssertFunction();
-#else
 	if(0 >= sprintf(szKey,"%s[%i]",szPathBase,iIndex))DummyAssertFunction();
-#endif
-
 	if (AI_SUCCESS != aiGetMaterialString(pcMat,szKey,szOut))
 	{
 		return AI_FAILURE;
@@ -559,11 +542,7 @@ aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 	if (piUVIndex)
 	{
 		int iUV;
-#if _MSC_VER >= 1400
-		if(0 >= sprintf_s(szKey,"%s[%i]",szUVBase,iIndex))DummyAssertFunction();
-#else
 		if(0 >= sprintf(szKey,"%s[%i]",szUVBase,iIndex))DummyAssertFunction();
-#endif
 		if (AI_SUCCESS != aiGetMaterialInteger(pcMat,szKey,&iUV))
 			iUV = 0;
 
@@ -573,11 +552,7 @@ aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 	if (pfBlendFactor)
 	{
 		float fBlend;
-#if _MSC_VER >= 1400
-		if(0 >= sprintf_s(szKey,"%s[%i]",szBlendBase,iIndex))DummyAssertFunction();
-#else
 		if(0 >= sprintf(szKey,"%s[%i]",szBlendBase,iIndex))DummyAssertFunction();
-#endif
 		if (AI_SUCCESS != aiGetMaterialFloat(pcMat,szKey,&fBlend))
 			fBlend = 1.0f;
 
@@ -588,11 +563,7 @@ aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 	if (peTextureOp)
 	{
 		aiTextureOp op;
-#if _MSC_VER >= 1400
-		if(0 >= sprintf_s(szKey,"%s[%i]",szOpBase,iIndex))DummyAssertFunction();
-#else
 		if(0 >= sprintf(szKey,"%s[%i]",szOpBase,iIndex))DummyAssertFunction();
-#endif
 		if (AI_SUCCESS != aiGetMaterialInteger(pcMat,szKey,(int*)&op))
 			op = aiTextureOp_Multiply;
 
@@ -605,11 +576,7 @@ aiReturn aiGetMaterialTexture(const aiMaterial* pcMat,
 		aiTextureMapMode eMode;
 		for (unsigned int q = 0; q < 3;++q)
 		{
-#if _MSC_VER >= 1400
-			if(0 >= sprintf_s(szKey,"%s[%i]",aszMapModeBase[q],iIndex))DummyAssertFunction();
-#else
 			if(0 >= sprintf(szKey,"%s[%i]",aszMapModeBase[q],iIndex))DummyAssertFunction();
-#endif
 			if (AI_SUCCESS != aiGetMaterialInteger(pcMat,szKey,(int*)&eMode))
 			{
 				eMode = aiTextureMapMode_Wrap;

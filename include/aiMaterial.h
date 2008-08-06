@@ -213,7 +213,7 @@ struct aiMaterialProperty
     *
     * Keys are case insensitive.
     */
-    C_STRUCT aiString* mKey;
+    C_STRUCT aiString mKey;
 
     /**	Size of the buffer mData is pointing to, in bytes
 	* This value may not be 0.

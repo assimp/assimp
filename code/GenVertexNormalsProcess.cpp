@@ -51,25 +51,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+// ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 GenVertexNormalsProcess::GenVertexNormalsProcess()
 {
 }
 
+// ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 GenVertexNormalsProcess::~GenVertexNormalsProcess()
 {
 	// nothing to do here
 }
 
-// -------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool GenVertexNormalsProcess::IsActive( unsigned int pFlags) const
 {
 	return (pFlags & aiProcess_GenSmoothNormals) != 0;
 }
 
-// -------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void GenVertexNormalsProcess::Execute( aiScene* pScene)
 {
@@ -88,10 +90,10 @@ void GenVertexNormalsProcess::Execute( aiScene* pScene)
 			"Vertex normals have been calculated");
 	}
 	else DefaultLogger::get()->debug("GenVertexNormalsProcess finished. "
-		"There was nothing to do");
+		"Normals are already there");
 }
 
-// -------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
 {
@@ -110,8 +112,8 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
 		aiVector3D pDelta2 = *pV3 - *pV1;
 		aiVector3D vNor = pDelta1 ^ pDelta2;
 
-		if (face.mIndices[1] > face.mIndices[2])
-			vNor *= -1.0f;
+		/*if (face.mIndices[1] > face.mIndices[2])
+			vNor *= -1.0f;*/
 
 		for (unsigned int i = 0;i < face.mNumIndices;++i)
 		{
@@ -154,7 +156,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
 		pcNor /= (float) verticesFound.size();
 		pcNew[i] = pcNor;
 	}
-	delete pMesh->mNormals;
+	delete[] pMesh->mNormals;
 	pMesh->mNormals = pcNew;
 
 	return true;

@@ -43,11 +43,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  tangents and bitangents for all imported meshes
  */
 
+// STL headers
 #include <vector>
 #include <assert.h>
-#include "../include/DefaultLogger.h"
+
+// internal headers
 #include "CalcTangentsProcess.h"
 #include "SpatialSort.h"
+
+// public ASSIMP headers
+#include "../include/DefaultLogger.h"
 #include "../include/aiPostProcess.h"
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
@@ -85,7 +90,7 @@ void CalcTangentsProcess::Execute( aiScene* pScene)
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 		if(ProcessMesh( pScene->mMeshes[a]))bHas = true;
 
-	if (bHas)DefaultLogger::get()->debug("CalcTangentsProcess finished. There was much work to do ...");
+	if (bHas)DefaultLogger::get()->debug("CalcTangentsProcess finished. Tangents have been calculated");
 	else DefaultLogger::get()->debug("CalcTangentsProcess finished");
 }
 

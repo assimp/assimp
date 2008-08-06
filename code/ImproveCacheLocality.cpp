@@ -39,8 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the post processing step to join identical vertices
- * for all imported meshes
+/** @file Implementation of the post processing to improve the
+ *   cache locality of a mesh.
  * <br>
  * The algorithm is roughly basing on this paper:
  * http://www.cs.princeton.edu/gfx/pubs/Sander_2007_%3ETR/tipsy.pdf
@@ -167,6 +167,17 @@ void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshN
 	}
 	delete[] piFIFOStack;
 	float fACMR = (float)iCacheMisses / pMesh->mNumFaces;
+	if (3.0 == fACMR)
+	{
+		char szBuff[128]; // should be sufficiently large in every case
+
+		// the JoinIdenticalVertices process has not been executed on this
+		// mesh, otherwise this value would normally be at least minimally#
+		// smaller than 3.0 ...
+		::sprintf(szBuff,"Mesh %i: JIV-Step has not been executed properly (precondition)",meshNum);
+		DefaultLogger::get()->warn(szBuff);
+		return;
+	}
 
 	// first we need to build a vertex-triangle adjacency list
 	VertexTriangleAdjacency adj(pMesh->mFaces,pMesh->mNumFaces, pMesh->mNumVertices,true);
@@ -351,7 +362,7 @@ void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshN
 		char szBuff[128]; // should be sufficiently large in every case
 		float fACMR2 = (float)iCacheMisses / pMesh->mNumFaces;
 
-		sprintf(szBuff,"Mesh %i | ACMR in: %f out: %f | ~%.1f%%",meshNum,fACMR,fACMR2,
+		::sprintf(szBuff,"Mesh %i | ACMR in: %f out: %f | ~%.1f%%",meshNum,fACMR,fACMR2,
 			((fACMR - fACMR2) / fACMR) * 100.f);
 		DefaultLogger::get()->info(szBuff);
 	}

@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
+#include "../include/assimp.hpp"
 
 // boost headers
 #include <boost/scoped_ptr.hpp>
@@ -126,6 +127,17 @@ void MDLImporter::InternReadFile(
 	{
 		throw new ImportErrorException( "Failed to open MDL file " + pFile + ".");
 	}
+
+	// The AI_CONFIG_IMPORT_MDL_KEYFRAME option overrides the
+	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
+#if 0
+	if(0xffffffff == (this->configFrameID = this->mImporter->GetProperty(
+		AI_CONFIG_IMPORT_MDL_KEYFRAME,0xffffffff)))
+	{
+		this->configFrameID = this->mImporter->GetProperty(
+			AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
+	}
+#endif
 
 	// this should work for all other types of MDL files, too ...
 	// the quake header is one of the smallest, afaik
@@ -236,17 +248,11 @@ void MDLImporter::InternReadFile(
 		throw ex;
 	}
 
-	// make sure that the normals are facing outwards
-	// (mainly this applies to MDL7 (due to the FlipNormals option in MED).
-	// However there are some invalid models in other format, too)
-	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-		this->FlipNormals(pScene->mMeshes[i]);
-
 	// delete the file buffer and cleanup
 	delete[] this->mBuffer;
-	DEBUG_INVALIDATE_PTR(this->mBuffer);
-	DEBUG_INVALIDATE_PTR(this->pIOHandler);
-	DEBUG_INVALIDATE_PTR(this->pScene);
+	AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
+	AI_DEBUG_INVALIDATE_PTR(this->pIOHandler);
+	AI_DEBUG_INVALIDATE_PTR(this->pScene);
 	return;
 }
 // ------------------------------------------------------------------------------------------------
@@ -254,7 +260,7 @@ void MDLImporter::SizeCheck(const void* szPos)
 {
 	if (!szPos || (const unsigned char*)szPos > this->mBuffer + this->iFileSize)
 	{
-		throw new ImportErrorException("Invalid file. The file is too small "
+		throw new ImportErrorException("Invalid MDL file. The file is too small "
 			"or contains invalid data.");
 	}
 }
@@ -278,7 +284,7 @@ void MDLImporter::SizeCheck(const void* szPos, const char* szFile, unsigned int 
 #else
 		::sprintf(szBuffer,
 #endif
-			"Invalid file. The file is too small "
+			"Invalid MDL file. The file is too small "
 			"or contains invalid data (File: %s Line: %i)",szFilePtr,iLine);
 
 		throw new ImportErrorException(szBuffer);
@@ -301,32 +307,35 @@ void MDLImporter::ValidateHeader_Quake1(const MDL::Header* pcHeader)
 		throw new ImportErrorException( "[Quake 1 MDL] There are no triangles in the file");
 	}
 
-	// check whether the maxima are exceeded ...
-	if (pcHeader->num_verts > AI_MDL_MAX_VERTS)
+	// check whether the maxima are exceeded ...however, this applies for Quake 1 MDLs only
+	if (!this->iGSFileVersion)
 	{
-		DefaultLogger::get()->warn("Quake 1 MDL model has more than AI_MDL_MAX_VERTS vertices");
-	}
-	if (pcHeader->num_tris > AI_MDL_MAX_TRIANGLES)
-	{
-		DefaultLogger::get()->warn("Quake 1 MDL model has more than AI_MDL_MAX_TRIANGLES triangles");
-	}
-	if (pcHeader->num_frames > AI_MDL_MAX_FRAMES)
-	{
-		DefaultLogger::get()->warn("Quake 1 MDL model has more than AI_MDL_MAX_FRAMES frames");
-	}
-	// (this does not apply for 3DGS MDLs)
-	if (!this->iGSFileVersion && pcHeader->version != AI_MDL_VERSION)
-	{
-		DefaultLogger::get()->warn("Quake 1 MDL model has an unknown version: AI_MDL_VERSION (=6) is "
-			"the expected file format version");
-	}
-
-	if (pcHeader->num_skins)
-	{
-		if(!pcHeader->skinwidth || !pcHeader->skinheight)
+		if (pcHeader->num_verts > AI_MDL_MAX_VERTS)
 		{
-			DefaultLogger::get()->warn("Skin width or height are 0. Division through "
-				"zero would occur ...");
+			DefaultLogger::get()->warn("Quake 1 MDL model has more than AI_MDL_MAX_VERTS vertices");
+		}
+		if (pcHeader->num_tris > AI_MDL_MAX_TRIANGLES)
+		{
+			DefaultLogger::get()->warn("Quake 1 MDL model has more than AI_MDL_MAX_TRIANGLES triangles");
+		}
+		if (pcHeader->num_frames > AI_MDL_MAX_FRAMES)
+		{
+			DefaultLogger::get()->warn("Quake 1 MDL model has more than AI_MDL_MAX_FRAMES frames");
+		}
+		// (this does not apply for 3DGS MDLs)
+		if (!this->iGSFileVersion && pcHeader->version != AI_MDL_VERSION)
+		{
+			DefaultLogger::get()->warn("Quake 1 MDL model has an unknown version: AI_MDL_VERSION (=6) is "
+				"the expected file format version");
+		}
+
+		if (pcHeader->num_skins)
+		{
+			if(!pcHeader->skinwidth || !pcHeader->skinheight)
+			{
+				DefaultLogger::get()->warn("Skin width or height are 0. Division through "
+					"zero would occur ...");
+			}
 		}
 	}
 }
@@ -994,8 +1003,9 @@ void MDLImporter::ReadFaces_3DGS_MDL7(
 			unsigned int iIndex = pcGroupTris->v_index[c];
 			if(iIndex > (unsigned int)groupInfo.pcGroup->numverts)
 			{
-				// LOG
-				iIndex = groupInfo.pcGroup->numverts-1;
+				// (we might need to read this section a second time - to process
+				//  frame vertices correctly)
+				const_cast<MDL::Triangle_MDL7*>(pcGroupTris)->v_index[c] = iIndex = groupInfo.pcGroup->numverts-1;
 				DefaultLogger::get()->warn("Index overflow in MDL7 vertex list");
 			}
 
@@ -1022,14 +1032,6 @@ void MDLImporter::ReadFaces_3DGS_MDL7(
 				vNormal.x = _AI_MDL7_ACCESS_VERT(groupInfo.pcGroupVerts,iIndex,pcHeader->mainvertex_stc_size) .norm[0];
 				vNormal.z = _AI_MDL7_ACCESS_VERT(groupInfo.pcGroupVerts,iIndex,pcHeader->mainvertex_stc_size) .norm[1];
 				vNormal.y = _AI_MDL7_ACCESS_VERT(groupInfo.pcGroupVerts,iIndex,pcHeader->mainvertex_stc_size) .norm[2];
-
-				// FIX: It seems to be necessary to invert all normals
-				// FIX2: No, it is not necessary :-)
-#if 0
-				vNormal.x *= -1.0f;
-				vNormal.y *= -1.0f;
-				vNormal.z *= -1.0f;
-#endif
 			}
 			else if (AI_MDL7_FRAMEVERTEX120503_STCSIZE <= pcHeader->mainvertex_stc_size)
 			{
@@ -1108,6 +1110,7 @@ void MDLImporter::ReadFaces_3DGS_MDL7(
 }
 // ------------------------------------------------------------------------------------------------
 bool MDLImporter::ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7& groupInfo,
+	MDL::IntGroupData_MDL7& groupData,
 	MDL::IntSharedData_MDL7& shared,
 	const unsigned char* szCurrent,
 	const unsigned char** szCurrentOut)
@@ -1119,9 +1122,10 @@ bool MDLImporter::ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7& groupInf
 
 	// if we have no bones we can simply skip all frames,
 	// otherwise we'll need to process them.
+	// FIX: If we need another frame than the first we must apply frame vertex replacements ...
 	for(unsigned int iFrame = 0; iFrame < (unsigned int)groupInfo.pcGroup->numframes;++iFrame)
 	{
-		MDL::IntFrameInfo_MDL7 frame((const MDL::Frame_MDL7*)szCurrent,iFrame);
+		MDL::IntFrameInfo_MDL7 frame ((const MDL::Frame_MDL7*)szCurrent,iFrame);
 
 		const unsigned int iAdd = pcHeader->frame_stc_size + 
 			frame.pcFrame->vertices_count * pcHeader->framevertex_stc_size +
@@ -1129,15 +1133,82 @@ bool MDLImporter::ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7& groupInf
 
 		if (((const char*)szCurrent - (const char*)pcHeader) + iAdd > (unsigned int)pcHeader->data_size)
 		{
-			DefaultLogger::get()->warn("Index overflow in frame area. Ignoring all frames and "
-				"all further groups, too.");
+			DefaultLogger::get()->warn("Index overflow in frame area. "
+				"Ignoring all frames and all further mesh groups, too.");
 
 			// don't parse more groups if we can't even read one
 			// FIXME: sometimes this seems to occur even for valid files ...
 			*szCurrentOut = szCurrent;
 			return false;
 		}
+		// our output frame?
+		if (configFrameID == iFrame)
+		{
+			const MDL::Vertex_MDL7* pcFrameVertices = (const MDL::Vertex_MDL7*)
+				(szCurrent + pcHeader->framevertex_stc_size);
 
+			for (unsigned int qq = 0; qq < frame.pcFrame->vertices_count;++qq)
+			{
+				// I assume this are simple replacements for normal
+				// vertices, the bone index serving as the index of the
+				// vertex to be replaced.
+				uint16_t iIndex = _AI_MDL7_ACCESS(pcFrameVertices,qq,
+					pcHeader->framevertex_stc_size,MDL::Vertex_MDL7).vertindex;
+
+				if (iIndex >= groupInfo.pcGroup->numverts)
+				{
+					DefaultLogger::get()->warn("Invalid vertex index in frame vertex section. "
+						"Skipping this frame vertex");
+					continue;
+				}
+
+				aiVector3D vPosition,vNormal;
+					
+				vPosition.x = _AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,pcHeader->framevertex_stc_size) .x;
+				vPosition.z = _AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,pcHeader->framevertex_stc_size) .y;
+				vPosition.y = _AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,pcHeader->framevertex_stc_size) .z;
+
+				// now read the normal vector
+				if (AI_MDL7_FRAMEVERTEX030305_STCSIZE <= pcHeader->mainvertex_stc_size)
+				{
+					// read the full normal vector
+					vNormal.x = _AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,pcHeader->framevertex_stc_size) .norm[0];
+					vNormal.z = _AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,pcHeader->framevertex_stc_size) .norm[1];
+					vNormal.y = _AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,pcHeader->framevertex_stc_size) .norm[2];
+				}
+				else if (AI_MDL7_FRAMEVERTEX120503_STCSIZE <= pcHeader->mainvertex_stc_size)
+				{
+					// read the normal vector from Quake2's smart table
+					MD2::LookupNormalIndex(_AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,
+						pcHeader->framevertex_stc_size) .norm162index,vNormal);
+
+					std::swap(vNormal.z,vNormal.y);
+				}
+
+				// FIXME: O(n^2) at the moment ...
+				// shouldn't be too worse, frame vertices aren't required more
+				// than once a century ...
+				const MDL::Triangle_MDL7* pcGroupTris = groupInfo.pcGroupTris;
+				unsigned int iOutIndex = 0;
+				for (unsigned int iTriangle = 0; iTriangle < (unsigned int)groupInfo.pcGroup->numtris; ++iTriangle)
+				{
+					// iterate through all indices of the current triangle
+					for (unsigned int c = 0; c < 3;++c,++iOutIndex)
+					{
+						// replace the vertex with the new data
+						const unsigned int iCurIndex = pcGroupTris->v_index[c];
+						if (iCurIndex == iIndex)
+						{
+							groupData.vPositions[iOutIndex] = vPosition;
+							groupData.vNormals[iOutIndex] = vNormal;
+						}
+					}
+					// get the next triangle in the list
+					pcGroupTris = (const MDL::Triangle_MDL7*)((const char*)pcGroupTris + 
+						pcHeader->triangle_stc_size);
+				}
+			}
+		}
 		// parse bone trafo matrix keys (only if there are bones ...)
 		if (shared.apcOutBones)
 		{
@@ -1331,8 +1402,12 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 		}
 
 		// store the name of the group
-		::memcpy(&aszGroupNameBuffer[iGroup*AI_MDL7_MAX_GROUPNAMESIZE],
+		const unsigned int ofs = iGroup*AI_MDL7_MAX_GROUPNAMESIZE;
+		::memcpy(&aszGroupNameBuffer[ofs],
 			groupInfo.pcGroup->name,AI_MDL7_MAX_GROUPNAMESIZE);
+
+		// make sure '\0' is at the end
+		aszGroupNameBuffer[ofs+AI_MDL7_MAX_GROUPNAMESIZE-1] = '\0';
 
 		// read all skins
 		sharedData.pcMats.reserve(sharedData.pcMats.size() + groupInfo.pcGroup->numskins);
@@ -1362,6 +1437,8 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 			aiString szName;
 			szName.Set(AI_DEFAULT_MATERIAL_NAME);
 			pcHelper->AddProperty(&szName,AI_MATKEY_NAME);
+
+			sharedData.abNeedMaterials.resize(1,false);
 		}
 
 		// now get a pointer to all texture coords in the group
@@ -1379,10 +1456,9 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 		VALIDATE_FILE_SIZE(szCurrent);
 
 		MDL::IntSplittedGroupData_MDL7 splittedGroupData(sharedData,avOutList[iGroup]);
+		MDL::IntGroupData_MDL7 groupData;
 		if (groupInfo.pcGroup->numtris && groupInfo.pcGroup->numverts)
 		{
-			MDL::IntGroupData_MDL7 groupData;
-
 			// build output vectors
 			const unsigned int iNumVertices = groupInfo.pcGroup->numtris*3;
 			groupData.vPositions.resize(iNumVertices);
@@ -1426,7 +1502,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 			"vertices or faces. It will be skipped.");
 
 		// process all frames
-		if(!ProcessFrames_3DGS_MDL7(groupInfo,sharedData,szCurrent,&szCurrent))
+		if(!ProcessFrames_3DGS_MDL7(groupInfo,groupData, sharedData,szCurrent,&szCurrent))
 		{
 			break;
 		}
@@ -1497,8 +1573,8 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 
 	delete[] avOutList;
 	delete[] aszGroupNameBuffer; 
-	DEBUG_INVALIDATE_PTR(avOutList);
-	DEBUG_INVALIDATE_PTR(aszGroupNameBuffer);
+	AI_DEBUG_INVALIDATE_PTR(avOutList);
+	AI_DEBUG_INVALIDATE_PTR(aszGroupNameBuffer);
 
 	// build a final material list. 
 	this->CopyMaterials_3DGS_MDL7(sharedData);
@@ -1550,7 +1626,7 @@ void MDLImporter::CopyMaterials_3DGS_MDL7(MDL::IntSharedData_MDL7 &shared)
 			{
 				// destruction is done by the destructor of sh
 				delete shared.pcMats[i];
-				DEBUG_INVALIDATE_PTR(shared.pcMats[i]);
+				AI_DEBUG_INVALIDATE_PTR(shared.pcMats[i]);
 				continue;
 			}
 			this->pScene->mMaterials[p] = shared.pcMats[i];
@@ -1952,55 +2028,6 @@ void MDLImporter::JoinSkins_3DGS_MDL7(
 		iVal = 1;
 		pcMatOut->AddProperty<int>(&iVal,1,AI_MATKEY_UVWSRC_DIFFUSE(1));
 		pcMatOut->AddProperty(&sString,AI_MATKEY_TEXTURE_DIFFUSE(1));
-	}
-}
-// ------------------------------------------------------------------------------------------------
-void MDLImporter::FlipNormals(aiMesh* pcMesh)
-{
-	ai_assert(NULL != pcMesh);
-
-	// compute the bounding box of both the model vertices + normals and
-	// the umodified model vertices. Then check whether the first BB
-	// is smaller than the second. In this case we can assume that the
-	// normals need to be flipped, although there are a few special cases ..
-	// convex, concave, planar models ...
-
-	aiVector3D vMin0(1e10f,1e10f,1e10f);
-	aiVector3D vMin1(1e10f,1e10f,1e10f);
-	aiVector3D vMax0(-1e10f,-1e10f,-1e10f);
-	aiVector3D vMax1(-1e10f,-1e10f,-1e10f);
-
-	for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
-	{
-		vMin1.x = std::min(vMin1.x,pcMesh->mVertices[i].x);
-		vMin1.y = std::min(vMin1.y,pcMesh->mVertices[i].y);
-		vMin1.z = std::min(vMin1.z,pcMesh->mVertices[i].z);
-
-		vMax1.x = std::max(vMax1.x,pcMesh->mVertices[i].x);
-		vMax1.y = std::max(vMax1.y,pcMesh->mVertices[i].y);
-		vMax1.z = std::max(vMax1.z,pcMesh->mVertices[i].z);
-
-		aiVector3D vWithNormal = pcMesh->mVertices[i] + pcMesh->mNormals[i];
-
-		vMin0.x = std::min(vMin0.x,vWithNormal.x);
-		vMin0.y = std::min(vMin0.y,vWithNormal.y);
-		vMin0.z = std::min(vMin0.z,vWithNormal.z);
-
-		vMax0.x = std::max(vMax0.x,vWithNormal.x);
-		vMax0.y = std::max(vMax0.y,vWithNormal.y);
-		vMax0.z = std::max(vMax0.z,vWithNormal.z);
-	}
-
-	if (::fabsf((vMax0.x - vMin0.x) * (vMax0.y - vMin0.y) * (vMax0.z - vMin0.z)) <= 
-		::fabsf((vMax1.x - vMin1.x) * (vMax1.y - vMin1.y) * (vMax1.z - vMin1.z)))
-	{
-		DefaultLogger::get()->info("The models normals are facing inwards "
-			"(or the model is too planar or concave). Flipping the normal set ...");
-
-		for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
-		{
-			pcMesh->mNormals[i] *= -1.0f;
-		}
 	}
 }
 // ------------------------------------------------------------------------------------------------

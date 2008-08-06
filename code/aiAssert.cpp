@@ -12,7 +12,7 @@ void Assimp::aiAssert (bool expression, const std::string &message, unsigned int
 {
 	if (!expression)
 	{
-		std::cerr << "File :" << file << ", line " << uiLine << " : " << message << std::endl;
+		std::cout << "File :" << file << ", line " << uiLine << " : " << message << std::endl;
 
 #ifdef _WIN32
 #ifndef __GNUC__

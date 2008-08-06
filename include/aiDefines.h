@@ -94,4 +94,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	endif
 #endif
 
+#ifdef _DEBUG
+#	define AI_DEBUG_INVALIDATE_PTR(ptr) ptr = 0;
+#else
+#	define AI_DEBUG_INVALIDATE_PTR(ptr)
+#endif
+
 #endif // !! AI_DEFINES_H_INC

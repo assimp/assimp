@@ -41,9 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the MDL importer class */
 
+// internal headers
 #include "MaterialSystem.h"
 #include "HMPLoader.h"
+#include "MD2FileData.h"
 
+// public ASSIMP headers
 #include "../include/DefaultLogger.h"
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
@@ -51,11 +54,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
 
+// boost headers
 #include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
-
-extern float g_avNormals[162][3];
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -103,12 +105,12 @@ void HMPImporter::InternReadFile(
 		throw new ImportErrorException( "Failed to open HMP file " + pFile + ".");
 	}
 
-	// check whether the ply file is large enough to contain
+	// check whether the HMP file is large enough to contain
 	// at least the file header
 	size_t fileSize = file->FileSize();
 	if( fileSize < 50)
 	{
-		throw new ImportErrorException( ".hmp File is too small.");
+		throw new ImportErrorException( "HMP File is too small.");
 	}
 
 	// allocate storage and copy the contents of the file to a memory buffer
@@ -147,9 +149,17 @@ void HMPImporter::InternReadFile(
 	}
 	else
 	{
+		// print the magic word to the logger
+		char szBuffer[5];
+		szBuffer[0] = ((char*)&iMagic)[0];
+		szBuffer[1] = ((char*)&iMagic)[1];
+		szBuffer[2] = ((char*)&iMagic)[2];
+		szBuffer[3] = ((char*)&iMagic)[3];
+		szBuffer[4] = '\0';
+
 		// we're definitely unable to load this file
 		throw new ImportErrorException( "Unknown HMP subformat " + pFile +
-			". Magic word is not known");
+			". Magic word (" + szBuffer + ") is not known");
 	}
 
 	} catch (ImportErrorException* ex) {
@@ -161,39 +171,42 @@ void HMPImporter::InternReadFile(
 	delete[] this->mBuffer;
 	return;
 }
+// ------------------------------------------------------------------------------------------------ 
+void HMPImporter::ValidateHeader_HMP457( )
+{
+	const HMP::Header_HMP5* const pcHeader = (const HMP::Header_HMP5*)this->mBuffer;
 
+	if (120 > this->iFileSize)
+	{
+		throw new ImportErrorException("HMP file is too small (header size is "
+			"120 bytes, this file is smaller)");
+	}
+
+	if (!pcHeader->ftrisize_x || !pcHeader->ftrisize_y)
+	{
+		throw new ImportErrorException("Size of triangles in either  x or y direction is zero");
+	}
+	if(pcHeader->fnumverts_x < 1.0f || (pcHeader->numverts/pcHeader->fnumverts_x) < 1.0f)
+	{
+		throw new ImportErrorException("Number of triangles in either x or y direction is zero");
+	}
+	if(!pcHeader->numframes)
+	{
+		throw new ImportErrorException("There are no frames. At least one should be there");
+	}
+}
 // ------------------------------------------------------------------------------------------------ 
 void HMPImporter::InternReadFile_HMP4( )
 {
 	throw new ImportErrorException("HMP4 is currently not supported");
 }
-
 // ------------------------------------------------------------------------------------------------ 
 void HMPImporter::InternReadFile_HMP5( )
 {
-	throw new ImportErrorException("HMP4 is currently not supported");
-}
-
-// ------------------------------------------------------------------------------------------------ 
-void HMPImporter::InternReadFile_HMP7( )
-{
-	if (120 > this->iFileSize)
-	{
-		throw new ImportErrorException("HMP7 file is too small (header size is "
-			"120 bytes, this file is smaller)");
-	}
-
 	// read the file header and skip everything to byte 84
 	const HMP::Header_HMP5* pcHeader = (const HMP::Header_HMP5*)this->mBuffer;
 	const unsigned char* szCurrent = (const unsigned char*)(this->mBuffer+84);
-
-	if (!pcHeader->ftrisize_x || !pcHeader->ftrisize_y ||
-		pcHeader->fnumverts_x < 1.0f || (pcHeader->numverts/pcHeader->fnumverts_x) < 1.0f ||
-		!pcHeader->numframes)
-	{
-		throw new ImportErrorException("One or more of the values in the HMP7 "
-			"file header are invalid.");
-	}
+	this->ValidateHeader_HMP457();
 
 	// generate an output mesh
 	this->pScene->mNumMeshes = 1;
@@ -206,6 +219,120 @@ void HMPImporter::InternReadFile_HMP7( )
 
 	const unsigned int height = (unsigned int)(pcHeader->numverts / pcHeader->fnumverts_x);
 	const unsigned int width = (unsigned int)pcHeader->fnumverts_x;
+
+	// generate/load a material for the terrain
+	this->CreateMaterial(szCurrent,&szCurrent);
+
+	// goto offset 120, I don't know why ...
+	// (fixme) is this the frame header? I assume yes since it starts with 2. 
+	szCurrent += 36;
+
+	this->SizeCheck(szCurrent + sizeof(const HMP::Vertex_HMP7)*height*width);
+
+	// now load all vertices from the file
+	aiVector3D* pcVertOut = pcMesh->mVertices;
+	aiVector3D* pcNorOut = pcMesh->mNormals;
+	const HMP::Vertex_HMP5* src = (const HMP::Vertex_HMP5*) szCurrent;
+	for (unsigned int y = 0; y < height;++y)
+	{
+		for (unsigned int x = 0; x < width;++x)
+		{
+			pcVertOut->x = x * pcHeader->ftrisize_x;
+			pcVertOut->y = y * pcHeader->ftrisize_y;
+			pcVertOut->z = (((float)src->z / 0xffff)-0.5f) * pcHeader->ftrisize_x * 8.0f; 
+			MD2::LookupNormalIndex(src->normals162index, *pcNorOut );
+			++pcVertOut;++pcNorOut;++src;
+		}
+	}
+
+	// generate texture coordinates if necessary
+	if (pcHeader->numskins)this->GenerateTextureCoords(width,height);
+
+	// now build a list of faces
+	this->CreateOutputFaceList(width,height);	
+
+	// there is no nodegraph in HMP files. Simply assign the one mesh
+	// (no, not the one ring) to the root node
+	this->pScene->mRootNode = new aiNode();
+	this->pScene->mRootNode->mName.Set("terrain_root");
+	this->pScene->mRootNode->mNumMeshes = 1;
+	this->pScene->mRootNode->mMeshes = new unsigned int[1];
+	this->pScene->mRootNode->mMeshes[0] = 0;
+}
+// ------------------------------------------------------------------------------------------------ 
+void HMPImporter::InternReadFile_HMP7( )
+{
+	// read the file header and skip everything to byte 84
+	const HMP::Header_HMP5* const pcHeader = (const HMP::Header_HMP5*)this->mBuffer;
+	const unsigned char* szCurrent = (const unsigned char*)(this->mBuffer+84);
+	this->ValidateHeader_HMP457();
+
+	// generate an output mesh
+	this->pScene->mNumMeshes = 1;
+	this->pScene->mMeshes = new aiMesh*[1];
+	aiMesh* pcMesh = this->pScene->mMeshes[0] = new aiMesh();
+
+	pcMesh->mMaterialIndex = 0;
+	pcMesh->mVertices = new aiVector3D[pcHeader->numverts];
+	pcMesh->mNormals = new aiVector3D[pcHeader->numverts];
+
+	const unsigned int height = (unsigned int)(pcHeader->numverts / pcHeader->fnumverts_x);
+	const unsigned int width = (unsigned int)pcHeader->fnumverts_x;
+
+	// generate/load a material for the terrain
+	this->CreateMaterial(szCurrent,&szCurrent);
+
+	// goto offset 120, I don't know why ...
+	// (fixme) is this the frame header? I assume yes since it starts with 2. 
+	szCurrent += 36;
+
+	this->SizeCheck(szCurrent + sizeof(const HMP::Vertex_HMP7)*height*width);
+
+	// now load all vertices from the file
+	aiVector3D* pcVertOut = pcMesh->mVertices;
+	aiVector3D* pcNorOut = pcMesh->mNormals;
+	const HMP::Vertex_HMP7* src = (const HMP::Vertex_HMP7*) szCurrent;
+	for (unsigned int y = 0; y < height;++y)
+	{
+		for (unsigned int x = 0; x < width;++x)
+		{
+			pcVertOut->x = x * pcHeader->ftrisize_x;
+			pcVertOut->y = y * pcHeader->ftrisize_y;
+
+			// FIXME: What exctly is the correct scaling factor to use?
+			// possibly pcHeader->scale_origin[2] in combination with a
+			// signed interpretation of src->z?
+			pcVertOut->z = (((float)src->z / 0xffff)-0.5f) * pcHeader->ftrisize_x * 8.0f; 
+
+			pcNorOut->x = ((float)src->normal_x / 0x80 ); // * pcHeader->scale_origin[0];
+			pcNorOut->y = ((float)src->normal_y / 0x80 ); // * pcHeader->scale_origin[1];
+			pcNorOut->z = 1.0f;
+			pcNorOut->Normalize();
+			
+			++pcVertOut;++pcNorOut;++src;
+		}
+	}
+
+	// generate texture coordinates if necessary
+	if (pcHeader->numskins)this->GenerateTextureCoords(width,height);
+
+	// now build a list of faces
+	this->CreateOutputFaceList(width,height);	
+
+	// there is no nodegraph in HMP files. Simply assign the one mesh
+	// (no, not the One Ring) to the root node
+	this->pScene->mRootNode = new aiNode();
+	this->pScene->mRootNode->mName.Set("terrain_root");
+	this->pScene->mRootNode->mNumMeshes = 1;
+	this->pScene->mRootNode->mMeshes = new unsigned int[1];
+	this->pScene->mRootNode->mMeshes[0] = 0;
+}
+// ------------------------------------------------------------------------------------------------ 
+void HMPImporter::CreateMaterial(const unsigned char* szCurrent,
+	const unsigned char** szCurrentOut)
+{
+	aiMesh* const pcMesh = this->pScene->mMeshes[0];
+	const HMP::Header_HMP5* const pcHeader = (const HMP::Header_HMP5*)this->mBuffer;
 
 	// we don't need to generate texture coordinates if
 	// we have no textures in the file ...
@@ -225,7 +352,7 @@ void HMPImporter::InternReadFile_HMP7( )
 		pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
 
 		aiColor3D clr;
-		clr.b = clr.g = clr.r = 0.7f;
+		clr.b = clr.g = clr.r = 0.6f;
 		pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_DIFFUSE);
 		pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_SPECULAR);
 
@@ -241,45 +368,14 @@ void HMPImporter::InternReadFile_HMP7( )
 		this->pScene->mMaterials = new aiMaterial*[1];
 		this->pScene->mMaterials[0] = pcHelper;
 	}
+	*szCurrentOut = szCurrent;
+}
+// ------------------------------------------------------------------------------------------------ 
+void HMPImporter::CreateOutputFaceList(unsigned int width,unsigned int height)
+{
+	aiMesh* const pcMesh = this->pScene->mMeshes[0];
 
-	// goto offset 120, I don't know why ...
-	// (fixme) is this the frame header? I assume yes since it starts
-	// with 2. 
-	szCurrent += 36;
-
-	this->SizeCheck(szCurrent + sizeof(const HMP::Vertex_HMP7)*height*width);
-
-	// now load all vertices from the file
-	aiVector3D* pcVertOut = pcMesh->mVertices;
-	aiVector3D* pcNorOut = pcMesh->mNormals;
-	const HMP::Vertex_HMP7* src = (const HMP::Vertex_HMP7*) szCurrent;
-	for (unsigned int y = 0; y < height;++y)
-	{
-		for (unsigned int x = 0; x < width;++x)
-		{
-			pcVertOut->x = x * pcHeader->ftrisize_x;
-			pcVertOut->y = y * pcHeader->ftrisize_y;
-			// FIXME: What exctly is the correct scaling factor to use?
-			// possibly pcHeader->scale_origin[2] in combination with a
-			// signed interpretation of src->z?
-			pcVertOut->z = (((float)src->z / 0xffff)-0.5f) * pcHeader->ftrisize_x * 8.0f; 
-
-			pcNorOut->x = ((float)src->normal_x / 0x80 ); // * pcHeader->scale_origin[0];
-			pcNorOut->y = ((float)src->normal_y / 0x80 ); // * pcHeader->scale_origin[1];
-			pcNorOut->z = 1.0f;
-			pcNorOut->Normalize();
-			
-			++pcVertOut;++pcNorOut;++src;
-		}
-	}
-
-	// generate texture coordinates if necessary
-	if (pcHeader->numskins)
-	{
-		this->GenerateTextureCoords(width,height);
-	}
-
-	// now build a list of faces
+	// allocate enough storage
 	const unsigned int iNumSquares = (width-1) * (height-1);
 	pcMesh->mNumFaces = iNumSquares << 1;
 	pcMesh->mFaces = new aiFace[pcMesh->mNumFaces];
@@ -289,12 +385,13 @@ void HMPImporter::InternReadFile_HMP7( )
 	aiVector3D* pcNormals = new aiVector3D[pcMesh->mNumVertices];
 
 	aiFace* pcFaceOut(pcMesh->mFaces);
-	pcVertOut = pcVertices;
-	pcNorOut = pcNormals;
+	aiVector3D* pcVertOut = pcVertices;
+	aiVector3D* pcNorOut = pcNormals;
 
 	aiVector3D* pcUVs = pcMesh->mTextureCoords[0] ? new aiVector3D[pcMesh->mNumVertices] : NULL;
 	aiVector3D* pcUVOut(pcUVs);
 
+	// build the terrain square
 	unsigned int iCurrent = 0;
 	for (unsigned int y = 0; y < height-1;++y)
 	{
@@ -360,16 +457,6 @@ void HMPImporter::InternReadFile_HMP7( )
 		delete[] pcMesh->mTextureCoords[0];
 		pcMesh->mTextureCoords[0] = pcUVs;
 	}
-
-	// there is no nodegraph in HMP files. Simply assign the one mesh
-	// (no, not the one ring) to the root node
-	this->pScene->mRootNode = new aiNode();
-	this->pScene->mRootNode->mName.Set("terrain_root");
-	this->pScene->mRootNode->mNumMeshes = 1;
-	this->pScene->mRootNode->mMeshes = new unsigned int[1];
-	this->pScene->mRootNode->mMeshes[0] = 0;
-
-	return;
 }
 // ------------------------------------------------------------------------------------------------ 
 void HMPImporter::ReadFirstSkin(unsigned int iNumSkins, const unsigned char* szCursor,
@@ -433,15 +520,16 @@ void HMPImporter::GenerateTextureCoords(
 
 	aiVector3D* uv = this->pScene->mMeshes[0]->mTextureCoords[0];
 
-	const float fX = (1.0f / height) + (1.0f / height) / (height-1);
-	const float fY = (1.0f / width) + (1.0f / width) / (width-1);
+	const float fY = (1.0f / height) + (1.0f / height) / (height-1);
+	const float fX = (1.0f / width) + (1.0f / width) / (width-1);
 
 	for (unsigned int y = 0; y < height;++y)
 	{
 		for (unsigned int x = 0; x < width;++x)
 		{
-			uv->x = fX*x;
 			uv->y = 1.0f-fY*y;
+			uv->x = fX*x;
+			uv->z = 0.0f;
 			++uv;
 		}
 	}

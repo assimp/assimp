@@ -48,6 +48,25 @@ inline unsigned int strtol10( const char* in, const char** out=0)
 	return value;
 }
 
+
+// specal version of the function, providing higher accuracy
+inline uint64_t strtol10_64( const char* in, const char** out=0)
+{
+	uint64_t value = 0;
+
+	while ( 1 )
+	{
+		if ( *in < '0' || *in > '9' )
+			break;
+
+		value = ( value * 10 ) + ( *in - '0' );
+		++in;
+	}
+	if (out)
+		*out = in;
+	return value;
+}
+
 //! Provides a fast function for converting a string into a float,
 //! about 6 times faster than atof in win32.
 // If you find any bugs, please send them to me, niko (at) irrlicht3d.org.
@@ -64,17 +83,24 @@ inline const char* fast_atof_move( const char* c, float& out)
 	}
 
 	//f = (float)strtol(c, &t, 10);
-	f = (float) strtol10 ( c, &c );
+	f = (float) strtol10_64 ( c, &c );
 
 	if (*c == '.')
 	{
 		++c;
 
+		// NOTE: The original implementation is highly unaccurate here
+		// The precision of a single IEEE 754 float is not high enough
+		// everything behind the 6th digit tends to be more inaccurate
+		// than it would need  to be.
+		// Casting to double seems to solve the problem.
+		// strtol_64 is used to prevent integer overflow.
+
 		//float pl = (float)strtol(c, &t, 10);
-		float pl = (float) strtol10 ( c, &t );
+		double pl = (double) strtol10_64 ( c, &t );
 		pl *= fast_atof_table[t-c];
 
-		f += pl;
+		f += (float)pl;
 
 		c = t;
 

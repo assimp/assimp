@@ -50,25 +50,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+// ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 GenFaceNormalsProcess::GenFaceNormalsProcess()
 	{
 	}
 
+// ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 GenFaceNormalsProcess::~GenFaceNormalsProcess()
 	{
 	// nothing to do here
 	}
 
-// -------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool GenFaceNormalsProcess::IsActive( unsigned int pFlags) const
 {
 	return	(pFlags & aiProcess_GenNormals) != 0;
 }
 
-// -------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void GenFaceNormalsProcess::Execute( aiScene* pScene)
 {
@@ -86,10 +88,10 @@ void GenFaceNormalsProcess::Execute( aiScene* pScene)
 			"Face normals have been calculated");
 	}
 	else DefaultLogger::get()->debug("GenFaceNormalsProcess finished. "
-		"There was nothing to do");
+		"Normals are already there");
 }
 
-// -------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
 {
@@ -109,8 +111,8 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
 		aiVector3D pDelta2 = *pV3 - *pV1;
 		aiVector3D vNor = pDelta1 ^ pDelta2;
 
-		if (face.mIndices[1] > face.mIndices[2])
-			vNor *= -1.0f;
+		//if (face.mIndices[1] > face.mIndices[2])
+		//	vNor *= -1.0f;
 
 		for (unsigned int i = 0;i < face.mNumIndices;++i)
 		{

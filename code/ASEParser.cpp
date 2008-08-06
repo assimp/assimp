@@ -55,9 +55,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
 
-// boost headers
-#include <boost/scoped_ptr.hpp>
-
 using namespace Assimp;
 using namespace Assimp::ASE;
 

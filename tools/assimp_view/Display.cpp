@@ -475,7 +475,7 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
 
 	// find out whether this is the default texture or not
 
-	if (piTexture)
+	if (piTexture && *piTexture)
 	{
 		// {9785DA94-1D96-426b-B3CB-BADC36347F5E}
 		static const GUID guidPrivateData = 

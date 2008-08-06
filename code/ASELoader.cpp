@@ -94,7 +94,7 @@ bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 
 	// NOTE: Sometimes the extension .ASK is also used
 	// however, often it only contains static animation skeletons
-	// without the real animations.
+	// without real animations.
 	if (extension[3] != 'e' && extension[3] != 'E' &&
 		extension[3] != 'k' && extension[3] != 'K')return false;
 
@@ -114,14 +114,9 @@ void ASEImporter::InternReadFile(
 	}
 
 	size_t fileSize = file->FileSize();
-
 	std::string::size_type pos = pFile.find_last_of('.');
 	std::string extension = pFile.substr( pos);
-	if(extension[3] == 'k' || extension[3] == 'K')
-	{
-		this->mIsAsk = true;
-	}
-	else this->mIsAsk = false;
+	this->mIsAsk = (extension[3] == 'k' || extension[3] == 'K');
 
 	// allocate storage and copy the contents of the file to a memory buffer
 	// (terminate it with zero)
@@ -132,61 +127,69 @@ void ASEImporter::InternReadFile(
 
 	// construct an ASE parser and parse the file
 	this->mParser = new ASE::Parser((const char*)this->mBuffer);
-	this->mParser->Parse();
-
-	// if absolutely no material has been loaded from the file
-	// we need to generate a default material
-	this->GenerateDefaultMaterial();
-
-	// process all meshes
-	std::vector<aiMesh*> avOutMeshes;
-	avOutMeshes.reserve(this->mParser->m_vMeshes.size()*2);
-	for (std::vector<ASE::Mesh>::iterator
-		i =  this->mParser->m_vMeshes.begin();
-		i != this->mParser->m_vMeshes.end();++i)
+	try
 	{
-		if ((*i).bSkip)continue;
+		this->mParser->Parse();
 
-		// transform all vertices into worldspace
-		// world2obj transform is specified in the
-		// transformation matrix of a scenegraph node
-		this->TransformVertices(*i);
+		// if absolutely no material has been loaded from the file
+		// we need to generate a default material
+		this->GenerateDefaultMaterial();
 
-		// now we need to create proper meshes from the import
-		// we need to split them by materials, build valid vertex/face lists ...
-		this->BuildUniqueRepresentation(*i);
+		// process all meshes
+		std::vector<aiMesh*> avOutMeshes;
+		avOutMeshes.reserve(this->mParser->m_vMeshes.size()*2);
+		for (std::vector<ASE::Mesh>::iterator
+			i =  this->mParser->m_vMeshes.begin();
+			i != this->mParser->m_vMeshes.end();++i)
+		{
+			if ((*i).bSkip)continue;
 
-		// need to generate proper vertex normals if necessary
-		this->GenerateNormals(*i);
+			// transform all vertices into worldspace
+			// world2obj transform is specified in the
+			// transformation matrix of a scenegraph node
+			this->TransformVertices(*i);
 
-		// convert all meshes to aiMesh objects
-		this->ConvertMeshes(*i,avOutMeshes);
+			// now we need to create proper meshes from the import we need to 
+			// split them by materials, build valid vertex/face lists ...
+			this->BuildUniqueRepresentation(*i);
+
+			// need to generate proper vertex normals if necessary
+			this->GenerateNormals(*i);
+
+			// convert all meshes to aiMesh objects
+			this->ConvertMeshes(*i,avOutMeshes);
+		}
+
+		// now build the output mesh list. remove dummies
+		pScene->mNumMeshes = (unsigned int)avOutMeshes.size();
+		aiMesh** pp = pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
+		for (std::vector<aiMesh*>::const_iterator
+			i =  avOutMeshes.begin();
+			i != avOutMeshes.end();++i)
+		{
+			if (!(*i)->mNumFaces)continue;
+			*pp++ = *i;
+		}
+		pScene->mNumMeshes = (unsigned int)(pp - pScene->mMeshes);
+
+		// buil final material indices (remove submaterials and make the final list)
+		this->BuildMaterialIndices();
+
+		// build the final node graph
+		this->BuildNodes();
+
+		// build output animations
+		this->BuildAnimations();
+
 	}
-	
-	// now build the output mesh list. remove dummies
-	pScene->mNumMeshes = (unsigned int)avOutMeshes.size();
-	aiMesh** pp = pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
-	for (std::vector<aiMesh*>::const_iterator
-		i =  avOutMeshes.begin();
-		i != avOutMeshes.end();++i)
+	catch (ImportErrorException* ex)
 	{
-		if (!(*i)->mNumFaces)continue;
-		*pp++ = *i;
+		delete this->mParser; AI_DEBUG_INVALIDATE_PTR( this->mParser );
+		delete[] this->mBuffer; AI_DEBUG_INVALIDATE_PTR( this->mBuffer );
+		throw ex;
 	}
-	pScene->mNumMeshes = (unsigned int)(pp - pScene->mMeshes);
-
-	// buil final material indices (remove submaterials and make the final list)
-	this->BuildMaterialIndices();
-
-	// build the final node graph
-	this->BuildNodes();
-
-	// build output animations
-	this->BuildAnimations();
-
-	// delete the ASE parser
-	delete this->mParser;
-	this->mParser = NULL;
+	delete this->mParser; AI_DEBUG_INVALIDATE_PTR( this->mParser );
+	delete[] this->mBuffer; AI_DEBUG_INVALIDATE_PTR( this->mBuffer );
 	return;
 }
 // ------------------------------------------------------------------------------------------------
@@ -333,11 +336,7 @@ void ASEImporter::AddNodes(aiNode* pcParent,const char* szName,
 
 		aiMatrix4x4 mParentAdjust  = decompTrafo.mMatrix;
 		mParentAdjust.Inverse();
-		//if(ComputeLocalToWorldShift(mParentAdjust, decompTrafo, mesh.inherit))
-		{
-			node->mTransformation = mParentAdjust*mesh.mTransform;
-		}
-		//else node->mTransformation = mesh.mTransform;
+		node->mTransformation = mParentAdjust*mesh.mTransform;
 		
 		// Transform all vertices of the mesh back into their local space -> 
 		// at the moment they are pretransformed
@@ -351,8 +350,6 @@ void ASEImporter::AddNodes(aiNode* pcParent,const char* szName,
 			*pvCurPtr = mInverse * (*pvCurPtr);
 			pvCurPtr++;
 		}
-
-		//pcMesh->mColors[2] = NULL;
 
 		// add sub nodes
 		aiMatrix4x4 mNewAbs = decompTrafo.mMatrix * node->mTransformation;
@@ -1242,8 +1239,7 @@ void ASEImporter::GenerateNormals(ASE::Mesh& mesh)
 					vNormals += mesh.mNormals[(*a)];
 					fDiv += 1.0f;
 				}
-				vNormals.x /= fDiv;vNormals.y /= fDiv;vNormals.z /= fDiv;
-				vNormals.Normalize();
+				vNormals /= fDiv;
 				avNormals[(*i).mIndices[c]] = vNormals;
 				poResult.clear();
 			}

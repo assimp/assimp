@@ -108,6 +108,7 @@ void ValidateDSProcess::ReportError(const char* msg,...)
 		throw new ImportErrorException("Idiot ... learn coding!");
 	}
 	va_end(args);
+	ai_assert(false);
 	throw new ImportErrorException("Validation failed: " + std::string(szBuffer,iLen));
 }
 // ------------------------------------------------------------------------------------------------
@@ -357,6 +358,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 		{
 			if (!pMesh->mBones[i])
 			{
+				delete[] afSum;
 				this->ReportError("aiMesh::mBones[%i] is NULL (aiMesh::mNumBones is %i)",
 					i,pMesh->mNumBones);
 			}
@@ -366,6 +368,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 			{
 				if (pMesh->mBones[i]->mName == pMesh->mBones[a]->mName)
 				{
+					delete[] afSum;
 					this->ReportError("aiMesh::mBones[%i] has the same name as "
 						"aiMesh::mBones[%i]",i,a);
 				}
@@ -376,9 +379,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 		{
 			if (afSum[i] && (afSum[i] <= 0.995 || afSum[i] >= 1.005))
 			{
-				delete[] afSum;
-				this->ReportError("aiMesh::mVertices[%i]: The sum of all bone "
-					"weights isn't 1.0f (sum is %f)",i,afSum[i]);
+				this->ReportWarning("aiMesh::mVertices[%i]: bone weight sum != 1.0 (sum is %f)",i,afSum[i]);
 			}
 		}
 		delete[] afSum;
@@ -457,9 +458,9 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 	for (unsigned int i = 0; i < pMaterial->mNumProperties;++i)
 	{
 		aiMaterialProperty* prop = pMaterial->mProperties[i];
-		if (0 == ASSIMP_strincmp( prop->mKey->data, szBaseBuf, iLen ))
+		if (0 == ASSIMP_strincmp( prop->mKey.data, szBaseBuf, iLen ))
 		{
-			const char* sz = &prop->mKey->data[iLen];
+			const char* sz = &prop->mKey.data[iLen];
 			if (*sz)
 			{
 				++sz;
@@ -488,12 +489,12 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 	for (unsigned int i = 0; i < pMaterial->mNumProperties;++i)
 	{
 		aiMaterialProperty* prop = pMaterial->mProperties[i];
-		if (0 == ASSIMP_strincmp( prop->mKey->data, szBaseBuf, iLen ))
+		if (0 == ASSIMP_strincmp( prop->mKey.data, szBaseBuf, iLen ))
 		{
 			if (aiPTI_Integer != prop->mType || sizeof(int) > prop->mDataLength)
 				this->ReportError("Material property %s is expected to be an integer",prop->mKey);
 
-			const char* sz = &prop->mKey->data[iLen];
+			const char* sz = &prop->mKey.data[iLen];
 			if (*sz)
 			{
 				++sz;
@@ -546,7 +547,8 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 		// check all predefined types
 		if (aiPTI_String == prop->mType)
 		{
-			if (prop->mDataLength < sizeof(aiString))
+			// FIX: strings are now stored in a less expensive way ...
+			if (prop->mDataLength < sizeof(size_t) + ((const aiString*)prop->mData)->length + 1)
 			{
 				this->ReportError("aiMaterial::mProperties[%i].mDataLength is "
 					"too small to contain a string (%i, needed: %i)",

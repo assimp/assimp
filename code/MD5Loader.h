@@ -39,21 +39,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-/** @file Definition of the .MD5 importer class. */
+/** @file Definition of the .MD5 importer class.
+http://www.modwiki.net/wiki/MD5_(file_format)
+*/
 #ifndef AI_MD5LOADER_H_INCLUDED
 #define AI_MD5LOADER_H_INCLUDED
 
 #include "BaseImporter.h"
+#include "MD5Parser.h"
+
 #include "../include/aiTypes.h"
 
-struct aiNode;
-#include "MD5FileData.h"
+namespace Assimp	{
 
-namespace Assimp
-{
-class MaterialHelper;
-
-using namespace MD5;
+class IOStream;
+using namespace Assimp::MD5;
 
 // ---------------------------------------------------------------------------
 /** Used to load MD5 files
@@ -96,11 +96,57 @@ protected:
 
 protected:
 
-	/** Header of the MD5 file */
-	const MD5::Header* m_pcHeader;
+
+	// -------------------------------------------------------------------
+	/** Load the *.MD5MESH file.
+	 * Must be called at first.
+	*/
+	void LoadMD5MeshFile ();
+
+	// -------------------------------------------------------------------
+	/** Load the *.MD5ANIM file.
+	*/
+	void LoadMD5AnimFile ();
+
+	// -------------------------------------------------------------------
+	/** Load the contents of a specific file into memory and
+	 *  alocates a buffer to keep it.
+	 *
+	 *  mBuffer is changed to point to this buffer.
+	 *  Don't forget to delete it later ...
+	 *  @param pFile File stream to be read
+	*/
+	void LoadFileIntoMemory (IOStream* pFile);
+	void UnloadFileFromMemory ();
+
+
+	/** IOSystem to be used to access files */
+	IOSystem* mIOHandler;
+
+	/** Path to the file, excluding the file extension but
+	    with the dot */
+	std::string mFile;
 
 	/** Buffer to hold the loaded file */
-	const unsigned char* mBuffer;
+	char* mBuffer;
+
+	/** Size of the file */
+	unsigned int fileSize;
+
+	/** Current line number. For debugging purposes */
+	unsigned int iLineNumber;
+
+	/** Scene to be filled */
+	aiScene* pScene;
+
+	/** (Custom) I/O handler implementation */
+	IOSystem* pIOHandler;
+
+	/** true if the MD5MESH file has already been parsed */
+	bool bHadMD5Mesh;
+
+	/** true if the MD5ANIM file has already been parsed */
+	bool bHadMD5Anim;
 };
 
 } // end of namespace Assimp

@@ -265,7 +265,7 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
 						aiBone* pc = new aiBone();
 						pcMesh->mBones[pcMesh->mNumBones++] = pc;
 						pc->mName = aiString(bone->mName);
-						pc->mNumWeights = avTempWeights.size();
+						pc->mNumWeights = (unsigned int)avTempWeights.size();
 						pc->mOffsetMatrix = bone->mOffsetMatrix;
 
 						// no need to reallocate the array for the last submesh.
@@ -615,7 +615,7 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
 						*ppCurrent++ = pcOut = new aiBone();
 						pcOut->mName = aiString(pcOldBone->mName);
 						pcOut->mOffsetMatrix = pcOldBone->mOffsetMatrix;
-						pcOut->mNumWeights = pcWeightList->size();
+						pcOut->mNumWeights = (unsigned int)pcWeightList->size();
 						pcOut->mWeights = new aiVertexWeight[pcOut->mNumWeights];
 
 						// copy the vertex weights

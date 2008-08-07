@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_BYTESWAP_H_INC
 
 #include "../include/aiAssert.h"
+#include "../include/aiTypes.h"
 
 namespace Assimp
 {
@@ -61,26 +62,39 @@ class ByteSwap
 public:
 	//! Swap the byte oder of 2 byte of data
 	//! \param szOut Buffer to be swapped
-	static inline void Swap2(char* szOut)
+	static inline void Swap2(void* _szOut)
 	{
-		ai_assert(NULL != szOut);
+		ai_assert(NULL != _szOut);
+		int8_t* szOut = (int8_t*)_szOut;
 		std::swap(szOut[0],szOut[1]);
 	}
 
 	//! Swap the byte oder of 4 byte of data
 	//! \param szOut Buffer to be swapped
-	static inline void Swap4(char* szOut)
+	static inline void Swap4(void* _szOut)
 	{
-		ai_assert(NULL != szOut);
+#if _MSC_VER >= 1400 && (defined _M_X86)
+		__asm
+		{
+			mov edi, _szOut
+			mov eax, dword_ptr[edi]
+			bswap eax
+			mov dword_ptr[edi], eax
+		};
+#else
+		ai_assert(NULL != _szOut);
+		int8_t* szOut = (int8_t*)_szOut;
 		std::swap(szOut[0],szOut[3]);
 		std::swap(szOut[1],szOut[2]);
+#endif
 	}
 
 	//! Swap the byte oder of 8 byte of data
 	//! \param szOut Buffer to be swapped
-	static inline void Swap8(char* szOut)
+	static inline void Swap8(void* _szOut)
 	{
-		ai_assert(NULL != szOut);
+		ai_assert(NULL != _szOut);
+		int8_t* szOut = (int8_t*)_szOut;
 		std::swap(szOut[0],szOut[7]);
 		std::swap(szOut[1],szOut[6]);
 		std::swap(szOut[2],szOut[5]);
@@ -91,47 +105,54 @@ public:
 	//! \param fOut Float value to be swapped
 	static inline void Swap(float* fOut)
 	{
-		Swap4((char*)fOut);
+		Swap4(fOut);
 	}
 
 	//! Swap a double precision float
 	//! \param fOut Double value to be swapped
 	static inline void Swap(double* fOut)
 	{
-		Swap8((char*)fOut);
+		Swap8(fOut);
 	}
 
 	//! Swap a 16 bit integer
 	//! \param fOut Integer to be swapped
 	static inline void Swap(int16_t* fOut)
 	{
-		Swap2((char*)fOut);
+		Swap2(fOut);
 	}
 
 	//! Swap a 32 bit integer
 	//! \param fOut Integer to be swapped
 	static inline void Swap(int32_t* fOut)	
 	{
-		Swap4((char*)fOut);
+		Swap4(fOut);
 	}
 
 	//! Swap a 64 bit integer
 	//! \param fOut Integer to be swapped
 	static inline void Swap(int64_t* fOut)
 	{
-		Swap8((char*)fOut);
+		Swap8(fOut);
 	}
 };
 };
 
-// byteswap macros for BigEndian support 
+// byteswap macros for BigEndian/LittleEndian support 
 #if (defined AI_BUILD_BIG_ENDIAN)
-#	define AI_SWAP2(p) ByteSwap::Swap2((char*)&(p))
-#	define AI_SWAP4(p) ByteSwap::Swap4((char*)&(p))
-#	define AI_SWAP8(p) ByteSwap::Swap8((char*)&(p))
-#	define AI_SWAP2P(p) ByteSwap::Swap2((char*)(p))
-#	define AI_SWAP4P(p) ByteSwap::Swap4((char*)(p))
-#	define AI_SWAP8P(p) ByteSwap::Swap8((char*)(p))
+#	define AI_LSWAP2(p)
+#	define AI_LSWAP4(p)
+#	define AI_LSWAP8(p)
+#	define AI_LSWAP2P(p)
+#	define AI_LSWAP4P(p)
+#	define AI_LSWAP8P(p)
+#	define LE_NCONST const
+#	define AI_SWAP2(p) ByteSwap::Swap2(&(p))
+#	define AI_SWAP4(p) ByteSwap::Swap4(&(p))
+#	define AI_SWAP8(p) ByteSwap::Swap8(&(p))
+#	define AI_SWAP2P(p) ByteSwap::Swap2((p))
+#	define AI_SWAP4P(p) ByteSwap::Swap4((p))
+#	define AI_SWAP8P(p) ByteSwap::Swap8((p))
 #	define BE_NCONST
 #else
 #	define AI_SWAP2(p)
@@ -141,7 +162,15 @@ public:
 #	define AI_SWAP4P(p)
 #	define AI_SWAP8P(p)
 #	define BE_NCONST const
+#	define AI_LSWAP2(p)		ByteSwap::Swap2(&(p))
+#	define AI_LSWAP4(p)		ByteSwap::Swap4(&(p))
+#	define AI_LSWAP8(p)		ByteSwap::Swap8(&(p))
+#	define AI_LSWAP2P(p)	ByteSwap::Swap2((p))
+#	define AI_LSWAP4P(p)	ByteSwap::Swap4((p))
+#	define AI_LSWAP8P(p)	ByteSwap::Swap8((p))
+#	define LE_NCONST
 #endif
+
 
 
 #endif //!! AI_BYTESWAP_H_INC

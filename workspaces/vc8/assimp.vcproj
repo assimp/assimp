@@ -735,6 +735,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\IFF.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\ImproveCacheLocality.h"
 				>
 			</File>
@@ -1042,6 +1046,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="LWO"
+				>
+				<File
+					RelativePath="..\..\code\LWOFileData.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\LWOLoader.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="sources"
@@ -1315,6 +1331,14 @@
 				>
 				<File
 					RelativePath="..\..\code\STLLoader.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="LWO"
+				>
+				<File
+					RelativePath="..\..\code\LWOLoader.cpp"
 					>
 				</File>
 			</Filter>

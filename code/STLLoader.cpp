@@ -347,6 +347,7 @@ bool STLImporter::LoadBinaryFile()
 		sz += sizeof(aiVector3D);
 		*(vn+1) = *vn;
 		*(vn+2) = *vn;
+		vn += 3;
 
 		*vp++ = *((aiVector3D*)sz);
 		sz += sizeof(aiVector3D);

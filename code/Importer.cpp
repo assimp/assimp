@@ -98,6 +98,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AI_BUILD_NO_STL_IMPORTER)
 #	include "STLLoader.h"
 #endif
+#if (!defined AI_BUILD_NO_LWO_IMPORTER)
+#	include "LWOLoader.h"
+#endif
 
 // PostProcess-Steps
 #if (!defined AI_BUILD_NO_CALCTANGENTS_PROCESS)
@@ -194,6 +197,9 @@ Importer::Importer() :
 #endif
 #if (!defined AI_BUILD_NO_STL_IMPORTER)
 	mImporter.push_back( new STLImporter());
+#endif
+#if (!defined AI_BUILD_NO_LWO_IMPORTER)
+	mImporter.push_back( new LWOImporter());
 #endif
 
 	// add an instance of each post processing step here in the order 

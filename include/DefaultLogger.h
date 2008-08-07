@@ -41,7 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AI_DEFAULTLOGGER_H_INCLUDED)
 #define AI_DEFAULTLOGGER_H_INCLUDED
 
-#include "../include/Logger.h"
+#include "Logger.h"
+#include "NullLogger.h"
 #include <vector>
 
 namespace Assimp
@@ -49,38 +50,6 @@ namespace Assimp
 // ---------------------------------------------------------------------------
 class IOStream;
 struct LogStreamInfo;
-
-
-// ---------------------------------------------------------------------------
-/**	@class	NullLogger
- *	@brief	Empty logging implementation. Does nothing. Used by default
- *  if the application hasn't specified a custom logger (or DefaultLogger)
- *  via DefaultLogger::set() or DefaultLogger::create();
- */
-class NullLogger : public Logger 
-{
-public:
-	/**	@brief	Logs a debug message */
-	void debug(const std::string &message) {}
-
-	/**	@brief	Logs an info message */
-	void info(const std::string &message) {}
-
-	/**	@brief	Logs a warning message */
-	void warn(const std::string &message) {}
-	
-	/**	@brief	Logs an error message */
-	void error(const std::string &message) {}
-
-	/** @brief Log severity setter */
-	void setLogSeverity(LogSeverity log_severity) {}
-
-	/**	@brief	Detach a still attached stream from logger */
-	void attachStream(LogStream *pStream, unsigned int severity) {}
-
-	/**	@brief	Detach a still attached stream from logger */
-	void detatchStream(LogStream *pStream, unsigned int severity) {}
-};
 
 
 // ---------------------------------------------------------------------------

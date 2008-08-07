@@ -305,6 +305,11 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 				abRefList[face.mIndices[a]] = true;
 			}
 		}
+		// check whether there are vertices that aren't referenced by a face
+		for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
+		{
+			if (!abRefList[i])this->ReportError("aiMesh::mVertices[%i] is not referenced",i);
+		}
 		abRefList.clear();
 
 		// texture channel 2 may not be set if channel 1 is zero ...
@@ -390,6 +395,11 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh,
 	const aiBone* pBone,float* afSum)
 {
 	this->Validate(&pBone->mName);
+
+   	if (!pBone->mNumWeights)
+	{
+		this->ReportError("aiBone::mNumWeights is zero");
+	}
 
 	// check whether all vertices affected by this bone are valid
 	for (unsigned int i = 0; i < pBone->mNumWeights;++i)
@@ -641,6 +651,15 @@ void ValidateDSProcess::Validate( const aiTexture* pTexture)
 				"without a leading dot (format hint: %s).",szTemp);
 		}
 	}
+
+	const char* sz = pTexture->achFormatHint;
+ 	if (	sz[0] >= 'A' && sz[0] <= 'Z' ||
+		sz[1] >= 'A' && sz[1] <= 'Z' ||
+		sz[2] >= 'A' && sz[2] <= 'Z' ||
+		sz[3] >= 'A' && sz[3] <= 'Z')
+	{
+		this->ReportError("aiTexture::achFormatHint contains non-lowercase characters");
+	}
 }
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
@@ -679,6 +698,7 @@ __break_out:
 			this->ReportError("aiBoneAnim::mPositionKeys is NULL (aiBoneAnim::mNumPositionKeys is %i)",
 				pBoneAnim->mNumPositionKeys);
 		}
+		double dLast = -0.1;
 		for (unsigned int i = 0; i < pBoneAnim->mNumPositionKeys;++i)
 		{
 			if (pBoneAnim->mPositionKeys[i].mTime > pAnimation->mDuration)
@@ -688,6 +708,14 @@ __break_out:
 					(float)pBoneAnim->mPositionKeys[i].mTime,
 					(float)pAnimation->mDuration);
 			}
+			if (pBoneAnim->mPositionKeys[i].mTime <= dLast)
+			{
+				this->ReportError("aiBoneAnim::mPositionKeys[%i].mTime (%.5f) is larger "
+					"than aiAnimation::mPositionKeys[%i] (which is %.5f)",i,
+					(float)pBoneAnim->mPositionKeys[i].mTime,
+					i, (float)dLast);
+			}
+			dLast = pBoneAnim->mPositionKeys[i].mTime;
 		}
 	}
 	// rotation keys
@@ -698,6 +726,7 @@ __break_out:
 			this->ReportError("aiBoneAnim::mRotationKeys is NULL (aiBoneAnim::mNumRotationKeys is %i)",
 				pBoneAnim->mNumRotationKeys);
 		}
+		double dLast = -0.1;
 		for (unsigned int i = 0; i < pBoneAnim->mNumRotationKeys;++i)
 		{
 			if (pBoneAnim->mRotationKeys[i].mTime > pAnimation->mDuration)
@@ -707,6 +736,14 @@ __break_out:
 					(float)pBoneAnim->mRotationKeys[i].mTime,
 					(float)pAnimation->mDuration);
 			}
+			if (pBoneAnim->mRotationKeys[i].mTime <= dLast)
+			{
+				this->ReportError("aiBoneAnim::mRotationKeys[%i].mTime (%.5f) is larger "
+					"than aiAnimation::mRotationKeys[%i] (which is %.5f)",i,
+					(float)pBoneAnim->mRotationKeys[i].mTime,
+					i, (float)dLast);
+			}
+			dLast = pBoneAnim->mRotationKeys[i].mTime;
 		}
 	}
 	// scaling keys
@@ -717,6 +754,7 @@ __break_out:
 			this->ReportError("aiBoneAnim::mScalingKeys is NULL (aiBoneAnim::mNumScalingKeys is %i)",
 				pBoneAnim->mNumScalingKeys);
 		}
+		double dLast = -0.1;
 		for (unsigned int i = 0; i < pBoneAnim->mNumScalingKeys;++i)
 		{
 			if (pBoneAnim->mScalingKeys[i].mTime > pAnimation->mDuration)
@@ -726,6 +764,14 @@ __break_out:
 					(float)pBoneAnim->mScalingKeys[i].mTime,
 					(float)pAnimation->mDuration);
 			}
+			if (pBoneAnim->mScalingKeys[i].mTime <= dLast)
+			{
+				this->ReportError("aiBoneAnim::mScalingKeys[%i].mTime (%.5f) is larger "
+					"than aiAnimation::mScalingKeys[%i] (which is %.5f)",i,
+					(float)pBoneAnim->mScalingKeys[i].mTime,
+					i, (float)dLast);
+			}
+			dLast = pBoneAnim->mScalingKeys[i].mTime;
 		}
 	}
 }

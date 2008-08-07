@@ -124,5 +124,24 @@ public:
 };
 };
 
+// byteswap macros for BigEndian support 
+#if (defined AI_BUILD_BIG_ENDIAN)
+#	define AI_SWAP2(p) ByteSwap::Swap2((char*)&(p))
+#	define AI_SWAP4(p) ByteSwap::Swap4((char*)&(p))
+#	define AI_SWAP8(p) ByteSwap::Swap8((char*)&(p))
+#	define AI_SWAP2P(p) ByteSwap::Swap2((char*)(p))
+#	define AI_SWAP4P(p) ByteSwap::Swap4((char*)(p))
+#	define AI_SWAP8P(p) ByteSwap::Swap8((char*)(p))
+#	define BE_NCONST
+#else
+#	define AI_SWAP2(p)
+#	define AI_SWAP4(p)
+#	define AI_SWAP8(p)
+#	define AI_SWAP2P(p)
+#	define AI_SWAP4P(p)
+#	define AI_SWAP8P(p)
+#	define BE_NCONST const
+#endif
+
 
 #endif //!! AI_BYTESWAP_H_INC

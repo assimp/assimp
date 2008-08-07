@@ -41,8 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the JNI API for jAssimp */
 
-#if (defined ASSIMP_JNI_EXPORT)
-
 #include "JNIEnvironment.h"
 #include "JNILogger.h"
 
@@ -51,36 +49,11 @@ using namespace Assimp;
 namespace Assimp	{
 namespace JNIBridge		{
 
-
-/*static*/ jclass JNIEnvironment::Class_java_lang_String = 0;
-/*static*/ jmethodID JNIEnvironment::MID_String_getBytes = 0;
-/*static*/ jmethodID JNIEnvironment::MID_String_init = 0;
-
-
 // ------------------------------------------------------------------------------------------------
 bool JNIEnvironment::AttachToCurrentThread (JNIEnv* pcEnv)
 {
 	ai_assert(NULL != pcEnv);
 
-	// first initialize some members
-	if (0 == Class_java_lang_String)
-	{
-		if( 0 == (Class_java_lang_String = pcEnv->FindClass("java.lang.String")))
-			return false;
-	}
-	if (0 == MID_String_getBytes)
-	{
-		if( 0 == (MID_String_getBytes = pcEnv->GetStaticMethodID(
-			Class_java_lang_String,"getBytes","()[byte")))
-			return false;
-	}
-	if (0 == MID_String_init)
-	{
-		if( 0 == (MID_String_init = pcEnv->GetStaticMethodID(
-			Class_java_lang_String,"String","([byte)V")))
-			return false;
-	}
-	
 	// now initialize the thread-local storage
 	if (NULL == this->ptr.get())
 	{
@@ -96,6 +69,10 @@ bool JNIEnvironment::AttachToCurrentThread (JNIEnv* pcEnv)
 
 	// attach the logger
 	((JNILogDispatcher*)DefaultLogger::get())->OnAttachToCurrentThread(this->ptr.get());
+
+
+	// get handles to all methods/fields/classes
+	this->Initialize();
 
 	return true;
 }
@@ -127,6 +104,33 @@ JNIThreadData* JNIEnvironment::GetThread()
 	return this->ptr.get();
 }
 // ------------------------------------------------------------------------------------------------
+void JNIEnvironment::_java::_lang::_String::Initialize()
+{
+	JNIEnv* pcEnv = JJNIEnvironment::Get()->GetThread()->m_pcEnv;
+
+	// first initialize some members
+	if( !(this->Class = pcEnv->FindClass("java.lang.String")))
+		JNIEnvironment::Get()->ThrowException("Unable to get handle of class java.lang.String");
+	
+	if( !(this->getBytes = pcEnv->GetMethodID(this->Class,"getBytes","()[byte")))
+		JNIEnvironment::Get()->ThrowException("Unable to get handle of class java.lang.String");
+
+	if( !(this->constructor_ByteArray = pcEnv->GetStaticMethodID(
+		this->Class,"<init>","([byte)V")))
+		JNIEnvironment::Get()->ThrowException("Unable to get handle of class java.lang.String");
+}
+// ------------------------------------------------------------------------------------------------
+void JNIEnvironment::_java::_lang::_Array::Initialize()
+{
+	JNIEnv* pcEnv = JJNIEnvironment::Get()->GetThread()->m_pcEnv;
+
+	if( !(this->FloatArray_Class = pcEnv->FindClass("[F")))
+		JNIEnvironment::Get()->ThrowException("Unable to get handle of class float[]");
+
+	if( !(this->IntArray_Class = pcEnv->FindClass("[I")))
+		JNIEnvironment::Get()->ThrowException("Unable to get handle of class int[]");
+}
+// ------------------------------------------------------------------------------------------------
 jstring JNU_NewStringNative(JNIEnv *env, const char *str)
 {
 	jstring result;
@@ -142,8 +146,8 @@ jstring JNU_NewStringNative(JNIEnv *env, const char *str)
 	{
 		env->SetByteArrayRegion(bytes, 0, len,
 			(jbyte *)str);
-		result = (jstring)env->NewObject(JNIEnvironment::Class_java_lang_String,
-			JNIEnvironment::MID_String_init, bytes);
+		result = (jstring)env->NewObject(AIJ_GET_HANDLE(java.lang.String.Class),
+			AIJ_GET_HANDLE(java.lang.String.constructor_ByteArray), bytes);
 		env->DeleteLocalRef(bytes);
 		return result;
 	} /* else fall through */
@@ -160,7 +164,7 @@ char *JNU_GetStringNativeChars(JNIEnv *env, jstring jstr)
 		return 0; /* out of memory error */
 	}
 
-	bytes = (jbyteArray)env->CallObjectMethod(jstr,JNIEnvironment::MID_String_getBytes);
+	bytes = (jbyteArray)env->CallObjectMethod(jstr,AIJ_GET_HANDLE(java.lang.String.getBytes));
 	exc = env->ExceptionOccurred();
 	if (!exc)
 	{
@@ -182,7 +186,23 @@ char *JNU_GetStringNativeChars(JNIEnv *env, jstring jstr)
 	env->DeleteLocalRef(bytes);
 	return result;
 }
+// ------------------------------------------------------------------------------------------------
+JNU_CopyDataToArray(jarray jfl, void* data, unsigned int size)
+{
+	void* pf;
+	jboolean iscopy = FALSE;
+
+	// lock the array and get direct access to its buffer
+	if(!pf = pc->GetPrimitiveArrayCritical(jfl,&iscopy))
+		JNIEnvironment::Get()->ThrowNativeError("Unable to lock array");
+
+	// copy the data to the array
+	::memcpy(pf,data,size);
+
+	// release our reference to the array
+	pc->ReleasePrimitiveArrayCritical(jfl,pf,0);
+}
 
 };};
 
-#endif // ! JNI only
+

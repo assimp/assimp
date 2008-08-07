@@ -57,6 +57,78 @@ import java.io.IOException;
  */
 public class DumpToFile {
 
+
+    /**
+     * Count all nodes recursively
+     *
+     * @param node Current node
+     * @return Number of nodes
+     */
+    public static int CountNodes(Node node) {
+
+        int ret = 1;
+        if (0 != node.getNumChildren()) {
+            for (Node n : node.getChildren()) {
+
+                ret += CountNodes(n);
+            }
+        }
+        return ret;
+    }
+
+
+    /**
+     * Print all nodes recursively
+     *
+     * @param node   Current node
+     * @param stream Output stream
+     * @param suffix Suffix to all output
+     * @throws IOException yes ... sometimes ... :-)
+     */
+    public static void PrintNodes(Node node, FileWriter stream, String suffix) throws IOException {
+        String suffNew = suffix + "\t";
+        stream.write(suffix + node.getName() + "\n");
+
+        // print all meshes
+        if (0 != node.getNumMeshes()) {
+            stream.write(suffNew + "Meshes: ");
+
+            for (int i : node.getMeshes()) {
+
+                stream.write(i + " ");
+            }
+            stream.write("\n");
+        }
+
+        // print all children
+        if (0 != node.getNumChildren()) {
+            for (Node n : node.getChildren()) {
+
+                PrintNodes(n, stream, suffNew);
+            }
+        }
+    }
+
+
+    /**
+     * Saves an embedded texture image as TrueVision Targa file
+     *
+     * @param texture Texture to be exported
+     * @param path    Output path
+     * @throws IOException yes ... sometimes ... :-)
+     */
+    public static void SaveTextureToTGA(Texture texture, String path) throws IOException {
+
+    }
+
+
+    /**
+     * Entry point of the application
+     *
+     * @param arguments The first argument is the name of the
+     *                  mesh to be opened, the second is te name of the primary output file.
+     * @throws IOException
+     */
     public static void Main(String[] arguments) throws IOException {
 
         /* Use output.txt as default output file if none was specified
@@ -67,7 +139,20 @@ public class DumpToFile {
             arguments = new String[2];
             arguments[0] = s;
             arguments[1] = "output.txt";
-        } else if (2 != arguments.length) return;
+        } else if (2 != arguments.length) {
+            System.exit(-5);
+        }
+
+        int iLen;
+        if ((iLen = arguments[1].length()) < 4 ||
+                arguments[1].charAt(iLen - 1) != 't' ||
+                arguments[1].charAt(iLen - 2) != 'x' ||
+                arguments[1].charAt(iLen - 3) != 't' ||
+                arguments[1].charAt(iLen - 4) != '.') {
+            System.out.println("The output path must have .txt as file extension");
+            System.exit(-10);
+            return;
+        }
 
         FileWriter stream;
         try {
@@ -75,20 +160,21 @@ public class DumpToFile {
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Unable to open output file");
-            throw e;
+            System.exit(-15);
+            return;
         }
 
         /* Try to create an instance of class assimp.Importer.
-         * The constructor throws an assimp.NativeError exception
+         * The constructor throws an assimp.NativeException exception
          * if the native jAssimp library is not available.It must
          * be placed in the jar/class directory of the application
          */
         Importer imp;
         try {
             imp = new Importer();
-        } catch (NativeError nativeError) {
-            nativeError.printStackTrace();
-            System.out.println("NativeError exception [#1]: " + nativeError.getMessage());
+        } catch (NativeException nativeException) {
+            nativeException.printStackTrace();
+            System.out.println("NativeException exception [#1]: " + nativeException.getMessage());
             return;
         }
 
@@ -101,8 +187,9 @@ public class DumpToFile {
         imp.addPostProcessStep(PostProcessStep.CalcTangentSpace);
         imp.addPostProcessStep(PostProcessStep.GenSmoothNormals);
         imp.addPostProcessStep(PostProcessStep.JoinIdenticalVertices);
+        imp.addPostProcessStep(PostProcessStep.FixInfacingNormals);
 
-        /* Load the asset into memory. Again, a NativeError exception
+        /* Load the asset into memory. Again, a NativeException exception
          * could be thrown if an unexpected errors occurs in the
          * native interface. If assimp is just unable to load the asset
          * null is the return value and no exception is thrown
@@ -110,9 +197,9 @@ public class DumpToFile {
         Scene scene;
         try {
             scene = imp.readFile(arguments[0]);
-        } catch (NativeError nativeError) {
-            nativeError.printStackTrace();
-            System.out.println("NativeError exception [#2] :" + nativeError.getMessage());
+        } catch (NativeException nativeException) {
+            nativeException.printStackTrace();
+            System.out.println("NativeException exception [#2] :" + nativeException.getMessage());
             return;
         }
         if (null == scene) {
@@ -122,61 +209,198 @@ public class DumpToFile {
 
         /* Now iterate through all meshes that have been loaded
          */
-        int iMesh = 0;
-        for (Mesh mesh : scene.getMeshes()) {
+        if (0 != scene.getNumMeshes()) {
+            for (Mesh mesh : scene.getMeshes()) {
 
-            stream.write("Mesh " + iMesh + "\n");
-            stream.write("\tNum Vertices: " + mesh.getNumVertices() + "\n");
-            stream.write("\tNum Faces: " + mesh.getNumFaces() + "\n");
-            stream.write("\tNum Bones: " + mesh.getNumBones() + "\n\n");
+                stream.write("Mesh\n");
+                stream.write("\tNum Vertices: " + mesh.getNumVertices() + "\n");
+                stream.write("\tNum Faces: " + mesh.getNumFaces() + "\n");
+                stream.write("\tNum Bones: " + mesh.getNumBones() + "\n\n");
 
-            /* Output all vertices. First get direct access to jAssimp's buffers
-             * UV coords and colors could also be there, but we don't output them
-             * at the moment!
-             */
-            float[] positions = mesh.getPositionArray();
-            float[] normals = mesh.getNormalArray();
-            float[] tangents = mesh.getTangentArray();
-            float[] bitangents = mesh.getBitangentArray();
-            for (int i = 0; i < mesh.getNumVertices(); ++i) {
+                /* Output all vertices. First get direct access to jAssimp's buffers
+                */
+                float[] positions = mesh.getPositionArray();
+                float[] normals = mesh.getNormalArray();
+                float[] tangents = mesh.getTangentArray();
+                float[] bitangents = mesh.getBitangentArray();
 
-                // format: "Vertex pos(x|y|z) nor(x|y|z) tan(x|y|) bit(x|y|z)"
-                // great that this IDE is automatically able to replace + with append ... ;-)
-                stream.write(new StringBuilder().
-                        append("\tVertex: pos(").
-                        append(positions[i * 3]).append("|").
-                        append(positions[i * 3 + 1]).append("|").
-                        append(positions[i * 3 + 2]).append(")\t").
-                        append("nor(").
-                        append(normals[i * 3]).append("|").
-                        append(normals[i * 3 + 1]).append("|").
-                        append(normals[i * 3 + 2]).append(")\t").
-                        append("tan(").
-                        append(tangents[i * 3]).append("|").
-                        append(tangents[i * 3 + 1]).append("|").
-                        append(tangents[i * 3 + 2]).append(")\t").
-                        append("bit(").
-                        append(bitangents[i * 3]).append("|").
-                        append(bitangents[i * 3 + 1]).append("|").
-                        append(bitangents[i * 3 + 2]).append(")\n").toString());
+                float[][] uvs = new float[ Mesh.MAX_NUMBER_OF_TEXTURECOORDS][];
+                for (int i = 0; i < Mesh.MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+                    if (mesh.hasUVCoords((i))) uvs[i] = mesh.getTexCoordArray(i);
+                    else break;
+                }
 
+                float[][] vcs = new float[ Mesh.MAX_NUMBER_OF_COLOR_SETS][];
+                for (int i = 0; i < Mesh.MAX_NUMBER_OF_COLOR_SETS; ++i) {
+                    if (mesh.hasVertexColors((i))) uvs[i] = mesh.getVertexColorArray(i);
+                    else break;
+                }
+
+                for (int i = 0; i < mesh.getNumVertices(); ++i) {
+
+                    // format: "Vertex pos(x|y|z) nor(x|y|z) tan(x|y|) bit(x|y|z)"
+                    // great that this IDE is automatically able to replace + with append ... ;-)
+                    if (mesh.hasPositions()) {
+                        stream.write(new StringBuilder().
+                                append("\tVertex: pos(").
+                                append(positions[i * 3]).append("|").
+                                append(positions[i * 3 + 1]).append("|").
+                                append(positions[i * 3 + 2]).append(")").toString());
+                    }
+                    if (mesh.hasNormals()) {
+                        stream.write(new StringBuilder().
+                                append("\tnor(").
+                                append(normals[i * 3]).append("|").
+                                append(normals[i * 3 + 1]).append("|").
+                                append(normals[i * 3 + 2]).append(")").toString());
+                    }
+                    if (mesh.hasTangentsAndBitangents()) {
+                        stream.write(new StringBuilder().
+                                append("\ttan(").
+                                append(tangents[i * 3]).append("|").
+                                append(tangents[i * 3 + 1]).append("|").
+                                append(tangents[i * 3 + 2]).append(")").toString());
+
+                        stream.write(new StringBuilder().
+                                append("\tbit(").
+                                append(bitangents[i * 3]).append("|").
+                                append(bitangents[i * 3 + 1]).append("|").
+                                append(bitangents[i * 3 + 2]).append(")").toString());
+                    }
+
+                    for (int a = 0; i < Mesh.MAX_NUMBER_OF_TEXTURECOORDS; ++a) {
+                        if (!mesh.hasUVCoords((a))) break;
+
+                        stream.write(new StringBuilder().append("\tuv").append(a).append("(").
+                                append(uvs[a][i * 3]).append("|").
+                                append(uvs[a][i * 3 + 1]).append("|").
+                                append(uvs[a][i * 3 + 2]).append(")").toString());
+                    }
+
+                    for (int a = 0; i < Mesh.MAX_NUMBER_OF_COLOR_SETS; ++a) {
+                        if (!mesh.hasVertexColors((a))) break;
+
+                        stream.write(new StringBuilder().append("\tcol").append(a).append("(").
+                                append(vcs[a][i * 4]).append("|").
+                                append(vcs[a][i * 4 + 1]).append("|").
+                                append(vcs[a][i * 4 + 2]).append("|").
+                                append(vcs[a][i * 4 + 3]).append(")").toString());
+                    }
+                    stream.write("\n");
+                }
+                stream.write("\n");
+
+                /* Now write a list of all faces in this model
+                */
+                int[] faces = mesh.getFaceArray();
+                for (int i = 0; i < mesh.getNumFaces(); ++i) {
+                    stream.write(new StringBuilder().append("\tFace (").
+                            append(faces[i * 3]).append("|").
+                            append(faces[i * 3 + 1]).append("|").
+                            append(faces[i * 3 + 2]).append(")\n").toString());
+                }
+                stream.write("\n");
+
+                /*  Now write a list of all bones of this model
+                */
+                if (mesh.hasBones()) {
+                    Bone[] bones = mesh.getBonesArray();
+                    for (Bone bone : bones) {
+
+                        stream.write("\tBone " + bone.getName() + "\n");
+                        Bone.Weight[] weights = bone.getWeightsArray();
+                        for (Bone.Weight weight : weights) {
+                            stream.write("\t\tWeight (" + weight.index + "|" + weight.weight + ")\n");
+                        }
+
+                    }
+                }
+                stream.write("\n");
             }
-            stream.write("\n\n");
-
-            /* Now write a list of all faces in this model
-             */
-            int[] faces = mesh.getFaceArray();
-            for (int i = 0; i < mesh.getNumFaces(); ++i) {
-                stream.write(new StringBuilder().append("\tFace (").
-                        append(faces[i * 3]).append("|").
-                        append(faces[i * 3 + 1]).append("|").
-                        append(faces[i * 3 + 2]).append(")\n").toString());
-            }
-
-            ++iMesh;
         }
 
+        /* Now iterate through all animations that have been loaded
+        */
+        if (0 != scene.getNumAnimations()) {
+            for (Animation anim : scene.getAnimations()) {
 
+                stream.write("Animation\n" +
+                        "\tName: " + anim.getName() + "\n" +
+                        "\tDuration: " + anim.getDuration() + "\n" +
+                        "\tTicks/s: " + anim.getTicksPerSecond() + "\n" +
+                        "\tNum BoneAnim channels: " + anim.getNumBoneAnimChannels() + "\n\n");
+
+                /*
+                 * Write all bone animation channels
+                 */
+                if (0 != anim.getNumBoneAnimChannels()) {
+                    for (BoneAnim boneAnim : anim.getBoneAnimChannels()) {
+
+                        stream.write("\tBoneAnim\n" +
+                                "\tName: " + boneAnim.getName() + "\n" +
+                                "\tNum QuatKeys: " + boneAnim.getNumQuatKeys() + "\n");
+
+                        /* Write all rotation keys
+                         */
+                        for (BoneAnim.KeyFrame<Quaternion> key : boneAnim.getQuatKeys()) {
+                            stream.write("\t\tQuatKey: \n" +
+                                    "\t\t\tTicks: " + key.time + "\n" +
+                                    "\t\t\tValue: (" + key.value.x + "|" + key.value.y + "|" +
+                                    key.value.z + "|" + key.value.w + ")\n");
+                        }
+                        stream.write("\tNum SclKeys: " + boneAnim.getNumScalingKeys() + "\n");
+
+                        /* Write all scaling keys
+                        */
+                        for (BoneAnim.KeyFrame<float[]> key : boneAnim.getScalingKeys()) {
+                            stream.write("\t\tSclKey: \n" +
+                                    "\t\t\tTicks: " + key.time + "\n" +
+                                    "\t\t\tValue: (" + key.value[0] + "|" + key.value[1] + "|" +
+                                    key.value[2] + ")\n");
+                        }
+                        stream.write("\tNum PosKeys: " + boneAnim.getNumPosKeys() + "\n");
+
+                        /* Write all position keys
+                        */
+                        for (BoneAnim.KeyFrame<float[]> key : boneAnim.getPosKeys()) {
+                            stream.write("\t\tPosKey: \n" +
+                                    "\t\t\tTicks: " + key.time + "\n" +
+                                    "\t\t\tValue: (" + key.value[0] + "|" + key.value[1] + "|" +
+                                    key.value[2] + ")\n");
+                        }
+                        stream.write("\n");
+                    }
+                }
+            }
+        }
+
+        /* Now print all nodes -> recursively
+         *
+         */
+        stream.write("Nodegraph\n" +
+                "\tNodes: " + CountNodes(scene.getRootNode()) + "\n\n");
+        PrintNodes(scene.getRootNode(), stream, "\t");
+        stream.write("\n");
+
+        /* Now print all textures .. ehm ... export them to proper TGA files
+         */
+        if (0 != scene.getNumTextures()) {
+            int i = 0;
+            for (Texture texture : scene.getTextures()) {
+
+                String path = arguments[1].substring(0, arguments[1].length() - 4) + "_tex" + i++ + ".tga";
+                stream.write("Emb. Texture\n" +
+                    "\tExportPath: " + path + "\n\n");
+
+                SaveTextureToTGA(texture, path);
+            }
+        }
+
+        /*  Now print all materials
+         */
+
+
+        // close the stream again
         stream.close();
     }
 }

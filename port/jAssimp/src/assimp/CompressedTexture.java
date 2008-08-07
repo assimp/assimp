@@ -42,7 +42,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package assimp;
 
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.ByteArrayInputStream;
 
 /**
  * Represents an embedded compressed texture that is stored in a format
@@ -59,23 +64,6 @@ public class CompressedTexture extends Texture {
 
     private String m_format = "";
 
-
-    /**
-     * Construction from a given parent object and array index
-     *
-     * @param parent Must be valid, null is not allowed
-     * @param index  Valied index in the parent's list
-     */
-    public CompressedTexture(Object parent, int index) throws NativeError {
-        super(parent, index);
-
-        // need to get the format of the texture via the JNI
-        if ((m_format = this._NativeGetCTextureFormat(((Scene) this.getParent()).
-                getImporter().getContext(), this.getArrayIndex())).equals("")) {
-            throw new NativeError("Unable to get the format of the compressed texture");
-        }
-    }
-
     /**
      * Retrieves the format of the texture data. This is
      * the most common file extension of the format (without a
@@ -84,7 +72,7 @@ public class CompressedTexture extends Texture {
      * @return Extension string or null if the format of the texture
      *         data is not known to ASSIMP.
      */
-    public String getFormat() {
+    public final String getFormat() {
         return m_format;
     }
 
@@ -93,15 +81,7 @@ public class CompressedTexture extends Texture {
      *
      * @return Data poiner
      */
-    public byte[] getData() {
-        if (null == data) {
-            try {
-                this.onMap();
-            } catch (NativeError nativeError) {
-                DefaultLogger.get().error(nativeError.getMessage());
-                return null;
-            }
-        }
+    public final byte[] getData() {
         return (byte[]) data;
     }
 
@@ -110,7 +90,7 @@ public class CompressedTexture extends Texture {
      *
      * @return Data poiner
      */
-    public int getLength() {
+    public final int getLength() {
         return width;
     }
 
@@ -120,7 +100,7 @@ public class CompressedTexture extends Texture {
      * @return n/a
      */
     @Override
-    public int getHeight() {
+    public final int getHeight() {
         return 0;
     }
 
@@ -130,7 +110,7 @@ public class CompressedTexture extends Texture {
      * @return n/a
      */
     @Override
-    public int getWidth() {
+    public final int getWidth() {
         return 0;
     }
 
@@ -150,33 +130,55 @@ public class CompressedTexture extends Texture {
      * @return n/a
      */
     @Override
-    public Color[] getColorArray() {
+    public final Color[] getColorArray() {
         return null;
     }
 
+
     /**
-     * Internal helper function to map the native texture data into
-     * a <code>byte</code> array in the memory of the JVM
+     * @return The return value is <code>true</code> of the
+     *         file format can't be recognized.
+     * @see <code>Texture.hasAlphaChannel()</code>
      */
-    @Override
-    protected void onMap() throws NativeError {
+    public boolean hasAlphaChannel() {
 
-        // first allocate the output array
-        data = new byte[this.width];
+        // try to determine it from the file format sequence
+        if (m_format.equals("bmp") || m_format.equals("dib")) return false;
+        if (m_format.equals("tif") || m_format.equals("tiff")) return false;
+        if (m_format.equals("jpg") || m_format.equals("jpeg")) return false;
 
-        // now allocate a temporary output array
-        byte[] temp = new byte[this.width];
+        // todo: add more
 
-        // and copy the native color data to it
-        if (0xffffffff == this._NativeMapColorData(
-                ((Scene) this.getParent()).getImporter().getContext(),
-                this.getArrayIndex(), temp)) {
-            throw new NativeError("Unable to map compressed aiTexture into the Java-VM");
-        }
-        DefaultLogger.get().debug("CompressedTexture.onMap successful");
-
-        return;
+        return true;
     }
 
-    private native String _NativeGetCTextureFormat(long context, int arrayIndex);
+
+    /**
+     * Convert the texture into a <code>java.awt.BufferedImage</code>
+     *
+     * @return <code>java.awt.BufferedImage</code> object containing
+     *         a copy of the texture image. The return value is <code>null</code>
+     *         if the file format is not known.
+     */
+    public BufferedImage convertToImage() {
+
+        BufferedImage img = null;
+        try {
+
+            // create an input stream and attach it to an image input stream
+            ImageInputStream stream = ImageIO.createImageInputStream(
+                    new ByteArrayInputStream((byte[])data));
+
+            // and use the stream to decode the file
+            img = ImageIO.read(stream);
+
+        } catch (IOException e) {
+
+            DefaultLogger.get().error("Unable to decode compressed embedded texture +" +
+                    "(Format hint: " + m_format + ")" );
+
+        }
+        // return the created image to the caller
+        return img;
+    }
 }

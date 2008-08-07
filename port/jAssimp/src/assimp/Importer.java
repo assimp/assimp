@@ -45,9 +45,7 @@ package assimp;
 import java.util.Vector;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.File;
-import java.lang.ref.Reference;
 
 /**
  * Main class of jAssimp. The class is a simple wrapper for the native
@@ -63,6 +61,15 @@ import java.lang.ref.Reference;
  * @version 1.0
  */
 public class Importer {
+
+
+    /**
+     * Represents a property (key-value)
+     */
+    private class Property<Type> {
+        String key;
+        Type value;
+    }
 
     /**
      * Default implementation of <code>IOStream</code>.
@@ -84,6 +91,7 @@ public class Importer {
 
         /**
          * Construction with a given path
+         *
          * @param file Path to the file to be opened
          * @throws FileNotFoundException If the file isn't accessible at all
          */
@@ -153,53 +161,74 @@ public class Importer {
     private IOSystem ioSystem = null;
 
     /**
+     * List of config properties
+     */
+    private Vector<Property<Integer>> properties;
+
+
+    /**
+     * Specifies whether the native jAssimp library is currently
+     * in a loaded state.
+     */
+    private static boolean bLibInitialized = false;
+
+
+    private static final String JASSIMP_RUNTIME_NAME_X64 = "jAssimp64";
+    private static final String JASSIMP_RUNTIME_NAME_X86 = "jAssimp32";
+
+    public static final int PROPERTY_WAS_NOT_EXISTING = 0xffffffff;
+
+    /**
      * Public constructor. Initialises the JNI bridge to the native
      * ASSIMP library. A native Assimp::Importer object is constructed and
      * initialized. The flag list is set to zero, a default I/O handler
      * is initialized.
      *
      * @param iVersion Version of the JNI interface to be used.
-     * @throws NativeError Thrown if the jassimp library could not be loaded
+     * @throws NativeException Thrown if the jassimp library could not be loaded
      *                     or if the entry point to the module wasn't found. if this exception
      *                     is not thrown, you can assume that jAssimp is fully available.
      */
-    public Importer(int iVersion) throws NativeError {
+    public Importer(int iVersion) throws NativeException {
 
         // allocate a default I/O system
         ioSystem = new DefaultIOSystem();
 
-        /** try to load the jassimp library. First try to load the
-         * x64 version, in case of failure the x86 version
-         */
-        try {
-            System.loadLibrary("jassimp64");
-        }
-        catch (UnsatisfiedLinkError exc) {
+        if (!bLibInitialized) {
+
+            /** try to load the jassimp library. First try to load the
+             * x64 version, in case of failure the x86 version
+             */
             try {
-                System.loadLibrary("jassimp32");
+                System.loadLibrary(JASSIMP_RUNTIME_NAME_X64);
             }
-            catch (UnsatisfiedLinkError exc2) {
-                throw new NativeError("Unable to load the jassimp library");
+            catch (UnsatisfiedLinkError exc) {
+                try {
+                    System.loadLibrary(JASSIMP_RUNTIME_NAME_X86);
+                }
+                catch (UnsatisfiedLinkError exc2) {
+                    throw new NativeException("Unable to load the jAssimp library");
+                }
             }
+            bLibInitialized = true;
         }
         // now create the native Importer class and setup our internal
         // data structures outside the VM.
         try {
             if (0xffffffffffffffffl == (this.m_iNativeHandle = _NativeInitContext(iVersion))) {
-                throw new NativeError(
+                throw new NativeException(
                         "Unable to initialize the native library context." +
                                 "The initialization routine has failed");
             }
         }
         catch (UnsatisfiedLinkError exc) {
-            throw new NativeError(
+            throw new NativeException(
                     "Unable to initialize the native library context." +
                             "The initialization routine has not been found");
         }
-        return;
     }
 
-    public Importer() throws NativeError {
+    public Importer() throws NativeException {
         this(0);
     }
 
@@ -208,21 +237,23 @@ public class Importer {
      * assets. If no custom implementation was provided via <code>setIoSystem()</code>
      * a default implementation will be used. Use <code>isDefaultIoSystem()</code>
      * to check this.
+     *
      * @return Always a valid <code>IOSystem</code> object, never null.
      */
-    public IOSystem getIoSystem() {
+    public final IOSystem getIoSystem() {
         return ioSystem;
     }
 
-    
+
     /**
      * Checks whether a default IO system is currently being used to load
      * assets. Using the default IO system has many performance benefits,
      * but it is possible to provide a custom IO system (<code>setIoSystem()</code>).
      * This allows applications to add support for archives like ZIP.
+     *
      * @return true if a default <code>IOSystem</code> is active,
      */
-    public boolean isDefaultIoSystem() {
+    public final boolean isDefaultIoSystem() {
         return ioSystem instanceof DefaultIOSystem;
     }
 
@@ -235,7 +266,7 @@ public class Importer {
      * @return true if the step has been added successfully
      * @see PostProcessStep
      */
-    public boolean addPostProcessStep(PostProcessStep p_Step) {
+    public final boolean addPostProcessStep(PostProcessStep p_Step) {
 
         if (isPostProcessStepActive(p_Step)) return false;
         this.m_vPPSteps.add(p_Step);
@@ -253,7 +284,7 @@ public class Importer {
      * @return true if the step is active
      * @see PostProcessStep
      */
-    public boolean isPostProcessStepActive(PostProcessStep p_Step) {
+    public final boolean isPostProcessStepActive(PostProcessStep p_Step) {
 
         for (PostProcessStep step : m_vPPSteps) {
             if (step.equals(p_Step)) return true;
@@ -272,7 +303,7 @@ public class Importer {
      *         it was not existing
      * @see PostProcessStep
      */
-    public boolean removePostProcessStep(PostProcessStep p_Step) {
+    public final boolean removePostProcessStep(PostProcessStep p_Step) {
 
         return this.m_vPPSteps.remove(p_Step);
     }
@@ -287,10 +318,10 @@ public class Importer {
      *
      * @param path Path to the file to be read
      * @return null if the import failed, otherwise a valid Scene instance
-     * @throws NativeError This exception is thrown when an unknown error
+     * @throws NativeException This exception is thrown when an unknown error
      *                     occurs in the JNI bridge module.
      */
-    public Scene readFile(String path) throws NativeError {
+    public final Scene readFile(String path) throws NativeException {
         this.scene = new Scene(this);
         this.path = path;
 
@@ -315,24 +346,18 @@ public class Importer {
             else if (step.equals(PostProcessStep.PreTransformVertices)) flags |= 0x100;
             else if (step.equals(PostProcessStep.LimitBoneWeights)) flags |= 0x200;
             else if (step.equals(PostProcessStep.ValidateDataStructure)) flags |= 0x400;
+            else if (step.equals(PostProcessStep.FixInfacingNormals)) flags |= 0x800;
+            else if (step.equals(PostProcessStep.ImproveVertexLocality)) flags |= 0x1600;
         }
 
         // now load the mesh
         if (0xffffffff == this._NativeLoad(this.path, flags, this.m_iNativeHandle)) {
             this.scene = null;
             this.path = null;
-            throw new NativeError("Failed to load the mesh");
+            throw new NativeException("Failed to load the mesh");
         }
-        // and setup our Scene object
-        try {
-            this.scene.construct();
-        }
-        catch (NativeError exc) {
-
-            // delete everything ...
-            this.scene = null;
-            this.path = null;
-            throw exc;
+        if (null == this.scene) {
+            throw new NativeException("Failed to copy the data into the Java VM");
         }
         return this.scene;
     }
@@ -344,7 +369,7 @@ public class Importer {
      * @param o Object to be compred with *this*
      * @return true if *this* is equal to o
      */
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -358,7 +383,7 @@ public class Importer {
      * Implementation of <code>java.lang.Object.finalize()</code>
      * We override this to make sure that all native resources are
      * deleted properly. This will free the native Assimp::Importer object
-     * and its associated aiScene instance. A NativeError is thrown
+     * and its associated aiScene instance. A NativeException is thrown
      * if the destruction failed. This means that not all resources have
      * been deallocated and memory leaks are remaining.
      */
@@ -368,7 +393,7 @@ public class Importer {
 
         // be sure that native resources are deallocated properly
         if (0xffffffff == _NativeFreeContext(this.m_iNativeHandle)) {
-            throw new NativeError("Unable to destroy the native library context");
+            throw new NativeException("Unable to destroy the native library context");
         }
     }
 
@@ -388,12 +413,78 @@ public class Importer {
 
 
     /**
+     * Set an integer property. All supported config properties are
+     * defined as constants in the <code>ConfigProperty</code> class
+     *
+     * @param prop Name of the config property
+     * @param val  New value for the config property
+     * @return Old value of the property or <code>PROPERTY_WAS_NOT_EXISTING</code>
+     *         if the property has not yet been set.
+     */
+    public final int setPropertyInt(final String prop, int val) {
+
+        for (Property<Integer> i : this.properties) {
+            if (i.key.equals(prop)) {
+                int old = i.value;
+                i.value = val;
+
+                // make sure all changes are sent to the native implementation
+                this._NativeSetPropertyInt(prop, val, this.getContext());
+                return old;
+            }
+        }
+
+        Property<Integer> propNew = new Property<Integer>();
+        propNew.key = prop;
+        propNew.value = val;
+        this.properties.add(propNew);
+
+        // make sure all changes are sent to the native implementation
+        this._NativeSetPropertyInt(prop, val, this.getContext());
+        return PROPERTY_WAS_NOT_EXISTING;
+    }
+
+
+    /**
+     * Gets an integer config property  that has been set using
+     * <code>setPropertyInt</code>. All supported config properties are
+     * defined as constants in the <code>ConfigProperty</code> class
+     *
+     * @param prop         Name of the config property
+     * @param error_return Default return value if the property isn't there
+     * @return Current value of the config property or
+     *         error_return if the property has not yet been set
+     */
+    public final int getPropertyInt(final String prop, int error_return) {
+
+        for (Property<Integer> i : this.properties) {
+            if (i.key.equals(prop)) {
+                return i.value;
+            }
+        }
+        return error_return;
+    }
+
+    /**
+     * Gets an integer config property  that has been set using
+     * <code>setPropertyInt</code>. All supported config properties are
+     * defined as constants in the <code>ConfigProperty</code> class
+     *
+     * @param prop Name of the config property
+     * @return Current of the property or <code>PROPERTY_WAS_NOT_EXISTING</code>
+     *         if the property has not yet been set.
+     */
+    public final int getPropertyInt(final String prop) {
+        return getPropertyInt(prop, PROPERTY_WAS_NOT_EXISTING);
+    }
+
+    /**
      * Retrieves the native context of the class. This is normally the
      * address of the native Importer object.
      *
      * @return Native context
      */
-    public long getContext() {
+    public final long getContext() {
         return m_iNativeHandle;
     }
 
@@ -430,4 +521,14 @@ public class Importer {
      * @return 0xffffffff if an error occured
      */
     private native int _NativeLoad(String path, int flags, long iContext);
+
+    /**
+     * JNI bridge call. For internal use only
+     * The method sets a property
+     *
+     * @param name Name of the property
+     * @param prop New value for the property
+     * @return 0xffffffff if an error occured
+     */
+    private native int _NativeSetPropertyInt(String name, int prop, long iContext);
 }

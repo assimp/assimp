@@ -50,18 +50,85 @@ package assimp;
  * @author Aramis (Alexander Gessler)
  * @version 1.0
  */
-public class Animation extends Mappable {
+public class Animation {
+
     /**
-     * Construction from a given object and array index
-     *
-     * @param parent Must be valid, null is not allowed
-     * @param index  Valied index in the parent's list
+     * The name of the animation.
      */
-    public Animation(Object parent, int index) {
-        super(parent, index);
+    private String name = "";
+
+    /**
+     * Duration of the animation in ticks.
+     */
+    private double mDuration = 0.0;
+
+    /**
+     * Ticks per second. 0 if not specified in the imported file
+     */
+    private double mTicksPerSecond = 0.0;
+
+    /**
+     * Bone animation channels
+     */
+    private BoneAnim[] boneAnims = null;
+
+
+    /**
+     * Returns the name of the animation channel
+     *
+     * @return If the modelling package this data was exported from does support
+     *         only a single animation channel, this name is usually <code>""</code>
+     */
+    public final String getName() {
+        return name;
     }
 
-    protected void onMap() throws NativeError {
+    /**
+     * Returns the total duration of the animation, in ticks
+     *
+     * @return Total duration
+     */
+    public final double getDuration() {
+        return mDuration;
+    }
 
+    /**
+     * Returns the ticks per second count.
+     *
+     * @return 0 if not specified in the imported file
+     */
+    public final double getTicksPerSecond() {
+        return mTicksPerSecond;
+    }
+
+
+    /**
+     * Returns the number of bone animation channels
+     * @return This value is never 0
+     */
+    public final int getNumBoneAnimChannels() {
+        assert(null != boneAnims);
+        return boneAnims.length;
+    }
+
+    /**
+     * Returns the list of all bone animation channels
+     * @return This value is never <code>null</code>
+     */
+    public final BoneAnim[] getBoneAnimChannels() {
+       assert(null != boneAnims);
+        return boneAnims;
+    }
+
+
+    /**
+     * Returns a specific bone animation channel
+     * @param i Index of the animation channel. Must be between
+     * 0 and the value returned by <code>getNumBoneAnimChannels</code>
+     * @return This value is never <code>null</code>
+     */
+    public final BoneAnim getBoneAnimChannel(int i) {
+       assert(null != boneAnims && i < boneAnims.length);
+        return boneAnims[i];
     }
 }

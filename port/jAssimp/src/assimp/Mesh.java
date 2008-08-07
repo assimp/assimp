@@ -60,47 +60,22 @@ import java.awt.*;
  * @author Aramis (Alexander Gessler)
  * @version 1.0
  */
-public class Mesh extends Mappable {
+public class Mesh {
 
     /**
      * Defines the maximum number of UV(W) channels that are available
      * for a mesh. If a loader finds more channels in a file, some
      * will be skipped
      */
-    private static final int MAX_NUMBER_OF_TEXTURECOORDS = 0x4;
+    public static final int MAX_NUMBER_OF_TEXTURECOORDS = 0x4;
 
     /**
      * Defines the maximum number of vertex color channels that are
      * available for a mesh. If a loader finds more channels in a file,
      * some will be skipped
      */
-    private static final int MAX_NUMBER_OF_COLOR_SETS = 0x4;
+    public static final int MAX_NUMBER_OF_COLOR_SETS = 0x4;
 
-
-    /**
-     * Specifies which vertex components are existing in
-     * the native implementation. If a member is null here,
-     * although it is existing, it hasn't yet been mapped
-     * into memory
-     */
-    private int m_iPresentFlags = 0;
-
-    private static final int PF_POSITION = 0x1;
-    private static final int PF_NORMAL = 0x2;
-    private static final int PF_TANGENTBITANGENT = 0x4;
-    private static final int PF_BONES = 0x8;
-    private static final int PF_VERTEXCOLOR = 0x1000;
-    private static final int PF_UVCOORD = 0x10000;
-
-    private static int PF_VERTEXCOLORn(int n) {
-        assert(n <= MAX_NUMBER_OF_COLOR_SETS);
-        return PF_VERTEXCOLOR << n;
-    }
-
-    private static int PF_UVCOORDn(int n) {
-        assert(n <= MAX_NUMBER_OF_TEXTURECOORDS);
-        return PF_UVCOORD << n;
-    }
 
     /**
      * Contains the vertices loaded from the model
@@ -150,53 +125,28 @@ public class Mesh extends Mappable {
      */
     private int[] m_vFaces = null;
 
-    /**
-     * Number of vertices in the mesh
-     */
-    private int m_iNumVertices;
 
     /**
-     * Number of faces in the mesh
+     * Bones which are influencing the mesh
      */
-    private int m_iNumFaces;
-
-    /**
-     * Number of bones in the mesh
-     */
-    private int m_iNumBones;
+    private Bone[] m_vBones = null;
 
     /**
      * Material index of the mesh
      */
-    private int m_iMaterialIndex;
+    private int m_iMaterialIndex = 0;
 
-
-    /**
-     * Construction from a given parent object and array index
-     *
-     * @param parent Parent object
-     * @param index  Valied index in the parent's list
-     */
-    public Mesh(Object parent, int index) throws NativeError {
-        super(parent, index);
-
-        assert (parent instanceof Scene);
-
-        Scene sc = (Scene) parent;
-        if (0xffffffff == this._NativeInitMembers(
-                sc.getImporter().getContext(), this.getArrayIndex())) {
-            throw new NativeError("Unable to intiailise class members via JNI");
-        }
-    }
 
     /**
      * Check whether there are vertex positions in the model
-     * <code>getVertex()</code> will assert this.
+     * <code>getPosition()</code> will assert this.
      *
-     * @return true if vertex positions are available.
+     * @return true if vertex positions are available. This is
+     *         guaranteed to be always true, except for scenes which contain only
+     *         animation skeletons.
      */
-    public boolean hasPositions() {
-        return 0 != (this.m_iPresentFlags & PF_POSITION);
+    public final boolean hasPositions() {
+        return null != this.m_vVertices;
     }
 
     /**
@@ -205,8 +155,8 @@ public class Mesh extends Mappable {
      *
      * @return true if vertex normals are available.
      */
-    public boolean hasNormals() {
-        return 0 != (this.m_iPresentFlags & PF_NORMAL);
+    public final boolean hasNormals() {
+        return null != this.m_vNormals;
     }
 
     /**
@@ -215,8 +165,8 @@ public class Mesh extends Mappable {
      *
      * @return true if vertex normals are available.
      */
-    public boolean hasBones() {
-        return 0 != (this.m_iPresentFlags & PF_BONES);
+    public final boolean hasBones() {
+        return null != this.m_vBones;
     }
 
     /**
@@ -225,8 +175,8 @@ public class Mesh extends Mappable {
      *
      * @return true if vertex tangents and bitangents are available.
      */
-    public boolean hasTangentsAndBitangents() {
-        return 0 != (this.m_iPresentFlags & PF_TANGENTBITANGENT);
+    public final boolean hasTangentsAndBitangents() {
+        return null != this.m_vBitangents && null != this.m_vTangents;
     }
 
     /**
@@ -236,8 +186,8 @@ public class Mesh extends Mappable {
      * @param n UV coordinate set index
      * @return true the uv coordinate set is available.
      */
-    public boolean hasUVCoords(int n) {
-        return 0 != (this.m_iPresentFlags & PF_UVCOORDn(n));
+    public final boolean hasUVCoords(int n) {
+        return n < this.m_avUVs.length && null != this.m_avUVs[n];
     }
 
     /**
@@ -247,8 +197,8 @@ public class Mesh extends Mappable {
      * @param n Vertex color set index
      * @return true the vertex color set is available.
      */
-    public boolean hasVertexColors(int n) {
-        return 0 != (this.m_iPresentFlags & PF_VERTEXCOLORn(n));
+    public final boolean hasVertexColors(int n) {
+        return n < this.m_avColors.length && null != this.m_avColors[n];
     }
 
 
@@ -258,8 +208,8 @@ public class Mesh extends Mappable {
      * @return Number of vertices in the model. This could be 0 in some
      *         extreme cases although loaders should filter such cases out
      */
-    public int getNumVertices() {
-        return m_iNumVertices;
+    public final int getNumVertices() {
+        return m_vVertices.length;
     }
 
 
@@ -269,8 +219,8 @@ public class Mesh extends Mappable {
      * @return Number of faces in the model. This could be 0 in some
      *         extreme cases although loaders should filter such cases out
      */
-    public int getNumFaces() {
-        return m_iNumFaces;
+    public final int getNumFaces() {
+        return m_vFaces.length;
     }
 
     /**
@@ -278,8 +228,8 @@ public class Mesh extends Mappable {
      *
      * @return Number of bones in the model.
      */
-    public int getNumBones() {
-        return m_iNumBones;
+    public final int getNumBones() {
+        return m_vBones.length;
     }
 
     /**
@@ -287,7 +237,7 @@ public class Mesh extends Mappable {
      *
      * @return Zero-based material index
      */
-    public int getMaterialIndex() {
+    public final int getMaterialIndex() {
         return m_iMaterialIndex;
     }
 
@@ -298,12 +248,10 @@ public class Mesh extends Mappable {
      * @param afOut  Output array, size must at least be 3
      *               Receives the vertex position components in x,y,z order
      */
-    public void getPosition(int iIndex, float[] afOut) {
-        assert(this.hasPositions());
-        assert(afOut.length >= 3);
-        assert(iIndex < this.getNumVertices()); // explicitly assert here, no AIOOBE
-
-        if (null == this.m_vVertices) this.mapVertices();
+    public final void getPosition(int iIndex, float[] afOut) {
+        assert(hasPositions() &&
+                afOut.length >= 3 &&
+                iIndex < this.getNumVertices());
 
         iIndex *= 3;
         afOut[0] = this.m_vVertices[iIndex];
@@ -319,13 +267,10 @@ public class Mesh extends Mappable {
      * @param iOutBase Start index in the output array
      *                 Receives the vertex position components in x,y,z order
      */
-    public void getPosition(int iIndex, float[] afOut, int iOutBase) {
-        assert(this.hasPositions());
-        assert(afOut.length >= 3);
-        assert(iOutBase + 3 <= afOut.length);
-        assert(iIndex < this.getNumVertices()); // explicitly assert here, no AIOOBE
-
-        if (null == this.m_vVertices) this.mapVertices();
+    public final void getPosition(int iIndex, float[] afOut, int iOutBase) {
+        assert(hasPositions() &&
+                iOutBase + 3 <= afOut.length &&
+                iIndex < this.getNumVertices());
 
         iIndex *= 3;
         afOut[iOutBase] = this.m_vVertices[iIndex];
@@ -340,9 +285,7 @@ public class Mesh extends Mappable {
      * @return Array of floats, size is numverts * 3. Component ordering
      *         is xyz.
      */
-    public float[] getPositionArray() {
-        assert(this.hasPositions());
-        if (null == this.m_vVertices) this.mapVertices();
+    public final float[] getPositionArray() {
         return this.m_vVertices;
     }
 
@@ -353,17 +296,15 @@ public class Mesh extends Mappable {
      * @param afOut  Output array, size must at least be 3
      *               Receives the vertex normal components in x,y,z order
      */
-    public void getNormal(int iIndex, float[] afOut) {
-        assert(this.hasNormals());
-        assert(afOut.length >= 3);
-        assert(iIndex < this.getNumVertices()); // explicitly assert here, no AIOOBE
-
-        if (null == this.m_vNormals) this.mapNormals();
+    public final void getNormal(int iIndex, float[] afOut) {
+        assert(hasNormals() &&
+                afOut.length >= 3 &&
+                iIndex < this.getNumVertices());
 
         iIndex *= 3;
-        afOut[0] = this.m_vNormals[iIndex];
-        afOut[1] = this.m_vNormals[iIndex + 1];
-        afOut[2] = this.m_vNormals[iIndex + 2];
+        afOut[0] = this.m_vTangents[iIndex];
+        afOut[1] = this.m_vTangents[iIndex + 1];
+        afOut[2] = this.m_vTangents[iIndex + 2];
     }
 
     /**
@@ -374,13 +315,10 @@ public class Mesh extends Mappable {
      * @param iOutBase Start index in the output array
      *                 Receives the vertex normal components in x,y,z order
      */
-    public void getNormal(int iIndex, float[] afOut, int iOutBase) {
-        assert(this.hasNormals());
-        assert(afOut.length >= 3);
-        assert(iOutBase + 3 <= afOut.length);
-        assert(iIndex < this.getNumVertices()); // explicitly assert here, no AIOOBE
-
-        if (null == this.m_vNormals) this.mapNormals();
+    public final void getNormal(int iIndex, float[] afOut, int iOutBase) {
+        assert(hasNormals() &&
+                iOutBase + 3 <= afOut.length &&
+                iIndex < this.getNumVertices());
 
         iIndex *= 3;
         afOut[iOutBase] = this.m_vNormals[iIndex];
@@ -395,9 +333,7 @@ public class Mesh extends Mappable {
      * @return Array of floats, size is numverts * 3. Component ordering
      *         is xyz.
      */
-    public float[] getNormalArray() {
-        assert(this.hasNormals());
-        if (null == this.m_vNormals) this.mapNormals();
+    public final float[] getNormalArray() {
         return this.m_vNormals;
     }
 
@@ -408,12 +344,10 @@ public class Mesh extends Mappable {
      * @param afOut  Output array, size must at least be 3
      *               Receives the vertex tangent components in x,y,z order
      */
-    public void getTangent(int iIndex, float[] afOut) {
-        assert(this.hasTangentsAndBitangents());
-        assert(afOut.length >= 3);
-        assert(iIndex < this.getNumVertices()); // explicitly assert here, no AIOOBE
-
-        if (null == this.m_vTangents) this.mapTangents();
+    public final void getTangent(int iIndex, float[] afOut) {
+        assert(hasTangentsAndBitangents() &&
+                afOut.length >= 3 &&
+                iIndex < this.getNumVertices());
 
         iIndex *= 3;
         afOut[0] = this.m_vTangents[iIndex];
@@ -429,13 +363,10 @@ public class Mesh extends Mappable {
      * @param iOutBase Start index in the output array
      *                 Receives the vertex tangent components in x,y,z order
      */
-    public void getTangent(int iIndex, float[] afOut, int iOutBase) {
-        assert(this.hasTangentsAndBitangents());
-        assert(afOut.length >= 3);
-        assert(iOutBase + 3 <= afOut.length);
-        assert(iIndex < this.getNumVertices()); // explicitly assert here, no AIOOBE
-
-        if (null == this.m_vTangents) this.mapTangents();
+    public final void getTangent(int iIndex, float[] afOut, int iOutBase) {
+        assert(hasTangentsAndBitangents() &&
+                iOutBase + 3 <= afOut.length &&
+                iIndex < this.getNumVertices());
 
         iIndex *= 3;
         afOut[iOutBase] = this.m_vTangents[iIndex];
@@ -450,9 +381,7 @@ public class Mesh extends Mappable {
      * @return Array of floats, size is numverts * 3. Component ordering
      *         is xyz.
      */
-    public float[] getTangentArray() {
-        assert(this.hasTangentsAndBitangents());
-        if (null == this.m_vTangents) this.mapTangents();
+    public final float[] getTangentArray() {
         return this.m_vTangents;
     }
 
@@ -463,12 +392,10 @@ public class Mesh extends Mappable {
      * @param afOut  Output array, size must at least be 3
      *               Receives the vertex bitangent components in x,y,z order
      */
-    public void getBitangent(int iIndex, float[] afOut) {
-        assert(this.hasTangentsAndBitangents());
-        assert(afOut.length >= 3);
-        assert(iIndex < this.getNumVertices()); // explicitly assert here, no AIOOBE
-
-        if (null == this.m_vBitangents) this.mapBitangents();
+    public final void getBitangent(int iIndex, float[] afOut) {
+        assert(hasTangentsAndBitangents() &&
+                afOut.length >= 3 && 3 >= afOut.length &&
+                iIndex < this.getNumVertices());
 
         iIndex *= 3;
         afOut[0] = this.m_vBitangents[iIndex];
@@ -484,13 +411,10 @@ public class Mesh extends Mappable {
      * @param iOutBase Start index in the output array
      *                 Receives the vertex bitangent components in x,y,z order
      */
-    public void getBitangent(int iIndex, float[] afOut, int iOutBase) {
-        assert(this.hasTangentsAndBitangents());
-        assert(afOut.length >= 3);
-        assert(iOutBase + 3 <= afOut.length);
-        assert(iIndex < this.getNumVertices()); // explicitly assert here, no AIOOBE
-
-        if (null == this.m_vBitangents) this.mapBitangents();
+    public final void getBitangent(int iIndex, float[] afOut, int iOutBase) {
+        assert(hasTangentsAndBitangents() &&
+                iOutBase + 3 <= afOut.length &&
+                iIndex < this.getNumVertices());
 
         iIndex *= 3;
         afOut[iOutBase] = this.m_vBitangents[iIndex];
@@ -505,9 +429,8 @@ public class Mesh extends Mappable {
      * @return Array of floats, size is numverts * 3. Component ordering
      *         is xyz.
      */
-    public float[] getBitangentArray() {
+    public final float[] getBitangentArray() {
         assert(this.hasTangentsAndBitangents());
-        if (null == this.m_vBitangents) this.mapBitangents();
         return this.m_vBitangents;
     }
 
@@ -521,12 +444,9 @@ public class Mesh extends Mappable {
      *                <code>getNumUVComponents</code> returns for <code>channel</code>
      *                Receives the vertex texture coordinate, components are in u,v,w order
      */
-    public void getTexCoord(int channel, int iIndex, float[] afOut) {
-        assert(this.hasUVCoords(channel));
-        assert(afOut.length >= this.m_aiNumUVComponents[channel]);
-        assert(iIndex < this.getNumVertices()); // explicitly assert here, no AIOOBE
-
-        if (null == this.m_avUVs[channel]) this.mapUVs(channel);
+    public final void getTexCoord(int channel, int iIndex, float[] afOut) {
+        assert(this.hasUVCoords(channel) && afOut.length >= 4 &&
+                4 >= afOut.length && iIndex < this.getNumVertices());
 
         iIndex *= this.m_aiNumUVComponents[channel];
         for (int i = 0; i < this.m_aiNumUVComponents[channel]; ++i) {
@@ -544,13 +464,9 @@ public class Mesh extends Mappable {
      *                 Receives the vertex texture coordinate, components are in u,v,w order
      * @param iOutBase Start index in the output array
      */
-    public void getTexCoord(int channel, int iIndex, float[] afOut, int iOutBase) {
-        assert(this.hasUVCoords(channel));
-        assert(afOut.length >= this.m_aiNumUVComponents[channel]);
-        assert(iOutBase + this.m_aiNumUVComponents[channel] <= afOut.length);
-        assert(iIndex < this.getNumVertices()); // explicitly assert here, no AIOOBE
-
-        if (null == this.m_avUVs[channel]) this.mapUVs(channel);
+    public final void getTexCoord(int channel, int iIndex, float[] afOut, int iOutBase) {
+        assert(this.hasUVCoords(channel) && afOut.length >= 4 &&
+                iOutBase + 4 <= afOut.length && iIndex < this.getNumVertices());
 
         iIndex *= this.m_aiNumUVComponents[channel];
         for (int i = 0; i < this.m_aiNumUVComponents[channel]; ++i) {
@@ -565,9 +481,8 @@ public class Mesh extends Mappable {
      * @return Array of floats, size is numverts * <code>getNumUVComponents
      *         (channel)</code>. Component ordering is uvw.
      */
-    public float[] getTexCoordArray(int channel) {
-        assert(this.hasUVCoords(channel));
-        if (null == this.m_avUVs[channel]) this.mapUVs(channel);
+    public final float[] getTexCoordArray(int channel) {
+        assert(channel < MAX_NUMBER_OF_TEXTURECOORDS);
         return this.m_avUVs[channel];
     }
 
@@ -579,12 +494,9 @@ public class Mesh extends Mappable {
      * @param afOut   Output array, size must at least be 4
      *                Receives the vertex color components in r,g,b,a order
      */
-    public void getVertexColor(int channel, int iIndex, float[] afOut) {
-        assert(this.hasVertexColors(channel));
-        assert(afOut.length >= 4);
-        assert(iIndex < this.getNumVertices()); // explicitly assert here, no AIOOBE
-
-        if (null == this.m_avColors[channel]) this.mapColors(channel);
+    public final void getVertexColor(int channel, int iIndex, float[] afOut) {
+        assert(this.hasVertexColors(channel) && afOut.length >= 4 &&
+                iIndex < this.getNumVertices());
 
         iIndex *= 4;   // RGBA order
         afOut[0] = this.m_avColors[channel][iIndex];
@@ -600,7 +512,7 @@ public class Mesh extends Mappable {
      * @param iIndex  Zero-based index of the vertex
      * @return Vertex color value packed as <code>java.awt.Color</code>
      */
-    public Color getVertexColor(int channel, int iIndex) {
+    public final Color getVertexColor(int channel, int iIndex) {
 
         float[] afColor = new float[4];
         this.getVertexColor(channel, iIndex, afColor);
@@ -616,13 +528,9 @@ public class Mesh extends Mappable {
      *                 Receives the vertex color components in r,g,b,a order
      * @param iOutBase Start index in the output array
      */
-    public void getVertexColor(int channel, int iIndex, float[] afOut, int iOutBase) {
-        assert(this.hasVertexColors(channel));
-        assert(afOut.length >= 4);
-        assert(iOutBase + 4 <= afOut.length);
-        assert(iIndex < this.getNumVertices()); // explicitly assert here, no AIOOBE
-
-        if (null == this.m_avColors[channel]) this.mapColors(channel);
+    public final void getVertexColor(int channel, int iIndex, float[] afOut, int iOutBase) {
+        assert(this.hasVertexColors(channel) && afOut.length >= 4 &&
+                iOutBase + 4 <= afOut.length && iIndex < this.getNumVertices());
 
         iIndex *= 4;   // RGBA order
         afOut[iOutBase] = this.m_avColors[channel][iIndex];
@@ -638,9 +546,8 @@ public class Mesh extends Mappable {
      * @return Array of floats, size is numverts * 3. Component ordering
      *         is xyz.
      */
-    public float[] getVertexColorArray(int channel) {
-        assert(this.hasVertexColors(channel));
-        if (null == this.m_avColors[channel]) this.mapColors(channel);
+    public final float[] getVertexColorArray(int channel) {
+        assert(channel < MAX_NUMBER_OF_COLOR_SETS);
         return this.m_avColors[channel];
     }
 
@@ -652,9 +559,8 @@ public class Mesh extends Mappable {
      *               returned by <code>getNumFaces()</code>
      * @param aiOut  Output array, size must at least be 3
      */
-    public void getFace(int iIndex, int[] aiOut) {
+    public final void getFace(int iIndex, int[] aiOut) {
         assert(aiOut.length >= 3);
-        if (null == this.m_vFaces) this.mapFaces();
         iIndex *= 3;
         aiOut[0] = this.m_vFaces[iIndex];
         aiOut[1] = this.m_vFaces[iIndex + 1];
@@ -669,9 +575,8 @@ public class Mesh extends Mappable {
      * @param aiOut    Output array, size must at least be 3
      * @param iOutBase Start index in the output array
      */
-    public void getFace(int iIndex, int[] aiOut, int iOutBase) {
+    public final void getFace(int iIndex, int[] aiOut, int iOutBase) {
         assert(aiOut.length >= 3);
-        if (null == this.m_vFaces) this.mapFaces();
         iIndex *= 3;
         aiOut[0] = this.m_vFaces[iIndex];
         aiOut[iOutBase + 1] = this.m_vFaces[iIndex + 1];
@@ -687,156 +592,31 @@ public class Mesh extends Mappable {
      *         of three indices (higher level polygons are automatically
      *         triangulated by the library)
      */
-    public int[] getFaceArray() {
-        if (null == this.m_vFaces) this.mapFaces();
+    public final int[] getFaceArray() {
         return this.m_vFaces;
     }
 
 
-    protected void onMap() throws NativeError {
-        // map all vertex component arrays into JVM memory
-        if (this.hasPositions()) this.mapVertices();
-        if (this.hasNormals()) this.mapNormals();
-        if (this.hasTangentsAndBitangents()) {
-            this.mapTangents();
-            this.mapBitangents();
-        }
-        for (int i = 0; i < MAX_NUMBER_OF_COLOR_SETS; ++i) {
-            if (this.hasVertexColors(i)) this.mapColors(i);
-        }
-        for (int i = 0; i < MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
-            if (this.hasUVCoords(i)) this.mapUVs(i);
-        }
-        DefaultLogger.get().debug("Mesh.onMap successful");
-    }
-
-
-    private void mapVertices() {
-        this.m_vVertices = new float[this.getNumVertices() * 3];
-        if (0xffffffff == this._NativeMapVertices(((Scene) this.getParent()).
-                getImporter().getContext(), this.getArrayIndex(),
-                this.m_vVertices)) {
-            // this should occur rarely. No need to throw an exception,
-            // simply write to log and let the array at 0.0f
-            DefaultLogger.get().error("Unable to map vertices into JVM memory");
-        }
-    }
-
-    private void mapNormals() {
-        this.m_vNormals = new float[this.getNumVertices() * 3];
-        if (0xffffffff == this._NativeMapNormals(((Scene) this.getParent()).
-                getImporter().getContext(), this.getArrayIndex(),
-                this.m_vNormals)) {
-            // this should occur rarely. No need to throw an exception,
-            // simply write to log and let the array at 0.0f
-            DefaultLogger.get().error("Unable to map normals into JVM memory");
-        }
-    }
-
-    private void mapTangents() {
-        this.m_vTangents = new float[this.getNumVertices() * 3];
-        if (0xffffffff == this._NativeMapTangents(((Scene) this.getParent()).
-                getImporter().getContext(), this.getArrayIndex(),
-                this.m_vTangents)) {
-            // this should occur rarely. No need to throw an exception,
-            // simply write to log and let the array at 0.0f
-            DefaultLogger.get().error("Unable to map tangents into JVM memory");
-        }
-    }
-
-    private void mapBitangents() {
-        this.m_vBitangents = new float[this.getNumVertices() * 3];
-        if (0xffffffff == this._NativeMapBitangents(((Scene) this.getParent()).
-                getImporter().getContext(), this.getArrayIndex(),
-                this.m_vBitangents)) {
-            // this should occur rarely. No need to throw an exception,
-            // simply write to log and let the array at 0.0f
-            DefaultLogger.get().error("Unable to map bitangents into JVM memory");
-        }
-    }
-
-    private void mapFaces() {
-        this.m_vFaces = new int[this.getNumFaces() * 3];
-        if (0xffffffff == this._NativeMapFaces(((Scene) this.getParent()).
-                getImporter().getContext(), this.getArrayIndex(),
-                this.m_vFaces)) {
-            // this should occur rarely. No need to throw an exception,
-            // simply write to log and let the array at 0
-            DefaultLogger.get().error("Unable to map faces into JVM memory");
-        }
-    }
-
-    private void mapUVs(int channel) {
-        this.m_avUVs[channel] = new float[this.getNumVertices() * this.m_aiNumUVComponents[channel]];
-        if (0xffffffff == this._NativeMapUVs(((Scene) this.getParent()).
-                getImporter().getContext(), this.getArrayIndex(),
-                channel, this.m_avUVs[channel])) {
-            // this should occur rarely. No need to throw an exception,
-            // simply write to log and let the array at 0.0f
-            DefaultLogger.get().error("Unable to map UV coordinate set " + channel + " into JVM memory");
-        }
-    }
-
-    private void mapColors(int channel) {
-        this.m_avColors[channel] = new float[this.getNumVertices() * 4];
-        if (0xffffffff == this._NativeMapColors(((Scene) this.getParent()).
-                getImporter().getContext(), this.getArrayIndex(),
-                channel, this.m_avColors[channel])) {
-            // this should occur rarely. No need to throw an exception,
-            // simply write to log and let the array at 0.0f
-            DefaultLogger.get().error("Unable to map vertex color channel " + channel + " into JVM memory");
-        }
+    /**
+     * Provides access to the array of all bones influencing this
+     * mesh.
+     *
+     * @return Bone array
+     */
+    public final Bone[] getBonesArray() {
+        assert (null != this.m_vBones);
+        return this.m_vBones;
     }
 
 
     /**
-     * JNI bridge function - for internal use only
-     * Retrieve a bit combination which indicates which vertex
-     * components are existing in the model.
+     * Get a bone influencing the mesh
      *
-     * @param context Current importer context (imp.hashCode)
-     * @return Combination of the PF_XXX constants
+     * @param i Index of the bone
+     * @return Bone
      */
-    private native int _NativeGetPresenceFlags(long context, long index);
-
-    /**
-     * JNI bridge function - for internal use only
-     * Initialise class members
-     *
-     * @param context Current importer context (imp.hashCode)
-     * @return Number of vertices in the mesh
-     */
-    private native int _NativeInitMembers(long context, long index);
-
-    /**
-     * JNI bridge function - for internal use only
-     * Retrieve the number of uvw components for a channel
-     *
-     * @param context Current importer context (imp.hashCode)
-     * @param out     Output array. Size must be MAX_NUMBER_OF_TEXTURECOORDS.
-     * @return 0xffffffff if an error occured
-     */
-    private native int _NativeGetNumUVComponents(long context, long index, int[] out);
-
-    /**
-     * JNI bridge function - for internal use only
-     * Map the position component of the mesh's vertices into memory
-     *
-     * @param context Current importer context (imp.hashCode)
-     * @param out     Output array. Must be large enough
-     * @return 0xffffffff if an error occured
-     */
-    private native int _NativeMapVertices(long context, long index, float[] out);
-
-    private native int _NativeMapNormals(long context, long index, float[] out);
-
-    private native int _NativeMapTangents(long context, long index, float[] out);
-
-    private native int _NativeMapBitangents(long context, long index, float[] out);
-
-    private native int _NativeMapUVs(long context, long index, int channel, float[] out);
-
-    private native int _NativeMapColors(long context, long index, int channel, float[] out);
-
-    private native int _NativeMapFaces(long context, long index, int[] out);
+    public final Bone getBone(int i) {
+        assert (null != this.m_vBones && i < this.m_vBones.length);
+        return this.m_vBones[i];
+    }
 }

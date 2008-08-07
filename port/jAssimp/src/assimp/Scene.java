@@ -42,8 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package assimp;
 
-import java.util.Vector;
-
 /**
  * Represents the asset data that has been loaded. A scene consists of
  * multiple meshes, animations, materials and embedded textures.
@@ -57,13 +55,13 @@ import java.util.Vector;
  */
 public class Scene {
 
-    // NOTE: use Vector's to be able to use the constructor for initialisation
-    private Vector<Mesh> m_vMeshes;
-    private Vector<Texture> m_vTextures;
-    private Vector<Material> m_vMaterials;
-    private Vector<Animation> m_vAnimations;
+    private Mesh[] m_vMeshes = null;
+    private Texture[] m_vTextures = null;
+    private Material[] m_vMaterials = null;
+    private Animation[] m_vAnimations = null;
     private Node m_rootNode = null;
     private Importer imp = null;
+    private int flags;
 
     private Scene() {
     }
@@ -76,13 +74,51 @@ public class Scene {
         return this.imp;
     }
 
+
+    /**
+     * Specifies that no full model but only an animation skeleton has been
+     * imported. There are no materials in this case. There are no
+     * textures in this case. But there is a node graph, animation channels
+     * and propably meshes with bones.
+     */
+    public static final int FLAG_ANIM_SKELETON_ONLY	= 0x1;
+
+
+    /**
+     * Get the scene flags. This can be any combination of the
+     * FLAG_XXX constants defined int this scope
+     * @return Scene flags.
+     */
+    public final int getFlags() {
+        return flags;
+    }
+
     /**
      * Get the mesh list
      *
      * @return mesh list
      */
-    public final Vector<Mesh> getMeshes() {
+    public final Mesh[] getMeshes() {
         return m_vMeshes;
+    }
+
+    /**
+     * Get the number of meshes in the scene
+     * @return this value can be 0 if the <code>ANIMATION_SKELETON_ONLY</code>
+     * flag is set.
+     */
+    public final int getNumMeshes() {
+        return m_vMeshes.length;
+    }
+
+    /**
+     * Get a mesh from the scene
+     * @param i Index of the mesh
+     * @return scene.mesh[i]
+     */
+    public final Mesh getMesh(int i) {
+        assert(i < m_vMeshes.length);
+        return m_vMeshes[i];
     }
 
     /**
@@ -90,8 +126,26 @@ public class Scene {
      *
      * @return Texture list
      */
-    public final Vector<Texture> getTextures() {
+    public final Texture[] getTextures() {
         return m_vTextures;
+    }
+
+     /**
+     * Get the number of textures in the scene
+     * @return this value is often 0 since most texture's arent' embedded
+     */
+    public int getNumTextures() {
+        return m_vTextures.length;
+    }
+
+    /**
+     * Get an embedded texture from the scene
+     * @param i Index of the mesh
+     * @return scene.texture[i]
+     */
+    public final Texture getTexture(int i) {
+        assert(i < m_vTextures.length);
+        return m_vTextures[i];
     }
 
     /**
@@ -99,8 +153,16 @@ public class Scene {
      *
      * @return Material list
      */
-    public final Vector<Material> getMaterials() {
+    public final Material[] getMaterials() {
         return m_vMaterials;
+    }
+
+     /**
+     * Get the number of animations in the scene
+     * @return this value could be 0, most models have no animations
+     */
+    public int getNumAnimations() {
+        return m_vAnimations.length;
     }
 
     /**
@@ -108,7 +170,7 @@ public class Scene {
      *
      * @return Animation list
      */
-    public final Vector<Animation> getAnimations() {
+    public final Animation[] getAnimations() {
         return m_vAnimations;
     }
 
@@ -120,94 +182,4 @@ public class Scene {
     public final Node getRootNode() {
         return m_rootNode;
     }
-
-    /**
-     * Used to initialize the class instance. Called by Importer. Will maybe
-     * be replaced with a RAII solution ...
-     */
-    protected void construct() throws NativeError {
-
-        int i;
-
-        // Mesh, Animation, Texture, Material and Node constructors
-        // throw exceptions if they fail
-
-        // load all meshes
-        int iTemp = this._NativeGetNumMeshes(imp.hashCode());
-        if (0xffffffff == iTemp) throw new NativeError("Unable to obtain number of meshes in the scene");
-        this.m_vMeshes.setSize(iTemp);
-
-        for (i = 0; i < iTemp; ++i) {
-            this.m_vMeshes.set(i, new Mesh(this, i));
-        }
-
-        // load all animations
-        iTemp = this._NativeGetNumAnimations(imp.getContext());
-        if (0xffffffff == iTemp) throw new NativeError("Unable to obtain number of animations in the scene");
-        this.m_vAnimations.setSize(iTemp);
-
-        for (i = 0; i < iTemp; ++i) {
-            this.m_vAnimations.set(i, new Animation(this, i));
-        }
-
-        // load all textures
-        iTemp = this._NativeGetNumTextures(imp.getContext());
-        if (0xffffffff == iTemp) throw new NativeError("Unable to obtain number of textures in the scene");
-        this.m_vTextures.setSize(iTemp);
-
-        for (i = 0; i < iTemp; ++i) {
-            this.m_vTextures.set(i, new Texture(this, i));
-        }
-
-        // load all materials
-        iTemp = this._NativeGetNumMaterials(imp.getContext());
-        if (0xffffffff == iTemp) throw new NativeError("Unable to obtain number of materials in the scene");
-        this.m_vMaterials.setSize(iTemp);
-
-        for (i = 0; i < iTemp; ++i) {
-            this.m_vMaterials.set(i, new Material(this, i));
-        }
-
-        // now load all nodes
-        //this.m_rootNode = new Node(this, 0xffffffff);
-
-
-        return;
-    }
-
-    /**
-     * JNI bridge function - for internal use only
-     * Retrieve the number of meshes in a scene
-     *
-     * @param context Current importer context (imp.hashCode)
-     * @return Number of meshes in the scene that belongs to the context
-     */
-    private native int _NativeGetNumMeshes(long context);
-
-    /**
-     * JNI bridge function - for internal use only
-     * Retrieve the number of animations in a scene
-     *
-     * @param context Current importer context (imp.hashCode)
-     * @return Number of animations in the scene that belongs to the context
-     */
-    private native int _NativeGetNumAnimations(long context);
-
-    /**
-     * JNI bridge function - for internal use only
-     * Retrieve the number of textures in a scene
-     *
-     * @param context Current importer context (imp.hashCode)
-     * @return Number of textures in the scene that belongs to the context
-     */
-    private native int _NativeGetNumTextures(long context);
-
-    /**
-     * JNI bridge function - for internal use only
-     * Retrieve the number of materials in a scene
-     *
-     * @param context Current importer context (imp.hashCode)
-     * @return Number of materials in the scene that belongs to the context
-     */
-    private native int _NativeGetNumMaterials(long context);
 }

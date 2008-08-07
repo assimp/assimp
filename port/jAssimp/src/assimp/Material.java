@@ -47,16 +47,179 @@ package assimp;
 /**
  * Class to wrap materials. Materials are represented in ASSIMP as a list of
  * key/value pairs, the key being a <code>String</code> and the value being
- * a binary buffer.
+ * a binary buffer. The class provides several get methods to access
+ * material properties easily.
  *
  * @author Aramis (Alexander Gessler)
  * @version 1.0
  */
-public class Material extends Mappable {
+public class Material {
 
 
+    /**
+     * Internal representation of a material property
+     */
+    private class Property {
+        String key;
+        Object value;
+    }
+
+    /**
+     * List of all properties for this material
+     */
+    public Property[] properties;
+
+
+    /**
+     * Special exception class which is thrown if a material property
+     * could not be found.
+     */
+    public class PropertyNotFoundException extends Exception {
+
+        public final String property_key;
+
+        /**
+         * Constructs a new exception
+         * @param message Error message
+         * @param property_key Name of the property that wasn't found
+         */
+        public PropertyNotFoundException(String message, String property_key) {
+            super(message);
+            this.property_key = property_key;
+        }
+    }
+
+
+    /**
+     * Get a property with a specific name as generic <code>Object</code>
+     * @param key MATKEY_XXX key constant
+     * @return  null if the property wasn't there or hasn't
+     * the desired output type. The returned <code>Object</code> can be
+     * casted to the expected data type for the property. Primitive
+     * types are represented by their boxed variants.
+     */
+    public Object getProperty(String key) throws PropertyNotFoundException {
+
+        for (Property prop : properties)  {
+            if (prop.key.equals(key)){
+                return prop.value;
+            }
+        }
+        throw new PropertyNotFoundException("Unable to find material property: ",key);
+    }
+
+   /**
+     * Get a material property as float array
+     * @param key MATKEY_XXX key constant
+      * @throws PropertyNotFoundException - if the property can't be found
+      * or if it has the wrong data type.
+     */
+    public float[] getPropertyAsFloatArray(String key) throws PropertyNotFoundException {
+
+        Object obj = getProperty(key);
+        if (obj instanceof float[]) {
+            return (float[]) obj;
+        }
+        String msg = "The data type requested (float[]) doesn't match the " +
+            "real data type of the material property";
+        DefaultLogger.get().error(msg);
+       throw new PropertyNotFoundException(msg,key);
+    }
+
+
+     /**
+     * Get a floating-point material property
+     * @param key MATKEY_XXX key constant
+     * @return The value of the property.
+      * @throws PropertyNotFoundException - if the property can't be found
+      * or if it has the wrong data type.
+     */
+    public float getPropertyAsFloat(String key) throws PropertyNotFoundException {
+
+        Object obj = getProperty(key);
+        if (obj instanceof Float) {
+            return (Float) obj;
+        }
+        String msg = "The data type requested (Float) doesn't match the " +
+            "real data type of the material property";
+        DefaultLogger.get().error(msg);
+       throw new PropertyNotFoundException(msg,key);
+    }
+
+
+    /**
+     * Get an integer material property
+     * @param key MATKEY_XXX key constant
+     * @return The value of the property.
+      * @throws PropertyNotFoundException - if the property can't be found
+      * or if it has the wrong data type.
+     */
+    public int getPropertyAsInt(String key) throws PropertyNotFoundException {
+
+        Object obj = getProperty(key);
+        if (obj instanceof Integer) {
+            return (Integer) obj;
+        }
+        String msg = "The data type requested (Integer) doesn't match the " +
+            "real data type of the material property";
+        DefaultLogger.get().error(msg);
+       throw new PropertyNotFoundException(msg,key);
+    }
+
+
+    /**
+     * Get a material property string
+     * @param key MATKEY_XXX key constant
+     * @return The value of the property.
+      * @throws PropertyNotFoundException - if the property can't be found
+      * or if it has the wrong data type.
+     */
+    public String getPropertyAsString(String key) throws PropertyNotFoundException {
+
+        Object obj = getProperty(key);
+        if (obj instanceof String) {
+            return (String) obj;
+        }
+        String msg = "The data type requested (java.lang.String) doesn't match the " +
+            "real data type of the material property";
+        DefaultLogger.get().error(msg);
+       throw new PropertyNotFoundException(msg,key);
+    }
+
+
+    /**
+     * Material key: defines the name of the material
+     * The type of this material property is <code>String</code>
+     */
     public static final String MATKEY_NAME = "$mat.name";
 
+    /**
+     * Material key: defines the diffuse base color of the material
+     * The type of this material property is <code>float[]</code>.
+     * The array has 4 or 3 components in RGB(A) order.
+     */
+    public static final String MATKEY_COLOR_DIFFUSE = "$clr.diffuse";
+
+    /**
+     * Material key: defines the specular base color of the material
+     * The type of this material property is <code>float[]</code>.
+     * The array has 4 or 3 components in RGB(A) order.
+     */
+    public static final String MATKEY_COLOR_SPECULAR = "$clr.specular";
+
+    /**
+     * Material key: defines the ambient base color of the material
+     * The type of this material property is <code>float[]</code>.
+     * The array has 4 or 3 components in RGB(A) order.
+     */
+    public static final String MATKEY_COLOR_AMBIENT = "$clr.ambient";
+
+    /**
+     * Material key: defines the emissive base color of the material
+     * The type of this material property is <code>float[]</code>.
+     * The array has 4 or 3 components in RGB(A) order.
+     */
+    public static final String MATKEY_COLOR_EMISSIVE = "$clr.emissive";
 
     /**
      * Specifies the blend operation to be used to combine the Nth
@@ -72,66 +235,54 @@ public class Material extends Mappable {
     }
 
     /**
-     * @see MATKEY_TEXOP_DIFFUSE()
+     * @see <code>MATKEY_TEXOP_DIFFUSE</code>
      */
     public static String MATKEY_TEXOP_SPECULAR(int N) {
         return "$tex.op.specular[" + N + "]";
     }
 
     /**
-     * @see MATKEY_TEXOP_DIFFUSE()
+     * @see <code>MATKEY_TEXOP_DIFFUSE</code>
      */
     public static String MATKEY_TEXOP_AMBIENT(int N) {
         return "$tex.op.ambient[" + N + "]";
     }
 
     /**
-     * @see MATKEY_TEXOP_DIFFUSE()
+     * @see <code>MATKEY_TEXOP_DIFFUSE</code>
      */
     public static String MATKEY_TEXOP_EMISSIVE(int N) {
         return "$tex.op.emissive[" + N + "]";
     }
 
     /**
-     * @see MATKEY_TEXOP_DIFFUSE()
+     * @see <code>MATKEY_TEXOP_DIFFUSE</code>
      */
     public static String MATKEY_TEXOP_NORMALS(int N) {
         return "$tex.op.normals[" + N + "]";
     }
 
     /**
-     * @see MATKEY_TEXOP_DIFFUSE()
+     * @see <code>MATKEY_TEXOP_DIFFUSE</code>
      */
     public static String MATKEY_TEXOP_HEIGHT(int N) {
         return "$tex.op.height[" + N + "]";
     }
 
     /**
-     * @see MATKEY_TEXOP_DIFFUSE()
+     * @see <code>MATKEY_TEXOP_DIFFUSE</code>
      */
     public static String MATKEY_TEXOP_SHININESS(int N) {
         return "$tex.op.shininess[" + N + "]";
     }
 
     /**
-     * @see MATKEY_TEXOP_DIFFUSE()
+     * @see <code>MATKEY_TEXOP_DIFFUSE</code>
      */
     public static String MATKEY_TEXOP_OPACITY(int N) {
         return "$tex.op.opacity[" + N + "]";
     }
 
 
-    /**
-     * Construction from a given parent object and array index
-     *
-     * @param parent Must be valid, null is not allowed
-     * @param index  Valied index in the parent's list
-     */
-    public Material(Object parent, int index) {
-        super(parent, index);
-    }
 
-    protected void onMap() throws NativeError {
-
-    }
 }

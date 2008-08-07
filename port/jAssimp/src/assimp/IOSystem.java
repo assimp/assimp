@@ -42,7 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package assimp;
 
-import java.io.InputStream;
 import java.io.FileNotFoundException;
 
 

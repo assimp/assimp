@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package assimp;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 /**
  * Represents an embedded texture. Sometimes textures are not referenced
@@ -56,30 +57,13 @@ import java.awt.*;
  * @author Aramis (Alexander Gessler)
  * @version 1.0
  */
-public class Texture extends Mappable {
+public class Texture  {
 
     protected int width = 0;
     protected int height = 0;
+    protected int needAlpha = 0xffffffff;
 
     protected Object data = null;
-
-    /**
-     * Construction from a given parent object and array index
-     *
-     * @param parent Must be valid, null is not allowed
-     * @param index  Valied index in the parent's list
-     */
-    public Texture(Object parent, int index) throws NativeError {
-        super(parent, index);
-
-        long lTemp;
-        if (0x0 == (lTemp = this._NativeGetTextureInfo(((Scene) this.getParent()).
-                getImporter().getContext(), this.getArrayIndex()))) {
-            throw new NativeError("Unable to get the width and height of the texture");
-        }
-        this.width = (int) (lTemp);
-        this.height = (int) (lTemp >> 32);
-    }
 
 
     /**
@@ -100,6 +84,30 @@ public class Texture extends Mappable {
         return width;
     }
 
+
+    /**
+     * Returns whether the texture uses its alpha channel
+     * @return <code>true</code> if at least one pixel
+     * has an alpha value below 0xFF.
+     */
+    public boolean hasAlphaChannel() {
+
+        // already computed?
+        if (0xffffffff == needAlpha && null != data) {
+
+            Color[] clr = getColorArray();
+            for (Color c : clr) {
+              if (c.getAlpha() < 255) {
+                  needAlpha = 1;
+                  return true;
+              }
+            }
+            needAlpha = 0;
+            return false;
+        }
+        return 0x1 == needAlpha;
+    }
+
     /**
      * Get the color at a given position of the texture
      *
@@ -110,15 +118,6 @@ public class Texture extends Mappable {
     public Color getPixel(int x, int y) {
 
         assert(x < width && y < height);
-
-        // map the color data in memory if required ...
-        if (null == data) {
-            try {
-                this.onMap();
-            } catch (NativeError nativeError) {
-                return Color.black;
-            }
-        }
         return ((Color[]) data)[y * width + x];
     }
 
@@ -128,68 +127,29 @@ public class Texture extends Mappable {
      * @return Array of <code>java.awt.Color</code>, size: width * height
      */
     public Color[] getColorArray() {
-
-        // map the color data in memory if required ...
-        if (null == data) {
-            try {
-                this.onMap();
-            } catch (NativeError nativeError) {
-                return null;
-            }
-        }
         return (Color[]) data;
     }
 
+
     /**
-     * Internal helper function to map the native texture data into
-     * a <code>java.awt.Color</code> array
+     * Convert the texture into a <code>java.awt.BufferedImage</code>
+     * @return <code>java.awt.BufferedImage</code> object containing
+     * a copy of the texture image. The texture is a ARGB texture if
+     * an alpha channel is required, otehrwise RGB is used as format.
      */
-    @Override
-    protected void onMap() throws NativeError {
-        final int iNumPixels = width * height;
+    public BufferedImage convertToImage() {
 
-        // first allocate the output array
-        data = new Color[iNumPixels];
+        BufferedImage buf = new BufferedImage(width,height, hasAlphaChannel()
+                ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
 
-        // now allocate a temporary output array
-        byte[] temp = new byte[(iNumPixels) << 2];
+        int[] aiColorBuffer = new int[width*height];
+        Color[] clr = getColorArray();
 
-        // and copy the native color data to it
-        if (0xffffffff == this._NativeMapColorData(((Scene) this.getParent()).getImporter().getContext(),
-                this.getArrayIndex(), temp)) {
-            throw new NativeError("Unable to map aiTexture into the Java-VM");
+        for (int i = 0; i <  width*height;++i) {
+            aiColorBuffer[i] =  clr[i].getRGB();
         }
 
-        DefaultLogger.get().debug("Texture.onMap successful");
-
-        // now convert the temporary representation to a Color array
-        // (data is given in BGRA order, we need RGBA)
-        for (int i = 0, iBase = 0; i < iNumPixels; ++i, iBase += 4) {
-            ((Color[]) data)[i] = new Color(temp[iBase + 2], temp[iBase + 1], temp[iBase], temp[iBase + 3]);
-        }
-        return;
+        buf.setRGB(0,0,width,height,aiColorBuffer,0,width*4);
+        return buf;
     }
-
-    /**
-     * JNI bridge call. For internal use only
-     * The method maps the contents of the native aiTexture object into memory
-     * the native memory area will be deleted afterwards.
-     *
-     * @param context Current importer context (imp.hashCode)
-     * @param index   Index of the texture in the scene
-     * @param temp    Output array. Assumed to be width * height * 4 in size
-     * @return 0xffffffff if an error occured
-     */
-    protected native int _NativeMapColorData(long context, long index, byte[] temp);
-
-    /**
-     * JNI bridge call. For internal use only
-     * The method retrieves information on the underlying texture
-     *
-     * @param context Current importer context (imp.hashCode)
-     * @param index   Index of the texture in the scene
-     * @return 0x0 if an error occured, otherwise the width in the lower 32 bits
-     *         and the height in the higher 32 bits
-     */
-    private native long _NativeGetTextureInfo(long context, long index);
 }

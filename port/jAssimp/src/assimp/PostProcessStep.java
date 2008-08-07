@@ -187,78 +187,27 @@ public class PostProcessStep {
             new PostProcessStep("ValidateDataStructure");
 
 
-    /**
-     * Set the vertex split limit for the "SplitLargeMeshes" process
-     * If a mesh exceeds this limit it will be splitted
-     *
-     * @param limit New vertex split limit. Pass 0xffffffff to disable
-     *              a vertex split limit. However, splitting by triangles is still active
-     *              then.
-     * @return Old vertex split limit
-     */
-    public static synchronized int setVertexSplitLimit(int limit) {
-        if (s_iVertexSplitLimit != limit) {
-            // send to the JNI bridge ...
-            s_iVertexSplitLimit = limit;
-            _NativeSetVertexSplitLimit(limit);
-        }
-        return limit;
-    }
+    /** This step tries to determine which meshes have normal vectors
+	 * that are facing inwards. The algorithm is simple but effective:
+	 * the bounding box of all vertices + their normals is compared against
+	 * the volume of the bounding box of all vertices without their normals.
+	 * This works well for most objects, problems might occur with planar
+	 * surfaces. However the step tries to filter such cases out.
+	 * The step inverts all infacing normals. Generally it is recommended
+	 * to enable this step.
+	*/
+    public static final PostProcessStep FixInfacingNormals =
+            new PostProcessStep("FixInfacingNormals");
 
-    /**
-     * Set the triangle split limit for the "SplitLargeMeshes" process
-     * If a mesh exceeds this limit it will be splitted
-     *
-     * @param limit new triangle split limit. Pass 0xffffffff to disable
-     *              a triangle split limit. However, splitting by vertices is still active
-     *              then.
-     * @return Old triangle split limit
-     */
-    public static synchronized int setTriangleSplitLimit(int limit) {
-        if (s_iTriangleSplitLimit != limit) {
-            // send to the JNI bridge ...
-            s_iTriangleSplitLimit = limit;
-            _NativeSetTriangleSplitLimit(limit);
-        }
-        return limit;
-    }
 
-    /**
-     * Set the bone weight limit for the "LimitBoneWeights" process
-     * If a mesh exceeds this limit it will be splitted
-     *
-     * @param limit new bone weight limit. Pass 0xffffffff to disable it.
-     * @return Old bone weight limit
-     */
-    public static synchronized int setSetBoneWeightLimit(int limit) {
-        if (s_iBoneWeightLimit != limit) {
-            // send to the JNI bridge ...
-            s_iBoneWeightLimit = limit;
-            _NativeSetBoneWeightLimit(limit);
-        }
-        return limit;
-    }
-
-    /**
-     * JNI bridge call. For internal use only
-     *
-     * @param limit New vertex split limit
-     */
-    private native static void _NativeSetVertexSplitLimit(int limit);
-
-    /**
-     * JNI bridge call. For internal use only
-     *
-     * @param limit New triangle split limit
-     */
-    private native static void _NativeSetTriangleSplitLimit(int limit);
-
-    /**
-     * JNI bridge call. For internal use only
-     *
-     * @param limit New bone weight limit
-     */
-    private native static void _NativeSetBoneWeightLimit(int limit);
+    /** Reorders triangles for vertex cache locality and thus better performance.
+	 * The step tries to improve the ACMR (average post-transform vertex cache
+	 * miss ratio) for all meshes. The step runs in O(n) and is roughly
+	 * basing on the algorithm described in this paper:
+	 * <url>http://www.cs.princeton.edu/gfx/pubs/Sander_2007_%3ETR/tipsy.pdf</url>
+	 */
+	 public static final PostProcessStep ImproveVertexLocality =
+            new PostProcessStep("ImproveVertexLocality");
 
 
     private final String myName; // for debug only

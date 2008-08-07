@@ -43,7 +43,7 @@ package assimp;
 
 /**
  * Defines all shading models supported by the library
- * <p/>
+ * 
  * NOTE: The list of shading modes has been taken from Blender3D.
  * See Blender3D documentation for more information. The API does
  * not distinguish between "specular" and "diffuse" shaders (thus the

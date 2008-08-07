@@ -44,90 +44,106 @@ package assimp;
 
 
 /**
- * A bone belongs to a mesh stores a list of vertex weights.
- * It represents a joint of the skeleton. The bone hierarchy
- * is contained in the node graph.
+ * A bone animation channel defines the animation keyframes for
+ * a single bone in the mesh hierarchy.
  *
  * @author Aramis (Alexander Gessler)
  * @version 1.0
  */
-public class Bone {
-
+public class BoneAnim {
 
     /**
-     * Represents a single vertex weight
+     * Describes a keyframe
      */
-    public class Weight {
-
-
-        public Weight() {
-            index = 0;
-            weight = 1.0f;
-        }
+    public class KeyFrame<Type> {
 
         /**
-         * Index of the vertex in the corresponding <code>Mesh</code>
+         * Time line position of *this* keyframe, in "ticks"
          */
-        public int index;
-
+        public double time;
 
         /**
-         * Weight of the vertex. All weights for a vertex sum up to
-         * 1.0
+         * Current value of the property being animated
          */
-        public float weight;
+        public Type value;
     }
 
     /**
-     * Name of the bone
+     * Rotation keyframes
      */
-    private String name = "";
+    private KeyFrame<Quaternion>[] mQuatKeys;
+
+    /**
+     * Position keyframes. Component ordering is x,y,z
+     */
+    private KeyFrame<float[]>[] mPosKeys;
+
+    /**
+     * scaling keyframes. Component ordering is x,y,z
+     */
+    private KeyFrame<float[]>[] mScalingKeys;
 
 
     /**
-     * List of vertex weights for the bone
+     * Name of the bone affected by this animation channel
      */
-    private Weight[] weights = null;
+    private String mName;
 
 
     /**
-     * Retrieves the name of the node
-     * @return Normally bones are never unnamed
+     * Returns the name of the bone affected by this animation channel
+     * @return Bone name
      */
     public final String getName() {
-        return this.name;
+        return mName;
     }
-
 
     /**
-     * Returns a reference to the array of weights
-     * @return <code>Weight</code> array
+     * Returns the number of rotation keyframes
+     * @return This can be 0.
      */
-    public final Weight[] getWeightsArray() {
-        assert(null != weights);
-        return weights;
+    public final int getNumQuatKeys() {
+        return null == mQuatKeys ? 0 : mQuatKeys.length;
     }
 
+     /**
+     * Returns the number of position keyframes
+     * @return This can be 0.
+     */
+    public final int getNumPosKeys() {
+        return null == mPosKeys ? 0 : mPosKeys.length;
+    }
+
+     /**
+     * Returns the number of scaling keyframes
+     * @return This can be 0.
+     */
+    public final int getNumScalingKeys() {
+        return null == mScalingKeys ? 0 : mScalingKeys.length;
+    }
 
     /**
-     * Returns the number of bone weights.
-     * @return There should at least be one vertex weights (the
-     * validation step would complain otherwise)
+     * Get a reference to the list of all rotation keyframes
+     * @return Could be <code>null</code> if there are no rotation keys
      */
-    public final int getNumWeights() {
-        assert(null != weights);
-        return weights.length;
+    public final KeyFrame<Quaternion>[] getQuatKeys() {
+        return mQuatKeys;
     }
-
 
     /**
-     * Returns one specific vertex weights
-     * @param weight Index of the vertex weights. Must be between
-     * 0 and <code>getNumWeights()-1</code>
-     * @return Vertex weight
+     * Get a reference to the list of all position keyframes
+     * @return Could be <code>null</code> if there are no position keys
      */
-    public final Weight getWeight(int weight) {
-        assert(null != weights && weight < this.weights.length);
-        return this.weights[weight];
+    public final KeyFrame<float[]>[] getPosKeys() {
+        return mPosKeys;
     }
+
+     /**
+     * Get a reference to the list of all scaling keyframes
+     * @return Could be <code>null</code> if there are no scaling keys
+     */
+    public final KeyFrame<float[]>[] getScalingKeys() {
+        return mScalingKeys;
+    }
+
 }

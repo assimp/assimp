@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="module_assimp" default="compile.module.assimp">
+  <dirname property="module.assimp.basedir" file="${ant.file.module_assimp}"/>
+  
+  <property name="module.jdk.home.assimp" value="${project.jdk.home}"/>
+  <property name="module.jdk.classpath.assimp" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.assimp" value="${compiler.args}"/>
+  
+  <property name="assimp.output.dir" value="${module.assimp.basedir}/classes"/>
+  <property name="assimp.testoutput.dir" value="${module.assimp.basedir}/classes"/>
+  
+  <path id="assimp.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="assimp.module.classpath">
+    <path refid="${module.jdk.classpath.assimp}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.assimp">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.assimp">
+    <patternset refid="excluded.from.module.assimp"/>
+  </patternset>
+  
+  <path id="assimp.module.sourcepath">
+    <dirset dir="${module.assimp.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.assimp" depends="compile.module.assimp.production,compile.module.assimp.tests" description="Compile module assimp"/>
+  
+  <target name="compile.module.assimp.production" description="Compile module assimp; production classes">
+    <mkdir dir="${assimp.output.dir}"/>
+    <javac2 destdir="${assimp.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memoryMaximumSize="${compiler.max.memory}" fork="true" executable="${module.jdk.home.assimp}/bin/javac">
+      <compilerarg line="${compiler.args.assimp}"/>
+      <bootclasspath refid="assimp.module.bootclasspath"/>
+      <classpath refid="assimp.module.classpath"/>
+      <src refid="assimp.module.sourcepath"/>
+    </javac2>
+    
+    <copy todir="${assimp.output.dir}">
+      <fileset dir="${module.assimp.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.assimp.tests" depends="compile.module.assimp.production" description="compile module assimp; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.assimp" description="cleanup module">
+    <delete dir="${assimp.output.dir}"/>
+    <delete dir="${assimp.testoutput.dir}"/>
+  </target>
+</project>

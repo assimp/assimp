@@ -45,13 +45,13 @@ package assimp;
  * Exception class used by jAssimp. It is thrown whenever an unknown error
  * occurs in the JNI bridge between the native Assimp library and the Java VM.
  */
-public class NativeError extends Exception {
+public class NativeException extends Exception {
 
-    public NativeError() {
+    public NativeException() {
         super("Unknown error");
     }
 
-    public NativeError(String sz) {
+    public NativeException(String sz) {
         super(sz);
     }
 }

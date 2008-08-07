@@ -70,7 +70,7 @@ public class Node {
      * Local transformation matrix of the node
      * Stored in row-major order.
      */
-    private float[] nodeTransform = null;
+    private Matrix4x4 nodeTransform = null;
 
 
     /**
@@ -85,15 +85,9 @@ public class Node {
      * List of all child nodes
      * May be empty
      */
-    private Vector<Node> children = null;
-    private int numChildren = 0; // temporary
+    private Node[] children = null;
 
-    /**
-     * Parent scene
-     */
-    private Scene parentScene = null;
-
-
+ 
     /**
      * Parent node or null if we're the root node of the scene
      */
@@ -101,31 +95,29 @@ public class Node {
 
     /**
      * Constructs a new node and initializes it
-     * @param parentScene Parent scene object
      * @param parentNode Parent node or null for root nodes
-     * @param index Unique index of the node
      */
-    public Node(Scene parentScene, Node parentNode, int index) {
+    public Node(Node parentNode) {
 
-        this.parentScene = parentScene;
         this.parent = parentNode;
-
-        // Initialize JNI class members, including numChildren
-        this._NativeInitMembers(parentScene.getImporter().getContext(),index);
-
-        // get all children of the node
-        for (int i = 0; i < numChildren;++i) {
-            this.children.add(new Node(parentScene, this,  ++index));
-        }
     }
 
 
     /**
+     * Returns the number of meshes of this node
+     * @return Number of meshes
+     */
+    public final int getNumMeshes() {
+        return meshIndices.length;
+    }
+
+    /**
      * Get a list of all meshes of this node
      *
-     * @return Array containing indices into the Scene's mesh list
+     * @return Array containing indices into the Scene's mesh list.
+     * If there are no meshes, the array is <code>null</code>
      */
-    int[] getMeshes() {
+    public final int[] getMeshes() {
         return meshIndices;
     }
 
@@ -142,7 +134,7 @@ public class Node {
      *
      * @return Row-major transformation matrix
      */
-    float[] getTransformRowMajor() {
+    public final Matrix4x4 getTransformRowMajor() {
         return nodeTransform;
     }
 
@@ -159,26 +151,10 @@ public class Node {
      *
      * @return Column-major transformation matrix
      */
-    float[] getTransformColumnMajor() {
+    public final Matrix4x4 getTransformColumnMajor() {
 
-        float[] transform = new float[16];
-        transform[0] = nodeTransform[0];
-        transform[1] = nodeTransform[4];
-        transform[2] = nodeTransform[8];
-        transform[3] = nodeTransform[12];
-        transform[4] = nodeTransform[1];
-        transform[5] = nodeTransform[5];
-        transform[6] = nodeTransform[9];
-        transform[7] = nodeTransform[13];
-        transform[8] = nodeTransform[2];
-        transform[9] = nodeTransform[6];
-        transform[10] = nodeTransform[10];
-        transform[11] = nodeTransform[14];
-        transform[12] = nodeTransform[3];
-        transform[13] = nodeTransform[7];
-        transform[15] = nodeTransform[11];
-        transform[16] = nodeTransform[15];
-        return transform;
+       Matrix4x4 m = new Matrix4x4( nodeTransform );
+       return m.transpose();
     }
 
 
@@ -192,7 +168,7 @@ public class Node {
      *
      * @return Node name
      */
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
@@ -201,23 +177,41 @@ public class Node {
      * Get the list of all child nodes of *this* node
      * @return List of children. May be empty.
      */
-    public Vector<Node> getChildren() {
+    public final  Node[] getChildren() {
         return children;
+    }
+
+    /**
+     * Get the number of child nodes of *this* node
+     * @return May be 0
+     */
+    public final int getNumChildren()  {
+        return children.length;
     }
 
     /**
      * Get the parent node of the node
      * @return Parent node
      */
-    public Node getParent() {
+    public final Node getParent() {
         return parent;
     }
 
+
     /**
-     * Get the parent scene of the node
-     * @return Never null
+     * Searches this node and recursively all sub nodes
+     * for a node with a specific name
+     * @param _name Name of the node to search for
+     * @return Either a reference to the node or <code>null</code>
+     * if no node with this name was found.
      */
-    public Scene getParentScene() {
-        return parentScene;
+    public final Node findNode(String _name) {
+
+        if (_name.equals(name))return this;
+        for (Node node : children) {
+            Node out;
+            if (null != (out = node.findNode(_name)))return out;
+        }
+        return null;
     }
 }

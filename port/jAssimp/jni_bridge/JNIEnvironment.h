@@ -48,11 +48,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <jni.h>
 
-#include "../../include/aiAssert.h"
+#include "../../../include/aiAssert.h"
+#include "../../../include/aiMesh.h"
+#include "../../../include/aiScene.h"
+
 
 namespace Assimp	{
 namespace JNIBridge		{
 
+
+#define AIJ_GET_HANDLE(__handle__) \
+	(JNIEnvironment::Get()-> __handle__)
+
+#define AIJ_GET_DEFAULT_CTOR_HANDLE (__handle__) \
+	(JNIEnvironment::Get()-> __handle__ . DefaultCtor)
+
+#define AIJ_GET_CLASS_HANDLE (__handle__) \
+	(JNIEnvironment::Get()-> __handle__ . Class)
 
 // ---------------------------------------------------------------------------
 /**	@class	JNIThreadData
@@ -132,16 +144,310 @@ public:
 	//! Get the thread local data of the current thread
 	JNIThreadData* GetThread();
 
+	//! Throw an NativeEror exception with the specified error message
+	//! The error message is optional.
+	void ThrowNativeError(const char* msg = NULL);
+
 public:
 
-	//! Handle to the java.lang.String class
-	static jclass Class_java_lang_String;
 
-	//! Handle to the java.lang.String.getBytes() class
-	static jmethodID MID_String_getBytes;
 
-	//! Handle to the java.lang.String.String(byte[]) c'tor
-	static jmethodID MID_String_init;
+	struct _java
+	{
+		inline void Initialize()
+		{
+			lang.Initialize();
+		}
+
+		struct _lang
+		{
+			inline void Initialize()
+			{
+				String.Initialize();
+			}
+
+			struct _String
+			{
+				void Initialize();
+
+				//! Handle to the java.lang.String class
+				static jclass Class;
+
+				//! Handle to the java.lang.String.getBytes() class
+				static jmethodID getBytes;
+
+				//! Handle to the java.lang.String.String(byte[]) c'tor
+				static jmethodID constructor_ByteArray;
+
+			} String;
+
+
+			struct _Array
+			{
+				void Initialize();
+
+				jclass FloatArray_Class;
+				jclass IntArray_Class;
+
+			} Array;
+
+		} lang;
+	} java;
+
+
+
+	//! Represents the JNI interface to the package assimp
+	struct _assimp 
+	{
+		//! Initializes the package assimp for use with jAssimp
+		inline void Initialize()
+		{
+			// the NativeError class must be initialized first as it
+			// is used by all other class initializers
+			NativeException.Initialize();
+
+			// now initialize all other classes, the rder doesn't care.
+			Scene.Initialize();
+			Importer.Initialize();
+			Mesh.Initialize();
+			Bone.Initialize();
+			Animation.Initialize();
+			BoneAnim.Initialize();
+			Texture.Initialize();
+			CompressedTexture.Initialize();
+			Matrix3x3.Initialize();
+			Matrix4x4.Initialize();
+			Quaternion.Initialize();
+			Node.Initialize();
+			Material.Initialize();
+		};
+
+		//! Represents the JNI interface to class assimp.NativeException
+		struct _NativeException
+		{
+			void Initialize();
+
+			jclass Class;
+
+		} NativeException;
+
+
+		//! Represents the JNI interface to class assimp.Importer
+		struct _Importer
+		{
+			void Initialize();
+
+			jclass Class;
+
+			jfieldID scene;
+
+		} Importer;
+
+
+		//! Represents the JNI interface to class assimp.Scene
+		struct _Scene
+		{
+			void Initialize();
+
+			jclass Class;
+
+			jmethodID DefaultCtor;
+
+			jfieldID m_vMeshes;
+			jfieldID m_vTextures;
+			jfieldID m_vMaterials;
+			jfieldID m_vAnimations;
+			jfieldID m_rootNode;
+			jfieldID flags;
+
+		} Scene;
+
+
+		//! Represents the JNI interface to class assimp.Mesh
+		struct _Mesh
+		{
+			void Initialize();
+			void Fill(jobject obj,const aiMesh* pcSrc);
+
+			jclass Class;
+
+			jmethodID DefaultCtor;
+
+			jfieldID m_vVertices;
+			jfieldID m_vTangents;
+			jfieldID m_vBitangents;
+			jfieldID m_vNormals;
+			jfieldID m_avUVs;
+			jfieldID m_vFaces;
+			jfieldID m_avColors;
+			jfieldID m_aiNumUVComponents;
+			jfieldID m_vBones;
+			jfieldID m_iMaterialIndex;
+
+		} Mesh;
+
+		//! Represents the JNI interface to class assimp.Bone
+		struct _Bone
+		{
+			void Initialize();
+
+			jclass Class;
+
+			jmethodID DefaultCtor;
+
+			jfieldID name;
+			jfieldID weights;
+
+		} Bone;
+
+		//! Represents the JNI interface to class assimp.Animation
+		struct _Animation
+		{
+			void Initialize();
+
+			jclass Class;
+
+			jmethodID DefaultCtor;
+
+			jfieldID name;
+			jfieldID mDuration;
+			jfieldID mTicksPerSecond;
+			jfieldID boneAnims;
+
+		} Animation;
+
+		//! Represents the JNI interface to class assimp.BoneAnim
+		struct _BoneAnim
+		{
+			void Initialize();
+
+
+			//! Represents the JNI interface to class assimp.BoneAnim.KeyFrame<quak>
+			struct _KeyFrame
+			{
+				jclass Class;
+
+				jmethodID DefaultCtor;
+
+				jfieldID time;
+				jfieldID value;
+
+			} KeyFrame;
+
+			jclass Class;
+
+			jmethodID DefaultCtor;
+
+			jfieldID mName;
+			jfieldID mQuatKeys;
+			jfieldID mPosKeys;
+			jfieldID mScalingKeys;
+
+		} BoneAnim;
+
+		//! Represents the JNI interface to class assimp.Texture
+		struct _Texture
+		{
+			void Initialize();
+
+			jclass Class;
+
+			jmethodID DefaultCtor;
+
+			jfieldID width;
+			jfieldID height;
+			jfieldID data;
+
+		} Texture;
+
+		//! Represents the JNI interface to class assimp.CompressedTexture
+		struct _CompressedTexture
+		{
+			void Initialize();
+
+			jclass Class;
+			jmethodID DefaultCtor;
+			jfieldID m_format;
+
+		} CompressedTexture;
+
+		//! Represents the JNI interface to class assimp.Material
+		struct _Material
+		{
+			void Initialize();
+
+			//! Represents the JNI interface to class assimp.Material.Property
+			struct _Property
+			{
+				jclass Class;
+
+				jfieldID key;
+				jfieldID value;
+
+			} Property;
+
+			jclass Class;
+			jmethodID DefaultCtor;
+			jfieldID properties;
+
+		} Material;
+
+		//! Represents the JNI interface to class assimp.Matrix4x4
+		struct _Matrix4x4
+		{
+			void Initialize();
+
+			jclass Class;
+			jmethodID DefaultCtor;
+			jfieldID coeff;
+
+		} Matrix4x4;
+
+		//! Represents the JNI interface to class assimp.Matrix3x3
+		struct _Matrix3x3
+		{
+			void Initialize();
+
+			jclass Class;
+			jmethodID DefaultCtor;
+			jfieldID coeff;
+
+		} Matrix3x3;
+
+		//! Represents the JNI interface to class assimp.Quaternion
+		struct _Quaternion
+		{
+			void Initialize();
+
+			jclass Class;
+
+			jmethodID DefaultCtor;
+
+			jfieldID x;
+			jfieldID y;
+			jfieldID z;
+			jfieldID w;
+
+		} Quaternion;
+
+		//! Represents the JNI interface to class assimp.Node
+		struct _Node
+		{
+			void Initialize();
+
+			jclass Class;
+
+			jmethodID DefaultCtor;
+
+			jfieldID meshIndices;
+			jfieldID nodeTransform;
+			jfieldID name;
+			jfieldID children;
+			jfieldID parent;
+
+		} Node;
+
+	} assimp;
 
 private:
 
@@ -157,6 +463,15 @@ private:
 
 };};
 
+
+// ---------------------------------------------------------------------------
+/** @brief Helper function to copy data to a Java array
+ *
+ * @param jfl Java array
+ * @param data Input data
+ * @param size Size of data to be copied, in bytes
+ */
+JNU_CopyDataToArray(jarray jfl, void* data, unsigned int size);
 
 // ---------------------------------------------------------------------------
 /** @brief Helper function to create a java.lang.String from

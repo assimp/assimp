@@ -104,7 +104,7 @@ void PLYImporter::InternReadFile(
 	size_t fileSize = file->FileSize();
 	if( fileSize < 10)
 	{
-		throw new ImportErrorException( ".ply File is too small.");
+		throw new ImportErrorException( "PLY File is too small.");
 	}
 
 	// allocate storage and copy the contents of the file to a memory buffer
@@ -121,6 +121,7 @@ void PLYImporter::InternReadFile(
 		this->mBuffer[2] != 'Y' && this->mBuffer[2] != 'y')
 	{
 		delete[] this->mBuffer;
+		AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 		throw new ImportErrorException( "Invalid .ply file: Magic number \'ply\' is no there");
 	}
 	char* szMe = (char*)&this->mBuffer[3];
@@ -138,6 +139,7 @@ void PLYImporter::InternReadFile(
 			if(!PLY::DOM::ParseInstance(szMe,&sPlyDom))
 			{
 				delete[] this->mBuffer;
+				AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 				throw new ImportErrorException( "Invalid .ply file: Unable to build DOM (#1)");
 			}
 		}
@@ -159,18 +161,21 @@ void PLYImporter::InternReadFile(
 			if(!PLY::DOM::ParseInstanceBinary(szMe,&sPlyDom,bIsBE))
 			{
 				delete[] this->mBuffer;
+				AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 				throw new ImportErrorException( "Invalid .ply file: Unable to build DOM (#2)");
 			}
 		}
 		else
 		{
 			delete[] this->mBuffer;
+			AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 			throw new ImportErrorException( "Invalid .ply file: Unknown file format");
 		}
 	}
 	else
 	{
 		delete[] this->mBuffer;
+		AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 		throw new ImportErrorException( "Invalid .ply file: Missing format specification");
 	}
 	this->pcDOM = &sPlyDom;
@@ -181,7 +186,10 @@ void PLYImporter::InternReadFile(
 
 	if (avPositions.empty())
 	{
-		throw new ImportErrorException( "Invalid .ply file: No vertices found");
+		delete[] this->mBuffer;
+		AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
+		throw new ImportErrorException( "Invalid .ply file: No vertices found. "
+			"Unable to interpret the data format of the PLY file");
 	}
 
 	// now load a list of normals. 
@@ -199,6 +207,7 @@ void PLYImporter::InternReadFile(
 		if (avPositions.size() < 3)
 		{
 			delete[] this->mBuffer;
+			AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 			throw new ImportErrorException( "Invalid .ply file: Not enough vertices to build "
 				"a face list. ");
 		}
@@ -237,6 +246,7 @@ void PLYImporter::InternReadFile(
 	if (avMeshes.empty())
 	{
 		delete[] this->mBuffer;
+		AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 		throw new ImportErrorException( "Invalid .ply file: Unable to extract mesh data ");
 	}
 
@@ -261,7 +271,7 @@ void PLYImporter::InternReadFile(
 		pScene->mRootNode->mMeshes[i] = i;
 
 	// delete the file buffer
-	delete[] this->mBuffer;
+	delete[] this->mBuffer;AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 
 	// DOM is lying on the stack, will be deconstructed automatically
 	return;

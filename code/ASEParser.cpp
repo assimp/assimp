@@ -190,7 +190,7 @@ bool Parser::SkipToNextToken()
 		}
 		else bLastWasEndLine = false;
 		if ('*' == me || '}' == me || '{' == me)return true;
-		else if ('\0' == me)return false;
+		if ('\0' == me)return false;
 
 		++this->m_szFile;
 	}
@@ -1551,7 +1551,8 @@ void Parser::ParseLV3MeshCFaceListBlock(unsigned int iNumFaces, ASE::Mesh& mesh)
 void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 {
 	// allocate enough storage for the normals
-	sMesh.mNormals.resize(sMesh.mPositions.size());
+	sMesh.mNormals.resize(sMesh.mPositions.size(),
+		aiVector3D( std::numeric_limits<float>::quiet_NaN(), 0.0f, 0.0f));
 	int iDepth = 0;
 
 	// we need the *MESH_VERTEXNORMAL blocks, ignore the face normals

@@ -215,7 +215,7 @@ void ASEImporter::GenerateDefaultMaterial()
 		this->mParser->m_vMaterials.push_back ( ASE::Material() );
 		ASE::Material& mat = this->mParser->m_vMaterials.back();
 
-		mat.mDiffuse = aiColor3D(0.5f,0.5f,0.5f);
+	mat.mDiffuse = aiColor3D(0.6f,0.6f,0.6f);
 		mat.mSpecular = aiColor3D(1.0f,1.0f,1.0f);
 		mat.mAmbient = aiColor3D(0.05f,0.05f,0.05f);
 		mat.mShading = Dot3DSFile::Gouraud;
@@ -409,11 +409,23 @@ void ASEImporter::BuildNodes()
 			{
 				continue;
 			}
-			if (szMyName[0].length() == szMyName2[1].length() &&
+			if (szMyName[1].length() == szMyName2[0].length() &&
 				0 == ASSIMP_stricmp ( szMyName[1].c_str(), szMyName2[0].c_str()))
 			{
 				bKnowParent = true;
 				break;
+			}
+
+			// check if there is another mesh with the same unknown parent
+			// that has already been handled and added to the list
+			if (i2 < i)
+			{
+				if (szMyName[1].length() == szMyName2[1].length() &&
+					0 == ASSIMP_stricmp ( szMyName[1].c_str(), szMyName2[1].c_str()))
+				{
+					bKnowParent = true;
+					break;
+				}
 			}
 		}
 		if (!bKnowParent)
@@ -430,19 +442,38 @@ void ASEImporter::BuildNodes()
 			apcNodes.push_back(pcScene->mRootNode->mChildren[i]);
 
 		delete[] pcScene->mRootNode->mChildren;
-		for (std::vector<unsigned int>::const_iterator
+		for (std::vector<unsigned int>::/*const_*/iterator
 			i =  aiList.begin();
 			i != aiList.end();++i)
 		{
 			std::string* szMyName = (std::string*)pcScene->mMeshes[*i]->mColors[1];
 			if (!szMyName)continue;
 
+#if 0 // moved to the scope above
+			for (std::vector<unsigned int>::iterator
+				a =  i+1;
+				a != aiList.end();++a)
+			{
+				std::string* szMyName2 = (std::string*)pcScene->mMeshes[*i]->mColors[1];
+				if (!szMyName)continue;
+				if (0 == ASSIMP_stricmp(szMyName2->c_str(),szMyName->c_str()))
+				{
+					a = aiList.erase(a);
+					if (a == aiList.end())break;
+				}
+			}
+#endif
+
+			DefaultLogger::get()->info("Generating dummy node: " + szMyName[1] + ". "
+				"This node is not defined in the ASE file, but referenced as "
+				"parent node.");
+
 			// the parent is not known, so we can assume that we must add 
 			// this node to the root node of the whole scene
 			aiNode* pcNode = new aiNode();
 			pcNode->mParent = pcScene->mRootNode;
 			pcNode->mName.Set(szMyName[1]);
-			this->AddNodes(pcNode,szMyName[1].c_str());
+			this->AddNodes(pcScene,pcNode,pcNode->mName.data);
 			apcNodes.push_back(pcNode);
 		}
 		pcScene->mRootNode->mChildren = new aiNode*[apcNodes.size()];
@@ -468,7 +499,7 @@ void ASEImporter::BuildNodes()
 		pc->mNumChildren = 0;
 		delete pc;
 	}
-	else if (0 == pcScene->mRootNode->mNumChildren)
+	else if (!pcScene->mRootNode->mNumChildren)
 	{
 		throw new ImportErrorException("No nodes loaded. The ASE/ASK file is either empty or corrupt");
 	}
@@ -528,6 +559,7 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 		for (unsigned int n = 0; n < 3;++n,++iCurrent)
 		{
 			mPositions[iCurrent] = mesh.mPositions[(*i).mIndices[n]];
+			std::swap(mPositions[iCurrent].z,mPositions[iCurrent].y); // DX-to-OGL
 
 			// add texture coordinates
 			for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS;++c)
@@ -535,6 +567,7 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 				if (!mesh.amTexCoords[c].empty())
 				{
 					amTexCoords[c][iCurrent] = mesh.amTexCoords[c][(*i).amUVIndices[c][n]];
+					amTexCoords[c][iCurrent].y = 1.0f - amTexCoords[c][iCurrent].y; // DX-to-OGL
 				}
 			}
 			// add vertex colors
@@ -546,6 +579,7 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 			if (!mesh.mNormals.empty())
 			{
 				mNormals[iCurrent] = mesh.mNormals[(*i).mIndices[n]];
+				std::swap(mNormals[iCurrent].z,mNormals[iCurrent].y); // DX-to-OGL
 			}
 
 			// handle bone vertices
@@ -1073,7 +1107,9 @@ void ASEImporter::BuildMaterialIndices()
 		if (this->mParser->m_vMaterials[iMat].bNeed)
 		{
 			// convert it to the aiMaterial layout
-			this->ConvertMaterial(this->mParser->m_vMaterials[iMat]);
+			ASE::Material& mat = this->mParser->m_vMaterials[iMat];
+			this->ConvertMaterial(mat);
+			TextureTransform::ApplyScaleNOffset(mat);
 			++pcScene->mNumMaterials;
 		}
 		for (unsigned int iSubMat = 0; iSubMat < this->mParser->m_vMaterials[
@@ -1082,7 +1118,9 @@ void ASEImporter::BuildMaterialIndices()
 			if (this->mParser->m_vMaterials[iMat].avSubMaterials[iSubMat].bNeed)
 			{
 				// convert it to the aiMaterial layout
-				this->ConvertMaterial(this->mParser->m_vMaterials[iMat].avSubMaterials[iSubMat]);
+				ASE::Material& mat = this->mParser->m_vMaterials[iMat].avSubMaterials[iSubMat];
+				this->ConvertMaterial(mat);
+				TextureTransform::ApplyScaleNOffset(mat);
 				++pcScene->mNumMaterials;
 			}
 		}
@@ -1172,6 +1210,24 @@ void ASEImporter::BuildMaterialIndices()
 // Generate normal vectors basing on smoothing groups
 void ASEImporter::GenerateNormals(ASE::Mesh& mesh)
 {
+	if (!mesh.mNormals.empty())
+	{
+		// check whether there are uninitialized normals. If there are
+		// some, skip all normals from the file and compute them on our own
+		for (std::vector<aiVector3D>::const_iterator
+			qq =  mesh.mNormals.begin();
+			qq != mesh.mNormals.end();++qq)
+		{
+			if (is_qnan((*qq).x))
+			{
+				DefaultLogger::get()->warn("Normals were specified in the file, "
+					"but not all vertices seem to have normals assigned. The "
+					"whole normal set will be recomputed.");
+				mesh.mNormals.clear();
+				break;
+			}
+		}
+	}
 	if (mesh.mNormals.empty())
 	{
 		// need to calculate normals ... 

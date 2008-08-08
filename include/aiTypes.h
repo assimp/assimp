@@ -216,6 +216,43 @@ enum aiReturn
 };
 
 
+// ---------------------------------------------------------------------------
+/** Stores the memory requirements for different parts (e.g. meshes, materials,
+ *  animations) of an import.
+ *  @see Importer::GetMemoryRequirements()
+*/
+// ---------------------------------------------------------------------------
+struct aiMemoryInfo
+{
+#ifdef __cplusplus
+
+	//! Default constructor
+	inline aiMemoryInfo()
+		: textures   (0)
+		, materials  (0)
+		, meshes     (0)
+		, nodes      (0)
+		, animations (0)
+		, total      (0)
+	{}
+
+#endif
+
+	//! Storage allocated for texture data, in bytes
+	unsigned int textures;
+	//! Storage allocated for material data, in bytes
+	unsigned int materials;
+	//! Storage allocated for mesh data, in bytes
+	unsigned int meshes;
+	//! Storage allocated for node data, in bytes
+	unsigned int nodes;
+	//! Storage allocated for animation data, in bytes
+	unsigned int animations;
+	//! Storage allocated for the import, in bytes
+	unsigned int total;
+};
+
+
 #ifdef __cplusplus
 }
 #endif //!  __cplusplus

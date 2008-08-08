@@ -113,7 +113,7 @@ struct aiNode
 };
 
 //! @def AI_SCENE_FLAGS_ANIM_SKELETON_ONLY
-//! Specifies that no model but only an animation skeleton has been
+//! Specifies that no full model but only an animation skeleton has been
 //! imported. There are no materials in this case. There are no
 //! textures in this case. But there is a node graph, animation channels
 //! and propably meshes with bones.

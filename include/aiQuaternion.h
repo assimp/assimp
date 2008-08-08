@@ -63,9 +63,6 @@ struct aiQuaternion
 	/** Construct from euler angles */
 	aiQuaternion( float rotx, float roty, float rotz);
 
-	/** Construct from an axis angle pair */
-	aiQuaternion( aiVector3D axis, float angle);
-
 	/** Construct from a normalized quaternion stored in a vec3 */
 	aiQuaternion( aiVector3D normalized);
 

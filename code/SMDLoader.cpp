@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
+#include "../include/assimp.hpp"
 
 // boost headers
 #include <boost/scoped_ptr.hpp>
@@ -138,6 +139,15 @@ void SMDImporter::InternReadFile(
 	// reserve enough space for ... hm ... 20 bones
 	this->asBones.reserve(20);
 
+	// The AI_CONFIG_IMPORT_SMD_KEYFRAME option overrides the
+	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
+	if(0xffffffff == (this->configFrameID = this->mImporter->GetProperty(
+		AI_CONFIG_IMPORT_SMD_KEYFRAME,0xffffffff)))
+	{
+		this->configFrameID = this->mImporter->GetProperty(
+			AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
+	}
+
 	try
 	{
 		// parse the file ...
@@ -195,11 +205,13 @@ void SMDImporter::InternReadFile(
 	catch (ImportErrorException* ex)
 	{
 		delete[] this->mBuffer;
+		AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 		throw ex;
 	}
 
 	// delete the file buffer
 	delete[] this->mBuffer;
+	AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 }
 // ------------------------------------------------------------------------------------------------
 // Write an error message with line number to the log file
@@ -817,8 +829,9 @@ void SMDImporter::ParseVASection(const char* szCurrent,
 		{
 			szCurrent += 5;
 			// NOTE: The doc says that time values COULD be negative ...
+			// note2: this is the shape key -> valve docs
 			int iTime = 0;
-			if(!this->ParseSignedInt(szCurrent,&szCurrent,iTime) || iTime)break;
+			if(!this->ParseSignedInt(szCurrent,&szCurrent,iTime) || this->configFrameID != iTime)break;
 			SkipLine(szCurrent,&szCurrent);
 		}
 		else 

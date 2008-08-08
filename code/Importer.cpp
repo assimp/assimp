@@ -68,9 +68,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AI_BUILD_NO_MD3_IMPORTER)
 #	include "MD3Loader.h"
 #endif
-#if (!defined AI_BUILD_NO_MD4_IMPORTER)
-#	include "MD4Loader.h"
-#endif
 #if (!defined AI_BUILD_NO_MDL_IMPORTER)
 #	include "MDLLoader.h"
 #endif
@@ -92,6 +89,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AI_BUILD_NO_SMD_IMPORTER)
 #	include "SMDLoader.h"
 #endif
+#if (!defined AI_BUILD_NO_MDR_IMPORTER)
+#	include "MDRLoader.h"
+#endif
+#if (!defined AI_BUILD_NO_MDC_IMPORTER)
+#	include "MDCLoader.h"
+#endif
+#if (!defined AI_BUILD_NO_MD5_IMPORTER)
+#	include "MD5Loader.h"
+#endif
 #if (!defined AI_BUILD_NO_MD5_IMPORTER)
 #	include "MD5Loader.h"
 #endif
@@ -101,6 +107,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AI_BUILD_NO_LWO_IMPORTER)
 #	include "LWOLoader.h"
 #endif
+
 
 // PostProcess-Steps
 #if (!defined AI_BUILD_NO_CALCTANGENTS_PROCESS)
@@ -138,6 +145,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #if (!defined AI_BUILD_NO_IMPROVECACHELOCALITY_PROCESS)
 #	include "ImproveCacheLocality.h"
+#endif
+#if (!defined AI_BUILD_NO_FIXINFACINGNORMALS_PROCESS)
+#	include "FixNormalsStep.h"
 #endif
 #if (!defined AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
 #	include "RemoveRedundantMaterials.h"
@@ -180,9 +190,6 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_MDL_IMPORTER)
 	mImporter.push_back( new MDLImporter());
 #endif
-#if (!defined AI_BUILD_NO_MD4_IMPORTER)
-	mImporter.push_back( new MD4Importer());
-#endif
 #if (!defined AI_BUILD_NO_ASE_IMPORTER)
 	mImporter.push_back( new ASEImporter());
 #endif
@@ -191,6 +198,12 @@ Importer::Importer() :
 #endif
 #if (!defined AI_BUILD_NO_SMD_IMPORTER)
 	mImporter.push_back( new SMDImporter());
+#endif
+#if (!defined AI_BUILD_NO_MDR_IMPORTER)
+	mImporter.push_back( new MDRImporter());
+#endif
+#if (!defined AI_BUILD_NO_MDC_IMPORTER)
+	mImporter.push_back( new MDCImporter());
 #endif
 #if (!defined AI_BUILD_NO_MD5_IMPORTER)
 	mImporter.push_back( new MD5Importer());
@@ -215,6 +228,9 @@ Importer::Importer() :
 #endif
 #if (!defined AI_BUILD_NO_PRETRANSFORMVERTICES_PROCESS)
 	mPostProcessingSteps.push_back( new PretransformVertices());
+#endif
+#if (!defined AI_BUILD_NO_FIXINFACINGNORMALS_PROCESS)
+	mPostProcessingSteps.push_back( new FixInfacingNormalsProcess());
 #endif
 #if (!defined AI_BUILD_NO_SPLITLARGEMESHES_PROCESS)
 	mPostProcessingSteps.push_back( new SplitLargeMeshesProcess_Triangle());
@@ -246,6 +262,21 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_IMPROVECACHELOCALITY_PROCESS)
 	mPostProcessingSteps.push_back( new ImproveCacheLocalityProcess());
 #endif
+
+	// store the *this* pointer in all BaseImporter instances
+	for (std::vector<BaseImporter*>::iterator
+		i =  mImporter.begin();
+		i != mImporter.end();++i)
+	{
+		(**i).mImporter = this;
+	}
+	// store the *this* pointer in all BaseProcess instances
+	for (std::vector<BaseProcess*>::iterator
+		i =  mPostProcessingSteps.begin();
+		i != mPostProcessingSteps.end();++i)
+	{
+		(**i).mImporter = this;
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -432,6 +463,155 @@ void Importer::GetExtensionList(std::string& szOut)
 
 		(*i)->GetExtensionList(szOut);
 	}
+	return;
+}
+// ------------------------------------------------------------------------------------------------
+// Set a configuration property
+int Importer::SetProperty(const char* szName, int iValue)
+{
+	ai_assert(NULL != szName);
+
+	// search in the list ...
+	for (std::vector<IntPropertyInfo>::iterator
+		i =  this->mIntProperties.begin();
+		i != this->mIntProperties.end();++i)
+	{
+		if (0 == ::strcmp( (*i).name.c_str(), szName ))
+		{
+			int iOld = (*i).value;
+			(*i).value = iValue;
+			return iOld;
+		}
+	}
+	// the property is not yet in the list ...
+	this->mIntProperties.push_back( IntPropertyInfo() );
+	IntPropertyInfo& me = this->mIntProperties.back();
+	me.name = std::string(szName);
+	me.value = iValue;
+	return AI_PROPERTY_WAS_NOT_EXISTING;
+}
+// ------------------------------------------------------------------------------------------------
+// Get a configuration property
+int Importer::GetProperty(const char* szName, 
+	int iErrorReturn /*= 0xffffffff*/)
+{
+	ai_assert(NULL != szName);
+
+	// search in the list ...
+	for (std::vector<IntPropertyInfo>::const_iterator
+		i =  this->mIntProperties.begin();
+		i != this->mIntProperties.end();++i)
+	{
+		if (0 == ::strcmp( (*i).name.c_str(), szName ))
+		{
+			return (*i).value;
+		}
+	}
+	return iErrorReturn;
+}
+// ------------------------------------------------------------------------------------------------
+void AddNodeWeight(unsigned int& iScene,const aiNode* pcNode)
+{
+	iScene += sizeof(aiNode);
+	iScene += sizeof(unsigned int) * pcNode->mNumMeshes;
+	iScene += sizeof(void*) * pcNode->mNumChildren;
+	for (unsigned int i = 0; i < pcNode->mNumChildren;++i)
+		AddNodeWeight(iScene,pcNode->mChildren[i]);
+}
+// ------------------------------------------------------------------------------------------------
+// Get the memory requirements of the scene
+void Importer::GetMemoryRequirements(aiMemoryInfo& in) const
+{
+	in.aiMemoryInfo::aiMemoryInfo();
+	if (!this->mScene)return;
+
+	in.total = sizeof(aiScene);
+
+	// add all meshes
+	for (unsigned int i = 0; i < mScene->mNumMeshes;++i)
+	{
+		in.meshes += sizeof(aiMesh);
+		if (mScene->mMeshes[i]->HasPositions())
+			in.meshes += sizeof(aiVector3D) * mScene->mMeshes[i]->mNumVertices;
+
+		if (mScene->mMeshes[i]->HasNormals())
+			in.meshes += sizeof(aiVector3D) * mScene->mMeshes[i]->mNumVertices;
+
+		if (mScene->mMeshes[i]->HasTangentsAndBitangents())
+			in.meshes += sizeof(aiVector3D) * mScene->mMeshes[i]->mNumVertices * 2;
+
+		for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS;++a)
+		{
+			if (mScene->mMeshes[i]->HasVertexColors(a))
+				in.meshes += sizeof(aiColor4D) * mScene->mMeshes[i]->mNumVertices;
+			else break;
+		}
+		for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS;++a)
+		{
+			if (mScene->mMeshes[i]->HasTextureCoords(a))
+				in.meshes += sizeof(aiVector3D) * mScene->mMeshes[i]->mNumVertices;
+			else break;
+		}
+		if (mScene->mMeshes[i]->HasBones())
+		{
+			in.meshes += sizeof(void*) * mScene->mMeshes[i]->mNumBones;
+			for (unsigned int p = 0; p < mScene->mMeshes[i]->mNumBones;++p)
+			{
+				in.meshes += sizeof(aiBone);
+				in.meshes += mScene->mMeshes[i]->mBones[p]->mNumWeights * sizeof(aiVertexWeight);
+			}
+		}
+		in.meshes += (sizeof(aiFace) + 3 * sizeof(unsigned int))*mScene->mMeshes[i]->mNumFaces;
+	}
+    in.total += in.meshes;
+
+	// add all embedded textures
+	for (unsigned int i = 0; i < mScene->mNumTextures;++i)
+	{
+		const aiTexture* pc = mScene->mTextures[i];
+		in.textures += sizeof(aiTexture);
+		if (pc->mHeight)
+		{
+			in.textures += 4 * pc->mHeight * pc->mWidth;
+		}
+		else in.textures += pc->mWidth;
+	}
+	in.total += in.textures;
+
+	// add all animations
+	for (unsigned int i = 0; i < mScene->mNumAnimations;++i)
+	{
+		const aiAnimation* pc = mScene->mAnimations[i];
+		in.animations += sizeof(aiAnimation);
+
+		// add all bone anims
+		for (unsigned int a = 0; a < pc->mNumBones;++a)
+		{
+			const aiBoneAnim* pc2 = pc->mBones[i];
+			in.animations += sizeof(aiBoneAnim);
+			in.animations += pc2->mNumPositionKeys * sizeof(aiVectorKey);
+			in.animations += pc2->mNumScalingKeys * sizeof(aiVectorKey);
+			in.animations += pc2->mNumRotationKeys * sizeof(aiQuatKey);
+		}
+	}
+	in.total += in.animations;
+
+	// add all nodes
+	AddNodeWeight(in.nodes,mScene->mRootNode);
+	in.total += in.nodes;
+
+	// add all materials
+	for (unsigned int i = 0; i < mScene->mNumMaterials;++i)
+	{
+		const aiMaterial* pc = mScene->mMaterials[i];
+		in.materials += sizeof(aiMaterial);
+		in.materials += pc->mNumAllocated * sizeof(void*);
+		for (unsigned int a = 0; a < pc->mNumProperties;++a)
+		{
+			in.materials += pc->mProperties[a]->mDataLength;
+		}
+	}
+	in.total += in.materials;
 	return;
 }
 

@@ -110,6 +110,10 @@ using namespace Assimp::ASE;
 	} else bLastWasEndLine = false; \
 	++this->m_szFile; 
 
+#ifdef _MSC_VER
+#	define sprintf sprintf_s
+#endif
+
 // ------------------------------------------------------------------------------------------------
 Parser::Parser (const char* szFile)
 {
@@ -724,32 +728,20 @@ bool Parser::ParseString(std::string& out,const char* szName)
 {
 	char szBuffer[1024];
 
-#if (!defined _MSC_VER) || ( _MSC_VER < 1400)
-	ai_assert(strlen(szName) < 750);
-#endif
 
 	// NOTE: The name could also be the texture in some cases
 	// be prepared that this might occur ...
 	if (!SkipSpaces(this->m_szFile,&this->m_szFile))
 	{
-#if _MSC_VER >= 1400
-		sprintf_s(szBuffer,"Unable to parse %s block: Unexpected EOL",szName);
-#else
 		sprintf(szBuffer,"Unable to parse %s block: Unexpected EOL",szName);
-#endif
 		this->LogWarning(szBuffer);
 		return false;
 	}
 	// there must be "
 	if ('\"' != *this->m_szFile)
 	{
-#if _MSC_VER >= 1400
-		sprintf_s(szBuffer,"Unable to parse %s block: String is expected "
-			"to be enclosed in double quotation marks",szName);
-#else
 		sprintf(szBuffer,"Unable to parse %s block: String is expected "
 			"to be enclosed in double quotation marks",szName);
-#endif
 		this->LogWarning(szBuffer);
 		return false;
 	}
@@ -759,16 +751,10 @@ bool Parser::ParseString(std::string& out,const char* szName)
 	{
 		if ('\"' == *sz)break;
 		else if ('\0' == sz)
-		{
-#if _MSC_VER >= 1400
-			sprintf_s(szBuffer,"Unable to parse %s block: String is expected to be "
-				"enclosed in double quotation marks but EOF was reached before a closing "
-				"quotation mark was found",szName);
-#else
+		{			
 			sprintf(szBuffer,"Unable to parse %s block: String is expected to be "
 				"enclosed in double quotation marks but EOF was reached before a closing "
 				"quotation mark was found",szName);
-#endif
 			this->LogWarning(szBuffer);
 			return false;
 		}

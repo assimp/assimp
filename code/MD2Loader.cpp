@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the MD2 importer class */
 #include "MD2Loader.h"
 #include "MaterialSystem.h"
+#include "ByteSwap.h"
 #include "MD2NormalTable.h" // shouldn't be included by other units
 
 #include "../include/IOStream.h"
@@ -50,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
 #include "../include/DefaultLogger.h"
+#include "../include/assimp.hpp"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -110,6 +112,18 @@ bool MD2Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
+// Setup configuration properties
+void MD2Importer::SetupProperties(const Importer* pImp)
+{
+	// The AI_CONFIG_IMPORT_MD2_KEYFRAME option overrides the
+	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
+	if(0xffffffff == (this->configFrameID = pImp->GetProperty(
+		AI_CONFIG_IMPORT_MD2_KEYFRAME,0xffffffff)))
+	{
+		this->configFrameID = pImp->GetProperty(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
+	}
+}
+// ------------------------------------------------------------------------------------------------
 // Validate the file header
 void MD2Importer::ValidateHeader( )
 {
@@ -117,9 +131,6 @@ void MD2Importer::ValidateHeader( )
 	if (this->m_pcHeader->magic != AI_MD2_MAGIC_NUMBER_BE &&
 		this->m_pcHeader->magic != AI_MD2_MAGIC_NUMBER_LE)
 	{
-		delete[] this->mBuffer;
-		AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
-
 		char szBuffer[5];
 		szBuffer[0] = ((char*)&this->m_pcHeader->magic)[0];
 		szBuffer[1] = ((char*)&this->m_pcHeader->magic)[1];
@@ -133,27 +144,22 @@ void MD2Importer::ValidateHeader( )
 
 	// check file format version
 	if (this->m_pcHeader->version != 8)
-	{
 		DefaultLogger::get()->warn( "Unsupported md2 file version. Continuing happily ...");
-	}
 
-	/* to be validated:
-	int32_t offsetSkins; 
-	int32_t offsetTexCoords; 
-	int32_t offsetTriangles; 
-	int32_t offsetFrames; 
-	//int32_t offsetGlCommands; 
-	int32_t offsetEnd; 
-	*/
+	// check some values whether they are valid
+	if (0 == this->m_pcHeader->numFrames)
+		throw new ImportErrorException( "Invalid md2 file: NUM_FRAMES is 0");
 
-	if (this->m_pcHeader->offsetSkins	+ this->m_pcHeader->numSkins * sizeof (MD2::Skin)			>= this->fileSize ||
-		this->m_pcHeader->offsetTexCoords + this->m_pcHeader->numTexCoords * sizeof (MD2::TexCoord) >= this->fileSize ||
-		this->m_pcHeader->offsetTriangles + this->m_pcHeader->numTriangles * sizeof (MD2::Triangle) >= this->fileSize ||
-		this->m_pcHeader->offsetFrames	  + this->m_pcHeader->numFrames * sizeof (MD2::Frame)		>= this->fileSize ||
+	if (this->m_pcHeader->offsetEnd > (int32_t)fileSize)
+		throw new ImportErrorException( "Invalid md2 file: File is too small");
+
+	if (this->m_pcHeader->offsetSkins		+ this->m_pcHeader->numSkins * sizeof (MD2::Skin)			>= this->fileSize ||
+		this->m_pcHeader->offsetTexCoords	+ this->m_pcHeader->numTexCoords * sizeof (MD2::TexCoord)	>= this->fileSize ||
+		this->m_pcHeader->offsetTriangles	+ this->m_pcHeader->numTriangles * sizeof (MD2::Triangle)	>= this->fileSize ||
+		this->m_pcHeader->offsetFrames		+ this->m_pcHeader->numFrames * sizeof (MD2::Frame)			>= this->fileSize ||
 		this->m_pcHeader->offsetEnd			> this->fileSize)
 	{
 		throw new ImportErrorException("Invalid MD2 header: some offsets are outside the file");
-		AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 	}
 
 	if (this->m_pcHeader->numSkins > AI_MD2_MAX_SKINS)
@@ -162,27 +168,27 @@ void MD2Importer::ValidateHeader( )
 		DefaultLogger::get()->warn("The model contains more frames than Quake 2 supports");
 	if (this->m_pcHeader->numVertices > AI_MD2_MAX_VERTS)
 		DefaultLogger::get()->warn("The model contains more vertices than Quake 2 supports");
+
+	if (this->m_pcHeader->numFrames >= this->configFrameID )
+		throw new ImportErrorException("The requested frame is not existing the file");
+
 }
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
-void MD2Importer::InternReadFile( 
-								 const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
+void MD2Importer::InternReadFile( const std::string& pFile, 
+	aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
-	{
-		throw new ImportErrorException( "Failed to open md2 file " + pFile + ".");
-	}
+		throw new ImportErrorException( "Failed to open MD2 file " + pFile + "");
 
 	// check whether the md3 file is large enough to contain
 	// at least the file header
 	fileSize = (unsigned int)file->FileSize();
 	if( fileSize < sizeof(MD2::Header))
-	{
-		throw new ImportErrorException( "md2 File is too small.");
-	}
+		throw new ImportErrorException( "MD2 File is too small");
 
 	try
 	{
@@ -191,17 +197,30 @@ void MD2Importer::InternReadFile(
 		file->Read( (void*)mBuffer, 1, fileSize);
 
 		this->m_pcHeader = (const MD2::Header*)this->mBuffer;
-	this->ValidateHeader();
 
-		// check some values whether they are valid
-		if (0 == this->m_pcHeader->numFrames)
-		{
-			throw new ImportErrorException( "Invalid md2 file: NUM_FRAMES is 0");
-		}
-		if (this->m_pcHeader->offsetEnd > (int32_t)fileSize)
-		{
-			throw new ImportErrorException( "Invalid md2 file: File is too small");
-		}
+#ifdef AI_BUILD_BIG_ENDIAN
+
+		ByteSwap::Swap4(&m_pcHeader->frameSize);
+		ByteSwap::Swap4(&m_pcHeader->magic);
+		ByteSwap::Swap4(&m_pcHeader->numFrames);
+		ByteSwap::Swap4(&m_pcHeader->numGlCommands);
+		ByteSwap::Swap4(&m_pcHeader->numSkins);
+		ByteSwap::Swap4(&m_pcHeader->numTexCoords);
+		ByteSwap::Swap4(&m_pcHeader->numTriangles);
+		ByteSwap::Swap4(&m_pcHeader->numVertices);
+		ByteSwap::Swap4(&m_pcHeader->offsetEnd);
+		ByteSwap::Swap4(&m_pcHeader->offsetFrames);
+		ByteSwap::Swap4(&m_pcHeader->offsetGlCommands);
+		ByteSwap::Swap4(&m_pcHeader->offsetSkins);
+		ByteSwap::Swap4(&m_pcHeader->offsetTexCoords);
+		ByteSwap::Swap4(&m_pcHeader->offsetTriangles);
+		ByteSwap::Swap4(&m_pcHeader->skinHeight);
+		ByteSwap::Swap4(&m_pcHeader->skinWidth);
+		ByteSwap::Swap4(&m_pcHeader->version);
+
+#endif
+
+		this->ValidateHeader();
 
 		// there won't be more than one mesh inside the file
 		pScene->mNumMaterials = 1;
@@ -216,19 +235,42 @@ void MD2Importer::InternReadFile(
 		aiMesh* pcMesh = pScene->mMeshes[0] = new aiMesh();
 
 		// navigate to the begin of the frame data
-		const MD2::Frame* pcFrame = (const MD2::Frame*) (
-			(unsigned char*)this->m_pcHeader + this->m_pcHeader->offsetFrames);
+		const MD2::Frame* pcFrame = (const MD2::Frame*) ((uint8_t*)
+			this->m_pcHeader + this->m_pcHeader->offsetFrames);
+		pcFrame += this->configFrameID;
 
 		// navigate to the begin of the triangle data
-		MD2::Triangle* pcTriangles = (MD2::Triangle*) (
-			(unsigned char*)this->m_pcHeader + this->m_pcHeader->offsetTriangles);
+		MD2::Triangle* pcTriangles = (MD2::Triangle*) ((uint8_t*)
+			this->m_pcHeader + this->m_pcHeader->offsetTriangles);
 
 		// navigate to the begin of the tex coords data
-		const MD2::TexCoord* pcTexCoords = (const MD2::TexCoord*) (
-			(unsigned char*)this->m_pcHeader + this->m_pcHeader->offsetTexCoords);
+		const MD2::TexCoord* pcTexCoords = (const MD2::TexCoord*) ((uint8_t*)
+			this->m_pcHeader + this->m_pcHeader->offsetTexCoords);
 
 		// navigate to the begin of the vertex data
 		const MD2::Vertex* pcVerts = (const MD2::Vertex*) (pcFrame->vertices);
+
+#ifdef AI_BUILD_BIG_ENDIAN
+		for (uint32_t i = 0; i< m_pcHeader->numTriangles)
+		{
+			for (unsigned int p = 0; p < 3;++p)
+			{
+				ByteSwap::Swap2(& pcTriangles[i].textureIndices[p]);
+				ByteSwap::Swap2(& pcTriangles[i].vertexIndices[p]);
+			}
+		}
+		for (uint32_t i = 0; i < m_pcHeader->offsetTexCoords;++i)
+		{
+			ByteSwap::Swap2(& pcTexCoords[i].s);
+			ByteSwap::Swap2(& pcTexCoords[i].t);
+		}
+		ByteSwap::Swap4( & pcFrame->scale[0] );
+		ByteSwap::Swap4( & pcFrame->scale[1] );
+		ByteSwap::Swap4( & pcFrame->scale[2] );
+		ByteSwap::Swap4( & pcFrame->translate[0] );
+		ByteSwap::Swap4( & pcFrame->translate[1] );
+		ByteSwap::Swap4( & pcFrame->translate[2] );
+#endif
 
 		pcMesh->mNumFaces = this->m_pcHeader->numTriangles;
 		pcMesh->mFaces = new aiFace[this->m_pcHeader->numTriangles];

@@ -75,6 +75,14 @@ public:
 	* See BaseImporter::CanRead() for details.	*/
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
 
+
+	// -------------------------------------------------------------------
+	/** Called prior to ReadFile().
+	* The function is a request to the importer to update its configuration
+	* basing on the Importer's configuration property list.
+	*/
+	void SetupProperties(const Importer* pImp);
+
 protected:
 
 	// -------------------------------------------------------------------
@@ -100,6 +108,9 @@ protected:
 	void ValidateHeader();
 
 protected:
+
+	/** Configuration option: frame to be loaded */
+	unsigned int configFrameID;
 
 	/** Header of the MD2 file */
 	const MD2::Header* m_pcHeader;

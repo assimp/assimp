@@ -78,6 +78,14 @@ public:
 	* See BaseImporter::CanRead() for details.	*/
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
 
+
+	// -------------------------------------------------------------------
+	/** Called prior to ReadFile().
+	* The function is a request to the importer to update its configuration
+	* basing on the Importer's configuration property list.
+	*/
+	void SetupProperties(const Importer* pImp);
+
 protected:
 
 	// -------------------------------------------------------------------
@@ -104,6 +112,9 @@ protected:
 	void ValidateSurfaceHeaderOffsets(const MD3::Surface* pcSurfHeader);
 
 protected:
+
+	/** Configuration option: frame to be loaded */
+	unsigned int configFrameID;
 
 	/** Header of the MD3 file */
 	const MD3::Header* m_pcHeader;

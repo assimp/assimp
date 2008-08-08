@@ -38,7 +38,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines the helper data structures for importing MD2 files  */
+/** @file Defines the helper data structures for importing MD2 files  
+
+**********************************************************************
+File format specification: 
+//http://linux.ucla.edu/~phaethon/q3/formats/md2-schoenblum.html
+**********************************************************************
+
+*/
 #ifndef AI_MD2FILEHELPER_H_INC
 #define AI_MD2FILEHELPER_H_INC
 
@@ -52,11 +59,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "./Compiler/pushpack1.h"
 
-namespace Assimp
-{
-//http://linux.ucla.edu/~phaethon/q3/formats/md2-schoenblum.html
-namespace MD2
-{
+namespace Assimp	{
+namespace MD2	{
 
 #define AI_MD2_MAGIC_NUMBER_BE	'IDP2'
 #define AI_MD2_MAGIC_NUMBER_LE	'2PDI'
@@ -93,8 +97,6 @@ struct Header
 	uint32_t offsetEnd; 
 
 } PACK_STRUCT;
-
-
 
 // ---------------------------------------------------------------------------
 /**	\brief Data structure for a MD2 OpenGl draw command

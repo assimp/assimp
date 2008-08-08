@@ -46,15 +46,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_SMDLOADER_H_INCLUDED
 #define AI_SMDLOADER_H_INCLUDED
 
+// internal headers
 #include "BaseImporter.h"
 #include "ParsingUtils.h"
 
+// public Assimp headers
 #include "../include/aiTypes.h"
 #include "../include/aiTexture.h"
 #include "../include/aiAnim.h"
 #include "../include/aiMaterial.h"
 struct aiNode;
 
+// STL headers
 #include <vector>
 
 namespace Assimp	{
@@ -362,6 +365,9 @@ protected:
 	}
 
 private:
+
+	/** Configuration option: frame to be loaded */
+	unsigned int configFrameID;
 
 	/** Buffer to hold the loaded file */
 	char* mBuffer;

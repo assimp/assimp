@@ -37,128 +37,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-
-
 //!
-//! @file Definition of HMP importer class
+//! @file Declaration of the HMP importer class
 //!
 
 #ifndef AI_HMPLOADER_H_INCLUDED
 #define AI_HMPLOADER_H_INCLUDED
 
-#include "BaseImporter.h"
+// public ASSIMP headers
 #include "../include/aiTypes.h"
 #include "../include/aiTexture.h"
 #include "../include/aiMaterial.h"
 
-struct aiNode;
+// internal headers
+#include "BaseImporter.h"
 #include "MDLLoader.h"
+#include "HMPFileData.h"
 
-namespace Assimp
-{
-class MaterialHelper;
-
-#define AI_HMP_MAGIC_NUMBER_BE_4	'HMP4'
-#define AI_HMP_MAGIC_NUMBER_LE_4	'4PMH'
-
-#define AI_HMP_MAGIC_NUMBER_BE_5	'HMP5'
-#define AI_HMP_MAGIC_NUMBER_LE_5	'5PMH'
-
-#define AI_HMP_MAGIC_NUMBER_BE_7	'HMP7'
-#define AI_HMP_MAGIC_NUMBER_LE_7	'7PMH'
-
-namespace HMP
-{
-
-// ugly compiler dependent packing stuff
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) ||	defined (__BCPLUSPLUS__)
-#	pragma pack(push,1)
-#	define PACK_STRUCT
-#elif defined( __GNUC__ )
-#	define PACK_STRUCT	__attribute__((packed))
-#else
-#	error Compiler not supported. Never do this again.
-#endif
-
-// ---------------------------------------------------------------------------
-/** Data structure for the header of a HMP5 file.
- *  This is also used by HMP4 and HMP7, but with modifications
-*/
-struct Header_HMP5
-{
-	int8_t	ident[4]; // "HMP5"
-	int32_t		version;
-	
-	// ignored
-	float	scale[3];
-	float	scale_origin[3];
-	float	boundingradius;
-	
-	//! Size of one triangle in x direction
-	float	ftrisize_x;		
-	//! Size of one triangle in y direction
-	float	ftrisize_y;		
-	//! Number of vertices in x direction
-	float	fnumverts_x;	
-							
-	//! Number of skins in the file
-	int32_t		numskins;
-
-	// can ignore this?
-	int32_t		skinwidth;
-	int32_t		skinheight;
-
-	//!Number of vertices in the file
-	int32_t		numverts;
-
-	// ignored and zero
-	int32_t		numtris;
-
-	//! only one supported ...
-	int32_t		numframes;		
-
-	//! Always 0 ...
-	int32_t		num_stverts;	
-	int32_t		flags;
-	float	size;
-} PACK_STRUCT;
-
-// ---------------------------------------------------------------------------
-/** Data structure for a terrain vertex in a HMP4 file 
-*/
-struct Vertex_HMP4
-{
-	uint16_t p_pos[3];		
-	uint8_t normals162index;	
-	uint8_t pad;				
-} PACK_STRUCT;
-
-// ---------------------------------------------------------------------------
-/** Data structure for a terrain vertex in a HMP5 file 
-*/
-struct Vertex_HMP5
-{
-	uint16_t z;	
-	uint8_t normals162index;	
-	uint8_t pad;				
-} PACK_STRUCT;
-
-// ---------------------------------------------------------------------------
-/** Data structure for a terrain vertex in a HMP7 file 
-*/
-struct Vertex_HMP7
-{
-	uint16_t	 z;				
-	int8_t normal_x,normal_y;
-} PACK_STRUCT;
-
-// reset packing to the original value
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) || defined (__BCPLUSPLUS__)
-#	pragma pack( pop )
-#endif
-#undef PACK_STRUCT
-
-}; //! namespace HMP
+namespace Assimp {
+using namespace HMP;
 
 // ---------------------------------------------------------------------------
 /** Used to load 3D GameStudio HMP files (terrains)

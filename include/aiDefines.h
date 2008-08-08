@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (defined _MSC_VER)
 
 	// include stdint.h from the C98 standard
-#	include "Compiler/VisualStudio/stdint.h"
+#	include "Compiler/MSVC/stdint.h"
 
 #	undef ASSIMP_API
 
@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	// ************************************************************
 #	if (defined ASSIMP_BUILD_DLL_EXPORT)
 #		define ASSIMP_API __declspec(dllexport)
+#		pragma warning (disable : 4251)
 
 	// ************************************************************
 	// Define ASSIMP_DLL before including Assimp to use ASSIMP in
@@ -102,5 +103,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #		define AI_DEBUG_INVALIDATE_PTR(x)
 #	endif
 #endif 
+
+#define AI_MATH_PI		(3.1415926538)
+#define AI_MATH_TWO_PI	(AI_MATH_PI * 2.0)
 
 #endif // !! AI_DEFINES_H_INC

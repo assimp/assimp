@@ -39,8 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Defines the data structures in which the imported geometry is 
-    returned by ASSIMP */
+/** @file Declares the data structures in which the imported geometry is 
+    returned by ASSIMP: aiMesh, aiFace and aiBone data structures. */
 #ifndef AI_MESH_H_INC
 #define AI_MESH_H_INC
 
@@ -110,9 +110,7 @@ struct aiFace
 		else if (this->mIndices && this->mNumIndices == o.mNumIndices)
 		{
 			for (unsigned int i = 0;i < this->mNumIndices;++i)
-			{
 				if (this->mIndices[i] != o.mIndices[i])return false;
-			}
 			return true;
 		}
 		return false;
@@ -196,11 +194,11 @@ struct aiBone
 		if (other.mWeights && other.mNumWeights)
 		{
 			mWeights = new aiVertexWeight[mNumWeights];
-			memcpy(mWeights,other.mWeights,mNumWeights * sizeof(aiVertexWeight));
+			::memcpy(mWeights,other.mWeights,mNumWeights * sizeof(aiVertexWeight));
 		}
 	}
 
-	//! Destructor to delete the array of vertex weights
+	//! Destructor - deletes the array of vertex weights
 	~aiBone()
 	{
 		if (mNumWeights)delete [] mWeights;
@@ -210,19 +208,24 @@ struct aiBone
 
 #if (!defined AI_MAX_NUMBER_OF_COLOR_SETS)
 
+
+// ---------------------------------------------------------------------------
 /** Maximum number of vertex color sets per mesh.
 *
 * Normally: Diffuse, specular, ambient and emissive
-* However, one could use the vertex color sets for any other purpose, too.
+* However one could use the vertex color sets for any other purpose, too.
 *
 * \note Some internal structures expect (and assert) this value
 *   to be at least 4
 */
-#define AI_MAX_NUMBER_OF_COLOR_SETS 0x4
+// ---------------------------------------------------------------------------
+#	define AI_MAX_NUMBER_OF_COLOR_SETS 0x4
 
 #endif // !! AI_MAX_NUMBER_OF_COLOR_SETS
 #if (!defined AI_MAX_NUMBER_OF_TEXTURECOORDS)
 
+
+// ---------------------------------------------------------------------------
 /** Maximum number of texture coord sets (UV(W) channels) per mesh 
 *
 * The material system uses the AI_MATKEY_UVWSRC_XXX keys to specify 
@@ -231,7 +234,8 @@ struct aiBone
 * \note Some internal structures expect (and assert) this value
 *   to be at least 4
 */
-#define AI_MAX_NUMBER_OF_TEXTURECOORDS 0x4
+// ---------------------------------------------------------------------------
+#	define AI_MAX_NUMBER_OF_TEXTURECOORDS 0x4
 
 // NOTE (Aramis): If you change these values, make sure that you also
 // change the corresponding values in all Assimp ports.
@@ -260,6 +264,7 @@ struct aiBone
 * \note The mPositions member is not optional, although a Has()-Method is
 * provided for it.
 */
+// ---------------------------------------------------------------------------
 struct aiMesh
 {
 	/** The number of vertices in this mesh. 
@@ -343,12 +348,24 @@ struct aiMesh
 	C_STRUCT aiBone** mBones;
 
 	/** The material used by this mesh. 
-	 * A mesh does use only a single material. If an imported model uses multiple materials,
-	 * the import splits up the mesh. Use this value as index into the scene's material list.
+	 * A mesh does use only a single material. If an imported model uses
+	 * multiple materials, the import splits up the mesh. Use this value 
+	 * as index into the scene's material list.
 	 */
 	unsigned int mMaterialIndex;
 
+	/** The maximum vertex smooth angle for the mesh.
+	 *  If the angle between two vertex normals is larger,
+	 *  the vertex normals should not be smoothed. The GenVertexNormals-Step
+	 *  takes care of this value. The angle is specified in radians.
+	 *  It is 2PI if the source file didn't contain any additional 
+	 *  information related to the calculation of vertex normals.
+	 */
+	float mMaxSmoothingAngle;
+
 #ifdef __cplusplus
+
+	//! Default constructor. Initializes all members to 0
 	aiMesh()
 	{
 		mNumVertices = 0; mNumFaces = 0;
@@ -364,8 +381,10 @@ struct aiMesh
 			mColors[a] = NULL;
 		mNumBones = 0; mBones = NULL;
 		mMaterialIndex = 0;
+		mMaxSmoothingAngle = (float)AI_MATH_TWO_PI;
 	}
 
+	//! Deletes all storage allocated for the mesh
 	~aiMesh()
 	{
 		if ( mNumVertices) // fix to make this work for invalid scenes, too
@@ -392,7 +411,8 @@ struct aiMesh
 	}
 
 	//! Check whether the mesh contains positions. If no special scene flags
-	//! are set this should always return true
+	//! (such as AI_SCENE_FLAGS_ANIM_SKELETON_ONLY) are set this MUST
+	//! always return true
 	inline bool HasPositions() const 
 		{ return mVertices != NULL; }
 

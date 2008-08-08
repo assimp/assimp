@@ -58,15 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiAnim.h"
 #include "../include/aiMaterial.h"
 
-// ugly compiler dependent packing stuff
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) ||	defined (__BCPLUSPLUS__)
-#	pragma pack(push,1)
-#	define PACK_STRUCT
-#elif defined( __GNUC__ )
-#	define PACK_STRUCT	__attribute__((packed))
-#else
-#	error Compiler not supported. Never do this again.
-#endif
+#include "./Compiler/pushpack1.h"
 
 namespace Assimp	{
 namespace MDL	{
@@ -115,15 +107,6 @@ namespace MDL	{
 #if (!defined AI_MDL_MAX_TRIANGLES)
 #	define AI_MDL_MAX_TRIANGLES			2048	
 #endif
-
-// helper macro that sets a pointer to NULL in debug builds
-#if (!defined DEBUG_INVALIDATE_PTR)
-#	if (defined _DEBUG)
-#		define DEBUG_INVALIDATE_PTR(x) x = NULL;
-#	else
-#		define DEBUG_INVALIDATE_PTR(x)
-#	endif
-#endif 
 
 // material key that is set for dummy materials that are
 // just referencing another material
@@ -747,11 +730,7 @@ struct GroupFrame
 	SimpleFrame *frames; 
 } PACK_STRUCT;
 
-// reset packing to the original value
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) || defined (__BCPLUSPLUS__)
-#	pragma pack( pop )
-#endif
-#undef PACK_STRUCT
+#include "./Compiler/poppack1.h"
 
 
 // ---------------------------------------------------------------------------

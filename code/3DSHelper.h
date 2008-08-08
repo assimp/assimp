@@ -38,7 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines the helper data structures for importing XFiles */
+/** @file Defines the helper data structures for importing 3DS files.
+http://www.jalix.org/ressources/graphics/3DS/_unofficials/3ds-unofficial.txt */
+
 #ifndef AI_3DSFILEHELPER_H_INC
 #define AI_3DSFILEHELPER_H_INC
 
@@ -54,18 +56,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SpatialSort.h"
 
-namespace Assimp
-{
-	namespace Dot3DS
-	{
+namespace Assimp	{
+namespace Dot3DS	{
 
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) ||	defined (__BCPLUSPLUS__)
-#	pragma pack(push,2)
-#	define PACK_STRUCT
-#elif defined( __GNUC__ )
-#	define PACK_STRUCT	__attribute__((packed))
-#else
-#	error Compiler not supported
+#include "./Compiler/pushpack1.h"
+
+#ifdef _MSC_VER
+#	define sprintf sprintf_s
 #endif
 
 // ---------------------------------------------------------------------------
@@ -118,9 +115,7 @@ public:
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// enum for all chunks in 3ds files. Unused
 	// ones are commented, list is not complete since
-	// there are many undocumented chunks.
-	//
-	// Links: http://www.jalix.org/ressources/graphics/3DS/_unofficials/3ds-unofficial.txt
+	// there are many undocumented chunks
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	enum 
 	{
@@ -317,10 +312,7 @@ public:
 	};
 };
 
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) || defined (__BCPLUSPLUS__)
-#	pragma pack( pop )
-#endif
-#undef PACK_STRUCT
+#include "./Compiler/poppack1.h"
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a 3ds mesh face */
@@ -352,18 +344,18 @@ struct Texture
 {
 	//! Default constructor
 	Texture()
-		: 
-		mScaleU(1.0f),
-		mScaleV(1.0f),
-		mOffsetU(0.0f),
-		mOffsetV(0.0f),
-		mRotation(0.0f),
-		iUVSrc(0),
-		mMapMode(aiTextureMapMode_Wrap)
+		: mScaleU	(1.0f)
+		, mScaleV	(1.0f)
+		, mOffsetU	(0.0f)
+		, mOffsetV	(0.0f)
+		, mRotation	(0.0f)
+		, iUVSrc	(0)
+		, mMapMode	(aiTextureMapMode_Wrap)
 	{
 		mTextureBlend = std::numeric_limits<float>::quiet_NaN();
 	}
-	//! Specifies the blending factor for the texture
+
+	//! Specifies the blend factor for the texture
 	float mTextureBlend;
 
 	//! Specifies the filename of the texture
@@ -402,7 +394,7 @@ struct Material
 		static int iCnt = 0;
 		
 		char szTemp[128];
-		sprintf(szTemp,"$$_UNNAMED_%i_$$",iCnt++);
+		sprintf(szTemp,"UNNAMED_%i",iCnt++);
 		mName = szTemp;
 	}
 
@@ -458,11 +450,7 @@ struct Mesh
 		static int iCnt = 0;
 		
 		char szTemp[128];
-#if _MSC_VER >= 1400
-		::sprintf_s(szTemp,"$$_UNNAMED_%i_$$",iCnt++);
-#else
-		::sprintf(szTemp,"$$_UNNAMED_%i_$$",iCnt++);
-#endif
+		::sprintf(szTemp,"UNNAMED_%i",iCnt++);
 		mName = szTemp;
 	}
 
@@ -499,11 +487,7 @@ struct Node
 		static int iCnt = 0;
 		
 		char szTemp[128];
-#if _MSC_VER >= 1400
-		::sprintf_s(szTemp,"$$_UNNAMED_%i_$$",iCnt++);
-#else
-		::sprintf(szTemp,"$$_UNNAMED_%i_$$",iCnt++);
-#endif
+		::sprintf(szTemp,"UNNAMED_%i",iCnt++);
 		mName = szTemp;
 
 #ifdef AI_3DS_KEYFRAME_ANIMATION

@@ -148,17 +148,6 @@ enum aiPostProcessSteps
 	*/
 	aiProcess_ValidateDataStructure = 0x400,
 
-	/** This step tries to determine which meshes have normal vectors 
-	 * that are facing inwards. The algorithm is simple but effective:
-	 * the bounding box of all vertices + their normals is compared against
-	 * the volume of the bounding box of all vertices without their normals.
-	 * This works well for most objects, problems might occur with planar
-	 * surfaces. However the step tries to filter such cases out.
-	 * The step inverts all infacing normals. Generally it is recommended
-	 * to enable this step.
-	*/
-	aiProcess_FixInfacingNormals = 0x800,
-
 	/** Reorders triangles for vertex cache locality and thus better performance.
 	 * The step tries to improve the ACMR (average post-transform vertex cache
 	 * miss ratio) for all meshes. The step runs in O(n) and is roughly
@@ -174,6 +163,17 @@ enum aiPostProcessSteps
 	 * can't do that if two meshes have different materials.
 	 */
 	aiProcess_RemoveRedundantMaterials = 0x1000,
+
+	/** This step tries to determine which meshes have normal vectors 
+	 * that are facing inwards. The algorithm is simple but effective:
+	 * the bounding box of all vertices + their normals is compared against
+	 * the volume of the bounding box of all vertices without their normals.
+	 * This works well for most objects, problems might occur with planar
+	 * surfaces. However the step tries to filter such cases out.
+	 * The step inverts all infacing normals. Generally it is recommended
+	 * to enable this step.
+	*/
+	aiProcess_FixInfacingNormals = 0x2000,
 };
 
 

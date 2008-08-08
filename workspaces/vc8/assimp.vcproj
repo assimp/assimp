@@ -678,10 +678,10 @@
 				Name="Compiler"
 				>
 				<Filter
-					Name="VisualStudio"
+					Name="MSVC"
 					>
 					<File
-						RelativePath="..\..\include\Compiler\VisualStudio\stdint.h"
+						RelativePath="..\..\include\Compiler\MSVC\stdint.h"
 						>
 					</File>
 				</Filter>
@@ -879,14 +879,14 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="MD4"
+				Name="Compiler"
 				>
 				<File
-					RelativePath="..\..\code\MD4FileData.h"
+					RelativePath="..\..\code\Compiler\poppack1.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\MD4Loader.h"
+					RelativePath="..\..\code\Compiler\pushpack1.h"
 					>
 				</File>
 			</Filter>
@@ -985,10 +985,18 @@
 					RelativePath="..\..\code\extra\MakeVerboseFormat.h"
 					>
 				</File>
+				<File
+					RelativePath="..\..\code\extra\MD4FileData.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="HMPLoader"
 				>
+				<File
+					RelativePath="..\..\code\HMPFileData.h"
+					>
+				</File>
 				<File
 					RelativePath="..\..\code\HMPLoader.h"
 					>
@@ -1179,12 +1187,8 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="MD4"
+				Name="Compiler"
 				>
-				<File
-					RelativePath="..\..\code\MD4Loader.cpp"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="X"

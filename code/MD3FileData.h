@@ -38,7 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines the helper data structures for importing MD3 files  */
+/** @file Defines the helper data structures for importing MD3 files.
+      http://linux.ucla.edu/~phaethon/q3/formats/md3format.html
+*/
 #ifndef AI_MD3FILEHELPER_H_INC
 #define AI_MD3FILEHELPER_H_INC
 
@@ -50,21 +52,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiMesh.h"
 #include "../include/aiAnim.h"
 
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) ||	defined (__BCPLUSPLUS__)
-#	pragma pack(push,1)
-#	define PACK_STRUCT
-#elif defined( __GNUC__ )
-#	define PACK_STRUCT	__attribute__((packed))
-#else
-#	error Compiler not supported
-#endif
+#include "./Compiler/pushpack1.h"
 
-
-namespace Assimp
-{
-// http://linux.ucla.edu/~phaethon/q3/formats/md3format.html
-namespace MD3
-{
+namespace Assimp	{
+namespace MD3	{
 
 #define AI_MD3_MAGIC_NUMBER_BE	'IDP3'
 #define AI_MD3_MAGIC_NUMBER_LE	'3PDI'
@@ -239,11 +230,7 @@ struct Vertex
 	uint16_t  NORMAL;
 } PACK_STRUCT;
 
-// reset packing to the original value
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) || defined (__BCPLUSPLUS__)
-#	pragma pack( pop )
-#endif
-#undef PACK_STRUCT
+#include "./Compiler/poppack1.h"
 
 // ---------------------------------------------------------------------------
 /**	\brief Unpack a Q3 16 bit vector to its full float3 representation

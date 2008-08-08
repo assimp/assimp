@@ -59,6 +59,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+#ifdef _MSC_VER
+#	define sprintf sprintf_s
+#endif
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 FixInfacingNormalsProcess::FixInfacingNormalsProcess()
@@ -88,7 +92,7 @@ void FixInfacingNormalsProcess::Execute( aiScene* pScene)
 
 	bool bHas = false;
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-		if(ProcessMesh( pScene->mMeshes[a]))bHas = true;
+		if(ProcessMesh( pScene->mMeshes[a],a))bHas = true;
 
 	if (bHas)DefaultLogger::get()->debug("FixInfacingNormalsProcess finished. At least one mesh' normals have been flipped.");
 	else DefaultLogger::get()->debug("FixInfacingNormalsProcess finished");
@@ -96,7 +100,7 @@ void FixInfacingNormalsProcess::Execute( aiScene* pScene)
 
 // ------------------------------------------------------------------------------------------------
 // Apply the step to the mesh
-bool FixInfacingNormalsProcess::ProcessMesh( aiMesh* pcMesh)
+bool FixInfacingNormalsProcess::ProcessMesh( aiMesh* pcMesh, unsigned int index)
 {
 	ai_assert(NULL != pcMesh);
 
@@ -159,8 +163,12 @@ bool FixInfacingNormalsProcess::ProcessMesh( aiMesh* pcMesh)
 	if (::fabsf(fDelta0_x * fDelta1_yz) <
 		::fabsf(fDelta1_x * fDelta1_y * fDelta1_z))
 	{
-		DefaultLogger::get()->info("Found a mesh whose normals are facing inwards "
-			"(or the model is too planar or concave). Flipping mesh normals ...");
+		if (!DefaultLogger::isNullLogger())
+		{
+			char buffer[128]; // should be sufficiently large
+			::sprintf(buffer,"Mesh %i: Normals are facing inwards (or the mesh is planar)",index);
+			DefaultLogger::get()->info(buffer);
+		}
 
 		for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
 		{

@@ -49,21 +49,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MDLFILEHELPER2_H_INC
 #define AI_MDLFILEHELPER2_H_INC
 
+#include "./Compiler/pushpack1.h"
 
-// ugly compiler dependent packing stuff
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) ||	defined (__BCPLUSPLUS__)
-#	pragma pack(push,1)
-#	define PACK_STRUCT
-#elif defined( __GNUC__ )
-#	define PACK_STRUCT	__attribute__((packed))
-#else
-#	error Compiler not supported. Never do this again.
-#endif
-
-namespace Assimp
-{
-namespace MDL
-{
+namespace Assimp	{
+namespace MDL	{
 
 // magic bytes used in Half Life 2 MDL models
 #define AI_MDL_MAGIC_NUMBER_BE_HL2a	'IDST'
@@ -151,11 +140,7 @@ struct Header_HL2
 	int32_t			transitionindex;
 } PACK_STRUCT;
 
-// reset packing to the original value
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) || defined (__BCPLUSPLUS__)
-#	pragma pack( pop )
-#endif
-#undef PACK_STRUCT
+#include "./Compiler/poppack1.h"
 
 };}; // end namespaces
 #endif // ! AI_MDLFILEHELPER2_H_INC

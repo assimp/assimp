@@ -88,7 +88,7 @@ protected:
 	/** Executes the step on the given mesh
 	 * @param pMesh The mesh to process.
 	 */
-	bool ProcessMesh( aiMesh* pMesh);
+	bool ProcessMesh( aiMesh* pMesh, unsigned int index);
 };
 
 } // end of namespace Assimp

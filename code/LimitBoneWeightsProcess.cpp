@@ -49,28 +49,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
+#include "../include/assimp.hpp"
 #include "../include/DefaultLogger.h"
 
 using namespace Assimp;
 
-
-/*static*/ unsigned int LimitBoneWeightsProcess::mMaxWeights = AI_LMW_MAX_WEIGHTS;
-
-extern "C" {
-// ------------------------------------------------------------------------------------------------
-aiReturn aiSetBoneWeightLimit(unsigned int pLimit)
-{
-	if (0 == pLimit)
-	{
-		LimitBoneWeightsProcess::mMaxWeights = 0xFFFFFFFF;
-		return AI_FAILURE;
-	}
-
-	LimitBoneWeightsProcess::mMaxWeights = pLimit;
-	DefaultLogger::get()->debug("aiSetBoneWeightLimit() - bone weight limit was changed");
-	return AI_SUCCESS;
-}
-};
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -98,6 +81,18 @@ void LimitBoneWeightsProcess::Execute( aiScene* pScene)
 {
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 		ProcessMesh( pScene->mMeshes[a]);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Executes the post processing step on the given imported data.
+void LimitBoneWeightsProcess::SetupProperties(const Importer* pImp)
+{
+	// get the current value of the property
+	if(0xffffffff == (this->mMaxWeights = pImp->GetProperty(
+		AI_CONFIG_PP_LBW_MAX_WEIGHTS,0xffffffff)))
+	{
+		this->mMaxWeights = AI_LMW_MAX_WEIGHTS;
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

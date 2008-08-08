@@ -154,7 +154,7 @@ public:
 	 *   for the requested property is returned!
 	 * @return Current value of the property
 	 */
-	int GetProperty(const char* szName, int iErrorReturn = 0xffffffff);
+	int GetProperty(const char* szName, int iErrorReturn = 0xffffffff) const;
 
 
 	// -------------------------------------------------------------------

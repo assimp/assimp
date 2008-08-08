@@ -49,7 +49,7 @@
     <option name="MAXIMUM_HEAP_SIZE" value="128" />
   </component>
   <component name="JavadocGenerationManager">
-    <option name="OUTPUT_DIRECTORY" value="J:/Programmieren/ASSIMP/assimp/doc/javadoc" />
+    <option name="OUTPUT_DIRECTORY" value="J:/Programmieren/ASSIMP3/assimp/doc/javadoc" />
     <option name="OPTION_SCOPE" value="package" />
     <option name="OPTION_HIERARCHY" value="true" />
     <option name="OPTION_NAVIGATOR" value="true" />
@@ -178,7 +178,7 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://J:/Programmieren/ASSIMP/ASSIMP/port/jAssimp/assimp.iml" filepath="J:/Programmieren/ASSIMP/ASSIMP/port/jAssimp/assimp.iml" />
+      <module fileurl="file://J:/Programmieren/ASSIMP/ASSIMP3/port/jAssimp/assimp.iml" filepath="J:/Programmieren/ASSIMP/ASSIMP3/port/jAssimp/assimp.iml" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" />

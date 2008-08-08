@@ -137,6 +137,14 @@ public:
 	inline const std::string& GetErrorText() const 
 		{ return mErrorText; }
 
+
+	// -------------------------------------------------------------------
+	/** Called prior to ReadFile().
+	* The function is a request to the importer to update its configuration
+	* basing on the Importer's configuration property list.
+	*/
+	virtual void SetupProperties(const Importer* pImp);
+
 protected:
 
 	// -------------------------------------------------------------------

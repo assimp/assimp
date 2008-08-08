@@ -39,8 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of BaseImporter */
+/** @file Implementation of BaseProcess */
 #include "BaseImporter.h"
+#include "BaseProcess.h"
 
 #include "../include/DefaultLogger.h"
 #include "../include/aiScene.h"
@@ -50,50 +51,44 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-BaseImporter::BaseImporter()
+BaseProcess::BaseProcess()
 {
 	// nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-BaseImporter::~BaseImporter()
+BaseProcess::~BaseProcess()
 {
 	// nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file and returns the imported data.
-aiScene* BaseImporter::ReadFile( const std::string& pFile, IOSystem* pIOHandler)
+void BaseProcess::ExecuteOnScene( Importer* pImp)
 {
-	// create a scene object to hold the data
-	aiScene* scene = new aiScene();
+	ai_assert(NULL != pImp && NULL != pImp->mScene);
 
-	// dispatch importing
+	// catch exceptions thrown inside the PostProcess-Step
 	try
 	{
-		InternReadFile( pFile, scene, pIOHandler);
+		this->Execute(pImp->mScene);
+
 	} catch( ImportErrorException* exception)
 	{
 		// extract error description
-		mErrorText = exception->GetErrorText();
-
-		DefaultLogger::get()->error(mErrorText);
+		pImp->mErrorString = exception->GetErrorText();
+		DefaultLogger::get()->error(pImp->mErrorString);
 
 		delete exception;
 
 		// and kill the partially imported data
-		delete scene;
-		scene = NULL;
+		delete pImp->mScene;
+		pImp->mScene = NULL;
 	}
-
-	// return what we gathered from the import. 
-	return scene;
 }
 
 // ------------------------------------------------------------------------------------------------
-void BaseImporter::SetupProperties(const Importer* pImp)
+void BaseProcess::SetupProperties(const Importer* pImp)
 {
 	// the default implementation does nothing
 }
-

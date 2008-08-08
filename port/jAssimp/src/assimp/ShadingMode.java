@@ -52,16 +52,18 @@ package assimp;
  */
 public class ShadingMode {
 
+    private ShadingMode() {}
+
     /**
      * Flat shading. Shading is done on per-face base,
      * diffuse only.
      */
-    int Flat = 0x1;
+    public static final int Flat = 0x1;
 
     /**
      * Diffuse gouraud shading. Shading on per-vertex base
      */
-    int Gouraud = 0x2;
+    public static final int Gouraud = 0x2;
 
     /**
      * Diffuse/Specular Phong-Shading
@@ -69,7 +71,7 @@ public class ShadingMode {
      * Shading is applied on per-pixel base. This is the
      * slowest algorithm, but generates the best results.
      */
-    int Phong = 0x3;
+    public static final int Phong = 0x3;
 
     /**
      * Diffuse/Specular Phong-Blinn-Shading
@@ -78,7 +80,7 @@ public class ShadingMode {
      * bit faster than phong and in some cases even
      * more realistic
      */
-    int Blinn = 0x4;
+    public static final int Blinn = 0x4;
 
     /**
      * Toon-Shading per pixel
@@ -86,7 +88,7 @@ public class ShadingMode {
      * Shading is applied on per-pixel base. The output looks
      * like a comic. Often combined with edge detection.
      */
-    int Toon = 0x5;
+    public static final int Toon = 0x5;
 
     /**
      * OrenNayar-Shading per pixel
@@ -94,7 +96,7 @@ public class ShadingMode {
      * Extension to standard lambertian shading, taking the
      * roughness of the material into account
      */
-    int OrenNayar = 0x6;
+    public static final int OrenNayar = 0x6;
 
     /**
      * Minnaert-Shading per pixel
@@ -102,15 +104,15 @@ public class ShadingMode {
      * Extension to standard lambertian shading, taking the
      * "darkness" of the material into account
      */
-    int Minnaert = 0x7;
+    public static final int Minnaert = 0x7;
 
     /**
      * CookTorrance-Shading per pixel
      */
-    int CookTorrance = 0x8;
+    public static final int CookTorrance = 0x8;
 
     /**
      * No shading at all
      */
-    int NoShading = 0x8;
+    public static final int NoShading = 0x8;
 }

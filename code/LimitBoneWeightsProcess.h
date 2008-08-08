@@ -91,35 +91,53 @@ public:
 	bool IsActive( unsigned int pFlags) const;
 
 	// -------------------------------------------------------------------
-	/** Executes the post processing step on the given imported data.
-	* At the moment a process is not supposed to fail.
-	* @param pScene The imported data to work at.
+	/** Called prior to ExecuteOnScene().
+	* The function is a request to the process to update its configuration
+	* basing on the Importer's configuration property list.
 	*/
-	void Execute( aiScene* pScene);
+	virtual void SetupProperties(const Importer* pImp);
 
 protected:
+
 	// -------------------------------------------------------------------
 	/** Limits the bone weight count for all vertices in the given mesh.
 	* @param pMesh The mesh to process.
 	*/
 	void ProcessMesh( aiMesh* pMesh);
 
+	// -------------------------------------------------------------------
+	/** Executes the post processing step on the given imported data.
+	* At the moment a process is not supposed to fail.
+	* @param pScene The imported data to work at.
+	*/
+	void Execute( aiScene* pScene);
+
+
 protected:
+
+	// -------------------------------------------------------------------
 	/** Describes a bone weight on a vertex */
 	struct Weight
 	{
 		unsigned int mBone; ///< Index of the bone
 		float mWeight;      ///< Weight of that bone on this vertex
 		Weight() { }
-		Weight( unsigned int pBone, float pWeight) { mBone = pBone; mWeight = pWeight; }
+		Weight( unsigned int pBone, float pWeight) 
+		{
+			mBone = pBone; 
+			mWeight = pWeight; 
+		}
 
 		/** Comparision operator to sort bone weights by descending weight */
-		bool operator < (const Weight& pWeight) const { return mWeight > pWeight.mWeight; }
+		bool operator < (const Weight& pWeight) const
+		{ 
+			return mWeight > pWeight.mWeight;
+		}
 	};
 
 public:
 	/** Maximum number of bones influencing any single vertex. */
-	static unsigned int mMaxWeights;
+	unsigned int mMaxWeights;
 };
 
 } // end of namespace Assimp

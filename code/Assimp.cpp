@@ -184,7 +184,7 @@ void aiGetExtensionList(aiString* szOut)
 }
 // ------------------------------------------------------------------------------------------------
 void aiGetMemoryRequirements(const C_STRUCT aiScene* pIn,
-	C_STRUCT aiMemoryInfo* in);
+	C_STRUCT aiMemoryInfo* in)
 {
 // lock the mutex
 #if (defined AI_C_THREADSAFE)
@@ -198,7 +198,7 @@ void aiGetMemoryRequirements(const C_STRUCT aiScene* pIn,
 	{
 		DefaultLogger::get()->error("Unable to find the Importer instance for this scene. "
 			"Are you sure it has been created by aiImportFile(ex)(...)?");
-		return 0;
+		return;
 	}
 	// get memory statistics
 	it->second->GetMemoryRequirements(*in);

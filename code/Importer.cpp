@@ -100,9 +100,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AI_BUILD_NO_MD5_IMPORTER)
 #	include "MD5Loader.h"
 #endif
-#if (!defined AI_BUILD_NO_MD5_IMPORTER)
-#	include "MD5Loader.h"
-#endif
 #if (!defined AI_BUILD_NO_STL_IMPORTER)
 #	include "STLLoader.h"
 #endif
@@ -266,21 +263,6 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_IMPROVECACHELOCALITY_PROCESS)
 	mPostProcessingSteps.push_back( new ImproveCacheLocalityProcess());
 #endif
-
-	//// store the *this* pointer in all BaseImporter instances
-	//for (std::vector<BaseImporter*>::iterator
-	//	i =  mImporter.begin();
-	//	i != mImporter.end();++i)
-	//{
-	//	(**i).mImporter = this;
-	//}
-	//// store the *this* pointer in all BaseProcess instances
-	//for (std::vector<BaseProcess*>::iterator
-	//	i =  mPostProcessingSteps.begin();
-	//	i != mPostProcessingSteps.end();++i)
-	//{
-	//	(**i).mImporter = this;
-	//}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -327,6 +309,7 @@ bool Importer::IsDefaultIOHandler()
 {
 	return mIsDefaultHandler;
 }
+#ifdef _DEBUG
 // ------------------------------------------------------------------------------------------------
 // Validate post process step flags 
 bool ValidateFlags(unsigned int pFlags)
@@ -341,6 +324,7 @@ bool ValidateFlags(unsigned int pFlags)
 
 	return true;
 }
+#endif // ! DEBUG
 // ------------------------------------------------------------------------------------------------
 // Reads the given file and returns its contents if successful. 
 const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags)
@@ -384,11 +368,13 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 	}
 
 	// dispatch the reading to the worker class for this format
+	imp->SetupProperties( this );
 	mScene = imp->ReadFile( pFile, mIOHandler);
 	
 	// if successful, apply all active post processing steps to the imported data
 	if( mScene)
 	{
+#ifdef _DEBUG
 		if (bExtraVerbose)
 		{
 			pFlags |= aiProcess_ValidateDataStructure;
@@ -397,15 +383,17 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 			// TODO: temporary solution, clean up later
 			mScene->mFlags |= 0x80000000; 
 		}
+#endif // ! DEBUG
 		for( unsigned int a = 0; a < mPostProcessingSteps.size(); a++)
 		{
 			BaseProcess* process = mPostProcessingSteps[a];
 			if( process->IsActive( pFlags))
 			{
-				process->ExecuteOnScene( this );
+				process->SetupProperties( this );
+				process->ExecuteOnScene	( this );
 			}
-			if( !mScene)break; // error string has already been set ...
-
+			if( !mScene)break; 
+#ifdef _DEBUG
 			// if the extra verbose mode is active execute the
 			// VaidateDataStructureStep again after each step
 			if (bExtraVerbose && a)
@@ -415,18 +403,18 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 				if( !mScene)
 				{
 					DefaultLogger::get()->error("Extra verbose: failed to revalidate data structures");
-					break; // error string has already been set ...
+					break; 
 				}
 			}
+#endif // ! DEBUG
 		}
+#ifdef _DEBUG
 		if (bExtraVerbose)mScene->mFlags &= ~0x80000000; 
+#endif // ! DEBUG
 	}
 
 	// if failed, extract the error string
-	else if( !mScene)
-	{
-		mErrorString = imp->GetErrorText();
-	}
+	else if( !mScene)mErrorString = imp->GetErrorText();
 
 	// either successful or failure - the pointer expresses it anyways
 	return mScene;
@@ -497,7 +485,7 @@ int Importer::SetProperty(const char* szName, int iValue)
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
 int Importer::GetProperty(const char* szName, 
-	int iErrorReturn /*= 0xffffffff*/)
+	int iErrorReturn /*= 0xffffffff*/) const
 {
 	ai_assert(NULL != szName);
 

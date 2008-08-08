@@ -1047,6 +1047,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\BaseProcess.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\CalcTangentsProcess.cpp"
 				>
 			</File>

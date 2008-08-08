@@ -46,41 +46,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiPostProcess.h"
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
+#include "../include/assimp.hpp"
 
 using namespace Assimp;
 
-/*static*/ unsigned int SplitLargeMeshesProcess_Triangle::LIMIT = AI_SLM_DEFAULT_MAX_TRIANGLES;
-/*static*/ unsigned int SplitLargeMeshesProcess_Vertex::LIMIT = AI_SLM_DEFAULT_MAX_VERTICES;
 
-extern "C" {
-
-// ------------------------------------------------------------------------------------------------
-aiReturn aiSetVertexSplitLimit(unsigned int pLimit)
-{
-	if (0 == pLimit)
-	{
-		SplitLargeMeshesProcess_Vertex::LIMIT = 0xFFFFFFFF;
-		return AI_FAILURE;
-	}
-
-	SplitLargeMeshesProcess_Vertex::LIMIT = pLimit;
-	DefaultLogger::get()->debug("aiSetVertexSplitLimit() - vertex split limit was changed");
-	return AI_SUCCESS;
-}
-// ------------------------------------------------------------------------------------------------
-aiReturn aiSetTriangleSplitLimit(unsigned int pLimit)
-{
-	if (0 == pLimit)
-	{
-		SplitLargeMeshesProcess_Triangle::LIMIT = 0xFFFFFFFF;
-		return AI_FAILURE;
-	}
-
-	SplitLargeMeshesProcess_Triangle::LIMIT = pLimit;
-	DefaultLogger::get()->debug("aiSetTriangleSplitLimit() - triangle split limit was changed");
-	return AI_SUCCESS;
-}
-}; //! extern "C"
 
 // ------------------------------------------------------------------------------------------------
 SplitLargeMeshesProcess_Triangle::SplitLargeMeshesProcess_Triangle()
@@ -96,12 +66,14 @@ SplitLargeMeshesProcess_Triangle::~SplitLargeMeshesProcess_Triangle()
 // Returns whether the processing step is present in the given flag field.
 bool SplitLargeMeshesProcess_Triangle::IsActive( unsigned int pFlags) const
 {
-	return (pFlags & aiProcess_SplitLargeMeshes) != 0 && (0xFFFFFFFF != LIMIT);
+	return (pFlags & aiProcess_SplitLargeMeshes) != 0;
 }
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void SplitLargeMeshesProcess_Triangle::Execute( aiScene* pScene)
 {
+	if (0xffffffff == this->LIMIT)return;
+
 	DefaultLogger::get()->debug("SplitLargeMeshesProcess_Triangle begin");
 	std::vector<std::pair<aiMesh*, unsigned int> > avList;
 
@@ -124,6 +96,17 @@ void SplitLargeMeshesProcess_Triangle::Execute( aiScene* pScene)
 	}
 	else DefaultLogger::get()->debug("SplitLargeMeshesProcess_Triangle finished. There was nothing to do");
 	return;
+}
+// ------------------------------------------------------------------------------------------------
+// Setup properties
+void SplitLargeMeshesProcess_Triangle::SetupProperties( const Importer* pImp)
+{
+        // get the current value of the split property
+	if(0xcdcdcdcd == (this->LIMIT = pImp->GetProperty(
+		AI_CONFIG_PP_SLM_TRIANGLE_LIMIT,0xcdcdcdcd)))
+	{
+		this->LIMIT = AI_SLM_DEFAULT_MAX_TRIANGLES;
+	}
 }
 // ------------------------------------------------------------------------------------------------
 // Update a node after some meshes have been split
@@ -368,13 +351,15 @@ SplitLargeMeshesProcess_Vertex::~SplitLargeMeshesProcess_Vertex()
 // Returns whether the processing step is present in the given flag field.
 bool SplitLargeMeshesProcess_Vertex::IsActive( unsigned int pFlags) const
 {
-	return (pFlags & aiProcess_SplitLargeMeshes) != 0 && (0xFFFFFFFF != LIMIT);
+	return (pFlags & aiProcess_SplitLargeMeshes) != 0;
 }
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void SplitLargeMeshesProcess_Vertex::Execute( aiScene* pScene)
 {
 	std::vector<std::pair<aiMesh*, unsigned int> > avList;
+
+  	if (0xffffffff == this->LIMIT)return;
 
 	DefaultLogger::get()->debug("SplitLargeMeshesProcess_Vertex begin");
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
@@ -396,6 +381,17 @@ void SplitLargeMeshesProcess_Vertex::Execute( aiScene* pScene)
 	}
 	else DefaultLogger::get()->debug("SplitLargeMeshesProcess_Vertex finished. There was nothing to do");
 	return;
+}
+// ------------------------------------------------------------------------------------------------
+// Setup properties
+void SplitLargeMeshesProcess_Vertex::SetupProperties( const Importer* pImp)
+{
+        // get the current value of the split property
+	if(0xcdcdcdcd == (this->LIMIT = pImp->GetProperty(
+		AI_CONFIG_PP_SLM_VERTEX_LIMIT,0xcdcdcdcd)))
+	{
+		this->LIMIT = AI_SLM_DEFAULT_MAX_VERTICES;
+	}
 }
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.

@@ -105,6 +105,18 @@ bool SMDImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
+// Setup configuration properties
+void SMDImporter::SetupProperties(const Importer* pImp)
+{
+	// The AI_CONFIG_IMPORT_SMD_KEYFRAME option overrides the
+	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
+	if(0xffffffff == (this->configFrameID = pImp->GetProperty(
+		AI_CONFIG_IMPORT_SMD_KEYFRAME,0xffffffff)))
+	{
+		this->configFrameID = pImp->GetProperty(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
+	}
+}
+// ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void SMDImporter::InternReadFile( 
 	const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
@@ -138,15 +150,6 @@ void SMDImporter::InternReadFile(
 
 	// reserve enough space for ... hm ... 20 bones
 	this->asBones.reserve(20);
-
-	// The AI_CONFIG_IMPORT_SMD_KEYFRAME option overrides the
-	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
-	if(0xffffffff == (this->configFrameID = this->mImporter->GetProperty(
-		AI_CONFIG_IMPORT_SMD_KEYFRAME,0xffffffff)))
-	{
-		this->configFrameID = this->mImporter->GetProperty(
-			AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
-	}
 
 	try
 	{

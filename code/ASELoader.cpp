@@ -473,7 +473,7 @@ void ASEImporter::BuildNodes()
 			aiNode* pcNode = new aiNode();
 			pcNode->mParent = pcScene->mRootNode;
 			pcNode->mName.Set(szMyName[1]);
-			this->AddNodes(pcScene,pcNode,pcNode->mName.data);
+			this->AddNodes(pcNode,pcNode->mName.data);
 			apcNodes.push_back(pcNode);
 		}
 		pcScene->mRootNode->mChildren = new aiNode*[apcNodes.size()];

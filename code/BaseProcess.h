@@ -53,17 +53,19 @@ namespace Assimp
 // ---------------------------------------------------------------------------
 /** The BaseProcess defines a common interface for all post processing steps.
  * A post processing step is run after a successful import if the caller
- * specified the corresponding flag when calling ReadFile(). Enum #aiPostProcessSteps
- * defines which flags are available. 
- * After a successful import the Importer iterates over its internal array of processes
- * and calls IsActive() on each process to evaluate if the step should be executed.
- * If the function returns true, the class' Execute() function is called subsequently.
+ * specified the corresponding flag when calling ReadFile(). 
+ * Enum #aiPostProcessSteps defines which flags are available. 
+ * After a successful import the Importer iterates over its internal array 
+ * of processes and calls IsActive() on each process to evaluate if the step 
+ * should be executed. If the function returns true, the class' Execute() 
+ * function is called subsequently.
  */
-class ASSIMP_API BaseProcess
+class ASSIMP_API BaseProcess 
 {
 	friend class Importer;
 
 public:
+
 	/** Constructor to be privately used by Importer */
 	BaseProcess();
 
@@ -71,11 +73,13 @@ public:
 	virtual ~BaseProcess();
 
 public:
+
 	// -------------------------------------------------------------------
-	/** Returns whether the processing step is present in the given flag field.
-	 * @param pFlags The processing flags the importer was called with. A bitwise
-	 *   combination of #aiPostProcessSteps.
-	 * @return true if the process is present in this flag fields, false if not.
+	/** Returns whether the processing step is present in the given flag.
+	 * @param pFlags The processing flags the importer was called with. A
+	 *   bitwise combination of #aiPostProcessSteps.
+	 * @return true if the process is present in this flag fields, 
+	 *   false if not.
 	*/
 	virtual bool IsActive( unsigned int pFlags) const = 0;
 
@@ -88,6 +92,13 @@ public:
 	void ExecuteOnScene( Importer* pImp);
 
 	// -------------------------------------------------------------------
+	/** Called prior to ExecuteOnScene().
+	* The function is a request to the process to update its configuration
+	* basing on the Importer's configuration property list.
+	*/
+	virtual void SetupProperties(const Importer* pImp);
+
+	// -------------------------------------------------------------------
 	/** Executes the post processing step on the given imported data.
 	* A process should throw an ImportErrorException* if it fails.
 	* This method must be implemented by deriving classes.
@@ -96,15 +107,6 @@ public:
 	virtual void Execute( aiScene* pScene) = 0;
 };
 
-/** Constructor, dummy implementation to keep the compiler from complaining */
-inline BaseProcess::BaseProcess()
-{
-}
-
-/** Destructor */
-inline BaseProcess::~BaseProcess()
-{
-}
 
 } // end of namespace Assimp
 

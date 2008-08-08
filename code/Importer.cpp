@@ -89,11 +89,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AI_BUILD_NO_SMD_IMPORTER)
 #	include "SMDLoader.h"
 #endif
+#if 0
 #if (!defined AI_BUILD_NO_MDR_IMPORTER)
 #	include "MDRLoader.h"
 #endif
 #if (!defined AI_BUILD_NO_MDC_IMPORTER)
 #	include "MDCLoader.h"
+#endif
 #endif
 #if (!defined AI_BUILD_NO_MD5_IMPORTER)
 #	include "MD5Loader.h"
@@ -199,11 +201,13 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_SMD_IMPORTER)
 	mImporter.push_back( new SMDImporter());
 #endif
+#if 0
 #if (!defined AI_BUILD_NO_MDR_IMPORTER)
 	mImporter.push_back( new MDRImporter());
 #endif
 #if (!defined AI_BUILD_NO_MDC_IMPORTER)
 	mImporter.push_back( new MDCImporter());
+#endif
 #endif
 #if (!defined AI_BUILD_NO_MD5_IMPORTER)
 	mImporter.push_back( new MD5Importer());
@@ -263,20 +267,20 @@ Importer::Importer() :
 	mPostProcessingSteps.push_back( new ImproveCacheLocalityProcess());
 #endif
 
-	// store the *this* pointer in all BaseImporter instances
-	for (std::vector<BaseImporter*>::iterator
-		i =  mImporter.begin();
-		i != mImporter.end();++i)
-	{
-		(**i).mImporter = this;
-	}
-	// store the *this* pointer in all BaseProcess instances
-	for (std::vector<BaseProcess*>::iterator
-		i =  mPostProcessingSteps.begin();
-		i != mPostProcessingSteps.end();++i)
-	{
-		(**i).mImporter = this;
-	}
+	//// store the *this* pointer in all BaseImporter instances
+	//for (std::vector<BaseImporter*>::iterator
+	//	i =  mImporter.begin();
+	//	i != mImporter.end();++i)
+	//{
+	//	(**i).mImporter = this;
+	//}
+	//// store the *this* pointer in all BaseProcess instances
+	//for (std::vector<BaseProcess*>::iterator
+	//	i =  mPostProcessingSteps.begin();
+	//	i != mPostProcessingSteps.end();++i)
+	//{
+	//	(**i).mImporter = this;
+	//}
 }
 
 // ------------------------------------------------------------------------------------------------

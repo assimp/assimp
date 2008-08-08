@@ -2089,8 +2089,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		return -4;
 		}
 	// setup ASSIMP standard limits for the SplitLargeMeshes-process
-	aiSetTriangleSplitLimit(g_sCaps.MaxPrimitiveCount-1);
-	aiSetVertexSplitLimit(0xFFFFFFFF);
+//	aiSetTriangleSplitLimit(g_sCaps.MaxPrimitiveCount-1);
+//	aiSetVertexSplitLimit(0xFFFFFFFF);
 
 	CLogDisplay::Instance().AddEntry("[OK] The viewer has been initialized successfully");
 

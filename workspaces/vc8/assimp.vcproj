@@ -723,6 +723,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\FixNormalsStep.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\GenFaceNormalsProcess.h"
 				>
 			</File>
@@ -975,46 +979,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="jAssimp"
-				>
-				<File
-					RelativePath="..\..\port\jAssimp\jni_bridge\assimp_Importer.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\port\jAssimp\jni_bridge\assimp_Material.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\port\jAssimp\jni_bridge\jAssimp\assimp_Mesh.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\port\jAssimp\jni_bridge\jAssimp\assimp_Node.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\port\jAssimp\jni_bridge\assimp_PostProcessStep.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\port\jAssimp\jni_bridge\assimp_Scene.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\port\jAssimp\jni_bridge\assimp_Texture.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\port\jAssimp\jni_bridge\JNIEnvironment.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\port\jAssimp\jni_bridge\JNILogger.h"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="extra"
 				>
 				<File
@@ -1088,6 +1052,10 @@
 			</File>
 			<File
 				RelativePath="..\..\code\DefaultIOSystem.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\FixNormalsStep.cpp"
 				>
 			</File>
 			<File
@@ -1271,22 +1239,6 @@
 				>
 				<File
 					RelativePath="..\..\code\DefaultLogger.cpp"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="jAssimp"
-				>
-				<File
-					RelativePath="..\..\port\jAssimp\jni_bridge\JNICalls.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\port\jAssimp\jni_bridge\JNIEnvironment.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\port\jAssimp\jni_bridge\JNILogger.cpp"
 					>
 				</File>
 			</Filter>

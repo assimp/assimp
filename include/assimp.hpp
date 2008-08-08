@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 // public ASSIMP headers
-#include "aiDefines.h"
+#include "aiTypes.h"
 #include "aiConfig.h"
 
 

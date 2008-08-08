@@ -169,6 +169,7 @@ void DefaultLogger::attachStream( LogStream *pStream, unsigned int severity )
 		if ( (*it)->m_pStream == pStream )
 		{
 			(*it)->m_uiErrorSeverity |= severity;
+			return;
 		}
 	}
 	

@@ -69,7 +69,7 @@ void MD2::LookupNormalIndex(uint8_t iNormalIndex,aiVector3D& vOut)
 	// make sure the normal index has a valid value
 	if (iNormalIndex >= ARRAYSIZE(g_avNormals))
 	{
-		DefaultLogger::get()->warn("Index overflow in MDL7 normal vector list (the "
+		DefaultLogger::get()->warn("Index overflow in Quake II normal vector list (the "
 			" LUT has only 162 entries). ");
 
 		iNormalIndex = ARRAYSIZE(g_avNormals) - 1;
@@ -113,6 +113,30 @@ bool MD2Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 // Validate the file header
 void MD2Importer::ValidateHeader( )
 {
+	// check magic number
+	if (this->m_pcHeader->magic != AI_MD2_MAGIC_NUMBER_BE &&
+		this->m_pcHeader->magic != AI_MD2_MAGIC_NUMBER_LE)
+	{
+		delete[] this->mBuffer;
+		AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
+
+		char szBuffer[5];
+		szBuffer[0] = ((char*)&this->m_pcHeader->magic)[0];
+		szBuffer[1] = ((char*)&this->m_pcHeader->magic)[1];
+		szBuffer[2] = ((char*)&this->m_pcHeader->magic)[2];
+		szBuffer[3] = ((char*)&this->m_pcHeader->magic)[3];
+		szBuffer[4] = '\0';
+
+		throw new ImportErrorException("Invalid MD2 magic word: should be IDP2, the "
+			"magic word found is " + std::string(szBuffer));
+	}
+
+	// check file format version
+	if (this->m_pcHeader->version != 8)
+	{
+		DefaultLogger::get()->warn( "Unsupported md2 file version. Continuing happily ...");
+	}
+
 	/* to be validated:
 	int32_t offsetSkins; 
 	int32_t offsetTexCoords; 
@@ -129,6 +153,7 @@ void MD2Importer::ValidateHeader( )
 		this->m_pcHeader->offsetEnd			> this->fileSize)
 	{
 		throw new ImportErrorException("Invalid MD2 header: some offsets are outside the file");
+		AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 	}
 
 	if (this->m_pcHeader->numSkins > AI_MD2_MAX_SKINS)
@@ -166,20 +191,7 @@ void MD2Importer::InternReadFile(
 		file->Read( (void*)mBuffer, 1, fileSize);
 
 		this->m_pcHeader = (const MD2::Header*)this->mBuffer;
-
-		// check magic number
-		if (this->m_pcHeader->magic != AI_MD2_MAGIC_NUMBER_BE &&
-			this->m_pcHeader->magic != AI_MD2_MAGIC_NUMBER_LE)
-		{
-			throw new ImportErrorException( "Invalid md2 file: Magic bytes not found");
-		}
-
-		// check file format version
-		if (this->m_pcHeader->version != 8)
-		{
-			DefaultLogger::get()->warn( "Unsupported md2 file version. Continuing happily ...");
-		}
-		this->ValidateHeader();
+	this->ValidateHeader();
 
 		// check some values whether they are valid
 		if (0 == this->m_pcHeader->numFrames)

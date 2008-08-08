@@ -50,12 +50,12 @@ BEGIN
         BEGIN
             VALUE "Comments", "Licensed under a 3-clause BSD license"
             VALUE "CompanyName", "ASSIMP Development Team"
-            VALUE "FileDescription", "Open Asset Import Library "
+            VALUE "FileDescription", "Open Asset Import Library"
             VALUE "FileVersion", "1, 0, 0, 0"
             VALUE "InternalName", "assimp"
             VALUE "LegalCopyright", "Copyright (C) 2008"
             VALUE "OriginalFilename", "assimpNN.dll"
-            VALUE "ProductName", "Open Asset Import Library "
+            VALUE "ProductName", "Open Asset Import Library"
             VALUE "ProductVersion", "1, 0, 0, 0"
         END
     END
@@ -65,41 +65,6 @@ BEGIN
     END
 END
 
-#else
-
-VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
- PRODUCTVERSION 1,0,0,1
- FILEFLAGSMASK 0x17L
-#ifdef _DEBUG
- FILEFLAGS 0x1L
-#else
- FILEFLAGS 0x0L
-#endif
- FILEOS 0x4L
- FILETYPE 0x7L
- FILESUBTYPE 0x0L
-BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "040704b0"
-        BEGIN
-            VALUE "Comments", "Licensed under a 3-clause BSD license"
-            VALUE "CompanyName", "ASSIMP Development Team"
-            VALUE "FileDescription", "ASSIMP-JNI bridge module"
-            VALUE "FileVersion", "1, 0, 0, 0"
-            VALUE "InternalName", "jassimp"
-            VALUE "LegalCopyright", "Copyright (C) 2008"
-            VALUE "OriginalFilename", "jAssimpNN.dll"
-            VALUE "ProductName", "ASSIMP-JNI bridge module"
-            VALUE "ProductVersion", "1, 0, 0, 0"
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x407, 1200
-    END
-END
 
 #endif // !!ASSIMP_JNI_EXPORT 
 

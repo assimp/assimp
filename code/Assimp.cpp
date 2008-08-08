@@ -39,18 +39,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 /** @file Implementation of the Plain-C API */
+
+// CRT headers
 #include <map>
 
+// public ASSIMP headers
 #include "../include/assimp.h"
 #include "../include/assimp.hpp"
-
+#include "../include/DefaultLogger.h"
 #include "../include/aiAssert.h"
-using namespace Assimp;
 
+// boost headers
+#define AI_C_THREADSAFE
 #if (defined AI_C_THREADSAFE)
 #	include <boost/thread/thread.hpp>
 #	include <boost/thread/mutex.hpp>
 #endif
+
+using namespace Assimp;
 
 /** Stores the importer objects for all active import processes */
 typedef std::map< const aiScene*, Assimp::Importer* > ImporterMap;
@@ -111,7 +117,11 @@ void aiReleaseImport( const aiScene* pScene)
 	ImporterMap::iterator it = gActiveImports.find( pScene);
 	// it should be there... else the user is playing fools with us
 	if( it == gActiveImports.end())
+	{
+		DefaultLogger::get()->error("Unable to find the Importer instance for this scene. "
+			"Are you sure it has been created by aiImportFile(ex)(...)?");
 		return;
+	}
 
 	// kill the importer, the data dies with it
 	delete it->second;
@@ -171,5 +181,26 @@ void aiGetExtensionList(aiString* szOut)
 	pcTemp->GetExtensionList(szTemp);
 	szOut->Set ( szTemp );
 	delete pcTemp;
+}
+// ------------------------------------------------------------------------------------------------
+void aiGetMemoryRequirements(const C_STRUCT aiScene* pIn,
+	C_STRUCT aiMemoryInfo* in);
+{
+// lock the mutex
+#if (defined AI_C_THREADSAFE)
+	boost::mutex::scoped_lock lock(gMutex);
+#endif
+
+	// find the importer associated with this data
+	ImporterMap::iterator it = gActiveImports.find( pIn);
+	// it should be there... else the user is playing fools with us
+	if( it == gActiveImports.end())
+	{
+		DefaultLogger::get()->error("Unable to find the Importer instance for this scene. "
+			"Are you sure it has been created by aiImportFile(ex)(...)?");
+		return 0;
+	}
+	// get memory statistics
+	it->second->GetMemoryRequirements(*in);
 }
 

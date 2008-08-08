@@ -141,6 +141,16 @@ ASSIMP_API int aiIsExtensionSupported(const char* szExtension);
 // ---------------------------------------------------------------------------
 ASSIMP_API void aiGetExtensionList(C_STRUCT aiString* szOut);
 
+
+// ---------------------------------------------------------------------------
+/** Get the storage required by an imported asset
+ * \param pIn Input asset.
+ * \param in Data structure to be filled. 
+ */
+// ---------------------------------------------------------------------------
+ASSIMP_API void aiGetMemoryRequirements(const C_STRUCT aiScene* pIn,
+	C_STRUCT aiMemoryInfo* in);
+
 #ifdef __cplusplus
 }
 #endif

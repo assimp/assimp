@@ -148,6 +148,17 @@ enum aiPostProcessSteps
 	*/
 	aiProcess_ValidateDataStructure = 0x400,
 
+	/** This step tries to determine which meshes have normal vectors 
+	 * that are facing inwards. The algorithm is simple but effective:
+	 * the bounding box of all vertices + their normals is compared against
+	 * the volume of the bounding box of all vertices without their normals.
+	 * This works well for most objects, problems might occur with planar
+	 * surfaces. However the step tries to filter such cases out.
+	 * The step inverts all infacing normals. Generally it is recommended
+	 * to enable this step.
+	*/
+	aiProcess_FixInfacingNormals = 0x800,
+
 	/** Reorders triangles for vertex cache locality and thus better performance.
 	 * The step tries to improve the ACMR (average post-transform vertex cache
 	 * miss ratio) for all meshes. The step runs in O(n) and is roughly
@@ -165,37 +176,6 @@ enum aiPostProcessSteps
 	aiProcess_RemoveRedundantMaterials = 0x1000,
 };
 
-// ---------------------------------------------------------------------------
-/** \brief Set the maximum number of vertices in a mesh.
- *
- * This is used by the SplitLargeMeshes PostProcess-Step to determine
- * whether a mesh must be splitted or not.
- * \param pLimit Vertex limit. 
- * \note The default value is AI_SLM_DEFAULT_MAX_VERTICES, defined in
- *       the internal header file SplitLargeMeshes.h
- */
-ASSIMP_API aiReturn aiSetVertexSplitLimit(unsigned int pLimit);
-
-// ---------------------------------------------------------------------------
-/** \brief Set the maximum number of triangles in a mesh.
- *
- * This is used by the SplitLargeMeshes PostProcess-Step to determine
- * whether a mesh must be splitted or not.
- * \param pLimit Triangle limit
- * \note The default value is AI_SLM_DEFAULT_MAX_TRIANGLES, defined in
- *       the internal header file SplitLargeMeshes.h
- */
-ASSIMP_API aiReturn aiSetTriangleSplitLimit(unsigned int pLimit);
-
-// ---------------------------------------------------------------------------
-/** \brief Set the maximum number of bones affecting a single vertex
- *
- * This is used by the aiProcess_LimitBoneWeights PostProcess-Step.
- * \param pLimit Bone limit
- * \note The default value is AI_LMW_MAX_WEIGHTS, defined in
- *       the internal header file LimitBoneWeightsProcess.h
- */
-ASSIMP_API aiReturn aiSetBoneWeightLimit(unsigned int pLimit);
 
 #ifdef __cplusplus
 } // end of extern "C"

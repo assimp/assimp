@@ -47,10 +47,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #error This header requires C++ to be used.
 #endif
 
+// STL headers
 #include <string>
 #include <vector>
 
+// public ASSIMP headers
 #include "aiDefines.h"
+#include "aiConfig.h"
+
+
+#define AI_PROPERTY_WAS_NOT_EXISTING 0xffffffff
 
 struct aiScene;
 
@@ -88,6 +94,28 @@ class ASSIMP_API Importer
 	// used internally
 	friend class BaseProcess;
 
+protected:
+
+	template <typename Type>
+	struct PropertyInfo
+	{
+		std::string name;
+		Type value;
+
+		bool operator==(const PropertyInfo<Type>& other) const
+		{
+			return other.name == this->name &&
+				other.value == this->value;
+		}
+
+		bool operator!=(const PropertyInfo<Type>& other) const
+		{
+			return !(other == *this);
+		}
+	};
+
+	typedef PropertyInfo<int> IntPropertyInfo;
+
 public:
 
 	// -------------------------------------------------------------------
@@ -102,6 +130,31 @@ public:
 	 * which now will be destroyed along with the object. 
 	 */
 	~Importer();
+
+
+	// -------------------------------------------------------------------
+	/** Set a configuration property.
+	 * @param szName Name of the property. All supported properties
+	 *   are defined in the aiConfig.g header (the constants start
+	 *   with AI_CONFIG_XXX).
+	 * @param iValue New value of the property
+	 * @return Old value of the property or AI_PROPERTY_WAS_NOT_EXISTING
+     * if the property has not yet been set.
+	 */
+	int SetProperty(const char* szName, int iValue);
+
+
+	// -------------------------------------------------------------------
+	/** Get a configuration property.
+	 * @param szName Name of the property. All supported properties
+	 *   are defined in the aiConfig.g header (the constants start
+	 *   with AI_CONFIG_XXX).
+	 * @param iErrorReturn Value that is returned if the property
+	 *   is not found. Note that this value, not the default value
+	 *   for the requested property is returned!
+	 * @return Current value of the property
+	 */
+	int GetProperty(const char* szName, int iErrorReturn = 0xffffffff);
 
 
 	// -------------------------------------------------------------------
@@ -200,6 +253,14 @@ public:
 
 
 	// -------------------------------------------------------------------
+	/** Returns the storage allocated by ASSIMP to hold the asset data
+	 * in memory.
+	 * \param in Data structure to be filled. 
+	*/
+	void GetMemoryRequirements(aiMemoryInfo& in) const;
+
+
+	// -------------------------------------------------------------------
 	/** Enables the "extra verbose" mode. In this mode the data 
 	* structure is validated after each post-process step to make sure
 	* all steps behave consequently in the same manner when modifying
@@ -214,6 +275,7 @@ private:
 	Importer(const Importer &other);
 
 protected:
+
 
 	/** IO handler to use for all file accesses. */
 	IOSystem* mIOHandler;
@@ -232,6 +294,9 @@ protected:
 
 	/** The error description, if there was one. */
 	std::string mErrorString;
+
+	/** List of integer properties */
+	std::vector<IntPropertyInfo> mIntProperties;
 
 	/** Used for testing */
 	bool bExtraVerbose;

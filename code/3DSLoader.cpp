@@ -297,13 +297,8 @@ void Dot3DSImporter::ParseEditorChunk(int& piRemaining)
 		{
 			// print the version number
 			char szBuffer[128];
-#if _MSC_VER >= 1400
-			::sprintf_s(szBuffer,"3DS file version chunk: %i",
-				(int) *((uint16_t*)this->mCurrent));
-#else
 			::sprintf(szBuffer,"3DS file version chunk: %i",
 				(int) *((uint16_t*)this->mCurrent));
-#endif
 			DefaultLogger::get()->info(szBuffer);
 		}
 		else

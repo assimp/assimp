@@ -794,6 +794,7 @@ void Parser::ParseLV1GeometryObjectBlock(ASE::Mesh& mesh)
 			{
 				this->m_szFile+=9;
 				this->ParseLV2NodeTransformBlock(mesh);continue;
+				//mesh.mTransform.Transpose();
 			}
 			// mesh data
 			if (0 == strncmp(this->m_szFile,"*MESH" ,5) &&

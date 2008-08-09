@@ -101,12 +101,8 @@ void SplitLargeMeshesProcess_Triangle::Execute( aiScene* pScene)
 // Setup properties
 void SplitLargeMeshesProcess_Triangle::SetupProperties( const Importer* pImp)
 {
-        // get the current value of the split property
-	if(0xcdcdcdcd == (this->LIMIT = pImp->GetProperty(
-		AI_CONFIG_PP_SLM_TRIANGLE_LIMIT,0xcdcdcdcd)))
-	{
-		this->LIMIT = AI_SLM_DEFAULT_MAX_TRIANGLES;
-	}
+    // get the current value of the split property
+	this->LIMIT = pImp->GetProperty(AI_CONFIG_PP_SLM_TRIANGLE_LIMIT,AI_SLM_DEFAULT_MAX_TRIANGLES);
 }
 // ------------------------------------------------------------------------------------------------
 // Update a node after some meshes have been split
@@ -291,15 +287,11 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
 
 					// copy positions
 					if (pMesh->mVertices != NULL)
-					{
 						pcMesh->mVertices[iIndexOut] = pMesh->mVertices[iIndex];
-					}
 
 					// copy normals
 					if (pMesh->HasNormals())
-					{
 						pcMesh->mNormals[iIndexOut] = pMesh->mNormals[iIndex];
-					}
 
 					// copy tangents/bitangents
 					if (pMesh->HasTangentsAndBitangents())
@@ -312,17 +304,13 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
 					for (unsigned int c = 0;  c < AI_MAX_NUMBER_OF_TEXTURECOORDS;++c)
 					{
 						if (pMesh->HasTextureCoords( c))
-						{
 							pcMesh->mTextureCoords[c][iIndexOut] = pMesh->mTextureCoords[c][iIndex];
-						}
 					}
 					// vertex colors 
 					for (unsigned int c = 0;  c < AI_MAX_NUMBER_OF_COLOR_SETS;++c)
 					{
 						if (pMesh->HasVertexColors( c))
-						{
 							pcMesh->mColors[c][iIndexOut] = pMesh->mColors[c][iIndex];
-						}
 					}
 				}
 			}
@@ -386,12 +374,7 @@ void SplitLargeMeshesProcess_Vertex::Execute( aiScene* pScene)
 // Setup properties
 void SplitLargeMeshesProcess_Vertex::SetupProperties( const Importer* pImp)
 {
-        // get the current value of the split property
-	if(0xcdcdcdcd == (this->LIMIT = pImp->GetProperty(
-		AI_CONFIG_PP_SLM_VERTEX_LIMIT,0xcdcdcdcd)))
-	{
-		this->LIMIT = AI_SLM_DEFAULT_MAX_VERTICES;
-	}
+	this->LIMIT = pImp->GetProperty(AI_CONFIG_PP_SLM_VERTEX_LIMIT,AI_SLM_DEFAULT_MAX_VERTICES);
 }
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
@@ -455,9 +438,15 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
 			}
 
 			// clear the temporary helper array
-			if (0 != iBase)
+			if (iBase)
 			{
-				memset(&avWasCopied[0],0xFF,pMesh->mNumVertices * sizeof(unsigned int));
+				// we can't use memset here we unsigned int needn' be 32 bits
+				for (std::vector<unsigned int>::iterator
+					iter = avWasCopied.begin(),end = avWasCopied.end();
+					iter != end;++iter)
+				{
+					(*iter) = 0xffffffff;
+				}
 			}
 
 			// output vectors

@@ -120,8 +120,8 @@ public:
 	enum 
 	{
 
-		// **************************************************************
-		// Base chunks which can be found everywhere in the file
+		// ********************************************************************
+		// Basic chunks which can be found everywhere in the file
 		CHUNK_VERSION	= 0x0002,
 		CHUNK_RGBF      = 0x0010,		// float4 R; float4 G; float4 B
 		CHUNK_RGBB      = 0x0011,		// int1 R; int1 G; int B
@@ -132,7 +132,7 @@ public:
 
 		CHUNK_PERCENTW	= 0x0030,		// int2   percentage
 		CHUNK_PERCENTF	= 0x0031,		// float4  percentage
-		// **************************************************************
+		// ********************************************************************
 
 		// Unknown and ignored. Possibly a chunk used by PROJ (
 		// Discreet 3DS max Project File)?
@@ -162,7 +162,7 @@ public:
 		CHUNK_BIT_MAP   = 0x1100,
 		CHUNK_BIT_MAP_EXISTS  = 0x1101,
 
-		// **************************************************************
+		// ********************************************************************
 		// Viewport related stuff. Ignored
 		CHUNK_DEFAULT_VIEW = 0x3000,
 		CHUNK_VIEW_TOP = 0x3010,
@@ -173,7 +173,7 @@ public:
 		CHUNK_VIEW_BACK = 0x3060,
 		CHUNK_VIEW_USER = 0x3070,
 		CHUNK_VIEW_CAMERA = 0x3080,
-		// **************************************************************
+		// ********************************************************************
 
 		// Mesh chunks
 		CHUNK_OBJBLOCK  = 0x4000,
@@ -196,7 +196,7 @@ public:
 		// to the root node's transformation matrix
 		CHUNK_MASTER_SCALE    = 0x0100,
 
-		// **************************************************************
+		// ********************************************************************
 		// Material chunks
 		CHUNK_MAT_MATERIAL  = 0xAFFF,
 
@@ -280,7 +280,7 @@ public:
 
 			// Specifies whether a materail requires two-sided rendering
 			CHUNK_MAT_TWO_SIDE = 0xA081,  
-		// **************************************************************
+		// ********************************************************************
 
 		// Main keyframer chunk. Contains translation/rotation/scaling data
 		CHUNK_KEYFRAMER		= 0xB000,
@@ -293,7 +293,7 @@ public:
 		CHUNK_TRACKROTATE   = 0xB021,
 		CHUNK_TRACKSCALE    = 0xB022,
 
-		// **************************************************************
+		// ********************************************************************
 		// Keyframes for various other stuff in the file
 		// Ignored
 		CHUNK_AMBIENTKEY    = 0xB001,
@@ -308,7 +308,7 @@ public:
 		CHUNK_TRACKLIGTGT	= 0xB006,
 		CHUNK_TRACKSPOTL	= 0xB007,
 		CHUNK_FRAMES		= 0xB008
-		// **************************************************************
+		// ********************************************************************
 	};
 };
 

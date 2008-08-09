@@ -43,8 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_3DSIMPORTER_H_INC
 #define AI_3DSIMPORTER_H_INC
 
-#include <map>
-
 #include "BaseImporter.h"
 #include "../include/aiTypes.h"
 
@@ -73,10 +71,18 @@ protected:
 	~Dot3DSImporter();
 
 public:
+
 	// -------------------------------------------------------------------
 	/** Returns whether the class can handle the format of the given file. 
 	* See BaseImporter::CanRead() for details.	*/
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+
+	// -------------------------------------------------------------------
+	/** Called prior to ReadFile().
+	* The function is a request to the importer to update its configuration
+	* basing on the Importer's configuration property list.
+	*/
+	void SetupProperties(const Importer* pImp);
 
 protected:
 
@@ -233,6 +239,10 @@ protected:
 
 
 protected:
+
+	/** Configuration option: skip pivot chunks */
+	bool configSkipPivot;
+
 	/** Buffer to hold the loaded file */
 	unsigned char* mBuffer;
 

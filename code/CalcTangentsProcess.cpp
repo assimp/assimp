@@ -56,6 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiPostProcess.h"
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
+#include "../include/assimp.hpp"
 
 using namespace Assimp;
 
@@ -78,6 +79,16 @@ CalcTangentsProcess::~CalcTangentsProcess()
 bool CalcTangentsProcess::IsActive( unsigned int pFlags) const
 {
 	return (pFlags & aiProcess_CalcTangentSpace) != 0;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Executes the post processing step on the given imported data.
+void CalcTangentsProcess::SetupProperties(const Importer* pImp)
+{
+	// get the current value of the property
+	this->configMaxAngle = pImp->GetProperty(AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE,45000) / 1000.0f;
+	this->configMaxAngle = std::max(std::min(this->configMaxAngle,180.0f),0.0f);
+	this->configMaxAngle *= 0.0174532925f;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -213,7 +224,6 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh)
 		vertexFinder.FindPositions( origPos, posEpsilon, verticesFound);
 
 		// look among them for other vertices sharing the same normal and a close-enough tangent/bitangent
-		static const float MAX_DIFF_ANGLE = 0.701f;
 		for( unsigned int b = 0; b < verticesFound.size(); b++)
 		{
 			unsigned int idx = verticesFound[b];
@@ -221,9 +231,9 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh)
 				continue;
 			if( meshNorm[idx] * origNorm < angleEpsilon)
 				continue;
-			if( meshTang[idx] * origTang < MAX_DIFF_ANGLE)
+			if( acosf( meshTang[idx] * origTang) > this->configMaxAngle)
 				continue;
-			if( meshBitang[idx] * origBitang < MAX_DIFF_ANGLE)
+			if( acosf( meshBitang[idx] * origBitang) > this->configMaxAngle)
 				continue;
 
 			// it's similar enough -> add it to the smoothing group

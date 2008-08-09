@@ -93,9 +93,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AI_BUILD_NO_MDR_IMPORTER)
 #	include "MDRLoader.h"
 #endif
+#endif
 #if (!defined AI_BUILD_NO_MDC_IMPORTER)
 #	include "MDCLoader.h"
-#endif
 #endif
 #if (!defined AI_BUILD_NO_MD5_IMPORTER)
 #	include "MD5Loader.h"
@@ -202,9 +202,9 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_MDR_IMPORTER)
 	mImporter.push_back( new MDRImporter());
 #endif
+#endif
 #if (!defined AI_BUILD_NO_MDC_IMPORTER)
 	mImporter.push_back( new MDCImporter());
-#endif
 #endif
 #if (!defined AI_BUILD_NO_MD5_IMPORTER)
 	mImporter.push_back( new MD5Importer());

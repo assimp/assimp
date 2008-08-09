@@ -105,6 +105,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #define AI_CONFIG_IMPORT_3DS_IGNORE_PIVOT	"imp.3ds.nopivot"
 
+// ---------------------------------------------------------------------------
+/** \brief Specifies the maximum angle that may be between two vertex tangents
+ *         that their tangents and bitangents are smoothed.
+ *
+ * This applies to the CalcTangentSpace-Step. The angle is specified
+ * in degrees * 1000, so 180000 is PI. The default value is
+ * 45 degrees. The maximum value is 180000.
+ */
+#define AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE "pp.ct.max_smoothing"
+
+// ---------------------------------------------------------------------------
+/** \brief Specifies the maximum angle that may be between two face normals
+ *         at the same vertex position that their are smoothed.
+ *
+ * This applies to the GenSmoothNormals-Step. The angle is specified
+ * in degrees * 1000, so 180000 is PI. The default value is
+ * 180 degrees (all vertex normals are smoothed). The maximum value is 180000
+ * \note This can be manually overriden by loaders via #aiMesh::mMaxSmoothingAngle;
+ */
+#define AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE "pp.gsn.max_smoothing"
+
 
 #define AI_CONFIG_PP_OG_MAX_DEPTH			"pp.og.max_depth"
 #define AI_CONFIG_PP_OG_MIN_TRIS_PER_NODE	"pp.og.min_tris"

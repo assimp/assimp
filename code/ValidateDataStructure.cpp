@@ -710,10 +710,10 @@ __break_out:
 			}
 			if (pBoneAnim->mPositionKeys[i].mTime <= dLast)
 			{
-				this->ReportError("aiBoneAnim::mPositionKeys[%i].mTime (%.5f) is larger "
+				this->ReportWarning("aiBoneAnim::mPositionKeys[%i].mTime (%.5f) is smaller "
 					"than aiAnimation::mPositionKeys[%i] (which is %.5f)",i,
 					(float)pBoneAnim->mPositionKeys[i].mTime,
-					i, (float)dLast);
+					i-1, (float)dLast);
 			}
 			dLast = pBoneAnim->mPositionKeys[i].mTime;
 		}
@@ -738,10 +738,10 @@ __break_out:
 			}
 			if (pBoneAnim->mRotationKeys[i].mTime <= dLast)
 			{
-				this->ReportError("aiBoneAnim::mRotationKeys[%i].mTime (%.5f) is larger "
+				this->ReportWarning("aiBoneAnim::mRotationKeys[%i].mTime (%.5f) is smaller "
 					"than aiAnimation::mRotationKeys[%i] (which is %.5f)",i,
 					(float)pBoneAnim->mRotationKeys[i].mTime,
-					i, (float)dLast);
+					i-1, (float)dLast);
 			}
 			dLast = pBoneAnim->mRotationKeys[i].mTime;
 		}
@@ -766,10 +766,10 @@ __break_out:
 			}
 			if (pBoneAnim->mScalingKeys[i].mTime <= dLast)
 			{
-				this->ReportError("aiBoneAnim::mScalingKeys[%i].mTime (%.5f) is larger "
+				this->ReportWarning("aiBoneAnim::mScalingKeys[%i].mTime (%.5f) is smaller "
 					"than aiAnimation::mScalingKeys[%i] (which is %.5f)",i,
 					(float)pBoneAnim->mScalingKeys[i].mTime,
-					i, (float)dLast);
+					i-1, (float)dLast);
 			}
 			dLast = pBoneAnim->mScalingKeys[i].mTime;
 		}

@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
+#include "../include/assimp.hpp"
 
 // boost headers
 #include <boost/scoped_ptr.hpp>
@@ -97,6 +98,12 @@ bool Dot3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) co
 		return true;
 
 	return false;
+}
+// ------------------------------------------------------------------------------------------------
+// Setup configuration properties
+void Dot3DSImporter::SetupProperties(const Importer* pImp)
+{
+	this->configSkipPivot = pImp->GetProperty(AI_CONFIG_IMPORT_3DS_IGNORE_PIVOT,0) ? true : false;
 }
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
@@ -144,48 +151,46 @@ void Dot3DSImporter::InternReadFile(
 	try
 	{
 		this->ParseMainChunk(iRemaining);
+
+		// Generate an unique set of vertices/indices for
+		// all meshes contained in the file
+		for (std::vector<Dot3DS::Mesh>::iterator
+			i =  this->mScene->mMeshes.begin();
+			i != this->mScene->mMeshes.end();++i)
+		{
+			// TODO: see function body
+			this->CheckIndices(&(*i));
+			this->MakeUnique(&(*i));
+
+			// first generate normals for the mesh
+			this->GenNormals(&(*i));
+		}
+
+		// Apply scaling and offsets to all texture coordinates
+		TextureTransform::ApplyScaleNOffset(this->mScene->mMaterials);
+
+		// Replace all occurences of the default material with a valid material.
+		// Generate it if no material containing DEFAULT in its name has been
+		// found in the file
+		this->ReplaceDefaultMaterial();
+
+		// Convert the scene from our internal representation to an aiScene object
+		this->ConvertScene(pScene);
+
+		// Generate the node graph for the scene. This is a little bit
+		// tricky since we'll need to split some meshes into submeshes
+		this->GenerateNodeGraph(pScene);
+
+		// Now apply a master scaling factor to the scene
+		this->ApplyMasterScale(pScene);
+
 	}
 	catch ( ImportErrorException* ex)
 	{
-		delete[] this->mBuffer;
+		delete[] this->mBuffer;AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 		throw ex;
-	};
-
-	// Generate an unique set of vertices/indices for
-	// all meshes contained in the file
-	for (std::vector<Dot3DS::Mesh>::iterator
-		i =  this->mScene->mMeshes.begin();
-		i != this->mScene->mMeshes.end();++i)
-	{
-		// TODO: see function body
-		this->CheckIndices(&(*i));
-		this->MakeUnique(&(*i));
-
-		// first generate normals for the mesh
-		this->GenNormals(&(*i));
 	}
-
-	// Apply scaling and offsets to all texture coordinates
-	TextureTransform::ApplyScaleNOffset(this->mScene->mMaterials);
-
-	// Replace all occurences of the default material with a valid material.
-	// Generate it if no material containing DEFAULT in its name has been
-	// found in the file
-	this->ReplaceDefaultMaterial();
-	
-	// Convert the scene from our internal representation to an aiScene object
-	this->ConvertScene(pScene);
-
-	// Generate the node graph for the scene. This is a little bit
-	// tricky since we'll need to split some meshes into submeshes
-	this->GenerateNodeGraph(pScene);
-
-	// Now apply a master scaling factor to the scene
-	this->ApplyMasterScale(pScene);
-
-	delete[] this->mBuffer;
-	delete this->mScene;
-	return;
+	delete[] this->mBuffer;AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 }
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ApplyMasterScale(aiScene* pScene)

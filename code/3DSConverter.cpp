@@ -59,6 +59,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+#ifdef _MSC_VER
+#	define sprintf sprintf_s
+#endif
 
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ReplaceDefaultMaterial()
@@ -113,8 +116,7 @@ void Dot3DSImporter::ReplaceDefaultMaterial()
 			{
 				(*a) = iIndex;
 				++iCnt;
-				DefaultLogger::get()->warn("Material index overflow in 3DS file. Assigning "
-					"default material ...");
+				DefaultLogger::get()->warn("Material index overflow in 3DS file. Using default material");
 			}
 		}
 	}
@@ -157,58 +159,36 @@ void Dot3DSImporter::CheckIndices(Dot3DS::Mesh* sMesh)
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::MakeUnique(Dot3DS::Mesh* sMesh)
 {
-	std::vector<aiVector3D> vNew;
-	vNew.resize(sMesh->mFaces.size() * 3);
-
-	std::vector<aiVector2D> vNew2;
-
-	// TODO: Remove this step. By maintaining a small LUT it
-	// would be possible to do this directly in the parsing step
 	unsigned int iBase = 0;
 
-	if (0 != sMesh->mTexCoords.size())
+	std::vector<aiVector3D> vNew;
+	std::vector<aiVector2D> vNew2;
+
+	vNew.resize(sMesh->mFaces.size() * 3);
+	if (sMesh->mTexCoords.size())vNew2.resize(sMesh->mFaces.size() * 3);
+
+	for (unsigned int i = 0; i < sMesh->mFaces.size();++i)
 	{
-		vNew2.resize(sMesh->mFaces.size() * 3);
-		for (unsigned int i = 0; i < sMesh->mFaces.size();++i)
+		uint32_t iTemp1,iTemp2;
+
+		// positions
+		vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[2]];
+		iTemp1 = iBase++;
+		vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[1]];
+		iTemp2 = iBase++;
+		vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[0]];
+
+		// texture coordinates
+		if (sMesh->mTexCoords.size())
 		{
-			uint32_t iTemp1,iTemp2;
-
-			// position and texture coordinates
-			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[2]];
-			vNew2[iBase]   = sMesh->mTexCoords[sMesh->mFaces[i].mIndices[2]];
-			iTemp1 = iBase++;
-
-			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[1]];
-			vNew2[iBase]   = sMesh->mTexCoords[sMesh->mFaces[i].mIndices[1]];
-			iTemp2 = iBase++;
-
-			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[0]];
-			vNew2[iBase]   = sMesh->mTexCoords[sMesh->mFaces[i].mIndices[0]];
-			sMesh->mFaces[i].mIndices[2] = iBase++;
-
-			sMesh->mFaces[i].mIndices[0] = iTemp1;
-			sMesh->mFaces[i].mIndices[1] = iTemp2;
+			vNew2[iTemp1]   = sMesh->mTexCoords[sMesh->mFaces[i].mIndices[2]];
+			vNew2[iTemp2]   = sMesh->mTexCoords[sMesh->mFaces[i].mIndices[1]];
+			vNew2[iBase]    = sMesh->mTexCoords[sMesh->mFaces[i].mIndices[0]];
 		}
-	}
-	else
-	{
-		for (unsigned int i = 0; i < sMesh->mFaces.size();++i)
-		{
-			uint32_t iTemp1,iTemp2;
 
-			// position only
-			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[2]];
-			iTemp1 = iBase++;
-
-			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[1]];
-			iTemp2 = iBase++;
-
-			vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[0]];
-			sMesh->mFaces[i].mIndices[2] = iBase++;
-
-			sMesh->mFaces[i].mIndices[0] = iTemp1;
-			sMesh->mFaces[i].mIndices[1] = iTemp2;
-		}
+		sMesh->mFaces[i].mIndices[2] = iBase++;
+		sMesh->mFaces[i].mIndices[0] = iTemp1;
+		sMesh->mFaces[i].mIndices[1] = iTemp2;
 	}
 	sMesh->mPositions = vNew;
 	sMesh->mTexCoords = vNew2;
@@ -400,7 +380,7 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 	}
 
 	// store the name of the material itself, too
-	if( oldMat.mName.length() > 0)
+	if( oldMat.mName.length())
 	{
 		aiString tex;
 		tex.Set( oldMat.mName);
@@ -430,14 +410,19 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 			a != (*i).mFaceMaterials.end();++a,++iNum)
 		{
 			// check range
+			// FIX: shouldn't be necessary anymore, has been moved to ReplaceDefaultMaterial()
+#if 0
 			if ((*a) >= this->mScene->mMaterials.size())
 			{
 				DefaultLogger::get()->error("3DS face material index is out of range");
 
 				// use the last material instead
+				// TODO: assign the default material index
 				aiSplit[this->mScene->mMaterials.size()-1].push_back(iNum);
 			}
-		else aiSplit[*a].push_back(iNum);
+			else
+#endif	
+		aiSplit[*a].push_back(iNum);
 		}
 		// now generate submeshes
 		bool bFirst = true;
@@ -455,14 +440,14 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 				avOutMeshes.push_back(p_pcOut);
 				
 				// convert vertices
-				p_pcOut->mNumVertices = (unsigned int)aiSplit[p].size()*3;
 				p_pcOut->mNumFaces = (unsigned int)aiSplit[p].size();
+				p_pcOut->mNumVertices = p_pcOut->mNumFaces*3;
 
 				// allocate enough storage for faces
 				p_pcOut->mFaces = new aiFace[p_pcOut->mNumFaces];
 				iFaceCnt += p_pcOut->mNumFaces;
 
-				if (p_pcOut->mNumVertices != 0)
+				if (p_pcOut->mNumVertices)
 				{
 					p_pcOut->mVertices = new aiVector3D[p_pcOut->mNumVertices];
 					p_pcOut->mNormals = new aiVector3D[p_pcOut->mNumVertices];
@@ -489,7 +474,7 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 					}
 				}
 				// convert texture coordinates
-				if ((*i).mTexCoords.size() != 0)
+				if ((*i).mTexCoords.size())
 				{
 					p_pcOut->mTextureCoords[0] = new aiVector3D[p_pcOut->mNumVertices];
 
@@ -525,17 +510,13 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 		pcOut->mMeshes[a] = avOutMeshes[a];
 	}
 
-	if (0 == iFaceCnt)
-	{
+	if (!iFaceCnt)
 		throw new ImportErrorException("No faces loaded. The mesh is empty");
-	}
 
 	// for each material in the scene we need to setup the UV source
 	// set for each texture
 	for (unsigned int a = 0; a < pcOut->mNumMaterials;++a)
-	{
 		TextureTransform::SetupMatUVSrc( pcOut->mMaterials[a], &this->mScene->mMaterials[a] );
-	}
 	return;
 }
 // ------------------------------------------------------------------------------------------------
@@ -551,7 +532,9 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 			const Dot3DS::Mesh* pcMesh = (const Dot3DS::Mesh*)pcSOut->mMeshes[a]->mColors[0];
 			ai_assert(NULL != pcMesh);
 
-			if (0 == ASSIMP_stricmp(pcIn->mName.c_str(),pcMesh->mName.c_str()))
+			// do case independent comparisons here, just for safety
+			if (pcIn->mName.length() == pcMesh->mName.length() &&
+				!ASSIMP_stricmp(pcIn->mName.c_str(),pcMesh->mName.c_str()))
 			{
 				iArray.push_back(a);
 			}
@@ -560,7 +543,8 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 		{
 			aiMatrix4x4& mTrafo = ((Dot3DS::Mesh*)pcSOut->mMeshes[iArray[0]]->mColors[0])->mMat;
 			aiMatrix4x4 mInv = mTrafo;
-			mInv.Inverse();
+			if (!this->configSkipPivot)
+				mInv.Inverse();
 
 			pcOut->mName.Set(pcIn->mName);
 			pcOut->mNumMeshes = (unsigned int)iArray.size();
@@ -575,7 +559,7 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 				const aiVector3D* const pvEnd = mesh->mVertices+mesh->mNumVertices;
 				aiVector3D* pvCurrent = mesh->mVertices;
 
-				if(pivot.x || pivot.y || pivot.z)
+				if(pivot.x || pivot.y || pivot.z && !this->configSkipPivot)
 				{
 					while (pvCurrent != pvEnd)
 					{
@@ -593,18 +577,12 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 					while (pvCurrent != pvEnd)
 					{
 						std::swap( pvCurrent->y, pvCurrent->z );
-						//pvCurrent->y *= -1.0f;
 						++pvCurrent;
 					}
 				}
 				pcOut->mMeshes[i] = iIndex;
 			}
 		}
-		/*else
-		{
-			DefaultLogger::get()->warn("A node that is not a dummy does not "
-				"reference a valid mesh.");
-		}*/
 	}
 	pcOut->mTransformation = aiMatrix4x4(); 
 	pcOut->mNumChildren = (unsigned int)pcIn->mChildren.size();
@@ -636,8 +614,7 @@ void Dot3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 		//
 		unsigned int iCnt = 0;
 
-		DefaultLogger::get()->warn("No hierarchy information has been "
-			"found in the file. A flat hierarchy tree is built ...");
+		DefaultLogger::get()->warn("No hierarchy information has been found in the file. ");
 
 		pcOut->mRootNode->mNumChildren = pcOut->mNumMeshes;
 		pcOut->mRootNode->mChildren = new aiNode* [ pcOut->mNumMeshes ];
@@ -654,11 +631,7 @@ void Dot3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 
 			char szBuffer[128];
 			int iLen;
-#if _MSC_VER >= 1400
-			iLen = sprintf_s(szBuffer,"UNNAMED_%i",i);
-#else
 			iLen = sprintf(szBuffer,"UNNAMED_%i",i);
-#endif
 			ai_assert(0 < iLen);
 			::memcpy(pcNode->mName.data,szBuffer,iLen);
 			pcNode->mName.data[iLen] = '\0';

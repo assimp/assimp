@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MDLDefaultColorMap.h"
 #include "MD2FileData.h" 
 #include "qnan.h" 
+#include "ByteSwap.h" 
 
 // public ASSIMP headers
 #include "../include/DefaultLogger.h"
@@ -61,8 +62,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
-
-extern float g_avNormals[162][3];
 
 
 // ------------------------------------------------------------------------------------------------
@@ -80,7 +79,6 @@ extern float g_avNormals[162][3];
 #	define _AI_MDL7_ACCESS_VERT(_data, _index, _limit) \
 	_AI_MDL7_ACCESS(_data,_index,_limit,MDL::Vertex_MDL7)
 #endif
-
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -116,36 +114,34 @@ bool MDLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
+// Setup configuration properties
+void MDLImporter::SetupProperties(const Importer* pImp)
+{
+	// The AI_CONFIG_IMPORT_MDL_KEYFRAME option overrides the
+	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
+	if(0xffffffff == (this->configFrameID = pImp->GetProperty(
+		AI_CONFIG_IMPORT_MDL_KEYFRAME,0xffffffff)))
+	{
+		this->configFrameID =  pImp->GetProperty(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
+	}
+}
+// ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
-void MDLImporter::InternReadFile( 
-	const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
+void MDLImporter::InternReadFile( const std::string& pFile, 
+								 aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
-	{
 		throw new ImportErrorException( "Failed to open MDL file " + pFile + ".");
-	}
 
-	// The AI_CONFIG_IMPORT_MDL_KEYFRAME option overrides the
-	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
-#if 0
-	if(0xffffffff == (this->configFrameID = this->mImporter->GetProperty(
-		AI_CONFIG_IMPORT_MDL_KEYFRAME,0xffffffff)))
-	{
-		this->configFrameID = this->mImporter->GetProperty(
-			AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
-	}
-#endif
 
 	// this should work for all other types of MDL files, too ...
 	// the quake header is one of the smallest, afaik
 	this->iFileSize = (unsigned int)file->FileSize();
 	if( this->iFileSize < sizeof(MDL::Header))
-	{
 		throw new ImportErrorException( "MDL File is too small.");
-	}
 
 	// allocate storage and copy the contents of the file to a memory buffer
 	this->pScene = pScene;
@@ -162,89 +158,93 @@ void MDLImporter::InternReadFile(
 	// determine the file subtype and call the appropriate member function
 	try {
 
-	// Original Quake1 format
-	if (AI_MDL_MAGIC_NUMBER_BE == iMagicWord ||
-		AI_MDL_MAGIC_NUMBER_LE == iMagicWord)
-	{
-		DefaultLogger::get()->debug("MDL subtype: Quake 1, magic word is IDPO");
-		this->iGSFileVersion = 0;
-		this->InternReadFile_Quake1();
-	}
-	// GameStudio A<old> MDL2 format - used by some test models that come with 3DGS
-	else if (AI_MDL_MAGIC_NUMBER_BE_GS3 == iMagicWord ||
-			 AI_MDL_MAGIC_NUMBER_LE_GS3 == iMagicWord)
-	{
-		DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A2, magic word is MDL2");
-		this->iGSFileVersion = 2;
-		this->InternReadFile_Quake1();
-	}
-	// GameStudio A4 MDL3 format
-	else if (AI_MDL_MAGIC_NUMBER_BE_GS4 == iMagicWord ||
-			 AI_MDL_MAGIC_NUMBER_LE_GS4 == iMagicWord)
-	{
-		DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A4, magic word is MDL3");
-		this->iGSFileVersion = 3;
-		this->InternReadFile_3DGS_MDL345();
-	}
-	// GameStudio A5+ MDL4 format
-	else if (AI_MDL_MAGIC_NUMBER_BE_GS5a == iMagicWord ||
-			 AI_MDL_MAGIC_NUMBER_LE_GS5a == iMagicWord)
-	{
-		DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A4, magic word is MDL4");
-		this->iGSFileVersion = 4;
-		this->InternReadFile_3DGS_MDL345();
-	}
-	// GameStudio A5+ MDL5 format
-	else if (AI_MDL_MAGIC_NUMBER_BE_GS5b == iMagicWord ||
-			 AI_MDL_MAGIC_NUMBER_LE_GS5b == iMagicWord)
-	{
-		DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A5, magic word is MDL5");
-		this->iGSFileVersion = 5;
-		this->InternReadFile_3DGS_MDL345();
-	}
-	// GameStudio A6+ MDL6 format (not sure whether it is really existing ... )
-	else if (AI_MDL_MAGIC_NUMBER_BE_GS6 == iMagicWord ||
-			 AI_MDL_MAGIC_NUMBER_LE_GS6 == iMagicWord)
-	{
-		DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A6, magic word is MDL6");
-		this->iGSFileVersion = 6;
-		this->InternReadFile_3DGS_MDL345();
-	}
-	// GameStudio A7 MDL7 format
-	else if (AI_MDL_MAGIC_NUMBER_BE_GS7 == iMagicWord ||
-			 AI_MDL_MAGIC_NUMBER_LE_GS7 == iMagicWord)
-	{
-		DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A7, magic word is MDL7");
-		this->iGSFileVersion = 7;
-		this->InternReadFile_3DGS_MDL7();
-	}
-	// IDST/IDSQ Format (CS:S/HL�, etc ...)
-	else if (AI_MDL_MAGIC_NUMBER_BE_HL2a == iMagicWord ||
-			 AI_MDL_MAGIC_NUMBER_LE_HL2a == iMagicWord ||
-			 AI_MDL_MAGIC_NUMBER_BE_HL2b == iMagicWord ||
-			 AI_MDL_MAGIC_NUMBER_LE_HL2b == iMagicWord)
-	{
-		DefaultLogger::get()->debug("MDL subtype: CS:S\\HL�, magic word is IDST/IDSQ");
-		this->iGSFileVersion = 0;
-		this->InternReadFile_HL2();
-	}
-	else
-	{
-		// print the magic word to the logger
-		char szBuffer[5];
-		szBuffer[0] = ((char*)&iMagicWord)[0];
-		szBuffer[1] = ((char*)&iMagicWord)[1];
-		szBuffer[2] = ((char*)&iMagicWord)[2];
-		szBuffer[3] = ((char*)&iMagicWord)[3];
-		szBuffer[4] = '\0';
+		// Original Quake1 format
+		if (AI_MDL_MAGIC_NUMBER_BE == iMagicWord ||
+			AI_MDL_MAGIC_NUMBER_LE == iMagicWord)
+		{
+			DefaultLogger::get()->debug("MDL subtype: Quake 1, magic word is IDPO");
+			this->iGSFileVersion = 0;
+			this->InternReadFile_Quake1();
+		}
+		// GameStudio A<old> MDL2 format - used by some test models that come with 3DGS
+		else if (AI_MDL_MAGIC_NUMBER_BE_GS3 == iMagicWord ||
+			AI_MDL_MAGIC_NUMBER_LE_GS3 == iMagicWord)
+		{
+			DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A2, magic word is MDL2");
+			this->iGSFileVersion = 2;
+			this->InternReadFile_Quake1();
+		}
+		// GameStudio A4 MDL3 format
+		else if (AI_MDL_MAGIC_NUMBER_BE_GS4 == iMagicWord ||
+			AI_MDL_MAGIC_NUMBER_LE_GS4 == iMagicWord)
+		{
+			DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A4, magic word is MDL3");
+			this->iGSFileVersion = 3;
+			this->InternReadFile_3DGS_MDL345();
+		}
+		// GameStudio A5+ MDL4 format
+		else if (AI_MDL_MAGIC_NUMBER_BE_GS5a == iMagicWord ||
+			AI_MDL_MAGIC_NUMBER_LE_GS5a == iMagicWord)
+		{
+			DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A4, magic word is MDL4");
+			this->iGSFileVersion = 4;
+			this->InternReadFile_3DGS_MDL345();
+		}
+		// GameStudio A5+ MDL5 format
+		else if (AI_MDL_MAGIC_NUMBER_BE_GS5b == iMagicWord ||
+			AI_MDL_MAGIC_NUMBER_LE_GS5b == iMagicWord)
+		{
+			DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A5, magic word is MDL5");
+			this->iGSFileVersion = 5;
+			this->InternReadFile_3DGS_MDL345();
+		}
+		// GameStudio A6+ MDL6 format (not sure whether it is really existing ... )
+		else if (AI_MDL_MAGIC_NUMBER_BE_GS6 == iMagicWord ||
+			AI_MDL_MAGIC_NUMBER_LE_GS6 == iMagicWord)
+		{
+			DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A6, magic word is MDL6");
+			this->iGSFileVersion = 6;
+			this->InternReadFile_3DGS_MDL345();
+		}
+		// GameStudio A7 MDL7 format
+		else if (AI_MDL_MAGIC_NUMBER_BE_GS7 == iMagicWord ||
+			AI_MDL_MAGIC_NUMBER_LE_GS7 == iMagicWord)
+		{
+			DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A7, magic word is MDL7");
+			this->iGSFileVersion = 7;
+			this->InternReadFile_3DGS_MDL7();
+		}
+		// IDST/IDSQ Format (CS:S/HL�, etc ...)
+		else if (AI_MDL_MAGIC_NUMBER_BE_HL2a == iMagicWord ||
+			AI_MDL_MAGIC_NUMBER_LE_HL2a == iMagicWord ||
+			AI_MDL_MAGIC_NUMBER_BE_HL2b == iMagicWord ||
+			AI_MDL_MAGIC_NUMBER_LE_HL2b == iMagicWord)
+		{
+			DefaultLogger::get()->debug("MDL subtype: CS:S\\HL�, magic word is IDST/IDSQ");
+			this->iGSFileVersion = 0;
+			this->InternReadFile_HL2();
+		}
+		else
+		{
+			// print the magic word to the logger
+			char szBuffer[5];
+			szBuffer[0] = ((char*)&iMagicWord)[0];
+			szBuffer[1] = ((char*)&iMagicWord)[1];
+			szBuffer[2] = ((char*)&iMagicWord)[2];
+			szBuffer[3] = ((char*)&iMagicWord)[3];
+			szBuffer[4] = '\0';
 
-		// we're definitely unable to load this file
-		throw new ImportErrorException( "Unknown MDL subformat " + pFile +
-			". Magic word (" + szBuffer + ") is not known");
-	}
+			// we're definitely unable to load this file
+			throw new ImportErrorException( "Unknown MDL subformat " + pFile +
+				". Magic word (" + szBuffer + ") is not known");
+		}
 
-	} catch (ImportErrorException* ex) {
+	} 
+	catch (ImportErrorException* ex) {
 		delete[] this->mBuffer;
+		AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
+		AI_DEBUG_INVALIDATE_PTR(this->pIOHandler);
+		AI_DEBUG_INVALIDATE_PTR(this->pScene);
 		throw ex;
 	}
 
@@ -253,7 +253,6 @@ void MDLImporter::InternReadFile(
 	AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 	AI_DEBUG_INVALIDATE_PTR(this->pIOHandler);
 	AI_DEBUG_INVALIDATE_PTR(this->pScene);
-	return;
 }
 // ------------------------------------------------------------------------------------------------
 void MDLImporter::SizeCheck(const void* szPos)
@@ -279,12 +278,7 @@ void MDLImporter::SizeCheck(const void* szPos, const char* szFile, unsigned int 
 		if (szFilePtr)++szFilePtr;
 
 		char szBuffer[1024];
-#if _MSC_VER >= 1400
-		::sprintf_s(szBuffer,
-#else
-		::sprintf(szBuffer,
-#endif
-			"Invalid MDL file. The file is too small "
+		::sprintf(szBuffer,"Invalid MDL file. The file is too small "
 			"or contains invalid data (File: %s Line: %i)",szFilePtr,iLine);
 
 		throw new ImportErrorException(szBuffer);
@@ -295,56 +289,67 @@ void MDLImporter::ValidateHeader_Quake1(const MDL::Header* pcHeader)
 {
 	// some values may not be NULL
 	if (!pcHeader->num_frames)
-	{
 		throw new ImportErrorException( "[Quake 1 MDL] There are no frames in the file");
-	}
+
 	if (!pcHeader->num_verts)
-	{
 		throw new ImportErrorException( "[Quake 1 MDL] There are no vertices in the file");
-	}
+
 	if (!pcHeader->num_tris)
-	{
 		throw new ImportErrorException( "[Quake 1 MDL] There are no triangles in the file");
-	}
 
 	// check whether the maxima are exceeded ...however, this applies for Quake 1 MDLs only
 	if (!this->iGSFileVersion)
 	{
 		if (pcHeader->num_verts > AI_MDL_MAX_VERTS)
-		{
 			DefaultLogger::get()->warn("Quake 1 MDL model has more than AI_MDL_MAX_VERTS vertices");
-		}
+
 		if (pcHeader->num_tris > AI_MDL_MAX_TRIANGLES)
-		{
 			DefaultLogger::get()->warn("Quake 1 MDL model has more than AI_MDL_MAX_TRIANGLES triangles");
-		}
+
 		if (pcHeader->num_frames > AI_MDL_MAX_FRAMES)
-		{
 			DefaultLogger::get()->warn("Quake 1 MDL model has more than AI_MDL_MAX_FRAMES frames");
-		}
+
 		// (this does not apply for 3DGS MDLs)
 		if (!this->iGSFileVersion && pcHeader->version != AI_MDL_VERSION)
-		{
 			DefaultLogger::get()->warn("Quake 1 MDL model has an unknown version: AI_MDL_VERSION (=6) is "
 				"the expected file format version");
-		}
-
-		if (pcHeader->num_skins)
-		{
-			if(!pcHeader->skinwidth || !pcHeader->skinheight)
-			{
-				DefaultLogger::get()->warn("Skin width or height are 0. Division through "
-					"zero would occur ...");
-			}
-		}
+		if(pcHeader->num_skins && (!pcHeader->skinwidth || !pcHeader->skinheight))
+			DefaultLogger::get()->warn("Skin width or height are 0");
 	}
 }
+#ifdef AI_BUILD_BIG_ENDIAN
+// ------------------------------------------------------------------------------------------------
+void FlipQuakeHeader(BE_NCONST MDL::Header* pcHeader)
+{
+	ByteSwap::Swap4(& pcHeader->ident);
+	ByteSwap::Swap4(& pcHeader->version);
+	ByteSwap::Swap4(& pcHeader->boundingradius);
+	ByteSwap::Swap4(& pcHeader->flags);
+	ByteSwap::Swap4(& pcHeader->num_frames);
+	ByteSwap::Swap4(& pcHeader->num_skins);
+	ByteSwap::Swap4(& pcHeader->num_tris);
+	ByteSwap::Swap4(& pcHeader->num_verts);
+	for (unsigned int i = 0; i < 3;++i)
+	{
+		ByteSwap::Swap4(& pcHeader->scale[i]);
+		ByteSwap::Swap4(& pcHeader->translate[i]);
+	}
+	ByteSwap::Swap4(& pcHeader->size);
+	ByteSwap::Swap4(& pcHeader->skinheight);
+	ByteSwap::Swap4(& pcHeader->skin);
+}
+#endif
 // ------------------------------------------------------------------------------------------------
 void MDLImporter::InternReadFile_Quake1( )
 {
 	ai_assert(NULL != pScene);
 
-	const MDL::Header* pcHeader = (const MDL::Header*)this->mBuffer;
+	BE_NCONST MDL::Header* pcHeader = (BE_NCONST MDL::Header*)this->mBuffer;
+
+#ifdef AI_BUILD_BIG_ENDIAN
+	FlipQuakeHeader(pcHeader);
+#endif
+
 	ValidateHeader_Quake1(pcHeader);
 
 	// current cursor position in the file
@@ -353,13 +358,16 @@ void MDLImporter::InternReadFile_Quake1( )
 	// need to read all textures
 	for (unsigned int i = 0; i < (unsigned int)pcHeader->num_skins;++i)
 	{
-		union{const MDL::Skin* pcSkin;const MDL::GroupSkin* pcGroupSkin;};
-		pcSkin = (const MDL::Skin*)szCurrent;
+		union{BE_NCONST MDL::Skin* pcSkin;BE_NCONST MDL::GroupSkin* pcGroupSkin;};
+		pcSkin = (BE_NCONST MDL::Skin*)szCurrent;
 
+		AI_SWAP4( pcSkin->group );
 
 		// Quake 1 groupskins
 		if (1 == pcSkin->group)
 		{
+			AI_SWAP4( pcGroupSkin->nb );
+
 			// need to skip multiple images
 			const unsigned int iNumImages = (unsigned int)pcGroupSkin->nb;
 			szCurrent += sizeof(uint32_t) * 2;
@@ -413,6 +421,25 @@ void MDLImporter::InternReadFile_Quake1( )
 
 	VALIDATE_FILE_SIZE((const unsigned char*)(pcVertices + pcHeader->num_verts));
 
+#ifdef AI_BUILD_BIG_ENDIAN
+
+	for (unsigned int i = 0; i<pcHeader->num_verts;++i)
+	{
+		AI_SWAP4( pcTexCoords[i].onseam );
+		AI_SWAP4( pcTexCoords[i].s );
+		AI_SWAP4( pcTexCoords[i].t );
+	}
+
+	for (unsigned int i = 0; i<pcHeader->num_tris;++i)
+	{
+		AI_SWAP4( pcTriangles[i].facesfront);
+		AI_SWAP4( pcTriangles[i].vertex[0]);
+		AI_SWAP4( pcTriangles[i].vertex[1]);
+		AI_SWAP4( pcTriangles[i].vertex[2]);
+	}
+
+#endif
+
 	// setup materials
 	this->SetupMaterialProperties_3DGS_MDL5_Quake1();
 
@@ -453,7 +480,6 @@ void MDLImporter::InternReadFile_Quake1( )
 			if (iIndex >= (unsigned int)pcHeader->num_verts)
 			{
 				iIndex = pcHeader->num_verts-1;
-				
 				DefaultLogger::get()->warn("Index overflow in Q1-MDL vertex list.");
 			}
 
@@ -461,16 +487,16 @@ void MDLImporter::InternReadFile_Quake1( )
 			vec.x = (float)pcVertices[iIndex].v[0] * pcHeader->scale[0];
 			vec.x += pcHeader->translate[0];
 
-			// (flip z and y component)
-			vec.z = (float)pcVertices[iIndex].v[1] * pcHeader->scale[1];
-			vec.z += pcHeader->translate[1];
+			vec.y = (float)pcVertices[iIndex].v[1] * pcHeader->scale[1];
+			vec.y += pcHeader->translate[1];
+			vec.y *= -1.0f;
 
-			vec.y = (float)pcVertices[iIndex].v[2] * pcHeader->scale[2];
-			vec.y += pcHeader->translate[2];
+			vec.z = (float)pcVertices[iIndex].v[2] * pcHeader->scale[2];
+			vec.z += pcHeader->translate[2];
 
 			// read the normal vector from the precalculated normal table
 			MD2::LookupNormalIndex(pcVertices[iIndex].normalIndex,pcMesh->mNormals[iCurrent]);
-			std::swap ( pcMesh->mNormals[iCurrent].y,pcMesh->mNormals[iCurrent].z );
+			pcMesh->mNormals[iCurrent].y *= -1.0f;
 
 			// read texture coordinates
 			float s = (float)pcTexCoords[iIndex].s;
@@ -546,6 +572,9 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 
 	// the header of MDL 3/4/5 is nearly identical to the original Quake1 header
 	const MDL::Header* pcHeader = (const MDL::Header*)this->mBuffer;
+#ifdef AI_BUILD_BIG_ENDIAN
+	FlipQuakeHeader(pcHeader);
+#endif
 	this->ValidateHeader_Quake1(pcHeader);
 
 	// current cursor position in the file
@@ -584,6 +613,26 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 	const MDL::Triangle_MDL3* pcTriangles = (const MDL::Triangle_MDL3*)szCurrent;
 	szCurrent += sizeof(MDL::Triangle_MDL3) * pcHeader->num_tris;
 
+#ifdef AI_BUILD_BIG_ENDIAN
+
+	for (unsigned int i = 0; i<pcHeader->synctype;++i)
+	{
+		AI_SWAP2( pcTexCoords[i].u );
+		AI_SWAP2( pcTexCoords[i].v );
+	}
+
+	for (unsigned int i = 0; i<pcHeader->num_tris;++i)
+	{
+		AI_SWAP4( pcTriangles[i].index_xyz[0]);
+		AI_SWAP4( pcTriangles[i].index_xyz[1]);
+		AI_SWAP4( pcTriangles[i].index_xyz[2]);
+		AI_SWAP4( pcTriangles[i].index_uv[0]);
+		AI_SWAP4( pcTriangles[i].index_uv[1]);
+		AI_SWAP4( pcTriangles[i].index_uv[2]);
+	}
+
+#endif
+
 	VALIDATE_FILE_SIZE(szCurrent);
 
 	// setup materials
@@ -620,15 +669,15 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 	const MDL::Frame* pcFrames = (const MDL::Frame*)szCurrent;
 
 	// byte packed vertices
+	// BIG TODO: these two snippets are nearly totally identical ...
 	// ***********************************************************************
 	if (0 == pcFrames->type || 3 >= this->iGSFileVersion)
 	{
-		const MDL::SimpleFrame* pcFirstFrame = 
-			(const MDL::SimpleFrame*)(szCurrent + sizeof(uint32_t));
+		const MDL::SimpleFrame* pcFirstFrame = (const MDL::SimpleFrame*)(szCurrent + sizeof(uint32_t));
 
 		// get a pointer to the vertices
-		const MDL::Vertex* pcVertices = (const MDL::Vertex*) (
-			(pcFirstFrame->name) + sizeof(pcFirstFrame->name));
+		const MDL::Vertex* pcVertices = (const MDL::Vertex*) ((pcFirstFrame->name) 
+			+ sizeof(pcFirstFrame->name));
 
 		VALIDATE_FILE_SIZE(pcVertices + pcHeader->num_verts);
 
@@ -654,16 +703,16 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 				vec.x = (float)pcVertices[iIndex].v[0] * pcHeader->scale[0];
 				vec.x += pcHeader->translate[0];
 
-				// (flip z and y component)
-				vec.z = (float)pcVertices[iIndex].v[1] * pcHeader->scale[1];
-				vec.z += pcHeader->translate[1];
+				vec.y = (float)pcVertices[iIndex].v[1] * pcHeader->scale[1];
+				vec.y += pcHeader->translate[1];
+				vec.y *= -1.0f;
 
-				vec.y = (float)pcVertices[iIndex].v[2] * pcHeader->scale[2];
-				vec.y += pcHeader->translate[2];
+				vec.z = (float)pcVertices[iIndex].v[2] * pcHeader->scale[2];
+				vec.z += pcHeader->translate[2];
 
 				// read the normal vector from the precalculated normal table
 				MD2::LookupNormalIndex(pcVertices[iIndex].normalIndex,pcMesh->mNormals[iCurrent]);
-				std::swap ( pcMesh->mNormals[iCurrent].y,pcMesh->mNormals[iCurrent].z );
+				pcMesh->mNormals[iCurrent].y *= -1.0f;
 
 				// read texture coordinates
 				if (pcHeader->synctype)
@@ -684,12 +733,11 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 	else
 	{
 		// now get a pointer to the first frame in the file
-		const MDL::SimpleFrame_MDLn_SP* pcFirstFrame = 
-			(const MDL::SimpleFrame_MDLn_SP*) (szCurrent + sizeof(uint32_t));
+		const MDL::SimpleFrame_MDLn_SP* pcFirstFrame = (const MDL::SimpleFrame_MDLn_SP*) (szCurrent + sizeof(uint32_t));
 
 		// get a pointer to the vertices
-		const MDL::Vertex_MDL4* pcVertices = (const MDL::Vertex_MDL4*) 
-			((pcFirstFrame->name) + sizeof(pcFirstFrame->name));
+		const MDL::Vertex_MDL4* pcVertices = (const MDL::Vertex_MDL4*) ((pcFirstFrame->name) +
+			sizeof(pcFirstFrame->name));
 
 		VALIDATE_FILE_SIZE(pcVertices + pcHeader->num_verts);
 
@@ -715,16 +763,16 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 				vec.x = (float)pcVertices[iIndex].v[0] * pcHeader->scale[0];
 				vec.x += pcHeader->translate[0];
 
-				// (flip z and y component)
-				vec.z = (float)pcVertices[iIndex].v[1] * pcHeader->scale[1];
-				vec.z += pcHeader->translate[1];
+				vec.y = (float)pcVertices[iIndex].v[1] * pcHeader->scale[1];
+				vec.y += pcHeader->translate[1];
+				vec.y *= -1.0f;
 
-				vec.y = (float)pcVertices[iIndex].v[2] * pcHeader->scale[2];
-				vec.y += pcHeader->translate[2];
+				vec.z = (float)pcVertices[iIndex].v[2] * pcHeader->scale[2];
+				vec.z += pcHeader->translate[2];
 
 				// read the normal vector from the precalculated normal table
 				MD2::LookupNormalIndex(pcVertices[iIndex].normalIndex,pcMesh->mNormals[iCurrent]);
-				std::swap ( pcMesh->mNormals[iCurrent].y,pcMesh->mNormals[iCurrent].z );
+				pcMesh->mNormals[iCurrent].y *= -1.0f;
 
 				// read texture coordinates
 				if (pcHeader->synctype)
@@ -920,14 +968,9 @@ void MDLImporter::CalcAbsBoneMatrices_3DGS_MDL7(const MDL::Bone_MDL7* pcBones,
 
 				if (AI_MDL7_BONE_STRUCT_SIZE__NAME_IS_NOT_THERE == pcHeader->bone_stc_size)
 				{
-					// no real name for our poor bone :-(
-#					if (_MSC_VER >= 1400)
-						pcOutBone->mName.length = ::sprintf_s(pcOutBone->mName.data,
-							MAXLEN,"UnnamedBone_%i",iBone);
-#					else
-						pcOutBone->mName.length = ::sprintf(pcOutBone->mName.data,
-							"UnnamedBone_%i",iBone);
-#					endif
+					// no real name for our poor bone is specified :-(	
+					pcOutBone->mName.length = ::sprintf(pcOutBone->mName.data,
+						"UnnamedBone_%i",iBone);
 				}
 				else
 				{
@@ -1012,17 +1055,15 @@ void MDLImporter::ReadFaces_3DGS_MDL7(
 			// write the output face index
 			groupData.pcFaces[iTriangle].mIndices[2-c] = iOutIndex;
 
-			// swap z and y axis
 			aiVector3D& vPosition = groupData.vPositions[ iOutIndex ];
 			vPosition.x = _AI_MDL7_ACCESS_VERT(groupInfo.pcGroupVerts,iIndex,pcHeader->mainvertex_stc_size) .x;
-			vPosition.z = _AI_MDL7_ACCESS_VERT(groupInfo.pcGroupVerts,iIndex,pcHeader->mainvertex_stc_size) .y;
-			vPosition.y = _AI_MDL7_ACCESS_VERT(groupInfo.pcGroupVerts,iIndex,pcHeader->mainvertex_stc_size) .z;
+			vPosition.y = -1.0f*_AI_MDL7_ACCESS_VERT(groupInfo.pcGroupVerts,iIndex,pcHeader->mainvertex_stc_size) .y;
+			vPosition.z = _AI_MDL7_ACCESS_VERT(groupInfo.pcGroupVerts,iIndex,pcHeader->mainvertex_stc_size) .z;
 
 			// if we have bones, save the index
 			if (!groupData.aiBones.empty())
-			{
-				groupData.aiBones[iOutIndex] = _AI_MDL7_ACCESS_VERT(groupInfo.pcGroupVerts,iIndex,pcHeader->mainvertex_stc_size).vertindex;
-			}
+				groupData.aiBones[iOutIndex] = _AI_MDL7_ACCESS_VERT(groupInfo.pcGroupVerts,
+				iIndex,pcHeader->mainvertex_stc_size).vertindex;
 
 			// now read the normal vector
 			if (AI_MDL7_FRAMEVERTEX030305_STCSIZE <= pcHeader->mainvertex_stc_size)
@@ -1030,8 +1071,8 @@ void MDLImporter::ReadFaces_3DGS_MDL7(
 				// read the full normal vector
 				aiVector3D& vNormal = groupData.vNormals[ iOutIndex ];
 				vNormal.x = _AI_MDL7_ACCESS_VERT(groupInfo.pcGroupVerts,iIndex,pcHeader->mainvertex_stc_size) .norm[0];
-				vNormal.z = _AI_MDL7_ACCESS_VERT(groupInfo.pcGroupVerts,iIndex,pcHeader->mainvertex_stc_size) .norm[1];
-				vNormal.y = _AI_MDL7_ACCESS_VERT(groupInfo.pcGroupVerts,iIndex,pcHeader->mainvertex_stc_size) .norm[2];
+				vNormal.y = -1.0f*_AI_MDL7_ACCESS_VERT(groupInfo.pcGroupVerts,iIndex,pcHeader->mainvertex_stc_size) .norm[1];
+				vNormal.z = _AI_MDL7_ACCESS_VERT(groupInfo.pcGroupVerts,iIndex,pcHeader->mainvertex_stc_size) .norm[2];
 			}
 			else if (AI_MDL7_FRAMEVERTEX120503_STCSIZE <= pcHeader->mainvertex_stc_size)
 			{
@@ -1039,8 +1080,7 @@ void MDLImporter::ReadFaces_3DGS_MDL7(
 				aiVector3D& vNormal = groupData.vNormals[ iOutIndex ];
 				MD2::LookupNormalIndex(_AI_MDL7_ACCESS_VERT(groupInfo.pcGroupVerts,iIndex,
 					pcHeader->mainvertex_stc_size) .norm162index,vNormal);
-
-				std::swap(groupData.vNormals[iOutIndex].z,groupData.vNormals[iOutIndex].y);
+				vNormal.y *= -1.0f;
 			}
 			// validate and process the first uv coordinate set
 			// *************************************************************
@@ -1063,9 +1103,7 @@ void MDLImporter::ReadFaces_3DGS_MDL7(
 				}
 				// assign the material index, but only if it is existing
 				if (pcHeader->triangle_stc_size >= AI_MDL7_TRIANGLE_STD_SIZE_ONE_UV_WITH_MATINDEX)
-				{
 					groupData.pcFaces[iTriangle].iMatIndex[0] = pcGroupTris->skinsets[0].material;
-				}
 			}
 			// validate and process the second uv coordinate set
 			// *************************************************************
@@ -1090,14 +1128,11 @@ void MDLImporter::ReadFaces_3DGS_MDL7(
 					// coordinate set ... wastes memory and loading time
 					if (0 != iIndex && (u != groupData.vTextureCoords1[ iOutIndex ].x ||
 						v != groupData.vTextureCoords1[ iOutIndex ].y ) )
-					{
 						groupData.bNeed2UV = true;
-					}
+				
 					// if the material differs, we need a second skin, too
 					if (pcGroupTris->skinsets[ 1 ].material != pcGroupTris->skinsets[ 0 ].material)
-					{
 						groupData.bNeed2UV = true;
-					}
 				}
 				// assign the material index
 				groupData.pcFaces[ iTriangle ].iMatIndex[ 1 ] = pcGroupTris->skinsets[ 1 ].material;
@@ -1144,9 +1179,7 @@ bool MDLImporter::ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7& groupInf
 		// our output frame?
 		if (configFrameID == iFrame)
 		{
-			const MDL::Vertex_MDL7* pcFrameVertices = (const MDL::Vertex_MDL7*)
-				(szCurrent + pcHeader->framevertex_stc_size);
-
+			const MDL::Vertex_MDL7* pcFrameVertices = (const MDL::Vertex_MDL7*)(szCurrent+pcHeader->frame_stc_size);
 			for (unsigned int qq = 0; qq < frame.pcFrame->vertices_count;++qq)
 			{
 				// I assume this are simple replacements for normal
@@ -1157,37 +1190,33 @@ bool MDLImporter::ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7& groupInf
 
 				if (iIndex >= groupInfo.pcGroup->numverts)
 				{
-					DefaultLogger::get()->warn("Invalid vertex index in frame vertex section. "
-						"Skipping this frame vertex");
+					DefaultLogger::get()->warn("Invalid vertex index in frame vertex section");
 					continue;
 				}
 
 				aiVector3D vPosition,vNormal;
 					
 				vPosition.x = _AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,pcHeader->framevertex_stc_size) .x;
-				vPosition.z = _AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,pcHeader->framevertex_stc_size) .y;
-				vPosition.y = _AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,pcHeader->framevertex_stc_size) .z;
+				vPosition.y = -1.0f*_AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,pcHeader->framevertex_stc_size) .y;
+				vPosition.z = _AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,pcHeader->framevertex_stc_size) .z;
 
 				// now read the normal vector
 				if (AI_MDL7_FRAMEVERTEX030305_STCSIZE <= pcHeader->mainvertex_stc_size)
 				{
 					// read the full normal vector
 					vNormal.x = _AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,pcHeader->framevertex_stc_size) .norm[0];
-					vNormal.z = _AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,pcHeader->framevertex_stc_size) .norm[1];
-					vNormal.y = _AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,pcHeader->framevertex_stc_size) .norm[2];
+					vNormal.y = -1.0f* _AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,pcHeader->framevertex_stc_size) .norm[1];
+					vNormal.z = _AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,pcHeader->framevertex_stc_size) .norm[2];
 				}
 				else if (AI_MDL7_FRAMEVERTEX120503_STCSIZE <= pcHeader->mainvertex_stc_size)
 				{
 					// read the normal vector from Quake2's smart table
 					MD2::LookupNormalIndex(_AI_MDL7_ACCESS_VERT(pcFrameVertices,qq,
 						pcHeader->framevertex_stc_size) .norm162index,vNormal);
-
-					std::swap(vNormal.z,vNormal.y);
+					vNormal.y *= -1.0f;
 				}
 
 				// FIXME: O(n^2) at the moment ...
-				// shouldn't be too worse, frame vertices aren't required more
-				// than once a century ...
 				const MDL::Triangle_MDL7* pcGroupTris = groupInfo.pcGroupTris;
 				unsigned int iOutIndex = 0;
 				for (unsigned int iTriangle = 0; iTriangle < (unsigned int)groupInfo.pcGroup->numtris; ++iTriangle)
@@ -1204,16 +1233,13 @@ bool MDLImporter::ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7& groupInf
 						}
 					}
 					// get the next triangle in the list
-					pcGroupTris = (const MDL::Triangle_MDL7*)((const char*)pcGroupTris + 
-						pcHeader->triangle_stc_size);
+					pcGroupTris = (const MDL::Triangle_MDL7*)((const char*)
+						pcGroupTris + pcHeader->triangle_stc_size);
 				}
 			}
 		}
 		// parse bone trafo matrix keys (only if there are bones ...)
-		if (shared.apcOutBones)
-		{
-			this->ParseBoneTrafoKeys_3DGS_MDL7(groupInfo,frame,shared);
-		}
+		if (shared.apcOutBones)this->ParseBoneTrafoKeys_3DGS_MDL7(groupInfo,frame,shared);
 		szCurrent += iAdd;
 	}
 	*szCurrentOut = szCurrent;
@@ -1371,7 +1397,6 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 	// load all bones (they are shared by all groups, so
 	// we'll need to add them to all groups/meshes later)
 	// apcBonesOut is a list of all bones or NULL if they could not been loaded 
-	// TODO (aramis): Make apcBonesOut an MDL::IntBone_MDL7*
 	szCurrent += pcHeader->bones_num * pcHeader->bone_stc_size;
 	sharedData.apcOutBones = this->LoadBones_3DGS_MDL7();
 
@@ -1493,19 +1518,13 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 				if (!splittedGroupData.aiSplit[qq]->empty())
 					sharedData.abNeedMaterials[qq] = true;
 			}
-
-			// now generate output meshes
-			this->GenerateOutputMeshes_3DGS_MDL7(groupData,
-				splittedGroupData);
 		}
 		else DefaultLogger::get()->warn("[3DGS MDL7] Mesh group consists of 0 "
 			"vertices or faces. It will be skipped.");
 
-		// process all frames
-		if(!ProcessFrames_3DGS_MDL7(groupInfo,groupData, sharedData,szCurrent,&szCurrent))
-		{
-			break;
-		}
+		// process all frames and generate output meshes
+		this->ProcessFrames_3DGS_MDL7(groupInfo,groupData, sharedData,szCurrent,&szCurrent);
+		this->GenerateOutputMeshes_3DGS_MDL7(groupData,splittedGroupData);
 	}
 
 	// generate a nodegraph and subnodes for each group
@@ -1545,16 +1564,9 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 
 			// setup the name of the node
 			char* const szBuffer = &aszGroupNameBuffer[i*AI_MDL7_MAX_GROUPNAMESIZE];
-			if ('\0' == *szBuffer)
-			{
-#if _MSC_VER >= 1400
-				::sprintf_s(szBuffer,AI_MDL7_MAX_GROUPNAMESIZE,"Group_%i",p);
-#else
-				::sprintf(szBuffer,"Group_%i",p);
-#endif
-			}
+			if ('\0' == *szBuffer)pcNode->mName.length = ::sprintf(szBuffer,"Group_%i",p);
+			else pcNode->mName.length = ::strlen(szBuffer);
 			::strcpy(pcNode->mName.data,szBuffer);
-			pcNode->mName.length = ::strlen(szBuffer);
 			++p;
 		}
 	}
@@ -1566,10 +1578,9 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 		this->pScene->mRootNode = pcOldRoot->mChildren[0];
 		pcOldRoot->mChildren[0] = NULL;
 		delete pcOldRoot;
-
 		this->pScene->mRootNode->mParent = NULL;
 	}
-	else this->pScene->mRootNode->mName.Set("mesh_root");
+	else this->pScene->mRootNode->mName.Set("<mesh_root>");
 
 	delete[] avOutList;
 	delete[] aszGroupNameBuffer; 
@@ -1578,8 +1589,6 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 
 	// build a final material list. 
 	this->CopyMaterials_3DGS_MDL7(sharedData);
-
-	// handle materials that are just referencing another material correctly
 	this->HandleMaterialReferences_3DGS_MDL7();
 
 	// generate output bone animations and add all bones to the scenegraph
@@ -1590,7 +1599,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 		aiNode* const pc = this->pScene->mRootNode->mChildren[
 			this->pScene->mRootNode->mNumChildren-1] = new aiNode();
 
-		pc->mName.Set("skeleton_root");
+		pc->mName.Set("<skeleton_root>");
 
 		// add bones to the nodegraph
 		this->AddBonesToNodeGraph_3DGS_MDL7((const Assimp::MDL::IntBone_MDL7 **)
@@ -1604,64 +1613,15 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 // ------------------------------------------------------------------------------------------------
 void MDLImporter::CopyMaterials_3DGS_MDL7(MDL::IntSharedData_MDL7 &shared)
 {
-	unsigned int iNewNumMaterials = 0;
-	unsigned int p = 0;
-	for (;p < shared.pcMats.size();++p)
-		if (shared.abNeedMaterials[p])++iNewNumMaterials;
-
-	this->pScene->mMaterials = new aiMaterial*[iNewNumMaterials];
-	if ((unsigned int)shared.pcMats.size() == iNewNumMaterials)
-	{
-		this->pScene->mNumMaterials = (unsigned int)shared.pcMats.size();
-		for (unsigned int i = 0; i < this->pScene->mNumMaterials;++i)
-			this->pScene->mMaterials[i] = shared.pcMats[i];
-	}
-	else
-	{
-		p = 0;
-		const unsigned int iMSB = 0x1u << (sizeof (unsigned int)*8-1);
-		for (unsigned int i = 0; i < (unsigned int)shared.pcMats.size();++i)
-		{
-			if (!shared.abNeedMaterials[i])
-			{
-				// destruction is done by the destructor of sh
-				delete shared.pcMats[i];
-				AI_DEBUG_INVALIDATE_PTR(shared.pcMats[i]);
-				continue;
-			}
-			this->pScene->mMaterials[p] = shared.pcMats[i];
-
-			if (p != i)
-			{
-				// replace the material index and MSB in all material
-				// indices that have been replaced to make sure they won't be
-				// replaced again (this won't work if there are more than
-				// 2^31 materials in the model - but this shouldn't care :-)).
-				for (unsigned int qq = 0; qq < this->pScene->mNumMeshes;++qq)
-				{
-					aiMesh* const pcMesh = this->pScene->mMeshes[qq];
-					if (i == pcMesh->mMaterialIndex)
-					{
-						pcMesh->mMaterialIndex = p | iMSB;
-					}
-				}
-			}
-			++p;
-		}
-		this->pScene->mNumMaterials = iNewNumMaterials;
-
-		// Remove the MSB from all material indices
-		for (unsigned int qq = 0; qq < this->pScene->mNumMeshes;++qq)
-		{
-			this->pScene->mMeshes[qq]->mMaterialIndex &= ~iMSB;
-		}
-	}
+	this->pScene->mNumMaterials = (unsigned int)shared.pcMats.size();
+	this->pScene->mMaterials = new aiMaterial*[this->pScene->mNumMaterials];
+	for (unsigned int i = 0; i < this->pScene->mNumMaterials;++i)
+		this->pScene->mMaterials[i] = shared.pcMats[i];
 }
 // ------------------------------------------------------------------------------------------------
 void MDLImporter::HandleMaterialReferences_3DGS_MDL7()
 {
 	// search for referrer materials
-	// (there is no test file but Conitec's docs say it is supported ... :cry: )
 	for (unsigned int i = 0; i < this->pScene->mNumMaterials;++i)
 	{
 		int iIndex = 0;
@@ -1672,9 +1632,7 @@ void MDLImporter::HandleMaterialReferences_3DGS_MDL7()
 			{
 				aiMesh* const pcMesh = this->pScene->mMeshes[a];
 				if (i == pcMesh->mMaterialIndex)
-				{
 					pcMesh->mMaterialIndex = iIndex;
-				}
 			}
 			// collapse the rest of the array
 			delete this->pScene->mMaterials[i];
@@ -1731,8 +1689,7 @@ void MDLImporter::ParseBoneTrafoKeys_3DGS_MDL7(
 		else
 		{
 			DefaultLogger::get()->warn("Found animation keyframes "
-				"in a group that is not the first. They will be igored, "
-				"the format specification says this should not occur");
+				"in a group that is not the first. They will be igored");
 		}
 	}
 }
@@ -1802,7 +1759,7 @@ void MDLImporter::BuildOutputAnims_3DGS_MDL7(
 				aiBoneAnim* const pcBoneAnim = pcAnim->mBones[iCnt++] = new aiBoneAnim();
 				pcBoneAnim->mBoneName = aiString( intBone->mName );
 
-				// allocate enough storahe for all keys
+				// allocate enough storage for all keys
 				pcBoneAnim->mNumPositionKeys = (unsigned int)intBone->pkeyPositions.size();
 				pcBoneAnim->mNumScalingKeys  = (unsigned int)intBone->pkeyPositions.size();
 				pcBoneAnim->mNumRotationKeys = (unsigned int)intBone->pkeyPositions.size();

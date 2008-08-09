@@ -88,6 +88,10 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 		unsigned int* aiMappingTable = new unsigned int[pScene->mNumMaterials];
 		unsigned int iNewNum = 0;
 
+		std::vector<bool> abReferenced(pScene->mNumMaterials,false);
+		for (unsigned int i = 0;i < pScene->mNumMeshes;++i)
+			abReferenced[pScene->mMeshes[i]->mMaterialIndex] = true;
+
 		// iterate through all materials and calculate a hash for them
 		// store all hashes in a list and so a quick search whether
 		// we do already have a specific hash. This allows us to
@@ -96,6 +100,9 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 		aiHashes = new uint32_t[pScene->mNumMaterials];
 		for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
 		{
+			// if the material is not referenced ... remove it
+			if (!abReferenced[i])continue;
+
 			uint32_t me = aiHashes[i] = ((MaterialHelper*)pScene->mMaterials[i])->ComputeHash();
 			for (unsigned int a = 0; a < i;++a)
 			{
@@ -120,6 +127,9 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 			::memset(ppcMaterials,0,sizeof(void*)*iNewNum); 
 			for (unsigned int p = 0; p < pScene->mNumMaterials;++p)
 			{
+				// if the material is not referenced ... remove it
+				if (!abReferenced[p])continue;
+
 				// generate new names for all modified materials
 				const unsigned int idx = aiMappingTable[p]; 
 				if (ppcMaterials[idx]) 

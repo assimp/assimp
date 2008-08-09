@@ -109,14 +109,11 @@ void ASEImporter::InternReadFile(
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
-	{
 		throw new ImportErrorException( "Failed to open ASE file " + pFile + ".");
-	}
 
 	size_t fileSize = file->FileSize();
 	std::string::size_type pos = pFile.find_last_of('.');
 	std::string extension = pFile.substr( pos);
-	this->mIsAsk = (extension[3] == 'k' || extension[3] == 'K');
 
 	// allocate storage and copy the contents of the file to a memory buffer
 	// (terminate it with zero)
@@ -144,11 +141,7 @@ void ASEImporter::InternReadFile(
 		{
 			if ((*i).bSkip)continue;
 
-			// transform all vertices into worldspace
-			// world2obj transform is specified in the
-			// transformation matrix of a scenegraph node
 			this->TransformVertices(*i);
-
 			// now we need to create proper meshes from the import we need to 
 			// split them by materials, build valid vertex/face lists ...
 			this->BuildUniqueRepresentation(*i);
@@ -215,7 +208,7 @@ void ASEImporter::GenerateDefaultMaterial()
 		this->mParser->m_vMaterials.push_back ( ASE::Material() );
 		ASE::Material& mat = this->mParser->m_vMaterials.back();
 
-	mat.mDiffuse = aiColor3D(0.6f,0.6f,0.6f);
+		mat.mDiffuse = aiColor3D(0.6f,0.6f,0.6f);
 		mat.mSpecular = aiColor3D(1.0f,1.0f,1.0f);
 		mat.mAmbient = aiColor3D(0.05f,0.05f,0.05f);
 		mat.mShading = Dot3DSFile::Gouraud;
@@ -449,21 +442,6 @@ void ASEImporter::BuildNodes()
 			std::string* szMyName = (std::string*)pcScene->mMeshes[*i]->mColors[1];
 			if (!szMyName)continue;
 
-#if 0 // moved to the scope above
-			for (std::vector<unsigned int>::iterator
-				a =  i+1;
-				a != aiList.end();++a)
-			{
-				std::string* szMyName2 = (std::string*)pcScene->mMeshes[*i]->mColors[1];
-				if (!szMyName)continue;
-				if (0 == ASSIMP_stricmp(szMyName2->c_str(),szMyName->c_str()))
-				{
-					a = aiList.erase(a);
-					if (a == aiList.end())break;
-				}
-			}
-#endif
-
 			DefaultLogger::get()->info("Generating dummy node: " + szMyName[1] + ". "
 				"This node is not defined in the ASE file, but referenced as "
 				"parent node.");
@@ -604,19 +582,6 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 
 	for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS;++c)
 		mesh.amTexCoords[c] = amTexCoords[c];
-
-	// now need to transform all vertices with the inverse of their
-	// transformation matrix ...
-	//aiMatrix4x4 mInverse = mesh.mTransform;
-	//mInverse.Inverse();
-
-	//for (std::vector<aiVector3D>::iterator
-	//	i =  mesh.mPositions.begin();
-	//	i != mesh.mPositions.end();++i)
-	//{
-	//	(*i) = mInverse * (*i);
-	//}
-
 	return;
 }
 // ------------------------------------------------------------------------------------------------
@@ -1066,7 +1031,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 					pc->mName.Set(mesh.mBones[jfkennedy].mName);
 					pc->mNumWeights = (unsigned int)avBonesOut[jfkennedy].size();
 					pc->mWeights = new aiVertexWeight[pc->mNumWeights];
-					memcpy(pc->mWeights,&avBonesOut[jfkennedy][0],
+					::memcpy(pc->mWeights,&avBonesOut[jfkennedy][0],
 						sizeof(aiVertexWeight) * pc->mNumWeights);
 					++pcBone;
 				}
@@ -1246,9 +1211,8 @@ void ASEImporter::GenerateNormals(ASE::Mesh& mesh)
 			aiVector3D pDelta2 = *pV3 - *pV1;
 			aiVector3D vNor = pDelta1 ^ pDelta2;
 
-			mesh.mNormals[face.mIndices[0]] = vNor;
-			mesh.mNormals[face.mIndices[1]] = vNor;
-			mesh.mNormals[face.mIndices[2]] = vNor;
+			for (unsigned int i = 0; i < 3;++i)
+				mesh.mNormals[face.mIndices[i]] = vNor;
 		}
 
 		// calculate the position bounds so we have a reliable epsilon to 
@@ -1287,15 +1251,13 @@ void ASEImporter::GenerateNormals(ASE::Mesh& mesh)
 					posEpsilon,poResult);
 
 				aiVector3D vNormals;
-				float fDiv = 0.0f;
 				for (std::vector<unsigned int>::const_iterator
 					a =  poResult.begin();
 					a != poResult.end();++a)
 				{
 					vNormals += mesh.mNormals[(*a)];
-					fDiv += 1.0f;
 				}
-				vNormals /= fDiv;
+				vNormals.Normalize();
 				avNormals[(*i).mIndices[c]] = vNormals;
 				poResult.clear();
 			}

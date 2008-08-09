@@ -38,21 +38,22 @@ IDI_SMALL               ICON                    "small.ico"
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOGEX 22, 17, 283, 170
+IDD_ABOUTBOX DIALOGEX 22, 17, 283, 169
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_CAPTION | WS_SYSMENU
-CAPTION "About ASSIMP"
+CAPTION "About Open Asset Import Library"
 FONT 10, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
-    LTEXT           "ASSIMP is the free, OpenSource ASSet IMPort Library",IDC_STATIC,42,12,204,12
-    LTEXT           "Developed by members of the german game development community www.zfx.info",IDC_STATIC,42,30,204,24
-    LTEXT           "Thomas Schulze \t\taka <Schrompf> ",IDC_STATIC,42,66,192,8
-    LTEXT           "Kim Kulling \t\t\taka <Sir Kimmi> ",IDC_STATIC,42,78,186,8
-    LTEXT           "Rainer Schmidt \t\t\taka <Guru>",IDC_STATIC,42,90,180,8
-    LTEXT           "Alexander Gessler\t\taka <Aramis>",IDC_STATIC,42,102,186,8
+    LTEXT           "Open Asset Import Library (Assimp)",IDC_STATIC,77,13,121,12
+    LTEXT           "A free C/C++ library for game && graphics developers. Developed by members of the german game development community www.zfx.info",IDC_STATIC,47,26,204,24
+    LTEXT           "Thomas Schulze \t\taka <Schrompf> ",IDC_STATIC,55,80,192,8
+    LTEXT           "Kim Kulling \t\t\taka <Kimmi> ",IDC_STATIC,55,92,186,8
+    LTEXT           "Rainer Schmidt \t\t\taka <Guru>",IDC_STATIC,55,104,180,8
+    LTEXT           "Alexander Gessler\t\taka <Aramis>",IDC_STATIC,55,68,186,8
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,60,282,1
-    LTEXT           "http://zfxce.svn.sourceforge.net/viewvc/zfxce/trunk/ASSIMP",IDC_STATIC,42,120,198,8
-    DEFPUSHBUTTON   "Love this library",IDOK,199,148,67,14
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,138,281,1
+    LTEXT           "assimp.sourceforge.net",IDC_STATIC,7,137,78,8
+    DEFPUSHBUTTON   "Love this library",IDOK,200,128,67,14
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,148,283,1
+    CONTROL         130,IDC_STATIC,"Static",SS_BITMAP,0,149,514,20
 END
 
 IDD_DIALOGMAIN DIALOGEX 0, 0, 594, 384
@@ -233,6 +234,7 @@ GUIDELINES DESIGNINFO
 BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
+        TOPMARGIN, 1
         BOTTOMMARGIN, 158
     END
 

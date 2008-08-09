@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiPostProcess.h"
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
+#include "../include/assimp.hpp"
 
 using namespace Assimp;
 
@@ -70,7 +71,15 @@ bool GenVertexNormalsProcess::IsActive( unsigned int pFlags) const
 {
 	return (pFlags & aiProcess_GenSmoothNormals) != 0;
 }
-
+// ------------------------------------------------------------------------------------------------
+// Executes the post processing step on the given imported data.
+void GenVertexNormalsProcess::SetupProperties(const Importer* pImp)
+{
+	// get the current value of the property
+	this->configMaxAngle = pImp->GetProperty(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE,180000) / 1000.0f;
+	this->configMaxAngle = std::max(std::min(this->configMaxAngle,180.0f),0.0f);
+	this->configMaxAngle *= 0.0174532925f;
+}
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void GenVertexNormalsProcess::Execute( aiScene* pScene)
@@ -111,14 +120,10 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
 		aiVector3D pDelta1 = *pV2 - *pV1;
 		aiVector3D pDelta2 = *pV3 - *pV1;
 		aiVector3D vNor = pDelta1 ^ pDelta2;
-
-		/*if (face.mIndices[1] > face.mIndices[2])
-			vNor *= -1.0f;*/
+		vNor.Normalize();
 
 		for (unsigned int i = 0;i < face.mNumIndices;++i)
-		{
 			pMesh->mNormals[face.mIndices[i]] = vNor;
-		}
 	}
 
 	// calculate the position bounds so we have a reliable epsilon to 
@@ -135,9 +140,13 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
 	}
 
 	const float posEpsilon = (maxVec - minVec).Length() * 1e-5f;
+
 	// set up a SpatialSort to quickly find all vertices close to a given position
 	SpatialSort vertexFinder( pMesh->mVertices, pMesh->mNumVertices, sizeof( aiVector3D));
 	std::vector<unsigned int> verticesFound;
+
+	const float fLimit = (AI_MESH_SMOOTHING_ANGLE_NOT_SET == pMesh->mMaxSmoothingAngle
+		? this->configMaxAngle : pMesh->mMaxSmoothingAngle);
 
 	aiVector3D* pcNew = new aiVector3D[pMesh->mNumVertices];
 	for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
@@ -148,12 +157,19 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
 		vertexFinder.FindPositions( posThis, posEpsilon, verticesFound);
 
 		aiVector3D pcNor; 
+		unsigned int div = 0;
 		for (unsigned int a = 0; a < verticesFound.size(); ++a)
 		{
 			unsigned int vidx = verticesFound[a];
+
+			// check whether the angle between the two normals is not too large
+			if (acosf(pMesh->mNormals[vidx] * pMesh->mNormals[i]) > fLimit)
+				continue;
+
 			pcNor += pMesh->mNormals[vidx];
+			++div;
 		}
-		pcNor /= (float) verticesFound.size();
+		pcNor.Normalize();
 		pcNew[i] = pcNor;
 	}
 	delete[] pMesh->mNormals;

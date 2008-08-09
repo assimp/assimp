@@ -248,6 +248,8 @@ struct aiBone
 
 #endif // !! AI_MAX_NUMBER_OF_TEXTURECOORDS
 
+#define AI_MESH_SMOOTHING_ANGLE_NOT_SET (10e10f)
+
 // ---------------------------------------------------------------------------
 /** A mesh represents a geometry or model with a single material. 
 *
@@ -358,8 +360,9 @@ struct aiMesh
 	 *  If the angle between two vertex normals is larger,
 	 *  the vertex normals should not be smoothed. The GenVertexNormals-Step
 	 *  takes care of this value. The angle is specified in radians.
-	 *  It is 2PI if the source file didn't contain any additional 
-	 *  information related to the calculation of vertex normals.
+	 *  It is set to AI_MESH_SMOOTHING_ANGLE_NOT_SET if the source file didn't
+	 *  contain any additional information related to the calculation of
+	 *  vertex normals.
 	 */
 	float mMaxSmoothingAngle;
 
@@ -381,7 +384,7 @@ struct aiMesh
 			mColors[a] = NULL;
 		mNumBones = 0; mBones = NULL;
 		mMaterialIndex = 0;
-		mMaxSmoothingAngle = (float)AI_MATH_TWO_PI;
+		mMaxSmoothingAngle = AI_MESH_SMOOTHING_ANGLE_NOT_SET;
 	}
 
 	//! Deletes all storage allocated for the mesh

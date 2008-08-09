@@ -83,10 +83,11 @@ protected:
 
 public:
 	// -------------------------------------------------------------------
-	/** Returns whether the processing step is present in the given flag field.
-	* @param pFlags The processing flags the importer was called with. A bitwise
-	*   combination of #aiPostProcessSteps.
-	* @return true if the process is present in this flag fields, false if not.
+	/** Returns whether the processing step is present in the given flag.
+	* @param pFlags The processing flags the importer was called with. 
+	*   A bitwise combination of #aiPostProcessSteps.
+	* @return true if the process is present in this flag fields, 
+	*   false if not.
 	*/
 	bool IsActive( unsigned int pFlags) const;
 
@@ -95,7 +96,7 @@ public:
 	* The function is a request to the process to update its configuration
 	* basing on the Importer's configuration property list.
 	*/
-	virtual void SetupProperties(const Importer* pImp);
+	void SetupProperties(const Importer* pImp);
 
 protected:
 

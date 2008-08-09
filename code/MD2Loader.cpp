@@ -169,7 +169,7 @@ void MD2Importer::ValidateHeader( )
 	if (this->m_pcHeader->numVertices > AI_MD2_MAX_VERTS)
 		DefaultLogger::get()->warn("The model contains more vertices than Quake 2 supports");
 
-	if (this->m_pcHeader->numFrames >= this->configFrameID )
+	if (this->m_pcHeader->numFrames <= this->configFrameID )
 		throw new ImportErrorException("The requested frame is not existing the file");
 
 }

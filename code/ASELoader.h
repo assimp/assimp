@@ -114,8 +114,6 @@ protected:
 	 * \param mesh Mesh to work on
 	 */
 	void TransformVertices(ASE::Mesh& mesh);
-
-	// -------------------------------------------------------------------
 	/** Create one-material-per-mesh meshes ;-)
 	 * \param mesh Mesh to work with
 	 *  \param Receives the list of all created meshes
@@ -167,9 +165,6 @@ protected:
 
 	/** Buffer to hold the loaded file */
 	unsigned char* mBuffer;
-
-	/** true if this is an .ask file */
-	bool mIsAsk;
 
 	/** Scene to be filled */
 	aiScene* pcScene;

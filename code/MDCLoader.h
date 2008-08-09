@@ -38,36 +38,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Definition of the .MD3 importer class. */
-#ifndef AI_MD3LOADER_H_INCLUDED
-#define AI_MD3LOADER_H_INCLUDED
-
-#include "BaseImporter.h"
-#include "ByteSwap.h"
+/** @file Definition of the MDC importer class. */
+#ifndef AI_MDCLOADER_H_INCLUDED
+#define AI_MDCLOADER_H_INCLUDED
 
 #include "../include/aiTypes.h"
 
-struct aiNode;
+#include "BaseImporter.h"
+#include "MDCFileData.h"
+#include "ByteSwap.h"
 
-#include "MD3FileData.h"
-namespace Assimp	{
-class MaterialHelper;
-
-using namespace MD3;
+namespace Assimp
+{
+using namespace MDC;
 
 // ---------------------------------------------------------------------------
-/** Used to load MD3 files
+/** Used to load MDC files
 */
-class MD3Importer : public BaseImporter
+class MDCImporter : public BaseImporter
 {
 	friend class Importer;
 
 protected:
 	/** Constructor to be privately used by Importer */
-	MD3Importer();
+	MDCImporter();
 
 	/** Destructor, private as well */
-	~MD3Importer();
+	~MDCImporter();
 
 public:
 
@@ -75,7 +72,6 @@ public:
 	/** Returns whether the class can handle the format of the given file. 
 	* See BaseImporter::CanRead() for details.	*/
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
-
 
 	// -------------------------------------------------------------------
 	/** Called prior to ReadFile().
@@ -92,37 +88,44 @@ protected:
 	 */
 	void GetExtensionList(std::string& append)
 	{
-		append.append("*.md3");
+		append.append("*.mdc");
 	}
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 
 	* See BaseImporter::InternReadFile() for details
 	*/
-	void InternReadFile( const std::string& pFile, aiScene* pScene, 
+	void InternReadFile( const std::string& pFile, aiScene* pScene,
 		IOSystem* pIOHandler);
+
+protected:
 
 
 	// -------------------------------------------------------------------
-	/** Validate offsets in the header
+	/** Validate the header of the file
 	*/
-	void ValidateHeaderOffsets();
-	void ValidateSurfaceHeaderOffsets(const MD3::Surface* pcSurfHeader);
+	void ValidateHeader();
+
+	// -------------------------------------------------------------------
+	/** Validate the header of a MDC surface
+	*/
+	void ValidateSurfaceHeader(BE_NCONST MDC::Surface* pcSurf);
 
 protected:
+
 
 	/** Configuration option: frame to be loaded */
 	unsigned int configFrameID;
 
-	/** Header of the MD3 file */
-	BE_NCONST MD3::Header* pcHeader;
+	/** Header of the MDC file */
+	BE_NCONST MDC::Header* pcHeader;
 
-	/** File buffer  */
-	BE_NCONST unsigned char* mBuffer;
+	/** Buffer to hold the loaded file */
+	unsigned char* mBuffer;
 
-	/** Size of the file, in bytes */
+	/** size of the file, in bytes */
 	unsigned int fileSize;
-	};
+};
 
 } // end of namespace Assimp
 

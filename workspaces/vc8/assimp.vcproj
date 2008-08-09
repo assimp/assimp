@@ -583,6 +583,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\aiConfig.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\aiDefines.h"
 				>
 			</File>
@@ -672,6 +676,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\LogStream.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\NullLogger.h"
 				>
 			</File>
 			<Filter
@@ -966,10 +974,6 @@
 				Name="Logger"
 				>
 				<File
-					RelativePath="..\..\code\DefaultLogger.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\code\FileLogStream.h"
 					>
 				</File>
@@ -1027,6 +1031,30 @@
 				</File>
 				<File
 					RelativePath="..\..\code\LWOLoader.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="MDC"
+				>
+				<File
+					RelativePath="..\..\code\MDCFileData.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\MDCLoader.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\MDCNormalTable.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="MDR"
+				>
+				<File
+					RelativePath="..\..\code\MDRFileData.h"
 					>
 				</File>
 			</Filter>
@@ -1299,6 +1327,14 @@
 				>
 				<File
 					RelativePath="..\..\code\LWOLoader.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="MDC"
+				>
+				<File
+					RelativePath="..\..\code\MDCLoader.cpp"
 					>
 				</File>
 			</Filter>

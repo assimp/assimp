@@ -107,10 +107,23 @@ protected:
 	*/
 	void LoadLWOBSurface(unsigned int size);
 
+	// -------------------------------------------------------------------
+	/** Loads the LWO tag list from the file
+	*/
+	void LoadLWOTags(unsigned int size);
 
-	typedef std::vector<aiVector3D> PointList;
-	typedef std::vector<LWO::Face> FaceList;
-	typedef std::vector<LWO::Surface> SurfaceList;
+	// -------------------------------------------------------------------
+	/** Resolve the tag and surface lists that have been loaded.
+	* Generates the mMapping table.
+	*/
+	void ResolveTags();
+
+
+	typedef std::vector<aiVector3D>		PointList;
+	typedef std::vector<LWO::Face>		FaceList;
+	typedef std::vector<LWO::Surface>	SurfaceList;
+	typedef std::vector<std::string>	TagList;
+	typedef std::vector<unsigned int>	TagMappingTable;
 
 private:
 
@@ -131,16 +144,33 @@ private:
 		const uint8_t* const end, 
 		unsigned int max = 0xffffffff);
 
+	// -------------------------------------------------------------------
+	/** Parse a string from the current file position
+	*/
+	void ParseString(std::string& out,unsigned int max);
+
+	// -------------------------------------------------------------------
+	/** Adjust a texture path
+	*/
+	void AdjustTexturePath(std::string& out);
+
 protected:
 
 	/** Temporary point list from the file */
-	PointList mTempPoints;
+	PointList* mTempPoints;
 
 	/** Temporary face list from the file*/
-	FaceList mFaces;
+	FaceList* mFaces;
+
+	/** Temporary tag list from the file */
+	TagList* mTags;
+
+	/** Mapping table to convert from tag to surface indices.
+	    0xffffffff indicates that a no corresponding surface is available */
+	TagMappingTable* mMapping;
 
 	/** Temporary surface list from the file */
-	SurfaceList mSurfaces;
+	SurfaceList* mSurfaces;
 
 	/** file buffer */
 	LE_NCONST uint8_t* mFileBuffer;

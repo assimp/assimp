@@ -93,8 +93,8 @@ bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	if (extension[2] != 's' && extension[2] != 'S')return false;
 
 	// NOTE: Sometimes the extension .ASK is also used
-	// however, often it only contains static animation skeletons
-	// without real animations.
+	// however, it often contains static animation skeletons
+	// only (without real animations).
 	if (extension[3] != 'e' && extension[3] != 'E' &&
 		extension[3] != 'k' && extension[3] != 'K')return false;
 
@@ -112,77 +112,70 @@ void ASEImporter::InternReadFile(
 		throw new ImportErrorException( "Failed to open ASE file " + pFile + ".");
 
 	size_t fileSize = file->FileSize();
+
 	std::string::size_type pos = pFile.find_last_of('.');
 	std::string extension = pFile.substr( pos);
 
 	// allocate storage and copy the contents of the file to a memory buffer
 	// (terminate it with zero)
-	this->mBuffer = new unsigned char[fileSize+1];
+	std::vector<char> mBuffer2(fileSize+1);
+	file->Read( &mBuffer2[0], 1, fileSize);
+	mBuffer2[fileSize] = '\0';
+
+	this->mBuffer = &mBuffer2[0];
 	this->pcScene = pScene;
-	file->Read( (void*)mBuffer, 1, fileSize);
-	this->mBuffer[fileSize] = '\0';
 
 	// construct an ASE parser and parse the file
-	this->mParser = new ASE::Parser((const char*)this->mBuffer);
-	try
+	// TODO: clean this up, mParser should be a reference, not a pointer ...
+	ASE::Parser parser(this->mBuffer);
+	this->mParser = &parser;
+	this->mParser->Parse();
+
+	// if absolutely no material has been loaded from the file
+	// we need to generate a default material
+	this->GenerateDefaultMaterial();
+
+	// process all meshes
+	std::vector<aiMesh*> avOutMeshes;
+	avOutMeshes.reserve(this->mParser->m_vMeshes.size()*2);
+	for (std::vector<ASE::Mesh>::iterator
+		i =  this->mParser->m_vMeshes.begin();
+		i != this->mParser->m_vMeshes.end();++i)
 	{
-		this->mParser->Parse();
+		if ((*i).bSkip)continue;
 
-		// if absolutely no material has been loaded from the file
-		// we need to generate a default material
-		this->GenerateDefaultMaterial();
+		this->TransformVertices(*i);
+		// now we need to create proper meshes from the import we need to 
+		// split them by materials, build valid vertex/face lists ...
+		this->BuildUniqueRepresentation(*i);
 
-		// process all meshes
-		std::vector<aiMesh*> avOutMeshes;
-		avOutMeshes.reserve(this->mParser->m_vMeshes.size()*2);
-		for (std::vector<ASE::Mesh>::iterator
-			i =  this->mParser->m_vMeshes.begin();
-			i != this->mParser->m_vMeshes.end();++i)
-		{
-			if ((*i).bSkip)continue;
+		// need to generate proper vertex normals if necessary
+		this->GenerateNormals(*i);
 
-			this->TransformVertices(*i);
-			// now we need to create proper meshes from the import we need to 
-			// split them by materials, build valid vertex/face lists ...
-			this->BuildUniqueRepresentation(*i);
-
-			// need to generate proper vertex normals if necessary
-			this->GenerateNormals(*i);
-
-			// convert all meshes to aiMesh objects
-			this->ConvertMeshes(*i,avOutMeshes);
-		}
-
-		// now build the output mesh list. remove dummies
-		pScene->mNumMeshes = (unsigned int)avOutMeshes.size();
-		aiMesh** pp = pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
-		for (std::vector<aiMesh*>::const_iterator
-			i =  avOutMeshes.begin();
-			i != avOutMeshes.end();++i)
-		{
-			if (!(*i)->mNumFaces)continue;
-			*pp++ = *i;
-		}
-		pScene->mNumMeshes = (unsigned int)(pp - pScene->mMeshes);
-
-		// buil final material indices (remove submaterials and make the final list)
-		this->BuildMaterialIndices();
-
-		// build the final node graph
-		this->BuildNodes();
-
-		// build output animations
-		this->BuildAnimations();
-
+		// convert all meshes to aiMesh objects
+		this->ConvertMeshes(*i,avOutMeshes);
 	}
-	catch (ImportErrorException* ex)
+
+	// now build the output mesh list. remove dummies
+	pScene->mNumMeshes = (unsigned int)avOutMeshes.size();
+	aiMesh** pp = pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
+	for (std::vector<aiMesh*>::const_iterator
+		i =  avOutMeshes.begin();
+		i != avOutMeshes.end();++i)
 	{
-		delete this->mParser; AI_DEBUG_INVALIDATE_PTR( this->mParser );
-		delete[] this->mBuffer; AI_DEBUG_INVALIDATE_PTR( this->mBuffer );
-		throw ex;
+		if (!(*i)->mNumFaces)continue;
+		*pp++ = *i;
 	}
-	delete this->mParser; AI_DEBUG_INVALIDATE_PTR( this->mParser );
-	delete[] this->mBuffer; AI_DEBUG_INVALIDATE_PTR( this->mBuffer );
+	pScene->mNumMeshes = (unsigned int)(pp - pScene->mMeshes);
+
+	// buil final material indices (remove submaterials and make the final list)
+	this->BuildMaterialIndices();
+
+	// build the final node graph
+	this->BuildNodes();
+
+	// build output animations
+	this->BuildAnimations();
 	return;
 }
 // ------------------------------------------------------------------------------------------------

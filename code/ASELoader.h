@@ -164,7 +164,7 @@ protected:
 	ASE::Parser* mParser;
 
 	/** Buffer to hold the loaded file */
-	unsigned char* mBuffer;
+	char* mBuffer;
 
 	/** Scene to be filled */
 	aiScene* pcScene;

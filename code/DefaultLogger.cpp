@@ -80,8 +80,9 @@ struct LogStreamInfo
 //	Creates the only singleton instance
 Logger *DefaultLogger::create(const std::string &name, LogSeverity severity)
 {
-	if ( NULL == m_pLogger )
-		m_pLogger = new DefaultLogger( name, severity );
+	if (m_pLogger && !isNullLogger() )
+		delete m_pLogger;
+	m_pLogger = new DefaultLogger( name, severity );
 	
 	return m_pLogger;
 }
@@ -111,7 +112,7 @@ Logger *DefaultLogger::get()
 //	Kills the only instance
 void DefaultLogger::kill()
 {
-	ai_assert (NULL != m_pLogger);
+	if (m_pLogger != &s_pNullLogger)return;
 	delete m_pLogger;
 	m_pLogger = &s_pNullLogger;
 }
@@ -123,7 +124,7 @@ void DefaultLogger::debug( const std::string &message )
 	if ( m_Severity == Logger::NORMAL )
 		return;
 
-	const std::string msg( "Debug, thread " + getThreadID() + " :" + message );
+	const std::string msg( "Debug, T" + getThreadID() + ": " + message );
 	writeToStreams( msg, Logger::DEBUGGING );
 }
 
@@ -131,7 +132,7 @@ void DefaultLogger::debug( const std::string &message )
 //	Logs an info
 void DefaultLogger::info( const std::string &message )
 {
-	const std::string msg( "Info: " + getThreadID() + " :" + message );
+	const std::string msg( "Info,  T" + getThreadID() + ": " + message );
 	writeToStreams( msg , Logger::INFO );
 }
 
@@ -139,7 +140,7 @@ void DefaultLogger::info( const std::string &message )
 //	Logs a warning
 void DefaultLogger::warn( const std::string &message )
 {
-	const std::string msg( "Warn:  " + getThreadID() + " :"+ message );
+	const std::string msg( "Warn,  T" + getThreadID() + ": "+ message );
 	writeToStreams( msg, Logger::WARN );
 }
 
@@ -147,7 +148,7 @@ void DefaultLogger::warn( const std::string &message )
 //	Logs an error
 void DefaultLogger::error( const std::string &message )
 {
-	const std::string msg( "Error:  "+ getThreadID() + " :" + message );
+	const std::string msg( "Error, T"+ getThreadID() + ": " + message );
 	writeToStreams( msg, Logger::ERR );
 }
 
@@ -232,10 +233,10 @@ DefaultLogger::DefaultLogger( const std::string &name, LogSeverity severity ) :
 {
 #ifdef WIN32
 	m_Streams.push_back( new Win32DebugLogStream() );
-	if (name.empty())
-		return;
 #endif
 	
+	if (name.empty())
+		return;
 	m_Streams.push_back( new FileLogStream( name ) );
 }
 
@@ -293,7 +294,7 @@ std::string DefaultLogger::getThreadID()
 	if ( hThread )
 	{
 		std::stringstream thread_msg;
-		thread_msg << ::GetCurrentThreadId() << " ";
+		thread_msg << ::GetCurrentThreadId() /*<< " "*/;
 		return thread_msg.str();
 	}
 	else

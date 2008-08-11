@@ -242,14 +242,14 @@ void LWOImporter::CountVertsAndFaces(unsigned int& verts, unsigned int& faces,
 {
 	while (cursor < end && max--)
 	{
-		uint16_t numIndices = *((uint16_t*)cursor);cursor+=2;
+		uint16_t numIndices = *((LE_NCONST uint16_t*)cursor);cursor+=2;
 		verts += numIndices;faces++;
 		cursor += numIndices*2;
-		int16_t surface = *((uint16_t*)cursor);cursor+=2;
+		int16_t surface = *((LE_NCONST uint16_t*)cursor);cursor+=2;
 		if (surface < 0)
 		{
 			// there are detail polygons
-			numIndices = *((uint16_t*)cursor);cursor+=2;
+			numIndices = *((LE_NCONST uint16_t*)cursor);cursor+=2;
 			CountVertsAndFaces(verts,faces,cursor,end,numIndices);
 		}
 	}
@@ -263,13 +263,13 @@ void LWOImporter::CopyFaceIndices(LWOImporter::FaceList::iterator& it,
 	while (cursor < end && max--)
 	{
 		LWO::Face& face = *it;++it;
-		if(face.mNumIndices = *((uint16_t*)cursor))
+		if(face.mNumIndices = *((LE_NCONST uint16_t*)cursor))
 		{
 			if (cursor + face.mNumIndices*2 + 4 >= end)break;
 			face.mIndices = new unsigned int[face.mNumIndices];
 			for (unsigned int i = 0; i < face.mNumIndices;++i)
 			{
-				face.mIndices[i] = *((uint16_t*)(cursor+=2));
+				face.mIndices[i] = *((LE_NCONST uint16_t*)(cursor+=2));
 				if (face.mIndices[i] >= mTempPoints->size())
 				{
 					face.mIndices[i] = mTempPoints->size()-1;
@@ -279,13 +279,13 @@ void LWOImporter::CopyFaceIndices(LWOImporter::FaceList::iterator& it,
 		}
 		else DefaultLogger::get()->warn("LWO: Face has 0 indices");
 		cursor+=2;
-		int16_t surface = *((uint16_t*)cursor);cursor+=2;
+		int16_t surface = *((LE_NCONST uint16_t*)cursor);cursor+=2;
 		if (surface < 0)
 		{
 			surface = -surface;
 
 			// there are detail polygons
-			uint16_t numPolygons = *((uint16_t*)cursor);cursor+=2;
+			uint16_t numPolygons = *((LE_NCONST uint16_t*)cursor);cursor+=2;
 			if (cursor < end)CopyFaceIndices(it,cursor,end,numPolygons);
 		}
 		face.surfaceIndex = surface-1;

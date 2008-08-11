@@ -1095,6 +1095,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\DefaultLogger.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\FixNormalsStep.cpp"
 				>
 			</File>
@@ -1267,14 +1271,6 @@
 				</File>
 				<File
 					RelativePath="..\..\code\ASEParser.cpp"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Logger"
-				>
-				<File
-					RelativePath="..\..\code\DefaultLogger.cpp"
 					>
 				</File>
 			</Filter>

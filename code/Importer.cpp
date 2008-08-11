@@ -299,7 +299,7 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp)
 	pImp->GetExtensionList(st);
 
 #ifdef _DEBUG
-	const char* sz = ::strtok(st.c_str(),";");
+	const char* sz = ::strtok(const_cast<char*>(st.c_str()),";");
 	while (sz)
 	{
 		if (IsExtensionSupported(std::string(sz)))

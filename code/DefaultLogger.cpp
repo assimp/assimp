@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FileLogStream.h"
 
 #include <iostream>
+#include <sstream>
 
 namespace Assimp
 {
@@ -68,17 +69,24 @@ struct LogStreamInfo
 	{
 		// empty
 	}
+	
+	// Destructor
+	~LogStreamInfo()
+	{
+		// empty
+	}
 };
 // ---------------------------------------------------------------------------
 //	Creates the only singleton instance
 Logger *DefaultLogger::create(const std::string &name, LogSeverity severity)
 {
-	m_pLogger = new DefaultLogger( name, severity );
+	if ( NULL == m_pLogger )
+		m_pLogger = new DefaultLogger( name, severity );
 	
 	return m_pLogger;
 }
 // ---------------------------------------------------------------------------
-void DefaultLogger::set (Logger *logger)
+void DefaultLogger::set( Logger *logger )
 {
 	if (!logger)
 	{
@@ -110,20 +118,20 @@ void DefaultLogger::kill()
 
 // ---------------------------------------------------------------------------
 //	Debug message
-void DefaultLogger::debug(const std::string &message)
+void DefaultLogger::debug( const std::string &message )
 {
 	if ( m_Severity == Logger::NORMAL )
 		return;
 
-	const std::string msg( "Debug: " + message );
+	const std::string msg( "Debug, thread " + getThreadID() + " :" + message );
 	writeToStreams( msg, Logger::DEBUGGING );
 }
 
 // ---------------------------------------------------------------------------
 //	Logs an info
-void DefaultLogger::info(const std::string &message)
+void DefaultLogger::info( const std::string &message )
 {
-	const std::string msg( "Info: " + message );
+	const std::string msg( "Info: " + getThreadID() + " :" + message );
 	writeToStreams( msg , Logger::INFO );
 }
 
@@ -131,7 +139,7 @@ void DefaultLogger::info(const std::string &message)
 //	Logs a warning
 void DefaultLogger::warn( const std::string &message )
 {
-	const std::string msg( "Warn:  " + message );
+	const std::string msg( "Warn:  " + getThreadID() + " :"+ message );
 	writeToStreams( msg, Logger::WARN );
 }
 
@@ -139,7 +147,7 @@ void DefaultLogger::warn( const std::string &message )
 //	Logs an error
 void DefaultLogger::error( const std::string &message )
 {
-	const std::string msg( "Error:  " + message );
+	const std::string msg( "Error:  "+ getThreadID() + " :" + message );
 	writeToStreams( msg, Logger::ERR );
 }
 
@@ -258,8 +266,7 @@ void DefaultLogger::writeToStreams(const std::string &message,
 {
 	if ( message.empty() )
 		return;
-
-	for ( ConstStreamIt it = this->m_StreamArray.begin();
+	for ( ConstStreamIt it = m_StreamArray.begin();
 		it != m_StreamArray.end();
 		++it)
 	{
@@ -274,6 +281,26 @@ void DefaultLogger::writeToStreams(const std::string &message,
 	{
 		(*it)->write( message + std::string("\n"));
 	}
+}
+
+// ---------------------------------------------------------------------------
+//	Returns thread id, if not supported only a zero will be returned.
+std::string DefaultLogger::getThreadID()
+{
+	std::string thread_id( "0" );
+#ifdef WIN32
+	HANDLE hThread = GetCurrentThread();
+	if ( hThread )
+	{
+		std::stringstream thread_msg;
+		thread_msg << ::GetCurrentThreadId() << " ";
+		return thread_msg.str();
+	}
+	else
+		return thread_id;
+#else
+	return thread_id;
+#endif
 }
 
 // ---------------------------------------------------------------------------

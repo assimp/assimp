@@ -7,7 +7,7 @@ namespace Assimp
 {
 // ---------------------------------------------------------------------------
 /**	@class	LogStream
-	 *	@brief	Abstract interface for log stream implementations.
+ *	@brief	Abstract interface for log stream implementations.
  */
 class ASSIMP_API LogStream
 {

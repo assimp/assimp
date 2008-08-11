@@ -131,6 +131,11 @@ private:
 	/**	@brief	Writes message into a file	*/
 	void writeToStreams(const std::string &message, ErrorSeverity ErrorSev );
 
+	/**	@brief	Returns the thread id.
+	 *	@remark	This is an OS specific feature, if not supported, a zero will be returned.
+	 */
+	std::string getThreadID();
+
 private:
 	//	Aliases for stream container
 	typedef std::vector<LogStreamInfo*>	StreamArray;

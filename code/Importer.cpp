@@ -282,6 +282,65 @@ Importer::~Importer()
 }
 
 // ------------------------------------------------------------------------------------------------
+//	Empty and private copy constructor
+Importer::Importer(const Importer &other)
+{
+	// empty
+}
+
+// ------------------------------------------------------------------------------------------------
+aiReturn Importer::RegisterLoader(BaseImporter* pImp)
+{
+	ai_assert(NULL != pImp);
+
+	// check whether we would have two loaders for the same file extension now
+
+	std::string st;
+	pImp->GetExtensionList(st);
+
+#ifdef _DEBUG
+	const char* sz = ::strtok(st.c_str(),";");
+	while (sz)
+	{
+		if (IsExtensionSupported(std::string(sz)))
+		{
+			DefaultLogger::get()->error(std::string( "The file extension " ) + sz + " is already in use");
+			return AI_FAILURE;
+		}
+		sz = ::strtok(NULL,";");
+	}
+#endif
+
+	// add the loader
+	this->mImporter.push_back(pImp);
+	DefaultLogger::get()->info("Registering custom importer: " + st);
+	return AI_SUCCESS;
+}
+
+// ------------------------------------------------------------------------------------------------
+aiReturn Importer::UnregisterLoader(BaseImporter* pImp)
+{
+	ai_assert(NULL != pImp);
+
+	for (std::vector<BaseImporter*>::iterator
+		it = mImporter.begin(),end = mImporter.end();
+		it != end;++it)
+	{
+		if (pImp == (*it))
+		{
+			mImporter.erase(it);
+
+			std::string st;
+			pImp->GetExtensionList(st);
+			DefaultLogger::get()->info("Unregistering custom importer: " + st);
+			return AI_SUCCESS;
+		}
+	}
+	DefaultLogger::get()->warn("Unable to remove importer: importer not found");
+	return AI_FAILURE;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Supplies a custom IO handler to the importer to open and access files.
 void Importer::SetIOHandler( IOSystem* pIOHandler)
 {
@@ -299,16 +358,19 @@ void Importer::SetIOHandler( IOSystem* pIOHandler)
 	}
 	return;
 }
+
 // ------------------------------------------------------------------------------------------------
 IOSystem* Importer::GetIOHandler()
 {
 	return mIOHandler;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool Importer::IsDefaultIOHandler()
 {
 	return mIsDefaultHandler;
 }
+
 #ifdef _DEBUG
 // ------------------------------------------------------------------------------------------------
 // Validate post process step flags 
@@ -325,6 +387,7 @@ bool ValidateFlags(unsigned int pFlags)
 	return true;
 }
 #endif // ! DEBUG
+
 // ------------------------------------------------------------------------------------------------
 // Reads the given file and returns its contents if successful. 
 const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags)
@@ -383,6 +446,8 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 			// TODO: temporary solution, clean up later
 			mScene->mFlags |= 0x80000000; 
 		}
+#else
+		if (bExtraVerbose)DefaultLogger::get()->warn("Not a debug build, ignoring extra verbose setting");
 #endif // ! DEBUG
 		for( unsigned int a = 0; a < mPostProcessingSteps.size(); a++)
 		{
@@ -421,13 +486,6 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Empty and private copy constructor
-Importer::Importer(const Importer &other)
-{
-	// empty
-}
-
-// ------------------------------------------------------------------------------------------------
 // Helper function to check whether an extension is supported by ASSIMP
 bool Importer::IsExtensionSupported(const std::string& szExtension)
 {
@@ -440,6 +498,7 @@ bool Importer::IsExtensionSupported(const std::string& szExtension)
 	}
 	return false;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Helper function to build a list of all file extensions supported by ASSIMP
 void Importer::GetExtensionList(std::string& szOut)
@@ -457,6 +516,7 @@ void Importer::GetExtensionList(std::string& szOut)
 	}
 	return;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
 int Importer::SetProperty(const char* szName, int iValue)
@@ -482,6 +542,7 @@ int Importer::SetProperty(const char* szName, int iValue)
 	me.value = iValue;
 	return AI_PROPERTY_WAS_NOT_EXISTING;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
 int Importer::GetProperty(const char* szName, 
@@ -510,6 +571,7 @@ void AddNodeWeight(unsigned int& iScene,const aiNode* pcNode)
 	for (unsigned int i = 0; i < pcNode->mNumChildren;++i)
 		AddNodeWeight(iScene,pcNode->mChildren[i]);
 }
+
 // ------------------------------------------------------------------------------------------------
 // Get the memory requirements of the scene
 void Importer::GetMemoryRequirements(aiMemoryInfo& in) const

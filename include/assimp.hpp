@@ -55,6 +55,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "aiTypes.h"
 #include "aiConfig.h"
 
+// internal ASSIMP headers - for plugin development
+#include "./../code/BaseImporter.h"
+#include "./../code/BaseProcess.h"
 
 #define AI_PROPERTY_WAS_NOT_EXISTING 0xffffffff
 
@@ -133,10 +136,57 @@ public:
 
 
 	// -------------------------------------------------------------------
+	/** Registers a new loader.
+	 *
+	 * @param pImp Importer to be added. The Importer instance takes 
+	 *   ownership of the pointer, so it will be automatically deleted
+	 *   with the Importer instance.
+	 * @return AI_SUCCESS if the loader has been added. The registration
+	 *   fails if there is already a loader for a specific file extension.
+	 */
+	aiReturn RegisterLoader(BaseImporter* pImp);
+
+
+	// -------------------------------------------------------------------
+	/** Unregisters a loader.
+	 *
+	 * @param pImp Importer to be unregistered.
+	 * @return AI_SUCCESS if the loader has been removed. The function
+	 *   fails if the loader is currently in use (this could happen
+	 *   if the #Importer instance is used by more than one thread) or
+	 *   if it has not yet been registered.
+	 */
+	aiReturn UnregisterLoader(BaseImporter* pImp);
+
+#if 0
+	// -------------------------------------------------------------------
+	/** Registers a new post-process step.
+	 *
+	 * @param pImp Post-process step to be added. The Importer instance 
+	 *   takes ownership of the pointer, so it will be automatically 
+	 *   deleted with the Importer instance.
+	 * @return AI_SUCCESS if the step has been added.
+	 */
+	aiReturn RegisterPPStep(BaseProcess* pImp);
+
+
+	// -------------------------------------------------------------------
+	/** Unregisters a post-process step.
+	 *
+	 * @param pImp Step to be unregistered. 
+	 * @return AI_SUCCESS if the step has been removed. The function
+	 *   fails if the step is currently in use (this could happen
+	 *   if the #Importer instance is used by more than one thread) or
+	 *   if it has not yet been registered.
+	 */
+	aiReturn UnregisterPPStep(BaseProcess* pImp);
+#endif
+
+	// -------------------------------------------------------------------
 	/** Set a configuration property.
 	 * @param szName Name of the property. All supported properties
-	 *   are defined in the aiConfig.g header (the constants start
-	 *   with AI_CONFIG_XXX).
+	 *   are defined in the aiConfig.g header (the constants share the
+	 *   prefix AI_CONFIG_XXX).
 	 * @param iValue New value of the property
 	 * @return Old value of the property or AI_PROPERTY_WAS_NOT_EXISTING
      * if the property has not yet been set.

@@ -12,6 +12,7 @@ void Assimp::aiAssert (bool expression, const std::string &message, unsigned int
 {
 	if (!expression)
 	{
+		// FIX (Aramis): changed std::cerr to std::cout that the message appears in VS' output window ...
 		std::cout << "File :" << file << ", line " << uiLine << " : " << message << std::endl;
 
 #ifdef _WIN32

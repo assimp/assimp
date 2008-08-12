@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseImporter.h"
 #include "LWOFileData.h"
+#include "MaterialSystem.h"
 
 #include <vector>
 
@@ -132,16 +133,16 @@ private:
 	*/
 	void CountVertsAndFaces(unsigned int& verts, 
 		unsigned int& faces,
-		LE_NCONST uint8_t*& cursor, 
-		const uint8_t* const end,
+		LE_NCONST uint16_t*& cursor, 
+		const uint16_t* const end,
 		unsigned int max = 0xffffffff);
 
 	// -------------------------------------------------------------------
 	/** Read vertices and faces in a LWOB file
 	*/
 	void CopyFaceIndices(FaceList::iterator& it,
-		LE_NCONST uint8_t*& cursor, 
-		const uint8_t* const end, 
+		LE_NCONST uint16_t*& cursor, 
+		const uint16_t* const end, 
 		unsigned int max = 0xffffffff);
 
 	// -------------------------------------------------------------------
@@ -153,6 +154,11 @@ private:
 	/** Adjust a texture path
 	*/
 	void AdjustTexturePath(std::string& out);
+
+	// -------------------------------------------------------------------
+	/** Convert a LWO surface description to an ASSIMP material
+	*/
+	void ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat);
 
 protected:
 

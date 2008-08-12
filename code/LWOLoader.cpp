@@ -232,44 +232,79 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		// generate the corresponding material
 		MaterialHelper* pcMat = new MaterialHelper();
 		pScene->mMaterials[p] = pcMat;
-		//ConvertMaterial(mSurfaces[i],pcMat);
+		ConvertMaterial((*mSurfaces)[i],pcMat);
 		++p;
 	}
+
+	// create a dummy nodegraph - the root node renders everything
+	aiNode* p = pScene->mRootNode = new aiNode();
+	p->mNumMeshes = pScene->mNumMeshes;
+	p->mMeshes = new unsigned int[pScene->mNumMeshes];
+	p->mName.Set("<LWORoot>");
+	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+		p->mMeshes[i] = i;
 }
+
+// ------------------------------------------------------------------------------------------------
+void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat)
+{
+	// copy the name of the surface
+	aiString st;
+	st.Set(surf.mName);
+	pcMat->AddProperty(&st,AI_MATKEY_NAME);
+
+	int i = surf.bDoubleSided ? 1 : 0;
+	pcMat->AddProperty<int>(&i,1,AI_MATKEY_TWOSIDED);
+	
+	if (surf.mSpecularValue && surf.mGlossiness)
+	{
+		// this is only an assumption, needs to be confirmed.
+		/*if (16.0f >= surf.mGlossiness)surf.mGlossiness = 10.0f;
+		else if (64.0f >= surf.mGlossiness)surf.mGlossiness = 14.0f;
+		else if (256.0f >= surf.mGlossiness)surf.mGlossiness = 20.0f;
+		else surf.mGlossiness = 24.0f;*/
+
+		pcMat->AddProperty<float>(&surf.mSpecularValue,1,AI_MATKEY_SHININESS_STRENGTH);
+		pcMat->AddProperty<float>(&surf.mGlossiness,1,AI_MATKEY_SHININESS);
+	}
+
+}
+
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::CountVertsAndFaces(unsigned int& verts, unsigned int& faces,
-	LE_NCONST uint8_t*& cursor, const uint8_t* const end, unsigned int max)
+	LE_NCONST uint16_t*& cursor, const uint16_t* const end, unsigned int max)
 {
 	while (cursor < end && max--)
 	{
-		uint16_t numIndices = *((LE_NCONST uint16_t*)cursor);cursor+=2;
+		uint16_t numIndices = *cursor++;
 		verts += numIndices;faces++;
-		cursor += numIndices*2;
-		int16_t surface = *((LE_NCONST uint16_t*)cursor);cursor+=2;
+		cursor += numIndices;
+		int16_t surface = *cursor++;
 		if (surface < 0)
 		{
 			// there are detail polygons
-			numIndices = *((LE_NCONST uint16_t*)cursor);cursor+=2;
+			numIndices = *cursor++;
 			CountVertsAndFaces(verts,faces,cursor,end,numIndices);
 		}
 	}
 }
+
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::CopyFaceIndices(LWOImporter::FaceList::iterator& it,
-	LE_NCONST uint8_t*& cursor, 
-	const uint8_t* const end,
+	LE_NCONST uint16_t*& cursor, 
+	const uint16_t* const end,
 	unsigned int max)
 {
 	while (cursor < end && max--)
 	{
 		LWO::Face& face = *it;++it;
-		if(face.mNumIndices = *((LE_NCONST uint16_t*)cursor))
+		if(face.mNumIndices = *cursor++)
 		{
-			if (cursor + face.mNumIndices*2 + 4 >= end)break;
+			if (cursor + face.mNumIndices >= end)break;
 			face.mIndices = new unsigned int[face.mNumIndices];
 			for (unsigned int i = 0; i < face.mNumIndices;++i)
 			{
-				face.mIndices[i] = *((LE_NCONST uint16_t*)(cursor+=2));
+				face.mIndices[i] = *cursor++;
 				if (face.mIndices[i] >= mTempPoints->size())
 				{
 					face.mIndices[i] = mTempPoints->size()-1;
@@ -278,19 +313,19 @@ void LWOImporter::CopyFaceIndices(LWOImporter::FaceList::iterator& it,
 			}
 		}
 		else DefaultLogger::get()->warn("LWO: Face has 0 indices");
-		cursor+=2;
-		int16_t surface = *((LE_NCONST uint16_t*)cursor);cursor+=2;
+		int16_t surface = *cursor++;
 		if (surface < 0)
 		{
 			surface = -surface;
 
 			// there are detail polygons
-			uint16_t numPolygons = *((LE_NCONST uint16_t*)cursor);cursor+=2;
+			uint16_t numPolygons = *cursor++;
 			if (cursor < end)CopyFaceIndices(it,cursor,end,numPolygons);
 		}
 		face.surfaceIndex = surface-1;
 	}
 }
+
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::ResolveTags()
 {
@@ -307,6 +342,7 @@ void LWOImporter::ResolveTags()
 		}
 	}
 }
+
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::ParseString(std::string& out,unsigned int max)
 {
@@ -324,6 +360,7 @@ void LWOImporter::ParseString(std::string& out,unsigned int max)
 	unsigned int len = unsigned int (in-sz);
 	out = std::string(sz,len);
 }
+
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::AdjustTexturePath(std::string& out)
 {
@@ -336,8 +373,8 @@ void LWOImporter::AdjustTexturePath(std::string& out)
 }
 
 // ------------------------------------------------------------------------------------------------
-#define AI_LWO_VALIDATE_CHUNK_LENGTH(name,size) \
-	if (head->length < size) \
+#define AI_LWO_VALIDATE_CHUNK_LENGTH(length,name,size) \
+	if (length < size) \
 	{ \
 		DefaultLogger::get()->warn("LWO: "#name" chunk is too small"); \
 		break; \
@@ -363,40 +400,45 @@ void LWOImporter::LoadLWOTags(unsigned int size)
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWOBSurface(unsigned int size)
 {
+	LE_NCONST uint8_t* const end = mFileBuffer + size;
+
 	uint32_t iCursor = 0;
 	mSurfaces->push_back( LWO::Surface () );
 	LWO::Surface& surf = mSurfaces->back();
 	LWO::Texture* pTex = NULL;
 
 	// at first we'll need to read the name of the surface
-	const uint8_t* sz = mFileBuffer;
+	LE_NCONST uint8_t* sz = mFileBuffer;
 	while (*mFileBuffer)
 	{
-		if (++iCursor > size)throw new ImportErrorException("LWOB: Invalid file, surface name is too long");
-		++mFileBuffer;
+		if (++mFileBuffer > end)throw new ImportErrorException("LWOB: Invalid file, surface name is too long");
 	}
 	unsigned int len = unsigned int (mFileBuffer-sz);
 	surf.mName = std::string((const char*)sz,len);
-	mFileBuffer += 1-(len & 1); // skip one byte if the length of the string is odd
+	mFileBuffer++;
+	if (!(len & 1))++mFileBuffer; // skip one byte if the length of the surface name is odd
 	while (true)
 	{
-		if ((iCursor += sizeof(IFF::ChunkHeader)) > size)break;
-		LE_NCONST IFF::ChunkHeader* head = (LE_NCONST IFF::ChunkHeader*)mFileBuffer;
-		AI_LSWAP4(head->length);
-		AI_LSWAP4(head->type);
-		if ((iCursor += head->length) > size)
+		if (mFileBuffer + 6 > end)
+			break;
+
+		// no proper IFF header here - the chunk length is specified as int16
+		uint32_t head_type		= *((LE_NCONST uint32_t*)mFileBuffer);mFileBuffer+=4;
+		uint16_t head_length	= *((LE_NCONST uint16_t*)mFileBuffer);mFileBuffer+=2;
+		AI_LSWAP4(head_type);
+		AI_LSWAP2(head_length);
+		if (mFileBuffer + head_length > end)
 		{
 			throw new ImportErrorException("LWOB: Invalid file, the size attribute of "
 				"a surface sub chunk points behind the end of the file");
 		}
-		mFileBuffer += sizeof(IFF::ChunkHeader);
-		LE_NCONST uint8_t* next = mFileBuffer+head->length;
-		switch (head->type)
+		LE_NCONST uint8_t* const next = mFileBuffer+head_length;
+		switch (head_type)
 		{
 			// diffuse color
 		case AI_LWO_COLR:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(COLR,3);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,COLR,3);
 				surf.mColor.r = *mFileBuffer++ / 255.0f;
 				surf.mColor.g = *mFileBuffer++ / 255.0f;
 				surf.mColor.b = *mFileBuffer   / 255.0f;
@@ -405,7 +447,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 			// diffuse strength ... hopefully
 		case AI_LWO_DIFF:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(DIFF,2);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,DIFF,2);
 				AI_LSWAP2(mFileBuffer);
 				surf.mDiffuseValue = *((int16_t*)mFileBuffer) / 255.0f;
 				break;
@@ -413,7 +455,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 			// specular strength ... hopefully
 		case AI_LWO_SPEC:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(SPEC,2);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,SPEC,2);
 				AI_LSWAP2(mFileBuffer);
 				surf.mSpecularValue = *((int16_t*)mFileBuffer) / 255.0f;
 				break;
@@ -421,7 +463,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		// transparency
 		case AI_LWO_TRAN:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(TRAN,2);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,TRAN,2);
 				AI_LSWAP2(mFileBuffer);
 				surf.mTransparency = *((int16_t*)mFileBuffer) / 255.0f;
 				break;
@@ -429,7 +471,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		// glossiness
 		case AI_LWO_GLOS:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(GLOS,2);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,GLOS,2);
 				AI_LSWAP2(mFileBuffer);
 				surf.mGlossiness = float(*((int16_t*)mFileBuffer));
 				break;
@@ -469,7 +511,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 			{
 				if (pTex)
 				{
-					ParseString(pTex->mFileName,head->length);	
+					ParseString(pTex->mFileName,head_length);	
 					AdjustTexturePath(pTex->mFileName);
 					mFileBuffer += pTex->mFileName.length();
 				}
@@ -480,7 +522,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		// texture strength
 		case AI_LWO_TVAL:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(TVAL,1);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,TVAL,1);
 				if (pTex)pTex->mStrength = *mFileBuffer / 255.0f;
 				else DefaultLogger::get()->warn("LWOB: TVAL tag was encuntered "
 					"although there was no xTEX tag before");
@@ -490,24 +532,26 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		mFileBuffer = next;
 	}
 }
+
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWOBFile()
 {
-	uint32_t iCursor = 0;
+	LE_NCONST uint8_t* const end = mFileBuffer + fileSize;
 	while (true)
 	{
-		if ((iCursor += sizeof(IFF::ChunkHeader)) > this->fileSize)break;
-		LE_NCONST IFF::ChunkHeader* head = (LE_NCONST IFF::ChunkHeader*)mFileBuffer;
+		if (mFileBuffer + sizeof(IFF::ChunkHeader) > end)
+			break;
+		LE_NCONST IFF::ChunkHeader* const head = (LE_NCONST IFF::ChunkHeader*)mFileBuffer;
 		AI_LSWAP4(head->length);
 		AI_LSWAP4(head->type);
-		if ((iCursor += head->length) > this->fileSize)
+		mFileBuffer += sizeof(IFF::ChunkHeader);
+		if (mFileBuffer + head->length > end)
 		{
-			//throw new ImportErrorException("LWOB: Invalid file, the size attribute of "
-			//	"a chunk points behind the end of the file");
+			throw new ImportErrorException("LWOB: Invalid file, the size attribute of "
+				"a chunk points behind the end of the file");
 			break;
 		}
-		mFileBuffer += sizeof(IFF::ChunkHeader);
-		LE_NCONST uint8_t* next = mFileBuffer+head->length;
+		LE_NCONST uint8_t* const next = mFileBuffer+head->length;
 		switch (head->type)
 		{
 			// vertex list
@@ -525,12 +569,12 @@ void LWOImporter::LoadLWOBFile()
 		case AI_LWO_POLS:
 			{
 				// first find out how many faces and vertices we'll finally need
-				const uint8_t* const end = mFileBuffer + head->length;
-				LE_NCONST uint8_t* cursor = mFileBuffer;
+				LE_NCONST uint16_t* const end	= (LE_NCONST uint16_t*)next;
+				LE_NCONST uint16_t* cursor		= (LE_NCONST uint16_t*)mFileBuffer;
 
 #ifndef AI_BUILD_BIG_ENDIAN
 				while (cursor < end)ByteSwap::Swap2(cursor++);
-				cursor = mFileBuffer;
+				cursor = (LE_NCONST uint16_t*)mFileBuffer;
 #endif
 
 				unsigned int iNumFaces = 0,iNumVertices = 0;
@@ -539,7 +583,7 @@ void LWOImporter::LoadLWOBFile()
 				// allocate the output array and copy face indices
 				if (iNumFaces)
 				{
-					cursor = mFileBuffer;
+					cursor = (LE_NCONST uint16_t*)mFileBuffer;
 					this->mTempPoints->resize(iNumVertices);
 					this->mFaces->resize(iNumFaces);
 					FaceList::iterator it = this->mFaces->begin();

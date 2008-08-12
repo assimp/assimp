@@ -89,11 +89,10 @@ Logger *DefaultLogger::create(const std::string &name, LogSeverity severity)
 // ---------------------------------------------------------------------------
 void DefaultLogger::set( Logger *logger )
 {
-	if (!logger)
-	{
-		 DefaultLogger::m_pLogger = &s_pNullLogger;
-		 return;
-	}
+	if (!logger)logger = &s_pNullLogger;
+	if (m_pLogger && !isNullLogger() )
+		delete m_pLogger;
+
 	DefaultLogger::m_pLogger = logger;
 }
 // ---------------------------------------------------------------------------

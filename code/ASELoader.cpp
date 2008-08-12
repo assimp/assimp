@@ -113,9 +113,6 @@ void ASEImporter::InternReadFile(
 
 	size_t fileSize = file->FileSize();
 
-	std::string::size_type pos = pFile.find_last_of('.');
-	std::string extension = pFile.substr( pos);
-
 	// allocate storage and copy the contents of the file to a memory buffer
 	// (terminate it with zero)
 	std::vector<char> mBuffer2(fileSize+1);

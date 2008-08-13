@@ -82,6 +82,14 @@ inline int ASSIMP_stricmp(const char *s1, const char *s2)
 }
 
 // ---------------------------------------------------------------------------
+inline int ASSIMP_stricmp(const std::string& a, const std::string& b)
+{
+	int i = (int)b.length()-(int)a.length();
+	if (i)return i;
+	return ASSIMP_stricmp(a.c_str(),b.c_str());
+}
+
+// ---------------------------------------------------------------------------
 /** \brief Helper function to do platform independent string comparison.
  *
  *  This is required since strincmp() is not consistently available on
@@ -121,6 +129,6 @@ inline int ASSIMP_strincmp(const char *s1, const char *s2, unsigned int n)
 	}
 #endif
 }
-};
+}
 
 #endif // !  AI_STRINGCOMPARISON_H_INC

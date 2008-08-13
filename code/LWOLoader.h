@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MaterialSystem.h"
 
 #include <vector>
+struct aiTexture;
 
 namespace Assimp	{
 using namespace LWO;
@@ -74,6 +75,14 @@ public:
 	* See BaseImporter::CanRead() for details.	*/
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
 
+
+	// -------------------------------------------------------------------
+	/** Called prior to ReadFile().
+	* The function is a request to the importer to update its configuration
+	* basing on the Importer's configuration property list.
+	*/
+	void SetupProperties(const Importer* pImp);
+
 protected:
 
 	// -------------------------------------------------------------------
@@ -95,22 +104,49 @@ protected:
 
 	// -------------------------------------------------------------------
 	/** Loads a LWO file in the older LWOB format (LW < 6)
-	*/
+	 */
 	void LoadLWOBFile();
 
 	// -------------------------------------------------------------------
 	/** Loads a LWO file in the newer LWO2 format (LW >= 6)
-	*/
+	 */
 	void LoadLWO2File();
 
 	// -------------------------------------------------------------------
 	/** Loads a surface chunk from an LWOB file
-	*/
+	 *  @param size Maximum size to be read, in bytes.  
+	 */
 	void LoadLWOBSurface(unsigned int size);
 
 	// -------------------------------------------------------------------
+	/** Loads a surface chunk from an LWO2 file
+	 *  @param size Maximum size to be read, in bytes.  
+	 */
+	void LoadLWO2Surface(unsigned int size);
+
+	// -------------------------------------------------------------------
+	/** Loads a texture block from a LWO2 file.
+	 *  @param size Maximum size to be read, in bytes.  
+	 *  @param type Type of the texture block - PROC, GRAD or IMAP
+	 */
+	void LoadLWO2TextureBlock(uint32_t type, unsigned int size );
+
+	// -------------------------------------------------------------------
+	/** Loads an image map from a LWO2 file
+	 *  @param size Maximum size to be read, in bytes.  
+	 *  @param tex Texture object to be filled
+	 */
+	void LoadLWO2ImageMap(unsigned int size, LWO::Texture& tex );
+	void LoadLWO2Gradient(unsigned int size, LWO::Texture& tex );
+	void LoadLWO2Procedural(unsigned int size, LWO::Texture& tex );
+
+	// loads the header - used by thethree functions above
+	void LoadLWO2TextureHeader(unsigned int size, LWO::Texture& tex );
+
+	// -------------------------------------------------------------------
 	/** Loads the LWO tag list from the file
-	*/
+	 *  @param size Maximum size to be read, in bytes.  
+	 */
 	void LoadLWOTags(unsigned int size);
 
 	// -------------------------------------------------------------------
@@ -118,6 +154,17 @@ protected:
 	* Generates the mMapping table.
 	*/
 	void ResolveTags();
+
+	// -------------------------------------------------------------------
+	/** Computes a proper texture form a procedural gradient
+	 *  description.
+	 *  @param grad Gradient description
+     *  @param out List of output textures. The new texture should
+	 *    be added to the list, if the conversion was successful.
+	 *  @return true if successful
+	*/
+	bool ComputeGradientTexture(LWO::GradientInfo& grad,
+		std::vector<aiTexture*>& out);
 
 
 	typedef std::vector<aiVector3D>		PointList;
@@ -162,6 +209,9 @@ private:
 
 protected:
 
+	/** true if the file is a LWO2 file*/
+	bool mIsLWO2;
+
 	/** Temporary point list from the file */
 	PointList* mTempPoints;
 
@@ -187,6 +237,8 @@ protected:
 	/** Output scene */
 	aiScene* pScene;
 
+	/** Configuration option: X and Y size of gradient maps */
+	unsigned int configGradientResX,configGradientResY;
 };
 
 } // end of namespace Assimp

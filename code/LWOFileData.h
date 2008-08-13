@@ -51,6 +51,7 @@ Original copyright notice: "Ernie Wright  17 Sep 00"
 
 
 #include "IFF.h"
+#include <vector>
 #include "../include/aiMesh.h"
 
 namespace Assimp {
@@ -239,6 +240,29 @@ struct Face : public aiFace
 	unsigned int surfaceIndex;
 };
 
+// ---------------------------------------------------------------------------
+/** \brief LWO2 gradient keyframe
+ */
+struct GradientKey
+{
+	aiColor4D color;
+	float value;
+};
+
+// ---------------------------------------------------------------------------
+/** \brief Data structure for a LWO2 gradient
+ */
+struct GradientInfo
+{
+	GradientInfo()
+		: mStart(0.0f)
+		, mEnd(1.0f)
+	{}
+
+	float mStart,mEnd;
+	bool mRepeat;
+	std::vector<GradientKey> mKeys;
+};
 
 
 // ---------------------------------------------------------------------------
@@ -255,6 +279,14 @@ struct Texture
 
 	//! Strength of the texture
 	float mStrength;
+
+
+	/*************** SPECIFIC TO LWO2 *********************/
+	uint32_t type; // type of the texture
+
+	
+	GradientInfo mGradient;
+	// todo ... maybe support for procedurals?
 };
 
 
@@ -285,13 +317,21 @@ struct Surface
 	float mDiffuseValue,mSpecularValue,mTransparency,mGlossiness;
 
 	//! Maximum angle between two adjacent triangles
-	//! that they can be smoothed
+	//! that they can be smoothed - in degrees
 	float mMaximumSmoothAngle;
 
 	//! Textures
 	Texture mColorTexture,mDiffuseTexture,mSpecularTexture,
 		mBumpTexture,mTransparencyTexture;
 };
+
+// ---------------------------------------------------------------------------
+#define AI_LWO_VALIDATE_CHUNK_LENGTH(length,name,size) \
+	if (length < size) \
+	{ \
+		DefaultLogger::get()->warn("LWO: "#name" chunk is too small"); \
+		break; \
+	} \
 
 }}
 

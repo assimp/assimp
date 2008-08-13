@@ -114,24 +114,20 @@ void Dot3DSImporter::InternReadFile(
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
-	{
-		throw new ImportErrorException( "Failed to open file " + pFile + ".");
-	}
+		throw new ImportErrorException( "Failed to open 3DS file " + pFile + ".");
 
 	// check whether the .3ds file is large enough to contain
 	// at least one chunk.
 	size_t fileSize = file->FileSize();
 	if( fileSize < 16)
-	{
 		throw new ImportErrorException( "3DS File is too small.");
-	}
 
 	this->mScene = new Dot3DS::Scene();
 
 	// allocate storage and copy the contents of the file to a memory buffer
-	this->mBuffer = new unsigned char[fileSize];
-	file->Read( mBuffer, 1, fileSize);
-	this->mCurrent = this->mBuffer;
+	std::vector<unsigned char> mBuffer2(fileSize);
+	file->Read( &mBuffer2[0], 1, fileSize);
+	this->mCurrent = this->mBuffer = &mBuffer2[0];
 	this->mLast = this->mBuffer+fileSize;
 
 	// initialize members
@@ -146,51 +142,39 @@ void Dot3DSImporter::InternReadFile(
 	this->bHasBG = false;
 
 	int iRemaining = (unsigned int)fileSize;
+	this->ParseMainChunk(iRemaining);
 
-	// parse the file
-	try
+	// Generate an unique set of vertices/indices for
+	// all meshes contained in the file
+	for (std::vector<Dot3DS::Mesh>::iterator
+		i =  this->mScene->mMeshes.begin();
+		i != this->mScene->mMeshes.end();++i)
 	{
-		this->ParseMainChunk(iRemaining);
+		// TODO: see function body
+		this->CheckIndices(&(*i));
+		this->MakeUnique(&(*i));
 
-		// Generate an unique set of vertices/indices for
-		// all meshes contained in the file
-		for (std::vector<Dot3DS::Mesh>::iterator
-			i =  this->mScene->mMeshes.begin();
-			i != this->mScene->mMeshes.end();++i)
-		{
-			// TODO: see function body
-			this->CheckIndices(&(*i));
-			this->MakeUnique(&(*i));
-
-			// first generate normals for the mesh
-			this->GenNormals(&(*i));
-		}
-
-		// Apply scaling and offsets to all texture coordinates
-		TextureTransform::ApplyScaleNOffset(this->mScene->mMaterials);
-
-		// Replace all occurences of the default material with a valid material.
-		// Generate it if no material containing DEFAULT in its name has been
-		// found in the file
-		this->ReplaceDefaultMaterial();
-
-		// Convert the scene from our internal representation to an aiScene object
-		this->ConvertScene(pScene);
-
-		// Generate the node graph for the scene. This is a little bit
-		// tricky since we'll need to split some meshes into submeshes
-		this->GenerateNodeGraph(pScene);
-
-		// Now apply a master scaling factor to the scene
-		this->ApplyMasterScale(pScene);
-
+		// first generate normals for the mesh
+		this->GenNormals(&(*i));
 	}
-	catch ( ImportErrorException* ex)
-	{
-		delete[] this->mBuffer;AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
-		throw ex;
-	}
-	delete[] this->mBuffer;AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
+
+	// Apply scaling and offsets to all texture coordinates
+	TextureTransform::ApplyScaleNOffset(this->mScene->mMaterials);
+
+	// Replace all occurences of the default material with a valid material.
+	// Generate it if no material containing DEFAULT in its name has been
+	// found in the file
+	this->ReplaceDefaultMaterial();
+
+	// Convert the scene from our internal representation to an aiScene object
+	this->ConvertScene(pScene);
+
+	// Generate the node graph for the scene. This is a little bit
+	// tricky since we'll need to split some meshes into submeshes
+	this->GenerateNodeGraph(pScene);
+
+	// Now apply a master scaling factor to the scene
+	this->ApplyMasterScale(pScene);
 }
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ApplyMasterScale(aiScene* pScene)
@@ -250,8 +234,6 @@ void Dot3DSImporter::ParseMainChunk(int& piRemaining)
 	switch (psChunk->Flag)
 	{
 	case Dot3DSFile::CHUNK_MAIN:
-	//case 0x444d: // bugfix
-
 		this->ParseEditorChunk(iRemaining);
 		break;
 	};
@@ -274,11 +256,8 @@ void Dot3DSImporter::ParseEditorChunk(int& piRemaining)
 	const Dot3DSFile::Chunk* psChunk;
 
 	this->ReadChunk(&psChunk);
-	
-
 	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
-		- sizeof(Dot3DSFile::Chunk));
+	const unsigned char* pcCurNext = pcCur + (psChunk->Size - sizeof(Dot3DSFile::Chunk));
 
 	// get chunk type
 	int iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
@@ -331,11 +310,8 @@ void Dot3DSImporter::ParseObjectChunk(int& piRemaining)
 	const Dot3DSFile::Chunk* psChunk;
 
 	this->ReadChunk(&psChunk);
-	
-
 	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
-		- sizeof(Dot3DSFile::Chunk));
+	const unsigned char* pcCurNext = pcCur + (psChunk->Size - sizeof(Dot3DSFile::Chunk));
 
 	const unsigned char* sz = this->mCurrent;
 	unsigned int iCnt = 0;
@@ -384,9 +360,7 @@ void Dot3DSImporter::ParseObjectChunk(int& piRemaining)
 			}
 		break;
 
-
 	case Dot3DSFile::CHUNK_BIT_MAP:
-
 		this->mBackgroundImage = std::string((const char*)this->mCurrent);
 		break;
 
@@ -438,11 +412,8 @@ void Dot3DSImporter::ParseChunk(int& piRemaining)
 	const Dot3DSFile::Chunk* psChunk;
 
 	this->ReadChunk(&psChunk);
-	
-
 	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
-		- sizeof(Dot3DSFile::Chunk));
+	const unsigned char* pcCurNext = pcCur + (psChunk->Size - sizeof(Dot3DSFile::Chunk));
 
 	// get chunk type
 	int iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
@@ -473,11 +444,8 @@ void Dot3DSImporter::ParseKeyframeChunk(int& piRemaining)
 	const Dot3DSFile::Chunk* psChunk;
 
 	this->ReadChunk(&psChunk);
-	
-
 	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
-		- sizeof(Dot3DSFile::Chunk));
+	const unsigned char* pcCurNext = pcCur + (psChunk->Size - sizeof(Dot3DSFile::Chunk));
 
 	// get chunk type
 	int iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
@@ -512,8 +480,7 @@ void Dot3DSImporter::InverseNodeSearch(Dot3DS::Node* pcNode,Dot3DS::Node* pcCurr
 	}
 	if (pcCurrent->mHierarchyPos == pcNode->mHierarchyPos)
 	{
-		if(NULL != pcCurrent->mParent)
-			pcCurrent->mParent->push_back(pcNode);
+		if(pcCurrent->mParent)pcCurrent->mParent->push_back(pcNode);
 		else pcCurrent->push_back(pcNode);
 		return;
 	}
@@ -535,7 +502,6 @@ void Dot3DSImporter::ParseHierarchyChunk(int& piRemaining)
 	const unsigned char* sz = (unsigned char*)this->mCurrent;
 	unsigned int iCnt = 0;
 	uint16_t iHierarchy;
-//	uint16_t iTemp;
 	Dot3DS::Node* pcNode;
 	switch (psChunk->Flag)
 	{
@@ -754,11 +720,8 @@ void Dot3DSImporter::ParseFaceChunk(int& piRemaining)
 	Dot3DS::Mesh& mMesh = this->mScene->mMeshes.back();
 
 	this->ReadChunk(&psChunk);
-	
-
 	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
-		- sizeof(Dot3DSFile::Chunk));
+	const unsigned char* pcCurNext = pcCur + (psChunk->Size - sizeof(Dot3DSFile::Chunk));
 
 	// get chunk type
 	const unsigned char* sz = this->mCurrent;
@@ -855,11 +818,8 @@ void Dot3DSImporter::ParseMeshChunk(int& piRemaining)
 	Dot3DS::Mesh& mMesh = this->mScene->mMeshes.back();
 
 	this->ReadChunk(&psChunk);
-	
-
 	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
-		- sizeof(Dot3DSFile::Chunk));
+	const unsigned char* pcCurNext = pcCur + (psChunk->Size - sizeof(Dot3DSFile::Chunk));
 
 	// get chunk type
 	const unsigned char* sz = this->mCurrent;
@@ -884,8 +844,6 @@ void Dot3DSImporter::ParseMeshChunk(int& piRemaining)
 		break;
 	case Dot3DSFile::CHUNK_TRMATRIX:
 		{
-		// http://www.gamedev.net/community/forums/topic.asp?topic_id=263063
-		// http://www.gamedev.net/community/forums/topic.asp?topic_id=392310
 		pf = (float*)this->mCurrent;
 		this->mCurrent += 12 * sizeof(float);
 
@@ -901,7 +859,6 @@ void Dot3DSImporter::ParseMeshChunk(int& piRemaining)
 		mMesh.mMat.a4 = pf[9];
 		mMesh.mMat.b4 = pf[10];
 		mMesh.mMat.c4 = pf[11];
-		//mMesh.mMat.Transpose(); // todo ----
 
 		// now check whether the matrix has got a negative determinant
 		// If yes, we need to flip all vertices' x axis ....
@@ -940,15 +897,6 @@ void Dot3DSImporter::ParseMeshChunk(int& piRemaining)
 			this->mCurrent += sizeof(aiVector2D);
 		}
 		break;
-
-#if 0
-	case Dot3DSFile::CHUNK_TXTINFO:
-
-		// for debugging purposes. Read two bytes to determine the mapping type
-		iNum = *((uint16_t*)this->mCurrent);
-		this->mCurrent += sizeof(uint16_t);
-	break;
-#endif
 
 	case Dot3DSFile::CHUNK_FACELIST:
 
@@ -996,11 +944,8 @@ void Dot3DSImporter::ParseMaterialChunk(int& piRemaining)
 	const Dot3DSFile::Chunk* psChunk;
 
 	this->ReadChunk(&psChunk);
-	
-
 	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
-		- sizeof(Dot3DSFile::Chunk));
+	const unsigned char* pcCurNext = pcCur + (psChunk->Size - sizeof(Dot3DSFile::Chunk));
 
 	// get chunk type
 	const unsigned char* sz = this->mCurrent;
@@ -1018,11 +963,14 @@ void Dot3DSImporter::ParseMaterialChunk(int& piRemaining)
 		// truncate it.
 		while (*sz++ != '\0')
 		{
-			if (sz > pcCurNext-1)break;
+			if (sz > pcCurNext-1)
+			{
+				DefaultLogger::get()->error("Material name string is too long");
+				break;
+			}
 			++iCnt;
 		}
-		this->mScene->mMaterials.back().mName = std::string(
-			(const char*)this->mCurrent,iCnt);
+		this->mScene->mMaterials.back().mName = std::string((const char*)this->mCurrent,iCnt);
 		break;
 	case Dot3DSFile::CHUNK_MAT_DIFFUSE:
 		pc = &this->mScene->mMaterials.back().mDiffuse;
@@ -1030,6 +978,7 @@ void Dot3DSImporter::ParseMaterialChunk(int& piRemaining)
 		if (is_qnan(pc->r))
 		{
 			// color chunk is invalid. Simply ignore it
+			DefaultLogger::get()->error("Unable to read DIFFUSE chunk");
 			pc->r = pc->g = pc->b = 1.0f;
 		}
 		break;
@@ -1039,6 +988,7 @@ void Dot3DSImporter::ParseMaterialChunk(int& piRemaining)
 		if (is_qnan(pc->r))
 		{
 			// color chunk is invalid. Simply ignore it
+			DefaultLogger::get()->error("Unable to read SPECULAR chunk");
 			pc->r = pc->g = pc->b = 1.0f;
 		}
 		break;
@@ -1048,6 +998,7 @@ void Dot3DSImporter::ParseMaterialChunk(int& piRemaining)
 		if (is_qnan(pc->r))
 		{
 			// color chunk is invalid. Simply ignore it
+			DefaultLogger::get()->error("Unable to read AMBIENT chunk");
 			pc->r = pc->g = pc->b = 1.0f;
 		}
 		break;
@@ -1058,6 +1009,7 @@ void Dot3DSImporter::ParseMaterialChunk(int& piRemaining)
 		{
 			// color chunk is invalid. Simply ignore it
 			// EMISSSIVE TO 0|0|0
+			DefaultLogger::get()->error("Unable to read EMISSIVE chunk");
 			pc->r = pc->g = pc->b = 0.0f;
 		}
 		break;

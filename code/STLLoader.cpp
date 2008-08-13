@@ -109,10 +109,13 @@ void STLImporter::InternReadFile(
 
 	// allocate storage and copy the contents of the file to a memory buffer
 	// (terminate it with zero)
-	this->mBuffer = new char[fileSize+1];
+	std::vector<char> mBuffer2(fileSize+1);
+	
+	file->Read(&mBuffer2[0], 1, fileSize);
+	mBuffer2[fileSize] = '\0';
+
 	this->pScene = pScene;
-	file->Read( (void*)mBuffer, 1, fileSize);
-	const_cast<char*>(this->mBuffer)[fileSize] = '\0';
+	this->mBuffer = &mBuffer2[0];
 
 	// the default vertex color is white
 	clrColorDefault.r = clrColorDefault.g = clrColorDefault.b = clrColorDefault.a = 1.0f;
@@ -130,32 +133,24 @@ void STLImporter::InternReadFile(
 	pScene->mRootNode->mMeshes[0] = 0;
 
 	bool bMatClr = false;
-	try
-	{
-		// check whether the file starts with 'solid' -
-		// in this case we can simply assume it IS a text file. finished.
-		if (!::strncmp(mBuffer,"solid",5))
-			this->LoadASCIIFile();
-		else bMatClr = this->LoadBinaryFile();
 
-		// now copy faces
-		pMesh->mFaces = new aiFace[pMesh->mNumFaces];
-		for (unsigned int i = 0, p = 0; i < pMesh->mNumFaces;++i)
-		{
-			aiFace& face = pMesh->mFaces[i];
-			face.mIndices = new unsigned int[face.mNumIndices = 3];
-			for (unsigned int o = 0; o < 3;++o,++p)
-				face.mIndices[o] = p;
-		}
-	}
-	catch (ImportErrorException* ex)
+	// check whether the file starts with 'solid' -
+	// in this case we can simply assume it IS a text file. finished.
+	if (!::strncmp(mBuffer,"solid",5))
+		this->LoadASCIIFile();
+	else bMatClr = this->LoadBinaryFile();
+
+	// now copy faces
+	pMesh->mFaces = new aiFace[pMesh->mNumFaces];
+	for (unsigned int i = 0, p = 0; i < pMesh->mNumFaces;++i)
 	{
-		delete[] this->mBuffer;AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
-		throw ex;
+		aiFace& face = pMesh->mFaces[i];
+		face.mIndices = new unsigned int[face.mNumIndices = 3];
+		for (unsigned int o = 0; o < 3;++o,++p)
+			face.mIndices[o] = p;
 	}
 
-	// create a single default material - everything white, as
-	// we have vertex colors
+	// create a single default material - everything white, as we have vertex colors
 	MaterialHelper* pcMat = new MaterialHelper();
 	aiString s;
 	s.Set(AI_DEFAULT_MATERIAL_NAME);

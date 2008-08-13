@@ -392,8 +392,7 @@ void ASEImporter::BuildNodes()
 			{
 				continue;
 			}
-			if (szMyName[1].length() == szMyName2[0].length() &&
-				0 == ASSIMP_stricmp ( szMyName[1].c_str(), szMyName2[0].c_str()))
+			if (!ASSIMP_stricmp ( szMyName[1], szMyName2[0]))
 			{
 				bKnowParent = true;
 				break;
@@ -403,8 +402,7 @@ void ASEImporter::BuildNodes()
 			// that has already been handled and added to the list
 			if (i2 < i)
 			{
-				if (szMyName[1].length() == szMyName2[1].length() &&
-					0 == ASSIMP_stricmp ( szMyName[1].c_str(), szMyName2[1].c_str()))
+				if (ASSIMP_stricmp ( szMyName[1], szMyName2[1]))
 				{
 					bKnowParent = true;
 					break;

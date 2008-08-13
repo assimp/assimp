@@ -78,7 +78,7 @@ void GenVertexNormalsProcess::SetupProperties(const Importer* pImp)
 	// get the current value of the property
 	this->configMaxAngle = pImp->GetProperty(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE,180000) / 1000.0f;
 	this->configMaxAngle = std::max(std::min(this->configMaxAngle,180.0f),0.0f);
-	this->configMaxAngle *= 0.0174532925f;
+	this->configMaxAngle = AI_DEG_TO_RAD(this->configMaxAngle);
 }
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.

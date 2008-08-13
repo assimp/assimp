@@ -1325,6 +1325,10 @@
 					RelativePath="..\..\code\LWOLoader.cpp"
 					>
 				</File>
+				<File
+					RelativePath="..\..\code\LWOMaterial.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="MDC"

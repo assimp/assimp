@@ -44,21 +44,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "LWOLoader.h"
 #include "MaterialSystem.h"
+#include "StringComparison.h"
 #include "ByteSwap.h"
 
 // public assimp headers
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
-#include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
 #include "../include/DefaultLogger.h"
+#include "../include/assimp.hpp"
 
 // boost headers
 #include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
-
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -90,6 +90,13 @@ bool LWOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	if (extension[3] != 'o' && extension[3] != 'O')return false;
 
 	return true;
+}
+// ------------------------------------------------------------------------------------------------
+// Setup configuration properties
+void LWOImporter::SetupProperties(const Importer* pImp)
+{
+	this->configGradientResX = pImp->GetProperty(AI_CONFIG_IMPORT_LWO_GRADIENT_RESX,512);
+	this->configGradientResY = pImp->GetProperty(AI_CONFIG_IMPORT_LWO_GRADIENT_RESY,512);
 }
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
@@ -134,10 +141,18 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	mSurfaces = &_mSurfaces;
 
 	// old lightwave file format (prior to v6)
-	if (AI_LWO_FOURCC_LWOB == fileType)this->LoadLWOBFile();
+	if (AI_LWO_FOURCC_LWOB == fileType)
+	{
+		mIsLWO2 = false;
+		this->LoadLWOBFile();
+	}
 
 	// new lightwave format
-	else if (AI_LWO_FOURCC_LWO2 == fileType)this->LoadLWO2File();
+	else if (AI_LWO_FOURCC_LWO2 == fileType)
+	{
+		mIsLWO2 = true;
+		this->LoadLWO2File();
+	}
 
 	// we don't know this format
 	else 
@@ -198,6 +213,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		// generate the mesh 
 		aiMesh* mesh = pScene->mMeshes[p] = new aiMesh();
 		mesh->mNumFaces = sorted.size();
+		mesh->mMaxSmoothingAngle = AI_DEG_TO_RAD((*mSurfaces)[i].mMaximumSmoothAngle);
 
 		for (SortedRep::const_iterator it = sorted.begin(), end = sorted.end();
 			it != end;++it)
@@ -259,15 +275,40 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 	if (surf.mSpecularValue && surf.mGlossiness)
 	{
 		// this is only an assumption, needs to be confirmed.
-		/*if (16.0f >= surf.mGlossiness)surf.mGlossiness = 10.0f;
-		else if (64.0f >= surf.mGlossiness)surf.mGlossiness = 14.0f;
-		else if (256.0f >= surf.mGlossiness)surf.mGlossiness = 20.0f;
-		else surf.mGlossiness = 24.0f;*/
+		// the values have been tweaked by hand and seem to be correct.
+		float fGloss;
+		if (mIsLWO2)fGloss = surf.mGlossiness * 0.8f;
+		else
+		{
+			if (16.0f >= surf.mGlossiness)fGloss = 6.0f;
+			else if (64.0f >= surf.mGlossiness)fGloss = 20.0f;
+			else if (256.0f >= surf.mGlossiness)fGloss = 50.0f;
+			else fGloss = 80.0f;
+		}
 
 		pcMat->AddProperty<float>(&surf.mSpecularValue,1,AI_MATKEY_SHININESS_STRENGTH);
-		pcMat->AddProperty<float>(&surf.mGlossiness,1,AI_MATKEY_SHININESS);
+		pcMat->AddProperty<float>(&fGloss,1,AI_MATKEY_SHININESS);
 	}
 
+	// (the diffuse value is just a scaling factor)
+	aiColor3D clr = surf.mColor;
+	clr.r *= surf.mDiffuseValue;
+	clr.g *= surf.mDiffuseValue;
+	clr.b *= surf.mDiffuseValue;
+	pcMat->AddProperty<aiColor3D>(&surf.mColor,1,AI_MATKEY_COLOR_DIFFUSE);
+
+	// specular color
+	clr.r = surf.mSpecularValue;
+	clr.g = surf.mSpecularValue;
+	clr.b = surf.mSpecularValue;
+	pcMat->AddProperty<aiColor3D>(&surf.mColor,1,AI_MATKEY_COLOR_SPECULAR);
+
+	// opacity
+	float f = 1.0f-surf.mTransparency;
+	pcMat->AddProperty<float>(&f,1,AI_MATKEY_OPACITY);
+
+	// now handle all textures ...
+	// TODO
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -334,7 +375,9 @@ void LWOImporter::ResolveTags()
 	{
 		for (unsigned int i = 0; i < mSurfaces->size();++i)
 		{
-			if ((*mTags)[a] == (*mSurfaces)[i].mName)
+			const std::string& c = (*mTags)[a];
+			const std::string& d = (*mSurfaces)[i].mName;
+			if (!ASSIMP_stricmp(c,d))
 			{
 				(*mMapping)[a] = i;
 				break;
@@ -352,7 +395,7 @@ void LWOImporter::ParseString(std::string& out,unsigned int max)
 	{
 		if (++iCursor > max)
 		{
-			DefaultLogger::get()->warn("LWOB: Invalid file, texture name (TIMG) is too long");
+			DefaultLogger::get()->warn("LWOB: Invalid file, string is is too long");
 			break;
 		}
 		++in;
@@ -373,163 +416,20 @@ void LWOImporter::AdjustTexturePath(std::string& out)
 }
 
 // ------------------------------------------------------------------------------------------------
-#define AI_LWO_VALIDATE_CHUNK_LENGTH(length,name,size) \
-	if (length < size) \
-	{ \
-		DefaultLogger::get()->warn("LWO: "#name" chunk is too small"); \
-		break; \
-	} \
-
-// ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWOTags(unsigned int size)
 {
 	const char* szCur = (const char*)mFileBuffer, *szLast = szCur;
 	const char* const szEnd = szLast+size;
 	while (szCur < szEnd)
 	{
-		if (!(*szCur++))
+		if (!(*szCur))
 		{
 			const unsigned int len = unsigned int(szCur-szLast);
 			mTags->push_back(std::string(szLast,len));
 			szCur += len & 1;
 			szLast = szCur;
 		}
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-void LWOImporter::LoadLWOBSurface(unsigned int size)
-{
-	LE_NCONST uint8_t* const end = mFileBuffer + size;
-
-	uint32_t iCursor = 0;
-	mSurfaces->push_back( LWO::Surface () );
-	LWO::Surface& surf = mSurfaces->back();
-	LWO::Texture* pTex = NULL;
-
-	// at first we'll need to read the name of the surface
-	LE_NCONST uint8_t* sz = mFileBuffer;
-	while (*mFileBuffer)
-	{
-		if (++mFileBuffer > end)throw new ImportErrorException("LWOB: Invalid file, surface name is too long");
-	}
-	unsigned int len = unsigned int (mFileBuffer-sz);
-	surf.mName = std::string((const char*)sz,len);
-	mFileBuffer++;
-	if (!(len & 1))++mFileBuffer; // skip one byte if the length of the surface name is odd
-	while (true)
-	{
-		if (mFileBuffer + 6 > end)
-			break;
-
-		// no proper IFF header here - the chunk length is specified as int16
-		uint32_t head_type		= *((LE_NCONST uint32_t*)mFileBuffer);mFileBuffer+=4;
-		uint16_t head_length	= *((LE_NCONST uint16_t*)mFileBuffer);mFileBuffer+=2;
-		AI_LSWAP4(head_type);
-		AI_LSWAP2(head_length);
-		if (mFileBuffer + head_length > end)
-		{
-			throw new ImportErrorException("LWOB: Invalid file, the size attribute of "
-				"a surface sub chunk points behind the end of the file");
-		}
-		LE_NCONST uint8_t* const next = mFileBuffer+head_length;
-		switch (head_type)
-		{
-			// diffuse color
-		case AI_LWO_COLR:
-			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,COLR,3);
-				surf.mColor.r = *mFileBuffer++ / 255.0f;
-				surf.mColor.g = *mFileBuffer++ / 255.0f;
-				surf.mColor.b = *mFileBuffer   / 255.0f;
-				break;
-			}
-			// diffuse strength ... hopefully
-		case AI_LWO_DIFF:
-			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,DIFF,2);
-				AI_LSWAP2(mFileBuffer);
-				surf.mDiffuseValue = *((int16_t*)mFileBuffer) / 255.0f;
-				break;
-			}
-			// specular strength ... hopefully
-		case AI_LWO_SPEC:
-			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,SPEC,2);
-				AI_LSWAP2(mFileBuffer);
-				surf.mSpecularValue = *((int16_t*)mFileBuffer) / 255.0f;
-				break;
-			}
-		// transparency
-		case AI_LWO_TRAN:
-			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,TRAN,2);
-				AI_LSWAP2(mFileBuffer);
-				surf.mTransparency = *((int16_t*)mFileBuffer) / 255.0f;
-				break;
-			}
-		// glossiness
-		case AI_LWO_GLOS:
-			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,GLOS,2);
-				AI_LSWAP2(mFileBuffer);
-				surf.mGlossiness = float(*((int16_t*)mFileBuffer));
-				break;
-			}
-		// color texture
-		case AI_LWO_CTEX:
-			{
-				pTex = &surf.mColorTexture;
-				break;
-			}
-		// diffuse texture
-		case AI_LWO_DTEX:
-			{
-				pTex = &surf.mDiffuseTexture;
-				break;
-			}
-		// specular texture
-		case AI_LWO_STEX:
-			{
-				pTex = &surf.mSpecularTexture;
-				break;
-			}
-		// bump texture
-		case AI_LWO_BTEX:
-			{
-				pTex = &surf.mBumpTexture;
-				break;
-			}
-		// transparency texture
-		case AI_LWO_TTEX:
-			{
-				pTex = &surf.mTransparencyTexture;
-				break;
-			}
-			// texture path
-		case AI_LWO_TIMG:
-			{
-				if (pTex)
-				{
-					ParseString(pTex->mFileName,head_length);	
-					AdjustTexturePath(pTex->mFileName);
-					mFileBuffer += pTex->mFileName.length();
-				}
-				else DefaultLogger::get()->warn("LWOB: TIMG tag was encuntered although "
-					"there was no xTEX tag before");
-				break;
-			}
-		// texture strength
-		case AI_LWO_TVAL:
-			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,TVAL,1);
-				if (pTex)pTex->mStrength = *mFileBuffer / 255.0f;
-				else DefaultLogger::get()->warn("LWOB: TVAL tag was encuntered "
-					"although there was no xTEX tag before");
-				break;
-			}
-		}
-		mFileBuffer = next;
+		szCur++;
 	}
 }
 

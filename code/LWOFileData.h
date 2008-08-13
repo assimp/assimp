@@ -301,7 +301,8 @@ struct Surface
 		, mSpecularValue		(1.0f)
 		, mTransparency			(0.0f)
 		, mGlossiness			(0.0f)
-		, mMaximumSmoothAngle	(90.0f)
+		, mLuminosity			(0.0f)
+		, mMaximumSmoothAngle	(0.0f) // 0 == not specified
 	{}
 
 	//! Name of the surface
@@ -314,7 +315,7 @@ struct Surface
 	bool bDoubleSided;
 
 	//! Various material parameters
-	float mDiffuseValue,mSpecularValue,mTransparency,mGlossiness;
+	float mDiffuseValue,mSpecularValue,mTransparency,mGlossiness,mLuminosity;
 
 	//! Maximum angle between two adjacent triangles
 	//! that they can be smoothed - in degrees

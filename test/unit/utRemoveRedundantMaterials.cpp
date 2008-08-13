@@ -59,6 +59,15 @@ void RemoveRedundantMatsTest :: setUp (void)
 	this->pcScene1->mMaterials[1] = getUniqueMaterial2();
 	this->pcScene1->mMaterials[4] = getUniqueMaterial3();
 
+	// all materials must be referenced
+	this->pcScene1->mNumMeshes = 5;
+	this->pcScene1->mMeshes = new aiMesh*[5];
+	for (unsigned int i = 0; i < 5;++i)
+	{
+		this->pcScene1->mMeshes[i] = new aiMesh();
+		this->pcScene1->mMeshes[i]->mMaterialIndex = i;
+	}
+
 	// setup an unique name for each material - this shouldn't care
 	aiString mTemp;
 	mTemp.length = 1;

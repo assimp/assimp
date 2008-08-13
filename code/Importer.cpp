@@ -576,7 +576,7 @@ void AddNodeWeight(unsigned int& iScene,const aiNode* pcNode)
 // Get the memory requirements of the scene
 void Importer::GetMemoryRequirements(aiMemoryInfo& in) const
 {
-	in.aiMemoryInfo::aiMemoryInfo();
+	in = aiMemoryInfo();
 	if (!this->mScene)return;
 
 	in.total = sizeof(aiScene);

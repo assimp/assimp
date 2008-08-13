@@ -113,6 +113,14 @@ public:
 	virtual void SetupProperties(const Importer* pImp);
 
 
+	//! Set the split limit - needed for unit testing
+	inline void SetLimit(unsigned int l)
+		{LIMIT = l;}
+
+	//! Get the split limit
+	inline unsigned int GetLimit() const
+		{return LIMIT;}
+
 protected:
 
 	// -------------------------------------------------------------------
@@ -172,6 +180,15 @@ public:
 	* basing on the Importer's configuration property list.
 	*/
 	virtual void SetupProperties(const Importer* pImp);
+
+
+	//! Set the split limit - needed for unit testing
+	inline void SetLimit(unsigned int l)
+		{LIMIT = l;}
+
+	//! Get the split limit
+	inline unsigned int GetLimit() const
+		{return LIMIT;}
 
 protected:
 

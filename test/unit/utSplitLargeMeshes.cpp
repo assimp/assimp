@@ -6,12 +6,12 @@ CPPUNIT_TEST_SUITE_REGISTRATION (SplitLargeMeshesTest);
 
 void SplitLargeMeshesTest :: setUp (void)
 {
-	aiSetVertexSplitLimit(1000);
-	aiSetTriangleSplitLimit(1000);
-
 	// construct the processes
 	this->piProcessTriangle = new SplitLargeMeshesProcess_Triangle();
 	this->piProcessVertex = new SplitLargeMeshesProcess_Vertex();
+
+	this->piProcessTriangle->SetLimit(1000);
+	this->piProcessVertex->SetLimit(1000);
 
 	this->pcMesh1 = new aiMesh();
 	pcMesh1->mNumVertices = 2100; // quersumme: 3
@@ -47,9 +47,9 @@ void SplitLargeMeshesTest :: setUp (void)
 		aiFace& face = pcMesh2->mFaces[i];
 		face.mNumIndices = 3;
 		face.mIndices = new unsigned int[3];
-		face.mIndices[0] = unsigned int((rand() / (float)RAND_MAX) * pcMesh2->mNumVertices);
-		face.mIndices[1] = unsigned int((rand() / (float)RAND_MAX) * pcMesh2->mNumVertices);
-		face.mIndices[2] = unsigned int((rand() / (float)RAND_MAX) * pcMesh2->mNumVertices);
+		face.mIndices[0] = (unsigned int)((rand() / (float)RAND_MAX) * pcMesh2->mNumVertices);
+		face.mIndices[1] = (unsigned int)((rand() / (float)RAND_MAX) * pcMesh2->mNumVertices);
+		face.mIndices[2] = (unsigned int)((rand() / (float)RAND_MAX) * pcMesh2->mNumVertices);
 	}
 }
 

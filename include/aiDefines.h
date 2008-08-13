@@ -67,6 +67,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #		define ASSIMP_API 
 #	endif
 
+#else
+#	define ASSIMP_API
 #endif // (defined _MSC_VER)
 
 #ifdef __cplusplus

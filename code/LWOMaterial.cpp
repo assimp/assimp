@@ -59,6 +59,60 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
+void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat)
+{
+	// copy the name of the surface
+	aiString st;
+	st.Set(surf.mName);
+	pcMat->AddProperty(&st,AI_MATKEY_NAME);
+
+	int i = surf.bDoubleSided ? 1 : 0;
+	pcMat->AddProperty<int>(&i,1,AI_MATKEY_TWOSIDED);
+	
+	if (surf.mSpecularValue && surf.mGlossiness)
+	{
+		// this is only an assumption, needs to be confirmed.
+		// the values have been tweaked by hand and seem to be correct.
+		float fGloss;
+		if (mIsLWO2)fGloss = surf.mGlossiness * 0.8f;
+		else
+		{
+			if (16.0f >= surf.mGlossiness)fGloss = 6.0f;
+			else if (64.0f >= surf.mGlossiness)fGloss = 20.0f;
+			else if (256.0f >= surf.mGlossiness)fGloss = 50.0f;
+			else fGloss = 80.0f;
+		}
+
+		pcMat->AddProperty<float>(&surf.mSpecularValue,1,AI_MATKEY_SHININESS_STRENGTH);
+		pcMat->AddProperty<float>(&fGloss,1,AI_MATKEY_SHININESS);
+	}
+
+	// (the diffuse value is just a scaling factor)
+	aiColor3D clr = surf.mColor;
+	clr.r *= surf.mDiffuseValue;
+	clr.g *= surf.mDiffuseValue;
+	clr.b *= surf.mDiffuseValue;
+	pcMat->AddProperty<aiColor3D>(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
+
+	// specular color
+	clr.b = clr.g  = clr.r = surf.mSpecularValue;
+	pcMat->AddProperty<aiColor3D>(&clr,1,AI_MATKEY_COLOR_SPECULAR);
+
+	// emissive color
+	// (luminosity is not really the same but it affects the surface in 
+	//  a similar way. However, some scalings seems to be necessary)
+	clr.g = clr.b = clr.r = surf.mLuminosity*0.8f;
+	pcMat->AddProperty<aiColor3D>(&clr,1,AI_MATKEY_COLOR_EMISSIVE);
+
+	// opacity
+	float f = 1.0f-surf.mTransparency;
+	pcMat->AddProperty<float>(&f,1,AI_MATKEY_OPACITY);
+
+	// now handle all textures ...
+	// TODO
+}
+
+// ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWOBSurface(unsigned int size)
 {
 	LE_NCONST uint8_t* const end = mFileBuffer + size;
@@ -89,7 +143,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		LE_NCONST uint8_t* const next = mFileBuffer+head_length;
 		switch (head_type)
 		{
-			// diffuse color
+		// diffuse color
 		case AI_LWO_COLR:
 			{
 				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,COLR,3);
@@ -98,7 +152,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 				surf.mColor.b = *mFileBuffer   / 255.0f;
 				break;
 			}
-			// diffuse strength ... hopefully
+		// diffuse strength ...
 		case AI_LWO_DIFF:
 			{
 				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,DIFF,2);
@@ -106,12 +160,20 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 				surf.mDiffuseValue = *((int16_t*)mFileBuffer) / 255.0f;
 				break;
 			}
-			// specular strength ... hopefully
+		// specular strength ... 
 		case AI_LWO_SPEC:
 			{
 				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,SPEC,2);
 				AI_LSWAP2P(mFileBuffer);
 				surf.mSpecularValue = *((int16_t*)mFileBuffer) / 255.0f;
+				break;
+			}
+		// luminosity ... 
+		case AI_LWO_LUMI:
+			{
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,LUMI,2);
+				AI_LSWAP2P(mFileBuffer);
+				surf.mLuminosity = *((int16_t*)mFileBuffer) / 255.0f;
 				break;
 			}
 		// transparency

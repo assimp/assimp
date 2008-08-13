@@ -253,7 +253,7 @@ inline aiMatrix4x4& aiMatrix4x4::RotationX(float a, aiMatrix4x4& out)
      M = |  0  cos(A) -sin(A)  0 |
          |  0  sin(A)  cos(A)  0 |
          |  0  0       0       1 |	*/
-	out.aiMatrix4x4::aiMatrix4x4();
+	out = aiMatrix4x4();
 	out.b2 = out.c3 = cos(a);
 	out.b3 = -(out.c2 = sin(a));
 	return out;
@@ -267,7 +267,7 @@ inline aiMatrix4x4& aiMatrix4x4::RotationY(float a, aiMatrix4x4& out)
          | -sin(A)  0   cos(A)  0 |
          |  0       0   0       1 |
 		*/
-	out.aiMatrix4x4::aiMatrix4x4();
+	out = aiMatrix4x4();
 	out.a1 = out.c3 = cos(a);
 	out.c1 = -(out.a3 = sin(a));
 	return out;
@@ -281,7 +281,7 @@ inline aiMatrix4x4& aiMatrix4x4::RotationZ(float a, aiMatrix4x4& out)
      M = |  sin(A)   cos(A)   0   0 |
          |  0        0        1   0 |
          |  0        0        0   1 |	*/
-	out.aiMatrix4x4::aiMatrix4x4();
+	out = aiMatrix4x4();
 	out.a1 = out.b2 = cos(a);
 	out.a2 = -(out.b1 = sin(a));
 	return out;
@@ -289,7 +289,7 @@ inline aiMatrix4x4& aiMatrix4x4::RotationZ(float a, aiMatrix4x4& out)
 // ---------------------------------------------------------------------------
 inline aiMatrix4x4& aiMatrix4x4::Translation(aiVector3D v, aiMatrix4x4& out)
 {
-	out.aiMatrix4x4::aiMatrix4x4();
+	out = aiMatrix4x4();
 	out.d1 = v.x;
 	out.d2 = v.y;
 	out.d3 = v.z;

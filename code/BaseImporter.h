@@ -50,6 +50,7 @@ namespace Assimp
 {
 
 class IOSystem;
+class Importer;
 
 // ---------------------------------------------------------------------------
 /** Simple exception class to be thrown if an error occurs while importing. */

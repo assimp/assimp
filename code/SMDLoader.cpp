@@ -890,6 +890,13 @@ void SMDImporter::ParseSkeletonSection(const char* szCurrent,
 	}
 	*szCurrentOut = szCurrent;	
 }
+
+#define SMDI_PARSE_RETURN { \
+	SkipLine(szCurrent,&szCurrent); \
+	*szCurrentOut = szCurrent; \
+	return; \
+}
+
 // ------------------------------------------------------------------------------------------------
 // Parse a node line
 void SMDImporter::ParseNodeInfo(const char* szCurrent,
@@ -900,7 +907,7 @@ void SMDImporter::ParseNodeInfo(const char* szCurrent,
 	if(!this->ParseUnsignedInt(szCurrent,&szCurrent,iBone) || !SkipSpaces(szCurrent,&szCurrent))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing bone index");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 	// add our bone to the list
 	if (iBone >= this->asBones.size())this->asBones.resize(iBone+1);
@@ -932,7 +939,7 @@ void SMDImporter::ParseNodeInfo(const char* szCurrent,
 		else if (!(*szEnd))
 		{
 			this->LogErrorNoThrow("Unexpected EOF/EOL while parsing bone name");
-			goto __RETURN; // YEAH!!!
+			SMDI_PARSE_RETURN;
 		}
 		++szEnd;
 	}
@@ -943,13 +950,11 @@ void SMDImporter::ParseNodeInfo(const char* szCurrent,
 	if(!this->ParseSignedInt(szCurrent,&szCurrent,(int&)bone.iParent))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing bone parent index. Assuming -1");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 
 	// go to the beginning of the next line
-__RETURN:
-	SkipLine(szCurrent,&szCurrent);
-	*szCurrentOut = szCurrent;
+	SMDI_PARSE_RETURN;
 }
 // ------------------------------------------------------------------------------------------------
 // Parse a skeleton element
@@ -963,12 +968,12 @@ void SMDImporter::ParseSkeletonElement(const char* szCurrent,
 	if(!this->ParseUnsignedInt(szCurrent,&szCurrent,iBone))
 	{
 		DefaultLogger::get()->error("Unexpected EOF/EOL while parsing bone index");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 	if (iBone >= this->asBones.size())
 	{
 		this->LogErrorNoThrow("Bone index in skeleton section is out of range");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 	SMD::Bone& bone = this->asBones[iBone];
 
@@ -979,32 +984,32 @@ void SMDImporter::ParseSkeletonElement(const char* szCurrent,
 	if(!this->ParseFloat(szCurrent,&szCurrent,vPos.x))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing bone.pos.x");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 	if(!this->ParseFloat(szCurrent,&szCurrent,vPos.y))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing bone.pos.y");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 	if(!this->ParseFloat(szCurrent,&szCurrent,vPos.z))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing bone.pos.z");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 	if(!this->ParseFloat(szCurrent,&szCurrent,vRot.x))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing bone.rot.x");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 	if(!this->ParseFloat(szCurrent,&szCurrent,vRot.y))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing bone.rot.y");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 	if(!this->ParseFloat(szCurrent,&szCurrent,vRot.z))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing bone.rot.z");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 	// build the transformation matrix of the key
 	key.matrix.FromEulerAngles(vRot.x,vRot.y,vRot.z);
@@ -1017,9 +1022,7 @@ void SMDImporter::ParseSkeletonElement(const char* szCurrent,
 	}
 
 	// go to the beginning of the next line
-__RETURN:
-	SkipLine(szCurrent,&szCurrent);
-	*szCurrentOut = szCurrent;
+	SMDI_PARSE_RETURN;
 }
 // ------------------------------------------------------------------------------------------------
 // Parse a triangle
@@ -1108,69 +1111,66 @@ void SMDImporter::ParseVertex(const char* szCurrent,
 	if(!this->ParseSignedInt(szCurrent,&szCurrent,(int32_t&)vertex.iParentNode))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing vertex.parent");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 	if(!this->ParseFloat(szCurrent,&szCurrent,vertex.pos.x))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing vertex.pos.x");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 	if(!this->ParseFloat(szCurrent,&szCurrent,vertex.pos.y))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing vertex.pos.y");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 	if(!this->ParseFloat(szCurrent,&szCurrent,vertex.pos.z))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing vertex.pos.z");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 	if(!this->ParseFloat(szCurrent,&szCurrent,vertex.nor.x))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing vertex.nor.x");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 	if(!this->ParseFloat(szCurrent,&szCurrent,vertex.nor.y))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing vertex.nor.y");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 	if(!this->ParseFloat(szCurrent,&szCurrent,vertex.nor.z))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing vertex.nor.z");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 
-	if (bVASection)goto __RETURN;
+	if (bVASection)SMDI_PARSE_RETURN;
 
 	if(!this->ParseFloat(szCurrent,&szCurrent,vertex.uv.x))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing vertex.uv.x");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 	if(!this->ParseFloat(szCurrent,&szCurrent,vertex.uv.y))
 	{
 		this->LogErrorNoThrow("Unexpected EOF/EOL while parsing vertex.uv.y");
-		goto __RETURN; // YEAH!!!
+		SMDI_PARSE_RETURN;
 	}
 
 	// now read the number of bones affecting this vertex
 	// all elements from now are fully optional, we don't need them
 	unsigned int iSize = 0;
-	if(!this->ParseUnsignedInt(szCurrent,&szCurrent,iSize))goto __RETURN;
+	if(!this->ParseUnsignedInt(szCurrent,&szCurrent,iSize))SMDI_PARSE_RETURN;
 	vertex.aiBoneLinks.resize(iSize,std::pair<unsigned int, float>(-1,0.0f));
 
 	for (std::vector<std::pair<unsigned int, float> >::iterator
 		i =  vertex.aiBoneLinks.begin();
 		i != vertex.aiBoneLinks.end();++i)
 	{
-		if(!this->ParseUnsignedInt(szCurrent,&szCurrent,(*i).first))goto __RETURN;
-		if(!this->ParseFloat(szCurrent,&szCurrent,(*i).second))goto __RETURN;
+		if(!this->ParseUnsignedInt(szCurrent,&szCurrent,(*i).first))SMDI_PARSE_RETURN;
+		if(!this->ParseFloat(szCurrent,&szCurrent,(*i).second))SMDI_PARSE_RETURN;
 	}
 
 	// go to the beginning of the next line
-__RETURN:
-	SkipLine(szCurrent,&szCurrent);
-	*szCurrentOut = szCurrent;
-	return;
+	SMDI_PARSE_RETURN;
 }

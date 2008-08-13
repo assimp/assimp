@@ -50,6 +50,8 @@ struct aiScene;
 namespace Assimp
 {
 
+class Importer;
+
 // ---------------------------------------------------------------------------
 /** The BaseProcess defines a common interface for all post processing steps.
  * A post processing step is run after a successful import if the caller

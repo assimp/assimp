@@ -65,6 +65,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+#if _MSC_VER >= 1400
+#	define vsprintf vsprintf_s
+#	define sprintf sprintf_s
+#endif
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ValidateDSProcess::ValidateDSProcess()
@@ -96,11 +101,7 @@ void ValidateDSProcess::ReportError(const char* msg,...)
 	char szBuffer[3000];
 
 	int iLen;
-#if _MSC_VER >= 1400
-	iLen = vsprintf_s(szBuffer,msg,args);
-#else
 	iLen = vsprintf(szBuffer,msg,args);
-#endif
 
 	if (0 >= iLen)
 	{
@@ -122,11 +123,7 @@ void ValidateDSProcess::ReportWarning(const char* msg,...)
 	char szBuffer[3000];
 
 	int iLen;
-#if _MSC_VER >= 1400
-	iLen = vsprintf_s(szBuffer,msg,args);
-#else
 	iLen = vsprintf(szBuffer,msg,args);
-#endif
 
 	if (0 >= iLen)
 	{
@@ -456,11 +453,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 	// "$tex.file.<szType>[<index>]"
 	char szBaseBuf[512];
 	int iLen;
-#if _MSC_VER >= 1400
-	iLen = ::sprintf_s(szBaseBuf,"$tex.file.%s",szType);
-#else
 	iLen = ::sprintf(szBaseBuf,"$tex.file.%s",szType);
-#endif
 	if (0 >= iLen)return;
 
 	int iNumIndices = 0;
@@ -474,7 +467,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 			if (*sz)
 			{
 				++sz;
-				iIndex = std::max(iIndex, (int)strtol10(sz,NULL));
+				iIndex = std::max(iIndex, (int)strtol10(sz,0));
 				++iNumIndices;
 			}
 
@@ -489,11 +482,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 	}
 
 	// now check whether all UV indices are valid ...
-#if _MSC_VER >= 1400
-	iLen = ::sprintf_s(szBaseBuf,"$tex.uvw.%s",szType);
-#else
 	iLen = ::sprintf(szBaseBuf,"$tex.uvw.%s",szType);
-#endif
 	if (0 >= iLen)return;
 	
 	for (unsigned int i = 0; i < pMaterial->mNumProperties;++i)

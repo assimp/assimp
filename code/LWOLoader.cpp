@@ -213,7 +213,8 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		// generate the mesh 
 		aiMesh* mesh = pScene->mMeshes[p] = new aiMesh();
 		mesh->mNumFaces = sorted.size();
-		mesh->mMaxSmoothingAngle = AI_DEG_TO_RAD((*mSurfaces)[i].mMaximumSmoothAngle);
+		if ((*mSurfaces)[i].mMaximumSmoothAngle)
+			mesh->mMaxSmoothingAngle = AI_DEG_TO_RAD((*mSurfaces)[i].mMaximumSmoothAngle);
 
 		for (SortedRep::const_iterator it = sorted.begin(), end = sorted.end();
 			it != end;++it)
@@ -259,56 +260,6 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	p->mName.Set("<LWORoot>");
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
 		p->mMeshes[i] = i;
-}
-
-// ------------------------------------------------------------------------------------------------
-void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat)
-{
-	// copy the name of the surface
-	aiString st;
-	st.Set(surf.mName);
-	pcMat->AddProperty(&st,AI_MATKEY_NAME);
-
-	int i = surf.bDoubleSided ? 1 : 0;
-	pcMat->AddProperty<int>(&i,1,AI_MATKEY_TWOSIDED);
-	
-	if (surf.mSpecularValue && surf.mGlossiness)
-	{
-		// this is only an assumption, needs to be confirmed.
-		// the values have been tweaked by hand and seem to be correct.
-		float fGloss;
-		if (mIsLWO2)fGloss = surf.mGlossiness * 0.8f;
-		else
-		{
-			if (16.0f >= surf.mGlossiness)fGloss = 6.0f;
-			else if (64.0f >= surf.mGlossiness)fGloss = 20.0f;
-			else if (256.0f >= surf.mGlossiness)fGloss = 50.0f;
-			else fGloss = 80.0f;
-		}
-
-		pcMat->AddProperty<float>(&surf.mSpecularValue,1,AI_MATKEY_SHININESS_STRENGTH);
-		pcMat->AddProperty<float>(&fGloss,1,AI_MATKEY_SHININESS);
-	}
-
-	// (the diffuse value is just a scaling factor)
-	aiColor3D clr = surf.mColor;
-	clr.r *= surf.mDiffuseValue;
-	clr.g *= surf.mDiffuseValue;
-	clr.b *= surf.mDiffuseValue;
-	pcMat->AddProperty<aiColor3D>(&surf.mColor,1,AI_MATKEY_COLOR_DIFFUSE);
-
-	// specular color
-	clr.r = surf.mSpecularValue;
-	clr.g = surf.mSpecularValue;
-	clr.b = surf.mSpecularValue;
-	pcMat->AddProperty<aiColor3D>(&surf.mColor,1,AI_MATKEY_COLOR_SPECULAR);
-
-	// opacity
-	float f = 1.0f-surf.mTransparency;
-	pcMat->AddProperty<float>(&f,1,AI_MATKEY_OPACITY);
-
-	// now handle all textures ...
-	// TODO
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -400,7 +351,7 @@ void LWOImporter::ParseString(std::string& out,unsigned int max)
 		}
 		++in;
 	}
-	unsigned int len = unsigned int (in-sz);
+	unsigned int len = (unsigned int) (in-sz);
 	out = std::string(sz,len);
 }
 
@@ -424,7 +375,7 @@ void LWOImporter::LoadLWOTags(unsigned int size)
 	{
 		if (!(*szCur))
 		{
-			const unsigned int len = unsigned int(szCur-szLast);
+			const unsigned int len = (unsigned int)(szCur-szLast);
 			mTags->push_back(std::string(szLast,len));
 			szCur += len & 1;
 			szLast = szCur;

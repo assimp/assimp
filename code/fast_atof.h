@@ -1,8 +1,16 @@
 // Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine" and the "irrXML" project.
 // For conditions of distribution and use, see copyright notice in irrlicht.h and irrXML.h
+
+// ------------------------------------------------------------------------------------
+// Original description: (Schrompf)
 // Adapted to the ASSIMP library because the builtin atof indeed takes AGES to parse a
 // float inside a large string. Before parsing, it does a strlen on the given point.
+// Changes:
+//  22nd October 08 (Aramis_acg): Added temporary cast to double, added strtol10_64
+//     to ensure long numbers are handled correctly
+// ------------------------------------------------------------------------------------
+
 
 #ifndef __FAST_A_TO_F_H_INCLUDED__
 #define __FAST_A_TO_F_H_INCLUDED__
@@ -31,6 +39,8 @@ const float fast_atof_table[16] =	{  // we write [16] here instead of [] to work
 	0.000000000000001f
 };
 
+
+// ------------------------------------------------------------------------------------
 inline unsigned int strtol10( const char* in, const char** out=0)
 {
 	unsigned int value = 0;
@@ -49,6 +59,7 @@ inline unsigned int strtol10( const char* in, const char** out=0)
 }
 
 
+// ------------------------------------------------------------------------------------
 // specal version of the function, providing higher accuracy
 inline uint64_t strtol10_64( const char* in, const char** out=0)
 {
@@ -67,6 +78,8 @@ inline uint64_t strtol10_64( const char* in, const char** out=0)
 	return value;
 }
 
+
+// ------------------------------------------------------------------------------------
 //! Provides a fast function for converting a string into a float,
 //! about 6 times faster than atof in win32.
 // If you find any bugs, please send them to me, niko (at) irrlicht3d.org.
@@ -127,6 +140,8 @@ inline const char* fast_atof_move( const char* c, float& out)
 	return c;
 }
 
+
+// ------------------------------------------------------------------------------------
 inline float fast_atof(const char* c)
 {
 	float ret;

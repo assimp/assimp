@@ -55,6 +55,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "aiTypes.h"
 #include "aiConfig.h"
 
+namespace Assimp
+{
+	class Importer;
+};
+
 // internal ASSIMP headers - for plugin development
 #include "./../code/BaseImporter.h"
 #include "./../code/BaseProcess.h"

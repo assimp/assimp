@@ -51,17 +51,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 
-
 // ------------------------------------------------------------------------------------------------
 SplitLargeMeshesProcess_Triangle::SplitLargeMeshesProcess_Triangle()
-	{
-		// nothing to do here
-	}
+{
+	LIMIT = AI_SLM_DEFAULT_MAX_TRIANGLES;
+}
 // ------------------------------------------------------------------------------------------------
 SplitLargeMeshesProcess_Triangle::~SplitLargeMeshesProcess_Triangle()
-	{
+{
 	// nothing to do here
-	}
+}
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool SplitLargeMeshesProcess_Triangle::IsActive( unsigned int pFlags) const
@@ -327,14 +326,14 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
 }
 // ------------------------------------------------------------------------------------------------
 SplitLargeMeshesProcess_Vertex::SplitLargeMeshesProcess_Vertex()
-	{
-		// nothing to do here
-	}
+{
+	LIMIT = AI_SLM_DEFAULT_MAX_VERTICES;
+}
 // ------------------------------------------------------------------------------------------------
 SplitLargeMeshesProcess_Vertex::~SplitLargeMeshesProcess_Vertex()
-	{
+{
 	// nothing to do here
-	}
+}
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool SplitLargeMeshesProcess_Vertex::IsActive( unsigned int pFlags) const

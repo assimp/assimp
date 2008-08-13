@@ -72,7 +72,7 @@ inline aiReturn aiMaterial::Get(const char* pKey,Type* pOut,
 		if (prop->mDataLength < sizeof(Type)*iNum)return AI_FAILURE;
 		if (strcmp(prop->mData,(char*)aiPTI_Buffer)!=0)return AI_FAILURE;
 
-		iNum = std::min(iNum,prop->mDataLength / sizeof(Type));
+		iNum = std::min((size_t)iNum,prop->mDataLength / sizeof(Type));
 		::memcpy(pOut,prop->mData,iNum * sizeof(Type));
 		if (pMax)*pMax = iNum;
 	}

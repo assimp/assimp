@@ -27,8 +27,8 @@ void VTAdjacency :: setUp (void)
 		face.mIndices[0] = iCurrent++;
 
 
-		while(face.mIndices[0] == ( face.mIndices[1] = unsigned int(((float)rand()/RAND_MAX)*499)));
-		while(face.mIndices[0] == ( face.mIndices[2] = unsigned int(((float)rand()/RAND_MAX)*499)) ||
+		while(face.mIndices[0] == ( face.mIndices[1] = (unsigned int)(((float)rand()/RAND_MAX)*499)));
+		while(face.mIndices[0] == ( face.mIndices[2] = (unsigned int)(((float)rand()/RAND_MAX)*499)) ||
 			face.mIndices[1] == face.mIndices[2]);
 	}
 

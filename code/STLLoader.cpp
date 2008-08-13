@@ -182,7 +182,7 @@ void STLImporter::LoadASCIIFile()
 	unsigned int temp;
 
 	// setup the name of the node
-	if (temp = unsigned int(sz-szMe))
+	if (temp = (unsigned int)(sz-szMe))
 	{
 		pScene->mRootNode->mName.length = temp;
 		::memcpy(pScene->mRootNode->mName.data,szMe,temp);
@@ -213,9 +213,9 @@ void STLImporter::LoadASCIIFile()
 			if (pMesh->mNumFaces == curFace)
 			{
 				// need to resize the arrays, our size estimate was wrong
-				unsigned int iNeededSize = unsigned int(sz-mBuffer) / pMesh->mNumFaces;
+				unsigned int iNeededSize = (unsigned int)(sz-mBuffer) / pMesh->mNumFaces;
 				if (iNeededSize <= 160)iNeededSize >>= 1; // prevent endless looping
-				unsigned int add = unsigned int((mBuffer+fileSize)-sz) / iNeededSize;
+				unsigned int add = (unsigned int)((mBuffer+fileSize)-sz) / iNeededSize;
 				add += add >> 3; // add 12.5% as buffer
 				iNeededSize = (pMesh->mNumFaces + add)*3;
 				aiVector3D* pv = new aiVector3D[iNeededSize];

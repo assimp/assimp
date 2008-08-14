@@ -74,30 +74,50 @@ public:
 	typedef std::vector<char>::const_iterator ConstDataArrayIt;
 
 public:
+	///	\brief	Constructor with data array.
 	ObjFileParser(std::vector<char> &Data, const std::string &strAbsPath, const std::string &strModelName);
+	///	\brief	Destructor
 	~ObjFileParser();
+	///	\brief	Model getter.
 	ObjFile::Model *GetModel() const;
 
 private:
+	///	Parse the loadedfile
 	void parseFile();
+	///	Method to copy the new delimited word in the current line.
 	void copyNextWord(char *pBuffer, size_t length);
+	///	Method to copy the new line.
 	void copyNextLine(char *pBuffer, size_t length);
-	void getVector3(std::vector<aiVector3D*> &point3d_array);
+	///	Stores the following 3d vector.
+	void getVector3( std::vector<aiVector3D*> &point3d_array );
+	///	Stores the following 3d vector.
 	void getVector2(std::vector<aiVector2D*> &point2d_array);
+	///	Stores the following face.
 	void getFace();
 	void getMaterialDesc();
+	///	Gets a comment.
 	void getComment();
+	/// Gets a a material library.
 	void getMaterialLib();
+	/// Creates a new material.
 	void getNewMaterial();
+	/// Gets the groupname from file.
 	void getGroupName();
+	/// Gets the group number from file.
 	void getGroupNumber();
+	///
 	int getMaterialIndex( const std::string &strMaterialName );
+	///
 	void getObjectName();
+	///
 	void createObject(const std::string &strObjectName);
+	///	Error report in token
 	void reportErrorTokenInFace();
-	void extractExtension(const std::string strFile, std::string &strExt);
+	///	Extractor for extention
+	void extractExtension(const std::string &strFile, std::string &strExt);
 
 private:
+	///	Default material name
 	static const std::string DEFAULT_MATERIAL;/* = "defaultmaterial";*/
 	//!	Absolute filepath to model
 	std::string m_strAbsPath;

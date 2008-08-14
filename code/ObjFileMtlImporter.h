@@ -76,20 +76,21 @@ public:
 	~ObjFileMtlImporter();
 
 private:
-	//!	\brief	Copy constructor, empty.
+	///	Copy constructor, empty.
 	ObjFileMtlImporter(const ObjFileMtlImporter &rOther);
-	
-	//!	\brief	Assignment operator, returns only a reference of this instance.
+	///	\brief	Assignment operator, returns only a reference of this instance.
 	ObjFileMtlImporter &operator = (const ObjFileMtlImporter &rOther);
-
-	//!	\brief	Load the whole material description
+	///	Load the whole material description
 	void load();
-	
-	//!	
+	///	Get color data.
 	void getColorRGBA( aiColor3D *pColor);
+	///	Get illumination model from loaded data
 	void getIlluminationModel( int &illum_model );
+	///	Gets a float value from data.	
 	void getFloatValue( float &value );
+	///	Creates a new material from loaded data.
 	void createMaterial();
+	///	Get texture name from loaded data.
 	void getTexture();
 
 private:
@@ -106,6 +107,8 @@ private:
 	//!	Helper buffer
 	char m_buffer[BUFFERSIZE];
 };
+
+// ------------------------------------------------------------------------------------------------
 
 } // Namespace Assimp
 

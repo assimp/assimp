@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <map>
 #include "../include/aiTypes.h"
+#include "../include/aiMesh.h"
 
 namespace Assimp
 {
@@ -151,12 +152,16 @@ struct Material
 	//!	Illumination model 
 	int illumination_model;
 
+	//!	Constructor
 	Material()
 	{
+		// empty
 	}
 
+	// Destructor
 	~Material()
 	{
+		// empty
 	}
 };
 
@@ -165,19 +170,27 @@ struct Material
 //!	\brief	Data structure to store a mesh
 struct Mesh
 {
+	///	Array with pointer to all stored faces
 	std::vector<Face*> m_Faces;
+	///	Assigned material
 	Material *m_pMaterial;
+	///	Number of stored indices.
 	unsigned int m_uiNumIndices;
+	/// Number of UV
+	unsigned int m_uiUVCoordinates[ AI_MAX_NUMBER_OF_TEXTURECOORDS ];
+	///	Material index.
 	unsigned int m_uiMaterialIndex;
 
+	///	Constructor
 	Mesh() :
 		m_pMaterial(NULL),
 		m_uiNumIndices(0),
 		m_uiMaterialIndex(0)
 	{
-		// empty
+		memset(m_uiUVCoordinates, 0, sizeof( unsigned int ) * AI_MAX_NUMBER_OF_TEXTURECOORDS);
 	}
 
+	///	Destructor
 	~Mesh() 
 	{
 		// empty
@@ -259,6 +272,8 @@ struct Model
 		m_Meshes.clear();
 	}
 };
+
+// ------------------------------------------------------------------------------------------------
 
 } // Namespace ObjFile
 } // Namespace Assimp

@@ -57,8 +57,10 @@ struct Object;
 struct Model;
 }
 
+// ------------------------------------------------------------------------------------------------
 ///	\class	ObjFileImporter
 ///	\brief	Imports a waveform obj file
+// ------------------------------------------------------------------------------------------------
 class ObjFileImporter :
 	BaseImporter
 {	
@@ -112,7 +114,7 @@ private:
 	//!	\brief	Appends a child node to a parentnode and updates the datastructures.
 	void appendChildToParentNode(aiNode *pParent, aiNode *pChild);
 
-	//!	\brief
+	//!	\brief TODO!
 	void createAnimations();
 
 private:
@@ -124,10 +126,14 @@ private:
 	std::string m_strAbsPath;
 };
 
+// ------------------------------------------------------------------------------------------------
+//	
 inline void ObjFileImporter::GetExtensionList(std::string& append)
 {
 	append.append("*.obj");
 }
+
+// ------------------------------------------------------------------------------------------------
 
 } // Namespace Assimp
 

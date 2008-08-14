@@ -1,3 +1,43 @@
+/*
+---------------------------------------------------------------------------
+Open Asset Import Library (ASSIMP)
+---------------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the following 
+conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------------
+*/
 #include "ObjFileImporter.h"
 #include "ObjFileParser.h"
 #include "ObjFileData.h"
@@ -6,8 +46,8 @@
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
-#include "MaterialSystem.h"
 #include "../include/DefaultLogger.h"
+#include "MaterialSystem.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/format.hpp>
@@ -116,7 +156,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
 	else
 	{
 		// This is an error, so break down the application
-		assert (false);
+		ai_assert (false);
 	}
 
 	// Create nodes for the whole scene	
@@ -224,29 +264,33 @@ void ObjFileImporter::createTopology(const ObjFile::Model* pModel,
 
 	// Create faces
 	ObjFile::Mesh *pObjMesh = pModel->m_Meshes[ uiMeshIndex ];
-	pMesh->mNumFaces = (unsigned int) pObjMesh->m_Faces.size();
-	pMesh->mFaces = new aiFace[ pMesh->mNumFaces ];
-	pMesh->mMaterialIndex = pObjMesh->m_uiMaterialIndex;
-
-	// Copy all data from all stored meshes
-	for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++)
+	ai_assert( NULL != pObjMesh );
+	pMesh->mNumFaces = static_cast<unsigned int>( pObjMesh->m_Faces.size() );
+	if ( pMesh->mNumFaces > 0 )
 	{
-		aiFace *pFace = &pMesh->mFaces[ index ];
-		const unsigned int uiNumIndices = (unsigned int) pObjMesh->m_Faces[ index ]->m_pVertices->size();
-		pFace->mNumIndices = (unsigned int) uiNumIndices;
-		if (pFace->mNumIndices > 0)
+		pMesh->mFaces = new aiFace[ pMesh->mNumFaces ];
+		pMesh->mMaterialIndex = pObjMesh->m_uiMaterialIndex;
+
+		// Copy all data from all stored meshes
+		for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++)
 		{
-			pFace->mIndices = new unsigned int[ uiNumIndices ];
-			ObjFile::Face::IndexArray *pIndexArray = pObjMesh->m_Faces[ index ]->m_pVertices;
-			ai_assert ( NULL != pIndexArray );
-			for ( size_t a=0; a<pFace->mNumIndices; a++ )
+			aiFace *pFace = &pMesh->mFaces[ index ];
+			const unsigned int uiNumIndices = (unsigned int) pObjMesh->m_Faces[ index ]->m_pVertices->size();
+			pFace->mNumIndices = (unsigned int) uiNumIndices;
+			if (pFace->mNumIndices > 0)
 			{
-				pFace->mIndices[ a ] = pIndexArray->at( a );
+				pFace->mIndices = new unsigned int[ uiNumIndices ];
+				ObjFile::Face::IndexArray *pIndexArray = pObjMesh->m_Faces[ index ]->m_pVertices;
+				ai_assert ( NULL != pIndexArray );
+				for ( size_t a=0; a<pFace->mNumIndices; a++ )
+				{
+					pFace->mIndices[ a ] = pIndexArray->at( a );
+				}
 			}
-		}
-		else
-		{
-			pFace->mIndices = NULL;
+			else
+			{
+				pFace->mIndices = NULL;
+			}
 		}
 	}
 
@@ -255,13 +299,14 @@ void ObjFileImporter::createTopology(const ObjFile::Model* pModel,
 }
 
 // ------------------------------------------------------------------------------------------------
+//	Creates a vretex array
 void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel, 
 										const ObjFile::Object* pCurrentObject, 
 										unsigned int uiMeshIndex,
 										aiMesh* pMesh)
 {
 	// Checking preconditions
-	ai_assert ( NULL != pCurrentObject );
+	ai_assert( NULL != pCurrentObject );
 	
 	// Break, if no faces are stored in object
 	if (pCurrentObject->m_Faces.empty())
@@ -283,18 +328,25 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 	// Allocate buffer for texture coordinates
 	if ( !pModel->m_TextureCoord.empty() )
 	{
-		for ( size_t i=0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++)
-			pMesh->mTextureCoords[ i ] = new aiVector3D[ pModel->m_TextureCoord.size() ];
+		for ( size_t i=0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++ )
+		{
+			const unsigned int num_uv = pObjMesh->m_uiUVCoordinates[ i ];
+			if ( num_uv > 0 )
+			{
+				pMesh->mNumUVComponents[ i ] = num_uv;
+				pMesh->mTextureCoords[ i ] = new aiVector3D[ num_uv ];
+			}
+		}
 	}
 	
 	// Copy vertices, normals and textures into aiMesh instance
 	unsigned int newIndex = 0;
 	for ( size_t index=0; index < pObjMesh->m_Faces.size(); index++ )
 	{
-		// get destination face
+		// Get destination face
 		aiFace *pDestFace = &pMesh->mFaces[ index ];
 		
-		// get source face
+		// Get source face
 		ObjFile::Face *pSourceFace = pObjMesh->m_Faces[ index ]; 
 
 		// Copy all index arrays
@@ -304,32 +356,38 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 			assert ( vertex < pModel->m_Vertices.size() );
 			pMesh->mVertices[ newIndex ] = *pModel->m_Vertices[ vertex ];
 			
-			if ( !pModel->m_Normals.empty() )
+			// Copy all normals 
+			if ( !pSourceFace->m_pNormals->empty() )
 			{
 				const unsigned int normal = pSourceFace->m_pNormals->at( vertexIndex );
-				assert( normal < pModel->m_Normals.size() );
+				ai_assert( normal < pModel->m_Normals.size() );
 				pMesh->mNormals[ newIndex ] = *pModel->m_Normals[ normal ];
 			}
 			
+			// Copy all texture coordinates
 			if ( !pModel->m_TextureCoord.empty() )
 			{
 				const unsigned int tex = pSourceFace->m_pTexturCoords->at( vertexIndex );
-				ai_assert ( tex < pModel->m_TextureCoord.size() );
+				ai_assert( tex < pModel->m_TextureCoord.size() );
 				for ( size_t i=0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++)
 				{
-					aiVector2D coord2d = *pModel->m_TextureCoord[ tex ];
-					pMesh->mTextureCoords[ i ][ newIndex ] = aiVector3D( coord2d.x, coord2d.y, 0.0 );
+					if ( pMesh->mNumUVComponents[ i ] > 0 )
+					{
+						aiVector2D coord2d = *pModel->m_TextureCoord[ tex ];
+						pMesh->mTextureCoords[ i ][ newIndex ] = aiVector3D( coord2d.x, coord2d.y, 0.0 );
+					}
 				}
 			}
 
-			assert( pMesh->mNumVertices > newIndex );
+			ai_assert( pMesh->mNumVertices > newIndex );
 			pDestFace->mIndices[ vertexIndex ] = newIndex;
-			newIndex++;
+			++newIndex;
 		}
 	}	
 }
 
 // ------------------------------------------------------------------------------------------------
+//	Counts all stored meshes 
 void ObjFileImporter::countObjects(const std::vector<ObjFile::Object*> &rObjects, int &iNumMeshes)
 {
 	iNumMeshes = 0;
@@ -349,6 +407,7 @@ void ObjFileImporter::countObjects(const std::vector<ObjFile::Object*> &rObjects
 }
 
 // ------------------------------------------------------------------------------------------------
+//	Creates tha material 
 void ObjFileImporter::createMaterial(const ObjFile::Model* pModel, const ObjFile::Object* pData, 
 									 aiScene* pScene)
 {

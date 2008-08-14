@@ -18,6 +18,7 @@ namespace Assimp
 const std::string ObjFileParser::DEFAULT_MATERIAL = "defaultmaterial";
 
 // -------------------------------------------------------------------
+//	Constructor with loaded data and directories.
 ObjFileParser::ObjFileParser(std::vector<char> &Data, 
 							 const std::string &strAbsPath, 
 							 const std::string &strModelName) :
@@ -302,9 +303,11 @@ void ObjFileParser::getFace()
 		m_pModel->m_pCurrentMesh = new ObjFile::Mesh();
 		m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
 	}
+	
+	// Store the face
 	m_pModel->m_pCurrentMesh->m_Faces.push_back( face );
-	if ( !face->m_pVertices->empty() )
-		m_pModel->m_pCurrentMesh->m_uiNumIndices += face->m_pVertices->size();
+	m_pModel->m_pCurrentMesh->m_uiNumIndices += face->m_pVertices->size();
+	m_pModel->m_pCurrentMesh->m_uiUVCoordinates[ 0 ] += face->m_pTexturCoords[0].size(); 
 	
 	// Skip the rest of the line
 	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
@@ -577,7 +580,7 @@ void ObjFileParser::reportErrorTokenInFace()
 
 // -------------------------------------------------------------------
 //	Extracts the extention from a filename
-void ObjFileParser::extractExtension(const std::string strFile, 
+void ObjFileParser::extractExtension(const std::string &strFile, 
 									 std::string &strExt)
 {
 	strExt = "";

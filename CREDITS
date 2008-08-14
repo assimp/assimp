@@ -1,0 +1,11 @@
+
+Open Asset Import Library (Assimp)
+Developers and Contributors
+===============================================================
+
+The following is the list of all constributors.
+Thanks for your help!
+
+- Andrew Galante,
+submitted patches to make Assimp compile with GCC-4, a makefile and the xcode3 workspace.
+

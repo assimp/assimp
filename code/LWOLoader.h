@@ -48,8 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "LWOFileData.h"
 #include "MaterialSystem.h"
 
-#include <vector>
 struct aiTexture;
+struct aiNode;
 
 namespace Assimp	{
 using namespace LWO;
@@ -60,6 +60,7 @@ using namespace LWO;
 class LWOImporter : public BaseImporter
 {
 	friend class Importer;
+
 
 protected:
 	/** Constructor to be privately used by Importer */
@@ -101,6 +102,7 @@ protected:
 	void InternReadFile( const std::string& pFile, aiScene* pScene, 
 		IOSystem* pIOHandler);
 
+private:
 
 	// -------------------------------------------------------------------
 	/** Loads a LWO file in the older LWOB format (LW < 6)
@@ -150,6 +152,36 @@ protected:
 	void LoadLWOTags(unsigned int size);
 
 	// -------------------------------------------------------------------
+	/** Load polygons from a POLS chunk
+	 *  @param length Size of the chunk
+	*/
+	void LoadLWOPolygons(unsigned int length);
+
+	// -------------------------------------------------------------------
+	/** Load polygons from a PNTS chunk
+	 *  @param length Size of the chunk
+	*/
+	void LoadLWOPoints(unsigned int length);
+
+
+	// -------------------------------------------------------------------
+	/** Count vertices and faces in a LWOB/LWO2 file
+	*/
+	void CountVertsAndFaces(unsigned int& verts, 
+		unsigned int& faces,
+		LE_NCONST uint16_t*& cursor, 
+		const uint16_t* const end,
+		unsigned int max = 0xffffffff);
+
+	// -------------------------------------------------------------------
+	/** Read vertices and faces in a LWOB/LWO2 file
+	*/
+	void CopyFaceIndices(LWO::FaceList::iterator& it,
+		LE_NCONST uint16_t*& cursor, 
+		const uint16_t* const end, 
+		unsigned int max = 0xffffffff);
+
+	// -------------------------------------------------------------------
 	/** Resolve the tag and surface lists that have been loaded.
 	* Generates the mMapping table.
 	*/
@@ -166,32 +198,6 @@ protected:
 	bool ComputeGradientTexture(LWO::GradientInfo& grad,
 		std::vector<aiTexture*>& out);
 
-
-	typedef std::vector<aiVector3D>		PointList;
-	typedef std::vector<LWO::Face>		FaceList;
-	typedef std::vector<LWO::Surface>	SurfaceList;
-	typedef std::vector<std::string>	TagList;
-	typedef std::vector<unsigned int>	TagMappingTable;
-
-private:
-
-	// -------------------------------------------------------------------
-	/** Count vertices and faces in a LWOB file
-	*/
-	void CountVertsAndFaces(unsigned int& verts, 
-		unsigned int& faces,
-		LE_NCONST uint16_t*& cursor, 
-		const uint16_t* const end,
-		unsigned int max = 0xffffffff);
-
-	// -------------------------------------------------------------------
-	/** Read vertices and faces in a LWOB file
-	*/
-	void CopyFaceIndices(FaceList::iterator& it,
-		LE_NCONST uint16_t*& cursor, 
-		const uint16_t* const end, 
-		unsigned int max = 0xffffffff);
-
 	// -------------------------------------------------------------------
 	/** Parse a string from the current file position
 	*/
@@ -207,16 +213,23 @@ private:
 	*/
 	void ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat);
 
+	// -------------------------------------------------------------------
+	/** Generate the final node graph
+	 *  Unused nodes are deleted.
+	 *  @param apcNodes Flat list of nodes
+	*/
+	void GenerateNodeGraph(std::vector<aiNode*>& apcNodes);
+
 protected:
 
 	/** true if the file is a LWO2 file*/
 	bool mIsLWO2;
 
-	/** Temporary point list from the file */
-	PointList* mTempPoints;
+	/** Temporary list of layers from the file */
+	LayerList* mLayers;
 
-	/** Temporary face list from the file*/
-	FaceList* mFaces;
+	/** Pointer to the current layer */
+	LWO::Layer* mCurLayer;
 
 	/** Temporary tag list from the file */
 	TagList* mTags;

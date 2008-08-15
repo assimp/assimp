@@ -52,6 +52,7 @@ Original copyright notice: "Ernie Wright  17 Sep 00"
 
 #include "IFF.h"
 #include <vector>
+#include <list>
 #include "../include/aiMesh.h"
 
 namespace Assimp {
@@ -333,6 +334,39 @@ struct Surface
 		DefaultLogger::get()->warn("LWO: "#name" chunk is too small"); \
 		break; \
 	} \
+
+
+typedef std::vector<aiVector3D>		PointList;
+typedef std::vector<LWO::Face>		FaceList;
+typedef std::vector<LWO::Surface>	SurfaceList;
+typedef std::vector<std::string>	TagList;
+typedef std::vector<unsigned int>	TagMappingTable;
+
+
+// ---------------------------------------------------------------------------
+/** \brief Represents a layer in the file
+ */
+struct Layer
+{
+	Layer()
+		: mParent (0xffff)
+	{}
+
+	/** Temporary point list from the file */
+	PointList mTempPoints;
+
+	/** Temporary face list from the file*/
+	FaceList mFaces;
+
+	/** Parent index */
+	uint16_t mParent;
+
+	/** Name of the layer */
+	std::string mName;
+};
+
+typedef std::list<LWO::Layer>		LayerList;
+
 
 }}
 

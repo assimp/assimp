@@ -166,8 +166,6 @@ void STLImporter::InternReadFile(
 	pScene->mNumMaterials = 1;
 	pScene->mMaterials = new aiMaterial*[1];
 	pScene->mMaterials[0] = pcMat;
-
-	delete[] this->mBuffer;AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 }
 // ------------------------------------------------------------------------------------------------
 // Read an ASCII STL file

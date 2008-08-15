@@ -100,6 +100,16 @@ struct aiNode
 		mNumMeshes = 0; mMeshes = NULL;
 	}
 
+	/** Construction from a specific name */
+	aiNode(const std::string& name) 
+	{ 
+		// set all members to zero by default
+		mParent = NULL; 
+		mNumChildren = 0; mChildren = NULL;
+		mNumMeshes = 0; mMeshes = NULL;
+		mName = name;
+	}
+
 	/** Destructor */
 	~aiNode()
 	{

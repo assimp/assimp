@@ -1,0 +1,96 @@
+#------------------------------------------------------------------------------
+# ASSIMP scons build file
+#
+#------------------------------------------------------------------------------
+import sys
+
+#------------------------------------------------------------------------------
+g_LibPath = Split("""
+	./
+	/usr/lib/
+	/usr/local/lib/
+""")
+#------------------------------------------------------------------------------
+g_IncPath = Split("""
+	../../code/
+	/usr/include/
+	/usr/local/include/
+""")
+#------------------------------------------------------------------------------
+g_assimp_lib_Source = Split("""
+	../../code/3DSConverter.cpp
+	../../code/3DSGenNormals.cpp
+	../../code/3DSLoader.cpp
+	../../code/3DSSpatialSort.cpp
+	../../code/aiAssert.cpp
+	../../code/ASELoader.cpp
+	../../code/ASEParser.cpp
+	../../code/Assimp.cpp
+	../../code/BaseImporter.cpp
+	../../code/BaseProcess.cpp
+	../../code/CalcTangentsProcess.cpp
+	../../code/ConvertToLHProcess.cpp
+	../../code/DefaultIOStream.cpp
+	../../code/DefaultIOSystem.cpp
+	../../code/DefaultLogger.cpp
+	../../code/FixNormalsStep.cpp
+	../../code/GenFaceNormalsProcess.cpp
+	../../code/GenVertexNormalsProcess.cpp
+	../../code/HMPLoader.cpp
+	../../code/Importer.cpp
+	../../code/ImproveCacheLocality.cpp
+	../../code/JoinVerticesProcess.cpp
+	../../code/KillNormalsProcess.cpp
+	../../code/LimitBoneWeightsProcess.cpp
+	../../code/LWOLoader.cpp
+	../../code/LWOMaterial.cpp
+	../../code/MaterialSystem.cpp
+	../../code/MD2Loader.cpp
+	../../code/MD3Loader.cpp
+	../../code/MD5Loader.cpp
+	../../code/MD5Parser.cpp
+	../../code/MDCLoader.cpp
+	../../code/MDLLoader.cpp
+	../../code/MDLMaterialLoader.cpp
+	../../code/ObjFileImporter.cpp
+	../../code/ObjFileMtlImporter.cpp
+	../../code/ObjFileParser.cpp
+	../../code/PretransformVertices.cpp
+	../../code/PlyLoader.cpp
+	../../code/PlyParser.cpp
+	../../code/RemoveComments.cpp
+	../../code/RemoveRedundantMaterials.cpp
+	../../code/SMDLoader.cpp
+	../../code/SpatialSort.cpp
+	../../code/SplitLargeMeshes.cpp
+	../../code/STLLoader.cpp
+	../../code/TextureTransform.cpp
+	../../code/TriangulateProcess.cpp
+	../../code/ValidateDataStructure.cpp
+	../../code/VertexTriangleAdjacency.cpp
+	../../code/XFileImporter.cpp
+	../../code/XFileParser.cpp
+""")
+#------------------------------------------------------------------------------
+# don't reset CC/CXX-variable, other users might have set it to something special
+#------------------------------------------------------------------------------
+ccflags = '-pipe'
+
+if ARGUMENTS.get('debug', 0):
+	print "Using Debug Build!"
+	ccflags = ccflags + ' -g -pg -Wall -pedantic '
+else:
+	ccflags = ccflags + ' -Os -msse -Wall -pedantic'
+	
+env = Environment(CCFLAGS = ccflags, CPPPATH = g_IncPath, LIBPATH=g_LibPath)
+conf = Configure( env )
+
+#if not conf.CheckCHeader( "boost/thread/thread.hpp" ):
+#	print "Boost must be installed!"
+#	Exit( 1 )
+env = conf.Finish()
+
+# Build library
+env.StaticLibrary(target = "assimp", source = g_assimp_lib_Source, 
+		LIBPATH = g_LibPath)
+

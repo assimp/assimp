@@ -166,7 +166,7 @@ struct Bone
 	bool bIsUsed;
 };
 
-}; //! namespace SMD
+} //! namespace SMD
 
 // ---------------------------------------------------------------------------
 /** Used to load Half-life 1 and 2 SMD models
@@ -416,6 +416,7 @@ private:
 	unsigned int iLineNumber;
 
 };
-}; // end of namespace Assimp
+
+} // end of namespace Assimp
 
 #endif // AI_SMDIMPORTER_H_INC

@@ -163,7 +163,7 @@ struct Skin
 void LookupNormalIndex(uint8_t index,aiVector3D& vOut);
 
 
-};
-};
+}
+}
 
 #endif // !! include guard

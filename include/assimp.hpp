@@ -58,7 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp
 {
 	class Importer;
-};
+}
 
 // internal ASSIMP headers - for plugin development
 #include "./../code/BaseImporter.h"

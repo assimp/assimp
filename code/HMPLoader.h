@@ -152,8 +152,8 @@ protected:
 
 private:
 
-
 };
-}; // end of namespace Assimp
+
+} // end of namespace Assimp
 
 #endif // AI_HMPIMPORTER_H_INC

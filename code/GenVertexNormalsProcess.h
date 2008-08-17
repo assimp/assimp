@@ -45,7 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseProcess.h"
 #include "../include/aiMesh.h"
+
 class GenNormalsTest;
+
 namespace Assimp {
 
 // ---------------------------------------------------------------------------
@@ -102,6 +104,6 @@ private:
 	float configMaxAngle;
 };
 
-}; // end of namespace Assimp
+} // end of namespace Assimp
 
 #endif // !!AI_GENVERTEXNORMALPROCESS_H_INC

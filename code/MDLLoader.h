@@ -461,6 +461,7 @@ protected:
 	 */
 	unsigned int iFileSize;
 };
-}; // end of namespace Assimp
+
+} // end of namespace Assimp
 
 #endif // AI_3DSIMPORTER_H_INC

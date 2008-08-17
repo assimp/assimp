@@ -556,6 +556,7 @@ public:
 };
 
 
-};};
+} // Namespace ASE
+} // Namespace ASSIMP
 
 #endif // !! include guard

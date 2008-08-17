@@ -142,5 +142,7 @@ struct Header_HL2
 
 #include "./Compiler/poppack1.h"
 
-};}; // end namespaces
+}
+} // end namespaces
+
 #endif // ! AI_MDLFILEHELPER2_H_INC

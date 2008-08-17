@@ -136,7 +136,8 @@ public:
 		Swap8(fOut);
 	}
 };
-};
+
+} // Namespace Assimp
 
 // byteswap macros for BigEndian/LittleEndian support 
 #if (defined AI_BUILD_BIG_ENDIAN)

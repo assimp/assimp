@@ -202,6 +202,6 @@ public:
 		const Dot3DS::Material* pcMatIn);
 };
 
-};
+}
 
 #endif //! AI_TEXTURE_TRANSFORM_H_INCLUDED

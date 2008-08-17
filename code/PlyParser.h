@@ -551,8 +551,8 @@ TYPE PLY::PropertyInstance::ConvertTo(
 	};
 	return (TYPE)0;
 }
-};
 
-};
+} // Namespace PLY
+} // Namespace AssImp
 
 #endif // !! include guard

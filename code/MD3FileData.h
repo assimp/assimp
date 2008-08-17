@@ -294,7 +294,7 @@ inline void Vec3NormalToLatLng( const aiVector3D& p_vIn, uint16_t& p_iOut )
 	}
 }
 
-};
-};
+}
+}
 
 #endif // !! AI_MD3FILEHELPER_H_INC

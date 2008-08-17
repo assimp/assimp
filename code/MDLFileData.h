@@ -142,7 +142,7 @@ struct Header
 	int32_t num_skins;       
 
 	//! Texture width in pixels
-	int32_t skinwidth;        
+	int32_t skinwidth;
 
 	//! Texture height in pixels
 	int32_t skinheight;       
@@ -959,6 +959,7 @@ struct IntSplittedGroupData_MDL7
 };
 
 
-};}; // end namespaces
+}
+} // end namespaces
 
 #endif // !! AI_MDLFILEHELPER_H_INC

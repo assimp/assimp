@@ -76,7 +76,7 @@ enum aiPropertyTypeInfo
 
     /** Simple binary buffer
     */
-    aiPTI_Buffer = 0x5,
+    aiPTI_Buffer = 0x5
 };
 
 // ---------------------------------------------------------------------------

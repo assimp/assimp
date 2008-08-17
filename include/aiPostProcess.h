@@ -173,7 +173,7 @@ enum aiPostProcessSteps
 	 * The step inverts all infacing normals. Generally it is recommended
 	 * to enable this step.
 	*/
-	aiProcess_FixInfacingNormals = 0x2000,
+	aiProcess_FixInfacingNormals = 0x2000
 };
 
 

@@ -80,6 +80,7 @@ public:
 	*/
 	void Execute( aiScene* pScene);
 };
-}; // end of namespace Assimp
+
+} // end of namespace Assimp
 
 #endif // !!AI_REMOVEREDUNDANTMATERIALS_H_INC

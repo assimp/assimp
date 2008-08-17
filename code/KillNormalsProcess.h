@@ -81,6 +81,7 @@ public:
 private:
 	bool KillMeshNormals (aiMesh* pcMesh);
 };
-}; // end of namespace Assimp
+
+} // end of namespace Assimp
 
 #endif // !!AI_KILLNORMALPROCESS_H_INC

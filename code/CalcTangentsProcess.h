@@ -85,6 +85,13 @@ public:
 	*/
 	void SetupProperties(const Importer* pImp);
 
+
+	// setter for configMaxAngle
+	inline void SetMaxSmoothAngle(float f)
+	{
+		configMaxAngle =f;
+	}
+
 protected:
 
 	// -------------------------------------------------------------------

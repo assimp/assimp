@@ -123,10 +123,10 @@ void ComputeNormalsWithSmoothingsGroups(MeshWithSmoothingGroups<T>& sMesh)
 				a != poResult.end();++a)
 			{
 				vNormals += sMesh.mNormals[(*a)];
-				fDiv += 1.0f;
+				//fDiv += 1.0f;
 			}
-			vNormals.x /= fDiv;vNormals.y /= fDiv;vNormals.z /= fDiv;
-			//vNormals.Normalize();
+			//vNormals.x /= fDiv;vNormals.y /= fDiv;vNormals.z /= fDiv;
+			vNormals.Normalize();
 			avNormals[(*i).mIndices[c]] = vNormals;
 			//poResult.clear();
 		}

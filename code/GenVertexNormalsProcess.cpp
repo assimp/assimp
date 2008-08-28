@@ -56,6 +56,7 @@ using namespace Assimp;
 // Constructor to be privately used by Importer
 GenVertexNormalsProcess::GenVertexNormalsProcess()
 {
+	this->configMaxAngle = AI_DEG_TO_RAD(175.f);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -76,8 +77,8 @@ bool GenVertexNormalsProcess::IsActive( unsigned int pFlags) const
 void GenVertexNormalsProcess::SetupProperties(const Importer* pImp)
 {
 	// get the current value of the property
-	this->configMaxAngle = pImp->GetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE,180.f);
-	this->configMaxAngle = std::max(std::min(this->configMaxAngle,180.0f),0.0f);
+	this->configMaxAngle = pImp->GetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE,175.f);
+	this->configMaxAngle = std::max(std::min(this->configMaxAngle,175.0f),0.0f);
 	this->configMaxAngle = AI_DEG_TO_RAD(this->configMaxAngle);
 }
 // ------------------------------------------------------------------------------------------------
@@ -145,7 +146,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
 	SpatialSort vertexFinder( pMesh->mVertices, pMesh->mNumVertices, sizeof( aiVector3D));
 	std::vector<unsigned int> verticesFound;
 
-	const float fLimit = this->configMaxAngle; 
+	const float fLimit = cosf(this->configMaxAngle); 
 
 	aiVector3D* pcNew = new aiVector3D[pMesh->mNumVertices];
 	for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
@@ -162,7 +163,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
 			unsigned int vidx = verticesFound[a];
 
 			// check whether the angle between the two normals is not too large
-			if (acosf(pMesh->mNormals[vidx] * pMesh->mNormals[i]) > fLimit)
+			if (pMesh->mNormals[vidx] * pMesh->mNormals[i] < fLimit)
 				continue;
 
 			pcNor += pMesh->mNormals[vidx];

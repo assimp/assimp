@@ -128,7 +128,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This applies to the CalcTangentSpace-Step. The angle is specified
  * in degrees , so 180 is PI. The default value is
- * 45 degrees. The maximum value is 180.
+ * 45 degrees. The maximum value is 175.
  * Property type: float. 
  */
 #define AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE "pp.ct.max_smoothing"
@@ -139,7 +139,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This applies to the GenSmoothNormals-Step. The angle is specified
  * in degrees, so 180 is PI. The default value is
- * 180 degrees (all vertex normals are smoothed). The maximum value is 180
+ * 180 degrees (all vertex normals are smoothed). The maximum value is 175
  * Property type: float. 
  */
 #define AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE "pp.gsn.max_smoothing"

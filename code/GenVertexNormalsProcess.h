@@ -89,6 +89,13 @@ public:
 	*/
 	void Execute( aiScene* pScene);
 
+
+	// setter for configMaxAngle
+	inline void SetMaxSmoothAngle(float f)
+	{
+		configMaxAngle =f;
+	}
+
 protected:
 
 	// -------------------------------------------------------------------

@@ -53,15 +53,16 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 GenFaceNormalsProcess::GenFaceNormalsProcess()
-	{
-	}
+{
+	// nothing to do here
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 GenFaceNormalsProcess::~GenFaceNormalsProcess()
-	{
+{
 	// nothing to do here
-	}
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
@@ -110,6 +111,7 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
 		aiVector3D pDelta1 = *pV2 - *pV1;
 		aiVector3D pDelta2 = *pV3 - *pV1;
 		aiVector3D vNor = pDelta1 ^ pDelta2;
+		vNor.Normalize();
 
 		//if (face.mIndices[1] > face.mIndices[2])
 		//	vNor *= -1.0f;

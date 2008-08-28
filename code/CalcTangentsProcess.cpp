@@ -64,7 +64,7 @@ using namespace Assimp;
 // Constructor to be privately used by Importer
 CalcTangentsProcess::CalcTangentsProcess()
 {
-	// nothing to do here
+	this->configMaxAngle = AI_DEG_TO_RAD(45.f);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -87,7 +87,7 @@ void CalcTangentsProcess::SetupProperties(const Importer* pImp)
 {
 	// get the current value of the property
 	this->configMaxAngle = pImp->GetPropertyFloat(AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE,45.f);
-	this->configMaxAngle = std::max(std::min(this->configMaxAngle,180.0f),0.0f);
+	this->configMaxAngle = std::max(std::min(this->configMaxAngle,45.0f),0.0f);
 	this->configMaxAngle = AI_DEG_TO_RAD(this->configMaxAngle);
 }
 
@@ -205,6 +205,8 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh)
 	SpatialSort vertexFinder( meshPos, pMesh->mNumVertices, sizeof( aiVector3D));
 	std::vector<unsigned int> verticesFound;
 
+	const float fLimit = cosf(this->configMaxAngle); 
+
 	// in the second pass we now smooth out all tangents and bitangents at the same local position 
 	// if they are not too far off.
 	std::vector<bool> vertexDone( pMesh->mNumVertices, false);
@@ -231,9 +233,9 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh)
 				continue;
 			if( meshNorm[idx] * origNorm < angleEpsilon)
 				continue;
-			if( acosf( meshTang[idx] * origTang) > this->configMaxAngle)
+			if(  meshTang[idx] * origTang < fLimit)
 				continue;
-			if( acosf( meshBitang[idx] * origBitang) > this->configMaxAngle)
+			if( meshBitang[idx] * origBitang < fLimit)
 				continue;
 
 			// it's similar enough -> add it to the smoothing group

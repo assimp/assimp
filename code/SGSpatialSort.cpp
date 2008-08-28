@@ -12,18 +12,18 @@ with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
-  copyright notice, this list of conditions and the
-  following disclaimer.
+copyright notice, this list of conditions and the
+following disclaimer.
 
 * Redistributions in binary form must reproduce the above
-  copyright notice, this list of conditions and the
-  following disclaimer in the documentation and/or other
-  materials provided with the distribution.
+copyright notice, this list of conditions and the
+following disclaimer in the documentation and/or other
+materials provided with the distribution.
 
 * Neither the name of the ASSIMP team, nor the names of its
-  contributors may be used to endorse or promote products
-  derived from this software without specific prior
-  written permission of the ASSIMP Development Team.
+contributors may be used to endorse or promote products
+derived from this software without specific prior
+written permission of the ASSIMP Development Team.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
@@ -40,66 +40,53 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Implementation of the helper class to quickly find 
- vertices close to a given position. Special implementation for 
- the 3ds loader handling smooth groups correctly  */
+vertices close to a given position. Special implementation for 
+the 3ds loader handling smooth groups correctly  */
 
 #include <algorithm>
-#include "3DSSpatialSort.h"
+#include "SGSpatialSort.h"
 
 #include "../include/aiAssert.h"
 
 using namespace Assimp;
-using namespace Assimp::Dot3DS;
 
 
 // ------------------------------------------------------------------------------------------------
-D3DSSpatialSorter::D3DSSpatialSorter()
-	{
+SGSpatialSort::SGSpatialSort()
+{
 	// define the reference plane. We choose some arbitrary vector away from all basic axises 
 	// in the hope that no model spreads all its vertices along this plane.
 	mPlaneNormal.Set( 0.8523f, 0.34321f, 0.5736f);
 	mPlaneNormal.Normalize();
-	}
-// ------------------------------------------------------------------------------------------------
-// Destructor
-D3DSSpatialSorter::~D3DSSpatialSorter()
-	{
-	// nothing to do here, everything destructs automatically
-	}
-// ------------------------------------------------------------------------------------------------
-void D3DSSpatialSorter::AddFace(const Dot3DS::Face* pcFace,
-	const std::vector<aiVector3D>& vPositions)
-{
-	ai_assert(NULL != pcFace);
-
-	// store position by index and distance
-	float distance = vPositions[pcFace->mIndices[0]] * mPlaneNormal;
-	mPositions.push_back( Entry( pcFace->mIndices[0], vPositions[pcFace->mIndices[0]], 
-		distance, pcFace->iSmoothGroup));
-
-	// triangle vertex 2
-	distance = vPositions[pcFace->mIndices[1]] * mPlaneNormal;
-	mPositions.push_back( Entry( pcFace->mIndices[1], vPositions[pcFace->mIndices[1]], 
-		distance, pcFace->iSmoothGroup));
-
-	// triangle vertex 3
-	distance = vPositions[pcFace->mIndices[2]] * mPlaneNormal;
-	mPositions.push_back( Entry( pcFace->mIndices[2], vPositions[pcFace->mIndices[2]], 
-		distance, pcFace->iSmoothGroup));
 }
 // ------------------------------------------------------------------------------------------------
-void D3DSSpatialSorter::Prepare()
+// Destructor
+SGSpatialSort::~SGSpatialSort()
+{
+	// nothing to do here, everything destructs automatically
+}
+// ------------------------------------------------------------------------------------------------
+void SGSpatialSort::Add(const aiVector3D& vPosition, unsigned int index,
+	unsigned int smoothingGroup)
+{
+	// store position by index and distance
+	float distance = vPosition * mPlaneNormal;
+	mPositions.push_back( Entry( index, vPosition, 
+		distance, smoothingGroup));
+}
+// ------------------------------------------------------------------------------------------------
+void SGSpatialSort::Prepare()
 {
 	// now sort the array ascending by distance.
 	std::sort( this->mPositions.begin(), this->mPositions.end());
 }
 // ------------------------------------------------------------------------------------------------
 // Returns an iterator for all positions close to the given position.
-void D3DSSpatialSorter::FindPositions( const aiVector3D& pPosition, 
-	uint32_t pSG,
-	float pRadius,
-	std::vector<unsigned int>& poResults) const
-	{
+void SGSpatialSort::FindPositions( const aiVector3D& pPosition, 
+									  uint32_t pSG,
+									  float pRadius,
+									  std::vector<unsigned int>& poResults) const
+{
 	float dist = pPosition * mPlaneNormal;
 	float minDist = dist - pRadius, maxDist = dist + pRadius;
 
@@ -119,14 +106,14 @@ void D3DSSpatialSorter::FindPositions( const aiVector3D& pPosition,
 	unsigned int index = (unsigned int)mPositions.size() / 2;
 	unsigned int binaryStepSize = (unsigned int)mPositions.size() / 4;
 	while( binaryStepSize > 1)
-		{
+	{
 		if( mPositions[index].mDistance < minDist)
 			index += binaryStepSize;
 		else
 			index -= binaryStepSize;
 
 		binaryStepSize /= 2;
-		}
+	}
 
 	// depending on the direction of the last step we need to single step a bit back or forth
 	// to find the actual beginning element of the range
@@ -140,33 +127,16 @@ void D3DSSpatialSorter::FindPositions( const aiVector3D& pPosition,
 
 	float squareEpsilon = pRadius * pRadius;
 	std::vector<Entry>::const_iterator it = mPositions.begin() + index;
-	if (0 == pSG)
+	while( it->mDistance < maxDist)
+	{
+		if((it->mPosition - pPosition).SquareLength() < squareEpsilon &&
+			(it->mSmoothGroups & pSG || 0 == it->mSmoothGroups || 0 == pSG))
 		{
-		while( it->mDistance < maxDist)
-			{
-			if((it->mPosition - pPosition).SquareLength() < squareEpsilon)
-				{
-				poResults.push_back( it->mIndex);
-				}
-			++it;
-			if( it == mPositions.end())
-				break;
-			}
+			poResults.push_back( it->mIndex);
 		}
-	else
-		{
-		while( it->mDistance < maxDist)
-			{
-			if((it->mPosition - pPosition).SquareLength() < squareEpsilon &&
-				(it->mSmoothGroups & pSG || 0 == it->mSmoothGroups))
-				{
-				poResults.push_back( it->mIndex);
-				}
-			++it;
-			if( it == mPositions.end())
-				break;
-			}
-		}
-	return;
+		++it;
+		if( it == mPositions.end())
+			break;
 	}
+}
 

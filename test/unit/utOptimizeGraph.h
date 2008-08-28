@@ -1,19 +1,19 @@
-#ifndef TESTLBW_H
-#define TESTLBW_H
+#ifndef TESTOG_H
+#define TESTOG_H
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
 #include <aiScene.h>
-#include <LimitBoneWeightsProcess.h>
+#include <OptimizeGraphProcess.h>
 
 
 using namespace std;
 using namespace Assimp;
 
-class LimitBoneWeightsTest : public CPPUNIT_NS :: TestFixture
+class OptimizeGraphProcessTest : public CPPUNIT_NS :: TestFixture
 {
-    CPPUNIT_TEST_SUITE (LimitBoneWeightsTest);
+    CPPUNIT_TEST_SUITE (OptimizeGraphProcessTest);
     CPPUNIT_TEST (testProcess);
     CPPUNIT_TEST_SUITE_END ();
 
@@ -28,9 +28,8 @@ class LimitBoneWeightsTest : public CPPUNIT_NS :: TestFixture
    
 	private:
 
-		LimitBoneWeightsProcess* piProcess;
-		aiMesh* pcMesh;
-
+		OptimizeGraphProcess* piProcess;
+		aiScene* pcMesh;
 };
 
 #endif 

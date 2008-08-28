@@ -735,6 +735,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\GenericProperty.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\GenFaceNormalsProcess.h"
 				>
 			</File>
@@ -771,6 +775,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\OptimizeGraphProcess.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\ParsingUtils.h"
 				>
 			</File>
@@ -788,6 +796,18 @@
 			</File>
 			<File
 				RelativePath="..\..\code\RemoveRedundantMaterials.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\SGSpatialSort.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\SmoothingGroups.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\SmoothingGroups.inl"
 				>
 			</File>
 			<File
@@ -868,10 +888,6 @@
 						RelativePath="..\..\code\3DSLoader.h"
 						>
 					</File>
-					<File
-						RelativePath="..\..\code\3DSSpatialSort.h"
-						>
-					</File>
 				</Filter>
 				<Filter
 					Name="ASE"
@@ -886,7 +902,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="HMPLoader"
+					Name="HMP"
 					>
 					<File
 						RelativePath="..\..\code\HMPFileData.h"
@@ -1061,6 +1077,14 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="DXF"
+					>
+					<File
+						RelativePath="..\..\code\DXFLoader.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
@@ -1139,6 +1163,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\OptimizeGraphProcess.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\PretransformVertices.cpp"
 				>
 			</File>
@@ -1148,6 +1176,10 @@
 			</File>
 			<File
 				RelativePath="..\..\code\RemoveRedundantMaterials.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\SGSpatialSort.cpp"
 				>
 			</File>
 			<File
@@ -1197,15 +1229,7 @@
 						>
 					</File>
 					<File
-						RelativePath="..\..\code\3DSGenNormals.cpp"
-						>
-					</File>
-					<File
 						RelativePath="..\..\code\3DSLoader.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\code\3DSSpatialSort.cpp"
 						>
 					</File>
 				</Filter>
@@ -1342,6 +1366,14 @@
 					</File>
 					<File
 						RelativePath="..\..\code\XFileParser.cpp"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="DXF"
+					>
+					<File
+						RelativePath="..\..\code\DXFLoader.cpp"
 						>
 					</File>
 				</Filter>

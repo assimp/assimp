@@ -40,16 +40,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Implementation of the PLY importer class */
+
+// internal headers
 #include "PlyLoader.h"
 #include "MaterialSystem.h"
 #include "StringComparison.h"
 
+// public ASSIMP headers
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
+#include "../include/DefaultLogger.h"
 
+// boost headeers
 #include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
@@ -95,24 +100,19 @@ void PLYImporter::InternReadFile(
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
-	{
 		throw new ImportErrorException( "Failed to open PLY file " + pFile + ".");
-	}
 
 	// check whether the ply file is large enough to contain
 	// at least the file header
 	size_t fileSize = file->FileSize();
 	if( fileSize < 10)
-	{
 		throw new ImportErrorException( "PLY File is too small.");
-	}
 
 	// allocate storage and copy the contents of the file to a memory buffer
 	// (terminate it with zero)
-	// FIX: Allocate an extra buffer of 12.5% to be sure we won't crash
-	// if an overrun occurs.
-	this->mBuffer = new unsigned char[fileSize+1 + (fileSize>>3)];
-	file->Read( (void*)mBuffer, 1, fileSize);
+	std::vector<unsigned char> mBuffer2(fileSize+1);
+	file->Read( &mBuffer2[0], 1, fileSize);
+	this->mBuffer = &mBuffer2[0];
 	this->mBuffer[fileSize] = '\0';
 
 	// the beginning of the file must be PLY
@@ -120,8 +120,6 @@ void PLYImporter::InternReadFile(
 		this->mBuffer[1] != 'L' && this->mBuffer[1] != 'l' ||
 		this->mBuffer[2] != 'Y' && this->mBuffer[2] != 'y')
 	{
-		delete[] this->mBuffer;
-		AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 		throw new ImportErrorException( "Invalid .ply file: Magic number \'ply\' is no there");
 	}
 	char* szMe = (char*)&this->mBuffer[3];
@@ -137,11 +135,7 @@ void PLYImporter::InternReadFile(
 			szMe += 6;
 			SkipLine(szMe,(const char**)&szMe);
 			if(!PLY::DOM::ParseInstance(szMe,&sPlyDom))
-			{
-				delete[] this->mBuffer;
-				AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 				throw new ImportErrorException( "Invalid .ply file: Unable to build DOM (#1)");
-			}
 		}
 		else if (0 == ASSIMP_strincmp(szMe,"binary_",7))
 		{
@@ -159,18 +153,9 @@ void PLYImporter::InternReadFile(
 			// skip the line, parse the rest of the header and build the DOM
 			SkipLine(szMe,(const char**)&szMe);
 			if(!PLY::DOM::ParseInstanceBinary(szMe,&sPlyDom,bIsBE))
-			{
-				delete[] this->mBuffer;
-				AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 				throw new ImportErrorException( "Invalid .ply file: Unable to build DOM (#2)");
-			}
 		}
-		else
-		{
-			delete[] this->mBuffer;
-			AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
-			throw new ImportErrorException( "Invalid .ply file: Unknown file format");
-		}
+		else throw new ImportErrorException( "Invalid .ply file: Unknown file format");
 	}
 	else
 	{
@@ -185,12 +170,8 @@ void PLYImporter::InternReadFile(
 	this->LoadVertices(&avPositions,false);
 
 	if (avPositions.empty())
-	{
-		delete[] this->mBuffer;
-		AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 		throw new ImportErrorException( "Invalid .ply file: No vertices found. "
-			"Unable to interpret the data format of the PLY file");
-	}
+			"Unable to parse the data format of the PLY file.");
 
 	// now load a list of normals. 
 	std::vector<aiVector3D> avNormals;
@@ -206,10 +187,8 @@ void PLYImporter::InternReadFile(
 	{
 		if (avPositions.size() < 3)
 		{
-			delete[] this->mBuffer;
-			AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
-			throw new ImportErrorException( "Invalid .ply file: Not enough vertices to build "
-				"a face list. ");
+			throw new ImportErrorException( "Invalid .ply file: Not enough "
+				"vertices to build a face list. ");
 		}
 
 		unsigned int iNum = (unsigned int)avPositions.size() / 3;
@@ -244,11 +223,7 @@ void PLYImporter::InternReadFile(
 		&avColors,&avTexCoords,&avMaterials,&avMeshes);
 
 	if (avMeshes.empty())
-	{
-		delete[] this->mBuffer;
-		AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 		throw new ImportErrorException( "Invalid .ply file: Unable to extract mesh data ");
-	}
 
 	// now generate the output scene object. Fill the material list
 	pScene->mNumMaterials = (unsigned int)avMaterials.size();
@@ -269,12 +244,6 @@ void PLYImporter::InternReadFile(
 
 	for (unsigned int i = 0; i < pScene->mRootNode->mNumMeshes;++i)
 		pScene->mRootNode->mMeshes[i] = i;
-
-	// delete the file buffer
-	delete[] this->mBuffer;AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
-
-	// DOM is lying on the stack, will be deconstructed automatically
-	return;
 }
 // ------------------------------------------------------------------------------------------------
 void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
@@ -819,9 +788,8 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 
 					if (3 > iNum)
 					{
-						// We must filter out all degenerates. Leave a message
-						// in the log ...
-						// LOG
+						// We must filter out all degenerates.
+						DefaultLogger::get()->warn("PLY: Found degenerated triangle");
 						continue;
 					}
 

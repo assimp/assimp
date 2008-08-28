@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseProcess.h"
 #include "DefaultIOStream.h"
 #include "DefaultIOSystem.h"
+#include "GenericProperty.h"
 
 // Importers
 #if (!defined AI_BUILD_NO_X_IMPORTER)
@@ -151,6 +152,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
 #	include "RemoveRedundantMaterials.h"
 #endif
+#if (!defined AI_BUILD_NO_OPTIMIZEGRAPH_PROCESS)
+#	include "OptimizeGraphProcess.h"
+#endif
 
 
 using namespace Assimp;
@@ -168,6 +172,9 @@ Importer::Importer() :
 	bExtraVerbose = false; // disable extra verbose mode by default
 
 	// add an instance of each worker class here
+	// the order doesn't really care, however file formats that are
+	// used more frequently than others should be at the beginning.
+
 #if (!defined AI_BUILD_NO_X_IMPORTER)
 	mImporter.push_back( new XFileImporter());
 #endif
@@ -217,12 +224,17 @@ Importer::Importer() :
 #endif
 
 	// add an instance of each post processing step here in the order 
-	// of sequence it is executed
+	// of sequence it is executed. steps that are added here are not validated -
+	// as RegisterPPStep() does - all dependencies must be there.
+
 #if (!defined AI_BUILD_NO_VALIDATEDS_PROCESS)
 	mPostProcessingSteps.push_back( new ValidateDSProcess()); // must be first
 #endif
 #if (!defined AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
 	mPostProcessingSteps.push_back( new RemoveRedundantMatsProcess());
+#endif
+#if (!defined AI_BUILD_NO_OPTIMIZEGRAPH_PROCESS)
+	mPostProcessingSteps.push_back( new OptimizeGraphProcess());
 #endif
 #if (!defined AI_BUILD_NO_TRIANGULATE_PROCESS)
 	mPostProcessingSteps.push_back( new TriangulateProcess());
@@ -379,8 +391,16 @@ bool ValidateFlags(unsigned int pFlags)
 	if (pFlags & aiProcess_GenSmoothNormals &&
 		pFlags & aiProcess_GenNormals)
 	{
-		DefaultLogger::get()->error("aiProcess_GenSmoothNormals and aiProcess_GenNormals "
-			"may not be specified together");
+		DefaultLogger::get()->error("aiProcess_GenSmoothNormals and "
+			"aiProcess_GenNormals may not be specified together");
+		return false;
+	}
+
+	if (pFlags & aiProcess_PreTransformVertices &&
+		pFlags & aiProcess_OptimizeGraph)
+	{
+		DefaultLogger::get()->error("aiProcess_PreTransformVertives and "
+			"aiProcess_OptimizeGraph may not be specified together");
 		return false;
 	}
 
@@ -489,14 +509,20 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 // Helper function to check whether an extension is supported by ASSIMP
 bool Importer::IsExtensionSupported(const std::string& szExtension)
 {
+	return NULL != FindLoader(szExtension);
+}
+
+// ------------------------------------------------------------------------------------------------
+BaseImporter* Importer::FindLoader (const std::string& szExtension)
+{
 	for (std::vector<BaseImporter*>::const_iterator
 		i =  this->mImporter.begin();
 		i != this->mImporter.end();++i)
 	{
 		// pass the file extension to the CanRead(..,NULL)-method
-		if ((*i)->CanRead(szExtension,NULL))return true;
+		if ((*i)->CanRead(szExtension,NULL))return *i;
 	}
-	return false;
+	return NULL;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -519,49 +545,48 @@ void Importer::GetExtensionList(std::string& szOut)
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-int Importer::SetProperty(const char* szName, int iValue)
+void Importer::SetPropertyInteger(const char* szName, int iValue, 
+	bool* bWasExisting /*= NULL*/)
 {
-	ai_assert(NULL != szName);
+	SetGenericProperty<int>(mIntProperties, szName,iValue,bWasExisting);	
+}
 
-	// search in the list ...
-	for (std::vector<IntPropertyInfo>::iterator
-		i =  this->mIntProperties.begin();
-		i != this->mIntProperties.end();++i)
-	{
-		if (0 == ::strcmp( (*i).name.c_str(), szName ))
-		{
-			int iOld = (*i).value;
-			(*i).value = iValue;
-			return iOld;
-		}
-	}
-	// the property is not yet in the list ...
-	this->mIntProperties.push_back( IntPropertyInfo() );
-	IntPropertyInfo& me = this->mIntProperties.back();
-	me.name = std::string(szName);
-	me.value = iValue;
-	return AI_PROPERTY_WAS_NOT_EXISTING;
+// ------------------------------------------------------------------------------------------------
+void Importer::SetPropertyFloat(const char* szName, float iValue, 
+	bool* bWasExisting /*= NULL*/)
+{
+	SetGenericProperty<float>(mFloatProperties, szName,iValue,bWasExisting);	
+}
+
+// ------------------------------------------------------------------------------------------------
+void Importer::SetPropertyString(const char* szName, const std::string& value, 
+	bool* bWasExisting /*= NULL*/)
+{
+	SetGenericProperty<std::string>(mStringProperties, szName,value,bWasExisting);	
 }
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-int Importer::GetProperty(const char* szName, 
+int Importer::GetPropertyInteger(const char* szName, 
 	int iErrorReturn /*= 0xffffffff*/) const
 {
-	ai_assert(NULL != szName);
-
-	// search in the list ...
-	for (std::vector<IntPropertyInfo>::const_iterator
-		i =  this->mIntProperties.begin();
-		i != this->mIntProperties.end();++i)
-	{
-		if (0 == ::strcmp( (*i).name.c_str(), szName ))
-		{
-			return (*i).value;
-		}
-	}
-	return iErrorReturn;
+	return GetGenericProperty<int>(mIntProperties,szName,iErrorReturn);
 }
+
+// ------------------------------------------------------------------------------------------------
+float Importer::GetPropertyFloat(const char* szName, 
+	float iErrorReturn /*= 10e10*/) const
+{
+	return GetGenericProperty<float>(mFloatProperties,szName,iErrorReturn);
+}
+
+// ------------------------------------------------------------------------------------------------
+std::string Importer::GetPropertyString(const char* szName, 
+	const std::string& iErrorReturn /*= ""*/) const
+{
+	return GetGenericProperty<std::string>(mStringProperties,szName,iErrorReturn);
+}
+
 // ------------------------------------------------------------------------------------------------
 void AddNodeWeight(unsigned int& iScene,const aiNode* pcNode)
 {

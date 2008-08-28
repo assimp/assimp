@@ -52,17 +52,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+// ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 PretransformVertices::PretransformVertices()
-	{
-	}
-
+{
+}
+// ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 PretransformVertices::~PretransformVertices()
-	{
+{
 	// nothing to do here
-	}
-
+}
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool PretransformVertices::IsActive( unsigned int pFlags) const

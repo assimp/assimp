@@ -76,7 +76,7 @@ bool GenVertexNormalsProcess::IsActive( unsigned int pFlags) const
 void GenVertexNormalsProcess::SetupProperties(const Importer* pImp)
 {
 	// get the current value of the property
-	this->configMaxAngle = pImp->GetProperty(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE,180000) / 1000.0f;
+	this->configMaxAngle = pImp->GetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE,180.f);
 	this->configMaxAngle = std::max(std::min(this->configMaxAngle,180.0f),0.0f);
 	this->configMaxAngle = AI_DEG_TO_RAD(this->configMaxAngle);
 }
@@ -145,8 +145,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
 	SpatialSort vertexFinder( pMesh->mVertices, pMesh->mNumVertices, sizeof( aiVector3D));
 	std::vector<unsigned int> verticesFound;
 
-	const float fLimit = (AI_MESH_SMOOTHING_ANGLE_NOT_SET == pMesh->mMaxSmoothingAngle
-		? this->configMaxAngle : pMesh->mMaxSmoothingAngle);
+	const float fLimit = this->configMaxAngle; 
 
 	aiVector3D* pcNew = new aiVector3D[pMesh->mNumVertices];
 	for (unsigned int i = 0; i < pMesh->mNumVertices;++i)

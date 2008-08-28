@@ -41,13 +41,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjFileImporter.h"
 #include "ObjFileParser.h"
 #include "ObjFileData.h"
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiMesh.h"
+#include "MaterialSystem.h"
+
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
 #include "../include/DefaultLogger.h"
-#include "MaterialSystem.h"
+#include "../include/IOStream.h"
+#include "../include/IOSystem.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/format.hpp>
@@ -237,7 +237,7 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 	if ( meshSizeDiff > 0 )
 	{
 		pNode->mMeshes = new unsigned int[ meshSizeDiff ];
-		pNode->mNumMeshes = meshSizeDiff;
+		pNode->mNumMeshes = (unsigned int)meshSizeDiff;
 		size_t index = 0;
 		for (size_t i = oldMeshSize; i < MeshArray.size(); i++)
 		{

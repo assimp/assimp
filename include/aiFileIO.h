@@ -53,11 +53,13 @@ extern "C" {
 
 
 struct aiFileIO;
+struct aiFile;
 
-typedef aiFileIO (*aiFileOpenProc)(C_STRUCT aiFileIO*, const char*, const char*);
-typedef aiReturn (*aiFileCloseProc)(C_STRUCT aiFileIO*);
-typedef unsigned long (*aiFileReadWriteProc)(C_STRUCT aiFileIO*, char*, unsigned int, unsigned int);
-typedef unsigned long (*aiFileTellProc)(C_STRUCT aiFileIO*);
+typedef aiFile* (*aiFileOpenProc)(C_STRUCT aiFileIO*, const char*, const char*);
+typedef void (*aiFileCloseProc)(C_STRUCT aiFileIO*, C_STRUCT aiFile*);
+typedef size_t (*aiFileWriteProc)(C_STRUCT aiFile*, const char*, size_t, size_t);
+typedef size_t (*aiFileReadProc)(C_STRUCT aiFile*, char*, size_t,size_t);
+typedef size_t (*aiFileTellProc)(C_STRUCT aiFile*);
 
 // ---------------------------------------------------------------------------
 /** Define seek origins in fseek()-style.
@@ -70,9 +72,25 @@ enum aiOrigin
 	aiOrigin_END = 0x2		//!< End of file
 };
 
-typedef aiReturn (*aiFileSeek)(aiFileIO*, unsigned long, aiOrigin);
-
+typedef aiReturn (*aiFileSeek)(aiFile*, size_t, aiOrigin);
 typedef char* aiUserData;
+
+// ---------------------------------------------------------------------------
+/** Defines how C-Assimp accesses files. Provided are functions to open
+ *  and close files.
+*/
+// ---------------------------------------------------------------------------
+struct aiFileIO
+{
+	//! Function used to open a new file
+	aiFileOpenProc OpenProc;
+
+	//! Function used to close an existing file
+	aiFileCloseProc CloseProc;
+
+	//! User-defined data
+	aiUserData UserData;
+};
 
 // ---------------------------------------------------------------------------
 /** Data structure to wrap a set of fXXXX (e.g fopen) replacement functions
@@ -81,30 +99,27 @@ typedef char* aiUserData;
 * counterparts in the CRT.
 */
 // ---------------------------------------------------------------------------
-struct aiFileIO
+struct aiFile
 {
-	//! User data assigned to the structure
-	aiUserData UserData;
-
-	//! Function used to open a new file
-	aiFileOpenProc OpenFunc;
-
-	//! Function used to close an existing file
-	aiFileCloseProc CloseFunc;
-
 	//! Function used to read from a file
-	aiFileReadWriteProc ReadFunc;
+	aiFileReadProc ReadProc;
 
 	//! Function used to write to a file
-	aiFileReadWriteProc WriteFunc;
+	aiFileWriteProc WriteProc;
 
 	//! Function used to retrieve the current
 	//! position of the file cursor (ftell())
 	aiFileTellProc TellProc;
 
+	//! Function used to retrieve the size of the file, in bytes
+	aiFileTellProc FileSizeProc;
+
 	//! Function used to set the current position
 	//! of the file cursor (fseek())
 	aiFileSeek SeekProc;
+
+	//! User-defined data
+	aiUserData UserData;
 };
 
 

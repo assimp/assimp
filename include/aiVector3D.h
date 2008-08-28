@@ -75,6 +75,9 @@ struct aiVector3D
 	inline bool operator!= (const aiVector3D& other) const
 		{return x != other.x || y != other.y || z != other.z;}
 
+	inline aiVector3D& operator= (float f)
+		{x = y = z = f;return *this;}
+
 #endif // __cplusplus
 
 	float x, y, z;	

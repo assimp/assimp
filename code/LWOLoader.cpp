@@ -95,8 +95,8 @@ bool LWOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 // Setup configuration properties
 void LWOImporter::SetupProperties(const Importer* pImp)
 {
-	this->configGradientResX = pImp->GetProperty(AI_CONFIG_IMPORT_LWO_GRADIENT_RESX,512);
-	this->configGradientResY = pImp->GetProperty(AI_CONFIG_IMPORT_LWO_GRADIENT_RESY,512);
+	this->configGradientResX = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_LWO_GRADIENT_RESX,512);
+	this->configGradientResY = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_LWO_GRADIENT_RESY,512);
 }
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
@@ -174,10 +174,10 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	std::vector<aiMesh*> apcMeshes;
 	std::vector<aiNode*> apcNodes;
 	apcNodes.reserve(mLayers->size());
-	apcMeshes.reserve(mLayers->size()*std::min((mSurfaces->size()/2u), 1u));
+	apcMeshes.reserve(mLayers->size()*std::min(((unsigned int)mSurfaces->size()/2u), 1u));
 
 	// the RemoveRedundantMaterials step will clean this up later
-	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials = mSurfaces->size()];
+	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials = (unsigned int)mSurfaces->size()];
 	for (unsigned int mat = 0; mat < pScene->mNumMaterials;++mat)
 	{
 		MaterialHelper* pcMat = new MaterialHelper();
@@ -192,7 +192,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		const LWO::Layer& layer = *lit;
 
 		// I don't know whether there could be dummy layers, but it would be possible
-		const unsigned int meshStart = apcMeshes.size();
+		const unsigned int meshStart = (unsigned int)apcMeshes.size();
 		if (!layer.mFaces.empty() && !layer.mTempPoints.empty())
 		{
 			// now sort all faces by the surfaces assigned to them
@@ -207,13 +207,13 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 				if (idx >= mTags->size())
 				{
 					DefaultLogger::get()->warn("LWO: Invalid face surface index");
-					idx = mTags->size()-1;
+					idx = (unsigned int)mTags->size()-1;
 				}
 				if(0xffffffff == (idx = _mMapping[idx]))
 				{
 					if (0xffffffff == iDefaultSurface)
 					{
-						iDefaultSurface = mSurfaces->size();
+						iDefaultSurface = (unsigned int)mSurfaces->size();
 						mSurfaces->push_back(LWO::Surface());
 						LWO::Surface& surf = mSurfaces->back();
 						surf.mColor.r = surf.mColor.g = surf.mColor.b = 0.6f; 
@@ -240,7 +240,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 				// generate the mesh 
 				aiMesh* mesh = new aiMesh();
 				apcMeshes.push_back(mesh);
-				mesh->mNumFaces = sorted.size();
+				mesh->mNumFaces = (unsigned int)sorted.size();
 
 				for (SortedRep::const_iterator it = sorted.begin(), end = sorted.end();
 					it != end;++it)
@@ -281,7 +281,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		apcNodes.push_back(pcNode);
 		pcNode->mName.Set(layer.mName);
 		pcNode->mParent = reinterpret_cast<aiNode*>(layer.mParent);
-		pcNode->mNumMeshes = apcMeshes.size() - meshStart;
+		pcNode->mNumMeshes = (unsigned int)apcMeshes.size() - meshStart;
 		pcNode->mMeshes = new unsigned int[pcNode->mNumMeshes];
 		for (unsigned int p = 0; p < pcNode->mNumMeshes;++p)
 			pcNode->mMeshes[p] = p + meshStart;
@@ -292,7 +292,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	// copy the meshes to the output structure
 	if (apcMeshes.size()) // shouldn't occur, just to be sure we don't crash
 	{
-		pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes = apcMeshes.size() ];
+		pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes = (unsigned int)apcMeshes.size() ];
 		::memcpy(pScene->mMeshes,&apcMeshes[0],pScene->mNumMeshes*sizeof(void*));
 	}
 }
@@ -414,7 +414,7 @@ void LWOImporter::CopyFaceIndices(FaceList::iterator& it,
 				if (mi > mCurLayer->mTempPoints.size())
 				{
 					DefaultLogger::get()->warn("LWO: face index is out of range");
-					mi = mCurLayer->mTempPoints.size()-1;
+					mi = (unsigned int)mCurLayer->mTempPoints.size()-1;
 				}
 			}
 		}

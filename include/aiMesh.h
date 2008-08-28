@@ -356,16 +356,6 @@ struct aiMesh
 	 */
 	unsigned int mMaterialIndex;
 
-	/** The maximum vertex smooth angle for the mesh, in radians
-	 *  If the angle between two vertex normals is larger,
-	 *  the vertex normals should not be smoothed. The GenVertexNormals-Step
-	 *  takes care of this value. The angle is specified in radians.
-	 *  It is set to AI_MESH_SMOOTHING_ANGLE_NOT_SET if the source file didn't
-	 *  contain any additional information related to the calculation of
-	 *  vertex normals.
-	 */
-	float mMaxSmoothingAngle;
-
 #ifdef __cplusplus
 
 	//! Default constructor. Initializes all members to 0
@@ -384,7 +374,6 @@ struct aiMesh
 			mColors[a] = NULL;
 		mNumBones = 0; mBones = NULL;
 		mMaterialIndex = 0;
-		mMaxSmoothingAngle = AI_MESH_SMOOTHING_ANGLE_NOT_SET;
 	}
 
 	//! Deletes all storage allocated for the mesh

@@ -306,8 +306,8 @@ void ObjFileParser::getFace()
 	
 	// Store the face
 	m_pModel->m_pCurrentMesh->m_Faces.push_back( face );
-	m_pModel->m_pCurrentMesh->m_uiNumIndices += face->m_pVertices->size();
-	m_pModel->m_pCurrentMesh->m_uiUVCoordinates[ 0 ] += face->m_pTexturCoords[0].size(); 
+	m_pModel->m_pCurrentMesh->m_uiNumIndices += (unsigned int)face->m_pVertices->size();
+	m_pModel->m_pCurrentMesh->m_uiUVCoordinates[ 0 ] += (unsigned int)face->m_pTexturCoords[0].size(); 
 	
 	// Skip the rest of the line
 	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
@@ -462,7 +462,7 @@ int ObjFileParser::getMaterialIndex( const std::string &strMaterialName )
 		{
 			if ( strMaterialName == m_pModel->m_MaterialLib[ index ])
 			{
-				mat_index = index;
+				mat_index = (int)index;
 				break;
 			}
 		}

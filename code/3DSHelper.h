@@ -38,7 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines the helper data structures for importing 3DS files.
+/** @file Defines helper data structures for the import of 3DS files.
 http://www.jalix.org/ressources/graphics/3DS/_unofficials/3ds-unofficial.txt */
 
 #ifndef AI_3DSFILEHELPER_H_INC
@@ -55,20 +55,18 @@ http://www.jalix.org/ressources/graphics/3DS/_unofficials/3ds-unofficial.txt */
 #include "../include/aiMaterial.h"
 
 #include "SpatialSort.h"
+#include "SmoothingGroups.h"
 
 namespace Assimp	{
 namespace Dot3DS	{
 
 #include "./Compiler/pushpack1.h"
 
-#ifdef _MSC_VER
-#	define sprintf sprintf_s
-#endif
-
 // ---------------------------------------------------------------------------
 /** Dot3DSFile class: Helper class for loading 3ds files. Defines chunks
 *  and data structures.
 */
+// ---------------------------------------------------------------------------
 class Dot3DSFile
 {
 public:
@@ -91,32 +89,27 @@ public:
 	typedef enum
 	{
 		// translated to gouraud shading with wireframe active
-		Wire = 0,
+		Wire = 0x0,
 
 		// if this material is set, no vertex normals will
 		// be calculated for the model. Face normals + gouraud
-		Flat = 1,
+		Flat = 0x1,
 
 		// standard gouraud shading
-		Gouraud = 2,
+		Gouraud = 0x2,
 
 		// phong shading
-		Phong = 3,
+		Phong = 0x3,
 
 		// cooktorrance or anistropic phong shading ...
 		// the exact meaning is unknown, if you know it
 		// feel free to tell me ;-)
-		Metal = 4,
+		Metal = 0x4,
 
 		// required by the ASE loader
-		Blinn = 5
+		Blinn = 0x5
 	} shadetype3ds;
 
-	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	// enum for all chunks in 3ds files. Unused
-	// ones are commented, list is not complete since
-	// there are many undocumented chunks
-	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	enum 
 	{
 
@@ -316,26 +309,10 @@ public:
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a 3ds mesh face */
-struct Face
+struct Face : public FaceWithSmoothingGroup
 {
-	Face() : iSmoothGroup(0), bFlipped(false)
-	{
-		// let the rest uninitialized for performance
-		this->mIndices[0] = 0;
-		this->mIndices[1] = 0;
-		this->mIndices[2] = 0;
-	}
-
-	
-	//! Indices. .3ds is using uint16. However, after
-	//! an unique vrtex set has been geneerated it might
-	//! be an index becomes > 2^16
-	uint32_t mIndices[3];
-
-	//! specifies to which smoothing group the face belongs to
-	uint32_t iSmoothGroup;
-
-	//! Specifies that the face normal must be flipped
+	//! Specifies that the face normal must be flipped.
+	//! todo: do we really need this?
 	bool bFlipped;
 };
 // ---------------------------------------------------------------------------
@@ -442,7 +419,7 @@ struct Material
 };
 // ---------------------------------------------------------------------------
 /** Helper structure to represent a 3ds file mesh */
-struct Mesh
+struct Mesh : public MeshWithSmoothingGroups<Dot3DS::Face>
 {
 	//! Default constructor
 	Mesh()
@@ -457,20 +434,11 @@ struct Mesh
 	//! Name of the mesh
 	std::string mName;
 
-	//! Vertex positions
-	std::vector<aiVector3D> mPositions;
-
-	//! Face lists
-	std::vector<Face> mFaces;
-
 	//! Texture coordinates
 	std::vector<aiVector2D> mTexCoords;
 
 	//! Face materials
 	std::vector<unsigned int> mFaceMaterials;
-
-	//! Normal vectors
-	std::vector<aiVector3D> mNormals;
 
 	//! Local transformation matrix
 	aiMatrix4x4 mMat;

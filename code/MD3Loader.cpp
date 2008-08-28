@@ -144,10 +144,10 @@ void MD3Importer::SetupProperties(const Importer* pImp)
 {
 	// The AI_CONFIG_IMPORT_MD3_KEYFRAME option overrides the
 	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
-	if(0xffffffff == (this->configFrameID = pImp->GetProperty(
+	if(0xffffffff == (this->configFrameID = pImp->GetPropertyInteger(
 		AI_CONFIG_IMPORT_MD3_KEYFRAME,0xffffffff)))
 	{
-		this->configFrameID = pImp->GetProperty(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
+		this->configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
 	}
 }
 // ------------------------------------------------------------------------------------------------

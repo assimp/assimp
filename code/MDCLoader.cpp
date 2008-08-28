@@ -194,10 +194,10 @@ void MDCImporter::SetupProperties(const Importer* pImp)
 {
 	// The AI_CONFIG_IMPORT_MDC_KEYFRAME option overrides the
 	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
-	if(0xffffffff == (this->configFrameID = pImp->GetProperty(
+	if(0xffffffff == (this->configFrameID = pImp->GetPropertyInteger(
 		AI_CONFIG_IMPORT_MDC_KEYFRAME,0xffffffff)))
 	{
-		this->configFrameID = pImp->GetProperty(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
+		this->configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
 	}
 }
 // ------------------------------------------------------------------------------------------------
@@ -443,7 +443,7 @@ void MDCImporter::InternReadFile(
 		pScene->mMeshes[i]->mTextureCoords[3] = NULL;
 
 	// create materials
-	pScene->mNumMaterials = aszShaders.size();
+	pScene->mNumMaterials = (unsigned int)aszShaders.size();
 	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
 	for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
 	{

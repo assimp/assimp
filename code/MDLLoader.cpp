@@ -51,11 +51,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // public ASSIMP headers
 #include "../include/DefaultLogger.h"
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
+#include "../include/IOStream.h"
+#include "../include/IOSystem.h"
 #include "../include/assimp.hpp"
 
 // boost headers
@@ -119,11 +118,12 @@ void MDLImporter::SetupProperties(const Importer* pImp)
 {
 	// The AI_CONFIG_IMPORT_MDL_KEYFRAME option overrides the
 	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
-	if(0xffffffff == (this->configFrameID = pImp->GetProperty(
+	if(0xffffffff == (this->configFrameID = pImp->GetPropertyInteger(
 		AI_CONFIG_IMPORT_MDL_KEYFRAME,0xffffffff)))
 	{
-		this->configFrameID =  pImp->GetProperty(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
+		this->configFrameID =  pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
 	}
+	this->configPalette =  pImp->GetPropertyString(AI_CONFIG_IMPORT_MDL_COLORMAP,"colormap.lmp");
 }
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 

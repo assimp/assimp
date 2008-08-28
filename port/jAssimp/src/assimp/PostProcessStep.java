@@ -174,7 +174,6 @@ public class PostProcessStep {
     public static final PostProcessStep LimitBoneWeights =
             new PostProcessStep("LimitBoneWeights");
 
-
     /**
      * Validates the aiScene data structure before it is returned.
      * This makes sure that all indices are valid, all animations and
@@ -187,19 +186,6 @@ public class PostProcessStep {
             new PostProcessStep("ValidateDataStructure");
 
 
-    /** This step tries to determine which meshes have normal vectors
-	 * that are facing inwards. The algorithm is simple but effective:
-	 * the bounding box of all vertices + their normals is compared against
-	 * the volume of the bounding box of all vertices without their normals.
-	 * This works well for most objects, problems might occur with planar
-	 * surfaces. However the step tries to filter such cases out.
-	 * The step inverts all infacing normals. Generally it is recommended
-	 * to enable this step.
-	*/
-    public static final PostProcessStep FixInfacingNormals =
-            new PostProcessStep("FixInfacingNormals");
-
-
     /** Reorders triangles for vertex cache locality and thus better performance.
 	 * The step tries to improve the ACMR (average post-transform vertex cache
 	 * miss ratio) for all meshes. The step runs in O(n) and is roughly
@@ -209,6 +195,46 @@ public class PostProcessStep {
 	 public static final PostProcessStep ImproveVertexLocality =
             new PostProcessStep("ImproveVertexLocality");
 
+
+    /** Searches for redundant materials and removes them.
+	 *
+	 * This is especially useful in combination with the PretransformVertices
+	 * and OptimizeGraph steps. Both steps join small meshes, but they
+	 * can't do that if two meshes have different materials.
+	 */
+	 public static final PostProcessStep RemoveRedundantMaterials =
+            new PostProcessStep("RemoveRedundantMaterials");
+
+	/** This step tries to determine which meshes have normal vectors
+	 * that are facing inwards. The algorithm is simple but effective:
+	 * the bounding box of all vertices + their normals is compared against
+	 * the volume of the bounding box of all vertices without their normals.
+	 * This works well for most objects, problems might occur with planar
+	 * surfaces. However, the step tries to filter such cases.
+	 * The step inverts all infacing normals. Generally it is recommended
+	 * to enable this step, although the result is not always correct.
+	*/
+	 public static final PostProcessStep FixInfacingNormals =
+            new PostProcessStep("FixInfacingNormals");
+
+	/** This step performs some optimizations on the node graph.
+	 *
+	 * It is incompatible to the PreTransformVertices-Step. Some configuration
+	 * options exist, see aiConfig.h for more details.
+	 * Generally, two actions are available:<br>
+	 *   1. Remove animation nodes and data from the scene. This allows other
+	 *      steps for further optimizations.<br>
+	 *   2. Combine very small meshes to larger ones. Only if the meshes
+	 *      are used by the same node or by nodes on the same hierarchy (with
+	 *      equal local transformations). Unlike PreTransformVertices, the
+	 *      OptimizeGraph-step doesn't transform vertices from one space
+	 *      another.<br>
+	 *   3. Remove hierarchy levels<br>
+	 *
+	 *  It is recommended to have this step run with the default configuration.
+	 */
+	 public static final PostProcessStep OptimizeGraph =
+            new PostProcessStep("OptimizeGraph");
 
     private final String myName; // for debug only
 

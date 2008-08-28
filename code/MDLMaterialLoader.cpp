@@ -61,7 +61,7 @@ using namespace Assimp;
 void MDLImporter::SearchPalette(const unsigned char** pszColorMap)
 {
 	// now try to find the color map in the current directory
-	IOStream* pcStream = this->pIOHandler->Open("colormap.lmp","rb");
+	IOStream* pcStream = this->pIOHandler->Open(configPalette,"rb");
 
 	const unsigned char* szColorMap = (const unsigned char*)::g_aclrDefaultColorMap;
 	if(pcStream)

@@ -38,70 +38,51 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#ifndef AI_HASH_H_INCLUDED
-#define AI_HASH_H_INCLUDED
+#ifndef AI_GENERIC_PROPERTY_H_INCLUDED
+#define AI_GENERIC_PROPERTY_H_INCLUDED
+
+#include "./../include/assimp.hpp"
+#include "Hash.h"
 
 // ------------------------------------------------------------------------------------------------
-// hashing function taken from 
-// http://www.azillionmonkeys.com/qed/hash.html
-// (incremental version of the hashing function)
-// (stdint.h should have been been included here)
-#undef get16bits
-#if (defined(__GNUC__) && defined(__i386__)) || defined(__WATCOMC__) \
-  || defined(_MSC_VER) || defined (__BORLANDC__) || defined (__TURBOC__)
-#define get16bits(d) (*((const uint16_t *) (d)))
-#endif
+template <class T>
+inline void SetGenericProperty(std::map< uint32_t, T >& list, 
+	const char* szName, const T& value, bool* bWasExisting)
+{
+	ai_assert(NULL != szName);
 
-#if !defined (get16bits)
-#define get16bits(d) ((((uint32_t)(((const uint8_t *)(d))[1])) << 8)\
-                       +(uint32_t)(((const uint8_t *)(d))[0]) )
-#endif
+	typedef std::map< uint32_t, T >  GenericPropertyMap;
+	typedef std::pair< uint32_t, T > GenericPair;
 
-// ------------------------------------------------------------------------------------------------
-inline uint32_t SuperFastHash (const char * data, unsigned int len = 0, uint32_t hash = 0) {
-uint32_t tmp;
-int rem;
+	uint32_t hash = SuperFastHash(szName);
 
-    if (!data) return 0;
-	if (!len)len = (unsigned int)::strlen(data);
-
-    rem = len & 3;
-    len >>= 2;
-
-    /* Main loop */
-    for (;len > 0; len--) {
-        hash  += get16bits (data);
-        tmp    = (get16bits (data+2) << 11) ^ hash;
-        hash   = (hash << 16) ^ tmp;
-        data  += 2*sizeof (uint16_t);
-        hash  += hash >> 11;
-    }
-
-    /* Handle end cases */
-    switch (rem) {
-        case 3: hash += get16bits (data);
-                hash ^= hash << 16;
-                hash ^= data[sizeof (uint16_t)] << 18;
-                hash += hash >> 11;
-                break;
-        case 2: hash += get16bits (data);
-                hash ^= hash << 11;
-                hash += hash >> 17;
-                break;
-        case 1: hash += *data;
-                hash ^= hash << 10;
-                hash += hash >> 1;
-    }
-
-    /* Force "avalanching" of final 127 bits */
-    hash ^= hash << 3;
-    hash += hash >> 5;
-    hash ^= hash << 4;
-    hash += hash >> 17;
-    hash ^= hash << 25;
-    hash += hash >> 6;
-
-    return hash;
+	GenericPropertyMap::iterator it = list.find(hash);
+	if (it == list.end())
+	{
+		if (bWasExisting)*bWasExisting = false;
+		list.insert(GenericPair( hash, value ));
+		return;
+	}
+	(*it).second = value;
+	if (bWasExisting)*bWasExisting = true;
 }
 
-#endif // !! AI_HASH_H_INCLUDED
+
+// ------------------------------------------------------------------------------------------------
+template <class T>
+inline T GetGenericProperty(const std::map< uint32_t, T >& list, 
+	const char* szName, const T& errorReturn)
+{
+	ai_assert(NULL != szName);
+
+	typedef std::map< uint32_t, T >  GenericPropertyMap;
+	typedef std::pair< uint32_t, T > GenericPair;
+
+	uint32_t hash = SuperFastHash(szName);
+
+	GenericPropertyMap::const_iterator it = list.find(hash);
+	if (it == list.end())return errorReturn;
+	return (*it).second;
+}
+
+#endif // !! AI_GENERIC_PROPERTY_H_INCLUDED

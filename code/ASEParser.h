@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiAnim.h"
 
 // for some helper routines like IsSpace()
-#include "PlyParser.h"
+#include "ParsingUtils.h"
 #include "qnan.h"
 
 // ASE is quite similar to 3ds. We can reuse some structures
@@ -87,7 +87,7 @@ struct Material : public Dot3DS::Material
 };
 // ---------------------------------------------------------------------------
 /** Helper structure to represent an ASE file face */
-struct Face : public Dot3DS::Face
+struct Face : public FaceWithSmoothingGroup
 {
 	//! Default constructor. Initializes everything with 0
 	Face()
@@ -224,13 +224,13 @@ struct DecompTransform
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent an ASE file mesh */
-struct Mesh
+struct Mesh : public MeshWithSmoothingGroups<ASE::Face>
 {
 	//! Constructor. Creates a default name for the mesh
 	Mesh() : bSkip(false)
 	{
 		static int iCnt = 0;
-		char szTemp[128];
+		char szTemp[128]; // should be sufficiently large
 		::sprintf(szTemp,"UNNAMED_%i",iCnt++);
 		mName = szTemp;
 
@@ -249,20 +249,11 @@ struct Mesh
 	//! "" if there is no parent ...
 	std::string mParent;
 
-	//! vertex positions
-	std::vector<aiVector3D> mPositions;
-
-	//! List of all faces loaded
-	std::vector<ASE::Face> mFaces;
-
 	//! List of all texture coordinate sets
 	std::vector<aiVector3D> amTexCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 
 	//! List of all vertex color sets.
 	std::vector<aiColor4D> mVertexColors;
-
-	//! List of normal vectors
-	std::vector<aiVector3D> mNormals;
 
 	//! List of all bone vertices
 	std::vector<BoneVertex> mBoneVertices;

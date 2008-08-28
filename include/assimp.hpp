@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // STL headers
 #include <string>
+#include <map>
 #include <vector>
 
 // public ASSIMP headers
@@ -67,6 +68,8 @@ namespace Assimp
 #define AI_PROPERTY_WAS_NOT_EXISTING 0xffffffff
 
 struct aiScene;
+struct aiFileIO;
+const aiScene* aiImportFileEx( const char*, unsigned int, aiFileIO*);
 
 namespace Assimp
 {
@@ -101,28 +104,14 @@ class ASSIMP_API Importer
 {
 	// used internally
 	friend class BaseProcess;
+	friend const aiScene* ::aiImportFileEx( const char*, unsigned int, aiFileIO*);
 
-protected:
+public:
 
-	template <typename Type>
-	struct PropertyInfo
-	{
-		std::string name;
-		Type value;
-
-		bool operator==(const PropertyInfo<Type>& other) const
-		{
-			return other.name == this->name &&
-				other.value == this->value;
-		}
-
-		bool operator!=(const PropertyInfo<Type>& other) const
-		{
-			return !(other == *this);
-		}
-	};
-
-	typedef PropertyInfo<int> IntPropertyInfo;
+	typedef uint32_t KeyType;
+	typedef std::map<KeyType, int>  		IntPropertyMap;
+	typedef std::map<KeyType, float>		FloatPropertyMap;
+	typedef std::map<KeyType, std::string>	StringPropertyMap;
 
 public:
 
@@ -188,28 +177,66 @@ public:
 #endif
 
 	// -------------------------------------------------------------------
-	/** Set a configuration property.
+	/** Set an integer configuration property.
 	 * @param szName Name of the property. All supported properties
-	 *   are defined in the aiConfig.g header (the constants share the
+	 *   are defined in the aiConfig.g header (all constants share the
 	 *   prefix AI_CONFIG_XXX).
 	 * @param iValue New value of the property
-	 * @return Old value of the property or AI_PROPERTY_WAS_NOT_EXISTING
-     * if the property has not yet been set.
+	 * @param bWasExisting Optional pointer to receive true if the
+	 *   property was set before. The new value replaced the old value
+	 *   in this case.
+	 * @note Property of different types (float, int, string ..) are kept
+	 *   on different stacks, so calling SetPropertyInteger() for a 
+	 *   floating-point property has no effect - the loader will call
+	 *   GetPropertyFloat() to read the property, but it won't be there.
 	 */
-	int SetProperty(const char* szName, int iValue);
+	void SetPropertyInteger(const char* szName, int iValue, 
+		bool* bWasExisting = NULL);
+
+	// -------------------------------------------------------------------
+	/** Set a floating-point configuration property.
+	 * @see SetPropertyInteger()
+	 */
+	void SetPropertyFloat(const char* szName, float fValue, 
+		bool* bWasExisting = NULL);
+
+	// -------------------------------------------------------------------
+	/** Set a string configuration property.
+	 * @see SetPropertyInteger()
+	 */
+	void SetPropertyString(const char* szName, const std::string& sValue, 
+		bool* bWasExisting = NULL);
 
 
 	// -------------------------------------------------------------------
 	/** Get a configuration property.
 	 * @param szName Name of the property. All supported properties
-	 *   are defined in the aiConfig.g header (the constants start
-	 *   with AI_CONFIG_XXX).
-	 * @param iErrorReturn Value that is returned if the property
-	 *   is not found. Note that this value, not the default value
-	 *   for the requested property is returned!
+	 *   are defined in the aiConfig.g header (all constants share the
+	 *   prefix AI_CONFIG_XXX).
+	 * @param iErrorReturn Value that is returned if the property 
+	 *   is not found. 
 	 * @return Current value of the property
+	 * @note Property of different types (float, int, string ..) are kept
+	 *   on different lists, so calling SetPropertyInteger() for a 
+	 *   floating-point property has no effect - the loader will call
+	 *   GetPropertyFloat() to read the property, but it won't be there.
 	 */
-	int GetProperty(const char* szName, int iErrorReturn = 0xffffffff) const;
+	int GetPropertyInteger(const char* szName, 
+		int iErrorReturn = 0xffffffff) const;
+
+	// -------------------------------------------------------------------
+	/** Get a floating-point configuration property
+	 * @see GetPropertyInteger()
+	 */
+	float GetPropertyFloat(const char* szName, 
+		float fErrorReturn = 10e10f) const;
+
+	// -------------------------------------------------------------------
+	/** Get a string configuration property
+	 * @see GetPropertyInteger()
+	 */
+	std::string GetPropertyString(const char* szName,
+		const std::string& sErrorReturn = "") const;
 
 
 	// -------------------------------------------------------------------
@@ -278,10 +305,11 @@ public:
 
 
 	// -------------------------------------------------------------------
-	/** Returns whether a given file extension is supported by ASSIMP
+	/** Returns whether a given file extension is supported by ASSIMP.
 	*
 	* @param szExtension Extension to be checked.
-	*   Must include a leading dot '.'. Example: ".3ds", ".md3"
+	*   Must include a trailing dot '.'. Example: ".3ds", ".md3".
+	*   Cases-insensitive.
 	* @return true if the extension is supported, false otherwise
 	*/
 	bool IsExtensionSupported(const std::string& szExtension);
@@ -296,6 +324,18 @@ public:
 	*   Format of the list: "*.3ds;*.obj;*.dae". 
 	*/
 	void GetExtensionList(std::string& szOut);
+
+
+	// -------------------------------------------------------------------
+	/** Find the loader corresponding to a specific file extension.
+	*
+	*  This is quite similar to IsExtensionSupported() except a
+	*  BaseImporter instance is returned.
+	*  @param szExtension Extension to be checke, cases insensitive,
+	*    must include a trailing dot.
+	*  @return NULL if there is no loader for the extension.
+	*/
+	BaseImporter* FindLoader (const std::string& szExtension);
 
 
 	// -------------------------------------------------------------------
@@ -351,9 +391,17 @@ protected:
 	std::string mErrorString;
 
 	/** List of integer properties */
-	std::vector<IntPropertyInfo> mIntProperties;
+	IntPropertyMap mIntProperties;
 
-	/** Used for testing */
+	/** List of floating-point properties */
+	FloatPropertyMap mFloatProperties;
+
+	/** List of string properties */
+	StringPropertyMap mStringProperties;
+
+	/** Used for testing - extra verbose mode causes the
+	    validateDataStructure-Step to be executed before
+		and after every single postprocess step */
 	bool bExtraVerbose;
 };
 

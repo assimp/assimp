@@ -44,40 +44,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_D3DSSPATIALSORT_H_INC
 
 #include <vector>
-#include "../include/aiVector3D.h"
-
-
-#if (!defined AI_BUILD_NO_ASE_IMPORTER)
-#	include "3DSHelper.h"
-#endif
+#include "../include/aiTypes.h"
 
 namespace Assimp
 {
-
-using namespace Dot3DS;
 
 // ------------------------------------------------------------------------------------------------
 /** Specialized version of SpatialSort to support smoothing groups
  *  This is used in the .3ds loader
  */
-class D3DSSpatialSorter
+class SGSpatialSort
 {
 public:
 
-	D3DSSpatialSorter();
+	SGSpatialSort();
 
 	// -------------------------------------------------------------------
 	/** Construction from a given face array, handling smoothing groups properly
 	 */
-	D3DSSpatialSorter(const std::vector<aiVector3D>& vPositions);
+	SGSpatialSort(const std::vector<aiVector3D>& vPositions);
 
 	// -------------------------------------------------------------------
-	/** Add a face to the spatial sorter
-	 * @param pcFace Face to be added
-	 * @param vPositions Input position list
+	/** Add a vertex to the spatial sort
+	 * @param vPosition Vertex position to be added
+	 * @param index Index of the vrtex
+	 * @param smoothingGroup SmoothingGroup for this vertex
 	 */
-	void AddFace(const Dot3DS::Face* pcFace,
-		const std::vector<aiVector3D>& vPositions);
+	void Add(const aiVector3D& vPosition, unsigned int index,
+		unsigned int smoothingGroup);
 
 	// -------------------------------------------------------------------
 	/** Prepare the spatial sorter for use
@@ -85,7 +79,7 @@ public:
 	void Prepare();
 
 	/** Destructor */
-	~D3DSSpatialSorter();
+	~SGSpatialSort();
 
 	// -------------------------------------------------------------------
 	/** Returns an iterator for all positions close to the given position.

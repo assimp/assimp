@@ -239,22 +239,6 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\port\jAssimp\jni_bridge\assimp_Importer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\port\jAssimp\jni_bridge\assimp_Importer_DefaultIOStream.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\port\jAssimp\jni_bridge\assimp_Importer_DefaultIOSystem.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\port\jAssimp\jni_bridge\assimp_Importer_Property.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\port\jAssimp\jni_bridge\JNIEnvironment.h"
 				>
 			</File>
@@ -262,6 +246,26 @@
 				RelativePath="..\..\port\jAssimp\jni_bridge\JNILogger.h"
 				>
 			</File>
+			<Filter
+				Name="javah"
+				>
+				<File
+					RelativePath="..\..\port\jAssimp\jni_bridge\assimp_Importer.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\port\jAssimp\jni_bridge\assimp_Importer_DefaultIOStream.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\port\jAssimp\jni_bridge\assimp_Importer_DefaultIOSystem.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\port\jAssimp\jni_bridge\assimp_Importer_Property.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="resources"

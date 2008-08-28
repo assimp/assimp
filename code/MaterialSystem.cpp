@@ -268,7 +268,7 @@ uint32_t MaterialHelper::ComputeHash()
 		// NOTE: We need to exclude the material name from the hash
 		if ((prop = this->mProperties[i]) && 0 != ::strcmp(prop->mKey.data,AI_MATKEY_NAME)) 
 		{
-			hash = SuperFastHash(prop->mKey.data,prop->mKey.length,hash);
+			hash = SuperFastHash(prop->mKey.data,(unsigned int)prop->mKey.length,hash);
 			hash = SuperFastHash(prop->mData,prop->mDataLength,hash);
 		}
 	}
@@ -371,8 +371,8 @@ aiReturn MaterialHelper::AddProperty (const aiString* pInput,
 	const char* pKey)
 {
 	// fix ... don't keep the whole string buffer
-	return this->AddBinaryProperty(pInput,
-		pInput->length+1+ (size_t)((uint8_t*)&pInput->data - (uint8_t*)&pInput->length),
+	return this->AddBinaryProperty(pInput,(unsigned int)pInput->length+1+
+		(unsigned int)(((uint8_t*)&pInput->data - (uint8_t*)&pInput->length)),
 		pKey,aiPTI_String);
 }
 // ------------------------------------------------------------------------------------------------

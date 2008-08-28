@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "ASELoader.h"
-#include "3DSSpatialSort.h"
 #include "MaterialSystem.h"
 #include "StringComparison.h"
 #include "TextureTransform.h"
@@ -142,6 +141,7 @@ void ASEImporter::InternReadFile(
 		if ((*i).bSkip)continue;
 
 		this->TransformVertices(*i);
+
 		// now we need to create proper meshes from the import we need to 
 		// split them by materials, build valid vertex/face lists ...
 		this->BuildUniqueRepresentation(*i);
@@ -1135,9 +1135,7 @@ void ASEImporter::BuildMaterialIndices()
 	}
 	// prepare for the next step
 	for (unsigned int hans = 0; hans < this->mParser->m_vMaterials.size();++hans)
-	{
 		TextureTransform::ApplyScaleNOffset(this->mParser->m_vMaterials[hans]);
-	}
 
 	// now we need to iterate through all meshes,
 	// generating correct texture coordinates and material uv indices
@@ -1182,75 +1180,6 @@ void ASEImporter::GenerateNormals(ASE::Mesh& mesh)
 		}
 	}
 	if (mesh.mNormals.empty())
-	{
-		// need to calculate normals ... 
-		// TODO: Find a way to merge this with the code in 3DSGenNormals.cpp
-		mesh.mNormals.resize(mesh.mPositions.size(),aiVector3D());
-		for( unsigned int a = 0; a < mesh.mFaces.size(); a++)
-		{
-			const ASE::Face& face = mesh.mFaces[a];
-
-			// assume it is a triangle
-			aiVector3D* pV1 = &mesh.mPositions[face.mIndices[2]];
-			aiVector3D* pV2 = &mesh.mPositions[face.mIndices[1]];
-			aiVector3D* pV3 = &mesh.mPositions[face.mIndices[0]];
-
-			aiVector3D pDelta1 = *pV2 - *pV1;
-			aiVector3D pDelta2 = *pV3 - *pV1;
-			aiVector3D vNor = pDelta1 ^ pDelta2;
-
-			for (unsigned int i = 0; i < 3;++i)
-				mesh.mNormals[face.mIndices[i]] = vNor;
-		}
-
-		// calculate the position bounds so we have a reliable epsilon to 
-		// check position differences against 
-		// @Schrompf: This is the 7th time this snippet is repeated!
-		aiVector3D minVec( 1e10f, 1e10f, 1e10f), maxVec( -1e10f, -1e10f, -1e10f);
-		for( unsigned int a = 0; a < mesh.mPositions.size(); a++)
-		{
-			minVec.x = std::min( minVec.x, mesh.mPositions[a].x);
-			minVec.y = std::min( minVec.y, mesh.mPositions[a].y);
-			minVec.z = std::min( minVec.z, mesh.mPositions[a].z);
-			maxVec.x = std::max( maxVec.x, mesh.mPositions[a].x);
-			maxVec.y = std::max( maxVec.y, mesh.mPositions[a].y);
-			maxVec.z = std::max( maxVec.z, mesh.mPositions[a].z);
-		}
-		const float posEpsilon = (maxVec - minVec).Length() * 1e-5f;
-
-		std::vector<aiVector3D> avNormals;
-		avNormals.resize(mesh.mNormals.size());
-
-		// now generate the spatial sort tree
-		D3DSSpatialSorter sSort;
-		for( std::vector<ASE::Face>::iterator
-			i =  mesh.mFaces.begin();
-			i != mesh.mFaces.end();++i){sSort.AddFace(&(*i),mesh.mPositions);}
-		sSort.Prepare();
-
-		for( std::vector<ASE::Face>::iterator
-			i =  mesh.mFaces.begin();
-			i != mesh.mFaces.end();++i)
-		{
-			std::vector<unsigned int> poResult;
-			for (unsigned int c = 0; c < 3;++c)
-			{
-				sSort.FindPositions(mesh.mPositions[(*i).mIndices[c]],(*i).iSmoothGroup,
-					posEpsilon,poResult);
-
-				aiVector3D vNormals;
-				for (std::vector<unsigned int>::const_iterator
-					a =  poResult.begin();
-					a != poResult.end();++a)
-				{
-					vNormals += mesh.mNormals[(*a)];
-				}
-				vNormals.Normalize();
-				avNormals[(*i).mIndices[c]] = vNormals;
-				poResult.clear();
-			}
-		}
-		mesh.mNormals = avNormals;
-	}
+		ComputeNormalsWithSmoothingsGroups<ASE::Face>(mesh);
 	return;
 }

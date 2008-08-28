@@ -66,8 +66,8 @@ struct aiString;
 * @param pFile Path and filename of the file to be imported, 
 *   expected to be a null-terminated c-string. NULL is not a valid value.
 * @param pFlags Optional post processing steps to be executed after 
-*   a successful import. Provide a bitwise combination of the #aiPostProcessSteps
-*   flags.
+*   a successful import. Provide a bitwise combination of the 
+*   #aiPostProcessSteps flags.
 * @return Pointer to the imported data or NULL if the import failed. 
 */
 // ---------------------------------------------------------------------------
@@ -85,18 +85,19 @@ ASSIMP_API const C_STRUCT aiScene* aiImportFile( const char* pFile,
 * done with it, call aiReleaseImport() to free the resources associated with 
 * this file. If the import fails, NULL is returned instead. Call 
 * aiGetErrorString() to retrieve a human-readable error text.
-* @param pFile aiFileIO structure.  All functions pointers must be
-*   initialized. aiFileIO::OpenFunc() and aiFileIO::CloseFunc()
-*   will be used to open other files in the fs if the asset to be 
-*   loaded depends on them. NULL is not a valid value.
-* @return Pointer to the imported data or NULL if the import failed. 
-*
-* @note The C-API creates a new Importer instance internally for each call 
-* to this function. Therefore the C-API is thread-safe. 
+* @param pFile Path and filename of the file to be imported, 
+*   expected to be a null-terminated c-string. NULL is not a valid value.
+* @param pFlags Optional post processing steps to be executed after 
+*   a successful import. Provide a bitwise combination of the
+*   #aiPostProcessSteps flags.
+* @param pFS aiFileIO structure. Will be used to open the model file itself
+*   and any other files the loader needs to open.
+* @return Pointer to the imported data or NULL if the import failed.  
 */
 // ---------------------------------------------------------------------------
 ASSIMP_API const C_STRUCT aiScene* aiImportFileEx( 
-	const C_STRUCT aiFileIO* pFile);
+	const char* pFile, unsigned int pFlags,
+	C_STRUCT aiFileIO* pFS);
 
 
 // ---------------------------------------------------------------------------
@@ -150,6 +151,31 @@ ASSIMP_API void aiGetExtensionList(C_STRUCT aiString* szOut);
 // ---------------------------------------------------------------------------
 ASSIMP_API void aiGetMemoryRequirements(const C_STRUCT aiScene* pIn,
 	C_STRUCT aiMemoryInfo* in);
+
+
+// ---------------------------------------------------------------------------
+/** Set an integer property. This is the C-version of 
+ *  #Importer::SetPropertyInteger(). In the C-API properties are shared by
+ *  all imports. It is not possible to specify them per asset.
+ *
+ * \param szName Name of the configuration property to be set. All constants
+ *   are defined in the aiConfig.h header file.
+ * \param value New value for the property
+ */
+// ---------------------------------------------------------------------------
+ASSIMP_API void aiSetImportPropertyInteger(const char* szName, int value);
+
+// ---------------------------------------------------------------------------
+/**  @see aiSetImportPropertyInteger()
+ */
+ASSIMP_API void aiSetImportPropertyFloat(const char* szName, float value);
+
+// ---------------------------------------------------------------------------
+/**  @see aiSetImportPropertyInteger()
+ */
+ASSIMP_API void aiSetImportPropertyString(const char* szName,
+	const C_STRUCT aiString* st);
+
 
 #ifdef __cplusplus
 }

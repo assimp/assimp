@@ -64,7 +64,7 @@ using namespace Assimp::ASE;
 #define BLUBB(_message_) \
 	{this->LogError(_message_);return;}
 
-
+// ------------------------------------------------------------------------------------------------
 #define AI_ASE_HANDLE_TOP_LEVEL_SECTION(iDepth) \
 	else if ('{' == *this->m_szFile)iDepth++; \
 	else if ('}' == *this->m_szFile) \
@@ -87,6 +87,7 @@ using namespace Assimp::ASE;
 	} else bLastWasEndLine = false; \
 	++this->m_szFile; 
 
+// ------------------------------------------------------------------------------------------------
 #define AI_ASE_HANDLE_SECTION(iDepth, level, msg) \
 	else if ('{' == *this->m_szFile)iDepth++; \
 	else if ('}' == *this->m_szFile) \
@@ -1723,62 +1724,29 @@ void Parser::ParseLV4MeshLongTriple(unsigned int* apOut)
 	ai_assert(NULL != apOut);
 
 	for (unsigned int i = 0; i < 3;++i)
-	{
-		// skip spaces and tabs
-		if(!SkipSpaces(this->m_szFile,&this->m_szFile))
-		{
-			// LOG 
-			this->LogWarning("Unable to parse indexable long triple: unexpected EOL [#1]");
-			++this->iLineNumber;
-			apOut[0] = apOut[1] = apOut[2] = 0;
-			return;
-		}
-		apOut[i] = strtol10(this->m_szFile,&this->m_szFile);
-	}
+		ParseLV4MeshLong(apOut[i]);
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshLongTriple(unsigned int* apOut, unsigned int& rIndexOut)
 {
 	ai_assert(NULL != apOut);
 
-	// skip spaces and tabs
-	if(!SkipSpaces(this->m_szFile,&this->m_szFile))
-	{
-		// LOG 
-		this->LogWarning("Unable to parse indexed long triple: unexpected EOL [#4]");
-		rIndexOut = 0;
-		apOut[0] = apOut[1] = apOut[2] = 0;
-		++this->iLineNumber;
-		return;
-	}
 	// parse the index
-	rIndexOut = strtol10(this->m_szFile,&this->m_szFile);
+	ParseLV4MeshLong(rIndexOut);
 
 	// parse the three others
 	this->ParseLV4MeshLongTriple(apOut);
-	return;
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshFloatTriple(float* apOut, unsigned int& rIndexOut)
 {
 	ai_assert(NULL != apOut);
 
-	// skip spaces and tabs
-	if(!SkipSpaces(this->m_szFile,&this->m_szFile))
-	{
-		// LOG 
-		this->LogWarning("Unable to parse indexed float triple: unexpected EOL [#1]");
-		rIndexOut = 0;
-		apOut[0] = apOut[1] = apOut[2] = 0.0f;
-		++this->iLineNumber;
-		return;
-	}
 	// parse the index
-	rIndexOut = strtol10(this->m_szFile,&this->m_szFile);
+	ParseLV4MeshLong(rIndexOut);
 	
 	// parse the three others
 	this->ParseLV4MeshFloatTriple(apOut);
-	return;
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshFloatTriple(float* apOut)
@@ -1786,20 +1754,7 @@ void Parser::ParseLV4MeshFloatTriple(float* apOut)
 	ai_assert(NULL != apOut);
 
 	for (unsigned int i = 0; i < 3;++i)
-	{
-		// skip spaces and tabs
-		if(!SkipSpaces(this->m_szFile,&this->m_szFile))
-		{
-			// LOG 
-			this->LogWarning("Unable to parse float triple: unexpected EOL [#5]");
-			apOut[0] = apOut[1] = apOut[2] = 0.0f;
-			++this->iLineNumber;
-			return;
-		}
-		// parse the float
-		this->m_szFile = fast_atof_move(this->m_szFile,apOut[i]);
-	}
-	return;
+		ParseLV4MeshFloat(apOut[i]);
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshFloat(float& fOut)
@@ -1815,9 +1770,6 @@ void Parser::ParseLV4MeshFloat(float& fOut)
 	}
 	// parse the first float
 	this->m_szFile = fast_atof_move(this->m_szFile,fOut);
-	// go to the next valid sequence
-	//this->SkipToNextToken();
-	return;
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshLong(unsigned int& iOut)
@@ -1833,7 +1785,4 @@ void Parser::ParseLV4MeshLong(unsigned int& iOut)
 	}
 	// parse the value
 	iOut = strtol10(this->m_szFile,&this->m_szFile);
-	// go to the next valid sequence
-	//this->SkipToNextToken();
-	return;
 }

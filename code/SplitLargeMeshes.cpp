@@ -101,7 +101,7 @@ void SplitLargeMeshesProcess_Triangle::Execute( aiScene* pScene)
 void SplitLargeMeshesProcess_Triangle::SetupProperties( const Importer* pImp)
 {
     // get the current value of the split property
-	this->LIMIT = pImp->GetProperty(AI_CONFIG_PP_SLM_TRIANGLE_LIMIT,AI_SLM_DEFAULT_MAX_TRIANGLES);
+	this->LIMIT = pImp->GetPropertyInteger(AI_CONFIG_PP_SLM_TRIANGLE_LIMIT,AI_SLM_DEFAULT_MAX_TRIANGLES);
 }
 // ------------------------------------------------------------------------------------------------
 // Update a node after some meshes have been split
@@ -373,7 +373,7 @@ void SplitLargeMeshesProcess_Vertex::Execute( aiScene* pScene)
 // Setup properties
 void SplitLargeMeshesProcess_Vertex::SetupProperties( const Importer* pImp)
 {
-	this->LIMIT = pImp->GetProperty(AI_CONFIG_PP_SLM_VERTEX_LIMIT,AI_SLM_DEFAULT_MAX_VERTICES);
+	this->LIMIT = pImp->GetPropertyInteger(AI_CONFIG_PP_SLM_VERTEX_LIMIT,AI_SLM_DEFAULT_MAX_VERTICES);
 }
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.

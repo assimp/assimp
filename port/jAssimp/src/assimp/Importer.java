@@ -71,6 +71,38 @@ public class Importer {
         Type value;
     }
 
+
+    /**
+     * Represents a property list
+     */
+    private class PropertyList<Type> extends Vector<Property<Type>> {
+
+        public void setProperty(final String prop, final Type val) {
+
+            for (Property<Type> i : this) {
+                if (i.key.equals(prop)) {
+                    i.value = val;
+                    return;
+                }
+            }
+
+            Property<Type> propNew = new Property<Type>();
+            propNew.key = prop;
+            propNew.value = val;
+            this.add(propNew);
+        }
+
+        public Type getProperty(final String prop) {
+
+            for (Property<Type> i : this) {
+                if (i.key.equals(prop)) {
+                    return i.value;
+                }
+            }
+            return null;
+        }
+    }
+
     /**
      * Default implementation of <code>IOStream</code>.
      * <br>
@@ -158,12 +190,14 @@ public class Importer {
     /**
      * I/O system to be used
      */
-    private IOSystem ioSystem = null;
+    private IOSystem ioSystem = new DefaultIOSystem();
 
     /**
-     * List of config properties
+     * List of config properties for all supported types: int, float and string
      */
-    private Vector<Property<Integer>> properties;
+    private PropertyList<Integer> properties = new PropertyList<Integer>();
+    private PropertyList<Float> propertiesFloat = new PropertyList<Float>();
+    private PropertyList<String> propertiesString = new PropertyList<String>();
 
 
     /**
@@ -186,13 +220,10 @@ public class Importer {
      *
      * @param iVersion Version of the JNI interface to be used.
      * @throws NativeException Thrown if the jassimp library could not be loaded
-     *                     or if the entry point to the module wasn't found. if this exception
-     *                     is not thrown, you can assume that jAssimp is fully available.
+     *                         or if the entry point to the module wasn't found. if this exception
+     *                         is not thrown, you can assume that jAssimp is fully available.
      */
     public Importer(int iVersion) throws NativeException {
-
-        // allocate a default I/O system
-        ioSystem = new DefaultIOSystem();
 
         if (!bLibInitialized) {
 
@@ -319,7 +350,7 @@ public class Importer {
      * @param path Path to the file to be read
      * @return null if the import failed, otherwise a valid Scene instance
      * @throws NativeException This exception is thrown when an unknown error
-     *                     occurs in the JNI bridge module.
+     *                         occurs in the JNI bridge module.
      */
     public final Scene readFile(String path) throws NativeException {
         this.scene = new Scene(this);
@@ -346,8 +377,10 @@ public class Importer {
             else if (step.equals(PostProcessStep.PreTransformVertices)) flags |= 0x100;
             else if (step.equals(PostProcessStep.LimitBoneWeights)) flags |= 0x200;
             else if (step.equals(PostProcessStep.ValidateDataStructure)) flags |= 0x400;
-            else if (step.equals(PostProcessStep.FixInfacingNormals)) flags |= 0x800;
-            else if (step.equals(PostProcessStep.ImproveVertexLocality)) flags |= 0x1600;
+            else if (step.equals(PostProcessStep.ImproveVertexLocality)) flags |= 0x800;
+            else if (step.equals(PostProcessStep.RemoveRedundantMaterials)) flags |= 0x1000;
+            else if (step.equals(PostProcessStep.FixInfacingNormals)) flags |= 0x2000;
+            else if (step.equals(PostProcessStep.OptimizeGraph)) flags |= 0x4000;
         }
 
         // now load the mesh
@@ -418,30 +451,39 @@ public class Importer {
      *
      * @param prop Name of the config property
      * @param val  New value for the config property
-     * @return Old value of the property or <code>PROPERTY_WAS_NOT_EXISTING</code>
-     *         if the property has not yet been set.
      */
-    public final int setPropertyInt(final String prop, int val) {
+    public final void setPropertyInt(final String prop, int val) {
 
-        for (Property<Integer> i : this.properties) {
-            if (i.key.equals(prop)) {
-                int old = i.value;
-                i.value = val;
-
-                // make sure all changes are sent to the native implementation
-                this._NativeSetPropertyInt(prop, val, this.getContext());
-                return old;
-            }
-        }
-
-        Property<Integer> propNew = new Property<Integer>();
-        propNew.key = prop;
-        propNew.value = val;
-        this.properties.add(propNew);
-
-        // make sure all changes are sent to the native implementation
+        this.properties.setProperty(prop, val);
         this._NativeSetPropertyInt(prop, val, this.getContext());
-        return PROPERTY_WAS_NOT_EXISTING;
+    }
+
+
+    /**
+     * Set a floating-point property. All supported config properties are
+     * defined as constants in the <code>ConfigProperty</code> class
+     *
+     * @param prop Name of the config property
+     * @param val  New value for the config property
+     */
+    public final void setPropertyFloat(final String prop, float val) {
+
+        this.propertiesFloat.setProperty(prop, val);
+        this._NativeSetPropertyFloat(prop, val, this.getContext());
+    }
+
+
+    /**
+     * Set a string property. All supported config properties are
+     * defined as constants in the <code>ConfigProperty</code> class
+     *
+     * @param prop Name of the config property
+     * @param val  New value for the config property
+     */
+    public final void setPropertyString(final String prop, String val) {
+
+        this.propertiesString.setProperty(prop, val);
+        this._NativeSetPropertyString(prop, val, this.getContext());
     }
 
 
@@ -457,12 +499,36 @@ public class Importer {
      */
     public final int getPropertyInt(final String prop, int error_return) {
 
-        for (Property<Integer> i : this.properties) {
-            if (i.key.equals(prop)) {
-                return i.value;
-            }
-        }
-        return error_return;
+        Integer i = this.properties.getProperty(prop);
+        return i != null ? i : error_return;
+    }
+
+
+    /**
+     * Gets a floating-point config property that has been set using
+     * <code>setPropertyFloat</code>. All supported config properties are
+     * defined as constants in the <code>ConfigProperty</code> class
+     *
+     * @see <code>getPropertyInt</code>
+     */
+    public final float getPropertyFloat(final String prop, float error_return) {
+
+        Float i = this.propertiesFloat.getProperty(prop);
+        return i != null ? i : error_return;
+    }
+
+
+    /**
+     * Gets a string config property that has been set using
+     * <code>setPropertyString</code>. All supported config properties are
+     * defined as constants in the <code>ConfigProperty</code> class
+     *
+     * @see <code>getPropertyInt</code>
+     */
+    public final String getPropertyString(final String prop, String error_return) {
+
+        String i = this.propertiesString.getProperty(prop);
+        return i != null ? i : error_return;
     }
 
     /**
@@ -531,4 +597,12 @@ public class Importer {
      * @return 0xffffffff if an error occured
      */
     private native int _NativeSetPropertyInt(String name, int prop, long iContext);
+
+    // float-version
+    private native int _NativeSetPropertyFloat(String name,
+       float prop, long iContext);
+
+    // String-version
+    private native int _NativeSetPropertyString(String name,
+       String prop, long iContext);
 }

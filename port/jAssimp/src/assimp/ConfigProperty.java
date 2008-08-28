@@ -44,7 +44,7 @@ package assimp;
 
 /**
  * Defines configuration properties.
- *
+ * <p/>
  * Static helper class, can't be instanced. It defines configuration
  * property keys to be used with <code> Importer.setPropertyInt</code>
  *
@@ -55,7 +55,6 @@ public class ConfigProperty {
 
     private ConfigProperty() {
     }
-
 
 
     /**
@@ -79,15 +78,13 @@ public class ConfigProperty {
     public static final int DEFAULT_LBW_MAX_WEIGHTS = 4;
 
 
-
-
-
     /**
      * Set the maximum number of vertices in a mesh.
      * <p/>
      * This is used by the "SplitLargeMeshes" PostProcess-Step to determine
      * whether a mesh must be splitted or not.
-     * \note The default value is <code>DEFAULT_SLM_MAX_TRIANGLES</code>
+     * note: The default value is <code>DEFAULT_SLM_MAX_TRIANGLES</code>.
+     * The type of the property is int.
      */
     public static final String CONFIG_PP_SLM_TRIANGLE_LIMIT
             = "pp.slm.triangle_limit";
@@ -98,7 +95,8 @@ public class ConfigProperty {
      * <p/>
      * This is used by the "SplitLargeMeshes" PostProcess-Step to determine
      * whether a mesh must be splitted or not.
-     * \note The default value is <code>DEFAULT_SLM_MAX_VERTICES</code>
+     * note: The default value is <code>DEFAULT_SLM_MAX_VERTICES</code>.
+     * The type of the property is int.
      */
     public static final String CONFIG_PP_SLM_VERTEX_LIMIT
             = "pp.slm.vertex_limit";
@@ -108,7 +106,8 @@ public class ConfigProperty {
      * Set the maximum number of bones affecting a single vertex
      * <p/>
      * This is used by the aiProcess_LimitBoneWeights PostProcess-Step.
-     * \note The default value is <code>DEFAULT_LBW_MAX_WEIGHTS</code>
+     * note :The default value is <code>DEFAULT_LBW_MAX_WEIGHTS</code>.
+     * The type of the property is int.
      */
     public static final String CONFIG_PP_LBW_MAX_WEIGHTS
             = "pp.lbw.weights_limit";
@@ -126,6 +125,7 @@ public class ConfigProperty {
      * <code>CONFIG_IMPORT_XXX_KEYFRAME</code> options (where XXX is a
      * placeholder for the file format for which you want to override the
      * global setting).
+     * The type of the property is int.
      */
     public static final String CONFIG_IMPORT_GLOBAL_KEYFRAME
             = "imp.global.kf";
@@ -144,11 +144,60 @@ public class ConfigProperty {
      * There are some faulty 3DS files on the internet which look
      * only correctly with pivot points disabled. By default,
      * this option is disabled.
+     * note: This is a boolean property stored as an integer, 0 is false
      */
     public static final String CONFIG_IMPORT_3DS_IGNORE_PIVOT
             = "imp.3ds.nopivot";
 
-    public static final String CONFIG_PP_OG_MAX_DEPTH = "pp.og.max_depth";
-    public static final String CONFIG_PP_OG_MIN_TRIS_PER_NODE = "pp.og.min_tris";
-    public static final String CONFIG_PP_OG_MAXIMALLY_SMALL = "pp.og.maximally_small";
+
+    /**
+     * Specifies the maximum angle that may be between two vertex tangents
+     * that their tangents and bitangents are smoothed.
+     * <p/>
+     * This applies to the CalcTangentSpace-Step. The angle is specified
+     * in degrees, so 180 is PI. The default value is
+     * 45 degrees. The maximum value is 180.f
+     * The type of the property is float.
+     */
+    public static final String AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE
+            = "pp.ct.max_smoothing";
+
+
+    /**
+     * Specifies the maximum angle that may be between two face normals
+     * at the same vertex position that their are smoothed.
+     * <p/>
+     * This applies to the GenSmoothNormals-Step. The angle is specified
+     * in degrees * 1000, so 180.f is PI. The default value is
+     * 180 degrees (all vertex normals are smoothed). The maximum value is 180.f
+     * The type of the property is float.
+     */
+    public static final String AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE
+            = "pp.gsn.max_smoothing";
+
+
+    /**
+     * Specifies the minimum number of faces a node should have.
+     * This is an input parameter to the OptimizeGraph-Step.
+     * <p/>
+     * Nodes whose referenced meshes have less faces than this value
+     * are propably joined with neighbors with identical world matrices.
+     * However, it is just a hint to the step.
+     * The type of the property is int.
+     */
+    public static final String AI_CONFIG_PP_OG_MIN_NUM_FACES
+            = "pp.og.min_faces";
+
+
+    /** \brief Specifies whether animations are removed from the asset.
+     *         This is an input parameter to the OptimizeGraph-Step.
+     *
+     * If an application does not need the animation data, erasing it at the
+     * beginning of the post-process pipeline allows some steps - including
+     * OptimizeGraph itself - to apply further optimizations.
+     * note: This is a boolean property stored as an integer, 0 is false
+     */
+    public static final String AI_CONFIG_PP_OG_REMOVE_ANIMATIONS
+            = "pp.og.remove_anims";
+
 }

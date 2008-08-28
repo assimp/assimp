@@ -61,14 +61,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-// we're just doing this with static buffers whose size is known at
-// compile time, so the compiler should automatically expand to
-// sprintf<array_length>(...)
-
-#if _MSC_VER >= 1400
-#	define sprintf sprintf_s
-#endif
-
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 MD5Importer::MD5Importer()
@@ -122,9 +114,8 @@ void MD5Importer::InternReadFile(
 
 	// make sure we return no incomplete data
 	if (!bHadMD5Mesh && !bHadMD5Anim)
-	{
 		throw new ImportErrorException("Failed to read valid data from this MD5");
-	}
+	
 	if (!bHadMD5Mesh)pScene->mFlags |= AI_SCENE_FLAGS_ANIM_SKELETON_ONLY;
 }
 // ------------------------------------------------------------------------------------------------
@@ -285,30 +276,48 @@ void MD5Importer::LoadMD5MeshFile ()
 	pScene->mRootNode->mNumChildren = 2;
 	pScene->mRootNode->mChildren = new aiNode*[2];
 
-	aiNode* pcNode = pScene->mRootNode->mChildren[0] = new aiNode();
-	pcNode->mNumMeshes = (unsigned int)meshParser.mMeshes.size();
-	pcNode->mMeshes = new unsigned int[pcNode->mNumMeshes];
-	pcNode->mName.Set("MD5Mesh");
-	pcNode->mParent = pScene->mRootNode;
-	for (unsigned int i = 0; i < pcNode->mNumMeshes;++i)
-	{
-		pcNode->mMeshes[i] = i;
-	}
-
 	// now create the hierarchy of animated bones
-	pcNode = pScene->mRootNode->mChildren[1] = new aiNode();
+	aiNode* pcNode = pScene->mRootNode->mChildren[1] = new aiNode();
 	pcNode->mName.Set("MD5Anim");
 	pcNode->mParent = pScene->mRootNode;
 	AttachChilds(-1,pcNode,meshParser.mJoints);
 
+	pcNode = pScene->mRootNode->mChildren[0] = new aiNode();
+	pcNode->mName.Set("MD5Mesh");
+	pcNode->mParent = pScene->mRootNode;
+
+	std::vector<MD5::MeshDesc>::const_iterator end = meshParser.mMeshes.end();
+
+	// FIX: MD5 files exported from Blender can have empty meshes
+	for (std::vector<MD5::MeshDesc>::const_iterator 
+		 it  = meshParser.mMeshes.begin(),
+		 end = meshParser.mMeshes.end(); it != end;++it)
+	{
+		if (!(*it).mFaces.empty() && !(*it).mVertices.empty())
+			++pScene->mNumMaterials;
+	}
+
 	// generate all meshes
-	pScene->mNumMeshes = pScene->mNumMaterials = (unsigned int)meshParser.mMeshes.size();
+	pScene->mNumMeshes = pScene->mNumMaterials;
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 	pScene->mMaterials = new aiMaterial*[pScene->mNumMeshes];
-	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+
+	//  storage for node mesh indices
+	pcNode->mNumMeshes = pScene->mNumMeshes;
+	pcNode->mMeshes = new unsigned int[pcNode->mNumMeshes];
+	for (unsigned int m = 0; m < pcNode->mNumMeshes;++m)
+		pcNode->mMeshes[m] = m;
+
+	unsigned int n = 0;
+	for (std::vector<MD5::MeshDesc>::iterator 
+		 it  = meshParser.mMeshes.begin(),
+		 end = meshParser.mMeshes.end(); it != end;++it)
 	{
-		aiMesh* mesh = pScene->mMeshes[i] = new aiMesh();
-		MD5::MeshDesc& meshSrc = meshParser.mMeshes[i];
+		MD5::MeshDesc& meshSrc = *it;
+		if (meshSrc.mFaces.empty() || meshSrc.mVertices.empty())
+			continue;
+
+		aiMesh* mesh = pScene->mMeshes[n] = new aiMesh();
 
 		// generate unique vertices in our internal verbose format
 		MakeDataUnique(meshSrc);
@@ -424,9 +433,9 @@ void MD5Importer::LoadMD5MeshFile ()
 
 		// generate a material for the mesh
 		MaterialHelper* mat = new MaterialHelper();
-		pScene->mMaterials[i] = mat;
+		pScene->mMaterials[n] = mat;
 		mat->AddProperty(&meshSrc.mShader,AI_MATKEY_TEXTURE_DIFFUSE(0));
-		mesh->mMaterialIndex = i;
+		mesh->mMaterialIndex = n++;
 	}
 
 	// delete the file again

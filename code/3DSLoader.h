@@ -207,14 +207,9 @@ protected:
 	void ConvertScene(aiScene* pcOut);
 
 	// -------------------------------------------------------------------
-	/** generate normal vectors for a given mesh
-	*/
-	void GenNormals(Dot3DS::Mesh* sMesh);
-
-	// -------------------------------------------------------------------
 	/** generate unique vertices for a mesh
 	*/
-	void MakeUnique(Dot3DS::Mesh* sMesh);
+	void MakeUnique(Dot3DS::Mesh& sMesh);
 
 	// -------------------------------------------------------------------
 	/** Add a node to the node graph
@@ -235,7 +230,7 @@ protected:
 	// -------------------------------------------------------------------
 	/** Clamp all indices in the file to a valid range
 	*/
-	void CheckIndices(Dot3DS::Mesh* sMesh);
+	void CheckIndices(Dot3DS::Mesh& sMesh);
 
 
 protected:

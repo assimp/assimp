@@ -55,8 +55,7 @@ struct aiNode;
 #include "MDLFileData.h"
 #include "HalfLifeFileData.h"
 
-namespace Assimp
-{
+namespace Assimp	{
 class MaterialHelper;
 
 using namespace MDL;
@@ -442,6 +441,9 @@ protected:
 	/** Configuration option: frame to be loaded */
 	unsigned int configFrameID;
 
+	/** Configuration option: palette to be used to decode palletized images*/
+	std::string configPalette;
+
 	/** Buffer to hold the loaded file */
 	unsigned char* mBuffer;
 
@@ -449,16 +451,13 @@ protected:
 	 * (MDL7 doesn't need this, the format has a separate loader) */
 	unsigned int iGSFileVersion;
 
-	/** Output I/O handler. used to load external lmp files
-	*/
+	/** Output I/O handler. used to load external lmp files */
 	IOSystem* pIOHandler;
 
-	/** Output scene to be filled
-	*/
+	/** Output scene to be filled */
 	aiScene* pScene;
 
-	/** Size of the input file in bytes
-	 */
+	/** Size of the input file in bytes */
 	unsigned int iFileSize;
 };
 

@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * whether a mesh must be splitted or not.
  * \note The default value is AI_SLM_DEFAULT_MAX_VERTICES, defined in
  *       the internal header file SplitLargeMeshes.h
+ * Property type: integer.
  */
 #define AI_CONFIG_PP_SLM_TRIANGLE_LIMIT	"pp.slm.triangle_limit"
 
@@ -61,6 +62,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * whether a mesh must be splitted or not.
  * \note The default value is AI_SLM_DEFAULT_MAX_TRIANGLES, defined in
  *       the internal header file SplitLargeMeshes.h
+ * Property type: integer.
  */
 #define AI_CONFIG_PP_SLM_VERTEX_LIMIT	"pp.slm.vertex_limit"
 
@@ -71,6 +73,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * This is used by the aiProcess_LimitBoneWeights PostProcess-Step.
  * \note The default value is AI_LBW_MAX_WEIGHTS, defined in
  *       the internal header file LimitBoneWeightsProcess.h
+ * Property type: integer.
  */
 #define AI_CONFIG_PP_LBW_MAX_WEIGHTS	"pp.lbw.weights_limit"
 
@@ -86,6 +89,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   for a specific loader. You can use the AI_CONFIG_IMPORT_XXX_KEYFRAME
  *   options (where XXX is a placeholder for the file format for which you
  *   want to override the global setting).
+ * Property type: integer.
  */
 #define AI_CONFIG_IMPORT_GLOBAL_KEYFRAME	"imp.global.kf"
 
@@ -101,7 +105,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** \brief Causes the 3DS loader to ignore pivot points in the file
  *
  * There are some faulty 3DS files which look only correctly with
- * pivot points disabled 
+ * pivot points disabled.
+ * Property type: integer (1: true; !1: false).
  */
 #define AI_CONFIG_IMPORT_3DS_IGNORE_PIVOT	"imp.3ds.nopivot"
 
@@ -112,6 +117,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * LightWave represents the gradients with infinite detail,
  * but for use in realtime the loader computes replacement textures.
  * The default size is 512 * 512.
+ * Property type: integer. 
  */
 #define AI_CONFIG_IMPORT_LWO_GRADIENT_RESX	"imp.lwo.gradres_x"
 #define AI_CONFIG_IMPORT_LWO_GRADIENT_RESY	"imp.lwo.gradres_y"
@@ -121,8 +127,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *         that their tangents and bitangents are smoothed.
  *
  * This applies to the CalcTangentSpace-Step. The angle is specified
- * in degrees * 1000, so 180000 is PI. The default value is
- * 45 degrees. The maximum value is 180000.
+ * in degrees , so 180 is PI. The default value is
+ * 45 degrees. The maximum value is 180.
+ * Property type: float. 
  */
 #define AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE "pp.ct.max_smoothing"
 
@@ -131,15 +138,59 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *         at the same vertex position that their are smoothed.
  *
  * This applies to the GenSmoothNormals-Step. The angle is specified
- * in degrees * 1000, so 180000 is PI. The default value is
- * 180 degrees (all vertex normals are smoothed). The maximum value is 180000
- * \note This can be manually overriden by loaders via #aiMesh::mMaxSmoothingAngle;
+ * in degrees, so 180 is PI. The default value is
+ * 180 degrees (all vertex normals are smoothed). The maximum value is 180
+ * Property type: float. 
  */
 #define AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE "pp.gsn.max_smoothing"
 
 
-#define AI_CONFIG_PP_OG_MAX_DEPTH			"pp.og.max_depth"
-#define AI_CONFIG_PP_OG_MIN_TRIS_PER_NODE	"pp.og.min_tris"
-#define AI_CONFIG_PP_OG_MAXIMALLY_SMALL		"pp.og.maximally_small"
+// ---------------------------------------------------------------------------
+/** \brief Specifies the minimum number of faces a node should have.
+ *         This is an input parameter to the OptimizeGraph-Step.
+ *
+ * Nodes whose referenced meshes have less faces than this value
+ * are propably joined with neighbors with identical world matrices.
+ * However, it is just a hint to the step.
+ * Property type: integer 
+ */
+#define AI_CONFIG_PP_OG_MIN_NUM_FACES		"pp.og.min_faces"
+
+
+// ---------------------------------------------------------------------------
+/** \brief Specifies whether animations are removed from the asset.
+ *         This is an input parameter to the OptimizeGraph-Step.
+ *
+ * If an application does not need the animation data, erasing it at the
+ * beginning of the post-process pipeline allows some steps - including
+ * OptimizeGraph itself - to apply further optimizations.
+ * Property type: integer (1: true; !1: false).
+ */
+#define AI_CONFIG_PP_OG_REMOVE_ANIMATIONS	"pp.og.remove_anims"
+
+
+// ---------------------------------------------------------------------------
+/** \brief Specifies whether the OptimizeGraphProcess joins nodes even if
+ *         their local transformations are inequal.
+ *
+ * By default, nodes with different local transformations are never joined.
+ * The intention is that all vertices should remain in their original
+ * local coordinate space where they are correctly centered and aligned,
+ * which does also allow for some significant culling improvements.
+ */
+#define AI_CONFIG_PP_OG_JOIN_INEQUAL_TRANSFORMS	"pp.og.allow_diffwm"
+
+
+// ---------------------------------------------------------------------------
+/** \brief Sets the colormap (= palette) to be used to decode embedded
+ *         textures in MDL files.
+ *
+ * This must be a valid path to a file. The file is 768 (256*3) bytes
+ * large and contains RGB tripels for each of the 256 palette entries.
+ * The default value is colormap.lmp. If the file is nto found,
+ * a default palette is used.
+ * Property type: string.
+ */
+#define AI_CONFIG_IMPORT_MDL_COLORMAP		"imp.mdl.color_map"
 
 #endif // !! AI_CONFIG_H_INC

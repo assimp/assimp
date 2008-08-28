@@ -38,79 +38,56 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines a post processing step to join identical vertices 
-    on all imported meshes.*/
-#ifndef AI_JOINVERTICESPROCESS_H_INC
-#define AI_JOINVERTICESPROCESS_H_INC
+/** @file Declaration of the .dxf importer class. */
+#ifndef AI_DXFLOADER_H_INCLUDED
+#define AI_DXFLOADER_H_INCLUDED
 
-#include "BaseProcess.h"
+#include "BaseImporter.h"
 #include "../include/aiTypes.h"
 
-struct aiMesh;
-class JoinVerticesTest;
-
-namespace Assimp
-{
+namespace Assimp	{
 
 // ---------------------------------------------------------------------------
-/** The JoinVerticesProcess unites identical vertices in all imported meshes. 
- * By default the importer returns meshes where each face addressed its own 
- * set of vertices even if that means that identical vertices are stored multiple
- * times. The JoinVerticesProcess finds these identical vertices and 
- * erases all but one of the copies. This usually reduces the number of vertices
- * in a mesh by a serious amount and is the standard form to render a mesh.
- */
-class ASSIMP_API JoinVerticesProcess : public BaseProcess
+/** DXF importer class
+*/
+class DXFImporter : public BaseImporter
 {
 	friend class Importer;
-	friend class ::JoinVerticesTest;
 
 protected:
 	/** Constructor to be privately used by Importer */
-	JoinVerticesProcess();
+	DXFImporter();
 
 	/** Destructor, private as well */
-	~JoinVerticesProcess();
+	~DXFImporter();
 
 public:
-	// -------------------------------------------------------------------
-	/** Returns whether the processing step is present in the given flag field.
-	 * @param pFlags The processing flags the importer was called with. A bitwise
-	 *   combination of #aiPostProcessSteps.
-	 * @return true if the process is present in this flag fields, false if not.
-	*/
-	bool IsActive( unsigned int pFlags) const;
 
 	// -------------------------------------------------------------------
-	/** Executes the post processing step on the given imported data.
-	* At the moment a process is not supposed to fail.
-	* @param pScene The imported data to work at.
-	*/
-	void Execute( aiScene* pScene);
+	/** Returns whether the class can handle the format of the given file. 
+	* See BaseImporter::CanRead() for details.	*/
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
 
 protected:
-	// -------------------------------------------------------------------
-	/** Unites identical vertices in the given mesh.
-	 * @param pMesh The mesh to process.
-	 * @param meshIndex Index of the mesh to process
-	 */
-	int ProcessMesh( aiMesh* pMesh, unsigned int meshIndex);
 
 	// -------------------------------------------------------------------
-	/** Little helper function to calculate the quadratic difference 
-	 * of two colours. 
-	 * @param pColor1 First color
-	 * @param pColor2 second color
-	 * @return Quadratic color difference
+	/** Called by Importer::GetExtensionList() for each loaded importer.
+	 * See BaseImporter::GetExtensionList() for details
 	 */
-	float GetColorDifference( const aiColor4D& pColor1, const aiColor4D& pColor2) const
+	void GetExtensionList(std::string& append)
 	{
-		aiColor4D c(	pColor1.r - pColor2.r, pColor1.g - pColor2.g, 
-						pColor1.b - pColor2.b, pColor1.a - pColor2.a);
-		return c.r*c.r + c.g*c.g + c.b*c.b + c.a*c.a;
+		append.append("*.dxf");
 	}
+
+	// -------------------------------------------------------------------
+	/** Imports the given file into the given scene structure. 
+	* See BaseImporter::InternReadFile() for details
+	*/
+	void InternReadFile( const std::string& pFile, aiScene* pScene, 
+		IOSystem* pIOHandler);
+
 };
 
 } // end of namespace Assimp
 
-#endif // AI_CALCTANGENTSPROCESS_H_INC
+#endif // AI_3DSIMPORTER_H_INC

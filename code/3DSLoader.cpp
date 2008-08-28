@@ -50,23 +50,48 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // public ASSIMP headers
 #include "../include/DefaultLogger.h"
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
+#include "../include/IOStream.h"
+#include "../include/IOSystem.h"
 #include "../include/assimp.hpp"
 
 // boost headers
 #include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
+		
 
-#if (!defined ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG)
-#	define ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG			\
-	"WARNING: Size of chunk data plus size of "			\
-	"subordinate chunks is larger than the size "		\
-	"specified in the top-level chunk header."			
+// begin a chunk: parse it, validate its length, get a pointer to its end
+#define ASSIMP_3DS_BEGIN_CHUNK() \
+	const Dot3DSFile::Chunk* psChunk; \
+	this->ReadChunk(&psChunk); \
+	const unsigned char* pcCur = this->mCurrent; \
+	const unsigned char* pcCurNext = pcCur + (psChunk->Size \
+		- sizeof(Dot3DSFile::Chunk));
+
+// process the end of a chunk and return if the end of the file is reached
+#define ASSIMP_3DS_END_CHUNK() \
+	this->mCurrent = pcCurNext; \
+	piRemaining -= psChunk->Size; \
+	if (0 >= piRemaining)return;
+
+
+// check whether the size of all subordinate chunks of a chunks is
+// not larger than the size of the chunk itself
+#ifdef _DEBUG
+#	define ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG \
+		"Size of chunk data plus size of subordinate chunks is " \
+		"larger than the size specified in the top-level chunk header."	
+
+#	define ASSIMP_3DS_VALIDATE_CHUNK_SIZE() \
+	if (pcCurNext < this->mCurrent) \
+	{ \
+		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG); \
+		pcCurNext = this->mCurrent; \
+	}
+#else
+#	define ASSIMP_3DS_VALIDATE_CHUNK_SIZE()
 #endif
 
 // ------------------------------------------------------------------------------------------------
@@ -92,7 +117,7 @@ bool Dot3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) co
 		return false;
 	std::string extension = pFile.substr( pos);
 
-	// not brilliant but working ;-)
+	// not brillant but working ;-)
 	if( extension == ".3ds" || extension == ".3DS" || 
 		extension == ".3Ds" || extension == ".3dS")
 		return true;
@@ -103,7 +128,7 @@ bool Dot3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) co
 // Setup configuration properties
 void Dot3DSImporter::SetupProperties(const Importer* pImp)
 {
-	this->configSkipPivot = pImp->GetProperty(AI_CONFIG_IMPORT_3DS_IGNORE_PIVOT,0) ? true : false;
+	this->configSkipPivot = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_3DS_IGNORE_PIVOT,0) ? true : false;
 }
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
@@ -151,11 +176,11 @@ void Dot3DSImporter::InternReadFile(
 		i != this->mScene->mMeshes.end();++i)
 	{
 		// TODO: see function body
-		this->CheckIndices(&(*i));
-		this->MakeUnique(&(*i));
+		this->CheckIndices(*i);
+		this->MakeUnique(*i);
 
 		// first generate normals for the mesh
-		this->GenNormals(&(*i));
+		ComputeNormalsWithSmoothingsGroups<Dot3DS::Face>(*i);
 	}
 
 	// Apply scaling and offsets to all texture coordinates
@@ -179,11 +204,7 @@ void Dot3DSImporter::InternReadFile(
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ApplyMasterScale(aiScene* pScene)
 {
-	// NOTE: Some invalid files have masterscale set to 0.0
-	if (0.0f == this->mMasterScale)
-		{
-		this->mMasterScale = 1.0f;
-		}
+	if (!this->mMasterScale)this->mMasterScale = 1.0f;
 	else this->mMasterScale = 1.0f / this->mMasterScale;
 
 	// construct an uniform scaling matrix and multiply with it
@@ -200,9 +221,8 @@ void Dot3DSImporter::ReadChunk(const Dot3DSFile::Chunk** p_ppcOut)
 
 	// read chunk
 	if (this->mCurrent >= this->mLast)
-	{
 		throw new ImportErrorException("Unexpected end of file, can't read chunk header");
-	}
+
 	const uintptr_t iDiff = this->mLast - this->mCurrent;
 	if (iDiff < sizeof(Dot3DSFile::Chunk)) 
 	{
@@ -211,23 +231,15 @@ void Dot3DSImporter::ReadChunk(const Dot3DSFile::Chunk** p_ppcOut)
 	}
 	*p_ppcOut = (const Dot3DSFile::Chunk*) this->mCurrent;
 	if ((**p_ppcOut).Size + this->mCurrent > this->mLast)
-	{
 		throw new ImportErrorException("Unexpected end of file, can't read chunk footer");
-	}
+
 	this->mCurrent += sizeof(Dot3DSFile::Chunk);
 	return;
 }
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ParseMainChunk(int& piRemaining)
 {
-	const Dot3DSFile::Chunk* psChunk;
-
-	this->ReadChunk(&psChunk);
-	
-
-	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
-		- sizeof(Dot3DSFile::Chunk));
+	ASSIMP_3DS_BEGIN_CHUNK();
 
 	// get chunk type
 	int iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
@@ -237,27 +249,14 @@ void Dot3DSImporter::ParseMainChunk(int& piRemaining)
 		this->ParseEditorChunk(iRemaining);
 		break;
 	};
-	if (pcCurNext < this->mCurrent)
-	{
-		// place an error message. If we crash the programmer
-		// will be able to find it
-		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
-		pcCurNext = this->mCurrent;
-	}
-	// Go to the starting position of the next top-level chunk
-	this->mCurrent = pcCurNext;
-	piRemaining -= psChunk->Size;
-	if (0 >= piRemaining)return;
+	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
+	ASSIMP_3DS_END_CHUNK();
 	return this->ParseMainChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ParseEditorChunk(int& piRemaining)
 {
-	const Dot3DSFile::Chunk* psChunk;
-
-	this->ReadChunk(&psChunk);
-	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size - sizeof(Dot3DSFile::Chunk));
+	ASSIMP_3DS_BEGIN_CHUNK();
 
 	// get chunk type
 	int iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
@@ -291,27 +290,14 @@ void Dot3DSImporter::ParseEditorChunk(int& piRemaining)
 		}
 		break;
 	};
-	if (pcCurNext < this->mCurrent)
-	{
-		// place an error message. If we crash the programmer
-		// will be able to find it
-		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
-		pcCurNext = this->mCurrent;
-	}
-	// Go to the starting position of the next top-level chunk
-	this->mCurrent = pcCurNext;
-	piRemaining -= psChunk->Size;
-	if (0 >= piRemaining)return;
+	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
+	ASSIMP_3DS_END_CHUNK();
 	return this->ParseEditorChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ParseObjectChunk(int& piRemaining)
 {
-	const Dot3DSFile::Chunk* psChunk;
-
-	this->ReadChunk(&psChunk);
-	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size - sizeof(Dot3DSFile::Chunk));
+	ASSIMP_3DS_BEGIN_CHUNK();
 
 	const unsigned char* sz = this->mCurrent;
 	unsigned int iCnt = 0;
@@ -384,17 +370,8 @@ void Dot3DSImporter::ParseObjectChunk(int& piRemaining)
 		break;
 
 	};
-	if (pcCurNext < this->mCurrent)
-	{
-		// place an error message. If we crash the programmer
-		// will be able to find it
-		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
-		pcCurNext = this->mCurrent;
-	}
-	// Go to the starting position of the next top-level chunk
-	this->mCurrent = pcCurNext;
-	piRemaining -= psChunk->Size;
-	if (0 >= piRemaining)return;
+	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
+	ASSIMP_3DS_END_CHUNK();
 	return this->ParseObjectChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
@@ -409,11 +386,7 @@ void Dot3DSImporter::SkipChunk()
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ParseChunk(int& piRemaining)
 {
-	const Dot3DSFile::Chunk* psChunk;
-
-	this->ReadChunk(&psChunk);
-	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size - sizeof(Dot3DSFile::Chunk));
+	ASSIMP_3DS_BEGIN_CHUNK();
 
 	// get chunk type
 	int iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
@@ -424,28 +397,14 @@ void Dot3DSImporter::ParseChunk(int& piRemaining)
 		this->ParseMeshChunk(iRemaining);
 		break;
 	};
-	if (pcCurNext < this->mCurrent)
-	{
-		// place an error message. If we crash the programmer
-		// will be able to find it
-		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
-		pcCurNext = this->mCurrent;
-	}
-	// Go to the starting position of the next top-level chunk
-	this->mCurrent = pcCurNext;
-
-	piRemaining -= psChunk->Size;
-	if (0 >= piRemaining)return;
+	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
+	ASSIMP_3DS_END_CHUNK();
 	return this->ParseChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ParseKeyframeChunk(int& piRemaining)
 {
-	const Dot3DSFile::Chunk* psChunk;
-
-	this->ReadChunk(&psChunk);
-	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size - sizeof(Dot3DSFile::Chunk));
+	ASSIMP_3DS_BEGIN_CHUNK();
 
 	// get chunk type
 	int iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
@@ -456,18 +415,8 @@ void Dot3DSImporter::ParseKeyframeChunk(int& piRemaining)
 		this->ParseHierarchyChunk(iRemaining);
 		break;
 	};
-	if (pcCurNext < this->mCurrent)
-	{
-		// place an error message. If we crash the programmer
-		// will be able to find it
-		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
-		pcCurNext = this->mCurrent;
-	}
-	// Go to the starting position of the next top-level chunk
-	this->mCurrent = pcCurNext;
-
-	piRemaining -= psChunk->Size;
-	if (0 >= piRemaining)return;
+	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
+	ASSIMP_3DS_END_CHUNK();
 	return this->ParseKeyframeChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
@@ -489,14 +438,7 @@ void Dot3DSImporter::InverseNodeSearch(Dot3DS::Node* pcNode,Dot3DS::Node* pcCurr
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ParseHierarchyChunk(int& piRemaining)
 {
-	const Dot3DSFile::Chunk* psChunk;
-
-	this->ReadChunk(&psChunk);
-	
-
-	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
-		- sizeof(Dot3DSFile::Chunk));
+	ASSIMP_3DS_BEGIN_CHUNK();
 
 	// get chunk type
 	const unsigned char* sz = (unsigned char*)this->mCurrent;
@@ -548,6 +490,7 @@ void Dot3DSImporter::ParseHierarchyChunk(int& piRemaining)
 
 		// pivot = origin of rotation and scaling
 		this->mCurrentNode->vPivot = *((const aiVector3D*)this->mCurrent);
+		std::swap(this->mCurrentNode->vPivot.y,this->mCurrentNode->vPivot.z);
 		this->mCurrent += sizeof(aiVector3D);
 		break;
 
@@ -576,8 +519,7 @@ void Dot3DSImporter::ParseHierarchyChunk(int& piRemaining)
 			uint16_t sNum = *((const uint16_t*)mCurrent);
 			this->mCurrent += sizeof(uint16_t);
 
-			aiVectorKey v;
-			v.mTime = (double)sNum;
+			aiVectorKey v;v.mTime = (double)sNum;
 
 			this->mCurrent += sizeof(uint32_t);
 			v.mValue =  *((const aiVector3D*)this->mCurrent);
@@ -591,7 +533,8 @@ void Dot3DSImporter::ParseHierarchyChunk(int& piRemaining)
 				if ((*i).mTime == v.mTime){v.mTime = -10e10f;break;}
 			}
 			// add the new keyframe
-			if (v.mTime != -10e10f)this->mCurrentNode->aPositionKeys.push_back(v);
+			if (v.mTime != -10e10f)
+				this->mCurrentNode->aPositionKeys.push_back(v);
 		}
 		break;
 
@@ -618,9 +561,7 @@ void Dot3DSImporter::ParseHierarchyChunk(int& piRemaining)
 			uint16_t sNum = *((const uint16_t*)mCurrent);
 			this->mCurrent += sizeof(uint16_t);
 
-			aiQuatKey v;
-			v.mTime = (double)sNum;
-
+			aiQuatKey v;v.mTime = (double)sNum;
 			this->mCurrent += sizeof(uint32_t);
 
 			float fRadians = *((const float*)this->mCurrent);
@@ -640,7 +581,8 @@ void Dot3DSImporter::ParseHierarchyChunk(int& piRemaining)
 				if ((*i).mTime == v.mTime){v.mTime = -10e10f;break;}
 			}
 			// add the new keyframe
-			if (v.mTime != -10e10f)this->mCurrentNode->aRotationKeys.push_back(v);
+			if (v.mTime != -10e10f)
+				this->mCurrentNode->aRotationKeys.push_back(v);
 		}
 		break;
 
@@ -698,30 +640,15 @@ void Dot3DSImporter::ParseHierarchyChunk(int& piRemaining)
 		break;
 #endif
 	};
-	if (pcCurNext < this->mCurrent)
-	{
-		// place an error message. If we crash the programmer
-		// will be able to find it
-		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
-		pcCurNext = this->mCurrent;
-	}
-	// Go to the starting position of the next top-level chunk
-	this->mCurrent = pcCurNext;
-
-	piRemaining -= psChunk->Size;
-	if (0 >= piRemaining)return;
+	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
+	ASSIMP_3DS_END_CHUNK();
 	return this->ParseHierarchyChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ParseFaceChunk(int& piRemaining)
 {
-	const Dot3DSFile::Chunk* psChunk;
-
+	ASSIMP_3DS_BEGIN_CHUNK();
 	Dot3DS::Mesh& mMesh = this->mScene->mMeshes.back();
-
-	this->ReadChunk(&psChunk);
-	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size - sizeof(Dot3DSFile::Chunk));
 
 	// get chunk type
 	const unsigned char* sz = this->mCurrent;
@@ -796,30 +723,15 @@ void Dot3DSImporter::ParseFaceChunk(int& piRemaining)
 
 		break;
 	};
-	if (pcCurNext < this->mCurrent)
-	{
-		// place an error message. If we crash the programmer
-		// will be able to find it
-		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
-		pcCurNext = this->mCurrent;
-	}
-	// Go to the starting position of the next chunk on this level
-	this->mCurrent = pcCurNext;
-
-	piRemaining -= psChunk->Size;
-	if (0 >= piRemaining)return;
+	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
+	ASSIMP_3DS_END_CHUNK();
 	return ParseFaceChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ParseMeshChunk(int& piRemaining)
 {
-	const Dot3DSFile::Chunk* psChunk;
-
+	ASSIMP_3DS_BEGIN_CHUNK();
 	Dot3DS::Mesh& mMesh = this->mScene->mMeshes.back();
-
-	this->ReadChunk(&psChunk);
-	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size - sizeof(Dot3DSFile::Chunk));
 
 	// get chunk type
 	const unsigned char* sz = this->mCurrent;
@@ -837,7 +749,7 @@ void Dot3DSImporter::ParseMeshChunk(int& piRemaining)
 		{
 			mMesh.mPositions.push_back(*((aiVector3D*)this->mCurrent));
 			aiVector3D& v = mMesh.mPositions.back();
-			//std::swap( v.y, v.z);
+			std::swap( v.y, v.z);
 			//v.y *= -1.0f;
 			this->mCurrent += sizeof(aiVector3D);
 		}
@@ -924,28 +836,14 @@ void Dot3DSImporter::ParseMeshChunk(int& piRemaining)
 		break;
 
 	};
-	if (pcCurNext < this->mCurrent)
-	{
-		// place an error message. If we crash the programmer
-		// will be able to find it
-		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
-		pcCurNext = this->mCurrent;
-	}
-	// Go to the starting position of the next chunk on this level
-	this->mCurrent = pcCurNext;
-
-	piRemaining -= psChunk->Size;
-	if (0 >= piRemaining)return;
+	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
+	ASSIMP_3DS_END_CHUNK();
 	return ParseMeshChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ParseMaterialChunk(int& piRemaining)
 {
-	const Dot3DSFile::Chunk* psChunk;
-
-	this->ReadChunk(&psChunk);
-	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size - sizeof(Dot3DSFile::Chunk));
+	ASSIMP_3DS_BEGIN_CHUNK();
 
 	// get chunk type
 	const unsigned char* sz = this->mCurrent;
@@ -958,9 +856,8 @@ void Dot3DSImporter::ParseMaterialChunk(int& piRemaining)
 	case Dot3DSFile::CHUNK_MAT_MATNAME:
 
 		// string in file is zero-terminated, 
-		// this should be no problem. However, validate whether
-		// it overlaps the end of the chunk, if yes we should
-		// truncate it.
+		// this should be no problem. However, validate whether it overlaps 
+		// the end of the chunk, if yes we should truncate it.
 		while (*sz++ != '\0')
 		{
 			if (sz > pcCurNext-1)
@@ -1017,8 +914,7 @@ void Dot3DSImporter::ParseMaterialChunk(int& piRemaining)
 		pcf = &this->mScene->mMaterials.back().mTransparency;
 		*pcf = this->ParsePercentageChunk();
 		// NOTE: transparency, not opacity
-		if (is_qnan(*pcf))
-			*pcf = 1.0f;
+		if (is_qnan(*pcf))*pcf = 1.0f;
 		else *pcf = 1.0f - *pcf * (float)0xFFFF / 100.0f;
 		break;
 
@@ -1037,16 +933,14 @@ void Dot3DSImporter::ParseMaterialChunk(int& piRemaining)
 	case Dot3DSFile::CHUNK_MAT_SHININESS:
 		pcf = &this->mScene->mMaterials.back().mSpecularExponent;
 		*pcf = this->ParsePercentageChunk();
-		if (is_qnan(*pcf))
-			*pcf = 0.0f;
+		if (is_qnan(*pcf))*pcf = 0.0f;
 		else *pcf *= (float)0xFFFF;
 		break;
 
 	case Dot3DSFile::CHUNK_MAT_SHININESS_PERCENT:
 		pcf = &this->mScene->mMaterials.back().mShininessStrength;
 		*pcf = this->ParsePercentageChunk();
-		if (is_qnan(*pcf))
-			*pcf = 0.0f;
+		if (is_qnan(*pcf))*pcf = 0.0f;
 		else *pcf *= (float)0xffff / 100.0f;
 		break;
 
@@ -1054,8 +948,7 @@ void Dot3DSImporter::ParseMaterialChunk(int& piRemaining)
 		// TODO: need to multiply with emissive base color?
 		pcf = &this->mScene->mMaterials.back().sTexEmissive.mTextureBlend;
 		*pcf = this->ParsePercentageChunk();
-		if (is_qnan(*pcf))
-			*pcf = 0.0f;
+		if (is_qnan(*pcf))*pcf = 0.0f;
 		else *pcf = *pcf * (float)0xFFFF / 100.0f;
 		break;
 
@@ -1085,31 +978,14 @@ void Dot3DSImporter::ParseMaterialChunk(int& piRemaining)
 		this->ParseTextureChunk(iRemaining,&this->mScene->mMaterials.back().sTexEmissive);
 		break;
 	};
-	if (pcCurNext < this->mCurrent)
-	{
-		// place an error message. If we crash the programmer
-		// will be able to find it
-		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG);
-		pcCurNext = this->mCurrent;
-	}
-	// Go to the starting position of the next chunk on this level
-	this->mCurrent = pcCurNext;
-
-	piRemaining -= psChunk->Size;
-	if (0 >= piRemaining)return;
+	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
+	ASSIMP_3DS_END_CHUNK();
 	return ParseMaterialChunk(piRemaining);
 }
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ParseTextureChunk(int& piRemaining,Dot3DS::Texture* pcOut)
 {
-	const Dot3DSFile::Chunk* psChunk;
-
-	this->ReadChunk(&psChunk);
-	
-
-	const unsigned char* pcCur = this->mCurrent;
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size 
-		- sizeof(Dot3DSFile::Chunk));
+	ASSIMP_3DS_BEGIN_CHUNK();
 
 	// get chunk type
 	const unsigned char* sz = this->mCurrent;
@@ -1184,11 +1060,8 @@ void Dot3DSImporter::ParseTextureChunk(int& piRemaining,Dot3DS::Texture* pcOut)
 		break;
 	};
 
-	// Go to the starting position of the next chunk on this level
-	this->mCurrent = pcCurNext;
-
-	piRemaining -= psChunk->Size;
-	if (0 >= piRemaining)return;
+	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
+	ASSIMP_3DS_END_CHUNK();
 	return ParseTextureChunk(piRemaining,pcOut);
 }
 // ------------------------------------------------------------------------------------------------
@@ -1226,20 +1099,22 @@ void Dot3DSImporter::ParseColorChunk(aiColor3D* p_pcOut,
 
 	const Dot3DSFile::Chunk* psChunk;
 	this->ReadChunk(&psChunk);
-	if (NULL == psChunk)
+	if (!psChunk)
 	{
 		*p_pcOut = clrError;
 		return;
 	}
+	const unsigned int diff = psChunk->Size - sizeof(Dot3DSFile::Chunk);
+
 	const unsigned char* pcCur = this->mCurrent;
-	this->mCurrent += psChunk->Size - sizeof(Dot3DSFile::Chunk);
+	this->mCurrent += diff;
 	bool bGamma = false;
 	switch(psChunk->Flag)
 	{
 	case Dot3DSFile::CHUNK_LINRGBF:
 		bGamma = true;
 	case Dot3DSFile::CHUNK_RGBF:
-		if (sizeof(float) * 3 > psChunk->Size - sizeof(Dot3DSFile::Chunk))
+		if (sizeof(float) * 3 > diff)
 		{
 			*p_pcOut = clrError;
 			return;
@@ -1252,7 +1127,7 @@ void Dot3DSImporter::ParseColorChunk(aiColor3D* p_pcOut,
 	case Dot3DSFile::CHUNK_LINRGBB:
 		bGamma = true;
 	case Dot3DSFile::CHUNK_RGBB:
-		if (sizeof(char) * 3 > psChunk->Size - sizeof(Dot3DSFile::Chunk))
+		if (sizeof(char) * 3 > diff)
 		{
 			*p_pcOut = clrError;
 			return;
@@ -1265,7 +1140,7 @@ void Dot3DSImporter::ParseColorChunk(aiColor3D* p_pcOut,
 	// percentage chunks: accepted to be compatible with various
 	// .3ds files with very curious content
 	case Dot3DSFile::CHUNK_PERCENTF:
-		if (p_bAcceptPercent && 4 <= psChunk->Size - sizeof(Dot3DSFile::Chunk))
+		if (p_bAcceptPercent && 4 <= diff)
 		{
 			p_pcOut->r = *((float*)pcCur);
 			p_pcOut->g = *((float*)pcCur);
@@ -1275,7 +1150,7 @@ void Dot3DSImporter::ParseColorChunk(aiColor3D* p_pcOut,
 		*p_pcOut = clrError;
 		return;
 	case Dot3DSFile::CHUNK_PERCENTW:
-		if (p_bAcceptPercent && 1 <= psChunk->Size - sizeof(Dot3DSFile::Chunk))
+		if (p_bAcceptPercent && 1 <= diff)
 		{
 			p_pcOut->r = (float)pcCur[0] / 255.0f;
 			p_pcOut->g = (float)pcCur[0] / 255.0f;
@@ -1289,9 +1164,6 @@ void Dot3DSImporter::ParseColorChunk(aiColor3D* p_pcOut,
 		// skip unknown chunks, hope this won't cause any problems.
 		return this->ParseColorChunk(p_pcOut,p_bAcceptPercent);
 	};
-	// assume input gamma = 1.0, output gamma = 2.2 
-	// Not sure whether this is correct, too tired to 
-	// think about it ;-)
 	if (bGamma)
 	{
 		p_pcOut->r = powf(p_pcOut->r, 1.0f / 2.2f);

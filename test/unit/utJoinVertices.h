@@ -5,15 +5,15 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include <aiScene.h>
-#include <LimitBoneWeightsProcess.h>
+#include <JoinVerticesProcess.h>
 
 
 using namespace std;
 using namespace Assimp;
 
-class LimitBoneWeightsTest : public CPPUNIT_NS :: TestFixture
+class JoinVerticesTest : public CPPUNIT_NS :: TestFixture
 {
-    CPPUNIT_TEST_SUITE (LimitBoneWeightsTest);
+    CPPUNIT_TEST_SUITE (JoinVerticesTest);
     CPPUNIT_TEST (testProcess);
     CPPUNIT_TEST_SUITE_END ();
 
@@ -28,7 +28,7 @@ class LimitBoneWeightsTest : public CPPUNIT_NS :: TestFixture
    
 	private:
 
-		LimitBoneWeightsProcess* piProcess;
+		JoinVerticesProcess* piProcess;
 		aiMesh* pcMesh;
 
 };

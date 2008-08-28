@@ -169,12 +169,64 @@ enum aiPostProcessSteps
 	 * the bounding box of all vertices + their normals is compared against
 	 * the volume of the bounding box of all vertices without their normals.
 	 * This works well for most objects, problems might occur with planar
-	 * surfaces. However the step tries to filter such cases out.
+	 * surfaces. However, the step tries to filter such cases.
 	 * The step inverts all infacing normals. Generally it is recommended
-	 * to enable this step.
+	 * to enable this step, although the result is not always correct.
 	*/
-	aiProcess_FixInfacingNormals = 0x2000
+	aiProcess_FixInfacingNormals = 0x2000,
+
+	/** This step performs some optimizations on the node graph.
+	 * 
+	 * It is incompatible to the PreTransformVertices-Step. Some configuration
+	 * options exist, see aiConfig.h for more details. 
+	 * Generally, two actions are available:<br>
+	 *   1. Remove animation nodes and data from the scene. This allows other
+	 *      steps for further optimizations.<br>
+	 *   2. Combine very small meshes to larger ones. Only if the meshes
+	 *      are used by the same node or by nodes on the same hierarchy (with
+	 *      equal local transformations). Unlike PreTransformVertices, the
+	 *      OptimizeGraph-step doesn't transform vertices from one space 
+	 *      another.<br>
+	 *   3. Remove hierarchy levels<br>
+	 *
+	 *  It is recommended to have this step run with the default configuration.
+	 */
+	aiProcess_OptimizeGraph = 0x4000
 };
+
+
+/** @def AI_POSTPROCESS_DEFAULT_REALTIME_FASTEST
+ *  @brief Default postprocess configuration targeted at realtime applications
+ *    which need to load models as fast as possible.
+ *  
+ *  If you're using DirectX, don't forget to combine this value with
+ * the #aiProcess_ConvertToLeftHanded step.
+ */
+#define AI_POSTPROCESS_DEFAULT_REALTIME_FASTEST \
+	aiProcess_CalcTangentSpace		|  \
+	aiProcess_GenNormals			|  \
+	aiProcess_JoinIdenticalVertices |  \
+	aiProcess_Triangulate
+
+
+ /** @def AI_POSTPROCESS_DEFAULT_REALTIME_FASTEST
+ *  @brief Default postprocess configuration targeted at realtime applications.
+ *    Unlike AI_POSTPROCESS_DEFAULT_REALTIME_FASTEST, this configuration
+ *    performs some extra optimizations.
+ *  
+ *  If you're using DirectX, don't forget to combine this value with
+ * the #aiProcess_ConvertToLeftHanded step.
+ */
+#define AI_POSTPROCESS_DEFAULT_REALTIME \
+	aiProcess_CalcTangentSpace				|  \
+	aiProcess_GenSmoothNormals				|  \
+	aiProcess_JoinIdenticalVertices			|  \
+	aiProcess_ImproveCacheLocality			|  \
+	aiProcess_LimitBoneWeights				|  \
+	aiProcess_RemoveRedundantMaterials      |  \
+	aiProcess_SplitLargeMeshes				|  \
+	aiProcess_OptimizeGraph					|  \
+	aiProcess_Triangulate
 
 
 #ifdef __cplusplus

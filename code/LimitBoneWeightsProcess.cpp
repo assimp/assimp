@@ -89,7 +89,7 @@ void LimitBoneWeightsProcess::Execute( aiScene* pScene)
 void LimitBoneWeightsProcess::SetupProperties(const Importer* pImp)
 {
 	// get the current value of the property
-	this->mMaxWeights = pImp->GetProperty(AI_CONFIG_PP_LBW_MAX_WEIGHTS,AI_LMW_MAX_WEIGHTS);
+	this->mMaxWeights = pImp->GetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS,AI_LMW_MAX_WEIGHTS);
 }
 
 // ------------------------------------------------------------------------------------------------

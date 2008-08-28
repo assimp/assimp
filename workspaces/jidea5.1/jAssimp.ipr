@@ -178,7 +178,7 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://J:/Programmieren/ASSIMP/ASSIMP3/port/jAssimp/assimp.iml" filepath="J:/Programmieren/ASSIMP/ASSIMP3/port/jAssimp/assimp.iml" />
+      <module fileurl="file://J:/Programmieren/ASSIMP/assimp3/trunk/port/jAssimp/assimp.iml" filepath="J:/Programmieren/ASSIMP/assimp3/trunk/port/jAssimp/assimp.iml" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" />

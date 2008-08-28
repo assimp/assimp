@@ -59,10 +59,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-#ifdef _MSC_VER
-#	define sprintf sprintf_s
-#endif
-
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ReplaceDefaultMaterial()
 {
@@ -130,70 +126,66 @@ void Dot3DSImporter::ReplaceDefaultMaterial()
 	}
 	return;
 }
+
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::CheckIndices(Dot3DS::Mesh* sMesh)
+void Dot3DSImporter::CheckIndices(Dot3DS::Mesh& sMesh)
 {
 	for (std::vector< Dot3DS::Face >::iterator
-		 i =  sMesh->mFaces.begin();
-		 i != sMesh->mFaces.end();++i)
+		 i =  sMesh.mFaces.begin();
+		 i != sMesh.mFaces.end();++i)
 	{
 		// check whether all indices are in range
-		if ((*i).mIndices[0] >= sMesh->mPositions.size())
+		for (unsigned int a = 0; a < 3;++a)
 		{
-			DefaultLogger::get()->warn("Face index overflow in 3DS file (#1)");
-			(*i).mIndices[0] = (uint32_t)sMesh->mPositions.size()-1;
-		}
-		if ((*i).mIndices[1] >= sMesh->mPositions.size())
-		{
-			DefaultLogger::get()->warn("Face index overflow in 3DS file (#2)");
-			(*i).mIndices[1] = (uint32_t)sMesh->mPositions.size()-1;
-		}
-		if ((*i).mIndices[2] >= sMesh->mPositions.size())
-		{
-			DefaultLogger::get()->warn("Face index overflow in 3DS file (#3)");
-			(*i).mIndices[2] = (uint32_t)sMesh->mPositions.size()-1;
+			if ((*i).mIndices[a] >= sMesh.mPositions.size())
+			{
+				DefaultLogger::get()->warn("3DS: Face index overflow)");
+				(*i).mIndices[a] = (uint32_t)sMesh.mPositions.size()-1;
+			}
 		}
 	}
 	return;
 }
+
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::MakeUnique(Dot3DS::Mesh* sMesh)
+void Dot3DSImporter::MakeUnique(Dot3DS::Mesh& sMesh)
 {
 	unsigned int iBase = 0;
 
 	std::vector<aiVector3D> vNew;
 	std::vector<aiVector2D> vNew2;
 
-	vNew.resize(sMesh->mFaces.size() * 3);
-	if (sMesh->mTexCoords.size())vNew2.resize(sMesh->mFaces.size() * 3);
+	vNew.resize(sMesh.mFaces.size() * 3);
+	if (sMesh.mTexCoords.size())vNew2.resize(sMesh.mFaces.size() * 3);
 
-	for (unsigned int i = 0; i < sMesh->mFaces.size();++i)
+	for (unsigned int i = 0; i < sMesh.mFaces.size();++i)
 	{
 		uint32_t iTemp1,iTemp2;
 
 		// positions
-		vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[2]];
+		vNew[iBase]   = sMesh.mPositions[sMesh.mFaces[i].mIndices[2]];
 		iTemp1 = iBase++;
-		vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[1]];
+		vNew[iBase]   = sMesh.mPositions[sMesh.mFaces[i].mIndices[1]];
 		iTemp2 = iBase++;
-		vNew[iBase]   = sMesh->mPositions[sMesh->mFaces[i].mIndices[0]];
+		vNew[iBase]   = sMesh.mPositions[sMesh.mFaces[i].mIndices[0]];
 
 		// texture coordinates
-		if (sMesh->mTexCoords.size())
+		if (sMesh.mTexCoords.size())
 		{
-			vNew2[iTemp1]   = sMesh->mTexCoords[sMesh->mFaces[i].mIndices[2]];
-			vNew2[iTemp2]   = sMesh->mTexCoords[sMesh->mFaces[i].mIndices[1]];
-			vNew2[iBase]    = sMesh->mTexCoords[sMesh->mFaces[i].mIndices[0]];
+			vNew2[iTemp1]   = sMesh.mTexCoords[sMesh.mFaces[i].mIndices[2]];
+			vNew2[iTemp2]   = sMesh.mTexCoords[sMesh.mFaces[i].mIndices[1]];
+			vNew2[iBase]    = sMesh.mTexCoords[sMesh.mFaces[i].mIndices[0]];
 		}
 
-		sMesh->mFaces[i].mIndices[2] = iBase++;
-		sMesh->mFaces[i].mIndices[0] = iTemp1;
-		sMesh->mFaces[i].mIndices[1] = iTemp2;
+		sMesh.mFaces[i].mIndices[2] = iBase++;
+		sMesh.mFaces[i].mIndices[0] = iTemp1;
+		sMesh.mFaces[i].mIndices[1] = iTemp2;
 	}
-	sMesh->mPositions = vNew;
-	sMesh->mTexCoords = vNew2;
+	sMesh.mPositions = vNew;
+	sMesh.mTexCoords = vNew2;
 	return;
 }
+
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 	MaterialHelper& mat)
@@ -201,14 +193,14 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 	// NOTE: Pass the background image to the viewer by bypassing the
 	// material system. This is an evil hack, never do it  again!
 	if (0 != this->mBackgroundImage.length() && this->bHasBG)
-		{
+	{
 		aiString tex;
 		tex.Set( this->mBackgroundImage);
 		mat.AddProperty( &tex, AI_MATKEY_GLOBAL_BACKGROUND_IMAGE);
 
 		// be sure this is only done for the first material
 		this->mBackgroundImage = std::string("");
-		}
+	}
 
 	// At first add the base ambient color of the
 	// scene to	the material
@@ -250,7 +242,7 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 	// two sided rendering?
 	if (oldMat.mTwoSided)
 	{
-		int i = 0;
+		int i = 1;
 		mat.AddProperty<int>(&i,1,AI_MATKEY_TWOSIDED);
 	}
 
@@ -268,8 +260,6 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 			eShading = aiShadingMode_Gouraud; break;
 
 		// assume cook-torrance shading for metals.
-		// NOTE: I assume the real shader inside 3ds max is an anisotropic
-		// Phong-Blinn shader, but this is a good approximation too
 		case Dot3DS::Dot3DSFile::Phong :
 			eShading = aiShadingMode_Phong; break;
 
@@ -409,20 +399,7 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 			a =  (*i).mFaceMaterials.begin();
 			a != (*i).mFaceMaterials.end();++a,++iNum)
 		{
-			// check range
-			// FIX: shouldn't be necessary anymore, has been moved to ReplaceDefaultMaterial()
-#if 0
-			if ((*a) >= this->mScene->mMaterials.size())
-			{
-				DefaultLogger::get()->error("3DS face material index is out of range");
-
-				// use the last material instead
-				// TODO: assign the default material index
-				aiSplit[this->mScene->mMaterials.size()-1].push_back(iNum);
-			}
-			else
-#endif	
-		aiSplit[*a].push_back(iNum);
+			aiSplit[*a].push_back(iNum);
 		}
 		// now generate submeshes
 		bool bFirst = true;
@@ -506,12 +483,9 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 	pcOut->mNumMeshes = (unsigned int)avOutMeshes.size();
 	pcOut->mMeshes = new aiMesh*[pcOut->mNumMeshes]();
 	for (unsigned int a = 0; a < pcOut->mNumMeshes;++a)
-	{
 		pcOut->mMeshes[a] = avOutMeshes[a];
-	}
 
-	if (!iFaceCnt)
-		throw new ImportErrorException("No faces loaded. The mesh is empty");
+	if (!iFaceCnt)throw new ImportErrorException("No faces loaded. The mesh is empty");
 
 	// for each material in the scene we need to setup the UV source
 	// set for each texture
@@ -519,6 +493,7 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 		TextureTransform::SetupMatUVSrc( pcOut->mMaterials[a], &this->mScene->mMaterials[a] );
 	return;
 }
+
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* pcIn)
 {
@@ -533,11 +508,8 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 			ai_assert(NULL != pcMesh);
 
 			// do case independent comparisons here, just for safety
-			if (pcIn->mName.length() == pcMesh->mName.length() &&
-				!ASSIMP_stricmp(pcIn->mName.c_str(),pcMesh->mName.c_str()))
-			{
+			if (!ASSIMP_stricmp(pcIn->mName,pcMesh->mName))
 				iArray.push_back(a);
-			}
 		}
 		if (!iArray.empty())
 		{
@@ -568,10 +540,11 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 						pvCurrent->y -= pivot.y;
 						pvCurrent->z -= pivot.z;
 						*pvCurrent = mTrafo * (*pvCurrent);
-						std::swap( pvCurrent->y, pvCurrent->z );
+						//std::swap( pvCurrent->y, pvCurrent->z );
 						++pvCurrent;
 					}
 				}
+#if 0
 				else
 				{
 					while (pvCurrent != pvEnd)
@@ -580,6 +553,7 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 						++pvCurrent;
 					}
 				}
+#endif
 				pcOut->mMeshes[i] = iIndex;
 			}
 		}
@@ -658,9 +632,7 @@ void Dot3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 
 	// if the root node is a default node setup a name for it
 	if (pcOut->mRootNode->mName.data[0] == '$' && pcOut->mRootNode->mName.data[1] == '$')
-	{
 		pcOut->mRootNode->mName.Set("<root>");
-	}
 }
 // ------------------------------------------------------------------------------------------------
 void Dot3DSImporter::ConvertScene(aiScene* pcOut)

@@ -684,6 +684,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\test\unit\utImporter.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\test\unit\utImproveCacheLocality.cpp"
 				>
 			</File>
@@ -697,6 +701,10 @@
 			</File>
 			<File
 				RelativePath="..\..\test\unit\utMaterialSystem.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utOptimizeGraph.cpp"
 				>
 			</File>
 			<File
@@ -734,11 +742,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\test\unit\utImporter.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utJoinVertices.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\test\unit\utLimitBoneWeights.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\test\unit\utMaterialSystem.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utOptimizeGraph.h"
 				>
 			</File>
 			<File

@@ -89,7 +89,7 @@ using namespace Assimp::ASE;
 
 // ------------------------------------------------------------------------------------------------
 #define AI_ASE_HANDLE_SECTION(iDepth, level, msg) \
-	else if ('{' == *this->m_szFile)iDepth++; \
+	if ('{' == *this->m_szFile)iDepth++; \
 	else if ('}' == *this->m_szFile) \
 	{ \
 		if (0 == --iDepth) \
@@ -201,18 +201,6 @@ bool Parser::SkipToNextToken()
 	}
 }
 // ------------------------------------------------------------------------------------------------
-bool Parser::SkipOpeningBracket()
-{
-	if (!SkipSpaces(this->m_szFile,&this->m_szFile))return false;
-	if ('{' != *this->m_szFile)
-	{
-		this->LogWarning("Unable to parse block: Unexpected character, \'{\' expected [#1]");
-		return false;
-	}
-	this->SkipToNextToken();
-	return true;
-}
-// ------------------------------------------------------------------------------------------------
 bool Parser::SkipSection()
 {
 	// must handle subsections ...
@@ -308,6 +296,7 @@ void Parser::Parse()
 			{
 				this->m_szFile+=13;
 				this->LogInfo("Found light source (*LIGHTOBJECT chunk). It will be ignored");
+				SkipSection();
 				continue;
 			}
 			if (0 == strncmp(this->m_szFile,"*CAMERAOBJECT",13) &&
@@ -315,6 +304,7 @@ void Parser::Parse()
 			{
 				this->m_szFile+=14;
 				this->LogInfo("Found virtual camera (*CAMERAOBJECT chunk). It will be ignored");
+				SkipSection();
 				continue;
 			}
 			if (0 == strncmp(this->m_szFile,"*COMMENT",8) &&
@@ -425,10 +415,6 @@ void Parser::ParseLV1MaterialListBlock()
 
 				// get a reference to the material
 				Material& sMat = this->m_vMaterials[iIndex+iOldMaterialCount];
-
-				// skip the '{'
-				this->SkipOpeningBracket();
-
 				// parse the material block
 				this->ParseLV2MaterialBlock(sMat);
 				continue;
@@ -555,8 +541,6 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				IsSpaceOrNewLine(*(this->m_szFile+12)))
 			{
 				this->m_szFile+=13;
-				// skip the opening bracket
-				this->SkipOpeningBracket();
 				// parse the texture block
 				this->ParseLV3MapBlock(mat.sTexDiffuse);continue;
 			}
@@ -565,8 +549,6 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				IsSpaceOrNewLine(*(this->m_szFile+12)))
 			{
 				this->m_szFile+=13;
-				// skip the opening bracket
-				this->SkipOpeningBracket();
 				// parse the texture block
 				this->ParseLV3MapBlock(mat.sTexAmbient);continue;
 			}
@@ -575,8 +557,6 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				IsSpaceOrNewLine(*(this->m_szFile+13)))
 			{
 				this->m_szFile+=14;
-				// skip the opening bracket
-				this->SkipOpeningBracket();
 				// parse the texture block
 				this->ParseLV3MapBlock(mat.sTexSpecular);continue;
 			}
@@ -585,8 +565,6 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				IsSpaceOrNewLine(*(this->m_szFile+12)))
 			{
 				this->m_szFile+=13;
-				// skip the opening bracket
-				this->SkipOpeningBracket();
 				// parse the texture block
 				this->ParseLV3MapBlock(mat.sTexOpacity);continue;
 			}
@@ -595,8 +573,6 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				IsSpaceOrNewLine(*(this->m_szFile+14)))
 			{
 				this->m_szFile+=15;
-				// skip the opening bracket
-				this->SkipOpeningBracket();
 				// parse the texture block
 				this->ParseLV3MapBlock(mat.sTexEmissive);continue;
 			}
@@ -605,18 +581,14 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				IsSpaceOrNewLine(*(this->m_szFile+9)))
 			{
 				this->m_szFile+=10;
-				// skip the opening bracket
-				this->SkipOpeningBracket();
 				// parse the texture block
 				this->ParseLV3MapBlock(mat.sTexBump);
 			}
 			// specular/shininess map
-			if (0 == strncmp(this->m_szFile,"*MAP_SHINE",10) &&
-				IsSpaceOrNewLine(*(this->m_szFile+10)))
+			if (0 == strncmp(this->m_szFile,"*MAP_SHINESTRENGTH",18) &&
+				IsSpaceOrNewLine(*(this->m_szFile+18)))
 			{
 				this->m_szFile+=11;
-				// skip the opening bracket
-				this->SkipOpeningBracket();
 				// parse the texture block
 				this->ParseLV3MapBlock(mat.sTexShininess);continue;
 			}
@@ -647,9 +619,6 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 
 				// get a reference to the material
 				Material& sMat = mat.avSubMaterials[iIndex];
-
-				// skip the '{'
-				this->SkipOpeningBracket();
 
 				// parse the material block
 				this->ParseLV2MaterialBlock(sMat);
@@ -1051,7 +1020,6 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 				IsSpaceOrNewLine(*(this->m_szFile+15)))
 			{
 				this->m_szFile+=16;
-				this->SkipOpeningBracket();
 				this->ParseLV3MeshFaceListBlock(iNumFaces,mesh);continue;
 			}
 			// mesh texture vertex list block
@@ -1059,7 +1027,6 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 				IsSpaceOrNewLine(*(this->m_szFile+15)))
 			{
 				this->m_szFile+=16;
-				this->SkipOpeningBracket();
 				this->ParseLV3MeshTListBlock(iNumTVertices,mesh);continue;
 			}
 			// mesh texture face block
@@ -1067,7 +1034,6 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 				IsSpaceOrNewLine(*(this->m_szFile+15)))
 			{
 				this->m_szFile+=16;
-				this->SkipOpeningBracket();
 				this->ParseLV3MeshTFaceListBlock(iNumTFaces,mesh);continue;
 			}
 			// mesh color vertex list block
@@ -1075,7 +1041,6 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 				IsSpaceOrNewLine(*(this->m_szFile+15)))
 			{
 				this->m_szFile+=16;
-				this->SkipOpeningBracket();
 				this->ParseLV3MeshCListBlock(iNumCVertices,mesh);continue;
 			}
 			// mesh color face block
@@ -1083,7 +1048,6 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 				IsSpaceOrNewLine(*(this->m_szFile+15)))
 			{
 				this->m_szFile+=16;
-				this->SkipOpeningBracket();
 				this->ParseLV3MeshCFaceListBlock(iNumCFaces,mesh);continue;
 			}
 			// another mesh UV channel ...
@@ -1099,21 +1063,16 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 				{
 					this->LogWarning("Mapping channel has an invalid index. Skipping UV channel");
 					// skip it ...
-					this->SkipOpeningBracket();
 					this->SkipSection();
 				}
 				if (iIndex > AI_MAX_NUMBER_OF_TEXTURECOORDS)
 				{
 					this->LogWarning("Too many UV channels specified. Skipping channel ..");
 					// skip it ...
-					this->SkipOpeningBracket();
 					this->SkipSection();
 				}
 				else
 				{
-					// skip the '{'
-					this->SkipOpeningBracket();
-
 					// parse the mapping channel
 					this->ParseLV3MappingChannel(iIndex-1,mesh);
 				}
@@ -1172,7 +1131,6 @@ void Parser::ParseLV3MeshWeightsBlock(ASE::Mesh& mesh)
 				IsSpaceOrNewLine(*(this->m_szFile+15)))
 			{
 				this->m_szFile+=16;
-				this->SkipOpeningBracket();
 				this->ParseLV4MeshBones(iNumBones,mesh);continue;
 			}
 			// parse the list of bones vertices
@@ -1180,7 +1138,6 @@ void Parser::ParseLV3MeshWeightsBlock(ASE::Mesh& mesh)
 				IsSpaceOrNewLine(*(this->m_szFile+22)))
 			{
 				this->m_szFile+=23;
-				this->SkipOpeningBracket();
 				this->ParseLV4MeshBonesVertices(iNumVertices,mesh);
 				continue;
 			}
@@ -1448,7 +1405,6 @@ void Parser::ParseLV3MappingChannel(unsigned int iChannel, ASE::Mesh& mesh)
 				IsSpaceOrNewLine(*(this->m_szFile+15)))
 			{
 				this->m_szFile+=16;
-				this->SkipOpeningBracket();
 				this->ParseLV3MeshTListBlock(iNumTVertices,mesh,iChannel);
 				continue;
 			}
@@ -1457,7 +1413,6 @@ void Parser::ParseLV3MappingChannel(unsigned int iChannel, ASE::Mesh& mesh)
 				IsSpaceOrNewLine(*(this->m_szFile+15)))
 			{
 				this->m_szFile+=16;
-				this->SkipOpeningBracket();
 				this->ParseLV3MeshTFaceListBlock(iNumTFaces,mesh, iChannel);
 				continue;
 			}

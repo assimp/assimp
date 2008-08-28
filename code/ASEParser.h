@@ -472,10 +472,6 @@ private:
 	void ParseLV4MeshLong(unsigned int& iOut);
 
 	// -------------------------------------------------------------------
-	//! Skip the opening bracket at the beginning of a complex statement
-	bool SkipOpeningBracket();
-
-	// -------------------------------------------------------------------
 	//! Skip everything to the next: '*' or '\0'
 	bool SkipToNextToken();
 

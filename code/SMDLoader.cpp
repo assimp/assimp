@@ -1061,9 +1061,8 @@ bool SMDImporter::ParseFloat(const char* szCurrent,
 	const char** szCurrentOut, float& out)
 {
 	if(!SkipSpaces(szCurrent,&szCurrent))
-	{
 		return false;
-	}
+
 	*szCurrentOut = fast_atof_move(szCurrent,out);
 	return true;
 }
@@ -1073,9 +1072,8 @@ bool SMDImporter::ParseUnsignedInt(const char* szCurrent,
 	const char** szCurrentOut, uint32_t& out)
 {
 	if(!SkipSpaces(szCurrent,&szCurrent))
-	{
 		return false;
-	}
+
 	out = (uint32_t)strtol10(szCurrent,szCurrentOut);
 	return true;
 }
@@ -1085,21 +1083,9 @@ bool SMDImporter::ParseSignedInt(const char* szCurrent,
 	const char** szCurrentOut, int32_t& out)
 {
 	if(!SkipSpaces(szCurrent,&szCurrent))
-	{
 		return false;
-	}
-	// handle signs
-	bool bInv = false;
-	if ('-' == *szCurrent)
-	{
-		++szCurrent;
-		bInv = true;
-	}
-	else if ('+' == *szCurrent)++szCurrent;
 
-	// parse the integer
-	out = (int32_t)strtol10(szCurrent,szCurrentOut);
-	if (bInv)out = -out;
+	out = (int32_t)strtol10s(szCurrent,szCurrentOut);
 	return true;
 }
 // ------------------------------------------------------------------------------------------------

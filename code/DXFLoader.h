@@ -42,6 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_DXFLOADER_H_INCLUDED
 #define AI_DXFLOADER_H_INCLUDED
 
+#include <vector>
+
 #include "BaseImporter.h"
 #include "../include/aiTypes.h"
 
@@ -81,11 +83,69 @@ protected:
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 
-	* See BaseImporter::InternReadFile() for details
-	*/
+	 * See BaseImporter::InternReadFile() for details
+	 */
 	void InternReadFile( const std::string& pFile, aiScene* pScene, 
 		IOSystem* pIOHandler);
 
+	// -------------------------------------------------------------------
+	/** Get the next line from the file.
+	 *  @return false if the end of the file was reached
+	 */
+	bool GetNextLine();
+
+	// -------------------------------------------------------------------
+	/** Get the next token (group code + data line) from the file.
+	 *  @return false if the end of the file was reached
+	 */
+	bool GetNextToken();
+
+	// -------------------------------------------------------------------
+	/** Parses the ENTITIES section in the file
+	 *  @return false if the end of the file was reached
+	 */
+	bool ParseEntities();
+
+	// -------------------------------------------------------------------
+	/** Parses the HEADER section in the file
+	 *  @return false if the end of the file was reached
+	 */
+	bool ParseHeader();
+
+	// -------------------------------------------------------------------
+	/** Parses a 3DFACE section in the file
+	 *  @return false if the end of the file was reached
+	 */
+	bool Parse3DFace();
+
+private:
+
+	// points to the next section 
+	const char* buffer;
+
+	// specifies the current group code
+	int groupCode;
+
+	// contains the current data line
+	char cursor[4096];
+
+	// describes a single layer in the DXF file
+	struct LayerInfo
+	{
+		LayerInfo()
+		{
+			name[0] = '\0';
+		}
+
+		char name[4096];
+
+		// face buffer - order is x,y,z,w v1,v2,v3 (w is equal to z if unused)
+		std::vector<aiVector3D> vPositions;
+	};
+
+	// list of all loaded layers
+	std::vector<LayerInfo> mLayers;
+	LayerInfo* mDefaultLayer;
 };
 
 } // end of namespace Assimp

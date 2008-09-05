@@ -107,6 +107,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AI_BUILD_NO_LWO_IMPORTER)
 #	include "LWOLoader.h"
 #endif
+#if (!defined AI_BUILD_NO_DXF_IMPORTER)
+#	include "DXFLoader.h"
+#endif
 
 
 // PostProcess-Steps
@@ -221,6 +224,9 @@ Importer::Importer() :
 #endif
 #if (!defined AI_BUILD_NO_LWO_IMPORTER)
 	mImporter.push_back( new LWOImporter());
+#endif
+#if (!defined AI_BUILD_NO_DXF_IMPORTER)
+	mImporter.push_back( new DXFImporter());
 #endif
 
 	// add an instance of each post processing step here in the order 

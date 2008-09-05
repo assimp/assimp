@@ -58,6 +58,18 @@ inline unsigned int strtol10( const char* in, const char** out=0)
 	return value;
 }
 
+// ------------------------------------------------------------------------------------
+// signed variant of strtol10
+inline int strtol10s( const char* in, const char** out=0)
+{
+	bool bNeg = false;
+	if ('-' == *in){++in;bNeg = true;}
+	if ('+' == *in)++in;
+	int value = strtol10(in,out);
+	if (bNeg)value = -value;
+	return value;
+}
+
 
 // ------------------------------------------------------------------------------------
 // specal version of the function, providing higher accuracy

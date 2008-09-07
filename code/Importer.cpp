@@ -110,6 +110,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AI_BUILD_NO_DXF_IMPORTER)
 #	include "DXFLoader.h"
 #endif
+#if (!defined AI_BUILD_NO_NFF_IMPORTER)
+#	include "NFFLoader.h"
+#endif
 
 
 // PostProcess-Steps
@@ -227,6 +230,9 @@ Importer::Importer() :
 #endif
 #if (!defined AI_BUILD_NO_DXF_IMPORTER)
 	mImporter.push_back( new DXFImporter());
+#endif
+#if (!defined AI_BUILD_NO_NFF_IMPORTER)
+	mImporter.push_back( new NFFImporter());
 #endif
 
 	// add an instance of each post processing step here in the order 

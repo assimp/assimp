@@ -38,28 +38,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Declaration of the STL importer class. */
-#ifndef AI_STLLOADER_H_INCLUDED
-#define AI_STLLOADER_H_INCLUDED
+/** @file Declaration of the NFF importer class. */
+#ifndef AI_NFFLOADER_H_INCLUDED
+#define AI_NFFLOADER_H_INCLUDED
 
 #include "BaseImporter.h"
+#include <vector>
+
 #include "../include/aiTypes.h"
 
 namespace Assimp	{
 
 // ---------------------------------------------------------------------------
-/** Clas to load STL files
+/** NFF (Neutral File Format) Importer class
 */
-class STLImporter : public BaseImporter
+class NFFImporter : public BaseImporter
 {
 	friend class Importer;
 
 protected:
 	/** Constructor to be privately used by Importer */
-	STLImporter();
+	NFFImporter();
 
 	/** Destructor, private as well */
-	~STLImporter();
+	~NFFImporter();
 
 public:
 
@@ -76,7 +78,7 @@ protected:
 	 */
 	void GetExtensionList(std::string& append)
 	{
-		append.append("*.stl");
+		append.append("*.nff");
 	}
 
 	// -------------------------------------------------------------------
@@ -86,33 +88,46 @@ protected:
 	void InternReadFile( const std::string& pFile, aiScene* pScene, 
 		IOSystem* pIOHandler);
 
+private:
 
-	// -------------------------------------------------------------------
-	/** Loads a binary .stl file
-	 * @return true if the default vertex color must be used as material color
-	*/
-	bool LoadBinaryFile();
 
-	// -------------------------------------------------------------------
-	/** Loads a ASCII text .stl file
-	*/
-	void LoadASCIIFile();
+	// describes face material properties
+	struct ShadingInfo
+	{
+		ShadingInfo()
+			: color(0.6f,0.6f,0.6f,1.0f)
+		{}
 
-protected:
+		aiColor4D color;
+		//float diffuse, specular; --- not implemented yet
 
-	/** Buffer to hold the loaded file */
-	const char* mBuffer;
+		bool operator == (const ShadingInfo& other) const
+			{return color == other.color;}
+	};
 
-	/** Size of the file, in bytes */
-	unsigned int fileSize;
+	// describes a NFF mesh
+	struct MeshInfo
+	{
+		MeshInfo(bool bHN, bool bL = false)
+			: bHasNormals(bHN)
+			, bLocked(bL)
+		{
+			name[0] = '\0'; // by default meshes are unnamed
+		}
 
-	/** Output scene */
-	aiScene* pScene;
+		ShadingInfo shader;
+		bool bHasNormals, bLocked;
 
-	/** Default vertex color */
-	aiColor4D clrColorDefault;
+		// for spheres, cones and cylinders: center point of the object
+		aiVector3D center;
+
+		char name[128];
+
+		std::vector<aiVector3D> vertices, normals;
+		std::vector<unsigned int> faces;
+	};
 };
 
 } // end of namespace Assimp
 
-#endif // AI_3DSIMPORTER_H_IN
+#endif // AI_NFFIMPORTER_H_IN

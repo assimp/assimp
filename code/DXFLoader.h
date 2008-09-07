@@ -107,12 +107,6 @@ protected:
 	bool ParseEntities();
 
 	// -------------------------------------------------------------------
-	/** Parses the HEADER section in the file
-	 *  @return false if the end of the file was reached
-	 */
-	bool ParseHeader();
-
-	// -------------------------------------------------------------------
 	/** Parses a 3DFACE section in the file
 	 *  @return false if the end of the file was reached
 	 */

@@ -92,21 +92,21 @@ bool DXFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 // ------------------------------------------------------------------------------------------------
 bool DXFImporter::GetNextLine()
 {
-	if(!SkipLine(buffer,&buffer))return false;
-	if(!SkipSpaces(buffer,&buffer))return GetNextLine();
+	if(!SkipLine(&buffer))return false;
+	if(!SkipSpaces(&buffer))return GetNextLine();
 	return true;
 }
 
 // ------------------------------------------------------------------------------------------------
 bool DXFImporter::GetNextToken()
 {
-	SkipSpaces(buffer,&buffer);
+	SkipSpaces(&buffer);
 	groupCode = strtol10s(buffer,&buffer);
 	if(!GetNextLine())return false;
 	
 	// copy the data line to a separate buffer
-	char* m = cursor;
-	while (!IsLineEnd ( *buffer ) && m < (cursor+sizeof(cursor)/sizeof(char)))
+	char* m = cursor, *end = &cursor[4096];
+	while (!IsLineEnd ( *buffer ) && m < end)
 		*m++ = *buffer++;
 	
 	*m = '\0';
@@ -142,10 +142,6 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 			// ENTITIES section
 			if (!::strcmp(cursor,"ENTITIES"))
 				if (!ParseEntities())break;
-
-			// HEADER section - just to print the file format version
-			else if (!::strcmp(cursor,"HEADER"))
-				if (!ParseHeader())break;
 
 			// other sections such as BLOCK - skip them to make
 			// sure there will be no name conflicts
@@ -268,27 +264,6 @@ bool DXFImporter::ParseEntities()
 			};
 			if (!::strcmp(cursor,"ENDSEC"))
 				return true;
-		}
-	}
-	return false;
-}
-
-// ------------------------------------------------------------------------------------------------
-bool DXFImporter::ParseHeader()
-{
-	// --- at the moment we don't need any information from the header
-	while (GetNextToken())
-	{
-		if (!groupCode)
-		{
-			if (!::strcmp(cursor,"ENDSEC"))
-				return true;
-		}
-
-		// print comment strings
-		else if (999 == groupCode)
-		{
-			DefaultLogger::get()->info(std::string( cursor ));
 		}
 	}
 	return false;

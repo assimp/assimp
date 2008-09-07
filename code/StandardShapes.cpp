@@ -38,51 +38,45 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Declares a helper class, "CommentRemover", which can be
- *  used to remove comments (single and multi line) from a text file.
+/** @file Implementation of the StandardShapes class
  */
-#ifndef AI_REMOVE_COMMENTS_H_INC
-#define AI_REMOVE_COMMENTS_H_INC
-
+#include "../include/aiTypes.h"
+#include "../include/DefaultLogger.h"
 #include "../include/aiAssert.h"
+
+#include "StandardShapes.h"
 
 namespace Assimp	{
 
-// ---------------------------------------------------------------------------
-/** \brief Helper class to remove single and multi line comments from a file
- * 
- *  Some mesh formats like MD5 have comments that are quite similar
- *  to those in C or C++ so this code has been moved to a separate
- *  module.
- */
-class ASSIMP_API CommentRemover
+// ------------------------------------------------------------------------------------------------
+void StandardShapes::MakeSphere(
+	aiVector3D&		center,
+	float			radius,
+	float			tess,
+	std::vector<aiVector3D>& positions)
 {
-	// class cannot be instanced
-	CommentRemover() {}
+}
 
-public:
+// ------------------------------------------------------------------------------------------------
+void StandardShapes::MakeCone(
+	aiVector3D&		center1,
+	float			radius1,
+	aiVector3D&		center2,
+	float			radius2,
+	float			tess, 
+	std::vector<aiVector3D>& positions, 
+	bool bOpened /*= false*/)
+{
+}
 
-	//! Remove single-line comments. The end of a line is
-	//! expected to be either NL or CR or NLCR.
-	//! \param szComment The start sequence of the comment, e.g. "//"
-	//! \param szBuffer Buffer to work with
-	//! \param chReplacement Character to be used as replacement
-	//! for commented lines. By default this is ' '
-	static void RemoveLineComments(const char* szComment,
-		char* szBuffer, char chReplacement = ' ');
+// ------------------------------------------------------------------------------------------------
+void StandardShapes::MakeCircle(
+	aiVector3D&		center, 
+	aiVector3D&		normal, 
+	float			radius,
+	float			tess,
+	std::vector<aiVector3D>& positions)
+{
+}
 
-	//! Remove multi-line comments. The end of a line is
-	//! expected to be either NL or CR or NLCR. Multi-line comments
-	//! may not be nested (as in C).
-	//! \param szCommentStart The start sequence of the comment, e.g. "/*"
-	//! \param szCommentEnd The end sequence of the comment, e.g. "*/"
-	//! \param szBuffer Buffer to work with
-	//! \param chReplacement Character to be used as replacement
-	//! for commented lines. By default this is ' '
-	static void RemoveMultiLineComments(const char* szCommentStart,
-		const char* szCommentEnd,char* szBuffer,
-		char chReplacement = ' ');
-};
 } // ! Assimp
-
-#endif // !! AI_REMOVE_COMMENTS_H_INC

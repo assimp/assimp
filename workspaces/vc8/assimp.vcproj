@@ -819,6 +819,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\StandardShapes.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\StringComparison.h"
 				>
 			</File>
@@ -1085,6 +1089,18 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="RAW"
+					>
+				</Filter>
+				<Filter
+					Name="NFF"
+					>
+					<File
+						RelativePath="..\..\code\NFFLoader.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
@@ -1188,6 +1204,10 @@
 			</File>
 			<File
 				RelativePath="..\..\code\SplitLargeMeshes.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\StandardShapes.cpp"
 				>
 			</File>
 			<File
@@ -1374,6 +1394,18 @@
 					>
 					<File
 						RelativePath="..\..\code\DXFLoader.cpp"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="RAW"
+					>
+				</Filter>
+				<Filter
+					Name="NFF"
+					>
+					<File
+						RelativePath="..\..\code\NFFLoader.cpp"
 						>
 					</File>
 				</Filter>

@@ -99,6 +99,12 @@ struct aiColor3D
 	aiColor3D (float _r, float _g, float _b) : r(_r), g(_g), b(_b) {}
 	aiColor3D (const aiColor3D& o) : r(o.r), g(o.g), b(o.b) {}
 	
+	bool operator == (const aiColor3D& other) const
+		{return r == other.r && g == other.g && b == other.b;}
+
+	bool operator != (const aiColor3D& other) const
+		{return r != other.r || g != other.g || b != other.b;}
+
 #endif // !__cplusplus
 
 	//! Red, green and blue color values
@@ -120,6 +126,12 @@ struct aiColor4D
 	aiColor4D (const aiColor4D& o) 
 		: r(o.r), g(o.g), b(o.b), a(o.a) {}
 	
+	bool operator == (const aiColor4D& other) const
+		{return r == other.r && g == other.g && b == other.b && a == other.a;}
+
+	bool operator != (const aiColor4D& other) const
+		{return r != other.r || g != other.g || b != other.b || a != other.a;}
+
 #endif // !__cplusplus
 
 	//! Red, green, blue and alpha color values

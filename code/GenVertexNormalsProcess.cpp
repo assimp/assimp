@@ -157,7 +157,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
 		vertexFinder.FindPositions( posThis, posEpsilon, verticesFound);
 
 		aiVector3D pcNor; 
-		unsigned int div = 0;
+		//unsigned int div = 0;
 		for (unsigned int a = 0; a < verticesFound.size(); ++a)
 		{
 			unsigned int vidx = verticesFound[a];
@@ -167,7 +167,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
 				continue;
 
 			pcNor += pMesh->mNormals[vidx];
-			++div;
+			//++div;
 		}
 		pcNor.Normalize();
 		pcNew[i] = pcNor;

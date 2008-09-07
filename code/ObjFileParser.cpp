@@ -428,6 +428,8 @@ void ObjFileParser::getNewMaterial()
 {
 	m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
 	m_DataIt = getNextWord<DataArrayIt>(m_DataIt, m_DataItEnd);
+	if ( m_DataIt == m_DataItEnd )
+		return;
 
 	char *pStart = &(*m_DataIt);
 	std::string strMat(pStart, *m_DataIt);
@@ -476,7 +478,9 @@ void ObjFileParser::getGroupName()
 	// Get next word from data buffer
 	m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
 	m_DataIt = getNextWord<DataArrayIt>(m_DataIt, m_DataItEnd);
-	
+	if ( m_DataIt == m_DataItEnd )
+		return;
+
 	// Store groupname in group library 
 	char *pStart = &(*m_DataIt);
 	while (!isSpace(*m_DataIt))
@@ -587,9 +591,11 @@ void ObjFileParser::extractExtension(const std::string &strFile,
 	if (strFile.empty())
 		return;
 
+	// Search for extention delimiter
 	std::string::size_type pos = strFile.find_last_of(".");
-	if (pos == std::string::npos)
+	if ( pos == std::string::npos )
 		return;
+
 	strExt = strFile.substr(pos, strFile.size() - pos);
 }
 // -------------------------------------------------------------------

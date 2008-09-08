@@ -1101,6 +1101,14 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="FBX"
+					>
+				</Filter>
+				<Filter
+					Name="Collada"
+					>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
@@ -1276,6 +1284,10 @@
 				<Filter
 					Name="LWO"
 					>
+					<File
+						RelativePath="..\..\code\LWOBLoader.cpp"
+						>
+					</File>
 					<File
 						RelativePath="..\..\code\LWOLoader.cpp"
 						>

@@ -140,6 +140,8 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 	MeshInfo* currentMeshWithNormals = NULL;
 	MeshInfo* currentMesh = NULL;
 
+	ShadingInfo s; // current material info
+
 	char line[4096];
 	const char* sz;
 	unsigned int sphere = 0,cylinder = 0,cone = 0,numNamed = 0;
@@ -197,8 +199,6 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 		{
 			SkipSpaces(&line[1],&sz);
 
-			ShadingInfo s; // color;
-
 			// read just the RGB colors, the rest is ignored for the moment
 			sz = fast_atof_move(sz, s.color.r);
 			SkipSpaces(&sz);
@@ -241,6 +241,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 		{
 			meshesLocked.push_back(MeshInfo(false,true));
 			MeshInfo& currentMesh = meshesLocked.back();
+			currentMesh.shader = s;
 
 			sz = &line[1];
 			aiVector3D center; float radius;
@@ -261,6 +262,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 		{
 			meshesLocked.push_back(MeshInfo(false,true));
 			MeshInfo& currentMesh = meshes.back();
+			currentMesh.shader = s;
 
 			sz = &line[1];
 			aiVector3D center1, center2; float radius1, radius2;
@@ -286,7 +288,8 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 		// '#' - comment
 		else if ('#' == line[0])
 		{
-			DefaultLogger::get()->info(line);
+			const char* sz;SkipSpaces(&line[1],&sz);
+			if (!IsLineEnd(*sz))DefaultLogger::get()->info(sz);
 		}
 	}
 

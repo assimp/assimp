@@ -49,11 +49,16 @@ Original copyright notice: "Ernie Wright  17 Sep 00"
 #ifndef AI_LWO_FILEDATA_INCLUDED
 #define AI_LWO_FILEDATA_INCLUDED
 
-
-#include "IFF.h"
+// STL headers
 #include <vector>
 #include <list>
+
+// public ASSIMP headers
 #include "../include/aiMesh.h"
+
+// internal headers
+#include "IFF.h"
+#include "SmoothingGroups.h"
 
 namespace Assimp {
 namespace LWO {
@@ -232,14 +237,93 @@ namespace LWO {
 #define AI_LWO_DATA  AI_IFF_FOURCC('D','A','T','A')
 
 
+/* VMAP types */
+#define AI_LWO_TXUV  AI_IFF_FOURCC('T','X','U','V')
+#define AI_LWO_RGB   AI_IFF_FOURCC(' ','R','G','B')
+#define AI_LWO_RGBA  AI_IFF_FOURCC('R','G','B','A')
+#define AI_LWO_WGHT  AI_IFF_FOURCC('W','G','H','T')
+
+
 // ---------------------------------------------------------------------------
 /** \brief Data structure for a face in a LWO file
+ *
+ * \note We can't use the code in SmoothingGroups.inl here - the mesh
+ *   structures of 3DS/ASE and LWO are too different. 
  */
 struct Face : public aiFace
 {
-	Face() : surfaceIndex(0) {}
+	Face() 
+		: surfaceIndex(0)
+		, smoothGroup(0)
+	{}
+
 	unsigned int surfaceIndex;
+	unsigned int smoothGroup;
 };
+
+
+// ---------------------------------------------------------------------------
+/** \brief Base structure for all vertex map representations
+ */
+struct VMapEntry
+{
+	VMapEntry(unsigned int _dims)
+		:  dims(_dims)
+	{}
+
+	~VMapEntry() {delete[] rawData;}
+
+	std::string name;
+	float* rawData;
+	unsigned int dims;
+};
+
+// ---------------------------------------------------------------------------
+/** \brief Represents an extra vertex color channel
+ */
+struct VColorChannel : public VMapEntry
+{
+	VColorChannel(unsigned int num)
+		: VMapEntry(4)
+	{
+		data = new aiColor4D[num];
+		for (unsigned int i = 0; i < num;++i)
+			data[i].a = 1.0f;
+		rawData = (float*)data;
+	}
+
+	aiColor4D* data;
+};
+
+// ---------------------------------------------------------------------------
+/** \brief Represents an extra vertex UV channel
+ */
+struct UVChannel : public VMapEntry
+{
+	UVChannel(unsigned int num)
+		: VMapEntry(3)
+	{
+		data = new aiVector3D[num]; // to make the final copying easier
+		rawData = (float*)data;
+	}
+
+	aiVector3D* data;
+};
+
+// ---------------------------------------------------------------------------
+/** \brief Represents a weight map 
+ */
+struct WeightChannel : public VMapEntry
+{
+	WeightChannel(unsigned int num)
+		: VMapEntry(1)
+	{
+		rawData = new float[num];
+		for (unsigned int m = 0; m < num;++m)
+			rawData[m] = 0.f;
+	}
+};
+
 
 // ---------------------------------------------------------------------------
 /** \brief LWO2 gradient keyframe
@@ -272,7 +356,8 @@ struct GradientInfo
 struct Texture
 {
 	Texture()
-		: mStrength(1.0f)
+		: mStrength			(1.0f)
+		, iUVChannelIndex	(0)
 	{}
 
 	//! File name of the texture
@@ -285,6 +370,8 @@ struct Texture
 	/*************** SPECIFIC TO LWO2 *********************/
 	uint32_t type; // type of the texture
 
+	//! Index of the corresponding UV channel
+	unsigned int iUVChannelIndex;
 	
 	GradientInfo mGradient;
 	// todo ... maybe support for procedurals?
@@ -336,11 +423,15 @@ struct Surface
 	} \
 
 
-typedef std::vector<aiVector3D>		PointList;
-typedef std::vector<LWO::Face>		FaceList;
-typedef std::vector<LWO::Surface>	SurfaceList;
-typedef std::vector<std::string>	TagList;
-typedef std::vector<unsigned int>	TagMappingTable;
+// some typedefs ... to make life with loader monsters like this easier
+typedef std::vector	<	aiVector3D		>	PointList;
+typedef std::vector	<	LWO::Face		>	FaceList;
+typedef std::vector	<	LWO::Surface	>	SurfaceList;
+typedef std::vector	<	std::string		>	TagList;
+typedef std::vector	<	unsigned int	>	TagMappingTable;
+typedef std::vector	<	WeightChannel	>	WeightChannelList;
+typedef std::vector	<	VColorChannel	>	VColorChannelList;
+typedef std::vector	<	UVChannel		>	UVChannelList;
 
 
 // ---------------------------------------------------------------------------
@@ -350,13 +441,30 @@ struct Layer
 {
 	Layer()
 		: mParent (0xffff)
+		, mFaceIDXOfs(0)
+		, mPointIDXOfs(0)
 	{}
 
 	/** Temporary point list from the file */
 	PointList mTempPoints;
 
+	/** Weight channel list from the file */
+	WeightChannelList mWeightChannels;
+
+	/** Vertex color list from the file */
+	VColorChannelList mVColorChannels;
+
+	/** UV channel list from the file */
+	UVChannelList mUVChannels;
+
 	/** Temporary face list from the file*/
 	FaceList mFaces;
+
+	/** Current face indexing offset from the beginning of the buffers*/
+	unsigned int mFaceIDXOfs;
+
+	/** Current point indexing offset from the beginning of the buffers*/
+	unsigned int mPointIDXOfs;
 
 	/** Parent index */
 	uint16_t mParent;

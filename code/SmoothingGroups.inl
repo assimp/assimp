@@ -117,7 +117,6 @@ void ComputeNormalsWithSmoothingsGroups(MeshWithSmoothingGroups<T>& sMesh)
 				posEpsilon,poResult);
 
 			aiVector3D vNormals;
-			float fDiv = 0.0f;
 			for (std::vector<unsigned int>::const_iterator
 				a =  poResult.begin();
 				a != poResult.end();++a)
@@ -125,10 +124,8 @@ void ComputeNormalsWithSmoothingsGroups(MeshWithSmoothingGroups<T>& sMesh)
 				vNormals += sMesh.mNormals[(*a)];
 				//fDiv += 1.0f;
 			}
-			//vNormals.x /= fDiv;vNormals.y /= fDiv;vNormals.z /= fDiv;
 			vNormals.Normalize();
 			avNormals[(*i).mIndices[c]] = vNormals;
-			//poResult.clear();
 		}
 	}
 	sMesh.mNormals = avNormals;

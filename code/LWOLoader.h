@@ -55,7 +55,13 @@ namespace Assimp	{
 using namespace LWO;
 
 // ---------------------------------------------------------------------------
-/** Clas to load LWO files
+/** Class to load LWO files.
+ *
+ *  @note  Methods named "xxxLWO2[xxx]" are used with the newer LWO2 format.
+ *         Methods named "xxxLWOB[xxx]" are used with the older LWOB format.
+ *         Methods named "xxxLWO[xxx]" are used with both formats.
+ *         Methods named "xxx" are used to preprocess the loaded data -
+ *         they aren't specific to one format version, either
 */
 class LWOImporter : public BaseImporter
 {
@@ -158,6 +164,19 @@ private:
 	void LoadLWOPolygons(unsigned int length);
 
 	// -------------------------------------------------------------------
+	/** Load polygon tags from a PTAG chunk
+	 *  @param length Size of the chunk
+	*/
+	void LoadLWO2PolygonTags(unsigned int length);
+
+	// -------------------------------------------------------------------
+	/** Load a vertex map from a VMAP/VMAD chunk
+	 *  @param length Size of the chunk
+	 *  @param perPoly Operate on per-polygon base?
+	*/
+	void LoadLWO2VertexMap(unsigned int length, bool perPoly);
+
+	// -------------------------------------------------------------------
 	/** Load polygons from a PNTS chunk
 	 *  @param length Size of the chunk
 	*/
@@ -167,7 +186,13 @@ private:
 	// -------------------------------------------------------------------
 	/** Count vertices and faces in a LWOB/LWO2 file
 	*/
-	void CountVertsAndFaces(unsigned int& verts, 
+	void CountVertsAndFacesLWO2(unsigned int& verts, 
+		unsigned int& faces,
+		LE_NCONST uint16_t*& cursor, 
+		const uint16_t* const end,
+		unsigned int max = 0xffffffff);
+
+	void CountVertsAndFacesLWOB(unsigned int& verts, 
 		unsigned int& faces,
 		LE_NCONST uint16_t*& cursor, 
 		const uint16_t* const end,
@@ -176,7 +201,12 @@ private:
 	// -------------------------------------------------------------------
 	/** Read vertices and faces in a LWOB/LWO2 file
 	*/
-	void CopyFaceIndices(LWO::FaceList::iterator& it,
+	void CopyFaceIndicesLWO2(LWO::FaceList::iterator& it,
+		LE_NCONST uint16_t*& cursor, 
+		const uint16_t* const end, 
+		unsigned int max = 0xffffffff);
+
+	void CopyFaceIndicesLWOB(LWO::FaceList::iterator& it,
 		LE_NCONST uint16_t*& cursor, 
 		const uint16_t* const end, 
 		unsigned int max = 0xffffffff);
@@ -213,12 +243,35 @@ private:
 	*/
 	void ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat);
 
+	
+	// -------------------------------------------------------------------
+	/** Get a list of all UV/VC channels required by a specific surface.
+	 *
+	 *  @param surf Working surface
+	 *  @param layer Working layer
+	 *  @param out Output list. The members are indices into the 
+	 *    UV/VC channel lists of the layer
+	*/
+	void FindUVChannels(const LWO::Surface& surf, 
+		const LWO::Layer& layer,
+		unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS]);
+
+	void FindVCChannels(const LWO::Surface& surf, 
+		const LWO::Layer& layer,
+		unsigned int out[AI_MAX_NUMBER_OF_COLOR_SETS]);
+
 	// -------------------------------------------------------------------
 	/** Generate the final node graph
 	 *  Unused nodes are deleted.
 	 *  @param apcNodes Flat list of nodes
 	*/
 	void GenerateNodeGraph(std::vector<aiNode*>& apcNodes);
+
+	// -------------------------------------------------------------------
+	/** Read a variable sized integer
+	 *  @param inout Input and output buffer
+	*/
+	int ReadVSizedIntLWO2(uint8_t*& inout);
 
 protected:
 

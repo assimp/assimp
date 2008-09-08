@@ -153,7 +153,6 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	// new lightwave format
 	else if (AI_LWO_FOURCC_LWO2 == fileType)
 	{
-		throw new ImportErrorException("LWO2 is under development and currently disabled.");
 		mIsLWO2 = true;
 		this->LoadLWO2File();
 	}
@@ -252,6 +251,39 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 				aiFace* pf = mesh->mFaces = new aiFace[mesh->mNumFaces];
 				mesh->mMaterialIndex = i;
 
+				// find out which vertex color channels and which texture coordinate
+				// channels are really required by the material attached to this mesh
+				unsigned int vUVChannelIndices[AI_MAX_NUMBER_OF_TEXTURECOORDS];
+				unsigned int vVColorIndices[AI_MAX_NUMBER_OF_COLOR_SETS];
+
+#if _DEBUG
+				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_TEXTURECOORDS;++mui )
+					vUVChannelIndices[mui] = 0xffffffff;
+				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_COLOR_SETS;++mui )
+					vVColorIndices[mui] = 0xffffffff;
+#endif
+
+				FindUVChannels(_mSurfaces[i],layer,vUVChannelIndices);
+				FindVCChannels(_mSurfaces[i],layer,vVColorIndices);
+
+				// allocate storage for UV and CV channels
+				aiVector3D* pvUV[AI_MAX_NUMBER_OF_TEXTURECOORDS];
+				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_TEXTURECOORDS;++mui )
+				{
+					if (0xffffffff == vUVChannelIndices[mui])break;
+					pvUV[mui] = mesh->mTextureCoords[mui] = new aiVector3D[mesh->mNumVertices];
+
+					// LightWave doesn't support more than 2 UV components
+					mesh->mNumUVComponents[0] = 2;
+				}
+		
+				aiColor4D* pvVC[AI_MAX_NUMBER_OF_COLOR_SETS];
+				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_COLOR_SETS;++mui)	
+				{
+					if (0xffffffff == vVColorIndices[mui])break;
+					pvVC[mui] = mesh->mColors[mui] = new aiColor4D[mesh->mNumVertices];
+				}
+
 				// now convert all faces
 				unsigned int vert = 0;
 				for (SortedRep::const_iterator it = sorted.begin(), end = sorted.end();
@@ -262,7 +294,29 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 					// copy all vertices
 					for (unsigned int q = 0; q  < face.mNumIndices;++q)
 					{
-						*pv++ = layer.mTempPoints[face.mIndices[q]];
+						register unsigned int idx = face.mIndices[q];
+						*pv++ = layer.mTempPoints[idx];
+
+						// process UV coordinates
+						for (unsigned int w = 0; w < AI_MAX_NUMBER_OF_TEXTURECOORDS;++w)	
+						{
+							if (0xffffffff == vUVChannelIndices[w])break;
+							*(pvUV[w])++ = layer.mUVChannels[vUVChannelIndices[w]].data[idx];
+						}
+
+						// process vertex colors
+						for (unsigned int w = 0; w < AI_MAX_NUMBER_OF_COLOR_SETS;++w)	
+						{
+							if (0xffffffff == vVColorIndices[w])break;
+							*(pvVC[w])++ = layer.mVColorChannels[vVColorIndices[w]].data[idx];
+						}
+
+#if 0
+						// process vertex weights - not yet supported
+						for (unsigned int w = 0; w < layer.mWeightChannels.size();++w)
+						{
+						}
+#endif
 						face.mIndices[q] = vert++;
 					}
 
@@ -377,64 +431,9 @@ void LWOImporter::GenerateNodeGraph(std::vector<aiNode*>& apcNodes)
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::CountVertsAndFaces(unsigned int& verts, unsigned int& faces,
-	LE_NCONST uint16_t*& cursor, const uint16_t* const end, unsigned int max)
-{
-	while (cursor < end && max--)
-	{
-		uint16_t numIndices = *cursor++;
-		verts += numIndices;faces++;
-		cursor += numIndices;
-		int16_t surface = *cursor++;
-		if (surface < 0)
-		{
-			// there are detail polygons
-			numIndices = *cursor++;
-			CountVertsAndFaces(verts,faces,cursor,end,numIndices);
-		}
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-void LWOImporter::CopyFaceIndices(FaceList::iterator& it,
-	LE_NCONST uint16_t*& cursor, 
-	const uint16_t* const end,
-	unsigned int max)
-{
-	while (cursor < end && max--)
-	{
-		LWO::Face& face = *it;++it;
-		if(face.mNumIndices = *cursor++)
-		{
-			if (cursor + face.mNumIndices >= end)break;
-			face.mIndices = new unsigned int[face.mNumIndices];
-			for (unsigned int i = 0; i < face.mNumIndices;++i)
-			{
-				unsigned int & mi = face.mIndices[i] = *cursor++;
-				if (mi > mCurLayer->mTempPoints.size())
-				{
-					DefaultLogger::get()->warn("LWO: face index is out of range");
-					mi = (unsigned int)mCurLayer->mTempPoints.size()-1;
-				}
-			}
-		}
-		else DefaultLogger::get()->warn("LWO: Face has 0 indices");
-		int16_t surface = *cursor++;
-		if (surface < 0)
-		{
-			surface = -surface;
-
-			// there are detail polygons
-			uint16_t numPolygons = *cursor++;
-			if (cursor < end)CopyFaceIndices(it,cursor,end,numPolygons);
-		}
-		face.surfaceIndex = surface-1;
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
 void LWOImporter::ResolveTags()
 {
+	// --- this function is used for both LWO2 and LWOB
 	mMapping->resize(mTags->size(),0xffffffff);
 	for (unsigned int a = 0; a  < mTags->size();++a)
 	{
@@ -454,6 +453,7 @@ void LWOImporter::ResolveTags()
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::ParseString(std::string& out,unsigned int max)
 {
+	// --- this function is used for both LWO2 and LWOB
 	unsigned int iCursor = 0;
 	const char* in = (const char*)mFileBuffer,*sz = in;
 	while (*in)
@@ -472,6 +472,7 @@ void LWOImporter::ParseString(std::string& out,unsigned int max)
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::AdjustTexturePath(std::string& out)
 {
+	// --- this function is used for both LWO2 and LWOB
 	if (::strstr(out.c_str(), "(sequence)"))
 	{
 		// remove the (sequence) and append 000
@@ -481,8 +482,33 @@ void LWOImporter::AdjustTexturePath(std::string& out)
 }
 
 // ------------------------------------------------------------------------------------------------
+int LWOImporter::ReadVSizedIntLWO2(uint8_t*& inout)
+{
+	int i;
+	int c = *inout;inout++;
+	if(c != 0xFF)
+	{
+		i = c << 8;
+		c = *inout;inout++;
+		i |= c;
+	}
+	else
+	{
+		c = *inout;inout++;
+		i = c << 16;
+		c = *inout;inout++;
+		i |= c << 8;
+		c = *inout;inout++;
+		i |= c;
+	}
+	return i;
+}
+
+// ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWOTags(unsigned int size)
 {
+	// --- this function is used for both LWO2 and LWOB
+
 	const char* szCur = (const char*)mFileBuffer, *szLast = szCur;
 	const char* const szEnd = szLast+size;
 	while (szCur < szEnd)
@@ -501,6 +527,7 @@ void LWOImporter::LoadLWOTags(unsigned int size)
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWOPoints(unsigned int length)
 {
+	// --- this function is used for both LWO2 and LWOB
 	mCurLayer->mTempPoints.resize( length / 12 );
 
 	// perform endianess conversions
@@ -514,6 +541,17 @@ void LWOImporter::LoadLWOPoints(unsigned int length)
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWOPolygons(unsigned int length)
 {
+	// --- this function is used for both LWO2 and LWOB
+	if (mIsLWO2)
+	{
+		uint32_t type = *((LE_NCONST uint32_t*)mFileBuffer);mFileBuffer += 4;
+		if (type != AI_LWO_FACE)
+		{
+			DefaultLogger::get()->warn("LWO2: Only POLS.FACE chunsk are supported.");
+			return;
+		}
+	}
+
 	// first find out how many faces and vertices we'll finally need
 	LE_NCONST uint16_t* const end	= (LE_NCONST uint16_t*)(mFileBuffer+length);
 	LE_NCONST uint16_t* cursor		= (LE_NCONST uint16_t*)mFileBuffer;
@@ -525,76 +563,158 @@ void LWOImporter::LoadLWOPolygons(unsigned int length)
 #endif
 
 	unsigned int iNumFaces = 0,iNumVertices = 0;
-	CountVertsAndFaces(iNumVertices,iNumFaces,cursor,end);
+	if (mIsLWO2)CountVertsAndFacesLWO2(iNumVertices,iNumFaces,cursor,end);
+	else CountVertsAndFacesLWOB(iNumVertices,iNumFaces,cursor,end);
 
 	// allocate the output array and copy face indices
 	if (iNumFaces)
 	{
 		cursor = (LE_NCONST uint16_t*)mFileBuffer;
-		// this->mTempPoints->resize(iNumVertices);
+
 		mCurLayer->mFaces.resize(iNumFaces);
 		FaceList::iterator it = mCurLayer->mFaces.begin();
-		CopyFaceIndices(it,cursor,end);
+		if (mIsLWO2)CopyFaceIndicesLWO2(it,cursor,end);
+		else CopyFaceIndicesLWOB(it,cursor,end);
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::LoadLWOBFile()
+void LWOImporter::CountVertsAndFacesLWO2(unsigned int& verts, unsigned int& faces,
+	LE_NCONST uint16_t*& cursor, const uint16_t* const end, unsigned int max)
 {
-	LE_NCONST uint8_t* const end = mFileBuffer + fileSize;
-	while (true)
+	while (cursor < end && max--)
 	{
-		if (mFileBuffer + sizeof(IFF::ChunkHeader) > end)break;
-		LE_NCONST IFF::ChunkHeader* const head = (LE_NCONST IFF::ChunkHeader*)mFileBuffer;
-		AI_LSWAP4(head->length);
-		AI_LSWAP4(head->type);
-		mFileBuffer += sizeof(IFF::ChunkHeader);
-		if (mFileBuffer + head->length > end)
-		{
-			throw new ImportErrorException("LWOB: Invalid file, the size attribute of "
-				"a chunk points behind the end of the file");
-			break;
-		}
-		LE_NCONST uint8_t* const next = mFileBuffer+head->length;
-		switch (head->type)
-		{
-			// vertex list
-		case AI_LWO_PNTS:
-			{
-				if (!mCurLayer->mTempPoints.empty())
-					DefaultLogger::get()->warn("LWO: PNTS chunk encountered twice");
-				else LoadLWOPoints(head->length);
-				break;
-			}
-			// face list
-		case AI_LWO_POLS:
-			{
-				if (!mCurLayer->mFaces.empty())
-					DefaultLogger::get()->warn("LWO: POLS chunk encountered twice");
-				else LoadLWOPolygons(head->length);
-				break;
-			}
-			// list of tags
-		case AI_LWO_SRFS:
-			{
-				if (!mTags->empty())
-					DefaultLogger::get()->warn("LWO: SRFS chunk encountered twice");
-				else LoadLWOTags(head->length);
-				break;
-			}
+		uint16_t numIndices = *cursor++;
+		numIndices &= 0x03FF;
+		verts += numIndices;++faces;
 
-			// surface chunk
-		case AI_LWO_SURF:
-			{
-				if (!mSurfaces->empty())
-					DefaultLogger::get()->warn("LWO: SURF chunk encountered twice");
-				else LoadLWOBSurface(head->length);
-				break;
-			}
-		}
-		mFileBuffer = next;
+		for(uint16_t i = 0; i < numIndices; i++)
+			ReadVSizedIntLWO2((uint8_t*&)cursor);
 	}
 }
+
+// ------------------------------------------------------------------------------------------------
+void LWOImporter::CopyFaceIndicesLWO2(FaceList::iterator& it,
+	LE_NCONST uint16_t*& cursor, 
+	const uint16_t* const end,
+	unsigned int max)
+{
+	while (cursor < end && max--)
+	{
+		LWO::Face& face = *it;++it;
+		if(face.mNumIndices = (*cursor++) & 0x03FF)
+		{
+			face.mIndices = new unsigned int[face.mNumIndices];
+			
+			for(unsigned int i = 0; i < face.mNumIndices; i++)
+			{
+				face.mIndices[i] = ReadVSizedIntLWO2((uint8_t*&)cursor) + mCurLayer->mPointIDXOfs;
+				if(face.mIndices[i] > mCurLayer->mTempPoints.size())
+				{
+					DefaultLogger::get()->warn("LWO2: face index is out of range");
+					face.mIndices[i] = (unsigned int)mCurLayer->mTempPoints.size()-1;
+				}
+			}
+		}
+		else DefaultLogger::get()->warn("LWO2: face has 0 indices");
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void LWOImporter::LoadLWO2PolygonTags(unsigned int length)
+{
+	uint32_t type = *((LE_NCONST uint32_t*)mFileBuffer);mFileBuffer+=4;
+	AI_LSWAP4(type);
+
+	if (type != AI_LWO_SURF && type != AI_LWO_SMGP)
+		return;
+
+	LE_NCONST uint8_t* const end = mFileBuffer+length;
+	while (mFileBuffer < end)
+	{
+		unsigned int i = ReadVSizedIntLWO2(mFileBuffer) + mCurLayer->mFaceIDXOfs;
+		unsigned int j = ReadVSizedIntLWO2(mFileBuffer);
+
+		if (i > mCurLayer->mFaces.size())
+		{
+			DefaultLogger::get()->warn("LWO2: face index in ptag list is out of range");
+			continue;
+		}
+
+		switch (type)
+		{
+		case AI_LWO_SURF:
+			mCurLayer->mFaces[i].surfaceIndex = j;
+			break;
+		case AI_LWO_SMGP:
+			mCurLayer->mFaces[i].smoothGroup = j;
+			break;
+		};
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
+{
+	unsigned int type = *((LE_NCONST uint32_t*)mFileBuffer);mFileBuffer+=4;
+	unsigned int dims = *((LE_NCONST uint16_t*)mFileBuffer);mFileBuffer+=2;
+
+	VMapEntry* base;
+
+	switch (type)
+	{
+	case AI_LWO_TXUV:
+		if (dims != 2)
+		{
+			DefaultLogger::get()->warn("LWO2: Found UV channel with != 2 components"); 
+		}
+		mCurLayer->mUVChannels.push_back(UVChannel(mCurLayer->mTempPoints.size()));
+		base = &mCurLayer->mUVChannels.back();
+	case AI_LWO_WGHT:
+		if (dims != 1)
+		{
+			DefaultLogger::get()->warn("LWO2: found vertex weight map with != 1 components"); 
+		}
+		mCurLayer->mWeightChannels.push_back(WeightChannel(mCurLayer->mTempPoints.size()));
+		base = &mCurLayer->mWeightChannels.back();
+	case AI_LWO_RGB:
+	case AI_LWO_RGBA:
+		if (dims != 3 && dims != 4)
+		{
+			DefaultLogger::get()->warn("LWO2: found vertex color map with != 3&4 components"); 
+		}
+		mCurLayer->mVColorChannels.push_back(VColorChannel(mCurLayer->mTempPoints.size()));
+		base = &mCurLayer->mVColorChannels.back();
+	default: return;
+	};
+
+	// read the name of the vertex map 
+	ParseString(base->name,length);
+
+	// now read all entries in the map
+	type = std::min(dims,base->dims); 
+	const unsigned int diff = (dims - type)<<2;
+
+	LE_NCONST uint8_t* const end = mFileBuffer+length;
+	while (mFileBuffer < end)
+	{
+		unsigned int idx = ReadVSizedIntLWO2(mFileBuffer) + mCurLayer->mPointIDXOfs;
+		if (idx > mCurLayer->mTempPoints.size())
+		{
+			DefaultLogger::get()->warn("LWO2: vertex index in vmap/vmad is out of range");
+			continue;
+		}
+		for (unsigned int i = 0; i < type;++i)
+		{
+			base->rawData[idx*dims+i]= *((float*)mFileBuffer);
+			mFileBuffer += 4;
+		}
+		mFileBuffer += diff;
+	}
+}
+
+
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWO2File()
 {
@@ -647,24 +767,41 @@ void LWOImporter::LoadLWO2File()
 			// vertex list
 		case AI_LWO_PNTS:
 			{
-				if (!mCurLayer->mTempPoints.empty())
-					DefaultLogger::get()->warn("LWO: PNTS chunk encountered twice");
-				else LoadLWOPoints(head->length);
+				unsigned int old = (unsigned int)mCurLayer->mTempPoints.size();
+				LoadLWOPoints(head->length);
+				mCurLayer->mPointIDXOfs = old;
+				break;
+			}
+			// vertex tags
+		//case AI_LWO_VMAD:
+		case AI_LWO_VMAP:
+			{
+				if (mCurLayer->mTempPoints.empty())
+					DefaultLogger::get()->warn("LWO2: Unexpected VMAD/VMAP chunk");
+				else LoadLWO2VertexMap(head->length,head->type == AI_LWO_VMAD);
 				break;
 			}
 			// face list
 		case AI_LWO_POLS:
 			{
-				if (!mCurLayer->mFaces.empty())
-					DefaultLogger::get()->warn("LWO: POLS chunk encountered twice");
-				else LoadLWOPolygons(head->length);
+				unsigned int old = (unsigned int)mCurLayer->mFaces.size();
+				LoadLWOPolygons(head->length);
+				mCurLayer->mFaceIDXOfs = old;
+				break;
+			}
+			// polygon tags 
+		case AI_LWO_PTAG:
+			{
+				if (mCurLayer->mFaces.empty())
+					DefaultLogger::get()->warn("LWO2: Unexpected PTAG");
+				else LoadLWO2PolygonTags(head->length);
 				break;
 			}
 			// list of tags
 		case AI_LWO_SRFS:
 			{
 				if (!mTags->empty())
-					DefaultLogger::get()->warn("LWO: SRFS chunk encountered twice");
+					DefaultLogger::get()->warn("LWO2: SRFS chunk encountered twice");
 				else LoadLWOTags(head->length);
 				break;
 			}
@@ -673,8 +810,8 @@ void LWOImporter::LoadLWO2File()
 		case AI_LWO_SURF:
 			{
 				if (!mSurfaces->empty())
-					DefaultLogger::get()->warn("LWO: SURF chunk encountered twice");
-				else LoadLWOBSurface(head->length);
+					DefaultLogger::get()->warn("LWO2: SURF chunk encountered twice");
+				else LoadLWO2Surface(head->length);
 				break;
 			}
 		}

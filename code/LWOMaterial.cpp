@@ -113,140 +113,17 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::LoadLWOBSurface(unsigned int size)
+void LWOImporter::FindUVChannels(const LWO::Surface& surf, const LWO::Layer& layer,
+	unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS])
 {
-	LE_NCONST uint8_t* const end = mFileBuffer + size;
+	out[0] = 0xffffffff;
+}
 
-	uint32_t iCursor = 0;
-	mSurfaces->push_back( LWO::Surface () );
-	LWO::Surface& surf = mSurfaces->back();
-	LWO::Texture* pTex = NULL;
-
-	ParseString(surf.mName,size);
-	mFileBuffer+=surf.mName.length()+1;
-	// skip one byte if the length of the surface name is odd
-	if (!(surf.mName.length() & 1))++mFileBuffer; 
-	while (true)
-	{
-		if (mFileBuffer + 6 > end)break;
-
-		// no proper IFF header here - the chunk length is specified as int16
-		uint32_t head_type		= *((LE_NCONST uint32_t*)mFileBuffer);mFileBuffer+=4;
-		uint16_t head_length	= *((LE_NCONST uint16_t*)mFileBuffer);mFileBuffer+=2;
-		AI_LSWAP4(head_type);
-		AI_LSWAP2(head_length);
-		if (mFileBuffer + head_length > end)
-		{
-			throw new ImportErrorException("LWOB: Invalid file, the size attribute of "
-				"a surface sub chunk points behind the end of the file");
-		}
-		LE_NCONST uint8_t* const next = mFileBuffer+head_length;
-		switch (head_type)
-		{
-		// diffuse color
-		case AI_LWO_COLR:
-			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,COLR,3);
-				surf.mColor.r = *mFileBuffer++ / 255.0f;
-				surf.mColor.g = *mFileBuffer++ / 255.0f;
-				surf.mColor.b = *mFileBuffer   / 255.0f;
-				break;
-			}
-		// diffuse strength ...
-		case AI_LWO_DIFF:
-			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,DIFF,2);
-				AI_LSWAP2P(mFileBuffer);
-				surf.mDiffuseValue = *((int16_t*)mFileBuffer) / 255.0f;
-				break;
-			}
-		// specular strength ... 
-		case AI_LWO_SPEC:
-			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,SPEC,2);
-				AI_LSWAP2P(mFileBuffer);
-				surf.mSpecularValue = *((int16_t*)mFileBuffer) / 255.0f;
-				break;
-			}
-		// luminosity ... 
-		case AI_LWO_LUMI:
-			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,LUMI,2);
-				AI_LSWAP2P(mFileBuffer);
-				surf.mLuminosity = *((int16_t*)mFileBuffer) / 255.0f;
-				break;
-			}
-		// transparency
-		case AI_LWO_TRAN:
-			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,TRAN,2);
-				AI_LSWAP2P(mFileBuffer);
-				surf.mTransparency = *((int16_t*)mFileBuffer) / 255.0f;
-				break;
-			}
-		// glossiness
-		case AI_LWO_GLOS:
-			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,GLOS,2);
-				AI_LSWAP2P(mFileBuffer);
-				surf.mGlossiness = float(*((int16_t*)mFileBuffer));
-				break;
-			}
-		// color texture
-		case AI_LWO_CTEX:
-			{
-				pTex = &surf.mColorTexture;
-				break;
-			}
-		// diffuse texture
-		case AI_LWO_DTEX:
-			{
-				pTex = &surf.mDiffuseTexture;
-				break;
-			}
-		// specular texture
-		case AI_LWO_STEX:
-			{
-				pTex = &surf.mSpecularTexture;
-				break;
-			}
-		// bump texture
-		case AI_LWO_BTEX:
-			{
-				pTex = &surf.mBumpTexture;
-				break;
-			}
-		// transparency texture
-		case AI_LWO_TTEX:
-			{
-				pTex = &surf.mTransparencyTexture;
-				break;
-			}
-			// texture path
-		case AI_LWO_TIMG:
-			{
-				if (pTex)
-				{
-					ParseString(pTex->mFileName,head_length);	
-					AdjustTexturePath(pTex->mFileName);
-					mFileBuffer += pTex->mFileName.length();
-				}
-				else DefaultLogger::get()->warn("LWOB: TIMG tag was encuntered although "
-					"there was no xTEX tag before");
-				break;
-			}
-		// texture strength
-		case AI_LWO_TVAL:
-			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,TVAL,1);
-				if (pTex)pTex->mStrength = *mFileBuffer / 255.0f;
-				else DefaultLogger::get()->warn("LWOB: TVAL tag was encuntered "
-					"although there was no xTEX tag before");
-				break;
-			}
-		}
-		mFileBuffer = next;
-	}
+// ------------------------------------------------------------------------------------------------
+void LWOImporter::FindVCChannels(const LWO::Surface& surf, const LWO::Layer& layer,
+	unsigned int out[AI_MAX_NUMBER_OF_COLOR_SETS])
+{
+	out[0] = 0xffffffff;
 }
 
 // ------------------------------------------------------------------------------------------------

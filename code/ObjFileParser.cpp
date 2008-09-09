@@ -252,25 +252,25 @@ void ObjFileParser::getFace()
 		else 
 		{
 			//OBJ USES 1 Base ARRAYS!!!!
-			const int iVal = atoi(pPtr);
+			const int iVal = atoi( pPtr );
 			int tmp = iVal;
 			while ((tmp = tmp / 10)!=0)
 				++iStep;
 
-			if (0 != iVal)
+			if ( 0 != iVal )
 			{
 				// Store parsed index
-				if (0 == iPos)
+				if ( 0 == iPos )
 				{
-					pIndices->push_back(iVal-1);
+					pIndices->push_back( iVal-1 );
 				}
-				else if (1 == iPos)
+				else if ( 1 == iPos )
 				{	
-					pTexID->push_back(iVal-1);
+					pTexID->push_back( iVal-1 );
 				}
-				else if (2 == iPos)
+				else if ( 2 == iPos )
 				{
-					pNormalID->push_back(iVal-1);
+					pNormalID->push_back( iVal-1 );
 				}
 				else
 				{
@@ -278,7 +278,7 @@ void ObjFileParser::getFace()
 				}
 			}
 		}
-		for (int i=0; i<iStep; i++)
+		for ( int i=0; i<iStep; i++ )
 			++pPtr;
 	}
 

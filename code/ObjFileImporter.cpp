@@ -367,14 +367,17 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 			// Copy all texture coordinates
 			if ( !pModel->m_TextureCoord.empty() )
 			{
-				const unsigned int tex = pSourceFace->m_pTexturCoords->at( vertexIndex );
-				ai_assert( tex < pModel->m_TextureCoord.size() );
-				for ( size_t i=0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++)
+				if ( !pSourceFace->m_pTexturCoords->empty() )
 				{
-					if ( pMesh->mNumUVComponents[ i ] > 0 )
+					const unsigned int tex = pSourceFace->m_pTexturCoords->at( vertexIndex );
+					ai_assert( tex < pModel->m_TextureCoord.size() );
+					for ( size_t i=0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++)
 					{
-						aiVector2D coord2d = *pModel->m_TextureCoord[ tex ];
-						pMesh->mTextureCoords[ i ][ newIndex ] = aiVector3D( coord2d.x, coord2d.y, 0.0 );
+						if ( pMesh->mNumUVComponents[ i ] > 0 )
+						{
+							aiVector2D coord2d = *pModel->m_TextureCoord[ tex ];
+							pMesh->mTextureCoords[ i ][ newIndex ] = aiVector3D( coord2d.x, coord2d.y, 0.0 );
+						}
 					}
 				}
 			}

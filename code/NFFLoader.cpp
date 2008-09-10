@@ -90,14 +90,15 @@ bool NFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 // ------------------------------------------------------------------------------------------------
 bool GetNextLine(const char*& buffer, char out[4096])
 {
+	if ('\0' == *buffer)return false;
+
 	char* _out = out;
 	char* const end = _out+4096;
 	while (!IsLineEnd( *buffer ) && _out < end)
 		*_out++ = *buffer++;
 	*_out = '\0';
 
-	if ('\0' == *buffer)return false;
-	while (IsLineEnd( *buffer ))++buffer;
+	if ('\0' != *buffer)while (IsLineEnd( *buffer ))++buffer;
 	return true;
 }
 
@@ -150,6 +151,9 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 
 	ShadingInfo s; // current material info
 
+	// degree of tesselation
+	unsigned int iTesselation = 4;
+
 	char line[4096];
 	const char* sz;
 	unsigned int sphere = 0,cylinder = 0,cone = 0,numNamed = 0;
@@ -182,25 +186,26 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			SkipSpaces(sz,&sz);
 			m = strtol10(sz);
 
-			out->faces.push_back(m);
+			out->vertices.reserve(out->vertices.size()+m);
 			for (unsigned int n = 0; n < m;++n)
 			{
 				if(!GetNextLine(buffer,line))
 				{
 					DefaultLogger::get()->error("NFF: Unexpected EOF was encountered");
-					break;
+					continue;
 				}
 
 				aiVector3D v; sz = &line[0];
 				AI_NFF_PARSE_TRIPLE(v);
 				out->vertices.push_back(v);
 
-				if (&meshesWithNormals.back() == out)
+				if ('p' == line[1])
 				{
 					AI_NFF_PARSE_TRIPLE(v);
 					out->normals.push_back(v);
 				}
 			}
+			out->faces.push_back(m);
 		}
 		// 'f' - shading information block
 		else if ('f' == line[0] && IsSpace(line[1]))
@@ -254,11 +259,17 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			AI_NFF_PARSE_SHAPE_INFORMATION();
 
 			// generate the sphere - it consists of simple triangles
-			StandardShapes::MakeSphere(aiVector3D(), radius, 500.0f, currentMesh.vertices);
-			currentMesh.faces.resize(currentMesh.vertices.size(),3);
+			StandardShapes::MakeSphere(aiVector3D(), radius, iTesselation, currentMesh.vertices);
+			currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
 			// generate a name for the mesh
 			::sprintf(currentMesh.name,"sphere_%i",sphere++);
+		}
+		// 'tess' - tesselation
+		else if (!strncmp(line,"tess",4) && IsSpace(line[4]))
+		{
+			sz = &line[5];SkipSpaces(&sz);
+			iTesselation = strtol10(sz);
 		}
 		// 'c' - cone
 		else if ('c' == line[0] && IsSpace(line[1]))
@@ -280,8 +291,8 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			center1 = -center2;
 
 			// generate the cone - it consists of simple triangles
-			StandardShapes::MakeCone(center1, radius1, center2, radius2, 500.0f, currentMesh.vertices);
-			currentMesh.faces.resize(currentMesh.vertices.size(),3);
+			StandardShapes::MakeCone(center1, radius1, center2, radius2, iTesselation, currentMesh.vertices);
+			currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
 			// generate a name for the mesh
 			if (radius1 != radius2)
@@ -384,7 +395,9 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 
 		// generate a material for the mesh
 		MaterialHelper* pcMat = (MaterialHelper*)(pScene->
-			mMaterials[m++] = new MaterialHelper());
+			mMaterials[m] = new MaterialHelper());
+
+		mesh->mMaterialIndex = m++;
 
 		aiString s;
 		s.Set(AI_DEFAULT_MATERIAL_NAME);

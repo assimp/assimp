@@ -95,8 +95,7 @@ bool LWOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 // Setup configuration properties
 void LWOImporter::SetupProperties(const Importer* pImp)
 {
-	this->configGradientResX = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_LWO_GRADIENT_RESX,512);
-	this->configGradientResY = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_LWO_GRADIENT_RESY,512);
+	// -- no configuration options at the moment
 }
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
@@ -669,14 +668,14 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 		{
 			DefaultLogger::get()->warn("LWO2: Found UV channel with != 2 components"); 
 		}
-		mCurLayer->mUVChannels.push_back(UVChannel(mCurLayer->mTempPoints.size()));
+		mCurLayer->mUVChannels.push_back(UVChannel((unsigned int)mCurLayer->mTempPoints.size()));
 		base = &mCurLayer->mUVChannels.back();
 	case AI_LWO_WGHT:
 		if (dims != 1)
 		{
 			DefaultLogger::get()->warn("LWO2: found vertex weight map with != 1 components"); 
 		}
-		mCurLayer->mWeightChannels.push_back(WeightChannel(mCurLayer->mTempPoints.size()));
+		mCurLayer->mWeightChannels.push_back(WeightChannel((unsigned int)mCurLayer->mTempPoints.size()));
 		base = &mCurLayer->mWeightChannels.back();
 	case AI_LWO_RGB:
 	case AI_LWO_RGBA:
@@ -684,7 +683,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 		{
 			DefaultLogger::get()->warn("LWO2: found vertex color map with != 3&4 components"); 
 		}
-		mCurLayer->mVColorChannels.push_back(VColorChannel(mCurLayer->mTempPoints.size()));
+		mCurLayer->mVColorChannels.push_back(VColorChannel((unsigned int)mCurLayer->mTempPoints.size()));
 		base = &mCurLayer->mVColorChannels.back();
 	default: return;
 	};

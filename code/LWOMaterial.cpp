@@ -135,13 +135,13 @@ void LWOImporter::LoadLWO2ImageMap(unsigned int size, LWO::Texture& tex )
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWO2Procedural(unsigned int size, LWO::Texture& tex )
 {
-	LE_NCONST uint8_t* const end = mFileBuffer + size;
+	// --- not supported at the moment
 }
 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWO2Gradient(unsigned int size, LWO::Texture& tex  )
 {
-	LE_NCONST uint8_t* const end = mFileBuffer + size;
+	// --- not supported at the moment
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -245,6 +245,7 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 				{
 				case AI_LWO_IMAP:
 				case AI_LWO_PROC:
+					break;
 				case AI_LWO_GRAD:
 					mFileBuffer+=4;
 					LoadLWO2TextureBlock(type,head_length-4);
@@ -256,21 +257,4 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 		}
 		mFileBuffer = next;
 	}
-}
-
-// ------------------------------------------------------------------------------------------------
-bool LWOImporter::ComputeGradientTexture(LWO::GradientInfo& grad,
-	std::vector<aiTexture*>& out)
-{
-	aiTexture* tex = new aiTexture();
-
-	tex->mHeight = configGradientResY;
-	tex->mWidth = configGradientResX;
-	unsigned int numPixels;
-	tex->pcData = new aiTexel[numPixels = tex->mHeight * tex->mWidth];
-
-	// to be implemented ...
-
-	out.push_back(tex);
-	return true;
 }

@@ -113,6 +113,14 @@ bool GetNextLine(const char*& buffer, char out[4096])
 	AI_NFF_PARSE_FLOAT(v.z) 
 
 // ------------------------------------------------------------------------------------------------
+#define AI_NFF_PARSE_SHAPE_INFORMATION() \
+	sz = &line[1]; \
+	aiVector3D center; float radius; \
+	AI_NFF_PARSE_TRIPLE(center); \
+	AI_NFF_PARSE_FLOAT(radius); \
+	currentMesh.center = center;
+
+// ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void NFFImporter::InternReadFile( const std::string& pFile, 
 	aiScene* pScene, IOSystem* pIOHandler)
@@ -243,12 +251,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			MeshInfo& currentMesh = meshesLocked.back();
 			currentMesh.shader = s;
 
-			sz = &line[1];
-			aiVector3D center; float radius;
-			AI_NFF_PARSE_TRIPLE(center);
-			AI_NFF_PARSE_FLOAT(radius);
-
-			currentMesh.center = center;
+			AI_NFF_PARSE_SHAPE_INFORMATION();
 
 			// generate the sphere - it consists of simple triangles
 			StandardShapes::MakeSphere(aiVector3D(), radius, 500.0f, currentMesh.vertices);

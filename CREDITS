@@ -9,3 +9,10 @@ Thanks for your help!
 - Andrew Galante,
 submitted patches to make Assimp compile with GCC-4, a makefile and the xcode3 workspace.
 
+- Andreas Nagel
+tested Assimp under Windows Vista 64 Bit
+
+- Marius Schröder
+allowed us to use many of his models for screenshots and testing
+
+... and many others

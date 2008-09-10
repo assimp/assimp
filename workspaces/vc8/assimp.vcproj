@@ -235,6 +235,7 @@
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="NDEBUG, _SCL_SECURE_NO_WARNINGS, _CRT_SECURE_NO_WARNINGS,WIN32"
 				StringPooling="true"
+				RuntimeLibrary="0"
 				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="2"
 				WarningLevel="3"

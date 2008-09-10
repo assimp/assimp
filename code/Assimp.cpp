@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "GenericProperty.h"
 
 // boost headers
-#define AI_C_THREADSAFE
+//#define AI_C_THREADSAFE
 #if (defined AI_C_THREADSAFE)
 #	include <boost/thread/thread.hpp>
 #	include <boost/thread/mutex.hpp>

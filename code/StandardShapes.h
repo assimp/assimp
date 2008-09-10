@@ -59,6 +59,16 @@ class ASSIMP_API StandardShapes
 
 public:
 
+	/** @brief Generates an icosahedron
+	 *
+	 *  @param center Center point of the icosahedron
+	 *  @param length Face length of the icosahedron
+	 *  @param positions Receives output triangles.
+	 */
+	static void MakeIcosahedron(aiVector3D& center,float length,
+		std::vector<aiVector3D>& positions);
+
+
 	/** @brief Generates a sphere
 	 *
 	 *  @param center Center point of the sphere

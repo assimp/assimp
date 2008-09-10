@@ -218,17 +218,6 @@ private:
 	void ResolveTags();
 
 	// -------------------------------------------------------------------
-	/** Computes a proper texture form a procedural gradient
-	 *  description.
-	 *  @param grad Gradient description
-     *  @param out List of output textures. The new texture should
-	 *    be added to the list, if the conversion was successful.
-	 *  @return true if successful
-	*/
-	bool ComputeGradientTexture(LWO::GradientInfo& grad,
-		std::vector<aiTexture*>& out);
-
-	// -------------------------------------------------------------------
 	/** Parse a string from the current file position
 	*/
 	void ParseString(std::string& out,unsigned int max);
@@ -294,6 +283,9 @@ protected:
 	/** Temporary surface list from the file */
 	SurfaceList* mSurfaces;
 
+	/** Temporary clip list from the file */
+	ClipList mClips;
+
 	/** file buffer */
 	LE_NCONST uint8_t* mFileBuffer;
 
@@ -302,9 +294,6 @@ protected:
 
 	/** Output scene */
 	aiScene* pScene;
-
-	/** Configuration option: X and Y size of gradient maps */
-	unsigned int configGradientResX,configGradientResY;
 };
 
 } // end of namespace Assimp

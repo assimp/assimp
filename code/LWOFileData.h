@@ -326,42 +326,21 @@ struct WeightChannel : public VMapEntry
 
 
 // ---------------------------------------------------------------------------
-/** \brief LWO2 gradient keyframe
- */
-struct GradientKey
-{
-	aiColor4D color;
-	float value;
-};
-
-// ---------------------------------------------------------------------------
-/** \brief Data structure for a LWO2 gradient
- */
-struct GradientInfo
-{
-	GradientInfo()
-		: mStart(0.0f)
-		, mEnd(1.0f)
-	{}
-
-	float mStart,mEnd;
-	bool mRepeat;
-	std::vector<GradientKey> mKeys;
-};
-
-
-// ---------------------------------------------------------------------------
 /** \brief Data structure for a LWO file texture
  */
 struct Texture
 {
 	Texture()
 		: mStrength			(1.0f)
-		, iUVChannelIndex	(0)
+		, mUVChannelIndex	("unknown")
+		, mClipIdx(0xffffffff)
 	{}
 
 	//! File name of the texture
 	std::string mFileName;
+
+	//! Clip index
+	unsigned int mClipIdx;
 
 	//! Strength of the texture
 	float mStrength;
@@ -370,13 +349,18 @@ struct Texture
 	/*************** SPECIFIC TO LWO2 *********************/
 	uint32_t type; // type of the texture
 
-	//! Index of the corresponding UV channel
-	unsigned int iUVChannelIndex;
-	
-	GradientInfo mGradient;
-	// todo ... maybe support for procedurals?
+	//! Name of the corresponding UV channel
+	std::string mUVChannelIndex;
 };
 
+// ---------------------------------------------------------------------------
+/** \brief Data structure for a LWO file clip
+ */
+struct Clip
+{
+	//! path to the base texture
+	std::string path;
+};
 
 // ---------------------------------------------------------------------------
 /** \brief Data structure for a LWO file surface (= material)
@@ -432,6 +416,7 @@ typedef std::vector	<	unsigned int	>	TagMappingTable;
 typedef std::vector	<	WeightChannel	>	WeightChannelList;
 typedef std::vector	<	VColorChannel	>	VColorChannelList;
 typedef std::vector	<	UVChannel		>	UVChannelList;
+typedef std::vector	<	Clip			>	ClipList;
 
 
 // ---------------------------------------------------------------------------

@@ -55,6 +55,7 @@ struct aiVector3D
 #ifdef __cplusplus
 	aiVector3D () : x(0.0f), y(0.0f), z(0.0f) {}
 	aiVector3D (float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+	aiVector3D (float _xyz) : x(_xyz), y(_xyz), z(_xyz) {}
 	aiVector3D (const aiVector3D& o) : x(o.x), y(o.y), z(o.z) {}
 
 	void Set( float pX, float pY, float pZ) { x = pX; y = pY; z = pZ; }
@@ -77,6 +78,9 @@ struct aiVector3D
 
 	inline aiVector3D& operator= (float f)
 		{x = y = z = f;return *this;}
+
+	const aiVector3D SymMul(const aiVector3D& o)
+		{return aiVector3D(x*o.x,y*o.y,z*o.z);}
 
 #endif // __cplusplus
 

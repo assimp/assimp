@@ -93,10 +93,11 @@ public:
 
 bool g_bWasFlipped = false;
 
+
 //-------------------------------------------------------------------------------
 // Flip all normal vectors
 //-------------------------------------------------------------------------------
-void AssetHelper::FlipNormals()
+void AssetHelper::FlipNormalsInt()
 {
 	// invert all normal vectors
 	for (unsigned int i = 0; i < this->pcScene->mNumMeshes;++i)
@@ -107,6 +108,13 @@ void AssetHelper::FlipNormals()
 			pcMesh->mNormals[a] *= -1.0f;
 		}
 	}
+}
+
+//-------------------------------------------------------------------------------
+void AssetHelper::FlipNormals()
+{
+	FlipNormalsInt();
+
 	// recreate native data
 	DeleteAssetData(true);
 	CreateAssetData();
@@ -145,12 +153,14 @@ void AssetHelper::SetNormalSet(unsigned int iSet)
 	{
 		MyGenFaceNormalsProcess* pcProcess = new MyGenFaceNormalsProcess();
 		pcProcess->Execute(this->pcScene);
+		//FlipNormalsInt();
 		delete pcProcess;
 	}
 	else if (SMOOTH == iSet)
 	{
 		MyGenVertexNormalsProcess* pcProcess = new MyGenVertexNormalsProcess();
 		pcProcess->Execute(this->pcScene);
+		//FlipNormalsInt();
 		delete pcProcess;
 	}
 	else if (ORIGINAL == iSet)

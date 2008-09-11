@@ -95,8 +95,7 @@ void ComputeNormalsWithSmoothingsGroups(MeshWithSmoothingGroups<T>& sMesh)
 	
 	// now generate the spatial sort tree
 	SGSpatialSort sSort;
-	for( std::vector<T>::iterator
-		i =  sMesh.mFaces.begin();
+	for( std::vector<T>::iterator i =  sMesh.mFaces.begin();
 		i != sMesh.mFaces.end();++i)
 	{
 		sSort.Add(sMesh.mPositions[(*i).mIndices[0]],(*i).mIndices[0],(*i).iSmoothGroup);
@@ -105,8 +104,7 @@ void ComputeNormalsWithSmoothingsGroups(MeshWithSmoothingGroups<T>& sMesh)
 	}
 	sSort.Prepare();
 
-	for( std::vector<T>::iterator
-		i =  sMesh.mFaces.begin();
+	for( std::vector<T>::iterator i =  sMesh.mFaces.begin();
 		i != sMesh.mFaces.end();++i)
 	{
 		std::vector<unsigned int> poResult;

@@ -164,7 +164,7 @@ struct aiTexture
 
 	// Construction
 	aiTexture ()
-		: mHeight(0), mWidth(0), pcData(NULL)
+		: mWidth(0), mHeight(0), pcData(NULL)
 	{
 		achFormatHint[0] = '\0';
 		achFormatHint[1] = '\0';

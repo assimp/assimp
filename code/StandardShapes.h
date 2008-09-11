@@ -59,32 +59,52 @@ class ASSIMP_API StandardShapes
 
 public:
 
+	/** @brief Generates a hexahedron (cube)
+	 *
+	 *  Hexahedrons can be scaled on all axes.
+	 *  @param center Center point of the hexahedron
+	 *  @param length Radius of the hexahedron 
+	 *  @param positions Receives output triangles.
+	 */
+	static void MakeHexahedron(aiVector3D& center,const aiVector3D& length,
+		std::vector<aiVector3D>& positions);
+
+
 	/** @brief Generates an icosahedron
 	 *
 	 *  @param center Center point of the icosahedron
-	 *  @param length Face length of the icosahedron
+	 *  @param length Radius of the icosahedron
 	 *  @param positions Receives output triangles.
 	 */
-	static void MakeIcosahedron(aiVector3D& center,float length,
+	static void MakeIcosahedron(aiVector3D& center,const aiVector3D& length,
 		std::vector<aiVector3D>& positions);
 
 
 	/** @brief Generates a dodecahedron
 	 *
 	 *  @param center Center point of the dodecahedron
-	 *  @param length Face length of the dodecahedron
-	 *  @param positions Receives output triangles.
+	 *  @param length Radius of the dodecahedron
+	 *  @param positions Receives output triangles
 	 */
-	static void MakeDodecahedron(aiVector3D& center,float length,
+	static void MakeDodecahedron(aiVector3D& center,const aiVector3D& length,
 		std::vector<aiVector3D>& positions);
 
 	/** @brief Generates an octahedron
 	 *
 	 *  @param center Center point of the octahedron
-	 *  @param length Face length of the octahedron
+	 *  @param length Radius of the octahedron
 	 *  @param positions Receives output triangles.
 	 */
-	static void MakeOctahedron(aiVector3D& center,float length,
+	static void MakeOctahedron(aiVector3D& center,const aiVector3D& length,
+		std::vector<aiVector3D>& positions);
+
+	/** @brief Generates a tetrahedron
+	 *
+	 *  @param center Center point of the tetrahedron
+	 *  @param length Radius of the octahedron
+	 *  @param positions Receives output triangles.
+	 */
+	static void MakeTetrahedron(aiVector3D& center,const aiVector3D& length,
 		std::vector<aiVector3D>& positions);
 
 
@@ -95,7 +115,7 @@ public:
 	 *  @param tess Number of subdivions - 0 generates a octahedron
 	 *  @param positions Receives output triangles.
 	 */
-	static void MakeSphere(aiVector3D& center,float radius,unsigned int tess,
+	static void MakeSphere(aiVector3D& center,float length,unsigned int tess,
 		std::vector<aiVector3D>& positions);
 
 	/** @brief Generates a cone or a cylinder, either opened or closed.
@@ -140,6 +160,40 @@ public:
 	static void MakeCircle(aiVector3D& center, aiVector3D& normal, 
 		float radius, unsigned int tess,
 		std::vector<aiVector3D>& positions);
+
+
+	// simplified versions - the radius is a single float and applies
+	// to all axes. These version of the functions must be used if ou 
+	// REALLY want a platonic primitive :-)
+	static void MakeHexahedron(aiVector3D& center,float length,
+		std::vector<aiVector3D>& positions)
+	{
+		MakeHexahedron(center,aiVector3D(length),positions);
+	}
+
+	static void MakeDodecahedron(aiVector3D& center,float length,
+		std::vector<aiVector3D>& positions)
+	{
+		MakeDodecahedron(center,aiVector3D(length),positions);
+	}
+
+	static void MakeOcathedron(aiVector3D& center,float length,
+		std::vector<aiVector3D>& positions)
+	{
+		MakeOctahedron(center,aiVector3D(length),positions);
+	}
+
+	static void MakeTetrahedron(aiVector3D& center,float length,
+		std::vector<aiVector3D>& positions)
+	{
+		MakeTetrahedron(center,aiVector3D(length),positions);
+	}
+
+	static void MakeIcosahedron(aiVector3D& center,float length,
+		std::vector<aiVector3D>& positions)
+	{
+		MakeIcosahedron(center,aiVector3D(length),positions);
+	}
 	
 };
 } // ! Assimp

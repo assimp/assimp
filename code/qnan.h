@@ -3,9 +3,7 @@
 #if (!defined AI_QNAN_H_INCLUDED)
 #define AI_QNAN_H_INCLUDED
 
-#if (!defined ASSIMP_BUILD_CPP_09)
-#	include <boost/static_assert.hpp>
-#endif
+
 
 inline bool is_qnan(const float in)
 {
@@ -20,14 +18,6 @@ inline bool is_qnan(const float in)
 		float f;
 		int32_t i;
 	} FPUNION1,FPUNION2;
-
-	// use a compile-time asertion if possible
-#if (defined ASSIMP_BUILD_CPP_09)
-	static_assert(sizeof(float)==sizeof(int32_t),
-		"A float seems not to be 4 bytes on this platform");
-#else
-	BOOST_STATIC_ASSERT(sizeof(float)==sizeof(int32_t));
-#endif
 
 	FPUNION1.f = in;
 	FPUNION2.f = std::numeric_limits<float>::quiet_NaN();

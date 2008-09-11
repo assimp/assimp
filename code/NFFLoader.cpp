@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsingUtils.h"
 #include "StandardShapes.h"
 #include "fast_atof.h"
+#include "qnan.h"
 
 // public assimp headers
 #include "../include/IOStream.h"
@@ -105,7 +106,7 @@ bool GetNextLine(const char*& buffer, char out[4096])
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_FLOAT(f) \
 	SkipSpaces(&sz); \
-	sz = fast_atof_move(sz, f); 
+	if (!::IsLineEnd(*sz))sz = fast_atof_move(sz, f); 
 
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_TRIPLE(v) \
@@ -115,10 +116,12 @@ bool GetNextLine(const char*& buffer, char out[4096])
 
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_SHAPE_INFORMATION() \
-	sz = &line[1]; \
-	aiVector3D center; float radius; \
+	aiVector3D center, radius(1.0f,std::numeric_limits<float>::quiet_NaN(),std::numeric_limits<float>::quiet_NaN()); \
 	AI_NFF_PARSE_TRIPLE(center); \
-	AI_NFF_PARSE_FLOAT(radius); \
+	AI_NFF_PARSE_TRIPLE(radius); \
+	if (is_qnan(radius.z))radius.z = radius.x; \
+	if (is_qnan(radius.y))radius.y = radius.x; \
+	currentMesh.radius = radius; \
 	currentMesh.center = center;
 
 // ------------------------------------------------------------------------------------------------
@@ -156,7 +159,9 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 
 	char line[4096];
 	const char* sz;
-	unsigned int sphere = 0,cylinder = 0,cone = 0,numNamed = 0;
+	unsigned int sphere = 0,cylinder = 0,cone = 0,numNamed = 0,
+		dodecahedron = 0,octecahedron = 0,octahedron = 0,tetrahedron = 0, hexahedron = 0;
+
 	while (GetNextLine(buffer,line))
 	{
 		if ('p' == line[0])
@@ -186,7 +191,12 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			SkipSpaces(sz,&sz);
 			m = strtol10(sz);
 
-			out->vertices.reserve(out->vertices.size()+m);
+			// ---- flip the face order
+			out->vertices.resize(out->vertices.size()+m);
+			if (out == currentMeshWithNormals)
+			{
+				out->normals.resize(out->vertices.size());
+			}
 			for (unsigned int n = 0; n < m;++n)
 			{
 				if(!GetNextLine(buffer,line))
@@ -197,12 +207,12 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 
 				aiVector3D v; sz = &line[0];
 				AI_NFF_PARSE_TRIPLE(v);
-				out->vertices.push_back(v);
+				out->vertices[out->vertices.size()-n-1] = v;
 
-				if ('p' == line[1])
+				if (out == currentMeshWithNormals)
 				{
 					AI_NFF_PARSE_TRIPLE(v);
-					out->normals.push_back(v);
+					out->normals[out->vertices.size()-n-1] = v;
 				}
 			}
 			out->faces.push_back(m);
@@ -256,15 +266,88 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			MeshInfo& currentMesh = meshesLocked.back();
 			currentMesh.shader = s;
 
+			sz = &line[1]; 
 			AI_NFF_PARSE_SHAPE_INFORMATION();
 
-			// generate the sphere - it consists of simple triangles
-			StandardShapes::MakeSphere(aiVector3D(), radius, iTesselation, currentMesh.vertices);
+			// we don't need scaling or translation here - we do it in the node's transform
+			StandardShapes::MakeSphere(aiVector3D(), 1.0f, iTesselation, currentMesh.vertices);
 			currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
 			// generate a name for the mesh
 			::sprintf(currentMesh.name,"sphere_%i",sphere++);
 		}
+		// 'dod' - dodecahedron
+		else if (!strncmp(line,"dod",3) && IsSpace(line[3]))
+		{
+			meshesLocked.push_back(MeshInfo(false,true));
+			MeshInfo& currentMesh = meshesLocked.back();
+			currentMesh.shader = s;
+
+			sz = &line[4]; 
+			AI_NFF_PARSE_SHAPE_INFORMATION();
+
+			// we don't need scaling or translation here - we do it in the node's transform
+			StandardShapes::MakeDodecahedron(aiVector3D(), 1.0f, currentMesh.vertices);
+			currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
+
+			// generate a name for the mesh
+			::sprintf(currentMesh.name,"dodecahedron_%i",dodecahedron++);
+		}
+
+		// 'oct' - octahedron
+		else if (!strncmp(line,"oct",3) && IsSpace(line[3]))
+		{
+			meshesLocked.push_back(MeshInfo(false,true));
+			MeshInfo& currentMesh = meshesLocked.back();
+			currentMesh.shader = s;
+
+			sz = &line[4]; 
+			AI_NFF_PARSE_SHAPE_INFORMATION();
+
+			// we don't need scaling or translation here - we do it in the node's transform
+			StandardShapes::MakeOctahedron(aiVector3D(), 1.0f, currentMesh.vertices);
+			currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
+
+			// generate a name for the mesh
+			::sprintf(currentMesh.name,"octecahedron_%i",octecahedron++);
+		}
+
+		// 'tet' - tetrahedron
+		else if (!strncmp(line,"tet",3) && IsSpace(line[3]))
+		{
+			meshesLocked.push_back(MeshInfo(false,true));
+			MeshInfo& currentMesh = meshesLocked.back();
+			currentMesh.shader = s;
+
+			sz = &line[4]; 
+			AI_NFF_PARSE_SHAPE_INFORMATION();
+
+			// we don't need scaling or translation here - we do it in the node's transform
+			StandardShapes::MakeTetrahedron(aiVector3D(), 1.0f, currentMesh.vertices);
+			currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
+
+			// generate a name for the mesh
+			::sprintf(currentMesh.name,"tetrahedron_%i",tetrahedron++);
+		}
+
+		// 'hex' - hexahedron
+		else if (!strncmp(line,"hex",3) && IsSpace(line[3]))
+		{
+			meshesLocked.push_back(MeshInfo(false,true));
+			MeshInfo& currentMesh = meshesLocked.back();
+			currentMesh.shader = s;
+
+			sz = &line[4]; 
+			AI_NFF_PARSE_SHAPE_INFORMATION();
+
+			// we don't need scaling or translation here - we do it in the node's transform
+			StandardShapes::MakeHexahedron(aiVector3D(),1.0f, currentMesh.vertices);
+			currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
+
+			// generate a name for the mesh
+			::sprintf(currentMesh.name,"hexahedron_%i",hexahedron++);
+		}
+
 		// 'tess' - tesselation
 		else if (!strncmp(line,"tess",4) && IsSpace(line[4]))
 		{
@@ -359,11 +442,16 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			node->mNumMeshes = 1;
 			node->mMeshes = new unsigned int[1];
 			node->mMeshes[0] = m;
+			node->mName.Set(src.name);
 
 			// setup the transformation matrix of the node
 			node->mTransformation.a4 = src.center.x;
 			node->mTransformation.b4 = src.center.y;
 			node->mTransformation.c4 = src.center.z;
+
+			node->mTransformation.a1 = src.radius.x;
+			node->mTransformation.b2 = src.radius.y;
+			node->mTransformation.c3 = src.radius.z;
 
 			++ppcChildren;
 		}

@@ -265,6 +265,12 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 
 		case Dot3DS::Dot3DSFile::Metal :
 			eShading = aiShadingMode_CookTorrance; break;
+
+			// FIX to workaround a warning with GCC 4 who complained
+			// about a missing case Blinn: here - Blinn isn't a valid
+			// value in the 3DS Loader, it is just needed for ASE
+		case Dot3DS::Dot3DSFile::Blinn :
+			eShading = aiShadingMode_Blinn; break;
 	}
 	mat.AddProperty<int>( (int*)&eShading,1,AI_MATKEY_SHADING_MODEL);
 
@@ -402,7 +408,6 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 			aiSplit[*a].push_back(iNum);
 		}
 		// now generate submeshes
-		bool bFirst = true;
 		for (unsigned int p = 0; p < this->mScene->mMaterials.size();++p)
 		{
 			if (aiSplit[p].size() != 0)
@@ -586,8 +591,6 @@ void Dot3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 		//   |       |       |            |
 		// MESH_0  MESH_1  MESH_2  ...  MESH_N
 		//
-		unsigned int iCnt = 0;
-
 		DefaultLogger::get()->warn("No hierarchy information has been found in the file. ");
 
 		pcOut->mRootNode->mNumChildren = pcOut->mNumMeshes;

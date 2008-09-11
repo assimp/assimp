@@ -201,6 +201,7 @@ class AssetHelper
 		// ------------------------------------------------------------------
 		// flip all normal vectors
 		void FlipNormals();
+		void FlipNormalsInt();
 	};
 
 #endif // !! IG

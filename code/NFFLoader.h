@@ -119,7 +119,7 @@ private:
 		bool bHasNormals, bLocked;
 
 		// for spheres, cones and cylinders: center point of the object
-		aiVector3D center;
+		aiVector3D center, radius;
 
 		char name[128];
 

@@ -1,10 +1,27 @@
 
+tess 4
+
+f 0.3 0.3 0.3 1 1
+
 # a centered sphere
+
+
 s 0 0 0 5
 
-# a polgyon that should not be visible
-p 4
-5 0 0
-0 -5 0
--5 0 0
-0 5 0
+s 20 0 0 5
+
+s 40 0 0 5
+
+s 60 0 0 5
+
+
+
+f 1 1 1 1 1
+
+s -5 0 0 3
+
+s 0 5 0 3
+s 0 -5 0 3
+
+
+

@@ -326,8 +326,8 @@ struct Texture
 		, mOffsetU	(0.0f)
 		, mOffsetV	(0.0f)
 		, mRotation	(0.0f)
-		, iUVSrc	(0)
 		, mMapMode	(aiTextureMapMode_Wrap)
+		, iUVSrc	(0)
 	{
 		mTextureBlend = std::numeric_limits<float>::quiet_NaN();
 	}
@@ -364,9 +364,9 @@ struct Material
 	mTransparency		(1.0f),
 	mBumpHeight			(1.0f),
 	iBakeUVTransform	(0),
-	pcSingleTexture		(NULL),
 	mShininessStrength	(1.0f),
-	mTwoSided			(false)
+	mTwoSided			(false),
+	pcSingleTexture		(NULL)
 	{
 		static int iCnt = 0;
 		

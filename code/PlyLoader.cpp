@@ -593,6 +593,7 @@ float PLYImporter::NormalizeColorValue (PLY::PropertyInstance::ValueUnion val,
 		return (float)val.iUInt / (float)0xFFFF;
 	case EDT_Int:
 		return ((float)val.iInt / (float)0xFF) + 0.5f;
+	default: ;
 	};
 	return 0.0f;
 }

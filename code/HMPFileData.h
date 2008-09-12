@@ -44,16 +44,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp	{
 namespace HMP	{
 
-#include "./Compiler/pushpack1.h"
+#include "./../include/Compiler/pushpack1.h"
 
-#define AI_HMP_MAGIC_NUMBER_BE_4	'HMP4'
-#define AI_HMP_MAGIC_NUMBER_LE_4	'4PMH'
+// to make it easier for ourselfes, we test the magic word against both "endianesses"
+#define HMP_MAKE(string) ((uint32_t)((string[0] << 24) + (string[1] << 16) + (string[2] << 8) + string[3]))
 
-#define AI_HMP_MAGIC_NUMBER_BE_5	'HMP5'
-#define AI_HMP_MAGIC_NUMBER_LE_5	'5PMH'
+#define AI_HMP_MAGIC_NUMBER_BE_4	HMP_MAKE("HMP4")
+#define AI_HMP_MAGIC_NUMBER_LE_4	HMP_MAKE("4PMH")
 
-#define AI_HMP_MAGIC_NUMBER_BE_7	'HMP7'
-#define AI_HMP_MAGIC_NUMBER_LE_7	'7PMH'
+#define AI_HMP_MAGIC_NUMBER_BE_5	HMP_MAKE("HMP5")
+#define AI_HMP_MAGIC_NUMBER_LE_5	HMP_MAKE("5PMH")
+
+#define AI_HMP_MAGIC_NUMBER_BE_7	HMP_MAKE("HMP7")
+#define AI_HMP_MAGIC_NUMBER_LE_7	HMP_MAKE("7PMH")
 
 // ---------------------------------------------------------------------------
 /** Data structure for the header of a HMP5 file.
@@ -127,7 +130,7 @@ struct Vertex_HMP7
 	int8_t normal_x,normal_y;
 } PACK_STRUCT;
 
-#include "./Compiler/poppack1.h"
+#include "./../include/Compiler/poppack1.h"
 
 } //! namespace HMP
 } //! namespace Assimp

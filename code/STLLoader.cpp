@@ -240,11 +240,11 @@ void STLImporter::LoadASCIIFile()
 			{
 				sz += 7;
 				SkipSpaces(&sz);
-				sz = fast_atof_move(sz, vn->x ); 
+				sz = fast_atof_move(sz, (float&)vn->x ); 
 				SkipSpaces(&sz);
-				sz = fast_atof_move(sz, vn->y ); 
+				sz = fast_atof_move(sz, (float&)vn->y ); 
 				SkipSpaces(&sz);
-				sz = fast_atof_move(sz, vn->z ); 
+				sz = fast_atof_move(sz, (float&)vn->z ); 
 				*(vn+1) = *vn;
 				*(vn+2) = *vn;
 			}
@@ -261,11 +261,11 @@ void STLImporter::LoadASCIIFile()
 				sz += 7;
 				SkipSpaces(&sz);
 				aiVector3D* vn = &pMesh->mVertices[(curFace-1)*3 + curVertex++];
-				sz = fast_atof_move(sz, vn->x ); 
+				sz = fast_atof_move(sz, (float&)vn->x ); 
 				SkipSpaces(&sz);
-				sz = fast_atof_move(sz, vn->y ); 
+				sz = fast_atof_move(sz, (float&)vn->y ); 
 				SkipSpaces(&sz);
-				sz = fast_atof_move(sz, vn->z ); 
+				sz = fast_atof_move(sz, (float&)vn->z ); 
 			}
 		}
 		else if (!::strncmp(sz,"endsolid",8))

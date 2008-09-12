@@ -48,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
+#include "./Compiler/pushpack1.h"
+
 // ---------------------------------------------------------------------------
 /** Represents a three-dimensional vector. */
 struct aiVector3D
@@ -85,7 +87,9 @@ struct aiVector3D
 #endif // __cplusplus
 
 	float x, y, z;	
-};
+} PACK_STRUCT;
+
+#include "./Compiler/poppack1.h"
 
 #ifdef __cplusplus
 } // end extern "C"

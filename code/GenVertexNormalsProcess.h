@@ -114,3 +114,4 @@ private:
 } // end of namespace Assimp
 
 #endif // !!AI_GENVERTEXNORMALPROCESS_H_INC
+

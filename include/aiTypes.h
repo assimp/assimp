@@ -67,6 +67,8 @@ const size_t MAXLEN = 1024;
 #	define MAXLEN 1024
 #endif
 
+#include "./Compiler/pushpack1.h"
+
 // ---------------------------------------------------------------------------
 /** Represents a two-dimensional vector. 
 */
@@ -82,7 +84,7 @@ struct aiVector2D
 
 	//! X and y coordinates
 	float x, y;
-} ;
+} PACK_STRUCT;
 
 // aiVector3D type moved to separate header due to size of operators
 // aiQuaternion type moved to separate header due to size of operators
@@ -109,7 +111,7 @@ struct aiColor3D
 
 	//! Red, green and blue color values
 	float r, g, b;
-};
+} PACK_STRUCT;
 
 
 // ---------------------------------------------------------------------------
@@ -136,7 +138,9 @@ struct aiColor4D
 
 	//! Red, green, blue and alpha color values
 	float r, g, b, a;
-};
+} PACK_STRUCT;
+
+#include "./Compiler/poppack1.h"
 
 
 // ---------------------------------------------------------------------------

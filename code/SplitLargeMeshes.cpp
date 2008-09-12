@@ -274,15 +274,14 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
 				// setup face type and number of indices
 				pcMesh->mFaces[p].mNumIndices = iNumIndices;
 				unsigned int* pi = pMesh->mFaces[iTemp].mIndices;
-
-				pcMesh->mFaces[p].mIndices = new unsigned int[iNumIndices];
+				unsigned int* piOut = pcMesh->mFaces[p].mIndices = new unsigned int[iNumIndices];
 
 				// and copy the contents of the old array, offset by current base
 				for (unsigned int v = 0; v < iNumIndices;++v)
 				{
-					unsigned int iIndex = pMesh->mFaces[iTemp].mIndices[v];
+					unsigned int iIndex = pi[v];
 					unsigned int iIndexOut = iCurrent++;
-					pcMesh->mFaces[p].mIndices[v] = iIndexOut;
+					piOut[v] = iIndexOut;
 
 					// copy positions
 					if (pMesh->mVertices != NULL)
@@ -407,7 +406,7 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
 		// determine the estimated size of a submesh
 		// (this could be too large. Max waste is a single digit percentage)
 		const unsigned int iSubMeshes = (pMesh->mNumVertices / SplitLargeMeshesProcess_Vertex::LIMIT) + 1;
-		const unsigned int iOutVertexNum2 = pMesh->mNumVertices /iSubMeshes;
+		//const unsigned int iOutVertexNum2 = pMesh->mNumVertices /iSubMeshes;
 
 		// create a std::vector<unsigned int> to indicate which vertices
 		// have already been copied

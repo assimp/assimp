@@ -321,7 +321,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 
 					pf->mIndices = face.mIndices;
 					pf->mNumIndices = face.mNumIndices;
-					const_cast<unsigned int*>(face.mIndices) = NULL; // make sure it won't be deleted
+					unsigned int** p = (unsigned int**)&face.mIndices;*p = NULL; // make sure it won't be deleted
 					pf++;
 				}
 				++p;
@@ -365,7 +365,7 @@ void LWOImporter::GenerateNodeGraph(std::vector<aiNode*>& apcNodes)
 		for (unsigned int i = 0; i < apcNodes.size();++i)
 		{
 			if (i == iCurParent)continue;
-			if ( reinterpret_cast<uint16_t>(apcNodes[i]->mParent) == iCurParent)++numChilds;
+			if ( (uint16_t)(uintptr_t)apcNodes[i]->mParent == iCurParent)++numChilds;
 		}
 		if (numChilds)
 		{
@@ -377,7 +377,7 @@ void LWOImporter::GenerateNodeGraph(std::vector<aiNode*>& apcNodes)
 			for (unsigned int i = 0, p = 0; i < apcNodes.size();++i)
 			{
 				if (i == iCurParent)continue;
-				uint16_t parent = reinterpret_cast<uint16_t>(apcNodes[i]->mParent);
+				uint16_t parent = (uint16_t)(uintptr_t)(apcNodes[i]->mParent);
 				if (parent == iCurParent)
 				{
 					node->mChildren[p++] = apcNodes[i];

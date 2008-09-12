@@ -132,3 +132,4 @@ void SpatialSort::FindPositions( const aiVector3D& pPosition, float pRadius, std
 	// that's it
 }
 
+

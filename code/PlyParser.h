@@ -264,7 +264,8 @@ public:
 
 	//! Default constructor
 	Element()
-		: NumOccur(0), eSemantic (EEST_INVALID)
+		:	eSemantic (EEST_INVALID)
+		,	NumOccur(0)
 	{}
 
 	//! Destructor. Dallocates all storage
@@ -548,6 +549,7 @@ TYPE PLY::PropertyInstance::ConvertTo(
 	case EDT_Short:
 	case EDT_Char:
 		return (TYPE)v.iInt;
+	default: ;
 	};
 	return (TYPE)0;
 }

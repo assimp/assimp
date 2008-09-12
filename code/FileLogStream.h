@@ -52,10 +52,10 @@ inline void FileLogStream::write( const std::string &message )
 {
 	if (m_pStream != NULL)
 	{
-		size_t size = m_pStream->Write(message.c_str(), sizeof(char), 
+		m_pStream->Write(message.c_str(), sizeof(char), 
 			message.size());
-		int i=0;
-		i++;
+		/*int i=0;
+		i++;*/
 	}
 }
 

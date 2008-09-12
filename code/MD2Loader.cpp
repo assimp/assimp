@@ -151,7 +151,7 @@ void MD2Importer::ValidateHeader( )
 	if (0 == this->m_pcHeader->numFrames)
 		throw new ImportErrorException( "Invalid md2 file: NUM_FRAMES is 0");
 
-	if (this->m_pcHeader->offsetEnd > (int32_t)fileSize)
+	if (this->m_pcHeader->offsetEnd > (uint32_t)fileSize)
 		throw new ImportErrorException( "Invalid md2 file: File is too small");
 
 	if (this->m_pcHeader->offsetSkins		+ this->m_pcHeader->numSkins * sizeof (MD2::Skin)			>= this->fileSize ||

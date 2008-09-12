@@ -106,7 +106,7 @@ bool GetNextLine(const char*& buffer, char out[4096])
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_FLOAT(f) \
 	SkipSpaces(&sz); \
-	if (!::IsLineEnd(*sz))sz = fast_atof_move(sz, f); 
+	if (!::IsLineEnd(*sz))sz = fast_atof_move(sz, (float&)f); 
 
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_TRIPLE(v) \
@@ -160,7 +160,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 	char line[4096];
 	const char* sz;
 	unsigned int sphere = 0,cylinder = 0,cone = 0,numNamed = 0,
-		dodecahedron = 0,octecahedron = 0,octahedron = 0,tetrahedron = 0, hexahedron = 0;
+		dodecahedron = 0,octahedron = 0,tetrahedron = 0, hexahedron = 0;
 
 	while (GetNextLine(buffer,line))
 	{
@@ -223,11 +223,11 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			SkipSpaces(&line[1],&sz);
 
 			// read just the RGB colors, the rest is ignored for the moment
-			sz = fast_atof_move(sz, s.color.r);
+			sz = fast_atof_move(sz, (float&)s.color.r);
 			SkipSpaces(&sz);
-			sz = fast_atof_move(sz, s.color.g);
+			sz = fast_atof_move(sz, (float&)s.color.g);
 			SkipSpaces(&sz);
-			sz = fast_atof_move(sz, s.color.b);
+			sz = fast_atof_move(sz, (float&)s.color.b);
 
 			// check whether we have this material already -
 			// although we have the RRM-Step, this is necessary here.
@@ -270,7 +270,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			AI_NFF_PARSE_SHAPE_INFORMATION();
 
 			// we don't need scaling or translation here - we do it in the node's transform
-			StandardShapes::MakeSphere(aiVector3D(), 1.0f, iTesselation, currentMesh.vertices);
+			StandardShapes::MakeSphere(iTesselation, currentMesh.vertices);
 			currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
 			// generate a name for the mesh
@@ -287,7 +287,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			AI_NFF_PARSE_SHAPE_INFORMATION();
 
 			// we don't need scaling or translation here - we do it in the node's transform
-			StandardShapes::MakeDodecahedron(aiVector3D(), 1.0f, currentMesh.vertices);
+			StandardShapes::MakeDodecahedron(currentMesh.vertices);
 			currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
 			// generate a name for the mesh
@@ -305,11 +305,11 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			AI_NFF_PARSE_SHAPE_INFORMATION();
 
 			// we don't need scaling or translation here - we do it in the node's transform
-			StandardShapes::MakeOctahedron(aiVector3D(), 1.0f, currentMesh.vertices);
+			StandardShapes::MakeOctahedron(currentMesh.vertices);
 			currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
 			// generate a name for the mesh
-			::sprintf(currentMesh.name,"octecahedron_%i",octecahedron++);
+			::sprintf(currentMesh.name,"octahedron_%i",octahedron++);
 		}
 
 		// 'tet' - tetrahedron
@@ -323,7 +323,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			AI_NFF_PARSE_SHAPE_INFORMATION();
 
 			// we don't need scaling or translation here - we do it in the node's transform
-			StandardShapes::MakeTetrahedron(aiVector3D(), 1.0f, currentMesh.vertices);
+			StandardShapes::MakeTetrahedron(currentMesh.vertices);
 			currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
 			// generate a name for the mesh
@@ -341,7 +341,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			AI_NFF_PARSE_SHAPE_INFORMATION();
 
 			// we don't need scaling or translation here - we do it in the node's transform
-			StandardShapes::MakeHexahedron(aiVector3D(),1.0f, currentMesh.vertices);
+			StandardShapes::MakeHexahedron(currentMesh.vertices);
 			currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
 			// generate a name for the mesh

@@ -1,23 +1,19 @@
 #rough makefile for linux/gnu systems.  requires that boost libs are installed
 #produces shared library output in bin/libassimp.so
 
-SOURCES = \
-	3DSConverter.cpp \
-	3DSGenNormals.cpp \
+
+SOURCES = 3DSConverter.cpp \
 	3DSLoader.cpp \
-	3DSSpatialSort.cpp \
 	aiAssert.cpp \
 	ASELoader.cpp \
 	ASEParser.cpp \
-	Assimp.cpp \
-	BaseImporter.cpp \
-	BaseProcess.cpp \
+	Assimp.cpp BaseImporter.cpp BaseProcess.cpp \
 	CalcTangentsProcess.cpp \
 	ConvertToLHProcess.cpp \
 	DefaultIOStream.cpp \
 	DefaultIOSystem.cpp \
 	DefaultLogger.cpp \
-	extra/MakeVerboseFormat.cpp \
+	DXFLoader.cpp \
 	FixNormalsStep.cpp \
 	GenFaceNormalsProcess.cpp \
 	GenVertexNormalsProcess.cpp \
@@ -27,8 +23,9 @@ SOURCES = \
 	JoinVerticesProcess.cpp \
 	KillNormalsProcess.cpp \
 	LimitBoneWeightsProcess.cpp \
-	LWOMaterial.cpp \
+	LWOBLoader.cpp \
 	LWOLoader.cpp \
+	LWOMaterial.cpp \
 	MaterialSystem.cpp \
 	MD2Loader.cpp \
 	MD3Loader.cpp \
@@ -37,17 +34,21 @@ SOURCES = \
 	MDCLoader.cpp \
 	MDLLoader.cpp \
 	MDLMaterialLoader.cpp \
+	NFFLoader.cpp \
 	ObjFileImporter.cpp \
 	ObjFileMtlImporter.cpp \
 	ObjFileParser.cpp \
+	OptimizeGraphProcess.cpp \
 	PlyLoader.cpp \
 	PlyParser.cpp \
 	PretransformVertices.cpp \
 	RemoveComments.cpp \
 	RemoveRedundantMaterials.cpp \
+	SGSpatialSort.cpp \
 	SMDLoader.cpp \
 	SpatialSort.cpp \
 	SplitLargeMeshes.cpp \
+	StandardShapes.cpp \
 	STLLoader.cpp \
 	TextureTransform.cpp \
 	TriangulateProcess.cpp \
@@ -58,15 +59,13 @@ SOURCES = \
 
 OBJECTS = $(SOURCES:.cpp=.o)
 
-TARGET = ../bin/libassimp.so
+TARGET = ./../bin/libassimp.so
 
 all:	$(TARGET)
 
 $(TARGET):	$(OBJECTS)
-	gcc -o $@ $(OBJECTS) -shared -lstdc++ -lboost_thread-mt -lboost_date_time-mt
-
+	gcc -o $@ $(OBJECTS) -shared -lstdc++ 
 %.o:%.cpp
 	$(CXX) -g -Wall -c $? -o $@ -I../include -fPIC
-
 clean:
 	rm -f $(OBJECTS) $(TARGET)

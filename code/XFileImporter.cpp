@@ -54,6 +54,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+#if _MSC_VER >= 1400
+#	define sprintf sprintf_s
+#endif
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 XFileImporter::XFileImporter()
@@ -153,9 +157,13 @@ void XFileImporter::CreateDataRepresentationFromImport( aiScene* pScene, const X
 		mat->AddProperty<int>( &shadeMode, 1, AI_MATKEY_SHADING_MODEL);
 		// material colours
 		int specExp = 1;
-		mat->AddProperty( &aiColor3D( 0, 0, 0), 1, AI_MATKEY_COLOR_EMISSIVE);
-		mat->AddProperty( &aiColor3D( 0.5f, 0.5f, 0.5f), 1, AI_MATKEY_COLOR_DIFFUSE);
-		mat->AddProperty( &aiColor3D( 0, 0, 0), 1, AI_MATKEY_COLOR_SPECULAR);
+
+		aiColor3D clr = aiColor3D( 0, 0, 0);
+		mat->AddProperty( &clr, 1, AI_MATKEY_COLOR_EMISSIVE);
+		mat->AddProperty( &clr, 1, AI_MATKEY_COLOR_SPECULAR);
+
+		clr = aiColor3D( 0.5f, 0.5f, 0.5f);
+		mat->AddProperty( &clr, 1, AI_MATKEY_COLOR_DIFFUSE);
 		mat->AddProperty( &specExp, 1, AI_MATKEY_SHININESS);
 
 		pScene->mMaterials = new aiMaterial*[1];
@@ -628,51 +636,27 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, const std::vector<XFile::
 				// bump map
 				if (std::string::npos != sz.find("bump", s) || std::string::npos != sz.find("height", s))
 				{
-#if _MSC_VER >= 1400
-					::sprintf_s(key,AI_MATKEY_TEXTURE_HEIGHT_ "[%i]",iHM++);
-#else
 					::sprintf(key,AI_MATKEY_TEXTURE_HEIGHT_ "[%i]",iHM++);
-#endif
 				} else
 				if (otex.mIsNormalMap || std::string::npos != sz.find( "normal", s) || std::string::npos != sz.find("nm", s))
 				{
-#if _MSC_VER >= 1400
-					::sprintf_s(key,AI_MATKEY_TEXTURE_NORMALS_ "[%i]",iNM++);
-#else
 					::sprintf(key,AI_MATKEY_TEXTURE_NORMALS_ "[%i]",iNM++);
-#endif
 				} else
 				if (std::string::npos != sz.find( "spec", s) || std::string::npos != sz.find( "glanz", s))
 				{
-#if _MSC_VER >= 1400
-					::sprintf_s(key,AI_MATKEY_TEXTURE_SPECULAR_ "[%i]",iSM++);
-#else
 					::sprintf(key,AI_MATKEY_TEXTURE_SPECULAR_ "[%i]",iSM++);
-#endif
 				} else
 				if (std::string::npos != sz.find( "ambi", s) || std::string::npos != sz.find( "env", s))
 				{
-#if _MSC_VER >= 1400
-					::sprintf_s(key,AI_MATKEY_TEXTURE_AMBIENT_ "[%i]",iAM++);
-#else
 					::sprintf(key,AI_MATKEY_TEXTURE_AMBIENT_ "[%i]",iAM++);
-#endif
 				} else
 				if (std::string::npos != sz.find( "emissive", s) || std::string::npos != sz.find( "self", s))
 				{
-#if _MSC_VER >= 1400
-					::sprintf_s(key,AI_MATKEY_TEXTURE_EMISSIVE_ "[%i]",iEM++);
-#else
 					::sprintf(key,AI_MATKEY_TEXTURE_EMISSIVE_ "[%i]",iEM++);
-#endif
 				} else
 				{
 				// assume it is a diffuse texture
-#if _MSC_VER >= 1400
-					::sprintf_s(key,AI_MATKEY_TEXTURE_DIFFUSE_ "[%i]",iDM++);
-#else
 					::sprintf(key,AI_MATKEY_TEXTURE_DIFFUSE_ "[%i]",iDM++);
-#endif
 				}
 
 				// place texture filename property under the corresponding name
@@ -686,3 +670,4 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, const std::vector<XFile::
 		pScene->mNumMaterials++;
 	}
 }
+

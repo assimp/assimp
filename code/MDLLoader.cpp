@@ -198,14 +198,6 @@ void MDLImporter::InternReadFile( const std::string& pFile,
 			this->iGSFileVersion = 5;
 			this->InternReadFile_3DGS_MDL345();
 		}
-		// GameStudio A6+ MDL6 format (not sure whether it is really existing ... )
-		else if (AI_MDL_MAGIC_NUMBER_BE_GS6 == iMagicWord ||
-			AI_MDL_MAGIC_NUMBER_LE_GS6 == iMagicWord)
-		{
-			DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A6, magic word is MDL6");
-			this->iGSFileVersion = 6;
-			this->InternReadFile_3DGS_MDL345();
-		}
 		// GameStudio A7 MDL7 format
 		else if (AI_MDL_MAGIC_NUMBER_BE_GS7 == iMagicWord ||
 			AI_MDL_MAGIC_NUMBER_LE_GS7 == iMagicWord)
@@ -1990,5 +1982,5 @@ void MDLImporter::JoinSkins_3DGS_MDL7(
 // ------------------------------------------------------------------------------------------------
 void MDLImporter::InternReadFile_HL2( )
 {
-	const MDL::Header_HL2* pcHeader = (const MDL::Header_HL2*)this->mBuffer;
+	//const MDL::Header_HL2* pcHeader = (const MDL::Header_HL2*)this->mBuffer;
 }

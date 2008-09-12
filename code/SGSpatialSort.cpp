@@ -140,3 +140,4 @@ void SGSpatialSort::FindPositions( const aiVector3D& pPosition,
 	}
 }
 
+

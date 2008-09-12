@@ -58,36 +58,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiAnim.h"
 #include "../include/aiMaterial.h"
 
-#include "./Compiler/pushpack1.h"
+#include "./../include/Compiler/pushpack1.h"
 
 namespace Assimp	{
 namespace MDL	{
 
+// to make it easier for ourselfes, we test the magic word against both "endianesses"
+#define MDL_MAKE(string) ((uint32_t)((string[0] << 24) + (string[1] << 16) + (string[2] << 8) + string[3]))
+
 // magic bytes used in Quake 1 MDL meshes
-#define AI_MDL_MAGIC_NUMBER_BE	'IDPO'
-#define AI_MDL_MAGIC_NUMBER_LE	'OPDI'
+#define AI_MDL_MAGIC_NUMBER_BE	MDL_MAKE("IDPO")
+#define AI_MDL_MAGIC_NUMBER_LE	MDL_MAKE("OPDI")
 
 // magic bytes used in GameStudio A<very  low> MDL meshes
-#define AI_MDL_MAGIC_NUMBER_BE_GS3	'MDL2'
-#define AI_MDL_MAGIC_NUMBER_LE_GS3	'2LDM'
+#define AI_MDL_MAGIC_NUMBER_BE_GS3	MDL_MAKE("MDL2")
+#define AI_MDL_MAGIC_NUMBER_LE_GS3	MDL_MAKE("2LDM")
 
 // magic bytes used in GameStudio A4 MDL meshes
-#define AI_MDL_MAGIC_NUMBER_BE_GS4	'MDL3'
-#define AI_MDL_MAGIC_NUMBER_LE_GS4	'3LDM'
+#define AI_MDL_MAGIC_NUMBER_BE_GS4	MDL_MAKE("MDL3")
+#define AI_MDL_MAGIC_NUMBER_LE_GS4	MDL_MAKE("3LDM")
 
 // magic bytes used in GameStudio A5+ MDL meshes
-#define AI_MDL_MAGIC_NUMBER_BE_GS5a	'MDL4'
-#define AI_MDL_MAGIC_NUMBER_LE_GS5a	'4LDM'
-#define AI_MDL_MAGIC_NUMBER_BE_GS5b	'MDL5'
-#define AI_MDL_MAGIC_NUMBER_LE_GS5b	'5LDM'
-
-// magic bytes used in GameStudio A6+ MDL meshes
-#define AI_MDL_MAGIC_NUMBER_BE_GS6	'MDL6'
-#define AI_MDL_MAGIC_NUMBER_LE_GS6	'6LDM'
+#define AI_MDL_MAGIC_NUMBER_BE_GS5a	MDL_MAKE("MDL4")
+#define AI_MDL_MAGIC_NUMBER_LE_GS5a	MDL_MAKE("4LDM")
+#define AI_MDL_MAGIC_NUMBER_BE_GS5b	MDL_MAKE("MDL5")
+#define AI_MDL_MAGIC_NUMBER_LE_GS5b	MDL_MAKE("5LDM")
 
 // magic bytes used in GameStudio A7+ MDL meshes
-#define AI_MDL_MAGIC_NUMBER_BE_GS7	'MDL7'
-#define AI_MDL_MAGIC_NUMBER_LE_GS7	'7LDM'
+#define AI_MDL_MAGIC_NUMBER_BE_GS7	MDL_MAKE("MDL7")
+#define AI_MDL_MAGIC_NUMBER_LE_GS7	MDL_MAKE("7LDM")
 
 
 // common limitations for Quake1 meshes. The loader does not check them,
@@ -121,7 +120,7 @@ namespace MDL	{
 struct Header
 {
 	//! magic number: "IDPO"
-	int32_t ident;          
+	uint32_t ident;          
 
 	//! version number: 6
 	int32_t version;          
@@ -730,7 +729,7 @@ struct GroupFrame
 	SimpleFrame *frames; 
 } PACK_STRUCT;
 
-#include "./Compiler/poppack1.h"
+#include "./../include/Compiler/poppack1.h"
 
 
 // ---------------------------------------------------------------------------
@@ -815,7 +814,8 @@ struct IntFrameInfo_MDL7
 {
 	//! Construction from an existing frame header
 	IntFrameInfo_MDL7(const MDL::Frame_MDL7* _pcFrame,unsigned int _iIndex) 
-		: pcFrame(_pcFrame), iIndex(_iIndex)
+		: iIndex(_iIndex)
+		, pcFrame(_pcFrame)
 	{}
 
 	//! Index of the frame
@@ -830,16 +830,18 @@ struct IntFrameInfo_MDL7
 struct IntGroupInfo_MDL7
 {
 	//! Default constructor
-	IntGroupInfo_MDL7()		:	
-		iIndex(0),
-		pcGroup(NULL),		pcGroupUVs(NULL),
-		pcGroupTris(NULL),	pcGroupVerts(NULL)
+	IntGroupInfo_MDL7()		
+		:	iIndex(0)
+		,	pcGroup(NULL)
+		,	pcGroupUVs(NULL)
+		,	pcGroupTris(NULL)
+		,	pcGroupVerts(NULL)
 		{}
 
 	//! Construction from an existing group header
 	IntGroupInfo_MDL7(const MDL::Group_MDL7* _pcGroup,unsigned int _iIndex)
-		:
-		pcGroup(_pcGroup),iIndex(_iIndex)
+		:	iIndex(_iIndex)
+		,	pcGroup(_pcGroup)
 	{}
 
 	//! Index of the group

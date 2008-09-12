@@ -633,7 +633,6 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 void Parser::ParseLV3MapBlock(Texture& map)
 {
 	int iDepth = 0;
-	unsigned int iNumSubMaterials = 0;
 	while (true)
 	{
 		if ('*' == *this->m_szFile)

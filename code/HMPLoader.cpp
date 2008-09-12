@@ -50,7 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/DefaultLogger.h"
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
-#include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
 

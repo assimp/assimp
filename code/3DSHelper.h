@@ -60,7 +60,7 @@ http://www.jalix.org/ressources/graphics/3DS/_unofficials/3ds-unofficial.txt */
 namespace Assimp	{
 namespace Dot3DS	{
 
-#include "./Compiler/pushpack1.h"
+#include "./../include/Compiler/pushpack1.h"
 
 // ---------------------------------------------------------------------------
 /** Dot3DSFile class: Helper class for loading 3ds files. Defines chunks
@@ -75,8 +75,8 @@ public:
 	//! data structure for a single chunk in a .3ds file
 	struct Chunk
 	{
-		unsigned short	Flag;
-		long			Size;
+		uint16_t	Flag;
+		uint32_t	Size;
 	} PACK_STRUCT;
 
 	//! source for this used own structures,
@@ -305,7 +305,7 @@ public:
 	};
 };
 
-#include "./Compiler/poppack1.h"
+#include "./../include/Compiler/poppack1.h"
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a 3ds mesh face */
@@ -360,12 +360,12 @@ struct Material
 	Material()
 		: 
 	mSpecularExponent	(0.0f),
+	mShininessStrength	(1.0f),
 	mShading(Dot3DSFile::Gouraud),
 	mTransparency		(1.0f),
 	mBumpHeight			(1.0f),
-	iBakeUVTransform	(0),
-	mShininessStrength	(1.0f),
 	mTwoSided			(false),
+	iBakeUVTransform	(0),
 	pcSingleTexture		(NULL)
 	{
 		static int iCnt = 0;

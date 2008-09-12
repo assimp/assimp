@@ -472,7 +472,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 			}
 
 			if (aiPTI_String != prop->mType)
-				this->ReportError("Material property %s is expected to be a string",prop->mKey);
+				this->ReportError("Material property %s is expected to be a string",prop->mKey.data);
 		}
 	}
 	if (iIndex +1 != iNumIndices)
@@ -491,7 +491,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 		if (0 == ASSIMP_strincmp( prop->mKey.data, szBaseBuf, iLen ))
 		{
 			if (aiPTI_Integer != prop->mType || sizeof(int) > prop->mDataLength)
-				this->ReportError("Material property %s is expected to be an integer",prop->mKey);
+				this->ReportError("Material property %s is expected to be an integer",prop->mKey.data);
 
 			const char* sz = &prop->mKey.data[iLen];
 			if (*sz)
@@ -510,14 +510,14 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 					for (unsigned int a = 0; a < this->mScene->mNumMeshes;++a)
 					{
 						aiMesh* mesh = this->mScene->mMeshes[a];
-						if(mesh->mMaterialIndex == iIndex)
+						if(mesh->mMaterialIndex == (unsigned int)iIndex)
 						{
 							int iChannels = 0;
 							while (mesh->HasTextureCoords(iChannels++));
 							if (iIndex >= iChannels)
 							{
 								this->ReportError("Invalid UV index: %i (key %s). Mesh %i has only %i UV channels",
-									iIndex,prop->mKey,a,iChannels);
+									iIndex,prop->mKey.data,a,iChannels);
 							}
 						}
 					}
@@ -598,6 +598,7 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 					"AI_MATKEY_SHININESS_STRENGTH key is 0.0");
 			}
 			break;
+		default: ;
 		};
 	}
 

@@ -331,9 +331,9 @@ struct WeightChannel : public VMapEntry
 struct Texture
 {
 	Texture()
-		: mStrength			(1.0f)
+		: mClipIdx(0xffffffff)
+		, mStrength			(1.0f)
 		, mUVChannelIndex	("unknown")
-		, mClipIdx(0xffffffff)
 	{}
 
 	//! File name of the texture
@@ -425,9 +425,9 @@ typedef std::vector	<	Clip			>	ClipList;
 struct Layer
 {
 	Layer()
-		: mParent (0xffff)
-		, mFaceIDXOfs(0)
+		: mFaceIDXOfs(0)
 		, mPointIDXOfs(0)
+		, mParent (0xffff)
 	{}
 
 	/** Temporary point list from the file */

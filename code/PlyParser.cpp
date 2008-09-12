@@ -60,10 +60,7 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 PLY::EDataType PLY::Property::ParseDataType(const char* p_szIn,const char** p_szOut)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
-
-
+	ai_assert(NULL != p_szIn && NULL != p_szOut);
 	PLY::EDataType eOut = PLY::EDT_INVALID;
 
 	if (0 == ASSIMP_strincmp(p_szIn,"char",4) ||
@@ -150,8 +147,7 @@ PLY::EDataType PLY::Property::ParseDataType(const char* p_szIn,const char** p_sz
 // ------------------------------------------------------------------------------------------------
 PLY::ESemantic PLY::Property::ParseSemantic(const char* p_szIn,const char** p_szOut)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
+	ai_assert(NULL != p_szIn && NULL != p_szOut);
 
 	PLY::ESemantic eOut = PLY::EST_INVALID;
 	if (0 == ASSIMP_strincmp(p_szIn,"red",3))
@@ -330,8 +326,7 @@ bool PLY::Property::ParseProperty (const char* p_szIn,
 	const char** p_szOut,
 	PLY::Property* pOut)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
+	ai_assert(NULL != p_szIn && NULL != p_szOut);
 
 	// Forms supported:
 	// "property float x"
@@ -405,9 +400,7 @@ bool PLY::Property::ParseProperty (const char* p_szIn,
 PLY::EElementSemantic PLY::Element::ParseSemantic(const char* p_szIn,
 	const char** p_szOut)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
-
+	ai_assert(NULL != p_szIn && NULL != p_szOut);
 	PLY::EElementSemantic eOut = PLY::EEST_INVALID;
 	if (0 == ASSIMP_strincmp(p_szIn,"vertex",6))
 	{
@@ -455,9 +448,7 @@ bool PLY::Element::ParseElement (const char* p_szIn,
 	const char** p_szOut,
 	PLY::Element* pOut)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
-	ai_assert(NULL != pOut);
+	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL != pOut);
 
 	// Example format: "element vertex 8"
 	*p_szOut = p_szIn;
@@ -514,9 +505,7 @@ bool PLY::Element::ParseElement (const char* p_szIn,
 bool PLY::DOM::SkipComments (const char* p_szIn,
 	const char** p_szOut)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
-
+	ai_assert(NULL != p_szIn && NULL != p_szOut);
 	*p_szOut = p_szIn;
 
 	// skip spaces
@@ -538,13 +527,10 @@ bool PLY::DOM::SkipComments (const char* p_szIn,
 // ------------------------------------------------------------------------------------------------
 bool PLY::DOM::ParseHeader (const char* p_szIn,const char** p_szOut)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
-
+	ai_assert(NULL != p_szIn && NULL != p_szOut);
 	DefaultLogger::get()->debug("PLY::DOM::ParseHeader() begin");
 
 	// after ply and format line
-	const char* szMax = *p_szOut;
 	*p_szOut = p_szIn;
 
 	// parse all elements
@@ -578,12 +564,9 @@ bool PLY::DOM::ParseElementInstanceLists (
 	const char* p_szIn,
 	const char** p_szOut)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
+	ai_assert(NULL != p_szIn && NULL != p_szOut);
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseElementInstanceLists() begin");
-
-	const char* szMax = *p_szOut;
 	*p_szOut = p_szIn;
 
 	this->alElementData.resize(this->alElements.size());
@@ -608,8 +591,7 @@ bool PLY::DOM::ParseElementInstanceListsBinary (
 	const char** p_szOut,
 	bool p_bBE)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
+	ai_assert(NULL != p_szIn && NULL != p_szOut);
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseElementInstanceListsBinary() begin");
 	*p_szOut = p_szIn;
@@ -633,8 +615,7 @@ bool PLY::DOM::ParseElementInstanceListsBinary (
 // ------------------------------------------------------------------------------------------------
 bool PLY::DOM::ParseInstanceBinary (const char* p_szIn,DOM* p_pcOut,bool p_bBE)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_pcOut);
+	ai_assert(NULL != p_szIn && NULL != p_pcOut);
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseInstanceBinary() begin");
 
@@ -680,12 +661,7 @@ bool PLY::ElementInstanceList::ParseInstanceList (
 	const PLY::Element* pcElement, 
 	PLY::ElementInstanceList* p_pcOut)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
-	ai_assert(NULL != pcElement);
-	ai_assert(NULL != p_pcOut);
-
-	const char* szMax = *p_szOut;
+	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL != pcElement && NULL != p_pcOut);
 
 	if (EEST_INVALID == pcElement->eSemantic)
 	{
@@ -722,10 +698,7 @@ bool PLY::ElementInstanceList::ParseInstanceListBinary (
 	PLY::ElementInstanceList* p_pcOut,
 	bool p_bBE /* = false */)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
-	ai_assert(NULL != pcElement);
-	ai_assert(NULL != p_pcOut);
+	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL != pcElement && NULL != p_pcOut);
 
 	// we can add special handling code for unknown element semantics since
 	// we can't skip it as a whole block (we don't know its exact size
@@ -748,10 +721,7 @@ bool PLY::ElementInstance::ParseInstance (
 	const PLY::Element* pcElement,
 	PLY::ElementInstance* p_pcOut)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
-	ai_assert(NULL != pcElement);
-	ai_assert(NULL != p_pcOut);
+	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL != pcElement && NULL != p_pcOut);
 
 	if (!SkipSpaces(p_szIn, &p_szIn))return false;
 
@@ -785,10 +755,7 @@ bool PLY::ElementInstance::ParseInstanceBinary (
 	PLY::ElementInstance* p_pcOut,
 	bool p_bBE /* = false */)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
-	ai_assert(NULL != pcElement);
-	ai_assert(NULL != p_pcOut);
+	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL != pcElement && NULL != p_pcOut);
 
 	// allocate enough storage
 	p_pcOut->alProperties.resize(pcElement->alProperties.size());
@@ -813,10 +780,7 @@ bool PLY::ElementInstance::ParseInstanceBinary (
 bool PLY::PropertyInstance::ParseInstance (const char* p_szIn,const char** p_szOut,
 	const PLY::Property* prop, PLY::PropertyInstance* p_pcOut)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
-	ai_assert(NULL != prop);
-	ai_assert(NULL != p_pcOut);
+	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL !=  prop && NULL != p_pcOut);
 
 	*p_szOut = p_szIn;
 
@@ -856,10 +820,7 @@ bool PLY::PropertyInstance::ParseInstance (const char* p_szIn,const char** p_szO
 bool PLY::PropertyInstance::ParseInstanceBinary (const char* p_szIn,const char** p_szOut,
 	const PLY::Property* prop, PLY::PropertyInstance* p_pcOut,bool p_bBE)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
-	ai_assert(NULL != prop);
-	ai_assert(NULL != p_pcOut);
+	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL != prop && NULL != p_pcOut);
 
 	if (prop->bIsList)
 	{
@@ -902,6 +863,8 @@ PLY::PropertyInstance::ValueUnion PLY::PropertyInstance::DefaultValue(
 	case EDT_Double:
 		out.fDouble = 0.0;
 		return out;
+
+	default: ;
 	};
 	out.iUInt = 0;
 	return out;
@@ -910,9 +873,7 @@ PLY::PropertyInstance::ValueUnion PLY::PropertyInstance::DefaultValue(
 bool PLY::PropertyInstance::ParseValue(const char* p_szIn,const char** p_szOut,
 	PLY::EDataType eType,PLY::PropertyInstance::ValueUnion* out)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
-	ai_assert(NULL != out);
+	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL != out);
 
 	switch (eType)
 	{
@@ -956,6 +917,7 @@ bool PLY::PropertyInstance::ParseValue(const char* p_szIn,const char** p_szOut,
 		float f;
 		p_szIn = fast_atof_move(p_szIn,f);
 		out->fDouble = (double)f;
+		break;
 
 	default:
 		*p_szOut = p_szIn;
@@ -972,9 +934,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
 	PLY::PropertyInstance::ValueUnion* out, 
 	bool p_bBE)
 {
-	ai_assert(NULL != p_szIn);
-	ai_assert(NULL != p_szOut);
-	ai_assert(NULL != out);
+	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL != out);
 
 	switch (eType)
 	{

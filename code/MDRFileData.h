@@ -46,21 +46,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiMesh.h"
 #include "../include/aiAnim.h"
 
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) ||	defined (__BCPLUSPLUS__)
-#	pragma pack(push,1)
-#	define PACK_STRUCT
-#elif defined( __GNUC__ )
-#	define PACK_STRUCT	__attribute__((packed))
-#else
-#	error Compiler not supported
-#endif
-
+#include "./../include/Compiler/pushpack1.h"
 
 namespace Assimp {
 namespace MDR {
 
-#define AI_MDR_MAGIC_NUMBER_BE	'RDM5'
-#define AI_MDR_MAGIC_NUMBER_LE	'5MDR'
+// to make it easier for ourselfes, we test the magic word against both "endianesses"
+#define MDR_MAKE(string) ((uint32_t)((string[0] << 24) + (string[1] << 16) + (string[2] << 8) + string[3]))
+
+#define AI_MDR_MAGIC_NUMBER_BE	MDR_MAKE("RDM5")
+#define AI_MDR_MAGIC_NUMBER_LE	MDR_MAKE("5MDR")
 
 // common limitations
 #define AI_MDR_VERSION			2
@@ -224,12 +219,7 @@ struct Header
 } PACK_STRUCT;
 
 
-// reset packing to the original value
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) || defined (__BCPLUSPLUS__)
-#	pragma pack( pop )
-#endif
-#undef PACK_STRUCT
-
+#include "./../include/Compiler/poppack1.h"
 
 };
 };

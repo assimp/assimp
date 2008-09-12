@@ -49,16 +49,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MDLFILEHELPER2_H_INC
 #define AI_MDLFILEHELPER2_H_INC
 
-#include "./Compiler/pushpack1.h"
+#include "./../include/Compiler/pushpack1.h"
+
+#include "MDLFileData.h"
 
 namespace Assimp	{
 namespace MDL	{
 
 // magic bytes used in Half Life 2 MDL models
-#define AI_MDL_MAGIC_NUMBER_BE_HL2a	'IDST'
-#define AI_MDL_MAGIC_NUMBER_LE_HL2a	'TSDI'
-#define AI_MDL_MAGIC_NUMBER_BE_HL2b	'IDSQ'
-#define AI_MDL_MAGIC_NUMBER_LE_HL2b	'QSDI'
+#define AI_MDL_MAGIC_NUMBER_BE_HL2a	MDL_MAKE("IDST")
+#define AI_MDL_MAGIC_NUMBER_LE_HL2a	MDL_MAKE("TSDI")
+#define AI_MDL_MAGIC_NUMBER_BE_HL2b	MDL_MAKE("IDSQ")
+#define AI_MDL_MAGIC_NUMBER_LE_HL2b	MDL_MAKE("QSDI")
 
 // ---------------------------------------------------------------------------
 /** \struct Header_HL2
@@ -140,7 +142,7 @@ struct Header_HL2
 	int32_t			transitionindex;
 } PACK_STRUCT;
 
-#include "./Compiler/poppack1.h"
+#include "./../include/Compiler/poppack1.h"
 
 }
 } // end namespaces

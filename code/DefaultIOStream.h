@@ -120,3 +120,4 @@ inline DefaultIOStream::DefaultIOStream (FILE* pFile,
 } // ns assimp
 
 #endif //!!AI_DEFAULTIOSTREAM_H_INC
+

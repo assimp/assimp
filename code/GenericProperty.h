@@ -56,7 +56,7 @@ inline void SetGenericProperty(std::map< uint32_t, T >& list,
 
 	uint32_t hash = SuperFastHash(szName);
 
-	GenericPropertyMap::iterator it = list.find(hash);
+	typename GenericPropertyMap::iterator it = list.find(hash);
 	if (it == list.end())
 	{
 		if (bWasExisting)*bWasExisting = false;
@@ -80,7 +80,7 @@ inline T GetGenericProperty(const std::map< uint32_t, T >& list,
 
 	uint32_t hash = SuperFastHash(szName);
 
-	GenericPropertyMap::const_iterator it = list.find(hash);
+	typename GenericPropertyMap::const_iterator it = list.find(hash);
 	if (it == list.end())return errorReturn;
 	return (*it).second;
 }

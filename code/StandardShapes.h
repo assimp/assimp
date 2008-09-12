@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 
+
 namespace Assimp	{
 
 // ---------------------------------------------------------------------------
@@ -65,6 +66,9 @@ public:
 	 *  @param center Center point of the hexahedron
 	 *  @param length Radius of the hexahedron 
 	 *  @param positions Receives output triangles.
+	 *
+	 *  @note If you define AI_STANDARD_SHAPES_OUTPUT_POLYGONS quads
+	 *    instead of triangles are returned.
 	 */
 	static void MakeHexahedron(aiVector3D& center,const aiVector3D& length,
 		std::vector<aiVector3D>& positions);
@@ -85,6 +89,8 @@ public:
 	 *  @param center Center point of the dodecahedron
 	 *  @param length Radius of the dodecahedron
 	 *  @param positions Receives output triangles
+	 *  @note If you define AI_STANDARD_SHAPES_OUTPUT_POLYGONS pentagons
+	 *    instead of triangles are returned.
 	 */
 	static void MakeDodecahedron(aiVector3D& center,const aiVector3D& length,
 		std::vector<aiVector3D>& positions);
@@ -165,6 +171,7 @@ public:
 	// simplified versions - the radius is a single float and applies
 	// to all axes. These version of the functions must be used if ou 
 	// REALLY want a platonic primitive :-)
+	// ---------------------------------------------------------------------
 	static void MakeHexahedron(aiVector3D& center,float length,
 		std::vector<aiVector3D>& positions)
 	{
@@ -177,7 +184,7 @@ public:
 		MakeDodecahedron(center,aiVector3D(length),positions);
 	}
 
-	static void MakeOcathedron(aiVector3D& center,float length,
+	static void MakeOctahedron(aiVector3D& center,float length,
 		std::vector<aiVector3D>& positions)
 	{
 		MakeOctahedron(center,aiVector3D(length),positions);
@@ -193,6 +200,47 @@ public:
 		std::vector<aiVector3D>& positions)
 	{
 		MakeIcosahedron(center,aiVector3D(length),positions);
+	}
+
+
+	// simplified versions - radius is 1, position is 0|0|0
+	// ---------------------------------------------------------------------
+	static void MakeHexahedron(std::vector<aiVector3D>& positions)
+	{
+		aiVector3D v;
+		MakeHexahedron(v,1.0f,positions);
+	}
+
+	static void MakeDodecahedron(std::vector<aiVector3D>& positions)
+	{
+		aiVector3D v;
+		MakeDodecahedron(v,1.0f,positions);
+	}
+
+	static void MakeOctahedron(std::vector<aiVector3D>& positions)
+	{
+		aiVector3D v;
+		MakeOctahedron(v,1.0f,positions);
+	}
+
+	static void MakeTetrahedron(std::vector<aiVector3D>& positions)
+	{
+		aiVector3D v;
+		MakeTetrahedron(v,1.0f,positions);
+	}
+
+	static void MakeIcosahedron(std::vector<aiVector3D>& positions)
+	{
+		aiVector3D v;
+		MakeIcosahedron(v,1.0f,positions);
+	}
+
+
+	static void MakeSphere(unsigned int tess,
+		std::vector<aiVector3D>& positions)
+	{
+		aiVector3D v;
+		MakeSphere(v,1.0f,tess,positions);
 	}
 	
 };

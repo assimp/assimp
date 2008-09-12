@@ -411,7 +411,7 @@ void ObjFileParser::getMaterialLib()
 		size_t size = pFile->FileSize();
 		std::vector<char> buffer;
 		buffer.resize( size );
-		size_t read_size = pFile->Read( &buffer[ 0 ], sizeof( char ), size );
+		pFile->Read( &buffer[ 0 ], sizeof( char ), size );
 		FileSystem.Close( pFile );
 
 		// Importing the material library 
@@ -494,7 +494,7 @@ void ObjFileParser::getGroupName()
 		ObjFile::Model::ConstGroupMapIt it = m_pModel->m_Groups.find(&strGroupName);
 		
 		// New group name, creating a new entry
-		ObjFile::Object *pObject = m_pModel->m_pCurrent;
+		//ObjFile::Object *pObject = m_pModel->m_pCurrent;
 		if (it == m_pModel->m_Groups.end())
 		{
 			std::vector<unsigned int> *pFaceIDArray = new std::vector<unsigned int>;

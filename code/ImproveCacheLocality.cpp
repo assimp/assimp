@@ -271,7 +271,7 @@ void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshN
 					const unsigned int dp = *p;
 
 					// the current vertex won't have any free triangles after this step
-					if (ivdx != dp)
+					if (ivdx != (int)dp)
 					{
 						// append the vertex to the dead-end stack
 						sDeadEndVStack.push(dp);

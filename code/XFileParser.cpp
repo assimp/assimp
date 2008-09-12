@@ -391,9 +391,9 @@ void XFileParser::ParseDataObjectSkinMeshHeader( Mesh* pMesh)
 {
 	readHeadOfDataObject();
 
-	unsigned int maxSkinWeightsPerVertex = ReadInt();
-	unsigned int maxSkinWeightsPerFace = ReadInt();
-	unsigned int numBonesInMesh = ReadInt();
+	/*unsigned int maxSkinWeightsPerVertex =*/ ReadInt();
+	/*unsigned int maxSkinWeightsPerFace =*/ ReadInt();
+	/*unsigned int numBonesInMesh = */ReadInt();
 
 	CheckForClosingBrace();
 }
@@ -478,7 +478,7 @@ void XFileParser::ParseDataObjectMeshMaterialList( Mesh* pMesh)
 	readHeadOfDataObject();
 
 	// read material count
-	unsigned int numMaterials = ReadInt();
+	/*unsigned int numMaterials =*/ ReadInt();
 	// read non triangulated face material index count
 	unsigned int numMatIndices = ReadInt();
 

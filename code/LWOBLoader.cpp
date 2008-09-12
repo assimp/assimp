@@ -175,7 +175,6 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 {
 	LE_NCONST uint8_t* const end = mFileBuffer + size;
 
-	uint32_t iCursor = 0;
 	mSurfaces->push_back( LWO::Surface () );
 	LWO::Surface& surf = mSurfaces->back();
 	LWO::Texture* pTex = NULL;

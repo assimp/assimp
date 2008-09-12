@@ -101,6 +101,7 @@ void CommentRemover::RemoveMultiLineComments(const char* szCommentStart,
 		++szBuffer;
 __continue_outer:
 		int i = 4; // NOP dummy
+		++i;
 	}
 }
 

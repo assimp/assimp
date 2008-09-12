@@ -195,7 +195,7 @@ void MakeDataUnique (MD5::MeshDesc& meshSrc)
 void AttachChilds(int iParentID,aiNode* piParent,BoneList& bones)
 {
 	ai_assert(NULL != piParent && !piParent->mNumChildren);
-	for (unsigned int i = 0; i < bones.size();++i)
+	for (int i = 0; i < (int)bones.size();++i)
 	{
 		// (avoid infinite recursion)
 		if (iParentID != i && bones[i].mParentIndex == iParentID)
@@ -207,7 +207,7 @@ void AttachChilds(int iParentID,aiNode* piParent,BoneList& bones)
 	if (piParent->mNumChildren)
 	{
 		piParent->mChildren = new aiNode*[piParent->mNumChildren];
-		for (unsigned int i = 0; i < bones.size();++i)
+		for (int i = 0; i < (int)bones.size();++i)
 		{
 			// (avoid infinite recursion)
 			if (iParentID != i && bones[i].mParentIndex == iParentID)
@@ -372,7 +372,7 @@ void MD5Importer::LoadMD5MeshFile ()
 				meshParser.mJoints[q].mMap = h++;
 			}
 	
-			unsigned int g = 0;
+			//unsigned int g = 0;
 			pv = mesh->mVertices;
 			for (MD5::VertexList::const_iterator
 				iter =  meshSrc.mVertices.begin();
@@ -410,7 +410,7 @@ void MD5Importer::LoadMD5MeshFile ()
 					*bone->mWeights++ = aiVertexWeight((unsigned int)(pv-mesh->mVertices),fNewWeight);
 				}
 				// convert from DOOM coordinate system to OGL
-				std::swap(pv->z,pv->y);
+				std::swap((float&)pv->z,(float&)pv->y);
 			}
 
 			// undo our nice offset tricks ...

@@ -52,13 +52,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiMesh.h"
 #include "../include/aiAnim.h"
 
-#include "./Compiler/pushpack1.h"
+#include "./../include/Compiler/pushpack1.h"
 
 namespace Assimp	{
 namespace MD3	{
 
-#define AI_MD3_MAGIC_NUMBER_BE	'IDP3'
-#define AI_MD3_MAGIC_NUMBER_LE	'3PDI'
+// to make it easier for ourselfes, we test the magic word against both "endianesses"
+#define MD3_MAKE(string) ((uint32_t)((string[0] << 24) + (string[1] << 16) + (string[2] << 8) + string[3]))
+
+#define AI_MD3_MAGIC_NUMBER_BE	MD3_MAKE("IDP3")
+#define AI_MD3_MAGIC_NUMBER_LE	MD3_MAKE("3PDI")
 
 // common limitations
 #define AI_MD3_VERSION			15
@@ -230,7 +233,7 @@ struct Vertex
 	uint16_t  NORMAL;
 } PACK_STRUCT;
 
-#include "./Compiler/poppack1.h"
+#include "./../include/Compiler/poppack1.h"
 
 // ---------------------------------------------------------------------------
 /**	\brief Unpack a Q3 16 bit vector to its full float3 representation
@@ -298,3 +301,4 @@ inline void Vec3NormalToLatLng( const aiVector3D& p_vIn, uint16_t& p_iOut )
 }
 
 #endif // !! AI_MD3FILEHELPER_H_INC
+

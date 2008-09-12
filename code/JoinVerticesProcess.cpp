@@ -134,7 +134,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	std::vector<Vertex> uniqueVertices;
 	uniqueVertices.reserve( pMesh->mNumVertices);
 
-	unsigned int iOldVerts = pMesh->mNumVertices;
+	//unsigned int iOldVerts = pMesh->mNumVertices;
 
 	// For each vertex the index of the vertex it was replaced by. 
 	std::vector<unsigned int> replaceIndex( pMesh->mNumVertices, 0xffffffff);
@@ -314,7 +314,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 		for( unsigned int b = 0; b < face.mNumIndices; b++)
 		{
 			const size_t index = face.mIndices[b];
-			face.mIndices[b] = replaceIndex[face.mIndices[b]];
+			face.mIndices[b] = replaceIndex[index];
 		}
 	}
 

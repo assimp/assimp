@@ -129,7 +129,7 @@ void LWOImporter::FindVCChannels(const LWO::Surface& surf, const LWO::Layer& lay
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWO2ImageMap(unsigned int size, LWO::Texture& tex )
 {
-	LE_NCONST uint8_t* const end = mFileBuffer + size;
+	//LE_NCONST uint8_t* const end = mFileBuffer + size;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -147,16 +147,16 @@ void LWOImporter::LoadLWO2Gradient(unsigned int size, LWO::Texture& tex  )
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWO2TextureHeader(unsigned int size, LWO::Texture& tex )
 {
-	LE_NCONST uint8_t* const end = mFileBuffer + size;
+	//LE_NCONST uint8_t* const end = mFileBuffer + size;
 }
 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWO2TextureBlock(uint32_t type, unsigned int size )
 {
-	LE_NCONST uint8_t* const end = mFileBuffer + size;
+	//LE_NCONST uint8_t* const end = mFileBuffer + size;
 
-	LWO::Surface& surf = mSurfaces->back();
-	LWO::Texture tex;
+	//LWO::Surface& surf = mSurfaces->back();
+	//LWO::Texture tex;
 
 	// now get the exact type of the texture
 }

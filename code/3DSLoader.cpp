@@ -490,7 +490,7 @@ void Dot3DSImporter::ParseHierarchyChunk(int& piRemaining)
 
 		// pivot = origin of rotation and scaling
 		this->mCurrentNode->vPivot = *((const aiVector3D*)this->mCurrent);
-		std::swap(this->mCurrentNode->vPivot.y,this->mCurrentNode->vPivot.z);
+		std::swap((float&)mCurrentNode->vPivot.y,(float&)mCurrentNode->vPivot.z);
 		this->mCurrent += sizeof(aiVector3D);
 		break;
 
@@ -734,8 +734,6 @@ void Dot3DSImporter::ParseMeshChunk(int& piRemaining)
 	Dot3DS::Mesh& mMesh = this->mScene->mMeshes.back();
 
 	// get chunk type
-	const unsigned char* sz = this->mCurrent;
-	unsigned int iCnt = 0;
 	int iRemaining;
 	uint16_t iNum = 0;
 	float* pf;
@@ -749,7 +747,7 @@ void Dot3DSImporter::ParseMeshChunk(int& piRemaining)
 		{
 			mMesh.mPositions.push_back(*((aiVector3D*)this->mCurrent));
 			aiVector3D& v = mMesh.mPositions.back();
-			std::swap( v.y, v.z);
+			std::swap( (float&)v.y, (float&)v.z);
 			//v.y *= -1.0f;
 			this->mCurrent += sizeof(aiVector3D);
 		}

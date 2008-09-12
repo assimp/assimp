@@ -56,8 +56,8 @@ ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer,
 									   ObjFile::Model *pModel ) :
 	m_DataIt( buffer.begin() ),
 	m_DataItEnd( buffer.end() ),
-	m_uiLine( 0 ),
-	m_pModel( pModel )
+	m_pModel( pModel ),
+	m_uiLine( 0 )
 {
 	ai_assert ( NULL != m_pModel );
 	if ( NULL == m_pModel->m_pDefaultMaterial )

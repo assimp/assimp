@@ -158,7 +158,7 @@ void TextureTransform::AddToList(std::vector<STransformVecInfo>& rasVec,
 			(*i).fScaleU  == pcTex->mScaleU  &&
 			(*i).fScaleV  == pcTex->mScaleV  &&
 			(*i).fRotation == pcTex->mRotation &&
-			(*i).iUVIndex == pcTex->iUVSrc)
+			(*i).iUVIndex == (unsigned int)pcTex->iUVSrc)
 		{
 			(*i).pcTextures.push_back(pcTex);
 			return;

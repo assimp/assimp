@@ -525,7 +525,7 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 		for (unsigned int n = 0; n < 3;++n,++iCurrent)
 		{
 			mPositions[iCurrent] = mesh.mPositions[(*i).mIndices[n]];
-			std::swap(mPositions[iCurrent].z,mPositions[iCurrent].y); // DX-to-OGL
+			std::swap((float&)mPositions[iCurrent].z,(float&)mPositions[iCurrent].y); // DX-to-OGL
 
 			// add texture coordinates
 			for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS;++c)
@@ -545,7 +545,7 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 			if (!mesh.mNormals.empty())
 			{
 				mNormals[iCurrent] = mesh.mNormals[(*i).mIndices[n]];
-				std::swap(mNormals[iCurrent].z,mNormals[iCurrent].y); // DX-to-OGL
+				std::swap((float&)mNormals[iCurrent].z,(float&)mNormals[iCurrent].y); // DX-to-OGL
 			}
 
 			// handle bone vertices
@@ -743,7 +743,6 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 			vSubMaterials.size()];
 
 		// build a list of all faces per submaterial
-		unsigned int iNum = 0;
 		for (unsigned int i = 0; i < mesh.mFaces.size();++i)
 		{
 			// check range

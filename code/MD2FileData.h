@@ -57,13 +57,16 @@ File format specification:
 #include "../include/aiMesh.h"
 #include "../include/aiAnim.h"
 
-#include "./Compiler/pushpack1.h"
+#include "./../include/Compiler/pushpack1.h"
 
 namespace Assimp	{
 namespace MD2	{
 
-#define AI_MD2_MAGIC_NUMBER_BE	'IDP2'
-#define AI_MD2_MAGIC_NUMBER_LE	'2PDI'
+// to make it easier for ourselfes, we test the magic word against both "endianesses"
+#define MD2_MAKE(string) ((uint32_t)((string[0] << 24) + (string[1] << 16) + (string[2] << 8) + string[3]))
+
+#define AI_MD2_MAGIC_NUMBER_BE	MD2_MAKE("IDP2")
+#define AI_MD2_MAGIC_NUMBER_LE	MD2_MAKE("2PDI")
 
 // common limitations
 #define AI_MD2_VERSION			15
@@ -153,7 +156,7 @@ struct Skin
 	char name[AI_MD2_MAXQPATH];              /* texture file name */
 } PACK_STRUCT;
 
-#include "./Compiler/poppack1.h"
+#include "./../include/Compiler/poppack1.h"
 
 
 // ---------------------------------------------------------------------------
@@ -167,3 +170,4 @@ void LookupNormalIndex(uint8_t index,aiVector3D& vOut);
 }
 
 #endif // !! include guard
+

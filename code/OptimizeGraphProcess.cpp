@@ -417,10 +417,11 @@ void OptimizeGraphProcess::JoinBones(
 			wmit = (*it).pSrcBones.begin(); wmit != wend; ++wmit)
 		{
 			aiBone* pip = (*wmit).first;
-			for (unsigned int mp = 0; mp < pip->mNumWeights;++mp)
+			for (unsigned int mp = 0; mp < pip->mNumWeights;++mp,++avw)
 			{
-				aiVertexWeight& vf = aiVertexWeight(pip->mWeights[mp]);
-				vf.mVertexId += (*wmit).second;
+				const aiVertexWeight& vfi = pip->mWeights[mp];
+				avw->mWeight = vfi.mWeight;
+				avw->mVertexId = vfi.mVertexId + (*wmit).second;
 			}
 		}
 	}
@@ -592,9 +593,9 @@ void OptimizeGraphProcess::ApplyNodeMeshesOptimization(aiNode* pNode)
 // ------------------------------------------------------------------------------------------------
 void OptimizeGraphProcess::TransformMeshes(aiNode* quak,aiNode* pNode)
 {
-	for (unsigned int ä = 0; ä < quak->mNumMeshes;++ä)
+	for (unsigned int pl = 0; pl < quak->mNumMeshes;++pl)
 	{
-		aiMesh* mariusIsHot = pScene->mMeshes[quak->mMeshes[ä]];
+		aiMesh* mariusIsHot = pScene->mMeshes[quak->mMeshes[pl]];
 		aiMatrix4x4 mMatTransform = pNode->mTransformation;
 
 		// transformation: first back to the parent's local space,

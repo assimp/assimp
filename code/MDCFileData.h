@@ -53,14 +53,18 @@ http://themdcfile.planetwolfenstein.gamespy.com/MDC_File_Format.pdf
 #include "../include/aiMesh.h"
 #include "../include/aiAnim.h"
 
-#include "./Compiler/pushpack1.h"
+#include "./../include/Compiler/pushpack1.h"
 
 
 namespace Assimp {
 namespace MDC {
 
-#define AI_MDC_MAGIC_NUMBER_BE	'CPDI'
-#define AI_MDC_MAGIC_NUMBER_LE	'IDPC'
+
+// to make it easier for ourselfes, we test the magic word against both "endianesses"
+#define MDC_MAKE(string) ((uint32_t)((string[0] << 24) + (string[1] << 16) + (string[2] << 8) + string[3]))
+
+#define AI_MDC_MAGIC_NUMBER_BE	MDC_MAKE("CPDI")
+#define AI_MDC_MAGIC_NUMBER_LE	MDC_MAKE("IDPC")
 
 // common limitations
 #define AI_MDC_VERSION			2
@@ -181,7 +185,7 @@ struct Shader
 
 } PACK_STRUCT;
 
-#include "./Compiler/poppack1.h"
+#include "./../include/Compiler/poppack1.h"
 
 
 // ---------------------------------------------------------------------------

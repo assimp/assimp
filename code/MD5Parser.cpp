@@ -205,11 +205,11 @@ bool MD5Parser::ParseSection(Section& out)
 	if ('(' != *sz++) \
 		MD5Parser::ReportWarning("Unexpected token: ( was expected",(*eit).iLineNumber); \
 	AI_MD5_SKIP_SPACES(); \
-	sz = fast_atof_move(sz,vec.x); \
+	sz = fast_atof_move(sz,(float&)vec.x); \
 	AI_MD5_SKIP_SPACES(); \
-	sz = fast_atof_move(sz,vec.y); \
+	sz = fast_atof_move(sz,(float&)vec.y); \
 	AI_MD5_SKIP_SPACES(); \
-	sz = fast_atof_move(sz,vec.z); \
+	sz = fast_atof_move(sz,(float&)vec.z); \
 	AI_MD5_SKIP_SPACES(); \
 	if (')' != *sz++) \
 		MD5Parser::ReportWarning("Unexpected token: ) was expected",(*eit).iLineNumber);
@@ -354,9 +354,9 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 					if ('(' != *sz++)
 						MD5Parser::ReportWarning("Unexpected token: ( was expected",(*eit).iLineNumber);
 					AI_MD5_SKIP_SPACES();
-					sz = fast_atof_move(sz,vert.mUV.x);
+					sz = fast_atof_move(sz,(float&)vert.mUV.x);
 					AI_MD5_SKIP_SPACES();
-					sz = fast_atof_move(sz,vert.mUV.y);
+					sz = fast_atof_move(sz,(float&)vert.mUV.y);
 					AI_MD5_SKIP_SPACES();
 					if (')' != *sz++)
 						MD5Parser::ReportWarning("Unexpected token: ) was expected",(*eit).iLineNumber);

@@ -194,9 +194,9 @@ struct InheritanceInfo
 struct DecompTransform
 {
 	//! Construction from a reference to an existing matrix
-	DecompTransform(aiMatrix4x4& ref) 
-		: vScaling(1.0f,1.0f,1.0f)
-		, vPosition(std::numeric_limits<float>::quiet_NaN(),0.0f,0.0f)
+	DecompTransform(aiMatrix4x4& ref)
+		: vPosition(std::numeric_limits<float>::quiet_NaN(),0.0f,0.0f)
+		, vScaling(1.0f,1.0f,1.0f)
 		, mMatrix(ref)
 	{}
 

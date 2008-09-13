@@ -325,7 +325,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		aiNode* pcNode = new aiNode();
 		apcNodes.push_back(pcNode);
 		pcNode->mName.Set(layer.mName);
-		pcNode->mParent = reinterpret_cast<aiNode*>(layer.mParent);
+		pcNode->mParent = (aiNode*)(uintptr_t)(layer.mParent);
 		pcNode->mNumMeshes = (unsigned int)apcMeshes.size() - meshStart;
 		pcNode->mMeshes = new unsigned int[pcNode->mNumMeshes];
 		for (unsigned int p = 0; p < pcNode->mNumMeshes;++p)
@@ -341,58 +341,87 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		ConvertMaterial((*mSurfaces)[mat],pcMat);
 	}
 
-	// generate the final node graph
-	GenerateNodeGraph(apcNodes);
-
 	// copy the meshes to the output structure
 	if (apcMeshes.size()) // shouldn't occur, just to be sure we don't crash
 	{
 		pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes = (unsigned int)apcMeshes.size() ];
 		::memcpy(pScene->mMeshes,&apcMeshes[0],pScene->mNumMeshes*sizeof(void*));
 	}
+
+	// generate the final node graph
+	GenerateNodeGraph(apcNodes);
+}
+
+// ------------------------------------------------------------------------------------------------
+void LWOImporter::AddChildren(aiNode* node, uintptr_t parent, std::vector<aiNode*>& apcNodes)
+{
+	unsigned int numChilds = 0;
+	
+	for (uintptr_t i  = 0; i < (uintptr_t)apcNodes.size();++i)
+	{
+		if (i == parent)continue;
+		if (apcNodes[i] && (uintptr_t)apcNodes[i]->mParent == parent)++node->mNumChildren;
+	}
+
+	if (node->mNumChildren)
+	{
+		node->mChildren = new aiNode* [ node->mNumChildren ];
+		for (uintptr_t i = 0, p = 0; i < (uintptr_t)apcNodes.size();++i)
+		{
+			if (i == parent)continue;
+
+			if (apcNodes[i] && parent == (uintptr_t)(apcNodes[i]->mParent))
+			{
+				node->mChildren[p++] = apcNodes[i];
+				apcNodes[i]->mParent = node;
+
+				// recursively add more children
+				AddChildren(apcNodes[i],i,apcNodes);
+				apcNodes[i] = NULL;
+			}
+		}
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::GenerateNodeGraph(std::vector<aiNode*>& apcNodes)
 {
-	// now generate the final nodegraph
-	uint16_t curIndex = 0;
-	while (curIndex < (uint16_t)apcNodes.size())
-	{
-		aiNode* node;
-		uint16_t iCurParent = curIndex-1;
-		node = curIndex ? apcNodes[iCurParent] : new aiNode("<dummy_root>");
-		if (!node){++curIndex;continue;}
+	// now generate the final nodegraph - generate a root node
+	pScene->mRootNode = new aiNode();
+	pScene->mRootNode->mName.Set("<LWORoot>");
+	AddChildren(pScene->mRootNode,0,apcNodes);
 
-		unsigned int numChilds = 0;
+	unsigned int extra = 0;
+	for (unsigned int i = 0; i < apcNodes.size();++i)
+		if (apcNodes[i] && apcNodes[i]->mNumMeshes)++extra;
+
+	if (extra)
+	{
+		// we need to add extra nodes to the root
+		const unsigned int newSize = extra + pScene->mRootNode->mNumChildren;
+		aiNode** const apcNewNodes = new aiNode*[newSize];
+		if((extra = pScene->mRootNode->mNumChildren))
+			::memcpy(apcNewNodes,pScene->mRootNode->mChildren,extra*sizeof(void*));
+
+		aiNode** cc = apcNewNodes+extra;
 		for (unsigned int i = 0; i < apcNodes.size();++i)
 		{
-			if (i == iCurParent)continue;
-			if ( (uint16_t)(uintptr_t)apcNodes[i]->mParent == iCurParent)++numChilds;
-		}
-		if (numChilds)
-		{
-			if (!pScene->mRootNode)
+			if (apcNodes[i] && apcNodes[i]->mNumMeshes)
 			{
-				pScene->mRootNode = node;
+				*cc++ = apcNodes[i];
+				apcNodes[i]->mParent = pScene->mRootNode;
+
+				// recursively add more children
+				AddChildren(apcNodes[i],i,apcNodes);
+				apcNodes[i] = NULL;
 			}
-			node->mChildren = new aiNode* [ node->mNumChildren = numChilds ];
-			for (unsigned int i = 0, p = 0; i < apcNodes.size();++i)
-			{
-				if (i == iCurParent)continue;
-				uint16_t parent = (uint16_t)(uintptr_t)(apcNodes[i]->mParent);
-				if (parent == iCurParent)
-				{
-					node->mChildren[p++] = apcNodes[i];
-					apcNodes[i]->mParent = node;
-					apcNodes[i] = NULL;
-				}
-			}
-			if (curIndex)apcNodes[iCurParent] = NULL;
 		}
-		else if (!curIndex)delete node;
-		++curIndex;
+		delete[] pScene->mRootNode->mChildren;
+		pScene->mRootNode->mChildren	= apcNewNodes;
+		pScene->mRootNode->mNumChildren	= newSize;
 	}
+	if (!pScene->mRootNode->mNumChildren)throw new ImportErrorException("LWO: Unable to build a valid node graph");
+
 	// remove a single root node
 	// TODO: implement directly in the above loop, no need to deallocate here
 	if (1 == pScene->mRootNode->mNumChildren)
@@ -402,39 +431,6 @@ void LWOImporter::GenerateNodeGraph(std::vector<aiNode*>& apcNodes)
 		delete pScene->mRootNode;
 		pScene->mRootNode = pc;
 	}
-
-	// add unreferenced nodes to a dummy root
-	unsigned int m = 0;
-	for (std::vector<aiNode*>::iterator it = apcNodes.begin(), end = apcNodes.end();
-		it != end;++it)
-	{
-		aiNode* p = *it;
-		if (p)++m;
-	}
-	if (m)
-	{
-		aiNode* pc = new aiNode();
-		pc->mName.Set("<dummy_root>");
-		aiNode** cc = pc->mChildren = new aiNode*[ pc->mNumChildren = m+1 ];
-		for (std::vector<aiNode*>::iterator it = apcNodes.begin(), end = apcNodes.end();
-			it != end;++it)
-		{
-			aiNode* p = *it;
-			if (p)
-			{
-				*cc++ = p;
-				p->mParent = pc;
-			}
-		}
-		if (pScene->mRootNode)
-		{
-			*cc = pScene->mRootNode;
-			pScene->mRootNode->mParent = pc;
-		}
-		else --pc->mNumChildren;
-		pScene->mRootNode = pc;
-	}
-	if (!pScene->mRootNode)throw new ImportErrorException("LWO: Unable to build a valid node graph");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -546,34 +542,23 @@ void LWOImporter::LoadLWOPoints(unsigned int length)
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::LoadLWOPolygons(unsigned int length)
+void LWOImporter::LoadLWO2Polygons(unsigned int length)
 {
-	// --- this function is used for both LWO2 and LWOB
-	if (mIsLWO2)
-	{
-		uint32_t type = *((LE_NCONST uint32_t*)mFileBuffer);mFileBuffer += 4;
-		AI_LSWAP4(type);
+	uint32_t type = *((LE_NCONST uint32_t*)mFileBuffer);mFileBuffer += 4;length-=4;
+	AI_LSWAP4(type);
 
-		if (type != AI_LWO_FACE)
-		{
-			DefaultLogger::get()->warn("LWO2: Only POLS.FACE chunsk are supported.");
-			return;
-		}
+	if (type != AI_LWO_FACE)
+	{
+		DefaultLogger::get()->warn("LWO2: Only POLS.FACE chunsk are supported.");
+		return;
 	}
 
 	// first find out how many faces and vertices we'll finally need
 	LE_NCONST uint16_t* const end	= (LE_NCONST uint16_t*)(mFileBuffer+length);
 	LE_NCONST uint16_t* cursor		= (LE_NCONST uint16_t*)mFileBuffer;
 
-	// perform endianess conversions
-#ifndef AI_BUILD_BIG_ENDIAN
-	while (cursor < end)ByteSwap::Swap2(cursor++);
-	cursor = (LE_NCONST uint16_t*)mFileBuffer;
-#endif
-
 	unsigned int iNumFaces = 0,iNumVertices = 0;
-	if (mIsLWO2)CountVertsAndFacesLWO2(iNumVertices,iNumFaces,cursor,end);
-	else CountVertsAndFacesLWOB(iNumVertices,iNumFaces,cursor,end);
+	CountVertsAndFacesLWO2(iNumVertices,iNumFaces,cursor,end);
 
 	// allocate the output array and copy face indices
 	if (iNumFaces)
@@ -582,8 +567,7 @@ void LWOImporter::LoadLWOPolygons(unsigned int length)
 
 		mCurLayer->mFaces.resize(iNumFaces);
 		FaceList::iterator it = mCurLayer->mFaces.begin();
-		if (mIsLWO2)CopyFaceIndicesLWO2(it,cursor,end);
-		else CopyFaceIndicesLWOB(it,cursor,end);
+		CopyFaceIndicesLWO2(it,cursor,end);
 	}
 }
 
@@ -593,6 +577,7 @@ void LWOImporter::CountVertsAndFacesLWO2(unsigned int& verts, unsigned int& face
 {
 	while (cursor < end && max--)
 	{
+		AI_LSWAP2P(cursor);
 		uint16_t numIndices = *cursor++;
 		numIndices &= 0x03FF;
 		verts += numIndices;++faces;
@@ -605,16 +590,14 @@ void LWOImporter::CountVertsAndFacesLWO2(unsigned int& verts, unsigned int& face
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::CopyFaceIndicesLWO2(FaceList::iterator& it,
 	LE_NCONST uint16_t*& cursor, 
-	const uint16_t* const end,
-	unsigned int max)
+	const uint16_t* const end)
 {
-	while (cursor < end && max--)
+	while (cursor < end)
 	{
 		LWO::Face& face = *it;++it;
-		if((face.mNumIndices = (*cursor++) & 0x03FF))
+		if((face.mNumIndices = (*cursor++) & 0x03FF)) // swapping has already been done
 		{
 			face.mIndices = new unsigned int[face.mNumIndices];
-			
 			for(unsigned int i = 0; i < face.mNumIndices; i++)
 			{
 				face.mIndices[i] = ReadVSizedIntLWO2((uint8_t*&)cursor) + mCurLayer->mPointIDXOfs;
@@ -794,7 +777,7 @@ void LWOImporter::LoadLWO2File()
 		case AI_LWO_POLS:
 			{
 				unsigned int old = (unsigned int)mCurLayer->mFaces.size();
-				LoadLWOPolygons(head->length);
+				LoadLWO2Polygons(head->length);
 				mCurLayer->mFaceIDXOfs = old;
 				break;
 			}
@@ -807,7 +790,7 @@ void LWOImporter::LoadLWO2File()
 				break;
 			}
 			// list of tags
-		case AI_LWO_SRFS:
+		case AI_LWO_TAGS:
 			{
 				if (!mTags->empty())
 					DefaultLogger::get()->warn("LWO2: SRFS chunk encountered twice");
@@ -818,9 +801,7 @@ void LWOImporter::LoadLWO2File()
 			// surface chunk
 		case AI_LWO_SURF:
 			{
-				if (!mSurfaces->empty())
-					DefaultLogger::get()->warn("LWO2: SURF chunk encountered twice");
-				else LoadLWO2Surface(head->length);
+				LoadLWO2Surface(head->length);
 				break;
 			}
 		}

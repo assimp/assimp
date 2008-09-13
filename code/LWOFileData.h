@@ -427,7 +427,7 @@ struct Layer
 	Layer()
 		: mFaceIDXOfs(0)
 		, mPointIDXOfs(0)
-		, mParent (0xffff)
+		, mParent (0x0)
 	{}
 
 	/** Temporary point list from the file */

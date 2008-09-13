@@ -74,7 +74,7 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 		// this is only an assumption, needs to be confirmed.
 		// the values have been tweaked by hand and seem to be correct.
 		float fGloss;
-		if (mIsLWO2)fGloss = surf.mGlossiness * 0.8f;
+		if (mIsLWO2)fGloss = surf.mGlossiness * 50.0f;
 		else
 		{
 			if (16.0f >= surf.mGlossiness)fGloss = 6.0f;

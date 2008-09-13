@@ -89,7 +89,7 @@ void LWOImporter::LoadLWOBFile()
 			{
 				if (!mCurLayer->mFaces.empty())
 					DefaultLogger::get()->warn("LWO: POLS chunk encountered twice");
-				else LoadLWOPolygons(head->length);
+				else LoadLWOBPolygons(head->length);
 				break;
 			}
 			// list of tags
@@ -104,13 +104,38 @@ void LWOImporter::LoadLWOBFile()
 			// surface chunk
 		case AI_LWO_SURF:
 			{
-				if (!mSurfaces->empty())
-					DefaultLogger::get()->warn("LWO: SURF chunk encountered twice");
-				else LoadLWOBSurface(head->length);
+				LoadLWOBSurface(head->length);
 				break;
 			}
 		}
 		mFileBuffer = next;
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void LWOImporter::LoadLWOBPolygons(unsigned int length)
+{
+	// first find out how many faces and vertices we'll finally need
+	LE_NCONST uint16_t* const end	= (LE_NCONST uint16_t*)(mFileBuffer+length);
+	LE_NCONST uint16_t* cursor		= (LE_NCONST uint16_t*)mFileBuffer;
+
+	// perform endianess conversions
+#ifndef AI_BUILD_BIG_ENDIAN
+	while (cursor < end)ByteSwap::Swap2(cursor++);
+	cursor = (LE_NCONST uint16_t*)mFileBuffer;
+#endif
+
+	unsigned int iNumFaces = 0,iNumVertices = 0;
+	CountVertsAndFacesLWOB(iNumVertices,iNumFaces,cursor,end);
+
+	// allocate the output array and copy face indices
+	if (iNumFaces)
+	{
+		cursor = (LE_NCONST uint16_t*)mFileBuffer;
+
+		mCurLayer->mFaces.resize(iNumFaces);
+		FaceList::iterator it = mCurLayer->mFaces.begin();
+		CopyFaceIndicesLWOB(it,cursor,end);
 	}
 }
 

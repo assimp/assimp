@@ -161,7 +161,8 @@ private:
 	/** Load polygons from a POLS chunk
 	 *  @param length Size of the chunk
 	*/
-	void LoadLWOPolygons(unsigned int length);
+	void LoadLWO2Polygons(unsigned int length);
+	void LoadLWOBPolygons(unsigned int length);
 
 	// -------------------------------------------------------------------
 	/** Load polygon tags from a PTAG chunk
@@ -203,8 +204,7 @@ private:
 	*/
 	void CopyFaceIndicesLWO2(LWO::FaceList::iterator& it,
 		LE_NCONST uint16_t*& cursor, 
-		const uint16_t* const end, 
-		unsigned int max = 0xffffffff);
+		const uint16_t* const end);
 
 	void CopyFaceIndicesLWOB(LWO::FaceList::iterator& it,
 		LE_NCONST uint16_t*& cursor, 
@@ -255,6 +255,15 @@ private:
 	 *  @param apcNodes Flat list of nodes
 	*/
 	void GenerateNodeGraph(std::vector<aiNode*>& apcNodes);
+
+	// -------------------------------------------------------------------
+	/** Add children to a node
+	 *  @param node Node to become a father
+	 *  @param parent Index of the node
+	 *  @param apcNodes Flat list of nodes - used nodes are set to NULL.
+	*/
+	void AddChildren(aiNode* node, uintptr_t parent, 
+		std::vector<aiNode*>& apcNodes);
 
 	// -------------------------------------------------------------------
 	/** Read a variable sized integer

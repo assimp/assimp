@@ -69,3 +69,10 @@ $(TARGET):	$(OBJECTS)
 	$(CXX) -g -Wall -c $? -o $@ -I../include -fPIC
 clean:
 	rm -f $(OBJECTS) $(TARGET)
+
+
+STATIC = ./../bin/libassimp.a
+static:    $(STATIC)
+$(STATIC):    $(OBJECTS)
+	ar rcs $@ $(OBJECTS)
+

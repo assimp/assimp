@@ -1,61 +1,77 @@
 <importedScene>
-  <version 1.2 />   <smiley code=":-)" />
+  <version name="1.2" />   <smiley code=":-)" />
   <node>
-    <name/>
-    <transformation matrix4x4 />
+    <name />
+    <transformation type="matrix4x4" />
 
     <mesh refid="0" />
-    <mesh ... />
+    <!--More mesh definitions-->
+	<mesh />
     
-    <childnode/>
-    <childnode... />
+    <childnode />
+    <childnode />
   </node>
   <meshes>
     <mesh id="0">
-      <meshheader MatID, Vertexcount, Facecount, a.s.o. />
+      <meshheader type="MatID, Vertexcount, Facecount, a.s.o." />
       <vertices>
-          <vertex xyz />
-          <vertex ... />
+          <vertex type="xyz" />
+          
+		  <!-- More vertex definitions -->
+		  <vertex />
       </vertices>
       <texturecoords index="0">
-          <texturecoord uv />
-          <texturecoord ... />
+          <texturecoord type="uv" />
+          <texturecoord  />
       </texturecoords>
       <texturecoords index="..." />
       <vertexcolors index="0">
-          <color rgba />
-          <color ... />
+          <color type="rgba" />
+          <color />
       </vertexcolors>
       <vertexcolors index="..." />
       <normals>
-          <normal xyz />
-          <normal ... />
+          <normal type="xyz" />
+          
+		  <!-- More normal definitions -->
+		  <normal />
       </normals>
       <tangents>
-        <tangent xyz />
-        <tangent ... />
+        <tangent type="xyz" />
+        
+		<!-- More tangent definitions -->
+		<tangent />
       </tangents>
       <bitangents>
-        <bitangent xyz />
-        <bitangent ... />
-      </tangents>
+        <bitangent type="xyz" />
+        
+		<!-- More bitanget defiitions... -->
+		<bitangent />
+      </bitangents>
       <faces>
           <face numIndices="3" indices="p1, p2, p3" />
-          <face ... />
+          
+		  <!-- More faces -->
+		  <face />
       </faces>      
       <bones>
         <bone>
           <name />
-          <offset matrix4x4 />
+          <offset type="matrix4x4" />
           <weights>
-            <weight v, w />
-            <weight... />
+            <weight type="v, w" />
+            
+			<!-- More weights -->
+			<weight />
           </weights>
         </bone>
-        <bone ... />
+        
+		<!-- More bones -->
+		<bone />
       </bones>      
     </mesh>
-    <mesh id="x" ... />
+    <!-- More meshes -->
+	<mesh id="x" />
   </meshes>
   <anims>
     <anim name="rudern" duration="4500" ticksPerSecond="50">
@@ -63,24 +79,24 @@
         <rotation>
           <rotkey time="0" rot="xyzw" />
           <rotkey time="100" rot="xyzw" />
-          ...
+          
         </rotation>
         <translation>
           <transkey time="0" trans="xyz" />
           <transkey time="100" trans="xyz" />
-          ...
+          
         </translation>
         <scaling>
           <scalekey time="0" scale="xyz" />
           <scalekey time="100" scale="xyz" />
-          ...
-        <scaling>
+          
+        </scaling>
       </animbone>
       <animbone nameOfAnimatedNode="blubb">
-        ...
+        
       </animbone>
     </anim>
-    <anim ... />
+    <anim />
   </anims>
   <materials>
     <material>
@@ -89,12 +105,14 @@
           <value/>
        </param>
     </material>
-    <material ... />
+    
+	<!-- More material definitions-->
+	<material />
   </materials>
   <textures>
-    </texture width, height, formatHint>
+    <texture type="width, height, formatHint">
       <data />
     </texture>
-    <texture ... />
+    <texture />
   </textures>
 </importedScene>

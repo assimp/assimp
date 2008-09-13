@@ -1,0 +1,7 @@
+	Open Asset Import Library (Assimp) Install
+	-----------------------------------------
+To take a look into the ASSIMP library just get the code, go to the 
+workspaces-directory and open your prefered build enviroment. Now just build 
+the engine, start the ASSIMP-Viewer application and select one of our basic test-files.
+
+You need boost-1.35 to build the Asset Import Library.

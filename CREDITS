@@ -6,13 +6,30 @@ Developers and Contributors
 The following is the list of all constributors.
 Thanks for your help!
 
+- Andreas Geissler,
+3DS-, ACE-, DXF-, HMP-, HDO-, MD2-, MD3-, MD5-, MDC-, MDL-, NFF-, PLY-, RAW-, SDM-, LWO2- and SDL-Loader, 
+Configuration-Interface, AssImp-Viewer (Win32), Website (Admin and Design), admin.
+
+-Thomas Schulze,
+X-Loader, Preprocessing framework.
+
+-R.Schmidt,
+Linux build, eclipse support.
+
+- Kim Kulling:
+Obj-Loader, Logging, Scons-build enviroment.
+
+- Matthias Gubisch,
+Visual Studio 9 support, bugfixes.
+
 - Andrew Galante,
 submitted patches to make Assimp compile with GCC-4, a makefile and the xcode3 workspace.
 
 - Andreas Nagel
-tested Assimp under Windows Vista 64 Bit
+tested Assimp under Windows Vista 64 Bit.
 
 - Marius Schröder
-allowed us to use many of his models for screenshots and testing
+allowed us to use many of his models for screenshots and testing.
 
-... and many others
+- Sebastian Hempel,
+Compile-Bugfixes for mingw, add enviroment for static library support in make.

@@ -1,0 +1,66 @@
+	Open Asset Import Library (Assimp) Readme
+	-----------------------------------------
+
+Here you can find information regarding the Asset Import Library:
+
+	1.		Overview
+	1.1		Supported file formats
+	1.2		File structure
+	2.		Build the Asset Import Library
+	3. 		Help
+	4.		License
+
+
+1.	Overview
+1.1	Supported file formats
+
+The Asset Import Library provides a lot of model formats:
+	- 3DS
+	- ACE
+	- DXF
+	- HMP
+ 	- HDO
+	- MD2
+ 	- MD3 
+	- MD5
+	- MDC
+	- MDL
+	- NFF
+ 	- PLY
+ 	- RAW
+	- SDM
+	- SDL
+	- LWO2
+
+1.2 File structure
+
+The Asset Import Library is implemented in C++ and provides a c-interface. The directories 
+are:
+
+	/bin			Binaries of the Asset Import Library.
+	/code			Code of the Asset Import Library.
+	/contrib		Third-party-libraries used by the Asset Import Library.
+	/doc			Documentation (doxygen generated and data structure as a xml-file)
+	/include		Public headers.
+	/lib			Static libraries.
+	/obj			Object files.
+	/port			Ports to other languages. Java is currently implemented.
+	/test			Unit- and regression tests.
+	/tools			Tools.
+	/workspaces		Build enviroments.
+
+
+2. Build the Asset Import Library
+
+Take a look into the INSTALL file.
+
+
+3. Help
+
+For more help go to http://assimp.sourceforge.net/ or go to http://www.zfx.info. Or take a look 
+into the /doc-directory.
+
+
+4. License
+
+The license of the Asset Import Library is based on the BSD-License.

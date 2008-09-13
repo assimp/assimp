@@ -33,3 +33,9 @@ allowed us to use many of his models for screenshots and testing.
 
 - Sebastian Hempel,
 Compile-Bugfixes for mingw, add enviroment for static library support in make.
+
+- Jonathan Pokrass
+supplied a bugfix concerning the scaling in the md3 loader.
+
+- Christian Schubert
+supplied various XFiles for testing purposes.

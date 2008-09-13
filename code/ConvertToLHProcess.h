@@ -57,7 +57,7 @@ namespace Assimp
  * invert the orientation of all faces, and adapting skinning and animation 
  * data in a similar way.
  */
-class ConvertToLHProcess : public BaseProcess
+class ASSIMP_API ConvertToLHProcess : public BaseProcess
 {
 	friend class Importer;
 

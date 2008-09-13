@@ -298,6 +298,7 @@
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT"
 				StringPooling="true"
+				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="2"
 				WarningLevel="3"
@@ -340,7 +341,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unittest_$(ConfigurationName)_$(PlatformName)&quot;"
+				CommandLine="copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unittest_$(ConfigurationName)_$(PlatformName)\&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -374,6 +375,7 @@
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT"
 				StringPooling="true"
+				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="2"
 				WarningLevel="3"
@@ -447,7 +449,7 @@
 				PreprocessorDefinitions="DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
@@ -522,7 +524,7 @@
 				PreprocessorDefinitions="DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
 				DebugInformationFormat="3"

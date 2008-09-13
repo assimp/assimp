@@ -43,18 +43,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_BASEIMPORTER_H_INC
 
 #include <string>
+#include "./../include/aiTypes.h"
 
 struct aiScene;
 
-namespace Assimp
-{
+namespace Assimp	{
 
 class IOSystem;
 class Importer;
 
 // ---------------------------------------------------------------------------
 /** Simple exception class to be thrown if an error occurs while importing. */
-class ImportErrorException 
+class ASSIMP_API ImportErrorException 
 {
 public:
 	/** Constructor with arguments */
@@ -82,7 +82,7 @@ private:
  * imports the given file. ReadFile is not overridable, it just calls 
  * InternReadFile() and catches any ImportErrorException that might occur.
  */
-class BaseImporter
+class ASSIMP_API BaseImporter
 {
 	friend class Importer;
 
@@ -186,6 +186,8 @@ protected:
 	/** Error description in case there was one. */
 	std::string mErrorText;
 };
+
+
 
 } // end of namespace Assimp
 

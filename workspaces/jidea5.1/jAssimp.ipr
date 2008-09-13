@@ -50,7 +50,7 @@
   </component>
   <component name="JavadocGenerationManager">
     <option name="OUTPUT_DIRECTORY" value="J:/Programmieren/ASSIMP3/assimp/doc/javadoc" />
-    <option name="OPTION_SCOPE" value="package" />
+    <option name="OPTION_SCOPE" value="protected" />
     <option name="OPTION_HIERARCHY" value="true" />
     <option name="OPTION_NAVIGATOR" value="true" />
     <option name="OPTION_INDEX" value="true" />

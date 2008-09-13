@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp.hpp"
 using namespace Assimp;
 
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 BaseImporter::BaseImporter()
@@ -96,4 +97,6 @@ void BaseImporter::SetupProperties(const Importer* pImp)
 {
 	// the default implementation does nothing
 }
+
+
 

@@ -58,7 +58,7 @@ struct LogStreamInfo;
  *	The name can be set by creating the logger. If no filename was specified 
  *	the logger will use the standard out and error streams.
  */
-class DefaultLogger :
+class ASSIMP_API DefaultLogger :
 	public Logger
 {
 public:

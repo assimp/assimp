@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8,00"
-	Name="jAssimp"
+	Name="jAssimp_NOT_FINISHED"
 	ProjectGUID="{FE78BFBA-4BA5-457D-8602-B800D498102D}"
 	RootNamespace="jAssimp"
 	Keyword="Win32Proj"

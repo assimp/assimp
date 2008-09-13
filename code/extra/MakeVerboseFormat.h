@@ -62,7 +62,7 @@ namespace Assimp
  * it has been moved to the main library since others might find it
  * useful, too.
 */
-class MakeVerboseFormatProcess : public BaseProcess
+class ASSIMP_API MakeVerboseFormatProcess : public BaseProcess
 {
 	friend class Importer;
 

@@ -847,6 +847,7 @@ void OptimizeGraphProcess::BuildOutputMeshList()
 // Executes the post processing step on the given imported data.
 void OptimizeGraphProcess::Execute( aiScene* pScene)
 {
+	throw new ImportErrorException("This step is disabled in this beta");
 	this->pScene = pScene;
 	/*
 

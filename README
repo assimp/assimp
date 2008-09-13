@@ -44,8 +44,9 @@ are:
 	/include		Public headers.
 	/lib			Static libraries.
 	/obj			Object files.
-	/port			Ports to other languages.  The Java port is not finished, but
-                        the Java part of the interface is fixed.
+	/port			Ports to other languages.  The Java port is not yet finished, but
+                        the Java part of the interface is fixed. So: you can't use it, but
+                        you can see how it will look like.
 	/test			Unit- and regression tests.
 	/tools			Tools.
 	/workspaces		Build enviroments.

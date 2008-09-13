@@ -142,7 +142,7 @@ void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator& it,
 	while (cursor < end && max--)
 	{
 		LWO::Face& face = *it;++it;
-		if(face.mNumIndices = *cursor++)
+		if((face.mNumIndices = *cursor++))
 		{
 			if (cursor + face.mNumIndices >= end)break;
 			face.mIndices = new unsigned int[face.mNumIndices];

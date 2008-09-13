@@ -91,19 +91,19 @@ MD5Parser::MD5Parser(char* buffer, unsigned int fileSize)
 	if ( !DefaultLogger::isNullLogger())
 	{
 		char szBuffer[128]; // should be sufficiently large
-		::sprintf(szBuffer,"MD5Parser end. Parsed %i sections",this->mSections.size());
+		::sprintf(szBuffer,"MD5Parser end. Parsed %i sections",(int)this->mSections.size());
 		DefaultLogger::get()->debug(szBuffer);
 	}
 }
 // ------------------------------------------------------------------------------------------------
-/*static*/ void MD5Parser::ReportError (char* error, unsigned int line)
+/*static*/ void MD5Parser::ReportError (const char* error, unsigned int line)
 {
 	char szBuffer[1024]; // you, listen to me, you HAVE TO BE sufficiently large
 	::sprintf(szBuffer,"Line %i: %s",line,error);
 	throw new ImportErrorException(szBuffer);
 }
 // ------------------------------------------------------------------------------------------------
-/*static*/ void MD5Parser::ReportWarning (char* warn, unsigned int line)
+/*static*/ void MD5Parser::ReportWarning (const char* warn, unsigned int line)
 {
 	char szBuffer[1024]; // you, listen to me, you HAVE TO BE sufficiently large
 	::sprintf(szBuffer,"Line %i: %s",line,warn);
@@ -248,7 +248,7 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 			if ( !::strcmp("numMeshes",(*iter).mName.c_str()))
 			{
 				unsigned int iNumMeshes;
-				if(iNumMeshes = ::strtol10((*iter).mGlobalValue.c_str()))
+				if((iNumMeshes = ::strtol10((*iter).mGlobalValue.c_str())))
 				{
 					mMeshes.reserve(iNumMeshes);
 				}
@@ -256,7 +256,7 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 			else if ( !::strcmp("numJoints",(*iter).mName.c_str()))
 			{
 				unsigned int iNumJoints;
-				if(iNumJoints = ::strtol10((*iter).mGlobalValue.c_str()))
+				if((iNumJoints = ::strtol10((*iter).mGlobalValue.c_str())))
 				{
 					mJoints.reserve(iNumJoints);
 				}
@@ -316,7 +316,7 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 					// reserve enough storage
 					AI_MD5_SKIP_SPACES();
 					unsigned int iNumVertices;
-					if(iNumVertices = ::strtol10(sz))
+					if((iNumVertices = ::strtol10(sz)))
 						desc.mVertices.resize(iNumVertices);
 				}
 				// numtris attribute
@@ -326,7 +326,7 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 					// reserve enough storage
 					AI_MD5_SKIP_SPACES();
 					unsigned int iNumTris;
-					if(iNumTris = ::strtol10(sz))
+					if((iNumTris = ::strtol10(sz)))
 						desc.mFaces.resize(iNumTris);
 				}
 				// numweights attribute
@@ -336,7 +336,7 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 					// reserve enough storage
 					AI_MD5_SKIP_SPACES();
 					unsigned int iNumWeights;
-					if(iNumWeights = ::strtol10(sz))
+					if((iNumWeights = ::strtol10(sz)))
 						desc.mWeights.resize(iNumWeights);
 				}
 				// vert attribute
@@ -507,7 +507,7 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 		else if(!::strcmp("numFrames",(*iter).mName.c_str()))
 		{
 			unsigned int iNum;
-			if(iNum = ::strtol10((*iter).mGlobalValue.c_str()))
+			if((iNum = ::strtol10((*iter).mGlobalValue.c_str())))
 			{
 				mFrames.reserve(iNum);
 			}
@@ -515,7 +515,7 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 		else if(!::strcmp("numJoints",(*iter).mName.c_str()))
 		{
 			unsigned int iNum;
-			if(iNum = ::strtol10((*iter).mGlobalValue.c_str()))
+			if((iNum = ::strtol10((*iter).mGlobalValue.c_str())))
 			{
 				mAnimatedBones.reserve(iNum);
 
@@ -527,7 +527,7 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 		else if(!::strcmp("numAnimatedComponents",(*iter).mName.c_str()))
 		{
 			unsigned int iNum;
-			if(iNum = ::strtol10((*iter).mGlobalValue.c_str()))
+			if((iNum = ::strtol10((*iter).mGlobalValue.c_str())))
 			{
 				mAnimatedBones.reserve(iNum);
 			}

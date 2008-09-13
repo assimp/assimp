@@ -173,9 +173,10 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 	mFileBuffer+=surf.mName.length()+1;
 	 // skip one byte if the length of the surface name is odd
 	if (!(surf.mName.length() & 1))++mFileBuffer;
+	mFileBuffer += 2;
 	while (true)
 	{
-		if (mFileBuffer + 6 > end)break;
+		if (mFileBuffer + 6 >= end)break;
 
 		// no proper IFF header here - the chunk length is specified as int16
 		uint32_t head_type		= *((LE_NCONST uint32_t*)mFileBuffer);mFileBuffer+=4;

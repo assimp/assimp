@@ -591,7 +591,7 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
 				{
 					// check whether the bone is existing
 					BoneWeightList* pcWeightList;
-					if (pcWeightList = (BoneWeightList*)pcMesh->mBones[k])
+					if ((pcWeightList = (BoneWeightList*)pcMesh->mBones[k]))
 					{
 						aiBone* pcOldBone = pMesh->mBones[k];
 						aiBone* pcOut;

@@ -174,14 +174,6 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	apcNodes.reserve(mLayers->size());
 	apcMeshes.reserve(mLayers->size()*std::min(((unsigned int)mSurfaces->size()/2u), 1u));
 
-	// the RemoveRedundantMaterials step will clean this up later
-	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials = (unsigned int)mSurfaces->size()];
-	for (unsigned int mat = 0; mat < pScene->mNumMaterials;++mat)
-	{
-		MaterialHelper* pcMat = new MaterialHelper();
-		pScene->mMaterials[mat] = pcMat;
-		ConvertMaterial((*mSurfaces)[mat],pcMat);
-	}
 
 	unsigned int iDefaultSurface = 0xffffffff; // index of the default surface
 	for (LayerList::const_iterator lit = mLayers->begin(), lend = mLayers->end();
@@ -205,9 +197,9 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 				if (idx >= mTags->size())
 				{
 					DefaultLogger::get()->warn("LWO: Invalid face surface index");
-					idx = (unsigned int)mTags->size()-1;
+					idx = 0xffffffff;
 				}
-				if(0xffffffff == (idx = _mMapping[idx]))
+				if(0xffffffff == idx || 0xffffffff == (idx = _mMapping[idx]))
 				{
 					if (0xffffffff == iDefaultSurface)
 					{
@@ -339,6 +331,16 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		for (unsigned int p = 0; p < pcNode->mNumMeshes;++p)
 			pcNode->mMeshes[p] = p + meshStart;
 	}
+
+	// the RemoveRedundantMaterials step will clean this up later
+	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials = (unsigned int)mSurfaces->size()];
+	for (unsigned int mat = 0; mat < pScene->mNumMaterials;++mat)
+	{
+		MaterialHelper* pcMat = new MaterialHelper();
+		pScene->mMaterials[mat] = pcMat;
+		ConvertMaterial((*mSurfaces)[mat],pcMat);
+	}
+
 	// generate the final node graph
 	GenerateNodeGraph(apcNodes);
 
@@ -360,6 +362,7 @@ void LWOImporter::GenerateNodeGraph(std::vector<aiNode*>& apcNodes)
 		aiNode* node;
 		uint16_t iCurParent = curIndex-1;
 		node = curIndex ? apcNodes[iCurParent] : new aiNode("<dummy_root>");
+		if (!node){++curIndex;continue;}
 
 		unsigned int numChilds = 0;
 		for (unsigned int i = 0; i < apcNodes.size();++i)
@@ -385,6 +388,7 @@ void LWOImporter::GenerateNodeGraph(std::vector<aiNode*>& apcNodes)
 					apcNodes[i] = NULL;
 				}
 			}
+			if (curIndex)apcNodes[iCurParent] = NULL;
 		}
 		else if (!curIndex)delete node;
 		++curIndex;
@@ -416,7 +420,11 @@ void LWOImporter::GenerateNodeGraph(std::vector<aiNode*>& apcNodes)
 			it != end;++it)
 		{
 			aiNode* p = *it;
-			if (p)*cc++ = p;
+			if (p)
+			{
+				*cc++ = p;
+				p->mParent = pc;
+			}
 		}
 		if (pScene->mRootNode)
 		{
@@ -544,6 +552,8 @@ void LWOImporter::LoadLWOPolygons(unsigned int length)
 	if (mIsLWO2)
 	{
 		uint32_t type = *((LE_NCONST uint32_t*)mFileBuffer);mFileBuffer += 4;
+		AI_LSWAP4(type);
+
 		if (type != AI_LWO_FACE)
 		{
 			DefaultLogger::get()->warn("LWO2: Only POLS.FACE chunsk are supported.");
@@ -601,7 +611,7 @@ void LWOImporter::CopyFaceIndicesLWO2(FaceList::iterator& it,
 	while (cursor < end && max--)
 	{
 		LWO::Face& face = *it;++it;
-		if(face.mNumIndices = (*cursor++) & 0x03FF)
+		if((face.mNumIndices = (*cursor++) & 0x03FF))
 		{
 			face.mIndices = new unsigned int[face.mNumIndices];
 			
@@ -630,12 +640,12 @@ void LWOImporter::LoadLWO2PolygonTags(unsigned int length)
 		return;
 
 	LE_NCONST uint8_t* const end = mFileBuffer+length;
-	while (mFileBuffer < end)
+	while (mFileBuffer <= end)
 	{
 		unsigned int i = ReadVSizedIntLWO2(mFileBuffer) + mCurLayer->mFaceIDXOfs;
 		unsigned int j = ReadVSizedIntLWO2(mFileBuffer);
 
-		if (i > mCurLayer->mFaces.size())
+		if (i >= mCurLayer->mFaces.size())
 		{
 			DefaultLogger::get()->warn("LWO2: face index in ptag list is out of range");
 			continue;

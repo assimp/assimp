@@ -325,20 +325,20 @@ public:
 	 *  @param error Error message to be reported
 	 *  @param line Index of the line where the error occured
 	 */
-	static void ReportError (char* error, unsigned int line);
+	static void ReportError (const char* error, unsigned int line);
 
 	// -------------------------------------------------------------------
 	/** Report a specific warning
 	 *  @param warn Warn message to be reported
 	 *  @param line Index of the line where the error occured
 	 */
-	static void ReportWarning (char* warn, unsigned int line);
+	static void ReportWarning (const char* warn, unsigned int line);
 
 
-	inline void ReportError (char* error)
+	inline void ReportError (const char* error)
 		{return ReportError(error, this->lineNumber);}
 
-	inline void ReportWarning (char* warn)
+	inline void ReportWarning (const char* warn)
 		{return ReportWarning(warn, this->lineNumber);}
 
 

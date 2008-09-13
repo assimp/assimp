@@ -179,7 +179,7 @@ void STLImporter::LoadASCIIFile()
 	unsigned int temp;
 
 	// setup the name of the node
-	if (temp = (unsigned int)(sz-szMe))
+	if ((temp = (unsigned int)(sz-szMe)))
 	{
 		pScene->mRootNode->mName.length = temp;
 		::memcpy(pScene->mRootNode->mName.data,szMe,temp);

@@ -294,10 +294,6 @@ void ASEImporter::AddNodes(aiNode* pcParent,const char* szName,
 
 		// TODO: experimental quick'n'dirty, clean this up ...
 		std::string szMyName[2] = {mesh.mName,mesh.mParent} ;
-		if (!szMyName)
-		{
-			continue;
-		}
 		if (szName)
 		{
 			if( len != szMyName[1].length() ||
@@ -375,11 +371,6 @@ void ASEImporter::BuildNodes()
 		// TODO: experimental quick'n'dirty, clean this up ...
 		std::string szMyName[2] = {mesh.mName,mesh.mParent} ;
 
-		if (!szMyName)
-		{
-			continue;
-		}
-
 		// check whether our parent is known
 		bool bKnowParent = false;
 		for (unsigned int i2 = 0; i2 < pcScene->mNumMeshes;++i2)
@@ -388,10 +379,6 @@ void ASEImporter::BuildNodes()
 			const ASE::Mesh& mesh2 = *((const ASE::Mesh*)pcScene->mMeshes[i2]->mColors[2]);
 			// TODO: experimental quick'n'dirty, clean this up ...
 			std::string szMyName2[2] = {mesh2.mName,mesh2.mParent} ;
-			if (!szMyName2)
-			{
-				continue;
-			}
 			if (!ASSIMP_stricmp ( szMyName[1], szMyName2[0]))
 			{
 				bKnowParent = true;

@@ -60,7 +60,7 @@ void TextureTransform::PreProcessUVTransform(
 
 	if (rcIn.mOffsetU)
 	{
-		if (iField = (int)rcIn.mOffsetU)
+		if ((iField = (int)rcIn.mOffsetU))
 		{
 			if (aiTextureMapMode_Wrap == rcIn.mMapMode)
 			{
@@ -94,7 +94,7 @@ void TextureTransform::PreProcessUVTransform(
 	}
 	if (rcIn.mOffsetV)
 	{
-		if (iField = (int)rcIn.mOffsetV)
+		if ((iField = (int)rcIn.mOffsetV))
 		{
 			if (aiTextureMapMode_Wrap == rcIn.mMapMode)
 			{
@@ -128,7 +128,7 @@ void TextureTransform::PreProcessUVTransform(
 	}
 	if (rcIn.mRotation)
 	{
-		if (iField = (int)(rcIn.mRotation / 3.141592654f))
+		if ((iField = (int)(rcIn.mRotation / 3.141592654f)))
 		{
 			float fNew = rcIn.mRotation-(float)iField*3.141592654f;
 

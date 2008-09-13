@@ -248,7 +248,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 		sprintf(szBuff,"Mesh %i | Verts in: %i out: %i | ~%.1f%%",
 			meshIndex,
 			pMesh->mNumVertices,
-			uniqueVertices.size(),
+			(int)uniqueVertices.size(),
 			((pMesh->mNumVertices - uniqueVertices.size()) / (float)pMesh->mNumVertices) * 100.f);
 		DefaultLogger::get()->info(szBuff);
 	}

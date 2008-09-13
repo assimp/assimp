@@ -1,6 +1,6 @@
 /** @file General documentation built from a doxygen comment */
 
-/** @mainpage ASSIMP - The open asset import library
+/** @mainpage ASSIMP - The Open Asset Import Library
 @section intro Introduction
 
 ASSIMP is a library to load and process geometric scenes from various data formats. It is taylored at typical game 
@@ -11,42 +11,30 @@ processing steps to the imported data such as conversion to indexed meshes, calc
 or conversion from right-handed to left-handed coordinate systems.
 
 ASSIMP is able to import the following file formats into your application:
+<hr>
+<b>3D Studio Max 3DS</b> ( <i>*.3ds</i> ) <br>
+<b>3D Studio Max ASE</b> ( <i>*.ase</i> ) <br>
+<b>Wavefront Object</b> ( <i>*.obj</i> ) <br>
+<b>Stanford Polygon Library</b> ( <i>*.ply</i> ) <br>
+<b>Milkshape 3D</b> ( <i>*.ms3d</i> ) <sup>1</sup><br>
+<b>AutoCAD DXF</b> ( <i>*.dxf</i> ) <sup>2</sup><br>
+<b>Neutral File Format</b> ( <i>*.nff</i> ) <br>
+<b>LightWave</b> ( <i>*.lwo</i> ) <br>
+<b>Valve Model</b> ( <i>*.smd,*.vta</i> ) <sup>3</sup> <br>
+<b>Quake I</b> ( <i>*.mdl</i> ) <br>
+<b>Quake II</b> ( <i>*.md2</i> ) <br>
+<b>Quake III</b> ( <i>*.md3</i> ) <br>
+<b>Return to Castle Wolfenstein</b> ( <i>*.mdc</i> )<br>
+<b>EliteForce II</b> ( <i>*.mdr</i> )<sup>1</sup><br>
+<b>Doom 3</b> ( <i>*.md5</i> ) <sup>3</sup> <br>
+<b>DirectX X </b> ( <i>*.x</i> ). <br>		
+<b>3D GameStudio </b> ( <i>*.mdl</i> ) <br>
+<b>3D GameStudio Terrain</b> ( <i>*.hmp</i> )<br>(<i>All sub versions of 3D GameStudio models/terrains are supported: mdl2, mdl3, mdl4, mdl5, mdl7, hmp4, hmp5, hmp7</i>)<br><br>
 
-<b>AutoDesk 3D Studio 4/5 (.3ds).</b> The old native format of 3DS max, now still supported and
-widely used.
-<br>
-<b>AutoDesk 3D Studio ASCII Export (.ase).</b> Text format used by 3DS max. Supports bone animations
-and highly complex materials.
-<br>
-<b>DirectX (.x)</b> A file format that can easily be read by D3DX and that is supported 
-as export format by most 3D modellers. ASSIMP supports both binary and ASCII X-Files.
-<br>
-<b>Stanford Polygon (.ply)</b> File format developed by the university of
-stanford. Thanks to its flexibility it often used for scientific purposes. Supported by ASSIMP
-are ASCII and binary PLY files, both LittleEndian and BigEndian.
-<br>
-<b>WaveFront Object (.obj)</b> File format that is widely used to exchange asset data
-between different applications.
-<br>
-<b>Milkshape 3D (.ms3d)</b> Native file format of the well-known modeller Milkshape 3D. 
-ASSIMP provides full support for bone animations contained in ms3d files.
-<br>
-<b>Quake I (.mdl)</b> The file format that was once used by the first part of the
-quake series. ASSIMP provides full support for loading embedded textures from Quake models.
-<br>
-<b>3D GameStudio (.mdl)</b> The file format of Conitecs 3D GameStudio tool suite.
-Used by the freeware modelling tool MED. ASSIMP provides full support for all types of
-3D GameStudio MDL files: <i>MDL3, MDL4, MDL5, MDL6, MDL7</i>. Bone animations are supported.
-<br>
-<b>Half-Life/CS:S (.mdl, .smd)</b> The file formats used in half life.
-<b>Quake II (.md2)/ Quake III (.md3)</b> Used by many free models on the web, support for
-Quake 2's and Quake 3's file formats is a must-have for each game engine. Quake 4 is
-existing but not widely used. However, it is supported by ASSIMP (and RavenSoft .mdr is supported, too)
-<br>
-<b>Doom 3 (.md5)</b> The well-known native file format of the Doom 3 engine, used in
-many games. Supports bone animation and advanced material settings.
-
-
+<sup>1</sup> Under development, but not included in the current beta release<br/>
+<sup>2</sup> Limited support<br/>
+<sup>3</sup> Animation support untested<br/>
+<hr>
 
 ASSIMP is independent of the Operating System by nature, providing a C++ interface for easy integration 
 with game engines and a C interface to allow bindings to other programming languages. At the moment the library runs 

@@ -1,4 +1,4 @@
-# Doxyfile 1.5.4
+# Doxyfile 1.5.3
 
 #---------------------------------------------------------------------------
 # Project related configuration options
@@ -11,9 +11,9 @@ CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
 REPEAT_BRIEF           = YES
-ABBREVIATE_BRIEF       = "The $name class     " \
-                         "The $name widget     " \
-                         "The $name file     " \
+ABBREVIATE_BRIEF       = "The $name class      " \
+                         "The $name widget      " \
+                         "The $name file      " \
                          is \
                          provides \
                          specifies \
@@ -40,10 +40,8 @@ OPTIMIZE_OUTPUT_FOR_C  = NO
 OPTIMIZE_OUTPUT_JAVA   = NO
 BUILTIN_STL_SUPPORT    = YES
 CPP_CLI_SUPPORT        = NO
-SIP_SUPPORT            = NO
 DISTRIBUTE_GROUP_DOC   = NO
 SUBGROUPING            = YES
-TYPEDEF_HIDES_STRUCT   = NO
 #---------------------------------------------------------------------------
 # Build related configuration options
 #---------------------------------------------------------------------------
@@ -82,13 +80,12 @@ WARNINGS               = YES
 WARN_IF_UNDOCUMENTED   = YES
 WARN_IF_DOC_ERROR      = YES
 WARN_NO_PARAMDOC       = NO
-WARN_FORMAT            = "$file:$line: $text     "
+WARN_FORMAT            = "$file:$line: $text      "
 WARN_LOGFILE           = 
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
 INPUT                  = ../include/ \
-                         ../code/ \
                          ../doc/
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
@@ -159,8 +156,8 @@ HTML_STYLESHEET        =
 HTML_ALIGN_MEMBERS     = YES
 GENERATE_HTMLHELP      = NO
 HTML_DYNAMIC_SECTIONS  = NO
-CHM_FILE               = 
-HHC_LOCATION           = 
+CHM_FILE               = AssimpDoc.chm
+HHC_LOCATION           = "C:/Program Files/HTML Help Workshop/hhc.exe"
 GENERATE_CHI           = NO
 BINARY_TOC             = NO
 TOC_EXPAND             = NO

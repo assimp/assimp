@@ -16,10 +16,9 @@ Here you can find information regarding the Asset Import Library:
 
 The Asset Import Library provides a lot of model formats:
 	- 3DS
-	- ACE
+	- ASE
 	- DXF
 	- HMP
- 	- HDO
 	- MD2
  	- MD3 
 	- MD5
@@ -27,10 +26,11 @@ The Asset Import Library provides a lot of model formats:
 	- MDL
 	- NFF
  	- PLY
- 	- RAW
-	- SDM
-	- SDL
-	- LWO2
+	- STL
+	- X
+	- LWO
+	- OBJ
+	- SMD
 
 1.2 File structure
 
@@ -44,7 +44,8 @@ are:
 	/include		Public headers.
 	/lib			Static libraries.
 	/obj			Object files.
-	/port			Ports to other languages. Java is currently implemented.
+	/port			Ports to other languages.  The Java port is not finished, but
+                        the Java part of the interface is fixed.
 	/test			Unit- and regression tests.
 	/tools			Tools.
 	/workspaces		Build enviroments.

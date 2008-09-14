@@ -42,6 +42,7 @@ g_assimp_lib_Source = Split("""
 	../../code/JoinVerticesProcess.cpp
 	../../code/KillNormalsProcess.cpp
 	../../code/LimitBoneWeightsProcess.cpp
+	../../code/LWOBLoader.cpp
 	../../code/LWOLoader.cpp
 	../../code/LWOMaterial.cpp
 	../../code/MaterialSystem.cpp

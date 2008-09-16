@@ -106,14 +106,17 @@ void ObjFileMtlImporter::load()
 				++m_DataIt;
 				if (*m_DataIt == 'a') // Ambient color
 				{
+					++m_DataIt;
 					getColorRGBA( &m_pModel->m_pCurrentMaterial->ambient );
 				}
 				else if (*m_DataIt == 'd')	// Diffuse color
 				{
+					++m_DataIt;
 					getColorRGBA( &m_pModel->m_pCurrentMaterial->diffuse );
 				}
 				else if (*m_DataIt == 's')
 				{
+					++m_DataIt;
 					getColorRGBA( &m_pModel->m_pCurrentMaterial->specular );
 				}
 				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
@@ -122,6 +125,7 @@ void ObjFileMtlImporter::load()
 
 		case 'd':	// Alpha value
 			{
+				++m_DataIt;
 				getFloatValue( m_pModel->m_pCurrentMaterial->alpha );
 				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 			}
@@ -129,13 +133,25 @@ void ObjFileMtlImporter::load()
 
 		case 'N':	// Shineness
 			{
-				getIlluminationModel( m_pModel->m_pCurrentMaterial->illumination_model );
+				++m_DataIt;
+				switch(*m_DataIt) 
+				{
+				case 's':
+					++m_DataIt;
+					getFloatValue(m_pModel->m_pCurrentMaterial->shineness);
+					break;
+				case 'i': //Index Of refraction 
+					//TODO
+					break;
+				}
 				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
+				break;
 			}
-			break;
+		
 
 		case 'm':	// Texture
 			{
+				m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
 				getTexture();
 				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 			}
@@ -150,6 +166,8 @@ void ObjFileMtlImporter::load()
 
 		case 'i':	// Illumination model
 			{
+				m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
+				getIlluminationModel( m_pModel->m_pCurrentMaterial->illumination_model );
 				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 			}
 			break;

@@ -240,8 +240,10 @@ void ObjFileParser::getFace()
 			if (iPos == 0)
 			{
 				//if there are no texturecoordinates in the obj file but normals
-				if (!vt && vn)
+				if (!vt && vn) {
 					iPos = 1;
+					iStep++;
+				}
 			}
 			iPos++;
 		}

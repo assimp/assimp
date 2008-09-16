@@ -58,6 +58,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+// AutoCAD Binary DXF<CR><LF><SUB><NULL> 
+#define AI_DXF_BINARY_IDENT ("AutoCAD Binary DXF\r\n\x1a\0")
+#define AI_DXF_BINARY_IDENT_LEN (24)
+
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 DXFImporter::DXFImporter()
@@ -100,6 +105,12 @@ bool DXFImporter::GetNextLine()
 // ------------------------------------------------------------------------------------------------
 bool DXFImporter::GetNextToken()
 {
+	if (bRepeat)
+	{
+		bRepeat = false;
+		return true;
+	}
+
 	SkipSpaces(&buffer);
 	groupCode = strtol10s(buffer,&buffer);
 	if(!GetNextLine())return false;
@@ -132,19 +143,23 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 	file->Read( &buffer2[0], m,1);
 	buffer2[m] = '\0';
 
+	bRepeat = false;
 	mDefaultLayer = NULL;
+
+	// check whether this is a binaray DXF file - we can't read binary DXF files :-(
+	if (!strncmp(AI_DXF_BINARY_IDENT,buffer,AI_DXF_BINARY_IDENT_LEN))
+		throw new ImportErrorException("DXF: Binary files are not supported at the moment");
 
 	// now get all lines of the file
 	while (GetNextToken())
 	{
 		if (2 == groupCode)
 		{
-			// ENTITIES section
-			if (!::strcmp(cursor,"ENTITIES"))
+			// ENTITIES and BLOCKS sections - skip the whole rest, no need to waste our time with them
+			if (!::strcmp(cursor,"ENTITIES") || !::strcmp(cursor,"BLOCKS"))
 				if (!ParseEntities())break;
 
-			// other sections such as BLOCK - skip them to make
-			// sure there will be no name conflicts
+			// other sections - skip them to make sure there will be no name conflicts
 			else
 			{
 				bool b = false;
@@ -165,14 +180,23 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 			break;
 	}
 
-	if (mLayers.empty())
+	// find out how many valud layers we have
+	for (std::vector<LayerInfo>::const_iterator it = mLayers.begin(),end = mLayers.end();
+		it != end;++it)
+	{
+		if (!(*it).vPositions.empty())++pScene->mNumMeshes;
+	}
+
+	if (!pScene->mNumMeshes)
 		throw new ImportErrorException("DXF: this file contains no 3d data");
 
-	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes = (unsigned int)mLayers.size()];
+	pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];
 	m = 0;
 	for (std::vector<LayerInfo>::const_iterator it = mLayers.begin(),end = mLayers.end();
 		it != end;++it)
 	{
+		if ((*it).vPositions.empty())continue;
+
 		// generate the output mesh
 		aiMesh* pMesh = pScene->mMeshes[m++] = new aiMesh();
 		const std::vector<aiVector3D>& vPositions = (*it).vPositions;
@@ -256,17 +280,185 @@ bool DXFImporter::ParseEntities()
 	while (GetNextToken())
 	{
 		if (!groupCode)
-		{
-			while (true) {
+		{			
 			if (!::strcmp(cursor,"3DFACE"))
-				if (!Parse3DFace()) return false; else continue;
-			break;
-			};
+				if (!Parse3DFace()) return false; else bRepeat = true;
+
+			if (!::strcmp(cursor,"POLYLINE"))
+				if (!ParsePolyLine()) return false; else bRepeat = true;
+
 			if (!::strcmp(cursor,"ENDSEC"))
 				return true;
 		}
 	}
 	return false;
+}
+
+// ------------------------------------------------------------------------------------------------
+void DXFImporter::SetLayer(LayerInfo*& out)
+{
+	for (std::vector<LayerInfo>::iterator it = mLayers.begin(),end = mLayers.end();
+		it != end;++it)
+	{
+		if (!::strcmp( (*it).name, cursor ))
+		{
+			out = &(*it);
+			break;
+		}
+	}
+	if (!out)
+	{
+		// we don't have this layer yet
+		mLayers.push_back(LayerInfo());
+		out = &mLayers.back();
+		::strcpy(out->name,cursor);
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void DXFImporter::SetDefaultLayer(LayerInfo*& out)
+{
+	if (!mDefaultLayer)
+	{
+		mLayers.push_back(LayerInfo());
+		mDefaultLayer = &mLayers.back();
+	}
+	out = mDefaultLayer;
+}
+
+// ------------------------------------------------------------------------------------------------
+bool DXFImporter::ParsePolyLine()
+{
+	bool ret = false;
+	LayerInfo* out = NULL;
+
+	std::vector<aiVector3D> positions;
+	std::vector<unsigned int> indices;
+	unsigned int flags = 0;
+
+	while (GetNextToken())
+	{
+		switch (groupCode)
+		{
+		case 0:
+			{
+				if (!::strcmp(cursor,"VERTEX"))
+				{
+					aiVector3D v;
+					unsigned int idx[4] = {0xffffffff,0xffffffff,0xffffffff,0xffffffff};
+					ParsePolyLineVertex(v, idx);
+					if (0xffffffff == idx[0])positions.push_back(v);
+					else
+					{
+						// check whether we have a fourth coordinate
+						if (0xffffffff == idx[3])
+						{
+							idx[3] = idx[2];
+						}
+
+						indices.reserve(indices.size()+4);
+						for (unsigned int m = 0; m < 4;++m)
+							indices.push_back(idx[m]);
+					}
+					bRepeat = true;
+				}
+				else if (!::strcmp(cursor,"ENDSEQ"))
+				{
+					ret = true;
+				}
+				break;
+			}
+
+		// flags --- important that we know whether it is a polyface mesh
+		case 70:
+			{
+				flags = strtol10(cursor);
+				break;
+			};
+
+		// optional number of vertices
+		case 71:
+			{
+				positions.reserve(std::min(std::max(100u, strtol10(cursor)),100000000u));
+				break;
+			}
+
+		// optional number of faces
+		case 72:
+			{
+				indices.reserve(std::min(std::max(100u, strtol10(cursor)),100000000u) * 4u);
+				break;
+			}
+
+		// 8 specifies the layer
+		case 8:
+			{
+				SetLayer(out);
+				break;
+			}
+		}
+	}
+	if (!(flags & 64))
+	{
+		DefaultLogger::get()->warn("DXF: Only polyface meshes are currently supported");
+		return ret;
+	}
+
+	if (positions.size() < 3 || indices.size() < 3)
+	{
+		DefaultLogger::get()->warn("DXF: Unable to parse POLYLINE element - not enough vertices");
+		return ret;
+	}
+
+	// use a default layer if necessary
+	if (!out)SetDefaultLayer(out);
+
+	// generate unique vertices
+	for (std::vector<unsigned int>::const_iterator it = indices.begin(), end = indices.end();
+		it != end; ++it)
+	{
+		unsigned int idx = *it;
+		if (idx > positions.size())
+		{
+			DefaultLogger::get()->error("DXF: Polyface mesh index os out of range");
+			idx = (unsigned int) positions.size();
+		}
+		out->vPositions.push_back(positions[idx-1]); // indices are one-based.
+	}
+
+	return ret;
+}
+
+// ------------------------------------------------------------------------------------------------
+bool DXFImporter::ParsePolyLineVertex(aiVector3D& out,unsigned int* outIdx)
+{
+	bool ret = false;
+	while (GetNextToken())
+	{
+		switch (groupCode)
+		{
+		case 0: ret = true;break;
+
+		// todo - handle the correct layer for the vertex
+
+		// x position of the first corner
+		case 10: out.x = fast_atof(cursor);break;
+
+		// y position of the first corner
+		case 20: out.y = -fast_atof(cursor);break;
+
+		// z position of the first corner
+		case 30: out.z = fast_atof(cursor);break;
+
+		// POLYFACE vertex indices
+		case 71: outIdx[0] = strtol10(cursor);break;
+		case 72: outIdx[1] = strtol10(cursor);break;
+		case 73: outIdx[2] = strtol10(cursor);break;
+		case 74: outIdx[3] = strtol10(cursor);break;
+		};
+		if (ret)break;
+	}
+	return ret;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -285,22 +477,7 @@ bool DXFImporter::Parse3DFace()
 		// 8 specifies the layer
 		case 8:
 			{
-				for (std::vector<LayerInfo>::iterator it = mLayers.begin(),end = mLayers.end();
-					it != end;++it)
-				{
-					if (!::strcmp( (*it).name, cursor ))
-					{
-						out = &(*it);
-						break;
-					}
-				}
-				if (!out)
-				{
-					// we don't have this layer yet
-					mLayers.push_back(LayerInfo());
-					out = &mLayers.back();
-					::strcpy(out->name,cursor);
-				}
+				SetLayer(out);
 				break;
 			}
 
@@ -344,20 +521,12 @@ bool DXFImporter::Parse3DFace()
 	}
 
 	// use a default layer if necessary
-	if (!out)
-	{
-		if (!mDefaultLayer)
-		{
-			mLayers.push_back(LayerInfo());
-			mDefaultLayer = &mLayers.back();
-		}
-		out = mDefaultLayer;
-	}
+	if (!out)SetDefaultLayer(out);
 
 	// add the faces to the face list for this layer
 	out->vPositions.push_back(vip[0]);
 	out->vPositions.push_back(vip[1]);
 	out->vPositions.push_back(vip[2]);
-	out->vPositions.push_back(vip[3]);
+	out->vPositions.push_back(vip[3]); // might be equal to the third
 	return ret;
 }

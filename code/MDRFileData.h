@@ -87,7 +87,7 @@ struct Vertex
 	aiVector3D		normal;
 	aiVector2D		texCoords;
 	uint32_t		numWeights;
-	Weight	weights[1];		// variable sized
+	Weight	weights;		// variable sized
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
@@ -143,9 +143,9 @@ struct Bone
 /** \brief Data structure for a frame in a MDR file
  */
 struct Frame {
-	aiVector3D	bounds[2];		// bounds of all surfaces of all LOD's for this frame
-	aiVector3D	localOrigin;	// midpoint of bounds, used for sphere cull
-	float		radius;			// dist from localOrigin to corner
+	aiVector3D	bounds0,bounds1;	// bounds of all surfaces of all LOD's for this frame
+	aiVector3D	localOrigin;		// midpoint of bounds, used for sphere cull
+	float		radius;				// dist from localOrigin to corner
 	char		name[16];
 	Bone	bones[1];			// [numBones]
 } PACK_STRUCT;
@@ -165,7 +165,7 @@ struct CompBone
  */
 struct CompFrame
 {
-        aiVector3D  bounds[2];		// bounds of all surfaces of all LOD's for this frame
+        aiVector3D  bounds0,bounds1;	// bounds of all surfaces of all LOD's for this frame
         aiVector3D  localOrigin;		// midpoint of bounds, used for sphere cull
         float      radius;			// dist from localOrigin to corner
         CompBone   bones[1];		// [numBones]
@@ -204,7 +204,7 @@ struct Header
 	char		name[AI_MDR_MAXQPATH];	
 
 	// frames and bones are shared by all levels of detail
-	int32_t		numFrames;
+	uint32_t	numFrames;
 	uint32_t	numBones;
 	uint32_t	ofsFrames;			
 
@@ -221,7 +221,6 @@ struct Header
 
 #include "./../include/Compiler/poppack1.h"
 
-};
-};
+}}
 
 #endif // !! AI_MDRFILEHELPER_H_INC

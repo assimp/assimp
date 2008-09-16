@@ -38,46 +38,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Declaration of the .dxf importer class. */
-#ifndef AI_DXFLOADER_H_INCLUDED
-#define AI_DXFLOADER_H_INCLUDED
+/** @file Definition of the MDR importer class. */
+#ifndef AI_MDRLOADER_H_INCLUDED
+#define AI_MDRLOADER_H_INCLUDED
 
-#include <vector>
-
-#include "BaseImporter.h"
 #include "../include/aiTypes.h"
 
+#include "BaseImporter.h"
+#include "MDRFileData.h"
+#include "ByteSwap.h"
+
 namespace Assimp	{
+using namespace MDR;
 
 // ---------------------------------------------------------------------------
-/** DXF importer class
+/** Importer class for the MDR file format (Ravensoft)
 */
-class DXFImporter : public BaseImporter
+class MDRImporter : public BaseImporter
 {
 	friend class Importer;
 
 protected:
 	/** Constructor to be privately used by Importer */
-	DXFImporter();
+	MDRImporter();
 
 	/** Destructor, private as well */
-	~DXFImporter();
-
-
-	// describes a single layer in the DXF file
-	struct LayerInfo
-	{
-		LayerInfo()
-		{
-			name[0] = '\0';
-		}
-
-		char name[4096];
-
-		// face buffer - order is x,y,z,w v1,v2,v3 (w is equal to z if unused)
-		std::vector<aiVector3D> vPositions;
-	};
-
+	~MDRImporter();
 
 public:
 
@@ -85,6 +71,13 @@ public:
 	/** Returns whether the class can handle the format of the given file. 
 	* See BaseImporter::CanRead() for details.	*/
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+
+	// -------------------------------------------------------------------
+	/** Called prior to ReadFile().
+	* The function is a request to the importer to update its configuration
+	* basing on the Importer's configuration property list.
+	*/
+	void SetupProperties(const Importer* pImp);
 
 protected:
 
@@ -94,87 +87,53 @@ protected:
 	 */
 	void GetExtensionList(std::string& append)
 	{
-		append.append("*.dxf");
+		append.append("*.mdr");
 	}
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 
-	 * See BaseImporter::InternReadFile() for details
-	 */
-	void InternReadFile( const std::string& pFile, aiScene* pScene, 
+	* See BaseImporter::InternReadFile() for details
+	*/
+	void InternReadFile( const std::string& pFile, aiScene* pScene,
 		IOSystem* pIOHandler);
 
-	// -------------------------------------------------------------------
-	/** Get the next line from the file.
-	 *  @return false if the end of the file was reached
-	 */
-	bool GetNextLine();
+protected:
+
 
 	// -------------------------------------------------------------------
-	/** Get the next token (group code + data line) from the file.
-	 *  @return false if the end of the file was reached
-	 */
-	bool GetNextToken();
+	/** Validate the header of the file
+	*/
+	void ValidateHeader();
 
 	// -------------------------------------------------------------------
-	/** Parses the ENTITIES section in the file
-	 *  @return false if the end of the file was reached
-	 */
-	bool ParseEntities();
+	/** Validate the header of a MDR surface
+	 *  @param pcSurf Surface to be validated
+	*/
+	void ValidateSurfaceHeader(BE_NCONST MDR::Surface* pcSurf);
 
 	// -------------------------------------------------------------------
-	/** Parses a 3DFACE section in the file
-	 *  @return false if the end of the file was reached
-	 */
-	bool Parse3DFace();
+	/** Validate the header of a MDR LOD
+	 *  @param pcLOD LOD to be validated
+	*/
+	void ValidateLODHeader(BE_NCONST MDR::LOD* pcLOD);
 
-	// -------------------------------------------------------------------
-	/** Parses a POLYLINE section in the file
-	 *  @return false if the end of the file was reached
-	 */
-	bool ParsePolyLine();
+protected:
 
-	// -------------------------------------------------------------------
-	/** Sets the current layer - cursor must point to the name of it.
-	 *  @param out Receives a handle to the layer
-	 */
-	void SetLayer(LayerInfo*& out);
 
-	// -------------------------------------------------------------------
-	/** Creates a default layer.
-	 *  @param out Receives a handle to the default layer
-	 */
-	void SetDefaultLayer(LayerInfo*& out);
+	/** Configuration option: frame to be loaded */
+	unsigned int configFrameID;
 
-	// -------------------------------------------------------------------
-	/** Parses a VERTEX element in a POLYLINE/POLYFACE
-	 *  @param out Receives the output vertex. 
-	 *  @param outIdx Receives the output vertex indices, if present.
-	 *    Wont't be modified otherwise. Size must be at least 4.
-	 *  @return false if the end of the file was reached
-	 */
-	bool ParsePolyLineVertex(aiVector3D& out,unsigned int* outIdx);
+	/** Header of the MDR file */
+	BE_NCONST MDR::Header* pcHeader;
 
-private:
+	/** Buffer to hold the loaded file */
+	unsigned char* mBuffer;
 
-	// points to the next section 
-	const char* buffer;
-
-	// specifies the current group code
-	int groupCode;
-
-	// contains the current data line
-	char cursor[4096];
-
-	// specifies whether the next call to GetNextToken()
-	// should return the current token a second time
-	bool bRepeat;
-
-	// list of all loaded layers
-	std::vector<LayerInfo> mLayers;
-	LayerInfo* mDefaultLayer;
+	/** size of the file, in bytes */
+	unsigned int fileSize;
 };
 
 } // end of namespace Assimp
 
-#endif // AI_3DSIMPORTER_H_INC
+#endif // AI_MDRIMPORTER_H_INC
+

@@ -1015,6 +1015,10 @@
 						RelativePath="..\..\code\MDRFileData.h"
 						>
 					</File>
+					<File
+						RelativePath="..\..\code\MDRLoader.h"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="Obj"
@@ -1095,6 +1099,10 @@
 				<Filter
 					Name="RAW"
 					>
+					<File
+						RelativePath="..\..\code\RawLoader.h"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="NFF"
@@ -1111,6 +1119,18 @@
 				<Filter
 					Name="Collada"
 					>
+				</Filter>
+				<Filter
+					Name="WRL"
+					>
+				</Filter>
+				<Filter
+					Name="OFF"
+					>
+					<File
+						RelativePath="..\..\code\OFFLoader.h"
+						>
+					</File>
 				</Filter>
 			</Filter>
 		</Filter>
@@ -1415,12 +1435,36 @@
 				<Filter
 					Name="RAW"
 					>
+					<File
+						RelativePath="..\..\code\RawLoader.cpp"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="NFF"
 					>
 					<File
 						RelativePath="..\..\code\NFFLoader.cpp"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="MDR"
+					>
+					<File
+						RelativePath="..\..\code\MDRLoader.cpp"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="WRL"
+					>
+				</Filter>
+				<Filter
+					Name="OFF"
+					>
+					<File
+						RelativePath="..\..\code\OFFLoader.cpp"
 						>
 					</File>
 				</Filter>

@@ -88,20 +88,6 @@ bool NFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 			 extension[2] != 'f' && extension[2] != 'F' ||
 			 extension[3] != 'f' && extension[3] != 'F');
 }
-// ------------------------------------------------------------------------------------------------
-bool GetNextLine(const char*& buffer, char out[4096])
-{
-	if ('\0' == *buffer)return false;
-
-	char* _out = out;
-	char* const end = _out+4096;
-	while (!IsLineEnd( *buffer ) && _out < end)
-		*_out++ = *buffer++;
-	*_out = '\0';
-
-	if ('\0' != *buffer)while (IsLineEnd( *buffer ))++buffer;
-	return true;
-}
 
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_FLOAT(f) \

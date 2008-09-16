@@ -90,10 +90,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AI_BUILD_NO_SMD_IMPORTER)
 #	include "SMDLoader.h"
 #endif
-#if 0
 #if (!defined AI_BUILD_NO_MDR_IMPORTER)
 #	include "MDRLoader.h"
-#endif
 #endif
 #if (!defined AI_BUILD_NO_MDC_IMPORTER)
 #	include "MDCLoader.h"
@@ -112,6 +110,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #if (!defined AI_BUILD_NO_NFF_IMPORTER)
 #	include "NFFLoader.h"
+#endif
+#if (!defined AI_BUILD_NO_RAW_IMPORTER)
+#	include "RAWLoader.h"
+#endif
+#if (!defined AI_BUILD_NO_OFF_IMPORTER)
+#	include "OffLoader.h"
 #endif
 
 
@@ -211,11 +215,11 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_SMD_IMPORTER)
 	mImporter.push_back( new SMDImporter());
 #endif
-#if 0
+/*
 #if (!defined AI_BUILD_NO_MDR_IMPORTER)
 	mImporter.push_back( new MDRImporter());
 #endif
-#endif
+ */
 #if (!defined AI_BUILD_NO_MDC_IMPORTER)
 	mImporter.push_back( new MDCImporter());
 #endif
@@ -233,6 +237,12 @@ Importer::Importer() :
 #endif
 #if (!defined AI_BUILD_NO_NFF_IMPORTER)
 	mImporter.push_back( new NFFImporter());
+#endif
+#if (!defined AI_BUILD_NO_RAW_IMPORTER)
+	mImporter.push_back( new RAWImporter());
+#endif
+#if (!defined AI_BUILD_NO_OFF_IMPORTER)
+	mImporter.push_back( new OFFImporter());
 #endif
 
 	// add an instance of each post processing step here in the order 

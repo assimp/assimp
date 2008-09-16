@@ -52,7 +52,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // public ASSIMP headers
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
-#include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
 #include "../include/DefaultLogger.h"

@@ -109,13 +109,12 @@ void Subdivide(std::vector<aiVector3D>& positions)
 
 
 // ------------------------------------------------------------------------------------------------
-void StandardShapes::MakeIcosahedron(aiVector3D& center,const aiVector3D& length,
-	std::vector<aiVector3D>& positions)
+void StandardShapes::MakeIcosahedron(std::vector<aiVector3D>& positions)
 {
 	positions.reserve(positions.size()+60);
 
 	const float t = (1.f + 2.236067977f)/2.f;
-	const aiVector3D s = aiVector3D( sqrt(1.f + t*t) ) / length;
+	const float s = sqrt(1.f + t*t);
 	
 	aiVector3D v0  = aiVector3D(t,1.f, 0.f)/s;
 	aiVector3D v1  = aiVector3D(-t,1.f, 0.f)/s;
@@ -157,8 +156,7 @@ void StandardShapes::MakeIcosahedron(aiVector3D& center,const aiVector3D& length
 }
 
 // ------------------------------------------------------------------------------------------------
-void StandardShapes::MakeDodecahedron(aiVector3D& center,const aiVector3D& length,
-	std::vector<aiVector3D>& positions)
+void StandardShapes::MakeDodecahedron(std::vector<aiVector3D>& positions)
 {
 	positions.reserve(positions.size()+108);
 
@@ -166,26 +164,26 @@ void StandardShapes::MakeDodecahedron(aiVector3D& center,const aiVector3D& lengt
 	const float b = sqrt((3.f-2.23606797f)/6.f);
 	const float c = sqrt((3.f+2.23606797f)/6.f);
 
-	aiVector3D v0  = aiVector3D(a,a,a).SymMul(length);
-	aiVector3D v1  = aiVector3D(a,a,-a).SymMul(length);
-	aiVector3D v2  = aiVector3D(a,-a,a).SymMul(length);
-	aiVector3D v3  = aiVector3D(a,-a,-a).SymMul(length);
-	aiVector3D v4  = aiVector3D(-a,a,a).SymMul(length);
-	aiVector3D v5  = aiVector3D(-a,a,-a).SymMul(length);
-	aiVector3D v6  = aiVector3D(-a,-a,a).SymMul(length);
-	aiVector3D v7  = aiVector3D(-a,-a,-a).SymMul(length);
-	aiVector3D v8  = aiVector3D(b,c,0.f).SymMul(length);
-	aiVector3D v9  = aiVector3D(-b,c,0.f).SymMul(length);
-	aiVector3D v10 = aiVector3D(b,-c,0.f).SymMul(length);
-	aiVector3D v11 = aiVector3D(-b,-c,0.f).SymMul(length);
-	aiVector3D v12 = aiVector3D(c, 0.f, b).SymMul(length);
-	aiVector3D v13 = aiVector3D(c, 0.f, -b).SymMul(length);
-	aiVector3D v14 = aiVector3D(-c, 0.f, b).SymMul(length);
-	aiVector3D v15 = aiVector3D(-c, 0.f, -b).SymMul(length);
-	aiVector3D v16 = aiVector3D(0.f, b, c).SymMul(length);
-	aiVector3D v17 = aiVector3D(0.f, -b, c).SymMul(length);
-	aiVector3D v18 = aiVector3D(0.f, b, -c).SymMul(length);
-	aiVector3D v19 = aiVector3D(0.f, -b, -c).SymMul(length);
+	aiVector3D v0  = aiVector3D(a,a,a);
+	aiVector3D v1  = aiVector3D(a,a,-a);
+	aiVector3D v2  = aiVector3D(a,-a,a);
+	aiVector3D v3  = aiVector3D(a,-a,-a);
+	aiVector3D v4  = aiVector3D(-a,a,a);
+	aiVector3D v5  = aiVector3D(-a,a,-a);
+	aiVector3D v6  = aiVector3D(-a,-a,a);
+	aiVector3D v7  = aiVector3D(-a,-a,-a);
+	aiVector3D v8  = aiVector3D(b,c,0.f);
+	aiVector3D v9  = aiVector3D(-b,c,0.f);
+	aiVector3D v10 = aiVector3D(b,-c,0.f);
+	aiVector3D v11 = aiVector3D(-b,-c,0.f);
+	aiVector3D v12 = aiVector3D(c, 0.f, b);
+	aiVector3D v13 = aiVector3D(c, 0.f, -b);
+	aiVector3D v14 = aiVector3D(-c, 0.f, b);
+	aiVector3D v15 = aiVector3D(-c, 0.f, -b);
+	aiVector3D v16 = aiVector3D(0.f, b, c);
+	aiVector3D v17 = aiVector3D(0.f, -b, c);
+	aiVector3D v18 = aiVector3D(0.f, b, -c);
+	aiVector3D v19 = aiVector3D(0.f, -b, -c);
 
 	ADD_PENTAGON(v0, v8, v9, v4, v16);
 	ADD_PENTAGON(v0, v12, v13, v1, v8);
@@ -203,17 +201,16 @@ void StandardShapes::MakeDodecahedron(aiVector3D& center,const aiVector3D& lengt
 }
 
 // ------------------------------------------------------------------------------------------------
-void StandardShapes::MakeOctahedron(aiVector3D& center,const aiVector3D& length,
-	std::vector<aiVector3D>& positions)
+void StandardShapes::MakeOctahedron(std::vector<aiVector3D>& positions)
 {
 	positions.reserve(positions.size()+24);
 
-	aiVector3D v0  = aiVector3D(length.x, 0.f, 0.f) ;
-	aiVector3D v1  = aiVector3D(-length.x, 0.f, 0.f);
-	aiVector3D v2  = aiVector3D(0.f, length.y, 0.f);
-	aiVector3D v3  = aiVector3D(0.f, -length.y, 0.f);
-	aiVector3D v4  = aiVector3D(0.f, 0.f, length.z);
-	aiVector3D v5  = aiVector3D(0.f, 0.f, -length.z);
+	aiVector3D v0  = aiVector3D(1.0f, 0.f, 0.f) ;
+	aiVector3D v1  = aiVector3D(-1.0f, 0.f, 0.f);
+	aiVector3D v2  = aiVector3D(0.f, 1.0f, 0.f);
+	aiVector3D v3  = aiVector3D(0.f, -1.0f, 0.f);
+	aiVector3D v4  = aiVector3D(0.f, 0.f, 1.0f);
+	aiVector3D v5  = aiVector3D(0.f, 0.f, -1.0f);
 
 	ADD_TRIANGLE(v4,v0,v2);
 	ADD_TRIANGLE(v4,v2,v1);
@@ -227,18 +224,17 @@ void StandardShapes::MakeOctahedron(aiVector3D& center,const aiVector3D& length,
 }
 
 // ------------------------------------------------------------------------------------------------
-void StandardShapes::MakeTetrahedron(aiVector3D& center,const aiVector3D& length,
-	std::vector<aiVector3D>& positions)
+void StandardShapes::MakeTetrahedron(std::vector<aiVector3D>& positions)
 {
 	positions.reserve(positions.size()+9);
 
 	const float a = 1.41421f/3.f;
 	const float b = 2.4494f/3.f;
 
-	aiVector3D v0  = aiVector3D(0.f,0.f,1.f).SymMul(length);
-	aiVector3D v1  = aiVector3D(2*a,0,-1.f/3.f).SymMul(length);
-	aiVector3D v2  = aiVector3D(-a,b,-1.f/3.f).SymMul(length);
-	aiVector3D v3  = aiVector3D(-a,-b,-1.f/3.f).SymMul(length);
+	aiVector3D v0  = aiVector3D(0.f,0.f,1.f);
+	aiVector3D v1  = aiVector3D(2*a,0,-1.f/3.f);
+	aiVector3D v2  = aiVector3D(-a,b,-1.f/3.f);
+	aiVector3D v3  = aiVector3D(-a,-b,-1.f/3.f);
 
 	ADD_TRIANGLE(v0,v1,v2);
 	ADD_TRIANGLE(v0,v2,v3);
@@ -247,20 +243,19 @@ void StandardShapes::MakeTetrahedron(aiVector3D& center,const aiVector3D& length
 }
 
 // ------------------------------------------------------------------------------------------------
-void StandardShapes::MakeHexahedron(aiVector3D& center,const aiVector3D& length,
-	std::vector<aiVector3D>& positions)
+void StandardShapes::MakeHexahedron(std::vector<aiVector3D>& positions)
 {
 	positions.reserve(positions.size()+36);
-	aiVector3D _length = length * (1.f/1.73205080f);
+	float length = 1.f/1.73205080f;
 
-	aiVector3D v0  = aiVector3D(-1.f,-1.f,-1.f).SymMul(_length) ;
-	aiVector3D v1  = aiVector3D(1.f,-1.f,-1.f).SymMul(_length)  ;
-	aiVector3D v2  = aiVector3D(1.f,1.f,-1.f) .SymMul(_length) ;
-	aiVector3D v3  = aiVector3D(-1.f,1.f,-1.f) .SymMul(_length) ;
-	aiVector3D v4  = aiVector3D(-1.f,-1.f,1.f) .SymMul(_length) ;
-	aiVector3D v5  = aiVector3D(1.f,-1.f,1.f) .SymMul(_length) ;
-	aiVector3D v6  = aiVector3D(1.f,1.f,1.f) .SymMul(_length) ;
-	aiVector3D v7  = aiVector3D(-1.f,1.f,1.f) .SymMul(_length) ;
+	aiVector3D v0  = aiVector3D(-1.f,-1.f,-1.f)*length;
+	aiVector3D v1  = aiVector3D(1.f,-1.f,-1.f)*length;
+	aiVector3D v2  = aiVector3D(1.f,1.f,-1.f)*length;
+	aiVector3D v3  = aiVector3D(-1.f,1.f,-1.f)*length;
+	aiVector3D v4  = aiVector3D(-1.f,-1.f,1.f)*length;
+	aiVector3D v5  = aiVector3D(1.f,-1.f,1.f)*length;
+	aiVector3D v6  = aiVector3D(1.f,1.f,1.f)*length;
+	aiVector3D v7  = aiVector3D(-1.f,1.f,1.f)*length;
 
 	ADD_QUAD(v0,v3,v2,v1);
 	ADD_QUAD(v0,v1,v5,v4);
@@ -273,13 +268,10 @@ void StandardShapes::MakeHexahedron(aiVector3D& center,const aiVector3D& length,
 #undef ADD_TRIANGLE
 
 // ------------------------------------------------------------------------------------------------
-void StandardShapes::MakeSphere(
-	aiVector3D&		center,
-	float			radius,
-	unsigned int	tess,
+void StandardShapes::MakeSphere(unsigned int	tess,
 	std::vector<aiVector3D>& positions)
 {
-	MakeIcosahedron(center,radius,positions);
+	MakeIcosahedron(positions);
 
 	for (unsigned int i = 0; i<tess;++i)
 		Subdivide(positions);

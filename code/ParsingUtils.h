@@ -107,6 +107,21 @@ inline bool SkipSpacesAndLineEnd( const char_t** inout)
 {
 	return SkipSpacesAndLineEnd<char_t>(*inout,inout);
 }
+// ---------------------------------------------------------------------------------
+template <class char_t>
+bool GetNextLine(const char_t*& buffer, char_t out[4096])
+{
+	if ((char_t)'\0' == *buffer)return false;
+
+	char* _out = out;
+	char* const end = _out+4096;
+	while (!IsLineEnd( *buffer ) && _out < end)
+		*_out++ = *buffer++;
+	*_out = (char_t)'\0';
+
+	while (IsLineEnd( *buffer ) && '\0' != *buffer)++buffer;
+	return true;
+}
 
 
 #endif // ! AI_PARSING_UTILS_H_INC

@@ -55,6 +55,9 @@ SOURCES = 3DSConverter.cpp \
 	ValidateDataStructure.cpp \
 	VertexTriangleAdjacency.cpp \
 	XFileImporter.cpp \
+	MDRLoader.cpp \
+	RawLoader.cpp \
+	OFFLoader.cpp \
 	XFileParser.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
@@ -66,7 +69,7 @@ all:	$(TARGET)
 $(TARGET):	$(OBJECTS)
 	gcc -o $@ $(OBJECTS) -shared -lstdc++ 
 %.o:%.cpp
-	$(CXX) -g -Wall -c $? -o $@ -I../include -fPIC
+	$(CXX) -g -Wall -c $? -o $@ -I../include -I"C:\Program Files\boost\boost_1_35_0" -fPIC
 clean:
 	rm -f $(OBJECTS) $(TARGET)
 

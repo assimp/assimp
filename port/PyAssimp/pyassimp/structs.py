@@ -1,5 +1,7 @@
+#-*- coding: UTF-8 -*-
+
 """
-All ASSIMP C-structures.
+All ASSIMP C-structures. See the Assimp-headers for all formats.
 """
 
 from ctypes import POINTER, c_int, c_uint, c_char, c_float, Structure, c_char_p, c_double, c_ubyte

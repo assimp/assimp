@@ -1,3 +1,11 @@
+#-*- coding: UTF-8 -*-
+
+"""
+PyAssimp
+
+This is the main-module of PyAssimp.
+"""
+
 import structs
 import ctypes
 import os

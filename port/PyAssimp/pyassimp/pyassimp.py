@@ -10,31 +10,19 @@ import structs
 import ctypes
 import os
 import helper
+from errors import AssimpError
 
 
 #get the assimp path
 LIBRARY = os.path.join(os.path.dirname(__file__), "assimp.so")
 
 
-class AssimpError(BaseException):
-    """
-    If ann internal error occures.
-    """
-    pass
-
-
 
 class AssimpLib(object):
-    from ctypes import POINTER
-    
-    #open library
-    _dll = ctypes.cdll.LoadLibrary(LIBRARY)
-    
-    #get functions
-    load = _dll.aiImportFile
-    load.restype = POINTER(structs.SCENE)
-    
-    release = _dll.aiReleaseImport
+    """
+    Assimp-Singleton
+    """
+    load, release = helper.search_library()
 
 
 

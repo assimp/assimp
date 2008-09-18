@@ -224,7 +224,7 @@ class MESH(Structure):
             #Vertex texture coords, also known as UV channels.
             #A mesh may contain 0 to AI_MAX_NUMBER_OF_TEXTURECOORDS per
             #vertex. NULL if not present. The array is mNumVertices in size. 
-            ("mTextureCoords", POINTER(VECTOR3D)*AI_MAX_NUMBER_OF_TEXTURECOORDS),
+            ("mTextureCoords", POINTER(VECTOR3D)*AI_MAX_NUMBER_OF_TEXTURECOORDS),#OK
         
             #Specifies the number of components for a given UV channel.
             #Up to three channels are supported (UVW, for accessing volume
@@ -232,7 +232,7 @@ class MESH(Structure):
             #component p.z of mTextureCoords[n][p] is set to 0.0f.
             #If the value is 1 for a given channel, p.y is set to 0.0f, too.
             #@note 4D coords are not supported
-            ("mNumUVComponents", c_uint*AI_MAX_NUMBER_OF_TEXTURECOORDS),
+            ("mNumUVComponents", c_uint*AI_MAX_NUMBER_OF_TEXTURECOORDS),        #OK
         
             #The faces the mesh is contstructed from. 
             #Each face referres to a number of vertices by their indices. 
@@ -253,7 +253,7 @@ class MESH(Structure):
             #A mesh does use only a single material. If an imported model uses
             #multiple materials, the import splits up the mesh. Use this value 
             #as index into the scene's material list.
-            ("mMaterialIndex", c_uint)
+            ("mMaterialIndex", c_uint)                                          #OK
         ]
 
 

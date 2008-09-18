@@ -156,8 +156,14 @@ class Mesh(AssimpBase):
         #vertex color sets
         self.colors = self._load_colors(mesh)
         
-        #number of texture coordinates
-        self.numuv = self._load_uv_component_count(mesh) #FIXME
+        #number of coordinates per uv-channel
+        self.uvsize = self._load_uv_component_count(mesh)
+        
+        #number of uv channels
+        self.texcoords = self._load_texture_coords(mesh)
+        
+        #the used material
+        self.material_index = mesh.mMaterialIndex
     
     
     def _load_uv_component_count(self, mesh):
@@ -170,6 +176,24 @@ class Mesh(AssimpBase):
         """
         return tuple(mesh.mNumUVComponents[i]
                      for i in range(structs.MESH.AI_MAX_NUMBER_OF_TEXTURECOORDS))
+    
+    
+    def _load_texture_coords(self, mesh):
+        """
+        Loads texture coordinates.
+        
+        mesh - mesh-data
+        
+        result texture coordinates
+        """
+        result = []
+        
+        for i in range(structs.MESH.AI_MAX_NUMBER_OF_TEXTURECOORDS):
+            result.append(self._load_array(mesh.mTextureCoords[i],
+                                           mesh.mNumVertices,
+                                           lambda x: (x.x, x.y, x.z)))
+                
+        return result
     
     
     def _load_colors(self, mesh):

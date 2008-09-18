@@ -9,7 +9,7 @@ This is the main-module of PyAssimp.
 import structs
 import ctypes
 import os
-from ctypes import POINTER, c_int, c_uint, c_double, c_char, c_float
+import helper
 
 
 #get the assimp path
@@ -25,6 +25,8 @@ class AssimpError(BaseException):
 
 
 class AssimpLib(object):
+    from ctypes import POINTER
+    
     #open library
     _dll = ctypes.cdll.LoadLibrary(LIBRARY)
     
@@ -103,6 +105,27 @@ class Scene(AssimpBase):
                      if (key & self.flags)>0]
 
 
+class Face(AssimpBase):
+    """
+    A single face in a mesh, referring to multiple vertices. 
+    If the number of indices is 3, the face is a triangle, 
+    for more than 3  it is a polygon.
+    
+    Point and line primitives are rarely used and are NOT supported. However,
+    a load could pass them as degenerated triangles.
+    """
+    
+    def __init__(self, face):
+        """
+        Loads a face from raw-data.
+        """
+        self.indices = [face.mIndices[i] for i in range(face.mNumIndices)]
+    
+    
+    def __repr__(self):
+        return str(self.indices)
+
+
 class Mesh(AssimpBase):
     """
     A mesh represents a geometry or model with a single material. 
@@ -130,28 +153,25 @@ class Mesh(AssimpBase):
         
         mesh - raw mesh-data
         """
-        #converts a VECTOR3D-struct to a tuple
-        vec2tuple = lambda x: (x.x, x.y, x.z)
-        
         #load vertices
         self.vertices = self._load_array(mesh.mVertices,
                                          mesh.mNumVertices,
-                                         vec2tuple)
+                                         helper.vec2tuple)
         
         #load normals
         self.normals = self._load_array(mesh.mNormals,
                                         mesh.mNumVertices,
-                                        vec2tuple)
+                                        helper.vec2tuple)
         
         #load tangents
         self.tangents = self._load_array(mesh.mTangents,
                                          mesh.mNumVertices,
-                                         vec2tuple)
+                                         helper.vec2tuple)
         
         #load bitangents
         self.bitangents = self._load_array(mesh.mBitangents,
                                            mesh.mNumVertices,
-                                           vec2tuple)
+                                           helper.vec2tuple)
         
         #vertex color sets
         self.colors = self._load_colors(mesh)
@@ -163,7 +183,21 @@ class Mesh(AssimpBase):
         self.texcoords = self._load_texture_coords(mesh)
         
         #the used material
-        self.material_index = mesh.mMaterialIndex
+        self.material_index = int(mesh.mMaterialIndex)
+        
+        #faces
+        self.faces = self._load_faces(mesh)
+    
+    
+    def _load_faces(self, mesh):
+        """
+        Loads all faces.
+        
+        mesh - mesh-data
+        
+        result faces
+        """
+        return [Face(mesh.mFaces[i]) for i in range(mesh.mNumFaces)]
     
     
     def _load_uv_component_count(self, mesh):
@@ -191,7 +225,7 @@ class Mesh(AssimpBase):
         for i in range(structs.MESH.AI_MAX_NUMBER_OF_TEXTURECOORDS):
             result.append(self._load_array(mesh.mTextureCoords[i],
                                            mesh.mNumVertices,
-                                           lambda x: (x.x, x.y, x.z)))
+                                           helper.vec2tuple))
                 
         return result
     

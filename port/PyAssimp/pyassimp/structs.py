@@ -7,6 +7,7 @@ All ASSIMP C-structures. See the Assimp-headers for all formats.
 from ctypes import POINTER, c_int, c_uint, c_char, c_float, Structure, c_char_p, c_double, c_ubyte
 
 
+
 class STRING(Structure):
     """
     Represents a String in ASSIMP.
@@ -111,10 +112,10 @@ class FACE(Structure):
     
     _fields_ = [
             #Number of indices defining this face. 3 for a triangle, >3 for polygon
-            ("mNumIndices", c_uint),
+            ("mNumIndices", c_uint),                                            #OK
             
             #Pointer to the indices array. Size of the array is given in numIndices.
-            ("mIndices", POINTER(c_uint))
+            ("mIndices", POINTER(c_uint))                                       #OK
         ]
 
 
@@ -187,7 +188,7 @@ class MESH(Structure):
         
             #The number of primitives (triangles, polygones, lines) in this mesh. 
             #This is also the size of the mFaces array 
-            ("mNumFaces", c_uint),
+            ("mNumFaces", c_uint),                                              #OK
         
             #Vertex positions. 
             #This array is always present in a mesh. The array is 
@@ -238,7 +239,7 @@ class MESH(Structure):
             #Each face referres to a number of vertices by their indices. 
             #This array is always present in a mesh, its size is given 
             #in mNumFaces.
-            ("mFaces", POINTER(FACE)),
+            ("mFaces", POINTER(FACE)),                                          #OK
         
             #The number of bones this mesh contains. 
             #Can be 0, in which case the mBones array is NULL. 

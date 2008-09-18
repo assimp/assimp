@@ -37,6 +37,7 @@ def main():
         print "    texture-coords 3:", len(tc[2]), "first:", tc[2][:3]
         print "    texture-coords 4:", len(tc[3]), "first:", tc[3][:3]
         print "    uv-counts:", mesh.uvsize
+        print "    faces:", len(mesh.faces), "first:", mesh.faces[:3]
         print
     
 

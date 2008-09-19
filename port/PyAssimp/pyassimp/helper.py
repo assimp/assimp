@@ -7,6 +7,7 @@ Some fancy helper functions.
 import os
 import ctypes
 import structs
+import operator
 from errors import AssimpError
 from ctypes import POINTER
 
@@ -28,6 +29,8 @@ def search_library():
     """
     #this path
     folder = os.path.dirname(__file__)
+    
+    candidates = []
     
     #test every file
     for filename in os.listdir(folder):
@@ -51,6 +54,12 @@ def search_library():
                 #Library found!
                 load.restype = POINTER(structs.SCENE)
                 
-                return (load, release)
+                candidates.append((library, load, release))
     
-    raise AssimpError, "assimp library not found"
+    if not candidates:
+        #no library found
+        raise AssimpError, "assimp library not found"
+    else:
+        #get the newest library
+        candidates = map(lambda x: (os.lstat(x[0])[-2], x), candidates)
+        return max(candidates, key=operator.itemgetter(0))[1][1:]

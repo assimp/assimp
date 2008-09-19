@@ -13,10 +13,6 @@ import helper
 from errors import AssimpError
 
 
-#get the assimp path
-LIBRARY = os.path.join(os.path.dirname(__file__), "assimp.so")
-
-
 
 class AssimpLib(object):
     """
@@ -46,6 +42,101 @@ class AssimpBase(object):
             return [cons(data[i]) for i in range(count)]
         else:
             return []
+
+
+class Matrix(AssimpBase):
+    """
+    Assimp 4x4-matrix
+    """
+    def __init__(self, matrix):
+        """
+        Copies matrix data to this structure.
+        
+        matrix - raw matrix data
+        """
+        m = matrix
+        
+        self.data = [
+                     [m.a1, m.a2, m.a3, m.a4],
+                     [m.b1, m.b2, m.b3, m.b4],
+                     [m.c1, m.c2, m.c3, m.c4],
+                     [m.d1, m.d2, m.d3, m.d4],
+                     ]
+    
+    
+    def __getitem__(self, index):
+        """
+        Returns an item out of the matrix data. Use (row, column) to access
+        data directly or an natural number n to access the n-th row.
+        
+        index - matrix index
+        
+        result element or row
+        """
+        try:
+            #tuple as index?
+            x, y = index
+            return data[x][y]
+        except TypeError:
+            #index as index
+            return data[index]
+    
+    
+    def __setitem__(self, index, value):
+        """
+        Sets an item of the matrix data. Use (row, column) to access
+        data directly or an natural number n to access the n-th row.
+        
+        index - matrix index
+        value - new value
+        """
+        try:
+            #tuple as index?
+            x, y = index
+            data[x][y] = value
+        except TypeError:
+            #index as index
+            data[index] = value
+
+
+class VertexWeight(AssimpBase):
+    """
+    Weight for vertices.
+    """
+    
+    def __init__(self, weight):
+        """
+        Copies vertex weights to this structure.
+        
+        weight - new weight
+        """
+        #corresponding vertex id
+        self.vertex = weight.mVertexId
+        
+        #my weight
+        self.weight = weight.mWeight
+
+
+class Bone(AssimpBase):
+    """
+    Single bone of a mesh. A bone has a name by which it can be found 
+    in the frame hierarchy and by which it can be addressed by animations.
+    """
+    
+    def __init__(self, bone):
+        """
+        Converts an ASSIMP-bone to a PyAssimp-bone.
+        """
+        #the name is easy
+        self.name = str(bone.mName)
+        
+        #matrix that transforms from mesh space to bone space in bind pose
+        self.matrix = Matrix(bone.mOffsetMatrix)
+        
+        #and of course the weights!
+        self._load_array(bone.mWeights,
+                         bone.mNumWeights,
+                         VertexWeight)
 
 
 class Scene(AssimpBase):
@@ -175,6 +266,30 @@ class Mesh(AssimpBase):
         
         #faces
         self.faces = self._load_faces(mesh)
+        
+        #bones
+        self.bones = self._load_bones(mesh)
+    
+    
+    def _load_bones(self, mesh):
+        """
+        Loads bones of this mesh.
+        
+        mesh - mesh-data
+        
+        result bones
+        """
+        count = mesh.mNumBones
+        
+        if count==0:
+            #no bones
+            return []
+        
+        #read bones
+        bones = mesh.mBones.contents
+        self._load_array(bones,
+                         count,
+                         Bone)
     
     
     def _load_faces(self, mesh):

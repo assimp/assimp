@@ -18,10 +18,10 @@ class STRING(Structure):
     
     _fields_ = [
             #length of the string
-            ("length", c_uint),
+            ("length", c_uint),                                                 #OK
             
             #string data
-            ("data", c_char*MAXLEN)
+            ("data", c_char*MAXLEN)                                             #OK
         ]
 
 
@@ -33,10 +33,10 @@ class MATRIX4X4(Structure):
     
     _fields_ = [
         #all the fields
-        ("a1", c_float), ("a2", c_float), ("a3", c_float), ("a4", c_float),
-        ("b1", c_float), ("b2", c_float), ("b3", c_float), ("b4", c_float),
-        ("c1", c_float), ("c2", c_float), ("c3", c_float), ("c4", c_float),
-        ("d1", c_float), ("d2", c_float), ("d3", c_float), ("d4", c_float),
+        ("a1", c_float), ("a2", c_float), ("a3", c_float), ("a4", c_float),     #OK
+        ("b1", c_float), ("b2", c_float), ("b3", c_float), ("b4", c_float),     #OK
+        ("c1", c_float), ("c2", c_float), ("c3", c_float), ("c4", c_float),     #OK
+        ("d1", c_float), ("d2", c_float), ("d3", c_float), ("d4", c_float),     #OK
     ]
 
 
@@ -126,11 +126,11 @@ class VERTEXWEIGHT(Structure):
     
     _fields_ = [
             #Index of the vertex which is influenced by the bone.
-            ("mVertexId", c_uint),
+            ("mVertexId", c_uint),                                              #OK
         
             #The strength of the influence in the range (0...1).
             #The influence from all bones at one vertex amounts to 1.
-            ("mWeight", c_float)
+            ("mWeight", c_float)                                                #OK
         ]
 
 
@@ -143,16 +143,16 @@ class BONE(Structure):
     
     _fields_ = [
             #The name of the bone. 
-            ("mName", STRING),
+            ("mName", STRING),                                                  #OK
         
             #The number of vertices affected by this bone
-            ("mNumWeights", c_uint),
+            ("mNumWeights", c_uint),                                            #OK
         
             #The vertices affected by this bone
-            ("mWeights", POINTER(VERTEXWEIGHT)),
+            ("mWeights", POINTER(VERTEXWEIGHT)),                                #OK
         
             #Matrix that transforms from mesh space to bone space in bind pose
-            ("mOffsetMatrix", MATRIX4X4)
+            ("mOffsetMatrix", MATRIX4X4)                                        #OK
         ]
 
 
@@ -243,12 +243,12 @@ class MESH(Structure):
         
             #The number of bones this mesh contains. 
             #Can be 0, in which case the mBones array is NULL. 
-            ("mNumBones", c_uint),
+            ("mNumBones", c_uint),                                              #OK
         
             #The bones of this mesh. 
             #A bone consists of a name by which it can be found in the
             #frame hierarchy and a set of vertex weights.
-            ("mBones", POINTER(POINTER(BONE))),
+            ("mBones", POINTER(POINTER(BONE))),                                 #OK
         
             #The material used by this mesh. 
             #A mesh does use only a single material. If an imported model uses

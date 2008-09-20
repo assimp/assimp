@@ -42,11 +42,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package assimp;
 
 /**
- * Created by IntelliJ IDEA.
- * User: Alex
- * Date: 08.06.2008
- * Time: 17:27:11
- * To change this template use File | Settings | File Templates.
+ * Defines how texture coordinates ! ElemOf [0 ... 1] are handled.
+ *
+ * This corresponds to the native <code>aiTextureMapMode</code> enum.
+ *
+ * @author Alexander Gessler (Aramis)
  */
 public class TextureMapMode {
+
+    /** A texture coordinate u|v is translated to u%1|v%1
+     */
+    public static final int Wrap = 0x0;
+
+     /** Texture coordinates outside the area formed by 1|1 and 0|0
+     *  are clamped to the nearest valid value on an axis
+     */
+    public static final int Clamp = 0x1;
+   
+     /** A texture coordinate u|v becomes u%1|v%1 if (u-(u%1))%2 is zero and
+     *  1-(u%1)|1-(v%1) otherwise
+     */
+    public static final int Mirror = 0x2;
 }

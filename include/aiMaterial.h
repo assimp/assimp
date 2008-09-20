@@ -197,7 +197,11 @@ enum aiShadingMode
 
     /** No shading at all
     */
-    aiShadingMode_NoShading = 0x8
+    aiShadingMode_NoShading = 0x9,
+
+	/** Fresnel shading
+    */
+    aiShadingMode_Fresnel = 0xa
 };
 
 
@@ -242,6 +246,7 @@ struct aiMaterialProperty
 } // need to end extern C block to allow template member functions
 #endif
 
+// supported texture types
 #define AI_TEXTYPE_OPACITY		0x0
 #define AI_TEXTYPE_SPECULAR		0x1
 #define AI_TEXTYPE_AMBIENT		0x2
@@ -250,6 +255,7 @@ struct aiMaterialProperty
 #define AI_TEXTYPE_NORMALS		0x5
 #define AI_TEXTYPE_SHININESS	0x6
 #define AI_TEXTYPE_DIFFUSE		0x7
+#define AI_TEXTYPE_GLOSSINESS	0x8
 
 // ---------------------------------------------------------------------------
 /** Data structure for a material
@@ -339,7 +345,7 @@ extern "C" {
 
 // ---------------------------------------------------------------------------
 /** @def AI_BUILD_KEY
- * Builds a material texture key with a dynamic index.
+ * Build a material texture key from an index that is not a compile-time constant.
  * Applications <b>could</b> do this (C-example):
  * @code
  * int i;
@@ -352,10 +358,10 @@ extern "C" {
  * @endcode 
  * However, this is wrong because AI_MATKEY_TEXTURE_DIFFUSE() builds the key 
  * string at <b>compile time</b>. <br>
- * Therefore, the dynamic indexing results in a
+ * Therefore, the indexing results in a
  * material key like this : "$tex.file.diffuse[i]" - and it is not very
  * propable that there is a key with this name ... (except the programmer
- * of an ASSIMP loader has made the same mistake :-) ).<br>
+ * of an ASSIMP loader has made the same fault :-) ).<br>
  * This is the right way:
  * @code
  * int i;
@@ -369,8 +375,8 @@ extern "C" {
  * }
  * @endcode 
  * @param base Base material key. This is the same key you'd have used
- *   normally with an underscore as suffix (e.g. AI_MATKEY_TEXTURE_DIFFUSE_)
- * @param index Index to be used. Here you may pass a variable!
+ *   normally with an extra underscore as suffix (e.g. AI_MATKEY_TEXTURE_DIFFUSE_)
+ * @param index Index to be used. 
  * @param out Array of chars to receive the output value. It must be 
  *  sufficiently large. This will be checked via a static assertion for
  *  C++0x. For MSVC8 and later versions the security enhanced version of
@@ -468,6 +474,16 @@ extern "C" {
  * <b>Default value:</b> 1.0f <br>
 */
 #define AI_MATKEY_SHININESS_STRENGTH "$mat.shinpercent"
+
+/** @def AI_MATKEY_REFRACTI
+ * Index of refraction of the material. This is used by some shading models,
+ * e.g. Cook-Torrance. The value is the ratio of the speed of light in a 
+ * vacuum to the speed of light in the material (always >= 1.0 in the real world).
+ * <br>
+ * <b>Type:</b> float<br>
+ * <b>Default value:</b> 1.0f <br>
+*/
+#define AI_MATKEY_REFRACTI "$mat.refracti"
 
 // ---------------------------------------------------------------------------
 /** @def AI_MATKEY_COLOR_DIFFUSE
@@ -586,8 +602,12 @@ extern "C" {
 #define AI_MATKEY_TEXTURE_HEIGHT_   "$tex.file.height"
 
 /** @def AI_MATKEY_TEXTURE_SHININESS
- *  Defines a specific shininess texture channel of the material
- *  <br>
+ * Defines a specific shininess texture channel of the material.
+ * The shininess corresponds to the specular exponent used in the
+ * phong lighting equation. However, it is undefined how the exponent
+ * is encoded in the texture. A possible way would be the following:
+ * pixel value c € (0,1), n = 2^(10c+2).
+ * <br>
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> none <br>
  * @note The key string is built at compile time, therefore it is not 
@@ -597,6 +617,7 @@ extern "C" {
 */
 #define AI_MATKEY_TEXTURE_SHININESS(N) "$tex.file.shininess["#N"]"
 #define AI_MATKEY_TEXTURE_SHININESS_   "$tex.file.shininess"
+
 
 /** @def AI_MATKEY_TEXTURE_OPACITY
  *  Defines a specific opacity texture channel of the material
@@ -626,6 +647,7 @@ extern "C" {
  * use the macro suffixed with '_' to build the key dynamically. The 
  * AI_BUILD_KEY()-macro can be used to do this.
  */
+// ---------------------------------------------------------------------------
 #define AI_MATKEY_TEXOP_DIFFUSE(N)	"$tex.op.diffuse["#N"]"
 /** @see AI_MATKEY_TEXOP_DIFFUSE */
 #define AI_MATKEY_TEXOP_AMBIENT(N)	"$tex.op.ambient["#N"]"
@@ -663,6 +685,7 @@ extern "C" {
  * use the macro suffixed with '_' to build the key dynamically. The 
  * AI_BUILD_KEY()-macro can be used to do this.
  */
+// ---------------------------------------------------------------------------
 #define AI_MATKEY_UVWSRC_DIFFUSE(N)		"$tex.uvw.diffuse["#N"]"
 /** @see AI_MATKEY_UVWSRC_DIFFUSE */
 #define AI_MATKEY_UVWSRC_AMBIENT(N)		"$tex.uvw.ambient["#N"]"
@@ -700,6 +723,7 @@ extern "C" {
  * use the macro suffixed with '_' to build the key dynamically. The 
  * AI_BUILD_KEY()-macro can be used to do this.
  */
+// ---------------------------------------------------------------------------
 #define AI_MATKEY_TEXBLEND_DIFFUSE(N)	"$tex.blend.diffuse["#N"]"
 /** @see AI_MATKEY_TEXBLEND_DIFFUSE */
 #define AI_MATKEY_TEXBLEND_AMBIENT(N)	"$tex.blend.ambient["#N"]"
@@ -738,6 +762,7 @@ extern "C" {
  * use the macro suffixed with '_' to build the key dynamically. The 
  * AI_BUILD_KEY()-macro can be used to do this.
  */
+// ---------------------------------------------------------------------------
 #define AI_MATKEY_MAPPINGMODE_U_DIFFUSE(N)	"$tex.mapmodeu.diffuse["#N"]"
 /** @see AI_MATKEY_MAPPINGMODE_U_DIFFUSE */
 #define AI_MATKEY_MAPPINGMODE_U_AMBIENT(N)	"$tex.mapmodeu.ambient["#N"]"
@@ -776,6 +801,7 @@ extern "C" {
  * use the macro suffixed with '_' to build the key dynamically. The 
  * AI_BUILD_KEY()-macro can be used to do this.
  */
+// ---------------------------------------------------------------------------
 #define AI_MATKEY_MAPPINGMODE_V_DIFFUSE(N)	"$tex.mapmodev.diffuse["#N"]"
 /** @see AI_MATKEY_MAPPINGMODE_V_DIFFUSE */
 #define AI_MATKEY_MAPPINGMODE_V_AMBIENT(N)	"$tex.mapmodev.ambient["#N"]"
@@ -814,6 +840,7 @@ extern "C" {
  * use the macro suffixed with '_' to build the key dynamically. The 
  * AI_BUILD_KEY()-macro can be used to do this.
  */
+// ---------------------------------------------------------------------------
 #define AI_MATKEY_MAPPINGMODE_W_DIFFUSE(N)	"$tex.mapmodew.diffuse["#N"]"
 /** @see AI_MATKEY_MAPPINGMODE_W_DIFFUSE */
 #define AI_MATKEY_MAPPINGMODE_W_AMBIENT(N)	"$tex.mapmodew.ambient["#N"]"
@@ -841,7 +868,6 @@ extern "C" {
 
 #define AI_MATKEY_ORENNAYAR_ROUGHNESS	 "$shading.orennayar.roughness"
 #define AI_MATKEY_MINNAERT_DARKNESS		 "$shading.minnaert.darkness"
-#define AI_MATKEY_COOK_TORRANCE_REFRACTI "$shading.cookt.refracti"
 #define AI_MATKEY_COOK_TORRANCE_PARAM	 "$shading.cookt.param"
 
 /** @def AI_MATKEY_GLOBAL_BACKGROUND_IMAGE

@@ -1132,6 +1132,10 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="AC"
+					>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
@@ -1467,6 +1471,10 @@
 						RelativePath="..\..\code\OFFLoader.cpp"
 						>
 					</File>
+				</Filter>
+				<Filter
+					Name="AC"
+					>
 				</Filter>
 			</Filter>
 		</Filter>

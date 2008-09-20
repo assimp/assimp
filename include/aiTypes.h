@@ -107,6 +107,16 @@ struct aiColor3D
 	bool operator != (const aiColor3D& other) const
 		{return r != other.r || g != other.g || b != other.b;}
 
+	aiColor3D operator+(const aiColor3D& c) const
+		{return aiColor3D(r+c.r,g+c.g,b+c.b);}
+	aiColor3D operator-(const aiColor3D& c) const
+		{return aiColor3D(r+c.r,g+c.g,b+c.b);}
+	aiColor3D operator*(const aiColor3D& c) const
+		{return aiColor3D(r*c.r,g*c.g,b*c.b);}
+	
+	aiColor3D operator*(float f)
+		{return aiColor3D(r*f,g*f,b*f);}
+
 #endif // !__cplusplus
 
 	//! Red, green and blue color values

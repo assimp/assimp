@@ -45,8 +45,14 @@ package assimp.test;
 import assimp.*;
 
 
+import javax.imageio.ImageWriter;
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.File;
+import java.awt.image.BufferedImage;
+import java.util.Iterator;
 
 
 /**
@@ -115,10 +121,34 @@ public class DumpToFile {
      *
      * @param texture Texture to be exported
      * @param path    Output path
-     * @throws IOException yes ... sometimes ... :-)
      */
-    public static void SaveTextureToTGA(Texture texture, String path) throws IOException {
+    public static void SaveTextureToTGA(Texture texture, String path) {
+        BufferedImage bImg = texture.convertToImage();
 
+        Iterator writers = ImageIO.getImageWritersBySuffix("tga");
+        if (!(writers.hasNext())) {
+            System.out.println("No writer for TGA file format available");
+            return;
+        }
+        ImageWriter w = (ImageWriter) (writers.next());
+        if (w == null) {
+            System.out.println("No writer for TGA file format available");
+            return;
+        }
+        File fo = new File(path);
+
+        try {
+
+        ImageOutputStream ios = ImageIO.createImageOutputStream(fo);
+        w.setOutput(ios);
+        w.write(bImg);
+
+        }
+        catch (IOException ex) {
+             System.out.println("Failed to write " + path);
+            return;
+        }
+        System.out.println(path + " has been written");
     }
 
 
@@ -390,7 +420,7 @@ public class DumpToFile {
 
                 String path = arguments[1].substring(0, arguments[1].length() - 4) + "_tex" + i++ + ".tga";
                 stream.write("Emb. Texture\n" +
-                    "\tExportPath: " + path + "\n\n");
+                        "\tExportPath: " + path + "\n\n");
 
                 SaveTextureToTGA(texture, path);
             }
@@ -398,7 +428,6 @@ public class DumpToFile {
 
         /*  Now print all materials
          */
-
 
         // close the stream again
         stream.close();

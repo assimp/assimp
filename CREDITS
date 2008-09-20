@@ -7,20 +7,28 @@ The following is the list of all constributors.
 Thanks for your help!
 
 - Alexander Gessler,
-3DS-, ASE-, DXF-, HMP-, MDL-, MD2-, MD3-, MD5-, MDC-, NFF-, PLY-, STL- and LWO-Loader, 
+3DS-, ASE-, DXF-, HMP-, MDL-, MD2-, MD3-, MD5-, MDC-, NFF-, PLY-, STL-, RAW-, OFF- and LWO-Loader, 
 Configuration-Interface, AssImp-Viewer (Win32), Website (Admin and Design), admin.
 
 -Thomas Schulze,
-X-Loader, Preprocessing framework.
+X-Loader, Preprocessing framework. Data structure & Interface design, documentation.
 
 -R.Schmidt,
 Linux build, eclipse support.
 
 - Kim Kulling:
-Obj-Loader, Logging, Scons-build enviroment.
+Obj-Loader, Logging, Scons-build environment.
 
 - Matthias Gubisch,
+Assimp.net
 Visual Studio 9 support, bugfixes.
+
+- Sebastian Hempel,
+PyAssimp
+Compile-Bugfixes for mingw, add enviroment for static library support in make.
+
+- Jonathan Pokrass
+supplied a bugfix concerning the scaling in the md3 loader.
 
 - Andrew Galante,
 submitted patches to make Assimp compile with GCC-4, a makefile and the xcode3 workspace.
@@ -30,12 +38,6 @@ tested Assimp under Windows Vista 64 Bit.
 
 - Marius Schröder
 allowed us to use many of his models for screenshots and testing.
-
-- Sebastian Hempel,
-Compile-Bugfixes for mingw, add enviroment for static library support in make.
-
-- Jonathan Pokrass
-supplied a bugfix concerning the scaling in the md3 loader.
 
 - Christian Schubert
 supplied various XFiles for testing purposes.

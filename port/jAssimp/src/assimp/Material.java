@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package assimp;
 
 
-
 /**
  * Class to wrap materials. Materials are represented in ASSIMP as a list of
  * key/value pairs, the key being a <code>String</code> and the value being
@@ -80,7 +79,8 @@ public class Material {
 
         /**
          * Constructs a new exception
-         * @param message Error message
+         *
+         * @param message      Error message
          * @param property_key Name of the property that wasn't found
          */
         public PropertyNotFoundException(String message, String property_key) {
@@ -92,27 +92,29 @@ public class Material {
 
     /**
      * Get a property with a specific name as generic <code>Object</code>
+     *
      * @param key MATKEY_XXX key constant
-     * @return  null if the property wasn't there or hasn't
-     * the desired output type. The returned <code>Object</code> can be
-     * casted to the expected data type for the property. Primitive
-     * types are represented by their boxed variants.
+     * @return null if the property wasn't there or hasn't
+     *         the desired output type. The returned <code>Object</code> can be
+     *         casted to the expected data type for the property. Primitive
+     *         types are represented by their boxed variants.
      */
     public Object getProperty(String key) throws PropertyNotFoundException {
 
-        for (Property prop : properties)  {
-            if (prop.key.equals(key)){
+        for (Property prop : properties) {
+            if (prop.key.equals(key)) {
                 return prop.value;
             }
         }
-        throw new PropertyNotFoundException("Unable to find material property: ",key);
+        throw new PropertyNotFoundException("Unable to find material property: ", key);
     }
 
-   /**
+    /**
      * Get a material property as float array
+     *
      * @param key MATKEY_XXX key constant
-      * @throws PropertyNotFoundException - if the property can't be found
-      * or if it has the wrong data type.
+     * @throws PropertyNotFoundException - if the property can't be found
+     *                                   or if it has the wrong data type.
      */
     public float[] getPropertyAsFloatArray(String key) throws PropertyNotFoundException {
 
@@ -121,18 +123,19 @@ public class Material {
             return (float[]) obj;
         }
         String msg = "The data type requested (float[]) doesn't match the " +
-            "real data type of the material property";
+                "real data type of the material property";
         DefaultLogger.get().error(msg);
-       throw new PropertyNotFoundException(msg,key);
+        throw new PropertyNotFoundException(msg, key);
     }
 
 
-     /**
+    /**
      * Get a floating-point material property
+     *
      * @param key MATKEY_XXX key constant
      * @return The value of the property.
-      * @throws PropertyNotFoundException - if the property can't be found
-      * or if it has the wrong data type.
+     * @throws PropertyNotFoundException - if the property can't be found
+     *                                   or if it has the wrong data type.
      */
     public float getPropertyAsFloat(String key) throws PropertyNotFoundException {
 
@@ -141,18 +144,19 @@ public class Material {
             return (Float) obj;
         }
         String msg = "The data type requested (Float) doesn't match the " +
-            "real data type of the material property";
+                "real data type of the material property";
         DefaultLogger.get().error(msg);
-       throw new PropertyNotFoundException(msg,key);
+        throw new PropertyNotFoundException(msg, key);
     }
 
 
     /**
      * Get an integer material property
+     *
      * @param key MATKEY_XXX key constant
      * @return The value of the property.
-      * @throws PropertyNotFoundException - if the property can't be found
-      * or if it has the wrong data type.
+     * @throws PropertyNotFoundException - if the property can't be found
+     *                                   or if it has the wrong data type.
      */
     public int getPropertyAsInt(String key) throws PropertyNotFoundException {
 
@@ -161,18 +165,19 @@ public class Material {
             return (Integer) obj;
         }
         String msg = "The data type requested (Integer) doesn't match the " +
-            "real data type of the material property";
+                "real data type of the material property";
         DefaultLogger.get().error(msg);
-       throw new PropertyNotFoundException(msg,key);
+        throw new PropertyNotFoundException(msg, key);
     }
 
 
     /**
      * Get a material property string
+     *
      * @param key MATKEY_XXX key constant
      * @return The value of the property.
-      * @throws PropertyNotFoundException - if the property can't be found
-      * or if it has the wrong data type.
+     * @throws PropertyNotFoundException - if the property can't be found
+     *                                   or if it has the wrong data type.
      */
     public String getPropertyAsString(String key) throws PropertyNotFoundException {
 
@@ -181,9 +186,9 @@ public class Material {
             return (String) obj;
         }
         String msg = "The data type requested (java.lang.String) doesn't match the " +
-            "real data type of the material property";
+                "real data type of the material property";
         DefaultLogger.get().error(msg);
-       throw new PropertyNotFoundException(msg,key);
+        throw new PropertyNotFoundException(msg, key);
     }
 
 
@@ -228,7 +233,9 @@ public class Material {
      * <br>
      * <b>Type:</b> int (TextureOp)<br>
      * <b>Default value:</b> 0<br>
-     * <b>Requires:</b> MATKEY_TEXTURE_DIFFUSE(0)<br>
+     * <b>Requires:</b> MATKEY_TEXTURE_DIFFUSE(N)<br>
+     *
+     * @param N Index of the texture
      */
     public static String MATKEY_TEXOP_DIFFUSE(int N) {
         return "$tex.op.diffuse[" + N + "]";
@@ -284,5 +291,320 @@ public class Material {
     }
 
 
+    /**
+     * Specifies the blend factor to be multiplied with the value of
+     * the n'th texture layer before it is combined with the previous
+     * layer using a specific blend operation.
+     * <p/>
+     * <br>
+     * <b>Type:</b> float<br>
+     * <b>Default value:</b> 1.0f<br>
+     * <b>Requires:</b> MATKEY_TEXTURE_DIFFUSE(N)<br>
+     *
+     * @param N Index of the texture
+     */
+    public static String MATKEY_TEXBLEND_DIFFUSE(int N) {
+        return "$tex.blend.diffuse[" + N + "]";
+    }
 
+    /**
+     * @see <code>MATKEY_TEXBLEND_DIFFUSE</code>
+     */
+    public static String MATKEY_TEXBLEND_SPECULAR(int N) {
+        return "$tex.blend.specular[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_TEXBLEND_DIFFUSE</code>
+     */
+    public static String MATKEY_TEXBLEND_AMBIENT(int N) {
+        return "$tex.blend.ambient[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_TEXBLEND_DIFFUSE</code>
+     */
+    public static String MATKEY_TEXBLEND_EMISSIVE(int N) {
+        return "$tex.blend.emissive[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_TEXBLEND_DIFFUSE</code>
+     */
+    public static String MATKEY_TEXBLEND_SHININESS(int N) {
+        return "$tex.blend.shininess[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_TEXBLEND_DIFFUSE</code>
+     */
+    public static String MATKEY_TEXBLEND_OPACITY(int N) {
+        return "$tex.blend.opacity[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_TEXBLEND_DIFFUSE</code>
+     */
+    public static String MATKEY_TEXBLEND_HEIGHT(int N) {
+        return "$tex.blend.height[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_TEXBLEND_DIFFUSE</code>
+     */
+    public static String MATKEY_TEXBLEND_NORMALS(int N) {
+        return "$tex.blend.normals[" + N + "]";
+    }
+
+
+    /**
+     * Specifies the index of the UV channel to be used for a texture
+     * <br>
+     * <b>Type:</b>int<br>
+     * <b>Default value:</b>0<br>
+     * <b>Requires:</b> MATKEY_TEXTURE_DIFFUSE(N)<br>
+     *
+     * @param N Index of the texture
+     */
+    public static String MATKEY_UVWSRC_DIFFUSE(int N) {
+        return "$tex.uvw.diffuse[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_UVWSRC_DIFFUSE</code>
+     */
+    public static String MATKEY_UVWSRC_SPECULAR(int N) {
+        return "$tex.uvw.specular[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_UVWSRC_DIFFUSE</code>
+     */
+    public static String MATKEY_UVWSRC_AMBIENT(int N) {
+        return "$tex.uvw.ambient[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_UVWSRC_DIFFUSE</code>
+     */
+    public static String MATKEY_UVWSRC_EMISSIVE(int N) {
+        return "$tex.uvw.emissive[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_UVWSRC_DIFFUSE</code>
+     */
+    public static String MATKEY_UVWSRC_SHININESS(int N) {
+        return "$tex.uvw.shininess[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_UVWSRC_DIFFUSE</code>
+     */
+    public static String MATKEY_UVWSRC_OPACITY(int N) {
+        return "$tex.uvw.opacity[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_UVWSRC_DIFFUSE</code>
+     */
+    public static String MATKEY_UVWSRC_HEIGHT(int N) {
+        return "$tex.uvw.height[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_UVWSRC_DIFFUSE</code>
+     */
+    public static String MATKEY_UVWSRC_NORMALS(int N) {
+        return "$tex.uvw.normals[" + N + "]";
+    }
+
+
+    /**
+     * Specifies the texture mapping mode in the v (y) direction.
+     * <br>
+     * <b>Type:</b>int<br>
+     * <b>Default value:</b>TextureMapMode.Wrap<br>
+     * <b>Requires:</b> MATKEY_TEXTURE_DIFFUSE(N)<br>
+     *
+     * @param N Index of the texture
+     */
+    public static String MATKEY_MAPPINGMODE_U_DIFFUSE(int N) {
+        return "$tex.mapmodeu.diffuse[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_U_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_U_SPECULAR(int N) {
+        return "$tex.mapmodeu.specular[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_U_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_U_AMBIENT(int N) {
+        return "$tex.mapmodeu.ambient[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_U_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_U_EMISSIVE(int N) {
+        return "$tex.mapmodeu.emissive[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_U_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_U_SHININESS(int N) {
+        return "$tex.mapmodeu.shininess[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_U_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_U_OPACITY(int N) {
+        return "$tex.mapmodeu.opacity[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_U_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_U_HEIGHT(int N) {
+        return "$tex.mapmodeu.height[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_U_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_U_NORMALS(int N) {
+        return "$tex.mapmodeu.normals[" + N + "]";
+    }
+
+
+    /**
+     * Specifies the texture mapping mode in the v (y) direction.
+     * <br>
+     * <b>Type:</b>int<br>
+     * <b>Default value:</b>TextureMapMode.Wrap<br>
+     * <b>Requires:</b> MATKEY_TEXTURE_DIFFUSE(N)<br>
+     *
+     * @param N Index of the texture
+     */
+    public static String MATKEY_MAPPINGMODE_V_DIFFUSE(int N) {
+        return "$tex.mapmodev.diffuse[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_V_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_V_SPECULAR(int N) {
+        return "$tex.mapmodev.specular[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_V_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_V_AMBIENT(int N) {
+        return "$tex.mapmodev.ambient[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_V_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_V_EMISSIVE(int N) {
+        return "$tex.mapmodev.emissive[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_V_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_V_SHININESS(int N) {
+        return "$tex.mapmodev.shininess[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_V_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_V_OPACITY(int N) {
+        return "$tex.mapmodev.opacity[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_V_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_V_HEIGHT(int N) {
+        return "$tex.mapmodev.height[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_V_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_V_NORMALS(int N) {
+        return "$tex.mapmodev.normals[" + N + "]";
+    }
+
+
+    /**
+     * Specifies the texture mapping mode in the w (z) direction.
+     * <br>
+     * <b>Type:</b>int<br>
+     * <b>Default value:</b>TextureMapMode.Wrap<br>
+     * <b>Requires:</b> MATKEY_TEXTURE_DIFFUSE(N)<br>
+     *
+     * @param N Index of the texture
+     */
+    public static String MATKEY_MAPPINGMODE_W_DIFFUSE(int N) {
+        return "$tex.mapmodew.diffuse[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_V_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_W_SPECULAR(int N) {
+        return "$tex.mapmodew.specular[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_V_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_W_AMBIENT(int N) {
+        return "$tex.mapmodew.ambient[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_V_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_W_EMISSIVE(int N) {
+        return "$tex.mapmodew.emissive[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_V_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_W_SHININESS(int N) {
+        return "$tex.mapmodew.shininess[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_V_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_W_OPACITY(int N) {
+        return "$tex.mapmodew.opacity[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_V_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_W_HEIGHT(int N) {
+        return "$tex.mapmodew.height[" + N + "]";
+    }
+
+    /**
+     * @see <code>MATKEY_MAPPINGMODE_V_DIFFUSE</code>
+     */
+    public static String MATKEY_MAPPINGMODE_W_NORMALS(int N) {
+        return "$tex.mapmodew.normals[" + N + "]";
+    }
 }

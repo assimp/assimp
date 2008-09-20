@@ -59,6 +59,142 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
+template <class T>
+T lerp(const T& one, const T& two, float val)
+{
+	return one + (two-one)*val;
+}
+
+// ------------------------------------------------------------------------------------------------
+inline aiTextureMapMode GetMapMode(LWO::Texture::Wrap in)
+{
+	switch (in)
+	{	
+		case LWO::Texture::REPEAT:
+			return aiTextureMapMode_Wrap;
+		case LWO::Texture::MIRROR:
+			return aiTextureMapMode_Mirror;
+		case LWO::Texture::RESET:
+			DefaultLogger::get()->warn("LWO2: Unsupported texture map mode: RESET");
+		case LWO::Texture::EDGE:
+			return aiTextureMapMode_Clamp;
+	}
+	return (aiTextureMapMode)0;
+}
+
+// ------------------------------------------------------------------------------------------------
+bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, const char* type)
+{
+	ai_assert(NULL != pcMat && NULL != type);
+
+	unsigned int cur = 0, temp = 0;
+	char buffer[512];
+	aiString s;
+	bool ret = false;
+
+	for (TextureList::const_iterator it = in.begin(), end = in.end();
+		 it != end;++it)
+	{
+		if (!(*it).enabled || !(*it).bCanUse || 0xffffffff == (*it).mRealUVIndex)continue;
+		ret = true;
+
+		// add the path to the texture
+		sprintf(buffer,"$tex.file.%s[%i]",type,cur);
+
+		// The older LWOB format does not use indirect references to clips.
+		// The file name of a texture is directly specified in the tex chunk.
+		if (mIsLWO2)
+		{
+			// find the corresponding clip
+			ClipList::iterator clip = mClips.begin();
+			temp = (*it).mClipIdx;
+			for (ClipList::iterator end = mClips.end(); clip != end; ++clip)
+			{
+				if ((*clip).idx == temp)
+				{
+					break;
+				}
+			}
+			if (mClips.end() == clip)
+			{
+				DefaultLogger::get()->error("LWO2: Clip index is out of bounds");
+				temp = 0;
+			}
+			if (Clip::UNSUPPORTED == (*clip).type)
+			{
+				DefaultLogger::get()->error("LWO2: Clip type is not supported");
+				continue;
+			}
+			AdjustTexturePath((*clip).path);
+			s.Set((*clip).path);
+		}
+		else 
+		{
+			std::string ss = (*it).mFileName;
+			if (!ss.length())
+			{
+				DefaultLogger::get()->error("LWOB: Empty file name");
+				continue;
+			}
+			AdjustTexturePath(ss);
+			s.Set(ss);
+		}
+		pcMat->AddProperty(&s,buffer);
+
+		// add the blend factor
+		sprintf(buffer,"$tex.blend.%s[%i]",type,cur);
+		pcMat->AddProperty(&(*it).mStrength,1,buffer);
+
+		// add the blend operation
+		sprintf(buffer,"$tex.op.%s[%i]",type,cur);
+		switch ((*it).blendType)
+		{
+			case LWO::Texture::Normal:
+			case LWO::Texture::Multiply:
+				temp = (unsigned int)aiTextureOp_Multiply;
+				break;
+
+			case LWO::Texture::Subtractive:
+			case LWO::Texture::Difference:
+				temp = (unsigned int)aiTextureOp_Subtract;
+				break;
+
+			case LWO::Texture::Divide:
+				temp = (unsigned int)aiTextureOp_Divide;
+				break;
+
+			case LWO::Texture::Additive:
+				temp = (unsigned int)aiTextureOp_Add;
+				break;
+
+			default:
+				temp = (unsigned int)aiTextureOp_Multiply;
+				DefaultLogger::get()->warn("LWO2: Unsupported texture blend mode: alpha or displacement");
+
+		}
+		pcMat->AddProperty<int>((int*)&temp,1,buffer);
+
+		// add the UV source index
+		sprintf(buffer,"$tex.uvw.%s[%i]",type,cur);
+		temp = (*it).mRealUVIndex;
+		pcMat->AddProperty<int>((int*)&temp,1,buffer);
+
+		// add the u-wrapping
+		sprintf(buffer,"$tex.mapmodeu.%s[%i]",type,cur);
+		temp = (unsigned int)GetMapMode((*it).wrapModeWidth);
+		pcMat->AddProperty<int>((int*)&temp,1,buffer);
+
+		// add the v-wrapping
+		sprintf(buffer,"$tex.mapmodev.%s[%i]",type,cur);
+		temp = (unsigned int)GetMapMode((*it).wrapModeHeight);
+		pcMat->AddProperty<int>((int*)&temp,1,buffer);
+
+		++cur;
+	}
+	return ret;
+}
+
+// ------------------------------------------------------------------------------------------------
 void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat)
 {
 	// copy the name of the surface
@@ -68,13 +204,19 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 
 	int i = surf.bDoubleSided ? 1 : 0;
 	pcMat->AddProperty<int>(&i,1,AI_MATKEY_TWOSIDED);
+
+	// add the refraction index and the bump intensity
+	pcMat->AddProperty<float>(&surf.mIOR,1,AI_MATKEY_REFRACTI);
+	pcMat->AddProperty<float>(&surf.mBumpIntensity,1,AI_MATKEY_BUMPSCALING);
 	
+	aiShadingMode m;
 	if (surf.mSpecularValue && surf.mGlossiness)
 	{
-		// this is only an assumption, needs to be confirmed.
-		// the values have been tweaked by hand and seem to be correct.
 		float fGloss;
-		if (mIsLWO2)fGloss = surf.mGlossiness * 50.0f;
+		if (mIsLWO2)
+		{
+			fGloss = pow( surf.mGlossiness*10.0f+2.0f, 2.0f);
+		}
 		else
 		{
 			if (16.0f >= surf.mGlossiness)fGloss = 6.0f;
@@ -85,18 +227,14 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 
 		pcMat->AddProperty<float>(&surf.mSpecularValue,1,AI_MATKEY_SHININESS_STRENGTH);
 		pcMat->AddProperty<float>(&fGloss,1,AI_MATKEY_SHININESS);
+		m = aiShadingMode_Phong;
 	}
-
-	// (the diffuse value is just a scaling factor)
-	aiColor3D clr = surf.mColor;
-	clr.r *= surf.mDiffuseValue;
-	clr.g *= surf.mDiffuseValue;
-	clr.b *= surf.mDiffuseValue;
-	pcMat->AddProperty<aiColor3D>(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
+	else m = aiShadingMode_Gouraud;
 
 	// specular color
-	clr.b = clr.g  = clr.r = surf.mSpecularValue;
+	aiColor3D clr = lerp( aiColor3D(1.f,1.f,1.f), surf.mColor, surf.mColorHighlights );
 	pcMat->AddProperty<aiColor3D>(&clr,1,AI_MATKEY_COLOR_SPECULAR);
+	pcMat->AddProperty<float>(&surf.mSpecularValue,1,AI_MATKEY_SHININESS_STRENGTH);
 
 	// emissive color
 	// (luminosity is not really the same but it affects the surface in 
@@ -108,15 +246,113 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 	float f = 1.0f-surf.mTransparency;
 	pcMat->AddProperty<float>(&f,1,AI_MATKEY_OPACITY);
 
-	// now handle all textures ...
-	// TODO
+	// ADD TEXTURES to the material
+	// TODO: find out how we can handle COLOR textures correctly...
+	bool b = HandleTextures(pcMat,surf.mColorTextures,"diffuse");
+	b = (b || HandleTextures(pcMat,surf.mDiffuseTextures,"diffuse"));
+	HandleTextures(pcMat,surf.mSpecularTextures,"specular");
+	HandleTextures(pcMat,surf.mGlossinessTextures,"shininess");
+	HandleTextures(pcMat,surf.mBumpTextures,"height");
+	HandleTextures(pcMat,surf.mOpacityTextures,"opacity");
+
+	// now we need to know which shader we must use
+	// iterate through the shader list of the surface and 
+	// search for a name we know 
+	for (ShaderList::const_iterator it = surf.mShaders.begin(), end = surf.mShaders.end();
+		 it != end;++it)
+	{
+		if (!(*it).enabled)continue;
+		if ((*it).functionName == "LW_SuperCelShader" ||
+			(*it).functionName == "AH_CelShader")
+		{
+			m = aiShadingMode_Toon;
+			break;
+		}
+		else if ((*it).functionName == "LW_RealFresnel" ||
+			(*it).functionName == "LW_FastFresnel")
+		{
+			m = aiShadingMode_Fresnel;
+			break;
+		}
+		else
+		{
+			DefaultLogger::get()->warn("LWO2: Unknown surface shader: " + (*it).functionName);
+		}
+	}
+	if (surf.mMaximumSmoothAngle <= 0.0f)m = aiShadingMode_Flat;
+	pcMat->AddProperty((int*)&m,1,AI_MATKEY_SHADING_MODEL);
+
+	// (the diffuse value is just a scaling factor)
+	// If a diffuse texture is set, we set this value to 1.0
+	clr = (b ? aiColor3D(1.f,1.f,1.f) : surf.mColor);
+	clr.r *= surf.mDiffuseValue;
+	clr.g *= surf.mDiffuseValue;
+	clr.b *= surf.mDiffuseValue;
+	pcMat->AddProperty<aiColor3D>(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::FindUVChannels(const LWO::Surface& surf, const LWO::Layer& layer,
+void LWOImporter::FindUVChannels(LWO::TextureList& list, LWO::Layer& layer,
+	unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS], unsigned int& next)
+{
+	for (TextureList::iterator it = list.begin(), end = list.end();
+		 it != end;++it)
+	{
+		if (!(*it).enabled || !(*it).bCanUse || 0xffffffff != (*it).mRealUVIndex)continue;
+		switch ((*it).mapMode)
+		{
+			// TODO: implement these special mappings ...
+		case LWO::Texture::Spherical:
+		case LWO::Texture::Cylindrical:
+		case LWO::Texture::Cubic:
+		case LWO::Texture::Planar:
+		case LWO::Texture::FrontProjection:
+
+			DefaultLogger::get()->warn("LWO2: Only UV mapping is currently supported.");
+			continue;
+
+		default: ;
+		}
+		for (unsigned int i = 0; i < layer.mUVChannels.size();++i)
+		{
+			if ((*it).mUVChannelIndex == layer.mUVChannels[i].name)
+			{
+				// check whether we have this channel already
+				for (unsigned int m = 0; m < next;++m)
+				{
+					if (i == out[m])
+					{
+						(*it).mRealUVIndex = m;
+					}
+				}
+				if (0xffffffff == (*it).mRealUVIndex)
+				{
+					(*it).mRealUVIndex = next;
+					out[next++] = i;
+					if (AI_MAX_NUMBER_OF_TEXTURECOORDS != next)
+						out[next] = 0xffffffff;
+					break;
+				}
+			}
+		}
+		if (0xffffffff == (*it).mRealUVIndex)
+			DefaultLogger::get()->error("LWO2: Unable to find matching UV channel for a texture");
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void LWOImporter::FindUVChannels(LWO::Surface& surf, LWO::Layer& layer,
 	unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS])
 {
 	out[0] = 0xffffffff;
+	unsigned int next = 0;
+
+	FindUVChannels(surf.mColorTextures,layer,out,next);
+	FindUVChannels(surf.mDiffuseTextures,layer,out,next);
+	FindUVChannels(surf.mSpecularTextures,layer,out,next);
+	FindUVChannels(surf.mGlossinessTextures,layer,out,next);
+	FindUVChannels(surf.mOpacityTextures,layer,out,next);
+	FindUVChannels(surf.mBumpTextures,layer,out,next);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -124,41 +360,240 @@ void LWOImporter::FindVCChannels(const LWO::Surface& surf, const LWO::Layer& lay
 	unsigned int out[AI_MAX_NUMBER_OF_COLOR_SETS])
 {
 	out[0] = 0xffffffff;
+	if (surf.mVCMap.length())
+	{
+		for (unsigned int i = 0; i < layer.mVColorChannels.size();++i)
+		{
+			if (surf.mVCMap == layer.mVColorChannels[i].name)
+			{
+				out[0] = i;
+				out[1] = 0xffffffff;
+				return;
+			}
+		}
+		DefaultLogger::get()->warn("LWO2: Unable to find vertex color channel: " + surf.mVCMap);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWO2ImageMap(unsigned int size, LWO::Texture& tex )
 {
-	//LE_NCONST uint8_t* const end = mFileBuffer + size;
+	LE_NCONST uint8_t* const end = mFileBuffer + size;
+	while (true)
+	{
+		if (mFileBuffer + 6 >= end)break;
+		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
+
+		if (mFileBuffer + head->length > end)
+			throw new ImportErrorException("LWO2: Invalid SURF.BLOCK chunk length");
+
+		LE_NCONST uint8_t* const next = mFileBuffer+head->length;
+		switch (head->type)
+		{
+		case AI_LWO_PROJ:
+			tex.wrapModeWidth  = (Texture::Wrap)GetU2();
+			tex.wrapModeHeight = (Texture::Wrap)GetU2();
+			break;
+		case AI_LWO_AXIS:
+			tex.majorAxis = (Texture::Axes)GetU2();
+			break;
+		case AI_LWO_IMAG:
+			tex.mClipIdx = GetU2();
+			break;
+		case AI_LWO_VMAP:
+			GetS0(tex.mUVChannelIndex,head->length);
+			break;
+		case AI_LWO_WRPH:
+			tex.wrapAmountH = GetF4();
+			break;
+		case AI_LWO_WRPW:
+			tex.wrapAmountW = GetF4();
+			break;
+		}
+		mFileBuffer = next;
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWO2Procedural(unsigned int size, LWO::Texture& tex )
 {
 	// --- not supported at the moment
+	DefaultLogger::get()->error("LWO2: Found procedural texture, this is not supported");
+	tex.bCanUse = false;
 }
 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWO2Gradient(unsigned int size, LWO::Texture& tex  )
 {
 	// --- not supported at the moment
+	DefaultLogger::get()->error("LWO2: Found gradient texture, this is not supported");
+	tex.bCanUse = false;
 }
 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWO2TextureHeader(unsigned int size, LWO::Texture& tex )
 {
-	//LE_NCONST uint8_t* const end = mFileBuffer + size;
+	LE_NCONST uint8_t* const end = mFileBuffer + size;
+
+	// get the ordinal string
+	GetS0( tex.ordinal, size);
+
+	// we could crash later if this is an empty string ...
+	if (!tex.ordinal.length())
+	{
+		DefaultLogger::get()->error("LWO2: Ill-formed SURF.BLOK ordinal string");
+		tex.ordinal = "\x00";
+	}
+	while (true)
+	{
+		if (mFileBuffer + 6 >= end)break;
+		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
+
+		if (mFileBuffer + head->length > end)
+			throw new ImportErrorException("LWO2: Invalid texture header chunk length");
+
+		LE_NCONST uint8_t* const next = mFileBuffer+head->length;
+		switch (head->type)
+		{
+		case AI_LWO_CHAN:
+			tex.type = GetU4();
+			break;
+		case AI_LWO_ENAB:
+			tex.enabled = GetU2() ? true : false;
+			break;
+		case AI_LWO_OPAC:
+			tex.blendType = (Texture::BlendType)GetU2();
+			tex.mStrength = GetF4();
+			break;
+		}
+		mFileBuffer = next;
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::LoadLWO2TextureBlock(uint32_t type, unsigned int size )
+void LWOImporter::LoadLWO2TextureBlock(LE_NCONST IFF::SubChunkHeader* head, unsigned int size )
 {
-	//LE_NCONST uint8_t* const end = mFileBuffer + size;
+	ai_assert(!mSurfaces->empty());
+	LWO::Surface& surf = mSurfaces->back();
+	LWO::Texture tex;
 
-	//LWO::Surface& surf = mSurfaces->back();
-	//LWO::Texture tex;
+	// load the texture header
+	LoadLWO2TextureHeader(head->length,tex);
+	size -= head->length + 6;
 
 	// now get the exact type of the texture
+	switch (head->type)
+	{
+	case AI_LWO_PROC:
+		LoadLWO2Procedural(size,tex);
+		break;
+	case AI_LWO_GRAD:
+		LoadLWO2Gradient(size,tex); 
+		break;
+	case AI_LWO_IMAP:
+		LoadLWO2ImageMap(size,tex);
+	}
+
+	// get the destination channel
+	TextureList* listRef = NULL;
+	switch (tex.type)
+	{
+	case AI_LWO_COLR:
+		listRef = &surf.mColorTextures;break;
+	case AI_LWO_DIFF:
+		listRef = &surf.mDiffuseTextures;break;
+	case AI_LWO_SPEC:
+		listRef = &surf.mSpecularTextures;break;
+	case AI_LWO_GLOS:
+		listRef = &surf.mGlossinessTextures;break;
+	case AI_LWO_BUMP:
+		listRef = &surf.mBumpTextures;break;
+	case AI_LWO_TRAN:
+		listRef = &surf.mOpacityTextures;break;
+	default:
+		DefaultLogger::get()->warn("LWO2: Encountered unknown texture type");
+		return;
+	}
+
+	// now attach the texture to the parent surface - sort by ordinal string
+	for (TextureList::iterator it = listRef->begin();
+		it != listRef->end(); ++it)
+	{
+		if (::strcmp(tex.ordinal.c_str(),(*it).ordinal.c_str()) < 0)
+		{
+			listRef->insert(it,tex);
+			return;
+		}
+	}
+	listRef->push_back(tex);
+}
+
+// ------------------------------------------------------------------------------------------------
+void LWOImporter::LoadLWO2ShaderBlock(LE_NCONST IFF::SubChunkHeader* head, unsigned int size )
+{
+	LE_NCONST uint8_t* const end = mFileBuffer + size;
+
+	ai_assert(!mSurfaces->empty());
+	LWO::Surface& surf = mSurfaces->back();
+	LWO::Shader shader;
+
+	// get the ordinal string
+	GetS0( shader.ordinal, size);
+
+	// we could crash later if this is an empty string ...
+	if (!shader.ordinal.length())
+	{
+		DefaultLogger::get()->error("LWO2: Ill-formed SURF.BLOK ordinal string");
+		shader.ordinal = "\x00";
+	}
+
+	// read the header
+	while (true)
+	{
+		if (mFileBuffer + 6 >= end)break;
+		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
+
+		if (mFileBuffer + head->length > end)
+			throw new ImportErrorException("LWO2: Invalid shader header chunk length");
+
+		LE_NCONST uint8_t* const next = mFileBuffer+head->length;
+		switch (head->type)
+		{
+		case AI_LWO_ENAB:
+			shader.enabled = GetU2() ? true : false;
+		}
+		mFileBuffer = next;
+	}
+
+	// process other subchunks ...
+	while (true)
+	{
+		if (mFileBuffer + 6 >= end)break;
+		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
+
+		if (mFileBuffer + head->length > end)
+			throw new ImportErrorException("LWO2: Invalid shader data chunk length");
+
+		LE_NCONST uint8_t* const next = mFileBuffer+head->length;
+		switch (head->type)
+		{
+		case AI_LWO_FUNC:
+			GetS0( shader.functionName, head->length );
+		}
+		mFileBuffer = next;
+	}
+
+	// now attach the shader to the parent surface - sort by ordinal string
+	for (ShaderList::iterator it = surf.mShaders.begin();
+		it != surf.mShaders.end(); ++it)
+	{
+		if (::strcmp(shader.ordinal.c_str(),(*it).ordinal.c_str()) < 0)
+		{
+			surf.mShaders.insert(it,shader);
+			return;
+		}
+	}
+	surf.mShaders.push_back(shader);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -169,88 +604,131 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 	mSurfaces->push_back( LWO::Surface () );
 	LWO::Surface& surf = mSurfaces->back();
 
-	ParseString(surf.mName,size);
-	mFileBuffer+=surf.mName.length()+1;
-	 // skip one byte if the length of the surface name is odd
-	if (!(surf.mName.length() & 1))++mFileBuffer;
-	mFileBuffer += 2;
+	GetS0(surf.mName,size);
+
+	// check whether this surface was derived from any other surface
+	std::string derived;
+	GetS0(derived,(unsigned int)(end - mFileBuffer));
+	if (derived.length())
+	{
+
+		// yes, find this surface
+		for (SurfaceList::iterator it = mSurfaces->begin(), end = mSurfaces->end()-1;
+			 it != end; ++it)
+		{
+			if ((*it).mName == derived)
+			{
+				// we have it ...
+				surf = *it;
+				derived.clear();
+			}
+		}
+		if (!derived.size())
+			DefaultLogger::get()->warn("LWO2: Unable to find source surface: " + derived);
+	}
+
 	while (true)
 	{
 		if (mFileBuffer + 6 >= end)break;
+		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
 
-		// no proper IFF header here - the chunk length is specified as int16
-		uint32_t head_type		= *((LE_NCONST uint32_t*)mFileBuffer);mFileBuffer+=4;
-		uint16_t head_length	= *((LE_NCONST uint16_t*)mFileBuffer);mFileBuffer+=2;
-		AI_LSWAP4(head_type);
-		AI_LSWAP2(head_length);
-		if (mFileBuffer + head_length > end)
-		{
-			throw new ImportErrorException("LWO2: Invalid file, the size attribute of "
-				"a surface sub chunk points behind the end of the file");
-		}
-		LE_NCONST uint8_t* const next = mFileBuffer+head_length;
-		switch (head_type)
+		if (mFileBuffer + head->length > end)
+			throw new ImportErrorException("LWO2: Invalid surface chunk length");
+
+		LE_NCONST uint8_t* const next = mFileBuffer+head->length;
+		switch (head->type)
 		{
 			// diffuse color
 		case AI_LWO_COLR:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,COLR,12);
-				surf.mColor.r = ((float*)mFileBuffer)[0];
-				surf.mColor.g = ((float*)mFileBuffer)[1];
-				surf.mColor.b = ((float*)mFileBuffer)[2];
-				AI_LSWAP4(surf.mColor.r);
-				AI_LSWAP4(surf.mColor.g);
-				AI_LSWAP4(surf.mColor.b);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,COLR,12);
+				surf.mColor.r = GetF4();
+				surf.mColor.g = GetF4();
+				surf.mColor.b = GetF4();
 				break;
 			}
 			// diffuse strength ... hopefully
 		case AI_LWO_DIFF:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,DIFF,4);
-				surf.mDiffuseValue = *((float*)mFileBuffer);
-				AI_LSWAP4(surf.mDiffuseValue);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,DIFF,4);
+				surf.mDiffuseValue = GetF4();
 				break;
 			}
 			// specular strength ... hopefully
 		case AI_LWO_SPEC:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,SPEC,4);
-				surf.mSpecularValue = *((float*)mFileBuffer);
-				AI_LSWAP4(surf.mSpecularValue);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,SPEC,4);
+				surf.mSpecularValue = GetF4();
 				break;
 			}
 			// transparency
 		case AI_LWO_TRAN:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,TRAN,4);
-				surf.mTransparency = *((float*)mFileBuffer);
-				AI_LSWAP4(surf.mTransparency);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,TRAN,4);
+				surf.mTransparency = GetF4();
 				break;
 			}
 			// glossiness
 		case AI_LWO_GLOS:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,GLOS,4);
-				surf.mGlossiness = *((float*)mFileBuffer);
-				AI_LSWAP4(surf.mGlossiness);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,GLOS,4);
+				surf.mGlossiness = GetF4();
+				break;
+			}
+			// bump intensity
+		case AI_LWO_BUMP:
+			{
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,BUMP,4);
+				surf.mBumpIntensity = GetF4();
+				break;
+			}
+			// color highlights
+		case AI_LWO_CLRH:
+			{
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,CLRH,4);
+				surf.mColorHighlights = GetF4();
+				break;
+			}
+			// index of refraction
+		case AI_LWO_RIND:
+			{
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,RIND,4);
+				surf.mIOR = GetF4();
+				break;
+			}
+			// polygon sidedness
+		case AI_LWO_SIDE:
+			{
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,SIDE,2);
+				surf.bDoubleSided = (3 == GetU2());
+				break;
+			}
+			// maximum smoothing angle
+		case AI_LWO_SMAN:
+			{
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,SMAN,4);
+				surf.mMaximumSmoothAngle = GetF4();
 				break;
 			}
 			// surface bock entry
 		case AI_LWO_BLOK:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,BLOK,4);
-				uint32_t type = *((uint32_t*)mFileBuffer);
-				AI_LSWAP4(type);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,BLOK,4);
+				LE_NCONST IFF::SubChunkHeader* head2 = IFF::LoadSubChunk(mFileBuffer);
 
-				switch (type)
+				switch (head2->type)
 				{
-				case AI_LWO_IMAP:
 				case AI_LWO_PROC:
-					break;
 				case AI_LWO_GRAD:
-					mFileBuffer+=4;
-					LoadLWO2TextureBlock(type,head_length-4);
+				case AI_LWO_IMAP:
+					LoadLWO2TextureBlock(head2, head->length);
 					break;
+				case AI_LWO_SHDR:
+					LoadLWO2ShaderBlock(head2, head->length);
+					break;
+
+				default:
+					DefaultLogger::get()->warn("LWO2: Found an unsupported surface BLOK");
 				};
 
 				break;

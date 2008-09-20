@@ -146,7 +146,7 @@ public:
 	 *  @param tess Number of triangles
 	 *  @param positions Receives output triangles.
 	 */
-	static void MakeCircle(aiVector3D& center, aiVector3D& normal, 
+	static void MakeCircle(const aiVector3D& center, const aiVector3D& normal, 
 		float radius, unsigned int tess,
 		std::vector<aiVector3D>& positions);
 	

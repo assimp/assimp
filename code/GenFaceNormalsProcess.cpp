@@ -106,20 +106,11 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
 
 		aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
 		aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
-		aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[2]];
-
-		aiVector3D pDelta1 = *pV2 - *pV1;
-		aiVector3D pDelta2 = *pV3 - *pV1;
-		aiVector3D vNor = pDelta1 ^ pDelta2;
-		vNor.Normalize();
-
-		//if (face.mIndices[1] > face.mIndices[2])
-		//	vNor *= -1.0f;
+		aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices-1]];
+		aiVector3D vNor = (*pV2 - *pV1) ^ (*pV3 - *pV1).Normalize();
 
 		for (unsigned int i = 0;i < face.mNumIndices;++i)
-		{
 			pMesh->mNormals[face.mIndices[i]] = vNor;
-		}
 	}
 	return true;
 }

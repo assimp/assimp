@@ -71,17 +71,17 @@ public class BoneAnim {
     /**
      * Rotation keyframes
      */
-    private KeyFrame<Quaternion>[] mQuatKeys;
+    private KeyFrame<Quaternion>[] mQuatKeys = null;
 
     /**
-     * Position keyframes. Component ordering is x,y,z
+     * Position keyframes. Component order is x,y,z
      */
-    private KeyFrame<float[]>[] mPosKeys;
+    private KeyFrame<float[]>[] mPosKeys = null;
 
     /**
-     * scaling keyframes. Component ordering is x,y,z
+     * scaling keyframes. Component order is x,y,z
      */
-    private KeyFrame<float[]>[] mScalingKeys;
+    private KeyFrame<float[]>[] mScalingKeys = null;
 
 
     /**

@@ -2,17 +2,21 @@
 
 // Definitions for the Interchange File Format (IFF)
 // Alexander Gessler, 2006
-// Adapted for Assimp August 2008
+// Adapted to Assimp August 2008
 
 #ifndef AI_IFF_H_INCLUDED
 #define AI_IFF_H_INCLUDED
 
 #include "ByteSwap.h"
 
-namespace Assimp {
-namespace IFF {
+namespace Assimp	{
+namespace IFF		{
 
+#include "./../include/Compiler/pushpack1.h"
+
+/////////////////////////////////////////////////////////////////////////////////
 //! Describes an IFF chunk header
+/////////////////////////////////////////////////////////////////////////////////
 struct ChunkHeader
 {
 	//! Type of the chunk header - FourCC
@@ -20,7 +24,22 @@ struct ChunkHeader
 
 	//! Length of the chunk data, in bytes
 	uint32_t length;
-};
+} PACK_STRUCT;
+
+
+/////////////////////////////////////////////////////////////////////////////////
+//! Describes an IFF sub chunk header
+/////////////////////////////////////////////////////////////////////////////////
+struct SubChunkHeader
+{
+	//! Type of the chunk header - FourCC
+	uint32_t type;
+
+	//! Length of the chunk data, in bytes
+	uint16_t length;
+} PACK_STRUCT;
+
+#include "./../include/Compiler/poppack1.h"
 
 
 #define AI_IFF_FOURCC(a,b,c,d) ((uint32_t) (((uint8_t)a << 24u) | \
@@ -31,17 +50,43 @@ struct ChunkHeader
 
 
 /////////////////////////////////////////////////////////////////////////////////
+//! Load a chunk header
+//! @param outFile Pointer to the file data - points to the chunk data afterwards
+//! @return Pointer to the chunk header
+/////////////////////////////////////////////////////////////////////////////////
+inline LE_NCONST ChunkHeader* LoadChunk(LE_NCONST uint8_t*& outFile)
+{
+	LE_NCONST ChunkHeader* head = (LE_NCONST ChunkHeader*) outFile;
+	AI_LSWAP4(head->length);
+	AI_LSWAP4(head->type);
+	outFile += sizeof(ChunkHeader);
+	return head;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+//! Load a sub chunk header
+//! @param outFile Pointer to the file data - points to the chunk data afterwards
+//! @return Pointer to the sub chunk header
+/////////////////////////////////////////////////////////////////////////////////
+inline LE_NCONST SubChunkHeader* LoadSubChunk(LE_NCONST uint8_t*& outFile)
+{
+	LE_NCONST SubChunkHeader* head = (LE_NCONST SubChunkHeader*) outFile;
+	AI_LSWAP2(head->length);
+	AI_LSWAP4(head->type);
+	outFile += sizeof(SubChunkHeader);
+	return head;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
 //! Read the file header and return the type of the file and its size
 //! @param outFile Pointer to the file data. The buffer must at 
 //!   least be 12 bytes large.
 //! @param fileType Receives the type of the file
 //! @return 0 if everything was OK, otherwise an error message
 /////////////////////////////////////////////////////////////////////////////////
-inline const char* ReadHeader(const uint8_t* outFile,uint32_t& fileType) 
+inline const char* ReadHeader(LE_NCONST uint8_t* outFile,uint32_t& fileType) 
 {
-	LE_NCONST ChunkHeader* head = (LE_NCONST ChunkHeader*) outFile;
-	AI_LSWAP4(head->length);
-	AI_LSWAP4(head->type);
+	LE_NCONST ChunkHeader* head = LoadChunk(outFile);
 	if(AI_IFF_FOURCC_FORM != head->type)
 	{
 		return "The file is not an IFF file: FORM chunk is missing";

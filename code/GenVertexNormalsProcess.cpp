@@ -116,12 +116,8 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
 
 		aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
 		aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
-		aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[2]];
-
-		aiVector3D pDelta1 = *pV2 - *pV1;
-		aiVector3D pDelta2 = *pV3 - *pV1;
-		aiVector3D vNor = pDelta1 ^ pDelta2;
-		vNor.Normalize();
+		aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices-1]];
+		aiVector3D vNor = (*pV2 - *pV1) ^ (*pV3 - *pV1).Normalize();
 
 		for (unsigned int i = 0;i < face.mNumIndices;++i)
 			pMesh->mNormals[face.mIndices[i]] = vNor;
@@ -146,7 +142,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
 	SpatialSort vertexFinder( pMesh->mVertices, pMesh->mNumVertices, sizeof( aiVector3D));
 	std::vector<unsigned int> verticesFound;
 
-	const float fLimit = cosf(this->configMaxAngle); 
+	const float fLimit = cos(this->configMaxAngle); 
 
 	aiVector3D* pcNew = new aiVector3D[pMesh->mNumVertices];
 	for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
@@ -157,7 +153,6 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
 		vertexFinder.FindPositions( posThis, posEpsilon, verticesFound);
 
 		aiVector3D pcNor; 
-		//unsigned int div = 0;
 		for (unsigned int a = 0; a < verticesFound.size(); ++a)
 		{
 			unsigned int vidx = verticesFound[a];
@@ -167,7 +162,6 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
 				continue;
 
 			pcNor += pMesh->mNormals[vidx];
-			//++div;
 		}
 		pcNor.Normalize();
 		pcNew[i] = pcNor;

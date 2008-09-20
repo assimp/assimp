@@ -226,7 +226,7 @@ void MDRImporter::InternReadFile(
 	file->Read( &mBuffer2[0], 1, fileSize);
 	mBuffer = &mBuffer2[0];
 
-	// validate the file header
+	// validate the file header and do BigEndian byte swapping for all sub headers
 	this->pcHeader = (BE_NCONST MDR::Header*)this->mBuffer;
 	this->ValidateHeader();
 }

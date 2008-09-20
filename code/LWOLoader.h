@@ -43,9 +43,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_LWOLOADER_H_INCLUDED
 
 #include "../include/aiTypes.h"
+#include "../include/DefaultLogger.h"
 
-#include "BaseImporter.h"
 #include "LWOFileData.h"
+#include "BaseImporter.h"
 #include "MaterialSystem.h"
 
 struct aiTexture;
@@ -63,6 +64,7 @@ using namespace LWO;
  *         Methods named "xxx" are used to preprocess the loaded data -
  *         they aren't specific to one format version, either
 */
+// ---------------------------------------------------------------------------
 class LWOImporter : public BaseImporter
 {
 	friend class Importer;
@@ -120,6 +122,17 @@ private:
 	 */
 	void LoadLWO2File();
 
+
+	// -------------------------------------------------------------------
+	/** Parsing functions used for all file format versions
+	*/
+	inline void GetS0(std::string& out,unsigned int max);
+	inline float GetF4();
+	inline uint32_t GetU4();
+	inline uint16_t GetU2();
+	inline uint8_t  GetU1();
+
+
 	// -------------------------------------------------------------------
 	/** Loads a surface chunk from an LWOB file
 	 *  @param size Maximum size to be read, in bytes.  
@@ -135,9 +148,18 @@ private:
 	// -------------------------------------------------------------------
 	/** Loads a texture block from a LWO2 file.
 	 *  @param size Maximum size to be read, in bytes.  
-	 *  @param type Type of the texture block - PROC, GRAD or IMAP
+	 *  @param head Header of the SUF.BLOK header
 	 */
-	void LoadLWO2TextureBlock(uint32_t type, unsigned int size );
+	void LoadLWO2TextureBlock(LE_NCONST IFF::SubChunkHeader* head,
+		unsigned int size );
+
+	// -------------------------------------------------------------------
+	/** Loads a shader block from a LWO2 file.
+	 *  @param size Maximum size to be read, in bytes.  
+	 *  @param head Header of the SUF.BLOK header
+	 */
+	void LoadLWO2ShaderBlock(LE_NCONST IFF::SubChunkHeader* head,
+		unsigned int size );
 
 	// -------------------------------------------------------------------
 	/** Loads an image map from a LWO2 file
@@ -183,6 +205,12 @@ private:
 	*/
 	void LoadLWOPoints(unsigned int length);
 
+	// -------------------------------------------------------------------
+	/** Load a clip from a CLIP chunk
+	 *  @param length Size of the chunk
+	*/
+	void LoadLWO2Clip(unsigned int length);
+
 
 	// -------------------------------------------------------------------
 	/** Count vertices and faces in a LWOB/LWO2 file
@@ -206,6 +234,7 @@ private:
 		LE_NCONST uint16_t*& cursor, 
 		const uint16_t* const end);
 
+	// -------------------------------------------------------------------
 	void CopyFaceIndicesLWOB(LWO::FaceList::iterator& it,
 		LE_NCONST uint16_t*& cursor, 
 		const uint16_t* const end, 
@@ -213,14 +242,27 @@ private:
 
 	// -------------------------------------------------------------------
 	/** Resolve the tag and surface lists that have been loaded.
-	* Generates the mMapping table.
+	*   Generates the mMapping table.
 	*/
 	void ResolveTags();
 
 	// -------------------------------------------------------------------
-	/** Parse a string from the current file position
+	/** Resolve the clip list that has been loaded.
+	*   Replaces clip references with real clips.
 	*/
-	void ParseString(std::string& out,unsigned int max);
+	void ResolveClips();
+
+	// -------------------------------------------------------------------
+	/** Add a texture list to an output material description.
+	 *
+	 *  @param pcMat Output material
+	 *  @param in Input texture list
+	 *  @param type Type identifier of the texture list. This is the string
+	 *    that appears in the middle of all material keys - e.g. "diffuse",
+	 *    "shininess", "glossiness" or "specular". 
+	*/
+	bool HandleTextures(MaterialHelper* pcMat, const TextureList& in,
+		const char* type);
 
 	// -------------------------------------------------------------------
 	/** Adjust a texture path
@@ -241,10 +283,15 @@ private:
 	 *  @param out Output list. The members are indices into the 
 	 *    UV/VC channel lists of the layer
 	*/
-	void FindUVChannels(const LWO::Surface& surf, 
-		const LWO::Layer& layer,
+	void FindUVChannels(/*const*/ LWO::Surface& surf, 
+		/*const*/ LWO::Layer& layer,
 		unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS]);
 
+	// -------------------------------------------------------------------
+	void FindUVChannels(LWO::TextureList& list, LWO::Layer& layer,
+		unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS], unsigned int& next);
+
+	// -------------------------------------------------------------------
 	void FindVCChannels(const LWO::Surface& surf, 
 		const LWO::Layer& layer,
 		unsigned int out[AI_MAX_NUMBER_OF_COLOR_SETS]);
@@ -270,6 +317,27 @@ private:
 	 *  @param inout Input and output buffer
 	*/
 	int ReadVSizedIntLWO2(uint8_t*& inout);
+
+	// -------------------------------------------------------------------
+	/** Assign a value from a VMAP to a vertex and all vertices 
+	 *  attached to it.
+	 *  @param base VMAP destination data
+	 *  @param numRead Number of float's to be read
+	 *  @param idx Absolute index of the first vertex
+	 *  @param data Value of the VMAP to be assigned - read numRead
+	 *    floats from this array.
+	*/
+	void DoRecursiveVMAPAssignment(VMapEntry* base, unsigned int numRead, 
+		unsigned int idx, float* data);
+
+	// -------------------------------------------------------------------
+	/** Compute normal vectors for a mesh
+	 *  @param mesh Input mesh
+	 *  @param smoothingGroups Smoothing-groups-per-face array
+	 *  @param surface Surface for the mesh 
+	*/
+	void ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& smoothingGroups,
+		const LWO::Surface& surface);
 
 protected:
 
@@ -304,6 +372,81 @@ protected:
 	/** Output scene */
 	aiScene* pScene;
 };
+
+
+// ------------------------------------------------------------------------------------------------
+inline float LWOImporter::GetF4()
+{
+	float f = *((float*)mFileBuffer);mFileBuffer += 4;
+	AI_LSWAP4(f);
+	return f;
+}
+
+// ------------------------------------------------------------------------------------------------
+inline uint32_t LWOImporter::GetU4()
+{
+	uint32_t f = *((uint32_t*)mFileBuffer);mFileBuffer += 4;
+	AI_LSWAP4(f);
+	return f;
+}
+
+// ------------------------------------------------------------------------------------------------
+inline uint16_t LWOImporter::GetU2()
+{
+	uint16_t f = *((uint16_t*)mFileBuffer);mFileBuffer += 2;
+	AI_LSWAP2(f);
+	return f;
+}
+
+// ------------------------------------------------------------------------------------------------
+inline uint8_t LWOImporter::GetU1()
+{
+	return *mFileBuffer++;
+}
+
+// ------------------------------------------------------------------------------------------------
+inline int LWOImporter::ReadVSizedIntLWO2(uint8_t*& inout)
+{
+	int i;
+	int c = *inout;inout++;
+	if(c != 0xFF)
+	{
+		i = c << 8;
+		c = *inout;inout++;
+		i |= c;
+	}
+	else
+	{
+		c = *inout;inout++;
+		i = c << 16;
+		c = *inout;inout++;
+		i |= c << 8;
+		c = *inout;inout++;
+		i |= c;
+	}
+	return i;
+}
+
+// ------------------------------------------------------------------------------------------------
+inline void LWOImporter::GetS0(std::string& out,unsigned int max)
+{
+	unsigned int iCursor = 0;
+	const char*sz = (const char*)mFileBuffer;
+	while (*mFileBuffer)
+	{
+		if (++iCursor > max)
+		{
+			DefaultLogger::get()->warn("LWO: Invalid file, string is is too long");
+			break;
+		}
+		++mFileBuffer;
+	}
+	unsigned int len = (unsigned int) ((const char*)mFileBuffer-sz);
+	out = std::string(sz,len);
+	mFileBuffer += (len&0x1 ? 1 : 2);
+}
+
+
 
 } // end of namespace Assimp
 

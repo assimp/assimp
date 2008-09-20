@@ -63,6 +63,31 @@ using namespace Assimp;
 #define AI_DXF_BINARY_IDENT_LEN (24)
 
 
+// color indices for DXF - 16 are supported
+static aiColor4D g_aclrDxfIndexColors[] =
+{
+	aiColor4D (0.6f, 0.6f, 0.6f, 1.0f),
+	aiColor4D (1.0f, 0.0f, 0.0f, 1.0f), // red
+	aiColor4D (0.0f, 1.0f, 0.0f, 1.0f), // green
+	aiColor4D (0.0f, 0.0f, 1.0f, 1.0f), // blue
+	aiColor4D (0.3f, 1.0f, 0.3f, 1.0f), // light green
+	aiColor4D (0.3f, 0.3f, 1.0f, 1.0f), // light blue
+	aiColor4D (1.0f, 0.3f, 0.3f, 1.0f), // light red
+	aiColor4D (1.0f, 0.0f, 1.0f, 1.0f), // pink
+	aiColor4D (1.0f, 0.6f, 0.0f, 1.0f), // orange
+	aiColor4D (0.6f, 0.3f, 0.0f, 1.0f), // dark orange
+	aiColor4D (1.0f, 1.0f, 0.0f, 1.0f), // yellow
+	aiColor4D (0.3f, 0.3f, 0.3f, 1.0f), // dark gray
+	aiColor4D (0.8f, 0.8f, 0.8f, 1.0f), // light gray
+	aiColor4D (0.0f, 00.f, 0.0f, 1.0f), // black
+	aiColor4D (1.0f, 1.0f, 1.0f, 1.0f), // white
+	aiColor4D (0.6f, 0.0f, 1.0f, 1.0f)  // violet
+};
+#define AI_DXF_NUM_INDEX_COLORS (sizeof(g_aclrDxfIndexColors)/sizeof(g_aclrDxfIndexColors[0]))
+
+// invalid/unassigned color value
+aiColor4D g_clrInvalid = aiColor4D(std::numeric_limits<float>::quiet_NaN(),0.f,0.f,1.f);
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 DXFImporter::DXFImporter()
@@ -157,7 +182,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 		{
 			// ENTITIES and BLOCKS sections - skip the whole rest, no need to waste our time with them
 			if (!::strcmp(cursor,"ENTITIES") || !::strcmp(cursor,"BLOCKS"))
-				if (!ParseEntities())break;
+				if (!ParseEntities())break; else bRepeat = true;
 
 			// other sections - skip them to make sure there will be no name conflicts
 			else
@@ -200,6 +225,21 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 		// generate the output mesh
 		aiMesh* pMesh = pScene->mMeshes[m++] = new aiMesh();
 		const std::vector<aiVector3D>& vPositions = (*it).vPositions;
+		const std::vector<aiColor4D>& vColors = (*it).vColors;
+
+		// check whether we need vertex colors here
+		aiColor4D* clrOut;
+		const aiColor4D* clr = NULL;
+		for (std::vector<aiColor4D>::const_iterator it2 = (*it).vColors.begin(), end2 = (*it).vColors.end();
+			 it2 != end2; ++it2)
+		{
+			if (std::numeric_limits<float>::quiet_NaN() != (*it2).r)
+			{
+				clrOut = pMesh->mColors[0] = new aiColor4D[vPositions.size()];
+				clr = &vColors[0];
+				break;
+			}
+		}
 
 		pMesh->mNumFaces = (unsigned int)vPositions.size() / 4u;
 		pMesh->mFaces = new aiFace[pMesh->mNumFaces];
@@ -222,6 +262,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 			for (unsigned int a = 0; a < face.mNumIndices;++a)
 			{
 				*vpOut++ = vp[a];
+				if (clr)*clrOut++ = clr[a];
 				face.mIndices[a] = pMesh->mNumVertices++;
 			}
 			vp += 4;
@@ -333,6 +374,7 @@ bool DXFImporter::ParsePolyLine()
 	LayerInfo* out = NULL;
 
 	std::vector<aiVector3D> positions;
+	std::vector<aiColor4D>  colors;
 	std::vector<unsigned int> indices;
 	unsigned int flags = 0;
 
@@ -344,10 +386,14 @@ bool DXFImporter::ParsePolyLine()
 			{
 				if (!::strcmp(cursor,"VERTEX"))
 				{
-					aiVector3D v;
+					aiVector3D v;aiColor4D clr(g_clrInvalid);
 					unsigned int idx[4] = {0xffffffff,0xffffffff,0xffffffff,0xffffffff};
-					ParsePolyLineVertex(v, idx);
-					if (0xffffffff == idx[0])positions.push_back(v);
+					ParsePolyLineVertex(v, clr, idx);
+					if (0xffffffff == idx[0])
+					{
+						positions.push_back(v);
+						colors.push_back(clr);
+					}
 					else
 					{
 						// check whether we have a fourth coordinate
@@ -413,6 +459,10 @@ bool DXFImporter::ParsePolyLine()
 	// use a default layer if necessary
 	if (!out)SetDefaultLayer(out);
 
+	flags = (unsigned int)(out->vPositions.size()+indices.size());
+	out->vPositions.reserve(flags);
+	out->vColors.reserve(flags);
+
 	// generate unique vertices
 	for (std::vector<unsigned int>::const_iterator it = indices.begin(), end = indices.end();
 		it != end; ++it)
@@ -424,13 +474,14 @@ bool DXFImporter::ParsePolyLine()
 			idx = (unsigned int) positions.size();
 		}
 		out->vPositions.push_back(positions[idx-1]); // indices are one-based.
+		out->vColors.push_back(colors[idx-1]); // indices are one-based.
 	}
 
 	return ret;
 }
 
 // ------------------------------------------------------------------------------------------------
-bool DXFImporter::ParsePolyLineVertex(aiVector3D& out,unsigned int* outIdx)
+bool DXFImporter::ParsePolyLineVertex(aiVector3D& out,aiColor4D& clr, unsigned int* outIdx)
 {
 	bool ret = false;
 	while (GetNextToken())
@@ -455,6 +506,9 @@ bool DXFImporter::ParsePolyLineVertex(aiVector3D& out,unsigned int* outIdx)
 		case 72: outIdx[1] = strtol10(cursor);break;
 		case 73: outIdx[2] = strtol10(cursor);break;
 		case 74: outIdx[3] = strtol10(cursor);break;
+
+		// color
+		case 62: clr = g_aclrDxfIndexColors[strtol10(cursor) % AI_DXF_NUM_INDEX_COLORS]; break;
 		};
 		if (ret)break;
 	}
@@ -468,6 +522,7 @@ bool DXFImporter::Parse3DFace()
 	LayerInfo* out = NULL;
 
 	aiVector3D vip[4]; // -- vectors are initialized to zero
+	aiColor4D  clr(g_clrInvalid);
 	while (GetNextToken())
 	{
 		switch (groupCode)
@@ -516,6 +571,9 @@ bool DXFImporter::Parse3DFace()
 
 		// z position of the fourth corner
 		case 33: vip[3].z = fast_atof(cursor);break;
+
+		// color
+		case 62: clr = g_aclrDxfIndexColors[strtol10(cursor) % AI_DXF_NUM_INDEX_COLORS]; break;
 		};
 		if (ret)break;
 	}
@@ -528,5 +586,8 @@ bool DXFImporter::Parse3DFace()
 	out->vPositions.push_back(vip[1]);
 	out->vPositions.push_back(vip[2]);
 	out->vPositions.push_back(vip[3]); // might be equal to the third
+
+	for (unsigned int i = 0; i < 4;++i)
+		out->vColors.push_back(clr);
 	return ret;
 }

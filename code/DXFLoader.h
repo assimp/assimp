@@ -76,6 +76,7 @@ protected:
 
 		// face buffer - order is x,y,z,w v1,v2,v3 (w is equal to z if unused)
 		std::vector<aiVector3D> vPositions;
+		std::vector<aiColor4D>  vColors;
 	};
 
 
@@ -149,11 +150,13 @@ protected:
 	// -------------------------------------------------------------------
 	/** Parses a VERTEX element in a POLYLINE/POLYFACE
 	 *  @param out Receives the output vertex. 
+	 *  @param clr Receives the output vertex color - won't be modified
+	 *    if it is not existing. 
 	 *  @param outIdx Receives the output vertex indices, if present.
 	 *    Wont't be modified otherwise. Size must be at least 4.
 	 *  @return false if the end of the file was reached
 	 */
-	bool ParsePolyLineVertex(aiVector3D& out,unsigned int* outIdx);
+	bool ParsePolyLineVertex(aiVector3D& out, aiColor4D& clr, unsigned int* outIdx);
 
 private:
 

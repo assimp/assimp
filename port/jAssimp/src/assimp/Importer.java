@@ -196,8 +196,8 @@ public class Importer {
      * List of config properties for all supported types: int, float and string
      */
     private PropertyList<Integer> properties = new PropertyList<Integer>();
-    private PropertyList<Float> propertiesFloat = new PropertyList<Float>();
-    private PropertyList<String> propertiesString = new PropertyList<String>();
+    private PropertyList<Float>   propertiesFloat = new PropertyList<Float>();
+    private PropertyList<String>  propertiesString = new PropertyList<String>();
 
 
     /**
@@ -221,7 +221,7 @@ public class Importer {
      * @param iVersion Version of the JNI interface to be used.
      * @throws NativeException Thrown if the jassimp library could not be loaded
      *                         or if the entry point to the module wasn't found. if this exception
-     *                         is not thrown, you can assume that jAssimp is fully available.
+     *                         is not thrown you can assume that jAssimp is fully available.
      */
     public Importer(int iVersion) throws NativeException {
 
@@ -390,9 +390,27 @@ public class Importer {
             throw new NativeException("Failed to load the mesh");
         }
         if (null == this.scene) {
-            throw new NativeException("Failed to copy the data into the Java VM");
+            throw new NativeException("Failed to copy the data to Java");
         }
         return this.scene;
+    }
+
+
+    /**
+     * Get the current scene or <code>null</code> if none is loaded
+     * @return Hello Amanda, I want to play a game ...
+     */
+    public final Scene getScene()   {
+        return scene;
+    }
+
+
+    /**
+     * Get the source path of the current scene or <code>null</code> if none is loaded
+     * @return Game Over.
+     */
+    public final String getScenePath() {
+        return path;
     }
 
 
@@ -554,6 +572,10 @@ public class Importer {
         return m_iNativeHandle;
     }
 
+
+    // *********************************************************************************
+    // JNI INTERNALS
+    // *********************************************************************************
 
     /**
      * JNI bridge call. For internal use only

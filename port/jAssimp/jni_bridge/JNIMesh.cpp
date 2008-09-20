@@ -211,7 +211,7 @@ void JNIEnvironment::_assimp::_Mesh::Fill(jobject obj,const aiMesh* pcSrc)
 	}
 
 	// copy bones
-	if (0 < pcSrc->mNumBones)
+	if (pcSrc->mNumBones)
 	{
 		// allocate the array
 		jobjectArray jarr = pc->NewObjectArray(pcSrc->mNumBones,

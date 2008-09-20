@@ -83,9 +83,10 @@ void SGSpatialSort::Prepare()
 // ------------------------------------------------------------------------------------------------
 // Returns an iterator for all positions close to the given position.
 void SGSpatialSort::FindPositions( const aiVector3D& pPosition, 
-									  uint32_t pSG,
-									  float pRadius,
-									  std::vector<unsigned int>& poResults) const
+	uint32_t pSG,
+	float pRadius,
+	std::vector<unsigned int>& poResults,
+	bool exactMatch /*= false*/) const
 {
 	float dist = pPosition * mPlaneNormal;
 	float minDist = dist - pRadius, maxDist = dist + pRadius;
@@ -126,17 +127,44 @@ void SGSpatialSort::FindPositions( const aiVector3D& pPosition,
 	// Add all positions inside the distance range within the given radius to the result aray
 
 	float squareEpsilon = pRadius * pRadius;
-	std::vector<Entry>::const_iterator it = mPositions.begin() + index;
-	while( it->mDistance < maxDist)
+	std::vector<Entry>::const_iterator it  = mPositions.begin() + index;
+	std::vector<Entry>::const_iterator end = mPositions.end();
+
+	if (exactMatch)
 	{
-		if((it->mPosition - pPosition).SquareLength() < squareEpsilon &&
-			(it->mSmoothGroups & pSG || 0 == it->mSmoothGroups || 0 == pSG))
+		while( it->mDistance < maxDist)
 		{
-			poResults.push_back( it->mIndex);
+			if((it->mPosition - pPosition).SquareLength() < squareEpsilon && it->mSmoothGroups == pSG)
+			{
+				poResults.push_back( it->mIndex);
+			}
+			++it;
+			if( end == it )break;
 		}
-		++it;
-		if( it == mPositions.end())
-			break;
+	}
+	else
+	{
+		// if the given smoothing group is 0, we'll return all surrounding vertices
+		if (!pSG)
+		{
+			while( it->mDistance < maxDist)
+			{
+				if((it->mPosition - pPosition).SquareLength() < squareEpsilon)
+					poResults.push_back( it->mIndex);
+				++it;
+				if( end == it)break;
+			}
+		}
+		else while( it->mDistance < maxDist)
+		{
+			if((it->mPosition - pPosition).SquareLength() < squareEpsilon &&
+				(it->mSmoothGroups & pSG || !it->mSmoothGroups))
+			{
+				poResults.push_back( it->mIndex);
+			}
+			++it;
+			if( end == it)break;
+		}
 	}
 }
 

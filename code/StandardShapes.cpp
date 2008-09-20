@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp	{
 
-	// note - flip the face ordering
+	// note - flip the face order
 #define ADD_TRIANGLE(n0,n1,n2) \
 	positions.push_back(n2); \
 	positions.push_back(n1); \
@@ -291,12 +291,13 @@ void StandardShapes::MakeCone(
 
 // ------------------------------------------------------------------------------------------------
 void StandardShapes::MakeCircle(
-	aiVector3D&		center, 
-	aiVector3D&		normal, 
-	float			radius,
-	unsigned int	tess,
+	const aiVector3D&	center, 
+	const aiVector3D&	normal, 
+	float				radius,
+	unsigned int		tess,
 	std::vector<aiVector3D>& positions)
 {
+	//aiVector3D current = aiVector3D ( normal.x,
 }
 
 } // ! Assimp

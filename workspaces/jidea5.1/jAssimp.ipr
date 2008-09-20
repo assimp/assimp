@@ -36,9 +36,9 @@
     <entry_points />
   </component>
   <component name="ExportToHTMLSettings">
-    <option name="PRINT_LINE_NUMBERS" value="false" />
-    <option name="OPEN_IN_BROWSER" value="false" />
-    <option name="OUTPUT_DIRECTORY" />
+    <option name="PRINT_LINE_NUMBERS" value="true" />
+    <option name="OPEN_IN_BROWSER" value="true" />
+    <option name="OUTPUT_DIRECTORY" value="J:\Programmieren\ASSIMP\assimp3\trunk\workspaces\jidea5.1\exportToHTML" />
   </component>
   <component name="GUI Designer component loader factory" />
   <component name="JavacSettings">
@@ -49,7 +49,7 @@
     <option name="MAXIMUM_HEAP_SIZE" value="128" />
   </component>
   <component name="JavadocGenerationManager">
-    <option name="OUTPUT_DIRECTORY" value="J:/Programmieren/ASSIMP3/assimp/doc/javadoc" />
+    <option name="OUTPUT_DIRECTORY" value="J:/Programmieren/ASSIMP/assimp3/doc/javadoc" />
     <option name="OPTION_SCOPE" value="protected" />
     <option name="OPTION_HIERARCHY" value="true" />
     <option name="OPTION_NAVIGATOR" value="true" />

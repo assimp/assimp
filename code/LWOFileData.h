@@ -40,9 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Defines chunk constants used by the LWO file format
 
-The chunks are taken from LWO2.h, found in the sourcecode of
-a project called Nxabega (http://www.sourceforge.net/projects/nxabega).
-I assume they are from the official LightWave SDK headers.
+The chunks are taken from the official LightWave SDK headers.
 Original copyright notice: "Ernie Wright  17 Sep 00" 
  
 */
@@ -253,12 +251,25 @@ namespace LWO {
 struct Face : public aiFace
 {
 	Face() 
-		: surfaceIndex(0)
-		, smoothGroup(0)
+		: surfaceIndex	(0)
+		, smoothGroup	(0)
 	{}
+
+	Face(const Face& f)
+	{
+		*this = f;
+	}
 
 	unsigned int surfaceIndex;
 	unsigned int smoothGroup;
+
+	Face& operator=(const LWO::Face& f)
+	{
+		aiFace::operator =(f);
+		surfaceIndex	= f.surfaceIndex;
+		smoothGroup		= f.smoothGroup;
+		return *this;
+	}
 };
 
 
@@ -271,11 +282,24 @@ struct VMapEntry
 		:  dims(_dims)
 	{}
 
-	~VMapEntry() {delete[] rawData;}
+	virtual ~VMapEntry() {}
+
+	//! allocates memory for the vertex map
+	virtual void Allocate(unsigned int num)
+	{
+		if (!rawData.empty())return; // return if already allocated
+
+		register unsigned int m = num*dims;
+		rawData.reserve(m + (m>>2u)); // 25% as  extra storage for VMADs
+		rawData.resize(m,0.f);
+		abAssigned.resize(num,false);
+	}
 
 	std::string name;
-	float* rawData;
 	unsigned int dims;
+	std::vector<float> rawData;
+
+	std::vector<bool> abAssigned;
 };
 
 // ---------------------------------------------------------------------------
@@ -283,16 +307,29 @@ struct VMapEntry
  */
 struct VColorChannel : public VMapEntry
 {
-	VColorChannel(unsigned int num)
+	VColorChannel()
 		: VMapEntry(4)
-	{
-		data = new aiColor4D[num];
-		for (unsigned int i = 0; i < num;++i)
-			data[i].a = 1.0f;
-		rawData = (float*)data;
-	}
+	{}
 
-	aiColor4D* data;
+	//! need to overwrite this function - the alpha channel must
+	//! be initialized to 1.0 by default
+	virtual void Allocate(unsigned int num)
+	{
+		if (!rawData.empty())return; // return if already allocated
+
+		register unsigned int m = num*dims;
+		rawData.reserve(m + (m>>2u)); // 25% as  extra storage for VMADs
+		rawData.resize(m,0.f);
+
+		for (std::vector<float>::iterator it = rawData.begin(), end = rawData.end();
+			 it != end;++it )	
+		{
+			for (unsigned int i = 0; i< 3;++i,++it)
+				*it = 0.f;
+			*it = 1.f;
+		}
+		abAssigned.resize(num,false);
+	}
 };
 
 // ---------------------------------------------------------------------------
@@ -300,14 +337,9 @@ struct VColorChannel : public VMapEntry
  */
 struct UVChannel : public VMapEntry
 {
-	UVChannel(unsigned int num)
-		: VMapEntry(3)
-	{
-		data = new aiVector3D[num]; // to make the final copying easier
-		rawData = (float*)data;
-	}
-
-	aiVector3D* data;
+	UVChannel()
+		: VMapEntry(2)
+	{}
 };
 
 // ---------------------------------------------------------------------------
@@ -315,13 +347,9 @@ struct UVChannel : public VMapEntry
  */
 struct WeightChannel : public VMapEntry
 {
-	WeightChannel(unsigned int num)
+	WeightChannel()
 		: VMapEntry(1)
-	{
-		rawData = new float[num];
-		for (unsigned int m = 0; m < num;++m)
-			rawData[m] = 0.f;
-	}
+	{}
 };
 
 
@@ -330,10 +358,59 @@ struct WeightChannel : public VMapEntry
  */
 struct Texture
 {
+	// we write the enum values out here to make debugging easier ...
+	enum BlendType
+	{
+		Normal			= 0,
+		Subtractive		= 1,
+		Difference		= 2,
+		Multiply		= 3,
+		Divide			= 4,
+		Alpha			= 5,
+		TextureDispl	= 6,
+		Additive		= 7
+	};
+
+	enum MappingMode
+	{
+		Planar			= 0,
+		Cylindrical		= 1,
+		Spherical		= 2,
+		Cubic			= 3,
+		FrontProjection	= 4,
+		UV				= 5
+	};
+
+	enum Axes
+	{
+		AXIS_X			= 0,
+		AXIS_Y			= 1,
+		AXIS_Z			= 2
+	};
+
+	enum Wrap
+	{
+		RESET			= 0,
+		REPEAT			= 1,
+		MIRROR			= 2,
+		EDGE			= 3
+	};
+
 	Texture()
 		: mClipIdx(0xffffffff)
 		, mStrength			(1.0f)
 		, mUVChannelIndex	("unknown")
+		, mRealUVIndex		(0xffffffff)
+		, enabled			(true)
+		, blendType			(Additive)
+		, bCanUse			(true)
+		, mapMode			(UV)
+		, majorAxis			(AXIS_X)
+		, wrapAmountH		(1.0f)
+		, wrapAmountW		(1.0f)
+		, wrapModeWidth		(REPEAT)
+		, wrapModeHeight	(REPEAT)
+		, ordinal			("\x00")
 	{}
 
 	//! File name of the texture
@@ -342,15 +419,38 @@ struct Texture
 	//! Clip index
 	unsigned int mClipIdx;
 
-	//! Strength of the texture
+	//! Strength of the texture - blend factor
 	float mStrength;
 
-
-	/*************** SPECIFIC TO LWO2 *********************/
 	uint32_t type; // type of the texture
 
 	//! Name of the corresponding UV channel
 	std::string mUVChannelIndex;
+	unsigned int mRealUVIndex;
+
+	//! is the texture enabled?
+	bool enabled;
+
+	//! blend type
+	BlendType blendType;
+
+	//! are we able to use the texture?
+	bool bCanUse;
+
+	//! mapping mode
+	MappingMode mapMode;
+
+	//! major axis for planar, cylindrical, spherical projections
+	Axes majorAxis;
+
+	//! wrap amount for cylindrical and spherical projections
+	float wrapAmountH,wrapAmountW;
+
+	//! wrapping mode for the texture
+	Wrap wrapModeWidth,wrapModeHeight;
+
+	//! ordinal string of the texture
+	std::string ordinal;
 };
 
 // ---------------------------------------------------------------------------
@@ -358,9 +458,47 @@ struct Texture
  */
 struct Clip
 {
-	//! path to the base texture
+	enum Type
+	{
+		 STILL, SEQ, REF, UNSUPPORTED
+	} type;
+
+	Clip()
+		: type	(UNSUPPORTED)
+		, idx	(0)
+	{}
+
+	//! path to the base texture -
 	std::string path;
+
+	//! reference to another CLIP
+	unsigned int clipRef;
+
+	//! index of the clip
+	unsigned int idx;
 };
+
+
+// ---------------------------------------------------------------------------
+/** \brief Data structure for a LWO file shader
+ *
+ *  Later
+ */
+struct Shader
+{
+	Shader()
+		:	ordinal			("\x00")
+		,	functionName	("unknown")
+		,	enabled			(true)
+	{}
+
+	std::string ordinal;
+	std::string functionName;
+	bool enabled;
+};
+
+typedef std::list < Texture >		TextureList;
+typedef std::list < Shader >		ShaderList;
 
 // ---------------------------------------------------------------------------
 /** \brief Data structure for a LWO file surface (= material)
@@ -368,13 +506,18 @@ struct Clip
 struct Surface
 {
 	Surface()
-		: bDoubleSided			(false)
-		, mDiffuseValue			(1.0f)
-		, mSpecularValue		(1.0f)
-		, mTransparency			(0.0f)
-		, mGlossiness			(0.0f)
-		, mLuminosity			(0.0f)
-		, mMaximumSmoothAngle	(0.0f) // 0 == not specified
+		: mColor				(0.78431f,0.78431f,0.78431f)
+		, bDoubleSided			(false)
+		, mDiffuseValue			(1.f)
+		, mSpecularValue		(0.f)
+		, mTransparency			(0.f)
+		, mGlossiness			(0.4f)
+		, mLuminosity			(0.f)
+		, mColorHighlights		(0.f)
+		, mMaximumSmoothAngle	(0.f) // 0 == not specified, no smoothing
+		, mVCMap				("")
+		, mIOR					(1.f) // vakuum
+		, mBumpIntensity		(1.f)
 	{}
 
 	//! Name of the surface
@@ -387,23 +530,38 @@ struct Surface
 	bool bDoubleSided;
 
 	//! Various material parameters
-	float mDiffuseValue,mSpecularValue,mTransparency,mGlossiness,mLuminosity;
+	float mDiffuseValue,mSpecularValue,mTransparency,mGlossiness,mLuminosity,mColorHighlights;
 
 	//! Maximum angle between two adjacent triangles
 	//! that they can be smoothed - in degrees
 	float mMaximumSmoothAngle;
 
-	//! Textures
-	Texture mColorTexture,mDiffuseTexture,mSpecularTexture,
-		mBumpTexture,mTransparencyTexture;
+	//! Vertex color map to be used to color the surface
+	std::string mVCMap;
+
+	//! Names of the special shaders to be applied to the surface
+	ShaderList mShaders;
+
+	//! Textures - the first entry in the list is evaluated first
+	TextureList mColorTextures, // color textures are added to both diffuse and specular texture stacks
+		mDiffuseTextures,
+		mSpecularTextures,
+		mOpacityTextures,
+		mBumpTextures,
+		mGlossinessTextures;
+
+	//! Index of refraction
+	float mIOR;
+
+	//! Bump intensity scaling
+	float mBumpIntensity;
 };
 
 // ---------------------------------------------------------------------------
 #define AI_LWO_VALIDATE_CHUNK_LENGTH(length,name,size) \
 	if (length < size) \
 	{ \
-		DefaultLogger::get()->warn("LWO: "#name" chunk is too small"); \
-		break; \
+		throw new ImportErrorException("LWO: "#name" chunk is too small"); \
 	} \
 
 
@@ -413,6 +571,7 @@ typedef std::vector	<	LWO::Face		>	FaceList;
 typedef std::vector	<	LWO::Surface	>	SurfaceList;
 typedef std::vector	<	std::string		>	TagList;
 typedef std::vector	<	unsigned int	>	TagMappingTable;
+typedef std::vector	<	unsigned int	>	ReferrerList;
 typedef std::vector	<	WeightChannel	>	WeightChannelList;
 typedef std::vector	<	VColorChannel	>	VColorChannelList;
 typedef std::vector	<	UVChannel		>	UVChannelList;
@@ -432,6 +591,11 @@ struct Layer
 
 	/** Temporary point list from the file */
 	PointList mTempPoints;
+
+	/** Lists for every point the index of another point
+	    that has been copied from *this* point or 0xffffffff if
+		no copy of the point has been made */
+	ReferrerList mPointReferrers;
 
 	/** Weight channel list from the file */
 	WeightChannelList mWeightChannels;
@@ -456,6 +620,9 @@ struct Layer
 
 	/** Name of the layer */
 	std::string mName;
+
+	/** Pivot point of the layer */
+	aiVector3D mPivot;
 };
 
 typedef std::list<LWO::Layer>		LayerList;

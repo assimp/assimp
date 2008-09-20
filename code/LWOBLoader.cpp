@@ -63,14 +63,11 @@ void LWOImporter::LoadLWOBFile()
 	while (true)
 	{
 		if (mFileBuffer + sizeof(IFF::ChunkHeader) > end)break;
-		LE_NCONST IFF::ChunkHeader* const head = (LE_NCONST IFF::ChunkHeader*)mFileBuffer;
-		AI_LSWAP4(head->length);
-		AI_LSWAP4(head->type);
-		mFileBuffer += sizeof(IFF::ChunkHeader);
+		LE_NCONST IFF::ChunkHeader* const head = IFF::LoadChunk(mFileBuffer);
+
 		if (mFileBuffer + head->length > end)
 		{
-			throw new ImportErrorException("LWOB: Invalid file, the size attribute of "
-				"a chunk points behind the end of the file");
+			throw new ImportErrorException("LWOB: Invalid chunk length");
 			break;
 		}
 		LE_NCONST uint8_t* const next = mFileBuffer+head->length;
@@ -204,104 +201,113 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 	LWO::Surface& surf = mSurfaces->back();
 	LWO::Texture* pTex = NULL;
 
-	ParseString(surf.mName,size);
-	mFileBuffer+=surf.mName.length()+1;
-	// skip one byte if the length of the surface name is odd
-	if (!(surf.mName.length() & 1))++mFileBuffer; 
+	GetS0(surf.mName,size);
 	while (true)
 	{
 		if (mFileBuffer + 6 > end)break;
 
-		// no proper IFF header here - the chunk length is specified as int16
-		uint32_t head_type		= *((LE_NCONST uint32_t*)mFileBuffer);mFileBuffer+=4;
-		uint16_t head_length	= *((LE_NCONST uint16_t*)mFileBuffer);mFileBuffer+=2;
-		AI_LSWAP4(head_type);
-		AI_LSWAP2(head_length);
-		if (mFileBuffer + head_length > end)
-		{
-			throw new ImportErrorException("LWOB: Invalid file, the size attribute of "
-				"a surface sub chunk points behind the end of the file");
-		}
-		LE_NCONST uint8_t* const next = mFileBuffer+head_length;
-		switch (head_type)
+		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
+
+		if (mFileBuffer + head->length > end)
+			throw new ImportErrorException("LWOB: Invalid surface chunk length");
+
+		LE_NCONST uint8_t* const next = mFileBuffer+head->length;
+		switch (head->type)
 		{
 		// diffuse color
 		case AI_LWO_COLR:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,COLR,3);
-				surf.mColor.r = *mFileBuffer++ / 255.0f;
-				surf.mColor.g = *mFileBuffer++ / 255.0f;
-				surf.mColor.b = *mFileBuffer   / 255.0f;
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,COLR,3);
+				surf.mColor.r = GetU1() / 255.0f;
+				surf.mColor.g = GetU1() / 255.0f;
+				surf.mColor.b = GetU1() / 255.0f;
 				break;
 			}
 		// diffuse strength ...
 		case AI_LWO_DIFF:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,DIFF,2);
-				AI_LSWAP2P(mFileBuffer);
-				surf.mDiffuseValue = *((int16_t*)mFileBuffer) / 255.0f;
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,DIFF,2);
+				surf.mDiffuseValue = GetU2() / 255.0f;
 				break;
 			}
 		// specular strength ... 
 		case AI_LWO_SPEC:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,SPEC,2);
-				AI_LSWAP2P(mFileBuffer);
-				surf.mSpecularValue = *((int16_t*)mFileBuffer) / 255.0f;
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,SPEC,2);
+				surf.mSpecularValue = GetU2() / 255.0f;
 				break;
 			}
 		// luminosity ... 
 		case AI_LWO_LUMI:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,LUMI,2);
-				AI_LSWAP2P(mFileBuffer);
-				surf.mLuminosity = *((int16_t*)mFileBuffer) / 255.0f;
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,LUMI,2);
+				surf.mLuminosity = GetU2() / 255.0f;
 				break;
 			}
 		// transparency
 		case AI_LWO_TRAN:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,TRAN,2);
-				AI_LSWAP2P(mFileBuffer);
-				surf.mTransparency = *((int16_t*)mFileBuffer) / 255.0f;
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,TRAN,2);
+				surf.mTransparency = GetU2() / 255.0f;
+				break;
+			}
+		// surface flags
+		case AI_LWO_FLAG:
+			{
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,FLAG,2);
+				uint16_t flag = GetU2();
+				if (flag & 0x4 )   surf.mMaximumSmoothAngle = 1.56207f;
+				if (flag & 0x8 )   surf.mColorHighlights = 1.f;
+				if (flag & 0x100)  surf.bDoubleSided = true;
+				break;
+			}
+		// maximum smoothing angle
+		case AI_LWO_SMAN:
+			{
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,SMAN,4);
+				surf.mMaximumSmoothAngle = GetF4();
 				break;
 			}
 		// glossiness
 		case AI_LWO_GLOS:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,GLOS,2);
-				AI_LSWAP2P(mFileBuffer);
-				surf.mGlossiness = float(*((int16_t*)mFileBuffer));
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,GLOS,2);
+				surf.mGlossiness = (float)GetU2();
 				break;
 			}
 		// color texture
 		case AI_LWO_CTEX:
 			{
-				pTex = &surf.mColorTexture;
+				surf.mColorTextures.push_back(Texture());
+				pTex = &surf.mColorTextures.back();
 				break;
 			}
 		// diffuse texture
 		case AI_LWO_DTEX:
 			{
-				pTex = &surf.mDiffuseTexture;
+				surf.mDiffuseTextures.push_back(Texture());
+				pTex = &surf.mDiffuseTextures.back();
 				break;
 			}
 		// specular texture
 		case AI_LWO_STEX:
 			{
-				pTex = &surf.mSpecularTexture;
+				surf.mSpecularTextures.push_back(Texture());
+				pTex = &surf.mSpecularTextures.back();
 				break;
 			}
 		// bump texture
 		case AI_LWO_BTEX:
 			{
-				pTex = &surf.mBumpTexture;
+				surf.mBumpTextures.push_back(Texture());
+				pTex = &surf.mBumpTextures.back();
 				break;
 			}
 		// transparency texture
 		case AI_LWO_TTEX:
 			{
-				pTex = &surf.mTransparencyTexture;
+				surf.mOpacityTextures.push_back(Texture());
+				pTex = &surf.mOpacityTextures.back();
 				break;
 			}
 			// texture path
@@ -309,9 +315,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 			{
 				if (pTex)
 				{
-					ParseString(pTex->mFileName,head_length);	
-					AdjustTexturePath(pTex->mFileName);
-					mFileBuffer += pTex->mFileName.length();
+					GetS0(pTex->mFileName,head->length);	
 				}
 				else DefaultLogger::get()->warn("LWOB: TIMG tag was encuntered although "
 					"there was no xTEX tag before");
@@ -320,8 +324,8 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		// texture strength
 		case AI_LWO_TVAL:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head_length,TVAL,1);
-				if (pTex)pTex->mStrength = *mFileBuffer / 255.0f;
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,TVAL,1);
+				if (pTex)pTex->mStrength = (float)GetU1()/ 255.f;
 				else DefaultLogger::get()->warn("LWOB: TVAL tag was encuntered "
 					"although there was no xTEX tag before");
 				break;

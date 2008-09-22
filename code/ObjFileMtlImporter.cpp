@@ -147,11 +147,12 @@ void ObjFileMtlImporter::load()
 				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 				break;
 			}
+			break;
 		
 
 		case 'm':	// Texture
 			{
-				m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
+
 				getTexture();
 				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 			}

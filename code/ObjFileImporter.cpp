@@ -322,7 +322,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 	pMesh->mVertices = new aiVector3D[ pMesh->mNumVertices ];
 	
 	// Allocate buffer for normal vectors
-	if ( !pModel->m_Normals.empty() )
+	if ( !pModel->m_Normals.empty() && pObjMesh->m_hasNormals )
 		pMesh->mNormals = new aiVector3D[ pMesh->mNumVertices ];
 	
 	// Allocate buffer for texture coordinates

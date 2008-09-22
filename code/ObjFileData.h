@@ -93,7 +93,18 @@ struct Face
 	//!	\brief	Destructor	
 	~Face()
 	{	
-		// empty
+		if(m_pVertices) {
+			delete m_pVertices;
+			m_pVertices = NULL;
+		}
+		if(m_pNormals) {
+			delete m_pNormals;
+			m_pNormals = NULL;
+		}
+		if(m_pTexturCoords) {
+			delete m_pTexturCoords;
+			m_pTexturCoords = NULL;
+		}
 	}
 };
 
@@ -181,11 +192,13 @@ struct Mesh
 	///	Material index.
 	unsigned int m_uiMaterialIndex;
 
+	bool m_hasNormals;
 	///	Constructor
 	Mesh() :
 		m_pMaterial(NULL),
 		m_uiNumIndices(0),
-		m_uiMaterialIndex(0)
+		m_uiMaterialIndex(0),
+		m_hasNormals(false)
 	{
 		memset(m_uiUVCoordinates, 0, sizeof( unsigned int ) * AI_MAX_NUMBER_OF_TEXTURECOORDS);
 	}
@@ -193,7 +206,12 @@ struct Mesh
 	///	Destructor
 	~Mesh() 
 	{
-		// empty
+		for (std::vector<Face*>::iterator it = m_Faces.begin();
+			it != m_Faces.end(); ++it)
+		{
+			delete *it;
+		}
+
 	}
 };
 
@@ -269,7 +287,17 @@ struct Model
 		{
 			delete *it;
 		}
+
 		m_Meshes.clear();
+
+		for(GroupMapIt it = m_Groups.begin();
+			it != m_Groups.end(); ++it)
+		{
+			delete it->second;
+		}
+		
+		m_Groups.clear();
+		
 	}
 };
 

@@ -45,6 +45,9 @@ ObjFileParser::ObjFileParser(std::vector<char> &Data,
 ObjFileParser::~ObjFileParser()
 {
 	// empty
+	if(m_pModel->m_pDefaultMaterial) delete m_pModel->m_pDefaultMaterial;
+	if(m_pModel) delete m_pModel;
+	
 }
 
 // -------------------------------------------------------------------
@@ -223,6 +226,9 @@ void ObjFileParser::getFace()
 	std::vector<unsigned int> *pIndices = new std::vector<unsigned int>;
 	std::vector<unsigned int> *pTexID = new std::vector<unsigned int>;
 	std::vector<unsigned int> *pNormalID = new std::vector<unsigned int>;
+	bool hasNormal = false;
+	
+
 	bool vt = (!m_pModel->m_TextureCoord.empty());
 	bool vn = (!m_pModel->m_Normals.empty());
 	int iStep = 0, iPos = 0;
@@ -273,6 +279,7 @@ void ObjFileParser::getFace()
 				else if ( 2 == iPos )
 				{
 					pNormalID->push_back( iVal-1 );
+					hasNormal = true;
 				}
 				else
 				{
@@ -310,7 +317,9 @@ void ObjFileParser::getFace()
 	m_pModel->m_pCurrentMesh->m_Faces.push_back( face );
 	m_pModel->m_pCurrentMesh->m_uiNumIndices += (unsigned int)face->m_pVertices->size();
 	m_pModel->m_pCurrentMesh->m_uiUVCoordinates[ 0 ] += (unsigned int)face->m_pTexturCoords[0].size(); 
-	
+	if(!m_pModel->m_pCurrentMesh->m_hasNormals && hasNormal) {
+		m_pModel->m_pCurrentMesh->m_hasNormals = true;
+	}
 	// Skip the rest of the line
 	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
@@ -330,7 +339,7 @@ void ObjFileParser::getMaterialDesc()
 
 	// Get name
 	std::string strName(pStart, &(*m_DataIt));
-	if ( strName.empty() )
+	if ( strName.empty())
 		return;
 
 	// Search for material

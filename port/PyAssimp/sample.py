@@ -11,7 +11,7 @@ import os
 #get a model out of assimp's test-data
 MODEL = os.path.join(os.path.dirname(__file__),
                      "..", "..",
-                     "test", "3DSFiles", "test1.3ds")
+                     "test", "MDLFiles", "MDL3 (3DGS A4)", "minigun.MDL")
 
 def main():
     scene = pyassimp.load(MODEL)
@@ -25,12 +25,7 @@ def main():
     print "  flags:", ", ".join(scene.list_flags())
     print "  meshes:", len(scene.meshes)
     print "  materials:", len(scene.materials)
-    print
-    
-    for index, material in enumerate(scene.materials):
-        print "MATERIAL", index+1
-        for key, value in material.properties.iteritems():
-            print "  %s: %s" % (key, value)
+    print "  textures:", len(scene.textures)
     print
     
     print "MESHES:"
@@ -48,6 +43,21 @@ def main():
         print "    faces:", len(mesh.faces), "first:", mesh.faces[:3]
         print "    bones:", len(mesh.bones), "first:", mesh.bones[:3]
         print
+    
+    print "MATERIALS:"
+    for index, material in enumerate(scene.materials):
+        print "  MATERIAL", index+1
+        for key, value in material.properties.iteritems():
+            print "    %s: %s" % (key, value)
+    print
+    
+    print "TEXTURES:"
+    for index, texture in enumerate(scene.textures):
+        print "  TEXTURE", index+1
+        print "    width:", texture.width
+        print "    height:", texture.height
+        print "    hint:", texture.hint
+        print "    data (size):", len(texture.data)
     
 
 if __name__ == "__main__":

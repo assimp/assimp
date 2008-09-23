@@ -27,7 +27,8 @@ class AssimpBase(object):
     Base class for all Assimp-classes.
     """
     
-    def _load_array(self, data, count, cons):
+    @staticmethod
+    def _load_array(data, count, cons):
         """
         Loads a whole array out of data, and constructs a new object. If data
         is NULL, an empty list will be returned.
@@ -42,6 +43,19 @@ class AssimpBase(object):
             return [cons(data[i]) for i in range(count)]
         else:
             return []
+    
+    
+    @staticmethod
+    def make_loader(function):
+        """
+        Creates a loader function for "_load_array".
+        
+        function - function to be applied to the content of an element
+        """
+        def loader(x):
+            return function(x.contents)
+        
+        return loader
 
 
 class Material(object):
@@ -179,9 +193,51 @@ class Bone(AssimpBase):
         self.matrix = Matrix(bone.mOffsetMatrix)
         
         #and of course the weights!
-        self._load_array(bone.mWeights,
+        Bone._load_array(bone.mWeights,
                          bone.mNumWeights,
                          VertexWeight)
+
+
+class Texture(AssimpBase):
+    """
+    Texture included in the model.
+    """
+    
+    def __init__(self, texture):
+        """
+        Convertes the raw data to a texture.
+        
+        texture - raw data
+        """
+        #dimensions
+        self.width = texture.mWidth
+        self.height = texture.mHeight
+        
+        #format hint
+        self.hint = texture.achFormatHint
+        
+        #load data
+        self.data = self._load_data(texture)
+    
+    
+    def _load_data(self, texture):
+        """
+        Loads the texture data.
+        
+        texture - the texture
+        
+        result texture data in (red, green, blue, alpha)
+        """
+        if self.height == 0:
+            #compressed data
+            size = self.width
+        else:
+            size = self.width * self.height
+        
+        #load!
+        return Texture._load_array(texture.pcData,
+                                   size,
+                                   lambda x: (x.r, x.g, x.b, x.a))
 
 
 class Scene(AssimpBase):
@@ -214,14 +270,19 @@ class Scene(AssimpBase):
         self.flags = model.flags
         
         #load mesh-data
-        self.meshes = self._load_array(model.mMeshes,
-                                       model.mNumMeshes,
-                                       lambda x: Mesh(x.contents))
+        self.meshes = Scene._load_array(model.mMeshes,
+                                        model.mNumMeshes,
+                                        Scene.make_loader(Mesh))
         
         #load materials
-        self.materials = self._load_array(model.mMaterials,
-                                          model.mNumMaterials,
-                                          lambda x: Material(x.contents))
+        self.materials = Scene._load_array(model.mMaterials,
+                                           model.mNumMaterials,
+                                           Scene.make_loader(Material))
+        
+        #load textures
+        self.textures = Scene._load_array(model.mTextures,
+                                          model.mNumTextures,
+                                          Scene.make_loader(Texture))
     
     
     def list_flags(self):
@@ -283,22 +344,22 @@ class Mesh(AssimpBase):
         mesh - raw mesh-data
         """
         #load vertices
-        self.vertices = self._load_array(mesh.mVertices,
+        self.vertices = Mesh._load_array(mesh.mVertices,
                                          mesh.mNumVertices,
                                          helper.vec2tuple)
         
         #load normals
-        self.normals = self._load_array(mesh.mNormals,
+        self.normals = Mesh._load_array(mesh.mNormals,
                                         mesh.mNumVertices,
                                         helper.vec2tuple)
         
         #load tangents
-        self.tangents = self._load_array(mesh.mTangents,
+        self.tangents = Mesh._load_array(mesh.mTangents,
                                          mesh.mNumVertices,
                                          helper.vec2tuple)
         
         #load bitangents
-        self.bitangents = self._load_array(mesh.mBitangents,
+        self.bitangents = Mesh._load_array(mesh.mBitangents,
                                            mesh.mNumVertices,
                                            helper.vec2tuple)
         
@@ -337,9 +398,9 @@ class Mesh(AssimpBase):
         
         #read bones
         bones = mesh.mBones.contents
-        self._load_array(bones,
-                         count,
-                         Bone)
+        return Mesh._load_array(bones,
+                                count,
+                                Bone)
     
     
     def _load_faces(self, mesh):
@@ -376,7 +437,7 @@ class Mesh(AssimpBase):
         result = []
         
         for i in range(structs.MESH.AI_MAX_NUMBER_OF_TEXTURECOORDS):
-            result.append(self._load_array(mesh.mTextureCoords[i],
+            result.append(Mesh._load_array(mesh.mTextureCoords[i],
                                            mesh.mNumVertices,
                                            helper.vec2tuple))
                 

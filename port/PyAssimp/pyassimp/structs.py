@@ -445,12 +445,12 @@ class TEXTURE(Structure):
             #If mHeight is zero the texture is compressed in a format
             #like JPEG. In this case mWidth specifies the size of the
             #memory area pcData is pointing to, in bytes.
-            ("mWidth", c_uint),
+            ("mWidth", c_uint),                                                 #OK
         
             #Height of the texture, in pixels
             #If this value is zero, pcData points to an compressed texture
             #in an unknown format (e.g. JPEG).
-            ("mHeight", c_uint),
+            ("mHeight", c_uint),                                                #OK
         
             #A hint from the loader to make it easier for applications
             #to determine the type of embedded compressed textures.
@@ -459,7 +459,7 @@ class TEXTURE(Structure):
             #information about the texture file format used OR the
             #file extension of the format without a leading dot.
             #E.g. 'dds\0', 'pcx\0'.  All characters are lower-case.
-            ("achFormatHint", c_char*4),
+            ("achFormatHint", c_char*4),                                        #OK
         
             #Data of the texture.
             #Points to an array of mWidth * mHeight aiTexel's.
@@ -468,7 +468,7 @@ class TEXTURE(Structure):
             #as possible. If mHeight = 0 this is a pointer to a memory
             #buffer of size mWidth containing the compressed texture
             #data. Good luck, have fun!
-            ("pcData", POINTER(TEXEL))
+            ("pcData", POINTER(TEXEL))                                          #OK
         ]
 
 
@@ -513,11 +513,11 @@ class SCENE(Structure):
             ("mAnimations", POINTER(POINTER(ANIMATION))),
             
             #The number of textures embedded into the file
-            ("mNumTextures", c_uint),
+            ("mNumTextures", c_uint),                                           #OK
             
             #The array of embedded textures.
             #Not many file formats embedd their textures into the file.
             #An example is Quake's MDL format (which is also used by
             #some GameStudio(TM) versions)
-            ("mTextures", POINTER(POINTER(TEXTURE)))
+            ("mTextures", POINTER(POINTER(TEXTURE)))                            #OK
         ]

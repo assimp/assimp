@@ -24,7 +24,15 @@ def main():
     print "SCENE:"
     print "  flags:", ", ".join(scene.list_flags())
     print "  meshes:", len(scene.meshes)
+    print "  materials:", len(scene.materials)
     print
+    
+    for index, material in enumerate(scene.materials):
+        print "MATERIAL", index+1
+        for key, value in material.properties.iteritems():
+            print "  %s: %s" % (key, value)
+    print
+    
     print "MESHES:"
     for index, mesh in enumerate(scene.meshes):
         print "  MESH", index+1

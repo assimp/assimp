@@ -44,6 +44,51 @@ class AssimpBase(object):
             return []
 
 
+class Material(object):
+    """
+    A Material.
+    """
+    
+    def __init__(self, material):
+        """
+        Converts the raw material data to a material.
+        """
+        self.properties = self._load_properties(material.mProperties,
+                                                material.mNumProperties)
+    
+    
+    def _load_properties(self, data, size):
+        """
+        Loads all properties of this mateiral.
+        
+        data - properties
+        size - elements in properties
+        """
+        result = {}
+        
+        #read all properties
+        for i in range(size):
+            p = data[i].contents
+            
+            #the name
+            key = p.mKey.data
+            
+            #the data
+            value = p.mData[:p.mDataLength]
+            
+            result[key] = str(value)
+        
+        return result
+    
+    
+    def __repr__(self):
+        return repr(self.properties)
+    
+    
+    def __str__(self):
+        return str(self.properties)
+
+
 class Matrix(AssimpBase):
     """
     Assimp 4x4-matrix
@@ -172,6 +217,11 @@ class Scene(AssimpBase):
         self.meshes = self._load_array(model.mMeshes,
                                        model.mNumMeshes,
                                        lambda x: Mesh(x.contents))
+        
+        #load materials
+        self.materials = self._load_array(model.mMaterials,
+                                          model.mNumMaterials,
+                                          lambda x: Material(x.contents))
     
     
     def list_flags(self):

@@ -266,25 +266,25 @@ class MATERIALPROPERTY(Structure):
     _fields_ = [
             #Specifies the name of the property (key)
             #Keys are case insensitive.
-            ("mKey", STRING),
+            ("mKey", STRING),                                                   #OK
         
             #Size of the buffer mData is pointing to, in bytes
             #This value may not be 0.
-            ("mDataLength", c_uint),
+            ("mDataLength", c_uint),                                            #OK
         
             #Type information for the property.
             #Defines the data layout inside the
             #data buffer. This is used by the library
             #internally to perform debug checks.
             #THIS IS AN ENUM!
-            ("mType", c_int),
+            ("mType", c_int),                                                   #IGNORED
         
             #Binary buffer to hold the property's value
             #The buffer has no terminal character. However,
             #if a string is stored inside it may use 0 as terminal,
             #but it would be contained in mDataLength. This member
             #is never 0
-            ("mData", c_char_p)
+            ("mData", c_char_p)                                                 #OK
         ]
 
 
@@ -300,11 +300,11 @@ class MATERIAL(Structure):
     
     _fields_ = [
             #List of all material properties loaded.
-            ("mProperties", POINTER(POINTER(MATERIALPROPERTY))),
+            ("mProperties", POINTER(POINTER(MATERIALPROPERTY))),                #OK
         
             #Number of properties loaded
-            ("mNumProperties", c_uint),
-            ("mNumAllocated", c_uint)
+            ("mNumProperties", c_uint),                                         #OK
+            ("mNumAllocated", c_uint)                                           #IGNORED
         ]
     
 
@@ -497,12 +497,12 @@ class SCENE(Structure):
             ("mMeshes", POINTER(POINTER(MESH))),                                #OK
             
             #The number of materials in the scene.
-            ("mNumMaterials", c_uint),
+            ("mNumMaterials", c_uint),                                          #OK
             
             #The array of materials.
             #Use the index given in each aiMesh structure to access this
             #array. The array is mNumMaterials in size.
-            ("mMaterials", POINTER(POINTER(MATERIAL))),
+            ("mMaterials", POINTER(POINTER(MATERIAL))),                         #OK
             
             #The number of animations in the scene.
             ("mNumAnimations", c_uint),

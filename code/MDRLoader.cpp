@@ -157,6 +157,9 @@ void MDRImporter::ValidateLODHeader(BE_NCONST MDR::LOD* pcLOD)
 
     const unsigned int iMax = this->fileSize - (unsigned int)((int8_t*)pcLOD-(int8_t*)pcHeader);
 
+	if (!pcLOD->numSurfaces)
+		throw new ImportErrorException("MDR: LOD has zero surfaces assigned");
+
 	uint32_t cur = pcLOD->ofsSurfaces; 
 	for (unsigned int i = 0; i < pcLOD->numSurfaces;++i)
 	{
@@ -208,9 +211,10 @@ void MDRImporter::SetupProperties(const Importer* pImp)
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
-void MDRImporter::InternReadFile( 
-	const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
+void MDRImporter::InternReadFile( const std::string& pFile, 
+	aiScene* pScene, IOSystem* pIOHandler)
 {
+#if 0
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
 
 	// Check whether we can read from the file
@@ -229,4 +233,113 @@ void MDRImporter::InternReadFile(
 	// validate the file header and do BigEndian byte swapping for all sub headers
 	this->pcHeader = (BE_NCONST MDR::Header*)this->mBuffer;
 	this->ValidateHeader();
+
+	// go to the first LOD
+	LE_NCONST MDR::LOD* lod = (LE_NCONST MDR::LOD*)((uint8_t*)this->pcHeader+pcHeader->ofsLODs);
+	std::vector<aiMesh*> outMeshes;
+	outMeshes.reserve(lod->numSurfaces);
+
+	// get a pointer to the first surface
+	LE_NCONST MDR::Surface* surf = (LE_NCONST MDR::Surface*)((uint8_t*)lod+lod->ofsSurfaces);
+	for (uint32_t i = 0; i < lod->numSurfaces; ++i)
+	{
+		if (surf->numTriangles && surf->numVerts && surf->numBoneReferences)
+		{
+			outMeshes.push_back(new aiMesh());
+			aiMesh* mesh = outMeshes.back();
+
+			mesh->mNumFaces = surf->numTriangles;
+			mesh->mNumVertices = mesh->mNumFaces*3;
+			mesh->mNumBones = surf->numBoneReferences;
+
+			mesh->mFaces = new aiFace[mesh->mNumFaces];
+			mesh->mVertices = new aiVector3D[mesh->mNumVertices];
+			mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
+			mesh->mBones = new aiBone*[mesh->mNumBones];
+
+			// allocate output bones
+			for (unsigned int p = 0; p < mesh->mNumBones;++p)
+			{
+				aiBone* bone = mesh->mBones[p] = new aiBone();
+				bone->mName.length = ::sprintf(  bone->mName.data, "B_%i",p);
+			}
+
+			struct VertexInfo
+			{
+				aiVector3D xyz;
+				aiVector3D normal;
+				aiVector3D uv;
+				unsigned int start,num;
+			};
+			typedef std::pair<uint32_t,float> BoneWeightInfo;
+
+			std::vector<BoneWeightInfo> mWeights;
+			mWeights.reserve(surf->numVerts << 1);
+
+			std::vector<VertexInfo> mVertices(surf->numVerts);
+
+			// get a pointer to the first vertex
+			LE_NCONST MDR::Vertex* v = (LE_NCONST MDR::Vertex*)((uint8_t*)surf+surf->ofsVerts);
+			for (unsigned int m = 0; m < surf->numVerts; ++m)
+			{
+				// get a pointer to the next vertex
+				v = (LE_NCONST MDR::Vertex*)((uint8_t*)(v+1) + v->numWeights*sizeof(MDR::Weight));
+
+				AI_SWAP4(v->numWeights);
+				AI_SWAP4(v->normal.x);AI_SWAP4(v->normal.y);AI_SWAP4(v->normal.z);
+				AI_SWAP4(v->texCoords.x);AI_SWAP4(v->texCoords.y);
+
+				VertexInfo& vert = mVertices[m];
+				vert.uv.x = v->texCoords.x;  vert.uv.y = v->texCoords.y; 
+				vert.normal = v->normal;
+				vert.start  = (unsigned int)mWeights.size();
+				vert.num    = v->numWeights;
+
+				for (unsigned int l = 0; l < vert.num; ++l)
+				{
+				}
+			}
+
+			// find out how large the output weight buffers must be
+			LE_NCONST MDR::Triangle* tri = (LE_NCONST MDR::Triangle*)((uint8_t*)surf+surf->ofsTriangles);
+			LE_NCONST MDR::Triangle* const triEnd = tri + surf->numTriangles;
+			for (; tri != triEnd; ++tri)
+			{
+				for (unsigned int o = 0; o < 3;++o)
+				{
+					AI_SWAP4(tri->indexes[o]);
+					register unsigned int temp = tri->indexes[o];
+					if (temp >= surf->numVerts)
+						throw new ImportErrorException("MDR: Vertex index is out of range");
+
+					VertexInfo& vert = mVertices[temp];
+					for (unsigned int l = vert.start; l < vert.start + vert.num; ++l)
+					{
+						if (mWeights[l].first >= surf->numBoneReferences)
+							throw new ImportErrorException("MDR: Bone index is out of range");
+
+						++mesh->mBones[mWeights[l].first]->mNumWeights;
+					}
+				}
+			}
+
+			// allocate storage for output bone weights
+			for (unsigned int p = 0; p < mesh->mNumBones;++p)
+			{
+				aiBone* bone = mesh->mBones[p];
+				ai_assert(0 != bone->mNumWeights);
+				bone->mWeights = new aiVertexWeight[bone->mNumWeights];
+			}
+
+			// and build the final output buffers
+		}
+
+		// get a pointer to the next surface
+		surf = (LE_NCONST MDR::Surface*)((uint8_t*)surf + surf->ofsEnd);	
+	}
+
+	pScene->mNumMeshes = (unsigned int) outMeshes.size();
+	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
+	::memcpy(pScene->mMeshes,&outMeshes[0],sizeof(void*)*pScene->mNumMeshes);
+#endif
 }

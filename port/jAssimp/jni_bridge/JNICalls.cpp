@@ -46,14 +46,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "assimp_Importer.h"
 
 // include assimp
-#include "../../include/aiTypes.h"
-#include "../../include/aiMesh.h"
-#include "../../include/aiAnim.h"
-#include "../../include/aiScene.h"
-#include "../../include/aiAssert.h"
-#include "../../include/aiPostProcess.h"
-#include "../../include/assimp.hpp"
-#include "../../include/DefaultLogger.h"
+#include <aiTypes.h>
+#include <aiMesh.h>
+#include <aiAnim.h>
+#include <aiScene.h>
+#include <aiAssert.h>
+#include <aiPostProcess.h>
+#include <assimp.hpp>
+#include <DefaultLogger.h>
 
 // include all jAssimp internal header files
 #include "JNIEnvironment.h"
@@ -93,6 +93,7 @@ bool jValidateContext (JASSIMP_CONTEXT context)
 	DefaultLogger::get()->error("[jnibridge] Invalid context");
 	return false;
 }
+
 // ------------------------------------------------------------------------------------------------
 /* Used in debug builds to validate a given scene
 */
@@ -107,6 +108,7 @@ bool jValidateScene (const aiScene* scene)
 }
 
 #endif // ! ASSIMP_DEBUG
+
 // ------------------------------------------------------------------------------------------------
 /* Used in debug builds to validate a given scene
 */
@@ -124,6 +126,7 @@ Assimp::Importer* jGetValidImporterScenePair (JASSIMP_CONTEXT jvmcontext)
 #endif // ! ASSIMP_DEBUG
 	return pcImp;
 }
+
 // ------------------------------------------------------------------------------------------------
 /*
  * Class:     assimp_Importer
@@ -164,6 +167,7 @@ JNIEXPORT jlong JNICALL Java_assimp_Importer__1NativeInitContext
 
 	return context;
 }
+
 // ------------------------------------------------------------------------------------------------
 /*
  * Class:     assimp_Importer
@@ -189,6 +193,7 @@ JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeFreeContext
 	JNIEnvironment::Get()->DetachFromCurrentThread();
 	return 0;
 }
+
 // ------------------------------------------------------------------------------------------------
 /*
  * Class:     assimp_Importer
@@ -213,7 +218,7 @@ JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeLoad
 	}
 	// get the importer instance from the context
 	Assimp::Importer* pcImp = (Assimp::Importer*)jvmcontext;
-	aiScene* pcOut;
+	const aiScene* pcOut;
 
 	// and load the file. The aiScene object itself remains accessible
 	// via Importer.GetScene().
@@ -227,7 +232,7 @@ JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeLoad
 	}
 
 	// release the path again
-	free((void*)szPath);
+	::free((void*)szPath);
 
 	// allocate a new assimp.Scene object to be returned by the importer
 	jobject jScene;
@@ -245,6 +250,67 @@ JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeLoad
 	return iRet;
 }
 
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_Importer
+ * Method:    _NativeSetPropertyInt
+ * Signature: (Ljava/lang/String;IJ)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeSetPropertyInt
+  (JNIEnv * jvmenv, jobject _this, jstring name, jint value, jlong jvmcontext)
+{
+#if (defined _DEBUG)
+	if (!jValidateContext((JASSIMP_CONTEXT)jvmcontext))return AI_JNI_ERROR_RETURN;
+#endif // ! ASSIMP_DEBUG
+
+	Assimp::Importer* pcImp = (Assimp::Importer*)jvmcontext;
+	const char* sz = JNU_GetStringNativeChars(jvmenv,name);
+	pcImp->SetPropertyInteger(sz,(int)value,NULL);
+	::free((void*)sz);
+	return 0;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_Importer
+ * Method:    _NativeSetPropertyFloat
+ * Signature: (Ljava/lang/String;FJ)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeSetPropertyFloat
+	(JNIEnv * jvmenv, jobject _this, jstring name, jfloat value, jlong jvmcontext)
+{
+#if (defined _DEBUG)
+	if (!jValidateContext((JASSIMP_CONTEXT)jvmcontext))return AI_JNI_ERROR_RETURN;
+#endif // ! ASSIMP_DEBUG
+
+	Assimp::Importer* pcImp = (Assimp::Importer*)jvmcontext;
+	const char* sz = JNU_GetStringNativeChars(jvmenv,name);
+	pcImp->SetPropertyFloat(sz,(float)value,NULL);
+	::free((void*)sz);
+	return 0;
+}
+
+// ------------------------------------------------------------------------------------------------
+/*
+ * Class:     assimp_Importer
+ * Method:    _NativeSetPropertyString
+ * Signature: (Ljava/lang/String;Ljava/lang/String;J)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeSetPropertyString
+  (JNIEnv * jvmenv, jobject _this, jstring name, jstring value, jlong jvmcontext)
+{
+#if (defined _DEBUG)
+	if (!jValidateContext((JASSIMP_CONTEXT)jvmcontext))return AI_JNI_ERROR_RETURN;
+#endif // ! ASSIMP_DEBUG
+
+	Assimp::Importer* pcImp = (Assimp::Importer*)jvmcontext;
+	const char* sz  = JNU_GetStringNativeChars(jvmenv,name);
+	const char* sz2 = JNU_GetStringNativeChars(jvmenv,value);
+	pcImp->SetPropertyString(sz,sz2,NULL);
+	::free((void*)sz);::free((void*)sz2);
+	return 0;
+}
 
 }; //! namespace JNIBridge
 }; //! namespace Assimp

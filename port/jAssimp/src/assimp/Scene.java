@@ -61,7 +61,7 @@ public class Scene {
     private Animation[] m_vAnimations = null;
     private Node m_rootNode = null;
     private Importer imp = null;
-    private int flags;
+    private int flags = 0;
 
     private Scene() {
     }

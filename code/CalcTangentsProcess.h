@@ -97,8 +97,9 @@ protected:
 	// -------------------------------------------------------------------
 	/** Calculates tangents and bitangents for a specific mesh.
 	* @param pMesh The mesh to process.
+	* @param meshIndex Index of the mesh
 	*/
-	bool ProcessMesh( aiMesh* pMesh);
+	bool ProcessMesh( aiMesh* pMesh, unsigned int meshIndex);
 
 	// -------------------------------------------------------------------
 	/** Executes the post processing step on the given imported data.

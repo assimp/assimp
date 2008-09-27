@@ -47,7 +47,22 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructs a spatially sorted representation from the given position array.
-SpatialSort::SpatialSort( const aiVector3D* pPositions, unsigned int pNumPositions, unsigned int pElementOffset)
+SpatialSort::SpatialSort( const aiVector3D* pPositions, unsigned int pNumPositions, 
+	unsigned int pElementOffset)
+{
+	Fill(pPositions,pNumPositions,pElementOffset);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Destructor
+SpatialSort::~SpatialSort()
+{
+	// nothing to do here, everything destructs automatically
+}
+
+// ------------------------------------------------------------------------------------------------
+void SpatialSort::Fill( const aiVector3D* pPositions, unsigned int pNumPositions, 
+	unsigned int pElementOffset)
 {
 	// define the reference plane. We choose some arbitrary vector away from all basic axises 
 	// in the hope that no model spreads all its vertices along this plane.
@@ -68,13 +83,6 @@ SpatialSort::SpatialSort( const aiVector3D* pPositions, unsigned int pNumPositio
 
 	// now sort the array ascending by distance.
 	std::sort( mPositions.begin(), mPositions.end());
-}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor
-SpatialSort::~SpatialSort()
-{
-	// nothing to do here, everything destructs automatically
 }
 
 // ------------------------------------------------------------------------------------------------

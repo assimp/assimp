@@ -490,7 +490,9 @@ void Dot3DSImporter::ParseHierarchyChunk(int& piRemaining)
 
 		// pivot = origin of rotation and scaling
 		this->mCurrentNode->vPivot = *((const aiVector3D*)this->mCurrent);
-		std::swap((float&)mCurrentNode->vPivot.y,(float&)mCurrentNode->vPivot.z);
+		//std::swap((float&)mCurrentNode->vPivot.y,(float&)mCurrentNode->vPivot.z);
+
+		mCurrentNode->vPivot.y *= -1.f;
 		this->mCurrent += sizeof(aiVector3D);
 		break;
 
@@ -747,8 +749,8 @@ void Dot3DSImporter::ParseMeshChunk(int& piRemaining)
 		{
 			mMesh.mPositions.push_back(*((aiVector3D*)this->mCurrent));
 			aiVector3D& v = mMesh.mPositions.back();
-			std::swap( (float&)v.y, (float&)v.z);
-			//v.y *= -1.0f;
+			//std::swap( (float&)v.y, (float&)v.z);
+			v.y *= -1.0f;
 			this->mCurrent += sizeof(aiVector3D);
 		}
 		break;
@@ -1019,8 +1021,6 @@ void Dot3DSImporter::ParseTextureChunk(int& piRemaining,Dot3DS::Texture* pcOut)
 				"x direction is zero. Assuming this should be 1.0 ... ");
 			pcOut->mScaleU = 1.0f;
 		}
-		// NOTE: some docs state it is 1/u, others say it is u ... ARGHH!
-		//pcOut->mScaleU = 1.0f / pcOut->mScaleU;
 		break;
 	case Dot3DSFile::CHUNK_MAT_MAP_VSCALE:
 		pcOut->mScaleV = *((float*)this->mCurrent);
@@ -1030,8 +1030,6 @@ void Dot3DSImporter::ParseTextureChunk(int& piRemaining,Dot3DS::Texture* pcOut)
 				"y direction is zero. Assuming this should be 1.0 ... ");
 			pcOut->mScaleV = 1.0f;
 		}
-		// NOTE: some docs state it is 1/v, others say it is v ... ARGHH!
-		//pcOut->mScaleV = 1.0f / pcOut->mScaleV;
 		break;
 	case Dot3DSFile::CHUNK_MAT_MAP_UOFFSET:
 		pcOut->mOffsetU = *((float*)this->mCurrent);
@@ -1103,14 +1101,15 @@ void Dot3DSImporter::ParseColorChunk(aiColor3D* p_pcOut,
 		return;
 	}
 	const unsigned int diff = psChunk->Size - sizeof(Dot3DSFile::Chunk);
-
 	const unsigned char* pcCur = this->mCurrent;
 	this->mCurrent += diff;
 	bool bGamma = false;
+
 	switch(psChunk->Flag)
 	{
 	case Dot3DSFile::CHUNK_LINRGBF:
 		bGamma = true;
+
 	case Dot3DSFile::CHUNK_RGBF:
 		if (sizeof(float) * 3 > diff)
 		{

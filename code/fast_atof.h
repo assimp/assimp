@@ -106,10 +106,9 @@ inline const char* fast_atof_move( const char* c, float& out)
 		++c;
 		inv = true;
 	}
+	else if (*c=='+')++c;
 
-	//f = (float)strtol(c, &t, 10);
 	f = (float) strtol10_64 ( c, &c );
-
 	if (*c == '.')
 	{
 		++c;
@@ -129,10 +128,10 @@ inline const char* fast_atof_move( const char* c, float& out)
 
 		c = t;
 
-		if (*c == 'e')
+		// FIX: a large 'E' should be allowed, too
+		if (*c == 'e' || *c == 'E')
 		{
 			++c;
-			//float exp = (float)strtol(c, &t, 10);
 			bool einv = (*c=='-');
 			if (einv)
 				++c;

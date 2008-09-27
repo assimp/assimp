@@ -101,9 +101,10 @@ protected:
 	// -------------------------------------------------------------------
 	/** Computes normals for a specific mesh
 	*  @param pcMesh Mesh
+	*  @param meshIndex Index of the mesh
 	*  @return true if vertex normals have been computed
 	*/
-	bool GenMeshVertexNormals (aiMesh* pcMesh);
+	bool GenMeshVertexNormals (aiMesh* pcMesh, unsigned int meshIndex);
 
 private:
 

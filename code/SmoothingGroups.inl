@@ -62,7 +62,6 @@ void ComputeNormalsWithSmoothingsGroups(MeshWithSmoothingGroups<T>& sMesh)
 	{
 		T& face = sMesh.mFaces[a];
 
-		// assume it is a triangle
 		aiVector3D* pV1 = &sMesh.mPositions[face.mIndices[0]];
 		aiVector3D* pV2 = &sMesh.mPositions[face.mIndices[1]];
 		aiVector3D* pV3 = &sMesh.mPositions[face.mIndices[2]];
@@ -76,9 +75,7 @@ void ComputeNormalsWithSmoothingsGroups(MeshWithSmoothingGroups<T>& sMesh)
 		sMesh.mNormals[face.mIndices[2]] = vNor;
 	}
 
-	// calculate the position bounds so we have a reliable epsilon to 
-	// check position differences against 
-	// @Schrompf: This is the 6th time this snippet is repeated!
+	// calculate the position bounds so we have a reliable epsilon to check position differences against 
 	aiVector3D minVec( 1e10f, 1e10f, 1e10f), maxVec( -1e10f, -1e10f, -1e10f);
 	for( unsigned int a = 0; a < sMesh.mPositions.size(); a++)
 	{
@@ -104,14 +101,17 @@ void ComputeNormalsWithSmoothingsGroups(MeshWithSmoothingGroups<T>& sMesh)
 	}
 	sSort.Prepare();
 
+	std::vector<bool> vertexDone(sMesh.mPositions.size(),false);
 	for( typename std::vector<T>::iterator i =  sMesh.mFaces.begin();
 		i != sMesh.mFaces.end();++i)
 	{
 		std::vector<unsigned int> poResult;
-
 		for (unsigned int c = 0; c < 3;++c)
 		{
-			sSort.FindPositions(sMesh.mPositions[(*i).mIndices[c]],(*i).iSmoothGroup,
+			register unsigned int idx = (*i).mIndices[c];
+			if (vertexDone[idx])continue;
+
+			sSort.FindPositions(sMesh.mPositions[idx],(*i).iSmoothGroup,
 				posEpsilon,poResult);
 
 			aiVector3D vNormals;
@@ -120,10 +120,18 @@ void ComputeNormalsWithSmoothingsGroups(MeshWithSmoothingGroups<T>& sMesh)
 				a != poResult.end();++a)
 			{
 				vNormals += sMesh.mNormals[(*a)];
-				//fDiv += 1.0f;
 			}
 			vNormals.Normalize();
-			avNormals[(*i).mIndices[c]] = vNormals;
+
+			// write back into all affected normals
+			for (std::vector<unsigned int>::const_iterator
+				a =  poResult.begin();
+				a != poResult.end();++a)
+			{
+				idx = *a;
+				avNormals [idx] = vNormals;
+				vertexDone[idx] = true;
+			}
 		}
 	}
 	sMesh.mNormals = avNormals;

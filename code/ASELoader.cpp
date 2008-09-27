@@ -471,7 +471,7 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 	// allocate output storage
 	std::vector<aiVector3D> mPositions;
 	std::vector<aiVector3D> amTexCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
-	std::vector<aiColor4D> mVertexColors;
+	std::vector<aiColor4D>  mVertexColors;
 	std::vector<aiVector3D> mNormals;
 	std::vector<BoneVertex> mBoneVertices;
 
@@ -512,7 +512,8 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 		for (unsigned int n = 0; n < 3;++n,++iCurrent)
 		{
 			mPositions[iCurrent] = mesh.mPositions[(*i).mIndices[n]];
-			std::swap((float&)mPositions[iCurrent].z,(float&)mPositions[iCurrent].y); // DX-to-OGL
+			//std::swap((float&)mPositions[iCurrent].z,(float&)mPositions[iCurrent].y); // DX-to-OGL
+			mPositions[iCurrent].y *= -1.f;
 
 			// add texture coordinates
 			for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS;++c)
@@ -532,7 +533,10 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 			if (!mesh.mNormals.empty())
 			{
 				mNormals[iCurrent] = mesh.mNormals[(*i).mIndices[n]];
-				std::swap((float&)mNormals[iCurrent].z,(float&)mNormals[iCurrent].y); // DX-to-OGL
+				mNormals[iCurrent].Normalize();
+
+				//std::swap((float&)mNormals[iCurrent].z,(float&)mNormals[iCurrent].y); // DX-to-OGL
+				mNormals[iCurrent].y *= -1.0f;
 			}
 
 			// handle bone vertices
@@ -1014,27 +1018,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 	}
 	return;
 }
-// ------------------------------------------------------------------------------------------------
-void ComputeBounds(ASE::Mesh& mesh,aiVector3D& minVec, aiVector3D& maxVec,
-				   aiMatrix4x4& matrix)
-{
-	minVec = aiVector3D( 1e10f, 1e10f, 1e10f);
-	maxVec = aiVector3D( -1e10f, -1e10f, -1e10f);
-	for( std::vector<aiVector3D>::const_iterator
-		i =  mesh.mPositions.begin();
-		i != mesh.mPositions.end();++i)
-	{
-		aiVector3D v = matrix*(*i);
 
-		minVec.x = std::min( minVec.x, v.x);
-		minVec.y = std::min( minVec.y, v.y);
-		minVec.z = std::min( minVec.z, v.z);
-		maxVec.x = std::max( maxVec.x, v.x);
-		maxVec.y = std::max( maxVec.y, v.y);
-		maxVec.z = std::max( maxVec.z, v.z);
-	}
-	return;
-}
 // ------------------------------------------------------------------------------------------------
 void ASEImporter::BuildMaterialIndices()
 {
@@ -1149,23 +1133,21 @@ void ASEImporter::GenerateNormals(ASE::Mesh& mesh)
 {
 	if (!mesh.mNormals.empty())
 	{
-		// check whether there are uninitialized normals. If there are
+		// check whether there are only uninitialized normals. If there are
 		// some, skip all normals from the file and compute them on our own
 		for (std::vector<aiVector3D>::const_iterator
 			qq =  mesh.mNormals.begin();
 			qq != mesh.mNormals.end();++qq)
 		{
-			if (is_qnan((*qq).x))
+			if (!(*qq).x || !(*qq).y || !(*qq).z)
 			{
-				DefaultLogger::get()->warn("Normals were specified in the file, "
-					"but not all vertices seem to have normals assigned. The "
-					"whole normal set will be recomputed.");
-				mesh.mNormals.clear();
-				break;
+				return;
 			}
 		}
+		mesh.mNormals.clear();
 	}
 	if (mesh.mNormals.empty())
+	{
 		ComputeNormalsWithSmoothingsGroups<ASE::Face>(mesh);
-	return;
+	}
 }

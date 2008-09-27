@@ -193,6 +193,18 @@ void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator& it,
 }
 
 // ------------------------------------------------------------------------------------------------
+LWO::Texture* LWOImporter::SetupNewTextureLWOB(LWO::TextureList& list,unsigned int size)
+{
+	list.push_back(LWO::Texture());
+	LWO::Texture* tex = &list.back();
+
+	std::string type;
+	GetS0(type,size);
+
+	return tex;
+}
+
+// ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWOBSurface(unsigned int size)
 {
 	LE_NCONST uint8_t* const end = mFileBuffer + size;
@@ -278,39 +290,39 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		// color texture
 		case AI_LWO_CTEX:
 			{
-				surf.mColorTextures.push_back(Texture());
-				pTex = &surf.mColorTextures.back();
+				pTex = SetupNewTextureLWOB(surf.mColorTextures,
+					head->length);
 				break;
 			}
 		// diffuse texture
 		case AI_LWO_DTEX:
 			{
-				surf.mDiffuseTextures.push_back(Texture());
-				pTex = &surf.mDiffuseTextures.back();
+				pTex = SetupNewTextureLWOB(surf.mDiffuseTextures,
+					head->length);
 				break;
 			}
 		// specular texture
 		case AI_LWO_STEX:
 			{
-				surf.mSpecularTextures.push_back(Texture());
-				pTex = &surf.mSpecularTextures.back();
+				pTex = SetupNewTextureLWOB(surf.mSpecularTextures,
+					head->length);
 				break;
 			}
 		// bump texture
 		case AI_LWO_BTEX:
 			{
-				surf.mBumpTextures.push_back(Texture());
-				pTex = &surf.mBumpTextures.back();
+				pTex = SetupNewTextureLWOB(surf.mBumpTextures,
+					head->length);
 				break;
 			}
 		// transparency texture
 		case AI_LWO_TTEX:
 			{
-				surf.mOpacityTextures.push_back(Texture());
-				pTex = &surf.mOpacityTextures.back();
+				pTex = SetupNewTextureLWOB(surf.mOpacityTextures,
+					head->length);
 				break;
 			}
-			// texture path
+		// texture path
 		case AI_LWO_TIMG:
 			{
 				if (pTex)

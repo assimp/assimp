@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DefaultIOStream.h"
 #include "DefaultIOSystem.h"
 #include "GenericProperty.h"
+#include "ProcessHelper.h"
 
 // Importers
 #if (!defined AI_BUILD_NO_X_IMPORTER)
@@ -167,6 +168,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 
+
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
@@ -179,11 +181,12 @@ Importer::Importer() :
 	// allocate a default IO handler
 	mIOHandler = new DefaultIOSystem;
 	mIsDefaultHandler = true; 
-	bExtraVerbose = false; // disable extra verbose mode by default
+	bExtraVerbose     = false; // disable extra verbose mode by default
 
 	// add an instance of each worker class here
 	// the order doesn't really care, however file formats that are
 	// used more frequently than others should be at the beginning.
+	mImporter.reserve(25);
 
 #if (!defined AI_BUILD_NO_X_IMPORTER)
 	mImporter.push_back( new XFileImporter());
@@ -248,6 +251,7 @@ Importer::Importer() :
 	// add an instance of each post processing step here in the order 
 	// of sequence it is executed. steps that are added here are not validated -
 	// as RegisterPPStep() does - all dependencies must be there.
+	mPostProcessingSteps.reserve(25);
 
 #if (!defined AI_BUILD_NO_VALIDATEDS_PROCESS)
 	mPostProcessingSteps.push_back( new ValidateDSProcess()); // must be first
@@ -276,6 +280,11 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_GENFACENORMALS_PROCESS)
 	mPostProcessingSteps.push_back( new GenFaceNormalsProcess());
 #endif
+
+
+	// DON'T change the order of these five!
+	mPostProcessingSteps.push_back( new ComputeSpatialSortProcess());
+
 #if (!defined AI_BUILD_NO_GENVERTEXNORMALS_PROCESS)
 	mPostProcessingSteps.push_back( new GenVertexNormalsProcess());
 #endif
@@ -285,6 +294,10 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_JOINVERTICES_PROCESS)
 	mPostProcessingSteps.push_back( new JoinVerticesProcess());
 #endif
+
+	mPostProcessingSteps.push_back( new DestroySpatialSortProcess());
+
+
 #if (!defined AI_BUILD_NO_SPLITLARGEMESHES_PROCESS)
 	mPostProcessingSteps.push_back( new SplitLargeMeshesProcess_Vertex());
 #endif
@@ -297,6 +310,15 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_IMPROVECACHELOCALITY_PROCESS)
 	mPostProcessingSteps.push_back( new ImproveCacheLocalityProcess());
 #endif
+
+	// allocate a SharedPostProcessInfo object and store pointers to it
+	// in all post-process steps in the list.
+	mPPShared = new SharedPostProcessInfo();
+	for (std::vector<BaseProcess*>::iterator it = mPostProcessingSteps.begin(),
+		 end =  mPostProcessingSteps.end(); it != end; ++it)
+	{
+		(*it)->SetSharedData(mPPShared);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -313,6 +335,9 @@ Importer::~Importer()
 
 	// kill imported scene. Destructors should do that recursivly
 	delete mScene;
+
+	// delete shared post-processing data
+	delete mPPShared;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -519,9 +544,11 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 		if (bExtraVerbose)mScene->mFlags &= ~0x80000000; 
 #endif // ! DEBUG
 	}
-
 	// if failed, extract the error string
 	else if( !mScene)mErrorString = imp->GetErrorText();
+
+	// clear any data allocated by post-process steps
+	mPPShared->Clean();
 
 	// either successful or failure - the pointer expresses it anyways
 	return mScene;

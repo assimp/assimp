@@ -41,6 +41,22 @@ JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeLoad
 JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeSetPropertyInt
   (JNIEnv *, jobject, jstring, jint, jlong);
 
+/*
+ * Class:     assimp_Importer
+ * Method:    _NativeSetPropertyFloat
+ * Signature: (Ljava/lang/String;FJ)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeSetPropertyFloat
+  (JNIEnv *, jobject, jstring, jfloat, jlong);
+
+/*
+ * Class:     assimp_Importer
+ * Method:    _NativeSetPropertyString
+ * Signature: (Ljava/lang/String;Ljava/lang/String;J)I
+ */
+JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeSetPropertyString
+  (JNIEnv *, jobject, jstring, jstring, jlong);
+
 #ifdef __cplusplus
 }
 #endif

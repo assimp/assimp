@@ -714,14 +714,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\CalcTangentsProcess.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\ConvertToLHProcess.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\code\DefaultIOStream.h"
 				>
 			</File>
@@ -734,19 +726,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\FixNormalsStep.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\code\GenericProperty.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\GenFaceNormalsProcess.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\GenVertexNormalsProcess.h"
 				>
 			</File>
 			<File
@@ -758,35 +738,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\ImproveCacheLocality.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\JoinVerticesProcess.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\KillNormalsProcess.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\LimitBoneWeightsProcess.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\code\MaterialSystem.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\OptimizeGraphProcess.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\code\ParsingUtils.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\PretransformVertices.h"
 				>
 			</File>
 			<File
@@ -795,10 +751,6 @@
 			</File>
 			<File
 				RelativePath="..\..\code\RemoveComments.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\RemoveRedundantMaterials.h"
 				>
 			</File>
 			<File
@@ -818,10 +770,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\SplitLargeMeshes.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\code\StandardShapes.h"
 				>
 			</File>
@@ -831,14 +779,6 @@
 			</File>
 			<File
 				RelativePath="..\..\code\TextureTransform.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\TriangulateProcess.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\ValidateDataStructure.h"
 				>
 			</File>
 			<File
@@ -1137,6 +1077,78 @@
 					>
 				</Filter>
 			</Filter>
+			<Filter
+				Name="PostProcess"
+				>
+				<File
+					RelativePath="..\..\code\CalcTangentsProcess.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\ConvertToLHProcess.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\FixNormalsStep.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\GenFaceNormalsProcess.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\GenVertexNormalsProcess.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\ImproveCacheLocality.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\JoinVerticesProcess.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\KillNormalsProcess.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\LimitBoneWeightsProcess.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\OptimizeGraphProcess.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\PretransformVertices.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\RemoveRedundantMaterials.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\SplitLargeMeshes.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\TriangulateProcess.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\ValidateDataStructure.h"
+					>
+				</File>
+				<Filter
+					Name="util"
+					>
+					<File
+						RelativePath="..\..\code\ProcessHelper.h"
+						>
+					</File>
+				</Filter>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="sources"
@@ -1158,14 +1170,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\CalcTangentsProcess.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\ConvertToLHProcess.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\code\DefaultIOStream.cpp"
 				>
 			</File>
@@ -1178,35 +1182,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\FixNormalsStep.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\GenFaceNormalsProcess.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\GenVertexNormalsProcess.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\code\Importer.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\ImproveCacheLocality.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\JoinVerticesProcess.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\KillNormalsProcess.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\LimitBoneWeightsProcess.cpp"
 				>
 			</File>
 			<File
@@ -1214,19 +1190,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\OptimizeGraphProcess.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\PretransformVertices.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\code\RemoveComments.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\RemoveRedundantMaterials.cpp"
 				>
 			</File>
 			<File
@@ -1238,23 +1202,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\SplitLargeMeshes.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\code\StandardShapes.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\code\TextureTransform.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\TriangulateProcess.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\ValidateDataStructure.cpp"
 				>
 			</File>
 			<File
@@ -1476,6 +1428,70 @@
 					Name="AC"
 					>
 				</Filter>
+			</Filter>
+			<Filter
+				Name="PostProcess"
+				>
+				<File
+					RelativePath="..\..\code\CalcTangentsProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\ConvertToLHProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\FixNormalsStep.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\GenFaceNormalsProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\GenVertexNormalsProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\ImproveCacheLocality.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\JoinVerticesProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\KillNormalsProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\LimitBoneWeightsProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\OptimizeGraphProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\PretransformVertices.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\RemoveRedundantMaterials.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\SplitLargeMeshes.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\TriangulateProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\ValidateDataStructure.cpp"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter

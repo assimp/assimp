@@ -67,9 +67,23 @@ public:
 	 * by index.
 	 * @param pPositions Pointer to the first position vector of the array.
 	 * @param pNumPositions Number of vectors to expect in that array.
-	 * @param pElementOffset Offset in bytes from the beginning of one vector in memory to the beginning of the next vector.
+	 * @param pElementOffset Offset in bytes from the beginning of one vector in memory 
+	 *   to the beginning of the next vector.
 	 */
-	SpatialSort( const aiVector3D* pPositions, unsigned int pNumPositions, unsigned int pElementOffset);
+	SpatialSort( const aiVector3D* pPositions, unsigned int pNumPositions, 
+		unsigned int pElementOffset);
+
+
+	/** Sets the input data for the SpatialSort. This replaces the old data.
+	 *
+	 * @param pPositions Pointer to the first position vector of the array.
+	 * @param pNumPositions Number of vectors to expect in that array.
+	 * @param pElementOffset Offset in bytes from the beginning of one vector in memory 
+	 *   to the beginning of the next vector.
+	 */
+	void Fill( const aiVector3D* pPositions, unsigned int pNumPositions, 
+		unsigned int pElementOffset);
+
 
 	/** Destructor */
 	~SpatialSort();

@@ -44,13 +44,139 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "../include/aiTypes.h"
+#include "GenericProperty.h"
+
+#include <map>
 
 struct aiScene;
 
-namespace Assimp
-{
+namespace Assimp	{
 
 class Importer;
+
+// ---------------------------------------------------------------------------
+/** Helper class to allow post-processing steps to interact with each other.
+ *
+ *  The class maintains a simple property list that can be used by pp-steps
+ *  to provide additional information to other steps. This is primarily
+ *  intended for cross-step optimizations.
+ */
+class ASSIMP_API SharedPostProcessInfo
+{
+public:
+
+	struct Base
+	{
+		virtual ~Base()
+		{}
+	};
+
+	template <typename T>
+	struct THeapData : public Base
+	{
+		THeapData(T* in)
+			: data (in)
+		{}
+
+		~THeapData()
+		{
+			delete data;
+		}
+		T* data;
+	};
+
+	template <typename T>
+	struct TStaticData : public Base
+	{
+		TStaticData(T in)
+			: data (in)
+		{}
+
+		~TStaticData()
+		{}
+
+		T data;
+	};
+
+	typedef uint32_t KeyType;
+	typedef std::map<KeyType, Base*>  PropertyMap;
+
+public:
+
+	~SharedPostProcessInfo()	
+	{
+		Clean();
+	}
+
+	void Clean()
+	{
+		// invoke the virtual destructor for all stored properties
+		for (PropertyMap::iterator it = pmap.begin(), end = pmap.end();
+			 it != end; ++it)
+		{
+			delete (*it).second;
+		}
+		pmap.clear();
+	}
+
+	template <typename T>
+	inline void AddProperty( const char* name, T* in )
+	{
+		AddProperty(name,(Base*)new THeapData<T>(in));
+	}
+
+	template <typename T>
+	inline void AddProperty( const char* name, T in )
+	{
+		AddProperty(name,(Base*)new TStaticData<T>(in));
+	}
+
+
+	template <typename T>
+	inline bool GetProperty( const char* name, T*& out ) const
+	{
+		THeapData<T>* t;
+		GetProperty(name,(Base*&)t);
+		if(!t)
+		{
+			out = NULL;
+			return false;
+		}
+		out = t->data;
+		return true;
+	}
+
+	template <typename T>
+	inline bool GetProperty( const char* name, T& out ) const
+	{
+		TStaticData<T>* t;
+		GetProperty(name,(Base*&)t);
+		if(!t)return false;
+		out = t->data;
+		return true;
+	}
+
+	inline void RemoveProperty( const char* name)
+	{
+		AddProperty<int*>(name, NULL);
+	}
+
+private:
+
+	inline void AddProperty( const char* name, Base* data)
+	{
+		SetGenericPropertyPtr<Base>(pmap,name,data);
+	}
+
+	inline void GetProperty( const char* name, Base*& data) const
+	{
+		data = GetGenericProperty<Base*>(pmap,name,NULL);
+	}
+
+	PropertyMap pmap;
+};
+
+#define AI_SPP_SPATIAL_SORT "$Spat"
 
 // ---------------------------------------------------------------------------
 /** The BaseProcess defines a common interface for all post processing steps.
@@ -107,6 +233,31 @@ public:
 	* @param pScene The imported data to work at.
 	*/
 	virtual void Execute( aiScene* pScene) = 0;
+
+
+	// -------------------------------------------------------------------
+	/** Assign a new SharedPostProcessInfo to the step. This object
+	 *  allows multiple postprocess steps to share data.
+	 * @param sh May be NULL
+	*/
+	inline void SetSharedData(SharedPostProcessInfo* sh)
+	{
+		shared = sh;
+	}
+
+	// -------------------------------------------------------------------
+	/** Get the shared data that is assigned to the step.
+	*/
+	inline SharedPostProcessInfo* GetSharedData()
+	{
+		return shared;
+	}
+
+protected:
+
+	/** See the doc of #SharedPostProcessInfo for more details 
+	 */
+	SharedPostProcessInfo* shared;
 };
 
 

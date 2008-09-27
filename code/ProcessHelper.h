@@ -38,86 +38,76 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#ifndef AI_GENERIC_PROPERTY_H_INCLUDED
-#define AI_GENERIC_PROPERTY_H_INCLUDED
+#ifndef AI_PROCESS_HELPER_H_INCLUDED
+#define AI_PROCESS_HELPER_H_INCLUDED
 
-#include "./../include/assimp.hpp"
-#include "Hash.h"
+#include "SpatialSort.h"
+#include "../include/aiPostProcess.h"
 
-// ------------------------------------------------------------------------------------------------
-template <class T>
-inline void SetGenericProperty(std::map< uint32_t, T >& list, 
-	const char* szName, const T& value, bool* bWasExisting = NULL)
-{
-	ai_assert(NULL != szName);
-
-	typedef std::map< uint32_t, T >  GenericPropertyMap;
-	typedef std::pair< uint32_t, T > GenericPair;
-
-	uint32_t hash = SuperFastHash(szName);
-
-	typename GenericPropertyMap::iterator it = list.find(hash);
-	if (it == list.end())
-	{
-		if (bWasExisting)*bWasExisting = false;
-		list.insert(GenericPair( hash, value ));
-		return;
-	}
-	(*it).second = value;
-	if (bWasExisting)*bWasExisting = true;
-}
-
+namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
-template <class T>
-inline T GetGenericProperty(const std::map< uint32_t, T >& list, 
-	const char* szName, const T& errorReturn)
+inline float ComputePositionEpsilon(const aiMesh* pMesh)
 {
-	ai_assert(NULL != szName);
+	const float epsilon = 1e-5f;
 
-	typedef std::map< uint32_t, T >  GenericPropertyMap;
-	typedef std::pair< uint32_t, T > GenericPair;
-
-	uint32_t hash = SuperFastHash(szName);
-
-	typename GenericPropertyMap::const_iterator it = list.find(hash);
-	if (it == list.end())return errorReturn;
-	return (*it).second;
+	// calculate the position bounds so we have a reliable epsilon to check position differences against 
+	aiVector3D minVec( 1e10f, 1e10f, 1e10f), maxVec( -1e10f, -1e10f, -1e10f);
+	for( unsigned int a = 0; a < pMesh->mNumVertices; a++)
+	{
+		minVec.x = std::min( minVec.x, pMesh->mVertices[a].x);
+		minVec.y = std::min( minVec.y, pMesh->mVertices[a].y);
+		minVec.z = std::min( minVec.z, pMesh->mVertices[a].z);
+		maxVec.x = std::max( maxVec.x, pMesh->mVertices[a].x);
+		maxVec.y = std::max( maxVec.y, pMesh->mVertices[a].y);
+		maxVec.z = std::max( maxVec.z, pMesh->mVertices[a].z);
+	}
+	return (maxVec - minVec).Length() * epsilon;
 }
-
 
 // ------------------------------------------------------------------------------------------------
-// Special version for pointer types - they will be deleted when replaced with another value
-// passing NULL removes the whole property
-template <class T>
-inline void SetGenericPropertyPtr(std::map< uint32_t, T* >& list, 
-	const char* szName, T* value, bool* bWasExisting = NULL)
+class ComputeSpatialSortProcess : public BaseProcess
 {
-	ai_assert(NULL != szName);
-
-	typedef std::map< uint32_t, T* >  GenericPropertyMap;
-	typedef std::pair< uint32_t, T* > GenericPair;
-
-	uint32_t hash = SuperFastHash(szName);
-
-	typename GenericPropertyMap::iterator it = list.find(hash);
-	if (it == list.end())
+	bool IsActive( unsigned int pFlags) const
 	{
-		if (bWasExisting)*bWasExisting = false;
-		list.insert(GenericPair( hash, value ));
-		return;
+		return NULL != shared && 0 != (pFlags & (aiProcess_CalcTangentSpace | 
+			aiProcess_GenNormals | aiProcess_JoinIdenticalVertices));
 	}
-	if ((*it).second != value)
-	{
-		delete (*it).second;
-		(*it).second = value;
-	}
-	if (!value)
-	{
-		list.erase(it);
-	}
-	if (bWasExisting)*bWasExisting = true;
-}
 
+	void Execute( aiScene* pScene)
+	{
+		typedef std::pair<SpatialSort, float> _Type;
 
-#endif // !! AI_GENERIC_PROPERTY_H_INCLUDED
+		std::vector<_Type>* p = new std::vector<_Type>(pScene->mNumMeshes); 
+		std::vector<_Type>::iterator it = p->begin();
+
+		for (unsigned int i = 0; i < pScene->mNumMeshes; ++i, ++it)
+		{
+			aiMesh* mesh = pScene->mMeshes[i];
+			_Type& blubb = *it;
+			blubb.first.Fill(mesh->mVertices,mesh->mNumVertices,sizeof(aiVector3D));
+
+			blubb.second = ComputePositionEpsilon(mesh);
+		}
+
+		shared->AddProperty(AI_SPP_SPATIAL_SORT,p);
+	}
+};
+
+// ------------------------------------------------------------------------------------------------
+class DestroySpatialSortProcess : public BaseProcess
+{
+	bool IsActive( unsigned int pFlags) const
+	{
+		return NULL != shared && 0 != (pFlags & (aiProcess_CalcTangentSpace | 
+			aiProcess_GenNormals | aiProcess_JoinIdenticalVertices));
+	}
+
+	void Execute( aiScene* pScene)
+	{
+		shared->RemoveProperty(AI_SPP_SPATIAL_SORT);
+	}
+};
+
+} // !! Assimp
+#endif // !! AI_PROCESS_HELPER_H_INCLUDED

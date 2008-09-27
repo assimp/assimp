@@ -47,16 +47,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <assert.h>
 
-// internal headers
-#include "CalcTangentsProcess.h"
-#include "SpatialSort.h"
-
 // public ASSIMP headers
 #include "../include/DefaultLogger.h"
 #include "../include/aiPostProcess.h"
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/assimp.hpp"
+
+// internal headers
+#include "CalcTangentsProcess.h"
+#include "ProcessHelper.h"
 
 using namespace Assimp;
 
@@ -99,7 +99,7 @@ void CalcTangentsProcess::Execute( aiScene* pScene)
 
 	bool bHas = false;
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-		if(ProcessMesh( pScene->mMeshes[a]))bHas = true;
+		if(ProcessMesh( pScene->mMeshes[a],a))bHas = true;
 
 	if (bHas)DefaultLogger::get()->debug("CalcTangentsProcess finished. Tangents have been calculated");
 	else DefaultLogger::get()->debug("CalcTangentsProcess finished");
@@ -107,7 +107,7 @@ void CalcTangentsProcess::Execute( aiScene* pScene)
 
 // ------------------------------------------------------------------------------------------------
 // Calculates tangents and bitangents for the given mesh
-bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh)
+bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 {
 	// we assume that the mesh is still in the verbose vertex format where each face has its own set
 	// of vertices and no vertices are shared between faces. Sadly I don't know any quick test to 
@@ -129,22 +129,6 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh)
 		DefaultLogger::get()->error("Unable to compute tangents: UV0 and normals must be there ");
 		return false;
 	}
-
-	// calculate the position bounds so we have a reliable epsilon to check position differences against 
-	aiVector3D minVec( 1e10f, 1e10f, 1e10f), maxVec( -1e10f, -1e10f, -1e10f);
-	for( unsigned int a = 0; a < pMesh->mNumVertices; a++)
-	{
-		minVec.x = std::min( minVec.x, pMesh->mVertices[a].x);
-		minVec.y = std::min( minVec.y, pMesh->mVertices[a].y);
-		minVec.z = std::min( minVec.z, pMesh->mVertices[a].z);
-		maxVec.x = std::max( maxVec.x, pMesh->mVertices[a].x);
-		maxVec.y = std::max( maxVec.y, pMesh->mVertices[a].y);
-		maxVec.z = std::max( maxVec.z, pMesh->mVertices[a].z);
-	}
-
-	// calculate epsilons border
-	const float epsilon = 1e-5f;
-	const float posEpsilon = (maxVec - minVec).Length() * epsilon;
 	const float angleEpsilon = 0.9999f;
 
 	// create space for the tangents and bitangents
@@ -201,8 +185,30 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh)
 		}
     }
 
+
 	// create a helper to quickly find locally close vertices among the vertex array
-	SpatialSort vertexFinder( meshPos, pMesh->mNumVertices, sizeof( aiVector3D));
+	// FIX: check whether we can reuse the SpatialSort of a previous step
+	SpatialSort* vertexFinder = NULL;
+	SpatialSort  _vertexFinder;
+	float posEpsilon;
+	if (shared)
+	{
+		std::vector<std::pair<SpatialSort,float> >* avf;
+		shared->GetProperty(AI_SPP_SPATIAL_SORT,avf);
+		if (avf)
+		{
+			std::pair<SpatialSort,float>& blubb = avf->operator [] (meshIndex);
+			vertexFinder = &blubb.first;
+			posEpsilon = blubb.second;;
+		}
+	}
+	if (!vertexFinder)
+	{
+		_vertexFinder.Fill(pMesh->mVertices, pMesh->mNumVertices, sizeof( aiVector3D));
+		vertexFinder = &_vertexFinder;
+		posEpsilon = ComputePositionEpsilon(pMesh);
+	}
+
 	std::vector<unsigned int> verticesFound;
 
 	const float fLimit = cosf(this->configMaxAngle); 
@@ -223,7 +229,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh)
 		closeVertices.push_back( a);
 
 		// find all vertices close to that position
-		vertexFinder.FindPositions( origPos, posEpsilon, verticesFound);
+		vertexFinder->FindPositions( origPos, posEpsilon, verticesFound);
 
 		// look among them for other vertices sharing the same normal and a close-enough tangent/bitangent
 		for( unsigned int b = 0; b < verticesFound.size(); b++)
@@ -245,7 +251,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh)
 
 		// smooth the tangents and bitangents of all vertices that were found to be close enough
 		aiVector3D smoothTangent( 0, 0, 0), smoothBitangent( 0, 0, 0);
-		for( unsigned int b = 0; b < closeVertices.size(); b++)
+		for( unsigned int b = 0; b < closeVertices.size(); ++b)
 		{
 			smoothTangent += meshTang[ closeVertices[b] ];
 			smoothBitangent += meshBitang[ closeVertices[b] ];
@@ -254,7 +260,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh)
 		smoothBitangent.Normalize();
 
 		// and write it back into all affected tangents
-		for( unsigned int b = 0; b < closeVertices.size(); b++)
+		for( unsigned int b = 0; b < closeVertices.size(); ++b)
 		{
 			meshTang[ closeVertices[b] ] = smoothTangent;
 			meshBitang[ closeVertices[b] ] = smoothBitangent;

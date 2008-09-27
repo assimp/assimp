@@ -2,12 +2,12 @@
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AssimpView", "assimp_view.vcproj", "{B17B959B-BB8A-4596-AF0F-A8C8DBBC3C5E}"
-	ProjectSection(ProjectDependencies) = postProject
-		{5691E159-2D9B-407F-971F-EA5C592DC524} = {5691E159-2D9B-407F-971F-EA5C592DC524}
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{5691E159-2D9B-407F-971F-EA5C592DC524} = {5691E159-2D9B-407F-971F-EA5C592DC524}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Assimp", "assimp.vcproj", "{5691E159-2D9B-407F-971F-EA5C592DC524}"
@@ -17,15 +17,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Assimp", "assimp.vcproj", "
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTest", "UnitTest.vcproj", "{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}"
-	ProjectSection(ProjectDependencies) = postProject
-		{5691E159-2D9B-407F-971F-EA5C592DC524} = {5691E159-2D9B-407F-971F-EA5C592DC524}
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{5691E159-2D9B-407F-971F-EA5C592DC524} = {5691E159-2D9B-407F-971F-EA5C592DC524}
+	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jAssimp_NOT_FINISHED", "jAssimp.vcproj", "{FE78BFBA-4BA5-457D-8602-B800D498102D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jAssimp", "jAssimp.vcproj", "{FE78BFBA-4BA5-457D-8602-B800D498102D}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
@@ -92,13 +92,15 @@ Global
 		{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}.Release|x64.ActiveCfg = Release|x64
 		{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}.Release|x64.Build.0 = Release|x64
 		{FE78BFBA-4BA5-457D-8602-B800D498102D}.Debug_DLL|Win32.ActiveCfg = Debug|Win32
-		{FE78BFBA-4BA5-457D-8602-B800D498102D}.Debug_DLL|x64.ActiveCfg = Debug|Win32
+		{FE78BFBA-4BA5-457D-8602-B800D498102D}.Debug_DLL|x64.ActiveCfg = Debug|x64
 		{FE78BFBA-4BA5-457D-8602-B800D498102D}.Debug|Win32.ActiveCfg = Debug|Win32
-		{FE78BFBA-4BA5-457D-8602-B800D498102D}.Debug|x64.ActiveCfg = Debug|Win32
+		{FE78BFBA-4BA5-457D-8602-B800D498102D}.Debug|x64.ActiveCfg = Debug|x64
+		{FE78BFBA-4BA5-457D-8602-B800D498102D}.Debug|x64.Build.0 = Debug|x64
 		{FE78BFBA-4BA5-457D-8602-B800D498102D}.Release_DLL|Win32.ActiveCfg = Release|Win32
-		{FE78BFBA-4BA5-457D-8602-B800D498102D}.Release_DLL|x64.ActiveCfg = Release|Win32
+		{FE78BFBA-4BA5-457D-8602-B800D498102D}.Release_DLL|x64.ActiveCfg = Release|x64
 		{FE78BFBA-4BA5-457D-8602-B800D498102D}.Release|Win32.ActiveCfg = Release|Win32
-		{FE78BFBA-4BA5-457D-8602-B800D498102D}.Release|x64.ActiveCfg = Release|Win32
+		{FE78BFBA-4BA5-457D-8602-B800D498102D}.Release|x64.ActiveCfg = Release|x64
+		{FE78BFBA-4BA5-457D-8602-B800D498102D}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

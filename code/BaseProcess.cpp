@@ -53,7 +53,7 @@ using namespace Assimp;
 // Constructor to be privately used by Importer
 BaseProcess::BaseProcess()
 {
-	// nothing to do here
+	shared = NULL;
 }
 
 // ------------------------------------------------------------------------------------------------

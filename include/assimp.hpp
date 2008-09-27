@@ -76,6 +76,7 @@ namespace Assimp
 
 class BaseImporter;
 class BaseProcess;
+class SharedPostProcessInfo;
 class IOStream;
 class IOSystem;
 
@@ -403,6 +404,9 @@ protected:
 	    validateDataStructure-Step to be executed before
 		and after every single postprocess step */
 	bool bExtraVerbose;
+
+	/** Used by post-process steps to share data */
+	SharedPostProcessInfo* mPPShared;
 };
 
 } // End of namespace Assimp

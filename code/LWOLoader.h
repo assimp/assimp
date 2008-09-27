@@ -339,6 +339,17 @@ private:
 	void ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& smoothingGroups,
 		const LWO::Surface& surface);
 
+
+	// -------------------------------------------------------------------
+	/** Setup a new texture after the corresponding chunk was 
+	 *  encountered in the file.
+	 *  @param list Texture list
+	 *  @param size Maximum number of bytes to be read
+	 *  @return Pointer to new texture
+	*/
+	LWO::Texture* SetupNewTextureLWOB(LWO::TextureList& list,
+		unsigned int size);
+
 protected:
 
 	/** true if the file is a LWO2 file*/

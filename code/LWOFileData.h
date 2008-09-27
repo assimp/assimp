@@ -56,7 +56,6 @@ Original copyright notice: "Ernie Wright  17 Sep 00"
 
 // internal headers
 #include "IFF.h"
-#include "SmoothingGroups.h"
 
 namespace Assimp {
 namespace LWO {

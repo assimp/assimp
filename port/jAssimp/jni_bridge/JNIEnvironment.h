@@ -48,9 +48,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <jni.h>
 
-#include "../../../include/aiAssert.h"
-#include "../../../include/aiMesh.h"
-#include "../../../include/aiScene.h"
+#include <aiAssert.h>
+#include <aiMesh.h>
+#include <aiScene.h>
 
 
 namespace Assimp	{
@@ -60,17 +60,18 @@ namespace JNIBridge		{
 #define AIJ_GET_HANDLE(__handle__) \
 	(JNIEnvironment::Get()-> __handle__)
 
-#define AIJ_GET_DEFAULT_CTOR_HANDLE (__handle__) \
+#define AIJ_GET_DEFAULT_CTOR_HANDLE(__handle__) \
 	(JNIEnvironment::Get()-> __handle__ . DefaultCtor)
 
-#define AIJ_GET_CLASS_HANDLE (__handle__) \
-	(JNIEnvironment::Get()-> __handle__ . Class)
+#define AIJ_GET_CLASS_HANDLE(__handle__) \
+	(JNIEnvironment::Get()-> __handle__.Class)
 
 // ---------------------------------------------------------------------------
 /**	@class	JNIThreadData
  *	@brief	Manages a list of JNI data structures that are
  *  private to a thread.
  */
+	// ---------------------------------------------------------------------------
 struct JNIThreadData
 {
 	//! Default constructor
@@ -93,6 +94,7 @@ struct JNIThreadData
  *	@brief	Helper class to manage the JNI environment for multithreaded
  *  use of the library.
  */
+// ---------------------------------------------------------------------------
 class JNIEnvironment
 {
 private:
@@ -151,7 +153,6 @@ public:
 public:
 
 
-
 	struct _java
 	{
 		inline void Initialize()
@@ -195,6 +196,20 @@ public:
 	} java;
 
 
+	struct _Base
+	{
+		virtual void Fill(jobject obj,const void* pcSrc) = 0;
+
+		jclass Class;
+		jmethodID DefaultCtor;
+	};
+
+#define AIJ_SET_INPUT_TYPE(__type__) \
+	\
+	void Fill(jobject obj,const __type__* pcSrc); \
+    \
+	inline void Fill(jobject obj,const void* pcSrc) \
+		{Fill(obj,(const __type__*)pcSrc);}
 
 	//! Represents the JNI interface to the package assimp
 	struct _assimp 
@@ -202,7 +217,7 @@ public:
 		//! Initializes the package assimp for use with jAssimp
 		inline void Initialize()
 		{
-			// the NativeError class must be initialized first as it
+			// the NativeException class must be initialized first as it
 			// is used by all other class initializers
 			NativeException.Initialize();
 
@@ -223,7 +238,7 @@ public:
 		};
 
 		//! Represents the JNI interface to class assimp.NativeException
-		struct _NativeException
+		struct _NativeException 
 		{
 			void Initialize();
 
@@ -245,13 +260,11 @@ public:
 
 
 		//! Represents the JNI interface to class assimp.Scene
-		struct _Scene
+		struct _Scene : public _Base 
 		{
 			void Initialize();
+			AIJ_SET_INPUT_TYPE(aiScene);
 
-			jclass Class;
-
-			jmethodID DefaultCtor;
 
 			jfieldID m_vMeshes;
 			jfieldID m_vTextures;
@@ -264,14 +277,10 @@ public:
 
 
 		//! Represents the JNI interface to class assimp.Mesh
-		struct _Mesh
+		struct _Mesh : public _Base
 		{
+			AIJ_SET_INPUT_TYPE(aiMesh);
 			void Initialize();
-			void Fill(jobject obj,const aiMesh* pcSrc);
-
-			jclass Class;
-
-			jmethodID DefaultCtor;
 
 			jfieldID m_vVertices;
 			jfieldID m_vTangents;
@@ -287,27 +296,33 @@ public:
 		} Mesh;
 
 		//! Represents the JNI interface to class assimp.Bone
-		struct _Bone
+		struct _Bone : public _Base
 		{
 			void Initialize();
-
-			jclass Class;
-
-			jmethodID DefaultCtor;
+			AIJ_SET_INPUT_TYPE(aiBone);
 
 			jfieldID name;
 			jfieldID weights;
 
+
+			//! Represents the JNI interface to class assimp.Bone.Weight
+			struct _Weight : public _Base
+			{
+				void Initialize();
+				AIJ_SET_INPUT_TYPE(aiVertexWeight);
+
+				jfieldID index;
+				jfieldID weight;
+
+			} Weight;
+
 		} Bone;
 
 		//! Represents the JNI interface to class assimp.Animation
-		struct _Animation
+		struct _Animation : public _Base
 		{
 			void Initialize();
-
-			jclass Class;
-
-			jmethodID DefaultCtor;
+			AIJ_SET_INPUT_TYPE(aiAnimation);
 
 			jfieldID name;
 			jfieldID mDuration;
@@ -317,10 +332,10 @@ public:
 		} Animation;
 
 		//! Represents the JNI interface to class assimp.BoneAnim
-		struct _BoneAnim
+		struct _BoneAnim : public _Base
 		{
 			void Initialize();
-
+			AIJ_SET_INPUT_TYPE(aiBoneAnim);
 
 			//! Represents the JNI interface to class assimp.BoneAnim.KeyFrame<quak>
 			struct _KeyFrame
@@ -334,10 +349,6 @@ public:
 
 			} KeyFrame;
 
-			jclass Class;
-
-			jmethodID DefaultCtor;
-
 			jfieldID mName;
 			jfieldID mQuatKeys;
 			jfieldID mPosKeys;
@@ -346,13 +357,10 @@ public:
 		} BoneAnim;
 
 		//! Represents the JNI interface to class assimp.Texture
-		struct _Texture
+		struct _Texture : public _Base
 		{
 			void Initialize();
-
-			jclass Class;
-
-			jmethodID DefaultCtor;
+			AIJ_SET_INPUT_TYPE(aiTexture);
 
 			jfieldID width;
 			jfieldID height;
@@ -361,67 +369,58 @@ public:
 		} Texture;
 
 		//! Represents the JNI interface to class assimp.CompressedTexture
-		struct _CompressedTexture
+		struct _CompressedTexture : public _Base
 		{
 			void Initialize();
+			AIJ_SET_INPUT_TYPE(aiTexture);
 
-			jclass Class;
-			jmethodID DefaultCtor;
 			jfieldID m_format;
 
 		} CompressedTexture;
 
 		//! Represents the JNI interface to class assimp.Material
-		struct _Material
+		struct _Material : public _Base
 		{
 			void Initialize();
+			AIJ_SET_INPUT_TYPE(aiMaterial);
 
 			//! Represents the JNI interface to class assimp.Material.Property
-			struct _Property
+			struct _Property : public _Base
 			{
-				jclass Class;
+				void Initialize();
+				AIJ_SET_INPUT_TYPE(aiMaterialProperty);
 
 				jfieldID key;
 				jfieldID value;
 
 			} Property;
-
-			jclass Class;
-			jmethodID DefaultCtor;
 			jfieldID properties;
 
 		} Material;
 
 		//! Represents the JNI interface to class assimp.Matrix4x4
-		struct _Matrix4x4
+		struct _Matrix4x4 : public _Base
 		{
 			void Initialize();
-
-			jclass Class;
-			jmethodID DefaultCtor;
+			AIJ_SET_INPUT_TYPE(aiMatrix4x4);
 			jfieldID coeff;
 
 		} Matrix4x4;
 
 		//! Represents the JNI interface to class assimp.Matrix3x3
-		struct _Matrix3x3
+		struct _Matrix3x3 : public _Base
 		{
 			void Initialize();
-
-			jclass Class;
-			jmethodID DefaultCtor;
+			AIJ_SET_INPUT_TYPE(aiMatrix3x3);
 			jfieldID coeff;
 
 		} Matrix3x3;
 
 		//! Represents the JNI interface to class assimp.Quaternion
-		struct _Quaternion
+		struct _Quaternion : public _Base
 		{
 			void Initialize();
-
-			jclass Class;
-
-			jmethodID DefaultCtor;
+			AIJ_SET_INPUT_TYPE(aiQuaternion);
 
 			jfieldID x;
 			jfieldID y;
@@ -431,13 +430,10 @@ public:
 		} Quaternion;
 
 		//! Represents the JNI interface to class assimp.Node
-		struct _Node
+		struct _Node : public _Base
 		{
 			void Initialize();
-
-			jclass Class;
-
-			jmethodID DefaultCtor;
+			AIJ_SET_INPUT_TYPE(aiNode);
 
 			jfieldID meshIndices;
 			jfieldID nodeTransform;
@@ -448,6 +444,12 @@ public:
 		} Node;
 
 	} assimp;
+
+	inline void Initialize()
+	{
+		assimp.Initialize();
+		java.Initialize();
+	}
 
 private:
 
@@ -461,17 +463,15 @@ private:
 	unsigned int m_iRefCnt;
 };
 
-};};
-
-
 // ---------------------------------------------------------------------------
 /** @brief Helper function to copy data to a Java array
  *
+ * @param pc JNI env handle
  * @param jfl Java array
  * @param data Input data
  * @param size Size of data to be copied, in bytes
  */
-JNU_CopyDataToArray(jarray jfl, void* data, unsigned int size);
+void JNU_CopyDataToArray(JNIEnv* pc, jarray jfl, void* data, unsigned int size);
 
 // ---------------------------------------------------------------------------
 /** @brief Helper function to create a java.lang.String from
@@ -493,6 +493,23 @@ jstring JNU_NewStringNative(JNIEnv *env, const char *str);
  * I am not sure whether it is really necessary, but I trust the source
  */
 char* JNU_GetStringNativeChars(JNIEnv *env, jstring jstr);
+
+
+// ---------------------------------------------------------------------------
+/** @brief Helper function to copy a whole object array to the VM
+ *
+ *  @param pc JNI env handle
+ *  @param in Input object array
+ *  @param num Size of input array
+ *  @param type Type of input
+ *  @param out Output object
+ */
+// ---------------------------------------------------------------------------
+void JNU_CopyObjectArrayToVM(JNIEnv* pc, const void** in, unsigned int num,
+	JNIEnvironment::_Base& type, jobjectArray& out);
+
+};};
+
 
 #endif //! AI_JNIENVIRONMENT_H_INCLUDED
 

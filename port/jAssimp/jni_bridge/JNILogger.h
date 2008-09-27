@@ -42,8 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_JNILOGGER_H_INCLUDED
 
 
-#include "../../include/Logger.h"
-#include "../../include/DefaultLogger.h"
+#include "../../../include/Logger.h"
+#include "../../../include/DefaultLogger.h"
 #include <vector>
 
 #include <jni.h>

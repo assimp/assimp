@@ -6,36 +6,8 @@ Open Asset Import Library (ASSIMP)
 Copyright (c) 2006-2008, ASSIMP Development Team
 
 All rights reserved.
-
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
-conditions are met:
-
-* Redistributions of source code must retain the above
-  copyright notice, this list of conditions and the
-  following disclaimer.
-
-* Redistributions in binary form must reproduce the above
-  copyright notice, this list of conditions and the
-  following disclaimer in the documentation and/or other
-  materials provided with the distribution.
-
-* Neither the name of the ASSIMP team, nor the names of its
-  contributors may be used to endorse or promote products
-  derived from this software without specific prior
-  written permission of the ASSIMP Development Team.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+See the disclaimer in JNIEnvironment.h for licensing and distribution 
+conditions.
 ---------------------------------------------------------------------------
 */
 
@@ -106,29 +78,29 @@ JNIThreadData* JNIEnvironment::GetThread()
 // ------------------------------------------------------------------------------------------------
 void JNIEnvironment::_java::_lang::_String::Initialize()
 {
-	JNIEnv* pcEnv = JJNIEnvironment::Get()->GetThread()->m_pcEnv;
+	JNIEnv* pcEnv = JNIEnvironment::Get()->GetThread()->m_pcEnv;
 
 	// first initialize some members
 	if( !(this->Class = pcEnv->FindClass("java.lang.String")))
-		JNIEnvironment::Get()->ThrowException("Unable to get handle of class java.lang.String");
+		JNIEnvironment::Get()->ThrowNativeError("Unable to get handle of class java.lang.String");
 	
 	if( !(this->getBytes = pcEnv->GetMethodID(this->Class,"getBytes","()[byte")))
-		JNIEnvironment::Get()->ThrowException("Unable to get handle of class java.lang.String");
+		JNIEnvironment::Get()->ThrowNativeError("Unable to get handle of class java.lang.String");
 
 	if( !(this->constructor_ByteArray = pcEnv->GetStaticMethodID(
 		this->Class,"<init>","([byte)V")))
-		JNIEnvironment::Get()->ThrowException("Unable to get handle of class java.lang.String");
+		JNIEnvironment::Get()->ThrowNativeError("Unable to get handle of class java.lang.String");
 }
 // ------------------------------------------------------------------------------------------------
 void JNIEnvironment::_java::_lang::_Array::Initialize()
 {
-	JNIEnv* pcEnv = JJNIEnvironment::Get()->GetThread()->m_pcEnv;
+	JNIEnv* pcEnv = JNIEnvironment::Get()->GetThread()->m_pcEnv;
 
 	if( !(this->FloatArray_Class = pcEnv->FindClass("[F")))
-		JNIEnvironment::Get()->ThrowException("Unable to get handle of class float[]");
+		JNIEnvironment::Get()->ThrowNativeError("Unable to get handle of class float[]");
 
 	if( !(this->IntArray_Class = pcEnv->FindClass("[I")))
-		JNIEnvironment::Get()->ThrowException("Unable to get handle of class int[]");
+		JNIEnvironment::Get()->ThrowNativeError("Unable to get handle of class int[]");
 }
 // ------------------------------------------------------------------------------------------------
 jstring JNU_NewStringNative(JNIEnv *env, const char *str)
@@ -140,7 +112,7 @@ jstring JNU_NewStringNative(JNIEnv *env, const char *str)
 	{
 		return NULL; /* out of memory error */
 	}
-	len = strlen(str);
+	len = (int)::strlen(str);
 	bytes = env->NewByteArray(len);
 	if (bytes != NULL) 
 	{
@@ -187,13 +159,13 @@ char *JNU_GetStringNativeChars(JNIEnv *env, jstring jstr)
 	return result;
 }
 // ------------------------------------------------------------------------------------------------
-JNU_CopyDataToArray(jarray jfl, void* data, unsigned int size)
+void JNU_CopyDataToArray(JNIEnv* pc, jarray jfl, void* data, unsigned int size)
 {
 	void* pf;
 	jboolean iscopy = FALSE;
 
 	// lock the array and get direct access to its buffer
-	if(!pf = pc->GetPrimitiveArrayCritical(jfl,&iscopy))
+	if(!(pf = pc->GetPrimitiveArrayCritical(jfl,&iscopy)))
 		JNIEnvironment::Get()->ThrowNativeError("Unable to lock array");
 
 	// copy the data to the array
@@ -201,6 +173,20 @@ JNU_CopyDataToArray(jarray jfl, void* data, unsigned int size)
 
 	// release our reference to the array
 	pc->ReleasePrimitiveArrayCritical(jfl,pf,0);
+}
+// ------------------------------------------------------------------------------------------------
+void JNU_CopyObjectArrayToVM(JNIEnv* pc, const void**  in, unsigned int num, 
+	 JNIEnvironment::_Base& type, jobjectArray& out)
+{
+	jobjectArray jarr =  pc->NewObjectArray(num,type.Class,0);
+	for (unsigned int i = 0; i < num;++i)
+	{
+		jobject jobj = pc->NewObject(type.Class,type.DefaultCtor);
+
+		type.Fill(jobj,in[i]);
+		pc->SetObjectArrayElement(jarr,i,jobj);
+	}
+	out = jarr;
 }
 
 };};

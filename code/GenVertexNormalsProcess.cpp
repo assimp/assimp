@@ -42,13 +42,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the post processing step to generate face
 * normals for all imported faces.
 */
-#include "GenVertexNormalsProcess.h"
-#include "SpatialSort.h"
+
+// public ASSIMP headers
 #include "../include/DefaultLogger.h"
 #include "../include/aiPostProcess.h"
-#include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/assimp.hpp"
+
+// internal headers
+#include "GenVertexNormalsProcess.h"
+#include "ProcessHelper.h"
 
 using namespace Assimp;
 
@@ -90,7 +93,7 @@ void GenVertexNormalsProcess::Execute( aiScene* pScene)
 	bool bHas = false;
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 	{
-		if(this->GenMeshVertexNormals( pScene->mMeshes[a]))
+		if(this->GenMeshVertexNormals( pScene->mMeshes[a],a))
 			bHas = true;
 	}
 
@@ -105,7 +108,7 @@ void GenVertexNormalsProcess::Execute( aiScene* pScene)
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
+bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int meshIndex)
 {
 	if (NULL != pMesh->mNormals)return false;
 
@@ -123,49 +126,87 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh)
 			pMesh->mNormals[face.mIndices[i]] = vNor;
 	}
 
-	// calculate the position bounds so we have a reliable epsilon to 
-	// check position differences against 
-	aiVector3D minVec( 1e10f, 1e10f, 1e10f), maxVec( -1e10f, -1e10f, -1e10f);
-	for( unsigned int a = 0; a < pMesh->mNumVertices; a++)
-	{
-		minVec.x = std::min( minVec.x, pMesh->mVertices[a].x);
-		minVec.y = std::min( minVec.y, pMesh->mVertices[a].y);
-		minVec.z = std::min( minVec.z, pMesh->mVertices[a].z);
-		maxVec.x = std::max( maxVec.x, pMesh->mVertices[a].x);
-		maxVec.y = std::max( maxVec.y, pMesh->mVertices[a].y);
-		maxVec.z = std::max( maxVec.z, pMesh->mVertices[a].z);
-	}
-
-	const float posEpsilon = (maxVec - minVec).Length() * 1e-5f;
-
 	// set up a SpatialSort to quickly find all vertices close to a given position
-	SpatialSort vertexFinder( pMesh->mVertices, pMesh->mNumVertices, sizeof( aiVector3D));
-	std::vector<unsigned int> verticesFound;
-
-	const float fLimit = cos(this->configMaxAngle); 
-
-	aiVector3D* pcNew = new aiVector3D[pMesh->mNumVertices];
-	for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
+	// check whether we can reuse the SpatialSort of a previous step.
+	SpatialSort* vertexFinder = NULL;
+	SpatialSort  _vertexFinder;
+	float posEpsilon;
+	const float epsilon = 1e-5f;
+	if (shared)
 	{
-		const aiVector3D& posThis = pMesh->mVertices[i];
-
-		// get all vertices that share this one ...
-		vertexFinder.FindPositions( posThis, posEpsilon, verticesFound);
-
-		aiVector3D pcNor; 
-		for (unsigned int a = 0; a < verticesFound.size(); ++a)
+		std::vector<std::pair<SpatialSort,float> >* avf;
+		shared->GetProperty(AI_SPP_SPATIAL_SORT,avf);
+		if (avf)
 		{
-			unsigned int vidx = verticesFound[a];
-
-			// check whether the angle between the two normals is not too large
-			if (pMesh->mNormals[vidx] * pMesh->mNormals[i] < fLimit)
-				continue;
-
-			pcNor += pMesh->mNormals[vidx];
+			std::pair<SpatialSort,float>& blubb = avf->operator [] (meshIndex);
+			vertexFinder = &blubb.first;
+			posEpsilon = blubb.second;
 		}
-		pcNor.Normalize();
-		pcNew[i] = pcNor;
 	}
+	if (!vertexFinder)
+	{
+		_vertexFinder.Fill(pMesh->mVertices, pMesh->mNumVertices, sizeof( aiVector3D));
+		vertexFinder = &_vertexFinder;
+		posEpsilon = ComputePositionEpsilon(pMesh);
+	}
+	std::vector<unsigned int> verticesFound;
+	aiVector3D* pcNew = new aiVector3D[pMesh->mNumVertices];
+
+	if (configMaxAngle >= AI_DEG_TO_RAD( 175.f ))
+	{
+		// there is no angle limit. Thus all vertices with positions close
+		// to each other will receive the same vertex normal. This allows us
+		// to optimize the whole algorithm a little bit ...
+		std::vector<bool> abHad(pMesh->mNumVertices,false);
+
+		for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
+		{
+			if (abHad[i])continue;
+
+			// get all vertices that share this one ...
+			vertexFinder->FindPositions( pMesh->mVertices[i], posEpsilon, verticesFound);
+
+			aiVector3D pcNor; 
+			for (unsigned int a = 0; a < verticesFound.size(); ++a)
+			{
+				register unsigned int vidx = verticesFound[a];
+				pcNor += pMesh->mNormals[vidx];
+			}
+			pcNor.Normalize();
+
+			// write the smoothed normal back to all affected normals
+			for (unsigned int a = 0; a < verticesFound.size(); ++a)
+			{
+				register unsigned int vidx = verticesFound[a];
+				pcNew[vidx] = pcNor;
+				abHad[vidx] = true;
+			}
+		}
+	}
+	else
+	{
+		const float fLimit = cos(configMaxAngle); 
+		for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
+		{
+			// get all vertices that share this one ...
+			vertexFinder->FindPositions( pMesh->mVertices[i] , posEpsilon, verticesFound);
+
+			aiVector3D pcNor; 
+			for (unsigned int a = 0; a < verticesFound.size(); ++a)
+			{
+				register unsigned int vidx = verticesFound[a];
+
+				// check whether the angle between the two normals is not too large
+				if (pMesh->mNormals[vidx] * pMesh->mNormals[i] < fLimit)
+					continue;
+
+				pcNor += pMesh->mNormals[vidx];
+			}
+			pcNor.Normalize();
+			pcNew[i] = pcNor;
+		}
+	}
+
 	delete[] pMesh->mNormals;
 	pMesh->mNormals = pcNew;
 

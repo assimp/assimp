@@ -159,7 +159,7 @@ public class DumpToFile {
      *                  mesh to be opened, the second is te name of the primary output file.
      * @throws IOException
      */
-    public static void Main(String[] arguments) throws IOException {
+    public static void main(String[] arguments) throws IOException {
 
         /* Use output.txt as default output file if none was specified
          * However, at least one parameter is expected

@@ -41,12 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the LWO importer class */
 
-// internal headers
-#include "LWOLoader.h"
-#include "MaterialSystem.h"
-#include "StringComparison.h"
-#include "SGSpatialSort.h"
-#include "ByteSwap.h"
 
 // public assimp headers
 #include "../include/IOStream.h"
@@ -54,6 +48,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiScene.h"
 #include "../include/aiAssert.h"
 #include "../include/assimp.hpp"
+
+// internal headers
+#include "LWOLoader.h"
+#include "MaterialSystem.h"
+#include "StringComparison.h"
+#include "SGSpatialSort.h"
+#include "ByteSwap.h"
+#include "ProcessHelper.h"
 
 // boost headers
 #include <boost/scoped_ptr.hpp>
@@ -313,7 +315,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 							aiVector3D*& pp = pvUV[w];
 							const aiVector2D& src = ((aiVector2D*)&layer.mUVChannels[vUVChannelIndices[w]].rawData[0])[idx];
 							pp->x = src.x;
-							pp->y = 1.0f - src.y; // DX to OGL
+							pp->y = 1.f-src.y; // DX to OGL
 							pp++;
 						}
 
@@ -414,20 +416,7 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 			out[face.mIndices[i]] = vNor;
 	}
 	if (!surface.mMaximumSmoothAngle)return;
-
-	// calculate the position bounds so we have a reliable epsilon to 
-	// check position differences against 
-	aiVector3D minVec( 1e10f, 1e10f, 1e10f), maxVec( -1e10f, -1e10f, -1e10f);
-	for( unsigned int a = 0; a < mesh->mNumVertices; a++)
-	{
-		minVec.x = std::min( minVec.x, mesh->mVertices[a].x);
-		minVec.y = std::min( minVec.y, mesh->mVertices[a].y);
-		minVec.z = std::min( minVec.z, mesh->mVertices[a].z);
-		maxVec.x = std::max( maxVec.x, mesh->mVertices[a].x);
-		maxVec.y = std::max( maxVec.y, mesh->mVertices[a].y);
-		maxVec.z = std::max( maxVec.z, mesh->mVertices[a].z);
-	}
-	const float posEpsilon = (maxVec - minVec).Length() * 1e-5f;
+	const float posEpsilon = ComputePositionEpsilon(mesh);
 	
 	// now generate the spatial sort tree
 	SGSpatialSort sSort;
@@ -443,9 +432,11 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 	}
 	// sort everything - this takes O(logn) time
 	sSort.Prepare();
-	std::vector<unsigned int> poResult;poResult.reserve(20);
+	std::vector<unsigned int> poResult;
+	poResult.reserve(20);
 
 	const float fLimit = cos(surface.mMaximumSmoothAngle);
+	std::vector<bool> vertexDone(mesh->mNumVertices,false);
 
 	// generate vertex normals. We have O(logn) for the binary lookup, which we need
 	// for n elements, thus the EXPECTED complexity is O(nlogn)
@@ -457,19 +448,26 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 		unsigned int* beginIdx = face.mIndices, *const endIdx = face.mIndices+face.mNumIndices;
 		for (; beginIdx != endIdx; ++beginIdx)
 		{
-			sSort.FindPositions(mesh->mVertices[*beginIdx],sg,posEpsilon,poResult,true);
+			register unsigned int idx = *beginIdx;
+
+			if (vertexDone[idx])continue;
+			sSort.FindPositions(mesh->mVertices[idx],sg,posEpsilon,poResult,true);
+
+			std::vector<unsigned int>::const_iterator a, end = poResult.end();
 
 			aiVector3D vNormals;
-			for (std::vector<unsigned int>::const_iterator
-				a =  poResult.begin(), end = poResult.end();
-				a != end;++a)
+			for (a =  poResult.begin();a != end;++a)
 			{
 				const aiVector3D& v = faceNormals[*a];
-				if (v * faceNormals[*beginIdx] < fLimit)continue;
+				if (v * faceNormals[idx] < fLimit)continue;
 				vNormals += v;
 			}
 			vNormals.Normalize();
-			mesh->mNormals[*beginIdx] = vNormals;
+			for (a =  poResult.begin();a != end;++a)
+			{
+				mesh->mNormals[*a] = vNormals;
+				vertexDone[*a] = true;
+			}
 		}
 	}
 }
@@ -802,12 +800,12 @@ void CreateNewEntry(std::vector< T >& list, unsigned int srcIdx)
 		it != end;++it)
 	{
 		T& chan = *it;
+
+		chan.abAssigned[srcIdx] = true;
+		chan.abAssigned.resize(chan.abAssigned.size()+1,false);
+
 		for (unsigned int a = 0; a < chan.dims;++a)
-		{
 			chan.rawData.push_back(chan.rawData[srcIdx*chan.dims+a]);
-			chan.abAssigned[srcIdx] = true;
-			chan.abAssigned.resize(chan.abAssigned.size()+1,false);
-		}
 	}
 }
 
@@ -891,10 +889,13 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 
 	float temp[4];
 
+	const unsigned int numPoints = (unsigned int)pointList.size();
+	const unsigned int numFaces  = (unsigned int)list.size();
+
 	while (mFileBuffer < end)
 	{
 		unsigned int idx = ReadVSizedIntLWO2(mFileBuffer) + mCurLayer->mPointIDXOfs;
-		if (idx >= pointList.size())
+		if (idx >= numPoints)
 		{
 			DefaultLogger::get()->warn("LWO2: vertex index in vmap/vmad is out of range");
 			mFileBuffer += base->dims*4;continue;
@@ -906,24 +907,29 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 			{
 				// we have already a VMAP entry for this vertex - thus
 				// we need to duplicate the corresponding polygon.
-				if (polyIdx >= list.size())
+				if (polyIdx >= numFaces)
 				{
 					DefaultLogger::get()->warn("LWO2: VMAD polygon index is out of range");
 					mFileBuffer += base->dims*4;continue;
 				}
 
 				LWO::Face& src = list[polyIdx];
+				refList.resize(refList.size()+src.mNumIndices, 0xffffffff);
 
 				// generate new vertex positions
 				for (unsigned int i = 0; i < src.mNumIndices;++i)
 				{
 					register unsigned int srcIdx = src.mIndices[i];
+					if (idx == srcIdx)
+					{
+						idx = (unsigned int)pointList.size();
+					}
+					src.mIndices[i] = (unsigned int)pointList.size();
 
 					// store the index of the new vertex in the old vertex
 					// so we get a single linked list we can traverse in
 					// only one direction
-					refList.push_back(0xffffffff);
-					AddToSingleLinkedList(refList,srcIdx,(src.mIndices[i] = (unsigned int)pointList.size()));
+					AddToSingleLinkedList(refList,srcIdx,src.mIndices[i]);
 					pointList.push_back(pointList[srcIdx]);
 
 					CreateNewEntry(mCurLayer->mVColorChannels,	srcIdx );

@@ -44,12 +44,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include <vector>
-#include "JoinVerticesProcess.h"
-#include "SpatialSort.h"
+
 #include "../include/DefaultLogger.h"
 #include "../include/aiPostProcess.h"
 #include "../include/aiMesh.h"
 #include "../include/aiScene.h"
+
+// internal headers
+#include "JoinVerticesProcess.h"
+#include "ProcessHelper.h"
 
 using namespace Assimp;
 
@@ -141,25 +144,32 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	// for each vertex whether it was replaced by an existing unique vertex (true) or a new vertex was created for it (false)
 	std::vector<bool> isVertexUnique( pMesh->mNumVertices, false);
 
-	// calculate the position bounds so we have a reliable epsilon to check position differences against 
-	aiVector3D minVec( 1e10f, 1e10f, 1e10f), maxVec( -1e10f, -1e10f, -1e10f);
-	for( unsigned int a = 0; a < pMesh->mNumVertices; a++)
+	// a little helper to find locally close vertices faster
+	// FIX: check whether we can reuse the SpatialSort of a previous step
+	const float epsilon = 1e-5f;
+	float posEpsilon;
+	SpatialSort* vertexFinder = NULL;
+	SpatialSort  _vertexFinder;
+	if (shared)
 	{
-		minVec.x = std::min( minVec.x, pMesh->mVertices[a].x);
-		minVec.y = std::min( minVec.y, pMesh->mVertices[a].y);
-		minVec.z = std::min( minVec.z, pMesh->mVertices[a].z);
-		maxVec.x = std::max( maxVec.x, pMesh->mVertices[a].x);
-		maxVec.y = std::max( maxVec.y, pMesh->mVertices[a].y);
-		maxVec.z = std::max( maxVec.z, pMesh->mVertices[a].z);
+		std::vector<std::pair<SpatialSort,float> >* avf;
+		shared->GetProperty(AI_SPP_SPATIAL_SORT,avf);
+		if (avf)
+		{
+			std::pair<SpatialSort,float>& blubb = avf->operator [] (meshIndex);
+			vertexFinder = &blubb.first;
+			posEpsilon = blubb.second;
+		}
+	}
+	if (!vertexFinder)
+	{
+		_vertexFinder.Fill(pMesh->mVertices, pMesh->mNumVertices, sizeof( aiVector3D));
+		vertexFinder = &_vertexFinder;
+		posEpsilon = ComputePositionEpsilon(pMesh);
 	}
 
-	// squared because we check against squared length of the vector difference	
-	const float epsilon = 1e-5f; 
-	const float posEpsilon = (maxVec - minVec).Length() * epsilon;
+	// squared because we check against squared length of the vector difference
 	const float squareEpsilon = epsilon * epsilon;
-
-	// a little helper to find locally close vertices faster
-	SpatialSort vertexFinder( pMesh->mVertices, pMesh->mNumVertices, sizeof( aiVector3D));
 	std::vector<unsigned int> verticesFound;
 
 	// now check each vertex if it brings something new to the table
@@ -177,7 +187,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 			v.mTexCoords[b] = (pMesh->mTextureCoords[b] != NULL) ? pMesh->mTextureCoords[b][a] : aiVector3D( 0, 0, 0);
 
 		// collect all vertices that are close enough to the given position
-		vertexFinder.FindPositions( v.mPosition, posEpsilon, verticesFound);
+		vertexFinder->FindPositions( v.mPosition, posEpsilon, verticesFound);
 
 		unsigned int matchIndex = 0xffffffff;
 		// check all unique vertices close to the position if this vertex is already present among them
@@ -233,7 +243,8 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 			// store where to found the matching unique vertex
 			replaceIndex[a] = matchIndex;
 			isVertexUnique[a] = false;
-		} else
+		}
+		else
 		{
 			// no unique vertex matches it upto now -> so add it
 			replaceIndex[a] = (unsigned int)uniqueVertices.size();

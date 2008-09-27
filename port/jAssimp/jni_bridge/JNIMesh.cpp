@@ -52,11 +52,13 @@ namespace JNIBridge		{
 // ------------------------------------------------------------------------------------------------
 void JNIEnvironment::_assimp::_Mesh::Initialize()
 {
-	JNIEnv* pc = JJNIEnvironment::Get()->GetThread()->m_pcEnv;
+	JNIEnv* pc = JNIEnvironment::Get()->GetThread()->m_pcEnv;
 
 	// load a handle to the class
 	if(!(this->Class = pc->FindClass("assimp.Mesh")))
 		JNIEnvironment::Get()->ThrowNativeError("Unable to load class assimp.mesh");
+
+	DefaultCtor = pc->GetMethodID(Class,"<init>","");
 
 	// load all fields of the class
 	this->m_vVertices	= pc->GetFieldID(Class,"m_vVertices","[F");
@@ -83,25 +85,22 @@ void JNIEnvironment::_assimp::_Mesh::Initialize()
 // ------------------------------------------------------------------------------------------------
 void JNIEnvironment::_assimp::_Mesh::Fill(jobject obj,const aiMesh* pcSrc)
 {
-	JNIEnv* pc = JJNIEnvironment::Get()->GetThread()->m_pcEnv;
+	JNIEnv* pc = JNIEnvironment::Get()->GetThread()->m_pcEnv;
 	
 	// set the material index
 	pc->SetIntField(obj,this->m_iMaterialIndex,pcSrc->mMaterialIndex);
 
 
 	// allocate the arrays and fill them
-	float* pf;
 	const unsigned int size = pcSrc->mNumVertices*12;
 	const unsigned int size2 = pcSrc->mNumVertices*3;
 
 	// copy vertex positions
 	if (pcSrc->HasPositions())
 	{
-		// allocate and copy data
 		jfloatArray jfl = pc->NewFloatArray(size2);	
-		JNU_CopyDataToArray(jfl,pcSrc->mVertices,size);
+		JNU_CopyDataToArray(pc,jfl,pcSrc->mVertices,size);
 
-		// set the corresponding field in the java object
 		pc->SetObjectField(obj,this->m_vVertices,jfl);
 	}
 	// copy vertex normals
@@ -109,25 +108,20 @@ void JNIEnvironment::_assimp::_Mesh::Fill(jobject obj,const aiMesh* pcSrc)
 	{
 		// allocate and copy data
 		jfloatArray jfl = pc->NewFloatArray(size2);	
-		JNU_CopyDataToArray(jfl,pcSrc->mNormals,size);
+		JNU_CopyDataToArray(pc,jfl,pcSrc->mNormals,size);
 
-		// set the corresponding field in the java object
 		pc->SetObjectField(obj,this->m_vNormals,jfl);	
 	}
 	// copy tangents and bitangents
 	if (pcSrc->HasTangentsAndBitangents())
 	{
-		// allocate and copy data
 		jfloatArray jfl = pc->NewFloatArray(size2);	
-		JNU_CopyDataToArray(jfl,pcSrc->mTangents,size);
+		JNU_CopyDataToArray(pc,jfl,pcSrc->mTangents,size);
 
-		// set the corresponding field in the java object
 		pc->SetObjectField(obj,this->m_vTangents,jfl);
 
 		jfl = pc->NewFloatArray(size2);	
-		JNU_CopyDataToArray(jfl,pcSrc->mBitangents,size);
-
-		// set the corresponding field in the java object
+		JNU_CopyDataToArray(pc,jfl,pcSrc->mBitangents,size);
 		pc->SetObjectField(obj,this->m_vBitangents,jfl);
 	}
 	// copy texture coordinates
@@ -140,9 +134,9 @@ void JNIEnvironment::_assimp::_Mesh::Fill(jobject obj,const aiMesh* pcSrc)
 		while (pcSrc->HasTextureCoords(channel))
 		{
 			jfloatArray jfl = pc->NewFloatArray(size2);	
-			JNU_CopyDataToArray(jfl,pcSrc->mTextureCoords[channel],size);
+			JNU_CopyDataToArray(pc,jfl,pcSrc->mTextureCoords[channel],size);
 
-			pc->SetObjectArrayElement(jobjarr,channel,jfl)
+			pc->SetObjectArrayElement(jobjarr,channel,jfl);
 			++channel;
 		}
 
@@ -150,7 +144,7 @@ void JNIEnvironment::_assimp::_Mesh::Fill(jobject obj,const aiMesh* pcSrc)
 		pc->SetObjectField(obj,this->m_avUVs,jobjarr);
 
 		jobjarr = (jobjectArray)  pc->NewIntArray(AI_MAX_NUMBER_OF_TEXTURECOORDS);
-		pc->SetIntArrayRegion((jintArray)jobjarr,0,channel,&pcSrc->mNumUVComponents);
+		pc->SetIntArrayRegion((jintArray)jobjarr,0,channel,(const jint*)&pcSrc->mNumUVComponents);
 		pc->SetObjectField(obj,this->m_aiNumUVComponents,jobjarr);
 	}
 	// copy vertex colors
@@ -166,7 +160,7 @@ void JNIEnvironment::_assimp::_Mesh::Fill(jobject obj,const aiMesh* pcSrc)
 		while (pcSrc->HasVertexColors(channel))
 		{
 			jfloatArray jfl = pc->NewFloatArray(size2);	
-			JNU_CopyDataToArray(jfl,pcSrc->mColors[channel],size);
+			JNU_CopyDataToArray(pc,jfl,pcSrc->mColors[channel],size);
 
 			pc->SetObjectArrayElement(jobjarr,channel,jfl);
 			++channel;
@@ -186,15 +180,13 @@ void JNIEnvironment::_assimp::_Mesh::Fill(jobject obj,const aiMesh* pcSrc)
 		// allocate and copy data
 		jintArray jil = pc->NewIntArray(size2);	
 
-		int* pf;
+		uint32_t* pf;
 		jboolean iscopy = FALSE;
 
-		// lock the array and get direct access to its buffer
-		if(!pf = pc->GetPrimitiveArrayCritical(jil,&iscopy))
+		if(!(pf = (uint32_t*)pc->GetPrimitiveArrayCritical(jil,&iscopy)))
 			JNIEnvironment::Get()->ThrowNativeError("Unable to lock face array");
 
-		// copy the data to the array - face by face
-		const aiFace** const pcEnd = pcSrc->mFaces+pcSrc->mNumFaces;
+		const aiFace* const pcEnd = pcSrc->mFaces+pcSrc->mNumFaces;
 		for (const aiFace* pcCur = pcSrc->mFaces;pcCur != pcEnd;++pcCur)
 		{
 			ai_assert(3 == pcCur->mNumIndices);
@@ -203,36 +195,17 @@ void JNIEnvironment::_assimp::_Mesh::Fill(jobject obj,const aiMesh* pcSrc)
 			*pf++ = pcCur->mIndices[2];
 		}
 
-		// release our reference to the array
 		pc->ReleasePrimitiveArrayCritical(jil,pf,0);
-
-		// set the corresponding field in the java object
 		pc->SetObjectField(obj,this->m_vFaces,jil);
 	}
 
 	// copy bones
 	if (pcSrc->mNumBones)
 	{
-		// allocate the array
-		jobjectArray jarr = pc->NewObjectArray(pcSrc->mNumBones,
-			AIJ_GET_HANDLE(assimp.Bone.Class),0);
-
-		// and fill all members
-		for (unsigned int i = 0; i < pcSrc->mNumBones;++i)
-		{
-			// allocate the array element
-			jobject jobj = pc->NewObject(AIJ_GET_CLASS_HANDLE(assimp.Bone),
-				AIJ_GET_DEFAULT_CTOR_HANDLE(assimp.Bone));
-
-			// fill it from the native data
-			JNIEnvironment::Get()->assimp.Bone.Fill(jobj,pcSrc->mBones[i]);
-
-			// and set the corresponding array entry
-			pc->SetObjectArrayElement(jarr,i,jobj);
-		}
-
-		// set the corresponding field in the java object
-		pc->SetObjectField(obj,this->m_vBones,jil);
+		jobjectArray ja;
+		JNU_CopyObjectArrayToVM(pc,(const void**)pcSrc->mBones,pcSrc->mNumBones,
+			AIJ_GET_HANDLE(assimp.Bone),ja);
+		pc->SetObjectField(obj,m_vBones,ja);
 	}
 }
 

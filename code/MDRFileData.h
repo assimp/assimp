@@ -87,7 +87,6 @@ struct Vertex
 	aiVector3D		normal;
 	aiVector2D		texCoords;
 	uint32_t		numWeights;
-	Weight	weights;		// variable sized
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
@@ -147,7 +146,6 @@ struct Frame {
 	aiVector3D	localOrigin;		// midpoint of bounds, used for sphere cull
 	float		radius;				// dist from localOrigin to corner
 	char		name[16];
-	Bone	bones[1];			// [numBones]
 } PACK_STRUCT;
 
 

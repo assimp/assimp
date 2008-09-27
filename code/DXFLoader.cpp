@@ -122,7 +122,8 @@ bool DXFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 // ------------------------------------------------------------------------------------------------
 bool DXFImporter::GetNextLine()
 {
-	if(!SkipLine(&buffer))return false;
+	if(!SkipLine(&buffer))
+		return false;
 	if(!SkipSpaces(&buffer))return GetNextLine();
 	return true;
 }
@@ -187,13 +188,10 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 			// other sections - skip them to make sure there will be no name conflicts
 			else
 			{
-				bool b = false;
 				while (GetNextToken())
 				{
-					if (!groupCode && !::strcmp(cursor,"ENDSEC"))
-						{b = true;break;}
+					if (!groupCode && !::strcmp(cursor,"ENDSEC"))break;
 				}
-				if (!b)break;
 			}
 		}
 		// print comment strings
@@ -233,9 +231,12 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 		for (std::vector<aiColor4D>::const_iterator it2 = (*it).vColors.begin(), end2 = (*it).vColors.end();
 			 it2 != end2; ++it2)
 		{
-			if (std::numeric_limits<float>::quiet_NaN() != (*it2).r)
+			if ((*it2).r == (*it2).r) // check against qnan
 			{
 				clrOut = pMesh->mColors[0] = new aiColor4D[vPositions.size()];
+				for (unsigned int i = 0; i < vPositions.size();++i)
+					clrOut[i] = aiColor4D(0.6f,0.6f,0.6f,1.0f);
+
 				clr = &vColors[0];
 				break;
 			}
@@ -262,7 +263,13 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 			for (unsigned int a = 0; a < face.mNumIndices;++a)
 			{
 				*vpOut++ = vp[a];
-				if (clr)*clrOut++ = clr[a];
+				if (clr)
+				{
+					if (std::numeric_limits<float>::quiet_NaN() != clr[a].r)
+						*clrOut = clr[a];
+
+					++clrOut;
+				}
 				face.mIndices[a] = pMesh->mNumVertices++;
 			}
 			vp += 4;
@@ -325,7 +332,7 @@ bool DXFImporter::ParseEntities()
 			if (!::strcmp(cursor,"3DFACE"))
 				if (!Parse3DFace()) return false; else bRepeat = true;
 
-			if (!::strcmp(cursor,"POLYLINE"))
+			if (!::strcmp(cursor,"POLYLINE") || !::strcmp(cursor,"LWPOLYLINE"))
 				if (!ParsePolyLine()) return false; else bRepeat = true;
 
 			if (!::strcmp(cursor,"ENDSEC"))

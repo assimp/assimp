@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseProcess.h"
 
 struct aiMesh;
-struct aiBoneAnim;
+struct aiNodeAnim;
 
 namespace Assimp
 {
@@ -114,7 +114,7 @@ protected:
 	 * work in local space and can therefore be left untouched.
 	 * @param pAnim The bone animation to transform
 	 */
-	void ProcessAnimation( aiBoneAnim* pAnim);
+	void ProcessAnimation( aiNodeAnim* pAnim);
 
 	//! true if the transformation matrix for the OGL-to-DX is 
 	//! directly used to transform all vertices.

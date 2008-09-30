@@ -418,24 +418,24 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation)
 	this->Validate(&pAnimation->mName);
 
 	// validate all materials
-	if (pAnimation->mNumBones)
+	if (pAnimation->mNumChannels)
 	{
-		if (!pAnimation->mBones)
+		if (!pAnimation->mChannels)
 		{
-			this->ReportError("aiAnimation::mBones is NULL (aiAnimation::mNumBones is %i)",
-				pAnimation->mBones);
+			this->ReportError("aiAnimation::mChannels is NULL (aiAnimation::mNumChannels is %i)",
+				pAnimation->mNumChannels);
 		}
-		for (unsigned int i = 0; i < pAnimation->mNumBones;++i)
+		for (unsigned int i = 0; i < pAnimation->mNumChannels;++i)
 		{
-			if (!pAnimation->mBones[i])
+			if (!pAnimation->mChannels[i])
 			{
-				this->ReportError("aiAnimation::mBones[%i] is NULL (aiAnimation::mNumBones is %i)",
-					i,pAnimation->mNumBones);
+				this->ReportError("aiAnimation::mChannels[%i] is NULL (aiAnimation::mNumChannels is %i)",
+					i, pAnimation->mNumChannels);
 			}
-			this->Validate(pAnimation, pAnimation->mBones[i]);
+			this->Validate(pAnimation, pAnimation->mChannels[i]);
 		}
 	}
-	else this->ReportError("aiAnimation::mNumBones is 0. At least one bone animation channel must be there.");
+	else this->ReportError("aiAnimation::mNumChannels is 0. At least one node animation channel must be there.");
 
 	// Animation duration is allowed to be zero in cases where the anim contains only a single key frame.
 	// if (!pAnimation->mDuration)this->ReportError("aiAnimation::mDuration is zero");
@@ -653,9 +653,9 @@ void ValidateDSProcess::Validate( const aiTexture* pTexture)
 }
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
-	 const aiBoneAnim* pBoneAnim)
+	 const aiNodeAnim* pNodeAnim)
 {
-	this->Validate(&pBoneAnim->mBoneName);
+	this->Validate(&pNodeAnim->mNodeName);
 
 #if 0
 	// check whether there is a bone with this name ...
@@ -665,103 +665,103 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 		aiMesh* mesh = this->mScene->mMeshes[i];
 		for (unsigned int a = 0; a < mesh->mNumBones;++a)
 		{
-			if (mesh->mBones[a]->mName == pBoneAnim->mBoneName)
+			if (mesh->mBones[a]->mName == pNodeAnim->mBoneName)
 				goto __break_out;
 		}
 	}
 __break_out:
 	if (i == this->mScene->mNumMeshes)
 	{
-		this->ReportWarning("aiBoneAnim::mBoneName is \"%s\". However, no bone with this name was found",
-			pBoneAnim->mBoneName.data);
+		this->ReportWarning("aiNodeAnim::mBoneName is \"%s\". However, no bone with this name was found",
+			pNodeAnim->mBoneName.data);
 	}
-	if (!pBoneAnim->mNumPositionKeys && !pBoneAnim->mNumRotationKeys && !pBoneAnim->mNumScalingKeys)
+	if (!pNodeAnim->mNumPositionKeys && !pNodeAnim->mNumRotationKeys && !pNodeAnim->mNumScalingKeys)
 	{
 		this->ReportWarning("A bone animation channel has no keys");
 	}
 #endif
 	// otherwise check whether one of the keys exceeds the total duration of the animation
-	if (pBoneAnim->mNumPositionKeys)
+	if (pNodeAnim->mNumPositionKeys)
 	{
-		if (!pBoneAnim->mPositionKeys)
+		if (!pNodeAnim->mPositionKeys)
 		{
-			this->ReportError("aiBoneAnim::mPositionKeys is NULL (aiBoneAnim::mNumPositionKeys is %i)",
-				pBoneAnim->mNumPositionKeys);
+			this->ReportError("aiNodeAnim::mPositionKeys is NULL (aiNodeAnim::mNumPositionKeys is %i)",
+				pNodeAnim->mNumPositionKeys);
 		}
 		double dLast = -0.1;
-		for (unsigned int i = 0; i < pBoneAnim->mNumPositionKeys;++i)
+		for (unsigned int i = 0; i < pNodeAnim->mNumPositionKeys;++i)
 		{
-			if (pBoneAnim->mPositionKeys[i].mTime > pAnimation->mDuration)
+			if (pNodeAnim->mPositionKeys[i].mTime > pAnimation->mDuration)
 			{
-				this->ReportError("aiBoneAnim::mPositionKeys[%i].mTime (%.5f) is larger "
+				this->ReportError("aiNodeAnim::mPositionKeys[%i].mTime (%.5f) is larger "
 					"than aiAnimation::mDuration (which is %.5f)",i,
-					(float)pBoneAnim->mPositionKeys[i].mTime,
+					(float)pNodeAnim->mPositionKeys[i].mTime,
 					(float)pAnimation->mDuration);
 			}
-			if (pBoneAnim->mPositionKeys[i].mTime <= dLast)
+			if (pNodeAnim->mPositionKeys[i].mTime <= dLast)
 			{
-				this->ReportWarning("aiBoneAnim::mPositionKeys[%i].mTime (%.5f) is smaller "
+				this->ReportWarning("aiNodeAnim::mPositionKeys[%i].mTime (%.5f) is smaller "
 					"than aiAnimation::mPositionKeys[%i] (which is %.5f)",i,
-					(float)pBoneAnim->mPositionKeys[i].mTime,
+					(float)pNodeAnim->mPositionKeys[i].mTime,
 					i-1, (float)dLast);
 			}
-			dLast = pBoneAnim->mPositionKeys[i].mTime;
+			dLast = pNodeAnim->mPositionKeys[i].mTime;
 		}
 	}
 	// rotation keys
-	if (pBoneAnim->mNumRotationKeys)
+	if (pNodeAnim->mNumRotationKeys)
 	{
-		if (!pBoneAnim->mRotationKeys)
+		if (!pNodeAnim->mRotationKeys)
 		{
-			this->ReportError("aiBoneAnim::mRotationKeys is NULL (aiBoneAnim::mNumRotationKeys is %i)",
-				pBoneAnim->mNumRotationKeys);
+			this->ReportError("aiNodeAnim::mRotationKeys is NULL (aiNodeAnim::mNumRotationKeys is %i)",
+				pNodeAnim->mNumRotationKeys);
 		}
 		double dLast = -0.1;
-		for (unsigned int i = 0; i < pBoneAnim->mNumRotationKeys;++i)
+		for (unsigned int i = 0; i < pNodeAnim->mNumRotationKeys;++i)
 		{
-			if (pBoneAnim->mRotationKeys[i].mTime > pAnimation->mDuration)
+			if (pNodeAnim->mRotationKeys[i].mTime > pAnimation->mDuration)
 			{
-				this->ReportError("aiBoneAnim::mRotationKeys[%i].mTime (%.5f) is larger "
+				this->ReportError("aiNodeAnim::mRotationKeys[%i].mTime (%.5f) is larger "
 					"than aiAnimation::mDuration (which is %.5f)",i,
-					(float)pBoneAnim->mRotationKeys[i].mTime,
+					(float)pNodeAnim->mRotationKeys[i].mTime,
 					(float)pAnimation->mDuration);
 			}
-			if (pBoneAnim->mRotationKeys[i].mTime <= dLast)
+			if (pNodeAnim->mRotationKeys[i].mTime <= dLast)
 			{
-				this->ReportWarning("aiBoneAnim::mRotationKeys[%i].mTime (%.5f) is smaller "
+				this->ReportWarning("aiNodeAnim::mRotationKeys[%i].mTime (%.5f) is smaller "
 					"than aiAnimation::mRotationKeys[%i] (which is %.5f)",i,
-					(float)pBoneAnim->mRotationKeys[i].mTime,
+					(float)pNodeAnim->mRotationKeys[i].mTime,
 					i-1, (float)dLast);
 			}
-			dLast = pBoneAnim->mRotationKeys[i].mTime;
+			dLast = pNodeAnim->mRotationKeys[i].mTime;
 		}
 	}
 	// scaling keys
-	if (pBoneAnim->mNumScalingKeys)
+	if (pNodeAnim->mNumScalingKeys)
 	{
-		if (!pBoneAnim->mScalingKeys)
+		if (!pNodeAnim->mScalingKeys)
 		{
-			this->ReportError("aiBoneAnim::mScalingKeys is NULL (aiBoneAnim::mNumScalingKeys is %i)",
-				pBoneAnim->mNumScalingKeys);
+			this->ReportError("aiNodeAnim::mScalingKeys is NULL (aiNodeAnim::mNumScalingKeys is %i)",
+				pNodeAnim->mNumScalingKeys);
 		}
 		double dLast = -0.1;
-		for (unsigned int i = 0; i < pBoneAnim->mNumScalingKeys;++i)
+		for (unsigned int i = 0; i < pNodeAnim->mNumScalingKeys;++i)
 		{
-			if (pBoneAnim->mScalingKeys[i].mTime > pAnimation->mDuration)
+			if (pNodeAnim->mScalingKeys[i].mTime > pAnimation->mDuration)
 			{
-				this->ReportError("aiBoneAnim::mScalingKeys[%i].mTime (%.5f) is larger "
+				this->ReportError("aiNodeAnim::mScalingKeys[%i].mTime (%.5f) is larger "
 					"than aiAnimation::mDuration (which is %.5f)",i,
-					(float)pBoneAnim->mScalingKeys[i].mTime,
+					(float)pNodeAnim->mScalingKeys[i].mTime,
 					(float)pAnimation->mDuration);
 			}
-			if (pBoneAnim->mScalingKeys[i].mTime <= dLast)
+			if (pNodeAnim->mScalingKeys[i].mTime <= dLast)
 			{
-				this->ReportWarning("aiBoneAnim::mScalingKeys[%i].mTime (%.5f) is smaller "
+				this->ReportWarning("aiNodeAnim::mScalingKeys[%i].mTime (%.5f) is smaller "
 					"than aiAnimation::mScalingKeys[%i] (which is %.5f)",i,
-					(float)pBoneAnim->mScalingKeys[i].mTime,
+					(float)pNodeAnim->mScalingKeys[i].mTime,
 					i-1, (float)dLast);
 			}
-			dLast = pBoneAnim->mScalingKeys[i].mTime;
+			dLast = pNodeAnim->mScalingKeys[i].mTime;
 		}
 	}
 }

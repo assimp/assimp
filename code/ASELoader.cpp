@@ -222,8 +222,8 @@ void ASEImporter::BuildAnimations()
 		this->pcScene->mNumAnimations = 1;
 		this->pcScene->mAnimations = new aiAnimation*[1];
 		aiAnimation* pcAnim = this->pcScene->mAnimations[0] = new aiAnimation();
-		pcAnim->mNumBones = iNum;
-		pcAnim->mBones = new aiBoneAnim*[iNum];
+		pcAnim->mNumChannels = iNum;
+		pcAnim->mChannels = new aiNodeAnim*[iNum];
 		pcAnim->mTicksPerSecond = this->mParser->iFrameSpeed * this->mParser->iTicksPerFrame;
 
 		iNum = 0;
@@ -233,36 +233,36 @@ void ASEImporter::BuildAnimations()
 			if ((*i).bSkip)continue;
 			if ((*i).mAnim.akeyPositions.size() > 1 || (*i).mAnim.akeyRotations.size() > 1)
 			{
-				aiBoneAnim* pcBoneAnim = pcAnim->mBones[iNum++] = new aiBoneAnim();
-				pcBoneAnim->mBoneName.Set((*i).mName);
+				aiNodeAnim* pcNodeAnim = pcAnim->mChannels[iNum++] = new aiNodeAnim();
+        pcNodeAnim->mNodeName.Set((*i).mName);
 
 				// copy position keys
 				if ((*i).mAnim.akeyPositions.size() > 1 )
 				{
-					pcBoneAnim->mNumPositionKeys = (unsigned int) (*i).mAnim.akeyPositions.size();
-					pcBoneAnim->mPositionKeys = new aiVectorKey[pcBoneAnim->mNumPositionKeys];
+					pcNodeAnim->mNumPositionKeys = (unsigned int) (*i).mAnim.akeyPositions.size();
+					pcNodeAnim->mPositionKeys = new aiVectorKey[pcNodeAnim->mNumPositionKeys];
 
-					::memcpy(pcBoneAnim->mPositionKeys,&(*i).mAnim.akeyPositions[0],
-						pcBoneAnim->mNumPositionKeys * sizeof(aiVectorKey));
+					::memcpy(pcNodeAnim->mPositionKeys,&(*i).mAnim.akeyPositions[0],
+						pcNodeAnim->mNumPositionKeys * sizeof(aiVectorKey));
 
-					for (unsigned int qq = 0; qq < pcBoneAnim->mNumPositionKeys;++qq)
+					for (unsigned int qq = 0; qq < pcNodeAnim->mNumPositionKeys;++qq)
 					{
-						double dTime = pcBoneAnim->mPositionKeys[qq].mTime;
+						double dTime = pcNodeAnim->mPositionKeys[qq].mTime;
 						pcAnim->mDuration = std::max(pcAnim->mDuration,dTime);
 					}
 				}
 				// copy rotation keys
 				if ((*i).mAnim.akeyRotations.size() > 1 )
 				{
-					pcBoneAnim->mNumRotationKeys = (unsigned int) (*i).mAnim.akeyPositions.size();
-					pcBoneAnim->mRotationKeys = new aiQuatKey[pcBoneAnim->mNumPositionKeys];
+					pcNodeAnim->mNumRotationKeys = (unsigned int) (*i).mAnim.akeyPositions.size();
+					pcNodeAnim->mRotationKeys = new aiQuatKey[pcNodeAnim->mNumPositionKeys];
 
-					::memcpy(pcBoneAnim->mRotationKeys,&(*i).mAnim.akeyRotations[0],
-						pcBoneAnim->mNumRotationKeys * sizeof(aiQuatKey));
+					::memcpy(pcNodeAnim->mRotationKeys,&(*i).mAnim.akeyRotations[0],
+						pcNodeAnim->mNumRotationKeys * sizeof(aiQuatKey));
 
-					for (unsigned int qq = 0; qq < pcBoneAnim->mNumRotationKeys;++qq)
+					for (unsigned int qq = 0; qq < pcNodeAnim->mNumRotationKeys;++qq)
 					{
-						double dTime = pcBoneAnim->mRotationKeys[qq].mTime;
+						double dTime = pcNodeAnim->mRotationKeys[qq].mTime;
 						pcAnim->mDuration = std::max(pcAnim->mDuration,dTime);
 					}
 				}

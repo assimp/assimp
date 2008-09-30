@@ -713,10 +713,10 @@ void Importer::GetMemoryRequirements(aiMemoryInfo& in) const
 		in.animations += sizeof(aiAnimation);
 
 		// add all bone anims
-		for (unsigned int a = 0; a < pc->mNumBones;++a)
+		for (unsigned int a = 0; a < pc->mNumChannels; ++a)
 		{
-			const aiBoneAnim* pc2 = pc->mBones[i];
-			in.animations += sizeof(aiBoneAnim);
+			const aiNodeAnim* pc2 = pc->mChannels[i];
+			in.animations += sizeof(aiNodeAnim);
 			in.animations += pc2->mNumPositionKeys * sizeof(aiVectorKey);
 			in.animations += pc2->mNumScalingKeys * sizeof(aiVectorKey);
 			in.animations += pc2->mNumRotationKeys * sizeof(aiQuatKey);

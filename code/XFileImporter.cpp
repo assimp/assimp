@@ -420,15 +420,15 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 		// duration will be determined by the maximum length
 		nanim->mDuration = 0;
 		nanim->mTicksPerSecond = pData->mAnimTicksPerSecond;
-		nanim->mNumBones = (unsigned int)anim->mAnims.size();
-		nanim->mBones = new aiBoneAnim*[nanim->mNumBones];
+		nanim->mNumChannels = (unsigned int)anim->mAnims.size();
+		nanim->mChannels = new aiNodeAnim*[nanim->mNumChannels];
 
 		for( unsigned int b = 0; b < anim->mAnims.size(); b++)
 		{
 			const XFile::AnimBone* bone = anim->mAnims[b];
-			aiBoneAnim* nbone = new aiBoneAnim;
-			nbone->mBoneName.Set( bone->mBoneName);
-			nanim->mBones[b] = nbone;
+			aiNodeAnim* nbone = new aiNodeAnim;
+			nbone->mNodeName.Set( bone->mBoneName);
+      nanim->mChannels[b] = nbone;
 
 			// apply the LH->RH conversion if the animation affects the root bone
 			bool isRootAnim = (bone->mBoneName == pScene->mRootNode->mName.data);

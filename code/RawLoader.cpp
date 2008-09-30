@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the RAW importer class */
 
 // internal headers
-#include "RAWLoader.h"
+#include "RawLoader.h"
 #include "MaterialSystem.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"

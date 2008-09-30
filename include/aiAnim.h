@@ -69,14 +69,11 @@ struct aiQuatKey
 /** Describes the animation of a single node. The name specifies the bone/node which is affected by this
  * animation channel. The keyframes are given in three separate series of values, one each for
  * position, rotation and scaling.
- * <br>
- * NOTE: The name "BoneAnim" is misleading. This structure is also used to describe
- * the animation of regular nodes on the node graph. They needn't be nodes.
  */
-struct aiBoneAnim
+struct aiNodeAnim
 {
-	/** The name of the bone affected by this animation. */
-	C_STRUCT aiString mBoneName;
+	/** The name of the node affected by this animation. */
+	C_STRUCT aiString mNodeName;
 
 	/** The number of position keys */
 	unsigned int mNumPositionKeys;
@@ -100,14 +97,14 @@ struct aiBoneAnim
 	C_STRUCT aiVectorKey* mScalingKeys;
 
 #ifdef __cplusplus
-	aiBoneAnim()
+	aiNodeAnim()
 	{
 		mNumPositionKeys = 0; mPositionKeys = NULL; 
 		mNumRotationKeys= 0; mRotationKeys = NULL; 
 		mNumScalingKeys = 0; mScalingKeys = NULL; 
 	}
 
-	~aiBoneAnim()
+	~aiNodeAnim()
 	{
 		if (mNumPositionKeys)
 			delete [] mPositionKeys;
@@ -119,7 +116,7 @@ struct aiBoneAnim
 #endif // __cplusplus
 };
 
-/** An animation consists of keyframe data for a number of bones. For each bone affected by the animation
+/** An animation consists of keyframe data for a number of nodes. For each node affected by the animation
  * a separate series of data is given.
  */
 struct aiAnimation
@@ -134,28 +131,28 @@ struct aiAnimation
 	/** Ticks per second. 0 if not specified in the imported file */
 	double mTicksPerSecond;
 
-	/** The number of bone animation channels. Each channel affects a single bone. */
-	unsigned int mNumBones;
-	/** The bone animation channels. Each channel affects a single bone. The array
-	* is mNumBones in size.
+	/** The number of bone animation channels. Each channel affects a single node. */
+	unsigned int mNumChannels;
+	/** The node animation channels. Each channel affects a single node. The array
+	* is mNumChannels in size.
 	*/
-	C_STRUCT aiBoneAnim** mBones;
+	C_STRUCT aiNodeAnim** mChannels;
 
 #ifdef __cplusplus
 	aiAnimation()
 	{
 		mDuration = 0;
 		mTicksPerSecond = 0;
-		mNumBones = 0; mBones = NULL;
+		mNumChannels = 0; mChannels = NULL;
 	}
 
 	~aiAnimation()
 	{
-		if (mNumBones)
+		if (mNumChannels)
 		{
-			for( unsigned int a = 0; a < mNumBones; a++)
-				delete mBones[a];
-			delete [] mBones;
+			for( unsigned int a = 0; a < mNumChannels; a++)
+				delete mChannels[a];
+			delete [] mChannels;
 		}
 	}
 #endif // __cplusplus

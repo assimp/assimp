@@ -97,11 +97,11 @@ void ConvertToLHProcess::Execute( aiScene* pScene)
 	for( unsigned int a = 0; a < pScene->mNumAnimations; a++)
 	{
 		aiAnimation* anim = pScene->mAnimations[a];
-		for( unsigned int b = 0; b < anim->mNumBones; b++)
+    for( unsigned int b = 0; b < anim->mNumChannels; b++)
 		{
-			aiBoneAnim* boneAnim = anim->mBones[b];
-			if( strcmp( boneAnim->mBoneName.data, pScene->mRootNode->mName.data) == 0)
-				ProcessAnimation( boneAnim);
+			aiNodeAnim* nodeAnim = anim->mChannels[b];
+			if( strcmp( nodeAnim->mNodeName.data, pScene->mRootNode->mName.data) == 0)
+				ProcessAnimation( nodeAnim);
 		}
 	}
 	DefaultLogger::get()->debug("ConvertToLHProcess finished");
@@ -139,7 +139,7 @@ void ConvertToLHProcess::ProcessMesh( aiMesh* pMesh)
 
 // ------------------------------------------------------------------------------------------------
 // Converts the given animation to LH coordinates. 
-void ConvertToLHProcess::ProcessAnimation( aiBoneAnim* pAnim)
+void ConvertToLHProcess::ProcessAnimation( aiNodeAnim* pAnim)
 {
 	// position keys
 	for( unsigned int a = 0; a < pAnim->mNumPositionKeys; a++)

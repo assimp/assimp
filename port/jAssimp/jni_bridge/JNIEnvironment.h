@@ -335,7 +335,7 @@ public:
 		struct _BoneAnim : public _Base
 		{
 			void Initialize();
-			AIJ_SET_INPUT_TYPE(aiBoneAnim);
+			AIJ_SET_INPUT_TYPE(aiNodeAnim);
 
 			//! Represents the JNI interface to class assimp.BoneAnim.KeyFrame<quak>
 			struct _KeyFrame

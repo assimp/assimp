@@ -535,10 +535,10 @@ void SMDImporter::CreateOutputAnimations()
 	aiAnimation*& anim = this->pScene->mAnimations[0] = new aiAnimation();
 
 	anim->mDuration = this->dLengthOfAnim;
-	anim->mNumBones = iNumBones;
+	anim->mNumChannels = iNumBones;
 	anim->mTicksPerSecond = 25.0; // FIXME: is this correct?
 
-	aiBoneAnim** pp = anim->mBones = new aiBoneAnim*[anim->mNumBones];
+	aiNodeAnim** pp = anim->mChannels = new aiNodeAnim*[anim->mNumChannels];
 	
 	// now build valid keys
 	unsigned int a = 0;
@@ -548,12 +548,10 @@ void SMDImporter::CreateOutputAnimations()
 	{
 		if (!(*i).bIsUsed)continue;
 
-		aiBoneAnim* p = pp[a] = new aiBoneAnim();
+		aiNodeAnim* p = pp[a] = new aiNodeAnim();
 
 		// copy the name of the bone
-		p->mBoneName.length = (*i).mName.length();
-		::memcpy(p->mBoneName.data,(*i).mName.c_str(),p->mBoneName.length);
-		p->mBoneName.data[p->mBoneName.length] = '\0';
+    p->mNodeName.Set( i->mName);
 
 		p->mNumRotationKeys = (unsigned int) (*i).sAnim.asKeys.size();
 		if (p->mNumRotationKeys)

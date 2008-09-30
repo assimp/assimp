@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiBone;
 struct aiMesh;
 struct aiAnimation;
-struct aiBoneAnim;
+struct aiNodeAnim;
 struct aiTexture;
 struct aiMaterial;
 struct aiNode;
@@ -152,7 +152,7 @@ protected:
 	 * @param pBoneAnim Input bone animation
 	 */
 	void Validate( const aiAnimation* pAnimation,
-		const aiBoneAnim* pBoneAnim);
+		const aiNodeAnim* pBoneAnim);
 
 	// -------------------------------------------------------------------
 	/** Validates a node and all of its subnodes

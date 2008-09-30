@@ -45,7 +45,7 @@ void JNIEnvironment::_assimp::_BoneAnim::Initialize()
 		JNIEnvironment::Get()->ThrowNativeError("Unable to load all fields of class assimp.BoneAnim");
 }
 // ------------------------------------------------------------------------------------------------
-void JNIEnvironment::_assimp::_BoneAnim::Fill(jobject obj,const aiBoneAnim* pcSrc)
+void JNIEnvironment::_assimp::_BoneAnim::Fill(jobject obj,const aiNodeAnim* pcSrc)
 {
 	JNIEnv* pc = JNIEnvironment::Get()->GetThread()->m_pcEnv;
 	

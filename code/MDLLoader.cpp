@@ -1734,12 +1734,12 @@ void MDLImporter::BuildOutputAnims_3DGS_MDL7(
 				pcAnim->mDuration = std::max(pcAnim->mDuration, (double)
 					apcBonesOut[i]->pkeyPositions[qq].mTime);
 			}
-			++pcAnim->mNumBones;
+			++pcAnim->mNumChannels;
 		}
 	}
 	if (pcAnim->mDuration)
 	{
-		pcAnim->mBones = new aiBoneAnim*[pcAnim->mNumBones];
+		pcAnim->mChannels = new aiNodeAnim*[pcAnim->mNumChannels];
 
 		unsigned int iCnt = 0;
 		for (uint32_t i = 0; i < pcHeader->bones_num;++i)
@@ -1748,24 +1748,24 @@ void MDLImporter::BuildOutputAnims_3DGS_MDL7(
 			{
 				const MDL::IntBone_MDL7* const intBone = apcBonesOut[i];
 
-				aiBoneAnim* const pcBoneAnim = pcAnim->mBones[iCnt++] = new aiBoneAnim();
-				pcBoneAnim->mBoneName = aiString( intBone->mName );
+				aiNodeAnim* const pcNodeAnim = pcAnim->mChannels[iCnt++] = new aiNodeAnim();
+				pcNodeAnim->mNodeName = aiString( intBone->mName );
 
 				// allocate enough storage for all keys
-				pcBoneAnim->mNumPositionKeys = (unsigned int)intBone->pkeyPositions.size();
-				pcBoneAnim->mNumScalingKeys  = (unsigned int)intBone->pkeyPositions.size();
-				pcBoneAnim->mNumRotationKeys = (unsigned int)intBone->pkeyPositions.size();
+				pcNodeAnim->mNumPositionKeys = (unsigned int)intBone->pkeyPositions.size();
+				pcNodeAnim->mNumScalingKeys  = (unsigned int)intBone->pkeyPositions.size();
+				pcNodeAnim->mNumRotationKeys = (unsigned int)intBone->pkeyPositions.size();
 
-				pcBoneAnim->mPositionKeys = new aiVectorKey[pcBoneAnim->mNumPositionKeys];
-				pcBoneAnim->mScalingKeys = new aiVectorKey[pcBoneAnim->mNumPositionKeys];
-				pcBoneAnim->mRotationKeys = new aiQuatKey[pcBoneAnim->mNumPositionKeys];
+				pcNodeAnim->mPositionKeys = new aiVectorKey[pcNodeAnim->mNumPositionKeys];
+				pcNodeAnim->mScalingKeys = new aiVectorKey[pcNodeAnim->mNumPositionKeys];
+				pcNodeAnim->mRotationKeys = new aiQuatKey[pcNodeAnim->mNumPositionKeys];
 
 				// copy all keys
-				for (unsigned int qq = 0; qq < pcBoneAnim->mNumPositionKeys;++qq)
+				for (unsigned int qq = 0; qq < pcNodeAnim->mNumPositionKeys;++qq)
 				{
-					pcBoneAnim->mPositionKeys[qq] = intBone->pkeyPositions[qq];
-					pcBoneAnim->mScalingKeys[qq] = intBone->pkeyScalings[qq];
-					pcBoneAnim->mRotationKeys[qq] = intBone->pkeyRotations[qq];
+					pcNodeAnim->mPositionKeys[qq] = intBone->pkeyPositions[qq];
+					pcNodeAnim->mScalingKeys[qq] = intBone->pkeyScalings[qq];
+					pcNodeAnim->mRotationKeys[qq] = intBone->pkeyRotations[qq];
 				}
 			}
 		}

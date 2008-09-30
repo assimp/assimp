@@ -470,17 +470,17 @@ void MD5Importer::LoadMD5AnimFile ()
 		pScene->mNumAnimations = 1;
 		pScene->mAnimations = new aiAnimation*[1];
 		aiAnimation* anim = pScene->mAnimations[0] = new aiAnimation();
-		anim->mNumBones = (unsigned int)animParser.mAnimatedBones.size();
-		anim->mBones = new aiBoneAnim*[anim->mNumBones];
-		for (unsigned int i = 0; i < anim->mNumBones;++i)
+		anim->mNumChannels = (unsigned int)animParser.mAnimatedBones.size();
+		anim->mChannels = new aiNodeAnim*[anim->mNumChannels];
+		for (unsigned int i = 0; i < anim->mNumChannels;++i)
 		{
-			aiBoneAnim* bone = anim->mBones[i] = new aiBoneAnim();
-			bone->mBoneName = aiString( animParser.mAnimatedBones[i].mName );
+			aiNodeAnim* node = anim->mChannels[i] = new aiNodeAnim();
+			node->mNodeName = aiString( animParser.mAnimatedBones[i].mName );
 
 			// allocate storage for the keyframes
-			bone->mNumPositionKeys = bone->mNumRotationKeys = (unsigned int)animParser.mFrames.size();
-			bone->mPositionKeys = new aiVectorKey[bone->mNumPositionKeys];
-			bone->mRotationKeys = new aiQuatKey[bone->mNumPositionKeys];
+			node->mNumPositionKeys = node->mNumRotationKeys = (unsigned int)animParser.mFrames.size();
+			node->mPositionKeys = new aiVectorKey[node->mNumPositionKeys];
+			node->mRotationKeys = new aiQuatKey[node->mNumPositionKeys];
 		}
 
 		// 1 tick == 1 frame
@@ -493,12 +493,12 @@ void MD5Importer::LoadMD5AnimFile ()
 			if (!(*iter).mValues.empty())
 			{
 				// now process all values in there ... read all joints
-				aiBoneAnim** pcAnimBone = anim->mBones;
+				aiNodeAnim** pcAnimNode = anim->mChannels;
 				MD5::BaseFrameDesc* pcBaseFrame = &animParser.mBaseFrames[0];
 				for (AnimBoneList::const_iterator 
 					iter2		= animParser.mAnimatedBones.begin(), 
 					iterEnd2	= animParser.mAnimatedBones.end();
-					iter2		!= iterEnd2;++iter2,++pcAnimBone,++pcBaseFrame)
+					iter2		!= iterEnd2;++iter2,++pcAnimNode,++pcBaseFrame)
 				{
 					if((*iter2).iFirstKeyIndex >= (*iter).mValues.size())
 					{
@@ -508,7 +508,7 @@ void MD5Importer::LoadMD5AnimFile ()
 					}
 					const float* fpCur = &(*iter).mValues[(*iter2).iFirstKeyIndex];
 
-					aiBoneAnim* pcCurAnimBone = *pcAnimBone;
+					aiNodeAnim* pcCurAnimBone = *pcAnimNode;
 					aiVectorKey* vKey = pcCurAnimBone->mPositionKeys++;
 
 					// translation on the x axis
@@ -557,11 +557,11 @@ void MD5Importer::LoadMD5AnimFile ()
 		}
 
 		// undo our offset computations
-		for (unsigned int i = 0; i < anim->mNumBones;++i)
+		for (unsigned int i = 0; i < anim->mNumChannels;++i)
 		{
-			aiBoneAnim* bone = anim->mBones[i];
-			bone->mPositionKeys -= bone->mNumPositionKeys;
-			bone->mRotationKeys -= bone->mNumPositionKeys;
+			aiNodeAnim* node = anim->mChannels[i];
+			node->mPositionKeys -= node->mNumPositionKeys;
+			node->mRotationKeys -= node->mNumPositionKeys;
 		}
 	}
 

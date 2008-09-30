@@ -176,10 +176,10 @@ void OptimizeGraphProcess::FindLockedNodes(aiNode* node)
 	for (unsigned int i = 0; i < pScene->mNumAnimations;++i)
 	{
 		aiAnimation* pani = pScene->mAnimations[i];
-		for (unsigned int a = 0; a < pani->mNumBones;++a)
+		for (unsigned int a = 0; a < pani->mNumChannels;++a)
 		{
-			aiBoneAnim* pba = pani->mBones[a];
-			if (pba->mBoneName == node->mName)
+			aiNodeAnim* pba = pani->mChannels[a];
+			if (pba->mNodeName == node->mName)
 			{
 				// this node is locked
 				node->mNumChildren |= AI_OG_UINT_MSB;

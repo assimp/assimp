@@ -318,6 +318,7 @@ void MD5Importer::LoadMD5MeshFile ()
 			continue;
 
 		aiMesh* mesh = pScene->mMeshes[n] = new aiMesh();
+		mesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
 		// generate unique vertices in our internal verbose format
 		MakeDataUnique(meshSrc);

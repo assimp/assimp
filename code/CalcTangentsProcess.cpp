@@ -114,11 +114,9 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	// assert() it here.
     //assert( must be verbose, dammit);
 
-	// TODO (Aramis)
-	// If we had a model format in the lib which has native support for
-	// tangents and bitangents, it would be necessary to add a
-	// "KillTangentsAndBitangents" flag ...
-	if (pMesh->mTangents && pMesh->mBitangents)
+
+	if (pMesh->mTangents && pMesh->mBitangents ||
+		!(pMesh->mPrimitiveTypes & (aiPrimitiveType_TRIANGLE | aiPrimitiveType_POLYGON)))
 	{
 		return false;
 	}
@@ -130,6 +128,8 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 		return false;
 	}
 	const float angleEpsilon = 0.9999f;
+
+	std::vector<bool> vertexDone( pMesh->mNumVertices, false);
 
 	// create space for the tangents and bitangents
 	pMesh->mTangents = new aiVector3D[pMesh->mNumVertices];
@@ -145,6 +145,13 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
 	{
 		const aiFace& face = pMesh->mFaces[a];
+		if (face.mNumIndices < 3)
+		{
+			for (unsigned int i = 0; i < face.mNumIndices;++i)
+				vertexDone[face.mIndices[i]] = true;
+
+			continue;
+		}
 
 		// triangle or polygon... we always use only the first three indices. A polygon
 		// is supposed to be planar anyways....
@@ -215,7 +222,6 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 
 	// in the second pass we now smooth out all tangents and bitangents at the same local position 
 	// if they are not too far off.
-	std::vector<bool> vertexDone( pMesh->mNumVertices, false);
 	for( unsigned int a = 0; a < pMesh->mNumVertices; a++)
 	{
 		if( vertexDone[a])

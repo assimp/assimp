@@ -750,9 +750,10 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 		// now generate submeshes
 		for (unsigned int p = 0; p < vSubMaterials.size();++p)
 		{
-			if (aiSplit[p].size() != 0)
+			if (!aiSplit[p].empty())
 			{
 				aiMesh* p_pcOut = new aiMesh();
+				p_pcOut->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
 				// let the sub material index
 				p_pcOut->mMaterialIndex = p;
@@ -900,6 +901,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 	{
 		// otherwise we can simply copy the data to one output mesh
 		aiMesh* p_pcOut = new aiMesh();
+		p_pcOut->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
 		// set an empty sub material index
 		p_pcOut->mMaterialIndex = ASE::Face::DEFAULT_MATINDEX;

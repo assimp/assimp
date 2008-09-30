@@ -134,7 +134,7 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 		aiProcess_ConvertToLeftHanded	| // convert everything to D3D left handed space
 		aiProcess_SplitLargeMeshes      | // split large, unrenderable meshes into submeshes
 		aiProcess_ValidateDataStructure | aiProcess_ImproveCacheLocality 
-		| aiProcess_RemoveRedundantMaterials ); // validate the output data structure
+		| aiProcess_RemoveRedundantMaterials | aiProcess_SortByPType); // validate the output data structure
 
 	// get the end time of zje operation, calculate delta t
 	double fEnd = (double)timeGetTime();
@@ -430,6 +430,12 @@ int CreateAssetData()
 		{
 			CMaterialManager::Instance().CreateMaterial(
 				g_pcAsset->apcMeshes[i],g_pcAsset->pcScene->mMeshes[i]);
+		}
+
+		if (g_pcAsset->pcScene->mMeshes[i]->mPrimitiveTypes == aiPrimitiveType_LINE ||
+			g_pcAsset->pcScene->mMeshes[i]->mPrimitiveTypes == aiPrimitiveType_POINT)
+		{
+			continue;
 		}
 
 		// create vertex buffer

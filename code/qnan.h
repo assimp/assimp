@@ -12,7 +12,7 @@ inline bool is_qnan(const float in)
 	// Another method would be to check whether in != in.
 	// This should also wor since nan compares to inequal, 
 	// even when compared with itself. However, this could
-	// case problems with other special floats like snan or inf
+	// cause problems with other special floats like snan
 	union _tagFPUNION
 	{
 		float f;

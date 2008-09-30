@@ -186,12 +186,21 @@ enum aiPostProcessSteps
 	 *      are used by the same node or by nodes on the same hierarchy (with
 	 *      equal local transformations). Unlike PreTransformVertices, the
 	 *      OptimizeGraph-step doesn't transform vertices from one space 
-	 *      another.<br>
-	 *   3. Remove hierarchy levels<br>
+	 *      another (at least with the default configuration).<br>
 	 *
 	 *  It is recommended to have this step run with the default configuration.
 	 */
-	aiProcess_OptimizeGraph = 0x4000
+	aiProcess_OptimizeGraph = 0x4000,
+
+	/** This step splits meshes with more than one primitive type in 
+	 *  homogenous submeshes. 
+	 *
+	 *  The step is executed after the triangulation step. After the step
+	 *  returns, just one bit is set in aiMesh::mPrimitiveTypes. This is 
+	 *  especially useful for real-time rendering where point and line
+	 *  primitives are often ignored or rendered separately.
+	*/
+	aiProcess_SortByPType = 0x8000
 };
 
 

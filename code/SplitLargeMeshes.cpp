@@ -41,12 +41,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the SplitLargeMeshes postprocessing step
 */
-#include "SplitLargeMeshes.h"
+
+
+// public Assimp headers
 #include "../include/DefaultLogger.h"
 #include "../include/aiPostProcess.h"
-#include "../include/aiMesh.h"
 #include "../include/aiScene.h"
 #include "../include/assimp.hpp"
+
+// internal headers of the post-processing framework
+#include "SplitLargeMeshes.h"
+#include "ProcessHelper.h"
 
 using namespace Assimp;
 
@@ -276,6 +281,22 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
 				unsigned int* pi = pMesh->mFaces[iTemp].mIndices;
 				unsigned int* piOut = pcMesh->mFaces[p].mIndices = new unsigned int[iNumIndices];
 
+				// need to update the output primitive types
+				switch (iNumIndices)
+				{
+				case 1:
+					pcMesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
+					break;
+				case 2:
+					pcMesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
+					break;
+				case 3:
+					pcMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+					break;
+				default:
+					pcMesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
+				}
+
 				// and copy the contents of the old array, offset by current base
 				for (unsigned int v = 0; v < iNumIndices;++v)
 				{
@@ -384,23 +405,9 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
 	if (pMesh->mNumVertices > SplitLargeMeshesProcess_Vertex::LIMIT)
 	{
 		typedef std::vector< std::pair<unsigned int,float> > VertexWeightTable;
-		VertexWeightTable* avPerVertexWeights = NULL;
 
 		// build a per-vertex weight list if necessary
-		if (pMesh->HasBones())
-		{
-			avPerVertexWeights = new VertexWeightTable[pMesh->mNumVertices];
-			for (unsigned int i = 0; i < pMesh->mNumBones;++i)
-			{
-				aiBone* bone = pMesh->mBones[i];
-				for (unsigned int a = 0; a < bone->mNumWeights;++a)
-				{
-					aiVertexWeight& weight = bone->mWeights[a];
-					avPerVertexWeights[weight.mVertexId].push_back( 
-						std::pair<unsigned int,float>(a,weight.mWeight));
-				}
-			}
-		}
+		VertexWeightTable* avPerVertexWeights = ComputeVertexBoneWeightTable(pMesh);
 
 		// we need to split this mesh into sub meshes
 		// determine the estimated size of a submesh
@@ -505,6 +512,22 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
 				// setup face type and number of indices
 				rFace.mNumIndices = iNumIndices;
 				rFace.mIndices = new unsigned int[iNumIndices];
+
+				// need to update the output primitive types
+				switch (rFace.mNumIndices)
+				{
+				case 1:
+					pcMesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
+					break;
+				case 2:
+					pcMesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
+					break;
+				case 3:
+					pcMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+					break;
+				default:
+					pcMesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
+				}
 
 				// and copy the contents of the old array, offset by current base
 				for (unsigned int v = 0; v < iNumIndices;++v)

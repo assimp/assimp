@@ -158,7 +158,7 @@ public:
 
 	inline void RemoveProperty( const char* name)
 	{
-		AddProperty<int*>(name, NULL);
+		SetGenericPropertyPtr<Base>(pmap,name,NULL);
 	}
 
 private:

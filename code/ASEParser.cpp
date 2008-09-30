@@ -239,11 +239,13 @@ void Parser::Parse()
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
+
 			// version should be 200. Validate this ...
-			if (0 == strncmp(m_szFile,"*3DSMAX_ASCIIEXPORT",19) &&
-				IsSpaceOrNewLine(*(m_szFile+19)))
+			if (0 == strncmp(m_szFile,"3DSMAX_ASCIIEXPORT",18) &&
+				IsSpaceOrNewLine(*(m_szFile+18)))
 			{
-				m_szFile+=20;
+				m_szFile+=19;
 
 				unsigned int iVersion;
 				ParseLV4MeshLong(iVersion);
@@ -256,61 +258,61 @@ void Parser::Parse()
 				continue;
 			}
 			// main scene information
-			if (0 == strncmp(m_szFile,"*SCENE",6) &&
-				IsSpaceOrNewLine(*(m_szFile+6)))
+			if (0 == strncmp(m_szFile,"SCENE",5) &&
+				IsSpaceOrNewLine(*(m_szFile+5)))
 			{
-				m_szFile+=7;
+				m_szFile+=6;
 				ParseLV1SceneBlock();
 				continue;
 			}
 			// material list
-			if (0 == strncmp(m_szFile,"*MATERIAL_LIST",14) &&
-				IsSpaceOrNewLine(*(m_szFile+14)))
+			if (0 == strncmp(m_szFile,"MATERIAL_LIST",13) &&
+				IsSpaceOrNewLine(*(m_szFile+13)))
 			{
-				m_szFile+=15;
+				m_szFile+=14;
 				ParseLV1MaterialListBlock();
 				continue;
 			}
 			// geometric object (mesh)
-			if (0 == strncmp(m_szFile,"*GEOMOBJECT",11) &&
-				IsSpaceOrNewLine(*(m_szFile+11)))
+			if (0 == strncmp(m_szFile,"GEOMOBJECT",10) &&
+				IsSpaceOrNewLine(*(m_szFile+10)))
 			{
-				m_szFile+=12;
+				m_szFile+=11;
 				m_vMeshes.push_back(Mesh());
 				ParseLV1GeometryObjectBlock(m_vMeshes.back());
 				continue;
 			}
 			// helper object = dummy in the hierarchy
-			if (0 == strncmp(m_szFile,"*HELPEROBJECT",13) &&
-				IsSpaceOrNewLine(*(m_szFile+13)))
+			if (0 == strncmp(m_szFile,"HELPEROBJECT",12) &&
+				IsSpaceOrNewLine(*(m_szFile+12)))
 			{
-				m_szFile+=14;
+				m_szFile+=13;
 				m_vMeshes.push_back(Mesh());
 				ParseLV1GeometryObjectBlock(m_vMeshes.back());
 				continue;
 			}
 			// ignore comments, lights and cameras
 			// (display comments on the console)
-			if (0 == strncmp(m_szFile,"*LIGHTOBJECT",12) &&
-				IsSpaceOrNewLine(*(m_szFile+12)))
+			if (0 == strncmp(m_szFile,"LIGHTOBJECT",11) &&
+				IsSpaceOrNewLine(*(m_szFile+11)))
 			{
-				m_szFile+=13;
+				m_szFile+=12;
 				LogInfo("Found light source (*LIGHTOBJECT chunk). It will be ignored");
 				SkipSection();
 				continue;
 			}
-			if (0 == strncmp(m_szFile,"*CAMERAOBJECT",13) &&
-				IsSpaceOrNewLine(*(m_szFile+13)))
+			if (0 == strncmp(m_szFile,"CAMERAOBJECT",12) &&
+				IsSpaceOrNewLine(*(m_szFile+122)))
 			{
-				m_szFile+=14;
+				m_szFile+=13;
 				LogInfo("Found virtual camera (*CAMERAOBJECT chunk). It will be ignored");
 				SkipSection();
 				continue;
 			}
-			if (0 == strncmp(m_szFile,"*COMMENT",8) &&
-				IsSpaceOrNewLine(*(m_szFile+8)))
+			if (0 == strncmp(m_szFile,"COMMENT",7) &&
+				IsSpaceOrNewLine(*(m_szFile+7)))
 			{
-				m_szFile+=9;
+				m_szFile+=8;
 				std::string out = "<unknown>";
 				ParseString(out,"*COMMENT");
 				LogInfo(("Comment: " + out).c_str());
@@ -329,49 +331,50 @@ void Parser::ParseLV1SceneBlock()
 	{
 		if ('*' == *m_szFile)
 		{
-			if (0 == strncmp(m_szFile,"*SCENE_BACKGROUND_STATIC",24) &&
-				IsSpaceOrNewLine(*(m_szFile+24)))
+			++m_szFile;
+			if (0 == strncmp(m_szFile,"SCENE_BACKGROUND_STATIC",23) &&
+				IsSpaceOrNewLine(*(m_szFile+23)))
 			{
-				m_szFile+=25;
+				m_szFile+=24;
 
 				// parse a color triple and assume it is really the bg color
 				ParseLV4MeshFloatTriple( &m_clrBackground.r );
 				continue;
 			}
-			if (0 == strncmp(m_szFile,"*SCENE_AMBIENT_STATIC",21) &&
-				IsSpaceOrNewLine(*(m_szFile+21)))
+			if (0 == strncmp(m_szFile,"SCENE_AMBIENT_STATIC",20) &&
+				IsSpaceOrNewLine(*(m_szFile+20)))
 			{
-				m_szFile+=22;
+				m_szFile+=21;
 
 				// parse a color triple and assume it is really the bg color
 				ParseLV4MeshFloatTriple( &m_clrAmbient.r );
 				continue;
 			}
-			if (0 == strncmp(m_szFile,"*SCENE_FIRSTFRAME",17) &&
-				IsSpaceOrNewLine(*(m_szFile+17)))
-			{
-				m_szFile+=18;
-				ParseLV4MeshLong(iFirstFrame);
-				continue;
-			}
-			if (0 == strncmp(m_szFile,"*SCENE_LASTFRAME",16) &&
+			if (0 == strncmp(m_szFile,"SCENE_FIRSTFRAME",16) &&
 				IsSpaceOrNewLine(*(m_szFile+16)))
 			{
 				m_szFile+=17;
+				ParseLV4MeshLong(iFirstFrame);
+				continue;
+			}
+			if (0 == strncmp(m_szFile,"SCENE_LASTFRAME",15) &&
+				IsSpaceOrNewLine(*(m_szFile+15)))
+			{
+				m_szFile+=16;
 				ParseLV4MeshLong(iLastFrame);
 				continue;
 			}
-			if (0 == strncmp(m_szFile,"*SCENE_FRAMESPEED",17) &&
-				IsSpaceOrNewLine(*(m_szFile+17)))
+			if (0 == strncmp(m_szFile,"SCENE_FRAMESPEED",16) &&
+				IsSpaceOrNewLine(*(m_szFile+16)))
 			{
-				m_szFile+=18;
+				m_szFile+=17;
 				ParseLV4MeshLong(iFrameSpeed);
 				continue;
 			}
-			if (0 == strncmp(m_szFile,"*SCENE_TICKSPERFRAME",20) &&
-				IsSpaceOrNewLine(*(m_szFile+20)))
+			if (0 == strncmp(m_szFile,"SCENE_TICKSPERFRAME",19) &&
+				IsSpaceOrNewLine(*(m_szFile+19)))
 			{
-				m_szFile+=21;
+				m_szFile+=20;
 				ParseLV4MeshLong(iTicksPerFrame);
 				continue;
 			}
@@ -389,20 +392,21 @@ void Parser::ParseLV1MaterialListBlock()
 	{
 		if ('*' == *m_szFile)
 		{
-			if (0 == strncmp(m_szFile,"*MATERIAL_COUNT",15) &&
-				IsSpaceOrNewLine(*(m_szFile+15)))
+			++m_szFile;
+			if (0 == strncmp(m_szFile,"MATERIAL_COUNT",14) &&
+				IsSpaceOrNewLine(*(m_szFile+14)))
 			{
-				m_szFile+=16;
+				m_szFile+=15;
 				ParseLV4MeshLong(iMaterialCount);
 
 				// now allocate enough storage to hold all materials
 				m_vMaterials.resize(iOldMaterialCount+iMaterialCount);
 				continue;
 			}
-			if (0 == strncmp(m_szFile,"*MATERIAL",9) &&
-				IsSpaceOrNewLine(*(m_szFile+9)))
+			if (0 == strncmp(m_szFile,"MATERIAL",8) &&
+				IsSpaceOrNewLine(*(m_szFile+8)))
 			{
-				m_szFile+=10;
+				m_szFile+=9;
 				unsigned int iIndex = 0;
 				ParseLV4MeshLong(iIndex);
 
@@ -431,40 +435,41 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 	{
 		if ('*' == *m_szFile)
 		{
-			if (0 == strncmp(m_szFile,"*MATERIAL_NAME",14) &&
-				IsSpaceOrNewLine(*(m_szFile+14)))
+			++m_szFile;
+			if (0 == strncmp(m_szFile,"MATERIAL_NAME",13) &&
+				IsSpaceOrNewLine(*(m_szFile+13)))
 			{
-				m_szFile+=15;
+				m_szFile+=14;
 			
 				if (!ParseString(mat.mName,"*MATERIAL_NAME"))SkipToNextToken();
 				continue;
 			}
 			// ambient material color
-			if (0 == strncmp(m_szFile,"*MATERIAL_AMBIENT",17) &&
-				IsSpaceOrNewLine(*(m_szFile+17)))
+			if (0 == strncmp(m_szFile,"MATERIAL_AMBIENT",16) &&
+				IsSpaceOrNewLine(*(m_szFile+16)))
 			{
-				m_szFile+=18;
+				m_szFile+=17;
 				ParseLV4MeshFloatTriple(&mat.mAmbient.r);continue;
 			}
 			// diffuse material color
-			if (0 == strncmp(m_szFile,"*MATERIAL_DIFFUSE",17) &&
-				IsSpaceOrNewLine(*(m_szFile+17)))
+			if (0 == strncmp(m_szFile,"MATERIAL_DIFFUSE",16) &&
+				IsSpaceOrNewLine(*(m_szFile+16)))
 			{
-				m_szFile+=18;
+				m_szFile+=17;
 				ParseLV4MeshFloatTriple(&mat.mDiffuse.r);continue;
 			}
 			// specular material color
-			if (0 == strncmp(m_szFile,"*MATERIAL_SPECULAR",18) &&
-				IsSpaceOrNewLine(*(m_szFile+18)))
+			if (0 == strncmp(m_szFile,"MATERIAL_SPECULAR",17) &&
+				IsSpaceOrNewLine(*(m_szFile+17)))
 			{
-				m_szFile+=19;
+				m_szFile+=16;
 				ParseLV4MeshFloatTriple(&mat.mSpecular.r);continue;
 			}
 			// material shading type
-			if (0 == strncmp(m_szFile,"*MATERIAL_SHADING",17) &&
-				IsSpaceOrNewLine(*(m_szFile+17)))
+			if (0 == strncmp(m_szFile,"MATERIAL_SHADING",16) &&
+				IsSpaceOrNewLine(*(m_szFile+16)))
 			{
-				m_szFile+=18;
+				m_szFile+=17;
 				
 				if (0 == strncmp(m_szFile,"Blinn",5) && 
 					IsSpaceOrNewLine(*(m_szFile+5)))
@@ -499,18 +504,18 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				continue;
 			}
 			// material transparency
-			if (0 == strncmp(m_szFile,"*MATERIAL_TRANSPARENCY",22) &&
-				IsSpaceOrNewLine(*(m_szFile+22)))
+			if (0 == strncmp(m_szFile,"MATERIAL_TRANSPARENCY",21) &&
+				IsSpaceOrNewLine(*(m_szFile+21)))
 			{
-				m_szFile+=23;
+				m_szFile+=22;
 				ParseLV4MeshFloat(mat.mTransparency);
 				mat.mTransparency = 1.0f - mat.mTransparency;continue;
 			}
 			// material self illumination
-			if (0 == strncmp(m_szFile,"*MATERIAL_SELFILLUM",19) &&
-				IsSpaceOrNewLine(*(m_szFile+19)))
+			if (0 == strncmp(m_szFile,"MATERIAL_SELFILLUM",18) &&
+				IsSpaceOrNewLine(*(m_szFile+18)))
 			{
-				m_szFile+=20;
+				m_szFile+=19;
 				float f = 0.0f;
 				ParseLV4MeshFloat(f);
 
@@ -520,91 +525,91 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				continue;
 			}
 			// material shininess
-			if (0 == strncmp(m_szFile,"*MATERIAL_SHINE",15) &&
-				IsSpaceOrNewLine(*(m_szFile+15)))
+			if (0 == strncmp(m_szFile,"MATERIAL_SHINE",14) &&
+				IsSpaceOrNewLine(*(m_szFile+14)))
 			{
-				m_szFile+=16;
+				m_szFile+=15;
 				ParseLV4MeshFloat(mat.mSpecularExponent);
 				mat.mSpecularExponent *= 15;continue;
 			}
 			// material shininess strength
-			if (0 == strncmp(m_szFile,"*MATERIAL_SHINESTRENGTH",23) &&
-				IsSpaceOrNewLine(*(m_szFile+23)))
+			if (0 == strncmp(m_szFile,"MATERIAL_SHINESTRENGTH",22) &&
+				IsSpaceOrNewLine(*(m_szFile+22)))
 			{
-				m_szFile+=24;
+				m_szFile+=23;
 				ParseLV4MeshFloat(mat.mShininessStrength);continue;
 			}
 			// diffuse color map
-			if (0 == strncmp(m_szFile,"*MAP_DIFFUSE",12) &&
-				IsSpaceOrNewLine(*(m_szFile+12)))
+			if (0 == strncmp(m_szFile,"MAP_DIFFUSE",11) &&
+				IsSpaceOrNewLine(*(m_szFile+11)))
 			{
-				m_szFile+=13;
+				m_szFile+=12;
 				// parse the texture block
 				ParseLV3MapBlock(mat.sTexDiffuse);continue;
 			}
 			// ambient color map
-			if (0 == strncmp(m_szFile,"*MAP_AMBIENT",12) &&
-				IsSpaceOrNewLine(*(m_szFile+12)))
+			if (0 == strncmp(m_szFile,"MAP_AMBIENT",11) &&
+				IsSpaceOrNewLine(*(m_szFile+11)))
 			{
-				m_szFile+=13;
+				m_szFile+=12;
 				// parse the texture block
 				ParseLV3MapBlock(mat.sTexAmbient);continue;
 			}
 			// specular color map
-			if (0 == strncmp(m_szFile,"*MAP_SPECULAR",13) &&
-				IsSpaceOrNewLine(*(m_szFile+13)))
+			if (0 == strncmp(m_szFile,"MAP_SPECULAR",122) &&
+				IsSpaceOrNewLine(*(m_szFile+12)))
 			{
-				m_szFile+=14;
+				m_szFile+=11;
 				// parse the texture block
 				ParseLV3MapBlock(mat.sTexSpecular);continue;
 			}
 			// opacity map
-			if (0 == strncmp(m_szFile,"*MAP_OPACITY",12) &&
-				IsSpaceOrNewLine(*(m_szFile+12)))
+			if (0 == strncmp(m_szFile,"MAP_OPACITY",11) &&
+				IsSpaceOrNewLine(*(m_szFile+11)))
 			{
-				m_szFile+=13;
+				m_szFile+=12;
 				// parse the texture block
 				ParseLV3MapBlock(mat.sTexOpacity);continue;
 			}
 			// emissive map
-			if (0 == strncmp(m_szFile,"*MAP_SELFILLUM",14) &&
-				IsSpaceOrNewLine(*(m_szFile+14)))
+			if (0 == strncmp(m_szFile,"MAP_SELFILLUM",13) &&
+				IsSpaceOrNewLine(*(m_szFile+13)))
 			{
-				m_szFile+=15;
+				m_szFile+=14;
 				// parse the texture block
 				ParseLV3MapBlock(mat.sTexEmissive);continue;
 			}
 			// bump map
-			if (0 == strncmp(m_szFile,"*MAP_BUMP",9) &&
-				IsSpaceOrNewLine(*(m_szFile+9)))
+			if (0 == strncmp(m_szFile,"MAP_BUMP",8) &&
+				IsSpaceOrNewLine(*(m_szFile+8)))
 			{
-				m_szFile+=10;
+				m_szFile+=9;
 				// parse the texture block
 				ParseLV3MapBlock(mat.sTexBump);
 			}
 			// specular/shininess map
-			if (0 == strncmp(m_szFile,"*MAP_SHINESTRENGTH",18) &&
-				IsSpaceOrNewLine(*(m_szFile+18)))
+			if (0 == strncmp(m_szFile,"MAP_SHINESTRENGTH",17) &&
+				IsSpaceOrNewLine(*(m_szFile+17)))
 			{
-				m_szFile+=11;
+				m_szFile+=18;
 				// parse the texture block
 				ParseLV3MapBlock(mat.sTexShininess);continue;
 			}
 			// number of submaterials
-			if (0 == strncmp(m_szFile,"*NUMSUBMTLS",11) &&
-				IsSpaceOrNewLine(*(m_szFile+11)))
+			if (0 == strncmp(m_szFile,"NUMSUBMTLS",10) &&
+				IsSpaceOrNewLine(*(m_szFile+10)))
 			{
-				m_szFile+=12;
+				m_szFile+=11;
 				ParseLV4MeshLong(iNumSubMaterials);
 
 				// allocate enough storage
 				mat.avSubMaterials.resize(iNumSubMaterials);
 			}
 			// submaterial chunks
-			if (0 == strncmp(m_szFile,"*SUBMATERIAL",12) &&
-				IsSpaceOrNewLine(*(m_szFile+12)))
+			if (0 == strncmp(m_szFile,"SUBMATERIAL",11) &&
+				IsSpaceOrNewLine(*(m_szFile+11)))
 			{
-				m_szFile+=13;
+				m_szFile+=12;
 				
 				unsigned int iIndex = 0;
 				ParseLV4MeshLong(iIndex);
@@ -634,54 +639,55 @@ void Parser::ParseLV3MapBlock(Texture& map)
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
 			// path to the texture
-			if (0 == strncmp(m_szFile,"*BITMAP" ,7) &&
-				IsSpaceOrNewLine(*(m_szFile+7)))
+			if (0 == strncmp(m_szFile,"BITMAP" ,6) &&
+				IsSpaceOrNewLine(*(m_szFile+6)))
 			{
-				m_szFile+=8;
+				m_szFile+=7;
 				if(!ParseString(map.mMapName,"*BITMAP"))SkipToNextToken();
 				continue;
 			}
 			// offset on the u axis
-			if (0 == strncmp(m_szFile,"*UVW_U_OFFSET" ,13) &&
-				IsSpaceOrNewLine(*(m_szFile+13)))
+			if (0 == strncmp(m_szFile,"UVW_U_OFFSET" ,12) &&
+				IsSpaceOrNewLine(*(m_szFile+12)))
 			{
-				m_szFile+=14;
+				m_szFile+=13;
 				ParseLV4MeshFloat(map.mOffsetU);continue;
 			}
 			// offset on the v axis
-			if (0 == strncmp(m_szFile,"*UVW_V_OFFSET" ,13) &&
-				IsSpaceOrNewLine(*(m_szFile+13)))
+			if (0 == strncmp(m_szFile,"UVW_V_OFFSET" ,12) &&
+				IsSpaceOrNewLine(*(m_szFile+12)))
 			{
-				m_szFile+=14;
+				m_szFile+=13;
 				ParseLV4MeshFloat(map.mOffsetV);continue;
 			}
 			// tiling on the u axis
-			if (0 == strncmp(m_szFile,"*UVW_U_TILING" ,13) &&
-				IsSpaceOrNewLine(*(m_szFile+13)))
+			if (0 == strncmp(m_szFile,"UVW_U_TILING" ,12) &&
+				IsSpaceOrNewLine(*(m_szFile+12)))
 			{
-				m_szFile+=14;
+				m_szFile+=13;
 				ParseLV4MeshFloat(map.mScaleU);continue;
 			}
 			// tiling on the v axis
-			if (0 == strncmp(m_szFile,"*UVW_V_TILING" ,13) &&
-				IsSpaceOrNewLine(*(m_szFile+13)))
+			if (0 == strncmp(m_szFile,"UVW_V_TILING" ,12) &&
+				IsSpaceOrNewLine(*(m_szFile+12)))
 			{
-				m_szFile+=14;
+				m_szFile+=13;
 				ParseLV4MeshFloat(map.mScaleV);continue;
 			}
 			// rotation around the z-axis
-			if (0 == strncmp(m_szFile,"*UVW_ANGLE" ,10) &&
-				IsSpaceOrNewLine(*(m_szFile+10)))
+			if (0 == strncmp(m_szFile,"UVW_ANGLE" ,9) &&
+				IsSpaceOrNewLine(*(m_szFile+9)))
 			{
-				m_szFile+=11;
+				m_szFile+=10;
 				ParseLV4MeshFloat(map.mRotation);continue;
 			}
 			// map blending factor
-			if (0 == strncmp(m_szFile,"*MAP_AMOUNT" ,11) &&
-				IsSpaceOrNewLine(*(m_szFile+11)))
+			if (0 == strncmp(m_szFile,"MAP_AMOUNT" ,10) &&
+				IsSpaceOrNewLine(*(m_szFile+10)))
 			{
-				m_szFile+=12;
+				m_szFile+=9;
 				ParseLV4MeshFloat(map.mTextureBlend);continue;
 			}
 		}
@@ -693,10 +699,6 @@ void Parser::ParseLV3MapBlock(Texture& map)
 bool Parser::ParseString(std::string& out,const char* szName)
 {
 	char szBuffer[1024];
-
-
-	// NOTE: The name could also be the texture in some cases
-	// be prepared that this might occur ...
 	if (!SkipSpaces(&m_szFile))
 	{
 		sprintf(szBuffer,"Unable to parse %s block: Unexpected EOL",szName);
@@ -706,7 +708,7 @@ bool Parser::ParseString(std::string& out,const char* szName)
 	// there must be "
 	if ('\"' != *m_szFile)
 	{
-		sprintf(szBuffer,"Unable to parse %s block: String is expected "
+		sprintf(szBuffer,"Unable to parse %s block: Strings are expected "
 			"to be enclosed in double quotation marks",szName);
 		LogWarning(szBuffer);
 		return false;
@@ -718,7 +720,7 @@ bool Parser::ParseString(std::string& out,const char* szName)
 		if ('\"' == *sz)break;
 		else if ('\0' == sz)
 		{			
-			sprintf(szBuffer,"Unable to parse %s block: String is expected to be "
+			sprintf(szBuffer,"Unable to parse %s block: Strings are expected to be "
 				"enclosed in double quotation marks but EOF was reached before a closing "
 				"quotation mark was found",szName);
 			LogWarning(szBuffer);
@@ -738,49 +740,50 @@ void Parser::ParseLV1GeometryObjectBlock(ASE::Mesh& mesh)
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
 			// name of the mesh/node
-			if (0 == strncmp(m_szFile,"*NODE_NAME" ,10) &&
-				IsSpaceOrNewLine(*(m_szFile+10)))
+			if (0 == strncmp(m_szFile,"NODE_NAME" ,9) &&
+				IsSpaceOrNewLine(*(m_szFile+9)))
 			{
-				m_szFile+=11;
+				m_szFile+=10;
 				if(!ParseString(mesh.mName,"*NODE_NAME"))SkipToNextToken();
 				continue;
 			}
 			// name of the parent of the node
-			if (0 == strncmp(m_szFile,"*NODE_PARENT" ,12) &&
-				IsSpaceOrNewLine(*(m_szFile+12)))
+			if (0 == strncmp(m_szFile,"NODE_PARENT" ,11) &&
+				IsSpaceOrNewLine(*(m_szFile+11)))
 			{
-				m_szFile+=13;
+				m_szFile+=12;
 				if(!ParseString(mesh.mParent,"*NODE_PARENT"))SkipToNextToken();
 				continue;
 			}
 			// transformation matrix of the node
-			if (0 == strncmp(m_szFile,"*NODE_TM" ,8) &&
-				IsSpaceOrNewLine(*(m_szFile+8)))
+			if (0 == strncmp(m_szFile,"NODE_TM" ,7) &&
+				IsSpaceOrNewLine(*(m_szFile+7)))
 			{
-				m_szFile+=9;
+				m_szFile+=8;
 				ParseLV2NodeTransformBlock(mesh);continue;
 				//mesh.mTransform.Transpose();
 			}
 			// mesh data
-			if (0 == strncmp(m_szFile,"*MESH" ,5) &&
-				IsSpaceOrNewLine(*(m_szFile+5)))
+			if (0 == strncmp(m_szFile,"MESH" ,4) &&
+				IsSpaceOrNewLine(*(m_szFile+4)))
 			{
-				m_szFile+=6;
+				m_szFile+=5;
 				ParseLV2MeshBlock(mesh);continue;
 			}
 			// mesh material index
-			if (0 == strncmp(m_szFile,"*MATERIAL_REF" ,13) &&
-				IsSpaceOrNewLine(*(m_szFile+13)))
+			if (0 == strncmp(m_szFile,"MATERIAL_REF" ,12) &&
+				IsSpaceOrNewLine(*(m_szFile+12)))
 			{
-				m_szFile+=14;
+				m_szFile+=13;
 				ParseLV4MeshLong(mesh.iMaterialIndex);continue;
 			}
 			// animation data of the node
-			if (0 == strncmp(m_szFile,"*TM_ANIMATION" ,13) &&
-				IsSpaceOrNewLine(*(m_szFile+13)))
+			if (0 == strncmp(m_szFile,"TM_ANIMATION" ,12) &&
+				IsSpaceOrNewLine(*(m_szFile+12)))
 			{
-				m_szFile+=14;
+				m_szFile+=13;
 				ParseLV2AnimationBlock(mesh);continue;
 			}
 		}
@@ -796,18 +799,19 @@ void Parser::ParseLV2AnimationBlock(ASE::Mesh& mesh)
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
 			// position keyframes
-			if (0 == strncmp(m_szFile,"*CONTROL_POS_TRACK" ,18) &&
-				IsSpaceOrNewLine(*(m_szFile+18)))
+			if (0 == strncmp(m_szFile,"CONTROL_POS_TRACK" ,17) &&
+				IsSpaceOrNewLine(*(m_szFile+17)))
 			{
-				m_szFile+=19;
+				m_szFile+=18;
 				ParseLV3PosAnimationBlock(mesh);continue;
 			}
 			// rotation keyframes
-			if (0 == strncmp(m_szFile,"*CONTROL_ROT_TRACK" ,18) &&
-				IsSpaceOrNewLine(*(m_szFile+18)))
+			if (0 == strncmp(m_szFile,"CONTROL_ROT_TRACK" ,17) &&
+				IsSpaceOrNewLine(*(m_szFile+17)))
 			{
-				m_szFile+=19;
+				m_szFile+=18;
 				ParseLV3RotAnimationBlock(mesh);continue;
 			}
 		}
@@ -822,11 +826,12 @@ void Parser::ParseLV3PosAnimationBlock(ASE::Mesh& mesh)
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
 			// position keyframe
-			if (0 == strncmp(m_szFile,"*CONTROL_POS_SAMPLE" ,19) &&
-				IsSpaceOrNewLine(*(m_szFile+19)))
+			if (0 == strncmp(m_szFile,"CONTROL_POS_SAMPLE" ,18) &&
+				IsSpaceOrNewLine(*(m_szFile+18)))
 			{
-				m_szFile+=20;
+				m_szFile+=19;
 				
 				unsigned int iIndex;
 				mesh.mAnim.akeyPositions.push_back(aiVectorKey());
@@ -847,11 +852,12 @@ void Parser::ParseLV3RotAnimationBlock(ASE::Mesh& mesh)
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
 			// rotation keyframe
-			if (0 == strncmp(m_szFile,"*CONTROL_ROT_SAMPLE" ,19) &&
-				IsSpaceOrNewLine(*(m_szFile+19)))
+			if (0 == strncmp(m_szFile,"CONTROL_ROT_SAMPLE" ,18) &&
+				IsSpaceOrNewLine(*(m_szFile+18)))
 			{
-				m_szFile+=20;
+				m_szFile+=19;
 
 				unsigned int iIndex;
 				mesh.mAnim.akeyRotations.push_back(aiQuatKey());
@@ -876,39 +882,40 @@ void Parser::ParseLV2NodeTransformBlock(ASE::Mesh& mesh)
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
 			// first row of the transformation matrix
-			if (0 == strncmp(m_szFile,"*TM_ROW0" ,8) &&
-				IsSpaceOrNewLine(*(m_szFile+8)))
+			if (0 == strncmp(m_szFile,"TM_ROW0" ,7) &&
+				IsSpaceOrNewLine(*(m_szFile+7)))
 			{
-				m_szFile+=9;
+				m_szFile+=8;
 				ParseLV4MeshFloatTriple(mesh.mTransform[0]);continue;
 			}
 			// second row of the transformation matrix
-			if (0 == strncmp(m_szFile,"*TM_ROW1" ,8) &&
-				IsSpaceOrNewLine(*(m_szFile+8)))
+			if (0 == strncmp(m_szFile,"TM_ROW1" ,7) &&
+				IsSpaceOrNewLine(*(m_szFile+7)))
 			{
-				m_szFile+=9;
+				m_szFile+=8;
 				ParseLV4MeshFloatTriple(mesh.mTransform[1]);continue;
 			}
 			// third row of the transformation matrix
-			if (0 == strncmp(m_szFile,"*TM_ROW2" ,8) &&
-				IsSpaceOrNewLine(*(m_szFile+8)))
+			if (0 == strncmp(m_szFile,"TM_ROW2" ,7) &&
+				IsSpaceOrNewLine(*(m_szFile+7)))
 			{
-				m_szFile+=9;
+				m_szFile+=8;
 				ParseLV4MeshFloatTriple(mesh.mTransform[2]);continue;
 			}
 			// fourth row of the transformation matrix
-			if (0 == strncmp(m_szFile,"*TM_ROW3" ,8) &&
-				IsSpaceOrNewLine(*(m_szFile+8)))
+			if (0 == strncmp(m_szFile,"TM_ROW3" ,7) &&
+				IsSpaceOrNewLine(*(m_szFile+7)))
 			{
-				m_szFile+=9;
+				m_szFile+=8;
 				ParseLV4MeshFloatTriple(mesh.mTransform[3]);continue;
 			}
 			// inherited position axes
-			if (0 == strncmp(m_szFile,"*INHERIT_POS" ,12) &&
-				IsSpaceOrNewLine(*(m_szFile+12)))
+			if (0 == strncmp(m_szFile,"INHERIT_POS" ,11) &&
+				IsSpaceOrNewLine(*(m_szFile+11)))
 			{
-				m_szFile+=13;
+				m_szFile+=12;
 				unsigned int aiVal[3];
 				ParseLV4MeshLongTriple(aiVal);
 				
@@ -917,10 +924,10 @@ void Parser::ParseLV2NodeTransformBlock(ASE::Mesh& mesh)
 				continue;
 			}
 			// inherited rotation axes
-			if (0 == strncmp(m_szFile,"*INHERIT_ROT" ,12) &&
-				IsSpaceOrNewLine(*(m_szFile+12)))
+			if (0 == strncmp(m_szFile,"INHERIT_ROT" ,11) &&
+				IsSpaceOrNewLine(*(m_szFile+11)))
 			{
-				m_szFile+=13;
+				m_szFile+=12;
 				unsigned int aiVal[3];
 				ParseLV4MeshLongTriple(aiVal);
 				
@@ -929,10 +936,10 @@ void Parser::ParseLV2NodeTransformBlock(ASE::Mesh& mesh)
 				continue;
 			}
 			// inherited scaling axes
-			if (0 == strncmp(m_szFile,"*INHERIT_SCL" ,12) &&
-				IsSpaceOrNewLine(*(m_szFile+12)))
+			if (0 == strncmp(m_szFile,"INHERIT_SCL" ,11) &&
+				IsSpaceOrNewLine(*(m_szFile+11)))
 			{
-				m_szFile+=13;
+				m_szFile+=12;
 				unsigned int aiVal[3];
 				ParseLV4MeshLongTriple(aiVal);
 				
@@ -959,105 +966,104 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
 			// Number of vertices in the mesh
-			if (0 == strncmp(m_szFile,"*MESH_NUMVERTEX" ,15) &&
-				IsSpaceOrNewLine(*(m_szFile+15)))
-			{
-				m_szFile+=16;
-				ParseLV4MeshLong(iNumVertices);continue;
-			}
-			// Number of texture coordinates in the mesh
-			if (0 == strncmp(m_szFile,"*MESH_NUMTVERTEX" ,16) &&
-				IsSpaceOrNewLine(*(m_szFile+16)))
-			{
-				m_szFile+=17;
-				ParseLV4MeshLong(iNumTVertices);continue;
-			}
-			// Number of vertex colors in the mesh
-			if (0 == strncmp(m_szFile,"*MESH_NUMCVERTEX" ,16) &&
-				IsSpaceOrNewLine(*(m_szFile+16)))
-			{
-				m_szFile+=17;
-				ParseLV4MeshLong(iNumCVertices);continue;
-			}
-			// Number of regular faces in the mesh
-			if (0 == strncmp(m_szFile,"*MESH_NUMFACES" ,14) &&
+			if (0 == strncmp(m_szFile,"MESH_NUMVERTEX" ,14) &&
 				IsSpaceOrNewLine(*(m_szFile+14)))
 			{
 				m_szFile+=15;
+				ParseLV4MeshLong(iNumVertices);continue;
+			}
+			// Number of texture coordinates in the mesh
+			if (0 == strncmp(m_szFile,"MESH_NUMTVERTEX" ,15) &&
+				IsSpaceOrNewLine(*(m_szFile+15)))
+			{
+				m_szFile+=16;
+				ParseLV4MeshLong(iNumTVertices);continue;
+			}
+			// Number of vertex colors in the mesh
+			if (0 == strncmp(m_szFile,"MESH_NUMCVERTEX" ,14) &&
+				IsSpaceOrNewLine(*(m_szFile+14)))
+			{
+				m_szFile+=15;
+				ParseLV4MeshLong(iNumCVertices);continue;
+			}
+			// Number of regular faces in the mesh
+			if (0 == strncmp(m_szFile,"MESH_NUMFACES" ,13) &&
+				IsSpaceOrNewLine(*(m_szFile+13)))
+			{
+				m_szFile+=14;
 				ParseLV4MeshLong(iNumFaces);continue;
-				// fix ...
-				//mesh.mFaces.resize(iNumFaces);
 			}
 			// Number of UVWed faces in the mesh
-			if (0 == strncmp(m_szFile,"*MESH_NUMTVFACES" ,16) &&
-				IsSpaceOrNewLine(*(m_szFile+16)))
+			if (0 == strncmp(m_szFile,"MESH_NUMTVFACES" ,15) &&
+				IsSpaceOrNewLine(*(m_szFile+15)))
 			{
-				m_szFile+=17;
+				m_szFile+=16;
 				ParseLV4MeshLong(iNumTFaces);continue;
 			}
 			// Number of colored faces in the mesh
-			if (0 == strncmp(m_szFile,"*MESH_NUMCVFACES" ,16) &&
-				IsSpaceOrNewLine(*(m_szFile+16)))
+			if (0 == strncmp(m_szFile,"MESH_NUMCVFACES" ,15) &&
+				IsSpaceOrNewLine(*(m_szFile+15)))
 			{
-				m_szFile+=17;
+				m_szFile+=16;
 				ParseLV4MeshLong(iNumCFaces);continue;
 			}
 			// mesh vertex list block
-			if (0 == strncmp(m_szFile,"*MESH_VERTEX_LIST" ,17) &&
-				IsSpaceOrNewLine(*(m_szFile+17)))
+			if (0 == strncmp(m_szFile,"MESH_VERTEX_LIST" ,16) &&
+				IsSpaceOrNewLine(*(m_szFile+16)))
 			{
-				m_szFile+=18;
+				m_szFile+=17;
 				ParseLV3MeshVertexListBlock(iNumVertices,mesh);
 				continue;
 			}
 			// mesh face list block
-			if (0 == strncmp(m_szFile,"*MESH_FACE_LIST" ,15) &&
-				IsSpaceOrNewLine(*(m_szFile+15)))
+			if (0 == strncmp(m_szFile,"MESH_FACE_LIST" ,14) &&
+				IsSpaceOrNewLine(*(m_szFile+14)))
 			{
-				m_szFile+=16;
+				m_szFile+=15;
 				ParseLV3MeshFaceListBlock(iNumFaces,mesh);continue;
 			}
 			// mesh texture vertex list block
-			if (0 == strncmp(m_szFile,"*MESH_TVERTLIST" ,15) &&
-				IsSpaceOrNewLine(*(m_szFile+15)))
+			if (0 == strncmp(m_szFile,"MESH_TVERTLIST" ,14) &&
+				IsSpaceOrNewLine(*(m_szFile+14)))
 			{
-				m_szFile+=16;
+				m_szFile+=15;
 				ParseLV3MeshTListBlock(iNumTVertices,mesh);continue;
 			}
 			// mesh texture face block
-			if (0 == strncmp(m_szFile,"*MESH_TFACELIST" ,15) &&
-				IsSpaceOrNewLine(*(m_szFile+15)))
+			if (0 == strncmp(m_szFile,"MESH_TFACELIST" ,14) &&
+				IsSpaceOrNewLine(*(m_szFile+14)))
 			{
-				m_szFile+=16;
+				m_szFile+=15;
 				ParseLV3MeshTFaceListBlock(iNumTFaces,mesh);continue;
 			}
 			// mesh color vertex list block
-			if (0 == strncmp(m_szFile,"*MESH_CVERTLIST" ,15) &&
-				IsSpaceOrNewLine(*(m_szFile+15)))
+			if (0 == strncmp(m_szFile,"MESH_CVERTLIST" ,14) &&
+				IsSpaceOrNewLine(*(m_szFile+14)))
 			{
-				m_szFile+=16;
+				m_szFile+=15;
 				ParseLV3MeshCListBlock(iNumCVertices,mesh);continue;
 			}
 			// mesh color face block
-			if (0 == strncmp(m_szFile,"*MESH_CFACELIST" ,15) &&
-				IsSpaceOrNewLine(*(m_szFile+15)))
+			if (0 == strncmp(m_szFile,"MESH_CFACELIST" ,14) &&
+				IsSpaceOrNewLine(*(m_szFile+14)))
 			{
-				m_szFile+=16;
+				m_szFile+=15;
 				ParseLV3MeshCFaceListBlock(iNumCFaces,mesh);continue;
 			}
 			// mesh normals
-			if (0 == strncmp(m_szFile,"*MESH_NORMALS" ,13) &&
-				IsSpaceOrNewLine(*(m_szFile+13)))
+			if (0 == strncmp(m_szFile,"MESH_NORMALS" ,12) &&
+				IsSpaceOrNewLine(*(m_szFile+12)))
 			{
-				m_szFile+=14;
+				m_szFile+=13;
 				ParseLV3MeshNormalListBlock(mesh);continue;
 			}
 			// another mesh UV channel ...
-			if (0 == strncmp(m_szFile,"*MESH_MAPPINGCHANNEL" ,20) &&
-				IsSpaceOrNewLine(*(m_szFile+20)))
+			if (0 == strncmp(m_szFile,"MESH_MAPPINGCHANNEL" ,19) &&
+				IsSpaceOrNewLine(*(m_szFile+19)))
 			{
-				m_szFile+=21;
+				m_szFile+=20;
 
 				unsigned int iIndex = 0;
 				ParseLV4MeshLong(iIndex);
@@ -1082,10 +1088,10 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 				continue;
 			}
 			// mesh animation keyframe. Not supported
-			if (0 == strncmp(m_szFile,"*MESH_ANIMATION" ,15) &&
-				IsSpaceOrNewLine(*(m_szFile+15)))
+			if (0 == strncmp(m_szFile,"MESH_ANIMATION" ,14) &&
+				IsSpaceOrNewLine(*(m_szFile+14)))
 			{
-				m_szFile+=16;
+				m_szFile+=15;
 				
 				LogWarning("Found *MESH_ANIMATION element in ASE/ASK file. "
 					"Keyframe animation is not supported by Assimp, this element "
@@ -1094,10 +1100,10 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 				continue;
 			}
 			// mesh animation keyframe. Not supported
-			if (0 == strncmp(m_szFile,"*MESH_WEIGHTS" ,13) &&
-				IsSpaceOrNewLine(*(m_szFile+13)))
+			if (0 == strncmp(m_szFile,"MESH_WEIGHTS" ,12) &&
+				IsSpaceOrNewLine(*(m_szFile+12)))
 			{
-				m_szFile+=14;
+				m_szFile+=13;
 				ParseLV3MeshWeightsBlock(mesh);continue;
 			}
 		}
@@ -1115,32 +1121,34 @@ void Parser::ParseLV3MeshWeightsBlock(ASE::Mesh& mesh)
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
+
 			// Number of bone vertices ...
-			if (0 == strncmp(m_szFile,"*MESH_NUMVERTEX" ,15) &&
-				IsSpaceOrNewLine(*(m_szFile+15)))
+			if (0 == strncmp(m_szFile,"MESH_NUMVERTEX" ,14) &&
+				IsSpaceOrNewLine(*(m_szFile+14)))
 			{
-				m_szFile+=16;
+				m_szFile+=15;
 				ParseLV4MeshLong(iNumVertices);continue;
 			}
 			// Number of bones
-			if (0 == strncmp(m_szFile,"*MESH_NUMBONE" ,13) &&
-				IsSpaceOrNewLine(*(m_szFile+13)))
+			if (0 == strncmp(m_szFile,"MESH_NUMBONE" ,11) &&
+				IsSpaceOrNewLine(*(m_szFile+11)))
 			{
-				m_szFile+=14;
+				m_szFile+=12;
 				ParseLV4MeshLong(iNumBones);continue;
 			}
 			// parse the list of bones
-			if (0 == strncmp(m_szFile,"*MESH_BONE_LIST" ,15) &&
-				IsSpaceOrNewLine(*(m_szFile+15)))
+			if (0 == strncmp(m_szFile,"MESH_BONE_LIST" ,14) &&
+				IsSpaceOrNewLine(*(m_szFile+14)))
 			{
-				m_szFile+=16;
+				m_szFile+=15;
 				ParseLV4MeshBones(iNumBones,mesh);continue;
 			}
 			// parse the list of bones vertices
-			if (0 == strncmp(m_szFile,"*MESH_BONE_VERTEX_LIST" ,22) &&
-				IsSpaceOrNewLine(*(m_szFile+22)))
+			if (0 == strncmp(m_szFile,"MESH_BONE_VERTEX_LIST" ,21) &&
+				IsSpaceOrNewLine(*(m_szFile+21)))
 			{
-				m_szFile+=23;
+				m_szFile+=22;
 				ParseLV4MeshBonesVertices(iNumVertices,mesh);
 				continue;
 			}
@@ -1158,11 +1166,13 @@ void Parser::ParseLV4MeshBones(unsigned int iNumBones,ASE::Mesh& mesh)
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
+
 			// Mesh bone with name ...
-			if (0 == strncmp(m_szFile,"*MESH_BONE_NAME" ,17) &&
-				IsSpaceOrNewLine(*(m_szFile+17)))
+			if (0 == strncmp(m_szFile,"MESH_BONE_NAME" ,16) &&
+				IsSpaceOrNewLine(*(m_szFile+16)))
 			{
-				m_szFile+=18;
+				m_szFile+=17;
 
 				// parse an index ...
 				if(SkipSpaces(&m_szFile))
@@ -1170,9 +1180,8 @@ void Parser::ParseLV4MeshBones(unsigned int iNumBones,ASE::Mesh& mesh)
 					unsigned int iIndex = strtol10(m_szFile,&m_szFile);
 					if (iIndex >= iNumBones)
 					{
-						iIndex = iNumBones-1;
-						LogWarning("Bone index is out of bounds. Using the largest valid "
-							"bone index instead");
+						continue;
+						LogWarning("Bone index is out of bounds");
 					}
 					if (!ParseString(mesh.mBones[iIndex].mName,"*MESH_BONE_NAME"))						
 						SkipToNextToken();
@@ -1192,11 +1201,13 @@ void Parser::ParseLV4MeshBonesVertices(unsigned int iNumVertices,ASE::Mesh& mesh
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
+
 			// Mesh bone vertex
-			if (0 == strncmp(m_szFile,"*MESH_BONE_VERTEX" ,17) &&
-				IsSpaceOrNewLine(*(m_szFile+17)))
+			if (0 == strncmp(m_szFile,"MESH_BONE_VERTEX" ,16) &&
+				IsSpaceOrNewLine(*(m_szFile+16)))
 			{
-				m_szFile+=18;
+				m_szFile+=17;
 
 				// read the vertex index
 				unsigned int iIndex = strtol10(m_szFile,&m_szFile);
@@ -1207,10 +1218,7 @@ void Parser::ParseLV4MeshBonesVertices(unsigned int iNumVertices,ASE::Mesh& mesh
 						"bone vertex index instead");
 				}
 
-				// now there there are 3 normal floats, the
-				// should be identical to the vertex positions
-				// contained in the *VERTEX_LIST block. Well, we check this
-				// in debug builds to be sure ;-)
+				// --- ignored
 				float afVert[3];
 				ParseLV4MeshFloatTriple(afVert);
 
@@ -1249,11 +1257,13 @@ void Parser::ParseLV3MeshVertexListBlock(
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
+
 			// Vertex entry
-			if (0 == strncmp(m_szFile,"*MESH_VERTEX" ,12) &&
-				IsSpaceOrNewLine(*(m_szFile+12)))
+			if (0 == strncmp(m_szFile,"MESH_VERTEX" ,11) &&
+				IsSpaceOrNewLine(*(m_szFile+11)))
 			{
-				m_szFile+=13;
+				m_szFile+=12;
 
 				aiVector3D vTemp;
 				unsigned int iIndex;
@@ -1261,7 +1271,7 @@ void Parser::ParseLV3MeshVertexListBlock(
 
 				if (iIndex >= iNumVertices)
 				{
-					LogWarning("Vertex has an invalid index. It will be ignored");
+					LogWarning("Invalid vertex index. It will be ignored");
 				}
 				else mesh.mPositions[iIndex] = vTemp;
 				continue;
@@ -1281,11 +1291,13 @@ void Parser::ParseLV3MeshFaceListBlock(unsigned int iNumFaces, ASE::Mesh& mesh)
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
+
 			// Face entry
-			if (0 == strncmp(m_szFile,"*MESH_FACE" ,10) &&
-				IsSpaceOrNewLine(*(m_szFile+10)))
+			if (0 == strncmp(m_szFile,"MESH_FACE" ,9) &&
+				IsSpaceOrNewLine(*(m_szFile+9)))
 			{
-				m_szFile+=11;
+				m_szFile+=10;
 
 				ASE::Face mFace;
 				ParseLV4MeshFace(mFace);
@@ -1313,11 +1325,13 @@ void Parser::ParseLV3MeshTListBlock(unsigned int iNumVertices,
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
+
 			// Vertex entry
-			if (0 == strncmp(m_szFile,"*MESH_TVERT" ,11) &&
-				IsSpaceOrNewLine(*(m_szFile+11)))
+			if (0 == strncmp(m_szFile,"MESH_TVERT" ,10) &&
+				IsSpaceOrNewLine(*(m_szFile+10)))
 			{
-				m_szFile+=12;
+				m_szFile+=11;
 
 				aiVector3D vTemp;
 				unsigned int iIndex;
@@ -1350,11 +1364,13 @@ void Parser::ParseLV3MeshTFaceListBlock(unsigned int iNumFaces,
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
+
 			// Face entry
-			if (0 == strncmp(m_szFile,"*MESH_TFACE" ,12) &&
-				IsSpaceOrNewLine(*(m_szFile+12)))
+			if (0 == strncmp(m_szFile,"MESH_TFACE" ,11) &&
+				IsSpaceOrNewLine(*(m_szFile+11)))
 			{
-				m_szFile+=13;
+				m_szFile+=12;
 
 				unsigned int aiValues[3];
 				unsigned int iIndex = 0;
@@ -1389,33 +1405,35 @@ void Parser::ParseLV3MappingChannel(unsigned int iChannel, ASE::Mesh& mesh)
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
+
 			// Number of texture coordinates in the mesh
-			if (0 == strncmp(m_szFile,"*MESH_NUMTVERTEX" ,16) &&
-				IsSpaceOrNewLine(*(m_szFile+16)))
-			{
-				m_szFile+=17;
-				ParseLV4MeshLong(iNumTVertices);continue;
-			}
-			// Number of UVWed faces in the mesh
-			if (0 == strncmp(m_szFile,"*MESH_NUMTVFACES" ,16) &&
-				IsSpaceOrNewLine(*(m_szFile+16)))
-			{
-				m_szFile+=17;
-				ParseLV4MeshLong(iNumTFaces);continue;
-			}
-			// mesh texture vertex list block
-			if (0 == strncmp(m_szFile,"*MESH_TVERTLIST" ,15) &&
+			if (0 == strncmp(m_szFile,"MESH_NUMTVERTEX" ,15) &&
 				IsSpaceOrNewLine(*(m_szFile+15)))
 			{
 				m_szFile+=16;
+				ParseLV4MeshLong(iNumTVertices);continue;
+			}
+			// Number of UVWed faces in the mesh
+			if (0 == strncmp(m_szFile,"MESH_NUMTVFACES" ,15) &&
+				IsSpaceOrNewLine(*(m_szFile+15)))
+			{
+				m_szFile+=16;
+				ParseLV4MeshLong(iNumTFaces);continue;
+			}
+			// mesh texture vertex list block
+			if (0 == strncmp(m_szFile,"MESH_TVERTLIST" ,14) &&
+				IsSpaceOrNewLine(*(m_szFile+14)))
+			{
+				m_szFile+=15;
 				ParseLV3MeshTListBlock(iNumTVertices,mesh,iChannel);
 				continue;
 			}
 			// mesh texture face block
-			if (0 == strncmp(m_szFile,"*MESH_TFACELIST" ,15) &&
-				IsSpaceOrNewLine(*(m_szFile+15)))
+			if (0 == strncmp(m_szFile,"MESH_TFACELIST" ,14) &&
+				IsSpaceOrNewLine(*(m_szFile+14)))
 			{
-				m_szFile+=16;
+				m_szFile+=15;
 				ParseLV3MeshTFaceListBlock(iNumTFaces,mesh, iChannel);
 				continue;
 			}
@@ -1434,11 +1452,13 @@ void Parser::ParseLV3MeshCListBlock(unsigned int iNumVertices, ASE::Mesh& mesh)
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
+
 			// Vertex entry
-			if (0 == strncmp(m_szFile,"*MESH_VERTCOL" ,13) &&
-				IsSpaceOrNewLine(*(m_szFile+13)))
+			if (0 == strncmp(m_szFile,"MESH_VERTCOL" ,12) &&
+				IsSpaceOrNewLine(*(m_szFile+12)))
 			{
-				m_szFile+=14;
+				m_szFile+=13;
 
 				aiColor4D vTemp;
 				vTemp.a = 1.0f;
@@ -1465,11 +1485,13 @@ void Parser::ParseLV3MeshCFaceListBlock(unsigned int iNumFaces, ASE::Mesh& mesh)
 	{
 		if ('*' == *m_szFile)
 		{
+			++m_szFile;
+
 			// Face entry
-			if (0 == strncmp(m_szFile,"*MESH_CFACE" ,12) &&
-				IsSpaceOrNewLine(*(m_szFile+12)))
+			if (0 == strncmp(m_szFile,"MESH_CFACE" ,11) &&
+				IsSpaceOrNewLine(*(m_szFile+11)))
 			{
-				m_szFile+=13;
+				m_szFile+=12;
 
 				unsigned int aiValues[3];
 				unsigned int iIndex = 0;
@@ -1503,15 +1525,18 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 
 	// just smooth both vertex and face normals together, so it will still
 	// work if one oneof the two is missing ...
-	// TODO: find out why many models have invalid normals ...
+	// TODO: find out why many models have invalid normals ... some docs
+	// say ASE normals needn't be orthonormal, so it could be it is OK
 	while (true)
 	{
 		if ('*' == *m_szFile)
 		{
-			if (0 == strncmp(m_szFile,"*MESH_VERTEXNORMAL",18) && 
-				IsSpaceOrNewLine(*(m_szFile+18)))
+			++m_szFile;
+
+			if (0 == strncmp(m_szFile,"MESH_VERTEXNORMAL",17) && 
+				IsSpaceOrNewLine(*(m_szFile+17)))
 			{
-				m_szFile += 19;
+				m_szFile += 18;
 				aiVector3D vNormal;
 				ParseLV4MeshFloatTriple(&vNormal.x,iIndex);
 
@@ -1523,10 +1548,10 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 				sMesh.mNormals[iIndex] += vNormal;
 				continue;
 			}
-			if (0 == strncmp(m_szFile,"*MESH_FACENORMAL",16) && 
-				IsSpaceOrNewLine(*(m_szFile+16)))
+			if (0 == strncmp(m_szFile,"MESH_FACENORMAL",15) && 
+				IsSpaceOrNewLine(*(m_szFile+15)))
 			{
-				m_szFile += 17;
+				m_szFile += 16;
 				aiVector3D vNormal;
 				ParseLV4MeshFloatTriple(&vNormal.x,iIndex);
 

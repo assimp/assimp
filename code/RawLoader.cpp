@@ -283,6 +283,8 @@ void RAWImporter::InternReadFile( const std::string& pFile,
 			aiMesh* mesh = pScene->mMeshes[meshIdx] = new aiMesh();
 			mesh->mMaterialIndex = meshIdx++;
 
+			mesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
+
 			// allocate storage for the vertex components and copy them
 			mesh->mNumVertices = (unsigned int)(*it2).vertices.size();
 			mesh->mVertices = new aiVector3D[ mesh->mNumVertices ];

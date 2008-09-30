@@ -251,6 +251,50 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 			pMesh->mMaterialIndex,this->mScene->mNumMaterials-1);
 	}
 
+	for (unsigned int i = 0; i < pMesh->mNumFaces; ++i)
+	{
+		aiFace& face = pMesh->mFaces[i];
+
+		if (pMesh->mPrimitiveTypes)
+		{
+			switch (face.mNumIndices)
+			{
+			case 0:
+				this->ReportError("aiMesh::mFaces[%i].mNumIndices is 0",i);
+			case 1:
+				if (0 == (pMesh->mPrimitiveTypes & aiPrimitiveType_POINT))
+				{
+					this->ReportError("aiMesh::mFaces[%i] is a POINT but aiMesh::mPrimtiveTypes "
+						"does not report the POINT flag",i);
+				}
+				break;
+			case 2:
+				if (0 == (pMesh->mPrimitiveTypes & aiPrimitiveType_LINE))
+				{
+					this->ReportError("aiMesh::mFaces[%i] is a LINE but aiMesh::mPrimtiveTypes "
+						"does not report the LINE flag",i);
+				}
+				break;
+			case 3:
+				if (0 == (pMesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE))
+				{
+					this->ReportError("aiMesh::mFaces[%i] is a TRIANGLE but aiMesh::mPrimtiveTypes "
+						"does not report the TRIANGLE flag",i);
+				}
+				break;
+			default:
+				if (0 == (pMesh->mPrimitiveTypes & aiPrimitiveType_POLYGON))
+				{
+					this->ReportError("aiMesh::mFaces[%i] is a POLYGON but aiMesh::mPrimtiveTypes "
+						"does not report the POLYGON flag",i);
+				}
+				break;
+			};
+		}
+
+		if (!face.mIndices)this->ReportError("aiMesh::mFaces[%i].mIndices is NULL",i);
+	}
+
 	if (this->mScene->mFlags & AI_SCENE_FLAGS_ANIM_SKELETON_ONLY)
 	{
 		if (pMesh->mNumVertices || pMesh->mVertices ||
@@ -281,10 +325,6 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 		for (unsigned int i = 0; i < pMesh->mNumFaces;++i)
 		{
 			aiFace& face = pMesh->mFaces[i];
-			if (!face.mIndices)this->ReportError("aiMesh::mFaces[%i].mIndices is NULL",i);
-			if (face.mNumIndices < 3)this->ReportError(
-				"aiMesh::mFaces[%i].mIndices is not a triangle or polygon",i);
-
 			for (unsigned int a = 0; a < face.mNumIndices;++a)
 			{
 				if (face.mIndices[a] >= pMesh->mNumVertices)

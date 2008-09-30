@@ -29,6 +29,6 @@ void GenNormalsTest :: tearDown (void)
 
 void  GenNormalsTest :: testSimpleTriangle (void)
 {
-	this->piProcess->GenMeshVertexNormals(pcMesh);
+	this->piProcess->GenMeshVertexNormals(pcMesh,0);
 	CPPUNIT_ASSERT(0 != pcMesh->mNormals);
 }

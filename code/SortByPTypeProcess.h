@@ -38,112 +38,68 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Definition of the MDR importer class. */
-#ifndef AI_MDRLOADER_H_INCLUDED
-#define AI_MDRLOADER_H_INCLUDED
+/** @file Defines a post processing step to sort meshes by the types 
+    of primitives they contain */
+#ifndef AI_SORTBYPTYPEPROCESS_H_INC
+#define AI_SORTBYPTYPEPROCESS_H_INC
 
-#include "../include/aiTypes.h"
+#include "BaseProcess.h"
+#include "../include/aiMesh.h"
 
-#include "BaseImporter.h"
-#include "MDRFileData.h"
-#include "ByteSwap.h"
-
+class SortByPTypeProcessTest;
 namespace Assimp	{
-using namespace MDR;
+
 
 // ---------------------------------------------------------------------------
-/** Importer class for the MDR file format (Ravensoft)
+/** DeterminePTypeHelperProcess: If aiMesh::mPrimitiveTypes is 0,
+ *  this step determines the types of primitive a mesh consists of.
 */
-class MDRImporter : public BaseImporter
+class ASSIMP_API DeterminePTypeHelperProcess : public BaseProcess
 {
 	friend class Importer;
+	friend class ::SortByPTypeProcessTest; // grant the unit test full access to us
 
 protected:
 	/** Constructor to be privately used by Importer */
-	MDRImporter();
+	DeterminePTypeHelperProcess();
 
 	/** Destructor, private as well */
-	~MDRImporter();
+	~DeterminePTypeHelperProcess();
 
 public:
+	// -------------------------------------------------------------------
+	bool IsActive( unsigned int pFlags) const;
 
 	// -------------------------------------------------------------------
-	/** Returns whether the class can handle the format of the given file. 
-	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	void Execute( aiScene* pScene);
+};
 
-	// -------------------------------------------------------------------
-	/** Called prior to ReadFile().
-	* The function is a request to the importer to update its configuration
-	* basing on the Importer's configuration property list.
-	*/
-	void SetupProperties(const Importer* pImp);
+
+// ---------------------------------------------------------------------------
+/** SortByPTypeProcess: Sorts meshes by the types of primitives they contain.
+ *  A mesh with 5 lines, 3 points and 145 triangles would be split in 3 
+ * submeshes.
+*/
+class ASSIMP_API SortByPTypeProcess : public BaseProcess
+{
+	friend class Importer;
+	friend class ::SortByPTypeProcessTest; // grant the unit test full access to us
 
 protected:
+	/** Constructor to be privately used by Importer */
+	SortByPTypeProcess();
+
+	/** Destructor, private as well */
+	~SortByPTypeProcess();
+
+public:
+	// -------------------------------------------------------------------
+	bool IsActive( unsigned int pFlags) const;
 
 	// -------------------------------------------------------------------
-	/** Called by Importer::GetExtensionList() for each loaded importer.
-	 * See BaseImporter::GetExtensionList() for details
-	 */
-	void GetExtensionList(std::string& append)
-	{
-		append.append("*.mdr");
-	}
-
-	// -------------------------------------------------------------------
-	/** Imports the given file into the given scene structure. 
-	* See BaseImporter::InternReadFile() for details
-	*/
-	void InternReadFile( const std::string& pFile, aiScene* pScene,
-		IOSystem* pIOHandler);
-
-protected:
-
-
-	// -------------------------------------------------------------------
-	/** Validate the header of the file
-	*/
-	void ValidateHeader();
-
-	// -------------------------------------------------------------------
-	/** Validate the header of a MDR surface
-	 *  @param pcSurf Surface to be validated
-	*/
-	void ValidateSurfaceHeader(BE_NCONST MDR::Surface* pcSurf);
-
-	// -------------------------------------------------------------------
-	/** Validate the header of a MDR LOD
-	 *  @param pcLOD LOD to be validated
-	*/
-	void ValidateLODHeader(BE_NCONST MDR::LOD* pcLOD);
-
-protected:
-
-
-	struct VertexInfo
-	{
-		aiVector3D xyz;
-		aiVector3D normal;
-		aiVector3D uv;
-		unsigned int start,num;
-	};
-	typedef std::pair<uint32_t,float> BoneWeightInfo;
-
-
-	/** Configuration option: frame to be loaded */
-	unsigned int configFrameID;
-
-	/** Header of the MDR file */
-	BE_NCONST MDR::Header* pcHeader;
-
-	/** Buffer to hold the loaded file */
-	unsigned char* mBuffer;
-
-	/** size of the file, in bytes */
-	unsigned int fileSize;
+	void Execute( aiScene* pScene);
 };
 
 } // end of namespace Assimp
 
-#endif // AI_MDRIMPORTER_H_INC
-
+#endif // !!AI_SORTBYPTYPEPROCESS_H_INC

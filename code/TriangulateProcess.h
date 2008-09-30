@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiMesh;
 
+class TriangulateProcessTest;
 namespace Assimp
 {
 
@@ -59,6 +60,7 @@ namespace Assimp
 class ASSIMP_API TriangulateProcess : public BaseProcess
 {
 	friend class Importer;
+	friend class ::TriangulateProcessTest; // grant the unit test full access to us
 
 protected:
 	/** Constructor to be privately used by Importer */

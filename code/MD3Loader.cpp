@@ -281,6 +281,7 @@ void MD3Importer::InternReadFile(
 		// allocate the output mesh
 		pScene->mMeshes[iNum] = new aiMesh();
 		aiMesh* pcMesh = pScene->mMeshes[iNum];
+		pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
 		pcMesh->mNumVertices		= pcSurfaces->NUM_TRIANGLES*3;
 		pcMesh->mNumFaces			= pcSurfaces->NUM_TRIANGLES;

@@ -680,7 +680,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\tools\assimp_view\AssetHelper.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tools\assimp_view\assimp_view.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\assimp_view.h"
 				>
 			</File>
 			<File
@@ -688,7 +696,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\tools\assimp_view\Background.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\Camera.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tools\assimp_view\Display.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\Display.h"
 				>
 			</File>
 			<File
@@ -704,7 +724,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\tools\assimp_view\LogDisplay.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tools\assimp_view\LogWindow.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\LogWindow.h"
 				>
 			</File>
 			<File
@@ -712,7 +740,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\tools\assimp_view\MaterialManager.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tools\assimp_view\MeshRenderer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\MeshRenderer.h"
 				>
 			</File>
 			<File
@@ -728,7 +764,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\tools\assimp_view\RenderOptions.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\Resource.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tools\assimp_view\Shaders.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\Shaders.h"
 				>
 			</File>
 			<File
@@ -798,60 +846,6 @@
 						UsePrecompiledHeader="1"
 					/>
 				</FileConfiguration>
-			</File>
-		</Filter>
-		<Filter
-			Name="headers"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-			>
-			<File
-				RelativePath="..\..\tools\assimp_view\AssetHelper.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tools\assimp_view\assimp_view.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tools\assimp_view\Background.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tools\assimp_view\Camera.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tools\assimp_view\Display.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tools\assimp_view\LogDisplay.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tools\assimp_view\LogWindow.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tools\assimp_view\MaterialManager.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tools\assimp_view\MeshRenderer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tools\assimp_view\RenderOptions.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tools\assimp_view\Resource.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tools\assimp_view\Shaders.h"
-				>
 			</File>
 			<File
 				RelativePath="..\..\tools\assimp_view\stdafx.h"

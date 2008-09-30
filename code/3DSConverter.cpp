@@ -413,6 +413,7 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 			if (aiSplit[p].size() != 0)
 			{
 				aiMesh* p_pcOut = new aiMesh();
+				p_pcOut->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
 				// be sure to setup the correct material index
 				p_pcOut->mMaterialIndex = p;

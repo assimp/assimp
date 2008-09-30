@@ -166,6 +166,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AI_BUILD_NO_OPTIMIZEGRAPH_PROCESS)
 #	include "OptimizeGraphProcess.h"
 #endif
+#if (!defined AI_BUILD_NO_SORTBYPTYPE_PROCESS)
+#	include "SortByPTypeProcess.h"
+#endif
 
 
 
@@ -254,8 +257,11 @@ Importer::Importer() :
 	mPostProcessingSteps.reserve(25);
 
 #if (!defined AI_BUILD_NO_VALIDATEDS_PROCESS)
-	mPostProcessingSteps.push_back( new ValidateDSProcess()); // must be first
+	mPostProcessingSteps.push_back( new ValidateDSProcess()); 
 #endif
+
+	mPostProcessingSteps.push_back( new DeterminePTypeHelperProcess());
+
 #if (!defined AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
 	mPostProcessingSteps.push_back( new RemoveRedundantMatsProcess());
 #endif
@@ -264,6 +270,9 @@ Importer::Importer() :
 #endif
 #if (!defined AI_BUILD_NO_TRIANGULATE_PROCESS)
 	mPostProcessingSteps.push_back( new TriangulateProcess());
+#endif
+#if (!defined AI_BUILD_NO_SORTBYPTYPE_PROCESS)
+	mPostProcessingSteps.push_back( new SortByPTypeProcess());
 #endif
 #if (!defined AI_BUILD_NO_PRETRANSFORMVERTICES_PROCESS)
 	mPostProcessingSteps.push_back( new PretransformVertices());
@@ -507,6 +516,13 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 #ifdef _DEBUG
 		if (bExtraVerbose)
 		{
+#if (!defined AI_BUILD_NO_VALIDATEDS_PROCESS)
+
+			DefaultLogger::get()->error("Extra verbose mode not available, library"
+				" wasn't build with the ValidateDS-Step");
+#endif
+
+
 			pFlags |= aiProcess_ValidateDataStructure;
 
 			// use the MSB to tell the ValidateDS-Step that e're in extra verbose mode
@@ -526,6 +542,11 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 			}
 			if( !mScene)break; 
 #ifdef _DEBUG
+
+#ifndef AI_BUILD_NO_VALIDATEDS_PROCESS
+			continue;
+#endif
+
 			// if the extra verbose mode is active execute the
 			// VaidateDataStructureStep again after each step
 			if (bExtraVerbose && a)

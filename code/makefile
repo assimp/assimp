@@ -58,6 +58,7 @@ SOURCES = 3DSConverter.cpp \
 	MDRLoader.cpp \
 	RawLoader.cpp \
 	OFFLoader.cpp \
+	SortByPTypeProcess.cpp \
 	XFileParser.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)

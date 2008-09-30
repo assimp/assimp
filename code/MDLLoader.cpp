@@ -437,7 +437,8 @@ void MDLImporter::InternReadFile_Quake1( )
 
 	// allocate enough storage to hold all vertices and triangles
 	aiMesh* pcMesh = new aiMesh();
-
+	
+	pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 	pcMesh->mNumVertices = pcHeader->num_tris * 3;
 	pcMesh->mNumFaces = pcHeader->num_tris;
 	pcMesh->mVertices = new aiVector3D[pcMesh->mNumVertices];
@@ -632,6 +633,7 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 
 	// allocate enough storage to hold all vertices and triangles
 	aiMesh* pcMesh = new aiMesh();
+	pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
 	pcMesh->mNumVertices = pcHeader->num_tris * 3;
 	pcMesh->mNumFaces = pcHeader->num_tris;
@@ -835,7 +837,7 @@ void MDLImporter::CalculateUVCoordinates_MDL5()
 
 			piPtr += 3;
 			iHeight = (unsigned int)*piPtr++;
-			iWidth = (unsigned int)*piPtr;
+			iWidth  = (unsigned int)*piPtr;
 			if (!iHeight || !iWidth)
 			{
 				DefaultLogger::get()->warn("Either the width or the height of the "
@@ -874,21 +876,21 @@ void MDLImporter::ValidateHeader_3DGS_MDL7(const MDL::Header_MDL7* pcHeader)
 
 	if (sizeof(MDL::ColorValue_MDL7) != pcHeader->colorvalue_stc_size)
 	{
-		// LOG
 		throw new ImportErrorException( 
-			"[3DGS MDL7] sizeof(MDL::ColorValue_MDL7) != pcHeader->colorvalue_stc_size");
+			"[3DGS MDL7] sizeof(MDL::ColorValue_MDL7) != pcHeader->colorvalue_stc_size"
+			);
 	}
 	if (sizeof(MDL::TexCoord_MDL7) != pcHeader->skinpoint_stc_size)
 	{
-		// LOG
 		throw new ImportErrorException( 
-			"[3DGS MDL7] sizeof(MDL::TexCoord_MDL7) != pcHeader->skinpoint_stc_size");
+			"[3DGS MDL7] sizeof(MDL::TexCoord_MDL7) != pcHeader->skinpoint_stc_size"
+			);
 	}
 	if (sizeof(MDL::Skin_MDL7) != pcHeader->skin_stc_size)
 	{
-		// LOG
 		throw new ImportErrorException( 
-			"sizeof(MDL::Skin_MDL7) != pcHeader->skin_stc_size");
+			"sizeof(MDL::Skin_MDL7) != pcHeader->skin_stc_size"
+			);
 	}
 
 	// if there are no groups ... how should we load such a file?
@@ -1837,6 +1839,8 @@ void MDLImporter::GenerateOutputMeshes_3DGS_MDL7(
 		{
 			// allocate the output mesh
 			aiMesh* pcMesh = new aiMesh();
+
+			pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 			pcMesh->mMaterialIndex = (unsigned int)i;
 
 			// allocate output storage

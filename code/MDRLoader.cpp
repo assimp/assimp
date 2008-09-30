@@ -124,16 +124,7 @@ void MDRImporter::ValidateHeader()
 		DefaultLogger::get()->warn("MDR: At least one bone must be there");
 
 	// validate all LODs
-	uint32_t cur = pcHeader->ofsLODs; 
-	for (uint32_t i = 0; i < pcHeader->numLODs;++i)
-	{
-		if (cur + sizeof(MDR::LOD) > fileSize)
-			throw new ImportErrorException("MDR: header is invalid - LOD out of range");
-
-		BE_NCONST MDR::LOD* pcSurf = (BE_NCONST MDR::LOD*)((int8_t*)pcHeader + cur);
-		ValidateLODHeader(pcSurf);
-		cur = pcSurf->ofsEnd;
-	}
+	if (pcHeader->ofsLODs > fileSize) 
 
 	// validate all frames
 	if (pcHeader->ofsFrames + sizeof(MDR::Frame) * (pcHeader->numBones-1) *
@@ -159,17 +150,6 @@ void MDRImporter::ValidateLODHeader(BE_NCONST MDR::LOD* pcLOD)
 
 	if (!pcLOD->numSurfaces)
 		throw new ImportErrorException("MDR: LOD has zero surfaces assigned");
-
-	uint32_t cur = pcLOD->ofsSurfaces; 
-	for (unsigned int i = 0; i < pcLOD->numSurfaces;++i)
-	{
-		if (cur + sizeof(MDR::Surface) > iMax)
-			throw new ImportErrorException("MDR: LOD header is invalid");
-
-		BE_NCONST MDR::Surface* pcSurf = (BE_NCONST MDR::Surface*)((int8_t*)pcLOD + cur);
-		ValidateSurfaceHeader(pcSurf);
-		cur = pcSurf->ofsEnd;
-	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -214,7 +194,6 @@ void MDRImporter::SetupProperties(const Importer* pImp)
 void MDRImporter::InternReadFile( const std::string& pFile, 
 	aiScene* pScene, IOSystem* pIOHandler)
 {
-#if 0
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
 
 	// Check whether we can read from the file
@@ -263,15 +242,6 @@ void MDRImporter::InternReadFile( const std::string& pFile,
 				aiBone* bone = mesh->mBones[p] = new aiBone();
 				bone->mName.length = ::sprintf(  bone->mName.data, "B_%i",p);
 			}
-
-			struct VertexInfo
-			{
-				aiVector3D xyz;
-				aiVector3D normal;
-				aiVector3D uv;
-				unsigned int start,num;
-			};
-			typedef std::pair<uint32_t,float> BoneWeightInfo;
 
 			std::vector<BoneWeightInfo> mWeights;
 			mWeights.reserve(surf->numVerts << 1);
@@ -341,5 +311,4 @@ void MDRImporter::InternReadFile( const std::string& pFile,
 	pScene->mNumMeshes = (unsigned int) outMeshes.size();
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 	::memcpy(pScene->mMeshes,&outMeshes[0],sizeof(void*)*pScene->mNumMeshes);
-#endif
 }

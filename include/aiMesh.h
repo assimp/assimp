@@ -250,6 +250,40 @@ struct aiBone
 
 #define AI_MESH_SMOOTHING_ANGLE_NOT_SET (10e10f)
 
+
+// ---------------------------------------------------------------------------
+/** Enumerates the types of geometric primitives supported by Assimp.
+*/
+// ---------------------------------------------------------------------------
+enum aiPrimitiveType
+{
+	/** A point primitive. 
+	 * This is just a single vertex in the virtual world, 
+	 * #aiFace contains just one index for such a primitive,
+	 */
+	aiPrimitiveType_POINT       = 0x1,
+
+	/** A line primitive. 
+	 * This is a line defined through a start and an end position.
+	 * #aiFace contains exactly two indices for such a primitive,
+	 */
+	aiPrimitiveType_LINE        = 0x2,
+
+	/** A triangular primitive. 
+	 * A triangle consists of three indices.
+	 */
+	aiPrimitiveType_TRIANGLE    = 0x4,
+
+	/** A higher-level polygon with more than 3 edges.
+	 * A triangle is a polygon, but polygon in this context means
+	 * "all polygons that are not triangles". The "Triangulate"-Step
+	 * is provided for your convinience, it splits all polygons in
+	 * triangles (which are much easier to handle).
+	 */
+	aiPrimitiveType_POLYGON     = 0x8
+};
+
+
 // ---------------------------------------------------------------------------
 /** A mesh represents a geometry or model with a single material. 
 *
@@ -269,6 +303,13 @@ struct aiBone
 // ---------------------------------------------------------------------------
 struct aiMesh
 {
+	/** Bitwise combination of the members of the #aiPrimitiveType enum.
+	 * This specifies which types of primitives are present in the mesh.
+	 * The "SortByPrimitiveType"-Step can be used to make sure the 
+	 * output meshes consist of one primitive type each.
+	 */
+	unsigned int mPrimitiveTypes;
+
 	/** The number of vertices in this mesh. 
 	* This is also the size of all of the per-vertex data arrays
 	*/
@@ -361,9 +402,11 @@ struct aiMesh
 	//! Default constructor. Initializes all members to 0
 	aiMesh()
 	{
-		mNumVertices = 0; mNumFaces = 0;
-		mVertices = NULL; mFaces = NULL;
-		mNormals = NULL; mTangents = NULL;
+		mNumVertices    = 0; 
+		mNumFaces       = 0;
+		mPrimitiveTypes = 0;
+		mVertices = NULL; mFaces    = NULL;
+		mNormals  = NULL; mTangents = NULL;
 		mBitangents = NULL;
 		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
 		{

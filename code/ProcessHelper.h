@@ -41,12 +41,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_PROCESS_HELPER_H_INCLUDED
 #define AI_PROCESS_HELPER_H_INCLUDED
 
-#include "SpatialSort.h"
 #include "../include/aiPostProcess.h"
+
+#include "SpatialSort.h"
+#include "BaseProcess.h"
 
 namespace Assimp {
 
+typedef std::pair< unsigned int,float > PerVertexWeight;
+typedef std::vector< PerVertexWeight > VertexWeightTable;
+
 // ------------------------------------------------------------------------------------------------
+// compute a good epsilon value for position comparisons
 inline float ComputePositionEpsilon(const aiMesh* pMesh)
 {
 	const float epsilon = 1e-5f;
@@ -64,6 +70,28 @@ inline float ComputePositionEpsilon(const aiMesh* pMesh)
 	}
 	return (maxVec - minVec).Length() * epsilon;
 }
+
+// ------------------------------------------------------------------------------------------------
+// Compute a per-vertex bone weight table
+// NOTE: delete result with operator delete[] ...
+inline VertexWeightTable* ComputeVertexBoneWeightTable(aiMesh* pMesh)
+{
+	if (!pMesh || !pMesh->mNumVertices || !pMesh->mNumBones) return NULL;
+
+	VertexWeightTable* avPerVertexWeights = new VertexWeightTable[pMesh->mNumVertices];
+	for (unsigned int i = 0; i < pMesh->mNumBones;++i)
+	{
+		aiBone* bone = pMesh->mBones[i];
+		for (unsigned int a = 0; a < bone->mNumWeights;++a)
+		{
+			aiVertexWeight& weight = bone->mWeights[a];
+			avPerVertexWeights[weight.mVertexId].push_back( 
+				std::pair<unsigned int,float>(a,weight.mWeight));
+		}
+	}
+	return avPerVertexWeights;
+}
+
 
 // ------------------------------------------------------------------------------------------------
 class ComputeSpatialSortProcess : public BaseProcess

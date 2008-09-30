@@ -787,13 +787,6 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 					const unsigned int iNum = (unsigned int)(*i)->alProperties[iProperty].avList.size();
 					sFace.mIndices.resize(iNum);
 
-					if (3 > iNum)
-					{
-						// We must filter out all degenerates.
-						DefaultLogger::get()->warn("PLY: Found degenerated triangle");
-						continue;
-					}
-
 					std::list<PLY::PropertyInstance::ValueUnion>::const_iterator p = 
 						(*i)->alProperties[iProperty].avList.begin();
 

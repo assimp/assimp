@@ -307,6 +307,7 @@ void SMDImporter::CreateOutputMeshes()
 		aiMesh*& pcMesh = this->pScene->mMeshes[i] = new aiMesh();
 		ai_assert(!aaiFaces[i].empty()); // should not be empty ...
 
+		pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 		pcMesh->mNumVertices = (unsigned int)aaiFaces[i].size()*3;
 		pcMesh->mNumFaces = (unsigned int)aaiFaces[i].size();
 		pcMesh->mMaterialIndex = i;
@@ -341,7 +342,7 @@ void SMDImporter::CreateOutputMeshes()
 			pcMesh->mFaces[iFace].mIndices = new unsigned int[3];
 			pcMesh->mFaces[iFace].mNumIndices = 3;
 
-			// fill the vertices (hardcode the loop for performance)
+			// fill the vertices 
 			unsigned int iSrcFace = aaiFaces[i][iFace];
 			SMD::Face& face = this->asTriangles[iSrcFace];
 

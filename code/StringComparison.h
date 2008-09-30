@@ -51,7 +51,7 @@ namespace Assimp
  *
  *  This is required since stricmp() is not consistently available on
  *  all platforms. Some platforms use the '_' prefix, others don't even
- *  have such a function. Yes, this is called an ISO standard.
+ *  have such a function. 
  *
  *  \param s1 First input string
  *  \param s2 Second input string
@@ -94,7 +94,7 @@ inline int ASSIMP_stricmp(const std::string& a, const std::string& b)
  *
  *  This is required since strincmp() is not consistently available on
  *  all platforms. Some platforms use the '_' prefix, others don't even
- *  have such a function. Yes, this is called an ISO standard.
+ *  have such a function. 
  *
  *  \param s1 First input string
  *  \param s2 Second input string

@@ -366,6 +366,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\port\jAssimp\jni_bridge\JNIEnvironment.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\port\jAssimp\jni_bridge\JNIIOStream.cpp"
 				>
 			</File>
@@ -375,6 +379,10 @@
 			</File>
 			<File
 				RelativePath="..\..\port\jAssimp\jni_bridge\JNILogger.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\port\jAssimp\jni_bridge\JNILogger.h"
 				>
 			</File>
 			<File
@@ -401,20 +409,6 @@
 				RelativePath="..\..\port\jAssimp\jni_bridge\JNITexture.cpp"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="headers"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-			>
-			<File
-				RelativePath="..\..\port\jAssimp\jni_bridge\JNIEnvironment.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\port\jAssimp\jni_bridge\JNILogger.h"
-				>
-			</File>
 			<Filter
 				Name="javah"
 				>
@@ -423,12 +417,6 @@
 					>
 				</File>
 			</Filter>
-		</Filter>
-		<Filter
-			Name="resources"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
 		</Filter>
 	</Files>
 	<Globals>

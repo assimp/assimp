@@ -290,9 +290,9 @@ inline aiMatrix4x4& aiMatrix4x4::RotationZ(float a, aiMatrix4x4& out)
 inline aiMatrix4x4& aiMatrix4x4::Translation(aiVector3D v, aiMatrix4x4& out)
 {
 	out = aiMatrix4x4();
-	out.d1 = v.x;
-	out.d2 = v.y;
-	out.d3 = v.z;
+	out.a4 = v.x;
+	out.b4 = v.y;
+	out.c4 = v.z;
 	return out;
 }
 

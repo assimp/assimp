@@ -94,31 +94,41 @@ void TriangulateProcess::Execute( aiScene* pScene)
 bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 {
 	// check whether we will need to do something ...
-	bool bNeed = false;
-	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
+	// FIX: now we have aiMesh::mPrimitiveTypes, so this is only here for test cases
+	if (!pMesh->mPrimitiveTypes)
 	{
-		const aiFace& face = pMesh->mFaces[a];
-		if( face.mNumIndices != 3)
+		bool bNeed = false;
+		for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
 		{
-			bNeed = true;
+			const aiFace& face = pMesh->mFaces[a];
+			if( face.mNumIndices != 3)
+			{
+				bNeed = true;
+			}
 		}
+		if (!bNeed)return false;
 	}
-	if (!bNeed)return false;
+	else if (!(pMesh->mPrimitiveTypes & aiPrimitiveType_POLYGON))
+		return false;
+
+	// the output mesh will contain triangles, but no polys anymore
+	pMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+	pMesh->mPrimitiveTypes &= ~aiPrimitiveType_POLYGON;
 
 	std::vector<aiFace> newFaces;
 	newFaces.reserve( pMesh->mNumFaces*2);
 	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
 	{
-		const aiFace& face = pMesh->mFaces[a];
+		aiFace& face = pMesh->mFaces[a];
 
 		// if it's a simple primitive, just copy it
-		if( face.mNumIndices == 3)
+		if( face.mNumIndices <= 3)
 		{
 			newFaces.push_back( aiFace());
 			aiFace& nface = newFaces.back();
 			nface.mNumIndices = face.mNumIndices;
-			nface.mIndices = new unsigned int[nface.mNumIndices];
-			memcpy( nface.mIndices, face.mIndices, nface.mNumIndices * sizeof( unsigned int));
+			nface.mIndices = face.mIndices;
+			face.mIndices = NULL;
 		} 
 		else
 		{
@@ -138,11 +148,17 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
 	// kill the old faces
 	delete [] pMesh->mFaces;
+
 	// and insert our newly generated faces
 	pMesh->mNumFaces = (unsigned int)newFaces.size();
 	pMesh->mFaces = new aiFace[pMesh->mNumFaces];
 	for( unsigned int a = 0; a < newFaces.size(); a++)
-		pMesh->mFaces[a] = newFaces[a];
+	{
+		// operator= would copy the whole array which is definitely not necessary
+		pMesh->mFaces[a].mNumIndices = newFaces[a].mNumIndices;
+		pMesh->mFaces[a].mIndices    = newFaces[a].mIndices;
+		newFaces[a].mIndices = NULL;
+	}
 
 	return true;
 }

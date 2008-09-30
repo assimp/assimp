@@ -164,9 +164,17 @@ protected:
 	 * expected to be correct. Override this function to implement the 
 	 * actual importing.
 	 * <br>
-	 * The output scene must meet the following conditions:<br>
-	 * - at least one mesh must be there<br>
+	 * The output scene must meet the following requirements:<br>
 	 * - at least a root node must be there<br>
+	 * - aiMesh::mPrimitiveTypes may be 0. The types of primitives
+	 *   in the mesh are determined automatically in this case.<br>
+	 * - the vertex data is stored in a pseudo-indexed "verbose" format.
+	 *   In fact this means that every vertex that is referenced by
+	 *   a face is unique. Or the other way round: a vertex index may
+	 *   not occur twice in a single aiMesh.
+	 *
+	 * If the "AnimationSkeletonOnly"-Flag is not set:<br>
+	 * - at least one mesh must be there<br>
 	 * - at least one material must be there<br>
 	 * - there may be no meshes with 0 vertices or faces<br>
 	 * This won't be checked (except by the validation step), Assimp will

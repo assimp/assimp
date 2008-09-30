@@ -430,43 +430,73 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 			sSort.Add(mesh->mVertices[tt],tt,*it);
 		}
 	}
-	// sort everything - this takes O(logn) time
+	// sort everything - this takes O(nlogn) time
 	sSort.Prepare();
 	std::vector<unsigned int> poResult;
 	poResult.reserve(20);
 
-	const float fLimit = cos(surface.mMaximumSmoothAngle);
-	std::vector<bool> vertexDone(mesh->mNumVertices,false);
-
 	// generate vertex normals. We have O(logn) for the binary lookup, which we need
 	// for n elements, thus the EXPECTED complexity is O(nlogn)
-	for( begin =  mesh->mFaces, it = smoothingGroups.begin(); begin != end; ++begin, ++it)
+	if (surface.mMaximumSmoothAngle < 3.f)
 	{
-		register unsigned int sg = *it;
+		const float fLimit = cos(surface.mMaximumSmoothAngle);
 
-		aiFace& face = *begin;
-		unsigned int* beginIdx = face.mIndices, *const endIdx = face.mIndices+face.mNumIndices;
-		for (; beginIdx != endIdx; ++beginIdx)
+		for( begin =  mesh->mFaces, it = smoothingGroups.begin(); begin != end; ++begin, ++it)
 		{
-			register unsigned int idx = *beginIdx;
+			register unsigned int sg = *it;
 
-			if (vertexDone[idx])continue;
-			sSort.FindPositions(mesh->mVertices[idx],sg,posEpsilon,poResult,true);
-
-			std::vector<unsigned int>::const_iterator a, end = poResult.end();
-
-			aiVector3D vNormals;
-			for (a =  poResult.begin();a != end;++a)
+			aiFace& face = *begin;
+			unsigned int* beginIdx = face.mIndices, *const endIdx = face.mIndices+face.mNumIndices;
+			for (; beginIdx != endIdx; ++beginIdx)
 			{
-				const aiVector3D& v = faceNormals[*a];
-				if (v * faceNormals[idx] < fLimit)continue;
-				vNormals += v;
+				register unsigned int idx = *beginIdx;
+				sSort.FindPositions(mesh->mVertices[idx],sg,posEpsilon,poResult,true);
+
+				std::vector<unsigned int>::const_iterator a, end = poResult.end();
+
+				aiVector3D vNormals;
+				for (a =  poResult.begin();a != end;++a)
+				{
+					const aiVector3D& v = faceNormals[*a];
+					if (v * faceNormals[idx] < fLimit)continue;
+					vNormals += v;
+				}
+				vNormals.Normalize();
+				mesh->mNormals[idx] = vNormals;
 			}
-			vNormals.Normalize();
-			for (a =  poResult.begin();a != end;++a)
+		}
+	}
+	else // faster code path in case there is no smooth angle
+	{
+		std::vector<bool> vertexDone(mesh->mNumVertices,false);
+
+		for( begin =  mesh->mFaces, it = smoothingGroups.begin(); begin != end; ++begin, ++it)
+		{
+			register unsigned int sg = *it;
+
+			aiFace& face = *begin;
+			unsigned int* beginIdx = face.mIndices, *const endIdx = face.mIndices+face.mNumIndices;
+			for (; beginIdx != endIdx; ++beginIdx)
 			{
-				mesh->mNormals[*a] = vNormals;
-				vertexDone[*a] = true;
+				register unsigned int idx = *beginIdx;
+
+				if (vertexDone[idx])continue;
+				sSort.FindPositions(mesh->mVertices[idx],sg,posEpsilon,poResult,true);
+
+				std::vector<unsigned int>::const_iterator a, end = poResult.end();
+
+				aiVector3D vNormals;
+				for (a =  poResult.begin();a != end;++a)
+				{
+					const aiVector3D& v = faceNormals[*a];
+					vNormals += v;
+				}
+				vNormals.Normalize();
+				for (a =  poResult.begin();a != end;++a)
+				{
+					mesh->mNormals[*a] = vNormals;
+					vertexDone[*a] = true;
+				}
 			}
 		}
 	}

@@ -443,6 +443,9 @@ void OptimizeGraphProcess::JoinMeshes(std::vector<aiMesh*>& meshList,
 		out->mNumVertices	+= (*it)->mNumVertices;
 		out->mNumFaces		+= (*it)->mNumFaces;
 		out->mNumBones		+= AI_OG_UNMASK((*it)->mNumBones);
+
+		// combine primitive type flags
+		out->mPrimitiveTypes |= (*it)->mPrimitiveTypes;
 	}
 
 	if (out->mNumVertices) // just for safety

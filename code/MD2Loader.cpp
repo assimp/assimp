@@ -232,11 +232,14 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 	pScene->mMaterials[0] = new MaterialHelper();
 	pScene->mNumMeshes = 1;
 	pScene->mMeshes = new aiMesh*[1];
+
 	aiMesh* pcMesh = pScene->mMeshes[0] = new aiMesh();
+	pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
 	// navigate to the begin of the frame data
 	const MD2::Frame* pcFrame = (const MD2::Frame*) ((uint8_t*)
 		this->m_pcHeader + this->m_pcHeader->offsetFrames);
+
 	pcFrame += this->configFrameID;
 
 	// navigate to the begin of the triangle data
@@ -352,16 +355,14 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 		if (!this->m_pcHeader->skinWidth)
 		{
 			DefaultLogger::get()->error("Skin width is zero but there are "
-				"valid absolute texture coordinates. Unable to compute "
-				"relative texture coordinates ranging from 0 to 1");
+				"valid absolute texture coordinates");
 			fDivisorU = 1.0f;
 		}
 		else fDivisorU = (float)this->m_pcHeader->skinWidth;
 		if (!this->m_pcHeader->skinHeight)
 		{
 			DefaultLogger::get()->error("Skin height is zero but there are "
-				"valid absolute texture coordinates. Unable to compute "
-				"relative texture coordinates ranging from 0 to 1");
+				"valid absolute texture coordinates ");
 			fDivisorV = 1.0f;
 		}
 		else fDivisorV = (float)this->m_pcHeader->skinHeight;

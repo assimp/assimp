@@ -638,6 +638,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\aiSceneEntities.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\aiTexture.h"
 				>
 			</File>
@@ -1293,14 +1297,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\KillNormalsProcess.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\KillNormalsProcess.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\code\LimitBoneWeightsProcess.cpp"
 					>
 				</File>
@@ -1330,6 +1326,14 @@
 				</File>
 				<File
 					RelativePath="..\..\code\RemoveRedundantMaterials.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\RemoveVCProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\RemoveVCProcess.h"
 					>
 				</File>
 				<File

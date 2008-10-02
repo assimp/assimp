@@ -48,18 +48,18 @@ namespace Assimp
 	{
 
 // ---------------------------------------------------------------------------
-/** KillNormalsProcess: Class to kill all normals loaded
+/** RemoveVCProcess: Class to kill all normals loaded
 */
-class ASSIMP_API KillNormalsProcess : public BaseProcess
+class ASSIMP_API RemoveVCProcess : public BaseProcess
 {
 	friend class Importer;
 
 protected:
 	/** Constructor to be privately used by Importer */
-	KillNormalsProcess();
+	RemoveVCProcess();
 
 	/** Destructor, private as well */
-	~KillNormalsProcess();
+	~RemoveVCProcess();
 
 public:
 	// -------------------------------------------------------------------
@@ -78,8 +78,19 @@ public:
 	void Execute( aiScene* pScene);
 
 
+	// -------------------------------------------------------------------
+	/** Called prior to ExecuteOnScene().
+	* The function is a request to the process to update its configuration
+	* basing on the Importer's configuration property list.
+	*/
+	virtual void SetupProperties(const Importer* pImp);
+
+
 private:
-	bool KillMeshNormals (aiMesh* pcMesh);
+
+	bool ProcessMesh (aiMesh* pcMesh);
+
+	unsigned int configDeleteFlags;
 };
 
 } // end of namespace Assimp

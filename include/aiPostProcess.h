@@ -80,11 +80,21 @@ enum aiPostProcessSteps
 	 */
 	aiProcess_Triangulate = 8,
 
-	/** Omits all normals found in the file. This can be used together
-	 * with either the aiProcess_GenNormals or the aiProcess_GenSmoothNormals
-	 * flag to force the recomputation of the normals.
+	/** Removes some parts of the mesh data structure (vertex components).
+	 *
+	 *  The vertex components to be removed are specified in a separate
+	 *  configuration option, AI_CONFIG_PP_RVC_FLAGS. This is quite useful
+	 *  if you don't need all vertex components. Especially vertex colors 
+	 *  are rarely used today ... . Calling this step to exclude unrequired
+	 *  vertex components from the pipeline as early as possible results
+	 *  in an increased performance and a more optimized output data structure.
+	 *  Note that vertex positions can't be removed. This step is also useful
+	 *  if you want to force Assimp to recompute normals or tangents. The
+	 *  corresponding steps don't recompute them if they're already there (
+     *  loaded from the source asset). By using this step you can make sure
+	 *  they are NOT there.
 	 */
-	aiProcess_KillNormals = 0x10,
+	aiProcess_RemVertexComponentXYZ = 0x10,
 
 	/** Generates normals for all faces of all meshes. The normals are shared
 	* between the three vertices of a face. This is ignored

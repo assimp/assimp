@@ -21,7 +21,7 @@ SOURCES = 3DSConverter.cpp \
 	Importer.cpp \
 	ImproveCacheLocality.cpp \
 	JoinVerticesProcess.cpp \
-	KillNormalsProcess.cpp \
+	RemoveVCProcess.cpp \
 	LimitBoneWeightsProcess.cpp \
 	LWOBLoader.cpp \
 	LWOLoader.cpp \

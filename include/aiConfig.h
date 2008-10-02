@@ -182,4 +182,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #define AI_CONFIG_IMPORT_MDL_COLORMAP		"imp.mdl.color_map"
 
+
+
+
+// ---------------------------------------------------------------------------
+enum aiVertexComponent
+{
+	//! Normal vectors
+	aiVertexComponent_NORMALS = 0x2u,
+
+	//! Tangents and bitangents go always together ...
+	aiVertexComponent_TANGENTS_AND_BITANGENTS = 0x4u,
+
+	//! ALL color sets
+	//! Use aiVertexComponent_COLORn(N) to specifiy the N'th set 
+	aiVertexComponent_COLORS = 0x8,
+
+	//! ALL texture UV sets
+	//! aiVertexComponent_TEXCOORDn(N) to specifiy the N'th set 
+	aiVertexComponent_TEXCOORDS = 0x10,
+};
+
+#define aiVertexComponent_COLORSn(n) (1u << (n+10u))
+#define aiVertexComponent_TEXCOORDSn(n) (1u << (n+20u))
+
+
+// ---------------------------------------------------------------------------
+/** \brief Input parameter to the #aiProcess_RemVertexComponentXYZ step:
+ *  Specifies the vertex components to be removed.
+ *
+ * See the documentation to this step for further details. The property
+ * is expected to be an integer, a bitwise combination of the
+ * #aiVertexComponent flags defined above in this header. The default
+ * value is 0. 
+ */
+#define AI_CONFIG_PP_RVC_FLAGS				"pp.rvc.flags"
+
 #endif // !! AI_CONFIG_H_INC

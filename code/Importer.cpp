@@ -140,7 +140,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include "GenVertexNormalsProcess.h"
 #endif
 #if (!defined AI_BUILD_NO_KILLNORMALS_PROCESS)
-#	include "KillNormalsProcess.h"
+#	include "RemoveVCProcess.h"
 #endif
 #if (!defined AI_BUILD_NO_SPLITLARGEMESHES_PROCESS)
 #	include "SplitLargeMeshes.h"
@@ -283,8 +283,8 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_SPLITLARGEMESHES_PROCESS)
 	mPostProcessingSteps.push_back( new SplitLargeMeshesProcess_Triangle());
 #endif
-#if (!defined AI_BUILD_NO_KILLNORMALS_PROCESS)
-	mPostProcessingSteps.push_back( new KillNormalsProcess());
+#if (!defined AI_BUILD_NO_REMOVEVC_PROCESS)
+	mPostProcessingSteps.push_back( new RemoveVCProcess());
 #endif
 #if (!defined AI_BUILD_NO_GENFACENORMALS_PROCESS)
 	mPostProcessingSteps.push_back( new GenFaceNormalsProcess());

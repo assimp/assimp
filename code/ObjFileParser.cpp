@@ -44,10 +44,11 @@ ObjFileParser::ObjFileParser(std::vector<char> &Data,
 // -------------------------------------------------------------------
 ObjFileParser::~ObjFileParser()
 {
-	// empty
-	if(m_pModel->m_pDefaultMaterial) delete m_pModel->m_pDefaultMaterial;
-	if(m_pModel) delete m_pModel;
-	
+	delete m_pModel->m_pDefaultMaterial;
+	m_pModel->m_pDefaultMaterial = NULL;
+
+	delete m_pModel;
+	m_pModel = NULL;
 }
 
 // -------------------------------------------------------------------
@@ -395,7 +396,7 @@ void ObjFileParser::getMaterialLib()
 		return;
 	
 	char *pStart = &(*m_DataIt);
-	while (!isSpace(*m_DataIt))
+	while (!isNewLine(*m_DataIt))
 		m_DataIt++;
 	
 	// Check for existence

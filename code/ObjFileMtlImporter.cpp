@@ -59,7 +59,7 @@ ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer,
 	m_pModel( pModel ),
 	m_uiLine( 0 )
 {
-	ai_assert ( NULL != m_pModel );
+	ai_assert( NULL != m_pModel );
 	if ( NULL == m_pModel->m_pDefaultMaterial )
 	{
 		m_pModel->m_pDefaultMaterial = new ObjFile::Material();
@@ -152,7 +152,6 @@ void ObjFileMtlImporter::load()
 
 		case 'm':	// Texture
 			{
-
 				getTexture();
 				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 			}

@@ -57,6 +57,15 @@ inline bool isSpace(char token)
 		token == '\t');
 }
 
+/**	@brief	Returns true, fi token id a new line marking token.
+ *	@param	token	Token to search in
+ *	@return	true, if token is a newline token.
+ */
+inline bool isNewLine( char token )
+{
+	return ( token == '\n' || token == '\f' || token == '\r' );
+}
+
 /**	@brief	Returns next word separated by a space
  *	@param	pBuffer	Pointer to data buffer
  *	@param	pEnd	Pointer to end of buffer

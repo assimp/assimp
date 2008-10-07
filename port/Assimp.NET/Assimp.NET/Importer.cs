@@ -45,7 +45,83 @@ using System.Text;
 
 namespace Assimp.NET
 {
-    class Importer
+    public class Importer
     {
+        public Importer()
+        {
+            throw new System.NotImplementedException();
+        }
+        
+        public Importer(int version)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public static int PROPERTY_WAS_NOT_EXISTING;
+
+        public bool addPostProcessStep(PostProcessStep ppStep)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public long getContext()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public IOStream getIOSystem()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int getPropertyInt(String property)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int getPropertyInt(String property, int error_return)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool isDefaultIOSystem()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool isPostProcessStepActive(PostProcessStep ppStep)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Scene readFile(String path)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool removePostProcessStep(PostProcessStep ppStep)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int setPropertyInt(String property, int val)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (Importer)obj == this;
+        }
+
+        public override string ToString()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

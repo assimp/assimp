@@ -45,7 +45,155 @@ using System.Text;
 
 namespace Assimp.NET
 {
-    class DefaultLogger
+    public class DefaultLogger : Logger
     {
+        private DefaultLogger()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public static int LOGSEVERITY_NORMAL;
+        public static int LOGSEVERITY_VERBOSE;
+
+        public static void NativeCallWriteDebug()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public static void NativeCallWriteError()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public static void NativeCallWriteInfo()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public static void NativeCallWriteWarn()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public static void create()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public static void create(String file, bool bErrorOut)
+        {
+            throw new System.NotImplementedException();
+        }
+
+
+        public static Logger logger
+        {
+            get
+            {
+                throw new System.NotImplementedException();
+            }
+            set
+            {
+                throw new System.NotImplementedException();
+            }
+        }
+
+        public static bool isNullLogger()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public static void kill()
+        {
+            throw new System.NotImplementedException();
+        }
+
+
+        public class FileStreamWrapper
+        {
+            public FileStreamWrapper(/*FileStream*/)
+            {
+                throw new System.NotImplementedException();
+            }
+            /*
+            public FileWriter getStream
+            {
+                throw new System.NotImplementedException();            {
+            }
+            */
+
+            public void write(String message)
+            {
+                throw new System.NotImplementedException();
+            }
+        }
+
+        public class StreamWrapper
+        {
+            public StreamWrapper(/*OutputStream*/)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            /*
+            public OutputStream getStream()
+            {
+                throw new System.NotImplementedException();
+            }
+            */
+
+            public void write(String message)
+            {
+                throw new System.NotImplementedException();
+            }
+        }
+
+        private Logger _logger;
+
+
+        public override void attachStream(LogStream stream, int severity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void detachStream(LogStream stream, int severity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void debug(string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void error(string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void info(string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void warn(string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (DefaultLogger)obj == this;
+        }
+
+        public override string ToString()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

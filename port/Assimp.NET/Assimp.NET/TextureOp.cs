@@ -45,7 +45,33 @@ using System.Text;
 
 namespace Assimp.NET
 {
-    class TextureOp
+    public class TextureOp
     {
+        private TextureOp()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public static int Add = 0x0;
+        public static int Multiply = 0x1;
+        public static int Subtract = 0x2;
+        public static int Divide = 0x3;
+        public static int SmoothAdd = 0x4;
+        public static int SignedAdd = 0x5;
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (TextureOp)obj == this;
+        }
+
+        public override string ToString()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

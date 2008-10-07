@@ -45,7 +45,25 @@ using System.Text;
 
 namespace Assimp.NET
 {
-    class TextureMapMode
+    public class TextureMapMode
     {
+        public static readonly int Wrap = 0x0;
+        public static readonly int Clamp = 0x1;
+        public static readonly int Mirror = 0x2;
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (TextureMapMode) obj == this;
+        }
+
+        public override string ToString()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -45,7 +45,83 @@ using System.Text;
 
 namespace Assimp.NET
 {
-    class Scene
+    public class Scene
     {
+        public static readonly int FLAG_ANIM_SKELETON_ONLY	= 0x1;
+
+        protected Scene(Importer importer)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Animation[] Animations
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public int Flags
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public Material[] Materials
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public Mesh getMesh(int i)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Mesh[] Meshes
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public int NumAnimations
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public int NumMeshes
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public int NumTextures
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public Node RootNode
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public Texture getTexture(int i)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Texture[] Textures
+        {
+            get { throw new System.NotImplementedException(); }
+        }        
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (Scene)obj == this;
+        }
+
+        public override string ToString()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

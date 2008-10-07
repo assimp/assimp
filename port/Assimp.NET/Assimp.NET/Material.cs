@@ -45,7 +45,103 @@ using System.Text;
 
 namespace Assimp.NET
 {
-    class Material
+    public class Material
     {
+        public class Property
+        {
+            public String key;
+            public Object value;
+        }
+
+        public class PropertyNotFoundException : Exception
+        {
+            public PropertyNotFoundException(String message, String key)
+            {
+                throw new System.NotImplementedException();
+            }
+            
+            public String property_key;
+        }
+
+        public static String MATKEY_COLOR_AMBIENT;
+        public static String MATKEY_COLOR_DIFFUSE;
+        public static String MATKEY_COLOR_EMISSIVE;
+        public static String MATKEY_COLOR_SPECULAR;
+        public static String MATKEY_NAME;
+
+        public Property[] properties
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public Material()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Object getProperty(String key)
+        {
+            throw new System.NotImplementedException();
+        }
+        public float getPropertyAsFloat(String key)
+        {
+            throw new System.NotImplementedException();
+        }
+        public float[] getPropertyAsFloatArray(String key)
+        {
+            throw new System.NotImplementedException();
+        }
+        public int getPropertyAsInt(String key)
+        {
+            throw new System.NotImplementedException();
+        }
+        public String getPropertyAsString(String key)
+        {
+            throw new System.NotImplementedException();
+        }
+        public static String MATKEY_TEXOP_AMBIENT(int N)
+        {
+            throw new System.NotImplementedException();
+        }
+        public static String MATKEY_TEXOP_DIFFUSE(int N)
+        {
+            throw new System.NotImplementedException();
+        }
+        public static String MATKEY_TEXOP_HEIGTH(int N)
+        {
+            throw new System.NotImplementedException();
+        }
+        public static String MATKEY_TEXOP_NORMALS(int N)
+        {
+            throw new System.NotImplementedException();
+        }
+        public static String MATKEY_TEXOP_OPACITY(int N)
+        {
+            throw new System.NotImplementedException();
+        }
+        public static String MATKEY_TEXOP_SHININESS(int N)
+        {
+            throw new System.NotImplementedException();
+        }
+        public static String MATKEY_TEXOP_SPECULAR(int N)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (Material)obj == this;
+        }
+
+        public override string ToString()
+        {
+            throw new System.NotImplementedException();
+        }
+
     }
 }

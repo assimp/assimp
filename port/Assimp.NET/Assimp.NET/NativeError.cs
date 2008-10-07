@@ -45,7 +45,31 @@ using System.Text;
 
 namespace Assimp.NET
 {
-    class NativeError
+    public class NativeError : Exception
     {
+        public NativeError()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public NativeError(String error)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (NativeError)obj == this;
+        }
+
+        public override string ToString()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Assimp.NET</RootNamespace>
     <AssemblyName>Assimp.NET</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -32,26 +32,34 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Animation.cs" />
     <Compile Include="Bone.cs" />
+    <Compile Include="BoneAnim.cs" />
     <Compile Include="CompressedTexture.cs" />
+    <Compile Include="ConfigProperty.cs" />
     <Compile Include="DefaultLogger.cs" />
     <Compile Include="Importer.cs" />
     <Compile Include="IOStream.cs" />
     <Compile Include="IOSystem.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="LogStream.cs" />
-    <Compile Include="Mappable.cs" />
     <Compile Include="Material.cs" />
+    <Compile Include="Matrix3x3.cs" />
+    <Compile Include="Matrix4x4.cs" />
     <Compile Include="Mesh.cs" />
     <Compile Include="NativeError.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="PostProcessStep.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Quaternion.cs" />
     <Compile Include="Scene.cs" />
     <Compile Include="ShadingMode.cs" />
     <Compile Include="Texture.cs" />

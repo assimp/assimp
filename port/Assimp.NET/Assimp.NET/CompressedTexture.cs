@@ -42,10 +42,75 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Drawing;
 
 namespace Assimp.NET
 {
-    class CompressedTexture
+    public class CompressedTexture : Texture
     {
+        public CompressedTexture()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override Bitmap ConvertToImage()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Color[] getColorArray()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public byte[] getData()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public String getFormat()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int getHeight()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int getLength()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override Color getPixel(int x, int y)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int getWidth()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override bool hasAlphaChannel
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (CompressedTexture)obj == this;
+        }
+
+        public override string ToString()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

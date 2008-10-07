@@ -348,7 +348,6 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				ExcludedFromBuild="false"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -366,7 +365,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\code;..\..\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
@@ -445,7 +444,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\code;..\..\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
@@ -525,7 +524,7 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
@@ -606,7 +605,7 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
@@ -678,7 +677,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\test\unit\utGenNormals.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\test\unit\utImporter.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utImporter.h"
 				>
 			</File>
 			<File
@@ -690,57 +697,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\test\unit\utLimitBoneWeights.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\test\unit\utMaterialSystem.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\test\unit\utOptimizeGraph.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\test\unit\utPretransformVertices.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\test\unit\utRemoveComments.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\test\unit\utRemoveRedundantMaterials.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\test\unit\utSplitLargeMeshes.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\test\unit\utTextureTransform.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\test\unit\utVertexTriangleAdjacency.cpp"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="headers"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-			>
-			<File
-				RelativePath="..\..\test\unit\utGenNormals.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\test\unit\utImporter.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\test\unit\utJoinVertices.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utLimitBoneWeights.cpp"
 				>
 			</File>
 			<File
@@ -748,7 +709,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\test\unit\utMaterialSystem.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\test\unit\utMaterialSystem.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utOptimizeGraph.cpp"
 				>
 			</File>
 			<File
@@ -756,7 +725,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\test\unit\utPretransformVertices.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\test\unit\utPretransformVertices.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utRemoveComments.cpp"
 				>
 			</File>
 			<File
@@ -764,7 +741,31 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\test\unit\utRemoveRedundantMaterials.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\test\unit\utRemoveRedundantMaterials.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utSharedPPData.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utSharedPPData.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utSortByPType.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utSortByPType.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utSplitLargeMeshes.cpp"
 				>
 			</File>
 			<File
@@ -772,15 +773,25 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\test\unit\utTextureTransform.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utTriangulate.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utTriangulate.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utVertexTriangleAdjacency.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\test\unit\utVertexTriangleAdjacency.h"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="resources"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
 		</Filter>
 	</Files>
 	<Globals>

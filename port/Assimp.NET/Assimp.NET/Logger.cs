@@ -45,7 +45,33 @@ using System.Text;
 
 namespace Assimp.NET
 {
-    class Logger
+    public abstract class Logger
     {
+        public static int ERRORSEVERITY_DEBUGGING;
+        public static int ERRORSEVERITY_ERROR;
+        public static int ERRORSEVERITY_INFO;
+        public static int ERRORSEVERITY_WARNING;
+
+        public abstract void attachStream(LogStream stream, int severity);
+        public abstract void detachStream(LogStream stream, int severity);
+        public abstract void debug(String message);
+        public abstract void error(String message);
+        public abstract void info(String message);
+        public abstract void warn(String message);
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (Logger)obj == this;
+        }
+
+        public override string ToString()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

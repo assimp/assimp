@@ -45,7 +45,43 @@ using System.Text;
 
 namespace Assimp.NET
 {
-    class PostProcessStep
+    public class PostProcessStep
     {
+        private PostProcessStep(String name)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public static readonly PostProcessStep CalcTangetSpace = new PostProcessStep("CalcTangentSpace");
+        public static readonly PostProcessStep ConvertToLeftHanded = new PostProcessStep("ConvertToLeftHanded");
+        public static readonly PostProcessStep FixInfacingNormals = new PostProcessStep("FixInfacingNormals");
+        public static readonly PostProcessStep GenFaceNormals = new PostProcessStep("GenFaceNormals");
+        public static readonly PostProcessStep GenSmoothNormals = new PostProcessStep("GenSmoothNormals");
+        public static readonly PostProcessStep ImproveVertexLocality = new PostProcessStep("ImproveVertexLocality");
+        public static readonly PostProcessStep JoinIdenticalVertices = new PostProcessStep("JoinIdenticalVertices");
+        public static readonly PostProcessStep KillNormals = new PostProcessStep("KillNormals");
+        public static readonly PostProcessStep LimitBoneWeights = new PostProcessStep("LimitBoneWeights");
+        public static readonly PostProcessStep PreTransformVertices = new PostProcessStep("PreTransformVertices");
+        public static readonly PostProcessStep SplitLargeMeshes = new PostProcessStep("SplitLargeMeshes");
+        public static readonly PostProcessStep VladiateDataStructure = new PostProcessStep("VladiateDataStructure");
+
+        public static readonly int DEFAULT_VERTEX_SPLIT_LIMIT = 1000000;
+        public static readonly int DEFAULT_TRIANGLE_SPLIT_LIMIT = 1000000;
+        public static readonly int DEFAULT_BONE_WEIGHT_LIMIT = 4;
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (PostProcessStep)obj == this;
+        }
+
+        public override string ToString()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

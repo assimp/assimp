@@ -45,7 +45,57 @@ using System.Text;
 
 namespace Assimp.NET
 {
-    class Bone
+    public class Bone
     {
+        public Bone()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public String getName()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int getNumWeights()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Bone.Weight getWeight(int weight)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Bone.Weight[] getWeightsArray()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public class Weight
+        {
+            Weight()
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public int index;
+            public float weight;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (Bone)obj == this;
+        }
+
+        public override string ToString()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

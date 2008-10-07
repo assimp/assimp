@@ -45,7 +45,37 @@ using System.Text;
 
 namespace Assimp.NET
 {
-    class ShadingMode
+    public class ShadingMode
     {
+        private ShadingMode Mode()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public static readonly int Flat = 0x1;
+        public static readonly int Gouraud = 0x2;
+        public static readonly int Phong = 0x3;
+        public static readonly int Blinn = 0x4;
+        public static readonly int Toon = 0x5;
+        public static readonly int OrenNayar = 0x6;
+        public static readonly int Minnaert = 0x7;
+        public static readonly int CookTorrance = 0x8;
+        public static readonly int NoShading = 0x9;
+
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (ShadingMode)obj == this;
+        }
+
+        public override string ToString()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

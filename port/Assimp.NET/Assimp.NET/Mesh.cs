@@ -45,7 +45,200 @@ using System.Text;
 
 namespace Assimp.NET
 {
-    class Mesh
+    public class Mesh
     {
+        public static int MAX_NUMBER_OF_COLOR_SETS;
+        public static int MAX_NUMBER_OF_TEXTURECOORDS;
+
+        public Mesh()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void getBitangent(int Index, float[] Out)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void getBitangent(int Index, float[] Out, int OutBase)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public float[] getBitangetArray()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Bone getBone(int i)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Bone[] getBonesArray()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void getFace(int Index, int[] Out)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void getFace(int Index, int[] Out, int OutBase)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int[] getFaceArray()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int getMaterialIndex()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void getNormal(int Index, float[] Out)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void getNormal(int Index, float[] Out, int OutBase)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public float[] getNormalArray()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int getNumBones()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int getNumFaces()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int getNumVertices()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void getPosition(int Index, float[] Out)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void getPosition(int Index, float[] Out, int OutBase)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public float[] getPositionArray()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void getTangent(int Index, float[] Out)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void getTangent(int Index, float[] Out, int OutBase)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public float[] getTangentArray()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void getTexCoord(int channel, int Index, float[] Out)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void getTexCoord(int channel, int Index, float[] Out, int OutBase)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public float[] getTexCoordArray(int channel)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public System.Drawing.Color getVertexColor(int channel, int Index)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void getVertexColor(int channel, int Index, float[] Out)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void getVertexColor(int channel, int Index, float[] Out, int OutBase)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public float[] getVertexColorArray(int channel)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool hasBones
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public bool hasNormals
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public bool hasPositions
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public bool hasTangentsAndBitangets
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public bool hasUVCoords
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public bool hasVertexColors
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (Mesh)obj == this;
+        }
+
+        public override string ToString()
+        {
+            throw new System.NotImplementedException();
+        }
+
     }
 }

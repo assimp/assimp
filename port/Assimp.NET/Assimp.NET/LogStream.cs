@@ -45,7 +45,8 @@ using System.Text;
 
 namespace Assimp.NET
 {
-    class LogStream
+    public interface LogStream
     {
+        void write(String message);
     }
 }

@@ -45,7 +45,9 @@ using System.Text;
 
 namespace Assimp.NET
 {
-    class IOSystem
+    public interface IOSystem
     {
+        bool Exists(String file);
+        bool Open(String file);
     }
 }

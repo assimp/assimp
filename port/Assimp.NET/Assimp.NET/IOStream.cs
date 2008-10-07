@@ -45,7 +45,7 @@ using System.Text;
 
 namespace Assimp.NET
 {
-    class IOStream
+    public interface IOStream
     {
     }
 }

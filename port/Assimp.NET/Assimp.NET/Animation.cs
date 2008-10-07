@@ -48,5 +48,49 @@ namespace Assimp.NET
 {
     public class Animation
     {
+        public Animation()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public BoneAnim getBoneAnimChannel(int i)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public BoneAnim[] gebBoneAnimChannels()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public double getDuration()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int getNumBoneAnimChannels()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public double getTicksPerSecond()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (Animation)obj == this;
+        }
+
+        public override string ToString()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

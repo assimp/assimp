@@ -45,7 +45,71 @@ using System.Text;
 
 namespace Assimp.NET
 {
-    class Node
+    public class Node
     {
+        public Node(Node parent)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Node findNode(String name)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Node[] getCildren()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int[] getMeshes()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public String getName()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int getNumChildren()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int getNumMeshes()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Node getParent()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Matrix4x4 getTransformColumnMajor()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Matrix4x4 getTransformRowMajor()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (Node)obj == this;
+        }
+
+        public override string ToString()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

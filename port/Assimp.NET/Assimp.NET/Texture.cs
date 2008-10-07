@@ -42,10 +42,62 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Drawing;
 
 namespace Assimp.NET
 {
-    class Texture
+    public class Texture
     {
+        protected int _width;
+        protected int _heigth;
+        protected int _needAlpha;
+
+        protected Object _data;
+
+        public int Height
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public int Width
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public virtual bool hasAlphaChannel
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public Color[] ColorArray
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public virtual Color getPixel(int x, int y)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public virtual Bitmap ConvertToImage()
+        {
+            throw new System.NotImplementedException();
+        }
+
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (Texture)obj == this;
+        }
+
+        public override string ToString()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

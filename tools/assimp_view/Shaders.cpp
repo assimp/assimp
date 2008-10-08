@@ -43,8 +43,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "assimp_view.h"
 
 
-namespace AssimpView {
+namespace AssimpView 
+{
 
+// ------------------------------------------------------------------------------------------------
 std::string g_szNormalsShader = std::string(
 
 	// World * View * Projection matrix\n"
@@ -52,31 +54,29 @@ std::string g_szNormalsShader = std::string(
 	"float4x4 WorldViewProjection	: WORLDVIEWPROJECTION;\n"
 	"float4 OUTPUT_COLOR;\n"
 	
-
-	// ----------------------------------------------------------------------------\n"
-	// Vertex shader input structure\n"
-	// ----------------------------------------------------------------------------\n"
+	// Vertex shader input structure
 	"struct VS_INPUT\n"
-		"{\n"
+	"{\n"
 		"// Position\n"
 		"float3 Position : POSITION;\n"
-		"};\n"
+	"};\n"
 
-
-	// ----------------------------------------------------------------------------\n"
-	// Vertex shader output structure\n"
-	// ----------------------------------------------------------------------------\n"
+	// Vertex shader output structure for pixel shader usage
 	"struct VS_OUTPUT\n"
-		"{\n"
-		"// Position\n"
+  "{\n"
 		"float4 Position : POSITION;\n"
-		"};\n"
+	"};\n"
 
-	// ----------------------------------------------------------------------------\n"
-	// Vertex shader\n"
-	// ----------------------------------------------------------------------------\n"
+	// Vertex shader output structure for FixedFunction usage
+	"struct VS_OUTPUT_FF\n"
+	"{\n"
+		"float4 Position : POSITION;\n"
+    "float4 Color : COLOR;\n"
+	"};\n"
+
+	// Vertex shader for rendering normals using pixel shader
 	"VS_OUTPUT RenderNormalsVS(VS_INPUT IN)\n"
-		"{\n"
+	"{\n"
 		"// Initialize the output structure with zero\n"
 		"VS_OUTPUT Out = (VS_OUTPUT)0;\n"
 
@@ -84,249 +84,236 @@ std::string g_szNormalsShader = std::string(
 		"Out.Position = mul(float4(IN.Position,1.0f),WorldViewProjection);\n"
 
 		"return Out;\n"
-		"}\n"
+	"}\n"
 
+	// Vertex shader for rendering normals using fixed function pipeline
+	"VS_OUTPUT RenderNormalsVS_FF(VS_INPUT IN)\n"
+  "{\n"
+		"VS_OUTPUT_FF Out;\n"
+		"Out.Position = mul(float4(IN.Position,1.0f),WorldViewProjection);\n"
+    "Out.Color = OUTPUT_COLOR;\n"
+		"return Out;\n"
+	"}\n"
 
-	// ----------------------------------------------------------------------------\n"
-	// Pixel shader\n"
-	// ----------------------------------------------------------------------------\n"
+	// Pixel shader
 	"float4 RenderNormalsPS() : COLOR\n"
-		"{\n"
+	"{\n"
 		"return OUTPUT_COLOR;\n"
-		"}\n"
+	"}\n"
 
-
-	// ----------------------------------------------------------------------------\n"
-	// Technique for the normal rendering effect (ps_2_0)\n"
-	// ----------------------------------------------------------------------------\n"
+	// Technique for the normal rendering effect (ps_2_0)
 	"technique RenderNormals\n"
-		"{\n"
+	"{\n"
 		"pass p0\n"
 		"{\n"
 		"CullMode=none;\n"
 		"PixelShader = compile ps_2_0 RenderNormalsPS();\n"
 		"VertexShader = compile vs_2_0 RenderNormalsVS();\n"
 		"}\n"
-		"};\n"
+	"};\n"
+
+	// Technique for the normal rendering effect (fixed function)
+	"technique RenderNormals_FF\n"
+	"{\n"
+		"pass p0\n"
+		"{\n"
+		  "CullMode=none;\n"
+		  "VertexShader = compile vs_2_0 RenderNormalsVS_FF();\n"
+      "ColorOp[0] = SelectArg0;\n"
+      "ColorArg0[0] = Diffuse;\n"
+      "AlphaOp[0] = SelectArg0;\n"
+      "AlphaArg0[0] = Diffuse;\n"
+		"}\n"
+	"};\n"
 	);
 
+// ------------------------------------------------------------------------------------------------
 std::string g_szSkyboxShader = std::string(
 
-	// ----------------------------------------------------------------------------\n"
-	// Sampler and texture for the skybox\n"
-	// ----------------------------------------------------------------------------\n"
+	// Sampler and texture for the skybox
 	"textureCUBE lw_tex_envmap;\n"
 	"samplerCUBE EnvironmentMapSampler = sampler_state\n"
 	"{\n"
-	"Texture = (lw_tex_envmap);\n"
-	"AddressU = CLAMP;\n"
-	"AddressV = CLAMP;\n"
-	"AddressW = CLAMP;\n"
+	  "Texture = (lw_tex_envmap);\n"
+	  "AddressU = CLAMP;\n"
+	  "AddressV = CLAMP;\n"
+	  "AddressW = CLAMP;\n"
 
-	"MAGFILTER = linear;\n"
-	"MINFILTER = linear;\n"
+	  "MAGFILTER = linear;\n"
+	  "MINFILTER = linear;\n"
 	"};\n"
 
 	// World * View * Projection matrix\n"
 	// NOTE: Assume that the material uses a WorldViewProjection matrix\n"
 	"float4x4 WorldViewProjection	: WORLDVIEWPROJECTION;\n"
 	
-
-	// ----------------------------------------------------------------------------\n"
-	// Vertex shader input structure\n"
-	// ----------------------------------------------------------------------------\n"
+	// Vertex shader input structure
 	"struct VS_INPUT\n"
-		"{\n"
-		// Position\n"
+	"{\n"
 		"float3 Position : POSITION;\n"
-
-		// 3D-Texture coordinate\n"
 		"float3 Texture0 : TEXCOORD0;\n"
-		"};\n"
+	"};\n"
 
-
-	// ----------------------------------------------------------------------------\n"
-	// Vertex shader output structure\n"
-	// ----------------------------------------------------------------------------\n"
+	// Vertex shader output structure
 	"struct VS_OUTPUT\n"
-		"{\n"
-		// Position\n"
+	"{\n"
 		"float4 Position : POSITION;\n"
-
-		// 3D-Texture coordinate\n"
 		"float3 Texture0 : TEXCOORD0;\n"
-		"};\n"
+	"};\n"
 
-	// ----------------------------------------------------------------------------\n"
-	// Vertex shader\n"
-	// ----------------------------------------------------------------------------\n"
+	// Vertex shader
 	"VS_OUTPUT RenderSkyBoxVS(VS_INPUT IN)\n"
-		"{\n"
-		// Initialize the output structure with zero\n"
-		"VS_OUTPUT Out = (VS_OUTPUT)0;\n"
+	"{\n"
+		"VS_OUTPUT Out;\n"
 
-		// Multiply with the WorldViewProjection matrix\n"
+		// Multiply with the WorldViewProjection matrix
 		"Out.Position = mul(float4(IN.Position,1.0f),WorldViewProjection);\n"
 
-		// Set z to w to ensure z becomes 1.0 after the division through\n"
-		// w occurs\n"
+		// Set z to w to ensure z becomes 1.0 after the division through w occurs
 		"Out.Position.z = Out.Position.w;\n"
 	
-		// Simply pass through texture coordinates\n"
+		// Simply pass through texture coordinates
 		"Out.Texture0 = IN.Texture0;\n"
 
 		"return Out;\n"
-		"}\n"
+	"}\n"
 
-
-	// ----------------------------------------------------------------------------\n"
-	// Pixel shader\n"
-	// ----------------------------------------------------------------------------\n"
+	// Pixel shader
 	"float4 RenderSkyBoxPS(float3 Texture0 : TEXCOORD0) : COLOR\n"
-		"{\n"
-		// Lookup the skybox texture\n"
+	"{\n"
+		// Lookup the skybox texture
 		"return texCUBE(EnvironmentMapSampler,Texture0) ;\n"
-		"}\n"
+	"}\n"
 
-
-	// ----------------------------------------------------------------------------\n"
-	// Technique for the skybox shader (ps_2_0)\n"
-	// ----------------------------------------------------------------------------\n"
+	// Technique for the skybox shader (ps_2_0)
 	"technique RenderSkyBox\n"
-		"{\n"
+	"{\n"
 		"pass p0\n"
 		"{\n"
-		"ZWriteEnable = FALSE;\n"
-		"FogEnable = FALSE;\n"
-		"CullMode = NONE;\n"
+		  "ZWriteEnable = FALSE;\n"
+		  "FogEnable = FALSE;\n"
+		  "CullMode = NONE;\n"
 
-		"PixelShader = compile ps_2_0 RenderSkyBoxPS();\n"
-		"VertexShader = compile vs_2_0 RenderSkyBoxVS();\n"
+		  "PixelShader = compile ps_2_0 RenderSkyBoxPS();\n"
+		  "VertexShader = compile vs_2_0 RenderSkyBoxVS();\n"
 		"}\n"
-		"};\n"
+	"};\n"
 
+  // -------------- same for static background image -----------------
 	"texture TEXTURE_2D;\n"
-		"sampler TEXTURE_SAMPLER = sampler_state\n"
-			"{\n"
-			"Texture = (TEXTURE_2D);\n"
-			"};\n"
+	"sampler TEXTURE_SAMPLER = sampler_state\n"
+	"{\n"
+		"Texture = (TEXTURE_2D);\n"
+	"};\n"
 
-
-	// ----------------------------------------------------------------------------\n"
 	"struct VS_OUTPUT2\n"
-		"{\n"
-		"// Position\n"
-		"float4 _Position : POSITION;\n"
+	"{\n"
+		"float4 Position : POSITION;\n"
+		"float2 TexCoord0 : TEXCOORD0;\n"
+	"};\n"
 
-		"// Texture coordinate\n"
-		"float2 _TexCoord0 : TEXCOORD0;\n"
-		"};\n"
+	"VS_OUTPUT2 RenderImageVS(float4 INPosition : POSITION, float2 INTexCoord0 : TEXCOORD0 )\n"
+	"{\n"
+		"VS_OUTPUT2 Out;\n"
 
-
-	// ----------------------------------------------------------------------------\n"
-	"VS_OUTPUT2 RenderImageVS(float4 INPosition : POSITION,\n"
-		"float2 INTexCoord0 : TEXCOORD0 )\n"
-		"{\n"
-		// Initialize the output structure with zero\n"
-		"VS_OUTPUT2 Out = (VS_OUTPUT2)0;\n"
-
-		"Out._Position.xy = INPosition.xy;\n"
-		"Out._Position.z = Out._Position.w = 1.0f;\n"
-
-		"Out._TexCoord0 = INTexCoord0;\n"
+		"Out.Position.xy = INPosition.xy;\n"
+		"Out.Position.z = Out._Position.w = 1.0f;\n"
+		"Out.TexCoord0 = INTexCoord0;\n"
 
 		"return Out;\n"
-		"}\n"
+	"}\n"
 
-	// ----------------------------------------------------------------------------\n"
 	"float4 RenderImagePS(float2 IN : TEXCOORD0) : COLOR\n"
-		"{\n"
+	"{\n"
 		"return tex2D(TEXTURE_SAMPLER,IN);\n"
-		"}\n"
+	"}\n"
 
-
-	// ----------------------------------------------------------------------------\n"
-	// Technique for the background image shader (ps_2_0)\n"
-	// ----------------------------------------------------------------------------\n"
+	// Technique for the background image shader (ps_2_0)
 	"technique RenderImage2D\n"
-		"{\n"
+	"{\n"
 		"pass p0\n"
-			"{\n"
+		"{\n"
 			"ZWriteEnable = FALSE;\n"
 			"FogEnable = FALSE;\n"
 			"CullMode = NONE;\n"
 	
 			"PixelShader = compile ps_2_0 RenderImagePS();\n"
 			"VertexShader = compile vs_2_0 RenderImageVS();\n"
-			"}\n"
-		"};\n"
-		);
+		"}\n"
+	"};\n"
+	);
 
 std::string g_szDefaultShader = std::string(
 
-	// World * View * Projection matrix\n"
-	// NOTE: Assume that the material uses a WorldViewProjection matrix\n"
+	// World * View * Projection matrix
+	// NOTE: Assume that the material uses a WorldViewProjection matrix
 	"float4x4 WorldViewProjection	: WORLDVIEWPROJECTION;\n"
 	"float4x4 World					: WORLD;\n"
 	"float4x3 WorldInverseTranspose	: WORLDINVERSETRANSPOSE;\n"
 
-
-	// light colors\n"
+	// light colors
 	"float3 afLightColor[5];\n"
-
-	// light direction \n"
+	// light direction
 	"float3 afLightDir[5];\n"
 
 	// position of the camera in worldspace\n"
 	"float3 vCameraPos : CAMERAPOSITION;\n"
 
-
-	// ----------------------------------------------------------------------------\n"
-	// Vertex shader input structure\n"
-	// ----------------------------------------------------------------------------\n"
+	// Vertex shader input structure
 	"struct VS_INPUT\n"
-		"{\n"
-		"// Position\n"
+	"{\n"
 		"float3 Position : POSITION;\n"
 		"float3 Normal : NORMAL;\n"
-		"};\n"
+	"};\n"
 
-
-	// ----------------------------------------------------------------------------\n"
-	// Vertex shader output structure\n"
-	// ----------------------------------------------------------------------------\n"
+	// Vertex shader output structure for pixel shader usage
 	"struct VS_OUTPUT\n"
-		"{\n"
-		// Position\n"
+	"{\n"
 		"float4 Position : POSITION;\n"
-
 		"float3 ViewDir : TEXCOORD0;\n"
 		"float3 Normal : TEXCOORD1;\n"
-		"};\n"
+	"};\n"
 
-	// ----------------------------------------------------------------------------\n"
-	// Vertex shader\n"
-	// ----------------------------------------------------------------------------\n"
+	// Vertex shader output structure for fixed function
+  "struct VS_OUTPUT_FF\n"
+  "{\n"
+		"float4 Position : POSITION;\n"
+		"float4 Color : COLOR;\n"
+	"};\n"
+
+	// Vertex shader for pixel shader usage
 	"VS_OUTPUT DefaultVShader(VS_INPUT IN)\n"
-		"{\n"
-		// Initialize the output structure with zero\n"
-		"VS_OUTPUT Out = (VS_OUTPUT)0;\n"
+	"{\n"
+		"VS_OUTPUT Out;\n"
 
-		// Multiply with the WorldViewProjection matrix\n"
+		// Multiply with the WorldViewProjection matrix
 		"Out.Position = mul(float4(IN.Position,1.0f),WorldViewProjection);\n"
 		"float3 WorldPos = mul(float4(IN.Position,1.0f),World);\n"
 		"Out.ViewDir = vCameraPos - WorldPos;\n"
 		"Out.Normal = mul(IN.Normal,WorldInverseTranspose);\n"
 
 		"return Out;\n"
-		"}\n"
+	"}\n"
 
+	// Vertex shader for fixed function pipeline
+	"VS_OUTPUT DefaultVShader_FF(VS_INPUT IN)\n"
+	"{\n"
+		"VS_OUTPUT Out;\n"
 
-	// ----------------------------------------------------------------------------\n"
-	// Pixel shader\n"
-	// ----------------------------------------------------------------------------\n"
+		// Multiply with the WorldViewProjection matrix
+		"Out.Position = mul(float4(IN.Position,1.0f),WorldViewProjection);\n"
+    "float3 worldNormal = mul( IN.Normal, float3x3( WorldInverseTranspose)); \n"
+
+    // per-vertex lighting. We simply assume light colors of unused lights to be black
+    "Out.Color = float4( 0.2f, 0.2f, 0.2f, 1.0f); \n"
+    "for( int a = 0; a < 5; a++)\n"
+    "  Out.Color.rgb += saturate( dot( afLightDir[a], worldNormal)) * afLightColor[a].rgb; \n"
+		"return Out;\n"
+	"}\n"
+
+	// Pixel shader for one light
 	"float4 DefaultPShaderSpecular_D1(VS_OUTPUT IN) : COLOR\n"
-		"{\n"
+	"{\n"
 		"float4 OUT = float4(0.0f,0.0f,0.0f,1.0f);\n"
 
 		"float3 Normal = normalize(IN.Normal);\n"
@@ -340,10 +327,11 @@ std::string g_szDefaultShader = std::string(
 				"saturate(fHalfLambert * 4.0f) * pow(dot(Reflect,ViewDir),9));\n"
 		"}\n"
 		"return OUT;\n"
-		"}\n"
-	// ----------------------------------------------------------------------------\n"
-		"float4 DefaultPShaderSpecular_D2(VS_OUTPUT IN) : COLOR\n"
-		"{\n"
+	"}\n"
+
+	// Pixel shader for two lights
+	"float4 DefaultPShaderSpecular_D2(VS_OUTPUT IN) : COLOR\n"
+	"{\n"
 		"float4 OUT = float4(0.0f,0.0f,0.0f,1.0f);\n"
 
 		"float3 Normal = normalize(IN.Normal);\n"
@@ -364,10 +352,10 @@ std::string g_szDefaultShader = std::string(
 			"saturate(fHalfLambert * 4.0f) * pow(dot(Reflect,afLightDir[1]),9));\n"
 		"}\n"
 		"return OUT;\n"
-		"}\n"
-	// ----------------------------------------------------------------------------\n"
+	"}\n"
+	// ----------------------------------------------------------------------------
 	"float4 DefaultPShaderSpecular_PS20_D1(VS_OUTPUT IN) : COLOR\n"
-		"{\n"
+	"{\n"
 		"float4 OUT = float4(0.0f,0.0f,0.0f,1.0f);\n"
 
 		"float3 Normal = normalize(IN.Normal);\n"
@@ -381,10 +369,10 @@ std::string g_szDefaultShader = std::string(
 		"}\n"
 
 		"return OUT;\n"
-		"}\n"
-	// ----------------------------------------------------------------------------\n"
+	"}\n"
+	// ----------------------------------------------------------------------------
 	"float4 DefaultPShaderSpecular_PS20_D2(VS_OUTPUT IN) : COLOR\n"
-		"{\n"
+	"{\n"
 		"float4 OUT = float4(0.0f,0.0f,0.0f,1.0f);\n"
 
 		"float3 Normal = normalize(IN.Normal);\n"
@@ -403,60 +391,69 @@ std::string g_szDefaultShader = std::string(
 			"pow(dot(Reflect,ViewDir),9));\n"
 		"}\n"
 		"return OUT;\n"
-		"}\n"
+	"}\n"
 
 
-	// ----------------------------------------------------------------------------\n"
-	// Technique for the default effect\n"
-	// ----------------------------------------------------------------------------\n"
+	// Technique for the default effect
 	"technique DefaultFXSpecular_D1\n"
-		"{\n"
+	"{\n"
 		"pass p0\n"
-			"{\n"
+		"{\n"
 			"CullMode=none;\n"
 			"PixelShader = compile ps_3_0 DefaultPShaderSpecular_D1();\n"
 			"VertexShader = compile vs_3_0 DefaultVShader();\n"
-			"}\n"
-		"};\n"
+		"}\n"
+	"};\n"
 	"technique DefaultFXSpecular_D2\n"
-		"{\n"
+	"{\n"
 		"pass p0\n"
-			"{\n"
+		"{\n"
 			"CullMode=none;\n"
 			"PixelShader = compile ps_3_0 DefaultPShaderSpecular_D2();\n"
 			"VertexShader = compile vs_3_0 DefaultVShader();\n"
-			"}\n"
-		"};\n"
+		"}\n"
+	"};\n"
 
-
-	// ----------------------------------------------------------------------------\n"
-	// Technique for the default effect (ps_2_0)\n"
-	// ----------------------------------------------------------------------------\n"
+	// Technique for the default effect (ps_2_0)
 	"technique DefaultFXSpecular_PS20_D1\n"
-		"{\n"
+	"{\n"
 		"pass p0\n"
-		"{\n"
-		"CullMode=none;\n"
-		"PixelShader = compile ps_2_0 DefaultPShaderSpecular_PS20_D1();\n"
-		"VertexShader = compile vs_2_0 DefaultVShader();\n"
+  	"{\n"
+		  "CullMode=none;\n"
+		  "PixelShader = compile ps_2_0 DefaultPShaderSpecular_PS20_D1();\n"
+		  "VertexShader = compile vs_2_0 DefaultVShader();\n"
 		"}\n"
-		"};\n"
+	"};\n"
 	"technique DefaultFXSpecular_PS20_D2\n"
-		"{\n"
+	"{\n"
 		"pass p0\n"
 		"{\n"
-		"CullMode=none;\n"
-		"PixelShader = compile ps_2_0 DefaultPShaderSpecular_PS20_D2();\n"
-		"VertexShader = compile vs_2_0 DefaultVShader();\n"
+		  "CullMode=none;\n"
+		  "PixelShader = compile ps_2_0 DefaultPShaderSpecular_PS20_D2();\n"
+		  "VertexShader = compile vs_2_0 DefaultVShader();\n"
 		"}\n"
-		"};\n"
-		);
+	"};\n"
+
+  // Technique for the default effect using the fixed function pixel pipeline
+	"technique DefaultFXSpecular_FF\n"
+  "{\n"
+		"pass p0\n"
+  	"{\n"
+			"CullMode=none;\n"
+			"VertexShader = compile vs_2_0 DefaultVShader_FF();\n"
+      "ColorOp[0] = SelectArg0;\n"
+      "ColorArg0[0] = Diffuse;\n"
+      "AlphaOp[0] = SelectArg0;\n"
+      "AlphaArg0[0] = Diffuse;\n"
+		"}\n"
+	"};\n"
+  );
 
 
 std::string g_szMaterialShader = std::string(
 
-	// World * View * Projection matrix\n"
-	// NOTE: Assume that the material uses a WorldViewProjection matrix\n"
+	// World * View * Projection matrix
+  // NOTE: Assume that the material uses a WorldViewProjection matrix
 	"float4x4 WorldViewProjection	: WORLDVIEWPROJECTION;\n"
 	"float4x4 World					: WORLD;\n"
 	"float4x3 WorldInverseTranspose	: WORLDINVERSETRANSPOSE;\n"
@@ -479,24 +476,24 @@ std::string g_szMaterialShader = std::string(
 	"float TRANSPARENCY;\n"
 	"#endif\n"
 
-	// light colors (diffuse and specular)\n"
+	// light colors (diffuse and specular)
 	"float4 afLightColor[5];\n"
 	"float4 afLightColorAmbient[5];\n"
 
-	// light direction \n"
+	// light direction
 	"float3 afLightDir[5];\n"
 
-	// position of the camera in worldspace\n"
+	// position of the camera in worldspace
 	"float3 vCameraPos : CAMERAPOSITION;\n"
 
 	"#ifdef AV_DIFFUSE_TEXTURE\n"
 		"texture DIFFUSE_TEXTURE;\n"
 		"sampler DIFFUSE_SAMPLER\n"
 		"{\n"
-		"Texture = <DIFFUSE_TEXTURE>;\n"
-		"MinFilter=LINEAR;\n"
-		"MagFilter=LINEAR;\n"
-		"MipFilter=LINEAR;\n"
+		  "Texture = <DIFFUSE_TEXTURE>;\n"
+		  "MinFilter=LINEAR;\n"
+		  "MagFilter=LINEAR;\n"
+		  "MipFilter=LINEAR;\n"
 		"};\n"
 	"#endif // AV_DIFFUSE_TEXTUR\n"
 
@@ -504,10 +501,10 @@ std::string g_szMaterialShader = std::string(
 		"texture SPECULAR_TEXTURE;\n"
 		"sampler SPECULAR_SAMPLER\n"
 		"{\n"
-		"Texture = <SPECULAR_TEXTURE>;\n"
-		"MinFilter=LINEAR;\n"
-		"MagFilter=LINEAR;\n"
-		"MipFilter=LINEAR;\n"
+		  "Texture = <SPECULAR_TEXTURE>;\n"
+		  "MinFilter=LINEAR;\n"
+		  "MagFilter=LINEAR;\n"
+		  "MipFilter=LINEAR;\n"
 		"};\n"
 	"#endif // AV_SPECULAR_TEXTUR\n"
 
@@ -515,10 +512,10 @@ std::string g_szMaterialShader = std::string(
 		"texture AMBIENT_TEXTURE;\n"
 		"sampler AMBIENT_SAMPLER\n"
 		"{\n"
-		"Texture = <AMBIENT_TEXTURE>;\n"
-		"MinFilter=LINEAR;\n"
-		"MagFilter=LINEAR;\n"
-		"MipFilter=LINEAR;\n"
+		  "Texture = <AMBIENT_TEXTURE>;\n"
+		  "MinFilter=LINEAR;\n"
+		  "MagFilter=LINEAR;\n"
+		  "MipFilter=LINEAR;\n"
 		"};\n"
 	"#endif // AV_AMBIENT_TEXTUR\n"
 
@@ -526,10 +523,10 @@ std::string g_szMaterialShader = std::string(
 		"texture OPACITY_TEXTURE;\n"
 		"sampler OPACITY_SAMPLER\n"
 		"{\n"
-		"Texture = <OPACITY_TEXTURE>;\n"
-		"MinFilter=LINEAR;\n"
-		"MagFilter=LINEAR;\n"
-		"MipFilter=LINEAR;\n"
+		  "Texture = <OPACITY_TEXTURE>;\n"
+		  "MinFilter=LINEAR;\n"
+		  "MagFilter=LINEAR;\n"
+		  "MipFilter=LINEAR;\n"
 		"};\n"
 	"#endif // AV_OPACITY_TEXTURE\n"
 
@@ -537,10 +534,10 @@ std::string g_szMaterialShader = std::string(
 		"texture EMISSIVE_TEXTURE;\n"
 		"sampler EMISSIVE_SAMPLER\n"
 		"{\n"
-		"Texture = <EMISSIVE_TEXTURE>;\n"
-		"MinFilter=LINEAR;\n"
-		"MagFilter=LINEAR;\n"
-		"MipFilter=LINEAR;\n"
+		  "Texture = <EMISSIVE_TEXTURE>;\n"
+		  "MinFilter=LINEAR;\n"
+		  "MagFilter=LINEAR;\n"
+		  "MipFilter=LINEAR;\n"
 		"};\n"
 	"#endif // AV_EMISSIVE_TEXTUR\n"
 
@@ -548,10 +545,10 @@ std::string g_szMaterialShader = std::string(
 		"texture NORMAL_TEXTURE;\n"
 		"sampler NORMAL_SAMPLER\n"
 		"{\n"
-		"Texture = <NORMAL_TEXTURE>;\n"
-		"MinFilter=LINEAR;\n"
-		"MagFilter=LINEAR;\n"
-		"MipFilter=LINEAR;\n"
+		  "Texture = <NORMAL_TEXTURE>;\n"
+		  "MinFilter=LINEAR;\n"
+		  "MagFilter=LINEAR;\n"
+		  "MipFilter=LINEAR;\n"
 		"};\n"
 	"#endif // AV_NORMAL_TEXTURE\n"
 
@@ -559,43 +556,30 @@ std::string g_szMaterialShader = std::string(
 		"textureCUBE lw_tex_envmap;\n"
 		"samplerCUBE EnvironmentMapSampler = sampler_state\n"
 		"{\n"
-		"Texture = (lw_tex_envmap);\n"
-		"AddressU = CLAMP;\n"
-		"AddressV = CLAMP;\n"
-		"AddressW = CLAMP;\n"
+		  "Texture = (lw_tex_envmap);\n"
+		  "AddressU = CLAMP;\n"
+		  "AddressV = CLAMP;\n"
+		  "AddressW = CLAMP;\n"
 
-		"MAGFILTER = linear;\n"
-		"MINFILTER = linear;\n"
+		  "MAGFILTER = linear;\n"
+		  "MINFILTER = linear;\n"
 		"};\n"
 	"#endif // AV_SKYBOX_LOOKUP\n"
 
-	// ----------------------------------------------------------------------------\n"
-	// Vertex shader input structure\n"
-	// ----------------------------------------------------------------------------\n"
+	// Vertex shader input structure
 	"struct VS_INPUT\n"
-		"{\n"
-		// Position\n"
+	"{\n"
 		"float3 Position : POSITION;\n"
 		"float3 Normal : NORMAL;\n"
-
-		// NOTE: Tangents and bitangents are passed to the shader
-		// in every case, even if not required. This saves a few lines 
-		// of code ...
-
 		"float3 Tangent   : TEXCOORD0;\n"
 		"float3 Bitangent : TEXCOORD1;\n"
 		"float2 TexCoord0 : TEXCOORD2;\n"
-		"};\n"
+	"};\n"
 
-
-	// ----------------------------------------------------------------------------\n"
-	// Vertex shader output structure\n"
-	// ----------------------------------------------------------------------------\n"
+	// Vertex shader output structure for pixel shader usage
 	"struct VS_OUTPUT\n"
-		"{\n"
-		// Position\n"
+	"{\n"
 		"float4 Position : POSITION;\n"
-
 		"float3 ViewDir : TEXCOORD0;\n"
 
 		"#ifndef AV_NORMAL_TEXTURE\n"
@@ -605,23 +589,28 @@ std::string g_szMaterialShader = std::string(
 		"float2 TexCoord0 : TEXCOORD2;\n"
 
 		"#ifdef AV_NORMAL_TEXTURE\n"
-
 		"float3 Light0 : TEXCOORD3;\n"
 		"float3 Light1 : TEXCOORD4;\n"
-
 		"#endif\n"
-		"};\n"
+	"};\n"
+
+	// Vertex shader output structure for fixed function pixel pipeline
+	"struct VS_OUTPUT_FF\n"
+	"{\n"
+		"float4 Position : POSITION;\n"
+    "float4 DiffuseColor : COLOR0;\n"
+    "float4 SpecularColor : COLOR1;\n"
+		"float2 TexCoord0 : TEXCOORD0;\n"
+	"};\n"
 
 
-	// ----------------------------------------------------------------------------\n"
-	// Selective SuperSampling in screenspace for reflection lookups\n"
-	// ----------------------------------------------------------------------------\n"
+	// Selective SuperSampling in screenspace for reflection lookups
 	"#ifndef AV_SKYBOX_LOOKUP\n"
 	"#define AV_DISABLESSS\n"
 	"#endif\n"
 	"#ifndef AV_DISABLESSS\n"
 	"float3 GetSSSCubeMap(float3 Reflect)\n"
-		"{\n"
+	"{\n"
 		// compute the reflection vector in screen space\n"
 		"float3 ScreenReflect = mul(Reflect,ViewProj);\n"
 
@@ -641,7 +630,7 @@ std::string g_szMaterialShader = std::string(
 		"fColor += texCUBEgrad(EnvironmentMapSampler,mul( ScreenReflect + (0.4f *-1.0 / 3.5) * fDX + (0.4f * 3.0 / 3.5) * fDY, InvViewProj),fDX,fDY).rgb;\n"
 		"fColor /= 7;\n"
 		"return fColor;\n"
-		"}\n"
+	"}\n"
 	"#else\n"
 		"#define GetSSSCubeMap(_refl) (texCUBElod(EnvironmentMapSampler,float4(_refl,0.0f)).rgb) \n"
 	"#endif\n"
@@ -656,13 +645,10 @@ std::string g_szMaterialShader = std::string(
 	"#endif\n"
 
 
-	// ----------------------------------------------------------------------------\n"
-	// Vertex shader\n"
-	// ----------------------------------------------------------------------------\n"
+	// Vertex shader for pixel shader usage and one light
 	"VS_OUTPUT MaterialVShader_D1(VS_INPUT IN)\n"
-		"{\n"
-		// Initialize the output structure with zero\n"
-		"VS_OUTPUT Out = (VS_OUTPUT)0;\n"
+	"{\n"
+		"VS_OUTPUT Out;\n"
 
 		// Multiply with the WorldViewProjection matrix\n"
 		"Out.Position = mul(float4(IN.Position,1.0f),WorldViewProjection);\n"
@@ -681,12 +667,12 @@ std::string g_szMaterialShader = std::string(
 		"Out.ViewDir = normalize(mul(WTTS, (vCameraPos - WorldPos)));\n"
 		"#endif\n"
 		"return Out;\n"
-		"}\n"
-	"// ----------------------------------------------------------------------------\n"
+	"}\n"
+
+	// Vertex shader for pixel shader usage and two lights
 	"VS_OUTPUT MaterialVShader_D2(VS_INPUT IN)\n"
-		"{\n"
-		// Initialize the output structure with zero\n"
-		"VS_OUTPUT Out = (VS_OUTPUT)0;\n"
+	"{\n"
+		"VS_OUTPUT Out;\n"
 
 		// Multiply with the WorldViewProjection matrix\n"
 		"Out.Position = mul(float4(IN.Position,1.0f),WorldViewProjection);\n"
@@ -706,14 +692,45 @@ std::string g_szMaterialShader = std::string(
 		"Out.ViewDir = normalize(mul(WTTS, (vCameraPos - WorldPos)));\n"
 		"#endif\n"
 		"return Out;\n"
-		"}\n"
+	"}\n"
+
+	// Vertex shader for zero to five lights using the fixed function pixel pipeline
+	"VS_OUTPUT MaterialVShader_FF(VS_INPUT IN)\n"
+	"{\n"
+		"VS_OUTPUT_FF Out;\n"
+
+		// Multiply with the WorldViewProjection matrix
+		"Out.Position = mul( float4( IN.Position, 1.0f), WorldViewProjection);\n"
+		"float3 worldPos = mul( float4( IN.Position, 1.0f), World);\n"
+    "float3 worldNormal = mul( IN.Normal, float3x3( WorldInverseTranspose)); \n"
+		"Out.TexCoord0 = IN.TexCoord0;\n"
+
+    // calculate per-vertex diffuse lighting including ambient part
+    "float4 diffuseColor = float4( 0.0f, 0.0f, 0.0f, 1.0f); \n"
+    "for( int a = 0; a < 5; a++) \n"
+    "  diffuseColor.rgb += saturate( dot( afLightDir[a], worldNormal)) * afLightColor[a].rgb; \n"
+    // factor in material properties and a bit of ambient lighting
+    "Out.DiffuseColor = diffuseColor * DIFFUSE_COLOR + float4( 0.2f, 0.2f, 0.2f, 1.0f) * AMBIENT_COLOR; ; \n"
+
+    // and specular including emissive part
+    "float4 specularColor = float4( 0.0f, 0.0f, 0.0f, 1.0f); \n"
+    "float3 viewDir = normalize( worldPos - vCameraPos); \n"
+    "for( int a = 0; a < 5; a++) \n"
+    "{ \n"
+    "  float3 reflDir = reflect( afLightDir[a], worldNormal); \n"
+    "  float specIntensity = pow( dot( -reflDir, viewDir), SPECULAR_STRENGTH) * SPECULARITY; \n"
+    "  specularColor.rgb += afLightColor[a] * specIntensity; \n"
+    "} \n"
+    // factor in material properties and the emissive part
+    "Out.SpecularColor = specularColor * SPECULAR_COLOR + EMISSIVE_COLOR; \n"
+
+		"return Out;\n"
+	"}\n"
 
 
-	// ----------------------------------------------------------------------------\n"
-	// Pixel shader\n"
-	// ----------------------------------------------------------------------------\n"
+	// Pixel shader - one light
 	"float4 MaterialPShaderSpecular_D1(VS_OUTPUT IN) : COLOR\n"
-		"{\n"
+	"{\n"
 		"float4 OUT = float4(0.0f,0.0f,0.0f,1.0f);\n"
 
 		"#ifdef AV_NORMAL_TEXTURE\n"
@@ -780,10 +797,11 @@ std::string g_szMaterialShader = std::string(
 		"return OUT;\n"
 
 		"#undef AV_LIGHT_0\n"
-		"}\n"
-	// ----------------------------------------------------------------------------\n"
+	"}\n"
+
+	// Pixel shader - two lights
 	"float4 MaterialPShaderSpecular_D2(VS_OUTPUT IN) : COLOR\n"
-		"{\n"
+	"{\n"
 		"float4 OUT = float4(0.0f,0.0f,0.0f,1.0f);\n"
 
 		"#ifdef AV_NORMAL_TEXTURE\n"
@@ -892,10 +910,11 @@ std::string g_szMaterialShader = std::string(
 
 		"#undef AV_LIGHT_0\n"
 		"#undef AV_LIGHT_1\n"
-		"}\n"
-	// ----------------------------------------------------------------------------\n"
+	"}\n"
+
+	// Same pixel shader again, one light
 	"float4 MaterialPShaderSpecular_PS20_D1(VS_OUTPUT IN) : COLOR\n"
-		"{\n"
+	"{\n"
 		"float4 OUT = float4(0.0f,0.0f,0.0f,1.0f);\n"
 
 		"#ifdef AV_NORMAL_TEXTURE\n"
@@ -946,10 +965,11 @@ std::string g_szMaterialShader = std::string(
 		"OUT.a *= tex2D(OPACITY_SAMPLER,IN.TexCoord0). AV_OPACITY_TEXTURE_REGISTER_MASK;\n"
 		"#endif\n"
 		"return OUT;\n"
-		"}\n"
-	// ----------------------------------------------------------------------------\n"
+	"}\n"
+
+	// Same pixel shader again, two lights
 	"float4 MaterialPShaderSpecular_PS20_D2(VS_OUTPUT IN) : COLOR\n"
-		"{\n"
+	"{\n"
 		"float4 OUT = float4(0.0f,0.0f,0.0f,1.0f);\n"
 
 		"#ifdef AV_NORMAL_TEXTURE\n"
@@ -1033,16 +1053,14 @@ std::string g_szMaterialShader = std::string(
 		"OUT.a *= tex2D(OPACITY_SAMPLER,IN.TexCoord0). AV_OPACITY_TEXTURE_REGISTER_MASK;\n"
 		"#endif\n"
 		"return OUT;\n"
-		"}\n"
+	"}\n"
 
 
-	// ----------------------------------------------------------------------------\n"
-	// Technique for the material effect\n"
-	// ----------------------------------------------------------------------------\n"
+	// Technique for the material effect
 	"technique MaterialFXSpecular_D1\n"
-		"{\n"
+	"{\n"
 		"pass p0\n"
-			"{\n"
+		"{\n"
 			"CullMode=none;\n"
 
 			"#ifdef AV_OPACITY_TEXTURE\n"
@@ -1059,12 +1077,12 @@ std::string g_szMaterialShader = std::string(
 
 			"PixelShader = compile ps_3_0 MaterialPShaderSpecular_D1();\n"
 			"VertexShader = compile vs_3_0 MaterialVShader_D1();\n"
-			"}\n"
-		"};\n"
+		"}\n"
+	"};\n"
 	"technique MaterialFXSpecular_D2\n"
-		"{\n"
+	"{\n"
 		"pass p0\n"
-			"{\n"
+		"{\n"
 			"CullMode=none;\n"
 
 			"#ifdef AV_OPACITY_TEXTURE\n"
@@ -1081,115 +1099,118 @@ std::string g_szMaterialShader = std::string(
 
 			"PixelShader = compile ps_3_0 MaterialPShaderSpecular_D2();\n"
 			"VertexShader = compile vs_3_0 MaterialVShader_D2();\n"
-			"}\n"
-		"};\n"
+		"}\n"
+	"};\n"
 
-
-	// ----------------------------------------------------------------------------\n"
-	// Technique for the material effect (ps_2_0)\n"
-	// ----------------------------------------------------------------------------\n"
+	// Technique for the material effect (ps_2_0)
 	"technique MaterialFXSpecular_PS20_D1\n"
-		"{\n"
+	"{\n"
 		"pass p0\n"
-		"{\n"
-		"CullMode=none;\n"
+  	"{\n"
+		  "CullMode=none;\n"
 
-		"#ifdef AV_OPACITY_TEXTURE\n"
-		"AlphaBlendEnable=TRUE;"
-		"SrcBlend = srcalpha;\n"
-		"DestBlend = invsrcalpha;\n"
-		"#else\n"
-		"#ifdef AV_OPACITY\n"
-		"AlphaBlendEnable=TRUE;"
-		"SrcBlend = srcalpha;\n"
-		"DestBlend = invsrcalpha;\n"
-		"#endif \n"
-		"#endif\n"
+		  "#ifdef AV_OPACITY_TEXTURE\n"
+		  "AlphaBlendEnable=TRUE;"
+		  "SrcBlend = srcalpha;\n"
+		  "DestBlend = invsrcalpha;\n"
+		  "#else\n"
+		  "#ifdef AV_OPACITY\n"
+		  "AlphaBlendEnable=TRUE;"
+		  "SrcBlend = srcalpha;\n"
+		  "DestBlend = invsrcalpha;\n"
+		  "#endif \n"
+		  "#endif\n"
 
-		"PixelShader = compile ps_2_0 MaterialPShaderSpecular_PS20_D1();\n"
-		"VertexShader = compile vs_2_0 MaterialVShader_D1();\n"
+		  "PixelShader = compile ps_2_0 MaterialPShaderSpecular_PS20_D1();\n"
+		  "VertexShader = compile vs_2_0 MaterialVShader_D1();\n"
 		"}\n"
-		"};\n"
+	"};\n"
+
 	"technique MaterialFXSpecular_PS20_D2\n"
-		"{\n"
+	"{\n"
+		"pass p0\n"
+	  "{\n"
+		  "CullMode=none;\n"
+
+		  "#ifdef AV_OPACITY_TEXTURE\n"
+		  "AlphaBlendEnable=TRUE;"
+		  "SrcBlend = srcalpha;\n"
+		  "DestBlend = invsrcalpha;\n"
+		  "#else\n"
+		  "#ifdef AV_OPACITY\n"
+		  "AlphaBlendEnable=TRUE;"
+		  "SrcBlend = srcalpha;\n"
+		  "DestBlend = invsrcalpha;\n"
+		  "#endif \n"
+		  "#endif\n"
+
+		  "PixelShader = compile ps_2_0 MaterialPShaderSpecular_PS20_D2();\n"
+		  "VertexShader = compile vs_2_0 MaterialVShader_D2();\n"
+		"}\n"
+	"};\n"
+
+	// Technique for the material effect using fixed function pixel pipeline
+	"technique MaterialFX_FF\n"
+	"{\n"
 		"pass p0\n"
 		"{\n"
-		"CullMode=none;\n"
-
-		"#ifdef AV_OPACITY_TEXTURE\n"
-		"AlphaBlendEnable=TRUE;"
-		"SrcBlend = srcalpha;\n"
-		"DestBlend = invsrcalpha;\n"
-		"#else\n"
-		"#ifdef AV_OPACITY\n"
-		"AlphaBlendEnable=TRUE;"
-		"SrcBlend = srcalpha;\n"
-		"DestBlend = invsrcalpha;\n"
-		"#endif \n"
-		"#endif\n"
-
-		"PixelShader = compile ps_2_0 MaterialPShaderSpecular_PS20_D2();\n"
-		"VertexShader = compile vs_2_0 MaterialVShader_D2();\n"
+			"CullMode=none;\n"
+      "SpecularEnable = true; \n"
+			"VertexShader = compile vs_2_0 MaterialVShader_FF();\n"
+      "ColorOp[0] = Modulate;\n"
+      "ColorArg0[0] = Texture;\n"
+      "ColorArg1[0] = Diffuse;\n"
+      "AlphaOp[0] = Modulate;\n"
+      "AlphaArg0[0] = Textur;\n"
+      "AlphaArg1[0] = Diffuse;\n"
 		"}\n"
-		"};\n"
-		);
+	"};\n"
+	);
 
 std::string g_szPassThroughShader = std::string(
 		"texture TEXTURE_2D;\n"
 		"sampler TEXTURE_SAMPLER = sampler_state\n"
-			"{\n"
+		"{\n"
 			"Texture = (TEXTURE_2D);\n"
-			"};\n"
+		"};\n"
 
-
-		// ----------------------------------------------------------------------------\n"
+    // Vertex Shader output for pixel shader usage
 		"struct VS_OUTPUT\n"
-			"{\n"
-			"// Position\n"
-			"float4 _Position : POSITION;\n"
+		"{\n"
+			"float4 Position : POSITION;\n"
+			"float2 TexCoord0 : TEXCOORD0;\n"
+		"};\n"
 
-			"// Texture coordinate\n"
-			"float2 _TexCoord0 : TEXCOORD0;\n"
-			"};\n"
+    // vertex shader for pixel shader usage
+		"VS_OUTPUT DefaultVShader(float4 INPosition : POSITION, float2 INTexCoord0 : TEXCOORD0 )\n"
+		"{\n"
+			"VS_OUTPUT Out;\n"
 
-
-		// ----------------------------------------------------------------------------\n"
-		"VS_OUTPUT DefaultVShader(float4 INPosition : POSITION,\n"
-			"float2 INTexCoord0 : TEXCOORD0 )\n"
-			"{\n"
-			"// Initialize the output structure with zero\n"
-			"VS_OUTPUT Out = (VS_OUTPUT)0;\n"
-
-			"Out._Position = INPosition;\n"
-			"Out._TexCoord0 = INTexCoord0;\n"
+			"Out.Position = INPosition;\n"
+			"Out.TexCoord0 = INTexCoord0;\n"
 
 			"return Out;\n"
-			"}\n"
+		"}\n"
 
 		// simply lookup a texture
-		// ----------------------------------------------------------------------------\n"
 		"float4 PassThrough_PS(float2 IN : TEXCOORD0) : COLOR\n"
 		"{\n"
-		"return tex2D(TEXTURE_SAMPLER,IN);\n"
+ 		"  return tex2D(TEXTURE_SAMPLER,IN);\n"
 		"}\n"
 
 		// visualize the alpha channel (in black) -> use a
-		// ----------------------------------------------------------------------------\n"
 		"float4 PassThroughAlphaA_PS(float2 IN : TEXCOORD0) : COLOR\n"
 		"{\n"
-		"return float4(0.0f,0.0f,0.0f,tex2D(TEXTURE_SAMPLER,IN).a);\n"
+		"  return float4(0.0f,0.0f,0.0f,tex2D(TEXTURE_SAMPLER,IN).a);\n"
 		"}\n"
 
 		// visualize the alpha channel (in black) -> use r
-		// ----------------------------------------------------------------------------\n"
 		"float4 PassThroughAlphaR_PS(float2 IN : TEXCOORD0) : COLOR\n"
 		"{\n"
-		"return float4(0.0f,0.0f,0.0f,tex2D(TEXTURE_SAMPLER,IN).r);\n"
+		"  return float4(0.0f,0.0f,0.0f,tex2D(TEXTURE_SAMPLER,IN).r);\n"
 		"}\n"
 
-		// ----------------------------------------------------------------------------\n"
-		// Simple pass-through technique\n"
-		// ----------------------------------------------------------------------------\n"
+		// Simple pass-through technique
 		"technique PassThrough\n"
 		"{\n"
 			"pass p0\n"
@@ -1205,9 +1226,7 @@ std::string g_szPassThroughShader = std::string(
 			"}\n"
 		"};\n"
 
-		// ----------------------------------------------------------------------------\n"
 		// Pass-through technique which visualizes the texture's alpha channel
-		// ----------------------------------------------------------------------------\n"
 		"technique PassThroughAlphaFromA\n"
 		"{\n"
 			"pass p0\n"
@@ -1223,9 +1242,7 @@ std::string g_szPassThroughShader = std::string(
 			"}\n"
 		"};\n"
 
-		// ----------------------------------------------------------------------------\n"
 		// Pass-through technique which visualizes the texture's red channel
-		// ----------------------------------------------------------------------------\n"
 		"technique PassThroughAlphaFromR\n"
 		"{\n"
 			"pass p0\n"
@@ -1240,7 +1257,25 @@ std::string g_szPassThroughShader = std::string(
 				"VertexShader = compile vs_2_0 DefaultVShader();\n"
 			"}\n"
 		"};\n"
-		);
+
+		// technique for fixed function pixel pipeline
+		"technique PassThrough_FF\n"
+		"{\n"
+			"pass p0\n"
+			"{\n"
+				"ZEnable = FALSE;\n"
+				"CullMode = none;\n"
+				"AlphaBlendEnable = TRUE;\n"
+				"SrcBlend =srcalpha;\n"
+				"DestBlend =invsrcalpha;\n"
+				"VertexShader = compile vs_2_0 DefaultVShader();\n"
+        "ColorOp[0] = SelectArg0;\n"
+        "ColorArg0[0] = Texture;\n"
+        "AlphaOp[0] = SelectArg0;\n"
+        "AlphaArg0[0] = Textur;\n"
+			"}\n"
+		"};\n"
+    );
 
 std::string g_szCheckerBackgroundShader = std::string(
 
@@ -1251,54 +1286,45 @@ std::string g_szCheckerBackgroundShader = std::string(
 		// size of a square in both x and y direction
 		"float SQUARE_SIZE = 10.0f;\n"
 
-		// ----------------------------------------------------------------------------\n"
+    // vertex shader output structure
 		"struct VS_OUTPUT\n"
-			"{\n"
-			"// Position\n"
-			"float4 _Position : POSITION;\n"	
-			"};\n"
+		"{\n"
+			"float4 Position : POSITION;\n"	
+		"};\n"
 
+    // vertex shader 
+		"VS_OUTPUT DefaultVShader(float4 INPosition : POSITION, float2 INTexCoord0 : TEXCOORD0 )\n"
+		"{\n"
+			"VS_OUTPUT Out;\n"
 
-		// ----------------------------------------------------------------------------\n"
-		"VS_OUTPUT DefaultVShader(float4 INPosition : POSITION,\n"
-			"float2 INTexCoord0 : TEXCOORD0 )\n"
-			"{\n"
-			"// Initialize the output structure with zero\n"
-			"VS_OUTPUT Out = (VS_OUTPUT)0;\n"
-
-			"Out._Position = INPosition;\n"
-
+			"Out.Position = INPosition;\n"
 			"return Out;\n"
-			"}\n"
+		"}\n"
 
-
-		// ----------------------------------------------------------------------------\n"
+		// pixel shader
 		"float4 MakePattern_PS(float2 IN : VPOS) : COLOR\n"
 		"{\n"
-		"float2 fDiv = IN / SQUARE_SIZE;\n"
-		"float3 fColor = COLOR_ONE;\n"
-		"if (0 == round(fmod(round(fDiv.x),2)))\n"
-			"{\n"
-			"if (0 == round(fmod(round(fDiv.y),2))) fColor = COLOR_TWO;\n"
-			"}\n"
-		"else if (0 != round(fmod(round(fDiv.y),2)))fColor = COLOR_TWO;\n"
-		"return float4(fColor,1.0f);"
+		  "float2 fDiv = IN / SQUARE_SIZE;\n"
+		  "float3 fColor = COLOR_ONE;\n"
+		  "if (0 == round(fmod(round(fDiv.x),2)))\n"
+		  "{\n"
+		  "  if (0 == round(fmod(round(fDiv.y),2))) fColor = COLOR_TWO;\n"
+		  "}\n"
+		  "else if (0 != round(fmod(round(fDiv.y),2)))fColor = COLOR_TWO;\n"
+		  "return float4(fColor,1.0f);"
 		"}\n"
 	
-
-		// ----------------------------------------------------------------------------\n"
-		// Shader to generate a pattern\n"
-		// ----------------------------------------------------------------------------\n"
+		// technique to generate a pattern
 		"technique MakePattern\n"
 		"{\n"
-		"pass p0\n"
-		"{\n"
-		"FillMode=Solid;\n"
-		"ZEnable = FALSE;\n"
-		"CullMode = none;\n"
-		"PixelShader = compile ps_3_0 MakePattern_PS();\n"
-		"VertexShader = compile vs_3_0 DefaultVShader();\n"
-		"}\n"
+		  "pass p0\n"
+		  "{\n"
+		    "FillMode=Solid;\n"
+		    "ZEnable = FALSE;\n"
+		    "CullMode = none;\n"
+		    "PixelShader = compile ps_3_0 MakePattern_PS();\n"
+		    "VertexShader = compile vs_3_0 DefaultVShader();\n"
+		  "}\n"
 		"};\n"
 		);
 	};

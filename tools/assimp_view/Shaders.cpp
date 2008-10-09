@@ -87,7 +87,7 @@ std::string g_szNormalsShader = std::string(
 	"}\n"
 
 	// Vertex shader for rendering normals using fixed function pipeline
-	"VS_OUTPUT RenderNormalsVS_FF(VS_INPUT IN)\n"
+	"VS_OUTPUT_FF RenderNormalsVS_FF(VS_INPUT IN)\n"
   "{\n"
 		"VS_OUTPUT_FF Out;\n"
 		"Out.Position = mul(float4(IN.Position,1.0f),WorldViewProjection);\n"
@@ -119,9 +119,9 @@ std::string g_szNormalsShader = std::string(
 		"{\n"
 		  "CullMode=none;\n"
 		  "VertexShader = compile vs_2_0 RenderNormalsVS_FF();\n"
-      "ColorOp[0] = SelectArg0;\n"
+      "ColorOp[0] = SelectArg1;\n"
       "ColorArg0[0] = Diffuse;\n"
-      "AlphaOp[0] = SelectArg0;\n"
+      "AlphaOp[0] = SelectArg1;\n"
       "AlphaArg0[0] = Diffuse;\n"
 		"}\n"
 	"};\n"
@@ -296,13 +296,13 @@ std::string g_szDefaultShader = std::string(
 	"}\n"
 
 	// Vertex shader for fixed function pipeline
-	"VS_OUTPUT DefaultVShader_FF(VS_INPUT IN)\n"
+	"VS_OUTPUT_FF DefaultVShader_FF(VS_INPUT IN)\n"
 	"{\n"
-		"VS_OUTPUT Out;\n"
+		"VS_OUTPUT_FF Out;\n"
 
 		// Multiply with the WorldViewProjection matrix
 		"Out.Position = mul(float4(IN.Position,1.0f),WorldViewProjection);\n"
-    "float3 worldNormal = mul( IN.Normal, float3x3( WorldInverseTranspose)); \n"
+    "float3 worldNormal = mul( IN.Normal, (float3x3) WorldInverseTranspose); \n"
 
     // per-vertex lighting. We simply assume light colors of unused lights to be black
     "Out.Color = float4( 0.2f, 0.2f, 0.2f, 1.0f); \n"
@@ -441,9 +441,9 @@ std::string g_szDefaultShader = std::string(
   	"{\n"
 			"CullMode=none;\n"
 			"VertexShader = compile vs_2_0 DefaultVShader_FF();\n"
-      "ColorOp[0] = SelectArg0;\n"
+      "ColorOp[0] = SelectArg1;\n"
       "ColorArg0[0] = Diffuse;\n"
-      "AlphaOp[0] = SelectArg0;\n"
+      "AlphaOp[0] = SelectArg1;\n"
       "AlphaArg0[0] = Diffuse;\n"
 		"}\n"
 	"};\n"
@@ -695,14 +695,14 @@ std::string g_szMaterialShader = std::string(
 	"}\n"
 
 	// Vertex shader for zero to five lights using the fixed function pixel pipeline
-	"VS_OUTPUT MaterialVShader_FF(VS_INPUT IN)\n"
+	"VS_OUTPUT_FF MaterialVShader_FF(VS_INPUT IN)\n"
 	"{\n"
 		"VS_OUTPUT_FF Out;\n"
 
 		// Multiply with the WorldViewProjection matrix
 		"Out.Position = mul( float4( IN.Position, 1.0f), WorldViewProjection);\n"
 		"float3 worldPos = mul( float4( IN.Position, 1.0f), World);\n"
-    "float3 worldNormal = mul( IN.Normal, float3x3( WorldInverseTranspose)); \n"
+    "float3 worldNormal = mul( IN.Normal, (float3x3) WorldInverseTranspose); \n"
 		"Out.TexCoord0 = IN.TexCoord0;\n"
 
     // calculate per-vertex diffuse lighting including ambient part
@@ -1161,7 +1161,7 @@ std::string g_szMaterialShader = std::string(
       "ColorArg0[0] = Texture;\n"
       "ColorArg1[0] = Diffuse;\n"
       "AlphaOp[0] = Modulate;\n"
-      "AlphaArg0[0] = Textur;\n"
+      "AlphaArg0[0] = Texture;\n"
       "AlphaArg1[0] = Diffuse;\n"
 		"}\n"
 	"};\n"
@@ -1269,10 +1269,10 @@ std::string g_szPassThroughShader = std::string(
 				"SrcBlend =srcalpha;\n"
 				"DestBlend =invsrcalpha;\n"
 				"VertexShader = compile vs_2_0 DefaultVShader();\n"
-        "ColorOp[0] = SelectArg0;\n"
+        "ColorOp[0] = SelectArg1;\n"
         "ColorArg0[0] = Texture;\n"
-        "AlphaOp[0] = SelectArg0;\n"
-        "AlphaArg0[0] = Textur;\n"
+        "AlphaOp[0] = SelectArg1;\n"
+        "AlphaArg0[0] = Texture;\n"
 			"}\n"
 		"};\n"
     );

@@ -955,8 +955,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 	{
 		if( piBuffer) 
 		{
-			MessageBox(g_hDlg,(LPCSTR
-				)piBuffer->GetBufferPointer(),"HLSL",MB_OK);
+			MessageBox(g_hDlg,(LPCSTR)piBuffer->GetBufferPointer(),"HLSL",MB_OK);
 			piBuffer->Release();
 		}
 		return 0;
@@ -974,8 +973,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 	{
 		if( piBuffer) 
 		{
-			MessageBox(g_hDlg,(LPCSTR
-				)piBuffer->GetBufferPointer(),"HLSL",MB_OK);
+			MessageBox(g_hDlg,(LPCSTR)piBuffer->GetBufferPointer(),"HLSL",MB_OK);
 			piBuffer->Release();
 		}
 		return 0;

@@ -924,6 +924,13 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 	}
 	g_piDevice->SetFVF(AssetHelper::Vertex::GetFVF());
 
+	// get the capabilities of the device object
+	g_piDevice->GetDeviceCaps(&g_sCaps);
+	if(g_sCaps.PixelShaderVersion < D3DPS_VERSION(3,0))
+	{
+		EnableWindow(GetDlgItem(g_hDlg,IDC_LOWQUALITY),FALSE);
+	}
+
 	// compile the default material shader (gray gouraud/phong)
 	ID3DXBuffer* piBuffer = NULL;
 	if(FAILED( D3DXCreateEffect(g_piDevice,
@@ -948,6 +955,10 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 		piBuffer = NULL;
 	}
 
+  // use Fixed Function effect when working with shaderless cards
+  if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
+    g_piDefaultEffect->SetTechnique( "DefaultFXSpecular_FF");
+
 	// create the shader used to draw the HUD
 	if(FAILED( D3DXCreateEffect(g_piDevice,
 		g_szPassThroughShader.c_str(),(UINT)g_szPassThroughShader.length(),
@@ -965,6 +976,10 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 		piBuffer->Release();
 		piBuffer = NULL;
 	}
+
+  // use Fixed Function effect when working with shaderless cards
+  if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
+    g_piPassThroughEffect->SetTechnique( "PassThrough_FF");
 
 	// create the shader used to visualize normal vectors
 	if(FAILED( D3DXCreateEffect(g_piDevice,
@@ -984,12 +999,9 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 		piBuffer = NULL;
 	}
 
-	// get the capabilities of the device object
-	g_piDevice->GetDeviceCaps(&g_sCaps);
-	if(g_sCaps.PixelShaderVersion < D3DPS_VERSION(3,0))
-	{
-		EnableWindow(GetDlgItem(g_hDlg,IDC_LOWQUALITY),FALSE);
-	}
+  // use Fixed Function effect when working with shaderless cards
+  if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
+    g_piNormalsEffect->SetTechnique( "RenderNormals_FF");
 
 	// create the texture for the HUD
 	CreateHUDTexture();

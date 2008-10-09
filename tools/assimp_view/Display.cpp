@@ -1905,6 +1905,10 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 		piEnd->SetVector( "vCameraPos",&apcVec[0]);
 
 		// setup the best technique 
+    if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
+    {
+      g_piDefaultEffect->SetTechnique( "DefaultFXSpecular_FF");
+    } else
 		if (g_sCaps.PixelShaderVersion < D3DPS_VERSION(3,0) || g_sOptions.bLowQuality)
 		{
 			if (g_sOptions.b3Lights)

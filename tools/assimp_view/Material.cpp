@@ -1054,7 +1054,13 @@ int CMaterialManager::CreateMaterial(
 			CLogDisplay::Instance().AddEntry("Unable to load material: UNNAMED");
 		}
 		return 0;
-	}
+	} else
+  {
+    // use Fixed Function effect when working with shaderless cards
+    if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
+      pcMesh->piEffect->SetTechnique( "MaterialFX_FF");
+  }
+
 	if( piBuffer) piBuffer->Release();
 
 
@@ -1205,6 +1211,10 @@ int CMaterialManager::SetupMaterial (
 	}
 
 	// setup the correct shader technique to be used for drawing
+  if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
+  {
+    g_piDefaultEffect->SetTechnique( "MaterialFXSpecular_FF");
+  } else
 	if (g_sCaps.PixelShaderVersion < D3DPS_VERSION(3,0) || g_sOptions.bLowQuality)
 	{
 		if (g_sOptions.b3Lights)

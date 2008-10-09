@@ -714,6 +714,7 @@ std::string g_szMaterialShader = std::string(
 
     // and specular including emissive part
     "float4 specularColor = float4( 0.0f, 0.0f, 0.0f, 1.0f); \n"
+  	"#ifdef AV_SPECULAR_COMPONENT\n"
     "float3 viewDir = normalize( worldPos - vCameraPos); \n"
     "for( int a = 0; a < 5; a++) \n"
     "{ \n"
@@ -721,6 +722,7 @@ std::string g_szMaterialShader = std::string(
     "  float specIntensity = pow( dot( -reflDir, viewDir), SPECULAR_STRENGTH) * SPECULARITY; \n"
     "  specularColor.rgb += afLightColor[a] * specIntensity; \n"
     "} \n"
+    "#endif // AV_SPECULAR_COMPONENT\n"
     // factor in material properties and the emissive part
     "Out.SpecularColor = specularColor * SPECULAR_COLOR + EMISSIVE_COLOR; \n"
 

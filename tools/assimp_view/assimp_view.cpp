@@ -910,17 +910,20 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 		sParams.MultiSampleType = sMSOut;
 	}
 
-	// create the D3D9 device object
-	if(FAILED(g_piD3D->CreateDevice(0,eType,
-		g_hDlg,D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,&sParams,&g_piDevice)))
+  // preget the device capabilities. If the hardware vertex shader is too old, we prefer software vertex processing
+  g_piD3D->GetDeviceCaps( 0, D3DDEVTYPE_HAL, &g_sCaps);
+  DWORD creationFlags = D3DCREATE_MULTITHREADED;
+  if( g_sCaps.VertexShaderVersion >= D3DVS_VERSION( 2, 0))
+    creationFlags |= D3DCREATE_HARDWARE_VERTEXPROCESSING;
+  else
+    creationFlags |= D3DCREATE_SOFTWARE_VERTEXPROCESSING;
+
+	// create the D3D9 device object. with software-vertexprocessing if VS2.0 isn`t supported in hardware
+	if(FAILED(g_piD3D->CreateDevice(0,eType, g_hDlg, creationFlags ,&sParams,&g_piDevice)))
 	{
-		if(FAILED(g_piD3D->CreateDevice(0,eType,
-			g_hDlg,D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,&sParams,&g_piDevice)))
-		{
-			// if hardware fails use software rendering instead
-			if (bHW)return CreateDevice(p_bMultiSample,p_bSuperSample,false);
-			return 0;
-		}
+		// if hardware fails use software rendering instead
+		if (bHW)return CreateDevice(p_bMultiSample,p_bSuperSample,false);
+		return 0;
 	}
 	g_piDevice->SetFVF(AssetHelper::Vertex::GetFVF());
 

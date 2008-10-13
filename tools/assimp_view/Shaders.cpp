@@ -302,11 +302,11 @@ std::string g_szDefaultShader = std::string(
 
 		// Multiply with the WorldViewProjection matrix
 		"Out.Position = mul(float4(IN.Position,1.0f),WorldViewProjection);\n"
-    "float3 worldNormal = mul( IN.Normal, (float3x3) WorldInverseTranspose); \n"
+    "float3 worldNormal = normalize( mul( IN.Normal, (float3x3) WorldInverseTranspose)); \n"
 
     // per-vertex lighting. We simply assume light colors of unused lights to be black
     "Out.Color = float4( 0.2f, 0.2f, 0.2f, 1.0f); \n"
-    "for( int a = 0; a < 5; a++)\n"
+    "for( int a = 0; a < 2; a++)\n"
     "  Out.Color.rgb += saturate( dot( afLightDir[a], worldNormal)) * afLightColor[a].rgb; \n"
 		"return Out;\n"
 	"}\n"
@@ -702,12 +702,12 @@ std::string g_szMaterialShader = std::string(
 		// Multiply with the WorldViewProjection matrix
 		"Out.Position = mul( float4( IN.Position, 1.0f), WorldViewProjection);\n"
 		"float3 worldPos = mul( float4( IN.Position, 1.0f), World);\n"
-    "float3 worldNormal = mul( IN.Normal, (float3x3) WorldInverseTranspose); \n"
+    "float3 worldNormal = normalize( mul( IN.Normal, (float3x3) WorldInverseTranspose)); \n"
 		"Out.TexCoord0 = IN.TexCoord0;\n"
 
     // calculate per-vertex diffuse lighting including ambient part
     "float4 diffuseColor = float4( 0.0f, 0.0f, 0.0f, 1.0f); \n"
-    "for( int a = 0; a < 5; a++) \n"
+    "for( int a = 0; a < 2; a++) \n"
     "  diffuseColor.rgb += saturate( dot( afLightDir[a], worldNormal)) * afLightColor[a].rgb; \n"
     // factor in material properties and a bit of ambient lighting
     "Out.DiffuseColor = diffuseColor * DIFFUSE_COLOR + float4( 0.2f, 0.2f, 0.2f, 1.0f) * AMBIENT_COLOR; ; \n"
@@ -716,10 +716,10 @@ std::string g_szMaterialShader = std::string(
     "float4 specularColor = float4( 0.0f, 0.0f, 0.0f, 1.0f); \n"
   	"#ifdef AV_SPECULAR_COMPONENT\n"
     "float3 viewDir = normalize( worldPos - vCameraPos); \n"
-    "for( int a = 0; a < 5; a++) \n"
+    "for( int a = 0; a < 2; a++) \n"
     "{ \n"
     "  float3 reflDir = reflect( afLightDir[a], worldNormal); \n"
-    "  float specIntensity = pow( dot( -reflDir, viewDir), SPECULAR_STRENGTH) * SPECULARITY; \n"
+    "  float specIntensity = pow( saturate( dot( reflDir, viewDir)), SPECULARITY) * SPECULAR_STRENGTH; \n"
     "  specularColor.rgb += afLightColor[a] * specIntensity; \n"
     "} \n"
     "#endif // AV_SPECULAR_COMPONENT\n"

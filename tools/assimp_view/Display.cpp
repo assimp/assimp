@@ -1671,6 +1671,10 @@ int CDisplay::HandleInputEmptyScene()
 //-------------------------------------------------------------------------------
 int CDisplay::DrawHUD()
 {
+  // HACK: (thom) can't get the effect to work on non-shader cards, therefore deactivated for the moment
+  if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
+    return 1;
+
 	// get the dimension of the back buffer
 	RECT sRect;
 	GetWindowRect(GetDlgItem(g_hDlg,IDC_RT),&sRect);
@@ -1688,7 +1692,10 @@ int CDisplay::DrawHUD()
 
 	// NOTE: The shader might be used for other purposes, too.
 	// So ensure the right technique is there
-	g_piPassThroughEffect->SetTechnique("PassThrough");
+  if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
+    g_piPassThroughEffect->SetTechnique( "PassThrough_FF");
+  else
+    g_piPassThroughEffect->SetTechnique("PassThrough");
 
 	// build vertices for drawing from system memory
 	UINT dw;
@@ -1877,9 +1884,11 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 		apcVec[0].x = g_avLightDirs[0].x;
 		apcVec[0].y = g_avLightDirs[0].y;
 		apcVec[0].z = g_avLightDirs[0].z;
+    apcVec[0].w = 0.0f;
 		apcVec[1].x = g_avLightDirs[0].x * -1.0f;
 		apcVec[1].y = g_avLightDirs[0].y * -1.0f;
 		apcVec[1].z = g_avLightDirs[0].z * -1.0f;
+    apcVec[1].w = 0.0f;
 
 		D3DXVec4Normalize(&apcVec[0],&apcVec[0]);
 		D3DXVec4Normalize(&apcVec[1],&apcVec[1]);
@@ -1890,10 +1899,19 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 		apcVec[0].z = ((g_avLightColors[0]) & 0xFF) / 255.0f;
 		apcVec[0].w = 1.0f;
 
-		apcVec[1].x = ((g_avLightColors[1] >> 16) & 0xFF) / 255.0f;
-		apcVec[1].y = ((g_avLightColors[1] >> 8) & 0xFF) / 255.0f;
-		apcVec[1].z = ((g_avLightColors[1]) & 0xFF) / 255.0f;
-		apcVec[1].w = 0.0f;
+    if( g_sOptions.b3Lights)
+    {
+		  apcVec[1].x = ((g_avLightColors[1] >> 16) & 0xFF) / 255.0f;
+		  apcVec[1].y = ((g_avLightColors[1] >> 8) & 0xFF) / 255.0f;
+		  apcVec[1].z = ((g_avLightColors[1]) & 0xFF) / 255.0f;
+		  apcVec[1].w = 0.0f;
+    } else
+    {
+		  apcVec[1].x = 0.0f;
+		  apcVec[1].y = 0.0f;
+		  apcVec[1].z = 0.0f;
+		  apcVec[1].w = 0.0f;
+    }
 
 		apcVec[0] *= g_fLightIntensity;
 		apcVec[1] *= g_fLightIntensity;
@@ -2143,7 +2161,10 @@ int CDisplay::RenderTextureView()
 	{
 		g_piPassThroughEffect->SetTechnique("PassThroughAlphaFromA");
 	}
-	else g_piPassThroughEffect->SetTechnique("PassThrough");
+	else if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
+    g_piPassThroughEffect->SetTechnique( "PassThrough_FF");
+  else
+    g_piPassThroughEffect->SetTechnique("PassThrough");
 
 	UINT dw;
 	g_piPassThroughEffect->Begin(&dw,0);

@@ -40,12 +40,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Implementation of BaseImporter */
+
+#include "AssimpPCH.h"
 #include "BaseImporter.h"
 
-#include "../include/DefaultLogger.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/assimp.hpp"
+
 using namespace Assimp;
 
 

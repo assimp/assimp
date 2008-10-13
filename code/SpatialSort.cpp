@@ -40,7 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Implementation of the helper class to quickly find vertices close to a given position */
-#include <algorithm>
+
+#include "AssimpPCH.h"
 #include "SpatialSort.h"
 
 using namespace Assimp;

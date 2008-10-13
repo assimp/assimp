@@ -43,16 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_PLYFILEHELPER_H_INC
 #define AI_PLYFILEHELPER_H_INC
 
-#include <string>
-#include <vector>
-#include <list>
-#include <sstream>
 
 #include "ParsingUtils.h"
 
-#include "../include/aiTypes.h"
-#include "../include/aiMesh.h"
-#include "../include/aiAnim.h"
 
 namespace Assimp
 {
@@ -240,16 +233,16 @@ public:
 	//! string is either '\n', '\r' or '\0'. Return valie is false
 	//! if the input string is NOT a valid property (E.g. does
 	//! not start with the "property" keyword)
-	static bool ParseProperty (const char* p_szIn, const char** p_szOut, 
+	static bool ParseProperty (const char* pCur, const char** pCurOut, 
 		Property* pOut);
 
 	// -------------------------------------------------------------------
 	//! Parse a data type from a string
-	static EDataType ParseDataType(const char* p_szIn,const char** p_szOut);
+	static EDataType ParseDataType(const char* pCur,const char** pCurOut);
 
 	// -------------------------------------------------------------------
 	//! Parse a semantic from a string
-	static ESemantic ParseSemantic(const char* p_szIn,const char** p_szOut);
+	static ESemantic ParseSemantic(const char* pCur,const char** pCurOut);
 };
 
 // ---------------------------------------------------------------------------------
@@ -268,22 +261,9 @@ public:
 		,	NumOccur(0)
 	{}
 
-	//! Destructor. Dallocates all storage
-	~Element()
-	{
-		// delete all elements
-		for (std::vector<Property*>::const_iterator
-			i =  this->alProperties.begin();
-			i != this->alProperties.end();++i)
-		{
-			delete (*i);
-		}
-		return;
-	}
-
 	//! List of properties assigned to the element
 	//! std::vector to support operator[]
-	std::vector<Property*> alProperties;
+	std::vector<Property> alProperties;
 
 	//! Semantic of the element
 	EElementSemantic eSemantic;
@@ -300,13 +280,13 @@ public:
 	//! Parse an element from a string. 
 	//! The function will parse all properties contained in the
 	//! element, too.
-	static bool ParseElement (const char* p_szIn, const char** p_szOut, 
+	static bool ParseElement (const char* pCur, const char** pCurOut, 
 		Element* pOut);
 
 	// -------------------------------------------------------------------
 	//! Parse a semantic from a string
-	static EElementSemantic ParseSemantic(const char* p_szIn,
-		const char** p_szOut);
+	static EElementSemantic ParseSemantic(const char* pCur,
+		const char** pCurOut);
 };
 
 // ---------------------------------------------------------------------------------
@@ -341,17 +321,17 @@ public:
 
 	// -------------------------------------------------------------------
 	//! List of all values parsed. Contains only one value
-	// for non-list propertys
-	std::list<ValueUnion> avList;
+	// for non-list properties
+	std::vector<ValueUnion> avList;
 
 	// -------------------------------------------------------------------
 	//! Parse a property instance 
-	static bool ParseInstance (const char* p_szIn,const char** p_szOut,
+	static bool ParseInstance (const char* pCur,const char** pCurOut,
 		const Property* prop, PropertyInstance* p_pcOut);
 
 	// -------------------------------------------------------------------
 	//! Parse a property instance in binary format
-	static bool ParseInstanceBinary (const char* p_szIn,const char** p_szOut,
+	static bool ParseInstanceBinary (const char* pCur,const char** pCurOut,
 		const Property* prop, PropertyInstance* p_pcOut,bool p_bBE);
 
 	// -------------------------------------------------------------------
@@ -360,12 +340,12 @@ public:
 
 	// -------------------------------------------------------------------
 	//! Parse a value
-	static bool ParseValue(const char* p_szIn,const char** p_szOut,
+	static bool ParseValue(const char* pCur,const char** pCurOut,
 		EDataType eType,ValueUnion* out);
 
 	// -------------------------------------------------------------------
 	//! Parse a binary value
-	static bool ParseValueBinary(const char* p_szIn,const char** p_szOut,
+	static bool ParseValueBinary(const char* pCur,const char** pCurOut,
 		EDataType eType,ValueUnion* out,bool p_bBE);
 
 	// -------------------------------------------------------------------
@@ -390,12 +370,12 @@ public:
 
 	// -------------------------------------------------------------------
 	//! Parse an element instance
-	static bool ParseInstance (const char* p_szIn,const char** p_szOut,
+	static bool ParseInstance (const char* pCur,const char** pCurOut,
 		const Element* pcElement, ElementInstance* p_pcOut);
 
 	// -------------------------------------------------------------------
 	//! Parse a binary element instance
-	static bool ParseInstanceBinary (const char* p_szIn,const char** p_szOut,
+	static bool ParseInstanceBinary (const char* pCur,const char** pCurOut,
 		const Element* pcElement, ElementInstance* p_pcOut,bool p_bBE);
 };
 
@@ -410,37 +390,17 @@ public:
 	ElementInstanceList ()
 	{}
 
-	//! Construction from a given element description
-	ElementInstanceList (const Element* pc)
-	{
-		// reserve enough storage to speedup the process
-		alInstances.resize(pc->NumOccur);
-	}
-
-	//! Destructor. Dallocates all storage
-	~ElementInstanceList()
-	{
-		// delete all elements
-		for (std::vector<ElementInstance*>::const_iterator
-			i =  this->alInstances.begin();
-			i != this->alInstances.end();++i)
-		{
-			delete (*i);
-		}
-		return;
-	}
-
 	//! List of all element instances
-	std::vector< ElementInstance* > alInstances;
+	std::vector< ElementInstance > alInstances;
 
 	// -------------------------------------------------------------------
 	//! Parse an element instance list
-	static bool ParseInstanceList (const char* p_szIn,const char** p_szOut,
+	static bool ParseInstanceList (const char* pCur,const char** pCurOut,
 		const Element* pcElement, ElementInstanceList* p_pcOut);
 
 	// -------------------------------------------------------------------
 	//! Parse a binary element instance list
-	static bool ParseInstanceListBinary (const char* p_szIn,const char** p_szOut,
+	static bool ParseInstanceListBinary (const char* pCur,const char** pCurOut,
 		const Element* pcElement, ElementInstanceList* p_pcOut,bool p_bBE);
 };
 // ---------------------------------------------------------------------------------
@@ -455,54 +415,35 @@ public:
 	DOM()
 	{}
 
-	//! Destructor. Dallocates all storage
-	~DOM()
-	{
-		// delete all elements
-		for (std::vector<Element*>::const_iterator
-			i =  this->alElements.begin();
-			i != this->alElements.end();++i)
-		{
-			delete (*i);
-		}
-		// delete all instance lists
-		for (std::vector<ElementInstanceList*>::const_iterator
-			i =  this->alElementData.begin();
-			i != this->alElementData.end();++i)
-		{
-			delete (*i);
-		}
-		return;
-	}
 
 	//! Contains all elements of the file format
-	std::vector<Element*> alElements;
+	std::vector<Element> alElements;
 	//! Contains the real data of each element's instance list
-	std::vector<ElementInstanceList*> alElementData;
+	std::vector<ElementInstanceList> alElementData;
 
 	//! Parse the DOM for a PLY file. The input string is assumed
 	//! to be terminated with zero
-	static bool ParseInstance (const char* p_szIn,DOM* p_pcOut);
-	static bool ParseInstanceBinary (const char* p_szIn,
+	static bool ParseInstance (const char* pCur,DOM* p_pcOut);
+	static bool ParseInstanceBinary (const char* pCur,
 		DOM* p_pcOut,bool p_bBE);
 
 	//! Skip all comment lines after this
-	static bool SkipComments (const char* p_szIn,const char** p_szOut);
+	static bool SkipComments (const char* pCur,const char** pCurOut);
 
 private:
 
 	// -------------------------------------------------------------------
 	//! Handle the file header and read all element descriptions
-	bool ParseHeader (const char* p_szIn,const char** p_szOut);
+	bool ParseHeader (const char* pCur,const char** pCurOut);
 
 	// -------------------------------------------------------------------
 	//! Read in all element instance lists
-	bool ParseElementInstanceLists (const char* p_szIn,const char** p_szOut);
+	bool ParseElementInstanceLists (const char* pCur,const char** pCurOut);
 
 	// -------------------------------------------------------------------
 	//! Read in all element instance lists for a binary file format
-	bool ParseElementInstanceListsBinary (const char* p_szIn,
-		const char** p_szOut,bool p_bBE);
+	bool ParseElementInstanceListsBinary (const char* pCur,
+		const char** pCurOut,bool p_bBE);
 };
 
 // ---------------------------------------------------------------------------------
@@ -530,7 +471,7 @@ public:
 
 // ---------------------------------------------------------------------------------
 template <typename TYPE>
-TYPE PLY::PropertyInstance::ConvertTo(
+inline TYPE PLY::PropertyInstance::ConvertTo(
 	PLY::PropertyInstance::ValueUnion v, PLY::EDataType eType)
 {
 	switch (eType)

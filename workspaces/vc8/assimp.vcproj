@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="DEBUG, _SCL_SECURE_NO_WARNINGS, _CRT_SECURE_NO_WARNINGS,WIN32"
+				PreprocessorDefinitions="DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="1"
@@ -50,6 +50,68 @@
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug|x64"
+			OutputDirectory="./../../lib/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			ConfigurationType="4"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories=""
+				PreprocessorDefinitions="DEBUG, _SCL_SECURE_NO_WARNINGS, _CRT_SECURE_NO_WARNINGS,WIN32"
+				BasicRuntimeChecks="3"
+				SmallerTypeCheck="true"
+				RuntimeLibrary="1"
+				EnableFunctionLevelLinking="true"
+				WarningLevel="3"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -107,12 +169,80 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="NDEBUG, _SCL_SECURE_NO_WARNINGS, _CRT_SECURE_NO_WARNINGS,WIN32"
+				PreprocessorDefinitions="NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32"
 				StringPooling="true"
 				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="2"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|x64"
+			OutputDirectory="./../../lib/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			ConfigurationType="4"
+			WholeProgramOptimization="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories=""
+				PreprocessorDefinitions="NDEBUG, _SCL_SECURE_NO_WARNINGS, _CRT_SECURE_NO_WARNINGS,WIN32"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="false"
+				EnableEnhancedInstructionSet="0"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="AssimpPCH.h"
+				WarningLevel="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -219,6 +349,83 @@
 			/>
 		</Configuration>
 		<Configuration
+			Name="Release_DLL|x64"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			ConfigurationType="2"
+			WholeProgramOptimization="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories=""
+				PreprocessorDefinitions="NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				BufferSecurityCheck="false"
+				EnableEnhancedInstructionSet="0"
+				WarningLevel="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\Assimp64.dll"
+				ImportLibrary="$(SolutionDir)..\..\lib\$(ProjectName)_$(ConfigurationName)_$(PlatformName)\assimp.lib"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unittest_$(ConfigurationName)_$(PlatformName)&quot;"
+			/>
+		</Configuration>
+		<Configuration
 			Name="Debug_DLL|Win32"
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
@@ -265,209 +472,6 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\Assimp32d.dll"
 				ImportLibrary="$(SolutionDir)..\..\lib\$(ProjectName)_$(ConfigurationName)_$(PlatformName)\assimp.lib"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unittest_$(ConfigurationName)_$(PlatformName)&quot;"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug|x64"
-			OutputDirectory="./../../lib/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
-			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
-			ConfigurationType="4"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="DEBUG, _SCL_SECURE_NO_WARNINGS, _CRT_SECURE_NO_WARNINGS,WIN32"
-				BasicRuntimeChecks="3"
-				SmallerTypeCheck="true"
-				RuntimeLibrary="1"
-				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release|x64"
-			OutputDirectory="./../../lib/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
-			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
-			ConfigurationType="4"
-			WholeProgramOptimization="0"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="NDEBUG, _SCL_SECURE_NO_WARNINGS, _CRT_SECURE_NO_WARNINGS,WIN32"
-				StringPooling="true"
-				RuntimeLibrary="0"
-				BufferSecurityCheck="false"
-				EnableEnhancedInstructionSet="2"
-				WarningLevel="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release_DLL|x64"
-			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
-			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
-			ConfigurationType="2"
-			WholeProgramOptimization="0"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT"
-				StringPooling="true"
-				RuntimeLibrary="2"
-				BufferSecurityCheck="false"
-				EnableEnhancedInstructionSet="2"
-				WarningLevel="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\Assimp64.dll"
-				ImportLibrary="$(SolutionDir)..\..\lib\$(ProjectName)_$(ConfigurationName)_$(PlatformName)\assimp.lib"
-				TargetMachine="17"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -586,6 +590,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\aiCamera.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\aiConfig.h"
 				>
 			</File>
@@ -595,6 +603,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\aiFileIO.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\aiLight.h"
 				>
 			</File>
 			<File
@@ -635,10 +647,6 @@
 			</File>
 			<File
 				RelativePath="..\..\include\aiScene.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\aiSceneEntities.h"
 				>
 			</File>
 			<File
@@ -692,14 +700,30 @@
 			<Filter
 				Name="Compiler"
 				>
-				<Filter
-					Name="MSVC"
+				<File
+					RelativePath="..\..\include\Compiler\poppack1.h"
 					>
-					<File
-						RelativePath="..\..\include\Compiler\MSVC\stdint.h"
-						>
-					</File>
-				</Filter>
+				</File>
+				<File
+					RelativePath="..\..\include\Compiler\pstdint.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\Compiler\pushpack1.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="BoostWorkaround"
+				>
+				<File
+					RelativePath="..\..\include\BoostWorkaround\boost\format.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\BoostWorkaround\boost\scoped_ptr.hpp"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -751,6 +775,10 @@
 			</File>
 			<File
 				RelativePath="..\..\code\DefaultLogger.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\FaceEdgeAdjacency.h"
 				>
 			</File>
 			<File
@@ -863,6 +891,46 @@
 				<File
 					RelativePath="..\..\code\extra\MakeVerboseFormat.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_DLL|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_DLL|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\code\extra\MakeVerboseFormat.h"
@@ -1235,6 +1303,26 @@
 				<Filter
 					Name="AC"
 					>
+					<File
+						RelativePath="..\..\code\ACLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\ACLoader.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="LWS"
+					>
+					<File
+						RelativePath="..\..\code\LWSLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\LWSLoader.h"
+						>
+					</File>
 				</Filter>
 			</Filter>
 			<Filter
@@ -1254,6 +1342,14 @@
 				</File>
 				<File
 					RelativePath="..\..\code\ConvertToLHProcess.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\FindInvalidDataProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\FindInvalidDataProcess.h"
 					>
 				</File>
 				<File
@@ -1378,16 +1474,60 @@
 				</Filter>
 			</Filter>
 			<Filter
-				Name="Compiler"
+				Name="PCH"
 				>
 				<File
-					RelativePath="..\..\code\Compiler\poppack1.h"
+					RelativePath="..\..\code\AssimpPCH.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="1"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="1"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_DLL|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_DLL|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\..\code\Compiler\pushpack1.h"
+					RelativePath="..\..\code\AssimpPCH.h"
 					>
 				</File>
+			</Filter>
+			<Filter
+				Name="TinyXML"
+				>
 			</Filter>
 		</Filter>
 		<Filter

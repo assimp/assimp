@@ -114,9 +114,12 @@ struct aiNode
 	~aiNode()
 	{
 		// delete al children recursively
-		for( unsigned int a = 0; a < mNumChildren; a++)
-			delete mChildren[a];
-		delete [] mChildren;
+		if (mChildren) // fix to make the d'tor work for invalid scenes, too
+		{
+			for( unsigned int a = 0; a < mNumChildren; a++)
+				delete mChildren[a];
+			delete [] mChildren;
+		}
 		delete [] mMeshes;
 	}
 #endif // __cplusplus
@@ -126,7 +129,8 @@ struct aiNode
 //! Specifies that no full model but only an animation skeleton has been
 //! imported. There are no materials in this case. There are no
 //! textures in this case. But there is a node graph, animation channels
-//! and propably meshes with bones.
+//! and propably meshes with bones. Validation of meshes is less strict
+//! with this flag, so be careful.
 #define AI_SCENE_FLAGS_ANIM_SKELETON_ONLY	0x1
 
 

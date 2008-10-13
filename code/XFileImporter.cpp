@@ -39,18 +39,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 /** @file Implementation of the XFile importer class */
+
+#include "AssimpPCH.h"
+
 #include "XFileImporter.h"
 #include "XFileParser.h"
 #include "MaterialSystem.h"
 #include "ConvertToLHProcess.h"
-
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
-
-#include <boost/scoped_ptr.hpp>
-#include <boost/format.hpp>
 
 using namespace Assimp;
 

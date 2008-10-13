@@ -1,4 +1,6 @@
-#include <iostream>
+
+#include "assimpPCH.h"
+
 #include "../include/aiAssert.h"
 #ifdef _WIN32
 #ifndef __GNUC__

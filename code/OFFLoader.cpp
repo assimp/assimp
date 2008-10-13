@@ -41,21 +41,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the OFF importer class */
 
+#include "AssimpPCH.h"
+
 // internal headers
 #include "OFFLoader.h"
-#include "MaterialSystem.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
 
-// public assimp headers
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/DefaultLogger.h"
-
-// boost headers
-#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 
@@ -81,8 +73,6 @@ bool OFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	if( pos == std::string::npos)return false;
 	std::string extension = pFile.substr( pos);
 
-	if (extension.length() < 4)return false;
-	if (extension[0] != '.')return false;
 
 	return !(extension.length() != 4 || extension[0] != '.' ||
 			 extension[1] != 'o' && extension[1] != 'R' ||

@@ -66,7 +66,7 @@ public class Material {
     /**
      * List of all properties for this material
      */
-    public Property[] properties;
+    private Property[] properties;
 
 
     /**

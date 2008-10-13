@@ -40,21 +40,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Implementation of the DXF importer class */
+
+#include "AssimpPCH.h"
+
+
 #include "DXFLoader.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
 #include "MaterialSystem.h"
 
-// public ASSIMP headers
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-
-#include "../include/DefaultLogger.h"
-
-// boost headers
-#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 

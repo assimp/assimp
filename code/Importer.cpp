@@ -41,16 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the CPP-API class #Importer */
 
-// STL/CSL heades
-#include <fstream>
-#include <string>
+#include "AssimpPCH.h"
 
-// public Assimp API
-#include "../include/assimp.hpp"
-#include "../include/aiAssert.h"
-#include "../include/aiScene.h"
-#include "../include/aiPostProcess.h"
-#include "../include/DefaultLogger.h"
 
 // internal headers
 #include "BaseImporter.h"
@@ -61,114 +53,125 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProcessHelper.h"
 
 // Importers
-#if (!defined AI_BUILD_NO_X_IMPORTER)
+#ifndef AI_BUILD_NO_X_IMPORTER
 #	include "XFileImporter.h"
 #endif
-#if (!defined AI_BUILD_NO_3DS_IMPORTER)
+#ifndef AI_BUILD_NO_3DS_IMPORTER
 #	include "3DSLoader.h"
 #endif
-#if (!defined AI_BUILD_NO_MD3_IMPORTER)
+#ifndef AI_BUILD_NO_MD3_IMPORTER
 #	include "MD3Loader.h"
 #endif
-#if (!defined AI_BUILD_NO_MDL_IMPORTER)
+#ifndef AI_BUILD_NO_MDL_IMPORTER
 #	include "MDLLoader.h"
 #endif
-#if (!defined AI_BUILD_NO_MD2_IMPORTER)
+#ifndef AI_BUILD_NO_MD2_IMPORTER
 #	include "MD2Loader.h"
 #endif
-#if (!defined AI_BUILD_NO_PLY_IMPORTER)
+#ifndef AI_BUILD_NO_PLY_IMPORTER
 #	include "PlyLoader.h"
 #endif
-#if (!defined AI_BUILD_NO_ASE_IMPORTER)
+#ifndef AI_BUILD_NO_ASE_IMPORTER
 #	include "ASELoader.h"
 #endif
-#if (!defined AI_BUILD_NO_OBJ_IMPORTER)
+#ifndef AI_BUILD_NO_OBJ_IMPORTER
 #	include "ObjFileImporter.h"
 #endif
-#if (!defined AI_BUILD_NO_HMP_IMPORTER)
+#ifndef AI_BUILD_NO_HMP_IMPORTER
 #	include "HMPLoader.h"
 #endif
-#if (!defined AI_BUILD_NO_SMD_IMPORTER)
+#ifndef AI_BUILD_NO_SMD_IMPORTER
 #	include "SMDLoader.h"
 #endif
-#if (!defined AI_BUILD_NO_MDR_IMPORTER)
+#ifndef AI_BUILD_NO_MDR_IMPORTER
 #	include "MDRLoader.h"
 #endif
-#if (!defined AI_BUILD_NO_MDC_IMPORTER)
+#ifndef AI_BUILD_NO_MDC_IMPORTER
 #	include "MDCLoader.h"
 #endif
-#if (!defined AI_BUILD_NO_MD5_IMPORTER)
+#ifndef AI_BUILD_NO_MD5_IMPORTER
 #	include "MD5Loader.h"
 #endif
-#if (!defined AI_BUILD_NO_STL_IMPORTER)
+#ifndef AI_BUILD_NO_STL_IMPORTER
 #	include "STLLoader.h"
 #endif
-#if (!defined AI_BUILD_NO_LWO_IMPORTER)
+#ifndef AI_BUILD_NO_LWO_IMPORTER
 #	include "LWOLoader.h"
 #endif
-#if (!defined AI_BUILD_NO_DXF_IMPORTER)
+#ifndef AI_BUILD_NO_DXF_IMPORTER
 #	include "DXFLoader.h"
 #endif
-#if (!defined AI_BUILD_NO_NFF_IMPORTER)
+#ifndef AI_BUILD_NO_NFF_IMPORTER
 #	include "NFFLoader.h"
 #endif
-#if (!defined AI_BUILD_NO_RAW_IMPORTER)
+#ifndef AI_BUILD_NO_RAW_IMPORTER
 #	include "RAWLoader.h"
 #endif
-#if (!defined AI_BUILD_NO_OFF_IMPORTER)
+#ifndef AI_BUILD_NO_OFF_IMPORTER
 #	include "OffLoader.h"
+#endif
+#ifndef AI_BUILD_NO_AC_IMPORTER
+#	include "ACLoader.h"
 #endif
 
 
 // PostProcess-Steps
-#if (!defined AI_BUILD_NO_CALCTANGENTS_PROCESS)
+#ifndef AI_BUILD_NO_CALCTANGENTS_PROCESS
 #	include "CalcTangentsProcess.h"
 #endif
-#if (!defined AI_BUILD_NO_JOINVERTICES_PROCESS)
+#ifndef AI_BUILD_NO_JOINVERTICES_PROCESS
 #	include "JoinVerticesProcess.h"
 #endif
-#if (!defined AI_BUILD_NO_CONVERTTOLH_PROCESS)
+#ifndef AI_BUILD_NO_CONVERTTOLH_PROCESS
 #	include "ConvertToLHProcess.h"
 #endif
-#if (!defined AI_BUILD_NO_TRIANGULATE_PROCESS)
+#ifndef AI_BUILD_NO_TRIANGULATE_PROCESS
 #	include "TriangulateProcess.h"
 #endif
-#if (!defined AI_BUILD_NO_GENFACENORMALS_PROCESS)
+#ifndef AI_BUILD_NO_GENFACENORMALS_PROCESS
 #	include "GenFaceNormalsProcess.h"
 #endif
-#if (!defined AI_BUILD_NO_GENVERTEXNORMALS_PROCESS)
+#ifndef AI_BUILD_NO_GENVERTEXNORMALS_PROCESS
 #	include "GenVertexNormalsProcess.h"
 #endif
-#if (!defined AI_BUILD_NO_KILLNORMALS_PROCESS)
+#ifndef AI_BUILD_NO_REMOVEVC_PROCESS
 #	include "RemoveVCProcess.h"
 #endif
-#if (!defined AI_BUILD_NO_SPLITLARGEMESHES_PROCESS)
+#ifndef AI_BUILD_NO_SPLITLARGEMESHES_PROCESS
 #	include "SplitLargeMeshes.h"
 #endif
-#if (!defined AI_BUILD_NO_PRETRANSFORMVERTICES_PROCESS)
+#ifndef AI_BUILD_NO_PRETRANSFORMVERTICES_PROCESS
 #	include "PretransformVertices.h"
 #endif
-#if (!defined AI_BUILD_NO_LIMITBONEWEIGHTS_PROCESS)
+#ifndef AI_BUILD_NO_LIMITBONEWEIGHTS_PROCESS
 #	include "LimitBoneWeightsProcess.h"
 #endif
-#if (!defined AI_BUILD_NO_VALIDATEDS_PROCESS)
+#ifndef AI_BUILD_NO_VALIDATEDS_PROCESS
 #	include "ValidateDataStructure.h"
 #endif
-#if (!defined AI_BUILD_NO_IMPROVECACHELOCALITY_PROCESS)
+#ifndef AI_BUILD_NO_IMPROVECACHELOCALITY_PROCESS
 #	include "ImproveCacheLocality.h"
 #endif
-#if (!defined AI_BUILD_NO_FIXINFACINGNORMALS_PROCESS)
+#ifndef AI_BUILD_NO_FIXINFACINGNORMALS_PROCESS
 #	include "FixNormalsStep.h"
 #endif
-#if (!defined AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
+#ifndef AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS
 #	include "RemoveRedundantMaterials.h"
 #endif
-#if (!defined AI_BUILD_NO_OPTIMIZEGRAPH_PROCESS)
+#ifndef AI_BUILD_NO_OPTIMIZEGRAPH_PROCESS
 #	include "OptimizeGraphProcess.h"
 #endif
-#if (!defined AI_BUILD_NO_SORTBYPTYPE_PROCESS)
-#	include "SortByPTypeProcess.h"
+#ifndef AI_BUILD_NO_FINDINVALIDDATA_PROCESS
+#	include "FindInvalidDataProcess.h"
 #endif
+
+// NOTE: the preprocessor code has been moved to the header as
+// we've also declared the DeterminePType process in it, which
+// can't be removed.
+
+//#ifndef AI_BUILD_NO_SORTBYPTYPE_PROCESS
+#	include "SortByPTypeProcess.h"
+//#endif
 
 
 
@@ -221,11 +224,9 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_SMD_IMPORTER)
 	mImporter.push_back( new SMDImporter());
 #endif
-/*
 #if (!defined AI_BUILD_NO_MDR_IMPORTER)
 	mImporter.push_back( new MDRImporter());
 #endif
- */
 #if (!defined AI_BUILD_NO_MDC_IMPORTER)
 	mImporter.push_back( new MDCImporter());
 #endif
@@ -250,6 +251,9 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_OFF_IMPORTER)
 	mImporter.push_back( new OFFImporter());
 #endif
+#if (!defined AI_BUILD_NO_AC_IMPORTER)
+	mImporter.push_back( new AC3DImporter());
+#endif
 
 	// add an instance of each post processing step here in the order 
 	// of sequence it is executed. steps that are added here are not validated -
@@ -262,17 +266,27 @@ Importer::Importer() :
 
 	mPostProcessingSteps.push_back( new DeterminePTypeHelperProcess());
 
-#if (!defined AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
-	mPostProcessingSteps.push_back( new RemoveRedundantMatsProcess());
+#if (!defined AI_BUILD_NO_REMOVEVC_PROCESS)
+	mPostProcessingSteps.push_back( new RemoveVCProcess());
 #endif
-#if (!defined AI_BUILD_NO_OPTIMIZEGRAPH_PROCESS)
-	mPostProcessingSteps.push_back( new OptimizeGraphProcess());
-#endif
+
 #if (!defined AI_BUILD_NO_TRIANGULATE_PROCESS)
 	mPostProcessingSteps.push_back( new TriangulateProcess());
 #endif
 #if (!defined AI_BUILD_NO_SORTBYPTYPE_PROCESS)
 	mPostProcessingSteps.push_back( new SortByPTypeProcess());
+#endif
+
+#if (!defined AI_BUILD_NO_FINDINVALIDDATA_PROCESS)
+	mPostProcessingSteps.push_back( new FindInvalidDataProcess());
+#endif
+
+
+#if (!defined AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
+	mPostProcessingSteps.push_back( new RemoveRedundantMatsProcess());
+#endif
+#if (!defined AI_BUILD_NO_OPTIMIZEGRAPH_PROCESS)
+	mPostProcessingSteps.push_back( new OptimizeGraphProcess());
 #endif
 #if (!defined AI_BUILD_NO_PRETRANSFORMVERTICES_PROCESS)
 	mPostProcessingSteps.push_back( new PretransformVertices());
@@ -282,9 +296,6 @@ Importer::Importer() :
 #endif
 #if (!defined AI_BUILD_NO_SPLITLARGEMESHES_PROCESS)
 	mPostProcessingSteps.push_back( new SplitLargeMeshesProcess_Triangle());
-#endif
-#if (!defined AI_BUILD_NO_REMOVEVC_PROCESS)
-	mPostProcessingSteps.push_back( new RemoveVCProcess());
 #endif
 #if (!defined AI_BUILD_NO_GENFACENORMALS_PROCESS)
 	mPostProcessingSteps.push_back( new GenFaceNormalsProcess());

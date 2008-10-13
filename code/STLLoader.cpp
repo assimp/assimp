@@ -41,21 +41,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the STL importer class */
 
+
+#include "AssimpPCH.h"
+
 // internal headers
 #include "STLLoader.h"
-#include "MaterialSystem.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
-
-// public assimp headers
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/DefaultLogger.h"
-
-// boost headers
-#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 
@@ -335,6 +327,8 @@ bool STLImporter::LoadBinaryFile()
 
 	for (unsigned int i = 0; i < pMesh->mNumFaces;++i)
 	{
+		// NOTE: Blender sometimes writes empty normals this is not
+		// our fault ... the RemoveInvalidData helper step should fix that
 		*vn = *((aiVector3D*)sz);
 		sz += sizeof(aiVector3D);
 		*(vn+1) = *vn;

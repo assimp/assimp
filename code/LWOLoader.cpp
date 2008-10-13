@@ -41,13 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the LWO importer class */
 
+#include "AssimpPCH.h"
 
-// public assimp headers
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/assimp.hpp"
 
 // internal headers
 #include "LWOLoader.h"
@@ -56,11 +51,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SGSpatialSort.h"
 #include "ByteSwap.h"
 #include "ProcessHelper.h"
-
-// boost headers
-#include <boost/scoped_ptr.hpp>
-#include <sstream>
-#include <iomanip>
 
 using namespace Assimp;
 
@@ -100,7 +90,7 @@ bool LWOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 // Setup configuration properties
 void LWOImporter::SetupProperties(const Importer* pImp)
 {
-	// -- no configuration options at the moment
+	configSpeedFlag = ( 0 != pImp->GetPropertyInteger(AI_CONFIG_FAVOUR_SPEED,0) ? true : false);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -437,7 +427,7 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 
 	// generate vertex normals. We have O(logn) for the binary lookup, which we need
 	// for n elements, thus the EXPECTED complexity is O(nlogn)
-	if (surface.mMaximumSmoothAngle < 3.f)
+	if (surface.mMaximumSmoothAngle < 3.f && !configSpeedFlag)
 	{
 		const float fLimit = cos(surface.mMaximumSmoothAngle);
 

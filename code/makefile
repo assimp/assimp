@@ -2,7 +2,8 @@
 #produces shared library output in bin/libassimp.so
 
 
-SOURCES = 3DSConverter.cpp \
+SOURCES = AssimpPCH.cpp \
+	3DSConverter.cpp \
 	3DSLoader.cpp \
 	aiAssert.cpp \
 	ASELoader.cpp \
@@ -59,6 +60,9 @@ SOURCES = 3DSConverter.cpp \
 	RawLoader.cpp \
 	OFFLoader.cpp \
 	SortByPTypeProcess.cpp \
+	FindInvalidDataProcess.cpp \
+	ACLoader.cpp \
+	LWSLoader.cpp \
 	XFileParser.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)

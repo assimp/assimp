@@ -43,19 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * all normals in meshes with infacing normals.
  */
 
-// CRT includes
-#include <vector>
-#include <assert.h>
+#include "AssimpPCH.h"
 
 // internal headers
 #include "FixNormalsStep.h"
 #include "SpatialSort.h"
 
-// public ASSIMP headers
-#include "../include/DefaultLogger.h"
-#include "../include/aiPostProcess.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
 
 using namespace Assimp;
 

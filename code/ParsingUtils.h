@@ -122,6 +122,30 @@ bool GetNextLine(const char_t*& buffer, char_t out[4096])
 	while (IsLineEnd( *buffer ) && '\0' != *buffer)++buffer;
 	return true;
 }
-
-
+// ---------------------------------------------------------------------------------
+template <class char_t>
+inline bool IsNumeric( char_t in)
+{
+	return in >= '0' && in <= '9' || '-' == in || '+' == in;
+}
+// ---------------------------------------------------------------------------------
+AI_FORCE_INLINE bool TokenMatch(const char*& in, const char* token, unsigned int len)
+{
+	if (!::strncmp(token,in,len) && IsSpaceOrNewLine(in[len]))
+	{
+		in += len+1;
+		return true;
+	}
+	return false;
+}
+// ---------------------------------------------------------------------------------
+AI_FORCE_INLINE bool TokenMatch(char*& in, const char* token, unsigned int len)
+{
+	if (!::strncmp(token,in,len) && IsSpaceOrNewLine(in[len]))
+	{
+		in += len+1;
+		return true;
+	}
+	return false;
+}
 #endif // ! AI_PARSING_UTILS_H_INC

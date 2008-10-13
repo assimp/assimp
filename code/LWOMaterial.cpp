@@ -41,20 +41,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the material oart of the LWO importer class */
 
+
+#include "AssimpPCH.h"
+
 // internal headers
 #include "LWOLoader.h"
 #include "MaterialSystem.h"
 #include "ByteSwap.h"
-
-// public assimp headers
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/DefaultLogger.h"
-
-// boost headers
-#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 

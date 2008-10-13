@@ -41,23 +41,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the STL importer class */
 
+#include "AssimpPCH.h"
+
 // internal headers
 #include "NFFLoader.h"
-#include "MaterialSystem.h"
 #include "ParsingUtils.h"
 #include "StandardShapes.h"
 #include "fast_atof.h"
-#include "qnan.h"
 
-// public assimp headers
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/DefaultLogger.h"
-
-// boost headers
-#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 

@@ -41,590 +41,488 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the PLY parser class */
 
+#include "AssimpPCH.h"
+
 #include "PlyLoader.h"
-#include "MaterialSystem.h"
 #include "fast_atof.h"
-#include "StringComparison.h"
-#include "ByteSwap.h"
 
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/DefaultLogger.h"
-
-#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
-PLY::EDataType PLY::Property::ParseDataType(const char* p_szIn,const char** p_szOut)
+PLY::EDataType PLY::Property::ParseDataType(const char* pCur,const char** pCurOut)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut);
+	ai_assert(NULL != pCur && NULL != pCurOut);
 	PLY::EDataType eOut = PLY::EDT_INVALID;
 
-	if (0 == ASSIMP_strincmp(p_szIn,"char",4) ||
-		0 == ASSIMP_strincmp(p_szIn,"int8",4))
+	if (TokenMatch(pCur,"char",4) ||
+		TokenMatch(pCur,"int8",4))
 	{
-		p_szIn+=4;
 		eOut = PLY::EDT_Char;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"uchar",5) ||
-			 0 == ASSIMP_strincmp(p_szIn,"uint8",5))
+	else if (TokenMatch(pCur,"uchar",5) ||
+			 TokenMatch(pCur,"uint8",5))
 	{
-		p_szIn+=5;
 		eOut = PLY::EDT_UChar;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"short",5) ||
-			 0 == ASSIMP_strincmp(p_szIn,"int16",5))
+	else if (TokenMatch(pCur,"short",5) ||
+			 TokenMatch(pCur,"int16",5))
 	{
-		p_szIn+=5;
 		eOut = PLY::EDT_Short;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"ushort",6) ||
-			 0 == ASSIMP_strincmp(p_szIn,"uint16",6))
+	else if (TokenMatch(pCur,"ushort",6) ||
+			 TokenMatch(pCur,"uint16",6))
 	{
-		p_szIn+=6;
 		eOut = PLY::EDT_UShort;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"int32",5))
+	else if (TokenMatch(pCur,"int32",5) || TokenMatch(pCur,"int",3))
 	{
-		p_szIn+=5;
 		eOut = PLY::EDT_Int;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"uint32",6))
+	else if (TokenMatch(pCur,"uint32",6) || TokenMatch(pCur,"uint",4))
 	{
-		p_szIn+=6;
 		eOut = PLY::EDT_UInt;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"int",3))
+	else if (TokenMatch(pCur,"float",5) || TokenMatch(pCur,"float32",7))
 	{
-		p_szIn+=3;
-		eOut = PLY::EDT_Int;
-	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"uint",4))
-	{
-		p_szIn+=4;
-		eOut = PLY::EDT_UInt;
-	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"float32",7))
-	{
-		p_szIn+=7;
 		eOut = PLY::EDT_Float;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"float",5))
+	else if (TokenMatch(pCur,"double64",8) || TokenMatch(pCur,"double",6) ||
+		     TokenMatch(pCur,"float64",7))
 	{
-		p_szIn+=5;
-		eOut = PLY::EDT_Float;
-	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"float64",7))
-	{
-		p_szIn+=7;
 		eOut = PLY::EDT_Double;
-	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"double64",8))
-	{
-		p_szIn+=8;
-		eOut = PLY::EDT_Double;
-	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"double",6))
-	{
-		p_szIn+=6;
-		eOut = PLY::EDT_Double;
-	}
-	// either end of line or space, but no other characters allowed
-	if (!(IsSpace(*p_szIn) || IsLineEnd(*p_szIn)))
-	{
-		eOut = PLY::EDT_INVALID;
 	}
 	if (PLY::EDT_INVALID == eOut)
 	{
 		DefaultLogger::get()->info("Found unknown data type in PLY file. This is OK");
 	}
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 	return eOut;
 }
 // ------------------------------------------------------------------------------------------------
-PLY::ESemantic PLY::Property::ParseSemantic(const char* p_szIn,const char** p_szOut)
+PLY::ESemantic PLY::Property::ParseSemantic(const char* pCur,const char** pCurOut)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut);
+	ai_assert(NULL != pCur && NULL != pCurOut);
 
 	PLY::ESemantic eOut = PLY::EST_INVALID;
-	if (0 == ASSIMP_strincmp(p_szIn,"red",3))
+	if (TokenMatch(pCur,"red",3))
 	{
-		p_szIn+=3;
 		eOut = PLY::EST_Red;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"green",4))
+	else if (TokenMatch(pCur,"green",5))
 	{
-		p_szIn+=5;
 		eOut = PLY::EST_Green;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"blue",4))
+	else if (TokenMatch(pCur,"blue",4))
 	{
-		p_szIn+=4;
 		eOut = PLY::EST_Blue;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"alpha",5))
+	else if (TokenMatch(pCur,"alpha",5))
 	{
-		p_szIn+=5;
 		eOut = PLY::EST_Alpha;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"vertex_index",12))
+	else if (TokenMatch(pCur,"vertex_index",12) || TokenMatch(pCur,"vertex_indices",14))
 	{
-		p_szIn+=12;
 		eOut = PLY::EST_VertexIndex;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"vertex_indices",14))
+	else if (TokenMatch(pCur,"material_index",14))
 	{
-		p_szIn+=14;
-		eOut = PLY::EST_VertexIndex;
-	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"material_index",14))
-	{
-		p_szIn+=14;
 		eOut = PLY::EST_MaterialIndex;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"ambient_red",11))
+	else if (TokenMatch(pCur,"ambient_red",11))
 	{
-		p_szIn+=11;
 		eOut = PLY::EST_AmbientRed;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"ambient_green",13))
+	else if (TokenMatch(pCur,"ambient_green",13))
 	{
-		p_szIn+=13;
 		eOut = PLY::EST_AmbientGreen;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"ambient_blue",12))
+	else if (TokenMatch(pCur,"ambient_blue",12))
 	{
-		p_szIn+=12;
 		eOut = PLY::EST_AmbientBlue;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"ambient_alpha",13))
+	else if (TokenMatch(pCur,"ambient_alpha",13))
 	{
-		p_szIn+=13;
 		eOut = PLY::EST_AmbientAlpha;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"diffuse_red",11))
+	else if (TokenMatch(pCur,"diffuse_red",11))
 	{
-		p_szIn+=11;
 		eOut = PLY::EST_DiffuseRed;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"diffuse_green",13))
+	else if (TokenMatch(pCur,"diffuse_green",13))
 	{
-		p_szIn+=13;
 		eOut = PLY::EST_DiffuseGreen;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"diffuse_blue",12))
+	else if (TokenMatch(pCur,"diffuse_blue",12))
 	{
-		p_szIn+=12;
 		eOut = PLY::EST_DiffuseBlue;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"diffuse_alpha",13))
+	else if (TokenMatch(pCur,"diffuse_alpha",13))
 	{
-		p_szIn+=13;
 		eOut = PLY::EST_DiffuseAlpha;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"specular_red",12))
+	else if (TokenMatch(pCur,"specular_red",12))
 	{
-		p_szIn+=12;
 		eOut = PLY::EST_SpecularRed;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"specular_green",14))
+	else if (TokenMatch(pCur,"specular_green",14))
 	{
-		p_szIn+=14;
 		eOut = PLY::EST_SpecularGreen;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"specular_blue",13))
+	else if (TokenMatch(pCur,"specular_blue",13))
 	{
-		p_szIn+=13;
 		eOut = PLY::EST_SpecularBlue;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"specular_alpha",14))
+	else if (TokenMatch(pCur,"specular_alpha",14))
 	{
-		p_szIn+=14;
 		eOut = PLY::EST_SpecularAlpha;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"opacity",7))
+	else if (TokenMatch(pCur,"opacity",7))
 	{
-		p_szIn+=7;
 		eOut = PLY::EST_Opacity;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"specular_power",6))
+	else if (TokenMatch(pCur,"specular_power",6))
 	{
-		p_szIn+=7;
 		eOut = PLY::EST_PhongPower;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"r",1))
+	else if (TokenMatch(pCur,"r",1))
 	{
-		p_szIn++;
 		eOut = PLY::EST_Red;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"g",1))
+	else if (TokenMatch(pCur,"g",1))
 	{
-		p_szIn++;
 		eOut = PLY::EST_Green;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"b",1))
+	else if (TokenMatch(pCur,"b",1))
 	{
-		p_szIn++;
 		eOut = PLY::EST_Blue;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"tx",2))
+	// NOTE: Blender3D exports texture coordinates as s,t tuples
+	else if (TokenMatch(pCur,"u",1) ||  TokenMatch(pCur,"s",1) || TokenMatch(pCur,"tx",2))
 	{
-		p_szIn+=2;
 		eOut = PLY::EST_UTextureCoord;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"ty",2))
+	else if (TokenMatch(pCur,"v",1) ||  TokenMatch(pCur,"t",1) || TokenMatch(pCur,"ty",2))
 	{
-		p_szIn+=2;
 		eOut = PLY::EST_VTextureCoord;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"u",1))
+	else if (TokenMatch(pCur,"x",1))
 	{
-		p_szIn++;
-		eOut = PLY::EST_UTextureCoord;
-	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"v",1))
-	{
-		p_szIn++;
-		eOut = PLY::EST_VTextureCoord;
-	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"x",1))
-	{
-		p_szIn++;
 		eOut = PLY::EST_XCoord;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"y",1))
+	else if (TokenMatch(pCur,"y",1))
 	{
-		p_szIn++;
 		eOut = PLY::EST_YCoord;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"z",1))
+	else if (TokenMatch(pCur,"z",1))
 	{
-		p_szIn++;
 		eOut = PLY::EST_ZCoord;
+	}
+	else if (TokenMatch(pCur,"nx",2))
+	{
+		eOut = PLY::EST_XNormal;
+	}
+	else if (TokenMatch(pCur,"ny",2))
+	{
+		eOut = PLY::EST_YNormal;
+	}
+	else if (TokenMatch(pCur,"nz",2))
+	{
+		eOut = PLY::EST_ZNormal;
 	}
 	else
 	{
-		DefaultLogger::get()->info("Found unknown property in file. This is ok");
-
-		// ... find the next space or new line
-		while (*p_szIn != ' ' && *p_szIn != '\t'  && 
-			   *p_szIn != '\r' && *p_szIn != '\0' && *p_szIn != '\n')p_szIn++;
+		DefaultLogger::get()->info("Found unknown property semantic in file. This is ok");
+		SkipLine(&pCur);
 	}
-	// either end of line or space, but no other characters allowed
-	if (!(IsSpace(*p_szIn) || IsLineEnd(*p_szIn)))
-	{
-		eOut = PLY::EST_INVALID;
-	}
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 	return eOut;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::Property::ParseProperty (const char* p_szIn,
-	const char** p_szOut,
+bool PLY::Property::ParseProperty (const char* pCur,
+	const char** pCurOut,
 	PLY::Property* pOut)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut);
+	ai_assert(NULL != pCur && NULL != pCurOut);
 
 	// Forms supported:
 	// "property float x"
 	// "property list uchar int vertex_index"
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 
 	// skip leading spaces
-	if (!SkipSpaces(p_szIn,&p_szIn))return false;
+	if (!SkipSpaces(pCur,&pCur))return false;
 
 	// skip the "property" string at the beginning
-	if (0 != ASSIMP_strincmp(p_szIn,"property",8) || !IsSpace(*(p_szIn+8)))
+	if (!TokenMatch(pCur,"property",8))
 	{
 		// seems not to be a valid property entry
 		return false;
 	}
 	// get next word
-	p_szIn += 9;
-	if (!SkipSpaces(p_szIn,&p_szIn))return false;
-
-	if (0 == ASSIMP_strincmp(p_szIn,"list",4) && IsSpace(*(p_szIn+4)))
+	if (!SkipSpaces(pCur,&pCur))return false;
+	if (TokenMatch(pCur,"list",4))
 	{
 		pOut->bIsList = true;
 
 		// seems to be a list.
-		p_szIn += 5;
-		if(EDT_INVALID == (pOut->eFirstType = PLY::Property::ParseDataType(p_szIn, &p_szIn)))
+		if(EDT_INVALID == (pOut->eFirstType = PLY::Property::ParseDataType(pCur, &pCur)))
 		{
 			// unable to parse list size data type
-			SkipLine(p_szIn,&p_szIn);
-			*p_szOut = p_szIn;
+			SkipLine(pCur,&pCur);
+			*pCurOut = pCur;
 			return false;
 		}
-		if (!SkipSpaces(p_szIn,&p_szIn))return false;
-		if(EDT_INVALID == (pOut->eType = PLY::Property::ParseDataType(p_szIn, &p_szIn)))
+		if (!SkipSpaces(pCur,&pCur))return false;
+		if(EDT_INVALID == (pOut->eType = PLY::Property::ParseDataType(pCur, &pCur)))
 		{
 			// unable to parse list data type
-			SkipLine(p_szIn,&p_szIn);
-			*p_szOut = p_szIn;
+			SkipLine(pCur,&pCur);
+			*pCurOut = pCur;
 			return false;
 		}
 	}
 	else
 	{
-		if(EDT_INVALID == (pOut->eType = PLY::Property::ParseDataType(p_szIn, &p_szIn)))
+		if(EDT_INVALID == (pOut->eType = PLY::Property::ParseDataType(pCur, &pCur)))
 		{
 			// unable to parse data type. Skip the property
-			SkipLine(p_szIn,&p_szIn);
-			*p_szOut = p_szIn;
+			SkipLine(pCur,&pCur);
+			*pCurOut = pCur;
 			return false;
 		}
 	}
 	
-	if (!SkipSpaces(p_szIn,&p_szIn))return false;
-	const char* szCur = p_szIn;
-	pOut->Semantic = PLY::Property::ParseSemantic(p_szIn, &p_szIn);
+	if (!SkipSpaces(pCur,&pCur))return false;
+	const char* szCur = pCur;
+	pOut->Semantic = PLY::Property::ParseSemantic(pCur, &pCur);
 
 	if (PLY::EST_INVALID == pOut->Semantic)
 	{
 		// store the name of the semantic
-		uintptr_t iDiff = (uintptr_t)p_szIn - (uintptr_t)szCur;
+		uintptr_t iDiff = (uintptr_t)pCur - (uintptr_t)szCur;
 
 		DefaultLogger::get()->info("Found unknown semantic in PLY file. This is OK");
 		pOut->szName = std::string(szCur,iDiff);
 	}
 
-	SkipSpacesAndLineEnd(p_szIn,&p_szIn);
-	*p_szOut = p_szIn;
+	SkipSpacesAndLineEnd(pCur,&pCur);
+	*pCurOut = pCur;
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
-PLY::EElementSemantic PLY::Element::ParseSemantic(const char* p_szIn,
-	const char** p_szOut)
+PLY::EElementSemantic PLY::Element::ParseSemantic(const char* pCur,
+	const char** pCurOut)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut);
+	ai_assert(NULL != pCur && NULL != pCurOut);
 	PLY::EElementSemantic eOut = PLY::EEST_INVALID;
-	if (0 == ASSIMP_strincmp(p_szIn,"vertex",6))
+	if (TokenMatch(pCur,"vertex",6))
 	{
-		p_szIn+=6;
 		eOut = PLY::EEST_Vertex;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"face",4))
+	else if (TokenMatch(pCur,"face",4))
 	{
-		p_szIn+=4;
 		eOut = PLY::EEST_Face;
 	}
 #if 0
-	else if (0 == ASSIMP_strincmp(p_szIn,"range_grid",10))
+	// TODO: maybe implement this?
+	else if (TokenMatch(pCur,"range_grid",10))
 	{
-		p_szIn+=10;
 		eOut = PLY::EEST_Face;
 	}
 #endif
-	else if (0 == ASSIMP_strincmp(p_szIn,"tristrips",9))
+	else if (TokenMatch(pCur,"tristrips",9))
 	{
-		p_szIn+=9;
 		eOut = PLY::EEST_TriStrip;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"edge",4))
+	else if (TokenMatch(pCur,"edge",4))
 	{
-		p_szIn+=4;
 		eOut = PLY::EEST_Edge;
 	}
-	else if (0 == ASSIMP_strincmp(p_szIn,"material",8))
+	else if (TokenMatch(pCur,"material",8))
 	{
-		p_szIn+=8;
 		eOut = PLY::EEST_Material;
 	}
-
-	// either end of line or space, but no other characters allowed
-	if (!(IsSpace(*p_szIn) || IsLineEnd(*p_szIn)))
-	{
-		eOut = PLY::EEST_INVALID;
-	}
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 	return eOut;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::Element::ParseElement (const char* p_szIn, 
-	const char** p_szOut,
+bool PLY::Element::ParseElement (const char* pCur, 
+	const char** pCurOut,
 	PLY::Element* pOut)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL != pOut);
+	ai_assert(NULL != pCur && NULL != pCurOut && NULL != pOut);
 
 	// Example format: "element vertex 8"
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 
 	// skip leading spaces
-	if (!SkipSpaces(p_szIn,&p_szIn))return false;
+	if (!SkipSpaces(&pCur))return false;
 
 	// skip the "element" string at the beginning
-	if (0 != ASSIMP_strincmp(p_szIn,"element",7) || !IsSpace(*(p_szIn+7)))
+	if (!TokenMatch(pCur,"element",7))
 	{
 		// seems not to be a valid property entry
 		return false;
 	}
 	// get next word
-	p_szIn += 8;
-	if (!SkipSpaces(p_szIn,&p_szIn))return false;
+	if (!SkipSpaces(&pCur))return false;
 
 	// parse the semantic of the element
-	const char* szCur = p_szIn;
-	pOut->eSemantic = PLY::Element::ParseSemantic(p_szIn,&p_szIn);
+	const char* szCur = pCur;
+	pOut->eSemantic = PLY::Element::ParseSemantic(pCur,&pCur);
 	if (PLY::EEST_INVALID == pOut->eSemantic)
 	{
-		// store the name of the semantic
-		uintptr_t iDiff = (uintptr_t)p_szIn - (uintptr_t)szCur;
-
+		// if the exact semantic can't be determined, just store
+		// the original string identifier
+		uintptr_t iDiff = (uintptr_t)pCur - (uintptr_t)szCur;
 		pOut->szName = std::string(szCur,iDiff);
 	}
 
-	if (!SkipSpaces(p_szIn,&p_szIn))return false;
+	if (!SkipSpaces(&pCur))return false;
 	
 	//parse the number of occurences of this element
-	pOut->NumOccur = strtol10(p_szIn,&p_szIn);
+	pOut->NumOccur = strtol10(pCur,&pCur);
 
 	// go to the next line
-	SkipSpacesAndLineEnd(p_szIn,&p_szIn);
+	SkipSpacesAndLineEnd(pCur,&pCur);
 
 	// now parse all properties of the element
 	while(true)
 	{
 		// skip all comments
-		PLY::DOM::SkipComments(p_szIn,&p_szIn);
+		PLY::DOM::SkipComments(pCur,&pCur);
 
-		PLY::Property* prop = new PLY::Property();
-
-		if(!PLY::Property::ParseProperty(p_szIn,&p_szIn,prop))break;
-
-		// add the property to the property list
+		PLY::Property prop;
+		if(!PLY::Property::ParseProperty(pCur,&pCur,&prop))break;
 		pOut->alProperties.push_back(prop);
 	}
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::DOM::SkipComments (const char* p_szIn,
-	const char** p_szOut)
+bool PLY::DOM::SkipComments (const char* pCur,
+	const char** pCurOut)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut);
-	*p_szOut = p_szIn;
+	ai_assert(NULL != pCur && NULL != pCurOut);
+	*pCurOut = pCur;
 
 	// skip spaces
-	if (!SkipSpaces(p_szIn,&p_szIn))return false;
+	if (!SkipSpaces(pCur,&pCur))return false;
 
-	if (0 == ASSIMP_strincmp(p_szIn,"comment",7))
+	if (TokenMatch(pCur,"comment",7))
 	{
-		p_szIn += 7;
-
-		SkipLine(p_szIn,&p_szIn);
-
-		SkipComments(p_szIn,&p_szIn);
-		*p_szOut = p_szIn;
+		SkipLine(pCur,&pCur);
+		SkipComments(pCur,&pCur);
+		*pCurOut = pCur;
 		return true;
 	}
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 	return false;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::DOM::ParseHeader (const char* p_szIn,const char** p_szOut)
+bool PLY::DOM::ParseHeader (const char* pCur,const char** pCurOut)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut);
+	ai_assert(NULL != pCur && NULL != pCurOut);
 	DefaultLogger::get()->debug("PLY::DOM::ParseHeader() begin");
 
 	// after ply and format line
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 
 	// parse all elements
 	while (true)
 	{
 		// skip all comments
-		PLY::DOM::SkipComments(p_szIn,&p_szIn);
+		PLY::DOM::SkipComments(pCur,&pCur);
 
-		PLY::Element* out = new PLY::Element();
-		if(PLY::Element::ParseElement(p_szIn,&p_szIn,out))
+		PLY::Element out;
+		if(PLY::Element::ParseElement(pCur,&pCur,&out))
 		{
 			// add the element to the list of elements
-			this->alElements.push_back(out);
+			alElements.push_back(out);
 		}
-		else if (0 == ASSIMP_strincmp(p_szIn,"end_header",10) && IsSpaceOrNewLine(*(p_szIn+10)))
+		else if (TokenMatch(pCur,"end_header",10))
 		{
 			// we have reached the end of the header
-			p_szIn += 11;
 			break;
 		}
-		// ignore unknown header elements
+		else
+		{
+			// ignore unknown header elements
+			SkipLine(&pCur);
+		}
 	}
-	SkipSpacesAndLineEnd(p_szIn,&p_szIn);
-	*p_szOut = p_szIn;
+	SkipSpacesAndLineEnd(pCur,&pCur);
+	*pCurOut = pCur;
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseHeader() succeeded");
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
 bool PLY::DOM::ParseElementInstanceLists (
-	const char* p_szIn,
-	const char** p_szOut)
+	const char* pCur,
+	const char** pCurOut)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut);
+	ai_assert(NULL != pCur && NULL != pCurOut);
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseElementInstanceLists() begin");
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 
-	this->alElementData.resize(this->alElements.size());
+	alElementData.resize(alElements.size());
 
-	std::vector<PLY::Element*>::const_iterator i = this->alElements.begin();
-	std::vector<PLY::ElementInstanceList*>::iterator a = this->alElementData.begin();
+	std::vector<PLY::Element>::const_iterator i = alElements.begin();
+	std::vector<PLY::ElementInstanceList>::iterator a = alElementData.begin();
 
 	// parse all element instances
-	for (;i != this->alElements.end();++i,++a)
+	for (;i != alElements.end();++i,++a)
 	{
-		*a = new PLY::ElementInstanceList((*i)); // reserve enough storage
-		PLY::ElementInstanceList::ParseInstanceList(p_szIn,&p_szIn,(*i),(*a));
+		(*a).alInstances.resize((*i).NumOccur);
+		PLY::ElementInstanceList::ParseInstanceList(pCur,&pCur,&(*i),&(*a));
 	}
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseElementInstanceLists() succeeded");
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
 bool PLY::DOM::ParseElementInstanceListsBinary (
-	const char* p_szIn,
-	const char** p_szOut,
+	const char* pCur,
+	const char** pCurOut,
 	bool p_bBE)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut);
+	ai_assert(NULL != pCur && NULL != pCurOut);
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseElementInstanceListsBinary() begin");
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 	
-	this->alElementData.resize(this->alElements.size());
+	alElementData.resize(alElements.size());
 
-	std::vector<PLY::Element*>::const_iterator i = this->alElements.begin();
-	std::vector<PLY::ElementInstanceList*>::iterator a = this->alElementData.begin();
+	std::vector<PLY::Element>::const_iterator i = alElements.begin();
+	std::vector<PLY::ElementInstanceList>::iterator a = alElementData.begin();
 
 	// parse all element instances
-	for (;i != this->alElements.end();++i,++a)
+	for (;i != alElements.end();++i,++a)
 	{
-		*a = new PLY::ElementInstanceList((*i)); // reserve enough storage
-		PLY::ElementInstanceList::ParseInstanceListBinary(p_szIn,&p_szIn,(*i),(*a),p_bBE);
+		(*a).alInstances.resize((*i).NumOccur);
+		PLY::ElementInstanceList::ParseInstanceListBinary(pCur,&pCur,&(*i),&(*a),p_bBE);
 	}
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseElementInstanceListsBinary() succeeded");
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::DOM::ParseInstanceBinary (const char* p_szIn,DOM* p_pcOut,bool p_bBE)
+bool PLY::DOM::ParseInstanceBinary (const char* pCur,DOM* p_pcOut,bool p_bBE)
 {
-	ai_assert(NULL != p_szIn && NULL != p_pcOut);
+	ai_assert(NULL != pCur && NULL != p_pcOut);
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseInstanceBinary() begin");
 
-	if(!p_pcOut->ParseHeader(p_szIn,&p_szIn))
+	if(!p_pcOut->ParseHeader(pCur,&pCur))
 	{
 		DefaultLogger::get()->debug("PLY::DOM::ParseInstanceBinary() failure");
 		return false;
 	}
-	if(!p_pcOut->ParseElementInstanceListsBinary(p_szIn,&p_szIn,p_bBE))
+	if(!p_pcOut->ParseElementInstanceListsBinary(pCur,&pCur,p_bBE))
 	{
 		DefaultLogger::get()->debug("PLY::DOM::ParseInstanceBinary() failure");
 		return false;
@@ -633,20 +531,20 @@ bool PLY::DOM::ParseInstanceBinary (const char* p_szIn,DOM* p_pcOut,bool p_bBE)
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::DOM::ParseInstance (const char* p_szIn,DOM* p_pcOut)
+bool PLY::DOM::ParseInstance (const char* pCur,DOM* p_pcOut)
 {
-	ai_assert(NULL != p_szIn);
+	ai_assert(NULL != pCur);
 	ai_assert(NULL != p_pcOut);
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseInstance() begin");
 
 
-	if(!p_pcOut->ParseHeader(p_szIn,&p_szIn))
+	if(!p_pcOut->ParseHeader(pCur,&pCur))
 	{
 		DefaultLogger::get()->debug("PLY::DOM::ParseInstance() failure");
 		return false;
 	}
-	if(!p_pcOut->ParseElementInstanceLists(p_szIn,&p_szIn))
+	if(!p_pcOut->ParseElementInstanceLists(pCur,&pCur))
 	{
 		DefaultLogger::get()->debug("PLY::DOM::ParseInstance() failure");
 		return false;
@@ -656,49 +554,45 @@ bool PLY::DOM::ParseInstance (const char* p_szIn,DOM* p_pcOut)
 }
 // ------------------------------------------------------------------------------------------------
 bool PLY::ElementInstanceList::ParseInstanceList (
-	const char* p_szIn,
-	const char** p_szOut,
+	const char* pCur,
+	const char** pCurOut,
 	const PLY::Element* pcElement, 
 	PLY::ElementInstanceList* p_pcOut)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL != pcElement && NULL != p_pcOut);
+	ai_assert(NULL != pCur && NULL != pCurOut && NULL != pcElement && NULL != p_pcOut);
 
-	if (EEST_INVALID == pcElement->eSemantic)
+	if (EEST_INVALID == pcElement->eSemantic || pcElement->alProperties.empty())
 	{
 		// if the element has an unknown semantic we can skip all lines
 		// However, there could be comments
 		for (unsigned int i = 0; i < pcElement->NumOccur;++i)
 		{
-			PLY::DOM::SkipComments(p_szIn,&p_szIn);
-			SkipLine(p_szIn,&p_szIn);
+			PLY::DOM::SkipComments(pCur,&pCur);
+			SkipLine(pCur,&pCur);
 		}
 	}
 	else
 	{
 		// be sure to have enough storage
-		p_pcOut->alInstances.resize(pcElement->NumOccur);
 		for (unsigned int i = 0; i < pcElement->NumOccur;++i)
 		{
-			PLY::DOM::SkipComments(p_szIn,&p_szIn);
-
-			PLY::ElementInstance* out = new PLY::ElementInstance();
-			PLY::ElementInstance::ParseInstance(p_szIn, &p_szIn,pcElement, out);
-			// add it to the list
-			p_pcOut->alInstances[i] = out;
+			PLY::DOM::SkipComments(pCur,&pCur);
+			PLY::ElementInstance::ParseInstance(pCur, &pCur,pcElement,
+				&p_pcOut->alInstances[i]);
 		}
 	}
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
 bool PLY::ElementInstanceList::ParseInstanceListBinary (
-	const char* p_szIn,
-	const char** p_szOut,
+	const char* pCur,
+	const char** pCurOut,
 	const PLY::Element* pcElement,
 	PLY::ElementInstanceList* p_pcOut,
 	bool p_bBE /* = false */)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL != pcElement && NULL != p_pcOut);
+	ai_assert(NULL != pCur && NULL != pCurOut && NULL != pcElement && NULL != p_pcOut);
 
 	// we can add special handling code for unknown element semantics since
 	// we can't skip it as a whole block (we don't know its exact size
@@ -706,102 +600,99 @@ bool PLY::ElementInstanceList::ParseInstanceListBinary (
 	// of the unknown element)
 	for (unsigned int i = 0; i < pcElement->NumOccur;++i)
 	{
-		PLY::ElementInstance* out = new PLY::ElementInstance();
-		PLY::ElementInstance::ParseInstanceBinary(p_szIn, &p_szIn,pcElement, out, p_bBE);
-		// add it to the list
-		p_pcOut->alInstances[i] = out;
+		PLY::ElementInstance::ParseInstanceBinary(pCur, &pCur,pcElement,
+			&p_pcOut->alInstances[i], p_bBE);
 	}
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
 bool PLY::ElementInstance::ParseInstance (
-	const char* p_szIn,
-	const char** p_szOut,
+	const char* pCur,
+	const char** pCurOut,
 	const PLY::Element* pcElement,
 	PLY::ElementInstance* p_pcOut)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL != pcElement && NULL != p_pcOut);
+	ai_assert(NULL != pCur && NULL != pCurOut && NULL != pcElement && NULL != p_pcOut);
 
-	if (!SkipSpaces(p_szIn, &p_szIn))return false;
+	if (!SkipSpaces(pCur, &pCur))return false;
 
 	// allocate enough storage
 	p_pcOut->alProperties.resize(pcElement->alProperties.size());
 
 	std::vector<PLY::PropertyInstance>::iterator i = p_pcOut->alProperties.begin();
-	std::vector<PLY::Property*>::const_iterator a = pcElement->alProperties.begin();
+	std::vector<PLY::Property>::const_iterator  a = pcElement->alProperties.begin();
 	for (;i != p_pcOut->alProperties.end();++i,++a)
 	{
-		if(!(PLY::PropertyInstance::ParseInstance(p_szIn, &p_szIn,(*a),&(*i))))
+		if(!(PLY::PropertyInstance::ParseInstance(pCur, &pCur,&(*a),&(*i))))
 		{
 			DefaultLogger::get()->warn("Unable to parse property instance. "
 				"Skipping this element instance");
 
 			// skip the rest of the instance
-			SkipLine(p_szIn, &p_szIn);
+			SkipLine(pCur, &pCur);
 
-			PLY::PropertyInstance::ValueUnion v = PLY::PropertyInstance::DefaultValue((*a)->eType);
+			PLY::PropertyInstance::ValueUnion v = PLY::PropertyInstance::DefaultValue((*a).eType);
 			(*i).avList.push_back(v);
 		}
 	}
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
 bool PLY::ElementInstance::ParseInstanceBinary (
-	const char* p_szIn,
-	const char** p_szOut,
+	const char* pCur,
+	const char** pCurOut,
 	const PLY::Element* pcElement,
 	PLY::ElementInstance* p_pcOut,
 	bool p_bBE /* = false */)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL != pcElement && NULL != p_pcOut);
+	ai_assert(NULL != pCur && NULL != pCurOut && NULL != pcElement && NULL != p_pcOut);
 
 	// allocate enough storage
 	p_pcOut->alProperties.resize(pcElement->alProperties.size());
 
 	std::vector<PLY::PropertyInstance>::iterator i =  p_pcOut->alProperties.begin();
-	std::vector<PLY::Property*>::const_iterator a =  pcElement->alProperties.begin();
+	std::vector<PLY::Property>::const_iterator   a =  pcElement->alProperties.begin();
 	for (;i != p_pcOut->alProperties.end();++i,++a)
 	{
-		if(!(PLY::PropertyInstance::ParseInstanceBinary(p_szIn, &p_szIn,(*a),&(*i),p_bBE)))
+		if(!(PLY::PropertyInstance::ParseInstanceBinary(pCur, &pCur,&(*a),&(*i),p_bBE)))
 		{
 			DefaultLogger::get()->warn("Unable to parse binary property instance. "
 				"Skipping this element instance");
 
-			PLY::PropertyInstance::ValueUnion v = PLY::PropertyInstance::DefaultValue((*a)->eType);
-			(*i).avList.push_back(v);
+			(*i).avList.push_back(PLY::PropertyInstance::DefaultValue((*a).eType));
 		}
 	}
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::PropertyInstance::ParseInstance (const char* p_szIn,const char** p_szOut,
+bool PLY::PropertyInstance::ParseInstance (const char* pCur,const char** pCurOut,
 	const PLY::Property* prop, PLY::PropertyInstance* p_pcOut)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL !=  prop && NULL != p_pcOut);
+	ai_assert(NULL != pCur && NULL != pCurOut && NULL !=  prop && NULL != p_pcOut);
 
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 
 	// skip spaces at the beginning
-	if (!SkipSpaces(p_szIn, &p_szIn))return false;
+	if (!SkipSpaces(pCur, &pCur))return false;
 
 	if (prop->bIsList)
 	{
 		// parse the number of elements in the list
 		PLY::PropertyInstance::ValueUnion v;
-		PLY::PropertyInstance::ParseValue(p_szIn, &p_szIn,prop->eFirstType,&v);
+		PLY::PropertyInstance::ParseValue(pCur, &pCur,prop->eFirstType,&v);
 
 		// convert to unsigned int
 		unsigned int iNum = PLY::PropertyInstance::ConvertTo<unsigned int>(v,prop->eFirstType);
 
 		// parse all list elements
+		p_pcOut->avList.resize(3);
 		for (unsigned int i = 0; i < iNum;++i)
 		{
-			if (!SkipSpaces(p_szIn, &p_szIn))return false;
-			PLY::PropertyInstance::ParseValue(p_szIn, &p_szIn,prop->eType,&v);
-			p_pcOut->avList.push_back(v);
+			if (!SkipSpaces(pCur, &pCur))return false;
+			PLY::PropertyInstance::ParseValue(pCur, &pCur,prop->eType,&p_pcOut->avList[i]);
 		}
 	}
 	else
@@ -809,24 +700,28 @@ bool PLY::PropertyInstance::ParseInstance (const char* p_szIn,const char** p_szO
 		// parse the property
 		PLY::PropertyInstance::ValueUnion v;
 
-		PLY::PropertyInstance::ParseValue(p_szIn, &p_szIn,prop->eType,&v);
+		PLY::PropertyInstance::ParseValue(pCur, &pCur,prop->eType,&v);
 		p_pcOut->avList.push_back(v);
 	}
-	SkipSpacesAndLineEnd(p_szIn, &p_szIn);
-	*p_szOut = p_szIn;
+	SkipSpacesAndLineEnd(pCur, &pCur);
+	*pCurOut = pCur;
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::PropertyInstance::ParseInstanceBinary (const char* p_szIn,const char** p_szOut,
-	const PLY::Property* prop, PLY::PropertyInstance* p_pcOut,bool p_bBE)
+bool PLY::PropertyInstance::ParseInstanceBinary (
+	const char*  pCur,
+	const char** pCurOut,
+	const PLY::Property* prop, 
+	PLY::PropertyInstance* p_pcOut,
+	bool p_bBE)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL != prop && NULL != p_pcOut);
+	ai_assert(NULL != pCur && NULL != pCurOut && NULL != prop && NULL != p_pcOut);
 
 	if (prop->bIsList)
 	{
 		// parse the number of elements in the list
 		PLY::PropertyInstance::ValueUnion v;
-		PLY::PropertyInstance::ParseValueBinary(p_szIn, &p_szIn,prop->eFirstType,&v,p_bBE);
+		PLY::PropertyInstance::ParseValueBinary(pCur, &pCur,prop->eFirstType,&v,p_bBE);
 
 		// convert to unsigned int
 		unsigned int iNum = PLY::PropertyInstance::ConvertTo<unsigned int>(v,prop->eFirstType);
@@ -834,7 +729,7 @@ bool PLY::PropertyInstance::ParseInstanceBinary (const char* p_szIn,const char**
 		// parse all list elements
 		for (unsigned int i = 0; i < iNum;++i)
 		{
-			PLY::PropertyInstance::ParseValueBinary(p_szIn, &p_szIn,prop->eType,&v,p_bBE);
+			PLY::PropertyInstance::ParseValueBinary(pCur, &pCur,prop->eType,&v,p_bBE);
 			p_pcOut->avList.push_back(v);
 		}
 	}
@@ -842,10 +737,10 @@ bool PLY::PropertyInstance::ParseInstanceBinary (const char* p_szIn,const char**
 	{
 		// parse the property
 		PLY::PropertyInstance::ValueUnion v;
-		PLY::PropertyInstance::ParseValueBinary(p_szIn, &p_szIn,prop->eType,&v,p_bBE);
+		PLY::PropertyInstance::ParseValueBinary(pCur, &pCur,prop->eType,&v,p_bBE);
 		p_pcOut->avList.push_back(v);
 	}
-	*p_szOut = p_szIn;
+	*pCurOut = pCur;
 	return true;
 }
 // ------------------------------------------------------------------------------------------------
@@ -857,11 +752,11 @@ PLY::PropertyInstance::ValueUnion PLY::PropertyInstance::DefaultValue(
 	switch (eType)
 	{
 	case EDT_Float:
-		out.fFloat = 0.0f;
+		out.fFloat = 0.f;
 		return out;
 
 	case EDT_Double:
-		out.fDouble = 0.0;
+		out.fDouble = 0.;
 		return out;
 
 	default: ;
@@ -870,78 +765,68 @@ PLY::PropertyInstance::ValueUnion PLY::PropertyInstance::DefaultValue(
 	return out;
 }
 // ------------------------------------------------------------------------------------------------
-bool PLY::PropertyInstance::ParseValue(const char* p_szIn,const char** p_szOut,
-	PLY::EDataType eType,PLY::PropertyInstance::ValueUnion* out)
+bool PLY::PropertyInstance::ParseValue(
+	const char* pCur,
+	const char** pCurOut,
+	PLY::EDataType eType,
+	PLY::PropertyInstance::ValueUnion* out)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL != out);
+	ai_assert(NULL != pCur && NULL != pCurOut && NULL != out);
 
+	register bool ret = true;
+	*pCurOut = pCur;
 	switch (eType)
 	{
 	case EDT_UInt:
 	case EDT_UShort:
 	case EDT_UChar:
 
-		// simply parse in a full uint
-		out->iUInt = (uint32_t)strtol10(p_szIn, &p_szIn);
-
+		out->iUInt = (uint32_t)strtol10(pCur, &pCur);
 		break;
 
 	case EDT_Int:
 	case EDT_Short:
 	case EDT_Char:
 
-		{
-		// simply parse in a full int
-		// Take care of the sign at the beginning
-		bool bMinus = false;
-		if (*p_szIn == '-')
-		{
-			p_szIn++;
-			bMinus = true;
-		}
-		out->iInt = (int32_t)strtol10(p_szIn, &p_szIn);
-		if (bMinus)out->iInt *= -1;
-
+		out->iInt = (int32_t)strtol10s(pCur, &pCur);
 		break;
-		}
 
 	case EDT_Float:
 
-		// parse a simple float
-		p_szIn = fast_atof_move(p_szIn,out->fFloat);
+		pCur = fast_atof_move(pCur,out->fFloat);
 		break;
 
 	case EDT_Double:
 
-		// Parse a double float. .. TODO: support this
 		float f;
-		p_szIn = fast_atof_move(p_szIn,f);
+		pCur = fast_atof_move(pCur,f);
 		out->fDouble = (double)f;
 		break;
 
 	default:
-		*p_szOut = p_szIn;
-		return false;
+		ret = false;
 	}
-	*p_szOut = p_szIn;
-	return true;
+	*pCurOut = pCur;
+	return ret;
 }
 // ------------------------------------------------------------------------------------------------
 bool PLY::PropertyInstance::ParseValueBinary(
-	const char* p_szIn,
-	const char** p_szOut,
+	const char* pCur,
+	const char** pCurOut,
 	PLY::EDataType eType,
 	PLY::PropertyInstance::ValueUnion* out, 
 	bool p_bBE)
 {
-	ai_assert(NULL != p_szIn && NULL != p_szOut && NULL != out);
+	ai_assert(NULL != pCur && NULL != pCurOut && NULL != out);
 
+	register bool ret = true;
 	switch (eType)
 	{
 	case EDT_UInt:
-		out->iUInt = (uint32_t)*((uint32_t*)p_szIn);
-		p_szIn += 4;
+		out->iUInt = (uint32_t)*((uint32_t*)pCur);
+		pCur += 4;
 		
+		// Swap endianess
 		if (p_bBE)
 		{
 			ByteSwap::Swap((int32_t*)&out->iUInt);
@@ -950,28 +835,31 @@ bool PLY::PropertyInstance::ParseValueBinary(
 
 	case EDT_UShort:
 		{
-		uint16_t i = *((uint16_t*)p_szIn);
+		uint16_t i = *((uint16_t*)pCur);
+
+		// Swap endianess
 		if (p_bBE)
-			{
+		{
 			ByteSwap::Swap((int16_t*)&i);
-			}
+		}
 		out->iUInt = (uint32_t)i;
-		p_szIn += 2;
+		pCur += 2;
 		break;
 		}
 
 	case EDT_UChar:
 		{
-		uint8_t i = *((uint8_t*)p_szIn);
+		uint8_t i = *((uint8_t*)pCur);
 		out->iUInt = (uint32_t)i;
-		p_szIn ++;
+		pCur ++;
 		break;
 		}
 
 	case EDT_Int:
-		out->iInt = *((int32_t*)p_szIn);
-		p_szIn += 4;
+		out->iInt = *((int32_t*)pCur);
+		pCur += 4;
 		
+		// Swap endianess
 		if (p_bBE)
 		{
 			ByteSwap::Swap((int32_t*)&out->iInt);
@@ -980,47 +868,52 @@ bool PLY::PropertyInstance::ParseValueBinary(
 
 	case EDT_Short:
 		{
-		int16_t i = *((int16_t*)p_szIn);
+		int16_t i = *((int16_t*)pCur);
+
+		// Swap endianess
 		if (p_bBE)
-			{
+		{
 			ByteSwap::Swap((int16_t*)&i);
-			}
+		}
 		out->iInt = (int32_t)i;
-		p_szIn += 2;
+		pCur += 2;
 		break;
 		}
 
 	case EDT_Char:
-		out->iInt = (int32_t)*((int8_t*)p_szIn);
-		p_szIn ++;
+		out->iInt = (int32_t)*((int8_t*)pCur);
+		pCur ++;
 		break;
 
 	case EDT_Float:
 		{
-		int32_t* pf = (int32_t*)p_szIn;
+		int32_t* pf = (int32_t*)pCur;
+
+		// Swap endianess
 		if (p_bBE)
 		{
 			ByteSwap::Swap((int32_t*)&pf);
 		}
-		p_szIn += 4;
+		pCur += 4;
 		out->fFloat = *((float*)&pf);
 		break;
 		}
 	case EDT_Double:
 		{
-		int64_t* pf = (int64_t*)p_szIn;
+		int64_t* pf = (int64_t*)pCur;
+
+		// Swap endianess
 		if (p_bBE)
 		{
 			ByteSwap::Swap((int64_t*)&pf);
 		}
-		p_szIn += 8;
+		pCur += 8;
 		out->fDouble = *((double*)&pf);
 		break;
 		}
 	default:
-		*p_szOut = p_szIn;
-		return false;
+		ret = false;
 	}
-	*p_szOut = p_szIn;
-	return true;
+	*pCurOut = pCur;
+	return ret;
 }

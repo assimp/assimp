@@ -102,13 +102,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 // ---------------------------------------------------------------------------
-/** \brief Causes the 3DS loader to ignore pivot points in the file
+/** \brief Configures the 3DS loader to ignore pivot points in the file
  *
  * There are some faulty 3DS files which look only correctly with
  * pivot points disabled.
- * Property type: integer (1: true; !1: false).
+ * Property type: integer (0: false; !0: true). Default value: false.
  */
 #define AI_CONFIG_IMPORT_3DS_IGNORE_PIVOT	"imp.3ds.nopivot"
+
+
+// ---------------------------------------------------------------------------
+/** \brief Configures the AC loader to collect all surfaces which have the
+ *    "Backface cull" flag set in separate meshes. 
+ *
+ * Property type: integer (0: false; !0: true). Default value: true.
+ */
+#define AI_CONFIG_IMPORT_AC_SEPARATE_BFCULL	"imp.ac.sepbfcull"
 
 
 // ---------------------------------------------------------------------------
@@ -139,23 +148,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *         This is an input parameter to the OptimizeGraph-Step.
  *
  * Nodes whose referenced meshes have less faces than this value
- * are propably joined with neighbors with identical world matrices.
+ * are propably joined with neighbors with identical local matrices.
  * However, it is just a hint to the step.
  * Property type: integer 
  */
 #define AI_CONFIG_PP_OG_MIN_NUM_FACES		"pp.og.min_faces"
-
-
-// ---------------------------------------------------------------------------
-/** \brief Specifies whether animations are removed from the asset.
- *         This is an input parameter to the OptimizeGraph-Step.
- *
- * If an application does not need the animation data, erasing it at the
- * beginning of the post-process pipeline allows some steps - including
- * OptimizeGraph itself - to apply further optimizations.
- * Property type: integer (1: true; !1: false).
- */
-#define AI_CONFIG_PP_OG_REMOVE_ANIMATIONS	"pp.og.remove_anims"
 
 
 // ---------------------------------------------------------------------------
@@ -186,36 +183,77 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 // ---------------------------------------------------------------------------
-enum aiVertexComponent
+enum aiComponent
 {
 	//! Normal vectors
-	aiVertexComponent_NORMALS = 0x2u,
+	aiComponent_NORMALS = 0x2u,
 
 	//! Tangents and bitangents go always together ...
-	aiVertexComponent_TANGENTS_AND_BITANGENTS = 0x4u,
+	aiComponent_TANGENTS_AND_BITANGENTS = 0x4u,
 
 	//! ALL color sets
-	//! Use aiVertexComponent_COLORn(N) to specifiy the N'th set 
-	aiVertexComponent_COLORS = 0x8,
+	//! Use aiComponent_COLORn(N) to specifiy the N'th set 
+	aiComponent_COLORS = 0x8,
 
 	//! ALL texture UV sets
-	//! aiVertexComponent_TEXCOORDn(N) to specifiy the N'th set 
-	aiVertexComponent_TEXCOORDS = 0x10,
+	//! aiComponent_TEXCOORDn(N) to specifiy the N'th set 
+	aiComponent_TEXCOORDS = 0x10,
+
+	//! Removes all bone weights from all meshes.
+	//! The scenegraph nodes corresponding to the
+	//! bones are removed
+	aiComponent_BONEWEIGHTS = 0x20,
+
+	//! Removes all bone animations (aiScene::mAnimations)
+	aiComponent_ANIMATIONS = 0x40,
+
+	//! Removes all embedded textures (aiScene::mTextures)
+	aiComponent_TEXTURES = 0x80,
+
+	//! Removes all light sources (aiScene::mLights)
+	//! The scenegraph nodes corresponding to the
+	//! light sources are removed.
+	aiComponent_LIGHTS = 0x100,
+
+	//! Removes all light sources (aiScene::mCameras)
+	//! The scenegraph nodes corresponding to the
+	//! cameras are removed.
+	aiComponent_CAMERAS = 0x200,
+
+	//! Removes all meshes (aiScene::mMeshes). The
+	//! #AI_SCENE_FLAGS_ANIM_SKELETON_ONLY flag is set in aiScene::mFlags.
+	aiComponent_MESHES = 0x400,
 };
 
-#define aiVertexComponent_COLORSn(n) (1u << (n+10u))
-#define aiVertexComponent_TEXCOORDSn(n) (1u << (n+20u))
+#define aiComponent_COLORSn(n) (1u << (n+20u))
+#define aiComponent_TEXCOORDSn(n) (1u << (n+25u))
 
 
 // ---------------------------------------------------------------------------
-/** \brief Input parameter to the #aiProcess_RemVertexComponentXYZ step:
- *  Specifies the vertex components to be removed.
+/** \brief Input parameter to the #aiProcess_RemoveComponent step:
+ *  Specifies the parts of the data structure to be removed.
  *
  * See the documentation to this step for further details. The property
  * is expected to be an integer, a bitwise combination of the
- * #aiVertexComponent flags defined above in this header. The default
- * value is 0. 
+ * #aiComponent flags defined above in this header. The default
+ * value is 0. Important: if no valid mesh is remaining after the
+ * step has been executed (e.g you thought it was funny to specify ALL
+ * of the flags defined above) the import FAILS. Mainly because there is
+ * no data to work on anymore ...
  */
 #define AI_CONFIG_PP_RVC_FLAGS				"pp.rvc.flags"
+
+
+
+// ---------------------------------------------------------------------------
+/** \brief Causes assimp to favour speed against import quality.
+ *
+ * Enabling this option may result in faster loading, but it needn't.
+ * It represents just a hint to loaders and post-processing steps to use
+ * faster code paths, if possible. 
+ * This property is expected to be an integer, != 0 stands for true.
+ * The default value is 0.
+ */
+#define AI_CONFIG_FAVOUR_SPEED				"imp.speed_flag"
 
 #endif // !! AI_CONFIG_H_INC

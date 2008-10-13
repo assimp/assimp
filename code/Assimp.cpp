@@ -41,19 +41,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the Plain-C API */
 
 
-// public ASSIMP headers
+
+#include "AssimpPCH.h"
 #include "../include/assimp.h"
+
+// public ASSIMP headers
 #include "../include/aiFileIO.h"
-#include "../include/assimp.hpp"
-#include "../include/DefaultLogger.h"
-#include "../include/aiAssert.h"
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
 
 #include "GenericProperty.h"
 
-// boost headers
-//#define AI_C_THREADSAFE
+
 #if (defined AI_C_THREADSAFE)
 #	include <boost/thread/thread.hpp>
 #	include <boost/thread/mutex.hpp>

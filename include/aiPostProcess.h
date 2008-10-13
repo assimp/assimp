@@ -54,7 +54,9 @@ enum aiPostProcessSteps
 	/** Calculates the tangents and bitangents for the imported meshes. Does nothing
 	 * if a mesh does not have normals. You might want this post processing step to be
 	 * executed if you plan to use tangent space calculations such as normal mapping 
-	 * applied to the meshes.
+	 * applied to the meshes. There exists a configuration option,
+	* #AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE that allows you to specify
+	* an angle maximum for the step.
 	 */
 	aiProcess_CalcTangentSpace = 1,
 
@@ -76,25 +78,29 @@ enum aiPostProcessSteps
 	/** Triangulates all faces of all meshes. By default the imported mesh data might 
 	 * contain faces with more than 3 indices. For rendering a mesh you usually need
 	 * all faces to be triangles. This post processing step splits up all higher faces
-	 * to triangles.
+	 * to triangles. This step won't modify line and point primitives. If you need
+	 * only triangles, do the following:<br>
+	 * 1. Specify both the aiProcess_Triangulate and the aiProcess_SortByPType
+	 * step. <br>
+	 * 2. Ignore all point and line meshes when you process assimp's output data.
 	 */
 	aiProcess_Triangulate = 8,
 
-	/** Removes some parts of the mesh data structure (vertex components).
+	/** Removes some parts of the data structure (animations, materials, 
+	 *  light sources, cameras, textures, vertex components).
 	 *
-	 *  The vertex components to be removed are specified in a separate
-	 *  configuration option, AI_CONFIG_PP_RVC_FLAGS. This is quite useful
-	 *  if you don't need all vertex components. Especially vertex colors 
-	 *  are rarely used today ... . Calling this step to exclude unrequired
-	 *  vertex components from the pipeline as early as possible results
-	 *  in an increased performance and a more optimized output data structure.
-	 *  Note that vertex positions can't be removed. This step is also useful
-	 *  if you want to force Assimp to recompute normals or tangents. The
-	 *  corresponding steps don't recompute them if they're already there (
-     *  loaded from the source asset). By using this step you can make sure
-	 *  they are NOT there.
+	 *  The  components to be removed are specified in a separate
+	 *  configuration option, #AI_CONFIG_PP_RVC_FLAGS. This is quite useful
+	 *  if you don't need all parts of the output structure. Especially vertex 
+	 *  colors are rarely used today ... . Calling this step to exclude unrequired
+	 *  stuff from the pipeline as early as possible results in an increased 
+	 *  performance and a better optimized output data structure.
+	 *  This step is also useful if you want to force Assimp to recompute 
+	 *  normals or tangents. The corresponding steps don't recompute them if 
+	 *  they're already there ( loaded from the source asset). By using this 
+	 *  step you can make sure they are NOT there.
 	 */
-	aiProcess_RemVertexComponentXYZ = 0x10,
+	aiProcess_RemoveComponent = 0x10,
 
 	/** Generates normals for all faces of all meshes. The normals are shared
 	* between the three vertices of a face. This is ignored
@@ -105,7 +111,9 @@ enum aiPostProcessSteps
 
 	/** Generates smooth normals for all vertices in the mesh. This is ignored
 	* if normals are already existing. This flag may not be specified together
-	* with aiProcess_GenNormals
+	* with aiProcess_GenNormals. There exists a configuration option,
+	* #AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE that allows you to specify
+	* an angle maximum for the step.
 	*/
 	aiProcess_GenSmoothNormals = 0x40,
 
@@ -228,8 +236,8 @@ enum aiPostProcessSteps
 	aiProcess_Triangulate
 
 
- /** @def AI_POSTPROCESS_DEFAULT_REALTIME_FASTEST
- *  @brief Default postprocess configuration targeted at realtime applications.
+ /** @def AI_POSTPROCESS_DEFAULT_REALTIME
+ *   @brief Default postprocess configuration targeted at realtime applications.
  *    Unlike AI_POSTPROCESS_DEFAULT_REALTIME_FASTEST, this configuration
  *    performs some extra optimizations.
  *  

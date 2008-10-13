@@ -4,29 +4,38 @@
 #define AI_QNAN_H_INCLUDED
 
 
-
-inline bool is_qnan(const float in)
+// ---------------------------------------------------------------------------
+// check whether a float is NaN
+AI_FORCE_INLINE bool is_qnan(float in)
 {
-	// _isnan() takes a double as argument and would
-	// require a cast. Therefore we must do it on our own ...
-	// Another method would be to check whether in != in.
-	// This should also wor since nan compares to inequal, 
-	// even when compared with itself. However, this could
-	// cause problems with other special floats like snan
-	union _tagFPUNION
-	{
-		float f;
-		int32_t i;
-	} FPUNION1,FPUNION2;
-
-	FPUNION1.f = in;
-	FPUNION2.f = std::numeric_limits<float>::quiet_NaN();
-	return FPUNION1.i == FPUNION2.i;
+	return (in != in);
 }
 
-inline bool is_not_qnan(const float in)
+// ---------------------------------------------------------------------------
+// check whether a float is NOT NaN. 
+AI_FORCE_INLINE bool is_not_qnan(float in)
 {
-	return !is_qnan(in);
+	return (in == in);
+}
+
+// ---------------------------------------------------------------------------
+// check whether a float is either NaN or (+/-) INF. Denorms return false,
+// they're treated like normal values.
+AI_FORCE_INLINE bool is_special_float(float in)
+{
+	union IEEESingle
+	{
+		float Float;
+		struct
+		{
+			uint32_t Frac : 23;
+			uint32_t Exp  : 8;
+			uint32_t Sign : 1;
+		} IEEE;
+	} f;
+
+	f.Float = in;
+	return (f.IEEE.Exp == (1u << 8)-1);
 }
 
 #endif // !! AI_QNAN_H_INCLUDED

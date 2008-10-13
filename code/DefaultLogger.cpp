@@ -39,15 +39,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "../include/DefaultLogger.h"
-#include "../include/aiAssert.h"
+#include "AssimpPCH.h"
+
 #include "DefaultIOSystem.h"
 #include "Win32DebugLogStream.h"
-#include "../include/IOStream.h"
 #include "FileLogStream.h"
-
-#include <iostream>
-#include <sstream>
 
 namespace Assimp
 {

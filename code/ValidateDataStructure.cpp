@@ -43,22 +43,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * the data structure returned by Assimp
  */
 
-// STL headers
-#include <vector>
-#include <assert.h>
+#include "AssimpPCH.h"
 
 // internal headers
 #include "ValidateDataStructure.h"
 #include "BaseImporter.h"
-#include "StringComparison.h"
 #include "fast_atof.h"
 
-// public ASSIMP headers
-#include "../include/DefaultLogger.h"
-#include "../include/aiPostProcess.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
 
 // CRT headers
 #include <stdarg.h>
@@ -109,7 +100,9 @@ void ValidateDSProcess::ReportError(const char* msg,...)
 		throw new ImportErrorException("Idiot ... learn coding!");
 	}
 	va_end(args);
-	ai_assert(false);
+#ifdef _DEBUG
+	aiAssert( false,szBuffer,__LINE__,__FILE__ );
+#endif
 	throw new ImportErrorException("Validation failed: " + std::string(szBuffer,iLen));
 }
 // ------------------------------------------------------------------------------------------------

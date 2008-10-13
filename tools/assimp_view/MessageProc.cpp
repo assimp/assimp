@@ -136,7 +136,11 @@ void MakeFileAssociations()
 	// ------------------------------------------------- 
 	// .md5
 	// -------------------------------------------------
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.md5",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
+	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.md5mesh",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
+	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
+	RegCloseKey(g_hRegistry);
+
+	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.md5anim",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
 	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
 	RegCloseKey(g_hRegistry);
 
@@ -144,6 +148,13 @@ void MakeFileAssociations()
 	// .mdl
 	// -------------------------------------------------
 	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.mdl",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
+	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
+	RegCloseKey(g_hRegistry);
+
+	// ------------------------------------------------- 
+	// .lwo
+	// -------------------------------------------------
+	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.lwo",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
 	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
 	RegCloseKey(g_hRegistry);
 

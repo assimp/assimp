@@ -41,19 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the material part of the MDL importer class */
 
+#include "AssimpPCH.h"
+
 // internal headers
-#include "MaterialSystem.h"
 #include "MDLLoader.h"
 #include "MDLDefaultColorMap.h"
-#include "qnan.h"
-
-// public ASSIMP headers
-#include "../include/DefaultLogger.h"
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
 
 using namespace Assimp;
 

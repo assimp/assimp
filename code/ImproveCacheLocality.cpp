@@ -46,16 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * http://www.cs.princeton.edu/gfx/pubs/Sander_2007_%3ETR/tipsy.pdf
  */
 
-// STL headers
-#include <vector>
-#include <stack>
-#include <queue>
-
-// public ASSIMP headers
-#include "../include/DefaultLogger.h"
-#include "../include/aiPostProcess.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
+#include "AssimpPCH.h"
 
 // internal headers
 #include "ImproveCacheLocality.h"

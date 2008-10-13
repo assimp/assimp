@@ -321,13 +321,13 @@ protected:
 	/** Parse an unsigned integer. There may be no sign!
 	 */
 	bool ParseUnsignedInt(const char* szCurrent,
-		const char** szCurrentOut, uint32_t& out);
+		const char** szCurrentOut, unsigned int& out);
 
 	// -------------------------------------------------------------------
 	/** Parse a signed integer. Signs (+,-) are handled.
 	 */
 	bool ParseSignedInt(const char* szCurrent,
-		const char** szCurrentOut, int32_t& out);
+		const char** szCurrentOut, int& out);
 
 	// -------------------------------------------------------------------
 	/** Fix invalid time values in the file
@@ -377,7 +377,7 @@ private:
 	unsigned int configFrameID;
 
 	/** Buffer to hold the loaded file */
-	char* mBuffer;
+	const char* mBuffer;
 
 	/** Output scene to be filled
 	*/

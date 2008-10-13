@@ -42,23 +42,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the main parts of the MDL importer class */
 
 // internal headers
-#include "MaterialSystem.h"
+#include "AssimpPCH.h"
+
 #include "MDLLoader.h"
 #include "MDLDefaultColorMap.h"
 #include "MD2FileData.h" 
-#include "qnan.h" 
-#include "ByteSwap.h" 
 
-// public ASSIMP headers
-#include "../include/DefaultLogger.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/assimp.hpp"
-
-// boost headers
-#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 
@@ -1712,7 +1701,7 @@ void MDLImporter::AddBonesToNodeGraph_3DGS_MDL7(const MDL::IntBone_MDL7** apcBon
 		aiNode* pcNode = pcParent->mChildren[qq++] = new aiNode();
 		pcNode->mName = aiString( pcBone->mName );
 
-		this->AddBonesToNodeGraph_3DGS_MDL7(apcBones,pcNode,i);
+		this->AddBonesToNodeGraph_3DGS_MDL7(apcBones,pcNode,(uint16_t)i);
 	}
 }
 // ------------------------------------------------------------------------------------------------

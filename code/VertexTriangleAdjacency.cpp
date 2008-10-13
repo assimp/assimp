@@ -42,9 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the VertexTriangleAdjacency helper class
  */
 
-// public ASSIMP headers
-#include "../include/DefaultLogger.h"
-#include "../include/aiMesh.h"
+#include "AssimpPCH.h"
 
 // internal headers
 #include "VertexTriangleAdjacency.h"

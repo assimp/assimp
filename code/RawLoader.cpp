@@ -41,21 +41,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the RAW importer class */
 
+#include "AssimpPCH.h"
+
 // internal headers
 #include "RawLoader.h"
-#include "MaterialSystem.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
 
-// public assimp headers
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/DefaultLogger.h"
-
-// boost headers
-#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 
@@ -92,11 +84,6 @@ bool RAWImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 }
 
 // ------------------------------------------------------------------------------------------------
-
-#define AI_RAW_IS_NON_INTEGRAL(sz) \
-	((*sz < '0' || *sz > '9') && *sz != '+' && *sz != '-')
-
-// ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void RAWImporter::InternReadFile( const std::string& pFile, 
 	aiScene* pScene, IOSystem* pIOHandler)
@@ -129,7 +116,7 @@ void RAWImporter::InternReadFile( const std::string& pFile,
 		// the beginning of a new group
 		const char* sz = line;SkipSpaces(&sz);
 		if (IsLineEnd(*sz))continue;
-		if (AI_RAW_IS_NON_INTEGRAL(sz))
+		if (!IsNumeric(*sz))
 		{
 			const char* sz2 = sz;
 			while (!IsSpaceOrNewLine(*sz2))++sz2;
@@ -158,7 +145,7 @@ void RAWImporter::InternReadFile( const std::string& pFile,
 			unsigned int num;
 			for (num = 0; num < 12;++num)
 			{
-				if(!SkipSpaces(&sz) || AI_RAW_IS_NON_INTEGRAL(sz))break;
+				if(!SkipSpaces(&sz) || !IsNumeric(*sz))break;
 				sz = fast_atof_move(sz,data[num]);
 			}
 			if (num != 12 && num != 9)

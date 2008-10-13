@@ -43,16 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  tangents and bitangents for all imported meshes
  */
 
-// STL headers
-#include <vector>
-#include <assert.h>
-
-// public ASSIMP headers
-#include "../include/DefaultLogger.h"
-#include "../include/aiPostProcess.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
-#include "../include/assimp.hpp"
+#include "AssimpPCH.h"
 
 // internal headers
 #include "CalcTangentsProcess.h"

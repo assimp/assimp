@@ -57,7 +57,6 @@ namespace Assimp	{
 
 // **********************************************************
 // Java: ConfigProperty.java, 
-//  ConfigProperty.OG_MAX_HIERARCHY_DEPTH
 //  ConfigProperty.OG_MIN_NUM_FACES
 //  ConfigProperty.JOIN_INEQUAL_TRANSFORMS
 // **********************************************************
@@ -68,10 +67,6 @@ namespace Assimp	{
 
 #if (!defined AI_OG_MIN_NUM_FACES)
 #	define AI_OG_MIN_NUM_FACES 0xffffffff
-#endif // !! AI_LMW_MAX_WEIGHTS
-
-#if (!defined AI_OG_REMOVE_ANIMATIONS)
-#	define AI_OG_REMOVE_ANIMATIONS false
 #endif // !! AI_LMW_MAX_WEIGHTS
 
 #if (!defined AI_OG_JOIN_INEQUAL_TRANSFORMS)
@@ -152,12 +147,6 @@ public:
 		configMinNumFaces = n;
 	}
 
-	// set the configRemoveAnimations property
-	inline void SetRemoveAnimations(bool b)
-	{
-		configRemoveAnimations = b;
-	}
-
 
 protected:
 
@@ -176,14 +165,6 @@ protected:
 	 *   if *this* node should be kept, it must be added to the list.
 	*/
 	void RemoveAnimationNodes (aiNode* node,std::vector<aiNode*>& out);
-
-
-	// -------------------------------------------------------------------
-	/** Entry point to the RemoveAnimationNodes algorithm.
-	 * @param node Root node to start with
-	 * @return New root node
-	 */
-	aiNode* RemoveAnimationNodes (aiNode* node);
 
 
 	// -------------------------------------------------------------------
@@ -308,12 +289,6 @@ private:
 	 */
 	unsigned int configMinNumFaces;
 
-
-	/** Configuration option: specifies whether animations are removed
-	    from the node graph. If animations aren't needed by the caller,
-	    this allows for further optimization.
-	 */
-	bool configRemoveAnimations;
 
 	/** Configuration option: specifies whether nodes with inequal
 	    world matrices are joined if they are on the same hierarchy

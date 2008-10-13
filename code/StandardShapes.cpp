@@ -40,10 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the StandardShapes class
  */
-#include "../include/aiTypes.h"
-#include "../include/DefaultLogger.h"
-#include "../include/aiAssert.h"
 
+#include "AssimpPCH.h"
 #include "StandardShapes.h"
 
 namespace Assimp	{

@@ -41,10 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Defines a helper class, "CommentRemover", which can be
  *  used to remove comments (single and multi line) from a text file.
  */
-#include "../include/aiTypes.h"
-#include "../include/DefaultLogger.h"
-#include "../include/aiAssert.h"
 
+#include "AssimpPCH.h"
 #include "RemoveComments.h"
 
 namespace Assimp

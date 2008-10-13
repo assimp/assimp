@@ -68,7 +68,7 @@ void HandleMouseInputFPS( void )
 
 		if( 0 != nYDiff)
 			{
-			D3DXMatrixRotationAxis( &matRotation, (D3DXVECTOR3*)& g_sCamera.vRight, D3DXToRadian((float)nYDiff / 3.0f));
+			D3DXMatrixRotationAxis( &matRotation, (D3DXVECTOR3*)& g_sCamera.vRight, D3DXToRadian((float)nYDiff / 6.0f));
 			D3DXVec3TransformCoord( (D3DXVECTOR3*)&g_sCamera.vLookAt, (D3DXVECTOR3*)& g_sCamera.vLookAt, &matRotation );
 			D3DXVec3TransformCoord( (D3DXVECTOR3*)&g_sCamera.vUp, (D3DXVECTOR3*)&g_sCamera.vUp, &matRotation );
 			
@@ -78,7 +78,7 @@ void HandleMouseInputFPS( void )
 		if( 0 != nXDiff )
 			{
 			D3DXVECTOR3 v(0,1,0);
-			D3DXMatrixRotationAxis( &matRotation, (D3DXVECTOR3*)&v, D3DXToRadian((float)nXDiff / 3.0f) );
+			D3DXMatrixRotationAxis( &matRotation, (D3DXVECTOR3*)&v, D3DXToRadian((float)nXDiff / 6.0f) );
 			D3DXVec3TransformCoord( (D3DXVECTOR3*)&g_sCamera.vLookAt, (D3DXVECTOR3*)&g_sCamera.vLookAt, &matRotation );
 			D3DXVec3TransformCoord( (D3DXVECTOR3*)&g_sCamera.vUp,(D3DXVECTOR3*) &g_sCamera.vUp, &matRotation );
 			

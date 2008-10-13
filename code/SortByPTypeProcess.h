@@ -74,6 +74,7 @@ public:
 	void Execute( aiScene* pScene);
 };
 
+#if (!defined AI_BUILD_NO_SORTBYPTYPE_PROCESS)
 
 // ---------------------------------------------------------------------------
 /** SortByPTypeProcess: Sorts meshes by the types of primitives they contain.
@@ -99,6 +100,8 @@ public:
 	// -------------------------------------------------------------------
 	void Execute( aiScene* pScene);
 };
+
+#endif 
 
 } // end of namespace Assimp
 

@@ -117,6 +117,18 @@ struct aiColor3D
 	aiColor3D operator*(float f)
 		{return aiColor3D(r*f,g*f,b*f);}
 
+	// ugly subscript operator ... should better use an union, but
+	// hopefully the compiler will optimize the switch away.
+	inline float& operator[] (unsigned int sub)
+	{
+		switch (sub)
+		{
+		case 0:  return (float&)r;
+		case 1:  return (float&)g;
+		default: return (float&)b;
+		};
+	}
+
 #endif // !__cplusplus
 
 	//! Red, green and blue color values
@@ -143,6 +155,19 @@ struct aiColor4D
 
 	bool operator != (const aiColor4D& other) const
 		{return r != other.r || g != other.g || b != other.b || a != other.a;}
+
+	// ugly subscript operator ... should better use an union, but
+	// hopefully the compiler will optimize the switch away.
+	inline float& operator[] (unsigned int sub)
+	{
+		switch (sub)
+		{
+		case 0:  return (float&)r;
+		case 1:  return (float&)g;
+		case 2:  return (float&)b;
+		default: return (float&)a;
+		};
+	}
 
 #endif // !__cplusplus
 

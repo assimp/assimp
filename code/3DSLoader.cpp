@@ -41,23 +41,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the 3ds importer class */
 
+#include "AssimpPCH.h"
+
 // internal headers
 #include "3DSLoader.h"
 #include "MaterialSystem.h"
 #include "TextureTransform.h"
 #include "StringComparison.h"
 #include "qnan.h"
-
-// public ASSIMP headers
-#include "../include/DefaultLogger.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/assimp.hpp"
-
-// boost headers
-#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 		

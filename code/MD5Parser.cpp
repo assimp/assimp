@@ -41,6 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the MD5 parser class */
 
+#include "AssimpPCH.h"
+
 // internal headers
 #include "MD5Loader.h"
 #include "MaterialSystem.h"
@@ -48,13 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsingUtils.h"
 #include "StringComparison.h"
 
-// public ASSIMP headers
-#include "../include/DefaultLogger.h"
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
 
 using namespace Assimp;
 using namespace Assimp::MD5;

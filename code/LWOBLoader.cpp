@@ -42,16 +42,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the LWO importer class for the older LWOB 
     file formats, including materials */
 
+
+#include "AssimpPCH.h"
+
 // internal headers
 #include "LWOLoader.h"
 #include "MaterialSystem.h"
 #include "ByteSwap.h"
-
-// public assimp headers
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/DefaultLogger.h"
-#include "../include/assimp.hpp"
 
 using namespace Assimp;
 

@@ -618,7 +618,8 @@ public class Importer {
      * @param prop New value for the property
      * @return 0xffffffff if an error occured
      */
-    private native int _NativeSetPropertyInt(String name, int prop, long iContext);
+    private native int _NativeSetPropertyInt(String name,
+ 	int prop, long iContext);
 
     // float-version
     private native int _NativeSetPropertyFloat(String name,

@@ -39,26 +39,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Defines the CPP-API to the Asset Import Library. */
+/** @file Defines the CPP-API to the Open Asset Import Library. */
 #ifndef AI_ASSIMP_HPP_INC
 #define AI_ASSIMP_HPP_INC
 
 #ifndef __cplusplus
-#error This header requires C++ to be used.
+#	error This header requires C++ to be used.
 #endif
-
-// STL headers
-#include <string>
-#include <map>
-#include <vector>
 
 // public ASSIMP headers
 #include "aiTypes.h"
 #include "aiConfig.h"
+#include "aiAssert.h"
 
 namespace Assimp
 {
+	// public interface
 	class Importer;
+	class IOStream;
+	class IOSystem;
+
+	// plugin development
+	class BaseImporter;
+	class BaseProcess;
+	class SharedPostProcessInfo;
 }
 
 // internal ASSIMP headers - for plugin development
@@ -69,16 +73,10 @@ namespace Assimp
 
 struct aiScene;
 struct aiFileIO;
-const aiScene* aiImportFileEx( const char*, unsigned int, aiFileIO*);
+extern "C" const aiScene* aiImportFileEx( const char*, unsigned int, aiFileIO*);
 
 namespace Assimp
 {
-
-class BaseImporter;
-class BaseProcess;
-class SharedPostProcessInfo;
-class IOStream;
-class IOSystem;
 
 // ---------------------------------------------------------------------------
 /** The Importer class forms an C++ interface to the functionality of the 

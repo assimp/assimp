@@ -41,14 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the "PretransformVertices" post processing step 
 */
-#include "PretransformVertices.h"
-#include "../include/DefaultLogger.h"
-#include "../include/aiPostProcess.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
 
-#include <list>
+#include "AssimpPCH.h"
+#include "PretransformVertices.h"
+
 
 using namespace Assimp;
 

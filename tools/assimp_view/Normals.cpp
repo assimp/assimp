@@ -159,6 +159,7 @@ void AssetHelper::SetNormalSet(unsigned int iSet)
 	else if (SMOOTH == iSet)
 	{
 		MyGenVertexNormalsProcess* pcProcess = new MyGenVertexNormalsProcess();
+		pcProcess->SetMaxSmoothAngle(1.5f);
 		pcProcess->Execute(this->pcScene);
 		//FlipNormalsInt();
 		delete pcProcess;

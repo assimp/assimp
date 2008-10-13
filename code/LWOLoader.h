@@ -382,6 +382,8 @@ protected:
 
 	/** Output scene */
 	aiScene* pScene;
+
+	bool configSpeedFlag;
 };
 
 

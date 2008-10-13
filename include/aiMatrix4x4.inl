@@ -217,12 +217,12 @@ inline void aiMatrix4x4::FromEulerAngles(float x, float y, float z)
 {
 	aiMatrix4x4& _this = *this;
 
-	const float A       = ::cosf(x);
-    const float B       = ::sinf(x);
-    const float C       = ::cosf(y);
-    const float D       = ::sinf(y);
-    const float E       = ::cosf(z);
-    const float F       = ::sinf(z);
+        const float A       = ::cos(x);
+    const float B       = ::sin(x);
+    const float C       = ::cos(y);
+    const float D       = ::sin(y);
+    const float E       = ::cos(z);
+    const float F       = ::sin(z);
     const float AD      =   A * D;
     const float BD      =   B * D;
     _this.a1  =   C * E;

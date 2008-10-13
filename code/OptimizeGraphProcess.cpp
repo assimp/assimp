@@ -40,17 +40,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** Implementation of the OptimizeGraphProcess post-processing step*/
 
-#include <vector>
-#include <list>
+#include "AssimpPCH.h"
 
 #include "OptimizeGraphProcess.h"
 #include "Hash.h"
 
-#include "../include/aiPostProcess.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/assimp.hpp"
-#include "../include/DefaultLogger.h"
 
 using namespace Assimp;
 
@@ -72,7 +66,6 @@ using namespace Assimp;
 // Constructor to be privately used by Importer
 OptimizeGraphProcess::OptimizeGraphProcess()
 {
-	configRemoveAnimations = AI_OG_REMOVE_ANIMATIONS;
 	configMinNumFaces = AI_OG_MIN_NUM_FACES;
 	configJoinInequalTransforms = AI_OG_JOIN_INEQUAL_TRANSFORMS;
 }
@@ -95,77 +88,13 @@ bool OptimizeGraphProcess::IsActive( unsigned int pFlags) const
 // Setup properties of the step
 void OptimizeGraphProcess::SetupProperties(const Importer* pImp)
 {
-	// remove animation nodes?
-	configRemoveAnimations = pImp->GetPropertyInteger(AI_CONFIG_PP_OG_REMOVE_ANIMATIONS,
-		AI_OG_REMOVE_ANIMATIONS) != 0 ? true : false;
-
 	// join nods with inequal transformations?
-	configRemoveAnimations = pImp->GetPropertyInteger(AI_CONFIG_PP_OG_JOIN_INEQUAL_TRANSFORMS,
+	configJoinInequalTransforms = pImp->GetPropertyInteger(AI_CONFIG_PP_OG_JOIN_INEQUAL_TRANSFORMS,
 		AI_OG_JOIN_INEQUAL_TRANSFORMS) != 0 ? true : false;
 
 	// minimum face number per node
 	configMinNumFaces = pImp->GetPropertyInteger(AI_CONFIG_PP_OG_MIN_NUM_FACES,
 		AI_OG_MIN_NUM_FACES);
-}
-
-// ------------------------------------------------------------------------------------------------
-aiNode* OptimizeGraphProcess::RemoveAnimationNodes (aiNode* node)
-{
-	ai_assert(NULL != node);
-
-	std::vector<aiNode*> out;
-	RemoveAnimationNodes(node,out);
-	if (out.empty())
-		throw new ImportErrorException("OptimizeGraphProcess: no nodes are remaining.");
-	if (1 == out.size())
-		return out[0];
-	aiNode* p = new aiNode();
-	p->mName.Set("<dummy_root>");
-	p->mNumChildren = (unsigned int)out.size();
-	p->mChildren = new aiNode*[p->mNumChildren];
-	::memcpy(p->mChildren,&out[0],p->mNumChildren*sizeof(void*));
-	return p;
-}
-
-// ------------------------------------------------------------------------------------------------
-void OptimizeGraphProcess::RemoveAnimationNodes (aiNode* node,std::vector<aiNode*>& out)
-{
-	ai_assert(NULL != node);
-
-	// if this is an animation node: shift all children on this layer
-	if (!node->mNumMeshes)
-	{
-		unsigned int old = (unsigned int)out.size();
-		for (unsigned int i = 0; i < node->mNumChildren;++i)
-		{
-			RemoveAnimationNodes(node->mChildren[i],out);
-		}
-		// update the transformations of all shifted childs
-		std::vector<aiNode*>::iterator it2 = out.end(),it = out.begin()+old;
-		for (; it != it2; ++it)
-			(*it)->mTransformation = node->mTransformation * (*it)->mTransformation;
-		
-		delete[] node->mChildren;node->mChildren = NULL;
-		delete node;
-	}
-	else 
-	{
-		// *this* node remains on this layer, and the children, too
-		out.push_back(node);
-
-		std::vector<aiNode*> outNew;
-		for (unsigned int i = 0; i < node->mNumChildren;++i)
-		{
-			RemoveAnimationNodes(node->mChildren[i],outNew);
-		}
-		if (outNew.size() > node->mNumChildren)
-		{
-			delete[] node->mChildren;
-			node->mChildren = new aiNode*[outNew.size()];
-		}
-		node->mNumChildren = (unsigned int)outNew.size();
-		::memcpy(node->mChildren,&outNew[0],node->mNumChildren*sizeof(void*));
-	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -893,22 +822,18 @@ void OptimizeGraphProcess::Execute( aiScene* pScene)
 	ComputeMeshHashes();
 
 	// STEP 2
-	if (configRemoveAnimations)
-		pScene->mRootNode = RemoveAnimationNodes(pScene->mRootNode);
+	FindLockedNodes(pScene->mRootNode);
 
 	// STEP 3
-	else FindLockedNodes(pScene->mRootNode);
-
-	// STEP 4
 	FindLockedMeshes(pScene->mRootNode);
 
-	// STEP 5
+	// STEP 4
 	ApplyOptimizations(pScene->mRootNode);
 
-	// STEP 6
+	// STEP 5
 	BuildOutputMeshList();
 
-	// STEP 7
+	// STEP 6
 	UnlockNodes(pScene->mRootNode);
 	UnlockMeshes();
 }

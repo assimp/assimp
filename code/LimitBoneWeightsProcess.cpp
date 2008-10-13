@@ -40,17 +40,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** Implementation of the LimitBoneWeightsProcess post processing step */
 
-#include <vector>
-#include <assert.h>
-
+#include "AssimpPCH.h"
 #include "LimitBoneWeightsProcess.h"
 
-#include "../include/aiPostProcess.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/assimp.hpp"
-#include "../include/DefaultLogger.h"
 
 using namespace Assimp;
 

@@ -42,11 +42,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BASEPROCESS_H_INC
 #define AI_BASEPROCESS_H_INC
 
+#include <map>
 
 #include "../include/aiTypes.h"
 #include "GenericProperty.h"
-
-#include <map>
 
 struct aiScene;
 

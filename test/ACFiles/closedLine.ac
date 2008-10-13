@@ -1,0 +1,21 @@
+AC3Db
+MATERIAL "" rgb 1 1 1  amb 0.2 0.2 0.2  emis 0 0 0  spec 0.5 0.5 0.5  shi 10  trans 0
+OBJECT world
+kids 1
+OBJECT poly
+name "rect"
+loc 1 0.5 0
+numvert 4
+-1 0.5 0
+1 0.5 0
+1 -0.5 0
+-1 -0.5 0
+numsurf 1
+SURF 0x21
+mat 0
+refs 4
+3 0 0
+2 1 0
+1 1 1
+0 0 1
+kids 0

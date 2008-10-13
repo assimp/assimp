@@ -1,0 +1,132 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="workspace.exe"/>
+    <OBJFILES value="workspace.obj ..\..\code\XFileParser.obj ..\..\code\3DSLoader.obj 
+      ..\..\code\ACLoader.obj ..\..\code\aiAssert.obj ..\..\code\ASELoader.obj 
+      ..\..\code\ASEParser.obj ..\..\code\Assimp.obj ..\..\code\BaseImporter.obj 
+      ..\..\code\BaseProcess.obj ..\..\code\CalcTangentsProcess.obj 
+      ..\..\code\ConvertToLHProcess.obj ..\..\code\DefaultIOStream.obj 
+      ..\..\code\DefaultIOSystem.obj ..\..\code\DefaultLogger.obj 
+      ..\..\code\DXFLoader.obj ..\..\code\FixNormalsStep.obj 
+      ..\..\code\GenFaceNormalsProcess.obj 
+      ..\..\code\GenVertexNormalsProcess.obj ..\..\code\HMPLoader.obj 
+      ..\..\code\Importer.obj ..\..\code\ImproveCacheLocality.obj 
+      ..\..\code\JoinVerticesProcess.obj ..\..\code\LimitBoneWeightsProcess.obj 
+      ..\..\code\LWOBLoader.obj ..\..\code\LWOLoader.obj 
+      ..\..\code\LWOMaterial.obj ..\..\code\MaterialSystem.obj 
+      ..\..\code\MD2Loader.obj ..\..\code\MD3Loader.obj ..\..\code\MD5Loader.obj 
+      ..\..\code\MD5Parser.obj ..\..\code\MDCLoader.obj ..\..\code\MDLLoader.obj 
+      ..\..\code\MDLMaterialLoader.obj ..\..\code\MDRLoader.obj 
+      ..\..\code\NFFLoader.obj ..\..\code\ObjFileImporter.obj 
+      ..\..\code\ObjFileMtlImporter.obj ..\..\code\ObjFileParser.obj 
+      ..\..\code\OFFLoader.obj ..\..\code\OptimizeGraphProcess.obj 
+      ..\..\code\PlyLoader.obj ..\..\code\PlyParser.obj 
+      ..\..\code\PretransformVertices.obj ..\..\code\RawLoader.obj 
+      ..\..\code\RemoveComments.obj ..\..\code\RemoveRedundantMaterials.obj 
+      ..\..\code\RemoveVCProcess.obj ..\..\code\SGSpatialSort.obj 
+      ..\..\code\SMDLoader.obj ..\..\code\SortByPTypeProcess.obj 
+      ..\..\code\SpatialSort.obj ..\..\code\SplitLargeMeshes.obj 
+      ..\..\code\StandardShapes.obj ..\..\code\STLLoader.obj 
+      ..\..\code\TextureTransform.obj ..\..\code\TriangulateProcess.obj 
+      ..\..\code\ValidateDataStructure.obj 
+      ..\..\code\VertexTriangleAdjacency.obj ..\..\code\XFileImporter.obj 
+      ..\..\code\3DSConverter.obj"/>
+    <RESFILES value="workspace.res"/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value=""/>
+    <LIBRARIES value=""/>
+    <SPARELIBS value="Vcl50.lib"/>
+    <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi dclocx50.bpi bcb2kaxserver50.bpi"/>
+    <PATHCPP value=".;..\..\code"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
+    <RELEASELIBPATH value="$(BCB)\lib\release"/>
+    <LINKER value="tlink32"/>
+    <USERDEFINES value="_DEBUG;ASSIMP_BUILD_DLL_EXPORT"/>
+    <SYSDEFINES value="_RTLDLL;NO_STRICT;USEPACKAGES"/>
+    <MAINSOURCE value="workspace.cpp"/>
+    <INCLUDEPATH value="..\..\code;$(BCB)\include;$(BCB)\include\vcl;..\..\include;..\..\include\Compiler"/>
+    <LIBPATH value="..\..\code;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <WARNINGS value="-w-par"/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c 
+      -tW -tWM"/>
+    <PFLAGS value="-$YD -$W -$O- -v -JPHNE -M"/>
+    <RFLAGS value=""/>
+    <AFLAGS value="/mx /w2 /zd"/>
+    <LFLAGS value="-D&quot;&quot; -aa -Tpe -x -Gn -v"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="c0w32.obj $(PACKAGES) Memmgr.Lib sysinit.obj $(OBJFILES)"/>
+    <ALLRES value="$(RESFILES)"/>
+    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cp32mti.lib"/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1031
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=3
+Item0=..\..\code;$(BCB)\include;$(BCB)\include\vcl;..\..\include;..\..\include\Compiler
+Item1=..\..\code;$(BCB)\include;$(BCB)\include\vcl;..\..\include
+Item2=..\..\code;$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=1
+Item0=..\..\code;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=2
+Item0=_DEBUG;ASSIMP_BUILD_DLL_EXPORT
+Item1=_DEBUG
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+  </IDEOPTIONS>
+</PROJECT>

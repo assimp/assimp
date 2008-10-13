@@ -73,6 +73,8 @@ public:
 	//! \param szOut Buffer to be swapped
 	static inline void Swap4(void* _szOut)
 	{
+		ai_assert(NULL != _szOut);
+
 #if _MSC_VER >= 1400 && (defined _M_X86)
 		__asm
 		{
@@ -82,7 +84,6 @@ public:
 			mov dword_ptr[edi], eax
 		};
 #else
-		ai_assert(NULL != _szOut);
 		int8_t* szOut = (int8_t*)_szOut;
 		std::swap(szOut[0],szOut[3]);
 		std::swap(szOut[1],szOut[2]);

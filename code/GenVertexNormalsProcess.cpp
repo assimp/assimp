@@ -43,11 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * normals for all imported faces.
 */
 
-// public ASSIMP headers
-#include "../include/DefaultLogger.h"
-#include "../include/aiPostProcess.h"
-#include "../include/aiScene.h"
-#include "../include/assimp.hpp"
+#include "AssimpPCH.h"
 
 // internal headers
 #include "GenVertexNormalsProcess.h"
@@ -75,6 +71,7 @@ bool GenVertexNormalsProcess::IsActive( unsigned int pFlags) const
 {
 	return (pFlags & aiProcess_GenSmoothNormals) != 0;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void GenVertexNormalsProcess::SetupProperties(const Importer* pImp)
@@ -84,6 +81,7 @@ void GenVertexNormalsProcess::SetupProperties(const Importer* pImp)
 	this->configMaxAngle = std::max(std::min(this->configMaxAngle,175.0f),0.0f);
 	this->configMaxAngle = AI_DEG_TO_RAD(this->configMaxAngle);
 }
+
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void GenVertexNormalsProcess::Execute( aiScene* pScene)
@@ -93,7 +91,7 @@ void GenVertexNormalsProcess::Execute( aiScene* pScene)
 	bool bHas = false;
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 	{
-		if(this->GenMeshVertexNormals( pScene->mMeshes[a],a))
+		if(GenMeshVertexNormals( pScene->mMeshes[a],a))
 			bHas = true;
 	}
 
@@ -120,7 +118,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 		aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
 		aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
 		aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices-1]];
-		aiVector3D vNor = (*pV2 - *pV1) ^ (*pV3 - *pV1).Normalize();
+		aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).Normalize();
 
 		for (unsigned int i = 0;i < face.mNumIndices;++i)
 			pMesh->mNormals[face.mIndices[i]] = vNor;

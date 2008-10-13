@@ -41,24 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the MDC importer class */
 
+#include "AssimpPCH.h"
+
 // internal headers
 #include "MDCLoader.h"
 #include "MD3FileData.h"
-#include "MaterialSystem.h"
-#include "StringComparison.h"
 #include "MDCNormalTable.h" // shouldn't be included by other units
-#include "ByteSwap.h"
-
-// public ASSIMP headers
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/DefaultLogger.h"
-#include "../include/assimp.hpp"
-
-// boost headers
-#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 using namespace Assimp::MDC;

@@ -41,22 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the MDR importer class */
 
-// internal headers
+#include "AssimpPCH.h"
 #include "MDRLoader.h"
-#include "MaterialSystem.h"
-#include "StringComparison.h"
-#include "ByteSwap.h"
-
-// public ASSIMP headers
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/DefaultLogger.h"
-#include "../include/assimp.hpp"
-
-// boost headers
-#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 using namespace Assimp::MDR;

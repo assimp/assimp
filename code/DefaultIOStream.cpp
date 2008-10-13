@@ -40,6 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /** @file Default File I/O implementation for #Importer */
 
+#include "AssimpPCH.h"
+
 #include "DefaultIOStream.h"
 #include "../include/aiAssert.h"
 #include <sys/types.h> 

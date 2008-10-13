@@ -38,9 +38,10 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+
+#include "AssimpPCH.h"
+
 #include "ObjFileMtlImporter.h"
-#include "../include/aiTypes.h"
-#include "../include/aiAssert.h"
 #include "ObjTools.h"
 #include "ObjFileData.h"
 #include "fast_atof.h"

@@ -38,12 +38,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "MaterialSystem.h"
-#include "StringComparison.h"
+#include "AssimpPCH.h"
 #include "Hash.h"
-
-#include "../include/aiMaterial.h"
-#include "../include/aiAssert.h"
 
 using namespace Assimp;
 

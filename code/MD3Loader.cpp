@@ -40,20 +40,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Implementation of the MD3 importer class */
+
+#include "AssimpPCH.h"
+
+
 #include "MD3Loader.h"
 #include "MaterialSystem.h"
 #include "StringComparison.h"
 #include "ByteSwap.h"
-
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/DefaultLogger.h"
-#include "../include/assimp.hpp"
-
-#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 

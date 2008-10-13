@@ -43,12 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * for all imported meshes
  */
 
-#include <vector>
-
-#include "../include/DefaultLogger.h"
-#include "../include/aiPostProcess.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
+#include "AssimpPCH.h"
 
 // internal headers
 #include "JoinVerticesProcess.h"

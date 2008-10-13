@@ -61,7 +61,7 @@ struct FaceWithSmoothingGroup
 
 	
 	//! Indices. .3ds is using uint16. However, after
-	//! an unique vrtex set has been geneerated it might
+	//! an unique vrtex set has been generated it might
 	//! be an index becomes > 2^16
 	uint32_t mIndices[3];
 

@@ -42,11 +42,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the post processing step to generate face
 * normals for all imported faces.
 */
+
+#include "AssimpPCH.h"
 #include "GenFaceNormalsProcess.h"
-#include "../include/DefaultLogger.h"
-#include "../include/aiPostProcess.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
+
 
 using namespace Assimp;
 

@@ -41,6 +41,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the ASE importer class */
 
+
+#include "AssimpPCH.h"
+
 // internal headers
 #include "ASELoader.h"
 #include "MaterialSystem.h"
@@ -50,16 +53,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // utilities
 #include "fast_atof.h"
 #include "qnan.h"
-
-// ASSIMP public headers
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/DefaultLogger.h"
-
-#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 using namespace Assimp::ASE;

@@ -42,14 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 // internal headers
+#include "AssimpPCH.h"
 #include "RemoveRedundantMaterials.h"
-#include "MaterialSystem.h"
-
-// public ASSIMP headers
-#include "../include/DefaultLogger.h"
-#include "../include/aiPostProcess.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
 
 using namespace Assimp;
 

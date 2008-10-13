@@ -38,19 +38,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+
+#include "AssimpPCH.h"
+
 #include "ObjFileImporter.h"
 #include "ObjFileParser.h"
 #include "ObjFileData.h"
-#include "MaterialSystem.h"
-
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-#include "../include/DefaultLogger.h"
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-
-#include <boost/scoped_ptr.hpp>
-#include <boost/format.hpp>
 
 namespace Assimp
 {

@@ -41,11 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file A helper class that processes texture transformations */
 
 
-#include "../include/aiTypes.h"
-#include "../include/DefaultLogger.h"
-#include "../include/aiAssert.h"
-
-#include "MaterialSystem.h"
+#include "AssimpPCH.h"
 #include "TextureTransform.h"
 
 namespace Assimp

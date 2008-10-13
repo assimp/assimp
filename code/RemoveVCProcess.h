@@ -90,7 +90,13 @@ private:
 
 	bool ProcessMesh (aiMesh* pcMesh);
 
+	/** Configuration
+	 */
 	unsigned int configDeleteFlags;
+
+	/** The scene the instance is currently operating on
+	 */
+	aiScene* mScene;
 };
 
 } // end of namespace Assimp

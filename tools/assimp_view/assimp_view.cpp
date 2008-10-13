@@ -125,6 +125,7 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 	// get current time
 	double fCur = (double)timeGetTime();
 
+
 	// call ASSIMPs C-API to load the file
 	g_pcAsset->pcScene = (aiScene*)aiImportFile(g_szFileName,
 		aiProcess_CalcTangentSpace		| // calculate tangents and bitangents

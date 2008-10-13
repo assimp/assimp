@@ -42,13 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the post processing step to split up
  * all faces with more than three indices into triangles.
  */
-#include <vector>
-#include <assert.h>
+
+#include "AssimpPCH.h"
 #include "TriangulateProcess.h"
-#include "../include/DefaultLogger.h"
-#include "../include/aiPostProcess.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
 
 using namespace Assimp;
 

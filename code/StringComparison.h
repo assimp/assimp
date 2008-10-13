@@ -64,29 +64,23 @@ inline int ASSIMP_stricmp(const char *s1, const char *s2)
 	return ::_stricmp(s1,s2);
 
 #else
-	const char *a1, *a2;
-	a1 = s1;
-	a2 = s2;
-
-	while (true)
+	register char c1, c2;
+	do 
 	{
-		char c1 = (char)::tolower(*a1); 
-		char c2 = (char)::tolower(*a2);
-		if ((0 == c1) && (0 == c2)) return 0;
-		if (c1 < c2) return-1;
-		if (c1 > c2) return 1;
-		++a1; 
-		++a2;
-	}
+		c1 = tolower(*s1++);
+		c2 = tolower(*s2++);
+	} 
+	while ( c1 && (c1 == c2) );
+
+	return c1 - c2;
 #endif
 }
 
 // ---------------------------------------------------------------------------
 inline int ASSIMP_stricmp(const std::string& a, const std::string& b)
 {
-	int i = (int)b.length()-(int)a.length();
-	if (i)return i;
-	return ASSIMP_stricmp(a.c_str(),b.c_str());
+	register int i = (int)b.length()-(int)a.length();
+	return (i ? i : ASSIMP_stricmp(a.c_str(),b.c_str()));
 }
 
 // ---------------------------------------------------------------------------
@@ -108,25 +102,17 @@ inline int ASSIMP_strincmp(const char *s1, const char *s2, unsigned int n)
 	return ::_strnicmp(s1,s2,n);
 
 #else
-	const char *a1, *a2;
-	a1 = s1;
-	a2 = s2;
-
+	register char c1, c2;
 	unsigned int p = 0;
-
-	while (true)
+	do 
 	{
-		if (p >= n)return 0;
+		if (p++ >= n)return 0;
+		c1 = tolower(*s1++);
+		c2 = tolower(*s2++);
+	} 
+	while ( c1 && (c1 == c2) );
 
-		char c1 = (char)::tolower(*a1); 
-		char c2 = (char)::tolower(*a2);
-		if ((0 == c1) && (0 == c2)) return 0;
-		if (c1 < c2) return-1;
-		if (c1 > c2) return 1;
-		++a1; 
-		++a2;
-		++p;
-	}
+	return c1 - c2;
 #endif
 }
 }

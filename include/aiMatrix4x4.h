@@ -49,15 +49,7 @@ extern "C" {
 struct aiMatrix3x3;
 struct aiQuaternion;
 
-// Set packing to 4
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) ||	defined (__BCPLUSPLUS__)
-	#pragma pack(push,4)
-	#define PACK_STRUCT
-#elif defined( __GNUC__ )
-	#define PACK_STRUCT	__attribute__((packed))
-#else
-	#error Compiler not supported
-#endif
+#include "./Compiler/pushpack1.h"
 
 // ---------------------------------------------------------------------------
 /** Represents a row-major 4x4 matrix, 
@@ -170,11 +162,7 @@ struct aiMatrix4x4
 } PACK_STRUCT;
 
 
-// Reset packing
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) || defined (__BCPLUSPLUS__)
-#pragma pack( pop )
-#endif
-#undef PACK_STRUCT
+#include "./Compiler/poppack1.h"
 
 #ifdef __cplusplus
 } // end extern "C"

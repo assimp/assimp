@@ -43,15 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  SortByPTypeProcess post-process steps.
 */
 
-// public ASSIMP headers
-#include "../include/DefaultLogger.h"
-#include "../include/aiPostProcess.h"
-#include "../include/aiScene.h"
+#include "AssimpPCH.h"
 
 // internal headers
 #include "ProcessHelper.h"
 #include "SortByPTypeProcess.h"
-#include "qnan.h"
 
 using namespace Assimp;
 

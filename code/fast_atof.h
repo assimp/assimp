@@ -53,9 +53,70 @@ inline unsigned int strtol10( const char* in, const char** out=0)
 		value = ( value * 10 ) + ( *in - '0' );
 		++in;
 	}
-	if (out)
-		*out = in;
+	if (out)*out = in;
 	return value;
+}
+
+// ------------------------------------------------------------------------------------
+inline unsigned int strtol8( const char* in, const char** out=0)
+{
+	unsigned int value = 0;
+
+	while ( 1 )
+	{
+		if ( *in < '0' || *in > '7' )
+			break;
+
+		value = ( value << 3 ) + ( *in - '0' );
+		++in;
+	}
+	if (out)*out = in;
+	return value;
+}
+
+// ------------------------------------------------------------------------------------
+// convert a string in hex format to a number
+inline unsigned int strtol16( const char* in, const char** out=0)
+{
+	unsigned int value = 0;
+
+	while ( 1 )
+	{
+		if ( *in >= '0' && *in <= '9' )
+		{
+			value = ( value << 4u ) + ( *in - '0' );
+		}
+		else if (*in >= 'A' && *in <= 'F')
+		{
+			value = ( value << 4u ) + ( *in - 'A' ) + 10;
+		}
+		else if (*in >= 'a' && *in <= 'f')
+		{
+			value = ( value << 4u ) + ( *in - 'a' ) + 10;
+		}
+		else break;
+		++in;
+	}
+	if (out)*out = in;
+	return value;
+}
+
+// ---------------------------------------------------------------------------------
+// convert just one hex digit
+inline unsigned int HexDigitToDecimal(char in)
+{
+	unsigned int out = 0xffffffff;
+	if (in >= '0' && in <= '9')
+		out = in - '0';
+
+	else if (in >= 'a' && in <= 'f')
+		out = 10u + in - 'a';
+
+	else if (in >= 'A' && in <= 'F')
+		out = 10u + in - 'A';
+
+	// return value is 0xffffffff if the input is not a hex digit
+	return out;
 }
 
 // ------------------------------------------------------------------------------------
@@ -70,6 +131,18 @@ inline int strtol10s( const char* in, const char** out=0)
 	return value;
 }
 
+// ------------------------------------------------------------------------------------
+// 0xNNNN - hex
+// 0NNN   - oct
+// NNN    - dec
+inline unsigned int strtol_cppstyle( const char* in, const char** out=0)
+{
+	if ('0' == in[0])
+	{
+		return 'x' == in[1] ? strtol10(in+2,out) : strtol8(in+1,out);
+	}
+	return strtol10(in, out);
+}
 
 // ------------------------------------------------------------------------------------
 // specal version of the function, providing higher accuracy

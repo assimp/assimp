@@ -41,23 +41,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the MD5 importer class */
 
+#include "AssimpPCH.h"
+
 // internal headers
 #include "MaterialSystem.h"
 #include "RemoveComments.h"
 #include "MD5Loader.h"
 #include "StringComparison.h"
 #include "fast_atof.h"
-
-// public headers
-#include "../include/DefaultLogger.h"
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
-#include "../include/aiAssert.h"
-
-// boost headers
-#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 

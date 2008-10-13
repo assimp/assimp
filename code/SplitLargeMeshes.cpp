@@ -42,12 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the SplitLargeMeshes postprocessing step
 */
 
-
-// public Assimp headers
-#include "../include/DefaultLogger.h"
-#include "../include/aiPostProcess.h"
-#include "../include/aiScene.h"
-#include "../include/assimp.hpp"
+#include "AssimpPCH.h"
 
 // internal headers of the post-processing framework
 #include "SplitLargeMeshes.h"

@@ -114,5 +114,5 @@ public class ShadingMode {
     /**
      * No shading at all
      */
-    public static final int NoShading = 0x8;
+    public static final int NoShading = 0x9;
 }

@@ -676,6 +676,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\test\unit\utFindInvalidData.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utFindInvalidData.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\test\unit\utFixInfacingNormals.cpp"
 				>
 			</File>

@@ -259,13 +259,13 @@ enum aiPrimitiveType
 {
 	/** A point primitive. 
 	 * This is just a single vertex in the virtual world, 
-	 * #aiFace contains just one index for such a primitive,
+	 * #aiFace contains just one index for such a primitive.
 	 */
 	aiPrimitiveType_POINT       = 0x1,
 
 	/** A line primitive. 
 	 * This is a line defined through a start and an end position.
-	 * #aiFace contains exactly two indices for such a primitive,
+	 * #aiFace contains exactly two indices for such a primitive.
 	 */
 	aiPrimitiveType_LINE        = 0x2,
 

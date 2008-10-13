@@ -84,7 +84,7 @@ protected:
 	 */
 	void GetExtensionList(std::string& append)
 	{
-		append.append("*.md5");
+		append.append("*.md5mesh;*.md5anim");
 	}
 
 	// -------------------------------------------------------------------

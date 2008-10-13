@@ -34,4 +34,7 @@ struct X
 #	pragma warning (disable : 4103) 
 #endif
 
+
 #define AI_PUSHPACK_IS_DEFINED
+
+

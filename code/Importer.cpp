@@ -113,6 +113,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_AC_IMPORTER
 #	include "ACLoader.h"
 #endif
+#ifndef AI_BUILD_NO_BVH_IMPORTER
+#	include "BVHLoader.h"
+#endif
 
 
 // PostProcess-Steps
@@ -253,6 +256,9 @@ Importer::Importer() :
 #endif
 #if (!defined AI_BUILD_NO_AC_IMPORTER)
 	mImporter.push_back( new AC3DImporter());
+#endif
+#if (!defined AI_BUILD_NO_BVH_IMPORTER)
+	mImporter.push_back( new BVHLoader());
 #endif
 
 	// add an instance of each post processing step here in the order 

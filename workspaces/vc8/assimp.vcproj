@@ -47,6 +47,8 @@
 				SmallerTypeCheck="true"
 				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
@@ -305,6 +307,8 @@
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="2"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 			/>
@@ -455,6 +459,8 @@
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
@@ -1324,6 +1330,18 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="BVH"
+					>
+					<File
+						RelativePath="..\..\code\BVHLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BVHLoader.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="PostProcess"
@@ -1484,7 +1502,7 @@
 						>
 						<Tool
 							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
+							UsePrecompiledHeader="1"
 						/>
 					</FileConfiguration>
 					<FileConfiguration

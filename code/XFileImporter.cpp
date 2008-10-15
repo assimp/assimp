@@ -12,18 +12,18 @@ with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
-  copyright notice, this list of conditions and the
-  following disclaimer.
+copyright notice, this list of conditions and the
+following disclaimer.
 
 * Redistributions in binary form must reproduce the above
-  copyright notice, this list of conditions and the
-  following disclaimer in the documentation and/or other
-  materials provided with the distribution.
+copyright notice, this list of conditions and the
+following disclaimer in the documentation and/or other
+materials provided with the distribution.
 
 * Neither the name of the ASSIMP team, nor the names of its
-  contributors may be used to endorse or promote products
-  derived from this software without specific prior
-  written permission of the ASSIMP Development Team.
+contributors may be used to endorse or promote products
+derived from this software without specific prior
+written permission of the ASSIMP Development Team.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
@@ -103,9 +103,9 @@ void XFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, I
 	// and create the proper return structures out of it
 	CreateDataRepresentationFromImport( pScene, parser.GetImportedData());
 
-  // if nothing came from it, report it as error
-  if( !pScene->mRootNode)
-    throw new ImportErrorException( "XFile is ill-formatted - no content imported.");
+	// if nothing came from it, report it as error
+	if( !pScene->mRootNode)
+		throw new ImportErrorException( "XFile is ill-formatted - no content imported.");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -139,8 +139,8 @@ void XFileImporter::CreateDataRepresentationFromImport( aiScene* pScene, const X
 	}
 
 	// convert the root node's transformation to OGL coords
-  if( pScene->mRootNode)
-  	ConvertToLHProcess::ConvertToOGL( pScene->mRootNode->mTransformation);
+	if( pScene->mRootNode)
+		ConvertToLHProcess::ConvertToOGL( pScene->mRootNode->mTransformation);
 
 	// finally: create a dummy material if not material was imported
 	if( pScene->mNumMaterials == 0)
@@ -180,7 +180,7 @@ aiNode* XFileImporter::CreateNodes( aiScene* pScene, aiNode* pParent, const XFil
 	memcpy( node->mName.data, pNode->mName.c_str(), pNode->mName.length());
 	node->mName.data[node->mName.length] = 0;
 	node->mTransformation = pNode->mTrafoMatrix;
-	
+
 	// convert meshes from the source node 
 	CreateMeshes( pScene, node, pNode->mMeshes);
 
@@ -323,7 +323,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 					for( unsigned int e = 0; e < AI_MAX_NUMBER_OF_COLOR_SETS; e++)
 						if( mesh->HasVertexColors( e))
 							mesh->mColors[e][newIndex] = sourceMesh->mColors[e][pf.mIndices[d]];
-					
+
 					newIndex++;
 				}
 			}
@@ -423,7 +423,7 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 			const XFile::AnimBone* bone = anim->mAnims[b];
 			aiNodeAnim* nbone = new aiNodeAnim;
 			nbone->mNodeName.Set( bone->mBoneName);
-      nanim->mChannels[b] = nbone;
+			nanim->mChannels[b] = nbone;
 
 			// apply the LH->RH conversion if the animation affects the root bone
 			bool isRootAnim = (bone->mBoneName == pScene->mRootNode->mName.data);
@@ -650,7 +650,7 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, const std::vector<XFile::
 					::sprintf(key,AI_MATKEY_TEXTURE_EMISSIVE_ "[%i]",iEM++);
 				} else
 				{
-				// assume it is a diffuse texture
+					// assume it is a diffuse texture
 					::sprintf(key,AI_MATKEY_TEXTURE_DIFFUSE_ "[%i]",iDM++);
 				}
 

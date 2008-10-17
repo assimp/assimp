@@ -52,23 +52,67 @@ extern "C" {
 #endif
 
 // ---------------------------------------------------------------------------
-/** Helper structure to describe a camera.
+/** Helper structure to describe a virtual camera. 
  *
- * 
+ * Cameras have a representation in the node graph and can be animated.
+ *
 */
 struct aiCamera
 {
 	/** The name of the camera.
 	 *
-	 *  By this name it is referenced by a node in the scene graph.
+	 *  There must be a node in the scenegraph with the same name.
+	 *  This node specifies the position of the camera in the scene
+	 *  hierarchy and can be animated.
 	 */
 	aiString mName;
 
+	/** Half horizontal field of view angle, in radians. 
+	 *
+	 *  The field of view angle is the angle between the center
+	 *  line of the screen and the left or right border.
+	 *  The default value is 1/4PI.
+	 */
+	float mHorizontalFOV;
 
-	float fHorizontalFOV;
+	/** Distance of the near clipping plane from the camera.
+	 *
+	 * The value may not be 0.f (for arithmetic reasons to prevent
+	 * a division through zero). The default value is 0.1f.
+	 */
+	float mClipPlaneNear;
 
-	float fCLipPlaneNear;
-	float fCLipPlaneFar;
+	/** Distance of the far clipping plane from the camera.
+	 *
+	 * The far clipping plane must, of course, be farer away than the
+	 * near clipping plane. The default value is 1000.f. The radio
+	 * between the near and the far plane should not be too
+	 * large (between 1000-10000 should be ok) to avoid floating-point
+	 * inaccuracies which could lead to z-fighting.
+	 */
+	float mClipPlaneFar;
+
+
+	/** Screen aspect ratio.
+	 *
+	 * This is the ration between the width and the height of the
+	 * screen. Typical values are 4/3, 1/2 or 1/1. This value is
+	 * 0 if the aspect ratio is not defined in the source file.
+	 * 0 is also the default value.
+	 */
+	float mAspect;
+
+#ifdef __cplusplus
+
+	aiCamera()
+		: mHorizontalFOV	(0.25f * (float)AI_MATH_PI)
+		, mClipPlaneNear	(0.1f)
+		, mClipPlaneFar		(1000.f)
+		, mAspect			(0.f)
+	{
+	}
+
+#endif
 };
 
 

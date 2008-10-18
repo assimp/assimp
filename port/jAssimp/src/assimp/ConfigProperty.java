@@ -39,8 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-
 package assimp;
+
 
 /**
  * Defines configuration properties.
@@ -175,29 +175,30 @@ public class ConfigProperty {
     public static final String AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE
             = "pp.gsn.max_smoothing";
 
+ 
+	/** Input parameter to the #aiProcess_RemoveComponent step:
+	 *  Specifies the parts of the data structure to be removed.
+	 *
+	 * See the documentation to this step for further details. The property
+	 * is expected to be an integer, a bitwise combination of the
+	 * flags defined in the <code>Component</code> class. The default
+	 * value is 0. Important: if no valid mesh is remaining after the
+	 * step has been executed (e.g you thought it was funny to specify ALL
+	 * of the flags defined above) the import FAILS. Mainly because there is
+	 * no data to work on anymore ...
+	 */
+	public static final String AI_CONFIG_PP_RVC_FLAGS 
+		= "pp.rvc.flags";
 
-    /**
-     * Specifies the minimum number of faces a node should have.
-     * This is an input parameter to the OptimizeGraph-Step.
-     * <p/>
-     * Nodes whose referenced meshes have less faces than this value
-     * are propably joined with neighbors with identical world matrices.
-     * However, it is just a hint to the step.
-     * The type of the property is int.
-     */
-    public static final String AI_CONFIG_PP_OG_MIN_NUM_FACES
-            = "pp.og.min_faces";
 
-
-    /** \brief Specifies whether animations are removed from the asset.
-     *         This is an input parameter to the OptimizeGraph-Step.
-     *
-     * If an application does not need the animation data, erasing it at the
-     * beginning of the post-process pipeline allows some steps - including
-     * OptimizeGraph itself - to apply further optimizations.
-     * note: This is a boolean property stored as an integer, 0 is false
-     */
-    public static final String AI_CONFIG_PP_OG_REMOVE_ANIMATIONS
-            = "pp.og.remove_anims";
-
-}
+	/** Causes assimp to favour speed against import quality.
+	*
+	 * Enabling this option may result in faster loading, but it needn't.
+	 * It represents just a hint to loaders and post-processing steps to use
+	 * faster code paths, if possible. 
+	 * This property is expected to be an integer, != 0 stands for true.
+	 * The default value is 0.
+	*/
+	public static final String AI_CONFIG_FAVOUR_SPEED 
+		=	"imp.speed_flag";
+};

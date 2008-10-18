@@ -59,7 +59,7 @@ namespace Assimp
  * is known at compile-time.
  */
 template <bool SwapEndianess = false>
-class ASSIMP_API StreamReader
+class StreamReader
 {
 public:
 
@@ -109,7 +109,7 @@ public:
 	 */
 	inline int8_t GetI1()
 	{
-		if (current + 1 >= end)
+		if (current >= end)
 			throw new ImportErrorException("End of file was reached");
 
 		return *current++;
@@ -162,7 +162,7 @@ private:
 	template <typename T>
 	inline T Get()
 	{
-		if (current + sizeof(T) >= end)
+		if (current + sizeof(T) > end)
 			throw new ImportErrorException("End of file was reached");
 
 		T f = *((const T*)current);

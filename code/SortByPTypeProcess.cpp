@@ -132,7 +132,11 @@ void DeterminePTypeHelperProcess::Execute( aiScene* pScene)
 			if (deg)
 			{
 				char s[64];
-				::_itoa(deg,s,10);
+				#if defined(_MSC_VER)
+          ::_itoa(deg,s,10);
+        #else
+          snprintf(s, 64, "%d", deg);  //itoa is not available under linux
+        #endif        
 				DefaultLogger::get()->warn(std::string("Found ") + s + " degenerated primitives");
 			}
 		}

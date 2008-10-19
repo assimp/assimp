@@ -1,5 +1,5 @@
 
-#include "assimpPCH.h"
+#include "AssimpPCH.h"
 
 #include "../include/aiAssert.h"
 #ifdef _WIN32

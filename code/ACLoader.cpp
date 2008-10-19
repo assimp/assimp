@@ -611,7 +611,12 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 
 	// print the file format version to the console
 	unsigned int version = HexDigitToDecimal( buffer[4] );
-	char msg[3];::_itoa(version,msg,10);
+	char msg[3];
+  #if defined(_MSC_VER)
+    ::_itoa(version,msg,10);
+  #else
+    snprintf(msg, 3, "%d", version);  //itoa is not available under linux
+  #endif    
 	DefaultLogger::get()->info(std::string("AC3D file format version: ") + msg);
 
 	std::vector<Material> materials;

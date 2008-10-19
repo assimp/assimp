@@ -105,10 +105,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include "NFFLoader.h"
 #endif
 #ifndef AI_BUILD_NO_RAW_IMPORTER
-#	include "RAWLoader.h"
+#	include "RawLoader.h"
 #endif
 #ifndef AI_BUILD_NO_OFF_IMPORTER
-#	include "OffLoader.h"
+#	include "OFFLoader.h"
 #endif
 #ifndef AI_BUILD_NO_AC_IMPORTER
 #	include "ACLoader.h"

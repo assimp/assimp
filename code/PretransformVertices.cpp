@@ -385,6 +385,7 @@ void PretransformVertices::Execute( aiScene* pScene)
 	// now delete all meshes in the scene and build a new mesh list
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
 	{
+		pScene->mMeshes[i]->mBones = NULL;
 		delete pScene->mMeshes[i];
 
 		// invalidate the contents of the old mesh array. We will most

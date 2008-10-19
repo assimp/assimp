@@ -1511,6 +1511,7 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="1"
+							PrecompiledHeaderThrough="AssimpPCH.h"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1519,6 +1520,7 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="1"
+							PrecompiledHeaderThrough="AssimpPCH.h"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1534,7 +1536,8 @@
 						>
 						<Tool
 							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
+							UsePrecompiledHeader="1"
+							PrecompiledHeaderThrough="AssimpPCH.h"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1542,7 +1545,8 @@
 						>
 						<Tool
 							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
+							UsePrecompiledHeader="1"
+							PrecompiledHeaderThrough="AssimpPCH.h"
 						/>
 					</FileConfiguration>
 				</File>

@@ -44,7 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_BVHLOADER_H_INC
 
 #include "BaseImporter.h"
-#include <boost/multi_array.hpp>
 
 namespace Assimp
 {
@@ -56,6 +55,28 @@ namespace Assimp
 class BVHLoader : public BaseImporter
 {
 	friend class Importer;
+
+	/** Possible animation channels for which the motion data holds the values */
+	enum ChannelType
+	{
+		Channel_PositionX,
+		Channel_PositionY,
+		Channel_PositionZ,
+		Channel_RotationX,
+		Channel_RotationY,
+		Channel_RotationZ
+	};
+
+	/** Collected list of node. Will be bones of the dummy mesh some day, addressed by their array index */
+	struct Node
+	{
+		const aiNode* mNode;
+		std::vector<ChannelType> mChannels;
+		std::vector<float> mChannelValues; // motion data values for that node. Of size NumChannels * NumFrames
+
+		Node() { }
+		Node( const aiNode* pNode) : mNode( pNode) { }
+	};
 
 protected:
 	/** Constructor to be privately used by Importer */
@@ -93,11 +114,14 @@ protected:
 	/** Reads a node and recursively its childs and returns the created node. */
 	aiNode* ReadNode();
 
+	/** Reads an end node and returns the created node. */
+	aiNode* ReadEndSite( const std::string& pParentName);
+
 	/** Reads a node offset for the given node */
 	void ReadNodeOffset( aiNode* pNode);
 
-	/** Reads the animation channels for the given node */
-	void ReadNodeChannels( aiNode* pNode);
+	/** Reads the animation channels into the given node */
+	void ReadNodeChannels( BVHLoader::Node& pNode);
 
 	/** Reads the motion data */
 	void ReadMotion( aiScene* pScene);
@@ -110,6 +134,9 @@ protected:
 
 	/** Aborts the file reading with an exception */
 	void ThrowException( const std::string& pError);
+
+	/** Constructs an animation for the motion data and stores it in the given scene */
+	void CreateAnimation( aiScene* pScene);
 
 protected:
 	/** Filename, for a verbose error message */
@@ -124,8 +151,14 @@ protected:
 	/** Current line, for error messages */
 	unsigned int mLine;
 
-	/** motion values per frame */
-	boost::multi_array<float, 2> mMotionValues;
+	/** Collected list of nodes. Will be bones of the dummy mesh some day, addressed by their array index.
+	* Also contain the motion data for the node's channels
+	*/
+	std::vector<Node> mNodes;
+
+	/** basic Animation parameters */
+	float mAnimTickDuration;
+	unsigned int mAnimNumFrames;
 };
 
 } // end of namespace Assimp

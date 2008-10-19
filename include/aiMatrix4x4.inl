@@ -252,6 +252,7 @@ inline aiMatrix4x4& aiMatrix4x4::RotationX(float a, aiMatrix4x4& out)
 	out.b3 = -(out.c2 = sin(a));
 	return out;
 }
+
 // ---------------------------------------------------------------------------
 inline aiMatrix4x4& aiMatrix4x4::RotationY(float a, aiMatrix4x4& out)
 {
@@ -281,7 +282,7 @@ inline aiMatrix4x4& aiMatrix4x4::RotationZ(float a, aiMatrix4x4& out)
 	return out;
 }
 // ---------------------------------------------------------------------------
-inline aiMatrix4x4& aiMatrix4x4::Translation(aiVector3D v, aiMatrix4x4& out)
+inline aiMatrix4x4& aiMatrix4x4::Translation( const aiVector3D& v, aiMatrix4x4& out)
 {
 	out = aiMatrix4x4();
 	out.a4 = v.x;
@@ -289,7 +290,6 @@ inline aiMatrix4x4& aiMatrix4x4::Translation(aiVector3D v, aiMatrix4x4& out)
 	out.c4 = v.z;
 	return out;
 }
-
 
 #endif // __cplusplus
 #endif // AI_MATRIX4x4_INL_INC

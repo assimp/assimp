@@ -84,6 +84,12 @@ bool ImproveCacheLocalityProcess::IsActive( unsigned int pFlags) const
 // Executes the post processing step on the given imported data.
 void ImproveCacheLocalityProcess::Execute( aiScene* pScene)
 {
+	if (!pScene->mNumMeshes)
+	{
+		DefaultLogger::get()->debug("ImproveCacheLocalityProcess skipped; there are no meshes");
+		return;
+	}
+
 	DefaultLogger::get()->debug("ImproveCacheLocalityProcess begin");
 
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
@@ -102,7 +108,14 @@ void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshN
 	// check whether the input data is valid ->
 	// - there must be vertices and faces (haha)
 	// - all faces must be triangulated
-	if (!pMesh->HasFaces() || !pMesh->HasPositions())return;
+	if (!pMesh->HasFaces() || !pMesh->HasPositions())
+		return;
+
+	if (pMesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
+	{
+		DefaultLogger::get()->error("This algorithm works on triangle meshes only");
+		return;
+	}
 
 	// find the input ACMR ...
 	unsigned int* piFIFOStack = new unsigned int[this->configCacheDepth];
@@ -116,26 +129,6 @@ void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshN
 	const aiFace* const pcEnd = pMesh->mFaces+pMesh->mNumFaces;
 	for (const aiFace* pcFace = pMesh->mFaces;pcFace != pcEnd;++pcFace)
 	{
-		if (3 != pcFace->mNumIndices)
-		{
-			DefaultLogger::get()->error("Unable to improve cache locality of non-triangulated faces");
-			delete[] piFIFOStack;
-			return;
-		}
-
-		// although it has not been tested, I'm quite sure degenerated triangles
-		// would crash if the algorithm was applied to them
-
-#if (defined _DEBUG)
-		if (pcFace->mIndices[0] == pcFace->mIndices[1] ||
-			pcFace->mIndices[2] == pcFace->mIndices[1] ||
-			pcFace->mIndices[2] == pcFace->mIndices[0])
-		{
-			DefaultLogger::get()->error("ImproveCacheLocalityProcess: There may be no degenerated triangles ");
-			return;
-		}
-#endif
-
 		for (unsigned int qq = 0; qq < 3;++qq)
 		{
 			bool bInCache = false;

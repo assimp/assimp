@@ -69,15 +69,8 @@ extern "C" {
 #	define AI_MAKE_EMBEDDED_TEXNAME(_n_) "*" # _n_
 #endif
 
-// ugly compiler dependent packing stuff
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) ||	defined (__BCPLUSPLUS__)
-#	pragma pack(push,1)
-#	define PACK_STRUCT
-#elif defined( __GNUC__ )
-#	define PACK_STRUCT	__attribute__((packed))
-#else
-#	error Compiler not supported. Never do this again.
-#endif
+
+#include "./Compiler/pushpack1.h"
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent a texel in ARGB8888 format
@@ -87,11 +80,9 @@ extern "C" {
 // ---------------------------------------------------------------------------
 struct aiTexel
 {
-	unsigned char b;
-	unsigned char g;
-	unsigned char r;
-	unsigned char a;
+	uint8_t b,g,r,a;
 
+#ifdef __cplusplus
 	//! Comparison operator
 	bool operator== (const aiTexel& other) const
 	{
@@ -105,14 +96,11 @@ struct aiTexel
 		return b != other.b || r != other.r ||
 			g != other.g || a != other.a;
 	}
+#endif // __cplusplus
 
 } PACK_STRUCT;
 
-// reset packing to the original value
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) || defined (__BCPLUSPLUS__)
-#	pragma pack( pop )
-#endif
-#undef PACK_STRUCT
+#include "./Compiler/poppack1.h"
 
 // ---------------------------------------------------------------------------
 /** Helper structure to describe an embedded texture
@@ -164,12 +152,14 @@ struct aiTexture
 
 	// Construction
 	aiTexture ()
-		: mWidth(0), mHeight(0), pcData(NULL)
+		: mWidth  (0)
+		, mHeight (0)
+		, pcData  (NULL)
 	{
-		achFormatHint[0] = '\0';
-		achFormatHint[1] = '\0';
-		achFormatHint[2] = '\0';
-		achFormatHint[3] = '\0';
+		achFormatHint[0] = 0;
+		achFormatHint[1] = 0;
+		achFormatHint[2] = 0;
+		achFormatHint[3] = 0;
 	}
 
 	// Destruction

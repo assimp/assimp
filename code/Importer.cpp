@@ -176,9 +176,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include "SortByPTypeProcess.h"
 //#endif
 
-
-
 using namespace Assimp;
+
+
 
 // ------------------------------------------------------------------------------------------------
 // Constructor. 
@@ -276,6 +276,9 @@ Importer::Importer() :
 	mPostProcessingSteps.push_back( new RemoveVCProcess());
 #endif
 
+#if (!defined AI_BUILD_NO_PRETRANSFORMVERTICES_PROCESS)
+	mPostProcessingSteps.push_back( new PretransformVertices());
+#endif
 #if (!defined AI_BUILD_NO_TRIANGULATE_PROCESS)
 	mPostProcessingSteps.push_back( new TriangulateProcess());
 #endif
@@ -293,9 +296,6 @@ Importer::Importer() :
 #endif
 #if (!defined AI_BUILD_NO_OPTIMIZEGRAPH_PROCESS)
 	mPostProcessingSteps.push_back( new OptimizeGraphProcess());
-#endif
-#if (!defined AI_BUILD_NO_PRETRANSFORMVERTICES_PROCESS)
-	mPostProcessingSteps.push_back( new PretransformVertices());
 #endif
 #if (!defined AI_BUILD_NO_FIXINFACINGNORMALS_PROCESS)
 	mPostProcessingSteps.push_back( new FixInfacingNormalsProcess());
@@ -488,105 +488,121 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 	// validate the flags
 	ai_assert(ValidateFlags(pFlags));
 
-	// check whether this Importer instance has already loaded
-	// a scene. In this case we need to delete the old one
-	if (this->mScene)
+	// put a large try block around everything to catch all std::exception's
+	// that might be thrown by STL containers or by new(). 
+	// ImportErrorException's are throw by ourselves and caught elsewhere.
+	try
 	{
-		delete mScene;
-		this->mScene = NULL;
-	}
-
-	// first check if the file is accessable at all
-	if( !mIOHandler->Exists( pFile))
-	{
-		mErrorString = "Unable to open file \"" + pFile + "\".";
-		DefaultLogger::get()->error(mErrorString);
-		return NULL;
-	}
-
-	// find an worker class which can handle the file
-	BaseImporter* imp = NULL;
-	for( unsigned int a = 0; a < mImporter.size(); a++)
-	{
-		if( mImporter[a]->CanRead( pFile, mIOHandler))
+		// check whether this Importer instance has already loaded
+		// a scene. In this case we need to delete the old one
+		if (this->mScene)
 		{
-			imp = mImporter[a];
-			break;
+			DefaultLogger::get()->debug("The previous scene has been deleted");
+			delete mScene;
+			this->mScene = NULL;
 		}
-	}
 
-	// put a proper error message if no suitable importer was found
-	if( !imp)
-	{
-		mErrorString = "No suitable reader found for the file format of file \"" + pFile + "\".";
-		DefaultLogger::get()->error(mErrorString);
-		return NULL;
-	}
-
-	// dispatch the reading to the worker class for this format
-	imp->SetupProperties( this );
-	mScene = imp->ReadFile( pFile, mIOHandler);
-	
-	// if successful, apply all active post processing steps to the imported data
-	if( mScene)
-	{
-#ifdef _DEBUG
-		if (bExtraVerbose)
+		// first check if the file is accessable at all
+		if( !mIOHandler->Exists( pFile))
 		{
+			mErrorString = "Unable to open file \"" + pFile + "\".";
+			DefaultLogger::get()->error(mErrorString);
+			return NULL;
+		}
+
+		// find an worker class which can handle the file
+		BaseImporter* imp = NULL;
+		for( unsigned int a = 0; a < mImporter.size(); a++)
+		{
+			if( mImporter[a]->CanRead( pFile, mIOHandler))
+			{
+				imp = mImporter[a];
+				break;
+			}
+		}
+
+		// put a proper error message if no suitable importer was found
+		if( !imp)
+		{
+			mErrorString = "No suitable reader found for the file format of file \"" + pFile + "\".";
+			DefaultLogger::get()->error(mErrorString);
+			return NULL;
+		}
+
+		// dispatch the reading to the worker class for this format
+		DefaultLogger::get()->info("Found a matching importer for this file format");
+		imp->SetupProperties( this );
+		mScene = imp->ReadFile( pFile, mIOHandler);
+
+		// if successful, apply all active post processing steps to the imported data
+		DefaultLogger::get()->info("Import succesful, entering postprocessing-steps");
+		if( mScene)
+		{
+#ifdef _DEBUG
+			if (bExtraVerbose)
+			{
 #if (!defined AI_BUILD_NO_VALIDATEDS_PROCESS)
 
-			DefaultLogger::get()->error("Extra verbose mode not available, library"
-				" wasn't build with the ValidateDS-Step");
+				DefaultLogger::get()->error("Extra verbose mode not available, library"
+					" wasn't build with the ValidateDS-Step");
 #endif
 
 
-			pFlags |= aiProcess_ValidateDataStructure;
-
-			// use the MSB to tell the ValidateDS-Step that e're in extra verbose mode
-			// TODO: temporary solution, clean up later
-			mScene->mFlags |= 0x80000000; 
-		}
-#else
-		if (bExtraVerbose)DefaultLogger::get()->warn("Not a debug build, ignoring extra verbose setting");
-#endif // ! DEBUG
-		for( unsigned int a = 0; a < mPostProcessingSteps.size(); a++)
-		{
-			BaseProcess* process = mPostProcessingSteps[a];
-			if( process->IsActive( pFlags))
-			{
-				process->SetupProperties( this );
-				process->ExecuteOnScene	( this );
+				pFlags |= aiProcess_ValidateDataStructure;
 			}
-			if( !mScene)break; 
+#else
+			if (bExtraVerbose)DefaultLogger::get()->warn("Not a debug build, ignoring extra verbose setting");
+#endif // ! DEBUG
+			for( unsigned int a = 0; a < mPostProcessingSteps.size(); a++)
+			{
+				BaseProcess* process = mPostProcessingSteps[a];
+				if( process->IsActive( pFlags))
+				{
+					process->SetupProperties( this );
+					process->ExecuteOnScene	( this );
+				}
+				if( !mScene)break; 
 #ifdef _DEBUG
 
 #ifndef AI_BUILD_NO_VALIDATEDS_PROCESS
-			continue;
+				continue;
 #endif
 
-			// if the extra verbose mode is active execute the
-			// VaidateDataStructureStep again after each step
-			if (bExtraVerbose && a)
-			{
-				DefaultLogger::get()->debug("Extra verbose: revalidating data structures");
-				((ValidateDSProcess*)mPostProcessingSteps[0])->ExecuteOnScene (this);
-				if( !mScene)
+				// if the extra verbose mode is active execute the
+				// VaidateDataStructureStep again after each step
+				if (bExtraVerbose && a)
 				{
-					DefaultLogger::get()->error("Extra verbose: failed to revalidate data structures");
-					break; 
+					DefaultLogger::get()->debug("Extra verbose: revalidating data structures");
+					((ValidateDSProcess*)mPostProcessingSteps[0])->ExecuteOnScene (this);
+					if( !mScene)
+					{
+						DefaultLogger::get()->error("Extra verbose: failed to revalidate data structures");
+						break; 
+					}
 				}
+#endif // ! DEBUG
 			}
-#endif // ! DEBUG
 		}
-#ifdef _DEBUG
-		if (bExtraVerbose)mScene->mFlags &= ~0x80000000; 
-#endif // ! DEBUG
-	}
-	// if failed, extract the error string
-	else if( !mScene)mErrorString = imp->GetErrorText();
+		// if failed, extract the error string
+		else if( !mScene)mErrorString = imp->GetErrorText();
 
-	// clear any data allocated by post-process steps
-	mPPShared->Clean();
+		// clear any data allocated by post-process steps
+		mPPShared->Clean();
+
+	} 
+	catch (std::exception &e)
+	{
+#if (defined _MSC_VER) &&	(defined _CPPRTTI) && (defined _DEBUG)
+
+		// if we have RTTI get the full name of the exception that occured
+		mErrorString = std::string(typeid( e ).name()) + ": " + e.what();
+#else
+		mErrorString = std::string("std::exception: ") + e.what();
+#endif
+
+		DefaultLogger::get()->error(mErrorString);
+		delete mScene;mScene = NULL;
+	}
 
 	// either successful or failure - the pointer expresses it anyways
 	return mScene;

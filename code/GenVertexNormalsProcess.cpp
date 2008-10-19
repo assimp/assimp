@@ -110,10 +110,30 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 {
 	if (NULL != pMesh->mNormals)return false;
 
+	// If the mesh consists of lines and/or points but not of
+	// triangles or higher-order polygons the normal vectors
+	// are undefined.
+	if (!(pMesh->mPrimitiveTypes & (aiPrimitiveType_TRIANGLE | aiPrimitiveType_POLYGON)))
+	{
+		DefaultLogger::get()->info("Normal vectors are undefined for line and point meshes");
+		return false;
+	}
+
+	// allocate an array to hold the output normals
+	const float qnan = std::numeric_limits<float>::quiet_NaN();
 	pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
+
+	// compute per-face normals but store them per-vertex
 	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
 	{
 		const aiFace& face = pMesh->mFaces[a];
+		if (face.mNumIndices < 3)
+		{
+			// either a point or a line -> no normal vector
+			for (unsigned int i = 0;i < face.mNumIndices;++i)
+				pMesh->mNormals[face.mIndices[i]] = qnan;
+			continue;
+		}
 
 		aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
 		aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
@@ -167,9 +187,10 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 			aiVector3D pcNor; 
 			for (unsigned int a = 0; a < verticesFound.size(); ++a)
 			{
-				register unsigned int vidx = verticesFound[a];
-				pcNor += pMesh->mNormals[vidx];
+				const aiVector3D& v = pMesh->mNormals[verticesFound[a]];
+				if (is_not_qnan(v.x))pcNor += v;
 			}
+		
 			pcNor.Normalize();
 
 			// write the smoothed normal back to all affected normals
@@ -183,7 +204,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 	}
 	else
 	{
-		const float fLimit = cos(configMaxAngle); 
+		const float fLimit = ::cos(configMaxAngle); 
 		for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
 		{
 			// get all vertices that share this one ...
@@ -192,16 +213,18 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 			aiVector3D pcNor; 
 			for (unsigned int a = 0; a < verticesFound.size(); ++a)
 			{
-				register unsigned int vidx = verticesFound[a];
+				const aiVector3D& v = pMesh->mNormals[verticesFound[a]];
 
 				// check whether the angle between the two normals is not too large
-				if (pMesh->mNormals[vidx] * pMesh->mNormals[i] < fLimit)
+				// HACK: if v.x is qnan the dot product will become qnan, too
+				//   therefore the comparison against fLimit should be false
+				//   in every case. Contact me if you disagree with this assumption
+				if (v * pMesh->mNormals[i] < fLimit)
 					continue;
 
-				pcNor += pMesh->mNormals[vidx];
+				pcNor += v;
 			}
-			pcNor.Normalize();
-			pcNew[i] = pcNor;
+			pcNew[i] = pcNor.Normalize();
 		}
 	}
 

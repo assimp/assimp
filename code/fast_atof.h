@@ -139,7 +139,7 @@ inline unsigned int strtol_cppstyle( const char* in, const char** out=0)
 {
 	if ('0' == in[0])
 	{
-		return 'x' == in[1] ? strtol10(in+2,out) : strtol8(in+1,out);
+		return 'x' == in[1] ? strtol16(in+2,out) : strtol8(in+1,out);
 	}
 	return strtol10(in, out);
 }

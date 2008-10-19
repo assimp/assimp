@@ -240,6 +240,20 @@ struct aiMaterialProperty
 	* is never 0
     */
     char* mData;
+
+#ifdef __cplusplus
+
+	aiMaterialProperty()
+	{
+		mData = NULL;
+	}
+
+	~aiMaterialProperty()
+	{
+		delete[] mData;
+	}
+
+#endif
 };
 
 #ifdef __cplusplus

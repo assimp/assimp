@@ -106,6 +106,12 @@ public:
 
 
 	// -------------------------------------------------------------------
+	/** Removes all properties from the material
+	 */
+	void Clear();
+
+
+	// -------------------------------------------------------------------
 	/** Computes a hash (hopefully unique) from all material properties
 	 *  The hash value must be updated after material properties have
 	 *  been changed.

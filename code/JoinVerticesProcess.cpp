@@ -109,6 +109,8 @@ void JoinVerticesProcess::Execute( aiScene* pScene)
 			DefaultLogger::get()->info(szBuff);
 		}
 	}
+
+	pScene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
 }
 
 // ------------------------------------------------------------------------------------------------

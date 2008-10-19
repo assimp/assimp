@@ -91,7 +91,11 @@ void UpdateMeshReferences(aiNode* node, const std::vector<unsigned int>& meshMap
 		}
 		// just let the members that are unused, that's much cheaper
 		// than a full array realloc'n'copy party ...
-		node->mNumMeshes = out;
+		if(!(node->mNumMeshes = out))
+		{
+			delete[] node->mMeshes;
+			node->mMeshes = NULL;
+		}
 	}
 	// recursively update all children
 	for (unsigned int i = 0; i < node->mNumChildren;++i)
@@ -173,7 +177,8 @@ inline const char* ValidateArrayContents<aiVector3D>(const aiVector3D* arr, unsi
 		}
 		if (i && v != arr[i-1])b = true;
 	}
-	if (!b)return "All vectors are identical";
+	if (!b)
+		return "All vectors are identical";
 	return NULL;
 }
 

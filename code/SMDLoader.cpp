@@ -156,7 +156,7 @@ void SMDImporter::InternReadFile(
 		}
 		// set the flag in the scene structure which indicates
 		// that there is nothing than an animation skeleton
-		pScene->mFlags |= AI_SCENE_FLAGS_ANIM_SKELETON_ONLY;
+		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
 	}
 
 	if (!asBones.empty())
@@ -179,7 +179,7 @@ void SMDImporter::InternReadFile(
 		// compute absolute bone transformation matrices
 		ComputeAbsoluteBoneTransformations();
 	}
-	if (!(pScene->mFlags & AI_SCENE_FLAGS_ANIM_SKELETON_ONLY))
+	if (!(pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
 	{
 		// create output meshes
 		CreateOutputMeshes();
@@ -462,7 +462,7 @@ void SMDImporter::AddBoneChildren(aiNode* pcNode, uint32_t iParent)
 void SMDImporter::CreateOutputNodes()
 {
 	pScene->mRootNode = new aiNode();
-	if (!(pScene->mFlags & AI_SCENE_FLAGS_ANIM_SKELETON_ONLY))
+	if (!(pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
 	{
 		// create one root node that renders all meshes
 		pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
@@ -475,7 +475,7 @@ void SMDImporter::CreateOutputNodes()
 	AddBoneChildren(pScene->mRootNode,(uint32_t)-1);
 
 	// if we have only one bone we can even remove the root node
-	if (pScene->mFlags & AI_SCENE_FLAGS_ANIM_SKELETON_ONLY && 
+	if (pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE && 
 		1 == pScene->mRootNode->mNumChildren)
 	{
 		aiNode* pcOldRoot = pScene->mRootNode;

@@ -185,7 +185,30 @@ void RemoveVCProcess::Execute( aiScene* pScene)
 		bHas = true;
 		ArrayDelete(pScene->mTextures,pScene->mNumTextures);
 	}
-#if 0
+
+	// handle materials
+	if ( configDeleteFlags & aiComponent_MATERIALS && pScene->mNumMaterials)
+	{
+		bHas = true;
+		for (unsigned int i = 1;i < pScene->mNumMaterials;++i)
+			delete pScene->mMaterials[i];
+
+		MaterialHelper* helper = (MaterialHelper*) pScene->mMaterials[0];
+		helper->Clear();
+
+		// gray
+		aiColor3D clr(0.6f,0.6f,0.6f);
+		helper->AddProperty(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
+
+		// add a small ambient color value
+		clr = aiColor3D(0.05f,0.05f,0.05f);
+		helper->AddProperty(&clr,1,AI_MATKEY_COLOR_AMBIENT);
+
+		aiString s;
+		s.Set("Dummy_MaterialsRemoved");
+		helper->AddProperty(&s,AI_MATKEY_NAME);
+	}
+
 	// handle light sources
 	if ( configDeleteFlags & aiComponent_LIGHTS)
 	{
@@ -198,7 +221,7 @@ void RemoveVCProcess::Execute( aiScene* pScene)
 	}
 
 	// handle camneras
-	if ( configDeleteFlags & aiComponent_CAMERA)
+	if ( configDeleteFlags & aiComponent_CAMERAS)
 	{
 		// mask nodes for removal
 		MaskNodes(pScene->mRootNode,pScene->mLights,pScene->mNumLights,
@@ -207,13 +230,12 @@ void RemoveVCProcess::Execute( aiScene* pScene)
 		bHas = true;
 		ArrayDelete(pScene->mCameras,pScene->mNumCameras);
 	}
-#endif
+
 	// handle meshes
 	if (configDeleteFlags & aiComponent_MESHES)
 	{
 		bHas = true;
 		ArrayDelete(pScene->mMeshes,pScene->mNumMeshes);
-		pScene->mFlags |= AI_SCENE_FLAGS_ANIM_SKELETON_ONLY;
 	}
 	else
 	{
@@ -232,7 +254,6 @@ void RemoveVCProcess::Execute( aiScene* pScene)
 	// MSB>>1 means:   NO, DON'T REMOVE ME (Veto)
 	if (bMasked)
 	{
-#if 0
 		if (pScene->mNumLights)
 		{
 			MaskNodes(pScene->mRootNode,pScene->mLights,pScene->mNumLights,
@@ -243,7 +264,6 @@ void RemoveVCProcess::Execute( aiScene* pScene)
 			MaskNodes(pScene->mRootNode,pScene->mCameras,pScene->mNumCameras,
 				AI_RC_UINT_MSB_2);
 		}
-#endif
 		if (!(configDeleteFlags & aiComponent_BONEWEIGHTS))
 		{
 			for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
@@ -259,15 +279,14 @@ void RemoveVCProcess::Execute( aiScene* pScene)
 		std::list<aiNode*> dummy;
 		UpdateNodeGraph(pScene->mRootNode,dummy, true);
 
-		// the root node will neever be deleted
+		// the root node will never be deleted
 	}
 
-	// now check whether the result contains
-	// !0 animations (+ the AI_SCENE_FLAGS_ANIM_SKELETON_ONLY flag) OR
-	// !0 meshes
-	if (!pScene->mNumAnimations && !pScene->mNumMeshes)
+	// now check whether the result is still a full scene
+	if (!pScene->mNumMeshes || !pScene->mNumMaterials)
 	{
-		throw new ImportErrorException("No valid data structure remaining");
+		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
+		DefaultLogger::get()->debug("Setting AI_SCENE_FLAGS_INCOMPLETE flag");
 	}
 
 	if (bHas)DefaultLogger::get()->info("RemoveVCProcess finished. Data structure cleanup has been done.");
@@ -290,6 +309,11 @@ void RemoveVCProcess::SetupProperties(const Importer* pImp)
 bool RemoveVCProcess::ProcessMesh(aiMesh* pMesh)
 {
 	bool ret = false;
+
+	// if all materials have been deleted let the material
+	// index of the mesh point to the created default material
+	if ( configDeleteFlags & aiComponent_MATERIALS)
+		pMesh->mMaterialIndex = 0;
 
 	// handle normals
 	if (configDeleteFlags & aiComponent_NORMALS && pMesh->mNormals)

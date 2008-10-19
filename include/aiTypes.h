@@ -114,19 +114,15 @@ struct aiColor3D
 	aiColor3D operator*(const aiColor3D& c) const
 		{return aiColor3D(r*c.r,g*c.g,b*c.b);}
 	
-	aiColor3D operator*(float f)
+	aiColor3D operator*(float f) const
 		{return aiColor3D(r*f,g*f,b*f);}
 
-	// ugly subscript operator ... should better use an union, but
-	// hopefully the compiler will optimize the switch away.
-	inline float& operator[] (unsigned int sub)
+	inline float operator[](unsigned int i) const {return *(&r + i);}
+	inline float& operator[](unsigned int i) {return *(&r + i);}
+
+	inline bool IsBlack() const
 	{
-		switch (sub)
-		{
-		case 0:  return (float&)r;
-		case 1:  return (float&)g;
-		default: return (float&)b;
-		};
+		return !r && !g && !b;
 	}
 
 #endif // !__cplusplus
@@ -156,17 +152,13 @@ struct aiColor4D
 	bool operator != (const aiColor4D& other) const
 		{return r != other.r || g != other.g || b != other.b || a != other.a;}
 
-	// ugly subscript operator ... should better use an union, but
-	// hopefully the compiler will optimize the switch away.
-	inline float& operator[] (unsigned int sub)
+	inline float operator[](unsigned int i) const {return *(&r + i);}
+	inline float& operator[](unsigned int i) {return *(&r + i);}
+
+	inline bool IsBlack() const
 	{
-		switch (sub)
-		{
-		case 0:  return (float&)r;
-		case 1:  return (float&)g;
-		case 2:  return (float&)b;
-		default: return (float&)a;
-		};
+		// the alpha component doesn't care here. black is black.
+		return !r && !g && !b;
 	}
 
 #endif // !__cplusplus

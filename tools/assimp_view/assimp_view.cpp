@@ -433,8 +433,7 @@ int CreateAssetData()
 				g_pcAsset->apcMeshes[i],g_pcAsset->pcScene->mMeshes[i]);
 		}
 
-		if (g_pcAsset->pcScene->mMeshes[i]->mPrimitiveTypes == aiPrimitiveType_LINE ||
-			g_pcAsset->pcScene->mMeshes[i]->mPrimitiveTypes == aiPrimitiveType_POINT)
+		if (g_pcAsset->pcScene->mMeshes[i]->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
 		{
 			continue;
 		}

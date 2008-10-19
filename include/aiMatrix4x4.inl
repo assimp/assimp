@@ -173,21 +173,15 @@ inline void aiMatrix4x4::Decompose (aiVector3D& scaling, aiQuaternion& rotation,
 	// and remove all scaling from the matrix
 	if(scaling.x)
 	{
-		vRows[0].x /= scaling.x;
-		vRows[0].y /= scaling.x;
-		vRows[0].z /= scaling.x;
+		vRows[0] /= scaling.x;
 	}
 	if(scaling.y)
 	{
-		vRows[1].x /= scaling.y;
-		vRows[1].y /= scaling.y;
-		vRows[1].z /= scaling.y;
+		vRows[1] /= scaling.y;
 	}
 	if(scaling.z)
 	{
-		vRows[2].x /= scaling.z;
-		vRows[2].y /= scaling.z;
-		vRows[2].z /= scaling.z;
+		vRows[2] /= scaling.z;
 	}
 
 	// build a 3x3 rotation matrix
@@ -217,7 +211,7 @@ inline void aiMatrix4x4::FromEulerAngles(float x, float y, float z)
 {
 	aiMatrix4x4& _this = *this;
 
-        const float A       = ::cos(x);
+    const float A       = ::cos(x);
     const float B       = ::sin(x);
     const float C       = ::cos(y);
     const float D       = ::sin(y);

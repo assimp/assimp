@@ -113,10 +113,10 @@ protected:
 	unsigned int configFrameID;
 
 	/** Header of the MD2 file */
-	const MD2::Header* m_pcHeader;
+	BE_NCONST MD2::Header* m_pcHeader;
 
 	/** Buffer to hold the loaded file */
-	const unsigned char* mBuffer;
+	BE_NCONST uint8_t* mBuffer;
 
 	/** Size of the file, in bytes */
 	unsigned int fileSize;

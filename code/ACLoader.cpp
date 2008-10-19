@@ -126,9 +126,13 @@ bool AC3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) cons
 	if( pos == std::string::npos)return false;
 	std::string extension = pFile.substr( pos);
 
-	return !(extension.length() != 3 || extension[0] != '.' ||
-			 extension[1] != 'a' && extension[1] != 'A' ||
-			 extension[2] != 'c' && extension[2] != 'C');
+	for( std::string::iterator it = extension.begin(); it != extension.end(); ++it)
+		*it = tolower( *it);
+
+	if( extension == ".ac" || extension == "ac")
+		return true;
+
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -308,9 +312,16 @@ void AC3DImporter::ConvertMaterial(const Object& object,
 	matDest.AddProperty<aiColor3D>(&matSrc.emis,1,AI_MATKEY_COLOR_EMISSIVE);
 	matDest.AddProperty<aiColor3D>(&matSrc.spec,1,AI_MATKEY_COLOR_SPECULAR);
 
-	float f = 1.f - matSrc.trans;
+	int n;
+	if (matSrc.shin)
+	{
+		n = aiShadingMode_Phong;
+		matDest.AddProperty<float>(&matSrc.shin,1,AI_MATKEY_SHININESS);
+	}
+	else n = aiShadingMode_Gouraud;
+	matDest.AddProperty<int>(&n,1,AI_MATKEY_SHADING_MODEL);
 
-	matDest.AddProperty<float>(&matSrc.shin,1,AI_MATKEY_SHININESS);
+	float f = 1.f - matSrc.trans;
 	matDest.AddProperty<float>(&f,1,AI_MATKEY_OPACITY);
 }
 
@@ -352,6 +363,13 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 				faces->mIndices = new unsigned int[1];
 				faces->mIndices[0] = i;
 			}
+
+			// use the primary material in this case. this should be the
+			// default material if all objects of the file contain points
+			// and no faces.
+			mesh->mMaterialIndex = 0;
+			outMaterials.push_back(new MaterialHelper());
+			ConvertMaterial(object, materials[0], *outMaterials.back());
 		}
 		else
 		{
@@ -501,7 +519,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 								face.mNumIndices = 2;
 								face.mIndices = new unsigned int[2];
 								face.mIndices[0] = cur++;
-								face.mIndices[1] = cur;
+								face.mIndices[1] = cur++;
 
 								// copy vertex positions
 								*vertices++ = object.vertices[(*it2).first];
@@ -660,6 +678,7 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 	if (1 != rootObjects.size())delete root;
 
 	// build output arrays
+	ai_assert(!meshes.empty());
 	pScene->mNumMeshes = (unsigned int)meshes.size();
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 	::memcpy(pScene->mMeshes,&meshes[0],pScene->mNumMeshes*sizeof(void*));

@@ -67,6 +67,35 @@ struct aiCamera
 	 */
 	aiString mName;
 
+	/** Position of the camera relative to the coordinate space
+	 *  defined by the corresponding node.
+	 *
+	 *  The default value is 0|0|0.
+	 */
+	aiVector3D mPosition;
+
+
+	/** 'Up' - vector of the camera coordinate system relative to
+	 *  the coordinate space defined by the corresponding node.
+	 *
+	 *  The 'right' vector of the camera coordinate system is
+	 *  the cross product of  the up and lookAt vectors.
+	 *  The default value is 0|1|0. The vector
+	 *  may be normalized, but it needn't.
+	 */
+	aiVector3D mUp;
+
+
+	/** 'LookAt' - vector of the camera coordinate system relative to
+	 *  the coordinate space defined by the corresponding node.
+	 *
+	 *  This is the viewing direction of the user.
+	 *  The default value is 0|0|1. The vector
+	 *  may be normalized, but it needn't.
+	 */
+	aiVector3D mLookAt;
+
+
 	/** Half horizontal field of view angle, in radians. 
 	 *
 	 *  The field of view angle is the angle between the center
@@ -105,7 +134,9 @@ struct aiCamera
 #ifdef __cplusplus
 
 	aiCamera()
-		: mHorizontalFOV	(0.25f * (float)AI_MATH_PI)
+		: mUp				(0.f,1.f,0.f)
+		, mLookAt			(0.f,0.f,1.f)
+		, mHorizontalFOV	(0.25f * (float)AI_MATH_PI)
 		, mClipPlaneNear	(0.1f)
 		, mClipPlaneFar		(1000.f)
 		, mAspect			(0.f)

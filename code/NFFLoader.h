@@ -78,7 +78,7 @@ protected:
 	 */
 	void GetExtensionList(std::string& append)
 	{
-		append.append("*.nff");
+		append.append("*.nff;*.enff");
 	}
 
 	// -------------------------------------------------------------------
@@ -95,35 +95,71 @@ private:
 	struct ShadingInfo
 	{
 		ShadingInfo()
-			: color(0.6f,0.6f,0.6f,1.0f)
+			: color(0.6f,0.6f,0.6f)
+			, diffuse   (1.f)
+			, specular  (1.f)
+			, ambient   (0.1f)
+			, refracti  (1.f)
 		{}
 
-		aiColor4D color;
-		//float diffuse, specular; --- not implemented yet
+		aiColor3D color;
+		float diffuse, specular, ambient, refracti;
 
+		std::string texFile;
+
+		// shininess is ignored for the moment
 		bool operator == (const ShadingInfo& other) const
-			{return color == other.color;}
+		{
+			return color == other.color		&& 
+				diffuse  == other.diffuse	&&
+				specular == other.specular	&&
+				ambient  == other.ambient	&&
+				refracti == other.refracti  &&
+				texFile  == other.texFile;
+		}
+	};
+
+	// describes a NFF light source
+	struct Light
+	{
+		Light()
+			: color		(1.f,1.f,1.f)
+			, intensity	(1.f)
+		{}
+
+		aiVector3D position;
+		float intensity;
+		aiColor3D color;
+	};
+
+	enum PatchType
+	{
+		PatchType_Simple = 0x0,
+		PatchType_Normals = 0x1,
+		PatchType_UVAndNormals = 0x2
 	};
 
 	// describes a NFF mesh
 	struct MeshInfo
 	{
-		MeshInfo(bool bHN, bool bL = false)
-			: bHasNormals(bHN)
+		MeshInfo(PatchType _pType, bool bL = false)
+			: pType(_pType)
 			, bLocked(bL)
 		{
 			name[0] = '\0'; // by default meshes are unnamed
 		}
 
 		ShadingInfo shader;
-		bool bHasNormals, bLocked;
+		PatchType pType;
+		bool bLocked;
 
 		// for spheres, cones and cylinders: center point of the object
 		aiVector3D center, radius;
 
 		char name[128];
 
-		std::vector<aiVector3D> vertices, normals;
+		std::vector<aiVector3D> vertices, normals, uvs;
+		std::vector<aiColor4D>  colors; // for NFF2
 		std::vector<unsigned int> faces;
 	};
 };

@@ -40,13 +40,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Defines the data structures in which the imported scene is returned. */
-#ifndef AI_SCENE_H_INC
-#define AI_SCENE_H_INC
+#ifndef __AI_SCENE_H_INC__
+#define __AI_SCENE_H_INC__
 
 #include "aiTypes.h"
-#include "aiMesh.h"
-#include "aiMaterial.h"
 #include "aiTexture.h"
+#include "aiMesh.h"
+#include "aiLight.h"
+#include "aiCamera.h"
+#include "aiMaterial.h"
 #include "aiAnim.h"
 
 #ifdef __cplusplus
@@ -80,8 +82,8 @@ struct aiNode
 
 	/** The number of child nodes of this node. */
 	unsigned int mNumChildren;
-	/** The child nodes of this node. NULL if mNumChildren is 0. */
 
+	/** The child nodes of this node. NULL if mNumChildren is 0. */
 	C_STRUCT aiNode** mChildren;
 
 	/** The number of meshes of this node. */
@@ -113,8 +115,9 @@ struct aiNode
 	/** Destructor */
 	~aiNode()
 	{
-		// delete al children recursively
-		if (mChildren) // fix to make the d'tor work for invalid scenes, too
+		// delete all children recursively
+		// to make sure we won't crash if the data is invalid ...
+		if (mChildren && mNumChildren)  
 		{
 			for( unsigned int a = 0; a < mNumChildren; a++)
 				delete mChildren[a];
@@ -122,17 +125,66 @@ struct aiNode
 		}
 		delete [] mMeshes;
 	}
+
+	/** Searches for a node with a specific name, beginning at this
+	 *  nodes. Normally you will call this method on the root node
+	 *  of the scene.
+	 * 
+	 *  @param name Name to seach for
+	 *  @return NULL or a valid Node if the search was successful.
+	 */
+	inline aiNode* FindNode(const aiString& name)
+	{
+		if (mName == name)return this;
+		for (unsigned int i = 0; i < mNumChildren;++i)
+		{
+			aiNode* p = mChildren[i]->FindNode(name);
+			if (p)return p;
+		}
+		// there is definitely no sub node with this name
+		return NULL;
+	}
+
 #endif // __cplusplus
 };
 
-//! @def AI_SCENE_FLAGS_ANIM_SKELETON_ONLY
-//! Specifies that no full model but only an animation skeleton has been
-//! imported. There are no materials in this case. There are no
-//! textures in this case. But there is a node graph, animation channels
-//! and propably meshes with bones. Validation of meshes is less strict
-//! with this flag, so be careful.
-#define AI_SCENE_FLAGS_ANIM_SKELETON_ONLY	0x1
 
+// ---------------------------------------------------------------------------
+/** @def AI_SCENE_FLAGS_INCOMPLETE
+ * Specifies that the scene data structure that was imported is not complete.
+ * This flag bypasses some internal validations and allows the import 
+ * of animation skeletons, material libraries or camera animation paths 
+ * using Assimp. Most applications won't support such data. 
+ */
+#define AI_SCENE_FLAGS_INCOMPLETE	0x1
+
+
+/** @def AI_SCENE_FLAGS_VALIDATED
+ * This flag is set by the validation postprocess-step (aiPostProcess_ValidateDS)
+ * if the validation is successful. In a validated scene you can be sure that
+ * any cross references in the data structure (e.g. vertex indices) are valid.
+ */
+#define AI_SCENE_FLAGS_VALIDATED	0x2
+
+
+/** @def AI_SCENE_FLAGS_VALIDATION_WARNING
+ * This flag is set by the validation postprocess-step (aiPostProcess_ValidateDS)
+ * if the validation is successful but some issues have been found.
+ * This can for example mean that a texture that does not exist is referenced 
+ * by a material or that the bone weights for a vertex don't sum to 1.0 ... .
+ * In most cases you should still be able to use the import. This flag could
+ * be useful for applications which don't capture Assimp's log output.
+ */
+#define AI_SCENE_FLAGS_VALIDATION_WARNING  	0x4
+
+
+/** @def AI_SCENE_FLAGS_NON_VERBOSE_FORMAT
+ * This flag is currently only set by the aiProcess_JoinIdenticalVertices step.
+ * It indicates that the vertices of the output meshes aren't in the internal
+ * verbose format anymore. In the verbose format all vertices are unique,
+ * no vertex is ever referenced by more than one face.
+ */
+#define AI_SCENE_FLAGS_NON_VERBOSE_FORMAT  	0x8
 
 // ---------------------------------------------------------------------------
 /** The root structure of the imported data. 
@@ -143,15 +195,20 @@ struct aiNode
 struct aiScene
 {
 
-	/** Any combination of the AI_SCENE_FLAGS_XXX flags */
+	/** Any combination of the AI_SCENE_FLAGS_XXX flags. By default 
+	* this value is 0, no flags are set. Most applications will
+	* want to reject all scenes with the AI_SCENE_FLAGS_INCOMPLETE 
+	* bit set.
+	*/
 	unsigned int mFlags;
 
 
 	/** The root node of the hierarchy. 
 	* 
 	* There will always be at least the root node if the import
-	* was successful. Presence of further nodes depends on the 
-	* format and content of the imported file.
+	* was successful (and no special flags have been set). 
+	* Presence of further nodes depends on the format and content 
+	* of the imported file.
 	*/
 	C_STRUCT aiNode* mRootNode;
 
@@ -163,7 +220,9 @@ struct aiScene
 	/** The array of meshes. 
 	*
 	* Use the indices given in the aiNode structure to access 
-	* this array. The array is mNumMeshes in size.
+	* this array. The array is mNumMeshes in size. If the
+	* AI_SCENE_FLAGS_INCOMPLETE flag is not set there will always 
+	* be at least ONE material.
 	*/
 	C_STRUCT aiMesh** mMeshes;
 
@@ -175,7 +234,9 @@ struct aiScene
 	/** The array of materials. 
 	* 
 	* Use the index given in each aiMesh structure to access this
-	* array. The array is mNumMaterials in size.
+	* array. The array is mNumMaterials in size. If the
+	* AI_SCENE_FLAGS_INCOMPLETE flag is not set there will always 
+	* be at least ONE material.
 	*/
 	C_STRUCT aiMaterial** mMaterials;
 
@@ -200,9 +261,35 @@ struct aiScene
 	* 
 	* Not many file formats embedd their textures into the file.
 	* An example is Quake's MDL format (which is also used by
-	* some GameStudio™ versions)
+	* some GameStudio versions)
 	*/
 	C_STRUCT aiTexture** mTextures;
+
+
+	/** The number of light sources in the scene. Light sources
+	  are fully optional, in most cases this attribute will be 0 */
+	unsigned int mNumLights;
+
+	/** The array of light sources.
+	* 
+	* All light sources imported from the given file are
+	* listed here. The array is mNumLights in size.
+	*/
+	C_STRUCT aiLight** mLights;
+
+
+	/** The number of cameras in the scene. Cameras
+	  are fully optional, in most cases this attribute will be 0 */
+	unsigned int mNumCameras;
+
+	/** The array of cameras.
+	* 
+	* All cameras imported from the given file are listed here.
+	* The array is mNumCameras in size. The first camera in the
+	* array (if existing) is the default camera view into
+	* the scene.
+	*/
+	C_STRUCT aiCamera** mCameras;
 
 #ifdef __cplusplus
 
@@ -215,6 +302,8 @@ struct aiScene
 		mNumMaterials = 0; mMaterials = NULL;
 		mNumAnimations = 0; mAnimations = NULL;
 		mNumTextures = 0; mTextures = NULL;
+		mNumCameras = 0; mCameras = NULL;
+		mNumLights = 0; mLights = NULL;
 		mFlags = 0;
 	}
 
@@ -223,31 +312,74 @@ struct aiScene
 	{
 		// delete all subobjects recursively
 		delete mRootNode;
-		if (mNumMeshes) // fix to make the d'tor work for invalid scenes, too
+
+		// To make sure we won't crash if the data is invalid it's
+		// mich better to check whether both mNumXXX and mXXX are
+		// valid instead of relying on just one of them.
+		if (mNumMeshes && mMeshes) 
 		{
 			for( unsigned int a = 0; a < mNumMeshes; a++)
 				delete mMeshes[a];
 			delete [] mMeshes;
 		}
-		if (mNumMaterials) // fix to make the d'tor work for invalid scenes, too
+		if (mNumMaterials && mMaterials) 
 		{
 			for( unsigned int a = 0; a < mNumMaterials; a++)
 				delete mMaterials[a];
 			delete [] mMaterials;
 		}
-		if (mNumAnimations) // fix to make the d'tor work for invalid scenes, too
+		if (mNumAnimations && mAnimations) 
 		{
 			for( unsigned int a = 0; a < mNumAnimations; a++)
 				delete mAnimations[a];
 			delete [] mAnimations;
 		}
-		if (mNumTextures) // fix to make the d'tor work for invalid scenes, too
+		if (mNumTextures && mTextures) 
 		{
 			for( unsigned int a = 0; a < mNumTextures; a++)
 				delete mTextures[a];
 			delete [] mTextures;
 		}
+		if (mNumLights && mLights) 
+		{
+			for( unsigned int a = 0; a < mNumLights; a++)
+				delete mLights[a];
+			delete [] mLights;
+		}
+		if (mNumCameras && mCameras) 
+		{
+			for( unsigned int a = 0; a < mNumCameras; a++)
+				delete mCameras[a];
+			delete [] mCameras;
+		}
 	}
+
+	//! Check whether the scene contains meshes
+	//! Unless no special scene flags are set this will always be true.
+	inline bool HasMeshes() const 
+		{ return mMeshes != NULL; }
+
+	//! Check whether the scene contains materials
+	//! Unless no special scene flags are set this will always be true.
+	inline bool HasMaterials() const 
+		{ return mMaterials != NULL; }
+
+	//! Check whether the scene contains lights
+	inline bool HasLights() const 
+		{ return mLights != NULL; }
+
+	//! Check whether the scene contains textures
+	inline bool HasTextures() const 
+		{ return mTextures != NULL; }
+
+	//! Check whether the scene contains cameras
+	inline bool HasCameras() const 
+		{ return mCameras != NULL; }
+
+	//! Check whether the scene contains animations
+	inline bool HasAnimations() const 
+		{ return mAnimations != NULL; }
+
 #endif // __cplusplus
 };
 
@@ -255,4 +387,4 @@ struct aiScene
 }
 #endif
 
-#endif // AI_SCENE_H_INC
+#endif // __AI_SCENE_H_INC__

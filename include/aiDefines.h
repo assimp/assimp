@@ -120,6 +120,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #	define AI_FORCE_INLINE __forceinline
 
+
 #else
 #	define ASSIMP_API
 #	define AI_FORCE_INLINE inline

@@ -41,8 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Declares the data structures in which the imported geometry is 
     returned by ASSIMP: aiMesh, aiFace and aiBone data structures. */
-#ifndef AI_MESH_H_INC
-#define AI_MESH_H_INC
+#ifndef __AI_MESH_H_INC__
+#define __AI_MESH_H_INC__
 
 #include "aiTypes.h"
 
@@ -58,7 +58,6 @@ extern "C" {
 * Point and line primitives are rarely used and are NOT supported. However,
 * a load could pass them as degenerated triangles.
 */
-// ---------------------------------------------------------------------------
 struct aiFace
 {
 	//! Number of indices defining this face. 3 for a triangle, >3 for polygon
@@ -130,7 +129,6 @@ struct aiFace
 // ---------------------------------------------------------------------------
 /** A single influence of a bone on a vertex.
  */
-// ---------------------------------------------------------------------------
 struct aiVertexWeight
 {
 	//! Index of the vertex which is influenced by the bone.
@@ -161,7 +159,6 @@ struct aiVertexWeight
 * in the frame hierarchy and by which it can be addressed by animations. 
 * In addition it has a number of influences on vertices.
 */
-// ---------------------------------------------------------------------------
 struct aiBone
 {
 	//! The name of the bone. 
@@ -218,7 +215,6 @@ struct aiBone
 * \note Some internal structures expect (and assert) this value
 *   to be at least 4
 */
-// ---------------------------------------------------------------------------
 #	define AI_MAX_NUMBER_OF_COLOR_SETS 0x4
 
 #endif // !! AI_MAX_NUMBER_OF_COLOR_SETS
@@ -234,7 +230,6 @@ struct aiBone
 * \note Some internal structures expect (and assert) this value
 *   to be at least 4
 */
-// ---------------------------------------------------------------------------
 #	define AI_MAX_NUMBER_OF_TEXTURECOORDS 0x4
 
 // NOTE (Aramis): If you change these values, make sure that you also
@@ -248,33 +243,34 @@ struct aiBone
 
 #endif // !! AI_MAX_NUMBER_OF_TEXTURECOORDS
 
-#define AI_MESH_SMOOTHING_ANGLE_NOT_SET (10e10f)
-
 
 // ---------------------------------------------------------------------------
 /** Enumerates the types of geometric primitives supported by Assimp.
 */
-// ---------------------------------------------------------------------------
 enum aiPrimitiveType
 {
 	/** A point primitive. 
+	 *
 	 * This is just a single vertex in the virtual world, 
 	 * #aiFace contains just one index for such a primitive.
 	 */
 	aiPrimitiveType_POINT       = 0x1,
 
 	/** A line primitive. 
+	 *
 	 * This is a line defined through a start and an end position.
 	 * #aiFace contains exactly two indices for such a primitive.
 	 */
 	aiPrimitiveType_LINE        = 0x2,
 
 	/** A triangular primitive. 
+	 *
 	 * A triangle consists of three indices.
 	 */
 	aiPrimitiveType_TRIANGLE    = 0x4,
 
 	/** A higher-level polygon with more than 3 edges.
+	 *
 	 * A triangle is a polygon, but polygon in this context means
 	 * "all polygons that are not triangles". The "Triangulate"-Step
 	 * is provided for your convinience, it splits all polygons in
@@ -298,9 +294,9 @@ enum aiPrimitiveType
 *
 * A Mesh uses only a single material which is referenced by a material ID.
 * \note The mPositions member is not optional, although a Has()-Method is
-* provided for it.
+* provided for it. However, positions *could* be missing if the
+* AI_SCENE_FLAGS_INCOMPLETE flag is set in aiScene::mFlags.
 */
-// ---------------------------------------------------------------------------
 struct aiMesh
 {
 	/** Bitwise combination of the members of the #aiPrimitiveType enum.
@@ -328,14 +324,23 @@ struct aiMesh
 
 	/** Vertex normals. 
 	* The array contains normalized vectors, NULL if not present. 
-	* The array is mNumVertices in size. 
+	* The array is mNumVertices in size. Normals are undefined for
+	* point and line primitives. A mesh consisting of points and
+	* lines only may not have normal vectors. Meshes with mixed
+	* primitive types (i.e. lines and triangles) may have normals,
+	* but the normals for vertices that are only referenced by
+	* point or line primitives are undefined and set to QNaN.
 	*/
 	C_STRUCT aiVector3D* mNormals;
 
 	/** Vertex tangents. 
 	* The tangent of a vertex points in the direction of the positive 
 	* X texture axis. The array contains normalized vectors, NULL if
-	* not present. The array is mNumVertices in size. 
+	* not present. The array is mNumVertices in size. A mesh consisting 
+	* of points and lines only may not have normal vectors. Meshes with 
+	* mixed primitive types (i.e. lines and triangles) may have 
+	* normals, but the normals for vertices that are only referenced by
+	* point or line primitives are undefined and set to QNaN. 
 	* @note If the mesh contains tangents, it automatically also 
 	* contains bitangents. 
 	*/
@@ -368,6 +373,7 @@ struct aiMesh
 	* or cube maps). If the value is 2 for a given channel n, the
 	* component p.z of mTextureCoords[n][p] is set to 0.0f.
 	* If the value is 1 for a given channel, p.y is set to 0.0f, too.
+	* If this value is 0, 2 should be assumed.
 	* @note 4D coords are not supported 
 	*/
 	unsigned int mNumUVComponents[AI_MAX_NUMBER_OF_TEXTURECOORDS];
@@ -375,7 +381,8 @@ struct aiMesh
 	/** The faces the mesh is contstructed from. 
 	* Each face referres to a number of vertices by their indices. 
 	* This array is always present in a mesh, its size is given 
-	* in mNumFaces.
+	* in mNumFaces. If the AI_SCENE_FLAGS_NON_VERBOSE_FORMAT
+	* is NOT set each face references an unique set of vertices.
 	*/
 	C_STRUCT aiFace* mFaces;
 
@@ -422,7 +429,7 @@ struct aiMesh
 	//! Deletes all storage allocated for the mesh
 	~aiMesh()
 	{
-		if ( mNumVertices) // fix to make this work for invalid scenes, too
+		if ( mNumVertices ) // fix to make this work for invalid scenes, too
 		{
 			delete [] mVertices; 
 			delete [] mNormals;
@@ -433,7 +440,7 @@ struct aiMesh
 			for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
 				delete [] mColors[a];
 		}
-		if ( mNumBones) // fix to make this work for invalid scenes, too
+		if ( mNumBones && mBones) // fix to make this work for invalid scenes, too
 		{
 			for( unsigned int a = 0; a < mNumBones; a++)
 				delete mBones[a];
@@ -461,6 +468,9 @@ struct aiMesh
 		{ return mNormals != NULL; }
 
 	//! Check whether the mesh contains tangent and bitangent vectors
+	//! It is not possible that it contains tangents and no bitangents
+	//! (or the other way round). The existence of one of them
+	//! implies that the second is there, too.
 	inline bool HasTangentsAndBitangents() const 
 		{ return mTangents != NULL && mBitangents != NULL; }
 
@@ -478,7 +488,7 @@ struct aiMesh
 	//! \param pIndex Index of the texture coordinates set
 	inline bool HasTextureCoords( unsigned int pIndex) const
 	{ 
-		if( pIndex > AI_MAX_NUMBER_OF_TEXTURECOORDS) 
+		if( pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) 
 			return false; 
 		else 
 			return mTextureCoords[pIndex] != NULL; 
@@ -494,5 +504,5 @@ struct aiMesh
 }
 #endif
 
-#endif // AI_MESH_H_INC
+#endif // __AI_MESH_H_INC
 

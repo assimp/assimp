@@ -162,7 +162,7 @@ protected:
 	 */
 	void GetExtensionList(std::string& append)
 	{
-		append.append("*.ac");
+		append.append("*.ac;*.acc");
 	}
 
 	// -------------------------------------------------------------------

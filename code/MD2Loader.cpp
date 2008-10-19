@@ -183,12 +183,12 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 	if( fileSize < sizeof(MD2::Header))
 		throw new ImportErrorException( "MD2 File is too small");
 
-	std::vector<unsigned char> mBuffer2(fileSize);
+	std::vector<uint8_t> mBuffer2(fileSize);
 	file->Read(&mBuffer2[0], 1, fileSize);
 	mBuffer = &mBuffer2[0];
 
 
-	m_pcHeader = (const MD2::Header*)mBuffer;
+	m_pcHeader = (BE_NCONST MD2::Header*)mBuffer;
 
 #ifdef AI_BUILD_BIG_ENDIAN
 
@@ -229,7 +229,7 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 	pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
 	// navigate to the begin of the frame data
-	const MD2::Frame* pcFrame = (const MD2::Frame*) ((uint8_t*)
+	BE_NCONST MD2::Frame* pcFrame = (BE_NCONST MD2::Frame*) ((uint8_t*)
 		m_pcHeader + m_pcHeader->offsetFrames);
 
 	pcFrame += configFrameID;
@@ -239,11 +239,11 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 		m_pcHeader + m_pcHeader->offsetTriangles);
 
 	// navigate to the begin of the tex coords data
-	const MD2::TexCoord* pcTexCoords = (const MD2::TexCoord*) ((uint8_t*)
+	BE_NCONST MD2::TexCoord* pcTexCoords = (BE_NCONST MD2::TexCoord*) ((uint8_t*)
 		m_pcHeader + m_pcHeader->offsetTexCoords);
 
 	// navigate to the begin of the vertex data
-	const MD2::Vertex* pcVerts = (const MD2::Vertex*) (pcFrame->vertices);
+	BE_NCONST MD2::Vertex* pcVerts = (BE_NCONST MD2::Vertex*) (pcFrame->vertices);
 
 #ifdef AI_BUILD_BIG_ENDIAN
 	for (uint32_t i = 0; i< m_pcHeader->numTriangles)
@@ -410,14 +410,11 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 				}
 
 				aiVector3D& pcOut = pcMesh->mTextureCoords[0][iCurrent];
-				float u,v;
 
 				// the texture coordinates are absolute values but we
 				// need relative values between 0 and 1
-				u = pcTexCoords[iIndex].s / fDivisorU;
-				v = pcTexCoords[iIndex].t / fDivisorV;
-				pcOut.x = u;
-				pcOut.y = 1.0f - v; // FIXME: Is this correct for MD2?
+				pcOut.x = pcTexCoords[iIndex].s / fDivisorU;
+				pcOut.y = 1.f- pcTexCoords[iIndex].t / fDivisorV;
 			}
 		}
 		// FIX: flip the face order for use with OpenGL

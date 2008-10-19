@@ -97,11 +97,31 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
 {
 	if (NULL != pMesh->mNormals)return false;
 
-	pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
+	// If the mesh consists of lines and/or points but not of
+	// triangles or higher-order polygons the normal vectors
+	// are undefined.
+	if (!(pMesh->mPrimitiveTypes & (aiPrimitiveType_TRIANGLE | aiPrimitiveType_POLYGON)))
+	{
+		DefaultLogger::get()->info("Normal vectors are undefined for line and point meshes");
+		return false;
+	}
 
+	// allocate an array to hold the output normals
+	pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
+	const float qnan = std::numeric_limits<float>::quiet_NaN();
+
+	// iterate through all faces and compute per-face normals but store
+	// them per-vertex. 
 	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
 	{
 		const aiFace& face = pMesh->mFaces[a];
+		if (face.mNumIndices < 3)
+		{
+			// either a point or a line -> no well-defined normal vector
+			for (unsigned int i = 0;i < face.mNumIndices;++i)
+				pMesh->mNormals[face.mIndices[i]] = qnan;
+			continue;
+		}
 
 		aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
 		aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];

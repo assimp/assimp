@@ -109,8 +109,6 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 
 	pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes = 1 ];
 	aiMesh* mesh = pScene->mMeshes[0] = new aiMesh();
-	mesh->mNumVertices = numFaces*3;
-	aiVector3D* verts = mesh->mVertices = new aiVector3D[mesh->mNumVertices];
 	aiFace* faces = mesh->mFaces = new aiFace [mesh->mNumFaces = numFaces];
 
 	std::vector<aiVector3D> tempPositions(numVertices);
@@ -131,21 +129,43 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 		fast_atof_move(sz,(float&)v.z);
 	}
 
-	// now read all faces lines
-	for (unsigned int i = 0, p = 0; i< mesh->mNumFaces;++i)
+	
+	// First find out how many vertices we'll need
+	const char* old = buffer;
+	for (unsigned int i = 0; i< mesh->mNumFaces;++i)
 	{
 		if(!GetNextLine(buffer,line))
 		{
 			DefaultLogger::get()->error("OFF: The number of faces in the header is incorrect");
 			break;
 		}
-		unsigned int idx;sz = line;SkipSpaces(&sz);
-		if(!(faces->mNumIndices = strtol10(sz,&sz)) || faces->mNumIndices > 100)
+		sz = line;SkipSpaces(&sz);
+		if(!(faces->mNumIndices = strtol10(sz,&sz)) || faces->mNumIndices > 9)
 		{
 			DefaultLogger::get()->error("OFF: Faces with zero indices aren't allowed");
 			--mesh->mNumFaces;
 			continue;
 		}
+		mesh->mNumVertices += faces->mNumIndices;
+		++faces;
+	}
+
+	if (!mesh->mNumVertices)
+		throw new ImportErrorException("OFF: There are no valid faces");
+
+	// allocate storage for the output vertices
+	aiVector3D* verts = mesh->mVertices = new aiVector3D[mesh->mNumVertices];
+
+	// second: now parse all face indices
+	buffer = old;faces = mesh->mFaces;
+	for (unsigned int i = 0, p = 0; i< mesh->mNumFaces;)
+	{
+		if(!GetNextLine(buffer,line))break;
+
+		unsigned int idx;
+		sz = line;SkipSpaces(&sz);
+		if(!(idx = strtol10(sz,&sz)) || idx > 9)
+			continue;
 
 		faces->mIndices = new unsigned int [faces->mNumIndices];
 		for (unsigned int m = 0; m < faces->mNumIndices;++m)
@@ -156,10 +176,10 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 				DefaultLogger::get()->error("OFF: Vertex index is out of range");
 				idx = numVertices-1;
 			}
-
 			faces->mIndices[m] = p++;
 			*verts++ = tempPositions[idx];
 		}
+		++i;
 		++faces;
 	}
 	

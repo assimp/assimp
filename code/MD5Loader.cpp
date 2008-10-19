@@ -107,7 +107,7 @@ void MD5Importer::InternReadFile(
 	if (!bHadMD5Mesh && !bHadMD5Anim)
 		throw new ImportErrorException("Failed to read valid data from this MD5");
 	
-	if (!bHadMD5Mesh)pScene->mFlags |= AI_SCENE_FLAGS_ANIM_SKELETON_ONLY;
+	if (!bHadMD5Mesh)pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
 }
 // ------------------------------------------------------------------------------------------------
 void MD5Importer::LoadFileIntoMemory (IOStream* file)

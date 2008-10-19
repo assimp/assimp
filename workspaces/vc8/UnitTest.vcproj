@@ -676,6 +676,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\test\unit\RemoveComponent.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\RemoveComponent.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\test\unit\utFindInvalidData.cpp"
 				>
 			</File>

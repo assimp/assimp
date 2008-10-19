@@ -727,6 +727,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\include\BoostWorkaround\boost\multi_array.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\include\BoostWorkaround\boost\scoped_ptr.hpp"
 					>
 				</File>
@@ -865,6 +869,10 @@
 			</File>
 			<File
 				RelativePath="..\..\code\StandardShapes.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\StreamReader.h"
 				>
 			</File>
 			<File

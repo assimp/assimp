@@ -56,11 +56,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-#if _MSC_VER >= 1400
-#	define vsprintf vsprintf_s
-#	define sprintf sprintf_s
-#endif
-
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ValidateDSProcess::ValidateDSProcess()
@@ -126,114 +121,200 @@ void ValidateDSProcess::ReportWarning(const char* msg,...)
 	va_end(args);
 	DefaultLogger::get()->warn("Validation warning: " + std::string(szBuffer,iLen));
 }
+
+// ------------------------------------------------------------------------------------------------
+inline int HasNameMatch(const aiString& in, aiNode* node)
+{
+	int result = (node->mName == in ? 1 : 0 );
+	for (unsigned int i = 0; i < node->mNumChildren;++i)
+	{
+		result += HasNameMatch(in,node->mChildren[i]);
+	}
+	return result;
+}
+
+// ------------------------------------------------------------------------------------------------
+template <typename T>
+inline void ValidateDSProcess::DoValidation(T** parray, unsigned int size, 
+	const char* firstName, const char* secondName)
+{
+	// validate all entries
+	if (size)
+	{
+		if (!parray)
+		{
+			ReportError("aiScene::%s is NULL (aiScene::%s is %i)",
+				firstName, secondName, size);
+		}
+		for (unsigned int i = 0; i < size;++i)
+		{
+			if (!parray[i])
+			{
+				ReportError("aiScene::%s[%i] is NULL (aiScene::%s is %i)",
+					firstName,i,secondName,size);
+			}
+			Validate(parray[i]);
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+template <typename T>
+inline void ValidateDSProcess::DoValidationEx(T** parray, unsigned int size, 
+	const char* firstName, const char* secondName)
+{
+	// validate all entries
+	if (size)
+	{
+		if (!parray)
+		{
+			ReportError("aiScene::%s is NULL (aiScene::%s is %i)",
+				firstName, secondName, size);
+		}
+		for (unsigned int i = 0; i < size;++i)
+		{
+			if (!parray[i])
+			{
+				ReportError("aiScene::%s[%i] is NULL (aiScene::%s is %i)",
+					firstName,i,secondName,size);
+			}
+			Validate(parray[i]);
+
+			// check whether there are duplicate names
+			for (unsigned int a = i+1; a < size;++a)
+			{
+				if (parray[i]->mName == parray[a]->mName)
+				{
+					this->ReportError("aiScene::%s[%i] has the same name as "
+						"aiScene::%s[%i]",firstName, i,secondName, a);
+				}
+			}
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+template <typename T>
+inline void ValidateDSProcess::DoValidationWithNameCheck(T** array, 
+	unsigned int size, const char* firstName, 
+	const char* secondName)
+{
+	// validate all entries
+	DoValidationEx(array,size,firstName,secondName);
+	
+	for (unsigned int i = 0; i < size;++i)
+	{
+		int res = HasNameMatch(array[i]->mName,mScene->mRootNode);
+		if (!res)
+		{
+			ReportError("aiScene::%s[%i] has no corresponding node in the scene graph (%s)",
+				firstName,i,array[i]->mName.data);
+		}
+		else if (1 != res)
+		{
+			ReportError("aiScene::%s[%i]: there are more than one nodes with %s as name",
+				firstName,i,array[i]->mName.data);
+		}
+	}
+}
+
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void ValidateDSProcess::Execute( aiScene* pScene)
 {
 	this->mScene = pScene;
 	DefaultLogger::get()->debug("ValidateDataStructureProcess begin");
+	
+	// validate the node graph of the scene
+	Validate(pScene->mRootNode);
+	
+	// at least one of the mXXX arrays must be non-empty or we'll flag 
+	// the sebe as invalid
+	bool has = false;
 
 	// validate all meshes
-	if (pScene->mNumMeshes)
+	if (pScene->mNumMeshes) 
 	{
-		if (!pScene->mMeshes)
-		{
-			this->ReportError("aiScene::mMeshes is NULL (aiScene::mNumMeshes is %i)",
-				pScene->mNumMeshes);
-		}
-		for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-		{
-			if (!pScene->mMeshes[i])
-			{
-				this->ReportError("aiScene::mMeshes[%i] is NULL (aiScene::mNumMeshes is %i)",
-					i,pScene->mNumMeshes);
-			}
-			this->Validate(pScene->mMeshes[i]);
-		}
+		has = true;
+		DoValidation(pScene->mMeshes,pScene->mNumMeshes,"mMeshes","mNumMeshes");
 	}
-	else if (!(this->mScene->mFlags & AI_SCENE_FLAGS_ANIM_SKELETON_ONLY))
+	else if (!(mScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
 	{
-		this->ReportError("aiScene::mNumMeshes is 0. At least one mesh must be there");
+		ReportError("aiScene::mNumMeshes is 0. At least one mesh must be there");
 	}
-
+	
 	// validate all animations
-	if (pScene->mNumAnimations)
+	if (pScene->mNumAnimations) 
 	{
-		if (!pScene->mAnimations)
-		{
-			this->ReportError("aiScene::mAnimations is NULL (aiScene::mNumAnimations is %i)",
-				pScene->mNumAnimations);
-		}
-		for (unsigned int i = 0; i < pScene->mNumAnimations;++i)
-		{
-			if (!pScene->mAnimations[i])
-			{
-				this->ReportError("aiScene::mAnimations[%i] is NULL (aiScene::mNumAnimations is %i)",
-					i,pScene->mNumAnimations);
-			}
-			this->Validate(pScene->mAnimations[i]);
-
-			// check whether there are duplicate animation names
-			for (unsigned int a = i+1; a < pScene->mNumAnimations;++a)
-			{
-				if (pScene->mAnimations[i]->mName == pScene->mAnimations[a]->mName)
-				{
-					this->ReportError("aiScene::mAnimations[%i] has the same name as "
-						"aiScene::mAnimations[%i]",i,a);
-				}
-			}
-		}
+		has = true;
+		DoValidation(pScene->mAnimations,pScene->mNumAnimations,
+			"mAnimations","mNumAnimations");
 	}
-	else if (this->mScene->mFlags & AI_SCENE_FLAGS_ANIM_SKELETON_ONLY)
+	
+	// validate all cameras
+	if (pScene->mNumCameras) 
 	{
-		this->ReportError("aiScene::mNumAnimations is 0 and the "
-			"AI_SCENE_FLAGS_ANIM_SKELETON_ONLY flag is set.");
+		has = true;
+		DoValidationWithNameCheck(pScene->mCameras,pScene->mNumCameras,
+			"mCameras","mNumCameras");
 	}
 
-	// validate all textures
-	if (pScene->mNumTextures)
+	// validate all lights
+	if (pScene->mNumLights) 
 	{
-		if (!pScene->mTextures)
-		{
-			this->ReportError("aiScene::mTextures is NULL (aiScene::mNumTextures is %i)",
-				pScene->mNumTextures);
-		}
-		for (unsigned int i = 0; i < pScene->mNumTextures;++i)
-		{
-			if (!pScene->mTextures[i])
-			{
-				this->ReportError("aiScene::mTextures[%i] is NULL (aiScene::mNumTextures is %i)",
-					i,pScene->mNumTextures);
-			}
-			this->Validate(pScene->mTextures[i]);
-		}
+		has = true;
+		DoValidationWithNameCheck(pScene->mLights,pScene->mNumLights,
+			"mLights","mNumLights");
 	}
-
+	
 	// validate all materials
-	if (pScene->mNumMaterials)
+	if (pScene->mNumMaterials) 
 	{
-		if (!pScene->mMaterials)
-		{
-			this->ReportError("aiScene::mMaterials is NULL (aiScene::mNumMaterials is %i)",
-				pScene->mNumMaterials);
-		}
-		for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
-		{
-			if (!pScene->mMaterials[i])
-			{
-				this->ReportError("aiScene::mMaterials[%i] is NULL (aiScene::mNumMaterials is %i)",
-					i,pScene->mNumMaterials);
-			}
-			this->Validate(pScene->mMaterials[i]);
-		}
+		has = true;
+		DoValidation(pScene->mCameras,pScene->mNumCameras,"mMaterials","mNumMaterials");
 	}
-	else this->ReportError("aiScene::mNumMaterials is 0. At least one material must be there.");
+	else if (!(mScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
+	{
+		ReportError("aiScene::mNumMaterials is 0. At least one material must be there");
+	}
 
-	// validate the node graph of the scene
-	this->Validate(pScene->mRootNode);
-
+	if (!has)ReportError("The aiScene data structure is empty");
 	DefaultLogger::get()->debug("ValidateDataStructureProcess end");
 }
+
+// ------------------------------------------------------------------------------------------------
+void ValidateDSProcess::Validate( const aiLight* pLight)
+{
+	if (pLight->mType == aiLightSource_UNDEFINED)
+		ReportError("aiLight::mType is aiLightSource_UNDEFINED");
+
+	if (!pLight->mAttenuationConstant &&
+		!pLight->mAttenuationLinear   && 
+		!pLight->mAttenuationQuadratic)
+	{
+		ReportError("aiLight::mAttenuationXXX - all are zero");
+	}
+
+	if (pLight->mAngleInnerCone > pLight->mAngleOuterCone)
+		ReportError("aiLight::mAngleInnerCone is larger than aiLight::mAngleOuterCone");
+
+	if (pLight->mColorDiffuse.IsBlack() && pLight->mColorAmbient.IsBlack() 
+		&& pLight->mColorSpecular.IsBlack())
+	{
+		ReportError("aiLight::mColorXXX - all are black and won't have any influence");
+	}
+}
+	
+// ------------------------------------------------------------------------------------------------
+void ValidateDSProcess::Validate( const aiCamera* pCamera)
+{
+	if (pCamera->mClipPlaneFar <= pCamera->mClipPlaneNear)
+		ReportError("aiCamera::mClipPlaneFar must be >= aiCamera::mClipPlaneNear");
+
+	if (!pCamera->mHorizontalFOV || pCamera->mHorizontalFOV >= (float)AI_MATH_PI)
+		ReportError("%f is not a valid value for aiCamera::mHorizontalFOV",pCamera->mHorizontalFOV);
+}
+
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::Validate( const aiMesh* pMesh)
 {
@@ -288,96 +369,91 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 		if (!face.mIndices)this->ReportError("aiMesh::mFaces[%i].mIndices is NULL",i);
 	}
 
-	if (this->mScene->mFlags & AI_SCENE_FLAGS_ANIM_SKELETON_ONLY)
+	// positions must always be there ...
+	if (!pMesh->mNumVertices || !pMesh->mVertices && !mScene->mFlags)
 	{
-		if (pMesh->mNumVertices || pMesh->mVertices ||
-			pMesh->mNumFaces || pMesh->mFaces)
+		this->ReportError("The mesh contains no vertices");
+	}
+
+	// if tangents are there there must also be bitangent vectors ...
+	if ((pMesh->mTangents != NULL) != (pMesh->mBitangents != NULL))
+	{
+		this->ReportError("If there are tangents there must also be bitangent vectors");
+	}
+
+	// faces, too
+	if (!pMesh->mNumFaces || !pMesh->mFaces && !mScene->mFlags)
+	{
+		this->ReportError("The mesh contains no faces");
+	}
+
+	// now check whether the face indexing layout is correct:
+	// unique vertices, pseudo-indexed.
+	std::vector<bool> abRefList;
+	abRefList.resize(pMesh->mNumVertices,false);
+	for (unsigned int i = 0; i < pMesh->mNumFaces;++i)
+	{
+		aiFace& face = pMesh->mFaces[i];
+		for (unsigned int a = 0; a < face.mNumIndices;++a)
 		{
-			this->ReportWarning("The mesh contains vertices and faces although "
-				"the AI_SCENE_FLAGS_ANIM_SKELETON_ONLY flag is set");
+			if (face.mIndices[a] >= pMesh->mNumVertices)
+			{
+				this->ReportError("aiMesh::mFaces[%i]::mIndices[%i] is out of range",i,a);
+			}
+			// the MSB flag is temporarily used by the extra verbose
+			// mode to tell us that the JoinVerticesProcess might have 
+			// been executed already.
+			if ( !(this->mScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT ) && abRefList[face.mIndices[a]])
+			{
+				ReportError("aiMesh::mVertices[%i] is referenced twice - second "
+					"time by aiMesh::mFaces[%i]::mIndices[%i]",face.mIndices[a],i,a);
+			}
+			abRefList[face.mIndices[a]] = true;
 		}
 	}
-	else
+	// check whether there are vertices that aren't referenced by a face
+	for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
 	{
-		// positions must always be there ...
-		if (!pMesh->mNumVertices || !pMesh->mVertices)
-		{
-			this->ReportError("The mesh contains no vertices");
-		}
-
-		// faces, too
-		if (!pMesh->mNumFaces || !pMesh->mFaces)
-		{
-			this->ReportError("The mesh contains no faces");
-		}
-
-		// now check whether the face indexing layout is correct:
-		// unique vertices, pseudo-indexed.
-		std::vector<bool> abRefList;
-		abRefList.resize(pMesh->mNumVertices,false);
-		for (unsigned int i = 0; i < pMesh->mNumFaces;++i)
-		{
-			aiFace& face = pMesh->mFaces[i];
-			for (unsigned int a = 0; a < face.mNumIndices;++a)
-			{
-				if (face.mIndices[a] >= pMesh->mNumVertices)
-				{
-					this->ReportError("aiMesh::mFaces[%i]::mIndices[%i] is out of range",i,a);
-				}
-				// the MSB flag is temporarily used by the extra verbose
-				// mode to tell us that the JoinVerticesProcess might have 
-				// been executed already.
-				if ( !(this->mScene->mFlags & 0x80000000 ) && abRefList[face.mIndices[a]])
-				{
-					this->ReportError("aiMesh::mVertices[%i] is referenced twice - second "
-						"time by aiMesh::mFaces[%i]::mIndices[%i]",face.mIndices[a],i,a);
-				}
-				abRefList[face.mIndices[a]] = true;
-			}
-		}
-		// check whether there are vertices that aren't referenced by a face
-		for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
-		{
-			if (!abRefList[i])this->ReportError("aiMesh::mVertices[%i] is not referenced",i);
-		}
-		abRefList.clear();
-
-		// texture channel 2 may not be set if channel 1 is zero ...
-		{
-			unsigned int i = 0;
-			for (;i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
-			{
-				if (!pMesh->HasTextureCoords(i))break;
-			}
-			for (;i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
-				if (pMesh->HasTextureCoords(i))
-				{
-					this->ReportError("Texture coordinate channel %i is existing, "
-						"although the previous channel was NULL.",i);
-				}
-		}
-		// the same for the vertex colors
-		{
-			unsigned int i = 0;
-			for (;i < AI_MAX_NUMBER_OF_COLOR_SETS;++i)
-			{
-				if (!pMesh->HasVertexColors(i))break;
-			}
-			for (;i < AI_MAX_NUMBER_OF_COLOR_SETS;++i)
-				if (pMesh->HasVertexColors(i))
-				{
-					this->ReportError("Vertex color channel %i is existing, "
-						"although the previous channel was NULL.",i);
-				}
-		}
+		if (!abRefList[i])this->ReportError("aiMesh::mVertices[%i] is not referenced",i);
 	}
+	abRefList.clear();
+
+	// texture channel 2 may not be set if channel 1 is zero ...
+	{
+		unsigned int i = 0;
+		for (;i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
+		{
+			if (!pMesh->HasTextureCoords(i))break;
+		}
+		for (;i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
+			if (pMesh->HasTextureCoords(i))
+			{
+				ReportError("Texture coordinate channel %i is existing, "
+					"although the previous channel was NULL.",i);
+			}
+	}
+	// the same for the vertex colors
+	{
+		unsigned int i = 0;
+		for (;i < AI_MAX_NUMBER_OF_COLOR_SETS;++i)
+		{
+			if (!pMesh->HasVertexColors(i))break;
+		}
+		for (;i < AI_MAX_NUMBER_OF_COLOR_SETS;++i)
+			if (pMesh->HasVertexColors(i))
+			{
+				ReportError("Vertex color channel %i is existing, "
+					"although the previous channel was NULL.",i);
+			}
+	}
+
 
 	// now validate all bones
 	if (pMesh->HasBones())
 	{
 		if (!pMesh->mBones)
 		{
-			this->ReportError("aiMesh::mBones is NULL (aiMesh::mNumBones is %i)",
+			ReportError("aiMesh::mBones is NULL (aiMesh::mNumBones is %i)",
 				pMesh->mNumBones);
 		}
 		float* afSum = NULL;
@@ -397,7 +473,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 				this->ReportError("aiMesh::mBones[%i] is NULL (aiMesh::mNumBones is %i)",
 					i,pMesh->mNumBones);
 			}
-			this->Validate(pMesh,pMesh->mBones[i],afSum);
+			Validate(pMesh,pMesh->mBones[i],afSum);
 
 			for (unsigned int a = i+1; a < pMesh->mNumBones;++a)
 			{
@@ -414,7 +490,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 		{
 			if (afSum[i] && (afSum[i] <= 0.995 || afSum[i] >= 1.005))
 			{
-				this->ReportWarning("aiMesh::mVertices[%i]: bone weight sum != 1.0 (sum is %f)",i,afSum[i]);
+				ReportWarning("aiMesh::mVertices[%i]: bone weight sum != 1.0 (sum is %f)",i,afSum[i]);
 			}
 		}
 		delete[] afSum;

@@ -145,10 +145,22 @@ protected:
 	 * @param pTexture Input texture
 	 */
 	void Validate( const aiTexture* pTexture);
+	
+	// -------------------------------------------------------------------
+	/** Validates a light source
+	 * @param pLight Input light
+	 */
+	void Validate( const aiLight* pLight);
+	
+	// -------------------------------------------------------------------
+	/** Validates a camera
+	 * @param pCamera Input camera
+	 */
+	void Validate( const aiCamera* pCamera);
 
 	// -------------------------------------------------------------------
 	/** Validates a bone animation channel
-	 * @param pAnimation Input animation
+	 * @param pAnimation Animation channel.
 	 * @param pBoneAnim Input bone animation
 	 */
 	void Validate( const aiAnimation* pAnimation,
@@ -168,8 +180,27 @@ protected:
 
 private:
 
+	// template to validate one of the aiScene::mXXX arrays
+	template <typename T>
+	inline void DoValidation(T** array, unsigned int size, 
+		const char* firstName, const char* secondName);
+
+	// extended version: checks whethr T::mName occurs twice
+	template <typename T>
+	inline void DoValidationEx(T** array, unsigned int size, 
+		const char* firstName, const char* secondName);
+		
+	// extension to the first template which does also search
+	// the nodegraph for an item with the same name
+	template <typename T>
+	inline void DoValidationWithNameCheck(T** array, unsigned int size, 
+		const char* firstName, const char* secondName);
+
 	aiScene* mScene;
 };
+
+
+
 
 } // end of namespace Assimp
 

@@ -70,11 +70,9 @@ public:
 	inline StreamReader(IOStream* stream)
 	{
 		ai_assert(NULL != stream);
-
-		this->input = input;
 		this->stream = stream;
 
-		size_t s = stream->GetFileSize();
+		size_t s = stream->FileSize();
 		if (!s)throw new ImportErrorException("File is empty");
 
 		current = buffer = new int8_t[s];

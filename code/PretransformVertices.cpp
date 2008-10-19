@@ -48,23 +48,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+// some array offsets
+#define AI_PTVS_VERTEX 0x0
+#define AI_PTVS_FACE 0x1
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 PretransformVertices::PretransformVertices()
 {
 }
+
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 PretransformVertices::~PretransformVertices()
 {
 	// nothing to do here
 }
+
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool PretransformVertices::IsActive( unsigned int pFlags) const
 {
 	return	(pFlags & aiProcess_PreTransformVertices) != 0;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Count the number of nodes
 unsigned int CountNodes( aiNode* pcNode )
@@ -76,14 +83,20 @@ unsigned int CountNodes( aiNode* pcNode )
 	}
 	return iRet;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Get a bitwise combination identifying the vertex format of a mesh
 unsigned int GetMeshVFormat(aiMesh* pcMesh)
 {
-	if (0xdeadbeef == pcMesh->mNumUVComponents[0])
-		return pcMesh->mNumUVComponents[1];
+	// the vertex format is stored in aiMesh::mBones for later retrieval.
+	// there isn't a good reason to compute it a few hundred times
+	// from scratch. The pointer is unused as animations are lost
+	// during PretransformVertices.
+	if (pcMesh->mBones)
+		return (unsigned int)pcMesh->mBones;
 
 	unsigned int iRet = 0;
+	ai_assert(NULL != pcMesh->mVertices);
 
 	// normals
 	if (pcMesh->HasNormals())iRet |= 0x1;
@@ -92,23 +105,25 @@ unsigned int GetMeshVFormat(aiMesh* pcMesh)
 
 	// texture coordinates
 	unsigned int p = 0;
-	ai_assert(4 >= AI_MAX_NUMBER_OF_TEXTURECOORDS);
+	ai_assert(8 >= AI_MAX_NUMBER_OF_TEXTURECOORDS);
 	while (pcMesh->HasTextureCoords(p))
 	{
-		iRet |= (0x100 << p++);
+		iRet |= (0x100 << p);
 		if (3 == pcMesh->mNumUVComponents[p])
-			iRet |= (0x1000 << p++);
+			iRet |= (0x10000 << p);
+
+		++p;
 	}
 	// vertex colors
 	p = 0;
-	while (pcMesh->HasVertexColors(p))iRet |= (0x10000 << p++);
+	ai_assert(8 >= AI_MAX_NUMBER_OF_COLOR_SETS);
+	while (pcMesh->HasVertexColors(p))iRet |= (0x1000000 << p++);
 
 	// store the value for later use
-	pcMesh->mNumUVComponents[0] = 0xdeadbeef;
-	pcMesh->mNumUVComponents[1] = iRet;
-
+	pcMesh->mBones = (aiBone**)iRet;
 	return iRet;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Count the number of vertices in the whole scene and a given
 // material index
@@ -132,9 +147,6 @@ void CountVerticesAndFaces( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
 	return;
 }
 
-#define AI_PTVS_VERTEX 0x0
-#define AI_PTVS_FACE 0x1
-
 // ------------------------------------------------------------------------------------------------
 // Collect vertex/face data
 void CollectData( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
@@ -157,11 +169,14 @@ void CollectData( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
 				aiMatrix4x4 mWorldIT = pcNode->mTransformation;
 				mWorldIT.Inverse().Transpose();
 
+				// TODO: implement Inverse() for aiMatrix3x3
+				aiMatrix3x3 m = aiMatrix3x3(mWorldIT);
+				
 				// copy normals, transform them to worldspace
 				for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
 				{
 					pcMeshOut->mNormals[aiCurrent[AI_PTVS_VERTEX]+n] = 
-						mWorldIT * pcMesh->mNormals[n];
+						m * pcMesh->mNormals[n];
 				}
 			}
 			if (iVFormat & 0x2)
@@ -185,7 +200,7 @@ void CollectData( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
 				++p;
 			}
 			p = 0;
-			while (iVFormat & (0x10000 << p))
+			while (iVFormat & (0x1000000 << p))
 			{
 				// copy vertex colors
 				memcpy(pcMeshOut->mColors[p] + aiCurrent[AI_PTVS_VERTEX],
@@ -213,6 +228,23 @@ void CollectData( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
 				// just make sure the array won't be deleted by the
 				// aiFace destructor ...
 				pcMesh->mFaces[planck].mIndices = NULL;
+
+				// FIX: update the mPrimitiveTypes member of the mesh
+				switch (pcMesh->mFaces[planck].mNumIndices)
+				{
+				case 0x1:
+					pcMeshOut->mPrimitiveTypes |= aiPrimitiveType_POINT;
+					break;
+				case 0x2:
+					pcMeshOut->mPrimitiveTypes |= aiPrimitiveType_LINE;
+					break;
+				case 0x3:
+					pcMeshOut->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+					break;
+				default:
+					pcMeshOut->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
+					break;
+				};
 			}
 			aiCurrent[AI_PTVS_VERTEX] += pcMesh->mNumVertices;
 			aiCurrent[AI_PTVS_FACE] += pcMesh->mNumFaces;
@@ -225,11 +257,12 @@ void CollectData( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
 	}
 	return;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Get a list of all vertex formats that occur for a given material index
 // The output list contains duplicate elements
 void GetVFormatList( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
-					std::list<unsigned int>& aiOut)
+	std::list<unsigned int>& aiOut)
 {
 	for (unsigned int i = 0; i < pcNode->mNumMeshes;++i)
 	{
@@ -245,13 +278,14 @@ void GetVFormatList( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
 	}
 	return;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Compute the absolute transformation matrices of each node
 void ComputeAbsoluteTransform( aiNode* pcNode )
 {
 	if (pcNode->mParent)
 	{
-		pcNode->mTransformation =  pcNode->mTransformation*pcNode->mParent->mTransformation;
+		pcNode->mTransformation = pcNode->mParent->mTransformation*pcNode->mTransformation;
 	}
 
 	for (unsigned int i = 0;i < pcNode->mNumChildren;++i)
@@ -260,18 +294,37 @@ void ComputeAbsoluteTransform( aiNode* pcNode )
 	}
 	return;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void PretransformVertices::Execute( aiScene* pScene)
 {
 	DefaultLogger::get()->debug("PretransformVerticesProcess begin");
 
+	const unsigned int iOldMeshes = pScene->mNumMeshes;
+	const unsigned int iOldAnimationChannels = pScene->mNumAnimations;
+	const unsigned int iOldNodes = CountNodes(pScene->mRootNode);
+
 	// first compute absolute transformation matrices for all nodes
 	ComputeAbsoluteTransform(pScene->mRootNode);
 
+	// delete aiMesh::mBones for all meshes. The bones are
+	// removed during this step and we need the pointer as
+	// temporary storage
+	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+	{
+		aiMesh* mesh = pScene->mMeshes[i];
+
+		for (unsigned int a = 0; a < mesh->mNumBones;++a)
+			delete mesh->mBones[a];
+
+		delete[] mesh->mBones;
+		mesh->mBones = NULL;
+	}
+
 	// now build a list of output meshes
 	std::vector<aiMesh*> apcOutMeshes;
-	apcOutMeshes.reserve(pScene->mNumMaterials*2);
+	apcOutMeshes.reserve(pScene->mNumMaterials<<1u);
 	std::list<unsigned int> aiVFormats;
 	for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
 	{
@@ -306,12 +359,12 @@ void PretransformVertices::Execute( aiScene* pScene)
 				while ((*j) & (0x100 << iFaces))
 				{
 					pcMesh->mTextureCoords[iFaces] = new aiVector3D[iVertices];
-					if ((*j) & (0x1000 << iFaces))pcMesh->mNumUVComponents[iFaces] = 3;
+					if ((*j) & (0x10000 << iFaces))pcMesh->mNumUVComponents[iFaces] = 3;
 					else pcMesh->mNumUVComponents[iFaces] = 2;
 					iFaces++;
 				}
 				iFaces = 0;
-				while ((*j) & (0x10000 << iFaces))
+				while ((*j) & (0x1000000 << iFaces))
 					pcMesh->mColors[iFaces] = new aiColor4D[iVertices];
 
 				// fill the mesh ...
@@ -324,20 +377,58 @@ void PretransformVertices::Execute( aiScene* pScene)
 	// remove all animations from the scene
 	for (unsigned int i = 0; i < pScene->mNumAnimations;++i)
 		delete pScene->mAnimations[i];
-	pScene->mAnimations = NULL;
+	delete[] pScene->mAnimations;
+
+	pScene->mAnimations    = NULL;
 	pScene->mNumAnimations = 0;
 
 	// now delete all meshes in the scene and build a new mesh list
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+	{
 		delete pScene->mMeshes[i];
-	if (apcOutMeshes.size() != pScene->mNumMeshes)
+
+		// invalidate the contents of the old mesh array. We will most
+		// likely have less output meshes now, so the last entries of 
+		// the mesh array are not overridden. We set them to NULL to 
+		// make sure the developer gets notified when his application
+		// attempts to access these fields ...
+		AI_DEBUG_INVALIDATE_PTR( pScene->mMeshes[i] );
+	}
+
+	pScene->mNumMeshes = (unsigned int)apcOutMeshes.size();
+	if (apcOutMeshes.size() > pScene->mNumMeshes)
 	{
 		delete[] pScene->mMeshes;
-		pScene->mNumMeshes = (unsigned int)apcOutMeshes.size();
 		pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 	}
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
 		pScene->mMeshes[i] = apcOutMeshes[i];
+
+	// --- we need to keep all cameras and lights 
+	for (unsigned int i = 0; i < pScene->mNumCameras;++i)
+	{
+		aiCamera* cam = pScene->mCameras[i];
+		const aiNode* nd = pScene->mRootNode->FindNode(cam->mName);
+		ai_assert(NULL != nd);
+
+		// multiply all properties of the camera with the absolute
+		// transformation of the corresponding node
+		cam->mPosition = nd->mTransformation * cam->mPosition;
+		cam->mLookAt   = aiMatrix3x3( nd->mTransformation ) * cam->mLookAt;
+		cam->mUp       = aiMatrix3x3( nd->mTransformation ) * cam->mUp;
+	}
+
+	for (unsigned int i = 0; i < pScene->mNumLights;++i)
+	{
+		aiLight* l = pScene->mLights[i];
+		const aiNode* nd = pScene->mRootNode->FindNode(l->mName);
+		ai_assert(NULL != nd);
+
+		// multiply all properties of the camera with the absolute
+		// transformation of the corresponding node
+		l->mPosition   = nd->mTransformation * l->mPosition;
+		l->mDirection  = aiMatrix3x3( nd->mTransformation ) * l->mDirection;
+	}
 
 	// now delete all nodes in the scene and build a new
 	// flat node graph with a root node and some level 1 children
@@ -345,7 +436,7 @@ void PretransformVertices::Execute( aiScene* pScene)
 	pScene->mRootNode = new aiNode();
 	pScene->mRootNode->mName.Set("<dummy_root>");
 
-	if (1 == pScene->mNumMeshes)
+	if (1 == pScene->mNumMeshes && !pScene->mNumLights && !pScene->mNumCameras)
 	{
 		pScene->mRootNode->mNumMeshes = 1;
 		pScene->mRootNode->mMeshes = new unsigned int[1];
@@ -353,22 +444,59 @@ void PretransformVertices::Execute( aiScene* pScene)
 	}
 	else
 	{
-		pScene->mRootNode->mNumChildren = pScene->mNumMeshes;
-		pScene->mRootNode->mChildren = new aiNode*[pScene->mNumMeshes];
-		for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-		{
-			aiNode* pcNode = pScene->mRootNode->mChildren[i] = new aiNode();
-			pcNode->mName.length = sprintf(pcNode->mName.data,"dummy_%i",i);
+		pScene->mRootNode->mNumChildren = pScene->mNumMeshes+pScene->mNumLights+pScene->mNumCameras;
+		aiNode** nodes = pScene->mRootNode->mChildren = new aiNode*[pScene->mRootNode->mNumChildren];
 
+		// generate mesh nodes
+		for (unsigned int i = 0; i < pScene->mNumMeshes;++i,++nodes)
+		{
+			aiNode* pcNode = *nodes = new aiNode();
+			pcNode->mParent = pScene->mRootNode;
+			pcNode->mName.length = ::sprintf(pcNode->mName.data,"mesh_%i",i);
+
+			// setup mesh indices
 			pcNode->mNumMeshes = 1;
 			pcNode->mMeshes = new unsigned int[1];
 			pcNode->mMeshes[0] = i;
+		}
+		// generate light nodes
+		for (unsigned int i = 0; i < pScene->mNumLights;++i,++nodes)
+		{
+			aiNode* pcNode = *nodes = new aiNode();
 			pcNode->mParent = pScene->mRootNode;
+			pcNode->mName.length = ::sprintf(pcNode->mName.data,"light_%i",i);
+			pScene->mLights[i]->mName = pcNode->mName;
+		}
+		// generate camera nodes
+		for (unsigned int i = 0; i < pScene->mNumCameras;++i,++nodes)
+		{
+			aiNode* pcNode = *nodes = new aiNode();
+			pcNode->mParent = pScene->mRootNode;
+			pcNode->mName.length = ::sprintf(pcNode->mName.data,"cam_%i",i);
+			pScene->mCameras[i]->mName = pcNode->mName;
 		}
 	}
 
-	DefaultLogger::get()->debug("PretransformVerticesProcess finished. All "
-		"vertices are in worldspace now");
+	// print statistics
+	if (!DefaultLogger::isNullLogger())
+	{
+		char buffer[4096];
+
+		DefaultLogger::get()->debug("PretransformVerticesProcess finished");
+
+		::sprintf(buffer,"Removed %i nodes and %i animation channels (%i output nodes)",
+			iOldNodes,iOldAnimationChannels,CountNodes(pScene->mRootNode));
+		DefaultLogger::get()->info(buffer);
+
+		::sprintf(buffer,"Kept %i lights and %i cameras",
+			pScene->mNumLights,pScene->mNumCameras);
+		DefaultLogger::get()->info(buffer);
+
+		::sprintf(buffer,"Moved %i meshes to WCS (number of output meshes: %i)",
+			iOldMeshes,pScene->mNumMeshes);
+		DefaultLogger::get()->info(buffer);
+	}
+
 	return;
 }
 

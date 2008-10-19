@@ -242,16 +242,16 @@ MaterialHelper::MaterialHelper()
 // ------------------------------------------------------------------------------------------------
 MaterialHelper::~MaterialHelper()
 {
-	for (unsigned int i = 0; i < this->mNumProperties;++i)
+	Clear();
+}
+// ------------------------------------------------------------------------------------------------
+void MaterialHelper::Clear()
+{
+	for (unsigned int i = 0; i < mNumProperties;++i)
 	{
-		// be careful ...
-		if(NULL != this->mProperties[i])
-		{
-			delete[] this->mProperties[i]->mData;
-			delete this->mProperties[i];
-		}
+		// delete this entry
+		delete mProperties[i];
 	}
-	return;
 }
 // ------------------------------------------------------------------------------------------------
 uint32_t MaterialHelper::ComputeHash()
@@ -282,7 +282,6 @@ aiReturn MaterialHelper::RemoveProperty (const char* pKey)
 			if (0 == ASSIMP_stricmp( this->mProperties[i]->mKey.data, pKey ))
 			{
 				// delete this entry
-				delete[] this->mProperties[i]->mData;
 				delete this->mProperties[i];
 				
 				// collapse the array behind --.
@@ -318,7 +317,6 @@ aiReturn MaterialHelper::AddBinaryProperty (const void* pInput,
 			if (0 == ASSIMP_stricmp( this->mProperties[i]->mKey.data, pKey ))
 			{
 				// delete this entry
-				delete[] this->mProperties[i]->mData;
 				delete this->mProperties[i];
 				iOutIndex = i;
 			}
@@ -402,8 +400,7 @@ void MaterialHelper::CopyPropertyList(MaterialHelper* pcDest,
 		for (unsigned int q = 0; q < iOldNum;++q)
 		{
 			prop = pcDest->mProperties[q];
-			if (propSrc->mKey.length == prop->mKey.length && 
-				!ASSIMP_stricmp(propSrc->mKey.data,prop->mKey.data))
+			if (!ASSIMP_stricmp(propSrc->mKey.data,prop->mKey.data))
 			{
 				delete prop;
 

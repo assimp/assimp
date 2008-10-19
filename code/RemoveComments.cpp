@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 #include "RemoveComments.h"
+#include "ParsingUtils.h"
 
 namespace Assimp
 {
@@ -56,17 +57,17 @@ void CommentRemover::RemoveLineComments(const char* szComment,
 	ai_assert(NULL != szComment && NULL != szBuffer && *szComment);
 
 	const size_t len = ::strlen(szComment);
-
 	while (*szBuffer)
 	{
-		if (0 == ::strncmp(szBuffer,szComment,len))
+		if (!::strncmp(szBuffer,szComment,len))
 		{
-			while (*szBuffer != '\r' && *szBuffer != '\n' && *szBuffer)
+			while (!IsLineEnd(*szBuffer))
 				*szBuffer++ = chReplacement;
 		}
 		++szBuffer;
 	}
 }
+
 // ------------------------------------------------------------------------------------------------
 void CommentRemover::RemoveMultiLineComments(const char* szCommentStart,
 	const char* szCommentEnd,char* szBuffer,
@@ -74,32 +75,30 @@ void CommentRemover::RemoveMultiLineComments(const char* szCommentStart,
 {
 	// validate parameters
 	ai_assert(NULL != szCommentStart && NULL != szCommentEnd &&
-		NULL != szBuffer && '\0' != *szCommentStart && '\0' != *szCommentEnd);
+		NULL != szBuffer && *szCommentStart && *szCommentEnd);
 
-	const size_t len = ::strlen(szCommentEnd);
+	const size_t len  = ::strlen(szCommentEnd);
 	const size_t len2 = ::strlen(szCommentStart);
 
 	while (*szBuffer)
 	{
-		if (0 == ::strncmp(szBuffer,szCommentStart,len2))
+		if (!::strncmp(szBuffer,szCommentStart,len2))
 		{
 			while (*szBuffer)
 			{
-					
-				if (0 == ::strncmp(szBuffer,szCommentEnd,len))
+				if (!::strncmp(szBuffer,szCommentEnd,len))
 				{
 					for (unsigned int i = 0; i < len;++i)
 						*szBuffer++ = chReplacement;
-					goto __continue_outer; // WUHHHAAAAHHAA!
+					
+					break;
 				}
 			*szBuffer++ = chReplacement;
 			}
-			return;
+			if (!(*szBuffer))return;
+			continue;
 		}
 		++szBuffer;
-__continue_outer:
-		int i = 4; // NOP dummy
-		++i;
 	}
 }
 

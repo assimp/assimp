@@ -74,7 +74,7 @@ all:	$(TARGET)
 $(TARGET):	$(OBJECTS)
 	gcc -o $@ $(OBJECTS) -shared -lstdc++ 
 %.o:%.cpp
-	$(CXX) -g -Wall -c $? -o $@ -I../include -I"C:\Program Files\boost\boost_1_35_0" -I"%BOOST_DIR%" 
+	$(CXX) -g -Wall -c $? -o $@ -I../include -I"C:\Program Files\boost\boost_1_35_0"
 clean:
 	del *.o
 

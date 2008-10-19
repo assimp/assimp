@@ -246,12 +246,16 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 		{
 			aiFace& face = pMesh->mFaces[i];
 
-			// check whether we need four indices here
-			if (vp[3] != vp[2])
+			// check whether we need four,three or two indices here
+			if (vp[1] == vp[2])
 			{
-				face.mNumIndices = 4;
+				face.mNumIndices = 2;
 			}
-			else face.mNumIndices = 3;
+			else if (vp[3] == vp[2])
+			{
+				 face.mNumIndices = 3;
+			}
+			else face.mNumIndices = 4;
 			face.mIndices = new unsigned int[face.mNumIndices];
 
 			for (unsigned int a = 0; a < face.mNumIndices;++a)
@@ -323,7 +327,7 @@ bool DXFImporter::ParseEntities()
 	{
 		if (!groupCode)
 		{			
-			if (!::strcmp(cursor,"3DFACE"))
+			if (!::strcmp(cursor,"3DFACE") || !::strcmp(cursor,"LINE") || !::strcmp(cursor,"3DLINE"))
 				if (!Parse3DFace()) return false; else bRepeat = true;
 
 			if (!::strcmp(cursor,"POLYLINE") || !::strcmp(cursor,"LWPOLYLINE"))
@@ -524,6 +528,10 @@ bool DXFImporter::Parse3DFace()
 
 	aiVector3D vip[4]; // -- vectors are initialized to zero
 	aiColor4D  clr(g_clrInvalid);
+
+	// this is also used for for parsing line entities
+	bool bThird = false;
+
 	while (GetNextToken())
 	{
 		switch (groupCode)
@@ -556,28 +564,36 @@ bool DXFImporter::Parse3DFace()
 		case 31: vip[1].z = fast_atof(cursor);break;
 
 		// x position of the third corner
-		case 12: vip[2].x = fast_atof(cursor);break;
+		case 12: vip[2].x = fast_atof(cursor);
+			bThird = true;break;
 
 		// y position of the third corner
-		case 22: vip[2].y = -fast_atof(cursor);break;
+		case 22: vip[2].y = -fast_atof(cursor);
+			bThird = true;break;
 
 		// z position of the third corner
-		case 32: vip[2].z = fast_atof(cursor);break;
+		case 32: vip[2].z = fast_atof(cursor);
+			bThird = true;break;
 
 		// x position of the fourth corner
-		case 13: vip[3].x = fast_atof(cursor);break;
+		case 13: vip[3].x = fast_atof(cursor);
+			bThird = true;break;
 
 		// y position of the fourth corner
-		case 23: vip[3].y = -fast_atof(cursor);break;
+		case 23: vip[3].y = -fast_atof(cursor);
+			bThird = true;break;
 
 		// z position of the fourth corner
-		case 33: vip[3].z = fast_atof(cursor);break;
+		case 33: vip[3].z = fast_atof(cursor);
+			bThird = true;break;
 
 		// color
 		case 62: clr = g_aclrDxfIndexColors[strtol10(cursor) % AI_DXF_NUM_INDEX_COLORS]; break;
 		};
 		if (ret)break;
 	}
+
+	if (!bThird)vip[2] = vip[1];
 
 	// use a default layer if necessary
 	if (!out)SetDefaultLayer(out);
@@ -592,3 +608,5 @@ bool DXFImporter::Parse3DFace()
 		out->vColors.push_back(clr);
 	return ret;
 }
+
+

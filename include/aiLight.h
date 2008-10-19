@@ -70,6 +70,8 @@ enum aiLightSourceType
 
 	//! A spot light source emmits light in a specific 
 	//! angle. It has a position and a direction it is pointing to.
+	//! A good example for a spot light is a light spot in
+	//! sport arenas.
 	aiLightSource_SPOT          = 0x3
 };
 
@@ -82,7 +84,7 @@ enum aiLightSourceType
 */
 struct aiLight
 {
-	/** The name of the light sources.
+	/** The name of the light source.
 	 *
 	 *  There must be a node in the scenegraph with the same name.
 	 *  This node specifies the position of the light in the scene
@@ -91,20 +93,23 @@ struct aiLight
 	aiString mName;
 
 	/** The type of the light source.
+ 	 *
+	 * aiLightSource_UNDEFINED is nto a valid value for this member.
 	 */
 	aiLightSourceType mType;
 
 	/** Position of the light source in space. Relative to the
-	 *  node corresponding to the light.
+	 *  transformation of the node corresponding to the light.
 	 *
 	 *  The position is undefined for directional lights.
 	 */
 	aiVector3D mPosition;
 
 	/** Direction of the light source in space. Relative to the
-	 *  node corresponding to the light.
+	 *  transformation of the node corresponding to the light.
 	 *
-	 *  The direction is undefined for point lights.
+	 *  The direction is undefined for point lights. The vector
+	 *  may be normalized, but it needn't.
 	 */
 	aiVector3D mDirection;
 
@@ -115,7 +120,7 @@ struct aiLight
 	 *  @code
 	 *  Atten = 1/( att0 + att1 * d + att2 * d*d)
 	 *  @endcode
-	 *  This member corresponds to the att01 variable in the equation.
+	 *  This member corresponds to the att0 variable in the equation.
 	 */
 	float mAttenuationConstant;
 
@@ -126,7 +131,7 @@ struct aiLight
 	 *  @code
 	 *  Atten = 1/( att0 + att1 * d + att2 * d*d)
 	 *  @endcode
-	 *  This member corresponds to the att02 variable in the equation.
+	 *  This member corresponds to the att1 variable in the equation.
 	 */
 	float mAttenuationLinear;
 
@@ -137,28 +142,33 @@ struct aiLight
 	 *  @code
 	 *  Atten = 1/( att0 + att1 * d + att2 * d*d)
 	 *  @endcode
-	 *  This member corresponds to the att03 variable in the equation.
+	 *  This member corresponds to the att2 variable in the equation.
 	 */
 	float mAttenuationQuadratic;
 
 	/** Diffuse color of the light source
 	 *
-	 *  The color has no alpha component which wouldn't make
-	 *  sense for light sources.
+	 *  The diffuse light color is multiplied with the diffuse 
+	 *  material color to obtain the final color that contributes
+	 *  to the diffuse shading term.
 	 */
 	aiColor3D mColorDiffuse;
 
 	/** Specular color of the light source
 	 *
-	 *  The color has no alpha component which wouldn't make
-	 *  sense for light sources.
+	 *  The specular light color is multiplied with the specular
+	 *  material color to obtain the final color that contributes
+	 *  to the specular shading term.
 	 */
 	aiColor3D mColorSpecular;
 
 	/** Ambient color of the light source
 	 *
-	 *  The color has no alpha component which wouldn't make
-	 *  sense for light sources.
+	 *  The ambient light color is multiplied with the ambient
+	 *  material color to obtain the final color that contributes
+	 *  to the ambient shading term. Most renderers will ignore
+	 *  this value it, is just a remaining of the fixed-function pipeline
+	 *  that is still supported by quite many file formats.
 	 */
 	aiColor3D mColorAmbient;
 
@@ -168,18 +178,19 @@ struct aiLight
 	 *  angle. The angle is given in radians. It is 2PI for point 
 	 *  lights and undefined for directional lights.
 	 */
-	float mAngleOuterCone;
+	float mAngleInnerCone;
 
 	/** Outer angle of a spot light's light cone.
 	 *
 	 *  The spot light does not affect objects outside this angle.
 	 *  The angle is given in radians. It is 2PI for point lights and 
-	 *  undefined for directional lights.
+	 *  undefined for directional lights. The outer angle must be
+	 *  greater than or equal to the inner angle.
 	 *  It is assumed that the application uses a smooth
 	 *  interpolation between the inner and the outer cone of the
 	 *  spot light. 
 	 */
-	float mAngleInnerCone;
+	float mAngleOuterCone;
 
 #ifdef __cplusplus
 
@@ -188,8 +199,8 @@ struct aiLight
 		,	mAttenuationConstant  (0.f)
 		,   mAttenuationLinear    (1.f)
 		,   mAttenuationQuadratic (0.f)
-		,	mAngleOuterCone       ((float)AI_MATH_TWO_PI)
 		,	mAngleInnerCone       ((float)AI_MATH_TWO_PI)
+		,	mAngleOuterCone       ((float)AI_MATH_TWO_PI)
 	{
 	}
 

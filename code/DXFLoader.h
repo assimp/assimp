@@ -74,7 +74,10 @@ protected:
 
 		char name[4096];
 
-		// face buffer - order is x,y,z,w v1,v2,v3 (w is equal to z if unused)
+		// face buffer - order is x,y,z v1,v2,v3,v4 
+		// if v2 = v3:    line
+		// elsif v3 = v2: triangle
+		// else: polygon
 		std::vector<aiVector3D> vPositions;
 		std::vector<aiColor4D>  vColors;
 	};

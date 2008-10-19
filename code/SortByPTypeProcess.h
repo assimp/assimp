@@ -72,6 +72,13 @@ public:
 
 	// -------------------------------------------------------------------
 	void Execute( aiScene* pScene);
+
+	// -------------------------------------------------------------------
+	void SetupProperties(const Importer* pImp);
+
+private:
+
+	bool bSpeedFlag;
 };
 
 #if (!defined AI_BUILD_NO_SORTBYPTYPE_PROCESS)

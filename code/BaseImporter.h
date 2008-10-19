@@ -178,7 +178,7 @@ protected:
 	 *   a face is unique. Or the other way round: a vertex index may
 	 *   not occur twice in a single aiMesh.
 	 *
-	 * If the "AnimationSkeletonOnly"-Flag is not set:<br>
+	 * If the AI_SCENE_FLAGS_INCOMPLETE-Flag is not set:<br>
 	 * - at least one mesh must be there<br>
 	 * - at least one material must be there<br>
 	 * - there may be no meshes with 0 vertices or faces<br>

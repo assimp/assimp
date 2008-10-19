@@ -40,8 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Defines constants for configurable properties */
-#ifndef AI_CONFIG_H_INC
-#define AI_CONFIG_H_INC
+#ifndef __AI_CONFIG_H_INC__
+#define __AI_CONFIG_H_INC__
 
 // ---------------------------------------------------------------------------
 /** \brief Set the maximum number of vertices in a mesh.
@@ -138,7 +138,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * This applies to the GenSmoothNormals-Step. The angle is specified
  * in degrees, so 180 is PI. The default value is
  * 175 degrees (all vertex normals are smoothed). The maximum value is 175
- * Property type: float. 
+ * Property type: float. Warning: seting this option may cause a severe
+ * loss of performance. 
  */
 #define AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE "pp.gsn.max_smoothing"
 
@@ -169,20 +170,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ---------------------------------------------------------------------------
 /** \brief Sets the colormap (= palette) to be used to decode embedded
- *         textures in MDL files.
+ *         textures in MDL (Quake or 3DGS) files.
  *
  * This must be a valid path to a file. The file is 768 (256*3) bytes
- * large and contains RGB tripels for each of the 256 palette entries.
- * The default value is colormap.lmp. If the file is nto found,
- * a default palette is used.
+ * large and contains RGB triplets for each of the 256 palette entries.
+ * The default value is colormap.lmp. If the file is not found,
+ * a default palette (from Quake 1) is used. 
  * Property type: string.
  */
 #define AI_CONFIG_IMPORT_MDL_COLORMAP		"imp.mdl.color_map"
 
 
-
-
 // ---------------------------------------------------------------------------
+/** \brief Enumerates components of the aiScene and aiMesh data structures
+ *  that can be excluded from the import with the RemoveComponent step.
+ *
+ *  See the documentation to #aiProcess_RemoveComment for more details.
+ */
 enum aiComponent
 {
 	//! Normal vectors
@@ -220,9 +224,13 @@ enum aiComponent
 	//! cameras are removed.
 	aiComponent_CAMERAS = 0x200,
 
-	//! Removes all meshes (aiScene::mMeshes). The
-	//! #AI_SCENE_FLAGS_ANIM_SKELETON_ONLY flag is set in aiScene::mFlags.
+	//! Removes all meshes (aiScene::mMeshes). 
 	aiComponent_MESHES = 0x400,
+
+	//! Removes all materials. One default material will
+	//! be generated, so aiScene::mNumMaterials will be 1.
+	//! This makes no real sense without the aiComponent_TEXTURES flag.
+	aiComponent_MATERIALS = 0x800
 };
 
 #define aiComponent_COLORSn(n) (1u << (n+20u))

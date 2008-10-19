@@ -95,13 +95,16 @@ unsigned int GetMeshVFormat(aiMesh* pcMesh)
 	if (pcMesh->mBones)
 		return (unsigned int)pcMesh->mBones;
 
-	unsigned int iRet = 0;
 	ai_assert(NULL != pcMesh->mVertices);
 
+	// FIX: the hash may never be 0. Otherwise a comparison against
+	// nullptr could be successful
+	unsigned int iRet = 1;
+
 	// normals
-	if (pcMesh->HasNormals())iRet |= 0x1;
+	if (pcMesh->HasNormals())iRet |= 0x2;
 	// tangents and bitangents
-	if (pcMesh->HasTangentsAndBitangents())iRet |= 0x2;
+	if (pcMesh->HasTangentsAndBitangents())iRet |= 0x4;
 
 	// texture coordinates
 	unsigned int p = 0;

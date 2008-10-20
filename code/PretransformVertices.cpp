@@ -93,7 +93,7 @@ unsigned int GetMeshVFormat(aiMesh* pcMesh)
 	// from scratch. The pointer is unused as animations are lost
 	// during PretransformVertices.
 	if (pcMesh->mBones)
-		return (unsigned int)pcMesh->mBones;
+		return (unsigned int)(unsigned long)pcMesh->mBones;
 
 	ai_assert(NULL != pcMesh->mVertices);
 
@@ -123,7 +123,7 @@ unsigned int GetMeshVFormat(aiMesh* pcMesh)
 	while (pcMesh->HasVertexColors(p))iRet |= (0x1000000 << p++);
 
 	// store the value for later use
-	pcMesh->mBones = (aiBone**)iRet;
+	pcMesh->mBones = (aiBone**)(unsigned long)iRet;
 	return iRet;
 }
 

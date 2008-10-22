@@ -41,6 +41,8 @@ const float fast_atof_table[16] =	{  // we write [16] here instead of [] to work
 
 
 // ------------------------------------------------------------------------------------
+// convert a string in decimal format to a number
+// ------------------------------------------------------------------------------------
 inline unsigned int strtol10( const char* in, const char** out=0)
 {
 	unsigned int value = 0;
@@ -57,6 +59,8 @@ inline unsigned int strtol10( const char* in, const char** out=0)
 	return value;
 }
 
+// ------------------------------------------------------------------------------------
+// convert a string in octal format to a number
 // ------------------------------------------------------------------------------------
 inline unsigned int strtol8( const char* in, const char** out=0)
 {
@@ -76,6 +80,7 @@ inline unsigned int strtol8( const char* in, const char** out=0)
 
 // ------------------------------------------------------------------------------------
 // convert a string in hex format to a number
+// ------------------------------------------------------------------------------------
 inline unsigned int strtol16( const char* in, const char** out=0)
 {
 	unsigned int value = 0;
@@ -101,8 +106,9 @@ inline unsigned int strtol16( const char* in, const char** out=0)
 	return value;
 }
 
-// ---------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 // convert just one hex digit
+// ------------------------------------------------------------------------------------
 inline unsigned int HexDigitToDecimal(char in)
 {
 	unsigned int out = 0xffffffff;
@@ -121,6 +127,7 @@ inline unsigned int HexDigitToDecimal(char in)
 
 // ------------------------------------------------------------------------------------
 // signed variant of strtol10
+// ------------------------------------------------------------------------------------
 inline int strtol10s( const char* in, const char** out=0)
 {
 	bool bNeg = false;
@@ -132,9 +139,11 @@ inline int strtol10s( const char* in, const char** out=0)
 }
 
 // ------------------------------------------------------------------------------------
+// Parse a C++-like integer literal - hex and oct prefixes.
 // 0xNNNN - hex
 // 0NNN   - oct
 // NNN    - dec
+// ------------------------------------------------------------------------------------
 inline unsigned int strtol_cppstyle( const char* in, const char** out=0)
 {
 	if ('0' == in[0])
@@ -145,7 +154,9 @@ inline unsigned int strtol_cppstyle( const char* in, const char** out=0)
 }
 
 // ------------------------------------------------------------------------------------
-// specal version of the function, providing higher accuracy
+// Special version of the function, providing higher accuracy
+// It is mainly used bx fast_atof to prevent ugly integer overflows.
+// ------------------------------------------------------------------------------------
 inline uint64_t strtol10_64( const char* in, const char** out=0)
 {
 	uint64_t value = 0;
@@ -168,6 +179,7 @@ inline uint64_t strtol10_64( const char* in, const char** out=0)
 //! Provides a fast function for converting a string into a float,
 //! about 6 times faster than atof in win32.
 // If you find any bugs, please send them to me, niko (at) irrlicht3d.org.
+// ------------------------------------------------------------------------------------
 inline const char* fast_atof_move( const char* c, float& out)
 {
 	bool inv = false;

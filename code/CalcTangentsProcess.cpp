@@ -105,10 +105,15 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	// assert() it here.
     //assert( must be verbose, dammit);
 
+	if (pMesh->mTangents) // thisimplies that mBitangents is also there
+		return false;
 
-	if (pMesh->mTangents && pMesh->mBitangents ||
-		!(pMesh->mPrimitiveTypes & (aiPrimitiveType_TRIANGLE | aiPrimitiveType_POLYGON)))
+	// If the mesh consists of lines and/or points but not of
+	// triangles or higher-order polygons the normal vectors
+	// are undefined.
+	if (!(pMesh->mPrimitiveTypes & (aiPrimitiveType_TRIANGLE | aiPrimitiveType_POLYGON)))
 	{
+		DefaultLogger::get()->info("Tangents are undefined for line and point meshes");
 		return false;
 	}
 
@@ -121,6 +126,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	const float angleEpsilon = 0.9999f;
 
 	std::vector<bool> vertexDone( pMesh->mNumVertices, false);
+	const float qnan = std::numeric_limits<float>::quiet_NaN();
 
 	// create space for the tangents and bitangents
 	pMesh->mTangents = new aiVector3D[pMesh->mNumVertices];
@@ -138,8 +144,14 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 		const aiFace& face = pMesh->mFaces[a];
 		if (face.mNumIndices < 3)
 		{
+			// There are less than three indices, thus the tangent vector
+			// is not defined. We are finished with these vertices now,
+			// their tangent vectors are set to qnan.
 			for (unsigned int i = 0; i < face.mNumIndices;++i)
+			{
 				vertexDone[face.mIndices[i]] = true;
+				meshTang  [face.mIndices[i]] = qnan;
+			}
 
 			continue;
 		}

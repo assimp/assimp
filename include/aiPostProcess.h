@@ -218,7 +218,25 @@ enum aiPostProcessSteps
 	 *  especially useful for real-time rendering where point and line
 	 *  primitives are often ignored or rendered separately.
 	*/
-	aiProcess_SortByPType = 0x8000
+	aiProcess_SortByPType = 0x8000,
+
+	/** This step searches all meshes for degenerated primitives and
+	 *  converts them to proper lines or points.
+	 *
+	 * A face is degenerated if one or more of its faces are identical.
+	*/
+	aiProcess_FindDegenerates = 0x10000,
+
+
+	/** This step searches all meshes for invalid data, such as zeroed
+	 *  normal vectors or invalid UV coords and removes them.
+	 *
+	 * This is especially useful for normals. If they are invalid, and
+	 * the step recognizes this, they will be removed and can later
+	 * be computed by one of the other steps.<br>
+	 * The step will also remove meshes that are infinitely small.
+	*/
+	aiProcess_FindInvalidData = 0x20000,
 };
 
 

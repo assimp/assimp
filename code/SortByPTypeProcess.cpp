@@ -55,7 +55,6 @@ using namespace Assimp;
 // Constructor to be privately used by Importer
 DeterminePTypeHelperProcess ::DeterminePTypeHelperProcess()
 {
-	bSpeedFlag = false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -74,13 +73,6 @@ bool DeterminePTypeHelperProcess::IsActive( unsigned int pFlags) const
 }
 
 // ------------------------------------------------------------------------------------------------
-// called as a request to the step to update its configuration
-void DeterminePTypeHelperProcess::SetupProperties(const Importer* pImp)
-{
-	bSpeedFlag = (pImp->GetPropertyInteger(AI_CONFIG_FAVOUR_SPEED,0) ? true : false);
-}
-
-// ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void DeterminePTypeHelperProcess::Execute( aiScene* pScene)
 {
@@ -88,59 +80,6 @@ void DeterminePTypeHelperProcess::Execute( aiScene* pScene)
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
 	{
 		aiMesh* mesh = pScene->mMeshes[i];
-
-		// if the speed flag is not set search whether there are any degenerated
-		// primitives in the mesh
-		if (false && !bSpeedFlag)
-		{
-			unsigned int deg = 0;
-			for (unsigned int a = 0; a < mesh->mNumFaces; ++a)
-			{
-				aiFace& face = mesh->mFaces[a];
-				bool first = true;
-
-				// check whether the face contains degenerated entries
-				for (register unsigned int i = 0; i < face.mNumIndices; ++i)
-				{
-					for (register unsigned int a = i+1; a < face.mNumIndices; ++a)
-					{
-						if (mesh->mVertices[face.mIndices[i]] == mesh->mVertices[face.mIndices[a]])
-						{
-							// we have found a matching vertex position
-							// remove the corresponding index from the array
-							for (unsigned int m = a; m < face.mNumIndices-1; ++m)
-							{
-								face.mIndices[m] = face.mIndices[m+1];
-							}
-							--a;
-							--face.mNumIndices;
-
-							// NOTE: we set the removed vertex index to an unique value
-							// to make sure the developer gets notified when his
-							// application attemps to access this data.
-							face.mIndices[face.mNumIndices] = 0xdeadbeef;
-
-							if(first)
-							{
-								++deg;
-								first = false;
-							}
-						}
-					}
-				}
-			}
-			if (deg)
-			{
-				char s[64];
-				#if defined(_MSC_VER)
-          ::_itoa(deg,s,10);
-        #else
-          snprintf(s, 64, "%d", deg);  //itoa is not available under linux
-        #endif        
-				DefaultLogger::get()->warn(std::string("Found ") + s + " degenerated primitives");
-			}
-		}
-
 		if (!mesh->mPrimitiveTypes)
 		{
 			for (unsigned int a = 0; a < mesh->mNumFaces; ++a)
@@ -248,6 +187,8 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 	std::vector<aiMesh*> outMeshes;
 	outMeshes.reserve(pScene->mNumMeshes<<1u);
 
+	bool bAnyChanges = false;
+
 	std::vector<unsigned int> replaceMeshIndex(pScene->mNumMeshes*5,0xffffffff);
 	std::vector<unsigned int>::iterator meshIdx = replaceMeshIndex.begin();
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
@@ -288,7 +229,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 			++meshIdx;
 			continue;
 		}
-		
+		bAnyChanges = true;
 		const unsigned int first = (unsigned int)outMeshes.size();
 
 		// reuse our current mesh arrays for the submesh 
@@ -468,7 +409,12 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 		delete mesh;
 	}
 
-	UpdateNodes(replaceMeshIndex,pScene->mRootNode);
+	// If we added at least one mesh process all nodes in the node
+	// graph and update their respective mesh indices.
+	if (bAnyChanges)
+	{
+		UpdateNodes(replaceMeshIndex,pScene->mRootNode);
+	}
 
 	if (outMeshes.size() != pScene->mNumMeshes)
 	{

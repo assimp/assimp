@@ -788,10 +788,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\code\FaceEdgeAdjacency.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\code\fast_atof.h"
 				>
 			</File>
@@ -837,6 +833,14 @@
 			</File>
 			<File
 				RelativePath="..\..\code\RemoveComments.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\SceneCombiner.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\SceneCombiner.h"
 				>
 			</File>
 			<File
@@ -1368,6 +1372,14 @@
 				</File>
 				<File
 					RelativePath="..\..\code\ConvertToLHProcess.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\FindDegenerates.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\FindDegenerates.h"
 					>
 				</File>
 				<File

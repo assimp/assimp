@@ -70,8 +70,7 @@ FindInvalidDataProcess::~FindInvalidDataProcess()
 // Returns whether the processing step is present in the given flag field.
 bool FindInvalidDataProcess::IsActive( unsigned int pFlags) const
 {
-	// this step is always active
-	return true;
+	return 0 != (pFlags & aiProcess_FindInvalidData);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -258,18 +257,21 @@ int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 		}
 
 		// process mesh normals
-		if (pMesh->mNormals && ProcessArray(pMesh->mNormals,pMesh->mNumVertices,"normals",dirtyMask))
+		if (pMesh->mNormals && ProcessArray(pMesh->mNormals,pMesh->mNumVertices,
+			"normals",dirtyMask))
 			ret = true;
 
 		// process mesh tangents
-		if (pMesh->mTangents && ProcessArray(pMesh->mTangents,pMesh->mNumVertices,"tangents",dirtyMask))
+		if (pMesh->mTangents && ProcessArray(pMesh->mTangents,pMesh->mNumVertices,
+			"tangents",dirtyMask))
 		{
 			delete[] pMesh->mBitangents; pMesh->mBitangents = NULL;
 			ret = true;
 		}
 
 		// process mesh bitangents
-		if (pMesh->mBitangents && ProcessArray(pMesh->mBitangents,pMesh->mNumVertices,"bitangents",dirtyMask))
+		if (pMesh->mBitangents && ProcessArray(pMesh->mBitangents,pMesh->mNumVertices,
+			"bitangents",dirtyMask))
 		{
 			delete[] pMesh->mTangents; pMesh->mTangents = NULL;
 			ret = true;

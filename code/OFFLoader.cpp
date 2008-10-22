@@ -75,7 +75,7 @@ bool OFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 
 
 	return !(extension.length() != 4 || extension[0] != '.' ||
-			 extension[1] != 'o' && extension[1] != 'R' ||
+			 extension[1] != 'o' && extension[1] != 'O' ||
 			 extension[2] != 'f' && extension[2] != 'F' ||
 			 extension[3] != 'f' && extension[3] != 'F');
 }

@@ -1,0 +1,39 @@
+nff			// cokecan.nff, A file designed to illustrate uv texturing
+version 3.0
+
+Coke_Can
+mtable cokecan.mat
+
+18 // Eighteen vertices
+
+ 10.0   -37.0   0.0   uv 0.0   1.0 // #0 Start around top of can
+  7.071 -37.0   7.071 uv 0.125 1.0 // #1
+  0.0   -37.0  10.0   uv 0.25  1.0 // #2
+ -7.071 -37.0   7.071 uv 0.375 1.0 // #3
+-10.0   -37.0   0.0   uv 0.5   1.0 // #4
+ -7.071 -37.0  -7.071 uv 0.625 1.0 // #5
+  0.0   -37.0 -10.0   uv 0.75  1.0 // #6
+  7.071 -37.0  -7.071 uv 0.875 1.0 // #7
+ 10.0   -37.0   0.0   uv 1.0   1.0 // #8 ( Same as #0 except u value ) 
+
+ 10.0   0.0   0.0   uv 0.0   0.0 // #9   Repeat around bottom of can
+  7.071 0.0   7.071 uv 0.125 0.0 // #10
+  0.0   0.0  10.0   uv 0.25  0.0 // #11
+ -7.071 0.0   7.071 uv 0.375 0.0 // #12
+-10.0   0.0   0.0   uv 0.5   0.0 // #13
+ -7.071 0.0  -7.071 uv 0.625 0.0 // #14
+  0.0   0.0 -10.0   uv 0.75  0.0 // #15
+  7.071 0.0  -7.071 uv 0.875 0.0 // #16
+ 10.0   0.0   0.0   uv 0.0   0.0 // #17 ( Same as #9 except u value )
+
+10 // Ten polygons
+8  0  1  2  3  4  5  6  7 matid 0 // Top of can.  Note lack of "both"
+8  9 10 11 12 13 14 15 16 matid 0 both // Bottom of can
+4  9 10  1  0 matid 0 both _V_cokelabl.tga // Vanilla texture on silver
+4 10 11  2  1 matid 0 both _S_cokelabl.tga // Shaded texture on silver
+4 11 12  3  2 matid 0 both _T_cokelabl.tga // Transparent texture on silver
+4 12 13  4  3 matid 0 both _U_cokelabl.tga // Shaded & Transparent on silver
+4 13 14  5  4 matid 1 both _V_cokelabl.tga // Vanilla texture on green
+4 14 15  6  5 matid 1 both _S_cokelabl.tga // Shaded texture on green
+4 15 16  7  6 matid 1 both _T_cokelabl.tga // Transparent texture on green
+4 16 17  8  7 matid 1 both _U_cokelabl.tga // Shaded & Transparent on green

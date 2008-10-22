@@ -190,50 +190,49 @@ struct InheritanceInfo
 };
 
 // ---------------------------------------------------------------------------
-/** Stores a decomposed transformation matrix */
-struct DecompTransform
+/** Represents an ASE file node. Base class for mesh, light and cameras */
+struct BaseNode
 {
-	//! Construction from a reference to an existing matrix
-	DecompTransform(aiMatrix4x4& ref)
-		: vPosition(std::numeric_limits<float>::quiet_NaN(),0.0f,0.0f)
-		, vScaling(1.0f,1.0f,1.0f)
-		, mMatrix(ref)
-	{}
+	enum Type {Light, Camera, Mesh, Dummy} mType;
 
-	//! Translational component
-	mutable aiVector3D vPosition;
-
-	//! Rotational component
-	mutable aiQuaternion qRotation;
-
-	//! Scaling component
-	mutable aiVector3D vScaling;
-
-	//! Reference to the matrix being decomposed
-	const aiMatrix4x4& mMatrix;
-
-	//! Decomposes the matrix if this has not yet been done
-	inline void NeedDecomposedMatrixNOW() const
+	//! Constructor. Creates a default name for the node
+	BaseNode(Type _mType)
+		: mType			(_mType)
+		, mProcessed	(false)
 	{
-		if (is_qnan(vPosition.x))
-		{
-			mMatrix.Decompose(vScaling,qRotation,vPosition);
-		}
-	}
-};
-
-// ---------------------------------------------------------------------------
-/** Helper structure to represent an ASE file mesh */
-struct Mesh : public MeshWithSmoothingGroups<ASE::Face>
-{
-	//! Constructor. Creates a default name for the mesh
-	Mesh() : bSkip(false)
-	{
+		// generate a default name for the  node
 		static int iCnt = 0;
 		char szTemp[128]; // should be sufficiently large
 		::sprintf(szTemp,"UNNAMED_%i",iCnt++);
 		mName = szTemp;
+	}
 
+	//! Name of the mesh
+	std::string mName;
+
+	//! Name of the parent of the node
+	//! "" if there is no parent ...
+	std::string mParent;
+
+	//! Transformation matrix of the node
+	aiMatrix4x4 mTransform;
+
+	//! Specifies which axes transformations a node inherits
+	//! from its parent ...
+	InheritanceInfo inherit;
+
+	bool mProcessed;
+};
+
+// ---------------------------------------------------------------------------
+/** Helper structure to represent an ASE file mesh */
+struct Mesh : public MeshWithSmoothingGroups<ASE::Face>, public BaseNode
+{
+	//! Constructor.
+	Mesh() 
+		: BaseNode	(BaseNode::Mesh)
+		, bSkip		(false)
+	{
 		// use 2 texture vertex components by default
 		for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS;++c)
 			this->mNumUVComponents[c] = 2;
@@ -241,13 +240,6 @@ struct Mesh : public MeshWithSmoothingGroups<ASE::Face>
 		// setup the default material index by default
 		iMaterialIndex = Face::DEFAULT_MATINDEX;
 	}
-
-	//! Name of the mesh
-	std::string mName;
-
-	//! Name of the parent of the mesh
-	//! "" if there is no parent ...
-	std::string mParent;
 
 	//! List of all texture coordinate sets
 	std::vector<aiVector3D> amTexCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
@@ -261,9 +253,6 @@ struct Mesh : public MeshWithSmoothingGroups<ASE::Face>
 	//! List of all bones
 	std::vector<Bone> mBones;
 
-	//! Transformation matrix of the mesh
-	aiMatrix4x4 mTransform;
-
 	//! Animation channels for the node
 	Animation mAnim;
 
@@ -275,10 +264,45 @@ struct Mesh : public MeshWithSmoothingGroups<ASE::Face>
 
 	//! used internally
 	bool bSkip;
+};
 
-	//! Specifies which axes transformations a node inherits
-	//! from its parent ...
-	InheritanceInfo inherit;
+// ---------------------------------------------------------------------------
+/** Helper structure to represent an ASE light source */
+struct Light : public BaseNode
+{
+	enum LightType
+	{
+		OMNI
+	};
+
+	//! Constructor. 
+	Light() 
+		: BaseNode	 (BaseNode::Light)
+		, mLightType (OMNI)
+		, mColor	 (1.f,1.f,1.f)
+		, mIntensity (1.f) // light is white by default
+	{	
+	}
+
+	LightType mLightType;
+	aiColor3D mColor;
+	float mIntensity;
+};
+
+// ---------------------------------------------------------------------------
+/** Helper structure to represent an ASE camera */
+struct Camera : public BaseNode
+{
+	//! Constructor
+	Camera() 
+		: BaseNode	(BaseNode::Camera)
+		, mFOV  (0.75f)   // in radians
+		, mNear (0.1f) 
+		, mFar  (1000.f)  // could be zero
+	{
+	}
+
+	float mFOV, mNear, mFar;
 };
 
 // ---------------------------------------------------------------------------------
@@ -318,14 +342,31 @@ private:
 	void ParseLV1GeometryObjectBlock(Mesh& mesh);
 
 	// -------------------------------------------------------------------
+	//! Parse a *LIGHTOBJECT block in a file
+	//! \param light Light object to be filled
+	void ParseLV1LightObjectBlock(Light& mesh);
+
+	// -------------------------------------------------------------------
+	//! Parse a *CAMERAOBJECT block in a file
+	//! \param cam Camera object to be filled
+	void ParseLV1CameraObjectBlock(Camera& cam);
+
+	// -------------------------------------------------------------------
+	//! Parse the shared parts of the *GEOMOBJECT, *LIGHTOBJECT and
+	//! *CAMERAOBJECT chunks.
+	//! \param mesh ..
+	//! \return true = token parsed, get next please
+	bool ParseSharedNodeInfo(ASE::BaseNode& mesh);
+
+	// -------------------------------------------------------------------
 	//! Parse a *MATERIAL blocks in a material list
 	//! \param mat Material structure to be filled
 	void ParseLV2MaterialBlock(Material& mat);
 
 	// -------------------------------------------------------------------
 	//! Parse a *NODE_TM block in a file
-	//! \param mesh Mesh object to be filled
-	void ParseLV2NodeTransformBlock(Mesh& mesh);
+	//! \param mesh Node (!) object to be filled
+	void ParseLV2NodeTransformBlock(BaseNode& mesh);
 
 	// -------------------------------------------------------------------
 	//! Parse a *TM_ANIMATION block in a file
@@ -338,6 +379,16 @@ private:
 	//! Parse a *MESH block in a file
 	//! \param mesh Mesh object to be filled
 	void ParseLV2MeshBlock(Mesh& mesh);
+
+	// -------------------------------------------------------------------
+	//! Parse a *LIGHT_SETTINGS block in a file
+	//! \param light Light object to be filled
+	void ParseLV2LightSettingsBlock(Light& light);
+
+	// -------------------------------------------------------------------
+	//! Parse a *CAMERA_SETTINGS block in a file
+	//! \param cam Camera object to be filled
+	void ParseLV2CameraSettingsBlock(Camera& cam);
 
 	// -------------------------------------------------------------------
 	//! Parse the *MAP_XXXXXX blocks in a material
@@ -522,9 +573,14 @@ public:
 	//! List of all meshes found in the file
 	std::vector<Mesh> m_vMeshes;
 
+	//! List of all lights found in the file
+	std::vector<Light> m_vLights;
+
+	//! List of all cameras found in the file
+	std::vector<Camera> m_vCameras;
+
 	//! Current line in the file
 	unsigned int iLineNumber;
-
 
 	//! First frame
 	unsigned int iFirstFrame;

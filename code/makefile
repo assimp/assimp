@@ -63,6 +63,10 @@ SOURCES = AssimpPCH.cpp \
 	FindInvalidDataProcess.cpp \
 	ACLoader.cpp \
 	LWSLoader.cpp \
+	BVHLoader.cpp \
+	SceneCombiner.cpp \
+	SkeletonMeshBuilder.cpp \
+	FindDegenerates.cpp \
 	XFileParser.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)

@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsingUtils.h"
 #include "StandardShapes.h"
 #include "fast_atof.h"
-
+#include "RemoveComments.h"
 
 using namespace Assimp;
 
@@ -75,18 +75,13 @@ bool NFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	std::string extension = pFile.substr( pos);
 
 	// extensions: enff and nff
-	if (!extension.length() || extension[0] != '.')return false;
-	if (extension.length() == 4)
-	{
-		return !(extension[1] != 'n' && extension[1] != 'N' ||
-				 extension[2] != 'f' && extension[2] != 'F' ||
-				 extension[3] != 'f' && extension[3] != 'F');
-	}
-	else return !(	extension.length() != 5 ||
-					extension[1] != 'e' && extension[1] != 'E' ||
-					extension[2] != 'n' && extension[2] != 'N' ||
-					extension[3] != 'f' && extension[3] != 'F' ||
-					extension[4] != 'f' && extension[4] != 'F');
+	for( std::string::iterator it = extension.begin(); it != extension.end(); ++it)
+		*it = tolower( *it);
+
+	if( extension == ".nff" || extension == ".enff")
+		return true;
+
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -111,6 +106,122 @@ bool NFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	currentMesh.center = center;
 
 // ------------------------------------------------------------------------------------------------
+#define AI_NFF2_GET_NEXT_TOKEN() \
+	do \
+	{ \
+	if (!GetNextLine(buffer,line)) \
+		{DefaultLogger::get()->warn("NFF2: Unexpected EOF, can't read next token");break;} \
+	SkipSpaces(line,&sz); \
+	} \
+	while(IsLineEnd(*sz))
+
+
+// ------------------------------------------------------------------------------------------------
+// Loads the materail table for the NFF2 file format from an external file
+void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo>& output,
+	const std::string& path, IOSystem* pIOHandler)
+{
+	boost::scoped_ptr<IOStream> file( pIOHandler->Open( path, "rb"));
+
+	// Check whether we can read from the file
+	if( !file.get())
+	{
+		DefaultLogger::get()->error("NFF2: Unable to open material library " + path + ".");
+		return;
+	}
+
+	// get the size of the file
+	const unsigned int m = (unsigned int)file->FileSize();
+
+	// allocate storage and copy the contents of the file to a memory buffer
+	// (terminate it with zero)
+	std::vector<char> mBuffer2(m+1);
+	file->Read(&mBuffer2[0],m,1);
+	const char* buffer = &mBuffer2[0];
+	mBuffer2[m] = '\0';
+
+	// First of all: remove all comments from the file
+	CommentRemover::RemoveLineComments("//",&mBuffer2[0]);
+
+	// The file should start with the magic sequence "mat"
+	if (!TokenMatch(buffer,"mat",3))
+	{
+		DefaultLogger::get()->error("NFF2: Not a valid material library " + path + ".");
+		return;
+	}
+
+	ShadingInfo* curShader = NULL;
+
+	// No read the file line per line
+	char line[4096];
+	const char* sz;
+	while (GetNextLine(buffer,line))
+	{
+		SkipSpaces(line,&sz);
+
+		// 'version' defines the version of the file format
+		if (TokenMatch(sz,"version",7))
+		{
+			DefaultLogger::get()->info("NFF (Sense8) material library file format: " + std::string(sz));
+		}
+		// 'matdef' starts a new material in the file
+		else if (TokenMatch(sz,"matdef",6))
+		{
+			// add a new material to the list
+			output.push_back( ShadingInfo() );
+			curShader = & output.back();
+
+			// parse the name of the material
+		}
+		else if (!TokenMatch(sz,"valid",5))
+		{
+			// check whether we have an active material at the moment
+			if (!IsLineEnd(*sz))
+			{
+				if (!curShader)
+				{
+					DefaultLogger::get()->error(std::string("NFF2 material library: Found element ") + 
+						sz + "but there is no active material");
+					continue;
+				}
+			}
+			else continue;
+
+			// now read the material property and determine its type
+			aiColor3D c;
+			if (TokenMatch(sz,"ambient",7))
+			{
+				AI_NFF_PARSE_TRIPLE(c);
+				curShader->ambient = c;
+			}
+			else if (TokenMatch(sz,"diffuse",7) || TokenMatch(sz,"ambientdiffuse",14) /* correct? */)
+			{
+				AI_NFF_PARSE_TRIPLE(c);
+				curShader->diffuse = c;
+			}
+			else if (TokenMatch(sz,"specular",8))
+			{
+				AI_NFF_PARSE_TRIPLE(c);
+				curShader->specular = c;
+			}
+			else if (TokenMatch(sz,"emission",8))
+			{
+				AI_NFF_PARSE_TRIPLE(c);
+				curShader->emissive = c;
+			}
+			else if (TokenMatch(sz,"shininess",9))
+			{
+				AI_NFF_PARSE_FLOAT(curShader->shininess);
+			}
+			else if (TokenMatch(sz,"opacity",7))
+			{
+				AI_NFF_PARSE_FLOAT(curShader->opacity);
+			}
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void NFFImporter::InternReadFile( const std::string& pFile, 
 	aiScene* pScene, IOSystem* pIOHandler)
@@ -118,7 +229,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
-	if( file.get() == NULL)
+	if( !file.get())
 		throw new ImportErrorException( "Failed to open NFF file " + pFile + ".");
 
 	unsigned int m = (unsigned int)file->FileSize();
@@ -142,7 +253,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 
 	// camera parameters
 	aiVector3D camPos, camUp(0.f,1.f,0.f), camLookAt(0.f,0.f,1.f);
-	float angle;
+	float angle = 45.f;
 	aiVector2D resolution;
 
 	bool hasCam = false;
@@ -172,16 +283,24 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 	// check whether this is the NFF2 file format
 	if (TokenMatch(buffer,"nff",3))
 	{
+		const float qnan = std::numeric_limits<float>::quiet_NaN();
+		const aiColor4D  cQNAN = aiColor4D (qnan,0.f,0.f,1.f);
+		const aiVector3D vQNAN = aiVector3D(qnan,0.f,0.f);
+
 		// another NFF file format ... just a raw parser has been implemented
-		// no support for textures yet, I don't think it is worth the effort
+		// no support for further details, I don't think it is worth the effort
 		// http://ozviz.wasp.uwa.edu.au/~pbourke/dataformats/nff/nff2.html
+		// http://www.netghost.narod.ru/gff/graphics/summary/sense8.htm
+
+		// First of all: remove all comments from the file
+		CommentRemover::RemoveLineComments("//",&mBuffer2[0]);
 
 		while (GetNextLine(buffer,line))
 		{
-			sz = line;
+			SkipSpaces(line,&sz);
 			if (TokenMatch(sz,"version",7))
 			{
-				DefaultLogger::get()->info("NFF (alt.) file format: " + std::string(sz));
+				DefaultLogger::get()->info("NFF (Sense8) file format: " + std::string(sz));
 			}
 			else if (TokenMatch(sz,"viewpos",7))
 			{
@@ -193,79 +312,341 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				AI_NFF_PARSE_TRIPLE(camLookAt);
 				hasCam = true;
 			}
-			else if (TokenMatch(sz,"//",2))
+			// This starts a new object section
+			else if (!IsSpaceOrNewLine(*sz))
 			{
-				// comment ...
-				DefaultLogger::get()->info(sz);
-			}
-			else if (!IsSpace(*sz))
-			{
-				// must be a new object
-				meshes.push_back(MeshInfo(PatchType_Simple));
-				MeshInfo& mesh = meshes.back();
+				unsigned int subMeshIdx = 0;
 
-				if (!GetNextLine(buffer,line))
-				{DefaultLogger::get()->warn("NFF2: Unexpected EOF, can't read number of vertices");break;}
+				// read the name of the object, skip all spaces
+				// at the end of it.
+				const char* sz3 = sz;
+				while (!IsSpaceOrNewLine(*sz))++sz;
+				std::string objectName = std::string(sz3,(unsigned int)(sz-sz3));
 
-				SkipSpaces(line,&sz);
+				const unsigned int objStart = (unsigned int)meshes.size();
+
+				// There could be a material table in a separate file
+				std::vector<ShadingInfo> materialTable;
+				while (true)
+				{
+					AI_NFF2_GET_NEXT_TOKEN();
+
+					// material table - an external file
+					if (TokenMatch(sz,"mtable",6))
+					{
+						SkipSpaces(&sz);
+						sz3 = sz;
+						while (!IsSpaceOrNewLine(*sz))++sz;
+						const unsigned int diff = (unsigned int)(sz-sz3);
+						if (!diff)DefaultLogger::get()->warn("NFF2: Found empty mtable token");
+						else 
+						{
+							// The material table has the file extension .mat.
+							// If it is not there, we need to append it
+							std::string path = std::string(sz3,diff);
+							if(std::string::npos == path.find_last_of(".mat"))
+							{
+								path.append(".mat");
+							}
+
+							// Now extract the working directory from the path to
+							// this file and append the material library filename 
+							// to it.
+							std::string::size_type s;
+							if ((std::string::npos == (s = path.find_last_of('\\')) || !s) &&
+								(std::string::npos == (s = path.find_last_of('/'))  || !s) )
+							{
+								s = pFile.find_last_of('\\');
+								if (std::string::npos == s)s = pFile.find_last_of('/');
+								if (std::string::npos != s)
+								{
+									path = pFile.substr(0,s+1) + path;
+								}
+							}
+							LoadNFF2MaterialTable(materialTable,path,pIOHandler);
+						}
+					}
+					else break;
+				}
+
+				// read the numbr of vertices
 				unsigned int num = ::strtol10(sz,&sz);
 				
-				std::vector<aiVector3D> tempPositions;
-				std::vector<aiVector3D> outPositions;
-				mesh.vertices.reserve(num*3);
-				mesh.colors.reserve (num*3);
-				tempPositions.reserve(num);
+				// temporary storage
+				std::vector<aiColor4D>  tempColors;
+				std::vector<aiVector3D> tempPositions,tempTextureCoords,tempNormals;
+
+				bool hasNormals = false,hasUVs = false,hasColor = false;
+
+				tempPositions.reserve      (num);
+				tempColors.reserve         (num);
+				tempNormals.reserve        (num);
+				tempTextureCoords.reserve  (num);
 				for (unsigned int i = 0; i < num; ++i)
 				{
-					if (!GetNextLine(buffer,line))
-						{DefaultLogger::get()->warn("NFF2: Unexpected EOF, can't read vertices");break;}
-
-					sz = line;
+					AI_NFF2_GET_NEXT_TOKEN();
 					aiVector3D v;
 					AI_NFF_PARSE_TRIPLE(v);
 					tempPositions.push_back(v);
-				}
-				if (!GetNextLine(buffer,line))
-					{DefaultLogger::get()->warn("NFF2: Unexpected EOF, can't read number of faces");break;}
 
-				if (!num)throw new ImportErrorException("NFF2: There are zero vertices");
-
-				SkipSpaces(line,&sz);
-				num = ::strtol10(sz,&sz);
-				mesh.faces.reserve(num);
-
-				for (unsigned int i = 0; i < num; ++i)
-				{
-					if (!GetNextLine(buffer,line))
-						{DefaultLogger::get()->warn("NFF2: Unexpected EOF, can't read faces");break;}
-
-					SkipSpaces(line,&sz);
-					unsigned int idx, numIdx = ::strtol10(sz,&sz);
-					if (numIdx)
+					// parse all other attributes in the line
+					while (true)
 					{
-						mesh.faces.push_back(numIdx);
-						for (unsigned int a = 0; a < numIdx;++a)
+						SkipSpaces(&sz);
+						if (IsLineEnd(*sz))break;
+
+						// color definition
+						if (TokenMatch(sz,"0x",2))
 						{
-							SkipSpaces(sz,&sz);
-							idx = ::strtol10(sz,&sz);
-							if (idx >= (unsigned int)tempPositions.size())
-							{
-								DefaultLogger::get()->error("NFF2: Index overflow");
-								idx = 0;
-							}
-							mesh.vertices.push_back(tempPositions[idx]);
+							hasColor = true;
+							register unsigned int numIdx = ::strtol16(sz,&sz);
+							aiColor4D clr;
+							clr.a = 1.f;
+
+							// 0xRRGGBB
+							clr.r = ((numIdx >> 16u) & 0xff) / 255.f;
+							clr.g = ((numIdx >> 8u)  & 0xff) / 255.f;
+							clr.b = ((numIdx)        & 0xff) / 255.f;
+							tempColors.push_back(clr);
+						}
+						// normal vector
+						else if (TokenMatch(sz,"norm",4))
+						{
+							hasNormals = true;
+							AI_NFF_PARSE_TRIPLE(v);
+							tempNormals.push_back(v);
+						}
+						// UV coordinate
+						else if (TokenMatch(sz,"uv",2))
+						{
+							hasUVs = true;
+							AI_NFF_PARSE_FLOAT(v.x);
+							AI_NFF_PARSE_FLOAT(v.y);
+							v.z = 0.f;
+							tempTextureCoords.push_back(v);
 						}
 					}
 
-					SkipSpaces(sz,&sz);
-					idx = ::strtol_cppstyle(sz,&sz);
-					aiColor4D clr;
-					clr.r = ((numIdx >> 8u) & 0xf) / 16.f;
-					clr.g = ((numIdx >> 4u) & 0xf) / 16.f;
-					clr.b = ((numIdx)       & 0xf) / 16.f;
-					clr.a = 1.f;
-					for (unsigned int a = 0; a < numIdx;++a)
-						mesh.colors.push_back(clr);
+					// fill in dummies for all attributes that have not been set
+					if (tempNormals.size() != tempPositions.size())
+						tempNormals.push_back(vQNAN);
+
+					if (tempTextureCoords.size() != tempPositions.size())
+						tempTextureCoords.push_back(vQNAN);
+
+					if (tempColors.size() != tempPositions.size())
+						tempColors.push_back(cQNAN);
+				}
+
+				AI_NFF2_GET_NEXT_TOKEN();
+				if (!num)throw new ImportErrorException("NFF2: There are zero vertices");
+				num = ::strtol10(sz,&sz);
+
+				std::vector<unsigned int> tempIdx;
+				tempIdx.reserve(10);
+				for (unsigned int i = 0; i < num; ++i)
+				{
+					AI_NFF2_GET_NEXT_TOKEN();
+					SkipSpaces(line,&sz);
+					unsigned int numIdx = ::strtol10(sz,&sz);
+
+					// read all faces indices
+					if (numIdx)
+					{
+						// mesh.faces.push_back(numIdx);
+						// tempIdx.erase(tempIdx.begin(),tempIdx.end());
+						tempIdx.resize(numIdx);
+
+						for (unsigned int a = 0; a < numIdx;++a)
+						{
+							SkipSpaces(sz,&sz);
+							m = ::strtol10(sz,&sz);
+							if (m >= (unsigned int)tempPositions.size())
+							{
+								DefaultLogger::get()->error("NFF2: Vertex index overflow");
+								m= 0;
+							}
+							// mesh.vertices.push_back (tempPositions[idx]);
+							tempIdx[a] = m;
+						}
+					}
+
+					// build a temporary shader object for the face. 
+					ShadingInfo shader;
+					unsigned int matIdx = 0;
+
+					// white material color - we have vertex colors
+					shader.color = aiColor3D(1.f,1.f,1.f); 
+					aiColor4D c  = aiColor4D(1.f,1.f,1.f,1.f);
+					while (true)
+					{
+						SkipSpaces(sz,&sz);
+						if(IsLineEnd(*sz))break;
+
+						// per-polygon colors
+						if (TokenMatch(sz,"0x",2))
+						{
+							hasColor = true;
+							const char* sz2 = sz;
+							numIdx = ::strtol16(sz,&sz);
+							const unsigned int diff = (unsigned int)(sz-sz2);
+
+							// 0xRRGGBB
+							if (diff > 3)
+							{
+								c.r = ((numIdx >> 16u) & 0xff) / 255.f;
+								c.g = ((numIdx >> 8u)  & 0xff) / 255.f;
+								c.b = ((numIdx)        & 0xff) / 255.f;
+							}
+							// 0xRGB
+							else
+							{
+								c.r = ((numIdx >> 8u) & 0xf) / 16.f;
+								c.g = ((numIdx >> 4u) & 0xf) / 16.f;
+								c.b = ((numIdx)       & 0xf) / 16.f;
+							}
+						}
+						// TODO - implement texture mapping here
+#if 0
+						// mirror vertex texture coordinate?
+						else if (TokenMatch(sz,"mirror",6))
+						{
+						}
+						// texture coordinate scaling
+						else if (TokenMatch(sz,"scale",5))
+						{
+						}
+						// texture coordinate translation
+						else if (TokenMatch(sz,"trans",5))
+						{
+						}
+						// texture coordinate rotation angle
+						else if (TokenMatch(sz,"rot",3))
+						{
+						}
+#endif
+
+						// texture file name for this polygon + mapping information
+						else if ('_' == sz[0])
+						{
+							// get mapping information
+							switch (sz[1])
+							{
+							case 'v':
+							case 'V':
+
+								shader.shaded = false;
+								break;
+
+							case 't':
+							case 'T':
+							case 'u':
+							case 'U':
+
+								DefaultLogger::get()->warn("Unsupported NFF2 texture attribute: trans");
+							};
+							if (!sz[1] || '_' != sz[2])
+							{
+								DefaultLogger::get()->warn("NFF2: Expected underscore after texture attributes");
+								continue;
+							}
+							const char* sz2 = sz+3;
+							while (!IsSpaceOrNewLine( *sz ))++sz;
+							const unsigned int diff = (unsigned int)(sz-sz2);
+							if (diff)shader.texFile = std::string(sz2,diff);
+						}
+
+						// Two-sided material?
+						else if (TokenMatch(sz,"both",4))
+						{
+							shader.twoSided = true;
+						}
+
+						// Material ID?
+						else if (!materialTable.empty() && TokenMatch(sz,"matid",5))
+						{
+							SkipSpaces(&sz);
+							matIdx = ::strtol10(sz,&sz);
+							if (matIdx >= materialTable.size())
+							{
+								DefaultLogger::get()->error("NFF2: Material index overflow.");
+								matIdx = 0;
+							}
+
+							// now combine our current shader with the shader we
+							// read from the material table.
+							ShadingInfo& mat = materialTable[matIdx];
+							shader.ambient   = mat.ambient;
+							shader.diffuse   = mat.diffuse;
+							shader.emissive  = mat.emissive;
+							shader.opacity   = mat.opacity;
+							shader.specular  = mat.specular;
+							shader.shininess = mat.shininess;
+						}
+						else SkipToken(sz);
+					}
+
+					// search the list of all shaders we have for this object whether
+					// there is an identical one. In this case, we append our mesh
+					// data to it.
+					MeshInfo* mesh = NULL;
+					for (std::vector<MeshInfo>::iterator it = meshes.begin() + objStart, end = meshes.end();
+						 it != end; ++it)
+					{
+						if ((*it).shader == shader && (*it).matIndex == matIdx)
+						{
+							// we have one, we can append our data to it
+							mesh = &(*it);
+						}
+					}
+					if (!mesh)
+					{
+						meshes.push_back(MeshInfo(PatchType_Simple,false));
+						mesh = &meshes.back();
+						mesh->matIndex = matIdx;
+
+						// We need to add a new mesh to the list. We assign
+						// an unique name to it to make sure the scene will
+						// pass the validation step for the moment.
+						// TODO: fix naming of objects in the scenegraph later
+						if (objectName.length())
+						{
+							::strcpy(mesh->name,objectName.c_str()); 
+							itoa10(&mesh->name[objectName.length()],30,subMeshIdx++);
+						}
+
+						// copy the shader to the mesh. 
+						mesh->shader = shader;
+					}
+
+					// fill the mesh with data
+					if (!tempIdx.empty())
+					{
+						mesh->faces.push_back((unsigned int)tempIdx.size());
+						for (std::vector<unsigned int>::const_iterator it = tempIdx.begin(), end = tempIdx.end();
+							it != end;++it)
+						{
+							m = *it;
+
+							// copy colors -vertex color specifications override polygon color specifications
+							if (hasColor)
+							{
+								const aiColor4D& clr = tempColors[m];
+								mesh->colors.push_back((is_qnan( clr.r ) ? c : clr));
+							}
+
+							// positions should always be there
+							mesh->vertices.push_back (tempPositions[m]);
+
+							// copy normal vectors
+							if (hasNormals)
+								mesh->normals.push_back  (tempNormals[m]);
+
+							// copy texture coordinates
+							if (hasUVs)
+								mesh->uvs.push_back      (tempTextureCoords[m]);
+						}
+					}
 				}
 				if (!num)throw new ImportErrorException("NFF2: There are zero faces");
 			}
@@ -375,11 +756,16 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				AI_NFF_PARSE_TRIPLE(s.color);
 
 				// read the other properties
-				AI_NFF_PARSE_FLOAT(s.diffuse);
-				AI_NFF_PARSE_FLOAT(s.specular);
+				AI_NFF_PARSE_FLOAT(s.diffuse.r);
+				AI_NFF_PARSE_FLOAT(s.specular.r);
 				AI_NFF_PARSE_FLOAT(d); // skip shininess and transmittance
 				AI_NFF_PARSE_FLOAT(d);
 				AI_NFF_PARSE_FLOAT(s.refracti);
+
+				// NFF2 uses full colors here so we need to use them too
+				// although NFF uses simple scaling factors
+				s.diffuse.g = s.diffuse.b = s.diffuse.r;
+				s.specular.g = s.specular.b = s.specular.r;
 
 				// if the next one is NOT a number we assume it is a texture file name
 				// this feature is used by some NFF files on the internet and it has
@@ -436,14 +822,12 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 					currentMesh = &meshes.back();
 					currentMesh->shader = s;
 				}
-
 				if (!currentMeshWithNormals)
 				{
 					meshesWithNormals.push_back(MeshInfo(PatchType_Normals));
 					currentMeshWithNormals = &meshesWithNormals.back();
 					currentMeshWithNormals->shader = s;
 				}
-
 				if (!currentMeshWithUVCoords)
 				{
 					meshesWithUVCoords.push_back(MeshInfo(PatchType_UVAndNormals));
@@ -676,7 +1060,11 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 		c->mLookAt		= camLookAt - camPos;
 		c->mPosition	= camPos;
 		c->mUp			= camUp;
-		c->mAspect		= resolution.x / resolution.y;
+
+		// If the resolution is not specified in the file we
+		// need to set 1.0 as aspect. The division would become
+		// INF otherwise.
+		c->mAspect		= (!resolution.y ? 0.f : resolution.x / resolution.y);
 		++ppcChildren;
 	}
 
@@ -715,7 +1103,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 		mesh->mNumVertices = (unsigned int)src.vertices.size();
 		mesh->mNumFaces = (unsigned int)src.faces.size();
 
-		// generate sub nodes for named meshes
+		// Generate sub nodes for named meshes
 		if (src.name[0])
 		{
 			aiNode* const node = *ppcChildren = new aiNode();
@@ -754,7 +1142,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				sizeof(aiColor4D)*mesh->mNumVertices);
 		}
 
-		if (src.pType != PatchType_Simple)
+		if (!src.normals.empty())
 		{
 			ai_assert(src.normals.size() == src.vertices.size());
 
@@ -764,7 +1152,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				sizeof(aiVector3D)*mesh->mNumVertices);
 		}
 
-		if (src.pType == PatchType_UVAndNormals)
+		if (!src.uvs.empty())
 		{
 			ai_assert(src.uvs.size() == src.vertices.size());
 
@@ -800,11 +1188,39 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 		c = src.shader.color * src.shader.specular;
 		pcMat->AddProperty(&c,1,AI_MATKEY_COLOR_SPECULAR);
 
+		// NFF2 - default values for NFF
+		pcMat->AddProperty(&src.shader.ambient, 1,AI_MATKEY_COLOR_AMBIENT);
+		pcMat->AddProperty(&src.shader.emissive,1,AI_MATKEY_COLOR_EMISSIVE);
+		pcMat->AddProperty(&src.shader.opacity, 1,AI_MATKEY_OPACITY);
+
+		// setup the first texture layer, if existing
 		if (src.shader.texFile.length())
 		{
 			s.Set(src.shader.texFile);
 			pcMat->AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(0));
 		}
+
+		// setup the name of the material
+		if (src.shader.name.length())
+		{
+			s.Set(src.shader.texFile);
+			pcMat->AddProperty(&s,AI_MATKEY_NAME);
+		}
+
+		// setup some more material properties that are specific to NFF2
+		int i;
+		if (src.shader.twoSided)
+		{
+			i = 1;
+			pcMat->AddProperty(&i,1,AI_MATKEY_TWOSIDED);
+		}
+		i = (src.shader.shaded ? aiShadingMode_Gouraud : aiShadingMode_NoShading);
+		if (src.shader.shininess)
+		{
+			i = aiShadingMode_Phong;
+			pcMat->AddProperty(&src.shader.shininess,1,AI_MATKEY_SHININESS);
+		}
+		pcMat->AddProperty(&i,1,AI_MATKEY_SHADING_MODEL);
 	}
 	pScene->mRootNode = root;
 }

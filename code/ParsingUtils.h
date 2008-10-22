@@ -148,4 +148,10 @@ AI_FORCE_INLINE bool TokenMatch(char*& in, const char* token, unsigned int len)
 	}
 	return false;
 }
+// ---------------------------------------------------------------------------------
+AI_FORCE_INLINE void SkipToken(const char*& in)
+{
+	SkipSpaces(&in);
+	while (!IsSpaceOrNewLine(*in))++in;
+}
 #endif // ! AI_PARSING_UTILS_H_INC

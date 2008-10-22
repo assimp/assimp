@@ -786,93 +786,97 @@ int CMaterialManager::CreateMaterial(
 
 	aiString szPath;
 
-	//
-	// DIFFUSE TEXTURE ------------------------------------------------
-	//
-	if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_DIFFUSE(0),&szPath))
+	if (pcSource->mTextureCoords[0])
 	{
-		LoadTexture(&pcMesh->piDiffuseTexture,&szPath);
-	}
 
-	//
-	// SPECULAR TEXTURE ------------------------------------------------
-	//
-	if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_SPECULAR(0),&szPath))
-	{
-		LoadTexture(&pcMesh->piSpecularTexture,&szPath);
-	}
-
-	//
-	// OPACITY TEXTURE ------------------------------------------------
-	//
-	if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_OPACITY(0),&szPath))
-	{
-		LoadTexture(&pcMesh->piOpacityTexture,&szPath);
-	}
-	else
-	{
-		// try to find out whether the diffuse texture has any
-		// non-opaque pixels. If we find a few, use it as opacity texture
-		if (pcMesh->piDiffuseTexture && HasAlphaPixels(pcMesh->piDiffuseTexture))
+		//
+		// DIFFUSE TEXTURE ------------------------------------------------
+		//
+		if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_DIFFUSE(0),&szPath))
 		{
-			int iVal;
+			LoadTexture(&pcMesh->piDiffuseTexture,&szPath);
+		}
 
-			// NOTE: This special value is set by the tree view if the user
-			// manually removes the alpha texture from the view ...
-			if (AI_SUCCESS != aiGetMaterialInteger(pcMat,"no_a_from_d",&iVal))
+		//
+		// SPECULAR TEXTURE ------------------------------------------------
+		//
+		if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_SPECULAR(0),&szPath))
+		{
+			LoadTexture(&pcMesh->piSpecularTexture,&szPath);
+		}
+
+		//
+		// OPACITY TEXTURE ------------------------------------------------
+		//
+		if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_OPACITY(0),&szPath))
+		{
+			LoadTexture(&pcMesh->piOpacityTexture,&szPath);
+		}
+		else
+		{
+			// try to find out whether the diffuse texture has any
+			// non-opaque pixels. If we find a few, use it as opacity texture
+			if (pcMesh->piDiffuseTexture && HasAlphaPixels(pcMesh->piDiffuseTexture))
 			{
-				pcMesh->piOpacityTexture = pcMesh->piDiffuseTexture;
-				pcMesh->piOpacityTexture->AddRef();
+				int iVal;
+
+				// NOTE: This special value is set by the tree view if the user
+				// manually removes the alpha texture from the view ...
+				if (AI_SUCCESS != aiGetMaterialInteger(pcMat,"no_a_from_d",&iVal))
+				{
+					pcMesh->piOpacityTexture = pcMesh->piDiffuseTexture;
+					pcMesh->piOpacityTexture->AddRef();
+				}
 			}
 		}
-	}
 
-	//
-	// AMBIENT TEXTURE ------------------------------------------------
-	//
-	if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_AMBIENT(0),&szPath))
-	{
-		LoadTexture(&pcMesh->piAmbientTexture,&szPath);
-	}
+		//
+		// AMBIENT TEXTURE ------------------------------------------------
+		//
+		if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_AMBIENT(0),&szPath))
+		{
+			LoadTexture(&pcMesh->piAmbientTexture,&szPath);
+		}
 
-	//
-	// EMISSIVE TEXTURE ------------------------------------------------
-	//
-	if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_EMISSIVE(0),&szPath))
-	{
-		LoadTexture(&pcMesh->piEmissiveTexture,&szPath);
-	}
+		//
+		// EMISSIVE TEXTURE ------------------------------------------------
+		//
+		if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_EMISSIVE(0),&szPath))
+		{
+			LoadTexture(&pcMesh->piEmissiveTexture,&szPath);
+		}
 
-	//
-	// Shininess TEXTURE ------------------------------------------------
-	//
-	if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_SHININESS(0),&szPath))
-	{
-		LoadTexture(&pcMesh->piShininessTexture,&szPath);
-	}
+		//
+		// Shininess TEXTURE ------------------------------------------------
+		//
+		if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_SHININESS(0),&szPath))
+		{
+			LoadTexture(&pcMesh->piShininessTexture,&szPath);
+		}
 
-	//
-	// NORMAL/HEIGHT MAP ------------------------------------------------
-	//
-	bool bHM = false;
-	if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_NORMALS(0),&szPath))
-	{
-		LoadTexture(&pcMesh->piNormalTexture,&szPath);
-	}
-	else
-	{
-		if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_HEIGHT(0),&szPath))
+		//
+		// NORMAL/HEIGHT MAP ------------------------------------------------
+		//
+		bool bHM = false;
+		if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_NORMALS(0),&szPath))
 		{
 			LoadTexture(&pcMesh->piNormalTexture,&szPath);
 		}
-		bHM = true;
-	}
+		else
+		{
+			if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_HEIGHT(0),&szPath))
+			{
+				LoadTexture(&pcMesh->piNormalTexture,&szPath);
+			}
+			bHM = true;
+		}
 
-	// normal/height maps are sometimes mixed up. Try to detect the type
-	// of the texture automatically
-	if (pcMesh->piNormalTexture)
-	{
-		HMtoNMIfNecessary(pcMesh->piNormalTexture, &pcMesh->piNormalTexture,bHM);
+		// normal/height maps are sometimes mixed up. Try to detect the type
+		// of the texture automatically
+		if (pcMesh->piNormalTexture)
+		{
+			HMtoNMIfNecessary(pcMesh->piNormalTexture, &pcMesh->piNormalTexture,bHM);
+		}
 	}
 
 	// check whether a global background texture is contained

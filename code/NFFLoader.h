@@ -50,7 +50,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp	{
 
 // ---------------------------------------------------------------------------
-/** NFF (Neutral File Format) Importer class
+/** NFF (Neutral File Format) Importer class.
+ *
+ * The class implements both Eric Haynes NFF format and Sense8's NFF (NFF2) format.
+ * Both are quite different and the loading code is somewhat dirty at 
+ * the moment. Sense8 should be moved to a separate loader.
 */
 class NFFImporter : public BaseImporter
 {
@@ -90,22 +94,34 @@ protected:
 
 private:
 
-
+	
 	// describes face material properties
 	struct ShadingInfo
 	{
 		ShadingInfo()
-			: color(0.6f,0.6f,0.6f)
-			, diffuse   (1.f)
-			, specular  (1.f)
-			, ambient   (0.1f)
+			: color     (0.6f,0.6f,0.6f)
+			, diffuse   (1.f,1.f,1.f)
+			, specular  (1.f,1.f,1.f)
+			, ambient   (0.f,0.f,0.f)
+			, emissive	(0.f,0.f,0.f)
 			, refracti  (1.f)
+			, twoSided  (false) // for NFF2
+			, shaded    (true)  // for NFF2
+			, opacity	(1.f)
+			, shininess	(0.f)
 		{}
 
-		aiColor3D color;
-		float diffuse, specular, ambient, refracti;
+		aiColor3D color,diffuse,specular,ambient,emissive;
+		float refracti;
 
 		std::string texFile;
+
+		// For NFF2
+		bool twoSided;
+		bool shaded;
+		float opacity, shininess;
+
+		std::string name;
 
 		// shininess is ignored for the moment
 		bool operator == (const ShadingInfo& other) const
@@ -115,7 +131,12 @@ private:
 				specular == other.specular	&&
 				ambient  == other.ambient	&&
 				refracti == other.refracti  &&
-				texFile  == other.texFile;
+				texFile  == other.texFile   &&
+				twoSided == other.twoSided  &&
+				shaded   == other.shaded;
+
+			// Some properties from NFF2 aren't compared by this operator.
+			// Comparing MeshInfo::matIndex should do that.
 		}
 	};
 
@@ -143,8 +164,10 @@ private:
 	struct MeshInfo
 	{
 		MeshInfo(PatchType _pType, bool bL = false)
-			: pType(_pType)
-			, bLocked(bL)
+			: pType     (_pType)
+			, bLocked   (bL)
+			, matIndex  (0)
+			, radius	(1.f,1.f,1.f)
 		{
 			name[0] = '\0'; // by default meshes are unnamed
 		}
@@ -159,9 +182,25 @@ private:
 		char name[128];
 
 		std::vector<aiVector3D> vertices, normals, uvs;
-		std::vector<aiColor4D>  colors; // for NFF2
 		std::vector<unsigned int> faces;
+
+		// for NFF2
+		std::vector<aiColor4D>  colors; 
+		unsigned int matIndex;
 	};
+
+	
+	// -------------------------------------------------------------------
+	/** Loads the material table for the NFF2 file format from an
+	 *  external file.
+	 *
+	 *  @param output Receives the list of output meshes
+	 *  @param path Path to the file (abs. or rel.)
+	 *  @param pIOHandler IOSystem to be used to open the file
+	*/
+	void LoadNFF2MaterialTable(std::vector<ShadingInfo>& output,
+		const std::string& path, IOSystem* pIOHandler);
+
 };
 
 } // end of namespace Assimp

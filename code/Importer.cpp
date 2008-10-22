@@ -167,6 +167,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_FINDINVALIDDATA_PROCESS
 #	include "FindInvalidDataProcess.h"
 #endif
+#ifndef AI_BUILD_NO_FINDDEGENERATES_PROCESS
+#	include "FindDegenerates.h"
+#endif
 
 // NOTE: the preprocessor code has been moved to the header as
 // we've also declared the DeterminePType process in it, which
@@ -271,6 +274,11 @@ Importer::Importer() :
 #endif
 
 	mPostProcessingSteps.push_back( new DeterminePTypeHelperProcess());
+
+#if (!defined AI_BUILD_NO_FINDDEGENERATES_PROCESS)
+	mPostProcessingSteps.push_back( new FindDegeneratesProcess());
+#endif
+
 
 #if (!defined AI_BUILD_NO_REMOVEVC_PROCESS)
 	mPostProcessingSteps.push_back( new RemoveVCProcess());
@@ -535,9 +543,9 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 		mScene = imp->ReadFile( pFile, mIOHandler);
 
 		// if successful, apply all active post processing steps to the imported data
-		DefaultLogger::get()->info("Import succesful, entering postprocessing-steps");
 		if( mScene)
 		{
+			DefaultLogger::get()->info("Import successful, entering postprocessing-steps");
 #ifdef _DEBUG
 			if (bExtraVerbose)
 			{

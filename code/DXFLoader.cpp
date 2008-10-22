@@ -430,14 +430,14 @@ bool DXFImporter::ParsePolyLine()
 		// optional number of vertices
 		case 71:
 			{
-				positions.reserve(std::min(std::max(100u, strtol10(cursor)),100000000u));
+				positions.reserve(strtol10(cursor));
 				break;
 			}
 
 		// optional number of faces
 		case 72:
 			{
-				indices.reserve(std::min(std::max(100u, strtol10(cursor)),100000000u) * 4u);
+				indices.reserve(strtol10(cursor) * 4u);
 				break;
 			}
 
@@ -496,6 +496,8 @@ bool DXFImporter::ParsePolyLineVertex(aiVector3D& out,aiColor4D& clr, unsigned i
 		case 0: ret = true;break;
 
 		// todo - handle the correct layer for the vertex
+		// At the moment it is assumed that all vertices of 
+		// a polyline are placed on the same global layer.
 
 		// x position of the first corner
 		case 10: out.x = fast_atof(cursor);break;

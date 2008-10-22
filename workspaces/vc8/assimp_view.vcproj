@@ -764,10 +764,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\tools\assimp_view\no_materials.fx"
-				>
-			</File>
-			<File
 				RelativePath="..\..\tools\assimp_view\Normals.cpp"
 				>
 			</File>

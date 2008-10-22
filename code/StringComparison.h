@@ -47,6 +47,63 @@ namespace Assimp
 {
 
 // ---------------------------------------------------------------------------
+// itoa is not consistently available on all platforms so it is quite useful
+// to have a small replacement function here. No need to use a full sprintf()
+// if we just want to print a number ...
+// @param out Output buffer
+// @param max Maximum number of characters to be written, including '\0'
+// @param number Number to be written
+// @return Number of bytes written. Including '\0'.
+// ---------------------------------------------------------------------------
+inline unsigned int itoa10( char* out, unsigned int max, int32_t number)
+{
+	ai_assert(NULL != out);
+
+	static const char lookup[] = {'0','1','2','3','4','5','6','7','8','9'};
+
+	// write the unary minus to indicate we have a negative number
+	unsigned int written = 1u;
+	if (number < 0 && written < max)
+	{
+		*out++ = '-';
+		++written;
+	}
+
+	// We begin with the largest number that is not zero. 
+	int32_t cur = 1000000000; // 2147483648
+	bool mustPrint = false;
+	while (cur > 0 && written <= max)
+	{
+		unsigned int digit = number / cur;
+		if (digit > 0 || mustPrint || 1 == cur)
+		{
+			// print all future zero's from now
+			mustPrint = true;	
+			*out++ = lookup[digit];
+
+			++written;
+			number -= digit*10;
+		}
+		cur /= 10;
+	}
+
+	// append a terminal zero
+	*out++ = '\0';
+	return written;
+}
+
+// ---------------------------------------------------------------------------
+// Secure template overload
+// The compiler should choose this function if he is able to determine the
+// size of the array automatically.
+// ---------------------------------------------------------------------------
+template <unsigned int length>
+inline unsigned int itoa10( char(& out)[length], int32_t number)
+{
+	return itoa10(out,length,number);
+}
+
+// ---------------------------------------------------------------------------
 /** \brief Helper function to do platform independent string comparison.
  *
  *  This is required since stricmp() is not consistently available on
@@ -76,6 +133,9 @@ inline int ASSIMP_stricmp(const char *s1, const char *s2)
 #endif
 }
 
+// ---------------------------------------------------------------------------
+/** \brief Case independent comparison of two std::strings
+ */
 // ---------------------------------------------------------------------------
 inline int ASSIMP_stricmp(const std::string& a, const std::string& b)
 {

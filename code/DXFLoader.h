@@ -42,10 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_DXFLOADER_H_INCLUDED
 #define AI_DXFLOADER_H_INCLUDED
 
-#include <vector>
-
-#include "BaseImporter.h"
-#include "../include/aiTypes.h"
 
 namespace Assimp	{
 
@@ -159,7 +155,8 @@ protected:
 	 *    Wont't be modified otherwise. Size must be at least 4.
 	 *  @return false if the end of the file was reached
 	 */
-	bool ParsePolyLineVertex(aiVector3D& out, aiColor4D& clr, unsigned int* outIdx);
+	bool ParsePolyLineVertex(aiVector3D& out, aiColor4D& clr, 
+		unsigned int* outIdx);
 
 private:
 

@@ -53,8 +53,7 @@ namespace Assimp
 {
 
 // ---------------------------------------------------------------------------
-/** The FindInvalidData postprocessing step is always active, there is
- *  no corresponding aiPostProcess flag. It searches the mesh data
+/** The FindInvalidData postprocessing step. It searches the mesh data
  *  for parts that are obviously invalid and removes them.
  *
  *  Originally this was a workaround for some models written by Blender

@@ -60,9 +60,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // If we have at least VC8 some C string manipulation functions
 // are mapped to their safe _s counterparts (e.g. _itoa_s).
 // *******************************************************************
-#	if _MSC_VER >= 1400 && !(defined _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES)
-#		define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
-#	endif
+#if _MSC_VER >= 1400 && !(defined _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES)
+#	define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
+#endif
 
 // *******************************************************************
 // STL headers - we need quite a lot of them

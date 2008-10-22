@@ -271,7 +271,7 @@ void ValidateDSProcess::Execute( aiScene* pScene)
 	if (pScene->mNumMaterials) 
 	{
 		has = true;
-		DoValidation(pScene->mCameras,pScene->mNumCameras,"mMaterials","mNumMaterials");
+		DoValidation(pScene->mMaterials,pScene->mNumMaterials,"mMaterials","mNumMaterials");
 	}
 	else if (!(mScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
 	{
@@ -292,7 +292,7 @@ void ValidateDSProcess::Validate( const aiLight* pLight)
 		!pLight->mAttenuationLinear   && 
 		!pLight->mAttenuationQuadratic)
 	{
-		ReportError("aiLight::mAttenuationXXX - all are zero");
+		ReportWarning("aiLight::mAttenuationXXX - all are zero");
 	}
 
 	if (pLight->mAngleInnerCone > pLight->mAngleOuterCone)
@@ -301,7 +301,7 @@ void ValidateDSProcess::Validate( const aiLight* pLight)
 	if (pLight->mColorDiffuse.IsBlack() && pLight->mColorAmbient.IsBlack() 
 		&& pLight->mColorSpecular.IsBlack())
 	{
-		ReportError("aiLight::mColorXXX - all are black and won't have any influence");
+		ReportWarning("aiLight::mColorXXX - all are black and won't have any influence");
 	}
 }
 	
@@ -411,12 +411,15 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 			abRefList[face.mIndices[a]] = true;
 		}
 	}
+
 	// check whether there are vertices that aren't referenced by a face
+	bool b = false;
 	for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
 	{
-		if (!abRefList[i])this->ReportError("aiMesh::mVertices[%i] is not referenced",i);
+		if (!abRefList[i])b = true;
 	}
 	abRefList.clear();
+	if (b)ReportWarning("There are unreferenced vertices");
 
 	// texture channel 2 may not be set if channel 1 is zero ...
 	{
@@ -428,7 +431,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 		for (;i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
 			if (pMesh->HasTextureCoords(i))
 			{
-				ReportError("Texture coordinate channel %i is existing, "
+				ReportError("Texture coordinate channel %i exists "
 					"although the previous channel was NULL.",i);
 			}
 	}
@@ -442,7 +445,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 		for (;i < AI_MAX_NUMBER_OF_COLOR_SETS;++i)
 			if (pMesh->HasVertexColors(i))
 			{
-				ReportError("Vertex color channel %i is existing, "
+				ReportError("Vertex color channel %i is exists "
 					"although the previous channel was NULL.",i);
 			}
 	}
@@ -589,11 +592,13 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 		this->ReportError("%s #%i is set, but there are only %i %s textures",
 			szType,iIndex,iNumIndices,szType);
 	}
+	if (!iNumIndices)return;
 
 	// now check whether all UV indices are valid ...
 	iLen = ::sprintf(szBaseBuf,"$tex.uvw.%s",szType);
 	if (0 >= iLen)return;
-	
+
+	bool bNoSpecified = true;
 	for (unsigned int i = 0; i < pMaterial->mNumProperties;++i)
 	{
 		aiMaterialProperty* prop = pMaterial->mProperties[i];
@@ -607,6 +612,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 			{
 				++sz;
 				iIndex = strtol10(sz,NULL);
+				bNoSpecified = false;
 
 				// ignore UV indices for texture channel that are not there ...
 				if (iIndex >= iNumIndices)
@@ -616,13 +622,13 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 
 					// check whether there is a mesh using this material
 					// which has not enough UV channels ...
-					for (unsigned int a = 0; a < this->mScene->mNumMeshes;++a)
+					for (unsigned int a = 0; a < mScene->mNumMeshes;++a)
 					{
 						aiMesh* mesh = this->mScene->mMeshes[a];
 						if(mesh->mMaterialIndex == (unsigned int)iIndex)
 						{
 							int iChannels = 0;
-							while (mesh->HasTextureCoords(iChannels++));
+							while (mesh->HasTextureCoords(iChannels))++iChannels;
 							if (iIndex >= iChannels)
 							{
 								this->ReportError("Invalid UV index: %i (key %s). Mesh %i has only %i UV channels",
@@ -630,6 +636,24 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 							}
 						}
 					}
+				}
+			}
+		}
+	}
+	if (bNoSpecified)
+	{
+		// Assume that all textures are using the first UV channel
+		for (unsigned int a = 0; a < mScene->mNumMeshes;++a)
+		{
+			aiMesh* mesh = this->mScene->mMeshes[a];
+			if(mesh->mMaterialIndex == (unsigned int)iIndex)
+			{
+				if (!mesh->mTextureCoords[0])
+				{
+					// This is a special case ... it could be that the
+					// original mesh format intended the use of a special
+					// mapping here.
+					ReportWarning("UV-mapped texture, but there are no UV coords");
 				}
 			}
 		}

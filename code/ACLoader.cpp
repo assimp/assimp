@@ -683,7 +683,9 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 	if (1 != rootObjects.size())delete root;
 
 	// build output arrays
-	ai_assert(!meshes.empty());
+	if (meshes.empty())
+	{
+	}
 	pScene->mNumMeshes = (unsigned int)meshes.size();
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 	::memcpy(pScene->mMeshes,&meshes[0],pScene->mNumMeshes*sizeof(void*));

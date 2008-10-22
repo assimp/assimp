@@ -38,70 +38,43 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines a post processing step to kill all loaded normals */
-#ifndef AI_KILLNORMALPROCESS_H_INC
-#define AI_KILLNORMALPROCESS_H_INC
+/** @file Defines a post processing step to search all meshes for
+  degenerated faces */
+#ifndef AI_FINDDEGENERATESPROCESS_H_INC
+#define AI_FINDDEGENERATESPROCESS_H_INC
 
 #include "BaseProcess.h"
 #include "../include/aiMesh.h"
 
-class RemoveVCProcessTest;
-namespace Assimp
-	{
+class FindDegeneratesProcessTest;
+namespace Assimp	{
+
 
 // ---------------------------------------------------------------------------
-/** RemoveVCProcess: Class to kill all normals loaded
+/** FindDegeneratesProcess: Searches a mesh for degenerated triangles.
 */
-class ASSIMP_API RemoveVCProcess : public BaseProcess
+class ASSIMP_API FindDegeneratesProcess : public BaseProcess
 {
 	friend class Importer;
-	friend class ::RemoveVCProcessTest;
+	friend class ::FindDegeneratesProcessTest; // grant the unit test full access to us
 
 protected:
 	/** Constructor to be privately used by Importer */
-	RemoveVCProcess();
+	FindDegeneratesProcess();
 
 	/** Destructor, private as well */
-	~RemoveVCProcess();
+	~FindDegeneratesProcess();
 
 public:
 	// -------------------------------------------------------------------
-	/** Returns whether the processing step is present in the given flag field.
-	* @param pFlags The processing flags the importer was called with. A bitwise
-	*   combination of #aiPostProcessSteps.
-	* @return true if the process is present in this flag fields, false if not.
-	*/
 	bool IsActive( unsigned int pFlags) const;
 
 	// -------------------------------------------------------------------
-	/** Executes the post processing step on the given imported data.
-	* At the moment a process is not supposed to fail.
-	* @param pScene The imported data to work at.
-	*/
 	void Execute( aiScene* pScene);
-
-
-	// -------------------------------------------------------------------
-	/** Called prior to ExecuteOnScene().
-	* The function is a request to the process to update its configuration
-	* basing on the Importer's configuration property list.
-	*/
-	virtual void SetupProperties(const Importer* pImp);
-
 
 private:
 
-	bool ProcessMesh (aiMesh* pcMesh);
-
-	/** Configuration
-	 */
-	unsigned int configDeleteFlags;
-
-	/** The scene the instance is currently operating on
-	 */
-	aiScene* mScene;
 };
+}
 
-} // end of namespace Assimp
-
-#endif // !!AI_KILLNORMALPROCESS_H_INC
+#endif // !! AI_FINDDEGENERATESPROCESS_H_INC

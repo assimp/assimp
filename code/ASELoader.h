@@ -137,6 +137,16 @@ protected:
 	void BuildNodes();
 
 	// -------------------------------------------------------------------
+	/** Build output cameras
+	 */
+	void BuildCameras();
+
+	// -------------------------------------------------------------------
+	/** Build output lights
+	 */
+	void BuildLights();
+
+	// -------------------------------------------------------------------
 	/** Build output animations
 	 */
 	void BuildAnimations();
@@ -145,11 +155,14 @@ protected:
 	/** Add sub nodes to a node
 	 *  \param pcParent parent node to be filled
 	 *  \param szName Name of the parent node
-	 *  \param decompTrafo Decomposed absolute parent transformation mat
+	 *  \param matrix Current transform
 	 */
-	void AddNodes(aiNode* pcParent,const char* szName);
-	void AddNodes(aiNode* pcParent,const char* szName,
-		const ASE::DecompTransform& decompTrafo);
+	void AddNodes(std::vector<BaseNode*>& nodes,
+		aiNode* pcParent,const char* szName);
+
+	void AddNodes(std::vector<BaseNode*>& nodes,
+		aiNode* pcParent,const char* szName,
+		const aiMatrix4x4& matrix);
 
 	// -------------------------------------------------------------------
 	/** Generate a default material and add it to the parser's list

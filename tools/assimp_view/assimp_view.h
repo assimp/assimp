@@ -255,6 +255,9 @@ enum EClickPos
 
 	extern float g_fACMR /*= 3.0f*/;
 	extern IDirect3DQuery9* g_piQuery;
-	};
+	}
+
+// outside of namespace, to help Intellisense and solve boost::metatype_stuff_miracle
+#include "AnimEvaluator.h"
 
 #endif // !! AV_MAIN_H_INCLUDED

@@ -680,6 +680,14 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\tools\assimp_view\AnimEvaluator.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\AnimEvaluator.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tools\assimp_view\AssetHelper.h"
 				>
 			</File>

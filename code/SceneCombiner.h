@@ -86,6 +86,17 @@ public:
 	 */
 	static void MergeMeshes(aiMesh* dest,std::vector<aiMesh*>& src,
 		unsigned int flags);
+
+
+	// -------------------------------------------------------------------
+	/** Add a name prefix to all nodes in a scene.
+	 *
+	 *  @param Current node. This function is called recursively.
+	 *  @param prefix Prefix to be added to all nodes
+	 *  @param len STring length
+	 */
+	static void AddNodePrefixes(aiNode* node, const char* prefix,
+		unsigned int len);
 };
 
 }

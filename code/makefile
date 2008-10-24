@@ -67,7 +67,9 @@ SOURCES = AssimpPCH.cpp \
 	SceneCombiner.cpp \
 	SkeletonMeshBuilder.cpp \
 	FindDegenerates.cpp \
-	XFileParser.cpp
+	XFileParser.cpp \
+	./irrXML/irrXML.cpp \
+	IRRMeshLoader.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 

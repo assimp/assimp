@@ -1354,6 +1354,18 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="IRRMesh"
+					>
+					<File
+						RelativePath="..\..\code\IRRMeshLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\IRRMeshLoader.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="PostProcess"
@@ -1568,8 +1580,116 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="TinyXML"
+				Name="irrXML"
 				>
+				<File
+					RelativePath="..\..\code\irrXML\CXMLReaderImpl.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\irrXML\fast_atof.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\irrXML\heapsort.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\irrXML\irrArray.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\irrXML\irrString.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\irrXML\irrTypes.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\irrXML\irrXML.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							BasicRuntimeChecks="0"
+							SmallerTypeCheck="false"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							BasicRuntimeChecks="0"
+							SmallerTypeCheck="false"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_DLL|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							BasicRuntimeChecks="0"
+							SmallerTypeCheck="false"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_DLL|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_DLL|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							BasicRuntimeChecks="0"
+							SmallerTypeCheck="false"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_DLL|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\code\irrXML\irrXML.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\irrXML\irrXMLWrapper.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter

@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DXFLoader.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
-#include "MaterialSystem.h"
 
 
 using namespace Assimp;
@@ -246,7 +245,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 		{
 			aiFace& face = pMesh->mFaces[i];
 
-			// check whether we need four,three or two indices here
+			// check whether we need four, three or two indices here
 			if (vp[1] == vp[2])
 			{
 				face.mNumIndices = 2;
@@ -263,7 +262,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 				*vpOut++ = vp[a];
 				if (clr)
 				{
-					if (std::numeric_limits<float>::quiet_NaN() != clr[a].r)
+					if (is_not_qnan( clr[a].r ))
 						*clrOut = clr[a];
 
 					++clrOut;
@@ -437,7 +436,7 @@ bool DXFImporter::ParsePolyLine()
 		// optional number of faces
 		case 72:
 			{
-				indices.reserve(strtol10(cursor) * 4u);
+				indices.reserve(strtol10(cursor));
 				break;
 			}
 

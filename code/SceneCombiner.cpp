@@ -51,6 +51,31 @@ namespace Assimp
 {
 
 // ------------------------------------------------------------------------------------------------
+// Add a prefix to a string
+inline void PrefixString(aiString& string,const char* prefix, unsigned int len)
+{
+	// Add the prefix
+	::memmove(string.data+len,string.data,string.length+1);
+	::memcpy (string.data, prefix, len);
+
+	// And update the string's length
+	string.length += len;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Add a name prefix to all nodes in a hierarchy
+void SceneCombiner::AddNodePrefixes(aiNode* node, const char* prefix, unsigned int len)
+{
+	ai_assert(NULL != prefix);
+
+	PrefixString(node->mName,prefix,len);
+
+	// Process all children recursively
+	for (unsigned int i = 0; i < node->mNumChildren;++i)
+		AddNodePrefixes(node->mChildren[i],prefix,len);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Merges two scenes. Currently only used by the LWS loader.
 void SceneCombiner::MergeScenes(aiScene* dest,std::vector<aiScene*>& src,
 	unsigned int flags)
@@ -88,7 +113,10 @@ void SceneCombiner::MergeScenes(aiScene* dest,std::vector<aiScene*>& src,
 
 		if ((*cur)->mNumAnimations > 0 ||
 			(*cur)->mNumCameras    > 0 ||
-			(*cur)->mNumLights     > 0)bNeedPrefix = true;
+			(*cur)->mNumLights     > 0)
+		{
+			bNeedPrefix = true;
+		}
 	}
 
 	// generate the output texture list + an offset table
@@ -176,6 +204,17 @@ void SceneCombiner::MergeScenes(aiScene* dest,std::vector<aiScene*>& src,
 
 	if (bNeedPrefix)
 	{
+		// Allocate space for light sources, cameras and animations
+		aiLight** ppLights = dest->mLights = (dest->mNumLights 
+			? new aiLight*[dest->mNumLights] : NULL);
+
+		aiCamera** ppCameras = dest->mCameras = (dest->mNumCameras 
+			? new aiCamera*[dest->mNumCameras] : NULL);
+
+		aiAnimation** ppAnims = dest->mAnimations = (dest->mNumAnimations 
+			? new aiAnimation*[dest->mNumAnimations] : NULL);
+
+
 		for (cur = begin, cnt = 0; cur != end; ++cur)
 		{
 			char buffer[10];
@@ -187,12 +226,30 @@ void SceneCombiner::MergeScenes(aiScene* dest,std::vector<aiScene*>& src,
 			*sz++ = '_';
 			*sz++ = '\0';
 
-//			AddNodePrefixes((*cur)->mRootNode,buffer,*cur);
-			/** CONTINUE WORK HERE **/
+			const unsigned int len = (unsigned int)::strlen(buffer);
+			AddNodePrefixes((*cur)->mRootNode,buffer,len);
+
+			// Copy light sources, add the prefix to them, too
+			for (unsigned int i = 0; i < (*cur)->mNumLights;++i,++ppLights)
+			{
+				*ppLights = (*cur)->mLights[i];
+				PrefixString((*ppLights)->mName,buffer,len);
+			}
+			// Copy cameras, add the prefix to them, too
+			for (unsigned int i = 0; i < (*cur)->mNumCameras;++i,++ppCameras)
+			{
+				*ppCameras = (*cur)->mCameras[i];
+				PrefixString((*ppCameras)->mName,buffer,len);
+			}
+
+			// Copy animations, add the prefix to them, too
+			for (unsigned int i = 0; i < (*cur)->mNumAnimations;++i,++ppAnims)
+			{
+				*ppAnims = (*cur)->mAnimations[i];
+				PrefixString((*ppAnims)->mName,buffer,len);
+			}
 		}
 	}
-
-	// now copy all cameras
 
 	// now delete all input scenes
 	for (cur = begin; cur != end; ++cur)

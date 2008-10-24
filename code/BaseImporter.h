@@ -194,6 +194,27 @@ protected:
 	virtual void InternReadFile( const std::string& pFile, 
 		aiScene* pScene, IOSystem* pIOHandler) = 0;
 
+
+	// -------------------------------------------------------------------
+	/** A utility for CanRead().
+	 *
+	 *  The function searches the header of a file for a specific token
+	 *  and returns true if this token is found. This works for text
+	 *  files only. There is a rudimentary handling if UNICODE files.
+	 *  The comparison is case independent.
+	 *
+	 *  @param pIOSystem IO System to work with
+	 *  @param file File name of the file
+	 *  @param tokens List of tokens to search for
+	 *  @param numTokens Size of the token array
+	 *  @param searchBytes Number of bytes to be searched for the tokens.
+	 */
+	static bool SearchFileHeaderForToken(IOSystem* pIOSystem, 
+		const std::string&	file,
+		const char**		tokens, 
+		unsigned int		numTokens,
+		unsigned int		searchBytes = 200);
+
 protected:
 
 	/** Error description in case there was one. */

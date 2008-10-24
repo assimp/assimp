@@ -97,5 +97,46 @@ void BaseImporter::SetupProperties(const Importer* pImp)
 	// the default implementation does nothing
 }
 
+// ------------------------------------------------------------------------------------------------
+bool BaseImporter::SearchFileHeaderForToken(IOSystem* pIOHandler,
+	const std::string&	pFile,
+	const char**		tokens, 
+	unsigned int		numTokens,
+	unsigned int		searchBytes /* = 200 */)
+{
+	ai_assert(NULL != tokens && 0 != numTokens && NULL != pIOHandler && 0 != searchBytes);
+
+	boost::scoped_ptr<IOStream> pStream (pIOHandler->Open(pFile));
+	if (pStream.get() )
+	{
+		// read 200 characters from the file
+		boost::scoped_ptr<char> _buffer (new char[searchBytes]);
+		char* buffer = _buffer.get();
+
+		unsigned int read = (unsigned int)pStream->Read(buffer,1,searchBytes);
+		if (!read)return false;
+
+		for (unsigned int i = 0; i < read;++i)
+			buffer[i] = ::tolower(buffer[i]);
+
+		// It is not a proper handling of unicode files here ...
+		// ehm ... but it works in most cases.
+		char* cur = buffer,*cur2 = buffer,*end = &buffer[read];
+		while (cur != end)
+		{
+			if (*cur)*cur2++ = *cur;
+			++cur;
+		}
+		*cur2 = '\0';
+
+		for (unsigned int i = 0; i < numTokens;++i)
+		{
+			ai_assert(NULL != tokens[i]);
+			if (::strstr(buffer,tokens[i]))return true;
+		}
+	}
+	return false;
+}
+
 
 

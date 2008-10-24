@@ -116,6 +116,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_BVH_IMPORTER
 #	include "BVHLoader.h"
 #endif
+#ifndef AI_BUILD_NO_IRRMESH_IMPORTER
+#	include "IRRMeshLoader.h"
+#endif
+
 
 
 // PostProcess-Steps
@@ -262,6 +266,9 @@ Importer::Importer() :
 #endif
 #if (!defined AI_BUILD_NO_BVH_IMPORTER)
 	mImporter.push_back( new BVHLoader());
+#endif
+#if (!defined AI_BUILD_NO_IRRMESH_IMPORTER)
+	mImporter.push_back( new IRRMeshImporter());
 #endif
 
 	// add an instance of each post processing step here in the order 

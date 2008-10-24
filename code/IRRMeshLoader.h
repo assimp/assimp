@@ -38,36 +38,44 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Declaration of the .LWS (LightWave Scene Format) importer class. */
-#ifndef AI_LWSLOADER_H_INCLUDED
-#define AI_LWSLOADER_H_INCLUDED
+/** @file Declaration of the .irrMesh (Irrlight Engine Mesh Format)
+    importer class. */
+#ifndef AI_IRRMESHLOADER_H_INCLUDED
+#define AI_IRRMESHLOADER_H_INCLUDED
 
+#include "./irrXML/irrXMLWrapper.h"
 
 namespace Assimp	{
 
+#define AI_IRRMESH_MAT_trans_vertex_alpha 0x1
+#define AI_IRRMESH_MAT_lightmap		0x2 
+#define AI_IRRMESH_MAT_lightmap_m2	(AI_IRRMESH_MAT_lightmap|0x4)
+#define AI_IRRMESH_MAT_lightmap_m4	(AI_IRRMESH_MAT_lightmap|0x5)
+
 // ---------------------------------------------------------------------------
-/** LWS (LightWave Scene Format) importer class.
+/** IrrMesh importer class.
  *
- *  This class does heavily depend on the LWO importer class. LWS files
- *  contain mainly descriptions how LWO objects are composed together
- *  in a scene. 
-*/
-class LWSImporter : public BaseImporter
+ * IrrMesh is the native file format of the Irrlight engine and its editor
+ * irrEdit. As IrrEdit itself is capable of importing quite many file formats,
+ * it might be a good file format for data exchange.
+ */
+class IRRMeshImporter : public BaseImporter
 {
 	friend class Importer;
 
 protected:
 	/** Constructor to be privately used by Importer */
-	LWSImporter();
+	IRRMeshImporter();
 
 	/** Destructor, private as well */
-	~LWSImporter();
+	~IRRMeshImporter();
 
 public:
 
 	// -------------------------------------------------------------------
 	/** Returns whether the class can handle the format of the given file. 
-	* See BaseImporter::CanRead() for details.	*/
+	 *  See BaseImporter::CanRead() for details.	
+	 */
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
 
 protected:
@@ -78,7 +86,13 @@ protected:
 	 */
 	void GetExtensionList(std::string& append)
 	{
-		append.append("*.lws");
+
+		/*  NOTE: The file extenxsion .xml is too generic. We'll 
+		 *  need to open the file in CanRead() and check whether it is 
+		 *  a real irrlicht file
+		 */
+
+		append.append("*.xml;*.irrmesh");
 	}
 
 	// -------------------------------------------------------------------
@@ -91,8 +105,39 @@ protected:
 private:
 
 
+	template <class T>
+	struct Property
+	{
+		std::string name;
+		T value;
+	};
+
+	typedef Property<uint32_t>		HexProperty;
+	typedef Property<std::string>	StringProperty;
+	typedef Property<bool>			BoolProperty;
+	typedef Property<float>			FloatProperty;
+
+	IrrXMLReader* reader;
+
+
+	// -------------------------------------------------------------------
+	/** Parse a material description from the XML
+	 *  @return The created material
+	 *  @param matFlags Receives AI_IRRMESH_MAT_XX flags
+	 */
+	aiMaterial* ParseMaterial(unsigned int& matFlags);
+
+
+	// -------------------------------------------------------------------
+	/** Read a property of the specified type from the current XML element.
+	 *  @param out Recives output data
+	 */
+	void ReadHexProperty    (HexProperty&    out);
+	void ReadStringProperty (StringProperty& out);
+	void ReadBoolProperty   (BoolProperty&   out);
+	void ReadFloatProperty  (FloatProperty&  out);
 };
 
 } // end of namespace Assimp
 
-#endif // AI_LWSIMPORTER_H_INC
+#endif // AI_IRRMESHIMPORTER_H_INC

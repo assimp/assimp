@@ -727,10 +727,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\BoostWorkaround\boost\multi_array.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\include\BoostWorkaround\boost\scoped_ptr.hpp"
 					>
 				</File>
@@ -1724,6 +1720,14 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath="..\..\code\SkeletonMeshBuilder.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\code\SkeletonMeshBuilder.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

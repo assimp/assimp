@@ -106,16 +106,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #	include "../include/BoostWorkaround/boost/scoped_ptr.hpp"
 #	include "../include/BoostWorkaround/boost/format.hpp"
-#	include "../include/BoostWorkaround/boost/multi_array.hpp"
 
 #else
 
-// NOTE: boost::multi_array is nto yet supported by the workaround
-#define AI_BUILD_NO_BVH_IMPORTER
-
 #	include <boost/scoped_ptr.hpp>
 #	include <boost/format.hpp>
-#	include <boost/multi_array.hpp>
 
 #endif
 

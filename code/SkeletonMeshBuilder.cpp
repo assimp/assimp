@@ -162,32 +162,35 @@ void SkeletonMeshBuilder::CreateGeometry( const aiNode* pNode)
 		mFaces.push_back( Face( vertexStartIndex + 21, vertexStartIndex + 22, vertexStartIndex + 23));
 	}
 
-	// create a bone affecting all the newly created vertices
-	aiBone* bone = new aiBone;
-	mBones.push_back( bone);
-	bone->mName = pNode->mName;
-
-	// calculate the bone offset matrix by concatenating the inverse transformations of all parents
-	bone->mOffsetMatrix = aiMatrix4x4( pNode->mTransformation).Inverse();
-	for( aiNode* parent = pNode->mParent; parent != NULL; parent = parent->mParent)
-		bone->mOffsetMatrix = aiMatrix4x4( parent->mTransformation).Inverse() * bone->mOffsetMatrix;
-
-	// add all the vertices to the bone's influences
 	unsigned int numVertices = mVertices.size() - vertexStartIndex;
-	bone->mNumWeights = numVertices;
-	bone->mWeights = new aiVertexWeight[numVertices];
-	for( unsigned int a = 0; a < numVertices; a++)
-		bone->mWeights[a] = aiVertexWeight( vertexStartIndex + a, 1.0f);
+  if( numVertices > 0)
+  {
+    // create a bone affecting all the newly created vertices
+    aiBone* bone = new aiBone;
+    mBones.push_back( bone);
+    bone->mName = pNode->mName;
 
-	// HACK: (thom) transform all vertices to the bone's local space. Should be done before adding
-	// them to the array, but I'm tired now and I'm annoyed.
-	aiMatrix4x4 boneToMeshTransform = aiMatrix4x4( bone->mOffsetMatrix).Inverse();
-	for( unsigned int a = vertexStartIndex; a < mVertices.size(); a++)
-		mVertices[a] = boneToMeshTransform * mVertices[a];
+    // calculate the bone offset matrix by concatenating the inverse transformations of all parents
+    bone->mOffsetMatrix = aiMatrix4x4( pNode->mTransformation).Inverse();
+    for( aiNode* parent = pNode->mParent; parent != NULL; parent = parent->mParent)
+	    bone->mOffsetMatrix = aiMatrix4x4( parent->mTransformation).Inverse() * bone->mOffsetMatrix;
 
-	// and finally recurse into the children list
-	for( unsigned int a = 0; a < pNode->mNumChildren; a++)
-		CreateGeometry( pNode->mChildren[a]);
+    // add all the vertices to the bone's influences
+    bone->mNumWeights = numVertices;
+    bone->mWeights = new aiVertexWeight[numVertices];
+    for( unsigned int a = 0; a < numVertices; a++)
+	    bone->mWeights[a] = aiVertexWeight( vertexStartIndex + a, 1.0f);
+
+    // HACK: (thom) transform all vertices to the bone's local space. Should be done before adding
+    // them to the array, but I'm tired now and I'm annoyed.
+    aiMatrix4x4 boneToMeshTransform = aiMatrix4x4( bone->mOffsetMatrix).Inverse();
+    for( unsigned int a = vertexStartIndex; a < mVertices.size(); a++)
+	    mVertices[a] = boneToMeshTransform * mVertices[a];
+  }
+
+  // and finally recurse into the children list
+  for( unsigned int a = 0; a < pNode->mNumChildren; a++)
+	  CreateGeometry( pNode->mChildren[a]);
 }
 
 // ------------------------------------------------------------------------------------------------

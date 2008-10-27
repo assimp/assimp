@@ -90,6 +90,8 @@ void SkeletonMeshBuilder::CreateGeometry( const aiNode* pNode)
 			const aiMatrix4x4& childTransform = pNode->mChildren[a]->mTransformation;
 			aiVector3D childpos( childTransform.a4, childTransform.b4, childTransform.c4);
 			float distanceToChild = childpos.Length();
+      if( distanceToChild < 0.0001f)
+        continue;
 			aiVector3D up = aiVector3D( childpos).Normalize();
 
 			aiVector3D orth( 1.0f, 0.0f, 0.0f);

@@ -1362,6 +1362,18 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="IRR"
+					>
+					<File
+						RelativePath="..\..\code\IRRLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\IRRLoader.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="PostProcess"

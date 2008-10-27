@@ -52,33 +52,36 @@ namespace Assimp	{
 	positions.push_back(n1); \
 	positions.push_back(n0);
 
-#ifdef AI_STANDARD_SHAPES_OUTPUT_POLYGONS
-
 #	define ADD_PENTAGON(n0,n1,n2,n3,n4) \
-	positions.push_back(n0); \
-	positions.push_back(n1); \
-	positions.push_back(n2); \
-	positions.push_back(n3); \
-	positions.push_back(n4); 
+	if (polygons) \
+	{ \
+		positions.push_back(n0); \
+		positions.push_back(n1); \
+		positions.push_back(n2); \
+		positions.push_back(n3); \
+		positions.push_back(n4); \
+	} \
+	else \
+	{ \
+		ADD_TRIANGLE(n0, n1, n2) \
+		ADD_TRIANGLE(n0, n2, n3) \
+		ADD_TRIANGLE(n0, n3, n4) \
+	}
 
 #	define ADD_QUAD(n0,n1,n2,n3) \
-	positions.push_back(n0); \
-	positions.push_back(n1); \
-	positions.push_back(n2); \
-	positions.push_back(n3); 
+	if (polygons) \
+	{ \
+		positions.push_back(n0); \
+		positions.push_back(n1); \
+		positions.push_back(n2); \
+		positions.push_back(n3); \
+	} \
+	else \
+	{ \
+		ADD_TRIANGLE(n0, n1, n2) \
+		ADD_TRIANGLE(n0, n2, n3) \
+	}
 
-#else
-
-#	define ADD_PENTAGON(n0,n1,n2,n3,n4) \
-	ADD_TRIANGLE(n0, n1, n2) \
-	ADD_TRIANGLE(n0, n2, n3) \
-	ADD_TRIANGLE(n0, n3, n4) 
-
-#	define ADD_QUAD(n0,n1,n2,n3) \
-	ADD_TRIANGLE(n0, n1, n2) \
-	ADD_TRIANGLE(n0, n2, n3) 
-
-#endif
 
 // ------------------------------------------------------------------------------------------------
 void Subdivide(std::vector<aiVector3D>& positions)
@@ -105,9 +108,74 @@ void Subdivide(std::vector<aiVector3D>& positions)
 	}
 }
 
+// ------------------------------------------------------------------------------------------------
+aiMesh* StandardShapes::MakeMesh(const std::vector<aiVector3D>& positions,
+	unsigned int numIndices)
+{
+	if (positions.size() & numIndices || positions.empty() || !numIndices)return NULL;
+
+	aiMesh* out = new aiMesh();
+	switch (numIndices)
+	{
+	case 1:
+		out->mPrimitiveTypes = aiPrimitiveType_POINT;
+		break;
+	case 2:
+		out->mPrimitiveTypes = aiPrimitiveType_LINE;
+		break;
+	case 3:
+		out->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
+		break;
+	default:
+		out->mPrimitiveTypes = aiPrimitiveType_POLYGON;
+		break;
+	};
+
+	out->mNumFaces = (unsigned int)positions.size() / numIndices;
+	out->mFaces = new aiFace[out->mNumFaces];
+	for (unsigned int i = 0, a = 0; i < out->mNumFaces;++i)
+	{
+		aiFace& f = out->mFaces[i];
+		f.mNumIndices = numIndices;
+		f.mIndices = new unsigned int[numIndices];
+		for (unsigned int i = 0; i < numIndices;++i,++a)
+			f.mIndices[i] = a;
+	}
+	out->mNumVertices = (unsigned int)positions.size();
+	out->mVertices = new aiVector3D[out->mNumVertices];
+	::memcpy(out->mVertices,&positions[0],out->mNumVertices*sizeof(aiVector3D));
+	return out;
+}
 
 // ------------------------------------------------------------------------------------------------
-void StandardShapes::MakeIcosahedron(std::vector<aiVector3D>& positions)
+aiMesh* StandardShapes::MakeMesh ( unsigned int (*GenerateFunc)(
+	std::vector<aiVector3D>&))
+{
+	std::vector<aiVector3D> temp;
+	unsigned num = (*GenerateFunc)(temp);
+	return MakeMesh(temp,num);
+}
+
+// ------------------------------------------------------------------------------------------------
+aiMesh* StandardShapes::MakeMesh ( unsigned int (*GenerateFunc)(
+	std::vector<aiVector3D>&, bool))
+{
+	std::vector<aiVector3D> temp;
+	unsigned num = (*GenerateFunc)(temp,true);
+	return MakeMesh(temp,num);
+}
+
+// ------------------------------------------------------------------------------------------------
+aiMesh* StandardShapes::MakeMesh ( unsigned int (*GenerateFunc)(
+	unsigned int,std::vector<aiVector3D>&))
+{
+	std::vector<aiVector3D> temp;
+	unsigned num = (*GenerateFunc)(4,temp);
+	return MakeMesh(temp,num);
+}
+
+// ------------------------------------------------------------------------------------------------
+unsigned int StandardShapes::MakeIcosahedron(std::vector<aiVector3D>& positions)
 {
 	positions.reserve(positions.size()+60);
 
@@ -151,10 +219,12 @@ void StandardShapes::MakeIcosahedron(std::vector<aiVector3D>& positions)
 	ADD_TRIANGLE(v9,v4,v6);
 	ADD_TRIANGLE(v10,v5,v7);
 	ADD_TRIANGLE(v11,v7,v5);
+	return 3;
 }
 
 // ------------------------------------------------------------------------------------------------
-void StandardShapes::MakeDodecahedron(std::vector<aiVector3D>& positions)
+unsigned int StandardShapes::MakeDodecahedron(std::vector<aiVector3D>& positions,
+	bool polygons /*= false*/)
 {
 	positions.reserve(positions.size()+108);
 
@@ -196,10 +266,11 @@ void StandardShapes::MakeDodecahedron(std::vector<aiVector3D>& positions)
 	ADD_PENTAGON(v7, v15, v5, v18, v19);
 	ADD_PENTAGON(v7, v11, v6, v14, v15);
 	ADD_PENTAGON(v7, v19, v3, v10, v11);
+	return (polygons ? 5 : 3);
 }
 
 // ------------------------------------------------------------------------------------------------
-void StandardShapes::MakeOctahedron(std::vector<aiVector3D>& positions)
+unsigned int StandardShapes::MakeOctahedron(std::vector<aiVector3D>& positions)
 {
 	positions.reserve(positions.size()+24);
 
@@ -219,10 +290,11 @@ void StandardShapes::MakeOctahedron(std::vector<aiVector3D>& positions)
 	ADD_TRIANGLE(v5,v1,v2);
 	ADD_TRIANGLE(v5,v3,v1);
 	ADD_TRIANGLE(v5,v0,v3);
+	return 3;
 }
 
 // ------------------------------------------------------------------------------------------------
-void StandardShapes::MakeTetrahedron(std::vector<aiVector3D>& positions)
+unsigned int StandardShapes::MakeTetrahedron(std::vector<aiVector3D>& positions)
 {
 	positions.reserve(positions.size()+9);
 
@@ -238,10 +310,12 @@ void StandardShapes::MakeTetrahedron(std::vector<aiVector3D>& positions)
 	ADD_TRIANGLE(v0,v2,v3);
 	ADD_TRIANGLE(v0,v3,v1);
 	ADD_TRIANGLE(v1,v3,v2);
+	return 3;
 }
 
 // ------------------------------------------------------------------------------------------------
-void StandardShapes::MakeHexahedron(std::vector<aiVector3D>& positions)
+unsigned int StandardShapes::MakeHexahedron(std::vector<aiVector3D>& positions,
+	bool polygons /*= false*/)
 {
 	positions.reserve(positions.size()+36);
 	float length = 1.f/1.73205080f;
@@ -261,9 +335,13 @@ void StandardShapes::MakeHexahedron(std::vector<aiVector3D>& positions)
 	ADD_QUAD(v6,v5,v1,v2);
 	ADD_QUAD(v6,v2,v3,v7);
 	ADD_QUAD(v6,v7,v4,v5);
+	return (polygons ? 4 : 3);
 }
 
+// Cleanup ...
 #undef ADD_TRIANGLE
+#undef ADD_QUAD
+#undef ADD_PENTAGON
 
 // ------------------------------------------------------------------------------------------------
 void StandardShapes::MakeSphere(unsigned int	tess,

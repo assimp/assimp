@@ -102,6 +102,13 @@ public:
 
 	// -------------------------------------------------------------------
 	void Execute( aiScene* pScene);
+
+	// -------------------------------------------------------------------
+	void SetupProperties(const Importer* pImp);
+
+private:
+
+	int configRemoveMeshes;
 };
 
 #endif 

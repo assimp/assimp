@@ -141,7 +141,7 @@ void FindDegeneratesProcess::Execute( aiScene* pScene)
 				break;
 			};
 		}
-		if (deg)
+		if (deg && !DefaultLogger::isNullLogger())
 		{
 			char s[64];
 			itoa10(s,deg); 

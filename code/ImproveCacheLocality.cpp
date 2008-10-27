@@ -153,13 +153,16 @@ void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshN
 	float fACMR = (float)iCacheMisses / pMesh->mNumFaces;
 	if (3.0 == fACMR)
 	{
-		char szBuff[128]; // should be sufficiently large in every case
+		if (!DefaultLogger::isNullLogger())
+		{
+			char szBuff[128]; // should be sufficiently large in every case
 
-		// the JoinIdenticalVertices process has not been executed on this
-		// mesh, otherwise this value would normally be at least minimally#
-		// smaller than 3.0 ...
-		::sprintf(szBuff,"Mesh %i: JIV-Step has not been executed properly (precondition)",meshNum);
-		DefaultLogger::get()->warn(szBuff);
+			// the JoinIdenticalVertices process has not been executed on this
+			// mesh, otherwise this value would normally be at least minimally#
+			// smaller than 3.0 ...
+			::sprintf(szBuff,"Mesh %i: Not suitable for vcache optimization",meshNum);
+			DefaultLogger::get()->warn(szBuff);
+		}
 		return;
 	}
 

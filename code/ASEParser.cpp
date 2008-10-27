@@ -254,6 +254,12 @@ void Parser::Parse()
 				ParseLV1SceneBlock();
 				continue;
 			}
+			// "group"
+			if (TokenMatch(m_szFile,"GROUP",5)) 
+			{
+				Parse();
+				continue;
+			}
 			// material list
 			if (TokenMatch(m_szFile,"MATERIAL_LIST",13)) 
 			{

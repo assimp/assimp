@@ -78,20 +78,22 @@ bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 		return false;
 	std::string extension = pFile.substr( pos);
 
-	if (extension.length() < 4)return false;
-	if (extension[0] != '.')return false;
-
-	if (extension[1] != 'a' && extension[1] != 'A')return false;
-	if (extension[2] != 's' && extension[2] != 'S')return false;
-
-	// NOTE: Sometimes the extension .ASK is also used
-	// however, it often contains static animation skeletons
-	// only (without real animations).
-	if (extension[3] != 'e' && extension[3] != 'E' &&
-		extension[3] != 'k' && extension[3] != 'K')return false;
-
-	return true;
+	// Either ASE or ASK
+	return  !(extension.length() < 4 || extension[0] != '.' ||
+			  extension[1] != 'a' && extension[1] != 'A' ||
+			  extension[2] != 's' && extension[2] != 'S' ||
+			  extension[3] != 'e' && extension[3] != 'E' &&
+			  extension[3] != 'k' && extension[3] != 'K');
 }
+
+// ------------------------------------------------------------------------------------------------
+// Setup configuration options
+void ASEImporter::SetupProperties(const Importer* pImp)
+{
+	configRecomputeNormals = (pImp->GetPropertyInteger(
+		AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS,0) ? true : false);
+}
+
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void ASEImporter::InternReadFile( 
@@ -125,6 +127,7 @@ void ASEImporter::InternReadFile(
 	GenerateDefaultMaterial();
 
 	// process all meshes
+	bool tookNormals = false;
 	std::vector<aiMesh*> avOutMeshes;
 	avOutMeshes.reserve(mParser->m_vMeshes.size()*2);
 	for (std::vector<ASE::Mesh>::iterator
@@ -140,10 +143,16 @@ void ASEImporter::InternReadFile(
 		BuildUniqueRepresentation(*i);
 
 		// need to generate proper vertex normals if necessary
-		GenerateNormals(*i);
+		if(GenerateNormals(*i))tookNormals = true;
 
 		// convert all meshes to aiMesh objects
 		ConvertMeshes(*i,avOutMeshes);
+	}
+	if (tookNormals)
+	{
+		DefaultLogger::get()->debug("ASE: Taking normals from the file. Use "
+			"the AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS option if you "
+			"experience problems");
 	}
 
 	// now build the output mesh list. remove dummies
@@ -192,15 +201,15 @@ void ASEImporter::GenerateDefaultMaterial()
 	}
 	if (bHas || mParser->m_vMaterials.empty())
 	{
-		// add a simple material without sub materials to the parser's list
+		// add a simple material without submaterials to the parser's list
 		mParser->m_vMaterials.push_back ( ASE::Material() );
 		ASE::Material& mat = mParser->m_vMaterials.back();
 
-		mat.mDiffuse = aiColor3D(0.6f,0.6f,0.6f);
+		mat.mDiffuse  = aiColor3D(0.6f,0.6f,0.6f);
 		mat.mSpecular = aiColor3D(1.0f,1.0f,1.0f);
-		mat.mAmbient = aiColor3D(0.05f,0.05f,0.05f);
-		mat.mShading = Dot3DSFile::Gouraud;
-		mat.mName = AI_DEFAULT_MATERIAL_NAME;
+		mat.mAmbient  = aiColor3D(0.05f,0.05f,0.05f);
+		mat.mShading  = Dot3DSFile::Gouraud;
+		mat.mName     = AI_DEFAULT_MATERIAL_NAME;
 	}
 }
 
@@ -295,7 +304,7 @@ void ASEImporter::BuildCameras()
 			// copy members
 			out->mClipPlaneFar  = in.mFar;
 			out->mClipPlaneNear = (in.mNear ? in.mNear : 0.1f); 
-			out->mHorizontalFOV = AI_RAD_TO_DEG( in.mFOV );
+			out->mHorizontalFOV = in.mFOV;
 
 			out->mName.Set(in.mName);
 		}
@@ -317,6 +326,7 @@ void ASEImporter::BuildLights()
 
 			out->mName.Set(in.mName);
 			out->mType = aiLightSource_POINT;
+			out->mColorDiffuse = out->mColorSpecular = in.mColor * in.mIntensity;
 		}
 	}
 }
@@ -327,6 +337,64 @@ void ASEImporter::AddNodes(std::vector<BaseNode*>& nodes,
 {
 	aiMatrix4x4 m;
 	this->AddNodes(nodes,pcParent,szName,m);
+}
+
+// ------------------------------------------------------------------------------------------------
+void ASEImporter::AddMeshes(const ASE::BaseNode* snode,aiNode* node)
+{
+	for (unsigned int i = 0; i < pcScene->mNumMeshes;++i)
+	{
+		// Get the name of the mesh (the mesh instance has been temporarily
+		// stored in the third vertex color)
+		const aiMesh* pcMesh  = pcScene->mMeshes[i];
+		const ASE::Mesh* mesh = (const ASE::Mesh*)pcMesh->mColors[2];
+
+		if (mesh == snode)++node->mNumMeshes;
+	}
+
+	if(node->mNumMeshes)
+	{
+		node->mMeshes = new unsigned int[node->mNumMeshes];
+		for (unsigned int i = 0, p = 0; i < pcScene->mNumMeshes;++i)
+		{
+			const aiMesh* pcMesh  = pcScene->mMeshes[i];
+			const ASE::Mesh* mesh = (const ASE::Mesh*)pcMesh->mColors[2];
+			if (mesh == snode)
+			{
+				node->mMeshes[p++] = i;
+
+				// Transform all vertices of the mesh back into their local space -> 
+				// at the moment they are pretransformed
+				aiMatrix4x4 m  = mesh->mTransform;
+				m.Inverse();
+
+				aiVector3D* pvCurPtr = pcMesh->mVertices;
+				const aiVector3D* pvEndPtr = pvCurPtr + pcMesh->mNumVertices;
+				while (pvCurPtr != pvEndPtr)
+				{
+					*pvCurPtr = m * (*pvCurPtr);
+					pvCurPtr++;
+				}
+
+				// Do the same for the normal vectors if we have them
+				// Here we need to use the (Inverse)Transpose of a 3x3
+				// matrix without the translational component.
+				if (pcMesh->mNormals)
+				{
+					aiMatrix3x3 m3 = aiMatrix3x3( mesh->mTransform );
+					m3.Transpose();
+
+					pvCurPtr = pcMesh->mNormals;
+					pvEndPtr = pvCurPtr + pcMesh->mNumVertices;
+					while (pvCurPtr != pvEndPtr)
+					{
+						*pvCurPtr = m3 * (*pvCurPtr);
+						pvCurPtr++;
+					}
+				}
+			}
+		}
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -375,64 +443,17 @@ void ASEImporter::AddNodes (std::vector<BaseNode*>& nodes,
 		// be used when this code is refactored next.
 		if (snode->mType == BaseNode::Mesh)
 		{
-			for (unsigned int i = 0; i < pcScene->mNumMeshes;++i)
-			{
-				// Get the name of the mesh (the mesh instance has been temporarily
-				// stored in the third vertex color)
-				const aiMesh* pcMesh  = pcScene->mMeshes[i];
-				const ASE::Mesh* mesh = (const ASE::Mesh*)pcMesh->mColors[2];
-
-				if (mesh == snode)++node->mNumMeshes;
-			}
-
-			if(node->mNumMeshes)
-			{
-				node->mMeshes = new unsigned int[node->mNumMeshes];
-				for (unsigned int i = 0, p = 0; i < pcScene->mNumMeshes;++i)
-				{
-					const aiMesh* pcMesh  = pcScene->mMeshes[i];
-					const ASE::Mesh* mesh = (const ASE::Mesh*)pcMesh->mColors[2];
-					if (mesh == snode)
-					{
-						node->mMeshes[p++] = i;
-
-						// Transform all vertices of the mesh back into their local space -> 
-						// at the moment they are pretransformed
-						mParentAdjust = mesh->mTransform;
-						mParentAdjust.Inverse();
-
-						aiVector3D* pvCurPtr = pcMesh->mVertices;
-						const aiVector3D* pvEndPtr = pvCurPtr + pcMesh->mNumVertices;
-						while (pvCurPtr != pvEndPtr)
-						{
-							*pvCurPtr = mParentAdjust * (*pvCurPtr);
-							pvCurPtr++;
-						}
-
-						// Do the same for the normal vectors if we have them
-						// Here we need to use the (Inverse)Transpose of a 3x3
-						// matrix without the translational component.
-						if (pcMesh->mNormals)
-						{
-							aiMatrix3x3 m3 = aiMatrix3x3( mesh->mTransform );
-							m3.Transpose();
-
-							pvCurPtr = pcMesh->mNormals;
-							pvEndPtr = pvCurPtr + pcMesh->mNumVertices;
-							while (pvCurPtr != pvEndPtr)
-							{
-								*pvCurPtr = m3 * (*pvCurPtr);
-								pvCurPtr++;
-							}
-						}
-					}
-				}
-			}
+			AddMeshes(snode,node);
 		}
 
 		// add sub nodes
 		aiMatrix4x4 mNewAbs = mat * node->mTransformation;
-		AddNodes(nodes,node,node->mName.data,mNewAbs);
+
+		// prevent stack overflow
+		if (node->mName != node->mParent->mName)
+		{
+			AddNodes(nodes,node,node->mName.data,mNewAbs);
+		}
 	}
 
 	// allocate enough space for the child nodes
@@ -493,7 +514,7 @@ void ASEImporter::BuildNodes()
 		{
 			if (it2 == it)continue;
 
-			if ((*it2)->mParent == (*it)->mName)
+			if ((*it2)->mName == (*it)->mParent)
 			{
 				bKnowParent = true;
 				break;
@@ -521,17 +542,12 @@ void ASEImporter::BuildNodes()
 		{
 			const ASE::BaseNode* src = *i;
 
-			/*
-			DefaultLogger::get()->info("Generating dummy node: " + src->mName + ". "
-				"This node is not defined in the ASE file, but referenced as "
-				"parent node");
-			*/
-
 			// the parent is not known, so we can assume that we must add 
 			// this node to the root node of the whole scene
 			aiNode* pcNode = new aiNode();
 			pcNode->mParent = pcScene->mRootNode;
 			pcNode->mName.Set(src->mName);
+			AddMeshes(src,pcNode);
 			AddNodes(nodes,pcNode,pcNode->mName.data);
 			apcNodes.push_back(pcNode);
 		}
@@ -1252,9 +1268,9 @@ void ASEImporter::BuildMaterialIndices()
 }
 // ------------------------------------------------------------------------------------------------
 // Generate normal vectors basing on smoothing groups
-void ASEImporter::GenerateNormals(ASE::Mesh& mesh)
+bool ASEImporter::GenerateNormals(ASE::Mesh& mesh)
 {
-	if (!mesh.mNormals.empty())
+	if (!mesh.mNormals.empty() && !configRecomputeNormals)
 	{
 		// check whether there are only uninitialized normals. If there are
 		// some, skip all normals from the file and compute them on our own
@@ -1264,14 +1280,11 @@ void ASEImporter::GenerateNormals(ASE::Mesh& mesh)
 		{
 			if ((*qq).x || (*qq).y || (*qq).z)
 			{
-				DefaultLogger::get()->debug("Using normal vectors from the ASE file. They are sometimes crappy");
-				return;
+				return true;
 			}
 		}
-		mesh.mNormals.clear();
 	}
-	if (mesh.mNormals.empty())
-	{
-		ComputeNormalsWithSmoothingsGroups<ASE::Face>(mesh);
-	}
+	// The array will be reused
+	ComputeNormalsWithSmoothingsGroups<ASE::Face>(mesh);
+	return false;
 }

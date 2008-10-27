@@ -282,12 +282,14 @@ public:
 	* read-only, the importer object keeps ownership of the data and will
     * destroy it upon destruction. If the import failes, NULL is returned.
 	* A human-readable error description can be retrieved by calling 
-	* GetErrorString().
+	* GetErrorString(). The previous scene will be deleted during this call.
 	* @param pFile Path and filename to the file to be imported.
 	* @param pFlags Optional post processing steps to be executed after 
 	*   a successful import. Provide a bitwise combination of the 
 	*   #aiPostProcessSteps flags.
 	* @return A pointer to the imported data, NULL if the import failed.
+	*   The pointer to the scene remains in possession of the Importer
+	*   instance. Use GetOrphanedScene() to take ownership of it.
 	*/
 	const aiScene* ReadFile( const std::string& pFile, unsigned int pFlags);
 
@@ -339,11 +341,30 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Returns the scene loaded by the last successful call to ReadFile()
-	*
-	* @return Current scene or NULL if there is currently no scene loaded
-	*/
+	 *
+	 * @return Current scene or NULL if there is currently no scene loaded
+	 */
 	inline const aiScene* GetScene()
-		{return this->mScene;}
+	{
+		return mScene;
+	}
+
+
+	// -------------------------------------------------------------------
+	/** Returns the scene loaded by the last successful call to ReadFile()
+	 *  and releases the scene from the ownership of the Importer 
+	 *  instance. The application is now resposible for deleting the
+	 *  scene. Any further calls to GetScene() or GetOrphanedScene()
+	 *  will return NULL - until a new scene has been loaded via ReadFile().
+	 *
+	 * @return Current scene or NULL if there is currently no scene loaded
+	 */
+	inline const aiScene* GetOrphanedScene()
+	{
+			aiScene* scene = mScene;
+			mScene = NULL;
+			return scene;
+	}
 
 
 	// -------------------------------------------------------------------

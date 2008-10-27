@@ -147,7 +147,6 @@ void CountVerticesAndFaces( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
 		CountVerticesAndFaces(pcScene,pcNode->mChildren[i],iMat,
 			iVFormat,piFaces,piVertices);
 	}
-	return;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -167,7 +166,7 @@ void CollectData( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
 				pcMeshOut->mVertices[aiCurrent[AI_PTVS_VERTEX]+n] = 
 					pcNode->mTransformation * pcMesh->mVertices[n];
 			}
-			if (iVFormat & 0x1)
+			if (iVFormat & 0x2)
 			{
 				aiMatrix4x4 mWorldIT = pcNode->mTransformation;
 				mWorldIT.Inverse().Transpose();
@@ -182,7 +181,7 @@ void CollectData( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
 						m * pcMesh->mNormals[n];
 				}
 			}
-			if (iVFormat & 0x2)
+			if (iVFormat & 0x4)
 			{
 				// copy tangents
 				memcpy(pcMeshOut->mTangents + aiCurrent[AI_PTVS_VERTEX],
@@ -250,7 +249,7 @@ void CollectData( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
 				};
 			}
 			aiCurrent[AI_PTVS_VERTEX] += pcMesh->mNumVertices;
-			aiCurrent[AI_PTVS_FACE] += pcMesh->mNumFaces;
+			aiCurrent[AI_PTVS_FACE]   += pcMesh->mNumFaces;
 		}
 	}
 	for (unsigned int i = 0;i < pcNode->mNumChildren;++i)
@@ -258,28 +257,22 @@ void CollectData( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
 		CollectData(pcScene,pcNode->mChildren[i],iMat,
 			iVFormat,pcMeshOut,aiCurrent);
 	}
-	return;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Get a list of all vertex formats that occur for a given material index
 // The output list contains duplicate elements
-void GetVFormatList( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
+void GetVFormatList( aiScene* pcScene, unsigned int iMat,
 	std::list<unsigned int>& aiOut)
 {
-	for (unsigned int i = 0; i < pcNode->mNumMeshes;++i)
+	for (unsigned int i = 0; i < pcScene->mNumMeshes;++i)
 	{
-		aiMesh* pcMesh = pcScene->mMeshes[ pcNode->mMeshes[i] ]; 
+		aiMesh* pcMesh = pcScene->mMeshes[ i ]; 
 		if (iMat == pcMesh->mMaterialIndex)
 		{
 			aiOut.push_back(GetMeshVFormat(pcMesh));
 		}
 	}
-	for (unsigned int i = 0;i < pcNode->mNumChildren;++i)
-	{
-		GetVFormatList(pcScene,pcNode->mChildren[i],iMat,aiOut);
-	}
-	return;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -295,7 +288,6 @@ void ComputeAbsoluteTransform( aiNode* pcNode )
 	{
 		ComputeAbsoluteTransform(pcNode->mChildren[i]);
 	}
-	return;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -333,8 +325,8 @@ void PretransformVertices::Execute( aiScene* pScene)
 	{
 		// get the list of all vertex formats for this material
 		aiVFormats.clear();
-		GetVFormatList(pScene,pScene->mRootNode,i,aiVFormats);
-		aiVFormats.sort(std::less<unsigned int>());
+		GetVFormatList(pScene,i,aiVFormats);
+		aiVFormats.sort();
 		aiVFormats.unique();
 		for (std::list<unsigned int>::const_iterator
 			j =  aiVFormats.begin();
@@ -352,11 +344,11 @@ void PretransformVertices::Execute( aiScene* pScene)
 				pcMesh->mFaces = new aiFace[iFaces];
 				pcMesh->mVertices = new aiVector3D[iVertices];
 				pcMesh->mMaterialIndex = i;
-				if ((*j) & 0x1)pcMesh->mNormals = new aiVector3D[iVertices];
-				if ((*j) & 0x2)
+				if ((*j) & 0x2)pcMesh->mNormals = new aiVector3D[iVertices];
+				if ((*j) & 0x4)
 				{
-					pcMesh->mTangents = new aiVector3D[iVertices];
-					pcMesh->mBitangents = new aiVector3D[iVertices];
+					pcMesh->mTangents    = new aiVector3D[iVertices];
+					pcMesh->mBitangents  = new aiVector3D[iVertices];
 				}
 				iFaces = 0;
 				while ((*j) & (0x100 << iFaces))
@@ -396,17 +388,28 @@ void PretransformVertices::Execute( aiScene* pScene)
 		// the mesh array are not overridden. We set them to NULL to 
 		// make sure the developer gets notified when his application
 		// attempts to access these fields ...
-		AI_DEBUG_INVALIDATE_PTR( pScene->mMeshes[i] );
+		pScene->mMeshes[i] = NULL;
 	}
 
-	pScene->mNumMeshes = (unsigned int)apcOutMeshes.size();
-	if (apcOutMeshes.size() > pScene->mNumMeshes)
+	// If no meshes are referenced in the node graph it is
+	// possible that we get no output meshes. However, this 
+	// is OK if we had no input meshes, too
+	if (apcOutMeshes.empty())
 	{
-		delete[] pScene->mMeshes;
-		pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
+		if (pScene->mNumMeshes)
+		{
+			throw new ImportErrorException("No output meshes: all meshes are orphaned "
+				"and have no node references");
+		}
 	}
-	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-		pScene->mMeshes[i] = apcOutMeshes[i];
+	else
+	{
+		// It is impossible that we have more output meshes than 
+		// input meshes, so we can easily reuse the old mesh array
+		pScene->mNumMeshes = (unsigned int)apcOutMeshes.size();
+		for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+			pScene->mMeshes[i] = apcOutMeshes[i];
+	}
 
 	// --- we need to keep all cameras and lights 
 	for (unsigned int i = 0; i < pScene->mNumCameras;++i)

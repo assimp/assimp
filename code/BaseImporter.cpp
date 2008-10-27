@@ -139,4 +139,124 @@ bool BaseImporter::SearchFileHeaderForToken(IOSystem* pIOHandler,
 }
 
 
+// ------------------------------------------------------------------------------------------------
+struct LoadRequest
+{
+	LoadRequest(const std::string& _file, unsigned int _flags)
+		:	file	(_file)
+		,	flags	(_flags)
+		,	scene	(NULL)
+		,	refCnt	(1)
+		,	loaded	(false)
+	{}
+
+	const std::string file;
+	unsigned int flags;
+	unsigned int refCnt;
+
+	aiScene* scene;
+	bool loaded;
+
+	bool operator== (const std::string& f)
+		{return file == f;}
+};
+
+struct BatchData
+{
+	// IO system to be used for all imports
+	IOSystem* pIOSystem;
+
+	// Importer used to load all meshes
+	Importer* pImporter;
+
+	// List of all imports
+	std::list<LoadRequest> requests;
+};
+
+// ------------------------------------------------------------------------------------------------
+BatchLoader::BatchLoader(IOSystem* pIO)
+{
+	ai_assert(NULL != pIO);
+
+	pimpl = new BatchData();
+	BatchData* data = ( BatchData* )pimpl;
+	data->pIOSystem = pIO;
+	data->pImporter = new Importer();
+}
+
+// ------------------------------------------------------------------------------------------------
+BatchLoader::~BatchLoader()
+{
+	// delete all scenes wthat have not been polled by the user
+	BatchData* data = ( BatchData* )pimpl;
+	for (std::list<LoadRequest>::iterator it = data->requests.begin();
+		it != data->requests.end(); ++it)
+	{
+		delete (*it).scene;
+	}
+	delete data->pImporter;
+	delete data;
+}
+
+// ------------------------------------------------------------------------------------------------
+void BatchLoader::AddLoadRequest	(const std::string& file)
+{
+	// no threaded implementation for the moment
+	BatchData* data = ( BatchData* )pimpl;
+	std::list<LoadRequest>::iterator it = std::find(data->requests.begin(),
+		data->requests.end(), file);
+
+	if (it != data->requests.end())
+	{
+		(*it).refCnt++;
+		return;
+	}
+	data->requests.push_back(LoadRequest(file,0));
+}
+
+
+// ------------------------------------------------------------------------------------------------
+aiScene* BatchLoader::GetImport		(const std::string& file)
+{
+	// no threaded implementation for the moment
+	BatchData* data = ( BatchData* )pimpl;
+	std::list<LoadRequest>::iterator it = std::find(data->requests.begin(),
+		data->requests.end(), file);
+	if (it != data->requests.end() && (*it).loaded)
+	{
+		aiScene* sc = (*it).scene;
+		if (!(--(*it).refCnt))
+		{
+			data->requests.erase(it);
+		}
+		return sc;
+	}
+	return NULL;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void BatchLoader::LoadAll()
+{
+	BatchData* data = ( BatchData* )pimpl;
+
+	// no threaded implementation for the moment
+	for (std::list<LoadRequest>::iterator it = data->requests.begin();
+		it != data->requests.end(); ++it)
+	{
+		// no postprocessing for the moment except validation
+		// in debug builds
+		unsigned int pp = 0;
+#ifdef _DEBUG
+		pp |= aiProcess_ValidateDataStructure;
+#endif
+
+		data->pImporter->ReadFile((*it).file,pp);
+		(*it).scene = const_cast<aiScene*>(data->pImporter->GetOrphanedScene());
+		(*it).loaded = true;
+	}
+}
+
+
+
 

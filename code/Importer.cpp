@@ -119,7 +119,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_IRRMESH_IMPORTER
 #	include "IRRMeshLoader.h"
 #endif
-
+#ifndef AI_BUILD_NO_IRR_IMPORTER
+#	include "IRRLoader.h"
+#endif
 
 
 // PostProcess-Steps
@@ -270,6 +272,9 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_IRRMESH_IMPORTER)
 	mImporter.push_back( new IRRMeshImporter());
 #endif
+#if (!defined AI_BUILD_NO_IRR_IMPORTER)
+	mImporter.push_back( new IRRImporter());
+#endif
 
 	// add an instance of each post processing step here in the order 
 	// of sequence it is executed. steps that are added here are not validated -
@@ -291,6 +296,10 @@ Importer::Importer() :
 	mPostProcessingSteps.push_back( new RemoveVCProcess());
 #endif
 
+
+#if (!defined AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
+	mPostProcessingSteps.push_back( new RemoveRedundantMatsProcess());
+#endif
 #if (!defined AI_BUILD_NO_PRETRANSFORMVERTICES_PROCESS)
 	mPostProcessingSteps.push_back( new PretransformVertices());
 #endif
@@ -306,9 +315,6 @@ Importer::Importer() :
 #endif
 
 
-#if (!defined AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
-	mPostProcessingSteps.push_back( new RemoveRedundantMatsProcess());
-#endif
 #if (!defined AI_BUILD_NO_OPTIMIZEGRAPH_PROCESS)
 	mPostProcessingSteps.push_back( new OptimizeGraphProcess());
 #endif

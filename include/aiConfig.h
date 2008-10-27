@@ -121,6 +121,29 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 // ---------------------------------------------------------------------------
+/** \brief Configures the ASE loader to always reconstruct normal vectors
+ *	basing on the smoothing groups loaded from the file.
+ * 
+ * Many ASE files have invalid normals (they're not orthonormal). This
+ * is the fault of 3DS Max ASE exporter. 
+ * Property type: integer (0: false; !0: true). Default value: false.
+ */
+#define AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS	"imp.ase.reconn"
+
+
+// ---------------------------------------------------------------------------
+/** \brief Configures the LWO loader to load just one layer from the model.
+ * 
+ * LWO files consist of layers and in some cases it could be useful to load
+ * only one of them. This property can be either a string - which specifies
+ * the name of the layer - or an integer - the index of the layer. If the
+ * property is not set the whole LWO model is loaded. Loading fails if the
+ * requested layer is not available.
+ */
+#define AI_CONFIG_IMPORT_LWO_ONE_LAYER_ONLY			"imp.lwo.layer"
+
+
+// ---------------------------------------------------------------------------
 /** \brief Specifies the maximum angle that may be between two vertex tangents
  *         that their tangents and bitangents are smoothed.
  *
@@ -251,6 +274,16 @@ enum aiComponent
  */
 #define AI_CONFIG_PP_RVC_FLAGS				"pp.rvc.flags"
 
+// ---------------------------------------------------------------------------
+/** \brief Input parameter to the #aiProcess_SortByPType step:
+ *  Specifies which primitive types are removed by the step.
+ *
+ *  This is a bitwise combination of the aiPrimitiveType flags.
+ *  Specifying all of them is illegal, of course. A typical use would
+ *  be to easily exclude all line and point meshes from the import. This
+ *  is an integer property, its default value is 0.
+ */
+#define AI_CONFIG_PP_SBP_REMOVE				"pp.sbp.remove"
 
 
 // ---------------------------------------------------------------------------
@@ -263,5 +296,8 @@ enum aiComponent
  * The default value is 0.
  */
 #define AI_CONFIG_FAVOUR_SPEED				"imp.speed_flag"
+
+
+
 
 #endif // !! AI_CONFIG_H_INC

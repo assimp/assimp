@@ -69,7 +69,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif // min
 
 // default movement speed 
-#define MOVE_SPEED 0.4f
+#define MOVE_SPEED 3.f
 
 using namespace Assimp;
 

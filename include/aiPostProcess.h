@@ -217,6 +217,9 @@ enum aiPostProcessSteps
 	 *  returns, just one bit is set in aiMesh::mPrimitiveTypes. This is 
 	 *  especially useful for real-time rendering where point and line
 	 *  primitives are often ignored or rendered separately.
+	 *  You can use the AI_CONFIG_PP_SBP_REMOVE option to specify which
+	 *  primitive types you need. This can be used to easily exclude
+	 *  lines and points, which are rarely used, from the import.
 	*/
 	aiProcess_SortByPType = 0x8000,
 

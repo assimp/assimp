@@ -125,6 +125,9 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 	// get current time
 	double fCur = (double)timeGetTime();
 
+	// Remove allline and point meshes from the import
+	 aiSetImportPropertyInteger(AI_CONFIG_PP_SBP_REMOVE,
+		aiPrimitiveType_LINE | aiPrimitiveType_POINT);
 
 	// call ASSIMPs C-API to load the file
 	g_pcAsset->pcScene = (aiScene*)aiImportFile(g_szFileName,
@@ -136,7 +139,7 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 		aiProcess_SplitLargeMeshes      | // split large, unrenderable meshes into submeshes
 		aiProcess_ValidateDataStructure | aiProcess_ImproveCacheLocality 
 		| aiProcess_RemoveRedundantMaterials | aiProcess_SortByPType |
-		aiProcess_FindInvalidData); // validate the output data structure
+		aiProcess_FindDegenerates | aiProcess_FindInvalidData); // validate the output data structure
 
 	// get the end time of zje operation, calculate delta t
 	double fEnd = (double)timeGetTime();

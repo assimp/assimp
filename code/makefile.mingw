@@ -69,7 +69,8 @@ SOURCES = AssimpPCH.cpp \
 	SkeletonMeshBuilder.cpp \
 	BVHLoader.cpp \
 	./irrXML/irrXML.cpp \
-	IRRMeshLoader.cpp
+	IRRMeshLoader.cpp \
+	IRRLoader.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 

@@ -133,6 +133,12 @@ bool SortByPTypeProcess::IsActive( unsigned int pFlags) const
 }
 
 // ------------------------------------------------------------------------------------------------
+void SortByPTypeProcess::SetupProperties(const Importer* pImp)
+{
+	configRemoveMeshes = pImp->GetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE,0);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Update changed meshes in all nodes
 void UpdateNodes(const std::vector<unsigned int>& replaceMeshIndex, aiNode* node)
 {
@@ -143,26 +149,38 @@ void UpdateNodes(const std::vector<unsigned int>& replaceMeshIndex, aiNode* node
 		unsigned int newSize = 0;
 		for (unsigned int m = 0; m< node->mNumMeshes; ++m)
 		{
-			it = replaceMeshIndex.begin()+(node->mMeshes[m]*5u);
-			for (;*it != 0xcdcdcdcd;++it)
+			unsigned int add = node->mMeshes[m]<<2;
+			for (unsigned int i = 0; i < 4;++i)
 			{
-				if (0xffffffff != *it)++newSize;
+				if (0xffffffff != replaceMeshIndex[add+i])++newSize;
 			}
 		}
-
-		ai_assert(0 != newSize);
-
-		unsigned int* newMeshes = new unsigned int[newSize];
-		for (unsigned int m = 0; m< node->mNumMeshes; ++m)
+		if (!newSize)
 		{
-			it = replaceMeshIndex.begin()+(node->mMeshes[m]*5u);
-			for (;*it != 0xcdcdcdcd;++it)
-			{
-				if (0xffffffff != *it)*newMeshes++ = *it;
-			}
+			delete[] node->mMeshes;
+			node->mNumMeshes = 0;
+			node->mMeshes    = NULL;
 		}
-		delete[] node->mMeshes;
-		node->mMeshes = newMeshes-(node->mNumMeshes = newSize);
+		else
+		{
+			// Try to reuse the old array if possible
+			unsigned int* newMeshes = (newSize > node->mNumMeshes 
+				? new unsigned int[newSize] : node->mMeshes);
+
+			for (unsigned int m = 0; m< node->mNumMeshes; ++m)
+			{
+				unsigned int add = node->mMeshes[m]<<2;
+				for (unsigned int i = 0; i < 4;++i)
+				{
+					if (0xffffffff != replaceMeshIndex[add+i])
+						*newMeshes++ = replaceMeshIndex[add+i];
+				}
+			}
+			if (newSize > node->mNumMeshes)
+				delete[] node->mMeshes;
+
+			node->mMeshes = newMeshes-(node->mNumMeshes = newSize);
+		}
 	}
 
 	// call all subnodes recursively
@@ -189,7 +207,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 
 	bool bAnyChanges = false;
 
-	std::vector<unsigned int> replaceMeshIndex(pScene->mNumMeshes*5,0xffffffff);
+	std::vector<unsigned int> replaceMeshIndex(pScene->mNumMeshes*4,0xffffffff);
 	std::vector<unsigned int>::iterator meshIdx = replaceMeshIndex.begin();
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
 	{
@@ -221,12 +239,14 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 
 		if (1 == num)
 		{
-			*meshIdx = (unsigned int) outMeshes.size();
-			outMeshes.push_back(mesh);
-			
+			if (!(configRemoveMeshes & mesh->mPrimitiveTypes))
+			{
+				*meshIdx = (unsigned int) outMeshes.size();
+				outMeshes.push_back(mesh);
+			}
+			else bAnyChanges = true;
+
 			meshIdx += 4;
-			*meshIdx = 0xcdcdcdcd;
-			++meshIdx;
 			continue;
 		}
 		bAnyChanges = true;
@@ -253,7 +273,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 		VertexWeightTable* avw = ComputeVertexBoneWeightTable(mesh);
 		for (unsigned int real = 0; real < 4; ++real,++meshIdx)
 		{
-			if ( !aiNumPerPType[real])
+			if ( !aiNumPerPType[real] || configRemoveMeshes & (1u << real))
 			{
 				continue;
 			}
@@ -343,7 +363,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 					if (vert)
 					{
 						*vert++ = mesh->mVertices[idx];
-						mesh->mVertices[idx].x = std::numeric_limits<float>::quiet_NaN();
+						//mesh->mVertices[idx].x = std::numeric_limits<float>::quiet_NaN();
 					}
 					if (nor )*nor++  = mesh->mNormals[idx];
 					if (tan )
@@ -370,6 +390,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 				in.mIndices = NULL;
 				++outFaces;
 			}
+			ai_assert(outFaces == out->mFaces + out->mNumFaces);
 
 			// now generate output bones
 			for (unsigned int q = 0; q < mesh->mNumBones;++q)
@@ -399,14 +420,17 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 			}
 		}
 
-		*meshIdx = 0xcdcdcdcd;
-		++meshIdx;
-
 		// delete the per-vertex bone weights table
 		delete[] avw;
 
 		// delete the input mesh
 		delete mesh;
+	}
+
+	if (outMeshes.empty())
+	{
+		// This should not occur
+		throw new ImportErrorException("No meshes remaining");
 	}
 
 	// If we added at least one mesh process all nodes in the node
@@ -421,17 +445,17 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 		delete[] pScene->mMeshes;
 		pScene->mNumMeshes = (unsigned int)outMeshes.size();
 		pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
-		::memcpy(pScene->mMeshes,&outMeshes[0],pScene->mNumMeshes*sizeof(void*));
 	}
+	::memcpy(pScene->mMeshes,&outMeshes[0],pScene->mNumMeshes*sizeof(void*));
 
 	if (!DefaultLogger::isNullLogger())
 	{
 		char buffer[1024];
-		::sprintf(buffer,"Points: %i, Lines: %i, Triangles: %i, Polygons: %i (Meshes)",
-			aiNumMeshesPerPType[0],
-			aiNumMeshesPerPType[1],
-			aiNumMeshesPerPType[2],
-			aiNumMeshesPerPType[3]);
+		::sprintf(buffer,"Points: %i%s, Lines: %i%s, Triangles: %i%s, Polygons: %i%s (Meshes, X = removed)",
+			aiNumMeshesPerPType[0], (configRemoveMeshes & aiPrimitiveType_POINT     ? "X" : ""),
+			aiNumMeshesPerPType[1], (configRemoveMeshes & aiPrimitiveType_LINE      ? "X" : ""),
+			aiNumMeshesPerPType[2], (configRemoveMeshes & aiPrimitiveType_TRIANGLE  ? "X" : ""),
+			aiNumMeshesPerPType[3], (configRemoveMeshes & aiPrimitiveType_POLYGON   ? "X" : ""));
 		DefaultLogger::get()->info(buffer);
 		DefaultLogger::get()->debug("SortByPTypeProcess finished");
 	}

@@ -90,7 +90,9 @@ bool LWOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 // Setup configuration properties
 void LWOImporter::SetupProperties(const Importer* pImp)
 {
-	configSpeedFlag = ( 0 != pImp->GetPropertyInteger(AI_CONFIG_FAVOUR_SPEED,0) ? true : false);
+	configSpeedFlag  = ( 0 != pImp->GetPropertyInteger(AI_CONFIG_FAVOUR_SPEED,0) ? true : false);
+	configLayerIndex = pImp->GetPropertyInteger (AI_CONFIG_IMPORT_LWO_ONE_LAYER_ONLY,0xffffffff); 
+	configLayerName  = pImp->GetPropertyString  (AI_CONFIG_IMPORT_LWO_ONE_LAYER_ONLY,"");
 }
 
 // ------------------------------------------------------------------------------------------------

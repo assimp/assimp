@@ -50,58 +50,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-IRRMeshImporter::IRRMeshImporter()
-{
-	// nothing to do here
-}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
-IRRMeshImporter::~IRRMeshImporter()
-{
-	// nothing to do here
-}
-
-// ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
-bool IRRMeshImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
-{
-	/* NOTE: A simple check for the file extension is not enough
-	 * here. Irrmesh and irr are easy, but xml is too generic
-	 * and could be collada, too. So we need to open the file and
-	 * search for typical tokens.
-	 */
-
-	std::string::size_type pos = pFile.find_last_of('.');
-
-	// no file extension - can't read
-	if( pos == std::string::npos)
-		return false;
-
-	std::string extension = pFile.substr( pos);
-	for (std::string::iterator i = extension.begin(); i != extension.end();++i)
-		*i = ::tolower(*i);
-
-	if (extension == ".irrmesh")return true;
-	else if (extension == ".xml")
-	{
-		/*  If CanRead() is called to check whether the loader
-		 *  supports a specific file extension in general we
-		 *  must return true here.
-		 */
-		if (!pIOHandler)return true;
-		const char* tokens[] = {"irrlicht","irrmesh"};
-		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,2);
-	}
-	return false;
-}
+/**** AT FIRST: IrrlightBase, base class for IrrMesh and Irr *******/
 
 // ------------------------------------------------------------------------------------------------
 // read a property in hexadecimal format (i.e. ffffffff)
-void IRRMeshImporter::ReadHexProperty    (HexProperty&    out)
+void IrrlichtBase::ReadHexProperty    (HexProperty&    out)
 {
 	for (int i = 0; i < reader->getAttributeCount();++i)
 	{
@@ -119,7 +72,7 @@ void IRRMeshImporter::ReadHexProperty    (HexProperty&    out)
 
 // ------------------------------------------------------------------------------------------------
 // read a string property
-void IRRMeshImporter::ReadStringProperty (StringProperty& out)
+void IrrlichtBase::ReadStringProperty (StringProperty& out)
 {
 	for (int i = 0; i < reader->getAttributeCount();++i)
 	{
@@ -137,7 +90,7 @@ void IRRMeshImporter::ReadStringProperty (StringProperty& out)
 
 // ------------------------------------------------------------------------------------------------
 // read a boolean property
-void IRRMeshImporter::ReadBoolProperty   (BoolProperty&   out)
+void IrrlichtBase::ReadBoolProperty   (BoolProperty&   out)
 {
 	for (int i = 0; i < reader->getAttributeCount();++i)
 	{
@@ -156,7 +109,7 @@ void IRRMeshImporter::ReadBoolProperty   (BoolProperty&   out)
 
 // ------------------------------------------------------------------------------------------------
 // read a float property
-void IRRMeshImporter::ReadFloatProperty  (FloatProperty&  out)
+void IrrlichtBase::ReadFloatProperty  (FloatProperty&  out)
 {
 	for (int i = 0; i < reader->getAttributeCount();++i)
 	{
@@ -166,8 +119,43 @@ void IRRMeshImporter::ReadFloatProperty  (FloatProperty&  out)
 		}
 		else if (!ASSIMP_stricmp(reader->getAttributeName(i),"value"))
 		{
-			// true or false, case insensitive
+			// just parse the float
 			out.value = fast_atof( reader->getAttributeValue(i) );
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// read a vector property
+void IrrlichtBase::ReadVectorProperty  (VectorProperty&  out)
+{
+	for (int i = 0; i < reader->getAttributeCount();++i)
+	{
+		if (!ASSIMP_stricmp(reader->getAttributeName(i),"name"))
+		{
+			out.name = std::string( reader->getAttributeValue(i) );
+		}
+		else if (!ASSIMP_stricmp(reader->getAttributeName(i),"value"))
+		{
+			// three floats, separated with commas
+			const char* ptr = reader->getAttributeValue(i);
+
+			SkipSpaces(&ptr);
+			ptr = fast_atof_move( ptr,(float&)out.value.x );
+			SkipSpaces(&ptr);
+			if (',' != *ptr)
+			{
+				DefaultLogger::get()->error("IRR(MESH): Expected comma in vector definition");
+			}
+			else SkipSpaces(ptr+1,&ptr);
+			ptr = fast_atof_move( ptr,(float&)out.value.y );
+			SkipSpaces(&ptr);
+			if (',' != *ptr)
+			{
+				DefaultLogger::get()->error("IRR(MESH): Expected comma in vector definition");
+			}
+			else SkipSpaces(ptr+1,&ptr);
+			ptr = fast_atof_move( ptr,(float&)out.value.z );
 		}
 	}
 }
@@ -194,7 +182,7 @@ int ConvertMappingMode(const std::string& mode)
 
 // ------------------------------------------------------------------------------------------------
 // Parse a material from the XML file
-aiMaterial* IRRMeshImporter::ParseMaterial(unsigned int& matFlags)
+aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 {
 	MaterialHelper* mat = new MaterialHelper();
 	aiColor4D clr;
@@ -351,9 +339,11 @@ aiMaterial* IRRMeshImporter::ParseMaterial(unsigned int& matFlags)
 
 				/* Assume there are no further nested nodes in <material> elements
 				 */
-
-				return mat;
-
+				if (/* IRRMESH */ !ASSIMP_stricmp(reader->getNodeName(),"material") ||
+					/* IRR     */ !ASSIMP_stricmp(reader->getNodeName(),"attributes"))
+				{
+					return mat;
+				}
 			default:
 
 				// GCC complains here ...
@@ -362,6 +352,55 @@ aiMaterial* IRRMeshImporter::ParseMaterial(unsigned int& matFlags)
 	}
 	DefaultLogger::get()->error("IRRMESH: Unexpected end of file. Material is not complete");
 	return mat;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// Constructor to be privately used by Importer
+IRRMeshImporter::IRRMeshImporter()
+{
+	// nothing to do here
+}
+
+// ------------------------------------------------------------------------------------------------
+// Destructor, private as well 
+IRRMeshImporter::~IRRMeshImporter()
+{
+	// nothing to do here
+}
+
+// ------------------------------------------------------------------------------------------------
+// Returns whether the class can handle the format of the given file. 
+bool IRRMeshImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+{
+	/* NOTE: A simple check for the file extension is not enough
+	 * here. Irrmesh and irr are easy, but xml is too generic
+	 * and could be collada, too. So we need to open the file and
+	 * search for typical tokens.
+	 */
+
+	std::string::size_type pos = pFile.find_last_of('.');
+
+	// no file extension - can't read
+	if( pos == std::string::npos)
+		return false;
+
+	std::string extension = pFile.substr( pos);
+	for (std::string::iterator i = extension.begin(); i != extension.end();++i)
+		*i = ::tolower(*i);
+
+	if (extension == ".irrmesh")return true;
+	else if (extension == ".xml")
+	{
+		/*  If CanRead() is called to check whether the loader
+		 *  supports a specific file extension in general we
+		 *  must return true here.
+		 */
+		if (!pIOHandler)return true;
+		const char* tokens[] = {"irrmesh"};
+		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
+	}
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -428,6 +467,8 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 				curNormals.clear();
 				curUV2s.clear();
 				curUVs.clear();
+				curTangents.clear();
+				curBitangents.clear();
 			}
 			
 
@@ -591,7 +632,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 						curUV2s.push_back(temp);
 					}
 					// read optional tangent and bitangent vectors
-					if (vertexFormat == 2)
+					else if (vertexFormat == 2)
 					{
 						// tangents
 						sz = fast_atof_move(sz,(float&)temp.x);
@@ -720,6 +761,9 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 			meshes.push_back(curMesh);  
 		}
 	}
+
+	if (materials.empty())
+		throw new ImportErrorException("IRRMESH: Unable to read a mesh from this file");
 
 	// now generate the output scene
 	pScene->mNumMeshes = (unsigned int)meshes.size();

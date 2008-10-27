@@ -94,11 +94,19 @@ protected:
 		IOSystem* pIOHandler);
 
 	// -------------------------------------------------------------------
+	/** Called prior to ReadFile().
+	* The function is a request to the importer to update its configuration
+	* basing on the Importer's configuration property list.
+	*/
+	void SetupProperties(const Importer* pImp);
+
+	// -------------------------------------------------------------------
 	/** Generate normal vectors basing on smoothing groups
 	 * (in some cases the normal are already contained in the file)
 	 * \param mesh Mesh to work on
+	 * \return false if the normals have been recomputed
 	 */
-	void GenerateNormals(ASE::Mesh& mesh);
+	bool GenerateNormals(ASE::Mesh& mesh);
 
 	// -------------------------------------------------------------------
 	/** Create valid vertex/normal/UV/color/face lists.
@@ -164,6 +172,8 @@ protected:
 		aiNode* pcParent,const char* szName,
 		const aiMatrix4x4& matrix);
 
+	void AddMeshes(const ASE::BaseNode* snode,aiNode* node);
+
 	// -------------------------------------------------------------------
 	/** Generate a default material and add it to the parser's list
 	 *  Called if no material has been found in the file (rare for ASE,
@@ -181,6 +191,10 @@ protected:
 
 	/** Scene to be filled */
 	aiScene* pcScene;
+
+	/** Config options: Recompute the normals in every case - WA
+	    for 3DS Max broken ASE normal export */
+	bool configRecomputeNormals;
 };
 
 } // end of namespace Assimp

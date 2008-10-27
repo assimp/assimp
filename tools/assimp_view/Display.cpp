@@ -1954,6 +1954,10 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 	{
 		for (unsigned int i = 0; i < piNode->mNumMeshes;++i)
 		{
+			// fix: Render triangle meshes only
+			if (g_pcAsset->pcScene->mMeshes[piNode->mMeshes[i]]->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
+				continue;
+
 			// don't render the mesh if the render pass is incorrect
 			if (g_sOptions.bRenderMats && (
 				g_pcAsset->apcMeshes[piNode->mMeshes[i]]->piOpacityTexture || 

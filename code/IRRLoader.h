@@ -40,80 +40,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Declaration of the .irrMesh (Irrlight Engine Mesh Format)
     importer class. */
-#ifndef AI_IRRMESHLOADER_H_INCLUDED
-#define AI_IRRMESHLOADER_H_INCLUDED
+#ifndef AI_IRRLOADER_H_INCLUDED
+#define AI_IRRLOADER_H_INCLUDED
 
-#include "./irrXML/irrXMLWrapper.h"
+#include "IRRMeshLoader.h"
 
 namespace Assimp	{
 
-#define AI_IRRMESH_MAT_trans_vertex_alpha 0x1
-#define AI_IRRMESH_MAT_lightmap		0x2 
-#define AI_IRRMESH_MAT_lightmap_m2	(AI_IRRMESH_MAT_lightmap|0x4)
-#define AI_IRRMESH_MAT_lightmap_m4	(AI_IRRMESH_MAT_lightmap|0x5)
-
 
 // ---------------------------------------------------------------------------
-/** Base class for the Irr and IrrMesh importers
- */
-class IrrlichtBase
-{
-protected:
-
-	template <class T>
-	struct Property
-	{
-		std::string name;
-		T value;
-	};
-
-	typedef Property<uint32_t>		HexProperty;
-	typedef Property<std::string>	StringProperty;
-	typedef Property<bool>			BoolProperty;
-	typedef Property<float>			FloatProperty;
-	typedef Property<aiVector3D>	VectorProperty;
-
-	/** XML reader instance
-	 */
-	IrrXMLReader* reader;
-
-
-	// -------------------------------------------------------------------
-	/** Parse a material description from the XML
-	 *  @return The created material
-	 *  @param matFlags Receives AI_IRRMESH_MAT_XX flags
-	 */
-	aiMaterial* ParseMaterial(unsigned int& matFlags);
-
-
-	// -------------------------------------------------------------------
-	/** Read a property of the specified type from the current XML element.
-	 *  @param out Recives output data
-	 */
-	void ReadHexProperty    (HexProperty&    out);
-	void ReadStringProperty (StringProperty& out);
-	void ReadBoolProperty   (BoolProperty&   out);
-	void ReadFloatProperty  (FloatProperty&  out);
-	void ReadVectorProperty  (VectorProperty&  out);
-};
-
-// ---------------------------------------------------------------------------
-/** IrrMesh importer class.
+/** Irr importer class.
  *
- * IrrMesh is the native file format of the Irrlight engine and its editor
+ * Irr is the native scene file format of the Irrlight engine and its editor
  * irrEdit. As IrrEdit itself is capable of importing quite many file formats,
  * it might be a good file format for data exchange.
  */
-class IRRMeshImporter : public BaseImporter, public IrrlichtBase
+class IRRImporter : public BaseImporter, public IrrlichtBase
 {
 	friend class Importer;
 
 protected:
 	/** Constructor to be privately used by Importer */
-	IRRMeshImporter();
+	IRRImporter();
 
 	/** Destructor, private as well */
-	~IRRMeshImporter();
+	~IRRImporter();
 
 public:
 
@@ -137,7 +88,7 @@ protected:
 		 *  a real irrlicht file
 		 */
 
-		append.append("*.xml;*.irrmesh");
+		append.append("*.xml;*.irr");
 	}
 
 	// -------------------------------------------------------------------
@@ -147,8 +98,71 @@ protected:
 	void InternReadFile( const std::string& pFile, aiScene* pScene, 
 		IOSystem* pIOHandler);
 
+private:
+
+	/** Data structure for a scenegraph node in an IRR file
+	 */
+	struct Node
+	{
+		// Type of the node
+		enum ET
+		{
+			LIGHT,
+			CUBE,
+			MESH,
+			SKYBOX,
+			DUMMY,
+			CAMERA,
+			TERRAIN,
+			SPHERE,
+			ANIMMESH
+		} type;
+
+		Node(ET t)
+			:	type		(t)
+			,	scaling		(1.f,1.f,1.f) // assume uniform scaling by default
+			,	animation	(NULL)
+			,	framesPerSecond	(0.f)
+		{
+		
+			// Generate a default name for the node
+			char buffer[128];
+			static int cnt;
+			::sprintf(buffer,"IrrNode_%i",cnt++);
+			name = std::string(buffer);
+
+			// reserve space for up to 5 materials
+			materials.reserve(5);
+
+			// reserve space for up to 5 children
+			children.reserve(5);
+		}
+
+		// Transformation of the node
+		aiVector3D position, rotation, scaling;
+
+		// Name of the node
+		std::string name;
+
+		// List of all child nodes
+		std::vector<Node*> children;
+
+		// Parent node
+		Node* parent;
+
+		// Animation channels that belongs to this node
+		aiNodeAnim* animation;
+
+		// Animated meshes: frames per second
+		// 0.f if not specified
+		float framesPerSecond;
+
+		//! Meshes: List of materials to be assigned
+		//! along with their corresponding material flags
+		std::vector< std::pair<aiMaterial*, unsigned int> > materials;
+	};
 };
 
 } // end of namespace Assimp
 
-#endif // AI_IRRMESHIMPORTER_H_INC
+#endif // AI_IRRIMPORTER_H_INC

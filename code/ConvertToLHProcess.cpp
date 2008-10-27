@@ -78,8 +78,7 @@ bool ConvertToLHProcess::IsActive( unsigned int pFlags) const
 {
 	if (pFlags & aiProcess_ConvertToLeftHanded)
 	{
-		if (pFlags & aiProcess_PreTransformVertices)
-			this->bTransformVertices = true;
+		bTransformVertices = (0 != (pFlags & aiProcess_PreTransformVertices) ? true : false);
 		return true;
 	}
 	return false;
@@ -99,25 +98,28 @@ void ConvertToLHProcess::Execute( aiScene* pScene)
 	DefaultLogger::get()->debug("ConvertToLHProcess begin");
 
 	// transform vertex by vertex or change the root transform?
-	if (this->bTransformVertices)
+	// We can't do the coordinate system transformation earlier 
+	// in the pipeline - most steps assume that we're in OGL
+	// space. So we need to transform all vertices a second time
+	// here.
+	if (bTransformVertices)
 	{
-		this->bTransformVertices = false;
 		aiMatrix4x4 mTransform;
-		this->ConvertToDX(mTransform);
+		ConvertToDX(mTransform);
 		for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
 		{
 			aiMesh* pcMesh = pScene->mMeshes[i];
+
+			// transform all vertices
 			for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
-			{
-				pcMesh->mVertices[n] = mTransform * pcMesh->mVertices[n];
-			}
+				pcMesh->mVertices[n]  = mTransform * pcMesh->mVertices[n];
+		
+			// transform all normals
 			if (pcMesh->HasNormals())
 			{
 				mTransform.Inverse().Transpose();
 				for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
-				{
-					pcMesh->mNormals[n] = mTransform * pcMesh->mNormals[n];
-				}
+					pcMesh->mNormals[n]  = mTransform * pcMesh->mNormals[n];
 			}
 		}
 	}

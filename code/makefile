@@ -69,7 +69,8 @@ SOURCES = AssimpPCH.cpp \
 	FindDegenerates.cpp \
 	XFileParser.cpp \
 	./irrXML/irrXML.cpp \
-	IRRMeshLoader.cpp
+	IRRMeshLoader.cpp \
+	IRRLoader.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 

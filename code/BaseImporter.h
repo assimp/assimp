@@ -215,12 +215,77 @@ protected:
 		unsigned int		numTokens,
 		unsigned int		searchBytes = 200);
 
+#if 0 /** TODO **/
+	// -------------------------------------------------------------------
+	/** An utility for all text file loaders. It converts a file to our
+	 *  ASCII/UTF8 character set. Special unicode characters are lost.
+	 *
+	 *  @param buffer Input buffer. Needn't be terminated with zero.
+	 *  @param length Length of the input buffer, in bytes. Receives the
+	 *    number of output characters, excluding the terminal char.
+	 *  @return true if the source format did not match our internal
+	 *    format so it was converted.
+	 */
+	static bool ConvertToUTF8(const char* buffer, 
+		unsigned int& length);
+#endif
+
 protected:
 
 	/** Error description in case there was one. */
 	std::string mErrorText;
 };
 
+// ---------------------------------------------------------------------------
+/** A helper class that can be used by importers which need to load many
+ *  extern meshes recursively.
+ *
+ *  The class uses several threads to load these meshes (or at least it
+ *  could, this has not yet been implemented at the moment).
+ *
+ *  @note The class may not be used by more than one thread
+ */
+class ASSIMP_API BatchLoader
+{
+
+public:
+
+	/** Construct a batch loader from a given IO system
+	 */
+	BatchLoader(IOSystem* pIO);
+	~BatchLoader();
+
+
+	/** Add a new file to the list of files to be loaded.
+	 *
+	 *  No postprocessing steps are executed on the file
+	 *  @param file File to be loaded
+	 */
+	void AddLoadRequest		(const std::string& file);
+
+
+	/** Get an imported scene.
+	 *
+	 *  This polls the import from the internal request list.
+	 *  If an import is requested several times, this function
+	 *  can be called several times, too.
+	 *
+	 *  @param file File name of the scene
+	 *  @return NULL if there is no scene with this file name
+	 *  in the queue of the scene hasn't been loaded yet.
+	 */
+	aiScene* GetImport		(const std::string& file);
+
+
+	/** Waits until all scenes have been loaded.
+	 */
+	void LoadAll();
+
+private:
+
+	// No need to have that in the public API ...
+	void* pimpl;
+};
 
 
 } // end of namespace Assimp

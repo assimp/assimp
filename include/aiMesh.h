@@ -213,7 +213,7 @@ struct aiBone
 * However one could use the vertex color sets for any other purpose, too.
 *
 * \note Some internal structures expect (and assert) this value
-*   to be at least 4
+*   to be at 4
 */
 #	define AI_MAX_NUMBER_OF_COLOR_SETS 0x4
 
@@ -228,7 +228,7 @@ struct aiBone
 * which UVW channel serves as data source for a texture,
 *
 * \note Some internal structures expect (and assert) this value
-*   to be at least 4
+*   to be  4
 */
 #	define AI_MAX_NUMBER_OF_TEXTURECOORDS 0x4
 
@@ -311,7 +311,7 @@ struct aiMesh
 	*/
 	unsigned int mNumVertices;
 
-	/** The number of primitives (triangles, polygones, lines) in this  mesh. 
+	/** The number of primitives (triangles, polygons, lines) in this  mesh. 
 	* This is also the size of the mFaces array 
 	*/
 	unsigned int mNumFaces;
@@ -329,7 +329,16 @@ struct aiMesh
 	* lines only may not have normal vectors. Meshes with mixed
 	* primitive types (i.e. lines and triangles) may have normals,
 	* but the normals for vertices that are only referenced by
-	* point or line primitives are undefined and set to QNaN.
+	* point or line primitives are undefined and set to QNaN (WARN:
+	* qNaN compares to inequal to *everything*, even to qNaN itself.
+	* Use code like this
+	* @code
+	* #define IS_QNAN(f) (f != f)
+	* @endcode
+	* to check whether a field is qnan).
+	* @note Normal vectors computed by Assimp are always unit-length.
+	* However, this needn't apply for normals that have been taken
+	*   directly from the model file.
 	*/
 	C_STRUCT aiVector3D* mNormals;
 
@@ -342,7 +351,8 @@ struct aiMesh
 	* normals, but the normals for vertices that are only referenced by
 	* point or line primitives are undefined and set to QNaN. 
 	* @note If the mesh contains tangents, it automatically also 
-	* contains bitangents. 
+	* contains bitangents (the bitangent is just the cross product of
+	* tangent and normal vectors). 
 	*/
 	C_STRUCT aiVector3D* mTangents;
 

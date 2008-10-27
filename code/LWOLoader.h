@@ -384,6 +384,8 @@ protected:
 	aiScene* pScene;
 
 	bool configSpeedFlag;
+	unsigned int configLayerIndex;
+	std::string  configLayerName;
 };
 
 

@@ -57,7 +57,7 @@ namespace Assimp
  * the resembles the node hierarchy. This is useful for file formats
  * that don't carry any mesh data but only animation data.
  */
-class SkeletonMeshBuilder
+class ASSIMP_API SkeletonMeshBuilder
 {
 public:
   /** The constructor processes the given scene and adds a mesh there. Does nothing

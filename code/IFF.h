@@ -54,9 +54,9 @@ struct SubChunkHeader
 //! @param outFile Pointer to the file data - points to the chunk data afterwards
 //! @return Pointer to the chunk header
 /////////////////////////////////////////////////////////////////////////////////
-inline LE_NCONST ChunkHeader* LoadChunk(LE_NCONST uint8_t*& outFile)
+inline ChunkHeader* LoadChunk(uint8_t*& outFile)
 {
-	LE_NCONST ChunkHeader* head = (LE_NCONST ChunkHeader*) outFile;
+	ChunkHeader* head = (ChunkHeader*) outFile;
 	AI_LSWAP4(head->length);
 	AI_LSWAP4(head->type);
 	outFile += sizeof(ChunkHeader);
@@ -68,9 +68,9 @@ inline LE_NCONST ChunkHeader* LoadChunk(LE_NCONST uint8_t*& outFile)
 //! @param outFile Pointer to the file data - points to the chunk data afterwards
 //! @return Pointer to the sub chunk header
 /////////////////////////////////////////////////////////////////////////////////
-inline LE_NCONST SubChunkHeader* LoadSubChunk(LE_NCONST uint8_t*& outFile)
+inline SubChunkHeader* LoadSubChunk(uint8_t*& outFile)
 {
-	LE_NCONST SubChunkHeader* head = (LE_NCONST SubChunkHeader*) outFile;
+	SubChunkHeader* head = (SubChunkHeader*) outFile;
 	AI_LSWAP2(head->length);
 	AI_LSWAP4(head->type);
 	outFile += sizeof(SubChunkHeader);
@@ -84,9 +84,9 @@ inline LE_NCONST SubChunkHeader* LoadSubChunk(LE_NCONST uint8_t*& outFile)
 //! @param fileType Receives the type of the file
 //! @return 0 if everything was OK, otherwise an error message
 /////////////////////////////////////////////////////////////////////////////////
-inline const char* ReadHeader(LE_NCONST uint8_t* outFile,uint32_t& fileType) 
+inline const char* ReadHeader(uint8_t* outFile,uint32_t& fileType) 
 {
-	LE_NCONST ChunkHeader* head = LoadChunk(outFile);
+	ChunkHeader* head = LoadChunk(outFile);
 	if(AI_IFF_FOURCC_FORM != head->type)
 	{
 		return "The file is not an IFF file: FORM chunk is missing";

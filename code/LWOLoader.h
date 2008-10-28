@@ -217,7 +217,7 @@ private:
 	*/
 	void CountVertsAndFacesLWO2(unsigned int& verts, 
 		unsigned int& faces,
-		LE_NCONST uint16_t*& cursor, 
+		uint16_t*& cursor, 
 		const uint16_t* const end,
 		unsigned int max = 0xffffffff);
 
@@ -231,7 +231,7 @@ private:
 	/** Read vertices and faces in a LWOB/LWO2 file
 	*/
 	void CopyFaceIndicesLWO2(LWO::FaceList::iterator& it,
-		LE_NCONST uint16_t*& cursor, 
+		uint16_t*& cursor, 
 		const uint16_t* const end);
 
 	// -------------------------------------------------------------------
@@ -375,7 +375,7 @@ protected:
 	ClipList mClips;
 
 	/** file buffer */
-	LE_NCONST uint8_t* mFileBuffer;
+	uint8_t* mFileBuffer;
 
 	/** Size of the file, in bytes */
 	unsigned int fileSize;

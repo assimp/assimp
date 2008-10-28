@@ -241,9 +241,11 @@ void MDRImporter::InternReadFile( const std::string& pFile,
 				// get a pointer to the next vertex
 				v = (LE_NCONST MDR::Vertex*)((uint8_t*)(v+1) + v->numWeights*sizeof(MDR::Weight));
 
+#ifndef AI_BUILD_BIG_ENDIAN
 				AI_SWAP4(v->numWeights);
 				AI_SWAP4(v->normal.x);AI_SWAP4(v->normal.y);AI_SWAP4(v->normal.z);
 				AI_SWAP4(v->texCoords.x);AI_SWAP4(v->texCoords.y);
+#endif        
 
 				VertexInfo& vert = mVertices[m];
 				vert.uv.x = v->texCoords.x;  vert.uv.y = v->texCoords.y; 
@@ -263,7 +265,9 @@ void MDRImporter::InternReadFile( const std::string& pFile,
 			{
 				for (unsigned int o = 0; o < 3;++o)
 				{
+#ifndef AI_BUILD_BIG_ENDIAN        
 					AI_SWAP4(tri->indexes[o]);
+#endif          
 					register unsigned int temp = tri->indexes[o];
 					if (temp >= surf->numVerts)
 						throw new ImportErrorException("MDR: Vertex index is out of range");

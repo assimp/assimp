@@ -67,7 +67,7 @@ void LWOImporter::LoadLWOBFile()
 			throw new ImportErrorException("LWOB: Invalid chunk length");
 			break;
 		}
-		LE_NCONST uint8_t* const next = mFileBuffer+head->length;
+		uint8_t* const next = mFileBuffer+head->length;
 		switch (head->type)
 		{
 			// vertex list
@@ -220,7 +220,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		if (mFileBuffer + head->length > end)
 			throw new ImportErrorException("LWOB: Invalid surface chunk length");
 
-		LE_NCONST uint8_t* const next = mFileBuffer+head->length;
+		uint8_t* const next = mFileBuffer+head->length;
 		switch (head->type)
 		{
 		// diffuse color

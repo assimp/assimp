@@ -246,7 +246,7 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 	BE_NCONST MD2::Vertex* pcVerts = (BE_NCONST MD2::Vertex*) (pcFrame->vertices);
 
 #ifdef AI_BUILD_BIG_ENDIAN
-	for (uint32_t i = 0; i< m_pcHeader->numTriangles)
+	for (uint32_t i = 0; i< m_pcHeader->numTriangles; ++i)
 	{
 		for (unsigned int p = 0; p < 3;++p)
 		{

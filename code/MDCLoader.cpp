@@ -234,7 +234,7 @@ void MDCImporter::InternReadFile(
 
 		if (pcSurface2->ulNumVertices && pcSurface2->ulNumTriangles)++pScene->mNumMeshes;
 		iNumShaders += pcSurface2->ulNumShaders;
-		pcSurface2 = (const MDC::Surface*)((int8_t*)pcSurface2 + pcSurface2->ulOffsetEnd);
+		pcSurface2 = (BE_NCONST MDC::Surface*)((int8_t*)pcSurface2 + pcSurface2->ulOffsetEnd);
 	}
 	aszShaders.reserve(iNumShaders);
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];

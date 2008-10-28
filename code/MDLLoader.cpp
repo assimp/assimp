@@ -317,7 +317,7 @@ void FlipQuakeHeader(BE_NCONST MDL::Header* pcHeader)
 	}
 	ByteSwap::Swap4(& pcHeader->size);
 	ByteSwap::Swap4(& pcHeader->skinheight);
-	ByteSwap::Swap4(& pcHeader->skin);
+//	ByteSwap::Swap4(& pcHeader->skin);
 }
 #endif
 // ------------------------------------------------------------------------------------------------
@@ -374,17 +374,17 @@ void MDLImporter::InternReadFile_Quake1( )
 		}
 	}
 	// get a pointer to the texture coordinates
-	const MDL::TexCoord* pcTexCoords = (const MDL::TexCoord*)szCurrent;
+	BE_NCONST MDL::TexCoord* pcTexCoords = (BE_NCONST MDL::TexCoord*)szCurrent;
 	szCurrent += sizeof(MDL::TexCoord) * pcHeader->num_verts;
 
 	// get a pointer to the triangles
-	const MDL::Triangle* pcTriangles = (const MDL::Triangle*)szCurrent;
+	BE_NCONST MDL::Triangle* pcTriangles = (BE_NCONST MDL::Triangle*)szCurrent;
 	szCurrent += sizeof(MDL::Triangle) * pcHeader->num_tris;
 	VALIDATE_FILE_SIZE(szCurrent);
 
 	// now get a pointer to the first frame in the file
-	const MDL::Frame* pcFrames = (const MDL::Frame*)szCurrent;
-	const MDL::SimpleFrame* pcFirstFrame;
+	BE_NCONST MDL::Frame* pcFrames = (BE_NCONST MDL::Frame*)szCurrent;
+	BE_NCONST MDL::SimpleFrame* pcFirstFrame;
 
 	if (0 == pcFrames->type)
 	{
@@ -394,10 +394,10 @@ void MDLImporter::InternReadFile_Quake1( )
 	else
 	{
 		// get the first frame in the group
-		const MDL::GroupFrame* pcFrames2 = (const MDL::GroupFrame*)pcFrames;
-		pcFirstFrame = (const MDL::SimpleFrame*)(&pcFrames2->time + pcFrames->type);
+		BE_NCONST MDL::GroupFrame* pcFrames2 = (BE_NCONST MDL::GroupFrame*)pcFrames;
+		pcFirstFrame = (BE_NCONST MDL::SimpleFrame*)(&pcFrames2->time + pcFrames->type);
 	}
-	const MDL::Vertex* pcVertices = (const MDL::Vertex*) ((pcFirstFrame->name) +
+	BE_NCONST MDL::Vertex* pcVertices = (BE_NCONST MDL::Vertex*) ((pcFirstFrame->name) +
 		sizeof(pcFirstFrame->name));
 
 	VALIDATE_FILE_SIZE((const unsigned char*)(pcVertices + pcHeader->num_verts));
@@ -553,7 +553,7 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 	ai_assert(NULL != pScene);
 
 	// the header of MDL 3/4/5 is nearly identical to the original Quake1 header
-	const MDL::Header* pcHeader = (const MDL::Header*)this->mBuffer;
+	BE_NCONST MDL::Header* pcHeader = (BE_NCONST MDL::Header*)this->mBuffer;
 #ifdef AI_BUILD_BIG_ENDIAN
 	FlipQuakeHeader(pcHeader);
 #endif
@@ -586,13 +586,13 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 		
 	}
 	// get a pointer to the texture coordinates
-	const MDL::TexCoord_MDL3* pcTexCoords = (const MDL::TexCoord_MDL3*)szCurrent;
+	BE_NCONST MDL::TexCoord_MDL3* pcTexCoords = (BE_NCONST MDL::TexCoord_MDL3*)szCurrent;
 	szCurrent += sizeof(MDL::TexCoord_MDL3) * pcHeader->synctype;
 
 	// NOTE: for MDLn formats "synctype" corresponds to the number of UV coords
 
 	// get a pointer to the triangles
-	const MDL::Triangle_MDL3* pcTriangles = (const MDL::Triangle_MDL3*)szCurrent;
+	BE_NCONST MDL::Triangle_MDL3* pcTriangles = (BE_NCONST MDL::Triangle_MDL3*)szCurrent;
 	szCurrent += sizeof(MDL::Triangle_MDL3) * pcHeader->num_tris;
 
 #ifdef AI_BUILD_BIG_ENDIAN

@@ -699,7 +699,7 @@ void LWOImporter::LoadLWO2Polygons(unsigned int length)
 	}
 
 	// first find out how many faces and vertices we'll finally need
-	LE_NCONST uint16_t* cursor		= (LE_NCONST uint16_t*)mFileBuffer;
+	uint16_t* cursor		= (uint16_t*)mFileBuffer;
 
 	unsigned int iNumFaces = 0,iNumVertices = 0;
 	CountVertsAndFacesLWO2(iNumVertices,iNumFaces,cursor,end);
@@ -707,7 +707,7 @@ void LWOImporter::LoadLWO2Polygons(unsigned int length)
 	// allocate the output array and copy face indices
 	if (iNumFaces)
 	{
-		cursor = (LE_NCONST uint16_t*)mFileBuffer;
+		cursor = (uint16_t*)mFileBuffer;
 
 		mCurLayer->mFaces.resize(iNumFaces);
 		FaceList::iterator it = mCurLayer->mFaces.begin();
@@ -717,7 +717,7 @@ void LWOImporter::LoadLWO2Polygons(unsigned int length)
 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::CountVertsAndFacesLWO2(unsigned int& verts, unsigned int& faces,
-	LE_NCONST uint16_t*& cursor, const uint16_t* const end, unsigned int max)
+	uint16_t*& cursor, const uint16_t* const end, unsigned int max)
 {
 	while (cursor < end && max--)
 	{
@@ -733,7 +733,7 @@ void LWOImporter::CountVertsAndFacesLWO2(unsigned int& verts, unsigned int& face
 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::CopyFaceIndicesLWO2(FaceList::iterator& it,
-	LE_NCONST uint16_t*& cursor, 
+	uint16_t*& cursor, 
 	const uint16_t* const end)
 {
 	while (cursor < end)
@@ -979,7 +979,7 @@ void LWOImporter::LoadLWO2Clip(unsigned int length)
 	// first - get the index of the clip
 	clip.idx = GetU4();
 
-	LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
+	IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
 	switch (head->type)
 	{
 	case AI_LWO_STIL:
@@ -994,7 +994,8 @@ void LWOImporter::LoadLWO2Clip(unsigned int length)
 			int16_t start  = GetU2();  mFileBuffer+=4;
 
 			std::string s;std::stringstream ss;
-			GetS0(s,head->length);head->length -= (unsigned int)s.length()+1;
+			GetS0(s,head->length);
+      head->length -= (unsigned int)s.length()+1;
 			ss << s;
 			ss << std::setw(digits) << offset + start;
 			GetS0(s,head->length);
@@ -1029,14 +1030,14 @@ void LWOImporter::LoadLWO2File()
 	while (true)
 	{
 		if (mFileBuffer + sizeof(IFF::ChunkHeader) > end)break;
-		LE_NCONST IFF::ChunkHeader* const head = IFF::LoadChunk(mFileBuffer);
+		IFF::ChunkHeader* const head = IFF::LoadChunk(mFileBuffer);
 
 		if (mFileBuffer + head->length > end)
 		{
 			throw new ImportErrorException("LWO2: Chunk length points behind the file");
 			break;
 		}
-		LE_NCONST uint8_t* const next = mFileBuffer+head->length;
+		uint8_t* const next = mFileBuffer+head->length;
 		unsigned int iUnnamed = 0;
 		switch (head->type)
 		{

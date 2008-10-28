@@ -170,17 +170,17 @@ void MD3Importer::InternReadFile(
 
 #ifdef AI_BUILD_BIG_ENDIAN
 
-	ByteSwap::Swap4(&pcHeader->VERSION);
-	ByteSwap::Swap4(&pcHeader->FLAGS);
-	ByteSwap::Swap4(&pcHeader->IDENT);
-	ByteSwap::Swap4(&pcHeader->NUM_FRAMES);
-	ByteSwap::Swap4(&pcHeader->NUM_SKINS);
-	ByteSwap::Swap4(&pcHeader->NUM_SURFACES);
-	ByteSwap::Swap4(&pcHeader->NUM_TAGS);
-	ByteSwap::Swap4(&pcHeader->OFS_EOF);
-	ByteSwap::Swap4(&pcHeader->OFS_FRAMES);
-	ByteSwap::Swap4(&pcHeader->OFS_SURFACES);
-	ByteSwap::Swap4(&pcHeader->OFS_TAGS);
+	AI_SWAP4(pcHeader->VERSION);
+	AI_SWAP4(pcHeader->FLAGS);
+	AI_SWAP4(pcHeader->IDENT);
+	AI_SWAP4(pcHeader->NUM_FRAMES);
+	AI_SWAP4(pcHeader->NUM_SKINS);
+	AI_SWAP4(pcHeader->NUM_SURFACES);
+	AI_SWAP4(pcHeader->NUM_TAGS);
+	AI_SWAP4(pcHeader->OFS_EOF);
+	AI_SWAP4(pcHeader->OFS_FRAMES);
+	AI_SWAP4(pcHeader->OFS_SURFACES);
+	AI_SWAP4(pcHeader->OFS_TAGS);
 
 #endif
 
@@ -188,7 +188,7 @@ void MD3Importer::InternReadFile(
 	this->ValidateHeaderOffsets();
 
 	// now navigate to the list of surfaces
-	const MD3::Surface* pcSurfaces = (const MD3::Surface*)(mBuffer + pcHeader->OFS_SURFACES);
+	BE_NCONST MD3::Surface* pcSurfaces = (BE_NCONST MD3::Surface*)(mBuffer + pcHeader->OFS_SURFACES);
 
 	// allocate output storage
 	pScene->mNumMeshes = pcHeader->NUM_SURFACES;
@@ -210,17 +210,17 @@ void MD3Importer::InternReadFile(
 
 #ifdef AI_BUILD_BIG_ENDIAN
 
-		ByteSwap::Swap4(pcSurfaces->FLAGS);
-		ByteSwap::Swap4(pcSurfaces->IDENT);
-		ByteSwap::Swap4(pcSurfaces->NUM_FRAMES);
-		ByteSwap::Swap4(pcSurfaces->NUM_SHADER);
-		ByteSwap::Swap4(pcSurfaces->NUM_TRIANGLES);
-		ByteSwap::Swap4(pcSurfaces->NUM_VERTICES);
-		ByteSwap::Swap4(pcSurfaces->OFS_END);
-		ByteSwap::Swap4(pcSurfaces->OFS_SHADERS);
-		ByteSwap::Swap4(pcSurfaces->OFS_ST);
-		ByteSwap::Swap4(pcSurfaces->OFS_TRIANGLES);
-		ByteSwap::Swap4(pcSurfaces->OFS_XYZNORMAL);
+		AI_SWAP4(pcSurfaces->FLAGS);
+		AI_SWAP4(pcSurfaces->IDENT);
+		AI_SWAP4(pcSurfaces->NUM_FRAMES);
+		AI_SWAP4(pcSurfaces->NUM_SHADER);
+		AI_SWAP4(pcSurfaces->NUM_TRIANGLES);
+		AI_SWAP4(pcSurfaces->NUM_VERTICES);
+		AI_SWAP4(pcSurfaces->OFS_END);
+		AI_SWAP4(pcSurfaces->OFS_SHADERS);
+		AI_SWAP4(pcSurfaces->OFS_ST);
+		AI_SWAP4(pcSurfaces->OFS_TRIANGLES);
+		AI_SWAP4(pcSurfaces->OFS_XYZNORMAL);
 
 #endif
 
@@ -228,25 +228,25 @@ void MD3Importer::InternReadFile(
 		this->ValidateSurfaceHeaderOffsets(pcSurfaces);
 
 		// navigate to the vertex list of the surface
-		const MD3::Vertex* pcVertices = (const MD3::Vertex*)
+		BE_NCONST MD3::Vertex* pcVertices = (BE_NCONST MD3::Vertex*)
 			(((uint8_t*)pcSurfaces) + pcSurfaces->OFS_XYZNORMAL);
 
 		// navigate to the triangle list of the surface
-		const MD3::Triangle* pcTriangles = (const MD3::Triangle*)
+		BE_NCONST MD3::Triangle* pcTriangles = (BE_NCONST MD3::Triangle*)
 			(((uint8_t*)pcSurfaces) + pcSurfaces->OFS_TRIANGLES);
 
 		// navigate to the texture coordinate list of the surface
-		const MD3::TexCoord* pcUVs = (const MD3::TexCoord*)
+		BE_NCONST MD3::TexCoord* pcUVs = (BE_NCONST MD3::TexCoord*)
 			(((uint8_t*)pcSurfaces) + pcSurfaces->OFS_ST);
 
 		// navigate to the shader list of the surface
-		const MD3::Shader* pcShaders = (const MD3::Shader*)
+		BE_NCONST MD3::Shader* pcShaders = (BE_NCONST MD3::Shader*)
 			(((uint8_t*)pcSurfaces) + pcSurfaces->OFS_SHADERS);
 
 		// if the submesh is empty ignore it
 		if (0 == pcSurfaces->NUM_VERTICES || 0 == pcSurfaces->NUM_TRIANGLES)
 		{
-			pcSurfaces = (const MD3::Surface*)(((uint8_t*)pcSurfaces) + pcSurfaces->OFS_END);
+			pcSurfaces = (BE_NCONST MD3::Surface*)(((uint8_t*)pcSurfaces) + pcSurfaces->OFS_END);
 			pScene->mNumMeshes--;
 			continue;
 		}
@@ -255,19 +255,19 @@ void MD3Importer::InternReadFile(
 
 		for (uint32_t i = 0; i < pcSurfaces->NUM_VERTICES;++i)
 		{
-			ByteSwap::Swap2( & pcVertices[i].NORMAL );
-			ByteSwap::Swap2( & pcVertices[i].X );
-			ByteSwap::Swap2( & pcVertices[i].Y );
-			ByteSwap::Swap2( & pcVertices[i].Z );
+			AI_SWAP2( pcVertices[i].NORMAL );
+			AI_SWAP2( pcVertices[i].X );
+			AI_SWAP2( pcVertices[i].Y );
+			AI_SWAP2( pcVertices[i].Z );
 
-			ByteSwap::Swap4( & pcUVs[i].U );
-			ByteSwap::Swap4( & pcUVs[i].U );
+			AI_SWAP4( pcUVs[i].U );
+			AI_SWAP4( pcUVs[i].U );
 		}
 		for (uint32_t i = 0; i < pcSurfaces->NUM_TRIANGLES;++i)
 		{
-			ByteSwap::Swap4(pcTriangles[i].INDEXES[0]);
-			ByteSwap::Swap4(pcTriangles[i].INDEXES[1]);
-			ByteSwap::Swap4(pcTriangles[i].INDEXES[2]);
+			AI_SWAP4(pcTriangles[i].INDEXES[0]);
+			AI_SWAP4(pcTriangles[i].INDEXES[1]);
+			AI_SWAP4(pcTriangles[i].INDEXES[2]);
 		}
 
 #endif
@@ -424,7 +424,7 @@ void MD3Importer::InternReadFile(
 			}
 		}
 		// go to the next surface
-		pcSurfaces = (const MD3::Surface*)(((unsigned char*)pcSurfaces) + pcSurfaces->OFS_END);
+		pcSurfaces = (BE_NCONST MD3::Surface*)(((unsigned char*)pcSurfaces) + pcSurfaces->OFS_END);
 	}
 
 	if (!pScene->mNumMeshes)

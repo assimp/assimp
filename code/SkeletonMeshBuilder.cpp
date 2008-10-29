@@ -101,6 +101,7 @@ void SkeletonMeshBuilder::CreateGeometry( const aiNode* pNode)
 			aiVector3D front = (up ^ orth).Normalize();
 			aiVector3D side = (front ^ up).Normalize();
 
+	  		unsigned int localVertexStart = mVertices.size();
 			mVertices.push_back( -front * distanceToChild * 0.1f);
 			mVertices.push_back( childpos);
 			mVertices.push_back( -side * distanceToChild * 0.1f);
@@ -114,7 +115,6 @@ void SkeletonMeshBuilder::CreateGeometry( const aiNode* pNode)
 			mVertices.push_back( childpos);
 			mVertices.push_back( -front * distanceToChild * 0.1f);
 
-			unsigned localVertexStart = vertexStartIndex + a * 12;
 			mFaces.push_back( Face( localVertexStart + 0, localVertexStart + 1, localVertexStart + 2));
 			mFaces.push_back( Face( localVertexStart + 3, localVertexStart + 4, localVertexStart + 5));
 			mFaces.push_back( Face( localVertexStart + 6, localVertexStart + 7, localVertexStart + 8));

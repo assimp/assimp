@@ -94,6 +94,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // *******************************************************************
 // internal headers that are nearly always required
 // *******************************************************************
+#include "BaseImporter.h"
 #include "MaterialSystem.h"
 #include "StringComparison.h"
 #include "StreamReader.h"

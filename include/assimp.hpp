@@ -65,15 +65,11 @@ namespace Assimp
 	class SharedPostProcessInfo;
 }
 
-// internal ASSIMP headers - for plugin development
-#include "./../code/BaseImporter.h"
-#include "./../code/BaseProcess.h"
-
 #define AI_PROPERTY_WAS_NOT_EXISTING 0xffffffff
 
 struct aiScene;
 struct aiFileIO;
-extern "C" ASSIMP_API const aiScene* aiImportFileEx( const char*, unsigned int, aiFileIO*);
+extern "C" const aiScene* aiImportFileEx( const char*, unsigned int, aiFileIO*);
 
 namespace Assimp
 {

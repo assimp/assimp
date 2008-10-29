@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_IRRMESHLOADER_H_INCLUDED
 
 #include "./irrXML/irrXMLWrapper.h"
+#include "BaseImporter.h"
 
 namespace Assimp	{
 

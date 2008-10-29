@@ -80,15 +80,6 @@ bool MDRImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 // Validate the header of the given MDR file
 void MDRImporter::ValidateHeader()
 {
-	AI_SWAP4(pcLOD->version);
-	AI_SWAP4(pcLOD->numBones);
-	AI_SWAP4(pcLOD->numTags);
-	AI_SWAP4(pcLOD->numFrames);
-	AI_SWAP4(pcLOD->ofsFrames);
-	AI_SWAP4(pcLOD->ofsTags);
-	AI_SWAP4(pcLOD->numLODs);
-	AI_SWAP4(pcLOD->ofsLODs);
-
 	if (pcHeader->ident != AI_MDR_MAGIC_NUMBER_BE &&
 		pcHeader->ident != AI_MDR_MAGIC_NUMBER_LE)
 	{

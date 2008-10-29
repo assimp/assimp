@@ -47,6 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	error This header requires C++ to be used.
 #endif
 
+
+#include <map>
 // public ASSIMP headers
 #include "aiTypes.h"
 #include "aiConfig.h"

@@ -1016,6 +1016,13 @@ int CMaterialManager::CreateMaterial(
 		++iCurrent;
 	}
 
+	if( pcSource->HasBones())
+	{
+		sMacro[iCurrent].Name = "AV_SKINNING";
+		sMacro[iCurrent].Definition = "1";
+		++iCurrent;
+	}
+
 	// If a cubemap is active, we'll need to lookup it for calculating
 	// a physically correct reflection
 	if (CBackgroundPainter::TEXTURE_CUBE == CBackgroundPainter::Instance().GetMode())
@@ -1059,11 +1066,11 @@ int CMaterialManager::CreateMaterial(
 		}
 		return 0;
 	} else
-  {
-    // use Fixed Function effect when working with shaderless cards
-    if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
-      pcMesh->piEffect->SetTechnique( "MaterialFX_FF");
-  }
+	{
+		// use Fixed Function effect when working with shaderless cards
+		if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
+			pcMesh->piEffect->SetTechnique( "MaterialFX_FF");
+	}
 
 	if( piBuffer) piBuffer->Release();
 
@@ -1225,11 +1232,27 @@ int CMaterialManager::SetupMaterial (
 		}
 	}
 
+	// setup bones if neccessary
+//	if( pcMesh->HasBones())
+	{
+		static float matrices[4*3*60];
+		float* tempmat = matrices;
+		for( unsigned int a = 0; a < 60; a++)
+		{
+			// HACK: (thom) set identity matrices for all bones for the moment so that you see something
+			*tempmat++ = 1.0f; *tempmat++ = 0.0f; *tempmat++ = 0.0f; *tempmat++ = 0.0f; 
+			*tempmat++ = 0.0f; *tempmat++ = 1.0f; *tempmat++ = 0.0f; *tempmat++ = 0.0f; 
+			*tempmat++ = 0.0f; *tempmat++ = 0.0f; *tempmat++ = 1.0f; *tempmat++ = 0.0f; 
+		}
+		pcMesh->piEffect->SetVectorArray( "gBoneMatrix", (const D3DXVECTOR4*) matrices, 3*60);
+	}
+
+
 	// setup the correct shader technique to be used for drawing
-  if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
-  {
-    g_piDefaultEffect->SetTechnique( "MaterialFXSpecular_FF");
-  } else
+	if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
+	{
+		g_piDefaultEffect->SetTechnique( "MaterialFXSpecular_FF");
+	} else
 	if (g_sCaps.PixelShaderVersion < D3DPS_VERSION(3,0) || g_sOptions.bLowQuality)
 	{
 		if (g_sOptions.b3Lights)

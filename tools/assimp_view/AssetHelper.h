@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AV_ASSET_HELPER_H_INCLUDED)
 #define AV_ASSET_HELPER_H_INCLUDED
 
+class SceneAnimator;
 
 //-------------------------------------------------------------------------------
 /**	\brief Class to wrap ASSIMP's asset output structures
@@ -66,7 +67,11 @@ class AssetHelper
 		// default constructor
 		AssetHelper()
 			: iNormalSet(ORIGINAL)
-		{}
+		{
+			mAnimator = NULL;
+			apcMeshes = NULL;
+			pcScene = NULL;
+		}
 
 		//---------------------------------------------------------------
 		// default vertex data structure
@@ -74,7 +79,7 @@ class AssetHelper
 		// required by the shader they will be committed to the GPU)
 		//---------------------------------------------------------------
 		struct Vertex
-			{
+		{
 			aiVector3D vPosition;
 			aiVector3D vNormal;
 
@@ -82,30 +87,43 @@ class AssetHelper
 			aiVector3D vTangent;
 			aiVector3D vBitangent;
 			aiVector2D vTextureUV;
+			unsigned char mBoneIndices[4];
+			unsigned char mBoneWeights[4]; // last Weight not used, calculated inside the vertex shader
 
-			// retrieves the FVF code of the vertex type
-			static DWORD GetFVF()
+			/** Returns the vertex declaration elements to create a declaration from. */
+			static D3DVERTEXELEMENT9* GetDeclarationElements() 
+			{
+				static D3DVERTEXELEMENT9 decl[] =
 				{
-				return D3DFVF_DIFFUSE | D3DFVF_XYZ | D3DFVF_NORMAL |
-					D3DFVF_TEX1 | D3DFVF_TEX2 | D3DFVF_TEX3 |
-					D3DFVF_TEXCOORDSIZE3(0) | D3DFVF_TEXCOORDSIZE3(1);
-				}
-			};
+					{ 0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+					{ 0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL, 0 },
+					{ 0, 24, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0 },
+					{ 0, 28, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TANGENT, 0 },
+					{ 0, 40, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_BINORMAL, 0 },
+					{ 0, 52, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+					{ 0, 60, D3DDECLTYPE_UBYTE4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_BLENDINDICES, 0 },
+					{ 0, 64, D3DDECLTYPE_UBYTE4N, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_BLENDWEIGHT, 0 },
+					D3DDECL_END()
+				};
+
+				return decl;
+			}
+		};
 
 		//---------------------------------------------------------------
 		// FVF vertex structure used for normals
 		//---------------------------------------------------------------
 		struct LineVertex
-			{
+		{
 			aiVector3D vPosition;
 			DWORD dColorDiffuse;
 
 			// retrieves the FVF code of the vertex type
 			static DWORD GetFVF()
-				{
+			{
 				return D3DFVF_DIFFUSE | D3DFVF_XYZ;
-				}
-			};
+			}
+		};
 
 		//---------------------------------------------------------------
 		// Helper class to store GPU related resources created for
@@ -190,6 +208,9 @@ class AssetHelper
 
 		// Scene wrapper instance
 		aiScene* pcScene;
+
+		// Animation player to animate the scene if necessary
+		SceneAnimator* mAnimator;
 
 		// Specifies the normal set to be used
 		unsigned int iNormalSet;

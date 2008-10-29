@@ -28,6 +28,7 @@
 #include <windows.h>
 
 // C RunTime-Headerdateien
+#include <assert.h>
 #include <stdlib.h>
 #include <malloc.h>
 #include <memory.h>

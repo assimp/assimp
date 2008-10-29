@@ -73,7 +73,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-namespace AssimpView {
+namespace AssimpView 
+{
 
 #include "AssetHelper.h"
 #include "Camera.h"
@@ -85,6 +86,15 @@ namespace AssimpView {
 #include "Display.h"
 #include "MeshRenderer.h"
 #include "MaterialManager.h"
+
+} // end of namespace AssimpView - for a while
+
+// outside of namespace, to help Intellisense and solve boost::metatype_stuff_miracle
+#include "AnimEvaluator.h"
+#include "SceneAnimator.h"
+
+namespace AssimpView 
+{
 
 //-------------------------------------------------------------------------------
 // Function prototypes
@@ -196,6 +206,7 @@ enum EClickPos
 	extern HWND g_hDlg							/*= NULL*/;
 	extern IDirect3D9* g_piD3D					/*= NULL*/;
 	extern IDirect3DDevice9* g_piDevice			/*= NULL*/;
+	extern IDirect3DVertexDeclaration9* gDefaultVertexDecl /*= NULL*/;
 	extern double g_fFPS						/*= 0.0f*/;
 	extern char g_szFileName[MAX_PATH];
 	extern ID3DXEffect* g_piDefaultEffect		/*= NULL*/;
@@ -241,7 +252,7 @@ enum EClickPos
 	extern RenderOptions g_sOptions;
 	extern Camera g_sCamera;
 	extern AssetHelper *g_pcAsset				/*= NULL*/;
-
+	
 
 	//
 	// Contains the mask image for the HUD 
@@ -256,8 +267,5 @@ enum EClickPos
 	extern float g_fACMR /*= 3.0f*/;
 	extern IDirect3DQuery9* g_piQuery;
 	}
-
-// outside of namespace, to help Intellisense and solve boost::metatype_stuff_miracle
-#include "AnimEvaluator.h"
 
 #endif // !! AV_MAIN_H_INCLUDED

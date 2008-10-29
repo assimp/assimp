@@ -48,6 +48,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace AssimpView
 {
 
+/** Calculates transformations for a given timestamp from a set of animation tracks. Not directly useful,
+ * better use the AnimPlayer class.
+ */
 class AnimEvaluator
 {
 public:

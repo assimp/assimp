@@ -776,6 +776,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\tools\assimp_view\SceneAnimator.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tools\assimp_view\SceneAnimator.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tools\assimp_view\Shaders.cpp"
 				>
 			</File>

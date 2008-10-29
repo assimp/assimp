@@ -259,11 +259,20 @@ std::string g_szDefaultShader = std::string(
 	// position of the camera in worldspace\n"
 	"float3 vCameraPos : CAMERAPOSITION;\n"
 
+	// Bone matrices
+	"#ifdef AV_SKINNING \n"
+	"float4x3 gBoneMatrix[60]; \n"
+	"#endif // AV_SKINNING \n"
+
 	// Vertex shader input structure
 	"struct VS_INPUT\n"
 	"{\n"
 		"float3 Position : POSITION;\n"
 		"float3 Normal : NORMAL;\n"
+		"#ifdef AV_SKINNING \n"
+			"float4 BlendIndices : BLENDINDICES;\n"
+			"float4 BlendWeights : BLENDWEIGHT;\n"
+		"#endif // AV_SKINNING \n"
 	"};\n"
 
 	// Vertex shader output structure for pixel shader usage
@@ -275,8 +284,8 @@ std::string g_szDefaultShader = std::string(
 	"};\n"
 
 	// Vertex shader output structure for fixed function
-  "struct VS_OUTPUT_FF\n"
-  "{\n"
+	"struct VS_OUTPUT_FF\n"
+	"{\n"
 		"float4 Position : POSITION;\n"
 		"float4 Color : COLOR;\n"
 	"};\n"
@@ -286,9 +295,20 @@ std::string g_szDefaultShader = std::string(
 	"{\n"
 		"VS_OUTPUT Out;\n"
 
+		"#ifdef AV_SKINNING \n"
+		"float4 weights = IN.BlendWeights; \n"
+		"weights.w = 1.0f - dot( weights.xyz, float3( 1, 1, 1)); \n"
+		"float3 objPos = mul( IN.Position, gBoneMatrix[IN.BlendIndices.x]) * weights.x; \n"
+		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.y]) * weights.y; \n"
+		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.z]) * weights.z; \n"
+		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.w]) * weights.w; \n"
+		"#else \n"
+		"float3 objPos = IN.Position; \n"
+		"#endif // AV_SKINNING \n"
+
 		// Multiply with the WorldViewProjection matrix
-		"Out.Position = mul(float4(IN.Position,1.0f),WorldViewProjection);\n"
-		"float3 WorldPos = mul(float4(IN.Position,1.0f),World);\n"
+		"Out.Position = mul( float4( objPos, 1.0f), WorldViewProjection);\n"
+		"float3 WorldPos = mul( float4( objPos, 1.0f), World);\n"
 		"Out.ViewDir = vCameraPos - WorldPos;\n"
 		"Out.Normal = mul(IN.Normal,WorldInverseTranspose);\n"
 
@@ -300,15 +320,27 @@ std::string g_szDefaultShader = std::string(
 	"{\n"
 		"VS_OUTPUT_FF Out;\n"
 
-		// Multiply with the WorldViewProjection matrix
-		"Out.Position = mul(float4(IN.Position,1.0f),WorldViewProjection);\n"
-    "float3 worldNormal = normalize( mul( IN.Normal, (float3x3) WorldInverseTranspose)); \n"
+		"#ifdef AV_SKINNING \n"
+		"float4 weights = IN.BlendWeights; \n"
+		"weights.w = 1.0f - dot( weights.xyz, float3( 1, 1, 1)); \n"
+		"float3 objPos = mul( IN.Position, gBoneMatrix[IN.BlendIndices.x]) * weights.x; \n"
+		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.y]) * weights.y; \n"
+		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.z]) * weights.z; \n"
+		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.w]) * weights.w; \n"
+		"#else \n"
+		"float3 objPos = IN.Position; \n"
+		"#endif // AV_SKINNING \n"
 
-    // per-vertex lighting. We simply assume light colors of unused lights to be black
-    "Out.Color = float4( 0.2f, 0.2f, 0.2f, 1.0f); \n"
-    "for( int a = 0; a < 2; a++)\n"
-    "  Out.Color.rgb += saturate( dot( afLightDir[a], worldNormal)) * afLightColor[a].rgb; \n"
-		"return Out;\n"
+		// Multiply with the WorldViewProjection matrix
+		"Out.Position = mul( float4( objPos, 1.0f), WorldViewProjection);\n"
+
+		"float3 worldNormal = normalize( mul( IN.Normal, (float3x3) WorldInverseTranspose)); \n"
+
+		// per-vertex lighting. We simply assume light colors of unused lights to be black
+		"Out.Color = float4( 0.2f, 0.2f, 0.2f, 1.0f); \n"
+		"for( int a = 0; a < 2; a++)\n"
+		"  Out.Color.rgb += saturate( dot( afLightDir[a], worldNormal)) * afLightColor[a].rgb; \n"
+			"return Out;\n"
 	"}\n"
 
 	// Pixel shader for one light
@@ -434,17 +466,17 @@ std::string g_szDefaultShader = std::string(
 		"}\n"
 	"};\n"
 
-  // Technique for the default effect using the fixed function pixel pipeline
+	// Technique for the default effect using the fixed function pixel pipeline
 	"technique DefaultFXSpecular_FF\n"
-  "{\n"
+	"{\n"
 		"pass p0\n"
-  	"{\n"
+		"{\n"
 			"CullMode=none;\n"
 			"VertexShader = compile vs_2_0 DefaultVShader_FF();\n"
-      "ColorOp[0] = SelectArg1;\n"
-      "ColorArg0[0] = Diffuse;\n"
-      "AlphaOp[0] = SelectArg1;\n"
-      "AlphaArg0[0] = Diffuse;\n"
+			"ColorOp[0] = SelectArg1;\n"
+			"ColorArg0[0] = Diffuse;\n"
+			"AlphaOp[0] = SelectArg1;\n"
+			"AlphaArg0[0] = Diffuse;\n"
 		"}\n"
 	"};\n"
   );
@@ -485,6 +517,11 @@ std::string g_szMaterialShader = std::string(
 
 	// position of the camera in worldspace
 	"float3 vCameraPos : CAMERAPOSITION;\n"
+
+	// Bone matrices
+	"#ifdef AV_SKINNING \n"
+	"float4x3 gBoneMatrix[60]; \n"
+	"#endif // AV_SKINNING \n"
 
 	"#ifdef AV_DIFFUSE_TEXTURE\n"
 		"texture DIFFUSE_TEXTURE;\n"
@@ -574,6 +611,10 @@ std::string g_szMaterialShader = std::string(
 		"float3 Tangent   : TEXCOORD0;\n"
 		"float3 Bitangent : TEXCOORD1;\n"
 		"float2 TexCoord0 : TEXCOORD2;\n"
+		"#ifdef AV_SKINNING \n"
+			"float4 BlendIndices : BLENDINDICES;\n"
+			"float4 BlendWeights : BLENDWEIGHT;\n"
+		"#endif // AV_SKINNING \n"
 	"};\n"
 
 	// Vertex shader output structure for pixel shader usage
@@ -598,8 +639,8 @@ std::string g_szMaterialShader = std::string(
 	"struct VS_OUTPUT_FF\n"
 	"{\n"
 		"float4 Position : POSITION;\n"
-    "float4 DiffuseColor : COLOR0;\n"
-    "float4 SpecularColor : COLOR1;\n"
+		"float4 DiffuseColor : COLOR0;\n"
+		"float4 SpecularColor : COLOR1;\n"
 		"float2 TexCoord0 : TEXCOORD0;\n"
 	"};\n"
 
@@ -650,9 +691,20 @@ std::string g_szMaterialShader = std::string(
 	"{\n"
 		"VS_OUTPUT Out;\n"
 
-		// Multiply with the WorldViewProjection matrix\n"
-		"Out.Position = mul(float4(IN.Position,1.0f),WorldViewProjection);\n"
-		"float3 WorldPos = mul(float4(IN.Position,1.0f),World);\n"
+		"#ifdef AV_SKINNING \n"
+		"float4 weights = IN.BlendWeights; \n"
+		"weights.w = 1.0f - dot( weights.xyz, float3( 1, 1, 1)); \n"
+		"float3 objPos = mul( IN.Position, gBoneMatrix[IN.BlendIndices.x]) * weights.x; \n"
+		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.y]) * weights.y; \n"
+		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.z]) * weights.z; \n"
+		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.w]) * weights.w; \n"
+		"#else \n"
+		"float3 objPos = IN.Position; \n"
+		"#endif // AV_SKINNING \n"
+
+		// Multiply with the WorldViewProjection matrix
+		"Out.Position = mul( float4( objPos, 1.0f), WorldViewProjection);\n"
+		"float3 WorldPos = mul( float4( objPos, 1.0f), World);\n"
 		"Out.TexCoord0 = IN.TexCoord0;\n"
 
 		"#ifndef AV_NORMAL_TEXTURE\n"
@@ -674,9 +726,20 @@ std::string g_szMaterialShader = std::string(
 	"{\n"
 		"VS_OUTPUT Out;\n"
 
-		// Multiply with the WorldViewProjection matrix\n"
-		"Out.Position = mul(float4(IN.Position,1.0f),WorldViewProjection);\n"
-		"float3 WorldPos = mul(float4(IN.Position,1.0f),World);\n"
+		"#ifdef AV_SKINNING \n"
+		"float4 weights = IN.BlendWeights; \n"
+		"weights.w = 1.0f - dot( weights.xyz, float3( 1, 1, 1)); \n"
+		"float3 objPos = mul( IN.Position, gBoneMatrix[IN.BlendIndices.x]) * weights.x; \n"
+		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.y]) * weights.y; \n"
+		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.z]) * weights.z; \n"
+		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.w]) * weights.w; \n"
+		"#else \n"
+		"float3 objPos = IN.Position; \n"
+		"#endif // AV_SKINNING \n"
+
+		// Multiply with the WorldViewProjection matrix
+		"Out.Position = mul( float4( objPos, 1.0f), WorldViewProjection);\n"
+		"float3 WorldPos = mul( float4( objPos, 1.0f), World);\n"
 		"Out.TexCoord0 = IN.TexCoord0;\n"
 
 		"#ifndef AV_NORMAL_TEXTURE\n"
@@ -699,32 +762,43 @@ std::string g_szMaterialShader = std::string(
 	"{\n"
 		"VS_OUTPUT_FF Out;\n"
 
+		"#ifdef AV_SKINNING \n"
+		"float4 weights = IN.BlendWeights; \n"
+		"weights.w = 1.0f - dot( weights.xyz, float3( 1, 1, 1)); \n"
+		"float3 objPos = mul( IN.Position, gBoneMatrix[IN.BlendIndices.x]) * weights.x; \n"
+		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.y]) * weights.y; \n"
+		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.z]) * weights.z; \n"
+		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.w]) * weights.w; \n"
+		"#else \n"
+		"float3 objPos = IN.Position; \n"
+		"#endif // AV_SKINNING \n"
+
 		// Multiply with the WorldViewProjection matrix
-		"Out.Position = mul( float4( IN.Position, 1.0f), WorldViewProjection);\n"
-		"float3 worldPos = mul( float4( IN.Position, 1.0f), World);\n"
-    "float3 worldNormal = normalize( mul( IN.Normal, (float3x3) WorldInverseTranspose)); \n"
+		"Out.Position = mul( float4( objPos, 1.0f), WorldViewProjection);\n"
+		"float3 worldPos = mul( float4( objPos, 1.0f), World);\n"
+		"float3 worldNormal = normalize( mul( IN.Normal, (float3x3) WorldInverseTranspose)); \n"
 		"Out.TexCoord0 = IN.TexCoord0;\n"
 
-    // calculate per-vertex diffuse lighting including ambient part
-    "float4 diffuseColor = float4( 0.0f, 0.0f, 0.0f, 1.0f); \n"
-    "for( int a = 0; a < 2; a++) \n"
-    "  diffuseColor.rgb += saturate( dot( afLightDir[a], worldNormal)) * afLightColor[a].rgb; \n"
-    // factor in material properties and a bit of ambient lighting
-    "Out.DiffuseColor = diffuseColor * DIFFUSE_COLOR + float4( 0.2f, 0.2f, 0.2f, 1.0f) * AMBIENT_COLOR; ; \n"
+		// calculate per-vertex diffuse lighting including ambient part
+		"float4 diffuseColor = float4( 0.0f, 0.0f, 0.0f, 1.0f); \n"
+		"for( int a = 0; a < 2; a++) \n"
+		"  diffuseColor.rgb += saturate( dot( afLightDir[a], worldNormal)) * afLightColor[a].rgb; \n"
+		// factor in material properties and a bit of ambient lighting
+		"Out.DiffuseColor = diffuseColor * DIFFUSE_COLOR + float4( 0.2f, 0.2f, 0.2f, 1.0f) * AMBIENT_COLOR; ; \n"
 
-    // and specular including emissive part
-    "float4 specularColor = float4( 0.0f, 0.0f, 0.0f, 1.0f); \n"
-  	"#ifdef AV_SPECULAR_COMPONENT\n"
-    "float3 viewDir = normalize( worldPos - vCameraPos); \n"
-    "for( int a = 0; a < 2; a++) \n"
-    "{ \n"
-    "  float3 reflDir = reflect( afLightDir[a], worldNormal); \n"
-    "  float specIntensity = pow( saturate( dot( reflDir, viewDir)), SPECULARITY) * SPECULAR_STRENGTH; \n"
-    "  specularColor.rgb += afLightColor[a] * specIntensity; \n"
-    "} \n"
-    "#endif // AV_SPECULAR_COMPONENT\n"
-    // factor in material properties and the emissive part
-    "Out.SpecularColor = specularColor * SPECULAR_COLOR + EMISSIVE_COLOR; \n"
+		// and specular including emissive part
+		"float4 specularColor = float4( 0.0f, 0.0f, 0.0f, 1.0f); \n"
+		"#ifdef AV_SPECULAR_COMPONENT\n"
+		"float3 viewDir = normalize( worldPos - vCameraPos); \n"
+		"for( int a = 0; a < 2; a++) \n"
+		"{ \n"
+		"  float3 reflDir = reflect( afLightDir[a], worldNormal); \n"
+		"  float specIntensity = pow( saturate( dot( reflDir, viewDir)), SPECULARITY) * SPECULAR_STRENGTH; \n"
+		"  specularColor.rgb += afLightColor[a] * specIntensity; \n"
+		"} \n"
+		"#endif // AV_SPECULAR_COMPONENT\n"
+		// factor in material properties and the emissive part
+		"Out.SpecularColor = specularColor * SPECULAR_COLOR + EMISSIVE_COLOR; \n"
 
 		"return Out;\n"
 	"}\n"
@@ -1157,14 +1231,14 @@ std::string g_szMaterialShader = std::string(
 		"pass p0\n"
 		"{\n"
 			"CullMode=none;\n"
-      "SpecularEnable = true; \n"
+			"SpecularEnable = true; \n"
 			"VertexShader = compile vs_2_0 MaterialVShader_FF();\n"
-      "ColorOp[0] = Modulate;\n"
-      "ColorArg0[0] = Texture;\n"
-      "ColorArg1[0] = Diffuse;\n"
-      "AlphaOp[0] = Modulate;\n"
-      "AlphaArg0[0] = Texture;\n"
-      "AlphaArg1[0] = Diffuse;\n"
+			"ColorOp[0] = Modulate;\n"
+			"ColorArg0[0] = Texture;\n"
+			"ColorArg1[0] = Diffuse;\n"
+			"AlphaOp[0] = Modulate;\n"
+			"AlphaArg0[0] = Texture;\n"
+			"AlphaArg1[0] = Diffuse;\n"
 		"}\n"
 	"};\n"
 	);

@@ -55,6 +55,7 @@ HINSTANCE g_hInstance				= NULL;
 HWND g_hDlg							= NULL;
 IDirect3D9* g_piD3D					= NULL;
 IDirect3DDevice9* g_piDevice		= NULL;
+IDirect3DVertexDeclaration9* gDefaultVertexDecl = NULL;
 double g_fFPS						= 0.0f;
 char g_szFileName[MAX_PATH];
 ID3DXEffect* g_piDefaultEffect		= NULL;
@@ -222,6 +223,9 @@ int LoadAsset(void)
 		g_pcAsset->apcMeshes[i] = new AssetHelper::MeshHelper();
 	}
 
+	// create animator
+	g_pcAsset->mAnimator = new SceneAnimator( g_pcAsset->pcScene);
+
 	// build a new caption string for the viewer
 	char szOut[MAX_PATH + 10];
 	sprintf(szOut,AI_VIEW_CAPTION_BASE " [%s]",g_szFileName);
@@ -272,6 +276,7 @@ int DeleteAsset(void)
 	}
 	aiReleaseImport(g_pcAsset->pcScene);
 	delete[] g_pcAsset->apcMeshes;
+	delete g_pcAsset->mAnimator;
 	delete g_pcAsset;
 	g_pcAsset = NULL;
 
@@ -430,23 +435,25 @@ int CreateAssetData()
 
 	for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
 	{
+		const aiMesh* mesh = g_pcAsset->pcScene->mMeshes[i];
+
 		// create the material for the mesh
 		if (!g_pcAsset->apcMeshes[i]->piEffect)
 		{
 			CMaterialManager::Instance().CreateMaterial(
-				g_pcAsset->apcMeshes[i],g_pcAsset->pcScene->mMeshes[i]);
+				g_pcAsset->apcMeshes[i],mesh);
 		}
 
-		if (g_pcAsset->pcScene->mMeshes[i]->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
+		if (mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
 		{
 			continue;
 		}
 
 		// create vertex buffer
 		if(FAILED( g_piDevice->CreateVertexBuffer(sizeof(AssetHelper::Vertex) *
-			g_pcAsset->pcScene->mMeshes[i]->mNumVertices,
+			mesh->mNumVertices,
 			D3DUSAGE_WRITEONLY,
-			AssetHelper::Vertex::GetFVF(),
+			0,
 			D3DPOOL_DEFAULT, &g_pcAsset->apcMeshes[i]->piVB,NULL)))
 		{
 			MessageBox(g_hDlg,"Failed to create vertex buffer",
@@ -459,11 +466,11 @@ int CreateAssetData()
 			dwUsage |= D3DUSAGE_DYNAMIC;
 
 		// check whether we can use 16 bit indices
-		if (g_pcAsset->pcScene->mMeshes[i]->mNumFaces * 3 >= 65536)
+		if (mesh->mNumFaces * 3 >= 65536)
 		{
 			// create 32 bit index buffer
 			if(FAILED( g_piDevice->CreateIndexBuffer( 4 *
-				g_pcAsset->pcScene->mMeshes[i]->mNumFaces * 3,
+				mesh->mNumFaces * 3,
 				D3DUSAGE_WRITEONLY | dwUsage,
 				D3DFMT_INDEX32,
 				D3DPOOL_DEFAULT, 
@@ -478,11 +485,11 @@ int CreateAssetData()
 			// now fill the index buffer
 			unsigned int* pbData;
 			g_pcAsset->apcMeshes[i]->piIB->Lock(0,0,(void**)&pbData,0);
-			for (unsigned int x = 0; x < g_pcAsset->pcScene->mMeshes[i]->mNumFaces;++x)
+			for (unsigned int x = 0; x < mesh->mNumFaces;++x)
 			{
 				for (unsigned int a = 0; a < 3;++a)
 				{
-					*pbData++ = g_pcAsset->pcScene->mMeshes[i]->mFaces[x].mIndices[a];
+					*pbData++ = mesh->mFaces[x].mIndices[a];
 				}
 			}
 		}
@@ -490,7 +497,7 @@ int CreateAssetData()
 		{
 			// create 16 bit index buffer
 			if(FAILED( g_piDevice->CreateIndexBuffer( 2 *
-				g_pcAsset->pcScene->mMeshes[i]->mNumFaces * 3,
+				mesh->mNumFaces * 3,
 				D3DUSAGE_WRITEONLY | dwUsage,
 				D3DFMT_INDEX16,
 				D3DPOOL_DEFAULT,
@@ -505,56 +512,86 @@ int CreateAssetData()
 			// now fill the index buffer
 			uint16_t* pbData;
 			g_pcAsset->apcMeshes[i]->piIB->Lock(0,0,(void**)&pbData,0);
-			for (unsigned int x = 0; x < g_pcAsset->pcScene->mMeshes[i]->mNumFaces;++x)
+			for (unsigned int x = 0; x < mesh->mNumFaces;++x)
 			{
 				for (unsigned int a = 0; a < 3;++a)
 				{
-					*pbData++ = (uint16_t)g_pcAsset->pcScene->mMeshes[i]->mFaces[x].mIndices[a];
+					*pbData++ = (uint16_t)mesh->mFaces[x].mIndices[a];
 				}
 			}
 		}
 		g_pcAsset->apcMeshes[i]->piIB->Unlock();
 
+		// collect weights on all vertices. Quick and careless
+		std::vector<std::vector<aiVertexWeight> > weightsPerVertex( mesh->mNumVertices);
+		for( unsigned int a = 0; a < mesh->mNumBones; a++)
+		{
+			const aiBone* bone = mesh->mBones[a];
+			for( unsigned int b = 0; b < bone->mNumWeights; b++)
+				weightsPerVertex[bone->mWeights[b].mVertexId].push_back( aiVertexWeight( a, bone->mWeights[b].mWeight));
+		}
+
 		// now fill the vertex buffer
 		AssetHelper::Vertex* pbData2;
 		g_pcAsset->apcMeshes[i]->piVB->Lock(0,0,(void**)&pbData2,0);
-		for (unsigned int x = 0; x < g_pcAsset->pcScene->mMeshes[i]->mNumVertices;++x)
+		for (unsigned int x = 0; x < mesh->mNumVertices;++x)
 		{
-			pbData2->vPosition = g_pcAsset->pcScene->mMeshes[i]->mVertices[x];
+			pbData2->vPosition = mesh->mVertices[x];
 
-			if (NULL == g_pcAsset->pcScene->mMeshes[i]->mNormals)
+			if (NULL == mesh->mNormals)
 				pbData2->vNormal = aiVector3D(0.0f,0.0f,0.0f);
-			else pbData2->vNormal = g_pcAsset->pcScene->mMeshes[i]->mNormals[x];
+			else pbData2->vNormal = mesh->mNormals[x];
 
-			if (NULL == g_pcAsset->pcScene->mMeshes[i]->mTangents)
+			if (NULL == mesh->mTangents)
 			{
 				pbData2->vTangent = aiVector3D(0.0f,0.0f,0.0f);
 				pbData2->vBitangent = aiVector3D(0.0f,0.0f,0.0f);
 			}
 			else 
 			{
-				pbData2->vTangent = g_pcAsset->pcScene->mMeshes[i]->mTangents[x];
-				pbData2->vBitangent = g_pcAsset->pcScene->mMeshes[i]->mBitangents[x];
+				pbData2->vTangent = mesh->mTangents[x];
+				pbData2->vBitangent = mesh->mBitangents[x];
 			}
 
-			if (g_pcAsset->pcScene->mMeshes[i]->HasVertexColors( 0))
+			if (mesh->HasVertexColors( 0))
 			{
 				pbData2->dColorDiffuse = D3DCOLOR_ARGB(
-					((unsigned char)std::max( std::min( g_pcAsset->pcScene->mMeshes[i]->mColors[0][x].a * 255.0f, 255.0f),0.0f)),
-					((unsigned char)std::max( std::min( g_pcAsset->pcScene->mMeshes[i]->mColors[0][x].r * 255.0f, 255.0f),0.0f)),
-					((unsigned char)std::max( std::min( g_pcAsset->pcScene->mMeshes[i]->mColors[0][x].g * 255.0f, 255.0f),0.0f)),
-					((unsigned char)std::max( std::min( g_pcAsset->pcScene->mMeshes[i]->mColors[0][x].b * 255.0f, 255.0f),0.0f)));
+					((unsigned char)std::max( std::min( mesh->mColors[0][x].a * 255.0f, 255.0f),0.0f)),
+					((unsigned char)std::max( std::min( mesh->mColors[0][x].r * 255.0f, 255.0f),0.0f)),
+					((unsigned char)std::max( std::min( mesh->mColors[0][x].g * 255.0f, 255.0f),0.0f)),
+					((unsigned char)std::max( std::min( mesh->mColors[0][x].b * 255.0f, 255.0f),0.0f)));
 			}
 			else pbData2->dColorDiffuse = D3DCOLOR_ARGB(0xFF,0,0,0);
 
 			// ignore a third texture coordinate component
-			if (g_pcAsset->pcScene->mMeshes[i]->HasTextureCoords( 0))
+			if (mesh->HasTextureCoords( 0))
 			{
 				pbData2->vTextureUV = aiVector2D(
-					g_pcAsset->pcScene->mMeshes[i]->mTextureCoords[0][x].x,
-					g_pcAsset->pcScene->mMeshes[i]->mTextureCoords[0][x].y);
+					mesh->mTextureCoords[0][x].x,
+					mesh->mTextureCoords[0][x].y);
 			}
 			else pbData2->vTextureUV = aiVector2D(0.0f,0.0f);
+
+			// Bone indices and weights
+			if( mesh->HasBones())
+			{
+				unsigned char boneIndices[4] = { 0, 0, 0, 0 };
+				unsigned char boneWeights[4] = { 0, 0, 0, 0 };
+				assert( weightsPerVertex[x].size() <= 4);
+				for( unsigned int a = 0; a < weightsPerVertex[x].size(); a++)
+				{
+					boneIndices[a] = weightsPerVertex[x][a].mVertexId;
+					boneWeights[a] = (unsigned char) (weightsPerVertex[x][a].mWeight * 255.0f);
+				}
+
+				memcpy( pbData2->mBoneIndices, boneIndices, sizeof( boneIndices));
+				memcpy( pbData2->mBoneWeights, boneWeights, sizeof( boneWeights));
+			} else
+			{
+				memset( pbData2->mBoneIndices, 0, sizeof( pbData2->mBoneIndices));
+				memset( pbData2->mBoneWeights, 0, sizeof( pbData2->mBoneWeights));
+			}
+
 			++pbData2;
 		}
 		g_pcAsset->apcMeshes[i]->piVB->Unlock();
@@ -562,7 +599,7 @@ int CreateAssetData()
 		// now generate the second vertex buffer, holding all normals
 		if (!g_pcAsset->apcMeshes[i]->piVBNormals)
 		{
-			GenerateNormalsAsLineList(g_pcAsset->apcMeshes[i],g_pcAsset->pcScene->mMeshes[i]);
+			GenerateNormalsAsLineList(g_pcAsset->apcMeshes[i],mesh);
 		}
 	}
 	return 1;
@@ -743,6 +780,12 @@ int ShutdownDevice(void)
 		g_pcTexture = NULL;
 	}
 
+	if( NULL != gDefaultVertexDecl)
+	{
+		gDefaultVertexDecl->Release();
+		gDefaultVertexDecl = NULL;
+	}
+
 	// delete the main D3D device object
 	if (NULL != g_piDevice)
 	{
@@ -914,13 +957,13 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 		sParams.MultiSampleType = sMSOut;
 	}
 
-  // preget the device capabilities. If the hardware vertex shader is too old, we prefer software vertex processing
-  g_piD3D->GetDeviceCaps( 0, D3DDEVTYPE_HAL, &g_sCaps);
-  DWORD creationFlags = D3DCREATE_MULTITHREADED;
-  if( g_sCaps.VertexShaderVersion >= D3DVS_VERSION( 2, 0))
-    creationFlags |= D3DCREATE_HARDWARE_VERTEXPROCESSING;
-  else
-    creationFlags |= D3DCREATE_SOFTWARE_VERTEXPROCESSING;
+	// preget the device capabilities. If the hardware vertex shader is too old, we prefer software vertex processing
+	g_piD3D->GetDeviceCaps( 0, D3DDEVTYPE_HAL, &g_sCaps);
+	DWORD creationFlags = D3DCREATE_MULTITHREADED;
+	if( g_sCaps.VertexShaderVersion >= D3DVS_VERSION( 2, 0))
+		creationFlags |= D3DCREATE_HARDWARE_VERTEXPROCESSING;
+	else
+		creationFlags |= D3DCREATE_SOFTWARE_VERTEXPROCESSING;
 
 	// create the D3D9 device object. with software-vertexprocessing if VS2.0 isn`t supported in hardware
 	if(FAILED(g_piD3D->CreateDevice(0,eType, g_hDlg, creationFlags ,&sParams,&g_piDevice)))
@@ -929,7 +972,15 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 		if (bHW)return CreateDevice(p_bMultiSample,p_bSuperSample,false);
 		return 0;
 	}
-	g_piDevice->SetFVF(AssetHelper::Vertex::GetFVF());
+
+	// create a vertex declaration to match the vertex
+	D3DVERTEXELEMENT9* vdecl = AssetHelper::Vertex::GetDeclarationElements();
+	if( FAILED( g_piDevice->CreateVertexDeclaration( vdecl, &gDefaultVertexDecl)))
+	{
+		MessageBox( g_hDlg, "Failed to create vertex declaration", "Init", MB_OK);
+		return 0;
+	}
+	g_piDevice->SetVertexDeclaration( gDefaultVertexDecl);
 
 	// get the capabilities of the device object
 	g_piDevice->GetDeviceCaps(&g_sCaps);
@@ -962,9 +1013,9 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 		piBuffer = NULL;
 	}
 
-  // use Fixed Function effect when working with shaderless cards
-  if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
-    g_piDefaultEffect->SetTechnique( "DefaultFXSpecular_FF");
+	// use Fixed Function effect when working with shaderless cards
+	if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
+		g_piDefaultEffect->SetTechnique( "DefaultFXSpecular_FF");
 
 	// create the shader used to draw the HUD
 	if(FAILED( D3DXCreateEffect(g_piDevice,
@@ -984,9 +1035,9 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 		piBuffer = NULL;
 	}
 
-  // use Fixed Function effect when working with shaderless cards
-  if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
-    g_piPassThroughEffect->SetTechnique( "PassThrough_FF");
+	// use Fixed Function effect when working with shaderless cards
+	if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
+		g_piPassThroughEffect->SetTechnique( "PassThrough_FF");
 
 	// create the shader used to visualize normal vectors
 	if(FAILED( D3DXCreateEffect(g_piDevice,
@@ -1006,9 +1057,9 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 		piBuffer = NULL;
 	}
 
-  // use Fixed Function effect when working with shaderless cards
-  if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
-    g_piNormalsEffect->SetTechnique( "RenderNormals_FF");
+	// use Fixed Function effect when working with shaderless cards
+	if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
+		g_piNormalsEffect->SetTechnique( "RenderNormals_FF");
 
 	// create the texture for the HUD
 	CreateHUDTexture();

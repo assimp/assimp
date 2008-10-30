@@ -67,6 +67,9 @@ void AnimEvaluator::Evaluate( double pTime)
 	if( mAnim->mDuration > 0.0)
 		time = fmod( pTime, mAnim->mDuration);
 
+	if( mTransforms.size() != mAnim->mNumChannels)
+		mTransforms.resize( mAnim->mNumChannels);
+
 	// calculate the transformations for each animation channel
 	for( unsigned int a = 0; a < mAnim->mNumChannels; a++)
 	{

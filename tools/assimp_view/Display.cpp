@@ -737,6 +737,12 @@ int CDisplay::FillDisplayList(void)
 //-------------------------------------------------------------------------------
 int CDisplay::OnRender()
 {
+	// update possible animation
+	if( g_pcAsset)
+	{
+		assert( g_pcAsset->mAnimator);
+		g_pcAsset->mAnimator->Calculate( double( clock()) / double( CLOCKS_PER_SEC));
+	}
 	// begin the frame
 	g_piDevice->BeginScene();
 
@@ -1884,11 +1890,11 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 		apcVec[0].x = g_avLightDirs[0].x;
 		apcVec[0].y = g_avLightDirs[0].y;
 		apcVec[0].z = g_avLightDirs[0].z;
-    apcVec[0].w = 0.0f;
+		apcVec[0].w = 0.0f;
 		apcVec[1].x = g_avLightDirs[0].x * -1.0f;
 		apcVec[1].y = g_avLightDirs[0].y * -1.0f;
 		apcVec[1].z = g_avLightDirs[0].z * -1.0f;
-    apcVec[1].w = 0.0f;
+		apcVec[1].w = 0.0f;
 
 		D3DXVec4Normalize(&apcVec[0],&apcVec[0]);
 		D3DXVec4Normalize(&apcVec[1],&apcVec[1]);
@@ -1899,19 +1905,19 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 		apcVec[0].z = ((g_avLightColors[0]) & 0xFF) / 255.0f;
 		apcVec[0].w = 1.0f;
 
-    if( g_sOptions.b3Lights)
-    {
-		  apcVec[1].x = ((g_avLightColors[1] >> 16) & 0xFF) / 255.0f;
-		  apcVec[1].y = ((g_avLightColors[1] >> 8) & 0xFF) / 255.0f;
-		  apcVec[1].z = ((g_avLightColors[1]) & 0xFF) / 255.0f;
-		  apcVec[1].w = 0.0f;
-    } else
-    {
-		  apcVec[1].x = 0.0f;
-		  apcVec[1].y = 0.0f;
-		  apcVec[1].z = 0.0f;
-		  apcVec[1].w = 0.0f;
-    }
+		if( g_sOptions.b3Lights)
+		{
+			apcVec[1].x = ((g_avLightColors[1] >> 16) & 0xFF) / 255.0f;
+			apcVec[1].y = ((g_avLightColors[1] >> 8) & 0xFF) / 255.0f;
+			apcVec[1].z = ((g_avLightColors[1]) & 0xFF) / 255.0f;
+			apcVec[1].w = 0.0f;
+		} else
+		{
+			apcVec[1].x = 0.0f;
+			apcVec[1].y = 0.0f;
+			apcVec[1].z = 0.0f;
+			apcVec[1].w = 0.0f;
+		}
 
 		apcVec[0] *= g_fLightIntensity;
 		apcVec[1] *= g_fLightIntensity;
@@ -1923,10 +1929,10 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 		piEnd->SetVector( "vCameraPos",&apcVec[0]);
 
 		// setup the best technique 
-    if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
-    {
-      g_piDefaultEffect->SetTechnique( "DefaultFXSpecular_FF");
-    } else
+		if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
+		{
+			g_piDefaultEffect->SetTechnique( "DefaultFXSpecular_FF");
+		} else
 		if (g_sCaps.PixelShaderVersion < D3DPS_VERSION(3,0) || g_sOptions.bLowQuality)
 		{
 			if (g_sOptions.b3Lights)
@@ -1954,14 +1960,15 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 	{
 		for (unsigned int i = 0; i < piNode->mNumMeshes;++i)
 		{
+			const aiMesh* mesh = g_pcAsset->pcScene->mMeshes[piNode->mMeshes[i]];
+			AssetHelper::MeshHelper* helper = g_pcAsset->apcMeshes[piNode->mMeshes[i]];
+
 			// fix: Render triangle meshes only
-			if (g_pcAsset->pcScene->mMeshes[piNode->mMeshes[i]]->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
+			if (mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
 				continue;
 
 			// don't render the mesh if the render pass is incorrect
-			if (g_sOptions.bRenderMats && (
-				g_pcAsset->apcMeshes[piNode->mMeshes[i]]->piOpacityTexture || 
-				g_pcAsset->apcMeshes[piNode->mMeshes[i]]->fOpacity != 1.0f))
+			if (g_sOptions.bRenderMats && (helper->piOpacityTexture || helper->fOpacity != 1.0f))
 			{
 				if (!bAlpha)continue;
 			}
@@ -1970,8 +1977,25 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 			// now setup the material
 			if (g_sOptions.bRenderMats)
 			{
-				CMaterialManager::Instance().SetupMaterial(
-					g_pcAsset->apcMeshes[piNode->mMeshes[i]],pcProj,aiMe,pcCam,vPos);
+				CMaterialManager::Instance().SetupMaterial( helper, pcProj, aiMe, pcCam, vPos);
+			}
+
+			// Upload bone matrices. This maybe is the wrong place to do it, but for the heck of it I don't understand this code flow
+			if( mesh->HasBones())
+			{
+				static float matrices[4*3*60];
+				float* tempmat = matrices;
+				const std::vector<aiMatrix4x4>& boneMats = g_pcAsset->mAnimator->GetBoneMatrices( piNode, i);
+				assert( boneMats.size() == mesh->mNumBones);
+
+				for( unsigned int a = 0; a < mesh->mNumBones; a++)
+				{
+					const aiMatrix4x4& mat = boneMats[a];
+					*tempmat++ = mat.a1; *tempmat++ = mat.a2; *tempmat++ = mat.a3; *tempmat++ = mat.a4; 
+					*tempmat++ = mat.b1; *tempmat++ = mat.b2; *tempmat++ = mat.b3; *tempmat++ = mat.b4; 
+					*tempmat++ = mat.c1; *tempmat++ = mat.c2; *tempmat++ = mat.c3; *tempmat++ = mat.c4; 
+				}
+				helper->piEffect->SetFloatArray( "gBoneMatrix", matrices, 3*60*4);
 			}
 
 			if (bAlpha)CMeshRenderer::Instance().DrawSorted(piNode->mMeshes[i],aiMe);
@@ -1980,31 +2004,25 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 			// now end the material
 			if (g_sOptions.bRenderMats)
 			{
-				CMaterialManager::Instance().EndMaterial(
-					g_pcAsset->apcMeshes[piNode->mMeshes[i]]);
+				CMaterialManager::Instance().EndMaterial( helper);
 			}
 
 			// render normal vectors?
-			if (g_sOptions.bRenderNormals && g_pcAsset->apcMeshes[piNode->mMeshes[i]]->piVBNormals)
+			if (g_sOptions.bRenderNormals && helper->piVBNormals)
 			{
 				// this is very similar to the code in SetupMaterial()
 				ID3DXEffect* piEnd = g_piNormalsEffect;
 
 				piEnd->SetVector("OUTPUT_COLOR",&vVector);
 
-				piEnd->SetMatrix("WorldViewProjection",
-					(const D3DXMATRIX*)&pcProj);
+				piEnd->SetMatrix("WorldViewProjection", (const D3DXMATRIX*)&pcProj);
 
 				UINT dwPasses = 0;
 				piEnd->Begin(&dwPasses,0);
 				piEnd->BeginPass(0);
 
-				g_piDevice->SetStreamSource(0,
-					g_pcAsset->apcMeshes[piNode->mMeshes[i]]->piVBNormals,0,
-					sizeof(AssetHelper::LineVertex));
-
-				g_piDevice->DrawPrimitive(D3DPT_LINELIST,0,
-					g_pcAsset->pcScene->mMeshes[piNode->mMeshes[i]]->mNumVertices);
+				g_piDevice->SetStreamSource(0, helper->piVBNormals, 0, sizeof(AssetHelper::LineVertex));
+				g_piDevice->DrawPrimitive(D3DPT_LINELIST,0, g_pcAsset->pcScene->mMeshes[piNode->mMeshes[i]]->mNumVertices);
 
 				piEnd->EndPass();
 				piEnd->End();

@@ -34,6 +34,7 @@
 #include <memory.h>
 #include <tchar.h>
 #include <stdio.h>
+#include <time.h>
 
 // D3D9 includes
 

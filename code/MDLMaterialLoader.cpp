@@ -114,14 +114,13 @@ aiColor4D MDLImporter::ReplaceTextureWithColor(const aiTexture* pcTexture)
 // ------------------------------------------------------------------------------------------------
 void MDLImporter::CreateTextureARGB8_3DGS_MDL3(const unsigned char* szData)
 {
-	const MDL::Header* pcHeader = (const MDL::Header*)this->mBuffer;
-	VALIDATE_FILE_SIZE(szData + pcHeader->skinwidth *
-		pcHeader->skinheight);
+	VALIDATE_FILE_SIZE(szData + mpcHeader->skinwidth *
+		mpcHeader->skinheight);
 
 	// allocate a new texture object
 	aiTexture* pcNew = new aiTexture();
-	pcNew->mWidth = pcHeader->skinwidth;
-	pcNew->mHeight = pcHeader->skinheight;
+	pcNew->mWidth = mpcHeader->skinwidth;
+	pcNew->mHeight = mpcHeader->skinheight;
 
 	pcNew->pcData = new aiTexel[pcNew->mWidth * pcNew->mHeight];
 
@@ -158,8 +157,6 @@ void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char* szData,
 	unsigned int iType,
 	unsigned int* piSkip)
 {
-	const MDL::Header* pcHeader = (const MDL::Header*)this->mBuffer;
-
 	ai_assert(NULL != piSkip);
 
 	if (iType == 1 || iType > 3)
@@ -172,8 +169,8 @@ void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char* szData,
 
 	// allocate a new texture object
 	aiTexture* pcNew = new aiTexture();
-	pcNew->mWidth = pcHeader->skinwidth;
-	pcNew->mHeight = pcHeader->skinheight;
+	pcNew->mWidth = mpcHeader->skinwidth;
+	pcNew->mHeight = mpcHeader->skinheight;
 	
 	if (bNoRead)pcNew->pcData = (aiTexel*)0xffffffff;
 	this->ParseTextureColorData(szData,iType,piSkip,pcNew);
@@ -224,8 +221,9 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 			for (i = 0; i < pcNew->mWidth*pcNew->mHeight;++i)
 			{
 				MDL::RGB565 val = ((MDL::RGB565*)szData)[i];
-
-				pcNew->pcData[i].a = 0xFF;
+        AI_SWAP2(val);    
+				
+        pcNew->pcData[i].a = 0xFF;
 				pcNew->pcData[i].r = (unsigned char)val.b << 3;
 				pcNew->pcData[i].g = (unsigned char)val.g << 2;
 				pcNew->pcData[i].b = (unsigned char)val.r << 3;
@@ -254,6 +252,7 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 			for (i = 0; i < pcNew->mWidth*pcNew->mHeight;++i)
 			{
 				MDL::ARGB4 val = ((MDL::ARGB4*)szData)[i];
+        AI_SWAP2(val);    
 
 				pcNew->pcData[i].a = (unsigned char)val.a << 4;
 				pcNew->pcData[i].r = (unsigned char)val.r << 4;
@@ -287,9 +286,9 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 
 				pcNew->pcData[i].a = 0xFF;
 				pcNew->pcData[i].b = *_szData++;
-				pcNew->pcData[i].g = *_szData++;
-				pcNew->pcData[i].r = *_szData;
-			}
+        pcNew->pcData[i].g = *_szData++;
+		    pcNew->pcData[i].r = *_szData;
+      }
 		} 
 		else i = pcNew->mWidth*pcNew->mHeight;
 
@@ -317,10 +316,10 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 				const unsigned char* _szData = &szData[i*4];
 
 				pcNew->pcData[i].b = *_szData++;
-				pcNew->pcData[i].g = *_szData++;
-				pcNew->pcData[i].r = *_szData++;
-				pcNew->pcData[i].a = *_szData;
-			}
+        pcNew->pcData[i].g = *_szData++;
+        pcNew->pcData[i].r = *_szData++;
+        pcNew->pcData[i].a = *_szData;
+      }
 		} 
 		else i = pcNew->mWidth*pcNew->mHeight;
 
@@ -352,9 +351,9 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 
 				pcNew->pcData[i].a = 0xFF;
 				pcNew->pcData[i].r = *sz++;
-				pcNew->pcData[i].g = *sz++;
-				pcNew->pcData[i].b = *sz;
-			}
+        pcNew->pcData[i].g = *sz++;
+        pcNew->pcData[i].b = *sz;
+      }
 			this->FreePalette(szColorMap);
 
 		} 
@@ -381,9 +380,11 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char* szData,
 
 	// first read the size of the texture
 	pcNew->mWidth = *((uint32_t*)szData);
+  AI_SWAP4(pcNew->mWidth); 
 	szData += sizeof(uint32_t);
 
 	pcNew->mHeight = *((uint32_t*)szData);
+  AI_SWAP4(pcNew->mHeight); 
 	szData += sizeof(uint32_t);
 
 	if (bNoRead)pcNew->pcData = (aiTexel*)0xffffffff;

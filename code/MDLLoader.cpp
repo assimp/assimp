@@ -298,26 +298,31 @@ void MDLImporter::ValidateHeader_Quake1(const MDL::Header* pcHeader)
 			DefaultLogger::get()->warn("Skin width or height are 0");
 	}
 }
+
 #ifdef AI_BUILD_BIG_ENDIAN
 // ------------------------------------------------------------------------------------------------
 void FlipQuakeHeader(BE_NCONST MDL::Header* pcHeader)
 {
-	ByteSwap::Swap4(& pcHeader->ident);
-	ByteSwap::Swap4(& pcHeader->version);
-	ByteSwap::Swap4(& pcHeader->boundingradius);
-	ByteSwap::Swap4(& pcHeader->flags);
-	ByteSwap::Swap4(& pcHeader->num_frames);
-	ByteSwap::Swap4(& pcHeader->num_skins);
-	ByteSwap::Swap4(& pcHeader->num_tris);
-	ByteSwap::Swap4(& pcHeader->num_verts);
+	AI_SWAP4( pcHeader->ident);
+	AI_SWAP4( pcHeader->version);
+	AI_SWAP4( pcHeader->boundingradius);
+	AI_SWAP4( pcHeader->flags);
+	AI_SWAP4( pcHeader->num_frames);
+	AI_SWAP4( pcHeader->num_skins);
+	AI_SWAP4( pcHeader->num_tris);
+	AI_SWAP4( pcHeader->num_verts);
 	for (unsigned int i = 0; i < 3;++i)
 	{
-		ByteSwap::Swap4(& pcHeader->scale[i]);
-		ByteSwap::Swap4(& pcHeader->translate[i]);
+		AI_SWAP4( pcHeader->scale[i]);
+		AI_SWAP4( pcHeader->translate[i]);
 	}
-	ByteSwap::Swap4(& pcHeader->size);
-	ByteSwap::Swap4(& pcHeader->skinheight);
+	AI_SWAP4( pcHeader->size);
+	AI_SWAP4( pcHeader->skinheight);
+  AI_SWAP4( pcHeader->skinwidth); 
+  AI_SWAP4( pcHeader->synctype); 
+  
 //	ByteSwap::Swap4(& pcHeader->skin);
+
 }
 #endif
 // ------------------------------------------------------------------------------------------------
@@ -325,19 +330,19 @@ void MDLImporter::InternReadFile_Quake1( )
 {
 	ai_assert(NULL != pScene);
 
-	BE_NCONST MDL::Header* pcHeader = (BE_NCONST MDL::Header*)this->mBuffer;
+	mpcHeader = (BE_NCONST MDL::Header*)this->mBuffer;
 
 #ifdef AI_BUILD_BIG_ENDIAN
-	FlipQuakeHeader(pcHeader);
+	FlipQuakeHeader(mpcHeader);
 #endif
 
-	ValidateHeader_Quake1(pcHeader);
+	ValidateHeader_Quake1(mpcHeader);
 
 	// current cursor position in the file
-	const unsigned char* szCurrent = (const unsigned char*)(pcHeader+1);
+	const unsigned char* szCurrent = (const unsigned char*)(mpcHeader+1);
 
 	// need to read all textures
-	for (unsigned int i = 0; i < (unsigned int)pcHeader->num_skins;++i)
+	for (unsigned int i = 0; i < (unsigned int)mpcHeader->num_skins;++i)
 	{
 		union{BE_NCONST MDL::Skin* pcSkin;BE_NCONST MDL::GroupSkin* pcGroupSkin;};
 		pcSkin = (BE_NCONST MDL::Skin*)szCurrent;
@@ -360,7 +365,7 @@ void MDLImporter::InternReadFile_Quake1( )
 					this->CreateTextureARGB8_3DGS_MDL3(szCurrent + iNumImages * sizeof(float));
 				}
 				// go to the end of the skin section / the beginning of the next skin
-				szCurrent += pcHeader->skinheight * pcHeader->skinwidth +
+				szCurrent += mpcHeader->skinheight * mpcHeader->skinwidth +
 					sizeof(float) * iNumImages;
 			}
 		}
@@ -375,11 +380,11 @@ void MDLImporter::InternReadFile_Quake1( )
 	}
 	// get a pointer to the texture coordinates
 	BE_NCONST MDL::TexCoord* pcTexCoords = (BE_NCONST MDL::TexCoord*)szCurrent;
-	szCurrent += sizeof(MDL::TexCoord) * pcHeader->num_verts;
+	szCurrent += sizeof(MDL::TexCoord) * mpcHeader->num_verts;
 
 	// get a pointer to the triangles
 	BE_NCONST MDL::Triangle* pcTriangles = (BE_NCONST MDL::Triangle*)szCurrent;
-	szCurrent += sizeof(MDL::Triangle) * pcHeader->num_tris;
+	szCurrent += sizeof(MDL::Triangle) * mpcHeader->num_tris;
 	VALIDATE_FILE_SIZE(szCurrent);
 
 	// now get a pointer to the first frame in the file
@@ -400,24 +405,25 @@ void MDLImporter::InternReadFile_Quake1( )
 	BE_NCONST MDL::Vertex* pcVertices = (BE_NCONST MDL::Vertex*) ((pcFirstFrame->name) +
 		sizeof(pcFirstFrame->name));
 
-	VALIDATE_FILE_SIZE((const unsigned char*)(pcVertices + pcHeader->num_verts));
+	VALIDATE_FILE_SIZE((const unsigned char*)(pcVertices + mpcHeader->num_verts));
 
 #ifdef AI_BUILD_BIG_ENDIAN
 
-	for (unsigned int i = 0; i<pcHeader->num_verts;++i)
+	for (unsigned int i = 0; i<mpcHeader->num_verts;++i)
 	{
 		AI_SWAP4( pcTexCoords[i].onseam );
 		AI_SWAP4( pcTexCoords[i].s );
 		AI_SWAP4( pcTexCoords[i].t );
 	}
 
-	for (unsigned int i = 0; i<pcHeader->num_tris;++i)
+	for (unsigned int i = 0; i<mpcHeader->num_tris;++i)
 	{
 		AI_SWAP4( pcTriangles[i].facesfront);
 		AI_SWAP4( pcTriangles[i].vertex[0]);
 		AI_SWAP4( pcTriangles[i].vertex[1]);
 		AI_SWAP4( pcTriangles[i].vertex[2]);
 	}
+  
 
 #endif
 
@@ -428,8 +434,8 @@ void MDLImporter::InternReadFile_Quake1( )
 	aiMesh* pcMesh = new aiMesh();
 	
 	pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
-	pcMesh->mNumVertices = pcHeader->num_tris * 3;
-	pcMesh->mNumFaces = pcHeader->num_tris;
+	pcMesh->mNumVertices = mpcHeader->num_tris * 3;
+	pcMesh->mNumFaces = mpcHeader->num_tris;
 	pcMesh->mVertices = new aiVector3D[pcMesh->mNumVertices];
 	pcMesh->mTextureCoords[0] = new aiVector3D[pcMesh->mNumVertices];
 	pcMesh->mFaces = new aiFace[pcMesh->mNumFaces];
@@ -447,7 +453,7 @@ void MDLImporter::InternReadFile_Quake1( )
 
 	// now iterate through all triangles
 	unsigned int iCurrent = 0;
-	for (unsigned int i = 0; i < (unsigned int) pcHeader->num_tris;++i)
+	for (unsigned int i = 0; i < (unsigned int) mpcHeader->num_tris;++i)
 	{
 		pcMesh->mFaces[i].mIndices = new unsigned int[3];
 		pcMesh->mFaces[i].mNumIndices = 3;
@@ -459,22 +465,22 @@ void MDLImporter::InternReadFile_Quake1( )
 
 			// read vertices
 			unsigned int iIndex = pcTriangles->vertex[c];
-			if (iIndex >= (unsigned int)pcHeader->num_verts)
+			if (iIndex >= (unsigned int)mpcHeader->num_verts)
 			{
-				iIndex = pcHeader->num_verts-1;
+				iIndex = mpcHeader->num_verts-1;
 				DefaultLogger::get()->warn("Index overflow in Q1-MDL vertex list.");
 			}
 
 			aiVector3D& vec = pcMesh->mVertices[iCurrent];
-			vec.x = (float)pcVertices[iIndex].v[0] * pcHeader->scale[0];
-			vec.x += pcHeader->translate[0];
+			vec.x = (float)pcVertices[iIndex].v[0] * mpcHeader->scale[0];
+			vec.x += mpcHeader->translate[0];
 
-			vec.y = (float)pcVertices[iIndex].v[1] * pcHeader->scale[1];
-			vec.y += pcHeader->translate[1];
+			vec.y = (float)pcVertices[iIndex].v[1] * mpcHeader->scale[1];
+			vec.y += mpcHeader->translate[1];
 			vec.y *= -1.0f;
 
-			vec.z = (float)pcVertices[iIndex].v[2] * pcHeader->scale[2];
-			vec.z += pcHeader->translate[2];
+			vec.z = (float)pcVertices[iIndex].v[2] * mpcHeader->scale[2];
+			vec.z += mpcHeader->translate[2];
 
 			// read the normal vector from the precalculated normal table
 			MD2::LookupNormalIndex(pcVertices[iIndex].normalIndex,pcMesh->mNormals[iCurrent]);
@@ -488,12 +494,12 @@ void MDLImporter::InternReadFile_Quake1( )
 			if (0 == pcTriangles->facesfront &&
 				0 != pcTexCoords[iIndex].onseam)
 			{
-				s += pcHeader->skinwidth * 0.5f; 
+				s += mpcHeader->skinwidth * 0.5f; 
 			}
 
 			// Scale s and t to range from 0.0 to 1.0 
-			pcMesh->mTextureCoords[0][iCurrent].x = (s + 0.5f) / pcHeader->skinwidth;
-			pcMesh->mTextureCoords[0][iCurrent].y = 1.0f-(t + 0.5f) / pcHeader->skinheight;
+			pcMesh->mTextureCoords[0][iCurrent].x = (s + 0.5f) / mpcHeader->skinwidth;
+			pcMesh->mTextureCoords[0][iCurrent].y = 1.0f-(t + 0.5f) / mpcHeader->skinheight;
 
 		}
 		pcMesh->mFaces[i].mIndices[0] = iTemp+2;
@@ -553,21 +559,21 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 	ai_assert(NULL != pScene);
 
 	// the header of MDL 3/4/5 is nearly identical to the original Quake1 header
-	BE_NCONST MDL::Header* pcHeader = (BE_NCONST MDL::Header*)this->mBuffer;
+	mpcHeader = (BE_NCONST MDL::Header*)this->mBuffer;
 #ifdef AI_BUILD_BIG_ENDIAN
-	FlipQuakeHeader(pcHeader);
+	FlipQuakeHeader(mpcHeader);
 #endif
-	this->ValidateHeader_Quake1(pcHeader);
+	this->ValidateHeader_Quake1(mpcHeader);
 
 	// current cursor position in the file
-	const unsigned char* szCurrent = (const unsigned char*)(pcHeader+1);
+	const unsigned char* szCurrent = (const unsigned char*)(mpcHeader+1);
 
 	// need to read all textures
-	for (unsigned int i = 0; i < (unsigned int)pcHeader->num_skins;++i)
+	for (unsigned int i = 0; i < (unsigned int)mpcHeader->num_skins;++i)
 	{
-		const MDL::Skin* pcSkin;
-		pcSkin = (const MDL::Skin*)szCurrent;
-		
+		BE_NCONST MDL::Skin* pcSkin;
+		pcSkin = (BE_NCONST  MDL::Skin*)szCurrent;
+		AI_SWAP4( pcSkin->group);
 		// create one output image
 		unsigned int iSkip = i ? 0xffffffff : 0;
 		if (5 <= this->iGSFileVersion)
@@ -587,30 +593,30 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 	}
 	// get a pointer to the texture coordinates
 	BE_NCONST MDL::TexCoord_MDL3* pcTexCoords = (BE_NCONST MDL::TexCoord_MDL3*)szCurrent;
-	szCurrent += sizeof(MDL::TexCoord_MDL3) * pcHeader->synctype;
+	szCurrent += sizeof(MDL::TexCoord_MDL3) * mpcHeader->synctype;
 
 	// NOTE: for MDLn formats "synctype" corresponds to the number of UV coords
 
 	// get a pointer to the triangles
 	BE_NCONST MDL::Triangle_MDL3* pcTriangles = (BE_NCONST MDL::Triangle_MDL3*)szCurrent;
-	szCurrent += sizeof(MDL::Triangle_MDL3) * pcHeader->num_tris;
+	szCurrent += sizeof(MDL::Triangle_MDL3) * mpcHeader->num_tris;
 
 #ifdef AI_BUILD_BIG_ENDIAN
 
-	for (unsigned int i = 0; i<pcHeader->synctype;++i)
+	for (unsigned int i = 0; i<mpcHeader->synctype;++i)
 	{
 		AI_SWAP2( pcTexCoords[i].u );
 		AI_SWAP2( pcTexCoords[i].v );
 	}
 
-	for (unsigned int i = 0; i<pcHeader->num_tris;++i)
+	for (unsigned int i = 0; i<mpcHeader->num_tris;++i)
 	{
-		AI_SWAP4( pcTriangles[i].index_xyz[0]);
-		AI_SWAP4( pcTriangles[i].index_xyz[1]);
-		AI_SWAP4( pcTriangles[i].index_xyz[2]);
-		AI_SWAP4( pcTriangles[i].index_uv[0]);
-		AI_SWAP4( pcTriangles[i].index_uv[1]);
-		AI_SWAP4( pcTriangles[i].index_uv[2]);
+		AI_SWAP2( pcTriangles[i].index_xyz[0]);
+		AI_SWAP2( pcTriangles[i].index_xyz[1]);
+		AI_SWAP2( pcTriangles[i].index_xyz[2]);
+		AI_SWAP2( pcTriangles[i].index_uv[0]);
+		AI_SWAP2( pcTriangles[i].index_uv[1]);
+		AI_SWAP2( pcTriangles[i].index_uv[2]);
 	}
 
 #endif
@@ -624,8 +630,8 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 	aiMesh* pcMesh = new aiMesh();
 	pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
-	pcMesh->mNumVertices = pcHeader->num_tris * 3;
-	pcMesh->mNumFaces = pcHeader->num_tris;
+	pcMesh->mNumVertices = mpcHeader->num_tris * 3;
+	pcMesh->mNumFaces = mpcHeader->num_tris;
 	pcMesh->mFaces = new aiFace[pcMesh->mNumFaces];
 
 	// there won't be more than one mesh inside the file
@@ -638,18 +644,19 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 	pScene->mMeshes[0] = pcMesh;
 
 	// allocate output storage
-	pcMesh->mNumVertices = (unsigned int)pcHeader->num_tris*3;
+	pcMesh->mNumVertices = (unsigned int)mpcHeader->num_tris*3;
 	pcMesh->mVertices = new aiVector3D[pcMesh->mNumVertices];
 	pcMesh->mNormals = new aiVector3D[pcMesh->mNumVertices];
 
-	if (pcHeader->synctype)
+	if (mpcHeader->synctype)
 	{
 		pcMesh->mTextureCoords[0] = new aiVector3D[pcMesh->mNumVertices];
 		pcMesh->mNumUVComponents[0] = 2;
 	}
 
 	// now get a pointer to the first frame in the file
-	const MDL::Frame* pcFrames = (const MDL::Frame*)szCurrent;
+	BE_NCONST MDL::Frame* pcFrames = (BE_NCONST MDL::Frame*)szCurrent;
+  AI_SWAP4(pcFrames->type);
 
 	// byte packed vertices
 	// BIG TODO: these two snippets are nearly totally identical ...
@@ -662,11 +669,11 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 		const MDL::Vertex* pcVertices = (const MDL::Vertex*) ((pcFirstFrame->name) 
 			+ sizeof(pcFirstFrame->name));
 
-		VALIDATE_FILE_SIZE(pcVertices + pcHeader->num_verts);
+		VALIDATE_FILE_SIZE(pcVertices + mpcHeader->num_verts);
 
 		// now iterate through all triangles
 		unsigned int iCurrent = 0;
-		for (unsigned int i = 0; i < (unsigned int) pcHeader->num_tris;++i)
+		for (unsigned int i = 0; i < (unsigned int) mpcHeader->num_tris;++i)
 		{
 			pcMesh->mFaces[i].mIndices = new unsigned int[3];
 			pcMesh->mFaces[i].mNumIndices = 3;
@@ -676,29 +683,29 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 			{
 				// read vertices
 				unsigned int iIndex = pcTriangles->index_xyz[c];
-				if (iIndex >= (unsigned int)pcHeader->num_verts)
+				if (iIndex >= (unsigned int)mpcHeader->num_verts)
 				{
-					iIndex = pcHeader->num_verts-1;
+					iIndex = mpcHeader->num_verts-1;
 					DefaultLogger::get()->warn("Index overflow in MDLn vertex list");
 				}
 
 				aiVector3D& vec = pcMesh->mVertices[iCurrent];
-				vec.x = (float)pcVertices[iIndex].v[0] * pcHeader->scale[0];
-				vec.x += pcHeader->translate[0];
+				vec.x = (float)pcVertices[iIndex].v[0] * mpcHeader->scale[0];
+				vec.x += mpcHeader->translate[0];
 
-				vec.y = (float)pcVertices[iIndex].v[1] * pcHeader->scale[1];
-				vec.y += pcHeader->translate[1];
+				vec.y = (float)pcVertices[iIndex].v[1] * mpcHeader->scale[1];
+				vec.y += mpcHeader->translate[1];
 				vec.y *= -1.0f;
 
-				vec.z = (float)pcVertices[iIndex].v[2] * pcHeader->scale[2];
-				vec.z += pcHeader->translate[2];
+				vec.z = (float)pcVertices[iIndex].v[2] * mpcHeader->scale[2];
+				vec.z += mpcHeader->translate[2];
 
 				// read the normal vector from the precalculated normal table
 				MD2::LookupNormalIndex(pcVertices[iIndex].normalIndex,pcMesh->mNormals[iCurrent]);
 				pcMesh->mNormals[iCurrent].y *= -1.0f;
 
 				// read texture coordinates
-				if (pcHeader->synctype)
+				if (mpcHeader->synctype)
 				{
 					this->ImportUVCoordinate_3DGS_MDL345(pcMesh->mTextureCoords[0][iCurrent],
 						pcTexCoords,pcTriangles->index_uv[c]);
@@ -722,11 +729,11 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 		const MDL::Vertex_MDL4* pcVertices = (const MDL::Vertex_MDL4*) ((pcFirstFrame->name) +
 			sizeof(pcFirstFrame->name));
 
-		VALIDATE_FILE_SIZE(pcVertices + pcHeader->num_verts);
+		VALIDATE_FILE_SIZE(pcVertices + mpcHeader->num_verts);
 
 		// now iterate through all triangles
 		unsigned int iCurrent = 0;
-		for (unsigned int i = 0; i < (unsigned int) pcHeader->num_tris;++i)
+		for (unsigned int i = 0; i < (unsigned int) mpcHeader->num_tris;++i)
 		{
 			pcMesh->mFaces[i].mIndices = new unsigned int[3];
 			pcMesh->mFaces[i].mNumIndices = 3;
@@ -736,29 +743,29 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 			{
 				// read vertices
 				unsigned int iIndex = pcTriangles->index_xyz[c];
-				if (iIndex >= (unsigned int)pcHeader->num_verts)
+				if (iIndex >= (unsigned int)mpcHeader->num_verts)
 				{
-					iIndex = pcHeader->num_verts-1;
+					iIndex = mpcHeader->num_verts-1;
 					DefaultLogger::get()->warn("Index overflow in MDLn vertex list");
 				}
 
 				aiVector3D& vec = pcMesh->mVertices[iCurrent];
-				vec.x = (float)pcVertices[iIndex].v[0] * pcHeader->scale[0];
-				vec.x += pcHeader->translate[0];
+				vec.x = (float)pcVertices[iIndex].v[0] * mpcHeader->scale[0];
+				vec.x += mpcHeader->translate[0];
 
-				vec.y = (float)pcVertices[iIndex].v[1] * pcHeader->scale[1];
-				vec.y += pcHeader->translate[1];
+				vec.y = (float)pcVertices[iIndex].v[1] * mpcHeader->scale[1];
+				vec.y += mpcHeader->translate[1];
 				vec.y *= -1.0f;
 
-				vec.z = (float)pcVertices[iIndex].v[2] * pcHeader->scale[2];
-				vec.z += pcHeader->translate[2];
+				vec.z = (float)pcVertices[iIndex].v[2] * mpcHeader->scale[2];
+				vec.z += mpcHeader->translate[2];
 
 				// read the normal vector from the precalculated normal table
 				MD2::LookupNormalIndex(pcVertices[iIndex].normalIndex,pcMesh->mNormals[iCurrent]);
 				pcMesh->mNormals[iCurrent].y *= -1.0f;
 
 				// read texture coordinates
-				if (pcHeader->synctype)
+				if (mpcHeader->synctype)
 				{
 					this->ImportUVCoordinate_3DGS_MDL345(pcMesh->mTextureCoords[0][iCurrent],
 						pcTexCoords,pcTriangles->index_uv[c]);

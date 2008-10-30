@@ -446,6 +446,9 @@ protected:
 
 	/** Buffer to hold the loaded file */
 	unsigned char* mBuffer;
+  
+  /**Endian converted header of the file. This is espcially important for be targets */
+  BE_NCONST MDL::Header *mpcHeader;
 
 	/** For GameStudio MDL files: The number in the magic word, either 3,4 or 5 
 	 * (MDL7 doesn't need this, the format has a separate loader) */

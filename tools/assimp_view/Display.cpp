@@ -740,7 +740,7 @@ int CDisplay::OnRender()
 	// update possible animation
 	if( g_pcAsset)
 	{
-		assert( g_pcAsset->mAnimator);
+		ai_assert( g_pcAsset->mAnimator);
 		g_pcAsset->mAnimator->Calculate( double( clock()) / double( CLOCKS_PER_SEC));
 	}
 	// begin the frame
@@ -1974,29 +1974,35 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 			}
 			else if (bAlpha)continue;
 
+			// Upload bone matrices. This maybe is the wrong place to do it, but for the heck of it I don't understand this code flow
+			if( mesh->HasBones())
+			{
+				static float matrices[4*4*60];
+				float* tempmat = matrices;
+				const std::vector<aiMatrix4x4>& boneMats = g_pcAsset->mAnimator->GetBoneMatrices( piNode, i);
+				ai_assert( boneMats.size() == mesh->mNumBones);
+
+				for( unsigned int a = 0; a < mesh->mNumBones; a++)
+				{
+					const aiMatrix4x4& mat = boneMats[a];
+					*tempmat++ = mat.a1; *tempmat++ = mat.a2; *tempmat++ = mat.a3;
+					tempmat++;  
+					*tempmat++ = mat.a4; *tempmat++ = mat.b1; *tempmat++ = mat.b2;
+					tempmat++; 
+					*tempmat++ = mat.b3; *tempmat++ = mat.b4; *tempmat++ = mat.c1; 
+					tempmat++;
+					*tempmat++ = mat.c2; *tempmat++ = mat.c3; *tempmat++ = mat.c4; 
+					tempmat++;
+				}
+				helper->piEffect->SetMatrixArray( "gBoneMatrix", (D3DXMATRIX*)matrices, 60);
+			}
+
 			// now setup the material
 			if (g_sOptions.bRenderMats)
 			{
 				CMaterialManager::Instance().SetupMaterial( helper, pcProj, aiMe, pcCam, vPos);
 			}
-
-			// Upload bone matrices. This maybe is the wrong place to do it, but for the heck of it I don't understand this code flow
-			if( mesh->HasBones())
-			{
-				static float matrices[4*3*60];
-				float* tempmat = matrices;
-				const std::vector<aiMatrix4x4>& boneMats = g_pcAsset->mAnimator->GetBoneMatrices( piNode, i);
-				assert( boneMats.size() == mesh->mNumBones);
-
-				for( unsigned int a = 0; a < mesh->mNumBones; a++)
-				{
-					const aiMatrix4x4& mat = boneMats[a];
-					*tempmat++ = mat.a1; *tempmat++ = mat.a2; *tempmat++ = mat.a3; *tempmat++ = mat.a4; 
-					*tempmat++ = mat.b1; *tempmat++ = mat.b2; *tempmat++ = mat.b3; *tempmat++ = mat.b4; 
-					*tempmat++ = mat.c1; *tempmat++ = mat.c2; *tempmat++ = mat.c3; *tempmat++ = mat.c4; 
-				}
-				helper->piEffect->SetFloatArray( "gBoneMatrix", matrices, 3*60*4);
-			}
+			g_piDevice->SetVertexDeclaration( gDefaultVertexDecl);
 
 			if (bAlpha)CMeshRenderer::Instance().DrawSorted(piNode->mMeshes[i],aiMe);
 			else CMeshRenderer::Instance().DrawUnsorted(piNode->mMeshes[i]);

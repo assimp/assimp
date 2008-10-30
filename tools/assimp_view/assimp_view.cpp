@@ -577,7 +577,7 @@ int CreateAssetData()
 			{
 				unsigned char boneIndices[4] = { 0, 0, 0, 0 };
 				unsigned char boneWeights[4] = { 0, 0, 0, 0 };
-				assert( weightsPerVertex[x].size() <= 4);
+				ai_assert( weightsPerVertex[x].size() <= 4);
 				for( unsigned int a = 0; a < weightsPerVertex[x].size(); a++)
 				{
 					boneIndices[a] = weightsPerVertex[x][a].mVertexId;

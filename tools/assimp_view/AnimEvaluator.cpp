@@ -135,6 +135,7 @@ void AnimEvaluator::Evaluate( double pTime)
 		mat.a2 *= presentScaling.y; mat.b2 *= presentScaling.y; mat.c2 *= presentScaling.y;
 		mat.a3 *= presentScaling.z; mat.b3 *= presentScaling.z; mat.c3 *= presentScaling.z;
 		mat.a4 = presentPosition.x; mat.b4 = presentPosition.y; mat.c4 = presentPosition.z;
+		//mat.Transpose();
 	}
 
 	mLastTime = time;

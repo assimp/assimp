@@ -933,6 +933,9 @@ int CMaterialManager::CreateMaterial(
 		if ((pcMesh->fOpacity != 1.0f ? true : false) != (pc->fOpacity != 1.0f ? true : false))
 			continue;
 
+		if (pcSource->HasBones() != g_pcAsset->pcScene->mMeshes[i]->HasBones())
+			continue;
+
 		// we can reuse this material
 		if (pc->piEffect)
 		{
@@ -1113,6 +1116,22 @@ int CMaterialManager::CreateMaterial(
 	{
 		pcMesh->piEffect->SetTexture("lw_tex_envmap",CBackgroundPainter::Instance().GetTexture());
 	}
+
+	// setup bones if neccessary
+	if( !pcSource->HasBones())
+	{
+		static float matrices[4*3*60];
+		float* tempmat = matrices;
+		for( unsigned int a = 0; a < 60; a++)
+		{
+			// HACK: (thom) set identity matrices for all bones for the moment so that you see something
+			*tempmat++ = 1.0f; *tempmat++ = 0.0f; *tempmat++ = 0.0f; *tempmat++ = 0.0f; 
+			*tempmat++ = 0.0f; *tempmat++ = 1.0f; *tempmat++ = 0.0f; *tempmat++ = 0.0f; 
+			*tempmat++ = 0.0f; *tempmat++ = 0.0f; *tempmat++ = 1.0f; *tempmat++ = 0.0f; 
+		}
+		pcMesh->piEffect->SetVectorArray( "gBoneMatrix", (const D3DXVECTOR4*) matrices, 3*60);
+	}
+
 	return 1;
 }
 //-------------------------------------------------------------------------------
@@ -1140,11 +1159,11 @@ int CMaterialManager::SetupMaterial (
 	apcVec[0].x = g_avLightDirs[0].x;
 	apcVec[0].y = g_avLightDirs[0].y;
 	apcVec[0].z = g_avLightDirs[0].z;
-	apcVec[0].w = 0.0f;
+  apcVec[0].w = 0.0f;
 	apcVec[1].x = g_avLightDirs[0].x * -1.0f;
 	apcVec[1].y = g_avLightDirs[0].y * -1.0f;
 	apcVec[1].z = g_avLightDirs[0].z * -1.0f;
-	apcVec[1].w = 0.0f;
+  apcVec[1].w = 0.0f;
 	D3DXVec4Normalize(&apcVec[0],&apcVec[0]);
 	D3DXVec4Normalize(&apcVec[1],&apcVec[1]);
 	piEnd->SetVectorArray("afLightDir",apcVec,5);
@@ -1154,19 +1173,19 @@ int CMaterialManager::SetupMaterial (
 	apcVec[0].z = ((g_avLightColors[0])			& 0xFF) / 255.0f;
 	apcVec[0].w = 1.0f;
 
-	if( g_sOptions.b3Lights)
-	{
-		apcVec[1].x = ((g_avLightColors[1] >> 16) & 0xFF) / 255.0f;
-		apcVec[1].y = ((g_avLightColors[1] >> 8) & 0xFF) / 255.0f;
-		apcVec[1].z = ((g_avLightColors[1]) & 0xFF) / 255.0f;
-		apcVec[1].w = 0.0f;
-	} else
-	{
-		apcVec[1].x = 0.0f;
-		apcVec[1].y = 0.0f;
-		apcVec[1].z = 0.0f;
-		apcVec[1].w = 0.0f;
-	}
+  if( g_sOptions.b3Lights)
+  {
+	  apcVec[1].x = ((g_avLightColors[1] >> 16) & 0xFF) / 255.0f;
+	  apcVec[1].y = ((g_avLightColors[1] >> 8) & 0xFF) / 255.0f;
+	  apcVec[1].z = ((g_avLightColors[1]) & 0xFF) / 255.0f;
+	  apcVec[1].w = 0.0f;
+  } else
+  {
+	  apcVec[1].x = 0.0f;
+	  apcVec[1].y = 0.0f;
+	  apcVec[1].z = 0.0f;
+	  apcVec[1].w = 0.0f;
+  }
 
 	apcVec[0] *= g_fLightIntensity;
 	apcVec[1] *= g_fLightIntensity;
@@ -1231,6 +1250,9 @@ int CMaterialManager::SetupMaterial (
 			piEnd->SetTexture("lw_tex_envmap",CBackgroundPainter::Instance().GetTexture());
 		}
 	}
+
+
+
 
 	// setup the correct shader technique to be used for drawing
 	if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))

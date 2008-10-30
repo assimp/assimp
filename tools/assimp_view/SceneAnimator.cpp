@@ -133,9 +133,9 @@ const aiMatrix4x4& SceneAnimator::GetGlobalTransform( const std::string& pNodeNa
 // Calculates the bone matrices for the given mesh. 
 const std::vector<aiMatrix4x4>& SceneAnimator::GetBoneMatrices( const aiNode* pNode, size_t pMeshIndex /* = 0 */)
 {
-	assert( pMeshIndex < pNode->mNumMeshes);
+	ai_assert( pMeshIndex < pNode->mNumMeshes);
 	size_t meshIndex = pNode->mMeshes[pMeshIndex];
-	assert( meshIndex < mScene->mNumMeshes);
+	ai_assert( meshIndex < mScene->mNumMeshes);
 	const aiMesh* mesh = mScene->mMeshes[meshIndex];
 
 	// resize array and initialise it with identity matrices
@@ -203,7 +203,7 @@ void SceneAnimator::UpdateTransforms( SceneAnimNode* pNode, const std::vector<ai
 	// update node local transform
 	if( pNode->mChannelIndex != -1)
 	{
-		assert( pNode->mChannelIndex < pTransforms.size());
+		ai_assert( pNode->mChannelIndex < pTransforms.size());
 		pNode->mLocalTransform = pTransforms[pNode->mChannelIndex];
 
 		// update global transform as well

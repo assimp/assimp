@@ -68,6 +68,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #undef max
 #endif // min
 
+#include <time.h>
+
 // default movement speed 
 #define MOVE_SPEED 3.f
 

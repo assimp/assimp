@@ -611,10 +611,10 @@ std::string g_szMaterialShader = std::string(
 		"float3 Tangent   : TEXCOORD0;\n"
 		"float3 Bitangent : TEXCOORD1;\n"
 		"float2 TexCoord0 : TEXCOORD2;\n"
-		"#ifdef AV_SKINNING \n"
+		 // "#ifdef AV_SKINNING \n"
 			"float4 BlendIndices : BLENDINDICES;\n"
 			"float4 BlendWeights : BLENDWEIGHT;\n"
-		"#endif // AV_SKINNING \n"
+		// "#endif // AV_SKINNING \n"
 	"};\n"
 
 	// Vertex shader output structure for pixel shader usage
@@ -689,7 +689,7 @@ std::string g_szMaterialShader = std::string(
 	// Vertex shader for pixel shader usage and one light
 	"VS_OUTPUT MaterialVShader_D1(VS_INPUT IN)\n"
 	"{\n"
-		"VS_OUTPUT Out;\n"
+		"VS_OUTPUT Out = (VS_OUTPUT)0;\n"
 
 		"#ifdef AV_SKINNING \n"
 		"float4 weights = IN.BlendWeights; \n"
@@ -724,7 +724,7 @@ std::string g_szMaterialShader = std::string(
 	// Vertex shader for pixel shader usage and two lights
 	"VS_OUTPUT MaterialVShader_D2(VS_INPUT IN)\n"
 	"{\n"
-		"VS_OUTPUT Out;\n"
+		"VS_OUTPUT Out = (VS_OUTPUT)0;\n"
 
 		"#ifdef AV_SKINNING \n"
 		"float4 weights = IN.BlendWeights; \n"
@@ -760,7 +760,7 @@ std::string g_szMaterialShader = std::string(
 	// Vertex shader for zero to five lights using the fixed function pixel pipeline
 	"VS_OUTPUT_FF MaterialVShader_FF(VS_INPUT IN)\n"
 	"{\n"
-		"VS_OUTPUT_FF Out;\n"
+		"VS_OUTPUT_FF Out = (VS_OUTPUT_FF)0;\n"
 
 		"#ifdef AV_SKINNING \n"
 		"float4 weights = IN.BlendWeights; \n"

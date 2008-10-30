@@ -41,6 +41,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="DEBUG, _SCL_SECURE_NO_WARNINGS, _CRT_SECURE_NO_WARNINGS,WIN32"
@@ -166,6 +167,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
@@ -293,6 +295,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
@@ -443,6 +446,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT"
@@ -583,6 +587,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\aiCamera.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\aiConfig.h"
 				>
 			</File>
@@ -592,6 +600,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\aiFileIO.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\aiLight.h"
 				>
 			</File>
 			<File
@@ -689,14 +701,34 @@
 			<Filter
 				Name="Compiler"
 				>
-				<Filter
-					Name="MSVC"
+				<File
+					RelativePath="..\..\include\Compiler\poppack1.h"
 					>
-					<File
-						RelativePath="..\..\include\Compiler\MSVC\stdint.h"
-						>
-					</File>
-				</Filter>
+				</File>
+				<File
+					RelativePath="..\..\include\Compiler\pstdint.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\Compiler\pushpack1.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Boost_Workaround"
+				>
+				<File
+					RelativePath="..\..\include\BoostWorkaround\boost\format.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\BoostWorkaround\boost\multi_array.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\BoostWorkaround\boost\scoped_ptr.hpp"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -708,6 +740,14 @@
 			</File>
 			<File
 				RelativePath="..\..\code\Assimp.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\AssimpPCH.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\AssimpPCH.h"
 				>
 			</File>
 			<File
@@ -759,6 +799,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\FindDegenerates.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\FindDegenerates.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\GenericProperty.h"
 				>
 			</File>
@@ -799,11 +847,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\SceneCombiner.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\SceneCombiner.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\SGSpatialSort.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\code\SGSpatialSort.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\SkeletonMeshBuilder.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\SkeletonMeshBuilder.h"
 				>
 			</File>
 			<File
@@ -828,6 +892,10 @@
 			</File>
 			<File
 				RelativePath="..\..\code\StandardShapes.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\StreamReader.h"
 				>
 			</File>
 			<File
@@ -873,6 +941,46 @@
 			<Filter
 				Name="Loaders"
 				>
+				<File
+					RelativePath="..\..\code\ACLoader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\ACLoader.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\BVHLoader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\BVHLoader.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\IRRLoader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\IRRLoader.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\IRRMeshLoader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\IRRMeshLoader.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\LWSLoader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\LWSLoader.h"
+					>
+				</File>
 				<Filter
 					Name="3DS"
 					>
@@ -1254,6 +1362,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\FindInvalidDataProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\FindInvalidDataProcess.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\FixNormalsStep.cpp"
 					>
 				</File>
@@ -1383,6 +1499,46 @@
 				</File>
 				<File
 					RelativePath="..\..\code\Compiler\pushpack1.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="irrXML"
+				>
+				<File
+					RelativePath="..\..\code\irrXML\CXMLReaderImpl.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\irrXML\fast_atof.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\irrXML\heapsort.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\irrXML\irrArray.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\irrXML\irrString.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\irrXML\irrTypes.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\irrXML\irrXML.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\irrXML\irrXML.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\irrXML\irrXMLWrapper.h"
 					>
 				</File>
 			</Filter>

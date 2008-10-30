@@ -1985,14 +1985,10 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 				for( unsigned int a = 0; a < mesh->mNumBones; a++)
 				{
 					const aiMatrix4x4& mat = boneMats[a];
-					*tempmat++ = mat.a1; *tempmat++ = mat.a2; *tempmat++ = mat.a3;
-					tempmat++;  
-					*tempmat++ = mat.a4; *tempmat++ = mat.b1; *tempmat++ = mat.b2;
-					tempmat++; 
-					*tempmat++ = mat.b3; *tempmat++ = mat.b4; *tempmat++ = mat.c1; 
-					tempmat++;
-					*tempmat++ = mat.c2; *tempmat++ = mat.c3; *tempmat++ = mat.c4; 
-					tempmat++;
+					*tempmat++ = mat.a1; *tempmat++ = mat.a2; *tempmat++ = mat.a3; *tempmat++ = mat.a4;  
+					*tempmat++ = mat.b1; *tempmat++ = mat.b2; *tempmat++ = mat.b3; *tempmat++ = mat.b4;
+					*tempmat++ = mat.c1; *tempmat++ = mat.c2; *tempmat++ = mat.c3; *tempmat++ = mat.c4; 
+					*tempmat++ = mat.d1; *tempmat++ = mat.d2; *tempmat++ = mat.d3; *tempmat++ = mat.d4; 
 				}
 				helper->piEffect->SetMatrixArray( "gBoneMatrix", (D3DXMATRIX*)matrices, 60);
 			}

@@ -1991,7 +1991,7 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 					*tempmat++ = mat.d1; *tempmat++ = mat.d2; *tempmat++ = mat.d3; *tempmat++ = mat.d4; 
 					//tempmat += 4;
 				}
-				helper->piEffect->SetMatrixTransposeArray( "gBoneMatrix", (D3DXMATRIX*)matrices, 60);
+				helper->piEffect->SetMatrixArray( "gBoneMatrix", (D3DXMATRIX*)matrices, 60);
 			}
 
 			// now setup the material

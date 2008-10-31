@@ -77,7 +77,7 @@ void AnimEvaluator::Evaluate( double pTime)
 
 		// ******** Position *****
 		aiVector3D presentPosition( 0, 0, 0);
-		if( channel->mPositionKeys > 0)
+		if( channel->mNumPositionKeys > 0)
 		{
 			// Look for present frame number. Search from last position if time is after the last time, else from beginning
 			// Should be much quicker than always looking from start for the average use case.
@@ -96,7 +96,7 @@ void AnimEvaluator::Evaluate( double pTime)
 
 		// ******** Rotation *********
 		aiQuaternion presentRotation( 1, 0, 0, 0);
-		if( channel->mRotationKeys > 0)
+		if( channel->mNumRotationKeys > 0)
 		{
 			unsigned int frame = (time >= mLastTime) ? mLastPositions[a].get<1>() : 0;
 			while( frame < channel->mNumRotationKeys - 1)
@@ -113,7 +113,7 @@ void AnimEvaluator::Evaluate( double pTime)
 
 		// ******** Scaling **********
 		aiVector3D presentScaling( 0, 0, 0);
-		if( channel->mScalingKeys > 0)
+		if( channel->mNumScalingKeys > 0)
 		{
 			unsigned int frame = (time >= mLastTime) ? mLastPositions[a].get<2>() : 0;
 			while( frame < channel->mNumScalingKeys - 1)

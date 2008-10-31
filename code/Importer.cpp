@@ -122,6 +122,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_IRR_IMPORTER
 #	include "IRRLoader.h"
 #endif
+//#ifndef AI_BUILD_NO_Q3D_IMPORTER
+//#	include "Q3DLoader.h"
+//#endif
 
 
 // PostProcess-Steps
@@ -213,7 +216,7 @@ Importer::Importer() :
 	mImporter.push_back( new ObjFileImporter());
 #endif
 #if (!defined AI_BUILD_NO_3DS_IMPORTER)
-	mImporter.push_back( new Dot3DSImporter());
+	mImporter.push_back( new Discreet3DSImporter());
 #endif
 #if (!defined AI_BUILD_NO_MD3_IMPORTER)
 	mImporter.push_back( new MD3Importer());
@@ -275,6 +278,9 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_IRR_IMPORTER)
 	mImporter.push_back( new IRRImporter());
 #endif
+//#if (!defined AI_BUILD_NO_Q3D_IMPORTER)
+//	mImporter.push_back( new Q3DImporter());
+//#endif
 
 	// add an instance of each post processing step here in the order 
 	// of sequence it is executed. steps that are added here are not validated -
@@ -286,6 +292,7 @@ Importer::Importer() :
 #endif
 
 	mPostProcessingSteps.push_back( new DeterminePTypeHelperProcess());
+
 
 #if (!defined AI_BUILD_NO_FINDDEGENERATES_PROCESS)
 	mPostProcessingSteps.push_back( new FindDegeneratesProcess());
@@ -705,7 +712,7 @@ float Importer::GetPropertyFloat(const char* szName,
 }
 
 // ------------------------------------------------------------------------------------------------
-std::string Importer::GetPropertyString(const char* szName, 
+const std::string& Importer::GetPropertyString(const char* szName, 
 	const std::string& iErrorReturn /*= ""*/) const
 {
 	return GetGenericProperty<std::string>(mStringProperties,szName,iErrorReturn);

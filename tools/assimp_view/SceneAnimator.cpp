@@ -224,7 +224,7 @@ void SceneAnimator::CalculateGlobalTransform( SceneAnimNode* pInternalNode)
 	SceneAnimNode* node = pInternalNode->mParent;
 	while( node)
 	{
-		pInternalNode->mGlobalTransform *= node->mLocalTransform;
+		pInternalNode->mGlobalTransform = pInternalNode->mGlobalTransform * node->mLocalTransform;
 		node = node->mParent;
 	}
 }

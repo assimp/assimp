@@ -46,13 +46,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ------------------------------------------------------------------------------------------------
 template <class T>
-inline void SetGenericProperty(std::map< uint32_t, T >& list, 
+inline void SetGenericProperty(std::map< unsigned int, T >& list, 
 	const char* szName, const T& value, bool* bWasExisting = NULL)
 {
 	ai_assert(NULL != szName);
 
-	typedef std::map< uint32_t, T >  GenericPropertyMap;
-	typedef std::pair< uint32_t, T > GenericPair;
+	typedef std::map<  unsigned int, T >  GenericPropertyMap;
+	typedef std::pair< unsigned int, T > GenericPair;
 
 	uint32_t hash = SuperFastHash(szName);
 
@@ -70,13 +70,13 @@ inline void SetGenericProperty(std::map< uint32_t, T >& list,
 
 // ------------------------------------------------------------------------------------------------
 template <class T>
-inline T GetGenericProperty(const std::map< uint32_t, T >& list, 
+inline const T& GetGenericProperty(const std::map< unsigned int, T >& list, 
 	const char* szName, const T& errorReturn)
 {
 	ai_assert(NULL != szName);
 
-	typedef std::map< uint32_t, T >  GenericPropertyMap;
-	typedef std::pair< uint32_t, T > GenericPair;
+	typedef std::map<  unsigned int, T >  GenericPropertyMap;
+	typedef std::pair< unsigned int, T > GenericPair;
 
 	uint32_t hash = SuperFastHash(szName);
 
@@ -90,13 +90,13 @@ inline T GetGenericProperty(const std::map< uint32_t, T >& list,
 // Special version for pointer types - they will be deleted when replaced with another value
 // passing NULL removes the whole property
 template <class T>
-inline void SetGenericPropertyPtr(std::map< uint32_t, T* >& list, 
+inline void SetGenericPropertyPtr(std::map< unsigned int, T* >& list, 
 	const char* szName, T* value, bool* bWasExisting = NULL)
 {
 	ai_assert(NULL != szName);
 
-	typedef std::map< uint32_t, T* >  GenericPropertyMap;
-	typedef std::pair< uint32_t, T* > GenericPair;
+	typedef std::map<  unsigned int, T* >  GenericPropertyMap;
+	typedef std::pair< unsigned int, T* > GenericPair;
 
 	uint32_t hash = SuperFastHash(szName);
 

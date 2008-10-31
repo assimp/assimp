@@ -109,8 +109,9 @@ void FindInvalidDataProcess::Execute( aiScene* pScene)
 
 	bool out = false;
 	std::vector<unsigned int> meshMapping(pScene->mNumMeshes);
-	unsigned int real = 0;	
+	unsigned int real = 0, realAnimations = 0;	
 
+	// Process meshes
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 	{
 		int result;
@@ -131,8 +132,32 @@ void FindInvalidDataProcess::Execute( aiScene* pScene)
 		meshMapping[a] = real++;
 	}
 
+	// Process animations
+	for (unsigned int a = 0; a < pScene->mNumAnimations;++a)
+	{
+		int result;
+		if ((result = ProcessAnimation( pScene->mAnimations[a])))
+		{
+			out = true;
+
+			if (2 == result)
+			{
+				// remove this animation
+				delete pScene->mAnimations[a];
+				AI_DEBUG_INVALIDATE_PTR(pScene->mAnimations[a]);
+				continue;
+			}
+		}
+		pScene->mAnimations[realAnimations++] = pScene->mAnimations[a];
+	}
+
 	if (out)
 	{
+		if(!(pScene->mNumAnimations = realAnimations))
+		{
+			delete[] pScene->mAnimations;
+			pScene->mAnimations = NULL;
+		}
 		if ( real != pScene->mNumMeshes)
 		{
 			if (!real)
@@ -199,7 +224,69 @@ inline bool ProcessArray(T*& in, unsigned int num,const char* name,
 }
 
 // ------------------------------------------------------------------------------------------------
-// Executes the post processing step on the given imported data.
+template <typename T>
+inline bool AllIdentical(T* in, unsigned int num)
+{
+	if (!num)return true;
+	for (unsigned int i = 0; i < num-1;++i)
+	{
+		if (in[i] != in[i+1])return false;
+	}
+	return true;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Search an animation for invalid content
+int FindInvalidDataProcess::ProcessAnimation (aiAnimation* anim)
+{
+	bool out = false;
+	unsigned int real = 0;
+
+	// Process all animation channels
+	for (unsigned int a = 0; a < anim->mNumChannels;++a)
+	{
+		int result;
+		if ((result = ProcessAnimationChannel( anim->mChannels[a])))
+		{
+			out = true;
+			// remove this animation channel
+			delete anim->mChannels[a];
+			AI_DEBUG_INVALIDATE_PTR(anim->mChannels[a]);
+			continue;
+		}
+		anim->mChannels[real++] = anim->mChannels[a];
+	}
+	if (out)
+	{
+		anim->mNumChannels = real;
+		if (!real)
+		{
+			DefaultLogger::get()->error("Deleting anim: it consists of dummy tracks");
+			return 2;
+		}
+		return 1;
+	}
+	return 0;
+}
+
+// ------------------------------------------------------------------------------------------------
+int FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
+{
+	int i = 0;
+
+	// Check whether all values are identical or whether there is just one keyframe
+	if ((1 >= anim->mNumPositionKeys || AllIdentical(anim->mPositionKeys,anim->mNumPositionKeys)) &&
+		(1 >= anim->mNumScalingKeys  || AllIdentical(anim->mRotationKeys,anim->mNumRotationKeys)) &&
+		(1 >= anim->mNumRotationKeys || AllIdentical(anim->mScalingKeys,anim->mNumScalingKeys)))
+	{
+		DefaultLogger::get()->error("Deleting dummy position animation channel");
+		return 1;
+	}
+	return 0;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Search a mesh for invalid contents
 int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 {
 	bool ret = false;

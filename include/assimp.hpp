@@ -65,6 +65,7 @@ namespace Assimp
 	class BaseImporter;
 	class BaseProcess;
 	class SharedPostProcessInfo;
+	class BatchLoader;
 }
 
 #define AI_PROPERTY_WAS_NOT_EXISTING 0xffffffff
@@ -101,11 +102,12 @@ class ASSIMP_API Importer
 {
 	// used internally
 	friend class BaseProcess;
+	friend class BatchLoader;
 	friend const aiScene* ::aiImportFileEx( const char*, unsigned int, aiFileIO*);
 
 public:
 
-	typedef uint32_t KeyType;
+	typedef unsigned int KeyType;
 	typedef std::map<KeyType, int>  		IntPropertyMap;
 	typedef std::map<KeyType, float>		FloatPropertyMap;
 	typedef std::map<KeyType, std::string>	StringPropertyMap;
@@ -230,9 +232,11 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Get a string configuration property
+	 *
+	 *  The return value remains valid until the property is modified.
 	 * @see GetPropertyInteger()
 	 */
-	std::string GetPropertyString(const char* szName,
+	const std::string& GetPropertyString(const char* szName,
 		const std::string& sErrorReturn = "") const;
 
 

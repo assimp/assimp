@@ -152,6 +152,9 @@ private:
 	StreamArray	m_StreamArray;
 	//!	Array with default streams
 	std::vector<LogStream*> m_Streams;
+
+	bool noRepeatMsg;
+	std::string lastMsg;
 };
 // ---------------------------------------------------------------------------
 

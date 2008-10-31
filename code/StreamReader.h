@@ -64,7 +64,8 @@ class StreamReader
 public:
 
 	/** Construction from a given stream with a well-defined endianess
-	 *
+	 * 
+	 *  The stream will be deleted afterwards.
 	 *  @param stream Input stream
 	 */
 	inline StreamReader(IOStream* stream)
@@ -76,10 +77,15 @@ public:
 		if (!s)throw new ImportErrorException("File is empty");
 
 		current = buffer = new int8_t[s];
-		end = &buffer[s];
+		stream->Read(current,s,1);
+		end = limit = &buffer[s];
 	}
 
-	inline ~StreamReader() {delete[] buffer;}
+	inline ~StreamReader() 
+	{
+		delete[] buffer;
+		delete stream;
+	}
 
 
 	/** Read a float from the stream 
@@ -127,11 +133,88 @@ public:
 		return Get<int64_t>();
 	}
 
-	/** Get the remaining stream size
+	/** Get the remaining stream size (to the end of the srream)
 	 */
 	inline unsigned int GetRemainingSize()
 	{
 		return (unsigned int)(end - current);
+	}
+
+
+	/** Get the remaining stream size (to the current read limit)
+	 */
+	inline unsigned int GetRemainingSizeToLimit()
+	{
+		return (unsigned int)(limit - current);
+	}
+
+
+	/** Increase the file pointer
+	 */
+	inline void IncPtr(unsigned int plus)
+	{
+		current += plus;
+		if (current > end)
+		{
+			throw new ImportErrorException("End of file was reached");
+		}
+	}
+
+	/** Get the current file pointer
+	 */
+	inline int8_t* GetPtr() const
+	{
+		return current;
+	}
+
+	/** Set current file pointer
+	 */
+	inline void SetPtr(int8_t* p)
+	{
+		current = p;
+		if (current > end || current < buffer)
+		{
+			throw new ImportErrorException("End of file was reached");
+		}
+	}
+
+	/** Get the current offset from the beginning of the file
+	 */
+	inline int GetCurrentPos() const
+	{
+		return (unsigned int)(current - buffer);
+	}
+
+	/** Setup a temporary read limit
+	 * 
+	 *  @param limit Maximum number of bytes to be read from
+	 *    the beginning of the file. Passing 0xffffffff
+	 *    resets the limit.
+	 */
+	inline void SetReadLimit(unsigned int _limit)
+	{
+		if (0xffffffff == _limit)
+		{
+			limit = end;
+			return;
+		}
+		limit = buffer + _limit;
+		if (limit > end)
+			throw new ImportErrorException("StreamReader: Invalid read limit");
+	}
+
+	/** Get the current read limit
+	 */
+	inline int GetReadLimit() const
+	{
+		return (unsigned int)(limit - buffer);
+	}
+
+	/** Skip to the read limit
+	 */
+	inline void SkipToReadLimit()
+	{
+		current = limit;
 	}
 
 	// overload operator>> for those who prefer this way ...
@@ -160,8 +243,8 @@ private:
 	template <typename T>
 	inline T Get()
 	{
-		if (current + sizeof(T) > end)
-			throw new ImportErrorException("End of file was reached");
+		if (current + sizeof(T) > limit)
+			throw new ImportErrorException("End of file or stream limit was reached");
 
 		T f = *((const T*)current);
 		if (SwapEndianess)
@@ -173,7 +256,7 @@ private:
 	}
 
 	IOStream* stream;
-	int8_t *buffer, *current, *end;
+	int8_t *buffer, *current, *end, *limit;
 };
 
 #ifdef AI_BUILD_BIG_ENDIAN
@@ -184,6 +267,6 @@ private:
 	typedef StreamReader<false> StreamReaderLE;
 #endif
 
-};
+} // end namespace Assimp
 
 #endif // !! AI_STREAMREADER_H_INCLUDED

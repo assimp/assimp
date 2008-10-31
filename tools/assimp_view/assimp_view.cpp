@@ -561,7 +561,7 @@ int CreateAssetData()
 					((unsigned char)std::max( std::min( mesh->mColors[0][x].g * 255.0f, 255.0f),0.0f)),
 					((unsigned char)std::max( std::min( mesh->mColors[0][x].b * 255.0f, 255.0f),0.0f)));
 			}
-			else pbData2->dColorDiffuse = D3DCOLOR_ARGB(0xFF,0,0,0);
+			else pbData2->dColorDiffuse = D3DCOLOR_ARGB(0xFF,0xff,0xff,0xff);
 
 			// ignore a third texture coordinate component
 			if (mesh->HasTextureCoords( 0))
@@ -570,7 +570,7 @@ int CreateAssetData()
 					mesh->mTextureCoords[0][x].x,
 					mesh->mTextureCoords[0][x].y);
 			}
-			else pbData2->vTextureUV = aiVector2D(0.0f,0.0f);
+			else pbData2->vTextureUV = aiVector2D(0.5f,0.5f);
 
 			// Bone indices and weights
 			if( mesh->HasBones())

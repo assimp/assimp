@@ -58,8 +58,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 // ------------------------------------------------------------------------------------------------
-inline uint32_t SuperFastHash (const char * data, unsigned int len = 0, uint32_t hash = 0) {
-uint32_t tmp;
+inline unsigned int SuperFastHash (const char * data, unsigned int len = 0, unsigned int hash = 0) {
+unsigned int tmp;
 int rem;
 
     if (!data) return 0;

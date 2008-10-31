@@ -247,6 +247,22 @@ protected:
  */
 class ASSIMP_API BatchLoader
 {
+	// friend of Importer
+
+public:
+
+	/** Represents a full list of configuration properties
+	 *  for the importer.
+	 *
+	 *  Properties can be set using SetGenericProperty
+	 */
+	struct PropertyMap
+	{
+		Importer::IntPropertyMap     ints;
+		Importer::FloatPropertyMap   floats;
+		Importer::StringPropertyMap  strings;
+	};
+
 
 public:
 
@@ -258,10 +274,12 @@ public:
 
 	/** Add a new file to the list of files to be loaded.
 	 *
-	 *  No postprocessing steps are executed on the file
 	 *  @param file File to be loaded
+	 *  @param steps Steps to be executed on the file
+	 *  @param map Optional configuration properties
 	 */
-	void AddLoadRequest		(const std::string& file);
+	void AddLoadRequest	(const std::string& file,
+		unsigned int steps = 0, const PropertyMap* map = NULL);
 
 
 	/** Get an imported scene.

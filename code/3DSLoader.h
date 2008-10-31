@@ -53,22 +53,22 @@ namespace Assimp
 {
 class MaterialHelper;
 
-using namespace Dot3DS;
+using namespace D3DS;
 
 // ---------------------------------------------------------------------------
-/** The Dot3DSImporter is a worker class capable of importing a scene from a
+/** The Discreet3DSImporter is a worker class capable of importing a scene from a
 * 3ds Max 4/5 Files (.3ds)
 */
-class Dot3DSImporter : public BaseImporter
+class Discreet3DSImporter : public BaseImporter
 {
 	friend class Importer;
 
 protected:
 	/** Constructor to be privately used by Importer */
-	Dot3DSImporter();
+	Discreet3DSImporter();
 
 	/** Destructor, private as well */
-	~Dot3DSImporter();
+	~Discreet3DSImporter();
 
 public:
 
@@ -105,15 +105,15 @@ protected:
 	// -------------------------------------------------------------------
 	/** Converts a temporary material to the outer representation 
 	*/
-	void ConvertMaterial(Dot3DS::Material& p_cMat,
+	void ConvertMaterial(D3DS::Material& p_cMat,
 		MaterialHelper& p_pcOut);
 
 	// -------------------------------------------------------------------
-	/** Read a chunk, get a pointer to it
-	*  The mCurrent pointer will be increased by sizeof(Dot3DSFile::Chunk),
-	* thus pointing directly to the data of the chunk
+	/** Read a chunk
+	 *
+	 *  @param pcOut Receives the current chunk
 	*/
-	void ReadChunk(const Dot3DSFile::Chunk** p_ppcOut);
+	void ReadChunk(Discreet3DS::Chunk* pcOut);
 
 	// -------------------------------------------------------------------
 	/** Parse a percentage chunk. mCurrent will point to the next
@@ -144,52 +144,57 @@ protected:
 	// -------------------------------------------------------------------
 	/** Parse a main top-level chunk in the file
 	*/
-	void ParseMainChunk(int& piRemaining);
+	void ParseMainChunk();
 
 	// -------------------------------------------------------------------
 	/** Parse a top-level chunk in the file
 	*/
-	void ParseChunk(int& piRemaining);
+	void ParseChunk(const char* name, unsigned int num);
 
 	// -------------------------------------------------------------------
 	/** Parse a top-level editor chunk in the file
 	*/
-	void ParseEditorChunk(int& piRemaining);
+	void ParseEditorChunk();
 
 	// -------------------------------------------------------------------
 	/** Parse a top-level object chunk in the file
 	*/
-	void ParseObjectChunk(int& piRemaining);
+	void ParseObjectChunk();
 
 	// -------------------------------------------------------------------
 	/** Parse a material chunk in the file
 	*/
-	void ParseMaterialChunk(int& piRemaining);
+	void ParseMaterialChunk();
 
 	// -------------------------------------------------------------------
 	/** Parse a mesh chunk in the file
 	*/
-	void ParseMeshChunk(int& piRemaining);
+	void ParseMeshChunk();
+
+	// -------------------------------------------------------------------
+	/** Parse a light chunk in the file
+	*/
+	void ParseLightChunk();
 
 	// -------------------------------------------------------------------
 	/** Parse a face list chunk in the file
 	*/
-	void ParseFaceChunk(int& piRemaining);
+	void ParseFaceChunk();
 
 	// -------------------------------------------------------------------
 	/** Parse a keyframe chunk in the file
 	*/
-	void ParseKeyframeChunk(int& piRemaining);
+	void ParseKeyframeChunk();
 
 	// -------------------------------------------------------------------
 	/** Parse a hierarchy chunk in the file
 	*/
-	void ParseHierarchyChunk(int& piRemaining);
+	void ParseHierarchyChunk(uint16_t parent);
 
 	// -------------------------------------------------------------------
 	/** Parse a texture chunk in the file
 	*/
-	void ParseTextureChunk(int& piRemaining,Dot3DS::Texture* pcOut);
+	void ParseTextureChunk(D3DS::Texture* pcOut);
 
 	// -------------------------------------------------------------------
 	/** Convert the meshes in the file
@@ -209,18 +214,18 @@ protected:
 	// -------------------------------------------------------------------
 	/** generate unique vertices for a mesh
 	*/
-	void MakeUnique(Dot3DS::Mesh& sMesh);
+	void MakeUnique(D3DS::Mesh& sMesh);
 
 	// -------------------------------------------------------------------
 	/** Add a node to the node graph
 	*/
-	void AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* pcIn);
+	void AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Node* pcIn);
 
 	// -------------------------------------------------------------------
 	/** Search for a node in the graph.
 	* Called recursively
 	*/
-	void InverseNodeSearch(Dot3DS::Node* pcNode,Dot3DS::Node* pcCurrent);
+	void InverseNodeSearch(D3DS::Node* pcNode,D3DS::Node* pcCurrent);
 
 	// -------------------------------------------------------------------
 	/** Apply the master scaling factor to the mesh
@@ -230,7 +235,7 @@ protected:
 	// -------------------------------------------------------------------
 	/** Clamp all indices in the file to a valid range
 	*/
-	void CheckIndices(Dot3DS::Mesh& sMesh);
+	void CheckIndices(D3DS::Mesh& sMesh);
 
 
 protected:
@@ -238,23 +243,17 @@ protected:
 	/** Configuration option: skip pivot chunks */
 	bool configSkipPivot;
 
-	/** Buffer to hold the loaded file */
-	unsigned char* mBuffer;
-
-	/** Pointer to the current read position */
-	const unsigned char* mCurrent;
-
-	/** Used to store old chunk addresses to jump back in the file*/
-	const unsigned char* mLast;
+	/** Stream to read from */
+	StreamReaderLE* stream;
 
 	/** Last touched node index */
 	short mLastNodeIndex;
 
 	/** Current node, root node */
-	Dot3DS::Node* mCurrentNode, *mRootNode;
+	D3DS::Node* mCurrentNode, *mRootNode;
 
 	/** Scene under construction */
-	Dot3DS::Scene* mScene;
+	D3DS::Scene* mScene;
 
 	/** Ambient base color of the scene */
 	aiColor3D mClrAmbient;

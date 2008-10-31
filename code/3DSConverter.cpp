@@ -46,50 +46,55 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "3DSLoader.h"
-#include "MaterialSystem.h"
 #include "TextureTransform.h"
-#include "StringComparison.h"
-#include "qnan.h"
 
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ReplaceDefaultMaterial()
+// Setup final material indices, generae a default material if necessary
+void Discreet3DSImporter::ReplaceDefaultMaterial()
 {
+	// *******************************************************************
 	// try to find an existing material that matches the
 	// typical default material setting:
 	// - no textures
 	// - diffuse color (in grey!)
 	// NOTE: This is here to workaround the fact that some
 	// exporters are writing a default material, too.
-	unsigned int iIndex = 0xcdcdcdcd;
-	for (unsigned int i = 0; i < this->mScene->mMaterials.size();++i)
+	// *******************************************************************
+	unsigned int idx = 0xcdcdcdcd;
+	for (unsigned int i = 0; i < mScene->mMaterials.size();++i)
 	{
-	if (std::string::npos == this->mScene->mMaterials[i].mName.find("default") &&
-		std::string::npos == this->mScene->mMaterials[i].mName.find("DEFAULT"))continue;
+		std::string s = mScene->mMaterials[i].mName;
+		for (std::string::iterator it = s.begin(); it != s.end(); ++it)
+			*it = ::tolower(*it);
 
-	if (this->mScene->mMaterials[i].mDiffuse.r !=
-		this->mScene->mMaterials[i].mDiffuse.g ||
-		this->mScene->mMaterials[i].mDiffuse.r !=
-		this->mScene->mMaterials[i].mDiffuse.b)continue;
+		if (std::string::npos == s.find("default"))continue;
 
-	if (this->mScene->mMaterials[i].sTexDiffuse.mMapName.length() != 0	||
-		this->mScene->mMaterials[i].sTexBump.mMapName.length()!= 0		|| 
-		this->mScene->mMaterials[i].sTexOpacity.mMapName.length() != 0	||
-		this->mScene->mMaterials[i].sTexEmissive.mMapName.length() != 0	||
-		this->mScene->mMaterials[i].sTexSpecular.mMapName.length() != 0	||
-		this->mScene->mMaterials[i].sTexShininess.mMapName.length() != 0 )continue;
+		if (mScene->mMaterials[i].mDiffuse.r !=
+			mScene->mMaterials[i].mDiffuse.g ||
+			mScene->mMaterials[i].mDiffuse.r !=
+			mScene->mMaterials[i].mDiffuse.b)continue;
 
-	iIndex = i;
+		if (mScene->mMaterials[i].sTexDiffuse.mMapName.length()   != 0	||
+			mScene->mMaterials[i].sTexBump.mMapName.length()      != 0	|| 
+			mScene->mMaterials[i].sTexOpacity.mMapName.length()   != 0	||
+			mScene->mMaterials[i].sTexEmissive.mMapName.length()  != 0	||
+			mScene->mMaterials[i].sTexSpecular.mMapName.length()  != 0	||
+			mScene->mMaterials[i].sTexShininess.mMapName.length() != 0 )
+		{
+			continue;
+		}
+		idx = i;
 	}
-	if (0xcdcdcdcd == iIndex)iIndex = (unsigned int)this->mScene->mMaterials.size();
+	if (0xcdcdcdcd == idx)idx = (unsigned int)mScene->mMaterials.size();
 
 	// now iterate through all meshes and through all faces and
 	// find all faces that are using the default material
-	unsigned int iCnt = 0;
-	for (std::vector<Dot3DS::Mesh>::iterator
-		i =  this->mScene->mMeshes.begin();
-		i != this->mScene->mMeshes.end();++i)
+	unsigned int cnt = 0;
+	for (std::vector<D3DS::Mesh>::iterator
+		i =  mScene->mMeshes.begin();
+		i != mScene->mMeshes.end();++i)
 	{
 		for (std::vector<unsigned int>::iterator
 			a =  (*i).mFaceMaterials.begin();
@@ -99,32 +104,35 @@ void Dot3DSImporter::ReplaceDefaultMaterial()
 			// some exporters seem to generate invalid data here
 			if (0xcdcdcdcd == (*a))
 			{
-				(*a) = iIndex;
-				++iCnt;
+				(*a) = idx;
+				++cnt;
 			}
-			else if ( (*a) >= this->mScene->mMaterials.size())
+			else if ( (*a) >= mScene->mMaterials.size())
 			{
-				(*a) = iIndex;
-				++iCnt;
+				(*a) = idx;
 				DefaultLogger::get()->warn("Material index overflow in 3DS file. Using default material");
+				++cnt;
 			}
 		}
 	}
-	if (iCnt && iIndex == this->mScene->mMaterials.size())
+	if (cnt && idx == mScene->mMaterials.size())
 	{
-		// we need to create our own default material
-		Dot3DS::Material sMat;
+		// We need to create our own default material
+		D3DS::Material sMat;
 		sMat.mDiffuse = aiColor3D(0.3f,0.3f,0.3f);
 		sMat.mName = "%%%DEFAULT";
-		this->mScene->mMaterials.push_back(sMat);
+		mScene->mMaterials.push_back(sMat);
+
+		DefaultLogger::get()->info("3DS: Generating default material");
 	}
 	return;
 }
 
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::CheckIndices(Dot3DS::Mesh& sMesh)
+// Check whether all indices are valid. Otherwise we'd crash before the validation step was reached
+void Discreet3DSImporter::CheckIndices(D3DS::Mesh& sMesh)
 {
-	for (std::vector< Dot3DS::Face >::iterator
+	for (std::vector< D3DS::Face >::iterator
 		 i =  sMesh.mFaces.begin();
 		 i != sMesh.mFaces.end();++i)
 	{
@@ -133,8 +141,13 @@ void Dot3DSImporter::CheckIndices(Dot3DS::Mesh& sMesh)
 		{
 			if ((*i).mIndices[a] >= sMesh.mPositions.size())
 			{
-				DefaultLogger::get()->warn("3DS: Face index overflow)");
+				DefaultLogger::get()->warn("3DS: Vertex index overflow)");
 				(*i).mIndices[a] = (uint32_t)sMesh.mPositions.size()-1;
+			}
+			if ( !sMesh.mTexCoords.empty() && (*i).mIndices[a] >= sMesh.mTexCoords.size())
+			{
+				DefaultLogger::get()->warn("3DS: Texture coordinate index overflow)");
+				(*i).mIndices[a] = (uint32_t)sMesh.mTexCoords.size()-1;
 			}
 		}
 	}
@@ -142,14 +155,14 @@ void Dot3DSImporter::CheckIndices(Dot3DS::Mesh& sMesh)
 }
 
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::MakeUnique(Dot3DS::Mesh& sMesh)
+// Generate out unique verbose format representation
+void Discreet3DSImporter::MakeUnique(D3DS::Mesh& sMesh)
 {
 	unsigned int iBase = 0;
 
-	std::vector<aiVector3D> vNew;
+	// Allocate output storage
+	std::vector<aiVector3D> vNew  (sMesh.mFaces.size() * 3);
 	std::vector<aiVector2D> vNew2;
-
-	vNew.resize(sMesh.mFaces.size() * 3);
 	if (sMesh.mTexCoords.size())vNew2.resize(sMesh.mFaces.size() * 3);
 
 	for (unsigned int i = 0; i < sMesh.mFaces.size();++i)
@@ -181,26 +194,27 @@ void Dot3DSImporter::MakeUnique(Dot3DS::Mesh& sMesh)
 }
 
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
+// Convert a 3DS material to an aiMaterial
+void Discreet3DSImporter::ConvertMaterial(D3DS::Material& oldMat,
 	MaterialHelper& mat)
 {
 	// NOTE: Pass the background image to the viewer by bypassing the
-	// material system. This is an evil hack, never do it  again!
-	if (0 != this->mBackgroundImage.length() && this->bHasBG)
+	// material system. This is an evil hack, never do it again!
+	if (0 != mBackgroundImage.length() && bHasBG)
 	{
 		aiString tex;
-		tex.Set( this->mBackgroundImage);
+		tex.Set( mBackgroundImage);
 		mat.AddProperty( &tex, AI_MATKEY_GLOBAL_BACKGROUND_IMAGE);
 
 		// be sure this is only done for the first material
-		this->mBackgroundImage = std::string("");
+		mBackgroundImage = std::string("");
 	}
 
 	// At first add the base ambient color of the
 	// scene to	the material
-	oldMat.mAmbient.r += this->mClrAmbient.r;
-	oldMat.mAmbient.g += this->mClrAmbient.g;
-	oldMat.mAmbient.b += this->mClrAmbient.b;
+	oldMat.mAmbient.r += mClrAmbient.r;
+	oldMat.mAmbient.g += mClrAmbient.g;
+	oldMat.mAmbient.b += mClrAmbient.b;
 
 	aiString name;
 	name.Set( oldMat.mName);
@@ -213,12 +227,12 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 	mat.AddProperty( &oldMat.mEmissive, 1, AI_MATKEY_COLOR_EMISSIVE);
 
 	// phong shininess and shininess strength
-	if (Dot3DS::Dot3DSFile::Phong == oldMat.mShading || 
-		Dot3DS::Dot3DSFile::Metal == oldMat.mShading)
+	if (D3DS::Discreet3DS::Phong == oldMat.mShading || 
+		D3DS::Discreet3DS::Metal == oldMat.mShading)
 	{
 		if (!oldMat.mSpecularExponent || !oldMat.mShininessStrength)
 		{
-			oldMat.mShading = Dot3DS::Dot3DSFile::Gouraud;
+			oldMat.mShading = D3DS::Discreet3DS::Gouraud;
 		}
 		else
 		{
@@ -244,31 +258,31 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 	aiShadingMode eShading = aiShadingMode_NoShading;
 	switch (oldMat.mShading)
 	{
-		case Dot3DS::Dot3DSFile::Flat:
+		case D3DS::Discreet3DS::Flat:
 			eShading = aiShadingMode_Flat; break;
 
 		// I don't know what "Wire" shading should be,
 		// assume it is simple lambertian diffuse (L dot N) shading
-		case Dot3DS::Dot3DSFile::Wire:
-		case Dot3DS::Dot3DSFile::Gouraud:
+		case D3DS::Discreet3DS::Wire:
+		case D3DS::Discreet3DS::Gouraud:
 			eShading = aiShadingMode_Gouraud; break;
 
 		// assume cook-torrance shading for metals.
-		case Dot3DS::Dot3DSFile::Phong :
+		case D3DS::Discreet3DS::Phong :
 			eShading = aiShadingMode_Phong; break;
 
-		case Dot3DS::Dot3DSFile::Metal :
+		case D3DS::Discreet3DS::Metal :
 			eShading = aiShadingMode_CookTorrance; break;
 
 			// FIX to workaround a warning with GCC 4 who complained
 			// about a missing case Blinn: here - Blinn isn't a valid
 			// value in the 3DS Loader, it is just needed for ASE
-		case Dot3DS::Dot3DSFile::Blinn :
+		case D3DS::Discreet3DS::Blinn :
 			eShading = aiShadingMode_Blinn; break;
 	}
 	mat.AddProperty<int>( (int*)&eShading,1,AI_MATKEY_SHADING_MODEL);
 
-	if (Dot3DS::Dot3DSFile::Wire == oldMat.mShading)
+	if (D3DS::Discreet3DS::Wire == oldMat.mShading)
 	{
 		// set the wireframe flag
 		unsigned int iWire = 1;
@@ -276,6 +290,7 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 	}
 
 	// texture, if there is one
+	// DIFFUSE texture
 	if( oldMat.sTexDiffuse.mMapName.length() > 0)
 	{
 		aiString tex;
@@ -292,6 +307,7 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_DIFFUSE(0));
 		}
 	}
+	// SPECULAR texture
 	if( oldMat.sTexSpecular.mMapName.length() > 0)
 	{
 		aiString tex;
@@ -308,6 +324,7 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_SPECULAR(0));
 		}
 	}
+	// OPACITY texture
 	if( oldMat.sTexOpacity.mMapName.length() > 0)
 	{
 		aiString tex;
@@ -323,6 +340,7 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_OPACITY(0));
 		}
 	}
+	// EMISSIVE texture
 	if( oldMat.sTexEmissive.mMapName.length() > 0)
 	{
 		aiString tex;
@@ -338,6 +356,7 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_EMISSIVE(0));
 		}
 	}
+	// BUMP texturee
 	if( oldMat.sTexBump.mMapName.length() > 0)
 	{
 		aiString tex;
@@ -353,6 +372,7 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_HEIGHT(0));
 		}
 	}
+	// SHININESS texture
 	if( oldMat.sTexShininess.mMapName.length() > 0)
 	{
 		aiString tex;
@@ -369,7 +389,7 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 		}
 	}
 
-	// store the name of the material itself, too
+	// Store the name of the material itself, too
 	if( oldMat.mName.length())
 	{
 		aiString tex;
@@ -378,31 +398,31 @@ void Dot3DSImporter::ConvertMaterial(Dot3DS::Material& oldMat,
 	}
 	return;
 }
+
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
+// Split meshes by their materials and generate output aiMesh'es
+void Discreet3DSImporter::ConvertMeshes(aiScene* pcOut)
 {
 	std::vector<aiMesh*> avOutMeshes;
-	avOutMeshes.reserve(this->mScene->mMeshes.size() * 2);
+	avOutMeshes.reserve(mScene->mMeshes.size() * 2);
 
 	unsigned int iFaceCnt = 0;
 
 	// we need to split all meshes by their materials
-	for (std::vector<Dot3DS::Mesh>::iterator
-		i =  this->mScene->mMeshes.begin();
-		i != this->mScene->mMeshes.end();++i)
+	for (std::vector<D3DS::Mesh>::iterator i =  mScene->mMeshes.begin();
+		i != mScene->mMeshes.end();++i)
 	{
 		std::vector<unsigned int>* aiSplit = new std::vector<unsigned int>[
-			this->mScene->mMaterials.size()];
+			mScene->mMaterials.size()];
 
 		unsigned int iNum = 0;
-		for (std::vector<unsigned int>::const_iterator
-			a =  (*i).mFaceMaterials.begin();
+		for (std::vector<unsigned int>::const_iterator a =  (*i).mFaceMaterials.begin();
 			a != (*i).mFaceMaterials.end();++a,++iNum)
 		{
 			aiSplit[*a].push_back(iNum);
 		}
 		// now generate submeshes
-		for (unsigned int p = 0; p < this->mScene->mMaterials.size();++p)
+		for (unsigned int p = 0; p < mScene->mMaterials.size();++p)
 		{
 			if (aiSplit[p].size() != 0)
 			{
@@ -438,15 +458,15 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 						p_pcOut->mFaces[q].mNumIndices = 3;
 
 						p_pcOut->mFaces[q].mIndices[2] = iBase;
-						p_pcOut->mVertices[iBase] = (*i).mPositions[(*i).mFaces[iIndex].mIndices[0]];
+						p_pcOut->mVertices[iBase]  = (*i).mPositions[(*i).mFaces[iIndex].mIndices[0]];
 						p_pcOut->mNormals[iBase++] = (*i).mNormals[(*i).mFaces[iIndex].mIndices[0]];
 
 						p_pcOut->mFaces[q].mIndices[1] = iBase;
-						p_pcOut->mVertices[iBase] = (*i).mPositions[(*i).mFaces[iIndex].mIndices[1]];
+						p_pcOut->mVertices[iBase]  = (*i).mPositions[(*i).mFaces[iIndex].mIndices[1]];
 						p_pcOut->mNormals[iBase++] = (*i).mNormals[(*i).mFaces[iIndex].mIndices[1]];
 
 						p_pcOut->mFaces[q].mIndices[0] = iBase;
-						p_pcOut->mVertices[iBase] = (*i).mPositions[(*i).mFaces[iIndex].mIndices[2]];
+						p_pcOut->mVertices[iBase]  = (*i).mPositions[(*i).mFaces[iIndex].mIndices[2]];
 						p_pcOut->mNormals[iBase++] = (*i).mNormals[(*i).mFaces[iIndex].mIndices[2]];
 					}
 				}
@@ -460,51 +480,60 @@ void Dot3DSImporter::ConvertMeshes(aiScene* pcOut)
 					{
 						unsigned int iIndex2 = aiSplit[p][q];
 
-						unsigned int iIndex = (*i).mFaces[iIndex2].mIndices[0];
-						aiVector2D& pc = (*i).mTexCoords[iIndex];
-						p_pcOut->mTextureCoords[0][iBase++] = aiVector3D(pc.x,pc.y,0.0f);
+						aiVector2D* pc = &(*i).mTexCoords[(*i).mFaces[iIndex2].mIndices[0]];
+						p_pcOut->mTextureCoords[0][iBase++] = aiVector3D(pc->x,pc->y,0.0f);
 
-						iIndex = (*i).mFaces[iIndex2].mIndices[1];
-						pc = (*i).mTexCoords[iIndex];
-						p_pcOut->mTextureCoords[0][iBase++] = aiVector3D(pc.x,pc.y,0.0f);
+						pc = &(*i).mTexCoords[(*i).mFaces[iIndex2].mIndices[1]];
+						p_pcOut->mTextureCoords[0][iBase++] = aiVector3D(pc->x,pc->y,0.0f);
 
-						iIndex = (*i).mFaces[iIndex2].mIndices[2];
-						pc = (*i).mTexCoords[iIndex];
-						p_pcOut->mTextureCoords[0][iBase++] = aiVector3D(pc.x,pc.y,0.0f);
+						pc = &(*i).mTexCoords[(*i).mFaces[iIndex2].mIndices[2]];
+						p_pcOut->mTextureCoords[0][iBase++] = aiVector3D(pc->x,pc->y,0.0f);
 					}
 					// apply texture coordinate scalings
-					TextureTransform::BakeScaleNOffset ( p_pcOut, &this->mScene->mMaterials[
+					TextureTransform::BakeScaleNOffset ( p_pcOut, &mScene->mMaterials[
 						p_pcOut->mMaterialIndex] );
 				}
 			}
 		}
 		delete[] aiSplit;
 	}
+
+	// Copy them to the output array
 	pcOut->mNumMeshes = (unsigned int)avOutMeshes.size();
 	pcOut->mMeshes = new aiMesh*[pcOut->mNumMeshes]();
 	for (unsigned int a = 0; a < pcOut->mNumMeshes;++a)
 		pcOut->mMeshes[a] = avOutMeshes[a];
 
-	if (!iFaceCnt)throw new ImportErrorException("No faces loaded. The mesh is empty");
+	// We should have at least one face here
+	if (!iFaceCnt)
+		throw new ImportErrorException("No faces loaded. The mesh is empty");
 
 	// for each material in the scene we need to setup the UV source
 	// set for each texture
 	for (unsigned int a = 0; a < pcOut->mNumMaterials;++a)
-		TextureTransform::SetupMatUVSrc( pcOut->mMaterials[a], &this->mScene->mMaterials[a] );
+	{
+		TextureTransform::SetupMatUVSrc( pcOut->mMaterials[a], &mScene->mMaterials[a] );
+	}
 	return;
 }
 
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* pcIn)
+// Add a node to the scenegraph and setup its final transformation
+void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Node* pcIn)
 {
 	std::vector<unsigned int> iArray;
 	iArray.reserve(3);
 
-	if (pcIn->mName != "$$$DUMMY")
+	if (pcIn->mName == "$$$DUMMY")
+	{
+		// append the "real" name of the dummy to the string
+		pcIn->mName.append(pcIn->mDummyName);
+	}
+	else // if (pcIn->mName != "$$$DUMMY")
 	{		
 		for (unsigned int a = 0; a < pcSOut->mNumMeshes;++a)
 		{
-			const Dot3DS::Mesh* pcMesh = (const Dot3DS::Mesh*)pcSOut->mMeshes[a]->mColors[0];
+			const D3DS::Mesh* pcMesh = (const D3DS::Mesh*)pcSOut->mMeshes[a]->mColors[0];
 			ai_assert(NULL != pcMesh);
 
 			// do case independent comparisons here, just for safety
@@ -513,12 +542,11 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 		}
 		if (!iArray.empty())
 		{
-			aiMatrix4x4& mTrafo = ((Dot3DS::Mesh*)pcSOut->mMeshes[iArray[0]]->mColors[0])->mMat;
+			aiMatrix4x4& mTrafo = ((D3DS::Mesh*)pcSOut->mMeshes[iArray[0]]->mColors[0])->mMat;
 			aiMatrix4x4 mInv = mTrafo;
-			if (!this->configSkipPivot)
+			if (!configSkipPivot)
 				mInv.Inverse();
 
-			pcOut->mName.Set(pcIn->mName);
 			pcOut->mNumMeshes = (unsigned int)iArray.size();
 			pcOut->mMeshes = new unsigned int[iArray.size()];
 			for (unsigned int i = 0;i < iArray.size();++i)
@@ -531,7 +559,7 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 				const aiVector3D* const pvEnd = mesh->mVertices+mesh->mNumVertices;
 				aiVector3D* pvCurrent = mesh->mVertices;
 
-				if(pivot.x || pivot.y || pivot.z && !this->configSkipPivot)
+				if(pivot.x || pivot.y || pivot.z && !configSkipPivot)
 				{
 					while (pvCurrent != pvEnd)
 					{
@@ -558,63 +586,90 @@ void Dot3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Dot3DS::Node* 
 			}
 		}
 	}
+
+	// Setup the name of the node
+	pcOut->mName.Set(pcIn->mName);
+
+	// Setup the transformation matrix of the node
 	pcOut->mTransformation = aiMatrix4x4(); 
+
+	// Allocate storage for children
 	pcOut->mNumChildren = (unsigned int)pcIn->mChildren.size();
 	pcOut->mChildren = new aiNode*[pcIn->mChildren.size()];
+
+	// Recursively process all children
 	for (unsigned int i = 0; i < pcIn->mChildren.size();++i)
 	{
 		pcOut->mChildren[i] = new aiNode();
 		pcOut->mChildren[i]->mParent = pcOut;
-		AddNodeToGraph(pcSOut,pcOut->mChildren[i],
-			pcIn->mChildren[i]);
+		AddNodeToGraph(pcSOut,pcOut->mChildren[i],pcIn->mChildren[i]);
 	}
 	return;
 }
+
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::GenerateNodeGraph(aiScene* pcOut)
+// Generate the output node graph
+void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 {
 	pcOut->mRootNode = new aiNode();
 
-	if (0 == this->mRootNode->mChildren.size())
-		{
+	if (0 == mRootNode->mChildren.size())
+	{
 		// seems the file has not even a hierarchy.
 		// generate a flat hiearachy which looks like this:
 		//
 		//                ROOT_NODE
 		//                   |
 		//   ----------------------------------------
-		//   |       |       |            |
-		// MESH_0  MESH_1  MESH_2  ...  MESH_N
+		//   |       |       |            |         |  
+		// MESH_0  MESH_1  MESH_2  ...  MESH_N    CAMERA_0 ....
 		//
 		DefaultLogger::get()->warn("No hierarchy information has been found in the file. ");
 
-		pcOut->mRootNode->mNumChildren = pcOut->mNumMeshes;
-		pcOut->mRootNode->mChildren = new aiNode* [ pcOut->mNumMeshes ];
+		pcOut->mRootNode->mNumChildren = pcOut->mNumMeshes + 
+			mScene->mCameras.size() + mScene->mLights.size();
 
-		for (unsigned int i = 0; i < pcOut->mNumMeshes;++i)
-			{
-			aiNode* pcNode = new aiNode();
+		pcOut->mRootNode->mChildren = new aiNode* [ pcOut->mRootNode->mNumChildren ];
+		pcOut->mRootNode->mName.Set("<3DSDummyRoot>");
+
+		// Build dummy nodes for all meshes
+		unsigned int a = 0;
+		for (unsigned int i = 0; i < pcOut->mNumMeshes;++i,++a)
+		{
+			aiNode* pcNode = pcOut->mRootNode->mChildren[a] = new aiNode();
 			pcNode->mParent = pcOut->mRootNode;
-			pcNode->mNumChildren = 0;
-			pcNode->mChildren = 0;
 			pcNode->mMeshes = new unsigned int[1];
 			pcNode->mMeshes[0] = i;
 			pcNode->mNumMeshes = 1;
 
-			char szBuffer[128];
-			int iLen;
-			iLen = sprintf(szBuffer,"UNNAMED_%i",i);
-			ai_assert(0 < iLen);
-			::memcpy(pcNode->mName.data,szBuffer,iLen);
-			pcNode->mName.data[iLen] = '\0';
-			pcNode->mName.length = iLen;
-
-			// add the new child to the parent node
-			pcOut->mRootNode->mChildren[i] = pcNode;
-			}
+			// Build a name for the node
+			pcNode->mName.length = sprintf(pcNode->mName.data,"3DSMesh_%i",i);	
 		}
-	else this->AddNodeToGraph(pcOut,  pcOut->mRootNode, this->mRootNode);
 
+		// Build dummy nodes for all cameras
+		for (unsigned int i = 0; i < (unsigned int )mScene->mCameras.size();++i,++a)
+		{
+			aiNode* pcNode = pcOut->mRootNode->mChildren[a] = new aiNode();
+			pcNode->mParent = pcOut->mRootNode;
+
+			// Build a name for the node
+			pcNode->mName = mScene->mCameras[i]->mName;
+		}
+
+		// Build dummy nodes for all lights
+		for (unsigned int i = 0; i < (unsigned int )mScene->mLights.size();++i,++a)
+		{
+			aiNode* pcNode = pcOut->mRootNode->mChildren[a] = new aiNode();
+			pcNode->mParent = pcOut->mRootNode;
+
+			// Build a name for the node
+			pcNode->mName = mScene->mLights[i]->mName;
+		}
+	}
+	else AddNodeToGraph(pcOut,  pcOut->mRootNode, mRootNode);
+
+	// We used the first vertex color set to store some
+	// temporary values, so we need to cleanup here
 	for (unsigned int a = 0; a < pcOut->mNumMeshes;++a)
 		pcOut->mMeshes[a]->mColors[0] = NULL;
 
@@ -631,19 +686,48 @@ void Dot3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 	// if the root node is a default node setup a name for it
 	if (pcOut->mRootNode->mName.data[0] == '$' && pcOut->mRootNode->mName.data[1] == '$')
 		pcOut->mRootNode->mName.Set("<root>");
-}
-// ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ConvertScene(aiScene* pcOut)
-{
-	pcOut->mNumMaterials = (unsigned int)this->mScene->mMaterials.size();
-	pcOut->mMaterials = new aiMaterial*[pcOut->mNumMaterials];
 
+	// modify the transformation of the root node to change
+	// the coordinate system of the whole scene from Max' to OpenGL
+	pcOut->mRootNode->mTransformation.a3 *= -1.f;
+	pcOut->mRootNode->mTransformation.b3 *= -1.f;
+	pcOut->mRootNode->mTransformation.c3 *= -1.f;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Convert all meshes in the scene and generate the final output scene.
+void Discreet3DSImporter::ConvertScene(aiScene* pcOut)
+{
+	// Allocate enough storage for all output materials
+	pcOut->mNumMaterials = (unsigned int)mScene->mMaterials.size();
+	pcOut->mMaterials    = new aiMaterial*[pcOut->mNumMaterials];
+
+	//  ... and convert the 3DS materials to aiMaterial's
 	for (unsigned int i = 0; i < pcOut->mNumMaterials;++i)
 	{
 		MaterialHelper* pcNew = new MaterialHelper();
-		this->ConvertMaterial(this->mScene->mMaterials[i],*pcNew);
+		ConvertMaterial(mScene->mMaterials[i],*pcNew);
 		pcOut->mMaterials[i] = pcNew;
 	}
-	this->ConvertMeshes(pcOut);
+
+	// Generate the output mesh list
+	ConvertMeshes(pcOut);
+
+	// Now copy all light sources to the output scene
+	pcOut->mNumLights = (unsigned int)mScene->mLights.size();
+	if (pcOut->mNumLights)
+	{
+		pcOut->mLights = new aiLight*[pcOut->mNumLights];
+		::memcpy(pcOut->mLights,&mScene->mLights[0],sizeof(void*)*pcOut->mNumLights);
+	}
+
+	// Now copy all cameras to the output scene
+	pcOut->mNumCameras = (unsigned int)mScene->mCameras.size();
+	if (pcOut->mNumCameras)
+	{
+		pcOut->mCameras = new aiCamera*[pcOut->mNumCameras];
+		::memcpy(pcOut->mCameras,&mScene->mCameras[0],sizeof(void*)*pcOut->mNumCameras);
+	}
+
 	return;
 }

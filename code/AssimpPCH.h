@@ -42,6 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_PCH_INCLUDED
 #define ASSIMP_PCH_INCLUDED
 
+#define ASSIMP_INTERNAL_BUILD
+
 // *******************************************************************
 // Print detailled memory allocation statistics? In this case we'll
 // need to overload all C++ memory management functions. It is assumed
@@ -89,7 +91,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiScene.h"
 #include "../include/aiPostProcess.h"
 #include "../include/assimp.hpp"
-
 
 // *******************************************************************
 // internal headers that are nearly always required

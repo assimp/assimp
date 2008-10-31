@@ -80,7 +80,7 @@ extern "C" {
 // ---------------------------------------------------------------------------
 struct aiTexel
 {
-	uint8_t b,g,r,a;
+	unsigned char b,g,r,a;
 
 #ifdef __cplusplus
 	//! Comparison operator

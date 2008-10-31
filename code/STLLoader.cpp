@@ -298,6 +298,7 @@ bool STLImporter::LoadBinaryFile()
 		{
 			// read the default vertex color for facets
 			bIsMaterialise = true;
+			DefaultLogger::get()->info("STL: Taking code path for Materialise files");
 			this->clrColorDefault.r = (*sz2++) / 255.0f;
 			this->clrColorDefault.g = (*sz2++) / 255.0f;
 			this->clrColorDefault.b = (*sz2++) / 255.0f;
@@ -356,6 +357,8 @@ bool STLImporter::LoadBinaryFile()
 				for (unsigned int i = 0; i <pMesh->mNumVertices;++i)
 					*pMesh->mColors[0]++ = this->clrColorDefault;
 				pMesh->mColors[0] -= pMesh->mNumVertices;
+
+				DefaultLogger::get()->info("STL: Mesh has vertex colors");
 			}
 			aiColor4D* clr = &pMesh->mColors[0][pMesh->mNumFaces*3];
 			clr->a = 1.0f;
@@ -378,7 +381,7 @@ bool STLImporter::LoadBinaryFile()
 	}
 	if (bIsMaterialise && !pMesh->mColors[0])
 	{
-		// use the color was diffuse material color
+		// use the color as diffuse material color
 		return true;
 	}
 	return false;

@@ -848,6 +848,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\SkeletonMeshBuilder.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\SkeletonMeshBuilder.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\SmoothingGroups.h"
 				>
 			</File>
@@ -1374,6 +1382,10 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="Q3D"
+					>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="PostProcess"
@@ -1595,10 +1607,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\irrXML\fast_atof.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\code\irrXML\heapsort.h"
 					>
 				</File>
@@ -1732,14 +1740,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath="..\..\code\SkeletonMeshBuilder.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\code\SkeletonMeshBuilder.h"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

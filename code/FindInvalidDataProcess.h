@@ -92,6 +92,21 @@ protected:
 	 * @return 0 - nothing, 1 - removed sth, 2 - please delete me
 	 */
 	int ProcessMesh( aiMesh* pMesh);
+
+
+	// -------------------------------------------------------------------
+	/** Executes the postprocessing step on the given animation
+	 * @param anim The animation to process.
+	 * @return 0 - nothing, 1 - removed sth, 2 - please delete me
+	 */
+	int ProcessAnimation (aiAnimation* anim);
+
+	// -------------------------------------------------------------------
+	/** Executes the postprocessing step on the given anim channel
+	 * @param anim The animation channel to process.
+	 * @return 0 - nothing, 1 - removed sth, 2 - please delete me
+	 */
+	int ProcessAnimationChannel (aiNodeAnim* anim);
 };
 
 } // end of namespace Assimp

@@ -69,6 +69,7 @@ inline aiTextureMapMode GetMapMode(LWO::Texture::Wrap in)
 			return aiTextureMapMode_Mirror;
 		case LWO::Texture::RESET:
 			DefaultLogger::get()->warn("LWO2: Unsupported texture map mode: RESET");
+			// fall though here
 		case LWO::Texture::EDGE:
 			return aiTextureMapMode_Clamp;
 	}
@@ -258,12 +259,18 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 		if ((*it).functionName == "LW_SuperCelShader" ||
 			(*it).functionName == "AH_CelShader")
 		{
+			DefaultLogger::get()->info("Mapping LW_SuperCelShader/AH_CelShader "
+				"to aiShadingMode_Toon");
+
 			m = aiShadingMode_Toon;
 			break;
 		}
 		else if ((*it).functionName == "LW_RealFresnel" ||
 			(*it).functionName == "LW_FastFresnel")
 		{
+			DefaultLogger::get()->info("Mapping LW_RealFresnel/LW_FastFresnel "
+				"to aiShadingMode_Fresnel");
+
 			m = aiShadingMode_Fresnel;
 			break;
 		}
@@ -554,22 +561,8 @@ void LWOImporter::LoadLWO2ShaderBlock(LE_NCONST IFF::SubChunkHeader* head, unsig
 		{
 		case AI_LWO_ENAB:
 			shader.enabled = GetU2() ? true : false;
-		}
-		mFileBuffer = next;
-	}
+			break;
 
-	// process other subchunks ...
-	while (true)
-	{
-		if (mFileBuffer + 6 >= end)break;
-		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
-
-		if (mFileBuffer + head->length > end)
-			throw new ImportErrorException("LWO2: Invalid shader data chunk length");
-
-		uint8_t* const next = mFileBuffer+head->length;
-		switch (head->type)
-		{
 		case AI_LWO_FUNC:
 			GetS0( shader.functionName, head->length );
 		}

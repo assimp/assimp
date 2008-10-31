@@ -140,27 +140,31 @@ bool BaseImporter::SearchFileHeaderForToken(IOSystem* pIOHandler,
 
 
 // ------------------------------------------------------------------------------------------------
+// Represents an import request
 struct LoadRequest
 {
-	LoadRequest(const std::string& _file, unsigned int _flags)
+	LoadRequest(const std::string& _file, unsigned int _flags,const BatchLoader::PropertyMap* _map)
 		:	file	(_file)
 		,	flags	(_flags)
 		,	scene	(NULL)
 		,	refCnt	(1)
 		,	loaded	(false)
+		,	map		(*_map)
 	{}
 
 	const std::string file;
 	unsigned int flags;
 	unsigned int refCnt;
-
 	aiScene* scene;
 	bool loaded;
+	BatchLoader::PropertyMap map;
 
 	bool operator== (const std::string& f)
 		{return file == f;}
 };
 
+// ------------------------------------------------------------------------------------------------
+// BatchLoader::pimpl data structure
 struct BatchData
 {
 	// IO system to be used for all imports
@@ -199,7 +203,8 @@ BatchLoader::~BatchLoader()
 }
 
 // ------------------------------------------------------------------------------------------------
-void BatchLoader::AddLoadRequest	(const std::string& file)
+void BatchLoader::AddLoadRequest	(const std::string& file,
+	unsigned int steps /*= 0*/, const PropertyMap* map /*= NULL*/)
 {
 	// no threaded implementation for the moment
 	BatchData* data = ( BatchData* )pimpl;
@@ -211,9 +216,8 @@ void BatchLoader::AddLoadRequest	(const std::string& file)
 		(*it).refCnt++;
 		return;
 	}
-	data->requests.push_back(LoadRequest(file,0));
+	data->requests.push_back(LoadRequest(file,steps,map));
 }
-
 
 // ------------------------------------------------------------------------------------------------
 aiScene* BatchLoader::GetImport		(const std::string& file)
@@ -234,7 +238,6 @@ aiScene* BatchLoader::GetImport		(const std::string& file)
 	return NULL;
 }
 
-
 // ------------------------------------------------------------------------------------------------
 void BatchLoader::LoadAll()
 {
@@ -244,12 +247,15 @@ void BatchLoader::LoadAll()
 	for (std::list<LoadRequest>::iterator it = data->requests.begin();
 		it != data->requests.end(); ++it)
 	{
-		// no postprocessing for the moment except validation
-		// in debug builds
-		unsigned int pp = 0;
+		// force validation in debug builds
+		unsigned int pp = (*it).flags;
 #ifdef _DEBUG
 		pp |= aiProcess_ValidateDataStructure;
 #endif
+		// setup config properties if necessary
+		data->pImporter->mFloatProperties  = (*it).map.floats;
+		data->pImporter->mIntProperties    = (*it).map.ints;
+		data->pImporter->mStringProperties = (*it).map.strings;
 
 		data->pImporter->ReadFile((*it).file,pp);
 		(*it).scene = const_cast<aiScene*>(data->pImporter->GetOrphanedScene());

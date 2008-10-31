@@ -165,6 +165,7 @@ struct Material
 
 	//!	Constructor
 	Material()
+		:	diffuse(0.6f,0.6f,0.6f)
 	{
 		// empty
 	}

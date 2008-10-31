@@ -49,7 +49,7 @@ namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
 void TextureTransform::PreProcessUVTransform(
-	Dot3DS::Texture& rcIn)
+	D3DS::Texture& rcIn)
 {
 	char szTemp[512];
 	int iField;
@@ -139,7 +139,7 @@ void TextureTransform::PreProcessUVTransform(
 }
 // ------------------------------------------------------------------------------------------------
 void TextureTransform::AddToList(std::vector<STransformVecInfo>& rasVec,
-	Dot3DS::Texture* pcTex)
+	D3DS::Texture* pcTex)
 {
 	// check whether the texture is existing
 	if (0 == pcTex->mMapName.length())return;
@@ -176,10 +176,10 @@ void TextureTransform::AddToList(std::vector<STransformVecInfo>& rasVec,
 	rasVec.push_back(sInfo);
 }
 // ------------------------------------------------------------------------------------------------
-void TextureTransform::ApplyScaleNOffset(Dot3DS::Material& material)
+void TextureTransform::ApplyScaleNOffset(D3DS::Material& material)
 {
 	unsigned int iCnt = 0;
-	Dot3DS::Texture* pcTexture = NULL;
+	D3DS::Texture* pcTexture = NULL;
 
 	// diffuse texture
 	if (material.sTexDiffuse.mMapName.length())
@@ -278,10 +278,10 @@ void TextureTransform::ApplyScaleNOffset(Dot3DS::Material& material)
 	}
 }
 // ------------------------------------------------------------------------------------------------
-void TextureTransform::ApplyScaleNOffset(std::vector<Dot3DS::Material>& materials)
+void TextureTransform::ApplyScaleNOffset(std::vector<D3DS::Material>& materials)
 {
 	unsigned int iNum = 0;
-	for (std::vector<Dot3DS::Material>::iterator
+	for (std::vector<D3DS::Material>::iterator
 		i =  materials.begin();
 		i != materials.end();++i,++iNum)
 	{
@@ -291,7 +291,7 @@ void TextureTransform::ApplyScaleNOffset(std::vector<Dot3DS::Material>& material
 }
 // ------------------------------------------------------------------------------------------------
 void TextureTransform::BakeScaleNOffset(
-	aiMesh* pcMesh, Dot3DS::Material* pcSrc)
+	aiMesh* pcMesh, D3DS::Material* pcSrc)
 {
 	// NOTE: we don't use a texture matrix to do the transformation
 	// it is more efficient this way ... 
@@ -538,7 +538,7 @@ void TextureTransform::BakeScaleNOffset(
 	return;
 }
 // ------------------------------------------------------------------------------------------------
-void TextureTransform::SetupMatUVSrc (aiMaterial* pcMat, const Dot3DS::Material* pcMatIn)
+void TextureTransform::SetupMatUVSrc (aiMaterial* pcMat, const D3DS::Material* pcMatIn)
 {
 	ai_assert(NULL != pcMat);
 	ai_assert(NULL != pcMatIn);

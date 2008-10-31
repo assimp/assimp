@@ -86,7 +86,7 @@ inline VertexWeightTable* ComputeVertexBoneWeightTable(aiMesh* pMesh)
 		{
 			aiVertexWeight& weight = bone->mWeights[a];
 			avPerVertexWeights[weight.mVertexId].push_back( 
-				std::pair<unsigned int,float>(a,weight.mWeight));
+				std::pair<unsigned int,float>(i,weight.mWeight));
 		}
 	}
 	return avPerVertexWeights;

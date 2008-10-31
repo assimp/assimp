@@ -83,7 +83,7 @@ protected:
 	 */
 	void GetExtensionList(std::string& append)
 	{
-		append.append("*.ase;*.ask");
+		append.append("*.ase;*.ask;*.asc");
 	}
 
 	// -------------------------------------------------------------------
@@ -116,12 +116,6 @@ protected:
 	 */
 	void BuildUniqueRepresentation(ASE::Mesh& mesh);
 
-	// -------------------------------------------------------------------
-	/** Transform all vertices with the inverse transformation
-	 *  matrix of the mesh
-	 * \param mesh Mesh to work on
-	 */
-	void TransformVertices(ASE::Mesh& mesh);
 	/** Create one-material-per-mesh meshes ;-)
 	 * \param mesh Mesh to work with
 	 *  \param Receives the list of all created meshes
@@ -191,6 +185,8 @@ protected:
 
 	/** Scene to be filled */
 	aiScene* pcScene;
+
+	std::vector<BaseNode*> nodes;
 
 	/** Config options: Recompute the normals in every case - WA
 	    for 3DS Max broken ASE normal export */

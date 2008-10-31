@@ -233,6 +233,8 @@ DefaultLogger::DefaultLogger( const std::string &name, LogSeverity severity ) :
 	if (name.empty())
 		return;
 	m_Streams.push_back( new FileLogStream( name ) );
+
+	noRepeatMsg = false;
 }
 
 // ---------------------------------------------------------------------------
@@ -262,20 +264,37 @@ void DefaultLogger::writeToStreams(const std::string &message,
 {
 	if ( message.empty() )
 		return;
+
+	std::string s;
+	if (message == lastMsg)
+	{
+		if (!noRepeatMsg)
+		{
+			noRepeatMsg = true;
+			s = "Skipping one or more lines with the same contents";
+		}
+		else return;
+	}
+	else
+	{
+		lastMsg = s = message;
+		noRepeatMsg = false;
+	}
+
 	for ( ConstStreamIt it = m_StreamArray.begin();
 		it != m_StreamArray.end();
 		++it)
 	{
 		if ( ErrorSev & (*it)->m_uiErrorSeverity )
 		{
-			(*it)->m_pStream->write( message );
+			(*it)->m_pStream->write( s);
 		}
 	}
 	for (std::vector<LogStream*>::iterator it = m_Streams.begin();
 		it != m_Streams.end();
 		++it)
 	{
-		(*it)->write( message + std::string("\n"));
+		(*it)->write( s + std::string("\n"));
 	}
 }
 

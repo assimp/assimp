@@ -54,7 +54,7 @@ struct aiNode;
 namespace Assimp
 {
 
-using namespace Assimp::Dot3DS;
+using namespace Assimp::D3DS;
 
 // ---------------------------------------------------------------------------
 /** Helper class representing texture coordinate transformations
@@ -87,7 +87,7 @@ struct STransformVecInfo
 
 	//! List of all textures that use this texture
 	//! coordinate transformations
-	std::vector<Dot3DS::Texture*> pcTextures; 
+	std::vector<D3DS::Texture*> pcTextures; 
 
 
 	// -------------------------------------------------------------------
@@ -148,7 +148,7 @@ public:
 	 * \param rcIn Input texture
 	*/
 	inline static bool HasUVTransform(
-		const Dot3DS::Texture& rcIn)
+		const D3DS::Texture& rcIn)
 	{
 		return (rcIn.mOffsetU || rcIn.mOffsetV ||
 			1.0f != rcIn.mScaleU  ||  1.0f != rcIn.mScaleV || rcIn.mRotation);
@@ -159,7 +159,7 @@ public:
 	 * \param rcIn Input texture
 	*/
 	static void PreProcessUVTransform(
-		Dot3DS::Texture& rcIn);
+		D3DS::Texture& rcIn);
 
 	// -------------------------------------------------------------------
 	/** Check whether the texture coordinate transformation of
@@ -168,21 +168,21 @@ public:
 	 * \param pcTex Pointer to the texture
 	*/
 	static void AddToList(std::vector<STransformVecInfo>& rasVec,
-		Dot3DS::Texture* pcTex);
+		D3DS::Texture* pcTex);
 
 	// -------------------------------------------------------------------
 	/** Get a full list of all texture coordinate offsets required
 	 *  for a material
 	 * \param materials List of materials to be processed
 	*/
-	static void ApplyScaleNOffset(std::vector<Dot3DS::Material>& materials);
+	static void ApplyScaleNOffset(std::vector<D3DS::Material>& materials);
 
 	// -------------------------------------------------------------------
 	/** Get a full list of all texture coordinate offsets required
 	 *  for a material
 	 * \param material Material to be processed
 	*/
-	static void ApplyScaleNOffset(Dot3DS::Material& material);
+	static void ApplyScaleNOffset(D3DS::Material& material);
 
 	// -------------------------------------------------------------------
 	/** Precompute as many texture coordinate transformations as possible
@@ -190,7 +190,7 @@ public:
 	 * \param pcSrc Input material. Must have been passed to
 	 * ApplyScaleNOffset
 	*/
-	static void BakeScaleNOffset(aiMesh* pcMesh, Dot3DS::Material* pcSrc);
+	static void BakeScaleNOffset(aiMesh* pcMesh, D3DS::Material* pcSrc);
 
 	
 	// -------------------------------------------------------------------
@@ -199,7 +199,7 @@ public:
 	 * \param pcMatIn Input material, unconverted
 	*/
 	static void SetupMatUVSrc (aiMaterial* pcMat, 
-		const Dot3DS::Material* pcMatIn);
+		const D3DS::Material* pcMatIn);
 };
 
 }

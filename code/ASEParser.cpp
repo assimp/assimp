@@ -135,8 +135,7 @@ void Parser::LogWarning(const char* szWarn)
 #if _MSC_VER >= 1400
 	sprintf_s(szTemp,"Line %i: %s",iLineNumber,szWarn);
 #else
-	ai_assert(strlen(szWarn) < 950);
-	sprintf(szTemp,"Line %i: %s",iLineNumber,szWarn);
+	snprintf(szTemp,1024,"Line %i: %s",iLineNumber,szWarn);
 #endif
 
 	// output the warning to the logger ...
@@ -151,8 +150,7 @@ void Parser::LogInfo(const char* szWarn)
 #if _MSC_VER >= 1400
 	sprintf_s(szTemp,"Line %i: %s",iLineNumber,szWarn);
 #else
-	ai_assert(strlen(szWarn) < 950);
-	sprintf(szTemp,"Line %i: %s",iLineNumber,szWarn);
+	snprintf(szTemp,1024,"Line %i: %s",iLineNumber,szWarn);
 #endif
 
 	// output the information to the logger ...
@@ -167,8 +165,7 @@ void Parser::LogError(const char* szWarn)
 #if _MSC_VER >= 1400
 	sprintf_s(szTemp,"Line %i: %s",iLineNumber,szWarn);
 #else
-	ai_assert(strlen(szWarn) < 950);
-	sprintf(szTemp,"Line %i: %s",iLineNumber,szWarn);
+	snprintf(szTemp,1024,"Line %i: %s",iLineNumber,szWarn);
 #endif
 
 	// throw an exception
@@ -241,10 +238,10 @@ void Parser::Parse()
 				unsigned int iVersion;
 				ParseLV4MeshLong(iVersion);
 
-				if (200 != iVersion)
+				if (iVersion > 200)
 				{
 					LogWarning("Unknown file format version: *3DSMAX_ASCIIEXPORT should \
-						be 200. Continuing happily ...");
+						be <=200. Continuing happily ...");
 				}
 				continue;
 			}
@@ -254,7 +251,8 @@ void Parser::Parse()
 				ParseLV1SceneBlock();
 				continue;
 			}
-			// "group"
+			// "group" - no implementation yet, in facte
+			// we're just ignoring them for the moment
 			if (TokenMatch(m_szFile,"GROUP",5)) 
 			{
 				Parse();
@@ -271,15 +269,15 @@ void Parser::Parse()
 				
 			{
 				m_vMeshes.push_back(Mesh());
-				ParseLV1GeometryObjectBlock(m_vMeshes.back());
+				ParseLV1ObjectBlock(m_vMeshes.back());
 				continue;
 			}
 			// helper object = dummy in the hierarchy
 			if (TokenMatch(m_szFile,"HELPEROBJECT",12)) 
 				
 			{
-				m_vMeshes.push_back(Mesh());
-				ParseLV1GeometryObjectBlock(m_vMeshes.back());
+				m_vDummies.push_back(Dummy());
+				ParseLV1ObjectBlock(m_vDummies.back());
 				continue;
 			}
 			// light object
@@ -287,14 +285,14 @@ void Parser::Parse()
 				
 			{
 				m_vLights.push_back(Light());
-				ParseLV1LightObjectBlock(m_vLights.back());
+				ParseLV1ObjectBlock(m_vLights.back());
 				continue;
 			}
 			// camera object
 			if (TokenMatch(m_szFile,"CAMERAOBJECT",12)) 
 			{
 				m_vCameras.push_back(Camera());
-				ParseLV1CameraObjectBlock(m_vCameras.back());
+				ParseLV1ObjectBlock(m_vCameras.back());
 				continue;
 			}
 			// comment - print it on the console
@@ -436,24 +434,24 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 			{
 				if (TokenMatch(m_szFile,"Blinn",5))
 				{
-					mat.mShading = Dot3DSFile::Blinn;
+					mat.mShading = Discreet3DS::Blinn;
 				}
 				else if (TokenMatch(m_szFile,"Phong",5))
 				{
-					mat.mShading = Dot3DSFile::Phong;
+					mat.mShading = Discreet3DS::Phong;
 				}
 				else if (TokenMatch(m_szFile,"Flat",4))
 				{
-					mat.mShading = Dot3DSFile::Flat;
+					mat.mShading = Discreet3DS::Flat;
 				}
 				else if (TokenMatch(m_szFile,"Wire",4))
 				{
-					mat.mShading = Dot3DSFile::Wire;
+					mat.mShading = Discreet3DS::Wire;
 				}
 				else
 				{
 					// assume gouraud shading
-					mat.mShading = Dot3DSFile::Gouraud;
+					mat.mShading = Discreet3DS::Gouraud;
 					SkipToNextToken();
 				}
 				continue;
@@ -572,13 +570,28 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 void Parser::ParseLV3MapBlock(Texture& map)
 {
 	int iDepth = 0;
+
+	// *BITMAP should not be there if *MAP_CLASS is not BITMAP,
+	// but we need to expect that case ... if the path is
+	// empty the texture won't be used later.
+	bool parsePath = true; 
 	while (true)
 	{
 		if ('*' == *m_szFile)
 		{
 			++m_szFile;
+			// type of map
+			if (TokenMatch(m_szFile,"MAP_CLASS" ,9))
+			{
+				std::string temp;
+				if(!ParseString(temp,"*MAP_CLASS"))
+					SkipToNextToken();
+				if (temp != "Bitmap")
+					parsePath = false; 
+				continue;
+			}
 			// path to the texture
-			if (TokenMatch(m_szFile,"BITMAP" ,6))
+			if (parsePath && TokenMatch(m_szFile,"BITMAP" ,6))
 			{
 				if(!ParseString(map.mMapName,"*BITMAP"))
 					SkipToNextToken();
@@ -664,33 +677,7 @@ bool Parser::ParseString(std::string& out,const char* szName)
 }
 
 // ------------------------------------------------------------------------------------------------
-bool Parser::ParseSharedNodeInfo(ASE::BaseNode& mesh)
-{
-	// name of the mesh/node
-	if (TokenMatch(m_szFile,"NODE_NAME" ,9))
-	{
-		if(!ParseString(mesh.mName,"*NODE_NAME"))
-			SkipToNextToken();
-		return true;
-	}
-	// name of the parent of the node
-	if (TokenMatch(m_szFile,"NODE_PARENT" ,11) )
-	{
-		if(!ParseString(mesh.mParent,"*NODE_PARENT"))
-			SkipToNextToken();
-		return true;
-	}
-	// transformation matrix of the node
-	if (TokenMatch(m_szFile,"NODE_TM" ,7))
-	{
-		ParseLV2NodeTransformBlock(mesh);
-		return true;
-	}
-	return false;
-}
-
-// ------------------------------------------------------------------------------------------------
-void Parser::ParseLV1LightObjectBlock(ASE::Light& light)
+void Parser::ParseLV1ObjectBlock(ASE::BaseNode& node)
 {
 	int iDepth = 0;
 	while (true)
@@ -698,50 +685,93 @@ void Parser::ParseLV1LightObjectBlock(ASE::Light& light)
 		if ('*' == *m_szFile)
 		{
 			++m_szFile;
-			// first process common tokens such as node name and transform
-			if (ParseSharedNodeInfo(light))continue;
-			// light settings
-			if (TokenMatch(m_szFile,"LIGHT_SETTINGS" ,14))
-			{
-				ParseLV2LightSettingsBlock(light);
-				continue;
-			}
-			// type of the light source
-			if (TokenMatch(m_szFile,"LIGHT_TYPE" ,10))
-			{
-				if (!ASSIMP_strincmp("omni",m_szFile,4))
-				{
-					light.mLightType = ASE::Light::OMNI;
-				}
-				else
-				{
-					// TODO: use std::string as parameter for LogWarning
-					LogWarning("Unknown kind of light source");
-				}
-				continue;
-			}
-		}
-		AI_ASE_HANDLE_TOP_LEVEL_SECTION(iDepth);
-	}
-	return;
-}
 
-// ------------------------------------------------------------------------------------------------
-void Parser::ParseLV1CameraObjectBlock(ASE::Camera& camera)
-{
-	int iDepth = 0;
-	while (true)
-	{
-		if ('*' == *m_szFile)
-		{
-			++m_szFile;
 			// first process common tokens such as node name and transform
-			if (ParseSharedNodeInfo(camera))continue;
-			// Camera settings
-			if (TokenMatch(m_szFile,"CAMERA_SETTINGS" ,15))
+			// name of the mesh/node
+			if (TokenMatch(m_szFile,"NODE_NAME" ,9))
 			{
-				ParseLV2CameraSettingsBlock(camera);
+				if(!ParseString(node.mName,"*NODE_NAME"))
+					SkipToNextToken();
 				continue;
+			}
+			// name of the parent of the node
+			if (TokenMatch(m_szFile,"NODE_PARENT" ,11) )
+			{
+				if(!ParseString(node.mParent,"*NODE_PARENT"))
+					SkipToNextToken();
+				continue;
+			}
+			// transformation matrix of the node
+			if (TokenMatch(m_szFile,"NODE_TM" ,7))
+			{
+				ParseLV2NodeTransformBlock(node);
+				continue;
+			}
+			// animation data of the node
+			if (TokenMatch(m_szFile,"TM_ANIMATION" ,12))
+			{
+				ParseLV2AnimationBlock(node);
+				continue;
+			}
+
+			if (node.mType == BaseNode::Light)
+			{
+				// light settings
+				if (TokenMatch(m_szFile,"LIGHT_SETTINGS" ,14))
+				{
+					ParseLV2LightSettingsBlock((ASE::Light&)node);
+					continue;
+				}
+				// type of the light source
+				if (TokenMatch(m_szFile,"LIGHT_TYPE" ,10))
+				{
+					if (!ASSIMP_strincmp("omni",m_szFile,4))
+					{
+						((ASE::Light&)node).mLightType = ASE::Light::OMNI;
+					}
+					else if (!ASSIMP_strincmp("target",m_szFile,6))
+					{
+						((ASE::Light&)node).mLightType = ASE::Light::TARGET;
+					}
+					else if (!ASSIMP_strincmp("free",m_szFile,4))
+					{
+						((ASE::Light&)node).mLightType = ASE::Light::FREE;
+					}
+					else if (!ASSIMP_strincmp("directional",m_szFile,11))
+					{
+						((ASE::Light&)node).mLightType = ASE::Light::DIRECTIONAL;
+					}
+					else
+					{
+						// TODO: use std::string as parameter for LogWarning
+						LogWarning("Unknown kind of light source");
+					}
+					continue;
+				}
+			}
+			else if (node.mType == BaseNode::Camera)
+			{
+				// Camera settings
+				if (TokenMatch(m_szFile,"CAMERA_SETTINGS" ,15))
+				{
+					ParseLV2CameraSettingsBlock((ASE::Camera&)node);
+					continue;
+				}
+			}
+			else if (node.mType == BaseNode::Mesh)
+			{
+				// mesh data
+				if (TokenMatch(m_szFile,"MESH" ,4))
+				{
+					ParseLV2MeshBlock((ASE::Mesh&)node);
+					continue;
+				}
+				// mesh material index
+				if (TokenMatch(m_szFile,"MATERIAL_REF" ,12))
+				{
+					ParseLV4MeshLong(((ASE::Mesh&)node).iMaterialIndex);
+					continue;
+				}
 			}
 		}
 		AI_ASE_HANDLE_TOP_LEVEL_SECTION(iDepth);
@@ -798,6 +828,16 @@ void Parser::ParseLV2LightSettingsBlock(ASE::Light& light)
 				ParseLV4MeshFloat(light.mIntensity);
 				continue;
 			}
+			if (TokenMatch(m_szFile,"LIGHT_HOTSPOT" ,13))
+			{
+				ParseLV4MeshFloat(light.mAngle);
+				continue;
+			}
+			if (TokenMatch(m_szFile,"LIGHT_FALLOFF" ,13))
+			{
+				ParseLV4MeshFloat(light.mFalloff);
+				continue;
+			}
 		}
 		AI_ASE_HANDLE_SECTION(iDepth,"2","LIGHT_SETTINGS");
 	}
@@ -805,79 +845,122 @@ void Parser::ParseLV2LightSettingsBlock(ASE::Light& light)
 }
 
 // ------------------------------------------------------------------------------------------------
-void Parser::ParseLV1GeometryObjectBlock(ASE::Mesh& mesh)
+void Parser::ParseLV2AnimationBlock(ASE::BaseNode& mesh)
 {
 	int iDepth = 0;
-	while (true)
-	{
-		if ('*' == *m_szFile)
-		{
-			++m_szFile;
-			
-			if (ParseSharedNodeInfo(mesh))continue;
 
-			// mesh data
-			if (TokenMatch(m_szFile,"MESH" ,4))
-			{
-				ParseLV2MeshBlock(mesh);
-				continue;
-			}
-			// mesh material index
-			if (TokenMatch(m_szFile,"MATERIAL_REF" ,12))
-			{
-				ParseLV4MeshLong(mesh.iMaterialIndex);
-				continue;
-			}
-			// animation data of the node
-			if (TokenMatch(m_szFile,"TM_ANIMATION" ,12))
-			{
-				ParseLV2AnimationBlock(mesh);
-				continue;
-			}
-		}
-		AI_ASE_HANDLE_TOP_LEVEL_SECTION(iDepth);
-	}
-	return;
-}
-// ------------------------------------------------------------------------------------------------
-void Parser::ParseLV2AnimationBlock(ASE::Mesh& mesh)
-{
-	int iDepth = 0;
+	ASE::Animation* anim = &mesh.mAnim;
 	while (true)
 	{
 		if ('*' == *m_szFile)
 		{
 			++m_szFile;
-			// position keyframes
-			if (TokenMatch(m_szFile,"CONTROL_POS_TRACK" ,17))
+			if (TokenMatch(m_szFile,"NODE_NAME" ,9))
 			{
-				ParseLV3PosAnimationBlock(mesh);continue;
+				std::string temp;
+				if(!ParseString(temp,"*NODE_NAME"))
+					SkipToNextToken();
+
+				// If the name of the node contains .target it 
+				// represents an animated camera or spot light
+				// target.
+				if (std::string::npos != temp.find(".Target"))
+				{
+					if  (mesh.mType != BaseNode::Camera  &&
+						(mesh.mType != BaseNode::Light || 
+						((ASE::Light&)mesh).mLightType != ASE::Light::TARGET))
+					{   /* it is not absolutely sure we know the type of the light source yet */
+
+						DefaultLogger::get()->error("ASE: Found target animation channel "
+							"but the node is neither a camera nor a spot light");
+						anim = NULL;
+					}
+					else anim = &mesh.mTargetAnim;
+				}
+				continue;
+			}
+
+			// position keyframes
+			if (TokenMatch(m_szFile,"CONTROL_POS_TRACK"  ,17)  ||
+				TokenMatch(m_szFile,"CONTROL_POS_BEZIER" ,18)  ||
+				TokenMatch(m_szFile,"CONTROL_POS_TCB"    ,15))
+			{
+				if (!anim)SkipSection();
+				else ParseLV3PosAnimationBlock(*anim);
+				continue;
+			}
+			// scaling keyframes
+			if (TokenMatch(m_szFile,"CONTROL_SCALE_TRACK"  ,19) ||
+				TokenMatch(m_szFile,"CONTROL_SCALE_BEZIER" ,20) ||
+				TokenMatch(m_szFile,"CONTROL_SCALE_TCB"    ,17))
+			{
+				if (!anim || anim == &mesh.mTargetAnim)
+				{
+					// Target animation channels may have no rotation channels
+					DefaultLogger::get()->error("ASE: Ignoring scaling channel in target animation");
+					SkipSection();
+				}
+				else ParseLV3ScaleAnimationBlock(*anim);
+				continue;
 			}
 			// rotation keyframes
-			if (TokenMatch(m_szFile,"CONTROL_ROT_TRACK" ,17))
+			if (TokenMatch(m_szFile,"CONTROL_ROT_TRACK"  ,17) ||
+				TokenMatch(m_szFile,"CONTROL_ROT_BEZIER" ,18) ||
+				TokenMatch(m_szFile,"CONTROL_ROT_TCB"    ,15))
 			{
-				ParseLV3RotAnimationBlock(mesh);continue;
+				if (!anim || anim == &mesh.mTargetAnim)
+				{
+					// Target animation channels may have no rotation channels
+					DefaultLogger::get()->error("ASE: Ignoring rotation channel in target animation");
+					SkipSection();
+				}
+				else ParseLV3RotAnimationBlock(*anim);
+				continue;
 			}
 		}
 		AI_ASE_HANDLE_SECTION(iDepth,"2","TM_ANIMATION");
 	}
 }
 // ------------------------------------------------------------------------------------------------
-void Parser::ParseLV3PosAnimationBlock(ASE::Mesh& mesh)
+void Parser::ParseLV3ScaleAnimationBlock(ASE::Animation& anim)
 {
 	int iDepth = 0;
+	unsigned int iIndex;
+
 	while (true)
 	{
 		if ('*' == *m_szFile)
 		{
 			++m_szFile;
-			// position keyframe
-			if (TokenMatch(m_szFile,"CONTROL_POS_SAMPLE" ,18))
-			{
-				unsigned int iIndex;
-				mesh.mAnim.akeyPositions.push_back(aiVectorKey());
-				aiVectorKey& key = mesh.mAnim.akeyPositions.back();
 
+			bool b = false;
+
+			// For the moment we're just reading the three floats -
+			// we ignore the ádditional information for bezier's and TCBs
+
+			// simple scaling keyframe
+			if (TokenMatch(m_szFile,"CONTROL_SCALE_SAMPLE" ,20))
+			{
+				b = true;
+				anim.mScalingType = ASE::Animation::TRACK;
+			}
+
+			// Bezier scaling keyframe
+			if (TokenMatch(m_szFile,"CONTROL_BEZIER_SCALE_KEY" ,24))
+			{
+				b = true;
+				anim.mScalingType = ASE::Animation::BEZIER;
+			}
+			// TCB scaling keyframe
+			if (TokenMatch(m_szFile,"CONTROL_TCB_SCALE_KEY" ,21))
+			{
+				b = true;
+				anim.mScalingType = ASE::Animation::TCB;
+			}
+			if (b)
+			{
+				anim.akeyScaling.push_back(aiVectorKey());
+				aiVectorKey& key = anim.akeyScaling.back();
 				ParseLV4MeshFloatTriple(&key.mValue.x,iIndex);
 				key.mTime = (double)iIndex;
 			}
@@ -886,22 +969,90 @@ void Parser::ParseLV3PosAnimationBlock(ASE::Mesh& mesh)
 	}
 }
 // ------------------------------------------------------------------------------------------------
-void Parser::ParseLV3RotAnimationBlock(ASE::Mesh& mesh)
+void Parser::ParseLV3PosAnimationBlock(ASE::Animation& anim)
 {
 	int iDepth = 0;
+	unsigned int iIndex;
 	while (true)
 	{
 		if ('*' == *m_szFile)
 		{
 			++m_szFile;
-			// rotation keyframe
+			
+			bool b = false;
+
+			// For the moment we're just reading the three floats -
+			// we ignore the ádditional information for bezier's and TCBs
+
+			// simple scaling keyframe
+			if (TokenMatch(m_szFile,"CONTROL_POS_SAMPLE" ,18))
+			{
+				b = true;
+				anim.mPositionType = ASE::Animation::TRACK;
+			}
+
+			// Bezier scaling keyframe
+			if (TokenMatch(m_szFile,"CONTROL_BEZIER_POS_KEY" ,22))
+			{
+				b = true;
+				anim.mPositionType = ASE::Animation::BEZIER;
+			}
+			// TCB scaling keyframe
+			if (TokenMatch(m_szFile,"CONTROL_TCB_POS_KEY" ,19))
+			{
+				b = true;
+				anim.mPositionType = ASE::Animation::TCB;
+			}
+			if (b)
+			{
+				anim.akeyPositions.push_back(aiVectorKey());
+				aiVectorKey& key = anim.akeyPositions.back();
+				ParseLV4MeshFloatTriple(&key.mValue.x,iIndex);
+				key.mTime = (double)iIndex;
+			}
+		}
+		AI_ASE_HANDLE_SECTION(iDepth,"3","*CONTROL_POS_TRACK");
+	}
+}
+// ------------------------------------------------------------------------------------------------
+void Parser::ParseLV3RotAnimationBlock(ASE::Animation& anim)
+{
+	int iDepth = 0;
+	unsigned int iIndex;
+	while (true)
+	{
+		if ('*' == *m_szFile)
+		{
+			++m_szFile;
+
+			bool b = false;
+
+			// For the moment we're just reading the  floats -
+			// we ignore the ádditional information for bezier's and TCBs
+
+			// simple scaling keyframe
 			if (TokenMatch(m_szFile,"CONTROL_ROT_SAMPLE" ,18))
 			{
-				unsigned int iIndex;
-				mesh.mAnim.akeyRotations.push_back(aiQuatKey());
-				aiQuatKey& key = mesh.mAnim.akeyRotations.back();
+				b = true;
+				anim.mRotationType = ASE::Animation::TRACK;
+			}
 
-				// first read the axis, then the angle in radians
+			// Bezier scaling keyframe
+			if (TokenMatch(m_szFile,"CONTROL_BEZIER_ROT_KEY" ,22))
+			{
+				b = true;
+				anim.mRotationType = ASE::Animation::BEZIER;
+			}
+			// TCB scaling keyframe
+			if (TokenMatch(m_szFile,"CONTROL_TCB_ROT_KEY" ,19))
+			{
+				b = true;
+				anim.mRotationType = ASE::Animation::TCB;
+			}
+			if (b)
+			{
+				anim.akeyRotations.push_back(aiQuatKey());
+				aiQuatKey& key = anim.akeyRotations.back();
 				aiVector3D v;float f;
 				ParseLV4MeshFloatTriple(&v.x,iIndex);
 				ParseLV4MeshFloat(f);
@@ -916,64 +1067,103 @@ void Parser::ParseLV3RotAnimationBlock(ASE::Mesh& mesh)
 void Parser::ParseLV2NodeTransformBlock(ASE::BaseNode& mesh)
 {
 	int iDepth = 0;
+	int mode   = 0; 
 	while (true)
 	{
 		if ('*' == *m_szFile)
 		{
 			++m_szFile;
-			// first row of the transformation matrix
-			if (TokenMatch(m_szFile,"TM_ROW0" ,7))
+			// name of the node
+			if (TokenMatch(m_szFile,"NODE_NAME" ,9))
 			{
-				ParseLV4MeshFloatTriple(mesh.mTransform[0]);
+				std::string temp;
+				if(!ParseString(temp,"*NODE_NAME"))
+					SkipToNextToken();
+
+				std::string::size_type s;
+				if (temp == mesh.mName)
+				{
+					mode = 1;
+				}
+				else if (std::string::npos != (s = temp.find(".Target")) &&
+					mesh.mName == temp.substr(0,s))
+				{
+					// This should be either a target light or a target camera
+					if ( mesh.mType == BaseNode::Light &&  ((ASE::Light&)mesh) .mLightType  == ASE::Light::TARGET ||
+						 mesh.mType == BaseNode::Camera && ((ASE::Camera&)mesh).mCameraType == ASE::Camera::TARGET)
+					{
+						mode = 2;
+					}
+					else DefaultLogger::get()->error("ASE: Ignoring target transform, "
+						"this is no spot light or target camera");
+				}
+				else
+				{
+					DefaultLogger::get()->error("ASE: Unknown node transformation: " + temp);
+					// mode = 0
+				}
 				continue;
 			}
-			// second row of the transformation matrix
-			if (TokenMatch(m_szFile,"TM_ROW1" ,7))
+			if (mode)
 			{
-				ParseLV4MeshFloatTriple(mesh.mTransform[1]);
-				continue;
-			}
-			// third row of the transformation matrix
-			if (TokenMatch(m_szFile,"TM_ROW2" ,7))
-			{
-				ParseLV4MeshFloatTriple(mesh.mTransform[2]);
-				continue;
-			}
-			// fourth row of the transformation matrix
-			if (TokenMatch(m_szFile,"TM_ROW3" ,7))
-			{
-				ParseLV4MeshFloatTriple(mesh.mTransform[3]);
-				continue;
-			}
-			// inherited position axes
-			if (TokenMatch(m_szFile,"INHERIT_POS" ,11))
-			{
-				unsigned int aiVal[3];
-				ParseLV4MeshLongTriple(aiVal);
-				
-				for (unsigned int i = 0; i < 3;++i)
-					mesh.inherit.abInheritPosition[i] = aiVal[i] != 0;
-				continue;
-			}
-			// inherited rotation axes
-			if (TokenMatch(m_szFile,"INHERIT_ROT" ,11))
-			{
-				unsigned int aiVal[3];
-				ParseLV4MeshLongTriple(aiVal);
-				
-				for (unsigned int i = 0; i < 3;++i)
-					mesh.inherit.abInheritRotation[i] = aiVal[i] != 0;
-				continue;
-			}
-			// inherited scaling axes
-			if (TokenMatch(m_szFile,"INHERIT_SCL" ,11))
-			{
-				unsigned int aiVal[3];
-				ParseLV4MeshLongTriple(aiVal);
-				
-				for (unsigned int i = 0; i < 3;++i)
-					mesh.inherit.abInheritScaling[i] = aiVal[i] != 0;
-				continue;
+				// fourth row of the transformation matrix - and also the 
+				// only information here that is interesting for targets
+				if (TokenMatch(m_szFile,"TM_ROW3" ,7))
+				{
+					ParseLV4MeshFloatTriple((mode == 1 ? mesh.mTransform[3] : &mesh.mTargetPosition.x));
+					continue;
+				}
+				if (mode == 1)
+				{
+					// first row of the transformation matrix
+					if (TokenMatch(m_szFile,"TM_ROW0" ,7))
+					{
+						ParseLV4MeshFloatTriple(mesh.mTransform[0]);
+						continue;
+					}
+					// second row of the transformation matrix
+					if (TokenMatch(m_szFile,"TM_ROW1" ,7))
+					{
+						ParseLV4MeshFloatTriple(mesh.mTransform[1]);
+						continue;
+					}
+					// third row of the transformation matrix
+					if (TokenMatch(m_szFile,"TM_ROW2" ,7))
+					{
+						ParseLV4MeshFloatTriple(mesh.mTransform[2]);
+						continue;
+					}
+					// inherited position axes
+					if (TokenMatch(m_szFile,"INHERIT_POS" ,11))
+					{
+						unsigned int aiVal[3];
+						ParseLV4MeshLongTriple(aiVal);
+
+						for (unsigned int i = 0; i < 3;++i)
+							mesh.inherit.abInheritPosition[i] = aiVal[i] != 0;
+						continue;
+					}
+					// inherited rotation axes
+					if (TokenMatch(m_szFile,"INHERIT_ROT" ,11))
+					{
+						unsigned int aiVal[3];
+						ParseLV4MeshLongTriple(aiVal);
+
+						for (unsigned int i = 0; i < 3;++i)
+							mesh.inherit.abInheritRotation[i] = aiVal[i] != 0;
+						continue;
+					}
+					// inherited scaling axes
+					if (TokenMatch(m_szFile,"INHERIT_SCL" ,11))
+					{
+						unsigned int aiVal[3];
+						ParseLV4MeshLongTriple(aiVal);
+
+						for (unsigned int i = 0; i < 3;++i)
+							mesh.inherit.abInheritScaling[i] = aiVal[i] != 0;
+						continue;
+					}
+				}
 			}
 		}
 		AI_ASE_HANDLE_SECTION(iDepth,"2","*NODE_TM");
@@ -1493,45 +1683,58 @@ void Parser::ParseLV3MeshCFaceListBlock(unsigned int iNumFaces, ASE::Mesh& mesh)
 void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 {
 	// allocate enough storage for the normals
-	sMesh.mNormals.resize(sMesh.mPositions.size(),aiVector3D( 0.f, 0.f, 0.f ));
+	sMesh.mNormals.resize(sMesh.mFaces.size()*3,aiVector3D( 0.f, 0.f, 0.f ));
+	
 	int iDepth = 0;
-	unsigned int iIndex = 0;
+	unsigned int iIndex = 0, faceIdx = 0xffffffff;
 
 	// just smooth both vertex and face normals together, so it will still
-	// work if one oneof the two is missing ...
-	// FIX: ASE normals aren't orhotnormal and not really usable for us
+	// work if one one of the two is missing ...
 	while (true)
 	{
 		if ('*' == *m_szFile)
 		{
 			++m_szFile;
-			if (TokenMatch(m_szFile,"MESH_VERTEXNORMAL",17))
+			if (0xffffffff != faceIdx && TokenMatch(m_szFile,"MESH_VERTEXNORMAL",17))
 			{
 				aiVector3D vNormal;
 				ParseLV4MeshFloatTriple(&vNormal.x,iIndex);
 
-				if (iIndex >= sMesh.mNormals.size())
+				if (iIndex == sMesh.mFaces[faceIdx].mIndices[0])
 				{
-					LogWarning("Normal index is too large");
+					iIndex = 0;
+				}
+				else if (iIndex != sMesh.mFaces[faceIdx].mIndices[1])
+				{
+					iIndex = 1;
+				}
+				else if (iIndex != sMesh.mFaces[faceIdx].mIndices[2])
+				{
+					iIndex = 2;
+				}
+				else
+				{
+					LogWarning("Normal index doesn't fit to face index");
 					continue;
 				}
-				sMesh.mNormals[iIndex] += vNormal;
+				// We'll renormalized later
+				sMesh.mNormals[faceIdx*3 + iIndex] += vNormal;
 				continue;
 			}
 			if (TokenMatch(m_szFile,"MESH_FACENORMAL",15))
 			{
 				aiVector3D vNormal;
-				ParseLV4MeshFloatTriple(&vNormal.x,iIndex);
+				ParseLV4MeshFloatTriple(&vNormal.x,faceIdx);
 
 				if (iIndex >= sMesh.mFaces.size())
 				{
 					LogWarning("Face normal index is too large");
+					faceIdx = 0xffffffff;
 					continue;
 				}
-				for (unsigned int i = 0; i<3; ++i)
-				{
-					sMesh.mNormals[sMesh.mFaces[iIndex].mIndices[i]] += vNormal;
-				}
+				sMesh.mNormals[faceIdx*3]    += vNormal;
+				sMesh.mNormals[faceIdx*3 +1] += vNormal;
+				sMesh.mNormals[faceIdx*3 +2] += vNormal;
 				continue;
 			}
 		}

@@ -688,7 +688,7 @@ bool PLY::PropertyInstance::ParseInstance (const char* pCur,const char** pCurOut
 		unsigned int iNum = PLY::PropertyInstance::ConvertTo<unsigned int>(v,prop->eFirstType);
 
 		// parse all list elements
-		p_pcOut->avList.resize(3);
+		p_pcOut->avList.resize(iNum);
 		for (unsigned int i = 0; i < iNum;++i)
 		{
 			if (!SkipSpaces(pCur, &pCur))return false;

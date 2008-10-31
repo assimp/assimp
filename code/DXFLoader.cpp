@@ -118,6 +118,19 @@ bool DXFImporter::GetNextLine()
 	if(!SkipLine(&buffer))
 		return false;
 	if(!SkipSpaces(&buffer))return GetNextLine();
+	else if (*buffer == '{')
+	{
+		// some strange meta data ...
+		while (true)
+		{
+			if(!SkipLine(&buffer))
+				return false;
+
+			if(SkipSpaces(&buffer) && *buffer == '}')
+				break;
+		}
+		return GetNextLine();
+	}
 	return true;
 }
 
@@ -422,7 +435,10 @@ bool DXFImporter::ParsePolyLine()
 		// flags --- important that we know whether it is a polyface mesh
 		case 70:
 			{
-				flags = strtol10(cursor);
+				if (!flags)
+				{
+					flags = strtol10(cursor);
+				}
 				break;
 			};
 
@@ -472,7 +488,7 @@ bool DXFImporter::ParsePolyLine()
 		it != end; ++it)
 	{
 		unsigned int idx = *it;
-		if (idx > positions.size())
+		if (idx > positions.size() || !idx)
 		{
 			DefaultLogger::get()->error("DXF: Polyface mesh index os out of range");
 			idx = (unsigned int) positions.size();
@@ -511,7 +527,7 @@ bool DXFImporter::ParsePolyLineVertex(aiVector3D& out,aiColor4D& clr, unsigned i
 		case 71: outIdx[0] = strtol10(cursor);break;
 		case 72: outIdx[1] = strtol10(cursor);break;
 		case 73: outIdx[2] = strtol10(cursor);break;
-		case 74: outIdx[3] = strtol10(cursor);break;
+	//	case 74: outIdx[3] = strtol10(cursor);break;
 
 		// color
 		case 62: clr = g_aclrDxfIndexColors[strtol10(cursor) % AI_DXF_NUM_INDEX_COLORS]; break;

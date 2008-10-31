@@ -45,61 +45,48 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "3DSLoader.h"
-#include "MaterialSystem.h"
 #include "TextureTransform.h"
-#include "StringComparison.h"
-#include "qnan.h"
 
 using namespace Assimp;
 		
+// ------------------------------------------------------------------------------------------------
+// Begins a new parsing block
+// - Reads the current chunk and validates it
+// - computes its length
 
-// begin a chunk: parse it, validate its length, get a pointer to its end
 #define ASSIMP_3DS_BEGIN_CHUNK() \
-	const Dot3DSFile::Chunk* psChunk; \
-	this->ReadChunk(&psChunk); \
-	const unsigned char* pcCur = this->mCurrent; \
-	const unsigned char* pcCurNext = pcCur + (psChunk->Size \
-		- sizeof(Dot3DSFile::Chunk));
+	Discreet3DS::Chunk chunk; \
+	ReadChunk(&chunk); \
+	int chunkSize = chunk.Size-sizeof(Discreet3DS::Chunk); \
+	int oldReadLimit = stream->GetReadLimit(); \
+	stream->SetReadLimit(stream->GetCurrentPos() + chunkSize);
+	
 
-// process the end of a chunk and return if the end of the file is reached
+// ------------------------------------------------------------------------------------------------
+// End a parsing block
+// Must follow at the end of each parsing block
+
 #define ASSIMP_3DS_END_CHUNK() \
-	this->mCurrent = pcCurNext; \
-	piRemaining -= psChunk->Size; \
-	if (0 >= piRemaining)return;
+	stream->SkipToReadLimit(); \
+	stream->SetReadLimit(oldReadLimit); \
+	if (stream->GetRemainingSizeToLimit() == 0)return;
 
-
-// check whether the size of all subordinate chunks of a chunks is
-// not larger than the size of the chunk itself
-#ifdef _DEBUG
-#	define ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG \
-		"Size of chunk data plus size of subordinate chunks is " \
-		"larger than the size specified in the top-level chunk header."	
-
-#	define ASSIMP_3DS_VALIDATE_CHUNK_SIZE() \
-	if (pcCurNext < this->mCurrent) \
-	{ \
-		DefaultLogger::get()->warn(ASSIMP_3DS_WARN_CHUNK_OVERFLOW_MSG); \
-		pcCurNext = this->mCurrent; \
-	}
-#else
-#	define ASSIMP_3DS_VALIDATE_CHUNK_SIZE()
-#endif
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-Dot3DSImporter::Dot3DSImporter()
+Discreet3DSImporter::Discreet3DSImporter()
 {
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
-Dot3DSImporter::~Dot3DSImporter()
+Discreet3DSImporter::~Discreet3DSImporter()
 {
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool Dot3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool Discreet3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 {
 	// simple check of file extension is enough for the moment
 	std::string::size_type pos = pFile.find_last_of('.');
@@ -107,315 +94,428 @@ bool Dot3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) co
 	if( pos == std::string::npos)
 		return false;
 	std::string extension = pFile.substr( pos);
+	for (std::string::iterator i = extension.begin(); i != extension.end();++i)
+		*i = ::tolower(*i);
 
-	// not brillant but working ;-)
-	if( extension == ".3ds" || extension == ".3DS" || 
-		extension == ".3Ds" || extension == ".3dS")
-		return true;
-
-	return false;
+	return (extension == ".3ds");
 }
+
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties
-void Dot3DSImporter::SetupProperties(const Importer* pImp)
+void Discreet3DSImporter::SetupProperties(const Importer* pImp)
 {
-	this->configSkipPivot = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_3DS_IGNORE_PIVOT,0) ? true : false;
+	configSkipPivot = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_3DS_IGNORE_PIVOT,0) ? true : false;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
-void Dot3DSImporter::InternReadFile( 
-	const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
+void Discreet3DSImporter::InternReadFile( const std::string& pFile, 
+	aiScene* pScene, IOSystem* pIOHandler)
 {
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+	StreamReaderLE stream(pIOHandler->Open(pFile,"rb"));
+	this->stream = &stream;
 
-	// Check whether we can read from the file
-	if( file.get() == NULL)
-		throw new ImportErrorException( "Failed to open 3DS file " + pFile + ".");
+	// We should have at least one chunk
+	if (stream.GetRemainingSize() < 16)
+		throw new ImportErrorException("3DS file is either empty or corrupt: " + pFile);
 
-	// check whether the .3ds file is large enough to contain
-	// at least one chunk.
-	size_t fileSize = file->FileSize();
-	if( fileSize < 16)
-		throw new ImportErrorException( "3DS File is too small.");
+	// Allocate our temporary 3DS representation
+	mScene = new D3DS::Scene();
 
-	this->mScene = new Dot3DS::Scene();
+	// Initialize members
+	mLastNodeIndex             = -1;
+	mCurrentNode               = new D3DS::Node();
+	mRootNode                  = mCurrentNode;
+	mRootNode->mHierarchyPos   = -1;
+	mRootNode->mHierarchyIndex = -1;
+	mRootNode->mParent         = NULL;
+	mMasterScale               = 1.0f;
+	mBackgroundImage           = "";
+	bHasBG                     = false;
 
-	// allocate storage and copy the contents of the file to a memory buffer
-	std::vector<unsigned char> mBuffer2(fileSize);
-	file->Read( &mBuffer2[0], 1, fileSize);
-	this->mCurrent = this->mBuffer = &mBuffer2[0];
-	this->mLast = this->mBuffer+fileSize;
+	// Parse the file
+	ParseMainChunk();
 
-	// initialize members
-	this->mLastNodeIndex = -1;
-	this->mCurrentNode = new Dot3DS::Node();
-	this->mRootNode = this->mCurrentNode;
-	this->mRootNode->mHierarchyPos = -1;
-	this->mRootNode->mHierarchyIndex = -1;
-	this->mRootNode->mParent = NULL;
-	this->mMasterScale = 1.0f;
-	this->mBackgroundImage = "";
-	this->bHasBG = false;
-
-	int iRemaining = (unsigned int)fileSize;
-	this->ParseMainChunk(iRemaining);
-
-	// Generate an unique set of vertices/indices for
-	// all meshes contained in the file
-	for (std::vector<Dot3DS::Mesh>::iterator
-		i =  this->mScene->mMeshes.begin();
-		i != this->mScene->mMeshes.end();++i)
+	// Process all meshes in the file. First check whether all
+	// face indices haev valid values. The generate our 
+	// internal verbose representation. Finally compute normal
+	// vectors from the smoothing groups we read from the
+	// file.
+	for (std::vector<D3DS::Mesh>::iterator i =  mScene->mMeshes.begin(),
+		 end = mScene->mMeshes.end(); i != end;++i)
 	{
-		// TODO: see function body
-		this->CheckIndices(*i);
-		this->MakeUnique(*i);
-
-		// first generate normals for the mesh
-		ComputeNormalsWithSmoothingsGroups<Dot3DS::Face>(*i);
+		CheckIndices(*i);
+		MakeUnique  (*i);
+		ComputeNormalsWithSmoothingsGroups<D3DS::Face>(*i);
 	}
 
 	// Apply scaling and offsets to all texture coordinates
-	TextureTransform::ApplyScaleNOffset(this->mScene->mMaterials);
+	TextureTransform::ApplyScaleNOffset(mScene->mMaterials);
 
-	// Replace all occurences of the default material with a valid material.
-	// Generate it if no material containing DEFAULT in its name has been
-	// found in the file
-	this->ReplaceDefaultMaterial();
+	// Replace all occurences of the default material with a
+	// valid material. Generate it if no material containing
+	// DEFAULT in its name has been found in the file
+	ReplaceDefaultMaterial();
 
-	// Convert the scene from our internal representation to an aiScene object
-	this->ConvertScene(pScene);
+	// Convert the scene from our internal representation to an
+	// aiScene object. This involves copying all meshes, lights
+	// and cameras to the scene
+	ConvertScene(pScene);
 
 	// Generate the node graph for the scene. This is a little bit
 	// tricky since we'll need to split some meshes into submeshes
-	this->GenerateNodeGraph(pScene);
+	GenerateNodeGraph(pScene);
 
-	// Now apply a master scaling factor to the scene
-	this->ApplyMasterScale(pScene);
+	// Now apply the master scaling factor to the scene
+	ApplyMasterScale(pScene);
+
+	// We're finished here. Everything destructs automatically
+	// and the output scene should be valid.
 }
+
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ApplyMasterScale(aiScene* pScene)
+// Applies a master-scaling factor to the imported scene
+void Discreet3DSImporter::ApplyMasterScale(aiScene* pScene)
 {
-	if (!this->mMasterScale)this->mMasterScale = 1.0f;
-	else this->mMasterScale = 1.0f / this->mMasterScale;
+	// There are some 3DS files with a zero scaling factor
+	if (!mMasterScale)mMasterScale = 1.0f;
+	else mMasterScale = 1.0f / mMasterScale;
 
 	// construct an uniform scaling matrix and multiply with it
 	pScene->mRootNode->mTransformation *= aiMatrix4x4( 
-		this->mMasterScale,0.0f, 0.0f, 0.0f,
-		0.0f, this->mMasterScale,0.0f, 0.0f,
-		0.0f, 0.0f, this->mMasterScale,0.0f,
+		mMasterScale,0.0f, 0.0f, 0.0f,
+		0.0f, mMasterScale,0.0f, 0.0f,
+		0.0f, 0.0f, mMasterScale,0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f);
 }
+
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ReadChunk(const Dot3DSFile::Chunk** p_ppcOut)
+// Reads a new chunk from the file
+void Discreet3DSImporter::ReadChunk(Discreet3DS::Chunk* pcOut)
 {
-	ai_assert(p_ppcOut != NULL);
+	ai_assert(pcOut != NULL);
 
-	// read chunk
-	if (this->mCurrent >= this->mLast)
-		throw new ImportErrorException("Unexpected end of file, can't read chunk header");
+	pcOut->Flag = stream->GetI2();
+	pcOut->Size = stream->GetI4();
 
-	const uintptr_t iDiff = this->mLast - this->mCurrent;
-	if (iDiff < sizeof(Dot3DSFile::Chunk)) 
-	{
-		*p_ppcOut = NULL;
-		return;
-	}
-	*p_ppcOut = (const Dot3DSFile::Chunk*) this->mCurrent;
-	if ((**p_ppcOut).Size + this->mCurrent > this->mLast)
-		throw new ImportErrorException("Unexpected end of file, can't read chunk footer");
+	if (pcOut->Size - sizeof(Discreet3DS::Chunk) > stream->GetRemainingSize())
+		throw new ImportErrorException("Chunk is too large");
+	
+	if (pcOut->Size - sizeof(Discreet3DS::Chunk) > stream->GetRemainingSizeToLimit())
+		DefaultLogger::get()->error("3DS: Chunk overflow");
+}
 
-	this->mCurrent += sizeof(Dot3DSFile::Chunk);
+// ------------------------------------------------------------------------------------------------
+// Skip a chunk
+void Discreet3DSImporter::SkipChunk()
+{
+	Discreet3DS::Chunk psChunk;
+	ReadChunk(&psChunk);
+	
+	stream->IncPtr(psChunk.Size-sizeof(Discreet3DS::Chunk));
 	return;
 }
+
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseMainChunk(int& piRemaining)
+// Process the primary chunk of the file
+void Discreet3DSImporter::ParseMainChunk()
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
 
 	// get chunk type
-	int iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-	switch (psChunk->Flag)
+	switch (chunk.Flag)
 	{
-	case Dot3DSFile::CHUNK_MAIN:
-		this->ParseEditorChunk(iRemaining);
+	case Discreet3DS::CHUNK_MAIN:
+		ParseEditorChunk();
 		break;
 	};
-	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
+
 	ASSIMP_3DS_END_CHUNK();
-	return this->ParseMainChunk(piRemaining);
+
+	// recursively continue processing this hierarchy level
+	return ParseMainChunk();
 }
+
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseEditorChunk(int& piRemaining)
+void Discreet3DSImporter::ParseEditorChunk()
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
 
 	// get chunk type
-	int iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-	switch (psChunk->Flag)
+	switch (chunk.Flag)
 	{
-	case Dot3DSFile::CHUNK_OBJMESH:
+	case Discreet3DS::CHUNK_OBJMESH:
 
-		this->ParseObjectChunk(iRemaining);
+		ParseObjectChunk();
 		break;
 
 	// NOTE: In several documentations in the internet this
 	// chunk appears at different locations
-	case Dot3DSFile::CHUNK_KEYFRAMER:
+	case Discreet3DS::CHUNK_KEYFRAMER:
 
-		this->ParseKeyframeChunk(iRemaining);
+		ParseKeyframeChunk();
 		break;
 
-	case Dot3DSFile::CHUNK_VERSION:
-
-		if (psChunk->Size >= 2+sizeof(Dot3DSFile::Chunk))
+	case Discreet3DS::CHUNK_VERSION:
 		{
-			// print the version number
-			char szBuffer[128];
-			::sprintf(szBuffer,"3DS file version chunk: %i",
-				(int) *((uint16_t*)this->mCurrent));
-			DefaultLogger::get()->info(szBuffer);
-		}
-		else
-		{
-			DefaultLogger::get()->warn("Invalid version chunk in 3DS file");
+		// print the version number
+		char buff[10];
+		itoa10(buff,stream->GetI2());
+		DefaultLogger::get()->info(std::string("3DS file format version: ") + buff);
 		}
 		break;
 	};
-	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
 	ASSIMP_3DS_END_CHUNK();
-	return this->ParseEditorChunk(piRemaining);
+
+	// recursively continue processing this hierarchy level
+	return ParseEditorChunk();
 }
+
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseObjectChunk(int& piRemaining)
+void Discreet3DSImporter::ParseObjectChunk()
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
 
-	const unsigned char* sz = this->mCurrent;
-	unsigned int iCnt = 0;
-
 	// get chunk type
-	int iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-	switch (psChunk->Flag)
+	switch (chunk.Flag)
 	{
-	case Dot3DSFile::CHUNK_OBJBLOCK:
-
-		this->mScene->mMeshes.push_back(Dot3DS::Mesh());
-
-		// at first we need to parse the name of the
-		// geometry object
-
-		while (*sz++ != '\0')
+	case Discreet3DS::CHUNK_OBJBLOCK:
 		{
-			if (sz > pcCurNext-1)break;
-			++iCnt;
+		unsigned int cnt = 0;
+		const char* sz = (const char*)stream->GetPtr();
+
+		// Get the name of the geometry object
+		while (stream->GetI1())++cnt;
+		ParseChunk(sz,cnt);
 		}
-		this->mScene->mMeshes.back().mName = std::string(
-			(const char*)this->mCurrent,iCnt);
-		++iCnt;
-
-		this->mCurrent += iCnt;
-		iRemaining -= iCnt;
-		this->ParseChunk(iRemaining);
 		break;
 
-	case Dot3DSFile::CHUNK_MAT_MATERIAL:
+	case Discreet3DS::CHUNK_MAT_MATERIAL:
 
-		this->mScene->mMaterials.push_back(Dot3DS::Material());
-		this->ParseMaterialChunk(iRemaining);
+		// Add a new material to the list
+		mScene->mMaterials.push_back(D3DS::Material());
+		ParseMaterialChunk();
 		break;
 
-	case Dot3DSFile::CHUNK_AMBCOLOR:
+	case Discreet3DS::CHUNK_AMBCOLOR:
 
 		// This is the ambient base color of the scene.
 		// We add it to the ambient color of all materials
-		this->ParseColorChunk(&this->mClrAmbient,true);
-		if (is_qnan(this->mClrAmbient.r))
-			{
-			this->mClrAmbient.r = 0.0f;
-			this->mClrAmbient.g = 0.0f;
-			this->mClrAmbient.b = 0.0f;
-			}
+		ParseColorChunk(&mClrAmbient,true);
+		if (is_qnan(mClrAmbient.r))
+		{
+			// We failed to read the ambient base color.
+			// Set it to black so it won't have affect
+			// the rendering 
+			mClrAmbient.r = 0.0f;
+			mClrAmbient.g = 0.0f;
+			mClrAmbient.b = 0.0f;
+		}
 		break;
 
-	case Dot3DSFile::CHUNK_BIT_MAP:
-		this->mBackgroundImage = std::string((const char*)this->mCurrent);
+	case Discreet3DS::CHUNK_BIT_MAP:
+		{
+		// Specifies the background image. The string
+		// should already be properly 0 terminated but we
+		// need to be sure
+		unsigned int cnt = 0;
+		const char* sz = (const char*)stream->GetPtr();
+		while (stream->GetI1())++cnt;
+
+		mBackgroundImage = std::string(sz,cnt);
+		}
 		break;
 
 
-	case Dot3DSFile::CHUNK_BIT_MAP_EXISTS:
+	case Discreet3DS::CHUNK_BIT_MAP_EXISTS:
 		bHasBG = true;
 		break;
 
 
-	case Dot3DSFile::CHUNK_MASTER_SCALE:
+	case Discreet3DS::CHUNK_MASTER_SCALE:
 
-		this->mMasterScale = *((float*)this->mCurrent);
-		this->mCurrent += sizeof(float);
+		// Scene master scaling factor
+		mMasterScale = stream->GetF4();
 		break;
 
-	// NOTE: In several documentations in the internet this
-	// chunk appears at different locations
-	case Dot3DSFile::CHUNK_KEYFRAMER:
-
-		this->ParseKeyframeChunk(iRemaining);
-		break;
 
 	};
-	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
 	ASSIMP_3DS_END_CHUNK();
-	return this->ParseObjectChunk(piRemaining);
+
+	// recursively continue processing this hierarchy level
+	return ParseObjectChunk();
 }
+
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::SkipChunk()
-{
-	const Dot3DSFile::Chunk* psChunk;
-	this->ReadChunk(&psChunk);
-	
-	this->mCurrent += psChunk->Size - sizeof(Dot3DSFile::Chunk);
-	return;
-}
-// ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseChunk(int& piRemaining)
+void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
 
 	// get chunk type
-	int iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-	switch (psChunk->Flag)
+	switch (chunk.Flag)
 	{
-	case Dot3DSFile::CHUNK_TRIMESH:
-		// this starts a new mesh
-		this->ParseMeshChunk(iRemaining);
+	case Discreet3DS::CHUNK_TRIMESH:
+		{
+		// this starts a new triangle mesh
+		mScene->mMeshes.push_back(D3DS::Mesh());
+		D3DS::Mesh& m = mScene->mMeshes.back();
+
+		// Setup the name of the mesh
+		m.mName = std::string(name, num);
+
+		// Read mesh chunks
+		ParseMeshChunk();
+		}
+		break;
+
+	case Discreet3DS::CHUNK_LIGHT:
+		{
+		// This starts a new light
+		aiLight* light = new aiLight();
+		mScene->mLights.push_back(light);
+
+		light->mName.Set(std::string(name, num));
+
+		// First read the position of the light
+		light->mPosition.x = stream->GetF4();
+		light->mPosition.y = stream->GetF4();
+		light->mPosition.z = stream->GetF4();
+
+		// Now check for further subchunks (excluding color)
+		int8_t* p = stream->GetPtr();
+		ParseLightChunk();
+
+		// Now read the color
+		stream->SetPtr(p);
+		ParseColorChunk(&light->mColorDiffuse,true);
+		if (is_qnan(light->mColorDiffuse.r))
+		{
+			// it could be there is no color subchunk
+			light->mColorDiffuse = aiColor3D(1.f,1.f,1.f);
+		}
+
+		// The specular light color is identical to
+		// the diffuse light color. The ambient light
+		// color is equal to the ambient base color of
+		// the whole scene.
+		light->mColorSpecular = light->mColorDiffuse;
+		light->mColorAmbient  = mClrAmbient;
+
+		if (light->mType == aiLightSource_UNDEFINED)
+		{
+			// It must be a point light
+			light->mType = aiLightSource_POINT;
+		}}
+		break;
+
+	case Discreet3DS::CHUNK_CAMERA:
+		{
+		// This starts a new camera
+		aiCamera* camera = new aiCamera();
+		mScene->mCameras.push_back(camera);
+
+		camera->mName.Set(std::string(name, num));
+
+		// First read the position of the camera
+		camera->mPosition.x = stream->GetF4();
+		camera->mPosition.y = stream->GetF4();
+		camera->mPosition.z = stream->GetF4();
+
+		// Then the camera target
+		camera->mLookAt.x = stream->GetF4() - camera->mPosition.x;
+		camera->mLookAt.y = stream->GetF4() - camera->mPosition.y;
+		camera->mLookAt.z = stream->GetF4() - camera->mPosition.z;
+
+		// We wouldn't need to normalize here, but we do it
+		camera->mLookAt.Normalize();
+
+		// And finally - the camera rotation angle, in
+		// counter clockwise direction 
+		float angle =  AI_DEG_TO_RAD( stream->GetF4() );
+		aiQuaternion quat(camera->mLookAt,angle);
+		camera->mUp = quat.GetMatrix() * aiVector3D(0.f,1.f,0.f);
+
+		// Read the lense angle
+		// TODO
+		camera->mHorizontalFOV = AI_DEG_TO_RAD ( stream->GetF4() );
+		}
 		break;
 	};
-	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
 	ASSIMP_3DS_END_CHUNK();
-	return this->ParseChunk(piRemaining);
+
+	// recursively continue processing this hierarchy level
+	return ParseChunk(name,num);
 }
+
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseKeyframeChunk(int& piRemaining)
+void Discreet3DSImporter::ParseLightChunk()
+{
+	ASSIMP_3DS_BEGIN_CHUNK();
+	aiLight* light = mScene->mLights.back();
+
+	// get chunk type
+	switch (chunk.Flag)
+	{
+	case Discreet3DS::CHUNK_SPOTLIGHT:
+		{
+			// Now we can be sure that the light is a spot light
+			light->mType = aiLightSource_SPOT;
+
+			// We wouldn't need to normalize here, but we do it
+			light->mDirection.x = stream->GetF4() - light->mPosition.x;
+			light->mDirection.y = stream->GetF4() - light->mPosition.y;
+			light->mDirection.z = stream->GetF4() - light->mPosition.z;
+			light->mDirection.Normalize();
+
+			// Now the hotspot and falloff angles - in degrees
+			light->mAngleInnerCone = AI_DEG_TO_RAD( stream->GetF4() );
+			light->mAngleOuterCone = AI_DEG_TO_RAD( stream->GetF4() );
+
+			// We assume linear attenuation
+			light->mAttenuationLinear = 1;
+		}
+		break; 
+	};
+
+	ASSIMP_3DS_END_CHUNK();
+
+	// recursively continue processing this hierarchy level
+	return ParseLightChunk();
+}
+
+// ------------------------------------------------------------------------------------------------
+void Discreet3DSImporter::ParseKeyframeChunk()
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
 
 	// get chunk type
-	int iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-	switch (psChunk->Flag)
+	switch (chunk.Flag)
 	{
-	case Dot3DSFile::CHUNK_TRACKINFO:
-		// this starts a new mesh
-		this->ParseHierarchyChunk(iRemaining);
+	case Discreet3DS::CHUNK_TRACKCAMTGT:
+	case Discreet3DS::CHUNK_SPOTLIGHT:
+	case Discreet3DS::CHUNK_TRACKCAMERA:
+	case Discreet3DS::CHUNK_TRACKINFO:
+	case Discreet3DS::CHUNK_TRACKLIGHT:
+	case Discreet3DS::CHUNK_TRACKLIGTGT:
+
+		// this starts a new mesh hierarchy chunk
+		ParseHierarchyChunk(chunk.Flag);
 		break;
 	};
-	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
+
 	ASSIMP_3DS_END_CHUNK();
-	return this->ParseKeyframeChunk(piRemaining);
+
+	// recursively continue processing this hierarchy level
+	return ParseKeyframeChunk();
 }
+
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::InverseNodeSearch(Dot3DS::Node* pcNode,Dot3DS::Node* pcCurrent)
+// Little helper function for ParseHierarchyChunk
+void Discreet3DSImporter::InverseNodeSearch(D3DS::Node* pcNode,D3DS::Node* pcCurrent)
 {
-	if (NULL == pcCurrent)
+	if (!pcCurrent)
 	{
-		this->mRootNode->push_back(pcNode);
+		mRootNode->push_back(pcNode);
 		return;
 	}
 	if (pcCurrent->mHierarchyPos == pcNode->mHierarchyPos)
@@ -424,350 +524,426 @@ void Dot3DSImporter::InverseNodeSearch(Dot3DS::Node* pcNode,Dot3DS::Node* pcCurr
 		else pcCurrent->push_back(pcNode);
 		return;
 	}
-	return this->InverseNodeSearch(pcNode,pcCurrent->mParent);
+	return InverseNodeSearch(pcNode,pcCurrent->mParent);
 }
+
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseHierarchyChunk(int& piRemaining)
+D3DS::Node* FindNode(D3DS::Node* root, const std::string& name)
+{
+	if (root->mName == name)return root;
+	for (std::vector<D3DS::Node*>::iterator it = root->mChildren.begin();
+		it != root->mChildren.end(); ++it)
+	{
+		D3DS::Node* nd;
+		if (( nd = FindNode(*it,name)))return nd;
+	}
+	return NULL;
+}
+
+// ------------------------------------------------------------------------------------------------
+void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
 
 	// get chunk type
-	const unsigned char* sz = (unsigned char*)this->mCurrent;
-	unsigned int iCnt = 0;
-	uint16_t iHierarchy;
-	Dot3DS::Node* pcNode;
-	switch (psChunk->Flag)
+	switch (chunk.Flag)
 	{
-	case Dot3DSFile::CHUNK_TRACKOBJNAME:
-		
-		// get object name
-		while (*sz++ != '\0')
-		{
-			if (sz > pcCurNext-1)break;
-			++iCnt;
-		}
-		pcNode = new Dot3DS::Node();
-		pcNode->mName = std::string((const char*)this->mCurrent,iCnt);
+	case Discreet3DS::CHUNK_TRACKOBJNAME:
 
-		iCnt++;
-		// there are two unknown values which we can safely ignore
-		this->mCurrent += iCnt + sizeof(uint16_t)*2;
-		iHierarchy = *((uint16_t*)this->mCurrent);
-		iHierarchy++;
-		pcNode->mHierarchyPos = iHierarchy;
-		pcNode->mHierarchyIndex = this->mLastNodeIndex;
-		if (this->mCurrentNode && this->mCurrentNode->mHierarchyPos == iHierarchy) 
+		// This is the name of the object to which the track applies
+		// The chunk also defines the position of this object in the
+		// hierarchy.
+		{
+
+		// First of all: get the name of the object
+		unsigned int cnt = 0;
+		const char* sz = (const char*)stream->GetPtr();
+
+		while (stream->GetI1())++cnt;
+		std::string name = std::string(sz,cnt);
+
+		// Now find out whether we have this node already
+		// (target animation channels are stored with a
+		//  separate object ID)
+		D3DS::Node* pcNode = FindNode(mRootNode,name);
+		if (!pcNode)
+		{
+			pcNode = new D3DS::Node();
+			pcNode->mName = name;
+		}
+
+		// There are two unknown values which we can safely ignore
+		stream->IncPtr(4);
+
+		// Now read the hierarchy position of the object
+		uint16_t hierarchy = stream->GetI2() + 1;
+		pcNode->mHierarchyPos   = hierarchy;
+		pcNode->mHierarchyIndex = mLastNodeIndex;
+
+		// And find a proper position in the graph for it
+		if (mCurrentNode && mCurrentNode->mHierarchyPos == hierarchy) 
 		{
 			// add to the parent of the last touched node
-			this->mCurrentNode->mParent->push_back(pcNode);
-			this->mLastNodeIndex++;	
+			mCurrentNode->mParent->push_back(pcNode);
+			mLastNodeIndex++;	
 		}
-		else if(iHierarchy >= this->mLastNodeIndex)
+		else if(hierarchy >= mLastNodeIndex)
 		{
 			// place it at the current position in the hierarchy
-			this->mCurrentNode->push_back(pcNode);
-			this->mLastNodeIndex = iHierarchy;
+			mCurrentNode->push_back(pcNode);
+			mLastNodeIndex = hierarchy;
 		}
 		else
 		{
 			// need to go back to the specified position in the hierarchy.
-			this->InverseNodeSearch(pcNode,this->mCurrentNode);
-			this->mLastNodeIndex++;	
+			InverseNodeSearch(pcNode,mCurrentNode);
+			mLastNodeIndex++;	
 		}
-		this->mCurrentNode = pcNode;
+		// Make this node the current node
+		mCurrentNode = pcNode;
+		}
 		break;
 
-	case Dot3DSFile::CHUNK_TRACKPIVOT:
+	case Discreet3DS::CHUNK_TRACKDUMMYOBJNAME:
 
-		// pivot = origin of rotation and scaling
-		this->mCurrentNode->vPivot = *((const aiVector3D*)this->mCurrent);
-		//std::swap((float&)mCurrentNode->vPivot.y,(float&)mCurrentNode->vPivot.z);
-
-		mCurrentNode->vPivot.y *= -1.f;
-		this->mCurrent += sizeof(aiVector3D);
-		break;
-
-#ifdef AI_3DS_KEYFRAME_ANIMATION
-
-	case Dot3DSFile::CHUNK_TRACKPOS:
-
-		/*
-		+2 short flags; 
-		+8 short unknown[4];
-		+2 short keys;
-		+2 short unknown;
-		struct {
-		+2 short framenum;
-		+4 long unknown;
-		float pos_x, pos_y, pos_z; 
-		}  pos[keys]; 	
-		*/
-		this->mCurrent += 10;
-		iTemp = *((const uint16_t*)mCurrent);
-
-		this->mCurrent += sizeof(uint16_t) * 2;
-
-		for (unsigned int i = 0; i < (unsigned int)iTemp;++i)
+		// This is the "real" name of a $$$DUMMY object
 		{
-			uint16_t sNum = *((const uint16_t*)mCurrent);
-			this->mCurrent += sizeof(uint16_t);
-
-			aiVectorKey v;v.mTime = (double)sNum;
-
-			this->mCurrent += sizeof(uint32_t);
-			v.mValue =  *((const aiVector3D*)this->mCurrent);
-			this->mCurrent += sizeof(aiVector3D);
-
-			// check whether we do already have this keyframe
-			for (std::vector<aiVectorKey>::const_iterator
-				i =  this->mCurrentNode->aPositionKeys.begin();
-				i != this->mCurrentNode->aPositionKeys.end();++i)
+			if (mCurrentNode->mName != "$$$DUMMY")
 			{
-				if ((*i).mTime == v.mTime){v.mTime = -10e10f;break;}
+				DefaultLogger::get()->warn("3DS: Skipping dummy object name for non-dummy object");
+				break;
 			}
-			// add the new keyframe
-			if (v.mTime != -10e10f)
-				this->mCurrentNode->aPositionKeys.push_back(v);
+
+			const char* sz = (const char*)stream->GetPtr();
+			while (stream->GetI1());
+			mCurrentNode->mDummyName = std::string(sz);
 		}
 		break;
 
-	case Dot3DSFile::CHUNK_TRACKROTATE:
+	case Discreet3DS::CHUNK_TRACKPIVOT:
 
-		/*
-		+2 short flags; 
-		+8 short unknown[4];
-		+2 short keys;
-		+2 short unknown;
-		struct {
-		+2 short framenum;
-		+4 long unknown;
-		float rad , pos_x, pos_y, pos_z; 
-		}  pos[keys]; 	
-		*/
-		this->mCurrent += 10;
-		iTemp = *((const uint16_t*)mCurrent);
-
-		this->mCurrent += sizeof(uint16_t) * 2;
-
-		for (unsigned int i = 0; i < (unsigned int)iTemp;++i)
+		if ( Discreet3DS::CHUNK_TRACKINFO != parent) 
 		{
-			uint16_t sNum = *((const uint16_t*)mCurrent);
-			this->mCurrent += sizeof(uint16_t);
+			DefaultLogger::get()->warn("3DS: Skipping pivot subchunk for non usual object");
+			break;
+		}
 
-			aiQuatKey v;v.mTime = (double)sNum;
-			this->mCurrent += sizeof(uint32_t);
+		// Pivot = origin of rotation and scaling
+		mCurrentNode->vPivot.x = stream->GetF4();
+		mCurrentNode->vPivot.y = stream->GetF4();
+		mCurrentNode->vPivot.z = stream->GetF4();
+		break;
 
-			float fRadians = *((const float*)this->mCurrent);
-			this->mCurrent += sizeof(float);
 
-			aiVector3D vAxis = *((const aiVector3D*)this->mCurrent);
-			this->mCurrent += sizeof(aiVector3D);
+	case Discreet3DS::CHUNK_TRACKPOS:
+		{
+		stream->IncPtr(10);
+		unsigned int numFrames = stream->GetI2();
+		stream->IncPtr(2);
 
-			// construct a rotation quaternion from the axis-angle pair
-			v.mValue = aiQuaternion(vAxis,fRadians);
+		// This could also be meant as the target position for
+		// (targeted) lights and cameras
+		std::vector<aiVectorKey>* l;
+		if ( Discreet3DS::CHUNK_TRACKCAMTGT == parent || 
+			 Discreet3DS::CHUNK_TRACKLIGTGT == parent)
+		{
+			l = & mCurrentNode->aTargetPositionKeys;
+		}
+		else l = & mCurrentNode->aPositionKeys;
+
+		for (unsigned int i = 0; i < numFrames;++i)
+		{
+			unsigned int fidx = stream->GetI2();
+
+			// Setup a new position key
+			aiVectorKey v;
+			v.mTime = (double)fidx;
+
+			stream->IncPtr(4);
+			v.mValue.x = stream->GetF4();
+			v.mValue.y = stream->GetF4();
+			v.mValue.z = stream->GetF4();
+
+			// Check whether we do already have this keyframe
+			for (std::vector<aiVectorKey>::const_iterator
+				i =  l->begin();i != l->end();++i)
+			{
+				if ((*i).mTime == v.mTime)
+				{
+					DefaultLogger::get()->error("3DS: Found duplicate position keyframe");
+					v.mTime = -10e10f;
+					break;
+				}
+			}
+			// Add the new keyframe to the list
+			if (v.mTime != -10e10f)l->push_back(v);
+		}}
+		break;
+
+	case Discreet3DS::CHUNK_TRACKROLL:
+		{
+		// roll keys are accepted for cameras only
+		if (parent != Discreet3DS::CHUNK_TRACKCAMERA)
+		{
+			DefaultLogger::get()->warn("3DS: Ignoring roll track for non-camera object");
+			break;
+		}
+
+		stream->IncPtr(10);
+		unsigned int numFrames = stream->GetI2();
+		stream->IncPtr(2);
+
+		for (unsigned int i = 0; i < numFrames;++i)
+		{
+			unsigned int fidx = stream->GetI2();
+
+			// Setup a new position key
+			aiFloatKey v;
+			v.first = (double)fidx;
+
+			// This is just a single float 
+			stream->IncPtr(4);
+			v.second = stream->GetF4();
+
+			// Check whether we do already have this keyframe
+			for (std::vector<aiFloatKey>::const_iterator
+				i =  mCurrentNode->aCameraRollKeys.begin();
+				i != mCurrentNode->aCameraRollKeys.end();++i)
+			{
+				if ((*i).first == v.first)
+				{
+					DefaultLogger::get()->error("3DS: Found duplicate camera roll keyframe");
+					v.first = -10e10f;
+					break;
+				}
+			}
+			// Add the new keyframe to the list
+			if (v.first != -10e10f)
+				mCurrentNode->aCameraRollKeys.push_back(v);
+		}}
+		break;
+
+	case Discreet3DS::CHUNK_TRACKROTATE:
+		{
+		stream->IncPtr(10);
+		unsigned int numFrames = stream->GetI2();
+		stream->IncPtr(2);
+
+		for (unsigned int i = 0; i < numFrames;++i)
+		{
+			unsigned int fidx = stream->GetI2();
+
+			aiQuatKey v;
+			v.mTime = (double)fidx;
+
+			// The rotation keyframe is given as an axis-angle pair
+			float rad = stream->GetF4();
+			aiVector3D axis;
+			axis.x = stream->GetF4();
+			axis.y = stream->GetF4();
+			axis.z = stream->GetF4();
+
+			// Construct a rotation quaternion from the axis-angle pair
+			v.mValue = aiQuaternion(axis,rad);
 
 			// check whether we do already have this keyframe
 			for (std::vector<aiQuatKey>::const_iterator
-				i =  this->mCurrentNode->aRotationKeys.begin();
-				i != this->mCurrentNode->aRotationKeys.end();++i)
+				i =  mCurrentNode->aRotationKeys.begin();
+				i != mCurrentNode->aRotationKeys.end();++i)
 			{
-				if ((*i).mTime == v.mTime){v.mTime = -10e10f;break;}
+				if ((*i).mTime == v.mTime)
+				{
+					DefaultLogger::get()->error("3DS: Found duplicate rotation keyframe");
+					v.mTime = -10e10f;
+					break;
+				}
 			}
-			// add the new keyframe
+			// add the new keyframe to the list
 			if (v.mTime != -10e10f)
-				this->mCurrentNode->aRotationKeys.push_back(v);
-		}
+				mCurrentNode->aRotationKeys.push_back(v);
+		}}
 		break;
 
-	case Dot3DSFile::CHUNK_TRACKSCALE:
-
-		/*
-		+2 short flags; 
-		+8 short unknown[4];
-		+2 short keys;
-		+2 short unknown;
-		struct {
-		+2 short framenum;
-		+4 long unknown;
-		float pos_x, pos_y, pos_z; 
-		}  pos[keys]; 	
-		*/
-		this->mCurrent += 10;
-		iTemp = *((const uint16_t*)mCurrent);
-
-		this->mCurrent += sizeof(uint16_t) * 2;
-		for (unsigned int i = 0; i < (unsigned int)iTemp;++i)
+	case Discreet3DS::CHUNK_TRACKSCALE:
 		{
-			uint16_t sNum = *((const uint16_t*)mCurrent);
-			this->mCurrent += sizeof(uint16_t);
+		unsigned int invalid = 0;
 
+		stream->IncPtr(10);
+		unsigned int numFrames = stream->GetI2();
+		stream->IncPtr(2);
+
+		for (unsigned int i = 0; i < numFrames;++i)
+		{
+			unsigned int fidx = stream->GetI2();
+
+			// Setup a new key
 			aiVectorKey v;
-			v.mTime = (double)sNum;
+			v.mTime = (double)fidx;
 
-			this->mCurrent += sizeof(uint32_t);
-			v.mValue =  *((const aiVector3D*)this->mCurrent);
-			this->mCurrent += sizeof(aiVector3D);
+			// ... and read its value
+			v.mValue.x = stream->GetF4();
+			v.mValue.y = stream->GetF4();
+			v.mValue.z = stream->GetF4();
 
 			// check whether we do already have this keyframe
 			for (std::vector<aiVectorKey>::const_iterator
-				i =  this->mCurrentNode->aScalingKeys.begin();
-				i != this->mCurrentNode->aScalingKeys.end();++i)
+				i =  mCurrentNode->aScalingKeys.begin();
+				i != mCurrentNode->aScalingKeys.end();++i)
 			{
-				if ((*i).mTime == v.mTime){v.mTime = -10e10f;break;}
+				if ((*i).mTime == v.mTime)
+				{
+					DefaultLogger::get()->error("3DS: Found duplicate scaling keyframe");
+					v.mTime = -10e10f;
+					break;
+				}
 			}
 			// add the new keyframe
-			if (v.mTime != -10e10f)this->mCurrentNode->aScalingKeys.push_back(v);
+			if (v.mTime != -10e10f)
+				mCurrentNode->aScalingKeys.push_back(v);
 
-			if (v.mValue.x && v.mValue.y && v.mValue.z)
+			// Check whether this is a zero scaling keyframe
+			if (!v.mValue.x && !v.mValue.y && !v.mValue.z)
 			{
-				DefaultLogger::get()->warn("Found zero scaled axis in scaling keyframe");
-				++iCnt;
+				DefaultLogger::get()->warn("3DS: Found zero scaled axis in scaling keyframe");
+				++invalid;
 			}
 		}
 		// there are 3DS files that have only zero scalings
-		if (iTemp == iCnt)
+		if (numFrames == invalid)
 		{
-			DefaultLogger::get()->warn("All scaling keys are zero. They will be removed");
-			this->mCurrentNode->aScalingKeys.clear();
-		}
+			DefaultLogger::get()->warn("3DS: All scaling keys are zero. Ignoring them ...");
+			mCurrentNode->aScalingKeys.clear();
+		}}
 		break;
-#endif
 	};
-	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
+
 	ASSIMP_3DS_END_CHUNK();
-	return this->ParseHierarchyChunk(piRemaining);
+
+	// recursively continue processing this hierarchy level
+	return ParseHierarchyChunk(parent);
 }
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseFaceChunk(int& piRemaining)
+void Discreet3DSImporter::ParseFaceChunk()
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
-	Dot3DS::Mesh& mMesh = this->mScene->mMeshes.back();
 
-	// get chunk type
-	const unsigned char* sz = this->mCurrent;
-	uint32_t iCnt = 0,iTemp;
-	switch (psChunk->Flag)
+	// Get the mesh we're currently working on
+	D3DS::Mesh& mMesh = mScene->mMeshes.back();
+
+	// Get chunk type
+	switch (chunk.Flag)
 	{
-	case Dot3DSFile::CHUNK_SMOOLIST:
 
-		// one int32 for each face
-		for (std::vector<Dot3DS::Face>::iterator
-			i =  mMesh.mFaces.begin();
-			i != mMesh.mFaces.end();++i)
+	case Discreet3DS::CHUNK_SMOOLIST:
+		{
+		// This is the list of smoothing groups - a bitfield for
+		// every frame. Up to 32 smoothing groups assigned to a
+		// face.
+		unsigned int num = chunkSize/4, m = 0;
+		for (std::vector<D3DS::Face>::iterator i =  mMesh.mFaces.begin();
+			 m != num;++i, ++m)
 		{
 			// nth bit is set for nth smoothing group
-			(*i).iSmoothGroup = *((uint32_t*)this->mCurrent);
-			this->mCurrent += sizeof(uint32_t);
-		}
+			(*i).iSmoothGroup = stream->GetI4();
+		}}
 		break;
 
-	case Dot3DSFile::CHUNK_FACEMAT:
-
-		// at fist an asciiz with the material name
-		while (*sz++)
+	case Discreet3DS::CHUNK_FACEMAT:
 		{
-			// make sure we don't run over the end of the chunk
-			if (sz > pcCurNext-1)break;
-		}
+		// at fist an asciiz with the material name
+		const char* sz = (const char*)stream->GetPtr();
+		while (stream->GetI1());
 
 		// find the index of the material
-		unsigned int iIndex = 0xFFFFFFFF;
-		iCnt = 0;
-		for (std::vector<Dot3DS::Material>::const_iterator
-			i =  this->mScene->mMaterials.begin();
-			i != this->mScene->mMaterials.end();++i,++iCnt)
+		unsigned int idx = 0xcdcdcdcd, cnt = 0;
+		for (std::vector<D3DS::Material>::const_iterator
+			i =  mScene->mMaterials.begin();
+			i != mScene->mMaterials.end();++i,++cnt)
 		{
 			// compare case-independent to be sure it works
-			if (0 == ASSIMP_stricmp((const char*)this->mCurrent,
-				(const char*)((*i).mName.c_str())))
+			if ((*i).mName.length() && !ASSIMP_stricmp(sz, (*i).mName.c_str()))
 			{
-			iIndex = iCnt;
-			break;
+				idx = cnt;
+				break;
 			}
 		}
-		if (0xFFFFFFFF == iIndex)
+		if (0xcdcdcdcd == idx)
 		{
-			// this material is not known. Ignore this. We will later
+			DefaultLogger::get()->error(std::string("3DS: Unknown material: ") + sz);
+
+			// This material is not known. Ignore this. We will later
 			// assign the default material to all faces using *this*
 			// material. Use 0xcdcdcdcd as special value to indicate
 			// this.
-			iIndex = 0xcdcdcdcd;
 		}
-		this->mCurrent = sz;
-		iCnt = (int)(*((uint16_t*)this->mCurrent));
-		this->mCurrent += sizeof(uint16_t);
 
-		for (unsigned int i = 0; i < iCnt;++i)
+		// Now continue and read all material indices
+		cnt = stream->GetI2();
+		for (unsigned int i = 0; i < cnt;++i)
 		{
-			iTemp = (uint16_t)*((uint16_t*)this->mCurrent);
+			unsigned int fidx = (uint16_t)stream->GetI2();
 
 			// check range
-			if (iTemp >= mMesh.mFaceMaterials.size())
+			if (fidx >= mMesh.mFaceMaterials.size())
 			{
-				DefaultLogger::get()->error("Invalid face index in face material list");
-				mMesh.mFaceMaterials[mMesh.mFaceMaterials.size()-1] = iIndex;
+				DefaultLogger::get()->error("3DS: Invalid face index in face material list");
 			}
-			else
-			{
-				mMesh.mFaceMaterials[iTemp] = iIndex;
-			}
-			this->mCurrent += sizeof(uint16_t);
-		}
-
+			else mMesh.mFaceMaterials[fidx] = idx;
+		}}
 		break;
 	};
-	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
 	ASSIMP_3DS_END_CHUNK();
-	return ParseFaceChunk(piRemaining);
+
+	// recursively continue processing this hierarchy level
+	return ParseFaceChunk();
 }
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseMeshChunk(int& piRemaining)
+void Discreet3DSImporter::ParseMeshChunk()
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
-	Dot3DS::Mesh& mMesh = this->mScene->mMeshes.back();
+
+	// Get the mesh we're currently working on
+	D3DS::Mesh& mMesh = mScene->mMeshes.back();
 
 	// get chunk type
-	int iRemaining;
-	uint16_t iNum = 0;
-	float* pf;
-	switch (psChunk->Flag)
+	switch (chunk.Flag)
 	{
-	case Dot3DSFile::CHUNK_VERTLIST:
-
-		iNum = *((short*)this->mCurrent);
-		this->mCurrent += sizeof(short);
-		while (iNum-- > 0)
+	case Discreet3DS::CHUNK_VERTLIST:
 		{
-			mMesh.mPositions.push_back(*((aiVector3D*)this->mCurrent));
-			aiVector3D& v = mMesh.mPositions.back();
-			//std::swap( (float&)v.y, (float&)v.z);
-			v.y *= -1.0f;
-			this->mCurrent += sizeof(aiVector3D);
-		}
+		// This is the list of all vertices in the current mesh
+		int num = stream->GetI2();
+		while (num-- > 0)
+		{
+			aiVector3D v;
+			v.x = stream->GetF4();
+			v.y = stream->GetF4();
+			v.z = stream->GetF4();
+			mMesh.mPositions.push_back(v);
+		}}
 		break;
-	case Dot3DSFile::CHUNK_TRMATRIX:
+	case Discreet3DS::CHUNK_TRMATRIX:
 		{
-		pf = (float*)this->mCurrent;
-		this->mCurrent += 12 * sizeof(float);
+		// This is the RLEATIVE transformation matrix of the
+		// current mesh. However, all vertices are pretransformed
+		mMesh.mMat.a1 = stream->GetF4();
+		mMesh.mMat.b1 = stream->GetF4();
+		mMesh.mMat.c1 = stream->GetF4();
+		mMesh.mMat.a2 = stream->GetF4();
+		mMesh.mMat.b2 = stream->GetF4();
+		mMesh.mMat.c2 = stream->GetF4();
+		mMesh.mMat.a3 = stream->GetF4();
+		mMesh.mMat.b3 = stream->GetF4();
+		mMesh.mMat.c3 = stream->GetF4();
+		mMesh.mMat.a4 = stream->GetF4();
+		mMesh.mMat.b4 = stream->GetF4();
+		mMesh.mMat.c4 = stream->GetF4();
 
-		mMesh.mMat.a1 = pf[0];
-		mMesh.mMat.b1 = pf[1];
-		mMesh.mMat.c1 = pf[2];
-		mMesh.mMat.a2 = pf[3];
-		mMesh.mMat.b2 = pf[4];
-		mMesh.mMat.c2 = pf[5];
-		mMesh.mMat.a3 = pf[6];
-		mMesh.mMat.b3 = pf[7];
-		mMesh.mMat.c3 = pf[8];
-		mMesh.mMat.a4 = pf[9];
-		mMesh.mMat.b4 = pf[10];
-		mMesh.mMat.c4 = pf[11];
-
-		// now check whether the matrix has got a negative determinant
+		// Now check whether the matrix has got a negative determinant
 		// If yes, we need to flip all vertices' x axis ....
 		// From lib3ds, mesh.c
 		if (mMesh.mMat.Determinant() < 0.0f)
-			{
+		{
+			// Compute the inverse of the matrix
 			aiMatrix4x4 mInv = mMesh.mMat;
 			mInv.Inverse();
 
@@ -777,235 +953,266 @@ void Dot3DSImporter::ParseMeshChunk(int& piRemaining)
 			mMe.c1 *= -1.0f;
 			mMe.d1 *= -1.0f;
 			mInv = mInv * mMe;
-			for (register unsigned int i = 0; i < mMesh.mPositions.size();++i)
-				{
+
+			// Now transform all vertices
+			for (unsigned int i = 0; i < (unsigned int)mMesh.mPositions.size();++i)
+			{
 				aiVector3D a,c;
 				a = mMesh.mPositions[i];
 				c[0]= mInv[0][0]*a[0] + mInv[1][0]*a[1] + mInv[2][0]*a[2] + mInv[3][0];
 				c[1]= mInv[0][1]*a[0] + mInv[1][1]*a[1] + mInv[2][1]*a[2] + mInv[3][1];
 				c[2]= mInv[0][2]*a[0] + mInv[1][2]*a[1] + mInv[2][2]*a[2] + mInv[3][2];
 				mMesh.mPositions[i] = c;
-				}
 			}
-			
-		}
-		break;
-	case Dot3DSFile::CHUNK_MAPLIST:
-
-		iNum = *((uint16_t*)this->mCurrent);
-		this->mCurrent += sizeof(uint16_t);
-		while (iNum-- > 0)
-		{
-			mMesh.mTexCoords.push_back(*((aiVector2D*)this->mCurrent));
-			this->mCurrent += sizeof(aiVector2D);
-		}
+		}}
 		break;
 
-	case Dot3DSFile::CHUNK_FACELIST:
-
-		iNum = *((uint16_t*)this->mCurrent);
-		this->mCurrent += sizeof(uint16_t);
-		while (iNum-- > 0)
+	case Discreet3DS::CHUNK_MAPLIST:
 		{
-			Dot3DS::Face sFace;
-			sFace.mIndices[0] = *((uint16_t*)this->mCurrent);
-			this->mCurrent += sizeof(uint16_t);
-			sFace.mIndices[1] = *((uint16_t*)this->mCurrent);
-			this->mCurrent += sizeof(uint16_t);
-			sFace.mIndices[2] = *((uint16_t*)this->mCurrent);
-			this->mCurrent += 2*sizeof(uint16_t);
-			mMesh.mFaces.push_back(sFace);
+		// This is the list of all UV coords in the current mesh
+		int num = stream->GetI2();
+		while (num-- > 0)
+		{
+			aiVector2D v;
+			v.x = stream->GetF4();
+			v.y = stream->GetF4();
+			mMesh.mTexCoords.push_back(v);
+		}}
+		break;
+
+	case Discreet3DS::CHUNK_FACELIST:
+		{
+		// This is the list of all faces in the current mesh
+		int num = stream->GetI2();
+		while (num-- > 0)
+		{
+			// 3DS faces are ALWAYS triangles
+			mMesh.mFaces.push_back(D3DS::Face());
+			D3DS::Face& sFace = mMesh.mFaces.back();
+
+			sFace.mIndices[0] = (uint16_t)stream->GetI2();
+			sFace.mIndices[1] = (uint16_t)stream->GetI2();
+			sFace.mIndices[2] = (uint16_t)stream->GetI2();
+
+			stream->IncPtr(2); // skip edge visibility flag
 		}
 
-		// resize the material array (0xcdcdcdcd marks the
+		// Resize the material array (0xcdcdcdcd marks the
 		// default material; so if a face is not referenced
 		// by a material $$DEFAULT will be assigned to it)
 		mMesh.mFaceMaterials.resize(mMesh.mFaces.size(),0xcdcdcdcd);
 
-		iRemaining = (int)(pcCurNext - this->mCurrent);
-		if (iRemaining > 0)this->ParseFaceChunk(iRemaining);
+		// Larger 3DS files could have multiple FACE chunks here
+		chunkSize = stream->GetRemainingSizeToLimit();
+		if (chunkSize > sizeof(Discreet3DS::Chunk))
+			ParseFaceChunk();
+		}
 		break;
-
 	};
-	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
 	ASSIMP_3DS_END_CHUNK();
-	return ParseMeshChunk(piRemaining);
+
+	// recursively continue processing this hierarchy level
+	return ParseMeshChunk();
 }
+
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseMaterialChunk(int& piRemaining)
+void Discreet3DSImporter::ParseMaterialChunk()
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
 
 	// get chunk type
-	const unsigned char* sz = this->mCurrent;
-	unsigned int iCnt = 0;
-	int iRemaining;
-	aiColor3D* pc;
-	float* pcf;
-	switch (psChunk->Flag)
+	switch (chunk.Flag)
 	{
-	case Dot3DSFile::CHUNK_MAT_MATNAME:
+	case Discreet3DS::CHUNK_MAT_MATNAME:
 
-		// string in file is zero-terminated, 
-		// this should be no problem. However, validate whether it overlaps 
-		// the end of the chunk, if yes we should truncate it.
-		while (*sz++ != '\0')
 		{
-			if (sz > pcCurNext-1)
-			{
-				DefaultLogger::get()->error("Material name string is too long");
-				break;
-			}
-			++iCnt;
+		// The material name string is already zero-terminated, but
+		// we need to be sure ...
+		const char* sz = (const char*)stream->GetPtr();
+		unsigned int cnt = 0;
+		while (stream->GetI1())++cnt;
+
+		if (!cnt)
+		{
+			// This may not be, we use the default name instead
+			DefaultLogger::get()->error("3DS: Empty material name");
 		}
-		this->mScene->mMaterials.back().mName = std::string((const char*)this->mCurrent,iCnt);
+		else mScene->mMaterials.back().mName = std::string(sz,cnt);
+		}
 		break;
-	case Dot3DSFile::CHUNK_MAT_DIFFUSE:
-		pc = &this->mScene->mMaterials.back().mDiffuse;
-		this->ParseColorChunk(pc);
+
+	case Discreet3DS::CHUNK_MAT_DIFFUSE:
+		{
+		// This is the diffuse material color
+		aiColor3D* pc = &mScene->mMaterials.back().mDiffuse;
+		ParseColorChunk(pc);
 		if (is_qnan(pc->r))
 		{
 			// color chunk is invalid. Simply ignore it
 			DefaultLogger::get()->error("Unable to read DIFFUSE chunk");
 			pc->r = pc->g = pc->b = 1.0f;
-		}
+		}}
 		break;
-	case Dot3DSFile::CHUNK_MAT_SPECULAR:
-		pc = &this->mScene->mMaterials.back().mSpecular;
-		this->ParseColorChunk(pc);
+
+	case Discreet3DS::CHUNK_MAT_SPECULAR:
+		{
+		// This is the specular material color
+		aiColor3D* pc = &mScene->mMaterials.back().mSpecular;
+		ParseColorChunk(pc);
 		if (is_qnan(pc->r))
 		{
 			// color chunk is invalid. Simply ignore it
 			DefaultLogger::get()->error("Unable to read SPECULAR chunk");
 			pc->r = pc->g = pc->b = 1.0f;
-		}
+		}}
 		break;
-	case Dot3DSFile::CHUNK_MAT_AMBIENT:
-		pc = &this->mScene->mMaterials.back().mAmbient;
-		this->ParseColorChunk(pc);
+
+	case Discreet3DS::CHUNK_MAT_AMBIENT:
+		{
+		// This is the ambient material color
+		aiColor3D* pc = &mScene->mMaterials.back().mAmbient;
+		ParseColorChunk(pc);
 		if (is_qnan(pc->r))
 		{
 			// color chunk is invalid. Simply ignore it
 			DefaultLogger::get()->error("Unable to read AMBIENT chunk");
-			pc->r = pc->g = pc->b = 1.0f;
-		}
+			pc->r = pc->g = pc->b = 0.0f;
+		}}
 		break;
-	case Dot3DSFile::CHUNK_MAT_SELF_ILLUM:
-		pc = &this->mScene->mMaterials.back().mEmissive;
-		this->ParseColorChunk(pc);
+
+	case Discreet3DS::CHUNK_MAT_SELF_ILLUM:
+		{
+		// This is the emissive material color
+		aiColor3D* pc = &mScene->mMaterials.back().mEmissive;
+		ParseColorChunk(pc);
 		if (is_qnan(pc->r))
 		{
 			// color chunk is invalid. Simply ignore it
-			// EMISSSIVE TO 0|0|0
 			DefaultLogger::get()->error("Unable to read EMISSIVE chunk");
 			pc->r = pc->g = pc->b = 0.0f;
-		}
+		}}
 		break;
-	case Dot3DSFile::CHUNK_MAT_TRANSPARENCY:
-		pcf = &this->mScene->mMaterials.back().mTransparency;
-		*pcf = this->ParsePercentageChunk();
+
+	case Discreet3DS::CHUNK_MAT_TRANSPARENCY:
+		{
+		// This is the material's transparency
+		float* pcf = &mScene->mMaterials.back().mTransparency;
+		*pcf = ParsePercentageChunk();
+
 		// NOTE: transparency, not opacity
 		if (is_qnan(*pcf))*pcf = 1.0f;
 		else *pcf = 1.0f - *pcf * (float)0xFFFF / 100.0f;
+		}
 		break;
 
-	case Dot3DSFile::CHUNK_MAT_SHADING:
-		
-		this->mScene->mMaterials.back().mShading =
-			(Dot3DS::Dot3DSFile::shadetype3ds)*((uint16_t*)this->mCurrent);
-
-		this->mCurrent += sizeof(uint16_t);
+	case Discreet3DS::CHUNK_MAT_SHADING:
+		// This is the material shading mode
+		mScene->mMaterials.back().mShading = (D3DS::Discreet3DS::shadetype3ds)stream->GetI2();
 		break;
 
-	case Dot3DSFile::CHUNK_MAT_TWO_SIDE:
-		this->mScene->mMaterials.back().mTwoSided = true;
+	case Discreet3DS::CHUNK_MAT_TWO_SIDE:
+		// This is the two-sided flag
+		mScene->mMaterials.back().mTwoSided = true;
 		break;
 
-	case Dot3DSFile::CHUNK_MAT_SHININESS:
-		pcf = &this->mScene->mMaterials.back().mSpecularExponent;
-		*pcf = this->ParsePercentageChunk();
+	case Discreet3DS::CHUNK_MAT_SHININESS:
+		{ // This is the shininess of the material
+		float* pcf = &mScene->mMaterials.back().mSpecularExponent;
+		*pcf = ParsePercentageChunk();
 		if (is_qnan(*pcf))*pcf = 0.0f;
 		else *pcf *= (float)0xFFFF;
+		}
 		break;
 
-	case Dot3DSFile::CHUNK_MAT_SHININESS_PERCENT:
-		pcf = &this->mScene->mMaterials.back().mShininessStrength;
-		*pcf = this->ParsePercentageChunk();
+	case Discreet3DS::CHUNK_MAT_SHININESS_PERCENT:
+		{ // This is the shininess strength of the material
+		float* pcf = &mScene->mMaterials.back().mShininessStrength;
+		*pcf = ParsePercentageChunk();
 		if (is_qnan(*pcf))*pcf = 0.0f;
 		else *pcf *= (float)0xffff / 100.0f;
+		}
 		break;
 
-	case Dot3DSFile::CHUNK_MAT_SELF_ILPCT:
+	case Discreet3DS::CHUNK_MAT_SELF_ILPCT:
+		{ // This is the self illumination strength of the material
 		// TODO: need to multiply with emissive base color?
-		pcf = &this->mScene->mMaterials.back().sTexEmissive.mTextureBlend;
-		*pcf = this->ParsePercentageChunk();
+		float* pcf = &mScene->mMaterials.back().sTexEmissive.mTextureBlend;
+		*pcf = ParsePercentageChunk();
 		if (is_qnan(*pcf))*pcf = 0.0f;
 		else *pcf = *pcf * (float)0xFFFF / 100.0f;
+		}
 		break;
 
-	// parse texture chunks
-	case Dot3DSFile::CHUNK_MAT_TEXTURE:
-		iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-		this->ParseTextureChunk(iRemaining,&this->mScene->mMaterials.back().sTexDiffuse);
+	// Parse texture chunks
+	case Discreet3DS::CHUNK_MAT_TEXTURE:
+		// Diffuse texture
+		ParseTextureChunk(&mScene->mMaterials.back().sTexDiffuse);
 		break;
-	case Dot3DSFile::CHUNK_MAT_BUMPMAP:
-		iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-		this->ParseTextureChunk(iRemaining,&this->mScene->mMaterials.back().sTexBump);
+	case Discreet3DS::CHUNK_MAT_BUMPMAP:
+		// Height map
+		ParseTextureChunk(&mScene->mMaterials.back().sTexBump);
 		break;
-	case Dot3DSFile::CHUNK_MAT_OPACMAP:
-		iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-		this->ParseTextureChunk(iRemaining,&this->mScene->mMaterials.back().sTexOpacity);
+	case Discreet3DS::CHUNK_MAT_OPACMAP:
+		// Opacity texture
+		ParseTextureChunk(&mScene->mMaterials.back().sTexOpacity);
 		break;
-	case Dot3DSFile::CHUNK_MAT_MAT_SHINMAP:
-		iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-		this->ParseTextureChunk(iRemaining,&this->mScene->mMaterials.back().sTexShininess);
+	case Discreet3DS::CHUNK_MAT_MAT_SHINMAP:
+		// Shininess map
+		ParseTextureChunk(&mScene->mMaterials.back().sTexShininess);
 		break;
-	case Dot3DSFile::CHUNK_MAT_SPECMAP:
-		iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-		this->ParseTextureChunk(iRemaining,&this->mScene->mMaterials.back().sTexSpecular);
+	case Discreet3DS::CHUNK_MAT_SPECMAP:
+		// Specular map
+		ParseTextureChunk(&mScene->mMaterials.back().sTexSpecular);
 		break;
-	case Dot3DSFile::CHUNK_MAT_SELFIMAP:
-		iRemaining = (psChunk->Size - sizeof(Dot3DSFile::Chunk));
-		this->ParseTextureChunk(iRemaining,&this->mScene->mMaterials.back().sTexEmissive);
+	case Discreet3DS::CHUNK_MAT_SELFIMAP:
+		// Self-illumination (emissive) map
+		ParseTextureChunk(&mScene->mMaterials.back().sTexEmissive);
+		break;
+	case Discreet3DS::CHUNK_MAT_REFLMAP:
+
+		// Reflection map - no support in Assimp
+		DefaultLogger::get()->warn("3DS: Found reflection map in file. This is not supported");
+
 		break;
 	};
-	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
 	ASSIMP_3DS_END_CHUNK();
-	return ParseMaterialChunk(piRemaining);
+
+	// recursively continue processing this hierarchy level
+	return ParseMaterialChunk();
 }
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseTextureChunk(int& piRemaining,Dot3DS::Texture* pcOut)
+void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
 
 	// get chunk type
-	const unsigned char* sz = this->mCurrent;
-	unsigned int iCnt = 0;
-	switch (psChunk->Flag)
+	switch (chunk.Flag)
 	{
-	case Dot3DSFile::CHUNK_MAPFILE:
-		// string in file is zero-terminated, 
-		// this should be no problem. However, validate whether
-		// it overlaps the end of the chunk, if yes we should
-		// truncate it.
-		while (*sz++ != '\0')
+	case Discreet3DS::CHUNK_MAPFILE:
 		{
-			if (sz > pcCurNext-1)break;
-			++iCnt;
+		// The material name string is already zero-terminated, but
+		// we need to be sure ...
+		const char* sz = (const char*)stream->GetPtr();
+		unsigned int cnt = 0;
+		while (stream->GetI1())++cnt;
+		pcOut->mMapName = std::string(sz,cnt);
 		}
-		pcOut->mMapName = std::string((const char*)this->mCurrent,iCnt);
-		break;
-	// manually parse the blend factor
-	case Dot3DSFile::CHUNK_PERCENTF:
-		pcOut->mTextureBlend = *((float*)this->mCurrent);
-		break;
-	// manually parse the blend factor
-	case Dot3DSFile::CHUNK_PERCENTW:
-		pcOut->mTextureBlend = (float)(*((short*)this->mCurrent)) / 100.0f;
 		break;
 
-	case Dot3DSFile::CHUNK_MAT_MAP_USCALE:
-		pcOut->mScaleU = *((float*)this->mCurrent);
+
+	case Discreet3DS::CHUNK_PERCENTF:
+		// Manually parse the blend factor
+		pcOut->mTextureBlend = stream->GetF4();
+		break;
+
+	case Discreet3DS::CHUNK_PERCENTW:
+		// Manually parse the blend factor
+		pcOut->mTextureBlend = (float)((uint16_t)stream->GetI2()) / 100.0f;
+		break;
+
+	case Discreet3DS::CHUNK_MAT_MAP_USCALE:
+		// Texture coordinate scaling in the U direction
+		pcOut->mScaleU = stream->GetF4();
 		if (0.0f == pcOut->mScaleU)
 		{
 			DefaultLogger::get()->warn("Texture coordinate scaling in the "
@@ -1013,8 +1220,9 @@ void Dot3DSImporter::ParseTextureChunk(int& piRemaining,Dot3DS::Texture* pcOut)
 			pcOut->mScaleU = 1.0f;
 		}
 		break;
-	case Dot3DSFile::CHUNK_MAT_MAP_VSCALE:
-		pcOut->mScaleV = *((float*)this->mCurrent);
+	case Discreet3DS::CHUNK_MAT_MAP_VSCALE:
+		// Texture coordinate scaling in the V direction
+		pcOut->mScaleV = stream->GetF4();
 		if (0.0f == pcOut->mScaleV)
 		{
 			DefaultLogger::get()->warn("Texture coordinate scaling in the "
@@ -1022,17 +1230,25 @@ void Dot3DSImporter::ParseTextureChunk(int& piRemaining,Dot3DS::Texture* pcOut)
 			pcOut->mScaleV = 1.0f;
 		}
 		break;
-	case Dot3DSFile::CHUNK_MAT_MAP_UOFFSET:
-		pcOut->mOffsetU = *((float*)this->mCurrent);
+
+	case Discreet3DS::CHUNK_MAT_MAP_UOFFSET:
+		// Texture coordinate offset in the U direction
+		pcOut->mOffsetU = stream->GetF4();
 		break;
-	case Dot3DSFile::CHUNK_MAT_MAP_VOFFSET:
-		pcOut->mOffsetV = *((float*)this->mCurrent);
+
+	case Discreet3DS::CHUNK_MAT_MAP_VOFFSET:
+		// Texture coordinate offset in the V direction
+		pcOut->mOffsetV = stream->GetF4();
 		break;
-	case Dot3DSFile::CHUNK_MAT_MAP_ANG:
-		pcOut->mRotation = *((float*)this->mCurrent);
+
+	case Discreet3DS::CHUNK_MAT_MAP_ANG:
+		// Texture coordinate rotation, CCW in radians
+		pcOut->mRotation = stream->GetF4();
 		break;
-	case Dot3DSFile::CHUNK_MAT_MAP_TILING:
-		uint16_t iFlags = *((uint16_t*)this->mCurrent);
+
+	case Discreet3DS::CHUNK_MAT_MAP_TILING:
+		{
+		uint16_t iFlags = stream->GetI2();
 
 		// check whether the mirror flag is set
 		if (iFlags & 0x2u)
@@ -1043,38 +1259,38 @@ void Dot3DSImporter::ParseTextureChunk(int& piRemaining,Dot3DS::Texture* pcOut)
 		else if (iFlags & 0x10u && iFlags & 0x1u)
 		{
 			pcOut->mMapMode = aiTextureMapMode_Clamp;
-		}
+		}}
 		break;
 	};
 
-	ASSIMP_3DS_VALIDATE_CHUNK_SIZE();
 	ASSIMP_3DS_END_CHUNK();
-	return ParseTextureChunk(piRemaining,pcOut);
-}
-// ------------------------------------------------------------------------------------------------
-float Dot3DSImporter::ParsePercentageChunk()
-{
-	const Dot3DSFile::Chunk* psChunk;
-	this->ReadChunk(&psChunk);
-	if (NULL == psChunk)return std::numeric_limits<float>::quiet_NaN();
 
-	if (Dot3DSFile::CHUNK_PERCENTF == psChunk->Flag)
+	// recursively continue processing this hierarchy level
+	return ParseTextureChunk(pcOut);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Read a percentage chunk
+float Discreet3DSImporter::ParsePercentageChunk()
+{
+	Discreet3DS::Chunk chunk;
+	ReadChunk(&chunk);
+
+	if (Discreet3DS::CHUNK_PERCENTF == chunk.Flag)
 	{
-		if (sizeof(float) > psChunk->Size)
-			return std::numeric_limits<float>::quiet_NaN();
-		return *((float*)this->mCurrent);
+		return stream->GetF4();
 	}
-	else if (Dot3DSFile::CHUNK_PERCENTW == psChunk->Flag)
+	else if (Discreet3DS::CHUNK_PERCENTW == chunk.Flag)
 	{
-		if (2 > psChunk->Size)
-			return std::numeric_limits<float>::quiet_NaN();
-		return (float)(*((short*)this->mCurrent)) / (float)0xFFFF;
+		return (float)((uint16_t)stream->GetI2()) / (float)0xFFFF;
 	}
-	this->mCurrent += psChunk->Size - sizeof(Dot3DSFile::Chunk);
 	return std::numeric_limits<float>::quiet_NaN();
 }
+
 // ------------------------------------------------------------------------------------------------
-void Dot3DSImporter::ParseColorChunk(aiColor3D* p_pcOut,
+// Read a color chunk. If a percentage chunk is found instead, it will be converted
+// to a grayscale color value
+void Discreet3DSImporter::ParseColorChunk(aiColor3D* p_pcOut,
 	bool p_bAcceptPercent)
 {
 	ai_assert(p_pcOut != NULL);
@@ -1084,74 +1300,72 @@ void Dot3DSImporter::ParseColorChunk(aiColor3D* p_pcOut,
 		std::numeric_limits<float>::quiet_NaN(),
 		std::numeric_limits<float>::quiet_NaN());
 
-	const Dot3DSFile::Chunk* psChunk;
-	this->ReadChunk(&psChunk);
-	if (!psChunk)
-	{
-		*p_pcOut = clrError;
-		return;
-	}
-	const unsigned int diff = psChunk->Size - sizeof(Dot3DSFile::Chunk);
-	const unsigned char* pcCur = this->mCurrent;
-	this->mCurrent += diff;
+	Discreet3DS::Chunk chunk;
+	ReadChunk(&chunk);
+	const unsigned int diff = chunk.Size - sizeof(Discreet3DS::Chunk);
+
 	bool bGamma = false;
 
-	switch(psChunk->Flag)
+	// Get the type of the chunk
+	switch(chunk.Flag)
 	{
-	case Dot3DSFile::CHUNK_LINRGBF:
+	case Discreet3DS::CHUNK_LINRGBF:
 		bGamma = true;
 
-	case Dot3DSFile::CHUNK_RGBF:
+	case Discreet3DS::CHUNK_RGBF:
 		if (sizeof(float) * 3 > diff)
 		{
 			*p_pcOut = clrError;
 			return;
 		}
-		p_pcOut->r = ((float*)pcCur)[0];
-		p_pcOut->g = ((float*)pcCur)[1];
-		p_pcOut->b = ((float*)pcCur)[2];
+		p_pcOut->r = stream->GetF4();
+		p_pcOut->g = stream->GetF4();
+		p_pcOut->b = stream->GetF4();
 		break;
 
-	case Dot3DSFile::CHUNK_LINRGBB:
+	case Discreet3DS::CHUNK_LINRGBB:
 		bGamma = true;
-	case Dot3DSFile::CHUNK_RGBB:
+	case Discreet3DS::CHUNK_RGBB:
 		if (sizeof(char) * 3 > diff)
 		{
 			*p_pcOut = clrError;
 			return;
 		}
-		p_pcOut->r = (float)pcCur[0] / 255.0f;
-		p_pcOut->g = (float)pcCur[1] / 255.0f;
-		p_pcOut->b = (float)pcCur[2] / 255.0f;
+		p_pcOut->r = (float)(uint8_t)stream->GetI1() / 255.0f;
+		p_pcOut->g = (float)(uint8_t)stream->GetI1() / 255.0f;
+		p_pcOut->b = (float)(uint8_t)stream->GetI1() / 255.0f;
 		break;
 
-	// percentage chunks: accepted to be compatible with various
+	// Percentage chunks: accepted to be compatible with various
 	// .3ds files with very curious content
-	case Dot3DSFile::CHUNK_PERCENTF:
+	case Discreet3DS::CHUNK_PERCENTF:
 		if (p_bAcceptPercent && 4 <= diff)
 		{
-			p_pcOut->r = *((float*)pcCur);
-			p_pcOut->g = *((float*)pcCur);
-			p_pcOut->b = *((float*)pcCur);
+			p_pcOut->r = stream->GetF4();
+			p_pcOut->g = p_pcOut->b = p_pcOut->r;
 			break;
 		}
 		*p_pcOut = clrError;
 		return;
-	case Dot3DSFile::CHUNK_PERCENTW:
+
+	case Discreet3DS::CHUNK_PERCENTW:
 		if (p_bAcceptPercent && 1 <= diff)
 		{
-			p_pcOut->r = (float)pcCur[0] / 255.0f;
-			p_pcOut->g = (float)pcCur[0] / 255.0f;
-			p_pcOut->b = (float)pcCur[0] / 255.0f;
+			p_pcOut->r = (float)(uint8_t)stream->GetI1() / 255.0f;
+			p_pcOut->g = p_pcOut->b = p_pcOut->r;
 			break;
 		}
 		*p_pcOut = clrError;
 		return;
 
 	default:
+
 		// skip unknown chunks, hope this won't cause any problems.
-		return this->ParseColorChunk(p_pcOut,p_bAcceptPercent);
+		return ParseColorChunk(p_pcOut,p_bAcceptPercent);
 	};
+
+	// Do a gamma correction ... I'm not sure whether this is correct
+	// or not but I'm too tired now to think of it
 	if (bGamma)
 	{
 		p_pcOut->r = powf(p_pcOut->r, 1.0f / 2.2f);

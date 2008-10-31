@@ -72,6 +72,13 @@ struct aiQuaternion
 	/** Returns a matrix representation of the quaternion */
 	aiMatrix3x3 GetMatrix() const;
 
+
+	bool operator== (const aiQuaternion& o) const
+		{return x == o.x && y == o.y && z == o.z && w == o.w;}
+
+	bool operator!= (const aiQuaternion& o) const
+		{return !(*this == o);}
+
 #endif // __cplusplus
 
 	//! w,x,y,z components of the quaternion

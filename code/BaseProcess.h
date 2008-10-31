@@ -97,7 +97,7 @@ public:
 		T data;
 	};
 
-	typedef uint32_t KeyType;
+	typedef unsigned int KeyType;
 	typedef std::map<KeyType, Base*>  PropertyMap;
 
 public:

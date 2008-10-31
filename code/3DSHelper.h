@@ -58,19 +58,19 @@ http://www.jalix.org/ressources/graphics/3DS/_unofficials/3ds-unofficial.txt */
 #include "SmoothingGroups.h"
 
 namespace Assimp	{
-namespace Dot3DS	{
+namespace D3DS	{
 
 #include "./../include/Compiler/pushpack1.h"
 
 // ---------------------------------------------------------------------------
-/** Dot3DSFile class: Helper class for loading 3ds files. Defines chunks
+/** Discreet3DS class: Helper class for loading 3ds files. Defines chunks
 *  and data structures.
 */
 // ---------------------------------------------------------------------------
-class Dot3DSFile
+class Discreet3DS
 {
 public:
-	inline Dot3DSFile() {}
+	inline Discreet3DS() {}
 
 	//! data structure for a single chunk in a .3ds file
 	struct Chunk
@@ -241,12 +241,7 @@ public:
 			// Specular map. Seems to influence the specular color
 			CHUNK_MAT_SPECMAP = 0xA204,
 
-			// Holds shininess data. I assume the specular exponent is
-			// calculated like this:
-			//
-			// s[x,y] =  stex[x,y] * base_shininess;
-			// I also assume the data in the texture must be renormalized
-			// (normally by dividing / 255) after loading.
+			// Holds shininess data. 
 			CHUNK_MAT_MAT_SHINMAP = 0xA33C,
 
 			// Scaling in U/V direction.
@@ -281,6 +276,7 @@ public:
 		// Supported sub chunks
 		CHUNK_TRACKINFO		= 0xB002,
 		CHUNK_TRACKOBJNAME  = 0xB010,
+		CHUNK_TRACKDUMMYOBJNAME  = 0xB011,
 		CHUNK_TRACKPIVOT    = 0xB013,
 		CHUNK_TRACKPOS      = 0xB020,
 		CHUNK_TRACKROTATE   = 0xB021,
@@ -288,7 +284,7 @@ public:
 
 		// ********************************************************************
 		// Keyframes for various other stuff in the file
-		// Ignored
+		// Partially ignored
 		CHUNK_AMBIENTKEY    = 0xB001,
 		CHUNK_TRACKMORPH    = 0xB026,
 		CHUNK_TRACKHIDE     = 0xB029,
@@ -359,9 +355,10 @@ struct Material
 	//! Default constructor. Builds a default name for the material
 	Material()
 		: 
+	mDiffuse			(0.6f,0.6f,0.6f), // FIX ... we won't want object to be black
 	mSpecularExponent	(0.0f),
 	mShininessStrength	(1.0f),
-	mShading(Dot3DSFile::Gouraud),
+	mShading(Discreet3DS::Gouraud),
 	mTransparency		(1.0f),
 	mBumpHeight			(1.0f),
 	mTwoSided			(false),
@@ -388,7 +385,7 @@ struct Material
 	//! Ambient color of the material
 	aiColor3D mAmbient;
 	//! Shading type to be used
-	Dot3DSFile::shadetype3ds mShading;
+	Discreet3DS::shadetype3ds mShading;
 	//! Opacity of the material
 	float mTransparency;
 	//! Diffuse texture channel
@@ -419,7 +416,7 @@ struct Material
 };
 // ---------------------------------------------------------------------------
 /** Helper structure to represent a 3ds file mesh */
-struct Mesh : public MeshWithSmoothingGroups<Dot3DS::Face>
+struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
 {
 	//! Default constructor
 	Mesh()
@@ -443,6 +440,9 @@ struct Mesh : public MeshWithSmoothingGroups<Dot3DS::Face>
 	//! Local transformation matrix
 	aiMatrix4x4 mMat;
 };
+
+typedef std::pair<double, float> aiFloatKey;
+
 // ---------------------------------------------------------------------------
 /** Helper structure to represent a 3ds file node */
 struct Node
@@ -458,11 +458,9 @@ struct Node
 		::sprintf(szTemp,"UNNAMED_%i",iCnt++);
 		mName = szTemp;
 
-#ifdef AI_3DS_KEYFRAME_ANIMATION
-		aRotationKeys.reserve(10);
-		aPositionKeys.reserve(10);
-		aScalingKeys.reserve(10);
-#endif
+		aRotationKeys.reserve (20);
+		aPositionKeys.reserve (20);
+		aScalingKeys.reserve  (20);
 	}
 
 	//! Pointer to the parent node
@@ -474,13 +472,16 @@ struct Node
 	//! Name of the node
 	std::string mName;
 
+	//! Dummy nodes: real name to be combined with the $$$DUMMY 
+	std::string mDummyName;
+
 	//! Position of the node in the hierarchy (tree depth)
 	int16_t mHierarchyPos;
 
 	//! Index of the node
 	int16_t mHierarchyIndex;
 
-#ifdef AI_3DS_KEYFRAME_ANIMATION
+
 	//! Rotation keys loaded from the file
 	std::vector<aiQuatKey> aRotationKeys;
 
@@ -489,7 +490,14 @@ struct Node
 
 	//! Scaling keys loaded from the file
 	std::vector<aiVectorKey> aScalingKeys;
-#endif
+
+
+	// For target lights (spot lights and directional lights):
+	// The position of the target
+	std::vector< aiVectorKey > aTargetPositionKeys;
+
+	// For cameras: the camera roll angle
+	std::vector< aiFloatKey > aCameraRollKeys;
 
 	//! Pivot position loaded from the file
 	aiVector3D vPivot;
@@ -516,12 +524,18 @@ struct Scene
 	//! List of all meshes loaded
 	std::vector<Mesh> mMeshes;
 
+	//! List of all cameras loaded
+	std::vector<aiCamera*> mCameras;
+
+	//! List of all lights loaded
+	std::vector<aiLight*> mLights;
+
 	//! Pointer to the root node of the scene
 	Node* pcRootNode;
 };
 
 
-} // end of namespace Dot3DS
+} // end of namespace D3DS
 } // end of namespace Assimp
 
 #endif // AI_XFILEHELPER_H_INC

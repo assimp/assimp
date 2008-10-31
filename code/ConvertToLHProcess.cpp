@@ -117,9 +117,17 @@ void ConvertToLHProcess::Execute( aiScene* pScene)
 			// transform all normals
 			if (pcMesh->HasNormals())
 			{
-				mTransform.Inverse().Transpose();
 				for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
 					pcMesh->mNormals[n]  = mTransform * pcMesh->mNormals[n];
+			}
+			// transform all tangents and all bitangents
+			if (pcMesh->HasTangentsAndBitangents())
+			{
+				for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
+				{
+					pcMesh->mTangents[n]    = mTransform * pcMesh->mTangents[n];
+					pcMesh->mBitangents[n]  = mTransform * pcMesh->mBitangents[n];
+				}
 			}
 		}
 	}

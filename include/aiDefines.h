@@ -90,9 +90,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // compiler specific includes and definitions
 #if (defined _MSC_VER)
 
-	// include stdint.h from the C98 standard
-#	include "Compiler/pstdint.h"
-
 #	undef ASSIMP_API
 
 	
@@ -155,15 +152,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if (defined(__BORLANDC__) || defined (__BCPLUSPLUS__))
 
-// for borland add the replacement pstdint.h, too
-#       include "Compiler/pstdint.h"
-
 // "W8059 Packgröße der Struktur geändert"
 // TODO: find a way to deactivate this warning automatically
 // maybe there is a pragma to do exactly this?
 
 #endif
 
+// include our workaround stdint.h from the C98 standard to make
+// sure the types it declares are consistently available 
+#include "./../include/Compiler/pstdint.h"
 
 	// ************************************************************
 	// Define ASSIMP_BUILD_BOOST_WORKAROUND to compile assimp

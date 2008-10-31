@@ -60,17 +60,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ASE is quite similar to 3ds. We can reuse some structures
 #include "3DSLoader.h"
 
-namespace Assimp
-{
+namespace Assimp	{
+namespace ASE	{
 
-// http://wiki.beyondunreal.com/Legacy:ASE_File_Format
-namespace ASE
-{
-	using namespace Dot3DS;
+using namespace D3DS;
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing an ASE material */
-struct Material : public Dot3DS::Material
+struct Material : public D3DS::Material
 {
 	//! Default constructor
 	Material() : pcInstance(NULL), bNeed (false)
@@ -159,11 +156,33 @@ struct BoneVertex
 /** Helper structure to represent an ASE file animation */
 struct Animation
 {
-	//! List of rotation keyframes
+	enum Type
+	{
+		TRACK   = 0x0,
+		BEZIER  = 0x1,
+		TCB		= 0x2
+	} mRotationType, mScalingType, mPositionType;
+
+	Animation()
+		:	mRotationType	(TRACK)
+		,	mScalingType	(TRACK)
+		,	mPositionType	(TRACK)
+	{}
+
+	/** ONLY ONE OF THESE SETS IS USED 
+	 * 
+	 *  Bezier and TCB channels are converted to a normal
+	 *  trac later.
+	 */
+
+	//! List of track rotation keyframes
 	std::vector< aiQuatKey > akeyRotations;
 
-	//! List of position keyframes
+	//! List of track position keyframes
 	std::vector< aiVectorKey > akeyPositions;
+
+	//! List of track scaling keyframes
+	std::vector< aiVectorKey > akeyScaling;
 
 };
 
@@ -217,9 +236,19 @@ struct BaseNode
 	//! Transformation matrix of the node
 	aiMatrix4x4 mTransform;
 
+	//! Target position (target lights and cameras)
+	aiVector3D mTargetPosition;
+
 	//! Specifies which axes transformations a node inherits
 	//! from its parent ...
 	InheritanceInfo inherit;
+
+	//! Animation channels for the node
+	Animation mAnim;
+
+	//! Needed for lights and cameras: target animation channel
+	//! Should contain position keys only.
+	Animation mTargetAnim;
 
 	bool mProcessed;
 };
@@ -253,9 +282,6 @@ struct Mesh : public MeshWithSmoothingGroups<ASE::Face>, public BaseNode
 	//! List of all bones
 	std::vector<Bone> mBones;
 
-	//! Animation channels for the node
-	Animation mAnim;
-
 	//! Material index of the mesh
 	unsigned int iMaterialIndex;
 
@@ -272,7 +298,10 @@ struct Light : public BaseNode
 {
 	enum LightType
 	{
-		OMNI
+		OMNI,
+		TARGET,
+		FREE,
+		DIRECTIONAL
 	};
 
 	//! Constructor. 
@@ -281,28 +310,51 @@ struct Light : public BaseNode
 		, mLightType (OMNI)
 		, mColor	 (1.f,1.f,1.f)
 		, mIntensity (1.f) // light is white by default
+		, mAngle	 (45.f)
+		, mFalloff	 (0.f)
 	{	
 	}
 
 	LightType mLightType;
 	aiColor3D mColor;
 	float mIntensity;
+	float mAngle; // in degrees
+	float mFalloff;
 };
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent an ASE camera */
 struct Camera : public BaseNode
 {
+	enum CameraType
+	{
+		FREE,
+		TARGET
+	};
+
 	//! Constructor
 	Camera() 
-		: BaseNode	(BaseNode::Camera)
-		, mFOV  (0.75f)   // in radians
-		, mNear (0.1f) 
-		, mFar  (1000.f)  // could be zero
+		: BaseNode	  (BaseNode::Camera)
+		, mFOV        (0.75f)   // in radians
+		, mNear       (0.1f) 
+		, mFar        (1000.f)  // could be zero
+		, mCameraType (FREE)
 	{
 	}
 
 	float mFOV, mNear, mFar;
+	CameraType mCameraType;
+};
+
+// ---------------------------------------------------------------------------
+/** Helper structure to represent an ASE helper object (dummy) */
+struct Dummy : public BaseNode
+{
+	//! Constructor
+	Dummy() 
+		: BaseNode	(BaseNode::Dummy)
+	{
+	}
 };
 
 // ---------------------------------------------------------------------------------
@@ -337,26 +389,9 @@ private:
 	void ParseLV1MaterialListBlock();
 
 	// -------------------------------------------------------------------
-	//! Parse a *GEOMOBJECT block in a file
-	//! \param mesh Mesh object to be filled
-	void ParseLV1GeometryObjectBlock(Mesh& mesh);
-
-	// -------------------------------------------------------------------
-	//! Parse a *LIGHTOBJECT block in a file
-	//! \param light Light object to be filled
-	void ParseLV1LightObjectBlock(Light& mesh);
-
-	// -------------------------------------------------------------------
-	//! Parse a *CAMERAOBJECT block in a file
-	//! \param cam Camera object to be filled
-	void ParseLV1CameraObjectBlock(Camera& cam);
-
-	// -------------------------------------------------------------------
-	//! Parse the shared parts of the *GEOMOBJECT, *LIGHTOBJECT and
-	//! *CAMERAOBJECT chunks.
-	//! \param mesh ..
-	//! \return true = token parsed, get next please
-	bool ParseSharedNodeInfo(ASE::BaseNode& mesh);
+	//! Parse a *<xxx>OBJECT block in a file
+	//! \param mesh Node to be filled
+	void ParseLV1ObjectBlock(BaseNode& mesh);
 
 	// -------------------------------------------------------------------
 	//! Parse a *MATERIAL blocks in a material list
@@ -371,9 +406,10 @@ private:
 	// -------------------------------------------------------------------
 	//! Parse a *TM_ANIMATION block in a file
 	//! \param mesh Mesh object to be filled
-	void ParseLV2AnimationBlock(Mesh& mesh);
-	void ParseLV3PosAnimationBlock(Mesh& mesh);
-	void ParseLV3RotAnimationBlock(Mesh& mesh);
+	void ParseLV2AnimationBlock(BaseNode& mesh);
+	void ParseLV3PosAnimationBlock(ASE::Animation& anim);
+	void ParseLV3ScaleAnimationBlock(ASE::Animation& anim);
+	void ParseLV3RotAnimationBlock(ASE::Animation& anim);
 
 	// -------------------------------------------------------------------
 	//! Parse a *MESH block in a file
@@ -572,6 +608,9 @@ public:
 
 	//! List of all meshes found in the file
 	std::vector<Mesh> m_vMeshes;
+
+	//! List of all dummies found in the file
+	std::vector<Dummy> m_vDummies;
 
 	//! List of all lights found in the file
 	std::vector<Light> m_vLights;

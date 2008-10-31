@@ -65,7 +65,7 @@ using namespace Assimp;
 	} 
 
 // ------------------------------------------------------------------------------------------------
-// read a string enclosed in double quotation marks. buffer must point to "
+// read a string (may be enclosed in double quotation marks). buffer must point to "
 #define AI_AC_GET_STRING(out) \
 	++buffer; \
 	const char* sz = buffer; \
@@ -167,7 +167,8 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 			{
 				// load the children of this object recursively
 				obj.children.reserve(num);
-				LoadObjectSection(obj.children);
+				for (unsigned int i = 0; i < num; ++i)
+					LoadObjectSection(obj.children);
 			}
 			return;
 		}
@@ -218,12 +219,16 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 				obj.vertices.push_back(aiVector3D());
 				aiVector3D& v = obj.vertices.back();
 				AI_AC_CHECKED_LOAD_FLOAT_ARRAY("",0,3,&v.x);
+				//std::swap(v.z,v.y);
+				v.z *= -1.f;
 			}
 		}
 		else if (TokenMatch(buffer,"numsurf",7))
 		{
 			SkipSpaces(&buffer);
 			
+			bool Q3DWorkAround = false;
+
 			const unsigned int t = strtol10(buffer,&buffer);
 			obj.surfaces.reserve(t);
 			for (unsigned int i = 0; i < t;++i)
@@ -231,9 +236,17 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 				GetNextLine();
 				if (!TokenMatch(buffer,"SURF",4))
 				{
-					DefaultLogger::get()->error("AC3D: SURF token was expected");
+					// FIX: this can occur for some files - Quick 3D for 
+					// example writes no surf chunks
+					if (!Q3DWorkAround)
+					{
+						DefaultLogger::get()->warn("AC3D: SURF token was expected");
+						DefaultLogger::get()->debug("Continuing with Quick3D Workaround enabled");
+					}
 					--buffer; // make sure the line is processed a second time
-					break;
+					// break; --- see fix notes above
+
+					Q3DWorkAround = true;
 				}
 				SkipSpaces(&buffer);
 				obj.surfaces.push_back(Surface());
@@ -254,6 +267,16 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 					}
 					else if (TokenMatch(buffer,"refs",4))
 					{
+						// --- see fix notes above
+						if (Q3DWorkAround)
+						{
+							if (!surf.entries.empty())
+							{
+								buffer -= 6;
+								break;
+							}
+						}
+
 						SkipSpaces(&buffer);
 						const unsigned int m = strtol10(buffer);
 						surf.entries.reserve(m);
@@ -612,11 +635,7 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 	// print the file format version to the console
 	unsigned int version = HexDigitToDecimal( buffer[4] );
 	char msg[3];
-  #if defined(_MSC_VER)
-    ::_itoa(version,msg,10);
-  #else
-    snprintf(msg, 3, "%d", version);  //itoa is not available under linux
-  #endif    
+	itoa10(msg,3,version);
 	DefaultLogger::get()->info(std::string("AC3D file format version: ") + msg);
 
 	std::vector<Material> materials;
@@ -685,6 +704,7 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 	// build output arrays
 	if (meshes.empty())
 	{
+		throw new ImportErrorException("An unknown error occured during converting");
 	}
 	pScene->mNumMeshes = (unsigned int)meshes.size();
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];

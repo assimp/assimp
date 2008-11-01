@@ -661,9 +661,8 @@ private:
 			TextData = new char_type[sizeWithoutHeader];
 
 			// MSVC debugger complains here about loss of data ...
-			// todo ... I temporarily disabled the check in the build config
 			for (int i=0; i<sizeWithoutHeader; ++i)
-				TextData[i] = char_type( source[i] & ((1u << (sizeof( char_type)*8)) - 1));
+				TextData[i] = char_type( source[i] & (src_char_type)((((uint64_t)1u << (sizeof( char_type)*8)) - 1)));
 
 			TextBegin = TextData;
 			TextSize = sizeWithoutHeader;

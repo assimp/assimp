@@ -94,11 +94,14 @@ private:
 		Material()
 			:	diffuse			(0.6f,0.6f,0.6f)
 			,	transparency	(0.f)
+			,	texIdx			(0xffffffff)
 		{}
 
 		aiString name;
 		aiColor3D ambient, diffuse, specular;
 		float transparency;
+
+		unsigned int texIdx;
 	};
 
 	struct Face

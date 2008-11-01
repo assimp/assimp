@@ -103,7 +103,8 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 		std::string(&((const char*)stream.GetPtr())[8],2));
 
 	// ... an store it
-	unsigned int ff = strtol10(&((const char*)stream.GetPtr())[8]);
+	char major = ((const char*)stream.GetPtr())[8];
+	char minor = ((const char*)stream.GetPtr())[9];
 
 	stream.IncPtr(10);
 	unsigned int numMeshes    = (unsigned int)stream.GetI4();
@@ -212,19 +213,21 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 							Face& vec = faces[i];
 							for (unsigned int a = 0; a < (unsigned int)vec.indices.size();++a)
 							{
-								vec.indices[a] = stream.GetI4();
+								vec.uvindices[a] = stream.GetI4();
 								if (!i && !a)
-									mesh.prevUVIdx = vec.indices[a];
-								else if (vec.indices[a] != mesh.prevUVIdx)
+									mesh.prevUVIdx = vec.uvindices[a];
+								else if (vec.uvindices[a] != mesh.prevUVIdx)
 									mesh.prevUVIdx = 0xffffffff;
 							}
 						}
 					}
 
 					// we don't need the rest, but we need to get to the next chunk
-					stream.IncPtr(36 + ((ff > 30 ? 12 : 0 )));
+					stream.IncPtr(36);
+					if (minor > '0' && major == '3')
+						stream.IncPtr(mesh.faces.size());
 				}
-				stream.IncPtr(4 + (ff > 30 ?  24 : 0 )); // unknown value here
+				// stream.IncPtr(4); // unknown value here
 			}
 			break;
 
@@ -262,7 +265,9 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 				mat.transparency = stream.GetF4();
 
 				// unknown value here
-				stream.IncPtr(4);
+				// stream.IncPtr(4);
+				// FIX: it could be the texture index ...
+				mat.texIdx = (unsigned int)stream.GetI4();
 			}
 
 			break;
@@ -431,7 +436,8 @@ outer:
 		mat->AddProperty(&srcMat.specular, 1,AI_MATKEY_COLOR_SPECULAR);
 		mat->AddProperty(&srcMat.ambient,  1,AI_MATKEY_COLOR_AMBIENT);
 		
-		//srcMat.transparency = 1.0f - srcMat.transparency;
+		//if (!(minor > '0' && major == '3'))
+		//	srcMat.transparency = 1.0f - srcMat.transparency;
 		mat->AddProperty(&srcMat.transparency, 1, AI_MATKEY_OPACITY);
 
 		// add shininess - Quick3D seems to use it ins its viewer
@@ -445,10 +451,11 @@ outer:
 			mat->AddProperty(&srcMat.name,AI_MATKEY_NAME);
 
 		// Add a texture
-		if (real < pScene->mNumTextures)
+		if (srcMat.texIdx < pScene->mNumTextures || real < pScene->mNumTextures)
 		{
 			srcMat.name.data[0] = '*';
-			srcMat.name.length  = itoa10(&srcMat.name.data[1],1000,real);
+			srcMat.name.length  = itoa10(&srcMat.name.data[1],1000,
+				(srcMat.texIdx < pScene->mNumTextures ? srcMat.texIdx : real));
 			mat->AddProperty(&srcMat.name,AI_MATKEY_TEXTURE_DIFFUSE(0));
 		}
 
@@ -519,7 +526,7 @@ outer:
 				{
 					if (m.prevUVIdx != 0xffffffff && m.uv.size() >= m.verts.size()) // workaround
 					{
-						*uv++ = m.uv[face.indices[n]];
+						*uv = m.uv[face.indices[n]];
 					}
 					else
 					{
@@ -528,8 +535,10 @@ outer:
 							DefaultLogger::get()->warn("Quick3D: Texture coordinate index overflow");
 							face.uvindices[n] = 0;
 						}
-						*uv++ = m.uv[face.uvindices[n]];
+						*uv = m.uv[face.uvindices[n]];
 					}
+					uv->y = 1.f - uv->y;
+					++uv;
 				}
 
 				// setup the new vertex index

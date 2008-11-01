@@ -1830,22 +1830,19 @@ int CDisplay::RenderMaterialView()
 int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 						  bool bAlpha /*= false*/)
 {
-	aiMatrix4x4 mTemp = piNode->mTransformation;
-	mTemp.Transpose();
-	aiMatrix4x4 aiMe = mTemp * piMatrix;
+	aiMatrix4x4 aiMe = g_pcAsset->mAnimator->GetGlobalTransform( piNode->mName.data);
+	aiMe.Transpose();
+	aiMe *= piMatrix;
 
 	bool bChangedVM = false;
 	if (VIEWMODE_NODE == this->m_iViewMode && this->m_pcCurrentNode)
 	{
 		if (piNode != this->m_pcCurrentNode->psNode)
 		{
-			if (0 != piNode->mNumChildren)
+			// directly call our children
+			for (unsigned int i = 0; i < piNode->mNumChildren;++i)
 			{
-				// directly call our children
-				for (unsigned int i = 0; i < piNode->mNumChildren;++i)
-				{
-					RenderNode(piNode->mChildren[i],aiMe,bAlpha );
-				}
+				RenderNode(piNode->mChildren[i],piMatrix,bAlpha );
 			}
 			return 1;
 		}
@@ -1975,7 +1972,7 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 			else if (bAlpha)continue;
 
 			// Upload bone matrices. This maybe is the wrong place to do it, but for the heck of it I don't understand this code flow
-			if( mesh->HasBones())
+			if( mesh->HasBones() && helper->piEffect)
 			{
 				static float matrices[4*4*60];
 				float* tempmat = matrices;
@@ -2041,7 +2038,7 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 	// render all child nodes
 	for (unsigned int i = 0; i < piNode->mNumChildren;++i)
 	{
-		RenderNode(piNode->mChildren[i],aiMe,bAlpha );
+		RenderNode(piNode->mChildren[i],piMatrix,bAlpha );
 	}
 	// need to reset the viewmode?
 	if (bChangedVM)

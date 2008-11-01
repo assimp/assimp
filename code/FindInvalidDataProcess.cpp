@@ -272,6 +272,9 @@ int FindInvalidDataProcess::ProcessAnimation (aiAnimation* anim)
 // ------------------------------------------------------------------------------------------------
 int FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
 {
+	// TODO: (thom) For some reason, even proper channels are deleted as well. Therefore deactivated it for the moment.
+	return 0;
+
 	int i = 0;
 
 	// Check whether all values are identical or whether there is just one keyframe

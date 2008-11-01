@@ -129,7 +129,7 @@ public:
 
 protected:
 	/** Recursively creates an internal node structure matching the current scene and animation. */
-	SceneAnimNode* CreateNodeTree( aiNode* pNode);
+	SceneAnimNode* CreateNodeTree( aiNode* pNode, SceneAnimNode* pParent);
 
 	/** Recursively updates the internal node transformations from the given matrix array */
 	void UpdateTransforms( SceneAnimNode* pNode, const std::vector<aiMatrix4x4>& pTransforms);

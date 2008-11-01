@@ -112,7 +112,7 @@ void AnimEvaluator::Evaluate( double pTime)
 		}
 
 		// ******** Scaling **********
-		aiVector3D presentScaling( 0, 0, 0);
+		aiVector3D presentScaling( 1, 1, 1);
 		if( channel->mNumScalingKeys > 0)
 		{
 			unsigned int frame = (time >= mLastTime) ? mLastPositions[a].get<2>() : 0;

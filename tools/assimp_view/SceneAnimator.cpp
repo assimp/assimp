@@ -82,7 +82,7 @@ void SceneAnimator::SetAnimIndex( size_t pAnimIndex)
 
 	// create the internal node tree. Do this even in case of invalid animation index
 	// so that the transformation matrices are properly set up to mimic the current scene
-	mRootNode = CreateNodeTree( mScene->mRootNode);
+	mRootNode = CreateNodeTree( mScene->mRootNode, NULL);
 
 	// invalid anim index
 	if( mCurrentAnimIndex >= mScene->mNumAnimations)
@@ -126,7 +126,7 @@ const aiMatrix4x4& SceneAnimator::GetGlobalTransform( const std::string& pNodeNa
 	if( it == mNodesByName.end())
 		return mIdentityMatrix;
 
-	return it->second->mLocalTransform;
+	return it->second->mGlobalTransform;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -151,7 +151,7 @@ const std::vector<aiMatrix4x4>& SceneAnimator::GetBoneMatrices( const aiNode* pN
 	{
 		const aiBone* bone = mesh->mBones[a];
 		const aiMatrix4x4& currentGlobalTransform = GetGlobalTransform( std::string( bone->mName.data));
-		mTransforms[a] = bone->mOffsetMatrix * currentGlobalTransform * globalInverseMeshTransform;
+		mTransforms[a] = globalInverseMeshTransform * currentGlobalTransform * bone->mOffsetMatrix;
 	}
 
 	// and return the result
@@ -160,10 +160,11 @@ const std::vector<aiMatrix4x4>& SceneAnimator::GetBoneMatrices( const aiNode* pN
 
 // ------------------------------------------------------------------------------------------------
 // Recursively creates an internal node structure matching the current scene and animation.
-SceneAnimNode* SceneAnimator::CreateNodeTree( aiNode* pNode)
+SceneAnimNode* SceneAnimator::CreateNodeTree( aiNode* pNode, SceneAnimNode* pParent)
 {
 	// create a node
 	SceneAnimNode* internalNode = new SceneAnimNode( pNode->mName.data);
+	internalNode->mParent = pParent;
 	mNodesByName[std::string( pNode->mName.data)] = internalNode;
 
 	// copy its transformation
@@ -188,8 +189,7 @@ SceneAnimNode* SceneAnimator::CreateNodeTree( aiNode* pNode)
 	// continue for all child nodes and assign the created internal nodes as our children
 	for( unsigned int a = 0; a < pNode->mNumChildren; a++)
 	{
-		SceneAnimNode* childNode = CreateNodeTree( pNode->mChildren[a]);
-		childNode->mParent = internalNode;
+		SceneAnimNode* childNode = CreateNodeTree( pNode->mChildren[a], internalNode);
 		internalNode->mChildren.push_back( childNode);
 	}
 
@@ -224,7 +224,7 @@ void SceneAnimator::CalculateGlobalTransform( SceneAnimNode* pInternalNode)
 	SceneAnimNode* node = pInternalNode->mParent;
 	while( node)
 	{
-		pInternalNode->mGlobalTransform *= node->mLocalTransform;
+		pInternalNode->mGlobalTransform = node->mLocalTransform * pInternalNode->mGlobalTransform;
 		node = node->mParent;
 	}
 }

@@ -414,7 +414,7 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 				// the texture coordinates are absolute values but we
 				// need relative values between 0 and 1
 				pcOut.x = pcTexCoords[iIndex].s / fDivisorU;
-				pcOut.y = 1.f- pcTexCoords[iIndex].t / fDivisorV;
+				pcOut.y = 1.f - pcTexCoords[iIndex].t / fDivisorV;
 			}
 		}
 		// FIX: flip the face order for use with OpenGL

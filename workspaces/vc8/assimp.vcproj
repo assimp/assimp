@@ -1385,6 +1385,14 @@
 				<Filter
 					Name="Q3D"
 					>
+					<File
+						RelativePath="..\..\code\Q3DLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\Q3DLoader.h"
+						>
+					</File>
 				</Filter>
 			</Filter>
 			<Filter
@@ -1631,7 +1639,7 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							BasicRuntimeChecks="0"
-							SmallerTypeCheck="false"
+							SmallerTypeCheck="true"
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>

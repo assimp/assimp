@@ -735,6 +735,12 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 		};
 	}
 
+	if (AI_SUCCESS == aiGetMaterialFloat( pMaterial,AI_MATKEY_OPACITY,&fTemp))
+	{
+		if (!fTemp)
+			ReportWarning("Material is fully transparent ... are you sure you REALLY want this?");
+	}
+
 	// check whether there are invalid texture keys
 	SearchForInvalidTextures(pMaterial,"diffuse");
 	SearchForInvalidTextures(pMaterial,"specular");

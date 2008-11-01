@@ -44,9 +44,10 @@ inline aiMatrix3x3 aiMatrix3x3::operator* (const aiMatrix3x3& m) const
 // ------------------------------------------------------------------------------------------------
 inline aiMatrix3x3& aiMatrix3x3::Transpose()
 {
-	std::swap( a2, b1);
-	std::swap( a3, c1);
-	std::swap( b3, c2);
+	// (float&) don't remove, GCC complains cause of packed fields
+	std::swap( (float&)a2, (float&)b1);
+	std::swap( (float&)a3, (float&)c1);
+	std::swap( (float&)b3, (float&)c2);
 	return *this;
 }
 

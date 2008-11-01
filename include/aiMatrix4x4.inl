@@ -58,12 +58,13 @@ inline aiMatrix4x4 aiMatrix4x4::operator* (const aiMatrix4x4& m) const
 // ---------------------------------------------------------------------------
 inline aiMatrix4x4& aiMatrix4x4::Transpose()
 {
-	std::swap( b1, a2);
-	std::swap( c1, a3);
-	std::swap( c2, b3);
-	std::swap( d1, a4);
-	std::swap( d2, b4);
-	std::swap( d3, c4);
+	// (float&) don't remove, GCC complains cause of packed fields
+	std::swap( (float&)b1, (float&)a2);
+	std::swap( (float&)c1, (float&)a3);
+	std::swap( (float&)c2, (float&)b3);
+	std::swap( (float&)d1, (float&)a4);
+	std::swap( (float&)d2, (float&)b4);
+	std::swap( (float&)d3, (float&)c4);
 	return *this;
 }
 

@@ -70,7 +70,8 @@ SOURCES = AssimpPCH.cpp \
 	BVHLoader.cpp \
 	./irrXML/irrXML.cpp \
 	IRRMeshLoader.cpp \
-	IRRLoader.cpp
+	IRRLoader.cpp \
+	Q3DLoader.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 

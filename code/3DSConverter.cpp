@@ -666,7 +666,14 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 			pcNode->mName = mScene->mLights[i]->mName;
 		}
 	}
-	else AddNodeToGraph(pcOut,  pcOut->mRootNode, mRootNode);
+	else
+	{
+		// First of all: find out how many scaling, rotation and translation
+		// animation tracks we'll have afterwards
+		//unsigned int numRot = 0, numScale = 0, numTranslate = 0;
+		//CountTracks(mRootNode,numRot,numScale,numTranslate);
+		AddNodeToGraph(pcOut,  pcOut->mRootNode, mRootNode);
+	}
 
 	// We used the first vertex color set to store some
 	// temporary values, so we need to cleanup here

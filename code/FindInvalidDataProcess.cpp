@@ -273,14 +273,14 @@ int FindInvalidDataProcess::ProcessAnimation (aiAnimation* anim)
 int FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
 {
 	// TODO: (thom) For some reason, even proper channels are deleted as well. Therefore deactivated it for the moment.
-	return 0;
+	//return 0;
 
 	int i = 0;
 
 	// Check whether all values are identical or whether there is just one keyframe
-	if ((1 >= anim->mNumPositionKeys || AllIdentical(anim->mPositionKeys,anim->mNumPositionKeys)) &&
-		(1 >= anim->mNumScalingKeys  || AllIdentical(anim->mRotationKeys,anim->mNumRotationKeys)) &&
-		(1 >= anim->mNumRotationKeys || AllIdentical(anim->mScalingKeys,anim->mNumScalingKeys)))
+	if ((anim->mNumPositionKeys < 1 || AllIdentical(anim->mPositionKeys,anim->mNumPositionKeys)) &&
+		(anim->mNumScalingKeys  < 1  || AllIdentical(anim->mRotationKeys,anim->mNumRotationKeys)) &&
+		(anim->mNumRotationKeys < 1 || AllIdentical(anim->mScalingKeys,anim->mNumScalingKeys)))
 	{
 		DefaultLogger::get()->error("Deleting dummy position animation channel");
 		return 1;

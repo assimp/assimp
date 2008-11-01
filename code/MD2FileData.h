@@ -144,8 +144,8 @@ struct Frame
  */
 struct TexCoord
 {
-	int16_t s;
-	int16_t t;
+	uint16_t s;
+	uint16_t t;
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------

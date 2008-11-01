@@ -122,9 +122,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_IRR_IMPORTER
 #	include "IRRLoader.h"
 #endif
-//#ifndef AI_BUILD_NO_Q3D_IMPORTER
-//#	include "Q3DLoader.h"
-//#endif
+#ifndef AI_BUILD_NO_Q3D_IMPORTER
+#	include "Q3DLoader.h"
+#endif
 
 
 // PostProcess-Steps
@@ -278,9 +278,9 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_IRR_IMPORTER)
 	mImporter.push_back( new IRRImporter());
 #endif
-//#if (!defined AI_BUILD_NO_Q3D_IMPORTER)
-//	mImporter.push_back( new Q3DImporter());
-//#endif
+#if (!defined AI_BUILD_NO_Q3D_IMPORTER)
+	mImporter.push_back( new Q3DImporter());
+#endif
 
 	// add an instance of each post processing step here in the order 
 	// of sequence it is executed. steps that are added here are not validated -

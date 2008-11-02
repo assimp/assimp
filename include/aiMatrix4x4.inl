@@ -161,7 +161,7 @@ inline void aiMatrix4x4::Decompose (aiVector3D& scaling, aiQuaternion& rotation,
 
 	// extract the rows of the matrix
 	aiVector3D vRows[3] = {
-		aiVector3D(_this[0][0],_this[1][1],_this[2][0]),
+		aiVector3D(_this[0][0],_this[1][0],_this[2][0]),
 		aiVector3D(_this[0][1],_this[1][1],_this[2][1]),
 		aiVector3D(_this[0][2],_this[1][2],_this[2][2])
 	};
@@ -186,9 +186,9 @@ inline void aiMatrix4x4::Decompose (aiVector3D& scaling, aiQuaternion& rotation,
 	}
 
 	// build a 3x3 rotation matrix
-	aiMatrix3x3 m(vRows[0].x,vRows[0].y,vRows[0].z,
-		vRows[1].x,vRows[1].y,vRows[1].z,
-		vRows[2].x,vRows[2].y,vRows[2].z);
+	aiMatrix3x3 m(vRows[0].x,vRows[1].x,vRows[2].x,
+		vRows[0].y,vRows[1].y,vRows[2].y,
+		vRows[0].z,vRows[1].z,vRows[2].z);
 
 	// and generate the rotation quaternion from it
 	rotation = aiQuaternion(m);

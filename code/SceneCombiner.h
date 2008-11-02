@@ -48,6 +48,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp	{
 
+// ---------------------------------------------------------------------------
+/** \brief Helper data structure for SceneCombiner.
+ *
+ *  Describes to which node a scene must be attached to.
+ */
+struct AttachmentInfo
+{
+	AttachmentInfo()
+		:	scene			(NULL)
+		,	attachToNode	(NULL)
+	{}
+
+	AttachmentInfo(aiScene* _scene, aiNode* _attachToNode)
+		:	scene			(_scene)
+		,	attachToNode	(_attachToNode)
+	{}
+
+	aiScene* scene;
+	aiNode*  attachToNode;
+};
 
 // ---------------------------------------------------------------------------
 /** \brief Static helper class providing various utilities to merge two
@@ -73,7 +93,24 @@ public:
 	 *  @param flags Combination of the AI_INT_MERGE_SCENE flags defined above
 	 */
 	static void MergeScenes(aiScene* dest,std::vector<aiScene*>& src,
-		unsigned int flags);
+		unsigned int flags = 0);
+
+
+	// -------------------------------------------------------------------
+	/** Merges two or more scenes and attaches all sceenes to a specific
+	 *  position in the node graph of the masteer scene.
+	 *
+	 *  @param dest Destination scene. Must be empty.
+	 *  @param master Master scene. It will be deleted afterwards. All 
+	 *    other scenes will be inserted in its node graph.
+	 *  @param src Non-empty list of scenes to be merged along with their
+	 *    corresponding attachment points in the master scene. The function
+	 *    deletes the input scenes afterwards.
+	 *  @param flags Combination of the AI_INT_MERGE_SCENE flags defined above
+	 */
+	static void MergeScenes(aiScene* dest, const aiScene* master, 
+		std::vector<AttachmentInfo>& src,
+		unsigned int flags = 0);
 
 
 	// -------------------------------------------------------------------

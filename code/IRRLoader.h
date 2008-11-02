@@ -100,6 +100,54 @@ protected:
 
 private:
 
+	/** Data structure for a scenegraph node animator
+	 */
+	struct Animator
+	{
+		// Type of the animator
+		enum AT
+		{
+			UNKNOWN		  = 0x0,
+			ROTATION      = 0x1,
+			FLY_CIRCLE    = 0x2,
+			FLY_STRAIGHT  = 0x3,
+			FOLLOW_SPLINE = 0x4,
+			OTHER         = 0x5
+
+		} type;
+
+		Animator(AT t = UNKNOWN)
+			: type				(t)
+			, speed				(0.001f)
+			, direction			(0.f,1.f,0.f)
+			, circleRadius		(1.f)
+			, tightness			(0.5f)
+			, loop				(true)
+			, timeForWay		(100)
+		{
+		}
+
+		
+		// common parameters
+		float speed;
+		aiVector3D direction;
+
+		// FLY_CIRCLE
+		aiVector3D circleCenter;
+		float circleRadius;
+
+		// FOLLOW_SPLINE
+		float tightness;
+		std::vector<aiVectorKey> splineKeys;
+
+		// ROTATION (angles given in direction)
+
+		// FLY STRAIGHT
+		// circleCenter = start, direction = end
+		bool loop;
+		int timeForWay;
+	};
+
 	/** Data structure for a scenegraph node in an IRR file
 	 */
 	struct Node
@@ -119,10 +167,13 @@ private:
 		} type;
 
 		Node(ET t)
-			:	type		(t)
-			,	scaling		(1.f,1.f,1.f) // assume uniform scaling by default
-			,	animation	(NULL)
-			,	framesPerSecond	(0.f)
+			:	type				(t)
+			,	scaling				(1.f,1.f,1.f) // assume uniform scaling by default
+			,	animation			(NULL)
+			,	framesPerSecond		(0.f)
+			,	sphereRadius		(1.f)
+			,	spherePolyCountX	(100)
+			,	spherePolyCountY	(100)
 		{
 		
 			// Generate a default name for the node
@@ -157,9 +208,18 @@ private:
 		// 0.f if not specified
 		float framesPerSecond;
 
-		//! Meshes: List of materials to be assigned
-		//! along with their corresponding material flags
+		// Meshes: List of materials to be assigned
+		// along with their corresponding material flags
 		std::vector< std::pair<aiMaterial*, unsigned int> > materials;
+
+		// Spheres: radius of the sphere to be generates
+		float sphereRadius;
+
+		// Spheres: Number of polygons in the x,y direction
+		unsigned int spherePolyCountX,spherePolyCountY;
+
+		// List of all animators assigned to the node
+		std::list<Animator> animators;
 	};
 };
 

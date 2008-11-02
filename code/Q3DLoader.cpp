@@ -436,8 +436,8 @@ outer:
 		mat->AddProperty(&srcMat.specular, 1,AI_MATKEY_COLOR_SPECULAR);
 		mat->AddProperty(&srcMat.ambient,  1,AI_MATKEY_COLOR_AMBIENT);
 		
-		//if (!(minor > '0' && major == '3'))
-		//	srcMat.transparency = 1.0f - srcMat.transparency;
+		if (!(minor > '0' && major == '3'))
+			srcMat.transparency = 1.0f - srcMat.transparency;
 		mat->AddProperty(&srcMat.transparency, 1, AI_MATKEY_OPACITY);
 
 		// add shininess - Quick3D seems to use it ins its viewer

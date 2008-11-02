@@ -66,6 +66,14 @@ struct aiVectorKey
 	bool operator != (const aiVectorKey& o) const
 		{return o.mValue != this->mValue;}
 
+
+
+	// Only time is compared. This operator is defined
+	// for use with std::sort
+	bool operator < (const aiVectorKey& o) const
+		{return mTime < o.mTime;}
+
+
 #endif
 };
 
@@ -85,6 +93,14 @@ struct aiQuatKey
 
 	bool operator != (const aiQuatKey& o) const
 		{return o.mValue != this->mValue;}
+
+
+	// Only time is compared. This operator is defined
+	// for use with std::sort
+	bool operator < (const aiQuatKey& o) const
+		{return mTime < o.mTime;}
+
+
 
 #endif
 };
@@ -126,8 +142,8 @@ struct aiNodeAnim
 	/** The position keys of this animation channel. Positions are 
 	 * specified as 3D vector. The array is mNumPositionKeys in size.
 	 *
-	 *  If there are rotation or scaling keys, but no position keys,
-	 *  a constant position of 0|0|0 should be assumed.
+	 * If there are position keys, there will also be at least one
+	 * scaling and one rotation key.
 	 */
 	C_STRUCT aiVectorKey* mPositionKeys;
 
@@ -138,8 +154,8 @@ struct aiNodeAnim
 	 *  given as quaternions,  which are 4D vectors. The array is 
 	 *  mNumRotationKeys in size.
 	 *
-	 *  If there are position or scaling keys, but no rotation keys,
-	 *  a constant rotation of 0|0|0 should be assumed. 
+	 * If there are rotation keys, there will also be at least one
+	 * scaling and one position key.
 	 */
 	C_STRUCT aiQuatKey* mRotationKeys;
 
@@ -150,8 +166,8 @@ struct aiNodeAnim
 	/** The scaling keys of this animation channel. Scalings are 
 	 *  specified as 3D vector. The array is mNumScalingKeys in size.
 	 *
-	 *  If there are position or rotation keys, but no scaling keys,
-	 *  a constant scaling of 1|1|1 should be assumed. 
+	 * If there are scaling keys, there will also be at least one
+	 * position and one rotation key.
 	 */
 	C_STRUCT aiVectorKey* mScalingKeys;
 

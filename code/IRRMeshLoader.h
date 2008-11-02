@@ -73,6 +73,7 @@ protected:
 	typedef Property<bool>			BoolProperty;
 	typedef Property<float>			FloatProperty;
 	typedef Property<aiVector3D>	VectorProperty;
+	typedef Property<int>			IntProperty;
 
 	/** XML reader instance
 	 */
@@ -95,7 +96,8 @@ protected:
 	void ReadStringProperty (StringProperty& out);
 	void ReadBoolProperty   (BoolProperty&   out);
 	void ReadFloatProperty  (FloatProperty&  out);
-	void ReadVectorProperty  (VectorProperty&  out);
+	void ReadVectorProperty (VectorProperty&  out);
+	void ReadIntProperty    (IntProperty&    out);
 };
 
 // ---------------------------------------------------------------------------

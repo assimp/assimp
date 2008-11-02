@@ -71,6 +71,24 @@ void IrrlichtBase::ReadHexProperty    (HexProperty&    out)
 }
 
 // ------------------------------------------------------------------------------------------------
+// read a decimal property
+void IrrlichtBase::ReadIntProperty    (IntProperty&    out)
+{
+	for (int i = 0; i < reader->getAttributeCount();++i)
+	{
+		if (!ASSIMP_stricmp(reader->getAttributeName(i),"name"))
+		{
+			out.name = std::string( reader->getAttributeValue(i) );
+		}
+		else if (!ASSIMP_stricmp(reader->getAttributeName(i),"value"))
+		{
+			// parse the ecimal value
+			out.value = strtol10s(reader->getAttributeValue(i));
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
 // read a string property
 void IrrlichtBase::ReadStringProperty (StringProperty& out)
 {

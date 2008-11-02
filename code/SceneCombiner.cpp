@@ -275,6 +275,14 @@ void SceneCombiner::MergeScenes(aiScene* dest,std::vector<aiScene*>& src,
 
 
 // ------------------------------------------------------------------------------------------------
+void SceneCombiner::MergeScenes(aiScene* dest, const aiScene* master, 
+	std::vector<AttachmentInfo>& src,
+	unsigned int flags)
+{
+}
+
+
+// ------------------------------------------------------------------------------------------------
 void SceneCombiner::MergeMeshes(aiMesh* dest,std::vector<aiMesh*>& src,
 	unsigned int flags)
 {

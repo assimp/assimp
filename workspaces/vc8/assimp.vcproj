@@ -840,6 +840,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\ScenePreprocessor.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\ScenePreprocessor.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\SGSpatialSort.cpp"
 				>
 			</File>

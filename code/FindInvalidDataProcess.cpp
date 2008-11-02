@@ -134,30 +134,11 @@ void FindInvalidDataProcess::Execute( aiScene* pScene)
 
 	// Process animations
 	for (unsigned int a = 0; a < pScene->mNumAnimations;++a)
-	{
-		int result;
-		if ((result = ProcessAnimation( pScene->mAnimations[a])))
-		{
-			out = true;
+		ProcessAnimation( pScene->mAnimations[a]);
 
-			if (2 == result)
-			{
-				// remove this animation
-				delete pScene->mAnimations[a];
-				AI_DEBUG_INVALIDATE_PTR(pScene->mAnimations[a]);
-				continue;
-			}
-		}
-		pScene->mAnimations[realAnimations++] = pScene->mAnimations[a];
-	}
 
 	if (out)
 	{
-		if(!(pScene->mNumAnimations = realAnimations))
-		{
-			delete[] pScene->mAnimations;
-			pScene->mAnimations = NULL;
-		}
 		if ( real != pScene->mNumMeshes)
 		{
 			if (!real)
@@ -237,55 +218,60 @@ inline bool AllIdentical(T* in, unsigned int num)
 
 // ------------------------------------------------------------------------------------------------
 // Search an animation for invalid content
-int FindInvalidDataProcess::ProcessAnimation (aiAnimation* anim)
+void FindInvalidDataProcess::ProcessAnimation (aiAnimation* anim)
 {
-	bool out = false;
-	unsigned int real = 0;
-
 	// Process all animation channels
 	for (unsigned int a = 0; a < anim->mNumChannels;++a)
-	{
-		int result;
-		if ((result = ProcessAnimationChannel( anim->mChannels[a])))
-		{
-			out = true;
-			// remove this animation channel
-			delete anim->mChannels[a];
-			AI_DEBUG_INVALIDATE_PTR(anim->mChannels[a]);
-			continue;
-		}
-		anim->mChannels[real++] = anim->mChannels[a];
-	}
-	if (out)
-	{
-		anim->mNumChannels = real;
-		if (!real)
-		{
-			DefaultLogger::get()->error("Deleting anim: it consists of dummy tracks");
-			return 2;
-		}
-		return 1;
-	}
-	return 0;
+		ProcessAnimationChannel( anim->mChannels[a]);
 }
 
 // ------------------------------------------------------------------------------------------------
-int FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
+void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
 {
-	// TODO: (thom) For some reason, even proper channels are deleted as well. Therefore deactivated it for the moment.
-	//return 0;
-
 	int i = 0;
 
-	// Check whether all values are identical or whether there is just one keyframe
-	if ((anim->mNumPositionKeys < 1 || AllIdentical(anim->mPositionKeys,anim->mNumPositionKeys)) &&
-		(anim->mNumScalingKeys  < 1  || AllIdentical(anim->mRotationKeys,anim->mNumRotationKeys)) &&
-		(anim->mNumRotationKeys < 1 || AllIdentical(anim->mScalingKeys,anim->mNumScalingKeys)))
+	// ScenePreprocessor's work ...
+	ai_assert(0 != anim->mPositionKeys && 0 != anim->mRotationKeys && 0 != anim->mScalingKeys);
+
+	// Check whether all values in a tracks are identical - in this case
+	// we can remove al keys except one.
+	// POSITIONS
+	if (anim->mNumPositionKeys > 1 && AllIdentical(anim->mPositionKeys,anim->mNumPositionKeys))
 	{
-		DefaultLogger::get()->error("Deleting dummy position animation channel");
-		return 1;
+		aiVectorKey v = anim->mPositionKeys[0];
+
+		// Reallocate ... we need just ONE element, it makes no sense to reuse the array
+		delete[] anim->mPositionKeys;
+		anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys = 1];
+		anim->mPositionKeys[0] = v;
+		i = 1;
 	}
-	return 0;
+
+	// ROTATIONS
+	if (anim->mNumRotationKeys > 1 && AllIdentical(anim->mRotationKeys,anim->mNumRotationKeys))
+	{
+		aiQuatKey v = anim->mRotationKeys[0];
+
+		// Reallocate ... we need just ONE element, it makes no sense to reuse the array
+		delete[] anim->mRotationKeys;
+		anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys = 1];
+		anim->mRotationKeys[0] = v;
+		i = 1;
+	}
+
+	// SCALINGS
+	if (anim->mNumScalingKeys > 1 && AllIdentical(anim->mScalingKeys,anim->mNumScalingKeys))
+	{
+		aiVectorKey v = anim->mScalingKeys[0];
+
+		// Reallocate ... we need just ONE element, it makes no sense to reuse the array
+		delete[] anim->mScalingKeys;
+		anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys = 1];
+		anim->mScalingKeys[0] = v;
+		i = 1;
+	}
+	if (1 == i)
+		DefaultLogger::get()->warn("Simplified dummy tracks with just one key");
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -38,75 +38,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines a post processing step to search an importer's output
-    for data that is obviously invalid  */
-#ifndef AI_FINDINVALIDDATA_H_INC
-#define AI_FINDINVALIDDATA_H_INC
+/** @file Defines a post processing step to search all meshes for
+  degenerated faces */
+#ifndef AI_SCENE_PREPROCESSOR_H_INC
+#define AI_SCENE_PREPROCESSOR_H_INC
 
-#include "BaseProcess.h"
-#include "../include/aiTypes.h"
 
-struct aiMesh;
-class FindInvalidDataProcessTest;
+namespace Assimp	{
 
-namespace Assimp
-{
 
 // ---------------------------------------------------------------------------
-/** The FindInvalidData postprocessing step. It searches the mesh data
- *  for parts that are obviously invalid and removes them.
- *
- *  Originally this was a workaround for some models written by Blender
- *  which have zero normal vectors.
- */
-class ASSIMP_API FindInvalidDataProcess : public BaseProcess
+/** ScenePreprocessor: Preprocess a scene before any post-processing
+ *  steps are executed.
+*/
+class ASSIMP_API ScenePreprocessor
 {
-	friend class Importer;
-	friend class ::FindInvalidDataProcessTest;
-
-protected:
-
-	/** Constructor to be privately used by Importer */
-	FindInvalidDataProcess();
-
-	/** Destructor, private as well */
-	~FindInvalidDataProcess();
-
 public:
 
-	// -------------------------------------------------------------------
-	/** 
-	*/
-	bool IsActive( unsigned int pFlags) const;
-
-	// -------------------------------------------------------------------
-	/** 
-	*/
-	void Execute( aiScene* pScene);
+	/** Preprocess a given scene.
+	 *
+	 *  @param _scene Scene to be preprocessed
+	 */
+	void ProcessScene (aiScene* _scene);
 
 protected:
 
-	// -------------------------------------------------------------------
-	/** Executes the postprocessing step on the given mesh
-	 * @param pMesh The mesh to process.
-	 * @return 0 - nothing, 1 - removed sth, 2 - please delete me
-	 */
-	int ProcessMesh( aiMesh* pMesh);
-
-
-	// -------------------------------------------------------------------
-	/** Executes the postprocessing step on the given animation
-	 * @param anim The animation to process.
-	 */
 	void ProcessAnimation (aiAnimation* anim);
 
-	// -------------------------------------------------------------------
-	/** Executes the postprocessing step on the given anim channel
-	 * @param anim The animation channel to process.
-	 */
-	void ProcessAnimationChannel (aiNodeAnim* anim);
+protected:
+
+	//! Scene we're currently working on
+	aiScene* scene;
 };
 
-} // end of namespace Assimp
 
-#endif // AI_AI_FINDINVALIDDATA_H_INC
+} // ! end namespace Assimp
+
+#endif // include guard

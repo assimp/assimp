@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DefaultIOSystem.h"
 #include "GenericProperty.h"
 #include "ProcessHelper.h"
+#include "ScenePreprocessor.h"
 
 // Importers
 #ifndef AI_BUILD_NO_X_IMPORTER
@@ -565,6 +566,10 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 		// if successful, apply all active post processing steps to the imported data
 		if( mScene)
 		{
+			// FIRST of all - preprocess the scene 
+			ScenePreprocessor pre;
+			pre.ProcessScene(mScene);
+
 			DefaultLogger::get()->info("Import successful, entering postprocessing-steps");
 #ifdef _DEBUG
 			if (bExtraVerbose)

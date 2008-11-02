@@ -813,7 +813,7 @@ struct IntBone_MDL7 : aiBone
 struct IntFrameInfo_MDL7
 {
 	//! Construction from an existing frame header
-	IntFrameInfo_MDL7(const MDL::Frame_MDL7* _pcFrame,unsigned int _iIndex) 
+	IntFrameInfo_MDL7(BE_NCONST MDL::Frame_MDL7* _pcFrame,unsigned int _iIndex) 
 		: iIndex(_iIndex)
 		, pcFrame(_pcFrame)
 	{}
@@ -822,7 +822,7 @@ struct IntFrameInfo_MDL7
 	unsigned int iIndex;
 
 	//! Points to the header of the frame
-	const MDL::Frame_MDL7*	pcFrame; 
+	BE_NCONST MDL::Frame_MDL7*	pcFrame; 
 };
 
 // ---------------------------------------------------------------------------
@@ -839,7 +839,7 @@ struct IntGroupInfo_MDL7
 		{}
 
 	//! Construction from an existing group header
-	IntGroupInfo_MDL7(const MDL::Group_MDL7* _pcGroup,unsigned int _iIndex)
+	IntGroupInfo_MDL7(BE_NCONST MDL::Group_MDL7* _pcGroup, unsigned int _iIndex)
 		:	iIndex(_iIndex)
 		,	pcGroup(_pcGroup)
 	{}
@@ -848,16 +848,16 @@ struct IntGroupInfo_MDL7
 	unsigned int iIndex;
 
 	//! Points to the header of the group
-	const MDL::Group_MDL7*		pcGroup; 
+	BE_NCONST MDL::Group_MDL7*		pcGroup; 
 
 	//! Points to the beginning of the uv coordinate section
-	const MDL::TexCoord_MDL7*	pcGroupUVs;		
+	BE_NCONST MDL::TexCoord_MDL7*	pcGroupUVs;		
 
 	//! Points to the beginning of the triangle section
-	const MDL::Triangle_MDL7*	pcGroupTris;		
+	BE_NCONST MDL::Triangle_MDL7*	pcGroupTris;		
 
 	//! Points to the beginning of the vertex section
-	const MDL::Vertex_MDL7*		pcGroupVerts;
+	BE_NCONST MDL::Vertex_MDL7*		pcGroupVerts;
 };
 
 // ---------------------------------------------------------------------------

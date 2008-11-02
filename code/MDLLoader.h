@@ -353,11 +353,9 @@ protected:
 
 	// -------------------------------------------------------------------
 	/** Calculate absolute bone animation matrices for each bone
-	 * \param pcBones Pointer to the bone section in the file
 	 * \param apcOutBones Output bones array
 	 */
-	void CalcAbsBoneMatrices_3DGS_MDL7(const MDL::Bone_MDL7* pcBones,
-		MDL::IntBone_MDL7** apcOutBones);
+	void CalcAbsBoneMatrices_3DGS_MDL7(MDL::IntBone_MDL7** apcOutBones);
 
 	// -------------------------------------------------------------------
 	/** Add all bones to the nodegraph (as children of the root node)
@@ -446,11 +444,8 @@ protected:
 
 	/** Buffer to hold the loaded file */
 	unsigned char* mBuffer;
-  
-  /**Endian converted header of the file. This is espcially important for be targets */
-  BE_NCONST MDL::Header *mpcHeader;
-
-	/** For GameStudio MDL files: The number in the magic word, either 3,4 or 5 
+    
+  /** For GameStudio MDL files: The number in the magic word, either 3,4 or 5 
 	 * (MDL7 doesn't need this, the format has a separate loader) */
 	unsigned int iGSFileVersion;
 

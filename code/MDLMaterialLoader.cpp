@@ -114,13 +114,15 @@ aiColor4D MDLImporter::ReplaceTextureWithColor(const aiTexture* pcTexture)
 // ------------------------------------------------------------------------------------------------
 void MDLImporter::CreateTextureARGB8_3DGS_MDL3(const unsigned char* szData)
 {
-	VALIDATE_FILE_SIZE(szData + mpcHeader->skinwidth *
-		mpcHeader->skinheight);
+	const MDL::Header *pcHeader = (const MDL::Header*)this->mBuffer;  //the endianess is allready corrected in the InternReadFile_3DGS_MDL345 function
+  
+  VALIDATE_FILE_SIZE(szData + pcHeader->skinwidth *
+		pcHeader->skinheight);
 
 	// allocate a new texture object
 	aiTexture* pcNew = new aiTexture();
-	pcNew->mWidth = mpcHeader->skinwidth;
-	pcNew->mHeight = mpcHeader->skinheight;
+	pcNew->mWidth = pcHeader->skinwidth;
+	pcNew->mHeight = pcHeader->skinheight;
 
 	pcNew->pcData = new aiTexel[pcNew->mWidth * pcNew->mHeight];
 
@@ -158,6 +160,8 @@ void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char* szData,
 	unsigned int* piSkip)
 {
 	ai_assert(NULL != piSkip);
+  
+  const MDL::Header *pcHeader = (const MDL::Header*)this->mBuffer;  //the endianess is allready corrected in the InternReadFile_3DGS_MDL345 function
 
 	if (iType == 1 || iType > 3)
 	{
@@ -169,8 +173,8 @@ void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char* szData,
 
 	// allocate a new texture object
 	aiTexture* pcNew = new aiTexture();
-	pcNew->mWidth = mpcHeader->skinwidth;
-	pcNew->mHeight = mpcHeader->skinheight;
+	pcNew->mWidth = pcHeader->skinwidth;
+	pcNew->mHeight = pcHeader->skinheight;
 	
 	if (bNoRead)pcNew->pcData = (aiTexel*)0xffffffff;
 	this->ParseTextureColorData(szData,iType,piSkip,pcNew);
@@ -565,7 +569,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	// check whether a material definition is contained in the skin
 	if (iType & AI_MDL7_SKINTYPE_MATERIAL)
 	{
-		const MDL::Material_MDL7* pcMatIn = (const MDL::Material_MDL7*)szCurrent;
+		BE_NCONST MDL::Material_MDL7* pcMatIn = (BE_NCONST MDL::Material_MDL7*)szCurrent;
 		szCurrent = (unsigned char*)(pcMatIn+1);
 		VALIDATE_FILE_SIZE(szCurrent);
 
@@ -581,40 +585,54 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 
 		// read diffuse color
 		clrTemp.r = pcMatIn->Diffuse.r;
+    AI_SWAP4(clrTemp.r);  
 		clrTemp.g = pcMatIn->Diffuse.g;
+    AI_SWAP4(clrTemp.g);  
 		clrTemp.b = pcMatIn->Diffuse.b;
+    AI_SWAP4(clrTemp.b);  
 		COLOR_MULTIPLY_RGB();
 		pcMatOut->AddProperty<aiColor3D>(&clrTemp,1,AI_MATKEY_COLOR_DIFFUSE);
 
 		// read specular color
 		clrTemp.r = pcMatIn->Specular.r;
+    AI_SWAP4(clrTemp.r);  
 		clrTemp.g = pcMatIn->Specular.g;
+    AI_SWAP4(clrTemp.g);  
 		clrTemp.b = pcMatIn->Specular.b;
+    AI_SWAP4(clrTemp.b);  
 		COLOR_MULTIPLY_RGB();
 		pcMatOut->AddProperty<aiColor3D>(&clrTemp,1,AI_MATKEY_COLOR_SPECULAR);
 
 		// read ambient color
 		clrTemp.r = pcMatIn->Ambient.r;
+    AI_SWAP4(clrTemp.r);  
 		clrTemp.g = pcMatIn->Ambient.g;
+    AI_SWAP4(clrTemp.g);  
 		clrTemp.b = pcMatIn->Ambient.b;
+    AI_SWAP4(clrTemp.b);  
 		COLOR_MULTIPLY_RGB();
 		pcMatOut->AddProperty<aiColor3D>(&clrTemp,1,AI_MATKEY_COLOR_AMBIENT);
 
 		// read emissive color
 		clrTemp.r = pcMatIn->Emissive.r;
+    AI_SWAP4(clrTemp.r);  
 		clrTemp.g = pcMatIn->Emissive.g;
+    AI_SWAP4(clrTemp.g);  
 		clrTemp.b = pcMatIn->Emissive.b;
+    AI_SWAP4(clrTemp.b);  
 		pcMatOut->AddProperty<aiColor3D>(&clrTemp,1,AI_MATKEY_COLOR_EMISSIVE);
 
 		// FIX: Take the opacity from the ambient color
 		// the doc says something else, but it is fact that MED exports the
 		// opacity like this .... ARRRGGHH!
 		clrTemp.r = pcMatIn->Ambient.a;
+    AI_SWAP4(clrTemp.r);  
 		if (is_not_qnan(clrTexture.r))clrTemp.r *= clrTexture.a;
 		pcMatOut->AddProperty<float>(&clrTemp.r,1,AI_MATKEY_OPACITY);
 
 		// read phong power
 		int iShadingMode = (int)aiShadingMode_Gouraud;
+    AI_SWAP4(pcMatIn->Power);  
 		if (0.0f != pcMatIn->Power)
 		{
 			iShadingMode = (int)aiShadingMode_Phong;
@@ -641,6 +659,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	{
 		VALIDATE_FILE_SIZE(szCurrent);
 		int32_t iMe = *((int32_t*)szCurrent);
+    AI_SWAP4(iMe);  
 		szCurrent += sizeof(char) * iMe + sizeof(int32_t);
 		VALIDATE_FILE_SIZE(szCurrent);
 	}
@@ -728,7 +747,29 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
 	// check whether a material definition is contained in the skin
 	if (iType & AI_MDL7_SKINTYPE_MATERIAL)
 	{
-		const MDL::Material_MDL7* pcMatIn = (const MDL::Material_MDL7*)szCurrent;
+		BE_NCONST MDL::Material_MDL7* pcMatIn = (BE_NCONST MDL::Material_MDL7*)szCurrent;
+    AI_SWAP4(pcMatIn->Diffuse.r);  
+    AI_SWAP4(pcMatIn->Diffuse.g);
+    AI_SWAP4(pcMatIn->Diffuse.b);
+    AI_SWAP4(pcMatIn->Diffuse.a);
+    
+    AI_SWAP4(pcMatIn->Ambient.r);  
+    AI_SWAP4(pcMatIn->Ambient.g);
+    AI_SWAP4(pcMatIn->Ambient.b);
+    AI_SWAP4(pcMatIn->Ambient.a);
+
+    AI_SWAP4(pcMatIn->Specular.r);  
+    AI_SWAP4(pcMatIn->Specular.g);
+    AI_SWAP4(pcMatIn->Specular.b);
+    AI_SWAP4(pcMatIn->Specular.a);
+
+    AI_SWAP4(pcMatIn->Emissive.r);  
+    AI_SWAP4(pcMatIn->Emissive.g);
+    AI_SWAP4(pcMatIn->Emissive.b);
+    AI_SWAP4(pcMatIn->Emissive.a);
+    
+    AI_SWAP4(pcMatIn->Power);
+
 		szCurrent = (unsigned char*)(pcMatIn+1);
 	}
 
@@ -737,6 +778,7 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
 	if (iType & AI_MDL7_SKINTYPE_MATERIAL_ASCDEF)
 	{
 		int32_t iMe = *((int32_t*)szCurrent);
+    AI_SWAP4(iMe);  
 		szCurrent += sizeof(char) * iMe + sizeof(int32_t);
 	}
 	*szCurrentOut = szCurrent;
@@ -751,7 +793,9 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	ai_assert(NULL != szCurrentOut);
 
 	*szCurrentOut = szCurrent;
-	const MDL::Skin_MDL7* pcSkin = (const MDL::Skin_MDL7*)szCurrent;
+	BE_NCONST MDL::Skin_MDL7* pcSkin = (BE_NCONST MDL::Skin_MDL7*)szCurrent;
+  AI_SWAP4(pcSkin->width);
+  AI_SWAP4(pcSkin->height); 
 	szCurrent += 12;
 
 	// allocate an output material

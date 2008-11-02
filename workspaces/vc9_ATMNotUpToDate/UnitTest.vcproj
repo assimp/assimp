@@ -669,6 +669,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\test\unit\utFindInvalidData.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utFindInvalidData.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\test\unit\utFixInfacingNormals.cpp"
 				>
 			</File>
@@ -738,6 +746,14 @@
 			</File>
 			<File
 				RelativePath="..\..\test\unit\utRemoveComments.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utRemoveComponent.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utRemoveComponent.h"
 				>
 			</File>
 			<File

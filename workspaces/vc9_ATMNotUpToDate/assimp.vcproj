@@ -41,14 +41,15 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="DEBUG, _SCL_SECURE_NO_WARNINGS, _CRT_SECURE_NO_WARNINGS,WIN32"
+				PreprocessorDefinitions="DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
@@ -167,15 +168,16 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="NDEBUG, _SCL_SECURE_NO_WARNINGS, _CRT_SECURE_NO_WARNINGS,WIN32"
+				PreprocessorDefinitions="NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32"
 				StringPooling="true"
 				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="2"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 			/>
@@ -240,7 +242,9 @@
 				StringPooling="true"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="false"
-				EnableEnhancedInstructionSet="2"
+				EnableEnhancedInstructionSet="0"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
 			/>
 			<Tool
@@ -295,7 +299,6 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
@@ -305,6 +308,8 @@
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="2"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 			/>
@@ -344,7 +349,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unittest_$(ConfigurationName)_$(PlatformName)\&quot;"
+				CommandLine=""
 			/>
 		</Configuration>
 		<Configuration
@@ -380,7 +385,7 @@
 				StringPooling="true"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
-				EnableEnhancedInstructionSet="2"
+				EnableEnhancedInstructionSet="0"
 				WarningLevel="3"
 			/>
 			<Tool
@@ -446,7 +451,6 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT"
@@ -454,6 +458,8 @@
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
@@ -647,10 +653,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\aiSceneEntities.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\aiTexture.h"
 				>
 			</File>
@@ -715,14 +717,10 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Boost_Workaround"
+				Name="BoostWorkaround"
 				>
 				<File
 					RelativePath="..\..\include\BoostWorkaround\boost\format.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\BoostWorkaround\boost\multi_array.hpp"
 					>
 				</File>
 				<File
@@ -740,14 +738,6 @@
 			</File>
 			<File
 				RelativePath="..\..\code\Assimp.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\AssimpPCH.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\AssimpPCH.h"
 				>
 			</File>
 			<File
@@ -796,14 +786,6 @@
 			</File>
 			<File
 				RelativePath="..\..\code\FileLogStream.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\FindDegenerates.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\FindDegenerates.h"
 				>
 			</File>
 			<File
@@ -928,6 +910,46 @@
 				<File
 					RelativePath="..\..\code\extra\MakeVerboseFormat.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_DLL|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_DLL|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\code\extra\MakeVerboseFormat.h"
@@ -941,46 +963,6 @@
 			<Filter
 				Name="Loaders"
 				>
-				<File
-					RelativePath="..\..\code\ACLoader.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\ACLoader.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\BVHLoader.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\BVHLoader.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\IRRLoader.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\IRRLoader.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\IRRMeshLoader.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\IRRMeshLoader.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\LWSLoader.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\LWSLoader.h"
-					>
-				</File>
 				<Filter
 					Name="3DS"
 					>
@@ -1340,6 +1322,74 @@
 				<Filter
 					Name="AC"
 					>
+					<File
+						RelativePath="..\..\code\ACLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\ACLoader.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="LWS"
+					>
+					<File
+						RelativePath="..\..\code\LWSLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\LWSLoader.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="BVH"
+					>
+					<File
+						RelativePath="..\..\code\BVHLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BVHLoader.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="IRRMesh"
+					>
+					<File
+						RelativePath="..\..\code\IRRMeshLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\IRRMeshLoader.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="IRR"
+					>
+					<File
+						RelativePath="..\..\code\IRRLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\IRRLoader.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Q3D"
+					>
+					<File
+						RelativePath="..\..\code\Q3DLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\Q3DLoader.h"
+						>
+					</File>
 				</Filter>
 			</Filter>
 			<Filter
@@ -1359,6 +1409,14 @@
 				</File>
 				<File
 					RelativePath="..\..\code\ConvertToLHProcess.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\FindDegenerates.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\FindDegenerates.h"
 					>
 				</File>
 				<File
@@ -1491,14 +1549,58 @@
 				</Filter>
 			</Filter>
 			<Filter
-				Name="Compiler"
+				Name="PCH"
 				>
 				<File
-					RelativePath="..\..\code\Compiler\poppack1.h"
+					RelativePath="..\..\code\AssimpPCH.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="1"
+							PrecompiledHeaderThrough="AssimpPCH.h"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="1"
+							PrecompiledHeaderThrough="AssimpPCH.h"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="1"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_DLL|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="1"
+							PrecompiledHeaderThrough="AssimpPCH.h"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_DLL|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="1"
+							PrecompiledHeaderThrough="AssimpPCH.h"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\..\code\Compiler\pushpack1.h"
+					RelativePath="..\..\code\AssimpPCH.h"
 					>
 				</File>
 			</Filter>
@@ -1507,10 +1609,6 @@
 				>
 				<File
 					RelativePath="..\..\code\irrXML\CXMLReaderImpl.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\irrXML\fast_atof.h"
 					>
 				</File>
 				<File
@@ -1532,6 +1630,78 @@
 				<File
 					RelativePath="..\..\code\irrXML\irrXML.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							BasicRuntimeChecks="0"
+							SmallerTypeCheck="true"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							BasicRuntimeChecks="0"
+							SmallerTypeCheck="false"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_DLL|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							BasicRuntimeChecks="0"
+							SmallerTypeCheck="false"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_DLL|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_DLL|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							BasicRuntimeChecks="0"
+							SmallerTypeCheck="false"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_DLL|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\code\irrXML\irrXML.h"

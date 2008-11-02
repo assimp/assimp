@@ -79,8 +79,13 @@ typedef unsigned short wchar_t;
 #endif // microsoft compiler
 
 //! define a break macro for debugging only in Win32 mode.
+// WORKAROUND (ASSIMP): __asm int 3 not av. for x64
 #if defined(WIN32) && defined(_MSC_VER) && defined(_DEBUG)
+#if defined(_M_IX86)
 #define _IRR_DEBUG_BREAK_IF( _CONDITION_ ) if (_CONDITION_) {_asm int 3}
+#else
+#define _IRR_DEBUG_BREAK_IF( _CONDITION_ )
+#endif
 #else 
 #define _IRR_DEBUG_BREAK_IF( _CONDITION_ )
 #endif

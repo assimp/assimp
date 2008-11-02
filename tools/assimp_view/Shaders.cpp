@@ -260,19 +260,19 @@ std::string g_szDefaultShader = std::string(
 	"float3 vCameraPos : CAMERAPOSITION;\n"
 
 	// Bone matrices
-	"#ifdef AV_SKINNING \n"
+//	"#ifdef AV_SKINNING \n"
 	"float4x3 gBoneMatrix[60]; \n"
-	"#endif // AV_SKINNING \n"
+//	"#endif // AV_SKINNING \n"
 
 	// Vertex shader input structure
 	"struct VS_INPUT\n"
 	"{\n"
 		"float3 Position : POSITION;\n"
 		"float3 Normal : NORMAL;\n"
-		"#ifdef AV_SKINNING \n"
+//		"#ifdef AV_SKINNING \n"
 			"float4 BlendIndices : BLENDINDICES;\n"
 			"float4 BlendWeights : BLENDWEIGHT;\n"
-		"#endif // AV_SKINNING \n"
+//		"#endif // AV_SKINNING \n"
 	"};\n"
 
 	// Vertex shader output structure for pixel shader usage
@@ -295,16 +295,17 @@ std::string g_szDefaultShader = std::string(
 	"{\n"
 		"VS_OUTPUT Out;\n"
 
-		"#ifdef AV_SKINNING \n"
+//		"#ifdef AV_SKINNING \n"
 		"float4 weights = IN.BlendWeights; \n"
 		"weights.w = 1.0f - dot( weights.xyz, float3( 1, 1, 1)); \n"
-		"float3 objPos = mul( IN.Position, gBoneMatrix[IN.BlendIndices.x]) * weights.x; \n"
-		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.y]) * weights.y; \n"
-		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.z]) * weights.z; \n"
-		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.w]) * weights.w; \n"
-		"#else \n"
-		"float3 objPos = IN.Position; \n"
-		"#endif // AV_SKINNING \n"
+		"float4 localPos = float4( IN.Position, 1.0f); \n"
+		"float3 objPos = mul( localPos, gBoneMatrix[IN.BlendIndices.x]) * weights.x; \n"
+		"objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.y]) * weights.y; \n"
+		"objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.z]) * weights.z; \n"
+		"objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.w]) * weights.w; \n"
+//		"#else \n"
+//		"float3 objPos = IN.Position; \n"
+//		"#endif // AV_SKINNING \n"
 
 		// Multiply with the WorldViewProjection matrix
 		"Out.Position = mul( float4( objPos, 1.0f), WorldViewProjection);\n"
@@ -320,16 +321,17 @@ std::string g_szDefaultShader = std::string(
 	"{\n"
 		"VS_OUTPUT_FF Out;\n"
 
-		"#ifdef AV_SKINNING \n"
+//		"#ifdef AV_SKINNING \n"
 		"float4 weights = IN.BlendWeights; \n"
 		"weights.w = 1.0f - dot( weights.xyz, float3( 1, 1, 1)); \n"
-		"float3 objPos = mul( IN.Position, gBoneMatrix[IN.BlendIndices.x]) * weights.x; \n"
-		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.y]) * weights.y; \n"
-		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.z]) * weights.z; \n"
-		"objPos += mul( IN.Position, gBoneMatrix[IN.BlendIndices.w]) * weights.w; \n"
-		"#else \n"
-		"float3 objPos = IN.Position; \n"
-		"#endif // AV_SKINNING \n"
+		"float4 localPos = float4( IN.Position, 1.0f); \n"
+		"float3 objPos = mul( localPos, gBoneMatrix[IN.BlendIndices.x]) * weights.x; \n"
+		"objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.y]) * weights.y; \n"
+		"objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.z]) * weights.z; \n"
+		"objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.w]) * weights.w; \n"
+//		"#else \n"
+//		"float3 objPos = IN.Position; \n"
+//		"#endif // AV_SKINNING \n"
 
 		// Multiply with the WorldViewProjection matrix
 		"Out.Position = mul( float4( objPos, 1.0f), WorldViewProjection);\n"

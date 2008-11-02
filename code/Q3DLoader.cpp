@@ -194,10 +194,10 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 						normals[i].z = stream.GetF4();
 					}
 
-					if (numTextures)
+					numVerts = (unsigned int)stream.GetI4();
+					if (numTextures && numVerts)
 					{
 						// read all texture coordinates
-						numVerts = (unsigned int)stream.GetI4();
 						std::vector<aiVector3D>& uv = mesh.uv;
 						uv.resize(numVerts);
 
@@ -435,10 +435,14 @@ outer:
 		mat->AddProperty(&srcMat.diffuse,  1,AI_MATKEY_COLOR_DIFFUSE);
 		mat->AddProperty(&srcMat.specular, 1,AI_MATKEY_COLOR_SPECULAR);
 		mat->AddProperty(&srcMat.ambient,  1,AI_MATKEY_COLOR_AMBIENT);
-		
+	
+		// NOTE: Ignore transparency for the moment - it seems
+		// unclear how to interpret the data
+#if 0
 		if (!(minor > '0' && major == '3'))
 			srcMat.transparency = 1.0f - srcMat.transparency;
 		mat->AddProperty(&srcMat.transparency, 1, AI_MATKEY_OPACITY);
+#endif
 
 		// add shininess - Quick3D seems to use it ins its viewer
 		srcMat.transparency = 16.f;
@@ -522,7 +526,7 @@ outer:
 				else *norms =  m.normals[ face.indices[n] ];
 
 				// copy texture coordinates
-				if (uv)
+				if (uv && m.uv.size())
 				{
 					if (m.prevUVIdx != 0xffffffff && m.uv.size() >= m.verts.size()) // workaround
 					{

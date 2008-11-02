@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_IRRLOADER_H_INCLUDED
 
 #include "IRRMeshLoader.h"
+#include "SceneCombiner.h"
 
 namespace Assimp	{
 
@@ -208,6 +209,9 @@ private:
 		// 0.f if not specified
 		float framesPerSecond;
 
+		// Meshes: path to the mesh to be loaded
+		std::string meshPath;
+
 		// Meshes: List of materials to be assigned
 		// along with their corresponding material flags
 		std::vector< std::pair<aiMaterial*, unsigned int> > materials;
@@ -221,6 +225,16 @@ private:
 		// List of all animators assigned to the node
 		std::list<Animator> animators;
 	};
+
+
+	/** Fill the scenegraph recursively
+	 */
+	void GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
+		BatchLoader& batch,
+		std::vector<aiMesh*>& meshes,
+		std::vector<aiNodeAnim*>& anims,
+		std::vector<AttachmentInfo>& attach);
+
 };
 
 } // end of namespace Assimp

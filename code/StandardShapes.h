@@ -78,7 +78,7 @@ public:
 	static aiMesh* MakeMesh ( unsigned int (*GenerateFunc)
 		(std::vector<aiVector3D>&, bool));
 
-	static aiMesh* MakeMesh ( unsigned int (*GenerateFunc)
+	static aiMesh* MakeMesh ( unsigned int n,  void (*GenerateFunc)
 		(unsigned int,std::vector<aiVector3D>&));
 
 	// ----------------------------------------------------------------

@@ -208,7 +208,7 @@ inline bool ProcessArray(T*& in, unsigned int num,const char* name,
 template <typename T>
 inline bool AllIdentical(T* in, unsigned int num)
 {
-	if (!num)return true;
+	if (num <= 1)return true;
 	for (unsigned int i = 0; i < num-1;++i)
 	{
 		if (in[i] != in[i+1])return false;

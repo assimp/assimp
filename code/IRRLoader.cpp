@@ -103,6 +103,129 @@ bool IRRImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 }
 
 // ------------------------------------------------------------------------------------------------
+void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
+	BatchLoader& batch,
+	std::vector<aiMesh*>&        meshes,
+	std::vector<aiNodeAnim*>&    anims,
+	std::vector<AttachmentInfo>& attach)
+{
+	// Setup the name of this node
+	rootOut->mName.Set(root->name);
+
+	unsigned int oldMeshSize = (unsigned int)meshes.size();
+
+	// Now determine the type of the node 
+	switch (root->type)
+	{
+	case Node::ANIMMESH:
+	case Node::MESH:
+		{
+			// get the loaded mesh from the scene and add it to
+			// the list of all scenes to be attached to the 
+			// graph we're currently building
+			aiScene* scene = batch.GetImport(root->meshPath);
+			if (!scene)
+			{
+				DefaultLogger::get()->error("IRR: Unable to load external file: " + root->meshPath);
+				break;
+			}
+			attach.push_back(AttachmentInfo(scene,rootOut));
+		}
+		break;
+	
+	case Node::LIGHT:
+	case Node::CAMERA:
+
+		// We're already finished with lights and cameras
+		break;
+
+
+	case Node::SPHERE:
+		{
+			// generate the sphere model. Our input parameter to
+			// the sphere generation algorithm is the number of
+			// subdivisions of each triangle - but here we have
+			// the number of poylgons on a specific axis. Just
+			// use some limits ...
+			unsigned int mul = root->spherePolyCountX*root->spherePolyCountY;
+			if      (mul < 100)mul = 2;
+			else if (mul < 300)mul = 3;
+			else               mul = 4;
+
+			meshes.push_back(StandardShapes::MakeMesh(mul,&StandardShapes::MakeSphere));
+
+			// Adjust scaling
+			root->scaling *= root->sphereRadius;
+		}
+		break;
+
+	case Node::CUBE:
+	case Node::SKYBOX:
+		{
+			// Skyboxes and normal cubes - generate the cube first
+			meshes.push_back(StandardShapes::MakeMesh(&StandardShapes::MakeHexahedron));
+
+			// Adjust scaling
+			root->scaling *= root->sphereRadius;
+		}
+		break;
+
+	case Node::TERRAIN:
+		{
+		}
+		break;
+	};
+
+	// Check whether we added a mesh. In this case we'll also
+	// need to attach it to the node
+	if (oldMeshSize != (unsigned int) meshes.size())
+	{
+		rootOut->mNumMeshes = 1;
+		rootOut->mMeshes    = new unsigned int[1];
+		rootOut->mMeshes[0] = oldMeshSize;
+	}
+
+	// Now compute the final local transformation matrix of the
+	// node from the given translation, rotation and scaling values.
+	// (the rotation is given in Euler angles, XYZ order)
+	aiMatrix4x4 m;
+	rootOut->mTransformation = aiMatrix4x4::RotationX(AI_DEG_TO_RAD(root->rotation.x),m)
+		* aiMatrix4x4::RotationY(AI_DEG_TO_RAD(root->rotation.y),m)
+		* aiMatrix4x4::RotationZ(AI_DEG_TO_RAD(root->rotation.z),m);
+
+	// apply scaling
+	aiMatrix4x4& mat = rootOut->mTransformation;
+	mat.a1 *= root->scaling.x;
+	mat.b1 *= root->scaling.x; 
+	mat.c1 *= root->scaling.x;
+	mat.a2 *= root->scaling.y; 
+	mat.b2 *= root->scaling.y; 
+	mat.c2 *= root->scaling.y;
+	mat.a3 *= root->scaling.z;
+	mat.b3 *= root->scaling.z; 
+	mat.c3 *= root->scaling.z;
+
+	// apply translation
+	mat.a4 = root->position.x; 
+	mat.b4 = root->position.y; 
+	mat.c4 = root->position.z;
+
+	// Add all children recursively. First allocate enough storage
+	// for them, then call us again
+	rootOut->mNumChildren = (unsigned int)root->children.size();
+	if (rootOut->mNumChildren)
+	{
+		rootOut->mChildren = new aiNode*[rootOut->mNumChildren];
+		for (unsigned int i = 0; i < rootOut->mNumChildren;++i)
+		{
+			aiNode* node = rootOut->mChildren[i] =  new aiNode();
+			node->mParent = rootOut;
+			GenerateGraph(root->children[i],node,scene,batch,meshes,anims,attach);
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void IRRImporter::InternReadFile( const std::string& pFile, 
 	aiScene* pScene, IOSystem* pIOHandler)
@@ -133,7 +256,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 	// List of output lights
 	std::vector<aiLight*> lights;
 
-
+	// Batch loader used to load external models
 	BatchLoader batch(pIOHandler);
 	
 	cameras.reserve(5);
@@ -391,6 +514,10 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 								{
 									curAnim->circleRadius = prop.value;
 								}
+								else if (curAnim->type == Animator::FOLLOW_SPLINE && prop.name == "Tightness")
+								{
+									curAnim->tightness = prop.value;
+								}
 							}
 							else
 							{
@@ -439,13 +566,12 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 										lights.back()->mAngleInnerCone =  AI_DEG_TO_RAD( prop.value );
 									}
 								}
-								// radius of the sphere to be generated
-								else if (Node::SPHERE == curNode->type)
+								// radius of the sphere to be generated -
+								// or alternatively, size of the cube
+								else if (Node::SPHERE == curNode->type && prop.name == "Radius" ||
+										 Node::CUBE == curNode->type   && prop.name == "Size" )
 								{
-									if (prop.name == "Radius")
-									{
-										curNode->sphereRadius = prop.value;
-									}
+									curNode->sphereRadius = prop.value;
 								}
 							}
 						}
@@ -524,6 +650,34 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 									}
 
 									batch.AddLoadRequest(prop.value,pp,&map);
+									curNode->meshPath = prop.value;
+								}
+								else if (inAnimator && prop.name == "Type")
+								{
+									// type of the animator
+									if (prop.value == "rotation")
+									{
+										curAnim->type = Animator::ROTATION;
+									}
+									else if (prop.value == "flyCircle")
+									{
+										curAnim->type = Animator::FLY_CIRCLE;
+									}
+									else if (prop.value == "flyStraight")
+									{
+										curAnim->type = Animator::FLY_CIRCLE;
+									}
+									else if (prop.value == "followSpline")
+									{
+										curAnim->type = Animator::FOLLOW_SPLINE;
+									}
+									else
+									{
+										DefaultLogger::get()->warn("IRR: Ignoring unknown animator: "
+											+ prop.value);
+
+										curAnim->type = Animator::UNKNOWN;
+									}
 								}
 							}
 						}
@@ -603,7 +757,6 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 	tempScene->mLights = new aiLight*[tempScene->mNumLights];
 	::memcpy(tempScene->mLights,&lights[0],sizeof(void*)*tempScene->mNumLights);
 
-
 	// temporary data
 	std::vector< aiNodeAnim*> anims;
 	std::vector< AttachmentInfo > attach;
@@ -615,8 +768,8 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 	/* Now process our scenegraph recursively: generate final
 	 * meshes and generate animation channels for all nodes.
 	 */
-//	GenerateGraph(root,tempScene->mRootNode, tempScene,
-//		batch, meshes, anims, attach);
+	GenerateGraph(root,tempScene->mRootNode, tempScene,
+		batch, meshes, anims, attach);
 
 	if (!anims.empty())
 	{
@@ -644,9 +797,21 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
 		DefaultLogger::get()->info("IRR: No Meshes loaded, setting AI_SCENE_FLAGS_INCOMPLETE flag");
 	}
+	else
+	{
+		// copy all meshes to the temporary scene
+		tempScene->mNumMeshes = (unsigned int)meshes.size();
+		tempScene->mMeshes = new aiMesh*[tempScene->mNumMeshes];
+		::memcpy(tempScene->mMeshes,&meshes[0],tempScene->mNumMeshes);
+	}
 
 	/*  Now merge all sub scenes and attach them to the correct
 	 *  attachment points in the scenegraph.
 	 */
 	SceneCombiner::MergeScenes(pScene,tempScene,attach);
+
+
+	/* Finished ... everything destructs automatically and all 
+	 * temporary scenes have already been deleted by MergeScenes()
+	 */
 }

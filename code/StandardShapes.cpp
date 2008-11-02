@@ -166,12 +166,12 @@ aiMesh* StandardShapes::MakeMesh ( unsigned int (*GenerateFunc)(
 }
 
 // ------------------------------------------------------------------------------------------------
-aiMesh* StandardShapes::MakeMesh ( unsigned int (*GenerateFunc)(
+aiMesh* StandardShapes::MakeMesh (unsigned int num,  void (*GenerateFunc)(
 	unsigned int,std::vector<aiVector3D>&))
 {
 	std::vector<aiVector3D> temp;
-	unsigned num = (*GenerateFunc)(4,temp);
-	return MakeMesh(temp,num);
+	(*GenerateFunc)(num,temp);
+	return MakeMesh(temp,3);
 }
 
 // ------------------------------------------------------------------------------------------------

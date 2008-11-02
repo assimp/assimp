@@ -587,7 +587,10 @@ void Parser::ParseLV3MapBlock(Texture& map)
 				if(!ParseString(temp,"*MAP_CLASS"))
 					SkipToNextToken();
 				if (temp != "Bitmap")
+				{
+					DefaultLogger::get()->warn("ASE: Skipping unknown map type: " + temp);
 					parsePath = false; 
+				}
 				continue;
 			}
 			// path to the texture
@@ -595,6 +598,15 @@ void Parser::ParseLV3MapBlock(Texture& map)
 			{
 				if(!ParseString(map.mMapName,"*BITMAP"))
 					SkipToNextToken();
+
+				if (map.mMapName == "None")
+				{
+					// Files with 'None' as map name are produced by
+					// an Maja to ASE exporter which name I forgot ..
+					DefaultLogger::get()->warn("ASE: Skipping invalid map entry");
+					map.mMapName = "";
+				}
+
 				continue;
 			}
 			// offset on the u axis

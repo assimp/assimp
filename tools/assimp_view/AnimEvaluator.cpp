@@ -96,8 +96,15 @@ void AnimEvaluator::Evaluate( double pTime)
 			double diffTime = nextKey.mTime - key.mTime;
 			if( diffTime < 0.0)
 				diffTime += mAnim->mDuration;
-			float factor = (time - key.mTime) / diffTime;
-			presentPosition = key.mValue + (nextKey.mValue - key.mValue) * factor;
+			if( diffTime > 0)
+			{
+				float factor = float( (time - key.mTime) / diffTime);
+				presentPosition = key.mValue + (nextKey.mValue - key.mValue) * factor;
+			} else
+			{
+				presentPosition = key.mValue;
+			}
+
 			mLastPositions[a].get<0>() = frame;
 		}
 
@@ -120,9 +127,15 @@ void AnimEvaluator::Evaluate( double pTime)
 			double diffTime = nextKey.mTime - key.mTime;
 			if( diffTime < 0.0)
 				diffTime += mAnim->mDuration;
-			float factor = (time - key.mTime) / diffTime;
+			if( diffTime > 0)
+			{
+				float factor = float( (time - key.mTime) / diffTime);
+				aiQuaternion::Interpolate( presentRotation, key.mValue, nextKey.mValue, factor);
+			} else
+			{
+				presentRotation = key.mValue;
+			}
 
-			aiQuaternion::Interpolate( presentRotation, key.mValue, nextKey.mValue, factor);
 			mLastPositions[a].get<1>() = frame;
 		}
 

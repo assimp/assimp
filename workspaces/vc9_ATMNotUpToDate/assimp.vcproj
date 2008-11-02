@@ -837,6 +837,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\ScenePreprocessor.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\ScenePreprocessor.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\SGSpatialSort.cpp"
 				>
 			</File>
@@ -963,6 +971,14 @@
 			<Filter
 				Name="Loaders"
 				>
+				<File
+					RelativePath="..\..\code\Q3DLoader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\Q3DLoader.h"
+					>
+				</File>
 				<Filter
 					Name="3DS"
 					>

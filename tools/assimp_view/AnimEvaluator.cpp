@@ -89,8 +89,15 @@ void AnimEvaluator::Evaluate( double pTime)
 				frame++;
 			}
 
-			// TODO: (thom) interpolation maybe?
-			presentPosition = channel->mPositionKeys[frame].mValue;
+			// interpolate between this frame's value and next frame's value
+			unsigned int nextFrame = (frame + 1) % channel->mNumPositionKeys;
+			const aiVectorKey& key = channel->mPositionKeys[frame];
+			const aiVectorKey& nextKey = channel->mPositionKeys[nextFrame];
+			double diffTime = nextKey.mTime - key.mTime;
+			if( diffTime < 0.0)
+				diffTime += mAnim->mDuration;
+			float factor = (time - key.mTime) / diffTime;
+			presentPosition = key.mValue + (nextKey.mValue - key.mValue) * factor;
 			mLastPositions[a].get<0>() = frame;
 		}
 
@@ -106,8 +113,16 @@ void AnimEvaluator::Evaluate( double pTime)
 				frame++;
 			}
 
-			// TODO: (thom) quaternions are a prime target for interpolation
-			presentRotation = channel->mRotationKeys[frame].mValue;
+			// interpolate between this frame's value and next frame's value
+			unsigned int nextFrame = (frame + 1) % channel->mNumRotationKeys;
+			const aiQuatKey& key = channel->mRotationKeys[frame];
+			const aiQuatKey& nextKey = channel->mRotationKeys[nextFrame];
+			double diffTime = nextKey.mTime - key.mTime;
+			if( diffTime < 0.0)
+				diffTime += mAnim->mDuration;
+			float factor = (time - key.mTime) / diffTime;
+
+			aiQuaternion::Interpolate( presentRotation, key.mValue, nextKey.mValue, factor);
 			mLastPositions[a].get<1>() = frame;
 		}
 

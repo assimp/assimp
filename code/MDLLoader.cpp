@@ -1031,16 +1031,6 @@ void MDLImporter::ReadFaces_3DGS_MDL7(
     AI_SWAP2(pcGroupTris->v_index[0]);
     AI_SWAP2(pcGroupTris->v_index[1]);
     AI_SWAP2(pcGroupTris->v_index[2]);
-    
-    AI_SWAP2(pcGroupTris->skinsets[0].st_index[0]); 
-    AI_SWAP2(pcGroupTris->skinsets[0].st_index[1]);
-    AI_SWAP2(pcGroupTris->skinsets[0].st_index[2]);
-    AI_SWAP4(pcGroupTris->skinsets[0].material);
-    
-    AI_SWAP2(pcGroupTris->skinsets[1].st_index[0]); 
-    AI_SWAP2(pcGroupTris->skinsets[1].st_index[1]);
-    AI_SWAP2(pcGroupTris->skinsets[1].st_index[2]);
-    AI_SWAP4(pcGroupTris->skinsets[1].material);
   
 		// iterate through all indices of the current triangle
 		for (unsigned int c = 0; c < 3;++c,++iOutIndex)
@@ -1094,7 +1084,12 @@ void MDLImporter::ReadFaces_3DGS_MDL7(
 			{
 				if (groupInfo.pcGroup->num_stpts)
 				{
-					iIndex = pcGroupTris->skinsets[0].st_index[c];
+					AI_SWAP2(pcGroupTris->skinsets[0].st_index[0]); 
+          AI_SWAP2(pcGroupTris->skinsets[0].st_index[1]);
+          AI_SWAP2(pcGroupTris->skinsets[0].st_index[2]);
+      
+          
+          iIndex = pcGroupTris->skinsets[0].st_index[c];
 					if(iIndex > (unsigned int)groupInfo.pcGroup->num_stpts)
 					{
 						iIndex = groupInfo.pcGroup->num_stpts-1;
@@ -1108,8 +1103,10 @@ void MDLImporter::ReadFaces_3DGS_MDL7(
 					groupData.vTextureCoords1[iOutIndex].y = v;
 				}
 				// assign the material index, but only if it is existing
-				if (pcHeader->triangle_stc_size >= AI_MDL7_TRIANGLE_STD_SIZE_ONE_UV_WITH_MATINDEX)
-					groupData.pcFaces[iTriangle].iMatIndex[0] = pcGroupTris->skinsets[0].material;
+				if (pcHeader->triangle_stc_size >= AI_MDL7_TRIANGLE_STD_SIZE_ONE_UV_WITH_MATINDEX){
+			    AI_SWAP4(pcGroupTris->skinsets[0].material);		
+          groupData.pcFaces[iTriangle].iMatIndex[0] = pcGroupTris->skinsets[0].material;
+        }     
 			}
 			// validate and process the second uv coordinate set
 			// *************************************************************
@@ -1117,7 +1114,12 @@ void MDLImporter::ReadFaces_3DGS_MDL7(
 			{
 				if (groupInfo.pcGroup->num_stpts)
 				{
-					iIndex = pcGroupTris->skinsets[1].st_index[c];
+			    AI_SWAP2(pcGroupTris->skinsets[1].st_index[0]); 
+          AI_SWAP2(pcGroupTris->skinsets[1].st_index[1]);
+          AI_SWAP2(pcGroupTris->skinsets[1].st_index[2]);
+          AI_SWAP4(pcGroupTris->skinsets[1].material);		
+          
+          iIndex = pcGroupTris->skinsets[1].st_index[c];
 					if(iIndex > (unsigned int)groupInfo.pcGroup->num_stpts)
 					{
 						iIndex = groupInfo.pcGroup->num_stpts-1;

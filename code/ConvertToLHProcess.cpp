@@ -51,11 +51,11 @@ using namespace Assimp;
 
 // The transformation matrix to convert from DirectX coordinates to OpenGL coordinates.
 const aiMatrix3x3 Assimp::ConvertToLHProcess::sToOGLTransform(
-	1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f
+	1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f
 	);
 // The transformation matrix to convert from OpenGL coordinates to DirectX coordinates.
 const aiMatrix3x3 Assimp::ConvertToLHProcess::sToDXTransform(
-	1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f
+	1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f
 	);
 
 // ------------------------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ void ConvertToLHProcess::Execute( aiScene* pScene)
 	for( unsigned int a = 0; a < pScene->mNumAnimations; a++)
 	{
 		aiAnimation* anim = pScene->mAnimations[a];
-    for( unsigned int b = 0; b < anim->mNumChannels; b++)
+		for( unsigned int b = 0; b < anim->mNumChannels; b++)
 		{
 			aiNodeAnim* nodeAnim = anim->mChannels[b];
 			if( strcmp( nodeAnim->mNodeName.data, pScene->mRootNode->mName.data) == 0)
@@ -193,6 +193,7 @@ void ConvertToLHProcess::ProcessAnimation( aiNodeAnim* pAnim)
 	for( unsigned int a = 0; a < pAnim->mNumPositionKeys; a++)
 		ConvertToDX( pAnim->mPositionKeys[a].mValue);
 
+	return;
 	// rotation keys
 	for( unsigned int a = 0; a < pAnim->mNumRotationKeys; a++)
 	{
@@ -212,13 +213,13 @@ void ConvertToLHProcess::ConvertToOGL( aiVector3D& poVector)
 // ------------------------------------------------------------------------------------------------
 void ConvertToLHProcess::ConvertToOGL( aiMatrix3x3& poMatrix)
 {
-	poMatrix *= sToOGLTransform;
+	poMatrix = sToOGLTransform * poMatrix;
 }
 
 // ------------------------------------------------------------------------------------------------
 void ConvertToLHProcess::ConvertToOGL( aiMatrix4x4& poMatrix)
 {
-	poMatrix *= aiMatrix4x4( sToOGLTransform);
+	poMatrix = aiMatrix4x4( sToOGLTransform) * poMatrix;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -231,12 +232,11 @@ void ConvertToLHProcess::ConvertToDX( aiVector3D& poVector)
 // ------------------------------------------------------------------------------------------------
 void ConvertToLHProcess::ConvertToDX( aiMatrix3x3& poMatrix)
 {
-	poMatrix *= sToDXTransform;
+	poMatrix = sToDXTransform * poMatrix;
 }
 
 // ------------------------------------------------------------------------------------------------
 void ConvertToLHProcess::ConvertToDX( aiMatrix4x4& poMatrix)
 {
-	aiMatrix4x4 temp(sToDXTransform);
-	poMatrix *= temp;
+	poMatrix = aiMatrix4x4(sToDXTransform) * poMatrix;
 }

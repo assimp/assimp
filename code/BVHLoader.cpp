@@ -435,20 +435,18 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 			{
 				poskey->mTime = double( fr);
 				poskey->mValue.x = node.mChannelValues[fr * node.mChannels.size() + 0];
-				poskey->mValue.y = node.mChannelValues[fr * node.mChannels.size() + 1];
-				poskey->mValue.z = node.mChannelValues[fr * node.mChannels.size() + 2];
+				poskey->mValue.z = node.mChannelValues[fr * node.mChannels.size() + 1];
+				poskey->mValue.y = node.mChannelValues[fr * node.mChannels.size() + 2];
 				++poskey;
 			}
 		} else
 		{
 			// if no translation part is given, put a default sequence
 			aiVector3D nodePos( node.mNode->mTransformation.a4, node.mNode->mTransformation.b4, node.mNode->mTransformation.c4);
-			nodeAnim->mNumPositionKeys = 2;
-			nodeAnim->mPositionKeys = new aiVectorKey[2];
+			nodeAnim->mNumPositionKeys = 1;
+			nodeAnim->mPositionKeys = new aiVectorKey[1];
 			nodeAnim->mPositionKeys[0].mTime = 0.0;
 			nodeAnim->mPositionKeys[0].mValue = nodePos;
-			nodeAnim->mPositionKeys[1].mTime = anim->mDuration;
-			nodeAnim->mPositionKeys[1].mValue = nodePos;
 		}
 
 		// rotation part. Always present. First find value offsets
@@ -485,9 +483,9 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 				float angleY = node.mChannelValues[fr * node.mChannels.size() + rotOffset + 2] * float( AI_MATH_PI) / 180.0f;
 				aiMatrix4x4 temp;
 				aiMatrix3x3 rotMatrix;
+				aiMatrix4x4::RotationZ( angleZ, temp); rotMatrix *= aiMatrix3x3( temp);
 				aiMatrix4x4::RotationX( angleX, temp); rotMatrix *= aiMatrix3x3( temp);
 				aiMatrix4x4::RotationY( angleY, temp); rotMatrix *= aiMatrix3x3( temp);
-				aiMatrix4x4::RotationZ( angleZ, temp); rotMatrix *= aiMatrix3x3( temp);
 
 				rotkey->mTime = double( fr);
 				rotkey->mValue = aiQuaternion( rotMatrix);
@@ -497,12 +495,10 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 
 		// scaling part. Always just a default track
 		{
-			nodeAnim->mNumScalingKeys = 2;
-			nodeAnim->mScalingKeys = new aiVectorKey[2];
+			nodeAnim->mNumScalingKeys = 1;
+			nodeAnim->mScalingKeys = new aiVectorKey[1];
 			nodeAnim->mScalingKeys[0].mTime = 0.0;
 			nodeAnim->mScalingKeys[0].mValue.Set( 1.0f, 1.0f, 1.0f);
-			nodeAnim->mScalingKeys[1].mTime = anim->mDuration;
-			nodeAnim->mScalingKeys[1].mValue.Set( 1.0f, 1.0f, 1.0f);
 		}
 	}
 }

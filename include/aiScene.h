@@ -121,8 +121,8 @@ struct aiNode
 		{
 			for( unsigned int a = 0; a < mNumChildren; a++)
 				delete mChildren[a];
-			delete [] mChildren;
 		}
+		delete [] mChildren;
 		delete [] mMeshes;
 	}
 
@@ -317,68 +317,61 @@ struct aiScene
 		// mich better to check whether both mNumXXX and mXXX are
 		// valid instead of relying on just one of them.
 		if (mNumMeshes && mMeshes) 
-		{
 			for( unsigned int a = 0; a < mNumMeshes; a++)
 				delete mMeshes[a];
-			delete [] mMeshes;
-		}
+		delete [] mMeshes;
+
 		if (mNumMaterials && mMaterials) 
-		{
 			for( unsigned int a = 0; a < mNumMaterials; a++)
 				delete mMaterials[a];
-			delete [] mMaterials;
-		}
+		delete [] mMaterials;
+
 		if (mNumAnimations && mAnimations) 
-		{
 			for( unsigned int a = 0; a < mNumAnimations; a++)
 				delete mAnimations[a];
-			delete [] mAnimations;
-		}
+		delete [] mAnimations;
+
 		if (mNumTextures && mTextures) 
-		{
 			for( unsigned int a = 0; a < mNumTextures; a++)
 				delete mTextures[a];
-			delete [] mTextures;
-		}
+		delete [] mTextures;
+
 		if (mNumLights && mLights) 
-		{
 			for( unsigned int a = 0; a < mNumLights; a++)
 				delete mLights[a];
-			delete [] mLights;
-		}
+		delete [] mLights;
+
 		if (mNumCameras && mCameras) 
-		{
 			for( unsigned int a = 0; a < mNumCameras; a++)
 				delete mCameras[a];
-			delete [] mCameras;
-		}
+		delete [] mCameras;
 	}
 
 	//! Check whether the scene contains meshes
 	//! Unless no special scene flags are set this will always be true.
 	inline bool HasMeshes() const 
-		{ return mMeshes != NULL; }
+		{ return mMeshes != NULL && mNumMeshes > 0; }
 
 	//! Check whether the scene contains materials
 	//! Unless no special scene flags are set this will always be true.
 	inline bool HasMaterials() const 
-		{ return mMaterials != NULL; }
+		{ return mMaterials != NULL && mNumMaterials > 0; }
 
 	//! Check whether the scene contains lights
 	inline bool HasLights() const 
-		{ return mLights != NULL; }
+		{ return mLights != NULL && mNumLights > 0; }
 
 	//! Check whether the scene contains textures
 	inline bool HasTextures() const 
-		{ return mTextures != NULL; }
+		{ return mTextures != NULL && mNumTextures > 0; }
 
 	//! Check whether the scene contains cameras
 	inline bool HasCameras() const 
-		{ return mCameras != NULL; }
+		{ return mCameras != NULL && mNumCameras > 0; }
 
 	//! Check whether the scene contains animations
 	inline bool HasAnimations() const 
-		{ return mAnimations != NULL; }
+		{ return mAnimations != NULL && mNumAnimations > 0; }
 
 #endif // __cplusplus
 };

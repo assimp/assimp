@@ -184,12 +184,9 @@ struct aiNodeAnim
 
 	~aiNodeAnim()
 	{
-		if (mNumPositionKeys)
-			delete [] mPositionKeys;
-		if (mNumRotationKeys)
-			delete [] mRotationKeys;
-		if (mNumScalingKeys)
-			delete [] mScalingKeys;
+		delete [] mPositionKeys;
+		delete [] mRotationKeys;
+		delete [] mScalingKeys;
 	}
 #endif // __cplusplus
 };
@@ -234,11 +231,10 @@ struct aiAnimation
 	~aiAnimation()
 	{
 		if (mNumChannels)
-		{
 			for( unsigned int a = 0; a < mNumChannels; a++)
 				delete mChannels[a];
-			delete [] mChannels;
-		}
+
+		delete [] mChannels;
 	}
 #endif // __cplusplus
 };

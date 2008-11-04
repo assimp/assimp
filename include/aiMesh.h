@@ -77,8 +77,7 @@ struct aiFace
 	//! Default destructor. Delete the index array
 	~aiFace()
 	{
-		if (mNumIndices)
-			delete [] mIndices;
+		delete [] mIndices;
 	}
 
 	//! Copy constructor. Copy the index array
@@ -198,7 +197,7 @@ struct aiBone
 	//! Destructor - deletes the array of vertex weights
 	~aiBone()
 	{
-		if (mNumWeights)delete [] mWeights;
+		delete [] mWeights;
 	}
 #endif // __cplusplus
 };
@@ -439,50 +438,41 @@ struct aiMesh
 	//! Deletes all storage allocated for the mesh
 	~aiMesh()
 	{
-		if ( mNumVertices ) // fix to make this work for invalid scenes, too
-		{
-			delete [] mVertices; 
-			delete [] mNormals;
-			delete [] mTangents;
-			delete [] mBitangents;
-			for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
-				delete [] mTextureCoords[a];
-			for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
-				delete [] mColors[a];
-		}
-		if ( mNumBones && mBones) // fix to make this work for invalid scenes, too
-		{
-			for( unsigned int a = 0; a < mNumBones; a++)
-				delete mBones[a];
-			delete [] mBones;
-		}
-		if ( mNumFaces) // fix to make this work for invalid scenes, too
-		{
-			delete [] mFaces;
-		}
+		delete [] mVertices; 
+		delete [] mNormals;
+		delete [] mTangents;
+		delete [] mBitangents;
+		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
+			delete [] mTextureCoords[a];
+		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
+			delete [] mColors[a];
+		for( unsigned int a = 0; a < mNumBones; a++)
+			delete mBones[a];
+		delete [] mBones;
+		delete [] mFaces;
 	}
 
 	//! Check whether the mesh contains positions. If no special scene flags
 	//! (such as AI_SCENE_FLAGS_ANIM_SKELETON_ONLY) are set this MUST
 	//! always return true
 	inline bool HasPositions() const 
-		{ return mVertices != NULL; }
+		{ return mVertices != NULL && mNumVertices > 0; }
 
 	//! Check whether the mesh contains faces. If no special scene flags
 	//! are set this should always return true
 	inline bool HasFaces() const 
-		{ return mFaces != NULL; }
+		{ return mFaces != NULL && mNumFaces > 0; }
 
 	//! Check whether the mesh contains normal vectors
 	inline bool HasNormals() const 
-		{ return mNormals != NULL; }
+		{ return mNormals != NULL && mNumVertices > 0; }
 
 	//! Check whether the mesh contains tangent and bitangent vectors
 	//! It is not possible that it contains tangents and no bitangents
 	//! (or the other way round). The existence of one of them
 	//! implies that the second is there, too.
 	inline bool HasTangentsAndBitangents() const 
-		{ return mTangents != NULL && mBitangents != NULL; }
+		{ return mTangents != NULL && mBitangents != NULL && mNumVertices > 0; }
 
 	//! Check whether the mesh contains a vertex color set
 	//! \param pIndex Index of the vertex color set
@@ -491,7 +481,7 @@ struct aiMesh
 		if( pIndex >= AI_MAX_NUMBER_OF_COLOR_SETS) 
 			return false; 
 		else 
-			return mColors[pIndex] != NULL; 
+			return mColors[pIndex] != NULL && mNumVertices > 0; 
 	}
 
 	//! Check whether the mesh contains a texture coordinate set
@@ -501,11 +491,11 @@ struct aiMesh
 		if( pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) 
 			return false; 
 		else 
-			return mTextureCoords[pIndex] != NULL; 
+			return mTextureCoords[pIndex] != NULL && mNumVertices > 0; 
 	}
 	//! Check whether the mesh contains bones
 	inline bool HasBones() const
-		{ return mBones != NULL; }
+		{ return mBones != NULL && mNumBones > 0; }
 
 #endif // __cplusplus
 };

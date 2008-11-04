@@ -371,9 +371,11 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 
 			// store the bones in the mesh
 			mesh->mNumBones = (unsigned int)newBones.size();
-			mesh->mBones = new aiBone*[mesh->mNumBones];
-			for( unsigned int c = 0; c < newBones.size(); c++)
-				mesh->mBones[c] = newBones[c];
+			if( newBones.size() > 0)
+			{
+				mesh->mBones = new aiBone*[mesh->mNumBones];
+				std::copy( newBones.begin(), newBones.end(), mesh->mBones);
+			}
 		}
 	}
 

@@ -455,6 +455,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 	int textMeaning = 0;
 	int vertexFormat = 0; // 0 = normal; 1 = 2 tcoords, 2 = tangents
 	bool useColors = false;
+	bool needLightMap = false;
 
 	// Parse the XML file
 	while (reader->read())
@@ -752,7 +753,12 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 					mat->AddProperty(&curColors[0].a,1,AI_MATKEY_OPACITY);
 				}
 
-				/* TODO: Add lightmapping support here */
+				// store the material flags for later use
+				curMesh->mNumUVComponents[3] = curMatFlags;
+				if ( curMatFlags & AI_IRRMESH_MAT_lightmap )
+				{
+					needLightMap = true;
+				}
 			}}
 			break;
 
@@ -783,10 +789,22 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 	if (materials.empty())
 		throw new ImportErrorException("IRRMESH: Unable to read a mesh from this file");
 
+	if(needLightMap)
+	{
+		// Compute light map UV coordinates
+//		ComputeLightMapUVCoordinates(meshes,materials);
+	}
+
 	// now generate the output scene
 	pScene->mNumMeshes = (unsigned int)meshes.size();
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
-	::memcpy(pScene->mMeshes,&meshes[0],sizeof(void*)*pScene->mNumMeshes);
+	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+	{
+		pScene->mMeshes[i] = meshes[i];
+
+		// clean this value ...
+		pScene->mMeshes[i]->mNumUVComponents[3] = 0;
+	}
 
 	pScene->mNumMaterials = (unsigned int)materials.size();
 	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];

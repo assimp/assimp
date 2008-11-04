@@ -297,14 +297,14 @@ void MD3Importer::InternReadFile(
 			{
 				// read vertices
 				pcMesh->mVertices[iCurrent].x = pcVertices[ pcTriangles->INDEXES[c]].X*AI_MD3_XYZ_SCALE;
-				pcMesh->mVertices[iCurrent].y = pcVertices[ pcTriangles->INDEXES[c]].Y*-1.0f*AI_MD3_XYZ_SCALE;
+				pcMesh->mVertices[iCurrent].y = pcVertices[ pcTriangles->INDEXES[c]].Y*AI_MD3_XYZ_SCALE;
 				pcMesh->mVertices[iCurrent].z = pcVertices[ pcTriangles->INDEXES[c]].Z*AI_MD3_XYZ_SCALE;
 
 				// convert the normal vector to uncompressed float3 format
 				LatLngNormalToVec3(pcVertices[pcTriangles->INDEXES[c]].NORMAL,
 					(float*)&pcMesh->mNormals[iCurrent]);
 
-				pcMesh->mNormals[iCurrent].y *= -1.0f;
+				//pcMesh->mNormals[iCurrent].y *= -1.0f;
 
 				// read texture coordinates
 				pcMesh->mTextureCoords[0][iCurrent].x = pcUVs[ pcTriangles->INDEXES[c]].U;

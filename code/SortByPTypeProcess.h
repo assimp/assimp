@@ -51,35 +51,6 @@ namespace Assimp	{
 
 
 // ---------------------------------------------------------------------------
-/** DeterminePTypeHelperProcess: If aiMesh::mPrimitiveTypes is 0,
- *  this step determines the types of primitive a mesh consists of.
-*/
-class ASSIMP_API DeterminePTypeHelperProcess : public BaseProcess
-{
-	friend class Importer;
-	friend class ::SortByPTypeProcessTest; // grant the unit test full access to us
-
-protected:
-	/** Constructor to be privately used by Importer */
-	DeterminePTypeHelperProcess();
-
-	/** Destructor, private as well */
-	~DeterminePTypeHelperProcess();
-
-public:
-	// -------------------------------------------------------------------
-	bool IsActive( unsigned int pFlags) const;
-
-	// -------------------------------------------------------------------
-	void Execute( aiScene* pScene);
-
-private:
-
-};
-
-#if (!defined AI_BUILD_NO_SORTBYPTYPE_PROCESS)
-
-// ---------------------------------------------------------------------------
 /** SortByPTypeProcess: Sorts meshes by the types of primitives they contain.
  *  A mesh with 5 lines, 3 points and 145 triangles would be split in 3 
  * submeshes.
@@ -111,7 +82,6 @@ private:
 	int configRemoveMeshes;
 };
 
-#endif 
 
 } // end of namespace Assimp
 

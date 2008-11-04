@@ -130,6 +130,29 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 				break;
 			}
 			attach.push_back(AttachmentInfo(scene,rootOut));
+
+			// now combine the material we've loaded for this mesh
+			// with the real meshes we got from the file. As we
+			// don't execute any pp-steps on the file, the numbers
+			// should be equal. If they are not, we can impossibly
+			// do this  ...
+			if (root->materials.size() != (unsigned int)scene->mNumMaterials)
+			{
+				DefaultLogger::get()->warn("IRR: Failed to match imported materials "
+					"with the materials found in the IRR scene file");
+
+				break;
+			}
+			for (unsigned int i = 0; i < scene->mNumMaterials;++i)
+			{
+				// delete the old material
+				delete scene->mMaterials[i];
+
+				std::pair<aiMaterial*, unsigned int>& src = root->materials[i];
+				scene->mMaterials[i] = src.first;
+
+				// Process material flags (e.g. lightmapping)
+			}
 		}
 		break;
 	

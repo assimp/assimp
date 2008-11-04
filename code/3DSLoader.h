@@ -219,7 +219,8 @@ protected:
 	// -------------------------------------------------------------------
 	/** Add a node to the node graph
 	*/
-	void AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Node* pcIn);
+	void AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Node* pcIn,
+		aiMatrix4x4& absTrafo);
 
 	// -------------------------------------------------------------------
 	/** Search for a node in the graph.

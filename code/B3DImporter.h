@@ -1,3 +1,4 @@
+
 /*
 Open Asset Import Library (ASSIMP)
 ----------------------------------------------------------------------
@@ -38,41 +39,68 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines a post processing step to search all meshes for
-  degenerated faces */
-#ifndef AI_SCENE_PREPROCESSOR_H_INC
-#define AI_SCENE_PREPROCESSOR_H_INC
+/** @file Definition of the .b3d importer class. */
 
+#ifndef AI_B3DIMPORTER_H_INC
+#define AI_B3DIMPORTER_H_INC
 
-namespace Assimp	{
+#include "../include/aiTypes.h"
+#include "../include/aiMesh.h"
+#include "../include/aiMaterial.h"
 
+#include <string>
+#include <vector>
 
-// ---------------------------------------------------------------------------
-/** ScenePreprocessor: Preprocess a scene before any post-processing
- *  steps are executed.
-*/
-class ASSIMP_API ScenePreprocessor
-{
+namespace Assimp{
+
+class B3DImporter : public BaseImporter{
 public:
 
-	/** Preprocess a given scene.
-	 *
-	 *  @param _scene Scene to be preprocessed
-	 */
-	void ProcessScene (aiScene* _scene);
+	virtual bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
 
 protected:
 
-	void ProcessAnimation (aiAnimation* anim);
-	void ProcessMesh (aiMesh* mesh);
+	virtual void GetExtensionList(std::string& append);
+	virtual void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
 
-protected:
+private:
 
-	//! Scene we're currently working on
-	aiScene* scene;
+	struct Vec2{ float x,y; };
+	struct Vec3{ float x,y,z; };
+	struct Vec4{ float x,y,z,w; };
+	struct Texture{ std::string name; };
+	struct Vertex{ int index;Vec3 position,normal,texcoords; };
+
+	int ReadByte();
+	int ReadInt();
+	float ReadFloat();
+	Vec2 ReadVec2();
+	Vec3 ReadVec3();
+	Vec4 ReadVec4();
+	std::string ReadString();
+	std::string ReadChunk();
+	void ExitChunk();
+	unsigned ChunkSize();
+
+	void ReadTEXS();
+	void ReadBRUS();
+	void ReadVRTS();
+	void ReadTRIS();
+	void ReadMESH();
+	void ReadNODE();
+	void ReadBB3D();
+
+	unsigned _pos;
+	unsigned _size;
+	std::vector<unsigned char> _buf;
+	std::vector<unsigned> _stack;
+
+	std::vector<Texture> _textures;
+	std::vector<MaterialHelper*> _materials;
+	std::vector<Vertex> _vertices;
+	std::vector<aiMesh*> _meshes;
 };
 
+}
 
-} // ! end namespace Assimp
-
-#endif // include guard
+#endif

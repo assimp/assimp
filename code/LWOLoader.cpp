@@ -143,6 +143,8 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	// old lightwave file format (prior to v6)
 	if (AI_LWO_FOURCC_LWOB == fileType)
 	{
+		DefaultLogger::get()->info("LWO file format: LWOB (<= LightWave 5.5)");
+
 		mIsLWO2 = false;
 		this->LoadLWOBFile();
 	}
@@ -150,6 +152,8 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	// new lightwave format
 	else if (AI_LWO_FOURCC_LWO2 == fileType)
 	{
+		DefaultLogger::get()->info("LWO file format: LWO2 (>= LightWave 6)");
+
 		mIsLWO2 = true;
 		this->LoadLWO2File();
 	}
@@ -307,7 +311,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 							aiVector3D*& pp = pvUV[w];
 							const aiVector2D& src = ((aiVector2D*)&layer.mUVChannels[vUVChannelIndices[w]].rawData[0])[idx];
 							pp->x = src.x;
-							pp->y = 1.f-src.y; // DX to OGL
+							pp->y = src.y; // DX to OGL
 							pp++;
 						}
 

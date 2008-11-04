@@ -72,7 +72,8 @@ SOURCES = AssimpPCH.cpp \
 	IRRMeshLoader.cpp \
 	IRRLoader.cpp \
 	Q3DLoader.cpp \
-	ScenePreprocessor.cpp
+	ScenePreprocessor.cpp \
+	B3DImporter.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 

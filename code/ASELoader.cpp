@@ -556,12 +556,15 @@ void ASEImporter::AddNodes (std::vector<BaseNode*>& nodes,
 
 	// allocate enough space for the child nodes
 	pcParent->mNumChildren = (unsigned int)apcNodes.size();
-	pcParent->mChildren = new aiNode*[apcNodes.size()];
-
-	// now build all nodes for our nice new children
-	for (unsigned int p = 0; p < apcNodes.size();++p)
+	if (pcParent->mNumChildren)
 	{
-		pcParent->mChildren[p] = apcNodes[p];
+		pcParent->mChildren = new aiNode*[apcNodes.size()];
+
+		// now build all nodes for our nice new children
+		for (unsigned int p = 0; p < apcNodes.size();++p)
+		{
+			pcParent->mChildren[p] = apcNodes[p];
+		}
 	}
 	return;
 }
@@ -578,7 +581,7 @@ void ASEImporter::BuildNodes()
 	pcScene->mRootNode->mName.Set("<root>");
 
 	// Setup the coordinate system transformation
-	pcScene->mRootNode->mTransformation.c3 *= -1.f;
+	//pcScene->mRootNode->mTransformation.c3 *= -1.f;
 	pcScene->mRootNode->mNumChildren = 1;
 	pcScene->mRootNode->mChildren = new aiNode*[1];
 	pcScene->mRootNode->mChildren[0] = new aiNode();
@@ -744,7 +747,7 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)
 				if (!mesh.amTexCoords[c].empty())
 				{
 					amTexCoords[c][iCurrent] = mesh.amTexCoords[c][(*i).amUVIndices[c][n]];
-					amTexCoords[c][iCurrent].y = 1.0f - amTexCoords[c][iCurrent].y; // DX-to-OGL
+					// amTexCoords[c][iCurrent].y = 1.f- amTexCoords[c][iCurrent].y; // DX-to-OGL
 				}
 			}
 			// add vertex colors

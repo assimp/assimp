@@ -566,11 +566,14 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 		// (target animation channels are stored with a
 		//  separate object ID)
 		D3DS::Node* pcNode = FindNode(mRootNode,name);
-		if (!pcNode)
+		if (pcNode)
 		{
-			pcNode = new D3DS::Node();
-			pcNode->mName = name;
+			// Make this node the current node
+			mCurrentNode = pcNode;
+			break;	
 		}
+		pcNode = new D3DS::Node();
+		pcNode->mName = name;
 
 		// There are two unknown values which we can safely ignore
 		stream->IncPtr(4);

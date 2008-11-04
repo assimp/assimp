@@ -1402,6 +1402,18 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="B3D"
+					>
+					<File
+						RelativePath="..\..\code\B3DImporter.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\B3DImporter.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="PostProcess"

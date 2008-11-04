@@ -51,64 +51,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-DeterminePTypeHelperProcess ::DeterminePTypeHelperProcess()
-{
-}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-DeterminePTypeHelperProcess::~DeterminePTypeHelperProcess()
-{
-	// nothing to do here
-}
-
-// ------------------------------------------------------------------------------------------------
-// Returns whether the processing step is present in the given flag field.
-bool DeterminePTypeHelperProcess::IsActive( unsigned int pFlags) const
-{
-	// this step is always active
-	return	true;
-}
-
-// ------------------------------------------------------------------------------------------------
-// Executes the post processing step on the given imported data.
-void DeterminePTypeHelperProcess::Execute( aiScene* pScene)
-{
-	DefaultLogger::get()->debug("DeterminePTypeHelper begin");
-	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-	{
-		aiMesh* mesh = pScene->mMeshes[i];
-		if (!mesh->mPrimitiveTypes)
-		{
-			for (unsigned int a = 0; a < mesh->mNumFaces; ++a)
-			{
-				aiFace& face = mesh->mFaces[a];
-				switch (face.mNumIndices)
-				{
-				case 3u:
-					mesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
-					break;
-
-				case 2u:
-					mesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
-					break;
-
-				case 1u:
-					mesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
-					break;
-
-				default:
-					mesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
-					break;
-				}
-			}
-		}
-	}
-	DefaultLogger::get()->debug("DeterminePTypeHelper finished");
-}
-
 
 
 // ------------------------------------------------------------------------------------------------

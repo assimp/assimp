@@ -48,7 +48,10 @@ void ScenePreprocessor::ProcessScene (aiScene* _scene)
 {
 	scene = _scene;
 
-	// - nothing to do for meshes for the moment
+	// Process all meshes
+	for (unsigned int i = 0; i < scene->mNumMeshes;++i)
+		ProcessMesh(scene->mMeshes[i]);
+
 	// - nothing to do for materials for the moment
 	// - nothing to do for nodes for the moment
 	// - nothing to do for textures for the moment
@@ -60,6 +63,37 @@ void ScenePreprocessor::ProcessScene (aiScene* _scene)
 		ProcessAnimation(scene->mAnimations[i]);
 }
 
+// ---------------------------------------------------------------------------
+void ScenePreprocessor::ProcessMesh (aiMesh* mesh)
+{
+	// If the information which primitive types are there in the
+	// mesh is currently not available, compute it.
+	if (!mesh->mPrimitiveTypes)
+	{
+		for (unsigned int a = 0; a < mesh->mNumFaces; ++a)
+		{
+			aiFace& face = mesh->mFaces[a];
+			switch (face.mNumIndices)
+			{
+			case 3u:
+				mesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+				break;
+
+			case 2u:
+				mesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
+				break;
+
+			case 1u:
+				mesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
+				break;
+
+			default:
+				mesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
+				break;
+			}
+		}
+	}
+}
 
 // ---------------------------------------------------------------------------
 void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)

@@ -126,6 +126,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_Q3D_IMPORTER
 #	include "Q3DLoader.h"
 #endif
+#ifndef AI_BUILD_NO_B3D_IMPORTER
+#	include "B3DImporter.h"
+#endif
 
 
 // PostProcess-Steps
@@ -180,14 +183,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_FINDDEGENERATES_PROCESS
 #	include "FindDegenerates.h"
 #endif
-
-// NOTE: the preprocessor code has been moved to the header as
-// we've also declared the DeterminePType process in it, which
-// can't be removed.
-
-//#ifndef AI_BUILD_NO_SORTBYPTYPE_PROCESS
+#ifndef AI_BUILD_NO_SORTBYPTYPE_PROCESS
 #	include "SortByPTypeProcess.h"
-//#endif
+#endif
 
 using namespace Assimp;
 
@@ -282,6 +280,9 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_Q3D_IMPORTER)
 	mImporter.push_back( new Q3DImporter());
 #endif
+#if (!defined AI_BUILD_NO_B3D_IMPORTER)
+	mImporter.push_back( new B3DImporter());
+#endif
 
 	// add an instance of each post processing step here in the order 
 	// of sequence it is executed. steps that are added here are not validated -
@@ -291,8 +292,6 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_VALIDATEDS_PROCESS)
 	mPostProcessingSteps.push_back( new ValidateDSProcess()); 
 #endif
-
-	mPostProcessingSteps.push_back( new DeterminePTypeHelperProcess());
 
 
 #if (!defined AI_BUILD_NO_FINDDEGENERATES_PROCESS)

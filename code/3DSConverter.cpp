@@ -519,11 +519,13 @@ void Discreet3DSImporter::ConvertMeshes(aiScene* pcOut)
 
 // ------------------------------------------------------------------------------------------------
 // Add a node to the scenegraph and setup its final transformation
-void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Node* pcIn)
+void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Node* pcIn,
+	aiMatrix4x4& absTrafo)
 {
 	std::vector<unsigned int> iArray;
 	iArray.reserve(3);
 
+	aiMatrix4x4 abs;
 	if (pcIn->mName == "$$$DUMMY")
 	{
 		// append the "real" name of the dummy to the string
@@ -542,10 +544,20 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Nod
 		}
 		if (!iArray.empty())
 		{
+			// The matrix should be identical for all meshes.
+			// It HAS to be identical for all meshes ........
 			aiMatrix4x4& mTrafo = ((D3DS::Mesh*)pcSOut->mMeshes[iArray[0]]->mColors[0])->mMat;
 			aiMatrix4x4 mInv = mTrafo;
 			if (!configSkipPivot)
 				mInv.Inverse();
+
+		/*	abs = mTrafo;
+			pcOut->mTransformation = absTrafo;
+			pcOut->mTransformation = pcOut->mTransformation.Inverse() * mTrafo;
+			const aiVector3D& pivot = pcIn->vPivot;
+			aiMatrix4x4 trans;
+		*/
+			const aiVector3D& pivot = pcIn->vPivot;
 
 			pcOut->mNumMeshes = (unsigned int)iArray.size();
 			pcOut->mMeshes = new unsigned int[iArray.size()];
@@ -555,7 +567,6 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Nod
 				aiMesh* const mesh = pcSOut->mMeshes[iIndex];
 
 				// http://www.zfx.info/DisplayThread.php?MID=235690#235690
-				const aiVector3D& pivot = pcIn->vPivot;
 				const aiVector3D* const pvEnd = mesh->mVertices+mesh->mNumVertices;
 				aiVector3D* pvCurrent = mesh->mVertices;
 
@@ -568,7 +579,6 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Nod
 						pvCurrent->y -= pivot.y;
 						pvCurrent->z -= pivot.z;
 						*pvCurrent = mTrafo * (*pvCurrent);
-						//std::swap( pvCurrent->y, pvCurrent->z );
 						++pvCurrent;
 					}
 				}
@@ -577,21 +587,80 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Nod
 				{
 					while (pvCurrent != pvEnd)
 					{
-						std::swap( pvCurrent->y, pvCurrent->z );
+						*pvCurrent = mInv * (*pvCurrent);
 						++pvCurrent;
 					}
 				}
 #endif
+
+				// Setup the mesh index
 				pcOut->mMeshes[i] = iIndex;
 			}
 		}
 	}
 
+	// Generate animation channels for the node
+	if (pcIn->aPositionKeys.size()  > 0  || pcIn->aRotationKeys.size()   > 0   ||
+		pcIn->aScalingKeys.size()   > 0  || pcIn->aCameraRollKeys.size() > 0 ||
+		pcIn->aTargetPositionKeys.size() > 0)
+	{
+		aiAnimation* anim = pcSOut->mAnimations[0];
+		ai_assert(NULL != anim);
+
+		// Allocate a new channel, increment the channel index
+		aiNodeAnim* channel = anim->mChannels[anim->mNumChannels++] = new aiNodeAnim();
+
+		// POSITION keys
+		if (pcIn->aPositionKeys.size()  > 0)
+		{
+			// Sort all keys with ascending time values
+			std::sort(pcIn->aPositionKeys.begin(),pcIn->aPositionKeys.end());
+
+			channel->mNumPositionKeys = (unsigned int)pcIn->aPositionKeys.size();
+			channel->mPositionKeys = new aiVectorKey[channel->mNumPositionKeys];
+			::memcpy(channel->mPositionKeys,&pcIn->aPositionKeys[0],
+				sizeof(aiVectorKey)*channel->mNumPositionKeys);
+
+			// Get the maximum key
+			anim->mDuration = std::max(anim->mDuration,channel->
+				mPositionKeys[channel->mNumPositionKeys-1].mTime);
+		}
+
+		// ROTATION keys
+		if (pcIn->aRotationKeys.size()  > 0)
+		{
+			// Sort all keys with ascending time values
+			std::sort(pcIn->aRotationKeys.begin(),pcIn->aRotationKeys.end());
+
+			channel->mNumRotationKeys = (unsigned int)pcIn->aRotationKeys.size();
+			channel->mRotationKeys = new aiQuatKey[channel->mNumRotationKeys];
+			::memcpy(channel->mRotationKeys,&pcIn->aRotationKeys[0],
+				sizeof(aiQuatKey)*channel->mNumRotationKeys);
+
+			// Get the maximum key
+			anim->mDuration = std::max(anim->mDuration,channel->
+				mRotationKeys[channel->mNumRotationKeys-1].mTime);
+		}
+
+		// SCALING keys
+		if (pcIn->aScalingKeys.size()  > 0)
+		{
+			// Sort all keys with ascending time values
+			std::sort(pcIn->aScalingKeys.begin(),pcIn->aScalingKeys.end());
+
+			channel->mNumScalingKeys = (unsigned int)pcIn->aScalingKeys.size();
+			channel->mScalingKeys = new aiVectorKey[channel->mNumScalingKeys];
+			::memcpy(channel->mScalingKeys,&pcIn->aScalingKeys[0],
+				sizeof(aiVectorKey)*channel->mNumScalingKeys);
+
+			// Get the maximum key
+			anim->mDuration = std::max(anim->mDuration,channel->
+				mScalingKeys[channel->mNumScalingKeys-1].mTime);
+		}
+	}
+
 	// Setup the name of the node
 	pcOut->mName.Set(pcIn->mName);
-
-	// Setup the transformation matrix of the node
-	pcOut->mTransformation = aiMatrix4x4(); 
 
 	// Allocate storage for children
 	pcOut->mNumChildren = (unsigned int)pcIn->mChildren.size();
@@ -602,9 +671,28 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Nod
 	{
 		pcOut->mChildren[i] = new aiNode();
 		pcOut->mChildren[i]->mParent = pcOut;
-		AddNodeToGraph(pcSOut,pcOut->mChildren[i],pcIn->mChildren[i]);
+		AddNodeToGraph(pcSOut,pcOut->mChildren[i],pcIn->mChildren[i],abs);
 	}
 	return;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Find out how many node animation channels we'll have finally
+void CountTracks(D3DS::Node* node, unsigned int& cnt)
+{
+	// We will never generate more than one channel for a node, so
+	// this is rather easy here.
+
+	if (node->aPositionKeys.size()  > 0  || node->aRotationKeys.size()   > 0   ||
+		node->aScalingKeys.size()   > 0  || node->aCameraRollKeys.size() > 0 ||
+		node->aTargetPositionKeys.size()  > 0)
+	{
+		++cnt;
+	}
+
+	// Recursively process all children
+	for (unsigned int i = 0; i < node->mChildren.size();++i)
+		CountTracks(node->mChildren[i],cnt);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -670,9 +758,26 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 	{
 		// First of all: find out how many scaling, rotation and translation
 		// animation tracks we'll have afterwards
-		//unsigned int numRot = 0, numScale = 0, numTranslate = 0;
-		//CountTracks(mRootNode,numRot,numScale,numTranslate);
-		AddNodeToGraph(pcOut,  pcOut->mRootNode, mRootNode);
+		unsigned int numChannel = 0;
+		CountTracks(mRootNode,numChannel);
+
+		if (numChannel)
+		{
+			// Allocate a primary animation channel
+			pcOut->mNumAnimations = 1;
+			pcOut->mAnimations    = new aiAnimation*[1];
+			aiAnimation* anim     = pcOut->mAnimations[0] = new aiAnimation();
+
+			anim->mName.Set("3DSMasterAnim");
+
+			// Allocate enough storage for all node animation channels, 
+			// but don't set the mNumChannels member - we'll use it to
+			// index into the array
+			anim->mChannels = new aiNodeAnim*[numChannel];
+		}
+
+		aiMatrix4x4 m;
+		AddNodeToGraph(pcOut,  pcOut->mRootNode, mRootNode,m);
 	}
 
 	// We used the first vertex color set to store some
@@ -694,11 +799,13 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 	if (pcOut->mRootNode->mName.data[0] == '$' && pcOut->mRootNode->mName.data[1] == '$')
 		pcOut->mRootNode->mName.Set("<root>");
 
+#if 0
 	// modify the transformation of the root node to change
 	// the coordinate system of the whole scene from Max' to OpenGL
 	pcOut->mRootNode->mTransformation.a3 *= -1.f;
 	pcOut->mRootNode->mTransformation.b3 *= -1.f;
 	pcOut->mRootNode->mTransformation.c3 *= -1.f;
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------

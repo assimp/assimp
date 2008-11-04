@@ -562,11 +562,11 @@ outer:
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
 		pScene->mRootNode->mMeshes[i] = i;
 
-	pScene->mRootNode->mTransformation *= aiMatrix4x4(
+	/*pScene->mRootNode->mTransformation *= aiMatrix4x4(
 		1.f, 0.f, 0.f, 0.f,
 	    0.f, -1.f,0.f, 0.f,
 		0.f, 0.f, 1.f, 0.f,
-		0.f, 0.f, 0.f, 1.f);
+		0.f, 0.f, 0.f, 1.f);*/
 
 	// Add cameras and light sources to the scene root node
 	pScene->mRootNode->mNumChildren = pScene->mNumLights+pScene->mNumCameras;

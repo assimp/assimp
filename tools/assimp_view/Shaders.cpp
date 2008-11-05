@@ -536,6 +536,17 @@ std::string g_szMaterialShader = std::string(
 		"};\n"
 	"#endif // AV_DIFFUSE_TEXTUR\n"
 
+	"#ifdef AV_DIFFUSE_TEXTURE2\n"
+		"texture DIFFUSE_TEXTURE2;\n"
+		"sampler DIFFUSE_SAMPLER2\n"
+		"{\n"
+		  "Texture = <DIFFUSE_TEXTURE2>;\n"
+		  "MinFilter=LINEAR;\n"
+		  "MagFilter=LINEAR;\n"
+		  "MipFilter=LINEAR;\n"
+		"};\n"
+	"#endif // AV_DIFFUSE_TEXTUR2\n"
+
 	"#ifdef AV_SPECULAR_TEXTURE\n"
 		"texture SPECULAR_TEXTURE;\n"
 		"sampler SPECULAR_SAMPLER\n"
@@ -614,6 +625,9 @@ std::string g_szMaterialShader = std::string(
 		"float3 Tangent   : TANGENT;\n"
 		"float3 Bitangent : BINORMAL;\n"
 		"float2 TexCoord0 : TEXCOORD0;\n"
+		"#ifdef AV_DIFFUSE_TEXTURE2 \n"
+		"float2 TexCoord1 : TEXCOORD1;\n"
+		"#endif \n"
 		  "#ifdef AV_SKINNING \n"
 			"float4 BlendIndices : BLENDINDICES;\n"
 			"float4 BlendWeights : BLENDWEIGHT;\n"
@@ -633,6 +647,9 @@ std::string g_szMaterialShader = std::string(
 		"#endif\n"
 
 		"float2 TexCoord0 : TEXCOORD2;\n"
+		"#ifdef AV_DIFFUSE_TEXTURE2 \n"
+		"float2 TexCoord1 : TEXCOORD3;\n"
+		"#endif \n"
 
 		"#ifdef AV_NORMAL_TEXTURE\n"
 		"float3 Light0 : TEXCOORD3;\n"
@@ -712,6 +729,9 @@ std::string g_szMaterialShader = std::string(
 		"Out.Position = mul( float4( objPos, 1.0f), WorldViewProjection);\n"
 		"float3 WorldPos = mul( float4( objPos, 1.0f), World);\n"
 		"Out.TexCoord0 = IN.TexCoord0;\n"
+		"#ifdef AV_DIFFUSE_TEXTURE2 \n"
+		"Out.TexCoord1 = IN.TexCoord1;\n"
+		"#endif\n"
 		"Out.Color = IN.Color;\n"
 
 		"#ifndef AV_NORMAL_TEXTURE\n"
@@ -749,6 +769,9 @@ std::string g_szMaterialShader = std::string(
 		"Out.Position = mul( float4( objPos, 1.0f), WorldViewProjection);\n"
 		"float3 WorldPos = mul( float4( objPos, 1.0f), World);\n"
 		"Out.TexCoord0 = IN.TexCoord0;\n"
+		"#ifdef AV_DIFFUSE_TEXTURE2 \n"
+		"Out.TexCoord1 = IN.TexCoord1;\n"
+		"#endif\n"
 		"Out.Color = IN.Color;\n"
 
 		"#ifndef AV_NORMAL_TEXTURE\n"
@@ -840,12 +863,18 @@ std::string g_szMaterialShader = std::string(
 			"float L1 = dot(Normal,afLightDir[0]) * 0.5f + 0.5f;\n"
 			"#define AV_LIGHT_0 afLightDir[0]\n"
 		"#endif\n"
+		"#ifdef AV_DIFFUSE_TEXTURE2\n"
+			"float fHalfLambert = 1.f;\n"
+		"#else\n"
 			"float fHalfLambert = L1*L1;\n"
+		"#endif \n"
 		"#ifdef AV_DIFFUSE_TEXTURE\n"
 			"OUT.rgb += afLightColor[0].rgb * DIFFUSE_COLOR.rgb * tex2D(DIFFUSE_SAMPLER,IN.TexCoord0).rgb * fHalfLambert * IN.Color.rgb +\n"
 		"#else\n"
 			"OUT.rgb += afLightColor[0].rgb * DIFFUSE_COLOR.rgb * fHalfLambert * IN.Color.rgb +\n"
 		"#endif // !AV_DIFFUSE_TEXTURE\n"
+
+		
 
 		"#ifdef AV_SPECULAR_COMPONENT\n"
 			"#ifndef AV_SKYBOX_LOOKUP\n"
@@ -873,6 +902,10 @@ std::string g_szMaterialShader = std::string(
 		"#else \n"
 			"EMISSIVE_COLOR.rgb;\n"
 		"#endif // !AV_EMISSIVE_TEXTURE\n"
+
+		"#ifdef AV_DIFFUSE_TEXTURE2\n"
+			"OUT.rgb *= tex2D(DIFFUSE_SAMPLER2,IN.TexCoord1).rgb*4.0f;\n"
+		"#endif \n"
 		"}\n"
 		"#ifdef AV_OPACITY\n"
 		"OUT.a = TRANSPARENCY;\n"

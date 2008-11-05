@@ -191,7 +191,9 @@ void ColorFromARGBPacked(uint32_t in, aiColor4D& clr)
 int ConvertMappingMode(const std::string& mode)
 {
 	if (mode == "texture_clamp_repeat")
+	{
 		return aiTextureMapMode_Wrap;
+	}
 	else if (mode == "texture_clamp_mirror")
 		return aiTextureMapMode_Mirror;
 
@@ -206,7 +208,8 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 	aiColor4D clr;
 	aiString s;
 
-	matFlags = 0;
+	matFlags = 0; // zero output flags
+	int cnt  = 0; // number of used texture channels
 
 	// Continue reading from the file
 	while (reader->read())
@@ -274,8 +277,6 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 			{
 				StringProperty prop;
 				ReadStringProperty(prop);
-				int cnt = 0;
-
 				if (prop.value.length())
 				{
 					// material type (shader)
@@ -289,6 +290,10 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 						{
 							matFlags = AI_IRRMESH_MAT_lightmap;
 						}
+						else if (prop.value == "solid_2layer")
+						{
+							matFlags = AI_IRRMESH_MAT_solid_2layer;
+						}
 						else if (prop.value == "lightmap_m2")
 						{
 							matFlags = AI_IRRMESH_MAT_lightmap_m2;
@@ -297,32 +302,90 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 						{
 							matFlags = AI_IRRMESH_MAT_lightmap_m4;
 						}
+						else if (prop.value == "lightmap_light")
+						{
+							matFlags = AI_IRRMESH_MAT_lightmap_light;
+						}
+						else if (prop.value == "lightmap_light_m2")
+						{
+							matFlags = AI_IRRMESH_MAT_lightmap_light_m2;
+						}
+						else if (prop.value == "lightmap_light_m4")
+						{
+							matFlags = AI_IRRMESH_MAT_lightmap_light_m4;
+						}
+						else if (prop.value == "lightmap_add")
+						{
+							matFlags = AI_IRRMESH_MAT_lightmap_add;
+						}
+						// Normal and parallax maps are treated equally
+						else if (prop.value == "normalmap_solid" ||
+							prop.value == "parallaxmap_solid")
+						{
+							matFlags = AI_IRRMESH_MAT_normalmap_solid;
+						}
+						else if (prop.value == "normalmap_trans_vertex_alpha" ||
+							prop.value == "parallaxmap_trans_vertex_alpha")
+						{
+							matFlags = AI_IRRMESH_MAT_normalmap_tva;
+						}
+						else if (prop.value == "normalmap_trans_add" ||
+							prop.value == "parallaxmap_trans_add")
+						{
+							matFlags = AI_IRRMESH_MAT_normalmap_ta;
+						}
 					}
 
 					// Up to 4 texture channels are supported
 					else if (prop.name == "Texture1")
 					{
+						// Always accept the primary texture channel
 						++cnt;
 						s.Set(prop.value);
 						mat->AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(0));
 					}
 					else if (prop.name == "Texture2")
 					{
-						++cnt;
-						s.Set(prop.value);
-						mat->AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(1));
+						// 2-layer material lightmapped?
+						if (matFlags & (AI_IRRMESH_MAT_solid_2layer | AI_IRRMESH_MAT_lightmap))
+						{
+							++cnt;
+							s.Set(prop.value);
+							mat->AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(1));
+
+							// set the corresponding material flag
+							matFlags |= AI_IRRMESH_EXTRA_2ND_TEXTURE;
+						}
+						// alternatively: normal or parallax mapping
+						else if (matFlags & AI_IRRMESH_MAT_normalmap_solid)
+						{
+							++cnt;
+							s.Set(prop.value);
+							mat->AddProperty(&s,AI_MATKEY_TEXTURE_NORMALS(1));
+
+							// set the corresponding material flag
+							matFlags |= AI_IRRMESH_EXTRA_2ND_TEXTURE;
+						}
 					}
 					else if (prop.name == "Texture3")
 					{
+						// We don't process the third texture channel as Irrlicht
+						// does not seem to use it.
+#if 0
 						++cnt;
 						s.Set(prop.value);
 						mat->AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(2));
+#endif
 					}
 					else if (prop.name == "Texture4" )
 					{
+						// We don't process the fourth texture channel as Irrlicht
+						// does not seem to use it.
+#if 0
 						++cnt;
 						s.Set(prop.value);
 						mat->AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(3));
+#endif
 					}
 
 					// Texture mapping options
@@ -360,6 +423,47 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 				if (/* IRRMESH */ !ASSIMP_stricmp(reader->getNodeName(),"material") ||
 					/* IRR     */ !ASSIMP_stricmp(reader->getNodeName(),"attributes"))
 				{
+					// Now process lightmapping flags
+					// We should have at least one texture, however
+					// if there are multiple textures we assign the
+					// lightmap settings to the last texture.
+					if (cnt && matFlags & AI_IRRMESH_MAT_lightmap)
+					{
+						static const char* PropArray[4] =
+						{
+							AI_MATKEY_TEXBLEND_DIFFUSE(0),
+							AI_MATKEY_TEXBLEND_DIFFUSE(1),
+							AI_MATKEY_TEXBLEND_DIFFUSE(2),
+							AI_MATKEY_TEXBLEND_DIFFUSE(3)
+						};
+						static const char* PropArray2[4] =
+						{
+							AI_MATKEY_TEXOP_DIFFUSE(0),
+							AI_MATKEY_TEXOP_DIFFUSE(1),
+							AI_MATKEY_TEXOP_DIFFUSE(2),
+							AI_MATKEY_TEXOP_DIFFUSE(3)
+						};
+						float f = 1.f;
+
+						// Additive lightmap?
+						int op = (matFlags & AI_IRRMESH_MAT_lightmap_add
+							? aiTextureOp_Add : aiTextureOp_Multiply);
+
+						// Handle Irrlicht's lightmapping scaling factor
+						if (matFlags & AI_IRRMESH_MAT_lightmap_m2 ||
+							matFlags & AI_IRRMESH_MAT_lightmap_light_m2)
+						{
+							f = 2.f;
+						}
+						else if (matFlags & AI_IRRMESH_MAT_lightmap_m4 ||
+							matFlags & AI_IRRMESH_MAT_lightmap_light_m4)
+						{
+							f = 4.f;
+						}
+						mat->AddProperty( &f, 1, PropArray  [cnt-1]);
+						mat->AddProperty( &op,1, PropArray2 [cnt-1]);
+					}
+
 					return mat;
 				}
 			default:
@@ -514,6 +618,27 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 				{
 					curUV2s.reserve (num);
 					vertexFormat = 1;
+
+					if (curMatFlags & AI_IRRMESH_EXTRA_2ND_TEXTURE)
+					{
+						// *********************************************************
+						// We have a second texture! So use this UV channel
+						// for it. The 2nd texture can be either a normal
+						// texture (solid_2layer or lightmap_xxx) or a normal 
+						// map (normal_..., parallax_...)
+						// *********************************************************
+						int idx = 1;
+						MaterialHelper* mat = ( MaterialHelper* ) curMat;
+
+						if (curMatFlags & (AI_IRRMESH_MAT_solid_2layer | AI_IRRMESH_MAT_lightmap))
+						{
+							mat->AddProperty(&idx,1,AI_MATKEY_UVWSRC_DIFFUSE(0));
+						}
+						else if (curMatFlags & AI_IRRMESH_MAT_normalmap_solid)
+						{
+							mat->AddProperty(&idx,1,AI_MATKEY_UVWSRC_NORMALS(0));
+						}
+					}
 				}
 				else if (!ASSIMP_stricmp("tangents", t))
 				{
@@ -789,11 +914,6 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 	if (materials.empty())
 		throw new ImportErrorException("IRRMESH: Unable to read a mesh from this file");
 
-	if(needLightMap)
-	{
-		// Compute light map UV coordinates
-//		ComputeLightMapUVCoordinates(meshes,materials);
-	}
 
 	// now generate the output scene
 	pScene->mNumMeshes = (unsigned int)meshes.size();

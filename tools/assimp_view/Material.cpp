@@ -797,6 +797,17 @@ int CMaterialManager::CreateMaterial(
 			LoadTexture(&pcMesh->piDiffuseTexture,&szPath);
 		}
 
+		if (pcSource->mTextureCoords[1])
+		{
+			//
+			// DIFFUSE TEXTURE2 ------------------------------------------------
+			//
+			if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_DIFFUSE(1),&szPath))
+			{
+				LoadTexture(&pcMesh->piDiffuseTexture2,&szPath);
+			}
+		}
+
 		//
 		// SPECULAR TEXTURE ------------------------------------------------
 		//
@@ -908,6 +919,9 @@ int CMaterialManager::CreateMaterial(
 		if  ((pcMesh->piDiffuseTexture != NULL ? true : false) != 
 			(pc->piDiffuseTexture != NULL ? true : false))
 			continue;
+		if  ((pcMesh->piDiffuseTexture2 != NULL ? true : false) != 
+			(pc->piDiffuseTexture2 != NULL ? true : false))
+			continue;
 		if  ((pcMesh->piSpecularTexture != NULL ? true : false) != 
 			(pc->piSpecularTexture != NULL ? true : false))
 			continue;
@@ -952,6 +966,12 @@ int CMaterialManager::CreateMaterial(
 	if (pcMesh->piDiffuseTexture)
 	{
 		sMacro[iCurrent].Name = "AV_DIFFUSE_TEXTURE";
+		sMacro[iCurrent].Definition = "1";
+		++iCurrent;
+	}
+	if (pcMesh->piDiffuseTexture2)
+	{
+		sMacro[iCurrent].Name = "AV_DIFFUSE_TEXTURE2";
 		sMacro[iCurrent].Definition = "1";
 		++iCurrent;
 	}
@@ -1099,6 +1119,8 @@ int CMaterialManager::CreateMaterial(
 
 	if (pcMesh->piDiffuseTexture)
 		pcMesh->piEffect->SetTexture("DIFFUSE_TEXTURE",pcMesh->piDiffuseTexture);
+	if (pcMesh->piDiffuseTexture2)
+		pcMesh->piEffect->SetTexture("DIFFUSE_TEXTURE2",pcMesh->piDiffuseTexture2);
 	if (pcMesh->piOpacityTexture)
 		pcMesh->piEffect->SetTexture("OPACITY_TEXTURE",pcMesh->piOpacityTexture);
 	if (pcMesh->piSpecularTexture)
@@ -1219,6 +1241,8 @@ int CMaterialManager::SetupMaterial (
 			pcMesh->piEffect->SetTexture("OPACITY_TEXTURE",pcMesh->piOpacityTexture);
 		if (pcMesh->piDiffuseTexture)
 			pcMesh->piEffect->SetTexture("DIFFUSE_TEXTURE",pcMesh->piDiffuseTexture);
+		if (pcMesh->piDiffuseTexture2)
+			pcMesh->piEffect->SetTexture("DIFFUSE_TEXTURE2",pcMesh->piDiffuseTexture2);
 		if (pcMesh->piSpecularTexture)
 			pcMesh->piEffect->SetTexture("SPECULAR_TEXTURE",pcMesh->piSpecularTexture);
 		if (pcMesh->piAmbientTexture)

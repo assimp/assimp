@@ -87,6 +87,7 @@ class AssetHelper
 			aiVector3D vTangent;
 			aiVector3D vBitangent;
 			aiVector2D vTextureUV;
+			aiVector2D vTextureUV2;
 			unsigned char mBoneIndices[4];
 			unsigned char mBoneWeights[4]; // last Weight not used, calculated inside the vertex shader
 
@@ -101,8 +102,9 @@ class AssetHelper
 					{ 0, 28, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TANGENT, 0 },
 					{ 0, 40, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_BINORMAL, 0 },
 					{ 0, 52, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
-					{ 0, 60, D3DDECLTYPE_UBYTE4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_BLENDINDICES, 0 },
-					{ 0, 64, D3DDECLTYPE_UBYTE4N, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_BLENDWEIGHT, 0 },
+					{ 0, 60, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 1 },
+					{ 0, 68, D3DDECLTYPE_UBYTE4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_BLENDINDICES, 0 },
+					{ 0, 72, D3DDECLTYPE_UBYTE4N, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_BLENDWEIGHT, 0 },
 					D3DDECL_END()
 				};
 
@@ -140,6 +142,7 @@ class AssetHelper
 					piEffect			(NULL),
 					piVBNormals			(NULL),
 					piDiffuseTexture	(NULL),
+					piDiffuseTexture2	(NULL),
 					piSpecularTexture	(NULL),
 					piAmbientTexture	(NULL),
 					piNormalTexture		(NULL),
@@ -177,6 +180,7 @@ class AssetHelper
 
 				// material textures
 				IDirect3DTexture9* piDiffuseTexture;
+				IDirect3DTexture9* piDiffuseTexture2;
 				IDirect3DTexture9* piSpecularTexture;
 				IDirect3DTexture9* piAmbientTexture;
 				IDirect3DTexture9* piEmissiveTexture;

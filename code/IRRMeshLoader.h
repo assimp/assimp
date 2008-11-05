@@ -48,10 +48,36 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp	{
 
-#define AI_IRRMESH_MAT_trans_vertex_alpha 0x1
-#define AI_IRRMESH_MAT_lightmap		0x2 
-#define AI_IRRMESH_MAT_lightmap_m2	(AI_IRRMESH_MAT_lightmap|0x4)
-#define AI_IRRMESH_MAT_lightmap_m4	(AI_IRRMESH_MAT_lightmap|0x5)
+// Default: 0 = solid, one texture
+#define AI_IRRMESH_MAT_solid_2layer			0x10000
+
+// Transparency flags
+#define AI_IRRMESH_MAT_trans_vertex_alpha	0x1
+#define AI_IRRMESH_MAT_trans_add			0x2
+
+// Lightmapping flags
+#define AI_IRRMESH_MAT_lightmap				0x2 
+#define AI_IRRMESH_MAT_lightmap_m2			(AI_IRRMESH_MAT_lightmap|0x4)
+#define AI_IRRMESH_MAT_lightmap_m4			(AI_IRRMESH_MAT_lightmap|0x8)
+#define AI_IRRMESH_MAT_lightmap_light		(AI_IRRMESH_MAT_lightmap|0x10)
+#define AI_IRRMESH_MAT_lightmap_light_m2	(AI_IRRMESH_MAT_lightmap|0x20)
+#define AI_IRRMESH_MAT_lightmap_light_m4	(AI_IRRMESH_MAT_lightmap|0x40)
+#define AI_IRRMESH_MAT_lightmap_add			(AI_IRRMESH_MAT_lightmap|0x80)
+
+// Standard NormalMap (or Parallax map, they're treated equally)
+#define AI_IRRMESH_MAT_normalmap_solid		(0x100)
+
+// Normal map combined with vertex alpha
+#define AI_IRRMESH_MAT_normalmap_tva	\
+	(AI_IRRMESH_MAT_normalmap_solid | AI_IRRMESH_MAT_trans_vertex_alpha)
+
+// Normal map combined with additive transparency
+#define AI_IRRMESH_MAT_normalmap_ta		\
+	(AI_IRRMESH_MAT_normalmap_solid | AI_IRRMESH_MAT_trans_add)
+
+// Special flag. It indicates a second texture has been found
+// Its type depends ... either a normal textue or a normal map
+#define AI_IRRMESH_EXTRA_2ND_TEXTURE		0x100000
 
 
 // ---------------------------------------------------------------------------

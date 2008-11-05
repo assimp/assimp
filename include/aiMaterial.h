@@ -416,7 +416,7 @@ extern "C" {
 
 	// otherwise ... simply hope the buffer is large enough :-)
 #	define AI_BUILD_KEY(base,index,out) \
-	::sprintf(out,"%s[%i]",base,index);
+	::snprintf(out,256,"%s[%i]",base,index);
 #endif
 
 
@@ -531,6 +531,7 @@ extern "C" {
  * <b>Default value:</b> 0.0f|0.0f|0.0f|1.0f <br>
 */
 #define AI_MATKEY_COLOR_EMISSIVE "$clr.emissive"
+
 
 // ---------------------------------------------------------------------------
 /** @def AI_MATKEY_TEXTURE_DIFFUSE

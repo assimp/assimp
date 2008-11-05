@@ -572,6 +572,14 @@ int CreateAssetData()
 			}
 			else pbData2->vTextureUV = aiVector2D(0.5f,0.5f);
 
+			if (mesh->HasTextureCoords( 1))
+			{
+				pbData2->vTextureUV2 = aiVector2D(
+					mesh->mTextureCoords[1][x].x,
+					mesh->mTextureCoords[1][x].y);
+			}
+			else pbData2->vTextureUV2 = aiVector2D(0.5f,0.5f);
+
 			// Bone indices and weights
 			if( mesh->HasBones())
 			{

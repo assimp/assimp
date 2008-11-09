@@ -896,6 +896,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\TargetAnimation.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\code\TargetAnimation.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\TextureTransform.cpp"
 				>
 			</File>

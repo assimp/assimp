@@ -177,6 +177,9 @@ protected:
 	 *   In fact this means that every vertex that is referenced by
 	 *   a face is unique. Or the other way round: a vertex index may
 	 *   not occur twice in a single aiMesh.
+	 * - aiAnimation::mDuration may be -1. Assimp determines the length
+	 *   of the animation automatically in this case as the length of
+	 *   the longest animation channel.
 	 *
 	 * If the AI_SCENE_FLAGS_INCOMPLETE-Flag is not set:<br>
 	 * - at least one mesh must be there<br>

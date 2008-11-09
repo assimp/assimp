@@ -103,15 +103,444 @@ bool IRRImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 }
 
 // ------------------------------------------------------------------------------------------------
+void IRRImporter::GetExtensionList(std::string& append)
+{
+	/*  NOTE: The file extenxsion .xml is too generic. We'll 
+	*  need to open the file in CanRead() and check whether it is 
+	*  a real irrlicht file
+	*/
+	append.append("*.xml;*.irr");
+}
+
+// ------------------------------------------------------------------------------------------------
+void IRRImporter::SetupProperties(const Importer* pImp)
+{
+	// read the output frame rate of all node animation channels
+	fps = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_IRR_ANIM_FPS,100);
+	if (!fps)
+	{
+		DefaultLogger::get()->error("IRR: Invalid FPS configuration");
+		fps = 100;
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Build a mesh tha consists of a single squad (a side of a skybox)
+aiMesh* IRRImporter::BuildSingleQuadMesh(const SkyboxVertex& v1,
+	const SkyboxVertex& v2,
+	const SkyboxVertex& v3,
+	const SkyboxVertex& v4)
+{
+	// allocate and prepare the mesh
+	aiMesh* out = new aiMesh();
+
+	out->mPrimitiveTypes = aiPrimitiveType_POLYGON;
+	out->mNumFaces = 1;
+
+	// build the face
+	out->mFaces    = new aiFace[1];
+	aiFace& face   = out->mFaces[0];
+	
+	face.mNumIndices = 4;
+	face.mIndices    = new unsigned int[4];
+	for (unsigned int i = 0; i < 4;++i)
+		face.mIndices[i] = i;
+
+	out->mNumVertices = 4;
+
+	// copy vertex positions
+	aiVector3D* vec = out->mVertices = new aiVector3D[4];
+	*vec++ = v1.position;
+	*vec++ = v2.position;
+	*vec++ = v3.position;
+	*vec   = v4.position;
+
+	// copy vertex normals
+	vec = out->mNormals = new aiVector3D[4];
+	*vec++ = v1.normal;
+	*vec++ = v2.normal;
+	*vec++ = v3.normal;
+	*vec   = v4.normal;
+
+	// copy texture coordinates
+	out->mTextureCoords[0] = new aiVector3D[4];
+	*vec++ = v1.uv;
+	*vec++ = v2.uv;
+	*vec++ = v3.uv;
+	*vec   = v4.uv;
+
+	return out;
+}
+
+// ------------------------------------------------------------------------------------------------
+void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMaterial*> materials)
+{
+	// Update the material of the skybox - replace the name
+	// and disable shading for skyboxes.
+	for (unsigned int i = 0; i < 6;++i)
+	{
+		MaterialHelper* out = ( MaterialHelper* ) (*(materials.end()-(6-i)));
+
+		aiString s;
+		s.length = ::sprintf( s.data, "SkyboxSide_%i",i );
+		out->AddProperty(&s,AI_MATKEY_NAME);
+
+		int shading = aiShadingMode_NoShading;
+		out->AddProperty(&shading,1,AI_MATKEY_SHADING_MODEL);
+	}
+
+	// Skyboxes are much more difficult. They are represented
+	// by six single planes with different textures, so we'll
+	// need to build six meshes.
+
+	const float l = 10.f; // the size used by Irrlicht
+
+	// FRONT SIDE
+	meshes.push_back( BuildSingleQuadMesh( 
+		SkyboxVertex(-l,-l,-l,  0, 0, 1,   1.f,1.f),
+		SkyboxVertex( l,-l,-l,  0, 0, 1,   0.f,1.f),
+		SkyboxVertex( l, l,-l,  0, 0, 1,   0.f,0.f),
+		SkyboxVertex(-l, l,-l,  0, 0, 1,   1.f,0.f)) );
+	meshes.back()->mMaterialIndex = materials.size()-6u;
+
+	// LEFT SIDE
+	meshes.push_back( BuildSingleQuadMesh( 
+		SkyboxVertex( l,-l,-l,  -1, 0, 0,   1.f,1.f),
+		SkyboxVertex( l,-l, l,  -1, 0, 0,   0.f,1.f),
+		SkyboxVertex( l, l, l,  -1, 0, 0,   0.f,0.f),
+		SkyboxVertex( l, l,-l,  -1, 0, 0,   1.f,0.f)) );
+	meshes.back()->mMaterialIndex = materials.size()-5u;
+
+	// BACK SIDE
+	meshes.push_back( BuildSingleQuadMesh( 
+		SkyboxVertex( l,-l, l,  0, 0, -1,   1.f,1.f),
+		SkyboxVertex(-l,-l, l,  0, 0, -1,   0.f,1.f),
+		SkyboxVertex(-l, l, l,  0, 0, -1,   0.f,0.f),
+		SkyboxVertex( l, l, l,  0, 0, -1,   1.f,0.f)) );
+	meshes.back()->mMaterialIndex = materials.size()-4u;
+
+	// RIGHT SIDE
+	meshes.push_back( BuildSingleQuadMesh( 
+		SkyboxVertex(-l,-l, l,  1, 0, 0,   1.f,1.f),
+		SkyboxVertex(-l,-l,-l,  1, 0, 0,   0.f,1.f),
+		SkyboxVertex(-l, l,-l,  1, 0, 0,   0.f,0.f),
+		SkyboxVertex(-l, l, l,  1, 0, 0,   1.f,0.f)) );
+	meshes.back()->mMaterialIndex = materials.size()-3u;
+
+	// TOP SIDE
+	meshes.push_back( BuildSingleQuadMesh( 
+		SkyboxVertex( l, l,-l,  0, -1, 0,   1.f,1.f),
+		SkyboxVertex( l, l, l,  0, -1, 0,   0.f,1.f),
+		SkyboxVertex(-l, l, l,  0, -1, 0,   0.f,0.f),
+		SkyboxVertex(-l, l,-l,  0, -1, 0,   1.f,0.f)) );
+	meshes.back()->mMaterialIndex = materials.size()-2u;
+
+	// BOTTOM SIDE
+	meshes.push_back( BuildSingleQuadMesh( 
+		SkyboxVertex( l,-l, l,  0,  1, 0,   0.f,0.f),
+		SkyboxVertex( l,-l,-l,  0,  1, 0,   1.f,0.f),
+		SkyboxVertex(-l,-l,-l,  0,  1, 0,   1.f,1.f),
+		SkyboxVertex(-l,-l,-l,  0,  1, 0,   0.f,1.f)) );
+	meshes.back()->mMaterialIndex = materials.size()-1u;
+}
+
+// ------------------------------------------------------------------------------------------------
+void IRRImporter::CopyMaterial(std::vector<aiMaterial*>	 materials,
+	std::vector< std::pair<aiMaterial*, unsigned int> >& inmaterials,
+	unsigned int& defMatIdx,
+	aiMesh* mesh)
+{
+	if (inmaterials.empty())
+	{
+		// Do we have a default material? If not we need to create one
+		if (0xffffffff == defMatIdx)
+		{
+			defMatIdx = (unsigned int)materials.size();
+			MaterialHelper* mat = new MaterialHelper();
+
+			aiString s;
+			s.Set(AI_DEFAULT_MATERIAL_NAME);
+			mat->AddProperty(&s,AI_MATKEY_NAME);
+
+			aiColor3D c(0.6f,0.6f,0.6f);
+			mat->AddProperty(&c,1,AI_MATKEY_COLOR_DIFFUSE);
+		}
+		mesh->mMaterialIndex = defMatIdx;
+		return;
+	}
+	else if (inmaterials.size() > 1)
+	{
+		DefaultLogger::get()->info("IRR: Skipping additional materials");
+	}
+
+	mesh->mMaterialIndex = (unsigned int)materials.size();
+	materials.push_back(inmaterials[0].first);
+}
+
+
+// ------------------------------------------------------------------------------------------------
+inline int ClampSpline(int idx, int size)
+{
+	return ( idx<0 ? size+idx : ( idx>=size ? idx-size : idx ) );
+}
+
+// ------------------------------------------------------------------------------------------------
+inline void FindSuitableMultiple(int& angle)
+{
+	if (angle < 3)angle = 3;
+	else if (angle < 10) angle = 10;
+	else if (angle < 20) angle = 20;
+	else if (angle < 30) angle = 30;
+	else
+	{
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void IRRImporter::ComputeAnimations(Node* root, std::vector<aiNodeAnim*>& anims,
+	const aiMatrix4x4& transform)
+{
+	ai_assert(NULL != root);
+
+	if (root->animators.empty())return;
+
+	typedef std::pair< TemporaryAnim, Animator* > AnimPair;
+	const unsigned int resolution = 1;
+
+	std::vector<AnimPair> temp;
+	temp.reserve(root->animators.size());
+
+	for (std::list<Animator>::iterator it = root->animators.begin();
+		it != root->animators.end(); ++it)
+	{
+		if ((*it).type == Animator::UNKNOWN ||
+			(*it).type == Animator::OTHER)
+		{
+			DefaultLogger::get()->warn("IRR: Skipping unknown or unsupported animator");
+			continue;
+		}
+		temp.push_back(AnimPair(TemporaryAnim(),&(*it)));
+	}
+
+	if (temp.empty())return;
+
+	// All animators are applied one after another. We generate a set of
+	// transformation matrices for each of it. Then we combine all 
+	// transformation matrices, decompose them and build an output animation.
+
+	for (std::vector<AnimPair>::iterator it = temp.begin();
+		 it != temp.end(); ++it)
+	{
+		TemporaryAnim& out = (*it).first;
+		Animator* in       = (*it).second;
+
+		switch (in->type)
+		{
+		case Animator::ROTATION:
+			{
+				// -----------------------------------------------------
+				// find out how long a full rotation will take
+				// This is the least common multiple of 360.f and all 
+				// three euler angles. Although we'll surely find a 
+				// possible multiple (haha) it could be somewhat large
+				// for our purposes. So we need to modify the angles
+				// here in order to get good results.
+				// -----------------------------------------------------
+				int angles[3];
+				angles[0] = (int)(in->direction.x*100);
+				angles[1] = (int)(in->direction.y*100);
+				angles[2] = (int)(in->direction.z*100);
+
+				angles[0] %= 360;
+				angles[1] %= 360;
+				angles[2] %= 360;
+
+				FindSuitableMultiple(angles[0]);
+				FindSuitableMultiple(angles[1]);
+				FindSuitableMultiple(angles[2]);
+
+				int lcm = 360;
+
+				if (angles[0])
+					lcm  = boost::math::lcm(lcm,angles[0]);
+
+				if (angles[1])
+					lcm  = boost::math::lcm(lcm,angles[1]);
+
+				if (angles[2])
+					lcm  = boost::math::lcm(lcm,angles[2]);
+
+				if (360 == lcm)
+					break;
+
+				// This can be a division through zero, but we don't care
+				float f1 = (float)lcm / angles[0];
+				float f2 = (float)lcm / angles[1];
+				float f3 = (float)lcm / angles[2];
+				
+				// find out how many time units we'll need for the finest
+				// track (in seconds) - this defines the number of output
+				// keys (fps * seconds)
+				float max ;
+				if (angles[0])
+					max = (float)lcm / angles[0];
+				if (angles[1])
+					max = std::max(max, (float)lcm / angles[1]);
+				if (angles[2])
+					max = std::max(max, (float)lcm / angles[2]);
+
+				
+				// Allocate transformation matrices
+				out.SetupMatrices((unsigned int)(max*fps));
+
+				// begin with a zero angle
+				aiVector3D angle;
+				for (unsigned int i = 0; i < out.last;++i)
+				{
+					// build the rotation matrix for the given euler angles
+					aiMatrix4x4& m = out.matrices[i];
+
+					// we start with the node transformation
+					m = transform; 
+
+					aiMatrix4x4 m2;
+
+					if (angle.x)
+						m *= aiMatrix4x4::RotationX(angle.x,m2);
+
+					if (angle.y)
+						m *= aiMatrix4x4::RotationX(angle.y,m2);
+
+					if (angle.z)
+						m *= aiMatrix4x4::RotationZ(angle.z,m2);
+
+					// increase the angle
+					angle += in->direction;
+				}
+
+				// This animation is repeated and repeated ...
+				out.post = aiAnimBehaviour_REPEAT;
+			}
+			break;
+
+		case Animator::FLY_CIRCLE:
+			{
+				
+			}
+			break;
+
+		case Animator::FLY_STRAIGHT:
+			{
+				
+			}
+			break;
+
+		case Animator::FOLLOW_SPLINE:
+			{
+				out.post = aiAnimBehaviour_REPEAT;
+				const int size = (int)in->splineKeys.size();
+				if (!size)
+				{
+					// We have no point in the spline. That's bad. Really bad.
+					DefaultLogger::get()->warn("IRR: Spline animators with no points defined");
+					break;
+				}
+				else if (size == 1)
+				{
+					// We have just one point in the spline
+					out.SetupMatrices(1);
+					out.matrices[0].a4 = in->splineKeys[0].mValue.x;
+					out.matrices[0].b4 = in->splineKeys[0].mValue.y;
+					out.matrices[0].c4 = in->splineKeys[0].mValue.z;
+					break;
+				}
+
+				unsigned int ticksPerFull = 15;
+				out.SetupMatrices(ticksPerFull*fps);
+
+				for (unsigned int i = 0; i < out.last;++i)
+				{
+					aiMatrix4x4& m = out.matrices[i];
+
+					const float dt = (i * in->speed * 0.001f );
+					const float u = dt - floor(dt);
+					const int idx = (int)floor(dt) % size;
+
+					// get the 4 current points to evaluate the spline
+					const aiVector3D& p0 = in->splineKeys[ ClampSpline( idx - 1, size ) ].mValue;
+					const aiVector3D& p1 = in->splineKeys[ ClampSpline( idx + 0, size ) ].mValue; 
+					const aiVector3D& p2 = in->splineKeys[ ClampSpline( idx + 1, size ) ].mValue; 
+					const aiVector3D& p3 = in->splineKeys[ ClampSpline( idx + 2, size ) ].mValue;
+
+					// compute polynomials
+					const float u2 = u*u;
+					const float u3 = u2*2;
+
+					const float h1 = 2.0f * u3 - 3.0f * u2 + 1.0f;
+					const float h2 = -2.0f * u3 + 3.0f * u3;
+					const float h3 = u3 - 2.0f * u3;
+					const float h4 = u3 - u2;
+
+					// compute the spline tangents
+					const aiVector3D t1 = ( p2 - p0 ) * in->tightness;
+					aiVector3D t2 = ( p3 - p1 ) * in->tightness;
+
+					// and use them to get the interpolated point
+					t2 = (h1 * p1 + p2 * h2 + t1 * h3 + h4 * t2);
+
+					// build a simple translation matrix from it
+					m.a4 = t2.x;
+					m.b4 = t2.y;
+					m.c4 = t2.z;
+				}
+			}
+			break;
+		};
+	}
+
+
+	aiNodeAnim* out = new aiNodeAnim();
+	out->mNodeName.Set(root->name);
+
+	if (temp.size() == 1)
+	{
+		// If there's just one animator to be processed our 
+		// task is quite easy
+		TemporaryAnim& one = temp[0].first;
+		
+		out->mPostState = one.post;
+		out->mNumPositionKeys = one.last;
+		out->mNumScalingKeys  = one.last;
+		out->mNumRotationKeys = one.last;
+
+		out->mPositionKeys = new aiVectorKey[one.last];
+		out->mScalingKeys  = new aiVectorKey[one.last];
+		out->mRotationKeys = new aiQuatKey[one.last];
+
+		for (unsigned int i = 0; i < one.last;++i)
+		{
+			aiVectorKey& scaling  = out->mScalingKeys[i];
+			aiVectorKey& position = out->mPositionKeys[i];
+			aiQuatKey&   rotation = out->mRotationKeys[i];
+
+			scaling.mTime = position.mTime = rotation.mTime = (double)i;
+			one.matrices[i].Decompose(scaling.mValue, rotation.mValue, position.mValue);
+		}
+	}
+
+	// NOTE: It is possible that some of the tracks we're returning
+	// are dummy tracks, but the ScenePreprocessor will fix that, hopefully
+}
+
+// ------------------------------------------------------------------------------------------------
 void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 	BatchLoader& batch,
 	std::vector<aiMesh*>&        meshes,
 	std::vector<aiNodeAnim*>&    anims,
-	std::vector<AttachmentInfo>& attach)
+	std::vector<AttachmentInfo>& attach,
+	std::vector<aiMaterial*>	 materials,
+	unsigned int&				 defMatIdx)
 {
-	// Setup the name of this node
-	rootOut->mName.Set(root->name);
-
 	unsigned int oldMeshSize = (unsigned int)meshes.size();
 
 	// Now determine the type of the node 
@@ -126,7 +555,8 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 			aiScene* scene = batch.GetImport(root->meshPath);
 			if (!scene)
 			{
-				DefaultLogger::get()->error("IRR: Unable to load external file: " + root->meshPath);
+				DefaultLogger::get()->error("IRR: Unable to load external file: " 
+					+ root->meshPath);
 				break;
 			}
 			attach.push_back(AttachmentInfo(scene,rootOut));
@@ -150,12 +580,70 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 
 				std::pair<aiMaterial*, unsigned int>& src = root->materials[i];
 				scene->mMaterials[i] = src.first;
+			}
 
-				// Process material flags (e.g. lightmapping)
+			// NOTE: Each mesh should have exactly one material assigned,
+			// but we do it in a separate loop if this behaviour changes
+			// in the future.
+			for (unsigned int i = 0; i < scene->mNumMeshes;++i)
+			{
+				// Process material flags 
+				aiMesh* mesh = scene->mMeshes[i];
+
+
+				// If "trans_vertex_alpha" mode is enabled, search all vertex colors 
+				// and check whether they have a common alpha value. This is quite
+				// often the case so we can simply extract it to a shared oacity
+				// value.
+				std::pair<aiMaterial*, unsigned int>& src = root->materials[
+					mesh->mMaterialIndex];
+
+				MaterialHelper* mat = (MaterialHelper*)src.first;
+				if (mesh->HasVertexColors(0) && 
+					src.second & AI_IRRMESH_MAT_trans_vertex_alpha)
+				{
+					bool bdo = true;
+					for (unsigned int a = 1; a < mesh->mNumVertices;++a)
+					{
+						if (mesh->mColors[0][a].a != mesh->mColors[0][a-1].a)
+						{
+							bdo = false;
+							break;
+						}
+					}
+					if (bdo)
+					{
+						DefaultLogger::get()->info("IRR: Replacing mesh vertex "
+							"alpha with common opacity");
+
+						for (unsigned int a = 0; a < mesh->mNumVertices;++a)
+							mesh->mColors[0][a].a = 1.f;
+
+						mat->AddProperty(& mesh->mColors[0][0].a, 1, AI_MATKEY_OPACITY);
+					}
+				}
+
+				// If we have a second texture coordinate set and a second texture
+				// (either lightmap, normalmap, 2layered material we need to
+				// setup the correct UV index for it). The texture can either
+				// be diffuse (lightmap & 2layer) or a normal map (normal & parallax)
+				if (mesh->HasTextureCoords(1))
+				{
+					int idx = 1;
+					if (src.second & (AI_IRRMESH_MAT_solid_2layer |
+						AI_IRRMESH_MAT_lightmap))
+					{
+						mat->AddProperty(&idx,1,AI_MATKEY_UVWSRC_DIFFUSE(0));
+					}
+					else if (src.second & AI_IRRMESH_MAT_normalmap_solid)
+					{
+						mat->AddProperty(&idx,1,AI_MATKEY_UVWSRC_NORMALS(0));
+					}
+				}
 			}
 		}
 		break;
-	
+
 	case Node::LIGHT:
 	case Node::CAMERA:
 
@@ -175,38 +663,84 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 			else if (mul < 300)mul = 3;
 			else               mul = 4;
 
-			meshes.push_back(StandardShapes::MakeMesh(mul,&StandardShapes::MakeSphere));
+			meshes.push_back(StandardShapes::MakeMesh(mul,
+				&StandardShapes::MakeSphere));
 
 			// Adjust scaling
 			root->scaling *= root->sphereRadius;
+
+			// Copy one output material
+			CopyMaterial(materials, root->materials, defMatIdx, meshes.back());
 		}
 		break;
 
 	case Node::CUBE:
-	case Node::SKYBOX:
 		{
-			// Skyboxes and normal cubes - generate the cube first
-			meshes.push_back(StandardShapes::MakeMesh(&StandardShapes::MakeHexahedron));
+			// Generate an unit cube first
+			meshes.push_back(StandardShapes::MakeMesh(
+				&StandardShapes::MakeHexahedron));
 
 			// Adjust scaling
 			root->scaling *= root->sphereRadius;
+
+			// Copy one output material
+			CopyMaterial(materials, root->materials, defMatIdx, meshes.back());
+		}
+		break;
+
+
+	case Node::SKYBOX:
+		{
+			// A skybox is defined by six materials
+			if (root->materials.size() < 6)
+			{
+				DefaultLogger::get()->error("IRR: There should be six materials "
+					"for a skybox");
+
+				break;
+			}
+
+			// copy those materials and generate 6 meshes for our new skybox
+			materials.reserve(materials.size() + 6);
+			for (unsigned int i = 0; i < 6;++i)
+				materials.insert(materials.end(),root->materials[i].first);
+
+			BuildSkybox(meshes,materials);
+
+			// *************************************************************
+			// Skyboxes will require a different code path for rendering,
+			// so there must be a way for the user to add special support
+			// for IRR skyboxes. We add a 'IRR.SkyBox_' prefix to the node.
+			// *************************************************************
+			root->name = "IRR.SkyBox_" + root->name;
+			DefaultLogger::get()->info("IRR: Loading skybox, this will "
+				"require special handling to be displayed correctly");
 		}
 		break;
 
 	case Node::TERRAIN:
 		{
+			// to support terrains, we'd need to have a texture decoder
+			DefaultLogger::get()->error("IRR: Unsupported node - TERRAIN");
 		}
 		break;
 	};
 
-	// Check whether we added a mesh. In this case we'll also
-	// need to attach it to the node
+	// Check whether we added a mesh (or more than one ...). In this case 
+	// we'll also need to attach it to the node
 	if (oldMeshSize != (unsigned int) meshes.size())
 	{
-		rootOut->mNumMeshes = 1;
-		rootOut->mMeshes    = new unsigned int[1];
-		rootOut->mMeshes[0] = oldMeshSize;
+		rootOut->mNumMeshes = (unsigned int)meshes.size() - oldMeshSize;
+		rootOut->mMeshes    = new unsigned int[rootOut->mNumMeshes];
+
+		for (unsigned int a = 0; a  < rootOut->mNumMeshes;++a)
+		{
+			rootOut->mMeshes[a] = oldMeshSize+a;
+		}
 	}
+
+	// Setup the name of this node
+	rootOut->mName.Set(root->name);
 
 	// Now compute the final local transformation matrix of the
 	// node from the given translation, rotation and scaling values.
@@ -233,6 +767,9 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 	mat.b4 = root->position.y; 
 	mat.c4 = root->position.z;
 
+	// now compute animations for the node
+	ComputeAnimations(root,anims,mat);
+
 	// Add all children recursively. First allocate enough storage
 	// for them, then call us again
 	rootOut->mNumChildren = (unsigned int)root->children.size();
@@ -243,7 +780,8 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 		{
 			aiNode* node = rootOut->mChildren[i] =  new aiNode();
 			node->mParent = rootOut;
-			GenerateGraph(root->children[i],node,scene,batch,meshes,anims,attach);
+			GenerateGraph(root->children[i],node,scene,batch,meshes,
+				anims,attach,materials,defMatIdx);
 		}
 	}
 }
@@ -286,7 +824,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 	lights.reserve(5);
 
 	bool inMaterials = false, inAnimator = false;
-	unsigned int guessedAnimCnt = 0, guessedMeshCnt = 0;
+	unsigned int guessedAnimCnt = 0, guessedMeshCnt = 0, guessedMatCnt = 0;
 
 	// Parse the XML file
 	while (reader->read())
@@ -297,6 +835,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 			
 			if (!ASSIMP_stricmp(reader->getNodeName(),"node"))
 			{
+				// ***********************************************************************
 				/*  What we're going to do with the node depends
 				 *  on its type:
 				 *
@@ -310,8 +849,10 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 				 *  "empty" - A dummy node
 				 *  "camera" - A camera
 				 *
-				 *  Each of these nodes can be animated.
+				 *  Each of these nodes can be animated and all can have multiple
+				 *  materials assigned (except lights, cameras and dummies, of course).
 				 */
+				// ***********************************************************************
 				const char* sz = reader->getAttributeValueSafe("type");
 				Node* nd;
 				if (!ASSIMP_stricmp(sz,"mesh"))
@@ -398,8 +939,9 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 
 				Animator* curAnim = NULL;
 
-				if (inMaterials && curNode->type == Node::ANIMMESH ||
-					curNode->type == Node::MESH )
+				// FIX: Materials can occur for nearly any type of node
+				if (inMaterials /* && curNode->type == Node::ANIMMESH ||
+					curNode->type == Node::MESH  */)
 				{
 					/*  This is a material description - parse it!
 					 */
@@ -407,6 +949,8 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 					std::pair< aiMaterial*, unsigned int >& p = curNode->materials.back();
 
 					p.first = ParseMaterial(p.second);
+
+					++guessedMatCnt;
 					continue;
 				}
 				else if (inAnimator)
@@ -467,6 +1011,14 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 									else if (prop.name == "Direction")
 									{
 										curAnim->direction = prop.value;
+
+										// From Irrlicht source - a workaround for backward
+										// compatibility with Irrlicht 1.1
+										if (curAnim->direction == aiVector3D())
+										{
+											curAnim->direction = aiVector3D(0.f,1.f,0.f);
+										}
+										else curAnim->direction.Normalize();
 									}
 								}
 								else if (curAnim->type == Animator::FLY_STRAIGHT)
@@ -781,18 +1333,22 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 	::memcpy(tempScene->mLights,&lights[0],sizeof(void*)*tempScene->mNumLights);
 
 	// temporary data
-	std::vector< aiNodeAnim*> anims;
-	std::vector< AttachmentInfo > attach;
-	std::vector<aiMesh*> meshes;
+	std::vector< aiNodeAnim*>		anims;
+	std::vector< aiMaterial*>		materials;
+	std::vector< AttachmentInfo >	attach;
+	std::vector<aiMesh*>			meshes;
 
-	anims.reserve(guessedAnimCnt + (guessedAnimCnt >> 2));
-	meshes.reserve(guessedMeshCnt + (guessedMeshCnt >> 2));
+	// try to guess how much storage we'll need
+	anims.reserve     (guessedAnimCnt + (guessedAnimCnt >> 2));
+	meshes.reserve    (guessedMeshCnt + (guessedMeshCnt >> 2));
+	materials.reserve (guessedMatCnt  + (guessedMatCnt >> 2));
 
 	/* Now process our scenegraph recursively: generate final
 	 * meshes and generate animation channels for all nodes.
 	 */
+	unsigned int defMatIdx = 0xffffffff;
 	GenerateGraph(root,tempScene->mRootNode, tempScene,
-		batch, meshes, anims, attach);
+		batch, meshes, anims, attach, materials, defMatIdx);
 
 	if (!anims.empty())
 	{

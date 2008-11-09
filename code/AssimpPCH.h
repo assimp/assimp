@@ -108,11 +108,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #	include "../include/BoostWorkaround/boost/scoped_ptr.hpp"
 #	include "../include/BoostWorkaround/boost/format.hpp"
+#	include "../include/BoostWorkaround/boost/common_factor_rt.hpp"
 
 #else
 
 #	include <boost/scoped_ptr.hpp>
 #	include <boost/format.hpp>
+#	include	<boost/math/common_factor_rt.hpp> 
 
 #endif
 

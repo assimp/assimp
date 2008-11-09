@@ -583,9 +583,10 @@ typedef std::vector	<	Clip			>	ClipList;
 struct Layer
 {
 	Layer()
-		: mFaceIDXOfs(0)
-		, mPointIDXOfs(0)
-		, mParent (0x0)
+		: mFaceIDXOfs	(0)
+		, mPointIDXOfs	(0)
+		, mParent		(0x0)
+		, skip			(false)
 	{}
 
 	/** Temporary point list from the file */
@@ -622,6 +623,9 @@ struct Layer
 
 	/** Pivot point of the layer */
 	aiVector3D mPivot;
+
+	/** Skip this layer? */
+	bool skip;
 };
 
 typedef std::list<LWO::Layer>		LayerList;

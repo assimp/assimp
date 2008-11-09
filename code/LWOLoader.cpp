@@ -122,20 +122,22 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 
 	mFileBuffer = &mBuffer[0] + 12;
 	fileSize -= 12;
+	hasNamedLayer = false;
 
 	// create temporary storage on the stack but store pointers to it in the class 
 	// instance. Therefore everything will be destructed properly if an exception 
 	// is thrown and we needn't take care of that.
-	LayerList _mLayers;
-	mLayers = &_mLayers;
-	TagList _mTags;				
-	mTags = &_mTags;
+	LayerList		_mLayers;
+	SurfaceList		_mSurfaces;		
+	TagList			_mTags;		
 	TagMappingTable _mMapping;	
-	mMapping = &_mMapping;
-	SurfaceList _mSurfaces;		
-	mSurfaces = &_mSurfaces;
 
-	// allocate a default layer
+	mLayers			= &_mLayers;
+	mTags			= &_mTags;
+	mMapping		= &_mMapping;
+	mSurfaces		= &_mSurfaces;
+
+	// Allocate a default layer (layer indices are 1-based from now)
 	mLayers->push_back(Layer());
 	mCurLayer = &mLayers->back();
 	mCurLayer->mName = "<LWODefault>";
@@ -146,7 +148,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		DefaultLogger::get()->info("LWO file format: LWOB (<= LightWave 5.5)");
 
 		mIsLWO2 = false;
-		this->LoadLWOBFile();
+		LoadLWOBFile();
 	}
 
 	// new lightwave format
@@ -155,7 +157,19 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		DefaultLogger::get()->info("LWO file format: LWO2 (>= LightWave 6)");
 
 		mIsLWO2 = true;
-		this->LoadLWO2File();
+		LoadLWO2File();
+
+		// The newer lightwave format allows the user to configure the
+		// loader that just one layer is used. If this is the case
+		// we need to check now whether the requested layer has been found.
+		if (0xffffffff != configLayerIndex && configLayerIndex > mLayers->size())
+			throw new ImportErrorException("LWO2: The requested layer was not found");
+
+		if (configLayerName.length() && !hasNamedLayer)
+		{
+			throw new ImportErrorException("LWO2: Unable to find the requested layer: " 
+				+ configLayerName);
+		}
 	}
 
 	// we don't know this format
@@ -176,15 +190,15 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	// now process all layers and build meshes and nodes
 	std::vector<aiMesh*> apcMeshes;
 	std::vector<aiNode*> apcNodes;
-	apcNodes.reserve(mLayers->size());
+	apcNodes. reserve(mLayers->size());
 	apcMeshes.reserve(mLayers->size()*std::min(((unsigned int)mSurfaces->size()/2u), 1u));
-
 
 	unsigned int iDefaultSurface = 0xffffffff; // index of the default surface
 	for (LayerList::iterator lit = mLayers->begin(), lend = mLayers->end();
 		lit != lend;++lit)
 	{
 		LWO::Layer& layer = *lit;
+		if (layer.skip)continue;
 
 		// I don't know whether there could be dummy layers, but it would be possible
 		const unsigned int meshStart = (unsigned int)apcMeshes.size();
@@ -218,15 +232,6 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 				pSorted[idx].push_back(i);
 			}
 			if (0xffffffff == iDefaultSurface)pSorted.erase(pSorted.end()-1);
-
-			// now generate output meshes
-			for (unsigned int p = 0; p < mSurfaces->size();++p)
-				if (!pSorted[p].empty())pScene->mNumMeshes++;
-
-			if (!pScene->mNumMeshes)
-				throw new ImportErrorException("LWO: There are no meshes");
-
-			pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 			for (unsigned int p = 0,i = 0;i < mSurfaces->size();++i)
 			{
 				SortedRep& sorted = pSorted[i];
@@ -311,7 +316,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 							aiVector3D*& pp = pvUV[w];
 							const aiVector2D& src = ((aiVector2D*)&layer.mUVChannels[vUVChannelIndices[w]].rawData[0])[idx];
 							pp->x = src.x;
-							pp->y = src.y; // DX to OGL
+							pp->y = src.y; 
 							pp++;
 						}
 
@@ -338,8 +343,9 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 					pf++;
 				}
 
-				// compute normal vectors for the mesh - we can't use our GenSmoothNormal-Step here
-				// since it wouldn't handle smoothing groups correctly
+				// compute normal vectors for the mesh - we can't use our GenSmoothNormal-
+				// Step here since it wouldn't handle smoothing groups correctly for LWO.
+				// So we use a separate implementation.
 				ComputeNormals(mesh,smoothingGroups,_mSurfaces[i]);
 
 				++p;
@@ -357,6 +363,9 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		for (unsigned int p = 0; p < pcNode->mNumMeshes;++p)
 			pcNode->mMeshes[p] = p + meshStart;
 	}
+
+	if (apcNodes.empty() || apcMeshes.empty())
+		throw new ImportErrorException("LWO: No meshes loaded");
 
 	// the RemoveRedundantMaterials step will clean this up later
 	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials = (unsigned int)mSurfaces->size()];
@@ -501,6 +510,7 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::AddChildren(aiNode* node, uintptr_t parent, std::vector<aiNode*>& apcNodes)
 {
+	parent -= 1;
 	for (uintptr_t i  = 0; i < (uintptr_t)apcNodes.size();++i)
 	{
 		if (i == parent)continue;
@@ -987,11 +997,15 @@ void LWOImporter::LoadLWO2Clip(unsigned int length)
 	switch (head->type)
 	{
 	case AI_LWO_STIL:
+
+		// "Normal" texture
 		GetS0(clip.path,head->length);
 		clip.type = Clip::STILL;
 		break;
 
 	case AI_LWO_ISEQ:
+
+		// Image sequence. We'll later take the first.
 		{
 			uint8_t digits = GetU1();  mFileBuffer++;
 			int16_t offset = GetU2();  mFileBuffer+=4;
@@ -999,7 +1013,8 @@ void LWOImporter::LoadLWO2Clip(unsigned int length)
 
 			std::string s;std::stringstream ss;
 			GetS0(s,head->length);
-      head->length -= (unsigned int)s.length()+1;
+
+			head->length -= (unsigned int)s.length()+1;
 			ss << s;
 			ss << std::setw(digits) << offset + start;
 			GetS0(s,head->length);
@@ -1018,6 +1033,8 @@ void LWOImporter::LoadLWO2Clip(unsigned int length)
 		break;
 
 	case AI_LWO_XREF:
+
+		// Just a cross-reference to another CLIp
 		clip.type = Clip::REF;
 		clip.clipRef = GetU4();
 		break;
@@ -1030,6 +1047,8 @@ void LWOImporter::LoadLWO2Clip(unsigned int length)
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWO2File()
 {
+	bool skip = false;
+
 	LE_NCONST uint8_t* const end = mFileBuffer + fileSize;
 	while (true)
 	{
@@ -1043,6 +1062,7 @@ void LWOImporter::LoadLWO2File()
 		}
 		uint8_t* const next = mFileBuffer+head->length;
 		unsigned int iUnnamed = 0;
+
 		switch (head->type)
 		{
 			// new layer
@@ -1052,6 +1072,15 @@ void LWOImporter::LoadLWO2File()
 				mLayers->push_back ( LWO::Layer() );
 				LWO::Layer& layer = mLayers->back();
 				mCurLayer = &layer;
+
+				// load this layer or ignore it? Check the layer index property
+				// NOTE: The first layer is the default layer, so the layer
+				// index is one-based now
+				if (0xffffffff != configLayerIndex && configLayerIndex != mLayers->size())
+				{
+					skip = true;
+				}
+				else skip = false;
 
 				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,LAYR,16);
 
@@ -1071,6 +1100,13 @@ void LWOImporter::LoadLWO2File()
 					layer.mName = buffer;
 				}
 
+				// load this layer or ignore it? Check the layer name property
+				if (configLayerName.length() && configLayerName != layer.mName)
+				{
+					skip = true;
+				}
+				else hasNamedLayer = true;
+
 				if (mFileBuffer + 2 <= next)
 					layer.mParent = GetU2();
 
@@ -1080,6 +1116,8 @@ void LWOImporter::LoadLWO2File()
 			// vertex list
 		case AI_LWO_PNTS:
 			{
+				if (skip)break;
+
 				unsigned int old = (unsigned int)mCurLayer->mTempPoints.size();
 				LoadLWOPoints(head->length);
 				mCurLayer->mPointIDXOfs = old;
@@ -1095,6 +1133,8 @@ void LWOImporter::LoadLWO2File()
 			// --- intentionally no break here
 		case AI_LWO_VMAP:
 			{
+				if (skip)break;
+
 				if (mCurLayer->mTempPoints.empty())
 					DefaultLogger::get()->warn("LWO2: Unexpected VMAP chunk");
 				else LoadLWO2VertexMap(head->length,head->type == AI_LWO_VMAD);
@@ -1103,6 +1143,8 @@ void LWOImporter::LoadLWO2File()
 			// face list
 		case AI_LWO_POLS:
 			{
+				if (skip)break;
+
 				unsigned int old = (unsigned int)mCurLayer->mFaces.size();
 				LoadLWO2Polygons(head->length);
 				mCurLayer->mFaceIDXOfs = old;
@@ -1111,6 +1153,8 @@ void LWOImporter::LoadLWO2File()
 			// polygon tags 
 		case AI_LWO_PTAG:
 			{
+				if (skip)break;
+
 				if (mCurLayer->mFaces.empty())
 					DefaultLogger::get()->warn("LWO2: Unexpected PTAG");
 				else LoadLWO2PolygonTags(head->length);

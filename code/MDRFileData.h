@@ -57,10 +57,11 @@ namespace MDR {
 #define AI_MDR_MAGIC_NUMBER_BE	MDR_MAKE("RDM5")
 #define AI_MDR_MAGIC_NUMBER_LE	MDR_MAKE("5MDR")
 
-// common limitations
+// common limitations for MDR - not validated for the moment
 #define AI_MDR_VERSION			2
 #define AI_MDR_MAXQPATH			64
 #define	AI_MDR_MAX_BONES		128
+
 
 // ---------------------------------------------------------------------------
 /** \brief Data structure for a vertex weight in a MDR file
@@ -146,6 +147,9 @@ struct Frame {
 	aiVector3D	localOrigin;		// midpoint of bounds, used for sphere cull
 	float		radius;				// dist from localOrigin to corner
 	char		name[16];
+
+	// bones follow here
+
 } PACK_STRUCT;
 
 
@@ -165,8 +169,7 @@ struct CompFrame
 {
         aiVector3D  bounds0,bounds1;	// bounds of all surfaces of all LOD's for this frame
         aiVector3D  localOrigin;		// midpoint of bounds, used for sphere cull
-        float      radius;			// dist from localOrigin to corner
-        CompBone   bones[1];		// [numBones]
+        float      radius;				// dist from localOrigin to corner
 } PACK_STRUCT;
 
 
@@ -196,24 +199,24 @@ struct Tag
  */
 struct Header
 {
-	uint32_t	ident;
-	uint32_t	version;
+	int32_t	ident;
+	int32_t	version;
 
 	char		name[AI_MDR_MAXQPATH];	
 
 	// frames and bones are shared by all levels of detail
-	uint32_t	numFrames;
-	uint32_t	numBones;
-	uint32_t	ofsFrames;			
+	int32_t	numFrames;
+	int32_t	numBones;
+	int32_t	ofsFrames;			
 
 	// each level of detail has completely separate sets of surfaces
-	uint32_t	numLODs;
-	uint32_t	ofsLODs;
+	int32_t	numLODs;
+	int32_t	ofsLODs;
 
-    uint32_t    numTags;
-	uint32_t    ofsTags;
+    int32_t    numTags;
+	int32_t    ofsTags;
 
-	uint32_t	ofsEnd;				
+	int32_t	ofsEnd;				
 } PACK_STRUCT;
 
 

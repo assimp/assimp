@@ -76,7 +76,13 @@ enum aiPropertyTypeInfo
 
     /** Simple binary buffer
     */
-    aiPTI_Buffer = 0x5
+    aiPTI_Buffer = 0x5,
+
+
+	/** This value is not used. It is just there to force the
+	 *  compiler to map this enum to a 32 Bit integer.
+	 */
+	_aiPTI_Force32Bit = 0x9fffffff
 };
 
 // ---------------------------------------------------------------------------
@@ -108,7 +114,13 @@ enum aiTextureOp
 
     /** T = T1 + (T2-0.5)
      */
-    aiTextureOp_SignedAdd = 0x5
+    aiTextureOp_SignedAdd = 0x5,
+
+
+	/** This value is not used. It is just there to force the
+	 *  compiler to map this enum to a 32 Bit integer.
+	 */
+	_aiTextureOp_Force32Bit = 0x9fffffff
 };
 
 // ---------------------------------------------------------------------------
@@ -130,7 +142,13 @@ enum aiTextureMapMode
     /** A texture coordinate u|v becomes u%1|v%1 if (u-(u%1))%2 is zero and
      *  1-(u%1)|1-(v%1) otherwise
      */
-    aiTextureMapMode_Mirror = 0x2
+    aiTextureMapMode_Mirror = 0x2,
+
+
+	/** This value is not used. It is just there to force the
+	 *  compiler to map this enum to a 32 Bit integer.
+	 */
+	_aiTextureMapMode_Force32Bit = 0x9fffffff
 };
 
 // ---------------------------------------------------------------------------
@@ -201,7 +219,13 @@ enum aiShadingMode
 
 	/** Fresnel shading
     */
-    aiShadingMode_Fresnel = 0xa
+    aiShadingMode_Fresnel = 0xa,
+
+
+	/** This value is not used. It is just there to force the
+	 *  compiler to map this enum to a 32 Bit integer.
+	 */
+	_aiShadingMode_Force32Bit = 0x9fffffff
 };
 
 

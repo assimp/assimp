@@ -72,7 +72,13 @@ enum aiLightSourceType
 	//! angle. It has a position and a direction it is pointing to.
 	//! A good example for a spot light is a light spot in
 	//! sport arenas.
-	aiLightSource_SPOT          = 0x3
+	aiLightSource_SPOT          = 0x3,
+
+
+	/** This value is not used. It is just there to force the
+	 *  compiler to map this enum to a 32 Bit integer.
+	 */
+	_aiLightSource_Force32Bit = 0x9fffffff
 };
 
 // ---------------------------------------------------------------------------

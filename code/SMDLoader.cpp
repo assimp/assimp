@@ -347,7 +347,11 @@ void SMDImporter::CreateOutputMeshes()
 				for (unsigned int iBone = 0;iBone < face.avVertices[iVert].aiBoneLinks.size();++iBone)
 				{
 					TempWeightListEntry& pairval = face.avVertices[iVert].aiBoneLinks[iBone];
-					if (pairval.first >= asBones.size())
+
+					// FIX: The second check is here just to make sure we won't 
+					// assign more than one weight to a single vertex index
+					if (pairval.first >= asBones.size() || 
+						pairval.first == face.avVertices[iVert].iParentNode)
 					{
 						DefaultLogger::get()->error("[SMD/VTA] Bone index overflow. "
 							"The bone index will be ignored, the weight will be assigned "
@@ -357,10 +361,16 @@ void SMDImporter::CreateOutputMeshes()
 					aaiBones[pairval.first].push_back(TempWeightListEntry(iNum,pairval.second));
 					fSum += pairval.second;
 				}
-				// if the sum of all vertex weights is not 1.0 we must assign 
+				// ******************************************************************
+				// If the sum of all vertex weights is not 1.0 we must assign 
 				// the rest to the vertex' parent node. Well, at least the doc says 
 				// we should ...
-				if (fSum <= 1.0f)
+				// FIX: We use 0.975 as limit, floating-point inaccuracies seem to
+				// be very strong in some SMD exporters. Furthermore it is possible
+				// that the parent of a vertex is 0xffffffff (if the corresponding
+				// entry in the file was unreadable)
+				// ******************************************************************
+				if (fSum < 0.975f && face.avVertices[iVert].iParentNode != 0xffffffff)
 				{
 					if (face.avVertices[iVert].iParentNode >= asBones.size())
 					{
@@ -385,7 +395,6 @@ void SMDImporter::CreateOutputMeshes()
 							TempWeightListEntry(iNum,1.0f-fSum));
 					}
 				}
-
 				pcMesh->mFaces[iFace].mIndices[iVert] = iNum++;
 			}
 		}
@@ -396,27 +405,30 @@ void SMDImporter::CreateOutputMeshes()
 		{
 			if (!aaiBones[iBone].empty())++iNum;
 		}
-		pcMesh->mNumBones = iNum;
-		pcMesh->mBones = new aiBone*[pcMesh->mNumBones];
-		iNum = 0;
-		for (unsigned int iBone = 0; iBone < asBones.size();++iBone)
+		if (iNum)
 		{
-			if (aaiBones[iBone].empty())continue;
-			aiBone*& bone = pcMesh->mBones[iNum] = new aiBone();
-
-			bone->mNumWeights = (unsigned int)aaiBones[iBone].size();
-			bone->mWeights = new aiVertexWeight[bone->mNumWeights];
-			bone->mOffsetMatrix = asBones[iBone].mOffsetMatrix;
-			bone->mName.Set( asBones[iBone].mName );
-
-			asBones[iBone].bIsUsed = true;
-
-			for (unsigned int iWeight = 0; iWeight < bone->mNumWeights;++iWeight)
+			pcMesh->mNumBones = iNum;
+			pcMesh->mBones = new aiBone*[pcMesh->mNumBones];
+			iNum = 0;
+			for (unsigned int iBone = 0; iBone < asBones.size();++iBone)
 			{
-				bone->mWeights[iWeight].mVertexId = aaiBones[iBone][iWeight].first;
-				bone->mWeights[iWeight].mWeight = aaiBones[iBone][iWeight].second;
+				if (aaiBones[iBone].empty())continue;
+				aiBone*& bone = pcMesh->mBones[iNum] = new aiBone();
+
+				bone->mNumWeights = (unsigned int)aaiBones[iBone].size();
+				bone->mWeights = new aiVertexWeight[bone->mNumWeights];
+				bone->mOffsetMatrix = asBones[iBone].mOffsetMatrix;
+				bone->mName.Set( asBones[iBone].mName );
+
+				asBones[iBone].bIsUsed = true;
+
+				for (unsigned int iWeight = 0; iWeight < bone->mNumWeights;++iWeight)
+				{
+					bone->mWeights[iWeight].mVertexId = aaiBones[iBone][iWeight].first;
+					bone->mWeights[iWeight].mWeight = aaiBones[iBone][iWeight].second;
+				}
+				++iNum;
 			}
-			++iNum;
 		}
 
 		delete[] aaiBones;
@@ -530,7 +542,7 @@ void SMDImporter::CreateOutputAnimations()
 		aiNodeAnim* p = pp[a] = new aiNodeAnim();
 
 		// copy the name of the bone
-    p->mNodeName.Set( i->mName);
+		p->mNodeName.Set( i->mName);
 
 		p->mNumRotationKeys = (unsigned int) (*i).sAnim.asKeys.size();
 		if (p->mNumRotationKeys)
@@ -631,11 +643,7 @@ void SMDImporter::CreateOutputMaterials()
 		pScene->mMaterials[iMat] = pcMat;
 
 		aiString szName;
-#if _MSC_VER >= 1400
-		szName.length = (size_t)::sprintf_s(szName.data,"Texture_%i",iMat);
-#else
 		szName.length = (size_t)::sprintf(szName.data,"Texture_%i",iMat);
-#endif
 		pcMat->AddProperty(&szName,AI_MATKEY_NAME);
 
 		::strcpy(szName.data, aszTextures[iMat].c_str() );
@@ -1071,6 +1079,11 @@ void SMDImporter::ParseVertex(const char* szCurrent,
 	const char** szCurrentOut, SMD::Vertex& vertex,
 	bool bVASection /*= false*/)
 {
+	if (SkipSpaces(&szCurrent) && IsLineEnd(*szCurrent))
+	{
+		SkipSpacesAndLineEnd(szCurrent,&szCurrent);
+		return ParseVertex(szCurrent,szCurrentOut,vertex,bVASection);
+	}
 	if(!ParseSignedInt(szCurrent,&szCurrent,(int&)vertex.iParentNode))
 	{
 		LogErrorNoThrow("Unexpected EOF/EOL while parsing vertex.parent");

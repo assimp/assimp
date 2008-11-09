@@ -38,8 +38,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
+
 /** @file Declaration of the .irrMesh (Irrlight Engine Mesh Format)
-    importer class. */
+    importer class.
+ */
 #ifndef AI_IRRLOADER_H_INCLUDED
 #define AI_IRRLOADER_H_INCLUDED
 
@@ -78,26 +80,20 @@ public:
 protected:
 
 	// -------------------------------------------------------------------
-	/** Called by Importer::GetExtensionList() for each loaded importer.
-	 * See BaseImporter::GetExtensionList() for details
+	/**
 	 */
-	void GetExtensionList(std::string& append)
-	{
-
-		/*  NOTE: The file extenxsion .xml is too generic. We'll 
-		 *  need to open the file in CanRead() and check whether it is 
-		 *  a real irrlicht file
-		 */
-
-		append.append("*.xml;*.irr");
-	}
+	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
-	/** Imports the given file into the given scene structure. 
-	 * See BaseImporter::InternReadFile() for details
+	/** 
 	 */
 	void InternReadFile( const std::string& pFile, aiScene* pScene, 
 		IOSystem* pIOHandler);
+
+	// -------------------------------------------------------------------
+	/** 
+	*/
+	void SetupProperties(const Importer* pImp);
 
 private:
 
@@ -170,7 +166,6 @@ private:
 		Node(ET t)
 			:	type				(t)
 			,	scaling				(1.f,1.f,1.f) // assume uniform scaling by default
-			,	animation			(NULL)
 			,	framesPerSecond		(0.f)
 			,	sphereRadius		(1.f)
 			,	spherePolyCountX	(100)
@@ -202,9 +197,6 @@ private:
 		// Parent node
 		Node* parent;
 
-		// Animation channels that belongs to this node
-		aiNodeAnim* animation;
-
 		// Animated meshes: frames per second
 		// 0.f if not specified
 		float framesPerSecond;
@@ -226,14 +218,117 @@ private:
 		std::list<Animator> animators;
 	};
 
+	/** Data structure for a vertex in an IRR skybox
+	 */
+	struct SkyboxVertex
+	{
+		SkyboxVertex()
+		{}
 
+		//! Construction from single vertex components
+		SkyboxVertex(float px, float py, float pz,
+			float nx, float ny, float nz, 
+			float uvx, float uvy)
+
+			:	position	(px,py,pz)
+			,	normal		(nx,ny,nz)
+			,	uv			(uvx,uvy,0.f)
+		{}
+
+		aiVector3D position, normal, uv;
+	};
+
+	/** Temporary data structure to describe an IRR animator
+	 *
+	 *  Irrlicht animations always start at the beginning, so
+	 *  we don't need "first" and "pre" for the moment.
+	 */
+	struct TemporaryAnim
+	{
+		TemporaryAnim()
+			:	last		(0)
+			,	post		(aiAnimBehaviour_DEFAULT)
+			,	matrices	(NULL)
+		{}
+
+		~TemporaryAnim()
+		{
+			delete[] matrices;
+		}
+
+		void SetupMatrices(unsigned int num)
+		{
+			last = num;
+			matrices = new aiMatrix4x4[num];
+		}
+
+		unsigned int last;   
+		aiAnimBehaviour post;
+
+		aiMatrix4x4* matrices;
+	};
+
+	// -------------------------------------------------------------------
 	/** Fill the scenegraph recursively
 	 */
 	void GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 		BatchLoader& batch,
 		std::vector<aiMesh*>& meshes,
 		std::vector<aiNodeAnim*>& anims,
-		std::vector<AttachmentInfo>& attach);
+		std::vector<AttachmentInfo>& attach,
+		std::vector<aiMaterial*> materials,
+		unsigned int& defaultMatIdx);
+
+
+	// -------------------------------------------------------------------
+	/** Generate a mesh that consists of just a single quad
+	 */
+	aiMesh* BuildSingleQuadMesh(const SkyboxVertex& v1,
+		const SkyboxVertex& v2,
+		const SkyboxVertex& v3,
+		const SkyboxVertex& v4);
+
+
+	// -------------------------------------------------------------------
+	/** Build a skybox 
+	 *
+	 *  @param meshes Receives 6 output meshes
+	 *  @param materials The last 6 materials are assigned to the newly
+	 *    created meshes. The names of the materials are adjusted.
+	 */
+	void BuildSkybox(std::vector<aiMesh*>& meshes, 
+		std::vector<aiMaterial*> materials);
+
+
+	// -------------------------------------------------------------------
+	/** Copy a material for a mesh to the output material list 
+	 *
+	 *  @param materials Receives an output material
+	 *  @param inmaterials List of input materials
+	 *  @param defMatIdx Default material index - 0xffffffff if not there
+	 *  @param mesh Mesh to work on
+	 */
+	void CopyMaterial(std::vector<aiMaterial*>	 materials,
+		std::vector< std::pair<aiMaterial*, unsigned int> >& inmaterials,
+		unsigned int& defMatIdx,
+		aiMesh* mesh);
+
+
+	// -------------------------------------------------------------------
+	/** Compute animations for a specific node
+	 *
+	 *  @param root Node to be processed
+	 *  @param anims The list of output animations
+	 *  @param transform Transformation matrix of the current node
+	 *    (relative to the parent's coordinate space)
+	 */
+	void ComputeAnimations(Node* root, std::vector<aiNodeAnim*>& anims,
+		const aiMatrix4x4& transform);
+
+
+private:
+
+	unsigned int fps;
 
 };
 

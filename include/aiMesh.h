@@ -275,7 +275,13 @@ enum aiPrimitiveType
 	 * is provided for your convinience, it splits all polygons in
 	 * triangles (which are much easier to handle).
 	 */
-	aiPrimitiveType_POLYGON     = 0x8
+	aiPrimitiveType_POLYGON     = 0x8,
+
+
+	/** This value is not used. It is just there to force the
+	 *  compiler to map this enum to a 32 Bit integer.
+	 */
+	_aiPrimitiveType_Force32Bit = 0x9fffffff
 };
 
 

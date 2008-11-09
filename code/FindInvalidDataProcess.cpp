@@ -160,7 +160,7 @@ void FindInvalidDataProcess::Execute( aiScene* pScene)
 // ------------------------------------------------------------------------------------------------
 template <typename T>
 inline const char* ValidateArrayContents(const T* arr, unsigned int size,
-	const std::vector<bool>& dirtyMask)
+	const std::vector<bool>& dirtyMask, bool mayBeIdentical = false, bool mayBeZero = true)
 {
 	return NULL;
 }
@@ -168,7 +168,7 @@ inline const char* ValidateArrayContents(const T* arr, unsigned int size,
 // ------------------------------------------------------------------------------------------------
 template <>
 inline const char* ValidateArrayContents<aiVector3D>(const aiVector3D* arr, unsigned int size,
-	const std::vector<bool>& dirtyMask)
+	const std::vector<bool>& dirtyMask, bool mayBeIdentical , bool mayBeZero )
 {
 	bool b = false;
 	for (unsigned int i = 0; i < size;++i)
@@ -180,9 +180,13 @@ inline const char* ValidateArrayContents<aiVector3D>(const aiVector3D* arr, unsi
 		{
 			return "INF/NAN was found in a vector component";
 		}
+		if (!mayBeZero && !v.x && !v.y && !v.z )
+		{
+			return "Found zero-length vector";
+		}
 		if (i && v != arr[i-1])b = true;
 	}
-	if (!b)
+	if (!b && !mayBeIdentical)
 		return "All vectors are identical";
 	return NULL;
 }
@@ -190,9 +194,10 @@ inline const char* ValidateArrayContents<aiVector3D>(const aiVector3D* arr, unsi
 // ------------------------------------------------------------------------------------------------
 template <typename T>
 inline bool ProcessArray(T*& in, unsigned int num,const char* name,
-	const std::vector<bool>& dirtyMask)
+	const std::vector<bool>& dirtyMask, bool mayBeIdentical = false, bool mayBeZero = true)
 {
-	const char* err = ValidateArrayContents(in,num,dirtyMask);
+	const char* err = ValidateArrayContents(in,num,dirtyMask,
+		mayBeIdentical,mayBeZero);
 	if (err)
 	{
 		DefaultLogger::get()->error(std::string("FindInvalidDataProcess fails on mesh ") + name + ": " + err);
@@ -231,7 +236,7 @@ void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
 	int i = 0;
 
 	// ScenePreprocessor's work ...
-	ai_assert(0 != anim->mPositionKeys && 0 != anim->mRotationKeys && 0 != anim->mScalingKeys);
+	ai_assert((0 != anim->mPositionKeys && 0 != anim->mRotationKeys && 0 != anim->mScalingKeys));
 
 	// Check whether all values in a tracks are identical - in this case
 	// we can remove al keys except one.
@@ -334,7 +339,7 @@ int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 
 		// process mesh normals
 		if (pMesh->mNormals && ProcessArray(pMesh->mNormals,pMesh->mNumVertices,
-			"normals",dirtyMask))
+			"normals",dirtyMask,true,false))
 			ret = true;
 
 		// process mesh tangents

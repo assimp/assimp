@@ -423,6 +423,7 @@ struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
 	{
 		static int iCnt = 0;
 		
+		// Generate a default name for the mesh
 		char szTemp[128];
 		::sprintf(szTemp,"UNNAMED_%i",iCnt++);
 		mName = szTemp;
@@ -441,7 +442,30 @@ struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
 	aiMatrix4x4 mMat;
 };
 
-typedef std::pair<double, float> aiFloatKey;
+// ---------------------------------------------------------------------------
+/** Float key - quite similar to aiVectorKey and aiQuatKey. Both are in the
+    C-API, so it would be difficult to make them a template. */
+struct aiFloatKey 
+{
+	double mTime;      ///< The time of this key
+	float mValue;	///< The value of this key
+
+#ifdef __cplusplus
+
+	// time is not compared
+	bool operator == (const aiFloatKey& o) const
+		{return o.mValue == this->mValue;}
+
+	bool operator != (const aiFloatKey& o) const
+		{return o.mValue != this->mValue;}
+
+	// Only time is compared. This operator is defined
+	// for use with std::sort
+	bool operator < (const aiFloatKey& o) const
+		{return mTime < o.mTime;}
+
+#endif
+};
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent a 3ds file node */
@@ -449,11 +473,13 @@ struct Node
 {
 	Node()
 
-		: mHierarchyPos(0),mHierarchyIndex(0)
+		:	mHierarchyPos		(0)
+		,	mHierarchyIndex		(0)
 
 	{
 		static int iCnt = 0;
 		
+		// Generate a default name for the node
 		char szTemp[128];
 		::sprintf(szTemp,"UNNAMED_%i",iCnt++);
 		mName = szTemp;
@@ -461,6 +487,12 @@ struct Node
 		aRotationKeys.reserve (20);
 		aPositionKeys.reserve (20);
 		aScalingKeys.reserve  (20);
+	}
+
+	~Node()
+	{
+		for (unsigned int i = 0; i < mChildren.size();++i)
+			delete mChildren[i];
 	}
 
 	//! Pointer to the parent node
@@ -480,7 +512,6 @@ struct Node
 
 	//! Index of the node
 	int16_t mHierarchyIndex;
-
 
 	//! Rotation keys loaded from the file
 	std::vector<aiQuatKey> aRotationKeys;
@@ -508,7 +539,6 @@ struct Node
 	{
 		mChildren.push_back(pc);
 		pc->mParent = this;
-		//pc->mHierarchyPos = this->mHierarchyPos+1;
 		return *this;
 	}
 };
@@ -516,7 +546,6 @@ struct Node
 /** Helper structure analogue to aiScene */
 struct Scene
 {
-
 	//! List of all materials loaded
 	//! NOTE: 3ds references materials globally
 	std::vector<Material> mMaterials;
@@ -531,7 +560,8 @@ struct Scene
 	std::vector<aiLight*> mLights;
 
 	//! Pointer to the root node of the scene
-	Node* pcRootNode;
+	// --- moved to main class
+	// Node* pcRootNode;
 };
 
 

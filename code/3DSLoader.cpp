@@ -169,8 +169,14 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
 	// Now apply the master scaling factor to the scene
 	ApplyMasterScale(pScene);
 
-	// We're finished here. Everything destructs automatically
-	// and the output scene should be valid.
+	// Delete our internal scene representation and the root
+	// node, so the whole hierarchy will follow
+	delete mRootNode;
+	delete mScene;
+
+	AI_DEBUG_INVALIDATE_PTR(mRootNode);
+	AI_DEBUG_INVALIDATE_PTR(mScene);
+	AI_DEBUG_INVALIDATE_PTR(this->stream);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -181,12 +187,14 @@ void Discreet3DSImporter::ApplyMasterScale(aiScene* pScene)
 	if (!mMasterScale)mMasterScale = 1.0f;
 	else mMasterScale = 1.0f / mMasterScale;
 
-	// construct an uniform scaling matrix and multiply with it
+	// Construct an uniform scaling matrix and multiply with it
 	pScene->mRootNode->mTransformation *= aiMatrix4x4( 
 		mMasterScale,0.0f, 0.0f, 0.0f,
 		0.0f, mMasterScale,0.0f, 0.0f,
 		0.0f, 0.0f, mMasterScale,0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Check whether a scaling track is assigned to the root node.
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -416,6 +424,11 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
 
 		camera->mName.Set(std::string(name, num));
 
+		// The camera position and look-at vector are
+		// difficult to handle. Later we'll copy these
+		// values to the local transformation of the
+		// camera's node.
+
 		// First read the position of the camera
 		camera->mPosition.x = stream->GetF4();
 		camera->mPosition.y = stream->GetF4();
@@ -541,6 +554,14 @@ D3DS::Node* FindNode(D3DS::Node* root, const std::string& name)
 }
 
 // ------------------------------------------------------------------------------------------------
+// Binary predicate for std::unique()
+template <class T>
+bool KeyUniqueCompare(const T& first, const T& second)
+{
+	return first.mTime == second.mTime;
+}
+
+// ------------------------------------------------------------------------------------------------
 void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
@@ -638,11 +659,14 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 		break;
 
 
+		// **************************************************************
+		// POSITION KEYFRAME
 	case Discreet3DS::CHUNK_TRACKPOS:
 		{
 		stream->IncPtr(10);
 		unsigned int numFrames = stream->GetI2();
 		stream->IncPtr(2);
+		bool sortKeys = false;
 
 		// This could also be meant as the target position for
 		// (targeted) lights and cameras
@@ -667,22 +691,26 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 			v.mValue.y = stream->GetF4();
 			v.mValue.z = stream->GetF4();
 
-			// Check whether we do already have this keyframe
-			for (std::vector<aiVectorKey>::const_iterator
-				i =  l->begin();i != l->end();++i)
-			{
-				if ((*i).mTime == v.mTime)
-				{
-					DefaultLogger::get()->error("3DS: Found duplicate position keyframe");
-					v.mTime = -10e10f;
-					break;
-				}
-			}
+			// check whether we'll need to sort the keys
+			if (!l->empty() && v.mTime <= l->back().mTime)
+				sortKeys = true;
+
 			// Add the new keyframe to the list
-			if (v.mTime != -10e10f)l->push_back(v);
+			l->push_back(v);
+		}
+
+		// Sort all keys with ascending time values?
+		if (sortKeys)
+		{
+			std::sort   (l->begin(),l->end());
+			std::unique (l->begin(),l->end(),
+				std::ptr_fun(&KeyUniqueCompare<aiVectorKey>));
 		}}
+
 		break;
 
+		// **************************************************************
+		// CAMERA ROLL KEYFRAME
 	case Discreet3DS::CHUNK_TRACKROLL:
 		{
 		// roll keys are accepted for cameras only
@@ -691,6 +719,8 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 			DefaultLogger::get()->warn("3DS: Ignoring roll track for non-camera object");
 			break;
 		}
+		bool sortKeys = false;
+		std::vector<aiFloatKey>* l = &mCurrentNode->aCameraRollKeys;
 
 		stream->IncPtr(10);
 		unsigned int numFrames = stream->GetI2();
@@ -702,39 +732,56 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 
 			// Setup a new position key
 			aiFloatKey v;
-			v.first = (double)fidx;
+			v.mTime = (double)fidx;
 
 			// This is just a single float 
 			stream->IncPtr(4);
-			v.second = stream->GetF4();
+			v.mValue = stream->GetF4();
 
-			// Check whether we do already have this keyframe
-			for (std::vector<aiFloatKey>::const_iterator
-				i =  mCurrentNode->aCameraRollKeys.begin();
-				i != mCurrentNode->aCameraRollKeys.end();++i)
-			{
-				if ((*i).first == v.first)
-				{
-					DefaultLogger::get()->error("3DS: Found duplicate camera roll keyframe");
-					v.first = -10e10f;
-					break;
-				}
-			}
+			// Check whether we'll need to sort the keys
+			if (!l->empty() && v.mTime <= l->back().mTime)
+				sortKeys = true;
+
 			// Add the new keyframe to the list
-			if (v.first != -10e10f)
-				mCurrentNode->aCameraRollKeys.push_back(v);
+			l->push_back(v);
+		}
+
+		// Sort all keys with ascending time values?
+		if (sortKeys)
+		{
+			std::sort   (l->begin(),l->end());
+			std::unique (l->begin(),l->end(),
+				std::ptr_fun(&KeyUniqueCompare<aiFloatKey>));
 		}}
 		break;
 
+
+		// **************************************************************
+		// CAMERA FOV KEYFRAME
+	case Discreet3DS::CHUNK_TRACKFOV:
+		{
+			DefaultLogger::get()->error("3DS: Skipping FOV animation track. "
+				"This is not supported");
+		}
+		break;
+
+
+		// **************************************************************
+		// ROTATION KEYFRAME
 	case Discreet3DS::CHUNK_TRACKROTATE:
 		{
 		stream->IncPtr(10);
 		unsigned int numFrames = stream->GetI2();
 		stream->IncPtr(2);
 
+		bool sortKeys = false;
+		std::vector<aiQuatKey>* l = &mCurrentNode->aRotationKeys;
+
 		for (unsigned int i = 0; i < numFrames;++i)
 		{
 			unsigned int fidx = stream->GetI2();
+
+			stream->IncPtr(4);
 
 			aiQuatKey v;
 			v.mTime = (double)fidx;
@@ -746,38 +793,43 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 			axis.y = stream->GetF4();
 			axis.z = stream->GetF4();
 
+			if (!axis.x && !axis.y && !axis.z)
+				axis.y = 1.f;
+
 			// Construct a rotation quaternion from the axis-angle pair
 			v.mValue = aiQuaternion(axis,rad);
 
-			// check whether we do already have this keyframe
-			for (std::vector<aiQuatKey>::const_iterator
-				i =  mCurrentNode->aRotationKeys.begin();
-				i != mCurrentNode->aRotationKeys.end();++i)
-			{
-				if ((*i).mTime == v.mTime)
-				{
-					DefaultLogger::get()->error("3DS: Found duplicate rotation keyframe");
-					v.mTime = -10e10f;
-					break;
-				}
-			}
+			// Check whether we'll need to sort the keys
+			if (!l->empty() && v.mTime <= l->back().mTime)
+				sortKeys = true;
+
 			// add the new keyframe to the list
-			if (v.mTime != -10e10f)
-				mCurrentNode->aRotationKeys.push_back(v);
+			l->push_back(v);
+		}
+		// Sort all keys with ascending time values?
+		if (sortKeys)
+		{
+			std::sort   (l->begin(),l->end());
+			std::unique (l->begin(),l->end(),
+				std::ptr_fun(&KeyUniqueCompare<aiQuatKey>));
 		}}
 		break;
 
+		// **************************************************************
+		// SCALING KEYFRAME
 	case Discreet3DS::CHUNK_TRACKSCALE:
 		{
-		unsigned int invalid = 0;
-
 		stream->IncPtr(10);
 		unsigned int numFrames = stream->GetI2();
 		stream->IncPtr(2);
 
+		bool sortKeys = false;
+		std::vector<aiVectorKey>* l = &mCurrentNode->aScalingKeys;
+
 		for (unsigned int i = 0; i < numFrames;++i)
 		{
 			unsigned int fidx = stream->GetI2();
+			stream->IncPtr(4);
 
 			// Setup a new key
 			aiVectorKey v;
@@ -788,34 +840,23 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 			v.mValue.y = stream->GetF4();
 			v.mValue.z = stream->GetF4();
 
-			// check whether we do already have this keyframe
-			for (std::vector<aiVectorKey>::const_iterator
-				i =  mCurrentNode->aScalingKeys.begin();
-				i != mCurrentNode->aScalingKeys.end();++i)
-			{
-				if ((*i).mTime == v.mTime)
-				{
-					DefaultLogger::get()->error("3DS: Found duplicate scaling keyframe");
-					v.mTime = -10e10f;
-					break;
-				}
-			}
-			// add the new keyframe
-			if (v.mTime != -10e10f)
-				mCurrentNode->aScalingKeys.push_back(v);
+			// check whether we'll need to sort the keys
+			if (!l->empty() && v.mTime <= l->back().mTime)
+				sortKeys = true;
+			
+			// Remove zero-scalings
+			if (!v.mValue.x)v.mValue.x = 1.f;
+			if (!v.mValue.y)v.mValue.y = 1.f;
+			if (!v.mValue.z)v.mValue.z = 1.f;
 
-			// Check whether this is a zero scaling keyframe
-			if (!v.mValue.x && !v.mValue.y && !v.mValue.z)
-			{
-				DefaultLogger::get()->warn("3DS: Found zero scaled axis in scaling keyframe");
-				++invalid;
-			}
+			l->push_back(v);
 		}
-		// there are 3DS files that have only zero scalings
-		if (numFrames == invalid)
+		// Sort all keys with ascending time values?
+		if (sortKeys)
 		{
-			DefaultLogger::get()->warn("3DS: All scaling keys are zero. Ignoring them ...");
-			mCurrentNode->aScalingKeys.clear();
+			std::sort   (l->begin(),l->end());
+			std::unique (l->begin(),l->end(),
+				std::ptr_fun(&KeyUniqueCompare<aiVectorKey>));
 		}}
 		break;
 	};
@@ -874,10 +915,12 @@ void Discreet3DSImporter::ParseFaceChunk()
 		{
 			DefaultLogger::get()->error(std::string("3DS: Unknown material: ") + sz);
 
+			// *********************************************************
 			// This material is not known. Ignore this. We will later
 			// assign the default material to all faces using *this*
 			// material. Use 0xcdcdcdcd as special value to indicate
 			// this.
+			// *********************************************************
 		}
 
 		// Now continue and read all material indices

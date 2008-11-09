@@ -77,6 +77,7 @@ bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	// no file extension - can't read
 	if( pos == std::string::npos)
 		return false;
+
 	std::string extension = pFile.substr( pos);
 
 	// Either ASE, ASC or ASK
@@ -109,7 +110,7 @@ void ASEImporter::InternReadFile( const std::string& pFile,
 
 	size_t fileSize = file->FileSize();
 
-	// allocate storage and copy the contents of the file to a memory buffer
+	// Allocate storage and copy the contents of the file to a memory buffer
 	// (terminate it with zero)
 	std::vector<char> mBuffer2(fileSize+1);
 	file->Read( &mBuffer2[0], 1, fileSize);
@@ -118,17 +119,35 @@ void ASEImporter::InternReadFile( const std::string& pFile,
 	this->mBuffer = &mBuffer2[0];
 	this->pcScene = pScene;
 
-	// construct an ASE parser and parse the file
-	// TODO: clean this up, mParser should be a reference, not a pointer ...
-	ASE::Parser parser(this->mBuffer);
+	// *****************************************************************
+	// Guess the file format by looking at the extension
+	// ASC is considered to be the older format 110,
+	// ASE is the actual version 200 (that is currently written by max)
+	// *****************************************************************
+	unsigned int defaultFormat;
+	std::string::size_type s = pFile.length()-1;
+	switch (pFile.c_str()[s])
+	{
+	case 'C':
+	case 'c':
+		defaultFormat = AI_ASE_OLD_FILE_FORMAT;
+		break;
+	default:
+		defaultFormat = AI_ASE_NEW_FILE_FORMAT;
+	};
+
+	// Construct an ASE parser and parse the file
+	ASE::Parser parser(mBuffer,defaultFormat);
 	mParser = &parser;
 	mParser->Parse();
 
+	// *****************************************************************
 	// Check whether we loaded at least one mesh. If we did - generate
 	// materials and copy meshes. 
+	// *****************************************************************
 	if ( !mParser->m_vMeshes.empty())
 	{
-		// if absolutely no material has been loaded from the file
+		// If absolutely no material has been loaded from the file
 		// we need to generate a default material
 		GenerateDefaultMaterial();
 
@@ -142,16 +161,16 @@ void ASEImporter::InternReadFile( const std::string& pFile,
 		{
 			if ((*i).bSkip)continue;
 
-			// now we need to create proper meshes from the import we 
+			// Now we need to create proper meshes from the import we 
 			// need to split them by materials, build valid vertex/
 			// face lists ...
 			BuildUniqueRepresentation(*i);
 
-			// need to generate proper vertex normals if necessary
+			// Need to generate proper vertex normals if necessary
 			if(GenerateNormals(*i))
 				tookNormals = true;
 
-			// convert all meshes to aiMesh objects
+			// Convert all meshes to aiMesh objects
 			ConvertMeshes(*i,avOutMeshes);
 		}
 		if (tookNormals)
@@ -161,7 +180,7 @@ void ASEImporter::InternReadFile( const std::string& pFile,
 				"experience problems");
 		}
 
-		// now build the output mesh list. Remove dummies
+		// Now build the output mesh list. Remove dummies
 		pScene->mNumMeshes = (unsigned int)avOutMeshes.size();
 		aiMesh** pp = pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 		for (std::vector<aiMesh*>::const_iterator
@@ -173,28 +192,33 @@ void ASEImporter::InternReadFile( const std::string& pFile,
 		}
 		pScene->mNumMeshes = (unsigned int)(pp - pScene->mMeshes);
 
-		// build final material indices (remove submaterials and setup
+		// Build final material indices (remove submaterials and setup
 		// the final list)
 		BuildMaterialIndices();
 	}
 
+	// *****************************************************************
 	// Copy all scene graph nodes - lights, cameras, dummies and meshes
 	// into one large array
+	// *****************************************************************
 	nodes.reserve(mParser->m_vMeshes.size() +mParser->m_vLights.size()
 		+ mParser->m_vCameras.size() + mParser->m_vDummies.size());
 
+	// Lights
 	for (std::vector<ASE::Light>::iterator it = mParser->m_vLights.begin(), 
 		 end = mParser->m_vLights.end();it != end; ++it)nodes.push_back(&(*it));
+
+	// Cameras
 	for (std::vector<ASE::Camera>::iterator it = mParser->m_vCameras.begin(), 
 		 end = mParser->m_vCameras.end();it != end; ++it)nodes.push_back(&(*it));
+
+	// Meshes
 	for (std::vector<ASE::Mesh>::iterator it = mParser->m_vMeshes.begin(),
 		end = mParser->m_vMeshes.end();it != end; ++it)nodes.push_back(&(*it));
-		for (std::vector<ASE::Dummy>::iterator it = mParser->m_vDummies.begin(),
-		end = mParser->m_vDummies.end();it != end; ++it)nodes.push_back(&(*it));
 
-	// process target cameras and target lights (
-	// generate animation channels for them and adjust the node graph)
-	// ProcessTargets();
+	// Dummies
+	for (std::vector<ASE::Dummy>::iterator it = mParser->m_vDummies.begin(),
+		end = mParser->m_vDummies.end();it != end; ++it)nodes.push_back(&(*it));
 
 	// build the final node graph
 	BuildNodes();
@@ -209,8 +233,11 @@ void ASEImporter::InternReadFile( const std::string& pFile,
 	BuildLights();
 
 	// TODO: STRANGE RESULTS ATM
+
+	// *****************************************************************
 	// If we have no meshes use the SkeletonMeshBuilder helper class
 	// to build a mesh for the animation skeleton
+	// *****************************************************************
 	if (!pScene->mNumMeshes)
 	{
 		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
@@ -278,7 +305,9 @@ void ASEImporter::BuildAnimations()
 		// that represent the node transformation.
 		if ((*i)->mAnim.akeyPositions.size() > 1 || 
 			(*i)->mAnim.akeyRotations.size() > 1 ||
-			(*i)->mAnim.akeyScaling.size()   > 1)
+			(*i)->mAnim.akeyScaling.size()   > 1 ||
+			(*i)->mTargetAnim.akeyPositions.size() > 1 
+			 && is_not_qnan( (*i)->mTargetPosition.x ))
 		{
 			++iNum;
 		}
@@ -298,62 +327,79 @@ void ASEImporter::BuildAnimations()
 		// Now iterate through all meshes and collect all data we can find
 		for (i =  nodes.begin();i != nodes.end();++i)
 		{
-			if ((*i)->mAnim.akeyPositions.size() > 1 || (*i)->mAnim.akeyRotations.size() > 1)
+			ASE::BaseNode* me = *i;
+			if ( me->mTargetAnim.akeyPositions.size() > 1 
+				 && is_not_qnan( me->mTargetPosition.x ))
+			{
+				// Generate an extra channel for the camera/light target.
+				// BuildNodes() does also generate an extra node, named
+				// <baseName>.Target.
+				aiNodeAnim* nd = pcAnim->mChannels[iNum++] = new aiNodeAnim();
+				nd->mNodeName.Set(me->mName + ".Target");
+
+				// Allocate the key array and fill it
+				nd->mNumPositionKeys = (unsigned int) me->mTargetAnim.akeyPositions.size();
+				nd->mPositionKeys    = new aiVectorKey[nd->mNumPositionKeys];
+
+				::memcpy(nd->mPositionKeys,&me->mTargetAnim.akeyPositions[0],
+					nd->mNumPositionKeys * sizeof(aiVectorKey));
+			}
+
+			if (me->mAnim.akeyPositions.size() > 1 || me->mAnim.akeyRotations.size() > 1)
 			{
 				// Begin a new node animation channel for this node
-				aiNodeAnim* pcNodeAnim = pcAnim->mChannels[iNum++] = new aiNodeAnim();
-				pcNodeAnim->mNodeName.Set((*i)->mName);
+				aiNodeAnim* nd = pcAnim->mChannels[iNum++] = new aiNodeAnim();
+				nd->mNodeName.Set(me->mName);
 
 				// copy position keys
-				if ((*i)->mAnim.akeyPositions.size() > 1 )
+				if (me->mAnim.akeyPositions.size() > 1 )
 				{
 					// Allocate the key array and fill it
-					pcNodeAnim->mNumPositionKeys = (unsigned int) (*i)->mAnim.akeyPositions.size();
-					pcNodeAnim->mPositionKeys    = new aiVectorKey[pcNodeAnim->mNumPositionKeys];
+					nd->mNumPositionKeys = (unsigned int) me->mAnim.akeyPositions.size();
+					nd->mPositionKeys    = new aiVectorKey[nd->mNumPositionKeys];
 
-					::memcpy(pcNodeAnim->mPositionKeys,&(*i)->mAnim.akeyPositions[0],
-						pcNodeAnim->mNumPositionKeys * sizeof(aiVectorKey));
-
-					// get the longest node anim channel 
-					for (unsigned int qq = 0; qq < pcNodeAnim->mNumPositionKeys;++qq)
-					{
-						pcAnim->mDuration = std::max(pcAnim->mDuration,
-							pcNodeAnim->mPositionKeys[qq].mTime);
-					}
+					::memcpy(nd->mPositionKeys,&me->mAnim.akeyPositions[0],
+						nd->mNumPositionKeys * sizeof(aiVectorKey));
 				}
 				// copy rotation keys
-				if ((*i)->mAnim.akeyRotations.size() > 1 )
+				if (me->mAnim.akeyRotations.size() > 1 )
 				{
 					// Allocate the key array and fill it
-					pcNodeAnim->mNumRotationKeys = (unsigned int) (*i)->mAnim.akeyRotations.size();
-					pcNodeAnim->mRotationKeys    = new aiQuatKey[pcNodeAnim->mNumRotationKeys];
+					nd->mNumRotationKeys = (unsigned int) me->mAnim.akeyRotations.size();
+					nd->mRotationKeys    = new aiQuatKey[nd->mNumRotationKeys];
 
-					::memcpy(pcNodeAnim->mRotationKeys,&(*i)->mAnim.akeyRotations[0],
-						pcNodeAnim->mNumRotationKeys * sizeof(aiQuatKey));
+					// **************************************************************
+					// Rotation keys are offsets to the previous keys.
+					// We have the quaternion representations of all 
+					// of them, so we just need to concatenate all
+					// (unit-length) quaternions to get the absolute
+					// rotations.
+					// FIX: Rotation keys are ABSOLUTE for the older
+					// file format 110 (ASC)
+					// **************************************************************
 
-					// get the longest node anim channel
-					for (unsigned int qq = 0; qq < pcNodeAnim->mNumRotationKeys;++qq)
+					aiQuaternion cur;
+					for (unsigned int a = 0; a < nd->mNumRotationKeys;++a)
 					{
-						pcAnim->mDuration = std::max(pcAnim->mDuration,
-							pcNodeAnim->mRotationKeys[qq].mTime);
+						aiQuatKey q = me->mAnim.akeyRotations[a];
+
+						if (mParser->iFileFormat > 110)
+						{
+							cur = (a ? cur*q.mValue : q.mValue);
+							q.mValue = cur.Normalize();
+						}
+						nd->mRotationKeys[a] = q; 
 					}
 				}
 				// copy scaling keys
-				if ((*i)->mAnim.akeyScaling.size() > 1 )
+				if (me->mAnim.akeyScaling.size() > 1 )
 				{
 					// Allocate the key array and fill it
-					pcNodeAnim->mNumScalingKeys = (unsigned int) (*i)->mAnim.akeyScaling.size();
-					pcNodeAnim->mScalingKeys    = new aiVectorKey[pcNodeAnim->mNumScalingKeys];
+					nd->mNumScalingKeys = (unsigned int) me->mAnim.akeyScaling.size();
+					nd->mScalingKeys    = new aiVectorKey[nd->mNumScalingKeys];
 
-					::memcpy(pcNodeAnim->mScalingKeys,&(*i)->mAnim.akeyScaling[0],
-						pcNodeAnim->mNumScalingKeys * sizeof(aiVectorKey));
-
-					// get the longest node anim channel 
-					for (unsigned int qq = 0; qq < pcNodeAnim->mNumScalingKeys;++qq)
-					{
-						pcAnim->mDuration = std::max(pcAnim->mDuration,
-							pcNodeAnim->mScalingKeys[qq].mTime);
-					}
+					::memcpy(nd->mScalingKeys,&me->mAnim.akeyScaling[0],
+						nd->mNumScalingKeys * sizeof(aiVectorKey));
 				}
 			}
 		}
@@ -534,15 +580,34 @@ void ASEImporter::AddNodes (std::vector<BaseNode*>& nodes,
 		mParentAdjust.Inverse();
 		node->mTransformation = mParentAdjust*snode->mTransform;
 
-		// If the type of this node is "Mesh" we need to search
-		// the list of output meshes in the data structure for
-		// all those that belonged to this node once. This is
-		// slightly inconvinient here and a better solution should
-		// be used when this code is refactored next.
-		if (snode->mType == BaseNode::Mesh)
+		// Further processing depends on the type of the node
+		if (snode->mType == ASE::BaseNode::Mesh)
 		{
+			// If the type of this node is "Mesh" we need to search
+			// the list of output meshes in the data structure for
+			// all those that belonged to this node once. This is
+			// slightly inconvinient here and a better solution should
+			// be used when this code is refactored next.
 			AddMeshes(snode,node);
 		}
+		else if (is_not_qnan( snode->mTargetPosition.x ))
+		{
+			// If this is a target camera or light we generate a small
+			// child node which marks the position of the camera
+			// target (the direction information is contained in *this*
+			// node's animation track but the exact target position
+			// would be lost otherwise)
+			apcNodes.push_back(new aiNode());
+			aiNode* node = apcNodes.back();
+
+			node->mName.Set ( snode->mName + ".Target" );
+			node->mTransformation.a4 = snode->mTargetPosition.x;
+			node->mTransformation.b4 = snode->mTargetPosition.y;
+			node->mTransformation.c4 = snode->mTargetPosition.z;
+
+			node->mParent = pcParent;
+		}
+
 
 		// add sub nodes
 		// aiMatrix4x4 mNewAbs =  mat * node->mTransformation;

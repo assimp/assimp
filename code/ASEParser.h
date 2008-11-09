@@ -130,10 +130,16 @@ struct Bone
 	{
 		static int iCnt = 0;
 		
+		// Generate a default name for the bone
 		char szTemp[128];
 		::sprintf(szTemp,"UNNAMED_%i",iCnt++);
 		mName = szTemp;
 	}
+
+	//! Construction from an existing name
+	Bone( const std::string& name)
+		:	mName	(name)
+	{}
 
 	//! Name of the bone
 	std::string mName;
@@ -224,6 +230,10 @@ struct BaseNode
 		char szTemp[128]; // should be sufficiently large
 		::sprintf(szTemp,"UNNAMED_%i",iCnt++);
 		mName = szTemp;
+
+		// Set mTargetPosition to qnan
+		const float qnan = std::numeric_limits<float>::quiet_NaN();
+		mTargetPosition.x = qnan;
 	}
 
 	//! Name of the mesh
@@ -357,7 +367,15 @@ struct Dummy : public BaseNode
 	}
 };
 
-// ---------------------------------------------------------------------------------
+// Parameters to Parser::Parse()
+#define AI_ASE_NEW_FILE_FORMAT 200
+#define AI_ASE_OLD_FILE_FORMAT 110
+
+// Internally we're a little bit more tolerant
+#define AI_ASE_IS_NEW_FILE_FORMAT()	(iFileFormat >= 200)
+#define AI_ASE_IS_OLD_FILE_FORMAT()	(iFileFormat < 200)
+
+// -------------------------------------------------------------------------------
 /** \brief Class to parse ASE files
  */
 class Parser
@@ -369,9 +387,14 @@ private:
 
 public:
 
+	// -------------------------------------------------------------------
 	//! Construct a parser from a given input file which is
 	//! guaranted to be terminated with zero.
-	Parser (const char* szFile);
+	//! @param szFile Input file
+	//! @param fileFormatDefault Assumed file format version. If the
+	//!   file format is specified in the file the new value replaces
+	//!   the default value.
+	Parser (const char* szFile, unsigned int fileFormatDefault);
 
 	// -------------------------------------------------------------------
 	//! Parses the file into the parsers internal representation
@@ -383,6 +406,10 @@ private:
 	// -------------------------------------------------------------------
 	//! Parse the *SCENE block in a file
 	void ParseLV1SceneBlock();
+
+	// -------------------------------------------------------------------
+	//! Parse the *MESH_SOFTSKINVERTS block in a file
+	void ParseLV1SoftSkinBlock();
 
 	// -------------------------------------------------------------------
 	//! Parse the *MATERIAL_LIST block in a file
@@ -593,7 +620,7 @@ private:
 public:
 
 	//! Pointer to current data
-	const char* m_szFile;
+	const char* filePtr;
 
 	//! background color to be passed to the viewer
 	//! QNAN if none was found
@@ -635,6 +662,9 @@ public:
 
 	//! true if the last character read was an end-line character
 	bool bLastWasEndLine;
+
+	//! File format version
+	unsigned int iFileFormat;
 };
 
 

@@ -242,6 +242,10 @@ void ValidateDSProcess::Execute( aiScene* pScene)
 	{
 		ReportError("aiScene::mNumMeshes is 0. At least one mesh must be there");
 	}
+	else if (pScene->mMeshes)
+	{
+		ReportError("aiScene::mMeshes is non-null although there are no meshes");
+	}
 	
 	// validate all animations
 	if (pScene->mNumAnimations) 
@@ -250,13 +254,21 @@ void ValidateDSProcess::Execute( aiScene* pScene)
 		DoValidation(pScene->mAnimations,pScene->mNumAnimations,
 			"mAnimations","mNumAnimations");
 	}
-	
+	else if (pScene->mAnimations)
+	{
+		ReportError("aiScene::mAnimations is non-null although there are no animations");
+	}
+
 	// validate all cameras
 	if (pScene->mNumCameras) 
 	{
 		has = true;
 		DoValidationWithNameCheck(pScene->mCameras,pScene->mNumCameras,
 			"mCameras","mNumCameras");
+	}
+	else if (pScene->mCameras)
+	{
+		ReportError("aiScene::mCameras is non-null although there are no cameras");
 	}
 
 	// validate all lights
@@ -265,6 +277,10 @@ void ValidateDSProcess::Execute( aiScene* pScene)
 		has = true;
 		DoValidationWithNameCheck(pScene->mLights,pScene->mNumLights,
 			"mLights","mNumLights");
+	}
+	else if (pScene->mLights)
+	{
+		ReportError("aiScene::mLights is non-null although there are no lights");
 	}
 	
 	// validate all materials
@@ -276,6 +292,10 @@ void ValidateDSProcess::Execute( aiScene* pScene)
 	else if (!(mScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
 	{
 		ReportError("aiScene::mNumMaterials is 0. At least one material must be there");
+	}
+	else if (pScene->mMaterials)
+	{
+		ReportError("aiScene::mMaterials is non-null although there are no materials");
 	}
 
 	if (!has)ReportError("The aiScene data structure is empty");
@@ -452,7 +472,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 
 
 	// now validate all bones
-	if (pMesh->HasBones())
+	if (pMesh->mNumBones)
 	{
 		if (!pMesh->mBones)
 		{
@@ -498,6 +518,10 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 		}
 		delete[] afSum;
 	}
+	else if (pMesh->mBones)
+	{
+		ReportError("aiMesh::mBones is non-null although there are no bones");
+	}
 }
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::Validate( const aiMesh* pMesh,
@@ -513,7 +537,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh,
 	// check whether all vertices affected by this bone are valid
 	for (unsigned int i = 0; i < pBone->mNumWeights;++i)
 	{
-		if (pBone->mWeights[i].mVertexId > pMesh->mNumVertices)
+		if (pBone->mWeights[i].mVertexId >= pMesh->mNumVertices)
 		{
 			this->ReportError("aiBone::mWeights[%i].mVertexId is out of range",i);
 		}
@@ -832,14 +856,14 @@ __break_out:
 		{
 			if (pNodeAnim->mPositionKeys[i].mTime > pAnimation->mDuration)
 			{
-				this->ReportError("aiNodeAnim::mPositionKeys[%i].mTime (%.5f) is larger "
+				ReportError("aiNodeAnim::mPositionKeys[%i].mTime (%.5f) is larger "
 					"than aiAnimation::mDuration (which is %.5f)",i,
 					(float)pNodeAnim->mPositionKeys[i].mTime,
 					(float)pAnimation->mDuration);
 			}
 			if (pNodeAnim->mPositionKeys[i].mTime <= dLast)
 			{
-				this->ReportWarning("aiNodeAnim::mPositionKeys[%i].mTime (%.5f) is smaller "
+				ReportWarning("aiNodeAnim::mPositionKeys[%i].mTime (%.5f) is smaller "
 					"than aiAnimation::mPositionKeys[%i] (which is %.5f)",i,
 					(float)pNodeAnim->mPositionKeys[i].mTime,
 					i-1, (float)dLast);
@@ -860,14 +884,14 @@ __break_out:
 		{
 			if (pNodeAnim->mRotationKeys[i].mTime > pAnimation->mDuration)
 			{
-				this->ReportError("aiNodeAnim::mRotationKeys[%i].mTime (%.5f) is larger "
+				ReportError("aiNodeAnim::mRotationKeys[%i].mTime (%.5f) is larger "
 					"than aiAnimation::mDuration (which is %.5f)",i,
 					(float)pNodeAnim->mRotationKeys[i].mTime,
 					(float)pAnimation->mDuration);
 			}
 			if (pNodeAnim->mRotationKeys[i].mTime <= dLast)
 			{
-				this->ReportWarning("aiNodeAnim::mRotationKeys[%i].mTime (%.5f) is smaller "
+				ReportWarning("aiNodeAnim::mRotationKeys[%i].mTime (%.5f) is smaller "
 					"than aiAnimation::mRotationKeys[%i] (which is %.5f)",i,
 					(float)pNodeAnim->mRotationKeys[i].mTime,
 					i-1, (float)dLast);
@@ -888,20 +912,26 @@ __break_out:
 		{
 			if (pNodeAnim->mScalingKeys[i].mTime > pAnimation->mDuration)
 			{
-				this->ReportError("aiNodeAnim::mScalingKeys[%i].mTime (%.5f) is larger "
+				ReportError("aiNodeAnim::mScalingKeys[%i].mTime (%.5f) is larger "
 					"than aiAnimation::mDuration (which is %.5f)",i,
 					(float)pNodeAnim->mScalingKeys[i].mTime,
 					(float)pAnimation->mDuration);
 			}
 			if (pNodeAnim->mScalingKeys[i].mTime <= dLast)
 			{
-				this->ReportWarning("aiNodeAnim::mScalingKeys[%i].mTime (%.5f) is smaller "
+				ReportWarning("aiNodeAnim::mScalingKeys[%i].mTime (%.5f) is smaller "
 					"than aiAnimation::mScalingKeys[%i] (which is %.5f)",i,
 					(float)pNodeAnim->mScalingKeys[i].mTime,
 					i-1, (float)dLast);
 			}
 			dLast = pNodeAnim->mScalingKeys[i].mTime;
 		}
+	}
+
+	if (!pNodeAnim->mNumScalingKeys && !pNodeAnim->mNumRotationKeys &&
+		!pNodeAnim->mNumPositionKeys)
+	{
+		ReportError("A node animation channel must have at least one subtrack");
 	}
 }
 // ------------------------------------------------------------------------------------------------

@@ -1,2 +1,6 @@
 "würfel.ase" - Made by Marius Schröder, free for any purpose
-"MotionCaptureROM.ase" - Recorded at the HTW Aalen using LycosIQ. Free for any purpose
+
+"MotionCaptureROM.ase" - Recorded at the HTW Aalen using LycosIQ.
+
+NOTE: The errors in the middle of the animation are there in the
+original animation track, too. The captured person lost a sensor ...

@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "3DSLoader.h"
 #include "TextureTransform.h"
+#include "TargetAnimation.h"
 
 using namespace Assimp;
 
@@ -528,7 +529,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Nod
 	aiMatrix4x4 abs;
 	if (pcIn->mName == "$$$DUMMY")
 	{
-		// append the "real" name of the dummy to the string
+		// Append the "real" name of the dummy to the string
 		pcIn->mName.append(pcIn->mDummyName);
 	}
 	else // if (pcIn->mName != "$$$DUMMY")
@@ -538,25 +539,18 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Nod
 			const D3DS::Mesh* pcMesh = (const D3DS::Mesh*)pcSOut->mMeshes[a]->mColors[0];
 			ai_assert(NULL != pcMesh);
 
-			// do case independent comparisons here, just for safety
-			if (!ASSIMP_stricmp(pcIn->mName,pcMesh->mName))
+			if (pcIn->mName == pcMesh->mName)
 				iArray.push_back(a);
 		}
 		if (!iArray.empty())
 		{
-			// The matrix should be identical for all meshes.
+			// The matrix should be identical for all meshes with the same name.
 			// It HAS to be identical for all meshes ........
 			aiMatrix4x4& mTrafo = ((D3DS::Mesh*)pcSOut->mMeshes[iArray[0]]->mColors[0])->mMat;
 			aiMatrix4x4 mInv = mTrafo;
 			if (!configSkipPivot)
 				mInv.Inverse();
 
-		/*	abs = mTrafo;
-			pcOut->mTransformation = absTrafo;
-			pcOut->mTransformation = pcOut->mTransformation.Inverse() * mTrafo;
-			const aiVector3D& pivot = pcIn->vPivot;
-			aiMatrix4x4 trans;
-		*/
 			const aiVector3D& pivot = pcIn->vPivot;
 
 			pcOut->mNumMeshes = (unsigned int)iArray.size();
@@ -566,7 +560,8 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Nod
 				const unsigned int iIndex = iArray[i];
 				aiMesh* const mesh = pcSOut->mMeshes[iIndex];
 
-				// http://www.zfx.info/DisplayThread.php?MID=235690#235690
+				// Pivot point adjustment.
+				// See: http://www.zfx.info/DisplayThread.php?MID=235690#235690
 				const aiVector3D* const pvEnd = mesh->mVertices+mesh->mNumVertices;
 				aiVector3D* pvCurrent = mesh->mVertices;
 
@@ -578,11 +573,9 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Nod
 						pvCurrent->x -= pivot.x;
 						pvCurrent->y -= pivot.y;
 						pvCurrent->z -= pivot.z;
-						*pvCurrent = mTrafo * (*pvCurrent);
 						++pvCurrent;
 					}
 				}
-#if 0
 				else
 				{
 					while (pvCurrent != pvEnd)
@@ -591,7 +584,6 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Nod
 						++pvCurrent;
 					}
 				}
-#endif
 
 				// Setup the mesh index
 				pcOut->mMeshes[i] = iIndex;
@@ -599,75 +591,143 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Nod
 		}
 	}
 
+	// Now build the transformation matrix of the node
+	// ROTATION
+	if (pcIn->aRotationKeys.size())
+	{
+		pcOut->mTransformation = aiMatrix4x4( pcIn->aRotationKeys[0].mValue.GetMatrix() );
+	}
+	else if (pcIn->aCameraRollKeys.size())
+	{
+		aiMatrix4x4::RotationZ(AI_DEG_TO_RAD(- pcIn->aCameraRollKeys[0].mValue),
+			pcOut->mTransformation);
+	}
+
+	// SCALING
+	aiMatrix4x4& m = pcOut->mTransformation;
+	if (pcIn->aScalingKeys.size())
+	{
+		const aiVector3D& v = pcIn->aScalingKeys[0].mValue;
+		m.a1 *= v.x; m.b1 *= v.x; m.c1 *= v.x;
+		m.a2 *= v.y; m.b2 *= v.y; m.c2 *= v.y;
+		m.a3 *= v.z; m.b3 *= v.z; m.c3 *= v.z;
+	}
+
+	// TRANSLATION
+	if (pcIn->aPositionKeys.size())
+	{
+		const aiVector3D& v = pcIn->aPositionKeys[0].mValue;
+		m.a4 += v.x;
+		m.b4 += v.y;
+		m.c4 += v.z;
+	}
+
 	// Generate animation channels for the node
-	if (pcIn->aPositionKeys.size()  > 0  || pcIn->aRotationKeys.size()   > 0   ||
-		pcIn->aScalingKeys.size()   > 0  || pcIn->aCameraRollKeys.size() > 0 ||
-		pcIn->aTargetPositionKeys.size() > 0)
+	if (pcIn->aPositionKeys.size()  > 1  || pcIn->aRotationKeys.size()   > 1   ||
+		pcIn->aScalingKeys.size()   > 1  || pcIn->aCameraRollKeys.size() > 1 ||
+		pcIn->aTargetPositionKeys.size() > 1)
 	{
 		aiAnimation* anim = pcSOut->mAnimations[0];
 		ai_assert(NULL != anim);
 
-		// Allocate a new channel, increment the channel index
-		aiNodeAnim* channel = anim->mChannels[anim->mNumChannels++] = new aiNodeAnim();
-
-		// POSITION keys
-		if (pcIn->aPositionKeys.size()  > 0)
+		if (pcIn->aCameraRollKeys.size() > 1)
 		{
-			// Sort all keys with ascending time values
-			std::sort(pcIn->aPositionKeys.begin(),pcIn->aPositionKeys.end());
+			DefaultLogger::get()->debug("3DS: Converting camera roll track ...");
 
-			channel->mNumPositionKeys = (unsigned int)pcIn->aPositionKeys.size();
-			channel->mPositionKeys = new aiVectorKey[channel->mNumPositionKeys];
-			::memcpy(channel->mPositionKeys,&pcIn->aPositionKeys[0],
-				sizeof(aiVectorKey)*channel->mNumPositionKeys);
+			// Camera roll keys - in fact they're just rotations
+			// around the camera's z axis. The angles are given
+			// in degrees (and they're clockwise).
+			pcIn->aRotationKeys.resize(pcIn->aCameraRollKeys.size());
+			for (unsigned int i = 0; i < pcIn->aCameraRollKeys.size();++i)
+			{
+				aiQuatKey&  q = pcIn->aRotationKeys[i];
+				aiFloatKey& f = pcIn->aCameraRollKeys[i];
 
-			// Get the maximum key
-			anim->mDuration = std::max(anim->mDuration,channel->
-				mPositionKeys[channel->mNumPositionKeys-1].mTime);
+				q.mTime  = f.mTime;
+				q.mValue = aiQuaternion(0.f,0.f,AI_DEG_TO_RAD(- f.mValue));
+			}
 		}
 
-		// ROTATION keys
-		if (pcIn->aRotationKeys.size()  > 0)
+		if (pcIn->aTargetPositionKeys.size() > 1)
 		{
-			// Sort all keys with ascending time values
-			std::sort(pcIn->aRotationKeys.begin(),pcIn->aRotationKeys.end());
+			//DefaultLogger::get()->debug("3DS: Converting target track ...");
 
-			channel->mNumRotationKeys = (unsigned int)pcIn->aRotationKeys.size();
-			channel->mRotationKeys = new aiQuatKey[channel->mNumRotationKeys];
-			::memcpy(channel->mRotationKeys,&pcIn->aRotationKeys[0],
-				sizeof(aiQuatKey)*channel->mNumRotationKeys);
+			//// Camera or spot light - need to convert the separate
+			//// target position channel to our representation
+			//TargetAnimationHelper helper;
 
-			// Get the maximum key
-			anim->mDuration = std::max(anim->mDuration,channel->
-				mRotationKeys[channel->mNumRotationKeys-1].mTime);
+			//helper.SetTargetAnimationChannel(&pcIn->aTargetPositionKeys);
+			//helper.SetMainAnimationChannel(&pcIn->aPositionKeys);
+
+			//// Do the conversion
+			//std::vector<aiVectorKey> distanceTrack;
+			//helper.Process(&distanceTrack);
+
+			//// Now add a new node as child, name it <ourName>.Target
+			//// and assign the distance track to it. This is that the
+			//// information where the target is and how it moves is
+			//// not lost
+			//D3DS::Node* nd = new D3DS::Node();
+			//pcIn->push_back(nd);
+
+			//nd->mName = pcIn->mName + ".Target";
+
+			//aiNodeAnim* nda = anim->mChannels[anim->mNumChannels++] = new aiNodeAnim();
+			//nda->mNodeName.Set(nd->mName);
+
+			//nda->mNumPositionKeys = (unsigned int)distanceTrack.size();
+			//nda->mPositionKeys = new aiVectorKey[nda->mNumPositionKeys];
+			//::memcpy(nda->mPositionKeys,&distanceTrack[0],
+			//	sizeof(aiVectorKey)*nda->mNumPositionKeys);
 		}
 
-		// SCALING keys
-		if (pcIn->aScalingKeys.size()  > 0)
+		// Just for safety ... we *should* have at least one track here
+		if (pcIn->aPositionKeys.size()  > 1  || pcIn->aRotationKeys.size()   > 1   ||
+			pcIn->aScalingKeys.size()   > 1)
 		{
-			// Sort all keys with ascending time values
-			std::sort(pcIn->aScalingKeys.begin(),pcIn->aScalingKeys.end());
+			// Allocate a new nda, increment the nda index
+			aiNodeAnim* nda = anim->mChannels[anim->mNumChannels++] = new aiNodeAnim();
+			nda->mNodeName.Set(pcIn->mName);
 
-			channel->mNumScalingKeys = (unsigned int)pcIn->aScalingKeys.size();
-			channel->mScalingKeys = new aiVectorKey[channel->mNumScalingKeys];
-			::memcpy(channel->mScalingKeys,&pcIn->aScalingKeys[0],
-				sizeof(aiVectorKey)*channel->mNumScalingKeys);
+			// POSITION keys
+			if (pcIn->aPositionKeys.size()  > 0)
+			{
+				nda->mNumPositionKeys = (unsigned int)pcIn->aPositionKeys.size();
+				nda->mPositionKeys = new aiVectorKey[nda->mNumPositionKeys];
+				::memcpy(nda->mPositionKeys,&pcIn->aPositionKeys[0],
+					sizeof(aiVectorKey)*nda->mNumPositionKeys);
+			}
 
-			// Get the maximum key
-			anim->mDuration = std::max(anim->mDuration,channel->
-				mScalingKeys[channel->mNumScalingKeys-1].mTime);
+			// ROTATION keys
+			if (pcIn->aRotationKeys.size()  > 0)
+			{
+				nda->mNumRotationKeys = (unsigned int)pcIn->aRotationKeys.size();
+				nda->mRotationKeys = new aiQuatKey[nda->mNumRotationKeys];
+				::memcpy(nda->mRotationKeys,&pcIn->aRotationKeys[0],
+					sizeof(aiQuatKey)*nda->mNumRotationKeys);
+			}
+
+			// SCALING keys
+			if (pcIn->aScalingKeys.size()  > 0)
+			{
+				nda->mNumScalingKeys = (unsigned int)pcIn->aScalingKeys.size();
+				nda->mScalingKeys = new aiVectorKey[nda->mNumScalingKeys];
+				::memcpy(nda->mScalingKeys,&pcIn->aScalingKeys[0],
+					sizeof(aiVectorKey)*nda->mNumScalingKeys);
+			}
 		}
 	}
 
 	// Setup the name of the node
 	pcOut->mName.Set(pcIn->mName);
 
-	// Allocate storage for children
+	// Allocate storage for children 
 	pcOut->mNumChildren = (unsigned int)pcIn->mChildren.size();
 	pcOut->mChildren = new aiNode*[pcIn->mChildren.size()];
 
 	// Recursively process all children
-	for (unsigned int i = 0; i < pcIn->mChildren.size();++i)
+	const unsigned int size = pcIn->mChildren.size();
+	for (unsigned int i = 0; i < size;++i)
 	{
 		pcOut->mChildren[i] = new aiNode();
 		pcOut->mChildren[i]->mParent = pcOut;
@@ -683,11 +743,13 @@ void CountTracks(D3DS::Node* node, unsigned int& cnt)
 	// We will never generate more than one channel for a node, so
 	// this is rather easy here.
 
-	if (node->aPositionKeys.size()  > 0  || node->aRotationKeys.size()   > 0   ||
-		node->aScalingKeys.size()   > 0  || node->aCameraRollKeys.size() > 0 ||
-		node->aTargetPositionKeys.size()  > 0)
+	if (node->aPositionKeys.size()  > 1  || node->aRotationKeys.size()   > 1   ||
+		node->aScalingKeys.size()   > 1  || node->aCameraRollKeys.size() > 1 ||
+		node->aTargetPositionKeys.size()  > 1)
 	{
 		++cnt;
+
+		if (node->aTargetPositionKeys.size()  > 1)++cnt;
 	}
 
 	// Recursively process all children
@@ -778,6 +840,14 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 
 		aiMatrix4x4 m;
 		AddNodeToGraph(pcOut,  pcOut->mRootNode, mRootNode,m);
+
+		// If the root node is unnamed name it "<3DSRoot>"
+		if (::strstr( pcOut->mRootNode->mName.data, "UNNAMED" )
+			|| pcOut->mRootNode->mName.data[0] == '$' 
+			&& pcOut->mRootNode->mName.data[1] == '$')
+		{
+			pcOut->mRootNode->mName.Set("<3DSRoot>");
+		}
 	}
 
 	// We used the first vertex color set to store some
@@ -794,10 +864,6 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 		pcOld->mChildren[0] = NULL;
 		delete pcOld;
 	}
-
-	// if the root node is a default node setup a name for it
-	if (pcOut->mRootNode->mName.data[0] == '$' && pcOut->mRootNode->mName.data[1] == '$')
-		pcOut->mRootNode->mName.Set("<root>");
 
 #if 0
 	// modify the transformation of the root node to change

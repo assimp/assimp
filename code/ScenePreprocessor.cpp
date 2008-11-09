@@ -98,9 +98,40 @@ void ScenePreprocessor::ProcessMesh (aiMesh* mesh)
 // ---------------------------------------------------------------------------
 void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
 {
+	double first = 10e10, last = -10e10;
 	for (unsigned int i = 0; i < anim->mNumChannels;++i)
 	{
 		aiNodeAnim* channel = anim->mChannels[i];
+
+		/*  If the exact duration of the animation is not given
+		 *  compute it now.
+		 */
+		if (anim->mDuration == -1.)
+		{
+			// Position keys
+			for (unsigned int i = 0; i < channel->mNumPositionKeys;++i)
+			{
+				aiVectorKey& key = channel->mPositionKeys[i];
+				first = std::min (first, key.mTime);
+				last  = std::max (last,  key.mTime);
+			}
+
+			// Scaling keys
+			for (unsigned int i = 0; i < channel->mNumScalingKeys;++i)
+			{
+				aiVectorKey& key = channel->mScalingKeys[i];
+				first = std::min (first, key.mTime);
+				last  = std::max (last,  key.mTime);
+			}
+
+			// Rotation keys
+			for (unsigned int i = 0; i < channel->mNumRotationKeys;++i)
+			{
+				aiQuatKey& key = channel->mRotationKeys[i];
+				first = std::min (first, key.mTime);
+				last  = std::max (last,  key.mTime);
+			}
+		}
 
 		/*  Check whether the animation channel has no rotation
 		 *  or position tracks. In this case we generate a dummy
@@ -159,5 +190,10 @@ void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
 				}
 			}
 		}
+	}
+	if (anim->mDuration == -1.)
+	{
+		DefaultLogger::get()->debug("Setting animation duration");
+		anim->mDuration = last - first;
 	}
 }

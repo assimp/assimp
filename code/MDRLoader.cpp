@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace Assimp::MDR;
 
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 MDRImporter::MDRImporter()
@@ -77,9 +78,38 @@ bool MDRImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 }
 
 // ------------------------------------------------------------------------------------------------
+// Uncompress a matrix
+void MDRImporter::MatrixUncompress(aiMatrix4x4& mat,const uint8_t * compressed)
+{
+	int value;
+
+	// First decompress the translation part
+	for (unsigned int n = 0; n < 3;++n)
+	{
+		value     = (int)((uint16_t *)(compressed))[n];
+		mat[0][n] = ((float)(value-(1<<15)))/64.f;
+	}
+
+	// Then decompress the rotation matrix
+	for (unsigned int n = 0, p = 3; n < 3;++n)
+	{
+		for (unsigned int m = 0; m < 3;++m,++p)
+		{
+			value =  (int)((uint16_t *)(compressed))[p];
+			mat[n][m]=((float)(value-(1<<15)))*(1.0f/(float)((1<<(15))-2));
+		}
+	}
+
+	// now zero the final row of the matrix
+	mat[3][0] = mat[3][1] = mat[3][2] = 0.f;
+	mat[3][3] = 1.f;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Validate the header of the given MDR file
 void MDRImporter::ValidateHeader()
 {
+	// Check the magic word - '5MDR'
 	if (pcHeader->ident != AI_MDR_MAGIC_NUMBER_BE &&
 		pcHeader->ident != AI_MDR_MAGIC_NUMBER_LE)
 	{
@@ -94,39 +124,70 @@ void MDRImporter::ValidateHeader()
 			"magic word found is " + std::string( szBuffer ));
 	}
 
-	if (pcHeader->version != AI_MDR_VERSION)
-		DefaultLogger::get()->warn("Unsupported MDR file version (2 (AI_MDR_VERSION) was expected)");
+	// Big endian - swap the fields in the header
+	AI_SWAP4(pcHeader->numBones);
+	AI_SWAP4(pcHeader->numFrames);
+	AI_SWAP4(pcHeader->ofsFrames);
+	AI_SWAP4(pcHeader->ofsLODs);
+	AI_SWAP4(pcHeader->ofsTags);
+	AI_SWAP4(pcHeader->version);
+	AI_SWAP4(pcHeader->numTags);
+	AI_SWAP4(pcHeader->numLODs);
 
+	// MDR file version should always be 2
+	if (pcHeader->version != AI_MDR_VERSION)
+		DefaultLogger::get()->warn("Unsupported MDR file version (2 was expected)");
+
+	// We compute the vertex positions from the bones,
+	// so we need at least one bone.
 	if (!pcHeader->numBones)
 		DefaultLogger::get()->warn("MDR: At least one bone must be there");
 
-	// validate all LODs
-	if (pcHeader->ofsLODs > fileSize) 
+	// We should have at least the first LOD in the valid range
+	if (pcHeader->ofsLODs > (int)fileSize) 
+		throw new ImportErrorException("MDR: header is invalid - LOD out of range");
+
+	// header::ofsFrames is negative if the frames are compressed
+	if (pcHeader->ofsFrames < 0)
+	{
+		// Ugly, but it will be our only change to make further
+		// reading easier
+		int32_t* p = const_cast<int32_t*>(&pcHeader->ofsFrames);
+		*p = -pcHeader->ofsFrames;
+		compressed = true;
+		DefaultLogger::get()->info("MDR: Compressed frames");
+	}
+	else compressed = false;
 
 	// validate all frames
-	if (pcHeader->ofsFrames + sizeof(MDR::Frame) * (pcHeader->numBones-1) *
-		sizeof(MDR::Bone) * pcHeader->numFrames > fileSize)
+	if ( pcHeader->ofsFrames +    sizeof(MDR::Frame) * 
+		(pcHeader->numBones -1) * sizeof(MDR::Bone)  * 
+		 pcHeader->numFrames > fileSize)
 	{
 		throw new ImportErrorException("MDR: header is invalid - frame out of range");
 	}
 
-	// check whether the requested frame is existing
-	if (this->configFrameID >= pcHeader->numFrames)
+	// Check whether the requested frame is existing
+	if (configFrameID >= (unsigned int) pcHeader->numFrames)
 		throw new ImportErrorException("The requested frame is not available");
 }
 
 // ------------------------------------------------------------------------------------------------
-// Validate the header of a given MDR file LOD
+// Validate the surface header of a given MDR file LOD
 void MDRImporter::ValidateLODHeader(BE_NCONST MDR::LOD* pcLOD)
 {
 	AI_SWAP4(pcLOD->ofsSurfaces);
 	AI_SWAP4(pcLOD->numSurfaces);
 	AI_SWAP4(pcLOD->ofsEnd);
 
-    const unsigned int iMax = this->fileSize - (unsigned int)((int8_t*)pcLOD-(int8_t*)pcHeader);
+    const unsigned int iMax = fileSize - (unsigned int)((int8_t*)pcLOD-(int8_t*)pcHeader);
 
+	// We should have at least one surface here
 	if (!pcLOD->numSurfaces)
 		throw new ImportErrorException("MDR: LOD has zero surfaces assigned");
+
+	if (pcLOD->ofsSurfaces > iMax)
+		throw new ImportErrorException("MDR: LOD header is invalid - surface out of range");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -143,9 +204,10 @@ void MDRImporter::ValidateSurfaceHeader(BE_NCONST MDR::Surface* pcSurf)
 	AI_SWAP4(pcSurf->ofsVerts);
 	AI_SWAP4(pcSurf->shaderIndex);
 
-    const unsigned int iMax = this->fileSize - (unsigned int)((int8_t*)pcSurf-(int8_t*)pcHeader);
+	// Find out how many bytes
+    const unsigned int iMax = fileSize - (unsigned int)((int8_t*)pcSurf-(int8_t*)pcHeader);
 
-	// not exact - there could be extra data in the vertices.
+	// Not exact - there could be extra data in the vertices.
 	if (pcSurf->ofsTriangles + pcSurf->numTriangles*sizeof(MDR::Triangle) > iMax ||
 		pcSurf->ofsVerts + pcSurf->numVerts*sizeof(MDR::Vertex) > iMax)
     {
@@ -157,13 +219,14 @@ void MDRImporter::ValidateSurfaceHeader(BE_NCONST MDR::Surface* pcSurf)
 // Setup configuration properties
 void MDRImporter::SetupProperties(const Importer* pImp)
 {
-	// The AI_CONFIG_IMPORT_MDR_KEYFRAME option overrides the
+	// **************************************************************
+	// The AI_CONFIG_IMPORT_MDR_KEYFRAME    option overrides the
 	//     AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
-	if(0xffffffff == (this->configFrameID = pImp->GetPropertyInteger(
-		AI_CONFIG_IMPORT_MDR_KEYFRAME,0xffffffff)))
-	{
-		this->configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
-	}
+	// **************************************************************
+	configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_MDR_KEYFRAME,0xffffffff);
+
+	if(0xffffffff == configFrameID)
+		configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -171,34 +234,36 @@ void MDRImporter::SetupProperties(const Importer* pImp)
 void MDRImporter::InternReadFile( const std::string& pFile, 
 	aiScene* pScene, IOSystem* pIOHandler)
 {
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
 		throw new ImportErrorException( "Failed to open MDR file " + pFile + ".");
 
-	// check whether the mdr file is large enough to contain the file header
+	// Check whether the mdr file is large enough to contain the file header
 	fileSize = (unsigned int)file->FileSize();
 	if( fileSize < sizeof(MDR::Header))
 		throw new ImportErrorException( "MDR File is too small.");
 
+	// Copy the contents of the file to a buffer
 	std::vector<unsigned char> mBuffer2(fileSize);
 	file->Read( &mBuffer2[0], 1, fileSize);
 	mBuffer = &mBuffer2[0];
 
-	// validate the file header and do BigEndian byte swapping for all sub headers
-	this->pcHeader = (BE_NCONST MDR::Header*)this->mBuffer;
-	this->ValidateHeader();
+	// Validate the file header and do BigEndian byte swapping for all sub headers
+	pcHeader = (BE_NCONST MDR::Header*)mBuffer;
+	ValidateHeader();
 
-	// go to the first LOD
-	LE_NCONST MDR::LOD* lod = (LE_NCONST MDR::LOD*)((uint8_t*)this->pcHeader+pcHeader->ofsLODs);
+	// Go to the first LOD
+	LE_NCONST MDR::LOD* lod = (LE_NCONST MDR::LOD*)((uint8_t*)pcHeader+pcHeader->ofsLODs);
 	std::vector<aiMesh*> outMeshes;
 	outMeshes.reserve(lod->numSurfaces);
 
-	// get a pointer to the first surface
+	// Get a pointer to the first surface and continue processing them all
 	LE_NCONST MDR::Surface* surf = (LE_NCONST MDR::Surface*)((uint8_t*)lod+lod->ofsSurfaces);
 	for (uint32_t i = 0; i < lod->numSurfaces; ++i)
 	{
+		// The surface must have a) faces b) vertices and c) bone references
 		if (surf->numTriangles && surf->numVerts && surf->numBoneReferences)
 		{
 			outMeshes.push_back(new aiMesh());
@@ -213,7 +278,7 @@ void MDRImporter::InternReadFile( const std::string& pFile,
 			mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
 			mesh->mBones = new aiBone*[mesh->mNumBones];
 
-			// allocate output bones
+			// Allocate output bones and generate proper names for them
 			for (unsigned int p = 0; p < mesh->mNumBones;++p)
 			{
 				aiBone* bone = mesh->mBones[p] = new aiBone();
@@ -232,30 +297,40 @@ void MDRImporter::InternReadFile( const std::string& pFile,
 				// get a pointer to the next vertex
 				v = (LE_NCONST MDR::Vertex*)((uint8_t*)(v+1) + v->numWeights*sizeof(MDR::Weight));
 
+				// Big Endian - swap the vertex data structure
 #ifndef AI_BUILD_BIG_ENDIAN
 				AI_SWAP4(v->numWeights);
-				AI_SWAP4(v->normal.x);AI_SWAP4(v->normal.y);AI_SWAP4(v->normal.z);
-				AI_SWAP4(v->texCoords.x);AI_SWAP4(v->texCoords.y);
+				AI_SWAP4(v->normal.x);
+				AI_SWAP4(v->normal.y);
+				AI_SWAP4(v->normal.z);
+				AI_SWAP4(v->texCoords.x);
+				AI_SWAP4(v->texCoords.y);
 #endif        
 
+				// Fill out output structure
 				VertexInfo& vert = mVertices[m];
+
 				vert.uv.x = v->texCoords.x;  vert.uv.y = v->texCoords.y; 
 				vert.normal = v->normal;
 				vert.start  = (unsigned int)mWeights.size();
 				vert.num    = v->numWeights;
 
+				// Now compute the final vertex position by averaging
+				// the positions affecting this vertex, weighting by
+				// the given vertex weights.
 				for (unsigned int l = 0; l < vert.num; ++l)
 				{
 				}
 			}
 
-			// find out how large the output weight buffers must be
+			// Find out how large the output weight buffers must be
 			LE_NCONST MDR::Triangle* tri = (LE_NCONST MDR::Triangle*)((uint8_t*)surf+surf->ofsTriangles);
 			LE_NCONST MDR::Triangle* const triEnd = tri + surf->numTriangles;
 			for (; tri != triEnd; ++tri)
 			{
 				for (unsigned int o = 0; o < 3;++o)
 				{
+					// Big endian: swap the 32 Bit index
 #ifndef AI_BUILD_BIG_ENDIAN        
 					AI_SWAP4(tri->indexes[o]);
 #endif          
@@ -274,7 +349,7 @@ void MDRImporter::InternReadFile( const std::string& pFile,
 				}
 			}
 
-			// allocate storage for output bone weights
+			// Allocate storage for output bone weights
 			for (unsigned int p = 0; p < mesh->mNumBones;++p)
 			{
 				aiBone* bone = mesh->mBones[p];
@@ -285,10 +360,11 @@ void MDRImporter::InternReadFile( const std::string& pFile,
 			// and build the final output buffers
 		}
 
-		// get a pointer to the next surface
+		// Get a pointer to the next surface and continue
 		surf = (LE_NCONST MDR::Surface*)((uint8_t*)surf + surf->ofsEnd);	
 	}
 
+	// Copy the vector to the C-style output array
 	pScene->mNumMeshes = (unsigned int) outMeshes.size();
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 	::memcpy(pScene->mMeshes,&outMeshes[0],sizeof(void*)*pScene->mNumMeshes);

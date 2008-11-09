@@ -131,6 +131,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS	"imp.ase.reconn"
 
 
+
 // ---------------------------------------------------------------------------
 /** \brief Configures the LWO loader to load just one layer from the model.
  * 
@@ -138,9 +139,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * only one of them. This property can be either a string - which specifies
  * the name of the layer - or an integer - the index of the layer. If the
  * property is not set the whole LWO model is loaded. Loading fails if the
- * requested layer is not available.
+ * requested layer is not available. The layer index is zero-based and the
+ * layer name may not be empty.
  */
 #define AI_CONFIG_IMPORT_LWO_ONE_LAYER_ONLY			"imp.lwo.layer"
+
+
+// ---------------------------------------------------------------------------
+/** \brief Defines the output frame rate of the IRR loader.
+ * 
+ * IRR animations are difficult to convert for Assimp and there will
+ * always be a loss of quality. This setting defines how many keys per second
+ * the converter will compute.<br>
+ * Property type: integer. Default value: 100
+ */
+#define AI_CONFIG_IMPORT_IRR_ANIM_FPS				"imp.irr.fps"
 
 
 // ---------------------------------------------------------------------------
@@ -253,7 +266,13 @@ enum aiComponent
 	//! Removes all materials. One default material will
 	//! be generated, so aiScene::mNumMaterials will be 1.
 	//! This makes no real sense without the aiComponent_TEXTURES flag.
-	aiComponent_MATERIALS = 0x800
+	aiComponent_MATERIALS = 0x800,
+
+
+	/** This value is not used. It is just there to force the
+	 *  compiler to map this enum to a 32 Bit integer.
+	 */
+	_aiComponent_Force32Bit = 0x9fffffff
 };
 
 #define aiComponent_COLORSn(n) (1u << (n+20u))

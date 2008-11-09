@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
+// ---------------------------------------------------------------------------
 /** A time-value pair specifying a certain 3D vector for the given time. */
 struct aiVectorKey
 {
@@ -77,6 +78,8 @@ struct aiVectorKey
 #endif
 };
 
+
+// ---------------------------------------------------------------------------
 /** A time-value pair specifying a rotation for the given time. For joint 
  *  animations the rotation is usually expressed using a quaternion.
  */
@@ -105,34 +108,58 @@ struct aiQuatKey
 #endif
 };
 
+// ---------------------------------------------------------------------------
+/** Defines how an animation channel behaves outside the defined time
+ *  range. This corresponds to aiNodeAnim::mPreState and 
+ *  aiNodeAnim::mPostState.
+ */
 enum aiAnimBehaviour
 {
-	// --- Wert aus Node-Transformation wird übernommen
+	/** The value from the default node transformation is taken
+	 */
 	aiAnimBehaviour_DEFAULT  = 0x0,  
 
-	// -- Nächster Key wird verwendet
+	/** The nearest key is used
+	 */
 	aiAnimBehaviour_CONSTANT = 0x1,
 
-	// -- Nächste beiden Keys werden linear extrapoliert
+	/** The value of the nearest two keys is linearly
+	 *  extrapolated for the current time value.
+	 */
 	aiAnimBehaviour_LINEAR   = 0x2,
 
-	// -- Animation wird wiederholt
-	// Und das solange bis die Animationszeit (aiAnimation::mDuration)
-	// abgelaufen ist. Ist diese 0 läuft das ganze ewig.
-	aiAnimBehaviour_REPEAT   = 0x3
+	/** The animation is repeated.
+	 *
+	 *  If the animation key go from n to m and the current
+	 *  time is t, use the value at (t-n) % (|m-n|).
+	 */
+	aiAnimBehaviour_REPEAT   = 0x3,
+
+
+
+	/** This value is not used, it is just here to force the
+	 *  the compiler to map this enum to a 32 Bit integer 
+	 */
+	_aiAnimBehaviour_Force32Bit = 0x8fffffff
 };
 
+// ---------------------------------------------------------------------------
 /** Describes the animation of a single node. The name specifies the 
  *  bone/node which is affected by this animation channel. The keyframes
  *  are given in three separate series of values, one each for position, 
  *  rotation and scaling. The transformation matrix computed from these
  *  values replaces the node's original transformation matrix at a
- *  spefific time. 
+ *  spefific time. The order in which the transformations are applied is
+ *  - as usual - scaling, rotation, translation.
+ *
+ *  @note All keys are returned in their correct, chronological order.
+ *  Duplicate keys don't pass the validation step. Most likely there
+ *  will be no negative time keys, but they are not forbidden ...
  */
 struct aiNodeAnim
 {
 	/** The name of the node affected by this animation. The node 
-	 *  must exist anf it must be unique.
+	 *  must exist and it must be unique.
 	 */
 	C_STRUCT aiString mNodeName;
 
@@ -172,7 +199,21 @@ struct aiNodeAnim
 	C_STRUCT aiVectorKey* mScalingKeys;
 
 
-	aiAnimBehaviour mPrePostState;
+	/** Defines how the animation behaves before the first
+	 *  key is encountered.
+	 *
+	 *  The default value is aiAnimBehaviour_DEFAULT (the original
+	 *  transformation matrix of the affacted node is taken).
+	 */
+	aiAnimBehaviour mPreState;
+
+	/** Defines how the animation behaves after the last 
+	 *  kway was encountered.
+	 *
+	 *  The default value is aiAnimBehaviour_DEFAULT (the original
+	 *  transformation matrix of the affacted node is taken).
+	 */
+	aiAnimBehaviour mPostState;
 
 #ifdef __cplusplus
 	aiNodeAnim()
@@ -180,6 +221,8 @@ struct aiNodeAnim
 		mNumPositionKeys = 0; mPositionKeys = NULL; 
 		mNumRotationKeys= 0; mRotationKeys = NULL; 
 		mNumScalingKeys = 0; mScalingKeys = NULL; 
+
+		mPreState = mPostState = aiAnimBehaviour_DEFAULT;
 	}
 
 	~aiNodeAnim()
@@ -191,6 +234,7 @@ struct aiNodeAnim
 #endif // __cplusplus
 };
 
+// ---------------------------------------------------------------------------
 /** An animation consists of keyframe data for a number of nodes. For 
  *  each node affected by the animation a separate series of data is given.
  */
@@ -223,7 +267,7 @@ struct aiAnimation
 #ifdef __cplusplus
 	aiAnimation()
 	{
-		mDuration = 0;
+		mDuration = -1.;
 		mTicksPerSecond = 0;
 		mNumChannels = 0; mChannels = NULL;
 	}

@@ -386,6 +386,7 @@ protected:
 	bool configSpeedFlag;
 	unsigned int configLayerIndex;
 	std::string  configLayerName;
+	bool hasNamedLayer;
 };
 
 

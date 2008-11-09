@@ -79,6 +79,12 @@ struct aiQuaternion
 	bool operator!= (const aiQuaternion& o) const
 		{return !(*this == o);}
 
+	/** Normalize the quaternion */
+	aiQuaternion& Normalize();
+
+	/** Multiply two quaternions */
+	aiQuaternion operator* (const aiQuaternion& two) const;
+
 	/** Performs a spherical interpolation between two quaternions and writes the result into the third.
 	 * @param pOut Target object to received the interpolated rotation.
 	 * @param pStart Start rotation of the interpolation at factor == 0.
@@ -246,6 +252,30 @@ inline void aiQuaternion::Interpolate( aiQuaternion& pOut, const aiQuaternion& p
   pOut.y = sclp * pStart.y + sclq * end.y;
   pOut.z = sclp * pStart.z + sclq * end.z;
   pOut.w = sclp * pStart.w + sclq * end.w;
+}
+
+// ---------------------------------------------------------------------------
+inline aiQuaternion& aiQuaternion::Normalize()
+{
+	// compute the magnitude and divide through it
+	const float mag = x*x+y*y+z*z+w*w;
+	if (mag)
+	{
+		x /= mag;
+		y /= mag;
+		z /= mag;
+		w /= mag;
+	}
+	return *this;
+}
+
+// ---------------------------------------------------------------------------
+inline aiQuaternion aiQuaternion::operator* (const aiQuaternion& t) const
+{
+	return aiQuaternion(w*t.w - x*t.x - y*t.y - z*t.z,
+		w*t.x + x*t.w + y*t.z - z*t.y,
+		w*t.y + y*t.w + z*t.x - x*t.z,
+		w*t.z + z*t.w + x*t.y - y*t.x);
 }
 
 } // end extern "C"

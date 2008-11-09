@@ -117,6 +117,14 @@ protected:
 	*/
 	void ValidateLODHeader(BE_NCONST MDR::LOD* pcLOD);
 
+	// -------------------------------------------------------------------
+	/** Uncompress a matrix
+	 *
+	 *  @param mat Destination matrix
+	 *  @param compressed Pointer to 24 bytesof compressed data
+	*/
+	void MatrixUncompress(aiMatrix4x4& mat,const uint8_t * compressed);
+
 protected:
 
 
@@ -141,6 +149,9 @@ protected:
 
 	/** size of the file, in bytes */
 	unsigned int fileSize;
+
+	/** compressed frames? */
+	bool compressed;
 };
 
 } // end of namespace Assimp

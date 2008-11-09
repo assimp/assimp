@@ -870,19 +870,12 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 					DefaultLogger::get()->error("IRRMESH: Not enough indices");
 
 				// Finish processing the mesh - do some small material workarounds
-				if (curMatFlags == AI_IRRMESH_MAT_trans_vertex_alpha && !useColors)
+				if (curMatFlags & AI_IRRMESH_MAT_trans_vertex_alpha && !useColors)
 				{
 					// Take the opacity value of the current material
 					// from the common vertex color alpha
 					MaterialHelper* mat = (MaterialHelper*)curMat;
 					mat->AddProperty(&curColors[0].a,1,AI_MATKEY_OPACITY);
-				}
-
-				// store the material flags for later use
-				curMesh->mNumUVComponents[3] = curMatFlags;
-				if ( curMatFlags & AI_IRRMESH_MAT_lightmap )
-				{
-					needLightMap = true;
 				}
 			}}
 			break;

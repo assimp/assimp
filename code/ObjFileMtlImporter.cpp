@@ -189,17 +189,13 @@ void ObjFileMtlImporter::getColorRGBA( aiColor3D *pColor )
 	ai_assert( NULL != pColor );
 	
 	float r, g, b;
-	m_DataIt = CopyNextWord<DataArrayIt>( m_DataIt, m_DataItEnd, m_buffer, BUFFERSIZE );
-	r = (float) fast_atof(m_buffer);
-
-	m_DataIt = CopyNextWord<DataArrayIt>( m_DataIt, m_DataItEnd, m_buffer, BUFFERSIZE );
-	g = (float) fast_atof(m_buffer);
-
-	m_DataIt = CopyNextWord<DataArrayIt>( m_DataIt, m_DataItEnd, m_buffer, BUFFERSIZE );
-	b = (float) fast_atof(m_buffer);
-
+	m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, r );
 	pColor->r = r;
+	
+	m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, g );
 	pColor->g = g;
+
+	m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, b );
 	pColor->b = b;
 }
 

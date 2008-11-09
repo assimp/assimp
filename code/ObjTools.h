@@ -51,10 +51,13 @@ namespace Assimp
 *	@param	token	Token to search in
 *	@return	true, if token is a space			
 */
-inline bool isSpace(char token)
+inline bool isSpace( char token )
 {
-	return (token == ' ' || token == '\n' || token == '\f' || token == '\r' ||
-		token == '\t');
+	return ( token == ' ' || 
+			token == '\n' || 
+			token == '\f' || 
+			token == '\r' ||
+			token == '\t' );
 }
 
 /**	@brief	Returns true, fi token id a new line marking token.
@@ -72,7 +75,7 @@ inline bool isNewLine( char token )
  *	@return	Pointer to next space
  */
 template<class Char_T>
-inline Char_T getNextWord(Char_T pBuffer, Char_T pEnd)
+inline Char_T getNextWord( Char_T pBuffer, Char_T pEnd )
 {
 	while (pBuffer != pEnd)
 	{
@@ -89,25 +92,25 @@ inline Char_T getNextWord(Char_T pBuffer, Char_T pEnd)
  *	@return	Pointer to next token
  */
 template<class Char_T>
-inline Char_T getNextToken(Char_T pBuffer, Char_T pEnd)
+inline Char_T getNextToken( Char_T pBuffer, Char_T pEnd )
 {
 	while (pBuffer != pEnd)
 	{
-		if (isSpace(*pBuffer))
+		if ( isSpace( *pBuffer ) )
 			break;
 		pBuffer++;
 	}
-	return getNextWord(pBuffer, pEnd);
+	return getNextWord( pBuffer, pEnd );
 }
 
 /**	@brief	Skips a line
- *	@param	Iterator set to current position
- *	@param	Iterator set to end of scratch buffer for readout
- *	@param	Current linenumber in format
+ *	@param	it		Iterator set to current position
+ *	@param	end		Iterator set to end of scratch buffer for readout
+ *	@param	uiLine	Current linenumber in format
  *	@return	Current-iterator with new position
  */
 template<class char_t>
-inline char_t skipLine(char_t it, char_t end, unsigned int &uiLine)
+inline char_t skipLine( char_t it, char_t end, unsigned int &uiLine )
 {
 	while ( it != end && *it != '\n' )
 		++it;
@@ -119,6 +122,12 @@ inline char_t skipLine(char_t it, char_t end, unsigned int &uiLine)
 	return it;
 }
 
+/**	@brief	Get a name, must be separated with a blank.
+ *	@param	it		set to current position
+ *	@param	end		set to end of scratch buffer for readout
+ *	@param	name	Separated name
+ *	@return	Current-iterator with new position
+ */
 template<class char_t>
 inline char_t getName( char_t it, char_t end, std::string &name )
 {
@@ -141,6 +150,13 @@ inline char_t getName( char_t it, char_t end, std::string &name )
 	return it;
 }
 
+/**	@brief	Get next word from given line
+ *	@param	it		set to current position
+ *	@param	end		set to end of scratch buffer for readout
+ *	@param	pBuffer	Buffer for next word
+ *	@param	length	Buffer length
+ *	@return	Current-iterator with new position
+ */
 template<class char_t>
 inline char_t CopyNextWord( char_t it, char_t end, char *pBuffer, size_t length )
 {
@@ -158,6 +174,23 @@ inline char_t CopyNextWord( char_t it, char_t end, char *pBuffer, size_t length 
 	return it;
 }
 
+/**	@brief	Get next float from given line
+ *	@param	it		set to current position
+ *	@param	end		set to end of scratch buffer for readout
+ *	@param	value	Separated float value.
+ *	@return	Current-iterator with new position
+ */
+template<class char_t>
+inline char_t getFloat( char_t it, char_t end, float &value )
+{
+	static const size_t BUFFERSIZE = 1024;
+	char buffer[ BUFFERSIZE ];
+	memset( buffer, '\0', BUFFERSIZE );
+	it = CopyNextWord<char_t>( it, end, buffer, BUFFERSIZE );
+	value = (float) fast_atof( buffer );
+
+	return it;
+}
 
 } // Namespace Assimp
 

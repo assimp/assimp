@@ -267,60 +267,36 @@ void B3DImporter::ReadVRTS(){
 void B3DImporter::ReadTRIS(){
 	int matid=ReadInt();
 
-	for( vector<Vertex>::iterator it=_vertices.begin();it!=_vertices.end();++it ){
-		it->index=-1;
-	}
-
-	vector<int> verts,tris;
-
-	while( ChunkSize() ){
-		int i=ReadInt();
-		Vertex &vert=_vertices[i];
-		if( vert.index==-1 ){
-			vert.index=verts.size();
-			verts.push_back( i );
-		}
-		tris.push_back( vert.index );
-	}
-
-	if( verts.empty() || tris.empty() ) return;
-
-	unsigned n_verts=verts.size();
-	unsigned n_tris=tris.size()/3;
-
-	//OK, we have a whole mesh...
-	aiVector3D *mv=new aiVector3D[n_verts];
-	aiVector3D *mn=new aiVector3D[n_verts];
-	aiVector3D *mc=new aiVector3D[n_verts];
-	for( unsigned i=0;i<n_verts;++i ){
-		Vertex &v=_vertices[verts[i]];
-		memcpy( &mv[i].x,&v.position.x,12 );
-		memcpy( &mn[i].x,&v.normal.x,12 );
-		memcpy( &mc[i].x,&v.texcoords.x,12 );
-	}
-
-	aiFace *faces=new aiFace[n_tris];
-	for( unsigned i=0;i<n_tris;++i ){
-		faces[i].mNumIndices=3;
-		unsigned *ip=faces[i].mIndices=new unsigned[3];
-		ip[0]=tris[i*3];
-		ip[1]=tris[i*3+1];
-		ip[2]=tris[i*3+2];
-	}
-
+	unsigned n_tris=ChunkSize()/12;
+	unsigned n_verts=n_tris*3;
+	
 	aiMesh *mesh=new aiMesh;
+	_meshes.push_back( mesh );
 
 	mesh->mMaterialIndex=matid;
-
 	mesh->mNumVertices=n_verts;
-	mesh->mVertices=mv;
-	mesh->mNormals=mn;
-	mesh->mTextureCoords[0]=mc;
-
 	mesh->mNumFaces=n_tris;
-	mesh->mFaces=faces;
+	mesh->mPrimitiveTypes=aiPrimitiveType_TRIANGLE;
 
-	_meshes.push_back( mesh );
+	aiVector3D *mv=mesh->mVertices=new aiVector3D[n_verts];
+	aiVector3D *mn=mesh->mNormals=new aiVector3D[n_verts];
+	aiVector3D *mc=mesh->mTextureCoords[0]=new aiVector3D[n_verts];
+
+	aiFace *face=mesh->mFaces=new aiFace[n_tris];
+
+	for( unsigned i=0;i<n_verts;i+=3 ){
+		face->mNumIndices=3;
+		unsigned *ip=face->mIndices=new unsigned[3];
+		for( unsigned j=0;j<3;++j ){
+			int k=ReadInt();
+			const Vertex &v=_vertices[k];
+			memcpy( mv++,&v.position.x,12 );
+			memcpy( mn++,&v.normal.x,12 );
+			memcpy( mc++,&v.texcoords.x,12 );
+			*ip++=i+j;
+		}
+		++face;
+	}
 }
 
 void B3DImporter::ReadMESH(){

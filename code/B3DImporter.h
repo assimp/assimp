@@ -69,7 +69,7 @@ private:
 	struct Vec3{ float x,y,z; };
 	struct Vec4{ float x,y,z,w; };
 	struct Texture{ std::string name; };
-	struct Vertex{ int index;Vec3 position,normal,texcoords; };
+	struct Vertex{ Vec3 position,normal,texcoords; };
 
 	int ReadByte();
 	int ReadInt();

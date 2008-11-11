@@ -11,7 +11,7 @@ Thanks for your help!
 Configuration-Interface, AssImp-Viewer (Win32), Website (Admin and Design), admin.
 
 -Thomas Schulze,
-X-Loader, Preprocessing framework. Data structure & Interface design, documentation.
+X-, BVH-Loader, Postprocessing framework. Data structure & Interface design, documentation.
 
 -R.Schmidt,
 Linux build, eclipse support.
@@ -22,6 +22,9 @@ Obj-Loader, Logging, Scons-build environment.
 - Matthias Gubisch,
 Assimp.net
 Visual Studio 9 support, bugfixes.
+
+- Mark Sibly
+B3D-Loader, Assimp testing
 
 - Sebastian Hempel,
 PyAssimp

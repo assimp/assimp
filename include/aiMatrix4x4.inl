@@ -282,6 +282,25 @@ inline aiMatrix4x4& aiMatrix4x4::RotationZ(float a, aiMatrix4x4& out)
 	out.a2 = -(out.b1 = sin(a));
 	return out;
 }
+
+// ---------------------------------------------------------------------------
+// Returns a rotation matrix for a rotation around an arbitrary axis.
+inline aiMatrix4x4& aiMatrix4x4::Rotation( float a, const aiVector3D& axis, aiMatrix4x4& out)
+{
+  float c = cos( a), s = sin( a), t = 1 - c;
+  float x = axis.x, y = axis.y, z = axis.z;
+
+  // Many thanks to MathWorld and Wikipedia
+  out.a1 = t*x*x + c;   out.a2 = t*x*y - s*z; out.a3 = t*x*z + s*y;
+  out.b1 = t*x*y + s*z; out.b2 = t*y*y + c;   out.b3 = t*y*z - s*x;
+  out.c1 = t*x*z - s*y; out.c2 = t*y*z + s*x; out.c3 = t*z*z + c;
+  out.a4 = out.b4 = out.c4 = 0.0f;
+  out.d1 = out.d2 = out.d3 = 0.0f;
+  out.d4 = 1.0f;
+
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 inline aiMatrix4x4& aiMatrix4x4::Translation( const aiVector3D& v, aiMatrix4x4& out)
 {

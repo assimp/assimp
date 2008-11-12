@@ -129,6 +129,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_B3D_IMPORTER
 #	include "B3DImporter.h"
 #endif
+#ifndef AI_BUILD_NO_COLLADA_IMPORTER
+#	include "ColladaLoader.h"
+#endif
 
 
 // PostProcess-Steps
@@ -282,6 +285,9 @@ Importer::Importer() :
 #endif
 #if (!defined AI_BUILD_NO_B3D_IMPORTER)
 	mImporter.push_back( new B3DImporter());
+#endif
+#if (!defined AI_BUILD_NO_COLLADA_IMPORTER)
+	mImporter.push_back( new ColladaLoader());
 #endif
 
 	// add an instance of each post processing step here in the order 

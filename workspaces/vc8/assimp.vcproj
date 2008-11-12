@@ -1422,6 +1422,26 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="Collada"
+					>
+					<File
+						RelativePath="..\..\code\ColladaLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\ColladaLoader.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\ColladaParser.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\ColladaParser.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="PostProcess"

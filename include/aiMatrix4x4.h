@@ -142,6 +142,14 @@ struct aiMatrix4x4
 	 */
 	static aiMatrix4x4& RotationZ(float a, aiMatrix4x4& out);
 
+	/** Returns a rotation matrix for a rotation around an arbitrary axis.
+	 *  @param a Rotation angle, in radians
+	 *  @param axis Rotation axis, should be a normalized vector.
+	 *  @param out Receives the output matrix
+	 *  \return Reference to the output matrix
+	 */
+	static aiMatrix4x4& Rotation(float a, const aiVector3D& axis, aiMatrix4x4& out);
+
 	/** \brief Returns a translation matrix 
 	 *  \param v Translation vector
 	 *  \param out Receives the output matrix

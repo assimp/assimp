@@ -410,6 +410,10 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 	for( unsigned int a = 0; a < pData->mAnims.size(); a++)
 	{
 		const XFile::Animation* anim = pData->mAnims[a];
+    // some exporters mock me with empty animation tags.
+    if( anim->mAnims.size() == 0)
+      continue;
+
 		// create a new animation to hold the data
 		aiAnimation* nanim = new aiAnimation;
 		newAnims.push_back( nanim);

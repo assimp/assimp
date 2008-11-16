@@ -360,7 +360,7 @@ void PretransformVertices::Execute( aiScene* pScene)
 				}
 				iFaces = 0;
 				while ((*j) & (0x1000000 << iFaces))
-					pcMesh->mColors[iFaces] = new aiColor4D[iVertices];
+					pcMesh->mColors[iFaces++] = new aiColor4D[iVertices];
 
 				// fill the mesh ...
 				unsigned int aiTemp[2] = {0,0};

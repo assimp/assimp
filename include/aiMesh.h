@@ -452,9 +452,14 @@ struct aiMesh
 			delete [] mTextureCoords[a];
 		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
 			delete [] mColors[a];
-		for( unsigned int a = 0; a < mNumBones; a++)
-			delete mBones[a];
-		delete [] mBones;
+
+		// DO NOT REMOVE THIS ADDITIONAL CHECK
+		if (mNumBones && mBones)
+		{
+			for( unsigned int a = 0; a < mNumBones; a++)
+				delete mBones[a];
+			delete [] mBones;
+		}
 		delete [] mFaces;
 	}
 

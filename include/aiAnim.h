@@ -274,11 +274,14 @@ struct aiAnimation
 
 	~aiAnimation()
 	{
-		if (mNumChannels)
+		// DO NOT REMOVE THIS ADDITIONAL CHECK
+		if (mNumChannels && mChannels)
+		{
 			for( unsigned int a = 0; a < mNumChannels; a++)
 				delete mChannels[a];
 
 		delete [] mChannels;
+		}
 	}
 #endif // __cplusplus
 };

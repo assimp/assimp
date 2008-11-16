@@ -298,7 +298,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 						for (VertexWeightTable::const_iterator it = tbl.begin(), end = tbl.end();
 							 it != end; ++it)
 						{
-							tempBones[ (*it).first ].push_back( aiVertexWeight(idx, (*it).second) );
+							tempBones[ (*it).first ].push_back( aiVertexWeight(outIdx, (*it).second) );
 						}
 					}
 
@@ -355,7 +355,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 					bone->mNumWeights = (unsigned int)in.size();
 					bone->mWeights = new aiVertexWeight[bone->mNumWeights];
 
-					::memcpy(bone->mWeights,&in[0],bone->mNumWeights*sizeof(void*));
+					::memcpy(bone->mWeights,&in[0],bone->mNumWeights*sizeof(aiVertexWeight));
 
 					++real;
 				}

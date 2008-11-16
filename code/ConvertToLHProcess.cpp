@@ -141,6 +141,10 @@ void ConvertToLHProcess::Execute( aiScene* pScene)
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 		ProcessMesh( pScene->mMeshes[a]);
 
+	// process all materials - we need to adjust UV transformations
+	for( unsigned int a = 0; a < pScene->mNumMaterials; a++)
+		ProcessMaterial( pScene->mMaterials[a]);
+
 	// transform all animation channels affecting the root node as well
 	for( unsigned int a = 0; a < pScene->mNumAnimations; a++)
 	{
@@ -153,6 +157,25 @@ void ConvertToLHProcess::Execute( aiScene* pScene)
 		}
 	}
 	DefaultLogger::get()->debug("ConvertToLHProcess finished");
+}
+
+// ------------------------------------------------------------------------------------------------
+// Converts a single material to left handed coordinates. 
+void ConvertToLHProcess::ProcessMaterial (aiMaterial* mat)
+{
+	for (unsigned int a = 0; a < mat->mNumProperties;++a)
+	{
+		aiMaterialProperty* prop = mat->mProperties[a];
+		if (!::strcmp( prop->mKey.data, "$tex.uvtrafo"))
+		{
+			ai_assert( prop->mDataLength >= sizeof(aiUVTransform));
+			aiUVTransform* uv = (aiUVTransform*)prop->mData;
+
+			// just flip it, that's everything
+			uv->mTranslation.y *= -1.f;
+			uv->mRotation *= -1.f;
+		}
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

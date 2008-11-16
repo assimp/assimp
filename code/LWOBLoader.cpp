@@ -45,11 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 
-// internal headers
+// Internal headers
 #include "LWOLoader.h"
-#include "MaterialSystem.h"
-#include "ByteSwap.h"
-
 using namespace Assimp;
 
 

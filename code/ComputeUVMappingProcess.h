@@ -38,42 +38,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines a post processing step to convert all data to a left-handed coordinate system.*/
-#ifndef AI_CONVERTTOLHPROCESS_H_INC
-#define AI_CONVERTTOLHPROCESS_H_INC
+/** @file Defines a post processing step to compute UV coordinates
+  from abstract mappings, such as box or spherical*/
+#ifndef AI_COMPUTEUVMAPPING_H_INC
+#define AI_COMPUTEUVMAPPING_H_INC
 
-#include "../include/aiTypes.h"
 #include "BaseProcess.h"
+#include "../include/aiMesh.h"
 
-struct aiMesh;
-struct aiNodeAnim;
-
+class ComputeUVMappingTest;
 namespace Assimp
-{
+	{
 
 // ---------------------------------------------------------------------------
-/** The ConvertToLHProcess converts all imported data to a left-handed coordinate
- * system. This implies inverting the Z axis for all transformation matrices
- * invert the orientation of all faces, and adapting skinning and animation 
- * data in a similar way.
- */
-class ASSIMP_API ConvertToLHProcess : public BaseProcess
+/** ComputeUVMappingProcess - converts special mappings, such as spherical,
+ *  cylindrical or boxed to proper UV coordinates for rendering.
+*/
+class ASSIMP_API ComputeUVMappingProcess : public BaseProcess
 {
 	friend class Importer;
+	friend class ::ComputeUVMappingTest; // grant the unit test full access to us
 
 protected:
 	/** Constructor to be privately used by Importer */
-	ConvertToLHProcess();
+	ComputeUVMappingProcess();
 
 	/** Destructor, private as well */
-	~ConvertToLHProcess();
+	~ComputeUVMappingProcess();
 
 public:
 	// -------------------------------------------------------------------
 	/** Returns whether the processing step is present in the given flag field.
-	 * @param pFlags The processing flags the importer was called with. A bitwise
-	 *   combination of #aiPostProcessSteps.
-	 * @return true if the process is present in this flag fields, false if not.
+	* @param pFlags The processing flags the importer was called with. A bitwise
+	*   combination of #aiPostProcessSteps.
+	* @return true if the process is present in this flag fields, false if not.
 	*/
 	bool IsActive( unsigned int pFlags) const;
 
@@ -84,56 +82,44 @@ public:
 	*/
 	void Execute( aiScene* pScene);
 
-	// -------------------------------------------------------------------
-	/** Static helper function to convert a vector/matrix from DX coords to OGL coords.
-	 * @param poMatrix The matrix to convert.
-	 */
-	static void ConvertToOGL( aiVector3D& poVector);
-	static void ConvertToOGL( aiMatrix3x3& poMatrix);
-	static void ConvertToOGL( aiMatrix4x4& poMatrix);
-
-	// -------------------------------------------------------------------
-	/** Static helper function to convert a vector/matrix from OGL coords back to DX coords.
-	 * @param poMatrix The matrix to convert.
-	 */
-	static void ConvertToDX( aiVector3D& poVector);
-	static void ConvertToDX( aiMatrix3x3& poMatrix);
-	static void ConvertToDX( aiMatrix4x4& poMatrix);
-
 protected:
-	// -------------------------------------------------------------------
-	/** Converts a single mesh to left handed coordinates. 
-	 * This simply means the order of all faces is inverted.
-	 * @param pMesh The mesh to convert.
-	 */
-	void ProcessMesh( aiMesh* pMesh);
 
 	// -------------------------------------------------------------------
-	/** Converts a single material to left handed coordinates. 
-	 * This simply means all UV offsets are inverted.
-	 * @param mat The material to convert.
-	 */
-	void ProcessMaterial (aiMaterial* mat);
+	/** Computes spherical UV coordinates for a mesh
+	 *
+	 *  @param mesh Mesh to be processed
+	 *  @param axis Main axis
+	 *  @return Index of the newly generated UV channel
+	*/
+	unsigned int ComputeSphereMapping(aiMesh* mesh,aiAxis axis);
 
 	// -------------------------------------------------------------------
-	/** Converts the given animation to LH coordinates. 
-	 * The rotation and translation keys are transformed, the scale keys
-	 * work in local space and can therefore be left untouched.
-	 * @param pAnim The bone animation to transform
-	 */
-	void ProcessAnimation( aiNodeAnim* pAnim);
+	/** Computes cylindrical UV coordinates for a mesh
+	 *
+	 *  @param mesh Mesh to be processed
+	 *  @param axis Main axis
+	 *  @return Index of the newly generated UV channel
+	*/
+	unsigned int ComputeCylinderMapping(aiMesh* mesh,aiAxis axis);
 
-	//! true if the transformation matrix for the OGL-to-DX is 
-	//! directly used to transform all vertices.
-	mutable bool bTransformVertices;
+	// -------------------------------------------------------------------
+	/** Computes planar UV coordinates for a mesh
+	 *
+	 *  @param mesh Mesh to be processed
+	 *  @param axis Main axis
+	 *  @return Index of the newly generated UV channel
+	*/
+	unsigned int ComputePlaneMapping(aiMesh* mesh,aiAxis axis);
 
-public:
-	/** The transformation matrix to convert from DirectX coordinates to OpenGL coordinates. */
-	static const aiMatrix3x3 sToOGLTransform;
-	/** The transformation matrix to convert from OpenGL coordinates to DirectX coordinates. */
-	static const aiMatrix3x3 sToDXTransform;
+	// -------------------------------------------------------------------
+	/** Computes cubic UV coordinates for a mesh
+	 *
+	 *  @param mesh Mesh to be processed
+	 *  @return Index of the newly generated UV channel
+	*/
+	unsigned int ComputeBoxMapping(aiMesh* mesh);
 };
 
 } // end of namespace Assimp
 
-#endif // AI_CONVERTTOLHPROCESS_H_INC
+#endif // AI_COMPUTEUVMAPPING_H_INC

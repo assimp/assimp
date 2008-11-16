@@ -74,7 +74,10 @@ SOURCES = AssimpPCH.cpp \
 	Q3DLoader.cpp \
 	ScenePreprocessor.cpp \
 	B3DImporter.cpp \
-	TargetAnimation.cpp
+	TargetAnimation.cpp \
+	ComputeUVMappingProcess.cpp  \
+	ColladaLoader.cpp \
+	ColladaParser.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 

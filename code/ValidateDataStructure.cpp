@@ -418,7 +418,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 		{
 			if (face.mIndices[a] >= pMesh->mNumVertices)
 			{
-				this->ReportError("aiMesh::mFaces[%i]::mIndices[%i] is out of range",i,a);
+				ReportError("aiMesh::mFaces[%i]::mIndices[%i] is out of range",i,a);
 			}
 			// the MSB flag is temporarily used by the extra verbose
 			// mode to tell us that the JoinVerticesProcess might have 
@@ -523,6 +523,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 		ReportError("aiMesh::mBones is non-null although there are no bones");
 	}
 }
+
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::Validate( const aiMesh* pMesh,
 	const aiBone* pBone,float* afSum)
@@ -548,6 +549,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh,
 		afSum[pBone->mWeights[i].mVertexId] += pBone->mWeights[i].mWeight;
 	}
 }
+
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::Validate( const aiAnimation* pAnimation)
 {
@@ -576,36 +578,54 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation)
 	// Animation duration is allowed to be zero in cases where the anim contains only a single key frame.
 	// if (!pAnimation->mDuration)this->ReportError("aiAnimation::mDuration is zero");
 }
+
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
-	const char* szType)
+	aiTextureType type)
 {
-	ai_assert(NULL != szType);
+	const char* szType;
+	switch (type)
+	{
+	case aiTextureType_DIFFUSE:
+		szType = "Diffuse";break;
 
-	// search all keys of the material ...
-	// textures must be specified with rising indices (e.g. diffuse #2 may not be
-	// specified if diffuse #1 is not there ...)
+	case aiTextureType_SPECULAR:
+		szType = "Specular";break;
 
-	// "$tex.file.<szType>[<index>]"
-	char szBaseBuf[512];
-	int iLen;
-	iLen = ::sprintf(szBaseBuf,"$tex.file.%s",szType);
-	if (0 >= iLen)return;
+	case aiTextureType_AMBIENT:
+		szType = "Ambient";break;
+
+	case aiTextureType_EMISSIVE:
+		szType = "Emissive";break;
+
+	case aiTextureType_OPACITY:
+		szType = "Opacity";break;
+
+	case aiTextureType_SHININESS:
+		szType = "Shininess";break;
+
+	case aiTextureType_NORMALS:
+		szType = "Normals";break;
+
+	case aiTextureType_HEIGHT:
+		szType = "Height";break;
+	};
+
+	// ****************************************************************************
+	// Search all keys of the material ...
+	// textures must be specified with ascending indices 
+	// (e.g. diffuse #2 may not be specified if diffuse #1 is not there ...)
+	// ****************************************************************************
 
 	int iNumIndices = 0;
 	int iIndex = -1;
 	for (unsigned int i = 0; i < pMaterial->mNumProperties;++i)
 	{
 		aiMaterialProperty* prop = pMaterial->mProperties[i];
-		if (0 == ASSIMP_strincmp( prop->mKey.data, szBaseBuf, iLen ))
+		if (!::strcmp(prop->mKey.data,"$tex.file") && prop->mSemantic == type)
 		{
-			const char* sz = &prop->mKey.data[iLen];
-			if (*sz)
-			{
-				++sz;
-				iIndex = std::max(iIndex, (int)strtol10(sz,0));
-				++iNumIndices;
-			}
+			iIndex = std::max(iIndex, (int) prop->mIndex);
+			++iNumIndices;
 
 			if (aiPTI_String != prop->mType)
 				this->ReportError("Material property %s is expected to be a string",prop->mKey.data);
@@ -613,52 +633,73 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 	}
 	if (iIndex +1 != iNumIndices)
 	{
-		this->ReportError("%s #%i is set, but there are only %i %s textures",
+		ReportError("%s #%i is set, but there are only %i %s textures",
 			szType,iIndex,iNumIndices,szType);
 	}
 	if (!iNumIndices)return;
 
-	// now check whether all UV indices are valid ...
-	iLen = ::sprintf(szBaseBuf,"$tex.uvw.%s",szType);
-	if (0 >= iLen)return;
+	// TODO: check whether the mappings are correctly
+	std::vector<aiTextureMapping> mappings(iNumIndices);
 
+	// Now check whether all UV indices are valid ...
 	bool bNoSpecified = true;
 	for (unsigned int i = 0; i < pMaterial->mNumProperties;++i)
 	{
 		aiMaterialProperty* prop = pMaterial->mProperties[i];
-		if (0 == ASSIMP_strincmp( prop->mKey.data, szBaseBuf, iLen ))
+		if (prop->mSemantic != type)continue;
+
+		if ((int)prop->mIndex >= iNumIndices)
+		{
+			ReportError("Found texture property with index %i, although there "
+				"are only %i textures of type %s",
+				prop->mIndex, iNumIndices, szType);
+		}
+			
+		if (!::strcmp(prop->mKey.data,"$tex.mapping"))
+		{
+			if (aiPTI_Integer != prop->mType || prop->mDataLength < sizeof(aiTextureMapping))
+			{
+				ReportError("Material property %s%i is expected to be an integer (size is %i)",
+					prop->mKey.data,prop->mIndex,prop->mDataLength);
+			}
+			mappings[prop->mIndex] = *((aiTextureMapping*)prop->mData);
+		}
+		else if (!::strcmp(prop->mKey.data,"$tex.uvtrafo"))
+		{
+			if (aiPTI_Float != prop->mType || prop->mDataLength < sizeof(aiUVTransform))
+			{
+				ReportError("Material property %s%i is expected to be 5 floats large (size is %i)",
+					prop->mKey.data,prop->mIndex, prop->mDataLength);
+			}
+			mappings[prop->mIndex] = *((aiTextureMapping*)prop->mData);
+		}
+		else if (!::strcmp(prop->mKey.data,"$tex.uvwsrc"))
 		{
 			if (aiPTI_Integer != prop->mType || sizeof(int) > prop->mDataLength)
-				this->ReportError("Material property %s is expected to be an integer",prop->mKey.data);
-
-			const char* sz = &prop->mKey.data[iLen];
-			if (*sz)
 			{
-				++sz;
-				iIndex = strtol10(sz,NULL);
-				bNoSpecified = false;
+				ReportError("Material property %s%i is expected to be an integer (size is %i)",
+					prop->mKey.data,prop->mIndex,prop->mDataLength);
+			}
+			bNoSpecified = false;
 
-				// ignore UV indices for texture channel that are not there ...
-				if (iIndex >= iNumIndices)
+			// Ignore UV indices for texture channels that are not there ...
+
+			// Get the value
+			iIndex = *((unsigned int*)prop->mData);
+
+			// Check whether there is a mesh using this material
+			// which has not enough UV channels ...
+			for (unsigned int a = 0; a < mScene->mNumMeshes;++a)
+			{
+				aiMesh* mesh = this->mScene->mMeshes[a];
+				if(mesh->mMaterialIndex == (unsigned int)i)
 				{
-					// get the value
-					iIndex = *((unsigned int*)prop->mData);
-
-					// check whether there is a mesh using this material
-					// which has not enough UV channels ...
-					for (unsigned int a = 0; a < mScene->mNumMeshes;++a)
+					int iChannels = 0;
+					while (mesh->HasTextureCoords(iChannels))++iChannels;
+					if (iIndex >= iChannels)
 					{
-						aiMesh* mesh = this->mScene->mMeshes[a];
-						if(mesh->mMaterialIndex == (unsigned int)iIndex)
-						{
-							int iChannels = 0;
-							while (mesh->HasTextureCoords(iChannels))++iChannels;
-							if (iIndex >= iChannels)
-							{
-								this->ReportError("Invalid UV index: %i (key %s). Mesh %i has only %i UV channels",
-									iIndex,prop->mKey.data,a,iChannels);
-							}
-						}
+						ReportError("Invalid UV index: %i (key %s). Mesh %i has only %i UV channels",
+							iIndex,prop->mKey.data,a,iChannels);
 					}
 				}
 			}
@@ -669,7 +710,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 		// Assume that all textures are using the first UV channel
 		for (unsigned int a = 0; a < mScene->mNumMeshes;++a)
 		{
-			aiMesh* mesh = this->mScene->mMeshes[a];
+			aiMesh* mesh = mScene->mMeshes[a];
 			if(mesh->mMaterialIndex == (unsigned int)iIndex)
 			{
 				if (!mesh->mTextureCoords[0])
@@ -766,15 +807,16 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 	}
 
 	// check whether there are invalid texture keys
-	SearchForInvalidTextures(pMaterial,"diffuse");
-	SearchForInvalidTextures(pMaterial,"specular");
-	SearchForInvalidTextures(pMaterial,"ambient");
-	SearchForInvalidTextures(pMaterial,"emissive");
-	SearchForInvalidTextures(pMaterial,"opacity");
-	SearchForInvalidTextures(pMaterial,"shininess");
-	SearchForInvalidTextures(pMaterial,"normals");
-	SearchForInvalidTextures(pMaterial,"height");
+	SearchForInvalidTextures(pMaterial,aiTextureType_DIFFUSE);
+	SearchForInvalidTextures(pMaterial,aiTextureType_SPECULAR);
+	SearchForInvalidTextures(pMaterial,aiTextureType_AMBIENT);
+	SearchForInvalidTextures(pMaterial,aiTextureType_EMISSIVE);
+	SearchForInvalidTextures(pMaterial,aiTextureType_OPACITY);
+	SearchForInvalidTextures(pMaterial,aiTextureType_SHININESS);
+	SearchForInvalidTextures(pMaterial,aiTextureType_HEIGHT);
+	SearchForInvalidTextures(pMaterial,aiTextureType_NORMALS);
 }
+
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::Validate( const aiTexture* pTexture)
 {
@@ -806,7 +848,7 @@ void ValidateDSProcess::Validate( const aiTexture* pTexture)
 	}
 
 	const char* sz = pTexture->achFormatHint;
- 	if (	sz[0] >= 'A' && sz[0] <= 'Z' ||
+ 	if (sz[0] >= 'A' && sz[0] <= 'Z' ||
 		sz[1] >= 'A' && sz[1] <= 'Z' ||
 		sz[2] >= 'A' && sz[2] <= 'Z' ||
 		sz[3] >= 'A' && sz[3] <= 'Z')
@@ -814,35 +856,13 @@ void ValidateDSProcess::Validate( const aiTexture* pTexture)
 		this->ReportError("aiTexture::achFormatHint contains non-lowercase characters");
 	}
 }
+
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 	 const aiNodeAnim* pNodeAnim)
 {
-	this->Validate(&pNodeAnim->mNodeName);
+	Validate(&pNodeAnim->mNodeName);
 
-#if 0
-	// check whether there is a bone with this name ...
-	unsigned int i = 0;
-	for (; i < this->mScene->mNumMeshes;++i)
-	{
-		aiMesh* mesh = this->mScene->mMeshes[i];
-		for (unsigned int a = 0; a < mesh->mNumBones;++a)
-		{
-			if (mesh->mBones[a]->mName == pNodeAnim->mBoneName)
-				goto __break_out;
-		}
-	}
-__break_out:
-	if (i == this->mScene->mNumMeshes)
-	{
-		this->ReportWarning("aiNodeAnim::mBoneName is \"%s\". However, no bone with this name was found",
-			pNodeAnim->mBoneName.data);
-	}
-	if (!pNodeAnim->mNumPositionKeys && !pNodeAnim->mNumRotationKeys && !pNodeAnim->mNumScalingKeys)
-	{
-		this->ReportWarning("A bone animation channel has no keys");
-	}
-#endif
 	// otherwise check whether one of the keys exceeds the total duration of the animation
 	if (pNodeAnim->mNumPositionKeys)
 	{
@@ -934,11 +954,12 @@ __break_out:
 		ReportError("A node animation channel must have at least one subtrack");
 	}
 }
+
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::Validate( const aiNode* pNode)
 {
-	if (!pNode)this->ReportError("A node of the scenegraph is NULL");
-	if (pNode != this->mScene->mRootNode && !pNode->mParent)
+	if (!pNode)ReportError("A node of the scenegraph is NULL");
+	if (pNode != mScene->mRootNode && !pNode->mParent)
 		this->ReportError("A node has no valid parent (aiNode::mParent is NULL)");
 
 	this->Validate(&pNode->mName);
@@ -948,21 +969,21 @@ void ValidateDSProcess::Validate( const aiNode* pNode)
 	{
 		if (!pNode->mMeshes)
 		{
-			this->ReportError("aiNode::mMeshes is NULL (aiNode::mNumMeshes is %i)",
+			ReportError("aiNode::mMeshes is NULL (aiNode::mNumMeshes is %i)",
 				pNode->mNumMeshes);
 		}
 		std::vector<bool> abHadMesh;
-		abHadMesh.resize(this->mScene->mNumMeshes,false);
+		abHadMesh.resize(mScene->mNumMeshes,false);
 		for (unsigned int i = 0; i < pNode->mNumMeshes;++i)
 		{
-			if (pNode->mMeshes[i] >= this->mScene->mNumMeshes)
+			if (pNode->mMeshes[i] >= mScene->mNumMeshes)
 			{
-				this->ReportError("aiNode::mMeshes[%i] is out of range (maximum is %i)",
-					pNode->mMeshes[i],this->mScene->mNumMeshes-1);
+				ReportError("aiNode::mMeshes[%i] is out of range (maximum is %i)",
+					pNode->mMeshes[i],mScene->mNumMeshes-1);
 			}
 			if (abHadMesh[pNode->mMeshes[i]])
 			{
-				this->ReportError("aiNode::mMeshes[%i] is already referenced by this node (value: %i)",
+				ReportError("aiNode::mMeshes[%i] is already referenced by this node (value: %i)",
 					i,pNode->mMeshes[i]);
 			}
 			abHadMesh[pNode->mMeshes[i]] = true;
@@ -977,10 +998,11 @@ void ValidateDSProcess::Validate( const aiNode* pNode)
 		}
 		for (unsigned int i = 0; i < pNode->mNumChildren;++i)
 		{
-			this->Validate(pNode->mChildren[i]);
+			Validate(pNode->mChildren[i]);
 		}
 	}
 }
+
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::Validate( const aiString* pString)
 {
@@ -995,11 +1017,11 @@ void ValidateDSProcess::Validate( const aiString* pString)
 		if ('\0' == *sz)
 		{
 			if (pString->length != (unsigned int)(sz-pString->data))
-				this->ReportError("aiString::data is invalid: the terminal zero is at a wrong offset");
+				ReportError("aiString::data is invalid: the terminal zero is at a wrong offset");
 			break;
 		}
 		else if (sz >= &pString->data[MAXLEN])
-			this->ReportError("aiString::data is invalid. There is no terminal character");
+			ReportError("aiString::data is invalid. There is no terminal character");
 		++sz;
 	}
 }

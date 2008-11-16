@@ -230,7 +230,6 @@ enum aiPostProcessSteps
 	*/
 	aiProcess_FindDegenerates = 0x10000,
 
-
 	/** This step searches all meshes for invalid data, such as zeroed
 	 *  normal vectors or invalid UV coords and removes them.
 	 *
@@ -240,6 +239,26 @@ enum aiPostProcessSteps
 	 * The step will also remove meshes that are infinitely small.
 	*/
 	aiProcess_FindInvalidData = 0x20000,
+
+	/** This step converts non-UV mappings (such as spherical or
+	 *  cylindrical) to proper UV mapping channels.
+	 *
+	 * Most applications will support UV mapping only, so you will
+	 * propably want to specify this step in every case.
+	*/
+	aiProcess_GenUVCoords = 0x40000,
+
+	/** This step pretransforms UV coordinates by the UV transformations
+	 *  (such as scalings or rotations).
+	 *
+	 * UV transformations are specified per-texture - see the
+	 * AI_MATKEY_UVTRANSFORM key for more information on this topic.
+	 * This step finds all textures with transformed input UV
+	 * coordinates and generates a new, transformed, UV channel for it.
+	 * Most applications won't support UV transformations, so you will
+	 * propably want to specify this step in every case.
+	*/
+	aiProcess_TransformUVCoords = 0x80000,
 };
 
 
@@ -254,7 +273,8 @@ enum aiPostProcessSteps
 	aiProcess_CalcTangentSpace		|  \
 	aiProcess_GenNormals			|  \
 	aiProcess_JoinIdenticalVertices |  \
-	aiProcess_Triangulate
+	aiProcess_Triangulate			|  \
+	aiProcess_GenUVCoords
 
 
  /** @def AI_POSTPROCESS_DEFAULT_REALTIME
@@ -274,7 +294,8 @@ enum aiPostProcessSteps
 	aiProcess_RemoveRedundantMaterials      |  \
 	aiProcess_SplitLargeMeshes				|  \
 	aiProcess_OptimizeGraph					|  \
-	aiProcess_Triangulate
+	aiProcess_Triangulate					|  \
+	aiProcess_GenUVCoords
 
 
 #ifdef __cplusplus

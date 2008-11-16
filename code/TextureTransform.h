@@ -38,56 +38,107 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Definition of a helper class that processes texture transformations */
+/** @file Definition of a helper step that processes texture transformations */
 #ifndef AI_TEXTURE_TRANSFORM_H_INCLUDED
 #define AI_TEXTURE_TRANSFORM_H_INCLUDED
 
 #include "BaseImporter.h"
-#include "../include/aiTypes.h"
-#include "../include/aiMaterial.h"
-#include "../include/aiMesh.h"
-
+#include "BaseProcess.h"
 
 struct aiNode;
-#include "3DSHelper.h"
 
-namespace Assimp
+namespace Assimp	{
+
+#define AI_TT_UV_IDX_LOCK_TBD	0xffffffff
+#define AI_TT_UV_IDX_LOCK_NONE	0xeeeeeeee
+
+
+#define AI_TT_ROTATION_EPSILON	((float)AI_DEG_TO_RAD(0.5))
+
+// ---------------------------------------------------------------------------
+/** Small helper structure representing a shortcut into the material list
+ *  to be able to update some values quickly.
+*/
+struct TTUpdateInfo
 {
+	TTUpdateInfo()
+		:	mat				(NULL)
+		,	directShortcut	(NULL)
+		,	semantic		(0)
+		,	index			(0)
+	{}
 
-using namespace Assimp::D3DS;
+	//! Direct shortcut, if available
+	unsigned int* directShortcut;
+
+	//! Material 
+	MaterialHelper* mat;
+
+	//! Texture type and index
+	unsigned int semantic, index;
+};
+
 
 // ---------------------------------------------------------------------------
 /** Helper class representing texture coordinate transformations
 */
-struct STransformVecInfo 
+struct STransformVecInfo : public aiUVTransform
 {
-	//! Construction. The resulting matrix is the identity
-	STransformVecInfo ()
-		: 
-		fScaleU(1.0f),fScaleV(1.0f),
-		fOffsetU(0.0f),fOffsetV(0.0f),
-		fRotation(0.0f),
-		iUVIndex(0)
+
+	STransformVecInfo()
+		:	uvIndex		(0)
+		,	mapU		(aiTextureMapMode_Wrap)
+		,	mapV		(aiTextureMapMode_Wrap)
+		,	lockedPos	(AI_TT_UV_IDX_LOCK_NONE)
 	{}
 
-	//! Texture coordinate scaling in the x-direction 
-	float fScaleU;
-	//! Texture coordinate scaling in the y-direction 
-	float fScaleV;
-	//! Texture coordinate offset in the x-direction
-	float fOffsetU;
-	//! Texture coordinate offset in the y-direction
-	float fOffsetV;
-	//! Texture coordinate rotation, clockwise, in radians
-	float fRotation;
-
 	//! Source texture coordinate index
-	unsigned int iUVIndex;
+	unsigned int uvIndex;
+
+	//! Texture mapping mode in the u, v direction
+	aiTextureMapMode mapU,mapV;
+
+	//! Locked destination UV index
+	//! AI_TT_UV_IDX_LOCK_TBD - to be determined
+	//! AI_TT_UV_IDX_LOCK_NONE - none (default)
+	unsigned int lockedPos;
+
+	//! Update info - shortcuts into all materials
+	//! that are referencing this transform setup
+	std::list<TTUpdateInfo> updateList;
 
 
-	//! List of all textures that use this texture
-	//! coordinate transformations
-	std::vector<D3DS::Texture*> pcTextures; 
+	// -------------------------------------------------------------------
+	/** Compare two transform setups
+	*/
+	inline bool operator== (const STransformVecInfo& other) const
+	{
+		// We use a small epsilon here
+		const float epsilon = 0.05f;
+
+		if (fabs( mTranslation.x - other.mTranslation.x ) > epsilon ||
+			fabs( mTranslation.y - other.mTranslation.y ) > epsilon)
+		{
+			return false;
+		}
+
+		if (fabs( mScaling.x - other.mScaling.x ) > epsilon ||
+			fabs( mScaling.y - other.mScaling.y ) > epsilon)
+		{
+			return false;
+		}
+
+		if (fabs( mRotation - other.mRotation) > epsilon)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	inline bool operator!= (const STransformVecInfo& other) const
+	{
+			return !(*this == other);
+	}
 
 
 	// -------------------------------------------------------------------
@@ -95,8 +146,9 @@ struct STransformVecInfo
 	*/
 	inline bool IsUntransformed() const
 	{
-		return 1.0f == fScaleU && 1.0f == fScaleV &&
-			!fOffsetU && !fOffsetV && !fRotation;
+		return (1.0f == mScaling.x && 1.f == mScaling.y &&
+			!mTranslation.x && !mTranslation.y && 
+			mRotation < AI_TT_ROTATION_EPSILON);
 	}
 
 	// -------------------------------------------------------------------
@@ -106,26 +158,26 @@ struct STransformVecInfo
 	{
 		mOut = aiMatrix3x3();
 
-		if (1.0f != this->fScaleU || 1.0f != this->fScaleV)
+		if (1.0f != mScaling.x || 1.0f != mScaling.y)
 		{
 			aiMatrix3x3 mScale;
-			mScale.a1 = this->fScaleU;
-			mScale.b2 = this->fScaleV;
+			mScale.a1 = mScaling.x;
+			mScale.b2 = mScaling.y;
 			mOut = mScale;
 		}
-		if (this->fRotation)
+		if (mRotation)
 		{
 			aiMatrix3x3 mRot; 
-			mRot.a1 = mRot.b2 = cosf(this->fRotation);
-			mRot.a2 = mRot.b1 = sinf(this->fRotation);
+			mRot.a1 = mRot.b2 = cos(mRotation);
+			mRot.a2 = mRot.b1 = sin(mRotation);
 			mRot.a2 = -mRot.a2;
 			mOut *= mRot;
 		}
-		if (this->fOffsetU || this->fOffsetV)
+		if (mTranslation.x || mTranslation.y)
 		{
 			aiMatrix3x3 mTrans; 
-			mTrans.a3 = this->fOffsetU;
-			mTrans.b3 = this->fOffsetV;
+			mTrans.a3 = mTranslation.x;
+			mTrans.b3 = mTranslation.y;
 			mOut *= mTrans;
 		}
 	}
@@ -133,73 +185,39 @@ struct STransformVecInfo
 
 
 // ---------------------------------------------------------------------------
-/** Helper class used by the ASE/ASK and 3DS loaders to handle texture
- *  coordinate transformations correctly (such as offsets, scaling)
+/** Helper step to compute final UV coordinate sets if there are scalings
+ *  or rotations in the original data read from the file.
 */
-class ASSIMP_API TextureTransform
+class ASSIMP_API TextureTransformStep : public BaseProcess
 {
-	//! Constructor, it is not possible to create instances of this class
-	TextureTransform() {}
 public:
 
+	TextureTransformStep();
+	~TextureTransformStep();
 
 	// -------------------------------------------------------------------
-	/** Returns true if a texture requires UV transformations
-	 * \param rcIn Input texture
-	*/
-	inline static bool HasUVTransform(
-		const D3DS::Texture& rcIn)
-	{
-		return (rcIn.mOffsetU || rcIn.mOffsetV ||
-			1.0f != rcIn.mScaleU  ||  1.0f != rcIn.mScaleV || rcIn.mRotation);
-	}
+	bool IsActive( unsigned int pFlags) const;
 
 	// -------------------------------------------------------------------
-	/** Must be called before HasUVTransform(rcIn) is called 
-	 * \param rcIn Input texture
-	*/
-	static void PreProcessUVTransform(
-		D3DS::Texture& rcIn);
+	void Execute( aiScene* pScene);
 
 	// -------------------------------------------------------------------
-	/** Check whether the texture coordinate transformation of
-	 *  a texture is already contained in a given list
-	 * \param rasVec List of transformations
-	 * \param pcTex Pointer to the texture
-	*/
-	static void AddToList(std::vector<STransformVecInfo>& rasVec,
-		D3DS::Texture* pcTex);
+	void SetupProperties(const Importer* pImp);
+
+
+protected:
+
 
 	// -------------------------------------------------------------------
-	/** Get a full list of all texture coordinate offsets required
-	 *  for a material
-	 * \param materials List of materials to be processed
+	/** Preprocess a specific UV transformation setup
+	 *
+	 *  @param info Transformation setup to be preprocessed.
 	*/
-	static void ApplyScaleNOffset(std::vector<D3DS::Material>& materials);
+	void PreProcessUVTransform(STransformVecInfo& info);
 
-	// -------------------------------------------------------------------
-	/** Get a full list of all texture coordinate offsets required
-	 *  for a material
-	 * \param material Material to be processed
-	*/
-	static void ApplyScaleNOffset(D3DS::Material& material);
+private:
 
-	// -------------------------------------------------------------------
-	/** Precompute as many texture coordinate transformations as possible
-	 * \param pcMesh Mesh containing the texture coordinate data
-	 * \param pcSrc Input material. Must have been passed to
-	 * ApplyScaleNOffset
-	*/
-	static void BakeScaleNOffset(aiMesh* pcMesh, D3DS::Material* pcSrc);
-
-	
-	// -------------------------------------------------------------------
-	/** Setup the correct UV source for a material
-	 * \param pcMat Final material to be changed
-	 * \param pcMatIn Input material, unconverted
-	*/
-	static void SetupMatUVSrc (aiMaterial* pcMat, 
-		const D3DS::Material* pcMatIn);
+	unsigned int configFlags;
 };
 
 }

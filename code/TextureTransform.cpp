@@ -44,533 +44,556 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssimpPCH.h"
 #include "TextureTransform.h"
 
-namespace Assimp
-{
+using namespace Assimp;
+
 
 // ------------------------------------------------------------------------------------------------
-void TextureTransform::PreProcessUVTransform(
-	D3DS::Texture& rcIn)
+// Constructor to be privately used by Importer
+TextureTransformStep::TextureTransformStep()
 {
+	// nothing to do here
+}
+
+// ------------------------------------------------------------------------------------------------
+// Destructor, private as well
+TextureTransformStep::~TextureTransformStep()
+{
+	// nothing to do here
+}
+
+// ------------------------------------------------------------------------------------------------
+// Returns whether the processing step is present in the given flag field.
+bool TextureTransformStep::IsActive( unsigned int pFlags) const
+{
+	return	(pFlags & aiProcess_TransformUVCoords) != 0;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Setup properties
+void TextureTransformStep::SetupProperties(const Importer* pImp)
+{
+	configFlags = pImp->GetPropertyInteger(AI_CONFIG_PP_TUV_EVALUATE,AI_UVTRAFO_ALL);
+}
+
+// ------------------------------------------------------------------------------------------------
+void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
+{
+	/*  This function tries to simplify the input UV transformation.
+	 *  That's very important as it allows us to reduce the number 
+	 *  of output UV channels. The oder in which the transformations
+	 *  are applied is - as always - scaling, rotation, translation.
+	 */
+
 	char szTemp[512];
-	int iField;
+	int rounded = 0;
 
-	if (rcIn.mOffsetU)
+
+	/* Optimize the rotation angle. That's slightly difficult as
+	 * we have an inprecise floating-point number (when comparing
+	 * UV transformations we'll take that into account by using
+	 * an epsilon of 5 degrees). If there is a rotation value, we can't
+	 * perform any further optimizations.
+	 */
+	if (info.mRotation)
 	{
-		if ((iField = (int)rcIn.mOffsetU))
+		float out = info.mRotation;
+		if ((rounded = (int)(info.mRotation / (float)AI_MATH_TWO_PI)))
 		{
-			if (aiTextureMapMode_Wrap == rcIn.mMapMode)
-			{
-				float fNew = rcIn.mOffsetU-(float)iField;
-				sprintf(szTemp,"[wrap] Found texture coordinate U offset %f. "
-					"This can be optimized to %f",rcIn.mOffsetU,fNew);
-	
-				DefaultLogger::get()->info(szTemp);
-				rcIn.mOffsetU = fNew;
-			}
-			else if (aiTextureMapMode_Mirror == rcIn.mMapMode)
-			{
-				if (0 != (iField % 2))iField--;
-				float fNew = rcIn.mOffsetU-(float)iField;
+			out -= rounded*(float)AI_MATH_PI;
 
-				sprintf(szTemp,"[mirror] Found texture coordinate U offset %f. "
-					"This can be optimized to %f",rcIn.mOffsetU,fNew);
-
-				DefaultLogger::get()->info(szTemp);
-				rcIn.mOffsetU = fNew;
-			}
-			else if (aiTextureMapMode_Clamp == rcIn.mMapMode)
-			{
-				sprintf(szTemp,"[clamp] Found texture coordinate U offset %f. "
-					"This can be clamped to 1.0f",rcIn.mOffsetU);
-
-				DefaultLogger::get()->info(szTemp);
-				rcIn.mOffsetU = 1.0f;
-			}
-		}
-	}
-	if (rcIn.mOffsetV)
-	{
-		if ((iField = (int)rcIn.mOffsetV))
-		{
-			if (aiTextureMapMode_Wrap == rcIn.mMapMode)
-			{
-				float fNew = rcIn.mOffsetV-(float)iField;
-				sprintf(szTemp,"[wrap] Found texture coordinate V offset %f. "
-					"This can be optimized to %f",rcIn.mOffsetV,fNew);
-
-				DefaultLogger::get()->info(szTemp);
-				rcIn.mOffsetV = fNew;
-			}
-			else if (aiTextureMapMode_Mirror == rcIn.mMapMode)
-			{
-				if (0 != (iField % 2))iField--;
-				float fNew = rcIn.mOffsetV-(float)iField;
-
-				sprintf(szTemp,"[mirror] Found texture coordinate V offset %f. "
-					"This can be optimized to %f",rcIn.mOffsetV,fNew);
-				
-				DefaultLogger::get()->info(szTemp);
-				rcIn.mOffsetV = fNew;
-			}
-			else if (aiTextureMapMode_Clamp == rcIn.mMapMode)
-			{
-				sprintf(szTemp,"[clamp] Found texture coordinate U offset %f. "
-					"This can be clamped to 1.0f",rcIn.mOffsetV);
-
-				DefaultLogger::get()->info(szTemp);
-				rcIn.mOffsetV = 1.0f;
-			}
-		}
-	}
-	if (rcIn.mRotation)
-	{
-		if ((iField = (int)(rcIn.mRotation / 3.141592654f)))
-		{
-			float fNew = rcIn.mRotation-(float)iField*3.141592654f;
-
-			sprintf(szTemp,"[wrap] Found texture coordinate rotation %f. "
-				"This can be optimized to %f",rcIn.mRotation,fNew);
+			sprintf(szTemp,"Texture coordinate rotation %f can "
+				"be simplified to %f",info.mRotation,out);
 			DefaultLogger::get()->info(szTemp);
+		}
 
-			rcIn.mRotation = fNew;
+		// Next step - convert negative rotation angles to positives
+		if (out < 0.f)
+			out = (float)AI_MATH_TWO_PI * 2 + out;
+
+		info.mRotation = out;
+		return;
+	}
+
+	float absTranslationX = info.mScaling.x * info.mTranslation.x;
+	float absTranslationY = info.mScaling.y * info.mTranslation.y;
+
+	/* Optimize UV translation in the U direction. To determine whether
+	 * or not we can optimize we need to look at the requested mapping
+	 * type (e.g. if mirroring is active there IS a difference between
+	 * offset 2 and 3)
+	 */
+	if ((rounded  = (int)absTranslationX))
+	{
+		float out;
+		szTemp[0] = 0;
+		if (aiTextureMapMode_Wrap == info.mapU)
+		{
+			// Wrap - simple take the fraction of the field
+			out = (absTranslationX-(float)rounded) / info.mScaling.x;
+			sprintf(szTemp,"[w] UV U offset %f can "
+				"be simplified to %f",info.mTranslation.x,out);
+		}
+		else if (aiTextureMapMode_Mirror == info.mapU && 1 != rounded)
+		{
+			// Mirror 
+			if (rounded % 2)rounded--;
+			out = (absTranslationX-(float)rounded) / info.mScaling.x;
+
+			sprintf(szTemp,"[m/d] UV U offset %f can "
+				"be simplified to %f",info.mTranslation.x,out);
+		}
+		else if (aiTextureMapMode_Clamp == info.mapU || aiTextureMapMode_Decal == info.mapU)
+		{
+			// Clamp - translations beyond 1,1 are senseless
+			sprintf(szTemp,"[c] UV U offset %f can "
+				"be clamped to 1.0f",info.mTranslation.x);
+
+			out = 1.f;
+		}
+		if (szTemp[0])
+		{
+			DefaultLogger::get()->info(szTemp);
+			info.mTranslation.x = out;
+		}
+	}
+
+	/* Optimize UV translation in the V direction. To determine whether
+	 * or not we can optimize we need to look at the requested mapping
+	 * type (e.g. if mirroring is active there IS a difference between
+	 * offset 2 and 3)
+	 */
+	if ((rounded  = (int)absTranslationY))
+	{
+		float out;
+		szTemp[0] = 0;
+		if (aiTextureMapMode_Wrap == info.mapV)
+		{
+			// Wrap - simple take the fraction of the field
+			out = (absTranslationY-(float)rounded) / info.mScaling.y;
+			sprintf(szTemp,"[w] UV V offset %f can "
+				"be simplified to %f",info.mTranslation.y,out);
+		}
+		else if (aiTextureMapMode_Mirror == info.mapV  && 1 != rounded)
+		{
+			// Mirror 
+			if (rounded % 2)rounded--;
+			out = (absTranslationY-(float)rounded) / info.mScaling.y;
+
+			sprintf(szTemp,"[m/d] UV V offset %f can "
+				"be simplified to %f",info.mTranslation.y,out);
+		}
+		else if (aiTextureMapMode_Clamp == info.mapV || aiTextureMapMode_Decal == info.mapV)
+		{
+			// Clamp - translations beyond 1,1 are senseless
+			sprintf(szTemp,"[c] UV V offset %f can"
+				"be clamped to 1.0f",info.mTranslation.y);
+
+			out = 1.f;
+		}
+		if (szTemp[0])
+		{
+			DefaultLogger::get()->info(szTemp);
+			info.mTranslation.y = out;
 		}
 	}
 	return;
 }
+
 // ------------------------------------------------------------------------------------------------
-void TextureTransform::AddToList(std::vector<STransformVecInfo>& rasVec,
-	D3DS::Texture* pcTex)
+void UpdateUVIndex(const std::list<TTUpdateInfo>& l, unsigned int n)
 {
-	// check whether the texture is existing
-	if (0 == pcTex->mMapName.length())return;
+	// Don't set if == 0 && wasn't set before
+	for (std::list<TTUpdateInfo>::const_iterator it = l.begin();
+		 it != l.end(); ++it)
+	{
+		const TTUpdateInfo& info = *it;
 
-	// search for an identical transformation in our list
-	for (std::vector<STransformVecInfo>::iterator
-		i =  rasVec.begin();
-		i != rasVec.end();++i)
-	{
-		if ((*i).fOffsetU == pcTex->mOffsetU &&
-			(*i).fOffsetV == pcTex->mOffsetV && 
-			(*i).fScaleU  == pcTex->mScaleU  &&
-			(*i).fScaleV  == pcTex->mScaleV  &&
-			(*i).fRotation == pcTex->mRotation &&
-			(*i).iUVIndex == (unsigned int)pcTex->iUVSrc)
+		if (info.directShortcut)
+			*info.directShortcut = n;
+		else if (!n)
 		{
-			(*i).pcTextures.push_back(pcTex);
-			return;
+			info.mat->AddProperty<int>((int*)&n,1,AI_MATKEY_UVWSRC(info.semantic,info.index));
 		}
-	}
-	// this is a new transformation, so add it to the list
-	STransformVecInfo sInfo;
-	sInfo.fScaleU = pcTex->mScaleU;
-	sInfo.fScaleV = pcTex->mScaleV;
-	sInfo.fOffsetU = pcTex->mOffsetU;
-	sInfo.fOffsetV = pcTex->mOffsetV;
-	sInfo.fRotation = pcTex->mRotation;
-	sInfo.iUVIndex = pcTex->iUVSrc;
-
-	// add the texture to the list
-	sInfo.pcTextures.push_back(pcTex);
-
-	// and add the transformation itself to the second list
-	rasVec.push_back(sInfo);
-}
-// ------------------------------------------------------------------------------------------------
-void TextureTransform::ApplyScaleNOffset(D3DS::Material& material)
-{
-	unsigned int iCnt = 0;
-	D3DS::Texture* pcTexture = NULL;
-
-	// diffuse texture
-	if (material.sTexDiffuse.mMapName.length())
-	{
-		PreProcessUVTransform(material.sTexDiffuse);
-		if (HasUVTransform(material.sTexDiffuse))
-		{
-			material.sTexDiffuse.bPrivate = true;
-			pcTexture = &material.sTexDiffuse;
-			++iCnt;
-		}
-	}
-	// specular texture
-	if (material.sTexSpecular.mMapName.length())
-	{
-		PreProcessUVTransform(material.sTexSpecular);
-		if (HasUVTransform(material.sTexSpecular))
-		{
-			material.sTexSpecular.bPrivate = true;
-			pcTexture = &material.sTexSpecular;
-			++iCnt;
-		}
-	}
-	// ambient texture
-	if (material.sTexAmbient.mMapName.length())
-	{
-		PreProcessUVTransform(material.sTexAmbient);
-		if (HasUVTransform(material.sTexAmbient))
-		{
-			material.sTexAmbient.bPrivate = true;
-			pcTexture = &material.sTexAmbient;
-			++iCnt;
-		}
-	}
-	// emissive texture
-	if (material.sTexEmissive.mMapName.length())
-	{
-		PreProcessUVTransform(material.sTexEmissive);
-		if (HasUVTransform(material.sTexEmissive))
-		{
-			material.sTexEmissive.bPrivate = true;
-			pcTexture = &material.sTexEmissive;
-			++iCnt;
-		}
-	}
-	// opacity texture
-	if (material.sTexOpacity.mMapName.length())
-	{
-		PreProcessUVTransform(material.sTexOpacity);
-		if (HasUVTransform(material.sTexOpacity))
-		{
-			material.sTexOpacity.bPrivate = true;
-			pcTexture = &material.sTexOpacity;
-			++iCnt;
-		}
-	}
-	// bump texture
-	if (material.sTexBump.mMapName.length())
-	{
-		PreProcessUVTransform(material.sTexBump);
-		if (HasUVTransform(material.sTexBump))
-		{
-			material.sTexBump.bPrivate = true;
-			pcTexture = &material.sTexBump;
-			++iCnt;
-		}
-	}
-	// shininess texture
-	if (material.sTexShininess.mMapName.length())
-	{
-		PreProcessUVTransform(material.sTexShininess);
-		if (HasUVTransform(material.sTexShininess))
-		{
-			material.sTexBump.bPrivate = true;
-			pcTexture = &material.sTexShininess;
-			++iCnt;
-		}
-	}
-	if (0 != iCnt)
-	{
-		// if only one texture needs scaling/offset operations
-		// we can apply them directly to the first texture
-		// coordinate sets of all meshes referencing *this* material
-		// However, we can't do it  now. We need to wait until
-		// everything is sorted by materials.
-		if (1 == iCnt && 0 == pcTexture->iUVSrc)
-		{
-			material.iBakeUVTransform = 1;
-			material.pcSingleTexture = pcTexture;
-		}
-		// we will need to generate a separate new texture channel
-		// for each texture. 
-		// However, we can't do it  now. We need to wait until
-		// everything is sorted by materials.
-		else material.iBakeUVTransform = 2;
 	}
 }
+
 // ------------------------------------------------------------------------------------------------
-void TextureTransform::ApplyScaleNOffset(std::vector<D3DS::Material>& materials)
+inline const char* MappingModeToChar(aiTextureMapMode map)
 {
-	unsigned int iNum = 0;
-	for (std::vector<D3DS::Material>::iterator
-		i =  materials.begin();
-		i != materials.end();++i,++iNum)
-	{
-		ApplyScaleNOffset(*i);
-	}
-	return;
-}
-// ------------------------------------------------------------------------------------------------
-void TextureTransform::BakeScaleNOffset(
-	aiMesh* pcMesh, D3DS::Material* pcSrc)
-{
-	// NOTE: we don't use a texture matrix to do the transformation
-	// it is more efficient this way ... 
+	if (aiTextureMapMode_Wrap == map)
+		return "-w";
 
-	if (!pcMesh->mTextureCoords[0])return;
-	if (0x1 == pcSrc->iBakeUVTransform)
-	{
-		char szTemp[512];
-		int iLen;
-#if _MSC_VER >= 1400
-		iLen = ::sprintf_s(szTemp,
-#else
-		iLen = ::sprintf(szTemp,
-#endif
-			"Transforming existing UV channel. Source UV: %i" 
-			" OffsetU: %f" 
-			" OffsetV: %f" 
-			" ScaleU: %f" 
-			" ScaleV: %f" 
-			" Rotation (rad): %f",0,
-			pcSrc->pcSingleTexture->mOffsetU,
-			pcSrc->pcSingleTexture->mOffsetV,
-			pcSrc->pcSingleTexture->mScaleU,
-			pcSrc->pcSingleTexture->mScaleV,
-			pcSrc->pcSingleTexture->mRotation);
-
-		ai_assert(0 < iLen);
-		DefaultLogger::get()->info(std::string(szTemp,iLen));
-
-		if (!pcSrc->pcSingleTexture->mRotation)
-		{
-			for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
-			{
-				// scaling
-				pcMesh->mTextureCoords[0][i].x *= pcSrc->pcSingleTexture->mScaleU;
-				pcMesh->mTextureCoords[0][i].y *= pcSrc->pcSingleTexture->mScaleV;
-
-				// offset
-				pcMesh->mTextureCoords[0][i].x += pcSrc->pcSingleTexture->mOffsetU;
-				pcMesh->mTextureCoords[0][i].y += pcSrc->pcSingleTexture->mOffsetV;
-			}
-		}
-		else
-		{
-			const float fSin = sinf(pcSrc->pcSingleTexture->mRotation);
-			const float fCos = cosf(pcSrc->pcSingleTexture->mRotation);
-			for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
-			{
-				// scaling
-				pcMesh->mTextureCoords[0][i].x *= pcSrc->pcSingleTexture->mScaleU;
-				pcMesh->mTextureCoords[0][i].y *= pcSrc->pcSingleTexture->mScaleV;
-
-				// rotation
-				pcMesh->mTextureCoords[0][i].x *= fCos;
-				pcMesh->mTextureCoords[0][i].y *= fSin;
-
-				// offset
-				pcMesh->mTextureCoords[0][i].x += pcSrc->pcSingleTexture->mOffsetU;
-				pcMesh->mTextureCoords[0][i].y += pcSrc->pcSingleTexture->mOffsetV;
-			}
-		}
-	}
-	else if (0x2 == pcSrc->iBakeUVTransform)
-	{
-		// first save all texture coordinate sets
-		aiVector3D* apvOriginalSets[AI_MAX_NUMBER_OF_TEXTURECOORDS];
-		for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
-		{
-			apvOriginalSets[i] = pcMesh->mTextureCoords[i];
-		}
-		unsigned int iNextEmpty = 0;
-		while (pcMesh->mTextureCoords[++iNextEmpty]);
-
-		aiVector3D* apvOutputSets[AI_MAX_NUMBER_OF_TEXTURECOORDS];
-		for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
-			apvOutputSets[i] = NULL;
-
-		// now we need to find all textures in the material
-		// which require scaling/offset operations
-		std::vector<STransformVecInfo> sOps;
-		sOps.reserve(10);
-		TextureTransform::AddToList(sOps,&pcSrc->sTexDiffuse);
-		TextureTransform::AddToList(sOps,&pcSrc->sTexSpecular);
-		TextureTransform::AddToList(sOps,&pcSrc->sTexEmissive);
-		TextureTransform::AddToList(sOps,&pcSrc->sTexOpacity);
-		TextureTransform::AddToList(sOps,&pcSrc->sTexBump);
-		TextureTransform::AddToList(sOps,&pcSrc->sTexShininess);
-		TextureTransform::AddToList(sOps,&pcSrc->sTexAmbient);
-
-		// check the list and find out how many we won't be able
-		// to generate.
-		std::vector<STransformVecInfo*> sFilteredOps;
-		unsigned int iNumUntransformed = 0;
-		sFilteredOps.reserve(sOps.size());
-		{
-			std::vector<STransformVecInfo*> sWishList;
-			sWishList.reserve(sOps.size());
-			for (unsigned int iUV = 0; iUV < AI_MAX_NUMBER_OF_TEXTURECOORDS;++iUV)
-			{
-				for (std::vector<STransformVecInfo>::iterator
-					i =  sOps.begin();
-					i != sOps.end();++i)
-				{
-					if (iUV != (*i).iUVIndex)continue;
-					if ((*i).IsUntransformed())
-					{
-						sFilteredOps.push_back(&(*i));
-					}
-					else sWishList.push_back(&(*i));
-				}
-			}
-			// are we able to generate all?
-			const int iDiff = AI_MAX_NUMBER_OF_TEXTURECOORDS-(int)
-				(sWishList.size()+sFilteredOps.size());
-
-			iNumUntransformed  = (unsigned int)sFilteredOps.size();
-			if (0 >= iDiff)
-			{
-				DefaultLogger::get()->warn("There are too many combinations of different "
-					"UV transformation operations to generate an own UV channel for each "
-					"(maximum is AI_MAX_NUMBER_OF_TEXTURECOORDS = 4 or 6). "
-					"An untransformed UV channel will be used for all remaining transformations");
-				
-				std::vector<STransformVecInfo*>::const_iterator nash =  sWishList.begin();
-				for (;nash != sWishList.end()-iDiff;++nash)
-				{
-					sFilteredOps.push_back(*nash);
-				}
-			}
-			else
-			{
-				for (std::vector<STransformVecInfo*>::const_iterator
-					nash =  sWishList.begin();
-					nash != sWishList.end();++nash)sFilteredOps.push_back(*nash);
-			}
-		}
-
-		// now fill in all output IV indices
-		unsigned int iNum = 0;
-		for (std::vector<STransformVecInfo*>::iterator
-			bogart =  sFilteredOps.begin();
-			bogart != sFilteredOps.end();++bogart,++iNum)
-		{
-			(**bogart).iUVIndex = iNum;
-		}
-
-		iNum = 0;
-		for (; iNum < iNumUntransformed; ++iNum)
-			pcMesh->mTextureCoords[iNum] = apvOriginalSets[iNum];
-
-		// now generate the texture coordinate sets
-		for (std::vector<STransformVecInfo*>::iterator
-			i =  sFilteredOps.begin()+iNumUntransformed;
-			i != sFilteredOps.end();++i,++iNum)
-		{
-			const aiVector3D* _pvBase = apvOriginalSets[(**i).iUVIndex];
-			aiVector3D* _pvOut = new aiVector3D[pcMesh->mNumVertices];
-			pcMesh->mTextureCoords[iNum] = _pvOut;
-
-			char szTemp[512];
-			int iLen;
-#if _MSC_VER >= 1400
-			iLen = ::sprintf_s(szTemp,
-#else
-			iLen = ::sprintf(szTemp,
-#endif
-				"Generating additional UV channel. Source UV: %i" 
-				" OffsetU: %f" 
-				" OffsetV: %f" 
-				" ScaleU: %f" 
-				" ScaleV: %f" 
-				" Rotation (rad): %f",0,
-				(**i).fOffsetU,
-				(**i).fOffsetV,
-				(**i).fScaleU,
-				(**i).fScaleV,
-				(**i).fRotation);
-			ai_assert(0 < iLen);
-			DefaultLogger::get()->info(std::string(szTemp,iLen));
-
-			const aiVector3D* pvBase = _pvBase;
-			aiVector3D* pvOut = _pvOut;
-			if (0.0f == (**i).fRotation)
-			{
-				for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
-				{
-					// scaling
-					pvOut->x = pvBase->x * (**i).fScaleU;
-					pvOut->y = pvBase->y * (**i).fScaleV;
-
-					// offset
-					pvOut->x += (**i).fOffsetU;
-					pvOut->y += (**i).fOffsetV;
-
-					pvBase++;
-					pvOut++;
-				}
-			}
-			else
-			{
-				const float fSin = sinf((**i).fRotation);
-				const float fCos = cosf((**i).fRotation);
-				for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
-				{
-					// scaling
-					pvOut->x = pvBase->x * (**i).fScaleU;
-					pvOut->y = pvBase->y * (**i).fScaleV;
-
-					// rotation
-					pvOut->x *= fCos;
-					pvOut->y *= fSin;
-
-					// offset
-					pvOut->x += (**i).fOffsetU;
-					pvOut->y += (**i).fOffsetV;
-
-					pvBase++;
-					pvOut++;
-				}
-			}
-		}
-
-		// now check which source texture coordinate sets
-		// can be deleted because they're not anymore required
-		for (iNum = 0; iNum < AI_MAX_NUMBER_OF_TEXTURECOORDS;++iNum)
-		{
-			for (unsigned int z = 0; z < iNumUntransformed;++z)
-			{
-				if (apvOriginalSets[iNum] == pcMesh->mTextureCoords[z])
-				{
-					apvOriginalSets[iNum] = NULL;
-					break;
-				}
-			}
-			if (apvOriginalSets[iNum])delete[] apvOriginalSets[iNum];
-		}
-	}
-
-	// setup bitflags to indicate which texture coordinate
-	// channels are used (this class works for 2d texture coordinates only)
-
-	unsigned int iIndex = 0;
-	while (pcMesh->HasTextureCoords(iIndex))pcMesh->mNumUVComponents[iIndex++] = 2;
-	return;
-}
-// ------------------------------------------------------------------------------------------------
-void TextureTransform::SetupMatUVSrc (aiMaterial* pcMat, const D3DS::Material* pcMatIn)
-{
-	ai_assert(NULL != pcMat);
-	ai_assert(NULL != pcMatIn);
+	if (aiTextureMapMode_Mirror == map)
+		return "-m";
 	
-	MaterialHelper* pcHelper = (MaterialHelper*)pcMat;
-
-	if(pcMatIn->sTexDiffuse.mMapName.length() > 0)
-		pcHelper->AddProperty<int>(&pcMatIn->sTexDiffuse.iUVSrc,1,
-			AI_MATKEY_UVWSRC_DIFFUSE(0));
-
-	if(pcMatIn->sTexSpecular.mMapName.length() > 0)
-		pcHelper->AddProperty<int>(&pcMatIn->sTexSpecular.iUVSrc,1,
-			AI_MATKEY_UVWSRC_SPECULAR(0));
-
-	if(pcMatIn->sTexEmissive.mMapName.length() > 0)
-		pcHelper->AddProperty<int>(&pcMatIn->sTexEmissive.iUVSrc,1,
-			AI_MATKEY_UVWSRC_EMISSIVE(0));
-
-	if(pcMatIn->sTexBump.mMapName.length() > 0)
-		pcHelper->AddProperty<int>(&pcMatIn->sTexBump.iUVSrc,1,
-			AI_MATKEY_UVWSRC_HEIGHT(0));
-
-	if(pcMatIn->sTexShininess.mMapName.length() > 0)
-		pcHelper->AddProperty<int>(&pcMatIn->sTexShininess.iUVSrc,1,
-			AI_MATKEY_UVWSRC_SHININESS(0));
-
-	if(pcMatIn->sTexOpacity.mMapName.length() > 0)
-		pcHelper->AddProperty<int>(&pcMatIn->sTexOpacity.iUVSrc,1,
-			AI_MATKEY_UVWSRC_OPACITY(0));
-
-	if(pcMatIn->sTexAmbient.mMapName.length() > 0)
-		pcHelper->AddProperty<int>(&pcMatIn->sTexAmbient.iUVSrc,1,
-			AI_MATKEY_UVWSRC_AMBIENT(0));
+	return "-c";
 }
-};
+
+// ------------------------------------------------------------------------------------------------
+void TextureTransformStep::Execute( aiScene* pScene) 
+{
+	DefaultLogger::get()->debug("TransformUVCoordsProcess begin");
+	
+
+	/*  We build a per-mesh list of texture transformations we'll need
+	 *  to apply. To achieve this, we iterate through all materials, 
+	 *  find all textures and get their transformations and UV indices. 
+	 *  Then we search for all meshes using this material.
+	 */
+	typedef std::list<STransformVecInfo> MeshTrafoList;
+	std::vector<MeshTrafoList> meshLists(pScene->mNumMeshes);
+
+	for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
+	{
+		aiMaterial* mat = pScene->mMaterials[i];
+		for (unsigned int a = 0; a < mat->mNumProperties;++a)
+		{
+			aiMaterialProperty* prop = mat->mProperties[a];
+			if (!::strcmp( prop->mKey.data, "$tex.file"))
+			{
+				STransformVecInfo info;
+
+				// Setup a shortcut structure to allow for a fast updating
+				// of the UV index later
+				TTUpdateInfo update;
+				update.mat = (MaterialHelper*) mat;
+				update.semantic = prop->mSemantic;
+				update.index = prop->mIndex;
+
+				// Get textured properties and transform
+				for (unsigned int a2 = 0; a2 < mat->mNumProperties;++a2)
+				{
+					aiMaterialProperty* prop2 = mat->mProperties[a2];
+					if (prop2->mSemantic != prop->mSemantic || prop2->mIndex != prop->mIndex)
+						continue;
+
+					if ( !::strcmp( prop2->mKey.data, "$tex.uvwsrc"))
+					{
+						info.uvIndex = *((int*)prop2->mData);
+
+						// Store a direct pointer for later use
+						update.directShortcut = (unsigned int*) &prop2->mData;
+					}
+
+					else if ( !::strcmp( prop2->mKey.data, "$tex.mapmodeu"))
+						info.mapU = *((aiTextureMapMode*)prop2->mData);
+
+					else if ( !::strcmp( prop2->mKey.data, "$tex.mapmodev"))
+						info.mapV = *((aiTextureMapMode*)prop2->mData);
+
+					else if ( !::strcmp( prop2->mKey.data, "$tex.uvtrafo"))
+					{
+						// ValidateDS should check this
+						ai_assert(prop2->mDataLength >= 20); 
+
+						::memcpy(&info.mTranslation.x,prop2->mData,
+							sizeof(float)*5);
+
+						delete[] prop2->mData;
+
+						// Directly remove this property from the list 
+						mat->mNumProperties--;
+						for (unsigned int a3 = a2; a3 < mat->mNumProperties;++a3)
+							mat->mProperties[a3] = mat->mProperties[a3+1];
+
+						// Warn: could be an underflow, but nevertheless it should work
+						--a2; 
+					}
+				}
+
+				// Find out which transformations are to be evaluated
+				if (!(configFlags & AI_UVTRAFO_ROTATION))
+					info.mRotation = 0.f;
+
+				if (!(configFlags & AI_UVTRAFO_SCALING))
+					info.mScaling = aiVector2D(1.f,1.f);
+
+				if (!(configFlags & AI_UVTRAFO_TRANSLATION))
+					info.mTranslation = aiVector2D(0.f,0.f);
+
+				// Do some preprocessing
+				PreProcessUVTransform(info);
+				info.uvIndex = std::min(info.uvIndex,AI_MAX_NUMBER_OF_TEXTURECOORDS -1u);
+
+				// Find out whether this material is used by more than
+				// one mesh. This will make our task much, much more difficult!
+				unsigned int cnt = 0;
+				for (unsigned int n = 0; n < pScene->mNumMeshes;++n)
+				{
+					if (pScene->mMeshes[n]->mMaterialIndex == i)
+						++cnt;
+				}
+
+				if (!cnt)continue;
+				else if (1 != cnt)
+				{
+					// This material is referenced by more than one mesh!
+					// So we need to make sure the UV index for the texture
+					// is identical for each of it ...
+					info.lockedPos = AI_TT_UV_IDX_LOCK_TBD;
+				}
+
+				// Get all coresponding meshes
+				for (unsigned int n = 0; n < pScene->mNumMeshes;++n)
+				{
+					aiMesh* mesh = pScene->mMeshes[n];
+					if (mesh->mMaterialIndex != i || !mesh->mTextureCoords[0]) continue;
+
+					unsigned int uv = info.uvIndex;
+					if (!mesh->mTextureCoords[uv])
+					{
+						// If the requested UV index is not available,
+						// take the first one instead.
+						uv = 0;
+					}
+					
+					if (mesh->mNumUVComponents[info.uvIndex] >= 3)
+					{
+						DefaultLogger::get()->warn("UV transformations on 3D mapping channels "
+							"are not supported by this step");
+
+						continue;
+					}
+
+					MeshTrafoList::iterator it;
+
+					// Check whether we have this transform setup already
+					for (it = meshLists[n].begin();it != meshLists[n].end(); ++it)
+					{
+						if ((*it) == info && (*it).uvIndex == uv)
+						{
+							(*it).updateList.push_back(update);
+							break;
+						}
+					}
+					if (it == meshLists[n].end())
+					{
+						meshLists[n].push_back(info);
+						meshLists[n].back().uvIndex = uv;
+						meshLists[n].back().updateList.push_back(update);
+					}
+				}
+			}
+		}
+	}
+
+	char buffer[1024]; // should be sufficiently large
+	unsigned int outChannels = 0, inChannels = 0, transformedChannels = 0;
+
+	// Now process all meshes. Important: we don't remove unreferenced UV channels.
+	// This is a job for the RemoveUnreferencedData-Step.
+	for (unsigned int q = 0; q < pScene->mNumMeshes;++q)
+	{
+		aiMesh* mesh = pScene->mMeshes[q];
+		MeshTrafoList& trafo =  meshLists[q];
+
+		inChannels += mesh->GetNumUVChannels();
+
+		if (!mesh->mTextureCoords[0] || trafo.empty() || 
+			trafo.size() == 1 && trafo.begin()->IsUntransformed())
+		{
+			outChannels += mesh->GetNumUVChannels();
+			continue;
+		}
+
+		// Move untransformed UV channels to the first
+		// position in the list .... except if we need
+		// a new locked index which should be as small as possible
+		bool veto = false;
+		unsigned int cnt = 0;
+		unsigned int untransformed = 0;
+
+		MeshTrafoList::iterator it,it2;
+		for (it = trafo.begin();it != trafo.end(); ++it,++cnt)
+		{
+			if ((*it).lockedPos == AI_TT_UV_IDX_LOCK_TBD)
+			{
+				// Lock this index and make sure it won't be changed
+				(*it).lockedPos = cnt;
+				veto = true;
+				continue;
+			}
+
+			if (!veto && it != trafo.begin() && (*it).IsUntransformed())
+			{
+				trafo.push_front((*it));
+				trafo.erase(it);
+
+				break;
+			}
+		}
+
+		// Find all that are not at their 'locked' position 
+		// and move them to it. Conflicts are possible but
+		// quite unlikely.
+		cnt = 0;
+		for (it = trafo.begin();it != trafo.end(); ++it,++cnt)
+		{
+			if ((*it).lockedPos != AI_TT_UV_IDX_LOCK_NONE && (*it).lockedPos != cnt)
+			{
+				it2 = trafo.begin();unsigned int t = 0;
+				while (t != (*it).lockedPos)++it2;
+
+				if ((*it2).lockedPos != AI_TT_UV_IDX_LOCK_NONE)
+				{
+					DefaultLogger::get()->error("Channel mismatch, can't compute all transformations properly");
+					continue;
+				}
+
+				std::swap(*it2,*it);
+				if ((*it).lockedPos == untransformed)untransformed = cnt;
+			}
+		}
+
+		// ... and add dummies for all unreferenced channels
+		// at the end of the list
+		bool ref[AI_MAX_NUMBER_OF_TEXTURECOORDS];
+		for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_TEXTURECOORDS;++n)
+			ref[n] = (!mesh->mTextureCoords[n] ? true : false);
+
+		for (it = trafo.begin();it != trafo.end(); ++it)
+			ref[(*it).uvIndex] = true;
+
+		for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_TEXTURECOORDS;++n)
+		{
+			if (ref[n])continue;
+			trafo.push_back(STransformVecInfo());
+			trafo.back().uvIndex = n;
+		}
+
+		// Then check whether this list breaks the channel limit.
+		// The unimportant ones are at the end of the list, so
+		// it shouldn't be too worse if we remove them.
+		unsigned int size = (unsigned int)trafo.size();
+		if (size > AI_MAX_NUMBER_OF_TEXTURECOORDS)
+		{
+			if (!DefaultLogger::isNullLogger())
+			{
+				::sprintf(buffer,"%i UV channels required but just %i available", 
+					trafo.size(),AI_MAX_NUMBER_OF_TEXTURECOORDS);
+
+				DefaultLogger::get()->error(buffer);
+			}
+			size = AI_MAX_NUMBER_OF_TEXTURECOORDS;
+		}
+
+
+		aiVector3D* old[AI_MAX_NUMBER_OF_TEXTURECOORDS];
+		for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_TEXTURECOORDS;++n)
+			old[n] = mesh->mTextureCoords[n];
+
+		// Now continue and generate the output channels. Channels
+		// that we're not going to need later can be overridden.
+		it = trafo.begin();
+		for (unsigned int n = 0; n < trafo.size();++n,++it)
+		{
+			if (n >= size)
+			{
+				// Try to use an untransformed channel for all channels we threw over board
+				UpdateUVIndex((*it).updateList,untransformed);
+				continue;
+			}
+
+			outChannels++;
+
+			// Write to the log
+			if (!DefaultLogger::isNullLogger())
+			{
+				sprintf(buffer,"Mesh %i, channel %i: t(%.3f,%.3f), s(%.3f,%.3f), r(%.3f), %s%s",
+					q,n,
+					(*it).mTranslation.x,
+					(*it).mTranslation.y,
+					(*it).mScaling.x,
+					(*it).mScaling.y,
+					AI_RAD_TO_DEG( (*it).mRotation),
+					MappingModeToChar ((*it).mapU),
+					MappingModeToChar ((*it).mapV));
+
+				DefaultLogger::get()->info(buffer);
+			}
+
+			// Check whether we need a new buffer here
+			if (mesh->mTextureCoords[n])
+			{
+				it2 = it;++it2;
+				for (unsigned int m = n+1; m < size;++m, ++it2)
+				{
+					if ((*it2).uvIndex == n)
+					{
+						it2 = trafo.begin();
+						break;
+					}
+				}
+				if (it2 == trafo.begin())
+				{
+					mesh->mTextureCoords[n] = new aiVector3D[mesh->mNumVertices];
+				} 
+			}
+			else mesh->mTextureCoords[n] = new aiVector3D[mesh->mNumVertices];
+
+			aiVector3D* src = old[(*it).uvIndex];
+			aiVector3D* dest, *end;
+			dest = mesh->mTextureCoords[n];
+
+			ai_assert(NULL != src);
+
+			// Copy the data to the destination array
+			if (dest != src)
+				::memcpy(dest,src,sizeof(aiVector3D)*mesh->mNumVertices);
+
+			end = dest + mesh->mNumVertices;
+
+			// Build a transformation matrix and transform all UV coords with it
+			if (!(*it).IsUntransformed())
+			{
+				const aiVector2D& trl = (*it).mTranslation;
+				const aiVector2D& scl = (*it).mScaling;
+
+				++transformedChannels;
+				aiMatrix3x3 matrix;
+
+				aiMatrix3x3 m2,m3,m4,m5;
+
+				m4.a1 = scl.x;
+				m4.b2 = scl.y;
+				
+				m2.a3 = m2.b3 = 0.5f;
+				m3.a3 = m3.b3 = -0.5f;
+
+				if ((*it).mRotation > AI_TT_ROTATION_EPSILON )
+					aiMatrix3x3::Rotation((*it).mRotation,matrix);
+
+				m5.a3 += trl.x; m5.b3 += trl.y;
+				matrix = m2 * m4 * matrix * m3 * m5;
+				
+
+				for (src = dest; src != end; ++src)
+				{
+					src->z = 1.f;
+					*src = matrix * *src;
+					src->x /= src->z;
+					src->y /= src->z;
+					src->z = 0.f;
+				}
+			}
+
+			// Update all UV indices
+			UpdateUVIndex((*it).updateList,n);
+		}
+	}
+
+	// Print some detailled statistics into the log
+	if (!DefaultLogger::isNullLogger())
+	{
+		if (transformedChannels)
+		{
+			::sprintf(buffer,"TransformUVCoordsProcess end: %i output channels (in: %i, modified: %i)",
+				outChannels,inChannels,transformedChannels);
+
+			DefaultLogger::get()->info(buffer);
+		}
+		else DefaultLogger::get()->debug("TransformUVCoordsProcess finished");
+	}
+}
+
+

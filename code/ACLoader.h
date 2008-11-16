@@ -236,6 +236,9 @@ private:
 	// basing on this information we can find a
 	// good estimate how many meshes we'll have in the final scene.
 	unsigned int mNumMeshes;
+
+	// current list of light sources
+	std::vector<aiLight*>* mLights;
 };
 
 } // end of namespace Assimp

@@ -65,11 +65,15 @@ public:
 	 *  \param pInput Pointer to input data
 	 *  \param pSizeInBytes Size of input data
 	 *  \param pKey Key/Usage of the property (AI_MATKEY_XXX)
+	 *  \param type Set by the AI_MATKEY_XXX macro
+	 *  \param index Set by the AI_MATKEY_XXX macro
 	 *  \param pType Type information hint
      */
 	aiReturn AddBinaryProperty (const void* pInput,
-		const unsigned int pSizeInBytes,
+		unsigned int pSizeInBytes,
 		const char* pKey,
+		unsigned int type,
+		unsigned int index,
 		aiPropertyTypeInfo pType);
 
 
@@ -79,9 +83,13 @@ public:
 	 *
 	 *  \param pInput Input string
 	 *  \param pKey Key/Usage of the property (AI_MATKEY_XXX)
+	 *  \param type Set by the AI_MATKEY_XXX macro
+	 *  \param index Set by the AI_MATKEY_XXX macro
 	 */
 	aiReturn AddProperty (const aiString* pInput,
-		const char* pKey);
+		const char* pKey,
+		unsigned int type,
+		unsigned int index);
 
 
 	// -------------------------------------------------------------------
@@ -89,20 +97,26 @@ public:
 	 *  \param pInput Pointer to the input data
 	 *  \param pNumValues Number of values in the array
 	 *  \param pKey Key/Usage of the property (AI_MATKEY_XXX)
+	 *  \param type Set by the AI_MATKEY_XXX macro
+	 *  \param index Set by the AI_MATKEY_XXX macro
 	 */
 	template<class TYPE>
 	aiReturn AddProperty (const TYPE* pInput,
-		const unsigned int pNumValues,
-		const char* pKey);
+		unsigned int pNumValues,
+		const char* pKey,
+		unsigned int type,
+		unsigned int index);
 
 
 	// -------------------------------------------------------------------
 	/** Remove a given key from the list
 	 *  The function fails if the key isn't found
 	 *
-	 *  \param pKey Key/Usage to be deleted
+	 *  \param pKey Key to be deleted
 	 */
-	aiReturn RemoveProperty (const char* pKey);
+	aiReturn RemoveProperty (const char* pKey,
+		unsigned int type,
+		unsigned int index);
 
 
 	// -------------------------------------------------------------------
@@ -136,11 +150,13 @@ public:
 template<class TYPE>
 aiReturn MaterialHelper::AddProperty (const TYPE* pInput,
 	const unsigned int pNumValues,
-	const char* pKey)
+	const char* pKey,
+	unsigned int type,
+	unsigned int index)
 {
 	return this->AddBinaryProperty((const void*)pInput,
 		pNumValues * sizeof(TYPE),
-		pKey,aiPTI_Buffer);
+		pKey,type,index,aiPTI_Buffer);
 }
 
 
@@ -149,11 +165,13 @@ aiReturn MaterialHelper::AddProperty (const TYPE* pInput,
 template<>
 inline aiReturn MaterialHelper::AddProperty<float> (const float* pInput,
 	const unsigned int pNumValues,
-	const char* pKey)
+	const char* pKey,
+	unsigned int type,
+	unsigned int index)
 {
 	return this->AddBinaryProperty((const void*)pInput,
 		pNumValues * sizeof(float),
-		pKey,aiPTI_Float);
+		pKey,type,index,aiPTI_Float);
 }
 
 
@@ -162,11 +180,13 @@ inline aiReturn MaterialHelper::AddProperty<float> (const float* pInput,
 template<>
 inline aiReturn MaterialHelper::AddProperty<aiColor4D> (const aiColor4D* pInput,
 	const unsigned int pNumValues,
-	const char* pKey)
+	const char* pKey,
+	unsigned int type,
+	unsigned int index)
 {
 	return this->AddBinaryProperty((const void*)pInput,
 		pNumValues * sizeof(aiColor4D),
-		pKey,aiPTI_Float);
+		pKey,type,index,aiPTI_Float);
 }
 
 
@@ -175,11 +195,13 @@ inline aiReturn MaterialHelper::AddProperty<aiColor4D> (const aiColor4D* pInput,
 template<>
 inline aiReturn MaterialHelper::AddProperty<aiColor3D> (const aiColor3D* pInput,
 	const unsigned int pNumValues,
-	const char* pKey)
+	const char* pKey,
+	unsigned int type,
+	unsigned int index)
 {
 	return this->AddBinaryProperty((const void*)pInput,
 		pNumValues * sizeof(aiColor3D),
-		pKey,aiPTI_Float);
+		pKey,type,index,aiPTI_Float);
 }
 
 
@@ -188,11 +210,13 @@ inline aiReturn MaterialHelper::AddProperty<aiColor3D> (const aiColor3D* pInput,
 template<>
 inline aiReturn MaterialHelper::AddProperty<int> (const int* pInput,
 	const unsigned int pNumValues,
-	const char* pKey)
+	const char* pKey,
+	unsigned int type,
+	unsigned int index)
 {
 	return this->AddBinaryProperty((const void*)pInput,
 		pNumValues * sizeof(int),
-		pKey,aiPTI_Integer);
+		pKey,type,index,aiPTI_Integer);
 }
 }
 

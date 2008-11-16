@@ -101,15 +101,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_CONFIG_IMPORT_SMD_KEYFRAME		"imp.smd.kf"
 
 
-// ---------------------------------------------------------------------------
-/** \brief Configures the 3DS loader to ignore pivot points in the file
- *
- * There are some faulty 3DS files which look only correctly with
- * pivot points disabled.
- * Property type: integer (0: false; !0: true). Default value: false.
- */
-#define AI_CONFIG_IMPORT_3DS_IGNORE_PIVOT	"imp.3ds.nopivot"
-
 
 // ---------------------------------------------------------------------------
 /** \brief Configures the AC loader to collect all surfaces which have the
@@ -303,6 +294,23 @@ enum aiComponent
  *  is an integer property, its default value is 0.
  */
 #define AI_CONFIG_PP_SBP_REMOVE				"pp.sbp.remove"
+
+
+
+#define AI_UVTRAFO_SCALING 0x1
+#define AI_UVTRAFO_ROTATION 0x2
+#define AI_UVTRAFO_TRANSLATION 0x4
+#define AI_UVTRAFO_ALL (AI_UVTRAFO_SCALING | AI_UVTRAFO_ROTATION | AI_UVTRAFO_TRANSLATION)
+
+// ---------------------------------------------------------------------------
+/** \brief Input parameter to the #aiProcess_TransformUVCoords step:
+ *  Specifies which UV transformations are evaluated.
+ *
+ *  This is a bitwise combination of the AI_UVTRAFO_XXX flags (integer
+ *  property, of course). By default all transformations are enabled 
+ * (AI_UVTRAFO_ALL).
+ */
+#define AI_CONFIG_PP_TUV_EVALUATE				"pp.tuv.process"
 
 
 // ---------------------------------------------------------------------------

@@ -108,6 +108,7 @@ void FindDegeneratesProcess::Execute( aiScene* pScene)
 						// application attemps to access this data.
 						face.mIndices[face.mNumIndices] = 0xdeadbeef;
 
+
 						if(first)
 						{
 							++deg;

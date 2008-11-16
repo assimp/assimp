@@ -94,6 +94,54 @@ inline VertexWeightTable* ComputeVertexBoneWeightTable(aiMesh* pMesh)
 
 
 // ------------------------------------------------------------------------------------------------
+// Get a string for a given aiTextureType
+inline const char* TextureTypeToString(aiTextureType in)
+{
+	switch (in)
+	{
+	case aiTextureType_DIFFUSE:
+		return "Diffuse";
+	case aiTextureType_SPECULAR:
+		return "Specular";
+	case aiTextureType_AMBIENT:
+		return "Ambient";
+	case aiTextureType_EMISSIVE:
+		return "Emissive";
+	case aiTextureType_OPACITY:
+		return "Opacity";
+	case aiTextureType_NORMALS:
+		return "Normals";
+	case aiTextureType_HEIGHT:
+		return "Height";
+	case aiTextureType_SHININESS:
+		return "Shininess";
+	}
+	return "LARGE ERROR, please leave the room immediately and call the police";
+}
+
+// ------------------------------------------------------------------------------------------------
+// Get a string for a given aiTextureMapping
+inline const char* MappingTypeToString(aiTextureMapping in)
+{
+	switch (in)
+	{
+	case aiTextureMapping_UV:
+		return "UV";
+	case aiTextureMapping_BOX:
+		return "Box";
+	case aiTextureMapping_SPHERE:
+		return "Sphere";
+	case aiTextureMapping_CYLINDER:
+		return "Cylinder";
+	case aiTextureMapping_PLANE:
+		return "Plane";
+	case aiTextureMapping_OTHER:
+		return "Other";
+	}
+	return "LARGE ERROR, please leave the room immediately and call the police";
+}
+
+// ------------------------------------------------------------------------------------------------
 class ComputeSpatialSortProcess : public BaseProcess
 {
 	bool IsActive( unsigned int pFlags) const

@@ -110,7 +110,7 @@ bool BaseImporter::SearchFileHeaderForToken(IOSystem* pIOHandler,
 	if (pStream.get() )
 	{
 		// read 200 characters from the file
-		boost::scoped_ptr<char> _buffer (new char[searchBytes]);
+		boost::scoped_array<char> _buffer (new char[searchBytes+1 /* for the '\0' */]);
 		char* buffer = _buffer.get();
 
 		unsigned int read = (unsigned int)pStream->Read(buffer,1,searchBytes);

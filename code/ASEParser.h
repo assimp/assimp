@@ -82,6 +82,7 @@ struct Material : public D3DS::Material
 	//! Can we remove this material?
 	bool bNeed;
 };
+
 // ---------------------------------------------------------------------------
 /** Helper structure to represent an ASE file face */
 struct Face : public FaceWithSmoothingGroup
@@ -174,12 +175,6 @@ struct Animation
 		,	mScalingType	(TRACK)
 		,	mPositionType	(TRACK)
 	{}
-
-	/** ONLY ONE OF THESE SETS IS USED 
-	 * 
-	 *  Bezier and TCB channels are converted to a normal
-	 *  trac later.
-	 */
 
 	//! List of track rotation keyframes
 	std::vector< aiQuatKey > akeyRotations;

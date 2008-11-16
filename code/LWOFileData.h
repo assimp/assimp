@@ -62,6 +62,7 @@ namespace LWO {
 
 #define AI_LWO_FOURCC_LWOB AI_IFF_FOURCC('L','W','O','B')
 #define AI_LWO_FOURCC_LWO2 AI_IFF_FOURCC('L','W','O','2')
+#define AI_LWO_FOURCC_LXOB AI_IFF_FOURCC('L','X','O','B')
 
 // chunks specific to the LWOB format
 #define AI_LWO_SRFS  AI_IFF_FOURCC('S','R','F','S')
@@ -178,6 +179,7 @@ namespace LWO {
 #define AI_LWO_AVAL  AI_IFF_FOURCC('A','V','A','L')
 #define AI_LWO_GVAL  AI_IFF_FOURCC('G','V','A','L')
 #define AI_LWO_BLOK  AI_IFF_FOURCC('B','L','O','K')
+#define AI_LWO_VCOL  AI_IFF_FOURCC('V','C','O','L')
 
 /* texture layer */
 #define AI_LWO_TYPE  AI_IFF_FOURCC('T','Y','P','E')
@@ -236,9 +238,12 @@ namespace LWO {
 
 /* VMAP types */
 #define AI_LWO_TXUV  AI_IFF_FOURCC('T','X','U','V')
-#define AI_LWO_RGB   AI_IFF_FOURCC(' ','R','G','B')
+#define AI_LWO_RGB   AI_IFF_FOURCC('R','G','B',' ')
 #define AI_LWO_RGBA  AI_IFF_FOURCC('R','G','B','A')
 #define AI_LWO_WGHT  AI_IFF_FOURCC('W','G','H','T')
+
+// MODO extension - per-vertex normal vectors
+#define AI_LWO_MODO_NORM AI_IFF_FOURCC('N', 'O', 'R', 'M')
 
 
 // ---------------------------------------------------------------------------
@@ -318,15 +323,11 @@ struct VColorChannel : public VMapEntry
 
 		register unsigned int m = num*dims;
 		rawData.reserve(m + (m>>2u)); // 25% as  extra storage for VMADs
-		rawData.resize(m,0.f);
+		rawData.resize(m);
 
-		for (std::vector<float>::iterator it = rawData.begin(), end = rawData.end();
-			 it != end;++it )	
-		{
-			for (unsigned int i = 0; i< 3;++i,++it)
-				*it = 0.f;
-			*it = 1.f;
-		}
+		for (aiColor4D* p = (aiColor4D*)&rawData[0]; p < (aiColor4D*)&rawData[m-1]; ++p)
+			*p = aiColor4D();
+
 		abAssigned.resize(num,false);
 	}
 };
@@ -351,6 +352,15 @@ struct WeightChannel : public VMapEntry
 	{}
 };
 
+// ---------------------------------------------------------------------------
+/** \brief Represents a vertex-normals channel (MODO extension)
+ */
+struct NormalChannel : public VMapEntry
+{
+	NormalChannel()
+		: VMapEntry(3)
+	{}
+};
 
 // ---------------------------------------------------------------------------
 /** \brief Data structure for a LWO file texture
@@ -515,8 +525,10 @@ struct Surface
 		, mColorHighlights		(0.f)
 		, mMaximumSmoothAngle	(0.f) // 0 == not specified, no smoothing
 		, mVCMap				("")
+		, mVCMapType			(AI_LWO_RGBA)
 		, mIOR					(1.f) // vakuum
 		, mBumpIntensity		(1.f)
+		, mWireframe			(false)
 	{}
 
 	//! Name of the surface
@@ -537,6 +549,7 @@ struct Surface
 
 	//! Vertex color map to be used to color the surface
 	std::string mVCMap;
+	uint32_t mVCMapType;
 
 	//! Names of the special shaders to be applied to the surface
 	ShaderList mShaders;
@@ -554,6 +567,9 @@ struct Surface
 
 	//! Bump intensity scaling
 	float mBumpIntensity;
+
+	//! Wireframe flag
+	bool mWireframe;
 };
 
 // ---------------------------------------------------------------------------
@@ -605,6 +621,9 @@ struct Layer
 
 	/** UV channel list from the file */
 	UVChannelList mUVChannels;
+
+	/** Normal vector channel from the file */
+	NormalChannel mNormals;
 
 	/** Temporary face list from the file*/
 	FaceList mFaces;

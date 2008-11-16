@@ -189,6 +189,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_SORTBYPTYPE_PROCESS
 #	include "SortByPTypeProcess.h"
 #endif
+#ifndef AI_BUILD_NO_GENUVCOORDS_PROCESS
+#	include "ComputeUVMappingProcess.h"
+#endif
+#ifndef AI_BUILD_NO_TRANSFORMTEXCOORDS_PROCESS
+#	include "TextureTransform.h"
+#endif
+
 
 using namespace Assimp;
 
@@ -290,7 +297,7 @@ Importer::Importer() :
 	mImporter.push_back( new ColladaLoader());
 #endif
 
-	// add an instance of each post processing step here in the order 
+	// Add an instance of each post processing step here in the order 
 	// of sequence it is executed. steps that are added here are not validated -
 	// as RegisterPPStep() does - all dependencies must be there.
 	mPostProcessingSteps.reserve(25);
@@ -308,6 +315,17 @@ Importer::Importer() :
 #if (!defined AI_BUILD_NO_REMOVEVC_PROCESS)
 	mPostProcessingSteps.push_back( new RemoveVCProcess());
 #endif
+
+
+	
+#ifndef AI_BUILD_NO_GENUVCOORDS_PROCESS
+	mPostProcessingSteps.push_back( new ComputeUVMappingProcess());
+#endif
+#ifndef AI_BUILD_NO_TRANSFORMTEXCOORDS_PROCESS
+	mPostProcessingSteps.push_back( new TextureTransformStep());
+#endif
+
+
 
 
 #if (!defined AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
@@ -371,6 +389,9 @@ Importer::Importer() :
 	mPostProcessingSteps.push_back( new ImproveCacheLocalityProcess());
 #endif
 
+
+
+
 	// allocate a SharedPostProcessInfo object and store pointers to it
 	// in all post-process steps in the list.
 	mPPShared = new SharedPostProcessInfo();
@@ -412,7 +433,9 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp)
 {
 	ai_assert(NULL != pImp);
 
-	// check whether we would have two loaders for the same file extension now
+	// Check whether we would have two loaders for the same file extension now
+	// This is absolutely OK, but we should warn the developer of the new
+	// loader that his code will propably never be called.
 
 	std::string st;
 	pImp->GetExtensionList(st);
@@ -423,15 +446,14 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp)
 	{
 		if (IsExtensionSupported(std::string(sz)))
 		{
-			DefaultLogger::get()->error(std::string( "The file extension " ) + sz + " is already in use");
-			return AI_FAILURE;
+			DefaultLogger::get()->warn(std::string( "The file extension " ) + sz + " is already in use");
 		}
 		sz = ::strtok(NULL,";");
 	}
 #endif
 
 	// add the loader
-	this->mImporter.push_back(pImp);
+	mImporter.push_back(pImp);
 	DefaultLogger::get()->info("Registering custom importer: " + st);
 	return AI_SUCCESS;
 }
@@ -729,7 +751,7 @@ const std::string& Importer::GetPropertyString(const char* szName,
 }
 
 // ------------------------------------------------------------------------------------------------
-void AddNodeWeight(unsigned int& iScene,const aiNode* pcNode)
+inline void AddNodeWeight(unsigned int& iScene,const aiNode* pcNode)
 {
 	iScene += sizeof(aiNode);
 	iScene += sizeof(unsigned int) * pcNode->mNumMeshes;
@@ -816,6 +838,10 @@ void Importer::GetMemoryRequirements(aiMemoryInfo& in) const
 	}
 	in.total += in.animations;
 
+	// add all cameras and all lights
+	in.total += in.cameras = sizeof(aiCamera) *  mScene->mNumCameras;
+	in.total += in.lights  = sizeof(aiLight)  *  mScene->mNumLights;
+
 	// add all nodes
 	AddNodeWeight(in.nodes,mScene->mRootNode);
 	in.total += in.nodes;
@@ -832,6 +858,5 @@ void Importer::GetMemoryRequirements(aiMemoryInfo& in) const
 		}
 	}
 	in.total += in.materials;
-	return;
 }
 

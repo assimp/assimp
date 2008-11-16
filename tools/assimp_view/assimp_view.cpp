@@ -140,7 +140,8 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 		aiProcess_SplitLargeMeshes      | // split large, unrenderable meshes into submeshes
 		aiProcess_ValidateDataStructure | aiProcess_ImproveCacheLocality 
 		| aiProcess_RemoveRedundantMaterials | aiProcess_SortByPType |
-		aiProcess_FindDegenerates | aiProcess_FindInvalidData); // validate the output data structure
+		aiProcess_FindDegenerates | aiProcess_FindInvalidData |
+		aiProcess_GenUVCoords | aiProcess_TransformUVCoords ); // validate the output data structure
 
 	// get the end time of zje operation, calculate delta t
 	double fEnd = (double)timeGetTime();

@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // http://www.azillionmonkeys.com/qed/hash.html
 // (incremental version of the hashing function)
 // (stdint.h should have been been included here)
+// ------------------------------------------------------------------------------------------------
 #undef get16bits
 #if (defined(__GNUC__) && defined(__i386__)) || defined(__WATCOMC__) \
   || defined(_MSC_VER) || defined (__BORLANDC__) || defined (__TURBOC__)

@@ -244,7 +244,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 		AssetHelper::MeshHelper* pcMesh = g_pcAsset->apcMeshes[i];
 		switch (this->m_pcCurrentTexture->iType)
 		{
-		case AI_TEXTYPE_DIFFUSE:
+		case aiTextureType_DIFFUSE:
 			if (pcMesh->piDiffuseTexture && pcMesh->piDiffuseTexture != piTexture)
 			{
 				pcMesh->piDiffuseTexture->Release();
@@ -257,7 +257,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 				}
 			}
 			break;
-		case AI_TEXTYPE_AMBIENT:
+		case aiTextureType_AMBIENT:
 			if (pcMesh->piAmbientTexture && pcMesh->piAmbientTexture != piTexture)
 			{
 				pcMesh->piAmbientTexture->Release();
@@ -270,7 +270,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 				}
 			}
 			break;
-		case AI_TEXTYPE_SPECULAR:
+		case aiTextureType_SPECULAR:
 			if (pcMesh->piSpecularTexture && pcMesh->piSpecularTexture != piTexture)
 			{
 				pcMesh->piSpecularTexture->Release();
@@ -283,7 +283,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 				}
 			}
 			break;
-		case AI_TEXTYPE_EMISSIVE:
+		case aiTextureType_EMISSIVE:
 			if (pcMesh->piEmissiveTexture && pcMesh->piEmissiveTexture != piTexture)
 			{
 				pcMesh->piEmissiveTexture->Release();
@@ -296,7 +296,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 				}
 			}
 			break;
-		case AI_TEXTYPE_SHININESS:
+		case aiTextureType_SHININESS:
 			if (pcMesh->piShininessTexture && pcMesh->piShininessTexture != piTexture)
 			{
 				pcMesh->piShininessTexture->Release();
@@ -309,8 +309,8 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 				}
 			}
 			break;
-		case AI_TEXTYPE_NORMALS:
-		case AI_TEXTYPE_HEIGHT:
+		case aiTextureType_NORMALS:
+		case aiTextureType_HEIGHT:
 			if (pcMesh->piNormalTexture && pcMesh->piNormalTexture != piTexture)
 			{
 				pcMesh->piNormalTexture->Release();
@@ -325,7 +325,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 				}
 			}
 			break;
-		default: //case AI_TEXTYPE_OPACITY && case AI_TEXTYPE_OPACITY | 0x40000000:
+		default: //case aiTextureType_OPACITY && case aiTextureType_OPACITY | 0x40000000:
 			if (pcMesh->piOpacityTexture && pcMesh->piOpacityTexture != piTexture)
 			{
 				pcMesh->piOpacityTexture->Release();
@@ -340,42 +340,44 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 			break;
 		};
 	}
-
 	// now update the material itself
 	aiString szOld;
 	const char* szKey = NULL;
+#if 0
 	switch (this->m_pcCurrentTexture->iType)
 	{
-	case AI_TEXTYPE_DIFFUSE:
+	case aiTextureType_DIFFUSE:
 		szKey = AI_MATKEY_TEXTURE_DIFFUSE(0);
 		break;
-	case AI_TEXTYPE_AMBIENT:
+	case aiTextureType_AMBIENT:
 		szKey = AI_MATKEY_TEXTURE_AMBIENT(0);
 		break;
-	case AI_TEXTYPE_SPECULAR:
+	case aiTextureType_SPECULAR:
 		szKey = AI_MATKEY_TEXTURE_SPECULAR(0);
 		break;
-	case AI_TEXTYPE_EMISSIVE:
+	case aiTextureType_EMISSIVE:
 		szKey = AI_MATKEY_TEXTURE_EMISSIVE(0);
 		break;
-	case AI_TEXTYPE_NORMALS:
+	case aiTextureType_NORMALS:
 		szKey = AI_MATKEY_TEXTURE_NORMALS(0);
 		break;
-	case AI_TEXTYPE_HEIGHT:
+	case aiTextureType_HEIGHT:
 		szKey = AI_MATKEY_TEXTURE_HEIGHT(0);
 		break;
-	case AI_TEXTYPE_SHININESS:
+	case aiTextureType_SHININESS:
 		szKey = AI_MATKEY_TEXTURE_SHININESS(0);
 		break;
-	default: //case AI_TEXTYPE_OPACITY && case AI_TEXTYPE_OPACITY | 0x40000000:
+	default: //case aiTextureType_OPACITY && case aiTextureType_OPACITY | 0x40000000:
 		szKey = AI_MATKEY_TEXTURE_OPACITY(0);
 		break;
 	};
+#endif
 	ai_assert(NULL != szKey);
 
-	aiGetMaterialString(pcMat,szKey,&szOld);
-	pcMat->AddProperty(&szString,szKey);
+	aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE(m_pcCurrentTexture->iType,0),&szOld);
+	pcMat->AddProperty(&szString,AI_MATKEY_TEXTURE(m_pcCurrentTexture->iType,0));
 
+#if 0
 	char szBuffer[512];
 	sprintf(szBuffer,"%s%s",szKey,"_old");
 
@@ -388,6 +390,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 	{
 		pcMat->RemoveProperty(szBuffer);
 	}
+#endif
 	return 1;
 }
 //-------------------------------------------------------------------------------
@@ -426,31 +429,31 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
 	IDirect3DTexture9** piTexture;
 	switch (iType)
 	{
-	case AI_TEXTYPE_DIFFUSE:
+	case aiTextureType_DIFFUSE:
 		piTexture = &g_pcAsset->apcMeshes[iMesh]->piDiffuseTexture;
 		szType = "Diffuse";
 		break;
-	case AI_TEXTYPE_SPECULAR:
+	case aiTextureType_SPECULAR:
 		piTexture = &g_pcAsset->apcMeshes[iMesh]->piSpecularTexture;
 		szType = "Specular";
 		break;
-	case AI_TEXTYPE_AMBIENT:
+	case aiTextureType_AMBIENT:
 		piTexture = &g_pcAsset->apcMeshes[iMesh]->piAmbientTexture;
 		szType = "Ambient";
 		break;
-	case AI_TEXTYPE_EMISSIVE:
+	case aiTextureType_EMISSIVE:
 		piTexture = &g_pcAsset->apcMeshes[iMesh]->piEmissiveTexture;
 		szType = "Emissive";
 		break;
-	case AI_TEXTYPE_HEIGHT:
+	case aiTextureType_HEIGHT:
 		piTexture = &g_pcAsset->apcMeshes[iMesh]->piNormalTexture;
 		szType = "HeightMap";
 		break;
-	case AI_TEXTYPE_NORMALS:
+	case aiTextureType_NORMALS:
 		piTexture = &g_pcAsset->apcMeshes[iMesh]->piNormalTexture;
 		szType = "NormalMap";
 		break;
-	case AI_TEXTYPE_SHININESS:
+	case aiTextureType_SHININESS:
 		piTexture = &g_pcAsset->apcMeshes[iMesh]->piShininessTexture;
 		szType = "Shininess";
 		break;
@@ -578,8 +581,8 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
 		(LPARAM)(LPTVINSERTSTRUCT)&sNew);
 
 	// for each texture in the list ... add it
-	// NOTE: This expects that AI_TEXTYPE_DIFFUSE is 7
-	ai_assert(7 == AI_TEXTYPE_DIFFUSE);
+	// NOTE: This expects that aiTextureType_DIFFUSE is 7
+	ai_assert(7 == aiTextureType_DIFFUSE);
 	unsigned int iUV;
 	float fBlend;
 	aiTextureOp eOp;
@@ -590,12 +593,12 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
 		unsigned int iNum = 0;
 		while (true)
 		{
-			if (AI_SUCCESS != aiGetMaterialTexture(pcMat,iNum,i,
-				&szPath,&iUV,&fBlend,&eOp))
+			if (AI_SUCCESS != aiGetMaterialTexture(pcMat,(aiTextureType)i,iNum,
+				&szPath,NULL, &iUV,&fBlend,&eOp))
 			{
 				break;
 			}
-			if (AI_TEXTYPE_OPACITY == i)bNoOpacity = false;
+			if (aiTextureType_OPACITY == i)bNoOpacity = false;
 			AddTextureToDisplayList(i,iNum,&szPath,hTexture,iUV,fBlend,eOp,iMesh);
 			++iNum;
 		}
@@ -619,7 +622,7 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
 		{
 			// seems the diffuse texture contains alpha, therefore it has been
 			// added to the opacity channel, too. Add a special value ...
-			AddTextureToDisplayList(AI_TEXTYPE_OPACITY | 0x40000000,
+			AddTextureToDisplayList(aiTextureType_OPACITY | 0x40000000,
 				0,&szPath,hTexture,iUV,fBlend,eOp,iMesh);
 		}
 	}
@@ -967,7 +970,7 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
 		ShowNormalUIComponents();
 	}
 
-	if ((AI_TEXTYPE_OPACITY | 0x40000000) == pcNew->iType)
+	if ((aiTextureType_OPACITY | 0x40000000) == pcNew->iType)
 	{
 		// for opacity textures display a warn message
 		CLogDisplay::Instance().AddEntry("[INFO] This texture is not existing in the "
@@ -1204,7 +1207,7 @@ int CDisplay::HandleTreeViewPopup(WPARAM wParam,LPARAM lParam)
 					g_pcAsset->apcMeshes[i],"DIFFUSE_COLOR"));
 			}
 		}
-		szMatKey = AI_MATKEY_COLOR_DIFFUSE;
+		szMatKey = "$clr.diffuse";
 		break;
 	case ID_SOLONG_CLEARSPECULARCOLOR:
 		for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
@@ -1215,7 +1218,7 @@ int CDisplay::HandleTreeViewPopup(WPARAM wParam,LPARAM lParam)
 					g_pcAsset->apcMeshes[i],"SPECULAR_COLOR"));
 			}
 		}
-		szMatKey = AI_MATKEY_COLOR_SPECULAR;
+		szMatKey = "$clr.specular";
 		break;
 	case ID_SOLONG_CLEARAMBIENTCOLOR:
 		for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
@@ -1226,7 +1229,7 @@ int CDisplay::HandleTreeViewPopup(WPARAM wParam,LPARAM lParam)
 					g_pcAsset->apcMeshes[i],"AMBIENT_COLOR"));
 			}
 		}
-		szMatKey = AI_MATKEY_COLOR_AMBIENT;
+		szMatKey = "$clr.ambient";
 		break;
 	case ID_SOLONG_CLEAREMISSIVECOLOR:
 		for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
@@ -1237,7 +1240,7 @@ int CDisplay::HandleTreeViewPopup(WPARAM wParam,LPARAM lParam)
 					g_pcAsset->apcMeshes[i],"EMISSIVE_COLOR"));
 			}
 		}
-		szMatKey = AI_MATKEY_COLOR_EMISSIVE;
+		szMatKey = "$clr.emissive";
 		break;
 	default:
 
@@ -1283,7 +1286,7 @@ int CDisplay::HandleTreeViewPopup(WPARAM wParam,LPARAM lParam)
 		// change the material key ...
 		Assimp::MaterialHelper* pcMat = (Assimp::MaterialHelper*)g_pcAsset->pcScene->mMaterials[
 			this->m_pcCurrentMaterial->iIndex];
-		pcMat->AddProperty<aiColor4D>(&clrOld,1,szMatKey);
+		pcMat->AddProperty<aiColor4D>(&clrOld,1,szMatKey,0,0);
 
 		if (ID_SOLONG_CLEARSPECULARCOLOR == LOWORD(wParam) &&
 			aiShadingMode_Gouraud == apclrOut.front().pMesh->eShadingMode)
@@ -1420,35 +1423,35 @@ int CDisplay::HandleTreeViewPopup2(WPARAM wParam,LPARAM lParam)
 
 		switch (this->m_pcCurrentTexture->iType)
 		{
-		case AI_TEXTYPE_DIFFUSE:
+		case aiTextureType_DIFFUSE:
 			pcMat->RemoveProperty(AI_MATKEY_TEXTURE_DIFFUSE(0));
 			break;
-		case AI_TEXTYPE_SPECULAR:
+		case aiTextureType_SPECULAR:
 			pcMat->RemoveProperty(AI_MATKEY_TEXTURE_SPECULAR(0));
 			break;
-		case AI_TEXTYPE_AMBIENT:
+		case aiTextureType_AMBIENT:
 			pcMat->RemoveProperty(AI_MATKEY_TEXTURE_AMBIENT(0));
 			break;
-		case AI_TEXTYPE_EMISSIVE:
+		case aiTextureType_EMISSIVE:
 			pcMat->RemoveProperty(AI_MATKEY_TEXTURE_EMISSIVE(0));
 			break;
-		case AI_TEXTYPE_NORMALS:
+		case aiTextureType_NORMALS:
 			pcMat->RemoveProperty(AI_MATKEY_TEXTURE_NORMALS(0));
 			break;
-		case AI_TEXTYPE_HEIGHT:
+		case aiTextureType_HEIGHT:
 			pcMat->RemoveProperty(AI_MATKEY_TEXTURE_HEIGHT(0));
 			break;
-		case AI_TEXTYPE_SHININESS:
+		case aiTextureType_SHININESS:
 			pcMat->RemoveProperty(AI_MATKEY_TEXTURE_SHININESS(0));
 			break;
-		case (AI_TEXTYPE_OPACITY | 0x40000000):
+		case (aiTextureType_OPACITY | 0x40000000):
 		
 			// set a special property to indicate that no alpha channel is required
 			{int iVal = 1;
-			pcMat->AddProperty<int>(&iVal,1,"no_a_from_d");}
+			pcMat->AddProperty<int>(&iVal,1,"no_a_from_d",0,0);}
 
 			break;
-		default: //case AI_TEXTYPE_OPACITY
+		default: //case aiTextureType_OPACITY
 			pcMat->RemoveProperty(AI_MATKEY_TEXTURE_OPACITY(0));
 		};
 
@@ -1505,41 +1508,42 @@ int CDisplay::HandleTreeViewPopup2(WPARAM wParam,LPARAM lParam)
 		TreeView_Select(GetDlgItem(g_hDlg,IDC_TREE1),this->m_hRoot,TVGN_CARET);
 		return 1;
 		}
-
+#if 0
 	case ID_HEY_RESETTEXTURE:
 		{
 		aiString szOld;
 		aiMaterial* pcMat = g_pcAsset->pcScene->mMaterials[this->m_pcCurrentTexture->iMatIndex];
 		switch (this->m_pcCurrentTexture->iType)
 		{
-		case AI_TEXTYPE_DIFFUSE:
+		case aiTextureType_DIFFUSE:
 			aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_DIFFUSE(0) "_old",&szOld);
 			break;
-		case AI_TEXTYPE_SPECULAR:
+		case aiTextureType_SPECULAR:
 			aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_SPECULAR(0) "_old",&szOld);
 			break;
-		case AI_TEXTYPE_AMBIENT:
+		case aiTextureType_AMBIENT:
 			aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_AMBIENT(0) "_old",&szOld);
 			break;
-		case AI_TEXTYPE_EMISSIVE:
+		case aiTextureType_EMISSIVE:
 			aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_EMISSIVE(0) "_old",&szOld);
 			break;
-		case AI_TEXTYPE_NORMALS:
+		case aiTextureType_NORMALS:
 			aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_NORMALS(0) "_old",&szOld);
 			break;
-		case AI_TEXTYPE_HEIGHT:
+		case aiTextureType_HEIGHT:
 			aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_HEIGHT(0) "_old",&szOld);
 			break;
-		case AI_TEXTYPE_SHININESS:
+		case aiTextureType_SHININESS:
 			aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_SHININESS(0) "_old",&szOld);
 			break;
-		default : //case AI_TEXTYPE_OPACITY && case AI_TEXTYPE_OPACITY | 0x40000000:
+		default : //case aiTextureType_OPACITY && case aiTextureType_OPACITY | 0x40000000:
 			aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_OPACITY(0) "_old",&szOld);
 			break;
 		};
 		if (0 != szOld.length)this->ReplaceCurrentTexture(szOld.data);
 		return 1;
 		}
+#endif
 	}
 	return 0;
 }
@@ -2195,11 +2199,11 @@ int CDisplay::RenderTextureView()
 	// commit the texture to the shader
 	g_piPassThroughEffect->SetTexture("TEXTURE_2D",*this->m_pcCurrentTexture->piTexture);
 
-	if (AI_TEXTYPE_OPACITY == this->m_pcCurrentTexture->iType)
+	if (aiTextureType_OPACITY == this->m_pcCurrentTexture->iType)
 	{
 		g_piPassThroughEffect->SetTechnique("PassThroughAlphaFromR");
 	}
-	else if ((AI_TEXTYPE_OPACITY | 0x40000000) == this->m_pcCurrentTexture->iType)
+	else if ((aiTextureType_OPACITY | 0x40000000) == this->m_pcCurrentTexture->iType)
 	{
 		g_piPassThroughEffect->SetTechnique("PassThroughAlphaFromA");
 	}
@@ -2212,8 +2216,8 @@ int CDisplay::RenderTextureView()
 	g_piPassThroughEffect->Begin(&dw,0);
 	g_piPassThroughEffect->BeginPass(0);
 
-	if (AI_TEXTYPE_HEIGHT == this->m_pcCurrentTexture->iType ||
-		AI_TEXTYPE_NORMALS == this->m_pcCurrentTexture->iType)
+	if (aiTextureType_HEIGHT == this->m_pcCurrentTexture->iType ||
+		aiTextureType_NORMALS == this->m_pcCurrentTexture->iType)
 	{
 		// manually disable alpha blending
 		g_piDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);

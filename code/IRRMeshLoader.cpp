@@ -429,20 +429,6 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 					// lightmap settings to the last texture.
 					if (cnt && matFlags & AI_IRRMESH_MAT_lightmap)
 					{
-						static const char* PropArray[4] =
-						{
-							AI_MATKEY_TEXBLEND_DIFFUSE(0),
-							AI_MATKEY_TEXBLEND_DIFFUSE(1),
-							AI_MATKEY_TEXBLEND_DIFFUSE(2),
-							AI_MATKEY_TEXBLEND_DIFFUSE(3)
-						};
-						static const char* PropArray2[4] =
-						{
-							AI_MATKEY_TEXOP_DIFFUSE(0),
-							AI_MATKEY_TEXOP_DIFFUSE(1),
-							AI_MATKEY_TEXOP_DIFFUSE(2),
-							AI_MATKEY_TEXOP_DIFFUSE(3)
-						};
 						float f = 1.f;
 
 						// Additive lightmap?
@@ -460,8 +446,8 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 						{
 							f = 4.f;
 						}
-						mat->AddProperty( &f, 1, PropArray  [cnt-1]);
-						mat->AddProperty( &op,1, PropArray2 [cnt-1]);
+						mat->AddProperty( &f, 1, AI_MATKEY_TEXBLEND_DIFFUSE(cnt-1));
+						mat->AddProperty( &op,1, AI_MATKEY_TEXOP_DIFFUSE(cnt-1));
 					}
 
 					return mat;
@@ -600,13 +586,28 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 				if (curMat)
 				{
 					DefaultLogger::get()->warn("IRRMESH: Only one material description per buffer, please");
-					delete curMat;
+					delete curMat;curMat = NULL;
 				}
 				curMat = ParseMaterial(curMatFlags);
 			}
 			/* no else here! */ if (!ASSIMP_stricmp(reader->getNodeName(),"vertices"))
 			{
 				int num = reader->getAttributeValueAsInt("vertexCount");
+
+				if (!num)
+				{
+					// This is possible ... remove the mesh from the list
+					// and skip further reading
+
+					DefaultLogger::get()->warn("IRRMESH: Found mesh with zero vertices");
+
+					delete curMat;curMat = NULL;
+
+					curMesh = NULL;
+					textMeaning = 0;
+					continue;
+				}
+
 				curVertices.reserve (num);
 				curNormals.reserve  (num);
 				curColors.reserve   (num);
@@ -648,6 +649,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 				}
 				else if (ASSIMP_stricmp("standard", t))
 				{
+					delete curMat;
 					DefaultLogger::get()->warn("IRRMESH: Unknown vertex format");
 				}
 				else vertexFormat = 0;
@@ -655,8 +657,11 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 			}
 			else if (!ASSIMP_stricmp(reader->getNodeName(),"indices"))
 			{
-				if (curVertices.empty())
+				if (curVertices.empty() && curMat)
+				{
+					delete curMat;
 					throw new ImportErrorException("IRRMESH: indices must come after vertices");
+				}
 
 				textMeaning = 2;
 
@@ -665,6 +670,23 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 
 				// allocate storage for all faces
 				curMesh->mNumVertices = reader->getAttributeValueAsInt("indexCount");
+				if (!curMesh->mNumVertices)
+				{
+					// This is possible ... remove the mesh from the list
+					// and skip further reading
+
+					DefaultLogger::get()->warn("IRRMESH: Found mesh with zero indices");
+
+					// mesh - away
+					delete curMesh; curMesh = NULL;
+
+					// material - away
+					delete curMat;curMat = NULL;
+
+					textMeaning = 0;
+					continue;
+				}
+
 				if (curMesh->mNumVertices % 3)
 				{
 					DefaultLogger::get()->warn("IRRMESH: Number if indices isn't divisible by 3");
@@ -888,7 +910,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 		};
 	}
 
-	// end of the last buffer. A material and a mesh should be there
+	// End of the last buffer. A material and a mesh should be there
 	if (curMat || curMesh)
 	{
 		if ( !curMat || !curMesh)

@@ -69,7 +69,7 @@ public:
 	 *  @param defaultTargetPos Default target position to be used if
 	 *	  no animated track is available. May be NULL.
 	 */
-	KeyIterator(std::vector<aiVectorKey>* _objPos,
+	KeyIterator(const std::vector<aiVectorKey>* _objPos,
 		const std::vector<aiVectorKey>* _targetObjPos,
 		const aiVector3D*  defaultObjectPos = NULL,
 		const aiVector3D*  defaultTargetPos = NULL);
@@ -129,7 +129,8 @@ class ASSIMP_API TargetAnimationHelper
 public:
 
 	TargetAnimationHelper()
-		:	objectPositions		(NULL)
+		:	targetPositions		(NULL)
+		,	objectPositions		(NULL)
 	{}
 
 
@@ -141,8 +142,8 @@ public:
 	 *
 	 *  @param targetPositions Translation channel
 	 */
-	void SetTargetAnimationChannel (
-		const std::vector<aiVectorKey>* targetPositions);
+	void SetTargetAnimationChannel (const 
+		std::vector<aiVectorKey>* targetPositions);
 
 
 	// ------------------------------------------------------------------
@@ -150,8 +151,15 @@ public:
 	 *
 	 *  @param objectPositions Translation channel
 	 */
-	void SetMainAnimationChannel (
+	void SetMainAnimationChannel ( const
 		std::vector<aiVectorKey>* objectPositions);
+
+	// ------------------------------------------------------------------
+	/** Sets the main animation channel to a fixed value 
+	 *
+	 *  @param fixed Fixed value for the main animation channel
+	 */
+	void SetFixedMainAnimationChannel(const aiVector3D& fixed);
 
 
 	// ------------------------------------------------------------------
@@ -163,8 +171,8 @@ public:
 
 private:
 
-	const std::vector<aiVectorKey>* targetPositions;
-	std::vector<aiVectorKey> *objectPositions;
+	const std::vector<aiVectorKey>* targetPositions,*objectPositions;
+	aiVector3D fixedMain;
 };
 
 

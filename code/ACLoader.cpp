@@ -151,10 +151,29 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 	if (!TokenMatch(buffer,"OBJECT",6))
 		return;
 
+	SkipSpaces(&buffer);
+
 	++mNumMeshes;
 
 	objects.push_back(Object());
 	Object& obj = objects.back();
+
+	aiLight* light = NULL;
+	if (!ASSIMP_stricmp(buffer,"light"))
+	{
+		// This is a light source. Add it to the list
+		mLights->push_back(light = new aiLight());
+
+		// Return a point light with no attenuation
+		light->mType = aiLightSource_POINT;
+		light->mColorDiffuse = light->mColorSpecular = aiColor3D(1.f,1.f,1.f);
+		light->mAttenuationConstant = 1.f;
+
+		// Generate a default name for both the light source and the node
+		light->mName.length = ::sprintf(light->mName.data,"ACLight_%i",mLights->size()-1);
+		obj.name = std::string( light->mName.data );
+
+	}
 
 	while (GetNextLine())
 	{
@@ -176,6 +195,13 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 		{
 			SkipSpaces(&buffer);
 			AI_AC_GET_STRING(obj.name);
+
+			// If this is a light source, we'll also need to store
+			// the name of the node in it.
+			if (light)
+			{
+				light->mName.Set(obj.name);
+			}
 		}
 		else if (TokenMatch(buffer,"texture",7))
 		{
@@ -219,8 +245,6 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 				obj.vertices.push_back(aiVector3D());
 				aiVector3D& v = obj.vertices.back();
 				AI_AC_CHECKED_LOAD_FLOAT_ARRAY("",0,3,&v.x);
-				//std::swap(v.z,v.y);
-				v.z *= -1.f;
 			}
 		}
 		else if (TokenMatch(buffer,"numsurf",7))
@@ -597,7 +621,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 	node->mTransformation = aiMatrix4x4 ( object.rotation );
 
 	node->mTransformation.a4 = object.translation.x;
-	node->mTransformation.b4 = object.translation.y;
+	node->mTransformation.b4 = -object.translation.y;
 	node->mTransformation.c4 = object.translation.z;
 
 	return node;
@@ -644,6 +668,9 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 	std::vector<Object> rootObjects;
 	rootObjects.reserve(5);
 
+	std::vector<aiLight*> lights;
+	mLights = & lights;
+
 	while (GetNextLine())
 	{
 		if (TokenMatch(buffer,"MATERIAL",8))
@@ -662,9 +689,9 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 			}
 
 			AI_AC_CHECKED_LOAD_FLOAT_ARRAY("rgb",3,3,&mat.rgb);
-			AI_AC_CHECKED_LOAD_FLOAT_ARRAY("amb",3,3,&mat.rgb);
-			AI_AC_CHECKED_LOAD_FLOAT_ARRAY("emis",4,3,&mat.rgb);
-			AI_AC_CHECKED_LOAD_FLOAT_ARRAY("spec",4,3,&mat.rgb);
+			AI_AC_CHECKED_LOAD_FLOAT_ARRAY("amb",3,3,&mat.amb);
+			AI_AC_CHECKED_LOAD_FLOAT_ARRAY("emis",4,3,&mat.emis);
+			AI_AC_CHECKED_LOAD_FLOAT_ARRAY("spec",4,3,&mat.spec);
 			AI_AC_CHECKED_LOAD_FLOAT_ARRAY("shi",3,1,&mat.shin);
 			AI_AC_CHECKED_LOAD_FLOAT_ARRAY("trans",5,1,&mat.trans);
 		}
@@ -701,6 +728,9 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 	pScene->mRootNode = ConvertObjectSection(*root,meshes,omaterials,materials);
 	if (1 != rootObjects.size())delete root;
 
+	if (!::strncmp( pScene->mRootNode->mName.data, "Node", 4))
+		pScene->mRootNode->mName.Set("<AC3DWorld>");
+
 	// build output arrays
 	if (meshes.empty())
 	{
@@ -710,10 +740,17 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 	::memcpy(pScene->mMeshes,&meshes[0],pScene->mNumMeshes*sizeof(void*));
 
-	// build output arrays
+
 	pScene->mNumMaterials = (unsigned int)omaterials.size();
 	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
 	::memcpy(pScene->mMaterials,&omaterials[0],pScene->mNumMaterials*sizeof(void*));
+
+	pScene->mNumLights = (unsigned int)lights.size();
+	if (lights.size())
+	{
+		pScene->mLights = new aiLight*[lights.size()];
+		::memcpy(pScene->mLights,&lights[0],lights.size()*sizeof(void*));
+	}
 }
 
 #endif //!defined AI_BUILD_NO_AC_IMPORTER

@@ -79,11 +79,10 @@ bool LWOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	if (extension.length() < 4)return false;
 	if (extension[0] != '.')return false;
 
-	if (extension[1] != 'l' && extension[1] != 'L')return false;
-	if (extension[2] != 'w' && extension[2] != 'W')return false;
-	if (extension[3] != 'o' && extension[3] != 'O')return false;
-
-	return true;
+	return ! (extension[1] != 'l' && extension[1] != 'L' ||
+			  extension[2] != 'w' && extension[2] != 'W' &&
+			  extension[2] != 'x' && extension[2] != 'X' ||
+			  extension[3] != 'o' && extension[3] != 'O');
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -151,11 +150,29 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		LoadLWOBFile();
 	}
 
-	// new lightwave format
+	// New lightwave format
 	else if (AI_LWO_FOURCC_LWO2 == fileType)
 	{
 		DefaultLogger::get()->info("LWO file format: LWO2 (>= LightWave 6)");
+	}
+	// MODO file format
+	else if (AI_LWO_FOURCC_LXOB == fileType)
+	{
+		DefaultLogger::get()->info("LWO file format: LXOB (Modo)");
+	}
+	// we don't know this format
+	else 
+	{
+		char szBuff[5];
+		szBuff[0] = (char)(fileType >> 24u);
+		szBuff[1] = (char)(fileType >> 16u);
+		szBuff[2] = (char)(fileType >> 8u);
+		szBuff[3] = (char)(fileType);
+		throw new ImportErrorException(std::string("Unknown LWO sub format: ") + szBuff);
+	}
 
+	if (AI_LWO_FOURCC_LWOB != fileType)
+	{
 		mIsLWO2 = true;
 		LoadLWO2File();
 
@@ -170,17 +187,6 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 			throw new ImportErrorException("LWO2: Unable to find the requested layer: " 
 				+ configLayerName);
 		}
-	}
-
-	// we don't know this format
-	else 
-	{
-		char szBuff[5];
-		szBuff[0] = (char)(fileType >> 24u);
-		szBuff[1] = (char)(fileType >> 16u);
-		szBuff[2] = (char)(fileType >> 8u);
-		szBuff[3] = (char)(fileType);
-		throw new ImportErrorException(std::string("Unknown LWO sub format: ") + szBuff);
 	}
 
 	// now, as we have loaded all data, we can resolve cross-referenced tags and clips
@@ -249,7 +255,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 					mesh->mNumVertices += layer.mFaces[*it].mNumIndices;
 				}
 
-				aiVector3D* pv = mesh->mVertices = new aiVector3D[mesh->mNumVertices];
+				aiVector3D *nrm = NULL, * pv = mesh->mVertices = new aiVector3D[mesh->mNumVertices];
 				aiFace* pf = mesh->mFaces = new aiFace[mesh->mNumFaces];
 				mesh->mMaterialIndex = i;
 
@@ -276,8 +282,12 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 					pvUV[mui] = mesh->mTextureCoords[mui] = new aiVector3D[mesh->mNumVertices];
 
 					// LightWave doesn't support more than 2 UV components
+					// so we can directly setup this value
 					mesh->mNumUVComponents[0] = 2;
 				}
+
+				if (layer.mNormals.name.length())
+					nrm = mesh->mNormals = new aiVector3D[mesh->mNumVertices];
 		
 				aiColor4D* pvVC[AI_MAX_NUMBER_OF_COLOR_SETS];
 				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_COLOR_SETS;++mui)	
@@ -320,11 +330,24 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 							pp++;
 						}
 
+						// process normals (MODO extension)
+						if (nrm)
+						{
+							*nrm++ = ((aiVector3D*)&layer.mNormals.rawData[0])[idx];
+						}
+
 						// process vertex colors
 						for (unsigned int w = 0; w < AI_MAX_NUMBER_OF_COLOR_SETS;++w)	
 						{
 							if (0xffffffff == vVColorIndices[w])break;
-							*(pvVC[w])++ = ((aiColor4D*)&layer.mVColorChannels[vVColorIndices[w]].rawData[0])[idx];
+							*pvVC[w] = ((aiColor4D*)&layer.mVColorChannels[vVColorIndices[w]].rawData[0])[idx];
+
+							// If a RGB color map is explicitly requested delete the
+							// alpha channel - it could theoretically be != 1.
+							if(_mSurfaces[i].mVCMapType == AI_LWO_RGB)
+								pvVC[w]->a = 1.f;
+
+							pvVC[w]++;
 						}
 
 #if 0
@@ -343,16 +366,19 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 					pf++;
 				}
 
-				// compute normal vectors for the mesh - we can't use our GenSmoothNormal-
-				// Step here since it wouldn't handle smoothing groups correctly for LWO.
-				// So we use a separate implementation.
-				ComputeNormals(mesh,smoothingGroups,_mSurfaces[i]);
-
+				if (!mesh->mNormals)
+				{
+					// Compute normal vectors for the mesh - we can't use our GenSmoothNormal-
+					// Step here since it wouldn't handle smoothing groups correctly for LWO.
+					// So we use a separate implementation.
+					ComputeNormals(mesh,smoothingGroups,_mSurfaces[i]);
+				}
+				else DefaultLogger::get()->debug("LWO2: No need to compute normals, they're already there");
 				++p;
 			}
 		}
 
-		// generate nodes to render the mesh. Store the parent index
+		// Generate nodes to render the mesh. Store the parent index
 		// in the mParent member of the nodes
 		aiNode* pcNode = new aiNode();
 		apcNodes.push_back(pcNode);
@@ -367,7 +393,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	if (apcNodes.empty() || apcMeshes.empty())
 		throw new ImportErrorException("LWO: No meshes loaded");
 
-	// the RemoveRedundantMaterials step will clean this up later
+	// The RemoveRedundantMaterials step will clean this up later
 	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials = (unsigned int)mSurfaces->size()];
 	for (unsigned int mat = 0; mat < pScene->mNumMaterials;++mat)
 	{
@@ -510,7 +536,6 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::AddChildren(aiNode* node, uintptr_t parent, std::vector<aiNode*>& apcNodes)
 {
-	parent -= 1;
 	for (uintptr_t i  = 0; i < (uintptr_t)apcNodes.size();++i)
 	{
 		if (i == parent)continue;
@@ -706,10 +731,15 @@ void LWOImporter::LoadLWO2Polygons(unsigned int length)
 	LE_NCONST uint16_t* const end	= (LE_NCONST uint16_t*)(mFileBuffer+length);
 	uint32_t type = GetU4();
 
-	if (type != AI_LWO_FACE)
+	// Determine the type of the polygons
+	switch (type)
 	{
-		DefaultLogger::get()->warn("LWO2: Only POLS.FACE chunks are supported.");
-		return;
+	case  AI_LWO_PTCH:
+	case  AI_LWO_FACE:
+
+		break;
+	default:
+		DefaultLogger::get()->warn("LWO2: Unsupported polygon type (PTCH and FACE are supported)");
 	}
 
 	// first find out how many faces and vertices we'll finally need
@@ -829,19 +859,26 @@ VMapEntry* FindEntry(std::vector< T >& list,const std::string& name, bool perPol
 
 // ------------------------------------------------------------------------------------------------
 template <class T>
-void CreateNewEntry(std::vector< T >& list, unsigned int srcIdx)
+inline void CreateNewEntry(T& chan, unsigned int srcIdx)
+{
+	if (!chan.name.length())return;
+
+	chan.abAssigned[srcIdx] = true;
+	chan.abAssigned.resize(chan.abAssigned.size()+1,false);
+
+	for (unsigned int a = 0; a < chan.dims;++a)
+		chan.rawData.push_back(chan.rawData[srcIdx*chan.dims+a]);
+}
+
+// ------------------------------------------------------------------------------------------------
+template <class T>
+inline void CreateNewEntry(std::vector< T >& list, unsigned int srcIdx)
 {
 	for (typename std::vector< T >::iterator 
 		it =  list.begin(), end = list.end();
 		it != end;++it)
 	{
-		T& chan = *it;
-
-		chan.abAssigned[srcIdx] = true;
-		chan.abAssigned.resize(chan.abAssigned.size()+1,false);
-
-		for (unsigned int a = 0; a < chan.dims;++a)
-			chan.rawData.push_back(chan.rawData[srcIdx*chan.dims+a]);
+		CreateNewEntry( *it, srcIdx );
 	}
 }
 
@@ -911,7 +948,24 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 		}
 		base = FindEntry(mCurLayer->mVColorChannels,name,perPoly);
 		break;
-	default: return;
+
+	case AI_LWO_MODO_NORM:
+
+		/*  This is a non-standard extension chunk used by Luxology's MODO.
+		 *  It stores per-vertex normals. This VMAP exists just once, has
+		 *  3 dimensions and is btw extremely beautiful.
+		 */
+		if (name != "vert_normals" || dims != 3 || mCurLayer->mNormals.name.length())
+			return;
+
+		DefaultLogger::get()->info("Non-standard extension: MODO VMAP.NORM.vert_normals");
+		
+		mCurLayer->mNormals.name = name;
+		base = & mCurLayer->mNormals;
+		break;
+
+	default: 
+		return;
 	};
 	base->Allocate((unsigned int)mCurLayer->mTempPoints.size());
 
@@ -946,20 +1000,22 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 				if (polyIdx >= numFaces)
 				{
 					DefaultLogger::get()->warn("LWO2: VMAD polygon index is out of range");
-					mFileBuffer += base->dims*4;continue;
+					mFileBuffer += base->dims*4;
+					continue;
 				}
 
 				LWO::Face& src = list[polyIdx];
-				refList.resize(refList.size()+src.mNumIndices, 0xffffffff);
 
-				// generate new vertex positions
+				// generate a new unique vertex for the corresponding index - but only
+				// if we can find the index in the face
 				for (unsigned int i = 0; i < src.mNumIndices;++i)
 				{
 					register unsigned int srcIdx = src.mIndices[i];
-					if (idx == srcIdx)
-					{
-						idx = (unsigned int)pointList.size();
-					}
+					if (idx != srcIdx)continue;
+
+					refList.resize(refList.size()+1, 0xffffffff);
+						
+					idx = (unsigned int)pointList.size();
 					src.mIndices[i] = (unsigned int)pointList.size();
 
 					// store the index of the new vertex in the old vertex
@@ -971,6 +1027,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 					CreateNewEntry(mCurLayer->mVColorChannels,	srcIdx );
 					CreateNewEntry(mCurLayer->mUVChannels,		srcIdx );
 					CreateNewEntry(mCurLayer->mWeightChannels,	srcIdx );
+					CreateNewEntry(mCurLayer->mNormals,	srcIdx );
 				}
 			}
 		}

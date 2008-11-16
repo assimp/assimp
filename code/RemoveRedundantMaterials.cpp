@@ -47,34 +47,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-#if _MSC_VER >= 1400
-#	define sprintf sprintf_s
-#endif
-
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 RemoveRedundantMatsProcess::RemoveRedundantMatsProcess()
 {
+	// nothing to do here
 }
+
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 RemoveRedundantMatsProcess::~RemoveRedundantMatsProcess()
 {
 	// nothing to do here
 }
-// -------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool RemoveRedundantMatsProcess::IsActive( unsigned int pFlags) const
 {
 	return (pFlags & aiProcess_RemoveRedundantMaterials) != 0;
 }
-// -------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 {
 	DefaultLogger::get()->debug("RemoveRedundantMatsProcess begin");
 
-	unsigned int iCnt = 0;
+	unsigned int iCnt = 0, unreferenced = 0;
 	if (pScene->mNumMaterials)
 	{
 		// TODO: reimplement this algorithm to work in-place
@@ -95,7 +95,11 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 		for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
 		{
 			// if the material is not referenced ... remove it
-			if (!abReferenced[i])continue;
+			if (!abReferenced[i])
+			{
+				++unreferenced;
+				continue;
+			}
 
 			uint32_t me = aiHashes[i] = ((MaterialHelper*)pScene->mMaterials[i])->ComputeHash();
 			for (unsigned int a = 0; a < i;++a)
@@ -153,7 +157,8 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 	else 
 	{
 		char szBuffer[128]; // should be sufficiently large
-		::sprintf(szBuffer,"RemoveRedundantMatsProcess finished. Found %i redundant materials",iCnt);
+		::sprintf(szBuffer,"RemoveRedundantMatsProcess finished. %i redundant and %i unused materials",
+			iCnt,unreferenced);
 		DefaultLogger::get()->info(szBuffer);
 	}
 }

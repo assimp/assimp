@@ -284,7 +284,16 @@ void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
 int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 {
 	bool ret = false;
-	std::vector<bool> dirtyMask;
+	std::vector<bool> dirtyMask(pMesh->mNumVertices,true);
+
+	// Ignore elements that are not referenced by vertices.
+	// (they are, for example, caused by the FindDegenerates step)
+	for (unsigned int m = 0; m < pMesh->mNumFaces;++m)
+	{
+		const aiFace& f = pMesh->mFaces[m];
+		for (unsigned int i = 0; i < f.mNumIndices;++i)
+			dirtyMask[f.mIndices[i]] = false;
+	}
 
 	// process vertex positions
 	if(pMesh->mVertices && ProcessArray(pMesh->mVertices,pMesh->mNumVertices,"positions",dirtyMask))
@@ -311,9 +320,7 @@ int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 	// -- we don't validate vertex colors, it's difficult to say whether
 	// they are invalid or not.
 
-	// normals and tangents are undefined for point and line faces.
-	// we generate a small lookup table in which we mark all
-	// indices into the normals/tangents array that MAY be invalid
+	// Normals and tangents are undefined for point and line faces.
 	if (pMesh->mNormals || pMesh->mTangents)
 	{
 		if (aiPrimitiveType_POINT & pMesh->mPrimitiveTypes ||
@@ -322,8 +329,7 @@ int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 			if (aiPrimitiveType_TRIANGLE & pMesh->mPrimitiveTypes ||
 				aiPrimitiveType_POLYGON  & pMesh->mPrimitiveTypes)
 			{
-				// we need the lookup table
-				dirtyMask.resize(pMesh->mNumVertices,false);
+				// We need to update the lookup-table
 				for (unsigned int m = 0; m < pMesh->mNumFaces;++m)
 				{
 					const aiFace& f = pMesh->mFaces[m];
@@ -334,27 +340,29 @@ int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 					else if (1 == f.mNumIndices)dirtyMask[f.mIndices[0]] = true;
 				}
 			}
+			// Normals, tangents and bitangents are undefined for
+			// the whole mesh (and should not even be there)
 			else return ret;
 		}
 
-		// process mesh normals
+		// Process mesh normals
 		if (pMesh->mNormals && ProcessArray(pMesh->mNormals,pMesh->mNumVertices,
 			"normals",dirtyMask,true,false))
 			ret = true;
 
-		// process mesh tangents
+		// Process mesh tangents
 		if (pMesh->mTangents && ProcessArray(pMesh->mTangents,pMesh->mNumVertices,
 			"tangents",dirtyMask))
 		{
-			delete[] pMesh->mBitangents; pMesh->mBitangents = NULL;
+			delete[] pMesh->mTangents; pMesh->mTangents = NULL;
 			ret = true;
 		}
 
-		// process mesh bitangents
+		// Process mesh bitangents
 		if (pMesh->mBitangents && ProcessArray(pMesh->mBitangents,pMesh->mNumVertices,
 			"bitangents",dirtyMask))
 		{
-			delete[] pMesh->mTangents; pMesh->mTangents = NULL;
+			delete[] pMesh->mBitangents; pMesh->mBitangents = NULL;
 			ret = true;
 		}
 	}

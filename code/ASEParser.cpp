@@ -634,6 +634,12 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 				mat.mSpecularExponent *= 15;
 				continue;
 			}
+			// two-sided material
+			if (TokenMatch(filePtr,"MATERIAL_TWOSIDED",17) )
+			{
+				mat.mTwoSided = true;
+				continue;
+			}
 			// material shininess strength
 			if (TokenMatch(filePtr,"MATERIAL_SHINESTRENGTH",22))
 			{
@@ -1387,7 +1393,7 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 				continue;
 			}
 			// Number of vertex colors in the mesh
-			if (TokenMatch(filePtr,"MESH_NUMCVERTEX" ,14))
+			if (TokenMatch(filePtr,"MESH_NUMCVERTEX" ,15))
 			{
 				ParseLV4MeshLong(iNumCVertices);
 				continue;
@@ -1877,44 +1883,38 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 {
 	AI_ASE_PARSER_INIT();
 
-	// allocate enough storage for the normals
+	// Allocate enough storage for the normals
 	sMesh.mNormals.resize(sMesh.mFaces.size()*3,aiVector3D( 0.f, 0.f, 0.f ));
-	unsigned int iIndex = 0, faceIdx = 0xffffffff;
+	unsigned int index, faceIdx = 0xffffffff;
 
-	// ********************************************************************
-	// just smooth both vertex and face normals together, so it will still
-	// work if one one of the two is missing. If one of the two is invalid
-	// the result will be partly corrected by this trick.
-	// ********************************************************************
+	// Smooth the vertex and face normals together. The result
+	// will be edgy then, but otherwise everything would be soft ...
 	while (true)
 	{
 		if ('*' == *filePtr)
 		{
 			++filePtr;
-			if (0xffffffff != faceIdx && TokenMatch(filePtr,"MESH_VERTEXNORMAL",17))
+			if (faceIdx != 0xffffffff && TokenMatch(filePtr,"MESH_VERTEXNORMAL",17))
 			{
 				aiVector3D vNormal;
-				ParseLV4MeshFloatTriple(&vNormal.x,iIndex);
+				ParseLV4MeshFloatTriple(&vNormal.x,index);
 
-				if (iIndex == sMesh.mFaces[faceIdx].mIndices[0])
-				{
-					iIndex = 0;
-				}
-				else if (iIndex == sMesh.mFaces[faceIdx].mIndices[1])
-				{
-					iIndex = 1;
-				}
-				else if (iIndex == sMesh.mFaces[faceIdx].mIndices[2])
-				{
-					iIndex = 2;
-				}
+				// Make sure we assign it to the correct face
+				const ASE::Face& face = sMesh.mFaces[faceIdx];
+				if (index == face.mIndices[0])
+					index = 0;
+				else if (index == face.mIndices[1])
+					index = 1;
+				else if (index == face.mIndices[2])
+					index = 2;
 				else
 				{
-					LogWarning("Normal index doesn't fit to face index");
+					DefaultLogger::get()->error("ASE: Invalid vertex index in MESH_VERTEXNORMAL section");
 					continue;
 				}
+
 				// We'll renormalize later
-				sMesh.mNormals[faceIdx*3 + iIndex] += vNormal;
+				sMesh.mNormals[faceIdx*3+index] += vNormal;
 				continue;
 			}
 			if (TokenMatch(filePtr,"MESH_FACENORMAL",15))
@@ -1922,15 +1922,14 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 				aiVector3D vNormal;
 				ParseLV4MeshFloatTriple(&vNormal.x,faceIdx);
 
-				if (iIndex >= sMesh.mFaces.size())
+				if (faceIdx >= sMesh.mFaces.size())
 				{
-					LogWarning("Face normal index is too large");
-					faceIdx = 0xffffffff;
+					DefaultLogger::get()->error("ASE: Invalid vertex index in MESH_FACENORMAL section");
 					continue;
 				}
-				sMesh.mNormals[faceIdx*3]    += vNormal;
-				sMesh.mNormals[faceIdx*3 +1] += vNormal;
-				sMesh.mNormals[faceIdx*3 +2] += vNormal;
+
+				// We'll renormalize later
+				sMesh.mNormals[faceIdx*3] += vNormal;
 				continue;
 			}
 		}
@@ -2037,7 +2036,7 @@ void Parser::ParseLV4MeshFace(ASE::Face& out)
 			return;
 		}
 		
-		// parse smoothing groups until we don_t anymore see commas
+		// Parse smoothing groups until we don't anymore see commas
 		// FIX: There needn't always be a value, sad but true
 		while (true)
 		{

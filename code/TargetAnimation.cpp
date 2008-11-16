@@ -45,20 +45,20 @@ using namespace Assimp;
 
 
 // ---------------------------------------------------------------------------
-KeyIterator::KeyIterator(std::vector<aiVectorKey>* _objPos,
+KeyIterator::KeyIterator(const std::vector<aiVectorKey>* _objPos,
 	const std::vector<aiVectorKey>* _targetObjPos,
 	const aiVector3D*  defaultObjectPos /*= NULL*/,
 	const aiVector3D*  defaultTargetPos /*= NULL*/)
 		
 		:	reachedEnd		(false)
 		,	curTime			(-1.)
-		,	objPos(_objPos)
+		,	objPos			(_objPos)
 		,	targetObjPos	(_targetObjPos)
 		,	nextObjPos		(0)
 		,	nextTargetObjPos(0)
 {
 	// Generate default transformation tracks if necessary
-	if (!objPos)
+	if (!objPos || objPos->empty())
 	{
 		defaultObjPos.resize(1);
 		defaultObjPos.front().mTime  = 10e10;
@@ -68,7 +68,7 @@ KeyIterator::KeyIterator(std::vector<aiVectorKey>* _objPos,
 
 		objPos = & defaultObjPos;
 	}
-	if (!targetObjPos)
+	if (!targetObjPos || targetObjPos->empty())
 	{
 		defaultTargetObjPos.resize(1);
 		defaultTargetObjPos.front().mTime  = 10e10;
@@ -129,7 +129,7 @@ void KeyIterator::operator ++()
 			const aiVectorKey& last  = targetObjPos->at(nextTargetObjPos);
 			const aiVectorKey& first = targetObjPos->at(nextTargetObjPos-1);
 
-			/*curTargetPosition = Interpolate(first.mValue, last.mValue,
+		/*	curTargetPosition = Interpolate(first.mValue, last.mValue,
 				(curTime-first.mTime) / (last.mTime-first.mTime));*/
 		}
 
@@ -177,23 +177,31 @@ void TargetAnimationHelper::SetTargetAnimationChannel (
 
 // ---------------------------------------------------------------------------
 void TargetAnimationHelper::SetMainAnimationChannel (
-	std::vector<aiVectorKey>* _objectPositions)
+	const std::vector<aiVectorKey>* _objectPositions)
 {
 	ai_assert(NULL != _objectPositions);
 	objectPositions = _objectPositions;
 }
 
 // ---------------------------------------------------------------------------
+void TargetAnimationHelper::SetFixedMainAnimationChannel(
+	const aiVector3D& fixed)
+{
+	objectPositions = NULL; // just to avoid confusion
+	fixedMain = fixed;
+}
+
+// ---------------------------------------------------------------------------
 void TargetAnimationHelper::Process(std::vector<aiVectorKey>* distanceTrack)
 {
-	ai_assert(NULL != objectPositions);
+	ai_assert(NULL != targetPositions);
 
 	// Iterate through all object keys and interpolate their values if necessary.
 	// Then get the corresponding target position, compute the difference
 	// vector between object and target position. Then compute a rotation matrix
 	// that rotates the base vector of the object coordinate system at that time
 	// to match the diff vector. 
-	KeyIterator iter(objectPositions,targetPositions);
+	KeyIterator iter(objectPositions,targetPositions,&fixedMain);
 	unsigned int curTarget;
 	for (;!iter.Finished();++iter)
 	{

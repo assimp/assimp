@@ -786,6 +786,9 @@ int CMaterialManager::CreateMaterial(
 
 	aiString szPath;
 
+	aiTextureMapMode mapU(aiTextureMapMode_Wrap),mapV(aiTextureMapMode_Wrap);
+
+	bool bib =false;
 	if (pcSource->mTextureCoords[0])
 	{
 
@@ -795,6 +798,9 @@ int CMaterialManager::CreateMaterial(
 		if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_DIFFUSE(0),&szPath))
 		{
 			LoadTexture(&pcMesh->piDiffuseTexture,&szPath);
+
+			aiGetMaterialInteger(pcMat,AI_MATKEY_MAPPINGMODE_U_DIFFUSE(0),(int*)&mapU);
+			aiGetMaterialInteger(pcMat,AI_MATKEY_MAPPINGMODE_V_DIFFUSE(0),(int*)&mapV);
 		}
 
 		if (pcSource->mTextureCoords[1])
@@ -833,7 +839,7 @@ int CMaterialManager::CreateMaterial(
 
 				// NOTE: This special value is set by the tree view if the user
 				// manually removes the alpha texture from the view ...
-				if (AI_SUCCESS != aiGetMaterialInteger(pcMat,"no_a_from_d",&iVal))
+				if (AI_SUCCESS != aiGetMaterialInteger(pcMat,"no_a_from_d",0,0,&iVal))
 				{
 					pcMesh->piOpacityTexture = pcMesh->piDiffuseTexture;
 					pcMesh->piOpacityTexture->AddRef();
@@ -879,6 +885,7 @@ int CMaterialManager::CreateMaterial(
 			{
 				LoadTexture(&pcMesh->piNormalTexture,&szPath);
 			}
+			else bib = true;
 			bHM = true;
 		}
 
@@ -968,6 +975,28 @@ int CMaterialManager::CreateMaterial(
 		sMacro[iCurrent].Name = "AV_DIFFUSE_TEXTURE";
 		sMacro[iCurrent].Definition = "1";
 		++iCurrent;
+
+		if (mapU == aiTextureMapMode_Wrap)
+			sMacro[iCurrent].Name = "AV_WRAPU";
+		else if (mapU == aiTextureMapMode_Mirror)
+			sMacro[iCurrent].Name = "AV_MIRRORU";
+		else // if (mapU == aiTextureMapMode_Clamp)
+			sMacro[iCurrent].Name = "AV_CLAMPU";
+
+		sMacro[iCurrent].Definition = "1";
+		++iCurrent;
+
+
+
+		if (mapV == aiTextureMapMode_Wrap)
+			sMacro[iCurrent].Name = "AV_WRAPV";
+		else if (mapV == aiTextureMapMode_Mirror)
+			sMacro[iCurrent].Name = "AV_MIRRORV";
+		else // if (mapV == aiTextureMapMode_Clamp)
+			sMacro[iCurrent].Name = "AV_CLAMPV";
+
+		sMacro[iCurrent].Definition = "1";
+		++iCurrent;
 	}
 	if (pcMesh->piDiffuseTexture2)
 	{
@@ -993,7 +1022,7 @@ int CMaterialManager::CreateMaterial(
 		sMacro[iCurrent].Definition = "1";
 		++iCurrent;
 	}
-	if (pcMesh->piNormalTexture)
+	if (pcMesh->piNormalTexture && !bib)
 	{
 		sMacro[iCurrent].Name = "AV_NORMAL_TEXTURE";
 		sMacro[iCurrent].Definition = "1";

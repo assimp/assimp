@@ -611,7 +611,6 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, const std::vector<XFile::
 				std::string sz = otex.mName;
 				if (!sz.length())continue;
 
-				char key[256];
 
 				// find the file name
 				const size_t iLen = sz.length();
@@ -634,35 +633,35 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, const std::vector<XFile::
 					if( isalpha( sz[c]))
 						sz[c] = tolower( sz[c]);
 
+
+				// Place texture filename property under the corresponding name
+				aiString tex( oldMat.mTextures[b].mName);
+
 				// bump map
 				if (std::string::npos != sz.find("bump", s) || std::string::npos != sz.find("height", s))
 				{
-					::sprintf(key,AI_MATKEY_TEXTURE_HEIGHT_ "[%i]",iHM++);
+					mat->AddProperty( &tex, AI_MATKEY_TEXTURE_HEIGHT(iHM++));
 				} else
 				if (otex.mIsNormalMap || std::string::npos != sz.find( "normal", s) || std::string::npos != sz.find("nm", s))
 				{
-					::sprintf(key,AI_MATKEY_TEXTURE_NORMALS_ "[%i]",iNM++);
+					mat->AddProperty( &tex, AI_MATKEY_TEXTURE_NORMALS(iNM++));
 				} else
 				if (std::string::npos != sz.find( "spec", s) || std::string::npos != sz.find( "glanz", s))
 				{
-					::sprintf(key,AI_MATKEY_TEXTURE_SPECULAR_ "[%i]",iSM++);
+					mat->AddProperty( &tex, AI_MATKEY_TEXTURE_SPECULAR(iSM++));
 				} else
 				if (std::string::npos != sz.find( "ambi", s) || std::string::npos != sz.find( "env", s))
 				{
-					::sprintf(key,AI_MATKEY_TEXTURE_AMBIENT_ "[%i]",iAM++);
+					mat->AddProperty( &tex, AI_MATKEY_TEXTURE_AMBIENT(iAM++));
 				} else
 				if (std::string::npos != sz.find( "emissive", s) || std::string::npos != sz.find( "self", s))
 				{
-					::sprintf(key,AI_MATKEY_TEXTURE_EMISSIVE_ "[%i]",iEM++);
+					mat->AddProperty( &tex, AI_MATKEY_TEXTURE_EMISSIVE(iEM++));
 				} else
 				{
-					// assume it is a diffuse texture
-					::sprintf(key,AI_MATKEY_TEXTURE_DIFFUSE_ "[%i]",iDM++);
+					// Assume it is a diffuse texture
+					mat->AddProperty( &tex, AI_MATKEY_TEXTURE_DIFFUSE(iDM++));
 				}
-
-				// place texture filename property under the corresponding name
-				aiString tex( oldMat.mTextures[b].mName);
-				mat->AddProperty( &tex, key);
 			}
 		}
 

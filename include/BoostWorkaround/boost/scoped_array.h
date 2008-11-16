@@ -1,36 +1,36 @@
 
-#ifndef __AI_BOOST_SCOPED_PTR_INCLUDED
-#define __AI_BOOST_SCOPED_PTR_INCLUDED
+#ifndef __AI_BOOST_SCOPED_ARRAY_INCLUDED
+#define __AI_BOOST_SCOPED_ARRAY_INCLUDED
 
-#ifndef BOOST_SCOPED_PTR_HPP_INCLUDED
+#ifndef BOOST_SCOPED_ARRAY_HPP_INCLUDED
 
 #include <assert.h>
 
 namespace boost {
 
-// small replacement for boost::scoped_ptr
+// small replacement for boost::scoped_array
 template <class T>
-class scoped_ptr
+class scoped_array
 {
 public:
 
 	// provide a default construtctor 
-	scoped_ptr()
+	scoped_array()
 		: ptr(0)
 	{
 	}
 
 	// construction from an existing heap object of type T
-	scoped_ptr(T* _ptr)
+	scoped_array(T* _ptr)
 		: ptr(_ptr)
 	{
 	}
 	
 	// automatic destruction of the wrapped object at the 
 	// end of our lifetime
-	~scoped_ptr()
+	~scoped_array()
 	{
-		delete ptr;
+		delete[] ptr;
 	}
 	
 	inline T* get()
@@ -50,11 +50,16 @@ public:
 
 	inline void reset (T* t = 0)
 	{
-		delete ptr;
+		delete[] ptr;
 		ptr = t;
 	}
 
-	void swap(scoped_ptr & b)
+	T & operator[](std::ptrdiff_t i) const
+	{
+		return ptr[i];
+	}
+
+	void swap(scoped_array & b)
 	{
 		std::swap(ptr, b.ptr);
 	}
@@ -67,7 +72,7 @@ private:
 };
 
 template<class T> 
-inline void swap(scoped_ptr<T> & a, scoped_ptr<T> & b)
+inline void swap(scoped_array<T> & a, scoped_array<T> & b)
 {
 	a.swap(b);
 }
@@ -75,6 +80,6 @@ inline void swap(scoped_ptr<T> & a, scoped_ptr<T> & b)
 } // end of namespace boost
 
 #else
-#	error "scoped_ptr.h was already included"
+#	error "scoped_array.h was already included"
 #endif
-#endif // __AI_BOOST_SCOPED_PTR_INCLUDED
+#endif // __AI_BOOST_SCOPED_ARRAY_INCLUDED

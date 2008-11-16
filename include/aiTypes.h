@@ -47,13 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "aiDefines.h"
 
-// include math helper classes and their implementations
+// include math helper classes 
 #include "aiVector3D.h"
 #include "aiMatrix3x3.h"
 #include "aiMatrix4x4.h"
-#include "aiVector3D.inl"
-#include "aiMatrix3x3.inl"
-#include "aiMatrix4x4.inl"
 
 #ifdef __cplusplus
 #	include <string>
@@ -72,7 +69,6 @@ const size_t MAXLEN = 1024;
 // ---------------------------------------------------------------------------
 /** Represents a two-dimensional vector. 
 */
-// ---------------------------------------------------------------------------
 struct aiVector2D
 {
 #ifdef __cplusplus
@@ -86,6 +82,25 @@ struct aiVector2D
 	float x, y;
 } PACK_STRUCT;
 
+
+// ---------------------------------------------------------------------------
+/** Represents a plane in a three-dimensional, euclidean space
+*/
+struct aiPlane
+{
+#ifdef __cplusplus
+	aiPlane () : a(0.f), b(0.f), c(0.f), d(0.f) {}
+	aiPlane (float _a, float _b, float _c, float _d) 
+		: a(_a), b(_b), c(_c), d(_d) {}
+
+	aiPlane (const aiPlane& o) : a(o.a), b(o.b), c(o.c), d(o.d) {}
+	
+#endif // !__cplusplus
+
+	//! Plane equation
+	float a,b,c,d;
+} PACK_STRUCT;
+
 // aiVector3D type moved to separate header due to size of operators
 // aiQuaternion type moved to separate header due to size of operators
 // aiMatrix4x4 type moved to separate header due to size of operators
@@ -93,7 +108,6 @@ struct aiVector2D
 // ---------------------------------------------------------------------------
 /** Represents a color in Red-Green-Blue space. 
 */
-// ---------------------------------------------------------------------------
 struct aiColor3D
 {
 #ifdef __cplusplus
@@ -136,7 +150,6 @@ struct aiColor3D
 /** Represents a color in Red-Green-Blue space including an 
 *   alpha component. 
 */
-// ---------------------------------------------------------------------------
 struct aiColor4D
 {
 #ifdef __cplusplus
@@ -157,7 +170,7 @@ struct aiColor4D
 
 	inline bool IsBlack() const
 	{
-		// the alpha component doesn't care here. black is black.
+		// The alpha component doesn't care here. black is black.
 		return !r && !g && !b;
 	}
 
@@ -173,7 +186,6 @@ struct aiColor4D
 // ---------------------------------------------------------------------------
 /** Represents a string, zero byte terminated 
 */
-// ---------------------------------------------------------------------------
 struct aiString
 {
 #ifdef __cplusplus
@@ -188,7 +200,7 @@ struct aiString
 		length(rOther.length) 
 	{
 		::memcpy( data, rOther.data, rOther.length);
-		this->data[this->length] = '\0';
+		data[length] = '\0';
 	}
 
 	//! Constructor from std::string
@@ -212,17 +224,36 @@ struct aiString
 	//! comparison operator
 	bool operator==(const aiString& other) const
 	{
-		return  (this->length == other.length &&
+		return  (length == other.length &&
 				 0 == strcmp(this->data,other.data));
 	}
 
 	//! inverse comparison operator
 	bool operator!=(const aiString& other) const
 	{
-		return  (this->length != other.length ||
+		return  (length != other.length ||
 				 0 != ::strcmp(this->data,other.data));
 	}
 
+	//! Append a string to the string
+	inline void Append (const char* app)
+	{
+		const size_t len = ::strlen(app);
+		if (!len)return;
+
+		if (length + len >= MAXLEN)
+			return;
+
+		::memcpy(&data[length],app,len+1);
+		length += len;
+	}
+
+	//! Clear the string
+	inline void Clear ()
+	{
+		length  = 0;
+		data[0] = '\0';
+	}
 
 #endif // !__cplusplus
 
@@ -240,18 +271,21 @@ struct aiString
 * To check whether or not a function failed check against
 * AI_SUCCESS. The error codes are mainly used by the C-API.
 */
-// ---------------------------------------------------------------------------
 enum aiReturn
 {
 	//! Indicates that a function was successful
 	AI_SUCCESS = 0x0,
+
 	//! Indicates that a function failed
 	AI_FAILURE = -0x1,
+
 	//! Indicates that a file was invalid
 	AI_INVALIDFILE = -0x2,
+
 	//! Indicates that not enough memory was available
 	//! to perform the requested operation
 	AI_OUTOFMEMORY = -0x3,
+
 	//! Indicates that an illegal argument has been
 	//! passed to a function. This is rarely used,
 	//! most functions assert in this case.
@@ -264,7 +298,6 @@ enum aiReturn
  *  animations) of an import.
  *  @see Importer::GetMemoryRequirements()
 */
-// ---------------------------------------------------------------------------
 struct aiMemoryInfo
 {
 #ifdef __cplusplus
@@ -276,6 +309,8 @@ struct aiMemoryInfo
 		, meshes     (0)
 		, nodes      (0)
 		, animations (0)
+		, cameras	 (0)
+		, lights	 (0)
 		, total      (0)
 	{}
 
@@ -283,14 +318,25 @@ struct aiMemoryInfo
 
 	//! Storage allocated for texture data, in bytes
 	unsigned int textures;
+
 	//! Storage allocated for material data, in bytes
 	unsigned int materials;
+
 	//! Storage allocated for mesh data, in bytes
 	unsigned int meshes;
+
 	//! Storage allocated for node data, in bytes
 	unsigned int nodes;
+
 	//! Storage allocated for animation data, in bytes
 	unsigned int animations;
+
+	//! Storage allocated for camera data, in bytes
+	unsigned int cameras;
+
+	//! Storage allocated for light data, in bytes
+	unsigned int lights;
+
 	//! Storage allocated for the import, in bytes
 	unsigned int total;
 };
@@ -299,5 +345,12 @@ struct aiMemoryInfo
 #ifdef __cplusplus
 }
 #endif //!  __cplusplus
+
+// Include implementations
+#include "aiVector3D.inl"
+#include "aiMatrix3x3.inl"
+#include "aiMatrix4x4.inl"
+
+
 #endif //!! include guard
 

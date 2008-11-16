@@ -238,11 +238,7 @@ protected:
 	*/
 	void CheckIndices(D3DS::Mesh& sMesh);
 
-
 protected:
-
-	/** Configuration option: skip pivot chunks */
-	bool configSkipPivot;
 
 	/** Stream to read from */
 	StreamReaderLE* stream;

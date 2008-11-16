@@ -134,11 +134,10 @@ protected:
 	/** Search the material data structure for invalid or corrupt
 	 *  texture keys.
 	 * @param pMaterial Input material
-	 * @param szType Type of the texture (the purpose string that
-	 *  occurs in material keys, e.g. "diffuse", "ambient")
+	 * @param type Type of the texture
 	 */
 	void SearchForInvalidTextures(const aiMaterial* pMaterial,
-		const char* szType);
+		aiTextureType type);
 
 	// -------------------------------------------------------------------
 	/** Validates a texture

@@ -104,7 +104,7 @@ bool Discreet3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandle
 // Setup configuration properties
 void Discreet3DSImporter::SetupProperties(const Importer* pImp)
 {
-	configSkipPivot = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_3DS_IGNORE_PIVOT,0) ? true : false;
+	// nothing to be done for the moment
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -141,16 +141,13 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
 	// internal verbose representation. Finally compute normal
 	// vectors from the smoothing groups we read from the
 	// file.
-	for (std::vector<D3DS::Mesh>::iterator i =  mScene->mMeshes.begin(),
+	for (std::vector<D3DS::Mesh>::iterator i = mScene->mMeshes.begin(),
 		 end = mScene->mMeshes.end(); i != end;++i)
 	{
 		CheckIndices(*i);
 		MakeUnique  (*i);
 		ComputeNormalsWithSmoothingsGroups<D3DS::Face>(*i);
 	}
-
-	// Apply scaling and offsets to all texture coordinates
-	TextureTransform::ApplyScaleNOffset(mScene->mMaterials);
 
 	// Replace all occurences of the default material with a
 	// valid material. Generate it if no material containing
@@ -678,6 +675,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 		}
 		else l = & mCurrentNode->aPositionKeys;
 
+		l->reserve(numFrames);
 		for (unsigned int i = 0; i < numFrames;++i)
 		{
 			unsigned int fidx = stream->GetI2();
@@ -724,6 +722,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 
 		stream->IncPtr(10);
 		unsigned int numFrames = stream->GetI2();
+		l->reserve(numFrames);
 		stream->IncPtr(2);
 
 		for (unsigned int i = 0; i < numFrames;++i)
@@ -776,6 +775,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 
 		bool sortKeys = false;
 		std::vector<aiQuatKey>* l = &mCurrentNode->aRotationKeys;
+		l->reserve(numFrames);
 
 		for (unsigned int i = 0; i < numFrames;++i)
 		{
@@ -825,6 +825,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 
 		bool sortKeys = false;
 		std::vector<aiVectorKey>* l = &mCurrentNode->aScalingKeys;
+		l->reserve(numFrames);
 
 		for (unsigned int i = 0; i < numFrames;++i)
 		{
@@ -924,7 +925,7 @@ void Discreet3DSImporter::ParseFaceChunk()
 		}
 
 		// Now continue and read all material indices
-		cnt = stream->GetI2();
+		cnt = (uint16_t)stream->GetI2();
 		for (unsigned int i = 0; i < cnt;++i)
 		{
 			unsigned int fidx = (uint16_t)stream->GetI2();
@@ -957,7 +958,8 @@ void Discreet3DSImporter::ParseMeshChunk()
 	case Discreet3DS::CHUNK_VERTLIST:
 		{
 		// This is the list of all vertices in the current mesh
-		int num = stream->GetI2();
+		int num = (int)(uint16_t)stream->GetI2();
+		mMesh.mPositions.reserve(num);
 		while (num-- > 0)
 		{
 			aiVector3D v;
@@ -985,8 +987,8 @@ void Discreet3DSImporter::ParseMeshChunk()
 		mMesh.mMat.c4 = stream->GetF4();
 
 		// Now check whether the matrix has got a negative determinant
-		// If yes, we need to flip all vertices' x axis ....
-		// From lib3ds, mesh.c
+		// If yes, we need to flip all vertices' Z axis ....
+		// This code has been taken from lib3ds
 		if (mMesh.mMat.Determinant() < 0.0f)
 		{
 			// Compute the inverse of the matrix
@@ -994,10 +996,10 @@ void Discreet3DSImporter::ParseMeshChunk()
 			mInv.Inverse();
 
 			aiMatrix4x4 mMe = mMesh.mMat;
-			mMe.a1 *= -1.0f;
-			mMe.b1 *= -1.0f;
 			mMe.c1 *= -1.0f;
-			mMe.d1 *= -1.0f;
+			mMe.c2 *= -1.0f;
+			mMe.c3 *= -1.0f;
+			mMe.c4 *= -1.0f;
 			mInv = mInv * mMe;
 
 			// Now transform all vertices
@@ -1010,16 +1012,19 @@ void Discreet3DSImporter::ParseMeshChunk()
 				c[2]= mInv[0][2]*a[0] + mInv[1][2]*a[1] + mInv[2][2]*a[2] + mInv[3][2];
 				mMesh.mPositions[i] = c;
 			}
+
+			DefaultLogger::get()->info("3DS: Flipping mesh Z-Axis");
 		}}
 		break;
 
 	case Discreet3DS::CHUNK_MAPLIST:
 		{
 		// This is the list of all UV coords in the current mesh
-		int num = stream->GetI2();
+		int num = (int)(uint16_t)stream->GetI2();
+		mMesh.mTexCoords.reserve(num);
 		while (num-- > 0)
 		{
-			aiVector2D v;
+			aiVector3D v;
 			v.x = stream->GetF4();
 			v.y = stream->GetF4();
 			mMesh.mTexCoords.push_back(v);
@@ -1029,7 +1034,8 @@ void Discreet3DSImporter::ParseMeshChunk()
 	case Discreet3DS::CHUNK_FACELIST:
 		{
 		// This is the list of all faces in the current mesh
-		int num = stream->GetI2();
+		int num = (int)(uint16_t)stream->GetI2();
+		mMesh.mFaces.reserve(num);
 		while (num-- > 0)
 		{
 			// 3DS faces are ALWAYS triangles
@@ -1226,6 +1232,7 @@ void Discreet3DSImporter::ParseMaterialChunk()
 	// recursively continue processing this hierarchy level
 	return ParseMaterialChunk();
 }
+
 // ------------------------------------------------------------------------------------------------
 void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
 {
@@ -1262,7 +1269,7 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
 		if (0.0f == pcOut->mScaleU)
 		{
 			DefaultLogger::get()->warn("Texture coordinate scaling in the "
-				"x direction is zero. Assuming this should be 1.0 ... ");
+				"x direction is zero. Assuming 1");
 			pcOut->mScaleU = 1.0f;
 		}
 		break;
@@ -1272,14 +1279,14 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
 		if (0.0f == pcOut->mScaleV)
 		{
 			DefaultLogger::get()->warn("Texture coordinate scaling in the "
-				"y direction is zero. Assuming this should be 1.0 ... ");
+				"y direction is zero. Assuming 1");
 			pcOut->mScaleV = 1.0f;
 		}
 		break;
 
 	case Discreet3DS::CHUNK_MAT_MAP_UOFFSET:
 		// Texture coordinate offset in the U direction
-		pcOut->mOffsetU = stream->GetF4();
+		pcOut->mOffsetU = -stream->GetF4();
 		break;
 
 	case Discreet3DS::CHUNK_MAT_MAP_VOFFSET:
@@ -1288,24 +1295,24 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
 		break;
 
 	case Discreet3DS::CHUNK_MAT_MAP_ANG:
-		// Texture coordinate rotation, CCW in radians
-		pcOut->mRotation = stream->GetF4();
+		// Texture coordinate rotation, CCW in DEGREES
+		pcOut->mRotation = -AI_DEG_TO_RAD( stream->GetF4() );
 		break;
 
 	case Discreet3DS::CHUNK_MAT_MAP_TILING:
 		{
 		uint16_t iFlags = stream->GetI2();
 
-		// check whether the mirror flag is set
+		// Get the mapping mode (for both axes)
 		if (iFlags & 0x2u)
-		{
 			pcOut->mMapMode = aiTextureMapMode_Mirror;
+		
+		else if (iFlags & 0x10u)
+			pcOut->mMapMode = aiTextureMapMode_Decal;
+		
+		// wrapping in all remaining cases
+		else pcOut->mMapMode = aiTextureMapMode_Wrap;
 		}
-		// assume that "decal" means clamping ...
-		else if (iFlags & 0x10u && iFlags & 0x1u)
-		{
-			pcOut->mMapMode = aiTextureMapMode_Clamp;
-		}}
 		break;
 	};
 

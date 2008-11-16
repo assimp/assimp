@@ -110,7 +110,7 @@ namespace MDL	{
 // material key that is set for dummy materials that are
 // just referencing another material
 #if (!defined AI_MDL7_REFERRER_MATERIAL)
-#	define AI_MDL7_REFERRER_MATERIAL "&&&referrer&&&"
+#	define AI_MDL7_REFERRER_MATERIAL "&&&referrer&&&",0,0
 #endif
 
 // ---------------------------------------------------------------------------

@@ -38,21 +38,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines helper data structures for the import of 3DS files.
-http://www.jalix.org/ressources/graphics/3DS/_unofficials/3ds-unofficial.txt */
+/** @file Defines helper data structures for the import of 3DS files */
 
 #ifndef AI_3DSFILEHELPER_H_INC
 #define AI_3DSFILEHELPER_H_INC
 
-#include <string>
-#include <vector>
-#include <sstream>
-
-#include "../include/aiTypes.h"
-#include "../include/aiQuaternion.h"
-#include "../include/aiMesh.h"
-#include "../include/aiAnim.h"
-#include "../include/aiMaterial.h"
 
 #include "SpatialSort.h"
 #include "SmoothingGroups.h"
@@ -66,11 +56,12 @@ namespace D3DS	{
 /** Discreet3DS class: Helper class for loading 3ds files. Defines chunks
 *  and data structures.
 */
-// ---------------------------------------------------------------------------
 class Discreet3DS
 {
-public:
+private:
 	inline Discreet3DS() {}
+
+public:
 
 	//! data structure for a single chunk in a .3ds file
 	struct Chunk
@@ -79,10 +70,6 @@ public:
 		uint32_t	Size;
 	} PACK_STRUCT;
 
-	//! source for this used own structures,
-	//! replaced it with out standard math helpers
-	typedef aiMatrix3x3 MatTransform;
-	typedef aiVector3D MatTranslate;
 
 	//! Used for shading field in material3ds structure
 	//! From AutoDesk 3ds SDK
@@ -301,26 +288,22 @@ public:
 	};
 };
 
-#include "./../include/Compiler/poppack1.h"
-
 // ---------------------------------------------------------------------------
 /** Helper structure representing a 3ds mesh face */
 struct Face : public FaceWithSmoothingGroup
 {
-	//! Specifies that the face normal must be flipped.
-	//! todo: do we really need this?
-	bool bFlipped;
 };
+
 // ---------------------------------------------------------------------------
 /** Helper structure representing a texture */
 struct Texture
 {
 	//! Default constructor
 	Texture()
-		: mScaleU	(1.0f)
-		, mScaleV	(1.0f)
-		, mOffsetU	(0.0f)
+		: mOffsetU	(0.0f)
 		, mOffsetV	(0.0f)
+		, mScaleU	(1.0f)
+		, mScaleV	(1.0f)
 		, mRotation	(0.0f)
 		, mMapMode	(aiTextureMapMode_Wrap)
 		, iUVSrc	(0)
@@ -335,10 +318,10 @@ struct Texture
 	std::string mMapName;
 
 	//! Specifies texture coordinate offsets/scaling/rotations
-	float mScaleU;
-	float mScaleV;
 	float mOffsetU;
 	float mOffsetV;
+	float mScaleU;
+	float mScaleV;
 	float mRotation;
 
 	//! Specifies the mapping mode to be used for the texture
@@ -348,6 +331,9 @@ struct Texture
 	bool bPrivate;
 	int iUVSrc;
 };
+
+#include "./../include/Compiler/poppack1.h"
+
 // ---------------------------------------------------------------------------
 /** Helper structure representing a 3ds material */
 struct Material
@@ -414,6 +400,7 @@ struct Material
 	unsigned int iBakeUVTransform;
 	Texture* pcSingleTexture;
 };
+
 // ---------------------------------------------------------------------------
 /** Helper structure to represent a 3ds file mesh */
 struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
@@ -433,7 +420,7 @@ struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
 	std::string mName;
 
 	//! Texture coordinates
-	std::vector<aiVector2D> mTexCoords;
+	std::vector<aiVector3D> mTexCoords;
 
 	//! Face materials
 	std::vector<unsigned int> mFaceMaterials;

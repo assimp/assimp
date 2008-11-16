@@ -727,6 +727,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\include\BoostWorkaround\boost\scoped_array.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\include\BoostWorkaround\boost\scoped_ptr.hpp"
 					>
 				</File>
@@ -901,14 +905,6 @@
 			</File>
 			<File
 				RelativePath="..\..\code\TargetAnimation.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\TextureTransform.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\TextureTransform.h"
 				>
 			</File>
 			<File
@@ -1344,6 +1340,14 @@
 					<File
 						RelativePath="..\..\code\ACLoader.cpp"
 						>
+						<FileConfiguration
+							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								GeneratePreprocessedFile="0"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\..\code\ACLoader.h"
@@ -1452,6 +1456,14 @@
 				</File>
 				<File
 					RelativePath="..\..\code\CalcTangentsProcess.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\ComputeUVMappingProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\ComputeUVMappingProcess.h"
 					>
 				</File>
 				<File
@@ -1572,6 +1584,14 @@
 				</File>
 				<File
 					RelativePath="..\..\code\SplitLargeMeshes.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\TextureTransform.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\TextureTransform.h"
 					>
 				</File>
 				<File

@@ -51,6 +51,27 @@ inline aiMatrix3x3& aiMatrix3x3::Transpose()
 	return *this;
 }
 
+// ------------------------------------------------------------------------------------------------
+inline aiMatrix3x3& aiMatrix3x3::Rotation(float a, aiMatrix3x3& out)
+{
+	out.a1 = out.b2 = ::cos(a);
+	out.b1 = ::sin(a);
+	out.a2 = - out.b1;
+
+	out.a3 = out.b3 = out.c1 = out.c2 = 0.f;
+	out.c3 = 1.f;
+
+	return out;
+}
+
+// ------------------------------------------------------------------------------------------------
+inline aiMatrix3x3& aiMatrix3x3::Translation( const aiVector2D& v, aiMatrix3x3& out)
+{
+	out = aiMatrix3x3();
+	out.a3 = v.x;
+	out.b3 = v.y;
+	return out;
+}
 
 
 #endif // __cplusplus

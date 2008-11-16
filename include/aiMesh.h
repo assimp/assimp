@@ -504,6 +504,23 @@ struct aiMesh
 		else 
 			return mTextureCoords[pIndex] != NULL && mNumVertices > 0; 
 	}
+
+	//! Get the number of UV channels the mesh contains
+	inline unsigned int GetNumUVChannels() const 
+	{
+		unsigned int n = 0;
+		while (n < AI_MAX_NUMBER_OF_TEXTURECOORDS && mTextureCoords[n])++n;
+		return n;
+	}
+
+	//! Get the number of vertex color channels the mesh contains
+	inline unsigned int GetNumColorChannels() const 
+	{
+		unsigned int n = 0;
+		while (n < AI_MAX_NUMBER_OF_COLOR_SETS && mColors[n])++n;
+		return n;
+	}
+
 	//! Check whether the mesh contains bones
 	inline bool HasBones() const
 		{ return mBones != NULL && mNumBones > 0; }

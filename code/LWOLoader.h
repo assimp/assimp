@@ -100,7 +100,7 @@ protected:
 	 */
 	void GetExtensionList(std::string& append)
 	{
-		append.append("*.lwo");
+		append.append("*.lwo;*.lxo");
 	}
 
 	// -------------------------------------------------------------------
@@ -257,12 +257,10 @@ private:
 	 *
 	 *  @param pcMat Output material
 	 *  @param in Input texture list
-	 *  @param type Type identifier of the texture list. This is the string
-	 *    that appears in the middle of all material keys - e.g. "diffuse",
-	 *    "shininess", "glossiness" or "specular". 
+	 *  @param type Type identifier of the texture list
 	*/
 	bool HandleTextures(MaterialHelper* pcMat, const TextureList& in,
-		const char* type);
+		aiTextureType type);
 
 	// -------------------------------------------------------------------
 	/** Adjust a texture path

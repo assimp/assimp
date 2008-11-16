@@ -46,7 +46,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "3DSLoader.h"
-#include "TextureTransform.h"
 #include "TargetAnimation.h"
 
 using namespace Assimp;
@@ -159,39 +158,58 @@ void Discreet3DSImporter::CheckIndices(D3DS::Mesh& sMesh)
 // Generate out unique verbose format representation
 void Discreet3DSImporter::MakeUnique(D3DS::Mesh& sMesh)
 {
-	unsigned int iBase = 0;
-
 	// Allocate output storage
 	std::vector<aiVector3D> vNew  (sMesh.mFaces.size() * 3);
-	std::vector<aiVector2D> vNew2;
-	if (sMesh.mTexCoords.size())vNew2.resize(sMesh.mFaces.size() * 3);
+	std::vector<aiVector3D> vNew2;
+	if (sMesh.mTexCoords.size())
+		vNew2.resize(sMesh.mFaces.size() * 3);
 
-	for (unsigned int i = 0; i < sMesh.mFaces.size();++i)
+	for (unsigned int i = 0, base = 0; i < sMesh.mFaces.size();++i)
 	{
-		uint32_t iTemp1,iTemp2;
+		D3DS::Face& face = sMesh.mFaces[i];
 
-		// positions
-		vNew[iBase]   = sMesh.mPositions[sMesh.mFaces[i].mIndices[2]];
-		iTemp1 = iBase++;
-		vNew[iBase]   = sMesh.mPositions[sMesh.mFaces[i].mIndices[1]];
-		iTemp2 = iBase++;
-		vNew[iBase]   = sMesh.mPositions[sMesh.mFaces[i].mIndices[0]];
-
-		// texture coordinates
-		if (sMesh.mTexCoords.size())
+		// Positions
+		for (unsigned int a = 0; a < 3;++a,++base)
 		{
-			vNew2[iTemp1]   = sMesh.mTexCoords[sMesh.mFaces[i].mIndices[2]];
-			vNew2[iTemp2]   = sMesh.mTexCoords[sMesh.mFaces[i].mIndices[1]];
-			vNew2[iBase]    = sMesh.mTexCoords[sMesh.mFaces[i].mIndices[0]];
-		}
+			vNew[base] = sMesh.mPositions[face.mIndices[a]];
+			if (sMesh.mTexCoords.size())
+				vNew2[base] = sMesh.mTexCoords[face.mIndices[a]];
 
-		sMesh.mFaces[i].mIndices[2] = iBase++;
-		sMesh.mFaces[i].mIndices[0] = iTemp1;
-		sMesh.mFaces[i].mIndices[1] = iTemp2;
+			face.mIndices[a] = base;
+		}
 	}
 	sMesh.mPositions = vNew;
 	sMesh.mTexCoords = vNew2;
 	return;
+}
+
+// ------------------------------------------------------------------------------------------------
+void CopyTexture(MaterialHelper& mat, D3DS::Texture& texture, aiTextureType type)
+{
+	// Setup the texture name
+	aiString tex;
+	tex.Set( texture.mMapName);
+	mat.AddProperty( &tex, AI_MATKEY_TEXTURE(type,0));
+
+	// Setup the texture blend factor
+	if (is_not_qnan(texture.mTextureBlend))
+		mat.AddProperty<float>( &texture.mTextureBlend, 1, AI_MATKEY_TEXBLEND(type,0));
+
+	// Setup the texture mapping mode
+	mat.AddProperty<int>((int*)&texture.mMapMode,1,AI_MATKEY_MAPPINGMODE_U(type,0));
+	mat.AddProperty<int>((int*)&texture.mMapMode,1,AI_MATKEY_MAPPINGMODE_V(type,0));
+
+	// Mirroring - double the scaling values 
+	if (texture.mMapMode == aiTextureMapMode_Mirror)
+	{
+		texture.mScaleU *= 2.f;
+		texture.mScaleV *= 2.f;
+		texture.mOffsetU /= 2.f;
+		texture.mOffsetV /= 2.f;
+	}
+	
+	// Setup texture UV transformations
+	mat.AddProperty<float>(&texture.mOffsetU,5,AI_MATKEY_UVTRANSFORM(type,0));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -207,12 +225,11 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material& oldMat,
 		tex.Set( mBackgroundImage);
 		mat.AddProperty( &tex, AI_MATKEY_GLOBAL_BACKGROUND_IMAGE);
 
-		// be sure this is only done for the first material
+		// Be sure this is only done for the first material
 		mBackgroundImage = std::string("");
 	}
 
-	// At first add the base ambient color of the
-	// scene to	the material
+	// At first add the base ambient color of the scene to the material
 	oldMat.mAmbient.r += mClrAmbient.r;
 	oldMat.mAmbient.g += mClrAmbient.g;
 	oldMat.mAmbient.b += mClrAmbient.b;
@@ -221,13 +238,13 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material& oldMat,
 	name.Set( oldMat.mName);
 	mat.AddProperty( &name, AI_MATKEY_NAME);
 
-	// material colors
+	// Material colors
 	mat.AddProperty( &oldMat.mAmbient, 1, AI_MATKEY_COLOR_AMBIENT);
 	mat.AddProperty( &oldMat.mDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
 	mat.AddProperty( &oldMat.mSpecular, 1, AI_MATKEY_COLOR_SPECULAR);
 	mat.AddProperty( &oldMat.mEmissive, 1, AI_MATKEY_COLOR_EMISSIVE);
 
-	// phong shininess and shininess strength
+	// Phong shininess and shininess strength
 	if (D3DS::Discreet3DS::Phong == oldMat.mShading || 
 		D3DS::Discreet3DS::Metal == oldMat.mShading)
 	{
@@ -242,20 +259,20 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material& oldMat,
 		}
 	}
 
-	// opacity
+	// Opacity
 	mat.AddProperty<float>( &oldMat.mTransparency,1,AI_MATKEY_OPACITY);
 
-	// bump height scaling
+	// Bump height scaling
 	mat.AddProperty<float>( &oldMat.mBumpHeight,1,AI_MATKEY_BUMPSCALING);
 
-	// two sided rendering?
+	// Two sided rendering?
 	if (oldMat.mTwoSided)
 	{
 		int i = 1;
 		mat.AddProperty<int>(&i,1,AI_MATKEY_TWOSIDED);
 	}
 
-	// shading mode
+	// Shading mode
 	aiShadingMode eShading = aiShadingMode_NoShading;
 	switch (oldMat.mShading)
 	{
@@ -263,8 +280,14 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material& oldMat,
 			eShading = aiShadingMode_Flat; break;
 
 		// I don't know what "Wire" shading should be,
-		// assume it is simple lambertian diffuse (L dot N) shading
+		// assume it is simple lambertian diffuse shading
 		case D3DS::Discreet3DS::Wire:
+			{
+				// Set the wireframe flag
+				unsigned int iWire = 1;
+				mat.AddProperty<int>( (int*)&iWire,1,AI_MATKEY_ENABLE_WIREFRAME);
+			}
+
 		case D3DS::Discreet3DS::Gouraud:
 			eShading = aiShadingMode_Gouraud; break;
 
@@ -283,112 +306,29 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material& oldMat,
 	}
 	mat.AddProperty<int>( (int*)&eShading,1,AI_MATKEY_SHADING_MODEL);
 
-	if (D3DS::Discreet3DS::Wire == oldMat.mShading)
-	{
-		// set the wireframe flag
-		unsigned int iWire = 1;
-		mat.AddProperty<int>( (int*)&iWire,1,AI_MATKEY_ENABLE_WIREFRAME);
-	}
-
-	// texture, if there is one
 	// DIFFUSE texture
 	if( oldMat.sTexDiffuse.mMapName.length() > 0)
-	{
-		aiString tex;
-		tex.Set( oldMat.sTexDiffuse.mMapName);
-		mat.AddProperty( &tex, AI_MATKEY_TEXTURE_DIFFUSE(0));
+		CopyTexture(mat,oldMat.sTexDiffuse, aiTextureType_DIFFUSE);
 
-		if (is_not_qnan(oldMat.sTexDiffuse.mTextureBlend))
-			mat.AddProperty<float>( &oldMat.sTexDiffuse.mTextureBlend, 1, AI_MATKEY_TEXBLEND_DIFFUSE(0));
-
-		if (aiTextureMapMode_Clamp != oldMat.sTexDiffuse.mMapMode)
-		{
-			int i = (int)oldMat.sTexSpecular.mMapMode;
-			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_U_DIFFUSE(0));
-			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_DIFFUSE(0));
-		}
-	}
 	// SPECULAR texture
 	if( oldMat.sTexSpecular.mMapName.length() > 0)
-	{
-		aiString tex;
-		tex.Set( oldMat.sTexSpecular.mMapName);
-		mat.AddProperty( &tex, AI_MATKEY_TEXTURE_SPECULAR(0));
+		CopyTexture(mat,oldMat.sTexSpecular, aiTextureType_SPECULAR);
 
-		if (is_not_qnan(oldMat.sTexSpecular.mTextureBlend))
-			mat.AddProperty<float>( &oldMat.sTexSpecular.mTextureBlend, 1, AI_MATKEY_TEXBLEND_SPECULAR(0));
-
-		if (aiTextureMapMode_Clamp != oldMat.sTexSpecular.mMapMode)
-		{
-			int i = (int)oldMat.sTexSpecular.mMapMode;
-			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_U_SPECULAR(0));
-			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_SPECULAR(0));
-		}
-	}
 	// OPACITY texture
 	if( oldMat.sTexOpacity.mMapName.length() > 0)
-	{
-		aiString tex;
-		tex.Set( oldMat.sTexOpacity.mMapName);
-		mat.AddProperty( &tex, AI_MATKEY_TEXTURE_OPACITY(0));
+		CopyTexture(mat,oldMat.sTexOpacity, aiTextureType_OPACITY);
 
-		if (is_not_qnan(oldMat.sTexOpacity.mTextureBlend))
-			mat.AddProperty<float>( &oldMat.sTexOpacity.mTextureBlend, 1,AI_MATKEY_TEXBLEND_OPACITY(0));
-		if (aiTextureMapMode_Clamp != oldMat.sTexOpacity.mMapMode)
-		{
-			int i = (int)oldMat.sTexOpacity.mMapMode;
-			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_U_OPACITY(0));
-			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_OPACITY(0));
-		}
-	}
 	// EMISSIVE texture
 	if( oldMat.sTexEmissive.mMapName.length() > 0)
-	{
-		aiString tex;
-		tex.Set( oldMat.sTexEmissive.mMapName);
-		mat.AddProperty( &tex, AI_MATKEY_TEXTURE_EMISSIVE(0));
+		CopyTexture(mat,oldMat.sTexEmissive, aiTextureType_EMISSIVE);
 
-		if (is_not_qnan(oldMat.sTexEmissive.mTextureBlend))
-			mat.AddProperty<float>( &oldMat.sTexEmissive.mTextureBlend, 1, AI_MATKEY_TEXBLEND_EMISSIVE(0));
-		if (aiTextureMapMode_Clamp != oldMat.sTexEmissive.mMapMode)
-		{
-			int i = (int)oldMat.sTexEmissive.mMapMode;
-			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_U_EMISSIVE(0));
-			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_EMISSIVE(0));
-		}
-	}
-	// BUMP texturee
+	// BUMP texture
 	if( oldMat.sTexBump.mMapName.length() > 0)
-	{
-		aiString tex;
-		tex.Set( oldMat.sTexBump.mMapName);
-		mat.AddProperty( &tex, AI_MATKEY_TEXTURE_HEIGHT(0));
+		CopyTexture(mat,oldMat.sTexBump, aiTextureType_HEIGHT);
 
-		if (is_not_qnan(oldMat.sTexBump.mTextureBlend))
-			mat.AddProperty<float>( &oldMat.sTexBump.mTextureBlend, 1, AI_MATKEY_TEXBLEND_HEIGHT(0));
-		if (aiTextureMapMode_Clamp != oldMat.sTexBump.mMapMode)
-		{
-			int i = (int)oldMat.sTexBump.mMapMode;
-			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_U_HEIGHT(0));
-			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_HEIGHT(0));
-		}
-	}
 	// SHININESS texture
 	if( oldMat.sTexShininess.mMapName.length() > 0)
-	{
-		aiString tex;
-		tex.Set( oldMat.sTexShininess.mMapName);
-		mat.AddProperty( &tex, AI_MATKEY_TEXTURE_SHININESS(0));
-
-		if (is_not_qnan(oldMat.sTexShininess.mTextureBlend))
-			mat.AddProperty<float>( &oldMat.sTexShininess.mTextureBlend, 1, AI_MATKEY_TEXBLEND_SHININESS(0));
-		if (aiTextureMapMode_Clamp != oldMat.sTexShininess.mMapMode)
-		{
-			int i = (int)oldMat.sTexShininess.mMapMode;
-			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_U_SHININESS(0));
-			mat.AddProperty<int>(&i,1,AI_MATKEY_MAPPINGMODE_V_SHININESS(0));
-		}
-	}
+		CopyTexture(mat,oldMat.sTexShininess, aiTextureType_SHININESS);
 
 	// Store the name of the material itself, too
 	if( oldMat.mName.length())
@@ -425,74 +365,51 @@ void Discreet3DSImporter::ConvertMeshes(aiScene* pcOut)
 		// now generate submeshes
 		for (unsigned int p = 0; p < mScene->mMaterials.size();++p)
 		{
-			if (aiSplit[p].size() != 0)
+			if (aiSplit[p].size())
 			{
-				aiMesh* p_pcOut = new aiMesh();
-				p_pcOut->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
+				aiMesh* meshOut = new aiMesh();
+				meshOut->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
 				// be sure to setup the correct material index
-				p_pcOut->mMaterialIndex = p;
+				meshOut->mMaterialIndex = p;
 
 				// use the color data as temporary storage
-				p_pcOut->mColors[0] = (aiColor4D*)(&*i);
-				avOutMeshes.push_back(p_pcOut);
+				meshOut->mColors[0] = (aiColor4D*)(&*i);
+				avOutMeshes.push_back(meshOut);
 				
 				// convert vertices
-				p_pcOut->mNumFaces = (unsigned int)aiSplit[p].size();
-				p_pcOut->mNumVertices = p_pcOut->mNumFaces*3;
+				meshOut->mNumFaces = (unsigned int)aiSplit[p].size();
+				meshOut->mNumVertices = meshOut->mNumFaces*3;
 
 				// allocate enough storage for faces
-				p_pcOut->mFaces = new aiFace[p_pcOut->mNumFaces];
-				iFaceCnt += p_pcOut->mNumFaces;
-
-				if (p_pcOut->mNumVertices)
-				{
-					p_pcOut->mVertices = new aiVector3D[p_pcOut->mNumVertices];
-					p_pcOut->mNormals = new aiVector3D[p_pcOut->mNumVertices];
-					unsigned int iBase = 0;
-
-					for (unsigned int q = 0; q < aiSplit[p].size();++q)
-					{
-						unsigned int iIndex = aiSplit[p][q];
-
-						p_pcOut->mFaces[q].mIndices = new unsigned int[3];
-						p_pcOut->mFaces[q].mNumIndices = 3;
-
-						p_pcOut->mFaces[q].mIndices[2] = iBase;
-						p_pcOut->mVertices[iBase]  = (*i).mPositions[(*i).mFaces[iIndex].mIndices[0]];
-						p_pcOut->mNormals[iBase++] = (*i).mNormals[(*i).mFaces[iIndex].mIndices[0]];
-
-						p_pcOut->mFaces[q].mIndices[1] = iBase;
-						p_pcOut->mVertices[iBase]  = (*i).mPositions[(*i).mFaces[iIndex].mIndices[1]];
-						p_pcOut->mNormals[iBase++] = (*i).mNormals[(*i).mFaces[iIndex].mIndices[1]];
-
-						p_pcOut->mFaces[q].mIndices[0] = iBase;
-						p_pcOut->mVertices[iBase]  = (*i).mPositions[(*i).mFaces[iIndex].mIndices[2]];
-						p_pcOut->mNormals[iBase++] = (*i).mNormals[(*i).mFaces[iIndex].mIndices[2]];
-					}
-				}
-				// convert texture coordinates
+				meshOut->mFaces = new aiFace[meshOut->mNumFaces];
+				iFaceCnt += meshOut->mNumFaces;
+			
+				meshOut->mVertices = new aiVector3D[meshOut->mNumVertices];
+				meshOut->mNormals  = new aiVector3D[meshOut->mNumVertices];
 				if ((*i).mTexCoords.size())
 				{
-					p_pcOut->mTextureCoords[0] = new aiVector3D[p_pcOut->mNumVertices];
+					meshOut->mTextureCoords[0] = new aiVector3D[meshOut->mNumVertices];
+				}
+				for (unsigned int q = 0, base = 0; q < aiSplit[p].size();++q)
+				{
+					register unsigned int index = aiSplit[p][q];
+					aiFace& face = meshOut->mFaces[q];
 
-					unsigned int iBase = 0;
-					for (unsigned int q = 0; q < aiSplit[p].size();++q)
+					face.mIndices = new unsigned int[3];
+					face.mNumIndices = 3;
+
+					for (unsigned int a = 0; a < 3;++a,++base)
 					{
-						unsigned int iIndex2 = aiSplit[p][q];
+						unsigned int idx = (*i).mFaces[index].mIndices[a];
+						meshOut->mVertices[base]  = (*i).mPositions[idx];
+						meshOut->mNormals [base]  = (*i).mNormals[idx];
 
-						aiVector2D* pc = &(*i).mTexCoords[(*i).mFaces[iIndex2].mIndices[0]];
-						p_pcOut->mTextureCoords[0][iBase++] = aiVector3D(pc->x,pc->y,0.0f);
+						if ((*i).mTexCoords.size())
+							meshOut->mTextureCoords[0][base] = (*i).mTexCoords[idx];
 
-						pc = &(*i).mTexCoords[(*i).mFaces[iIndex2].mIndices[1]];
-						p_pcOut->mTextureCoords[0][iBase++] = aiVector3D(pc->x,pc->y,0.0f);
-
-						pc = &(*i).mTexCoords[(*i).mFaces[iIndex2].mIndices[2]];
-						p_pcOut->mTextureCoords[0][iBase++] = aiVector3D(pc->x,pc->y,0.0f);
+						face.mIndices[a] = base;
 					}
-					// apply texture coordinate scalings
-					TextureTransform::BakeScaleNOffset ( p_pcOut, &mScene->mMaterials[
-						p_pcOut->mMaterialIndex] );
 				}
 			}
 		}
@@ -508,20 +425,12 @@ void Discreet3DSImporter::ConvertMeshes(aiScene* pcOut)
 	// We should have at least one face here
 	if (!iFaceCnt)
 		throw new ImportErrorException("No faces loaded. The mesh is empty");
-
-	// for each material in the scene we need to setup the UV source
-	// set for each texture
-	for (unsigned int a = 0; a < pcOut->mNumMaterials;++a)
-	{
-		TextureTransform::SetupMatUVSrc( pcOut->mMaterials[a], &mScene->mMaterials[a] );
-	}
-	return;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Add a node to the scenegraph and setup its final transformation
-void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Node* pcIn,
-	aiMatrix4x4& absTrafo)
+void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
+	D3DS::Node* pcIn, aiMatrix4x4& absTrafo)
 {
 	std::vector<unsigned int> iArray;
 	iArray.reserve(3);
@@ -529,11 +438,12 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Nod
 	aiMatrix4x4 abs;
 	if (pcIn->mName == "$$$DUMMY")
 	{
-		// Append the "real" name of the dummy to the string
-		pcIn->mName.append(pcIn->mDummyName);
+		// FIX: Append the "real" name of the dummy to the string
+		pcIn->mName = "Dummy." + pcIn->mDummyName;
 	}
 	else // if (pcIn->mName != "$$$DUMMY")
 	{		
+		// Find all meshes with the same name as the node
 		for (unsigned int a = 0; a < pcSOut->mNumMeshes;++a)
 		{
 			const D3DS::Mesh* pcMesh = (const D3DS::Mesh*)pcSOut->mMeshes[a]->mColors[0];
@@ -544,13 +454,10 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Nod
 		}
 		if (!iArray.empty())
 		{
-			// The matrix should be identical for all meshes with the same name.
-			// It HAS to be identical for all meshes ........
-			aiMatrix4x4& mTrafo = ((D3DS::Mesh*)pcSOut->mMeshes[iArray[0]]->mColors[0])->mMat;
-			aiMatrix4x4 mInv = mTrafo;
-			if (!configSkipPivot)
-				mInv.Inverse();
-
+			// The matrix should be identical for all meshes with the 
+			// same name. It HAS to be identical for all meshes .....
+			aiMatrix4x4 mInv = ((D3DS::Mesh*)pcSOut->mMeshes[iArray[0]]->mColors[0])->mMat;
+			mInv.Inverse();
 			const aiVector3D& pivot = pcIn->vPivot;
 
 			pcOut->mNumMeshes = (unsigned int)iArray.size();
@@ -560,31 +467,24 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Nod
 				const unsigned int iIndex = iArray[i];
 				aiMesh* const mesh = pcSOut->mMeshes[iIndex];
 
-				// Pivot point adjustment.
+				// Pivot point adjustment
 				// See: http://www.zfx.info/DisplayThread.php?MID=235690#235690
 				const aiVector3D* const pvEnd = mesh->mVertices+mesh->mNumVertices;
 				aiVector3D* pvCurrent = mesh->mVertices;
 
-				if(pivot.x || pivot.y || pivot.z && !configSkipPivot)
+				if(pivot.x || pivot.y || pivot.z)
 				{
-					while (pvCurrent != pvEnd)
+					for (;pvCurrent != pvEnd;++pvCurrent)
 					{
 						*pvCurrent = mInv * (*pvCurrent);
-						pvCurrent->x -= pivot.x;
-						pvCurrent->y -= pivot.y;
-						pvCurrent->z -= pivot.z;
-						++pvCurrent;
+						*pvCurrent -= pivot;
 					}
 				}
 				else
 				{
-					while (pvCurrent != pvEnd)
-					{
+					for (;pvCurrent != pvEnd;++pvCurrent)
 						*pvCurrent = mInv * (*pvCurrent);
-						++pvCurrent;
-					}
 				}
-
 				// Setup the mesh index
 				pcOut->mMeshes[i] = iIndex;
 			}
@@ -648,73 +548,82 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Nod
 			}
 		}
 
-		if (pcIn->aTargetPositionKeys.size() > 1)
+		//if (pcIn->aTargetPositionKeys.size() > 1)
+		//{
+		//	DefaultLogger::get()->debug("3DS: Converting target track ...");
+
+		//	// Camera or spot light - need to convert the separate
+		//	// target position channel to our representation
+		//	TargetAnimationHelper helper;
+
+		//	if (pcIn->aPositionKeys.empty())
+		//	{
+		//		// We can just pass zero here ...
+		//		helper.SetFixedMainAnimationChannel(aiVector3D());
+		//	}
+		//	else  helper.SetMainAnimationChannel(&pcIn->aPositionKeys);
+		//	helper.SetTargetAnimationChannel(&pcIn->aTargetPositionKeys);
+
+		//	// Do the conversion
+		//	std::vector<aiVectorKey> distanceTrack;
+		//	helper.Process(&distanceTrack);
+
+		//	// Now add a new node as child, name it <ourName>.Target
+		//	// and assign the distance track to it. This is that the
+		//	// information where the target is and how it moves is
+		//	// not lost
+		//	D3DS::Node* nd = new D3DS::Node();
+		//	pcIn->push_back(nd);
+
+		//	nd->mName = pcIn->mName + ".Target";
+
+		//	aiNodeAnim* nda = anim->mChannels[anim->mNumChannels++] = new aiNodeAnim();
+		//	nda->mNodeName.Set(nd->mName);
+
+		//	nda->mNumPositionKeys = (unsigned int)distanceTrack.size();
+		//	nda->mPositionKeys = new aiVectorKey[nda->mNumPositionKeys];
+		//	::memcpy(nda->mPositionKeys,&distanceTrack[0],
+		//		sizeof(aiVectorKey)*nda->mNumPositionKeys);
+		//}
+
+		// Allocate a new nda, increment the nda index
+		aiNodeAnim* nda = anim->mChannels[anim->mNumChannels++] = new aiNodeAnim();
+		nda->mNodeName.Set(pcIn->mName);
+
+		// POSITION keys
+		if (pcIn->aPositionKeys.size()  > 0)
 		{
-			//DefaultLogger::get()->debug("3DS: Converting target track ...");
-
-			//// Camera or spot light - need to convert the separate
-			//// target position channel to our representation
-			//TargetAnimationHelper helper;
-
-			//helper.SetTargetAnimationChannel(&pcIn->aTargetPositionKeys);
-			//helper.SetMainAnimationChannel(&pcIn->aPositionKeys);
-
-			//// Do the conversion
-			//std::vector<aiVectorKey> distanceTrack;
-			//helper.Process(&distanceTrack);
-
-			//// Now add a new node as child, name it <ourName>.Target
-			//// and assign the distance track to it. This is that the
-			//// information where the target is and how it moves is
-			//// not lost
-			//D3DS::Node* nd = new D3DS::Node();
-			//pcIn->push_back(nd);
-
-			//nd->mName = pcIn->mName + ".Target";
-
-			//aiNodeAnim* nda = anim->mChannels[anim->mNumChannels++] = new aiNodeAnim();
-			//nda->mNodeName.Set(nd->mName);
-
-			//nda->mNumPositionKeys = (unsigned int)distanceTrack.size();
-			//nda->mPositionKeys = new aiVectorKey[nda->mNumPositionKeys];
-			//::memcpy(nda->mPositionKeys,&distanceTrack[0],
-			//	sizeof(aiVectorKey)*nda->mNumPositionKeys);
+			nda->mNumPositionKeys = (unsigned int)pcIn->aPositionKeys.size();
+			nda->mPositionKeys = new aiVectorKey[nda->mNumPositionKeys];
+			::memcpy(nda->mPositionKeys,&pcIn->aPositionKeys[0],
+				sizeof(aiVectorKey)*nda->mNumPositionKeys);
 		}
 
-		// Just for safety ... we *should* have at least one track here
-		if (pcIn->aPositionKeys.size()  > 1  || pcIn->aRotationKeys.size()   > 1   ||
-			pcIn->aScalingKeys.size()   > 1)
+		// ROTATION keys
+		if (pcIn->aRotationKeys.size()  > 0)
 		{
-			// Allocate a new nda, increment the nda index
-			aiNodeAnim* nda = anim->mChannels[anim->mNumChannels++] = new aiNodeAnim();
-			nda->mNodeName.Set(pcIn->mName);
+			nda->mNumRotationKeys = (unsigned int)pcIn->aRotationKeys.size();
+			nda->mRotationKeys = new aiQuatKey[nda->mNumRotationKeys];
 
-			// POSITION keys
-			if (pcIn->aPositionKeys.size()  > 0)
+			// Rotations are quaternion offsets
+			aiQuaternion abs;
+			for (unsigned int n = 0; n < nda->mNumRotationKeys;++n)
 			{
-				nda->mNumPositionKeys = (unsigned int)pcIn->aPositionKeys.size();
-				nda->mPositionKeys = new aiVectorKey[nda->mNumPositionKeys];
-				::memcpy(nda->mPositionKeys,&pcIn->aPositionKeys[0],
-					sizeof(aiVectorKey)*nda->mNumPositionKeys);
-			}
+				const aiQuatKey& q = pcIn->aRotationKeys[n];
 
-			// ROTATION keys
-			if (pcIn->aRotationKeys.size()  > 0)
-			{
-				nda->mNumRotationKeys = (unsigned int)pcIn->aRotationKeys.size();
-				nda->mRotationKeys = new aiQuatKey[nda->mNumRotationKeys];
-				::memcpy(nda->mRotationKeys,&pcIn->aRotationKeys[0],
-					sizeof(aiQuatKey)*nda->mNumRotationKeys);
+				abs = (n ? abs * q.mValue : q.mValue);
+				nda->mRotationKeys[n].mTime  = q.mTime;
+				nda->mRotationKeys[n].mValue = abs.Normalize();
 			}
+		}
 
-			// SCALING keys
-			if (pcIn->aScalingKeys.size()  > 0)
-			{
-				nda->mNumScalingKeys = (unsigned int)pcIn->aScalingKeys.size();
-				nda->mScalingKeys = new aiVectorKey[nda->mNumScalingKeys];
-				::memcpy(nda->mScalingKeys,&pcIn->aScalingKeys[0],
-					sizeof(aiVectorKey)*nda->mNumScalingKeys);
-			}
+		// SCALING keys
+		if (pcIn->aScalingKeys.size()  > 0)
+		{
+			nda->mNumScalingKeys = (unsigned int)pcIn->aScalingKeys.size();
+			nda->mScalingKeys = new aiVectorKey[nda->mNumScalingKeys];
+			::memcpy(nda->mScalingKeys,&pcIn->aScalingKeys[0],
+				sizeof(aiVectorKey)*nda->mNumScalingKeys);
 		}
 	}
 
@@ -864,14 +773,6 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 		pcOld->mChildren[0] = NULL;
 		delete pcOld;
 	}
-
-#if 0
-	// modify the transformation of the root node to change
-	// the coordinate system of the whole scene from Max' to OpenGL
-	pcOut->mRootNode->mTransformation.a3 *= -1.f;
-	pcOut->mRootNode->mTransformation.b3 *= -1.f;
-	pcOut->mRootNode->mTransformation.c3 *= -1.f;
-#endif
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -48,11 +48,11 @@ extern "C" {
 #endif
 
 struct aiMatrix4x4;
+struct aiVector2D;
 
 // ---------------------------------------------------------------------------
 /** Represents a row-major 3x3 matrix 
 */
-// ---------------------------------------------------------------------------
 struct aiMatrix3x3
 {
 #ifdef __cplusplus
@@ -76,6 +76,22 @@ struct aiMatrix3x3
 	aiMatrix3x3& operator *= (const aiMatrix3x3& m);
 	aiMatrix3x3 operator* (const aiMatrix3x3& m) const;
 	aiMatrix3x3& Transpose();
+
+
+	/** \brief Returns a rotation matrix 
+	 *  \param a Rotation angle, in radians
+	 *  \param out Receives the output matrix
+	 *  \return Reference to the output matrix
+	 */
+	static aiMatrix3x3& Rotation(float a, aiMatrix3x3& out);
+
+
+	/** \brief Returns a translation matrix 
+	 *  \param v Translation vector
+	 *  \param out Receives the output matrix
+	 *  \return Reference to the output matrix
+	 */
+	static aiMatrix3x3& Translation( const aiVector2D& v, aiMatrix3x3& out);
 
 #endif // __cplusplus
 

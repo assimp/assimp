@@ -59,16 +59,20 @@ T lerp(const T& one, const T& two, float val)
 }
 
 // ------------------------------------------------------------------------------------------------
+// Convert a lightwave mapping mode to our's
 inline aiTextureMapMode GetMapMode(LWO::Texture::Wrap in)
 {
 	switch (in)
 	{	
 		case LWO::Texture::REPEAT:
 			return aiTextureMapMode_Wrap;
+
 		case LWO::Texture::MIRROR:
 			return aiTextureMapMode_Mirror;
+
 		case LWO::Texture::RESET:
 			DefaultLogger::get()->warn("LWO2: Unsupported texture map mode: RESET");
+
 			// fall though here
 		case LWO::Texture::EDGE:
 			return aiTextureMapMode_Clamp;
@@ -77,23 +81,67 @@ inline aiTextureMapMode GetMapMode(LWO::Texture::Wrap in)
 }
 
 // ------------------------------------------------------------------------------------------------
-bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, const char* type)
+bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, aiTextureType type)
 {
-	ai_assert(NULL != pcMat && NULL != type);
+	ai_assert(NULL != pcMat);
 
 	unsigned int cur = 0, temp = 0;
-	char buffer[512];
 	aiString s;
 	bool ret = false;
 
 	for (TextureList::const_iterator it = in.begin(), end = in.end();
 		 it != end;++it)
 	{
-		if (!(*it).enabled || !(*it).bCanUse || 0xffffffff == (*it).mRealUVIndex)continue;
+		if (!(*it).enabled || !(*it).bCanUse)continue;
 		ret = true;
 
-		// add the path to the texture
-		sprintf(buffer,"$tex.file.%s[%i]",type,cur);
+		// Convert lightwave's mapping modes to ours. We let them
+		// as they are, the GenUVcoords step will compute UV 
+		// channels if they're not there.
+
+		aiTextureMapping mapping;
+		switch ((*it).mapMode)
+		{
+			case LWO::Texture::Planar:
+				mapping = aiTextureMapping_PLANE;
+				break;
+			case LWO::Texture::Cylindrical:
+				mapping = aiTextureMapping_CYLINDER;
+				break;
+			case LWO::Texture::Spherical:
+				mapping = aiTextureMapping_SPHERE;
+				break;
+			case LWO::Texture::Cubic:
+				mapping = aiTextureMapping_BOX;
+				break;
+			case LWO::Texture::FrontProjection:
+				DefaultLogger::get()->error("LWO2: Unsupported texture mapping: FrontProjection");
+				mapping = aiTextureMapping_OTHER;
+				break;
+			case LWO::Texture::UV:
+				{
+					if( 0xffffffff == (*it).mRealUVIndex )
+					{
+						// We have no UV index for this texture, so we can't display it
+						continue;
+					}
+
+					// add the UV source index
+					temp = (*it).mRealUVIndex;
+					pcMat->AddProperty<int>((int*)&temp,1,AI_MATKEY_UVWSRC(type,cur));
+
+					mapping = aiTextureMapping_UV;
+				}
+				break;
+		};
+
+		if (mapping != aiTextureMapping_UV)
+		{
+			// Setup the main axis (the enum values map one to one)
+			pcMat->AddProperty<int>((int*)&(*it).majorAxis,1,AI_MATKEY_TEXMAP_AXIS(type,cur));
+			DefaultLogger::get()->debug("LWO2: Setting up non-UV mapping");
+		}
+
 
 		// The older LWOB format does not use indirect references to clips.
 		// The file name of a texture is directly specified in the tex chunk.
@@ -133,14 +181,12 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, c
 			AdjustTexturePath(ss);
 			s.Set(ss);
 		}
-		pcMat->AddProperty(&s,buffer);
+		pcMat->AddProperty(&s,AI_MATKEY_TEXTURE(type,cur));
 
 		// add the blend factor
-		sprintf(buffer,"$tex.blend.%s[%i]",type,cur);
-		pcMat->AddProperty(&(*it).mStrength,1,buffer);
+		pcMat->AddProperty<float>(&(*it).mStrength,1,AI_MATKEY_TEXBLEND(type,cur));
 
 		// add the blend operation
-		sprintf(buffer,"$tex.op.%s[%i]",type,cur);
 		switch ((*it).blendType)
 		{
 			case LWO::Texture::Normal:
@@ -166,22 +212,18 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, c
 				DefaultLogger::get()->warn("LWO2: Unsupported texture blend mode: alpha or displacement");
 
 		}
-		pcMat->AddProperty<int>((int*)&temp,1,buffer);
+		pcMat->AddProperty<int>((int*)&temp,1,AI_MATKEY_TEXOP(type,cur));
 
-		// add the UV source index
-		sprintf(buffer,"$tex.uvw.%s[%i]",type,cur);
-		temp = (*it).mRealUVIndex;
-		pcMat->AddProperty<int>((int*)&temp,1,buffer);
+		// setup the mapping mode
+		pcMat->AddProperty<int>((int*)&mapping,1,AI_MATKEY_MAPPING(type,cur));
 
 		// add the u-wrapping
-		sprintf(buffer,"$tex.mapmodeu.%s[%i]",type,cur);
 		temp = (unsigned int)GetMapMode((*it).wrapModeWidth);
-		pcMat->AddProperty<int>((int*)&temp,1,buffer);
+		pcMat->AddProperty<int>((int*)&temp,1,AI_MATKEY_MAPPINGMODE_U(type,cur));
 
 		// add the v-wrapping
-		sprintf(buffer,"$tex.mapmodev.%s[%i]",type,cur);
 		temp = (unsigned int)GetMapMode((*it).wrapModeHeight);
-		pcMat->AddProperty<int>((int*)&temp,1,buffer);
+		pcMat->AddProperty<int>((int*)&temp,1,AI_MATKEY_MAPPINGMODE_V(type,cur));
 
 		++cur;
 	}
@@ -237,17 +279,20 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 	pcMat->AddProperty<aiColor3D>(&clr,1,AI_MATKEY_COLOR_EMISSIVE);
 
 	// opacity
-	float f = 1.0f-surf.mTransparency;
-	pcMat->AddProperty<float>(&f,1,AI_MATKEY_OPACITY);
+	if (10e10f != surf.mTransparency)
+	{
+		float f = 1.0f-surf.mTransparency;
+		pcMat->AddProperty<float>(&f,1,AI_MATKEY_OPACITY);
+	}
 
 	// ADD TEXTURES to the material
 	// TODO: find out how we can handle COLOR textures correctly...
-	bool b = HandleTextures(pcMat,surf.mColorTextures,"diffuse");
-	b = (b || HandleTextures(pcMat,surf.mDiffuseTextures,"diffuse"));
-	HandleTextures(pcMat,surf.mSpecularTextures,"specular");
-	HandleTextures(pcMat,surf.mGlossinessTextures,"shininess");
-	HandleTextures(pcMat,surf.mBumpTextures,"height");
-	HandleTextures(pcMat,surf.mOpacityTextures,"opacity");
+	bool b = HandleTextures(pcMat,surf.mColorTextures,aiTextureType_DIFFUSE);
+	b = (b || HandleTextures(pcMat,surf.mDiffuseTextures,aiTextureType_DIFFUSE));
+	HandleTextures(pcMat,surf.mSpecularTextures,aiTextureType_SPECULAR);
+	HandleTextures(pcMat,surf.mGlossinessTextures,aiTextureType_SHININESS);
+	HandleTextures(pcMat,surf.mBumpTextures,aiTextureType_HEIGHT);
+	HandleTextures(pcMat,surf.mOpacityTextures,aiTextureType_OPACITY);
 
 	// now we need to know which shader we must use
 	// iterate through the shader list of the surface and 
@@ -255,7 +300,7 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 	for (ShaderList::const_iterator it = surf.mShaders.begin(), end = surf.mShaders.end();
 		 it != end;++it)
 	{
-		if (!(*it).enabled)continue;
+		//if (!(*it).enabled)continue;
 		if ((*it).functionName == "LW_SuperCelShader" ||
 			(*it).functionName == "AH_CelShader")
 		{
@@ -298,20 +343,11 @@ void LWOImporter::FindUVChannels(LWO::TextureList& list, LWO::Layer& layer,
 	for (TextureList::iterator it = list.begin(), end = list.end();
 		 it != end;++it)
 	{
-		if (!(*it).enabled || !(*it).bCanUse || 0xffffffff != (*it).mRealUVIndex)continue;
-		switch ((*it).mapMode)
+		// Ignore textures with non-UV mappings for the moment.
+		if (!(*it).enabled || !(*it).bCanUse || 0xffffffff != (*it).mRealUVIndex ||
+			(*it).mapMode != LWO::Texture::UV)
 		{
-			// TODO: implement these special mappings ...
-		case LWO::Texture::Spherical:
-		case LWO::Texture::Cylindrical:
-		case LWO::Texture::Cubic:
-		case LWO::Texture::Planar:
-		case LWO::Texture::FrontProjection:
-
-			DefaultLogger::get()->warn("LWO2: Only UV mapping is currently supported.");
 			continue;
-
-		default: ;
 		}
 		for (unsigned int i = 0; i < layer.mUVChannels.size();++i)
 		{
@@ -391,6 +427,9 @@ void LWOImporter::LoadLWO2ImageMap(unsigned int size, LWO::Texture& tex )
 		switch (head->type)
 		{
 		case AI_LWO_PROJ:
+			tex.mapMode = (Texture::MappingMode)GetU2();
+			break;
+		case AI_LWO_WRAP:
 			tex.wrapModeWidth  = (Texture::Wrap)GetU2();
 			tex.wrapModeHeight = (Texture::Wrap)GetU2();
 			break;
@@ -650,8 +689,43 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 			// transparency
 		case AI_LWO_TRAN:
 			{
+				if (surf.mTransparency == 10e10f)break;
+
 				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,TRAN,4);
 				surf.mTransparency = GetF4();
+				break;
+			}
+			// transparency mode
+		case AI_LWO_ALPH:
+			{
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,ALPH,6);
+				uint16_t mode = GetU2();
+				switch (mode)
+				{
+					// The surface has no effect on the alpha channel when rendered
+				case 0:
+					surf.mTransparency = 10e10f;
+					break;
+
+					// The alpha channel will be written with the constant value
+					// following the mode in the subchunk. 
+				case 1:
+					surf.mTransparency = GetF4();
+					break;
+
+					// The alpha value comes from the shadow density
+				case 3:
+					DefaultLogger::get()->error("LWO2: Unsupported alpha mode: shadow_density");
+					surf.mTransparency = 10e10f;
+				}
+				break;
+			}
+			// wireframe mode
+		case AI_LWO_LINE:
+			{
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,LINE,2);
+				if (GetU2() & 0x1)
+					surf.mWireframe = true;
 				break;
 			}
 			// glossiness
@@ -694,6 +768,18 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 			{
 				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,SMAN,4);
 				surf.mMaximumSmoothAngle = GetF4();
+				break;
+			}
+			// vertex color channel to be applied to the surface
+		case AI_LWO_VCOL:
+			{
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,VCOL,12);
+				surf.mDiffuseValue *= GetF4();				// strength
+				ReadVSizedIntLWO2(mFileBuffer);             // skip envelope
+				surf.mVCMapType = GetU4();					// type of the channel
+
+				// name of the channel
+				GetS0(surf.mVCMap, (unsigned int) (next - mFileBuffer ));
 				break;
 			}
 			// surface bock entry

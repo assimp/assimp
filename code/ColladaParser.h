@@ -97,16 +97,65 @@ public:
 	/** Accessor to a data array */
 	struct Accessor
 	{
-		unsigned int mCount;   // in number of objects
-		unsigned int mOffset;  // in number of values
-		unsigned int mStride;  // Stride in number of values
+		size_t mCount;   // in number of objects
+		size_t mOffset;  // in number of values
+		size_t mStride;  // Stride in number of values
+		std::vector<std::string> mParams; // names of the data streams in the accessors. Empty string tells to ignore. 
+		size_t mSubOffset[4]; // Suboffset inside the object for the common 4 elements. For a vector, thats XYZ, for a color RGBA and so on.
+							  // For example, SubOffset[0] denotes which of the values inside the object is the vector X component.
 		std::string mSource;   // URL of the source array
+		mutable const Data* mData; // Pointer to the source array, if resolved. NULL else
+
+		Accessor() 
+		{ 
+			mCount = 0; mOffset = 0; mStride = 0; mData = NULL; 
+			mSubOffset[0] = mSubOffset[1] = mSubOffset[2] = mSubOffset[3] = 0;
+		}
+	};
+
+	/** A single face in a mesh */
+	struct Face
+	{
+		std::vector<size_t> mIndices;
+	};
+
+	/** Different types of input data to a vertex or face */
+	enum InputType
+	{
+		IT_Invalid,
+		IT_Vertex,  // special type for per-index data referring to the <vertices> element carrying the per-vertex data.
+		IT_Position,
+		IT_Normal,
+		IT_Texcoord,
+		IT_Color
+	};
+
+	/** An input channel for mesh data, referring to a single accessor */
+	struct InputChannel
+	{
+		InputType mType;      // Type of the data
+		size_t mIndex;		  // Optional index, if multiple sets of the same data type are given
+		size_t mOffset;       // Index offset in the indices array of per-face indices. Don't ask, can't explain that any better.
+		std::string mAccessor; // ID of the accessor where to read the actual values from.
+		mutable const Accessor* mResolved; // Pointer to the accessor, if resolved. NULL else
+
+		InputChannel() { mType = IT_Invalid; mIndex = 0; mOffset = 0; mResolved = NULL; }
 	};
 
 	/** Contains data for a single mesh */
 	struct Mesh
 	{
-		
+		std::string mVertexID; // just to check if there's some sophisticated addressing involved... which we don't support, and therefore should warn about.
+		std::vector<InputChannel> mPerVertexData; // Vertex data addressed by vertex indices
+
+		// actual mesh data, assembled on encounter of a <p> element. Verbose format, not indexed
+		std::vector<aiVector3D> mPositions;
+		std::vector<aiVector3D> mNormals;
+		std::vector<aiVector2D> mTexCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
+		std::vector<aiColor4D> mColors[AI_MAX_NUMBER_OF_COLOR_SETS];
+
+		// Faces. Stored are only the number of vertices for each face. 1 == point, 2 == line, 3 == triangle, 4+ == poly
+		std::vector<size_t> mFaceSize;
 	};
 
 protected:
@@ -129,7 +178,31 @@ protected:
 	void ReadGeometryLibrary();
 
 	/** Reads a mesh from the geometry library */
-	void ReadGeometry();
+	void ReadMesh( Mesh* pMesh);
+
+	/** Reads a data array holding a number of floats, and stores it in the global library */
+	void ReadFloatArray();
+
+	/** Reads an accessor and stores it in the global library under the given ID - 
+	 * accessors use the ID of the parent <source> element
+	 */
+	void ReadAccessor( const std::string& pID);
+
+	/** Reads input declarations of per-vertex mesh data into the given mesh */
+	void ReadVertexData( Mesh* pMesh);
+
+	/** Reads input declarations of per-index mesh data into the given mesh */
+	void ReadIndexData( Mesh* pMesh);
+
+	/** Reads a single input channel element and stores it in the given array, if valid */
+	void ReadInputChannel( std::vector<InputChannel>& poChannels);
+
+	/** Reads a <p> primitive index list and assembles the mesh data into the given mesh */
+	void ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, 
+		size_t pNumPrimitives, const std::vector<size_t>& pVCount, bool pIsPolylist);
+
+	/** Extracts a single object from an input channel and stores it in the appropriate mesh data array */
+	void ExtractDataObjectFromChannel( const InputChannel& pInput, size_t pLocalIndex, Mesh* pMesh);
 
 	/** Reads the library of node hierarchies and scene parts */
 	void ReadSceneLibrary();
@@ -153,6 +226,9 @@ protected:
 	/** Compares the current xml element name to the given string and returns true if equal */
 	bool IsElement( const char* pName) const { assert( mReader->getNodeType() == irr::io::EXN_ELEMENT); return strcmp( mReader->getNodeName(), pName) == 0; }
 
+	/** Tests for the opening tag of the given element, throws an exception if not found */
+	void TestOpening( const char* pName);
+
 	/** Tests for the closing tag of the given element, throws an exception if not found */
 	void TestClosing( const char* pName);
 
@@ -168,12 +244,30 @@ protected:
 	/** Calculates the resulting transformation fromm all the given transform steps */
 	aiMatrix4x4 CalculateResultTransform( const std::vector<Transform>& pTransforms) const;
 
+	/** Determines the input data type for the given semantic string */
+	InputType GetTypeForSemantic( const std::string& pSemantic);
+
+	/** Finds the item in the given library by its reference, throws if not found */
+	template <typename Type> const Type& ResolveLibraryReference( const std::map<std::string, Type>& pLibrary, const std::string& pURL) const;
+
 protected:
 	/** Filename, for a verbose error message */
 	std::string mFileName;
 
 	/** XML reader */
 	irr::io::IrrXMLReader* mReader;
+
+	/** All data arrays found in the file by ID. Might be referred to by actually everyone. Collada, you are a steaming pile of indirection. */
+	typedef std::map<std::string, Data> DataLibrary;
+	DataLibrary mDataLibrary;
+
+	/** Same for accessors which define how the data in a data array is accessed. */
+	typedef std::map<std::string, Accessor> AccessorLibrary;
+	AccessorLibrary mAccessorLibrary;
+
+	/** Mesh library: mesh by ID */
+	typedef std::map<std::string, Mesh*> MeshLibrary;
+	MeshLibrary mMeshLibrary;
 
 	/** node library: root node of the hierarchy part by ID */
 	typedef std::map<std::string, Node*> NodeLibrary;
@@ -188,6 +282,17 @@ protected:
 	/** Which is the up vector */
 	enum { UP_X, UP_Y, UP_Z } mUpDirection;
 };
+
+// ------------------------------------------------------------------------------------------------
+// Finds the item in the given library by its reference, throws if not found
+template <typename Type> 
+const Type& ColladaParser::ResolveLibraryReference( const std::map<std::string, Type>& pLibrary, const std::string& pURL) const
+{
+	std::map<std::string, Type>::const_iterator it = pLibrary.find( pURL);
+	if( it == pLibrary.end())
+		ThrowException( boost::str( boost::format( "Unable to resolve library reference \"%s\".") % pURL));
+	return it->second;
+}
 
 } // end of namespace Assimp
 

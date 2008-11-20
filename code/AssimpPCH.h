@@ -117,6 +117,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include <boost/scoped_array.hpp>
 #	include <boost/format.hpp>
 #	include	<boost/math/common_factor_rt.hpp> 
+#	include <boost/foreach.hpp>
 
 #endif
 

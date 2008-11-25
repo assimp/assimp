@@ -747,7 +747,7 @@ void ColladaParser::ReadSceneNode( Node* pNode)
 					child->mName = mReader->getAttributeValue( attrName);
 
 				// TODO: (thom) support SIDs
-				assert( TestAttribute( "sid") == -1);
+//				assert( TestAttribute( "sid") == -1);
 
 				pNode->mChildren.push_back( child);
 				child->mParent = pNode;
@@ -759,6 +759,10 @@ void ColladaParser::ReadSceneNode( Node* pNode)
 				// test for it, in case we need to implement it
 				assert( false);
 				SkipElement();
+			} else if( IsElement( "instance_geometry"))
+			{
+				// Reference to a mesh, we possible material associations
+				ReadNodeGeometry( pNode);
 			} else
 			{
 				// skip everything else for the moment
@@ -798,6 +802,23 @@ void ColladaParser::ReadNodeTransformation( Node* pNode, TransformType pType)
 
 	// and consum the closing tag
 	TestClosing( tagName.c_str());
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads a mesh reference in a node and adds it to the node's mesh list
+void ColladaParser::ReadNodeGeometry( Node* pNode)
+{
+	// referred mesh is given as an attribute of the <instance_geometry> element
+	int attrUrl = GetAttribute( "url");
+	const char* url = mReader->getAttributeValue( attrUrl);
+	if( url[0] != '#')
+		ThrowException( "Unknown reference format");
+	
+	// store the mesh ID
+	pNode->mMeshes.push_back( std::string( url+1));
+	
+	// for the moment, skip the rest
+	SkipElement();
 }
 
 // ------------------------------------------------------------------------------------------------

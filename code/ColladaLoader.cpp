@@ -90,7 +90,25 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 	// build the node hierarchy from it
 	pScene->mRootNode = BuildHierarchy( parser, parser.mRootNode);
 
-	pScene->mFlags = AI_SCENE_FLAGS_INCOMPLETE;
+	// store all meshes
+	StoreSceneMeshes( pScene);
+
+	// create dummy material
+	Assimp::MaterialHelper* mat = new Assimp::MaterialHelper;
+	aiString name( std::string( "dummy"));
+	mat->AddProperty( &name, AI_MATKEY_NAME);
+
+	int shadeMode = aiShadingMode_Phong;
+	mat->AddProperty<int>( &shadeMode, 1, AI_MATKEY_SHADING_MODEL);
+	aiColor4D colAmbient( 0.2f, 0.2f, 0.2f, 1.0f), colDiffuse( 0.8f, 0.8f, 0.8f, 1.0f), colSpecular( 0.5f, 0.5f, 0.5f, 0.5f);
+	mat->AddProperty( &colAmbient, 1, AI_MATKEY_COLOR_AMBIENT);
+	mat->AddProperty( &colDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
+	mat->AddProperty( &colSpecular, 1, AI_MATKEY_COLOR_SPECULAR);
+	float specExp = 5.0f;
+	mat->AddProperty( &specExp, 1, AI_MATKEY_SHININESS);
+	pScene->mNumMaterials = 1;
+	pScene->mMaterials = new aiMaterial*[1];
+	pScene->mMaterials[0] = mat;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -112,5 +130,113 @@ aiNode* ColladaLoader::BuildHierarchy( const ColladaParser& pParser, const Colla
 		node->mChildren[a]->mParent = node;
 	}
 
+	// construct meshes
+	BuildMeshesForNode( pParser, pNode, node);
+
 	return node;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Builds meshes for the given node and references them
+void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const ColladaParser::Node* pNode, aiNode* pTarget)
+{
+	// accumulated mesh references by this node
+	std::vector<size_t> newMeshRefs;
+
+	// for the moment we simply ignore all material tags and transfer the meshes one by one
+	BOOST_FOREACH( const std::string& mid, pNode->mMeshes)
+	{
+		// find the referred mesh
+		ColladaParser::MeshLibrary::const_iterator srcMeshIt = pParser.mMeshLibrary.find( mid);
+		if( srcMeshIt == pParser.mMeshLibrary.end())
+		{
+			DefaultLogger::get()->warn( boost::str( boost::format( "Unable to find geometry for ID \"%s\". Skipping.") % mid));
+			continue;
+		}
+
+		// if we already have the mesh at the library, just add its index to the node's array
+		std::map<std::string, size_t>::const_iterator dstMeshIt = mMeshIndexbyID.find( mid);
+		if( dstMeshIt != mMeshIndexbyID.end())
+		{
+			newMeshRefs.push_back( dstMeshIt->second);
+		} else
+		{
+			// else we have to add the mesh to the collection and store its newly assigned index at the node
+			aiMesh* dstMesh = new aiMesh;
+			const ColladaParser::Mesh* srcMesh = srcMeshIt->second;
+
+			// copy positions
+			dstMesh->mNumVertices = srcMesh->mPositions.size();
+			dstMesh->mVertices = new aiVector3D[dstMesh->mNumVertices];
+			std::copy( srcMesh->mPositions.begin(), srcMesh->mPositions.end(), dstMesh->mVertices);
+
+			// normals, if given. HACK: (thom) Due to the fucking Collada spec we never know if we have the same
+			// number of normals as there are positions. So we also ignore any vertex attribute if it has a different count
+			if( srcMesh->mNormals.size() == dstMesh->mNumVertices)
+			{
+				dstMesh->mNormals = new aiVector3D[dstMesh->mNumVertices];
+				std::copy( srcMesh->mNormals.begin(), srcMesh->mNormals.end(), dstMesh->mNormals);
+			}
+
+			// same for texturecoords, as many as we have
+			for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
+			{
+				if( srcMesh->mTexCoords[a].size() == dstMesh->mNumVertices)
+				{
+					dstMesh->mTextureCoords[a] = new aiVector3D[dstMesh->mNumVertices];
+					for( size_t b = 0; b < dstMesh->mNumVertices; ++b)
+						dstMesh->mTextureCoords[a][b].Set( srcMesh->mTexCoords[a][b].x, srcMesh->mTexCoords[a][b].y, 0.0f);
+					dstMesh->mNumUVComponents[a] = 2;
+				}
+			}
+
+			// same for vertex colors, as many as we have
+			for( size_t a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
+			{
+				if( srcMesh->mColors[a].size() == dstMesh->mNumVertices)
+				{
+					dstMesh->mColors[a] = new aiColor4D[dstMesh->mNumVertices];
+					std::copy( srcMesh->mColors[a].begin(), srcMesh->mColors[a].end(), dstMesh->mColors[a]);
+				}
+			}
+
+			// create faces. Due to the fact that each face uses unique vertices, we can simply count up on each vertex
+			size_t vertex = 0;
+			dstMesh->mNumFaces = srcMesh->mFaceSize.size();
+			dstMesh->mFaces = new aiFace[dstMesh->mNumFaces];
+			for( size_t a = 0; a < dstMesh->mNumFaces; ++a)
+			{
+				size_t s = srcMesh->mFaceSize[a];
+				aiFace& face = dstMesh->mFaces[a];
+				face.mNumIndices = s;
+				face.mIndices = new unsigned int[s];
+				for( size_t b = 0; b < s; ++b)
+					face.mIndices[b] = vertex++;
+			}
+
+			// store the mesh, and store its new index in the node
+			newMeshRefs.push_back( mMeshes.size());
+			mMeshes.push_back( dstMesh);
+		}
+	}
+
+	// now place all mesh references we gathered in the target node
+	pTarget->mNumMeshes = newMeshRefs.size();
+	if( newMeshRefs.size())
+	{
+		pTarget->mMeshes = new size_t[pTarget->mNumMeshes];
+		std::copy( newMeshRefs.begin(), newMeshRefs.end(), pTarget->mMeshes);
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Stores all meshes in the given scene
+void ColladaLoader::StoreSceneMeshes( aiScene* pScene)
+{
+	pScene->mNumMeshes = mMeshes.size();
+	if( mMeshes.size() > 0)
+	{
+		pScene->mMeshes = new aiMesh*[mMeshes.size()];
+		std::copy( mMeshes.begin(), mMeshes.end(), pScene->mMeshes);
+	}
 }

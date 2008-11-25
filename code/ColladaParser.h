@@ -84,6 +84,8 @@ public:
 		/** Operations in order to calculate the resulting transformation to parent. */
 		std::vector<Transform> mTransforms;
 
+		std::vector<std::string> mMeshes; ///< Meshes at this node
+
 		Node() { mParent = NULL; }
 		~Node() { for( std::vector<Node*>::iterator it = mChildren.begin(); it != mChildren.end(); ++it) delete *it; }
 	};
@@ -212,6 +214,9 @@ protected:
 
 	/** Reads a node transformation entry of the given type and adds it to the given node's transformation list. */
 	void ReadNodeTransformation( Node* pNode, TransformType pType);
+
+	/** Reads a mesh reference in a node and adds it to the node's mesh list */
+	void ReadNodeGeometry( Node* pNode);
 
 	/** Reads the collada scene */
 	void ReadScene();

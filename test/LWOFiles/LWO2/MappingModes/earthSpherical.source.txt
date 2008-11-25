@@ -1,0 +1,9 @@
+Source:
+
+Nasa, Monthly Global Images
+
+http://earthobservatory.nasa.gov/Features/BlueMarble/BlueMarble_monthlies.php
+
+
+Downloaded November 24, 08.
+Rescaled to 2048 * 1024 with GIMP

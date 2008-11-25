@@ -10,6 +10,8 @@ OBJECT poly
 name "sphere"
 loc -0.0624103 -0.012381 0.0558408
 texture "./../LWOFiles/LWO2/MappingModes/concrete.jpg"
+texrep 1.9 2.5
+texoff 0.019 0.5
 crease 45.000000
 numvert 134
 -0.00202139 0.0563461 0

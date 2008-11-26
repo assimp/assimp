@@ -194,6 +194,6 @@ void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
 	if (anim->mDuration == -1.)
 	{
 		DefaultLogger::get()->debug("Setting animation duration");
-		anim->mDuration = last - first;
+		anim->mDuration = last - std::min( first, 0. );
 	}
 }

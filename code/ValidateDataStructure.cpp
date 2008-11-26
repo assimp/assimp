@@ -637,8 +637,6 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 			szType,iIndex,iNumIndices,szType);
 	}
 	if (!iNumIndices)return;
-
-	// TODO: check whether the mappings are correctly
 	std::vector<aiTextureMapping> mappings(iNumIndices);
 
 	// Now check whether all UV indices are valid ...
@@ -711,7 +709,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 		for (unsigned int a = 0; a < mScene->mNumMeshes;++a)
 		{
 			aiMesh* mesh = mScene->mMeshes[a];
-			if(mesh->mMaterialIndex == (unsigned int)iIndex)
+			if(mesh->mMaterialIndex == (unsigned int)iIndex && mappings[0] == aiTextureMapping_UV)
 			{
 				if (!mesh->mTextureCoords[0])
 				{

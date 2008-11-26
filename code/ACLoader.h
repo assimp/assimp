@@ -113,9 +113,20 @@ protected:
 	// Represents an AC3D object
 	struct Object
 	{
+		enum Type
+		{
+			World = 0x0,
+			Poly  = 0x1,
+			Group = 0x2,
+			Light = 0x4
+		} type;
+
+
 		Object()
 			:	texRepeat(1.f,1.f)
 			,	numRefs (0)
+			,	subDiv	(0)
+			,	type	(World)
 		{}
 
 		// name of the object
@@ -128,7 +139,7 @@ protected:
 		std::string texture;
 
 		// texture repat factors (scaling for all coordinates)
-		aiVector2D texRepeat;
+		aiVector2D texRepeat, texOffset;
 
 		// rotation matrix
 		aiMatrix3x3 rotation;
@@ -144,6 +155,10 @@ protected:
 
 		// number of indices (= num verts in verbose format)
 		unsigned int numRefs;
+
+		// number of subdivisions to be performed on the 
+		// imported data
+		unsigned int subDiv;
 	};
 
 
@@ -208,7 +223,8 @@ private:
 	aiNode* ConvertObjectSection(Object& object,
 		std::vector<aiMesh*>& meshes,
 		std::vector<MaterialHelper*>& outMaterials,
-		const std::vector<Material>& materials);
+		const std::vector<Material>& materials,
+		aiNode* parent = NULL);
 
 
 	// -------------------------------------------------------------------
@@ -239,6 +255,9 @@ private:
 
 	// current list of light sources
 	std::vector<aiLight*>* mLights;
+
+	// name counters
+	unsigned int lights, groups, polys, worlds;
 };
 
 } // end of namespace Assimp

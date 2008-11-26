@@ -191,6 +191,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Use our own definition of PI here
 #define AI_MATH_PI		(3.1415926538)
 #define AI_MATH_TWO_PI	(AI_MATH_PI * 2.0)
+#define AI_MATH_HALF_PI	(AI_MATH_PI * 0.5)
 
 // macrod to convert from radians to degrees and the reverse
 #define AI_DEG_TO_RAD(x) (x*0.0174532925f)

@@ -89,35 +89,59 @@ protected:
 	 *
 	 *  @param mesh Mesh to be processed
 	 *  @param axis Main axis
-	 *  @return Index of the newly generated UV channel
+	 *  @param out Receives output UV coordinates
 	*/
-	unsigned int ComputeSphereMapping(aiMesh* mesh,aiAxis axis);
+	void ComputeSphereMapping(aiMesh* mesh,aiAxis axis,
+		aiVector3D* out);
 
 	// -------------------------------------------------------------------
 	/** Computes cylindrical UV coordinates for a mesh
 	 *
 	 *  @param mesh Mesh to be processed
 	 *  @param axis Main axis
-	 *  @return Index of the newly generated UV channel
+	 *  @param out Receives output UV coordinates
 	*/
-	unsigned int ComputeCylinderMapping(aiMesh* mesh,aiAxis axis);
+	void ComputeCylinderMapping(aiMesh* mesh,aiAxis axis,
+		aiVector3D* out);
 
 	// -------------------------------------------------------------------
 	/** Computes planar UV coordinates for a mesh
 	 *
 	 *  @param mesh Mesh to be processed
 	 *  @param axis Main axis
-	 *  @return Index of the newly generated UV channel
+	 *  @param out Receives output UV coordinates
 	*/
-	unsigned int ComputePlaneMapping(aiMesh* mesh,aiAxis axis);
+	void ComputePlaneMapping(aiMesh* mesh,aiAxis axis, 
+		aiVector3D* out);
 
 	// -------------------------------------------------------------------
 	/** Computes cubic UV coordinates for a mesh
 	 *
 	 *  @param mesh Mesh to be processed
-	 *  @return Index of the newly generated UV channel
+	 *  @param out Receives output UV coordinates
 	*/
-	unsigned int ComputeBoxMapping(aiMesh* mesh);
+	void ComputeBoxMapping(aiMesh* mesh, aiVector3D* out);
+
+private:
+
+	// temporary structure to describe a mapping
+	struct MappingInfo
+	{
+		MappingInfo(aiTextureMapping _type)
+			: type	(_type)
+			, axis	(aiAxis_X)
+			, uv	(0u)
+		{}
+
+		aiTextureMapping type;
+		aiAxis axis;
+		unsigned int uv;
+
+		bool operator== (const MappingInfo& other)
+		{
+			return type == other.type && axis == other.axis;
+		}
+	};
 };
 
 } // end of namespace Assimp

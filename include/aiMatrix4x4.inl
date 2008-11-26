@@ -87,15 +87,12 @@ inline aiMatrix4x4& aiMatrix4x4::Inverse()
 	float det = Determinant();
 	if(det == 0.0f) 
 	{
+		const float nan = std::numeric_limits<float>::quiet_NaN();
 		*this = aiMatrix4x4(
-			std::numeric_limits<float>::quiet_NaN(),std::numeric_limits<float>::quiet_NaN(),
-			std::numeric_limits<float>::quiet_NaN(),std::numeric_limits<float>::quiet_NaN(),
-			std::numeric_limits<float>::quiet_NaN(),std::numeric_limits<float>::quiet_NaN(),
-			std::numeric_limits<float>::quiet_NaN(),std::numeric_limits<float>::quiet_NaN(),
-			std::numeric_limits<float>::quiet_NaN(),std::numeric_limits<float>::quiet_NaN(),
-			std::numeric_limits<float>::quiet_NaN(),std::numeric_limits<float>::quiet_NaN(),
-			std::numeric_limits<float>::quiet_NaN(),std::numeric_limits<float>::quiet_NaN(),
-			std::numeric_limits<float>::quiet_NaN(),std::numeric_limits<float>::quiet_NaN());
+			nan,nan,nan,nan,
+			nan,nan,nan,nan,
+			nan,nan,nan,nan,
+			nan,nan,nan,nan);
 		return *this;
 	}
 
@@ -128,7 +125,6 @@ inline float* aiMatrix4x4::operator[](unsigned int p_iIndex)
 {
 	return &this->a1 + p_iIndex * 4;
 }
-
 
 // ---------------------------------------------------------------------------
 inline const float* aiMatrix4x4::operator[](unsigned int p_iIndex) const
@@ -206,6 +202,11 @@ inline void aiMatrix4x4::DecomposeNoScaling (aiQuaternion& rotation,
 
 	// extract rotation
 	rotation = aiQuaternion((aiMatrix3x3)_this);
+}
+// ---------------------------------------------------------------------------
+inline void aiMatrix4x4::FromEulerAngles(const aiVector3D& blubb)
+{
+	FromEulerAngles(blubb.x,blubb.y,blubb.z);
 }
 // ---------------------------------------------------------------------------
 inline void aiMatrix4x4::FromEulerAngles(float x, float y, float z)

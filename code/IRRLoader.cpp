@@ -51,8 +51,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SceneCombiner.h"
 #include "StandardShapes.h"
 
+
+// We need boost::common_factor to compute the lcm/gcd of a number
+#ifdef ASSIMP_BUILD_BOOST_WORKAROUND
+#	include "../include/BoostWorkaround/boost/common_factor_rt.hpp"
+#else
+#	include	<boost/math/common_factor_rt.hpp> 
+#endif
+
 using namespace Assimp;
 
+// Transformation matrix to convert from Assimp to IRR space
+static aiMatrix4x4 AI_TO_IRR_MATRIX = aiMatrix4x4 ( 1.0f, 0.0f, 0.0f, 
+	0.f, 0.0f, 0.0f, -1.0f, 0.f, 0.0f, 1.0f, 0.0f, 0.f, 0.f, 0.f, 0.f, 1.f);
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -163,7 +174,7 @@ aiMesh* IRRImporter::BuildSingleQuadMesh(const SkyboxVertex& v1,
 	*vec   = v4.normal;
 
 	// copy texture coordinates
-	out->mTextureCoords[0] = new aiVector3D[4];
+	vec = out->mTextureCoords[0] = new aiVector3D[4];
 	*vec++ = v1.uv;
 	*vec++ = v2.uv;
 	*vec++ = v3.uv;
@@ -240,12 +251,12 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMateri
 		SkyboxVertex( l,-l, l,  0,  1, 0,   0.f,0.f),
 		SkyboxVertex( l,-l,-l,  0,  1, 0,   1.f,0.f),
 		SkyboxVertex(-l,-l,-l,  0,  1, 0,   1.f,1.f),
-		SkyboxVertex(-l,-l,-l,  0,  1, 0,   0.f,1.f)) );
+		SkyboxVertex(-l,-l, l,  0,  1, 0,   0.f,1.f)) );
 	meshes.back()->mMaterialIndex = materials.size()-1u;
 }
 
 // ------------------------------------------------------------------------------------------------
-void IRRImporter::CopyMaterial(std::vector<aiMaterial*>	 materials,
+void IRRImporter::CopyMaterial(std::vector<aiMaterial*>& materials,
 	std::vector< std::pair<aiMaterial*, unsigned int> >& inmaterials,
 	unsigned int& defMatIdx,
 	aiMesh* mesh)
@@ -297,44 +308,71 @@ inline void FindSuitableMultiple(int& angle)
 }
 
 // ------------------------------------------------------------------------------------------------
-void IRRImporter::ComputeAnimations(Node* root, std::vector<aiNodeAnim*>& anims,
-	const aiMatrix4x4& transform)
+void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNodeAnim*>& anims)
 {
-	ai_assert(NULL != root);
+	ai_assert(NULL != root && NULL != real);
 
 	if (root->animators.empty())return;
+	const aiMatrix4x4& transform = real->mTransformation;
 
-	typedef std::pair< TemporaryAnim, Animator* > AnimPair;
-	const unsigned int resolution = 1;
-
-	std::vector<AnimPair> temp;
-	temp.reserve(root->animators.size());
-
+	unsigned int total = 0;
 	for (std::list<Animator>::iterator it = root->animators.begin();
 		it != root->animators.end(); ++it)
 	{
-		if ((*it).type == Animator::UNKNOWN ||
-			(*it).type == Animator::OTHER)
+		if ((*it).type == Animator::UNKNOWN || (*it).type == Animator::OTHER)
 		{
 			DefaultLogger::get()->warn("IRR: Skipping unknown or unsupported animator");
 			continue;
 		}
-		temp.push_back(AnimPair(TemporaryAnim(),&(*it)));
+		++total;
+	}
+	if (!total)return;
+	else if (1 == total)
+	{
+		DefaultLogger::get()->warn("IRR: Generating dummy nodes to simulate multiple animators");
 	}
 
-	if (temp.empty())return;
+	// NOTE: 1 tick == i millisecond
 
-	// All animators are applied one after another. We generate a set of
-	// transformation matrices for each of it. Then we combine all 
-	// transformation matrices, decompose them and build an output animation.
-
-	for (std::vector<AnimPair>::iterator it = temp.begin();
-		 it != temp.end(); ++it)
+	unsigned int cur = 0;
+	for (std::list<Animator>::iterator it = root->animators.begin();
+		it != root->animators.end(); ++it)
 	{
-		TemporaryAnim& out = (*it).first;
-		Animator* in       = (*it).second;
+		if ((*it).type == Animator::UNKNOWN || (*it).type == Animator::OTHER)continue;
 
-		switch (in->type)
+		Animator& in = *it ;
+		aiNodeAnim* anim = new aiNodeAnim();
+
+		if (cur != total-1)
+		{
+			// Build a new name - a prefix instead of a suffix because it is
+			// easier to check against
+			anim->mNodeName.length = ::sprintf(anim->mNodeName.data,
+				"$INST_DUMMY_%i_%s",total-1,
+				(root->name.length() ? root->name.c_str() : ""));
+
+			// we'll also need to insert a dummy in the node hierarchy.
+			aiNode* dummy = new aiNode();
+
+			for (unsigned int i = 0; i < real->mParent->mNumChildren;++i)
+				if (real->mParent->mChildren[i] == real)
+					real->mParent->mChildren[i] = dummy;
+
+			dummy->mParent = real->mParent;
+			dummy->mName = anim->mNodeName;
+
+			dummy->mNumChildren = 1;
+			dummy->mChildren = new aiNode*[dummy->mNumChildren];
+			dummy->mChildren[0] = real;
+
+			// the transformation matrix of the dummy node is the identity
+
+			real->mParent = dummy;
+		}
+		else anim->mNodeName.Set(root->name);
+		++cur;
+
+		switch (in.type)
 		{
 		case Animator::ROTATION:
 			{
@@ -347,17 +385,20 @@ void IRRImporter::ComputeAnimations(Node* root, std::vector<aiNodeAnim*>& anims,
 				// here in order to get good results.
 				// -----------------------------------------------------
 				int angles[3];
-				angles[0] = (int)(in->direction.x*100);
-				angles[1] = (int)(in->direction.y*100);
-				angles[2] = (int)(in->direction.z*100);
+				angles[0] = (int)(in.direction.x*100);
+				angles[1] = (int)(in.direction.y*100);
+				angles[2] = (int)(in.direction.z*100);
 
 				angles[0] %= 360;
 				angles[1] %= 360;
 				angles[2] %= 360;
 
-				FindSuitableMultiple(angles[0]);
-				FindSuitableMultiple(angles[1]);
-				FindSuitableMultiple(angles[2]);
+				if ((angles[0]*angles[1]) && (angles[1]*angles[2]))
+				{
+					FindSuitableMultiple(angles[0]);
+					FindSuitableMultiple(angles[1]);
+					FindSuitableMultiple(angles[2]);
+				}
 
 				int lcm = 360;
 
@@ -390,87 +431,136 @@ void IRRImporter::ComputeAnimations(Node* root, std::vector<aiNodeAnim*>& anims,
 					max = std::max(max, (float)lcm / angles[2]);
 
 				
-				// Allocate transformation matrices
-				out.SetupMatrices((unsigned int)(max*fps));
+				anim->mNumRotationKeys = (unsigned int)(max*fps);
+				anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys];
+
 
 				// begin with a zero angle
 				aiVector3D angle;
-				for (unsigned int i = 0; i < out.last;++i)
+				for (unsigned int i = 0; i < anim->mNumRotationKeys;++i)
 				{
-					// build the rotation matrix for the given euler angles
-					aiMatrix4x4& m = out.matrices[i];
+					// build the quaternion for the given euler angles
+					aiQuatKey& q = anim->mRotationKeys[i];
 
-					// we start with the node transformation
-					m = transform; 
-
-					aiMatrix4x4 m2;
-
-					if (angle.x)
-						m *= aiMatrix4x4::RotationX(angle.x,m2);
-
-					if (angle.y)
-						m *= aiMatrix4x4::RotationX(angle.y,m2);
-
-					if (angle.z)
-						m *= aiMatrix4x4::RotationZ(angle.z,m2);
+					q.mValue = aiQuaternion(angle.x, angle.y, angle.z);
+					q.mTime = (double)i;
 
 					// increase the angle
-					angle += in->direction;
+					angle += in.direction;
 				}
 
 				// This animation is repeated and repeated ...
-				out.post = aiAnimBehaviour_REPEAT;
+				anim->mPostState = aiAnimBehaviour_REPEAT;
+				anim->mPreState  = aiAnimBehaviour_CONSTANT;
 			}
 			break;
 
 		case Animator::FLY_CIRCLE:
 			{
-				
+				anim->mPostState = aiAnimBehaviour_REPEAT;
+				anim->mPreState  = aiAnimBehaviour_CONSTANT;
+
+				// -----------------------------------------------------
+				// Find out how much time we'll need to perform a 
+				// full circle. 
+				// -----------------------------------------------------
+				const double seconds = (1. / in.speed) / 1000.;
+				const double tdelta = 1000. / fps;
+
+				anim->mNumPositionKeys = (unsigned int) (fps * seconds);
+				anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
+
+				// from Irrlicht, what else should we do than copying it?
+				aiVector3D vecU,vecV;
+				if (in.direction.y)
+				{
+					vecV = aiVector3D(50,0,0) ^ in.direction;
+				}
+				else vecV = aiVector3D(0,50,00) ^ in.direction;
+				vecV.Normalize();
+				vecU = (vecV ^ in.direction).Normalize();
+
+				// build the output keys
+				for (unsigned int i = 0; i < anim->mNumPositionKeys;++i)
+				{
+					aiVectorKey& key = anim->mPositionKeys[i];
+					key.mTime = i * tdelta;
+
+					const float t = (float) ( in.speed * key.mTime );
+					key.mValue = in.circleCenter  + in.circleRadius * ((vecU*::cos(t)) + (vecV*::sin(t)));
+				}
 			}
 			break;
 
 		case Animator::FLY_STRAIGHT:
 			{
-				
+				anim->mPostState = (in.loop ? aiAnimBehaviour_REPEAT : aiAnimBehaviour_CONSTANT);
+				anim->mPreState  = aiAnimBehaviour_CONSTANT;
+
+				const double seconds = in.timeForWay / 1000.;
+				const double tdelta = 1000. / fps;
+
+				anim->mNumPositionKeys = (unsigned int) (fps * seconds);
+				anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
+
+				aiVector3D diff = in.direction - in.circleCenter;
+				const float lengthOfWay = diff.Length();
+				diff.Normalize();
+
+				const double timeFactor = lengthOfWay / in.timeForWay;
+
+				// build the output keys
+				for (unsigned int i = 0; i < anim->mNumPositionKeys;++i)
+				{
+					aiVectorKey& key = anim->mPositionKeys[i];
+					key.mTime = i * tdelta;
+					key.mValue = in.circleCenter + diff * float(timeFactor * key.mTime);
+				}
 			}
 			break;
 
 		case Animator::FOLLOW_SPLINE:
 			{
-				out.post = aiAnimBehaviour_REPEAT;
-				const int size = (int)in->splineKeys.size();
+				anim->mPostState = aiAnimBehaviour_REPEAT;
+				anim->mPreState  = aiAnimBehaviour_CONSTANT;
+
+				const int size = (int)in.splineKeys.size();
 				if (!size)
 				{
 					// We have no point in the spline. That's bad. Really bad.
 					DefaultLogger::get()->warn("IRR: Spline animators with no points defined");
+
+					delete anim;anim = NULL;
 					break;
 				}
 				else if (size == 1)
 				{
-					// We have just one point in the spline
-					out.SetupMatrices(1);
-					out.matrices[0].a4 = in->splineKeys[0].mValue.x;
-					out.matrices[0].b4 = in->splineKeys[0].mValue.y;
-					out.matrices[0].c4 = in->splineKeys[0].mValue.z;
+					// We have just one point in the spline so we don't need the full calculation
+					anim->mNumPositionKeys = 1;
+					anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
+
+					anim->mPositionKeys[0].mValue = in.splineKeys[0].mValue;
+					anim->mPositionKeys[0].mTime  = 0.f;
 					break;
 				}
 
 				unsigned int ticksPerFull = 15;
-				out.SetupMatrices(ticksPerFull*fps);
+				anim->mNumPositionKeys = (unsigned int) ( ticksPerFull * fps );
+				anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
 
-				for (unsigned int i = 0; i < out.last;++i)
+				for (unsigned int i = 0; i < anim->mNumPositionKeys;++i)
 				{
-					aiMatrix4x4& m = out.matrices[i];
+					aiVectorKey& key = anim->mPositionKeys[i];
 
-					const float dt = (i * in->speed * 0.001f );
+					const float dt = (i * in.speed * 0.001f );
 					const float u = dt - floor(dt);
 					const int idx = (int)floor(dt) % size;
 
 					// get the 4 current points to evaluate the spline
-					const aiVector3D& p0 = in->splineKeys[ ClampSpline( idx - 1, size ) ].mValue;
-					const aiVector3D& p1 = in->splineKeys[ ClampSpline( idx + 0, size ) ].mValue; 
-					const aiVector3D& p2 = in->splineKeys[ ClampSpline( idx + 1, size ) ].mValue; 
-					const aiVector3D& p3 = in->splineKeys[ ClampSpline( idx + 2, size ) ].mValue;
+					const aiVector3D& p0 = in.splineKeys[ ClampSpline( idx - 1, size ) ].mValue;
+					const aiVector3D& p1 = in.splineKeys[ ClampSpline( idx + 0, size ) ].mValue; 
+					const aiVector3D& p2 = in.splineKeys[ ClampSpline( idx + 1, size ) ].mValue; 
+					const aiVector3D& p3 = in.splineKeys[ ClampSpline( idx + 2, size ) ].mValue;
 
 					// compute polynomials
 					const float u2 = u*u;
@@ -482,54 +572,90 @@ void IRRImporter::ComputeAnimations(Node* root, std::vector<aiNodeAnim*>& anims,
 					const float h4 = u3 - u2;
 
 					// compute the spline tangents
-					const aiVector3D t1 = ( p2 - p0 ) * in->tightness;
-					aiVector3D t2 = ( p3 - p1 ) * in->tightness;
+					const aiVector3D t1 = ( p2 - p0 ) * in.tightness;
+					aiVector3D t2 = ( p3 - p1 ) * in.tightness;
 
 					// and use them to get the interpolated point
 					t2 = (h1 * p1 + p2 * h2 + t1 * h3 + h4 * t2);
 
 					// build a simple translation matrix from it
-					m.a4 = t2.x;
-					m.b4 = t2.y;
-					m.c4 = t2.z;
+					key.mValue = t2.x;
+					key.mTime  = (double) i;
 				}
 			}
 			break;
 		};
-	}
-
-
-	aiNodeAnim* out = new aiNodeAnim();
-	out->mNodeName.Set(root->name);
-
-	if (temp.size() == 1)
-	{
-		// If there's just one animator to be processed our 
-		// task is quite easy
-		TemporaryAnim& one = temp[0].first;
-		
-		out->mPostState = one.post;
-		out->mNumPositionKeys = one.last;
-		out->mNumScalingKeys  = one.last;
-		out->mNumRotationKeys = one.last;
-
-		out->mPositionKeys = new aiVectorKey[one.last];
-		out->mScalingKeys  = new aiVectorKey[one.last];
-		out->mRotationKeys = new aiQuatKey[one.last];
-
-		for (unsigned int i = 0; i < one.last;++i)
+		if (anim)
 		{
-			aiVectorKey& scaling  = out->mScalingKeys[i];
-			aiVectorKey& position = out->mPositionKeys[i];
-			aiQuatKey&   rotation = out->mRotationKeys[i];
-
-			scaling.mTime = position.mTime = rotation.mTime = (double)i;
-			one.matrices[i].Decompose(scaling.mValue, rotation.mValue, position.mValue);
+			anims.push_back(anim);
+			++total;
 		}
 	}
+}
 
-	// NOTE: It is possible that some of the tracks we're returning
-	// are dummy tracks, but the ScenePreprocessor will fix that, hopefully
+// ------------------------------------------------------------------------------------------------
+// This function is maybe more generic than we'd need it here
+void SetupMapping (MaterialHelper* mat, aiTextureMapping mode, aiAxis axis = aiAxis_Y)
+{
+	// Check whether there are texture properties defined - setup
+	// the desired texture mapping mode for all of them and ignore
+	// all UV settings we might encounter. WE HAVE NO UVS!
+
+	std::vector<aiMaterialProperty*> p;
+	p.reserve(mat->mNumProperties+1);
+
+	for (unsigned int i = 0; i < mat->mNumProperties;++i)
+	{
+		aiMaterialProperty* prop = mat->mProperties[i];
+		if (!::strcmp( prop->mKey.data, "$tex.file"))
+		{
+			// Setup the mapping key
+			aiMaterialProperty* m = new aiMaterialProperty();
+			m->mKey.Set("$tex.mapping");
+			m->mIndex    = prop->mIndex;
+			m->mSemantic = prop->mSemantic;
+			m->mType     = aiPTI_Integer;
+
+			m->mDataLength = 4;
+			m->mData = new char[4];
+			*((int*)m->mData) = mode;
+
+			p.push_back(prop);
+			p.push_back(m);
+
+			// Setup the mapping axis
+			if (mode == aiTextureMapping_CYLINDER || mode == aiTextureMapping_PLANE ||
+				mode == aiTextureMapping_SPHERE)
+			{
+				m = new aiMaterialProperty();
+				m->mKey.Set("$tex.mapaxis");
+				m->mIndex    = prop->mIndex;
+				m->mSemantic = prop->mSemantic;
+				m->mType     = aiPTI_Integer;
+
+				m->mDataLength = 4;
+				m->mData = new char[4];
+				*((int*)m->mData) = axis;
+				p.push_back(m);
+			}
+		}
+		else if (! ::strcmp( prop->mKey.data, "$tex.uvwsrc"))
+		{
+			delete mat->mProperties[i];
+		}
+		else p.push_back(prop);
+	}
+
+	if (p.empty())return;
+
+	// rebuild the output array
+	if (p.size() > mat->mNumAllocated)
+	{
+		delete[] mat->mProperties;
+		mat->mProperties = new aiMaterialProperty*[p.size()];
+	}
+	mat->mNumProperties = (unsigned int)p.size();
+	::memcpy(mat->mProperties,&p[0],sizeof(void*)*mat->mNumProperties);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -538,10 +664,11 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 	std::vector<aiMesh*>&        meshes,
 	std::vector<aiNodeAnim*>&    anims,
 	std::vector<AttachmentInfo>& attach,
-	std::vector<aiMaterial*>	 materials,
+	std::vector<aiMaterial*>&	 materials,
 	unsigned int&				 defMatIdx)
 {
 	unsigned int oldMeshSize = (unsigned int)meshes.size();
+	unsigned int meshTrafoAssign = 0;
 
 	// Now determine the type of the node 
 	switch (root->type)
@@ -549,7 +676,10 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 	case Node::ANIMMESH:
 	case Node::MESH:
 		{
-			// get the loaded mesh from the scene and add it to
+			if (!root->meshPath.length())
+				break;
+
+			// Get the loaded mesh from the scene and add it to
 			// the list of all scenes to be attached to the 
 			// graph we're currently building
 			aiScene* scene = batch.GetImport(root->meshPath);
@@ -560,9 +690,45 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 				break;
 			}
 			attach.push_back(AttachmentInfo(scene,rootOut));
+			meshTrafoAssign = 1;
 
-			// now combine the material we've loaded for this mesh
-			// with the real meshes we got from the file. As we
+			// If the root node of the scene is animated - and *this* node
+			// is animated, too, we need to insert a dummy node into the
+			// hierarchy in order to avoid interferences with animations
+			for (unsigned int i = 0; i < scene->mNumAnimations;++i)
+			{
+				aiAnimation* anim = scene->mAnimations[i];
+				for (unsigned int a = 0; a < anim->mNumChannels;++a)
+				{
+					if (scene->mRootNode->mName == anim->mChannels[a]->mNodeName)
+					{
+						if (root->animators.empty())
+						{
+							meshTrafoAssign = 2;
+						}
+						else 
+						{
+							meshTrafoAssign = 3;
+							aiNode* dummy = new aiNode();
+							dummy->mName.Set("$CSpaceSeam$");
+							dummy->mNumChildren = 1;
+							dummy->mChildren = new aiNode*[1];
+							dummy->mChildren[0] = scene->mRootNode;
+
+							scene->mRootNode->mParent = dummy;
+							scene->mRootNode = dummy;
+							scene->mRootNode->mTransformation = AI_TO_IRR_MATRIX;
+						}
+						break;
+					}
+				}
+			}
+			if (1 == meshTrafoAssign)
+				scene->mRootNode->mTransformation *= AI_TO_IRR_MATRIX;
+	
+
+			// Now combine the material we've loaded for this mesh
+			// with the real materials we got from the file. As we
 			// don't execute any pp-steps on the file, the numbers
 			// should be equal. If they are not, we can impossibly
 			// do this  ...
@@ -575,7 +741,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 			}
 			for (unsigned int i = 0; i < scene->mNumMaterials;++i)
 			{
-				// delete the old material
+				// Delete the old material, we don't need it anymore
 				delete scene->mMaterials[i];
 
 				std::pair<aiMaterial*, unsigned int>& src = root->materials[i];
@@ -599,8 +765,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 					mesh->mMaterialIndex];
 
 				MaterialHelper* mat = (MaterialHelper*)src.first;
-				if (mesh->HasVertexColors(0) && 
-					src.second & AI_IRRMESH_MAT_trans_vertex_alpha)
+				if (mesh->HasVertexColors(0) && src.second & AI_IRRMESH_MAT_trans_vertex_alpha)
 				{
 					bool bdo = true;
 					for (unsigned int a = 1; a < mesh->mNumVertices;++a)
@@ -624,14 +789,13 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 				}
 
 				// If we have a second texture coordinate set and a second texture
-				// (either lightmap, normalmap, 2layered material we need to
-				// setup the correct UV index for it). The texture can either
+				// (either lightmap, normalmap, 2layered material) we need to
+				// setup the correct UV index for it. The texture can either
 				// be diffuse (lightmap & 2layer) or a normal map (normal & parallax)
 				if (mesh->HasTextureCoords(1))
 				{
 					int idx = 1;
-					if (src.second & (AI_IRRMESH_MAT_solid_2layer |
-						AI_IRRMESH_MAT_lightmap))
+					if (src.second & (AI_IRRMESH_MAT_solid_2layer | AI_IRRMESH_MAT_lightmap))
 					{
 						mat->AddProperty(&idx,1,AI_MATKEY_UVWSRC_DIFFUSE(0));
 					}
@@ -653,11 +817,11 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 
 	case Node::SPHERE:
 		{
-			// generate the sphere model. Our input parameter to
+			// Generate the sphere model. Our input parameter to
 			// the sphere generation algorithm is the number of
 			// subdivisions of each triangle - but here we have
 			// the number of poylgons on a specific axis. Just
-			// use some limits ...
+			// use some hardcoded limits to approximate this ...
 			unsigned int mul = root->spherePolyCountX*root->spherePolyCountY;
 			if      (mul < 100)mul = 2;
 			else if (mul < 300)mul = 3;
@@ -667,10 +831,14 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 				&StandardShapes::MakeSphere));
 
 			// Adjust scaling
-			root->scaling *= root->sphereRadius;
+			root->scaling *= root->sphereRadius/2;
 
 			// Copy one output material
 			CopyMaterial(materials, root->materials, defMatIdx, meshes.back());
+
+			// Now adjust this output material - if there is a first texture
+			// set, setup spherical UV mapping around the Y axis.
+			SetupMapping ( (MaterialHelper*) materials.back(), aiTextureMapping_SPHERE, aiAxis_Y );
 		}
 		break;
 
@@ -685,6 +853,10 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 
 			// Copy one output material
 			CopyMaterial(materials, root->materials, defMatIdx, meshes.back());
+
+			// Now adjust this output material - if there is a first texture
+			// set, setup cubic UV mapping 
+			SetupMapping ( (MaterialHelper*) materials.back(), aiTextureMapping_BOX );
 		}
 		break;
 
@@ -745,10 +917,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 	// Now compute the final local transformation matrix of the
 	// node from the given translation, rotation and scaling values.
 	// (the rotation is given in Euler angles, XYZ order)
-	aiMatrix4x4 m;
-	rootOut->mTransformation = aiMatrix4x4::RotationX(AI_DEG_TO_RAD(root->rotation.x),m)
-		* aiMatrix4x4::RotationY(AI_DEG_TO_RAD(root->rotation.y),m)
-		* aiMatrix4x4::RotationZ(AI_DEG_TO_RAD(root->rotation.z),m);
+	rootOut->mTransformation.FromEulerAngles(AI_DEG_TO_RAD(root->rotation) );
 
 	// apply scaling
 	aiMatrix4x4& mat = rootOut->mTransformation;
@@ -763,12 +932,15 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 	mat.c3 *= root->scaling.z;
 
 	// apply translation
-	mat.a4 = root->position.x; 
-	mat.b4 = root->position.y; 
-	mat.c4 = root->position.z;
+	mat.a4 += root->position.x; 
+	mat.b4 += root->position.y; 
+	mat.c4 += root->position.z;
+
+	if (meshTrafoAssign == 2)
+		mat *= AI_TO_IRR_MATRIX;
 
 	// now compute animations for the node
-	ComputeAnimations(root,anims,mat);
+	ComputeAnimations(root,rootOut, anims);
 
 	// Add all children recursively. First allocate enough storage
 	// for them, then call us again
@@ -804,6 +976,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 	// The root node of the scene
 	Node* root = new Node(Node::DUMMY);
 	root->parent = NULL;
+	root->name = "<IRRSceneRoot>";
 
 	// Current node parent
 	Node* curParent = root;
@@ -819,6 +992,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 
 	// Batch loader used to load external models
 	BatchLoader batch(pIOHandler);
+	batch.SetBasePath(pFile);
 	
 	cameras.reserve(5);
 	lights.reserve(5);
@@ -848,6 +1022,8 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 				 *    and join its animation channels with ours.
 				 *  "empty" - A dummy node
 				 *  "camera" - A camera
+				 *  "terrain" - a terrain node (data comes from a heightmap)
+				 *  "billboard", ""
 				 *
 				 *  Each of these nodes can be animated and all can have multiple
 				 *  materials assigned (except lights, cameras and dummies, of course).
@@ -855,8 +1031,9 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 				// ***********************************************************************
 				const char* sz = reader->getAttributeValueSafe("type");
 				Node* nd;
-				if (!ASSIMP_stricmp(sz,"mesh"))
+				if (!ASSIMP_stricmp(sz,"mesh") || !ASSIMP_stricmp(sz,"octTree"))
 				{
+					// OctTree's and meshes are treated equally
 					nd = new Node(Node::MESH);
 				}
 				else if (!ASSIMP_stricmp(sz,"cube"))
@@ -868,7 +1045,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 				else if (!ASSIMP_stricmp(sz,"skybox"))
 				{
 					nd = new Node(Node::SKYBOX);
-					++guessedMeshCnt;
+					guessedMeshCnt += 6;
 				}
 				else if (!ASSIMP_stricmp(sz,"camera"))
 				{
@@ -901,6 +1078,16 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 				{
 					nd = new Node(Node::DUMMY);
 				}
+				else if (!ASSIMP_stricmp(sz,"terrain"))
+				{
+					nd = new Node(Node::TERRAIN);
+				}
+				else if (!ASSIMP_stricmp(sz,"billBoard"))
+				{
+					// We don't support billboards, so ignore them
+					DefaultLogger::get()->error("IRR: Billboards are not supported by Assimp");
+					nd = new Node(Node::DUMMY);
+				}
 				else
 				{
 					DefaultLogger::get()->warn("IRR: Found unknown node: " + std::string(sz));
@@ -929,19 +1116,21 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 			else if (!ASSIMP_stricmp(reader->getNodeName(),"attributes"))
 			{
 				/*  We should have a valid node here
+				 *  FIX: no ... the scene root node is also contained in an attributes block
 				 */
 				if (!curNode)
 				{
+#if 0
 					DefaultLogger::get()->error("IRR: Encountered <attributes> element, but "
 						"there is no node active");
+#endif
 					continue;
 				}
 
 				Animator* curAnim = NULL;
 
-				// FIX: Materials can occur for nearly any type of node
-				if (inMaterials /* && curNode->type == Node::ANIMMESH ||
-					curNode->type == Node::MESH  */)
+				// Materials can occur for nearly any type of node
+				if (inMaterials && curNode->type != Node::DUMMY)
 				{
 					/*  This is a material description - parse it!
 					 */
@@ -976,10 +1165,6 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 							VectorProperty prop;
 							ReadVectorProperty(prop);
 
-							// Convert to our coordinate system
-							std::swap( (float&)prop.value.z, (float&)prop.value.y );
-							prop.value.y *= -1.f;
-
 							if (inAnimator)
 							{
 								if (curAnim->type == Animator::ROTATION && prop.name == "Rotation")
@@ -999,7 +1184,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 
 										// and parse its properties
 										key.mValue = prop.value;
-										key.mTime  = strtol10(&prop.name.c_str()[5]);
+										key.mTime  = strtol10(&prop.name[5]);
 									}
 								}
 								else if (curAnim->type == Animator::FLY_CIRCLE)
@@ -1127,7 +1312,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 								else if (Node::LIGHT == curNode->type)
 								{	
 									/*  Additional light information
-								 */
+									 */
 									if (prop.name == "Attenuation")
 									{
 										lights.back()->mAttenuationLinear  = prop.value;
@@ -1204,6 +1389,22 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 								}
 								else if (Node::LIGHT == curNode->type && "LightType" == prop.name)
 								{
+									if (prop.value == "Spot")
+										lights.back()->mType = aiLightSource_SPOT;
+									else if (prop.value == "Point")
+										lights.back()->mType = aiLightSource_POINT;
+									else if (prop.value == "Directional")
+										lights.back()->mType = aiLightSource_DIRECTIONAL;
+									else
+									{
+										// We won't pass the validation with aiLightSourceType_UNDEFINED,
+										// so we remove the light and replace it with a silly dummy node
+										delete lights.back();
+										lights.pop_back();
+										curNode->type = Node::DUMMY;
+
+										DefaultLogger::get()->error("Ignoring light of unknown type: " + prop.value);
+									}
 								}
 								else if (prop.name == "Mesh" && Node::MESH == curNode->type ||
 									Node::ANIMMESH == curNode->type)
@@ -1224,8 +1425,35 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 											aiComponent_ANIMATIONS | aiComponent_BONEWEIGHTS);
 									}
 
-									batch.AddLoadRequest(prop.value,pp,&map);
-									curNode->meshPath = prop.value;
+									/*  TODO: maybe implement the protection against recursive
+									*  loading calls directly in BatchLoader? The current
+									*  implementation is not absolutely safe. A LWS and an IRR
+									*  file referencing each other *could* cause the system to
+									*  recurse forever.
+									*/
+									std::string::size_type pos = prop.value.find_last_of('.');
+
+									// no file extension - can't read, so we don't need to try it
+									if( pos == std::string::npos)
+									{
+										DefaultLogger::get()->error("IRR: Can't load files without a file extension");
+									}
+									else
+									{
+										std::string extension = prop.value.substr( pos);
+										for (std::string::iterator i = extension.begin(); i != extension.end();++i)
+											*i = ::tolower(*i);
+
+										if (".irr" == prop.value)
+										{
+											DefaultLogger::get()->error("IRR: Can't load another IRR file recursively");
+										}
+										else
+										{
+											batch.AddLoadRequest(prop.value,pp,&map);
+											curNode->meshPath = prop.value;
+										}
+									}
 								}
 								else if (inAnimator && prop.name == "Type")
 								{
@@ -1275,12 +1503,12 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 				{
 					// currently is no node set. We need to go
 					// back in the node hierarchy
-					curParent = curParent->parent;
 					if (!curParent)
 					{
 						curParent = root;
 						DefaultLogger::get()->error("IRR: Too many closing <node> elements");
 					}
+					else curParent = curParent->parent;
 				}
 				else curNode = NULL;
 			}
@@ -1314,6 +1542,8 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 		else DefaultLogger::get()->warn("IRR: Camera aspect is not given, can't compute horizontal FOV");
 	}
 
+	batch.LoadAll();
+
 	/* Allocate a tempoary scene data structure
 	 */
 	aiScene* tempScene = new aiScene();
@@ -1322,15 +1552,21 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 
 	/* Copy the cameras to the output array
 	 */
-	tempScene->mNumCameras = (unsigned int)cameras.size();
-	tempScene->mCameras = new aiCamera*[tempScene->mNumCameras];
-	::memcpy(tempScene->mCameras,&cameras[0],sizeof(void*)*tempScene->mNumCameras);
+	if (!cameras.empty())
+	{
+		tempScene->mNumCameras = (unsigned int)cameras.size();
+		tempScene->mCameras = new aiCamera*[tempScene->mNumCameras];
+		::memcpy(tempScene->mCameras,&cameras[0],sizeof(void*)*tempScene->mNumCameras);
+	}
 
 	/* Copy the light sources to the output array
 	 */
-	tempScene->mNumLights = (unsigned int)lights.size();
-	tempScene->mLights = new aiLight*[tempScene->mNumLights];
-	::memcpy(tempScene->mLights,&lights[0],sizeof(void*)*tempScene->mNumLights);
+	if (!lights.empty())
+	{
+		tempScene->mNumLights = (unsigned int)lights.size();
+		tempScene->mLights = new aiLight*[tempScene->mNumLights];
+		::memcpy(tempScene->mLights,&lights[0],sizeof(void*)*tempScene->mNumLights);
+	}
 
 	// temporary data
 	std::vector< aiNodeAnim*>		anims;
@@ -1370,27 +1606,51 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 		an->mChannels = new aiNodeAnim*[an->mNumChannels];
 		::memcpy(an->mChannels, & anims [0], sizeof(void*)*an->mNumChannels);
 	}
-	if (meshes.empty())
-	{
-		// There are no meshes in the scene - the scene is incomplete
-		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
-		DefaultLogger::get()->info("IRR: No Meshes loaded, setting AI_SCENE_FLAGS_INCOMPLETE flag");
-	}
-	else
+	if (!meshes.empty())
 	{
 		// copy all meshes to the temporary scene
 		tempScene->mNumMeshes = (unsigned int)meshes.size();
 		tempScene->mMeshes = new aiMesh*[tempScene->mNumMeshes];
-		::memcpy(tempScene->mMeshes,&meshes[0],tempScene->mNumMeshes);
+		::memcpy(tempScene->mMeshes,&meshes[0],tempScene->mNumMeshes*
+			sizeof(void*));
+	}
+
+	/* Copy all materials to the output array
+	 */
+	if (!materials.empty())
+	{
+		tempScene->mNumMaterials = (unsigned int)materials.size();
+		tempScene->mMaterials = new aiMaterial*[tempScene->mNumMaterials];
+		::memcpy(tempScene->mMaterials,&materials[0],sizeof(void*)*
+			tempScene->mNumMaterials);
 	}
 
 	/*  Now merge all sub scenes and attach them to the correct
 	 *  attachment points in the scenegraph.
 	 */
-	SceneCombiner::MergeScenes(pScene,tempScene,attach);
+	SceneCombiner::MergeScenes(&pScene,tempScene,attach,
+		AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES |
+		AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES);
+
+
+	/*  If we have no meshes | no materials now set the INCOMPLETE
+	 *  scene flag. This is necessary if we failed to load all
+	 *  models from external files
+	 */
+	if (!pScene->mNumMeshes || !pScene->mNumMaterials)
+	{
+		DefaultLogger::get()->warn("IRR: No meshes loaded, setting AI_SCENE_FLAGS_INCOMPLETE");
+		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
+	}
+
+
+	// transformation matrix to convert from IRRMESH to ASSIMP coordinates
+	pScene->mRootNode->mTransformation *= aiMatrix4x4(1.0f, 0.0f, 0.0f, 0.f, 0.0f, 0.0f, -1.0f,
+		0.f, 0.0f, 1.0f, 0.0f, 0.f, 0.f, 0.f, 0.f, 1.f);
 
 
 	/* Finished ... everything destructs automatically and all 
 	 * temporary scenes have already been deleted by MergeScenes()
 	 */
+	return;
 }

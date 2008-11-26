@@ -102,6 +102,7 @@ void OptimizeGraphProcess::FindLockedNodes(aiNode* node)
 {
 	ai_assert(NULL != node);
 
+	// process animations
 	for (unsigned int i = 0; i < pScene->mNumAnimations;++i)
 	{
 		aiAnimation* pani = pScene->mAnimations[i];
@@ -110,11 +111,34 @@ void OptimizeGraphProcess::FindLockedNodes(aiNode* node)
 			aiNodeAnim* pba = pani->mChannels[a];
 			if (pba->mNodeName == node->mName)
 			{
-				// this node is locked
+				// this node is locked, it is referenced by an animation channel
 				node->mNumChildren |= AI_OG_UINT_MSB;
 			}
 		}
 	}
+
+	// process cameras
+	for (unsigned int i = 0; i < pScene->mNumCameras;++i)
+	{
+		aiCamera* p = pScene->mCameras[i];
+		if (p->mName == node->mName)
+		{
+			// this node is locked, it is referenced by a camera
+			node->mNumChildren |= AI_OG_UINT_MSB;
+		}
+	}
+
+	// process lights
+	for (unsigned int i = 0; i < pScene->mNumLights;++i)
+	{
+		aiLight* p = pScene->mLights[i];
+		if (p->mName == node->mName)
+		{
+			// this node is locked, it is referenced by a light
+			node->mNumChildren |= AI_OG_UINT_MSB;
+		}
+	}
+
 	// call all children
 	for (unsigned int i = 0; i < node->mNumChildren;++i)
 		FindLockedNodes(node->mChildren[i]);
@@ -250,233 +274,6 @@ inline unsigned int OptimizeGraphProcess::BinarySearch(NodeIndexList& sortedArra
 	return (unsigned int)sortedArray.size();
 }
 
-// ------------------------------------------------------------------------------------------------
-void OptimizeGraphProcess::BuildUniqueBoneList(
-	std::vector<aiMesh*>::const_iterator it,
-	std::vector<aiMesh*>::const_iterator end,
-	std::list<BoneWithHash>& asBones)
-{
-
-	unsigned int iOffset = 0;
-	for (; it != end;++it)
-	{
-		for (unsigned int l = 0; l < (*it)->mNumBones;++l)
-		{
-			aiBone* p = (*it)->mBones[l];
-			uint32_t itml = SuperFastHash(p->mName.data,(unsigned int)p->mName.length);
-
-			std::list<BoneWithHash>::iterator it2  = asBones.begin();
-			std::list<BoneWithHash>::iterator end2 = asBones.end();
-
-			for (;it2 != end2;++it2)
-			{
-				if ((*it2).first == itml)
-				{
-					(*it2).pSrcBones.push_back(BoneSrcIndex(p,iOffset));
-					break;
-				}
-			}
-			if (end2 == it2)
-			{
-				// need to begin a new bone entry
-				asBones.push_back(BoneWithHash());
-				BoneWithHash& btz = asBones.back();
-
-				// setup members
-				btz.first = itml;
-				btz.second = &p->mName;
-				btz.pSrcBones.push_back(BoneSrcIndex(p,iOffset));
-			}
-		}
-		iOffset += (*it)->mNumVertices;
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-void OptimizeGraphProcess::JoinBones(
-	std::vector<aiMesh*>::const_iterator it,
-	std::vector<aiMesh*>::const_iterator end,
-	aiMesh* out)
-{
-	ai_assert(NULL != out);
-
-	// find we need to build an unique list of all bones.
-	// we work with hashes to make the comparisons MUCH faster,
-	// at least if we have many bones.
-	std::list<BoneWithHash> asBones;
-	BuildUniqueBoneList(it,end,asBones);
-	
-	// now create the output bones
-	out->mBones = new aiBone*[asBones.size()];
-
-	for (std::list<BoneWithHash>::const_iterator it = asBones.begin(),
-		end = asBones.end(); it != end;++it)
-	{
-		aiBone* pc = out->mBones[out->mNumBones++] = new aiBone();
-		pc->mName = aiString( *((*it).second ));
-
-		// get an itrator to the end of the list
-		std::vector< BoneSrcIndex >::const_iterator wend = (*it).pSrcBones.end();
-
-		// loop through all bones to be joined for this bone
-		for (std::vector< BoneSrcIndex >::const_iterator 
-			wmit = (*it).pSrcBones.begin(); wmit != wend; ++wmit)
-		{
-			pc->mNumWeights += (*wmit).first->mNumWeights;
-
-			// NOTE: different offset matrices for bones with equal names
-			// are - at the moment - not handled correctly. 
-			if (wmit != (*it).pSrcBones.begin() &&
-				pc->mOffsetMatrix != (*wmit).first->mOffsetMatrix)
-			{
-				DefaultLogger::get()->warn("Bones with equal names but different "
-					"offset matrices can't be joined at the moment. If this causes "
-					"problems, deactivate the OptimizeGraph-Step");
-
-				continue;
-			}
-			pc->mOffsetMatrix = (*wmit).first->mOffsetMatrix;
-		}
-		// allocate the vertex weight array
-		aiVertexWeight* avw = pc->mWeights = new aiVertexWeight[pc->mNumWeights];
-
-		// and copy the final weights - adjust the vertex IDs by the 
-		// face index offset of the coresponding mesh.
-		for (std::vector< BoneSrcIndex >::const_iterator 
-			wmit = (*it).pSrcBones.begin(); wmit != wend; ++wmit)
-		{
-			aiBone* pip = (*wmit).first;
-			for (unsigned int mp = 0; mp < pip->mNumWeights;++mp,++avw)
-			{
-				const aiVertexWeight& vfi = pip->mWeights[mp];
-				avw->mWeight = vfi.mWeight;
-				avw->mVertexId = vfi.mVertexId + (*wmit).second;
-			}
-		}
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-void OptimizeGraphProcess::JoinMeshes(std::vector<aiMesh*>& meshList,
-	aiMesh*& out, unsigned int max)
-{
-	ai_assert(NULL != out && 0 != max);
-
-	out->mMaterialIndex = meshList[0]->mMaterialIndex;
-
-	// allocate the output mesh
-	out = new aiMesh();
-	std::vector<aiMesh*>::const_iterator end = meshList.begin()+max;
-	for (std::vector<aiMesh*>::const_iterator it = meshList.begin(); it != end;++it)
-	{
-		out->mNumVertices	+= (*it)->mNumVertices;
-		out->mNumFaces		+= (*it)->mNumFaces;
-		out->mNumBones		+= AI_OG_UNMASK((*it)->mNumBones);
-
-		// combine primitive type flags
-		out->mPrimitiveTypes |= (*it)->mPrimitiveTypes;
-	}
-
-	if (out->mNumVertices) // just for safety
-	{
-		aiVector3D* pv2;
-
-		// copy vertex positions
-		if (meshList[0]->HasPositions())
-		{
-			pv2 = out->mVertices = new aiVector3D[out->mNumVertices];
-			for (std::vector<aiMesh*>::const_iterator it = meshList.begin(); it != end;++it)
-			{
-				::memcpy(pv2,(*it)->mVertices,(*it)->mNumVertices*sizeof(aiVector3D));
-				pv2 += (*it)->mNumVertices;
-			}
-		}
-		// copy normals
-		if (meshList[0]->HasNormals())
-		{
-			pv2 = out->mNormals = new aiVector3D[out->mNumVertices];
-			for (std::vector<aiMesh*>::const_iterator it = meshList.begin(); it != end;++it)
-			{
-				::memcpy(pv2,(*it)->mNormals,(*it)->mNumVertices*sizeof(aiVector3D));
-				pv2 += (*it)->mNumVertices;
-			}
-		}
-		// copy tangents and bitangents
-		if (meshList[0]->HasTangentsAndBitangents())
-		{
-			pv2 = out->mTangents = new aiVector3D[out->mNumVertices];
-			aiVector3D* pv2b = out->mBitangents = new aiVector3D[out->mNumVertices];
-
-			for (std::vector<aiMesh*>::const_iterator it = meshList.begin(); it != end;++it)
-			{
-				::memcpy(pv2, (*it)->mTangents,	 (*it)->mNumVertices*sizeof(aiVector3D));
-				::memcpy(pv2b,(*it)->mBitangents,(*it)->mNumVertices*sizeof(aiVector3D));
-				pv2  += (*it)->mNumVertices;
-				pv2b += (*it)->mNumVertices;
-			}
-		}
-		// copy texture coordinates
-		unsigned int n = 0;
-		while (meshList[0]->HasTextureCoords(n))
-		{
-			out->mNumUVComponents[n] = meshList[0]->mNumUVComponents[n];
-
-			pv2 = out->mTextureCoords[n] = new aiVector3D[out->mNumVertices];
-			for (std::vector<aiMesh*>::const_iterator it = meshList.begin(); it != end;++it)
-			{
-				::memcpy(pv2,(*it)->mTextureCoords[n],(*it)->mNumVertices*sizeof(aiVector3D));
-				pv2 += (*it)->mNumVertices;
-			}
-			++n;
-		}
-		// copy vertex colors
-		n = 0;
-		while (meshList[0]->HasVertexColors(n))
-		{
-			aiColor4D* pv2 = out->mColors[n] = new aiColor4D[out->mNumVertices];
-			for (std::vector<aiMesh*>::const_iterator it = meshList.begin(); it != end;++it)
-			{
-				::memcpy(pv2,(*it)->mColors[n],(*it)->mNumVertices*sizeof(aiColor4D));
-				pv2 += (*it)->mNumVertices;
-			}
-			++n;
-		}
-	}
-
-	if (out->mNumFaces) // just for safety
-	{
-		// copy faces
-		out->mFaces = new aiFace[out->mNumFaces];
-		aiFace* pf2 = out->mFaces;
-
-		unsigned int ofs = 0;
-		for (std::vector<aiMesh*>::const_iterator it = meshList.begin(); it != end;++it)
-		{
-			for (unsigned int m = 0; m < (*it)->mNumFaces;++m,++pf2)
-			{
-				aiFace& face = (*it)->mFaces[m];
-				pf2->mNumIndices = face.mNumIndices;
-				pf2->mIndices = face.mIndices;
-
-				if (ofs)
-				{
-					// add the offset to the vertex
-					for (unsigned int q = 0; q < face.mNumIndices; ++q)
-						face.mIndices[q] += ofs;	
-				}
-				ofs += (*it)->mNumVertices;
-				face.mIndices = NULL;
-			}
-		}
-	}
-
-	// bones - as this is quite lengthy, I moved the code to a separate function
-	if (out->mNumBones)JoinBones(meshList.begin(),end,out);
-
-	// delete all source meshes
-	for (std::vector<aiMesh*>::const_iterator it = meshList.begin(); it != end;++it)
-		delete *it;
-}
 
 // ------------------------------------------------------------------------------------------------
 void OptimizeGraphProcess::ApplyNodeMeshesOptimization(aiNode* pNode)
@@ -513,7 +310,7 @@ void OptimizeGraphProcess::ApplyNodeMeshesOptimization(aiNode* pNode)
 		if (iNumMeshes > 0)
 		{
 			apcMeshes[iNumMeshes++] = pScene->mMeshes[nm];
-			JoinMeshes(apcMeshes,out,iNumMeshes);
+//			JoinMeshes(apcMeshes,out,iNumMeshes);
 		}
 		else out = pScene->mMeshes[nm];
 
@@ -785,13 +582,13 @@ void OptimizeGraphProcess::Execute( aiScene* pScene)
 
 	a) the term "mesh node" stands for a node with numMeshes > 0
 	b) the term "animation node" stands for a node with numMeshes == 0,
-	   regardless whether the node is referenced by animation channels.
+	   regardless whether the node is referenced by animation channels,
+	   lights or cameras
 
 	Algorithm:
 
 	1. Compute hashes for all meshes that we're able to check whether
 	   two meshes are compatible.
-	2. Remove animation nodes if we have been configured to do so
 	3. Find out which nodes may not be moved, so to speak are "locked" - a
 	   locked node will never be joined with neighbors.
 	   - A node lock is indicated by a set MSB in the aiNode::mNumChildren member

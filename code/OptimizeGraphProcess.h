@@ -87,14 +87,6 @@ struct NodeIndexEntry : public std::pair<unsigned int, unsigned int>
 	aiNode* pNode;
 };
 typedef std::vector<NodeIndexEntry> NodeIndexList;
-typedef std::pair<aiBone*,unsigned int> BoneSrcIndex;
-
-// ---------------------------------------------------------------------------
-struct BoneWithHash : public std::pair<uint32_t,aiString*>
-{
-	std::vector<BoneSrcIndex> pSrcBones;
-};
-
 
 // ---------------------------------------------------------------------------
 /** This post processing step reformats the output node graph to be more
@@ -230,38 +222,6 @@ protected:
 	void ApplyNodeMeshesOptimization(aiNode* pNode);
 
 
-	// -------------------------------------------------------------------
-	/** Join meshes.
-	 * The output meshes are deleted afterwards.
-	 * @param meshList List of meshes to be joined
-	 * @param out Receives a pointer to the output mesh.
-	 */
-	void JoinMeshes(std::vector<aiMesh*>& meshList,aiMesh*& out,
-		unsigned int max);
-
-
-	// -------------------------------------------------------------------
-	/** Join bones from a collection of meshes.
-	 * 
-	 * @param it First mesh to be processed
-	 * @param end Last mesh to be processed
-	 * @param out Valid output mesh to receive the output bone list.
-	 */
-	void JoinBones(std::vector<aiMesh*>::const_iterator it,
-		std::vector<aiMesh*>::const_iterator end,
-		aiMesh* out);
-
-
-	// -------------------------------------------------------------------
-	/** Build a list of unique bones from a collection of meshes.
-	 * 
-	 * @param it First mesh to be processed
-	 * @param end Last mesh to be processed
-	 * @param asBones Receives a list of unique bones
-	 */
-	void BuildUniqueBoneList(std::vector<aiMesh*>::const_iterator it,
-		std::vector<aiMesh*>::const_iterator end,
-		std::list<BoneWithHash>& asBones);
 
 	// -------------------------------------------------------------------
 	/** Build the output mesh list.

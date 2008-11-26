@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // include math helper classes 
 #include "aiVector3D.h"
+#include "aiVector2D.h"
 #include "aiMatrix3x3.h"
 #include "aiMatrix4x4.h"
 
@@ -66,22 +67,6 @@ const size_t MAXLEN = 1024;
 
 #include "./Compiler/pushpack1.h"
 
-// ---------------------------------------------------------------------------
-/** Represents a two-dimensional vector. 
-*/
-struct aiVector2D
-{
-#ifdef __cplusplus
-	aiVector2D () : x(0.0f), y(0.0f) {}
-	aiVector2D (float _x, float _y) : x(_x), y(_y) {}
-	aiVector2D (const aiVector2D& o) : x(o.x), y(o.y) {}
-	
-#endif // !__cplusplus
-
-	//! X and y coordinates
-	float x, y;
-} PACK_STRUCT;
-
 
 // ---------------------------------------------------------------------------
 /** Represents a plane in a three-dimensional, euclidean space
@@ -94,11 +79,30 @@ struct aiPlane
 		: a(_a), b(_b), c(_c), d(_d) {}
 
 	aiPlane (const aiPlane& o) : a(o.a), b(o.b), c(o.c), d(o.d) {}
-	
+
 #endif // !__cplusplus
 
 	//! Plane equation
 	float a,b,c,d;
+} PACK_STRUCT;
+
+
+// ---------------------------------------------------------------------------
+/** Represents a ray
+*/
+struct aiRay
+{
+#ifdef __cplusplus
+	aiRay () {}
+	aiRay (const aiVector3D& _pos, const aiVector3D& _dir)
+		: pos(_pos), dir(_dir) {}
+
+	aiRay (const aiRay& o) : pos (o.pos), dir (o.dir) {}
+
+#endif // !__cplusplus
+
+	//! Position and direction of the ray
+	aiVector3D pos, dir;
 } PACK_STRUCT;
 
 // aiVector3D type moved to separate header due to size of operators

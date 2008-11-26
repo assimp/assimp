@@ -293,7 +293,7 @@ protected:
 template <typename Type> 
 const Type& ColladaParser::ResolveLibraryReference( const std::map<std::string, Type>& pLibrary, const std::string& pURL) const
 {
-	std::map<std::string, Type>::const_iterator it = pLibrary.find( pURL);
+	typename std::map<std::string, Type>::const_iterator it = pLibrary.find( pURL);
 	if( it == pLibrary.end())
 		ThrowException( boost::str( boost::format( "Unable to resolve library reference \"%s\".") % pURL));
 	return it->second;

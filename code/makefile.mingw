@@ -77,7 +77,7 @@ SOURCES = AssimpPCH.cpp \
 	TargetAnimation.cpp \
 	ComputeUVMappingProcess.cpp \
 	ColladaLoader.cpp \
-	ColladaParser.cpp
+	ColladaParser.cpp 
 
 OBJECTS = $(SOURCES:.cpp=.o)
 

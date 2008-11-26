@@ -114,7 +114,7 @@ struct STransformVecInfo : public aiUVTransform
 	inline bool operator== (const STransformVecInfo& other) const
 	{
 		// We use a small epsilon here
-		const float epsilon = 0.05f;
+		const static float epsilon = 0.05f;
 
 		if (fabs( mTranslation.x - other.mTranslation.x ) > epsilon ||
 			fabs( mTranslation.y - other.mTranslation.y ) > epsilon)

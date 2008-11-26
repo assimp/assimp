@@ -48,14 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 
-// MSB for type unsigned int
-#define AI_RC_UINT_MSB (1u<<((sizeof(unsigned int)<<3u)-1u))
-#define AI_RC_UINT_MSB_2 (AI_RC_UINT_MSB>>1u)
-
-// unmask the two upper bits of an unsigned int
-#define AI_RC_UNMASK(p) (p & (~(AI_RC_UINT_MSB|AI_RC_UINT_MSB_2)))
-
-
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 RemoveVCProcess::RemoveVCProcess()
@@ -79,89 +71,70 @@ bool RemoveVCProcess::IsActive( unsigned int pFlags) const
 // ------------------------------------------------------------------------------------------------
 // Small helper function to delete all elements in a T** aray using delete
 template <typename T>
-inline void ArrayDelete(T**& in, unsigned int num)
+inline void ArrayDelete(T**& in, unsigned int& num)
 {
 	for (unsigned int i = 0; i < num; ++i)
 		delete in[i];
 
 	delete[] in;
 	in = NULL;
+	num = 0;
 }
 
-// ------------------------------------------------------------------------------------------------
-// Small helper function to set a sepcific bit in the aiNode::mNumMeshes member of all nodes
-// that are referenced by the elements of an array (T::mName must be there)
-template <typename T>
-inline void MaskNodes(aiNode* node,T** in, unsigned int num, unsigned int bit)
-{
-	if (node->mName.length)
-	{
-		for (unsigned int i = 0; i < num;++i)
-		{
-			T* cur = in[i];
-			if (cur->mName == node->mName)
-			{
-				node->mNumMeshes |= bit;
-				break;
-			}
-		}
-	}
-	for (unsigned int i = 0; i < node->mNumChildren;++i)
-		MaskNodes(node->mChildren[i],in,num,bit);
-}
-
-// ------------------------------------------------------------------------------------------------
-// Updates the node graph - removes all nodes which have the "remove" flag set and the 
-// "don't remove" flag not set. Nodes with meshes are never deleted.
-bool UpdateNodeGraph(aiNode* node,std::list<aiNode*>& childsOfParent,bool root)
-{
-	register bool b = false;
-
-	std::list<aiNode*> mine;
-	for (unsigned int i = 0; i < node->mNumChildren;++i)
-	{
-		if(UpdateNodeGraph(node->mChildren[i],mine,false))
-			b = true;
-	}
-
-	if (!root && !node->mNumMeshes && AI_RC_UINT_MSB == (node->mNumMeshes & (AI_RC_UINT_MSB | AI_RC_UINT_MSB_2)))
-	{
-		// this node needs to be removed
-		if(node->mNumChildren)
-		{
-			childsOfParent.insert(childsOfParent.end(),mine.begin(),mine.end());
-
-			// set all children to NULL to make sure they are not deleted when we delete ourself
-			for (unsigned int i = 0; i < node->mNumChildren;++i)
-				node->mChildren[i] = NULL;
-		}
-		b = true;
-		delete node;
-	}
-	else
-	{
-		AI_RC_UNMASK(node->mNumMeshes);
-		childsOfParent.push_back(node);
-
-		if (b)
-		{
-			// reallocate the array of our children here
-			node->mNumChildren = (unsigned int)mine.size();
-			aiNode** const children = new aiNode*[mine.size()];
-			aiNode** ptr = children;
-
-			for (std::list<aiNode*>::iterator it = mine.begin(), end = mine.end();
-				 it != end; ++it)
-			{
-				*ptr++ = *it;
-			}
-			delete[] node->mChildren;
-			node->mChildren = children;
-			return false;
-		}
-	}
-	return b;
-}
+//// ------------------------------------------------------------------------------------------------
+//// Updates the node graph - removes all nodes which have the "remove" flag set and the 
+//// "don't remove" flag not set. Nodes with meshes are never deleted.
+//bool UpdateNodeGraph(aiNode* node,std::list<aiNode*>& childsOfParent,bool root)
+//{
+//	register bool b = false;
+//
+//	std::list<aiNode*> mine;
+//	for (unsigned int i = 0; i < node->mNumChildren;++i)
+//	{
+//		if(UpdateNodeGraph(node->mChildren[i],mine,false))
+//			b = true;
+//	}
+//
+//	// somewhat tricky ... mNumMeshes must be originally 0 and MSB2 may not be set,
+//	// so we can do a simple comparison against MSB here
+//	if (!root && AI_RC_UINT_MSB == node->mNumMeshes )
+//	{
+//		// this node needs to be removed
+//		if(node->mNumChildren)
+//		{
+//			childsOfParent.insert(childsOfParent.end(),mine.begin(),mine.end());
+//
+//			// set all children to NULL to make sure they are not deleted when we delete ourself
+//			for (unsigned int i = 0; i < node->mNumChildren;++i)
+//				node->mChildren[i] = NULL;
+//		}
+//		b = true;
+//		delete node;
+//	}
+//	else
+//	{
+//		AI_RC_UNMASK(node->mNumMeshes);
+//		childsOfParent.push_back(node);
+//
+//		if (b)
+//		{
+//			// reallocate the array of our children here
+//			node->mNumChildren = (unsigned int)mine.size();
+//			aiNode** const children = new aiNode*[mine.size()];
+//			aiNode** ptr = children;
+//
+//			for (std::list<aiNode*>::iterator it = mine.begin(), end = mine.end();
+//				 it != end; ++it)
+//			{
+//				*ptr++ = *it;
+//			}
+//			delete[] node->mChildren;
+//			node->mChildren = children;
+//			return false;
+//		}
+//	}
+//	return b;
+//}
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
@@ -175,6 +148,7 @@ void RemoveVCProcess::Execute( aiScene* pScene)
 	// handle animations
 	if ( configDeleteFlags & aiComponent_ANIMATIONS)
 	{
+
 		bHas = true;
 		ArrayDelete(pScene->mAnimations,pScene->mNumAnimations);
 	}
@@ -212,21 +186,13 @@ void RemoveVCProcess::Execute( aiScene* pScene)
 	// handle light sources
 	if ( configDeleteFlags & aiComponent_LIGHTS)
 	{
-		// mask nodes for removal
-		MaskNodes(pScene->mRootNode,pScene->mLights,pScene->mNumLights,
-			AI_RC_UINT_MSB);
-
-		bHas = bMasked = true;
+		bHas =  true;
 		ArrayDelete(pScene->mLights,pScene->mNumLights);
 	}
 
 	// handle camneras
 	if ( configDeleteFlags & aiComponent_CAMERAS)
 	{
-		// mask nodes for removal
-		MaskNodes(pScene->mRootNode,pScene->mLights,pScene->mNumLights,
-			AI_RC_UINT_MSB);
-
 		bHas = true;
 		ArrayDelete(pScene->mCameras,pScene->mNumCameras);
 	}
@@ -241,46 +207,11 @@ void RemoveVCProcess::Execute( aiScene* pScene)
 	{
 		for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 		{
-			if(	this->ProcessMesh( pScene->mMeshes[a]))
+			if(	ProcessMesh( pScene->mMeshes[a]))
 				bHas = true;
 		}
-		if (configDeleteFlags & aiComponent_BONEWEIGHTS && bHas)bMasked = true;
 	}
 
-	// now check which scenegraph nodes are unnecessary now
-	// we use the upper two bits of aiNode::mNumMeshes as
-	// temporary storage. 
-	// MSB means:      REMOVE ME!
-	// MSB>>1 means:   NO, DON'T REMOVE ME (Veto)
-	if (bMasked)
-	{
-		if (pScene->mNumLights)
-		{
-			MaskNodes(pScene->mRootNode,pScene->mLights,pScene->mNumLights,
-				AI_RC_UINT_MSB_2);
-		}
-		if (pScene->mNumCameras)
-		{
-			MaskNodes(pScene->mRootNode,pScene->mCameras,pScene->mNumCameras,
-				AI_RC_UINT_MSB_2);
-		}
-		if (!(configDeleteFlags & aiComponent_BONEWEIGHTS))
-		{
-			for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-			{
-				aiMesh* mesh = pScene->mMeshes[i];
-				if (mesh->mNumBones)
-				{
-					MaskNodes(pScene->mRootNode,mesh->mBones,mesh->mNumBones,
-						AI_RC_UINT_MSB_2);
-				}
-			}
-		}
-		std::list<aiNode*> dummy;
-		UpdateNodeGraph(pScene->mRootNode,dummy, true);
-
-		// the root node will never be deleted
-	}
 
 	// now check whether the result is still a full scene
 	if (!pScene->mNumMeshes || !pScene->mNumMaterials)
@@ -385,13 +316,8 @@ bool RemoveVCProcess::ProcessMesh(aiMesh* pMesh)
 	// handle bones
 	if (configDeleteFlags & aiComponent_BONEWEIGHTS && pMesh->mBones)
 	{
-		// mask nodes for removal
-		MaskNodes(mScene->mRootNode,pMesh->mBones,pMesh->mNumBones,
-			AI_RC_UINT_MSB);
-
 		ArrayDelete(pMesh->mBones,pMesh->mNumBones);
 		ret = true;
 	}
-
 	return ret;
 }

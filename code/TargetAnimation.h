@@ -98,6 +98,9 @@ public:
 	inline const aiVector3D& GetCurTargetPosition() const
 		{return curTargetPosition;}
 
+	inline double GetCurTime() const
+		{return curTime;}
+
 private:
 
 	//! Did we reach the end?

@@ -175,6 +175,9 @@ struct BatchData
 
 	// List of all imports
 	std::list<LoadRequest> requests;
+
+	// Base path
+	std::string pathBase;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -203,20 +206,63 @@ BatchLoader::~BatchLoader()
 }
 
 // ------------------------------------------------------------------------------------------------
+void BatchLoader::SetBasePath (const std::string& pBase)
+{
+	BatchData* data = ( BatchData* )pimpl;
+	data->pathBase = pBase;
+
+	// file name? we just need the directory
+	std::string::size_type ss,ss2;
+	if (std::string::npos != (ss = data->pathBase.find_first_of('.')))
+	{
+		if (std::string::npos != (ss2 = data->pathBase.find_last_of('\\')) ||
+			std::string::npos != (ss2 = data->pathBase.find_last_of('/')))
+		{
+			if (ss > ss2)
+				data->pathBase.erase(ss2,data->pathBase.length()-ss2);
+		}
+		else return;
+	}
+
+	// make sure the directory is terminated properly
+	char s;
+	if ((s = *(data->pathBase.end()-1)) != '\\' && s != '/')
+		data->pathBase.append("\\");
+}
+
+// ------------------------------------------------------------------------------------------------
 void BatchLoader::AddLoadRequest	(const std::string& file,
 	unsigned int steps /*= 0*/, const PropertyMap* map /*= NULL*/)
 {
+	ai_assert(!file.empty());
+
 	// no threaded implementation for the moment
 	BatchData* data = ( BatchData* )pimpl;
-	std::list<LoadRequest>::iterator it = std::find(data->requests.begin(),
-		data->requests.end(), file);
 
-	if (it != data->requests.end())
+	std::string real;
+
+	// build a full path if this is a relative path and 
+	// we have a new base directory given
+	if (file.length() > 2 && file[1] != ':' && data->pathBase.length())
 	{
-		(*it).refCnt++;
-		return;
+		real = data->pathBase + file;
 	}
-	data->requests.push_back(LoadRequest(file,steps,map));
+	else real = file;
+	
+	// check whether we have this loading request already
+	std::list<LoadRequest>::iterator it;
+	for (it = data->requests.begin();it != data->requests.end(); ++it)
+	{
+		// Call IOSystem's path comparison function here
+		if (data->pIOSystem->ComparePaths((*it).file,real))
+		{
+			(*it).refCnt++;
+			return;
+		}
+	}
+
+	// no, we don't have it. So add it to the queue ...
+	data->requests.push_back(LoadRequest(real,steps,map));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -224,16 +270,27 @@ aiScene* BatchLoader::GetImport		(const std::string& file)
 {
 	// no threaded implementation for the moment
 	BatchData* data = ( BatchData* )pimpl;
-	std::list<LoadRequest>::iterator it = std::find(data->requests.begin(),
-		data->requests.end(), file);
-	if (it != data->requests.end() && (*it).loaded)
+	std::string real;
+
+	// build a full path if this is a relative path and 
+	// we have a new base directory given
+	if (file.length() > 2 && file[1] != ':' && data->pathBase.length())
 	{
-		aiScene* sc = (*it).scene;
-		if (!(--(*it).refCnt))
+		real = data->pathBase + file;
+	}
+	else real = file;
+	for (std::list<LoadRequest>::iterator it = data->requests.begin();it != data->requests.end(); ++it)
+	{
+		// Call IOSystem's path comparison function here
+		if (data->pIOSystem->ComparePaths((*it).file,real) && (*it).loaded)
 		{
-			data->requests.erase(it);
+			aiScene* sc = (*it).scene;
+			if (!(--(*it).refCnt))
+			{
+				data->requests.erase(it);
+			}
+			return sc;
 		}
-		return sc;
 	}
 	return NULL;
 }
@@ -257,9 +314,16 @@ void BatchLoader::LoadAll()
 		data->pImporter->mIntProperties    = (*it).map.ints;
 		data->pImporter->mStringProperties = (*it).map.strings;
 
+		if (!DefaultLogger::isNullLogger())
+		{
+			DefaultLogger::get()->info("%%% BEGIN EXTERNAL FILE %%%");
+			DefaultLogger::get()->info("File: " + (*it).file);
+		}
 		data->pImporter->ReadFile((*it).file,pp);
 		(*it).scene = const_cast<aiScene*>(data->pImporter->GetOrphanedScene());
 		(*it).loaded = true;
+
+		DefaultLogger::get()->info("%%% END EXTERNAL FILE %%%");
 	}
 }
 

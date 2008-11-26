@@ -238,35 +238,6 @@ private:
 		aiVector3D position, normal, uv;
 	};
 
-	/** Temporary data structure to describe an IRR animator
-	 *
-	 *  Irrlicht animations always start at the beginning, so
-	 *  we don't need "first" and "pre" for the moment.
-	 */
-	struct TemporaryAnim
-	{
-		TemporaryAnim()
-			:	last		(0)
-			,	post		(aiAnimBehaviour_DEFAULT)
-			,	matrices	(NULL)
-		{}
-
-		~TemporaryAnim()
-		{
-			delete[] matrices;
-		}
-
-		void SetupMatrices(unsigned int num)
-		{
-			last = num;
-			matrices = new aiMatrix4x4[num];
-		}
-
-		unsigned int last;   
-		aiAnimBehaviour post;
-
-		aiMatrix4x4* matrices;
-	};
 
 	// -------------------------------------------------------------------
 	/** Fill the scenegraph recursively
@@ -276,7 +247,7 @@ private:
 		std::vector<aiMesh*>& meshes,
 		std::vector<aiNodeAnim*>& anims,
 		std::vector<AttachmentInfo>& attach,
-		std::vector<aiMaterial*> materials,
+		std::vector<aiMaterial*>& materials,
 		unsigned int& defaultMatIdx);
 
 
@@ -308,7 +279,7 @@ private:
 	 *  @param defMatIdx Default material index - 0xffffffff if not there
 	 *  @param mesh Mesh to work on
 	 */
-	void CopyMaterial(std::vector<aiMaterial*>	 materials,
+	void CopyMaterial(std::vector<aiMaterial*>&	 materials,
 		std::vector< std::pair<aiMaterial*, unsigned int> >& inmaterials,
 		unsigned int& defMatIdx,
 		aiMesh* mesh);
@@ -319,16 +290,14 @@ private:
 	 *
 	 *  @param root Node to be processed
 	 *  @param anims The list of output animations
-	 *  @param transform Transformation matrix of the current node
-	 *    (relative to the parent's coordinate space)
 	 */
-	void ComputeAnimations(Node* root, std::vector<aiNodeAnim*>& anims,
-		const aiMatrix4x4& transform);
+	void ComputeAnimations(Node* root, aiNode* real, 
+		std::vector<aiNodeAnim*>& anims);
 
 
 private:
 
-	unsigned int fps;
+	double fps;
 
 };
 

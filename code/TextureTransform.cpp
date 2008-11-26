@@ -114,22 +114,20 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
 		return;
 	}
 
-	float absTranslationX = info.mScaling.x * info.mTranslation.x;
-	float absTranslationY = info.mScaling.y * info.mTranslation.y;
 
 	/* Optimize UV translation in the U direction. To determine whether
 	 * or not we can optimize we need to look at the requested mapping
 	 * type (e.g. if mirroring is active there IS a difference between
 	 * offset 2 and 3)
 	 */
-	if ((rounded  = (int)absTranslationX))
+	if ((rounded  = (int)info.mTranslation.x))
 	{
 		float out;
 		szTemp[0] = 0;
 		if (aiTextureMapMode_Wrap == info.mapU)
 		{
 			// Wrap - simple take the fraction of the field
-			out = (absTranslationX-(float)rounded) / info.mScaling.x;
+			out = info.mTranslation.x-(float)rounded;
 			sprintf(szTemp,"[w] UV U offset %f can "
 				"be simplified to %f",info.mTranslation.x,out);
 		}
@@ -137,7 +135,7 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
 		{
 			// Mirror 
 			if (rounded % 2)rounded--;
-			out = (absTranslationX-(float)rounded) / info.mScaling.x;
+			out = info.mTranslation.x-(float)rounded;
 
 			sprintf(szTemp,"[m/d] UV U offset %f can "
 				"be simplified to %f",info.mTranslation.x,out);
@@ -162,14 +160,14 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
 	 * type (e.g. if mirroring is active there IS a difference between
 	 * offset 2 and 3)
 	 */
-	if ((rounded  = (int)absTranslationY))
+	if ((rounded  = (int)info.mTranslation.y))
 	{
 		float out;
 		szTemp[0] = 0;
 		if (aiTextureMapMode_Wrap == info.mapV)
 		{
 			// Wrap - simple take the fraction of the field
-			out = (absTranslationY-(float)rounded) / info.mScaling.y;
+			out = info.mTranslation.y-(float)rounded;
 			sprintf(szTemp,"[w] UV V offset %f can "
 				"be simplified to %f",info.mTranslation.y,out);
 		}
@@ -177,7 +175,7 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
 		{
 			// Mirror 
 			if (rounded % 2)rounded--;
-			out = (absTranslationY-(float)rounded) / info.mScaling.y;
+			out = info.mTranslation.x-(float)rounded;
 
 			sprintf(szTemp,"[m/d] UV V offset %f can "
 				"be simplified to %f",info.mTranslation.y,out);
@@ -272,7 +270,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 						info.uvIndex = *((int*)prop2->mData);
 
 						// Store a direct pointer for later use
-						update.directShortcut = (unsigned int*) &prop2->mData;
+						update.directShortcut = (unsigned int*) prop2->mData;
 					}
 
 					else if ( !::strcmp( prop2->mKey.data, "$tex.mapmodeu"))
@@ -286,8 +284,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 						// ValidateDS should check this
 						ai_assert(prop2->mDataLength >= 20); 
 
-						::memcpy(&info.mTranslation.x,prop2->mData,
-							sizeof(float)*5);
+						::memcpy(&info.mTranslation.x,prop2->mData,sizeof(float)*5);
 
 						delete[] prop2->mData;
 

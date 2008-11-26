@@ -664,6 +664,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\aiVector2D.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\aiVector3D.h"
 				>
 			</File>
@@ -722,6 +726,10 @@
 			<Filter
 				Name="BoostWorkaround"
 				>
+				<File
+					RelativePath="..\..\include\BoostWorkaround\boost\common_factor_rt.hpp"
+					>
+				</File>
 				<File
 					RelativePath="..\..\include\BoostWorkaround\boost\format.hpp"
 					>

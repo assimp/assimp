@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+
 // ------------------------------------------------------------------------------------------------
 // Constructor. 
 DefaultIOSystem::DefaultIOSystem()
@@ -103,3 +104,42 @@ std::string DefaultIOSystem::getOsSeparator() const
 #endif
 	return sep;
 }
+
+// ------------------------------------------------------------------------------------------------
+// IOSystem default implementation (ComparePaths isn't a pure virtual function)
+bool IOSystem::ComparePaths (const std::string& one, 
+	const std::string& second)
+{
+	return !ASSIMP_stricmp(one,second);
+}
+
+// this should be sufficient for all platforms :D
+#define PATHLIMIT 1024
+
+// ------------------------------------------------------------------------------------------------
+// Convert a relative path into an absolute path
+inline void MakeAbsolutePath (const std::string& in, char* _out)
+{
+	::_fullpath(_out, in.c_str(),PATHLIMIT);
+}
+
+// ------------------------------------------------------------------------------------------------
+// DefaultIOSystem's more specialized implementation
+bool DefaultIOSystem::ComparePaths (const std::string& one, 
+	const std::string& second)
+{
+	// chances are quite good both paths are formatted identically,
+	// so we can hopefully return here already
+	if( !ASSIMP_stricmp(one,second) )
+		return true;
+
+	char temp1[PATHLIMIT];
+	char temp2[PATHLIMIT];
+	
+	MakeAbsolutePath (one, temp1);
+	MakeAbsolutePath (second, temp2);
+
+	return !ASSIMP_stricmp(temp1,temp2);
+}
+
+#undef PATHLIMIT

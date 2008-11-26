@@ -44,6 +44,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 namespace Assimp	{
+	namespace LWS	{
+
+// ---------------------------------------------------------------------------
+/** Represents an element in a LWS file.
+ *
+ *  This can either be a single data line - <name> <value> or it can
+ *  be a data group - { name <data_line0> ... n }
+ */
+class Element
+{
+	std::string name, data;
+	std::list<Element> children;
+
+	void Parse (const char* buffer);
+};
+
+
+} // end namespace LWS
 
 // ---------------------------------------------------------------------------
 /** LWS (LightWave Scene Format) importer class.
@@ -76,10 +94,7 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append)
-	{
-		append.append("*.lws");
-	}
+	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 

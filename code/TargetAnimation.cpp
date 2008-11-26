@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 
-// ---------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 KeyIterator::KeyIterator(const std::vector<aiVectorKey>* _objPos,
 	const std::vector<aiVectorKey>* _targetObjPos,
 	const aiVector3D*  defaultObjectPos /*= NULL*/,
@@ -80,7 +80,14 @@ KeyIterator::KeyIterator(const std::vector<aiVectorKey>* _objPos,
 	}
 }
 
-// ---------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+template <class T>
+T Interpolate(const T& one, const T& two, float val)
+{
+	return one + (two-one)*val;
+}
+
+// ------------------------------------------------------------------------------------------------
 void KeyIterator::operator ++()
 {
 	// If we are already at the end of all keyframes, return
@@ -129,8 +136,8 @@ void KeyIterator::operator ++()
 			const aiVectorKey& last  = targetObjPos->at(nextTargetObjPos);
 			const aiVectorKey& first = targetObjPos->at(nextTargetObjPos-1);
 
-		/*	curTargetPosition = Interpolate(first.mValue, last.mValue,
-				(curTime-first.mTime) / (last.mTime-first.mTime));*/
+			curTargetPosition = Interpolate(first.mValue, last.mValue, (float) (
+				(curTime-first.mTime) / (last.mTime-first.mTime) ));
 		}
 
 		// increment counters
@@ -155,8 +162,8 @@ void KeyIterator::operator ++()
 			const aiVectorKey& last  = objPos->at(nextObjPos);
 			const aiVectorKey& first = objPos->at(nextObjPos-1);
 
-			/*curPosition = Interpolate(first.mValue, last.mValue,
-				(curTime-first.mTime) / (last.mTime-first.mTime));*/
+			curPosition = Interpolate(first.mValue, last.mValue, (float) (
+				(curTime-first.mTime) / (last.mTime-first.mTime)));
 		}
 	}
 
@@ -167,7 +174,7 @@ void KeyIterator::operator ++()
 	}
 }
 
-// ---------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 void TargetAnimationHelper::SetTargetAnimationChannel (
 	const std::vector<aiVectorKey>* _targetPositions)
 {
@@ -175,7 +182,7 @@ void TargetAnimationHelper::SetTargetAnimationChannel (
 	targetPositions = _targetPositions;
 }
 
-// ---------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 void TargetAnimationHelper::SetMainAnimationChannel (
 	const std::vector<aiVectorKey>* _objectPositions)
 {
@@ -183,7 +190,7 @@ void TargetAnimationHelper::SetMainAnimationChannel (
 	objectPositions = _objectPositions;
 }
 
-// ---------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 void TargetAnimationHelper::SetFixedMainAnimationChannel(
 	const aiVector3D& fixed)
 {
@@ -191,23 +198,53 @@ void TargetAnimationHelper::SetFixedMainAnimationChannel(
 	fixedMain = fixed;
 }
 
-// ---------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 void TargetAnimationHelper::Process(std::vector<aiVectorKey>* distanceTrack)
 {
 	ai_assert(NULL != targetPositions);
+
+	// TODO: in most cases we won't need the extra array
+	std::vector<aiVectorKey>* fill = NULL;
+	std::vector<aiVectorKey>  real;
+	if (distanceTrack)
+	{
+		fill = (distanceTrack == objectPositions ? &real : distanceTrack);
+	}
+	fill->reserve(std::max( objectPositions->size(), targetPositions->size() ));
 
 	// Iterate through all object keys and interpolate their values if necessary.
 	// Then get the corresponding target position, compute the difference
 	// vector between object and target position. Then compute a rotation matrix
 	// that rotates the base vector of the object coordinate system at that time
 	// to match the diff vector. 
+
 	KeyIterator iter(objectPositions,targetPositions,&fixedMain);
-	unsigned int curTarget;
 	for (;!iter.Finished();++iter)
 	{
 		const aiVector3D&  position  = iter.GetCurPosition();
 		const aiVector3D&  tposition = iter.GetCurTargetPosition();
 
-	
+		// diff vector
+		aiVector3D diff = tposition - position;
+		float f = diff.SquareLength();
+		if (!f)
+		{
+			DefaultLogger::get()->error("Target position equals object position");
+			continue;
+		}
+		f = ::sqrt(f);
+
+		// output distance vector
+		if (fill)
+		{
+			fill->push_back(aiVectorKey());
+			aiVectorKey& v = fill->back();
+			v.mTime  = iter.GetCurTime();
+			v.mValue = aiVector3D (0.f,0.f,f);
+		}
+		diff /= f; 
 	}
+
+	if (real.size())
+		*distanceTrack = real;
 }

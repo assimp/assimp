@@ -76,6 +76,9 @@ void GenFaceNormalsProcess::Execute( aiScene* pScene)
 {
 	DefaultLogger::get()->debug("GenFaceNormalsProcess begin");
 
+	if (pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT)
+		throw new ImportErrorException("Post-processing order mismatch: expecting pseudo-indexed (\"verbose\") vertices here");
+
 	bool bHas = false;
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 	{

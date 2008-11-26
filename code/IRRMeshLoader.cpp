@@ -238,11 +238,18 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 					ColorFromARGBPacked(prop.value,clr);
 					mat->AddProperty(&clr,1,AI_MATKEY_COLOR_SPECULAR);
 				}
+
+				// NOTE: The 'emissive' property causes problems. It is
+				// often != 0, even if there is obviously no light
+				// emitted by the described surface. In fact I think
+				// IRRLICHT ignores this property, too.
+#if 0
 				else if (prop.name == "Emissive")
 				{
 					ColorFromARGBPacked(prop.value,clr);
 					mat->AddProperty(&clr,1,AI_MATKEY_COLOR_EMISSIVE);
 				}
+#endif
 			}
 			// Float properties
 			else if (!ASSIMP_stricmp(reader->getNodeName(),"float"))
@@ -746,24 +753,22 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 					sz = fast_atof_move(sz,(float&)temp.x);
 					SkipSpaces(&sz);
 
-					sz = fast_atof_move(sz,(float&)temp.z);
-					SkipSpaces(&sz);
-
 					sz = fast_atof_move(sz,(float&)temp.y);
 					SkipSpaces(&sz);
-					temp.y *= -1.0f;
+
+					sz = fast_atof_move(sz,(float&)temp.z);
+					SkipSpaces(&sz);
 					curVertices.push_back(temp);
 
 					// Read the vertex normals
 					sz = fast_atof_move(sz,(float&)temp.x);
 					SkipSpaces(&sz);
 
-					sz = fast_atof_move(sz,(float&)temp.z);
-					SkipSpaces(&sz);
-
 					sz = fast_atof_move(sz,(float&)temp.y);
 					SkipSpaces(&sz);
-					temp.y *= -1.0f;
+
+					sz = fast_atof_move(sz,(float&)temp.z);
+					SkipSpaces(&sz);
 					curNormals.push_back(temp);
 
 					// read the vertex colors
@@ -952,6 +957,10 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
 		pScene->mRootNode->mMeshes[i] = i;
+
+	// transformation matrix to convert from IRRMESH to ASSIMP coordinates
+	pScene->mRootNode->mTransformation *= aiMatrix4x4(
+		1.0f, 0.0f, 0.0f, 0.f, 0.0f, 0.0f, -1.0f, 0.f, 0.0f, 1.0f, 0.0f, 0.f, 0.f, 0.f, 0.f, 1.f);
 
 	delete reader;
 	AI_DEBUG_INVALIDATE_PTR(reader);

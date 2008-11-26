@@ -119,6 +119,7 @@ struct aiMatrix4x4
 	 *  \param z Rotation angle for the z-axis, in radians
 	 */
 	inline void FromEulerAngles(float x, float y, float z);
+	inline void FromEulerAngles(const aiVector3D& blubb);
 
 
 	/** \brief Returns a rotation matrix for a rotation around the x axis

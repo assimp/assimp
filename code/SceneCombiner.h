@@ -70,6 +70,43 @@ struct AttachmentInfo
 };
 
 // ---------------------------------------------------------------------------
+struct NodeAttachmentInfo
+{
+	NodeAttachmentInfo()
+		:	node			(NULL)
+		,	attachToNode	(NULL)
+	{}
+
+	NodeAttachmentInfo(aiNode* _scene, aiNode* _attachToNode)
+		:	node			(_scene)
+		,	attachToNode	(_attachToNode)
+	{}
+
+	aiNode*  node;
+	aiNode*  attachToNode;
+};
+
+// generate unique names for all named scene items
+#define AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES      0x1
+// generate unique names for materials, too 
+#define AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES   0x2
+// use deep copies of duplicate scenes
+#define AI_INT_MERGE_SCENE_DUPLICATES_DEEP_CPY   0x4
+
+
+typedef std::pair<aiBone*,unsigned int> BoneSrcIndex;
+
+// ---------------------------------------------------------------------------
+/** \brief Helper data structure for SceneCombiner::MergeBones.
+ *
+ */
+struct BoneWithHash : public std::pair<uint32_t,aiString*>
+{
+	std::vector<BoneSrcIndex> pSrcBones;
+};
+
+
+// ---------------------------------------------------------------------------
 /** \brief Static helper class providing various utilities to merge two
  *    scenes. It is intended as internal utility and NOT for use by 
  *    applications.
@@ -87,12 +124,14 @@ public:
 	// -------------------------------------------------------------------
 	/** Merges two or more scenes.
 	 *
-	 *  @param dest Destination scene. Must be empty.
+	 *  @param dest  Receives a pointer to the destination scene. If the
+	 *    pointer doesn't point to NULL when the function is called, the
+	 *    existing scene is cleared and refilled.
 	 *  @param src Non-empty list of scenes to be merged. The function
-	 *    deletes the input scenes afterwards.
+	 *    deletes the input scenes afterwards. There may be duplicate scenes.
 	 *  @param flags Combination of the AI_INT_MERGE_SCENE flags defined above
 	 */
-	static void MergeScenes(aiScene* dest,std::vector<aiScene*>& src,
+	static void MergeScenes(aiScene** dest,std::vector<aiScene*>& src,
 		unsigned int flags = 0);
 
 
@@ -100,15 +139,17 @@ public:
 	/** Merges two or more scenes and attaches all sceenes to a specific
 	 *  position in the node graph of the masteer scene.
 	 *
-	 *  @param dest Destination scene. Must be empty.
+	 *  @param dest Receives a pointer to the destination scene. If the
+	 *    pointer doesn't point to NULL when the function is called, the
+	 *    existing scene is cleared and refilled.
 	 *  @param master Master scene. It will be deleted afterwards. All 
 	 *    other scenes will be inserted in its node graph.
 	 *  @param src Non-empty list of scenes to be merged along with their
 	 *    corresponding attachment points in the master scene. The function
-	 *    deletes the input scenes afterwards.
+	 *    deletes the input scenes afterwards. There may be duplicate scenes.
 	 *  @param flags Combination of the AI_INT_MERGE_SCENE flags defined above
 	 */
-	static void MergeScenes(aiScene* dest, const aiScene* master, 
+	static void MergeScenes(aiScene** dest, aiScene* master, 
 		std::vector<AttachmentInfo>& src,
 		unsigned int flags = 0);
 
@@ -116,14 +157,44 @@ public:
 	// -------------------------------------------------------------------
 	/** Merges two or more meshes
 	 *
+	 *  The meshes should have equal vertex formats. Only components
+	 *  that are provided by ALL meshes will be present in the output mesh.
+	 *  An exception is made for VColors - they are set to black. The 
+	 *  meshes should have the same material indices, too. The output
+	 *  material index is always the material index of the first mesh.
+	 *
 	 *  @param dest Destination mesh. Must be empty.
-	 *  @param src Non-empty list of meshes to be merged. The function
-	 *    deletes the input meshes afterwards.
 	 *  @param flags Currently no parameters
+	 *  @param begin First mesh to be processed
+	 *  @param end Points to the mesh after the last mesh to be processed
 	 */
-	static void MergeMeshes(aiMesh* dest,std::vector<aiMesh*>& src,
-		unsigned int flags);
+	static void MergeMeshes(aiMesh** dest,unsigned int flags,
+		std::vector<aiMesh*>::const_iterator begin,
+		std::vector<aiMesh*>::const_iterator end);
 
+
+	// -------------------------------------------------------------------
+	/** Merges two or more bones
+	 *
+	 *  @param out Mesh to receive the output bone list
+	 *  @param flags Currently no parameters
+	 *  @param begin First mesh to be processed
+	 *  @param end Points to the mesh after the last mesh to be processed
+	 */
+	static void MergeBones(aiMesh* out,std::vector<aiMesh*>::const_iterator it,
+		std::vector<aiMesh*>::const_iterator end);
+
+
+	// -------------------------------------------------------------------
+	/** Builds a list of uniquely named bones in a mesh list
+	 *
+	 *  @param asBones Receives the output list
+	 *  @param it First mesh to be processed
+	 *  @param end Last mesh to be processed
+	 */
+	static void BuildUniqueBoneList(std::list<BoneWithHash>& asBones,
+		std::vector<aiMesh*>::const_iterator it,
+		std::vector<aiMesh*>::const_iterator end);
 
 	// -------------------------------------------------------------------
 	/** Add a name prefix to all nodes in a scene.
@@ -134,6 +205,75 @@ public:
 	 */
 	static void AddNodePrefixes(aiNode* node, const char* prefix,
 		unsigned int len);
+
+	// -------------------------------------------------------------------
+	/** Add an offset to all mesh indices in a node graph
+	 *
+	 *  @param Current node. This function is called recursively.
+	 *  @param offset Offset to be added to all mesh indices
+	 */
+	static void OffsetNodeMeshIndices (aiNode* node, unsigned int offset);
+
+	// -------------------------------------------------------------------
+	/** Attach a list of node graphs to well-defined nodes in a master
+	 *  graph. This is a helper for MergeScenes()
+	 *
+	 *  @param master Master scene
+	 *  @param srcList List of source scenes along with their attachment
+	 *    points. If an attachment point is NULL (or does not exist in
+	 *    the master graph), a scene is attached to the root of the master
+	 *    graph (as an additional child node)
+	 *  @duplicates List of duplicates. If elem[n] == n the scene is not
+	 *    a duplicate. Otherwise elem[n] links scene n to its first occurence.
+	 */
+	static void AttachToGraph ( aiScene* master, 
+		std::vector<NodeAttachmentInfo>& srcList);
+
+	static void AttachToGraph (aiNode* attach, 
+		std::vector<NodeAttachmentInfo>& srcList);
+
+
+	// -------------------------------------------------------------------
+	/** Get a deep copy of a scene
+	 *
+	 *  @param dest Receives a pointer to the destination scene
+	 *  @param src Source scene - remains unmodified.
+	 */
+	static void CopyScene(aiScene** dest,aiScene* source);
+
+
+	// -------------------------------------------------------------------
+	/** Get a flat copy of a scene
+	 *
+	 *  Only the first hierarchy layer is copied. All pointer members of
+	 *  aiScene are shared by source and destination scene.  If the
+	 *    pointer doesn't point to NULL when the function is called, the
+	 *    existing scene is cleared and refilled.
+	 *  @param dest Receives a pointer to the destination scene
+	 *  @param src Source scene - remains unmodified.
+	 */
+	static void CopySceneFlat(aiScene** dest,aiScene* source);
+
+
+	// -------------------------------------------------------------------
+	/** Get a deep copy of a mesh
+	 *
+	 *  @param dest Receives a pointer to the destination mesh
+	 *  @param src Source mesh - remains unmodified.
+	 */
+	static void Copy     (aiMesh** dest, const aiMesh* src);
+
+	// similar to Copy():
+	static void Copy  (aiMaterial** dest, const aiMaterial* src);
+	static void Copy  (aiTexture** dest, const aiTexture* src);
+	static void Copy  (aiAnimation** dest, const aiAnimation* src);
+	static void Copy  (aiCamera** dest, const aiCamera* src);
+	static void Copy  (aiBone** dest, const aiBone* src);
+	static void Copy  (aiLight** dest, const aiLight* src);
+	static void Copy  (aiNodeAnim** dest, const aiNodeAnim* src);
+
+	// recursive, of course
+	static void Copy     (aiNode** dest, const aiNode* src);
 };
 
 }

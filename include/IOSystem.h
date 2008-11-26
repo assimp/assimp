@@ -51,8 +51,8 @@ public:
 	virtual std::string getOsSeparator() const = 0;
 
 	// -------------------------------------------------------------------
-	/** Open a new file with a given path. When the access to the file is finished,
-	* call Close() to release all associated resources.
+	/** Open a new file with a given path. When the access to the file
+	* is finished, call Close() to release all associated resources.
 	*
 	* @param pFile Path to the file
 	* @param pMode Desired file I/O mode. Required are: "wb", "w", "wt",
@@ -60,8 +60,8 @@ public:
 	*
 	* @return New IOStream interface allowing the lib to access
 	*         the underlying file. 
-	* @note When implementing this class to provide custom IO handling, you propably
-	* have to supply an own implementation of IOStream as well. 
+	* @note When implementing this class to provide custom IO handling, 
+	* you propably have to supply an own implementation of IOStream as well. 
 	*/
 	virtual IOStream* Open(
 		const std::string& pFile,
@@ -72,6 +72,20 @@ public:
 	 * @param pFile The file instance previously created by Open().
 	 */
 	virtual void Close( IOStream* pFile) = 0;
+
+
+	// -------------------------------------------------------------------
+	/** Compares two paths and check whether the point to identical files.
+	 *  
+	 * The dummy implementation of this virtual performs a 
+	 * case-insensitive comparison of the path strings.
+	 * @param one First file
+	 * @param second Second file
+	 * @return true if the paths point to the same file. The file needn't
+	 *   be existing, however.
+	 */
+	virtual bool ComparePaths (const std::string& one, 
+		const std::string& second);
 };
 
 // ----------------------------------------------------------------------------
@@ -86,6 +100,7 @@ inline IOSystem::~IOSystem()
 	// empty
 }
 // ----------------------------------------------------------------------------
+
 
 } //!ns Assimp
 

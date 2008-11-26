@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ACLoader.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
-
+//#include "Subdivision.h"
 
 using namespace Assimp;
 
@@ -159,7 +159,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 	Object& obj = objects.back();
 
 	aiLight* light = NULL;
-	if (!ASSIMP_stricmp(buffer,"light"))
+	if (!ASSIMP_strincmp(buffer,"light",5))
 	{
 		// This is a light source. Add it to the list
 		mLights->push_back(light = new aiLight());
@@ -173,7 +173,22 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 		light->mName.length = ::sprintf(light->mName.data,"ACLight_%i",mLights->size()-1);
 		obj.name = std::string( light->mName.data );
 
+		DefaultLogger::get()->debug("AC3D: Light source encountered");
+		obj.type = Object::Light;
 	}
+	else if (!ASSIMP_strincmp(buffer,"group",5))
+	{
+		obj.type = Object::Group;
+	}
+	else if (!ASSIMP_strincmp(buffer,"poly",4))
+	{
+		obj.type = Object::Poly;
+	}
+	else if (!ASSIMP_strincmp(buffer,"world",5))
+	{
+		obj.type = Object::World;
+	}
+
 
 	while (GetNextLine())
 	{
@@ -213,6 +228,11 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 			SkipSpaces(&buffer);
 			AI_AC_CHECKED_LOAD_FLOAT_ARRAY("",0,2,&obj.texRepeat);
 		}
+		else if (TokenMatch(buffer,"texoff",6))
+		{
+			SkipSpaces(&buffer);
+			AI_AC_CHECKED_LOAD_FLOAT_ARRAY("",0,2,&obj.texOffset);
+		}
 		else if (TokenMatch(buffer,"rot",3))
 		{
 			SkipSpaces(&buffer);
@@ -222,6 +242,11 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 		{
 			SkipSpaces(&buffer);
 			AI_AC_CHECKED_LOAD_FLOAT_ARRAY("",0,3,&obj.translation);
+		}
+		else if (TokenMatch(buffer,"subdiv",6))
+		{
+			SkipSpaces(&buffer);
+			obj.subDiv = strtol10(buffer,&buffer);
 		}
 		else if (TokenMatch(buffer,"numvert",7))
 		{
@@ -352,6 +377,17 @@ void AC3DImporter::ConvertMaterial(const Object& object,
 	{
 		s.Set(object.texture);
 		matDest.AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(0));
+
+		// UV transformation
+		if (1.f != object.texRepeat.x || 1.f != object.texRepeat.y ||
+			object.texOffset.x        || object.texOffset.y)
+		{
+			aiUVTransform transform;
+			transform.mScaling = object.texRepeat;
+			transform.mTranslation = object.texOffset;
+			matDest.AddProperty<float>((float*)&transform,sizeof(aiUVTransform),
+				AI_MATKEY_UVTRANSFORM_DIFFUSE(0));
+		}
 	}
 
 	matDest.AddProperty<aiColor3D>(&matSrc.rgb,1, AI_MATKEY_COLOR_DIFFUSE);
@@ -377,9 +413,11 @@ void AC3DImporter::ConvertMaterial(const Object& object,
 aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 	std::vector<aiMesh*>& meshes,
 	std::vector<MaterialHelper*>& outMaterials,
-	const std::vector<Material>& materials)
+	const std::vector<Material>& materials,
+	aiNode* parent)
 {
 	aiNode* node = new aiNode();
+	node->mParent = parent;
 	if (object.vertices.size())
 	{
 		if (!object.surfaces.size() || !object.numRefs)
@@ -434,7 +472,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 				register unsigned int idx = (*it).mat;
 				if (idx >= needMat.size())
 				{
-					DefaultLogger::get()->error("AC3D: material index os out of range");
+					DefaultLogger::get()->error("AC3D: material index is out of range");
 					idx = 0;
 				}
 				if ((*it).entries.empty())
@@ -539,13 +577,14 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 									face.mIndices[i] = cur++;
 
 									// copy vertex positions
-									*vertices = object.vertices[entry.first];
+									*vertices = object.vertices[entry.first] + object.translation;
 
-									// copy texture coordinates (apply the UV offset)
+
+									// copy texture coordinates 
 									if (uv)
 									{
-										uv->x =  entry.second.x * object.texRepeat.x;
-										uv->y =  entry.second.y * object.texRepeat.y;
+										uv->x =  entry.second.x;
+										uv->y =  entry.second.y;
 										++uv;
 									}
 								}
@@ -571,11 +610,11 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 								// copy vertex positions
 								*vertices++ = object.vertices[(*it2).first];
 								
-								// copy texture coordinates (apply the UV offset)
+								// copy texture coordinates 
 								if (uv)
 								{
-									uv->x =  (*it2).second.x * object.texRepeat.x;
-									uv->y =  (*it2).second.y * object.texRepeat.y;
+									uv->x =  (*it2).second.x;
+									uv->y =  (*it2).second.y;
 									++uv;
 								}
 
@@ -591,17 +630,64 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 
 								if (uv)
 								{
-									uv->x =  (*it2).second.x * object.texRepeat.x;
-									uv->y =  (*it2).second.y * object.texRepeat.y;
+									uv->x =  (*it2).second.x;
+									uv->y =  (*it2).second.y;
 									++uv;
 								}
 							}
 						}
 					}
 				}
+#if 0
+				// Now apply catmull clark subdivision if necessary. However, this is
+				// not *absolutely* correct: it might be we split a mesh up into 
+				// multiple sub meshes, one for each material. AC3D doesn't do that
+				// in its subdivision implementation, so our output *could* look
+				// different in some cases.
+
+				if (object.subDiv)
+				{
+					Subdivider* div = Subdivider::Create(Subdivider::CATMULL_CLARKE);
+					div->Subdivide(mesh,object.subDiv);
+					delete div;
+				}
+#endif
 			}
 		}
 	}
+
+	if (object.name.length())
+		node->mName.Set(object.name);
+	else
+	{
+		// generate a name depending on the type of the node
+		switch (object.type)
+		{
+		case Object::Group:
+			node->mName.length = ::sprintf(node->mName.data,"ACGroup_%i",groups++);
+			break;
+		case Object::Poly:
+			node->mName.length = ::sprintf(node->mName.data,"ACPoly_%i",polys++);
+			break;
+		case Object::Light:
+			node->mName.length = ::sprintf(node->mName.data,"ACLight_%i",lights++);
+			break;
+
+			// there shouldn't be more than one world, but we don't care
+		case Object::World: 
+			node->mName.length = ::sprintf(node->mName.data,"ACWorld_%i",worlds++);
+			break;
+		}
+	}
+
+
+	// setup the local transformation matrix of the object
+	// compute the transformation offset to the parent node
+	node->mTransformation = aiMatrix4x4 ( object.rotation );
+
+	node->mTransformation.a4 = object.translation.x;
+	node->mTransformation.b4 = object.translation.y;
+	node->mTransformation.c4 = object.translation.z;
 
 	// add children to the object
 	if (object.children.size())
@@ -610,19 +696,9 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 		node->mChildren = new aiNode*[node->mNumChildren];
 		for (unsigned int i = 0; i < node->mNumChildren;++i)
 		{
-			node->mChildren[i] = ConvertObjectSection(object.children[i],meshes,outMaterials,materials);
-			node->mChildren[i]->mParent = node;
+			node->mChildren[i] = ConvertObjectSection(object.children[i],meshes,outMaterials,materials,node);
 		}
 	}
-
-	node->mName.Set(object.name);
-
-	// setup the local transformation matrix of the object
-	node->mTransformation = aiMatrix4x4 ( object.rotation );
-
-	node->mTransformation.a4 = object.translation.x;
-	node->mTransformation.b4 = -object.translation.y;
-	node->mTransformation.c4 = object.translation.z;
 
 	return node;
 }
@@ -652,6 +728,8 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 	mBuffer2[fileSize] = '\0';
 	buffer = &mBuffer2[0];
 	mNumMeshes = 0;
+
+	lights = polys = worlds = groups = 0;
 
 	if (::strncmp(buffer,"AC3D",4))
 		throw new ImportErrorException("AC3D: No valid AC3D file, magic sequence not found");
@@ -731,7 +809,7 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 	if (!::strncmp( pScene->mRootNode->mName.data, "Node", 4))
 		pScene->mRootNode->mName.Set("<AC3DWorld>");
 
-	// build output arrays
+	// copy meshes
 	if (meshes.empty())
 	{
 		throw new ImportErrorException("An unknown error occured during converting");
@@ -740,11 +818,12 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 	::memcpy(pScene->mMeshes,&meshes[0],pScene->mNumMeshes*sizeof(void*));
 
-
+	// copy materials
 	pScene->mNumMaterials = (unsigned int)omaterials.size();
 	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
 	::memcpy(pScene->mMaterials,&omaterials[0],pScene->mNumMaterials*sizeof(void*));
 
+	// copy lights
 	pScene->mNumLights = (unsigned int)lights.size();
 	if (lights.size())
 	{

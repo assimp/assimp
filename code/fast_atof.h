@@ -194,7 +194,7 @@ inline const char* fast_atof_move( const char* c, float& out)
 	else if (*c=='+')++c;
 
 	f = (float) strtol10_64 ( c, &c );
-	if (*c == '.')
+	if (*c == '.' || (c[0] == ',' && isdigit( c[1])))
 	{
 		++c;
 

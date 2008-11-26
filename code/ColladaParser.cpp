@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsingUtils.h"
 
 using namespace Assimp;
+using namespace Assimp::Collada;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -253,7 +254,8 @@ void ColladaParser::ReadMesh( Mesh* pMesh)
 				// read per-vertex mesh data
 				ReadVertexData( pMesh);
 			}
-			else if( IsElement( "polylist") || IsElement( "triangles"))
+			else if( IsElement( "triangles") || IsElement( "lines") || IsElement( "linestrips")
+				|| IsElement( "polygons") || IsElement( "polylist") || IsElement( "trifans") || IsElement( "tristrips")) 
 			{
 				// read per-index mesh data and faces setup
 				ReadIndexData( pMesh);
@@ -438,7 +440,23 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 
 	// distinguish between polys and triangles
 	std::string elementName = mReader->getNodeName();
-	bool isPolylist = IsElement( "polylist");
+	PrimitiveType primType = Prim_Invalid;
+	if( IsElement( "lines"))
+		primType = Prim_Lines;
+	else if( IsElement( "linestrips"))
+		primType = Prim_LineStrip;
+	else if( IsElement( "polygons"))
+		primType = Prim_Polygon;
+	else if( IsElement( "polylist"))
+		primType = Prim_Polylist;
+	else if( IsElement( "triangles"))
+		primType = Prim_Triangles;
+	else if( IsElement( "trifans"))
+		primType = Prim_TriFans;
+	else if( IsElement( "tristrips"))
+		primType = Prim_TriStrips;
+
+	assert( primType != Prim_Invalid);
 
 	// also a number of <input> elements, but in addition a <p> primitive collection and propably index counts for all primitives
 	while( mReader->read())
@@ -469,7 +487,7 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 			else if( IsElement( "p"))
 			{
 				// now here the actual fun starts - these are the indices to construct the mesh data from
-				ReadPrimitives( pMesh, perIndexData, numPrimitives, vcount, isPolylist);
+				ReadPrimitives( pMesh, perIndexData, numPrimitives, vcount, primType);
 			} else
 			{
 				ThrowException( "Unexpected sub element in tag \"vertices\".");
@@ -519,7 +537,7 @@ void ColladaParser::ReadInputChannel( std::vector<InputChannel>& poChannels)
 // ------------------------------------------------------------------------------------------------
 // Reads a <p> primitive index list and assembles the mesh data into the given mesh
 void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, 
-								   size_t pNumPrimitives, const std::vector<size_t>& pVCount, bool pIsPolylist)
+								   size_t pNumPrimitives, const std::vector<size_t>& pVCount, PrimitiveType pPrimType)
 {
 	// determine number of indices coming per vertex 
 	// find the offset index for all per-vertex channels
@@ -534,32 +552,52 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 
 	// determine the expected number of indices 
 	size_t expectedPointCount = 0;
-	if( pIsPolylist)
+	switch( pPrimType)
 	{
-		BOOST_FOREACH( size_t i, pVCount)
-			expectedPointCount += i;
-	} else
-	{
-		// everything triangles
-		expectedPointCount = 3 * pNumPrimitives;
+		case Prim_Polylist:
+		{
+			BOOST_FOREACH( size_t i, pVCount)
+				expectedPointCount += i;
+			break;
+		}
+		case Prim_Lines:
+			expectedPointCount = 2 * pNumPrimitives;
+			break;
+		case Prim_Triangles:
+			expectedPointCount = 3 * pNumPrimitives;
+			break;
+		default:
+			// other primitive types don't state the index count upfront... we need to guess
+			break;
 	}
 
 	// and read all indices into a temporary array
-	std::vector<size_t> indices( expectedPointCount * numOffsets);
+	std::vector<size_t> indices;
+	if( expectedPointCount > 0)
+		indices.reserve( expectedPointCount * numOffsets);
+
 	const char* content = GetTextContent();
-	BOOST_FOREACH( size_t& value, indices)
+	while( *content != 0)
 	{
-		if( *content == 0)
-			ThrowException( "Expected more values while reading primitive indices.");
-		// read a value in place
-		value = strtol10( content, &content);
+		// read a value 
+		unsigned int value = strtol10( content, &content);
+		indices.push_back( size_t( value));
 		// skip whitespace after it
 		SkipSpacesAndLineEnd( &content);
 	}
 
+	// complain if the index count doesn't fit
+	if( expectedPointCount > 0 && indices.size() != expectedPointCount * numOffsets)
+		ThrowException( "Expected different index count in <p> element.");
+	else if( expectedPointCount == 0 && (indices.size() % numOffsets) != 0)
+		ThrowException( "Expected different index count in <p> element.");
+
 	// find the data for all sources
 	BOOST_FOREACH( InputChannel& input, pMesh->mPerVertexData)
 	{
+		if( input.mResolved)
+			continue;
+
 		// find accessor
 		input.mResolved = &ResolveLibraryReference( mAccessorLibrary, input.mAccessor);
 		// resolve accessor's data pointer as well, if neccessary
@@ -570,6 +608,9 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 	// and the same for the per-index channels
 	BOOST_FOREACH( InputChannel& input, pPerIndexChannels)
 	{
+		if( input.mResolved)
+			continue;
+
 		// ignore vertex pointer, it doesn't refer to an accessor
 		if( input.mType == IT_Vertex)
 		{
@@ -590,12 +631,28 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 
 	// now assemble vertex data according to those indices
 	std::vector<size_t>::const_iterator idx = indices.begin();
-	for( size_t a = 0; a < pNumPrimitives; a++)
+
+	// For continued primitives, the given count does not come all in one <p>, but only one primitive per <p>
+	size_t numPrimitives = pNumPrimitives;
+	if( pPrimType == Prim_TriFans || pPrimType == Prim_Polygon)
+		numPrimitives = 1;
+
+	for( size_t a = 0; a < numPrimitives; a++)
 	{
 		// determine number of points for this primitive
-		size_t numPoints = 3;
-		if( pIsPolylist)
-			numPoints = pVCount[a];
+		size_t numPoints = 0;
+		switch( pPrimType)
+		{
+			case Prim_Lines: numPoints = 2; break;
+			case Prim_Triangles: numPoints = 3; break;
+			case Prim_Polylist: numPoints = pVCount[a]; break;
+			case Prim_TriFans: 
+			case Prim_Polygon: numPoints = indices.size() / numOffsets; break;
+			default:
+				// LineStrip and TriStrip not supported due to expected index unmangling
+				ThrowException( "Unsupported primitive type.");
+				break;
+		}
 
 		// store the face size to later reconstruct the face from
 		pMesh->mFaceSize.push_back( numPoints);
@@ -618,7 +675,7 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 		}
 	}
 
-	// if I ever get my hands on that guy how invented this steaming pile of indirection...
+	// if I ever get my hands on that guy who invented this steaming pile of indirection...
 	TestClosing( "p");
 }
 
@@ -979,7 +1036,9 @@ aiMatrix4x4 ColladaParser::CalculateResultTransform( const std::vector<Transform
 			case TF_ROTATE:
 			{
 				aiMatrix4x4 rot;
-				aiMatrix4x4::Rotation( tf.f[3], aiVector3D( tf.f[0], tf.f[1], tf.f[2]), rot);
+				float angle = tf.f[3] * float( AI_MATH_PI) / 180.0f;
+				aiVector3D axis( tf.f[0], tf.f[1], tf.f[2]);
+				aiMatrix4x4::Rotation( angle, axis, rot);
 				res *= rot;
 				break;
 			}
@@ -1019,7 +1078,7 @@ aiMatrix4x4 ColladaParser::CalculateResultTransform( const std::vector<Transform
 
 // ------------------------------------------------------------------------------------------------
 // Determines the input data type for the given semantic string
-ColladaParser::InputType ColladaParser::GetTypeForSemantic( const std::string& pSemantic)
+Collada::InputType ColladaParser::GetTypeForSemantic( const std::string& pSemantic)
 {
 	if( pSemantic == "POSITION")
 		return IT_Position;

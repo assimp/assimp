@@ -1438,6 +1438,10 @@
 					Name="Collada"
 					>
 					<File
+						RelativePath="..\..\code\ColladaHelper.h"
+						>
+					</File>
+					<File
 						RelativePath="..\..\code\ColladaLoader.cpp"
 						>
 					</File>

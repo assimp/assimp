@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_COLLADAPARSER_H_INC
 
 #include "./irrXML/irrXMLWrapper.h"
+#include "ColladaHelper.h"
 
 namespace Assimp
 {
@@ -54,111 +55,6 @@ namespace Assimp
 class ColladaParser
 {
 	friend class ColladaLoader;
-public:
-	/** Transformation types that can be applied to a node */
-	enum TransformType
-	{
-		TF_LOOKAT,
-		TF_ROTATE,
-		TF_TRANSLATE,
-		TF_SCALE,
-		TF_SKEW,
-		TF_MATRIX
-	};
-
-	/** Contains all data for one of the different transformation types */
-	struct Transform
-	{
-		TransformType mType;
-		float f[16]; ///< Interpretation of data depends on the type of the transformation 
-	};
-
-	/** A node in a scene hierarchy */
-	struct Node
-	{
-		std::string mName;
-		std::string mID;
-		Node* mParent;
-		std::vector<Node*> mChildren;
-
-		/** Operations in order to calculate the resulting transformation to parent. */
-		std::vector<Transform> mTransforms;
-
-		std::vector<std::string> mMeshes; ///< Meshes at this node
-
-		Node() { mParent = NULL; }
-		~Node() { for( std::vector<Node*>::iterator it = mChildren.begin(); it != mChildren.end(); ++it) delete *it; }
-	};
-
-	/** Data source array */
-	struct Data
-	{
-		std::vector<float> mValues;
-	};
-
-	/** Accessor to a data array */
-	struct Accessor
-	{
-		size_t mCount;   // in number of objects
-		size_t mOffset;  // in number of values
-		size_t mStride;  // Stride in number of values
-		std::vector<std::string> mParams; // names of the data streams in the accessors. Empty string tells to ignore. 
-		size_t mSubOffset[4]; // Suboffset inside the object for the common 4 elements. For a vector, thats XYZ, for a color RGBA and so on.
-							  // For example, SubOffset[0] denotes which of the values inside the object is the vector X component.
-		std::string mSource;   // URL of the source array
-		mutable const Data* mData; // Pointer to the source array, if resolved. NULL else
-
-		Accessor() 
-		{ 
-			mCount = 0; mOffset = 0; mStride = 0; mData = NULL; 
-			mSubOffset[0] = mSubOffset[1] = mSubOffset[2] = mSubOffset[3] = 0;
-		}
-	};
-
-	/** A single face in a mesh */
-	struct Face
-	{
-		std::vector<size_t> mIndices;
-	};
-
-	/** Different types of input data to a vertex or face */
-	enum InputType
-	{
-		IT_Invalid,
-		IT_Vertex,  // special type for per-index data referring to the <vertices> element carrying the per-vertex data.
-		IT_Position,
-		IT_Normal,
-		IT_Texcoord,
-		IT_Color
-	};
-
-	/** An input channel for mesh data, referring to a single accessor */
-	struct InputChannel
-	{
-		InputType mType;      // Type of the data
-		size_t mIndex;		  // Optional index, if multiple sets of the same data type are given
-		size_t mOffset;       // Index offset in the indices array of per-face indices. Don't ask, can't explain that any better.
-		std::string mAccessor; // ID of the accessor where to read the actual values from.
-		mutable const Accessor* mResolved; // Pointer to the accessor, if resolved. NULL else
-
-		InputChannel() { mType = IT_Invalid; mIndex = 0; mOffset = 0; mResolved = NULL; }
-	};
-
-	/** Contains data for a single mesh */
-	struct Mesh
-	{
-		std::string mVertexID; // just to check if there's some sophisticated addressing involved... which we don't support, and therefore should warn about.
-		std::vector<InputChannel> mPerVertexData; // Vertex data addressed by vertex indices
-
-		// actual mesh data, assembled on encounter of a <p> element. Verbose format, not indexed
-		std::vector<aiVector3D> mPositions;
-		std::vector<aiVector3D> mNormals;
-		std::vector<aiVector2D> mTexCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
-		std::vector<aiColor4D> mColors[AI_MAX_NUMBER_OF_COLOR_SETS];
-
-		// Faces. Stored are only the number of vertices for each face. 1 == point, 2 == line, 3 == triangle, 4+ == poly
-		std::vector<size_t> mFaceSize;
-	};
 
 protected:
 	/** Constructor from XML file */
@@ -180,7 +76,7 @@ protected:
 	void ReadGeometryLibrary();
 
 	/** Reads a mesh from the geometry library */
-	void ReadMesh( Mesh* pMesh);
+	void ReadMesh( Collada::Mesh* pMesh);
 
 	/** Reads a data array holding a number of floats, and stores it in the global library */
 	void ReadFloatArray();
@@ -191,32 +87,32 @@ protected:
 	void ReadAccessor( const std::string& pID);
 
 	/** Reads input declarations of per-vertex mesh data into the given mesh */
-	void ReadVertexData( Mesh* pMesh);
+	void ReadVertexData( Collada::Mesh* pMesh);
 
 	/** Reads input declarations of per-index mesh data into the given mesh */
-	void ReadIndexData( Mesh* pMesh);
+	void ReadIndexData( Collada::Mesh* pMesh);
 
 	/** Reads a single input channel element and stores it in the given array, if valid */
-	void ReadInputChannel( std::vector<InputChannel>& poChannels);
+	void ReadInputChannel( std::vector<Collada::InputChannel>& poChannels);
 
 	/** Reads a <p> primitive index list and assembles the mesh data into the given mesh */
-	void ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, 
-		size_t pNumPrimitives, const std::vector<size_t>& pVCount, bool pIsPolylist);
+	void ReadPrimitives( Collada::Mesh* pMesh, std::vector<Collada::InputChannel>& pPerIndexChannels, 
+		size_t pNumPrimitives, const std::vector<size_t>& pVCount, Collada::PrimitiveType pPrimType);
 
 	/** Extracts a single object from an input channel and stores it in the appropriate mesh data array */
-	void ExtractDataObjectFromChannel( const InputChannel& pInput, size_t pLocalIndex, Mesh* pMesh);
+	void ExtractDataObjectFromChannel( const Collada::InputChannel& pInput, size_t pLocalIndex, Collada::Mesh* pMesh);
 
 	/** Reads the library of node hierarchies and scene parts */
 	void ReadSceneLibrary();
 
 	/** Reads a scene node's contents including children and stores it in the given node */
-	void ReadSceneNode( Node* pNode);
+	void ReadSceneNode( Collada::Node* pNode);
 
 	/** Reads a node transformation entry of the given type and adds it to the given node's transformation list. */
-	void ReadNodeTransformation( Node* pNode, TransformType pType);
+	void ReadNodeTransformation( Collada::Node* pNode, Collada::TransformType pType);
 
 	/** Reads a mesh reference in a node and adds it to the node's mesh list */
-	void ReadNodeGeometry( Node* pNode);
+	void ReadNodeGeometry( Collada::Node* pNode);
 
 	/** Reads the collada scene */
 	void ReadScene();
@@ -247,10 +143,10 @@ protected:
 	const char* GetTextContent();
 
 	/** Calculates the resulting transformation fromm all the given transform steps */
-	aiMatrix4x4 CalculateResultTransform( const std::vector<Transform>& pTransforms) const;
+	aiMatrix4x4 CalculateResultTransform( const std::vector<Collada::Transform>& pTransforms) const;
 
 	/** Determines the input data type for the given semantic string */
-	InputType GetTypeForSemantic( const std::string& pSemantic);
+	Collada::InputType GetTypeForSemantic( const std::string& pSemantic);
 
 	/** Finds the item in the given library by its reference, throws if not found */
 	template <typename Type> const Type& ResolveLibraryReference( const std::map<std::string, Type>& pLibrary, const std::string& pURL) const;
@@ -263,23 +159,23 @@ protected:
 	irr::io::IrrXMLReader* mReader;
 
 	/** All data arrays found in the file by ID. Might be referred to by actually everyone. Collada, you are a steaming pile of indirection. */
-	typedef std::map<std::string, Data> DataLibrary;
+	typedef std::map<std::string, Collada::Data> DataLibrary;
 	DataLibrary mDataLibrary;
 
 	/** Same for accessors which define how the data in a data array is accessed. */
-	typedef std::map<std::string, Accessor> AccessorLibrary;
+	typedef std::map<std::string, Collada::Accessor> AccessorLibrary;
 	AccessorLibrary mAccessorLibrary;
 
 	/** Mesh library: mesh by ID */
-	typedef std::map<std::string, Mesh*> MeshLibrary;
+	typedef std::map<std::string, Collada::Mesh*> MeshLibrary;
 	MeshLibrary mMeshLibrary;
 
 	/** node library: root node of the hierarchy part by ID */
-	typedef std::map<std::string, Node*> NodeLibrary;
+	typedef std::map<std::string, Collada::Node*> NodeLibrary;
 	NodeLibrary mNodeLibrary;
 
 	/** Pointer to the root node. Don't delete, it just points to one of the nodes in the node library. */
-	Node* mRootNode;
+	Collada::Node* mRootNode;
 
 	/** Size unit: how large compared to a meter */
 	float mUnitSize;

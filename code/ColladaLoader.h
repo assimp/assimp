@@ -83,10 +83,10 @@ protected:
 	void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
 
 	/** Recursively constructs a scene node for the given parser node and returns it. */
-	aiNode* BuildHierarchy( const ColladaParser& pParser, const ColladaParser::Node* pNode);
+	aiNode* BuildHierarchy( const ColladaParser& pParser, const Collada::Node* pNode);
 
 	/** Builds meshes for the given node and references them */
-	void BuildMeshesForNode( const ColladaParser& pParser, const ColladaParser::Node* pNode, aiNode* pTarget);
+	void BuildMeshesForNode( const ColladaParser& pParser, const Collada::Node* pNode, aiNode* pTarget);
 
 	/** Stores all meshes in the given scene */
 	void StoreSceneMeshes( aiScene* pScene);

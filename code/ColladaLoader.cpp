@@ -90,6 +90,21 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 	// build the node hierarchy from it
 	pScene->mRootNode = BuildHierarchy( parser, parser.mRootNode);
 
+	// Convert to Z_UP, if different orientation
+	if( parser.mUpDirection == ColladaParser::UP_X)
+		pScene->mRootNode->mTransformation *= aiMatrix4x4( 
+			 0, -1,  0,  0, 
+			 0,  0, -1,  0,
+			 1,  0,  0,  0,
+			 0,  0,  0,  1);
+	else if( parser.mUpDirection == ColladaParser::UP_Y)
+		pScene->mRootNode->mTransformation *= aiMatrix4x4( 
+			 1,  0,  0,  0, 
+			 0,  0, -1,  0,
+			 0,  1,  0,  0,
+			 0,  0,  0,  1);
+
+
 	// store all meshes
 	StoreSceneMeshes( pScene);
 
@@ -113,7 +128,7 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 
 // ------------------------------------------------------------------------------------------------
 // Recursively constructs a scene node for the given parser node and returns it.
-aiNode* ColladaLoader::BuildHierarchy( const ColladaParser& pParser, const ColladaParser::Node* pNode)
+aiNode* ColladaLoader::BuildHierarchy( const ColladaParser& pParser, const Collada::Node* pNode)
 {
 	// create a node for it
 	aiNode* node = new aiNode( pNode->mName);
@@ -138,7 +153,7 @@ aiNode* ColladaLoader::BuildHierarchy( const ColladaParser& pParser, const Colla
 
 // ------------------------------------------------------------------------------------------------
 // Builds meshes for the given node and references them
-void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const ColladaParser::Node* pNode, aiNode* pTarget)
+void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Collada::Node* pNode, aiNode* pTarget)
 {
 	// accumulated mesh references by this node
 	std::vector<size_t> newMeshRefs;
@@ -163,7 +178,7 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 		{
 			// else we have to add the mesh to the collection and store its newly assigned index at the node
 			aiMesh* dstMesh = new aiMesh;
-			const ColladaParser::Mesh* srcMesh = srcMeshIt->second;
+			const Collada::Mesh* srcMesh = srcMeshIt->second;
 
 			// copy positions
 			dstMesh->mNumVertices = srcMesh->mPositions.size();

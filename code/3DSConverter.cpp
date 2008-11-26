@@ -548,43 +548,43 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 			}
 		}
 
-		//if (pcIn->aTargetPositionKeys.size() > 1)
-		//{
-		//	DefaultLogger::get()->debug("3DS: Converting target track ...");
+		if (pcIn->aTargetPositionKeys.size() > 1)
+		{
+			DefaultLogger::get()->debug("3DS: Converting target track ...");
 
-		//	// Camera or spot light - need to convert the separate
-		//	// target position channel to our representation
-		//	TargetAnimationHelper helper;
+			// Camera or spot light - need to convert the separate
+			// target position channel to our representation
+			TargetAnimationHelper helper;
 
-		//	if (pcIn->aPositionKeys.empty())
-		//	{
-		//		// We can just pass zero here ...
-		//		helper.SetFixedMainAnimationChannel(aiVector3D());
-		//	}
-		//	else  helper.SetMainAnimationChannel(&pcIn->aPositionKeys);
-		//	helper.SetTargetAnimationChannel(&pcIn->aTargetPositionKeys);
+			if (pcIn->aPositionKeys.empty())
+			{
+				// We can just pass zero here ...
+				helper.SetFixedMainAnimationChannel(aiVector3D());
+			}
+			else  helper.SetMainAnimationChannel(&pcIn->aPositionKeys);
+			helper.SetTargetAnimationChannel(&pcIn->aTargetPositionKeys);
 
-		//	// Do the conversion
-		//	std::vector<aiVectorKey> distanceTrack;
-		//	helper.Process(&distanceTrack);
+			// Do the conversion
+			std::vector<aiVectorKey> distanceTrack;
+			helper.Process(&distanceTrack);
 
-		//	// Now add a new node as child, name it <ourName>.Target
-		//	// and assign the distance track to it. This is that the
-		//	// information where the target is and how it moves is
-		//	// not lost
-		//	D3DS::Node* nd = new D3DS::Node();
-		//	pcIn->push_back(nd);
+			// Now add a new node as child, name it <ourName>.Target
+			// and assign the distance track to it. This is that the
+			// information where the target is and how it moves is
+			// not lost
+			D3DS::Node* nd = new D3DS::Node();
+			pcIn->push_back(nd);
 
-		//	nd->mName = pcIn->mName + ".Target";
+			nd->mName = pcIn->mName + ".Target";
 
-		//	aiNodeAnim* nda = anim->mChannels[anim->mNumChannels++] = new aiNodeAnim();
-		//	nda->mNodeName.Set(nd->mName);
+			aiNodeAnim* nda = anim->mChannels[anim->mNumChannels++] = new aiNodeAnim();
+			nda->mNodeName.Set(nd->mName);
 
-		//	nda->mNumPositionKeys = (unsigned int)distanceTrack.size();
-		//	nda->mPositionKeys = new aiVectorKey[nda->mNumPositionKeys];
-		//	::memcpy(nda->mPositionKeys,&distanceTrack[0],
-		//		sizeof(aiVectorKey)*nda->mNumPositionKeys);
-		//}
+			nda->mNumPositionKeys = (unsigned int)distanceTrack.size();
+			nda->mPositionKeys = new aiVectorKey[nda->mNumPositionKeys];
+			::memcpy(nda->mPositionKeys,&distanceTrack[0],
+				sizeof(aiVectorKey)*nda->mNumPositionKeys);
+		}
 
 		// Allocate a new nda, increment the nda index
 		aiNodeAnim* nda = anim->mChannels[anim->mNumChannels++] = new aiNodeAnim();

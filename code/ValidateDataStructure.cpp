@@ -869,7 +869,7 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 			this->ReportError("aiNodeAnim::mPositionKeys is NULL (aiNodeAnim::mNumPositionKeys is %i)",
 				pNodeAnim->mNumPositionKeys);
 		}
-		double dLast = -0.1;
+		double dLast = -10e10;
 		for (unsigned int i = 0; i < pNodeAnim->mNumPositionKeys;++i)
 		{
 			if (pNodeAnim->mPositionKeys[i].mTime > pAnimation->mDuration)
@@ -879,7 +879,7 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 					(float)pNodeAnim->mPositionKeys[i].mTime,
 					(float)pAnimation->mDuration);
 			}
-			if (pNodeAnim->mPositionKeys[i].mTime <= dLast)
+			if (i && pNodeAnim->mPositionKeys[i].mTime <= dLast)
 			{
 				ReportWarning("aiNodeAnim::mPositionKeys[%i].mTime (%.5f) is smaller "
 					"than aiAnimation::mPositionKeys[%i] (which is %.5f)",i,
@@ -897,7 +897,7 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 			this->ReportError("aiNodeAnim::mRotationKeys is NULL (aiNodeAnim::mNumRotationKeys is %i)",
 				pNodeAnim->mNumRotationKeys);
 		}
-		double dLast = -0.1;
+		double dLast = -10e10;
 		for (unsigned int i = 0; i < pNodeAnim->mNumRotationKeys;++i)
 		{
 			if (pNodeAnim->mRotationKeys[i].mTime > pAnimation->mDuration)
@@ -907,7 +907,7 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 					(float)pNodeAnim->mRotationKeys[i].mTime,
 					(float)pAnimation->mDuration);
 			}
-			if (pNodeAnim->mRotationKeys[i].mTime <= dLast)
+			if (i && pNodeAnim->mRotationKeys[i].mTime <= dLast)
 			{
 				ReportWarning("aiNodeAnim::mRotationKeys[%i].mTime (%.5f) is smaller "
 					"than aiAnimation::mRotationKeys[%i] (which is %.5f)",i,
@@ -925,7 +925,7 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 			this->ReportError("aiNodeAnim::mScalingKeys is NULL (aiNodeAnim::mNumScalingKeys is %i)",
 				pNodeAnim->mNumScalingKeys);
 		}
-		double dLast = -0.1;
+		double dLast = -10e10;
 		for (unsigned int i = 0; i < pNodeAnim->mNumScalingKeys;++i)
 		{
 			if (pNodeAnim->mScalingKeys[i].mTime > pAnimation->mDuration)
@@ -935,7 +935,7 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 					(float)pNodeAnim->mScalingKeys[i].mTime,
 					(float)pAnimation->mDuration);
 			}
-			if (pNodeAnim->mScalingKeys[i].mTime <= dLast)
+			if (i && pNodeAnim->mScalingKeys[i].mTime <= dLast)
 			{
 				ReportWarning("aiNodeAnim::mScalingKeys[%i].mTime (%.5f) is smaller "
 					"than aiAnimation::mScalingKeys[%i] (which is %.5f)",i,

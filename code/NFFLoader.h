@@ -109,6 +109,7 @@ private:
 			, shaded    (true)  // for NFF2
 			, opacity	(1.f)
 			, shininess	(0.f)
+			, mapping	(aiTextureMapping_UV)
 		{}
 
 		aiColor3D color,diffuse,specular,ambient,emissive;
@@ -122,6 +123,11 @@ private:
 		float opacity, shininess;
 
 		std::string name;
+
+		// texture mapping to be generated for the mesh - uv is the default
+		// it means: use UV if there, nothing otherwise. This property is
+		// used for locked meshes.
+		aiTextureMapping mapping;
 
 		// shininess is ignored for the moment
 		bool operator == (const ShadingInfo& other) const

@@ -82,7 +82,7 @@ KeyIterator::KeyIterator(const std::vector<aiVectorKey>* _objPos,
 
 // ------------------------------------------------------------------------------------------------
 template <class T>
-T Interpolate(const T& one, const T& two, float val)
+inline T Interpolate(const T& one, const T& two, float val)
 {
 	return one + (two-one)*val;
 }
@@ -93,20 +93,14 @@ void KeyIterator::operator ++()
 	// If we are already at the end of all keyframes, return
 	if (reachedEnd)return;
 
-	int breakThisUglyStuff = 0;
 
 	// Now search in all arrays for the time value closest
 	// to our current position on the time line
 	double d0,d1;
 	
-	d0 = objPos->at(nextObjPos).mTime;
-	if (nextObjPos == objPos->size()-1)
-		++breakThisUglyStuff;
-
-	d1 = targetObjPos->at(nextTargetObjPos).mTime;	
-	if (nextTargetObjPos == targetObjPos->size()-1)
-		++breakThisUglyStuff;
-
+	d0 = objPos->at      ( std::min ( nextObjPos, objPos->size()-1)             ).mTime;
+	d1 = targetObjPos->at( std::min ( nextTargetObjPos, targetObjPos->size()-1) ).mTime;	
+	
 	// Easiest case - all are identical. In this
 	// case we don't need to interpolate so we can
 	// return earlier
@@ -116,11 +110,14 @@ void KeyIterator::operator ++()
 		curPosition = objPos->at(nextObjPos).mValue;
 		curTargetPosition = targetObjPos->at(nextTargetObjPos).mValue;
 
-		// Increment all counters, regardless whether
-		// the corresponding arrays are there
-		++nextObjPos;
-		++nextTargetObjPos;
+		// increment counters
+		if (objPos->size() != nextObjPos-1)
+			++nextObjPos;
+
+		if (targetObjPos->size() != nextTargetObjPos-1)
+			++nextTargetObjPos;
 	}
+
 	// An object position key is closest to us
 	else if (d0 < d1)
 	{
@@ -140,12 +137,8 @@ void KeyIterator::operator ++()
 				(curTime-first.mTime) / (last.mTime-first.mTime) ));
 		}
 
-		// increment counters
 		if (objPos->size() != nextObjPos-1)
 			++nextObjPos;
-
-		if (targetObjPos->size() != nextTargetObjPos-1)
-			++nextTargetObjPos;
 	}
 	// A target position key is closest to us
 	else
@@ -165,9 +158,13 @@ void KeyIterator::operator ++()
 			curPosition = Interpolate(first.mValue, last.mValue, (float) (
 				(curTime-first.mTime) / (last.mTime-first.mTime)));
 		}
+
+		if (targetObjPos->size() != nextTargetObjPos-1)
+			++nextTargetObjPos;
 	}
 
-	if (2 == breakThisUglyStuff)
+	if (nextObjPos >= objPos->size()-1 &&
+		nextTargetObjPos >= targetObjPos->size()-1)
 	{
 		// We reached the very last keyframe
 		reachedEnd = true;
@@ -226,13 +223,7 @@ void TargetAnimationHelper::Process(std::vector<aiVectorKey>* distanceTrack)
 
 		// diff vector
 		aiVector3D diff = tposition - position;
-		float f = diff.SquareLength();
-		if (!f)
-		{
-			DefaultLogger::get()->error("Target position equals object position");
-			continue;
-		}
-		f = ::sqrt(f);
+		float f = diff.Length();
 
 		// output distance vector
 		if (fill)
@@ -243,6 +234,8 @@ void TargetAnimationHelper::Process(std::vector<aiVectorKey>* distanceTrack)
 			v.mValue = aiVector3D (0.f,0.f,f);
 		}
 		diff /= f; 
+
+		// diff is now the vector in which our camera is pointing
 	}
 
 	if (real.size())

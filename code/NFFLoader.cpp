@@ -835,6 +835,11 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 					currentMeshWithUVCoords->shader = s;
 				}
 			}
+			// 'shader' - other way to specify a texture
+			else if (TokenMatch(sz,"shader",6))
+			{
+				// todo
+			}
 			// 'l' - light source
 			else if (TokenMatch(sz,"l",1))
 			{
@@ -851,6 +856,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				meshesLocked.push_back(MeshInfo(PatchType_Simple,true));
 				MeshInfo& currentMesh = meshesLocked.back();
 				currentMesh.shader = s;
+				s.mapping = aiTextureMapping_SPHERE;
 
 				AI_NFF_PARSE_SHAPE_INFORMATION();
 
@@ -867,6 +873,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				meshesLocked.push_back(MeshInfo(PatchType_Simple,true));
 				MeshInfo& currentMesh = meshesLocked.back();
 				currentMesh.shader = s;
+				s.mapping = aiTextureMapping_SPHERE;
 
 				AI_NFF_PARSE_SHAPE_INFORMATION();
 
@@ -884,6 +891,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				meshesLocked.push_back(MeshInfo(PatchType_Simple,true));
 				MeshInfo& currentMesh = meshesLocked.back();
 				currentMesh.shader = s;
+				s.mapping = aiTextureMapping_SPHERE;
 
 				AI_NFF_PARSE_SHAPE_INFORMATION();
 
@@ -901,6 +909,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				meshesLocked.push_back(MeshInfo(PatchType_Simple,true));
 				MeshInfo& currentMesh = meshesLocked.back();
 				currentMesh.shader = s;
+				s.mapping = aiTextureMapping_SPHERE;
 
 				AI_NFF_PARSE_SHAPE_INFORMATION();
 
@@ -918,6 +927,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				meshesLocked.push_back(MeshInfo(PatchType_Simple,true));
 				MeshInfo& currentMesh = meshesLocked.back();
 				currentMesh.shader = s;
+				s.mapping = aiTextureMapping_SPHERE;
 
 				AI_NFF_PARSE_SHAPE_INFORMATION();
 
@@ -934,6 +944,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				meshesLocked.push_back(MeshInfo(PatchType_Simple,true));
 				MeshInfo& currentMesh = meshes.back();
 				currentMesh.shader = s;
+				s.mapping = aiTextureMapping_CYLINDER;
 
 				aiVector3D center1, center2; float radius1, radius2;
 				AI_NFF_PARSE_TRIPLE(center1);
@@ -1205,6 +1216,11 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 		{
 			s.Set(src.shader.texFile);
 			pcMat->AddProperty(&s,AI_MATKEY_NAME);
+		}
+
+		if (aiTextureMapping_UV != src.shader.mapping)
+		{
+			pcMat->AddProperty((int*)&src.shader.mapping, 1,AI_MATKEY_MAPPING_DIFFUSE(0));
 		}
 
 		// setup some more material properties that are specific to NFF2

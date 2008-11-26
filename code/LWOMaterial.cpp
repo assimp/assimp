@@ -138,10 +138,18 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, a
 		if (mapping != aiTextureMapping_UV)
 		{
 			// Setup the main axis (the enum values map one to one)
+			ai_assert(aiAxis_X == Texture::AXIS_X);
 			pcMat->AddProperty<int>((int*)&(*it).majorAxis,1,AI_MATKEY_TEXMAP_AXIS(type,cur));
+
+			// Setup UV scalings for cylindric and spherical projections
+			if (mapping == aiTextureMapping_CYLINDER || mapping == aiTextureMapping_SPHERE)
+			{
+				aiUVTransform trafo;
+				trafo.mScaling.x = (*it).wrapAmountW;
+				trafo.mScaling.y = (*it).wrapAmountH;
+			}
 			DefaultLogger::get()->debug("LWO2: Setting up non-UV mapping");
 		}
-
 
 		// The older LWOB format does not use indirect references to clips.
 		// The file name of a texture is directly specified in the tex chunk.

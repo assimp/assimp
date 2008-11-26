@@ -334,7 +334,6 @@ void ComputeUVMappingProcess::ComputePlaneMapping(aiMesh* mesh,aiAxis axis, aiVe
 	{
 		DefaultLogger::get()->error("Can't compute plane mapping, the mesh is "
 			"flat in the requested axis");
-
 		return;
 	}
 

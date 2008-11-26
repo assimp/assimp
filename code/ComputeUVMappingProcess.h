@@ -129,7 +129,7 @@ private:
 	{
 		MappingInfo(aiTextureMapping _type)
 			: type	(_type)
-			, axis	(aiAxis_X)
+			, axis	(aiAxis_Y)
 			, uv	(0u)
 		{}
 

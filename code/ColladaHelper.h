@@ -66,6 +66,13 @@ struct Transform
 	float f[16]; ///< Interpretation of data depends on the type of the transformation 
 };
 
+/** A reference to a mesh inside a node, including materials assigned to the various subgroups */
+struct MeshInstance
+{
+	std::string mMesh; ///< ID of the mesh
+	std::map<std::string, std::string> mMaterials; ///< Map of materials by the subgroup ID they're applied to
+};
+
 /** A node in a scene hierarchy */
 struct Node
 {
@@ -77,7 +84,7 @@ struct Node
 	/** Operations in order to calculate the resulting transformation to parent. */
 	std::vector<Transform> mTransforms;
 
-	std::vector<std::string> mMeshes; ///< Meshes at this node
+	std::vector<MeshInstance> mMeshes; ///< Meshes at this node
 
 	Node() { mParent = NULL; }
 	~Node() { for( std::vector<Node*>::iterator it = mChildren.begin(); it != mChildren.end(); ++it) delete *it; }
@@ -164,6 +171,48 @@ enum PrimitiveType
 	Prim_TriFans,
 	Prim_Polylist,
 	Prim_Polygon
+};
+
+/** A collada material. Pretty much the only member is a reference to an effect. */
+struct Material
+{
+	std::string mEffect;
+};
+
+/** Shading type supported by the standard effect spec of Collada */
+enum ShadeType
+{
+	Shade_Invalid,
+	Shade_Constant,
+	Shade_Lambert,
+	Shade_Phong,
+	Shade_Blinn
+};
+
+
+/** A collada effect. Can contain about anything according to the Collada spec, but we limit our version to a reasonable subset. */
+struct Effect
+{
+	ShadeType mShadeType;
+	aiColor4D mEmmisive, mAmbient, mDiffuse, mSpecular;
+	aiColor4D mReflectivity, mRefractivity;
+	std::string mTexEmmisive, mTexAmbient, mTexDiffuse, mTexSpecular;
+	float mShininess, mRefractIndex;
+
+	Effect() : mEmmisive( 0, 0, 0, 1), mAmbient( 0.1f, 0.1f, 0.1f, 1),
+		mDiffuse( 0.6f, 0.6f, 0.6f, 1), mSpecular( 0.4f, 0.4f, 0.4f, 1),
+		mReflectivity( 0, 0, 0, 0), mRefractivity( 0, 0, 0, 0)
+	{ 
+		mShadeType = Shade_Phong; 
+		mShininess = 10;
+		mRefractIndex = 1;
+	}
+};
+
+/** An image, meaning texture */
+struct Image
+{
+	std::string mFileName;
 };
 
 } // end of namespace Collada

@@ -72,6 +72,24 @@ protected:
 	/** Reads asset informations such as coordinate system informations and legal blah */
 	void ReadAssetInfo();
 
+	/** Reads the image library contents */
+	void ReadImageLibrary();
+
+	/** Reads an image entry into the given image */
+	void ReadImage( Collada::Image& pImage);
+
+	/** Reads the material library */
+	void ReadMaterialLibrary();
+
+	/** Reads a material entry into the given material */
+	void ReadMaterial( Collada::Material& pMaterial);
+
+	/** Reads the effect library */
+	void ReadEffectLibrary();
+
+	/** Reads an effect entry into the given effect*/
+	void ReadEffect( Collada::Effect* pEffect);
+
 	/** Reads the geometry library contents */
 	void ReadGeometryLibrary();
 
@@ -173,6 +191,18 @@ protected:
 	/** node library: root node of the hierarchy part by ID */
 	typedef std::map<std::string, Collada::Node*> NodeLibrary;
 	NodeLibrary mNodeLibrary;
+
+	/** Image library: stores texture properties by ID */
+	typedef std::map<std::string, Collada::Image> ImageLibrary;
+	ImageLibrary mImageLibrary;
+
+	/** Effect library: surface attributes by ID */
+	typedef std::map<std::string, Collada::Effect> EffectLibrary;
+	EffectLibrary mEffectLibrary;
+
+	/** Material library: surface material by ID */
+	typedef std::map<std::string, Collada::Material> MaterialLibrary;
+	MaterialLibrary mMaterialLibrary;
 
 	/** Pointer to the root node. Don't delete, it just points to one of the nodes in the node library. */
 	Collada::Node* mRootNode;

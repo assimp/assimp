@@ -175,6 +175,152 @@ void ColladaParser::ReadAssetInfo()
 }
 
 // ------------------------------------------------------------------------------------------------
+// Reads the image library contents
+void ColladaParser::ReadImageLibrary()
+{
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
+		{
+			if( IsElement( "image"))
+			{
+				// read ID. Another entry which is "optional" by design but obligatory in reality
+				int attrID = GetAttribute( "id");
+				std::string id = mReader->getAttributeValue( attrID);
+
+				// create an entry and store it in the library under its ID
+				mImageLibrary[id] = Image();
+
+				// read on from there
+				ReadImage( mImageLibrary[id]);
+			} else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
+		{
+			if( strcmp( mReader->getNodeName(), "library_images") != 0)
+				ThrowException( "Expected end of \"library_images\" element.");
+
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads an image entry into the given image
+void ColladaParser::ReadImage( Collada::Image& pImage)
+{
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
+		{
+			if( IsElement( "init_from"))
+			{
+				// element content is filename - hopefully
+				const char* content = GetTextContent();
+				pImage.mFileName = content;
+				TestClosing( "init_from");
+			} else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
+		{
+			if( strcmp( mReader->getNodeName(), "image") != 0)
+				ThrowException( "Expected end of \"image\" element.");
+
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads the material library
+void ColladaParser::ReadMaterialLibrary()
+{
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
+		{
+			if( IsElement( "material"))
+			{
+				// read ID. By now you propably know my opinion about this "specification"
+				int attrID = GetAttribute( "id");
+				std::string id = mReader->getAttributeValue( attrID);
+
+				// create an entry and store it in the library under its ID
+				mMaterialLibrary[id] = Material();
+				// read on from there
+				ReadMaterial( mMaterialLibrary[id]);
+			} else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
+		{
+			if( strcmp( mReader->getNodeName(), "library_materials") != 0)
+				ThrowException( "Expected end of \"library_materials\" element.");
+
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads a material entry into the given material
+void ColladaParser::ReadMaterial( Collada::Material& pMaterial)
+{
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
+		{
+			if( IsElement( "instance_effect"))
+			{
+				// referred effect by URL
+				int attrUrl = GetAttribute( "url");
+				const char* url = mReader->getAttributeValue( attrUrl);
+				if( url[0] != '#')
+					ThrowException( "Unknown reference format");
+
+				pMaterial.mEffect = url;
+
+				SkipElement();
+			} else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
+		{
+			if( strcmp( mReader->getNodeName(), "material") != 0)
+				ThrowException( "Expected end of \"image\" element.");
+
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads the effect library
+void ColladaParser::ReadEffectLibrary()
+{
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads an effect entry into the given effect
+void ColladaParser::ReadEffect( Collada::Effect* pEffect)
+{
+}
+
+// ------------------------------------------------------------------------------------------------
 // Reads the geometry library contents
 void ColladaParser::ReadGeometryLibrary()
 {
@@ -200,7 +346,7 @@ void ColladaParser::ReadGeometryLibrary()
 				// read on from there
 				ReadMesh( mesh);
 
-				// check for the closing tag of the outer <geometry" element, the inner closing of <mesh> has been consumed by ReadMesh()
+				// check for the closing tag of the outer <geometry> element, the inner closing of <mesh> has been consumed by ReadMesh()
 				TestClosing( "geometry");
 			} else
 			{
@@ -871,11 +1017,41 @@ void ColladaParser::ReadNodeGeometry( Node* pNode)
 	if( url[0] != '#')
 		ThrowException( "Unknown reference format");
 	
-	// store the mesh ID
-	pNode->mMeshes.push_back( std::string( url+1));
+	Collada::MeshInstance instance;
+	instance.mMesh = url+1; // skipping the leading #
+
+	// read material associations. Ignore additional elements inbetween
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
+		{
+			if( IsElement( "instance_material"))
+			{
+				// read ID of the geometry subgroup and the target material
+				int attrGroup = GetAttribute( "symbol");
+				std::string group = mReader->getAttributeValue( attrGroup);
+				int attrMaterial = GetAttribute( "target");
+				const char* urlMat = mReader->getAttributeValue( attrMaterial);
+				if( urlMat[0] != '#')
+					ThrowException( "Unknown reference format");
+				std::string mat = mReader->getAttributeValue( attrMaterial+1);
+
+				// store the association
+				instance.mMaterials[group] = mat;
+			} else
+			{
+				SkipElement();
+			}
+		} 
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
+		{
+			if( strcmp( mReader->getNodeName(), "instance_geometry") == 0)
+				break;
+		} 
+	}
 	
-	// for the moment, skip the rest
-	SkipElement();
+	// store it
+	pNode->mMeshes.push_back( instance);
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -159,18 +159,18 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 	std::vector<size_t> newMeshRefs;
 
 	// for the moment we simply ignore all material tags and transfer the meshes one by one
-	BOOST_FOREACH( const std::string& mid, pNode->mMeshes)
+	BOOST_FOREACH( const Collada::MeshInstance& mid, pNode->mMeshes)
 	{
 		// find the referred mesh
-		ColladaParser::MeshLibrary::const_iterator srcMeshIt = pParser.mMeshLibrary.find( mid);
+		ColladaParser::MeshLibrary::const_iterator srcMeshIt = pParser.mMeshLibrary.find( mid.mMesh);
 		if( srcMeshIt == pParser.mMeshLibrary.end())
 		{
-			DefaultLogger::get()->warn( boost::str( boost::format( "Unable to find geometry for ID \"%s\". Skipping.") % mid));
+			DefaultLogger::get()->warn( boost::str( boost::format( "Unable to find geometry for ID \"%s\". Skipping.") % mid.mMesh));
 			continue;
 		}
 
 		// if we already have the mesh at the library, just add its index to the node's array
-		std::map<std::string, size_t>::const_iterator dstMeshIt = mMeshIndexbyID.find( mid);
+		std::map<std::string, size_t>::const_iterator dstMeshIt = mMeshIndexbyID.find( mid.mMesh);
 		if( dstMeshIt != mMeshIndexbyID.end())
 		{
 			newMeshRefs.push_back( dstMeshIt->second);

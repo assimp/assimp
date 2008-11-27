@@ -135,6 +135,7 @@ C++ example:
 @code
 #include <assimp.hpp>  // C++ importer interface
 #include <aiScene.h>   // root structure of the imported data
+#include <aiPostProcess.h> // Post processing flags
 #include <aiMesh.h>    // example: mesh data structures. you'll propably need other includes, too
 
 bool DoTheImportThing( const std::string& pFile)
@@ -148,7 +149,7 @@ bool DoTheImportThing( const std::string& pFile)
   // if the import failed, report it
   if( !scene)
   {
-    DoTheErrorLogging( importer.GetErrorText());
+    DoTheErrorLogging( importer.GetErrorString());
     return false;
   }
 
@@ -177,6 +178,7 @@ C example:
 @code
 #include <assimp.h>  // Plain C importer interface
 #include <aiScene.h> // Root structure of the imported data
+#include <aiPostProcess.h> // Post processing flags
 #include <aiMesh.h>  // Example: mesh data structures. you'll propably need other includes, too
 
 bool DoTheImportThing( const char* pFile)

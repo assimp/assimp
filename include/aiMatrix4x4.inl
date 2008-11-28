@@ -87,12 +87,16 @@ inline aiMatrix4x4& aiMatrix4x4::Inverse()
 	float det = Determinant();
 	if(det == 0.0f) 
 	{
+		// Matrix not invertible. Setting all elements to nan is not really
+		// correct in a mathematical sense but it is easy to debug for the
+		// programmer.
 		const float nan = std::numeric_limits<float>::quiet_NaN();
 		*this = aiMatrix4x4(
 			nan,nan,nan,nan,
 			nan,nan,nan,nan,
 			nan,nan,nan,nan,
 			nan,nan,nan,nan);
+
 		return *this;
 	}
 
@@ -204,43 +208,62 @@ inline void aiMatrix4x4::DecomposeNoScaling (aiQuaternion& rotation,
 	rotation = aiQuaternion((aiMatrix3x3)_this);
 }
 // ---------------------------------------------------------------------------
-inline void aiMatrix4x4::FromEulerAngles(const aiVector3D& blubb)
+inline void aiMatrix4x4::FromEulerAnglesXYZ(const aiVector3D& blubb)
 {
-	FromEulerAngles(blubb.x,blubb.y,blubb.z);
+	FromEulerAnglesXYZ(blubb.x,blubb.y,blubb.z);
 }
 // ---------------------------------------------------------------------------
-inline void aiMatrix4x4::FromEulerAngles(float x, float y, float z)
+inline void aiMatrix4x4::FromEulerAnglesXYZ(float x, float y, float z)
 {
 	aiMatrix4x4& _this = *this;
 
-    const float A       = ::cos(x);
-    const float B       = ::sin(x);
-    const float C       = ::cos(y);
-    const float D       = ::sin(y);
-    const float E       = ::cos(z);
-    const float F       = ::sin(z);
-    const float AD      =   A * D;
-    const float BD      =   B * D;
-    _this.a1  =   C * E;
-    _this.a2  =  -C * F;
-    _this.a3  =   D;
-    _this.b1  =  BD * E + A * F;
-    _this.b2  = -BD * F + A * E;
-    _this.b3  =  -B * C;
-    _this.c1  = -AD * E + B * F;
-    _this.c2  =  AD * F + B * E;
-    _this.c3 =   A * C;
-    _this.a4 = _this.b4 = _this.c4 = _this.d1 = _this.d2 = _this.d3 =  0.0f;
-    _this.d4 = 1.0f;
+	float cr = cos( x );
+	float sr = sin( x );
+	float cp = cos( y );
+	float sp = sin( y );
+	float cy = cos( z );
+	float sy = sin( z );
+
+	_this.a1 = cp*cy ;
+	_this.a2 = cp*sy;
+	_this.a3 = -sp ;
+
+	float srsp = sr*sp;
+	float crsp = cr*sp;
+
+	_this.b1 = srsp*cy-cr*sy ;
+	_this.b2 = srsp*sy+cr*cy ;
+	_this.b3 = sr*cp ;
+
+	_this.c1 =  crsp*cy+sr*sy ;
+	_this.c2 =  crsp*sy-sr*cy ;
+	_this.c3 = cr*cp ;
+
 }
 // ---------------------------------------------------------------------------
 inline bool aiMatrix4x4::IsIdentity() const
 {
-	return !(a1 != 1.0f || a2 || a3 || a4 ||
-		b1 || b2 != 1.0f || b3 || b4 ||
-		c1 || c2 || c3 != 1.0f || a4 ||
-		d1 || d2 || d3 || d4 != 1.0f);
+	// Use a small epsilon to solve floating-point inaccuracies
+	const static float epsilon = 10e-3f;
+
+	return (a2 <= epsilon && a2 >= -epsilon &&
+			a3 <= epsilon && a3 >= -epsilon &&
+			a4 <= epsilon && a4 >= -epsilon &&
+			b1 <= epsilon && b1 >= -epsilon &&
+			b3 <= epsilon && b3 >= -epsilon &&
+			b4 <= epsilon && b4 >= -epsilon &&
+			c1 <= epsilon && c1 >= -epsilon &&
+			c2 <= epsilon && c2 >= -epsilon &&
+			c3 <= epsilon && c3 >= -epsilon &&
+			d1 <= epsilon && d1 >= -epsilon &&
+			d2 <= epsilon && d2 >= -epsilon &&
+			d3 <= epsilon && d3 >= -epsilon &&
+			a1 <= 1.f+epsilon && a1 >= 1.f-epsilon && 
+			b2 <= 1.f+epsilon && b2 >= 1.f-epsilon && 
+			c3 <= 1.f+epsilon && c3 >= 1.f-epsilon && 
+			d4 <= 1.f+epsilon && d4 >= 1.f-epsilon);
 }
+
 // ---------------------------------------------------------------------------
 inline aiMatrix4x4& aiMatrix4x4::RotationX(float a, aiMatrix4x4& out)
 {
@@ -310,6 +333,96 @@ inline aiMatrix4x4& aiMatrix4x4::Translation( const aiVector3D& v, aiMatrix4x4& 
 	out.b4 = v.y;
 	out.c4 = v.z;
 	return out;
+}
+
+// ---------------------------------------------------------------------------
+/** A function for creating a rotation matrix that rotates a vector called
+ * "from" into another vector called "to".
+ * Input : from[3], to[3] which both must be *normalized* non-zero vectors
+ * Output: mtx[3][3] -- a 3x3 matrix in colum-major form
+ * Authors: Tomas Möller, John Hughes
+ *          "Efficiently Building a Matrix to Rotate One Vector to Another"
+ *          Journal of Graphics Tools, 4(4):1-4, 1999
+ */
+// ---------------------------------------------------------------------------
+inline aiMatrix4x4& aiMatrix4x4::FromToMatrix(const aiVector3D& from, 
+	const aiVector3D& to, aiMatrix4x4& mtx)
+{
+	const aiVector3D v = from ^ to;
+	const float e = from * to;
+	const float f = (e < 0)? -e:e;
+
+	if (f > 1.0 - 0.00001f)     /* "from" and "to"-vector almost parallel */
+	{
+		aiVector3D u,v;     /* temporary storage vectors */
+		aiVector3D x;       /* vector most nearly orthogonal to "from" */
+
+		x.x = (from.x > 0.0)? from.x : -from.x;
+		x.y = (from.y > 0.0)? from.y : -from.y;
+		x.z = (from.z > 0.0)? from.z : -from.z;
+
+		if (x.x < x.y)
+		{
+			if (x.x < x.z)
+			{
+				x.x = 1.0; x.y = x.z = 0.0;
+			}
+			else
+			{
+				x.z = 1.0; x.y = x.z = 0.0;
+			}
+		}
+		else
+		{
+			if (x.y < x.z)
+			{
+				x.y = 1.0; x.x = x.z = 0.0;
+			}
+			else
+			{
+				x.z = 1.0; x.x = x.y = 0.0;
+			}
+		}
+
+		u.x = x.x - from.x; u.y = x.y - from.y; u.z = x.z - from.z;
+		v.x = x.x - to.x;   v.y = x.y - to.y;   v.z = x.z - to.z;
+
+		const float c1 = 2.0f / (u * u);
+		const float c2 = 2.0f / (v * v);
+		const float c3 = c1 * c2  * (u * v);
+
+		for (unsigned int i = 0; i < 3; i++) 
+		{
+			for (unsigned int j = 0; j < 3; j++) 
+			{
+				mtx[i][j] =  - c1 * u[i] * u[j] - c2 * v[i] * v[j]
+					+ c3 * v[i] * u[j];
+			}
+			mtx[i][i] += 1.0;
+		}
+	}
+	else  /* the most common case, unless "from"="to", or "from"=-"to" */
+	{
+		/* ... use this hand optimized version (9 mults less) */
+		const float h = 1.0f/(1.0f + e);      /* optimization by Gottfried Chen */
+		const float hvx = h * v.x;
+		const float hvz = h * v.z;
+		const float hvxy = hvx * v.y;
+		const float hvxz = hvx * v.z;
+		const float hvyz = hvz * v.y;
+		mtx[0][0] = e + hvx * v.x;
+		mtx[0][1] = hvxy - v.z;
+		mtx[0][2] = hvxz + v.y;
+
+		mtx[1][0] = hvxy + v.z;
+		mtx[1][1] = e + h * v.y * v.y;
+		mtx[1][2] = hvyz - v.x;
+
+		mtx[2][0] = hvxz - v.y;
+		mtx[2][1] = hvyz + v.x;
+		mtx[2][2] = e + hvz * v.z;
+	}
+	return mtx;
 }
 
 #endif // __cplusplus

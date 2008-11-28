@@ -917,7 +917,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 	// Now compute the final local transformation matrix of the
 	// node from the given translation, rotation and scaling values.
 	// (the rotation is given in Euler angles, XYZ order)
-	rootOut->mTransformation.FromEulerAngles(AI_DEG_TO_RAD(root->rotation) );
+	rootOut->mTransformation.FromEulerAnglesXYZ(AI_DEG_TO_RAD(root->rotation) );
 
 	// apply scaling
 	aiMatrix4x4& mat = rootOut->mTransformation;

@@ -511,7 +511,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 		// check whether all bone weights for a vertex sum to 1.0 ...
 		for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
 		{
-			if (afSum[i] && (afSum[i] <= 0.995 || afSum[i] >= 1.005))
+			if (afSum[i] && (afSum[i] <= 0.94 || afSum[i] >= 1.05))
 			{
 				ReportWarning("aiMesh::mVertices[%i]: bone weight sum != 1.0 (sum is %f)",i,afSum[i]);
 			}

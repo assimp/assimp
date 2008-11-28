@@ -174,6 +174,7 @@ private:
 			, bLocked   (bL)
 			, matIndex  (0)
 			, radius	(1.f,1.f,1.f)
+			, dir		(0.f,1.f,0.f)
 		{
 			name[0] = '\0'; // by default meshes are unnamed
 		}
@@ -183,7 +184,7 @@ private:
 		bool bLocked;
 
 		// for spheres, cones and cylinders: center point of the object
-		aiVector3D center, radius;
+		aiVector3D center, radius, dir;
 
 		char name[128];
 

@@ -114,6 +114,7 @@ aiMesh* StandardShapes::MakeMesh(const std::vector<aiVector3D>& positions,
 {
 	if (positions.size() & numIndices || positions.empty() || !numIndices)return NULL;
 
+	// Determine which kinds of primitives the mesh will consist of
 	aiMesh* out = new aiMesh();
 	switch (numIndices)
 	{
@@ -182,18 +183,18 @@ unsigned int StandardShapes::MakeIcosahedron(std::vector<aiVector3D>& positions)
 	const float t = (1.f + 2.236067977f)/2.f;
 	const float s = sqrt(1.f + t*t);
 	
-	aiVector3D v0  = aiVector3D(t,1.f, 0.f)/s;
-	aiVector3D v1  = aiVector3D(-t,1.f, 0.f)/s;
-	aiVector3D v2  = aiVector3D(t,-1.f, 0.f)/s;
-	aiVector3D v3  = aiVector3D(-t,-1.f, 0.f)/s;
-	aiVector3D v4  = aiVector3D(1.f, 0.f, t)/s;
-	aiVector3D v5  = aiVector3D(1.f, 0.f,-t)/s;
-	aiVector3D v6  = aiVector3D(-1.f, 0.f,t)/s;
-	aiVector3D v7  = aiVector3D(-1.f, 0.f,-t)/s;
-	aiVector3D v8  = aiVector3D(0.f, t, 1.f)/s;
-	aiVector3D v9  = aiVector3D(0.f,-t, 1.f)/s;
-	aiVector3D v10 = aiVector3D(0.f, t,-1.f)/s;
-	aiVector3D v11 = aiVector3D(0.f,-t,-1.f)/s;
+	const aiVector3D v0  = aiVector3D(t,1.f, 0.f)/s;
+	const aiVector3D v1  = aiVector3D(-t,1.f, 0.f)/s;
+	const aiVector3D v2  = aiVector3D(t,-1.f, 0.f)/s;
+	const aiVector3D v3  = aiVector3D(-t,-1.f, 0.f)/s;
+	const aiVector3D v4  = aiVector3D(1.f, 0.f, t)/s;
+	const aiVector3D v5  = aiVector3D(1.f, 0.f,-t)/s;
+	const aiVector3D v6  = aiVector3D(-1.f, 0.f,t)/s;
+	const aiVector3D v7  = aiVector3D(-1.f, 0.f,-t)/s;
+	const aiVector3D v8  = aiVector3D(0.f, t, 1.f)/s;
+	const aiVector3D v9  = aiVector3D(0.f,-t, 1.f)/s;
+	const aiVector3D v10 = aiVector3D(0.f, t,-1.f)/s;
+	const aiVector3D v11 = aiVector3D(0.f,-t,-1.f)/s;
 
 	ADD_TRIANGLE(v0,v8,v4);
 	ADD_TRIANGLE(v0,v5,v10);
@@ -232,26 +233,26 @@ unsigned int StandardShapes::MakeDodecahedron(std::vector<aiVector3D>& positions
 	const float b = sqrt((3.f-2.23606797f)/6.f);
 	const float c = sqrt((3.f+2.23606797f)/6.f);
 
-	aiVector3D v0  = aiVector3D(a,a,a);
-	aiVector3D v1  = aiVector3D(a,a,-a);
-	aiVector3D v2  = aiVector3D(a,-a,a);
-	aiVector3D v3  = aiVector3D(a,-a,-a);
-	aiVector3D v4  = aiVector3D(-a,a,a);
-	aiVector3D v5  = aiVector3D(-a,a,-a);
-	aiVector3D v6  = aiVector3D(-a,-a,a);
-	aiVector3D v7  = aiVector3D(-a,-a,-a);
-	aiVector3D v8  = aiVector3D(b,c,0.f);
-	aiVector3D v9  = aiVector3D(-b,c,0.f);
-	aiVector3D v10 = aiVector3D(b,-c,0.f);
-	aiVector3D v11 = aiVector3D(-b,-c,0.f);
-	aiVector3D v12 = aiVector3D(c, 0.f, b);
-	aiVector3D v13 = aiVector3D(c, 0.f, -b);
-	aiVector3D v14 = aiVector3D(-c, 0.f, b);
-	aiVector3D v15 = aiVector3D(-c, 0.f, -b);
-	aiVector3D v16 = aiVector3D(0.f, b, c);
-	aiVector3D v17 = aiVector3D(0.f, -b, c);
-	aiVector3D v18 = aiVector3D(0.f, b, -c);
-	aiVector3D v19 = aiVector3D(0.f, -b, -c);
+	const aiVector3D v0  = aiVector3D(a,a,a);
+	const aiVector3D v1  = aiVector3D(a,a,-a);
+	const aiVector3D v2  = aiVector3D(a,-a,a);
+	const aiVector3D v3  = aiVector3D(a,-a,-a);
+	const aiVector3D v4  = aiVector3D(-a,a,a);
+	const aiVector3D v5  = aiVector3D(-a,a,-a);
+	const aiVector3D v6  = aiVector3D(-a,-a,a);
+	const aiVector3D v7  = aiVector3D(-a,-a,-a);
+	const aiVector3D v8  = aiVector3D(b,c,0.f);
+	const aiVector3D v9  = aiVector3D(-b,c,0.f);
+	const aiVector3D v10 = aiVector3D(b,-c,0.f);
+	const aiVector3D v11 = aiVector3D(-b,-c,0.f);
+	const aiVector3D v12 = aiVector3D(c, 0.f, b);
+	const aiVector3D v13 = aiVector3D(c, 0.f, -b);
+	const aiVector3D v14 = aiVector3D(-c, 0.f, b);
+	const aiVector3D v15 = aiVector3D(-c, 0.f, -b);
+	const aiVector3D v16 = aiVector3D(0.f, b, c);
+	const aiVector3D v17 = aiVector3D(0.f, -b, c);
+	const aiVector3D v18 = aiVector3D(0.f, b, -c);
+	const aiVector3D v19 = aiVector3D(0.f, -b, -c);
 
 	ADD_PENTAGON(v0, v8, v9, v4, v16);
 	ADD_PENTAGON(v0, v12, v13, v1, v8);
@@ -274,12 +275,12 @@ unsigned int StandardShapes::MakeOctahedron(std::vector<aiVector3D>& positions)
 {
 	positions.reserve(positions.size()+24);
 
-	aiVector3D v0  = aiVector3D(1.0f, 0.f, 0.f) ;
-	aiVector3D v1  = aiVector3D(-1.0f, 0.f, 0.f);
-	aiVector3D v2  = aiVector3D(0.f, 1.0f, 0.f);
-	aiVector3D v3  = aiVector3D(0.f, -1.0f, 0.f);
-	aiVector3D v4  = aiVector3D(0.f, 0.f, 1.0f);
-	aiVector3D v5  = aiVector3D(0.f, 0.f, -1.0f);
+	const aiVector3D v0  = aiVector3D(1.0f, 0.f, 0.f) ;
+	const aiVector3D v1  = aiVector3D(-1.0f, 0.f, 0.f);
+	const aiVector3D v2  = aiVector3D(0.f, 1.0f, 0.f);
+	const aiVector3D v3  = aiVector3D(0.f, -1.0f, 0.f);
+	const aiVector3D v4  = aiVector3D(0.f, 0.f, 1.0f);
+	const aiVector3D v5  = aiVector3D(0.f, 0.f, -1.0f);
 
 	ADD_TRIANGLE(v4,v0,v2);
 	ADD_TRIANGLE(v4,v2,v1);
@@ -301,10 +302,10 @@ unsigned int StandardShapes::MakeTetrahedron(std::vector<aiVector3D>& positions)
 	const float a = 1.41421f/3.f;
 	const float b = 2.4494f/3.f;
 
-	aiVector3D v0  = aiVector3D(0.f,0.f,1.f);
-	aiVector3D v1  = aiVector3D(2*a,0,-1.f/3.f);
-	aiVector3D v2  = aiVector3D(-a,b,-1.f/3.f);
-	aiVector3D v3  = aiVector3D(-a,-b,-1.f/3.f);
+	const aiVector3D v0  = aiVector3D(0.f,0.f,1.f);
+	const aiVector3D v1  = aiVector3D(2*a,0,-1.f/3.f);
+	const aiVector3D v2  = aiVector3D(-a,b,-1.f/3.f);
+	const aiVector3D v3  = aiVector3D(-a,-b,-1.f/3.f);
 
 	ADD_TRIANGLE(v0,v1,v2);
 	ADD_TRIANGLE(v0,v2,v3);
@@ -318,16 +319,16 @@ unsigned int StandardShapes::MakeHexahedron(std::vector<aiVector3D>& positions,
 	bool polygons /*= false*/)
 {
 	positions.reserve(positions.size()+36);
-	float length = 1.f/1.73205080f;
+	const float length = 1.f/1.73205080f;
 
-	aiVector3D v0  = aiVector3D(-1.f,-1.f,-1.f)*length;
-	aiVector3D v1  = aiVector3D(1.f,-1.f,-1.f)*length;
-	aiVector3D v2  = aiVector3D(1.f,1.f,-1.f)*length;
-	aiVector3D v3  = aiVector3D(-1.f,1.f,-1.f)*length;
-	aiVector3D v4  = aiVector3D(-1.f,-1.f,1.f)*length;
-	aiVector3D v5  = aiVector3D(1.f,-1.f,1.f)*length;
-	aiVector3D v6  = aiVector3D(1.f,1.f,1.f)*length;
-	aiVector3D v7  = aiVector3D(-1.f,1.f,1.f)*length;
+	const aiVector3D v0  = aiVector3D(-1.f,-1.f,-1.f)*length;
+	const aiVector3D v1  = aiVector3D(1.f,-1.f,-1.f)*length;
+	const aiVector3D v2  = aiVector3D(1.f,1.f,-1.f)*length;
+	const aiVector3D v3  = aiVector3D(-1.f,1.f,-1.f)*length;
+	const aiVector3D v4  = aiVector3D(-1.f,-1.f,1.f)*length;
+	const aiVector3D v5  = aiVector3D(1.f,-1.f,1.f)*length;
+	const aiVector3D v6  = aiVector3D(1.f,1.f,1.f)*length;
+	const aiVector3D v7  = aiVector3D(-1.f,1.f,1.f)*length;
 
 	ADD_QUAD(v0,v3,v2,v1);
 	ADD_QUAD(v0,v1,v5,v4);
@@ -347,22 +348,95 @@ unsigned int StandardShapes::MakeHexahedron(std::vector<aiVector3D>& positions,
 void StandardShapes::MakeSphere(unsigned int	tess,
 	std::vector<aiVector3D>& positions)
 {
+	// Reserve enough storage. Every subdivision
+	// splits each triangle in 4, the icosahedron consists of 60 verts
+	positions.reserve(positions.size()+60 * integer_pow(4, tess));
+
+	// Construct an icosahedron to start with 
 	MakeIcosahedron(positions);
 
+	// ... and subdivide it until the requested output
+	// tesselation is reached
 	for (unsigned int i = 0; i<tess;++i)
 		Subdivide(positions);
 }
 
 // ------------------------------------------------------------------------------------------------
-void StandardShapes::MakeCone(
-	aiVector3D&		center1,
-	float			radius1,
-	aiVector3D&		center2,
-	float			radius2,
-	unsigned int	tess, 
-	std::vector<aiVector3D>& positions, 
-	bool bOpened /*= false*/)
+void StandardShapes::MakeCone(float height,float radius1,
+	float radius2,unsigned int tess, 
+	std::vector<aiVector3D>& positions,bool bOpen /*= false */)
 {
+	// Sorry, a cone with less than 3 segments makes 
+	// ABSOLUTELY NO SENSE
+	if (tess < 3 || !height)
+		return;
+
+	// No negative radii
+	radius1 = fabs(radius1);
+	radius2 = fabs(radius2);
+
+	float halfHeight = height / 2;
+
+	// radius1 is always the smaller one
+	if (radius2 > radius1)
+	{
+		std::swap(radius2,radius1);
+		halfHeight = -halfHeight;
+	}
+
+	// Use a large epsilon to check whether the cone is pointy
+	if (radius1 < (radius2-radius1)*10e-3f)radius1 = 0.f;
+
+	// We will need 3*2 verts per segment + 3*2 verts per segment
+	// if the cone is closed
+	const unsigned int mem = tess*6 + (!bOpen ? tess*3 * (radius1 ? 2 : 1) : 0);
+	positions.reserve(mem);
+
+	// Now construct all segments
+	const float angle_delta = (float)AI_MATH_TWO_PI / tess;
+	const float angle_max   = (float)AI_MATH_TWO_PI;
+
+	float s = 1.f; // cos(angle == 0);
+	float t = 0.f; // sin(angle == 0);
+
+	for (float angle = 0.f; angle < angle_max; )
+	{
+		const aiVector3D v1 = aiVector3D (s * radius1, -halfHeight, t * radius1 );
+		const aiVector3D v2 = aiVector3D (s * radius2,  halfHeight, t * radius2 );
+
+		const float next = angle + angle_delta;
+		float s2 = cos(next);
+		float t2 = sin(next);
+
+		const aiVector3D v3 = aiVector3D (s2 * radius2,  halfHeight, t2 * radius2 );
+		const aiVector3D v4 = aiVector3D (s2 * radius1, -halfHeight, t2 * radius1 );
+
+		positions.push_back(v1);
+		positions.push_back(v3);
+		positions.push_back(v2);
+		positions.push_back(v4);
+		positions.push_back(v3);
+		positions.push_back(v1);
+
+		if (!bOpen)
+		{
+			// generate the end 'cap'
+			positions.push_back(aiVector3D(s * radius2,  halfHeight, t * radius2 ));
+			positions.push_back(aiVector3D(0.f, halfHeight, 0.f));
+			positions.push_back(aiVector3D(s2 * radius2,  halfHeight, t2 * radius2 ));
+
+			if (radius1)
+			{
+				// generate the other end 'cap'
+				positions.push_back(aiVector3D(s * radius1,  -halfHeight, t * radius1 ));
+				positions.push_back(aiVector3D(0.f, -halfHeight, 0.f));
+				positions.push_back(aiVector3D(s2 * radius1,  -halfHeight, t2 * radius1 ));
+			}
+		}
+		s = s2;
+		t = t2;
+		angle = next;
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -373,7 +447,7 @@ void StandardShapes::MakeCircle(
 	unsigned int		tess,
 	std::vector<aiVector3D>& positions)
 {
-	//aiVector3D current = aiVector3D ( normal.x,
+	// todo
 }
 
 } // ! Assimp

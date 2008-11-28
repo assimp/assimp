@@ -5,23 +5,19 @@
 s 5.0 5.0 5.0 3.0
 
 #blue
-f 0.0 0.0 1.0 0 1 1
+f 0.0 0.0 1.0 0 1 1 1
 
 # Another simple sphere
 s 5.0 4.0 8.0 3.0
 
 #green
-f 0.0 1.0 0.0 0 1 1
+f 1.0 1.0 1.0 0.5 0.5 45.2776 0 1 ./../../LWOFiles/LWo2/MappingModes/EarthCylindric.jpg
 
 # And another one
 s 1.0 -4.0 2.0 4.0 2 2
 
 #red
 f 1.0 0.0 0.0 0 1 1
-
-# a simple cone
-c 10 10 5 3
-c 14 14 3 6
 
 
 # An icosahedron

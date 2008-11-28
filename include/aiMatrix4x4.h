@@ -118,8 +118,8 @@ struct aiMatrix4x4
 	 *  \param y Rotation angle for the y-axis, in radians
 	 *  \param z Rotation angle for the z-axis, in radians
 	 */
-	inline void FromEulerAngles(float x, float y, float z);
-	inline void FromEulerAngles(const aiVector3D& blubb);
+	inline void FromEulerAnglesXYZ(float x, float y, float z);
+	inline void FromEulerAnglesXYZ(const aiVector3D& blubb);
 
 
 	/** \brief Returns a rotation matrix for a rotation around the x axis
@@ -157,6 +157,18 @@ struct aiMatrix4x4
 	 *  \return Reference to the output matrix
 	 */
 	static aiMatrix4x4& Translation( const aiVector3D& v, aiMatrix4x4& out);
+
+
+	/** A function for creating a rotation matrix that rotates a vector called
+	* "from" into another vector called "to".
+	* Input : from[3], to[3] which both must be *normalized* non-zero vectors
+	* Output: mtx[3][3] -- a 3x3 matrix in colum-major form
+	* Authors: Tomas Möller, John Hughes
+	*          "Efficiently Building a Matrix to Rotate One Vector to Another"
+	*          Journal of Graphics Tools, 4(4):1-4, 1999
+	*/
+	static aiMatrix4x4& FromToMatrix(const aiVector3D& from, 
+		const aiVector3D& to, aiMatrix4x4& out);
 
 #endif // __cplusplus
 

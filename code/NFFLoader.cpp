@@ -665,32 +665,66 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				// 'tpp' - texture polygon patch primitive
 				if ('t' == line[0])
 				{
-					if (meshesWithUVCoords.empty())
+					currentMeshWithUVCoords = NULL;
+					for (std::vector<MeshInfo>::iterator it = meshesWithUVCoords.begin(), end = meshesWithUVCoords.end();
+						it != end;++it)
+					{
+						if ((*it).shader == s)
+						{
+							currentMeshWithUVCoords = &(*it);
+							break;
+						}
+					}
+
+					if (!currentMeshWithUVCoords)
 					{
 						meshesWithUVCoords.push_back(MeshInfo(PatchType_UVAndNormals));
 						currentMeshWithUVCoords = &meshesWithUVCoords.back();
+						currentMeshWithUVCoords->shader = s;
 					}
-
 					out = currentMeshWithUVCoords;
 				}
 				// 'pp' - polygon patch primitive
 				else if ('p' == line[1])
 				{
-					if (meshesWithNormals.empty())
+					currentMeshWithNormals = NULL;
+					for (std::vector<MeshInfo>::iterator it = meshesWithNormals.begin(), end = meshesWithNormals.end();
+						it != end;++it)
+					{
+						if ((*it).shader == s)
+						{
+							currentMeshWithNormals = &(*it);
+							break;
+						}
+					}
+
+					if (!currentMeshWithNormals)
 					{
 						meshesWithNormals.push_back(MeshInfo(PatchType_Normals));
 						currentMeshWithNormals = &meshesWithNormals.back();
+						currentMeshWithNormals->shader = s;
 					}
-
 					sz = &line[2];out = currentMeshWithNormals;
 				}
 				// 'p' - polygon primitive
 				else
 				{
-					if (meshes.empty())
+					currentMesh = NULL;
+					for (std::vector<MeshInfo>::iterator it = meshes.begin(), end = meshes.end();
+						it != end;++it)
+					{
+						if ((*it).shader == s)
+						{
+							currentMesh = &(*it);
+							break;
+						}
+					}
+
+					if (!currentMesh)
 					{
 						meshes.push_back(MeshInfo(PatchType_Simple));
 						currentMesh = &meshes.back();
+						currentMesh->shader = s;
 					}
 					sz = &line[1];out = currentMesh;
 				}
@@ -711,7 +745,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				{
 					if(!GetNextLine(buffer,line))
 					{
-						DefaultLogger::get()->error("NFF: Unexpected EOF was encountered");
+						DefaultLogger::get()->error("NFF: Unexpected EOF was encountered. Patch definition incomplete");
 						continue;
 					}
 
@@ -764,7 +798,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 
 				// NFF2 uses full colors here so we need to use them too
 				// although NFF uses simple scaling factors
-				s.diffuse.g = s.diffuse.b = s.diffuse.r;
+				s.diffuse.g  = s.diffuse.b = s.diffuse.r;
 				s.specular.g = s.specular.b = s.specular.r;
 
 				// if the next one is NOT a number we assume it is a texture file name
@@ -787,58 +821,14 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				{
 					AI_NFF_PARSE_FLOAT(s.ambient); // optional
 				}
-
-				// check whether we have this material already -
-				// although we have the RRM-Step, this is necessary here.
-				// otherwise we would generate hundreds of small meshes
-				// with just a few faces - this is surely never wanted.
-				currentMesh = currentMeshWithNormals = currentMeshWithUVCoords = NULL;
-				for (std::vector<MeshInfo>::iterator it = meshes.begin(), end = meshes.end();
-					it != end;++it)
-				{
-					if ((*it).bLocked)continue;
-					if ((*it).shader == s)
-					{
-						switch ((*it).pType)
-						{
-						case PatchType_Normals:
-							currentMeshWithNormals = &(*it);
-							break;
-
-						case PatchType_Simple:
-							currentMesh = &(*it);
-							break;
-
-						default:
-							currentMeshWithUVCoords = &(*it);
-							break;
-						};
-					}
-				}
-
-				if (!currentMesh)
-				{
-					meshes.push_back(MeshInfo(PatchType_Simple));
-					currentMesh = &meshes.back();
-					currentMesh->shader = s;
-				}
-				if (!currentMeshWithNormals)
-				{
-					meshesWithNormals.push_back(MeshInfo(PatchType_Normals));
-					currentMeshWithNormals = &meshesWithNormals.back();
-					currentMeshWithNormals->shader = s;
-				}
-				if (!currentMeshWithUVCoords)
-				{
-					meshesWithUVCoords.push_back(MeshInfo(PatchType_UVAndNormals));
-					currentMeshWithUVCoords = &meshesWithUVCoords.back();
-					currentMeshWithUVCoords->shader = s;
-				}
 			}
 			// 'shader' - other way to specify a texture
 			else if (TokenMatch(sz,"shader",6))
 			{
-				// todo
+				SkipSpaces(&sz);
+				const char* old = sz;
+				while (!IsSpaceOrNewLine(*sz))++sz;
+				s.texFile = std::string(old, (uintptr_t)sz - (uintptr_t)old);
 			}
 			// 'l' - light source
 			else if (TokenMatch(sz,"l",1))
@@ -856,7 +846,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				meshesLocked.push_back(MeshInfo(PatchType_Simple,true));
 				MeshInfo& currentMesh = meshesLocked.back();
 				currentMesh.shader = s;
-				s.mapping = aiTextureMapping_SPHERE;
+				currentMesh.shader.mapping = aiTextureMapping_SPHERE;
 
 				AI_NFF_PARSE_SHAPE_INFORMATION();
 
@@ -873,7 +863,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				meshesLocked.push_back(MeshInfo(PatchType_Simple,true));
 				MeshInfo& currentMesh = meshesLocked.back();
 				currentMesh.shader = s;
-				s.mapping = aiTextureMapping_SPHERE;
+				currentMesh.shader.mapping = aiTextureMapping_SPHERE;
 
 				AI_NFF_PARSE_SHAPE_INFORMATION();
 
@@ -891,7 +881,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				meshesLocked.push_back(MeshInfo(PatchType_Simple,true));
 				MeshInfo& currentMesh = meshesLocked.back();
 				currentMesh.shader = s;
-				s.mapping = aiTextureMapping_SPHERE;
+				currentMesh.shader.mapping = aiTextureMapping_SPHERE;
 
 				AI_NFF_PARSE_SHAPE_INFORMATION();
 
@@ -909,7 +899,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				meshesLocked.push_back(MeshInfo(PatchType_Simple,true));
 				MeshInfo& currentMesh = meshesLocked.back();
 				currentMesh.shader = s;
-				s.mapping = aiTextureMapping_SPHERE;
+				currentMesh.shader.mapping = aiTextureMapping_SPHERE;
 
 				AI_NFF_PARSE_SHAPE_INFORMATION();
 
@@ -927,7 +917,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				meshesLocked.push_back(MeshInfo(PatchType_Simple,true));
 				MeshInfo& currentMesh = meshesLocked.back();
 				currentMesh.shader = s;
-				s.mapping = aiTextureMapping_SPHERE;
+				currentMesh.shader.mapping = aiTextureMapping_BOX;
 
 				AI_NFF_PARSE_SHAPE_INFORMATION();
 
@@ -942,26 +932,54 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			else if (TokenMatch(sz,"c",1))
 			{
 				meshesLocked.push_back(MeshInfo(PatchType_Simple,true));
-				MeshInfo& currentMesh = meshes.back();
+				MeshInfo& currentMesh = meshesLocked.back();
 				currentMesh.shader = s;
-				s.mapping = aiTextureMapping_CYLINDER;
+				currentMesh.shader.mapping = aiTextureMapping_CYLINDER;
 
+				if(!GetNextLine(buffer,line))
+				{
+					DefaultLogger::get()->error("NFF: Unexpected end of file (cone definition not complete)");
+					break;
+				}
+				sz = line;
+
+				// read the two center points and the respective radii
 				aiVector3D center1, center2; float radius1, radius2;
 				AI_NFF_PARSE_TRIPLE(center1);
 				AI_NFF_PARSE_FLOAT(radius1);
+
+				if(!GetNextLine(buffer,line))
+				{
+					DefaultLogger::get()->error("NFF: Unexpected end of file (cone definition not complete)");
+					break;
+				}
+				sz = line;
+
 				AI_NFF_PARSE_TRIPLE(center2);
 				AI_NFF_PARSE_FLOAT(radius2);
 
-				// compute the center point of the cone/cylinder
-				center2 = (center2-center1)/2.f;
-				currentMesh.center = center1+center2;
-				center1 = -center2;
+				// compute the center point of the cone/cylinder -
+				// it is its local transformation origin
+				currentMesh.dir    =  center2-center1;
+				currentMesh.center =  center1+currentMesh.dir/2.f;
+
+				float f;
+				if (( f = currentMesh.dir.Length()) < 10e-3f )
+				{
+					DefaultLogger::get()->error("NFF: Cone height is close to zero");
+					continue;
+				}
+				currentMesh.dir /= f; // normalize
 
 				// generate the cone - it consists of simple triangles
-				StandardShapes::MakeCone(center1, radius1, center2, radius2, iTesselation, currentMesh.vertices);
+				StandardShapes::MakeCone(f, radius1, radius2,
+					integer_pow(4, iTesselation), currentMesh.vertices);
+
+				// MakeCone() returns tris
 				currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
-				// generate a name for the mesh
+				// generate a name for the mesh. 'cone' if it a cone,
+				// 'cylinder' if it is a cylinder. Funny, isn't it?
 				if (radius1 != radius2)
 					::sprintf(currentMesh.name,"cone_%i",cone++);
 				else ::sprintf(currentMesh.name,"cylinder_%i",cylinder++);
@@ -1125,13 +1143,16 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			node->mName.Set(src.name);
 
 			// setup the transformation matrix of the node
-			node->mTransformation.a4 = src.center.x;
-			node->mTransformation.b4 = src.center.y;
-			node->mTransformation.c4 = src.center.z;
+			aiMatrix4x4::FromToMatrix(aiVector3D(0.f,1.f,0.f),
+				src.dir,node->mTransformation);
 
-			node->mTransformation.a1 = src.radius.x;
-			node->mTransformation.b2 = src.radius.y;
-			node->mTransformation.c3 = src.radius.z;
+			aiMatrix4x4& mat = node->mTransformation;
+			mat.a1 *= src.radius.x; mat.b1 *= src.radius.x; mat.c1 *= src.radius.x;
+			mat.a2 *= src.radius.y; mat.b2 *= src.radius.y; mat.c2 *= src.radius.y;
+			mat.a3 *= src.radius.z; mat.b3 *= src.radius.z; mat.c3 *= src.radius.z;
+			mat.a4 = src.center.x;
+			mat.b4 = src.center.y;
+			mat.c4 = src.center.z;
 
 			++ppcChildren;
 		}
@@ -1194,7 +1215,8 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 		s.Set(AI_DEFAULT_MATERIAL_NAME);
 		pcMat->AddProperty(&s, AI_MATKEY_NAME);
 
-		aiColor3D c = src.shader.color * src.shader.diffuse;
+		// FIX: Ignore diffuse == 0 
+		aiColor3D c = src.shader.color * (src.shader.diffuse.r ?  src.shader.diffuse : aiColor3D(1.f,1.f,1.f));
 		pcMat->AddProperty(&c,1,AI_MATKEY_COLOR_DIFFUSE);
 		c = src.shader.color * src.shader.specular;
 		pcMat->AddProperty(&c,1,AI_MATKEY_COLOR_SPECULAR);
@@ -1209,6 +1231,9 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 		{
 			s.Set(src.shader.texFile);
 			pcMat->AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(0));
+
+			if (aiTextureMapping_UV != src.shader.mapping)
+				pcMat->AddProperty((int*)&src.shader.mapping, 1,AI_MATKEY_MAPPING_DIFFUSE(0));
 		}
 
 		// setup the name of the material
@@ -1216,11 +1241,6 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 		{
 			s.Set(src.shader.texFile);
 			pcMat->AddProperty(&s,AI_MATKEY_NAME);
-		}
-
-		if (aiTextureMapping_UV != src.shader.mapping)
-		{
-			pcMat->AddProperty((int*)&src.shader.mapping, 1,AI_MATKEY_MAPPING_DIFFUSE(0));
 		}
 
 		// setup some more material properties that are specific to NFF2

@@ -139,8 +139,8 @@ void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
 	const static float LOWER_LIMIT = 0.1f;
 	const static float UPPER_LIMIT = 0.9f;
 
-	const static float LOWER_EPSILON = 1e-3f;
-	const static float UPPER_EPSILON = 1.f-1e-3f;
+	const static float LOWER_EPSILON = 10e-3f;
+	const static float UPPER_EPSILON = 1.f-10e-3f;
 
 	for (unsigned int fidx = 0; fidx < mesh->mNumFaces;++fidx)
 	{

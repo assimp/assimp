@@ -54,7 +54,6 @@ namespace Assimp
 // @param max Maximum number of characters to be written, including '\0'
 // @param number Number to be written
 // @return Number of bytes written. Including '\0'.
-// ---------------------------------------------------------------------------
 inline unsigned int itoa10( char* out, unsigned int max, int32_t number)
 {
 	ai_assert(NULL != out);
@@ -96,7 +95,6 @@ inline unsigned int itoa10( char* out, unsigned int max, int32_t number)
 // Secure template overload
 // The compiler should choose this function if he is able to determine the
 // size of the array automatically.
-// ---------------------------------------------------------------------------
 template <unsigned int length>
 inline unsigned int itoa10( char(& out)[length], int32_t number)
 {
@@ -113,12 +111,15 @@ inline unsigned int itoa10( char(& out)[length], int32_t number)
  *  \param s1 First input string
  *  \param s2 Second input string
  */
-// ---------------------------------------------------------------------------
 inline int ASSIMP_stricmp(const char *s1, const char *s2)
 {
 #if (defined _MSC_VER)
 
 	return ::_stricmp(s1,s2);
+
+#elif defined( __GNUC__ )
+
+	return ::strcasecmp(s1,s2);
 
 #else
 	register char c1, c2;
@@ -136,7 +137,6 @@ inline int ASSIMP_stricmp(const char *s1, const char *s2)
 // ---------------------------------------------------------------------------
 /** \brief Case independent comparison of two std::strings
  */
-// ---------------------------------------------------------------------------
 inline int ASSIMP_stricmp(const std::string& a, const std::string& b)
 {
 	register int i = (int)b.length()-(int)a.length();
@@ -154,12 +154,15 @@ inline int ASSIMP_stricmp(const std::string& a, const std::string& b)
  *  \param s2 Second input string
  *  \param n Macimum number of characters to compare
  */
-// ---------------------------------------------------------------------------
 inline int ASSIMP_strincmp(const char *s1, const char *s2, unsigned int n)
 {
 #if (defined _MSC_VER)
 
 	return ::_strnicmp(s1,s2,n);
+
+#elif defined( __GNUC__ )
+
+	return ::strncasecmp(s1,s2, n);
 
 #else
 	register char c1, c2;
@@ -175,6 +178,18 @@ inline int ASSIMP_strincmp(const char *s1, const char *s2, unsigned int n)
 	return c1 - c2;
 #endif
 }
+
+
+// ---------------------------------------------------------------------------
+// Evaluates an integer power. 
+inline unsigned int integer_pow (unsigned int base, unsigned int power)
+{
+	unsigned int res = 1;
+	for (unsigned int i = 0; i < power;++i)
+		res *= base;
+
+	return res;
 }
+} // end of namespace
 
 #endif // !  AI_STRINGCOMPARISON_H_INC

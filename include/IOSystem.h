@@ -78,7 +78,7 @@ public:
 	/** Compares two paths and check whether the point to identical files.
 	 *  
 	 * The dummy implementation of this virtual performs a 
-	 * case-insensitive comparison of the path strings.
+	 * case-insensitive comparison of the absolute path strings.
 	 * @param one First file
 	 * @param second Second file
 	 * @return true if the paths point to the same file. The file needn't

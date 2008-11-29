@@ -106,12 +106,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // *******************************************************************
 #ifdef ASSIMP_BUILD_BOOST_WORKAROUND
 
+#if _MSC_VER >= 1400
+#	pragma message( "AssimpBuild: Using -noBoost workaround" )
+#endif
+
 #	include "../include/BoostWorkaround/boost/scoped_ptr.hpp"
 #	include "../include/BoostWorkaround/boost/scoped_array.hpp"
 #	include "../include/BoostWorkaround/boost/format.hpp"
 #	include "../include/BoostWorkaround/boost/foreach.hpp"
 
 #else
+
+#if _MSC_VER >= 1400
+#	pragma message( "AssimpBuild: Using standard boost headers" )
+#endif
 
 #	include <boost/scoped_ptr.hpp>
 #	include <boost/scoped_array.hpp>

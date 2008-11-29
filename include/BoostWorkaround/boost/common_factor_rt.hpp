@@ -9,8 +9,9 @@ namespace math	{
 
 // TODO: use binary GCD for unsigned integers ....
 template < typename IntegerType >
-IntegerType  gcd( IntegerType const &a, IntegerType const &b )
+IntegerType  gcd( IntegerType a, IntegerType b )
 {
+	IntegerType zero = (IntegerType)0;
 	while ( true )
 	{
 		if ( a == zero )
@@ -24,7 +25,7 @@ IntegerType  gcd( IntegerType const &a, IntegerType const &b )
 }
 
 template < typename IntegerType >
-IntegerType  lcm( IntegerType const &a, IntegerType const &b )
+IntegerType  lcm( IntegerType a, IntegerType b )
 {
 	IntegerType t = gcd (a,b);
 	if (!t)return t;

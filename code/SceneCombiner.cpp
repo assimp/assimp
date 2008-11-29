@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SceneCombiner.h"
 #include "fast_atof.h"
 #include "Hash.h"
+#include "time.h"
 
 // ----------------------------------------------------------------------------
 // We need boost::random here. The workaround uses rand() instead of a proper
@@ -58,11 +59,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ----------------------------------------------------------------------------
 #ifdef ASSIMP_BUILD_BOOST_WORKAROUND
 
+#if _MSC_VER >= 1400
+#	pragma message( "AssimpBuild: Using -noBoost workaround for boost::random" )
+#endif
+
 #	include "../include/BoostWorkaround/boost/random/uniform_int.hpp"
 #	include "../include/BoostWorkaround/boost/random/variate_generator.hpp"
 #	include "../include/BoostWorkaround/boost/random/mersenne_twister.hpp"
 
 #else
+
+#if _MSC_VER >= 1400
+#	pragma message( "AssimpBuild: Using standard boost headers for boost::random" )
+#endif
 
 #	include <boost/random/uniform_int.hpp>
 #	include <boost/random/variate_generator.hpp>
@@ -289,7 +298,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 	{
 		// Construct a proper random number generator
 		boost::mt19937 rng( ::clock() );
-		boost::uniform_int<> dist(1,1 << 24u);
+		boost::uniform_int<> dist(1u,1 << 24u);
 		boost::variate_generator<boost::mt19937&, boost::uniform_int<> > rndGen(rng, dist);   
 
 		for (unsigned int i = 1; i < src.size();++i)

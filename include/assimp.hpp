@@ -39,29 +39,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Defines the CPP-API to the Open Asset Import Library. */
-#ifndef AI_ASSIMP_HPP_INC
-#define AI_ASSIMP_HPP_INC
+/** @file Defines the C++-API to the Open Asset Import Library. */
+#ifndef __AI_ASSIMP_HPP_INC__
+#define __AI_ASSIMP_HPP_INC__
 
 #ifndef __cplusplus
-#	error This header requires C++ to be used.
+#	error This header requires C++ to be used. Use Assimp's C-API (assimp.h) \
+          to access the library from C code.
 #endif
 
-
 #include <map>
-// public ASSIMP headers
+
+// Public ASSIMP headers
 #include "aiTypes.h"
 #include "aiConfig.h"
 #include "aiAssert.h"
 
 namespace Assimp
 {
-	// public interface
+	// Public interface
 	class Importer;
 	class IOStream;
 	class IOSystem;
 
-	// plugin development
+	// Plugin development
 	class BaseImporter;
 	class BaseProcess;
 	class SharedPostProcessInfo;
@@ -282,7 +283,7 @@ public:
 	* If the call succeeds, the contents of the file are returned as a 
 	* pointer to an aiScene object. The returned data is intended to be 
 	* read-only, the importer object keeps ownership of the data and will
-    * destroy it upon destruction. If the import failes, NULL is returned.
+   	* destroy it upon destruction. If the import failes, NULL is returned.
 	* A human-readable error description can be retrieved by calling 
 	* GetErrorString(). The previous scene will be deleted during this call.
 	* @param pFile Path and filename to the file to be imported.
@@ -303,8 +304,7 @@ public:
 	* @return A description of the last error, an empty string if no 
 	*   error occured.
 	*/
-	inline const std::string& GetErrorString() const 
-		{ return mErrorString; }
+	inline const std::string& GetErrorString() const;
 
 
 	// -------------------------------------------------------------------
@@ -346,10 +346,7 @@ public:
 	 *
 	 * @return Current scene or NULL if there is currently no scene loaded
 	 */
-	inline const aiScene* GetScene()
-	{
-		return mScene;
-	}
+	inline const aiScene* GetScene();
 
 
 	// -------------------------------------------------------------------
@@ -361,12 +358,7 @@ public:
 	 *
 	 * @return Current scene or NULL if there is currently no scene loaded
 	 */
-	inline const aiScene* GetOrphanedScene()
-	{
-			aiScene* scene = mScene;
-			mScene = NULL;
-			return scene;
-	}
+	inline const aiScene* GetOrphanedScene();
 
 
 	// -------------------------------------------------------------------
@@ -383,8 +375,7 @@ public:
 	* all steps behave consequently in the same manner when modifying
 	* data structures.
 	*/
-	inline void SetExtraVerbose(bool bDo)
-		{this->bExtraVerbose = bDo;}
+	inline void SetExtraVerbose(bool bDo);
 
 private:
 
@@ -392,7 +383,6 @@ private:
 	Importer(const Importer &other);
 
 protected:
-
 
 	/** IO handler to use for all file accesses. */
 	IOSystem* mIOHandler;
@@ -430,6 +420,31 @@ protected:
 	SharedPostProcessInfo* mPPShared;
 };
 
+// ---------------------------------------------------------------------------
+// inline methods for Importer
+inline const std::string& Importer::GetErrorString() const 
+{ 
+	return mErrorString;
+}
+
+inline void Importer::SetExtraVerbose(bool bDo)
+{
+	bExtraVerbose = bDo;
+}
+
+inline const aiScene* Importer::GetOrphanedScene()
+{
+	aiScene* scene = mScene;
+	mScene = NULL;
+	return scene;
+}
+
+inline const aiScene* Importer::GetScene()
+{
+	return mScene;
+}
+
+
 } // End of namespace Assimp
 
-#endif // AI_ASSIMP_HPP_INC
+#endif // __AI_ASSIMP_HPP_INC

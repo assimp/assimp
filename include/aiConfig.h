@@ -39,9 +39,50 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Defines constants for configurable properties */
+/** @file Defines constants for configurable properties and helper
+    functions to determine the version of the Assimp library being used  */
 #ifndef __AI_CONFIG_H_INC__
 #define __AI_CONFIG_H_INC__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// ---------------------------------------------------------------------------
+/** Returns a string with legal copyright and licensing information 
+ *  about Assimp.
+ *
+ *  @return Never NULL
+ */
+ASSIMP_API const char*  aiGetLegalString  ();
+
+// ---------------------------------------------------------------------------
+/** Returns the current minor version number of Assimp.
+ *
+ *  @return Minor version of the Assimp runtime the application was
+ *    linked/built against
+ */
+ASSIMP_API unsigned int aiGetVersionMinor ();
+
+// ---------------------------------------------------------------------------
+/** Returns the current major version number of Assimp.
+ *
+ *  @return Major version of the Assimp runtime the application was
+ *    linked/built against
+ */
+ASSIMP_API unsigned int aiGetVersionMajor ();
+
+// ---------------------------------------------------------------------------
+/** Returns the repository revision of the Assimp runtime.
+ *
+ *  @return Repository revision number of the Assimp runtime the application 
+ *    was linked/built against
+ */
+ASSIMP_API unsigned int aiGetVersionRevision ();
+
+#ifdef __cplusplus
+} // end extern "C"
+#endif
 
 // ---------------------------------------------------------------------------
 /** \brief Set the maximum number of vertices in a mesh.

@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <map>
+#include <vector>
 
 // Public ASSIMP headers
 #include "aiTypes.h"

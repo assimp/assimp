@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 #include "TargetAnimation.h"
+#include <algorithm>
 
 using namespace Assimp;
 
@@ -98,8 +99,8 @@ void KeyIterator::operator ++()
 	// to our current position on the time line
 	double d0,d1;
 	
-	d0 = objPos->at      ( std::min ( nextObjPos, objPos->size()-1)             ).mTime;
-	d1 = targetObjPos->at( std::min ( nextTargetObjPos, targetObjPos->size()-1) ).mTime;	
+	d0 = objPos->at      ( std::min<unsigned int> ( nextObjPos, objPos->size()-1)             ).mTime;
+	d1 = targetObjPos->at( std::min<unsigned int> ( nextTargetObjPos, targetObjPos->size()-1) ).mTime;	
 	
 	// Easiest case - all are identical. In this
 	// case we don't need to interpolate so we can

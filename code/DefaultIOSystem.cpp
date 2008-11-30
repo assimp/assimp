@@ -120,7 +120,11 @@ bool IOSystem::ComparePaths (const std::string& one,
 // Convert a relative path into an absolute path
 inline void MakeAbsolutePath (const std::string& in, char* _out)
 {
-	::_fullpath(_out, in.c_str(),PATHLIMIT);
+	#ifdef WIN32
+    ::_fullpath(_out, in.c_str(),PATHLIMIT);
+  #else
+    realpath(in.c_str(), _out);     //TODO not a save implementation realpath assumes that _out has the size PATH_MAX defined in limits.h; an error handling should be added to both versions
+  #endif
 }
 
 // ------------------------------------------------------------------------------------------------

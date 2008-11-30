@@ -239,7 +239,7 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 	pTarget->mNumMeshes = newMeshRefs.size();
 	if( newMeshRefs.size())
 	{
-		pTarget->mMeshes = new size_t[pTarget->mNumMeshes];
+		pTarget->mMeshes = new unsigned int[pTarget->mNumMeshes];
 		std::copy( newMeshRefs.begin(), newMeshRefs.end(), pTarget->mMeshes);
 	}
 }

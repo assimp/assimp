@@ -177,6 +177,11 @@ protected:
 	void ParseLightChunk();
 
 	// -------------------------------------------------------------------
+	/** Parse a camera chunk in the file
+	*/
+	void ParseCameraChunk();
+
+	// -------------------------------------------------------------------
 	/** Parse a face list chunk in the file
 	*/
 	void ParseFaceChunk();
@@ -237,6 +242,11 @@ protected:
 	/** Clamp all indices in the file to a valid range
 	*/
 	void CheckIndices(D3DS::Mesh& sMesh);
+
+	// -------------------------------------------------------------------
+	/** Skip the TCB info in a track key
+	*/
+	void SkipTCBInfo();
 
 protected:
 

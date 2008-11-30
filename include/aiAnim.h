@@ -74,6 +74,9 @@ struct aiVectorKey
 	bool operator < (const aiVectorKey& o) const
 		{return mTime < o.mTime;}
 
+	bool operator > (const aiVectorKey& o) const
+		{return mTime > o.mTime;}
+
 
 #endif
 };
@@ -103,6 +106,8 @@ struct aiQuatKey
 	bool operator < (const aiQuatKey& o) const
 		{return mTime < o.mTime;}
 
+	bool operator > (const aiQuatKey& o) const
+		{return mTime < o.mTime;}
 
 
 #endif

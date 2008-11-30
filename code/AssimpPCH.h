@@ -44,6 +44,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define ASSIMP_INTERNAL_BUILD
 
+#ifdef ASSIMP_BUILD_DLL_EXPORT
+#	if _MSC_VER >= 1400
+#		pragma message( "AssimpBuild: Building Windows DLL" )
+#	endif
+#endif
+
 // *******************************************************************
 // Print detailled memory allocation statistics? In this case we'll
 // need to overload all C++ memory management functions. It is assumed
@@ -56,6 +62,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	void *operator new[] (size_t);     
 	void operator delete[] (void *);
 
+#	if _MSC_VER >= 1400
+#		pragma message( "AssimpBuild: Memory tracking enabled" )
+#	endif
+
+#endif
+
+#if _MSC_VER >= 1400
+#	ifdef _DEBUG
+#		pragma message( "AssimpBuild: Debug build" )
+#	else
+#		pragma message( "AssimpBuild: Release build" )
+#	endif
 #endif
 
 // *******************************************************************

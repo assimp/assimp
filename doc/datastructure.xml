@@ -11,6 +11,15 @@
     <childnode />
     <childnode />
   </node>
+
+  <cameras>
+    <camera up="0,1,0" lookat="0,0,1" fov="45"/>
+  </cameras>
+
+  <lights>
+    <light diffuse="black" type="spot" phi="5" theta="15"/>
+  </lights>
+  
   <meshes>
     <mesh id="0">
       <meshheader type="MatID, Vertexcount, Facecount, a.s.o." />

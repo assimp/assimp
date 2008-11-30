@@ -97,6 +97,16 @@ public:
 		Blinn = 0x5
 	} shadetype3ds;
 
+	// Flags for animated keys
+	enum
+	{
+		KEY_USE_TENS         = 0x1,
+		KEY_USE_CONT         = 0x2,
+		KEY_USE_BIAS         = 0x4,
+		KEY_USE_EASE_TO      = 0x8,
+		KEY_USE_EASE_FROM    = 0x10
+	} ;
+
 	enum 
 	{
 
@@ -283,8 +293,20 @@ public:
 		CHUNK_TRACKLIGHT	= 0xB005,
 		CHUNK_TRACKLIGTGT	= 0xB006,
 		CHUNK_TRACKSPOTL	= 0xB007,
-		CHUNK_FRAMES		= 0xB008
+		CHUNK_FRAMES		= 0xB008,
 		// ********************************************************************
+
+		// light sub-chunks
+		CHUNK_DL_OFF                 = 0x4620,
+		CHUNK_DL_OUTER_RANGE         = 0x465A,
+		CHUNK_DL_INNER_RANGE         = 0x4659,
+		CHUNK_DL_MULTIPLIER          = 0x465B,
+		CHUNK_DL_EXCLUDE             = 0x4654,
+		CHUNK_DL_ATTENUATE           = 0x4625,
+		CHUNK_DL_SPOTLIGHT           = 0x4610,
+
+		// camera sub-chunks
+		CHUNK_CAM_RANGES             = 0x4720
 	};
 };
 
@@ -347,9 +369,7 @@ struct Material
 	mShading(Discreet3DS::Gouraud),
 	mTransparency		(1.0f),
 	mBumpHeight			(1.0f),
-	mTwoSided			(false),
-	iBakeUVTransform	(0),
-	pcSingleTexture		(NULL)
+	mTwoSided			(false)
 	{
 		static int iCnt = 0;
 		
@@ -395,10 +415,6 @@ struct Material
 	Texture sTexAmbient;
 	//! True if the material must be rendered from two sides
 	bool mTwoSided;
-
-	//! Used internally
-	unsigned int iBakeUVTransform;
-	Texture* pcSingleTexture;
 };
 
 // ---------------------------------------------------------------------------
@@ -449,6 +465,9 @@ struct aiFloatKey
 	// Only time is compared. This operator is defined
 	// for use with std::sort
 	bool operator < (const aiFloatKey& o) const
+		{return mTime < o.mTime;}
+
+	bool operator > (const aiFloatKey& o) const
 		{return mTime < o.mTime;}
 
 #endif

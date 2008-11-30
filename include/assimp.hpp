@@ -74,7 +74,7 @@ namespace Assimp
 
 struct aiScene;
 struct aiFileIO;
-extern "C" const aiScene* aiImportFileEx( const char*, unsigned int, aiFileIO*);
+extern "C" ASSIMP_API const aiScene* aiImportFileEx( const char*, unsigned int, aiFileIO*);
 
 namespace Assimp
 {

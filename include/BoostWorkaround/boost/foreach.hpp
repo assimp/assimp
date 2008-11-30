@@ -56,28 +56,6 @@ auto_any<typename T::const_iterator> end(T const& t)
     return t.end();
 }
 
-
-// const_iterator
-template<typename T>
-bool done(auto_any_base const& cur, auto_any_base const& end, T const&)
-{
-    typedef typename T::const_iterator iter_type;
-    return auto_any_cast<iter_type>(cur) == auto_any_cast<iter_type>(end);
-}
-
-template<typename T>
-void next(auto_any_base const& cur, T const&)
-{
-   ++auto_any_cast<typename T::const_iterator>(cur);
-}
-
-template<typename T>
-typename T::const_reference deref(auto_any_base const& cur, T const&)
-{
-    return *auto_any_cast<typename T::const_iterator>(cur);
-}
-
-
 // iterator
 template<typename T>
 bool done(auto_any_base const& cur, auto_any_base const& end, T&)

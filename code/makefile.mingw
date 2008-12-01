@@ -56,7 +56,6 @@ SOURCES = AssimpPCH.cpp \
 	ValidateDataStructure.cpp \
 	VertexTriangleAdjacency.cpp \
 	XFileImporter.cpp \
-	MDRLoader.cpp \
 	RawLoader.cpp \
 	OFFLoader.cpp \
 	SortByPTypeProcess.cpp \

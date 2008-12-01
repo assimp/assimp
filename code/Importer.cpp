@@ -84,9 +84,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_SMD_IMPORTER
 #	include "SMDLoader.h"
 #endif
-#ifndef AI_BUILD_NO_MDR_IMPORTER
-#	include "MDRLoader.h"
-#endif
 #ifndef AI_BUILD_NO_MDC_IMPORTER
 #	include "MDCLoader.h"
 #endif
@@ -247,9 +244,6 @@ Importer::Importer() :
 #endif
 #if (!defined AI_BUILD_NO_SMD_IMPORTER)
 	mImporter.push_back( new SMDImporter());
-#endif
-#if (!defined AI_BUILD_NO_MDR_IMPORTER)
-	mImporter.push_back( new MDRImporter());
 #endif
 #if (!defined AI_BUILD_NO_MDC_IMPORTER)
 	mImporter.push_back( new MDCImporter());

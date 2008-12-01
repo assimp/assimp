@@ -1612,22 +1612,6 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="MDR"
-					>
-					<File
-						RelativePath="..\..\code\MDRFileData.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\code\MDRLoader.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\code\MDRLoader.h"
-						>
-					</File>
-				</Filter>
-				<Filter
 					Name="VRML97"
 					>
 				</Filter>

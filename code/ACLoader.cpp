@@ -180,16 +180,11 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 	{
 		obj.type = Object::Group;
 	}
-	else if (!ASSIMP_strincmp(buffer,"poly",4))
-	{
-		obj.type = Object::Poly;
-	}
 	else if (!ASSIMP_strincmp(buffer,"world",5))
 	{
 		obj.type = Object::World;
 	}
-
-
+	else obj.type = Object::Poly;
 	while (GetNextLine())
 	{
 		if (TokenMatch(buffer,"kids",4))
@@ -227,6 +222,8 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 		{
 			SkipSpaces(&buffer);
 			AI_AC_CHECKED_LOAD_FLOAT_ARRAY("",0,2,&obj.texRepeat);
+			if (!obj.texRepeat.x || !obj.texRepeat.y)
+				obj.texRepeat = aiVector2D (1.f,1.f);
 		}
 		else if (TokenMatch(buffer,"texoff",6))
 		{
@@ -685,9 +682,12 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 	// compute the transformation offset to the parent node
 	node->mTransformation = aiMatrix4x4 ( object.rotation );
 
-	node->mTransformation.a4 = object.translation.x;
-	node->mTransformation.b4 = object.translation.y;
-	node->mTransformation.c4 = object.translation.z;
+	if (object.type == Object::Group || !object.numRefs)
+	{
+		node->mTransformation.a4 = object.translation.x;
+		node->mTransformation.b4 = object.translation.y;
+		node->mTransformation.c4 = object.translation.z;
+	}
 
 	// add children to the object
 	if (object.children.size())

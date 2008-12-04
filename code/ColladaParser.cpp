@@ -388,10 +388,14 @@ void ColladaParser::ReadEffect( Collada::Effect& pEffect)
 				ReadEffectColor( pEffect.mDiffuse, pEffect.mTexDiffuse);
 			else if( IsElement( "specular"))
 				ReadEffectColor( pEffect.mSpecular, pEffect.mTexSpecular);
-			else if( IsElement( "reflective"))
-				ReadEffectColor( pEffect.mReflective, std::string());
-			else if( IsElement( "transparent"))
-				ReadEffectColor( pEffect.mRefractive, std::string());
+			else if( IsElement( "reflective")){
+				std::string buf;
+        ReadEffectColor( pEffect.mReflective, buf);
+      }    
+			else if( IsElement( "transparent")){
+        std::string buf;
+				ReadEffectColor( pEffect.mRefractive,buf);
+      }    
 			else if( IsElement( "shininess"))
 				ReadEffectFloat( pEffect.mShininess);
 			else if( IsElement( "reflectivity"))
@@ -426,13 +430,18 @@ void ColladaParser::ReadEffectColor( aiColor4D& pColor, std::string& pSampler)
 			{
 				// text content contains 4 floats
 				const char* content = GetTextContent();
-				content = fast_atof_move( content, pColor.r);
+        float fBuf;    
+				content = fast_atof_move( content, fBuf);
+        pColor.r = fBuf;
 				SkipSpacesAndLineEnd( &content);
-				content = fast_atof_move( content, pColor.g);
+				content = fast_atof_move( content, fBuf);
+        pColor.g = fBuf;    
 				SkipSpacesAndLineEnd( &content);
-				content = fast_atof_move( content, pColor.b);
+				content = fast_atof_move( content, fBuf);
+        pColor.b = fBuf;    
 				SkipSpacesAndLineEnd( &content);
-				content = fast_atof_move( content, pColor.a);
+				content = fast_atof_move( content, fBuf);
+        pColor.a = fBuf;    
 				SkipSpacesAndLineEnd( &content);
 
 				TestClosing( "color");

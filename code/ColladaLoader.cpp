@@ -87,6 +87,12 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 	// parse the input file
 	ColladaParser parser( pFile);
 
+	if( !parser.mRootNode)
+		throw new ImportErrorException( "File came out empty. Somethings wrong here.");
+
+	// create the materials first, for the meshes to find
+	BuildMaterials( parser, pScene);
+
 	// build the node hierarchy from it
 	pScene->mRootNode = BuildHierarchy( parser, parser.mRootNode);
 
@@ -107,23 +113,6 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 
 	// store all meshes
 	StoreSceneMeshes( pScene);
-
-	// create dummy material
-	Assimp::MaterialHelper* mat = new Assimp::MaterialHelper;
-	aiString name( std::string( "dummy"));
-	mat->AddProperty( &name, AI_MATKEY_NAME);
-
-	int shadeMode = aiShadingMode_Phong;
-	mat->AddProperty<int>( &shadeMode, 1, AI_MATKEY_SHADING_MODEL);
-	aiColor4D colAmbient( 0.2f, 0.2f, 0.2f, 1.0f), colDiffuse( 0.8f, 0.8f, 0.8f, 1.0f), colSpecular( 0.5f, 0.5f, 0.5f, 0.5f);
-	mat->AddProperty( &colAmbient, 1, AI_MATKEY_COLOR_AMBIENT);
-	mat->AddProperty( &colDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
-	mat->AddProperty( &colSpecular, 1, AI_MATKEY_COLOR_SPECULAR);
-	float specExp = 5.0f;
-	mat->AddProperty( &specExp, 1, AI_MATKEY_SHININESS);
-	pScene->mNumMaterials = 1;
-	pScene->mMaterials = new aiMaterial*[1];
-	pScene->mMaterials[0] = mat;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -168,70 +157,100 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 			DefaultLogger::get()->warn( boost::str( boost::format( "Unable to find geometry for ID \"%s\". Skipping.") % mid.mMesh));
 			continue;
 		}
+		const Collada::Mesh* srcMesh = srcMeshIt->second;
 
-		// if we already have the mesh at the library, just add its index to the node's array
-		std::map<std::string, size_t>::const_iterator dstMeshIt = mMeshIndexbyID.find( mid.mMesh);
-		if( dstMeshIt != mMeshIndexbyID.end())
+		// build a mesh for each of its subgroups
+		size_t vertexStart = 0, faceStart = 0;
+		for( size_t sm = 0; sm < srcMesh->mSubMeshes.size(); ++sm)
 		{
-			newMeshRefs.push_back( dstMeshIt->second);
-		} else
-		{
-			// else we have to add the mesh to the collection and store its newly assigned index at the node
-			aiMesh* dstMesh = new aiMesh;
-			const Collada::Mesh* srcMesh = srcMeshIt->second;
+			const Collada::SubMesh& submesh = srcMesh->mSubMeshes[sm];
+			// find material assigned to this submesh
+			std::map<std::string, std::string>::const_iterator meshMatIt = mid.mMaterials.find( submesh.mMaterial);
+			std::string meshMaterial;
+			if( meshMatIt != mid.mMaterials.end())
+				meshMaterial = meshMatIt->second;
+			else
+				DefaultLogger::get()->warn( boost::str( boost::format( "No material specified for subgroup \"%s\" in geometry \"%s\".") % submesh.mMaterial % mid.mMesh));
 
-			// copy positions
-			dstMesh->mNumVertices = srcMesh->mPositions.size();
-			dstMesh->mVertices = new aiVector3D[dstMesh->mNumVertices];
-			std::copy( srcMesh->mPositions.begin(), srcMesh->mPositions.end(), dstMesh->mVertices);
+			// built lookup index of the Mesh-Submesh-Material combination
+			ColladaMeshIndex index( mid.mMesh, sm, meshMaterial);
 
-			// normals, if given. HACK: (thom) Due to the fucking Collada spec we never know if we have the same
-			// number of normals as there are positions. So we also ignore any vertex attribute if it has a different count
-			if( srcMesh->mNormals.size() == dstMesh->mNumVertices)
+			// if we already have the mesh at the library, just add its index to the node's array
+			std::map<ColladaMeshIndex, size_t>::const_iterator dstMeshIt = mMeshIndexByID.find( index);
+			if( dstMeshIt != mMeshIndexByID.end())
 			{
-				dstMesh->mNormals = new aiVector3D[dstMesh->mNumVertices];
-				std::copy( srcMesh->mNormals.begin(), srcMesh->mNormals.end(), dstMesh->mNormals);
-			}
-
-			// same for texturecoords, as many as we have
-			for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
+				newMeshRefs.push_back( dstMeshIt->second);
+			} else
 			{
-				if( srcMesh->mTexCoords[a].size() == dstMesh->mNumVertices)
+				// else we have to add the mesh to the collection and store its newly assigned index at the node
+				aiMesh* dstMesh = new aiMesh;
+
+				// count the vertices addressed by its faces
+				size_t numVertices = 
+					std::accumulate( srcMesh->mFaceSize.begin() + faceStart, srcMesh->mFaceSize.begin() + faceStart + submesh.mNumFaces, 0);
+
+				// copy positions
+				dstMesh->mNumVertices = numVertices;
+				dstMesh->mVertices = new aiVector3D[numVertices];
+				std::copy( srcMesh->mPositions.begin() + vertexStart, srcMesh->mPositions.begin() + vertexStart + numVertices, dstMesh->mVertices);
+
+				// normals, if given. HACK: (thom) Due to the fucking Collada spec we never know if we have the same
+				// number of normals as there are positions. So we also ignore any vertex attribute if it has a different count
+				if( srcMesh->mNormals.size() == srcMesh->mPositions.size())
 				{
-					dstMesh->mTextureCoords[a] = new aiVector3D[dstMesh->mNumVertices];
-					for( size_t b = 0; b < dstMesh->mNumVertices; ++b)
-						dstMesh->mTextureCoords[a][b].Set( srcMesh->mTexCoords[a][b].x, srcMesh->mTexCoords[a][b].y, 0.0f);
-					dstMesh->mNumUVComponents[a] = 2;
+					dstMesh->mNormals = new aiVector3D[numVertices];
+					std::copy( srcMesh->mNormals.begin() + vertexStart, srcMesh->mNormals.begin() + vertexStart + numVertices, dstMesh->mNormals);
 				}
-			}
 
-			// same for vertex colors, as many as we have
-			for( size_t a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
-			{
-				if( srcMesh->mColors[a].size() == dstMesh->mNumVertices)
+				// same for texturecoords, as many as we have
+				for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
 				{
-					dstMesh->mColors[a] = new aiColor4D[dstMesh->mNumVertices];
-					std::copy( srcMesh->mColors[a].begin(), srcMesh->mColors[a].end(), dstMesh->mColors[a]);
+					if( srcMesh->mTexCoords[a].size() == srcMesh->mPositions.size())
+					{
+						dstMesh->mTextureCoords[a] = new aiVector3D[numVertices];
+						for( size_t b = vertexStart; b < vertexStart + numVertices; ++b)
+							dstMesh->mTextureCoords[a][b].Set( srcMesh->mTexCoords[a][b].x, srcMesh->mTexCoords[a][b].y, 0.0f);
+						dstMesh->mNumUVComponents[a] = 2;
+					}
 				}
-			}
 
-			// create faces. Due to the fact that each face uses unique vertices, we can simply count up on each vertex
-			size_t vertex = 0;
-			dstMesh->mNumFaces = srcMesh->mFaceSize.size();
-			dstMesh->mFaces = new aiFace[dstMesh->mNumFaces];
-			for( size_t a = 0; a < dstMesh->mNumFaces; ++a)
-			{
-				size_t s = srcMesh->mFaceSize[a];
-				aiFace& face = dstMesh->mFaces[a];
-				face.mNumIndices = s;
-				face.mIndices = new unsigned int[s];
-				for( size_t b = 0; b < s; ++b)
-					face.mIndices[b] = vertex++;
-			}
+				// same for vertex colors, as many as we have
+				for( size_t a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
+				{
+					if( srcMesh->mColors[a].size() == srcMesh->mPositions.size())
+					{
+						dstMesh->mColors[a] = new aiColor4D[numVertices];
+						std::copy( srcMesh->mColors[a].begin() + vertexStart, srcMesh->mColors[a].begin() + vertexStart + numVertices, dstMesh->mColors[a]);
+					}
+				}
 
-			// store the mesh, and store its new index in the node
-			newMeshRefs.push_back( mMeshes.size());
-			mMeshes.push_back( dstMesh);
+				// create faces. Due to the fact that each face uses unique vertices, we can simply count up on each vertex
+				size_t vertex = 0;
+				dstMesh->mNumFaces = submesh.mNumFaces;
+				dstMesh->mFaces = new aiFace[dstMesh->mNumFaces];
+				for( size_t a = 0; a < dstMesh->mNumFaces; ++a)
+				{
+					size_t s = srcMesh->mFaceSize[ faceStart + a];
+					aiFace& face = dstMesh->mFaces[a];
+					face.mNumIndices = s;
+					face.mIndices = new unsigned int[s];
+					for( size_t b = 0; b < s; ++b)
+						face.mIndices[b] = vertex++;
+				}
+
+				// store the mesh, and store its new index in the node
+				newMeshRefs.push_back( mMeshes.size());
+				mMeshIndexByID[index] = mMeshes.size();
+				mMeshes.push_back( dstMesh);
+				vertexStart += numVertices; faceStart += submesh.mNumFaces;
+
+				// assign the material index
+				std::map<std::string, size_t>::const_iterator matIt = mMaterialIndexByName.find( meshMaterial);
+				if( matIt != mMaterialIndexByName.end())
+					dstMesh->mMaterialIndex = matIt->second;
+				else
+					dstMesh->mMaterialIndex = 0;
+			}
 		}
 	}
 
@@ -254,4 +273,107 @@ void ColladaLoader::StoreSceneMeshes( aiScene* pScene)
 		pScene->mMeshes = new aiMesh*[mMeshes.size()];
 		std::copy( mMeshes.begin(), mMeshes.end(), pScene->mMeshes);
 	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Constructs materials from the collada material definitions
+void ColladaLoader::BuildMaterials( const ColladaParser& pParser, aiScene* pScene)
+{
+	std::vector<aiMaterial*> newMats;
+
+	for( ColladaParser::MaterialLibrary::const_iterator matIt = pParser.mMaterialLibrary.begin(); matIt != pParser.mMaterialLibrary.end(); ++matIt)
+	{
+		const Collada::Material& material = matIt->second;
+		// a material is only a reference to an effect
+		ColladaParser::EffectLibrary::const_iterator effIt = pParser.mEffectLibrary.find( material.mEffect);
+		if( effIt == pParser.mEffectLibrary.end())
+			continue;
+		const Collada::Effect& effect = effIt->second;
+
+		// create material
+		Assimp::MaterialHelper* mat = new Assimp::MaterialHelper;
+		aiString name( matIt->first);
+		mat->AddProperty( &name, AI_MATKEY_NAME);
+
+		int shadeMode;
+		switch( effect.mShadeType)
+		{
+			case Collada::Shade_Constant: shadeMode = aiShadingMode_NoShading; break;
+			case Collada::Shade_Lambert: shadeMode = aiShadingMode_Gouraud; break;
+			case Collada::Shade_Blinn: shadeMode = aiShadingMode_Blinn; break;
+			default: shadeMode = aiShadingMode_Phong; break;
+		}
+		mat->AddProperty<int>( &shadeMode, 1, AI_MATKEY_SHADING_MODEL);
+
+		mat->AddProperty( &effect.mAmbient, 1, AI_MATKEY_COLOR_AMBIENT);
+		mat->AddProperty( &effect.mDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
+		mat->AddProperty( &effect.mSpecular, 1, AI_MATKEY_COLOR_SPECULAR);
+		mat->AddProperty( &effect.mEmissive, 1, AI_MATKEY_COLOR_EMISSIVE);
+		mat->AddProperty( &effect.mShininess, 1, AI_MATKEY_SHININESS);
+		mat->AddProperty( &effect.mRefractIndex, 1, AI_MATKEY_REFRACTI);
+		
+		// add textures, if given
+		if( !effect.mTexAmbient.empty())
+			mat->AddProperty( &FindFilenameForEffectTexture( pParser, effect, effect.mTexAmbient), AI_MATKEY_TEXTURE_AMBIENT( 0));
+		if( !effect.mTexDiffuse.empty())
+			mat->AddProperty( &FindFilenameForEffectTexture( pParser, effect, effect.mTexDiffuse), AI_MATKEY_TEXTURE_DIFFUSE( 0));
+		if( !effect.mTexEmissive.empty())
+			mat->AddProperty( &FindFilenameForEffectTexture( pParser, effect, effect.mTexEmissive), AI_MATKEY_TEXTURE_EMISSIVE( 0));
+		if( !effect.mTexSpecular.empty())
+			mat->AddProperty( &FindFilenameForEffectTexture( pParser, effect, effect.mTexSpecular), AI_MATKEY_TEXTURE_SPECULAR( 0));
+
+		// store the material
+		mMaterialIndexByName[matIt->first] = newMats.size();
+		newMats.push_back( mat);
+	}
+
+	// store a dummy material if none were given
+	if( newMats.size() == 0)
+	{
+		Assimp::MaterialHelper* mat = new Assimp::MaterialHelper;
+		aiString name( std::string( "dummy"));
+		mat->AddProperty( &name, AI_MATKEY_NAME);
+
+		int shadeMode = aiShadingMode_Phong;
+		mat->AddProperty<int>( &shadeMode, 1, AI_MATKEY_SHADING_MODEL);
+		aiColor4D colAmbient( 0.2f, 0.2f, 0.2f, 1.0f), colDiffuse( 0.8f, 0.8f, 0.8f, 1.0f), colSpecular( 0.5f, 0.5f, 0.5f, 0.5f);
+		mat->AddProperty( &colAmbient, 1, AI_MATKEY_COLOR_AMBIENT);
+		mat->AddProperty( &colDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
+		mat->AddProperty( &colSpecular, 1, AI_MATKEY_COLOR_SPECULAR);
+		float specExp = 5.0f;
+		mat->AddProperty( &specExp, 1, AI_MATKEY_SHININESS);
+	}
+
+	// store the materials in the scene
+	pScene->mNumMaterials = newMats.size();
+	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
+	std::copy( newMats.begin(), newMats.end(), pScene->mMaterials);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Resolves the texture name for the given effect texture entry
+const aiString& ColladaLoader::FindFilenameForEffectTexture( const ColladaParser& pParser, const Collada::Effect& pEffect, const std::string& pName)
+{
+	// recurse through the param references until we end up at an image
+	std::string name = pName;
+	while( 1)
+	{
+		// the given string is a param entry. Find it
+		Collada::Effect::ParamLibrary::const_iterator it = pEffect.mParams.find( name);
+		// if not found, we're at the end of the recursion. The resulting string should be the image ID
+		if( it == pEffect.mParams.end())
+			break;
+
+		// else recurse on
+		name = it->second.mReference;
+	}
+
+	// find the image referred by this name in the image library of the scene
+	ColladaParser::ImageLibrary::const_iterator imIt = pParser.mImageLibrary.find( name);
+	if( imIt == pParser.mImageLibrary.end())
+		throw new ImportErrorException( boost::str( boost::format( "Unable to resolve effect texture entry \"%s\", ended up at ID \"%s\".") % pName % name));
+
+	static aiString result;
+	result.Set( imIt->second.mFileName);
+	return result;
 }

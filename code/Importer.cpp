@@ -541,10 +541,8 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 	// put a large try block around everything to catch all std::exception's
 	// that might be thrown by STL containers or by new(). 
 	// ImportErrorException's are throw by ourselves and caught elsewhere.
-#ifndef _DEBUG
 	try
 	{
-#endif 
 		// check whether this Importer instance has already loaded
 		// a scene. In this case we need to delete the old one
 		if (this->mScene)
@@ -644,7 +642,6 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 
 		// clear any data allocated by post-process steps
 		mPPShared->Clean();
-#ifndef _DEBUG
 	}
 	catch (std::exception &e)
 	{
@@ -659,7 +656,6 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 		DefaultLogger::get()->error(mErrorString);
 		delete mScene;mScene = NULL;
 	}
-#endif
 
 	// either successful or failure - the pointer expresses it anyways
 	return mScene;

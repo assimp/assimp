@@ -144,6 +144,13 @@ struct InputChannel
 	InputChannel() { mType = IT_Invalid; mIndex = 0; mOffset = 0; mResolved = NULL; }
 };
 
+/** Subset of a mesh with a certain material */
+struct SubMesh
+{
+	std::string mMaterial; ///< subgroup identifier
+	size_t mNumFaces; ///< number of faces in this submesh
+};
+
 /** Contains data for a single mesh */
 struct Mesh
 {
@@ -158,6 +165,9 @@ struct Mesh
 
 	// Faces. Stored are only the number of vertices for each face. 1 == point, 2 == line, 3 == triangle, 4+ == poly
 	std::vector<size_t> mFaceSize;
+
+	// Submeshes in this mesh, each with a given material
+	std::vector<SubMesh> mSubMeshes;
 };
 
 /** Which type of primitives the ReadPrimitives() function is going to read */
@@ -179,6 +189,20 @@ struct Material
 	std::string mEffect;
 };
 
+/** Type of the effect param */
+enum ParamType
+{
+	Param_Sampler,
+	Param_Surface
+};
+
+/** A param for an effect. Might be of several types, but they all just refer to each other, so I summarize them */
+struct EffectParam
+{
+	ParamType mType;
+	std::string mReference; // to which other thing the param is referring to. 
+};
+
 /** Shading type supported by the standard effect spec of Collada */
 enum ShadeType
 {
@@ -194,18 +218,25 @@ enum ShadeType
 struct Effect
 {
 	ShadeType mShadeType;
-	aiColor4D mEmmisive, mAmbient, mDiffuse, mSpecular;
-	aiColor4D mReflectivity, mRefractivity;
-	std::string mTexEmmisive, mTexAmbient, mTexDiffuse, mTexSpecular;
+	aiColor4D mEmissive, mAmbient, mDiffuse, mSpecular;
+	aiColor4D mReflective, mRefractive;
+	std::string mTexEmissive, mTexAmbient, mTexDiffuse, mTexSpecular;
 	float mShininess, mRefractIndex;
+	float mReflectivity, mRefractivity;
 
-	Effect() : mEmmisive( 0, 0, 0, 1), mAmbient( 0.1f, 0.1f, 0.1f, 1),
+	// local params referring to each other by their SID
+	typedef std::map<std::string, Collada::EffectParam> ParamLibrary;
+	ParamLibrary mParams;
+	
+	Effect() : mEmissive( 0, 0, 0, 1), mAmbient( 0.1f, 0.1f, 0.1f, 1),
 		mDiffuse( 0.6f, 0.6f, 0.6f, 1), mSpecular( 0.4f, 0.4f, 0.4f, 1),
-		mReflectivity( 0, 0, 0, 0), mRefractivity( 0, 0, 0, 0)
+		mReflective( 0, 0, 0, 0), mRefractive( 0, 0, 0, 0)
 	{ 
 		mShadeType = Shade_Phong; 
-		mShininess = 10;
-		mRefractIndex = 1;
+		mShininess = 10.0f;
+		mRefractIndex = 1.0f;
+		mReflectivity = 0.0f;
+		mRefractivity = 0.0f;
 	}
 };
 

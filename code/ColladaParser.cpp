@@ -112,6 +112,12 @@ void ColladaParser::ReadStructure()
 		{
 			if( IsElement( "asset"))
 				ReadAssetInfo();
+			else if( IsElement( "library_images"))
+				ReadImageLibrary();
+			else if( IsElement( "library_materials"))
+				ReadMaterialLibrary();
+			else if( IsElement( "library_effects"))
+				ReadEffectLibrary();
 			else if( IsElement( "library_geometries"))
 				ReadGeometryLibrary();
 			else if( IsElement( "library_visual_scenes"))
@@ -289,7 +295,7 @@ void ColladaParser::ReadMaterial( Collada::Material& pMaterial)
 				if( url[0] != '#')
 					ThrowException( "Unknown reference format");
 
-				pMaterial.mEffect = url;
+				pMaterial.mEffect = url+1;
 
 				SkipElement();
 			} else
@@ -312,12 +318,214 @@ void ColladaParser::ReadMaterial( Collada::Material& pMaterial)
 // Reads the effect library
 void ColladaParser::ReadEffectLibrary()
 {
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
+		{
+			if( IsElement( "effect"))
+			{
+				// read ID. Do I have to repeat my ranting about "optional" attributes?
+				int attrID = GetAttribute( "id");
+				std::string id = mReader->getAttributeValue( attrID);
+
+				// create an entry and store it in the library under its ID
+				mEffectLibrary[id] = Effect();
+				// read on from there
+				ReadEffect( mEffectLibrary[id]);
+			} else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
+		{
+			if( strcmp( mReader->getNodeName(), "library_effects") != 0)
+				ThrowException( "Expected end of \"library_effects\" element.");
+
+			break;
+		}
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
 // Reads an effect entry into the given effect
-void ColladaParser::ReadEffect( Collada::Effect* pEffect)
+void ColladaParser::ReadEffect( Collada::Effect& pEffect)
 {
+	// for the moment we don't support any other type of effect.
+	// TODO: (thom) Rewrite this so that it ignores the whole effect instead of bailing out
+	TestOpening( "profile_COMMON");
+
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
+		{
+			if( IsElement( "newparam"))
+			{
+				// save ID
+				int attrSID = GetAttribute( "sid");
+				std::string sid = mReader->getAttributeValue( attrSID);
+				pEffect.mParams[sid] = EffectParam();
+				ReadEffectParam( pEffect.mParams[sid]);
+			} 
+			else if( IsElement( "technique"))
+			{
+				// just syntactic sugar
+			}
+			else if( IsElement( "phong"))
+				pEffect.mShadeType = Shade_Phong;
+			else if( IsElement( "constant"))
+				pEffect.mShadeType = Shade_Constant;
+			else if( IsElement( "lambert"))
+				pEffect.mShadeType = Shade_Lambert;
+			else if( IsElement( "blinn"))
+				pEffect.mShadeType = Shade_Blinn;
+			else if( IsElement( "emission"))
+				ReadEffectColor( pEffect.mEmissive, pEffect.mTexEmissive);
+			else if( IsElement( "ambient"))
+				ReadEffectColor( pEffect.mAmbient, pEffect.mTexAmbient);
+			else if( IsElement( "diffuse"))
+				ReadEffectColor( pEffect.mDiffuse, pEffect.mTexDiffuse);
+			else if( IsElement( "specular"))
+				ReadEffectColor( pEffect.mSpecular, pEffect.mTexSpecular);
+			else if( IsElement( "reflective"))
+				ReadEffectColor( pEffect.mReflective, std::string());
+			else if( IsElement( "transparent"))
+				ReadEffectColor( pEffect.mRefractive, std::string());
+			else if( IsElement( "shininess"))
+				ReadEffectFloat( pEffect.mShininess);
+			else if( IsElement( "reflectivity"))
+				ReadEffectFloat( pEffect.mReflectivity);
+			else if( IsElement( "transparency"))
+				ReadEffectFloat( pEffect.mRefractivity);
+			else if( IsElement( "index_of_refraction"))
+				ReadEffectFloat( pEffect.mRefractIndex);
+			else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
+		{
+			if( strcmp( mReader->getNodeName(), "effect") == 0)
+				break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads an effect entry containing a color or a texture defining that color
+void ColladaParser::ReadEffectColor( aiColor4D& pColor, std::string& pSampler)
+{
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
+		{
+			if( IsElement( "color"))
+			{
+				// text content contains 4 floats
+				const char* content = GetTextContent();
+				content = fast_atof_move( content, pColor.r);
+				SkipSpacesAndLineEnd( &content);
+				content = fast_atof_move( content, pColor.g);
+				SkipSpacesAndLineEnd( &content);
+				content = fast_atof_move( content, pColor.b);
+				SkipSpacesAndLineEnd( &content);
+				content = fast_atof_move( content, pColor.a);
+				SkipSpacesAndLineEnd( &content);
+
+				TestClosing( "color");
+			} 
+			else if( IsElement( "texture"))
+			{
+				int attrTex = GetAttribute( "texture");
+				pSampler = mReader->getAttributeValue( attrTex);
+				SkipElement();
+			} else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
+		{
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads an effect entry containing a float
+void ColladaParser::ReadEffectFloat( float& pFloat)
+{
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
+		{
+			if( IsElement( "float"))
+			{
+				// text content contains a single floats
+				const char* content = GetTextContent();
+				content = fast_atof_move( content, pFloat);
+				SkipSpacesAndLineEnd( &content);
+
+				TestClosing( "float");
+			} else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
+		{
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads an effect parameter specification of any kind 
+void ColladaParser::ReadEffectParam( Collada::EffectParam& pParam)
+{
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
+		{
+			if( IsElement( "surface"))
+			{
+				// image ID given inside <init_from> tags
+				TestOpening( "init_from");
+				const char* content = GetTextContent();
+				pParam.mType = Param_Surface;
+				pParam.mReference = content;
+				TestClosing( "init_from");
+
+				// don't care for remaining stuff
+				SkipElement( "surface");
+			} 
+			else if( IsElement( "sampler2D"))
+			{
+				// surface ID is given inside <source> tags
+				TestOpening( "source");
+				const char* content = GetTextContent();
+				pParam.mType = Param_Sampler;
+				pParam.mReference = content;
+				TestClosing( "source");
+
+				// don't care for remaining stuff
+				SkipElement( "sampler2D");
+			} else
+			{
+				// ignore unknown element
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
+		{
+			break;
+		}
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -583,6 +791,14 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 	// read primitive count from the attribute
 	int attrCount = GetAttribute( "count");
 	size_t numPrimitives = (size_t) mReader->getAttributeValueAsInt( attrCount);
+
+	// material subgroup 
+	int attrMaterial = TestAttribute( "material");
+	SubMesh subgroup;
+	if( attrMaterial > -1)
+		subgroup.mMaterial = mReader->getAttributeValue( attrMaterial);
+	subgroup.mNumFaces = numPrimitives;
+	pMesh->mSubMeshes.push_back( subgroup);
 
 	// distinguish between polys and triangles
 	std::string elementName = mReader->getNodeName();
@@ -1020,36 +1236,36 @@ void ColladaParser::ReadNodeGeometry( Node* pNode)
 	Collada::MeshInstance instance;
 	instance.mMesh = url+1; // skipping the leading #
 
-	// read material associations. Ignore additional elements inbetween
-	while( mReader->read())
+	if( !mReader->isEmptyElement())
 	{
-		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
+		// read material associations. Ignore additional elements inbetween
+		while( mReader->read())
 		{
-			if( IsElement( "instance_material"))
+			if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
 			{
-				// read ID of the geometry subgroup and the target material
-				int attrGroup = GetAttribute( "symbol");
-				std::string group = mReader->getAttributeValue( attrGroup);
-				int attrMaterial = GetAttribute( "target");
-				const char* urlMat = mReader->getAttributeValue( attrMaterial);
-				if( urlMat[0] != '#')
-					ThrowException( "Unknown reference format");
-				std::string mat = mReader->getAttributeValue( attrMaterial+1);
+				if( IsElement( "instance_material"))
+				{
+					// read ID of the geometry subgroup and the target material
+					int attrGroup = GetAttribute( "symbol");
+					std::string group = mReader->getAttributeValue( attrGroup);
+					int attrMaterial = GetAttribute( "target");
+					const char* urlMat = mReader->getAttributeValue( attrMaterial);
+					if( urlMat[0] != '#')
+						ThrowException( "Unknown reference format");
+					std::string mat = urlMat+1;
 
-				// store the association
-				instance.mMaterials[group] = mat;
-			} else
+					// store the association
+					instance.mMaterials[group] = mat;
+				} 
+			} 
+			else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
 			{
-				SkipElement();
-			}
-		} 
-		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
-		{
-			if( strcmp( mReader->getNodeName(), "instance_geometry") == 0)
-				break;
-		} 
+				if( strcmp( mReader->getNodeName(), "instance_geometry") == 0)
+					break;
+			} 
+		}
 	}
-	
+
 	// store it
 	pNode->mMeshes.push_back( instance);
 }
@@ -1106,9 +1322,17 @@ void ColladaParser::SkipElement()
 	if( mReader->isEmptyElement())
 		return;
 
+	// reroute
+	SkipElement( mReader->getNodeName());
+}
+
+// ------------------------------------------------------------------------------------------------
+// Skips all data until the end node of the given element
+void ColladaParser::SkipElement( const char* pElement)
+{
 	// copy the current node's name because it'a pointer to the reader's internal buffer, 
 	// which is going to change with the upcoming parsing 
-	std::string element = mReader->getNodeName();
+	std::string element = pElement;
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)

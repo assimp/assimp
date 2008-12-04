@@ -49,6 +49,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp
 {
 
+struct ColladaMeshIndex
+{
+	std::string mMeshID;
+	size_t mSubMesh;
+	std::string mMaterial;
+	ColladaMeshIndex( const std::string& pMeshID, size_t pSubMesh, const std::string& pMaterial) 
+		: mMeshID( pMeshID), mSubMesh( pSubMesh), mMaterial( pMaterial)
+	{   }
+
+	bool operator < (const ColladaMeshIndex& p) const
+	{
+		if( mMeshID == p.mMeshID) 
+		{
+			if( mSubMesh == p.mSubMesh)
+				return mMaterial < p.mMaterial;
+			else 
+				return mSubMesh < p.mSubMesh;
+		} else
+		{
+			return mMeshID < p.mMeshID;
+		}
+	}
+};
+
 /** Loader class to read Collada scenes. Collada is over-engineered to death, with every new iteration bringing
  * more useless stuff, so I limited the data to what I think is useful for games. 
 */
@@ -91,12 +115,21 @@ protected:
 	/** Stores all meshes in the given scene */
 	void StoreSceneMeshes( aiScene* pScene);
 
+	/** Constructs materials from the collada material definitions */
+	void BuildMaterials( const ColladaParser& pParser, aiScene* pScene);
+
+	/** Resolves the texture name for the given effect texture entry */
+	const aiString& FindFilenameForEffectTexture( const ColladaParser& pParser, const Collada::Effect& pEffect, const std::string& pName);
+
 protected:
 	/** Filename, for a verbose error message */
 	std::string mFileName;
 
 	/** Which mesh-material compound was stored under which mesh ID */
-	std::map<std::string, size_t> mMeshIndexbyID;
+	std::map<ColladaMeshIndex, size_t> mMeshIndexByID;
+
+	/** Which material was stored under which index in the scene */
+	std::map<std::string, size_t> mMaterialIndexByName;
 
 	/** Accumulated meshes for the target scene */
 	std::vector<aiMesh*> mMeshes;

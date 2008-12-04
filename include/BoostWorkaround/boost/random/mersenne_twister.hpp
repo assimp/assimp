@@ -2,10 +2,6 @@
 #ifndef BOOST_MT_INCLUDED
 #define BOOST_MT_INCLUDED
 
-#if _MSC_VER >= 1400
-#	pragma message( "AssimpBuild: Using CRT's rand() as replacement for mt19937" )
-#endif
-
 namespace boost
 {
 

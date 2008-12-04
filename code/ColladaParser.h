@@ -88,7 +88,15 @@ protected:
 	void ReadEffectLibrary();
 
 	/** Reads an effect entry into the given effect*/
-	void ReadEffect( Collada::Effect* pEffect);
+	void ReadEffect( Collada::Effect& pEffect);
+
+	/** Reads an effect entry containing a color or a texture defining that color */
+	void ReadEffectColor( aiColor4D& pColor, std::string& pSampler);
+	/** Reads an effect entry containing a float */
+	void ReadEffectFloat( float& pFloat);
+
+	/** Reads an effect parameter specification of any kind */
+	void ReadEffectParam( Collada::EffectParam& pParam);
 
 	/** Reads the geometry library contents */
 	void ReadGeometryLibrary();
@@ -141,6 +149,9 @@ protected:
 
 	/** Skips all data until the end node of the current element */
 	void SkipElement();
+
+	/** Skips all data until the end node of the given element */
+	void SkipElement( const char* pElement);
 
 	/** Compares the current xml element name to the given string and returns true if equal */
 	bool IsElement( const char* pName) const { assert( mReader->getNodeType() == irr::io::EXN_ELEMENT); return strcmp( mReader->getNodeName(), pName) == 0; }

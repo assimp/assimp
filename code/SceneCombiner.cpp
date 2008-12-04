@@ -59,19 +59,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ----------------------------------------------------------------------------
 #ifdef ASSIMP_BUILD_BOOST_WORKAROUND
 
-#if _MSC_VER >= 1400
-#	pragma message( "AssimpBuild: Using -noBoost workaround for boost::random" )
-#endif
-
 #	include "../include/BoostWorkaround/boost/random/uniform_int.hpp"
 #	include "../include/BoostWorkaround/boost/random/variate_generator.hpp"
 #	include "../include/BoostWorkaround/boost/random/mersenne_twister.hpp"
 
 #else
-
-#if _MSC_VER >= 1400
-#	pragma message( "AssimpBuild: Using standard boost headers for boost::random" )
-#endif
 
 #	include <boost/random/uniform_int.hpp>
 #	include <boost/random/variate_generator.hpp>

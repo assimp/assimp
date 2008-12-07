@@ -102,4 +102,4 @@ void CommentRemover::RemoveMultiLineComments(const char* szCommentStart,
 	}
 }
 
-}; // !! Assimp
+} // !! Assimp

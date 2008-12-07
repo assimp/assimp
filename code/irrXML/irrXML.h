@@ -172,7 +172,7 @@ namespace io
 		ETF_UTF32_BE,
 
 		//! UTF-32 format, little endian
-		ETF_UTF32_LE,
+		ETF_UTF32_LE
 	};
 
 

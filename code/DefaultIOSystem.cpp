@@ -46,6 +46,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DefaultIOSystem.h"
 #include "DefaultIOStream.h"
 
+#ifdef __unix__
+#include <sys/param.h>
+#include <stdlib.h>
+#endif
+
 using namespace Assimp;
 
 
@@ -113,18 +118,19 @@ bool IOSystem::ComparePaths (const std::string& one,
 	return !ASSIMP_stricmp(one,second);
 }
 
-// this should be sufficient for all platforms :D
-#define PATHLIMIT 1024
+// this should be sufficient for all platforms :D -- not really :->
+#define PATHLIMIT 4096 
 
 // ------------------------------------------------------------------------------------------------
 // Convert a relative path into an absolute path
 inline void MakeAbsolutePath (const std::string& in, char* _out)
 {
-	#ifdef WIN32
-    ::_fullpath(_out, in.c_str(),PATHLIMIT);
-  #else
-    realpath(in.c_str(), _out);     //TODO not a save implementation realpath assumes that _out has the size PATH_MAX defined in limits.h; an error handling should be added to both versions
-  #endif
+#ifdef _WIN32
+	::_fullpath(_out, in.c_str(),PATHLIMIT);
+#else
+    // use realpath
+    realpath(in.c_str(), _out);
+#endif    
 }
 
 // ------------------------------------------------------------------------------------------------

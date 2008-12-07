@@ -258,7 +258,7 @@ enum aiPostProcessSteps
 	 * Most applications won't support UV transformations, so you will
 	 * propably want to specify this step in every case.
 	*/
-	aiProcess_TransformUVCoords = 0x80000,
+	aiProcess_TransformUVCoords = 0x80000
 };
 
 

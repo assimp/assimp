@@ -17,7 +17,7 @@
   </asset>
   <library_images>
     <image id="Map__1-image" name="Map__1">
-      <init_from>\..\LWOFiles\LWO2\MappingModes\EarthCylindric.jpg</init_from>
+      <init_from>\..\LWO\LWO2\MappingModes\EarthCylindric.jpg</init_from>
     </image>
   </library_images>
   <library_materials>

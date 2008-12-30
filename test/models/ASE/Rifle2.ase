@@ -32,7 +32,7 @@
 		*MAP_CLASS "Bitmap"
 		*MAP_SUBNO 1
 		*MAP_AMOUNT 1.0000
-		*BITMAP "C:/Users/ACG/Desktop/ASSIMP/assimp3/trunk/test/3DSFiles/m_rifl.bmp"
+		*BITMAP "../3DS/m_rifl.bmp"
 		*MAP_TYPE Screen
 		*UVW_U_OFFSET 0.000000
 		*UVW_V_OFFSET 0.000000

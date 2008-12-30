@@ -17,7 +17,7 @@
   </asset>
   <library_images>
     <image id="Map__1-image" name="Map__1">
-      <init_from>file://C:\Users\ACG\Desktop\ASSIMP\assimp3\trunk\test\LWOFiles\LWO2\MappingModes\earthSpherical.jpg</init_from>
+      <init_from>file://..\LWO\LWO2\MappingModes\earthSpherical.jpg</init_from>
     </image>
   </library_images>
   <library_materials>

@@ -66,6 +66,13 @@ void ScenePreprocessor::ProcessScene (aiScene* _scene)
 // ---------------------------------------------------------------------------
 void ScenePreprocessor::ProcessMesh (aiMesh* mesh)
 {
+	// If aiMesh::mNumUVComponents is *not* set assign the default value of 2
+	for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i)
+	{
+		if (!mesh->mNumUVComponents[i])
+			mesh->mNumUVComponents[i] = 2;
+	}
+
 	// If the information which primitive types are there in the
 	// mesh is currently not available, compute it.
 	if (!mesh->mPrimitiveTypes)

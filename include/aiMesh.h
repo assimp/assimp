@@ -388,7 +388,6 @@ struct aiMesh
 	* or cube maps). If the value is 2 for a given channel n, the
 	* component p.z of mTextureCoords[n][p] is set to 0.0f.
 	* If the value is 1 for a given channel, p.y is set to 0.0f, too.
-	* If this value is 0, 2 should be assumed.
 	* @note 4D coords are not supported 
 	*/
 	unsigned int mNumUVComponents[AI_MAX_NUMBER_OF_TEXTURECOORDS];

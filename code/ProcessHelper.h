@@ -116,7 +116,7 @@ inline const char* TextureTypeToString(aiTextureType in)
 	case aiTextureType_SHININESS:
 		return "Shininess";
     default:
-        return "LARGE ERROR, please leave the room immediately and call the police";        
+        return "HUGE ERROR, please leave the room immediately and call the police";        
 	}
 }
 
@@ -139,7 +139,7 @@ inline const char* MappingTypeToString(aiTextureMapping in)
 	case aiTextureMapping_OTHER:
 		return "Other";
     default:
-        return "LARGE ERROR, please leave the room immediately and call the police";        
+        return "HUGE ERROR, please leave the room immediately and call the police";        
 	}
 }
 
@@ -187,5 +187,5 @@ class DestroySpatialSortProcess : public BaseProcess
 	}
 };
 
-} // !! Assimp
+} // ! namespace Assimp
 #endif // !! AI_PROCESS_HELPER_H_INCLUDED

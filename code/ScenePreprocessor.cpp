@@ -69,7 +69,10 @@ void ScenePreprocessor::ProcessMesh (aiMesh* mesh)
 	// If aiMesh::mNumUVComponents is *not* set assign the default value of 2
 	for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i)
 	{
-		if (!mesh->mNumUVComponents[i])
+		if (!mesh->mTextureCoords[i])
+			mesh->mNumUVComponents[i] = 0;
+
+		else if( !mesh->mNumUVComponents[i])
 			mesh->mNumUVComponents[i] = 2;
 	}
 

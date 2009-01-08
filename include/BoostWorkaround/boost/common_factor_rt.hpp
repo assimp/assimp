@@ -11,7 +11,7 @@ namespace math	{
 template < typename IntegerType >
 IntegerType  gcd( IntegerType a, IntegerType b )
 {
-	IntegerType zero = (IntegerType)0;
+	const IntegerType zero = (IntegerType)0;
 	while ( true )
 	{
 		if ( a == zero )
@@ -27,7 +27,7 @@ IntegerType  gcd( IntegerType a, IntegerType b )
 template < typename IntegerType >
 IntegerType  lcm( IntegerType a, IntegerType b )
 {
-	IntegerType t = gcd (a,b);
+	const IntegerType t = gcd (a,b);
 	if (!t)return t;
 	return a / t * b;
 }

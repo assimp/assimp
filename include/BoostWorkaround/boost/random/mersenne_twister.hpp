@@ -6,7 +6,7 @@ namespace boost
 {
 
 	// A very minimal implementation. No mersenne_twister at all,
-	// but it should generate some randomness, though
+	// but it should generate some randomness though
 	class mt19937
 	{
 	public:

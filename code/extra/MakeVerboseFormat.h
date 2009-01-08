@@ -101,6 +101,7 @@ private:
 	//! Apply the postprocess step to a given submesh
 	bool MakeVerboseFormat (aiMesh* pcMesh);
 };
-}; // end of namespace Assimp
+        
+} // end of namespace Assimp
 
 #endif // !!AI_KILLNORMALPROCESS_H_INC

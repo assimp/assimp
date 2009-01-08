@@ -329,7 +329,7 @@ void MDCImporter::InternReadFile(
 
 #endif
 
-		const MDC::CompressedVertex* pcCVerts;
+		const MDC::CompressedVertex* pcCVerts = NULL;
 		int16_t* mdcCompVert = NULL;
 
 		// access compressed frames for large frame numbers, but never for the first

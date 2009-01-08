@@ -232,7 +232,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 		const std::vector<aiColor4D>& vColors = (*it).vColors;
 
 		// check whether we need vertex colors here
-		aiColor4D* clrOut;
+		aiColor4D* clrOut = NULL;
 		const aiColor4D* clr = NULL;
 		for (std::vector<aiColor4D>::const_iterator it2 = (*it).vColors.begin(), end2 = (*it).vColors.end();
 			 it2 != end2; ++it2)

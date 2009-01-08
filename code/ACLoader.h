@@ -125,8 +125,8 @@ protected:
 		Object()
 			:	texRepeat(1.f,1.f)
 			,	numRefs (0)
-			,	subDiv	(0)
 			,	type	(World)
+			,	subDiv	(0)                
 		{}
 
 		// name of the object

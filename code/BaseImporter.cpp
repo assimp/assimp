@@ -146,8 +146,8 @@ struct LoadRequest
 	LoadRequest(const std::string& _file, unsigned int _flags,const BatchLoader::PropertyMap* _map)
 		:	file	(_file)
 		,	flags	(_flags)
-		,	scene	(NULL)
 		,	refCnt	(1)
+		,	scene	(NULL)            
 		,	loaded	(false)
 		,	map		(*_map)
 	{}

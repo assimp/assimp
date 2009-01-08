@@ -1065,8 +1065,8 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 	root->mNumChildren = numNamed + (hasCam ? 1 : 0) + (unsigned int) lights.size();
 	root->mNumMeshes = pScene->mNumMeshes-numNamed;
 
-	aiNode** ppcChildren;
-	unsigned int* pMeshes;
+	aiNode** ppcChildren = NULL;
+	unsigned int* pMeshes = NULL;
 	if (root->mNumMeshes)
 		pMeshes = root->mMeshes = new unsigned int[root->mNumMeshes];
 	if (root->mNumChildren)

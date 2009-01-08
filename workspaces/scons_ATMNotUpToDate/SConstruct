@@ -17,7 +17,7 @@ g_IncPath = Split("""
 	/usr/local/include/
 """)
 #------------------------------------------------------------------------------
-g_assimp_lib_Source = Glob(r"../../code/*.cpp")
+g_assimp_lib_Source =  Glob(r"../../code/*.cpp") +     Glob(r"../../code/irrXML/*.cpp") +    Glob(r"../../code/extra/*.cpp") 
 
 #------------------------------------------------------------------------------
 # don't reset CC/CXX-variable, other users might have set it to something special
@@ -28,7 +28,7 @@ if ARGUMENTS.get('debug', 0):
 	print "Using Debug Build!"
 	ccflags = ccflags + ' -g -pg -Wall -pedantic '
 else:
-	ccflags = ccflags + ' -Os -msse -Wall -pedantic'
+	ccflags = ccflags + ' -Os -fno-strict-aliasing -msse -Wall -pedantic'
 	
 env = Environment(CCFLAGS = ccflags, CPPPATH = g_IncPath, LIBPATH=g_LibPath)
 conf = Configure( env )

@@ -115,8 +115,9 @@ inline const char* TextureTypeToString(aiTextureType in)
 		return "Height";
 	case aiTextureType_SHININESS:
 		return "Shininess";
+    default:
+        return "LARGE ERROR, please leave the room immediately and call the police";        
 	}
-	return "LARGE ERROR, please leave the room immediately and call the police";
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -137,8 +138,9 @@ inline const char* MappingTypeToString(aiTextureMapping in)
 		return "Plane";
 	case aiTextureMapping_OTHER:
 		return "Other";
+    default:
+        return "LARGE ERROR, please leave the room immediately and call the police";        
 	}
-	return "LARGE ERROR, please leave the room immediately and call the police";
 }
 
 // ------------------------------------------------------------------------------------------------

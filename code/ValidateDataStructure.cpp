@@ -583,32 +583,43 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation)
 void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 	aiTextureType type)
 {
-	const char* szType;
+	const char* szType = NULL;
 	switch (type)
 	{
 	case aiTextureType_DIFFUSE:
-		szType = "Diffuse";break;
+		szType = "Diffuse";
+        break;
 
 	case aiTextureType_SPECULAR:
-		szType = "Specular";break;
+		szType = "Specular";
+        break;
 
 	case aiTextureType_AMBIENT:
-		szType = "Ambient";break;
+		szType = "Ambient";
+        break;
 
 	case aiTextureType_EMISSIVE:
-		szType = "Emissive";break;
+		szType = "Emissive";
+        break;
 
 	case aiTextureType_OPACITY:
-		szType = "Opacity";break;
+		szType = "Opacity";
+        break;
 
 	case aiTextureType_SHININESS:
-		szType = "Shininess";break;
+		szType = "Shininess";
+        break;
 
 	case aiTextureType_NORMALS:
-		szType = "Normals";break;
+		szType = "Normals";
+        break;
 
 	case aiTextureType_HEIGHT:
-		szType = "Height";break;
+		szType = "Height";
+        break;
+
+    default:
+        break;
 	};
 
 	// ****************************************************************************

@@ -150,8 +150,8 @@ private:
 	struct Light
 	{
 		Light()
-			: color		(1.f,1.f,1.f)
-			, intensity	(1.f)
+			: intensity	(1.f)
+			, color		(1.f,1.f,1.f)
 		{}
 
 		aiVector3D position;

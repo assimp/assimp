@@ -335,7 +335,8 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 	// now read all triangles of the first frame, apply scaling and translation
 	unsigned int iCurrent = 0;
 
-	float fDivisorU,fDivisorV;
+	float fDivisorU = 1.0f;
+    float fDivisorV = 1.0f;
 	if (m_pcHeader->numTexCoords)
 	{
 		// allocate storage for texture coordinates, too
@@ -348,14 +349,12 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 		{
 			DefaultLogger::get()->error("Skin width is zero but there are "
 				"valid absolute texture coordinates");
-			fDivisorU = 1.0f;
 		}
 		else fDivisorU = (float)m_pcHeader->skinWidth;
 		if (!m_pcHeader->skinHeight)
 		{
 			DefaultLogger::get()->error("Skin height is zero but there are "
 				"valid absolute texture coordinates ");
-			fDivisorV = 1.0f;
 		}
 		else fDivisorV = (float)m_pcHeader->skinHeight;
 	}

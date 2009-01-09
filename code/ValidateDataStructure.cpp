@@ -291,6 +291,8 @@ void ValidateDSProcess::Execute( aiScene* pScene)
 	}
 	else if (!(mScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
 	{
+		// NOTE: ScenePreprocessor generates a default material if none is there
+		// (and at least one mesh is found). So this should never be triggered ...
 		ReportError("aiScene::mNumMaterials is 0. At least one material must be there");
 	}
 	else if (pScene->mMaterials)

@@ -129,10 +129,7 @@ bool AC3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) cons
 	for( std::string::iterator it = extension.begin(); it != extension.end(); ++it)
 		*it = tolower( *it);
 
-	if( extension == ".ac" || extension == "ac")
-		return true;
-
-	return false;
+	return( extension == ".ac3d" || extension == ".ac");
 }
 
 // ------------------------------------------------------------------------------------------------

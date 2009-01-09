@@ -81,8 +81,8 @@ void TriangulateProcess::Execute( aiScene* pScene)
 		if(	TriangulateMesh( pScene->mMeshes[a]))
 			bHas = true;
 	}
-	if (bHas)DefaultLogger::get()->info("TriangulateProcess finished. Found polygons to triangulate");
-	else DefaultLogger::get()->debug("TriangulateProcess finished. There was nothing to do.");
+	if (bHas)DefaultLogger::get()->info ("TriangulateProcess finished. All polygons have been triangulated");
+	else     DefaultLogger::get()->debug("TriangulateProcess finished. There was nothing to do.");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -111,8 +111,21 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 	pMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
 	pMesh->mPrimitiveTypes &= ~aiPrimitiveType_POLYGON;
 
-	std::vector<aiFace> newFaces;
-	newFaces.reserve( pMesh->mNumFaces*2);
+	// Find out how many output faces we'll have
+	unsigned int numOut = 0;
+	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
+	{
+		aiFace& face = pMesh->mFaces[a];
+		if( face.mNumIndices <= 3)
+			numOut++;
+
+		else numOut += face.mNumIndices-2;
+	}
+
+	// Just another check whether aiMesh::mPrimitiveTypes is correct
+	assert(numOut != pMesh->mNumFaces);
+	
+	aiFace* out = new aiFace[numOut], *curOut = out;
 	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
 	{
 		aiFace& face = pMesh->mFaces[a];
@@ -120,41 +133,38 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 		// if it's a simple primitive, just copy it
 		if( face.mNumIndices <= 3)
 		{
-			newFaces.push_back( aiFace());
-			aiFace& nface = newFaces.back();
+			aiFace& nface = *curOut++;
 			nface.mNumIndices = face.mNumIndices;
-			nface.mIndices = face.mIndices;
-			face.mIndices = NULL;
+			nface.mIndices    = face.mIndices;
 		} 
 		else
 		{
-			assert( face.mNumIndices > 3);
-			for( unsigned int b = 0; b < face.mNumIndices - 2; b++)
+			for( unsigned int b = 0, end = face.mNumIndices - 2; b < end; b++)
 			{
-				newFaces.push_back( aiFace());
-				aiFace& nface = newFaces.back();
+				aiFace& nface = *curOut++;
 				nface.mNumIndices = 3;
-				nface.mIndices = new unsigned int[3];
-				nface.mIndices[0] = face.mIndices[0];
+				
+				// Reuse the buffer for the very last element to save another allocation
+				if (b == end-1)
+					nface.mIndices = face.mIndices;
+				else
+				{
+					nface.mIndices = new unsigned int[3];
+					nface.mIndices[0] = face.mIndices[0];
+				}
+
 				nface.mIndices[1] = face.mIndices[b+1];
 				nface.mIndices[2] = face.mIndices[b+2];
 			}
 		}
+		face.mIndices = NULL;
 	}
 
 	// kill the old faces
 	delete [] pMesh->mFaces;
 
-	// and insert our newly generated faces
-	pMesh->mNumFaces = (unsigned int)newFaces.size();
-	pMesh->mFaces = new aiFace[pMesh->mNumFaces];
-	for( unsigned int a = 0; a < newFaces.size(); a++)
-	{
-		// operator= would copy the whole array which is definitely not necessary
-		pMesh->mFaces[a].mNumIndices = newFaces[a].mNumIndices;
-		pMesh->mFaces[a].mIndices    = newFaces[a].mIndices;
-		newFaces[a].mIndices = NULL;
-	}
-
+	// ... and store the new ones
+	pMesh->mFaces    = out;
+	pMesh->mNumFaces = numOut;
 	return true;
 }

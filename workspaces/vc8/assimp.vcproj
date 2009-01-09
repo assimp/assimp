@@ -1751,6 +1751,18 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="TER"
+					>
+					<File
+						RelativePath="..\..\code\TerragenLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\TerragenLoader.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="PostProcess"

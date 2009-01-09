@@ -129,7 +129,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_COLLADA_IMPORTER
 #	include "ColladaLoader.h"
 #endif
-
+#ifndef AI_BUILD_NO_TERRAGEN_IMPORTER
+#	include "TerragenLoader.h"
+#endif
 
 // PostProcess-Steps
 #ifndef AI_BUILD_NO_CALCTANGENTS_PROCESS
@@ -193,10 +195,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include "TextureTransform.h"
 #endif
 
-
 using namespace Assimp;
-
-
 
 // ------------------------------------------------------------------------------------------------
 // Constructor. 
@@ -205,12 +204,12 @@ Importer::Importer() :
 	mScene(NULL),
 	mErrorString("")	
 {
-	// allocate a default IO handler
+	// Allocate a default IO handler
 	mIOHandler = new DefaultIOSystem;
 	mIsDefaultHandler = true; 
 	bExtraVerbose     = false; // disable extra verbose mode by default
 
-	// add an instance of each worker class here
+	// Add an instance of each worker class here
 	// the order doesn't really care, however file formats that are
 	// used more frequently than others should be at the beginning.
 	mImporter.reserve(25);
@@ -289,6 +288,9 @@ Importer::Importer() :
 #endif
 #if (!defined AI_BUILD_NO_COLLADA_IMPORTER)
 	mImporter.push_back( new ColladaLoader());
+#endif
+#if (!defined AI_BUILD_NO_TERRAGEN_IMPORTER)
+	mImporter.push_back( new TerragenImporter());
 #endif
 
 	// Add an instance of each post processing step here in the order 

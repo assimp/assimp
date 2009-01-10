@@ -1,4 +1,6 @@
 
+
+===============================================================
 Open Asset Import Library (Assimp)
 Developers and Contributors
 ===============================================================
@@ -11,13 +13,13 @@ Thanks for your help!
 Configuration-Interface, AssImp-Viewer (Win32), Website (Admin and Design), admin.
 
 -Thomas Schulze,
-X-, BVH-Loader, Postprocessing framework. Data structure & Interface design, documentation.
+X-, Collda-, BVH-Loader, Postprocessing framework. Data structure & Interface design, documentation.
 
 -R.Schmidt,
 Linux build, eclipse support.
 
 - Kim Kulling:
-Obj-Loader, Logging, Scons-build environment.
+Obj-Loader, Logging, SCons-build environment.
 
 - Matthias Gubisch,
 Assimp.net
@@ -50,3 +52,6 @@ searched the web for several thousands of test models for internal use
 
 - John Connors
 supplied patches for linux and SCons.
+
+- T. R.
+The GUY who performed some of the CSM mocaps.

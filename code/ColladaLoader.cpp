@@ -1,4 +1,3 @@
-/** Implementation of the Collada loader */
 /*
 ---------------------------------------------------------------------------
 Open Asset Import Library (ASSIMP)
@@ -40,6 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
+/** @file Implementation of the Collada loader */
+
 #include "AssimpPCH.h"
 #include "../include/aiAnim.h"
 #include "ColladaLoader.h"
@@ -50,14 +51,12 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 ColladaLoader::~ColladaLoader()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
@@ -75,6 +74,16 @@ bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler) con
 	if( extension == ".dae")
 		return true;
 
+	// XML - too generic, we need to open the file and search for typical keywords
+	if( extension == ".xml")	{
+		/*  If CanRead() is called in order to check whether we
+		 *  support a specific file extension in general pIOHandler
+		 *  might be NULL and it's our duty to return true here.
+		 */
+		if (!pIOHandler)return true;
+		const char* tokens[] = {"collada"};
+		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
+	}
 	return false;
 }
 
@@ -88,7 +97,7 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 	ColladaParser parser( pFile);
 
 	if( !parser.mRootNode)
-		throw new ImportErrorException( "File came out empty. Somethings wrong here.");
+		throw new ImportErrorException( "File came out empty. Something is wrong here.");
 
 	// create the materials first, for the meshes to find
 	BuildMaterials( parser, pScene);
@@ -109,7 +118,6 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 			 0,  0, -1,  0,
 			 0,  1,  0,  0,
 			 0,  0,  0,  1);
-
 
 	// store all meshes
 	StoreSceneMeshes( pScene);

@@ -51,14 +51,12 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 BVHLoader::BVHLoader()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 BVHLoader::~BVHLoader()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
@@ -73,10 +71,7 @@ bool BVHLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	for( std::string::iterator it = extension.begin(); it != extension.end(); ++it)
 		*it = tolower( *it);
 
-	if( extension == ".bvh")
-		return true;
-
-	return false;
+	return ( extension == ".bvh");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -410,31 +405,54 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 	// now generate the tracks for all nodes
 	anim->mNumChannels = mNodes.size();
 	anim->mChannels = new aiNodeAnim*[anim->mNumChannels];
+
+	// FIX: set the array elements to NULL to ensure proper deletion if an exception is thrown
+	for (unsigned int i = 0; i < anim->mNumChannels;++i)
+		anim->mChannels[i] = NULL;
+
 	for( unsigned int a = 0; a < anim->mNumChannels; a++)
 	{
 		const Node& node = mNodes[a];
-		const char* nodeName = node.mNode->mName.data;
+		const std::string nodeName = std::string( node.mNode->mName.data );
 		aiNodeAnim* nodeAnim = new aiNodeAnim;
 		anim->mChannels[a] = nodeAnim;
-		nodeAnim->mNodeName.Set( std::string( nodeName));
+		nodeAnim->mNodeName.Set( nodeName);
 
 		// translational part, if given
 		if( node.mChannels.size() == 6)
 		{
-			if( node.mChannels[0] != Channel_PositionX || node.mChannels[1] != Channel_PositionY
-				|| node.mChannels[2] != Channel_PositionZ)
-			{
-				throw new ImportErrorException( boost::str( boost::format( "Unexpected animation "
-					"channel setup at node \"%s\".") % nodeName));
-			}
-
 			nodeAnim->mNumPositionKeys = mAnimNumFrames;
 			nodeAnim->mPositionKeys = new aiVectorKey[mAnimNumFrames];
 			aiVectorKey* poskey = nodeAnim->mPositionKeys;
 			for( unsigned int fr = 0; fr < mAnimNumFrames; ++fr)
 			{
 				poskey->mTime = double( fr);
-				poskey->mValue.x = node.mChannelValues[fr * node.mChannels.size() + 0];
+
+				// Now compute all translations in the right order
+				switch (node.mChannels[0])
+				{	
+				case Channel_PositionX: poskey->mValue.x = node.mChannelValues[fr * node.mChannels.size() + 0];break;
+				case Channel_PositionY: poskey->mValue.y = node.mChannelValues[fr * node.mChannels.size() + 0];break;
+				case Channel_PositionZ: poskey->mValue.z = node.mChannelValues[fr * node.mChannels.size() + 0];break;
+				default: throw new ImportErrorException( "Unexpected animation channel setup at node " + nodeName );
+				}
+
+				switch (node.mChannels[1])
+				{	
+				case Channel_PositionX: poskey->mValue.x = node.mChannelValues[fr * node.mChannels.size() + 1];break;
+				case Channel_PositionY: poskey->mValue.y = node.mChannelValues[fr * node.mChannels.size() + 1];break;
+				case Channel_PositionZ: poskey->mValue.z = node.mChannelValues[fr * node.mChannels.size() + 1];break;
+				default: throw new ImportErrorException( "Unexpected animation channel setup at node " + nodeName );
+				}
+
+				switch (node.mChannels[2])
+				{	
+				case Channel_PositionX: poskey->mValue.x = node.mChannelValues[fr * node.mChannels.size() + 2];break;
+				case Channel_PositionY: poskey->mValue.y = node.mChannelValues[fr * node.mChannels.size() + 2];break;
+				case Channel_PositionZ: poskey->mValue.z = node.mChannelValues[fr * node.mChannels.size() + 2];break;
+				default: throw new ImportErrorException( "Unexpected animation channel setup at node " + nodeName );
+				}
+
 				poskey->mValue.z = node.mChannelValues[fr * node.mChannels.size() + 1];
 				poskey->mValue.y = node.mChannelValues[fr * node.mChannels.size() + 2];
 				++poskey;
@@ -451,25 +469,12 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 
 		// rotation part. Always present. First find value offsets
 		{
-			unsigned int rotOffset = 0;
+			unsigned int rotOffset  = 0;
 			if( node.mChannels.size() == 6)
 			{
-				if( node.mChannels[3] != Channel_RotationZ || node.mChannels[4] != Channel_RotationX
-					|| node.mChannels[5] != Channel_RotationY)
-				{
-					throw new ImportErrorException( boost::str( boost::format( "Unexpected animation "
-						"channel setup at node \"%s\".") % nodeName));
-				}
+				// Offset all further calculations
 				rotOffset = 3;
-			} else
-			{
-				if( node.mChannels[0] != Channel_RotationZ || node.mChannels[1] != Channel_RotationX
-					|| node.mChannels[2] != Channel_RotationY || node.mChannels.size() != 3)
-				{
-					throw new ImportErrorException( boost::str( boost::format( "Unexpected animation "
-						"channel setup at node \"%s\".") % nodeName));
-				}
-			}
+			} 
 
 			// Then create the number of rotation keys
 			nodeAnim->mNumRotationKeys = mAnimNumFrames;
@@ -478,14 +483,35 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 			for( unsigned int fr = 0; fr < mAnimNumFrames; ++fr)
 			{
 				// translate ZXY euler angels into a quaternion
-				float angleZ = node.mChannelValues[fr * node.mChannels.size() + rotOffset + 0] * float( AI_MATH_PI) / 180.0f;
-				float angleX = node.mChannelValues[fr * node.mChannels.size() + rotOffset + 1] * float( AI_MATH_PI) / 180.0f;
-				float angleY = node.mChannelValues[fr * node.mChannels.size() + rotOffset + 2] * float( AI_MATH_PI) / 180.0f;
+				const float angle0 = node.mChannelValues[fr * node.mChannels.size() + rotOffset  ] * float( AI_MATH_PI) / 180.0f;
+				const float angle1 = node.mChannelValues[fr * node.mChannels.size() + rotOffset+1] * float( AI_MATH_PI) / 180.0f;
+				const float angle2 = node.mChannelValues[fr * node.mChannels.size() + rotOffset+2] * float( AI_MATH_PI) / 180.0f;
+
 				aiMatrix4x4 temp;
 				aiMatrix3x3 rotMatrix;
-				aiMatrix4x4::RotationZ( angleZ, temp); rotMatrix *= aiMatrix3x3( temp);
-				aiMatrix4x4::RotationX( angleX, temp); rotMatrix *= aiMatrix3x3( temp);
-				aiMatrix4x4::RotationY( angleY, temp); rotMatrix *= aiMatrix3x3( temp);
+				
+				// Compute rotation transformations in the right order
+				switch (node.mChannels[rotOffset]) 
+				{
+				case Channel_RotationX: aiMatrix4x4::RotationX( angle0, temp); rotMatrix *= aiMatrix3x3( temp); break;
+				case Channel_RotationY: aiMatrix4x4::RotationY( angle0, temp); rotMatrix *= aiMatrix3x3( temp);	break;
+				case Channel_RotationZ: aiMatrix4x4::RotationZ( angle0, temp); rotMatrix *= aiMatrix3x3( temp); break;
+				default: throw new ImportErrorException( "Unexpected animation channel setup at node " + nodeName );
+				}
+				switch (node.mChannels[rotOffset+1]) 
+				{
+				case Channel_RotationX: aiMatrix4x4::RotationX( angle1, temp); rotMatrix *= aiMatrix3x3( temp); break;
+				case Channel_RotationY: aiMatrix4x4::RotationY( angle1, temp); rotMatrix *= aiMatrix3x3( temp);	break;
+				case Channel_RotationZ: aiMatrix4x4::RotationZ( angle1, temp); rotMatrix *= aiMatrix3x3( temp); break;
+				default: throw new ImportErrorException( "Unexpected animation channel setup at node " + nodeName );
+				}
+				switch (node.mChannels[rotOffset+2]) 
+				{
+				case Channel_RotationX: aiMatrix4x4::RotationX( angle2, temp); rotMatrix *= aiMatrix3x3( temp); break;
+				case Channel_RotationY: aiMatrix4x4::RotationY( angle2, temp); rotMatrix *= aiMatrix3x3( temp);	break;
+				case Channel_RotationZ: aiMatrix4x4::RotationZ( angle2, temp); rotMatrix *= aiMatrix3x3( temp); break;
+				default: throw new ImportErrorException( "Unexpected animation channel setup at node " + nodeName );
+				}
 
 				rotkey->mTime = double( fr);
 				rotkey->mValue = aiQuaternion( rotMatrix);

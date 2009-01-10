@@ -132,7 +132,11 @@ bool BaseImporter::SearchFileHeaderForToken(IOSystem* pIOHandler,
 		for (unsigned int i = 0; i < numTokens;++i)
 		{
 			ai_assert(NULL != tokens[i]);
-			if (::strstr(buffer,tokens[i]))return true;
+			if (::strstr(buffer,tokens[i]))
+			{
+				DefaultLogger::get()->debug(std::string("Found positive match for header keyword: ") + tokens[i]);
+				return true;
+			}
 		}
 	}
 	return false;

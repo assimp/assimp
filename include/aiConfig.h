@@ -49,7 +49,7 @@ extern "C" {
 #endif
 
 // ---------------------------------------------------------------------------
-/** Returns a string with legal copyright and licensing information 
+/** @brief Returns a string with legal copyright and licensing information 
  *  about Assimp.
  *
  *  @return Never NULL
@@ -57,7 +57,7 @@ extern "C" {
 ASSIMP_API const char*  aiGetLegalString  ();
 
 // ---------------------------------------------------------------------------
-/** Returns the current minor version number of Assimp.
+/** @brief Returns the current minor version number of Assimp.
  *
  *  @return Minor version of the Assimp runtime the application was
  *    linked/built against
@@ -65,7 +65,7 @@ ASSIMP_API const char*  aiGetLegalString  ();
 ASSIMP_API unsigned int aiGetVersionMinor ();
 
 // ---------------------------------------------------------------------------
-/** Returns the current major version number of Assimp.
+/** @brief Returns the current major version number of Assimp.
  *
  *  @return Major version of the Assimp runtime the application was
  *    linked/built against
@@ -73,7 +73,7 @@ ASSIMP_API unsigned int aiGetVersionMinor ();
 ASSIMP_API unsigned int aiGetVersionMajor ();
 
 // ---------------------------------------------------------------------------
-/** Returns the repository revision of the Assimp runtime.
+/** @brief Returns the repository revision of the Assimp runtime.
  *
  *  @return Repository revision number of the Assimp runtime the application 
  *    was linked/built against
@@ -85,11 +85,11 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
 #endif
 
 // ---------------------------------------------------------------------------
-/** \brief Set the maximum number of vertices in a mesh.
+/** @brief  Set the maximum number of vertices in a mesh.
  *
  * This is used by the "SplitLargeMeshes" PostProcess-Step to determine
  * whether a mesh must be splitted or not.
- * \note The default value is AI_SLM_DEFAULT_MAX_VERTICES, defined in
+ * @note The default value is AI_SLM_DEFAULT_MAX_VERTICES, defined in
  *       the internal header file SplitLargeMeshes.h
  * Property type: integer.
  */
@@ -97,11 +97,11 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
 
 
 // ---------------------------------------------------------------------------
-/** \brief Set the maximum number of triangles in a mesh.
+/** @brief  Set the maximum number of triangles in a mesh.
  *
  * This is used by the "SplitLargeMeshes" PostProcess-Step to determine
  * whether a mesh must be splitted or not.
- * \note The default value is AI_SLM_DEFAULT_MAX_TRIANGLES, defined in
+ * @note The default value is AI_SLM_DEFAULT_MAX_TRIANGLES, defined in
  *       the internal header file SplitLargeMeshes.h
  * Property type: integer.
  */
@@ -109,10 +109,10 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
 
 
 // ---------------------------------------------------------------------------
-/** \brief Set the maximum number of bones affecting a single vertex
+/** @brief Set the maximum number of bones affecting a single vertex
  *
  * This is used by the aiProcess_LimitBoneWeights PostProcess-Step.
- * \note The default value is AI_LBW_MAX_WEIGHTS, defined in
+ * @note The default value is AI_LBW_MAX_WEIGHTS, defined in
  *       the internal header file LimitBoneWeightsProcess.h
  * Property type: integer.
  */
@@ -120,7 +120,7 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
 
 
 // ---------------------------------------------------------------------------
-/** \brief Set the vertex animation keyframe to be imported
+/** @brief  Set the vertex animation keyframe to be imported
  *
  * ASSIMP does not support vertex keyframes (only bone animation is supported).
  * The library reads only one frame of models with vertex animations.
@@ -144,7 +144,7 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
 
 
 // ---------------------------------------------------------------------------
-/** \brief Configures the AC loader to collect all surfaces which have the
+/** @brief  Configures the AC loader to collect all surfaces which have the
  *    "Backface cull" flag set in separate meshes. 
  *
  * Property type: integer (0: false; !0: true). Default value: true.
@@ -153,11 +153,10 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
 
 
 // ---------------------------------------------------------------------------
-/** \brief Configures the ASE loader to always reconstruct normal vectors
+/** @brief  Configures the ASE loader to always reconstruct normal vectors
  *	basing on the smoothing groups loaded from the file.
  * 
- * Many ASE files have invalid normals (they're not orthonormal). This
- * is the fault of 3DS Max ASE exporter. 
+ * Many ASE files have invalid normals (they're not orthonormal).
  * Property type: integer (0: false; !0: true). Default value: false.
  */
 #define AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS	"imp.ase.reconn"
@@ -165,7 +164,7 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
 
 
 // ---------------------------------------------------------------------------
-/** \brief Configures the LWO loader to load just one layer from the model.
+/** @brief  Configures the LWO loader to load just one layer from the model.
  * 
  * LWO files consist of layers and in some cases it could be useful to load
  * only one of them. This property can be either a string - which specifies
@@ -178,18 +177,18 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
 
 
 // ---------------------------------------------------------------------------
-/** \brief Defines the output frame rate of the IRR loader.
+/** @brief Defines the output frame rate of the IRR loader.
  * 
  * IRR animations are difficult to convert for Assimp and there will
  * always be a loss of quality. This setting defines how many keys per second
- * the converter will compute.<br>
+ * are returned by the converter.<br>
  * Property type: integer. Default value: 100
  */
 #define AI_CONFIG_IMPORT_IRR_ANIM_FPS				"imp.irr.fps"
 
 
 // ---------------------------------------------------------------------------
-/** \brief Specifies the maximum angle that may be between two vertex tangents
+/** @brief  Specifies the maximum angle that may be between two vertex tangents
  *         that their tangents and bitangents are smoothed.
  *
  * This applies to the CalcTangentSpace-Step. The angle is specified
@@ -200,20 +199,22 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
 #define AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE "pp.ct.max_smoothing"
 
 // ---------------------------------------------------------------------------
-/** \brief Specifies the maximum angle that may be between two face normals
- *         at the same vertex position that their are smoothed.
+/** @brief  Specifies the maximum angle that may be between two face normals
+ *          at the same vertex position that their are smoothed together.
  *
+ * Sometimes also refered to as 'crease angle'.
  * This applies to the GenSmoothNormals-Step. The angle is specified
- * in degrees, so 180 is PI. The default value is
- * 175 degrees (all vertex normals are smoothed). The maximum value is 175
- * Property type: float. Warning: seting this option may cause a severe
- * loss of performance. 
+ * in degrees, so 180 is PI. The default value is 175 degrees (all vertex 
+ * normals are smoothed). The maximum value is 175. Property type: float. 
+ * Warning: seting this option may cause a severe loss of performance. The
+ * performance is unaffacted if the AI_CONFIG_FAVOUR_SPEED flag is set, but
+ * the output quality may be reduced.
  */
 #define AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE "pp.gsn.max_smoothing"
 
 
 // ---------------------------------------------------------------------------
-/** \brief Specifies the minimum number of faces a node should have.
+/** @brief Specifies the minimum number of faces a node should have.
  *         This is an input parameter to the OptimizeGraph-Step.
  *
  * Nodes whose referenced meshes have less faces than this value
@@ -225,19 +226,19 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
 
 
 // ---------------------------------------------------------------------------
-/** \brief Specifies whether the OptimizeGraphProcess joins nodes even if
+/** @brief Specifies whether the OptimizeGraphProcess joins nodes even if
  *         their local transformations are inequal.
  *
  * By default, nodes with different local transformations are never joined.
  * The intention is that all vertices should remain in their original
  * local coordinate space where they are correctly centered and aligned,
- * which does also allow for some significant culling improvements.
+ * which could also allow for significant culling improvements.
  */
 #define AI_CONFIG_PP_OG_JOIN_INEQUAL_TRANSFORMS	"pp.og.allow_diffwm"
 
 
 // ---------------------------------------------------------------------------
-/** \brief Sets the colormap (= palette) to be used to decode embedded
+/** @brief Sets the colormap (= palette) to be used to decode embedded
  *         textures in MDL (Quake or 3DGS) files.
  *
  * This must be a valid path to a file. The file is 768 (256*3) bytes
@@ -250,7 +251,7 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
 
 
 // ---------------------------------------------------------------------------
-/** \brief Enumerates components of the aiScene and aiMesh data structures
+/** @brief Enumerates components of the aiScene and aiMesh data structures
  *  that can be excluded from the import with the RemoveComponent step.
  *
  *  See the documentation to #aiProcess_RemoveComment for more details.
@@ -307,12 +308,15 @@ enum aiComponent
 	_aiComponent_Force32Bit = 0x9fffffff
 };
 
+// Remove a specific color channel 'n'
 #define aiComponent_COLORSn(n) (1u << (n+20u))
+
+// Remove a specific UV channel 'n'
 #define aiComponent_TEXCOORDSn(n) (1u << (n+25u))
 
 
 // ---------------------------------------------------------------------------
-/** \brief Input parameter to the #aiProcess_RemoveComponent step:
+/** @brief Input parameter to the #aiProcess_RemoveComponent step:
  *  Specifies the parts of the data structure to be removed.
  *
  * See the documentation to this step for further details. The property
@@ -326,25 +330,31 @@ enum aiComponent
 #define AI_CONFIG_PP_RVC_FLAGS				"pp.rvc.flags"
 
 // ---------------------------------------------------------------------------
-/** \brief Input parameter to the #aiProcess_SortByPType step:
+/** @brief Input parameter to the #aiProcess_SortByPType step:
  *  Specifies which primitive types are removed by the step.
  *
  *  This is a bitwise combination of the aiPrimitiveType flags.
  *  Specifying all of them is illegal, of course. A typical use would
- *  be to easily exclude all line and point meshes from the import. This
+ *  be to exclude all line and point meshes from the import. This
  *  is an integer property, its default value is 0.
  */
 #define AI_CONFIG_PP_SBP_REMOVE				"pp.sbp.remove"
 
 
-
+// TransformUVCoords evalutes UV scalings
 #define AI_UVTRAFO_SCALING 0x1
+
+// TransformUVCoords evalutes UV rotations
 #define AI_UVTRAFO_ROTATION 0x2
+
+// TransformUVCoords evalutes UV translation
 #define AI_UVTRAFO_TRANSLATION 0x4
+
+// Everything baked together -> default value
 #define AI_UVTRAFO_ALL (AI_UVTRAFO_SCALING | AI_UVTRAFO_ROTATION | AI_UVTRAFO_TRANSLATION)
 
 // ---------------------------------------------------------------------------
-/** \brief Input parameter to the #aiProcess_TransformUVCoords step:
+/** @brief Input parameter to the #aiProcess_TransformUVCoords step:
  *  Specifies which UV transformations are evaluated.
  *
  *  This is a bitwise combination of the AI_UVTRAFO_XXX flags (integer
@@ -355,7 +365,7 @@ enum aiComponent
 
 
 // ---------------------------------------------------------------------------
-/** \brief Causes assimp to favour speed against import quality.
+/** @brief A hint to assimp to favour speed against import quality.
  *
  * Enabling this option may result in faster loading, but it needn't.
  * It represents just a hint to loaders and post-processing steps to use
@@ -364,8 +374,4 @@ enum aiComponent
  * The default value is 0.
  */
 #define AI_CONFIG_FAVOUR_SPEED				"imp.speed_flag"
-
-
-
-
 #endif // !! AI_CONFIG_H_INC

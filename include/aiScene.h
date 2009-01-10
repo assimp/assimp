@@ -186,6 +186,21 @@ struct aiNode
  */
 #define AI_SCENE_FLAGS_NON_VERBOSE_FORMAT  	0x8
 
+
+ /** @def AI_SCENE_FLAGS_TERRAIN
+ * Denotes pure height-map terrain data. Pure terrains usually consist of quads, 
+ * sometimes triangles, in a regular grid. The x,y coordinates of all vertex 
+ * positions refer to the x,y coordinates on the terrain height map, the z-axis
+ * stores the elevation at a specific point.
+ *
+ * TER (Terragen) and HMP (3D Game Studio) are height map formats.
+ * @note Assimp is propably not the best choice for loading *huge* terrains -
+ * fully triangulated data takes extremely much free store and should be avoided
+ * as long as possible (typically you'll do the triangulation when you actually
+ * need to render it).
+ */
+#define AI_SCENE_FLAGS_TERRAIN 0x16
+
 // ---------------------------------------------------------------------------
 /** The root structure of the imported data. 
 * 

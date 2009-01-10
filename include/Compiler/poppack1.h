@@ -1,7 +1,13 @@
 
-// may be included multiple times - resets structure packing to default
-// for all supported compilers. A pushpack1.h include must preceed
-// each inclusion of this header.
+// ===============================================================================
+// May be included multiple times - resets structure packing to the defaults 
+// for all supported compilers. Reverts the changes made by #include <pushpack1.h> 
+//
+// Currently this works on the following compilers:
+// MSVC 7,8,9
+// GCC
+// BORLAND (complains about 'pack state changed but not reverted', but works)
+// ===============================================================================
 
 #ifndef AI_PUSHPACK_IS_DEFINED
 #	error pushpack1.h must be included after poppack1.h

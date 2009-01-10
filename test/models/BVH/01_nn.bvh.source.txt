@@ -1,0 +1,50 @@
+http://sites.google.com/a/cgspeed.com/cgspeed/motion-capture/cmu-bvh-conversion
+
+
+ReadmeFirst.txt
+================
+
+
+READMEFIRST v1.00 last update July 20, 2008 by B. Hahne
+
+This READMEFIRST file accompanies the cgspeed.com "BVH conversion"
+release of the Carnegie-Mellon University (CMU) Graphics Lab Motion
+Capture Database.  See "Where to find stuff" at the bottom of this
+file for where to get the BVH conversion and/or the original CMU
+dataset.
+
+The original CMU motion capture database isn't in BVH format - it's
+in ASF/AMC format.  This BVH conversion release was created by Bruce
+Hahne, a hobbyist animator, in the interest of making the data more
+available and easily usable by other animators.  I presently (2008)
+maintain the web site www.cgspeed.com, where this BVH conversion
+release will be available or linked.
+
+The emphasis on this release is to produce BVH files that can rapidly
+be used in MotionBuilder for motion retargetting.  The files are not
+yet particularly Poser-friendly or DazStudio-friendly, due to
+incorrect assumptions that those programs have to make about the
+underlying joint rotation setup.
+
+
+[...]
+
+
+
+USAGE RIGHTS:
+
+CMU places no restrictions on the use of the original dataset, and I
+(Bruce) place no additional restrictions on the use of this particular
+BVH conversion.
+
+Here's the relevant paragraph from mocap.cs.cmu.edu:
+
+  Use this data!  This data is free for use in research and commercial
+  projects worldwide.  If you publish results obtained using this data,
+  we would appreciate it if you would send the citation to your
+  published paper to jkh+mocap@cs.cmu.edu, and also would add this text
+  to your acknowledgments section: "The data used in this project was
+  obtained from mocap.cs.cmu.edu.  The database was created with funding
+  from NSF EIA-0196217."
+
+[...]

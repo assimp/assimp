@@ -102,9 +102,9 @@ bool IRRImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	if (extension == ".irr")return true;
 	else if (extension == ".xml")
 	{
-		/*  If CanRead() is called to check whether the loader
-		 *  supports a specific file extension in general we
-		 *  must return true here.
+		/*  If CanRead() is called in order to check whether we
+		 *  support a specific file extension in general pIOHandler
+		 *  might be NULL and it's our duty to return true here.
 		 */
 		if (!pIOHandler)return true;
 		const char* tokens[] = {"irr_scene"};

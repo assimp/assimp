@@ -217,6 +217,9 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
 	// Check whether we have a mesh now
 	if (pScene->mNumMeshes != 1)
 		throw new ImportErrorException("TER: Unable to load terrain");
+
+	// Set the AI_SCENE_FLAGS_TERRAIN bit
+	pScene->mFlags |= AI_SCENE_FLAGS_TERRAIN;
 }
 
 #endif // !! AI_BUILD_NO_TERRAGEN_IMPORTER

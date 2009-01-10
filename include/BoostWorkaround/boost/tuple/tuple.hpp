@@ -1,4 +1,5 @@
-
+// A very small replacement for boost::tuple
+// (c) Alexander Gessler, 2008
 
 #ifndef BOOST_TUPLE_INCLUDED
 #define BOOST_TUPLE_INCLUDED

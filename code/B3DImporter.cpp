@@ -218,16 +218,40 @@ void B3DImporter::ReadBRUS(){
 
 		MaterialHelper *mat=new MaterialHelper;
 		_materials.push_back( mat );
+		
+		// Name
+		aiString ainame( name );
+		mat->AddProperty( &ainame,AI_MATKEY_NAME );
+		
+		// Diffuse color 
+		aiColor3D diffcolor( color.x,color.y,color.z ); 
+		mat->AddProperty( &diffcolor,1,AI_MATKEY_COLOR_DIFFUSE );
 
+		// Opacity
+		mat->AddProperty( &color.w,1,AI_MATKEY_OPACITY );
+
+		// Specular color
+		aiColor3D speccolor( shiny,shiny,shiny );
+		mat->AddProperty( &speccolor,1,AI_MATKEY_COLOR_SPECULAR );
+		
+		// Specular power
+		float specpow=shiny*128;
+		mat->AddProperty( &specpow,1,AI_MATKEY_SHININESS );
+		
+		// Double sided
+		if( fx & 0x10 ){
+			int i=1; 
+			mat->AddProperty( &i,1,AI_MATKEY_TWOSIDED );
+		} 		
+
+		//Textures
 		for( int i=0;i<n_texs;++i ){
 			int texid=ReadInt();
 			if( !i && texid>=0 && texid<_textures.size() ){
 				//just use tex 0 for now
 				const Texture &tex=_textures[texid];
-
-				aiString texstr;
-				texstr.Set( tex.name );
-				mat->AddProperty( &texstr,AI_MATKEY_TEXTURE_DIFFUSE(0) );
+				aiString texname( tex.name );
+				mat->AddProperty( &texname,AI_MATKEY_TEXTURE_DIFFUSE(0) );
 			}
 		}
 	}

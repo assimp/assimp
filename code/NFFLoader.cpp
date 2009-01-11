@@ -197,7 +197,7 @@ void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo>& output,
 			else if (TokenMatch(sz,"diffuse",7) || TokenMatch(sz,"ambientdiffuse",14) /* correct? */)
 			{
 				AI_NFF_PARSE_TRIPLE(c);
-				curShader->diffuse = c;
+				curShader->diffuse = curShader->ambient = c;
 			}
 			else if (TokenMatch(sz,"specular",8))
 			{

@@ -126,22 +126,28 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 	// get current time
 	double fCur = (double)timeGetTime();
 
-	// Remove allline and point meshes from the import
-	 aiSetImportPropertyInteger(AI_CONFIG_PP_SBP_REMOVE,
+	// Remove all line and point meshes from the import
+	aiSetImportPropertyInteger(AI_CONFIG_PP_SBP_REMOVE,
 		aiPrimitiveType_LINE | aiPrimitiveType_POINT);
 
-	// call ASSIMPs C-API to load the file
+	// Call ASSIMPs C-API to load the file
 	g_pcAsset->pcScene = (aiScene*)aiImportFile(g_szFileName,
-		aiProcess_CalcTangentSpace		| // calculate tangents and bitangents
-		aiProcess_JoinIdenticalVertices | // join identical vertices
-		aiProcess_Triangulate			| // triangulate n-polygons
-		aiProcess_GenSmoothNormals		| // generate smooth normal vectors if not existing
-		aiProcess_ConvertToLeftHanded	| // convert everything to D3D left handed space
-		aiProcess_SplitLargeMeshes      | // split large, unrenderable meshes into submeshes
-		aiProcess_ValidateDataStructure | aiProcess_ImproveCacheLocality 
-		| aiProcess_RemoveRedundantMaterials | aiProcess_SortByPType |
-		aiProcess_FindDegenerates | aiProcess_FindInvalidData |
-		aiProcess_GenUVCoords | aiProcess_TransformUVCoords); // validate the output data structure
+		aiProcess_CalcTangentSpace		   | // calculate tangents and bitangents if possible
+		aiProcess_JoinIdenticalVertices    | // join identical vertices/ optimize indexing
+		aiProcess_Triangulate			   | // triangulate polygons with more than 3 edges
+		aiProcess_GenSmoothNormals		   | // generate smooth normal vectors if not existing
+		aiProcess_ConvertToLeftHanded	   | // convert everything to D3D left handed space
+		aiProcess_SplitLargeMeshes         | // split large, unrenderable meshes into submeshes
+		aiProcess_ValidateDataStructure    | // perform a full validation of the loader's output
+		aiProcess_ImproveCacheLocality     | // improve the cache locality of the output vertices
+		aiProcess_RemoveRedundantMaterials | // remove redundant materials
+		aiProcess_SortByPType              | // make 'clean' meshes which consist of a single typ of primitives
+		aiProcess_FindDegenerates          | // remove degenerated polygons from the import
+		aiProcess_FindInvalidData          | // detect invalid model data, such as invalid normal vectors
+		aiProcess_GenUVCoords              | // convert spherical, cylindrical, box and planar mapping to proper UVs
+		aiProcess_TransformUVCoords        | // preprocess UV transformations (scaling, translation ...)
+//		aiProcess_PreTransformVertices	   |
+		0);
 
 	// get the end time of zje operation, calculate delta t
 	double fEnd = (double)timeGetTime();

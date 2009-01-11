@@ -48,11 +48,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 	// ************************************************************
-	// Define ASSIMP_BUILD_NO_XX_LOADER to disable a specific
-	// file format loader. The loader will be excluded from the
-	// build in this case. 'XX' stands for the file extension
-	// of the loader, e.g. ASSIMP_BUILD_NO_X_LOADER will disable
-	// the X loader.
+	// Define ASSIMP_BUILD_NO_XX_IMPORTER to disable a specific
+	// file format loader. The loader is be excluded from the
+	// build in this case. 'XX' stands for the most common file
+	// extension of the file format. E.g.: 
+    // ASSIMP_BUILD_NO_X_IMPORTER disables the X loader.
 	// ************************************************************
 
 	// ************************************************************

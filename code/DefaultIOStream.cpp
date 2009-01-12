@@ -43,70 +43,71 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssimpPCH.h"
 
 #include "DefaultIOStream.h"
-#include "../include/aiAssert.h"
 #include <sys/types.h> 
 #include <sys/stat.h> 
 
 using namespace Assimp;
 
-
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 DefaultIOStream::~DefaultIOStream()
 {
-	if (this->mFile)
-	{
-		::fclose(this->mFile);
-	}	
+	if (mFile)
+		::fclose(mFile);
 }
-// ---------------------------------------------------------------------------
+
+
+// ----------------------------------------------------------------------------------
 size_t DefaultIOStream::Read(void* pvBuffer, 
-								size_t pSize, 
-								size_t pCount)
+	size_t pSize, 
+	size_t pCount)
 {
 	ai_assert(NULL != pvBuffer && 0 != pSize && 0 != pCount);
-
-	if (!this->mFile)
-		return 0;
-
-	return ::fread(pvBuffer, pSize, pCount, this->mFile);
+	return (mFile ? ::fread(pvBuffer, pSize, pCount, mFile) : 0);
 }
-// ---------------------------------------------------------------------------
+
+
+// ----------------------------------------------------------------------------------
 size_t DefaultIOStream::Write(const void* pvBuffer, 
-								 size_t pSize,
-								 size_t pCount)
+	size_t pSize,
+	size_t pCount)
 {
 	ai_assert(NULL != pvBuffer && 0 != pSize && 0 != pCount);
-
-	if (!this->mFile)return 0;
-
-	::fseek(mFile, 0, SEEK_SET);
-	return ::fwrite(pvBuffer, pSize, pCount, this->mFile);
+	return (mFile ? ::fwrite(pvBuffer, pSize, pCount, mFile) : 0);
 }
-// ---------------------------------------------------------------------------
+
+
+// ----------------------------------------------------------------------------------
 aiReturn DefaultIOStream::Seek(size_t pOffset,
-						   aiOrigin pOrigin)
+	 aiOrigin pOrigin)
 {
-	if (!this->mFile)return AI_FAILURE;
+	if (!mFile)return AI_FAILURE;
 
-	return (0 == ::fseek(this->mFile, (long)pOffset,
-		(aiOrigin_CUR == pOrigin ? SEEK_CUR :
-		(aiOrigin_END == pOrigin ? SEEK_END : SEEK_SET))) 
-		? AI_SUCCESS : AI_FAILURE);
+	// Just to check whether our enum maps one to one with the CRT constants
+	ai_assert(aiOrigin_CUR == SEEK_CUR && aiOrigin_END == SEEK_END 
+		&& aiOrigin_SET == SEEK_SET);
+
+	// do the seek
+	return (0 == ::fseek(mFile, (long)pOffset,(int)pOrigin) ? AI_SUCCESS : AI_FAILURE);
 }
-// ---------------------------------------------------------------------------
+
+
+// ----------------------------------------------------------------------------------
 size_t DefaultIOStream::Tell() const
 {
-	if (!this->mFile)return 0;
-
-	return ::ftell(this->mFile);
+	if (!mFile)return 0;
+	return ::ftell(mFile);
 }
-// ---------------------------------------------------------------------------
+
+
+// ----------------------------------------------------------------------------------
 size_t DefaultIOStream::FileSize() const
 {
 	ai_assert (!mFilename.empty());
 
-	if (NULL == mFile)
+	if (! mFile)
 		return 0;
+
+	// TODO: Is that really faster if we have already opened the file?
 #if defined _WIN32 && !defined __GNUC__
 	struct __stat64 fileStat; 
 	int err = _stat64(  mFilename.c_str(), &fileStat ); 
@@ -121,4 +122,12 @@ size_t DefaultIOStream::FileSize() const
 	return (size_t) (fileStat.st_size); 
 #endif
 }
-// ---------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------
+void DefaultIOStream::Flush()
+{
+	if (mFile)
+		::fflush(mFile);
+}
+
+// ----------------------------------------------------------------------------------

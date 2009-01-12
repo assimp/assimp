@@ -123,11 +123,11 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 		return false;
 	}
 
-	// allocate an array to hold the output normals
+	// Allocate the array to hold the output normals
 	const float qnan = std::numeric_limits<float>::quiet_NaN();
 	pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
 
-	// compute per-face normals but store them per-vertex
+	// Compute per-face normals but store them per-vertex
 	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
 	{
 		const aiFace& face = pMesh->mFaces[a];
@@ -148,7 +148,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 			pMesh->mNormals[face.mIndices[i]] = vNor;
 	}
 
-	// set up a SpatialSort to quickly find all vertices close to a given position
+	// Set up a SpatialSort to quickly find all vertices close to a given position
 	// check whether we can reuse the SpatialSort of a previous step.
 	SpatialSort* vertexFinder = NULL;
 	SpatialSort  _vertexFinder;
@@ -176,16 +176,15 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 
 	if (configMaxAngle >= AI_DEG_TO_RAD( 175.f ))
 	{
-		// there is no angle limit. Thus all vertices with positions close
+		// There is no angle limit. Thus all vertices with positions close
 		// to each other will receive the same vertex normal. This allows us
 		// to optimize the whole algorithm a little bit ...
 		std::vector<bool> abHad(pMesh->mNumVertices,false);
-
 		for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
 		{
 			if (abHad[i])continue;
 
-			// get all vertices that share this one ...
+			// Get all vertices that share this one ...
 			vertexFinder->FindPositions( pMesh->mVertices[i], posEpsilon, verticesFound);
 
 			aiVector3D pcNor; 
@@ -194,10 +193,9 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 				const aiVector3D& v = pMesh->mNormals[verticesFound[a]];
 				if (is_not_qnan(v.x))pcNor += v;
 			}
-		
 			pcNor.Normalize();
 
-			// write the smoothed normal back to all affected normals
+			// Write the smoothed normal back to all affected normals
 			for (unsigned int a = 0; a < verticesFound.size(); ++a)
 			{
 				register unsigned int vidx = verticesFound[a];
@@ -211,7 +209,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 		const float fLimit = ::cos(configMaxAngle); 
 		for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
 		{
-			// get all vertices that share this one ...
+			// Get all vertices that share this one ...
 			vertexFinder->FindPositions( pMesh->mVertices[i] , posEpsilon, verticesFound);
 
 			aiVector3D pcNor; 
@@ -222,7 +220,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 				// check whether the angle between the two normals is not too large
 				// HACK: if v.x is qnan the dot product will become qnan, too
 				//   therefore the comparison against fLimit should be false
-				//   in every case. Contact me if you disagree with this assumption
+				//   in every case. 
 				if (v * pMesh->mNormals[i] < fLimit)
 					continue;
 

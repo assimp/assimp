@@ -43,27 +43,65 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_SCENE_PREPROCESSOR_H_INC
 #define AI_SCENE_PREPROCESSOR_H_INC
 
-
+class ScenePreprocessorTest;
 namespace Assimp	{
 
-
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 /** ScenePreprocessor: Preprocess a scene before any post-processing
  *  steps are executed.
+ *
+ *  The step computes data that needn't necessarily be provided by the
+ *  importer, such as aiMesh::mPrimitiveTypes.
 */
+// ----------------------------------------------------------------------------------
 class ASSIMP_API ScenePreprocessor
 {
+	// Make ourselves a friend of the corresponding test unit.
+	friend class ::ScenePreprocessorTest;
 public:
 
-	/** Preprocess a given scene.
-	 *
-	 *  @param _scene Scene to be preprocessed
+	// ----------------------------------------------------------------
+	/** Default c'tpr. Use SetScene() to assign a scene to the object.
 	 */
-	void ProcessScene (aiScene* _scene);
+	ScenePreprocessor()	
+		:	scene	(NULL)
+	{}
+
+	/** Constructs the object and assigns a specific scene to it
+	 */
+	ScenePreprocessor(aiScene* _scene)
+		:	scene	(_scene)
+	{}
+
+	// ----------------------------------------------------------------
+	/** Assign a (new) scene to the object.
+	 *  
+	 *  One 'SceneProcessor' can be used for multiple scenes.
+	 *  Call ProcessScene to have the scene preprocessed.
+	 *  @param sc Scene to be processed.
+	 */
+	void SetScene (aiScene* sc)	{
+		scene = sc;
+	}
+
+	// ----------------------------------------------------------------
+	/** Preprocess the current scene
+	 */
+	void ProcessScene ();
 
 protected:
 
+	// ----------------------------------------------------------------
+	/** Preprocess an animation in the scene
+	 *  @param anim Anim to be preprocessed.
+	 */
 	void ProcessAnimation (aiAnimation* anim);
+	
+	
+	// ----------------------------------------------------------------
+	/** Preprocess a mesh in the scene
+	 *  @param mesh Mesh to be preprocessed.
+	 */
 	void ProcessMesh (aiMesh* mesh);
 
 protected:

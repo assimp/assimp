@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="DllShared"
+	OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+	IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		PreprocessorDefinitions="ASSIMP_BUILD_DLL_EXPORT"
+	/>
+	<Tool
+		Name="VCPostBuildEventTool"
+		CommandLine=""
+	/>
+</VisualStudioPropertySheet>

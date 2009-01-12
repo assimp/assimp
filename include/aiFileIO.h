@@ -51,35 +51,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-
 struct aiFileIO;
 struct aiFile;
 
-typedef aiFile* (*aiFileOpenProc)(C_STRUCT aiFileIO*, const char*, const char*);
-typedef void (*aiFileCloseProc)(C_STRUCT aiFileIO*, C_STRUCT aiFile*);
-typedef size_t (*aiFileWriteProc)(C_STRUCT aiFile*, const char*, size_t, size_t);
-typedef size_t (*aiFileReadProc)(C_STRUCT aiFile*, char*, size_t,size_t);
-typedef size_t (*aiFileTellProc)(C_STRUCT aiFile*);
-
-// ---------------------------------------------------------------------------
-/** Define seek origins in fseek()-style.
-*/
-// ---------------------------------------------------------------------------
-enum aiOrigin
-{
-	aiOrigin_SET = 0x0,		//!< Set position
-	aiOrigin_CUR = 0x1,		//!< Current position
-	aiOrigin_END = 0x2		//!< End of file
-};
-
+// aiFile callbacks
+typedef size_t   (*aiFileWriteProc) (C_STRUCT aiFile*,   const char*, size_t, size_t);
+typedef size_t   (*aiFileReadProc)  (C_STRUCT aiFile*,   char*, size_t,size_t);
+typedef size_t   (*aiFileTellProc)  (C_STRUCT aiFile*);
+typedef void     (*aiFileFlushProc) (C_STRUCT aiFile*);
 typedef aiReturn (*aiFileSeek)(aiFile*, size_t, aiOrigin);
+
+// aiFileIO callbackss
+typedef aiFile* (*aiFileOpenProc)  (C_STRUCT aiFileIO*, const char*, const char*);
+typedef void    (*aiFileCloseProc) (C_STRUCT aiFileIO*, C_STRUCT aiFile*);
+
+// represents user-defined data
 typedef char* aiUserData;
 
-// ---------------------------------------------------------------------------
-/** Defines how C-Assimp accesses files. Provided are functions to open
- *  and close files.
+// ----------------------------------------------------------------------------------
+/** @class aiFileIO
+ *  @brief Defines Assimp's way of accessing files.
+ *
+ *  Provided are functions to open and close files. Supply a custom structure to
+ *  the import function. If you don't, a default implementation is used. Use this
+ *  to enable reading from other sources, such as ZIPs or memory locations.
 */
-// ---------------------------------------------------------------------------
 struct aiFileIO
 {
 	//! Function used to open a new file
@@ -92,13 +88,18 @@ struct aiFileIO
 	aiUserData UserData;
 };
 
-// ---------------------------------------------------------------------------
-/** Data structure to wrap a set of fXXXX (e.g fopen) replacement functions
-*
-* The functions behave the same way as their appropriate fXXXX 
-* counterparts in the CRT.
-*/
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
+/** @class aiFile
+ *  @brief Represents a read/write file
+ *
+ *  Actually, it is a data structure to wrap a set of fXXXX (e.g fopen) 
+ *  replacement functions
+ *
+ *  The default implementation of the functions utilizes the fXXX functions from 
+ *  the CRT. However, you can supply a custom implementation to Assimp by
+ *  also supplying a custom aiFileIO. Use this to enable reading from other sources, 
+ *  such as ZIPs or memory locations.
+ */
 struct aiFile
 {
 	//! Function used to read from a file
@@ -117,6 +118,9 @@ struct aiFile
 	//! Function used to set the current position
 	//! of the file cursor (fseek())
 	aiFileSeek SeekProc;
+
+	//! Function used to flush the file contents
+	aiFileFlushProc FlushProc;
 
 	//! User-defined data
 	aiUserData UserData;

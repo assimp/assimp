@@ -50,7 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "GenericProperty.h"
 
-
 #if (defined AI_C_THREADSAFE)
 #	include <boost/thread/thread.hpp>
 #	include <boost/thread/mutex.hpp>
@@ -92,7 +91,7 @@ public:
 	{}
 
 	// -------------------------------------------------------------------
-    size_t Read(void* pvBuffer, 
+	size_t Read(void* pvBuffer, 
 		size_t pSize, 
 		size_t pCount)
 	{
@@ -100,16 +99,14 @@ public:
 		return mFile->ReadProc(mFile,(char*)pvBuffer,pSize,pCount);
 	}
 
-
 	// -------------------------------------------------------------------
-   size_t Write(const void* pvBuffer, 
+	size_t Write(const void* pvBuffer, 
 		size_t pSize,
 		size_t pCount)
-   {
-	   // need to typecast here as C has no void*
-	   return mFile->WriteProc(mFile,(const char*)pvBuffer,pSize,pCount);
-   }
-
+	{
+		// need to typecast here as C has no void*
+		return mFile->WriteProc(mFile,(const char*)pvBuffer,pSize,pCount);
+	}
 
 	// -------------------------------------------------------------------
 	aiReturn Seek(size_t pOffset,
@@ -118,18 +115,22 @@ public:
 		return mFile->SeekProc(mFile,pOffset,pOrigin);
 	}
 
-
 	// -------------------------------------------------------------------
-    size_t Tell(void) const
+	size_t Tell(void) const
 	{
 		return mFile->TellProc(mFile);
 	}
-
 
 	// -------------------------------------------------------------------
 	size_t	FileSize() const
 	{
 		return mFile->FileSizeProc(mFile);
+	}
+
+	// -------------------------------------------------------------------
+	void Flush ()
+	{
+		return mFile->FlushProc(mFile);
 	}
 
 private:
@@ -152,13 +153,17 @@ public:
 	{
 		CIOSystemWrapper* pip = const_cast<CIOSystemWrapper*>(this);
 		IOStream* p = pip->Open(pFile);
-		if (p){pip->Close(p);return true;}
+		if (p){
+			pip->Close(p);
+			return true;
+		}
 		return false;
 	}
 
 	// -------------------------------------------------------------------
 	std::string getOsSeparator() const
 	{
+		// FIXME
 		return "/";
 	}
 
@@ -178,6 +183,7 @@ public:
 		mFileSystem->CloseProc(mFileSystem,((CIOStreamWrapper*) pFile)->mFile);
 		delete pFile;
 	}
+
 
 private:
 

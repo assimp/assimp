@@ -71,14 +71,14 @@ struct aiCamera
 	 *  This node specifies the position of the camera in the scene
 	 *  hierarchy and can be animated.
 	 */
-	aiString mName;
+	C_STRUCT aiString mName;
 
 	/** Position of the camera relative to the coordinate space
 	 *  defined by the corresponding node.
 	 *
 	 *  The default value is 0|0|0.
 	 */
-	aiVector3D mPosition;
+	C_STRUCT aiVector3D mPosition;
 
 
 	/** 'Up' - vector of the camera coordinate system relative to
@@ -89,7 +89,7 @@ struct aiCamera
 	 *  The default value is 0|1|0. The vector
 	 *  may be normalized, but it needn't.
 	 */
-	aiVector3D mUp;
+	C_STRUCT aiVector3D mUp;
 
 
 	/** 'LookAt' - vector of the camera coordinate system relative to
@@ -99,7 +99,7 @@ struct aiCamera
 	 *  The default value is 0|0|1. The vector
 	 *  may be normalized, but it needn't.
 	 */
-	aiVector3D mLookAt;
+	C_STRUCT aiVector3D mLookAt;
 
 
 	/** Half horizontal field of view angle, in radians. 
@@ -146,8 +146,7 @@ struct aiCamera
 		, mClipPlaneNear	(0.1f)
 		, mClipPlaneFar		(1000.f)
 		, mAspect			(0.f)
-	{
-	}
+	{}
 
 #endif
 };

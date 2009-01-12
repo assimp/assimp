@@ -1,4 +1,5 @@
 
+#include "UnitTestPCH.h"
 #include "utSharedPPData.h"
 
 
@@ -14,17 +15,21 @@ struct TestType
 	}
 };
 
+
+// ------------------------------------------------------------------------------------------------
 void SharedPPDataTest :: setUp (void)
 {
 	shared = new SharedPostProcessInfo();
 	destructed = false;
 }
 
+// ------------------------------------------------------------------------------------------------
 void SharedPPDataTest :: tearDown (void)
 {
 	
 }
 
+// ------------------------------------------------------------------------------------------------
 void  SharedPPDataTest :: testPODProperty (void)
 {
 	int i = 5;
@@ -38,6 +43,7 @@ void  SharedPPDataTest :: testPODProperty (void)
 	CPPUNIT_ASSERT(shared->GetProperty("test",m) && 12.f == m);
 }
 
+// ------------------------------------------------------------------------------------------------
 void  SharedPPDataTest :: testPropertyPointer (void)
 {
 	int *i = new int[35];
@@ -48,6 +54,7 @@ void  SharedPPDataTest :: testPropertyPointer (void)
 	CPPUNIT_ASSERT(!shared->GetProperty("test16",o));
 }
 
+// ------------------------------------------------------------------------------------------------
 void  SharedPPDataTest :: testPropertyDeallocation (void)
 {
 	TestType *out, * pip = new TestType();

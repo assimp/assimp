@@ -5,7 +5,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include <assimp.hpp>
-
+#include <BaseImporter.h>
 
 using namespace std;
 using namespace Assimp;

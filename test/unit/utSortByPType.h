@@ -15,7 +15,6 @@ using namespace Assimp;
 class SortByPTypeProcessTest : public CPPUNIT_NS :: TestFixture
 {
     CPPUNIT_TEST_SUITE (SortByPTypeProcessTest);
-	CPPUNIT_TEST (testDeterminePTypeStep);
 	CPPUNIT_TEST (testSortByPTypeStep);
     CPPUNIT_TEST_SUITE_END ();
 
@@ -30,7 +29,6 @@ class SortByPTypeProcessTest : public CPPUNIT_NS :: TestFixture
    
 	private:
 
-		DeterminePTypeHelperProcess* process0;
 		SortByPTypeProcess* process1;
 		aiScene* scene;
 };

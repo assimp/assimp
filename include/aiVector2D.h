@@ -50,8 +50,9 @@ extern "C" {
 
 #include "./Compiler/pushpack1.h"
 
-// ---------------------------------------------------------------------------
-/** Represents a two-dimensional vector. */
+// ----------------------------------------------------------------------------------
+/** Represents a two-dimensional vector. 
+ */
 struct aiVector2D
 {
 #ifdef __cplusplus
@@ -60,29 +61,58 @@ struct aiVector2D
 	aiVector2D (float _xyz) : x(_xyz), y(_xyz) {}
 	aiVector2D (const aiVector2D& o) : x(o.x), y(o.y) {}
 
-	void Set( float pX, float pY) { x = pX; y = pY;}
-	float SquareLength() const { return x*x + y*y; }
-	float Length() const { return sqrt( SquareLength()); }
-	aiVector2D& Normalize() { *this /= Length(); return *this; }
-	const aiVector2D& operator += (const aiVector2D& o) { x += o.x; y += o.y;  return *this; }
-	const aiVector2D& operator -= (const aiVector2D& o) { x -= o.x; y -= o.y;  return *this; }
-	const aiVector2D& operator *= (float f) { x *= f; y *= f;  return *this; }
-	const aiVector2D& operator /= (float f) { x /= f; y /= f;  return *this; }
+	void Set( float pX, float pY) { 
+		x = pX; y = pY;
+	}
+	
+	float SquareLength() const {
+		return x*x + y*y; 
+	}
+	
+	float Length() const {
+		return ::sqrt( SquareLength());
+	}
 
-	inline float operator[](unsigned int i) const {return *(&x + i);}
-	inline float& operator[](unsigned int i) {return *(&x + i);}
+	aiVector2D& Normalize() { 
+		*this /= Length(); return *this;
+	}
 
-	inline bool operator== (const aiVector2D& other) const
-		{return x == other.x && y == other.y;}
+	const aiVector2D& operator += (const aiVector2D& o) {
+		x += o.x; y += o.y;  return *this; 
+	}
+	const aiVector2D& operator -= (const aiVector2D& o) {
+		x -= o.x; y -= o.y;  return *this; 
+	}
+	const aiVector2D& operator *= (float f) { 
+		x *= f; y *= f;  return *this; 
+	}
+	const aiVector2D& operator /= (float f) {
+		x /= f; y /= f;  return *this; 
+	}
 
-	inline bool operator!= (const aiVector2D& other) const
-		{return x != other.x || y != other.y;}
+	float operator[](unsigned int i) const {
+		return *(&x + i);
+	}
 
-	inline aiVector2D& operator= (float f)
-		{x = y = f;return *this;}
+	float& operator[](unsigned int i) {
+		return *(&x + i);
+	}
 
-	const aiVector2D SymMul(const aiVector2D& o)
-		{return aiVector2D(x*o.x,y*o.y);}
+	bool operator== (const aiVector2D& other) const {
+		return x == other.x && y == other.y;
+	}
+
+	bool operator!= (const aiVector2D& other) const {
+		return x != other.x || y != other.y;
+	}
+
+	aiVector2D& operator= (float f)	{
+		x = y = f;return *this;
+	}
+
+	const aiVector2D SymMul(const aiVector2D& o) {
+		return aiVector2D(x*o.x,y*o.y);
+	}
 
 #endif // __cplusplus
 
@@ -94,36 +124,42 @@ struct aiVector2D
 #ifdef __cplusplus
 } // end extern "C"
 
+// ----------------------------------------------------------------------------------
 // symmetric addition
 inline aiVector2D operator + (const aiVector2D& v1, const aiVector2D& v2)
 {
 	return aiVector2D( v1.x + v2.x, v1.y + v2.y);
 }
 
+// ----------------------------------------------------------------------------------
 // symmetric subtraction
 inline aiVector2D operator - (const aiVector2D& v1, const aiVector2D& v2)
 {
 	return aiVector2D( v1.x - v2.x, v1.y - v2.y);
 }
 
+// ----------------------------------------------------------------------------------
 // scalar product
 inline float operator * (const aiVector2D& v1, const aiVector2D& v2)
 {
 	return v1.x*v2.x + v1.y*v2.y;
 }
 
+// ----------------------------------------------------------------------------------
 // scalar multiplication
 inline aiVector2D operator * ( float f, const aiVector2D& v)
 {
 	return aiVector2D( f*v.x, f*v.y);
 }
 
+// ----------------------------------------------------------------------------------
 // and the other way around
 inline aiVector2D operator * ( const aiVector2D& v, float f)
 {
 	return aiVector2D( f*v.x, f*v.y);
 }
 
+// ----------------------------------------------------------------------------------
 // scalar division
 inline aiVector2D operator / ( const aiVector2D& v, float f)
 {
@@ -131,12 +167,14 @@ inline aiVector2D operator / ( const aiVector2D& v, float f)
 	return v * (1/f);
 }
 
+// ----------------------------------------------------------------------------------
 // vector division
 inline aiVector2D operator / ( const aiVector2D& v, const aiVector2D& v2)
 {
 	return aiVector2D(v.x / v2.x,v.y / v2.y);
 }
 
+// ----------------------------------------------------------------------------------
 // vector inversion
 inline aiVector2D operator - ( const aiVector2D& v)
 {
@@ -144,5 +182,4 @@ inline aiVector2D operator - ( const aiVector2D& v)
 }
 
 #endif // __cplusplus
-
 #endif // AI_VECTOR2D_H_INC

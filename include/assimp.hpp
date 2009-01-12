@@ -40,8 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Defines the C++-API to the Open Asset Import Library. */
-#ifndef __AI_ASSIMP_HPP_INC__
-#define __AI_ASSIMP_HPP_INC__
+#ifndef INCLUDED_AI_ASSIMP_HPP
+#define INCLUDED_AI_ASSIMP_HPP
 
 #ifndef __cplusplus
 #	error This header requires C++ to be used. Use Assimp's C-API (assimp.h) \
@@ -51,24 +51,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <vector>
 
-// Public ASSIMP headers
+// Public ASSIMP data structure headers
 #include "aiTypes.h"
 #include "aiConfig.h"
 #include "aiAssert.h"
 
-namespace Assimp
-{
-	// Public interface
+namespace Assimp	{
+
+	// =======================================================================
+	// Public interface to Assimp 
+	// =======================================================================
 	class Importer;
 	class IOStream;
 	class IOSystem;
 
+	// =======================================================================
 	// Plugin development
+	// Include the following headers for the definitions:
+	// =======================================================================
+	// BaseImporter.h
+	// BaseProcess.h
 	class BaseImporter;
 	class BaseProcess;
 	class SharedPostProcessInfo;
 	class BatchLoader;
-}
+} //! namespace Assimp
 
 #define AI_PROPERTY_WAS_NOT_EXISTING 0xffffffff
 
@@ -76,20 +83,22 @@ struct aiScene;
 struct aiFileIO;
 extern "C" ASSIMP_API const aiScene* aiImportFileEx( const char*, unsigned int, aiFileIO*);
 
-namespace Assimp
-{
+namespace Assimp	{
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 /** The Importer class forms an C++ interface to the functionality of the 
-*   Asset Import library.
+*   Open Asset Import Library.
 *
 * Create an object of this class and call ReadFile() to import a file. 
 * If the import succeeds, the function returns a pointer to the imported data. 
 * The data remains property of the object, it is intended to be accessed 
 * read-only. The imported data will be destroyed along with the Importer 
-* object. If the import failes, ReadFile() returns a NULL pointer. In this
+* object. If the import fails, ReadFile() returns a NULL pointer. In this
 * case you can retrieve a human-readable error description be calling 
-* GetErrorString().
+* GetErrorString(). You can call ReadFile() multiple times with a single Importer
+* instance. Actually, constructing Importer objects involves quite many
+* allocations and may take some time, so it's better to reuse them as often as
+* possible.
 *
 * If you need the Importer to do custom file handling to access the files,
 * implement IOSystem and IOStream and supply an instance of your custom 
@@ -98,7 +107,7 @@ namespace Assimp
 * standard C++ IO logic will be used.
 *
 * @note One Importer instance is not thread-safe. If you use multiple
-* threads for loading each thread should manage its own Importer instance.
+* threads for loading each thread should maintain its own Importer instance.
 */
 class ASSIMP_API Importer
 {
@@ -122,6 +131,17 @@ public:
 	 * Call ReadFile() to start the import process.
 	 */
 	Importer();
+
+
+	// -------------------------------------------------------------------
+	/** Copy constructor.
+	 * 
+	 * This copies the configuration properties of another Importer.
+	 * If this Importer owns a scene it won't be copied.
+	 * Call ReadFile() to start the import process.
+	 */
+	Importer(const Importer& other);
+
 
 	// -------------------------------------------------------------------
 	/** Destructor. The object kept ownership of the imported data,
@@ -299,13 +319,23 @@ public:
 
 
 	// -------------------------------------------------------------------
+	/** Frees the current scene.
+	 *
+	 *  The function does nothing if no scene has previously been 
+	 *  read via ReadFile(). FreeScene() is called automatically by the
+	 *  destructor and ReadFile() itself.
+	 */
+	void FreeScene( );
+
+
+	// -------------------------------------------------------------------
 	/** Returns an error description of an error that occured in ReadFile(). 
 	*
 	* Returns an empty string if no error occured.
 	* @return A description of the last error, an empty string if no 
 	*   error occured.
 	*/
-	inline const std::string& GetErrorString() const;
+	const std::string& GetErrorString() const;
 
 
 	// -------------------------------------------------------------------
@@ -324,7 +354,8 @@ public:
 	*
 	* If a file extension is contained in the list this does, of course, not
 	* mean that ASSIMP is able to load all files with this extension.
-	* @param szOut String to receive the extension list.
+	* @param szOut String to receive the extension list. It just means there
+    *   is a loader which handles such files.
 	*   Format of the list: "*.3ds;*.obj;*.dae". 
 	*/
 	void GetExtensionList(std::string& szOut);
@@ -347,7 +378,7 @@ public:
 	 *
 	 * @return Current scene or NULL if there is currently no scene loaded
 	 */
-	inline const aiScene* GetScene();
+	const aiScene* GetScene() const;
 
 
 	// -------------------------------------------------------------------
@@ -359,7 +390,7 @@ public:
 	 *
 	 * @return Current scene or NULL if there is currently no scene loaded
 	 */
-	inline const aiScene* GetOrphanedScene();
+	aiScene* GetOrphanedScene();
 
 
 	// -------------------------------------------------------------------
@@ -376,12 +407,7 @@ public:
 	* all steps behave consequently in the same manner when modifying
 	* data structures.
 	*/
-	inline void SetExtraVerbose(bool bDo);
-
-private:
-
-	/** Empty copy constructor. */
-	Importer(const Importer &other);
+	void SetExtraVerbose(bool bDo);
 
 protected:
 
@@ -419,33 +445,30 @@ protected:
 
 	/** Used by post-process steps to share data */
 	SharedPostProcessInfo* mPPShared;
-};
+}; //! class Importer
 
-// ---------------------------------------------------------------------------
-// inline methods for Importer
+// ----------------------------------------------------------------------------------
 inline const std::string& Importer::GetErrorString() const 
 { 
 	return mErrorString;
 }
-
+// ----------------------------------------------------------------------------------
 inline void Importer::SetExtraVerbose(bool bDo)
 {
 	bExtraVerbose = bDo;
 }
-
-inline const aiScene* Importer::GetOrphanedScene()
-{
-	aiScene* scene = mScene;
-	mScene = NULL;
-	return scene;
-}
-
-inline const aiScene* Importer::GetScene()
+// ----------------------------------------------------------------------------------
+inline const aiScene* Importer::GetScene() const
 {
 	return mScene;
 }
+// ----------------------------------------------------------------------------------
+inline aiScene* Importer::GetOrphanedScene()
+{
+	aiScene* s = mScene;
+	mScene = NULL;
+	return s;
+}
 
-
-} // End of namespace Assimp
-
-#endif // __AI_ASSIMP_HPP_INC
+} // !namespace Assimp
+#endif // INCLUDED_AI_ASSIMP_HPP

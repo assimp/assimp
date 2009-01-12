@@ -227,14 +227,18 @@ void TargetAnimationHelper::Process(std::vector<aiVectorKey>* distanceTrack)
 		float f = diff.Length();
 
 		// output distance vector
-		if (fill)
+		if (f)
 		{
 			fill->push_back(aiVectorKey());
 			aiVectorKey& v = fill->back();
 			v.mTime  = iter.GetCurTime();
-			v.mValue = aiVector3D (0.f,0.f,f);
+			v.mValue = diff;
+
+			diff /= f;
 		}
-		diff /= f; 
+		else
+		{
+		}
 
 		// diff is now the vector in which our camera is pointing
 	}

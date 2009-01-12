@@ -171,9 +171,11 @@ inline const char* ValidateArrayContents<aiVector3D>(const aiVector3D* arr, unsi
 	const std::vector<bool>& dirtyMask, bool mayBeIdentical , bool mayBeZero )
 {
 	bool b = false;
+	unsigned int cnt = 0;
 	for (unsigned int i = 0; i < size;++i)
 	{
 		if (dirtyMask.size() && dirtyMask[i])continue;
+		++cnt;
 
 		const aiVector3D& v = arr[i];
 		if (is_special_float(v.x) || is_special_float(v.y) || is_special_float(v.z))
@@ -186,7 +188,7 @@ inline const char* ValidateArrayContents<aiVector3D>(const aiVector3D* arr, unsi
 		}
 		if (i && v != arr[i-1])b = true;
 	}
-	if (!b && !mayBeIdentical)
+	if (cnt > 1 && !b && !mayBeIdentical)
 		return "All vectors are identical";
 	return NULL;
 }
@@ -284,7 +286,7 @@ void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
 int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 {
 	bool ret = false;
-	std::vector<bool> dirtyMask(pMesh->mNumVertices,true);
+	std::vector<bool> dirtyMask(pMesh->mNumVertices,(pMesh->mNumFaces ? true : false));
 
 	// Ignore elements that are not referenced by vertices.
 	// (they are, for example, caused by the FindDegenerates step)
@@ -295,7 +297,7 @@ int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 			dirtyMask[f.mIndices[i]] = false;
 	}
 
-	// process vertex positions
+	// Process vertex positions
 	if(pMesh->mVertices && ProcessArray(pMesh->mVertices,pMesh->mNumVertices,"positions",dirtyMask))
 	{
 		DefaultLogger::get()->error("Deleting mesh: Unable to continue without vertex positions");
@@ -333,11 +335,13 @@ int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 				for (unsigned int m = 0; m < pMesh->mNumFaces;++m)
 				{
 					const aiFace& f = pMesh->mFaces[m];
-					if (2 == f.mNumIndices)
+
+					if (f.mNumIndices < 3) 
 					{
-						dirtyMask[f.mIndices[0]] = dirtyMask[f.mIndices[1]] = true;
+						dirtyMask[f.mIndices[0]] = true;
+						if (f.mNumIndices == 2) 
+							dirtyMask[f.mIndices[1]] = true;
 					}
-					else if (1 == f.mNumIndices)dirtyMask[f.mIndices[0]] = true;
 				}
 			}
 			// Normals, tangents and bitangents are undefined for
@@ -354,7 +358,7 @@ int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 		if (pMesh->mTangents && ProcessArray(pMesh->mTangents,pMesh->mNumVertices,
 			"tangents",dirtyMask))
 		{
-			delete[] pMesh->mTangents; pMesh->mTangents = NULL;
+			delete[] pMesh->mBitangents; pMesh->mBitangents = NULL;
 			ret = true;
 		}
 
@@ -362,7 +366,7 @@ int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 		if (pMesh->mBitangents && ProcessArray(pMesh->mBitangents,pMesh->mNumVertices,
 			"bitangents",dirtyMask))
 		{
-			delete[] pMesh->mBitangents; pMesh->mBitangents = NULL;
+			delete[] pMesh->mTangents; pMesh->mTangents = NULL;
 			ret = true;
 		}
 	}

@@ -70,9 +70,8 @@ void ComputeNormalsWithSmoothingsGroups(MeshWithSmoothingGroups<T>& sMesh)
 		aiVector3D pDelta2 = *pV3 - *pV1;
 		aiVector3D vNor = pDelta1 ^ pDelta2;
 
-		sMesh.mNormals[face.mIndices[0]] = vNor;
-		sMesh.mNormals[face.mIndices[1]] = vNor;
-		sMesh.mNormals[face.mIndices[2]] = vNor;
+		for (unsigned int c = 0; c < 3;++c)
+			sMesh.mNormals[face.mIndices[c]] = vNor;
 	}
 
 	// calculate the position bounds so we have a reliable epsilon to check position differences against 
@@ -95,9 +94,8 @@ void ComputeNormalsWithSmoothingsGroups(MeshWithSmoothingGroups<T>& sMesh)
 	for( typename std::vector<T>::iterator i =  sMesh.mFaces.begin();
 		i != sMesh.mFaces.end();++i)
 	{
-		sSort.Add(sMesh.mPositions[(*i).mIndices[0]],(*i).mIndices[0],(*i).iSmoothGroup);
-		sSort.Add(sMesh.mPositions[(*i).mIndices[1]],(*i).mIndices[1],(*i).iSmoothGroup);
-		sSort.Add(sMesh.mPositions[(*i).mIndices[2]],(*i).mIndices[2],(*i).iSmoothGroup);
+		for (unsigned int c = 0; c < 3;++c)
+			sSort.Add(sMesh.mPositions[(*i).mIndices[c]],(*i).mIndices[c],(*i).iSmoothGroup);
 	}
 	sSort.Prepare();
 

@@ -44,17 +44,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define ASSIMP_INTERNAL_BUILD
 
-// *******************************************************************
-// If we have at least VC8 some C string manipulation functions
-// are mapped to their safe _s counterparts (e.g. _itoa_s).
-// *******************************************************************
-#if _MSC_VER >= 1400 && !(defined _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES)
-#	define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
-#endif
+// Compile config
+#include "../include/aiDefines.h"
 
-// *******************************************************************
-// STL headers - we need quite a lot of them
-// *******************************************************************
+// ===================================================================
+// Runtime/STL headers
+// ===================================================================
 #include <vector>
 #include <list>
 #include <map>
@@ -67,10 +62,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <algorithm>
 #include <numeric>
+#include <new>
 
-// *******************************************************************
-// public ASSIMP headers
-// *******************************************************************
+// ===================================================================
+// Public ASSIMP headers
+// ===================================================================
 #include "../include/DefaultLogger.h"
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
@@ -78,18 +74,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiPostProcess.h"
 #include "../include/assimp.hpp"
 
-// *******************************************************************
-// internal headers that are nearly always required
-// *******************************************************************
+// ===================================================================
+// Internal utility headers
+// ===================================================================
 #include "BaseImporter.h"
 #include "MaterialSystem.h"
 #include "StringComparison.h"
 #include "StreamReader.h"
 #include "qnan.h"
 
-// *******************************************************************
+// ===================================================================
 // boost headers - take them from the workaround dir if possible
-// *******************************************************************
+// ===================================================================
 #ifdef ASSIMP_BUILD_BOOST_WORKAROUND
 
 #	include "../include/BoostWorkaround/boost/scoped_ptr.hpp"
@@ -104,8 +100,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include <boost/format.hpp>
 #	include <boost/foreach.hpp>
 
-#endif
-
-
+#endif // ! ASSIMP_BUILD_BOOST_WORKAROUND
 #endif // !! ASSIMP_PCH_INCLUDED
+
 

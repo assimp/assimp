@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
+// Get a specific property from a material
 aiReturn aiGetMaterialProperty(const aiMaterial* pMat, 
 	const char* pKey,
 	unsigned int type,
@@ -70,6 +71,7 @@ aiReturn aiGetMaterialProperty(const aiMaterial* pMat,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get an array of floating-point values from the material.
 aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat, 
 	const char* pKey,
 	unsigned int type,
@@ -124,6 +126,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get an array if integers from the material
 aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat, 
 	const char* pKey,
 	unsigned int type,
@@ -177,6 +180,7 @@ aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get a color (3 or 4 floats) from the material
 aiReturn aiGetMaterialColor(const aiMaterial* pMat, 
 	const char* pKey,
 	unsigned int type,
@@ -192,6 +196,7 @@ aiReturn aiGetMaterialColor(const aiMaterial* pMat,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get a string from the material
 aiReturn aiGetMaterialString(const aiMaterial* pMat, 
 	const char* pKey,
 	unsigned int type,
@@ -223,6 +228,7 @@ aiReturn aiGetMaterialString(const aiMaterial* pMat,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Construction. Actually the one and only way to get an aiMaterial instance
 MaterialHelper::MaterialHelper()
 {
 	// Allocate 5 entries by default
@@ -234,7 +240,30 @@ MaterialHelper::MaterialHelper()
 // ------------------------------------------------------------------------------------------------
 MaterialHelper::~MaterialHelper()
 {
+	_InternDestruct();
+}
+
+// ------------------------------------------------------------------------------------------------
+aiMaterial::~aiMaterial()
+{
+	// This is safe: aiMaterial has a private constructor,
+	// so instances must be created indirectly via MaterialHelper.
+	((MaterialHelper*)this)->_InternDestruct();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Manual destructor
+void MaterialHelper::_InternDestruct()
+{
+	// First clean up all properties
 	Clear();
+
+	// Then delete the array that stored them
+	delete[] mProperties;
+	AI_DEBUG_INVALIDATE_PTR(mProperties);
+
+	// Update members
+	mNumAllocated = 0;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -244,36 +273,38 @@ void MaterialHelper::Clear()
 	{
 		// delete this entry
 		delete mProperties[i];
+		AI_DEBUG_INVALIDATE_PTR(mProperties[i]);
 	}
 	mNumProperties = 0;
 
-	// The array remains
+	// The array remains allocated, we just invalidated its contents
 }
 
 // ------------------------------------------------------------------------------------------------
-uint32_t MaterialHelper::ComputeHash()
+uint32_t MaterialHelper::ComputeHash(bool includeMatName /*= false*/)
 {
 	uint32_t hash = 1503; // magic start value, choosen to be my birthday :-)
 	for (unsigned int i = 0; i < this->mNumProperties;++i)
 	{
 		aiMaterialProperty* prop;
 
-		// NOTE: We need to exclude the material name from the hash
-		if ((prop = this->mProperties[i]) && ::strcmp(prop->mKey.data,"$mat.name")) 
+		// If specified, exclude the material name from the hash
+		if ((prop = mProperties[i]) && (includeMatName || ::strcmp(prop->mKey.data,"$mat.name")))
 		{
 			hash = SuperFastHash(prop->mKey.data,(unsigned int)prop->mKey.length,hash);
 			hash = SuperFastHash(prop->mData,prop->mDataLength,hash);
 
 			// Combine the semantic and the index with the hash
 			// We print them to a string to make sure the quality
-			// of the hash isn't decreased.
+			// of the hashing state isn't affected (our hashing
+			// procedure was originally intended for plaintest).
 			char buff[32];
 			unsigned int len;
 			
-			len = itoa10(buff,prop->mSemantic);
+			len = ASSIMP_itoa10(buff,prop->mSemantic);
 			hash = SuperFastHash(buff,len-1,hash);
 
-			len = itoa10(buff,prop->mIndex);
+			len = ASSIMP_itoa10(buff,prop->mIndex);
 			hash = SuperFastHash(buff,len-1,hash);
 		}
 	}
@@ -359,11 +390,11 @@ aiReturn MaterialHelper::AddBinaryProperty (const void* pInput,
 		return AI_SUCCESS;
 	}
 
-	// resize the array ... allocate storage for 5 other properties
+	// resize the array ... double the storage
 	if (mNumProperties == mNumAllocated)
 	{
 		unsigned int iOld = mNumAllocated;
-		mNumAllocated += 5;
+		mNumAllocated *= 2;
 
 		aiMaterialProperty** ppTemp = new aiMaterialProperty*[mNumAllocated];
 		if (NULL == ppTemp)return AI_OUTOFMEMORY;

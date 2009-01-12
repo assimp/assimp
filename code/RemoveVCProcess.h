@@ -38,19 +38,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines a post processing step to kill all loaded normals */
-#ifndef AI_KILLNORMALPROCESS_H_INC
-#define AI_KILLNORMALPROCESS_H_INC
+/** @file Defines a post processing step to remove specific parts of the scene */
+#ifndef AI_REMOVEVCPROCESS_H_INCLUDED
+#define AI_REMOVEVCPROCESS_H_INCLUDED
 
 #include "BaseProcess.h"
 #include "../include/aiMesh.h"
 
 class RemoveVCProcessTest;
-namespace Assimp
-	{
+namespace Assimp	{
 
 // ---------------------------------------------------------------------------
-/** RemoveVCProcess: Class to kill all normals loaded
+/** RemoveVCProcess: Class to exclude specific parts of the data structure
+ *  from further processing by removing them,
 */
 class ASSIMP_API RemoveVCProcess : public BaseProcess
 {
@@ -80,7 +80,6 @@ public:
 	*/
 	void Execute( aiScene* pScene);
 
-
 	// -------------------------------------------------------------------
 	/** Called prior to ExecuteOnScene().
 	* The function is a request to the process to update its configuration
@@ -88,20 +87,37 @@ public:
 	*/
 	virtual void SetupProperties(const Importer* pImp);
 
+	// -------------------------------------------------------------------
+	/** Manually setup the configuration flags for the step
+	 *
+	 *  @param Bitwise combintion of the #aiComponent enumerated values.
+	*/
+	void SetDeleteFlags(unsigned int f)	
+	{
+		configDeleteFlags = f;
+	}
+
+	// -------------------------------------------------------------------
+	/** Query the current configuration.
+	*/
+	unsigned int GetDeleteFlags() const
+	{
+		return configDeleteFlags;
+	}
 
 private:
 
 	bool ProcessMesh (aiMesh* pcMesh);
 
-	/** Configuration
+	/** Configuration flag
 	 */
 	unsigned int configDeleteFlags;
 
-	/** The scene the instance is currently operating on
+	/** The scene we're working with
 	 */
 	aiScene* mScene;
 };
 
 } // end of namespace Assimp
 
-#endif // !!AI_KILLNORMALPROCESS_H_INC
+#endif // !!AI_REMOVEVCPROCESS_H_INCLUDED

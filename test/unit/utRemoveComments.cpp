@@ -1,20 +1,23 @@
 
-
+#include "UnitTestPCH.h"
 #include "utRemoveComments.h"
 
 
 CPPUNIT_TEST_SUITE_REGISTRATION (RemoveCommentsTest);
 
+// ------------------------------------------------------------------------------------------------
 void RemoveCommentsTest :: setUp (void)
 {
 	// nothing to do here
 }
 
+// ------------------------------------------------------------------------------------------------
 void RemoveCommentsTest :: tearDown (void)
 {
 	// nothing to do here
 }
 
+// ------------------------------------------------------------------------------------------------
 void RemoveCommentsTest :: testSingleLineComments (void)
 {
 	const char* szTest = "int i = 0; \n"
@@ -37,6 +40,7 @@ void RemoveCommentsTest :: testSingleLineComments (void)
 	delete[] szTest2;
 }
 
+// ------------------------------------------------------------------------------------------------
 void RemoveCommentsTest :: testMultiLineComments (void)
 {
 	char* szTest = 

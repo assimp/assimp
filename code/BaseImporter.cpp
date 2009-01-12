@@ -169,7 +169,7 @@ struct LoadRequest
 
 // ------------------------------------------------------------------------------------------------
 // BatchLoader::pimpl data structure
-struct BatchData
+struct Assimp::BatchData
 {
 	// IO system to be used for all imports
 	IOSystem* pIOSystem;
@@ -189,8 +189,7 @@ BatchLoader::BatchLoader(IOSystem* pIO)
 {
 	ai_assert(NULL != pIO);
 
-	pimpl = new BatchData();
-	BatchData* data = ( BatchData* )pimpl;
+	data = new BatchData();
 	data->pIOSystem = pIO;
 	data->pImporter = new Importer();
 }
@@ -199,7 +198,6 @@ BatchLoader::BatchLoader(IOSystem* pIO)
 BatchLoader::~BatchLoader()
 {
 	// delete all scenes wthat have not been polled by the user
-	BatchData* data = ( BatchData* )pimpl;
 	for (std::list<LoadRequest>::iterator it = data->requests.begin();
 		it != data->requests.end(); ++it)
 	{
@@ -212,7 +210,6 @@ BatchLoader::~BatchLoader()
 // ------------------------------------------------------------------------------------------------
 void BatchLoader::SetBasePath (const std::string& pBase)
 {
-	BatchData* data = ( BatchData* )pimpl;
 	data->pathBase = pBase;
 
 	// file name? we just need the directory
@@ -241,8 +238,6 @@ void BatchLoader::AddLoadRequest	(const std::string& file,
 	ai_assert(!file.empty());
 
 	// no threaded implementation for the moment
-	BatchData* data = ( BatchData* )pimpl;
-
 	std::string real;
 
 	// build a full path if this is a relative path and 
@@ -273,7 +268,6 @@ void BatchLoader::AddLoadRequest	(const std::string& file,
 aiScene* BatchLoader::GetImport		(const std::string& file)
 {
 	// no threaded implementation for the moment
-	BatchData* data = ( BatchData* )pimpl;
 	std::string real;
 
 	// build a full path if this is a relative path and 
@@ -302,8 +296,6 @@ aiScene* BatchLoader::GetImport		(const std::string& file)
 // ------------------------------------------------------------------------------------------------
 void BatchLoader::LoadAll()
 {
-	BatchData* data = ( BatchData* )pimpl;
-
 	// no threaded implementation for the moment
 	for (std::list<LoadRequest>::iterator it = data->requests.begin();
 		it != data->requests.end(); ++it)

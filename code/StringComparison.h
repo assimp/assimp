@@ -38,23 +38,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Definition of platform independent string comparison functions */
-#ifndef AI_STRINGCOMPARISON_H_INC
-#define AI_STRINGCOMPARISON_H_INC
+/** @file Definition of platform independent string workers:
 
+   ASSIMP_itoa10
+   ASSIMP_stricmp
+   ASSIMP_strincmp
 
-namespace Assimp
-{
+   These functions are not consistently available on all platforms,
+   or the provided implementations behave too differently.
+*/
+#ifndef INCLUDED_AI_STRING_WORKERS_H
+#define INCLUDED_AI_STRING_WORKERS_H
 
-// ---------------------------------------------------------------------------
-// itoa is not consistently available on all platforms so it is quite useful
-// to have a small replacement function here. No need to use a full sprintf()
-// if we just want to print a number ...
-// @param out Output buffer
-// @param max Maximum number of characters to be written, including '\0'
-// @param number Number to be written
-// @return Number of bytes written. Including '\0'.
-inline unsigned int itoa10( char* out, unsigned int max, int32_t number)
+namespace Assimp	{
+
+// -------------------------------------------------------------------------------
+/** @brief itoa with a fixed base 10
+ * 'itoa' is not consistently available on all platforms so it is quite useful
+ * to have a small replacement function here. No need to use a full sprintf()
+ * if we just want to print a number ...
+ * @param out Output buffer
+ * @param max Maximum number of characters to be written, including '\0'
+ * @param number Number to be written
+ * @return Number of bytes written. Including the terminal zero.
+ */
+inline unsigned int ASSIMP_itoa10( char* out, unsigned int max, int32_t number)
 {
 	ai_assert(NULL != out);
 
@@ -91,28 +99,32 @@ inline unsigned int itoa10( char* out, unsigned int max, int32_t number)
 	return written;
 }
 
-// ---------------------------------------------------------------------------
-// Secure template overload
-// The compiler should choose this function if he is able to determine the
-// size of the array automatically.
+// -------------------------------------------------------------------------------
+/** @brief itoa with a fixed base 10 (Secure template overload)
+ *  The compiler should choose this function if he is able to determine the
+ *  size of the array automatically.
+ */
 template <unsigned int length>
-inline unsigned int itoa10( char(& out)[length], int32_t number)
+inline unsigned int ASSIMP_itoa10( char(& out)[length], int32_t number)
 {
-	return itoa10(out,length,number);
+	return ASSIMP_itoa10(out,length,number);
 }
 
-// ---------------------------------------------------------------------------
-/** \brief Helper function to do platform independent string comparison.
+// -------------------------------------------------------------------------------
+/** @brief Helper function to do platform independent string comparison.
  *
  *  This is required since stricmp() is not consistently available on
  *  all platforms. Some platforms use the '_' prefix, others don't even
  *  have such a function. 
  *
- *  \param s1 First input string
- *  \param s2 Second input string
+ *  @param s1 First input string
+ *  @param s2 Second input string
+ *  @return 0 if the given strings are identical
  */
 inline int ASSIMP_stricmp(const char *s1, const char *s2)
 {
+	ai_assert(NULL != s1 && NULL != s2);
+
 #if (defined _MSC_VER)
 
 	return ::_stricmp(s1,s2);
@@ -134,8 +146,12 @@ inline int ASSIMP_stricmp(const char *s1, const char *s2)
 #endif
 }
 
-// ---------------------------------------------------------------------------
-/** \brief Case independent comparison of two std::strings
+// -------------------------------------------------------------------------------
+/** @brief Case independent comparison of two std::strings
+ *
+ *  @param a First  string
+ *  @param b Second string
+ *  @return 0 if a == b
  */
 inline int ASSIMP_stricmp(const std::string& a, const std::string& b)
 {
@@ -143,19 +159,23 @@ inline int ASSIMP_stricmp(const std::string& a, const std::string& b)
 	return (i ? i : ASSIMP_stricmp(a.c_str(),b.c_str()));
 }
 
-// ---------------------------------------------------------------------------
-/** \brief Helper function to do platform independent string comparison.
+// -------------------------------------------------------------------------------
+/** @brief Helper function to do platform independent string comparison.
  *
  *  This is required since strincmp() is not consistently available on
  *  all platforms. Some platforms use the '_' prefix, others don't even
  *  have such a function. 
  *
- *  \param s1 First input string
- *  \param s2 Second input string
- *  \param n Macimum number of characters to compare
+ *  @param s1 First input string
+ *  @param s2 Second input string
+ *  @param n Macimum number of characters to compare
+ *  @return 0 if the given strings are identical
  */
 inline int ASSIMP_strincmp(const char *s1, const char *s2, unsigned int n)
 {
+	ai_assert(NULL != s1 && NULL != s2);
+	if (!n)return 0;
+
 #if (defined _MSC_VER)
 
 	return ::_strnicmp(s1,s2,n);
@@ -180,8 +200,11 @@ inline int ASSIMP_strincmp(const char *s1, const char *s2, unsigned int n)
 }
 
 
-// ---------------------------------------------------------------------------
-// Evaluates an integer power. 
+// -------------------------------------------------------------------------------
+/** @brief Evaluates an integer power
+ *
+ * todo: move somewhere where it fits better in than here 
+ */
 inline unsigned int integer_pow (unsigned int base, unsigned int power)
 {
 	unsigned int res = 1;

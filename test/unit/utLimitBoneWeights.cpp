@@ -1,9 +1,11 @@
 
+#include "UnitTestPCH.h"
 #include "utLimitBoneWeights.h"
 
 
 CPPUNIT_TEST_SUITE_REGISTRATION (LimitBoneWeightsTest);
 
+// ------------------------------------------------------------------------------------------------
 void LimitBoneWeightsTest :: setUp (void)
 {
 	// construct the process
@@ -32,12 +34,14 @@ void LimitBoneWeightsTest :: setUp (void)
 	}
 }
 
+// ------------------------------------------------------------------------------------------------
 void LimitBoneWeightsTest :: tearDown (void)
 {
 	delete this->pcMesh;
 	delete this->piProcess;
 }
 
+// ------------------------------------------------------------------------------------------------
 void LimitBoneWeightsTest :: testProcess(void)
 {
 	// execute the step on the given data

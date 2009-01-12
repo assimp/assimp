@@ -6,7 +6,7 @@
 
 #include <aiScene.h>
 #include <RemoveVCProcess.h>
-
+#include <MaterialSystem.h>
 
 using namespace std;
 using namespace Assimp;

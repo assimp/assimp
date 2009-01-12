@@ -2072,6 +2072,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	HWND hDlg = CreateDialog(hInstance,MAKEINTRESOURCE(IDD_DIALOGMAIN),
 		NULL,&MessageProc);
 
+	// ensure we get high priority
+	::SetPriorityClass(GetCurrentProcess(),HIGH_PRIORITY_CLASS);
+
 	// initialise the default logger if neccessary
 	Assimp::DefaultLogger::create("",Assimp::Logger::VERBOSE);
 	Assimp::DefaultLogger::get()->attachStream((Assimp::LogStream*)&CLogWindow::Instance().pcStream,

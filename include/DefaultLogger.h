@@ -38,21 +38,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#if (!defined AI_DEFAULTLOGGER_H_INCLUDED)
-#define AI_DEFAULTLOGGER_H_INCLUDED
+#ifndef INCLUDED_AI_DEFAULTLOGGER
+#define INCLUDED_AI_DEFAULTLOGGER
 
 #include "Logger.h"
+#include "LogStream.h"
 #include "NullLogger.h"
 #include <vector>
 
-namespace Assimp
-{
-// ---------------------------------------------------------------------------
+namespace Assimp	{
+// ------------------------------------------------------------------------------------
 class IOStream;
 struct LogStreamInfo;
 
-
-// ---------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 /**	@class	DefaultLogger
  *	@brief	Default logging implementation. The logger writes into a file. 
  *	The name can be set by creating the logger. If no filename was specified 
@@ -62,13 +61,24 @@ class ASSIMP_API DefaultLogger :
 	public Logger
 {
 public:
-	/**	@brief	Creates a custom logging instance (DefaultLogger)
-	 *	@param	name		Name for logfile
+
+	/**	@brief	Creates a default logging instance (DefaultLogger)
+	 *	@param	name		Name for logfile. Only valid in combination
+	 *                      with the DLS_FILE flag. 
 	 *	@param	severity	Log severity, VERBOSE will activate debug messages
+	 *  @param  defStreams  Default log streams to be attached. Bitwise
+	 *                      combination of the DefaultLogStreams enumerated
+	 *                      values. If DLS_FILE is specified, but an empty
+	 *                      string is passed for 'name' no logfile is created.
+	 *  @param  io          IOSystem to be used to open external files (such as the 
+	 *                      logfile). Pass NULL for the default implementation.
 	 *
 	 * This replaces the default NullLogger with a DefaultLogger instance.
 	 */
-	static Logger *create(const std::string &name, LogSeverity severity);
+	static Logger *create(const std::string &name = "AssimpLog.txt",
+		LogSeverity severity    = NORMAL,
+		unsigned int defStreams = DLS_DEBUGGER | DLS_FILE,
+		IOSystem* io		    = NULL);
 
 	/** @brief	Setup a custom implementation of the Logger interface as
 	 *  default logger. 
@@ -88,7 +98,7 @@ public:
 	static Logger *get();
 
 	/** @brief  Return whether a default NullLogger is currently active
-	 *  @return true if the current logger id a NullLogger.
+	 *  @return true if the current logger is a NullLogger.
 	 *  Use create() or set() to setup a custom logger.
 	 */
 	static bool isNullLogger();
@@ -96,6 +106,9 @@ public:
 	/**	@brief	Will kill the singleton instance and setup a NullLogger as
         logger	*/
 	static void kill();
+
+
+
 
 	/**	@brief	Logs debug infos, only been written when severity level VERBOSE is set */
 	void debug(const std::string &message);
@@ -112,23 +125,23 @@ public:
 	/**	@drief	Severity setter	*/
 	void setLogSeverity(LogSeverity log_severity);
 	
-	/**	@brief	Detach a still attached stream from logger */
+	/**	@brief	Attach a stream to the logger. */
 	void attachStream(LogStream *pStream, unsigned int severity);
 
 	/**	@brief	Detach a still attached stream from logger */
 	void detatchStream(LogStream *pStream, unsigned int severity);
 
 private:
-	/**	@brief	Constructor
-	 *	@param	name		Name for logfile, keep this empty to use std::cout and std::cerr
-	 *	@param	severity	Severity of logger
+
+	/**	@brief	Private construction for internal use by create().
+	 *  @param severity Logging granularity
 	 */
-	DefaultLogger(const std::string &name, LogSeverity severity);
+	DefaultLogger(LogSeverity severity);
 	
 	/**	@brief	Destructor	*/
 	~DefaultLogger();
 
-	/**	@brief	Writes message into a file	*/
+	/**	@brief Writes a message to all streams */
 	void writeToStreams(const std::string &message, ErrorSeverity ErrorSev );
 
 	/**	@brief	Returns the thread id.
@@ -150,14 +163,12 @@ private:
 	LogSeverity m_Severity;
 	//!	Attached streams
 	StreamArray	m_StreamArray;
-	//!	Array with default streams
-	std::vector<LogStream*> m_Streams;
 
 	bool noRepeatMsg;
 	std::string lastMsg;
 };
-// ---------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
 } // Namespace Assimp
 
-#endif // !! AI_DEFAULTLOGGER_H_INCLUDED
+#endif // !! INCLUDED_AI_DEFAULTLOGGER

@@ -734,7 +734,7 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 	// print the file format version to the console
 	unsigned int version = HexDigitToDecimal( buffer[4] );
 	char msg[3];
-	itoa10(msg,3,version);
+	ASSIMP_itoa10(msg,3,version);
 	DefaultLogger::get()->info(std::string("AC3D file format version: ") + msg);
 
 	std::vector<Material> materials;

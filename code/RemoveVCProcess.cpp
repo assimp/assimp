@@ -81,60 +81,62 @@ inline void ArrayDelete(T**& in, unsigned int& num)
 	num = 0;
 }
 
-//// ------------------------------------------------------------------------------------------------
-//// Updates the node graph - removes all nodes which have the "remove" flag set and the 
-//// "don't remove" flag not set. Nodes with meshes are never deleted.
-//bool UpdateNodeGraph(aiNode* node,std::list<aiNode*>& childsOfParent,bool root)
-//{
-//	register bool b = false;
-//
-//	std::list<aiNode*> mine;
-//	for (unsigned int i = 0; i < node->mNumChildren;++i)
-//	{
-//		if(UpdateNodeGraph(node->mChildren[i],mine,false))
-//			b = true;
-//	}
-//
-//	// somewhat tricky ... mNumMeshes must be originally 0 and MSB2 may not be set,
-//	// so we can do a simple comparison against MSB here
-//	if (!root && AI_RC_UINT_MSB == node->mNumMeshes )
-//	{
-//		// this node needs to be removed
-//		if(node->mNumChildren)
-//		{
-//			childsOfParent.insert(childsOfParent.end(),mine.begin(),mine.end());
-//
-//			// set all children to NULL to make sure they are not deleted when we delete ourself
-//			for (unsigned int i = 0; i < node->mNumChildren;++i)
-//				node->mChildren[i] = NULL;
-//		}
-//		b = true;
-//		delete node;
-//	}
-//	else
-//	{
-//		AI_RC_UNMASK(node->mNumMeshes);
-//		childsOfParent.push_back(node);
-//
-//		if (b)
-//		{
-//			// reallocate the array of our children here
-//			node->mNumChildren = (unsigned int)mine.size();
-//			aiNode** const children = new aiNode*[mine.size()];
-//			aiNode** ptr = children;
-//
-//			for (std::list<aiNode*>::iterator it = mine.begin(), end = mine.end();
-//				 it != end; ++it)
-//			{
-//				*ptr++ = *it;
-//			}
-//			delete[] node->mChildren;
-//			node->mChildren = children;
-//			return false;
-//		}
-//	}
-//	return b;
-//}
+#if 0
+// ------------------------------------------------------------------------------------------------
+// Updates the node graph - removes all nodes which have the "remove" flag set and the 
+// "don't remove" flag not set. Nodes with meshes are never deleted.
+bool UpdateNodeGraph(aiNode* node,std::list<aiNode*>& childsOfParent,bool root)
+{
+	register bool b = false;
+
+	std::list<aiNode*> mine;
+	for (unsigned int i = 0; i < node->mNumChildren;++i)
+	{
+		if(UpdateNodeGraph(node->mChildren[i],mine,false))
+			b = true;
+	}
+
+	// somewhat tricky ... mNumMeshes must be originally 0 and MSB2 may not be set,
+	// so we can do a simple comparison against MSB here
+	if (!root && AI_RC_UINT_MSB == node->mNumMeshes )
+	{
+		// this node needs to be removed
+		if(node->mNumChildren)
+		{
+			childsOfParent.insert(childsOfParent.end(),mine.begin(),mine.end());
+
+			// set all children to NULL to make sure they are not deleted when we delete ourself
+			for (unsigned int i = 0; i < node->mNumChildren;++i)
+				node->mChildren[i] = NULL;
+		}
+		b = true;
+		delete node;
+	}
+	else
+	{
+		AI_RC_UNMASK(node->mNumMeshes);
+		childsOfParent.push_back(node);
+
+		if (b)
+		{
+			// reallocate the array of our children here
+			node->mNumChildren = (unsigned int)mine.size();
+			aiNode** const children = new aiNode*[mine.size()];
+			aiNode** ptr = children;
+
+			for (std::list<aiNode*>::iterator it = mine.begin(), end = mine.end();
+				 it != end; ++it)
+			{
+				*ptr++ = *it;
+			}
+			delete[] node->mChildren;
+			node->mChildren = children;
+			return false;
+		}
+	}
+	return b;
+}
+#endif
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
@@ -167,7 +169,9 @@ void RemoveVCProcess::Execute( aiScene* pScene)
 		for (unsigned int i = 1;i < pScene->mNumMaterials;++i)
 			delete pScene->mMaterials[i];
 
+		pScene->mNumMaterials = 1;
 		MaterialHelper* helper = (MaterialHelper*) pScene->mMaterials[0];
+		ai_assert(NULL != helper);
 		helper->Clear();
 
 		// gray
@@ -218,6 +222,10 @@ void RemoveVCProcess::Execute( aiScene* pScene)
 	{
 		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
 		DefaultLogger::get()->debug("Setting AI_SCENE_FLAGS_INCOMPLETE flag");
+
+		// If we have no meshes anymore we should also clear another flag ...
+		if (!pScene->mNumMeshes)
+			pScene->mFlags &= ~AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
 	}
 
 	if (bHas)DefaultLogger::get()->info("RemoveVCProcess finished. Data structure cleanup has been done.");
@@ -267,10 +275,10 @@ bool RemoveVCProcess::ProcessMesh(aiMesh* pMesh)
 
 	// handle texture coordinates
 	register bool b = (0 != (configDeleteFlags & aiComponent_TEXCOORDS));
-	for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i)
+	for (unsigned int i = 0, real = 0; real < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++real)
 	{
 		if (!pMesh->mTextureCoords[i])break;
-		if (configDeleteFlags & aiComponent_TEXCOORDSn(i) || b)
+		if (configDeleteFlags & aiComponent_TEXCOORDSn(real) || b)
 		{
 			delete pMesh->mTextureCoords[i];
 			pMesh->mTextureCoords[i] = NULL;
@@ -279,19 +287,19 @@ bool RemoveVCProcess::ProcessMesh(aiMesh* pMesh)
 			if (!b)
 			{
 				// collapse the rest of the array
-				unsigned int a;
-				for (a = i+1; a < AI_MAX_NUMBER_OF_TEXTURECOORDS;++a)
-				{
+				for (unsigned int a = i+1; a < AI_MAX_NUMBER_OF_TEXTURECOORDS;++a)
 					pMesh->mTextureCoords[a-1] = pMesh->mTextureCoords[a];
-				}
+				
 				pMesh->mTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS-1] = NULL;
+				continue;
 			}
 		}
+		++i;
 	}
 
 	// handle vertex colors
 	b = (0 != (configDeleteFlags & aiComponent_COLORS));
-	for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS; ++i)
+	for (unsigned int i = 0, real = 0; real < AI_MAX_NUMBER_OF_COLOR_SETS; ++real)
 	{
 		if (!pMesh->mColors[i])break;
 		if (configDeleteFlags & aiComponent_COLORSn(i) || b)
@@ -303,14 +311,14 @@ bool RemoveVCProcess::ProcessMesh(aiMesh* pMesh)
 			if (!b)
 			{
 				// collapse the rest of the array
-				unsigned int a;
-				for (a = i+1; a < AI_MAX_NUMBER_OF_COLOR_SETS;++a)
-				{
+				for (unsigned int a = i+1; a < AI_MAX_NUMBER_OF_COLOR_SETS;++a)
 					pMesh->mColors[a-1] = pMesh->mColors[a];
-				}
+
 				pMesh->mColors[AI_MAX_NUMBER_OF_COLOR_SETS-1] = NULL;
+				continue;
 			}
 		}
+		++i;
 	}
 
 	// handle bones

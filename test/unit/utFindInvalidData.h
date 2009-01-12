@@ -1,13 +1,8 @@
 #ifndef TESTNORMALS_H
 #define TESTNORMALS_H
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
 
-#include <aiTypes.h>
-#include <aiScene.h>
 #include <FindInvalidDataProcess.h>
-
 
 using namespace std;
 using namespace Assimp;

@@ -1,11 +1,11 @@
+
+#include "UnitTestPCH.h"
 #include "utRemoveRedundantMaterials.h"
-#include "aiPostProcess.h"
-#include <math.h>
 
 CPPUNIT_TEST_SUITE_REGISTRATION (RemoveRedundantMatsTest);
 
 
-
+// ------------------------------------------------------------------------------------------------
 aiMaterial* getUniqueMaterial1()
 {
 	// setup an unique name for each material - this shouldn't care
@@ -20,6 +20,7 @@ aiMaterial* getUniqueMaterial1()
 	return pcMat;
 }
 
+// ------------------------------------------------------------------------------------------------
 aiMaterial* getUniqueMaterial2()
 {
 	// setup an unique name for each material - this shouldn't care
@@ -34,6 +35,7 @@ aiMaterial* getUniqueMaterial2()
 	return pcMat;
 }
 
+// ------------------------------------------------------------------------------------------------
 aiMaterial* getUniqueMaterial3()
 {
 	// setup an unique name for each material - this shouldn't care
@@ -45,6 +47,7 @@ aiMaterial* getUniqueMaterial3()
 	return pcMat;
 }
 
+// ------------------------------------------------------------------------------------------------
 void RemoveRedundantMatsTest :: setUp (void)
 {
 	// construct the process
@@ -86,12 +89,14 @@ void RemoveRedundantMatsTest :: setUp (void)
 	mTemp.data[0]++;
 }
 
+// ------------------------------------------------------------------------------------------------
 void RemoveRedundantMatsTest :: tearDown (void)
 {
 	delete this->piProcess;
 	delete this->pcScene1;
 }
 
+// ------------------------------------------------------------------------------------------------
 void  RemoveRedundantMatsTest :: testRedundantMaterials (void)
 {
 	this->piProcess->Execute(this->pcScene1);

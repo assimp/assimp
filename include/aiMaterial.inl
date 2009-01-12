@@ -54,16 +54,16 @@ inline aiReturn aiMaterial::GetTexture( aiTextureType type,
     unsigned int* uvindex		/*= NULL*/,
     float* blend				/*= NULL*/,
     aiTextureOp* op				/*= NULL*/,
-	aiTextureMapMode* mapmode	/*= NULL*/)
+	aiTextureMapMode* mapmode	/*= NULL*/) const
 {
-	return aiGetMaterialTexture(this,type,idx,path,mapping,uvindex,blend,op,mapmode);
+	return ::aiGetMaterialTexture(this,type,idx,path,mapping,uvindex,blend,op,mapmode);
 }
 
 // ---------------------------------------------------------------------------
 template <typename Type>
 inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 	unsigned int idx, Type* pOut,
-	unsigned int* pMax)
+	unsigned int* pMax) const
 {
 	unsigned int iNum = pMax ? *pMax : 1;
 
@@ -71,8 +71,11 @@ inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 	aiReturn ret = aiGetMaterialProperty(this,pKey,type,idx,&prop);
 	if ( AI_SUCCESS == ret )
 	{
-		if (prop->mDataLength < sizeof(Type)*iNum)return AI_FAILURE;
-		if (strcmp(prop->mData,(char*)aiPTI_Buffer)!=0)return AI_FAILURE;
+		if (prop->mDataLength < sizeof(Type)*iNum)
+			return AI_FAILURE;
+
+		if (::strcmp(prop->mData,(char*)aiPTI_Buffer)!=0)
+			return AI_FAILURE;
 
 		iNum = std::min((size_t)iNum,prop->mDataLength / sizeof(Type));
 		::memcpy(pOut,prop->mData,iNum * sizeof(Type));
@@ -84,14 +87,17 @@ inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 // ---------------------------------------------------------------------------
 template <typename Type>
 inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
-	unsigned int idx,Type& pOut)
+	unsigned int idx,Type& pOut) const
 {
 	aiMaterialProperty* prop;
 	aiReturn ret = aiGetMaterialProperty(this,pKey,type,idx,&prop);
 	if ( AI_SUCCESS == ret )
 	{
-		if (prop->mDataLength < sizeof(Type))return AI_FAILURE;
-		if (strcmp(prop->mData,(char*)aiPTI_Buffer)!=0)return AI_FAILURE;
+		if (prop->mDataLength < sizeof(Type))
+			return AI_FAILURE;
+
+		if (::strcmp(prop->mData,(char*)aiPTI_Buffer)!=0)
+			return AI_FAILURE;
 
 		::memcpy(&pOut,prop->mData,sizeof(Type));
 	}
@@ -102,43 +108,43 @@ inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 template <>
 inline aiReturn aiMaterial::Get<float>(const char* pKey,unsigned int type,
 	unsigned int idx,float* pOut,
-	unsigned int* pMax)
+	unsigned int* pMax) const
 {
-	return aiGetMaterialFloatArray(this,pKey,type,idx,pOut,pMax);
+	return ::aiGetMaterialFloatArray(this,pKey,type,idx,pOut,pMax);
 }
 // ---------------------------------------------------------------------------
 template <>
 inline aiReturn aiMaterial::Get<int>(const char* pKey,unsigned int type,
 	unsigned int idx,int* pOut,
-	unsigned int* pMax)
+	unsigned int* pMax) const
 {
-	return aiGetMaterialIntegerArray(this,pKey,type,idx,pOut,pMax);
+	return ::aiGetMaterialIntegerArray(this,pKey,type,idx,pOut,pMax);
 }
 // ---------------------------------------------------------------------------
 template <>
 inline aiReturn aiMaterial::Get<float>(const char* pKey,unsigned int type,
-	unsigned int idx,float& pOut)
+	unsigned int idx,float& pOut) const
 {
 	return aiGetMaterialFloat(this,pKey,type,idx,&pOut);
 }
 // ---------------------------------------------------------------------------
 template <>
 inline aiReturn aiMaterial::Get<int>(const char* pKey,unsigned int type,
-	unsigned int idx,int& pOut)
+	unsigned int idx,int& pOut) const
 {
 	return aiGetMaterialInteger(this,pKey,type,idx,&pOut);
 }
 // ---------------------------------------------------------------------------
 template <>
 inline aiReturn aiMaterial::Get<aiColor4D>(const char* pKey,unsigned int type,
-	unsigned int idx,aiColor4D& pOut)
+	unsigned int idx,aiColor4D& pOut) const
 {
 	return aiGetMaterialColor(this,pKey,type,idx,&pOut);
 }
 // ---------------------------------------------------------------------------
 template <>
 inline aiReturn aiMaterial::Get<aiString>(const char* pKey,unsigned int type,
-	unsigned int idx,aiString& pOut)
+	unsigned int idx,aiString& pOut) const
 {
 	return aiGetMaterialString(this,pKey,type,idx,&pOut);
 }

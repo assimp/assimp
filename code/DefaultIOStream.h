@@ -42,17 +42,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_DEFAULTIOSTREAM_H_INC
 #define AI_DEFAULTIOSTREAM_H_INC
 
-#include <string>
 #include <stdio.h>
 #include "../include/IOStream.h"
 
-namespace Assimp
-{
+namespace Assimp	{
 
-// ---------------------------------------------------------------------------
-//!	\class	DefaultIOStream
-//!	\brief	Default IO implementation, use standard IO operations
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
+//!	@class	DefaultIOStream
+//!	@brief	Default IO implementation, use standard IO operations
 class DefaultIOStream : public IOStream
 {
 	friend class DefaultIOSystem;
@@ -66,13 +63,11 @@ public:
 	~DefaultIOStream ();
 
 	// -------------------------------------------------------------------
-	// -------------------------------------------------------------------
     size_t Read(void* pvBuffer, 
 		size_t pSize, 
 		size_t pCount);
 
 
-	// -------------------------------------------------------------------
 	// -------------------------------------------------------------------
     size_t Write(const void* pvBuffer, 
 		size_t pSize,
@@ -80,17 +75,17 @@ public:
 
 
 	// -------------------------------------------------------------------
-	// -------------------------------------------------------------------
 	aiReturn Seek(size_t pOffset,
 		aiOrigin pOrigin);
 
-
-	// -------------------------------------------------------------------
 	// -------------------------------------------------------------------
     size_t Tell() const;
 
-	//!	Returns filesize
+	// -------------------------------------------------------------------
 	size_t FileSize() const;
+
+	// -------------------------------------------------------------------
+	void Flush();
 
 private:
 	//!	File datastructure, using clib
@@ -98,7 +93,9 @@ private:
 	//!	Filename
 	std::string	mFilename;
 };
-// ---------------------------------------------------------------------------
+
+
+// ----------------------------------------------------------------------------------
 inline DefaultIOStream::DefaultIOStream () : 
 	mFile(NULL), 
 	mFilename("") 
@@ -106,7 +103,8 @@ inline DefaultIOStream::DefaultIOStream () :
 	// empty
 }
 
-// ---------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------
 inline DefaultIOStream::DefaultIOStream (FILE* pFile, 
 		const std::string &strFilename) :
 	mFile(pFile), 
@@ -114,8 +112,7 @@ inline DefaultIOStream::DefaultIOStream (FILE* pFile,
 {
 	// empty
 }
-
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 
 } // ns assimp
 

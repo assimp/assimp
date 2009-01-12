@@ -75,7 +75,7 @@ struct aiNode
 	C_STRUCT aiString mName;
 
 	/** The transformation relative to the node's parent. */
-	aiMatrix4x4 mTransformation;
+	C_STRUCT aiMatrix4x4 mTransformation;
 
 	/** Parent node. NULL if this node is the root node. */
 	C_STRUCT aiNode* mParent;
@@ -392,7 +392,7 @@ struct aiScene
 };
 
 #ifdef __cplusplus
-}
+} //! namespace Assimp
 #endif
 
 #endif // __AI_SCENE_H_INC__

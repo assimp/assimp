@@ -68,7 +68,7 @@ public:
 	 *  The stream will be deleted afterwards.
 	 *  @param stream Input stream
 	 */
-	inline StreamReader(IOStream* stream)
+	StreamReader(IOStream* stream)
 	{
 		ai_assert(NULL != stream);
 		this->stream = stream;
@@ -81,7 +81,7 @@ public:
 		end = limit = &buffer[s];
 	}
 
-	inline ~StreamReader() 
+	~StreamReader() 
 	{
 		delete[] buffer;
 		delete stream;
@@ -90,28 +90,28 @@ public:
 
 	/** Read a float from the stream 
 	 */
-	inline float GetF4()
+	float GetF4()
 	{
 		return Get<float>();
 	}
 
 	/** Read a double from the stream 
 	 */
-	inline double GetF8()
+	double GetF8()
 	{
 		return Get<double>();
 	}
 
 	/** Read a short from the stream
 	 */
-	inline int16_t GetI2()
+	int16_t GetI2()
 	{
 		return Get<int16_t>();
 	}
 
 	/** Read a char from the stream
 	 */
-	inline int8_t GetI1()
+	int8_t GetI1()
 	{
 		if (current >= end)
 			throw new ImportErrorException("End of file was reached");
@@ -121,21 +121,21 @@ public:
 
 	/** Read an int from the stream
 	 */
-	inline int32_t GetI4()
+	int32_t GetI4()
 	{
 		return Get<int32_t>();
 	}
 
 	/** Read a long from the stream
 	 */
-	inline int64_t GetI8()
+	int64_t GetI8()
 	{
 		return Get<int64_t>();
 	}
 
 	/** Get the remaining stream size (to the end of the srream)
 	 */
-	inline unsigned int GetRemainingSize()
+	unsigned int GetRemainingSize()
 	{
 		return (unsigned int)(end - current);
 	}
@@ -143,7 +143,7 @@ public:
 
 	/** Get the remaining stream size (to the current read limit)
 	 */
-	inline unsigned int GetRemainingSizeToLimit()
+	unsigned int GetRemainingSizeToLimit()
 	{
 		return (unsigned int)(limit - current);
 	}
@@ -151,7 +151,7 @@ public:
 
 	/** Increase the file pointer
 	 */
-	inline void IncPtr(unsigned int plus)
+	void IncPtr(unsigned int plus)
 	{
 		current += plus;
 		if (current > end)
@@ -162,14 +162,14 @@ public:
 
 	/** Get the current file pointer
 	 */
-	inline int8_t* GetPtr() const
+	int8_t* GetPtr() const
 	{
 		return current;
 	}
 
 	/** Set current file pointer
 	 */
-	inline void SetPtr(int8_t* p)
+	void SetPtr(int8_t* p)
 	{
 		current = p;
 		if (current > end || current < buffer)
@@ -180,7 +180,7 @@ public:
 
 	/** Get the current offset from the beginning of the file
 	 */
-	inline int GetCurrentPos() const
+	int GetCurrentPos() const
 	{
 		return (unsigned int)(current - buffer);
 	}
@@ -191,7 +191,7 @@ public:
 	 *    the beginning of the file. Passing 0xffffffff
 	 *    resets the limit.
 	 */
-	inline void SetReadLimit(unsigned int _limit)
+	void SetReadLimit(unsigned int _limit)
 	{
 		if (0xffffffff == _limit)
 		{
@@ -205,35 +205,35 @@ public:
 
 	/** Get the current read limit
 	 */
-	inline int GetReadLimit() const
+	int GetReadLimit() const
 	{
 		return (unsigned int)(limit - buffer);
 	}
 
 	/** Skip to the read limit
 	 */
-	inline void SkipToReadLimit()
+	void SkipToReadLimit()
 	{
 		current = limit;
 	}
 
 	// overload operator>> for those who prefer this way ...
-	inline void operator >> (float& f) 
+	void operator >> (float& f) 
 		{f = GetF4();}
 
-	inline void operator >> (double& f) 
+	void operator >> (double& f) 
 		{f = GetF8();}
 
-	inline void operator >> (int16_t& f) 
+	void operator >> (int16_t& f) 
 		{f = GetI2();}
 
-	inline void operator >> (int32_t& f) 
+	void operator >> (int32_t& f) 
 		{f = GetI4();}
 
-	inline void operator >> (int64_t& f) 
+	void operator >> (int64_t& f) 
 		{f = GetI8();}
 
-	inline void operator >> (int8_t& f) 
+	void operator >> (int8_t& f) 
 		{f = GetI1();}
 
 private:
@@ -241,7 +241,7 @@ private:
 	/** Generic read method. ByteSwap::Swap(T*) must exist.
 	 */
 	template <typename T>
-	inline T Get()
+	T Get()
 	{
 		if (current + sizeof(T) > limit)
 			throw new ImportErrorException("End of file or stream limit was reached");

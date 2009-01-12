@@ -1,5 +1,5 @@
 // A very small replacement for boost::tuple
-// (c) Alexander Gessler, 2008
+// (c) Alexander Gessler, 2008 [alexander.gessler@gmx.net]
 
 #ifndef BOOST_TUPLE_INCLUDED
 #define BOOST_TUPLE_INCLUDED
@@ -24,9 +24,22 @@ namespace boost	{
 			typedef const T t;
 		};
 
-		template <typename, unsigned, typename, bool, unsigned> 
-		struct value_getter;
+		// Predeclare some stuff
+		template <typename, unsigned, typename, bool, unsigned> struct value_getter;
+		
+		// Helper to obtain the type of a tuple element
+		template <typename T, unsigned NIDX, typename TNEXT, unsigned N /*= 0*/>
+		struct type_getter	{
+			typedef type_getter<typename TNEXT::type,NIDX+1,typename TNEXT::next_type,N> next_elem_getter;
+			typedef typename next_elem_getter::type type;
+		};
 
+		template <typename T, unsigned NIDX, typename TNEXT >
+		struct type_getter <T,NIDX,TNEXT,NIDX>	{
+			typedef T type;
+		};
+
+		// Base class for all explicit specializations of list_elem
 		template <typename T, unsigned NIDX, typename TNEXT >
 		struct list_elem_base {
 
@@ -47,27 +60,28 @@ namespace boost	{
 
 			// Get the value of a specific tuple element
 			template <unsigned N>
-			T& get () {
+			typename type_getter<T,NIDX,TNEXT,N>::type& get () {
 				value_getter <T,NIDX,TNEXT,false,N> s;
 				return s(*this);
 			}
 
 			// Get the value of a specific tuple element
 			template <unsigned N>
-			const T& get () const {
+			const typename type_getter<T,NIDX,TNEXT,N>::type& get () const {
 				value_getter <T,NIDX,TNEXT,true,N> s;
 				return s(*this);
 			}
 
-			// Assign a value to the tuple element
-			template <typename T2, typename TNEXT2> /* requires convertible(T2,T) */
-			list_elem& operator = (const list_elem<T2,NIDX,TNEXT2>& other)	{
-				me   = (T)other.me;
-				next = other.next;
-				return *this;
+			// Explicit cast
+			template <typename T2, typename TNEXT2 >
+			operator list_elem<T2,NIDX,TNEXT2> () const	{
+				list_elem<T2,NIDX,TNEXT2> ret;
+				ret.me   = (T2)me;
+				ret.next = next;
+				return ret;
 			}
 
-			// Recursively compare two elements
+			// Recursively compare two elements (last element returns always true)
 			bool operator == (const list_elem& s) const	{
 				return (me == s.me && next == s.next);
 			}
@@ -100,8 +114,8 @@ namespace boost	{
 		typedef list_elem<nulltype,0,int> list_end;
 
 		// Helper obtain to query the value of a tuple element
-		// NOTE: Could be a nested class, but afaik it's non-standard and at least
-		//       MSVC isn't able to evaluate the partial specialization correctly.
+		// NOTE: This can't be a nested class as the compiler won't accept a full or
+		// partial specialization of a nested class of a non-specialized template
 		template <typename T, unsigned NIDX, typename TNEXT, bool IS_CONST, unsigned N>
 		struct value_getter	 {
 
@@ -112,7 +126,9 @@ namespace boost	{
 			typedef value_getter<typename TNEXT::type,NIDX+1,typename TNEXT::next_type,
 				IS_CONST, N> next_value_getter;
 
-			typename ConstIf<IS_CONST,T>::t& operator () (typename ConstIf<IS_CONST,outer_elem >::t& me) {
+			typename ConstIf<IS_CONST,typename type_getter<T,NIDX,TNEXT,N>::type>::t& 
+				operator () (typename ConstIf<IS_CONST,outer_elem >::t& me) {
+				
 				next_value_getter s;
 				return s(me.next);
 			}
@@ -125,18 +141,6 @@ namespace boost	{
 			typename ConstIf<IS_CONST,T>::t& operator () (typename ConstIf<IS_CONST,outer_elem >::t& me) {
 				return me.me;
 			}
-		};
-
-		// Helper to obtain the type of a tuple element
-		template <typename T, unsigned NIDX, typename TNEXT, unsigned N /*= 0*/>
-		struct type_getter	{
-			typedef type_getter<typename TNEXT::type,NIDX+1,typename TNEXT::next_type,N> next_elem_getter;
-			typedef typename next_elem_getter::type type;
-		};
-
-		template <typename T, unsigned NIDX, typename TNEXT >
-		struct type_getter <T,NIDX,TNEXT,NIDX>	{
-			typedef T type;
 		};
 	};
 
@@ -175,11 +179,6 @@ namespace boost	{
 			return m.get<N>();
 		}
 
-		// assignment operator
-		tuple& operator= (const tuple& other)	{
-			m = other.m;
-			return *this;
-		}
 
 		// comparison operators
 		bool operator== (const tuple& other) const	{
@@ -195,9 +194,9 @@ namespace boost	{
 		template <	typename T0, typename T1,typename T2,
 					typename T3, typename T4>
 
-		operator tuple <T0,T1,T2,T3,T4> () {
+		operator tuple <T0,T1,T2,T3,T4> () const {
 			tuple <T0,T1,T2,T3,T4> s;
-			s.m = m;
+			s.m = (tuple <T0,T1,T2,T3,T4>::very_long)m;
 			return s;
 		}
 	};
@@ -278,4 +277,4 @@ namespace boost	{
 	}
 };
 
-#endif
+#endif // !! BOOST_TUPLE_INCLUDED

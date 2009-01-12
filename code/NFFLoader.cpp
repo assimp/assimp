@@ -612,7 +612,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 						if (objectName.length())
 						{
 							::strcpy(mesh->name,objectName.c_str()); 
-							itoa10(&mesh->name[objectName.length()],30,subMeshIdx++);
+							ASSIMP_itoa10(&mesh->name[objectName.length()],30,subMeshIdx++);
 						}
 
 						// copy the shader to the mesh. 

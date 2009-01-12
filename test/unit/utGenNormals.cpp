@@ -1,4 +1,5 @@
 
+#include "UnitTestPCH.h"
 #include "utGenNormals.h"
 
 
@@ -6,8 +7,9 @@ CPPUNIT_TEST_SUITE_REGISTRATION (GenNormalsTest);
 
 void GenNormalsTest :: setUp (void)
 {
-	this->piProcess = new GenVertexNormalsProcess();
-	this->pcMesh = new aiMesh();
+	piProcess = new GenVertexNormalsProcess();
+	pcMesh = new aiMesh();
+	pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 	pcMesh->mNumFaces = 1;
 	pcMesh->mFaces = new aiFace[1];
 	pcMesh->mFaces[0].mIndices = new unsigned int[pcMesh->mFaces[0].mNumIndices = 3];
@@ -29,6 +31,6 @@ void GenNormalsTest :: tearDown (void)
 
 void  GenNormalsTest :: testSimpleTriangle (void)
 {
-	this->piProcess->GenMeshVertexNormals(pcMesh,0);
+	piProcess->GenMeshVertexNormals(pcMesh,0);
 	CPPUNIT_ASSERT(0 != pcMesh->mNormals);
 }

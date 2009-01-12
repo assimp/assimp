@@ -145,7 +145,7 @@ void FindDegeneratesProcess::Execute( aiScene* pScene)
 		if (deg && !DefaultLogger::isNullLogger())
 		{
 			char s[64];
-			itoa10(s,deg); 
+			ASSIMP_itoa10(s,deg); 
 			DefaultLogger::get()->warn(std::string("Found ") + s + " degenerated primitives");
 		}
 	}

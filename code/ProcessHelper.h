@@ -164,7 +164,6 @@ class ComputeSpatialSortProcess : public BaseProcess
 			aiMesh* mesh = pScene->mMeshes[i];
 			_Type& blubb = *it;
 			blubb.first.Fill(mesh->mVertices,mesh->mNumVertices,sizeof(aiVector3D));
-
 			blubb.second = ComputePositionEpsilon(mesh);
 		}
 

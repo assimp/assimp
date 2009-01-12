@@ -39,8 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Definition of the base class for all importer worker classes. */
-#ifndef AI_BASEIMPORTER_H_INC
-#define AI_BASEIMPORTER_H_INC
+#ifndef INCLUDED_AI_BASEIMPORTER_H
+#define INCLUDED_AI_BASEIMPORTER_H
 
 #include <string>
 #include "./../include/aiTypes.h"
@@ -203,7 +203,7 @@ protected:
 	 *
 	 *  The function searches the header of a file for a specific token
 	 *  and returns true if this token is found. This works for text
-	 *  files only. There is a rudimentary handling if UNICODE files.
+	 *  files only. There is a rudimentary handling of UNICODE files.
 	 *  The comparison is case independent.
 	 *
 	 *  @param pIOSystem IO System to work with
@@ -238,6 +238,8 @@ protected:
 	/** Error description in case there was one. */
 	std::string mErrorText;
 };
+
+struct BatchData;
 
 // ---------------------------------------------------------------------------
 /** A helper class that can be used by importers which need to load many
@@ -316,7 +318,7 @@ public:
 private:
 
 	// No need to have that in the public API ...
-	void* pimpl;
+	BatchData* data;
 };
 
 

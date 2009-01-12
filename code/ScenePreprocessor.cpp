@@ -43,10 +43,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-// ---------------------------------------------------------------------------
-void ScenePreprocessor::ProcessScene (aiScene* _scene)
+// ---------------------------------------------------------------------------------------------
+void ScenePreprocessor::ProcessScene ()
 {
-	scene = _scene;
+	ai_assert(scene != NULL);
 
 	// Process all meshes
 	for (unsigned int i = 0; i < scene->mNumMeshes;++i)
@@ -87,7 +87,7 @@ void ScenePreprocessor::ProcessScene (aiScene* _scene)
 	}
 }
 
-// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------
 void ScenePreprocessor::ProcessMesh (aiMesh* mesh)
 {
 	// If aiMesh::mNumUVComponents is *not* set assign the default value of 2
@@ -129,7 +129,7 @@ void ScenePreprocessor::ProcessMesh (aiMesh* mesh)
 	}
 }
 
-// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------
 void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
 {
 	double first = 10e10, last = -10e10;

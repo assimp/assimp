@@ -124,7 +124,7 @@ enum aiAnimBehaviour
 	 */
 	aiAnimBehaviour_DEFAULT  = 0x0,  
 
-	/** The nearest key is used
+	/** The nearest key value is used without interpolation
 	 */
 	aiAnimBehaviour_CONSTANT = 0x1,
 
@@ -208,17 +208,17 @@ struct aiNodeAnim
 	 *  key is encountered.
 	 *
 	 *  The default value is aiAnimBehaviour_DEFAULT (the original
-	 *  transformation matrix of the affacted node is taken).
+	 *  transformation matrix of the affected node is used).
 	 */
-	aiAnimBehaviour mPreState;
+	C_ENUM aiAnimBehaviour mPreState;
 
 	/** Defines how the animation behaves after the last 
-	 *  kway was encountered.
+	 *  kway was processed.
 	 *
 	 *  The default value is aiAnimBehaviour_DEFAULT (the original
-	 *  transformation matrix of the affacted node is taken).
+	 *  transformation matrix of the affected node is taken).
 	 */
-	aiAnimBehaviour mPostState;
+	C_ENUM aiAnimBehaviour mPostState;
 
 #ifdef __cplusplus
 	aiNodeAnim()

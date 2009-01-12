@@ -397,7 +397,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 							{
 								// Offset the index and write it back ..
 								const unsigned int idx = strtol10(&s.data[1]) + offset[n];
-								itoa10(&s.data[1],sizeof(s.data)-1,idx);
+								ASSIMP_itoa10(&s.data[1],sizeof(s.data)-1,idx);
 							}
 						}
 

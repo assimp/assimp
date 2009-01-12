@@ -1,17 +1,12 @@
 #ifndef AI_WIN32DEBUGLOGSTREAM_H_INC
 #define AI_WIN32DEBUGLOGSTREAM_H_INC
 
+#ifdef WIN32
+
 #include "../include/LogStream.h"
-
-//#ifdef _MSC_VER
-#ifdef WIN32
 #include "Windows.h"
-#endif
 
-namespace Assimp
-{
-//#ifdef _MSC_VER
-#ifdef WIN32
+namespace Assimp	{
 
 // ---------------------------------------------------------------------------
 /**	@class	Win32DebugLogStream
@@ -34,16 +29,12 @@ public:
 // ---------------------------------------------------------------------------
 //	Default constructor
 inline Win32DebugLogStream::Win32DebugLogStream()
-{
-	// empty
-}
+{}
 
 // ---------------------------------------------------------------------------
 //	Default constructor
 inline Win32DebugLogStream::~Win32DebugLogStream()
-{
-	// empty
-}
+{}
 
 // ---------------------------------------------------------------------------
 //	Write method
@@ -53,9 +44,7 @@ inline void Win32DebugLogStream::write(const std::string &message)
 }
 
 // ---------------------------------------------------------------------------
-
-#endif
-
 }	// Namespace Assimp
 
-#endif
+#endif // ! WIN32
+#endif // guard

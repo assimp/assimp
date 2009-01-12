@@ -1,11 +1,11 @@
 
-
-
+#include "UnitTestPCH.h"
 #include "utVertexTriangleAdjacency.h"
 
 
 CPPUNIT_TEST_SUITE_REGISTRATION (VTAdjacency);
 
+// ------------------------------------------------------------------------------------------------
 void VTAdjacency :: setUp (void)
 {
 	// build a test mesh with randomized input data
@@ -90,6 +90,7 @@ void VTAdjacency :: setUp (void)
 	}
 }
 
+// ------------------------------------------------------------------------------------------------
 void VTAdjacency :: tearDown (void) 
 {
 	delete pMesh;
@@ -102,21 +103,25 @@ void VTAdjacency :: tearDown (void)
 	pMesh3 = 0;
 }
 
+// ------------------------------------------------------------------------------------------------
 void VTAdjacency :: largeRandomDataSet (void)
 {
 	checkMesh(pMesh);
 }
 
+// ------------------------------------------------------------------------------------------------
 void VTAdjacency :: smallDataSet (void)
 {
 	checkMesh(pMesh2);
 }
 
+// ------------------------------------------------------------------------------------------------
 void VTAdjacency :: unreferencedVerticesSet (void)
 {
 	checkMesh(pMesh3);
 }
 
+// ------------------------------------------------------------------------------------------------
 void VTAdjacency :: checkMesh (aiMesh* pMesh)
 {
 	pAdj = new VertexTriangleAdjacency(pMesh->mFaces,pMesh->mNumFaces,pMesh->mNumVertices,true);

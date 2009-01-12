@@ -39,28 +39,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** Assimo build configuration setup. See the notes in the comment
- *  blocks to find out how you can customize the Assimp build
+/** Assimp build configuration setup. See the notes in the comment
+ *  blocks to find out how you can customize your Assimp build.
  */
 
-#ifndef AI_DEFINES_H_INC
-#define AI_DEFINES_H_INC
+#ifndef INCLUDED_AI_DEFINES_H
+#define INCLUDED_AI_DEFINES_H
 
-
-	// ************************************************************
+	// ================================================================
 	// Define ASSIMP_BUILD_NO_XX_IMPORTER to disable a specific
 	// file format loader. The loader is be excluded from the
 	// build in this case. 'XX' stands for the most common file
 	// extension of the file format. E.g.: 
     // ASSIMP_BUILD_NO_X_IMPORTER disables the X loader.
-	// ************************************************************
+	// ================================================================
 
-	// ************************************************************
+	// ================================================================
 	// Define ASSIMP_BUILD_NO_XX_PROCESS to disable a specific
 	// post-processing step. The spe will be excluded from the
 	// build in this case. 'XX' stands for the name of the loader.
-	// Name list:
-	//
+	// List of defines:
 	// CALCTANGENTS
 	// JOINVERTICES
 	// CONVERTTOLH
@@ -80,45 +78,42 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	// FINDINVALIDDATA
 	// TRANSFORMTEXCOORDS
 	// GENUVCOORDS
-	// ************************************************************
+	// ================================================================
 
-
-	// ************************************************************
-	// Define AI_C_THREADSAFE if you want a thread-safe C-API
-	// This feature requires boost.
-	// ************************************************************
-
-
-// compiler specific includes and definitions
+// Compiler specific includes and definitions
 #if (defined _MSC_VER)
-
 #	undef ASSIMP_API
 
-	
-	// ************************************************************
+	// Include our workaround stdint.h - VC doesn't have one
+#	include "./../include/Compiler/pstdint.h"
+
+	// If we have at least VC8 some C string manipulation functions
+	// are mapped to their safe _s counterparts (e.g. _itoa_s).
+#if _MSC_VER >= 1400 && !(defined _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES) \
+	&& (defined ASSIMP_INTERNAL_BUILD)
+
+#	define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
+#endif
+
+	// ================================================================
 	// Define ASSIMP_BUILD_DLL_EXPORT to build a DLL of the library
-	// ************************************************************
+	// ================================================================
 #	if (defined ASSIMP_BUILD_DLL_EXPORT)
-
-#		if (defined ASSIMP_API)
-#			error ASSIMP_API is defined, although it shouldn't
-#		endif
-
 #		define ASSIMP_API __declspec(dllexport)
 #		pragma warning (disable : 4251)
 
-	// ************************************************************
+	// ================================================================
 	// Define ASSIMP_DLL before including Assimp to use ASSIMP in
 	// an external DLL (otherwise a static library is used)
-	// ************************************************************
+	// ================================================================
 #	elif (defined ASSIMP_DLL)
 #		define ASSIMP_API __declspec(dllimport)
 #	else
 #		define ASSIMP_API 
 #	endif
 
+	// Force the compiler to inline a function, if supported
 #	define AI_FORCE_INLINE __forceinline
-
 
 #else
 #	define ASSIMP_API
@@ -126,13 +121,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif // (defined _MSC_VER)
 
 #ifdef __cplusplus
+	// No explicit 'struct' and 'enum' tags for C++, we don't want to 
+	// confuse the AI of our IDE.
 #	define C_STRUCT
+#	define C_ENUM
 #else
-	// ************************************************************
+	// ================================================================
 	// To build the documentation, make sure ASSIMP_DOXYGEN_BUILD
 	// is defined by Doxygen's preprocessor. The corresponding
 	// entries in the DoxyFile look like this:
-	// ************************************************************
+	// ================================================================
 #if 0
 	ENABLE_PREPROCESSING   = YES
 	MACRO_EXPANSION        = YES
@@ -141,59 +139,86 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	INCLUDE_PATH           = 
 	INCLUDE_FILE_PATTERNS  = 
 	PREDEFINED             = ASSIMP_DOXYGEN_BUILD=1
-	EXPAND_AS_DEFINED      = C_STRUCT
+	EXPAND_AS_DEFINED      = C_STRUCT C_ENUM
 	SKIP_FUNCTION_MACROS   = YES
 #endif
-	// ************************************************************
+	// ================================================================
+	// Doxygen gets confused if we use c-struct typedefs to avoid
+	// the explicit 'struct' notation. This trick here has the same
+	// effect as the TYPEDEF_HIDES_STRUCT option, but we don't need
+	// to typedef all structs/enums.
+	// ================================================================
 #	if (defined ASSIMP_DOXYGEN_BUILD)
-#		define C_STRUCT
+#		define C_STRUCT 
+#		define C_ENUM   
 #	else
 #		define C_STRUCT struct
+#		define C_ENUM   enum
 #	endif
 #endif
 
 #if (defined(__BORLANDC__) || defined (__BCPLUSPLUS__))
 
 // "W8059 Packgröße der Struktur geändert"
-// TODO: find a way to deactivate this warning automatically
-// maybe there is a pragma to do exactly this?
 
 #endif
 
-// include our workaround stdint.h from the C98 standard to make
-// sure the types it declares are consistently available 
-#include "./../include/Compiler/pstdint.h"
-
-	// ************************************************************
+	// ================================================================
 	// Define ASSIMP_BUILD_BOOST_WORKAROUND to compile assimp
 	// without boost. This is done by using a few workaround
 	// classes. However, some assimp features are not available
-	// in this case. 
-	// ************************************************************
+	// in this case. This implies the ASSIMP_BUILD_SINGLETHREADED option.
+	// ================================================================
 #ifdef ASSIMP_BUILD_BOOST_WORKAROUND
 
-	// threading support in the C-API requires boost
-#	ifdef AI_C_THREADSAFE
-#		error Unable to activate C-API threading support. Boost is required for this.
-#	endif
+	// threading support requires boost
+#ifndef ASSIMP_BUILD_SINGLETHREADED
+#	define ASSIMP_BUILD_SINGLETHREADED
+#endif
 
 #endif
 
-// helper macro that sets a pointer to NULL in debug builds
-#if (!defined AI_DEBUG_INVALIDATE_PTR)
-#	if (defined _DEBUG)
-#		define AI_DEBUG_INVALIDATE_PTR(x) x = NULL;
-#	else
-#		define AI_DEBUG_INVALIDATE_PTR(x)
-#	endif
-#endif 
+	// ================================================================
+	// Define ASSIMP_BUILD_SINGLETHREADED to compile assimp
+	// without threading support. The library doesn't utilize
+	// threads then, and is itself not threadsafe.
+	// If this flag is specified, boost::threads is *not* required.
+	// ================================================================
+
+	// TODO
+#ifndef ASSIMP_BUILD_SINGLETHREADED
+#	define ASSIMP_BUILD_SINGLETHREADED
+#endif
+
+#ifndef ASSIMP_BUILD_SINGLETHREADED
+#	define AI_C_THREADSAFE
+#endif // !! ASSIMP_BUILD_SINGLETHREADED
+
+// Make sure NULL is defined
+#ifndef NULL
+#	define NULL 0
+#endif
+
+// Undefine the min/max macros defined by some platform headers
+#undef min
+#undef max
+
+// Concatenate two tokens after evaluating them
+#define AI_CONCAT(a,b) a ## b
+
+// Helper macro that sets a pointer to NULL in debug builds
+#if (defined _DEBUG)
+#	define AI_DEBUG_INVALIDATE_PTR(x) x = NULL;
+#else
+#	define AI_DEBUG_INVALIDATE_PTR(x)
+#endif
 
 // Use our own definition of PI here
 #define AI_MATH_PI		(3.1415926538)
 #define AI_MATH_TWO_PI	(AI_MATH_PI * 2.0)
 #define AI_MATH_HALF_PI	(AI_MATH_PI * 0.5)
 
-// macrod to convert from radians to degrees and the reverse
+// Tiny macro to convert from radians to degrees and the reverse
 #define AI_DEG_TO_RAD(x) (x*0.0174532925f)
 #define AI_RAD_TO_DEG(x) (x*57.2957795f)
 

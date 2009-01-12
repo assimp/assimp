@@ -41,8 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Declares the data structures in which the imported geometry is 
     returned by ASSIMP: aiMesh, aiFace and aiBone data structures. */
-#ifndef __AI_MESH_H_INC__
-#define __AI_MESH_H_INC__
+#ifndef INCLUDED_AI_MESH_H
+#define INCLUDED_AI_MESH_H
 
 #include "aiTypes.h"
 
@@ -51,13 +51,23 @@ extern "C" {
 #endif
 
 // ---------------------------------------------------------------------------
-/** A single face in a mesh, referring to multiple vertices. 
-*
-* If mNumIndices is 3, the face is a triangle, 
-* for mNumIndices > 3 it's a polygon.
-* Point and line primitives are rarely used and are NOT supported. However,
-* a load could pass them as degenerated triangles.
-*/
+/** @brief A single face in a mesh, referring to multiple vertices. 
+ *
+ * If mNumIndices is 3, the face is called 'triangle', for mNumIndices > 3 
+ * it's called 'polygon' (hey, that's just a definition!).
+ * <br>
+ * aiMesh::mPrimitiveTypes can be queried to quickly examine which types of
+ * primitive are present in a mesh. The aiProcess_SortByPType flag executes
+ * a special post-processing step which splits meshes with *different*
+ * primitive types mixed up (e.g. lines and triangles) in several, 'clean'
+ * submeshes. Furthermore there is a configuration option, 
+ * AI_CONFIG_PP_SBP_REMOVE, to force SortByPType to remove specific primitive
+ * types from the scene - completely. In most cases you'll propably want to
+ * set this config to 
+ * @code 
+ * aiPrimitiveType_LINE|aiPrimitiveType_POINT
+ * @endcode
+ */
 struct aiFace
 {
 	//! Number of indices defining this face. 3 for a triangle, >3 for polygon
@@ -93,10 +103,10 @@ struct aiFace
 		if (&o == this)
 			return *this;
 
-		delete mIndices;
+		delete[] mIndices;
 		mNumIndices = o.mNumIndices;
 		mIndices = new unsigned int[mNumIndices];
-		memcpy( mIndices, o.mIndices, mNumIndices * sizeof( unsigned int));
+		::memcpy( mIndices, o.mIndices, mNumIndices * sizeof( unsigned int));
 		return *this;
 	}
 
@@ -104,11 +114,11 @@ struct aiFace
 	//! of two faces is identical
 	bool operator== (const aiFace& o) const
 	{
-		if (this->mIndices == o.mIndices)return true;
-		else if (this->mIndices && this->mNumIndices == o.mNumIndices)
+		if (mIndices == o.mIndices)return true;
+		else if (mIndices && mNumIndices == o.mNumIndices)
 		{
 			for (unsigned int i = 0;i < this->mNumIndices;++i)
-				if (this->mIndices[i] != o.mIndices[i])return false;
+				if (mIndices[i] != o.mIndices[i])return false;
 			return true;
 		}
 		return false;
@@ -120,13 +130,12 @@ struct aiFace
 	{
 		return !(*this == o);
 	}
-
 #endif // __cplusplus
-};
+}; //! struct aiFace
 
 
 // ---------------------------------------------------------------------------
-/** A single influence of a bone on a vertex.
+/** @brief A single influence of a bone on a vertex.
  */
 struct aiVertexWeight
 {
@@ -150,14 +159,16 @@ struct aiVertexWeight
 	{ /* nothing to do here */ }
 
 #endif // __cplusplus
-};
+}; //! struct aiVertexWeight
 
 
 // ---------------------------------------------------------------------------
-/** A single bone of a mesh. A bone has a name by which it can be found 
-* in the frame hierarchy and by which it can be addressed by animations. 
-* In addition it has a number of influences on vertices.
-*/
+/** @brief A single bone of a mesh.
+ *
+ *  A bone has a name by which it can be found in the frame hierarchy and by
+ *  which it can be addressed by animations. In addition it has a number of 
+ *  influences on vertices.
+ */
 struct aiBone
 {
 	//! The name of the bone. 
@@ -200,52 +211,47 @@ struct aiBone
 		delete [] mWeights;
 	}
 #endif // __cplusplus
-};
+}; //! struct aiBone
 
-#if (!defined AI_MAX_NUMBER_OF_COLOR_SETS)
-
-
+#ifndef AI_MAX_NUMBER_OF_COLOR_SETS
 // ---------------------------------------------------------------------------
-/** Maximum number of vertex color sets per mesh.
-*
-* Normally: Diffuse, specular, ambient and emissive
-* However one could use the vertex color sets for any other purpose, too.
-*
-* \note Some internal structures expect (and assert) this value
-*   to be at 4
-*/
+/** @def AI_MAX_NUMBER_OF_COLOR_SETS
+ *  Maximum number of vertex color sets per mesh.
+ *
+ *  Normally: Diffuse, specular, ambient and emissive
+ *  However one could use the vertex color sets for any other purpose, too.
+ *
+ *  @note Some internal structures expect (and assert) this value
+ *    to be at least 4. For the moment it is absolutely safe to assume that
+ *    this will never change.
+ */
 #	define AI_MAX_NUMBER_OF_COLOR_SETS 0x4
-
 #endif // !! AI_MAX_NUMBER_OF_COLOR_SETS
-#if (!defined AI_MAX_NUMBER_OF_TEXTURECOORDS)
 
-
+#ifndef AI_MAX_NUMBER_OF_TEXTURECOORDS
 // ---------------------------------------------------------------------------
-/** Maximum number of texture coord sets (UV(W) channels) per mesh 
-*
-* The material system uses the AI_MATKEY_UVWSRC_XXX keys to specify 
-* which UVW channel serves as data source for a texture,
-*
-* \note Some internal structures expect (and assert) this value
-*   to be  4
+/** @def AI_MAX_NUMBER_OF_TEXTURECOORDS
+ *  Maximum number of texture coord sets (UV(W) channels) per mesh 
+ *
+ *  The material system uses the AI_MATKEY_UVWSRC_XXX keys to specify 
+ *  which UVW channel serves as data source for a texture.
+ *
+ *  @note Some internal structures expect (and assert) this value
+ *    to be at least 4. For the moment it is absolutely safe to assume that
+ *    this will never change.
 */
 #	define AI_MAX_NUMBER_OF_TEXTURECOORDS 0x4
-
-// NOTE (Aramis): If you change these values, make sure that you also
-// change the corresponding values in all Assimp ports.
-
-// **********************************************************
-// Java: Mesh.java, 
-//  Mesh.MAX_NUMBER_OF_TEXTURECOORDS
-//  Mesh.MAX_NUMBER_OF_COLOR_SETS
-// **********************************************************
-
 #endif // !! AI_MAX_NUMBER_OF_TEXTURECOORDS
 
 
 // ---------------------------------------------------------------------------
-/** Enumerates the types of geometric primitives supported by Assimp.
-*/
+/** @brief Enumerates the types of geometric primitives supported by Assimp.
+ *  
+ *  @see aiFace Face data structure
+ *  @see aiProcess_SortByPType Per-primitive sorting of meshes
+ *  @see aiProcess_Triangulate Automatic triangulation
+ *  @see AI_CONFIG_PP_SBP_REMOVE Removal of specific primitive types.
+ */
 enum aiPrimitiveType
 {
 	/** A point primitive. 
@@ -278,15 +284,18 @@ enum aiPrimitiveType
 	aiPrimitiveType_POLYGON     = 0x8,
 
 
-	/** This value is not used. It is just there to force the
+	/** This value is not used. It is just here to force the
 	 *  compiler to map this enum to a 32 Bit integer.
 	 */
 	_aiPrimitiveType_Force32Bit = 0x9fffffff
-};
+}; //! enum aiPrimitiveType
 
+// Get the #aiPrimitiveType flag for a specific number of face indices
+#define AI_PRIMITIVE_TYPE_FOR_N_INDICES(n) \
+	((n) > 3 ? aiPrimitiveType_POLYGON : (aiPrimitiveType)(1u << (n)-1))
 
 // ---------------------------------------------------------------------------
-/** A mesh represents a geometry or model with a single material. 
+/** @brief A mesh represents a geometry or model with a single material. 
 *
 * It usually consists of a number of vertices and a series of primitives/faces 
 * referencing the vertices. In addition there might be a series of bones, each 
@@ -298,9 +307,11 @@ enum aiPrimitiveType
 * test for the presence of various data streams.
 *
 * A Mesh uses only a single material which is referenced by a material ID.
-* \note The mPositions member is not optional, although a Has()-Method is
-* provided for it. However, positions *could* be missing if the
-* AI_SCENE_FLAGS_INCOMPLETE flag is set in aiScene::mFlags.
+* @note The mPositions member is usually not optional. However, vertex positions 
+* *could* be missing if the AI_SCENE_FLAGS_INCOMPLETE flag is set in 
+* @code
+* aiScene::mFlags
+* @endcode
 */
 struct aiMesh
 {
@@ -463,30 +474,30 @@ struct aiMesh
 	}
 
 	//! Check whether the mesh contains positions. If no special scene flags
-	//! (such as AI_SCENE_FLAGS_ANIM_SKELETON_ONLY) are set this MUST
-	//! always return true
-	inline bool HasPositions() const 
+	//! (such as AI_SCENE_FLAGS_ANIM_SKELETON_ONLY) are set this will
+	//! always return true 
+	bool HasPositions() const 
 		{ return mVertices != NULL && mNumVertices > 0; }
 
 	//! Check whether the mesh contains faces. If no special scene flags
 	//! are set this should always return true
-	inline bool HasFaces() const 
+	bool HasFaces() const 
 		{ return mFaces != NULL && mNumFaces > 0; }
 
 	//! Check whether the mesh contains normal vectors
-	inline bool HasNormals() const 
+	bool HasNormals() const 
 		{ return mNormals != NULL && mNumVertices > 0; }
 
 	//! Check whether the mesh contains tangent and bitangent vectors
 	//! It is not possible that it contains tangents and no bitangents
 	//! (or the other way round). The existence of one of them
 	//! implies that the second is there, too.
-	inline bool HasTangentsAndBitangents() const 
+	bool HasTangentsAndBitangents() const 
 		{ return mTangents != NULL && mBitangents != NULL && mNumVertices > 0; }
 
 	//! Check whether the mesh contains a vertex color set
 	//! \param pIndex Index of the vertex color set
-	inline bool HasVertexColors( unsigned int pIndex) const
+	bool HasVertexColors( unsigned int pIndex) const
 	{ 
 		if( pIndex >= AI_MAX_NUMBER_OF_COLOR_SETS) 
 			return false; 
@@ -496,7 +507,7 @@ struct aiMesh
 
 	//! Check whether the mesh contains a texture coordinate set
 	//! \param pIndex Index of the texture coordinates set
-	inline bool HasTextureCoords( unsigned int pIndex) const
+	bool HasTextureCoords( unsigned int pIndex) const
 	{ 
 		if( pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) 
 			return false; 
@@ -505,7 +516,7 @@ struct aiMesh
 	}
 
 	//! Get the number of UV channels the mesh contains
-	inline unsigned int GetNumUVChannels() const 
+	unsigned int GetNumUVChannels() const 
 	{
 		unsigned int n = 0;
 		while (n < AI_MAX_NUMBER_OF_TEXTURECOORDS && mTextureCoords[n])++n;
@@ -513,7 +524,7 @@ struct aiMesh
 	}
 
 	//! Get the number of vertex color channels the mesh contains
-	inline unsigned int GetNumColorChannels() const 
+	unsigned int GetNumColorChannels() const 
 	{
 		unsigned int n = 0;
 		while (n < AI_MAX_NUMBER_OF_COLOR_SETS && mColors[n])++n;
@@ -525,11 +536,10 @@ struct aiMesh
 		{ return mBones != NULL && mNumBones > 0; }
 
 #endif // __cplusplus
-};
+}; //! struct aiMesh
 
 #ifdef __cplusplus
 }
-#endif
-
+#endif //! extern "C"
 #endif // __AI_MESH_H_INC
 

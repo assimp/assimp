@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8,00"
-	Name="AssimpView"
+	Name="assimpview"
 	ProjectGUID="{B17B959B-BB8A-4596-AF0F-A8C8DBBC3C5E}"
 	RootNamespace="assimp_view"
 	Keyword="Win32Proj"
@@ -19,9 +19,9 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)..\..\tools\build\$(ConfigurationName)_$(PlatformName)"
-			IntermediateDirectory="$(SolutionDir)..\..\tools\build\$(ConfigurationName)_$(PlatformName)\obj"
+			Name="debug|Win32"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -67,7 +67,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
-				OutputFile="$(OutDir)\assimpview32d.exe"
+				OutputFile="$(OutDir)\assimp_view_debug.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;;&quot;$(DXSDK_DIR)lib\x86&quot;"
 				GenerateDebugInformation="true"
@@ -100,7 +100,7 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug|x64"
+			Name="debug|x64"
 			OutputDirectory="$(SolutionDir)..\..\tools\build\$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="$(SolutionDir)..\..\tools\build\$(ConfigurationName)_$(PlatformName)\obj"
 			ConfigurationType="1"
@@ -149,7 +149,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
-				OutputFile="$(OutDir)\assimpview64d.exe"
+				OutputFile="$(OutDir)\assimp_view_debug.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\lib\assimp_$(ConfigurationName)_$(PlatformName);&quot;$(DXSDK_DIR)lib\x64&quot;"
 				GenerateDebugInformation="true"
@@ -182,9 +182,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)..\..\tools\build\$(ConfigurationName)_$(PlatformName)"
-			IntermediateDirectory="$(SolutionDir)..\..\tools\build\$(ConfigurationName)_$(PlatformName)\obj"
+			Name="release|Win32"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
@@ -226,7 +226,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
-				OutputFile="$(OutDir)\assimpview32.exe"
+				OutputFile="$(OutDir)\assimp_view.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;;&quot;$(DXSDK_DIR)lib\x86&quot;"
 				IgnoreAllDefaultLibraries="false"
@@ -263,7 +263,7 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|x64"
+			Name="release|x64"
 			OutputDirectory="$(SolutionDir)..\..\tools\build\$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="$(SolutionDir)..\..\tools\build\$(ConfigurationName)_$(PlatformName)\obj"
 			ConfigurationType="1"
@@ -308,7 +308,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
-				OutputFile="$(OutDir)\assimpview64.exe"
+				OutputFile="$(OutDir)\assimp_view.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\lib\assimp_$(ConfigurationName)_$(PlatformName);&quot;$(DXSDK_DIR)lib\x64&quot;"
 				IgnoreAllDefaultLibraries="false"
@@ -345,9 +345,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release_DLL|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			Name="release-dll|Win32"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
@@ -389,9 +389,9 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
-				OutputFile="$(OutDir)\assimpview32.exe"
+				OutputFile="$(OutDir)\assimp_view.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib\assimp_$(ConfigurationName)_$(PlatformName);&quot;$(DXSDK_DIR)lib\x86&quot;"
+				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;;&quot;$(DXSDK_DIR)lib\x86&quot;"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
@@ -426,7 +426,7 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release_DLL|x64"
+			Name="release-dll|x64"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
@@ -471,7 +471,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
-				OutputFile="$(OutDir)\assimpview64.exe"
+				OutputFile="$(OutDir)\assimp_view.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\lib\assimp_$(ConfigurationName)_$(PlatformName);&quot;$(DXSDK_DIR)lib\x64&quot;"
 				IgnoreAllDefaultLibraries="false"
@@ -508,9 +508,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug_DLL|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			Name="debug-dll|Win32"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -556,9 +556,9 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
-				OutputFile="$(OutDir)\assimpview32d.exe"
+				OutputFile="$(OutDir)\assimp_view_debug.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib\assimp_$(ConfigurationName)_$(PlatformName);&quot;$(DXSDK_DIR)lib\x86&quot;"
+				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;;&quot;$(DXSDK_DIR)lib\x86&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -589,7 +589,7 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug_DLL|x64"
+			Name="debug-dll|x64"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
@@ -638,7 +638,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
-				OutputFile="$(OutDir)\assimpview64d.exe"
+				OutputFile="$(OutDir)\assimp_view_debug.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\lib\assimp_debug_dll_x64;&quot;$(DXSDK_DIR)lib\x64&quot;"
 				GenerateDebugInformation="true"
@@ -671,10 +671,11 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release -noBoost|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			Name="release-noboost-st|Win32"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
+			InheritedPropertySheets=".\shared\NoBoostShared.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -715,7 +716,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
-				OutputFile="$(OutDir)\assimpview32.exe"
+				OutputFile="$(OutDir)\assimp_view.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;;&quot;$(DXSDK_DIR)lib\x86&quot;"
 				IgnoreAllDefaultLibraries="false"
@@ -752,10 +753,11 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release -noBoost|x64"
+			Name="release-noboost-st|x64"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
+			InheritedPropertySheets=".\shared\NoBoostShared.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -797,7 +799,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
-				OutputFile="$(OutDir)\assimpview64.exe"
+				OutputFile="$(OutDir)\assimp_view.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\lib\assimp_$(ConfigurationName)_$(PlatformName);&quot;$(DXSDK_DIR)lib\x64&quot;"
 				IgnoreAllDefaultLibraries="false"
@@ -834,9 +836,174 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug -noBoost|Win32"
-			OutputDirectory="$(SolutionDir)..\..\tools\build\$(ConfigurationName)_$(PlatformName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			Name="debug-noboost-st|Win32"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			ConfigurationType="1"
+			InheritedPropertySheets=".\shared\NoBoostShared.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				SmallerTypeCheck="true"
+				RuntimeLibrary="1"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="2"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
+				OutputFile="$(OutDir)\assimp_view_debug.exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;;&quot;$(DXSDK_DIR)lib\x86&quot;"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="debug-noboost-st|x64"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets=".\shared\NoBoostShared.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				SmallerTypeCheck="true"
+				RuntimeLibrary="1"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="2"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
+				OutputFile="$(OutDir)\assimp_view_debug.exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\..\lib\assimp_$(ConfigurationName)_$(PlatformName);&quot;$(DXSDK_DIR)lib\x64&quot;"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="debug-st|Win32"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -882,7 +1049,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
-				OutputFile="$(OutDir)\assimpview32d.exe"
+				OutputFile="$(OutDir)\assimp_view_debug.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;;&quot;$(DXSDK_DIR)lib\x86&quot;"
 				GenerateDebugInformation="true"
@@ -915,7 +1082,7 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug -noBoost|x64"
+			Name="debug-st|x64"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
@@ -964,11 +1131,174 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
-				OutputFile="$(OutDir)\assimpview64d.exe"
+				OutputFile="$(OutDir)\assimp_view_debug.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\lib\assimp_$(ConfigurationName)_$(PlatformName);&quot;$(DXSDK_DIR)lib\x64&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="release-st|Win32"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			ConfigurationType="1"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
+				RuntimeLibrary="0"
+				UsePrecompiledHeader="2"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
+				OutputFile="$(OutDir)\assimp_view.exe"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;;&quot;$(DXSDK_DIR)lib\x86&quot;"
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames=""
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="release-st|x64"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
+				RuntimeLibrary="0"
+				UsePrecompiledHeader="2"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
+				OutputFile="$(OutDir)\assimp_view.exe"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="..\..\lib\assimp_$(ConfigurationName)_$(PlatformName);&quot;$(DXSDK_DIR)lib\x64&quot;"
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames=""
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -1121,7 +1451,7 @@
 				RelativePath="..\..\tools\assimp_view\stdafx.cpp"
 				>
 				<FileConfiguration
-					Name="Debug|Win32"
+					Name="debug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1129,7 +1459,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
+					Name="debug|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1137,7 +1467,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32"
+					Name="release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1145,7 +1475,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|x64"
+					Name="release|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1153,7 +1483,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_DLL|Win32"
+					Name="release-dll|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1161,7 +1491,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_DLL|x64"
+					Name="release-dll|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1169,7 +1499,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug_DLL|Win32"
+					Name="debug-dll|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1177,7 +1507,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug_DLL|x64"
+					Name="debug-dll|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1185,7 +1515,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release -noBoost|Win32"
+					Name="release-noboost-st|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1193,7 +1523,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release -noBoost|x64"
+					Name="release-noboost-st|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1201,7 +1531,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug -noBoost|Win32"
+					Name="debug-noboost-st|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1209,7 +1539,39 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug -noBoost|x64"
+					Name="debug-noboost-st|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="debug-st|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="debug-st|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release-st|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release-st|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"

@@ -458,7 +458,7 @@ outer:
 		if (srcMat.texIdx < pScene->mNumTextures || real < pScene->mNumTextures)
 		{
 			srcMat.name.data[0] = '*';
-			srcMat.name.length  = itoa10(&srcMat.name.data[1],1000,
+			srcMat.name.length  = ASSIMP_itoa10(&srcMat.name.data[1],1000,
 				(srcMat.texIdx < pScene->mNumTextures ? srcMat.texIdx : real));
 			mat->AddProperty(&srcMat.name,AI_MATKEY_TEXTURE_DIFFUSE(0));
 		}

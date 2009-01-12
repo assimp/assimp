@@ -40,18 +40,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AssimpPCH.h"
-
 #include "DefaultIOSystem.h"
+
+// Default log streams
 #include "Win32DebugLogStream.h"
+#include "StdOStreamLogStream.h"
 #include "FileLogStream.h"
 
-namespace Assimp
-{
-// ---------------------------------------------------------------------------
+namespace Assimp	{
+
+// ----------------------------------------------------------------------------------
 NullLogger DefaultLogger::s_pNullLogger;
 Logger *DefaultLogger::m_pLogger = &DefaultLogger::s_pNullLogger;
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 struct LogStreamInfo
 {
@@ -72,17 +74,73 @@ struct LogStreamInfo
 		// empty
 	}
 };
-// ---------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------
+// Construct a default log stream
+LogStream* LogStream::createDefaultStream(DefaultLogStreams	streams,
+	const std::string& name /*= "AssimpLog.txt"*/,
+	IOSystem* io		    /*= NULL*/)
+{
+	switch (streams)	
+	{
+		// This is a platform-specific feature
+	case DLS_DEBUGGER:
+#ifdef WIN32
+		return new Win32DebugLogStream();
+#else
+		return NULL;
+#endif
+
+		// Platform-independent default streams
+	case DLS_CERR:
+		return new StdOStreamLogStream(std::cerr);
+	case DLS_COUT:
+		return new StdOStreamLogStream(std::cout);
+	case DLS_FILE:
+		return (name.size() ? new FileLogStream(name,io) : NULL);
+	default:
+		// We don't know this default log stream, so raise an assertion
+		ai_assert(false);
+
+	};
+
+	// For compilers without dead code path detection
+	return NULL;
+}
+
+// ----------------------------------------------------------------------------------
 //	Creates the only singleton instance
-Logger *DefaultLogger::create(const std::string &name, LogSeverity severity)
+Logger *DefaultLogger::create(const std::string &name /*= "AssimpLog.txt"*/,
+	LogSeverity severity    /*= NORMAL*/,
+	unsigned int defStreams /*= DLS_DEBUGGER | DLS_FILE*/,
+	IOSystem* io		    /*= NULL*/)
 {
 	if (m_pLogger && !isNullLogger() )
 		delete m_pLogger;
-	m_pLogger = new DefaultLogger( name, severity );
+
+	m_pLogger = new DefaultLogger( severity );
+
+	// Attach default log streams
+	// Stream the log to the MSVC debugger?
+	if (defStreams & DLS_DEBUGGER)
+		m_pLogger->attachStream( LogStream::createDefaultStream(DLS_DEBUGGER));
+
+	// Stream the log to COUT?
+	if (defStreams & DLS_COUT)
+		m_pLogger->attachStream( LogStream::createDefaultStream(DLS_COUT));
+
+	// Stream the log to CERR?
+	if (defStreams & DLS_CERR)
+		 m_pLogger->attachStream( LogStream::createDefaultStream(DLS_CERR));
 	
+	// Stream the log to a file
+	if (defStreams & DLS_FILE && !name.empty())
+		m_pLogger->attachStream( LogStream::createDefaultStream(DLS_FILE,name,io));
+
 	return m_pLogger;
 }
-// ---------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------
 void DefaultLogger::set( Logger *logger )
 {
 	if (!logger)logger = &s_pNullLogger;
@@ -91,19 +149,21 @@ void DefaultLogger::set( Logger *logger )
 
 	DefaultLogger::m_pLogger = logger;
 }
-// ---------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------
 bool DefaultLogger::isNullLogger()
 {
 	return m_pLogger == &s_pNullLogger;
 }
-// ---------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------
 //	Singleton getter
 Logger *DefaultLogger::get()
 {
 	return m_pLogger;
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //	Kills the only instance
 void DefaultLogger::kill()
 {
@@ -112,7 +172,7 @@ void DefaultLogger::kill()
 	m_pLogger = &s_pNullLogger;
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //	Debug message
 void DefaultLogger::debug( const std::string &message )
 {
@@ -123,7 +183,7 @@ void DefaultLogger::debug( const std::string &message )
 	writeToStreams( msg, Logger::DEBUGGING );
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //	Logs an info
 void DefaultLogger::info( const std::string &message )
 {
@@ -131,7 +191,7 @@ void DefaultLogger::info( const std::string &message )
 	writeToStreams( msg , Logger::INFO );
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //	Logs a warning
 void DefaultLogger::warn( const std::string &message )
 {
@@ -139,7 +199,7 @@ void DefaultLogger::warn( const std::string &message )
 	writeToStreams( msg, Logger::WARN );
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //	Logs an error
 void DefaultLogger::error( const std::string &message )
 {
@@ -147,18 +207,19 @@ void DefaultLogger::error( const std::string &message )
 	writeToStreams( msg, Logger::ERR );
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //	Severity setter
 void DefaultLogger::setLogSeverity( LogSeverity log_severity )
 {
 	m_Severity = log_severity;
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //	Attachs a new stream
 void DefaultLogger::attachStream( LogStream *pStream, unsigned int severity )
 {
-	ai_assert ( NULL != pStream );
+	if (!pStream)
+		return;
 
 	// fix (Aramis)
 	if (0 == severity)
@@ -181,11 +242,12 @@ void DefaultLogger::attachStream( LogStream *pStream, unsigned int severity )
 	m_StreamArray.push_back( pInfo );
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //	Detatch a stream
 void DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
 {
-	ai_assert ( NULL != pStream );
+	if (!pStream)
+		return;
 
 	// fix (Aramis)
 	if (0 == severity)
@@ -199,79 +261,49 @@ void DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
 	{
 		if ( (*it)->m_pStream == pStream )
 		{
-			unsigned int uiSev = (*it)->m_uiErrorSeverity;
-			if ( severity & Logger::INFO ) 
-				uiSev &= ( ~Logger::INFO );
-			if ( severity & Logger::WARN ) 
-				uiSev &= ( ~Logger::WARN );
-			if ( severity & Logger::ERR ) 
-				uiSev &= ( ~Logger::ERR );
-			// fix (Aramis)
-			if ( severity & Logger::DEBUGGING ) 
-				uiSev &= ( ~Logger::DEBUGGING );
-
-			(*it)->m_uiErrorSeverity = uiSev;
-			
+			(*it)->m_uiErrorSeverity &= ~severity;
 			if ( (*it)->m_uiErrorSeverity == 0 )
 			{
-				it = m_StreamArray.erase( it );
+				m_StreamArray.erase( it );
 				break;
 			}
 		}
 	}
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //	Constructor
-DefaultLogger::DefaultLogger( const std::string &name, LogSeverity severity ) :
-	m_Severity( severity )
-{
-#ifdef WIN32
-	m_Streams.push_back( new Win32DebugLogStream() );
-#endif
-	
-	if (name.empty())
-		return;
-	m_Streams.push_back( new FileLogStream( name ) );
+DefaultLogger::DefaultLogger(LogSeverity severity) 
 
-	noRepeatMsg = false;
-}
+	:	m_Severity	( severity )
+	,	noRepeatMsg	(false)
+{}
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //	Destructor
 DefaultLogger::~DefaultLogger()
 {
-	for ( StreamIt it = m_StreamArray.begin(); 
-		it != m_StreamArray.end();
-		++it )
-	{
+	for ( StreamIt it = m_StreamArray.begin(); it != m_StreamArray.end(); ++it )
 		delete *it;
-	}
-
-	for (std::vector<LogStream*>::iterator it = m_Streams.begin();
-		it != m_Streams.end();
-		++it)
-	{
-		delete *it;
-	}
-	m_Streams.clear();
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //	Writes message to stream
 void DefaultLogger::writeToStreams(const std::string &message, 
-								   ErrorSeverity ErrorSev )
+	ErrorSeverity ErrorSev )
 {
 	if ( message.empty() )
 		return;
 
 	std::string s;
+
+	// Check whether this is a repeated message
 	if (message == lastMsg)
 	{
 		if (!noRepeatMsg)
 		{
 			noRepeatMsg = true;
-			s = "Skipping one or more lines with the same contents";
+			s = "Skipping one or more lines with the same contents\n";
 		}
 		else return;
 	}
@@ -279,32 +311,25 @@ void DefaultLogger::writeToStreams(const std::string &message,
 	{
 		lastMsg = s = message;
 		noRepeatMsg = false;
-	}
 
+		s.append("\n");
+	}
 	for ( ConstStreamIt it = m_StreamArray.begin();
 		it != m_StreamArray.end();
 		++it)
 	{
 		if ( ErrorSev & (*it)->m_uiErrorSeverity )
-		{
 			(*it)->m_pStream->write( s);
-		}
-	}
-	for (std::vector<LogStream*>::iterator it = m_Streams.begin();
-		it != m_Streams.end();
-		++it)
-	{
-		(*it)->write( s + std::string("\n"));
 	}
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //	Returns thread id, if not supported only a zero will be returned.
 std::string DefaultLogger::getThreadID()
 {
 	std::string thread_id( "0" );
 #ifdef WIN32
-	HANDLE hThread = GetCurrentThread();
+	HANDLE hThread = ::GetCurrentThread();
 	if ( hThread )
 	{
 		std::stringstream thread_msg;
@@ -318,6 +343,6 @@ std::string DefaultLogger::getThreadID()
 #endif
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 
-} // Namespace Assimp
+} // !namespace Assimp

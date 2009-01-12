@@ -1,9 +1,11 @@
+
+#include "UnitTestPCH.h"
 #include "utSplitLargeMeshes.h"
-#include "aiPostProcess.h"
-#include <math.h>
+
 
 CPPUNIT_TEST_SUITE_REGISTRATION (SplitLargeMeshesTest);
 
+// ------------------------------------------------------------------------------------------------
 void SplitLargeMeshesTest :: setUp (void)
 {
 	// construct the processes
@@ -53,12 +55,14 @@ void SplitLargeMeshesTest :: setUp (void)
 	}
 }
 
+// ------------------------------------------------------------------------------------------------
 void SplitLargeMeshesTest :: tearDown (void)
 {
 	delete this->piProcessTriangle;
 	delete this->piProcessVertex;
 }
 
+// ------------------------------------------------------------------------------------------------
 void SplitLargeMeshesTest :: testVertexSplit()
 {
 	std::vector< std::pair<aiMesh*, unsigned int> > avOut;
@@ -80,6 +84,7 @@ void SplitLargeMeshesTest :: testVertexSplit()
 	CPPUNIT_ASSERT(0 == iOldFaceNum);
 }
 
+// ------------------------------------------------------------------------------------------------
 void SplitLargeMeshesTest :: testTriangleSplit()
 {
 	std::vector< std::pair<aiMesh*, unsigned int> > avOut;

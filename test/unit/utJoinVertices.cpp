@@ -1,17 +1,19 @@
 
+#include "UnitTestPCH.h"
 #include "utJoinVertices.h"
 
 
 CPPUNIT_TEST_SUITE_REGISTRATION (JoinVerticesTest);
 
+// ------------------------------------------------------------------------------------------------
 void JoinVerticesTest :: setUp (void)
 {
 	// construct the process
-	this->piProcess = new JoinVerticesProcess();
+	piProcess = new JoinVerticesProcess();
 
 	// create a quite small mesh for testing purposes -
 	// the mesh itself is *something* but it has redundant vertices
-	this->pcMesh = new aiMesh();
+	pcMesh = new aiMesh();
 
 	pcMesh->mNumVertices = 900;
 	aiVector3D*& pv = pcMesh->mVertices = new aiVector3D[900];
@@ -49,16 +51,18 @@ void JoinVerticesTest :: setUp (void)
 	for (unsigned int i = 0; i < 900;++i)pcMesh->mBitangents[i] = 0.f; 
 }
 
+// ------------------------------------------------------------------------------------------------
 void JoinVerticesTest :: tearDown (void)
 {
 	delete this->pcMesh;
 	delete this->piProcess;
 }
 
+// ------------------------------------------------------------------------------------------------
 void JoinVerticesTest :: testProcess(void)
 {
 	// execute the step on the given data
-	this->piProcess->ProcessMesh(this->pcMesh,0);
+	piProcess->ProcessMesh(pcMesh,0);
 
 	// the number of faces shouldn't change
 	CPPUNIT_ASSERT(pcMesh->mNumFaces == 300);

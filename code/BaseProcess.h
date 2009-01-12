@@ -39,8 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Base class of all import post processing steps */
-#ifndef AI_BASEPROCESS_H_INC
-#define AI_BASEPROCESS_H_INC
+#ifndef INCLUDED_AI_BASEPROCESS_H
+#define INCLUDED_AI_BASEPROCESS_H
 
 #include <map>
 
@@ -155,20 +155,17 @@ public:
 		return true;
 	}
 
-	inline void RemoveProperty( const char* name)
-	{
+	inline void RemoveProperty( const char* name)	{
 		SetGenericPropertyPtr<Base>(pmap,name,NULL);
 	}
 
 private:
 
-	inline void AddProperty( const char* name, Base* data)
-	{
+	inline void AddProperty( const char* name, Base* data)	{
 		SetGenericPropertyPtr<Base>(pmap,name,data);
 	}
 
-	inline void GetProperty( const char* name, Base*& data) const
-	{
+	inline void GetProperty( const char* name, Base*& data) const	{
 		data = GetGenericProperty<Base*>(pmap,name,NULL);
 	}
 
@@ -239,16 +236,14 @@ public:
 	 *  allows multiple postprocess steps to share data.
 	 * @param sh May be NULL
 	*/
-	inline void SetSharedData(SharedPostProcessInfo* sh)
-	{
+	inline void SetSharedData(SharedPostProcessInfo* sh)	{
 		shared = sh;
 	}
 
 	// -------------------------------------------------------------------
 	/** Get the shared data that is assigned to the step.
 	*/
-	inline SharedPostProcessInfo* GetSharedData()
-	{
+	inline SharedPostProcessInfo* GetSharedData()	{
 		return shared;
 	}
 

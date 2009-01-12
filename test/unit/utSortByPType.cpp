@@ -1,9 +1,12 @@
 
+#include "UnitTestPCH.h"
 #include "utSortByPType.h"
 
+#include "utScenePreprocessor.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION (SortByPTypeProcessTest);
 
+// ------------------------------------------------------------------------------------------------
 static unsigned int num[10][4] = 
 	{
 		{0,0,0,1000},
@@ -18,6 +21,7 @@ static unsigned int num[10][4] =
 		{0,100,0,900},
 	};
 
+// ------------------------------------------------------------------------------------------------
 static unsigned int result[10] = 
 {
 	aiPrimitiveType_POLYGON,
@@ -32,10 +36,10 @@ static unsigned int result[10] =
 	aiPrimitiveType_LINE | aiPrimitiveType_POLYGON,
 };
 
-
+// ------------------------------------------------------------------------------------------------
 void SortByPTypeProcessTest :: setUp (void)
 {
-	process0 = new DeterminePTypeHelperProcess();
+//	process0 = new DeterminePTypeHelperProcess();
 	process1 = new SortByPTypeProcess();
 	scene = new aiScene();
 
@@ -108,27 +112,37 @@ void SortByPTypeProcessTest :: setUp (void)
 	}
 }
 
+// ------------------------------------------------------------------------------------------------
 void SortByPTypeProcessTest :: tearDown (void)
 {
-	delete process0;
+	//delete process0;
 	delete process1;
 	delete scene;
 }
 
-void  SortByPTypeProcessTest :: testDeterminePTypeStep (void)
-{
-	process0->Execute(scene);
+// ------------------------------------------------------------------------------------------------
+//void  SortByPTypeProcessTest :: testDeterminePTypeStep (void)
+//{
+//	process0->Execute(scene);
+//
+//	for (unsigned int i = 0; i < 10; ++i)
+//	{
+//		aiMesh* mesh = scene->mMeshes[i];
+//		CPPUNIT_ASSERT(mesh->mPrimitiveTypes == result[i]);
+//	}
+//}
 
-	for (unsigned int i = 0; i < 10; ++i)
-	{
-		aiMesh* mesh = scene->mMeshes[i];
-		CPPUNIT_ASSERT(mesh->mPrimitiveTypes == result[i]);
-	}
-}
-
+// ------------------------------------------------------------------------------------------------
 void  SortByPTypeProcessTest :: testSortByPTypeStep (void)
 {
-	process0->Execute(scene);
+//	process0->Execute(scene);
+
+	// and another small test for ScenePreprocessor
+	ScenePreprocessor s(scene);
+	s.ProcessScene();
+	for (unsigned int m = 0; m< 10;++m)
+		CPPUNIT_ASSERT(scene->mMeshes[m]->mPrimitiveTypes == result[m]);
+
 	process1->Execute(scene);
 
 	unsigned int idx = 0;
@@ -143,7 +157,7 @@ void  SortByPTypeProcessTest :: testSortByPTypeStep (void)
 				aiMesh* mesh = scene->mMeshes[real];
 
 				CPPUNIT_ASSERT(NULL != mesh);
-				CPPUNIT_ASSERT(mesh->mPrimitiveTypes == 1u<<n);
+				CPPUNIT_ASSERT(mesh->mPrimitiveTypes == AI_PRIMITIVE_TYPE_FOR_N_INDICES(n+1));
 				CPPUNIT_ASSERT(NULL != mesh->mVertices);
 				CPPUNIT_ASSERT(NULL != mesh->mNormals);
 				CPPUNIT_ASSERT(NULL != mesh->mTangents);

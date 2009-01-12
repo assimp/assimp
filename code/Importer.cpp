@@ -43,8 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 
-
-// internal headers
+// =======================================================================================
+// Internal headers
+// =======================================================================================
 #include "BaseImporter.h"
 #include "BaseProcess.h"
 #include "DefaultIOStream.h"
@@ -53,7 +54,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProcessHelper.h"
 #include "ScenePreprocessor.h"
 
+// =======================================================================================
 // Importers
+// =======================================================================================
 #ifndef AI_BUILD_NO_X_IMPORTER
 #	include "XFileImporter.h"
 #endif
@@ -133,7 +136,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include "TerragenLoader.h"
 #endif
 
+// =======================================================================================
 // PostProcess-Steps
+// =======================================================================================
 #ifndef AI_BUILD_NO_CALCTANGENTS_PROCESS
 #	include "CalcTangentsProcess.h"
 #endif
@@ -196,22 +201,50 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 using namespace Assimp;
+using namespace Assimp::Intern;
+
+// =======================================================================================
+// Intern::AllocateFromAssimpHeap serves as abstract base class. It overrides
+// new and delete (and their array counterparts) of public API classes (e.g. Logger) to
+// utilize our DLL heap
+// =======================================================================================
+void* AllocateFromAssimpHeap::operator new ( size_t num_bytes)	
+{
+	return ::operator new(num_bytes);
+}
+
+void AllocateFromAssimpHeap::operator delete ( void* data)	
+{
+	return ::operator delete(data);
+}
+
+void* AllocateFromAssimpHeap::operator new[] ( size_t num_bytes)	
+{
+	return ::operator new[](num_bytes);
+}
+
+void AllocateFromAssimpHeap::operator delete[] ( void* data)
+{
+	return ::operator delete[](data);
+}
 
 // ------------------------------------------------------------------------------------------------
-// Constructor. 
-Importer::Importer() :
-	mIOHandler(NULL),
-	mScene(NULL),
-	mErrorString("")	
+// Importer Constructor. 
+Importer::Importer() 
+	:	mIOHandler		(NULL)
+	,	mScene			(NULL)
+	,	mErrorString	("")	
 {
 	// Allocate a default IO handler
 	mIOHandler = new DefaultIOSystem;
 	mIsDefaultHandler = true; 
 	bExtraVerbose     = false; // disable extra verbose mode by default
 
+	// ======================================================================
 	// Add an instance of each worker class here
-	// the order doesn't really care, however file formats that are
+	// The order doesn't really care, however file formats that are
 	// used more frequently than others should be at the beginning.
+	// ======================================================================
 	mImporter.reserve(25);
 
 #if (!defined AI_BUILD_NO_X_IMPORTER)
@@ -293,9 +326,11 @@ Importer::Importer() :
 	mImporter.push_back( new TerragenImporter());
 #endif
 
+	// ======================================================================
 	// Add an instance of each post processing step here in the order 
-	// of sequence it is executed. steps that are added here are not validated -
-	// as RegisterPPStep() does - all dependencies must be there.
+	// of sequence it is executed. Steps that are added here are not
+	// validated - as RegisterPPStep() does - all dependencies must be there.
+	// ======================================================================
 	mPostProcessingSteps.reserve(25);
 
 #if (!defined AI_BUILD_NO_VALIDATEDS_PROCESS)
@@ -386,9 +421,7 @@ Importer::Importer() :
 #endif
 
 
-
-
-	// allocate a SharedPostProcessInfo object and store pointers to it
+	// Allocate a SharedPostProcessInfo object and store pointers to it
 	// in all post-process steps in the list.
 	mPPShared = new SharedPostProcessInfo();
 	for (std::vector<BaseProcess*>::iterator it = mPostProcessingSteps.begin(),
@@ -402,37 +435,47 @@ Importer::Importer() :
 // Destructor. 
 Importer::~Importer()
 {
+	// Delete all import plugins
 	for( unsigned int a = 0; a < mImporter.size(); a++)
 		delete mImporter[a];
+
+	// Delete all post-processing plug-ins
 	for( unsigned int a = 0; a < mPostProcessingSteps.size(); a++)
 		delete mPostProcessingSteps[a];
 
-	// delete the assigned IO handler
+	// Delete the assigned IO handler
 	delete mIOHandler;
 
-	// kill imported scene. Destructors should do that recursivly
+	// Kill imported scene. Destructors should do that recursivly
 	delete mScene;
 
-	// delete shared post-processing data
+	// Delete shared post-processing data
 	delete mPPShared;
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Empty and private copy constructor
+//	Copy constructor - copies the config of another Importer, not the scene
 Importer::Importer(const Importer &other)
 {
-	// empty
+	// Call the default constructor
+	new(this) Importer();
+
+	// Copy the property table
+	mIntProperties    = other.mIntProperties;
+	mFloatProperties  = other.mFloatProperties;
+	mStringProperties = other.mStringProperties;
 }
 
 // ------------------------------------------------------------------------------------------------
+// Register a custom loader plugin
 aiReturn Importer::RegisterLoader(BaseImporter* pImp)
 {
 	ai_assert(NULL != pImp);
-
-	// Check whether we would have two loaders for the same file extension now
+	// ======================================================================
+	// Check whether we would have two loaders for the same file extension 
 	// This is absolutely OK, but we should warn the developer of the new
 	// loader that his code will propably never be called.
-
+	// ======================================================================
 	std::string st;
 	pImp->GetExtensionList(st);
 
@@ -441,9 +484,8 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp)
 	while (sz)
 	{
 		if (IsExtensionSupported(std::string(sz)))
-		{
 			DefaultLogger::get()->warn(std::string( "The file extension " ) + sz + " is already in use");
-		}
+		
 		sz = ::strtok(NULL,";");
 	}
 #endif
@@ -455,10 +497,10 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp)
 }
 
 // ------------------------------------------------------------------------------------------------
+// Unregister a custom loader
 aiReturn Importer::UnregisterLoader(BaseImporter* pImp)
 {
 	ai_assert(NULL != pImp);
-
 	for (std::vector<BaseImporter*>::iterator
 		it = mImporter.begin(),end = mImporter.end();
 		it != end;++it)
@@ -481,12 +523,14 @@ aiReturn Importer::UnregisterLoader(BaseImporter* pImp)
 // Supplies a custom IO handler to the importer to open and access files.
 void Importer::SetIOHandler( IOSystem* pIOHandler)
 {
+	// If the new handler is zero, allocate a default IO implementation.
 	if (!pIOHandler)
 	{
 		delete mIOHandler;
 		mIOHandler = new DefaultIOSystem();
 		mIsDefaultHandler = true;
 	}
+	// Otherwise register the custom handler
 	else if (mIOHandler != pIOHandler)
 	{
 		delete mIOHandler;
@@ -534,27 +578,36 @@ bool ValidateFlags(unsigned int pFlags)
 #endif // ! DEBUG
 
 // ------------------------------------------------------------------------------------------------
+// Free the current scene
+void Importer::FreeScene( )
+{
+	delete mScene;
+	mScene = NULL;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Reads the given file and returns its contents if successful. 
 const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags)
 {
-	// validate the flags
+	// Validate the flags
 	ai_assert(ValidateFlags(pFlags));
 
-	// put a large try block around everything to catch all std::exception's
+	// ======================================================================
+	// Put a large try block around everything to catch all std::exception's
 	// that might be thrown by STL containers or by new(). 
 	// ImportErrorException's are throw by ourselves and caught elsewhere.
+	// ======================================================================
 	try
 	{
-		// check whether this Importer instance has already loaded
+		// Check whether this Importer instance has already loaded
 		// a scene. In this case we need to delete the old one
-		if (this->mScene)
+		if (mScene)
 		{
-			DefaultLogger::get()->debug("The previous scene has been deleted");
-			delete mScene;
-			this->mScene = NULL;
+			DefaultLogger::get()->debug("Deleting previous scene");
+			FreeScene();
 		}
 
-		// first check if the file is accessable at all
+		// First check if the file is accessable at all
 		if( !mIOHandler->Exists( pFile))
 		{
 			mErrorString = "Unable to open file \"" + pFile + "\".";
@@ -562,7 +615,7 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 			return NULL;
 		}
 
-		// find an worker class which can handle the file
+		// Find an worker class which can handle the file
 		BaseImporter* imp = NULL;
 		for( unsigned int a = 0; a < mImporter.size(); a++)
 		{
@@ -573,7 +626,7 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 			}
 		}
 
-		// put a proper error message if no suitable importer was found
+		// Put a proper error message if no suitable importer was found
 		if( !imp)
 		{
 			mErrorString = "No suitable reader found for the file format of file \"" + pFile + "\".";
@@ -581,17 +634,17 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 			return NULL;
 		}
 
-		// dispatch the reading to the worker class for this format
+		// Dispatch the reading to the worker class for this format
 		DefaultLogger::get()->info("Found a matching importer for this file format");
 		imp->SetupProperties( this );
 		mScene = imp->ReadFile( pFile, mIOHandler);
 
-		// if successful, apply all active post processing steps to the imported data
+		// If successful, apply all active post processing steps to the imported data
 		if( mScene)
 		{
 			// FIRST of all - preprocess the scene 
-			ScenePreprocessor pre;
-			pre.ProcessScene(mScene);
+			ScenePreprocessor pre(mScene);
+			pre.ProcessScene();
 
 			DefaultLogger::get()->info("Import successful, entering postprocessing-steps");
 #ifdef _DEBUG
@@ -648,7 +701,6 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 	catch (std::exception &e)
 	{
 #if (defined _MSC_VER) &&	(defined _CPPRTTI) 
-
 		// if we have RTTI get the full name of the exception that occured
 		mErrorString = std::string(typeid( e ).name()) + ": " + e.what();
 #else
@@ -710,6 +762,7 @@ void Importer::SetPropertyInteger(const char* szName, int iValue,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Set a configuration property
 void Importer::SetPropertyFloat(const char* szName, float iValue, 
 	bool* bWasExisting /*= NULL*/)
 {
@@ -717,6 +770,7 @@ void Importer::SetPropertyFloat(const char* szName, float iValue,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Set a configuration property
 void Importer::SetPropertyString(const char* szName, const std::string& value, 
 	bool* bWasExisting /*= NULL*/)
 {
@@ -732,6 +786,7 @@ int Importer::GetPropertyInteger(const char* szName,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get a configuration property
 float Importer::GetPropertyFloat(const char* szName, 
 	float iErrorReturn /*= 10e10*/) const
 {
@@ -739,6 +794,7 @@ float Importer::GetPropertyFloat(const char* szName,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get a configuration property
 const std::string& Importer::GetPropertyString(const char* szName, 
 	const std::string& iErrorReturn /*= ""*/) const
 {
@@ -746,6 +802,7 @@ const std::string& Importer::GetPropertyString(const char* szName,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get the memory requirements of a single node
 inline void AddNodeWeight(unsigned int& iScene,const aiNode* pcNode)
 {
 	iScene += sizeof(aiNode);
@@ -760,8 +817,9 @@ inline void AddNodeWeight(unsigned int& iScene,const aiNode* pcNode)
 void Importer::GetMemoryRequirements(aiMemoryInfo& in) const
 {
 	in = aiMemoryInfo();
-	if (!this->mScene)return;
 
+	// return if we have no scene loaded
+	if (!this->mScene)return;
 	in.total = sizeof(aiScene);
 
 	// add all meshes

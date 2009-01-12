@@ -57,7 +57,7 @@ using namespace Assimp;
 // Constructor to be privately used by Importer
 SortByPTypeProcess::SortByPTypeProcess()
 {
-	// nothing to do here
+	configRemoveMeshes = 0;
 }
 
 // ------------------------------------------------------------------------------------------------

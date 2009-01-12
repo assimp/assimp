@@ -102,20 +102,20 @@ struct aiLight
 	 *  This node specifies the position of the light in the scene
 	 *  hierarchy and can be animated.
 	 */
-	aiString mName;
+	C_STRUCT aiString mName;
 
 	/** The type of the light source.
  	 *
 	 * aiLightSource_UNDEFINED is nto a valid value for this member.
 	 */
-	aiLightSourceType mType;
+	C_ENUM aiLightSourceType mType;
 
 	/** Position of the light source in space. Relative to the
 	 *  transformation of the node corresponding to the light.
 	 *
 	 *  The position is undefined for directional lights.
 	 */
-	aiVector3D mPosition;
+	C_STRUCT aiVector3D mPosition;
 
 	/** Direction of the light source in space. Relative to the
 	 *  transformation of the node corresponding to the light.
@@ -123,7 +123,7 @@ struct aiLight
 	 *  The direction is undefined for point lights. The vector
 	 *  may be normalized, but it needn't.
 	 */
-	aiVector3D mDirection;
+	C_STRUCT aiVector3D mDirection;
 
 	/** Constant light attenuation factor. 
 	 *
@@ -164,7 +164,7 @@ struct aiLight
 	 *  material color to obtain the final color that contributes
 	 *  to the diffuse shading term.
 	 */
-	aiColor3D mColorDiffuse;
+	C_STRUCT aiColor3D mColorDiffuse;
 
 	/** Specular color of the light source
 	 *
@@ -172,7 +172,7 @@ struct aiLight
 	 *  material color to obtain the final color that contributes
 	 *  to the specular shading term.
 	 */
-	aiColor3D mColorSpecular;
+	C_STRUCT aiColor3D mColorSpecular;
 
 	/** Ambient color of the light source
 	 *
@@ -182,7 +182,7 @@ struct aiLight
 	 *  this value it, is just a remaining of the fixed-function pipeline
 	 *  that is still supported by quite many file formats.
 	 */
-	aiColor3D mColorAmbient;
+	C_STRUCT aiColor3D mColorAmbient;
 
 	/** Inner angle of a spot light's light cone.
 	 *

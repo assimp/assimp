@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="UnitTest"
+	OutputDirectory="./../../lib/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 	>
 	<Tool
 		Name="VCCLCompilerTool"

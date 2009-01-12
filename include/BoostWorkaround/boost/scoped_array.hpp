@@ -14,7 +14,7 @@ class scoped_array
 {
 public:
 
-	// provide a default construtctor 
+	// provide a default construtctor
 	scoped_array()
 		: ptr(0)
 	{
@@ -25,25 +25,25 @@ public:
 		: ptr(_ptr)
 	{
 	}
-	
-	// automatic destruction of the wrapped object at the 
+
+	// automatic destruction of the wrapped object at the
 	// end of our lifetime
 	~scoped_array()
 	{
 		delete[] ptr;
 	}
-	
+
 	inline T* get()
 	{
 		return ptr;
 	}
-	
+
 	inline operator T*()
 	{
 		return ptr;
 	}
-	
-	inline T* operator-> () 
+
+	inline T* operator-> ()
 	{
 		return ptr;
 	}
@@ -63,15 +63,15 @@ public:
 	{
 		std::swap(ptr, b.ptr);
 	}
-	
+
 private:
-	
+
 	// encapsulated object pointer
 	T* ptr;
 
 };
 
-template<class T> 
+template<class T>
 inline void swap(scoped_array<T> & a, scoped_array<T> & b)
 {
 	a.swap(b);
@@ -83,3 +83,4 @@ inline void swap(scoped_array<T> & a, scoped_array<T> & b)
 #	error "scoped_array.h was already included"
 #endif
 #endif // __AI_BOOST_SCOPED_ARRAY_INCLUDED
+

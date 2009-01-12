@@ -90,4 +90,4 @@ typename T::reference deref(auto_any_base const& cur, T&)
 
 } // end boost
 
-#endif 
+#endif

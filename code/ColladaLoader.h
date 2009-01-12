@@ -121,6 +121,9 @@ protected:
 	/** Resolves the texture name for the given effect texture entry */
 	const aiString& FindFilenameForEffectTexture( const ColladaParser& pParser, const Collada::Effect& pEffect, const std::string& pName);
 
+	/** Converts a path read from a collada file to the usual representation */
+	void ConvertPath (aiString& ss);
+
 protected:
 	/** Filename, for a verbose error message */
 	std::string mFileName;

@@ -382,6 +382,23 @@ const aiString& ColladaLoader::FindFilenameForEffectTexture( const ColladaParser
 		throw new ImportErrorException( boost::str( boost::format( "Unable to resolve effect texture entry \"%s\", ended up at ID \"%s\".") % pName % name));
 
 	static aiString result;
-	result.Set( imIt->second.mFileName);
+	result.Set( imIt->second.mFileName );
+	ConvertPath(result);
 	return result;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Convert a path read from a collada file to the usual representation
+void ColladaLoader::ConvertPath (aiString& ss)
+{
+	// TODO: collada spec, p 22. Handle URI correctly.
+	// For the moment we're just stripping the file:// away to make it work.
+	// Windoes doesn't seem to be able to find stuff like
+	// 'file://..\LWO\LWO2\MappingModes\earthSpherical.jpg'
+	if (0 == ::strncmp(ss.data,"file://",7)) 
+	{
+		ss.length -= 7;
+		::memmove(ss.data,ss.data+7,ss.length);
+		ss.data[ss.length] = '\0';
+	}
 }

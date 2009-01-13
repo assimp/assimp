@@ -1,6 +1,7 @@
 /** @file General documentation built from a doxygen comment */
 
-/** @mainpage ASSIMP - The Open Asset Import Library
+/**
+@mainpage ASSIMP - Open Asset Import Library
 @section intro Introduction
 
 ASSIMP is a library to load and process geometric scenes from various data formats. It is taylored at typical game 
@@ -10,42 +11,57 @@ storing it in a engine-specific format for easy and fast every-day-loading. ASSI
 processing steps to the imported data such as conversion to indexed meshes, calculation of normals or tangents/bitangents
 or conversion from right-handed to left-handed coordinate systems.
 
-ASSIMP is able to import the following file formats into your application:
+ASSIMP currently supports the following file formats (note that some loaders lack some features of their formats - 
+firstly some file formats contain data not supported by Assimp, secondly some stuff would require so much conversion work
+that it has not yet been implemented, thirdly some formats are not completely documented):
 <hr>
+<br><tt>
+<b>Collada</b> ( <i>*.dae;*.xml</i> ) <sup>3</sup><br>
+<b>Biovision BVH </b> ( <i>*.bvh</i> ) <br>
 <b>3D Studio Max 3DS</b> ( <i>*.3ds</i> ) <br>
 <b>3D Studio Max ASE</b> ( <i>*.ase</i> ) <br>
 <b>Wavefront Object</b> ( <i>*.obj</i> ) <br>
 <b>Stanford Polygon Library</b> ( <i>*.ply</i> ) <br>
-<b>Milkshape 3D</b> ( <i>*.ms3d</i> ) <sup>1</sup><br>
 <b>AutoCAD DXF</b> ( <i>*.dxf</i> ) <sup>2</sup><br>
 <b>Neutral File Format</b> ( <i>*.nff</i> ) <br>
-<b>LightWave</b> ( <i>*.lwo</i> ) <br>
+<b>Sense8 WorldToolkit</b> ( <i>*.nff</i> ) <br>
+<b>LightWave Model</b> ( <i>*.lwo</i> ) <br>
+<b>MODO model</b> ( <i>*.lxo</i> ) <br>
 <b>Valve Model</b> ( <i>*.smd,*.vta</i> ) <sup>3</sup> <br>
 <b>Quake I</b> ( <i>*.mdl</i> ) <br>
 <b>Quake II</b> ( <i>*.md2</i> ) <br>
 <b>Quake III</b> ( <i>*.md3</i> ) <br>
-<b>Return to Castle Wolfenstein</b> ( <i>*.mdc</i> )<br>
-<b>EliteForce II</b> ( <i>*.mdr</i> )<sup>1</sup><br>
+<b>RtCW</b> ( <i>*.mdc</i> )<br>
 <b>Doom 3</b> ( <i>*.md5</i> ) <sup>3</sup> <br>
 <b>DirectX X </b> ( <i>*.x</i> ). <br>		
-<b>3D GameStudio </b> ( <i>*.mdl</i> ) <br>
-<b>3D GameStudio Terrain</b> ( <i>*.hmp</i> )<br>(<i>All sub versions of 3D GameStudio models/terrains are supported: mdl2, mdl3, mdl4, mdl5, mdl7, hmp4, hmp5, hmp7</i>)<br><br>
-
-<sup>1</sup> Under development, but not included in the current beta release<br/>
-<sup>2</sup> Limited support<br/>
-<sup>3</sup> Animation support untested<br/>
+<b>Quick3D </b> ( <i>*.q3o;*q3s</i> ). <br>	
+<b>Raw Triangles </b> ( <i>*.raw</i> ). <br>	
+<b>AC3D </b> ( <i>*.ac</i> ). <br>
+<b>Stereolithography </b> ( <i>*.stl</i> ). <br>
+<b>Autodesk DXF </b> ( <i>*.dxf</i> ). <br>
+<b>Irrlicht Mesh </b> ( <i>*.irrmesh;*.xml</i> ). <br>
+<b>Irrlicht Scene </b> ( <i>*.irr;*.xml</i> ). <br>
+<b>Object File Format </b> ( <i>*.off</i> ). <br>	
+<b>Terragen Terrain </b> ( <i>*.ter</i> ) <br>
+<b>3D GameStudio Model </b> ( <i>*.mdl</i> ) <br>
+<b>3D GameStudio Terrain</b> ( <i>*.hmp</i> )<br><br><br>
+</tt>
+<sup>3</sup>: These formats support animations, but Assimp doesn't yet support them (or they're buggy)
+<br>
 <hr>
 
 ASSIMP is independent of the Operating System by nature, providing a C++ interface for easy integration 
 with game engines and a C interface to allow bindings to other programming languages. At the moment the library runs 
-on any little-endian platform including X86/Windows/Linux/Mac and X64/Windows/Linux/Mac. Big endian systems such as 
-PPC-Macs or PPC-Linux systems are not supported at the moment, but this might change later on. Special attention 
+on any little-endian platform including X86/Windows/Linux/Mac and X64/Windows/Linux/Mac. Special attention 
 was paid to keep the library as free as possible from dependencies. 
+
+Big endian systems such as PPC-Macs or PPC-Linux systems are not officially supported at the moment. However, most 
+formats handle the required endianess conversion correctly, so large parts of the library should work.
 
 The ASSIMP linker library and viewer application are provided under the BSD 3-clause license. This basically means
 that you are free to use it in open- or closed-source projects, for commercial or non-commercial purposes as you like
 as long as you retain the license informations and take own responsibility for what you do with it. For details see
-the <link>License file</link>.
+the LICENSE file.
 
 @section main_install Installation
 
@@ -105,6 +121,10 @@ it for yourself. Read the "Getting Started" section of the Boost documentation f
 can use a comfortable installer from <a href="http://www.boost-consulting.com/products/free">
 http://www.boost-consulting.com/products/free</a>. Choose the appropriate version of boost for your runtime of choice.
 
+If you don't want to use boost, you can build against our "Boost-Workaround". It consists of very small (dummy)
+implementations of the various boost utility classes used. However, you'll loose functionality (e.g. threading) by doing this. 
+So, if it is possible to use boost, you should use boost. See the @link use_noboost NoBoost @endlink for more details.
+
 Once boost is working, you have to set up a project for the ASSIMP library in your favourite IDE. If you use VC2005 or
 VC2008, you can simply load the solution or project files in the workspaces/ folder, otherwise you have to create a new 
 package and add all the headers and source files from the include/ and code/ directories. Set the temporary output folder
@@ -115,12 +135,48 @@ The last step is to integrate the library into your project. This is basically t
 the library files. Alternatively you can simply add the ASSIMP project to your project's overall solution and build it inside
 your solution.
 
+
+@section use_noboost Building without boost.
+
+The Boost-Workaround consists of dummy replacements for some boost utility templates. Currently there are replacements for
+<ul>
+<li><i>boost.scoped_ptr</i></li>
+<li><i>boost.scoped_array</i></li>
+<li><i>boost.format</i> </li>
+<li><i>boost.random</i> </li>
+<li><i>boost.common_factor</i> </li>
+<li><i>boost.foreach</i> </li>
+<li><i>boost.tuple</i></li>
+</ul>
+These implementations are very limited and are not intended for use outside Assimp. A compiler
+with full support for partial template specializations is required. To enable the workaround, put the following in
+your compiler's list of predefined macros: 
+@code
+#define ASSIMP_BUILD_BOOST_WORKAROUND
+@endcode
+<br>
+If you're working with the provided solutions for Visual Studio use the <i>-noboost</i> build configs. <br>
+
+<b>ASSIMP_BUILD_BOOST_WORKAROUND</b> implies <b>ASSIMP_BUILD_SINGLETHREADED</b>. <br>
+See the @link assimp_st next @endlink section
+for more details.
+
+@section assimp_st Single-threaded build
+
+// TODO
+
+
+
+@section assimp_dll DLL build
+
+// TODO
+
 */
 
 /** 
 @page usage Usage
 
-@section access_cpp Access by class interface
+@section access_cpp Access by C++ class interface
 
 The ASSIMP library can be accessed by both a class or flat function interface. The C++ class
 interface is the preferred way of interaction: you create an instance of class Assimp::Importer, 
@@ -133,39 +189,49 @@ results and then simply let it go out of scope.
 
 C++ example:
 @code
-#include <assimp.hpp>  // C++ importer interface
-#include <aiScene.h>   // root structure of the imported data
+#include <assimp.hpp>      // C++ importer interface
+#include <aiScene.h>       // Outptu data structure
 #include <aiPostProcess.h> // Post processing flags
-#include <aiMesh.h>    // example: mesh data structures. you'll propably need other includes, too
+
 
 bool DoTheImportThing( const std::string& pFile)
 {
-  // create an instance of the Importer class
+  // Create an instance of the Importer class
   Assimp::Importer importer;
 
-  // and have it read the given file with some example postprocessing
-  aiScene* scene = importer.ReadFile( pFile, aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
+  // And have it read the given file with some example postprocessing
+  // Usually - if speed is not the most important aspect for you - you'll 
+  // propably to request more postprocessing than we do in this example.
+  const aiScene* scene = importer.ReadFile( pFile, 
+	aiProcess_CalcTangentSpace       | 
+	aiProcess_Triangulate            |
+	aiProcess_JoinIdenticalVertices  |
+	aiProcess_SortByPType);
   
-  // if the import failed, report it
+  // If the import failed, report it
   if( !scene)
   {
     DoTheErrorLogging( importer.GetErrorString());
     return false;
   }
 
-  // now we can access the file's contents
+  // Now we can access the file's contents. 
   DoTheSceneProcessing( scene);
 
-  // we're done. Everything will be cleaned up by the importer destructor
+  // We're done. Everything will be cleaned up by the importer destructor
   return true;
 }
 @endcode
 
 What exactly is read from the files and how you interpret it is described at the @link data Data 
 Structures page. @endlink The post processing steps that the ASSIMP library can apply to the
-imported data are listed at #aiPostProcessSteps.
+imported data are listed at #aiPostProcessSteps. See the @link pp Post proccessing page @endlink for more details.
 
-@section access_c Access by function interface
+Note that the aiScene data structure returned is declared 'const'. Yes, you can get rid of 
+these 5 letters with a simple cast. Yes, you may do that. No, it's not recommended (and it's 
+suicide in DLL builds ...). 
+
+@section access_c Access by plain-c function interface
 
 The plain function interface is just as simple, but requires you to manually call the clean-up
 after you're done with the imported data. To start the import process, call aiImportFile()
@@ -176,15 +242,20 @@ imported scene to clean up all resources associated with the import.
 
 C example:
 @code
-#include <assimp.h>  // Plain C importer interface
-#include <aiScene.h> // Root structure of the imported data
+#include <assimp.h>        // Plain-C interface
+#include <aiScene.h>       // Output data structure
 #include <aiPostProcess.h> // Post processing flags
-#include <aiMesh.h>  // Example: mesh data structures. you'll propably need other includes, too
 
 bool DoTheImportThing( const char* pFile)
 {
   // Start the import on the given file with some example postprocessing
-  aiScene* scene = aiImportFile( pFile, aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
+  // Usually - if speed is not the most important aspect for you - you'll t
+  // propably to request more postprocessing than we do in this example.
+  const aiScene* scene = aiImportFile( pFile, 
+    aiProcess_CalcTangentSpace       | 
+	aiProcess_Triangulate            |
+	aiProcess_JoinIdenticalVertices  |
+	aiProcess_SortByPType);
 
   // If the import failed, report it
   if( !scene)
@@ -230,6 +301,7 @@ public:
   aiReturn Seek( size_t pOffset, aiOrigin pOrigin) { ... }
   size_t Tell() const { ... }
   size_t FileSize() const { ... }
+  void Flush () { ... }
 };
 
 // Fisher Price - My First Filesystem
@@ -238,9 +310,21 @@ class MyIOSystem : public Assimp::IOSystem
   MyIOSystem() { ... }
   ~MyIOSystem() { ... }
 
-  bool Exists( const std::string& pFile) const { ... }
-  std::string getOsSeparator() const { return "/"; }
-  IOStream* Open( const std::string& pFile, const std::string& pMode = std::string("rb")) { return new MyIOStream( ... ); }
+  // Check whether a specific file exists
+  bool Exists( const std::string& pFile) const {
+    .. 
+  }
+
+  // Get the path delimiter character we'd like to get
+  char GetOsSeparator() const { 
+    return '/'; 
+  }
+
+  // ... and finally a method to open a custom stream
+  IOStream* Open( const std::string& pFile, const std::string& pMode) {
+	return new MyIOStream( ... ); 
+  }
+
   void Close( IOStream* pFile) { delete pFile; }
 };
 @endcode
@@ -259,6 +343,27 @@ void DoTheImportThing( const std::string& pFile)
   importer.ReadFile( pFile, SomeFlag | SomeOtherFlag);
 }
 @endcode
+
+
+@section custom_io_c Using custom IO logic with the plain-c function interface
+
+// TODO
+
+@section threadsafety Thread-safety and internal multi-threading
+
+The ASSIMP library can be accessed by multiple threads simultaneously, as long as the
+following prerequisites are fulfilled: 
+<ul>
+<li> When using the C++-API make sure you create a new Importer instance for each thread.
+   Constructing instances of Importer is expensive, so it might be a good idea to
+   let every thread maintain its own thread-local instance (use it to 
+   load as many models as you want).</li>
+<li> The C-API is threadsafe as long as AI_C_THREADSAFE is defined. That's the default. </li>
+<li> When supplying custom IO logic, make sure your underyling implementation is thead-safe.</li>
+</ul>
+
+See the @link assimp_st Single-threaded build section @endlink to learn how to build a lightweight variant
+of Assimp which is not thread-safe and does not utilize multiple threads for loading.
 
 @section  logging Logging in the AssetImporter
 
@@ -730,3 +835,6 @@ Sinn: StandAlone-Test für die Importlib
 Benutzung: was kann er und wie löst man es aus
 Build: alles von #CustomBuild + DirectX + MFC?
 */
+
+
+

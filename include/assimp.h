@@ -39,7 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Defines the C-API to the Asset Import Library. */
+/** @file assimp.h
+    @brief Defines the C-API to the Asset Import Library. */
 #ifndef AI_ASSIMP_H_INC
 #define AI_ASSIMP_H_INC
 
@@ -113,7 +114,7 @@ ASSIMP_API void aiReleaseImport( const C_STRUCT aiScene* pScene);
 // ---------------------------------------------------------------------------
 /** Returns the error text of the last failed import process. 
 *
-* @return A textual description of the error that occured at the last
+* @return A textual description of the error that occurred at the last
 * import process. NULL if there was no error.
 */
 // ---------------------------------------------------------------------------

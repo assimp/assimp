@@ -39,8 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Defines the material system of the library
- *
+/** @file aiMaterial.h
+ *  @brief Defines the material system of the library
  */
 
 #ifndef AI_MATERIAL_H_INC
@@ -63,7 +63,7 @@ enum aiPropertyTypeInfo
 {
     /** Array of single-precision (32 Bit) floats
 	 *
-	 *  It is possibe to use aiGetMaterialInteger[Array]() (or the C++-API 
+	 *  It is possible to use aiGetMaterialInteger[Array]() (or the C++-API 
 	 *  aiMaterial::Get()) to query properties stored in floating-point format. 
 	 *  The material system performs the type conversion automatically.
     */
@@ -78,7 +78,7 @@ enum aiPropertyTypeInfo
 
     /** Array of (32 Bit) integers
 	 *
-	 *  It is possibe to use aiGetMaterialFloat[Array]() (or the C++-API 
+	 *  It is possible to use aiGetMaterialFloat[Array]() (or the C++-API 
 	 *  aiMaterial::Get()) to query properties stored in integer format. 
 	 *  The material system performs the type conversion automatically.
     */
@@ -320,7 +320,7 @@ enum aiShadingMode
     */
     aiShadingMode_Flat = 0x1,
 
-    /** Diffuse gouraud shading. Shading on per-vertex base
+    /** Diffuse Gouraud shading. Shading on per-vertex base
     */
     aiShadingMode_Gouraud =	0x2,
 
@@ -334,7 +334,7 @@ enum aiShadingMode
     /** Diffuse/Specular Phong-Blinn-Shading
     *
     *  Shading is applied on per-pixel base. This is a little
-    *  bit faster than phong and in some cases even
+    *  bit faster than Phong and in some cases even
     *  more realistic
     */
     aiShadingMode_Blinn	= 0x4,
@@ -348,7 +348,7 @@ enum aiShadingMode
 
     /** OrenNayar-Shading per pixel
     *
-    *  Extension to standard lambertian shading, taking the
+    *  Extension to standard Lambertian shading, taking the
     *  roughness of the material into account
     *	
     */
@@ -356,7 +356,7 @@ enum aiShadingMode
 
     /** Minnaert-Shading per pixel
     *
-    *  Extension to standard lambertian shading, taking the
+    *  Extension to standard Lambertian shading, taking the
     *  "darkness" of the material into account
     */
     aiShadingMode_Minnaert = 0x7,
@@ -446,7 +446,7 @@ struct aiMaterialProperty
 	unsigned int mIndex;
 
     /**	Size of the buffer mData is pointing to, in bytes
-	* This value may not be 0.
+	 * This value may not be 0.
     */
     unsigned int mDataLength;
 
@@ -463,7 +463,7 @@ struct aiMaterialProperty
     * The buffer has no terminal character. However,
     * if a string is stored inside it may use 0 as terminal,
     * but it would be contained in mDataLength. This member
-	* is never 0
+	 * is never 0
     */
     char* mData;
 
@@ -536,7 +536,7 @@ public:
 	// -------------------------------------------------------------------
 	/** @brief Helper function to get a texture from a material.
 	*
-	*  This function is provided just for convinience, you could also
+	*  This function is provided just for convenience, you could also
 	*  read the single material properties manually.
 	*  @param type Specifies the type of the texture to be retrieved (
 	*    e.g. diffuse, specular, height map ...)
@@ -640,7 +640,7 @@ extern "C" {
 
 /** @def AI_MATKEY_SHININESS
  *  Defines the base shininess of the material
- *  This is the exponent of the phong shading equation.
+ *  This is the exponent of the Phong shading equation.
  * <br>
  * <b>Type:</b> float<br>
  * <b>Default value:</b> 0.0f <br>
@@ -1099,8 +1099,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialProperty(
 *
 * Pass one of the AI_MATKEY_XXX constants for the last three parameters (the
 * example reads the AI_MATKEY_UVTRANSFORM property of the first diffuse texture)
-* @begincode
-*
+* @code
 * aiUVTransform trafo;
 * unsigned int max = sizeof(aiUVTransform);
 * if (AI_SUCCESS != aiGetMaterialFloatArray(mat, AI_MATKEY_UVTRANSFORM(aiTextureType_DIFFUSE,0),
@@ -1138,8 +1137,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
 *
 * Pass one of the AI_MATKEY_XXX constants for the last three parameters (the
 * example reads the AI_MATKEY_SPECULAR_STRENGTH property of the first diffuse texture)
-* @begincode
-*
+* @code
 * float specStrength = 1.f; // default value, remains unmodified if we fail.
 * aiGetMaterialFloat(mat, AI_MATKEY_SPECULAR_STRENGTH,
 *    (float*)&specStrength);
@@ -1243,7 +1241,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialString(const C_STRUCT aiMaterial* pMat,
 // ---------------------------------------------------------------------------
 /** @brief Helper function to get a texture from a material structure.
  *
- *  This function is provided just for convinience. 
+ *  This function is provided just for convenience. 
  *  @param mat Pointer to the input material. May not be NULL
  *  @param index Index of the texture to retrieve. If the index is too 
  *		large the function fails.

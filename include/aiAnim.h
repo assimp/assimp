@@ -39,8 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Defines the data structures in which the imported animations
-   are returned. */
+/** @file aiAnim.h
+ *  @brief Defines the data structures in which the imported animations
+ *  are returned.
+ */
 #ifndef AI_ANIM_H_INC
 #define AI_ANIM_H_INC
 
@@ -154,7 +156,7 @@ enum aiAnimBehaviour
  *  are given in three separate series of values, one each for position, 
  *  rotation and scaling. The transformation matrix computed from these
  *  values replaces the node's original transformation matrix at a
- *  spefific time. The order in which the transformations are applied is
+ *  specific time. The order in which the transformations are applied is
  *  - as usual - scaling, rotation, translation.
  *
  *  @note All keys are returned in their correct, chronological order.
@@ -213,7 +215,7 @@ struct aiNodeAnim
 	C_ENUM aiAnimBehaviour mPreState;
 
 	/** Defines how the animation behaves after the last 
-	 *  kway was processed.
+	 *  key was processed.
 	 *
 	 *  The default value is aiAnimBehaviour_DEFAULT (the original
 	 *  transformation matrix of the affected node is taken).
@@ -245,7 +247,7 @@ struct aiNodeAnim
  */
 struct aiAnimation
 {
-	/** The name of the animation. If the modelling package this data was 
+	/** The name of the animation. If the modeling package this data was 
 	 *  exported from does support only a single animation channel, this 
 	 *  name is usually empty (length is zero).
 	 */

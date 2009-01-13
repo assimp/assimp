@@ -489,8 +489,7 @@ SHOW_DIRECTORIES       = NO
 SHOW_FILES             = YES
 
 # Set the SHOW_NAMESPACES tag to NO to disable the generation of the 
-# Namespaces page. 
-# This will remove the Namespaces entry from the Quick Index 
+# Namespaces page.  This will remove the Namespaces entry from the Quick Index 
 # and from the Folder Tree View (if specified). The default is YES.
 
 SHOW_NAMESPACES        = YES
@@ -557,7 +556,7 @@ WARN_NO_PARAMDOC       = NO
 # $version, which will be replaced by the version of the file (if it could 
 # be obtained via FILE_VERSION_FILTER)
 
-WARN_FORMAT            = "$file:$line: $text      "
+WARN_FORMAT            = "$file:$line: $text"
 
 # The WARN_LOGFILE tag can be used to specify a file to which warning 
 # and error messages should be written. If left blank the output is written 
@@ -630,7 +629,7 @@ RECURSIVE              = YES
 # excluded from the INPUT source files. This way you can easily exclude a 
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
-EXCLUDE                = ../include/BoostWorkaround 
+EXCLUDE                = ../include/BoostWorkaround
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 
@@ -644,7 +643,8 @@ EXCLUDE_SYMLINKS       = NO
 # against the file with absolute path, so to exclude all test directories 
 # for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       = 
+EXCLUDE_PATTERNS       = */.svn/* \
+                         */.svn
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names 
 # (namespaces, classes, functions, etc.) that should be excluded from the 
@@ -685,17 +685,14 @@ IMAGE_PATH             =
 # by executing (via popen()) the command <filter> <input-file>, where <filter> 
 # is the value of the INPUT_FILTER tag, and <input-file> is the name of an 
 # input file. Doxygen will then use the output that the filter program writes 
-# to standard output. 
-# If FILTER_PATTERNS is specified, this tag will be 
+# to standard output.  If FILTER_PATTERNS is specified, this tag will be 
 # ignored.
 
 INPUT_FILTER           = 
 
 # The FILTER_PATTERNS tag can be used to specify filters on a per file pattern 
-# basis. 
-# Doxygen will compare the file name with each pattern and apply the 
-# filter if there is a match. 
-# The filters are a list of the form: 
+# basis.  Doxygen will compare the file name with each pattern and apply the 
+# filter if there is a match.  The filters are a list of the form: 
 # pattern=filter (like *.cpp=my_cpp_filter). See INPUT_FILTER for further 
 # info on how filters are used. If FILTER_PATTERNS is empty, INPUT_FILTER 
 # is applied to all files.
@@ -745,8 +742,7 @@ REFERENCES_RELATION    = NO
 # If the REFERENCES_LINK_SOURCE tag is set to YES (the default) 
 # and SOURCE_BROWSER tag is set to YES, then the hyperlinks from 
 # functions in REFERENCES_RELATION and REFERENCED_BY_RELATION lists will 
-# link to the source code. 
-# Otherwise they will link to the documentation.
+# link to the source code.  Otherwise they will link to the documentation.
 
 REFERENCES_LINK_SOURCE = YES
 
@@ -827,7 +823,7 @@ HTML_FOOTER            =
 # the style sheet file to the HTML output directory, so don't put your own 
 # stylesheet in the HTML output directory as well, or it will be erased!
 
-HTML_STYLESHEET        = style.css 
+HTML_STYLESHEET        = style.css
 
 # If the HTML_ALIGN_MEMBERS tag is set to YES, the members of classes, 
 # files or namespaces will be aligned in HTML using tables. If set to 
@@ -1216,10 +1212,8 @@ GENERATE_PERLMOD       = NO
 PERLMOD_LATEX          = NO
 
 # If the PERLMOD_PRETTY tag is set to YES the Perl module output will be 
-# nicely formatted so it can be parsed by a human reader. 
-# This is useful 
-# if you want to understand what is going on. 
-# On the other hand, if this 
+# nicely formatted so it can be parsed by a human reader.  This is useful 
+# if you want to understand what is going on.  On the other hand, if this 
 # tag is set to NO the size of the Perl module output will be much smaller 
 # and Perl will parse it just the same.
 
@@ -1281,14 +1275,16 @@ INCLUDE_FILE_PATTERNS  =
 # undefined via #undef or recursively expanded use the := operator 
 # instead of the = operator.
 
-PREDEFINED             = ASSIMP_DOXYGEN_BUILD=1
+PREDEFINED             = ASSIMP_DOXYGEN_BUILD=1 \
+                         __cplusplus
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then 
 # this tag can be used to specify a list of macro names that should be expanded. 
 # The macro definition that is found in the sources will be used. 
 # Use the PREDEFINED tag if you want to use a different macro definition.
 
-EXPAND_AS_DEFINED      = C_STRUCT C_ENUM
+EXPAND_AS_DEFINED      = C_STRUCT \
+                         C_ENUM
 
 # If the SKIP_FUNCTION_MACROS tag is set to YES (the default) then 
 # doxygen's preprocessor will remove all function-like macros that are alone 
@@ -1306,11 +1302,9 @@ SKIP_FUNCTION_MACROS   = YES
 # Optionally an initial location of the external documentation 
 # can be added for each tagfile. The format of a tag file without 
 # this location is as follows: 
-#  
-# TAGFILES = file1 file2 ... 
+#   TAGFILES = file1 file2 ... 
 # Adding location for the tag files is done as follows: 
-#  
-# TAGFILES = file1=loc1 "file2 = loc2" ... 
+#   TAGFILES = file1=loc1 "file2 = loc2" ... 
 # where "loc1" and "loc2" can be relative or absolute paths or 
 # URLs. If a location is present for each tag, the installdox tool 
 # does not have to be run to correct the links. 

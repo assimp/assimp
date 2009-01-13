@@ -38,7 +38,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-/** @file 3D vector structure, including operators when compiling in C++ */
+/** @file aiVector3D.h
+ *  @brief 3D vector structure, including operators when compiling in C++
+ */
 #ifndef AI_VECTOR3D_H_INC
 #define AI_VECTOR3D_H_INC
 

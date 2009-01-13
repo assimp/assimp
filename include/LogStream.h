@@ -38,7 +38,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Abstract base class 'LogStream', representing an output log stream.
+/** @file LogStream.h
+ *  @brief Abstract base class 'LogStream', representing an output log stream.
  */
 
 #ifndef INCLUDED_AI_LOGSTREAM_H
@@ -71,8 +72,8 @@ enum DefaultLogStreams
 };
 
 // ------------------------------------------------------------------------------------
-/**	@class	LogStream
- *	@brief	Abstract interface for log stream implementations.
+/** @class	LogStream
+ *	 @brief	Abstract interface for log stream implementations.
  *
  *  Several default implementations are provided, see DefaultLogStreams for more
  *  details. In most cases it shouldn't be necessary to write a custom log stream.
@@ -80,14 +81,14 @@ enum DefaultLogStreams
 class ASSIMP_API LogStream : public Intern::AllocateFromAssimpHeap
 {
 protected:
-	/**	@brief	Default constructor	*/
+	/** @brief	Default constructor	*/
 	LogStream();
 
 public:
-	/**	@brief	Virtual destructor	*/
+	/** @brief	Virtual destructor	*/
 	virtual ~LogStream();
 
-	/**	@brief	Overwrite this for your own output methods
+	/** @brief	Overwrite this for your own output methods
 	 *  @param  message Message to be written
   	 */
 	virtual void write(const std::string &message) = 0;
@@ -97,7 +98,7 @@ public:
 	 *  @param name For DLS_FILE: name of the output file
 	 *  @param  io  For DLS_FILE: IOSystem to be used to open the output file.
 	 *              Pass NULL for the default implementation.
-	 *  @return New LogStream instance - you're resposible for it's destruction!
+	 *  @return New LogStream instance - you're responsible for it's destruction!
 	 */
 	static LogStream* createDefaultStream(DefaultLogStreams	streams,
 		const std::string& name = "AssimpLog.txt",

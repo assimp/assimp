@@ -39,7 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Filesystem wrapper for C++. Inherit this class to supply
+/** @file IOSystem.h
+ *  @brief File system wrapper for C++. Inherit this class to supply
  *  custom file handling logic to the Import library.
 */
 
@@ -69,7 +70,7 @@ class ASSIMP_API IOSystem
 {
 public:
 	/** @brief Constructor. Create an instance of your derived class and
-	 * assign it to a #Importer instance by calling Importer::SetIOHandler().
+	 * assign it to an #Importer instance by calling Importer::SetIOHandler().
 	 */
 	IOSystem();
 
@@ -103,7 +104,7 @@ public:
 	* @return New IOStream interface allowing the lib to access
 	*         the underlying file. 
 	* @note When implementing this class to provide custom IO handling, 
-	* you propably have to supply an own implementation of IOStream as well. 
+	* you probably have to supply an own implementation of IOStream as well. 
 	*/
 	virtual IOStream* Open(
 		const std::string& pFile,

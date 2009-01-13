@@ -39,7 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Defines the aiLight data structure
+/** @file aiLight.h
+ *  @brief Defines the aiLight data structure
  */
 
 #ifndef __AI_LIGHT_H_INC__
@@ -64,11 +65,11 @@ enum aiLightSourceType
 	aiLightSource_DIRECTIONAL   = 0x1,
 
 	//! A point light source has a well-defined position
-	//! in space but no direction - it emmits light in all
+	//! in space but no direction - it emits light in all
 	//! directions. A normal bulb is a point light.
 	aiLightSource_POINT         = 0x2,
 
-	//! A spot light source emmits light in a specific 
+	//! A spot light source emits light in a specific 
 	//! angle. It has a position and a direction it is pointing to.
 	//! A good example for a spot light is a light spot in
 	//! sport arenas.
@@ -106,7 +107,7 @@ struct aiLight
 
 	/** The type of the light source.
  	 *
-	 * aiLightSource_UNDEFINED is nto a valid value for this member.
+	 * aiLightSource_UNDEFINED is not a valid value for this member.
 	 */
 	C_ENUM aiLightSourceType mType;
 

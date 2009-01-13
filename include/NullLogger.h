@@ -38,6 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
+/** @file NullLogger.h
+*/
+
 #if (!defined AI_NULLLOGGER_H_INCLUDED)
 #define AI_NULLLOGGER_H_INCLUDED
 
@@ -47,8 +50,8 @@ namespace Assimp
 {
 
 // ---------------------------------------------------------------------------
-/**	@class	NullLogger
- *	@brief	Empty logging implementation. Does nothing. Used by default
+/** @class	NullLogger
+ *	 @brief	Empty logging implementation. Does nothing. Used by default
  *  if the application hasn't specified a custom logger (or DefaultLogger)
  *  via DefaultLogger::set() or DefaultLogger::create();
  */

@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Defines the data structures in which the imported scene is returned. */
+/** @file aiScene.h
+ *  @brief Defines the data structures in which the imported scene is returned.
+ */
 #ifndef __AI_SCENE_H_INC__
 #define __AI_SCENE_H_INC__
 
@@ -61,8 +63,8 @@ extern "C" {
 *
 * Each node has name, a parent node (except for the root node), 
 * a transformation relative to its parent and possibly several child nodes.
-* Simple file formats don't support hierarchical structures, for these formats 
-* the imported scene does consist of only a single root node with no childs.
+* Simple file formats don't support hierarchical structures - for these formats 
+* the imported scene does consist of only a single root node without children.
 */
 // ---------------------------------------------------------------------------
 struct aiNode
@@ -130,7 +132,7 @@ struct aiNode
 	 *  nodes. Normally you will call this method on the root node
 	 *  of the scene.
 	 * 
-	 *  @param name Name to seach for
+	 *  @param name Name to search for
 	 *  @return NULL or a valid Node if the search was successful.
 	 */
 	inline aiNode* FindNode(const aiString& name)
@@ -194,7 +196,7 @@ struct aiNode
  * stores the elevation at a specific point.
  *
  * TER (Terragen) and HMP (3D Game Studio) are height map formats.
- * @note Assimp is propably not the best choice for loading *huge* terrains -
+ * @note Assimp is probably not the best choice for loading *huge* terrains -
  * fully triangulated data takes extremely much free store and should be avoided
  * as long as possible (typically you'll do the triangulation when you actually
  * need to render it).
@@ -274,7 +276,7 @@ struct aiScene
 
 	/** The array of embedded textures.
 	* 
-	* Not many file formats embedd their textures into the file.
+	* Not many file formats embed their textures into the file.
 	* An example is Quake's MDL format (which is also used by
 	* some GameStudio versions)
 	*/
@@ -325,11 +327,11 @@ struct aiScene
 	//! Destructor
 	~aiScene()
 	{
-		// delete all subobjects recursively
+		// delete all sub-objects recursively
 		delete mRootNode;
 
 		// To make sure we won't crash if the data is invalid it's
-		// mich better to check whether both mNumXXX and mXXX are
+		// much better to check whether both mNumXXX and mXXX are
 		// valid instead of relying on just one of them.
 		if (mNumMeshes && mMeshes) 
 			for( unsigned int a = 0; a < mNumMeshes; a++)

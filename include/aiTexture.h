@@ -39,9 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Defines texture helper structures for the library
+/** @file aiTexture.h
+ *  @brief Defines texture helper structures for the library
  *
- * Used for file formats which embedd their textures into the model file.
+ * Used for file formats which embed their textures into the model file.
  * Supported are both normal textures, which are stored as uncompressed
  * pixels, and "compressed" textures, which are stored in a file format
  * such as PNG or TGA.
@@ -141,7 +142,7 @@ struct aiTexture
 	 * information about the texture file format used OR the
 	 * file extension of the format without a trailing dot. If there 
 	 * are multiple file extensions for a format, the shortest 
-	 * extension is choosen (JPEG maps to 'jpg', not to 'jpeg').
+	 * extension is chosen (JPEG maps to 'jpg', not to 'jpeg').
 	 * E.g. 'dds\0', 'pcx\0', 'jpg'.  All characters are lower-case.
 	 */
 	char achFormatHint[4];
@@ -163,7 +164,7 @@ struct aiTexture
 	//! format hint against a given string.
 	//! @param s Input string. 4 characters are maximally processed.
 	//!        Example values: "jpg", "png"
-	//! @return true if the given string matches the fomat hint
+	//! @return true if the given string matches the format hint
 	bool CheckFormat(const char* s) const
 	{
 		ai_assert(s && !mHeight);

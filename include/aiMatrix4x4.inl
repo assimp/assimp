@@ -1,4 +1,6 @@
-/** @file Inline implementation of the 4x4 matrix operators */
+/** @file aiMatrix4x4.inl
+ *  @brief Inline implementation of the 4x4 matrix operators
+ */
 #ifndef AI_MATRIX4x4_INL_INC
 #define AI_MATRIX4x4_INL_INC
 

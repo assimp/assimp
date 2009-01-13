@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Defines the C++-API to the Open Asset Import Library. */
+/** @file assimp.hpp
+ *  @brief Defines the C++-API to the Open Asset Import Library.
+ */
 #ifndef INCLUDED_AI_ASSIMP_HPP
 #define INCLUDED_AI_ASSIMP_HPP
 
@@ -304,7 +306,7 @@ public:
 	* If the call succeeds, the contents of the file are returned as a 
 	* pointer to an aiScene object. The returned data is intended to be 
 	* read-only, the importer object keeps ownership of the data and will
-   	* destroy it upon destruction. If the import failes, NULL is returned.
+   * destroy it upon destruction. If the import fails, NULL is returned.
 	* A human-readable error description can be retrieved by calling 
 	* GetErrorString(). The previous scene will be deleted during this call.
 	* @param pFile Path and filename to the file to be imported.
@@ -329,11 +331,11 @@ public:
 
 
 	// -------------------------------------------------------------------
-	/** Returns an error description of an error that occured in ReadFile(). 
+	/** Returns an error description of an error that occurred in ReadFile(). 
 	*
-	* Returns an empty string if no error occured.
+	* Returns an empty string if no error occurred.
 	* @return A description of the last error, an empty string if no 
-	*   error occured.
+	*   error occurred.
 	*/
 	const std::string& GetErrorString() const;
 
@@ -366,7 +368,7 @@ public:
 	*
 	*  This is quite similar to IsExtensionSupported() except a
 	*  BaseImporter instance is returned.
-	*  @param szExtension Extension to be checke, cases insensitive,
+	*  @param szExtension Extension to be checked, cases insensitive,
 	*    must include a trailing dot.
 	*  @return NULL if there is no loader for the extension.
 	*/
@@ -384,7 +386,7 @@ public:
 	// -------------------------------------------------------------------
 	/** Returns the scene loaded by the last successful call to ReadFile()
 	 *  and releases the scene from the ownership of the Importer 
-	 *  instance. The application is now resposible for deleting the
+	 *  instance. The application is now responsible for deleting the
 	 *  scene. Any further calls to GetScene() or GetOrphanedScene()
 	 *  will return NULL - until a new scene has been loaded via ReadFile().
 	 *
@@ -440,7 +442,7 @@ protected:
 
 	/** Used for testing - extra verbose mode causes the
 	    validateDataStructure-Step to be executed before
-		and after every single postprocess step */
+		 and after every single postprocess step */
 	bool bExtraVerbose;
 
 	/** Used by post-process steps to share data */

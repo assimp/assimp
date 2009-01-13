@@ -38,7 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Definitions for import post processing steps */
+/** @file aiPostProcess.h
+ *  @brief Definitions for import post processing steps
+ */
 #ifndef AI_POSTPROCESS_H_INC
 #define AI_POSTPROCESS_H_INC
 
@@ -62,7 +64,7 @@ enum aiPostProcessSteps
 
 	/** Identifies and joins identical vertex data sets within all imported meshes. 
 	 * After this step is run each mesh does contain only unique vertices anymore,
-	 * so a vertex is possibly used by multiple faces. You propably always want
+	 * so a vertex is possibly used by multiple faces. You usually want
 	 * to use this post processing step.*/
 	aiProcess_JoinIdenticalVertices = 2,
 
@@ -92,7 +94,7 @@ enum aiPostProcessSteps
 	 *  The  components to be removed are specified in a separate
 	 *  configuration option, #AI_CONFIG_PP_RVC_FLAGS. This is quite useful
 	 *  if you don't need all parts of the output structure. Especially vertex 
-	 *  colors are rarely used today ... . Calling this step to exclude unrequired
+	 *  colors are rarely used today ... . Calling this step to exclude non-required
 	 *  stuff from the pipeline as early as possible results in an increased 
 	 *  performance and a better optimized output data structure.
 	 *  This step is also useful if you want to force Assimp to recompute 
@@ -128,10 +130,10 @@ enum aiPostProcessSteps
 	*/
 	aiProcess_SplitLargeMeshes = 0x80,
 
-	/** Removes the node graph and pretransforms all vertices with
+	/** Removes the node graph and pre-transforms all vertices with
 	* the local transformation matrices of their nodes. The output
 	* scene does still contain nodes, however, there is only a
-	* root node with childs, each one referencing only one mesh,
+	* root node with children, each one referencing only one mesh,
 	* each mesh referencing one material. For rendering, you can
 	* simply render all meshes in order, you don't need to pay
 	* attention to local transformations and the node hierarchy.
@@ -188,7 +190,7 @@ enum aiPostProcessSteps
 	 * the volume of the bounding box of all vertices without their normals.
 	 * This works well for most objects, problems might occur with planar
 	 * surfaces. However, the step tries to filter such cases.
-	 * The step inverts all infacing normals. Generally it is recommended
+	 * The step inverts all in-facing normals. Generally it is recommended
 	 * to enable this step, although the result is not always correct.
 	*/
 	aiProcess_FixInfacingNormals = 0x2000,
@@ -211,7 +213,7 @@ enum aiPostProcessSteps
 	aiProcess_OptimizeGraph = 0x4000,
 
 	/** This step splits meshes with more than one primitive type in 
-	 *  homogenous submeshes. 
+	 *  homogeneous submeshes. 
 	 *
 	 *  The step is executed after the triangulation step. After the step
 	 *  returns, just one bit is set in aiMesh::mPrimitiveTypes. This is 
@@ -244,11 +246,11 @@ enum aiPostProcessSteps
 	 *  cylindrical) to proper UV mapping channels.
 	 *
 	 * Most applications will support UV mapping only, so you will
-	 * propably want to specify this step in every case.
+	 * probably want to specify this step in every case.
 	*/
 	aiProcess_GenUVCoords = 0x40000,
 
-	/** This step pretransforms UV coordinates by the UV transformations
+	/** This step pre-transforms UV coordinates by the UV transformations
 	 *  (such as scalings or rotations).
 	 *
 	 * UV transformations are specified per-texture - see the
@@ -256,7 +258,7 @@ enum aiPostProcessSteps
 	 * This step finds all textures with transformed input UV
 	 * coordinates and generates a new, transformed, UV channel for it.
 	 * Most applications won't support UV transformations, so you will
-	 * propably want to specify this step in every case.
+	 * probably want to specify this step in every case.
 	*/
 	aiProcess_TransformUVCoords = 0x80000
 };

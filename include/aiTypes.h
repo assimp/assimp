@@ -39,6 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
+/** @file aiTypes.h
+*/
+
 #ifndef AI_TYPES_H_INC
 #define AI_TYPES_H_INC
 

@@ -38,7 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Quaternion structure, including operators when compiling in C++ */
+/** @file aiQuaternion.h
+ *  @brief Quaternion structure, including operators when compiling in C++
+ */
 #ifndef AI_QUATERNION_H_INC
 #define AI_QUATERNION_H_INC
 

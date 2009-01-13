@@ -39,8 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Defines constants for configurable properties and helper
-    functions to determine the version of the Assimp library being used  */
+/** @file aiConfig.h
+ *  @brief Defines constants for configurable properties and helper
+    functions to determine the version of the Assimp library being used
+ */
 #ifndef __AI_CONFIG_H_INC__
 #define __AI_CONFIG_H_INC__
 
@@ -88,7 +90,7 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
 /** @brief  Set the maximum number of vertices in a mesh.
  *
  * This is used by the "SplitLargeMeshes" PostProcess-Step to determine
- * whether a mesh must be splitted or not.
+ * whether a mesh must be split or not.
  * @note The default value is AI_SLM_DEFAULT_MAX_VERTICES, defined in
  *       the internal header file SplitLargeMeshes.h
  * Property type: integer.
@@ -100,7 +102,7 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
 /** @brief  Set the maximum number of triangles in a mesh.
  *
  * This is used by the "SplitLargeMeshes" PostProcess-Step to determine
- * whether a mesh must be splitted or not.
+ * whether a mesh must be split or not.
  * @note The default value is AI_SLM_DEFAULT_MAX_TRIANGLES, defined in
  *       the internal header file SplitLargeMeshes.h
  * Property type: integer.
@@ -124,7 +126,7 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
  *
  * ASSIMP does not support vertex keyframes (only bone animation is supported).
  * The library reads only one frame of models with vertex animations.
- * By default this is the first frame´.
+ * By default this is the first frame.
  * \note The default value is 0. This option applies to all importers.
  *   However, it is also possible to override the global setting
  *   for a specific loader. You can use the AI_CONFIG_IMPORT_XXX_KEYFRAME
@@ -202,12 +204,12 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
 /** @brief  Specifies the maximum angle that may be between two face normals
  *          at the same vertex position that their are smoothed together.
  *
- * Sometimes also refered to as 'crease angle'.
+ * Sometimes referred to as 'crease angle'.
  * This applies to the GenSmoothNormals-Step. The angle is specified
  * in degrees, so 180 is PI. The default value is 175 degrees (all vertex 
  * normals are smoothed). The maximum value is 175. Property type: float. 
- * Warning: seting this option may cause a severe loss of performance. The
- * performance is unaffacted if the AI_CONFIG_FAVOUR_SPEED flag is set, but
+ * Warning: setting this option may cause a severe loss of performance. The
+ * performance is unaffected if the AI_CONFIG_FAVOUR_SPEED flag is set, but
  * the output quality may be reduced.
  */
 #define AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE "pp.gsn.max_smoothing"
@@ -218,7 +220,7 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
  *         This is an input parameter to the OptimizeGraph-Step.
  *
  * Nodes whose referenced meshes have less faces than this value
- * are propably joined with neighbors with identical local matrices.
+ * are probably joined with neighbors with identical local matrices.
  * However, it is just a hint to the step.
  * Property type: integer 
  */
@@ -227,7 +229,7 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
 
 // ---------------------------------------------------------------------------
 /** @brief Specifies whether the OptimizeGraphProcess joins nodes even if
- *         their local transformations are inequal.
+ *         their local transformations are not equal.
  *
  * By default, nodes with different local transformations are never joined.
  * The intention is that all vertices should remain in their original
@@ -265,11 +267,11 @@ enum aiComponent
 	aiComponent_TANGENTS_AND_BITANGENTS = 0x4u,
 
 	//! ALL color sets
-	//! Use aiComponent_COLORn(N) to specifiy the N'th set 
+	//! Use aiComponent_COLORn(N) to specify the N'th set 
 	aiComponent_COLORS = 0x8,
 
 	//! ALL texture UV sets
-	//! aiComponent_TEXCOORDn(N) to specifiy the N'th set 
+	//! aiComponent_TEXCOORDn(N) to specify the N'th set 
 	aiComponent_TEXCOORDS = 0x10,
 
 	//! Removes all bone weights from all meshes.
@@ -341,13 +343,13 @@ enum aiComponent
 #define AI_CONFIG_PP_SBP_REMOVE				"pp.sbp.remove"
 
 
-// TransformUVCoords evalutes UV scalings
+// TransformUVCoords evaluates UV scalings
 #define AI_UVTRAFO_SCALING 0x1
 
-// TransformUVCoords evalutes UV rotations
+// TransformUVCoords evaluates UV rotations
 #define AI_UVTRAFO_ROTATION 0x2
 
-// TransformUVCoords evalutes UV translation
+// TransformUVCoords evaluates UV translation
 #define AI_UVTRAFO_TRANSLATION 0x4
 
 // Everything baked together -> default value

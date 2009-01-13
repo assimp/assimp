@@ -1,4 +1,6 @@
-/** @file Inline implementation of vector3D operators */
+/** @file aiVector3D.inl
+ *  @brief Inline implementation of vector3D operators
+ */
 #ifndef AI_VECTOR3D_INL_INC
 #define AI_VECTOR3D_INL_INC
 

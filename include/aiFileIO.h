@@ -39,7 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Defines generic routines to access memory-mapped files
+/** @file aiFileIO.h
+ *  @brief Defines generic routines to access memory-mapped files
  */
 
 #ifndef AI_FILEIO_H_INC

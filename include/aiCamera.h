@@ -39,7 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Defines the aiCamera data structure
+/** @file aiCamera.h
+ *  @brief Defines the aiCamera data structure
  */
 
 #ifndef AI_CAMERA_H_INC

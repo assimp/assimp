@@ -39,7 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** Assimp build configuration setup. See the notes in the comment
+/** @file aiDefines.h
+ *  @brief Assimp build configuration setup. See the notes in the comment
  *  blocks to find out how you can customize your Assimp build.
  */
 

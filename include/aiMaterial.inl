@@ -39,8 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Defines the material system of the library
- *
+/** @file aiMaterial.inl
+ *  @brief Defines the material system of the library
  */
 
 #ifndef AI_MATERIAL_INL_INC

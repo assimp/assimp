@@ -39,8 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Declares the data structures in which the imported geometry is 
-    returned by ASSIMP: aiMesh, aiFace and aiBone data structures. */
+/** @file aiMesh.h
+ *  @brief Declares the data structures in which the imported geometry is 
+    returned by ASSIMP: aiMesh, aiFace and aiBone data structures.
+ */
 #ifndef INCLUDED_AI_MESH_H
 #define INCLUDED_AI_MESH_H
 
@@ -278,7 +280,7 @@ enum aiPrimitiveType
 	 *
 	 * A triangle is a polygon, but polygon in this context means
 	 * "all polygons that are not triangles". The "Triangulate"-Step
-	 * is provided for your convinience, it splits all polygons in
+	 * is provided for your convenience, it splits all polygons in
 	 * triangles (which are much easier to handle).
 	 */
 	aiPrimitiveType_POLYGON     = 0x8,
@@ -403,8 +405,8 @@ struct aiMesh
 	*/
 	unsigned int mNumUVComponents[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 
-	/** The faces the mesh is contstructed from. 
-	* Each face referres to a number of vertices by their indices. 
+	/** The faces the mesh is constructed from. 
+	* Each face refers to a number of vertices by their indices. 
 	* This array is always present in a mesh, its size is given 
 	* in mNumFaces. If the AI_SCENE_FLAGS_NON_VERBOSE_FORMAT
 	* is NOT set each face references an unique set of vertices.

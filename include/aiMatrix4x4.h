@@ -38,7 +38,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-/** @file 4x4 matrix structure, including operators when compiling in C++ */
+/** @file aiMatrix4x4.h
+ *  @brief 4x4 matrix structure, including operators when compiling in C++
+ */
 #ifndef AI_MATRIX4X4_H_INC
 #define AI_MATRIX4X4_H_INC
 
@@ -53,7 +55,7 @@ struct aiQuaternion;
 
 // ---------------------------------------------------------------------------
 /** Represents a row-major 4x4 matrix, 
-*  use this for homogenious coordinates 
+*  use this for homogeneous coordinates 
 */
 // ---------------------------------------------------------------------------
 struct aiMatrix4x4

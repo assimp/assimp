@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Definition of a 3x3 matrix, including operators when compiling in C++ */
+/** @file aiMatrix3x3.h
+ *  @brief Definition of a 3x3 matrix, including operators when compiling in C++
+ */
 #ifndef AI_MATRIX3x3_H_INC
 #define AI_MATRIX3x3_H_INC
 

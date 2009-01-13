@@ -38,8 +38,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-/** @file File I/O wrappers for C++. 
-*/
+/** @file IOStream.h
+ *  @brief File I/O wrappers for C++. 
+ */
 
 #ifndef AI_IOSTREAM_H_INC
 #define AI_IOSTREAM_H_INC

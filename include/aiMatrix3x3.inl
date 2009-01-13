@@ -1,4 +1,6 @@
-/** @file Inline implementation of the 3x3 matrix operators */
+/** @file aiMatrix3x3.inl
+ *  @brief Inline implementation of the 3x3 matrix operators
+ */
 #ifndef AI_MATRIX3x3_INL_INC
 #define AI_MATRIX3x3_INL_INC
 

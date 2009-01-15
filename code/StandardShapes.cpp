@@ -38,7 +38,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Implementation of the StandardShapes class
+/** @file   StandardShapes.cpp
+ *  @brief  Implementation of the StandardShapes class
+ *
+ *  The primitive geometry data comes from 
+ *  http://geometrictools.com/Documentation/PlatonicSolids.pdf.
  */
 
 #include "AssimpPCH.h"
@@ -46,11 +50,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp	{
 
-	// note - flip the face order
-#define ADD_TRIANGLE(n0,n1,n2) \
-	positions.push_back(n2); \
+	
+# define ADD_TRIANGLE(n0,n1,n2) \
+	positions.push_back(n0); \
 	positions.push_back(n1); \
-	positions.push_back(n0);
+	positions.push_back(n2);
 
 #	define ADD_PENTAGON(n0,n1,n2,n3,n4) \
 	if (polygons) \
@@ -84,9 +88,10 @@ namespace Assimp	{
 
 
 // ------------------------------------------------------------------------------------------------
+// Fast subdivision for a mesh whose verts have a magnitude of 1
 void Subdivide(std::vector<aiVector3D>& positions)
 {
-	// assume this to be constant - input must be a Platonic primitive!
+	// assume this to be constant - (fixme: must be 1.0? I think so)
 	const float fl1 = positions[0].Length();
 
 	unsigned int origSize = (unsigned int)positions.size();
@@ -102,23 +107,25 @@ void Subdivide(std::vector<aiVector3D>& positions)
 		aiVector3D v3 = aiVector3D(b.x+c.x, b.y+c.y, b.z+c.z).Normalize()*fl1;
 
 		tv0 = v1; tv1 = v3; tv2 = v2; // overwrite the original
-		ADD_TRIANGLE(v2, v1, a);
-		ADD_TRIANGLE(v3, v2, c);
-		ADD_TRIANGLE(v1, v3, b);
+		ADD_TRIANGLE(v1, v2, a);
+		ADD_TRIANGLE(v2, v3, c);
+		ADD_TRIANGLE(v3, v1, b);
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
+// Construct a mesh from given vertex positions
 aiMesh* StandardShapes::MakeMesh(const std::vector<aiVector3D>& positions,
 	unsigned int numIndices)
 {
-	if (positions.size() & numIndices || positions.empty() || !numIndices)return NULL;
+	if (positions.size() & numIndices || positions.empty() || !numIndices)
+		return NULL;
 
-	// Determine which kinds of primitives the mesh will consist of
+	// Determine which kinds of primitives the mesh consists of
 	aiMesh* out = new aiMesh();
 	switch (numIndices)
 	{
-	case 1:
+	case 1: 
 		out->mPrimitiveTypes = aiPrimitiveType_POINT;
 		break;
 	case 2:
@@ -149,6 +156,7 @@ aiMesh* StandardShapes::MakeMesh(const std::vector<aiVector3D>& positions,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Construct a mesh with a specific shape (callback)
 aiMesh* StandardShapes::MakeMesh ( unsigned int (*GenerateFunc)(
 	std::vector<aiVector3D>&))
 {
@@ -158,6 +166,7 @@ aiMesh* StandardShapes::MakeMesh ( unsigned int (*GenerateFunc)(
 }
 
 // ------------------------------------------------------------------------------------------------
+// Construct a mesh with a specific shape (callback)
 aiMesh* StandardShapes::MakeMesh ( unsigned int (*GenerateFunc)(
 	std::vector<aiVector3D>&, bool))
 {
@@ -167,6 +176,7 @@ aiMesh* StandardShapes::MakeMesh ( unsigned int (*GenerateFunc)(
 }
 
 // ------------------------------------------------------------------------------------------------
+// Construct a mesh with a specific shape (callback)
 aiMesh* StandardShapes::MakeMesh (unsigned int num,  void (*GenerateFunc)(
 	unsigned int,std::vector<aiVector3D>&))
 {
@@ -176,6 +186,7 @@ aiMesh* StandardShapes::MakeMesh (unsigned int num,  void (*GenerateFunc)(
 }
 
 // ------------------------------------------------------------------------------------------------
+// Build an incosahedron with points.magnitude == 1
 unsigned int StandardShapes::MakeIcosahedron(std::vector<aiVector3D>& positions)
 {
 	positions.reserve(positions.size()+60);
@@ -224,6 +235,7 @@ unsigned int StandardShapes::MakeIcosahedron(std::vector<aiVector3D>& positions)
 }
 
 // ------------------------------------------------------------------------------------------------
+// Build a dodecahedron with points.magnitude == 1
 unsigned int StandardShapes::MakeDodecahedron(std::vector<aiVector3D>& positions,
 	bool polygons /*= false*/)
 {
@@ -271,6 +283,7 @@ unsigned int StandardShapes::MakeDodecahedron(std::vector<aiVector3D>& positions
 }
 
 // ------------------------------------------------------------------------------------------------
+// Build an octahedron with points.magnitude == 1
 unsigned int StandardShapes::MakeOctahedron(std::vector<aiVector3D>& positions)
 {
 	positions.reserve(positions.size()+24);
@@ -295,6 +308,7 @@ unsigned int StandardShapes::MakeOctahedron(std::vector<aiVector3D>& positions)
 }
 
 // ------------------------------------------------------------------------------------------------
+// Build a tetrahedron with points.magnitude == 1
 unsigned int StandardShapes::MakeTetrahedron(std::vector<aiVector3D>& positions)
 {
 	positions.reserve(positions.size()+9);
@@ -315,6 +329,7 @@ unsigned int StandardShapes::MakeTetrahedron(std::vector<aiVector3D>& positions)
 }
 
 // ------------------------------------------------------------------------------------------------
+// Build a hexahedron with points.magnitude == 1
 unsigned int StandardShapes::MakeHexahedron(std::vector<aiVector3D>& positions,
 	bool polygons /*= false*/)
 {
@@ -345,6 +360,7 @@ unsigned int StandardShapes::MakeHexahedron(std::vector<aiVector3D>& positions,
 #undef ADD_PENTAGON
 
 // ------------------------------------------------------------------------------------------------
+// Create a subdivision sphere
 void StandardShapes::MakeSphere(unsigned int	tess,
 	std::vector<aiVector3D>& positions)
 {
@@ -362,27 +378,30 @@ void StandardShapes::MakeSphere(unsigned int	tess,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Build a cone
 void StandardShapes::MakeCone(float height,float radius1,
 	float radius2,unsigned int tess, 
 	std::vector<aiVector3D>& positions,bool bOpen /*= false */)
 {
-	// Sorry, a cone with less than 3 segments makes 
-	// ABSOLUTELY NO SENSE
+	// Sorry, a cone with less than 3 segments makes ABSOLUTELY NO SENSE
 	if (tess < 3 || !height)
 		return;
 
+	size_t old = positions.size();
+
 	// No negative radii
-	radius1 = fabs(radius1);
-	radius2 = fabs(radius2);
+	radius1 = ::fabs(radius1);
+	radius2 = ::fabs(radius2);
 
 	float halfHeight = height / 2;
 
-	// radius1 is always the smaller one
+	// radius1 is always the smaller one 
 	if (radius2 > radius1)
 	{
 		std::swap(radius2,radius1);
 		halfHeight = -halfHeight;
 	}
+	else old = 0xffffffff;
 
 	// Use a large epsilon to check whether the cone is pointy
 	if (radius1 < (radius2-radius1)*10e-3f)radius1 = 0.f;
@@ -390,7 +409,7 @@ void StandardShapes::MakeCone(float height,float radius1,
 	// We will need 3*2 verts per segment + 3*2 verts per segment
 	// if the cone is closed
 	const unsigned int mem = tess*6 + (!bOpen ? tess*3 * (radius1 ? 2 : 1) : 0);
-	positions.reserve(mem);
+	positions.reserve(positions.size () + mem);
 
 	// Now construct all segments
 	const float angle_delta = (float)AI_MATH_TWO_PI / tess;
@@ -405,49 +424,79 @@ void StandardShapes::MakeCone(float height,float radius1,
 		const aiVector3D v2 = aiVector3D (s * radius2,  halfHeight, t * radius2 );
 
 		const float next = angle + angle_delta;
-		float s2 = cos(next);
-		float t2 = sin(next);
+		float s2 = ::cos(next);
+		float t2 = ::sin(next);
 
 		const aiVector3D v3 = aiVector3D (s2 * radius2,  halfHeight, t2 * radius2 );
 		const aiVector3D v4 = aiVector3D (s2 * radius1, -halfHeight, t2 * radius1 );
 
 		positions.push_back(v1);
-		positions.push_back(v3);
 		positions.push_back(v2);
-		positions.push_back(v4);
 		positions.push_back(v3);
+		positions.push_back(v4);
 		positions.push_back(v1);
+		positions.push_back(v3);
 
 		if (!bOpen)
 		{
 			// generate the end 'cap'
 			positions.push_back(aiVector3D(s * radius2,  halfHeight, t * radius2 ));
-			positions.push_back(aiVector3D(0.f, halfHeight, 0.f));
 			positions.push_back(aiVector3D(s2 * radius2,  halfHeight, t2 * radius2 ));
+			positions.push_back(aiVector3D(0.f, halfHeight, 0.f));
+			
 
 			if (radius1)
 			{
 				// generate the other end 'cap'
 				positions.push_back(aiVector3D(s * radius1,  -halfHeight, t * radius1 ));
-				positions.push_back(aiVector3D(0.f, -halfHeight, 0.f));
 				positions.push_back(aiVector3D(s2 * radius1,  -halfHeight, t2 * radius1 ));
+				positions.push_back(aiVector3D(0.f, -halfHeight, 0.f));
+				
 			}
 		}
 		s = s2;
 		t = t2;
 		angle = next;
 	}
+
+	// Need to flip face order?
+	if (0xffffffff != old )
+	{
+		for (size_t s = old; s < positions.size();s += 3)
+			std::swap(positions[s],positions[s+1]);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
-void StandardShapes::MakeCircle(
-	const aiVector3D&	center, 
-	const aiVector3D&	normal, 
-	float				radius,
-	unsigned int		tess,
+// Build a circle
+void StandardShapes::MakeCircle(float radius, unsigned int tess,
 	std::vector<aiVector3D>& positions)
 {
-	// todo
+	// Sorry, a circle with less than 3 segments makes ABSOLUTELY NO SENSE
+	if (tess < 3 || !radius)
+		return;
+
+	radius = ::fabs(radius);
+
+	// We will need 3 vertices per segment 
+	positions.reserve(positions.size()+tess*3);
+
+	const float angle_delta = (float)AI_MATH_TWO_PI / tess;
+	const float angle_max   = (float)AI_MATH_TWO_PI;
+
+	float s = 1.f; // cos(angle == 0);
+	float t = 0.f; // sin(angle == 0);
+
+	for (float angle = 0.f; angle < angle_max;  )
+	{
+		positions.push_back(aiVector3D(s * radius,0.f,t * radius));
+		angle += angle_delta;
+		s = ::cos(angle);
+		t = ::sin(angle);
+		positions.push_back(aiVector3D(s * radius,0.f,t * radius));
+
+		positions.push_back(aiVector3D(0.f,0.f,0.f));
+	}
 }
 
 } // ! Assimp

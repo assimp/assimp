@@ -247,7 +247,7 @@ void B3DImporter::ReadBRUS(){
 		//Textures
 		for( int i=0;i<n_texs;++i ){
 			int texid=ReadInt();
-			if( !i && texid>=0 && texid<_textures.size() ){
+			if( !i && texid>=0 && texid<(int)_textures.size() ){
 				//just use tex 0 for now
 				const Texture &tex=_textures[texid];
 				aiString texname( tex.name );

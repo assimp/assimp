@@ -2087,14 +2087,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\OptimizeGraphProcess.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\OptimizeGraphProcess.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\code\PretransformVertices.cpp"
 					>
 				</File>

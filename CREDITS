@@ -55,3 +55,6 @@ supplied patches for linux and SCons.
 
 - T. R.
 The GUY who performed some of the CSM mocaps.
+
+- Andy Maloney
+Contributed fixes for the documentation and the doxygen markup

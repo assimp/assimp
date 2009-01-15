@@ -195,22 +195,6 @@ enum aiPostProcessSteps
 	*/
 	aiProcess_FixInfacingNormals = 0x2000,
 
-	/** This step performs some optimizations on the node graph.
-	 * 
-	 * It is incompatible to the PreTransformVertices-Step. Some configuration
-	 * options exist, see aiConfig.h for more details. 
-	 * Generally, two actions are available:<br>
-	 *   1. Remove animation nodes and data from the scene. This allows other
-	 *      steps for further optimizations.<br>
-	 *   2. Combine very small meshes to larger ones. Only if the meshes
-	 *      are used by the same node or by nodes on the same hierarchy (with
-	 *      equal local transformations). Unlike PreTransformVertices, the
-	 *      OptimizeGraph-step doesn't transform vertices from one space 
-	 *      another (at least with the default configuration).<br>
-	 *
-	 *  It is recommended to have this step run with the default configuration.
-	 */
-	aiProcess_OptimizeGraph = 0x4000,
 
 	/** This step splits meshes with more than one primitive type in 
 	 *  homogeneous submeshes. 

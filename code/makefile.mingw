@@ -39,7 +39,6 @@ SOURCES = AssimpPCH.cpp \
 	ObjFileImporter.cpp \
 	ObjFileMtlImporter.cpp \
 	ObjFileParser.cpp \
-	OptimizeGraphProcess.cpp \
 	PlyLoader.cpp \
 	PlyParser.cpp \
 	PretransformVertices.cpp \

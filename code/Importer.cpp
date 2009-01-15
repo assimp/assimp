@@ -181,9 +181,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS
 #	include "RemoveRedundantMaterials.h"
 #endif
-#ifndef AI_BUILD_NO_OPTIMIZEGRAPH_PROCESS
-#	include "OptimizeGraphProcess.h"
-#endif
 #ifndef AI_BUILD_NO_FINDINVALIDDATA_PROCESS
 #	include "FindInvalidDataProcess.h"
 #endif
@@ -376,10 +373,6 @@ Importer::Importer()
 	mPostProcessingSteps.push_back( new FindInvalidDataProcess());
 #endif
 
-
-#if (!defined AI_BUILD_NO_OPTIMIZEGRAPH_PROCESS)
-	mPostProcessingSteps.push_back( new OptimizeGraphProcess());
-#endif
 #if (!defined AI_BUILD_NO_FIXINFACINGNORMALS_PROCESS)
 	mPostProcessingSteps.push_back( new FixInfacingNormalsProcess());
 #endif
@@ -564,15 +557,6 @@ bool ValidateFlags(unsigned int pFlags)
 			"aiProcess_GenNormals may not be specified together");
 		return false;
 	}
-
-	if (pFlags & aiProcess_PreTransformVertices &&
-		pFlags & aiProcess_OptimizeGraph)
-	{
-		DefaultLogger::get()->error("aiProcess_PreTransformVertives and "
-			"aiProcess_OptimizeGraph may not be specified together");
-		return false;
-	}
-
 	return true;
 }
 #endif // ! DEBUG

@@ -97,7 +97,8 @@ ASSIMP_API const C_STRUCT aiScene* aiImportFile( const char* pFile,
 */
 // ---------------------------------------------------------------------------
 ASSIMP_API const C_STRUCT aiScene* aiImportFileEx( 
-	const char* pFile, unsigned int pFlags,
+	const char* pFile,
+    unsigned int pFlags,
 	C_STRUCT aiFileIO* pFS);
 
 
@@ -156,7 +157,7 @@ ASSIMP_API void aiGetMemoryRequirements(const C_STRUCT aiScene* pIn,
 
 // ---------------------------------------------------------------------------
 /** Set an integer property. This is the C-version of 
- *  #Importer::SetPropertyInteger(). In the C-API properties are shared by
+ *  #Assimp::Importer::SetPropertyInteger(). In the C-API properties are shared by
  *  all imports. It is not possible to specify them per asset.
  *
  * \param szName Name of the configuration property to be set. All constants

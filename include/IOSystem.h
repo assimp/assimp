@@ -70,7 +70,7 @@ class ASSIMP_API IOSystem
 {
 public:
 	/** @brief Constructor. Create an instance of your derived class and
-	 * assign it to an #Importer instance by calling Importer::SetIOHandler().
+	 * assign it to an #Assimp::Importer instance by calling Importer::SetIOHandler().
 	 */
 	IOSystem();
 

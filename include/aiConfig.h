@@ -256,7 +256,7 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
 /** @brief Enumerates components of the aiScene and aiMesh data structures
  *  that can be excluded from the import with the RemoveComponent step.
  *
- *  See the documentation to #aiProcess_RemoveComment for more details.
+ *  See the documentation to #aiProcess_RemoveComponent for more details.
  */
 enum aiComponent
 {

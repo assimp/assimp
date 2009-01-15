@@ -133,7 +133,7 @@ struct aiFace
 		return !(*this == o);
 	}
 #endif // __cplusplus
-}; //! struct aiFace
+}; // struct aiFace
 
 
 // ---------------------------------------------------------------------------
@@ -161,7 +161,7 @@ struct aiVertexWeight
 	{ /* nothing to do here */ }
 
 #endif // __cplusplus
-}; //! struct aiVertexWeight
+};
 
 
 // ---------------------------------------------------------------------------
@@ -213,7 +213,7 @@ struct aiBone
 		delete [] mWeights;
 	}
 #endif // __cplusplus
-}; //! struct aiBone
+};
 
 #ifndef AI_MAX_NUMBER_OF_COLOR_SETS
 // ---------------------------------------------------------------------------
@@ -294,7 +294,7 @@ enum aiPrimitiveType
 
 // Get the #aiPrimitiveType flag for a specific number of face indices
 #define AI_PRIMITIVE_TYPE_FOR_N_INDICES(n) \
-	((n) > 3 ? aiPrimitiveType_POLYGON : (aiPrimitiveType)(1u << (n)-1))
+	((n) > 3 ? aiPrimitiveType_POLYGON : (aiPrimitiveType)(1u << ((n)-1)))
 
 // ---------------------------------------------------------------------------
 /** @brief A mesh represents a geometry or model with a single material. 
@@ -538,7 +538,7 @@ struct aiMesh
 		{ return mBones != NULL && mNumBones > 0; }
 
 #endif // __cplusplus
-}; //! struct aiMesh
+};
 
 #ifdef __cplusplus
 }

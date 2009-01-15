@@ -1,19 +1,21 @@
-/** @file General documentation built from a doxygen comment */
+/** @file dox.h
+ *  @brief General documentation built from a doxygen comment
+ */
 
 /**
 @mainpage ASSIMP - Open Asset Import Library
 @section intro Introduction
 
-ASSIMP is a library to load and process geometric scenes from various data formats. It is taylored at typical game 
+ASSIMP is a library to load and process geometric scenes from various data formats. It is tailored at typical game 
 scenarios by supporting a node hierarchy, static or skinned meshes, materials, bone animations and potential texture data.
 The library is *not* designed for speed, it is primarily useful for importing assets from various sources once and 
 storing it in a engine-specific format for easy and fast every-day-loading. ASSIMP is also able to apply various post
 processing steps to the imported data such as conversion to indexed meshes, calculation of normals or tangents/bitangents
 or conversion from right-handed to left-handed coordinate systems.
 
-ASSIMP currently supports the following file formats (note that some loaders lack some features of their formats - 
-firstly some file formats contain data not supported by Assimp, secondly some stuff would require so much conversion work
-that it has not yet been implemented, thirdly some formats are not completely documented):
+ASSIMP currently supports the following file formats (note that some loaders lack some features of their formats because 
+some file formats contain data not supported by Assimp, some stuff would require so much conversion work
+that it has not yet been implemented, and some formats are not completely documented):
 <hr>
 <br><tt>
 <b>Collada</b> ( <i>*.dae;*.xml</i> ) <sup>3</sup><br>
@@ -56,7 +58,7 @@ on any little-endian platform including X86/Windows/Linux/Mac and X64/Windows/Li
 was paid to keep the library as free as possible from dependencies. 
 
 Big endian systems such as PPC-Macs or PPC-Linux systems are not officially supported at the moment. However, most 
-formats handle the required endianess conversion correctly, so large parts of the library should work.
+formats handle the required endian conversion correctly, so large parts of the library should work.
 
 The ASSIMP linker library and viewer application are provided under the BSD 3-clause license. This basically means
 that you are free to use it in open- or closed-source projects, for commercial or non-commercial purposes as you like
@@ -94,20 +96,20 @@ The viewer offers a lot of additional features to view, interact with or export 
 /**
 @page install Installation
 
-@section install_prebuilt Using the prebuilt libraries
+@section install_prebuilt Using the pre-built libraries
 
-If you develop at Visual Studio 2005 or 2008, you can simply use the prebuilt linker libraries provided in the distribution.
+If you develop at Visual Studio 2005 or 2008, you can simply use the pre-built linker libraries provided in the distribution.
 Extract all files to a place of your choice. A directory called "Assimp" will be created there. Add the Assimp/include path
-to your include paths (Menu->Extras->Options->Projects and Solutions->VC++ Directories->Include files)
-and the Assimp/lib/<Compiler> path to your linker paths (Menu->Extras->Options->Projects and Solutions->VC++ Directories->Library files).
+to your include paths (Menu-&gt;Extras-&gt;Options-&gt;Projects and Solutions-&gt;VC++ Directories-&gt;Include files)
+and the Assimp/lib/&lt;Compiler&gt; path to your linker paths (Menu-&gt;Extras-&gt;Options-&gt;Projects and Solutions-&gt;VC++ Directories-&gt;Library files).
 This is neccessary only once to setup all paths inside you IDE.
 
-To use the library in your C++ project you have to include either <assimp.hpp> or <assimp.h> plus some others starting with <aiTypes.h>.
+To use the library in your C++ project you have to include either &lt;assimp.hpp&gt; or &lt;assimp.h&gt; plus some others starting with &lt;aiTypes.h&gt;.
 If you set up your IDE correctly the compiler should be able to find the files. Then you have to add the linker library to your
 project dependencies. Depending on your runtime of choice you either link against assimp_Debug.lib / assimp_Release.lib 
 (static runtime) or assimp_Debug_DLL.lib / assimp_Release_DLL.lib. If done correctly you should now be able to compile, link,
 run and use the application. If the linker complains about some integral functions being defined twice you propably have
-mixed the runtimes. Recheck the project configuration (project properties -> C++ -> Code generation -> Runtime) if you use 
+mixed the runtimes. Recheck the project configuration (project properties -&gt; C++ -&gt; Code generation -&gt; Runtime) if you use 
 static runtimes (Multithreaded / Multithreaded Debug) or dynamic runtimes (Multithreaded DLL / Multithreaded Debug DLL). Choose
 the ASSIMP linker lib accordingly.
 
@@ -131,7 +133,7 @@ package and add all the headers and source files from the include/ and code/ dir
 to obj/, for example, and redirect the output folder to bin/. Then build the library - it should compile and link fine.
 
 The last step is to integrate the library into your project. This is basically the same task as described in the 
-"Using prebuild libs" section above: add the include/ and bin/ directories to your IDE's paths so that the compiler can find
+"Using the pre-built libraries" section above: add the include/ and bin/ directories to your IDE's paths so that the compiler can find
 the library files. Alternatively you can simply add the ASSIMP project to your project's overall solution and build it inside
 your solution.
 
@@ -250,7 +252,7 @@ bool DoTheImportThing( const char* pFile)
 {
   // Start the import on the given file with some example postprocessing
   // Usually - if speed is not the most important aspect for you - you'll t
-  // propably to request more postprocessing than we do in this example.
+  // probably to request more postprocessing than we do in this example.
   const aiScene* scene = aiImportFile( pFile, 
     aiProcess_CalcTangentSpace       | 
 	aiProcess_Triangulate            |
@@ -390,8 +392,8 @@ little bit around. After that you should kill it to release the singleton instan
 
 If you want to integrate the ASSIMP-log into your own GUI it my be helpful to have a mechanism writing
 the logs into your own log windows. The logger interface provides this by implementing an interface called LogStream.
-You can attach and detach this logstream to the default-logger instance or any implementation derived from Logger. 
-Just derivate your own logger from the abstract baseclass LogStream and overwrite the write-method:
+You can attach and detach this log stream to the default-logger instance or any implementation derived from Logger. 
+Just derivate your own logger from the abstract base class LogStream and overwrite the write-method:
 
 @code
 // Example stream
@@ -449,7 +451,7 @@ Assimp::DefaultLogger::get()->attachStream( new myStream(), severity );
 If you want to implement your own logger just build a derivate from the abstract base class 
 Logger and overwrite the methods debug, info, warn and error. 
 
-If you ust want to see the debug-messages in a debug-configured build the Logger-interface 
+If you want to see the debug-messages in a debug-configured build, the Logger-interface 
 provides a logging-severity. You can set it calling the following method:
 
 @code
@@ -474,7 +476,7 @@ for further information on how to use the library.
 
 By default, all 3D data is provided in a right-handed coordinate system such as OpenGL uses. In
 this coordinate system, +X points to the right, +Y points away from the viewer into the screen and
-+Z points upwards. Several modelling packages such as 3D Studio Max use this coordinate system as well.
++Z points upwards. Several modeling packages such as 3D Studio Max use this coordinate system as well.
 By contrast, some other environments use left-handed coordinate systems, a prominent example being
 DirectX. If you need the imported data to be in a left-handed coordinate system, supply the
 aiProcess_ConvertToLeftHanded flag to the ReadFile() function call.
@@ -489,7 +491,7 @@ X3  Y3  Z3  T3
 @endcode
 
 ... with (X1, X2, X3) being the X base vector, (Y1, Y2, Y3) being the Y base vector, (Z1, Z2, Z3) 
-being the Z base vector and (T1, T2, T3) being the translation part. If you want to use thess matrices
+being the Z base vector and (T1, T2, T3) being the translation part. If you want to use these matrices
 in DirectX functions, you have to transpose them.
 
 @section hierarchy The Node Hierarchy
@@ -545,7 +547,7 @@ This function copies a node into the scene graph if it has children. If yes, a n
 is created for the import node and the node's meshes are copied over. If not, no object is created.
 Potential child objects will be added to the old targetParent, but there transformation will be correct
 in respect to the global space. This function also works great in filtering the bone nodes - nodes 
-that form the bone hierarchy for another mesh/node, but don't have any mesh themselfes.
+that form the bone hierarchy for another mesh/node, but don't have any mesh themselves.
 
 @section meshes Meshes
 
@@ -681,7 +683,7 @@ else // your loading code to load from a path ...
 corresponding mesh. Note: Some formats don't define this, so beware, it could be that
 a second diffuse texture in a mesh was originally intended to use a second UV channel although
 ASSIMP says it uses the first one. UV coordinate source indices are defined by the
-<i>AI_MATKEY_UVWSRC_<textype>(<texindex>)</i> material property. Assume 0 as default value if
+<i>AI_MATKEY_UVWSRC_&lt;textype&gt;(&lt;texindex&gt;)</i> material property. Assume 0 as default value if
 this property is not set.
 <br>
 <b>3. A blend factor.</b> This is used if multiple textures are assigned to a slot, e.g. two
@@ -689,7 +691,7 @@ or more textures on the diffuse channel. A texture's color value is multiplied w
 blend factor before it is combined with the previous color value (from the last texture or the 
 diffuse/specular/ambient/emissive base color) using
 a blend operation (see 4.). Blend factor are defined by the
-<i>AI_MATKEY_TEXBLEND_<textype>(<texindex>)</i> material property. Assume 1.0f as default value 
+<i>AI_MATKEY_TEXBLEND_&lt;textype&gt;(&lt;texindex&gt;)</i> material property. Assume 1.0f as default value 
 if this property is not set.
 <br>
 <b>4. A blend operation.</b> This is used if multiple textures are assigned to a slot, e.g. two
@@ -697,13 +699,13 @@ or more textures on the diffuse channel. After a texture's color value has been 
 with its blend factor, the blend operation is used to combine it with the previous color value 
 (from the last texture or the diffuse/specular/ambient/emissive base color).
 Blend operations are stored as integer property, however their type is aiTextureOp.
-Blend factor are defined by the <i>AI_TEXOP_BLEND_<textype>(<texindex>)</i> material property. Assume
+Blend factor are defined by the <i>AI_TEXOP_BLEND_&lt;textype&gt;(&lt;texindex&gt;)</i> material property. Assume
 aiTextureOp_Multiply as default value if this property is not set.
 <br>
 <b>5. Mapping modes for all axes </b> The mapping mode for an axis specifies how the rendering
 system should deal with UV coordinates beyond the 0-1 range. Mapping modes are
-defined by the <i>AI_MATKEY_MAPPINGMODE_<axis>_<textype>(<texindex>)</i> material property.
-<axis> is either U,V or W. The data type is int, however the real type is aiTextureMapMode.
+defined by the <i>AI_MATKEY_MAPPINGMODE_&lt;axis&gt;_&lt;textype&gt;(&lt;texindex&gt;)</i> material property.
+&lt;axis&gt; is either U,V or W. The data type is int, however the real type is aiTextureMapMode.
 The default value is aiTextureMapMode_Wrap.
 
 You can use the aiGetMaterialTexture() function to read all texture parameters at once (maybe
@@ -752,7 +754,7 @@ they have child nodes which are bones. So when creating the skeleton hierarchy f
 suggest the following method:
 
 a) Create a map or a similar container to store which nodes are necessary for the skeleton. 
-Preinitialise it for all nodes with a "no". <br>
+Pre-initialise it for all nodes with a "no". <br>
 b) For each bone in the mesh: <br>
 b1) Find the corresponding node in the scene's hierarchy by comparing their names. <br>
 b2) Mark this node as "yes" in the necessityMap. <br>
@@ -833,7 +835,7 @@ set if ASSIMP is able to determine the file format.
 @page viewer The Viewer
 Sinn: StandAlone-Test für die Importlib
 Benutzung: was kann er und wie löst man es aus
-Build: alles von #CustomBuild + DirectX + MFC?
+Build: alles von CustomBuild + DirectX + MFC?
 */
 
 

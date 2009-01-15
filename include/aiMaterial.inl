@@ -48,15 +48,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::GetTexture( aiTextureType type,
-    unsigned int  idx,
-    C_STRUCT aiString* path,
-	aiTextureMapping* mapping	/*= NULL*/,
-    unsigned int* uvindex		/*= NULL*/,
-    float* blend				/*= NULL*/,
-    aiTextureOp* op				/*= NULL*/,
-	aiTextureMapMode* mapmode	/*= NULL*/) const
+   unsigned int  index,
+   C_STRUCT aiString* path,
+   aiTextureMapping* mapping	/*= NULL*/,
+   unsigned int* uvindex		/*= NULL*/,
+   float* blend				   /*= NULL*/,
+   aiTextureOp* op				/*= NULL*/,
+   aiTextureMapMode* mapmode	/*= NULL*/) const
 {
-	return ::aiGetMaterialTexture(this,type,idx,path,mapping,uvindex,blend,op,mapmode);
+	return ::aiGetMaterialTexture(this,type,index,path,mapping,uvindex,blend,op,mapmode);
 }
 
 // ---------------------------------------------------------------------------

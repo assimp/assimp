@@ -1373,14 +1373,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\test\unit\utOptimizeGraph.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\test\unit\utOptimizeGraph.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\test\unit\utPretransformVertices.cpp"
 				>
 			</File>

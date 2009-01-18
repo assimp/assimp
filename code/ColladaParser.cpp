@@ -554,17 +554,12 @@ void ColladaParser::ReadGeometryLibrary()
 				// TODO: (thom) support SIDs
 				assert( TestAttribute( "sid") == -1);
 
-				// a <geometry> always contains a single <mesh> element inside, so we just skip that element in advance
-				TestOpening( "mesh");
-
 				// create a mesh and store it in the library under its ID
 				Mesh* mesh = new Mesh;
-				mMeshLibrary[id] = mesh;
-				// read on from there
-				ReadMesh( mesh);
+ 				mMeshLibrary[id] = mesh;
 
-				// check for the closing tag of the outer <geometry> element, the inner closing of <mesh> has been consumed by ReadMesh()
-				TestClosing( "geometry");
+				// read on from there
+        ReadGeometry( mesh);
 			} else
 			{
 				// ignore the rest
@@ -575,6 +570,34 @@ void ColladaParser::ReadGeometryLibrary()
 		{
 			if( strcmp( mReader->getNodeName(), "library_geometries") != 0)
 				ThrowException( "Expected end of \"library_geometries\" element.");
+
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads a geometry from the geometry library.
+void ColladaParser::ReadGeometry( Collada::Mesh* pMesh)
+{
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
+		{
+			if( IsElement( "mesh"))
+			{
+        // read on from there
+				ReadMesh( pMesh);
+			} else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
+		{
+			if( strcmp( mReader->getNodeName(), "geometry") != 0)
+				ThrowException( "Expected end of \"geometry\" element.");
 
 			break;
 		}
@@ -840,25 +863,31 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 			} 
 			else if( IsElement( "vcount"))
 			{
-				// case <polylist> - specifies the number of indices for each polygon
-				const char* content = GetTextContent();
-				vcount.reserve( numPrimitives);
-				for( unsigned int a = 0; a < numPrimitives; a++)
-				{
-					if( *content == 0)
-						ThrowException( "Expected more values while reading vcount contents.");
-					// read a number
-					vcount.push_back( (size_t) strtol10( content, &content));
-					// skip whitespace after it
-					SkipSpacesAndLineEnd( &content);
-				}
-				
-				TestClosing( "vcount");
+        if( !mReader->isEmptyElement())
+        {
+				  // case <polylist> - specifies the number of indices for each polygon
+				  const char* content = GetTextContent();
+				  vcount.reserve( numPrimitives);
+				  for( unsigned int a = 0; a < numPrimitives; a++)
+				  {
+					  if( *content == 0)
+						  ThrowException( "Expected more values while reading vcount contents.");
+					  // read a number
+					  vcount.push_back( (size_t) strtol10( content, &content));
+					  // skip whitespace after it
+					  SkipSpacesAndLineEnd( &content);
+				  }
+  				
+				  TestClosing( "vcount");
+        }
 			}
 			else if( IsElement( "p"))
 			{
-				// now here the actual fun starts - these are the indices to construct the mesh data from
-				ReadPrimitives( pMesh, perIndexData, numPrimitives, vcount, primType);
+        if( !mReader->isEmptyElement())
+        {
+				  // now here the actual fun starts - these are the indices to construct the mesh data from
+				  ReadPrimitives( pMesh, perIndexData, numPrimitives, vcount, primType);
+        }
 			} else
 			{
 				ThrowException( "Unexpected sub element in tag \"vertices\".");

@@ -155,7 +155,7 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 	// accumulated mesh references by this node
 	std::vector<size_t> newMeshRefs;
 
-	// for the moment we simply ignore all material tags and transfer the meshes one by one
+	// add a mesh for each subgroup in each collada mesh
 	BOOST_FOREACH( const Collada::MeshInstance& mid, pNode->mMeshes)
 	{
 		// find the referred mesh
@@ -172,6 +172,9 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 		for( size_t sm = 0; sm < srcMesh->mSubMeshes.size(); ++sm)
 		{
 			const Collada::SubMesh& submesh = srcMesh->mSubMeshes[sm];
+      if( submesh.mNumFaces == 0)
+        continue;
+
 			// find material assigned to this submesh
 			std::map<std::string, std::string>::const_iterator meshMatIt = mid.mMaterials.find( submesh.mMaterial);
 			std::string meshMaterial;
@@ -216,8 +219,8 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 					if( srcMesh->mTexCoords[a].size() == srcMesh->mPositions.size())
 					{
 						dstMesh->mTextureCoords[a] = new aiVector3D[numVertices];
-						for( size_t b = vertexStart; b < vertexStart + numVertices; ++b)
-							dstMesh->mTextureCoords[a][b].Set( srcMesh->mTexCoords[a][b].x, srcMesh->mTexCoords[a][b].y, 0.0f);
+						for( size_t b = 0; b < numVertices; ++b)
+							dstMesh->mTextureCoords[a][b].Set( srcMesh->mTexCoords[a][vertexStart+b].x, srcMesh->mTexCoords[a][vertexStart+b].y, 0.0f);
 						dstMesh->mNumUVComponents[a] = 2;
 					}
 				}

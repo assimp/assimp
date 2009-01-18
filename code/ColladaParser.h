@@ -101,6 +101,9 @@ protected:
 	/** Reads the geometry library contents */
 	void ReadGeometryLibrary();
 
+  /** Reads a geometry from the geometry library. */
+  void ReadGeometry( Collada::Mesh* pMesh);
+
 	/** Reads a mesh from the geometry library */
 	void ReadMesh( Collada::Mesh* pMesh);
 

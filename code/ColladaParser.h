@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_COLLADAPARSER_H_INC
 #define AI_COLLADAPARSER_H_INC
 
-#include "./irrXML/irrXMLWrapper.h"
+#include "irrXMLWrapper.h"
 #include "ColladaHelper.h"
 
 namespace Assimp

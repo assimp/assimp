@@ -41,8 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the 3ds importer class */
 
-
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
 // internal headers
 #include "3DSLoader.h"
@@ -125,16 +125,13 @@ void Discreet3DSImporter::ReplaceDefaultMaterial()
 
 		DefaultLogger::get()->info("3DS: Generating default material");
 	}
-	return;
 }
 
 // ------------------------------------------------------------------------------------------------
-// Check whether all indices are valid. Otherwise we'd crash before the validation step was reached
+// Check whether all indices are valid. Otherwise we'd crash before the validation step is reached
 void Discreet3DSImporter::CheckIndices(D3DS::Mesh& sMesh)
 {
-	for (std::vector< D3DS::Face >::iterator
-		 i =  sMesh.mFaces.begin();
-		 i != sMesh.mFaces.end();++i)
+	for (std::vector< D3DS::Face >::iterator i =  sMesh.mFaces.begin(); i != sMesh.mFaces.end();++i)
 	{
 		// check whether all indices are in range
 		for (unsigned int a = 0; a < 3;++a)
@@ -151,13 +148,15 @@ void Discreet3DSImporter::CheckIndices(D3DS::Mesh& sMesh)
 			}
 		}
 	}
-	return;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Generate out unique verbose format representation
 void Discreet3DSImporter::MakeUnique(D3DS::Mesh& sMesh)
 {
+	// TODO: really necessary? I don't think. Just a waste of memory and time
+	// to do it now in a separate buffer. 
+
 	// Allocate output storage
 	std::vector<aiVector3D> vNew  (sMesh.mFaces.size() * 3);
 	std::vector<aiVector3D> vNew2;
@@ -180,10 +179,10 @@ void Discreet3DSImporter::MakeUnique(D3DS::Mesh& sMesh)
 	}
 	sMesh.mPositions = vNew;
 	sMesh.mTexCoords = vNew2;
-	return;
 }
 
 // ------------------------------------------------------------------------------------------------
+// Convert a 3DS texture to texture keys in an aiMaterial
 void CopyTexture(MaterialHelper& mat, D3DS::Texture& texture, aiTextureType type)
 {
 	// Setup the texture name
@@ -200,6 +199,7 @@ void CopyTexture(MaterialHelper& mat, D3DS::Texture& texture, aiTextureType type
 	mat.AddProperty<int>((int*)&texture.mMapMode,1,AI_MATKEY_MAPPINGMODE_V(type,0));
 
 	// Mirroring - double the scaling values 
+	// FIXME: this is not really correct ...
 	if (texture.mMapMode == aiTextureMapMode_Mirror)
 	{
 		texture.mScaleU *= 2.f;
@@ -337,7 +337,6 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material& oldMat,
 		tex.Set( oldMat.mName);
 		mat.AddProperty( &tex, AI_MATKEY_NAME);
 	}
-	return;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -642,7 +641,6 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 		pcOut->mChildren[i]->mParent = pcOut;
 		AddNodeToGraph(pcSOut,pcOut->mChildren[i],pcIn->mChildren[i],abs);
 	}
-	return;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -809,6 +807,6 @@ void Discreet3DSImporter::ConvertScene(aiScene* pcOut)
 		pcOut->mCameras = new aiCamera*[pcOut->mNumCameras];
 		::memcpy(pcOut->mCameras,&mScene->mCameras[0],sizeof(void*)*pcOut->mNumCameras);
 	}
-
-	return;
 }
+
+#endif // !! ASSIMP_BUILD_NO_3DS_IMPORTER

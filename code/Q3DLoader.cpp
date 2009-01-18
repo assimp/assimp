@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the Q3D importer class */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_Q3D_IMPORTER
 
 // internal headers
 #include "Q3DLoader.h"
@@ -588,3 +589,5 @@ outer:
 		nd->mTransformation = pScene->mRootNode->mChildren[0]->mTransformation;
 	}
 }
+
+#endif // !! ASSIMP_BUILD_NO_Q3D_IMPORTER

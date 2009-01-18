@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the STL importer class */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_NFF_IMPORTER
 
 // internal headers
 #include "NFFLoader.h"
@@ -55,14 +56,12 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 NFFImporter::NFFImporter()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
 NFFImporter::~NFFImporter()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
@@ -1260,3 +1259,5 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 	}
 	pScene->mRootNode = root;
 }
+
+#endif // !! ASSIMP_BUILD_NO_NFF_IMPORTER

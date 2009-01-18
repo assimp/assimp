@@ -41,6 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_DAE_IMPORTER
+
 #include "ColladaParser.h"
 #include "fast_atof.h"
 #include "ParsingUtils.h"
@@ -1532,3 +1534,5 @@ Collada::InputType ColladaParser::GetTypeForSemantic( const std::string& pSemant
 	DefaultLogger::get()->warn( boost::str( boost::format( "Unknown vertex input type \"%s\". Ignoring.") % pSemantic));
 	return IT_Invalid;
 }
+
+#endif // !! ASSIMP_BUILD_NO_DAE_IMPORTER

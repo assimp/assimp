@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the b3d importer class */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_B3D_IMPORTER
 
 // internal headers
 #include "B3DImporter.h"
@@ -50,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace std;
 
+// ------------------------------------------------------------------------------------------------
 bool B3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const{
 
 	int pos=pFile.find_last_of( '.' );
@@ -61,10 +63,12 @@ bool B3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	return (ext[0]=='b' || ext[0]=='B') && (ext[1]=='3') && (ext[2]=='d' || ext[2]=='D');
 }
 
+// ------------------------------------------------------------------------------------------------
 void B3DImporter::GetExtensionList( std::string& append ){
 	append.append("*.b3d");
 }
 
+// ------------------------------------------------------------------------------------------------
 void B3DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler){
 
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
@@ -115,11 +119,13 @@ void B3DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 	pScene->mRootNode=node;
 }
 
+// ------------------------------------------------------------------------------------------------
 int B3DImporter::ReadByte(){
 	if( _pos<_buf.size() ) return _buf[_pos++];
 	throw new ImportErrorException( "B3D EOF Error" );
 }
 
+// ------------------------------------------------------------------------------------------------
 int B3DImporter::ReadInt(){
 	if( _pos+4<=_buf.size() ){
 		int n=*(int*)&_buf[_pos];
@@ -129,6 +135,7 @@ int B3DImporter::ReadInt(){
 	throw new ImportErrorException( "B3D EOF Error" );
 }
 
+// ------------------------------------------------------------------------------------------------
 float B3DImporter::ReadFloat(){
 	if( _pos+4<=_buf.size() ){
 		float n=*(float*)&_buf[_pos];
@@ -138,6 +145,7 @@ float B3DImporter::ReadFloat(){
 	throw new ImportErrorException( "B3D EOF Error" );
 }
 
+// ------------------------------------------------------------------------------------------------
 B3DImporter::Vec2 B3DImporter::ReadVec2(){
 	Vec2 t;
 	t.x=ReadFloat();
@@ -145,6 +153,7 @@ B3DImporter::Vec2 B3DImporter::ReadVec2(){
 	return t;
 }
 
+// ------------------------------------------------------------------------------------------------
 B3DImporter::Vec3 B3DImporter::ReadVec3(){
 	Vec3 t;
 	t.x=ReadFloat();
@@ -153,6 +162,7 @@ B3DImporter::Vec3 B3DImporter::ReadVec3(){
 	return t;
 }
 
+// ------------------------------------------------------------------------------------------------
 B3DImporter::Vec4 B3DImporter::ReadVec4(){
 	Vec4 t;
 	t.x=ReadFloat();
@@ -162,6 +172,7 @@ B3DImporter::Vec4 B3DImporter::ReadVec4(){
 	return t;
 }
 
+// ------------------------------------------------------------------------------------------------
 string B3DImporter::ReadString(){
 	string str;
 	while( _pos<_buf.size() ){
@@ -172,6 +183,7 @@ string B3DImporter::ReadString(){
 	throw new ImportErrorException( "B3D EOF Error" );
 }
 
+// ------------------------------------------------------------------------------------------------
 string B3DImporter::ReadChunk(){
 	string tag;
 	for( int i=0;i<4;++i ){
@@ -183,15 +195,18 @@ string B3DImporter::ReadChunk(){
 	return tag;
 }
 
+// ------------------------------------------------------------------------------------------------
 void B3DImporter::ExitChunk(){
 	_pos=_stack.back();
 	_stack.pop_back();
 }
 
+// ------------------------------------------------------------------------------------------------
 unsigned B3DImporter::ChunkSize(){
 	return _stack.back()-_pos;
 }
 
+// ------------------------------------------------------------------------------------------------
 void B3DImporter::ReadTEXS(){
 	while( ChunkSize() ){
 		string name=ReadString();
@@ -207,6 +222,7 @@ void B3DImporter::ReadTEXS(){
 	}
 }
 
+// ------------------------------------------------------------------------------------------------
 void B3DImporter::ReadBRUS(){
 	int n_texs=ReadInt();
 	while( ChunkSize() ){
@@ -257,6 +273,7 @@ void B3DImporter::ReadBRUS(){
 	}
 }
 
+// ------------------------------------------------------------------------------------------------
 void B3DImporter::ReadVRTS(){
 	int vertFlags=ReadInt();
 	int tc_sets=ReadInt();
@@ -288,6 +305,7 @@ void B3DImporter::ReadVRTS(){
 	}
 }
 
+// ------------------------------------------------------------------------------------------------
 void B3DImporter::ReadTRIS(){
 	int matid=ReadInt();
 
@@ -323,6 +341,7 @@ void B3DImporter::ReadTRIS(){
 	}
 }
 
+// ------------------------------------------------------------------------------------------------
 void B3DImporter::ReadMESH(){
 	int matid=ReadInt();
 
@@ -341,6 +360,7 @@ void B3DImporter::ReadMESH(){
 	_vertices.clear();
 }
 
+// ------------------------------------------------------------------------------------------------
 void B3DImporter::ReadNODE(){
 
 	string name=ReadString();
@@ -357,6 +377,7 @@ void B3DImporter::ReadNODE(){
 	}
 }
 
+// ------------------------------------------------------------------------------------------------
 void B3DImporter::ReadBB3D(){
 	string t=ReadChunk();
 	if( t=="BB3D" ){
@@ -375,3 +396,5 @@ void B3DImporter::ReadBB3D(){
 	}
 	ExitChunk();
 }
+
+#endif // !! ASSIMP_BUILD_NO_B3D_IMPORTER

@@ -42,19 +42,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the DXF importer class */
 
 #include "AssimpPCH.h"
-
+#ifndef ASSIMP_BUILD_NO_DXF_IMPORTER
 
 #include "DXFLoader.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
-
 
 using namespace Assimp;
 
 // AutoCAD Binary DXF<CR><LF><SUB><NULL> 
 #define AI_DXF_BINARY_IDENT ("AutoCAD Binary DXF\r\n\x1a\0")
 #define AI_DXF_BINARY_IDENT_LEN (24)
-
 
 // color indices for DXF - 16 are supported
 static aiColor4D g_aclrDxfIndexColors[] =
@@ -113,6 +111,7 @@ bool DXFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get a copy of the next data line, skip strange data
 bool DXFImporter::GetNextLine()
 {
 	if(!SkipLine(&buffer))
@@ -135,6 +134,7 @@ bool DXFImporter::GetNextLine()
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get the next token in the file
 bool DXFImporter::GetNextToken()
 {
 	if (bRepeat)
@@ -626,4 +626,5 @@ bool DXFImporter::Parse3DFace()
 	return ret;
 }
 
+#endif // !! ASSIMP_BUILD_NO_DXF_IMPORTER
 

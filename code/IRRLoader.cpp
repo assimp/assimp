@@ -60,10 +60,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 using namespace Assimp;
+using namespace boost::math;
 
-// Transformation matrix to convert from Assimp to IRR space
-static aiMatrix4x4 AI_TO_IRR_MATRIX = aiMatrix4x4 ( 1.0f, 0.0f, 0.0f, 
-	0.f, 0.0f, 0.0f, -1.0f, 0.f, 0.0f, 1.0f, 0.0f, 0.f, 0.f, 0.f, 0.f, 1.f);
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -1645,8 +1643,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 
 
 	// transformation matrix to convert from IRRMESH to ASSIMP coordinates
-	pScene->mRootNode->mTransformation *= aiMatrix4x4(1.0f, 0.0f, 0.0f, 0.f, 0.0f, 0.0f, -1.0f,
-		0.f, 0.0f, 1.0f, 0.0f, 0.f, 0.f, 0.f, 0.f, 1.f);
+	pScene->mRootNode->mTransformation *= AI_TO_IRR_MATRIX;
 
 
 	/* Finished ... everything destructs automatically and all 

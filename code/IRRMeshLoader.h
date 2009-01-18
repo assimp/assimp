@@ -43,88 +43,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_IRRMESHLOADER_H_INCLUDED
 #define AI_IRRMESHLOADER_H_INCLUDED
 
-#include "./irrXML/irrXMLWrapper.h"
 #include "BaseImporter.h"
+#include "IRRShared.h"
 
 namespace Assimp	{
-
-// Default: 0 = solid, one texture
-#define AI_IRRMESH_MAT_solid_2layer			0x10000
-
-// Transparency flags
-#define AI_IRRMESH_MAT_trans_vertex_alpha	0x1
-#define AI_IRRMESH_MAT_trans_add			0x2
-
-// Lightmapping flags
-#define AI_IRRMESH_MAT_lightmap				0x2 
-#define AI_IRRMESH_MAT_lightmap_m2			(AI_IRRMESH_MAT_lightmap|0x4)
-#define AI_IRRMESH_MAT_lightmap_m4			(AI_IRRMESH_MAT_lightmap|0x8)
-#define AI_IRRMESH_MAT_lightmap_light		(AI_IRRMESH_MAT_lightmap|0x10)
-#define AI_IRRMESH_MAT_lightmap_light_m2	(AI_IRRMESH_MAT_lightmap|0x20)
-#define AI_IRRMESH_MAT_lightmap_light_m4	(AI_IRRMESH_MAT_lightmap|0x40)
-#define AI_IRRMESH_MAT_lightmap_add			(AI_IRRMESH_MAT_lightmap|0x80)
-
-// Standard NormalMap (or Parallax map, they're treated equally)
-#define AI_IRRMESH_MAT_normalmap_solid		(0x100)
-
-// Normal map combined with vertex alpha
-#define AI_IRRMESH_MAT_normalmap_tva	\
-	(AI_IRRMESH_MAT_normalmap_solid | AI_IRRMESH_MAT_trans_vertex_alpha)
-
-// Normal map combined with additive transparency
-#define AI_IRRMESH_MAT_normalmap_ta		\
-	(AI_IRRMESH_MAT_normalmap_solid | AI_IRRMESH_MAT_trans_add)
-
-// Special flag. It indicates a second texture has been found
-// Its type depends ... either a normal textue or a normal map
-#define AI_IRRMESH_EXTRA_2ND_TEXTURE		0x100000
-
-
-// ---------------------------------------------------------------------------
-/** Base class for the Irr and IrrMesh importers
- */
-class IrrlichtBase
-{
-protected:
-
-	template <class T>
-	struct Property
-	{
-		std::string name;
-		T value;
-	};
-
-	typedef Property<uint32_t>		HexProperty;
-	typedef Property<std::string>	StringProperty;
-	typedef Property<bool>			BoolProperty;
-	typedef Property<float>			FloatProperty;
-	typedef Property<aiVector3D>	VectorProperty;
-	typedef Property<int>			IntProperty;
-
-	/** XML reader instance
-	 */
-	IrrXMLReader* reader;
-
-
-	// -------------------------------------------------------------------
-	/** Parse a material description from the XML
-	 *  @return The created material
-	 *  @param matFlags Receives AI_IRRMESH_MAT_XX flags
-	 */
-	aiMaterial* ParseMaterial(unsigned int& matFlags);
-
-
-	// -------------------------------------------------------------------
-	/** Read a property of the specified type from the current XML element.
-	 *  @param out Recives output data
-	 */
-	void ReadHexProperty    (HexProperty&    out);
-	void ReadStringProperty (StringProperty& out);
-	void ReadBoolProperty   (BoolProperty&   out);
-	void ReadFloatProperty  (FloatProperty&  out);
-	void ReadVectorProperty (VectorProperty&  out);
-	void ReadIntProperty    (IntProperty&    out);
-};
 
 // ---------------------------------------------------------------------------
 /** IrrMesh importer class.

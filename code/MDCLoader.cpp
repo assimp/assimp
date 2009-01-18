@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the MDC importer class */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_MDC_IMPORTER
 
 // internal headers
 #include "MDCLoader.h"
@@ -104,6 +105,7 @@ bool MDCImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 
 	return true;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Validate the header of the given MDC file
 void MDCImporter::ValidateHeader()
@@ -143,6 +145,7 @@ void MDCImporter::ValidateHeader()
 	if (this->configFrameID >= this->pcHeader->ulNumFrames)
 		throw new ImportErrorException("The requested frame is not available");
 }
+
 // ------------------------------------------------------------------------------------------------
 // Validate the header of a given MDC file surface
 void MDCImporter::ValidateSurfaceHeader(BE_NCONST MDC::Surface* pcSurf)
@@ -175,6 +178,7 @@ void MDCImporter::ValidateSurfaceHeader(BE_NCONST MDC::Surface* pcSurf)
             "are invalid and point somewhere behind the file.");
     }
 }
+
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties
 void MDCImporter::SetupProperties(const Importer* pImp)
@@ -187,6 +191,7 @@ void MDCImporter::SetupProperties(const Importer* pImp)
 		this->configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
 	}
 }
+
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void MDCImporter::InternReadFile( 
@@ -461,3 +466,5 @@ void MDCImporter::InternReadFile(
 		}
 	}
 }
+
+#endif // !! ASSIMP_BUILD_NO_MDC_IMPORTER

@@ -148,8 +148,14 @@ struct Material
 {
 	//!	NAme of material description
 	aiString MaterialName;
-	//!	Name of used texture
+
+	//!	Texture names
 	aiString texture;
+	aiString textureSpecular;
+	aiString textureAmbient;
+	aiString textureBump;
+	aiString textureSpecularity;
+
 	//!	Ambient color 
 	aiColor3D ambient;
 	//!	Diffuse color

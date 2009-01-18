@@ -40,13 +40,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_MD2_IMPORTER
 
 /** @file Implementation of the MD2 importer class */
 #include "MD2Loader.h"
 #include "MaterialSystem.h"
 #include "ByteSwap.h"
 #include "MD2NormalTable.h" // shouldn't be included by other units
-
 
 using namespace Assimp;
 using namespace Assimp::MD2;
@@ -422,3 +422,5 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 		pScene->mMeshes[0]->mFaces[i].mIndices[2] = iTemp+0;
 	}
 }
+
+#endif // !! ASSIMP_BUILD_NO_MD2_IMPORTER

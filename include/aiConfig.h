@@ -159,7 +159,7 @@ ASSIMP_API unsigned int aiGetVersionRevision ();
  *	basing on the smoothing groups loaded from the file.
  * 
  * Many ASE files have invalid normals (they're not orthonormal).
- * Property type: integer (0: false; !0: true). Default value: false.
+ * Property type: integer (0: false; !0: true). Default value: true.
  */
 #define AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS	"imp.ase.reconn"
 

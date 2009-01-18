@@ -41,8 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the STL importer class */
 
-
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_STL_IMPORTER
 
 // internal headers
 #include "STLLoader.h"
@@ -55,14 +55,12 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 STLImporter::STLImporter()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
 STLImporter::~STLImporter()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
@@ -386,3 +384,5 @@ bool STLImporter::LoadBinaryFile()
 	}
 	return false;
 }
+
+#endif // !! ASSIMP_BUILD_NO_STL_IMPORTER

@@ -40,13 +40,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
 #include "ObjFileImporter.h"
 #include "ObjFileParser.h"
 #include "ObjFileData.h"
 
-namespace Assimp
-{
+namespace Assimp	{
 // ------------------------------------------------------------------------------------------------
 
 using namespace std;
@@ -441,6 +441,18 @@ void ObjFileImporter::createMaterial(const ObjFile::Model* pModel, const ObjFile
 		// Adding textures
 		if ( 0 != pCurrentMaterial->texture.length )
 			mat->AddProperty( &pCurrentMaterial->texture, AI_MATKEY_TEXTURE_DIFFUSE(0));
+
+		if ( 0 != pCurrentMaterial->textureAmbient.length )
+			mat->AddProperty( &pCurrentMaterial->textureAmbient, AI_MATKEY_TEXTURE_AMBIENT(0));
+
+		if ( 0 != pCurrentMaterial->textureSpecular.length )
+			mat->AddProperty( &pCurrentMaterial->textureSpecular, AI_MATKEY_TEXTURE_SPECULAR(0));
+
+		if ( 0 != pCurrentMaterial->textureBump.length )
+			mat->AddProperty( &pCurrentMaterial->textureBump, AI_MATKEY_TEXTURE_HEIGHT(0));
+
+		if ( 0 != pCurrentMaterial->textureSpecularity.length )
+			mat->AddProperty( &pCurrentMaterial->textureSpecularity, AI_MATKEY_TEXTURE_SHININESS(0));
 		
 		// Store material property info in material array in scene
 		pScene->mMaterials[ pScene->mNumMaterials ] = mat;
@@ -489,3 +501,5 @@ void ObjFileImporter::appendChildToParentNode(aiNode *pParent, aiNode *pChild)
 // ------------------------------------------------------------------------------------------------
 
 }	// Namespace Assimp
+
+#endif // !! ASSIMP_BUILD_NO_OBJ_IMPORTER

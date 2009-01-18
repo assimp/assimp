@@ -1,0 +1,12 @@
+This is a heavily modified and shrinked version of zlib 1.2.3
+
+- Removed comments from zlib.h
+- Removed gzip/zip archive I/O
+- Removed Compression part
+- Removed infback.c
+- Added Assimp #idefs to exclude it if not needed
+
+All inflateNNN functions are available, for the rest you need to try.
+If a function is needed but is not there, get zlib and add the 
+corresponding files to the repos. zlib is quite clean, it shouldn't
+be too difficult to configure it to your needs.

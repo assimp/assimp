@@ -53,7 +53,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	// build in this case. 'XX' stands for the most common file
 	// extension of the file format. E.g.: 
     // ASSIMP_BUILD_NO_X_IMPORTER disables the X loader.
+	//
+	// Other configuration switches:
+	//    ASSIMP_BUILD_NO_COMPRESSED_X 
+	//      - Disable support for compressed X files, removes the
+	//        dependency from the zlib inflate algorithm.
+	//
 	// ================================================================
+#ifndef ASSIMP_BUILD_NO_COMPRESSED_X
+#	define ASSIMP_BUILD_NEED_Z_INFLATE
+#endif
 
 	// ================================================================
 	// Define ASSIMP_BUILD_NO_XX_PROCESS to disable a specific

@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the MDL importer class */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_HMP_IMPORTER
 
 // internal headers
 #include "MaterialSystem.h"
@@ -98,8 +99,8 @@ void HMPImporter::InternReadFile( const std::string& pFile,
 		throw new ImportErrorException( "HMP File is too small.");
 
 	// Allocate storage and copy the contents of the file to a memory buffer
-	this->pScene = pScene;
-	this->pIOHandler = pIOHandler;
+	pScene = pScene;
+	pIOHandler = pIOHandler;
 
 	std::vector<uint8_t> buffer(fileSize+1);
 	mBuffer = &buffer[0];
@@ -155,9 +156,9 @@ void HMPImporter::InternReadFile( const std::string& pFile,
 // ------------------------------------------------------------------------------------------------ 
 void HMPImporter::ValidateHeader_HMP457( )
 {
-	const HMP::Header_HMP5* const pcHeader = (const HMP::Header_HMP5*)this->mBuffer;
+	const HMP::Header_HMP5* const pcHeader = (const HMP::Header_HMP5*)mBuffer;
 
-	if (120 > this->iFileSize)
+	if (120 > iFileSize)
 	{
 		throw new ImportErrorException("HMP file is too small (header size is "
 			"120 bytes, this file is smaller)");
@@ -238,6 +239,7 @@ void HMPImporter::InternReadFile_HMP5( )
 	pScene->mRootNode->mMeshes = new unsigned int[1];
 	pScene->mRootNode->mMeshes[0] = 0;
 }
+
 // ------------------------------------------------------------------------------------------------ 
 void HMPImporter::InternReadFile_HMP7( )
 {
@@ -460,7 +462,9 @@ void HMPImporter::ReadFirstSkin(unsigned int iNumSkins, const unsigned char* szC
 
 	*szCursorOut = szCursor;
 }
+
 // ------------------------------------------------------------------------------------------------ 
+// Generate proepr texture coords
 void HMPImporter::GenerateTextureCoords(
 	const unsigned int width, const unsigned int height)
 {
@@ -480,3 +484,5 @@ void HMPImporter::GenerateTextureCoords(
 		}
 	}
 }
+
+#endif // !! ASSIMP_BUILD_NO_HMP_IMPORTER

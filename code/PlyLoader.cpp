@@ -39,30 +39,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the PLY importer class */
+/** @file  PlyLoader.cpp
+ *  @brief Implementation of the PLY importer class
+ */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_PLY_IMPORTER
 
 // internal headers
 #include "PlyLoader.h"
 #include "MaterialSystem.h"
 
-
-
 using namespace Assimp;
-
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 PLYImporter::PLYImporter()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
 PLYImporter::~PLYImporter()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
@@ -76,13 +74,13 @@ bool PLYImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	std::string extension = pFile.substr( pos);
 
 	if (extension.length() < 4)return false;
-	if (extension[0] != '.')return false;
+	if (extension[0] != '.')   return false;
 	if (extension[1] != 'p' && extension[1] != 'P')return false;
 	if (extension[2] != 'l' && extension[2] != 'L')return false;
 	if (extension[3] != 'y' && extension[3] != 'Y')return false;
-
 	return true;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void PLYImporter::InternReadFile( 
@@ -104,16 +102,17 @@ void PLYImporter::InternReadFile(
 	// (terminate it with zero)
 	std::vector<unsigned char> mBuffer2(fileSize+1);
 	file->Read( &mBuffer2[0], 1, fileSize);
-	this->mBuffer = &mBuffer2[0];
-	this->mBuffer[fileSize] = '\0';
+	mBuffer = &mBuffer2[0];
+	mBuffer[fileSize] = '\0';
 
-	// the beginning of the file must be PLY
-	if (this->mBuffer[0] != 'P' && this->mBuffer[0] != 'p' ||
-		this->mBuffer[1] != 'L' && this->mBuffer[1] != 'l' ||
-		this->mBuffer[2] != 'Y' && this->mBuffer[2] != 'y')
+	// the beginning of the file must be PLY - magic, magic
+	if (mBuffer[0] != 'P' && mBuffer[0] != 'p' ||
+		mBuffer[1] != 'L' && mBuffer[1] != 'l' ||
+		mBuffer[2] != 'Y' && mBuffer[2] != 'y')
 	{
 		throw new ImportErrorException( "Invalid .ply file: Magic number \'ply\' is no there");
 	}
+
 	char* szMe = (char*)&this->mBuffer[3];
 	SkipSpacesAndLineEnd(szMe,(const char**)&szMe);
 	
@@ -165,11 +164,11 @@ void PLYImporter::InternReadFile(
 
 	// now load a list of normals. 
 	std::vector<aiVector3D> avNormals;
-	this->LoadVertices(&avNormals,true);
+	LoadVertices(&avNormals,true);
 
 	// load the face list
 	std::vector<PLY::Face> avFaces;
-	this->LoadFaces(&avFaces);
+	LoadFaces(&avFaces);
 
 	// if no face list is existing we assume that the vertex
 	// list is containing a list of triangles
@@ -178,10 +177,10 @@ void PLYImporter::InternReadFile(
 		if (avPositions.size() < 3)
 		{
 			throw new ImportErrorException( "Invalid .ply file: Not enough "
-				"vertices to build a face list. ");
+				"vertices to build a proper face list. ");
 		}
 
-		unsigned int iNum = (unsigned int)avPositions.size() / 3;
+		const unsigned int iNum = (unsigned int)avPositions.size() / 3;
 		for (unsigned int i = 0; i< iNum;++i)
 		{
 			PLY::Face sFace;
@@ -194,22 +193,25 @@ void PLYImporter::InternReadFile(
 
 	// now load a list of all materials
 	std::vector<MaterialHelper*> avMaterials;
-	this->LoadMaterial(&avMaterials);
+	LoadMaterial(&avMaterials);
 
 	// now load a list of all vertex color channels
 	std::vector<aiColor4D> avColors;
-	this->LoadVertexColor(&avColors);
+	avColors.reserve(avPositions.size());
+	LoadVertexColor(&avColors);
 
 	// now try to load texture coordinates
 	std::vector<aiVector2D> avTexCoords;
-	this->LoadTextureCoordinates(&avTexCoords);
+	avTexCoords.reserve(avPositions.size());
+	LoadTextureCoordinates(&avTexCoords);
 
 	// now replace the default material in all faces and validate all material indices
-	this->ReplaceDefaultMaterial(&avFaces,&avMaterials);
+	ReplaceDefaultMaterial(&avFaces,&avMaterials);
 
 	// now convert this to a list of aiMesh instances
 	std::vector<aiMesh*> avMeshes;
-	this->ConvertMeshes(&avFaces,&avPositions,&avNormals,
+	avMeshes.reserve(avMaterials.size()+1);
+	ConvertMeshes(&avFaces,&avPositions,&avNormals,
 		&avColors,&avTexCoords,&avMaterials,&avMeshes);
 
 	if (avMeshes.empty())
@@ -235,7 +237,9 @@ void PLYImporter::InternReadFile(
 	for (unsigned int i = 0; i < pScene->mRootNode->mNumMeshes;++i)
 		pScene->mRootNode->mMeshes[i] = i;
 }
+
 // ------------------------------------------------------------------------------------------------
+// Split meshes by material IDs
 void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
 	const std::vector<aiVector3D>*			avPositions,
 	const std::vector<aiVector3D>*			avNormals,
@@ -249,17 +253,12 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
 	ai_assert(NULL != avMaterials);
 
 	// split by materials
-	std::vector<unsigned int>* aiSplit = new std::vector<unsigned int>[
-		avMaterials->size()];
+	std::vector<unsigned int>* aiSplit = new std::vector<unsigned int>[avMaterials->size()];
 
 	unsigned int iNum = 0;
-	for (std::vector<PLY::Face>::const_iterator
-		i =  avFaces->begin();
-		i != avFaces->end();++i,++iNum)
-	{
-		// index has already been checked
+	for (std::vector<PLY::Face>::const_iterator i = avFaces->begin();i != avFaces->end();++i,++iNum)
 		aiSplit[(*i).iMaterialIndex].push_back(iNum);
-	}
+	
 	// now generate submeshes
 	for (unsigned int p = 0; p < avMaterials->size();++p)
 	{
@@ -294,8 +293,7 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
 			// add all faces
 			iNum = 0;
 			unsigned int iVertex = 0;
-			for (std::vector<unsigned int>::const_iterator
-				i =  aiSplit[p].begin();
+			for (std::vector<unsigned int>::const_iterator i =  aiSplit[p].begin();
 				i != aiSplit[p].end();++i,++iNum)
 			{
 				p_pcOut->mFaces[iNum].mNumIndices = (unsigned int)(*avFaces)[*i].mIndices.size(); 
@@ -327,12 +325,13 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
 			avOut->push_back(p_pcOut);
 		}
 	}
-	delete[] aiSplit;
-	return;
+	delete[] aiSplit; // cleanup
 }
+
 // ------------------------------------------------------------------------------------------------
+// Generate a default material if none was specified and apply it to all vanilla faces
 void PLYImporter::ReplaceDefaultMaterial(std::vector<PLY::Face>* avFaces,
-										 std::vector<MaterialHelper*>* avMaterials)
+	std::vector<MaterialHelper*>* avMaterials)
 {
 	bool bNeedDefaultMat = false;
 
@@ -370,8 +369,8 @@ void PLYImporter::ReplaceDefaultMaterial(std::vector<PLY::Face>* avFaces,
 
 		avMaterials->push_back(pcHelper);
 	}
-	return;
 }
+
 // ------------------------------------------------------------------------------------------------
 void PLYImporter::LoadTextureCoordinates(std::vector<aiVector2D>* pvOut)
 {
@@ -384,9 +383,8 @@ void PLYImporter::LoadTextureCoordinates(std::vector<aiVector2D>* pvOut)
 
 	// serach in the DOM for a vertex entry
 	unsigned int _i = 0;
-	for (std::vector<PLY::Element>::const_iterator
-		i =  this->pcDOM->alElements.begin();
-		i != this->pcDOM->alElements.end();++i,++_i)
+	for (std::vector<PLY::Element>::const_iterator i = pcDOM->alElements.begin();
+		i != pcDOM->alElements.end();++i,++_i)
 	{
 		if (PLY::EEST_Vertex == (*i).eSemantic)
 		{
@@ -394,8 +392,7 @@ void PLYImporter::LoadTextureCoordinates(std::vector<aiVector2D>* pvOut)
 
 			// now check whether which normal components are available
 			unsigned int _a = 0;
-			for (std::vector<PLY::Property>::const_iterator
-				a =  (*i).alProperties.begin();
+			for (std::vector<PLY::Property>::const_iterator a =  (*i).alProperties.begin();
 				a != (*i).alProperties.end();++a,++_a)
 			{
 				if ((*a).bIsList)continue;
@@ -418,8 +415,7 @@ void PLYImporter::LoadTextureCoordinates(std::vector<aiVector2D>* pvOut)
 	if (NULL != pcList && 0 != cnt)
 	{
 		pvOut->reserve(pcList->alInstances.size());
-		for (std::vector<ElementInstance>::const_iterator
-			i =  pcList->alInstances.begin();
+		for (std::vector<ElementInstance>::const_iterator i = pcList->alInstances.begin();
 			i != pcList->alInstances.end();++i)
 		{
 			// convert the vertices to sp floats
@@ -441,7 +437,9 @@ void PLYImporter::LoadTextureCoordinates(std::vector<aiVector2D>* pvOut)
 		}
 	}
 }
+
 // ------------------------------------------------------------------------------------------------
+// Try to extract vertices from the PLY DOM
 void PLYImporter::LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals)
 {
 	ai_assert(NULL != pvOut);
@@ -453,21 +451,19 @@ void PLYImporter::LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals)
 
 	// serach in the DOM for a vertex entry
 	unsigned int _i = 0;
-	for (std::vector<PLY::Element>::const_iterator
-		i =  this->pcDOM->alElements.begin();
-		i != this->pcDOM->alElements.end();++i,++_i)
+	for (std::vector<PLY::Element>::const_iterator i =  pcDOM->alElements.begin();
+		i != pcDOM->alElements.end();++i,++_i)
 	{
 		if (PLY::EEST_Vertex == (*i).eSemantic)
 		{
-			pcList = &this->pcDOM->alElementData[_i];
+			pcList = &pcDOM->alElementData[_i];
 
 			// load normal vectors?
 			if (p_bNormals)
 			{
 				// now check whether which normal components are available
 				unsigned int _a = 0;
-				for (std::vector<PLY::Property>::const_iterator
-					a =  (*i).alProperties.begin();
+				for (std::vector<PLY::Property>::const_iterator a = (*i).alProperties.begin();
 					a != (*i).alProperties.end();++a,++_a)
 				{
 					if ((*a).bIsList)continue;
@@ -496,8 +492,7 @@ void PLYImporter::LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals)
 			{
 				// now check whether which coordinate sets are available
 				unsigned int _a = 0;
-				for (std::vector<PLY::Property>::const_iterator
-					a =  (*i).alProperties.begin();
+				for (std::vector<PLY::Property>::const_iterator a = (*i).alProperties.begin();
 					a != (*i).alProperties.end();++a,++_a)
 				{
 					if ((*a).bIsList)continue;
@@ -558,9 +553,10 @@ void PLYImporter::LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals)
 			pvOut->push_back(vOut);
 		}
 	}
-	return;
 }
+
 // ------------------------------------------------------------------------------------------------
+// Convert a color component to [0...1]
 float PLYImporter::NormalizeColorValue (PLY::PropertyInstance::ValueUnion val,
 	PLY::EDataType eType)
 {
@@ -587,7 +583,9 @@ float PLYImporter::NormalizeColorValue (PLY::PropertyInstance::ValueUnion val,
 	};
 	return 0.0f;
 }
+
 // ------------------------------------------------------------------------------------------------
+// Try to extract proper vertex colors from the PLY DOM
 void PLYImporter::LoadVertexColor(std::vector<aiColor4D>* pvOut)
 {
 	ai_assert(NULL != pvOut);
@@ -599,9 +597,8 @@ void PLYImporter::LoadVertexColor(std::vector<aiColor4D>* pvOut)
 
 	// serach in the DOM for a vertex entry
 	unsigned int _i = 0;
-	for (std::vector<PLY::Element>::const_iterator
-		i =  this->pcDOM->alElements.begin();
-		i != this->pcDOM->alElements.end();++i,++_i)
+	for (std::vector<PLY::Element>::const_iterator i = pcDOM->alElements.begin();
+		i != pcDOM->alElements.end();++i,++_i)
 	{
 		if (PLY::EEST_Vertex == (*i).eSemantic)
 		{
@@ -647,8 +644,7 @@ void PLYImporter::LoadVertexColor(std::vector<aiColor4D>* pvOut)
 	if (NULL != pcList && 0 != cnt)
 	{
 		pvOut->reserve(pcList->alInstances.size());
-		for (std::vector<ElementInstance>::const_iterator
-			i =  pcList->alInstances.begin();
+		for (std::vector<ElementInstance>::const_iterator i = pcList->alInstances.begin();
 			i != pcList->alInstances.end();++i)
 		{
 			// convert the vertices to sp floats
@@ -684,10 +680,10 @@ void PLYImporter::LoadVertexColor(std::vector<aiColor4D>* pvOut)
 			pvOut->push_back(vOut);
 		}
 	}
-	return;
 }
 
 // ------------------------------------------------------------------------------------------------
+// Try to extract proper faces from the PLY DOM
 void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 {
 	ai_assert(NULL != pvOut);
@@ -706,17 +702,15 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 
 	// serach in the DOM for a face entry
 	unsigned int _i = 0;
-	for (std::vector<PLY::Element>::const_iterator 
-		i =  this->pcDOM->alElements.begin();
-		i != this->pcDOM->alElements.end();++i,++_i)
+	for (std::vector<PLY::Element>::const_iterator i =  pcDOM->alElements.begin();
+		i != pcDOM->alElements.end();++i,++_i)
 	{
 		// face = unique number of vertex indices
 		if (PLY::EEST_Face == (*i).eSemantic)
 		{
-			pcList = &this->pcDOM->alElementData[_i];
+			pcList = &pcDOM->alElementData[_i];
 			unsigned int _a = 0;
-			for (std::vector<PLY::Property>::const_iterator 
-				a =  (*i).alProperties.begin();
+			for (std::vector<PLY::Property>::const_iterator a =  (*i).alProperties.begin();
 				a != (*i).alProperties.end();++a,++_a)
 			{
 				if (PLY::EST_VertexIndex == (*a).Semantic)
@@ -744,8 +738,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 			// find a list property in this ...
 			pcList = &this->pcDOM->alElementData[_i];
 			unsigned int _a = 0;
-			for (std::vector<PLY::Property>::const_iterator 
-				a =  (*i).alProperties.begin();
+			for (std::vector<PLY::Property>::const_iterator a =  (*i).alProperties.begin();
 				a != (*i).alProperties.end();++a,++_a)
 			{
 				// must be a dynamic list!
@@ -765,8 +758,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 		if (!bIsTristrip)
 		{
 			pvOut->reserve(pcList->alInstances.size());
-			for (std::vector<ElementInstance>::const_iterator 
-				i =  pcList->alInstances.begin();
+			for (std::vector<ElementInstance>::const_iterator i =  pcList->alInstances.begin();
 				i != pcList->alInstances.end();++i)
 			{
 				PLY::Face sFace;
@@ -797,10 +789,11 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 		}
 		else // triangle strips
 		{
+			// HUGE TODO: MAKE THAT FUCK WORK!
+
 			// normally we have only one triangle strip instance where
 			// a value of -1 indicates a restart of the strip
-			for (std::vector<ElementInstance>::const_iterator
-				i =  pcList->alInstances.begin();
+			for (std::vector<ElementInstance>::const_iterator i =  pcList->alInstances.begin();
 				i != pcList->alInstances.end();++i)
 			{
 				int aiTable[2] = {-1,-1};
@@ -838,9 +831,10 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 			}
 		}
 	}
-	return;
 }
+
 // ------------------------------------------------------------------------------------------------
+// Get a RGBA color in [0...1] range
 void PLYImporter::GetMaterialColor(const std::vector<PLY::PropertyInstance>& avList,
 	unsigned int aiPositions[4], 
 	PLY::EDataType aiTypes[4],
@@ -876,10 +870,10 @@ void PLYImporter::GetMaterialColor(const std::vector<PLY::PropertyInstance>& avL
 		clrOut->a = NormalizeColorValue(avList[
 			aiPositions[3]].avList.front(),aiTypes[3]);
 	}
-
-	return;
 }
+
 // ------------------------------------------------------------------------------------------------
+// Extract a material from the PLY DOM
 void PLYImporter::LoadMaterial(std::vector<MaterialHelper*>* pvOut)
 {
 	ai_assert(NULL != pvOut);
@@ -905,8 +899,7 @@ void PLYImporter::LoadMaterial(std::vector<MaterialHelper*>* pvOut)
 
 	// serach in the DOM for a vertex entry
 	unsigned int _i = 0;
-	for (std::vector<PLY::Element>::const_iterator
-		i =  this->pcDOM->alElements.begin();
+	for (std::vector<PLY::Element>::const_iterator i =  this->pcDOM->alElements.begin();
 		i != this->pcDOM->alElements.end();++i,++_i)
 	{
 		if (PLY::EEST_Material == (*i).eSemantic)
@@ -1005,8 +998,7 @@ void PLYImporter::LoadMaterial(std::vector<MaterialHelper*>* pvOut)
 	// check whether we have a valid source for the material data
 	if (NULL != pcList)
 	{
-		for (std::vector<ElementInstance>::const_iterator
-			i =  pcList->alInstances.begin();
+		for (std::vector<ElementInstance>::const_iterator i =  pcList->alInstances.begin();
 			i != pcList->alInstances.end();++i)
 		{
 			aiColor4D clrOut;
@@ -1060,5 +1052,6 @@ void PLYImporter::LoadMaterial(std::vector<MaterialHelper*>* pvOut)
 			pvOut->push_back(pcHelper);
 		}
 	}
-	return;
 }
+
+#endif // !! ASSIMP_BUILD_NO_PLY_IMPORTER

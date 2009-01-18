@@ -42,6 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the Collada loader */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_DAE_IMPORTER
+
 #include "../include/aiAnim.h"
 #include "ColladaLoader.h"
 #include "ColladaParser.h"
@@ -405,3 +407,5 @@ void ColladaLoader::ConvertPath (aiString& ss)
 		ss.data[ss.length] = '\0';
 	}
 }
+
+#endif // !! ASSIMP_BUILD_NO_DAE_IMPORTER

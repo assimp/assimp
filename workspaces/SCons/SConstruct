@@ -17,7 +17,7 @@ g_IncPath = Split("""
 	/usr/local/include/
 """)
 #------------------------------------------------------------------------------
-g_assimp_lib_Source =  Glob(r"../../code/*.cpp") +     Glob(r"../../code/irrXML/*.cpp") +    Glob(r"../../code/extra/*.cpp") 
+g_assimp_lib_Source =  Glob(r"../../code/*.cpp") +     Glob(r"../../contrib/irrXML/*.cpp") + Glob(r"../../contrib/zlib/*.c") + Glob(r"../../code/extra/*.cpp") 
 
 #------------------------------------------------------------------------------
 # don't reset CC/CXX-variable, other users might have set it to something special

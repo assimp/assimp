@@ -42,12 +42,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the PLY parser class */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_PLY_IMPORTER
 
 #include "PlyLoader.h"
 #include "fast_atof.h"
 
-
 using namespace Assimp;
+
 // ------------------------------------------------------------------------------------------------
 PLY::EDataType PLY::Property::ParseDataType(const char* pCur,const char** pCurOut)
 {
@@ -98,6 +99,7 @@ PLY::EDataType PLY::Property::ParseDataType(const char* pCur,const char** pCurOu
 	*pCurOut = pCur;
 	return eOut;
 }
+
 // ------------------------------------------------------------------------------------------------
 PLY::ESemantic PLY::Property::ParseSemantic(const char* pCur,const char** pCurOut)
 {
@@ -237,6 +239,7 @@ PLY::ESemantic PLY::Property::ParseSemantic(const char* pCur,const char** pCurOu
 	*pCurOut = pCur;
 	return eOut;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool PLY::Property::ParseProperty (const char* pCur,
 	const char** pCurOut,
@@ -309,6 +312,7 @@ bool PLY::Property::ParseProperty (const char* pCur,
 	*pCurOut = pCur;
 	return true;
 }
+
 // ------------------------------------------------------------------------------------------------
 PLY::EElementSemantic PLY::Element::ParseSemantic(const char* pCur,
 	const char** pCurOut)
@@ -345,6 +349,7 @@ PLY::EElementSemantic PLY::Element::ParseSemantic(const char* pCur,
 	*pCurOut = pCur;
 	return eOut;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool PLY::Element::ParseElement (const char* pCur, 
 	const char** pCurOut,
@@ -399,6 +404,7 @@ bool PLY::Element::ParseElement (const char* pCur,
 	*pCurOut = pCur;
 	return true;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool PLY::DOM::SkipComments (const char* pCur,
 	const char** pCurOut)
@@ -419,6 +425,7 @@ bool PLY::DOM::SkipComments (const char* pCur,
 	*pCurOut = pCur;
 	return false;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool PLY::DOM::ParseHeader (const char* pCur,const char** pCurOut)
 {
@@ -457,6 +464,7 @@ bool PLY::DOM::ParseHeader (const char* pCur,const char** pCurOut)
 	DefaultLogger::get()->debug("PLY::DOM::ParseHeader() succeeded");
 	return true;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool PLY::DOM::ParseElementInstanceLists (
 	const char* pCur,
@@ -483,6 +491,7 @@ bool PLY::DOM::ParseElementInstanceLists (
 	*pCurOut = pCur;
 	return true;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool PLY::DOM::ParseElementInstanceListsBinary (
 	const char* pCur,
@@ -510,6 +519,7 @@ bool PLY::DOM::ParseElementInstanceListsBinary (
 	*pCurOut = pCur;
 	return true;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool PLY::DOM::ParseInstanceBinary (const char* pCur,DOM* p_pcOut,bool p_bBE)
 {
@@ -530,6 +540,7 @@ bool PLY::DOM::ParseInstanceBinary (const char* pCur,DOM* p_pcOut,bool p_bBE)
 	DefaultLogger::get()->debug("PLY::DOM::ParseInstanceBinary() succeeded");
 	return true;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool PLY::DOM::ParseInstance (const char* pCur,DOM* p_pcOut)
 {
@@ -552,6 +563,7 @@ bool PLY::DOM::ParseInstance (const char* pCur,DOM* p_pcOut)
 	DefaultLogger::get()->debug("PLY::DOM::ParseInstance() succeeded");
 	return true;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool PLY::ElementInstanceList::ParseInstanceList (
 	const char* pCur,
@@ -584,6 +596,7 @@ bool PLY::ElementInstanceList::ParseInstanceList (
 	*pCurOut = pCur;
 	return true;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool PLY::ElementInstanceList::ParseInstanceListBinary (
 	const char* pCur,
@@ -606,6 +619,7 @@ bool PLY::ElementInstanceList::ParseInstanceListBinary (
 	*pCurOut = pCur;
 	return true;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool PLY::ElementInstance::ParseInstance (
 	const char* pCur,
@@ -639,6 +653,7 @@ bool PLY::ElementInstance::ParseInstance (
 	*pCurOut = pCur;
 	return true;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool PLY::ElementInstance::ParseInstanceBinary (
 	const char* pCur,
@@ -667,6 +682,7 @@ bool PLY::ElementInstance::ParseInstanceBinary (
 	*pCurOut = pCur;
 	return true;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool PLY::PropertyInstance::ParseInstance (const char* pCur,const char** pCurOut,
 	const PLY::Property* prop, PLY::PropertyInstance* p_pcOut)
@@ -707,6 +723,7 @@ bool PLY::PropertyInstance::ParseInstance (const char* pCur,const char** pCurOut
 	*pCurOut = pCur;
 	return true;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool PLY::PropertyInstance::ParseInstanceBinary (
 	const char*  pCur,
@@ -743,6 +760,7 @@ bool PLY::PropertyInstance::ParseInstanceBinary (
 	*pCurOut = pCur;
 	return true;
 }
+
 // ------------------------------------------------------------------------------------------------
 PLY::PropertyInstance::ValueUnion PLY::PropertyInstance::DefaultValue(
 	PLY::EDataType eType)
@@ -764,6 +782,7 @@ PLY::PropertyInstance::ValueUnion PLY::PropertyInstance::DefaultValue(
 	out.iUInt = 0;
 	return out;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool PLY::PropertyInstance::ParseValue(
 	const char* pCur,
@@ -809,6 +828,7 @@ bool PLY::PropertyInstance::ParseValue(
 	*pCurOut = pCur;
 	return ret;
 }
+
 // ------------------------------------------------------------------------------------------------
 bool PLY::PropertyInstance::ParseValueBinary(
 	const char* pCur,
@@ -827,21 +847,15 @@ bool PLY::PropertyInstance::ParseValueBinary(
 		pCur += 4;
 		
 		// Swap endianess
-		if (p_bBE)
-		{
-			ByteSwap::Swap((int32_t*)&out->iUInt);
-		}
+		if (p_bBE)ByteSwap::Swap((int32_t*)&out->iUInt);
 		break;
 
 	case EDT_UShort:
 		{
-		uint16_t i = *((uint16_t*)pCur);
+		int16_t i = *((uint16_t*)pCur);
 
 		// Swap endianess
-		if (p_bBE)
-		{
-			ByteSwap::Swap((int16_t*)&i);
-		}
+		if (p_bBE)ByteSwap::Swap(&i);
 		out->iUInt = (uint32_t)i;
 		pCur += 2;
 		break;
@@ -849,8 +863,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
 
 	case EDT_UChar:
 		{
-		uint8_t i = *((uint8_t*)pCur);
-		out->iUInt = (uint32_t)i;
+		out->iUInt = (uint32_t)(*((uint8_t*)pCur));
 		pCur ++;
 		break;
 		}
@@ -860,10 +873,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
 		pCur += 4;
 		
 		// Swap endianess
-		if (p_bBE)
-		{
-			ByteSwap::Swap((int32_t*)&out->iInt);
-		}
+		if (p_bBE)ByteSwap::Swap(&out->iInt);
 		break;
 
 	case EDT_Short:
@@ -871,10 +881,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
 		int16_t i = *((int16_t*)pCur);
 
 		// Swap endianess
-		if (p_bBE)
-		{
-			ByteSwap::Swap((int16_t*)&i);
-		}
+		if (p_bBE)ByteSwap::Swap(&i);
 		out->iInt = (int32_t)i;
 		pCur += 2;
 		break;
@@ -887,28 +894,20 @@ bool PLY::PropertyInstance::ParseValueBinary(
 
 	case EDT_Float:
 		{
-		int32_t* pf = (int32_t*)pCur;
+		out->fFloat = *((float*)pCur);
 
 		// Swap endianess
-		if (p_bBE)
-		{
-			ByteSwap::Swap((int32_t*)&pf);
-		}
+		if (p_bBE)ByteSwap::Swap((int32_t*)&out->fFloat);
 		pCur += 4;
-		out->fFloat = *((float*)&pf);
 		break;
 		}
 	case EDT_Double:
 		{
-		int64_t* pf = (int64_t*)pCur;
+		out->fDouble = *((double*)pCur);
 
 		// Swap endianess
-		if (p_bBE)
-		{
-			ByteSwap::Swap((int64_t*)&pf);
-		}
+		if (p_bBE)ByteSwap::Swap((int64_t*)&out->fDouble);
 		pCur += 8;
-		out->fDouble = *((double*)&pf);
 		break;
 		}
 	default:
@@ -917,3 +916,5 @@ bool PLY::PropertyInstance::ParseValueBinary(
 	*pCurOut = pCur;
 	return ret;
 }
+
+#endif // !! ASSIMP_BUILD_NO_PLY_IMPORTER

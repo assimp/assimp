@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_LWO_IMPORTER
 
 // internal headers
 #include "LWOLoader.h"
@@ -819,3 +820,5 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 		mFileBuffer = next;
 	}
 }
+
+#endif // !! ASSIMP_BUILD_NO_X_IMPORTER

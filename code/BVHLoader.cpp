@@ -41,7 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AssimpPCH.h"
-#include "../include/aiAnim.h"
+#ifndef ASSIMP_BUILD_NO_BVH_IMPORTER
+
 #include "BVHLoader.h"
 #include "fast_atof.h"
 #include "SkeletonMeshBuilder.h"
@@ -528,3 +529,5 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 		}
 	}
 }
+
+#endif // !! ASSIMP_BUILD_NO_BVH_IMPORTER

@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the OFF importer class */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_OFF_IMPORTER
 
 // internal headers
 #include "OFFLoader.h"
@@ -54,14 +55,12 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 OFFImporter::OFFImporter()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
 OFFImporter::~OFFImporter()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
@@ -197,3 +196,5 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 	pcMat->AddProperty(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
 	pScene->mMaterials[0] = pcMat;
 }
+
+#endif // !! ASSIMP_BUILD_NO_OFF_IMPORTER

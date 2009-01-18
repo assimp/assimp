@@ -8,7 +8,6 @@
 #include "irrXML.h"
 #include "irrString.h"
 #include "irrArray.h"
-#include "./../fast_atof.h"
 
 using namespace Assimp;
 

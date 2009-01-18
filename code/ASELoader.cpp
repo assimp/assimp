@@ -41,8 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the ASE importer class */
 
-
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_ASE_IMPORTER
 
 // internal headers
 #include "ASELoader.h"
@@ -60,13 +60,13 @@ using namespace Assimp::ASE;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ASEImporter::ASEImporter()
-{
-}
+{}
+
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
 ASEImporter::~ASEImporter()
-{
-}
+{}
+
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
 bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
@@ -93,7 +93,7 @@ bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 void ASEImporter::SetupProperties(const Importer* pImp)
 {
 	configRecomputeNormals = (pImp->GetPropertyInteger(
-		AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS,0) ? true : false);
+		AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS,1) ? true : false);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1423,3 +1423,5 @@ bool ASEImporter::GenerateNormals(ASE::Mesh& mesh)
 	ComputeNormalsWithSmoothingsGroups<ASE::Face>(mesh);
 	return false;
 }
+
+#endif // !! ASSIMP_BUILD_NO_BASE_IMPORTER

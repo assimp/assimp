@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
 #include "ObjFileParser.h"
 #include "ObjFileMtlImporter.h"
@@ -49,10 +50,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "DefaultIOSystem.h"
 
-namespace Assimp
-{
+namespace Assimp	{
 // -------------------------------------------------------------------
-const std::string ObjFileParser::DEFAULT_MATERIAL = "defaultmaterial";
+const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME; 
+// fix: changed that to our standard default name
 
 // -------------------------------------------------------------------
 //	Constructor with loaded data and directories.
@@ -650,3 +651,5 @@ void ObjFileParser::extractExtension(const std::string &strFile,
 // -------------------------------------------------------------------
 
 }	// Namespace Assimp
+
+#endif // !! ASSIMP_BUILD_NO_OBJ_IMPORTER

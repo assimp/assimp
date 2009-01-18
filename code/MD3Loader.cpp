@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the MD3 importer class */
 
 #include "AssimpPCH.h"
-
+#ifndef ASSIMP_BUILD_NO_MD3_IMPORTER
 
 #include "MD3Loader.h"
 #include "MaterialSystem.h"
@@ -55,14 +55,12 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 MD3Importer::MD3Importer()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
 MD3Importer::~MD3Importer()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
@@ -439,3 +437,5 @@ void MD3Importer::InternReadFile(
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
 		pScene->mRootNode->mMeshes[i] = i;
 }
+
+#endif // !! ASSIMP_BUILD_NO_MD3_IMPORTER

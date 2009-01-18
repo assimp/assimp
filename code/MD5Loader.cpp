@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the MD5 importer class */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_MD5_IMPORTER
 
 // internal headers
 #include "MaterialSystem.h"
@@ -84,6 +85,7 @@ bool MD5Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	if (extension[3] != '5')return false;
 	return true;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void MD5Importer::InternReadFile( 
@@ -109,6 +111,7 @@ void MD5Importer::InternReadFile(
 	
 	if (!bHadMD5Mesh)pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
 }
+
 // ------------------------------------------------------------------------------------------------
 void MD5Importer::LoadFileIntoMemory (IOStream* file)
 {
@@ -128,6 +131,7 @@ void MD5Importer::LoadFileIntoMemory (IOStream* file)
 	// now remove all line comments from the file
 	CommentRemover::RemoveLineComments("//",this->mBuffer,' ');
 }
+
 // ------------------------------------------------------------------------------------------------
 void MD5Importer::UnloadFileFromMemory ()
 {
@@ -136,6 +140,7 @@ void MD5Importer::UnloadFileFromMemory ()
 	this->mBuffer = NULL;
 	this->fileSize = 0;
 }
+
 // ------------------------------------------------------------------------------------------------
 void MakeDataUnique (MD5::MeshDesc& meshSrc)
 {
@@ -182,6 +187,7 @@ void MakeDataUnique (MD5::MeshDesc& meshSrc)
 		}
 	}
 }
+
 // ------------------------------------------------------------------------------------------------
 void AttachChilds(int iParentID,aiNode* piParent,BoneList& bones)
 {
@@ -238,6 +244,7 @@ void AttachChilds(int iParentID,aiNode* piParent,BoneList& bones)
 		piParent->mChildren -= piParent->mNumChildren;
 	}
 }
+
 // ------------------------------------------------------------------------------------------------
 void MD5Importer::LoadMD5MeshFile ()
 {
@@ -431,8 +438,9 @@ void MD5Importer::LoadMD5MeshFile ()
 	}
 
 	// delete the file again
-	this->UnloadFileFromMemory();
+	UnloadFileFromMemory();
 }
+
 // ------------------------------------------------------------------------------------------------
 void MD5Importer::LoadMD5AnimFile ()
 {
@@ -448,7 +456,7 @@ void MD5Importer::LoadMD5AnimFile ()
 	bHadMD5Anim = true;
 
 	// now load the file into memory
-	this->LoadFileIntoMemory(file.get());
+	LoadFileIntoMemory(file.get());
 
 	// now construct a parser and parse the file
 	MD5::MD5Parser parser(mBuffer,fileSize);
@@ -558,5 +566,7 @@ void MD5Importer::LoadMD5AnimFile ()
 	}
 
 	// delete the file again
-	this->UnloadFileFromMemory();
+	UnloadFileFromMemory();
 }
+
+#endif // !! ASSIMP_BUILD_NO_MD5_IMPORTER

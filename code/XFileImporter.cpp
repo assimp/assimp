@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the XFile importer class */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_X_IMPORTER
 
 #include "XFileImporter.h"
 #include "XFileParser.h"
@@ -48,10 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ConvertToLHProcess.h"
 
 using namespace Assimp;
-
-#if _MSC_VER >= 1400
-#	define sprintf sprintf_s
-#endif
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -670,4 +667,6 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, const std::vector<XFile::
 		pScene->mNumMaterials++;
 	}
 }
+
+#endif // !! ASSIMP_BUILD_NO_X_IMPORTER
 

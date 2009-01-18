@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_IRRLOADER_H_INCLUDED
 #define AI_IRRLOADER_H_INCLUDED
 
-#include "IRRMeshLoader.h"
+#include "IRRShared.h"
 #include "SceneCombiner.h"
 
 namespace Assimp	{

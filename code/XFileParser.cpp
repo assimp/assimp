@@ -42,14 +42,36 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the XFile parser helper class */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_X_IMPORTER
 
 #include "XFileParser.h"
 #include "XFileHelper.h"
-#include "BaseImporter.h"
 #include "fast_atof.h"
 
 using namespace Assimp;
 using namespace Assimp::XFile;
+
+#ifndef ASSIMP_BUILD_NO_COMPRESSED_X
+
+#include "../contrib/zlib/zlib.h"
+
+// Magic identifier for MSZIP compressed data
+#define MSZIP_MAGIC 0x4B43
+#define MSZIP_BLOCK 32786
+
+// ------------------------------------------------------------------------------------------------
+// Dummy memory wrappers for use with zlib
+void* dummy_alloc (void* opaque, unsigned int items, unsigned int size)	{
+
+	// we're using calloc to make it easier to debug the whole stuff
+	return ::calloc(items,size);
+}
+
+void  dummy_free  (void* opaque, void* address)	{
+	return ::free(address);
+}
+
+#endif // !! ASSIMP_BUILD_NO_COMPRESSED_X
 
 // ------------------------------------------------------------------------------------------------
 // Constructor. Creates a data structure out of the XFile given in the memory block. 
@@ -61,6 +83,9 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 	P = End = NULL;
 	mLineNumber = 0;
 	mScene = NULL;
+
+	// vector to store uncompressed file for INFLATE'd X files
+	std::vector<char> uncompressed;
 
 	// set up memory pointers
 	P = &pBuffer.front();
@@ -74,13 +99,30 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 	mMajorVersion = (unsigned int)(P[4] - 48) * 10 + (unsigned int)(P[5] - 48);
 	mMinorVersion = (unsigned int)(P[6] - 48) * 10 + (unsigned int)(P[7] - 48);
 
-	// read format
+	bool compressed = false;
+
+	// txt - pure ASCII text format
 	if( strncmp( P + 8, "txt ", 4) == 0)
 		mIsBinaryFormat = false;
+
+	// bin - Binary format
 	else if( strncmp( P + 8, "bin ", 4) == 0)
 		mIsBinaryFormat = true;
-	else
-    ThrowException( boost::str( boost::format( "Unsupported xfile format '%c%c%c%c'") % P[8] % P[9] % P[10] % P[11]));
+
+	// tzip - Inflate compressed text format
+	else if( strncmp( P + 8, "tzip", 4) == 0)
+	{
+		mIsBinaryFormat = false;
+		compressed = true;
+	}
+	// bzip - Inflate compressed binary format
+	else if( strncmp( P + 8, "bzip", 4) == 0)
+	{
+		mIsBinaryFormat = true;
+		compressed = true;
+	}
+	else ThrowException( boost::str(boost::format("Unsupported xfile format '%c%c%c%c'") 
+		% P[8] % P[9] % P[10] % P[11]));
 
 	// float size
 	mBinaryFloatSize = (unsigned int)(P[12] - 48) * 1000
@@ -89,11 +131,119 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 		+ (unsigned int)(P[15] - 48);
 
 	if( mBinaryFloatSize != 32 && mBinaryFloatSize != 64)
-		ThrowException( boost::str( boost::format( "Unknown float size %1% specified in xfile header.") % mBinaryFloatSize));
+		ThrowException( boost::str( boost::format( "Unknown float size %1% specified in xfile header.")
+			% mBinaryFloatSize));
 
-	// start reading here
 	P += 16;
-	ReadUntilEndOfLine();
+
+	// If this is a compressed X file, apply the inflate algorithm to it
+	if (compressed)
+	{
+#ifdef ASSIMP_BUILD_NO_COMPRESSED_X
+		throw new ImportErrorException("Assimp was built without compressed X support");
+#else
+		/* ///////////////////////////////////////////////////////////////////////  
+		 * COMPRESSED X FILE FORMAT
+		 * ///////////////////////////////////////////////////////////////////////
+		 *    [xhead]
+		 *    2 major
+		 *    2 minor
+		 *    4 type    // bzip,tzip
+		 *    [mszip_master_head]
+		 *    4 unkn    // checksum?
+		 *    2 unkn    // flags? (seems to be constant)
+		 *    [mszip_head]
+		 *    2 ofs     // offset to next section
+		 *    2 magic   // 'CK'
+		 *    ... ofs bytes of data
+		 *    ... next mszip_head
+		 *
+		 *  http://www.kdedevelopers.org/node/3181 has been very helpful.
+		 * ///////////////////////////////////////////////////////////////////////
+		 */
+
+		// build a zlib stream
+		z_stream stream;
+		stream.opaque = NULL;
+		stream.zalloc = &dummy_alloc;
+		stream.zfree  = &dummy_free;
+		stream.data_type = (mIsBinaryFormat ? Z_BINARY : Z_ASCII);
+
+		// initialize the inflation algorithm
+		::inflateInit2(&stream, -MAX_WBITS);
+
+		// skip unknown data (checksum, flags?)
+		P += 6;
+
+		// First find out how much storage we'll need. Count sections.
+		const char* P1       = P;
+		unsigned int est_out = 0;
+		while (P1 < End)
+		{
+			// read next offset
+			uint16_t ofs = *((uint16_t*)P1);
+			AI_SWAP2(ofs); P1 += 2;
+
+			if (ofs >= MSZIP_BLOCK)
+				throw new ImportErrorException("X: Invalid offset to next MSZIP compressed block");
+
+			// check magic word
+			uint16_t magic = *((uint16_t*)P1);
+			AI_SWAP2(magic); P1 += 2;
+
+			if (magic != MSZIP_MAGIC)
+				throw new ImportErrorException("X: Unsupported compressed format, expected MSZIP header");
+
+			// and advance to the next offset
+			P1 += ofs;
+			est_out += MSZIP_BLOCK; // one decompressed block is 32786 in size
+		}
+		
+		// Allocate storage and do the actual uncompressing
+		uncompressed.resize(est_out);
+		char* out = &uncompressed.front();
+		while (P < End)
+		{
+			uint16_t ofs = *((uint16_t*)P);
+			AI_SWAP2(ofs); 
+			P += 4;
+
+			// push data to the stream
+			stream.next_in   = (Bytef*)P;
+			stream.avail_in  = ofs;
+			stream.next_out  = (Bytef*)out;
+			stream.avail_out = MSZIP_BLOCK;
+
+			// and decompress the data ....
+			int ret = ::inflate( &stream, Z_SYNC_FLUSH );
+			if (ret != Z_OK && ret != Z_STREAM_END)
+				throw new ImportErrorException("X: Failed to decompress MSZIP-compressed data");
+
+			::inflateReset( &stream );
+			::inflateSetDictionary( &stream, (const Bytef*)out , MSZIP_BLOCK - stream.avail_out );
+
+			// and advance to the next offset
+			out +=  MSZIP_BLOCK - stream.avail_out;
+			P   += ofs;
+		}
+
+		// terminate zlib
+		::inflateEnd(&stream);
+		
+		// ok, update pointers to point to the uncompressed file data
+		P = &uncompressed[0];
+		End = out;
+
+		// FIXME: we don't need the compressed data anymore, could release
+		// it already for better memory usage. Consider breaking const-co.
+		DefaultLogger::get()->info("Successfully decompressed MSZIP-compressed file");
+#endif // !! ASSIMP_BUILD_NO_COMPRESSED_X
+	}
+	else
+	{
+		// start reading here
+		ReadUntilEndOfLine();
+	}
 
 	mScene = new Scene;
 	ParseFile();
@@ -1079,6 +1229,9 @@ unsigned int XFileParser::ReadInt()
 	} else
 	{
 		FindNextNoneWhiteSpace();
+
+		// TODO: consider using strtol10s instead???
+
 		// check preceeding minus sign
 		bool isNegative = false;
 		if( *P == '-')
@@ -1102,7 +1255,6 @@ unsigned int XFileParser::ReadInt()
 		}
 		
 		CheckForSeparator();
-
 		return isNegative ? ((unsigned int) -int( number)) : number;
 	}
 }
@@ -1139,7 +1291,7 @@ float XFileParser::ReadFloat()
 	FindNextNoneWhiteSpace();
 	// check for various special strings to allow reading files from faulty exporters
 	// I mean you, Blender!
-	if( strncmp( P, "-1.#IND00", 9) == 0)
+	if( strncmp( P, "-1.#IND00", 9) == 0 || strncmp( P, "1.#IND00", 8) == 0)
 	{ 
 		P += 9;
 		CheckForSeparator();
@@ -1208,6 +1360,7 @@ aiColor3D XFileParser::ReadRGB()
 	return color;
 }
 
+// ------------------------------------------------------------------------------------------------
 // Throws an exception with a line number and the given text.
 void XFileParser::ThrowException( const std::string& pText)
 {
@@ -1245,3 +1398,5 @@ void XFileParser::FilterHierarchy( XFile::Node* pNode)
 	for( unsigned int a = 0; a < pNode->mChildren.size(); a++)
 		FilterHierarchy( pNode->mChildren[a]);
 }
+
+#endif // !! ASSIMP_BUILD_NO_X_IMPORTER

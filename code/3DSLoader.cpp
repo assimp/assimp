@@ -42,10 +42,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the 3ds importer class */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
 // internal headers
 #include "3DSLoader.h"
-#include "TextureTransform.h"
 
 using namespace Assimp;
 		
@@ -53,36 +53,32 @@ using namespace Assimp;
 // Begins a new parsing block
 // - Reads the current chunk and validates it
 // - computes its length
-
-#define ASSIMP_3DS_BEGIN_CHUNK() \
-	Discreet3DS::Chunk chunk; \
-	ReadChunk(&chunk); \
-	int chunkSize = chunk.Size-sizeof(Discreet3DS::Chunk); \
-	int oldReadLimit = stream->GetReadLimit(); \
+#define ASSIMP_3DS_BEGIN_CHUNK()                                     \
+	Discreet3DS::Chunk chunk;                                        \
+	ReadChunk(&chunk);                                               \
+	int chunkSize = chunk.Size-sizeof(Discreet3DS::Chunk);	         \
+	const int oldReadLimit = stream->GetReadLimit();                 \
 	stream->SetReadLimit(stream->GetCurrentPos() + chunkSize);
 	
 
 // ------------------------------------------------------------------------------------------------
 // End a parsing block
-// Must follow at the end of each parsing block
-
-#define ASSIMP_3DS_END_CHUNK() \
-	stream->SkipToReadLimit(); \
-	stream->SetReadLimit(oldReadLimit); \
-	if (stream->GetRemainingSizeToLimit() == 0)return;
-
+// Must follow at the end of each parsing block, reset chunk end marker to previous value
+#define ASSIMP_3DS_END_CHUNK()                  \
+	stream->SkipToReadLimit();                  \
+	stream->SetReadLimit(oldReadLimit);         \
+	if (stream->GetRemainingSizeToLimit() == 0) \
+		return;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 Discreet3DSImporter::Discreet3DSImporter()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
 Discreet3DSImporter::~Discreet3DSImporter()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
@@ -551,6 +547,7 @@ void Discreet3DSImporter::InverseNodeSearch(D3DS::Node* pcNode,D3DS::Node* pcCur
 }
 
 // ------------------------------------------------------------------------------------------------
+// Find a node with a specific name in the import hierarchy
 D3DS::Node* FindNode(D3DS::Node* root, const std::string& name)
 {
 	if (root->mName == name)return root;
@@ -572,6 +569,7 @@ bool KeyUniqueCompare(const T& first, const T& second)
 }
 
 // ------------------------------------------------------------------------------------------------
+// Skip some additional import data.
 void Discreet3DSImporter::SkipTCBInfo()
 {
 	unsigned int flags = stream->GetI2();
@@ -600,6 +598,7 @@ void Discreet3DSImporter::SkipTCBInfo()
 }
 
 // ------------------------------------------------------------------------------------------------
+// Read hierarchy and keyframe info
 void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
@@ -897,7 +896,9 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 	// recursively continue processing this hierarchy level
 	return ParseHierarchyChunk(parent);
 }
+
 // ------------------------------------------------------------------------------------------------
+// Read a face chunk - it contains smoothing groups and material assignments
 void Discreet3DSImporter::ParseFaceChunk()
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
@@ -972,7 +973,9 @@ void Discreet3DSImporter::ParseFaceChunk()
 	// recursively continue processing this hierarchy level
 	return ParseFaceChunk();
 }
+
 // ------------------------------------------------------------------------------------------------
+// Read a mesh chunk. Here's the actual mesh data
 void Discreet3DSImporter::ParseMeshChunk()
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
@@ -1095,6 +1098,7 @@ void Discreet3DSImporter::ParseMeshChunk()
 }
 
 // ------------------------------------------------------------------------------------------------
+// Read a 3DS material chunk
 void Discreet3DSImporter::ParseMaterialChunk()
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
@@ -1432,3 +1436,5 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D* out,
 		return ParseColorChunk(out,acceptPercent);
 	};
 }
+
+#endif // !! ASSIMP_BUILD_NO_3DS_IMPORTER

@@ -40,15 +40,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
 #include "ObjFileMtlImporter.h"
 #include "ObjTools.h"
 #include "ObjFileData.h"
 #include "fast_atof.h"
 
-
-namespace Assimp
-{
+namespace Assimp	{
 
 // -------------------------------------------------------------------
 //	Constructor
@@ -152,6 +151,7 @@ void ObjFileMtlImporter::load()
 		
 
 		case 'm':	// Texture
+		case 'b':   // quick'n'dirty - for 'bump' sections
 			{
 				getTexture();
 				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
@@ -244,14 +244,50 @@ void ObjFileMtlImporter::createMaterial()
 //	Gets a texture name from data.
 void ObjFileMtlImporter::getTexture()
 {
+	aiString* out = NULL;
+
+	// FIXME: just a quick'n'dirty hack, consider cleanup later
+
+	// Diffuse texture
+	if (!ASSIMP_strincmp(&(*m_DataIt),"map_kd",6))
+		out = & m_pModel->m_pCurrentMaterial->texture;
+
+	// Ambient texture
+	else if (!ASSIMP_strincmp(&(*m_DataIt),"map_ka",6))
+		out = & m_pModel->m_pCurrentMaterial->textureAmbient;
+
+	// Specular texture
+	else if (!ASSIMP_strincmp(&(*m_DataIt),"map_ks",6))
+		out = & m_pModel->m_pCurrentMaterial->textureSpecular;
+
+	// Ambient texture
+	else if (!ASSIMP_strincmp(&(*m_DataIt),"map_ka",6))
+		out = & m_pModel->m_pCurrentMaterial->textureAmbient;
+
+	// Bump texture
+	else if (!ASSIMP_strincmp(&(*m_DataIt),"map_bump",8) || !ASSIMP_strincmp(&(*m_DataIt),"bump",4))
+		out = & m_pModel->m_pCurrentMaterial->textureBump;
+
+	// Specularity scaling (glossiness)
+	else if (!ASSIMP_strincmp(&(*m_DataIt),"map_ns",6))
+		out = & m_pModel->m_pCurrentMaterial->textureSpecularity;
+
+	else
+	{
+		DefaultLogger::get()->error("OBJ/MTL: Encountered unknown texture type");
+		return;
+	}
+
 	std::string strTexture;
 	m_DataIt = getName<DataArrayIt>( m_DataIt, m_DataItEnd, strTexture );
 	if ( m_DataItEnd == m_DataIt )
 		return;
 
-	m_pModel->m_pCurrentMaterial->texture.Set( strTexture );
+	out->Set( strTexture );
 }
 
 // -------------------------------------------------------------------
 
 } // Namespace Assimp
+
+#endif // !! ASSIMP_BUILD_NO_OBJ_IMPORTER

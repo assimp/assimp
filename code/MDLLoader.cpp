@@ -43,14 +43,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_MDL_IMPORTER
 
 #include "MDLLoader.h"
 #include "MDLDefaultColorMap.h"
 #include "MD2FileData.h" 
 
-
 using namespace Assimp;
-
 
 // ------------------------------------------------------------------------------------------------
 // macros used by the MDL7 loader
@@ -2047,3 +2046,5 @@ void MDLImporter::InternReadFile_HL2( )
 {
 	//const MDL::Header_HL2* pcHeader = (const MDL::Header_HL2*)this->mBuffer;
 }
+
+#endif // !! ASSIMP_BUILD_NO_MDL_IMPORTER

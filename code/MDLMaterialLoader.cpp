@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the material part of the MDL importer class */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_MDL_IMPORTER
 
 // internal headers
 #include "MDLLoader.h"
@@ -50,10 +51,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
+// Find a suitable pallette file or take teh default one
 void MDLImporter::SearchPalette(const unsigned char** pszColorMap)
 {
 	// now try to find the color map in the current directory
-	IOStream* pcStream = this->pIOHandler->Open(configPalette,"rb");
+	IOStream* pcStream = pIOHandler->Open(configPalette,"rb");
 
 	const unsigned char* szColorMap = (const unsigned char*)::g_aclrDefaultColorMap;
 	if(pcStream)
@@ -70,25 +72,26 @@ void MDLImporter::SearchPalette(const unsigned char** pszColorMap)
 		pcStream = NULL;
 	}
 	*pszColorMap = szColorMap;
-	return;
 }
+
 // ------------------------------------------------------------------------------------------------
+// Free the palette again
 void MDLImporter::FreePalette(const unsigned char* szColorMap)
 {
 	if (szColorMap != (const unsigned char*)::g_aclrDefaultColorMap)
-	{
 		delete[] szColorMap;
-	}
-	return;
 }
+
 // ------------------------------------------------------------------------------------------------
+// Check whether we can replace a texture with a single color
 aiColor4D MDLImporter::ReplaceTextureWithColor(const aiTexture* pcTexture)
 {
 	ai_assert(NULL != pcTexture);
 
 	aiColor4D clrOut;
 	clrOut.r = std::numeric_limits<float>::quiet_NaN();
-	if (!pcTexture->mHeight || !pcTexture->mWidth)return clrOut;
+	if (!pcTexture->mHeight || !pcTexture->mWidth)
+		return clrOut;
 
 	const unsigned int iNumPixels = pcTexture->mHeight*pcTexture->mWidth;
 	const aiTexel* pcTexel = pcTexture->pcData+1;
@@ -111,10 +114,12 @@ aiColor4D MDLImporter::ReplaceTextureWithColor(const aiTexture* pcTexture)
 	}
 	return clrOut;
 }
+
 // ------------------------------------------------------------------------------------------------
+// Read a texture from a MDL3 file
 void MDLImporter::CreateTextureARGB8_3DGS_MDL3(const unsigned char* szData)
 {
-	const MDL::Header *pcHeader = (const MDL::Header*)this->mBuffer;  //the endianess is allready corrected in the InternReadFile_3DGS_MDL345 function
+	const MDL::Header *pcHeader = (const MDL::Header*)mBuffer;  //the endianess is allready corrected in the InternReadFile_3DGS_MDL345 function
   
   VALIDATE_FILE_SIZE(szData + pcHeader->skinwidth *
 		pcHeader->skinheight);
@@ -141,20 +146,22 @@ void MDLImporter::CreateTextureARGB8_3DGS_MDL3(const unsigned char* szData)
 		pcNew->pcData[i].b = *sz;
 	}
 
-	this->FreePalette(szColorMap);
+	FreePalette(szColorMap);
 
 	// store the texture
 	aiTexture** pc = this->pScene->mTextures;
-	this->pScene->mTextures = new aiTexture*[this->pScene->mNumTextures+1];
-	for (unsigned int i = 0; i < this->pScene->mNumTextures;++i)
-		this->pScene->mTextures[i] = pc[i];
+	this->pScene->mTextures = new aiTexture*[pScene->mNumTextures+1];
+	for (unsigned int i = 0; i <pScene->mNumTextures;++i)
+		pScene->mTextures[i] = pc[i];
 
-	this->pScene->mTextures[this->pScene->mNumTextures] = pcNew;
-	this->pScene->mNumTextures++;
+	pScene->mTextures[this->pScene->mNumTextures] = pcNew;
+	pScene->mNumTextures++;
 	delete[] pc;
 	return;
 }
+
 // ------------------------------------------------------------------------------------------------
+// Read a texture from a MDL4 file
 void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char* szData, 
 	unsigned int iType,
 	unsigned int* piSkip)
@@ -184,25 +191,27 @@ void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char* szData,
 	{
 		if (!this->pScene->mNumTextures)
 		{
-			this->pScene->mNumTextures = 1;
-			this->pScene->mTextures = new aiTexture*[1];
-			this->pScene->mTextures[0] = pcNew;
+			pScene->mNumTextures = 1;
+			pScene->mTextures = new aiTexture*[1];
+			pScene->mTextures[0] = pcNew;
 		}
 		else
 		{
-			aiTexture** pc = this->pScene->mTextures;
-			this->pScene->mTextures = new aiTexture*[this->pScene->mNumTextures+1];
+			aiTexture** pc = pScene->mTextures;
+			pScene->mTextures = new aiTexture*[pScene->mNumTextures+1];
 			for (unsigned int i = 0; i < this->pScene->mNumTextures;++i)
-				this->pScene->mTextures[i] = pc[i];
-			this->pScene->mTextures[this->pScene->mNumTextures] = pcNew;
-			this->pScene->mNumTextures++;
+				pScene->mTextures[i] = pc[i];
+			pScene->mTextures[pScene->mNumTextures] = pcNew;
+			pScene->mNumTextures++;
 			delete[] pc;
 		}
 	}
 	else delete pcNew;
 	return;
 }
+
 // ------------------------------------------------------------------------------------------------
+// Load color data of a texture and convert it to our output format
 void MDLImporter::ParseTextureColorData(const unsigned char* szData, 
 	unsigned int iType,
 	unsigned int* piSkip,
@@ -225,9 +234,9 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 			for (i = 0; i < pcNew->mWidth*pcNew->mHeight;++i)
 			{
 				MDL::RGB565 val = ((MDL::RGB565*)szData)[i];
-        AI_SWAP2(val);    
-				
-        pcNew->pcData[i].a = 0xFF;
+				AI_SWAP2(val);    
+
+				pcNew->pcData[i].a = 0xFF;
 				pcNew->pcData[i].r = (unsigned char)val.b << 3;
 				pcNew->pcData[i].g = (unsigned char)val.g << 2;
 				pcNew->pcData[i].b = (unsigned char)val.r << 3;
@@ -256,7 +265,7 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 			for (i = 0; i < pcNew->mWidth*pcNew->mHeight;++i)
 			{
 				MDL::ARGB4 val = ((MDL::ARGB4*)szData)[i];
-        AI_SWAP2(val);    
+				AI_SWAP2(val);    
 
 				pcNew->pcData[i].a = (unsigned char)val.a << 4;
 				pcNew->pcData[i].r = (unsigned char)val.r << 4;
@@ -290,9 +299,9 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 
 				pcNew->pcData[i].a = 0xFF;
 				pcNew->pcData[i].b = *_szData++;
-        pcNew->pcData[i].g = *_szData++;
-		    pcNew->pcData[i].r = *_szData;
-      }
+				pcNew->pcData[i].g = *_szData++;
+				pcNew->pcData[i].r = *_szData;
+			}
 		} 
 		else i = pcNew->mWidth*pcNew->mHeight;
 
@@ -320,10 +329,10 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 				const unsigned char* _szData = &szData[i*4];
 
 				pcNew->pcData[i].b = *_szData++;
-        pcNew->pcData[i].g = *_szData++;
-        pcNew->pcData[i].r = *_szData++;
-        pcNew->pcData[i].a = *_szData;
-      }
+				pcNew->pcData[i].g = *_szData++;
+				pcNew->pcData[i].r = *_szData++;
+				pcNew->pcData[i].a = *_szData;
+			}
 		} 
 		else i = pcNew->mWidth*pcNew->mHeight;
 
@@ -355,9 +364,9 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 
 				pcNew->pcData[i].a = 0xFF;
 				pcNew->pcData[i].r = *sz++;
-        pcNew->pcData[i].g = *sz++;
-        pcNew->pcData[i].b = *sz;
-      }
+				pcNew->pcData[i].g = *sz++;
+				pcNew->pcData[i].b = *sz;
+			}
 			this->FreePalette(szColorMap);
 
 		} 
@@ -366,15 +375,15 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 
 		// FIXME: Also support for MIP maps?
 	}
-	return;
 }
+
 // ------------------------------------------------------------------------------------------------
+// Get a texture from a MDL5 file
 void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char* szData, 
 	unsigned int iType,
 	unsigned int* piSkip)
 {
 	ai_assert(NULL != piSkip);
-
 	bool bNoRead = *piSkip == 0xffffffff;
 
 	// allocate a new texture object
@@ -384,11 +393,11 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char* szData,
 
 	// first read the size of the texture
 	pcNew->mWidth = *((uint32_t*)szData);
-  AI_SWAP4(pcNew->mWidth); 
+	AI_SWAP4(pcNew->mWidth); 
 	szData += sizeof(uint32_t);
 
 	pcNew->mHeight = *((uint32_t*)szData);
-  AI_SWAP4(pcNew->mHeight); 
+	AI_SWAP4(pcNew->mHeight); 
 	szData += sizeof(uint32_t);
 
 	if (bNoRead)pcNew->pcData = (aiTexel*)0xffffffff;
@@ -420,7 +429,7 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char* szData,
 	else
 	{
 		// parse the color data of the texture
-		this->ParseTextureColorData(szData,iType,
+		ParseTextureColorData(szData,iType,
 			piSkip,pcNew);
 	}
 	*piSkip += sizeof(uint32_t) * 2;
@@ -430,26 +439,28 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char* szData,
 		// store the texture
 		if (!this->pScene->mNumTextures)
 		{
-			this->pScene->mNumTextures = 1;
-			this->pScene->mTextures = new aiTexture*[1];
-			this->pScene->mTextures[0] = pcNew;
+			pScene->mNumTextures = 1;
+			pScene->mTextures = new aiTexture*[1];
+			pScene->mTextures[0] = pcNew;
 		}
 		else
 		{
-			aiTexture** pc = this->pScene->mTextures;
-			this->pScene->mTextures = new aiTexture*[this->pScene->mNumTextures+1];
-			for (unsigned int i = 0; i < this->pScene->mNumTextures;++i)
+			aiTexture** pc = pScene->mTextures;
+			pScene->mTextures = new aiTexture*[pScene->mNumTextures+1];
+			for (unsigned int i = 0; i < pScene->mNumTextures;++i)
 				this->pScene->mTextures[i] = pc[i];
 
-			this->pScene->mTextures[this->pScene->mNumTextures] = pcNew;
-			this->pScene->mNumTextures++;
+			pScene->mTextures[pScene->mNumTextures] = pcNew;
+			pScene->mNumTextures++;
 			delete[] pc;
 		}
 	}
 	else delete pcNew;
 	return;
 }
+
 // ------------------------------------------------------------------------------------------------
+// Get a skin from a MDL7 file - more complex than all other subformats
 void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	const unsigned char* szCurrent,
 	const unsigned char** szCurrentOut,
@@ -466,11 +477,6 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	if (0x1 ==  iMasked)
 	{
 		// ***** REFERENCE TO ANOTHER SKIN INDEX *****
-
-		// NOTE: Documentation - if you can call it a documentation, I prefer
-		// the expression "rubbish" - states it is currently unused. However,
-		// I don't know what ideas the terrible developers of Conitec will
-		// have tomorrow, so Im going to implement it.
 		int referrer = (int)iWidth;
 		pcMatOut->AddProperty<int>(&referrer,1,AI_MDL7_REFERRER_MATERIAL);
 	}
@@ -486,6 +492,8 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 		pcNew = new aiTexture();
 		pcNew->mHeight = 0;
 		pcNew->mWidth = iWidth;
+
+		// place a proper format hint
 		pcNew->achFormatHint[0] = 'd';
 		pcNew->achFormatHint[1] = 'd';
 		pcNew->achFormatHint[2] = 's';
@@ -576,63 +584,65 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 		aiColor3D clrTemp;
 
 #define COLOR_MULTIPLY_RGB() \
-		if (is_not_qnan(clrTexture.r)) \
+	if (is_not_qnan(clrTexture.r)) \
 		{ \
-			clrTemp.r *= clrTexture.r; \
-			clrTemp.g *= clrTexture.g; \
-			clrTemp.b *= clrTexture.b; \
+		clrTemp.r *= clrTexture.r; \
+		clrTemp.g *= clrTexture.g; \
+		clrTemp.b *= clrTexture.b; \
 		}
 
 		// read diffuse color
 		clrTemp.r = pcMatIn->Diffuse.r;
-    AI_SWAP4(clrTemp.r);  
+		AI_SWAP4(clrTemp.r);  
 		clrTemp.g = pcMatIn->Diffuse.g;
-    AI_SWAP4(clrTemp.g);  
+		AI_SWAP4(clrTemp.g);  
 		clrTemp.b = pcMatIn->Diffuse.b;
-    AI_SWAP4(clrTemp.b);  
+		AI_SWAP4(clrTemp.b);  
 		COLOR_MULTIPLY_RGB();
 		pcMatOut->AddProperty<aiColor3D>(&clrTemp,1,AI_MATKEY_COLOR_DIFFUSE);
 
 		// read specular color
 		clrTemp.r = pcMatIn->Specular.r;
-    AI_SWAP4(clrTemp.r);  
+		AI_SWAP4(clrTemp.r);  
 		clrTemp.g = pcMatIn->Specular.g;
-    AI_SWAP4(clrTemp.g);  
+		AI_SWAP4(clrTemp.g);  
 		clrTemp.b = pcMatIn->Specular.b;
-    AI_SWAP4(clrTemp.b);  
+		AI_SWAP4(clrTemp.b);  
 		COLOR_MULTIPLY_RGB();
 		pcMatOut->AddProperty<aiColor3D>(&clrTemp,1,AI_MATKEY_COLOR_SPECULAR);
 
 		// read ambient color
 		clrTemp.r = pcMatIn->Ambient.r;
-    AI_SWAP4(clrTemp.r);  
+		AI_SWAP4(clrTemp.r);  
 		clrTemp.g = pcMatIn->Ambient.g;
-    AI_SWAP4(clrTemp.g);  
+		AI_SWAP4(clrTemp.g);  
 		clrTemp.b = pcMatIn->Ambient.b;
-    AI_SWAP4(clrTemp.b);  
+		AI_SWAP4(clrTemp.b);  
 		COLOR_MULTIPLY_RGB();
 		pcMatOut->AddProperty<aiColor3D>(&clrTemp,1,AI_MATKEY_COLOR_AMBIENT);
 
 		// read emissive color
 		clrTemp.r = pcMatIn->Emissive.r;
-    AI_SWAP4(clrTemp.r);  
+		AI_SWAP4(clrTemp.r);  
 		clrTemp.g = pcMatIn->Emissive.g;
-    AI_SWAP4(clrTemp.g);  
+		AI_SWAP4(clrTemp.g);  
 		clrTemp.b = pcMatIn->Emissive.b;
-    AI_SWAP4(clrTemp.b);  
+		AI_SWAP4(clrTemp.b);  
 		pcMatOut->AddProperty<aiColor3D>(&clrTemp,1,AI_MATKEY_COLOR_EMISSIVE);
+
+#undef COLOR_MULITPLY_RGB
 
 		// FIX: Take the opacity from the ambient color
 		// the doc says something else, but it is fact that MED exports the
 		// opacity like this .... ARRRGGHH!
 		clrTemp.r = pcMatIn->Ambient.a;
-    AI_SWAP4(clrTemp.r);  
+		AI_SWAP4(clrTemp.r);  
 		if (is_not_qnan(clrTexture.r))clrTemp.r *= clrTexture.a;
 		pcMatOut->AddProperty<float>(&clrTemp.r,1,AI_MATKEY_OPACITY);
 
 		// read phong power
 		int iShadingMode = (int)aiShadingMode_Gouraud;
-    AI_SWAP4(pcMatIn->Power);  
+		AI_SWAP4(pcMatIn->Power);  
 		if (0.0f != pcMatIn->Power)
 		{
 			iShadingMode = (int)aiShadingMode_Phong;
@@ -659,12 +669,12 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	{
 		VALIDATE_FILE_SIZE(szCurrent);
 		int32_t iMe = *((int32_t*)szCurrent);
-    AI_SWAP4(iMe);  
+		AI_SWAP4(iMe);  
 		szCurrent += sizeof(char) * iMe + sizeof(int32_t);
 		VALIDATE_FILE_SIZE(szCurrent);
 	}
 
-	// if an embedded texture has been loaded setup the corresponding
+	// If an embedded texture has been loaded setup the corresponding
 	// data structures in the aiScene instance
 	if (pcNew && this->pScene->mNumTextures <= 999)
 	{
@@ -702,7 +712,9 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	VALIDATE_FILE_SIZE(szCurrent);
 	*szCurrentOut = szCurrent;
 }
+
 // ------------------------------------------------------------------------------------------------
+// Skip a skin lump
 void MDLImporter::SkipSkinLump_3DGS_MDL7(
 	const unsigned char* szCurrent,
 	const unsigned char** szCurrentOut,
@@ -743,33 +755,11 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
 			szCurrent += iSkip;
 		}
 	}
-	
+
 	// check whether a material definition is contained in the skin
 	if (iType & AI_MDL7_SKINTYPE_MATERIAL)
 	{
 		BE_NCONST MDL::Material_MDL7* pcMatIn = (BE_NCONST MDL::Material_MDL7*)szCurrent;
-    AI_SWAP4(pcMatIn->Diffuse.r);  
-    AI_SWAP4(pcMatIn->Diffuse.g);
-    AI_SWAP4(pcMatIn->Diffuse.b);
-    AI_SWAP4(pcMatIn->Diffuse.a);
-    
-    AI_SWAP4(pcMatIn->Ambient.r);  
-    AI_SWAP4(pcMatIn->Ambient.g);
-    AI_SWAP4(pcMatIn->Ambient.b);
-    AI_SWAP4(pcMatIn->Ambient.a);
-
-    AI_SWAP4(pcMatIn->Specular.r);  
-    AI_SWAP4(pcMatIn->Specular.g);
-    AI_SWAP4(pcMatIn->Specular.b);
-    AI_SWAP4(pcMatIn->Specular.a);
-
-    AI_SWAP4(pcMatIn->Emissive.r);  
-    AI_SWAP4(pcMatIn->Emissive.g);
-    AI_SWAP4(pcMatIn->Emissive.b);
-    AI_SWAP4(pcMatIn->Emissive.a);
-    
-    AI_SWAP4(pcMatIn->Power);
-
 		szCurrent = (unsigned char*)(pcMatIn+1);
 	}
 
@@ -778,12 +768,14 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
 	if (iType & AI_MDL7_SKINTYPE_MATERIAL_ASCDEF)
 	{
 		int32_t iMe = *((int32_t*)szCurrent);
-    AI_SWAP4(iMe);  
+		AI_SWAP4(iMe);  
 		szCurrent += sizeof(char) * iMe + sizeof(int32_t);
 	}
 	*szCurrentOut = szCurrent;
 }
+
 // ------------------------------------------------------------------------------------------------
+// What the fuck does this function do? Can't remember
 void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	const unsigned char* szCurrent,
 	const unsigned char** szCurrentOut,
@@ -794,8 +786,8 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 
 	*szCurrentOut = szCurrent;
 	BE_NCONST MDL::Skin_MDL7* pcSkin = (BE_NCONST MDL::Skin_MDL7*)szCurrent;
-  AI_SWAP4(pcSkin->width);
-  AI_SWAP4(pcSkin->height); 
+	AI_SWAP4(pcSkin->width);
+	AI_SWAP4(pcSkin->height); 
 	szCurrent += 12;
 
 	// allocate an output material
@@ -805,9 +797,9 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	// skip length of file name
 	szCurrent += AI_MDL7_MAX_TEXNAMESIZE;
 
-	this->ParseSkinLump_3DGS_MDL7(szCurrent,szCurrentOut,pcMatOut,
+	ParseSkinLump_3DGS_MDL7(szCurrent,szCurrentOut,pcMatOut,
 		pcSkin->typ,pcSkin->width,pcSkin->height);
-	
+
 	// place the name of the skin in the material
 	if (pcSkin->texture_name[0])
 	{
@@ -819,5 +811,6 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 
 		pcMatOut->AddProperty(&szFile,AI_MATKEY_NAME);
 	}
-	return;
 }
+
+#endif // !! ASSIMP_BUILD_NO_MDL_IMPORTER

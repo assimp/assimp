@@ -82,8 +82,8 @@ namespace Intern		{
 		void  operator delete[] ( void* data);
 
 	}; //! struct AllocateFromAssimpHeap
-}; //! namespace Intern
-}; //! namespace Assimp
+} //! namespace Intern
+} //! namespace Assimp
 
 extern "C" {
 #endif

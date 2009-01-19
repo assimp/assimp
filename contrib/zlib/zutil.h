@@ -14,6 +14,12 @@
 #define ZUTIL_H
 
 #define ZLIB_INTERNAL
+
+/* https://sourceforge.net/forum/forum.php?thread_id=2881869&forum_id=817653
+ * Actually a smart workaround is to disable debug builds of zlib completely.
+ */
+#undef DEBUG
+
 #include "zlib.h"
 
 #ifdef STDC

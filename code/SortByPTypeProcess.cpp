@@ -51,8 +51,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-
-
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 SortByPTypeProcess::SortByPTypeProcess()
@@ -84,7 +82,7 @@ void SortByPTypeProcess::SetupProperties(const Importer* pImp)
 // Update changed meshes in all nodes
 void UpdateNodes(const std::vector<unsigned int>& replaceMeshIndex, aiNode* node)
 {
-	std::vector<unsigned int>::const_iterator it;
+//	std::vector<unsigned int>::const_iterator it;
 
 	if (node->mNumMeshes)
 	{

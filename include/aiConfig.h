@@ -40,51 +40,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file aiConfig.h
- *  @brief Defines constants for configurable properties and helper
-    functions to determine the version of the Assimp library being used
- */
-#ifndef __AI_CONFIG_H_INC__
-#define __AI_CONFIG_H_INC__
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-// ---------------------------------------------------------------------------
-/** @brief Returns a string with legal copyright and licensing information 
- *  about Assimp.
+ *  @brief Defines constants for configurable properties for the library
  *
- *  @return Never NULL
- */
-ASSIMP_API const char*  aiGetLegalString  ();
-
-// ---------------------------------------------------------------------------
-/** @brief Returns the current minor version number of Assimp.
+ *  Typically these properties are set via 
+ *  #Importer::SetPropertyFloat,
+ *  #Importer::SetPropertyInteger or
+ *  #Importer::SetPropertyString, 
+ *  depending on the data type of a property. All properties have a 
+ *  default value. See the doc for the mentioned methods for more details.
  *
- *  @return Minor version of the Assimp runtime the application was
- *    linked/built against
+ *  @note
+ *  The functions for use with the plain-c API are:
+ *  #aiSetImportPropertyInteger,
+ *  #aiSetImportPropertyFloat,
+ *  #aiSetImportPropertyString
  */
-ASSIMP_API unsigned int aiGetVersionMinor ();
-
-// ---------------------------------------------------------------------------
-/** @brief Returns the current major version number of Assimp.
- *
- *  @return Major version of the Assimp runtime the application was
- *    linked/built against
- */
-ASSIMP_API unsigned int aiGetVersionMajor ();
-
-// ---------------------------------------------------------------------------
-/** @brief Returns the repository revision of the Assimp runtime.
- *
- *  @return Repository revision number of the Assimp runtime the application 
- *    was linked/built against
- */
-ASSIMP_API unsigned int aiGetVersionRevision ();
-
-#ifdef __cplusplus
-} // end extern "C"
-#endif
+#ifndef INCLUDED_AI_CONFIG_H
+#define INCLUDED_AI_CONFIG_H
 
 // ---------------------------------------------------------------------------
 /** @brief  Set the maximum number of vertices in a mesh.

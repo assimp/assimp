@@ -4,4 +4,6 @@
 #include <aiTypes.h>
 #include <aiPostProcess.h>
 #include <aiScene.h>
+#include <aiVersion.h>
+#include <aiConfig.h>
 #include <assimp.h>

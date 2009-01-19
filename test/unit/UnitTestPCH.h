@@ -1,8 +1,8 @@
 
 
-#ifndef ASSIMP_BUILD_SINGLETHREADED
-#	include <boost/thread.hpp>
-#endif
+// #ifndef ASSIMP_BUILD_SINGLETHREADED
+// #	include <boost/thread.hpp>
+// #endif
 
 // Assimp public API
 #include <aiPostProcess.h>

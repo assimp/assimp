@@ -106,8 +106,7 @@ public:
 	* @note When implementing this class to provide custom IO handling, 
 	* you probably have to supply an own implementation of IOStream as well. 
 	*/
-	virtual IOStream* Open(
-		const std::string& pFile,
+	virtual IOStream* Open(const std::string& pFile,
 		const std::string& pMode = std::string("rb")) = 0;
 
 	// -------------------------------------------------------------------

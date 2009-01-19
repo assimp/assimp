@@ -47,9 +47,41 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Compile config
 #include "../include/aiDefines.h"
 
-// ===================================================================
+// Undefine the min/max macros defined by some platform headers
+#undef min
+#undef max
+
+// Concatenate two tokens after evaluating them
+#define AI_CONCAT(a,b) a ## b
+
+// Helper macro that sets a pointer to NULL in debug builds
+#if (defined _DEBUG)
+#	define AI_DEBUG_INVALIDATE_PTR(x) x = NULL;
+#else
+#	define AI_DEBUG_INVALIDATE_PTR(x)
+#endif
+
+// We depend heavily on the STL's performance, so we need to make sure
+// that the M$ implementation isn't 'secure', but 'fast'
+#if 0 // this crashes! what the fuck???
+#if (defined _MSC_VER) && (!defined DEBUG)
+#	define _SECURE_SCL 0
+#	define _SCL_SECURE_NO_DEPRECATE
+#	define _HAS_ITERATOR_DEBUGGING 0
+#endif
+#endif
+
+// If we have at least VC8 some C string manipulation functions
+	// are mapped to their safe _s counterparts (e.g. _itoa_s).
+#if _MSC_VER >= 1400 && !(defined _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES)
+#	define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
+#endif
+
+// Actually that'snot required for MSVC (it is included somewhere in 
+// the STL ..) but it is necessary for build with STLport.
+#include <ctype.h>
+
 // Runtime/STL headers
-// ===================================================================
 #include <vector>
 #include <list>
 #include <map>
@@ -64,9 +96,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <numeric>
 #include <new>
 
-// ===================================================================
 // Public ASSIMP headers
-// ===================================================================
 #include "../include/DefaultLogger.h"
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
@@ -74,18 +104,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiPostProcess.h"
 #include "../include/assimp.hpp"
 
-// ===================================================================
 // Internal utility headers
-// ===================================================================
 #include "BaseImporter.h"
 #include "MaterialSystem.h"
 #include "StringComparison.h"
 #include "StreamReader.h"
 #include "qnan.h"
 
-// ===================================================================
 // boost headers - take them from the workaround dir if possible
-// ===================================================================
 #ifdef ASSIMP_BUILD_BOOST_WORKAROUND
 
 #	include "../include/BoostWorkaround/boost/scoped_ptr.hpp"

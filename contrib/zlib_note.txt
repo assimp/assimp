@@ -5,6 +5,7 @@ This is a heavily modified and shrinked version of zlib 1.2.3
 - Removed Compression part
 - Removed infback.c
 - Added Assimp #idefs to exclude it if not needed
+- Disabled debug macros in zutil.h
 
 All inflateNNN functions are available, for the rest you need to try.
 If a function is needed but is not there, get zlib and add the 

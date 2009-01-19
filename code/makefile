@@ -36,7 +36,7 @@ DEFINEFLAGS =
 NAMESUFFIX = 
 
 # Output path for binaries
-BINPATH = ../bin/mingw/
+BINPATH = ../bin/gcc/
 
 # GCC compiler flags 
 CPPFLAGS=-Wall 

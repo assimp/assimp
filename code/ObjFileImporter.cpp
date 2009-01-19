@@ -319,17 +319,18 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 		pMesh->mNormals = new aiVector3D[ pMesh->mNumVertices ];
 	
 	// Allocate buffer for texture coordinates
-	if ( !pModel->m_TextureCoord.empty() )
+	if ( !pModel->m_TextureCoord.empty() && pObjMesh->m_uiUVCoordinates[0] )
 	{
-		for ( size_t i=0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++ )
-		{
-			const unsigned int num_uv = pObjMesh->m_uiUVCoordinates[ i ];
-			if ( num_uv > 0 )
-			{
-				pMesh->mNumUVComponents[ i ] = num_uv;
-				pMesh->mTextureCoords[ i ] = new aiVector3D[ num_uv ];
-			}
-		}
+		// FIXME (@Kimmi): cleanup, I don't see the intention behind this
+		// for ( size_t i=0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++ )
+		// {
+		//	const unsigned int num_uv = pObjMesh->m_uiUVCoordinates[ i ];
+		//	if ( num_uv > 0 )
+		//	{
+				pMesh->mNumUVComponents[ 0 ] = 2;
+				pMesh->mTextureCoords[ 0 ]   = new aiVector3D[ pMesh->mNumVertices ];
+		//	}
+		// }
 	}
 	
 	// Copy vertices, normals and textures into aiMesh instance

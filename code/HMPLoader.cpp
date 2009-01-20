@@ -99,10 +99,10 @@ void HMPImporter::InternReadFile( const std::string& pFile,
 		throw new ImportErrorException( "HMP File is too small.");
 
 	// Allocate storage and copy the contents of the file to a memory buffer
-	pScene = pScene;
-	pIOHandler = pIOHandler;
+	this->pScene     = pScene;
+	this->pIOHandler = pIOHandler;
 
-	std::vector<uint8_t> buffer(fileSize+1);
+	std::vector<uint8_t> buffer(fileSize);
 	mBuffer = &buffer[0];
 	file->Read( (void*)mBuffer, 1, fileSize);
 	iFileSize = (unsigned int)fileSize;

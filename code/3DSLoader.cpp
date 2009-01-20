@@ -356,7 +356,7 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
 		}
 		break;
 
-	case Discreet3DS::CHUNK_LIGHT:
+	case Discreet3DS::CHUNK_LIGHT:	
 		{
 		// This starts a new light
 		aiLight* light = new aiLight();
@@ -415,7 +415,7 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
 
 		// And finally - the camera rotation angle, in
 		// counter clockwise direction 
-		float angle =  AI_DEG_TO_RAD( stream->GetF4() );
+		const float angle =  AI_DEG_TO_RAD( stream->GetF4() );
 		aiQuaternion quat(camera->mLookAt,angle);
 		camera->mUp = quat.GetMatrix() * aiVector3D(0.f,1.f,0.f);
 
@@ -576,12 +576,12 @@ void Discreet3DSImporter::SkipTCBInfo()
 
 	if (!flags)
 	{
-		// ******************************************************************
+		//////////////////////////////////////////////////////////////////////////
 		// Currently we can't do anything with these values. They occur
 		// quite rare, so it wouldn't be worth the effort implementing
 		// them. 3DS ist not really suitable for complex animations,
 		// so full support is not required.
-		// ******************************************************************
+		//////////////////////////////////////////////////////////////////////////
 		DefaultLogger::get()->warn("3DS: Skipping TCB animation info");
 	}
 
@@ -696,7 +696,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 		break;
 
 
-		// **************************************************************
+		// ////////////////////////////////////////////////////////////////////
 		// POSITION KEYFRAME
 	case Discreet3DS::CHUNK_TRACKPOS:
 		{
@@ -744,7 +744,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 
 		break;
 
-		// **************************************************************
+		// ////////////////////////////////////////////////////////////////////
 		// CAMERA ROLL KEYFRAME
 	case Discreet3DS::CHUNK_TRACKROLL:
 		{
@@ -789,7 +789,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 		break;
 
 
-		// **************************************************************
+		// ////////////////////////////////////////////////////////////////////
 		// CAMERA FOV KEYFRAME
 	case Discreet3DS::CHUNK_TRACKFOV:
 		{
@@ -799,7 +799,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 		break;
 
 
-		// **************************************************************
+		// ////////////////////////////////////////////////////////////////////
 		// ROTATION KEYFRAME
 	case Discreet3DS::CHUNK_TRACKROTATE:
 		{
@@ -846,7 +846,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 		}}
 		break;
 
-		// **************************************************************
+		// ////////////////////////////////////////////////////////////////////
 		// SCALING KEYFRAME
 	case Discreet3DS::CHUNK_TRACKSCALE:
 		{
@@ -956,13 +956,11 @@ void Discreet3DSImporter::ParseFaceChunk()
 
 		// Now continue and read all material indices
 		cnt = (uint16_t)stream->GetI2();
-		for (unsigned int i = 0; i < cnt;++i)
-		{
+		for (unsigned int i = 0; i < cnt;++i)	{
 			unsigned int fidx = (uint16_t)stream->GetI2();
 
 			// check range
-			if (fidx >= mMesh.mFaceMaterials.size())
-			{
+			if (fidx >= mMesh.mFaceMaterials.size())	{
 				DefaultLogger::get()->error("3DS: Invalid face index in face material list");
 			}
 			else mMesh.mFaceMaterials[fidx] = idx;
@@ -1020,8 +1018,7 @@ void Discreet3DSImporter::ParseMeshChunk()
 		// Now check whether the matrix has got a negative determinant
 		// If yes, we need to flip all vertices' Z axis ....
 		// This code has been taken from lib3ds
-		if (mMesh.mMat.Determinant() < 0.0f)
-		{
+		if (mMesh.mMat.Determinant() < 0.0f)	{
 			// Compute the inverse of the matrix
 			aiMatrix4x4 mInv = mMesh.mMat;
 			mInv.Inverse();
@@ -1431,7 +1428,6 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D* out,
 
 	default:
 		stream->IncPtr(diff);
-
 		// Skip unknown chunks, hope this won't cause any problems.
 		return ParseColorChunk(out,acceptPercent);
 	};

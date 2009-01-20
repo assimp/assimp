@@ -39,17 +39,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-//!
-//! @file Definition of MDL importer class
-//!
+/**  @file MDLLoader.h
+ *   @brief Declaration of the loader for MDL files
+ */
 
 #ifndef AI_MDLLOADER_H_INCLUDED
 #define AI_MDLLOADER_H_INCLUDED
 
 #include "BaseImporter.h"
-#include "../include/aiTypes.h"
-#include "../include/aiTexture.h"
-#include "../include/aiMaterial.h"
 
 struct aiNode;
 #include "MDLFileData.h"
@@ -60,13 +57,28 @@ class MaterialHelper;
 
 using namespace MDL;
 
-
-#if (!defined VALIDATE_FILE_SIZE)
-#	define VALIDATE_FILE_SIZE(msg) this->SizeCheck(msg,__FILE__,__LINE__)
+// --------------------------------------------------------------------------------------
+// Include file/line information in debug builds
+#ifdef ASSIMP_BUILD_DEBUG
+#	define VALIDATE_FILE_SIZE(msg) SizeCheck(msg,__FILE__,__LINE__)
+#else
+#	define VALIDATE_FILE_SIZE(msg) SizeCheck(msg)
 #endif
 
-// ---------------------------------------------------------------------------
-/** Used to load MDL files
+// --------------------------------------------------------------------------------------
+/** @brief Class to load MDL files.
+ *
+ *  Several subformats exist:
+ *   <ul>
+ *      <li>Quake I</li>
+ *      <li>3D Game Studio MDL3, MDL4</li>
+ *      <li>3D Game Studio MDL5</li>
+ *      <li>3D Game Studio MDL7</li>
+ *      <li>Halflife 2</li>
+ *   </ul>
+ *  These formats are partially identical and it would be possible to load
+ *  them all with a single 1000-line function-beast. However, it has been
+ *  splitted to several code paths to make the code easier to read and maintain.
 */
 class MDLImporter : public BaseImporter
 {
@@ -101,10 +113,7 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append)
-	{
-		append.append("*.mdl");
-	}
+	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 
@@ -135,11 +144,6 @@ protected:
 	*/
 	void InternReadFile_HL2( );
 
-
-	// *******************************************************************
-	// Debugging/validation functions
-
-
 	// -------------------------------------------------------------------
 	/** Check whether a given position is inside the valid range
 	 *  Throw a new ImportErrorException if it is not
@@ -162,10 +166,6 @@ protected:
 	 * \param pcHeader Input header to be validated
 	 */
 	void ValidateHeader_Quake1(const MDL::Header* pcHeader);
-
-
-	// *******************************************************************
-	// Material import
 
 
 	// -------------------------------------------------------------------
@@ -195,6 +195,7 @@ protected:
 		unsigned int iType,
 		unsigned int* piSkip);
 
+
 	// -------------------------------------------------------------------
 	/** Used to load textures from MDL5
 	 * \param szData Input data
@@ -218,15 +219,12 @@ protected:
 	aiColor4D ReplaceTextureWithColor(const aiTexture* pcTexture);
 
 
-	// *******************************************************************
-	// Quake1, MDL 3,4,5 import
-
-
 	// -------------------------------------------------------------------
 	/** Converts the absolute texture coordinates in MDL5 files to
 	 *  relative in a range between 0 and 1
 	*/
 	void CalculateUVCoordinates_MDL5();
+
 
 	// -------------------------------------------------------------------
 	/** Read an UV coordinate from the file. If the file format is not
@@ -247,9 +245,6 @@ protected:
 	 */
 	void SetupMaterialProperties_3DGS_MDL5_Quake1( );
 
-
-	// *******************************************************************
-	// MDL7 import
 
 	// -------------------------------------------------------------------
 	/** Parse a skin lump in a MDL7/HMP7 file with all of its features
@@ -445,7 +440,7 @@ protected:
 	/** Buffer to hold the loaded file */
 	unsigned char* mBuffer;
     
-  /** For GameStudio MDL files: The number in the magic word, either 3,4 or 5 
+	/** For GameStudio MDL files: The number in the magic word, either 3,4 or 5 
 	 * (MDL7 doesn't need this, the format has a separate loader) */
 	unsigned int iGSFileVersion;
 

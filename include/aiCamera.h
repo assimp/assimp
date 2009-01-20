@@ -61,8 +61,39 @@ extern "C" {
  * writes the target point as a subnode of the camera's main node,
  * called "<camName>.Target". However, this is just additional information
  * then, the transformation tracks of the camera main node make the
- * camera already point in the right direction.
+ * camera already look in the right direction.
+ * <br>
+ * An important aspect is that the camera itself is also part of the
+ * scenegraph. This means, any values such as the look-at vector are not 
+ * *absolute*, they're <b>relative</b> to the coordinate system defined
+ * by the node which corresponds to the camera. This allows for camera
+ * animations. For static cameras parameters like the 'look-at' or 'up' vectors
+ * are usually specified directly in aiCamera, but beware, they could also
+ * be encoded in the node transformation. The following (pseudo)code sample 
+ * shows how to do it:
+ * @code
+ * // Get the camera matrix for a camera at a specific time
+ * // if the node hierarchy for the camera does not contain
+ * // at least one animated node this is a static computation
+ * get-camera-matrix (node sceneRoot, camera cam) : matrix
+ * {
+ *    node   cnd = find-node-for-camera(cam)
+ *    matrix cmt = identity()
  *
+ *    // as usual - get the absolute camera transformation for this frame
+ *    for each node nd in hierarchy from sceneRoot to cnd
+ *      matrix cur
+ *      if (is-animated(nd))
+ *         cur = eval-animation(nd)
+ *      else cur = nd->mTransformation;
+ *      cmt = mult-matrices( cmt, cur )
+ *    end for
+ *
+ *    // now multiply with the camera's own local transform
+ *    cam = mult-matrices (cam, get-camera-matrix(cmt) )
+ * }
+ * @endcode
+ * 
 */
 struct aiCamera
 {
@@ -148,6 +179,38 @@ struct aiCamera
 		, mClipPlaneFar		(1000.f)
 		, mAspect			(0.f)
 	{}
+
+	/** @brief Get a *right-handed* camera matrix from me
+	 *  @param out Camera matrix to be filled
+	 */
+	void GetCameraMatrix (aiMatrix4x4& out) const 
+	{
+		/** todo: test ... should work, but i'm not absolutely sure */
+
+		/** We don't know whether these vectors are already normalized ...*/
+		aiVector3D zaxis = mLookAt;     zaxis.Normalize();
+		aiVector3D yaxis = mUp;         yaxis.Normalize();
+		aiVector3D xaxis = mUp^mLookAt; xaxis.Normalize();
+
+		out.a3 = -(xaxis * mPosition);
+		out.b3 = -(yaxis * mPosition);
+		out.c3 = -(zaxis * mPosition);
+
+		out.a1 = xaxis.x;
+		out.a2 = xaxis.y;
+		out.a3 = xaxis.z;
+		
+		out.b1 = yaxis.x;
+		out.b2 = yaxis.y;
+		out.b3 = yaxis.z;
+
+		out.c1 = zaxis.x;
+		out.c2 = zaxis.y;
+		out.c3 = zaxis.z;
+
+		out.d1 = out.d2 = out.d3 = 0.f;
+		out.d4 = 1.f;
+	}
 
 #endif
 };

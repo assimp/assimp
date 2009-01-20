@@ -47,14 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "FixNormalsStep.h"
-#include "SpatialSort.h"
-
 
 using namespace Assimp;
 
-#ifdef _MSC_VER
-#	define sprintf sprintf_s
-#endif
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -87,8 +82,9 @@ void FixInfacingNormalsProcess::Execute( aiScene* pScene)
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 		if(ProcessMesh( pScene->mMeshes[a],a))bHas = true;
 
-	if (bHas)DefaultLogger::get()->debug("FixInfacingNormalsProcess finished. At least one mesh' normals have been flipped.");
-	else DefaultLogger::get()->debug("FixInfacingNormalsProcess finished");
+	if (bHas)
+		 DefaultLogger::get()->debug("FixInfacingNormalsProcess finished. Found issues.");
+	else DefaultLogger::get()->debug("FixInfacingNormalsProcess finished. No changes to the scene.");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -97,18 +93,19 @@ bool FixInfacingNormalsProcess::ProcessMesh( aiMesh* pcMesh, unsigned int index)
 {
 	ai_assert(NULL != pcMesh);
 
+	// Nothing to do if there are no model normals
 	if (!pcMesh->HasNormals())return false;
 
-	// compute the bounding box of both the model vertices + normals and
+	// Compute the bounding box of both the model vertices + normals and
 	// the umodified model vertices. Then check whether the first BB
 	// is smaller than the second. In this case we can assume that the
 	// normals need to be flipped, although there are a few special cases ..
 	// convex, concave, planar models ...
 
-	aiVector3D vMin0(1e10f,1e10f,1e10f);
-	aiVector3D vMin1(1e10f,1e10f,1e10f);
-	aiVector3D vMax0(-1e10f,-1e10f,-1e10f);
-	aiVector3D vMax1(-1e10f,-1e10f,-1e10f);
+	aiVector3D vMin0 (1e10f,1e10f,1e10f);
+	aiVector3D vMin1 (1e10f,1e10f,1e10f);
+	aiVector3D vMax0 (-1e10f,-1e10f,-1e10f);
+	aiVector3D vMax1 (-1e10f,-1e10f,-1e10f);
 
 	for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
 	{
@@ -120,7 +117,7 @@ bool FixInfacingNormalsProcess::ProcessMesh( aiMesh* pcMesh, unsigned int index)
 		vMax1.y = std::max(vMax1.y,pcMesh->mVertices[i].y);
 		vMax1.z = std::max(vMax1.z,pcMesh->mVertices[i].z);
 
-		aiVector3D vWithNormal = pcMesh->mVertices[i] + pcMesh->mNormals[i];
+		const aiVector3D vWithNormal = pcMesh->mVertices[i] + pcMesh->mNormals[i];
 
 		vMin0.x = std::min(vMin0.x,vWithNormal.x);
 		vMin0.y = std::min(vMin0.y,vWithNormal.y);
@@ -139,20 +136,19 @@ bool FixInfacingNormalsProcess::ProcessMesh( aiMesh* pcMesh, unsigned int index)
 	const float fDelta1_y = (vMax1.y - vMin1.y);
 	const float fDelta1_z = (vMax1.z - vMin1.z);
 
-	// check the case where the boxes are overlapping
+	// Check whether the boxes are overlapping
 	if (fDelta0_x > 0.0f != fDelta1_x > 0.0f)return false;
 	if (fDelta0_y > 0.0f != fDelta1_y > 0.0f)return false;
 	if (fDelta0_z > 0.0f != fDelta1_z > 0.0f)return false;
 
-
-	// check the case of a very planar surface
+	// Check whether this is a planar surface
 	const float fDelta1_yz = fDelta1_y * fDelta1_z;
 
 	if (fDelta1_x < 0.05f * sqrtf( fDelta1_yz ))return false;
 	if (fDelta1_y < 0.05f * sqrtf( fDelta1_z * fDelta1_x ))return false;
 	if (fDelta1_z < 0.05f * sqrtf( fDelta1_y * fDelta1_x ))return false;
 
-	// now compare the volume of the bounding boxes
+	// now compare the volumes of the bounding boxes
 	if (::fabsf(fDelta0_x * fDelta1_yz) <
 		::fabsf(fDelta1_x * fDelta1_y * fDelta1_z))
 	{
@@ -163,9 +159,16 @@ bool FixInfacingNormalsProcess::ProcessMesh( aiMesh* pcMesh, unsigned int index)
 			DefaultLogger::get()->info(buffer);
 		}
 
+		// Invert normals
 		for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
-		{
 			pcMesh->mNormals[i] *= -1.0f;
+
+		// ... and flip faces
+		for (unsigned int i = 0; i < pcMesh->mNumFaces;++i)
+		{
+			aiFace& face = pcMesh->mFaces[i];
+			for( unsigned int b = 0; b < face.mNumIndices / 2; b++)
+				std::swap( face.mIndices[b], face.mIndices[ face.mNumIndices - 1 - b]);
 		}
 		return true;
 	}

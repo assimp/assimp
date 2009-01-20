@@ -120,8 +120,8 @@ aiColor4D MDLImporter::ReplaceTextureWithColor(const aiTexture* pcTexture)
 void MDLImporter::CreateTextureARGB8_3DGS_MDL3(const unsigned char* szData)
 {
 	const MDL::Header *pcHeader = (const MDL::Header*)mBuffer;  //the endianess is allready corrected in the InternReadFile_3DGS_MDL345 function
-  
-  VALIDATE_FILE_SIZE(szData + pcHeader->skinwidth *
+
+	VALIDATE_FILE_SIZE(szData + pcHeader->skinwidth *
 		pcHeader->skinheight);
 
 	// allocate a new texture object
@@ -164,11 +164,11 @@ void MDLImporter::CreateTextureARGB8_3DGS_MDL3(const unsigned char* szData)
 // Read a texture from a MDL4 file
 void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char* szData, 
 	unsigned int iType,
-	unsigned int* piSkip)
+	 unsigned int* piSkip)
 {
 	ai_assert(NULL != piSkip);
-  
-  const MDL::Header *pcHeader = (const MDL::Header*)this->mBuffer;  //the endianess is allready corrected in the InternReadFile_3DGS_MDL345 function
+
+	const MDL::Header *pcHeader = (const MDL::Header*)mBuffer;  //the endianess is allready corrected in the InternReadFile_3DGS_MDL345 function
 
 	if (iType == 1 || iType > 3)
 	{
@@ -182,9 +182,9 @@ void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char* szData,
 	aiTexture* pcNew = new aiTexture();
 	pcNew->mWidth = pcHeader->skinwidth;
 	pcNew->mHeight = pcHeader->skinheight;
-	
+
 	if (bNoRead)pcNew->pcData = (aiTexel*)0xffffffff;
-	this->ParseTextureColorData(szData,iType,piSkip,pcNew);
+	ParseTextureColorData(szData,iType,piSkip,pcNew);
 
 	// store the texture
 	if (!bNoRead)

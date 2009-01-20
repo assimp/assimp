@@ -39,30 +39,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-//
-//! @file Definition of in-memory structures for the MDL file format. 
-//
-// The specification has been taken from various sources on the internet.
-// - http://tfc.duke.free.fr/coding/mdl-specs-en.html
-// - Conitec's MED SDK
-// - Many quite long HEX-editor sessions
+/**
+ * @file  MDLFileData.h
+ * @brief Definition of in-memory structures for the MDL file format. 
+ *
+ * The specification has been taken from various sources on the internet.
+ * - http://tfc.duke.free.fr/coding/mdl-specs-en.html
+ * - Conitec's MED SDK
+ * - Many quite long HEX-editor sessions
+ */
 
 #ifndef AI_MDLFILEHELPER_H_INC
 #define AI_MDLFILEHELPER_H_INC
-
-#include <string>
-#include <vector>
-
-#include "../include/aiTypes.h"
-#include "../include/aiMesh.h"
-#include "../include/aiAnim.h"
-#include "../include/aiMaterial.h"
 
 #include "./../include/Compiler/pushpack1.h"
 
 namespace Assimp	{
 namespace MDL	{
 
+// -------------------------------------------------------------------------------------
 // to make it easier for ourselfes, we test the magic word against both "endianesses"
 #define MDL_MAKE(string) ((uint32_t)((string[0] << 24) + (string[1] << 16) + (string[2] << 8) + string[3]))
 
@@ -113,7 +108,7 @@ namespace MDL	{
 #	define AI_MDL7_REFERRER_MATERIAL "&&&referrer&&&",0,0
 #endif
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct Header
  *  \brief Data structure for the MDL main header
  */
@@ -167,7 +162,7 @@ struct Header
 } PACK_STRUCT;
 
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct Header_MDL7
  *  \brief Data structure for the MDL 7 main header
  */
@@ -226,7 +221,8 @@ struct Header_MDL7
 	uint16_t frame_stc_size;
 } PACK_STRUCT;
 
-// ---------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------
 /** \struct Bone_MDL7
  *  \brief Data structure for a bone in a MDL7 file
  */
@@ -261,7 +257,7 @@ struct Bone_MDL7
 #	define AI_MDL7_MAX_GROUPNAMESIZE	16
 #endif // ! AI_MDL7_MAX_GROUPNAMESIZE
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct Group_MDL7
  *  \brief Group in a MDL7 file
  */
@@ -303,7 +299,7 @@ struct Group_MDL7
 #	define AI_MDL7_MAX_BONENAMESIZE 20
 #endif // !! AI_MDL7_MAX_BONENAMESIZE
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct Deformer_MDL7
  *  \brief Deformer in a MDL7 file
  */
@@ -318,7 +314,7 @@ struct Deformer_MDL7
 } PACK_STRUCT;
 
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct DeformerElement_MDL7
  *  \brief Deformer element in a MDL7 file
  */
@@ -331,7 +327,7 @@ struct DeformerElement_MDL7
 } PACK_STRUCT;
 
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct DeformerWeight_MDL7
  *  \brief Deformer weight in a MDL7 file
  */
@@ -346,7 +342,7 @@ struct DeformerWeight_MDL7
 // don't know why this was in the original headers ...
 typedef int32_t MD7_MATERIAL_ASCDEFSIZE;
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct ColorValue_MDL7
  *  \brief Data structure for a color value in a MDL7 file
  */
@@ -355,7 +351,7 @@ struct ColorValue_MDL7
 	float r,g,b,a;
 } PACK_STRUCT;
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct Material_MDL7
  *  \brief Data structure for a Material in a MDL7 file
  */
@@ -378,7 +374,7 @@ struct Material_MDL7
 } PACK_STRUCT;
 
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct Skin
  *  \brief Skin data structure #1 - used by Quake1, MDL2, MDL3 and MDL4
  */
@@ -402,7 +398,7 @@ struct Skin
 } PACK_STRUCT;
 
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct Skin
  *  \brief Skin data structure #2 - used by MDL5, MDL6 and MDL7
  *  \see Skin
@@ -431,7 +427,7 @@ struct Skin_MDL7
 	char			texture_name[AI_MDL7_MAX_TEXNAMESIZE];	
 } PACK_STRUCT;
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct RGB565
  *  \brief Data structure for a RGB565 pixel in a texture
  */
@@ -442,7 +438,7 @@ struct RGB565
 	uint16_t b : 5;
 } PACK_STRUCT;
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct ARGB4
  *  \brief Data structure for a ARGB4444 pixel in a texture
  */
@@ -454,7 +450,7 @@ struct ARGB4
 	uint16_t b : 4;
 } PACK_STRUCT;
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct GroupSkin
  *  \brief Skin data structure #2 (group of pictures)
  */
@@ -473,7 +469,7 @@ struct GroupSkin
 	uint8_t **data;  
 } PACK_STRUCT;
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct TexCoord
  *  \brief Texture coordinate data structure used by the Quake1 MDL format
  */
@@ -489,7 +485,7 @@ struct TexCoord
 	int32_t t;
 } PACK_STRUCT;
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct TexCoord_MDL3
  *  \brief Data structure for an UV coordinate in the 3DGS MDL3 format
  */
@@ -502,7 +498,7 @@ struct TexCoord_MDL3
 	int16_t v; 
 } PACK_STRUCT;
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct TexCoord_MDL7
  *  \brief Data structure for an UV coordinate in the 3DGS MDL7 format
  */
@@ -515,7 +511,7 @@ struct TexCoord_MDL7
 	float v; 
 } PACK_STRUCT;
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct SkinSet_MDL7
  *  \brief Skin set data structure for the 3DGS MDL7 format
  * MDL7 references UV coordinates per face via an index list.
@@ -531,7 +527,7 @@ struct SkinSet_MDL7
 	int32_t		material;	 // size 4				
 } PACK_STRUCT;
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct Triangle
  *  \brief Triangle data structure for the Quake1 MDL format
  */
@@ -544,7 +540,7 @@ struct Triangle
 	int32_t vertex[3];   
 } PACK_STRUCT;
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct Triangle_MDL3
  *  \brief Triangle data structure for the 3DGS MDL3 format
  */
@@ -557,7 +553,7 @@ struct Triangle_MDL3
 	uint16_t index_uv[3]; 
 } PACK_STRUCT;
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct Triangle_MDL7
  *  \brief Triangle data structure for the 3DGS MDL7 format
  */
@@ -588,7 +584,7 @@ struct Triangle_MDL7
 #	define AI_MDL_FRONTFACE			0x1
 #endif
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct Vertex
  *  \brief Vertex data structure
  */
@@ -599,7 +595,7 @@ struct Vertex
 } PACK_STRUCT;
 
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 struct Vertex_MDL4
 {
 	uint16_t v[3];
@@ -610,7 +606,7 @@ struct Vertex_MDL4
 #define AI_MDL7_FRAMEVERTEX120503_STCSIZE		16
 #define AI_MDL7_FRAMEVERTEX030305_STCSIZE		26
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct Vertex_MDL7
  *  \brief Vertex data structure used in MDL7 files
  */
@@ -625,7 +621,7 @@ struct Vertex_MDL7
 } PACK_STRUCT;
 
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct BoneTransform_MDL7
  *  \brief bone transformation matrix structure used in MDL7 files
  */
@@ -646,7 +642,7 @@ struct BoneTransform_MDL7
 #define AI_MDL7_MAX_FRAMENAMESIZE		16
 
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct Frame_MDL7
  *  \brief Frame data structure used by MDL7 files
  */
@@ -658,7 +654,7 @@ struct Frame_MDL7
 };
 
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct SimpleFrame
  *  \brief Data structure for a simple frame
  */
@@ -677,7 +673,7 @@ struct SimpleFrame
 	Vertex *verts; 
 } PACK_STRUCT;
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct Frame
  *  \brief Model frame data structure
  */
@@ -691,7 +687,7 @@ struct Frame
 } PACK_STRUCT;
 
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 struct SimpleFrame_MDLn_SP
 {
 	//! Minimum vertex of the bounding box
@@ -707,7 +703,7 @@ struct SimpleFrame_MDLn_SP
 	Vertex_MDL4 *verts; 
 } PACK_STRUCT;
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct GroupFrame
  *  \brief Data structure for a group of frames
  */
@@ -731,8 +727,7 @@ struct GroupFrame
 
 #include "./../include/Compiler/poppack1.h"
 
-
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct IntFace_MDL7
  *  \brief Internal data structure to temporarily represent a face
  */
@@ -753,8 +748,7 @@ struct IntFace_MDL7
 	unsigned int iMatIndex[2];
 }; 
 
-
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct IntMaterial_MDL7
  *  \brief Internal data structure to temporarily represent a material
  *  which has been created from two single materials along with the
@@ -776,8 +770,7 @@ struct IntMaterial_MDL7
 	unsigned int iOldMatIndices[2];
 };
 
-
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** \struct IntBone_MDL7
  *  \brief Internal data structure to represent a bone in a MDL7 file with
  *  all of its animation channels assigned to it.
@@ -808,7 +801,7 @@ struct IntBone_MDL7 : aiBone
 	std::vector<aiQuatKey> pkeyRotations;
 };
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 //! Describes a MDL7 frame
 struct IntFrameInfo_MDL7
 {
@@ -825,7 +818,7 @@ struct IntFrameInfo_MDL7
 	BE_NCONST MDL::Frame_MDL7*	pcFrame; 
 };
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 //! Describes a MDL7 mesh group
 struct IntGroupInfo_MDL7
 {
@@ -860,7 +853,7 @@ struct IntGroupInfo_MDL7
 	BE_NCONST MDL::Vertex_MDL7*		pcGroupVerts;
 };
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 //! Holds the data that belongs to a MDL7 mesh group
 struct IntGroupData_MDL7
 {
@@ -891,7 +884,7 @@ struct IntGroupData_MDL7
 	bool bNeed2UV;
 };
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 //! Holds data from an MDL7 file that is shared by all mesh groups
 struct IntSharedData_MDL7
 {
@@ -926,7 +919,7 @@ struct IntSharedData_MDL7
 	unsigned int iNum;
 };
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 //! Contains input data for GenerateOutputMeshes_3DGS_MDL7
 struct IntSplittedGroupData_MDL7
 {

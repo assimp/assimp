@@ -69,6 +69,7 @@ HMPImporter::~HMPImporter()
 // Returns whether the class can handle the format of the given file. 
 bool HMPImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 {
+	(void)pIOHandler; //this avoids the compiler warning of unused element
 	// simple check of file extension is enough for the moment
 	std::string::size_type pos = pFile.find_last_of('.');
 	// no file extension - can't read
@@ -84,8 +85,10 @@ bool HMPImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void HMPImporter::InternReadFile( const std::string& pFile, 
-	aiScene* pScene, IOSystem* pIOHandler)
+	aiScene* _pScene, IOSystem* _pIOHandler)
 {
+	pScene     = _pScene;
+	pIOHandler = _pIOHandler;
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
 
 	// Check whether we can read from the file
@@ -99,17 +102,13 @@ void HMPImporter::InternReadFile( const std::string& pFile,
 		throw new ImportErrorException( "HMP File is too small.");
 
 	// Allocate storage and copy the contents of the file to a memory buffer
-	this->pScene     = pScene;
-	this->pIOHandler = pIOHandler;
-
 	std::vector<uint8_t> buffer(fileSize);
 	mBuffer = &buffer[0];
 	file->Read( (void*)mBuffer, 1, fileSize);
 	iFileSize = (unsigned int)fileSize;
 
 	// Determine the file subtype and call the appropriate member function
-	uint32_t iMagic = *((uint32_t*)this->mBuffer);
-
+	const uint32_t iMagic = *((uint32_t*)this->mBuffer);
 
 	// HMP4 format
 	if (AI_HMP_MAGIC_NUMBER_LE_4 == iMagic ||

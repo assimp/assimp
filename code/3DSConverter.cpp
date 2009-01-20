@@ -54,14 +54,14 @@ using namespace Assimp;
 // Setup final material indices, generae a default material if necessary
 void Discreet3DSImporter::ReplaceDefaultMaterial()
 {
-	// *******************************************************************
-	// try to find an existing material that matches the
+	//////////////////////////////////////////////////////////////////////////
+	// Try to find an existing material that matches the
 	// typical default material setting:
 	// - no textures
 	// - diffuse color (in grey!)
 	// NOTE: This is here to workaround the fact that some
 	// exporters are writing a default material, too.
-	// *******************************************************************
+	//////////////////////////////////////////////////////////////////////////
 	unsigned int idx = 0xcdcdcdcd;
 	for (unsigned int i = 0; i < mScene->mMaterials.size();++i)
 	{
@@ -350,7 +350,7 @@ void Discreet3DSImporter::ConvertMeshes(aiScene* pcOut)
 
 	// we need to split all meshes by their materials
 	for (std::vector<D3DS::Mesh>::iterator i =  mScene->mMeshes.begin();
-		i != mScene->mMeshes.end();++i)
+		i != mScene->mMeshes.end();++i)	
 	{
 		std::vector<unsigned int>* aiSplit = new std::vector<unsigned int>[
 			mScene->mMaterials.size()];
@@ -490,6 +490,9 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 		}
 	}
 
+	// Setup the name of the node
+	pcOut->mName.Set(pcIn->mName);
+
 	// Now build the transformation matrix of the node
 	// ROTATION
 	if (pcIn->aRotationKeys.size())
@@ -546,7 +549,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 				q.mValue = aiQuaternion(0.f,0.f,AI_DEG_TO_RAD(- f.mValue));
 			}
 		}
-
+#if 0
 		if (pcIn->aTargetPositionKeys.size() > 1)
 		{
 			DefaultLogger::get()->debug("3DS: Converting target track ...");
@@ -583,9 +586,24 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 			nda->mPositionKeys = new aiVectorKey[nda->mNumPositionKeys];
 			::memcpy(nda->mPositionKeys,&distanceTrack[0],
 				sizeof(aiVectorKey)*nda->mNumPositionKeys);
-		}
 
-		// Allocate a new nda, increment the nda index
+			// The target animation is now encoded in the local transformation
+			// matrix of the camera, so we must clear the corresponding
+			// fields in aiCamera or aiLight.
+			for (unsigned int n = 0; n < pcSOut->mNumCameras;++n)	{
+				if (pcSOut->mCameras[n]->mName == pcOut->mName) {
+					pcSOut->mCameras[n]->mLookAt = aiVector3D(0.f,0.f,1.f);
+				}
+			}
+			for (unsigned int n = 0; n < pcSOut->mNumLights;++n)	{
+				if (pcSOut->mLights[n]->mName == pcOut->mName) {
+					pcSOut->mLights[n]->mDirection = aiVector3D(0.f,0.f,1.f);
+				}
+			}
+		}
+#endif
+
+		// Allocate a new node anim and setup its name
 		aiNodeAnim* nda = anim->mChannels[anim->mNumChannels++] = new aiNodeAnim();
 		nda->mNodeName.Set(pcIn->mName);
 
@@ -626,9 +644,6 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 		}
 	}
 
-	// Setup the name of the node
-	pcOut->mName.Set(pcIn->mName);
-
 	// Allocate storage for children 
 	pcOut->mNumChildren = (unsigned int)pcIn->mChildren.size();
 	pcOut->mChildren = new aiNode*[pcIn->mChildren.size()];
@@ -647,6 +662,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 // Find out how many node animation channels we'll have finally
 void CountTracks(D3DS::Node* node, unsigned int& cnt)
 {
+	//////////////////////////////////////////////////////////////////////////////
 	// We will never generate more than one channel for a node, so
 	// this is rather easy here.
 
@@ -656,6 +672,7 @@ void CountTracks(D3DS::Node* node, unsigned int& cnt)
 	{
 		++cnt;
 
+		// account for the additional channel for the camera/spotlight target position
 		if (node->aTargetPositionKeys.size()  > 1)++cnt;
 	}
 
@@ -669,10 +686,10 @@ void CountTracks(D3DS::Node* node, unsigned int& cnt)
 void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 {
 	pcOut->mRootNode = new aiNode();
-
 	if (0 == mRootNode->mChildren.size())
 	{
-		// seems the file has not even a hierarchy.
+		//////////////////////////////////////////////////////////////////////////////
+		// It seems the file is so fucked up that it has not even a hierarchy.
 		// generate a flat hiearachy which looks like this:
 		//
 		//                ROOT_NODE
@@ -747,18 +764,10 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 
 		aiMatrix4x4 m;
 		AddNodeToGraph(pcOut,  pcOut->mRootNode, mRootNode,m);
-
-		// If the root node is unnamed name it "<3DSRoot>"
-		if (::strstr( pcOut->mRootNode->mName.data, "UNNAMED" )
-			|| pcOut->mRootNode->mName.data[0] == '$' 
-			&& pcOut->mRootNode->mName.data[1] == '$')
-		{
-			pcOut->mRootNode->mName.Set("<3DSRoot>");
-		}
 	}
 
 	// We used the first vertex color set to store some
-	// temporary values, so we need to cleanup here
+	// temporary values so we need to cleanup here
 	for (unsigned int a = 0; a < pcOut->mNumMeshes;++a)
 		pcOut->mMeshes[a]->mColors[0] = NULL;
 
@@ -770,6 +779,13 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 		pcOut->mRootNode->mParent = NULL;
 		pcOld->mChildren[0] = NULL;
 		delete pcOld;
+	}
+
+	// If the root node is unnamed name it "<3DSRoot>"
+	if (::strstr( pcOut->mRootNode->mName.data, "UNNAMED" ) ||
+		pcOut->mRootNode->mName.data[0] == '$' && pcOut->mRootNode->mName.data[1] == '$')
+	{
+		pcOut->mRootNode->mName.Set("<3DSRoot>");
 	}
 }
 

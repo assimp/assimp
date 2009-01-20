@@ -784,7 +784,7 @@ the correct timing, all time stamp thus have to be divided by aiAnimation::mTick
 though, that certain combinations of file format and exporter don't always store this information
 in the exported file. In this case, mTicksPerSecond is set to 0 to indicate the lack of knowledge.
 
-The aiAnimation consists of a series of aiBoneAnims. Each bone animation affects a single node in
+The aiAnimation consists of a series of aiNodeAnim's. Each bone animation affects a single node in
 the node hierarchy only, the name specifying which node is affected. For this node the structure 
 stores three separate key sequences: a vector key sequence for the position, a quaternion key sequence
 for the rotation and another vector key sequence for the scaling. All 3d data is local to the

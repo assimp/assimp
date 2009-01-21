@@ -56,13 +56,6 @@ extern "C" {
 /** Helper structure to describe a virtual camera. 
  *
  * Cameras have a representation in the node graph and can be animated.
- * Note - some file formats (such as 3DS, ASE) export a "target point" -
- * the point the camera is looking at (it can even be animated). Assimp
- * writes the target point as a subnode of the camera's main node,
- * called "<camName>.Target". However, this is just additional information
- * then, the transformation tracks of the camera main node make the
- * camera already look in the right direction.
- * <br>
  * An important aspect is that the camera itself is also part of the
  * scenegraph. This means, any values such as the look-at vector are not 
  * *absolute*, they're <b>relative</b> to the coordinate system defined
@@ -70,7 +63,7 @@ extern "C" {
  * animations. For static cameras parameters like the 'look-at' or 'up' vectors
  * are usually specified directly in aiCamera, but beware, they could also
  * be encoded in the node transformation. The following (pseudo)code sample 
- * shows how to do it:
+ * shows how to do it: <br><br>
  * @code
  * // Get the camera matrix for a camera at a specific time
  * // if the node hierarchy for the camera does not contain
@@ -93,6 +86,13 @@ extern "C" {
  *    cam = mult-matrices (cam, get-camera-matrix(cmt) )
  * }
  * @endcode
+ *
+ * @note some file formats (such as 3DS, ASE) export a "target point" -
+ * the point the camera is looking at (it can even be animated). Assimp
+ * writes the target point as a subnode of the camera's main node,
+ * called "<camName>.Target". However this is just additional information
+ * then, the transformation tracks of the camera main node make the
+ * camera already look in the right direction.
  * 
 */
 struct aiCamera

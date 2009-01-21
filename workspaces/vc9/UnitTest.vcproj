@@ -24,7 +24,7 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\shared\UnitTest.vsprops"
+			InheritedPropertySheets=".\shared\UnitTest.vsprops;.\shared\FastSTL.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -105,7 +105,7 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\shared\UnitTest.vsprops"
+			InheritedPropertySheets=".\shared\UnitTest.vsprops;.\shared\FastSTL.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -127,7 +127,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\code;..\..\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_SECURE_SCL=0"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="UnitTestPCH.h"
@@ -184,7 +184,7 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\shared\UnitTest.vsprops"
+			InheritedPropertySheets=".\shared\UnitTest.vsprops;.\shared\FastSTL.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -263,7 +263,7 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\shared\UnitTest.vsprops"
+			InheritedPropertySheets=".\shared\UnitTest.vsprops;.\shared\FastSTL.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -344,7 +344,7 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\shared\UnitTest.vsprops;.\shared\NoBoostShared.vsprops"
+			InheritedPropertySheets=".\shared\UnitTest.vsprops;.\shared\NoBoostShared.vsprops;.\shared\FastSTL.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -423,7 +423,7 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\shared\UnitTest.vsprops;.\shared\NoBoostShared.vsprops"
+			InheritedPropertySheets=".\shared\UnitTest.vsprops;.\shared\NoBoostShared.vsprops;.\shared\FastSTL.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -504,7 +504,7 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\shared\UnitTest.vsprops;.\shared\SingleThreadedShared.vsprops"
+			InheritedPropertySheets=".\shared\UnitTest.vsprops;.\shared\SingleThreadedShared.vsprops;.\shared\FastSTL.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -585,7 +585,7 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\shared\UnitTest.vsprops;.\shared\SingleThreadedShared.vsprops"
+			InheritedPropertySheets=".\shared\UnitTest.vsprops;.\shared\SingleThreadedShared.vsprops;.\shared\FastSTL.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>

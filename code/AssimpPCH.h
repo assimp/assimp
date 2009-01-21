@@ -61,23 +61,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	define AI_DEBUG_INVALIDATE_PTR(x)
 #endif
 
-// We depend heavily on the STL's performance, so we need to make sure
-// that the M$ implementation isn't 'secure', but 'fast'
-#if 0 // this crashes! what the fuck???
-#if (defined _MSC_VER) && (!defined DEBUG)
-#	define _SECURE_SCL 0
-#	define _SCL_SECURE_NO_DEPRECATE
-#	define _HAS_ITERATOR_DEBUGGING 0
-#endif
-#endif
-
 // If we have at least VC8 some C string manipulation functions
-	// are mapped to their safe _s counterparts (e.g. _itoa_s).
+// are mapped to their safe _s counterparts (e.g. _itoa_s).
 #if _MSC_VER >= 1400 && !(defined _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES)
 #	define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
 #endif
 
-// Actually that'snot required for MSVC (it is included somewhere in 
+// Actually that's not required for MSVC (it is included somewhere in 
 // the STL ..) but it is necessary for build with STLport.
 #include <ctype.h>
 

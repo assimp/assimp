@@ -4,12 +4,8 @@
 // #	include <boost/thread.hpp>
 // #endif
 
-// Assimp public API
-#include <aiPostProcess.h>
-#include <aiScene.h>
-#include <assimp.hpp>
-#include <DefaultLogger.h>
-
+// We need to be sure to have the same STL settings as Assimp
+#include <AssimpPCH.h>
 
 // CPPUNIT
 #include <cppunit/TestFixture.h>

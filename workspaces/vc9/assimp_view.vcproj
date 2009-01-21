@@ -24,6 +24,7 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
+			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -104,6 +105,7 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
+			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -125,7 +127,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SECURE_SCL=0"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
@@ -184,6 +186,7 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
+			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -264,6 +267,7 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
+			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -344,7 +348,7 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\shared\NoBoostShared.vsprops"
+			InheritedPropertySheets=".\shared\NoBoostShared.vsprops;.\shared\FastSTL.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -425,7 +429,7 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\shared\NoBoostShared.vsprops"
+			InheritedPropertySheets=".\shared\NoBoostShared.vsprops;.\shared\FastSTL.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -506,6 +510,7 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
+			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -586,6 +591,7 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
+			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>

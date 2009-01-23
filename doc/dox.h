@@ -15,7 +15,7 @@ or conversion from right-handed to left-handed coordinate systems.
 
 ASSIMP currently supports the following file formats (note that some loaders lack some features of their formats because 
 some file formats contain data not supported by Assimp, some stuff would require so much conversion work
-that it has not yet been implemented, and some formats are not completely documented):
+that it has not yet been implemented, and some formats have not completely been documented by their inventors):
 <hr>
 <br><tt>
 <b>Collada</b> ( <i>*.dae;*.xml</i> ) <sup>3</sup><br>
@@ -177,14 +177,16 @@ for more details.
 @section assimp_stlport Building against STLport
 
 If your compiler's default implementation of the STL is too slow, lacks some features,
-contains bugs, or if you just want to tweak Assimp's performance a little, try a build
+contains bugs or if you just want to tweak Assimp's performance a little try a build
 against STLport. STLport is a free, fast and secure STL replacement that works with
-all major compilers and platforms. To get it, visit their website at
+all major compilers and platforms. To get it visit their website at
 <a href="http://www.stlport.org"/><stlport.org></a> and download the latest STLport release.
-Urually you'll just need to run 'configure' + a makefile (see the README for mroe details).
-Don't forget to add <stlport_root>/stlport to your compiler's default include paths - <b>prior</b>
+Usually you'll just need to run 'configure' + a makefile (see the README for mroe details).
+Don't miss to add <stlport_root>/stlport to your compiler's default include paths - <b>prior</b>
 to the directory where the compiler vendor's STL lies. Do the same for  <stlport_root>/lib and
 recompile Assimp. To ensure you're really building against STLport see aiGetCompileFlags().
+<br>
+Usually building Assimp against STLport yields a better overall performance.
 
 */
 

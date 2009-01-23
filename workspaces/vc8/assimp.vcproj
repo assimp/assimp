@@ -20,7 +20,7 @@
 		<Configuration
 			Name="debug|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets=".\shared\LibShared.vsprops"
+			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\FastSTL.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -85,6 +85,7 @@
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
+			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -145,7 +146,7 @@
 		<Configuration
 			Name="release|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets=".\shared\LibShared.vsprops"
+			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\FastSTL.vsprops"
 			WholeProgramOptimization="0"
 			>
 			<Tool
@@ -211,7 +212,7 @@
 		<Configuration
 			Name="release|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets=".\shared\LibShared.vsprops"
+			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\FastSTL.vsprops"
 			WholeProgramOptimization="0"
 			>
 			<Tool
@@ -276,7 +277,7 @@
 		<Configuration
 			Name="release-dll|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\shared\DllShared.vsprops"
+			InheritedPropertySheets=".\shared\DllShared.vsprops;.\shared\FastSTL.vsprops"
 			WholeProgramOptimization="0"
 			>
 			<Tool
@@ -353,7 +354,7 @@
 		<Configuration
 			Name="release-dll|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\shared\DllShared.vsprops"
+			InheritedPropertySheets=".\shared\DllShared.vsprops;.\shared\FastSTL.vsprops"
 			WholeProgramOptimization="0"
 			>
 			<Tool
@@ -429,7 +430,7 @@
 		<Configuration
 			Name="debug-dll|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\shared\DllShared.vsprops"
+			InheritedPropertySheets=".\shared\DllShared.vsprops;.\shared\FastSTL.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -504,7 +505,7 @@
 		<Configuration
 			Name="debug-dll|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\shared\DllShared.vsprops"
+			InheritedPropertySheets=".\shared\DllShared.vsprops;.\shared\FastSTL.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -578,7 +579,7 @@
 		<Configuration
 			Name="release-noboost-st|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\NoBoostShared.vsprops"
+			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\NoBoostShared.vsprops;.\shared\FastSTL.vsprops"
 			WholeProgramOptimization="0"
 			>
 			<Tool
@@ -643,7 +644,7 @@
 		<Configuration
 			Name="release-noboost-st|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\NoBoostShared.vsprops"
+			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\NoBoostShared.vsprops;.\shared\FastSTL.vsprops"
 			WholeProgramOptimization="0"
 			>
 			<Tool
@@ -708,7 +709,7 @@
 		<Configuration
 			Name="debug-noboost-st|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\NoBoostShared.vsprops"
+			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\NoBoostShared.vsprops;.\shared\FastSTL.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -771,7 +772,7 @@
 		<Configuration
 			Name="debug-noboost-st|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\NoBoostShared.vsprops"
+			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\NoBoostShared.vsprops;.\shared\FastSTL.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -832,7 +833,7 @@
 		<Configuration
 			Name="debug-st|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\SingleThreadedShared.vsprops"
+			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\SingleThreadedShared.vsprops;.\shared\FastSTL.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -895,7 +896,7 @@
 		<Configuration
 			Name="debug-st|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\SingleThreadedShared.vsprops"
+			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\SingleThreadedShared.vsprops;.\shared\FastSTL.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -956,7 +957,7 @@
 		<Configuration
 			Name="release-st|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\SingleThreadedShared.vsprops"
+			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\SingleThreadedShared.vsprops;.\shared\FastSTL.vsprops"
 			WholeProgramOptimization="0"
 			>
 			<Tool
@@ -1021,7 +1022,7 @@
 		<Configuration
 			Name="release-st|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\SingleThreadedShared.vsprops"
+			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\SingleThreadedShared.vsprops;.\shared\FastSTL.vsprops"
 			WholeProgramOptimization="0"
 			>
 			<Tool

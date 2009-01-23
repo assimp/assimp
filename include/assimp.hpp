@@ -302,21 +302,30 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Reads the given file and returns its contents if successful. 
-	* 
-	* If the call succeeds, the contents of the file are returned as a 
-	* pointer to an aiScene object. The returned data is intended to be 
-	* read-only, the importer object keeps ownership of the data and will
-   * destroy it upon destruction. If the import fails, NULL is returned.
-	* A human-readable error description can be retrieved by calling 
-	* GetErrorString(). The previous scene will be deleted during this call.
-	* @param pFile Path and filename to the file to be imported.
-	* @param pFlags Optional post processing steps to be executed after 
-	*   a successful import. Provide a bitwise combination of the 
-	*   #aiPostProcessSteps flags.
-	* @return A pointer to the imported data, NULL if the import failed.
-	*   The pointer to the scene remains in possession of the Importer
-	*   instance. Use GetOrphanedScene() to take ownership of it.
-	*/
+	 * 
+	 * If the call succeeds, the contents of the file are returned as a 
+	 * pointer to an aiScene object. The returned data is intended to be 
+	 * read-only, the importer object keeps ownership of the data and will
+	 * destroy it upon destruction. If the import fails, NULL is returned.
+	 * A human-readable error description can be retrieved by calling 
+	 * GetErrorString(). The previous scene will be deleted during this call.
+	 * @param pFile Path and filename to the file to be imported.
+	 * @param pFlags Optional post processing steps to be executed after 
+	 *   a successful import. Provide a bitwise combination of the 
+	 *   #aiPostProcessSteps flags.
+	 * @return A pointer to the imported data, NULL if the import failed.
+	 *   The pointer to the scene remains in possession of the Importer
+	 *   instance. Use GetOrphanedScene() to take ownership of it.
+	 */
+	const aiScene* ReadFile( const char* pFile, unsigned int pFlags);
+
+	// -------------------------------------------------------------------
+	/** @brief Reads the given file and returns its contents if successful. 
+	 *
+	 * This function is provided for backward compatibility.
+	 * See the const char* version for detailled docs.
+	 * @see ReadFile(const char*, pFlags)
+	 */
 	const aiScene* ReadFile( const std::string& pFile, unsigned int pFlags);
 
 
@@ -348,6 +357,15 @@ public:
 	*   Cases-insensitive.
 	* @return true if the extension is supported, false otherwise
 	*/
+	bool IsExtensionSupported(const char* szExtension);
+
+	// -------------------------------------------------------------------
+	/** @brief Returns whether a given file extension is supported by ASSIMP.
+	 *
+	 * This function is provided for backward compatibility.
+	 * See the const char* version for detailled docs.
+	 * @see IsExtensionSupported(const char*)
+	 */
 	bool IsExtensionSupported(const std::string& szExtension);
 
 
@@ -360,7 +378,16 @@ public:
     *   is a loader which handles such files.
 	*   Format of the list: "*.3ds;*.obj;*.dae". 
 	*/
-	void GetExtensionList(std::string& szOut);
+	void GetExtensionList(aiString& szOut);
+
+	// -------------------------------------------------------------------
+	/** @brief Get a full list of all file extensions supported by ASSIMP.
+	 *
+	 * This function is provided for backward compatibility.
+	 * See the aiString version for detailled docs.
+	 * @see GetExtensionList(aiString&)
+	 */
+	inline void GetExtensionList(std::string& szOut);
 
 
 	// -------------------------------------------------------------------
@@ -372,7 +399,7 @@ public:
 	*    must include a trailing dot.
 	*  @return NULL if there is no loader for the extension.
 	*/
-	BaseImporter* FindLoader (const std::string& szExtension);
+	BaseImporter* FindLoader (const char* szExtension);
 
 
 	// -------------------------------------------------------------------
@@ -449,27 +476,31 @@ protected:
 	SharedPostProcessInfo* mPPShared;
 }; //! class Importer
 
-// ----------------------------------------------------------------------------------
-inline const std::string& Importer::GetErrorString() const 
-{ 
-	return mErrorString;
-}
-// ----------------------------------------------------------------------------------
-inline void Importer::SetExtraVerbose(bool bDo)
+
+// ----------------------------------------------------------------------------
+// For compatibility, the interface of some functions taking a std::string was
+// changed to const char* to avoid crashes between binary incompatible STL 
+// versions. This code her is inlined,  so it shouldn't cause any problems.
+// ----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+AI_FORCE_INLINE const aiScene* Importer::ReadFile( const std::string& pFile,
+	unsigned int pFlags)
 {
-	bExtraVerbose = bDo;
+	return ReadFile(pFile.c_str(),pFlags);
 }
-// ----------------------------------------------------------------------------------
-inline const aiScene* Importer::GetScene() const
+// ----------------------------------------------------------------------------
+AI_FORCE_INLINE void Importer::GetExtensionList(std::string& szOut)
 {
-	return mScene;
+	aiString s;
+	GetExtensionList(s);
+	szOut = s.data;
 }
-// ----------------------------------------------------------------------------------
-inline aiScene* Importer::GetOrphanedScene()
+// ----------------------------------------------------------------------------
+AI_FORCE_INLINE bool Importer::IsExtensionSupported(
+	const std::string& szExtension)
 {
-	aiScene* s = mScene;
-	mScene = NULL;
-	return s;
+	return IsExtensionSupported(szExtension.c_str());
 }
 
 } // !namespace Assimp

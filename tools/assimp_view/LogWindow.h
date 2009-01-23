@@ -52,7 +52,7 @@ class CMyLogStream : Assimp::LogStream
 {
 public:
 	/**	@brief	Implementation of the abstract method	*/
-	void write(const std::string &message);
+	void write(const char* message);
 };
 
 
@@ -93,7 +93,7 @@ public:
 	void Save();
 
 	// write a line to the log window
-	void WriteLine(const std::string& message);
+	void WriteLine(const char* message);
 
 	// Set the bUpdate member
 	inline void SetAutoUpdate(bool b)

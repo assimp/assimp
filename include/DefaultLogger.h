@@ -54,11 +54,14 @@ namespace Assimp	{
 class IOStream;
 struct LogStreamInfo;
 
+//! Default log file
+#define ASSIMP_DEFAULT_LOG_NAME "AssimpLog.txt"
+
 // ------------------------------------------------------------------------------------
-/** @class	DefaultLogger
- *	 @brief	Default logging implementation. The logger writes into a file. 
- *	 The name can be set by creating the logger. If no filename was specified 
- *	 the logger will use the standard out and error streams.
+/**  @class	DefaultLogger
+ *	 @brief	Default logging implementation. 
+ *
+ *  todo .... move static stuff to Logger where it belongs to.
  */
 class ASSIMP_API DefaultLogger :
 	public Logger
@@ -66,9 +69,9 @@ class ASSIMP_API DefaultLogger :
 public:
 
 	/** @brief	Creates a default logging instance (DefaultLogger)
-	 *	 @param	name		Name for log file. Only valid in combination
+	 *	@param	name		Name for log file. Only valid in combination
 	 *                      with the DLS_FILE flag. 
-	 *	 @param	severity	Log severity, VERBOSE will activate debug messages
+	 *	@param	severity	Log severity, VERBOSE will activate debug messages
 	 *  @param  defStreams  Default log streams to be attached. Bitwise
 	 *                      combination of the DefaultLogStreams enumerated
 	 *                      values. If DLS_FILE is specified, but an empty
@@ -78,7 +81,7 @@ public:
 	 *
 	 * This replaces the default NullLogger with a DefaultLogger instance.
 	 */
-	static Logger *create(const std::string &name = "AssimpLog.txt",
+	static Logger *create(const char* name = ASSIMP_DEFAULT_LOG_NAME,
 		LogSeverity severity    = NORMAL,
 		unsigned int defStreams = DLS_DEBUGGER | DLS_FILE,
 		IOSystem* io		    = NULL);
@@ -110,30 +113,31 @@ public:
 	static void kill();
 
 
-
-
-	/**	@brief	Logs debug infos, only been written when severity level VERBOSE is set */
-	void debug(const std::string &message);
-
-	/**	@brief	Logs an info message */
-	void info(const std::string &message);
-
-	/**	@brief	Logs a warning message */
-	void warn(const std::string &message);
-	
-	/**	@brief	Logs an error message */
-	void error(const std::string &message);
-
 	/**	@brief	Severity setter	*/
-	void setLogSeverity(LogSeverity log_severity);
+	/* override */ void setLogSeverity(LogSeverity log_severity);
 	
 	/**	@brief	Attach a stream to the logger. */
-	void attachStream(LogStream *pStream, unsigned int severity);
+	/* override */ void attachStream(LogStream *pStream,
+		unsigned int severity);
 
 	/**	@brief	Detach a still attached stream from logger */
-	void detatchStream(LogStream *pStream, unsigned int severity);
+	/* override */ void detatchStream(LogStream *pStream, 
+		unsigned int severity);
 
 private:
+
+	/**	@brief	Logs debug infos, only been written when severity level VERBOSE is set */
+	/* override */ void OnDebug(const char* message);
+
+	/**	@brief	Logs an info message */
+	/* override */ void OnInfo(const char*  message);
+
+	/**	@brief	Logs a warning message */
+	/* override */ void OnWarn(const char*  message);
+	
+	/**	@brief	Logs an error message */
+	/* override */ void OnError(const char* message);
+
 
 	/** @brief	Private construction for internal use by create().
 	 *  @param severity Logging granularity
@@ -144,12 +148,12 @@ private:
 	~DefaultLogger();
 
 	/**	@brief Writes a message to all streams */
-	void writeToStreams(const std::string &message, ErrorSeverity ErrorSev );
+	void WriteToStreams(const char* message, ErrorSeverity ErrorSev );
 
 	/** @brief	Returns the thread id.
-	 *	 @remark	This is an OS specific feature, if not supported, a zero will be returned.
+	 *	@remark	This is an OS specific feature, if not supported, a zero will be returned.
 	 */
-	std::string getThreadID();
+	unsigned int GetThreadID();
 
 private:
 	//	Aliases for stream container
@@ -167,7 +171,8 @@ private:
 	StreamArray	m_StreamArray;
 
 	bool noRepeatMsg;
-	std::string lastMsg;
+	char lastMsg[MAX_LOG_MESSAGE_LENGTH*2];
+	size_t lastLen;
 };
 // ------------------------------------------------------------------------------------
 

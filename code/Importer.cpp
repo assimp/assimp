@@ -570,11 +570,43 @@ void Importer::FreeScene( )
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get the current error string, if any
+const std::string& Importer::GetErrorString() const 
+{ 
+	return mErrorString;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Enable extra-verbose mode
+void Importer::SetExtraVerbose(bool bDo)
+{
+	bExtraVerbose = bDo;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Get the current scene
+const aiScene* Importer::GetScene() const
+{
+	return mScene;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Orphan the current scene
+aiScene* Importer::GetOrphanedScene()
+{
+	aiScene* s = mScene;
+	mScene = NULL;
+	return s;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Reads the given file and returns its contents if successful. 
-const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags)
+const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 {
 	// Validate the flags
 	ai_assert(ValidateFlags(pFlags));
+
+	const std::string pFile(_pFile);
 
 	// ======================================================================
 	// Put a large try block around everything to catch all std::exception's
@@ -701,17 +733,18 @@ const aiScene* Importer::ReadFile( const std::string& pFile, unsigned int pFlags
 
 // ------------------------------------------------------------------------------------------------
 // Helper function to check whether an extension is supported by ASSIMP
-bool Importer::IsExtensionSupported(const std::string& szExtension)
+bool Importer::IsExtensionSupported(const char* szExtension)
 {
 	return NULL != FindLoader(szExtension);
 }
 
 // ------------------------------------------------------------------------------------------------
-BaseImporter* Importer::FindLoader (const std::string& szExtension)
+BaseImporter* Importer::FindLoader (const char* _szExtension)
 {
+	const std::string szExtension(_szExtension);
 	for (std::vector<BaseImporter*>::const_iterator
-		i =  this->mImporter.begin();
-		i != this->mImporter.end();++i)
+		i =  mImporter.begin();
+		i != mImporter.end();++i)
 	{
 		// pass the file extension to the CanRead(..,NULL)-method
 		if ((*i)->CanRead(szExtension,NULL))return *i;
@@ -721,19 +754,21 @@ BaseImporter* Importer::FindLoader (const std::string& szExtension)
 
 // ------------------------------------------------------------------------------------------------
 // Helper function to build a list of all file extensions supported by ASSIMP
-void Importer::GetExtensionList(std::string& szOut)
+void Importer::GetExtensionList(aiString& szOut)
 {
 	unsigned int iNum = 0;
+	std::string tmp; // todo: Rewrite baseImporter::GetExtensionList to use aiString, too
 	for (std::vector<BaseImporter*>::const_iterator
-		i =  this->mImporter.begin();
-		i != this->mImporter.end();++i,++iNum)
+		i =  mImporter.begin();
+		i != mImporter.end();++i,++iNum)
 	{
 		// insert a comma as delimiter character
 		if (0 != iNum)
-			szOut.append(";");
+			tmp.append(";");
 
-		(*i)->GetExtensionList(szOut);
+		(*i)->GetExtensionList(tmp);
 	}
+	szOut.Set(tmp);
 	return;
 }
 

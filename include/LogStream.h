@@ -69,7 +69,7 @@ enum DefaultLogStreams
 
 	// MSVC only: Stream the log the the debugger
 	DLS_DEBUGGER = 0x8
-};
+}; // !enum DefaultLogStreams
 
 // ------------------------------------------------------------------------------------
 /** @class	LogStream
@@ -88,11 +88,19 @@ public:
 	/** @brief	Virtual destructor	*/
 	virtual ~LogStream();
 
+	// -------------------------------------------------------------------
 	/** @brief	Overwrite this for your own output methods
+	 *
+	 *  Log messages *may* consist of multiple lines and you shouldn't
+	 *  expect a consistent formatting. If you want custom formatting 
+	 *  (e.g. generate HTML), supply a custom instance of Logger to
+	 *  DefaultLogger:set(). Usually you can *expect* that a log message
+	 *  is exactly one line long, terminated with a single \n sequence.
 	 *  @param  message Message to be written
   	 */
-	virtual void write(const std::string &message) = 0;
+	virtual void write(const char* message) = 0;
 
+	// -------------------------------------------------------------------
 	/** @brief Creates a default log stream
 	 *  @param streams Type of the default stream
 	 *  @param name For DLS_FILE: name of the output file
@@ -101,9 +109,9 @@ public:
 	 *  @return New LogStream instance - you're responsible for it's destruction!
 	 */
 	static LogStream* createDefaultStream(DefaultLogStreams	streams,
-		const std::string& name = "AssimpLog.txt",
+		const char* name = "AssimpLog.txt",
 		IOSystem* io			= NULL);
-};
+}; // !class LogStream
 
 // ------------------------------------------------------------------------------------
 //	Default constructor

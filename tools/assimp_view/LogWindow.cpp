@@ -127,7 +127,7 @@ void CLogWindow::Show()
 	}
 }
 //-------------------------------------------------------------------------------
-void CMyLogStream::write(const std::string &message)
+void CMyLogStream::write(const char* message)
 {
 	CLogWindow::Instance().WriteLine(message);
 }
@@ -193,7 +193,7 @@ void CLogWindow::Save()
 			D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
 }
 //-------------------------------------------------------------------------------
-void CLogWindow::WriteLine(const std::string& message)
+void CLogWindow::WriteLine(const char* message)
 {
 	this->szPlainText.append(message);
 	this->szPlainText.append("\r\n");
@@ -203,7 +203,7 @@ void CLogWindow::WriteLine(const std::string& message)
 		this->szText.resize(this->szText.length()-1);
 	}
 
-	switch (message.c_str()[0])
+	switch (message[0])
 	{
 	case 'e': 
 	case 'E':

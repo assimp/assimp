@@ -67,10 +67,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp	{
 namespace Intern		{
 
-	// Internal helper class to utilize our internal new/delete routines
-	// for allocating object of this class. By doing this you can safely
-	// share class objects between Assimp and the application - it works
-	// even over DLL boundaries.
+	/** @brief Internal helper class to utilize our internal new/delete 
+	 *    routines for allocating object of this and derived classes.
+	 *
+	 * By doing this you can safely share class objects between Assimp
+	 * and the application - it works even over DLL boundaries. A good
+	 * example is the IOSystem where the application allocates its custom
+	 * IOSystem, then calls Importer::SetIOSystem(). When the Importer
+	 * destructs, Assimp calls operator delete on the stored IOSystem.
+	 * If it lies on a different heap than Assimp is working with,
+	 * the application is determined to crash.
+	 */
 	struct ASSIMP_API AllocateFromAssimpHeap	{
 
 		// new/delete overload

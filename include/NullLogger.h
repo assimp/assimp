@@ -38,16 +38,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file NullLogger.h
+/** @file  NullLogger.h
+ *  @brief Dummy logger
 */
 
-#if (!defined AI_NULLLOGGER_H_INCLUDED)
-#define AI_NULLLOGGER_H_INCLUDED
+#ifndef INCLUDED_AI_NULLLOGGER_H
+#define INCLUDED_AI_NULLLOGGER_H
 
 #include "../include/Logger.h"
 
-namespace Assimp
-{
+namespace Assimp	{
 
 // ---------------------------------------------------------------------------
 /** @class	NullLogger
@@ -59,25 +59,39 @@ class ASSIMP_API NullLogger : public Logger
 {
 public:
 	/**	@brief	Logs a debug message */
-	void debug(const std::string &message) { (void)message;}  //this avoids compiler warnings
+	void OnDebug(const char* message) { 
+		(void)message; //this avoids compiler warnings
+	}
 
 	/**	@brief	Logs an info message */
-	void info(const std::string &message) {(void)message;}  //this avoids compiler warnings
+	void OnInfo(const char* message) { 
+		(void)message; //this avoids compiler warnings
+	}
 
 	/**	@brief	Logs a warning message */
-	void warn(const std::string &message) {(void)message;}  //this avoids compiler warnings
+	void OnWarn(const char* message) { 
+		(void)message; //this avoids compiler warnings
+	}
 	
 	/**	@brief	Logs an error message */
-	void error(const std::string &message) {(void)message;}  //this avoids compiler warnings
+	void OnError(const char* message) { 
+		(void)message; //this avoids compiler warnings
+	}
 
 	/** @brief Log severity setter */
-	void setLogSeverity(LogSeverity log_severity) {(void)log_severity;}  //this avoids compiler warnings
+	void setLogSeverity(LogSeverity log_severity) {
+		(void)log_severity;  //this avoids compiler warnings
+	}
 
 	/**	@brief	Detach a still attached stream from logger */
-	void attachStream(LogStream *pStream, unsigned int severity) {(void)pStream; (void)severity;}  //this avoids compiler warnings
+	void attachStream(LogStream *pStream, unsigned int severity) {
+		(void)pStream; (void)severity; //this avoids compiler warnings
+	}
 
 	/**	@brief	Detach a still attached stream from logger */
-	void detatchStream(LogStream *pStream, unsigned int severity) {(void)pStream; (void)severity;}  //this avoids compiler warnings
+	void detatchStream(LogStream *pStream, unsigned int severity) {
+		(void)pStream; (void)severity; //this avoids compiler warnings
+	}
 };
 
 }

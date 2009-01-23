@@ -149,7 +149,7 @@ public:
 	{}
 
 	// -------------------------------------------------------------------
-	bool Exists( const std::string& pFile) const
+	bool Exists( const char* pFile) const
 	{
 		CIOSystemWrapper* pip = const_cast<CIOSystemWrapper*>(this);
 		IOStream* p = pip->Open(pFile);
@@ -161,17 +161,16 @@ public:
 	}
 
 	// -------------------------------------------------------------------
-	std::string getOsSeparator() const
+	char getOsSeparator() const
 	{
 		// FIXME
-		return "/";
+		return '/';
 	}
 
 	// -------------------------------------------------------------------
-	IOStream* Open(const std::string& pFile,
-		const std::string& pMode = std::string("rb"))
+	IOStream* Open(const char* pFile,const char* pMode = "rb")
 	{
-		aiFile* p = mFileSystem->OpenProc(mFileSystem,pFile.c_str(),pMode.c_str());
+		aiFile* p = mFileSystem->OpenProc(mFileSystem,pFile,pMode);
 		if (!p)return NULL;
 		return new CIOStreamWrapper(p);
 	}
@@ -278,6 +277,7 @@ const char* aiGetErrorString()
 {
 	return gLastErrorString.c_str();
 }
+
 // ------------------------------------------------------------------------------------------------
 // Returns the error text of the last failed import process. 
 int aiIsExtensionSupported(const char* szExtension)
@@ -289,18 +289,18 @@ int aiIsExtensionSupported(const char* szExtension)
 	boost::mutex::scoped_lock lock(gMutex);
 #endif
 
-	if (!gActiveImports.empty())
-	{
-		return (int)((*(gActiveImports.begin())).second->IsExtensionSupported(
-			std::string ( szExtension )));
+	if (!gActiveImports.empty())	{
+		return (int)((*(gActiveImports.begin())).second->IsExtensionSupported( szExtension ));
 	}
+
 	// need to create a temporary Importer instance.
 	// TODO: Find a better solution ...
 	Assimp::Importer* pcTemp = new Assimp::Importer();
-	int i = (int)pcTemp->IsExtensionSupported(std::string ( szExtension ));
+	int i = (int)pcTemp->IsExtensionSupported(std::string(szExtension));
 	delete pcTemp;
 	return i;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Get a list of all file extensions supported by ASSIMP
 void aiGetExtensionList(aiString* szOut)
@@ -312,20 +312,18 @@ void aiGetExtensionList(aiString* szOut)
 	boost::mutex::scoped_lock lock(gMutex);
 #endif
 
-	std::string szTemp;
 	if (!gActiveImports.empty())
 	{
-		(*(gActiveImports.begin())).second->GetExtensionList(szTemp);
-		szOut->Set ( szTemp );
+		(*(gActiveImports.begin())).second->GetExtensionList(*szOut);
 		return;
 	}
 	// need to create a temporary Importer instance.
 	// TODO: Find a better solution ...
 	Assimp::Importer* pcTemp = new Assimp::Importer();
-	pcTemp->GetExtensionList(szTemp);
-	szOut->Set ( szTemp );
+	pcTemp->GetExtensionList(*szOut);
 	delete pcTemp;
 }
+
 // ------------------------------------------------------------------------------------------------
 void aiGetMemoryRequirements(const C_STRUCT aiScene* pIn,
 	C_STRUCT aiMemoryInfo* in)

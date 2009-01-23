@@ -308,7 +308,7 @@ void ValidateDSProcess::Execute( aiScene* pScene)
 void ValidateDSProcess::Validate( const aiLight* pLight)
 {
 	if (pLight->mType == aiLightSource_UNDEFINED)
-		ReportError("aiLight::mType is aiLightSource_UNDEFINED");
+		ReportWarning("aiLight::mType is aiLightSource_UNDEFINED");
 
 	if (!pLight->mAttenuationConstant &&
 		!pLight->mAttenuationLinear   && 
@@ -334,7 +334,7 @@ void ValidateDSProcess::Validate( const aiCamera* pCamera)
 		ReportError("aiCamera::mClipPlaneFar must be >= aiCamera::mClipPlaneNear");
 
 	if (!pCamera->mHorizontalFOV || pCamera->mHorizontalFOV >= (float)AI_MATH_PI)
-		ReportError("%f is not a valid value for aiCamera::mHorizontalFOV",pCamera->mHorizontalFOV);
+		ReportWarning("%f is not a valid value for aiCamera::mHorizontalFOV",pCamera->mHorizontalFOV);
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -44,8 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../include/IOSystem.h"
 
-namespace Assimp
-{
+namespace Assimp	{
 
 // ---------------------------------------------------------------------------
 /** Default implementation of IOSystem using the standard C file functions */
@@ -60,15 +59,15 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Tests for the existence of a file at the given path. */
-	bool Exists( const std::string& pFile) const;
+	bool Exists( const char* pFile) const;
 
 	// -------------------------------------------------------------------
 	/** Returns the directory separator. */
-	std::string getOsSeparator() const;
+	char getOsSeparator() const;
 
 	// -------------------------------------------------------------------
 	/** Open a new file with a given path. */
-	IOStream* Open( const std::string& pFile, const std::string& pMode = std::string("rb"));
+	IOStream* Open( const char* pFile, const char* pMode = "rb");
 
 	// -------------------------------------------------------------------
 	/** Closes the given file and releases all resources associated with it. */
@@ -76,7 +75,7 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Compare two paths */
-	bool ComparePaths (const std::string& one, const std::string& second);
+	bool ComparePaths (const char* one, const char* second) const;
 };
 
 } //!ns Assimp

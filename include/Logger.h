@@ -85,6 +85,10 @@ public:
 		ERR			= 8		//!< Error log message
 	};
 
+	/** @brief Maximum length for log messages
+	 */
+	static const size_t MAX_LOG_MESSAGE_LENGTH = 1024;
+
 public:
 	/** @brief	Virtual destructor */
 	virtual ~Logger();
@@ -92,22 +96,22 @@ public:
 	/** @brief	Writes a debug message
 	 *	 @param	message		Debug message
 	 */
-	virtual void debug(const std::string &message)= 0;
+	void debug(const std::string &message);
 
 	/** @brief	Writes a info message
 	 *	 @param	message		Info message
 	 */
-	virtual void info(const std::string &message) = 0;
+	void info(const std::string &message);
 
 	/** @brief	Writes a warning message
 	 *	 @param	message		Warn message
 	 */
-	virtual void warn(const std::string &message) = 0;
+	void warn(const std::string &message);
 
 	/** @brief	Writes an error message
 	 *	 @param	message		Error message
 	 */
-	virtual void error(const std::string &message) = 0;
+	void error(const std::string &message);
 
 	/** @brief	Set a new log severity.
 	 *	 @param	log_severity	New severity for logging
@@ -142,6 +146,38 @@ public:
 protected:
 	/**	@brief	Default constructor	*/
 	Logger();
+
+	/**  @brief Called as a request to write a specific debug message
+	 *	 @param	message		Debug message. Never longer than
+	 *     MAX_LOG_MESSAGE_LENGTH characters (exluding the '0').
+	 *   @note  The message string is only valid until the scope of
+	 *     the function is left.
+	 */
+	virtual void OnDebug(const char* message)= 0;
+
+	/**  @brief Called as a request to write a specific info message
+	 *	 @param	message		Info message. Never longer than
+	 *     MAX_LOG_MESSAGE_LENGTH characters (exluding the '0').
+	 *   @note  The message string is only valid until the scope of
+	 *     the function is left.
+	 */
+	virtual void OnInfo(const char* message) = 0;
+
+	/**  @brief Called as a request to write a specific warn message
+	 *	 @param	message		Warn message. Never longer than
+	 *     MAX_LOG_MESSAGE_LENGTH characters (exluding the '0').
+	 *   @note  The message string is only valid until the scope of
+	 *     the function is left.
+	 */
+	virtual void OnWarn(const char* essage) = 0;
+
+	/**  @brief Called as a request to write a specific error message
+	 *	 @param	message		Error message. Never longer than
+	 *     MAX_LOG_MESSAGE_LENGTH characters (exluding the '0').
+	 *   @note  The message string is only valid until the scope of
+	 *     the function is left.
+	 */
+	virtual void OnError(const char* message) = 0;
 };
 
 // ----------------------------------------------------------------------------------

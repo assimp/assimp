@@ -186,7 +186,6 @@
 			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>

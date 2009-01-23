@@ -39,6 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
+/** @file  DefaultLogger.cpp
+ *  @brief Implementation of DefaultLogger (and Logger)
+ */
+
 #include "AssimpPCH.h"
 #include "DefaultIOSystem.h"
 
@@ -54,7 +58,7 @@ NullLogger DefaultLogger::s_pNullLogger;
 Logger *DefaultLogger::m_pLogger = &DefaultLogger::s_pNullLogger;
 
 // ----------------------------------------------------------------------------------
-//
+// Represents a logstream + its error severity
 struct LogStreamInfo
 {
 	unsigned int m_uiErrorSeverity;
@@ -78,7 +82,7 @@ struct LogStreamInfo
 // ----------------------------------------------------------------------------------
 // Construct a default log stream
 LogStream* LogStream::createDefaultStream(DefaultLogStreams	streams,
-	const std::string& name /*= "AssimpLog.txt"*/,
+	const char* name /*= "AssimpLog.txt"*/,
 	IOSystem* io		    /*= NULL*/)
 {
 	switch (streams)	
@@ -97,7 +101,7 @@ LogStream* LogStream::createDefaultStream(DefaultLogStreams	streams,
 	case DLS_COUT:
 		return new StdOStreamLogStream(std::cout);
 	case DLS_FILE:
-		return (name.size() ? new FileLogStream(name,io) : NULL);
+		return (name && *name ? new FileLogStream(name,io) : NULL);
 	default:
 		// We don't know this default log stream, so raise an assertion
 		ai_assert(false);
@@ -110,10 +114,10 @@ LogStream* LogStream::createDefaultStream(DefaultLogStreams	streams,
 
 // ----------------------------------------------------------------------------------
 //	Creates the only singleton instance
-Logger *DefaultLogger::create(const std::string &name /*= "AssimpLog.txt"*/,
-	LogSeverity severity    /*= NORMAL*/,
-	unsigned int defStreams /*= DLS_DEBUGGER | DLS_FILE*/,
-	IOSystem* io		    /*= NULL*/)
+Logger *DefaultLogger::create(const char* name /*= "AssimpLog.txt"*/,
+	LogSeverity severity                       /*= NORMAL*/,
+	unsigned int defStreams                    /*= DLS_DEBUGGER | DLS_FILE*/,
+	IOSystem* io		                       /*= NULL*/)
 {
 	if (m_pLogger && !isNullLogger() )
 		delete m_pLogger;
@@ -134,10 +138,34 @@ Logger *DefaultLogger::create(const std::string &name /*= "AssimpLog.txt"*/,
 		 m_pLogger->attachStream( LogStream::createDefaultStream(DLS_CERR));
 	
 	// Stream the log to a file
-	if (defStreams & DLS_FILE && !name.empty())
+	if (defStreams & DLS_FILE && name && *name)
 		m_pLogger->attachStream( LogStream::createDefaultStream(DLS_FILE,name,io));
 
 	return m_pLogger;
+}
+
+// ----------------------------------------------------------------------------------
+void Logger::debug(const std::string &message)	{
+	ai_assert(message.length()<=Logger::MAX_LOG_MESSAGE_LENGTH);
+	return OnDebug(message.c_str());
+}
+
+// ----------------------------------------------------------------------------------
+void Logger::info(const std::string &message)	{
+	ai_assert(message.length()<=Logger::MAX_LOG_MESSAGE_LENGTH);
+	return OnInfo(message.c_str());
+}
+	
+// ----------------------------------------------------------------------------------
+void Logger::warn(const std::string &message)	{
+	ai_assert(message.length()<=Logger::MAX_LOG_MESSAGE_LENGTH);
+	return OnWarn(message.c_str());
+}
+
+// ----------------------------------------------------------------------------------
+void Logger::error(const std::string &message)	{
+	ai_assert(message.length()<=Logger::MAX_LOG_MESSAGE_LENGTH);
+	return OnError(message.c_str());
 }
 
 // ----------------------------------------------------------------------------------
@@ -174,37 +202,45 @@ void DefaultLogger::kill()
 
 // ----------------------------------------------------------------------------------
 //	Debug message
-void DefaultLogger::debug( const std::string &message )
+void DefaultLogger::OnDebug( const char* message )
 {
 	if ( m_Severity == Logger::NORMAL )
 		return;
 
-	const std::string msg( "Debug, T" + getThreadID() + ": " + message );
-	writeToStreams( msg, Logger::DEBUGGING );
+	char msg[MAX_LOG_MESSAGE_LENGTH*2];
+	::sprintf(msg,"Debug, T%i: %s", GetThreadID(), message );
+
+	WriteToStreams( msg, Logger::DEBUGGING );
 }
 
 // ----------------------------------------------------------------------------------
 //	Logs an info
-void DefaultLogger::info( const std::string &message )
+void DefaultLogger::OnInfo( const char* message )
 {
-	const std::string msg( "Info,  T" + getThreadID() + ": " + message );
-	writeToStreams( msg , Logger::INFO );
+	char msg[MAX_LOG_MESSAGE_LENGTH*2];
+	::sprintf(msg,"Info,  T%i: %s", GetThreadID(), message );
+
+	WriteToStreams( msg , Logger::INFO );
 }
 
 // ----------------------------------------------------------------------------------
 //	Logs a warning
-void DefaultLogger::warn( const std::string &message )
+void DefaultLogger::OnWarn( const char* message )
 {
-	const std::string msg( "Warn,  T" + getThreadID() + ": "+ message );
-	writeToStreams( msg, Logger::WARN );
+	char msg[MAX_LOG_MESSAGE_LENGTH*2];
+	::sprintf(msg,"Warn,  T%i: %s", GetThreadID(), message );
+
+	WriteToStreams( msg, Logger::WARN );
 }
 
 // ----------------------------------------------------------------------------------
 //	Logs an error
-void DefaultLogger::error( const std::string &message )
+void DefaultLogger::OnError( const char* message )
 {
-	const std::string msg( "Error, T"+ getThreadID() + ": " + message );
-	writeToStreams( msg, Logger::ERR );
+	char msg[MAX_LOG_MESSAGE_LENGTH*2];
+	::sprintf(msg,"Error, T%i: %s", GetThreadID(), message );
+
+	WriteToStreams( msg, Logger::ERR );
 }
 
 // ----------------------------------------------------------------------------------
@@ -289,57 +325,50 @@ DefaultLogger::~DefaultLogger()
 
 // ----------------------------------------------------------------------------------
 //	Writes message to stream
-void DefaultLogger::writeToStreams(const std::string &message, 
+void DefaultLogger::WriteToStreams(const char *message, 
 	ErrorSeverity ErrorSev )
 {
-	if ( message.empty() )
-		return;
-
-	std::string s;
+	ai_assert(NULL != message);
 
 	// Check whether this is a repeated message
-	if (message == lastMsg)
+	if (! ::strncmp( message,lastMsg, lastLen-1))
 	{
 		if (!noRepeatMsg)
 		{
 			noRepeatMsg = true;
-			s = "Skipping one or more lines with the same contents\n";
+			message = "Skipping one or more lines with the same contents\n";
 		}
 		else return;
 	}
 	else
 	{
-		lastMsg = s = message;
-		noRepeatMsg = false;
+		// append a new-line character to the message to be printed
+		lastLen = ::strlen(message);
+		::memcpy(lastMsg,message,lastLen+1);
+		::strcat(lastMsg+lastLen,"\n");
 
-		s.append("\n");
+		message = lastMsg;
+		noRepeatMsg = false;
+		++lastLen;
 	}
 	for ( ConstStreamIt it = m_StreamArray.begin();
 		it != m_StreamArray.end();
 		++it)
 	{
 		if ( ErrorSev & (*it)->m_uiErrorSeverity )
-			(*it)->m_pStream->write( s);
+			(*it)->m_pStream->write( message);
 	}
 }
 
 // ----------------------------------------------------------------------------------
 //	Returns thread id, if not supported only a zero will be returned.
-std::string DefaultLogger::getThreadID()
+unsigned int DefaultLogger::GetThreadID()
 {
-	std::string thread_id( "0" );
+	// fixme: we can get this value via boost::threads
 #ifdef WIN32
-	HANDLE hThread = ::GetCurrentThread();
-	if ( hThread )
-	{
-		std::stringstream thread_msg;
-		thread_msg << ::GetCurrentThreadId() /*<< " "*/;
-		return thread_msg.str();
-	}
-	else
-		return thread_id;
+	return (unsigned int)::GetCurrentThreadId();
 #else
-	return thread_id;
+	return 0; // not supported
 #endif
 }
 

@@ -437,11 +437,15 @@ void ObjFileParser::getMaterialLib()
 	while (!isNewLine(*m_DataIt))
 		m_DataIt++;
 	
+	// TODO: fix path construction
+	// CLEANUP ... who is resposible for *two* identical DefaultIOSystems 
+	// where the IOSystem passed to ReadFile() should be used???
+
 	// Check for existence
 	DefaultIOSystem IOSystem;
 	std::string strMatName(pStart, &(*m_DataIt));
 	std::string absName = m_strAbsPath + IOSystem.getOsSeparator() + strMatName;
-	if ( !IOSystem.Exists(absName) )
+	if ( !IOSystem.Exists( absName.c_str()) )
 	{
 		m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 		return;
@@ -454,7 +458,7 @@ void ObjFileParser::getMaterialLib()
 
 	// Load the material library
 	DefaultIOSystem FileSystem;
-	IOStream *pFile = FileSystem.Open(absName);
+	IOStream *pFile = FileSystem.Open(absName.c_str());
 	if (0L != pFile)
 	{
 		// Import material library data from file

@@ -6,7 +6,6 @@
 
 namespace Assimp	{
 
-
 // ----------------------------------------------------------------------------------
 /**	@class	FileLogStream
  *	@brief	Logstream to write into a file.
@@ -15,32 +14,29 @@ class FileLogStream :
 	public LogStream
 {
 public:
-	FileLogStream( const std::string &strFileName, IOSystem* io = NULL );
+	FileLogStream( const char* file, IOSystem* io = NULL );
 	~FileLogStream();
-	void write( const std::string &message );
+	void write( const char* message );
 
 private:
 	IOStream *m_pStream;
 };
 
-
 // ----------------------------------------------------------------------------------
 //	Constructor
-inline FileLogStream::FileLogStream( const std::string &strFileName, IOSystem* io ) :
+inline FileLogStream::FileLogStream( const char* file, IOSystem* io ) :
 	m_pStream(NULL)
 {
-	if ( strFileName.empty() )
+	if ( !file || 0 == *file )
 		return;
-
-	const static std::string mode = "wt";
 
 	// If no IOSystem is specified: take a default one
 	if (!io)
 	{
 		DefaultIOSystem FileSystem;
-		m_pStream = FileSystem.Open( strFileName, mode );
+		m_pStream = FileSystem.Open( file, "wt");
 	}
-	else m_pStream = io->Open( strFileName, mode );
+	else m_pStream = io->Open( file, "wt" );
 }
 
 // ----------------------------------------------------------------------------------
@@ -51,21 +47,18 @@ inline FileLogStream::~FileLogStream()
 	delete m_pStream;
 }
 
-
 // ----------------------------------------------------------------------------------
 //	Write method
-inline void FileLogStream::write( const std::string &message )
+inline void FileLogStream::write( const char* message )
 {
 	if (m_pStream != NULL)
 	{
-		m_pStream->Write(message.c_str(), sizeof(char), message.size());
+		m_pStream->Write(message, sizeof(char), ::strlen(message));
 		m_pStream->Flush();
 	}
 }
 
-
 // ----------------------------------------------------------------------------------
-
 } // !Namespace Assimp
 
 #endif // !! ASSIMP_FILELOGSTREAM_H_INC

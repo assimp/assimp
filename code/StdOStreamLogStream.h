@@ -22,7 +22,7 @@ public:
 	~StdOStreamLogStream();
 	
 	/**	@brief	Writer	*/
-	void write(const std::string &messgae);
+	void write(const char* message);
 private:
 	std::ostream& ostream;
 };
@@ -40,9 +40,9 @@ inline StdOStreamLogStream::~StdOStreamLogStream()
 
 // ---------------------------------------------------------------------------
 //	Write method
-inline void StdOStreamLogStream::write(const std::string &message)
+inline void StdOStreamLogStream::write(const char* message)
 {
-	ostream << message.c_str();
+	ostream << message;
 	ostream.flush();
 }
 

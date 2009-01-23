@@ -23,7 +23,7 @@ public:
 	~Win32DebugLogStream();
 	
 	/**	@brief	Writer	*/
-	void write(const std::string &messgae);
+	void write(const char* messgae);
 };
 
 // ---------------------------------------------------------------------------
@@ -38,9 +38,9 @@ inline Win32DebugLogStream::~Win32DebugLogStream()
 
 // ---------------------------------------------------------------------------
 //	Write method
-inline void Win32DebugLogStream::write(const std::string &message)
+inline void Win32DebugLogStream::write(const char* message)
 {
-	OutputDebugString( message.c_str() );
+	OutputDebugString( message);
 }
 
 // ---------------------------------------------------------------------------

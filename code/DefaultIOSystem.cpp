@@ -53,7 +53,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-
 // ------------------------------------------------------------------------------------------------
 // Constructor. 
 DefaultIOSystem::DefaultIOSystem()
@@ -70,9 +69,9 @@ DefaultIOSystem::~DefaultIOSystem()
 
 // ------------------------------------------------------------------------------------------------
 // Tests for the existence of a file at the given path.
-bool DefaultIOSystem::Exists( const std::string& pFile) const
+bool DefaultIOSystem::Exists( const char* pFile) const
 {
-	FILE* file = ::fopen( pFile.c_str(), "rb");
+	FILE* file = ::fopen( pFile, "rb");
 	if( !file)
 		return false;
 
@@ -82,13 +81,16 @@ bool DefaultIOSystem::Exists( const std::string& pFile) const
 
 // ------------------------------------------------------------------------------------------------
 // Open a new file with a given path.
-IOStream* DefaultIOSystem::Open( const std::string& strFile, const std::string& strMode)
+IOStream* DefaultIOSystem::Open( const char* strFile, const char* strMode)
 {
-	FILE* file = ::fopen( strFile.c_str(), strMode.c_str());
+	ai_assert(NULL != strFile);
+	ai_assert(NULL != strMode);
+
+	FILE* file = ::fopen( strFile, strMode);
 	if( NULL == file) 
 		return NULL;
 
-	return new DefaultIOStream( file, strFile);
+	return new DefaultIOStream(file, (std::string) strFile);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -100,20 +102,18 @@ void DefaultIOSystem::Close( IOStream* pFile)
 
 // ------------------------------------------------------------------------------------------------
 // Returns the operation specific directory separator
-std::string DefaultIOSystem::getOsSeparator() const
+char DefaultIOSystem::getOsSeparator() const
 {
 #ifndef _WIN32
-	std::string sep = "/";
+	return '/';
 #else
-	std::string sep = "\\";
+	return '\\';
 #endif
-	return sep;
 }
 
 // ------------------------------------------------------------------------------------------------
 // IOSystem default implementation (ComparePaths isn't a pure virtual function)
-bool IOSystem::ComparePaths (const std::string& one, 
-	const std::string& second)
+bool IOSystem::ComparePaths (const char* one, const char* second) const
 {
 	return !ASSIMP_stricmp(one,second);
 }
@@ -123,20 +123,19 @@ bool IOSystem::ComparePaths (const std::string& one,
 
 // ------------------------------------------------------------------------------------------------
 // Convert a relative path into an absolute path
-inline void MakeAbsolutePath (const std::string& in, char* _out)
+inline void MakeAbsolutePath (const char* in, char* _out)
 {
 #ifdef _WIN32
-	::_fullpath(_out, in.c_str(),PATHLIMIT);
+	::_fullpath(_out, in,PATHLIMIT);
 #else
     // use realpath
-    realpath(in.c_str(), _out);
+    realpath(in, _out);
 #endif    
 }
 
 // ------------------------------------------------------------------------------------------------
 // DefaultIOSystem's more specialized implementation
-bool DefaultIOSystem::ComparePaths (const std::string& one, 
-	const std::string& second)
+bool DefaultIOSystem::ComparePaths (const char* one, const char* second) const
 {
 	// chances are quite good both paths are formatted identically,
 	// so we can hopefully return here already

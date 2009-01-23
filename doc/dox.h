@@ -4,6 +4,9 @@
 
 /**
 @mainpage ASSIMP - Open Asset Import Library
+
+<img src="dragonsplash.png"></img>
+
 @section intro Introduction
 
 ASSIMP is a library to load and process geometric scenes from various data formats. It is tailored at typical game 
@@ -65,6 +68,9 @@ that you are free to use it in open- or closed-source projects, for commercial o
 as long as you retain the license informations and take own responsibility for what you do with it. For details see
 the LICENSE file.
 
+You can find test models for almost all formats in the <assimp_root>/test/models directory. Beware, they're *free*,
+but not all of them are *open-source*. If there's an accompagning '<file>\source.txt' file don't forget to read it.
+
 @section main_install Installation
 
 ASSIMP can be used in two ways: linking against the pre-built libraries or building the library on your own. The former 
@@ -91,12 +97,22 @@ The ASSIMP viewer is a standalone Windows/DirectX application that was developed
 for quickly examining the contents of a scene file and test the suitability of its contents for realtime rendering. 
 The viewer offers a lot of additional features to view, interact with or export bits of the data. See the
 @link viewer Viewer page @endlink for a detailed description of its capabilities.
+
+
+@section main_support Support & Feedback
+
+If you have any questions/comments/suggestions/bug reports you're welcome to post them in our 
+<a href="https://sourceforge.net/forum/forum.php?forum_id=817653">forums</a>. Alternatively there's
+a mailing list, <a href="https://sourceforge.net/mailarchive/forum.php?forum_name=assimp-discussions">
+assimp-discussions</a>.
+
+
 */
 
 /**
 @page install Installation
 
-@section install_prebuilt Using the pre-built libraries
+@section install_prebuilt Using the pre-built libraries with Visual C++ 8/9
 
 If you develop at Visual Studio 2005 or 2008, you can simply use the pre-built linker libraries provided in the distribution.
 Extract all files to a place of your choice. A directory called "Assimp" will be created there. Add the Assimp/include path
@@ -106,12 +122,46 @@ This is neccessary only once to setup all paths inside you IDE.
 
 To use the library in your C++ project you have to include either &lt;assimp.hpp&gt; or &lt;assimp.h&gt; plus some others starting with &lt;aiTypes.h&gt;.
 If you set up your IDE correctly the compiler should be able to find the files. Then you have to add the linker library to your
-project dependencies. Depending on your runtime of choice you either link against assimp_Debug.lib / assimp_Release.lib 
-(static runtime) or assimp_Debug_DLL.lib / assimp_Release_DLL.lib. If done correctly you should now be able to compile, link,
+project dependencies. Link to <assimp_root>/lib/<config-name>/assimp.lib. config-name is one of the predefined
+project configs. For static linking, use release/debug. See the sections below on this page for more information on the
+other build configs.
+If done correctly you should now be able to compile, link,
 run and use the application. If the linker complains about some integral functions being defined twice you propably have
 mixed the runtimes. Recheck the project configuration (project properties -&gt; C++ -&gt; Code generation -&gt; Runtime) if you use 
-static runtimes (Multithreaded / Multithreaded Debug) or dynamic runtimes (Multithreaded DLL / Multithreaded Debug DLL). Choose
-the ASSIMP linker lib accordingly.
+static runtimes (Multithreaded / Multithreaded Debug) or dynamic runtimes (Multithreaded DLL / Multithreaded Debug DLL).
+Choose the ASSIMP linker lib accordingly. 
+<br>
+Please don't forget to also read the @link assimp_stl section on MSVC and the STL @endlink 
+
+@section assimp_stl Microsoft Compilers & STL
+
+In VC8 and VC9 Microsoft has introduced some STL debugging features. A good example are improved iterator checks and
+various useful debug checks. Actually they are really helpful for debugging, but they're extremely slow. They're
+so extremely slow that they can make the STL up to 100 times slower (imagine a <i>std::vector<T>::operator[] </i>
+performing 3 or 4 single checks! scary ...).
+
+These security enhancements are - thanks MS! - also active in release builds, rendering Assimp several times 
+slower. However, it is possible to disable them by defining
+
+@code
+_HAS_ITERATOR_DEBUGGING=0
+_SECURE_SCL=0
+@endcode
+
+in the preprocessor options (or alternatively in the source code, just before the STL is included for the first time).
+<b>Assimp's vc8 and vc9 configs enable these flags by default</b>.
+
+<i>If you're linking statically against Assimp:</i> Make sure your applications uses the same STl settings! 
+If you do not, there are two binary incompatible STL versions mangled together and you'll crash. 
+Alternatively you can disable the fast STL settings for Assimp by removing the 'FastSTL' property sheet from
+the vc project file.
+
+<i>If you're using Assimp in a DLL:</i> It's ok. There's no STL used in the DLL interface, so it doesn't care whether
+your application uses the same STL settings or not.
+<br><br>
+Another option is to build against a different STL implementation, for example STlport. There's a special 
+@link assimp_stlport section @endlink describing how to achieve this.
+
 
 @section install_own Building the library from scratch
 
@@ -123,7 +173,7 @@ it for yourself. Read the "Getting Started" section of the Boost documentation f
 can use a comfortable installer from <a href="http://www.boost-consulting.com/products/free">
 http://www.boost-consulting.com/products/free</a>. Choose the appropriate version of boost for your runtime of choice.
 
-If you don't want to use boost, you can build against our "Boost-Workaround". It consists of very small (dummy)
+<b>If you don't want to use boost</b>, you can build against our <i>"Boost-Workaround"</i>. It consists of very small (dummy)
 implementations of the various boost utility classes used. However, you'll loose functionality (e.g. threading) by doing this. 
 So, if it is possible to use boost, you should use boost. See the @link use_noboost NoBoost @endlink for more details.
 
@@ -165,14 +215,17 @@ for more details.
 
 @section assimp_st Single-threaded build
 
-// TODO
-
+-- currently there is no difference between single-thread and normal builds --
 
 
 @section assimp_dll DLL build
 
-// TODO
+Assimp can be built as DLL. You just need to select a -dll config from the list of project
+configs and you're fine. Don't forget to copy the DLL to the directory of your executable :-)
 
+<b>NOTE:</b> Theoretically Assimp-dll can be used with multithreaded (non-dll) runtime libraries, 
+as long as you don't utilize any non-public stuff from the code dir. However, if you happen
+to encounter *very* strange problems try changing the runtime to multithreaded (Debug) DLL.
 
 @section assimp_stlport Building against STLport
 
@@ -181,14 +234,16 @@ contains bugs or if you just want to tweak Assimp's performance a little try a b
 against STLport. STLport is a free, fast and secure STL replacement that works with
 all major compilers and platforms. To get it visit their website at
 <a href="http://www.stlport.org"/><stlport.org></a> and download the latest STLport release.
-Usually you'll just need to run 'configure' + a makefile (see the README for mroe details).
+Usually you'll just need to run 'configure' + a makefile (see the README for more details).
 Don't miss to add <stlport_root>/stlport to your compiler's default include paths - <b>prior</b>
 to the directory where the compiler vendor's STL lies. Do the same for  <stlport_root>/lib and
 recompile Assimp. To ensure you're really building against STLport see aiGetCompileFlags().
 <br>
-Usually building Assimp against STLport yields a better overall performance.
+Usually building Assimp against STLport yields a better overall performance so it might be
+worth a try if the library is too slow for you.
 
 */
+
 
 /** 
 @page usage Usage
@@ -429,9 +484,9 @@ public:
 	}
 
 	// Write womethink using your own functionality
-	void write(const std::string &message)
+	void write(const char* message)
 	{
-		printf("%s\n", message.c_str();
+		::printf("%s\n", message);
 	}
 };
 

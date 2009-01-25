@@ -31,7 +31,7 @@
 			*MAP_CLASS "Bitmap"
 			*MAP_SUBNO 1
 			*MAP_AMOUNT 1.0000
-			*BITMAP "..\3DS\UVTransformTest\UVTransformTestImg.png"
+			*BITMAP "..\..\3DS\UVTransformTest\UVTransformTestImg.png"
 			*MAP_TYPE Screen
 			*UVW_U_OFFSET 0.0000
 			*UVW_V_OFFSET 0.0000

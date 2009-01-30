@@ -285,9 +285,11 @@ void B3DImporter::ReadVRTS(){
 		Vertex vert;
 
 		vert.position=ReadVec3();
+		std::swap( vert.position.y,vert.position.z );
 
 		if( vertFlags & 1 ){
 			vert.normal=ReadVec3();
+			std::swap( vert.normal.y,vert.normal.z );
 		}
 
 		if( vertFlags & 2 ){
@@ -299,6 +301,7 @@ void B3DImporter::ReadVRTS(){
 			for( int j=0;j<tc_size;++j ){
 				texcoords[j]=ReadFloat();
 			}
+			texcoords[1]=1-texcoords[1];
 			if( !i ) memcpy( &vert.texcoords.x,texcoords,12 );
 		}
 		_vertices.push_back( vert );
@@ -329,8 +332,12 @@ void B3DImporter::ReadTRIS(){
 	for( unsigned i=0;i<n_verts;i+=3 ){
 		face->mNumIndices=3;
 		unsigned *ip=face->mIndices=new unsigned[3];
+		int v[3];
+		v[0]=ReadInt();
+		v[2]=ReadInt();
+		v[1]=ReadInt();
 		for( unsigned j=0;j<3;++j ){
-			int k=ReadInt();
+			int k=v[j];//ReadInt();
 			const Vertex &v=_vertices[k];
 			memcpy( mv++,&v.position.x,12 );
 			memcpy( mn++,&v.normal.x,12 );
@@ -365,6 +372,7 @@ void B3DImporter::ReadNODE(){
 
 	string name=ReadString();
 	Vec3 trans=ReadVec3();
+	std::swap( trans.y,trans.z );
 	Vec3 scale=ReadVec3();
 	Vec4 rot=ReadVec4();
 

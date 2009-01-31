@@ -80,7 +80,7 @@ void B3DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 	// check whether the .b3d file is large enough to contain
 	// at least one chunk.
 	size_t fileSize = file->FileSize();
-	if( fileSize < 8) throw new ImportErrorException( "B3D File is too small.");
+	if( fileSize<8 ) throw new ImportErrorException( "B3D File is too small.");
 
 	_pos=0;
 	_buf.resize( fileSize );
@@ -92,24 +92,30 @@ void B3DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 	_meshes.clear();
 
 	ReadBB3D();
-
+	
 	//materials
-	aiMaterial **mats=new aiMaterial*[_materials.size()];
-	for( unsigned i=0;i<_materials.size();++i ){
-		mats[i]=_materials[i];
+	if( _materials.size() ){
+		aiMaterial **mats=new aiMaterial*[_materials.size()];
+		for( unsigned i=0;i<_materials.size();++i ){
+			mats[i]=_materials[i];
+		}
+		pScene->mNumMaterials=_materials.size();
+		pScene->mMaterials=mats;
 	}
-	pScene->mNumMaterials=_materials.size();
-	pScene->mMaterials=mats;
-
+	
 	//meshes
-	aiMesh **meshes=new aiMesh*[_meshes.size()];
-	for( unsigned i=0;i<_meshes.size();++i ){
-		meshes[i]=_meshes[i];
+	if( _meshes.size() ){
+		aiMesh **meshes=new aiMesh*[_meshes.size()];
+		for( unsigned i=0;i<_meshes.size();++i ){
+			meshes[i]=_meshes[i];
+		}
+		pScene->mNumMeshes=_meshes.size();
+		pScene->mMeshes=meshes;
+	}else{
+		throw new ImportErrorException( "B3D: No meshes loaded" );
 	}
-	pScene->mNumMeshes=_meshes.size();
-	pScene->mMeshes=meshes;
 
-	//nodes - NOTE: Have to create mMeshes array here or crash 'n' burn.
+	//create root node
 	aiNode *node=new aiNode( "root" );
 	node->mNumMeshes=_meshes.size();
 	node->mMeshes=new unsigned[_meshes.size()];
@@ -275,11 +281,11 @@ void B3DImporter::ReadBRUS(){
 
 // ------------------------------------------------------------------------------------------------
 void B3DImporter::ReadVRTS(){
-	int vertFlags=ReadInt();
-	int tc_sets=ReadInt();
-	int tc_size=ReadInt();
+	_vertFlags=ReadInt();
+	_tcSets=ReadInt();
+	_tcSize=ReadInt();
 
-	if( tc_sets<0 || tc_sets>4 || tc_size<0 || tc_size>4 ) throw new ImportErrorException( "B3D Param Error" );
+	if( _tcSets<0 || _tcSets>4 || _tcSize<0 || _tcSize>4 ) throw new ImportErrorException( "B3D Param Error" );
 
 	while( ChunkSize() ){
 		Vertex vert;
@@ -287,18 +293,18 @@ void B3DImporter::ReadVRTS(){
 		vert.position=ReadVec3();
 		std::swap( vert.position.y,vert.position.z );
 
-		if( vertFlags & 1 ){
+		if( _vertFlags & 1 ){
 			vert.normal=ReadVec3();
 			std::swap( vert.normal.y,vert.normal.z );
 		}
 
-		if( vertFlags & 2 ){
+		if( _vertFlags & 2 ){
 			Vec4 color=ReadVec4();
 		}
 
-		for( int i=0;i<tc_sets;++i ){
+		for( int i=0;i<_tcSets;++i ){
 			float texcoords[4]={0,0,0,0};
-			for( int j=0;j<tc_size;++j ){
+			for( int j=0;j<_tcSize;++j ){
 				texcoords[j]=ReadFloat();
 			}
 			texcoords[1]=1-texcoords[1];
@@ -323,10 +329,12 @@ void B3DImporter::ReadTRIS(){
 	mesh->mNumFaces=n_tris;
 	mesh->mPrimitiveTypes=aiPrimitiveType_TRIANGLE;
 
-	aiVector3D *mv=mesh->mVertices=new aiVector3D[n_verts];
-	aiVector3D *mn=mesh->mNormals=new aiVector3D[n_verts];
-	aiVector3D *mc=mesh->mTextureCoords[0]=new aiVector3D[n_verts];
-
+	aiVector3D *mv,*mn=0,*mc=0;
+	
+	mv=mesh->mVertices=new aiVector3D[n_verts];
+	if( _vertFlags & 1 ) mn=mesh->mNormals=new aiVector3D[n_verts];
+	if( _tcSets ) mc=mesh->mTextureCoords[0]=new aiVector3D[n_verts];
+	
 	aiFace *face=mesh->mFaces=new aiFace[n_tris];
 
 	for( unsigned i=0;i<n_verts;i+=3 ){
@@ -337,11 +345,11 @@ void B3DImporter::ReadTRIS(){
 		v[2]=ReadInt();
 		v[1]=ReadInt();
 		for( unsigned j=0;j<3;++j ){
-			int k=v[j];//ReadInt();
+			int k=v[j];
 			const Vertex &v=_vertices[k];
 			memcpy( mv++,&v.position.x,12 );
-			memcpy( mn++,&v.normal.x,12 );
-			memcpy( mc++,&v.texcoords.x,12 );
+			if( mn ) memcpy( mn++,&v.normal.x,12 );
+			if( mc ) memcpy( mc++,&v.texcoords.x,12 );
 			*ip++=i+j;
 		}
 		++face;
@@ -353,7 +361,7 @@ void B3DImporter::ReadMESH(){
 	int matid=ReadInt();
 
 	_vertices.clear();
-
+	
 	while( ChunkSize() ){
 		string t=ReadChunk();
 		if( t=="VRTS" ){
@@ -372,9 +380,12 @@ void B3DImporter::ReadNODE(){
 
 	string name=ReadString();
 	Vec3 trans=ReadVec3();
-	std::swap( trans.y,trans.z );
 	Vec3 scale=ReadVec3();
 	Vec4 rot=ReadVec4();
+
+	std::swap( trans.y,trans.z );
+	std::swap( scale.y,scale.z );
+	//do something to rot?!?
 
 	while( ChunkSize() ){
 		string t=ReadChunk();

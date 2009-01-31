@@ -94,7 +94,8 @@ private:
 	unsigned _size;
 	std::vector<unsigned char> _buf;
 	std::vector<unsigned> _stack;
-
+	
+	int _vertFlags,_tcSets,_tcSize;
 	std::vector<Texture> _textures;
 	std::vector<MaterialHelper*> _materials;
 	std::vector<Vertex> _vertices;

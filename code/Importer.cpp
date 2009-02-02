@@ -337,6 +337,10 @@ Importer::Importer()
 	mPostProcessingSteps.push_back( new ValidateDSProcess()); 
 #endif
 
+#if (!defined AI_BUILD_NO_REMOVEVC_PROCESS)
+	mPostProcessingSteps.push_back( new RemoveVCProcess());
+#endif
+
 #if (!defined AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
 	mPostProcessingSteps.push_back( new RemoveRedundantMatsProcess());
 #endif
@@ -349,12 +353,6 @@ Importer::Importer()
 #if (!defined AI_BUILD_NO_FINDDEGENERATES_PROCESS)
 	mPostProcessingSteps.push_back( new FindDegeneratesProcess());
 #endif
-
-
-#if (!defined AI_BUILD_NO_REMOVEVC_PROCESS)
-	mPostProcessingSteps.push_back( new RemoveVCProcess());
-#endif
-
 
 	
 #ifndef AI_BUILD_NO_GENUVCOORDS_PROCESS

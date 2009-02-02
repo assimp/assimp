@@ -108,6 +108,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include "../include/BoostWorkaround/boost/scoped_array.hpp"
 #	include "../include/BoostWorkaround/boost/format.hpp"
 #	include "../include/BoostWorkaround/boost/foreach.hpp"
+#	include "../include/BoostWorkaround/boost/static_assert.hpp"
 
 #else
 
@@ -115,6 +116,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include <boost/scoped_array.hpp>
 #	include <boost/format.hpp>
 #	include <boost/foreach.hpp>
+#	include <boost/static_assert.hpp>
 
 #endif // ! ASSIMP_BUILD_BOOST_WORKAROUND
 #endif // !! ASSIMP_PCH_INCLUDED

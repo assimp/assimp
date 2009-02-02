@@ -1253,6 +1253,10 @@
 					RelativePath="..\..\include\BoostWorkaround\boost\scoped_ptr.hpp"
 					>
 				</File>
+				<File
+					RelativePath="..\..\include\BoostWorkaround\boost\static_assert.hpp"
+					>
+				</File>
 				<Filter
 					Name="random"
 					>
@@ -2043,6 +2047,14 @@
 				</File>
 				<File
 					RelativePath="..\..\code\FindDegenerates.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\FindInstancesProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\FindInstancesProcess.h"
 					>
 				</File>
 				<File

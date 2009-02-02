@@ -196,6 +196,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_TRANSFORMTEXCOORDS_PROCESS
 #	include "TextureTransform.h"
 #endif
+#ifndef AI_BUILD_NO_FINDINSTANCES_PROCESS
+#	include "FindInstancesProcess.h"
+#endif
 
 using namespace Assimp;
 using namespace Assimp::Intern;
@@ -334,6 +337,14 @@ Importer::Importer()
 	mPostProcessingSteps.push_back( new ValidateDSProcess()); 
 #endif
 
+#if (!defined AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
+	mPostProcessingSteps.push_back( new RemoveRedundantMatsProcess());
+#endif
+
+#if (!defined AI_BUILD_NO_FINDINSTANCES_PROCESS)
+	mPostProcessingSteps.push_back( new FindInstancesProcess());
+#endif
+
 
 #if (!defined AI_BUILD_NO_FINDDEGENERATES_PROCESS)
 	mPostProcessingSteps.push_back( new FindDegeneratesProcess());
@@ -353,12 +364,6 @@ Importer::Importer()
 	mPostProcessingSteps.push_back( new TextureTransformStep());
 #endif
 
-
-
-
-#if (!defined AI_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
-	mPostProcessingSteps.push_back( new RemoveRedundantMatsProcess());
-#endif
 #if (!defined AI_BUILD_NO_PRETRANSFORMVERTICES_PROCESS)
 	mPostProcessingSteps.push_back( new PretransformVertices());
 #endif

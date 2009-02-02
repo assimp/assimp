@@ -48,11 +48,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-typedef std::pair< unsigned int,float > PerVertexWeight;
-typedef std::vector< PerVertexWeight > VertexWeightTable;
+// some aliases to make the whole stuff easier to read
+typedef std::pair	< unsigned int,float > PerVertexWeight;
+typedef std::vector	< PerVertexWeight    > VertexWeightTable;
 
-// ------------------------------------------------------------------------------------------------
-// compute a good epsilon value for position comparisons
+// -------------------------------------------------------------------------------
+/** Little helper function to calculate the quadratic difference 
+ * of two colours. 
+ * @param pColor1 First color
+ * @param pColor2 second color
+ * @return Quadratic color difference
+ */
+inline float GetColorDifference( const aiColor4D& pColor1, const aiColor4D& pColor2) 
+{
+	const aiColor4D c (pColor1.r - pColor2.r, pColor1.g - pColor2.g, 
+		pColor1.b - pColor2.b, pColor1.a - pColor2.a);
+
+	return c.r*c.r + c.g*c.g + c.b*c.b + c.a*c.a;
+}
+
+// -------------------------------------------------------------------------------
+// Compute a good epsilon value for position comparisons on a mesh
 inline float ComputePositionEpsilon(const aiMesh* pMesh)
 {
 	const float epsilon = 1e-5f;
@@ -71,20 +87,54 @@ inline float ComputePositionEpsilon(const aiMesh* pMesh)
 	return (maxVec - minVec).Length() * epsilon;
 }
 
-// ------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------
+// Compute an unique value for the vertex format of a mesh
+inline unsigned int GetMeshVFormatUnique(aiMesh* pcMesh)
+{
+	ai_assert(NULL != pcMesh);
+
+	// FIX: the hash may never be 0. Otherwise a comparison against
+	// nullptr could be successful
+	unsigned int iRet = 1;
+
+	// normals
+	if (pcMesh->HasNormals())iRet |= 0x2;
+	// tangents and bitangents
+	if (pcMesh->HasTangentsAndBitangents())iRet |= 0x4;
+
+	BOOST_STATIC_ASSERT(8 >= AI_MAX_NUMBER_OF_COLOR_SETS);
+	BOOST_STATIC_ASSERT(8 >= AI_MAX_NUMBER_OF_TEXTURECOORDS);
+
+	// texture coordinates
+	unsigned int p = 0;
+	while (pcMesh->HasTextureCoords(p))
+	{
+		iRet |= (0x100 << p);
+		if (3 == pcMesh->mNumUVComponents[p])
+			iRet |= (0x10000 << p);
+
+		++p;
+	}
+	// vertex colors
+	p = 0;
+	while (pcMesh->HasVertexColors(p))iRet |= (0x1000000 << p++);
+	return iRet;
+}
+
+// -------------------------------------------------------------------------------
 // Compute a per-vertex bone weight table
-// NOTE: delete result with operator delete[] ...
+// please .... delete result with operator delete[] ...
 inline VertexWeightTable* ComputeVertexBoneWeightTable(aiMesh* pMesh)
 {
-	if (!pMesh || !pMesh->mNumVertices || !pMesh->mNumBones) return NULL;
+	if (!pMesh || !pMesh->mNumVertices || !pMesh->mNumBones)
+		return NULL;
 
 	VertexWeightTable* avPerVertexWeights = new VertexWeightTable[pMesh->mNumVertices];
 	for (unsigned int i = 0; i < pMesh->mNumBones;++i)
 	{
 		aiBone* bone = pMesh->mBones[i];
-		for (unsigned int a = 0; a < bone->mNumWeights;++a)
-		{
-			aiVertexWeight& weight = bone->mWeights[a];
+		for (unsigned int a = 0; a < bone->mNumWeights;++a)	{
+			const aiVertexWeight& weight = bone->mWeights[a];
 			avPerVertexWeights[weight.mVertexId].push_back( 
 				std::pair<unsigned int,float>(i,weight.mWeight));
 		}
@@ -93,7 +143,7 @@ inline VertexWeightTable* ComputeVertexBoneWeightTable(aiMesh* pMesh)
 }
 
 
-// ------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------
 // Get a string for a given aiTextureType
 inline const char* TextureTypeToString(aiTextureType in)
 {
@@ -120,7 +170,7 @@ inline const char* TextureTypeToString(aiTextureType in)
 	}
 }
 
-// ------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------
 // Get a string for a given aiTextureMapping
 inline const char* MappingTypeToString(aiTextureMapping in)
 {
@@ -143,7 +193,9 @@ inline const char* MappingTypeToString(aiTextureMapping in)
 	}
 }
 
-// ------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------
+// Utility postprocess step to share the spatial sort tree between
+// all steps which use it to speedup its computations.
 class ComputeSpatialSortProcess : public BaseProcess
 {
 	bool IsActive( unsigned int pFlags) const
@@ -159,8 +211,7 @@ class ComputeSpatialSortProcess : public BaseProcess
 		std::vector<_Type>* p = new std::vector<_Type>(pScene->mNumMeshes); 
 		std::vector<_Type>::iterator it = p->begin();
 
-		for (unsigned int i = 0; i < pScene->mNumMeshes; ++i, ++it)
-		{
+		for (unsigned int i = 0; i < pScene->mNumMeshes; ++i, ++it)	{
 			aiMesh* mesh = pScene->mMeshes[i];
 			_Type& blubb = *it;
 			blubb.first.Fill(mesh->mVertices,mesh->mNumVertices,sizeof(aiVector3D));
@@ -171,7 +222,8 @@ class ComputeSpatialSortProcess : public BaseProcess
 	}
 };
 
-// ------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------
+// ... and the same again to cleanup the whole stuff
 class DestroySpatialSortProcess : public BaseProcess
 {
 	bool IsActive( unsigned int pFlags) const

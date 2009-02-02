@@ -95,20 +95,6 @@ protected:
 	 * @param meshIndex Index of the mesh to process
 	 */
 	int ProcessMesh( aiMesh* pMesh, unsigned int meshIndex);
-
-	// -------------------------------------------------------------------
-	/** Little helper function to calculate the quadratic difference 
-	 * of two colours. 
-	 * @param pColor1 First color
-	 * @param pColor2 second color
-	 * @return Quadratic color difference
-	 */
-	float GetColorDifference( const aiColor4D& pColor1, const aiColor4D& pColor2) const
-	{
-		aiColor4D c(	pColor1.r - pColor2.r, pColor1.g - pColor2.g, 
-						pColor1.b - pColor2.b, pColor1.a - pColor2.a);
-		return c.r*c.r + c.g*c.g + c.b*c.b + c.a*c.a;
-	}
 };
 
 } // end of namespace Assimp

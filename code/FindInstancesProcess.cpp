@@ -1,0 +1,254 @@
+/*
+---------------------------------------------------------------------------
+Open Asset Import Library (ASSIMP)
+---------------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the following 
+conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------------
+*/
+
+/** @file  FindInstancesProcess.cpp
+ *  @brief Implementation of the aiProcess_FindInstances postprocessing step
+*/
+
+#include "AssimpPCH.h"
+#include "FindInstancesProcess.h"
+
+using namespace Assimp;
+
+// ------------------------------------------------------------------------------------------------
+// Constructor to be privately used by Importer
+FindInstancesProcess::FindInstancesProcess()
+{}
+
+// ------------------------------------------------------------------------------------------------
+// Destructor, private as well
+FindInstancesProcess::~FindInstancesProcess()
+{}
+
+// ------------------------------------------------------------------------------------------------
+// Returns whether the processing step is present in the given flag field.
+bool FindInstancesProcess::IsActive( unsigned int pFlags) const
+{
+	return 0 != (pFlags & aiProcess_FindInstances);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Compare the bones of two meshes
+bool CompareBones(const aiMesh* orig, const aiMesh* inst)
+{
+	for (unsigned int i = 0; i < orig->mNumBones;++i) {
+		aiBone* aha = orig->mBones[i];
+		aiBone* oha = inst->mBones[i];
+
+		if (aha->mNumWeights   != oha->mNumWeights   ||
+			aha->mOffsetMatrix != oha->mOffsetMatrix ||
+			aha->mNumWeights   != oha->mNumWeights) {
+			return false;
+		}
+
+		// compare weight per weight ---
+		for (unsigned int n = 0; n < aha->mNumWeights;++n) {
+			if  (aha->mWeights[n].mVertexId != oha->mWeights[n].mVertexId ||
+				(aha->mWeights[n].mWeight - oha->mWeights[n].mWeight) < 10e-3f) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Update mesh indices in the node graph
+void UpdateMeshIndices(aiNode* node, unsigned int* lookup)
+{
+	for (unsigned int n = 0; n < node->mNumMeshes;++n)
+		node->mMeshes[n] = lookup[node->mMeshes[n]];
+
+	for (unsigned int n = 0; n < node->mNumChildren;++n)
+		UpdateMeshIndices(node->mChildren[n],lookup);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Executes the post processing step on the given imported data.
+void FindInstancesProcess::Execute( aiScene* pScene)
+{
+	DefaultLogger::get()->debug("FindInstancesProcess begin");
+	if (pScene->mNumMeshes) {
+
+		// use a pseudo hash for all meshes in the scene to quickly find 
+		// the ones which are possibly equal. This step is executed early 
+		// in the pipeline, so we could, depending on the file format,
+		// have several thousand small meshes. That's too much for a brute
+		// everyone-against-everyone check involving up to 25 comparisons
+		// each.
+		boost::scoped_array<uint64_t> hashes (new uint64_t[pScene->mNumMeshes]);
+		boost::scoped_array<unsigned int> remapping (new unsigned int[pScene->mNumMeshes]);
+
+		unsigned int numMeshesOut = 0;
+		for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
+
+			aiMesh* inst = pScene->mMeshes[i];
+			hashes[i] = GetMeshHash(inst);
+
+			for (int a = i-1; a > 0; --a) {
+				if (hashes[i] == hashes[a])
+				{
+					aiMesh* orig = pScene->mMeshes[a];
+					if (!orig)
+						continue;
+					
+					// check for hash collision .. we needn't check
+					// the vertex format, it *must* match due to the
+					// (brilliant) construction of the hash
+					if (orig->mNumBones       != inst->mNumBones      ||
+						orig->mNumFaces       != inst->mNumFaces      ||
+						orig->mNumVertices    != inst->mNumVertices   ||
+						orig->mMaterialIndex  != inst->mMaterialIndex ||
+						orig->mPrimitiveTypes != inst->mPrimitiveTypes)
+						continue;
+
+					// up to now the meshes are equal. find an appropriate
+					// epsilon to compare position differences against
+					float epsilon = ComputePositionEpsilon(inst);
+					epsilon *= epsilon;
+
+					// now compare vertex positions, normals,
+					// tangents and bitangents using this epsilon.
+					if (orig->HasPositions()) {
+						if(!CompareArrays(orig->mVertices,inst->mVertices,orig->mNumVertices,epsilon))
+							continue;
+					}
+					if (orig->HasNormals()) {
+						if(!CompareArrays(orig->mNormals,inst->mNormals,orig->mNumVertices,epsilon))
+							continue;
+					}
+					if (orig->HasTangentsAndBitangents()) {
+						if (!CompareArrays(orig->mTangents,inst->mTangents,orig->mNumVertices,epsilon) ||
+							!CompareArrays(orig->mBitangents,inst->mBitangents,orig->mNumVertices,epsilon))
+							continue;
+					}
+
+					// use a constant epsilon for colors and UV coordinates
+					static const float uvEpsilon = 10e-4f;
+
+					BOOST_STATIC_ASSERT(4 == AI_MAX_NUMBER_OF_COLOR_SETS);
+
+					// as in JIV: manually unrolled as continue wouldn't work as desired in inner loops
+					if (orig->mTextureCoords[0]) {
+						if(!CompareArrays(orig->mTextureCoords[0],inst->mTextureCoords[0],orig->mNumVertices,uvEpsilon))
+							continue;
+						if (orig->mTextureCoords[1]) {
+							if(!CompareArrays(orig->mTextureCoords[1],inst->mTextureCoords[1],orig->mNumVertices,uvEpsilon))
+								continue;
+							if (orig->mTextureCoords[2]) {
+								if(!CompareArrays(orig->mTextureCoords[2],inst->mTextureCoords[2],orig->mNumVertices,uvEpsilon))
+									continue;
+								if (orig->mTextureCoords[3]) {
+									if(!CompareArrays(orig->mTextureCoords[3],inst->mTextureCoords[3],orig->mNumVertices,uvEpsilon))
+										continue;
+								}
+							}
+						}
+					}
+
+					BOOST_STATIC_ASSERT(4 == AI_MAX_NUMBER_OF_COLOR_SETS);
+
+					// and the same nasty stuff for vertex colors ...
+					if (orig->mColors[0]) {
+						if(!CompareArrays(orig->mColors[0],inst->mColors[0],orig->mNumVertices,uvEpsilon))
+							continue;
+						if (orig->mTextureCoords[1]) {
+							if(!CompareArrays(orig->mColors[1],inst->mColors[1],orig->mNumVertices,uvEpsilon))
+								continue;
+							if (orig->mTextureCoords[2]) {
+								if(!CompareArrays(orig->mColors[2],inst->mColors[2],orig->mNumVertices,uvEpsilon))
+									continue;
+								if (orig->mTextureCoords[3]) {
+									if(!CompareArrays(orig->mColors[3],inst->mColors[3],orig->mNumVertices,uvEpsilon))
+										continue;
+								}
+							}
+						}
+					}
+
+					// It seems to be strange, but we really need to check whether the
+					// bones are identical too. Although it's extremely unprobable
+					// that they're not if control reaches here, but we need to deal
+					// with unprobable cases, too.
+					if (!CompareBones(orig,inst))
+						continue;
+
+					// FIXME: Ignore the faces for the moment ... ok!?
+				
+					// We're still here. Or in other words: 'inst' is an instance of 'orig'.
+					// Place a marker in our list that we can easily update mesh indices.
+					remapping[i] = a;
+
+					// Delete the instanced mesh, we don't need it anymore
+					delete inst;
+					pScene->mMeshes[i] = NULL;
+				}
+			}
+
+			// If we didn't find a match for the current mesh: keep it
+			if (pScene->mMeshes[i]) {
+				remapping[i] = numMeshesOut++;
+			}
+		}
+		ai_assert(0 != numMeshesOut);
+		if (numMeshesOut != pScene->mNumMeshes) {
+
+			// Collapse the meshes array by removing all NULL entries
+			for (unsigned int real = 0, i = 0; real < numMeshesOut; ++i) {
+				if (pScene->mMeshes[i])
+					pScene->mMeshes[real++] = pScene->mMeshes[i];
+			}
+
+			// And update the nodegraph with our nice lookup table
+			UpdateMeshIndices(pScene->mRootNode,remapping.get());
+
+			// write to log
+			if (!DefaultLogger::isNullLogger()) {
+			
+				char buffer[512];
+				::sprintf(buffer,"FindInstancesProcess finished. Found %i instances",pScene->mNumMeshes-numMeshesOut);
+				DefaultLogger::get()->info(buffer); 
+			}
+			pScene->mNumMeshes = numMeshesOut;
+		}
+		else DefaultLogger::get()->debug("FindInstancesProcess finished. No instanced meshes found"); 
+	}
+}

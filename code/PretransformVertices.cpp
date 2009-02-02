@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 #include "PretransformVertices.h"
-
+#include "ProcessHelper.h"
 
 using namespace Assimp;
 
@@ -95,32 +95,8 @@ unsigned int GetMeshVFormat(aiMesh* pcMesh)
 	if (pcMesh->mBones)
 		return (unsigned int)(unsigned long)pcMesh->mBones;
 
-	ai_assert(NULL != pcMesh->mVertices);
 
-	// FIX: the hash may never be 0. Otherwise a comparison against
-	// nullptr could be successful
-	unsigned int iRet = 1;
-
-	// normals
-	if (pcMesh->HasNormals())iRet |= 0x2;
-	// tangents and bitangents
-	if (pcMesh->HasTangentsAndBitangents())iRet |= 0x4;
-
-	// texture coordinates
-	unsigned int p = 0;
-	ai_assert(8 >= AI_MAX_NUMBER_OF_TEXTURECOORDS);
-	while (pcMesh->HasTextureCoords(p))
-	{
-		iRet |= (0x100 << p);
-		if (3 == pcMesh->mNumUVComponents[p])
-			iRet |= (0x10000 << p);
-
-		++p;
-	}
-	// vertex colors
-	p = 0;
-	ai_assert(8 >= AI_MAX_NUMBER_OF_COLOR_SETS);
-	while (pcMesh->HasVertexColors(p))iRet |= (0x1000000 << p++);
+	const unsigned int iRet = GetMeshVFormatUnique(pcMesh);
 
 	// store the value for later use
 	pcMesh->mBones = (aiBone**)(unsigned long)iRet;

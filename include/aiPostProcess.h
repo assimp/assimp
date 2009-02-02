@@ -243,8 +243,18 @@ enum aiPostProcessSteps
 	 * coordinates and generates a new, transformed, UV channel for it.
 	 * Most applications won't support UV transformations, so you will
 	 * probably want to specify this step in every case.
+
+	 * todo ... rewrite doc
 	*/
-	aiProcess_TransformUVCoords = 0x80000
+	aiProcess_TransformUVCoords = 0x80000,
+
+
+	/** This step searches for duplicate meshes and replaces duplicates
+	 *  with references to the first mesh.
+	 *
+	 * todo ... add more doc 
+	*/
+	aiProcess_FindInstances = 0x100000
 };
 
 

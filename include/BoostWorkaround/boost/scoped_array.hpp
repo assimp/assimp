@@ -38,11 +38,6 @@ public:
 		return ptr;
 	}
 
-	inline operator T*()
-	{
-		return ptr;
-	}
-
 	inline T* operator-> ()
 	{
 		return ptr;

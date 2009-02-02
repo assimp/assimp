@@ -209,7 +209,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 			if( (uv.mBitangent - v.mBitangent).SquareLength() > squareEpsilon)
 				continue;
 			// manually unrolled because continue wouldn't work as desired in an inner loop
-			ai_assert( AI_MAX_NUMBER_OF_COLOR_SETS == 4);
+			BOOST_STATIC_ASSERT(4 == AI_MAX_NUMBER_OF_COLOR_SETS);
 			if( GetColorDifference( uv.mColors[0], v.mColors[0]) > squareEpsilon)
 				continue;
 			if( GetColorDifference( uv.mColors[1], v.mColors[1]) > squareEpsilon)
@@ -219,7 +219,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 			if( GetColorDifference( uv.mColors[3], v.mColors[3]) > squareEpsilon)
 				continue;
 			// texture coord matching manually unrolled as well
-			ai_assert( AI_MAX_NUMBER_OF_TEXTURECOORDS == 4);
+			BOOST_STATIC_ASSERT(4 == AI_MAX_NUMBER_OF_TEXTURECOORDS);
 			if( (uv.mTexCoords[0] - v.mTexCoords[0]).SquareLength() > squareEpsilon)
 				continue;
 			if( (uv.mTexCoords[1] - v.mTexCoords[1]).SquareLength() > squareEpsilon)

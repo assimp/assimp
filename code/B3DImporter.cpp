@@ -117,6 +117,12 @@ void B3DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 
 	//create root node
 	aiNode *node=new aiNode( "root" );
+	node->mTransformation=aiMatrix4x4(
+	1,0,0,0,
+	0,0,1,0,
+	0,1,0,0,
+	0,0,0,1 );
+	
 	node->mNumMeshes=_meshes.size();
 	node->mMeshes=new unsigned[_meshes.size()];
 	for( unsigned i=0;i<_meshes.size();++i ){
@@ -291,11 +297,9 @@ void B3DImporter::ReadVRTS(){
 		Vertex vert;
 
 		vert.position=ReadVec3();
-		std::swap( vert.position.y,vert.position.z );
 
 		if( _vertFlags & 1 ){
 			vert.normal=ReadVec3();
-			std::swap( vert.normal.y,vert.normal.z );
 		}
 
 		if( _vertFlags & 2 ){
@@ -382,10 +386,6 @@ void B3DImporter::ReadNODE(){
 	Vec3 trans=ReadVec3();
 	Vec3 scale=ReadVec3();
 	Vec4 rot=ReadVec4();
-
-	std::swap( trans.y,trans.z );
-	std::swap( scale.y,scale.z );
-	//do something to rot?!?
 
 	while( ChunkSize() ){
 		string t=ReadChunk();

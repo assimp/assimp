@@ -66,11 +66,13 @@ void MakeVerboseFormatProcess::Execute( aiScene* pScene)
 	bool bHas = false;
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 	{
-		if(	this->MakeVerboseFormat( pScene->mMeshes[a]))
+		if(	MakeVerboseFormat( pScene->mMeshes[a]))
 			bHas = true;
 	}
-	if (bHas)DefaultLogger::get()->info("MakeVerboseFormatProcess finished. There was much work to do ...");
+	if (bHas) DefaultLogger::get()->info("MakeVerboseFormatProcess finished. There was much work to do ...");
 	else DefaultLogger::get()->debug("MakeVerboseFormatProcess. There was nothing to do.");
+
+	pScene->mFlags &= ~AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
 
 }
 // ------------------------------------------------------------------------------------------------

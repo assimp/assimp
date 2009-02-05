@@ -51,6 +51,7 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 FindInstancesProcess::FindInstancesProcess()
+:	configSpeedFlag (false)
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -62,7 +63,17 @@ FindInstancesProcess::~FindInstancesProcess()
 // Returns whether the processing step is present in the given flag field.
 bool FindInstancesProcess::IsActive( unsigned int pFlags) const
 {
-	return 0 != (pFlags & aiProcess_FindInstances);
+	// FindInstances makes absolutely no sense together with PreTransformVertices
+	// fixme: spawn error message somewhere else?
+	return 0 != (pFlags & aiProcess_FindInstances) && 0 == (pFlags & aiProcess_PreTransformVertices);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Setup properties for the step
+void FindInstancesProcess::SetupProperties(const Importer* pImp)
+{
+	// AI_CONFIG_FAVOUR_SPEED
+	configSpeedFlag = (0 != pImp->GetPropertyInteger(AI_CONFIG_FAVOUR_SPEED,0));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -112,7 +123,7 @@ void FindInstancesProcess::Execute( aiScene* pScene)
 		// the ones which are possibly equal. This step is executed early 
 		// in the pipeline, so we could, depending on the file format,
 		// have several thousand small meshes. That's too much for a brute
-		// everyone-against-everyone check involving up to 25 comparisons
+		// everyone-against-everyone check involving up to 10 comparisons
 		// each.
 		boost::scoped_array<uint64_t> hashes (new uint64_t[pScene->mNumMeshes]);
 		boost::scoped_array<unsigned int> remapping (new unsigned int[pScene->mNumMeshes]);
@@ -204,18 +215,40 @@ void FindInstancesProcess::Execute( aiScene* pScene)
 						}
 					}
 
-					// It seems to be strange, but we really need to check whether the
-					// bones are identical too. Although it's extremely unprobable
-					// that they're not if control reaches here, but we need to deal
-					// with unprobable cases, too.
-					if (!CompareBones(orig,inst))
-						continue;
+					// These two checks are actually quite expensive and almost *never* required.
+					// Almost. That's why they're still here. But there's no reason to do them
+					// in speed-targeted imports.
+					if (!configSpeedFlag) {
 
-					// FIXME: Ignore the faces for the moment ... ok!?
-				
+						// It seems to be strange, but we really need to check whether the
+						// bones are identical too. Although it's extremely unprobable
+						// that they're not if control reaches here, we need to deal
+						// with unprobable cases, too. It could still be that there are
+						// equal shapes which are deformed differently.
+						if (!CompareBones(orig,inst))
+							continue;
+
+						// For completeness ... compare even the index buffers for equality
+						// face order & winding order doesn't care. Input data is in verbose format.
+						boost::scoped_array<unsigned int> ftbl_orig(new unsigned int[orig->mNumVertices]);
+						boost::scoped_array<unsigned int> ftbl_inst(new unsigned int[orig->mNumVertices]);
+
+						for (unsigned int tt = 0; tt < orig->mNumFaces;++tt) {
+							aiFace& f = orig->mFaces[tt];
+							for (unsigned int nn = 0; nn < f.mNumIndices;++nn)
+								ftbl_orig[f.mIndices[nn]] = tt;
+
+							aiFace& f2 = inst->mFaces[tt];
+							for (unsigned int nn = 0; nn < f2.mNumIndices;++nn)
+								ftbl_inst[f2.mIndices[nn]] = tt;
+						}
+						if (0 != ::memcmp(ftbl_inst.get(),ftbl_orig.get(),orig->mNumVertices*sizeof(unsigned int)))
+							continue;
+					}
+
 					// We're still here. Or in other words: 'inst' is an instance of 'orig'.
 					// Place a marker in our list that we can easily update mesh indices.
-					remapping[i] = a;
+					remapping[i] = remapping[a];
 
 					// Delete the instanced mesh, we don't need it anymore
 					delete inst;

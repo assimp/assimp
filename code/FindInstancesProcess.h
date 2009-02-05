@@ -126,7 +126,13 @@ public:
 	// Execute step on a given scene
 	void Execute( aiScene* pScene);
 
+	// -------------------------------------------------------------------
+	// Setup properties prior to executing the process
+	void SetupProperties(const Importer* pImp);
+
 private:
+
+	bool configSpeedFlag;
 
 }; // ! end class FindInstancesProcess
 }  // ! end namespace Assimp

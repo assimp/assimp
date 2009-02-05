@@ -188,10 +188,10 @@ struct aiColor3D
 	float& operator[](unsigned int i) {return *(&r + i);}
 
 	// Check whether a color is black
-	// TODO: add epsilon?
 	bool IsBlack() const
 	{
-		return !r && !g && !b;
+		static const float epsilon = 10e-3f;
+		return fabs( r ) < epsilon && fabs( g ) < epsilon && fabs( b ) < epsilon;
 	}
 
 #endif // !__cplusplus
@@ -235,7 +235,8 @@ struct aiColor4D
 	inline bool IsBlack() const
 	{
 		// The alpha component doesn't care here. black is black.
-		return !r && !g && !b;
+		static const float epsilon = 10e-3f;
+		return fabs( r ) < epsilon && fabs( g ) < epsilon && fabs( b ) < epsilon;
 	}
 
 #endif // !__cplusplus

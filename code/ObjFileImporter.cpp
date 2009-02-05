@@ -431,7 +431,24 @@ void ObjFileImporter::createMaterial(const ObjFile::Model* pModel, const ObjFile
 
 		ObjFile::Material *pCurrentMaterial = (*it).second;
 		mat->AddProperty( &pCurrentMaterial->MaterialName, AI_MATKEY_NAME );
-		mat->AddProperty<int>( &pCurrentMaterial->illumination_model, 1, AI_MATKEY_SHADING_MODEL);
+
+		// convert illumination model
+		int sm;
+		switch (pCurrentMaterial->illumination_model) {
+			case 0:
+				sm = aiShadingMode_NoShading;
+				break;
+			case 1:
+				sm = aiShadingMode_Gouraud;
+				break;
+			case 2:
+				sm = aiShadingMode_Phong;
+				break;
+			default:
+				sm = aiShadingMode_Gouraud;
+				DefaultLogger::get()->error("OBJ/MTL: Unexpected illumination model (0-3 recognized)");
+		}
+		mat->AddProperty<int>( &sm, 1, AI_MATKEY_SHADING_MODEL);
 
 		// Adding material colors
 		mat->AddProperty( &pCurrentMaterial->ambient, 1, AI_MATKEY_COLOR_AMBIENT );
@@ -451,6 +468,9 @@ void ObjFileImporter::createMaterial(const ObjFile::Model* pModel, const ObjFile
 
 		if ( 0 != pCurrentMaterial->textureBump.length )
 			mat->AddProperty( &pCurrentMaterial->textureBump, AI_MATKEY_TEXTURE_HEIGHT(0));
+
+		if ( 0 != pCurrentMaterial->textureOpacity.length )
+			mat->AddProperty( &pCurrentMaterial->textureOpacity, AI_MATKEY_TEXTURE_OPACITY(0));
 
 		if ( 0 != pCurrentMaterial->textureSpecularity.length )
 			mat->AddProperty( &pCurrentMaterial->textureSpecularity, AI_MATKEY_TEXTURE_SHININESS(0));

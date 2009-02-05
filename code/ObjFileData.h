@@ -146,7 +146,7 @@ struct Object
 //!	\brief	Data structure to store all material specific data
 struct Material
 {
-	//!	NAme of material description
+	//!	Name of material description
 	aiString MaterialName;
 
 	//!	Texture names
@@ -155,6 +155,7 @@ struct Material
 	aiString textureAmbient;
 	aiString textureBump;
 	aiString textureSpecularity;
+	aiString textureOpacity;
 
 	//!	Ambient color 
 	aiColor3D ambient;
@@ -168,10 +169,15 @@ struct Material
 	float shineness;
 	//!	Illumination model 
 	int illumination_model;
+	//! Index of refraction
+	float ior;
 
 	//!	Constructor
 	Material()
-		:	diffuse(0.6f,0.6f,0.6f)
+		:	diffuse (0.6f,0.6f,0.6f)
+		,	ior		(1.f)
+		,	alpha	(1.f)
+		,	illumination_model (1)
 	{
 		// empty
 	}

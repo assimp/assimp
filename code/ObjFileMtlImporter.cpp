@@ -141,7 +141,8 @@ void ObjFileMtlImporter::load()
 					getFloatValue(m_pModel->m_pCurrentMaterial->shineness);
 					break;
 				case 'i': //Index Of refraction 
-					//TODO
+					++m_DataIt;
+					getFloatValue(m_pModel->m_pCurrentMaterial->ior);
 					break;
 				}
 				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
@@ -259,6 +260,10 @@ void ObjFileMtlImporter::getTexture()
 	// Specular texture
 	else if (!ASSIMP_strincmp(&(*m_DataIt),"map_ks",6))
 		out = & m_pModel->m_pCurrentMaterial->textureSpecular;
+
+	// Opacity texture
+	else if (!ASSIMP_strincmp(&(*m_DataIt),"map_d",5))
+		out = & m_pModel->m_pCurrentMaterial->textureOpacity;
 
 	// Ambient texture
 	else if (!ASSIMP_strincmp(&(*m_DataIt),"map_ka",6))

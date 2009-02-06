@@ -61,6 +61,7 @@ struct aiVectorKey
 	C_STRUCT aiVector3D mValue; ///< The value of this key
 
 #ifdef __cplusplus
+	typedef aiVector3D elem_type;
 
 	// time is not compared
 	bool operator == (const aiVectorKey& o) const
@@ -79,10 +80,8 @@ struct aiVectorKey
 	bool operator > (const aiVectorKey& o) const
 		{return mTime > o.mTime;}
 
-
 #endif
 };
-
 
 // ---------------------------------------------------------------------------
 /** A time-value pair specifying a rotation for the given time. For joint 
@@ -94,6 +93,7 @@ struct aiQuatKey
 	C_STRUCT aiQuaternion mValue; ///< The value of this key
 
 #ifdef __cplusplus
+	typedef aiQuaternion elem_type;
 
 	// time is not compared
 	bool operator == (const aiQuatKey& o) const
@@ -110,7 +110,6 @@ struct aiQuatKey
 
 	bool operator > (const aiQuatKey& o) const
 		{return mTime < o.mTime;}
-
 
 #endif
 };
@@ -161,7 +160,8 @@ enum aiAnimBehaviour
  *
  *  @note All keys are returned in their correct, chronological order.
  *  Duplicate keys don't pass the validation step. Most likely there
- *  will be no negative time keys, but they are not forbidden ...
+ *  will be no negative time values, but they are not forbidden ( so you should
+ *  be able to handle them )
  */
 struct aiNodeAnim
 {
@@ -226,8 +226,8 @@ struct aiNodeAnim
 	aiNodeAnim()
 	{
 		mNumPositionKeys = 0; mPositionKeys = NULL; 
-		mNumRotationKeys= 0; mRotationKeys = NULL; 
-		mNumScalingKeys = 0; mScalingKeys = NULL; 
+		mNumRotationKeys = 0; mRotationKeys = NULL; 
+		mNumScalingKeys  = 0; mScalingKeys  = NULL; 
 
 		mPreState = mPostState = aiAnimBehaviour_DEFAULT;
 	}
@@ -295,6 +295,66 @@ struct aiAnimation
 
 #ifdef __cplusplus
 }
-#endif
 
+
+// some C++ utilities for inter- and extrapolation
+namespace Assimp {
+
+
+// ---------------------------------------------------------------------------
+/** @brief Utility class to simplify interpolations of various data types.
+ *
+ *  The type of interpolation is choosen automatically depending on the
+ *  types of the arguments.
+ */
+template <typename T>
+struct Interpolator		
+{	
+	// ------------------------------------------------------------------
+	/** @brief Get the result of the interpolation between a,b.
+	 *
+	 *  The interpolation algorithm depends on the type of the operands.
+	 *  aiVectorKey LERPs, aiQuatKey SLERPs. Any other type lerps, too.
+	 */
+	void operator () (T& out,const T& a, const T& b, float d) const {
+		out = a + (b-a)*d;
+	}
+}; // ! Interpolator <T>
+
+// No need to have that in the doc, it is opaque.
+// The compiler chooses the right variant and we're done.
+#ifndef ASSIMP_DOXYGEN_BUILD
+
+template <>
+struct Interpolator	<aiQuaternion>	{	
+	void operator () (aiQuaternion& out,const aiQuaternion& a, 
+		const aiQuaternion& b, float d) const
+	{
+		aiQuaternion::Interpolate(out,a,b,d);
+	}
+}; // ! Interpolator <aiQuaternion>
+
+template <>
+struct Interpolator	 <aiVectorKey>	{	
+	void operator () (aiVector3D& out,const aiVectorKey& a,
+		const aiVectorKey& b, float d) const	
+	{
+		Interpolator<aiVector3D> ipl;
+		ipl(out,a.mValue,b.mValue,d);
+	}
+}; // ! Interpolator <aiVectorKey>
+
+template <>
+struct Interpolator <aiQuatKey>		{
+	void operator () (aiQuaternion& out, const aiQuatKey a,
+		const aiQuatKey& b, float d) const
+	{
+		Interpolator<aiQuaternion> ipl;
+		ipl(out,a.mValue,b.mValue,d);
+	}
+}; // ! Interpolator <aiQuatKey>
+
+#endif // !! ASSIMP_DOXYGEN_BUILD
+} //  ! end namespace Assimp
+#endif // __cplusplus
 #endif // AI_ANIM_H_INC

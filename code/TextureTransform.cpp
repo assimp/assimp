@@ -558,7 +558,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 				m3.a3 = m3.b3 = -0.5f;
 
 				if ((*it).mRotation > AI_TT_ROTATION_EPSILON )
-					aiMatrix3x3::Rotation((*it).mRotation,matrix);
+					aiMatrix3x3::RotationZ((*it).mRotation,matrix);
 
 				m5.a3 += trl.x; m5.b3 += trl.y;
 				matrix = m2 * m4 * matrix * m3 * m5;

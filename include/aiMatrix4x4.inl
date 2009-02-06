@@ -1,3 +1,44 @@
+/*
+---------------------------------------------------------------------------
+Open Asset Import Library (ASSIMP)
+---------------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the following 
+conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------------
+*/
+
 /** @file aiMatrix4x4.inl
  *  @brief Inline implementation of the 4x4 matrix operators
  */
@@ -16,7 +57,7 @@
 #include "aiAssert.h"
 #include "aiQuaternion.h"
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 inline aiMatrix4x4::aiMatrix4x4( const aiMatrix3x3& m)
 {
 	a1 = m.a1; a2 = m.a2; a3 = m.a3; a4 = 0.0f;
@@ -25,7 +66,7 @@ inline aiMatrix4x4::aiMatrix4x4( const aiMatrix3x3& m)
 	d1 = 0.0f; d2 = 0.0f; d3 = 0.0f; d4 = 1.0f;
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 inline aiMatrix4x4& aiMatrix4x4::operator *= (const aiMatrix4x4& m)
 {
 	*this = aiMatrix4x4(
@@ -48,7 +89,7 @@ inline aiMatrix4x4& aiMatrix4x4::operator *= (const aiMatrix4x4& m)
 	return *this;
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 inline aiMatrix4x4 aiMatrix4x4::operator* (const aiMatrix4x4& m) const
 {
 	aiMatrix4x4 temp( *this);
@@ -57,7 +98,7 @@ inline aiMatrix4x4 aiMatrix4x4::operator* (const aiMatrix4x4& m) const
 }
 
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 inline aiMatrix4x4& aiMatrix4x4::Transpose()
 {
 	// (float&) don't remove, GCC complains cause of packed fields
@@ -71,7 +112,7 @@ inline aiMatrix4x4& aiMatrix4x4::Transpose()
 }
 
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 inline float aiMatrix4x4::Determinant() const
 {
 	return a1*b2*c3*d4 - a1*b2*c4*d3 + a1*b3*c4*d2 - a1*b3*c2*d4 
@@ -82,7 +123,7 @@ inline float aiMatrix4x4::Determinant() const
 		- a4*b2*c3*d1 + a4*b2*c1*d3 - a4*b3*c1*d2 + a4*b3*c2*d1;
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 inline aiMatrix4x4& aiMatrix4x4::Inverse()
 {
 	// Compute the reciprocal determinant
@@ -126,31 +167,34 @@ inline aiMatrix4x4& aiMatrix4x4::Inverse()
 	return *this;
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 inline float* aiMatrix4x4::operator[](unsigned int p_iIndex)
 {
 	return &this->a1 + p_iIndex * 4;
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 inline const float* aiMatrix4x4::operator[](unsigned int p_iIndex) const
 {
 	return &this->a1 + p_iIndex * 4;
 }
-// ---------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------------
 inline bool aiMatrix4x4::operator== (const aiMatrix4x4 m) const
 {
 	return (a1 == m.a1 && a2 == m.a2 && a3 == m.a3 && a4 == m.a4 &&
-		b1 == m.b1 && b2 == m.b2 && b3 == m.b3 && b4 == m.b4 &&
-		c1 == m.c1 && c2 == m.c2 && c3 == m.c3 && c4 == m.c4 &&
-		d1 == m.d1 && d2 == m.d2 && d3 == m.d3 && d4 == m.d4);
+			b1 == m.b1 && b2 == m.b2 && b3 == m.b3 && b4 == m.b4 &&
+			c1 == m.c1 && c2 == m.c2 && c3 == m.c3 && c4 == m.c4 &&
+			d1 == m.d1 && d2 == m.d2 && d3 == m.d3 && d4 == m.d4);
 }
-// ---------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------------
 inline bool aiMatrix4x4::operator!= (const aiMatrix4x4 m) const
 {
 	return !(*this == m);
 }
-// ---------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------------
 inline void aiMatrix4x4::Decompose (aiVector3D& scaling, aiQuaternion& rotation,
 	aiVector3D& position) const
 {
@@ -195,7 +239,8 @@ inline void aiMatrix4x4::Decompose (aiVector3D& scaling, aiQuaternion& rotation,
 	// and generate the rotation quaternion from it
 	rotation = aiQuaternion(m);
 }
-// ---------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------------
 inline void aiMatrix4x4::DecomposeNoScaling (aiQuaternion& rotation,
 	aiVector3D& position) const
 {
@@ -209,12 +254,14 @@ inline void aiMatrix4x4::DecomposeNoScaling (aiQuaternion& rotation,
 	// extract rotation
 	rotation = aiQuaternion((aiMatrix3x3)_this);
 }
-// ---------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------------
 inline void aiMatrix4x4::FromEulerAnglesXYZ(const aiVector3D& blubb)
 {
 	FromEulerAnglesXYZ(blubb.x,blubb.y,blubb.z);
 }
-// ---------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------------
 inline void aiMatrix4x4::FromEulerAnglesXYZ(float x, float y, float z)
 {
 	aiMatrix4x4& _this = *this;
@@ -242,7 +289,8 @@ inline void aiMatrix4x4::FromEulerAnglesXYZ(float x, float y, float z)
 	_this.c3 = cr*cp ;
 
 }
-// ---------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------------
 inline bool aiMatrix4x4::IsIdentity() const
 {
 	// Use a small epsilon to solve floating-point inaccuracies
@@ -266,7 +314,7 @@ inline bool aiMatrix4x4::IsIdentity() const
 			d4 <= 1.f+epsilon && d4 >= 1.f-epsilon);
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 inline aiMatrix4x4& aiMatrix4x4::RotationX(float a, aiMatrix4x4& out)
 {
 	/*
@@ -280,7 +328,7 @@ inline aiMatrix4x4& aiMatrix4x4::RotationX(float a, aiMatrix4x4& out)
 	return out;
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 inline aiMatrix4x4& aiMatrix4x4::RotationY(float a, aiMatrix4x4& out)
 {
 	/*
@@ -295,7 +343,7 @@ inline aiMatrix4x4& aiMatrix4x4::RotationY(float a, aiMatrix4x4& out)
 	return out;
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 inline aiMatrix4x4& aiMatrix4x4::RotationZ(float a, aiMatrix4x4& out)
 {
 	/*
@@ -309,7 +357,7 @@ inline aiMatrix4x4& aiMatrix4x4::RotationZ(float a, aiMatrix4x4& out)
 	return out;
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 // Returns a rotation matrix for a rotation around an arbitrary axis.
 inline aiMatrix4x4& aiMatrix4x4::Rotation( float a, const aiVector3D& axis, aiMatrix4x4& out)
 {
@@ -327,7 +375,7 @@ inline aiMatrix4x4& aiMatrix4x4::Rotation( float a, const aiVector3D& axis, aiMa
   return out;
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 inline aiMatrix4x4& aiMatrix4x4::Translation( const aiVector3D& v, aiMatrix4x4& out)
 {
 	out = aiMatrix4x4();
@@ -337,7 +385,7 @@ inline aiMatrix4x4& aiMatrix4x4::Translation( const aiVector3D& v, aiMatrix4x4& 
 	return out;
 }
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 /** A function for creating a rotation matrix that rotates a vector called
  * "from" into another vector called "to".
  * Input : from[3], to[3] which both must be *normalized* non-zero vectors
@@ -346,84 +394,13 @@ inline aiMatrix4x4& aiMatrix4x4::Translation( const aiVector3D& v, aiMatrix4x4& 
  *          "Efficiently Building a Matrix to Rotate One Vector to Another"
  *          Journal of Graphics Tools, 4(4):1-4, 1999
  */
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 inline aiMatrix4x4& aiMatrix4x4::FromToMatrix(const aiVector3D& from, 
 	const aiVector3D& to, aiMatrix4x4& mtx)
-{
-	const aiVector3D v = from ^ to;
-	const float e = from * to;
-	const float f = (e < 0)? -e:e;
-
-	if (f > 1.0 - 0.00001f)     /* "from" and "to"-vector almost parallel */
-	{
-		aiVector3D u,v;     /* temporary storage vectors */
-		aiVector3D x;       /* vector most nearly orthogonal to "from" */
-
-		x.x = (from.x > 0.0)? from.x : -from.x;
-		x.y = (from.y > 0.0)? from.y : -from.y;
-		x.z = (from.z > 0.0)? from.z : -from.z;
-
-		if (x.x < x.y)
-		{
-			if (x.x < x.z)
-			{
-				x.x = 1.0; x.y = x.z = 0.0;
-			}
-			else
-			{
-				x.z = 1.0; x.y = x.z = 0.0;
-			}
-		}
-		else
-		{
-			if (x.y < x.z)
-			{
-				x.y = 1.0; x.x = x.z = 0.0;
-			}
-			else
-			{
-				x.z = 1.0; x.x = x.y = 0.0;
-			}
-		}
-
-		u.x = x.x - from.x; u.y = x.y - from.y; u.z = x.z - from.z;
-		v.x = x.x - to.x;   v.y = x.y - to.y;   v.z = x.z - to.z;
-
-		const float c1 = 2.0f / (u * u);
-		const float c2 = 2.0f / (v * v);
-		const float c3 = c1 * c2  * (u * v);
-
-		for (unsigned int i = 0; i < 3; i++) 
-		{
-			for (unsigned int j = 0; j < 3; j++) 
-			{
-				mtx[i][j] =  - c1 * u[i] * u[j] - c2 * v[i] * v[j]
-					+ c3 * v[i] * u[j];
-			}
-			mtx[i][i] += 1.0;
-		}
-	}
-	else  /* the most common case, unless "from"="to", or "from"=-"to" */
-	{
-		/* ... use this hand optimized version (9 mults less) */
-		const float h = 1.0f/(1.0f + e);      /* optimization by Gottfried Chen */
-		const float hvx = h * v.x;
-		const float hvz = h * v.z;
-		const float hvxy = hvx * v.y;
-		const float hvxz = hvx * v.z;
-		const float hvyz = hvz * v.y;
-		mtx[0][0] = e + hvx * v.x;
-		mtx[0][1] = hvxy - v.z;
-		mtx[0][2] = hvxz + v.y;
-
-		mtx[1][0] = hvxy + v.z;
-		mtx[1][1] = e + h * v.y * v.y;
-		mtx[1][2] = hvyz - v.x;
-
-		mtx[2][0] = hvxz - v.y;
-		mtx[2][1] = hvyz + v.x;
-		mtx[2][2] = e + hvz * v.z;
-	}
+{	
+	aiMatrix3x3 m3;
+	aiMatrix3x3::FromToMatrix(from,to,m3);
+	mtx = aiMatrix4x4(m3);
 	return mtx;
 }
 

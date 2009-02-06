@@ -52,6 +52,9 @@ extern "C" {
 
 #include "./Compiler/pushpack1.h"
 
+struct aiMatrix3x3;
+struct aiMatrix4x4;
+
 // ---------------------------------------------------------------------------
 /** Represents a three-dimensional vector. */
 struct aiVector3D
@@ -62,29 +65,58 @@ struct aiVector3D
 	aiVector3D (float _xyz) : x(_xyz), y(_xyz), z(_xyz) {}
 	aiVector3D (const aiVector3D& o) : x(o.x), y(o.y), z(o.z) {}
 
-	void Set( float pX, float pY, float pZ) { x = pX; y = pY; z = pZ; }
-	float SquareLength() const { return x*x + y*y + z*z; }
-	float Length() const { return sqrt( SquareLength()); }
-	aiVector3D& Normalize() { *this /= Length(); return *this; }
-	const aiVector3D& operator += (const aiVector3D& o) { x += o.x; y += o.y; z += o.z; return *this; }
-	const aiVector3D& operator -= (const aiVector3D& o) { x -= o.x; y -= o.y; z -= o.z; return *this; }
-	const aiVector3D& operator *= (float f) { x *= f; y *= f; z *= f; return *this; }
-	const aiVector3D& operator /= (float f) { x /= f; y /= f; z /= f; return *this; }
+public:
 
-	inline float operator[](unsigned int i) const {return *(&x + i);}
-	inline float& operator[](unsigned int i) {return *(&x + i);}
+	// combined operators
+	const aiVector3D& operator += (const aiVector3D& o);
+	const aiVector3D& operator -= (const aiVector3D& o);
+	const aiVector3D& operator *= (float f);
+	const aiVector3D& operator /= (float f);
 
-	inline bool operator== (const aiVector3D& other) const
-		{return x == other.x && y == other.y && z == other.z;}
+	// transform vector by matrix
+	aiVector3D& operator *= (const aiMatrix3x3& mat);
+	aiVector3D& operator *= (const aiMatrix4x4& mat);
 
-	inline bool operator!= (const aiVector3D& other) const
-		{return x != other.x || y != other.y || z != other.z;}
+	// access a single element
+	inline float operator[](unsigned int i) const;
+	inline float& operator[](unsigned int i);
 
-	inline aiVector3D& operator= (float f)
-		{x = y = z = f;return *this;}
+	// comparison
+	inline bool operator== (const aiVector3D& other) const;
+	inline bool operator!= (const aiVector3D& other) const;
 
-	const aiVector3D SymMul(const aiVector3D& o)
-		{return aiVector3D(x*o.x,y*o.y,z*o.z);}
+public:
+
+	/** @brief Set the components of a vector
+	 *  @param pX X component
+	 *  @param pY Y component
+	 *  @param pZ Z component
+	 */
+	void Set( float pX, float pY, float pZ);
+
+	/** @brief Get the squared length of the vector
+	 *  @return Square length
+	 */
+	float SquareLength() const;
+
+
+	/** @brief Get the length of the vector
+	 *  @return length
+	 */
+	float Length() const;
+
+
+	/** @brief Normalize the vector
+	 */
+	aiVector3D& Normalize();
+
+	
+	/** @brief Componentwise multiplication of two vectors
+	 *  
+	 *  Note that vec*vec yields the dot product.
+	 *  @param o Second factor
+	 */
+	const aiVector3D SymMul(const aiVector3D& o);
 
 #endif // __cplusplus
 
@@ -96,60 +128,6 @@ struct aiVector3D
 #ifdef __cplusplus
 } // end extern "C"
 
-// symmetric addition
-inline aiVector3D operator + (const aiVector3D& v1, const aiVector3D& v2)
-{
-	return aiVector3D( v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
-}
-
-// symmetric subtraction
-inline aiVector3D operator - (const aiVector3D& v1, const aiVector3D& v2)
-{
-	return aiVector3D( v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
-}
-
-// scalar product
-inline float operator * (const aiVector3D& v1, const aiVector3D& v2)
-{
-	return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
-}
-
-// scalar multiplication
-inline aiVector3D operator * ( float f, const aiVector3D& v)
-{
-	return aiVector3D( f*v.x, f*v.y, f*v.z);
-}
-
-// and the other way around
-inline aiVector3D operator * ( const aiVector3D& v, float f)
-{
-	return aiVector3D( f*v.x, f*v.y, f*v.z);
-}
-
-// scalar division
-inline aiVector3D operator / ( const aiVector3D& v, float f)
-{
-	
-	return v * (1/f);
-}
-
-// vector division
-inline aiVector3D operator / ( const aiVector3D& v, const aiVector3D& v2)
-{
-	return aiVector3D(v.x / v2.x,v.y / v2.y,v.z / v2.z);
-}
-
-// cross product
-inline aiVector3D operator ^ ( const aiVector3D& v1, const aiVector3D& v2)
-{
-	return aiVector3D( v1.y*v2.z - v1.z*v2.y, v1.z*v2.x - v1.x*v2.z, v1.x*v2.y - v1.y*v2.x);
-}
-
-// vector inversion
-inline aiVector3D operator - ( const aiVector3D& v)
-{
-	return aiVector3D( -v.x, -v.y, -v.z);
-}
 
 #endif // __cplusplus
 

@@ -212,7 +212,21 @@ enum aiPostProcessSteps
 	/** This step searches all meshes for degenerated primitives and
 	 *  converts them to proper lines or points.
 	 *
-	 * A face is degenerated if one or more of its faces are identical.
+	 * A face is degenerated if one or more of its points are identical.
+	 * To have the degenerated not only detected and collapsed but also
+	 * removed use the following procedure:
+	 * <ul>
+	 *   <li>Specify the aiProcess_FindDegenerates flag.
+	 *   </li>
+	 *   <li>Specify the aiProcess_SortByPType flag. This moves line and
+	 *     point primitives to separate meshes
+	 *   </li>
+	 *   <li>Set the AI_CONFIG_PP_SBP_REMOVE option to aiPrimitiveType_POINTS
+	 *       | aiPrimitiveType_LINES to cause SortByPType to reject point
+	 *       and line meshes from the scene.
+	 *   </li>
+	 * </ul>
+	 * 
 	*/
 	aiProcess_FindDegenerates = 0x10000,
 
@@ -255,6 +269,11 @@ enum aiPostProcessSteps
 	 * todo ... add more doc 
 	*/
 	aiProcess_FindInstances = 0x100000
+
+
+	// aiProcess_GenEntityMeshes = 0x100000,
+	// aiProcess_OptimizeAnimations = 0x200000
+	// aiProcess_OptimizeNodes      = 0x400000
 };
 
 

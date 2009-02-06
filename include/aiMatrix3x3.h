@@ -53,11 +53,16 @@ struct aiMatrix4x4;
 struct aiVector2D;
 
 // ---------------------------------------------------------------------------
-/** Represents a row-major 3x3 matrix 
-*/
+/** @brief Represents a row-major 3x3 matrix
+ *
+ *  There's much confusion about matrix layouts (colum vs. row order). 
+ *  This is *always* a row-major matrix. Even with the
+ *  aiProcess_ConvertToLeftHanded flag.
+ */
 struct aiMatrix3x3
 {
 #ifdef __cplusplus
+
 	aiMatrix3x3 () :	
 		a1(1.0f), a2(0.0f), a3(0.0f), 
 		b1(0.0f), b2(1.0f), b3(0.0f), 
@@ -71,29 +76,72 @@ struct aiMatrix3x3
 		c1(_c1), c2(_c2), c3(_c3)
 	{}
 
-	/** Construction from a 4x4 matrix. The remaining parts of the 
-	    matrix are ignored. */
+public:
+
+	// matrix multiplication. beware, not commutative
+	aiMatrix3x3& operator *= (const aiMatrix3x3& m);
+	aiMatrix3x3  operator  * (const aiMatrix3x3& m) const;
+
+	// array access operators
+	float* operator[]       (unsigned int p_iIndex);
+	const float* operator[] (unsigned int p_iIndex) const;
+
+	// comparison operators
+	bool operator== (const aiMatrix4x4 m) const;
+	bool operator!= (const aiMatrix4x4 m) const;
+
+public:
+
+	// -------------------------------------------------------------------
+	/** @brief Construction from a 4x4 matrix. The remaining parts 
+	 *  of the matrix are ignored.
+	 */
 	explicit aiMatrix3x3( const aiMatrix4x4& pMatrix);
 
-	aiMatrix3x3& operator *= (const aiMatrix3x3& m);
-	aiMatrix3x3 operator* (const aiMatrix3x3& m) const;
+	// -------------------------------------------------------------------
+	/** @brief Transpose the matrix
+	 */
 	aiMatrix3x3& Transpose();
 
-
-	/** \brief Returns a rotation matrix 
-	 *  \param a Rotation angle, in radians
-	 *  \param out Receives the output matrix
-	 *  \return Reference to the output matrix
+public:
+	// -------------------------------------------------------------------
+	/** @brief Returns a rotation matrix for a rotation around z
+	 *  @param a Rotation angle, in radians
+	 *  @param out Receives the output matrix
+	 *  @return Reference to the output matrix
 	 */
-	static aiMatrix3x3& Rotation(float a, aiMatrix3x3& out);
+	static aiMatrix3x3& RotationZ(float a, aiMatrix3x3& out);
 
+	// -------------------------------------------------------------------
+	/** @brief Returns a rotation matrix for a rotation around
+	 *    an arbitrary axis.
+	 *
+	 *  @param a Rotation angle, in radians
+	 *  @param axis Axis to rotate around
+	 *  @param out To be filled
+	 */
+	static aiMatrix3x3& aiMatrix3x3::Rotation( float a, 
+		const aiVector3D& axis, aiMatrix3x3& out);
 
-	/** \brief Returns a translation matrix 
-	 *  \param v Translation vector
-	 *  \param out Receives the output matrix
-	 *  \return Reference to the output matrix
+	// -------------------------------------------------------------------
+	/** @brief Returns a translation matrix 
+	 *  @param v Translation vector
+	 *  @param out Receives the output matrix
+	 *  @return Reference to the output matrix
 	 */
 	static aiMatrix3x3& Translation( const aiVector2D& v, aiMatrix3x3& out);
+
+	// -------------------------------------------------------------------
+	/** @brief A function for creating a rotation matrix that rotates a
+	 *  vector called "from" into another vector called "to".
+	 * Input : from[3], to[3] which both must be *normalized* non-zero vectors
+	 * Output: mtx[3][3] -- a 3x3 matrix in colum-major form
+	 * Authors: Tomas Möller, John Hughes
+	 *          "Efficiently Building a Matrix to Rotate One Vector to Another"
+	 *          Journal of Graphics Tools, 4(4):1-4, 1999
+	 */
+	static aiMatrix3x3& FromToMatrix(const aiVector3D& from, 
+		const aiVector3D& to, aiMatrix3x3& out);
 
 #endif // __cplusplus
 

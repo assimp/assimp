@@ -91,7 +91,7 @@ extern "C" {
  * the point the camera is looking at (it can even be animated). Assimp
  * writes the target point as a subnode of the camera's main node,
  * called "<camName>.Target". However this is just additional information
- * then, the transformation tracks of the camera main node make the
+ * then the transformation tracks of the camera main node make the
  * camera already look in the right direction.
  * 
 */
@@ -192,9 +192,9 @@ struct aiCamera
 		aiVector3D yaxis = mUp;         yaxis.Normalize();
 		aiVector3D xaxis = mUp^mLookAt; xaxis.Normalize();
 
-		out.a3 = -(xaxis * mPosition);
-		out.b3 = -(yaxis * mPosition);
-		out.c3 = -(zaxis * mPosition);
+		out.a4 = -(xaxis * mPosition);
+		out.b4 = -(yaxis * mPosition);
+		out.c4 = -(zaxis * mPosition);
 
 		out.a1 = xaxis.x;
 		out.a2 = xaxis.y;

@@ -197,6 +197,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\Assimp32.dll"
+				GenerateDebugInformation="true"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				ImportLibrary="$(SolutionDir)..\..\lib\$(ProjectName)_$(ConfigurationName)_$(PlatformName)\assimp.lib"
@@ -271,6 +272,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\Assimp32d.dll"
+				GenerateDebugInformation="true"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				ImportLibrary="$(SolutionDir)..\..\lib\$(ProjectName)_$(ConfigurationName)_$(PlatformName)\assimp.lib"

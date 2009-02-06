@@ -636,8 +636,6 @@ extern "C" {
 /** @def AI_MATKEY_SHININESS
  *  Defines the base shininess of the material
  *  This is the exponent of the Phong shading equation.
- *  The range of this value depends on the file format, but usually
- *  you can assume that you won't get higher valzes than 128.
  * <br>
  * <b>Type:</b> float<br>
  * <b>Default value:</b> 0.0f <br>

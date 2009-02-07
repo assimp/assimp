@@ -53,7 +53,7 @@ extern "C" {
 /** Defines the flags for all possible post processing steps. */
 enum aiPostProcessSteps
 {
-	/** Calculates the tangents and bitangents for the imported meshes. Does nothing
+	/** <hr>Calculates the tangents and bitangents for the imported meshes. Does nothing
 	 * if a mesh does not have normals. You might want this post processing step to be
 	 * executed if you plan to use tangent space calculations such as normal mapping 
 	 * applied to the meshes. There exists a configuration option,
@@ -62,13 +62,13 @@ enum aiPostProcessSteps
 	 */
 	aiProcess_CalcTangentSpace = 1,
 
-	/** Identifies and joins identical vertex data sets within all imported meshes. 
+	/** <hr>Identifies and joins identical vertex data sets within all imported meshes. 
 	 * After this step is run each mesh does contain only unique vertices anymore,
 	 * so a vertex is possibly used by multiple faces. You usually want
 	 * to use this post processing step.*/
 	aiProcess_JoinIdenticalVertices = 2,
 
-	/** Converts all the imported data to a left-handed coordinate space such as 
+	/** <hr>Converts all the imported data to a left-handed coordinate space such as 
 	 * the DirectX coordinate system. By default the data is returned in a right-handed
 	 * coordinate space which for example OpenGL prefers. In this space, +X points to the
 	 * right, +Y points towards the viewer and and +Z points upwards. In the DirectX 
@@ -77,7 +77,7 @@ enum aiPostProcessSteps
 	 */
 	aiProcess_ConvertToLeftHanded = 4,
 
-	/** Triangulates all faces of all meshes. By default the imported mesh data might 
+	/** <hr>Triangulates all faces of all meshes. By default the imported mesh data might 
 	 * contain faces with more than 3 indices. For rendering a mesh you usually need
 	 * all faces to be triangles. This post processing step splits up all higher faces
 	 * to triangles. This step won't modify line and point primitives. If you need
@@ -88,7 +88,7 @@ enum aiPostProcessSteps
 	 */
 	aiProcess_Triangulate = 8,
 
-	/** Removes some parts of the data structure (animations, materials, 
+	/** <hr>Removes some parts of the data structure (animations, materials, 
 	 *  light sources, cameras, textures, vertex components).
 	 *
 	 *  The  components to be removed are specified in a separate
@@ -104,33 +104,36 @@ enum aiPostProcessSteps
 	 */
 	aiProcess_RemoveComponent = 0x10,
 
-	/** Generates normals for all faces of all meshes. The normals are shared
+	/** <hr>Generates normals for all faces of all meshes. The normals are shared
 	* between the three vertices of a face. This is ignored
 	* if normals are already existing. This flag may not be specified together
-	* with aiProcess_GenSmoothNormals
+	* with aiProcess_GenSmoothNormals.
 	*/
 	aiProcess_GenNormals = 0x20,
 
-	/** Generates smooth normals for all vertices in the mesh. This is ignored
+	/** <hr>Generates smooth normals for all vertices in the mesh. This is ignored
 	* if normals are already existing. This flag may not be specified together
-	* with aiProcess_GenNormals. There exists a configuration option,
+	* with aiProcess_GenNormals. There's a configuration option,
 	* #AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE that allows you to specify
-	* an angle maximum for the step.
+	* an angle maximum for the normal smoothing algorithm. Normals exceeding
+	* this limit are not smoothed, resulting in a a 'hard' seam between two faces.
 	*/
 	aiProcess_GenSmoothNormals = 0x40,
 
-	/** Splits large meshes into submeshes
-	* This is quite useful for realtime rendering where the number of vertices
-	* is usually limited by the video driver.
+	/** <hr>Splits large meshes into submeshes
+	* This is quite useful for realtime rendering where the number of triangles
+	* to be maximally rendered in one drawcall is usually limited by the video driver. 
+	* The maximum vertex buffer size suffers from limitations, too. Both
+	* requirements are met with this step: you can specify both a triangle and vertex
+	* limit for a single mesh.
 	*
-	* The split limits can be set through aiSetVertexSplitLimit() and
-	* aiSetTriangleSplitLimit(). The default values for this are defined
-	* in the internal SplitLargeMeshes.h header as AI_SLM_DEFAULT_MAX_VERTICES
-	* and AI_SLM_DEFAULT_MAX_TRIANGLES. 
+	* The split limits can be set through the <tt>AI_CONFIG_PP_SLM_VERTEX_LIMIT</tt>
+	* and <tt>AI_CONFIG_PP_SLM_TRIANGLE_LIMIT</tt> The default values are 
+	* <tt>AI_SLM_DEFAULT_MAX_VERTICES</tt> and <tt>AI_SLM_DEFAULT_MAX_TRIANGLES</tt>. 
 	*/
 	aiProcess_SplitLargeMeshes = 0x80,
 
-	/** Removes the node graph and pre-transforms all vertices with
+	/** <hr>Removes the node graph and pre-transforms all vertices with
 	* the local transformation matrices of their nodes. The output
 	* scene does still contain nodes, however, there is only a
 	* root node with children, each one referencing only one mesh,
@@ -146,7 +149,7 @@ enum aiPostProcessSteps
 	*/
 	aiProcess_PreTransformVertices = 0x100,
 
-	/** Limits the number of bones simultaneously affecting a single vertex
+	/** <hr>Limits the number of bones simultaneously affecting a single vertex
 	* to a maximum value. If any vertex is affected by more than that number
 	* of bones, the least important vertex weights are removed and the remaining
 	* vertex weights are renormalized so that the weights still sum up to 1.
@@ -159,7 +162,7 @@ enum aiPostProcessSteps
 	*/
 	aiProcess_LimitBoneWeights = 0x200,
 
-	/** Validates the aiScene data structure before it is returned.
+	/** <hr>Validates the aiScene data structure before it is returned.
 	 * This makes sure that all indices are valid, all animations and
 	 * bones are linked correctly, all material are correct and so on ...
 	 * This is primarily intended for our internal debugging stuff,
@@ -168,7 +171,7 @@ enum aiPostProcessSteps
 	*/
 	aiProcess_ValidateDataStructure = 0x400,
 
-	/** Reorders triangles for vertex cache locality and thus better performance.
+	/** <hr>Reorders triangles for vertex cache locality and thus better performance.
 	 * The step tries to improve the ACMR (average post-transform vertex cache
 	 * miss ratio) for all meshes. The step runs in O(n) and is roughly
 	 * basing on the algorithm described in this paper:
@@ -176,7 +179,7 @@ enum aiPostProcessSteps
 	 */
 	aiProcess_ImproveCacheLocality = 0x800,
 
-	/** Searches for redundant materials and removes them.
+	/** <hr>Searches for redundant materials and removes them.
 	 *
 	 * This is especially useful in combination with the PretransformVertices 
 	 * and OptimizeGraph steps. Both steps join small meshes, but they
@@ -184,7 +187,7 @@ enum aiPostProcessSteps
 	 */
 	aiProcess_RemoveRedundantMaterials = 0x1000,
 
-	/** This step tries to determine which meshes have normal vectors 
+	/** <hr>This step tries to determine which meshes have normal vectors 
 	 * that are facing inwards. The algorithm is simple but effective:
 	 * the bounding box of all vertices + their normals is compared against
 	 * the volume of the bounding box of all vertices without their normals.
@@ -196,7 +199,7 @@ enum aiPostProcessSteps
 	aiProcess_FixInfacingNormals = 0x2000,
 
 
-	/** This step splits meshes with more than one primitive type in 
+	/** <hr>This step splits meshes with more than one primitive type in 
 	 *  homogeneous submeshes. 
 	 *
 	 *  The step is executed after the triangulation step. After the step
@@ -209,28 +212,44 @@ enum aiPostProcessSteps
 	*/
 	aiProcess_SortByPType = 0x8000,
 
-	/** This step searches all meshes for degenerated primitives and
+	/** <hr>This step searches all meshes for degenerated primitives and
 	 *  converts them to proper lines or points.
 	 *
 	 * A face is degenerated if one or more of its points are identical.
-	 * To have the degenerated not only detected and collapsed but also
-	 * removed use the following procedure:
+	 * To have the degenerated stuff not only detected and collapsed but
+	 * also removed, try one of the following procedures:
+	 * <br><b>1.</b> (if you support lines&points for rendering but don't
+	 *    want the degenerates)</br>
 	 * <ul>
-	 *   <li>Specify the aiProcess_FindDegenerates flag.
+	 *   <li>Specify the #aiProcess_FindDegenerates flag.
 	 *   </li>
-	 *   <li>Specify the aiProcess_SortByPType flag. This moves line and
-	 *     point primitives to separate meshes
+	 *   <li>Set the <tt>AI_CONFIG_PP_FD_REMOVE</tt> option to 1. This will 
+	 *       cause the step to remove degenerated triangles rom the import
+	 *       as soon as they're detected. They won't pass any further
+	 *       pipeline steps.
 	 *   </li>
-	 *   <li>Set the AI_CONFIG_PP_SBP_REMOVE option to aiPrimitiveType_POINTS
-	 *       | aiPrimitiveType_LINES to cause SortByPType to reject point
+	 * </ul>
+	 * <br><b>2.</b>(if you don't support lines&points at all ...)</br>
+	 * <ul>
+	 *   <li>Specify the #aiProcess_FindDegenerates flag.
+	 *   </li>
+	 *   <li>Specify the #aiProcess_SortByPType flag. This moves line and
+	 *     point primitives to separate meshes.
+	 *   </li>
+	 *   <li>Set the <tt>AI_CONFIG_PP_SBP_REMOVE</tt> option to 
+	 *       @code aiPrimitiveType_POINTS | aiPrimitiveType_LINES
+	 *       @endcode to cause SortByPType to reject point
 	 *       and line meshes from the scene.
 	 *   </li>
 	 * </ul>
-	 * 
+	 * @note Degenerated polygons are not necessarily evil and that's why
+	 * they're not removed by default. There are several file formats which 
+	 * don't support lines or points ... some exporters bypass the
+	 * format specification and write them as degenerated triangle instead.
 	*/
 	aiProcess_FindDegenerates = 0x10000,
 
-	/** This step searches all meshes for invalid data, such as zeroed
+	/** <hr>This step searches all meshes for invalid data, such as zeroed
 	 *  normal vectors or invalid UV coords and removes them.
 	 *
 	 * This is especially useful for normals. If they are invalid, and
@@ -240,7 +259,7 @@ enum aiPostProcessSteps
 	*/
 	aiProcess_FindInvalidData = 0x20000,
 
-	/** This step converts non-UV mappings (such as spherical or
+	/** <hr>This step converts non-UV mappings (such as spherical or
 	 *  cylindrical) to proper UV mapping channels.
 	 *
 	 * Most applications will support UV mapping only, so you will
@@ -248,7 +267,7 @@ enum aiPostProcessSteps
 	*/
 	aiProcess_GenUVCoords = 0x40000,
 
-	/** This step pre-transforms UV coordinates by the UV transformations
+	/** <hr>This step pre-transforms UV coordinates by the UV transformations
 	 *  (such as scalings or rotations).
 	 *
 	 * UV transformations are specified per-texture - see the
@@ -263,7 +282,7 @@ enum aiPostProcessSteps
 	aiProcess_TransformUVCoords = 0x80000,
 
 
-	/** This step searches for duplicate meshes and replaces duplicates
+	/** <hr>This step searches for duplicate meshes and replaces duplicates
 	 *  with references to the first mesh.
 	 *
 	 * todo ... add more doc 

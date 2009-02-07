@@ -70,6 +70,7 @@ public:
 		{}
 	};
 
+	//! Represents data that is allocated on the heap, thus needs to be deleted
 	template <typename T>
 	struct THeapData : public Base
 	{
@@ -84,6 +85,7 @@ public:
 		T* data;
 	};
 
+	//! Represents static, by-value data not allocated on the heap
 	template <typename T>
 	struct TStaticData : public Base
 	{
@@ -97,16 +99,19 @@ public:
 		T data;
 	};
 
+	// some typedefs for cleaner code
 	typedef unsigned int KeyType;
 	typedef std::map<KeyType, Base*>  PropertyMap;
 
 public:
 
+	//! Destructor
 	~SharedPostProcessInfo()	
 	{
 		Clean();
 	}
 
+	//! Remove all stored properties from the table
 	void Clean()
 	{
 		// invoke the virtual destructor for all stored properties
@@ -118,21 +123,22 @@ public:
 		pmap.clear();
 	}
 
+	//! Add a heap property to the list
 	template <typename T>
-	inline void AddProperty( const char* name, T* in )
-	{
+	void AddProperty( const char* name, T* in ){
 		AddProperty(name,(Base*)new THeapData<T>(in));
 	}
 
+	//! Add a static by-value property to the list
 	template <typename T>
-	inline void AddProperty( const char* name, T in )
-	{
+	void AddProperty( const char* name, T in ){
 		AddProperty(name,(Base*)new TStaticData<T>(in));
 	}
 
 
+	//! Get a heap property
 	template <typename T>
-	inline bool GetProperty( const char* name, T*& out ) const
+	bool GetProperty( const char* name, T*& out ) const
 	{
 		THeapData<T>* t;
 		GetProperty(name,(Base*&)t);
@@ -145,8 +151,9 @@ public:
 		return true;
 	}
 
+	//! Get a static, by-value property
 	template <typename T>
-	inline bool GetProperty( const char* name, T& out ) const
+	bool GetProperty( const char* name, T& out ) const
 	{
 		TStaticData<T>* t;
 		GetProperty(name,(Base*&)t);
@@ -155,22 +162,46 @@ public:
 		return true;
 	}
 
-	inline void RemoveProperty( const char* name)	{
+	//! Remove a property of a specific type
+	void RemoveProperty( const char* name)	{
 		SetGenericPropertyPtr<Base>(pmap,name,NULL);
 	}
 
 private:
 
-	inline void AddProperty( const char* name, Base* data)	{
+	//! Internal
+	void AddProperty( const char* name, Base* data)	{
 		SetGenericPropertyPtr<Base>(pmap,name,data);
 	}
 
-	inline void GetProperty( const char* name, Base*& data) const	{
+	//! Internal
+	void GetProperty( const char* name, Base*& data) const	{
 		data = GetGenericProperty<Base*>(pmap,name,NULL);
 	}
 
+private:
+
+	//! Map of all stored properties
 	PropertyMap pmap;
 };
+
+#if 0
+
+// ---------------------------------------------------------------------------
+/** @brief Represents a dependency table for a postprocessing steps.
+ *
+ *  For future use.
+ */
+ struct PPDependencyTable 
+ {
+	 unsigned int execute_me_before_these;
+	 unsigned int execute_me_after_these;
+	 unsigned int only_if_these_are_not_specified;
+	 unsigned int mutually_exclusive_with;
+ };
+
+#endif
+
 
 #define AI_SPP_SPATIAL_SORT "$Spat"
 

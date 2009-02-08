@@ -420,13 +420,13 @@ void ColladaParser::ReadLight( Collada::Light& pLight)
 				// text content contains 3 floats
 				const char* content = GetTextContent();
 				  
-				content = fast_atof_move( content, pLight.mColor.r);
+				content = fast_atof_move( content, (float&)pLight.mColor.r);
 				SkipSpacesAndLineEnd( &content);
 				
-				content = fast_atof_move( content, pLight.mColor.g);
+				content = fast_atof_move( content, (float&)pLight.mColor.g);
 				SkipSpacesAndLineEnd( &content);
 
-				content = fast_atof_move( content, pLight.mColor.b);
+				content = fast_atof_move( content, (float&)pLight.mColor.b);
 				SkipSpacesAndLineEnd( &content);
 
 				TestClosing( "color");
@@ -754,16 +754,16 @@ void ColladaParser::ReadEffectColor( aiColor4D& pColor, Sampler& pSampler)
 				// text content contains 4 floats
 				const char* content = GetTextContent(); 
 
-				content = fast_atof_move( content, pColor.r);
+				content = fast_atof_move( content, (float&)pColor.r);
 				SkipSpacesAndLineEnd( &content);
 
-				content = fast_atof_move( content, pColor.g);
+				content = fast_atof_move( content, (float&)pColor.g);
 				SkipSpacesAndLineEnd( &content);
 
-				content = fast_atof_move( content, pColor.b);
+				content = fast_atof_move( content, (float&)pColor.b);
 				SkipSpacesAndLineEnd( &content);
 
-				content = fast_atof_move( content, pColor.a);
+				content = fast_atof_move( content, (float&)pColor.a);
 				SkipSpacesAndLineEnd( &content);
 				TestClosing( "color");
 			} 

@@ -446,7 +446,7 @@ void ObjFileImporter::createMaterial(const ObjFile::Model* pModel, const ObjFile
 				break;
 			default:
 				sm = aiShadingMode_Gouraud;
-				DefaultLogger::get()->error("OBJ/MTL: Unexpected illumination model (0-3 recognized)");
+				DefaultLogger::get()->error("OBJ/MTL: Unexpected illumination model (0-2 recognized)");
 		}
 		mat->AddProperty<int>( &sm, 1, AI_MATKEY_SHADING_MODEL);
 
@@ -455,6 +455,9 @@ void ObjFileImporter::createMaterial(const ObjFile::Model* pModel, const ObjFile
 		mat->AddProperty( &pCurrentMaterial->diffuse, 1, AI_MATKEY_COLOR_DIFFUSE );
 		mat->AddProperty( &pCurrentMaterial->specular, 1, AI_MATKEY_COLOR_SPECULAR );
 		mat->AddProperty( &pCurrentMaterial->shineness, 1, AI_MATKEY_SHININESS );
+
+		// Adding refraction index
+		mat->AddProperty( &pCurrentMaterial->ior, 1, AI_MATKEY_REFRACTI );
 
 		// Adding textures
 		if ( 0 != pCurrentMaterial->texture.length )

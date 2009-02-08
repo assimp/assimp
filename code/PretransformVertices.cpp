@@ -138,35 +138,29 @@ void CollectData( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
 		{
 			// copy positions, transform them to worldspace
 			for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
-			{
-				pcMeshOut->mVertices[aiCurrent[AI_PTVS_VERTEX]+n] = 
-					pcNode->mTransformation * pcMesh->mVertices[n];
-			}
-			if (iVFormat & 0x2)
-			{
-				aiMatrix4x4 mWorldIT = pcNode->mTransformation;
-				mWorldIT.Inverse().Transpose();
+				pcMeshOut->mVertices[aiCurrent[AI_PTVS_VERTEX]+n] = pcNode->mTransformation * pcMesh->mVertices[n];
+			
 
-				// TODO: implement Inverse() for aiMatrix3x3
-				aiMatrix3x3 m = aiMatrix3x3(mWorldIT);
-				
+			aiMatrix4x4 mWorldIT = pcNode->mTransformation;
+			mWorldIT.Inverse().Transpose();
+
+			// TODO: implement Inverse() for aiMatrix3x3
+			aiMatrix3x3 m = aiMatrix3x3(mWorldIT);
+
+			if (iVFormat & 0x2)
+			{		
 				// copy normals, transform them to worldspace
-				for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
-				{
-					pcMeshOut->mNormals[aiCurrent[AI_PTVS_VERTEX]+n] = 
-						m * pcMesh->mNormals[n];
+				for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)	{
+					pcMeshOut->mNormals[aiCurrent[AI_PTVS_VERTEX]+n] = m * pcMesh->mNormals[n];
 				}
 			}
 			if (iVFormat & 0x4)
 			{
-				// copy tangents
-				memcpy(pcMeshOut->mTangents + aiCurrent[AI_PTVS_VERTEX],
-					pcMesh->mTangents,
-					pcMesh->mNumVertices * sizeof(aiVector3D));
-				// copy bitangents
-				memcpy(pcMeshOut->mBitangents + aiCurrent[AI_PTVS_VERTEX],
-					pcMesh->mBitangents,
-					pcMesh->mNumVertices * sizeof(aiVector3D));
+				// copy tangents and bitangents, transform them to worldspace
+				for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)	{
+					pcMeshOut->mTangents  [aiCurrent[AI_PTVS_VERTEX]+n] = m * pcMesh->mTangents[n];
+					pcMeshOut->mBitangents[aiCurrent[AI_PTVS_VERTEX]+n] = m * pcMesh->mBitangents[n];
+				}
 			}
 			unsigned int p = 0;
 			while (iVFormat & (0x100 << p))

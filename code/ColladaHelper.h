@@ -43,10 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_COLLADAHELPER_H_INC
 #define AI_COLLADAHELPER_H_INC
 
-namespace Assimp
-{
-namespace Collada
-{
+namespace Assimp	{
+namespace Collada		{
 
 /** Transformation types that can be applied to a node */
 enum TransformType
@@ -59,6 +57,19 @@ enum TransformType
 	TF_MATRIX
 };
 
+/** Different types of input data to a vertex or face */
+enum InputType
+{
+	IT_Invalid,
+	IT_Vertex,  // special type for per-index data referring to the <vertices> element carrying the per-vertex data.
+	IT_Position,
+	IT_Normal,
+	IT_Texcoord,
+	IT_Color,
+	IT_Tangent,
+	IT_Bitangent,
+};
+
 /** Contains all data for one of the different transformation types */
 struct Transform
 {
@@ -66,11 +77,135 @@ struct Transform
 	float f[16]; ///< Interpretation of data depends on the type of the transformation 
 };
 
+/** A collada camera. */
+struct Camera
+{
+	Camera()
+		:	mOrtho  (false)
+		,	mHorFov (10e10f)
+		,	mVerFov (10e10f)
+		,	mAspect (10e10f)
+		,	mZNear  (0.1f)
+		,	mZFar   (1000.f)
+	{}
+
+	// Name of camera
+	std::string mName;
+
+	// True if it is an orthografic camera
+	bool mOrtho;
+
+	//! Horizontal field of view in degrees
+	float mHorFov;
+
+	//! Vertical field of view in degrees
+	float mVerFov;
+
+	//! Screen aspect
+	float mAspect;
+
+	//! Near& far z
+	float mZNear, mZFar;
+};
+
+#define aiLightSource_AMBIENT 0xdeaddead
+
+/** A collada light source. */
+struct Light
+{	
+	Light()
+		:	mAttConstant     (1.f)
+		,	mAttLinear       (0.f)
+		,	mAttQuadratic    (0.f)
+		,	mFalloffAngle    (180.f)
+		,	mFalloffExponent (0.f)
+		,	mPenumbraAngle	 (10e10f)
+		,	mOuterAngle		 (10e10f)
+		,	mIntensity		 (1.f)
+	{}
+
+	//! Type of the light source aiLightSourceType + ambient
+	unsigned int mType;
+
+	//! Color of the light
+	aiColor3D mColor;
+
+	//! Light attenuation
+	float mAttConstant,mAttLinear,mAttQuadratic;
+
+	//! Spot light falloff
+	float mFalloffAngle;
+	float mFalloffExponent;
+
+	// -----------------------------------------------------
+	// FCOLLADA extension from here
+
+	//! ... related stuff from maja and max extensions
+	float mPenumbraAngle;
+	float mOuterAngle;
+
+	//! Common light intensity
+	float mIntensity;
+};
+
+/** Short vertex index description */
+struct InputSemanticMapEntry
+{
+	InputSemanticMapEntry()
+		:	mSet	(0)
+	{}
+
+	//! Index of set, optional
+	unsigned int mSet;
+
+	//! Name of referenced vertex input
+	InputType mType;
+};
+
+/** Table to map from effect to vertex input semantics */
+struct SemanticMappingTable
+{
+	//! Name of material
+	std::string mMatName;
+
+	//! List of semantic map commands, grouped by effect semantic name
+	std::map<std::string, InputSemanticMapEntry> mMap;
+
+	//! For std::find
+	bool operator == (const std::string& s) const {
+		return s == mMatName;
+	}
+};
+
 /** A reference to a mesh inside a node, including materials assigned to the various subgroups */
 struct MeshInstance
 {
-	std::string mMesh; ///< ID of the mesh
-	std::map<std::string, std::string> mMaterials; ///< Map of materials by the subgroup ID they're applied to
+	 ///< ID of the mesh
+	std::string mMesh;
+
+	 ///< Map of materials by the subgroup ID they're applied to
+	std::map<std::string, SemanticMappingTable> mMaterials;
+};
+
+/** A reference to a camera inside a node*/
+struct CameraInstance
+{
+	 ///< ID of the camera
+	std::string mCamera;
+};
+
+/** A reference to a light inside a node*/
+struct LightInstance
+{
+	 ///< ID of the camera
+	std::string mLight;
+};
+
+/** A reference to a node inside a node*/
+struct NodeInstance
+{
+	 ///< ID of the node
+	std::string mNode;
 };
 
 /** A node in a scene hierarchy */
@@ -84,10 +219,31 @@ struct Node
 	/** Operations in order to calculate the resulting transformation to parent. */
 	std::vector<Transform> mTransforms;
 
-	std::vector<MeshInstance> mMeshes; ///< Meshes at this node
+	/** Meshes at this node */
+	std::vector<MeshInstance> mMeshes;    
 
-	Node() { mParent = NULL; }
-	~Node() { for( std::vector<Node*>::iterator it = mChildren.begin(); it != mChildren.end(); ++it) delete *it; }
+	/** Lights at this node */
+	std::vector<LightInstance> mLights;  
+
+	/** Cameras at this node */
+	std::vector<CameraInstance> mCameras; 
+
+	/** Node instances at this node */
+	std::vector<NodeInstance> mNodeInstances;
+
+	/** Rootnodes: Name of primary camera, if any */
+	std::string mPrimaryCamera;
+
+	//! Constructor. Begin with a zero parent
+	Node() { 
+		mParent = NULL;
+	}
+
+	//! Destructor: delete all children subsequently
+	~Node() { 
+		for( std::vector<Node*>::iterator it = mChildren.begin(); it != mChildren.end(); ++it) 
+			delete *it; 
+	}
 };
 
 /** Data source array */
@@ -121,17 +277,6 @@ struct Face
 	std::vector<size_t> mIndices;
 };
 
-/** Different types of input data to a vertex or face */
-enum InputType
-{
-	IT_Invalid,
-	IT_Vertex,  // special type for per-index data referring to the <vertices> element carrying the per-vertex data.
-	IT_Position,
-	IT_Normal,
-	IT_Texcoord,
-	IT_Color
-};
-
 /** An input channel for mesh data, referring to a single accessor */
 struct InputChannel
 {
@@ -154,14 +299,24 @@ struct SubMesh
 /** Contains data for a single mesh */
 struct Mesh
 {
+	Mesh()
+	{
+		for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
+			mNumUVComponents[i] = 2;
+	}
+
 	std::string mVertexID; // just to check if there's some sophisticated addressing involved... which we don't support, and therefore should warn about.
 	std::vector<InputChannel> mPerVertexData; // Vertex data addressed by vertex indices
 
 	// actual mesh data, assembled on encounter of a <p> element. Verbose format, not indexed
 	std::vector<aiVector3D> mPositions;
 	std::vector<aiVector3D> mNormals;
-	std::vector<aiVector2D> mTexCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
-	std::vector<aiColor4D> mColors[AI_MAX_NUMBER_OF_COLOR_SETS];
+	std::vector<aiVector3D> mTangents;
+	std::vector<aiVector3D> mBitangents;
+	std::vector<aiVector3D> mTexCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
+	std::vector<aiColor4D>  mColors[AI_MAX_NUMBER_OF_COLOR_SETS];
+
+	unsigned int mNumUVComponents[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 
 	// Faces. Stored are only the number of vertices for each face. 1 == point, 2 == line, 3 == triangle, 4+ == poly
 	std::vector<size_t> mFaceSize;
@@ -213,30 +368,98 @@ enum ShadeType
 	Shade_Blinn
 };
 
+/** Represents a texture sampler in collada */
+struct Sampler
+{
+	Sampler()
+		:	mWrapU		(true)
+		,	mWrapV		(true)
+		,	mMirrorU	(true)
+		,	mMirrorV	(true)
+		,	mOp			(aiTextureOp_Multiply)
+		,	mUVId		(0xffffffff)
+		,	mWeighting  (1.f)
+		,	mMixWithPrevious (1.f)
+	{}
+
+	// Name of image reference
+	std::string mName;
+
+	// Wrap U?
+	bool mWrapU;
+
+	// Wrap V?
+	bool mWrapV;
+
+	// Mirror U?
+	bool mMirrorU;
+
+	// Mirror V?
+	bool mMirrorV;
+
+	// Blend mode
+	aiTextureOp mOp;
+
+	// UV transformation
+	aiUVTransform mTransform;
+
+	// Name of source UV channel
+	std::string mUVChannel;
+
+	// Resolved UV channel index or 0xffffffff if not known
+	unsigned int mUVId;
+
+	// OKINO/MAX3D extensions from here
+	// -------------------------------------------------------
+
+	// Weighting factor
+	float mWeighting;
+
+	// Mixing factor from OKINO
+	float mMixWithPrevious;
+};
 
 /** A collada effect. Can contain about anything according to the Collada spec, but we limit our version to a reasonable subset. */
 struct Effect
 {
+	// Shading mode
 	ShadeType mShadeType;
+
+	// Colors
 	aiColor4D mEmissive, mAmbient, mDiffuse, mSpecular;
-	aiColor4D mReflective, mRefractive;
-	std::string mTexEmissive, mTexAmbient, mTexDiffuse, mTexSpecular;
+	aiColor4D mTransparent;
+
+	// Textures
+	Sampler mTexEmissive, mTexAmbient, mTexDiffuse, mTexSpecular,
+		mTexTransparent, mTexBump;
+
+	// Scalar factory
 	float mShininess, mRefractIndex;
-	float mReflectivity, mRefractivity;
+	float mTransparency;
 
 	// local params referring to each other by their SID
 	typedef std::map<std::string, Collada::EffectParam> ParamLibrary;
 	ParamLibrary mParams;
+
+	// MAX3D extensions
+	// ---------------------------------------------------------
+	// Double-sided?
+	bool mDoubleSided, mWireframe, mFaceted;
 	
-	Effect() : mEmissive( 0, 0, 0, 1), mAmbient( 0.1f, 0.1f, 0.1f, 1),
-		mDiffuse( 0.6f, 0.6f, 0.6f, 1), mSpecular( 0.4f, 0.4f, 0.4f, 1),
-		mReflective( 0, 0, 0, 0), mRefractive( 0, 0, 0, 0)
+	Effect()
+		: mShadeType    (Shade_Phong)
+		, mEmissive		( 0, 0, 0, 1)
+		, mAmbient		( 0.1f, 0.1f, 0.1f, 1)
+		, mDiffuse		( 0.6f, 0.6f, 0.6f, 1)
+		, mSpecular		( 0.4f, 0.4f, 0.4f, 1)
+		, mTransparent	( 0, 0, 0, 1)
+		, mShininess    (10.0f)
+		, mRefractIndex (1.f)
+		, mTransparency (0.f)
+		, mDoubleSided	(false)
+		, mWireframe    (false)
+		, mFaceted      (false)
 	{ 
-		mShadeType = Shade_Phong; 
-		mShininess = 10.0f;
-		mRefractIndex = 1.0f;
-		mReflectivity = 0.0f;
-		mRefractivity = 0.0f;
 	}
 };
 

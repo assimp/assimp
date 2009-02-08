@@ -109,17 +109,53 @@ protected:
 	/** Recursively constructs a scene node for the given parser node and returns it. */
 	aiNode* BuildHierarchy( const ColladaParser& pParser, const Collada::Node* pNode);
 
+	/** Resolve node instances */
+	void ResolveNodeInstances( const ColladaParser& pParser, const Collada::Node* pNode,
+		std::vector<Collada::Node*>& resolved);
+
 	/** Builds meshes for the given node and references them */
-	void BuildMeshesForNode( const ColladaParser& pParser, const Collada::Node* pNode, aiNode* pTarget);
+	void BuildMeshesForNode( const ColladaParser& pParser, const Collada::Node* pNode, 
+		aiNode* pTarget);
+
+	/** Builds cameras for the given node and references them */
+	void BuildCamerasForNode( const ColladaParser& pParser, const Collada::Node* pNode, 
+		aiNode* pTarget);
+
+	/** Builds lights for the given node and references them */
+	void BuildLightsForNode( const ColladaParser& pParser, const Collada::Node* pNode, 
+		aiNode* pTarget);
 
 	/** Stores all meshes in the given scene */
 	void StoreSceneMeshes( aiScene* pScene);
 
+	/** Stores all materials in the given scene */
+	void StoreSceneMaterials( aiScene* pScene);
+
+	/** Stores all lights in the given scene */
+	void StoreSceneLights( aiScene* pScene);
+
+	/** Stores all cameras in the given scene */
+	void StoreSceneCameras( aiScene* pScene);
+
 	/** Constructs materials from the collada material definitions */
 	void BuildMaterials( const ColladaParser& pParser, aiScene* pScene);
 
+	/** Fill materials from the collada material definitions */
+	void FillMaterials( const ColladaParser& pParser, aiScene* pScene);
+
+	/** Resolve UV channel mappings*/
+	void ApplyVertexToEffectSemanticMapping(Collada::Sampler& sampler,
+		const Collada::SemanticMappingTable& table);
+
+	/** Add a texture and all of its sampling properties to a material*/
+	void AddTexture ( Assimp::MaterialHelper& mat, const ColladaParser& pParser,
+		const Collada::Effect& effect,
+		const Collada::Sampler& sampler,
+		aiTextureType type, unsigned int idx = 0);
+
 	/** Resolves the texture name for the given effect texture entry */
-	const aiString& FindFilenameForEffectTexture( const ColladaParser& pParser, const Collada::Effect& pEffect, const std::string& pName);
+	const aiString& FindFilenameForEffectTexture( const ColladaParser& pParser, 
+		const Collada::Effect& pEffect, const std::string& pName);
 
 	/** Converts a path read from a collada file to the usual representation */
 	void ConvertPath (aiString& ss);
@@ -136,6 +172,15 @@ protected:
 
 	/** Accumulated meshes for the target scene */
 	std::vector<aiMesh*> mMeshes;
+
+	/** Temporary material list */
+	std::vector<std::pair<Collada::Effect*, aiMaterial*> > newMats;
+
+	/** Temporary camera list */
+	std::vector<aiCamera*> mCameras;
+
+	/** Temporary light list */
+	std::vector<aiLight*> mLights;
 };
 
 } // end of namespace Assimp

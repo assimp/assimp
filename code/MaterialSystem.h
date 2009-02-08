@@ -179,6 +179,19 @@ inline aiReturn MaterialHelper::AddProperty<float> (const float* pInput,
 
 // ----------------------------------------------------------------------------------------
 template<>
+inline aiReturn MaterialHelper::AddProperty<aiUVTransform> (const aiUVTransform* pInput,
+	const unsigned int pNumValues,
+	const char* pKey,
+	unsigned int type,
+	unsigned int index)
+{
+	return AddBinaryProperty((const void*)pInput,
+		pNumValues * sizeof(aiUVTransform),
+		pKey,type,index,aiPTI_Float);
+}
+
+// ----------------------------------------------------------------------------------------
+template<>
 inline aiReturn MaterialHelper::AddProperty<aiColor4D> (const aiColor4D* pInput,
 	const unsigned int pNumValues,
 	const char* pKey,

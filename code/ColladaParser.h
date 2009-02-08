@@ -84,14 +84,30 @@ protected:
 	/** Reads a material entry into the given material */
 	void ReadMaterial( Collada::Material& pMaterial);
 
+	/** Reads the camera library */
+	void ReadCameraLibrary();
+
+	/** Reads a camera entry into the given camera */
+	void ReadCamera( Collada::Camera& pCamera);
+
+	/** Reads the light library */
+	void ReadLightLibrary();
+
+	/** Reads a light entry into the given light */
+	void ReadLight( Collada::Light& pLight);
+
 	/** Reads the effect library */
 	void ReadEffectLibrary();
 
 	/** Reads an effect entry into the given effect*/
 	void ReadEffect( Collada::Effect& pEffect);
 
+	/** Read sampler properties */
+	void ReadSamplerProperties( Collada::Sampler& pSampler);
+
 	/** Reads an effect entry containing a color or a texture defining that color */
-	void ReadEffectColor( aiColor4D& pColor, std::string& pSampler);
+	void ReadEffectColor( aiColor4D& pColor, Collada::Sampler& pSampler);
+
 	/** Reads an effect entry containing a float */
 	void ReadEffectFloat( float& pFloat);
 
@@ -101,8 +117,8 @@ protected:
 	/** Reads the geometry library contents */
 	void ReadGeometryLibrary();
 
-  /** Reads a geometry from the geometry library. */
-  void ReadGeometry( Collada::Mesh* pMesh);
+	/** Reads a geometry from the geometry library. */
+	void ReadGeometry( Collada::Mesh* pMesh);
 
 	/** Reads a mesh from the geometry library */
 	void ReadMesh( Collada::Mesh* pMesh);
@@ -146,6 +162,9 @@ protected:
 	/** Reads the collada scene */
 	void ReadScene();
 
+	// Processes bind_vertex_input and bind elements
+	void ReadMaterialVertexInputBinding( Collada::SemanticMappingTable& tbl);
+
 protected:
 	/** Aborts the file reading with an exception */
 	void ThrowException( const std::string& pError) const;
@@ -157,7 +176,10 @@ protected:
 	void SkipElement( const char* pElement);
 
 	/** Compares the current xml element name to the given string and returns true if equal */
-	bool IsElement( const char* pName) const { assert( mReader->getNodeType() == irr::io::EXN_ELEMENT); return strcmp( mReader->getNodeName(), pName) == 0; }
+	bool IsElement( const char* pName) const {
+		ai_assert( mReader->getNodeType() == irr::io::EXN_ELEMENT); 
+		return ::strcmp( mReader->getNodeName(), pName) == 0; 
+	}
 
 	/** Tests for the opening tag of the given element, throws an exception if not found */
 	void TestOpening( const char* pName);
@@ -165,14 +187,23 @@ protected:
 	/** Tests for the closing tag of the given element, throws an exception if not found */
 	void TestClosing( const char* pName);
 
-	/** Checks the present element for the presence of the attribute, returns its index or throws an exception if not found */
+	/** Checks the present element for the presence of the attribute, returns its index 
+	    or throws an exception if not found */
 	int GetAttribute( const char* pAttr) const;
 
-	/** Returns the index of the named attribute or -1 if not found. Does not throw, therefore useful for optional attributes */
+	/** Returns the index of the named attribute or -1 if not found. Does not throw,
+	    therefore useful for optional attributes */
 	int TestAttribute( const char* pAttr) const;
 
-	/** Reads the text contents of an element, throws an exception if not given. Skips leading whitespace. */
+	/** Reads the text contents of an element, throws an exception if not given. 
+	    Skips leading whitespace. */
 	const char* GetTextContent();
+
+	/** Reads a single bool from current text content */
+	bool ReadBoolFromTextContent();
+
+	/** Reads a single float from current text content */
+	float ReadFloatFromTextContent();
 
 	/** Calculates the resulting transformation fromm all the given transform steps */
 	aiMatrix4x4 CalculateResultTransform( const std::vector<Collada::Transform>& pTransforms) const;
@@ -181,7 +212,8 @@ protected:
 	Collada::InputType GetTypeForSemantic( const std::string& pSemantic);
 
 	/** Finds the item in the given library by its reference, throws if not found */
-	template <typename Type> const Type& ResolveLibraryReference( const std::map<std::string, Type>& pLibrary, const std::string& pURL) const;
+	template <typename Type> const Type& ResolveLibraryReference(
+		const std::map<std::string, Type>& pLibrary, const std::string& pURL) const;
 
 protected:
 	/** Filename, for a verbose error message */
@@ -217,6 +249,14 @@ protected:
 	/** Material library: surface material by ID */
 	typedef std::map<std::string, Collada::Material> MaterialLibrary;
 	MaterialLibrary mMaterialLibrary;
+
+	/** Light library: surface light by ID */
+	typedef std::map<std::string, Collada::Light> LightLibrary;
+	LightLibrary mLightLibrary;
+
+	/** Camera library: surface material by ID */
+	typedef std::map<std::string, Collada::Camera> CameraLibrary;
+	CameraLibrary mCameraLibrary;
 
 	/** Pointer to the root node. Don't delete, it just points to one of the nodes in the node library. */
 	Collada::Node* mRootNode;

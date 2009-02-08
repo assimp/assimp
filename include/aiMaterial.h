@@ -237,30 +237,34 @@ enum aiAxis
 */
 enum aiTextureType
 {
+	// Set as texture semantic for material properties not related to textures
+	aiTextureType_NONE = 0x0,
+
+
     /** The texture is combined with the result of the diffuse
 	 *  lighting equation.
     */
-    aiTextureType_DIFFUSE = 0x0,
+    aiTextureType_DIFFUSE = 0x1,
 
 	 /** The texture is combined with the result of the specular
 	 *  lighting equation.
     */
-    aiTextureType_SPECULAR = 0x1,
+    aiTextureType_SPECULAR = 0x2,
 
 	 /** The texture is combined with the result of the ambient
 	 *  lighting equation.
     */
-    aiTextureType_AMBIENT = 0x2,
+    aiTextureType_AMBIENT = 0x3,
 
 	 /** The texture is added to the result of the lighting
-	 *  calculation. It isn't influenced by any lighting.
+	 *  calculation. It isn't influenced by lights.
     */
-    aiTextureType_EMISSIVE = 0x3,
+    aiTextureType_EMISSIVE = 0x4,
 
 	 /** The texture is a height map and serves as input for
 	 *  a normal map generator.
     */
-    aiTextureType_HEIGHT = 0x4,
+    aiTextureType_HEIGHT = 0x5,
 
 	 /** The texture is a (tangent space) normal-map.
 	 *
@@ -268,7 +272,7 @@ enum aiTextureType
 	 *  for use with techniques such as Parallax Occlusion Mapping
 	 *  it is registered once as a normalmap.
     */
-    aiTextureType_NORMALS = 0x5,
+    aiTextureType_NORMALS = 0x6,
 
 	 /** The texture defines the glossiness of the material.
 	 *
@@ -277,19 +281,19 @@ enum aiTextureType
 	 *  function define to map the linear color values in the
 	 *  texture to a suitable exponent. Have fun.
     */
-    aiTextureType_SHININESS = 0x6,
+    aiTextureType_SHININESS = 0x7,
 
 	 /** The texture defines a per-pixel opacity.
 	 *
 	 *  Normally 'white' means opaque and 'black' means 
 	 *  'transparency'. Or quite the opposite. Have fun.
     */
-    aiTextureType_OPACITY = 0x7,
+    aiTextureType_OPACITY = 0x8,
 
 
 	 /** This value is not used. It is just here to force the
-	 *  compiler to map this enum to a 32 Bit integer.
-	 */
+	  *  compiler to map this enum to a 32 Bit integer.
+	  */
 	_aiTextureType_Force32Bit = 0x9fffffff
 };
 
@@ -367,6 +371,25 @@ enum aiShadingMode
 	 *  compiler to map this enum to a 32 Bit integer.
 	 */
 	_aiShadingMode_Force32Bit = 0x9fffffff
+};
+
+
+// ---------------------------------------------------------------------------
+/** @brief Defines flags for a texture.
+ *
+ *  See
+*/
+enum aiTextureFlags
+{
+	/** The texture's color values have to be inverted (componentwise 1-n)
+	 */
+	aiTextureFlags_Invert = 0x1,
+
+
+	/** This value is not used. It is just there to force the
+	 *  compiler to map this enum to a 32 Bit integer.
+	 */
+	_aiTextureFlags_Force32Bit = 0x9fffffff
 };
 
 #include "./Compiler/pushpack1.h"
@@ -707,7 +730,8 @@ extern "C" {
  * <b>Default value to be assumed if this key isn't there:</b> n/a<br>
  */
 // ---------------------------------------------------------------------------
-#define AI_MATKEY_TEXTURE(type, N) "$tex.file",type,N
+#define _AI_MATKEY_TEXTURE_BASE "$tex.file"
+#define AI_MATKEY_TEXTURE(type, N) _AI_MATKEY_TEXTURE_BASE,type,N
 
 // for backward compatibility
 #define AI_MATKEY_TEXTURE_DIFFUSE(N)	\
@@ -747,7 +771,8 @@ extern "C" {
  * and AI_MATKEY_MAPPING(type,N) == UV<br>
  */
 // ---------------------------------------------------------------------------
-#define AI_MATKEY_UVWSRC(type, N) "$tex.uvwsrc",type,N
+#define _AI_MATKEY_UVWSRC_BASE "$tex.uvwsrc"
+#define AI_MATKEY_UVWSRC(type, N) _AI_MATKEY_UVWSRC_BASE,type,N
 
 // for backward compatibility
 #define AI_MATKEY_UVWSRC_DIFFUSE(N)	\
@@ -786,7 +811,8 @@ extern "C" {
  * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N)<br>
  */
 // ---------------------------------------------------------------------------
-#define AI_MATKEY_TEXOP(type, N) "$tex.op",type,N
+#define _AI_MATKEY_TEXOP_BASE "$tex.op"
+#define AI_MATKEY_TEXOP(type, N) _AI_MATKEY_TEXOP_BASE,type,N
 
 // for backward compatibility
 #define AI_MATKEY_TEXOP_DIFFUSE(N)	\
@@ -824,7 +850,8 @@ extern "C" {
  * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N)<br>
  */
 // ---------------------------------------------------------------------------
-#define AI_MATKEY_MAPPING(type, N) "$tex.mapping",type,N
+#define _AI_MATKEY_MAPPING_BASE "$tex.mapping"
+#define AI_MATKEY_MAPPING(type, N) _AI_MATKEY_MAPPING_BASE,type,N
 
 // for backward compatibility
 #define AI_MATKEY_MAPPING_DIFFUSE(N)	\
@@ -855,14 +882,16 @@ extern "C" {
 /** @def AI_MATKEY_TEXBLEND (
  * Parameters: type, N<br>
  * Specifies the strength of the <N>th texture of type <type>. This is just
- * a multiplier for the texture's color values.
+ * a multiplier for the texture's color values. It may have any value, even
+ * outside [0..1]
  * <br>
  * <b>Type:</b> float<br>
  * <b>Default value to be assumed if this key isn't there:</b> 1.f<br>
  * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N)<br>
  */
 // ---------------------------------------------------------------------------
-#define AI_MATKEY_TEXBLEND(type, N) "$tex.blend",type,N
+#define _AI_MATKEY_TEXBLEND_BASE "$tex.blend"
+#define AI_MATKEY_TEXBLEND(type, N) _AI_MATKEY_TEXBLEND_BASE,type,N
 
 // for backward compatibility
 #define AI_MATKEY_TEXBLEND_DIFFUSE(N)	\
@@ -900,7 +929,8 @@ extern "C" {
  * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N)<br>
  */
 // ---------------------------------------------------------------------------
-#define AI_MATKEY_MAPPINGMODE_U(type, N) "$tex.mapmodeu",type,N
+#define _AI_MATKEY_MAPPINGMODE_U_BASE "$tex.mapmodeu"
+#define AI_MATKEY_MAPPINGMODE_U(type, N) _AI_MATKEY_MAPPINGMODE_U_BASE,type,N
 
 // for backward compatibility
 #define AI_MATKEY_MAPPINGMODE_U_DIFFUSE(N)	\
@@ -938,7 +968,8 @@ extern "C" {
  * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N)<br>
  */
 // ---------------------------------------------------------------------------
-#define AI_MATKEY_MAPPINGMODE_V(type, N) "$tex.mapmodev",type,N
+#define _AI_MATKEY_MAPPINGMODE_V_BASE "$tex.mapmodev"
+#define AI_MATKEY_MAPPINGMODE_V(type, N) _AI_MATKEY_MAPPINGMODE_V_BASE,type,N
 
 // for backward compatibility
 #define AI_MATKEY_MAPPINGMODE_V_DIFFUSE(N)	\
@@ -976,7 +1007,8 @@ extern "C" {
  * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N)<br>
  */
 // ---------------------------------------------------------------------------
-#define AI_MATKEY_MAPPINGMODE_W(type, N) "$tex.mapmodew",type,N
+#define _AI_MATKEY_MAPPINGMODE_W_BASE "$tex.mapmodew"
+#define AI_MATKEY_MAPPINGMODE_W(type, N) _AI_MATKEY_MAPPINGMODE_W_BASE,type,N
 
 // for backward compatibility
 #define AI_MATKEY_MAPPINGMODE_W_DIFFUSE(N)	\
@@ -1017,7 +1049,8 @@ extern "C" {
  * AI_MATKEY_MAPPING(type,N) != UV<br>
  */
 // ---------------------------------------------------------------------------
-#define AI_MATKEY_TEXMAP_AXIS(type, N) "$tex.mapaxis",type,N
+#define _AI_MATKEY_TEXMAP_AXIS_BASE "$tex.mapaxis"
+#define AI_MATKEY_TEXMAP_AXIS(type, N) _AI_MATKEY_TEXMAP_AXIS_BASE,type,N
 
 // ---------------------------------------------------------------------------
 /** @def AI_MATKEY_UVTRANSFORM 
@@ -1033,7 +1066,8 @@ extern "C" {
  * <b>Note:</b>Transformed 3D texture coordinates are not supported
  */
 // ---------------------------------------------------------------------------
-#define AI_MATKEY_UVTRANSFORM(type, N) "$tex.uvtrafo",type,N
+#define _AI_MATKEY_UVTRANSFORM_BASE "$tex.uvtrafo"
+#define AI_MATKEY_UVTRANSFORM(type, N) _AI_MATKEY_UVTRANSFORM_BASE,type,N
 
 // for backward compatibility
 #define AI_MATKEY_UVTRANSFORM_DIFFUSE(N)	\

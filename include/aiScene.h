@@ -57,23 +57,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------
 /** A node in the imported hierarchy. 
-*
-* Each node has name, a parent node (except for the root node), 
-* a transformation relative to its parent and possibly several child nodes.
-* Simple file formats don't support hierarchical structures - for these formats 
-* the imported scene does consist of only a single root node without children.
-*/
-// ---------------------------------------------------------------------------
+ *
+ * Each node has name, a parent node (except for the root node), 
+ * a transformation relative to its parent and possibly several child nodes.
+ * Simple file formats don't support hierarchical structures - for these formats 
+ * the imported scene does consist of only a single root node without children.
+ */
+// -------------------------------------------------------------------------------
 struct aiNode
 {
 	/** The name of the node. 
-	*
-	* The name might be empty (length of zero) but all nodes which 
-	* need to be accessed afterwards by bones or anims are usually named.
-	*/
+	 *
+	 * The name might be empty (length of zero) but all nodes which 
+	 * need to be accessed afterwards by bones or anims are usually named.
+	 * Multiple nodes may have the same name, but nodes which are accessed
+	 * by bones (see #aiBone and #aiMesh::mBones) *must* be unique.
+	 * 
+	 * Cameras and lights are assigned to a specific node name - if there
+	 * are multiple nodes with this name, they're assigned to each of them.
+	 */
 	C_STRUCT aiString mName;
 
 	/** The transformation relative to the node's parent. */
@@ -137,7 +141,14 @@ struct aiNode
 	 */
 	inline aiNode* FindNode(const aiString& name)
 	{
-		if (mName == name)return this;
+		return FindNode(name.data);
+	}
+
+	/** @override
+	 */
+	inline aiNode* FindNode(const char* name)
+	{
+		if (!::strcmp( mName.data,name))return this;
 		for (unsigned int i = 0; i < mNumChildren;++i)
 		{
 			aiNode* p = mChildren[i]->FindNode(name);
@@ -151,7 +162,7 @@ struct aiNode
 };
 
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------
 /** @def AI_SCENE_FLAGS_INCOMPLETE
  * Specifies that the scene data structure that was imported is not complete.
  * This flag bypasses some internal validations and allows the import 
@@ -203,12 +214,15 @@ struct aiNode
  */
 #define AI_SCENE_FLAGS_TERRAIN 0x16
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------
 /** The root structure of the imported data. 
-* 
-* Everything that was imported from the given file can be accessed from here.
-*/
-// ---------------------------------------------------------------------------
+ * 
+ *  Everything that was imported from the given file can be accessed from here.
+ *  Objects of this class are generally maintained and owned by Assimp, not
+ *  by the caller. You shouldn't want to instance it, nor should you ever try to
+ *  delete a given scene on your own.
+ */
+// -------------------------------------------------------------------------------
 struct aiScene
 {
 

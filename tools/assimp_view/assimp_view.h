@@ -198,7 +198,7 @@ enum EClickPos
 };
 
 #if (!defined AI_VIEW_CAPTION_BASE)
-#	define AI_VIEW_CAPTION_BASE "AssimpView 1.0"  
+#	define AI_VIEW_CAPTION_BASE "Open Asset Import Library : Viewer "  
 #endif // !! AI_VIEW_CAPTION_BASE
 
 //-------------------------------------------------------------------------------
@@ -268,6 +268,10 @@ enum EClickPos
 
 	extern float g_fACMR /*= 3.0f*/;
 	extern IDirect3DQuery9* g_piQuery;
+
+	extern bool g_bPlay						/*= false*/;
+
+	extern double g_dCurrent;
 	}
 
 #endif // !! AV_MAIN_H_INCLUDED

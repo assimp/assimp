@@ -217,12 +217,10 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 						int idx = 1;
 						MaterialHelper* mat = ( MaterialHelper* ) curMat;
 
-						if (curMatFlags & (AI_IRRMESH_MAT_solid_2layer | AI_IRRMESH_MAT_lightmap))
-						{
-							mat->AddProperty(&idx,1,AI_MATKEY_UVWSRC_DIFFUSE(0));
+						if (curMatFlags & (AI_IRRMESH_MAT_solid_2layer | AI_IRRMESH_MAT_lightmap)){
+							mat->AddProperty(&idx,1,AI_MATKEY_UVWSRC_LIGHTMAP(0));
 						}
-						else if (curMatFlags & AI_IRRMESH_MAT_normalmap_solid)
-						{
+						else if (curMatFlags & AI_IRRMESH_MAT_normalmap_solid){
 							mat->AddProperty(&idx,1,AI_MATKEY_UVWSRC_NORMALS(0));
 						}
 					}

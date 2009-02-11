@@ -40,11 +40,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file aiMaterial.inl
- *  @brief Defines the material system of the library
+ *  @brief Defines the C++ getters for the material system
  */
 
 #ifndef AI_MATERIAL_INL_INC
 #define AI_MATERIAL_INL_INC
+
+//! @cond never
 
 // ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::GetTexture( aiTextureType type,
@@ -74,8 +76,8 @@ inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 		if (prop->mDataLength < sizeof(Type)*iNum)
 			return AI_FAILURE;
 
-		if (::strcmp(prop->mData,(char*)aiPTI_Buffer)!=0)
-			return AI_FAILURE;
+	//	if (::strcmp(prop->mData,(char*)aiPTI_Buffer)!=0)
+	//		return AI_FAILURE;
 
 		iNum = std::min((size_t)iNum,prop->mDataLength / sizeof(Type));
 		::memcpy(pOut,prop->mData,iNum * sizeof(Type));
@@ -148,5 +150,7 @@ inline aiReturn aiMaterial::Get<aiString>(const char* pKey,unsigned int type,
 {
 	return aiGetMaterialString(this,pKey,type,idx,&pOut);
 }
+
+//! @endcond
 
 #endif //! AI_MATERIAL_INL_INC

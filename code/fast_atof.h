@@ -107,7 +107,8 @@ inline unsigned int strtol16( const char* in, const char** out=0)
 }
 
 // ------------------------------------------------------------------------------------
-// convert just one hex digit
+// Convert just one hex digit
+// Return value is 0xffffffff if the input is not hex
 // ------------------------------------------------------------------------------------
 inline unsigned int HexDigitToDecimal(char in)
 {
@@ -124,6 +125,16 @@ inline unsigned int HexDigitToDecimal(char in)
 	// return value is 0xffffffff if the input is not a hex digit
 	return out;
 }
+
+// ------------------------------------------------------------------------------------
+// Convert a hex-encoded octet (2 characters processed)
+// Return value is 0xffffffff if the input is not hex
+// ------------------------------------------------------------------------------------
+inline uint8_t HexOctetToDecimal(const char* in)
+{
+	return ((uint8_t)HexDigitToDecimal(in[0])<<4)+(uint8_t)HexDigitToDecimal(in[1]);
+}
+
 
 // ------------------------------------------------------------------------------------
 // signed variant of strtol10

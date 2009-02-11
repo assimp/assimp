@@ -142,13 +142,13 @@ class AssetHelper
 					piEffect			(NULL),
 					piVBNormals			(NULL),
 					piDiffuseTexture	(NULL),
-					piDiffuseTexture2	(NULL),
 					piSpecularTexture	(NULL),
 					piAmbientTexture	(NULL),
 					piNormalTexture		(NULL),
 					piEmissiveTexture	(NULL),
 					piOpacityTexture	(NULL),
 					piShininessTexture	(NULL),
+					piLightmapTexture	(NULL),
 					pvOriginalNormals	(NULL),
 					bSharedFX(false) {}
 
@@ -180,13 +180,13 @@ class AssetHelper
 
 				// material textures
 				IDirect3DTexture9* piDiffuseTexture;
-				IDirect3DTexture9* piDiffuseTexture2;
 				IDirect3DTexture9* piSpecularTexture;
 				IDirect3DTexture9* piAmbientTexture;
 				IDirect3DTexture9* piEmissiveTexture;
 				IDirect3DTexture9* piNormalTexture;
 				IDirect3DTexture9* piOpacityTexture;
 				IDirect3DTexture9* piShininessTexture;
+				IDirect3DTexture9* piLightmapTexture;
 
 				// material colors
 				D3DXVECTOR4 vDiffuseColor;

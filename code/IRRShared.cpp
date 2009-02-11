@@ -342,7 +342,7 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 					}
 
 					// Up to 4 texture channels are supported
-					else if (prop.name == "Texture1")
+					if (prop.name == "Texture1")
 					{
 						// Always accept the primary texture channel
 						++cnt;
@@ -356,7 +356,7 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 						{
 							++cnt;
 							s.Set(prop.value);
-							mat->AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(1));
+							mat->AddProperty(&s,AI_MATKEY_TEXTURE_LIGHTMAP(0));
 
 							// set the corresponding material flag
 							matFlags |= AI_IRRMESH_EXTRA_2ND_TEXTURE;
@@ -366,31 +366,26 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 						{
 							++cnt;
 							s.Set(prop.value);
-							mat->AddProperty(&s,AI_MATKEY_TEXTURE_NORMALS(1));
+							mat->AddProperty(&s,AI_MATKEY_TEXTURE_NORMALS(0));
 
 							// set the corresponding material flag
 							matFlags |= AI_IRRMESH_EXTRA_2ND_TEXTURE;
 						}
+						else DefaultLogger::get()->warn("IRRmat: Skipping second texture");
 					}
 					else if (prop.name == "Texture3")
 					{
-						// We don't process the third texture channel as Irrlicht
-						// does not seem to use it.
-#if 0
+						// Irrlicht does not seem to use these channels.
 						++cnt;
 						s.Set(prop.value);
-						mat->AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(2));
-#endif
+						mat->AddProperty(&s,AI_MATKEY_TEXTURE_UNKNOWN(0));
 					}
 					else if (prop.name == "Texture4" )
 					{
-						// We don't process the fourth texture channel as Irrlicht
-						// does not seem to use it.
-#if 0
+						// Irrlicht does not seem to use these channels.
 						++cnt;
 						s.Set(prop.value);
-						mat->AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(3));
-#endif
+						mat->AddProperty(&s,AI_MATKEY_TEXTURE_UNKNOWN(1));
 					}
 
 					// Texture mapping options
@@ -403,20 +398,26 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 					else if (prop.name == "TextureWrap2" && cnt >= 2)
 					{
 						int map = ConvertMappingMode(prop.value);
-						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_DIFFUSE(1));
-						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_DIFFUSE(1));	
+						if (matFlags & (AI_IRRMESH_MAT_solid_2layer | AI_IRRMESH_MAT_lightmap)) {
+							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_LIGHTMAP(1));
+							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_LIGHTMAP(1));	
+						}
+						else if (matFlags & (AI_IRRMESH_MAT_normalmap_solid)) {
+							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_NORMALS(1));
+							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_NORMALS(1));	
+						}
 					}
 					else if (prop.name == "TextureWrap3" && cnt >= 3)
 					{
 						int map = ConvertMappingMode(prop.value);
-						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_DIFFUSE(2));
-						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_DIFFUSE(2));
+						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_UNKNOWN(0));
+						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_UNKNOWN(0));
 					}
 					else if (prop.name == "TextureWrap4" && cnt >= 4)
 					{
 						int map = ConvertMappingMode(prop.value);
-						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_DIFFUSE(3));
-						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_DIFFUSE(3));
+						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_UNKNOWN(1));
+						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_UNKNOWN(1));
 					}
 				}
 			}
@@ -451,8 +452,8 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 						{
 							f = 4.f;
 						}
-						mat->AddProperty( &f, 1, AI_MATKEY_TEXBLEND_DIFFUSE(cnt-1));
-						mat->AddProperty( &op,1, AI_MATKEY_TEXOP_DIFFUSE(cnt-1));
+						mat->AddProperty( &f, 1, AI_MATKEY_TEXBLEND_LIGHTMAP(0));
+						mat->AddProperty( &op,1, AI_MATKEY_TEXOP_LIGHTMAP(0));
 					}
 
 					return mat;

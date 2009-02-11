@@ -138,9 +138,22 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, a
 
 		if (mapping != aiTextureMapping_UV)
 		{
-			// Setup the main axis (the enum values map one to one)
-			ai_assert(aiAxis_X == Texture::AXIS_X);
-			pcMat->AddProperty<int>((int*)&(*it).majorAxis,1,AI_MATKEY_TEXMAP_AXIS(type,cur));
+			// Setup the main axis 
+			aiVector3D v;
+			switch ((*it).majorAxis)
+			{
+				case Texture::AXIS_X:
+					v = aiVector3D(1.f,0.f,0.f);
+					break;
+				case Texture::AXIS_Y:
+					v = aiVector3D(0.f,1.f,0.f);
+					break;
+				default: // case Texture::AXIS_Z:
+					v = aiVector3D(0.f,0.f,1.f);
+					break;
+			}
+
+			pcMat->AddProperty(&v,1,AI_MATKEY_TEXMAP_AXIS(type,cur));
 
 			// Setup UV scalings for cylindric and spherical projections
 			if (mapping == aiTextureMapping_CYLINDER || mapping == aiTextureMapping_SPHERE)
@@ -164,17 +177,14 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, a
 			for (ClipList::iterator end = mClips.end(); clip != end; ++clip)
 			{
 				if ((*clip).idx == temp)
-				{
 					break;
-				}
+				
 			}
-			if (mClips.end() == clip)
-			{
+			if (mClips.end() == clip)	{
 				DefaultLogger::get()->error("LWO2: Clip index is out of bounds");
 				temp = 0;
 			}
-			if (Clip::UNSUPPORTED == (*clip).type)
-			{
+			if (Clip::UNSUPPORTED == (*clip).type)	{
 				DefaultLogger::get()->error("LWO2: Clip type is not supported");
 				continue;
 			}
@@ -184,8 +194,7 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, a
 		else 
 		{
 			std::string ss = (*it).mFileName;
-			if (!ss.length())
-			{
+			if (!ss.length()) {
 				DefaultLogger::get()->error("LWOB: Empty file name");
 				continue;
 			}
@@ -304,6 +313,7 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 	HandleTextures(pcMat,surf.mGlossinessTextures,aiTextureType_SHININESS);
 	HandleTextures(pcMat,surf.mBumpTextures,aiTextureType_HEIGHT);
 	HandleTextures(pcMat,surf.mOpacityTextures,aiTextureType_OPACITY);
+	HandleTextures(pcMat,surf.mReflectionTextures,aiTextureType_REFLECTION);
 
 	// now we need to know which shader we must use
 	// iterate through the shader list of the surface and 
@@ -315,7 +325,7 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 		if ((*it).functionName == "LW_SuperCelShader" ||
 			(*it).functionName == "AH_CelShader")
 		{
-			DefaultLogger::get()->info("Mapping LW_SuperCelShader/AH_CelShader "
+			DefaultLogger::get()->info("LWO2: Mapping LW_SuperCelShader/AH_CelShader "
 				"to aiShadingMode_Toon");
 
 			m = aiShadingMode_Toon;
@@ -324,7 +334,7 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 		else if ((*it).functionName == "LW_RealFresnel" ||
 			(*it).functionName == "LW_FastFresnel")
 		{
-			DefaultLogger::get()->info("Mapping LW_RealFresnel/LW_FastFresnel "
+			DefaultLogger::get()->info("LWO2: Mapping LW_RealFresnel/LW_FastFresnel "
 				"to aiShadingMode_Fresnel");
 
 			m = aiShadingMode_Fresnel;
@@ -367,8 +377,7 @@ void LWOImporter::FindUVChannels(LWO::TextureList& list, LWO::Layer& layer,
 				// check whether we have this channel already
 				for (unsigned int m = 0; m < next;++m)
 				{
-					if (i == out[m])
-					{
+					if (i == out[m])	{
 						(*it).mRealUVIndex = m;
 					}
 				}
@@ -383,7 +392,7 @@ void LWOImporter::FindUVChannels(LWO::TextureList& list, LWO::Layer& layer,
 			}
 		}
 		if (0xffffffff == (*it).mRealUVIndex)
-			DefaultLogger::get()->error("LWO2: Unable to find matching UV channel for a texture");
+			DefaultLogger::get()->error("LWO2: Unable to find matching UV channel for texture");
 	}
 }
 
@@ -400,6 +409,7 @@ void LWOImporter::FindUVChannels(LWO::Surface& surf, LWO::Layer& layer,
 	FindUVChannels(surf.mGlossinessTextures,layer,out,next);
 	FindUVChannels(surf.mOpacityTextures,layer,out,next);
 	FindUVChannels(surf.mBumpTextures,layer,out,next);
+	FindUVChannels(surf.mReflectionTextures,layer,out,next);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -560,6 +570,8 @@ void LWOImporter::LoadLWO2TextureBlock(LE_NCONST IFF::SubChunkHeader* head, unsi
 		listRef = &surf.mBumpTextures;break;
 	case AI_LWO_TRAN:
 		listRef = &surf.mOpacityTextures;break;
+	case AI_LWO_REFL:
+		listRef = &surf.mReflectionTextures;break;
 	default:
 		DefaultLogger::get()->warn("LWO2: Encountered unknown texture type");
 		return;
@@ -623,8 +635,7 @@ void LWOImporter::LoadLWO2ShaderBlock(LE_NCONST IFF::SubChunkHeader* head, unsig
 	for (ShaderList::iterator it = surf.mShaders.begin();
 		it != surf.mShaders.end(); ++it)
 	{
-		if (::strcmp(shader.ordinal.c_str(),(*it).ordinal.c_str()) < 0)
-		{
+		if (::strcmp(shader.ordinal.c_str(),(*it).ordinal.c_str()) < 0)	{
 			surf.mShaders.insert(it,shader);
 			return;
 		}

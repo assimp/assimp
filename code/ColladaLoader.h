@@ -137,6 +137,9 @@ protected:
 	/** Stores all cameras in the given scene */
 	void StoreSceneCameras( aiScene* pScene);
 
+	/** Stores all textures in the given scene */
+	void StoreSceneTextures( aiScene* pScene);
+
 	/** Constructs materials from the collada material definitions */
 	void BuildMaterials( const ColladaParser& pParser, aiScene* pScene);
 
@@ -181,6 +184,9 @@ protected:
 
 	/** Temporary light list */
 	std::vector<aiLight*> mLights;
+
+	/** Temporary texture list */
+	std::vector<aiTexture*> mTextures;
 };
 
 } // end of namespace Assimp

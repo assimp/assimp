@@ -39,6 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
+/** @file SceneAnimator.cpp
+ *  @brief Implementation of the utility class SceneAnimator
+ */
+
 #include "stdafx.h"
 #include "assimp_view.h"
 
@@ -52,6 +56,18 @@ SceneAnimator::SceneAnimator( const aiScene* pScene, size_t pAnimIndex)
 	mCurrentAnimIndex = -1;
 	mAnimEvaluator = NULL;
 	mRootNode = NULL;
+
+	// build the nodes-for-bones table
+	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+	{
+		const aiMesh* mesh = pScene->mMeshes[i];
+		for (unsigned int n = 0; n < mesh->mNumBones;++n)
+		{
+			const aiBone* bone = mesh->mBones[n];
+
+			mBoneNodesByName[bone->mName.data] = pScene->mRootNode->FindNode(bone->mName);
+		}
+	}
 
 	// changing the current animation also creates the node tree for this animation
 	SetAnimIndex( pAnimIndex);
@@ -109,9 +125,9 @@ void SceneAnimator::Calculate( double pTime)
 
 // ------------------------------------------------------------------------------------------------
 // Retrieves the most recent local transformation matrix for the given node. 
-const aiMatrix4x4& SceneAnimator::GetLocalTransform( const std::string& pNodeName) const
+const aiMatrix4x4& SceneAnimator::GetLocalTransform( const aiNode* node) const
 {
-	NodeMap::const_iterator it = mNodesByName.find( pNodeName);
+	NodeMap::const_iterator it = mNodesByName.find( node);
 	if( it == mNodesByName.end())
 		return mIdentityMatrix;
 
@@ -120,9 +136,9 @@ const aiMatrix4x4& SceneAnimator::GetLocalTransform( const std::string& pNodeNam
 
 // ------------------------------------------------------------------------------------------------
 // Retrieves the most recent global transformation matrix for the given node. 
-const aiMatrix4x4& SceneAnimator::GetGlobalTransform( const std::string& pNodeName) const
+const aiMatrix4x4& SceneAnimator::GetGlobalTransform( const aiNode* node) const
 {
-	NodeMap::const_iterator it = mNodesByName.find( pNodeName);
+	NodeMap::const_iterator it = mNodesByName.find( node);
 	if( it == mNodesByName.end())
 		return mIdentityMatrix;
 
@@ -142,7 +158,7 @@ const std::vector<aiMatrix4x4>& SceneAnimator::GetBoneMatrices( const aiNode* pN
 	mTransforms.resize( mesh->mNumBones, aiMatrix4x4());
 
 	// calculate the mesh's inverse global transform
-	aiMatrix4x4 globalInverseMeshTransform = GetGlobalTransform( std::string( pNode->mName.data));
+	aiMatrix4x4 globalInverseMeshTransform = GetGlobalTransform( pNode);
 	globalInverseMeshTransform.Inverse();
 
 	// Bone matrices transform from mesh coordinates in bind pose to mesh coordinates in skinned pose
@@ -150,7 +166,7 @@ const std::vector<aiMatrix4x4>& SceneAnimator::GetBoneMatrices( const aiNode* pN
 	for( size_t a = 0; a < mesh->mNumBones; ++a)
 	{
 		const aiBone* bone = mesh->mBones[a];
-		const aiMatrix4x4& currentGlobalTransform = GetGlobalTransform( std::string( bone->mName.data));
+		const aiMatrix4x4& currentGlobalTransform = GetGlobalTransform( mBoneNodesByName[ bone->mName.data ]);
 		mTransforms[a] = globalInverseMeshTransform * currentGlobalTransform * bone->mOffsetMatrix;
 	}
 
@@ -165,7 +181,7 @@ SceneAnimNode* SceneAnimator::CreateNodeTree( aiNode* pNode, SceneAnimNode* pPar
 	// create a node
 	SceneAnimNode* internalNode = new SceneAnimNode( pNode->mName.data);
 	internalNode->mParent = pParent;
-	mNodesByName[std::string( pNode->mName.data)] = internalNode;
+	mNodesByName[pNode] = internalNode;
 
 	// copy its transformation
 	internalNode->mLocalTransform = pNode->mTransformation;

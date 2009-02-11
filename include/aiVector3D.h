@@ -92,7 +92,7 @@ public:
 	 *  @param pY Y component
 	 *  @param pZ Z component
 	 */
-	void Set( float pX, float pY, float pZ);
+	void Set( float pX, float pY, float pZ = 0.f);
 
 	/** @brief Get the squared length of the vector
 	 *  @return Square length

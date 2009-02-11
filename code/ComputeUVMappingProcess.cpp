@@ -47,6 +47,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+namespace {
+
+	const static aiVector3D base_axis_y(0.f,1.f,0.f);
+	const static aiVector3D base_axis_x(1.f,0.f,0.f);
+	const static aiVector3D base_axis_z(0.f,0.f,1.f);
+	const static float angle_epsilon = 0.95f;
+};
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -67,40 +74,6 @@ ComputeUVMappingProcess::~ComputeUVMappingProcess()
 bool ComputeUVMappingProcess::IsActive( unsigned int pFlags) const
 {
 	return	(pFlags & aiProcess_GenUVCoords) != 0;
-}
-
-// ------------------------------------------------------------------------------------------------
-// Compute the AABB of a mesh
-inline void FindAABB (aiMesh* mesh, aiVector3D& min, aiVector3D& max)
-{
-	min = aiVector3D (10e10f,  10e10f, 10e10f);
-	max = aiVector3D (-10e10f,-10e10f,-10e10f);
-	for (unsigned int i = 0;i < mesh->mNumVertices;++i)
-	{
-		const aiVector3D& v = mesh->mVertices[i];
-		min.x = ::std::min(v.x,min.x);
-		min.y = ::std::min(v.y,min.y);
-		min.z = ::std::min(v.z,min.z);
-		max.x = ::std::max(v.x,max.x);
-		max.y = ::std::max(v.y,max.y);
-		max.z = ::std::max(v.z,max.z);
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-// Helper function to determine the 'real' center of a mesh
-inline void FindMeshCenter (aiMesh* mesh, aiVector3D& out, aiVector3D& min, aiVector3D& max)
-{
-	FindAABB(mesh,min,max);
-	out = min + (max-min)*0.5f;
-}
-
-// ------------------------------------------------------------------------------------------------
-// Helper function to determine the 'real' center of a mesh
-inline void FindMeshCenter (aiMesh* mesh, aiVector3D& out)
-{
-	aiVector3D min,max;
-	FindMeshCenter(mesh,out,min,max);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -208,48 +181,75 @@ void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ComputeUVMappingProcess::ComputeSphereMapping(aiMesh* mesh,aiAxis axis, aiVector3D* out)
+void ComputeUVMappingProcess::ComputeSphereMapping(aiMesh* mesh,const aiVector3D& axis, aiVector3D* out)
 {
-	aiVector3D center;
-	FindMeshCenter (mesh, center);
-	
-	// For each point get a normalized projection vector in the sphere,
-	// get its longitude and latitude and map them to their respective
-	// UV axes. Problems occur around the poles ... unsolvable.
-	//
-	// The spherical coordinate system looks like this:
-	// x = cos(lon)*cos(lat)
-	// y = sin(lon)*cos(lat)
-	// z = sin(lat)
-	// 
-	// Thus we can derive:
-	// lat  = arcsin (z)
-	// lon  = arctan (y/x)
+	aiVector3D center, min, max;
 
-	for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)
-	{
-		const aiVector3D diff = (mesh->mVertices[pnt]-center).Normalize();
-		float lat, lon;
+	// If the axis is one of x,y,z run a faster code path. It's worth the extra effort ...
+	// currently the mapping axis will always be one of x,y,z, except if the
+	// PretransformVertices step is used (it transforms the meshes into worldspace, 
+	// thus changing the mapping axis)
+	if (axis * base_axis_x >= angle_epsilon)	{
+		FindMeshCenter(mesh, center, min, max);
 
-		switch (axis)
+		// For each point get a normalized projection vector in the sphere,
+		// get its longitude and latitude and map them to their respective
+		// UV axes. Problems occur around the poles ... unsolvable.
+		//
+		// The spherical coordinate system looks like this:
+		// x = cos(lon)*cos(lat)
+		// y = sin(lon)*cos(lat)
+		// z = sin(lat)
+		// 
+		// Thus we can derive:
+		// lat  = arcsin (z)
+		// lon  = arctan (y/x)
+		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	
 		{
-		case aiAxis_X:
-			lat = asin  (diff.x);
-			lon = atan2 (diff.z, diff.y);
-			break;
-		case aiAxis_Y:
-			lat = asin  (diff.y);
-			lon = atan2 (diff.x, diff.z);
-			break;
-		case aiAxis_Z:
-			lat = asin  (diff.z);
-			lon = atan2 (diff.y, diff.x);
-			break;
+			const aiVector3D diff = (mesh->mVertices[pnt]-center).Normalize();
+			out[pnt] = aiVector3D((atan2 (diff.z, diff.y) + (float)AI_MATH_PI ) / (float)AI_MATH_TWO_PI,
+				(asin  (diff.x) + (float)AI_MATH_HALF_PI) / (float)AI_MATH_PI, 0.f);
 		}
-		out[pnt] = aiVector3D((lon + (float)AI_MATH_PI ) / (float)AI_MATH_TWO_PI,
-			(lat + (float)AI_MATH_HALF_PI) / (float)AI_MATH_PI, 0.f);
 	}
+	else if (axis * base_axis_y >= angle_epsilon)	{
+		FindMeshCenter(mesh, center, min, max);
 
+		// ... just the same again
+		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	
+		{
+			const aiVector3D diff = (mesh->mVertices[pnt]-center).Normalize();
+			out[pnt] = aiVector3D((atan2 (diff.x, diff.z) + (float)AI_MATH_PI ) / (float)AI_MATH_TWO_PI,
+				(asin  (diff.y) + (float)AI_MATH_HALF_PI) / (float)AI_MATH_PI, 0.f);
+		}
+	}
+	else if (axis * base_axis_z >= angle_epsilon)	{
+		FindMeshCenter(mesh, center, min, max);
+
+		// ... just the same again
+		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	
+		{
+			const aiVector3D diff = (mesh->mVertices[pnt]-center).Normalize();
+			out[pnt] = aiVector3D((atan2 (diff.y, diff.x) + (float)AI_MATH_PI ) / (float)AI_MATH_TWO_PI,
+				(asin  (diff.z) + (float)AI_MATH_HALF_PI) / (float)AI_MATH_PI, 0.f);
+		}
+	}
+	// slower code path in case the mapping axis is not one of the coordinate system axes
+	else
+	{
+		aiMatrix4x4 mTrafo;
+		aiMatrix4x4::FromToMatrix(axis,base_axis_y,mTrafo);
+		FindMeshCenterTransformed(mesh, center, min, max,mTrafo);
+
+		// again the same, except we're applying a transformation now
+		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	
+		{
+			const aiVector3D diff = ((mTrafo*mesh->mVertices[pnt])-center).Normalize();
+			out[pnt] = aiVector3D((atan2 (diff.y, diff.x) + (float)AI_MATH_PI ) / (float)AI_MATH_TWO_PI,
+				(asin  (diff.z) + (float)AI_MATH_HALF_PI) / (float)AI_MATH_PI, 0.f);
+		}
+	}
+	
+	
 	// Now find and remove UV seams. A seam occurs if a face has a tcoord
 	// close to zero on the one side, and a tcoord close to one on the
 	// other side.
@@ -257,47 +257,71 @@ void ComputeUVMappingProcess::ComputeSphereMapping(aiMesh* mesh,aiAxis axis, aiV
 }
 
 // ------------------------------------------------------------------------------------------------
-void ComputeUVMappingProcess::ComputeCylinderMapping(aiMesh* mesh,aiAxis axis, aiVector3D* out)
+void ComputeUVMappingProcess::ComputeCylinderMapping(aiMesh* mesh,const aiVector3D& axis, aiVector3D* out)
 {
 	aiVector3D center, min, max;
-	FindMeshCenter(mesh, center, min, max);
 
-	ai_assert(0 == aiAxis_X);
-	const float diff = max[axis] - min[axis];
-	if (!diff)
-	{
-		DefaultLogger::get()->error("Can't compute cylindrical mapping, the mesh is "
-			"flat in the requested axis");
+	// If the axis is one of x,y,z run a faster code path. It's worth the extra effort ...
+	// currently the mapping axis will always be one of x,y,z, except if the
+	// PretransformVertices step is used (it transforms the meshes into worldspace, 
+	// thus changing the mapping axis)
+	if (axis * base_axis_x >= angle_epsilon)	{
+		FindMeshCenter(mesh, center, min, max);
+		const float diff = max.x - min.x;
 
-		return;
-	}
+		// If the main axis is 'z', the z coordinate of a point 'p' is mapped 
+		// directly to the texture V axis. The other axis is derived from
+		// the angle between ( p.x - c.x, p.y - c.y ) and (1,0), where
+		// 'c' is the center point of the mesh.
+		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
+			const aiVector3D& pos = mesh->mVertices[pnt];
+			aiVector3D& uv  = out[pnt];
 
-	// If the main axis is 'z', the z coordinate of a point 'p' is mapped 
-	// directly to the texture V axis. The other axis is derived from
-	// the angle between ( p.x - c.x, p.y - c.y ) and (1,0), where
-	// 'c' is the center point of the mesh.
-	for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)
-	{
-		const aiVector3D& pos = mesh->mVertices[pnt];
-		aiVector3D& uv  = out[pnt];
-
-		switch (axis)
-		{
-		case aiAxis_X:
 			uv.y = (pos.x - min.x) / diff;
-			uv.x = atan2 ( pos.z - center.z, pos.y - center.y);
-			break;
-		case aiAxis_Y:
-			uv.y = (pos.y - min.y) / diff;
-			uv.x = atan2 ( pos.x - center.x, pos.z - center.z);
-			break;
-		case aiAxis_Z:
-			uv.y = (pos.z - min.z) / diff;
-			uv.x = atan2 ( pos.y - center.y, pos.x - center.x);
-			break;
+			uv.x = (atan2 ( pos.z - center.z, pos.y - center.y) +(float)AI_MATH_PI ) / (float)AI_MATH_TWO_PI;
 		}
-		uv.x = (uv.x +(float)AI_MATH_PI ) / (float)AI_MATH_TWO_PI;
-		uv.z = 0.f;
+	}
+	else if (axis * base_axis_y >= angle_epsilon)	{
+		FindMeshCenter(mesh, center, min, max);
+		const float diff = max.y - min.y;
+
+		// just the same ...
+		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
+			const aiVector3D& pos = mesh->mVertices[pnt];
+			aiVector3D& uv  = out[pnt];
+
+			uv.y = (pos.y - min.y) / diff;
+			uv.x = (atan2 ( pos.x - center.x, pos.z - center.z) +(float)AI_MATH_PI ) / (float)AI_MATH_TWO_PI;
+		}
+	}
+	else if (axis * base_axis_z >= angle_epsilon)	{
+		FindMeshCenter(mesh, center, min, max);
+		const float diff = max.z - min.z;
+
+		// just the same ...
+		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
+			const aiVector3D& pos = mesh->mVertices[pnt];
+			aiVector3D& uv  = out[pnt];
+
+			uv.y = (pos.z - min.z) / diff;
+			uv.x = (atan2 ( pos.y - center.y, pos.x - center.x) +(float)AI_MATH_PI ) / (float)AI_MATH_TWO_PI;
+		}
+	}
+	// slower code path in case the mapping axis is not one of the coordinate system axes
+	else {
+		aiMatrix4x4 mTrafo;
+		aiMatrix4x4::FromToMatrix(axis,base_axis_y,mTrafo);
+		FindMeshCenterTransformed(mesh, center, min, max,mTrafo);
+		const float diff = max.y - min.y;
+
+		// again the same, except we're applying a transformation now
+		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt){
+			const aiVector3D pos = mTrafo* mesh->mVertices[pnt];
+			aiVector3D& uv  = out[pnt];
+
+			uv.y = (pos.y - min.y) / diff;
+			uv.x = (atan2 ( pos.x - center.x, pos.z - center.z) +(float)AI_MATH_PI ) / (float)AI_MATH_TWO_PI;
+		}
 	}
 
 	// Now find and remove UV seams. A seam occurs if a face has a tcoord
@@ -307,61 +331,62 @@ void ComputeUVMappingProcess::ComputeCylinderMapping(aiMesh* mesh,aiAxis axis, a
 }
 
 // ------------------------------------------------------------------------------------------------
-void ComputeUVMappingProcess::ComputePlaneMapping(aiMesh* mesh,aiAxis axis, aiVector3D* out)
+void ComputeUVMappingProcess::ComputePlaneMapping(aiMesh* mesh,const aiVector3D& axis, aiVector3D* out)
 {
-	aiVector3D center, min, max;
-	FindMeshCenter(mesh, center, min, max);
-
 	float diffu,diffv;
+	aiVector3D center, min, max;
 
-	switch (axis)
-	{
-		case aiAxis_X:
-			diffu = max.z - min.z;
-			diffv = max.y - min.y;
-			break;
-		case aiAxis_Y:
-			diffu = max.x - min.x;
-			diffv = max.z - min.z;
-			break;
-		case aiAxis_Z:
-			diffu = max.y - min.y;
-			diffv = max.z - min.z;
-			break;
-	}
-	
-	if (!diffu || !diffv)
-	{
-		DefaultLogger::get()->error("Can't compute plane mapping, the mesh is "
-			"flat in the requested axis");
-		return;
-	}
+	// If the axis is one of x,y,z run a faster code path. It's worth the extra effort ...
+	// currently the mapping axis will always be one of x,y,z, except if the
+	// PretransformVertices step is used (it transforms the meshes into worldspace, 
+	// thus changing the mapping axis)
+	if (axis * base_axis_x >= angle_epsilon)	{
+		FindMeshCenter(mesh, center, min, max);
+		diffu = max.z - min.z;
+		diffv = max.y - min.y;
 
-	// That's rather simple. We just project the vertices onto a plane
-	// that lies on the two coordinate aces orthogonal to the main axis
-	for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)
-	{
-		const aiVector3D& pos = mesh->mVertices[pnt];
-		aiVector3D& uv  = out[pnt];
-
-		switch (axis)
-		{
-		case aiAxis_X:
-			uv.x = (pos.z - min.z) / diffu;
-			uv.y = (pos.y - min.y) / diffv;
-			break;
-		case aiAxis_Y:
-			uv.x = (pos.x - min.x) / diffu;
-			uv.y = (pos.z - min.z) / diffv;
-			break;
-		case aiAxis_Z:
-			uv.x = (pos.y - min.y) / diffu;
-			uv.y = (pos.x - min.x) / diffv;
-			break;
+		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
+			const aiVector3D& pos = mesh->mVertices[pnt];
+			out[pnt].Set((pos.z - min.z) / diffu,(pos.y - min.y) / diffv);
 		}
-		uv.z = 0.f;
+	}
+	else if (axis * base_axis_y >= angle_epsilon)	{
+		FindMeshCenter(mesh, center, min, max);
+		diffu = max.x - min.x;
+		diffv = max.z - min.z;
+
+		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
+			const aiVector3D& pos = mesh->mVertices[pnt];
+			out[pnt].Set((pos.x - min.x) / diffu,(pos.z - min.z) / diffv);
+		}
+	}
+	else if (axis * base_axis_z >= angle_epsilon)	{
+		FindMeshCenter(mesh, center, min, max);
+		diffu = max.y - min.y;
+		diffv = max.z - min.z;
+
+		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
+			const aiVector3D& pos = mesh->mVertices[pnt];
+			out[pnt].Set((pos.y - min.y) / diffu,(pos.x - min.x) / diffv);
+		}
+	}
+	// slower code path in case the mapping axis is not one of the coordinate system axes
+	else
+	{
+		aiMatrix4x4 mTrafo;
+		aiMatrix4x4::FromToMatrix(axis,base_axis_y,mTrafo);
+		FindMeshCenterTransformed(mesh, center, min, max,mTrafo);
+		diffu = max.x - min.x;
+		diffv = max.z - min.z;
+
+		// again the same, except we're applying a transformation now
+		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
+			const aiVector3D pos = mTrafo * mesh->mVertices[pnt];
+			out[pnt].Set((pos.x - min.x) / diffu,(pos.z - min.z) / diffv);
+		}
 	}
 
+	// shouldn't be necessary to remove UV seams ...
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -416,9 +441,8 @@ void ComputeUVMappingProcess::Execute( aiScene* pScene)
 						if (prop2->mSemantic != prop->mSemantic || prop2->mIndex != prop->mIndex)
 							continue;
 
-						if ( !::strcmp( prop2->mKey.data, "$tex.mapaxis"))
-						{
-							info.axis = *((aiAxis*)prop2->mData);
+						if ( !::strcmp( prop2->mKey.data, "$tex.mapaxis"))	{
+							info.axis = *((aiVector3D*)prop2->mData);
 							break;
 						}
 					}

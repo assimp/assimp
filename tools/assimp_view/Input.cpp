@@ -71,8 +71,6 @@ void HandleMouseInputFPS( void )
 			D3DXMatrixRotationAxis( &matRotation, (D3DXVECTOR3*)& g_sCamera.vRight, D3DXToRadian((float)nYDiff / 6.0f));
 			D3DXVec3TransformCoord( (D3DXVECTOR3*)&g_sCamera.vLookAt, (D3DXVECTOR3*)& g_sCamera.vLookAt, &matRotation );
 			D3DXVec3TransformCoord( (D3DXVECTOR3*)&g_sCamera.vUp, (D3DXVECTOR3*)&g_sCamera.vUp, &matRotation );
-			
-			CMeshRenderer::Instance().SetRotationChangedFlag();
 			}
 
 		if( 0 != nXDiff )
@@ -81,8 +79,6 @@ void HandleMouseInputFPS( void )
 			D3DXMatrixRotationAxis( &matRotation, (D3DXVECTOR3*)&g_sCamera.vUp, D3DXToRadian((float)nXDiff / 6.0f) );
 			D3DXVec3TransformCoord( (D3DXVECTOR3*)&g_sCamera.vLookAt, (D3DXVECTOR3*)&g_sCamera.vLookAt, &matRotation );
 			D3DXVec3TransformCoord( (D3DXVECTOR3*)&g_sCamera.vRight,(D3DXVECTOR3*) &g_sCamera.vRight, &matRotation );
-			
-			CMeshRenderer::Instance().SetRotationChangedFlag();
 			}
 		}
 
@@ -256,8 +252,6 @@ void HandleMouseInputLocal( void )
 				aiVector3D v = aiVector3D(1.0f,0.0f,0.0f);
 				D3DXMatrixRotationAxis( (D3DXMATRIX*) &matWorld, (D3DXVECTOR3*)&v, D3DXToRadian((float)nYDiff / 2.0f));
 				g_mWorldRotate = g_mWorldRotate * matWorld;
-
-				CMeshRenderer::Instance().SetRotationChangedFlag();
 				}
 
 			if( 0 != nXDiff && g_eClick != EClickPos_CircleVert)
@@ -265,8 +259,6 @@ void HandleMouseInputLocal( void )
 				aiVector3D v = aiVector3D(0.0f,1.0f,0.0f);
 				D3DXMatrixRotationAxis( (D3DXMATRIX*)&matWorld, (D3DXVECTOR3*)&v, D3DXToRadian((float)nXDiff / 2.0f) );
 				g_mWorldRotate = g_mWorldRotate * matWorld;
-
-				CMeshRenderer::Instance().SetRotationChangedFlag();
 				}
 			}
 		else
@@ -353,9 +345,6 @@ void HandleKeyboardInputFPS( void )
 	// End Key - View elevates down
 	if( keys[VK_END] & 0x80 )
 		g_sCamera.vPos.y -= MOVE_SPEED*g_fElpasedTime;
-
-	if (vOldPos != g_sCamera.vPos)
-		CMeshRenderer::Instance().SetRotationChangedFlag();
 	}
 
 

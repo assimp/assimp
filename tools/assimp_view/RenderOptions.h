@@ -35,7 +35,9 @@ class RenderOptions
 			bRotate			(true),
 			bLowQuality		(false),
 			bNoSpecular		(false),
-			bStereoView		(false)	{}
+			bStereoView		(false),
+			bCulling		(false),
+			bSkeleton		(false) {}
 
 		bool bMultiSample;
 
@@ -68,6 +70,8 @@ class RenderOptions
 
 		// wireframe or solid rendering?
 		DrawMode eDrawMode;
+
+		bool bCulling,bSkeleton;
 	};
 
 #endif // !! IG

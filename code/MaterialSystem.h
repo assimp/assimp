@@ -218,6 +218,19 @@ inline aiReturn MaterialHelper::AddProperty<aiColor3D> (const aiColor3D* pInput,
 
 // ----------------------------------------------------------------------------------------
 template<>
+inline aiReturn MaterialHelper::AddProperty<aiVector3D> (const aiVector3D* pInput,
+	const unsigned int pNumValues,
+	const char* pKey,
+	unsigned int type,
+	unsigned int index)
+{
+	return AddBinaryProperty((const void*)pInput,
+		pNumValues * sizeof(aiVector3D),
+		pKey,type,index,aiPTI_Float);
+}
+
+// ----------------------------------------------------------------------------------------
+template<>
 inline aiReturn MaterialHelper::AddProperty<int> (const int* pInput,
 	const unsigned int pNumValues,
 	const char* pKey,

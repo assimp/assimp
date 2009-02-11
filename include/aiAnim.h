@@ -321,9 +321,7 @@ struct Interpolator
 	}
 }; // ! Interpolator <T>
 
-// No need to have that in the doc, it is opaque.
-// The compiler chooses the right variant and we're done.
-#ifndef ASSIMP_DOXYGEN_BUILD
+//! @cond Never
 
 template <>
 struct Interpolator	<aiQuaternion>	{	
@@ -354,7 +352,7 @@ struct Interpolator <aiQuatKey>		{
 	}
 }; // ! Interpolator <aiQuatKey>
 
-#endif // !! ASSIMP_DOXYGEN_BUILD
+//! @endcond
 } //  ! end namespace Assimp
 #endif // __cplusplus
 #endif // AI_ANIM_H_INC

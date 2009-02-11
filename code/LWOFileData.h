@@ -560,7 +560,8 @@ struct Surface
 		mSpecularTextures,
 		mOpacityTextures,
 		mBumpTextures,
-		mGlossinessTextures;
+		mGlossinessTextures,
+		mReflectionTextures;
 
 	//! Index of refraction
 	float mIOR;

@@ -80,102 +80,15 @@ void MakeFileAssociations()
 
 	HKEY g_hRegistry;
 
-	// ------------------------------------------------- 
-	// .3ds
-	// -------------------------------------------------
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.3ds",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
-	RegCloseKey(g_hRegistry);
+	aiString list;
+	aiGetExtensionList(&list);
 
-	// ------------------------------------------------- 
-	// .x
-	// -------------------------------------------------
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.x",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
-	RegCloseKey(g_hRegistry);
-
-	// ------------------------------------------------- 
-	// .obj
-	// -------------------------------------------------
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.obj",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
-	RegCloseKey(g_hRegistry);
-
-	// ------------------------------------------------- 
-	// .ms3d
-	// -------------------------------------------------
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.ms3d",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
-	RegCloseKey(g_hRegistry);
-
-	// ------------------------------------------------- 
-	// .md3
-	// -------------------------------------------------
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.md3",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
-	RegCloseKey(g_hRegistry);
-
-	// ------------------------------------------------- 
-	// .md2
-	// -------------------------------------------------
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.md2",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
-	RegCloseKey(g_hRegistry);
-
-	// ------------------------------------------------- 
-	// .md4/mdr
-	// -------------------------------------------------
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.md4",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
-	RegCloseKey(g_hRegistry);
-
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.mdr",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
-	RegCloseKey(g_hRegistry);
-
-	// ------------------------------------------------- 
-	// .md5
-	// -------------------------------------------------
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.md5mesh",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
-	RegCloseKey(g_hRegistry);
-
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.md5anim",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
-	RegCloseKey(g_hRegistry);
-
-	// ------------------------------------------------- 
-	// .mdl
-	// -------------------------------------------------
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.mdl",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
-	RegCloseKey(g_hRegistry);
-
-	// ------------------------------------------------- 
-	// .lwo
-	// -------------------------------------------------
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.lwo",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
-	RegCloseKey(g_hRegistry);
-
-
-	// ------------------------------------------------- 
-	// .ply
-	// -------------------------------------------------
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.ply",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
-	RegCloseKey(g_hRegistry);
-
-
-	// ------------------------------------------------- 
-	// .ase/.ask
-	// -------------------------------------------------
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.ase",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
-	RegCloseKey(g_hRegistry);
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.ask",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
-	RegCloseKey(g_hRegistry);
+	while (1) 
+	{
+		RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.3ds",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
+		RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
+		RegCloseKey(g_hRegistry);
+	}
 
 	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\ASSIMPVIEW_CLASS",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
 	RegCloseKey(g_hRegistry);
@@ -398,6 +311,31 @@ void ToggleMats()
 	UpdateWindow(g_hDlg);
 }
 
+//-------------------------------------------------------------------------------
+// Toggle the "Culling" state
+//-------------------------------------------------------------------------------
+void ToggleCulling()
+{
+	g_sOptions.bCulling = !g_sOptions.bCulling; 
+
+	// store this in the registry, too
+	DWORD dwValue = 0;
+	if (g_sOptions.bCulling)dwValue = 1;
+	RegSetValueExA(g_hRegistry,"Culling",0,REG_DWORD,(const BYTE*)&dwValue,4);
+}
+
+//-------------------------------------------------------------------------------
+// Toggle the "Skeleton" state
+//-------------------------------------------------------------------------------
+void ToggleSkeleton()
+{
+	g_sOptions.bSkeleton = !g_sOptions.bSkeleton; 
+
+	// store this in the registry, too
+	DWORD dwValue = 0;
+	if (g_sOptions.bCulling)dwValue = 1;
+	RegSetValueExA(g_hRegistry,"Skeleton",0,REG_DWORD,(const BYTE*)&dwValue,4);
+}
 
 //-------------------------------------------------------------------------------
 // Toggle the "WireFrame" state
@@ -1212,6 +1150,9 @@ void InitUI()
 		CheckDlgButton(g_hDlg,IDC_TOGGLEWIRE,BST_CHECKED);
 	}
 	LoadCheckerPatternColors();
+
+	SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_SETRANGEMIN,TRUE,0);
+	SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_SETRANGEMAX,TRUE,10000);
 	return;
 }
 
@@ -1250,6 +1191,18 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 			// load the current color of the lights
 			LoadLightColors();
 			return TRUE;
+
+		case WM_HSCROLL:
+
+			if (GetDlgItem(g_hDlg, IDC_SLIDERANIM) == (HWND)lParam)
+			{
+				double num = (double)SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_GETPOS,0,0);
+				const aiAnimation* anim = g_pcAsset->pcScene->mAnimations[ g_pcAsset->mAnimator->CurrentAnimIndex() ];
+
+				g_dCurrent = (anim->mDuration/anim->mTicksPerSecond) * num/10000;
+				g_pcAsset->mAnimator->Calculate(g_dCurrent);
+			}
+			break;
 
 		case WM_MOUSEWHEEL:
 
@@ -1931,6 +1884,19 @@ __DRUNKEN_ALIEN_FROM_MARS:
 					{
 					ToggleWireFrame();
 					}
+				else if (IDC_SHOWSKELETON == LOWORD(wParam))
+					{
+					ToggleSkeleton();
+					}
+				else if (IDC_BFCULL == LOWORD(wParam))
+					{
+					ToggleCulling();
+					}
+				else if (IDC_PLAY == LOWORD(wParam))
+					{
+						g_bPlay = !g_bPlay;
+						SetDlgItemText(g_hDlg,IDC_PLAY,(g_bPlay ? "Stop" : "Play"));
+					}
 				}
 			// check the file history
 			for (unsigned int i = 0; i < AI_VIEW_NUM_RECENT_FILES;++i)
@@ -2102,11 +2068,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			"ASSIMP ModelViewer",MB_OK);
 		return -4;
 		}
-	// setup ASSIMP standard limits for the SplitLargeMeshes-process
-//	aiSetTriangleSplitLimit(g_sCaps.MaxPrimitiveCount-1);
-//	aiSetVertexSplitLimit(0xFFFFFFFF);
-
-	CLogDisplay::Instance().AddEntry("[OK] The viewer has been initialized successfully");
+	CLogDisplay::Instance().AddEntry("[OK] assimp_view has been initialized successfully");
 
 	// create the log window
 	CLogWindow::Instance().Init();
@@ -2264,6 +2226,26 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 						ToggleWireFrame();
 						break;
+
+					case 'K':
+					case 'k':
+
+						CheckDlgButton(g_hDlg,IDC_SHOWSKELETON,
+							IsDlgButtonChecked(g_hDlg,IDC_SHOWSKELETON) == BST_CHECKED 
+							? BST_UNCHECKED : BST_CHECKED);
+
+						ToggleSkeleton();
+						break;
+
+					case 'C':
+					case 'c':
+
+						CheckDlgButton(g_hDlg,IDC_BFCULL,
+							IsDlgButtonChecked(g_hDlg,IDC_BFCULL) == BST_CHECKED 
+							? BST_UNCHECKED : BST_CHECKED);
+
+						ToggleCulling();
+						break;
 					}
 				}
 			}
@@ -2273,6 +2255,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		CDisplay::Instance().OnRender();
 
 
+		// measure FPS, average it out
 		g_dCurTime     = timeGetTime();
 		g_fElpasedTime = (float)((g_dCurTime - g_dLastTime) * 0.001);
 		g_dLastTime    = g_dCurTime;

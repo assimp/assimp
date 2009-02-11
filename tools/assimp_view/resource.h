@@ -80,6 +80,7 @@
 #define IDC_SPEED                       1026
 #define IDC_COMBO1                      1027
 #define IDC_PINORDER                    1028
+#define IDC_NOSPECULAR2                 1028
 #define IDC_SSPEED                      1029
 #define IDC_SANIM                       1030
 #define IDC_SANIMGB                     1031
@@ -99,6 +100,10 @@
 #define IDC_NUMMESHES                   1047
 #define IDC_VIEWMAT                     1048
 #define IDC_VIEWMATRIX                  1048
+#define IDC_SLIDERANIM                  1052
+#define IDC_PLAY                        1053
+#define IDC_SHOWSKELETON                1054
+#define IDC_BFCULL                      1055
 #define ID_VIEWER_OPEN                  32771
 #define ID_VIEWER_CLOSETHIS             32772
 #define ID_VIEWER_CLOSEASSET            32773
@@ -168,7 +173,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        159
 #define _APS_NEXT_COMMAND_VALUE         32831
-#define _APS_NEXT_CONTROL_VALUE         1052
+#define _APS_NEXT_CONTROL_VALUE         1056
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

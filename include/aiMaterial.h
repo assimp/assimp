@@ -116,61 +116,65 @@ enum aiPropertyTypeInfo
  */
 enum aiTextureOp
 {
-    /** T = T1 * T2 */
-    aiTextureOp_Multiply = 0x0,
+	/** T = T1 * T2 */
+	aiTextureOp_Multiply = 0x0,
 
-    /** T = T1 + T2 */
-    aiTextureOp_Add = 0x1,
+	/** T = T1 + T2 */
+	aiTextureOp_Add = 0x1,
 
-    /** T = T1 - T2 */
-    aiTextureOp_Subtract = 0x2,
+	/** T = T1 - T2 */
+	aiTextureOp_Subtract = 0x2,
 
-    /** T = T1 / T2 */
-    aiTextureOp_Divide = 0x3,
+	/** T = T1 / T2 */
+	aiTextureOp_Divide = 0x3,
 
-    /** T = (T1 + T2) - (T1 * T2) */
-    aiTextureOp_SmoothAdd = 0x4,
+	/** T = (T1 + T2) - (T1 * T2) */
+	aiTextureOp_SmoothAdd = 0x4,
 
-    /** T = T1 + (T2-0.5) */
-    aiTextureOp_SignedAdd = 0x5,
+	/** T = T1 + (T2-0.5) */
+	aiTextureOp_SignedAdd = 0x5,
 
 
-	 /** This value is not used. It is just there to force the
-	 *  compiler to map this enum to a 32 Bit integer.
+	/** @cond never 
+	 *  This value is not used. It forces the compiler to use at least
+	 *  32 Bit integers to represent this enum.
 	 */
 	_aiTextureOp_Force32Bit = 0x9fffffff
+	//! @endcond
 };
 
 // ---------------------------------------------------------------------------
 /** @brief Defines how UV coordinates outside the [0...1] range are handled.
  *
+ *  Commonly refered to as 'wrapping mode'.
  */
 enum aiTextureMapMode
 {
     /** A texture coordinate u|v is translated to u%1|v%1 
-    */
+     */
     aiTextureMapMode_Wrap = 0x0,
 
     /** Texture coordinates outside [0...1]
-    *  are clamped to the nearest valid value.
-    */
+     *  are clamped to the nearest valid value.
+     */
     aiTextureMapMode_Clamp = 0x1,
 
-	 /** If the texture coordinates for a pixel are outside [0...1]
+	/** If the texture coordinates for a pixel are outside [0...1]
 	 *  the texture is not applied to that pixel
-    */
+     */
     aiTextureMapMode_Decal = 0x3,
 
     /** A texture coordinate u|v becomes u%1|v%1 if (u-(u%1))%2 is zero and
-    *  1-(u%1)|1-(v%1) otherwise
-    */
+     *  1-(u%1)|1-(v%1) otherwise
+     */
     aiTextureMapMode_Mirror = 0x2,
 
-
-	 /** This value is not used. It is just here to force the
-	 *  compiler to map this enum to a 32 Bit integer.
-	 */
+	 /** @cond never 
+	  *  This value is not used. It forces the compiler to use at least
+	  *  32 Bit integers to represent this enum.
+	  */
 	_aiTextureMapMode_Force32Bit = 0x9fffffff
+	//! @endcond
 };
 
 // ---------------------------------------------------------------------------
@@ -186,10 +190,11 @@ enum aiTextureMapping
 {
     /** The mapping coordinates are taken from an UV channel.
 	 *
-	 *  The #AI_MATKEY_UVWSRC key specifies from which (remember,
+	 *  The #AI_MATKEY_UVWSRC key specifies from which UV channel
+	 *  the texture coordinates are to be taken from (remember,
 	 *  meshes can have more than one UV channel). 
     */
-    aiTextureMapping_UV = 0x0 ,
+    aiTextureMapping_UV = 0x0,
 
 	 /** Spherical mapping */
     aiTextureMapping_SPHERE = 0x1,
@@ -207,177 +212,218 @@ enum aiTextureMapping
     aiTextureMapping_OTHER = 0x5,
 
 
-	 /** This value is not used. It is just here to force the
-	 *  compiler to map this enum to a 32 Bit integer.
-	 */
+	 /** @cond never 
+	  *  This value is not used. It forces the compiler to use at least
+	  *  32 Bit integers to represent this enum.
+	  */
 	_aiTextureMapping_Force32Bit = 0x9fffffff
+	//! @endcond
 };
 
 // ---------------------------------------------------------------------------
-/** @brief Defines which mesh axes are used to construct the projection shape
- *  for non-UV mappings around the model.
+/** @brief Defines the purpose of a texture 
  *
- *  This corresponds to the #AI_MATKEY_TEXMAP_AXIS property.
-*/
-enum aiAxis
-{
-	aiAxis_X = 0x0,
-	aiAxis_Y = 0x1,
-	aiAxis_Z = 0x2,
-
-
-	 /** This value is not used. It is just here to force the
-	 *  compiler to map this enum to a 32 Bit integer.
-	 */
-	_aiAxis_Force32Bit = 0x9fffffff
-};
-
-// ---------------------------------------------------------------------------
-/** Defines the purpose of a texture 
-*/
+ *  This is a very difficult topic. Different 3D packages support different
+ *  kinds of textures. For very common texture types, such as bumpmaps, the
+ *  rendering results depend on implementation details in the rendering 
+ *  pipelines of these applications. Assimp loads all texture references from
+ *  the model file and tries to determine which of the predefined texture
+ *  types below is the best choice to match the original use of the texture
+ *  as closely as possible.<br>
+ *  
+ *  In content pipelines you'll usually define how textures have to be handled,
+ *  and the artists working on models have to conform to this specification,
+ *  regardless which 3D tool they're using.
+ */
 enum aiTextureType
 {
-	// Set as texture semantic for material properties not related to textures
+	/** Dummy value.
+	 *
+	 *  No texture, but the value to be used as 'texture semantic' 
+	 *  (#aiMaterialProperty::mSemantic) for all material properties 
+	 *  *not* related to textures.
+	 */
 	aiTextureType_NONE = 0x0,
+
 
 
     /** The texture is combined with the result of the diffuse
 	 *  lighting equation.
-    */
+     */
     aiTextureType_DIFFUSE = 0x1,
 
-	 /** The texture is combined with the result of the specular
+	/** The texture is combined with the result of the specular
 	 *  lighting equation.
-    */
+     */
     aiTextureType_SPECULAR = 0x2,
 
-	 /** The texture is combined with the result of the ambient
+	/** The texture is combined with the result of the ambient
 	 *  lighting equation.
-    */
+     */
     aiTextureType_AMBIENT = 0x3,
 
-	 /** The texture is added to the result of the lighting
-	 *  calculation. It isn't influenced by lights.
-    */
+	/** The texture is added to the result of the lighting
+	 *  calculation. It isn't influenced by incoming light.
+     */
     aiTextureType_EMISSIVE = 0x4,
 
-	 /** The texture is a height map and serves as input for
-	 *  a normal map generator.
-    */
+	/** The texture is a height map.
+	 *
+	 *  By convention, higher grey-scale values stand for
+	 *  higher elevations from the base height.
+     */
     aiTextureType_HEIGHT = 0x5,
 
-	 /** The texture is a (tangent space) normal-map.
+	/** The texture is a (tangent space) normal-map.
 	 *
-	 *  If the normal map does also contain a height channel
-	 *  for use with techniques such as Parallax Occlusion Mapping
-	 *  it is registered once as a normalmap.
-    */
+	 *  Again, there are several conventions for tangent-space
+	 *  normal maps. Assimp does (intentionally) not 
+	 *  differenciate here.
+     */
     aiTextureType_NORMALS = 0x6,
 
-	 /** The texture defines the glossiness of the material.
+	/** The texture defines the glossiness of the material.
 	 *
 	 *  The glossiness is in fact the exponent of the specular
-	 *  lighting equation. Normally there is a conversion
-	 *  function define to map the linear color values in the
+	 *  (phong) lighting equation. Usually there is a conversion
+	 *  function defined to map the linear color values in the
 	 *  texture to a suitable exponent. Have fun.
     */
     aiTextureType_SHININESS = 0x7,
 
-	 /** The texture defines a per-pixel opacity.
+	/** The texture defines per-pixel opacity.
 	 *
-	 *  Normally 'white' means opaque and 'black' means 
+	 *  Usually 'white' means opaque and 'black' means 
 	 *  'transparency'. Or quite the opposite. Have fun.
     */
     aiTextureType_OPACITY = 0x8,
 
+	/** Displacement texture
+	 *
+	 *  The exact purpose and format is application-dependent.
+     *  Higher color values stand for higher vertex displacements.
+    */
+    aiTextureType_DISPLACEMENT = 0x9,
 
-	 /** This value is not used. It is just here to force the
-	  *  compiler to map this enum to a 32 Bit integer.
+	/** Lightmap texture (aka Ambient Occlusion)
+	 *
+	 *  Both 'Lightmaps' and dedicated 'ambient occlusion maps' are
+	 *  covered by this material property. The texture contains a
+	 *  scaling value for the final color value of a pixel. It's
+	 *  intensity is not affected by incoming light.
+    */
+    aiTextureType_LIGHTMAP = 0xA,
+
+	/** Reflection texture
+	 *
+	 * Contains the color of a perfect mirror reflection.
+	 * Rarely used, almost nevery for real-time applications.
+    */
+    aiTextureType_REFLECTION = 0xB,
+
+	/** Unknown texture
+	 *
+	 *  A texture reference that does not match any of the definitions 
+	 *  above is considered to be 'unknown'. It is still imported,
+	 *  but is excluded from any further postprocessing.
+    */
+    aiTextureType_UNKNOWN = 0xC,
+
+
+	 /** @cond never 
+	  *  This value is not used. It forces the compiler to use at least
+	  *  32 Bit integers to represent this enum.
 	  */
 	_aiTextureType_Force32Bit = 0x9fffffff
+	//! @endcond
 };
+
+#define AI_TEXTURE_TYPE_MAX  aiTextureType_UNKNOWN
 
 // ---------------------------------------------------------------------------
 /** @brief Defines all shading models supported by the library
  *
- *  @note The list of shading modes has been taken from Blender3D.
- *  See Blender3D documentation for more information. The API does
+ *  The list of shading modes has been taken from Blender.
+ *  See Blender documentation for more information. The API does
  *  not distinguish between "specular" and "diffuse" shaders (thus the
  *  specular term for diffuse shading models like Oren-Nayar remains
- *  undefined)
+ *  undefined). <br>
+ *  Again, this value is just a hint. Assimp tries to select the shader whose
+ *  most common implementation matches the original rendering results of the
+ *  3D modeller which wrote a particular model as closely as possible.
  */
 enum aiShadingMode
 {
     /** Flat shading. Shading is done on per-face base, 
-    *  diffuse only.
-    */
+     *  diffuse only. Also known as 'faceted shading'.
+     */
     aiShadingMode_Flat = 0x1,
 
-    /** Diffuse Gouraud shading. Shading on per-vertex base
-    */
+    /** Simple Gouraud shading. 
+     */
     aiShadingMode_Gouraud =	0x2,
 
-    /** Diffuse/Specular Phong-Shading
-    *
-    *  Shading is applied on per-pixel base. This is the
-    *  slowest algorithm, but generates the best results.
-    */
+    /** Phong-Shading -
+     */
     aiShadingMode_Phong = 0x3,
 
-    /** Diffuse/Specular Phong-Blinn-Shading
-    *
-    *  Shading is applied on per-pixel base. This is a little
-    *  bit faster than Phong and in some cases even
-    *  more realistic
-    */
+    /** Phong-Blinn-Shading
+     */
     aiShadingMode_Blinn	= 0x4,
 
     /** Toon-Shading per pixel
-    *
-    *  Shading is applied on per-pixel base. The output looks
-    *  like a comic. Often combined with edge detection.
-    */
+     *
+	 *  Also known as 'comic' shader.
+     */
     aiShadingMode_Toon = 0x5,
 
     /** OrenNayar-Shading per pixel
-    *
-    *  Extension to standard Lambertian shading, taking the
-    *  roughness of the material into account
-    *	
-    */
+     *
+     *  Extension to standard Lambertian shading, taking the
+     *  roughness of the material into account
+     */
     aiShadingMode_OrenNayar = 0x6,
 
     /** Minnaert-Shading per pixel
-    *
-    *  Extension to standard Lambertian shading, taking the
-    *  "darkness" of the material into account
-    */
+     *
+     *  Extension to standard Lambertian shading, taking the
+     *  "darkness" of the material into account
+     */
     aiShadingMode_Minnaert = 0x7,
 
     /** CookTorrance-Shading per pixel
-    */
+	 *
+	 *  Special shader for metallic surfaces.
+     */
     aiShadingMode_CookTorrance = 0x8,
 
-    /** No shading at all
+    /** No shading at all. Constant light influence of 1.0.
     */
     aiShadingMode_NoShading = 0x9,
 
 	 /** Fresnel shading
-    */
+     */
     aiShadingMode_Fresnel = 0xa,
 
 
-	 /** This value is not used. It is just there to force the
-	 *  compiler to map this enum to a 32 Bit integer.
-	 */
+	 /** @cond never 
+	  *  This value is not used. It forces the compiler to use at least
+	  *  32 Bit integers to represent this enum.
+	  */
 	_aiShadingMode_Force32Bit = 0x9fffffff
+	//! @endcond
 };
 
 
 // ---------------------------------------------------------------------------
-/** @brief Defines flags for a texture.
+/** @brief Defines some mixed flags for a particular texture.
  *
- *  See
+ *  Usually you'll tell your artists how textures have to look like ...
+ *  however, if you use Assimp for completely generic loadeing purposes you
+ *  might also need to process these flags in order to display as many 
+ *  'unknown' 3D models as possible correctly.
+ *
+ *  This corresponds to the #AI_MATKEY_TEXFLAGS property.
 */
 enum aiTextureFlags
 {
@@ -386,10 +432,13 @@ enum aiTextureFlags
 	aiTextureFlags_Invert = 0x1,
 
 
-	/** This value is not used. It is just there to force the
-	 *  compiler to map this enum to a 32 Bit integer.
-	 */
+	
+	 /** @cond never 
+	  *  This value is not used. It forces the compiler to use at least
+	  *  32 Bit integers to represent this enum.
+	  */
 	_aiTextureFlags_Force32Bit = 0x9fffffff
+	//! @endcond
 };
 
 #include "./Compiler/pushpack1.h"
@@ -406,17 +455,24 @@ enum aiTextureFlags
  */
 struct aiUVTransform
 {
-	/** Translation on the u and v axes. */
+	/** Translation on the u and v axes. 
+	 *
+	 *  The default value is (0|0).
+	 */
 	C_STRUCT aiVector2D mTranslation;
 
-	/** Scaling on the u and v axes. */
+	/** Scaling on the u and v axes. 
+	 *
+	 *  The default value is (1|1).
+	 */
 	C_STRUCT aiVector2D mScaling;
 
 	/** Rotation - in counter-clockwise direction.
-	*
-	*  The rotation angle is specified in radians. The
-	*  rotation center is 0.5f|0.5f.
-	*/
+	 *
+	 *  The rotation angle is specified in radians. The
+	 *  rotation center is 0.5f|0.5f. The default value
+     *  0.f.
+	 */
 	float mRotation;
 
 
@@ -440,53 +496,53 @@ struct aiUVTransform
 struct aiMaterialProperty
 {
     /** Specifies the name of the property (key)
-    *
-    * Keys are case insensitive. 
-    */
+     *
+     *  Keys are case insensitive. 
+     */
     C_STRUCT aiString mKey;
 
-	/** Textures: Specifies the exact usage semantic
-	*/
+	/** Textures: Specifies the exact usage semantic.
+	 *  
+	 *  For non-texture properties, this member is always 0 
+	 *  or #aiTextureType_NONE.
+	 */
 	unsigned int mSemantic;
 
 	/** Textures: Specifies the index of the texture
-	*
-	*  Textures are counted per-type.
-	*/
+	 *
+	 *  For non-texture properties, this member is always 0.
+	 */
 	unsigned int mIndex;
 
-    /**	Size of the buffer mData is pointing to, in bytes
+    /**	Size of the buffer mData is pointing to, in bytes.
+	 *
 	 * This value may not be 0.
-    */
+     */
     unsigned int mDataLength;
 
     /** Type information for the property.
-    *
-    * Defines the data layout inside the
-    * data buffer. This is used by the library
-    * internally to perform debug checks.
-    */
+     *
+     * Defines the data layout inside the data buffer. This is used
+	 * by the library internally to perform debug checks and to 
+	 * utilize proper type conversions. 
+	 * (It's probably a hacky solution, but it works.)
+     */
     C_ENUM aiPropertyTypeInfo mType;
 
     /**	Binary buffer to hold the property's value
-    *
-    * The buffer has no terminal character. However,
-    * if a string is stored inside it may use 0 as terminal,
-    * but it would be contained in mDataLength. This member
-	 * is never 0
-    */
+	 *
+     * The size of the buffer is always mDataLength.
+     */
     char* mData;
 
 #ifdef __cplusplus
 
-	aiMaterialProperty()
-	{
+	aiMaterialProperty()	{
 		mData = NULL;
 		mIndex = mSemantic = 0;
 	}
 
-	~aiMaterialProperty()
-	{
+	~aiMaterialProperty()	{
 		delete[] mData;
 	}
 
@@ -602,138 +658,179 @@ extern "C" {
 
 // ---------------------------------------------------------------------------
 /** @def AI_MATKEY_NAME
- *  Defines the name of the material 
- * <br>
+ *  Defines the name of the material. <br>
  * <b>Type:</b> string (aiString)<br>
- * <b>Default value:</b> none <br>
+ * <b>Default value:</b> <tt>none</tt> <br>
 */
 #define AI_MATKEY_NAME "$mat.name",0,0
 
-
+// ---------------------------------------------------------------------------
 /** @def AI_MATKEY_TWOSIDED
- *  Indicates that the material must be rendered two-sided
- * <br>
+ *  Indicates that the material must be rendered two-sided (means: no 
+ *  backface culling). <br>
  * <b>Type:</b> int <br>
- * <b>Default value:</b> 0 <br>
+ * <b>Default value:</b> <tt>0</tt> <br>
 */
 #define AI_MATKEY_TWOSIDED "$mat.twosided",0,0
 
-
+// ---------------------------------------------------------------------------
 /** @def AI_MATKEY_SHADING_MODEL
- *  Defines the shading model to use (aiShadingMode)
+ *  Defines the shading model to be used for this material. See the doc for
+ *  #aiShadingMode for a complete list of all predefined values.
  * <br>
  * <b>Type:</b> int (aiShadingMode)<br>
- * <b>Default value:</b> aiShadingMode_Gouraud <br>
+ * <b>Default value:</b> <tt>aiShadingMode_Gouraud</tt>
 */
 #define AI_MATKEY_SHADING_MODEL "$mat.shadingm",0,0
 
-
+// ---------------------------------------------------------------------------
 /** @def AI_MATKEY_ENABLE_WIREFRAME
- *  Integer property. 1 to enable wireframe for rendering
+ *  Integer property. 1 to enable wireframe mode for rendering.
+ *  A material with this property set to 1 should appear as wireframe, even
+ *  if the scene is rendered solid.
  * <br>
  * <b>Type:</b> int <br>
- * <b>Default value:</b> 0 <br>
+ * <b>Default value:</b> <tt>0</tt>
 */
 #define AI_MATKEY_ENABLE_WIREFRAME "$mat.wireframe",0,0
 
-
+// ---------------------------------------------------------------------------
 /** @def AI_MATKEY_OPACITY
- *  Defines the base opacity of the material
+ *  Defines the base opacity of the material. This value defines how
+ *  transparent the material actually is. However, in order to get absolutely
+ *  correct results you'll also need to evaluate the
+ *  #AI_MATKEY_COLOR_TRANSPARENT property.
  * <br>
  * <b>Type:</b> float<br>
- * <b>Default value:</b> 1.0f <br>
-*/
+ * <b>Default value:</b> <tt>1.0f</tt><br>
+ */
 #define AI_MATKEY_OPACITY "$mat.opacity",0,0
 
-
+// ---------------------------------------------------------------------------
 /** @def AI_MATKEY_BUMPSCALING
  *  Defines the height scaling of a bump map (for stuff like Parallax
- *  Occlusion Mapping)
- * <br>
+ *  Occlusion Mapping). The actual interpretation/range depends on the
+ *  3D applications which wrote a particular model. <br>
+ *
  * <b>Type:</b> float<br>
- * <b>Default value:</b> 1.0f <br>
-*/
+ * <b>Default value:</b> <tt>1.0f</tt>
+ */
 #define AI_MATKEY_BUMPSCALING "$mat.bumpscaling",0,0
 
-
+// ---------------------------------------------------------------------------
 /** @def AI_MATKEY_SHININESS
  *  Defines the base shininess of the material
- *  This is the exponent of the Phong shading equation.
- * <br>
+ *  This is the exponent of the Phong and Phong-Blinn shading equations.
+ *  The range is undefined and depends on the shader being used. The
+ *  value will not be negative, though. <br>
+ *
  * <b>Type:</b> float<br>
- * <b>Default value:</b> 0.0f <br>
-*/
+ * <b>Default value:</b> <tt>0.0f</tt>
+ */
 #define AI_MATKEY_SHININESS "$mat.shininess",0,0
 
-
+// ---------------------------------------------------------------------------
 /** @def AI_MATKEY_SHININESS_STRENGTH
  * Defines the strength of the specular highlight.
- * This is simply a multiplier to the specular color of a material
- * <br>
- * <b>Type:</b> float<br>
- * <b>Default value:</b> 1.0f <br>
-*/
+ * This simply scales the specular lighting coefficient. <br>
+ * 
+ * <b>Type:</b> float <br>
+ * <b>Default value:</b> <tt>1.0f</tt>
+ * @note The same effect could be achieved by scaling the specular material
+ * color. However, most 3D modelers keep this property separate and so
+ * do we. OK!?
+ */
 #define AI_MATKEY_SHININESS_STRENGTH "$mat.shinpercent",0,0
 
+// ---------------------------------------------------------------------------
 /** @def AI_MATKEY_REFRACTI
  * Index of refraction of the material. This is used by some shading models,
- * e.g. Cook-Torrance. The value is the ratio of the speed of light in a 
- * vacuum to the speed of light in the material (always >= 1.0 in the real world).
- * <br>
- * <b>Type:</b> float<br>
- * <b>Default value:</b> 1.0f <br>
-*/
+ * e.g. Cook-Torrance. The value is the ratio of the speed of light in a
+ * vacuum to the speed of light in the material. <br>
+ *
+ * <b>Type:</b> float <br>
+ * <b>Default value:</b> <tt>1.0f </tt>
+ */
 #define AI_MATKEY_REFRACTI "$mat.refracti",0,0
 
 // ---------------------------------------------------------------------------
 /** @def AI_MATKEY_COLOR_DIFFUSE
- *  Defines the diffuse base color of the material
- * <br>
- * <b>Type:</b> color (aiColor4D or aiColor3D)<br>
- * <b>Default value:</b> 0.0f|0.0f|0.0f|1.0f <br>
+ *  Defines the diffuse base color of the material.  <br>
+ * <b>Type:</b> color (#aiColor4D or #aiColor3D)     <br>
+ * <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f     </tt>    
 */
 #define AI_MATKEY_COLOR_DIFFUSE "$clr.diffuse",0,0
 
 /** @def AI_MATKEY_COLOR_AMBIENT
- *  Defines the ambient base color of the material
- * <br>
- * <b>Type:</b> color (aiColor4D or aiColor3D)<br>
- * <b>Default value:</b> 0.0f|0.0f|0.0f|1.0f <br>
+ *  Declares the amount of ambient light emitted from
+ *  the surface of this object.  <br>
+ * <b>Type:</b> color (#aiColor4D or #aiColor3D)     <br>
+ * <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f     </tt>       
 */
 #define AI_MATKEY_COLOR_AMBIENT "$clr.ambient",0,0
 
 /** @def AI_MATKEY_COLOR_SPECULAR
- *  Defines the specular base color of the material
- * <br>
- * <b>Type:</b> color (aiColor4D or aiColor3D)<br>
- * <b>Default value:</b> 0.0f|0.0f|0.0f|1.0f <br>
+ *  Declares the color of light specularly reflected from
+ *  the surface of this object. <br>
+ * <b>Type:</b> color (#aiColor4D or #aiColor3D)     <br>
+ * <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f     </tt>
 */
 #define AI_MATKEY_COLOR_SPECULAR "$clr.specular",0,0
 
 /** @def AI_MATKEY_COLOR_EMISSIVE
- *  Defines the emissive base color of the material
- * <br>
- * <b>Type:</b> color (aiColor4D or aiColor3D)<br>
- * <b>Default value:</b> 0.0f|0.0f|0.0f|1.0f <br>
+ *  Declares the amount of light emitted from the
+ *  surface of this object. <br>
+ * <b>Type:</b> color (#aiColor4D or #aiColor3D)     <br>
+ * <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f     </tt>
 */
 #define AI_MATKEY_COLOR_EMISSIVE "$clr.emissive",0,0
 
+/** @def AI_MATKEY_COLOR_TRANSPARENT
+ *  Defines the transparent base color of the material. <br>
+ * <b>Type:</b> color (#aiColor4D or #aiColor3D)        <br>
+ * <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f        </tt>
+*/
+#define AI_MATKEY_COLOR_TRANSPARENT "$clr.transparent",0,0
+
+/** @def AI_MATKEY_COLOR_REFLECTIVE
+ *  Declares the color of a perfect mirror reflection. <br>
+ * <b>Type:</b> color (#aiColor4D or #aiColor3D)       <br>
+ * <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f       </tt>
+*/
+#define AI_MATKEY_COLOR_REFLECTIVE "$clr.reflective",0,0
+
+
 // ---------------------------------------------------------------------------
-/** @def AI_MATKEY_TEXTURE 
- * Parameters: type, N<br>
+// Pure key names for all texture-related properties
+//! @cond MATS_DOC_FULL
+#define _AI_MATKEY_TEXTURE_BASE			"$tex.file"
+#define _AI_MATKEY_UVWSRC_BASE			"$tex.uvwsrc"
+#define _AI_MATKEY_TEXOP_BASE			"$tex.op"
+#define _AI_MATKEY_MAPPING_BASE			"$tex.mapping"
+#define _AI_MATKEY_TEXBLEND_BASE		"$tex.blend"
+#define _AI_MATKEY_MAPPINGMODE_U_BASE	"$tex.mapmodeu"
+#define _AI_MATKEY_MAPPINGMODE_V_BASE	"$tex.mapmodev"
+#define _AI_MATKEY_TEXMAP_AXIS_BASE		"$tex.mapaxis"
+#define _AI_MATKEY_UVTRANSFORM_BASE		"$tex.uvtrafo"
+#define _AI_MATKEY_TEXFLAGS_BASE		"$tex.flags"
+//! @endcond
+
+// ---------------------------------------------------------------------------
+/** 
+ * @def AI_MATKEY_TEXTURE
  * Specifies the path to the Nth texture of type "type".
- * This can either be a path to the texture or a string of the form '*&lt;i&gt;'
+ * This can either be a path to the texture or a string of the form '*i'
  * where i is an index into the array of embedded textures that has been
- * imported along with the scene. See aiTexture for more details.
+ * imported along with the scene. See #aiTexture for more details.
  * <br>
- * <b>Type:</b> String<br>
- * <b>Default value to be assumed if this key isn't there:</b> n/a<br>
+ * <b>Type:</b> #aiString<br>
+ * <b>Default value if key is not defined:</b> <tt>n/a</tt><br>
  */
 // ---------------------------------------------------------------------------
-#define _AI_MATKEY_TEXTURE_BASE "$tex.file"
 #define AI_MATKEY_TEXTURE(type, N) _AI_MATKEY_TEXTURE_BASE,type,N
 
-// for backward compatibility
+// For backward compatibility and simplicity
+//! @cond MATS_DOC_FULL
 #define AI_MATKEY_TEXTURE_DIFFUSE(N)	\
 	AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE,N)
 
@@ -758,23 +855,39 @@ extern "C" {
 #define AI_MATKEY_TEXTURE_OPACITY(N)	\
 	AI_MATKEY_TEXTURE(aiTextureType_OPACITY,N)
 
+#define AI_MATKEY_TEXTURE_DISPLACEMENT(N)	\
+	AI_MATKEY_TEXTURE(aiTextureType_DISPLACEMENT,N)
+
+#define AI_MATKEY_TEXTURE_LIGHTMAP(N)	\
+	AI_MATKEY_TEXTURE(aiTextureType_LIGHTMAP,N)
+
+#define AI_MATKEY_TEXTURE_REFLECTION(N)	\
+	AI_MATKEY_TEXTURE(aiTextureType_REFLECTION,N)
+
+#define AI_MATKEY_TEXTURE_UNKNOWN(N)	\
+	AI_MATKEY_TEXTURE(aiTextureType_UNKNOWN,N)
+
+//! @endcond
 
 // ---------------------------------------------------------------------------
-/** @def AI_MATKEY_UVWSRC
- * Parameters: type, N<br>
+/** 
+ * @def AI_MATKEY_UVWSRC
  * Specifies which UV channel is used as source for the mapping coordinates 
- * of the Nth texture of type "type".
+ * of the Nth texture of type "type". If the requested mapping channel does
+ * not exist in a mesh associated with the material, decrement the index by
+ * one until you find a working UV channel. Please note that this property
+ * is mutually exlusive with AI_MATKEY_MAPPING(type,N) set to 'UV'.
  * <br>
  * <b>Type:</b> int<br>
- * <b>Default value to be assumed if this key isn't there:</b> 0<br>
+ * <b>Default value if key is not defined:</b><tt>0</tt><br>
  * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N) 
  * and AI_MATKEY_MAPPING(type,N) == UV<br>
  */
 // ---------------------------------------------------------------------------
-#define _AI_MATKEY_UVWSRC_BASE "$tex.uvwsrc"
 #define AI_MATKEY_UVWSRC(type, N) _AI_MATKEY_UVWSRC_BASE,type,N
 
-// for backward compatibility
+// For backward compatibility and simplicity
+//! @cond MATS_DOC_FULL
 #define AI_MATKEY_UVWSRC_DIFFUSE(N)	\
 	AI_MATKEY_UVWSRC(aiTextureType_DIFFUSE,N)
 
@@ -799,22 +912,34 @@ extern "C" {
 #define AI_MATKEY_UVWSRC_OPACITY(N)	\
 	AI_MATKEY_UVWSRC(aiTextureType_OPACITY,N)
 
+#define AI_MATKEY_UVWSRC_DISPLACEMENT(N)	\
+	AI_MATKEY_UVWSRC(aiTextureType_DISPLACEMENT,N)
 
+#define AI_MATKEY_UVWSRC_LIGHTMAP(N)	\
+	AI_MATKEY_UVWSRC(aiTextureType_LIGHTMAP,N)
+
+#define AI_MATKEY_UVWSRC_REFLECTION(N)	\
+	AI_MATKEY_UVWSRC(aiTextureType_REFLECTION,N)
+
+#define AI_MATKEY_UVWSRC_UNKNOWN(N)	\
+	AI_MATKEY_UVWSRC(aiTextureType_UNKNOWN,N)
+
+//! @endcond
 // ---------------------------------------------------------------------------
-/** @def AI_MATKEY_TEXOP 
- * Parameters: type, N<br>
+/** 
+ * @def AI_MATKEY_TEXOP 
  * Specifies how the Nth texture of type "type" is combined with
- * the result of all color values from all previous textures combined.
+ * the result of all color values from all previous texture layers combined.
  * <br>
- * <b>Type:</b> int (aiTextureOp)<br>
- * <b>Default value to be assumed if this key isn't there:</b> multiply<br>
+ * <b>Type:</b> int (#aiTextureOp)<br>
+ * <b>Default value if key is not defined:</b> <tt>#aiTextureOp_Multiply</tt><br>
  * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N)<br>
  */
 // ---------------------------------------------------------------------------
-#define _AI_MATKEY_TEXOP_BASE "$tex.op"
 #define AI_MATKEY_TEXOP(type, N) _AI_MATKEY_TEXOP_BASE,type,N
 
-// for backward compatibility
+// For backward compatibility and simplicity
+//! @cond MATS_DOC_FULL
 #define AI_MATKEY_TEXOP_DIFFUSE(N)	\
 	AI_MATKEY_TEXOP(aiTextureType_DIFFUSE,N)
 
@@ -839,21 +964,33 @@ extern "C" {
 #define AI_MATKEY_TEXOP_OPACITY(N)	\
 	AI_MATKEY_TEXOP(aiTextureType_OPACITY,N)
 
+#define AI_MATKEY_TEXOP_DISPLACEMENT(N)	\
+	AI_MATKEY_TEXOP(aiTextureType_DISPLACEMENT,N)
 
+#define AI_MATKEY_TEXOP_LIGHTMAP(N)	\
+	AI_MATKEY_TEXOP(aiTextureType_LIGHTMAP,N)
+
+#define AI_MATKEY_TEXOP_REFLECTION(N)	\
+	AI_MATKEY_TEXOP(aiTextureType_REFLECTION,N)
+
+#define AI_MATKEY_TEXOP_UNKNOWN(N)	\
+	AI_MATKEY_TEXOP(aiTextureType_UNKNOWN,N)
+
+//! @endcond
 // ---------------------------------------------------------------------------
-/** @def AI_MATKEY_MAPPING 
- * Parameters: type, N<br>
+/** 
+ * @def AI_MATKEY_MAPPING 
  * Specifies how the Nth texture of type "type" is mapped.
  * <br>
- * <b>Type:</b> int (aiTextureMapping)<br>
- * <b>Default value to be assumed if this key isn't there:</b> UV<br>
- * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N)<br>
+ * <b>Type:</b> int (#aiTextureMapping)<br>
+ * <b>Default value if key is not defined:</b> <tt>#aiTextureMapping_UV</tt><br>
+ * <b>Requires:</b>#AI_MATKEY_TEXTURE(type,N)<br>
  */
 // ---------------------------------------------------------------------------
-#define _AI_MATKEY_MAPPING_BASE "$tex.mapping"
 #define AI_MATKEY_MAPPING(type, N) _AI_MATKEY_MAPPING_BASE,type,N
 
-// for backward compatibility
+// For backward compatibility and simplicity
+//! @cond MATS_DOC_FULL
 #define AI_MATKEY_MAPPING_DIFFUSE(N)	\
 	AI_MATKEY_MAPPING(aiTextureType_DIFFUSE,N)
 
@@ -878,22 +1015,35 @@ extern "C" {
 #define AI_MATKEY_MAPPING_OPACITY(N)	\
 	AI_MATKEY_MAPPING(aiTextureType_OPACITY,N)
 
+#define AI_MATKEY_MAPPING_DISPLACEMENT(N)	\
+	AI_MATKEY_MAPPING(aiTextureType_DISPLACEMENT,N)
+
+#define AI_MATKEY_MAPPING_LIGHTMAP(N)	\
+	AI_MATKEY_MAPPING(aiTextureType_LIGHTMAP,N)
+
+#define AI_MATKEY_MAPPING_REFLECTION(N)	\
+	AI_MATKEY_MAPPING(aiTextureType_REFLECTION,N)
+
+#define AI_MATKEY_MAPPING_UNKNOWN(N)	\
+	AI_MATKEY_MAPPING(aiTextureType_UNKNOWN,N)
+
+//! @endcond
 // ---------------------------------------------------------------------------
-/** @def AI_MATKEY_TEXBLEND (
- * Parameters: type, N<br>
+/** 
+ * @def AI_MATKEY_TEXBLEND 
  * Specifies the strength of the <N>th texture of type <type>. This is just
  * a multiplier for the texture's color values. It may have any value, even
- * outside [0..1]
+ * outside [0..1].
  * <br>
  * <b>Type:</b> float<br>
- * <b>Default value to be assumed if this key isn't there:</b> 1.f<br>
- * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N)<br>
+ * <b>Default value if this key is not defined:</b><tt>1.f</tt><br>
+ * <b>Requires:</b> #AI_MATKEY_TEXTURE(type,N)<br>
  */
 // ---------------------------------------------------------------------------
-#define _AI_MATKEY_TEXBLEND_BASE "$tex.blend"
 #define AI_MATKEY_TEXBLEND(type, N) _AI_MATKEY_TEXBLEND_BASE,type,N
 
-// for backward compatibility
+// For backward compatibility and simplicity
+//! @cond MATS_DOC_FULL
 #define AI_MATKEY_TEXBLEND_DIFFUSE(N)	\
 	AI_MATKEY_TEXBLEND(aiTextureType_DIFFUSE,N)
 
@@ -918,21 +1068,36 @@ extern "C" {
 #define AI_MATKEY_TEXBLEND_OPACITY(N)	\
 	AI_MATKEY_TEXBLEND(aiTextureType_OPACITY,N)
 
+#define AI_MATKEY_TEXBLEND_DISPLACEMENT(N)	\
+	AI_MATKEY_TEXBLEND(aiTextureType_DISPLACEMENT,N)
+
+#define AI_MATKEY_TEXBLEND_LIGHTMAP(N)	\
+	AI_MATKEY_TEXBLEND(aiTextureType_LIGHTMAP,N)
+
+#define AI_MATKEY_TEXBLEND_REFLECTION(N)	\
+	AI_MATKEY_TEXBLEND(aiTextureType_REFLECTION,N)
+
+#define AI_MATKEY_TEXBLEND_UNKNOWN(N)	\
+	AI_MATKEY_TEXBLEND(aiTextureType_UNKNOWN,N)
+
+//! @endcond
 // ---------------------------------------------------------------------------
-/** @def AI_MATKEY_MAPPINGMODE_U 
- * Parameters: type, N<br>
+/** 
+ * @def AI_MATKEY_MAPPINGMODE_U 
  * Specifies the texture mapping mode for the <N>th texture of type <type> in
- * the u (x) direction
+ * the u (x) direction.
  * <br>
- * <b>Type:</b> int (aiTextureMapMode)<br>
- * <b>Default value:</b> aiTextureMapMode_Wrap<br>
+ * <b>Type:</b> int (#aiTextureMapMode)<br>
+ * <b>Default value if key is not defined:</b><tt>#aiTextureMapMode_Wrap</tt><br>
  * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N)<br>
+  * @note There's no equivalent property for the 'w' axis of volume textures,
+ *   just because no formats exports this information.
  */
 // ---------------------------------------------------------------------------
-#define _AI_MATKEY_MAPPINGMODE_U_BASE "$tex.mapmodeu"
 #define AI_MATKEY_MAPPINGMODE_U(type, N) _AI_MATKEY_MAPPINGMODE_U_BASE,type,N
 
-// for backward compatibility
+// For backward compatibility and simplicity
+//! @cond MATS_DOC_FULL
 #define AI_MATKEY_MAPPINGMODE_U_DIFFUSE(N)	\
 	AI_MATKEY_MAPPINGMODE_U(aiTextureType_DIFFUSE,N)
 
@@ -957,21 +1122,36 @@ extern "C" {
 #define AI_MATKEY_MAPPINGMODE_U_OPACITY(N)	\
 	AI_MATKEY_MAPPINGMODE_U(aiTextureType_OPACITY,N)
 
+#define AI_MATKEY_MAPPINGMODE_U_DISPLACEMENT(N)	\
+	AI_MATKEY_MAPPINGMODE_U(aiTextureType_DISPLACEMENT,N)
+
+#define AI_MATKEY_MAPPINGMODE_U_LIGHTMAP(N)	\
+	AI_MATKEY_MAPPINGMODE_U(aiTextureType_LIGHTMAP,N)
+
+#define AI_MATKEY_MAPPINGMODE_U_REFLECTION(N)	\
+	AI_MATKEY_MAPPINGMODE_U(aiTextureType_REFLECTION,N)
+
+#define AI_MATKEY_MAPPINGMODE_U_UNKNOWN(N)	\
+	AI_MATKEY_MAPPINGMODE_U(aiTextureType_UNKNOWN,N)
+
+//! @endcond
 // ---------------------------------------------------------------------------
-/** @def AI_MATKEY_MAPPINGMODE_V 
- * Parameters: type, N<br>
+/** 
+ * @def AI_MATKEY_MAPPINGMODE_V 
  * Specifies the texture mapping mode for the <N>th texture of type <type> in
- * the w (z) direction
+ * the w (z) direction.
  * <br>
- * <b>Type:</b> int (aiTextureMapMode)<br>
- * <b>Default value:</b> aiTextureMapMode_Wrap<br>
+ * <b>Type:</b> int (#aiTextureMapMode)<br>
+ * <b>Default value if key is not defined:</b><tt>#aiTextureMapMode_Wrap</tt><br>
  * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N)<br>
+ * @note There's no equivalent property for the 'w' axis of volume textures,
+ *   just because no formats exports this information.
  */
 // ---------------------------------------------------------------------------
-#define _AI_MATKEY_MAPPINGMODE_V_BASE "$tex.mapmodev"
 #define AI_MATKEY_MAPPINGMODE_V(type, N) _AI_MATKEY_MAPPINGMODE_V_BASE,type,N
 
-// for backward compatibility
+// For backward compatibility and simplicity
+//! @cond MATS_DOC_FULL
 #define AI_MATKEY_MAPPINGMODE_V_DIFFUSE(N)	\
 	AI_MATKEY_MAPPINGMODE_V(aiTextureType_DIFFUSE,N)
 
@@ -996,80 +1176,92 @@ extern "C" {
 #define AI_MATKEY_MAPPINGMODE_V_OPACITY(N)	\
 	AI_MATKEY_MAPPINGMODE_V(aiTextureType_OPACITY,N)
 
+#define AI_MATKEY_MAPPINGMODE_V_DISPLACEMENT(N)	\
+	AI_MATKEY_MAPPINGMODE_V(aiTextureType_DISPLACEMENT,N)
+
+#define AI_MATKEY_MAPPINGMODE_V_LIGHTMAP(N)	\
+	AI_MATKEY_MAPPINGMODE_V(aiTextureType_LIGHTMAP,N)
+
+#define AI_MATKEY_MAPPINGMODE_V_REFLECTION(N)	\
+	AI_MATKEY_MAPPINGMODE_V(aiTextureType_REFLECTION,N)
+
+#define AI_MATKEY_MAPPINGMODE_V_UNKNOWN(N)	\
+	AI_MATKEY_MAPPINGMODE_V(aiTextureType_UNKNOWN,N)
+
+//! @endcond
 // ---------------------------------------------------------------------------
-/** @def AI_MATKEY_MAPPINGMODE_W 
- * Parameters: type, N<br>
- * Specifies the texture mapping mode for the <N>th texture of type <type> in
- * the w (z) direction
- * <br>
- * <b>Type:</b> int (aiTextureMapMode)<br>
- * <b>Default value:</b> aiTextureMapMode_Wrap<br>
- * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N)<br>
- */
-// ---------------------------------------------------------------------------
-#define _AI_MATKEY_MAPPINGMODE_W_BASE "$tex.mapmodew"
-#define AI_MATKEY_MAPPINGMODE_W(type, N) _AI_MATKEY_MAPPINGMODE_W_BASE,type,N
-
-// for backward compatibility
-#define AI_MATKEY_MAPPINGMODE_W_DIFFUSE(N)	\
-	AI_MATKEY_MAPPINGMODE_W(aiTextureType_DIFFUSE,N)
-
-#define AI_MATKEY_MAPPINGMODE_W_SPECULAR(N)	\
-	AI_MATKEY_MAPPINGMODE_W(aiTextureType_SPECULAR,N)
-
-#define AI_MATKEY_MAPPINGMODE_W_AMBIENT(N)	\
-	AI_MATKEY_MAPPINGMODE_W(aiTextureType_AMBIENT,N)
-
-#define AI_MATKEY_MAPPINGMODE_W_EMISSIVE(N)	\
-	AI_MATKEY_MAPPINGMODE_W(aiTextureType_EMISSIVE,N)
-
-#define AI_MATKEY_MAPPINGMODE_W_NORMALS(N)	\
-	AI_MATKEY_MAPPINGMODE_W(aiTextureType_NORMALS,N)
-
-#define AI_MATKEY_MAPPINGMODE_W_HEIGHT(N)	\
-	AI_MATKEY_MAPPINGMODE_W(aiTextureType_HEIGHT,N)
-
-#define AI_MATKEY_MAPPINGMODE_W_SHININESS(N)	\
-	AI_MATKEY_MAPPINGMODE_W(aiTextureType_SHININESS,N)
-
-#define AI_MATKEY_MAPPINGMODE_W_OPACITY(N)	\
-	AI_MATKEY_MAPPINGMODE_W(aiTextureType_OPACITY,N)
-
-
-// ---------------------------------------------------------------------------
-/** @def AI_MATKEY_TEXMAP_AXIS
- * Parameters: type, N<br>
+/** 
+ * @def AI_MATKEY_TEXMAP_AXIS
  * Specifies the main mapping axis of the Nth texture of type "type".
  * This applies to non-UV mapped textures. For spherical, cylindrical and
  * planar this is the main axis of the corresponding geometric shape.
  * <br>
- * <b>Type:</b> int (aiAxis)<br>
- * <b>Default value:</b> aiAxis_Z<br>
+ * <b>Type:</b> float[3] (#aiVector3D)<br>
+ * <b>Default value if key is not defined:</b> <tt>aiVector3D(0.f,1.f,0.f)</tt> <br>
  * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N) and 
  * AI_MATKEY_MAPPING(type,N) != UV<br>
  */
 // ---------------------------------------------------------------------------
-#define _AI_MATKEY_TEXMAP_AXIS_BASE "$tex.mapaxis"
 #define AI_MATKEY_TEXMAP_AXIS(type, N) _AI_MATKEY_TEXMAP_AXIS_BASE,type,N
 
+// For backward compatibility and simplicity
+//! @cond MATS_DOC_FULL
+#define AI_MATKEY_TEXMAP_AXIS_DIFFUSE(N)	\
+	AI_MATKEY_TEXMAP_AXIS(aiTextureType_DIFFUSE,N)
+
+#define AI_MATKEY_TEXMAP_AXIS_SPECULAR(N)	\
+	AI_MATKEY_TEXMAP_AXIS(aiTextureType_SPECULAR,N)
+
+#define AI_MATKEY_TEXMAP_AXIS_AMBIENT(N)	\
+	AI_MATKEY_TEXMAP_AXIS(aiTextureType_AMBIENT,N)
+
+#define AI_MATKEY_TEXMAP_AXIS_EMISSIVE(N)	\
+	AI_MATKEY_TEXMAP_AXIS(aiTextureType_EMISSIVE,N)
+
+#define AI_MATKEY_TEXMAP_AXIS_NORMALS(N)	\
+	AI_MATKEY_TEXMAP_AXIS(aiTextureType_NORMALS,N)
+
+#define AI_MATKEY_TEXMAP_AXIS_HEIGHT(N)	\
+	AI_MATKEY_TEXMAP_AXIS(aiTextureType_HEIGHT,N)
+
+#define AI_MATKEY_TEXMAP_AXIS_SHININESS(N)	\
+	AI_MATKEY_TEXMAP_AXIS(aiTextureType_SHININESS,N)
+
+#define AI_MATKEY_TEXMAP_AXIS_OPACITY(N)	\
+	AI_MATKEY_TEXMAP_AXIS(aiTextureType_OPACITY,N)
+
+#define AI_MATKEY_TEXMAP_AXIS_DISPLACEMENT(N)	\
+	AI_MATKEY_TEXMAP_AXIS(aiTextureType_DISPLACEMENT,N)
+
+#define AI_MATKEY_TEXMAP_AXIS_LIGHTMAP(N)	\
+	AI_MATKEY_TEXMAP_AXIS(aiTextureType_LIGHTMAP,N)
+
+#define AI_MATKEY_TEXMAP_AXIS_REFLECTION(N)	\
+	AI_MATKEY_TEXMAP_AXIS(aiTextureType_REFLECTION,N)
+
+#define AI_MATKEY_TEXMAP_AXIS_UNKNOWN(N)	\
+	AI_MATKEY_TEXMAP_AXIS(aiTextureType_UNKNOWN,N)
+
+//! @endcond
 // ---------------------------------------------------------------------------
-/** @def AI_MATKEY_UVTRANSFORM 
- * Parameters: type, N<br>
+/** 
+ * @def AI_MATKEY_UVTRANSFORM 
  * Specifies how the UV mapping coordinates for the Nth texture of type
  * "type" are transformed before they're used for mapping. This is an array
  * of five floats - use the aiUVTransform structure for simplicity. 
  * <br>
  * <b>Type:</b> Array of 5 floats<br>
- * <b>Default value:</b> 0.f,0.f,1.f,1.f,0.f <br>
+ * <b>Default value if key is not defined:</b><tt>0.f,0.f,1.f,1.f,0.f</tt><br>
  * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N) and 
  * AI_MATKEY_MAPPING(type,N) == UV<br>
- * <b>Note:</b>Transformed 3D texture coordinates are not supported
+ * <b>Note:</b>Transformed 3D texture coordinates are not *yet* supported.
+ * And they'll probably never be, no format exports such rubbish.
  */
 // ---------------------------------------------------------------------------
-#define _AI_MATKEY_UVTRANSFORM_BASE "$tex.uvtrafo"
 #define AI_MATKEY_UVTRANSFORM(type, N) _AI_MATKEY_UVTRANSFORM_BASE,type,N
 
-// for backward compatibility
+// For backward compatibility and simplicity
+//! @cond MATS_DOC_FULL
 #define AI_MATKEY_UVTRANSFORM_DIFFUSE(N)	\
 	AI_MATKEY_UVTRANSFORM(aiTextureType_DIFFUSE,N)
 
@@ -1094,7 +1286,69 @@ extern "C" {
 #define AI_MATKEY_UVTRANSFORM_OPACITY(N)	\
 	AI_MATKEY_UVTRANSFORM(aiTextureType_OPACITY,N)
 
+#define AI_MATKEY_UVTRANSFORM_DISPLACEMENT(N)	\
+	AI_MATKEY_UVTRANSFORM(aiTextureType_DISPLACEMENT,N)
 
+#define AI_MATKEY_UVTRANSFORM_LIGHTMAP(N)	\
+	AI_MATKEY_UVTRANSFORM(aiTextureType_LIGHTMAP,N)
+
+#define AI_MATKEY_UVTRANSFORM_REFLECTION(N)	\
+	AI_MATKEY_UVTRANSFORM(aiTextureType_REFLECTION,N)
+
+#define AI_MATKEY_UVTRANSFORM_UNKNOWN(N)	\
+	AI_MATKEY_UVTRANSFORM(aiTextureType_UNKNOWN,N)
+
+//! @endcond
+// ---------------------------------------------------------------------------
+/** 
+ * @def AI_MATKEY_TEXFLAGS
+ * Specifies flags for the Nth texture of type 'type'. The key is a bitwise
+ * combination of the #aiTextureFlags enumerated values.
+ * <br>
+ * <b>Type:</b> int (#aiTextureFlags)<br>
+ * <b>Default value if key is not defined:</b> <tt>0</tt><br>
+ * <b>Requires:</b>#AI_MATKEY_TEXTURE(type,N)<br>
+ */
+// ---------------------------------------------------------------------------
+#define AI_MATKEY_TEXFLAGS(type, N) _AI_MATKEY_TEXFLAGS_BASE,type,N
+
+// For backward compatibility and simplicity
+//! @cond MATS_DOC_FULL
+#define AI_MATKEY_TEXFLAGS_DIFFUSE(N)	\
+	AI_MATKEY_TEXFLAGS(aiTextureType_DIFFUSE,N)
+
+#define AI_MATKEY_TEXFLAGS_SPECULAR(N)	\
+	AI_MATKEY_TEXFLAGS(aiTextureType_SPECULAR,N)
+
+#define AI_MATKEY_TEXFLAGS_AMBIENT(N)	\
+	AI_MATKEY_TEXFLAGS(aiTextureType_AMBIENT,N)
+
+#define AI_MATKEY_TEXFLAGS_EMISSIVE(N)	\
+	AI_MATKEY_TEXFLAGS(aiTextureType_EMISSIVE,N)
+
+#define AI_MATKEY_TEXFLAGS_NORMALS(N)	\
+	AI_MATKEY_TEXFLAGS(aiTextureType_NORMALS,N)
+
+#define AI_MATKEY_TEXFLAGS_HEIGHT(N)	\
+	AI_MATKEY_TEXFLAGS(aiTextureType_HEIGHT,N)
+
+#define AI_MATKEY_TEXFLAGS_SHININESS(N)	\
+	AI_MATKEY_TEXFLAGS(aiTextureType_SHININESS,N)
+
+#define AI_MATKEY_TEXFLAGS_OPACITY(N)	\
+	AI_MATKEY_TEXFLAGS(aiTextureType_OPACITY,N)
+
+#define AI_MATKEY_TEXFLAGS_DISPLACEMENT(N)	\
+	AI_MATKEY_TEXFLAGS(aiTextureType_DISPLACEMENT,N)
+
+#define AI_MATKEY_TEXFLAGS_LIGHTMAP(N)	\
+	AI_MATKEY_TEXFLAGS(aiTextureType_LIGHTMAP,N)
+
+#define AI_MATKEY_TEXFLAGS_REFLECTION(N)	\
+	AI_MATKEY_TEXFLAGS(aiTextureType_REFLECTION,N)
+
+#define AI_MATKEY_TEXFLAGS_UNKNOWN(N)	\
+	AI_MATKEY_TEXFLAGS(aiTextureType_UNKNOWN,N)
 
 
 #define AI_MATKEY_ORENNAYAR_ROUGHNESS	 "$shading.orennayar.roughness",0,0
@@ -1102,9 +1356,11 @@ extern "C" {
 #define AI_MATKEY_COOK_TORRANCE_PARAM	 "$shading.cookt.param",0,0
 
 /** @def AI_MATKEY_GLOBAL_BACKGROUND_IMAGE
-*  Global property defined by some loaders. Contains the path to 
-*  the image file to be used as background image.
-*/
+ *  Global property defined by some loaders. Contains the path to 
+ *  the image file to be used as background image.
+ *
+ *  @deprecated
+ */
 #define AI_MATKEY_GLOBAL_BACKGROUND_IMAGE "$global.bg.image2d",0,0
 
 
@@ -1276,48 +1532,56 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialString(const C_STRUCT aiMaterial* pMat,
 // ---------------------------------------------------------------------------
 /** @brief Helper function to get a texture from a material structure.
  *
- *  This function is provided just for convenience. 
- *  @param mat Pointer to the input material. May not be NULL
- *  @param index Index of the texture to retrieve. If the index is too 
- *		large the function fails.
- *  @param type Specifies the type of the texture to retrieve (e.g. diffuse,
- *     specular, height map ...)
- *  @param path Receives the output path
- *		NULL is not allowed as value
- *  @param mapping The texture mapping.
- *		NULL is allowed as value.
- *  @param uvindex Receives the UV index of the texture. 
- *		NULL is allowed as value.
- *  @param blend Receives the blend factor for the texture
- *		NULL is allowed as value.
- *  @param op Receives the texture operation to perform between
- *		this texture and the previous texture. NULL is allowed as value.
- *  @param mapmode Receives the mapping modes to be used for the texture.
- *      The parameter may be NULL but if it is a valid pointer it MUST
- *      point to an array of 3 aiTextureMapMode variables (one for each
- *      axis: UVW order (=XYZ)). 
+ *  This function is provided just for convenience. You could also read the
+ *  texture by reading all of its properties manually. This function bundles
+ *  all of them in a huge function-monster.
+ *
+ *  @param[in] mat Pointer to the input material. May not be NULL
+ *  @param[in] type Specifies the type of the texture to read (e.g. diffuse,
+ *     specular, height map ...). 
+ *  @param[in] index Index of the texture layer to be read. The function 
+ *      fails if the requested layer is not available. 
+ *  @param[out] path Receives the output path
+ *      This parameter mist be non-null.
+ *  @param mapping The texture mapping mode to be used.
+ *      Pass NULL if you'e not interested in this information.
+ *  @param[out] uvindex For UV-mapped textures: receives the index of the UV
+ *      source channel. Unmodified otherwise.
+ *      Pass NULL if you'e not interested in this information.
+ *  @param[out] blend Receives the blend factor for the texture
+ *      Pass NULL if you'e not interested in this information.
+ *  @param[out] op Receives the texture blend operation to be perform between
+ *		this texture and the previous texture.
+ *      Pass NULL if you'e not interested in this information.
+ *  @param[out] mapmode Receives the mapping modes to be used for the texture.
+ *      Pass NULL if you'e not interested in this information. Otherwise,
+ *      pass a pointer to an array of two aiTextureMapMode's (one for each
+ *      axis, UV order).
+ *  @return AI_SUCCESS on success, something else otherwise. Have fun.
  */
 // ---------------------------------------------------------------------------
 #ifdef __cplusplus
 ASSIMP_API aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
-	 aiTextureType type,
+	aiTextureType type,
     unsigned int  index,
     aiString* path,
-	 aiTextureMapping* mapping	= NULL,
+	aiTextureMapping* mapping	= NULL,
     unsigned int* uvindex		= NULL,
     float* blend				= NULL,
     aiTextureOp* op				= NULL,
-	 aiTextureMapMode* mapmode	= NULL); 
+	aiTextureMapMode* mapmode	= NULL,
+	unsigned int* flags         = NULL); 
 #else
 C_ENUM aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     C_ENUM aiTextureType type,
     unsigned int  index,
     C_STRUCT aiString* path,
-	 C_ENUM aiTextureMapping* mapping	/*= NULL*/,
+	C_ENUM aiTextureMapping* mapping	/*= NULL*/,
     unsigned int* uvindex				/*= NULL*/,
     float* blend						/*= NULL*/,
     C_ENUM aiTextureOp* op				/*= NULL*/,
-	 C_ENUM aiTextureMapMode* mapmode	/*= NULL*/); 
+	C_ENUM aiTextureMapMode* mapmode	/*= NULL*/,
+	unsigned int* flags                 /*= NULL*/); 
 #endif // !#ifdef __cplusplus
 
 #ifdef __cplusplus

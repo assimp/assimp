@@ -400,6 +400,8 @@ struct Material
 	Texture sTexOpacity;
 	//! Specular texture channel
 	Texture sTexSpecular;
+	//! Reflective texture channel
+	Texture sTexReflective;
 	//! Bump texture channel
 	Texture sTexBump;
 	//! Emissive texture channel

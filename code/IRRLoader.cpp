@@ -593,7 +593,7 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
 
 // ------------------------------------------------------------------------------------------------
 // This function is maybe more generic than we'd need it here
-void SetupMapping (MaterialHelper* mat, aiTextureMapping mode, aiAxis axis = aiAxis_Y)
+void SetupMapping (MaterialHelper* mat, aiTextureMapping mode, const aiVector3D& axis = aiVector3D(0.f,1.f,0.f))
 {
 	// Check whether there are texture properties defined - setup
 	// the desired texture mapping mode for all of them and ignore
@@ -629,16 +629,15 @@ void SetupMapping (MaterialHelper* mat, aiTextureMapping mode, aiAxis axis = aiA
 				m->mKey.Set("$tex.mapaxis");
 				m->mIndex    = prop->mIndex;
 				m->mSemantic = prop->mSemantic;
-				m->mType     = aiPTI_Integer;
+				m->mType     = aiPTI_Float;
 
-				m->mDataLength = 4;
-				m->mData = new char[4];
-				*((int*)m->mData) = axis;
+				m->mDataLength = 12;
+				m->mData = new char[12];
+				*((aiVector3D*)m->mData) = axis;
 				p.push_back(m);
 			}
 		}
-		else if (! ::strcmp( prop->mKey.data, "$tex.uvwsrc"))
-		{
+		else if (! ::strcmp( prop->mKey.data, "$tex.uvwsrc"))	{
 			delete mat->mProperties[i];
 		}
 		else p.push_back(prop);
@@ -647,8 +646,7 @@ void SetupMapping (MaterialHelper* mat, aiTextureMapping mode, aiAxis axis = aiA
 	if (p.empty())return;
 
 	// rebuild the output array
-	if (p.size() > mat->mNumAllocated)
-	{
+	if (p.size() > mat->mNumAllocated)	{
 		delete[] mat->mProperties;
 		mat->mProperties = new aiMaterialProperty*[p.size()];
 	}
@@ -793,12 +791,10 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 				if (mesh->HasTextureCoords(1))
 				{
 					int idx = 1;
-					if (src.second & (AI_IRRMESH_MAT_solid_2layer | AI_IRRMESH_MAT_lightmap))
-					{
+					if (src.second & (AI_IRRMESH_MAT_solid_2layer | AI_IRRMESH_MAT_lightmap))	{
 						mat->AddProperty(&idx,1,AI_MATKEY_UVWSRC_DIFFUSE(0));
 					}
-					else if (src.second & AI_IRRMESH_MAT_normalmap_solid)
-					{
+					else if (src.second & AI_IRRMESH_MAT_normalmap_solid)	{
 						mat->AddProperty(&idx,1,AI_MATKEY_UVWSRC_NORMALS(0));
 					}
 				}
@@ -836,7 +832,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 
 			// Now adjust this output material - if there is a first texture
 			// set, setup spherical UV mapping around the Y axis.
-			SetupMapping ( (MaterialHelper*) materials.back(), aiTextureMapping_SPHERE, aiAxis_Y );
+			SetupMapping ( (MaterialHelper*) materials.back(), aiTextureMapping_SPHERE);
 		}
 		break;
 

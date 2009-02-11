@@ -487,46 +487,44 @@ aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     unsigned int* uvindex		/*= NULL*/,
     float* blend				/*= NULL*/,
     aiTextureOp* op				/*= NULL*/,
-	aiTextureMapMode* mapmode	/*= NULL*/)
+	aiTextureMapMode* mapmode	/*= NULL*/,
+	unsigned int* flags         /*= NULL*/
+	)
 {
 	ai_assert(NULL != mat && NULL != path);
 
 	// Get the path to the texture
-	if (AI_SUCCESS != aiGetMaterialString(mat,AI_MATKEY_TEXTURE(type,index),path))
-	{
+	if (AI_SUCCESS != aiGetMaterialString(mat,AI_MATKEY_TEXTURE(type,index),path))	{
 		return AI_FAILURE;
 	}
-
-	// Determine the mapping type of the texture
+	// Determine mapping type 
 	aiTextureMapping mapping = aiTextureMapping_UV;
 	aiGetMaterialInteger(mat,AI_MATKEY_MAPPING(type,index),(int*)&mapping);
-	if (_mapping)*_mapping = mapping;
+	if (_mapping)
+		*_mapping = mapping;
 
-	// Get the UV index of the texture
-	if (aiTextureMapping_UV == mapping && uvindex)
-	{
+	// Get UV index 
+	if (aiTextureMapping_UV == mapping && uvindex)	{
 		aiGetMaterialInteger(mat,AI_MATKEY_UVWSRC(type,index),(int*)uvindex);
 	}
-
-	// Get the blend factor of the texture
-	if (blend)
-	{
+	// Get blend factor 
+	if (blend)	{
 		aiGetMaterialFloat(mat,AI_MATKEY_TEXBLEND(type,index),blend);
 	}
-
-	// Get the texture operation of the texture
-	if (op)
-	{
+	// Get texture operation 
+	if (op){
 		aiGetMaterialInteger(mat,AI_MATKEY_TEXOP(type,index),(int*)op);
 	}
-
-	// get the texture mapping modes for the texture
-	if (mapmode)
-	{
+	// Get texture mapping modes
+	if (mapmode)	{
 		aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_U(type,index),(int*)&mapmode[0]);
 		aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_V(type,index),(int*)&mapmode[1]);		
-		aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_W(type,index),(int*)&mapmode[2]);
 	}
+	// Get texture flags
+	if (flags){
+		aiGetMaterialInteger(mat,AI_MATKEY_TEXFLAGS(type,index),(int*)flags);
+	}
+
 	return AI_SUCCESS;
 }
 

@@ -330,9 +330,12 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material& oldMat,
 	if( oldMat.sTexShininess.mMapName.length() > 0)
 		CopyTexture(mat,oldMat.sTexShininess, aiTextureType_SHININESS);
 
+	// REFLECTION texture
+	if( oldMat.sTexReflective.mMapName.length() > 0)
+		CopyTexture(mat,oldMat.sTexReflective, aiTextureType_REFLECTION);
+
 	// Store the name of the material itself, too
-	if( oldMat.mName.length())
-	{
+	if( oldMat.mName.length())	{
 		aiString tex;
 		tex.Set( oldMat.mName);
 		mat.AddProperty( &tex, AI_MATKEY_NAME);
@@ -435,8 +438,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 	iArray.reserve(3);
 
 	aiMatrix4x4 abs;
-	if (pcIn->mName == "$$$DUMMY")
-	{
+	if (pcIn->mName == "$$$DUMMY")	{
 		// FIX: Append the "real" name of the dummy to the string
 		pcIn->mName = "Dummy." + pcIn->mDummyName;
 	}
@@ -495,11 +497,10 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 
 	// Now build the transformation matrix of the node
 	// ROTATION
-	if (pcIn->aRotationKeys.size())
-	{
+	if (pcIn->aRotationKeys.size()){
 		pcOut->mTransformation = aiMatrix4x4( pcIn->aRotationKeys[0].mValue.GetMatrix() );
 	}
-	else if (pcIn->aCameraRollKeys.size())
+	else if (pcIn->aCameraRollKeys.size()) 
 	{
 		aiMatrix4x4::RotationZ(AI_DEG_TO_RAD(- pcIn->aCameraRollKeys[0].mValue),
 			pcOut->mTransformation);

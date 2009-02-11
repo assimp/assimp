@@ -73,6 +73,8 @@ HANDLE g_hThreadHandle				= NULL;
 float g_fWheelPos					= -10.0f;
 bool g_bLoadingCanceled				= false;
 IDirect3DTexture9* g_pcTexture		= NULL;
+bool g_bPlay						= false;
+double g_dCurrent = 0.;
 
 extern bool g_bWasFlipped			/*= false*/;
 
@@ -226,9 +228,8 @@ int LoadAsset(void)
 	// for each mesh in the original asset
 	g_pcAsset->apcMeshes = new AssetHelper::MeshHelper*[g_pcAsset->pcScene->mNumMeshes]();
 	for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
-	{	
 		g_pcAsset->apcMeshes[i] = new AssetHelper::MeshHelper();
-	}
+
 
 	// create animator
 	g_pcAsset->mAnimator = new SceneAnimator( g_pcAsset->pcScene);
@@ -248,16 +249,27 @@ int LoadAsset(void)
 	g_sCamera.vRight = aiVector3D(0.0f,1.0f,0.0f);
 
 	// build native D3D vertex/index buffers, textures, materials
-	if( 1 != CreateAssetData())return 0;
+	if( 1 != CreateAssetData())
+		return 0;
+
+	if (!g_pcAsset->pcScene->HasAnimations()) {
+		EnableWindow(GetDlgItem(g_hDlg,IDC_PLAY),FALSE);
+		EnableWindow(GetDlgItem(g_hDlg,IDC_SLIDERANIM),FALSE);
+	}
+	else {
+		EnableWindow(GetDlgItem(g_hDlg,IDC_PLAY),TRUE);
+		EnableWindow(GetDlgItem(g_hDlg,IDC_SLIDERANIM),TRUE);
+	}
 
 	CLogDisplay::Instance().AddEntry("[OK] The asset has been loaded successfully");
 	CDisplay::Instance().FillDisplayList();
 	CDisplay::Instance().FillAnimList();
 
 	CDisplay::Instance().FillDefaultStatistics();
+	
+	// render the scene once
+	CDisplay::Instance().OnRender();
 
-	// just make sure the alpha blend ordering is done in the first frame
-	CMeshRenderer::Instance().Reset();
 	g_pcAsset->iNormalSet = AssetHelper::ORIGINAL;
 	g_bWasFlipped = false;
 	return 1;
@@ -437,7 +449,6 @@ int CreateAssetData()
 
 	// reset all subsystems
 	CMaterialManager::Instance().Reset();
-	CMeshRenderer::Instance().Reset();
 	CDisplay::Instance().Reset();
 
 	for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)

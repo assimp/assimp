@@ -1,5 +1,3 @@
-/** Defines the parser helper class for the collada loader */
-
 /*
 Open Asset Import Library (ASSIMP)
 ----------------------------------------------------------------------
@@ -40,17 +38,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
+/** @file ColladaParser.h
+ *  @brief Defines the parser helper class for the collada loader 
+ */
+
 #ifndef AI_COLLADAPARSER_H_INC
 #define AI_COLLADAPARSER_H_INC
 
 #include "irrXMLWrapper.h"
 #include "ColladaHelper.h"
 
-namespace Assimp
-{
+namespace Assimp	{
 
-/** Parser helper class for the Collada loader. Does all the XML reading and builds internal data structures from it, 
- * but leaves the resolving of all the references to the loader.
+// ------------------------------------------------------------------------------------------
+/** Parser helper class for the Collada loader. 
+ *
+ *  Does all the XML reading and builds internal data structures from it, 
+ *  but leaves the resolving of all the references to the loader.
 */
 class ColladaParser
 {
@@ -176,10 +180,7 @@ protected:
 	void SkipElement( const char* pElement);
 
 	/** Compares the current xml element name to the given string and returns true if equal */
-	bool IsElement( const char* pName) const {
-		ai_assert( mReader->getNodeType() == irr::io::EXN_ELEMENT); 
-		return ::strcmp( mReader->getNodeName(), pName) == 0; 
-	}
+	bool IsElement( const char* pName) const;
 
 	/** Tests for the opening tag of the given element, throws an exception if not found */
 	void TestOpening( const char* pName);
@@ -199,13 +200,17 @@ protected:
 	    Skips leading whitespace. */
 	const char* GetTextContent();
 
+	/** Reads the text contents of an element, returns NULL if not given.
+	    Skips leading whitespace. */
+	const char* ColladaParser::TestTextContent();
+
 	/** Reads a single bool from current text content */
 	bool ReadBoolFromTextContent();
 
 	/** Reads a single float from current text content */
 	float ReadFloatFromTextContent();
 
-	/** Calculates the resulting transformation fromm all the given transform steps */
+	/** Calculates the resulting transformation from all the given transform steps */
 	aiMatrix4x4 CalculateResultTransform( const std::vector<Collada::Transform>& pTransforms) const;
 
 	/** Determines the input data type for the given semantic string */
@@ -222,7 +227,8 @@ protected:
 	/** XML reader */
 	irr::io::IrrXMLReader* mReader;
 
-	/** All data arrays found in the file by ID. Might be referred to by actually everyone. Collada, you are a steaming pile of indirection. */
+	/** All data arrays found in the file by ID. Might be referred to by actually 
+	    everyone. Collada, you are a steaming pile of indirection. */
 	typedef std::map<std::string, Collada::Data> DataLibrary;
 	DataLibrary mDataLibrary;
 
@@ -258,7 +264,8 @@ protected:
 	typedef std::map<std::string, Collada::Camera> CameraLibrary;
 	CameraLibrary mCameraLibrary;
 
-	/** Pointer to the root node. Don't delete, it just points to one of the nodes in the node library. */
+	/** Pointer to the root node. Don't delete, it just points to one of 
+	    the nodes in the node library. */
 	Collada::Node* mRootNode;
 
 	/** Size unit: how large compared to a meter */
@@ -266,7 +273,18 @@ protected:
 
 	/** Which is the up vector */
 	enum { UP_X, UP_Y, UP_Z } mUpDirection;
+
+	/** Collada file format version */
+	Collada::FormatVersion mFormat;
 };
+
+// ------------------------------------------------------------------------------------------------
+// Check for element match
+inline bool ColladaParser::IsElement( const char* pName) const
+{
+	ai_assert( mReader->getNodeType() == irr::io::EXN_ELEMENT); 
+	return ::strcmp( mReader->getNodeName(), pName) == 0; 
+}
 
 // ------------------------------------------------------------------------------------------------
 // Finds the item in the given library by its reference, throws if not found

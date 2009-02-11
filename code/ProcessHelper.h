@@ -68,22 +68,85 @@ inline float GetColorDifference( const aiColor4D& pColor1, const aiColor4D& pCol
 }
 
 // -------------------------------------------------------------------------------
+// Compute the AABB of a mesh
+inline void FindAABB (const aiMesh* mesh, aiVector3D& min, aiVector3D& max)
+{
+	min = aiVector3D (10e10f,  10e10f, 10e10f);
+	max = aiVector3D (-10e10f,-10e10f,-10e10f);
+	for (unsigned int i = 0;i < mesh->mNumVertices;++i)
+	{
+		const aiVector3D& v = mesh->mVertices[i];
+		min.x = ::std::min(v.x,min.x);
+		min.y = ::std::min(v.y,min.y);
+		min.z = ::std::min(v.z,min.z);
+		max.x = ::std::max(v.x,max.x);
+		max.y = ::std::max(v.y,max.y);
+		max.z = ::std::max(v.z,max.z);
+	}
+}
+
+// -------------------------------------------------------------------------------
+// Compute the AABB of a mesh after applying a given transform
+inline void FindAABBTransformed (const aiMesh* mesh, aiVector3D& min, aiVector3D& max, 
+	const aiMatrix4x4& m)
+{
+	min = aiVector3D (10e10f,  10e10f, 10e10f);
+	max = aiVector3D (-10e10f,-10e10f,-10e10f);
+	for (unsigned int i = 0;i < mesh->mNumVertices;++i)
+	{
+		const aiVector3D v = m * mesh->mVertices[i];
+		min.x = ::std::min(v.x,min.x);
+		min.y = ::std::min(v.y,min.y);
+		min.z = ::std::min(v.z,min.z);
+		max.x = ::std::max(v.x,max.x);
+		max.y = ::std::max(v.y,max.y);
+		max.z = ::std::max(v.z,max.z);
+	}
+}
+
+// -------------------------------------------------------------------------------
+// Helper function to determine the 'real' center of a mesh
+inline void FindMeshCenter (aiMesh* mesh, aiVector3D& out, aiVector3D& min, aiVector3D& max)
+{
+	FindAABB(mesh,min,max);
+	out = min + (max-min)*0.5f;
+}
+
+// -------------------------------------------------------------------------------
+// Helper function to determine the 'real' center of a mesh after applying a given transform
+inline void FindMeshCenterTransformed (aiMesh* mesh, aiVector3D& out, aiVector3D& min,
+	aiVector3D& max, const aiMatrix4x4& m)
+{
+	FindAABBTransformed(mesh,min,max,m);
+	out = min + (max-min)*0.5f;
+}
+
+// -------------------------------------------------------------------------------
+// Helper function to determine the 'real' center of a mesh
+inline void FindMeshCenter (aiMesh* mesh, aiVector3D& out)
+{
+	aiVector3D min,max;
+	FindMeshCenter(mesh,out,min,max);
+}
+
+// -------------------------------------------------------------------------------
+// Helper function to determine the 'real' center of a mesh after applying a given transform
+inline void FindMeshCenterTransformed (aiMesh* mesh, aiVector3D& out,
+	const aiMatrix4x4& m)
+{
+	aiVector3D min,max;
+	FindMeshCenterTransformed(mesh,out,min,max,m);
+}
+
+// -------------------------------------------------------------------------------
 // Compute a good epsilon value for position comparisons on a mesh
 inline float ComputePositionEpsilon(const aiMesh* pMesh)
 {
 	const float epsilon = 1e-5f;
 
 	// calculate the position bounds so we have a reliable epsilon to check position differences against 
-	aiVector3D minVec( 1e10f, 1e10f, 1e10f), maxVec( -1e10f, -1e10f, -1e10f);
-	for( unsigned int a = 0; a < pMesh->mNumVertices; a++)
-	{
-		minVec.x = std::min( minVec.x, pMesh->mVertices[a].x);
-		minVec.y = std::min( minVec.y, pMesh->mVertices[a].y);
-		minVec.z = std::min( minVec.z, pMesh->mVertices[a].z);
-		maxVec.x = std::max( maxVec.x, pMesh->mVertices[a].x);
-		maxVec.y = std::max( maxVec.y, pMesh->mVertices[a].y);
-		maxVec.z = std::max( maxVec.z, pMesh->mVertices[a].z);
-	}
+	aiVector3D minVec, maxVec;
+	FindAABB(pMesh,minVec,maxVec);
 	return (maxVec - minVec).Length() * epsilon;
 }
 
@@ -165,6 +228,14 @@ inline const char* TextureTypeToString(aiTextureType in)
 		return "Height";
 	case aiTextureType_SHININESS:
 		return "Shininess";
+	case aiTextureType_DISPLACEMENT:
+		return "Displacement";
+	case aiTextureType_LIGHTMAP:
+		return "Lightmap";
+	case aiTextureType_REFLECTION:
+		return "Reflection";
+	case aiTextureType_UNKNOWN:
+		return "Unknown";
     default:
         return "HUGE ERROR, please leave the room immediately and call the police";        
 	}

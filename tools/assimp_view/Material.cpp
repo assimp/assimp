@@ -455,6 +455,11 @@ void CMaterialManager::DeleteMaterial(AssetHelper::MeshHelper* pcIn)
 		pcIn->piShininessTexture->Release();
 		pcIn->piShininessTexture = NULL;
 	}
+	if (pcIn->piLightmapTexture)
+	{
+		pcIn->piLightmapTexture->Release();
+		pcIn->piLightmapTexture = NULL;
+	}
 }
 //-------------------------------------------------------------------------------
 void CMaterialManager::HMtoNMIfNecessary(
@@ -803,17 +808,6 @@ int CMaterialManager::CreateMaterial(
 			aiGetMaterialInteger(pcMat,AI_MATKEY_MAPPINGMODE_V_DIFFUSE(0),(int*)&mapV);
 		}
 
-		if (pcSource->mTextureCoords[1])
-		{
-			//
-			// DIFFUSE TEXTURE2 ------------------------------------------------
-			//
-			if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_DIFFUSE(1),&szPath))
-			{
-				LoadTexture(&pcMesh->piDiffuseTexture2,&szPath);
-			}
-		}
-
 		//
 		// SPECULAR TEXTURE ------------------------------------------------
 		//
@@ -872,6 +866,15 @@ int CMaterialManager::CreateMaterial(
 		}
 
 		//
+		// Lightmap TEXTURE ------------------------------------------------
+		//
+		if(AI_SUCCESS == aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE_LIGHTMAP(0),&szPath))
+		{
+			LoadTexture(&pcMesh->piLightmapTexture,&szPath);
+		}
+
+
+		//
 		// NORMAL/HEIGHT MAP ------------------------------------------------
 		//
 		bool bHM = false;
@@ -926,9 +929,6 @@ int CMaterialManager::CreateMaterial(
 		if  ((pcMesh->piDiffuseTexture != NULL ? true : false) != 
 			(pc->piDiffuseTexture != NULL ? true : false))
 			continue;
-		if  ((pcMesh->piDiffuseTexture2 != NULL ? true : false) != 
-			(pc->piDiffuseTexture2 != NULL ? true : false))
-			continue;
 		if  ((pcMesh->piSpecularTexture != NULL ? true : false) != 
 			(pc->piSpecularTexture != NULL ? true : false))
 			continue;
@@ -946,6 +946,9 @@ int CMaterialManager::CreateMaterial(
 			continue;
 		if  ((pcMesh->piShininessTexture != NULL ? true : false) != 
 			(pc->piShininessTexture != NULL ? true : false))
+			continue;
+		if  ((pcMesh->piLightmapTexture != NULL ? true : false) != 
+			(pc->piLightmapTexture != NULL ? true : false))
 			continue;
 		if ((pcMesh->eShadingMode != aiShadingMode_Gouraud ? true : false) != 
 			(pc->eShadingMode != aiShadingMode_Gouraud ? true : false))
@@ -998,12 +1001,6 @@ int CMaterialManager::CreateMaterial(
 		sMacro[iCurrent].Definition = "1";
 		++iCurrent;
 	}
-	if (pcMesh->piDiffuseTexture2)
-	{
-		sMacro[iCurrent].Name = "AV_DIFFUSE_TEXTURE2";
-		sMacro[iCurrent].Definition = "1";
-		++iCurrent;
-	}
 	if (pcMesh->piSpecularTexture)
 	{
 		sMacro[iCurrent].Name = "AV_SPECULAR_TEXTURE";
@@ -1020,6 +1017,16 @@ int CMaterialManager::CreateMaterial(
 	{
 		sMacro[iCurrent].Name = "AV_EMISSIVE_TEXTURE";
 		sMacro[iCurrent].Definition = "1";
+		++iCurrent;
+	}
+	if (pcMesh->piLightmapTexture)
+	{
+		sMacro[iCurrent].Name = "AV_LIGHTMAP_TEXTURE";
+		sMacro[iCurrent].Definition = "1";
+		++iCurrent;
+
+		sMacro[iCurrent].Name = "AV_LIGHTMAP_TEXTURE_UV_COORD";
+		sMacro[iCurrent].Definition = "IN.TexCoord0";
 		++iCurrent;
 	}
 	if (pcMesh->piNormalTexture && !bib)
@@ -1148,8 +1155,6 @@ int CMaterialManager::CreateMaterial(
 
 	if (pcMesh->piDiffuseTexture)
 		pcMesh->piEffect->SetTexture("DIFFUSE_TEXTURE",pcMesh->piDiffuseTexture);
-	if (pcMesh->piDiffuseTexture2)
-		pcMesh->piEffect->SetTexture("DIFFUSE_TEXTURE2",pcMesh->piDiffuseTexture2);
 	if (pcMesh->piOpacityTexture)
 		pcMesh->piEffect->SetTexture("OPACITY_TEXTURE",pcMesh->piOpacityTexture);
 	if (pcMesh->piSpecularTexture)
@@ -1162,6 +1167,8 @@ int CMaterialManager::CreateMaterial(
 		pcMesh->piEffect->SetTexture("NORMAL_TEXTURE",pcMesh->piNormalTexture);
 	if (pcMesh->piShininessTexture)
 		pcMesh->piEffect->SetTexture("SHININESS_TEXTURE",pcMesh->piShininessTexture);
+	if (pcMesh->piLightmapTexture)
+		pcMesh->piEffect->SetTexture("LIGHTMAP_TEXTURE",pcMesh->piLightmapTexture);
 
 	if (CBackgroundPainter::TEXTURE_CUBE == CBackgroundPainter::Instance().GetMode())
 	{
@@ -1270,8 +1277,6 @@ int CMaterialManager::SetupMaterial (
 			pcMesh->piEffect->SetTexture("OPACITY_TEXTURE",pcMesh->piOpacityTexture);
 		if (pcMesh->piDiffuseTexture)
 			pcMesh->piEffect->SetTexture("DIFFUSE_TEXTURE",pcMesh->piDiffuseTexture);
-		if (pcMesh->piDiffuseTexture2)
-			pcMesh->piEffect->SetTexture("DIFFUSE_TEXTURE2",pcMesh->piDiffuseTexture2);
 		if (pcMesh->piSpecularTexture)
 			pcMesh->piEffect->SetTexture("SPECULAR_TEXTURE",pcMesh->piSpecularTexture);
 		if (pcMesh->piAmbientTexture)
@@ -1282,6 +1287,8 @@ int CMaterialManager::SetupMaterial (
 			pcMesh->piEffect->SetTexture("NORMAL_TEXTURE",pcMesh->piNormalTexture);
 		if (pcMesh->piShininessTexture)
 			pcMesh->piEffect->SetTexture("SHININESS_TEXTURE",pcMesh->piShininessTexture);
+		if (pcMesh->piLightmapTexture)
+			pcMesh->piEffect->SetTexture("LIGHTMAP_TEXTURE",pcMesh->piLightmapTexture);
 
 		if (CBackgroundPainter::TEXTURE_CUBE == CBackgroundPainter::Instance().GetMode())
 		{

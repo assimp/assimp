@@ -669,8 +669,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 
 		// This is the "real" name of a $$$DUMMY object
 		{
-			if (mCurrentNode->mName != "$$$DUMMY")
-			{
+			if (mCurrentNode->mName != "$$$DUMMY")	{
 				DefaultLogger::get()->warn("3DS: Skipping dummy object name for non-dummy object");
 				break;
 			}
@@ -947,11 +946,11 @@ void Discreet3DSImporter::ParseFaceChunk()
 		{
 			DefaultLogger::get()->error(std::string("3DS: Unknown material: ") + sz);
 
-			// ******************************************************************
+			// --------------------------------------------------------------
 			// This material is not known. Ignore this. We will later
 			// assign the default material to all faces using *this*
 			// material. We use 0xcdcdcdcd as special value to indicate this.
-			// ******************************************************************
+			// --------------------------------------------------------------
 		}
 
 		// Now continue and read all material indices
@@ -1126,8 +1125,7 @@ void Discreet3DSImporter::ParseMaterialChunk()
 		// This is the diffuse material color
 		aiColor3D* pc = &mScene->mMaterials.back().mDiffuse;
 		ParseColorChunk(pc);
-		if (is_qnan(pc->r))
-		{
+		if (is_qnan(pc->r))	{
 			// color chunk is invalid. Simply ignore it
 			DefaultLogger::get()->error("3DS: Unable to read DIFFUSE chunk");
 			pc->r = pc->g = pc->b = 1.0f;
@@ -1139,8 +1137,7 @@ void Discreet3DSImporter::ParseMaterialChunk()
 		// This is the specular material color
 		aiColor3D* pc = &mScene->mMaterials.back().mSpecular;
 		ParseColorChunk(pc);
-		if (is_qnan(pc->r))
-		{
+		if (is_qnan(pc->r))	{
 			// color chunk is invalid. Simply ignore it
 			DefaultLogger::get()->error("3DS: Unable to read SPECULAR chunk");
 			pc->r = pc->g = pc->b = 1.0f;
@@ -1152,8 +1149,7 @@ void Discreet3DSImporter::ParseMaterialChunk()
 		// This is the ambient material color
 		aiColor3D* pc = &mScene->mMaterials.back().mAmbient;
 		ParseColorChunk(pc);
-		if (is_qnan(pc->r))
-		{
+		if (is_qnan(pc->r))	{
 			// color chunk is invalid. Simply ignore it
 			DefaultLogger::get()->error("3DS: Unable to read AMBIENT chunk");
 			pc->r = pc->g = pc->b = 0.0f;
@@ -1165,8 +1161,7 @@ void Discreet3DSImporter::ParseMaterialChunk()
 		// This is the emissive material color
 		aiColor3D* pc = &mScene->mMaterials.back().mEmissive;
 		ParseColorChunk(pc);
-		if (is_qnan(pc->r))
-		{
+		if (is_qnan(pc->r))	{
 			// color chunk is invalid. Simply ignore it
 			DefaultLogger::get()->error("3DS: Unable to read EMISSIVE chunk");
 			pc->r = pc->g = pc->b = 0.0f;
@@ -1248,9 +1243,8 @@ void Discreet3DSImporter::ParseMaterialChunk()
 		ParseTextureChunk(&mScene->mMaterials.back().sTexEmissive);
 		break;
 	case Discreet3DS::CHUNK_MAT_REFLMAP:
-		// Reflection map - no support in Assimp
-		DefaultLogger::get()->warn("3DS: Found reflection map in file. This is not supported");
-
+		// Reflection map
+		ParseTextureChunk(&mScene->mMaterials.back().sTexReflective);
 		break;
 	};
 	ASSIMP_3DS_END_CHUNK();

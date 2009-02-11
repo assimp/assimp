@@ -587,6 +587,17 @@ std::string g_szMaterialShader = std::string(
 		"};\n"
 	"#endif // AV_AMBIENT_TEXTUR\n"
 
+	"#ifdef AV_LIGHTMAP_TEXTURE\n"
+		"texture LIGHTMAP_TEXTURE;\n"
+		"sampler LIGHTMAP_SAMPLER\n"
+		"{\n"
+		  "Texture = <LIGHTMAP_TEXTURE>;\n"
+		  "MinFilter=LINEAR;\n"
+		  "MagFilter=LINEAR;\n"
+		  "MipFilter=LINEAR;\n"
+		"};\n"
+	"#endif // AV_LIGHTMAP_TEXTURE\n"
+
 	"#ifdef AV_OPACITY_TEXTURE\n"
 		"texture OPACITY_TEXTURE;\n"
 		"sampler OPACITY_SAMPLER\n"
@@ -643,7 +654,7 @@ std::string g_szMaterialShader = std::string(
 		"float3 Tangent   : TANGENT;\n"
 		"float3 Bitangent : BINORMAL;\n"
 		"float2 TexCoord0 : TEXCOORD0;\n"
-		"#ifdef AV_DIFFUSE_TEXTURE2 \n"
+		"#ifdef AV_TWO_UV \n"
 		"float2 TexCoord1 : TEXCOORD1;\n"
 		"#endif \n"
 		  "#ifdef AV_SKINNING \n"
@@ -686,44 +697,7 @@ std::string g_szMaterialShader = std::string(
 
 
 	// Selective SuperSampling in screenspace for reflection lookups
-	"#ifndef AV_SKYBOX_LOOKUP\n"
-	"#define AV_DISABLESSS\n"
-	"#endif\n"
-	"#ifndef AV_DISABLESSS\n"
-	"float3 GetSSSCubeMap(float3 Reflect)\n"
-	"{\n"
-		// compute the reflection vector in screen space\n"
-		"float3 ScreenReflect = mul(Reflect,ViewProj);\n"
-
-		// compute the gradients of the reflection vector\n"
-		"float3 fDX = ddx(ScreenReflect);\n"
-		"float3 fDY = ddy(ScreenReflect);\n"
-
-		// take the center step and calculate gradients for it\n"
-		"float3 fColor = texCUBE(EnvironmentMapSampler,Reflect).rgb;\n"
-
-		// Take 10 samples around the center step \n"
-		"fColor += texCUBEgrad(EnvironmentMapSampler,mul( ScreenReflect + (0.4f * 2.0 / 3.5) * fDX + (0.4f * 2.0 / 3.5) * fDY, InvViewProj),fDX,fDY).rgb;\n"
-		"fColor += texCUBEgrad(EnvironmentMapSampler,mul( ScreenReflect + (0.4f * 3.0 / 3.5) * fDX + (0.4f *-1.0 / 3.5) * fDY, InvViewProj),fDX,fDY).rgb;\n"
-		"fColor += texCUBEgrad(EnvironmentMapSampler,mul( ScreenReflect + (0.4f * 1.0 / 3.5) * fDX + (0.4f *-3.0 / 3.5) * fDY, InvViewProj),fDX,fDY).rgb;\n"
-		"fColor += texCUBEgrad(EnvironmentMapSampler,mul( ScreenReflect + (0.4f *-2.0 / 3.5) * fDX + (0.4f *-2.0 / 3.5) * fDY, InvViewProj),fDX,fDY).rgb;\n"
-		"fColor += texCUBEgrad(EnvironmentMapSampler,mul( ScreenReflect + (0.4f *-3.0 / 3.5) * fDX + (0.4f * 1.0 / 3.5) * fDY, InvViewProj),fDX,fDY).rgb;\n"
-		"fColor += texCUBEgrad(EnvironmentMapSampler,mul( ScreenReflect + (0.4f *-1.0 / 3.5) * fDX + (0.4f * 3.0 / 3.5) * fDY, InvViewProj),fDX,fDY).rgb;\n"
-		"fColor /= 7;\n"
-		"return fColor;\n"
-	"}\n"
-	"#else\n"
-		"#define GetSSSCubeMap(_refl) (texCUBElod(EnvironmentMapSampler,float4(_refl,0.0f)).rgb) \n"
-	"#endif\n"
-
-	// bugfix: if normal mapping is active we have the reflection
-	// vector in tangent, not in world space. Would need the inverse
-	// of the TSM matrix in the pixel shader (or world space tangent mapping)
-	// Simply disable realtime reflection for normal mapping.
-	"#ifdef AV_NORMAL_TEXTURE\n"
-	"#undef GetSSSCubeMap\n"
-	"#define GetSSSCubeMap(_refl) (float3(1.0f,1.0f,1.0f))\n"
-	"#endif\n"
+	"#define GetSSSCubeMap(_refl) (texCUBElod(EnvironmentMapSampler,float4(_refl,0.0f)).rgb) \n"
 
 
 	// Vertex shader for pixel shader usage and one light
@@ -747,7 +721,7 @@ std::string g_szMaterialShader = std::string(
 		"Out.Position = mul( float4( objPos, 1.0f), WorldViewProjection);\n"
 		"float3 WorldPos = mul( float4( objPos, 1.0f), World);\n"
 		"Out.TexCoord0 = IN.TexCoord0;\n"
-		"#ifdef AV_DIFFUSE_TEXTURE2 \n"
+		"#ifdef AV_TWO_UV \n"
 		"Out.TexCoord1 = IN.TexCoord1;\n"
 		"#endif\n"
 		"Out.Color = IN.Color;\n"
@@ -787,7 +761,7 @@ std::string g_szMaterialShader = std::string(
 		"Out.Position = mul( float4( objPos, 1.0f), WorldViewProjection);\n"
 		"float3 WorldPos = mul( float4( objPos, 1.0f), World);\n"
 		"Out.TexCoord0 = IN.TexCoord0;\n"
-		"#ifdef AV_DIFFUSE_TEXTURE2 \n"
+		"#ifdef AV_TWO_UV \n"
 		"Out.TexCoord1 = IN.TexCoord1;\n"
 		"#endif\n"
 		"Out.Color = IN.Color;\n"
@@ -893,7 +867,6 @@ std::string g_szMaterialShader = std::string(
 		"#endif // !AV_DIFFUSE_TEXTURE\n"
 
 		
-
 		"#ifdef AV_SPECULAR_COMPONENT\n"
 			"#ifndef AV_SKYBOX_LOOKUP\n"
 				"#ifdef AV_SPECULAR_TEXTURE\n"
@@ -920,13 +893,12 @@ std::string g_szMaterialShader = std::string(
 		"#else \n"
 			"EMISSIVE_COLOR.rgb;\n"
 		"#endif // !AV_EMISSIVE_TEXTURE\n"
-
-		"#ifdef AV_DIFFUSE_TEXTURE2\n"
-			"OUT.rgb *= tex2D(DIFFUSE_SAMPLER2,IN.TexCoord1).rgb*4.0f;\n"
-		"#endif \n"
 		"}\n"
 		"#ifdef AV_OPACITY\n"
 		"OUT.a = TRANSPARENCY;\n"
+		"#endif\n"
+		"#ifdef AV_LIGHTMAP_TEXTURE\n"
+		"OUT.rgb *= tex2D(LIGHTMAP_SAMPLER,AV_LIGHTMAP_TEXTURE_UV_COORD).rgb;\n"
 		"#endif\n"
 		"#ifdef AV_OPACITY_TEXTURE\n"
 		"OUT.a *= tex2D(OPACITY_SAMPLER,IN.TexCoord0). AV_OPACITY_TEXTURE_REGISTER_MASK;\n"
@@ -1039,6 +1011,9 @@ std::string g_szMaterialShader = std::string(
 		"}\n"
 		"#ifdef AV_OPACITY\n"
 		"OUT.a = TRANSPARENCY;\n"
+		"#endif\n"
+		"#ifdef AV_LIGHTMAP_TEXTURE\n"
+		"OUT.rgb *= tex2D(LIGHTMAP_SAMPLER,AV_LIGHTMAP_TEXTURE_UV_COORD).rgb;\n"
 		"#endif\n"
 		"#ifdef AV_OPACITY_TEXTURE\n"
 		"OUT.a *= tex2D(OPACITY_SAMPLER,IN.TexCoord0). AV_OPACITY_TEXTURE_REGISTER_MASK;\n"
@@ -1198,8 +1173,6 @@ std::string g_szMaterialShader = std::string(
 	"{\n"
 		"pass p0\n"
 		"{\n"
-			"CullMode=none;\n"
-
 			"#ifdef AV_OPACITY_TEXTURE\n"
 			"AlphaBlendEnable=TRUE;"
 			"SrcBlend = srcalpha;\n"
@@ -1220,8 +1193,6 @@ std::string g_szMaterialShader = std::string(
 	"{\n"
 		"pass p0\n"
 		"{\n"
-			"CullMode=none;\n"
-
 			"#ifdef AV_OPACITY_TEXTURE\n"
 			"AlphaBlendEnable=TRUE;"
 			"SrcBlend = srcalpha;\n"
@@ -1244,8 +1215,6 @@ std::string g_szMaterialShader = std::string(
 	"{\n"
 		"pass p0\n"
   	"{\n"
-		  "CullMode=none;\n"
-
 		  "#ifdef AV_OPACITY_TEXTURE\n"
 		  "AlphaBlendEnable=TRUE;"
 		  "SrcBlend = srcalpha;\n"
@@ -1267,7 +1236,7 @@ std::string g_szMaterialShader = std::string(
 	"{\n"
 		"pass p0\n"
 	  "{\n"
-		  "CullMode=none;\n"
+		  "//CullMode=none;\n"
 
 		  "#ifdef AV_OPACITY_TEXTURE\n"
 		  "AlphaBlendEnable=TRUE;"
@@ -1291,7 +1260,7 @@ std::string g_szMaterialShader = std::string(
 	"{\n"
 		"pass p0\n"
 		"{\n"
-			"CullMode=none;\n"
+			"//CullMode=none;\n"
 			"SpecularEnable = true; \n"
 			"VertexShader = compile vs_2_0 MaterialVShader_FF();\n"
 			"ColorOp[0] = Modulate;\n"

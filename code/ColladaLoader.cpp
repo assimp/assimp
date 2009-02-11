@@ -107,12 +107,20 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 	newMats.clear();
 	mLights.clear();
 	mCameras.clear();
+	mTextures.clear();
 
 	// parse the input file
 	ColladaParser parser( pFile);
 
 	if( !parser.mRootNode)
 		throw new ImportErrorException( "Collada: File came out empty. Something is wrong here.");
+
+	// reserve some storage to avoid unnecessary reallocs
+	newMats.reserve(parser.mMaterialLibrary.size()*2);
+	mMeshes.reserve(parser.mMeshLibrary.size()*2);
+
+	mCameras.reserve(parser.mCameraLibrary.size());
+	mLights.reserve(parser.mLightLibrary.size());
 
 	// create the materials first, for the meshes to find
 	BuildMaterials( parser, pScene);
@@ -394,6 +402,7 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 {
 	// accumulated mesh references by this node
 	std::vector<size_t> newMeshRefs;
+	newMeshRefs.reserve(pNode->mMeshes.size());
 
 	// add a mesh for each subgroup in each collada mesh
 	BOOST_FOREACH( const Collada::MeshInstance& mid, pNode->mMeshes)
@@ -566,6 +575,7 @@ void ColladaLoader::StoreSceneMeshes( aiScene* pScene)
 		pScene->mMeshes = new aiMesh*[mMeshes.size()];
 		std::copy( mMeshes.begin(), mMeshes.end(), pScene->mMeshes);
 	}
+	mMeshes.clear();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -578,6 +588,7 @@ void ColladaLoader::StoreSceneCameras( aiScene* pScene)
 		pScene->mCameras = new aiCamera*[mCameras.size()];
 		std::copy( mCameras.begin(), mCameras.end(), pScene->mCameras);
 	}
+	mCameras.clear();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -590,6 +601,20 @@ void ColladaLoader::StoreSceneLights( aiScene* pScene)
 		pScene->mLights = new aiLight*[mLights.size()];
 		std::copy( mLights.begin(), mLights.end(), pScene->mLights);
 	}
+	mLights.clear();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Stores all textures in the given scene
+void ColladaLoader::StoreSceneTextures( aiScene* pScene)
+{
+	pScene->mNumTextures = mTextures.size();
+	if( mTextures.size() > 0)
+	{
+		pScene->mTextures = new aiTexture*[mTextures.size()];
+		std::copy( mTextures.begin(), mTextures.end(), pScene->mTextures);
+	}
+	mTextures.clear();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -601,6 +626,8 @@ void ColladaLoader::StoreSceneMaterials( aiScene* pScene)
 	pScene->mMaterials = new aiMaterial*[newMats.size()];
 	for (unsigned int i = 0; i < newMats.size();++i)
 		pScene->mMaterials[i] = newMats[i].second;
+
+	newMats.clear();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -714,16 +741,21 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* pScene
 		mat.AddProperty<int>( &shadeMode, 1, AI_MATKEY_ENABLE_WIREFRAME);
 
 		// add material colors
-		mat.AddProperty( &effect.mAmbient, 1, AI_MATKEY_COLOR_AMBIENT);
+		mat.AddProperty( &effect.mAmbient, 1,AI_MATKEY_COLOR_AMBIENT);
 		mat.AddProperty( &effect.mDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
-		mat.AddProperty( &effect.mSpecular, 1, AI_MATKEY_COLOR_SPECULAR);
-		mat.AddProperty( &effect.mEmissive, 1, AI_MATKEY_COLOR_EMISSIVE);
+		mat.AddProperty( &effect.mSpecular, 1,AI_MATKEY_COLOR_SPECULAR);
+		mat.AddProperty( &effect.mEmissive, 1,	AI_MATKEY_COLOR_EMISSIVE);
+		mat.AddProperty( &effect.mTransparent, 1, AI_MATKEY_COLOR_TRANSPARENT);
+		mat.AddProperty( &effect.mReflective, 1, AI_MATKEY_COLOR_REFLECTIVE);
+
+		// scalar properties
 		mat.AddProperty( &effect.mShininess, 1, AI_MATKEY_SHININESS);
 		mat.AddProperty( &effect.mRefractIndex, 1, AI_MATKEY_REFRACTI);
 
 		// add textures, if given
 		if( !effect.mTexAmbient.mName.empty()) 
-			AddTexture( mat, pParser, effect, effect.mTexAmbient,aiTextureType_AMBIENT);
+			 /* It is merely a lightmap */
+			AddTexture( mat, pParser, effect, effect.mTexAmbient,aiTextureType_LIGHTMAP);
 
 		if( !effect.mTexEmissive.mName.empty())
 			AddTexture( mat, pParser, effect, effect.mTexEmissive,aiTextureType_EMISSIVE);
@@ -739,6 +771,9 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* pScene
 
 		if( !effect.mTexTransparent.mName.empty())
 			AddTexture( mat, pParser, effect, effect.mTexBump,aiTextureType_OPACITY);
+
+		if( !effect.mTexReflective.mName.empty())
+			AddTexture( mat, pParser, effect, effect.mTexReflective,aiTextureType_REFLECTION);
 	}
 }
 
@@ -797,7 +832,8 @@ void ColladaLoader::BuildMaterials( const ColladaParser& pParser, aiScene* pScen
 
 // ------------------------------------------------------------------------------------------------
 // Resolves the texture name for the given effect texture entry
-const aiString& ColladaLoader::FindFilenameForEffectTexture( const ColladaParser& pParser, const Collada::Effect& pEffect, const std::string& pName)
+const aiString& ColladaLoader::FindFilenameForEffectTexture( const ColladaParser& pParser,
+	const Collada::Effect& pEffect, const std::string& pName)
 {
 	// recurse through the param references until we end up at an image
 	std::string name = pName;
@@ -815,12 +851,42 @@ const aiString& ColladaLoader::FindFilenameForEffectTexture( const ColladaParser
 
 	// find the image referred by this name in the image library of the scene
 	ColladaParser::ImageLibrary::const_iterator imIt = pParser.mImageLibrary.find( name);
-	if( imIt == pParser.mImageLibrary.end())
-		throw new ImportErrorException( boost::str( boost::format( "Collada: Unable to resolve effect texture entry \"%s\", ended up at ID \"%s\".") % pName % name));
-
+	if( imIt == pParser.mImageLibrary.end()) {
+		throw new ImportErrorException( boost::str( boost::format( 
+			"Collada: Unable to resolve effect texture entry \"%s\", ended up at ID \"%s\".") % pName % name));
+	}
 	static aiString result;
-	result.Set( imIt->second.mFileName );
-	ConvertPath(result);
+
+	// if this is an embedded texture image setup an aiTexture for it
+	if (imIt->second.mFileName.empty()) {
+		if (imIt->second.mImageData.empty()) {
+			throw new ImportErrorException("Collada: Invalid texture, no data or file reference given");
+		}
+		aiTexture* tex = new aiTexture();
+
+		// setup format hint
+		if (imIt->second.mEmbeddedFormat.length() > 3) {
+			DefaultLogger::get()->warn("Collada: texture format hint is too long, truncating to 3 characters");
+		}
+		::strncpy(tex->achFormatHint,imIt->second.mEmbeddedFormat.c_str(),3);
+
+		// and copy texture data
+		tex->mHeight = 0;
+		tex->mWidth = imIt->second.mImageData.size();
+		tex->pcData = (aiTexel*)new char[tex->mWidth];
+		::memcpy(tex->pcData,&imIt->second.mImageData[0],tex->mWidth);
+
+		// setup texture reference string
+		result.data[0] = '*';
+		result.length = 1 + ASSIMP_itoa10(result.data+1,MAXLEN-1,mTextures.size());
+
+		// and add this texture to the list
+		mTextures.push_back(tex);
+	}
+	else {
+		result.Set( imIt->second.mFileName );
+		ConvertPath(result);
+	}
 	return result;
 }
 

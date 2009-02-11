@@ -62,6 +62,9 @@ ColladaParser::ColladaParser( const std::string& pFile)
 	mUnitSize = 1.0f;
 	mUpDirection = UP_Z;
 
+	// We assume the newest file format by default
+	mFormat = FV_1_5_n;
+
 	// generate a XML reader for it
 	mReader = irr::io::createIrrXMLReader( pFile.c_str());
 	if( !mReader)
@@ -109,6 +112,25 @@ void ColladaParser::ReadContents()
 		{
 			if( IsElement( "COLLADA"))
 			{
+				// check for 'version' attribute
+				const int attrib = TestAttribute("version");
+				if (attrib != -1) {
+					const char* version = mReader->getAttributeValue(attrib);
+					
+					if (!::strncmp(version,"1.5",3)) {
+						mFormat =  FV_1_5_n;
+						DefaultLogger::get()->debug("Collada schema version is 1.5.n");
+					}
+					else if (!::strncmp(version,"1.4",3)) {
+						mFormat =  FV_1_4_n;
+						DefaultLogger::get()->debug("Collada schema version is 1.4.n");
+					}
+					else if (!::strncmp(version,"1.3",3)) {
+						mFormat =  FV_1_3_n;
+						DefaultLogger::get()->debug("Collada schema version is 1.3.n");
+					}
+				}
+
 				ReadStructure();
 			} else
 			{
@@ -245,23 +267,74 @@ void ColladaParser::ReadImage( Collada::Image& pImage)
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT){
-			if( IsElement( "init_from"))
+			// Need to run different code paths here, depending on the Collada XSD version
+			if(  IsElement( "init_from"))
 			{
-				// element content is filename - hopefully
-				const char* content = GetTextContent();
-				pImage.mFileName = content;
-				TestClosing( "init_from");
-			} else
-			{
+				if (mFormat == FV_1_4_n) {
+					// element content is filename - hopefully
+					const char* sz = TestTextContent();
+					if (sz)pImage.mFileName = sz;
+					TestClosing( "init_from");
+				}
+				else if (mFormat == FV_1_5_n) {
+
+					// make sure we skip over mip and array initializations, which
+					// we don't support, but which could confuse the loader if 
+					// they're not skipped.
+					int attrib = TestAttribute("array_index");
+					if (attrib != -1 && mReader->getAttributeValueAsInt(attrib) > 0) {
+						DefaultLogger::get()->warn("Collada: Ignoring texture array index");
+						continue;
+					}
+
+					attrib = TestAttribute("mip_index");
+					if (attrib != -1 && mReader->getAttributeValueAsInt(attrib) > 0) {
+						DefaultLogger::get()->warn("Collada: Ignoring MIP map layer");
+						continue;
+					}
+
+					// TODO: correctly jump over cube and volume maps?
+				}
+			}
+			else if (mFormat == FV_1_5_n) {
+				if( IsElement( "ref"))
+				{
+					// element content is filename - hopefully
+					const char* sz = TestTextContent();
+					if (sz)pImage.mFileName = sz;
+					TestClosing( "ref");
+				} 
+				else if( IsElement( "hex") && !pImage.mFileName.length())
+				{
+					// embedded image. get format
+					const int attrib = TestAttribute("format");
+					if (-1 == attrib) 
+						DefaultLogger::get()->warn("Collada: Unknown image file format");
+					else pImage.mEmbeddedFormat = mReader->getAttributeValue(attrib);
+
+					const char* data = GetTextContent();
+
+					// hexadecimal-encoded binary octets. First of all, find the
+					// required buffer size to reserve enough storage.
+					const char* cur = data;
+					while (!IsSpaceOrNewLine(*cur)) cur++;
+
+					const unsigned int size = (unsigned int)(cur-data) * 2;
+					pImage.mImageData.resize(size);
+					for (unsigned int i = 0; i < size;++i) {
+						pImage.mImageData[i] = HexOctetToDecimal(data+(i<<1));
+					}
+					TestClosing( "hex");
+				} 
+			}
+			else	{
 				// ignore the rest
 				SkipElement();
 			}
 		}
 		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-			if( strcmp( mReader->getNodeName(), "image") != 0)
-				ThrowException( "Expected end of \"image\" element.");
-
-			break;
+			if( strcmp( mReader->getNodeName(), "image") == 0)
+				break;
 		}
 	}
 }
@@ -558,9 +631,9 @@ void ColladaParser::ReadEffect( Collada::Effect& pEffect)
 
 	while( mReader->read())
 	{
-		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-			if( IsElement( "newparam"))
-			{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
+		{
+			if( IsElement( "newparam"))	{
 				// save ID
 				int attrSID = GetAttribute( "sid");
 				std::string sid = mReader->getAttributeValue( attrSID);
@@ -592,8 +665,7 @@ void ColladaParser::ReadEffect( Collada::Effect& pEffect)
 			else if( IsElement( "specular"))
 				ReadEffectColor( pEffect.mSpecular, pEffect.mTexSpecular);
 			else if( IsElement( "reflective")) {
-			//	Collada::Sampler dummy;
-			//	ReadEffectColor( dummy,pEffect.mTexReflective);
+				ReadEffectColor( pEffect.mReflective, pEffect.mTexReflective);
 			}
 			else if( IsElement( "transparent"))
 				ReadEffectColor( pEffect.mTransparent,pEffect.mTexTransparent);
@@ -605,8 +677,6 @@ void ColladaParser::ReadEffect( Collada::Effect& pEffect)
 				ReadEffectFloat( pEffect.mTransparency);
 			else if( IsElement( "index_of_refraction"))
 				ReadEffectFloat( pEffect.mRefractIndex);
-			//	else if( IsElement( "reflectivity"))
-		    //		ReadEffectFloat( pEffect.mRefl);
 
 			// GOOGLEEARTH/OKINO extensions 
 			// -------------------------------------------------------
@@ -1921,6 +1991,17 @@ int ColladaParser::TestAttribute( const char* pAttr) const
 // Reads the text contents of an element, throws an exception if not given. Skips leading whitespace.
 const char* ColladaParser::GetTextContent()
 {
+	const char* sz = TestTextContent();
+	if(!sz) {
+		ThrowException( "Invalid contents in element \"n\".");
+	}
+	return sz;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads the text contents of an element, returns NULL if not given. Skips leading whitespace.
+const char* ColladaParser::TestTextContent()
+{
 	// present node should be the beginning of an element
 	if( mReader->getNodeType() != irr::io::EXN_ELEMENT || mReader->isEmptyElement())
 		ThrowException( "Expected opening element");
@@ -1929,7 +2010,7 @@ const char* ColladaParser::GetTextContent()
 	if( !mReader->read())
 		ThrowException( "Unexpected end of file while reading n element.");
 	if( mReader->getNodeType() != irr::io::EXN_TEXT)
-		ThrowException( "Invalid contents in element \"n\".");
+		return NULL;
 
 	// skip leading whitespace
 	const char* text = mReader->getNodeData();

@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AV_MESH_RENDERER_H_INCLUDED
 
 
-#define AI_VIEW_ALPHA_SORT_DELTA 3
 
 //-------------------------------------------------------------------------------
 /* Helper class tp render meshes
@@ -55,8 +54,7 @@ private:
 
 	// default constructor
 	CMeshRenderer() 
-		:	m_bRotationChanged(true),
-			m_iFrameCount(AI_VIEW_ALPHA_SORT_DELTA-1)
+
 	{
 		// no other members to initialize
 	}
@@ -90,43 +88,10 @@ public:
 		const aiMatrix4x4& mWorld);
 
 
-	//------------------------------------------------------------------
-	// Indicate that the rotation of the object or the camera has
-	// been changed, thus the alpha order tree must be updated
-	inline void SetRotationChangedFlag()
-	{
-		this->m_bRotationChanged = true;
-	}
-
-	//------------------------------------------------------------------
-	// Reset the state of the class
-	// Called whenever a new asset is loaded
-	inline void Reset()
-	{
-		this->m_bRotationChanged = true;
-		this->m_iFrameCount = 2;
-	}
-
-	//------------------------------------------------------------------
-	// Called at the beginning of the frame. Reset the state
-	// of the instance
-	inline void OnBeginFrame()
-	{
-		if (0 == this->m_iFrameCount)
-		{
-			this->m_bRotationChanged = false;
-		}
-	}
 
 private:
 
-	// true if the rotation of the object or camera has changed
-	// in the last frame. If there were no changes it should
-	// not be necessary to update the alpha ordering tree
-	bool m_bRotationChanged;
-
-	// only update the alpha order each AI_VIEW_ALPHA_SORT_DELTA frames
-	unsigned int m_iFrameCount;
+	
 };
 
 #endif //!! include guard

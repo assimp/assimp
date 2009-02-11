@@ -1089,9 +1089,8 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 		c->mPosition	= camPos;
 		c->mUp			= camUp;
 
-		// If the resolution is not specified in the file we
-		// need to set 1.0 as aspect. The division would become
-		// INF otherwise.
+		// If the resolution is not specified in the file, we
+		// need to set 1.0 as aspect. 
 		c->mAspect		= (!resolution.y ? 0.f : resolution.x / resolution.y);
 		++ppcChildren;
 	}
@@ -1231,8 +1230,12 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			s.Set(src.shader.texFile);
 			pcMat->AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(0));
 
-			if (aiTextureMapping_UV != src.shader.mapping)
+			if (aiTextureMapping_UV != src.shader.mapping) {
+
+				aiVector3D v(0.f,-1.f,0.f);
+				pcMat->AddProperty(&v, 1,AI_MATKEY_TEXMAP_AXIS_DIFFUSE(0));
 				pcMat->AddProperty((int*)&src.shader.mapping, 1,AI_MATKEY_MAPPING_DIFFUSE(0));
+			}
 		}
 
 		// setup the name of the material

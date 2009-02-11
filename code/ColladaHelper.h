@@ -46,6 +46,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp	{
 namespace Collada		{
 
+/** Collada file versions which evolved during the years ... */
+enum FormatVersion
+{
+	FV_1_5_n,
+	FV_1_4_n,
+	FV_1_3_n
+};
+
+
 /** Transformation types that can be applied to a node */
 enum TransformType
 {
@@ -382,56 +391,80 @@ struct Sampler
 		,	mMixWithPrevious (1.f)
 	{}
 
-	// Name of image reference
+	/** Name of image reference
+	 */
 	std::string mName;
 
-	// Wrap U?
+	/** Wrap U?
+	 */
 	bool mWrapU;
 
-	// Wrap V?
+	/** Wrap V?
+	 */
 	bool mWrapV;
 
-	// Mirror U?
+	/** Mirror U?
+	 */
 	bool mMirrorU;
 
-	// Mirror V?
+	/** Mirror V?
+	 */
 	bool mMirrorV;
 
-	// Blend mode
+	/** Blend mode
+	 */
 	aiTextureOp mOp;
 
-	// UV transformation
+	/** UV transformation
+	 */
 	aiUVTransform mTransform;
 
-	// Name of source UV channel
+	/** Name of source UV channel
+	 */
 	std::string mUVChannel;
 
-	// Resolved UV channel index or 0xffffffff if not known
+	/** Resolved UV channel index or 0xffffffff if not known
+	 */
 	unsigned int mUVId;
 
 	// OKINO/MAX3D extensions from here
 	// -------------------------------------------------------
 
-	// Weighting factor
+	/** Weighting factor
+	 */
 	float mWeighting;
 
-	// Mixing factor from OKINO
+	/** Mixing factor from OKINO
+	 */
 	float mMixWithPrevious;
 };
 
-/** A collada effect. Can contain about anything according to the Collada spec, but we limit our version to a reasonable subset. */
+/** Describes different alpha blending modes.  */
+enum AlphaMode
+{
+	AM_RGB_ZERO,
+	AM_RGB_ONE,
+	AM_ALPHA_ONE,
+	AM_ALPHA_ZERO
+};
+
+/** A collada effect. Can contain about anything according to the Collada spec,
+    but we limit our version to a reasonable subset. */
 struct Effect
 {
 	// Shading mode
 	ShadeType mShadeType;
 
+	// Alpha mode
+	AlphaMode mAlphaMode;
+
 	// Colors
-	aiColor4D mEmissive, mAmbient, mDiffuse, mSpecular;
-	aiColor4D mTransparent;
+	aiColor4D mEmissive, mAmbient, mDiffuse, mSpecular,
+		mTransparent, mReflective;
 
 	// Textures
 	Sampler mTexEmissive, mTexAmbient, mTexDiffuse, mTexSpecular,
-		mTexTransparent, mTexBump;
+		mTexTransparent, mTexBump, mTexReflective;
 
 	// Scalar factory
 	float mShininess, mRefractIndex;
@@ -448,6 +481,7 @@ struct Effect
 	
 	Effect()
 		: mShadeType    (Shade_Phong)
+		, mAlphaMode	(AM_ALPHA_ZERO)
 		, mEmissive		( 0, 0, 0, 1)
 		, mAmbient		( 0.1f, 0.1f, 0.1f, 1)
 		, mDiffuse		( 0.6f, 0.6f, 0.6f, 1)
@@ -467,6 +501,16 @@ struct Effect
 struct Image
 {
 	std::string mFileName;
+
+	/** If image file name is zero, embedded image data
+	 */
+	std::vector<uint8_t> mImageData;
+
+	/** If image file name is zero, file format of
+	 *  embedded image data.
+	 */
+	std::string mEmbeddedFormat;
+
 };
 
 } // end of namespace Collada

@@ -92,22 +92,23 @@ CBackgroundPainter CBackgroundPainter::s_cInstance;
 //-------------------------------------------------------------------------------
 void CBackgroundPainter::SetColor (D3DCOLOR p_clrNew)
 {
-	if (TEXTURE_CUBE == this->eMode)this->RemoveSBDeps();
+	if (TEXTURE_CUBE == eMode)
+		RemoveSBDeps();
 
-	this->clrColor = p_clrNew;
-	this->eMode = SIMPLE_COLOR;
+	clrColor = p_clrNew;
+	eMode = SIMPLE_COLOR;
 
-	if (this->pcTexture)
+	if (pcTexture)
 	{
-		this->pcTexture->Release();
-		this->pcTexture = NULL;
+		pcTexture->Release();
+		pcTexture = NULL;
 	}
 }
 //-------------------------------------------------------------------------------
 void CBackgroundPainter::RemoveSBDeps()
 {
-	MODE e = this->eMode;
-	this->eMode = SIMPLE_COLOR;
+	MODE e = eMode;
+	eMode = SIMPLE_COLOR;
 	if (g_pcAsset && g_pcAsset->pcScene)
 	{
 		for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
@@ -120,36 +121,36 @@ void CBackgroundPainter::RemoveSBDeps()
 			}
 		}
 	}
-	this->eMode = e;
+	eMode = e;
 }
 //-------------------------------------------------------------------------------
 void CBackgroundPainter::ResetSB()
 {
-	this->mMatrix = aiMatrix4x4();
+	mMatrix = aiMatrix4x4();
 }
 //-------------------------------------------------------------------------------
 void CBackgroundPainter::SetCubeMapBG (const char* p_szPath)
 {
 	bool bHad = false;
-	if (this->pcTexture)
+	if (pcTexture)
 	{
-		this->pcTexture->Release();
-		this->pcTexture = NULL;
-		if(TEXTURE_CUBE ==this->eMode)bHad = true;
+		pcTexture->Release();
+		pcTexture = NULL;
+		if(TEXTURE_CUBE ==eMode)bHad = true;
 	}
 
-	this->eMode = TEXTURE_CUBE;
+	eMode = TEXTURE_CUBE;
 
-	this->szPath = std::string( p_szPath );
+	szPath = std::string( p_szPath );
 
 	// ARRRGHH... ugly. TODO: Rewrite this!
 	aiString sz;
-	sz.Set(this->szPath);
+	sz.Set(szPath);
 	CMaterialManager::Instance().FindValidPath(&sz);
-	this->szPath = std::string( sz.data );
+	szPath = std::string( sz.data );
 
 	// now recreate all native resources
-	this->RecreateNativeResource();
+	RecreateNativeResource();
 
 	if (SIMPLE_COLOR != this->eMode)
 	{
@@ -188,35 +189,35 @@ void CBackgroundPainter::SetCubeMapBG (const char* p_szPath)
 //-------------------------------------------------------------------------------
 void CBackgroundPainter::RotateSB(const aiMatrix4x4* pm)
 {
-	this->mMatrix = this->mMatrix * (*pm);
+	this->mMatrix = mMatrix * (*pm);
 }
 //-------------------------------------------------------------------------------
 void CBackgroundPainter::SetTextureBG (const char* p_szPath)
 {
 	if (TEXTURE_CUBE == this->eMode)this->RemoveSBDeps();
 
-	if (this->pcTexture)
+	if (pcTexture)
 	{
-		this->pcTexture->Release();
-		this->pcTexture = NULL;
+		pcTexture->Release();
+		pcTexture = NULL;
 	}
 
-	this->eMode = TEXTURE_2D;
-	this->szPath = std::string( p_szPath );
+	eMode = TEXTURE_2D;
+	szPath = std::string( p_szPath );
 
 	// ARRRGHH... ugly. TODO: Rewrite this!
 	aiString sz;
-	sz.Set(this->szPath);
+	sz.Set(szPath);
 	CMaterialManager::Instance().FindValidPath(&sz);
-	this->szPath = std::string( sz.data );
+	szPath = std::string( sz.data );
 
 	// now recreate all native resources
-	this->RecreateNativeResource();
+	RecreateNativeResource();
 }
 //-------------------------------------------------------------------------------
 void CBackgroundPainter::OnPreRender()
 {
-	if (SIMPLE_COLOR != this->eMode)
+	if (SIMPLE_COLOR != eMode)
 	{
 		// clear the z-buffer only (in wireframe mode we must also clear
 		// the color buffer )
@@ -230,7 +231,7 @@ void CBackgroundPainter::OnPreRender()
 			g_piDevice->Clear(0,NULL,D3DCLEAR_ZBUFFER,0,1.0f,0);
 		}
 
-		if (TEXTURE_2D == this->eMode)
+		if (TEXTURE_2D == eMode)
 		{
 			RECT sRect;
 			GetWindowRect(GetDlgItem(g_hDlg,IDC_RT),&sRect);
@@ -284,8 +285,8 @@ void CBackgroundPainter::OnPreRender()
 			g_piDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,
 				&as,sizeof(SVertex));
 
-			this->piSkyBoxEffect->EndPass();
-			this->piSkyBoxEffect->End();
+			piSkyBoxEffect->EndPass();
+			piSkyBoxEffect->End();
 
 			g_piDevice->SetFVF(dw2);
 		}
@@ -293,12 +294,12 @@ void CBackgroundPainter::OnPreRender()
 	}
 	// clear both the render target and the z-buffer
 	g_piDevice->Clear(0,NULL,D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER,
-		this->clrColor,1.0f,0);
+		clrColor,1.0f,0);
 }
 //-------------------------------------------------------------------------------
 void CBackgroundPainter::OnPostRender()
 {
-	if (TEXTURE_CUBE == this->eMode)
+	if (TEXTURE_CUBE == eMode)
 	{
 		aiMatrix4x4 pcProj;
 		GetProjectionMatrix(pcProj);
@@ -310,16 +311,16 @@ void CBackgroundPainter::OnPostRender()
 		aiMe[3][0] = vPos.x;
 		aiMe[3][1] = vPos.y;
 		aiMe[3][2] = vPos.z;
-		aiMe = this->mMatrix * aiMe;
+		aiMe = mMatrix * aiMe;
 
 		pcProj = (aiMe * pcCam) * pcProj;
 
-		this->piSkyBoxEffect->SetMatrix("WorldViewProjection",
+		piSkyBoxEffect->SetMatrix("WorldViewProjection",
 			(const D3DXMATRIX*)&pcProj);
 
 		UINT dwPasses;
-		this->piSkyBoxEffect->Begin(&dwPasses,0);
-		this->piSkyBoxEffect->BeginPass(0);
+		piSkyBoxEffect->Begin(&dwPasses,0);
+		piSkyBoxEffect->BeginPass(0);
 
 		DWORD dw2;
 		g_piDevice->GetFVF(&dw2);
@@ -331,29 +332,29 @@ void CBackgroundPainter::OnPostRender()
 
 		g_piDevice->SetFVF(dw2);
 
-		this->piSkyBoxEffect->EndPass();
-		this->piSkyBoxEffect->End();
+		piSkyBoxEffect->EndPass();
+		piSkyBoxEffect->End();
 	}
 }
 //-------------------------------------------------------------------------------
 void CBackgroundPainter::ReleaseNativeResource()
 {
-	if (this->piSkyBoxEffect)
+	if ( piSkyBoxEffect)
 	{
-		this->piSkyBoxEffect->Release();
-		this->piSkyBoxEffect = NULL;
+		piSkyBoxEffect->Release();
+		piSkyBoxEffect = NULL;
 	}
-	if (this->pcTexture)
+	if (pcTexture)
 	{
-		this->pcTexture->Release();
-		this->pcTexture = NULL;
+		pcTexture->Release();
+		pcTexture = NULL;
 	}
 }
 //-------------------------------------------------------------------------------
 void CBackgroundPainter::RecreateNativeResource()
 {
-	if (SIMPLE_COLOR == this->eMode)return;
-	if (TEXTURE_CUBE == this->eMode)
+	if (SIMPLE_COLOR == eMode)return;
+	if (TEXTURE_CUBE == eMode)
 	{
 
 		// many skyboxes are 16bit FP format which isn't supported
@@ -367,7 +368,7 @@ void CBackgroundPainter::RecreateNativeResource()
 
 		if (FAILED(D3DXCreateCubeTextureFromFileEx(
 			g_piDevice,
-			this->szPath.c_str(),
+			szPath.c_str(),
 			D3DX_DEFAULT,
 			0,
 			0,
@@ -378,11 +379,11 @@ void CBackgroundPainter::RecreateNativeResource()
 			0,
 			NULL,
 			NULL,
-			(IDirect3DCubeTexture9**)&this->pcTexture)))
+			(IDirect3DCubeTexture9**)&pcTexture)))
 		{
-			const char* szEnd = strrchr(this->szPath.c_str(),'\\');
-			if (!szEnd)szEnd = strrchr(this->szPath.c_str(),'/');
-			if (!szEnd)szEnd = this->szPath.c_str()-1;
+			const char* szEnd = strrchr(szPath.c_str(),'\\');
+			if (!szEnd)szEnd = strrchr(szPath.c_str(),'/');
+			if (!szEnd)szEnd = szPath.c_str()-1;
 
 			char szTemp[1024];
 			sprintf(szTemp,"[ERROR] Unable to load background cubemap %s",szEnd+1);
@@ -390,7 +391,7 @@ void CBackgroundPainter::RecreateNativeResource()
 			CLogDisplay::Instance().AddEntry(szTemp,
 				D3DCOLOR_ARGB(0xFF,0xFF,0,0));
 
-			this->eMode = SIMPLE_COLOR;
+			eMode = SIMPLE_COLOR;
 			return;
 		}
 		else CLogDisplay::Instance().AddEntry("[OK] The skybox has been imported successfully",
@@ -400,7 +401,7 @@ void CBackgroundPainter::RecreateNativeResource()
 	{
 		if (FAILED(D3DXCreateTextureFromFileEx(
 			g_piDevice,
-			this->szPath.c_str(),
+			szPath.c_str(),
 			D3DX_DEFAULT,
 			D3DX_DEFAULT,
 			0,
@@ -412,11 +413,11 @@ void CBackgroundPainter::RecreateNativeResource()
 			0,
 			NULL,
 			NULL,
-			(IDirect3DTexture9**)&this->pcTexture)))
+			(IDirect3DTexture9**)&pcTexture)))
 		{
-			const char* szEnd = strrchr(this->szPath.c_str(),'\\');
-			if (!szEnd)szEnd = strrchr(this->szPath.c_str(),'/');
-			if (!szEnd)szEnd = this->szPath.c_str()-1;
+			const char* szEnd = strrchr(szPath.c_str(),'\\');
+			if (!szEnd)szEnd = strrchr(szPath.c_str(),'/');
+			if (!szEnd)szEnd = szPath.c_str()-1;
 
 			char szTemp[1024];
 			sprintf(szTemp,"[ERROR] Unable to load background texture %s",szEnd+1);
@@ -424,7 +425,7 @@ void CBackgroundPainter::RecreateNativeResource()
 			CLogDisplay::Instance().AddEntry(szTemp,
 				D3DCOLOR_ARGB(0xFF,0xFF,0,0));
 
-			this->eMode = SIMPLE_COLOR;
+			eMode = SIMPLE_COLOR;
 			return;
 		}
 		else CLogDisplay::Instance().AddEntry("[OK] The background texture has been imported successfully",
@@ -440,7 +441,7 @@ void CBackgroundPainter::RecreateNativeResource()
 			NULL,
 			D3DXSHADER_USE_LEGACY_D3DX9_31_DLL,
 			NULL,
-			&this->piSkyBoxEffect,NULL)))
+			&piSkyBoxEffect,NULL)))
 		{
 			CLogDisplay::Instance().AddEntry("[ERROR] Unable to compile skybox shader",
 				D3DCOLOR_ARGB(0xFF,0xFF,0,0));
@@ -449,15 +450,15 @@ void CBackgroundPainter::RecreateNativeResource()
 		}
 	}
 	// commit the correct textures to the shader
-	if (TEXTURE_CUBE == this->eMode)
+	if (TEXTURE_CUBE == eMode)
 	{
-		this->piSkyBoxEffect->SetTexture("lw_tex_envmap",this->pcTexture);
-		this->piSkyBoxEffect->SetTechnique("RenderSkyBox");
+		piSkyBoxEffect->SetTexture("lw_tex_envmap",pcTexture);
+		piSkyBoxEffect->SetTechnique("RenderSkyBox");
 	}
-	else if (TEXTURE_2D == this->eMode)
+	else if (TEXTURE_2D == eMode)
 	{
-		this->piSkyBoxEffect->SetTexture("TEXTURE_2D",this->pcTexture);
-		this->piSkyBoxEffect->SetTechnique("RenderImage2D");
+		piSkyBoxEffect->SetTexture("TEXTURE_2D",pcTexture);
+		piSkyBoxEffect->SetTechnique("RenderImage2D");
 	}
 }
 };

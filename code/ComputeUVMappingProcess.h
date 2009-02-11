@@ -91,7 +91,7 @@ protected:
 	 *  @param axis Main axis
 	 *  @param out Receives output UV coordinates
 	*/
-	void ComputeSphereMapping(aiMesh* mesh,aiAxis axis,
+	void ComputeSphereMapping(aiMesh* mesh,const aiVector3D& axis,
 		aiVector3D* out);
 
 	// -------------------------------------------------------------------
@@ -101,7 +101,7 @@ protected:
 	 *  @param axis Main axis
 	 *  @param out Receives output UV coordinates
 	*/
-	void ComputeCylinderMapping(aiMesh* mesh,aiAxis axis,
+	void ComputeCylinderMapping(aiMesh* mesh,const aiVector3D& axis,
 		aiVector3D* out);
 
 	// -------------------------------------------------------------------
@@ -111,7 +111,7 @@ protected:
 	 *  @param axis Main axis
 	 *  @param out Receives output UV coordinates
 	*/
-	void ComputePlaneMapping(aiMesh* mesh,aiAxis axis, 
+	void ComputePlaneMapping(aiMesh* mesh,const aiVector3D& axis, 
 		aiVector3D* out);
 
 	// -------------------------------------------------------------------
@@ -129,12 +129,12 @@ private:
 	{
 		MappingInfo(aiTextureMapping _type)
 			: type	(_type)
-			, axis	(aiAxis_Y)
+			, axis	(0.f,1.f,0.f)
 			, uv	(0u)
 		{}
 
 		aiTextureMapping type;
-		aiAxis axis;
+		aiVector3D axis;
 		unsigned int uv;
 
 		bool operator== (const MappingInfo& other)

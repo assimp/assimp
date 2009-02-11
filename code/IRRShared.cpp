@@ -275,6 +275,11 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 						: aiShadingMode_NoShading);
 					mat->AddProperty(&val,1,AI_MATKEY_SHADING_MODEL);
 				}
+				else if (prop.name == "BackfaceCulling")
+				{
+					int val = (!prop.value);
+					mat->AddProperty(&val,1,AI_MATKEY_TWOSIDED);
+				}
 			}
 			// String properties - textures and texture related properties
 			else if (!ASSIMP_stricmp(reader->getNodeName(),"texture") ||
@@ -339,6 +344,9 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 						{
 							matFlags = AI_IRRMESH_MAT_normalmap_ta;
 						}
+						else {
+							DefaultLogger::get()->warn("IRRMat: Unrecognized material type: " + prop.value);
+						}
 					}
 
 					// Up to 4 texture channels are supported
@@ -352,8 +360,7 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 					else if (prop.name == "Texture2")
 					{
 						// 2-layer material lightmapped?
-						if (matFlags & (AI_IRRMESH_MAT_solid_2layer | AI_IRRMESH_MAT_lightmap))
-						{
+						if (matFlags & AI_IRRMESH_MAT_lightmap)	{
 							++cnt;
 							s.Set(prop.value);
 							mat->AddProperty(&s,AI_MATKEY_TEXTURE_LIGHTMAP(0));
@@ -362,11 +369,19 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 							matFlags |= AI_IRRMESH_EXTRA_2ND_TEXTURE;
 						}
 						// alternatively: normal or parallax mapping
-						else if (matFlags & AI_IRRMESH_MAT_normalmap_solid)
-						{
+						else if (matFlags & AI_IRRMESH_MAT_normalmap_solid)	{
 							++cnt;
 							s.Set(prop.value);
 							mat->AddProperty(&s,AI_MATKEY_TEXTURE_NORMALS(0));
+
+							// set the corresponding material flag
+							matFlags |= AI_IRRMESH_EXTRA_2ND_TEXTURE;
+						}
+						// or just as second diffuse texture
+						else if (matFlags & AI_IRRMESH_MAT_solid_2layer)	{
+							++cnt;
+							s.Set(prop.value);
+							mat->AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(1));
 
 							// set the corresponding material flag
 							matFlags |= AI_IRRMESH_EXTRA_2ND_TEXTURE;
@@ -398,13 +413,17 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 					else if (prop.name == "TextureWrap2" && cnt >= 2)
 					{
 						int map = ConvertMappingMode(prop.value);
-						if (matFlags & (AI_IRRMESH_MAT_solid_2layer | AI_IRRMESH_MAT_lightmap)) {
-							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_LIGHTMAP(1));
-							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_LIGHTMAP(1));	
+						if (matFlags & AI_IRRMESH_MAT_lightmap) {
+							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_LIGHTMAP(0));
+							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_LIGHTMAP(0));	
 						}
 						else if (matFlags & (AI_IRRMESH_MAT_normalmap_solid)) {
-							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_NORMALS(1));
-							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_NORMALS(1));	
+							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_NORMALS(0));
+							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_NORMALS(0));	
+						}
+						else if (matFlags & AI_IRRMESH_MAT_solid_2layer) {
+							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_DIFFUSE(1));
+							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_DIFFUSE(1));	
 						}
 					}
 					else if (prop.name == "TextureWrap3" && cnt >= 3)

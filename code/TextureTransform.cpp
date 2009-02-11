@@ -283,9 +283,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 					{
 						// ValidateDS should check this
 						ai_assert(prop2->mDataLength >= 20); 
-
 						::memcpy(&info.mTranslation.x,prop2->mData,sizeof(float)*5);
-
 						delete[] prop2->mData;
 
 						// Directly remove this property from the list 
@@ -344,11 +342,8 @@ void TextureTransformStep::Execute( aiScene* pScene)
 						uv = 0;
 					}
 					
-					if (mesh->mNumUVComponents[info.uvIndex] >= 3)
-					{
-						DefaultLogger::get()->warn("UV transformations on 3D mapping channels "
-							"are not supported by this step");
-
+					if (mesh->mNumUVComponents[info.uvIndex] >= 3){
+						DefaultLogger::get()->warn("UV transformations on 3D mapping channels are not supported");
 						continue;
 					}
 
@@ -357,8 +352,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 					// Check whether we have this transform setup already
 					for (it = meshLists[n].begin();it != meshLists[n].end(); ++it)
 					{
-						if ((*it) == info && (*it).uvIndex == uv)
-						{
+						if ((*it) == info && (*it).uvIndex == uv)	{
 							(*it).updateList.push_back(update);
 							break;
 						}

@@ -217,7 +217,7 @@ std::string g_szSkyboxShader = std::string(
 		"VS_OUTPUT2 Out;\n"
 
 		"Out.Position.xy = INPosition.xy;\n"
-		"Out.Position.z = Out._Position.w = 1.0f;\n"
+		"Out.Position.z = Out.Position.w = 1.0f;\n"
 		"Out.TexCoord0 = INTexCoord0;\n"
 
 		"return Out;\n"
@@ -676,7 +676,7 @@ std::string g_szMaterialShader = std::string(
 		"#endif\n"
 
 		"float2 TexCoord0 : TEXCOORD2;\n"
-		"#ifdef AV_DIFFUSE_TEXTURE2 \n"
+		"#ifdef AV_TWO_UV \n"
 		"float2 TexCoord1 : TEXCOORD3;\n"
 		"#endif \n"
 

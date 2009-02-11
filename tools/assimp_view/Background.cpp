@@ -433,6 +433,7 @@ void CBackgroundPainter::RecreateNativeResource()
 	}
 	if (!piSkyBoxEffect)
 	{
+		ID3DXBuffer* piBuffer = NULL;
 		if(FAILED( D3DXCreateEffect(
 			g_piDevice,
 			g_szSkyboxShader.c_str(),
@@ -441,11 +442,17 @@ void CBackgroundPainter::RecreateNativeResource()
 			NULL,
 			D3DXSHADER_USE_LEGACY_D3DX9_31_DLL,
 			NULL,
-			&piSkyBoxEffect,NULL)))
+			&piSkyBoxEffect,&piBuffer)))
 		{
+			// failed to compile the shader
+			if( piBuffer) {
+				MessageBox(g_hDlg,(LPCSTR)piBuffer->GetBufferPointer(),"HLSL",MB_OK);
+				piBuffer->Release();
+			}
+
 			CLogDisplay::Instance().AddEntry("[ERROR] Unable to compile skybox shader",
 				D3DCOLOR_ARGB(0xFF,0xFF,0,0));
-			this->eMode = SIMPLE_COLOR;
+			eMode = SIMPLE_COLOR;
 			return ;
 		}
 	}

@@ -1025,8 +1025,16 @@ int CMaterialManager::CreateMaterial(
 		sMacro[iCurrent].Definition = "1";
 		++iCurrent;
 
+		int idx;
+		if(AI_SUCCESS == aiGetMaterialInteger(pcMat,AI_MATKEY_UVWSRC_LIGHTMAP(0),&idx) && idx >= 1 && pcSource->mTextureCoords[idx])	{
+			sMacro[iCurrent].Name = "AV_TWO_UV";
+			sMacro[iCurrent].Definition = "1";
+			++iCurrent;
+
+			sMacro[iCurrent].Definition = "IN.TexCoord1";
+		}
+		else sMacro[iCurrent].Definition = "IN.TexCoord0";
 		sMacro[iCurrent].Name = "AV_LIGHTMAP_TEXTURE_UV_COORD";
-		sMacro[iCurrent].Definition = "IN.TexCoord0";
 		++iCurrent;
 	}
 	if (pcMesh->piNormalTexture && !bib)
@@ -1170,8 +1178,7 @@ int CMaterialManager::CreateMaterial(
 	if (pcMesh->piLightmapTexture)
 		pcMesh->piEffect->SetTexture("LIGHTMAP_TEXTURE",pcMesh->piLightmapTexture);
 
-	if (CBackgroundPainter::TEXTURE_CUBE == CBackgroundPainter::Instance().GetMode())
-	{
+	if (CBackgroundPainter::TEXTURE_CUBE == CBackgroundPainter::Instance().GetMode()){
 		pcMesh->piEffect->SetTexture("lw_tex_envmap",CBackgroundPainter::Instance().GetTexture());
 	}
 

@@ -72,15 +72,12 @@ bool MD3Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	if( pos == std::string::npos)
 		return false;
 	std::string extension = pFile.substr( pos);
+	for( std::string::iterator it = extension.begin(); it != extension.end(); ++it)
+		*it = tolower( *it);
 
-	if (extension.length() < 4)return false;
-	if (extension[0] != '.')return false;
-	if (extension[1] != 'm' && extension[1] != 'M')return false;
-	if (extension[2] != 'd' && extension[2] != 'D')return false;
-	if (extension[3] != '3')return false;
-
-	return true;
+	return ( extension == ".md3");
 }
+
 // ------------------------------------------------------------------------------------------------
 void MD3Importer::ValidateHeaderOffsets()
 {
@@ -97,16 +94,15 @@ void MD3Importer::ValidateHeaderOffsets()
 	if (!pcHeader->NUM_SURFACES)
 		throw new ImportErrorException( "Invalid md3 file: NUM_SURFACES is 0");
 
-	if (pcHeader->OFS_FRAMES	>= fileSize ||
-		pcHeader->OFS_SURFACES	>= fileSize || 
-		pcHeader->OFS_EOF		> fileSize)
-	{
+	if (pcHeader->OFS_FRAMES >= fileSize || pcHeader->OFS_SURFACES >= fileSize || 
+		pcHeader->OFS_EOF > fileSize) {
 		throw new ImportErrorException("Invalid MD3 header: some offsets are outside the file");
 	}
 
-	if (pcHeader->NUM_FRAMES <= this->configFrameID )
+	if (pcHeader->NUM_FRAMES <= configFrameID )
 		throw new ImportErrorException("The requested frame is not existing the file");
 }
+
 // ------------------------------------------------------------------------------------------------
 void MD3Importer::ValidateSurfaceHeaderOffsets(const MD3::Surface* pcSurf)
 {
@@ -114,10 +110,9 @@ void MD3Importer::ValidateSurfaceHeaderOffsets(const MD3::Surface* pcSurf)
 	int32_t ofs = int32_t((const unsigned char*)pcSurf-this->mBuffer);
 
 	if (pcSurf->OFS_TRIANGLES	+ ofs + pcSurf->NUM_TRIANGLES * sizeof(MD3::Triangle)	> fileSize ||
-		pcSurf->OFS_SHADERS		+ ofs + pcSurf->NUM_SHADER * sizeof(MD3::Shader)		> fileSize ||
-		pcSurf->OFS_ST			+ ofs + pcSurf->NUM_VERTICES * sizeof(MD3::TexCoord)	> fileSize ||
-		pcSurf->OFS_XYZNORMAL	+ ofs + pcSurf->NUM_VERTICES * sizeof(MD3::Vertex)		> fileSize)
-	{
+		pcSurf->OFS_SHADERS		+ ofs + pcSurf->NUM_SHADER    * sizeof(MD3::Shader)		> fileSize ||
+		pcSurf->OFS_ST			+ ofs + pcSurf->NUM_VERTICES  * sizeof(MD3::TexCoord)	> fileSize ||
+		pcSurf->OFS_XYZNORMAL	+ ofs + pcSurf->NUM_VERTICES  * sizeof(MD3::Vertex)		> fileSize)	{
 		throw new ImportErrorException("Invalid MD3 surface header: some offsets are outside the file");
 	}
 
@@ -134,14 +129,15 @@ void MD3Importer::ValidateSurfaceHeaderOffsets(const MD3::Surface* pcSurf)
 // Setup configuration properties
 void MD3Importer::SetupProperties(const Importer* pImp)
 {
-	// The AI_CONFIG_IMPORT_MD3_KEYFRAME option overrides the
+	// The 
+	// AI_CONFIG_IMPORT_MD3_KEYFRAME option overrides the
 	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
-	if(0xffffffff == (this->configFrameID = pImp->GetPropertyInteger(
-		AI_CONFIG_IMPORT_MD3_KEYFRAME,0xffffffff)))
-	{
-		this->configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
+	configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_MD3_KEYFRAME,0xffffffff);
+	if(0xffffffff == configFrameID) {
+		configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
 	}
 }
+
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void MD3Importer::InternReadFile( 
@@ -183,10 +179,13 @@ void MD3Importer::InternReadFile(
 #endif
 
 	// validate the header
-	this->ValidateHeaderOffsets();
+	ValidateHeaderOffsets();
 
-	// now navigate to the list of surfaces
+	// navigate to the list of surfaces
 	BE_NCONST MD3::Surface* pcSurfaces = (BE_NCONST MD3::Surface*)(mBuffer + pcHeader->OFS_SURFACES);
+
+	// navigate to the list of tags
+	BE_NCONST MD3::Tag* pcTags = (BE_NCONST MD3::Tag*)(mBuffer + pcHeader->OFS_TAGS);
 
 	// allocate output storage
 	pScene->mNumMeshes = pcHeader->NUM_SURFACES;
@@ -223,7 +222,7 @@ void MD3Importer::InternReadFile(
 #endif
 
 		// validate the surface
-		this->ValidateSurfaceHeaderOffsets(pcSurfaces);
+		ValidateSurfaceHeaderOffsets(pcSurfaces);
 
 		// navigate to the vertex list of the surface
 		BE_NCONST MD3::Vertex* pcVertices = (BE_NCONST MD3::Vertex*)
@@ -336,7 +335,7 @@ void MD3Importer::InternReadFile(
 				bool bSuccess = true;
 				for (unsigned int a = 0; a  < iLen2;++a)
 				{
-					char sz = ::tolower ( pcShaders->NAME[a] );
+					char sz  = ::tolower ( pcShaders->NAME[a] );
 					char sz2 = ::tolower ( pcHeader->NAME[a] );
 					if (sz != sz2)
 					{
@@ -344,23 +343,19 @@ void MD3Importer::InternReadFile(
 						break;
 					}
 				}
-				if (bSuccess)
-				{
+				if (bSuccess)	{
 					// use the file name only
 					szEndDir2++;
 				}
-				else
-				{
+				else	{
 					// use the full path
 					szEndDir2 = (const char*)pcShaders->NAME;
 				}
 			}
 			MaterialHelper* pcHelper = new MaterialHelper();
 
-			if (szEndDir2)
-			{
-				if (szEndDir2[0])
-				{
+			if (szEndDir2)	{
+				if (szEndDir2[0])	{
 					aiString szString;
 					const size_t iLen = ::strlen(szEndDir2);
 					::memcpy(szString.data,szEndDir2,iLen);
@@ -369,10 +364,8 @@ void MD3Importer::InternReadFile(
 
 					pcHelper->AddProperty(&szString,AI_MATKEY_TEXTURE_DIFFUSE(0));
 				}
-				else 
-				{
-					DefaultLogger::get()->warn("Texture file name has zero length. "
-						"It will be skipped.");
+				else	{
+					DefaultLogger::get()->warn("Texture file name has zero length. Skipping");
 				}
 			}
 
@@ -397,8 +390,7 @@ void MD3Importer::InternReadFile(
 		}
 		else
 		{
-			if (0xFFFFFFFF != iDefaultMatIndex)
-			{
+			if (0xFFFFFFFF != iDefaultMatIndex)	{
 				pcMesh->mMaterialIndex = iDefaultMatIndex;
 			}
 			else
@@ -429,10 +421,40 @@ void MD3Importer::InternReadFile(
 		throw new ImportErrorException( "Invalid MD3 file: File contains no valid mesh");
 	pScene->mNumMaterials = iNumMaterials;
 
-	// now we need to generate an empty node graph
-	pScene->mRootNode = new aiNode();
+	// Now we need to generate an empty node graph
+	pScene->mRootNode = new aiNode("<MD3Root>");
 	pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
 	pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
+
+	// Attach tiny children for all tags
+	if (pcHeader->NUM_TAGS) {
+		pScene->mRootNode->mNumChildren = pcHeader->NUM_TAGS;
+		pScene->mRootNode->mChildren = new aiNode*[pcHeader->NUM_TAGS];
+
+		for (unsigned int i = 0; i < pcHeader->NUM_TAGS; ++i, ++pcTags) {
+
+			aiNode* nd = pScene->mRootNode->mChildren[i] = new aiNode();
+			nd->mName.Set((const char*)pcTags->NAME);
+			nd->mParent = pScene->mRootNode;
+
+			AI_SWAP4(pcTags->origin.x);
+			AI_SWAP4(pcTags->origin.y);
+			AI_SWAP4(pcTags->origin.z);
+
+			// copy local origin
+			nd->mTransformation.a4 = pcTags->origin.x;
+			nd->mTransformation.b4 = pcTags->origin.y;
+			nd->mTransformation.c4 = pcTags->origin.z;
+
+			// copy rest of transformation
+			for (unsigned int a = 0; a < 3;++a) {
+				for (unsigned int m = 0; m < 3;++m) {
+					nd->mTransformation[a][m] = pcTags->orientation[a][m];
+					AI_SWAP4(nd->mTransformation[a][m]);
+				}
+			}
+		}
+	}
 
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
 		pScene->mRootNode->mMeshes[i] = i;

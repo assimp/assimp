@@ -66,6 +66,7 @@ namespace MD3	{
 // common limitations
 #define AI_MD3_VERSION			15
 #define AI_MD3_MAXQPATH			64
+#define AI_MD3_MAXFRAME			16
 #define AI_MD3_MAX_FRAMES		1024
 #define AI_MD3_MAX_TAGS			16
 #define AI_MD3_MAX_SURFACES		32
@@ -126,7 +127,21 @@ struct Header
 // ---------------------------------------------------------------------------
 struct Frame
 {
-	// no need to define this, we won't need
+	//! minimum bounds
+	aiVector3D min;
+
+	//! maximum bounds
+	aiVector3D max;
+
+	//! local origin for this frame
+	aiVector3D origin;
+
+	//! radius of bounding sphere
+	float radius;
+
+	//! name of frame
+	char name[ AI_MD3_MAXFRAME ];
+
 } PACK_STRUCT;
 
 
@@ -136,7 +151,13 @@ struct Frame
 // ---------------------------------------------------------------------------
 struct Tag
 {
-	// no need to define this, we won't need
+	//! name of the tag
+	unsigned char NAME[ AI_MD3_MAXQPATH ];
+
+	//! Local tag origin and orientation
+	aiVector3D  origin;
+	float  orientation[3][3];
+
 } PACK_STRUCT;
 
 

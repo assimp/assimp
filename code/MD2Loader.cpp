@@ -94,25 +94,22 @@ bool MD2Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 	// no file extension - can't read
 	if( pos == std::string::npos)
 		return false;
+	
 	std::string extension = pFile.substr( pos);
+	for( std::string::iterator it = extension.begin(); it != extension.end(); ++it)
+		*it = tolower( *it);
 
-	if (extension.length() < 4)return false;
-	if (extension[0] != '.')return false;
-	if (extension[1] != 'm' && extension[1] != 'M')return false;
-	if (extension[2] != 'd' && extension[2] != 'D')return false;
-	if (extension[3] != '2')return false;
-
-	return true;
+	return ( extension == ".md2");
 }
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties
 void MD2Importer::SetupProperties(const Importer* pImp)
 {
-	// The AI_CONFIG_IMPORT_MD2_KEYFRAME option overrides the
+	// The 
+	// AI_CONFIG_IMPORT_MD2_KEYFRAME option overrides the
 	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
-	if(0xffffffff == (configFrameID = pImp->GetPropertyInteger(
-		AI_CONFIG_IMPORT_MD2_KEYFRAME,0xffffffff)))
-	{
+	configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_MD2_KEYFRAME,0xffffffff);
+	if(0xffffffff == configFrameID){
 		configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
 	}
 }

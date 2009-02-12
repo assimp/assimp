@@ -153,8 +153,10 @@ struct LoadRequest
 		,	refCnt	(1)
 		,	scene	(NULL)            
 		,	loaded	(false)
-		,	map		(*_map)
-	{}
+	{
+		if (_map)
+			map = *_map;
+	}
 
 	const std::string file;
 	unsigned int flags;
@@ -163,8 +165,9 @@ struct LoadRequest
 	bool loaded;
 	BatchLoader::PropertyMap map;
 
-	bool operator== (const std::string& f)
-		{return file == f;}
+	bool operator== (const std::string& f) {
+		return file == f;
+	}
 };
 
 // ------------------------------------------------------------------------------------------------

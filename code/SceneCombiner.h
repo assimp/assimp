@@ -75,33 +75,60 @@ struct NodeAttachmentInfo
 	NodeAttachmentInfo()
 		:	node			(NULL)
 		,	attachToNode	(NULL)
+		,	resolved		(false)
+		,	src_idx			(0xffffffff)
 	{}
 
-	NodeAttachmentInfo(aiNode* _scene, aiNode* _attachToNode)
+	NodeAttachmentInfo(aiNode* _scene, aiNode* _attachToNode,size_t idx)
 		:	node			(_scene)
 		,	attachToNode	(_attachToNode)
+		,	resolved		(false)
+		,	src_idx			(idx)
 	{}
 
 	aiNode*  node;
 	aiNode*  attachToNode;
+	bool     resolved;
+	size_t   src_idx;
 };
 
-// generate unique names for all named scene items
+// ---------------------------------------------------------------------------
+/** @def AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES
+ *  Generate unique names for all named scene items
+ */
 #define AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES      0x1
-// generate unique names for materials, too 
+
+/** @def AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES
+ *  Generate unique names for materials, too. 
+ *  This is not absolutely required to pass the validation.
+ */
 #define AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES   0x2
-// use deep copies of duplicate scenes
+
+/** @def AI_INT_MERGE_SCENE_DUPLICATES_DEEP_CPY
+ * Use deep copies of duplicate scenes
+ */
 #define AI_INT_MERGE_SCENE_DUPLICATES_DEEP_CPY   0x4
+
+/** @def AI_INT_MERGE_SCENE_RESOLVE_CROSS_ATTACHMENTS
+ * If attachment nodes are not found in the given master scene,
+ * search the other imported scenes for them in an any order.
+ */
+#define AI_INT_MERGE_SCENE_RESOLVE_CROSS_ATTACHMENTS 0x8
+
+/** @def AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY
+ * Can be combined with AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES.
+ * Unique names are generated, but only if this is absolutely
+ * required (if there would be conflicts otherwuse.)
+ */
+#define AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY 0x10
 
 
 typedef std::pair<aiBone*,unsigned int> BoneSrcIndex;
 
 // ---------------------------------------------------------------------------
-/** \brief Helper data structure for SceneCombiner::MergeBones.
- *
+/** @brief Helper data structure for SceneCombiner::MergeBones.
  */
-struct BoneWithHash : public std::pair<uint32_t,aiString*>
-{
+struct BoneWithHash : public std::pair<uint32_t,aiString*>	{
 	std::vector<BoneSrcIndex> pSrcBones;
 };
 

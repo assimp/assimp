@@ -48,13 +48,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MaterialSystem.h"
 #include "StringComparison.h"
 #include "ByteSwap.h"
+#include "SceneCombiner.h"
+#include "GenericProperty.h"
 
 using namespace Assimp;
-
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 MD3Importer::MD3Importer()
+: configFrameID  (0)
+, configHandleMP (true)
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -107,7 +110,7 @@ void MD3Importer::ValidateHeaderOffsets()
 void MD3Importer::ValidateSurfaceHeaderOffsets(const MD3::Surface* pcSurf)
 {
 	// calculate the relative offset of the surface
-	int32_t ofs = int32_t((const unsigned char*)pcSurf-this->mBuffer);
+	const int32_t ofs = int32_t((const unsigned char*)pcSurf-this->mBuffer);
 
 	if (pcSurf->OFS_TRIANGLES	+ ofs + pcSurf->NUM_TRIANGLES * sizeof(MD3::Triangle)	> fileSize ||
 		pcSurf->OFS_SHADERS		+ ofs + pcSurf->NUM_SHADER    * sizeof(MD3::Shader)		> fileSize ||
@@ -125,6 +128,13 @@ void MD3Importer::ValidateSurfaceHeaderOffsets(const MD3::Surface* pcSurf)
 	if (pcSurf->NUM_FRAMES > AI_MD3_MAX_FRAMES)
 		DefaultLogger::get()->warn("The model contains more frames than Quake 3 supports");
 }
+
+// ------------------------------------------------------------------------------------------------
+void MD3Importer::GetExtensionList(std::string& append)
+{
+	append.append("*.md3");
+}
+
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties
 void MD3Importer::SetupProperties(const Importer* pImp)
@@ -136,13 +146,107 @@ void MD3Importer::SetupProperties(const Importer* pImp)
 	if(0xffffffff == configFrameID) {
 		configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
 	}
+
+	// AI_CONFIG_IMPORT_MD3_HANDLE_MULTIPART
+	configHandleMP = (0 != pImp->GetPropertyInteger(AI_CONFIG_IMPORT_MD3_HANDLE_MULTIPART,1));
+}
+
+// ------------------------------------------------------------------------------------------------
+// Read a multi-part Q3 player model
+bool MD3Importer::ReadMultipartFile()
+{
+	std::string::size_type s = mFile.find_last_of('/');
+	if (s == std::string::npos) {
+		s = mFile.find_last_of('\\');
+	}
+	if (s == std::string::npos) {
+		s = 0;
+	}
+	else ++s;
+	std::string filename = mFile.substr(s), path = mFile.substr(0,s);
+	for( std::string::iterator it = filename .begin(); it != filename.end(); ++it)
+		*it = tolower( *it);
+
+	if (filename == "lower.md3" || filename == "upper.md3" || filename == "head.md3"){
+		std::string lower = path + "lower.md3";
+		std::string upper = path + "upper.md3";
+		std::string head  = path + "head.md3";
+
+		// ensure we won't try to load ourselves recursively
+		BatchLoader::PropertyMap props;
+		SetGenericProperty( props.ints, AI_CONFIG_IMPORT_MD3_HANDLE_MULTIPART, 0, NULL);
+
+		// now read these three files
+		BatchLoader batch(mIOHandler);
+		batch.AddLoadRequest(lower,0,&props);
+		batch.AddLoadRequest(upper,0,&props);
+		batch.AddLoadRequest(head,0,&props);
+		batch.LoadAll();
+
+		// now construct a dummy scene to place these three parts in
+		aiScene* master   = new aiScene();
+		aiNode* nd = master->mRootNode = new aiNode();
+		nd->mName.Set("<M3D_Player>");
+
+		// ... and get them. We need all of them.
+		aiScene* scene_lower = batch.GetImport(lower);
+		if (!scene_lower)
+			throw new ImportErrorException("M3D: Failed to read multipart model, lower.md3 fails to load");
+
+		aiScene* scene_upper = batch.GetImport(upper);
+		if (!scene_upper)
+			throw new ImportErrorException("M3D: Failed to read multipart model, upper.md3 fails to load");
+
+		aiScene* scene_head  = batch.GetImport(head);
+		if (!scene_head)
+			throw new ImportErrorException("M3D: Failed to read multipart model, head.md3 fails to load");
+
+		// build attachment infos. search for typical Q3 tags
+		std::vector<AttachmentInfo> attach;
+
+		// original root
+		attach.push_back(AttachmentInfo(scene_lower, nd));
+
+		// tag_torso
+		aiNode* tag_torso = scene_lower->mRootNode->FindNode("tag_torso");
+		if (!tag_torso) {
+			throw new ImportErrorException("M3D: Unable to find attachment tag: tag_torso expected");
+		}
+		attach.push_back(AttachmentInfo(scene_upper,tag_torso));
+
+		// tag_head
+		aiNode* tag_head = scene_upper->mRootNode->FindNode("tag_head");
+		if (!tag_head) {
+			throw new ImportErrorException("M3D: Unable to find attachment tag: tag_head expected");
+		}
+		attach.push_back(AttachmentInfo(scene_head,tag_head));
+
+		// and merge the scenes
+		SceneCombiner::MergeScenes(&mScene,master, attach,
+			AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES |
+			AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES |
+			AI_INT_MERGE_SCENE_RESOLVE_CROSS_ATTACHMENTS);
+
+		return true;
+	}
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
-void MD3Importer::InternReadFile( 
-	const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
+void MD3Importer::InternReadFile( const std::string& pFile, 
+	aiScene* pScene, IOSystem* pIOHandler)
 {
+	mFile = pFile;
+	mScene = pScene;
+	mIOHandler = pIOHandler;
+
+	// Load multi-part model file, if necessary
+	if (configHandleMP) {
+		if (ReadMultipartFile())
+			return;
+	}
+
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
 
 	// Check whether we can read from the file
@@ -301,8 +405,6 @@ void MD3Importer::InternReadFile(
 				LatLngNormalToVec3(pcVertices[pcTriangles->INDEXES[c]].NORMAL,
 					(float*)&pcMesh->mNormals[iCurrent]);
 
-				//pcMesh->mNormals[iCurrent].y *= -1.0f;
-
 				// read texture coordinates
 				pcMesh->mTextureCoords[0][iCurrent].x = pcUVs[ pcTriangles->INDEXES[c]].U;
 				pcMesh->mTextureCoords[0][iCurrent].y = 1.0f-pcUVs[ pcTriangles->INDEXES[c]].V;
@@ -355,18 +457,18 @@ void MD3Importer::InternReadFile(
 			MaterialHelper* pcHelper = new MaterialHelper();
 
 			if (szEndDir2)	{
+				aiString szString;
 				if (szEndDir2[0])	{
-					aiString szString;
 					const size_t iLen = ::strlen(szEndDir2);
 					::memcpy(szString.data,szEndDir2,iLen);
 					szString.data[iLen] = '\0';
 					szString.length = iLen;
-
-					pcHelper->AddProperty(&szString,AI_MATKEY_TEXTURE_DIFFUSE(0));
 				}
 				else	{
-					DefaultLogger::get()->warn("Texture file name has zero length. Skipping");
+					DefaultLogger::get()->warn("Texture file name has zero length. Using default name");
+					szString.Set("dummy_texture.bmp");
 				}
+				pcHelper->AddProperty(&szString,AI_MATKEY_TEXTURE_DIFFUSE(0));
 			}
 
 			int iMode = (int)aiShadingMode_Gouraud;
@@ -449,8 +551,8 @@ void MD3Importer::InternReadFile(
 			// copy rest of transformation
 			for (unsigned int a = 0; a < 3;++a) {
 				for (unsigned int m = 0; m < 3;++m) {
-					nd->mTransformation[a][m] = pcTags->orientation[a][m];
-					AI_SWAP4(nd->mTransformation[a][m]);
+					nd->mTransformation[m][a] = pcTags->orientation[a][m];
+					AI_SWAP4(nd->mTransformation[m][a]);
 				}
 			}
 		}

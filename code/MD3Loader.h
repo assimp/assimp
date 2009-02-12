@@ -90,29 +90,34 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append)
-	{
-		append.append("*.md3");
-	}
+	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 
-	* See BaseImporter::InternReadFile() for details
-	*/
+	 * See BaseImporter::InternReadFile() for details
+	 */
 	void InternReadFile( const std::string& pFile, aiScene* pScene, 
 		IOSystem* pIOHandler);
 
-
 	// -------------------------------------------------------------------
 	/** Validate offsets in the header
-	*/
+	 */
 	void ValidateHeaderOffsets();
 	void ValidateSurfaceHeaderOffsets(const MD3::Surface* pcSurfHeader);
+
+	// -------------------------------------------------------------------
+	/** Read a Q3 multipart file
+	 *  @return true if multi part has been processed
+	 */
+	bool ReadMultipartFile();
 
 protected:
 
 	/** Configuration option: frame to be loaded */
 	unsigned int configFrameID;
+
+	/** Configuration option: process multi-part files */
+	bool configHandleMP;
 
 	/** Header of the MD3 file */
 	BE_NCONST MD3::Header* pcHeader;
@@ -122,6 +127,15 @@ protected:
 
 	/** Size of the file, in bytes */
 	unsigned int fileSize;
+
+	/** Current file name */
+	std::string mFile;
+
+	/** Output scene to be filled */
+	aiScene* mScene;
+
+	/** IO system to be used to access the data*/
+	IOSystem* mIOHandler;
 	};
 
 } // end of namespace Assimp

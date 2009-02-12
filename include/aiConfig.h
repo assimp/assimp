@@ -136,6 +136,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS	"imp.ase.reconn"
 
 
+// ---------------------------------------------------------------------------
+/** @brief  Configures the M3D loader to process multi-part player models.
+ *
+ * These models usually consist of 3 files, lower.md3, upper.md3 and
+ * head.md3. If this property is set to true, Assimp will try to load and
+ * combine all three files if one of them is loaded. 
+ * Property type: integer (0: false; !0: true). Default value: true.
+ */
+#define AI_CONFIG_IMPORT_MD3_HANDLE_MULTIPART "IMPORT_MD3_HANDLE_MULTIPART"
+
 
 // ---------------------------------------------------------------------------
 /** @brief  Configures the LWO loader to load just one layer from the model.

@@ -129,7 +129,6 @@ inline void PrefixString(aiString& string,const char* prefix, unsigned int len)
 void SceneCombiner::AddNodePrefixes(aiNode* node, const char* prefix, unsigned int len)
 {
 	ai_assert(NULL != prefix);
-
 	PrefixString(node->mName,prefix,len);
 
 	// Process all children recursively
@@ -177,8 +176,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest,std::vector<aiScene*>& src,
 	master->mRootNode->mName.Set("<MergeRoot>");
 
 	std::vector<AttachmentInfo> srcList (src.size());
-	for (unsigned int i = 0; i < srcList.size();++i)
-	{
+	for (unsigned int i = 0; i < srcList.size();++i)	{
 		srcList[i] = AttachmentInfo(src[i],master->mRootNode);
 	}
 
@@ -190,7 +188,6 @@ void SceneCombiner::MergeScenes(aiScene** _dest,std::vector<aiScene*>& src,
 void SceneCombiner::AttachToGraph (aiNode* attach, std::vector<NodeAttachmentInfo>& srcList)
 {
 	unsigned int cnt;
-
 	for (cnt = 0; cnt < attach->mNumChildren;++cnt)
 		AttachToGraph(attach->mChildren[cnt],srcList);
 
@@ -198,15 +195,13 @@ void SceneCombiner::AttachToGraph (aiNode* attach, std::vector<NodeAttachmentInf
 	for (std::vector<NodeAttachmentInfo>::iterator it = srcList.begin();
 		 it != srcList.end(); ++it)
 	{
-		if ((*it).attachToNode == attach)
+		if ((*it).attachToNode == attach && !(*it).resolved)
 			++cnt;
 	}
 
-	if (cnt)
-	{
+	if (cnt)	{
 		aiNode** n = new aiNode*[cnt+attach->mNumChildren];
-		if (attach->mNumChildren)
-		{
+		if (attach->mNumChildren)	{
 			::memcpy(n,attach->mChildren,sizeof(void*)*attach->mNumChildren);
 			delete[] attach->mChildren;
 		}
@@ -215,14 +210,15 @@ void SceneCombiner::AttachToGraph (aiNode* attach, std::vector<NodeAttachmentInf
 		n += attach->mNumChildren;
 		attach->mNumChildren += cnt;
 
-		for (unsigned int i = 0; i < srcList.size();++i)
-		{
+		for (unsigned int i = 0; i < srcList.size();++i)	{
 			NodeAttachmentInfo& att = srcList[i];
-			if (att.attachToNode == attach)
-			{
+			if (att.attachToNode == attach && !att.resolved)	{
 				*n = att.node;
 				(**n).mParent = attach;
 				++n;
+
+				// mark this attachment as resolved
+				att.resolved = true;
 			}
 		}
 	}
@@ -261,8 +257,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 
 	std::vector<SceneHelper> src (srcList.size()+1);
 	src[0].scene = master;
-	for (unsigned int i = 0; i < srcList.size();++i)
-	{
+	for (unsigned int i = 0; i < srcList.size();++i)	{
 		src[i+1] = SceneHelper( srcList[i].scene );
 	}
 
@@ -271,7 +266,6 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 
 	// this helper array is used as lookup table several times
 	std::vector<unsigned int> offset(src.size());
-
 
 	// Find duplicate scenes
 	for (unsigned int i = 0; i < src.size();++i)
@@ -316,8 +310,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 	{
 		SceneHelper* cur = &src[n];
 
-		if (n == duplicates[n] || flags & AI_INT_MERGE_SCENE_DUPLICATES_DEEP_CPY) 
-		{
+		if (n == duplicates[n] || flags & AI_INT_MERGE_SCENE_DUPLICATES_DEEP_CPY)	{
 			dest->mNumTextures   += (*cur)->mNumTextures;
 			dest->mNumMaterials  += (*cur)->mNumMaterials;
 			dest->mNumMeshes     += (*cur)->mNumMeshes;
@@ -378,11 +371,8 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 
 				if ((*cur)->mNumTextures != dest->mNumTextures)
 				{
-					// We need to update all texture indices of the mesh.
-					// So we need to search for a material property like 
-					// that follows the following pattern: "$tex.file.<s>.<n>"
-					// where s is the texture type (i.e. diffuse) and n is 
-					// the index of the texture.
+					// We need to update all texture indices of the mesh. So we need to search for
+					// a material property called '$tex.file'
 
 					for (unsigned int a = 0; a < (*pip)->mNumProperties;++a)
 					{
@@ -393,8 +383,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 							// In this case the property looks like this: *<n>,
 							// where n is the index of the texture.
 							aiString& s = *((aiString*)prop->mData);
-							if ('*' == s.data[0])
-							{
+							if ('*' == s.data[0])	{
 								// Offset the index and write it back ..
 								const unsigned int idx = strtol10(&s.data[1]) + offset[n];
 								ASSIMP_itoa10(&s.data[1],sizeof(s.data)-1,idx);
@@ -428,8 +417,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 			SceneHelper* cur = &src[n];
 			for (unsigned int i = 0; i < (*cur)->mNumMeshes;++i)
 			{
-				if (n != duplicates[n])
-				{
+				if (n != duplicates[n])	{
 					if ( flags & AI_INT_MERGE_SCENE_DUPLICATES_DEEP_CPY)
 						Copy(pip, (*cur)->mMeshes[i]);
 
@@ -439,7 +427,6 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 
 				// update the material index of the mesh
 				(*pip)->mMaterialIndex +=  offset[n];
-
 				++pip;
 			}
 
@@ -481,8 +468,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 		{
 			Copy( &node, (*cur)->mRootNode );
 
-			if (flags & AI_INT_MERGE_SCENE_DUPLICATES_DEEP_CPY)
-			{
+			if (flags & AI_INT_MERGE_SCENE_DUPLICATES_DEEP_CPY)	{
 				// (note:) they are already 'offseted' by offset[duplicates[n]] 
 				OffsetNodeMeshIndices(node,offset[n] - offset[duplicates[n]]);
 			}
@@ -493,7 +479,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 			OffsetNodeMeshIndices(node,offset[n]);
 		}
 		if (n) // src[0] is the master node
-			nodes.push_back(NodeAttachmentInfo( node,srcList[n-1].attachToNode ));
+			nodes.push_back(NodeAttachmentInfo( node,srcList[n-1].attachToNode,n ));
 
 		// --------------------------------------------------------------------
 		// Copy light sources
@@ -508,8 +494,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 
 		// --------------------------------------------------------------------
 		// Copy cameras
-		for (unsigned int i = 0; i < (*cur)->mNumCameras;++i,++ppCameras)
-		{
+		for (unsigned int i = 0; i < (*cur)->mNumCameras;++i,++ppCameras)	{
 			if (n != duplicates[n]) // duplicate scene? 
 			{
 				Copy(ppCameras, (*cur)->mCameras[i]);
@@ -519,8 +504,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 
 		// --------------------------------------------------------------------
 		// Copy animations
-		for (unsigned int i = 0; i < (*cur)->mNumAnimations;++i,++ppAnims)
-		{
+		for (unsigned int i = 0; i < (*cur)->mNumAnimations;++i,++ppAnims)	{
 			if (n != duplicates[n]) // duplicate scene? 
 			{
 				Copy(ppAnims, (*cur)->mAnimations[i]);
@@ -529,8 +513,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 		}
 	}
 
-	for ( unsigned int n = 1; n < src.size();++n )
-	{
+	for ( unsigned int n = 1; n < src.size();++n )	{
 		SceneHelper* cur = &src[n];
 		// --------------------------------------------------------------------
 		// Add prefixes
@@ -542,8 +525,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 			for (unsigned int i = 0; i < (*cur)->mNumCameras;++i)
 				PrefixString(dest->mCameras[i]->mName,(*cur).id,(*cur).idlen);
 
-			for (unsigned int i = 0; i < (*cur)->mNumAnimations;++i)
-			{
+			for (unsigned int i = 0; i < (*cur)->mNumAnimations;++i)	{
 				aiAnimation* anim = dest->mAnimations[i]; 
 				PrefixString(anim->mName,(*cur).id,(*cur).idlen);
 
@@ -551,7 +533,6 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 				for (unsigned int a = 0; a < anim->mNumChannels;++a)
 					PrefixString(anim->mChannels[a]->mNodeName,(*cur).id,(*cur).idlen);
 			}
-
 			AddNodePrefixes(nodes[n-1].node,(*cur).id,(*cur).idlen);
 		}
 	}
@@ -560,10 +541,31 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 	AttachToGraph ( master, nodes);
 	dest->mRootNode = master->mRootNode;
 
+	// Check whether we succeeded at building the output graph
+	for (std::vector <NodeAttachmentInfo> ::iterator it = nodes.begin(); 
+		it != nodes.end(); ++it)
+	{
+		if (!(*it).resolved) {
+			if (flags & AI_INT_MERGE_SCENE_RESOLVE_CROSS_ATTACHMENTS) {
+				// search for this attachment point in all other imported scenes, too.
+				for ( unsigned int n = 0; n < src.size();++n ) {
+					if (n != (*it).src_idx) {
+						AttachToGraph(src[n].scene,nodes);
+						if ((*it).resolved)
+							break;
+					}
+				}
+			}
+			if (!(*it).resolved) {
+				DefaultLogger::get()->error(std::string("SceneCombiner: Failed to resolve attachment ") 
+					+ (*it).node->mName.data + " " + (*it).attachToNode->mName.data);
+			}
+		}
+	}
+
 	// now delete all input scenes. Make sure duplicate scenes aren't
 	// deleted more than one time
-	for ( unsigned int n = 0; n < src.size();++n )
-	{
+	for ( unsigned int n = 0; n < src.size();++n )	{
 		if (n != duplicates[n]) // duplicate scene?
 			continue;
 

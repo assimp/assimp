@@ -1157,6 +1157,42 @@ void InitUI()
 }
 
 //-------------------------------------------------------------------------------
+// Message prcoedure for the smooth normals dialog
+//-------------------------------------------------------------------------------
+INT_PTR CALLBACK SMMessageProc(HWND hwndDlg,UINT uMsg,
+							   WPARAM wParam,LPARAM lParam)
+{
+	UNREFERENCED_PARAMETER(lParam);
+	switch (uMsg)
+	{
+	case WM_INITDIALOG:
+		char s[30];
+		::sprintf(s,"%.2f",g_smoothAngle);
+		SetDlgItemText(hwndDlg,IDC_EDITSM,s);
+		return TRUE;
+
+	case WM_CLOSE:
+		EndDialog(hwndDlg,0);
+		return TRUE;
+
+	case WM_COMMAND:
+
+		if (IDOK == LOWORD(wParam)) {
+			char s[30];
+			GetDlgItemText(hwndDlg,IDC_EDITSM,s,30);
+			g_smoothAngle = atof(s);
+
+			EndDialog(hwndDlg,0);
+		}
+		else if (IDCANCEL == LOWORD(wParam)) {
+			EndDialog(hwndDlg,1);
+		}
+		return TRUE;
+	}
+	return FALSE;
+}
+
+//-------------------------------------------------------------------------------
 // Main message procedure of the application
 //
 // The function handles all incoming messages for the main window.
@@ -1762,6 +1798,10 @@ __DRUNKEN_ALIEN_FROM_MARS:
 						CLogDisplay::Instance().AddEntry("[INFO] Switched to mono mode",
 							D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
 					}
+				}
+			else if (ID_TOOLS_SETANGLELIMIT == LOWORD(wParam))
+				{
+				DialogBox(g_hInstance,MAKEINTRESOURCE(IDD_DIALOGSMOOTH),g_hDlg,&SMMessageProc);
 				}
 			else if (ID_VIEWER_CLEARHISTORY == LOWORD(wParam))
 				{

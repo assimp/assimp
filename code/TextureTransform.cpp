@@ -509,14 +509,12 @@ void TextureTransformStep::Execute( aiScene* pScene)
 				it2 = it;++it2;
 				for (unsigned int m = n+1; m < size;++m, ++it2)
 				{
-					if ((*it2).uvIndex == n)
-					{
+					if ((*it2).uvIndex == n){
 						it2 = trafo.begin();
 						break;
 					}
 				}
-				if (it2 == trafo.begin())
-				{
+				if (it2 == trafo.begin()){
 					mesh->mTextureCoords[n] = new aiVector3D[mesh->mNumVertices];
 				} 
 			}
@@ -557,9 +555,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 				m5.a3 += trl.x; m5.b3 += trl.y;
 				matrix = m2 * m4 * matrix * m3 * m5;
 				
-
-				for (src = dest; src != end; ++src)
-				{
+				for (src = dest; src != end; ++src)	{
 					src->z = 1.f;
 					*src = matrix * *src;
 					src->x /= src->z;

@@ -92,7 +92,7 @@ public:
 
 
 bool g_bWasFlipped = false;
-
+float g_smoothAngle = 80.f;
 
 //-------------------------------------------------------------------------------
 // Flip all normal vectors
@@ -103,8 +103,7 @@ void AssetHelper::FlipNormalsInt()
 	for (unsigned int i = 0; i < this->pcScene->mNumMeshes;++i)
 	{
 		aiMesh* pcMesh = this->pcScene->mMeshes[i];
-		for (unsigned int a = 0; a < pcMesh->mNumVertices;++a)
-		{
+		for (unsigned int a = 0; a < pcMesh->mNumVertices;++a){
 			pcMesh->mNormals[a] *= -1.0f;
 		}
 	}
@@ -126,24 +125,22 @@ void AssetHelper::FlipNormals()
 //-------------------------------------------------------------------------------
 void AssetHelper::SetNormalSet(unsigned int iSet)
 {
-	if (this->iNormalSet == iSet)return;
-
 	// we need to build an unique set of vertices for this ...
 	{
 		MyMakeVerboseFormatProcess* pcProcess = new MyMakeVerboseFormatProcess();
-		pcProcess->Execute(this->pcScene);
+		pcProcess->Execute(pcScene);
 		delete pcProcess;
 
-		for (unsigned int i = 0; i < this->pcScene->mNumMeshes;++i)
+		for (unsigned int i = 0; i < pcScene->mNumMeshes;++i)
 		{
-			if (!this->apcMeshes[i]->pvOriginalNormals)
+			if (!apcMeshes[i]->pvOriginalNormals)
 			{
-				this->apcMeshes[i]->pvOriginalNormals = new aiVector3D[this->pcScene->mMeshes[i]->mNumVertices];
-				memcpy( this->apcMeshes[i]->pvOriginalNormals,this->pcScene->mMeshes[i]->mNormals,
-					this->pcScene->mMeshes[i]->mNumVertices * sizeof(aiVector3D));
+				apcMeshes[i]->pvOriginalNormals = new aiVector3D[pcScene->mMeshes[i]->mNumVertices];
+				memcpy( apcMeshes[i]->pvOriginalNormals,pcScene->mMeshes[i]->mNormals,
+					pcScene->mMeshes[i]->mNumVertices * sizeof(aiVector3D));
 			}
-			delete[] this->pcScene->mMeshes[i]->mNormals;
-			this->pcScene->mMeshes[i]->mNormals = NULL;
+			delete[] pcScene->mMeshes[i]->mNormals;
+			pcScene->mMeshes[i]->mNormals = NULL;
 		}
 	}
 
@@ -152,49 +149,49 @@ void AssetHelper::SetNormalSet(unsigned int iSet)
 	if (HARD == iSet)
 	{
 		MyGenFaceNormalsProcess* pcProcess = new MyGenFaceNormalsProcess();
-		pcProcess->Execute(this->pcScene);
-		//FlipNormalsInt();
+		pcProcess->Execute(pcScene);
+		FlipNormalsInt();
 		delete pcProcess;
 	}
 	else if (SMOOTH == iSet)
 	{
 		MyGenVertexNormalsProcess* pcProcess = new MyGenVertexNormalsProcess();
-		pcProcess->SetMaxSmoothAngle(1.5f);
-		pcProcess->Execute(this->pcScene);
-		//FlipNormalsInt();
+		pcProcess->SetMaxSmoothAngle((float)AI_DEG_TO_RAD(g_smoothAngle));
+		pcProcess->Execute(pcScene);
+		FlipNormalsInt();
 		delete pcProcess;
 	}
 	else if (ORIGINAL == iSet)
 	{
-		for (unsigned int i = 0; i < this->pcScene->mNumMeshes;++i)
+		for (unsigned int i = 0; i < pcScene->mNumMeshes;++i)
 		{
-			if (this->apcMeshes[i]->pvOriginalNormals)
+			if (apcMeshes[i]->pvOriginalNormals)
 			{
-				delete[] this->pcScene->mMeshes[i]->mNormals;
-				this->pcScene->mMeshes[i]->mNormals = this->apcMeshes[i]->pvOriginalNormals;
-				this->apcMeshes[i]->pvOriginalNormals = NULL;
+				delete[] pcScene->mMeshes[i]->mNormals;
+				pcScene->mMeshes[i]->mNormals = apcMeshes[i]->pvOriginalNormals;
+				apcMeshes[i]->pvOriginalNormals = NULL;
 			}
 		}
 	}
 
 	// recalculate tangents and bitangents
 	Assimp::BaseProcess* pcProcess = new MyCalcTangentsProcess();
-	pcProcess->Execute(this->pcScene);
+	pcProcess->Execute(pcScene);
 	delete pcProcess;
 
 	// join the mesh vertices again
 	pcProcess = new MyJoinVerticesProcess();
-	pcProcess->Execute(this->pcScene);
+	pcProcess->Execute(pcScene);
 	delete pcProcess;
 
-	this->iNormalSet = iSet;
+	iNormalSet = iSet;
 
 	if (g_bWasFlipped)
 	{
 		// invert all normal vectors
-		for (unsigned int i = 0; i < this->pcScene->mNumMeshes;++i)
+		for (unsigned int i = 0; i < pcScene->mNumMeshes;++i)
 		{
-			aiMesh* pcMesh = this->pcScene->mMeshes[i];
+			aiMesh* pcMesh = pcScene->mMeshes[i];
 			for (unsigned int a = 0; a < pcMesh->mNumVertices;++a)
 			{
 				pcMesh->mNormals[a] *= -1.0f;

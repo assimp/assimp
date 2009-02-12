@@ -156,6 +156,20 @@ BEGIN
     CONTROL         "",IDC_EDIT1,"RichEdit20A",ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | ES_NUMBER | WS_VSCROLL | WS_TABSTOP,3,4,358,174,WS_EX_STATICEDGE
 END
 
+IDD_DIALOGSMOOTH DIALOGEX 0, 0, 253, 86
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Set smooth limit "
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,195,53,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,143,53,50,14
+    EDITTEXT        IDC_EDITSM,107,7,139,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Angle limit (in degrees):",IDC_STATIC,13,10,76,8
+    LTEXT           "The angle limit defines the maximum angle that may be between two adjacent face normals that they're smoothed together.",IDC_STATIC,13,27,231,19
+    LTEXT           "NOTE: use 'Smooth normals' to update the normals to the new settings",IDC_STATIC,12,75,230,8
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,73,239,1
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -259,6 +273,14 @@ BEGIN
         TOPMARGIN, 14
         BOTTOMMARGIN, 175
     END
+
+    IDD_DIALOGSMOOTH, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 246
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 79
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -310,9 +332,10 @@ BEGIN
         MENUITEM "Clear log",                   ID_TOOLS_CLEARLOG
         MENUITEM SEPARATOR
         MENUITEM "Original normals",            ID_TOOLS_ORIGINALNORMALS, CHECKED
-        MENUITEM "Smooth normals",              ID_TOOLS_SMOOTHNORMALS
         MENUITEM "Hard normals",                ID_TOOLS_HARDNORMALS
+        MENUITEM "Smooth normals",              ID_TOOLS_SMOOTHNORMALS
         MENUITEM SEPARATOR
+        MENUITEM "Set angle limit ...",         ID_TOOLS_SETANGLELIMIT
         MENUITEM "Flip normals",                ID_TOOLS_FLIPNORMALS
         MENUITEM SEPARATOR
         MENUITEM "Stereo view",                 ID_TOOLS_STEREOVIEW

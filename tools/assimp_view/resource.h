@@ -40,6 +40,7 @@
 #define IDB_BTXI                        155
 #define IDR_TXPOPUP                     156
 #define IDR_MATPOPUP                    157
+#define IDD_DIALOGSMOOTH                159
 #define IDC_CHECK1                      1000
 #define IDC_TOGGLEMS                    1000
 #define IDC_CHECK2                      1001
@@ -104,6 +105,7 @@
 #define IDC_PLAY                        1053
 #define IDC_SHOWSKELETON                1054
 #define IDC_BFCULL                      1055
+#define IDC_EDITSM                      1056
 #define ID_VIEWER_OPEN                  32771
 #define ID_VIEWER_CLOSETHIS             32772
 #define ID_VIEWER_CLOSEASSET            32773
@@ -164,6 +166,27 @@
 #define ID_VERTEXCACHELOCALITY_FINDBEST 32828
 #define ID_OPTIMIZE_SCENEGRAPH          32829
 #define ID_SCENEGRAPH_SMALLESTPOSSIBLEGRAPH 32830
+#define ID_SMOOTHNORMALS_5              32831
+#define ID_SMOOTHNORMALS_6              32832
+#define ID_SMOOTHNORMALS_MAXANGLE60     32833
+#define ID_SMOOTHNORMALS_MAXANGLE90     32834
+#define ID_SMOOTHNORMALS_MAXANGLE120    32835
+#define ID_SMOOTHNORMALS_NOLIMIT        32836
+#define ID_SMOOTHNORMALS_30             32837
+#define ID_SMOOTHNORMALS_40             32838
+#define ID_SMOOTHNORMALS_60             32839
+#define ID_SMOOTHNORMALS_90             32840
+#define ID_SMOOTHNORMALS_120            32841
+#define ID_Menu32842                    32842
+#define ID_SMOOTHANGLE_30               32843
+#define ID_SMOOTHANGLE_40               32844
+#define ID_SMOOTHANGLE_50               32845
+#define ID_SMOOTHANGLE_60               32846
+#define ID_SMOOTHANGLE_70               32847
+#define ID_SMOOTHANGLE_90               32848
+#define ID_SMOOTHANGLE_120              32849
+#define ID_SMOOTHANGLE_NONE             32850
+#define ID_TOOLS_SETANGLELIMIT          32851
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -171,9 +194,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        159
-#define _APS_NEXT_COMMAND_VALUE         32831
-#define _APS_NEXT_CONTROL_VALUE         1056
+#define _APS_NEXT_RESOURCE_VALUE        160
+#define _APS_NEXT_COMMAND_VALUE         32852
+#define _APS_NEXT_CONTROL_VALUE         1057
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

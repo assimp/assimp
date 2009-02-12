@@ -187,7 +187,7 @@ aiNode* ColladaLoader::BuildHierarchy( const ColladaParser& pParser, const Colla
 		if (!pNode->mLights.empty() || !pNode->mCameras.empty()) {
 	
 			::strcpy(node->mName.data,"$ColladaAutoName$_");
-			node->mName.length = 18 + ASSIMP_itoa10(node->mName.data+18,MAXLEN-18,(uint32_t)clock());
+			node->mName.length = 17 + ASSIMP_itoa10(node->mName.data+18,MAXLEN-18,(uint32_t)clock());
 		}
 	}
 	

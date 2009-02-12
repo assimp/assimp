@@ -272,6 +272,7 @@ enum EClickPos
 	extern bool g_bPlay						/*= false*/;
 
 	extern double g_dCurrent;
+	extern float g_smoothAngle /*= 90.f*/;
 	}
 
 #endif // !! AV_MAIN_H_INCLUDED

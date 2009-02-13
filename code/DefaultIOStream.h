@@ -50,6 +50,9 @@ namespace Assimp	{
 // ----------------------------------------------------------------------------------
 //!	@class	DefaultIOStream
 //!	@brief	Default IO implementation, use standard IO operations
+//! @note   An instance of this class can exist without a valid file handle
+//!         attached to it. All calls fail, but the instance can nevertheless be
+//!         used with no restrictions.
 class DefaultIOStream : public IOStream
 {
 	friend class DefaultIOSystem;
@@ -63,28 +66,33 @@ public:
 	~DefaultIOStream ();
 
 	// -------------------------------------------------------------------
+	// Read from stream
     size_t Read(void* pvBuffer, 
 		size_t pSize, 
 		size_t pCount);
 
 
 	// -------------------------------------------------------------------
+	// Write to stream
     size_t Write(const void* pvBuffer, 
 		size_t pSize,
 		size_t pCount);
 
-
 	// -------------------------------------------------------------------
+	// Seek specific position
 	aiReturn Seek(size_t pOffset,
 		aiOrigin pOrigin);
 
 	// -------------------------------------------------------------------
+	// Get current seek position
     size_t Tell() const;
 
 	// -------------------------------------------------------------------
+	// Get size of file
 	size_t FileSize() const;
 
 	// -------------------------------------------------------------------
+	// Flush file contents
 	void Flush();
 
 private:
@@ -92,13 +100,17 @@ private:
 	FILE* mFile;
 	//!	Filename
 	std::string	mFilename;
+
+	//! Cached file size
+	mutable size_t cachedSize;
 };
 
 
 // ----------------------------------------------------------------------------------
 inline DefaultIOStream::DefaultIOStream () : 
-	mFile(NULL), 
-	mFilename("") 
+	mFile		(NULL), 
+	mFilename	(""),
+	cachedSize	(0xffffffff)
 {
 	// empty
 }
@@ -108,7 +120,8 @@ inline DefaultIOStream::DefaultIOStream () :
 inline DefaultIOStream::DefaultIOStream (FILE* pFile, 
 		const std::string &strFilename) :
 	mFile(pFile), 
-	mFilename(strFilename)
+	mFilename(strFilename),
+	cachedSize	(0xffffffff)
 {
 	// empty
 }

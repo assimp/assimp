@@ -370,7 +370,7 @@ private:
 	inline bool SkipLine( const char* in, const char** out)
 	{
 		++lineNumber;
-		return ::SkipLine(in,out);
+		return Assimp::SkipLine(in,out);
 	}
 	// -------------------------------------------------------------------
 	inline bool SkipLine( )
@@ -407,7 +407,7 @@ private:
 	// -------------------------------------------------------------------
 	inline bool SkipSpaces( )
 	{
-		return ::SkipSpaces((const char**)&buffer);
+		return Assimp::SkipSpaces((const char**)&buffer);
 	}
 
 	char* buffer;

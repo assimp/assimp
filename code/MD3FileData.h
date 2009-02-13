@@ -38,9 +38,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines the helper data structures for importing MD3 files.
-      http://linux.ucla.edu/~phaethon/q3/formats/md3format.html
-*/
+/** @file Md3FileData.h
+ *
+ *  @brief Defines helper data structures for importing MD3 files.
+ *  http://linux.ucla.edu/~phaethon/q3/formats/md3format.html
+ */
 #ifndef AI_MD3FILEHELPER_H_INC
 #define AI_MD3FILEHELPER_H_INC
 
@@ -77,10 +79,9 @@ namespace MD3	{
 // master scale factor for all vertices in a MD3 model
 #define AI_MD3_XYZ_SCALE		(1.0f/64.0f)
 
-// ---------------------------------------------------------------------------
-/** \brief Data structure for the MD3 main header
+// -------------------------------------------------------------------------------
+/** @brief Data structure for the MD3 main header
  */
-// ---------------------------------------------------------------------------
 struct Header
 {
 	//! magic number
@@ -90,7 +91,7 @@ struct Header
 	uint32_t VERSION;
 
 	//! original name in .pak archive
-	unsigned char NAME[ AI_MD3_MAXQPATH ];
+	char NAME[ AI_MD3_MAXQPATH ];
 
 	//! unknown
 	int32_t FLAGS;
@@ -121,10 +122,9 @@ struct Header
 } PACK_STRUCT;
 
 
-// ---------------------------------------------------------------------------
-/** \brief Data structure for the frame header
+// -------------------------------------------------------------------------------
+/** @brief Data structure for the frame header
  */
-// ---------------------------------------------------------------------------
 struct Frame
 {
 	//! minimum bounds
@@ -145,14 +145,13 @@ struct Frame
 } PACK_STRUCT;
 
 
-// ---------------------------------------------------------------------------
-/** \brief Data structure for the tag header
+// -------------------------------------------------------------------------------
+/** @brief Data structure for the tag header
  */
-// ---------------------------------------------------------------------------
 struct Tag
 {
 	//! name of the tag
-	unsigned char NAME[ AI_MD3_MAXQPATH ];
+	char NAME[ AI_MD3_MAXQPATH ];
 
 	//! Local tag origin and orientation
 	aiVector3D  origin;
@@ -161,17 +160,16 @@ struct Tag
 } PACK_STRUCT;
 
 
-// ---------------------------------------------------------------------------
-/** \brief Data structure for the surface header
+// -------------------------------------------------------------------------------
+/** @brief Data structure for the surface header
  */
-// ---------------------------------------------------------------------------
 struct Surface
 {
 	//! magic number
 	int32_t IDENT;
 
 	//! original name of the surface
-	unsigned char NAME[ AI_MD3_MAXQPATH ];
+	char NAME[ AI_MD3_MAXQPATH ];
 
 	//! unknown
 	int32_t FLAGS;
@@ -205,24 +203,22 @@ struct Surface
 	int32_t OFS_END;
 } PACK_STRUCT;
 
-// ---------------------------------------------------------------------------
-/** \brief Data structure for a shader
+// -------------------------------------------------------------------------------
+/** @brief Data structure for a shader defined in there
  */
-// ---------------------------------------------------------------------------
 struct Shader
 {
 	//! filename of the shader
-	unsigned char NAME[ AI_MD3_MAXQPATH ];
+	char NAME[ AI_MD3_MAXQPATH ];
 
 	//! index of the shader
 	uint32_t SHADER_INDEX;
 } PACK_STRUCT;
 
 
-// ---------------------------------------------------------------------------
-/** \brief Data structure for a triangle
+// -------------------------------------------------------------------------------
+/** @brief Data structure for a triangle
  */
-// ---------------------------------------------------------------------------
 struct Triangle
 {
 	//! triangle indices
@@ -230,10 +226,9 @@ struct Triangle
 } PACK_STRUCT;
 
 
-// ---------------------------------------------------------------------------
-/** \brief Data structure for an UV coord
+// -------------------------------------------------------------------------------
+/** @brief Data structure for an UV coord
  */
-// ---------------------------------------------------------------------------
 struct TexCoord
 {
 	//! UV coordinates
@@ -241,10 +236,9 @@ struct TexCoord
 } PACK_STRUCT;
 
 
-// ---------------------------------------------------------------------------
-/** \brief Data structure for a vertex
+// -------------------------------------------------------------------------------
+/** @brief Data structure for a vertex
  */
-// ---------------------------------------------------------------------------
 struct Vertex
 {
 	//! X/Y/Z coordinates
@@ -256,15 +250,14 @@ struct Vertex
 
 #include "./../include/Compiler/poppack1.h"
 
-// ---------------------------------------------------------------------------
-/**	\brief Unpack a Q3 16 bit vector to its full float3 representation
+// -------------------------------------------------------------------------------
+/**	@brief Unpack a Q3 16 bit vector to its full float3 representation
  *
- *	\param p_iNormal Input normal vector in latitude/longitude form
- *	\param p_afOut Pointer to an array of three floats to receive the result
+ *	@param p_iNormal Input normal vector in latitude/longitude form
+ *	@param p_afOut Pointer to an array of three floats to receive the result
  *
- *	\note This has been taken from q3 source (misc_model.c)
+ *	@note This has been taken from q3 source (misc_model.c)
  */
-// ---------------------------------------------------------------------------
 inline void LatLngNormalToVec3(uint16_t p_iNormal, float* p_afOut)
 {
 	float lat = (float)(( p_iNormal >> 8u ) & 0xff);
@@ -279,14 +272,13 @@ inline void LatLngNormalToVec3(uint16_t p_iNormal, float* p_afOut)
 }
 
 
-// ---------------------------------------------------------------------------
-/**	\brief Pack a Q3 normal into 16bit latitute/longitude representation
- *	\param p_vIn Input vector
- *	\param p_iOut Output normal
+// -------------------------------------------------------------------------------
+/**	@brief Pack a Q3 normal into 16bit latitute/longitude representation
+ *	@param p_vIn Input vector
+ *	@param p_iOut Output normal
  *
- *	\note This has been taken from q3 source (mathlib.c)
+ *	@note This has been taken from q3 source (mathlib.c)
  */
-// ---------------------------------------------------------------------------
 inline void Vec3NormalToLatLng( const aiVector3D& p_vIn, uint16_t& p_iOut ) 
 {
 	// check for singularities

@@ -38,7 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Definition of the .MD3 importer class. */
+/** @file  Md3Loader.h
+ *  @brief Declaration of the .MD3 importer class.
+ */
 #ifndef AI_MD3LOADER_H_INCLUDED
 #define AI_MD3LOADER_H_INCLUDED
 
@@ -47,16 +49,142 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../include/aiTypes.h"
 
-struct aiNode;
-
 #include "MD3FileData.h"
 namespace Assimp	{
 class MaterialHelper;
 
 using namespace MD3;
+namespace Q3Shader {
 
 // ---------------------------------------------------------------------------
-/** Used to load MD3 files
+/** @brief Tiny utility data structure to hold the data of a .skin file
+ */
+struct SkinData
+{
+	//! A single entryin texture list
+	struct TextureEntry : public std::pair<std::string,std::string>
+	{
+		// did we resolve this texture entry?
+		bool resolved;
+
+		// for std::find()
+		bool operator == (const std::string& f) const {
+			return f == first;
+		}
+	};
+
+	//! List of textures
+	std::list<TextureEntry> textures;
+
+	// rest is ignored for the moment
+};
+
+// ---------------------------------------------------------------------------
+/** @brief Specifies cull modi for Quake shader files.
+ */
+enum ShaderCullMode
+{
+	CULL_NONE,
+	CULL_CW,
+	CULL_CCW,
+};
+
+// ---------------------------------------------------------------------------
+/** @brief Specifies alpha blend modi (src + dest) for Quake shader files
+ */
+enum BlendFunc
+{
+	BLEND_NONE,
+	BLEND_GL_ONE, 
+	BLEND_GL_ZERO,
+	BLEND_GL_DST_COLOR,
+	BLEND_GL_ONE_MINUS_DST_COLOR,
+	BLEND_GL_SRC_ALPHA,
+	BLEND_GL_ONE_MINUS_SRC_ALPHA
+};
+
+// ---------------------------------------------------------------------------
+/** @brief Specifies alpha test modi for Quake texture maps
+ */
+enum AlphaTestFunc
+{
+	AT_NONE,
+	AT_GT0,
+	AT_LT128, 
+	AT_GE128
+};
+
+// ---------------------------------------------------------------------------
+/** @brief Tiny utility data structure to hold a .shader map data block
+ */
+struct ShaderMapBlock
+{
+	ShaderMapBlock()
+		 :	blend_src	(BLEND_NONE)
+		 ,	blend_dest	(BLEND_NONE)
+		 ,	alpha_test	(AT_NONE)
+	{}
+
+	//! Name of referenced map
+	std::string name;
+
+	//! Blend and alpha test settings for texture
+	BlendFunc blend_src,blend_dest;
+	AlphaTestFunc alpha_test;
+};
+
+// ---------------------------------------------------------------------------
+/** @brief Tiny utility data structure to hold a .shader data block
+ */
+struct ShaderDataBlock
+{
+	ShaderDataBlock()
+		:	cull	(CULL_CCW)
+	{}
+
+	//! Name of referenced data element
+	std::string name;
+
+	//! Cull mode for the element
+	ShaderCullMode cull;
+
+	//! Maps defined in the shader
+	std::list<ShaderMapBlock> maps;
+};
+
+// ---------------------------------------------------------------------------
+/** @brief Tiny utility data structure to hold the data of a .shader file
+ */
+struct ShaderData
+{
+	//! Shader data blocks
+	std::list<ShaderDataBlock> blocks;
+};
+
+// ---------------------------------------------------------------------------
+/** @brief Load a shader file
+ *
+ *  Generally, parsing is error tolerant. There's no failure.
+ *  @param fill Receives output data
+ *  @param file File to be read.
+ *  @param io IOSystem to be used for reading
+ */
+void LoadShader(ShaderData& fill, const std::string& file,IOSystem* io);
+
+// ---------------------------------------------------------------------------
+/** @brief Load a skin file
+ *
+ *  Generally, parsing is error tolerant. There's no failure.
+ *  @param fill Receives output data
+ *  @param file File to be read.
+ *  @param io IOSystem to be used for reading
+ */
+void LoadSkin(SkinData& fill, const std::string& file,IOSystem* io);
+
+} // ! namespace Q3SHader
+
+// ---------------------------------------------------------------------------
+/** @brief Importer class to load MD3 files
 */
 class MD3Importer : public BaseImporter
 {
@@ -111,6 +239,12 @@ protected:
 	 */
 	bool ReadMultipartFile();
 
+	// -------------------------------------------------------------------
+	/** Try to read the skin for a MD3 file
+	 *  @param fill Receives output information
+	 */
+	void ReadSkin(Q3Shader::SkinData& fill);
+
 protected:
 
 	/** Configuration option: frame to be loaded */
@@ -118,6 +252,9 @@ protected:
 
 	/** Configuration option: process multi-part files */
 	bool configHandleMP;
+
+	/** Configuration option: name of skin file to be read */
+	std::string configSkinFile;
 
 	/** Header of the MD3 file */
 	BE_NCONST MD3::Header* pcHeader;
@@ -130,6 +267,12 @@ protected:
 
 	/** Current file name */
 	std::string mFile;
+
+	/** Current base directory  */
+	std::string path;
+
+	/** Pure file we're currently reading */
+	std::string filename;
 
 	/** Output scene to be filled */
 	aiScene* mScene;

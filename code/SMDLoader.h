@@ -360,7 +360,7 @@ protected:
 	// -------------------------------------------------------------------
 	inline bool SkipLine( const char* in, const char** out)
 	{
-		::SkipLine(in,out);
+		Assimp::SkipLine(in,out);
 		++iLineNumber;
 		return true;
 	}
@@ -368,7 +368,7 @@ protected:
 	inline bool SkipSpacesAndLineEnd( const char* in, const char** out)
 	{
 		++iLineNumber;
-		return ::SkipSpacesAndLineEnd(in,out);
+		return Assimp::SkipSpacesAndLineEnd(in,out);
 	}
 
 private:

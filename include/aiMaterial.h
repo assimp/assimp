@@ -441,6 +441,54 @@ enum aiTextureFlags
 	//! @endcond
 };
 
+
+// ---------------------------------------------------------------------------
+/** @brief Defines alpha-blend flags.
+ *
+ *  If you're familiar with OpenGL or D3D, these flags aren't new to you.
+ *  The define *how* the final color value of a pixel is computed, basing
+ *  on the previous color at that pixel and the new color value from the
+ *  material.
+ *  The blend formula is:
+ *  @code
+ *    SourceColor * SourceBlend + DestColor * DestBlend
+ *  @endcode
+ *  where <DestColor> is the previous color in the framebuffer at this
+ *  position and <SourceColor> is the material colro before the transparency
+ *  calculation.<br>
+ *  This corresponds to the #AI_MATKEY_BLEND_FUNC property.
+*/
+enum aiBlendMode
+{
+	/** 
+	 *  Formula:
+	 *  @code
+	 *  SourceColor*SourceAlpha + DestColor*(1-SourceAlpha)
+	 *  @endcode
+	 */
+	aiBlendMode_Default = 0x0,
+
+	/** Additive blending
+	 *
+	 *  Formula:
+	 *  @code
+	 *  SourceColor*1 + DestColor*1
+	 *  @endcode
+	 */
+	aiBlendMode_Additive = 0x1,
+
+	// we don't need more for the moment, but we might need them
+	// in future versions ...
+
+	 /** @cond never 
+	  *  This value is not used. It forces the compiler to use at least
+	  *  32 Bit integers to represent this enum.
+	  */
+	_aiBlendMode_Force32Bit = 0x9fffffff
+	//! @endcond
+};
+
+
 #include "./Compiler/pushpack1.h"
 
 // ---------------------------------------------------------------------------
@@ -688,18 +736,33 @@ extern "C" {
  *  Integer property. 1 to enable wireframe mode for rendering.
  *  A material with this property set to 1 should appear as wireframe, even
  *  if the scene is rendered solid.
- * <br>
- * <b>Type:</b> int <br>
- * <b>Default value:</b> <tt>0</tt>
+ *  <br>
+ *  <b>Type:</b> int <br>
+ *  <b>Default value:</b> <tt>0</tt>
 */
 #define AI_MATKEY_ENABLE_WIREFRAME "$mat.wireframe",0,0
 
 // ---------------------------------------------------------------------------
+/** @def AI_MATKEY_BLEND_FUNC
+ *  Integer property (one of the #aiBlendMode enumerated values). Defines
+ *  the blend function to be used to combine the material color for a specific
+ *  pixel with the previous framebuffer color at this position. This 
+ *  corresponds to the #AI_MATKEY_OPACITY and #AI_MATKEY_COLOR_TRANSPARENT
+ *  property. No alpha-blending needs to be turned on if the opacity for all
+ *  color channels is 1.0 and the blend mode is set to #aiBlendMode_Default.
+ *  <br>
+ *  <b>Type:</b> int (#aiBlendMode)<br>
+ *  <b>Default value:</b> <tt>#aiBlendMode_Default</tt>
+*/
+#define AI_MATKEY_BLEND_FUNC "$mat.blend",0,0
+
+// ---------------------------------------------------------------------------
 /** @def AI_MATKEY_OPACITY
- *  Defines the base opacity of the material. This value defines how
- *  transparent the material actually is. However, in order to get absolutely
- *  correct results you'll also need to evaluate the
- *  #AI_MATKEY_COLOR_TRANSPARENT property.
+ *  Defines the base opacity of the material. To get the opacity value for
+ *  a particular channel, this value is multiplied with the corresponding
+ *  channel of the #AI_MATKEY_COLOR_TRANSPARENT property. The final value
+ *  is fed in the blend function defined by the #AI_MATKEY_BLEND_FUNC
+ *  property.
  * <br>
  * <b>Type:</b> float<br>
  * <b>Default value:</b> <tt>1.0f</tt><br>
@@ -755,7 +818,8 @@ extern "C" {
 
 // ---------------------------------------------------------------------------
 /** @def AI_MATKEY_COLOR_DIFFUSE
- *  Defines the diffuse base color of the material.  <br>
+ *  Defines the diffuse base color of the material.  
+ *  If stored as 4-component color, the alpha channel is ignored.<br>
  * <b>Type:</b> color (#aiColor4D or #aiColor3D)     <br>
  * <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f     </tt>    
 */
@@ -763,39 +827,46 @@ extern "C" {
 
 /** @def AI_MATKEY_COLOR_AMBIENT
  *  Declares the amount of ambient light emitted from
- *  the surface of this object.  <br>
- * <b>Type:</b> color (#aiColor4D or #aiColor3D)     <br>
- * <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f     </tt>       
+ *  the surface of this object. If stored as 4-component color, 
+ *  the alpha channel is ignored.<br><br>
+ *  <b>Type:</b> color (#aiColor4D or #aiColor3D)     <br>
+ *  <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f     </tt>       
 */
 #define AI_MATKEY_COLOR_AMBIENT "$clr.ambient",0,0
 
 /** @def AI_MATKEY_COLOR_SPECULAR
  *  Declares the color of light specularly reflected from
- *  the surface of this object. <br>
- * <b>Type:</b> color (#aiColor4D or #aiColor3D)     <br>
- * <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f     </tt>
+ *  the surface of this object. If stored as 4-component color, the 
+ *  alpha channel is ignored.<br><br>
+ *  <b>Type:</b> color (#aiColor4D or #aiColor3D)     <br>
+ *  <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f     </tt>
 */
 #define AI_MATKEY_COLOR_SPECULAR "$clr.specular",0,0
 
 /** @def AI_MATKEY_COLOR_EMISSIVE
  *  Declares the amount of light emitted from the
- *  surface of this object. <br>
- * <b>Type:</b> color (#aiColor4D or #aiColor3D)     <br>
- * <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f     </tt>
+ *  surface of this object. If stored as 4-component color, the alpha
+ *  channel is ignored.<br><br>
+ *  <b>Type:</b> color (#aiColor4D or #aiColor3D)     <br>
+ *  <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f     </tt>
 */
 #define AI_MATKEY_COLOR_EMISSIVE "$clr.emissive",0,0
 
 /** @def AI_MATKEY_COLOR_TRANSPARENT
- *  Defines the transparent base color of the material. <br>
- * <b>Type:</b> color (#aiColor4D or #aiColor3D)        <br>
- * <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f        </tt>
+ *  Defines the transparent base color of the material. If stored as 
+ *  4-component color, the alpha channel is ignored. This 
+ *  corresponds to the #AI_MATKEY_OPACITY and #AI_MATKEY_BLEND_FUNC
+ *  material properties.<br> <br>
+ *  <b>Type:</b> color (#aiColor4D or #aiColor3D)        <br>
+ *  <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f        </tt>
 */
 #define AI_MATKEY_COLOR_TRANSPARENT "$clr.transparent",0,0
 
 /** @def AI_MATKEY_COLOR_REFLECTIVE
- *  Declares the color of a perfect mirror reflection. <br>
- * <b>Type:</b> color (#aiColor4D or #aiColor3D)       <br>
- * <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f       </tt>
+ *  Declares the color of a perfect mirror reflection. If stored as
+ *  4-component color, the alpha channel is ignored.<br> <br>
+ *  <b>Type:</b> color (#aiColor4D or #aiColor3D)       <br>
+ *  <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f       </tt>
 */
 #define AI_MATKEY_COLOR_REFLECTIVE "$clr.reflective",0,0
 

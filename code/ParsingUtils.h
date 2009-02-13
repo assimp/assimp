@@ -39,9 +39,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-/** @file Defines helper functions for text parsing  */
+/** @file ParsingUtils.h
+ *  @brief Defines helper functions for text parsing 
+ */
 #ifndef AI_PARSING_UTILS_H_INC
 #define AI_PARSING_UTILS_H_INC
+
+#include "StringComparison.h"
+namespace Assimp {
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
@@ -129,16 +134,6 @@ AI_FORCE_INLINE bool IsNumeric( char_t in)
 	return in >= '0' && in <= '9' || '-' == in || '+' == in;
 }
 // ---------------------------------------------------------------------------------
-AI_FORCE_INLINE bool TokenMatch(const char*& in, const char* token, unsigned int len)
-{
-	if (!::strncmp(token,in,len) && IsSpaceOrNewLine(in[len]))
-	{
-		in += len+1;
-		return true;
-	}
-	return false;
-}
-// ---------------------------------------------------------------------------------
 AI_FORCE_INLINE bool TokenMatch(char*& in, const char* token, unsigned int len)
 {
 	if (!::strncmp(token,in,len) && IsSpaceOrNewLine(in[len]))
@@ -149,9 +144,38 @@ AI_FORCE_INLINE bool TokenMatch(char*& in, const char* token, unsigned int len)
 	return false;
 }
 // ---------------------------------------------------------------------------------
+/** @brief Case-ignoring version of TokenMatch
+ *  @param in Input
+ *  @param token Token to check for
+ *  @param len Number of characters to check
+ */
+AI_FORCE_INLINE bool TokenMatchI(const char*& in, const char* token, unsigned int len)
+{
+	if (!ASSIMP_strincmp(token,in,len) && IsSpaceOrNewLine(in[len]))
+	{
+		in += len+1;
+		return true;
+	}
+	return false;
+}
+// ---------------------------------------------------------------------------------
+AI_FORCE_INLINE bool TokenMatch(const char*& in, const char* token, unsigned int len)
+{
+	return TokenMatch(const_cast<char*&>(in), token, len);
+}
+// ---------------------------------------------------------------------------------
 AI_FORCE_INLINE void SkipToken(const char*& in)
 {
 	SkipSpaces(&in);
 	while (!IsSpaceOrNewLine(*in))++in;
 }
+// ---------------------------------------------------------------------------------
+AI_FORCE_INLINE std::string GetNextToken(const char*& in)
+{
+	SkipSpacesAndLineEnd(&in);
+	const char* cur = in;
+	while (!IsSpaceOrNewLine(*in))++in;
+	return std::string(cur,(size_t)(in-cur));
+}
+} // ! namespace Assimp
 #endif // ! AI_PARSING_UTILS_H_INC

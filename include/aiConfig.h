@@ -144,7 +144,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * combine all three files if one of them is loaded. 
  * Property type: integer (0: false; !0: true). Default value: true.
  */
-#define AI_CONFIG_IMPORT_MD3_HANDLE_MULTIPART "IMPORT_MD3_HANDLE_MULTIPART"
+#define AI_CONFIG_IMPORT_MD3_HANDLE_MULTIPART \
+	"IMPORT_MD3_HANDLE_MULTIPART"
+
+// ---------------------------------------------------------------------------
+/** @brief  Tells the MD3 loader which skin files to load.
+ *
+ * When loading MD3 files, Assimp checks whether a file 
+ * <md3_file_name>_<skin_name>.skin is existing. These files are used by
+ * Quake III to be able to assign different skins (e.g. red and blue team) 
+ * to models. 'default', 'red', 'blue' are typical skin names.
+ * Property type: String. Default value: "default".
+ */
+#define AI_CONFIG_IMPORT_MD3_SKIN_NAME \
+	"IMPORT_MD3_SKIN_NAME"
 
 
 // ---------------------------------------------------------------------------

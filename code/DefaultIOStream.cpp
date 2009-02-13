@@ -38,7 +38,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-/** @file Default File I/O implementation for #Importer */
+/** @file  DefaultIOStream.cpp
+ *  @brief Default File I/O implementation for #Importer 
+ */
 
 #include "AssimpPCH.h"
 
@@ -80,11 +82,12 @@ size_t DefaultIOStream::Write(const void* pvBuffer,
 aiReturn DefaultIOStream::Seek(size_t pOffset,
 	 aiOrigin pOrigin)
 {
-	if (!mFile)return AI_FAILURE;
+	if (!mFile)
+		return AI_FAILURE;
 
 	// Just to check whether our enum maps one to one with the CRT constants
-	ai_assert(aiOrigin_CUR == SEEK_CUR && aiOrigin_END == SEEK_END 
-		&& aiOrigin_SET == SEEK_SET);
+	BOOST_STATIC_ASSERT(aiOrigin_CUR == SEEK_CUR && 
+		aiOrigin_END == SEEK_END && aiOrigin_SET == SEEK_SET);
 
 	// do the seek
 	return (0 == ::fseek(mFile, (long)pOffset,(int)pOrigin) ? AI_SUCCESS : AI_FAILURE);
@@ -102,25 +105,27 @@ size_t DefaultIOStream::Tell() const
 // ----------------------------------------------------------------------------------
 size_t DefaultIOStream::FileSize() const
 {
-	ai_assert (!mFilename.empty());
-
-	if (! mFile)
+	if (! mFile || mFilename.empty())
 		return 0;
+	
+	if (0xffffffff == cachedSize) {
 
-	// TODO: Is that really faster if we have already opened the file?
+		// TODO: Is that really faster if we're already owning a handle to the file?
 #if defined _WIN32 && !defined __GNUC__
-	struct __stat64 fileStat; 
-	int err = _stat64(  mFilename.c_str(), &fileStat ); 
-	if (0 != err) 
-		return 0; 
-	return (size_t) (fileStat.st_size); 
+		struct __stat64 fileStat; 
+		int err = _stat64(  mFilename.c_str(), &fileStat ); 
+		if (0 != err) 
+			return 0; 
+		cachedSize = (size_t) (fileStat.st_size); 
 #else
-	struct stat fileStat; 
-	int err = stat(mFilename.c_str(), &fileStat ); 
-	if (0 != err) 
-		return 0; 
-	return (size_t) (fileStat.st_size); 
+		struct stat fileStat; 
+		int err = stat(mFilename.c_str(), &fileStat ); 
+		if (0 != err) 
+			return 0; 
+		cachedSize = (size_t) (fileStat.st_size); 
 #endif
+	}
+	return cachedSize;
 }
 
 // ----------------------------------------------------------------------------------

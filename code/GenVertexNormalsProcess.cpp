@@ -76,10 +76,9 @@ bool GenVertexNormalsProcess::IsActive( unsigned int pFlags) const
 // Executes the post processing step on the given imported data.
 void GenVertexNormalsProcess::SetupProperties(const Importer* pImp)
 {
-	// get the current value of the property
-	this->configMaxAngle = pImp->GetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE,175.f);
-	this->configMaxAngle = std::max(std::min(this->configMaxAngle,175.0f),0.0f);
-	this->configMaxAngle = AI_DEG_TO_RAD(this->configMaxAngle);
+	// Get the current value of the AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE property
+	configMaxAngle = pImp->GetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE,175.f);
+	configMaxAngle = AI_DEG_TO_RAD(std::max(std::min(configMaxAngle,175.0f),0.0f));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -98,8 +97,7 @@ void GenVertexNormalsProcess::Execute( aiScene* pScene)
 			bHas = true;
 	}
 
-	if (bHas)
-	{
+	if (bHas)	{
 		DefaultLogger::get()->info("GenVertexNormalsProcess finished. "
 			"Vertex normals have been calculated");
 	}
@@ -154,8 +152,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 	SpatialSort  _vertexFinder;
 	float posEpsilon;
 	const float epsilon = 1e-5f;
-	if (shared)
-	{
+	if (shared)	{
 		std::vector<std::pair<SpatialSort,float> >* avf;
 		shared->GetProperty(AI_SPP_SPATIAL_SORT,avf);
 		if (avf)
@@ -165,8 +162,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 			posEpsilon = blubb.second;
 		}
 	}
-	if (!vertexFinder)
-	{
+	if (!vertexFinder)	{
 		_vertexFinder.Fill(pMesh->mVertices, pMesh->mNumVertices, sizeof( aiVector3D));
 		vertexFinder = &_vertexFinder;
 		posEpsilon = ComputePositionEpsilon(pMesh);
@@ -174,22 +170,19 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 	std::vector<unsigned int> verticesFound;
 	aiVector3D* pcNew = new aiVector3D[pMesh->mNumVertices];
 
-	if (configMaxAngle >= AI_DEG_TO_RAD( 175.f ))
-	{
+	if (configMaxAngle >= AI_DEG_TO_RAD( 175.f ))	{
 		// There is no angle limit. Thus all vertices with positions close
 		// to each other will receive the same vertex normal. This allows us
 		// to optimize the whole algorithm a little bit ...
 		std::vector<bool> abHad(pMesh->mNumVertices,false);
-		for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
-		{
+		for (unsigned int i = 0; i < pMesh->mNumVertices;++i)	{
 			if (abHad[i])continue;
 
 			// Get all vertices that share this one ...
 			vertexFinder->FindPositions( pMesh->mVertices[i], posEpsilon, verticesFound);
 
 			aiVector3D pcNor; 
-			for (unsigned int a = 0; a < verticesFound.size(); ++a)
-			{
+			for (unsigned int a = 0; a < verticesFound.size(); ++a)	{
 				const aiVector3D& v = pMesh->mNormals[verticesFound[a]];
 				if (is_not_qnan(v.x))pcNor += v;
 			}
@@ -204,17 +197,16 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 			}
 		}
 	}
-	else
-	{
+	// Slower code path if a smooth angle is set. There are many ways to achieve
+	// the effect, this one is the most straightforward one.
+	else	{
 		const float fLimit = ::cos(configMaxAngle); 
-		for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
-		{
+		for (unsigned int i = 0; i < pMesh->mNumVertices;++i)	{
 			// Get all vertices that share this one ...
 			vertexFinder->FindPositions( pMesh->mVertices[i] , posEpsilon, verticesFound);
 
 			aiVector3D pcNor; 
-			for (unsigned int a = 0; a < verticesFound.size(); ++a)
-			{
+			for (unsigned int a = 0; a < verticesFound.size(); ++a)	{
 				const aiVector3D& v = pMesh->mNormals[verticesFound[a]];
 
 				// check whether the angle between the two normals is not too large

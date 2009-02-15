@@ -548,9 +548,6 @@ std::string g_szMaterialShader = std::string(
 		  "#ifdef AV_CLAMPV\n"
 		  "AddressV = CLAMP;\n"
 		  "#endif\n"
-		  "MinFilter=LINEAR;\n"
-		  "MagFilter=LINEAR;\n"
-		  "MipFilter=LINEAR;\n"
 		"};\n"
 	"#endif // AV_DIFFUSE_TEXTUR\n"
 
@@ -559,9 +556,6 @@ std::string g_szMaterialShader = std::string(
 		"sampler DIFFUSE_SAMPLER2\n"
 		"{\n"
 		  "Texture = <DIFFUSE_TEXTURE2>;\n"
-		  "MinFilter=LINEAR;\n"
-		  "MagFilter=LINEAR;\n"
-		  "MipFilter=LINEAR;\n"
 		"};\n"
 	"#endif // AV_DIFFUSE_TEXTUR2\n"
 
@@ -570,9 +564,6 @@ std::string g_szMaterialShader = std::string(
 		"sampler SPECULAR_SAMPLER\n"
 		"{\n"
 		  "Texture = <SPECULAR_TEXTURE>;\n"
-		  "MinFilter=LINEAR;\n"
-		  "MagFilter=LINEAR;\n"
-		  "MipFilter=LINEAR;\n"
 		"};\n"
 	"#endif // AV_SPECULAR_TEXTUR\n"
 
@@ -581,9 +572,6 @@ std::string g_szMaterialShader = std::string(
 		"sampler AMBIENT_SAMPLER\n"
 		"{\n"
 		  "Texture = <AMBIENT_TEXTURE>;\n"
-		  "MinFilter=LINEAR;\n"
-		  "MagFilter=LINEAR;\n"
-		  "MipFilter=LINEAR;\n"
 		"};\n"
 	"#endif // AV_AMBIENT_TEXTUR\n"
 
@@ -592,9 +580,6 @@ std::string g_szMaterialShader = std::string(
 		"sampler LIGHTMAP_SAMPLER\n"
 		"{\n"
 		  "Texture = <LIGHTMAP_TEXTURE>;\n"
-		  "MinFilter=LINEAR;\n"
-		  "MagFilter=LINEAR;\n"
-		  "MipFilter=LINEAR;\n"
 		"};\n"
 	"#endif // AV_LIGHTMAP_TEXTURE\n"
 
@@ -603,9 +588,6 @@ std::string g_szMaterialShader = std::string(
 		"sampler OPACITY_SAMPLER\n"
 		"{\n"
 		  "Texture = <OPACITY_TEXTURE>;\n"
-		  "MinFilter=LINEAR;\n"
-		  "MagFilter=LINEAR;\n"
-		  "MipFilter=LINEAR;\n"
 		"};\n"
 	"#endif // AV_OPACITY_TEXTURE\n"
 
@@ -614,9 +596,6 @@ std::string g_szMaterialShader = std::string(
 		"sampler EMISSIVE_SAMPLER\n"
 		"{\n"
 		  "Texture = <EMISSIVE_TEXTURE>;\n"
-		  "MinFilter=LINEAR;\n"
-		  "MagFilter=LINEAR;\n"
-		  "MipFilter=LINEAR;\n"
 		"};\n"
 	"#endif // AV_EMISSIVE_TEXTUR\n"
 
@@ -625,9 +604,6 @@ std::string g_szMaterialShader = std::string(
 		"sampler NORMAL_SAMPLER\n"
 		"{\n"
 		  "Texture = <NORMAL_TEXTURE>;\n"
-		  "MinFilter=LINEAR;\n"
-		  "MagFilter=LINEAR;\n"
-		  "MipFilter=LINEAR;\n"
 		"};\n"
 	"#endif // AV_NORMAL_TEXTURE\n"
 
@@ -1278,6 +1254,8 @@ std::string g_szPassThroughShader = std::string(
 		"sampler TEXTURE_SAMPLER = sampler_state\n"
 		"{\n"
 			"Texture = (TEXTURE_2D);\n"
+			"MinFilter = POINT;\n"
+			"MagFilter = POINT;\n"
 		"};\n"
 
     // Vertex Shader output for pixel shader usage

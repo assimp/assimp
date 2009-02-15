@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the LWO importer class */
+/** @file  LWOLoader.cpp
+ *  @brief Implementation of the LWO importer class
+ */
 
 #include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_LWO_IMPORTER
@@ -230,6 +232,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 						mSurfaces->push_back(LWO::Surface());
 						LWO::Surface& surf = mSurfaces->back();
 						surf.mColor.r = surf.mColor.g = surf.mColor.b = 0.6f; 
+						surf.mName = "LWODefaultSurface";
 					}
 					idx = iDefaultSurface;
 				}
@@ -329,8 +332,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 						}
 
 						// process normals (MODO extension)
-						if (nrm)
-						{
+						if (nrm)	{
 							*nrm++ = ((aiVector3D*)&layer.mNormals.rawData[0])[idx];
 						}
 
@@ -401,7 +403,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	}
 
 	// copy the meshes to the output structure
-	if (apcMeshes.size()) // shouldn't occur, just to be sure we don't crash
+	if (apcMeshes.size()) // shouldn't happen, just to be sure we don't crash
 	{
 		pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes = (unsigned int)apcMeshes.size() ];
 		::memcpy(pScene->mMeshes,&apcMeshes[0],pScene->mNumMeshes*sizeof(void*));
@@ -415,24 +417,23 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& smoothingGroups,
 	const LWO::Surface& surface)
 {
-	// allocate output storage
+	// Allocate output storage
 	mesh->mNormals = new aiVector3D[mesh->mNumVertices];
 
 	// First generate per-face normals
 	aiVector3D* out;
 	std::vector<aiVector3D> faceNormals;
 
+	// ... in some cases that's already enough
 	if (!surface.mMaximumSmoothAngle)
 		out = mesh->mNormals;
-	else
-	{
+	else	{
 		faceNormals.resize(mesh->mNumVertices);
 		out = &faceNormals[0];
 	}
 
 	aiFace* begin = mesh->mFaces, *const end = mesh->mFaces+mesh->mNumFaces;
-	for (; begin != end; ++begin)
-	{
+	for (; begin != end; ++begin)	{
 		aiFace& face = *begin;
 
 		// LWO doc: "the normal is defined as the cross product of the first and last edges"
@@ -447,7 +448,7 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 	if (!surface.mMaximumSmoothAngle)return;
 	const float posEpsilon = ComputePositionEpsilon(mesh);
 	
-	// now generate the spatial sort tree
+	// Now generate the spatial sort tree
 	SGSpatialSort sSort;
 	std::vector<unsigned int>::const_iterator it = smoothingGroups.begin();
 	for( begin =  mesh->mFaces; begin != end; ++begin, ++it)
@@ -459,70 +460,57 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 			sSort.Add(mesh->mVertices[tt],tt,*it);
 		}
 	}
-	// sort everything - this takes O(nlogn) time
+	// Sort everything - this takes O(nlogn) time
 	sSort.Prepare();
 	std::vector<unsigned int> poResult;
 	poResult.reserve(20);
 
-	// generate vertex normals. We have O(logn) for the binary lookup, which we need
+	// Generate vertex normals. We have O(logn) for the binary lookup, which we need
 	// for n elements, thus the EXPECTED complexity is O(nlogn)
-	if (surface.mMaximumSmoothAngle < 3.f && !configSpeedFlag)
-	{
+	if (surface.mMaximumSmoothAngle < 3.f && !configSpeedFlag)	{
 		const float fLimit = cos(surface.mMaximumSmoothAngle);
 
-		for( begin =  mesh->mFaces, it = smoothingGroups.begin(); begin != end; ++begin, ++it)
-		{
-			register unsigned int sg = *it;
-
-			aiFace& face = *begin;
+		for( begin =  mesh->mFaces, it = smoothingGroups.begin(); begin != end; ++begin, ++it)	{
+			const aiFace& face = *begin;
 			unsigned int* beginIdx = face.mIndices, *const endIdx = face.mIndices+face.mNumIndices;
 			for (; beginIdx != endIdx; ++beginIdx)
 			{
 				register unsigned int idx = *beginIdx;
-				sSort.FindPositions(mesh->mVertices[idx],sg,posEpsilon,poResult,true);
-
+				sSort.FindPositions(mesh->mVertices[idx],*it,posEpsilon,poResult,true);
 				std::vector<unsigned int>::const_iterator a, end = poResult.end();
 
 				aiVector3D vNormals;
-				for (a =  poResult.begin();a != end;++a)
-				{
+				for (a =  poResult.begin();a != end;++a)	{
 					const aiVector3D& v = faceNormals[*a];
-					if (v * faceNormals[idx] < fLimit)continue;
+					if (v * faceNormals[idx] < fLimit)
+						continue;
 					vNormals += v;
 				}
-				vNormals.Normalize();
-				mesh->mNormals[idx] = vNormals;
+				mesh->mNormals[idx] = vNormals.Normalize();
 			}
 		}
 	}
-	else // faster code path in case there is no smooth angle
-	{
+	 // faster code path in case there is no smooth angle
+	else	{
 		std::vector<bool> vertexDone(mesh->mNumVertices,false);
-
-		for( begin =  mesh->mFaces, it = smoothingGroups.begin(); begin != end; ++begin, ++it)
-		{
-			register unsigned int sg = *it;
-
-			aiFace& face = *begin;
+		for( begin =  mesh->mFaces, it = smoothingGroups.begin(); begin != end; ++begin, ++it)	{
+			const aiFace& face = *begin;
 			unsigned int* beginIdx = face.mIndices, *const endIdx = face.mIndices+face.mNumIndices;
 			for (; beginIdx != endIdx; ++beginIdx)
 			{
 				register unsigned int idx = *beginIdx;
-
-				if (vertexDone[idx])continue;
-				sSort.FindPositions(mesh->mVertices[idx],sg,posEpsilon,poResult,true);
-
+				if (vertexDone[idx])
+					continue;
+				sSort.FindPositions(mesh->mVertices[idx],*it,posEpsilon,poResult,true);
 				std::vector<unsigned int>::const_iterator a, end = poResult.end();
 
 				aiVector3D vNormals;
-				for (a =  poResult.begin();a != end;++a)
-				{
+				for (a =  poResult.begin();a != end;++a)	{
 					const aiVector3D& v = faceNormals[*a];
 					vNormals += v;
 				}
 				vNormals.Normalize();
-				for (a =  poResult.begin();a != end;++a)
-				{
+				for (a =  poResult.begin();a != end;++a)	{
 					mesh->mNormals[*a] = vNormals;
 					vertexDone[*a] = true;
 				}
@@ -617,9 +605,9 @@ void LWOImporter::ResolveTags()
 	mMapping->resize(mTags->size(),0xffffffff);
 	for (unsigned int a = 0; a  < mTags->size();++a)
 	{
+		const std::string& c = (*mTags)[a];
 		for (unsigned int i = 0; i < mSurfaces->size();++i)
 		{
-			const std::string& c = (*mTags)[a];
 			const std::string& d = (*mSurfaces)[i].mName;
 			if (!ASSIMP_stricmp(c,d))
 			{
@@ -688,9 +676,11 @@ void LWOImporter::LoadLWOTags(unsigned int size)
 	{
 		if (!(*szCur))
 		{
-			const unsigned int len = (unsigned int)(szCur-szLast);
-			mTags->push_back(std::string(szLast,len));
-			szCur += len & 1;
+			const size_t len = (size_t)(szCur-szLast);
+			// FIX: skip empty-sized tags
+			if (len)
+				mTags->push_back(std::string(szLast,len));
+			szCur += (len&0x1 ? 1 : 2);
 			szLast = szCur;
 		}
 		szCur++;
@@ -881,7 +871,7 @@ inline void CreateNewEntry(std::vector< T >& list, unsigned int srcIdx)
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::DoRecursiveVMAPAssignment(VMapEntry* base, unsigned int numRead, 
+inline void LWOImporter::DoRecursiveVMAPAssignment(VMapEntry* base, unsigned int numRead, 
 	unsigned int idx, float* data)
 {
 	ai_assert(NULL != data);
@@ -897,7 +887,7 @@ void LWOImporter::DoRecursiveVMAPAssignment(VMapEntry* base, unsigned int numRea
 }
 
 // ------------------------------------------------------------------------------------------------
-void AddToSingleLinkedList(ReferrerList& refList, unsigned int srcIdx, unsigned int destIdx)
+inline void AddToSingleLinkedList(ReferrerList& refList, unsigned int srcIdx, unsigned int destIdx)
 {
 	if(0xffffffff == refList[srcIdx])
 	{

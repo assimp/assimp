@@ -296,6 +296,10 @@ public:
 	int HandleTreeViewPopup(WPARAM wParam,LPARAM lParam);
 
 	//------------------------------------------------------------------
+	// Enable animation-related parts of the UI
+	int EnableAnimTools(BOOL hm) ;
+
+	//------------------------------------------------------------------
 	// setter for m_iViewMode
 	inline void SetViewMode(unsigned int p_iNew)
 	{
@@ -444,6 +448,13 @@ private:
 	// Used by HandleTreeViewPopup().
 	int HandleTreeViewPopup2(WPARAM wParam,LPARAM lParam);
 
+	//------------------------------------------------------------------
+	// Render skeleton
+	int RenderSkeleton (aiNode* piNode,const aiMatrix4x4& piMatrix, 
+		const aiMatrix4x4& parent);
+
+	
+
 private:
 
 	// view mode
@@ -485,6 +496,10 @@ private:
 	// Colors used to draw the checker pattern (for the
 	// texture viewer as background )
 	D3DXVECTOR4 m_avCheckerColors[2];
+
+	// View projection matrix
+	aiMatrix4x4 mViewProjection;
+	aiVector3D vPos;
 	};
 
 #endif // AV_DISPLAY_H_INCLUDE

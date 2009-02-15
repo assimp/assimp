@@ -171,14 +171,12 @@ struct aiNode
  */
 #define AI_SCENE_FLAGS_INCOMPLETE	0x1
 
-
 /** @def AI_SCENE_FLAGS_VALIDATED
  * This flag is set by the validation postprocess-step (aiPostProcess_ValidateDS)
  * if the validation is successful. In a validated scene you can be sure that
  * any cross references in the data structure (e.g. vertex indices) are valid.
  */
 #define AI_SCENE_FLAGS_VALIDATED	0x2
-
 
 /** @def AI_SCENE_FLAGS_VALIDATION_WARNING
  * This flag is set by the validation postprocess-step (aiPostProcess_ValidateDS)
@@ -190,7 +188,6 @@ struct aiNode
  */
 #define AI_SCENE_FLAGS_VALIDATION_WARNING  	0x4
 
-
 /** @def AI_SCENE_FLAGS_NON_VERBOSE_FORMAT
  * This flag is currently only set by the aiProcess_JoinIdenticalVertices step.
  * It indicates that the vertices of the output meshes aren't in the internal
@@ -198,7 +195,6 @@ struct aiNode
  * no vertex is ever referenced by more than one face.
  */
 #define AI_SCENE_FLAGS_NON_VERBOSE_FORMAT  	0x8
-
 
  /** @def AI_SCENE_FLAGS_TERRAIN
  * Denotes pure height-map terrain data. Pure terrains usually consist of quads, 
@@ -212,7 +208,8 @@ struct aiNode
  * as long as possible (typically you'll do the triangulation when you actually
  * need to render it).
  */
-#define AI_SCENE_FLAGS_TERRAIN 0x16
+#define AI_SCENE_FLAGS_TERRAIN 0x10
+
 
 // -------------------------------------------------------------------------------
 /** The root structure of the imported data. 

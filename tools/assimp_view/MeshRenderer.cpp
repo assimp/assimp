@@ -60,8 +60,17 @@ int CMeshRenderer::DrawUnsorted(unsigned int iIndex)
 
 	g_piDevice->SetIndices(g_pcAsset->apcMeshes[iIndex]->piIB);
 
+	D3DPRIMITIVETYPE type;
+	switch (g_pcAsset->pcScene->mMeshes[iIndex]->mPrimitiveTypes) {
+		case aiPrimitiveType_POINT:
+			type = D3DPT_POINTLIST;break;
+		case aiPrimitiveType_LINE:
+			type = D3DPT_LINELIST;break;
+		case aiPrimitiveType_TRIANGLE:
+			type = D3DPT_TRIANGLELIST;break;
+	}
 	// and draw the mesh
-	g_piDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
+	g_piDevice->DrawIndexedPrimitive(type,
 		0,0,
 		g_pcAsset->pcScene->mMeshes[iIndex]->mNumVertices,0,
 		g_pcAsset->pcScene->mMeshes[iIndex]->mNumFaces);
@@ -76,6 +85,8 @@ int CMeshRenderer::DrawSorted(unsigned int iIndex,const aiMatrix4x4& mWorld)
 	AssetHelper::MeshHelper* pcHelper = g_pcAsset->apcMeshes[iIndex]; 
 	const aiMesh* pcMesh = g_pcAsset->pcScene->mMeshes[iIndex];
 
+	if (pcMesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
+		return DrawUnsorted(iIndex);
 	if (pcMesh->HasBones())
 		return DrawUnsorted(iIndex);
 

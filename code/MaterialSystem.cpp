@@ -288,24 +288,16 @@ uint32_t MaterialHelper::ComputeHash(bool includeMatName /*= false*/)
 	{
 		aiMaterialProperty* prop;
 
-		// If specified, exclude the material name from the hash
-		if ((prop = mProperties[i]) && (includeMatName || ::strcmp(prop->mKey.data,"$mat.name")))
+		// Exclude all properties whose first character is '?' from the hash
+		// See doc for aiMaterialProperty.
+		if ((prop = mProperties[i]) && (includeMatName || prop->mKey.data[0] != '?'))
 		{
 			hash = SuperFastHash(prop->mKey.data,(unsigned int)prop->mKey.length,hash);
 			hash = SuperFastHash(prop->mData,prop->mDataLength,hash);
 
 			// Combine the semantic and the index with the hash
-			// We print them to a string to make sure the quality
-			// of the hashing state isn't affected (our hashing
-			// procedure was originally intended for plaintest).
-			char buff[32];
-			unsigned int len;
-			
-			len = ASSIMP_itoa10(buff,prop->mSemantic);
-			hash = SuperFastHash(buff,len-1,hash);
-
-			len = ASSIMP_itoa10(buff,prop->mIndex);
-			hash = SuperFastHash(buff,len-1,hash);
+			hash = SuperFastHash((const char*)&prop->mSemantic,sizeof(unsigned int),hash);
+			hash = SuperFastHash((const char*)&prop->mIndex,sizeof(unsigned int),hash);
 		}
 	}
 	return hash;

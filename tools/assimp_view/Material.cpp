@@ -825,9 +825,12 @@ int CMaterialManager::CreateMaterial(
 		}
 		else
 		{
+			int flags = 0;
+			aiGetMaterialInteger(pcMat,AI_MATKEY_TEXFLAGS_DIFFUSE(0),&flags);
+
 			// try to find out whether the diffuse texture has any
 			// non-opaque pixels. If we find a few, use it as opacity texture
-			if (pcMesh->piDiffuseTexture && HasAlphaPixels(pcMesh->piDiffuseTexture))
+			if (pcMesh->piDiffuseTexture && !(flags & aiTextureFlags_IgnoreAlpha) && HasAlphaPixels(pcMesh->piDiffuseTexture))
 			{
 				int iVal;
 
@@ -911,10 +914,13 @@ int CMaterialManager::CreateMaterial(
 	// This is a workaround for some meshes in the DX SDK (e.g. tiny.x)
 	// FIX: Added this check to the x-loader, but the line remains to
 	// catch other loader doing the same ...
-	if (0.0f == pcMesh->fShininess)
-	{
+	if (0.0f == pcMesh->fShininess){
 		pcMesh->eShadingMode = aiShadingMode_Gouraud;
 	}
+
+	int two_sided = 0;
+	aiGetMaterialInteger(pcMat,AI_MATKEY_TWOSIDED,&two_sided);
+	pcMesh->twosided = (two_sided != 0);
 
 	// check whether we have already a material using the same
 	// shader. This will decrease loading time rapidly ...
@@ -969,7 +975,7 @@ int CMaterialManager::CreateMaterial(
 			return 2;
 		}
 	}
-	this->m_iShaderCount++;
+	m_iShaderCount++;
 
 	// build macros for the HLSL compiler
 	unsigned int iCurrent = 0;
@@ -988,7 +994,6 @@ int CMaterialManager::CreateMaterial(
 
 		sMacro[iCurrent].Definition = "1";
 		++iCurrent;
-
 
 
 		if (mapV == aiTextureMapMode_Wrap)
@@ -1303,8 +1308,10 @@ int CMaterialManager::SetupMaterial (
 		}
 	}
 
-
-
+	// disable culling, if necessary
+	if (pcMesh->twosided && g_sOptions.bCulling) {
+		g_piDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_NONE);
+	}
 
 	// setup the correct shader technique to be used for drawing
 	if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
@@ -1339,6 +1346,11 @@ int CMaterialManager::EndMaterial (AssetHelper::MeshHelper* pcMesh)
 	// end the effect
 	pcMesh->piEffect->EndPass();
 	pcMesh->piEffect->End();
+
+	// reenable culling if necessary
+	if (pcMesh->twosided && g_sOptions.bCulling) {
+		g_piDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
+	}
 
 	return 1;
 }

@@ -95,8 +95,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 		for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
 		{
 			// if the material is not referenced ... remove it
-			if (!abReferenced[i])
-			{
+			if (!abReferenced[i])	{
 				++unreferenced;
 				continue;
 			}
@@ -104,8 +103,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 			uint32_t me = aiHashes[i] = ((MaterialHelper*)pScene->mMaterials[i])->ComputeHash();
 			for (unsigned int a = 0; a < i;++a)
 			{
-				if (me == aiHashes[a])
-				{				
+				if (me == aiHashes[a])	{				
 					++iCnt;
 					me = 0;
 					aiMappingTable[i] = aiMappingTable[a];
@@ -113,27 +111,26 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 					break;
 				}
 			}
-			if (me)
-			{
+			if (me)	{
 				aiMappingTable[i] = iNewNum++;
 			}
 		}
-		if (iCnt)
-		{
+		if (iCnt)	{
 			// build an output material list
 			aiMaterial** ppcMaterials = new aiMaterial*[iNewNum];
 			::memset(ppcMaterials,0,sizeof(void*)*iNewNum); 
 			for (unsigned int p = 0; p < pScene->mNumMaterials;++p)
 			{
 				// if the material is not referenced ... remove it
-				if (!abReferenced[p])continue;
+				if (!abReferenced[p])
+					continue;
 
 				// generate new names for all modified materials
 				const unsigned int idx = aiMappingTable[p]; 
 				if (ppcMaterials[idx]) 
 				{
 					aiString sz;
-					sz.length = ::sprintf(sz.data,"aiMaterial #%i",p);
+					sz.length = ::sprintf(sz.data,"JoinedMaterial_#%i",p);
 					((MaterialHelper*)ppcMaterials[idx])->AddProperty(&sz,AI_MATKEY_NAME);
 				}
 				else ppcMaterials[idx] = pScene->mMaterials[p];

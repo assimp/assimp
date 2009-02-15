@@ -438,11 +438,11 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 	iArray.reserve(3);
 
 	aiMatrix4x4 abs;
-	if (pcIn->mName == "$$$DUMMY")	{
+	/*if (pcIn->mName == "$$$DUMMY")	{
 		// FIX: Append the "real" name of the dummy to the string
 		pcIn->mName = "Dummy." + pcIn->mDummyName;
 	}
-	else // if (pcIn->mName != "$$$DUMMY")
+	else*/ // if (pcIn->mName != "$$$DUMMY")
 	{		
 		// Find all meshes with the same name as the node
 		for (unsigned int a = 0; a < pcSOut->mNumMeshes;++a)

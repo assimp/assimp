@@ -150,7 +150,8 @@ class AssetHelper
 					piShininessTexture	(NULL),
 					piLightmapTexture	(NULL),
 					pvOriginalNormals	(NULL),
-					bSharedFX(false) {}
+					bSharedFX(false),
+					twosided (false){}
 
 				~MeshHelper ()
 					{
@@ -202,6 +203,9 @@ class AssetHelper
 
 				// strength of the specular highlight
 				float fSpecularStrength;
+
+				// two-sided?
+				bool twosided;
 
 				// Stores a pointer to the original normal set of the asset
 				aiVector3D* pvOriginalNormals;

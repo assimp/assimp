@@ -663,8 +663,7 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 		for (SurfaceList::iterator it = mSurfaces->begin(), end = mSurfaces->end()-1;
 			 it != end; ++it)
 		{
-			if ((*it).mName == derived)
-			{
+			if ((*it).mName == derived)	{
 				// we have it ...
 				surf = *it;
 				derived.clear();

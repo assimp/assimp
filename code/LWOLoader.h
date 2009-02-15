@@ -455,7 +455,7 @@ inline void LWOImporter::GetS0(std::string& out,unsigned int max)
 		}
 		++mFileBuffer;
 	}
-	unsigned int len = (unsigned int) ((const char*)mFileBuffer-sz);
+	size_t len = (size_t) ((const char*)mFileBuffer-sz);
 	out = std::string(sz,len);
 	mFileBuffer += (len&0x1 ? 1 : 2);
 }

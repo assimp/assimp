@@ -186,6 +186,13 @@ public:
 		return mCurrentAnimIndex;
 	}
 
+	// ----------------------------------------------------------------------------
+	/** @brief Get the current animation or NULL
+	 */
+	aiAnimation* CurrentAnim() const {
+		return  mCurrentAnimIndex < mScene->mNumAnimations ? mScene->mAnimations[ mCurrentAnimIndex ] : NULL;
+	}
+
 protected:
 
 	/** Recursively creates an internal node structure matching the 

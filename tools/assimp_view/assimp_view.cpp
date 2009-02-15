@@ -128,10 +128,6 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 	// get current time
 	double fCur = (double)timeGetTime();
 
-	// Remove all line and point meshes from the import
-	aiSetImportPropertyInteger(AI_CONFIG_PP_SBP_REMOVE,
-		aiPrimitiveType_LINE | aiPrimitiveType_POINT);
-
 	// Call ASSIMPs C-API to load the file
 	g_pcAsset->pcScene = (aiScene*)aiImportFile(g_szFileName,
 		aiProcess_CalcTangentSpace		   | // calculate tangents and bitangents if possible
@@ -456,15 +452,9 @@ int CreateAssetData()
 		const aiMesh* mesh = g_pcAsset->pcScene->mMeshes[i];
 
 		// create the material for the mesh
-		if (!g_pcAsset->apcMeshes[i]->piEffect)
-		{
+		if (!g_pcAsset->apcMeshes[i]->piEffect)	{
 			CMaterialManager::Instance().CreateMaterial(
 				g_pcAsset->apcMeshes[i],mesh);
-		}
-
-		if (mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
-		{
-			continue;
 		}
 
 		// create vertex buffer
@@ -472,8 +462,7 @@ int CreateAssetData()
 			mesh->mNumVertices,
 			D3DUSAGE_WRITEONLY,
 			0,
-			D3DPOOL_DEFAULT, &g_pcAsset->apcMeshes[i]->piVB,NULL)))
-		{
+			D3DPOOL_DEFAULT, &g_pcAsset->apcMeshes[i]->piVB,NULL)))	{
 			MessageBox(g_hDlg,"Failed to create vertex buffer",
 				"ASSIMP Viewer Utility",MB_OK);
 			return 2;
@@ -483,12 +472,22 @@ int CreateAssetData()
 		if (g_pcAsset->apcMeshes[i]->piOpacityTexture || 1.0f != g_pcAsset->apcMeshes[i]->fOpacity)
 			dwUsage |= D3DUSAGE_DYNAMIC;
 
+		unsigned int nidx;
+		switch (mesh->mPrimitiveTypes) {
+			case aiPrimitiveType_POINT:
+				nidx = 1;break;
+			case aiPrimitiveType_LINE:
+				nidx = 2;break;
+			case aiPrimitiveType_TRIANGLE:
+				nidx = 3;break;
+			default: assert(false);
+		};
+
 		// check whether we can use 16 bit indices
-		if (mesh->mNumFaces * 3 >= 65536)
-		{
+		if (mesh->mNumFaces * 3 >= 65536)	{
 			// create 32 bit index buffer
 			if(FAILED( g_piDevice->CreateIndexBuffer( 4 *
-				mesh->mNumFaces * 3,
+				mesh->mNumFaces * nidx,
 				D3DUSAGE_WRITEONLY | dwUsage,
 				D3DFMT_INDEX32,
 				D3DPOOL_DEFAULT, 
@@ -505,17 +504,16 @@ int CreateAssetData()
 			g_pcAsset->apcMeshes[i]->piIB->Lock(0,0,(void**)&pbData,0);
 			for (unsigned int x = 0; x < mesh->mNumFaces;++x)
 			{
-				for (unsigned int a = 0; a < 3;++a)
+				for (unsigned int a = 0; a < nidx;++a)
 				{
 					*pbData++ = mesh->mFaces[x].mIndices[a];
 				}
 			}
 		}
-		else
-		{
+		else	{
 			// create 16 bit index buffer
 			if(FAILED( g_piDevice->CreateIndexBuffer( 2 *
-				mesh->mNumFaces * 3,
+				mesh->mNumFaces * nidx,
 				D3DUSAGE_WRITEONLY | dwUsage,
 				D3DFMT_INDEX16,
 				D3DPOOL_DEFAULT,
@@ -532,7 +530,7 @@ int CreateAssetData()
 			g_pcAsset->apcMeshes[i]->piIB->Lock(0,0,(void**)&pbData,0);
 			for (unsigned int x = 0; x < mesh->mNumFaces;++x)
 			{
-				for (unsigned int a = 0; a < 3;++a)
+				for (unsigned int a = 0; a < nidx;++a)
 				{
 					*pbData++ = (uint16_t)mesh->mFaces[x].mIndices[a];
 				}
@@ -542,8 +540,7 @@ int CreateAssetData()
 
 		// collect weights on all vertices. Quick and careless
 		std::vector<std::vector<aiVertexWeight> > weightsPerVertex( mesh->mNumVertices);
-		for( unsigned int a = 0; a < mesh->mNumBones; a++)
-		{
+		for( unsigned int a = 0; a < mesh->mNumBones; a++)	{
 			const aiBone* bone = mesh->mBones[a];
 			for( unsigned int b = 0; b < bone->mNumWeights; b++)
 				weightsPerVertex[bone->mWeights[b].mVertexId].push_back( aiVertexWeight( a, bone->mWeights[b].mWeight));
@@ -560,19 +557,16 @@ int CreateAssetData()
 				pbData2->vNormal = aiVector3D(0.0f,0.0f,0.0f);
 			else pbData2->vNormal = mesh->mNormals[x];
 
-			if (NULL == mesh->mTangents)
-			{
+			if (NULL == mesh->mTangents)	{
 				pbData2->vTangent = aiVector3D(0.0f,0.0f,0.0f);
 				pbData2->vBitangent = aiVector3D(0.0f,0.0f,0.0f);
 			}
-			else 
-			{
+			else	{
 				pbData2->vTangent = mesh->mTangents[x];
 				pbData2->vBitangent = mesh->mBitangents[x];
 			}
 
-			if (mesh->HasVertexColors( 0))
-			{
+			if (mesh->HasVertexColors( 0))	{
 				pbData2->dColorDiffuse = D3DCOLOR_ARGB(
 					((unsigned char)std::max( std::min( mesh->mColors[0][x].a * 255.0f, 255.0f),0.0f)),
 					((unsigned char)std::max( std::min( mesh->mColors[0][x].r * 255.0f, 255.0f),0.0f)),
@@ -582,16 +576,14 @@ int CreateAssetData()
 			else pbData2->dColorDiffuse = D3DCOLOR_ARGB(0xFF,0xff,0xff,0xff);
 
 			// ignore a third texture coordinate component
-			if (mesh->HasTextureCoords( 0))
-			{
+			if (mesh->HasTextureCoords( 0))	{
 				pbData2->vTextureUV = aiVector2D(
 					mesh->mTextureCoords[0][x].x,
 					mesh->mTextureCoords[0][x].y);
 			}
 			else pbData2->vTextureUV = aiVector2D(0.5f,0.5f);
 
-			if (mesh->HasTextureCoords( 1))
-			{
+			if (mesh->HasTextureCoords( 1))	{
 				pbData2->vTextureUV2 = aiVector2D(
 					mesh->mTextureCoords[1][x].x,
 					mesh->mTextureCoords[1][x].y);
@@ -599,8 +591,7 @@ int CreateAssetData()
 			else pbData2->vTextureUV2 = aiVector2D(0.5f,0.5f);
 
 			// Bone indices and weights
-			if( mesh->HasBones())
-			{
+			if( mesh->HasBones())	{
 				unsigned char boneIndices[4] = { 0, 0, 0, 0 };
 				unsigned char boneWeights[4] = { 0, 0, 0, 0 };
 				ai_assert( weightsPerVertex[x].size() <= 4);
@@ -623,8 +614,7 @@ int CreateAssetData()
 		g_pcAsset->apcMeshes[i]->piVB->Unlock();
 
 		// now generate the second vertex buffer, holding all normals
-		if (!g_pcAsset->apcMeshes[i]->piVBNormals)
-		{
+		if (!g_pcAsset->apcMeshes[i]->piVBNormals)	{
 			GenerateNormalsAsLineList(g_pcAsset->apcMeshes[i],mesh);
 		}
 	}

@@ -45,6 +45,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace AssimpView {
 
+struct SVertex
+{
+	float x,y,z,w,u,v;
+};
 
 CDisplay CDisplay::s_cInstance;
 
@@ -91,43 +95,40 @@ void GetNodeCount(aiNode* pcNode, unsigned int* piCnt)
 }
 
 //-------------------------------------------------------------------------------
+int CDisplay::EnableAnimTools(BOOL hm) 
+{
+	EnableWindow(GetDlgItem(g_hDlg,IDC_PLAY),hm);
+	EnableWindow(GetDlgItem(g_hDlg,IDC_SLIDERANIM),hm);
+	return 1;
+}
+
+//-------------------------------------------------------------------------------
+// Fill animation combo box
 int CDisplay::FillAnimList(void)
 {
-	if (0 == g_pcAsset->pcScene->mNumAnimations)
+	if (0 != g_pcAsset->pcScene->mNumAnimations)
 	{
-		// disable all UI components related to animations
-		EnableWindow(GetDlgItem(g_hDlg,IDC_PLAYANIM),FALSE);
-		EnableWindow(GetDlgItem(g_hDlg,IDC_SPEED),FALSE);
-		EnableWindow(GetDlgItem(g_hDlg,IDC_PINORDER),FALSE);
-
-		EnableWindow(GetDlgItem(g_hDlg,IDC_SSPEED),FALSE);
-		EnableWindow(GetDlgItem(g_hDlg,IDC_SANIMGB),FALSE);
-		EnableWindow(GetDlgItem(g_hDlg,IDC_SANIM),FALSE);
-		EnableWindow(GetDlgItem(g_hDlg,IDC_COMBO1),FALSE);
-	}
-	else
-	{
-		// reenable all animation components if they have been
-		// disabled for a previous mesh
-		EnableWindow(GetDlgItem(g_hDlg,IDC_PLAYANIM),TRUE);
-		EnableWindow(GetDlgItem(g_hDlg,IDC_SPEED),TRUE);
-		EnableWindow(GetDlgItem(g_hDlg,IDC_PINORDER),TRUE);
-
-		EnableWindow(GetDlgItem(g_hDlg,IDC_SSPEED),TRUE);
-		EnableWindow(GetDlgItem(g_hDlg,IDC_SANIMGB),TRUE);
-		EnableWindow(GetDlgItem(g_hDlg,IDC_SANIM),TRUE);
-		EnableWindow(GetDlgItem(g_hDlg,IDC_COMBO1),TRUE);
-
 		// now fill in all animation names
-		for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumAnimations;++i)
-		{
+		for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumAnimations;++i)	{
 			SendDlgItemMessage(g_hDlg,IDC_COMBO1,CB_ADDSTRING,0,
 				( LPARAM ) g_pcAsset->pcScene->mAnimations[i]->mName.data);
 		}
+
+		// also add a dummy - 'none'
+		SendDlgItemMessage(g_hDlg,IDC_COMBO1,CB_ADDSTRING,0,(LPARAM)"none");
+
+		// select first
+		SendDlgItemMessage(g_hDlg,IDC_COMBO1,CB_SETCURSEL,0,0);
+
+		EnableAnimTools(TRUE);
 	}
+	else // tools remain disabled
+		EnableAnimTools(FALSE);
+
 	return 1;
 }
 //-------------------------------------------------------------------------------
+// Clear the list of animations
 int CDisplay::ClearAnimList(void)
 {
 	// clear the combo box
@@ -135,6 +136,7 @@ int CDisplay::ClearAnimList(void)
 	return 1;
 }
 //-------------------------------------------------------------------------------
+// Clear the tree view
 int CDisplay::ClearDisplayList(void)
 {
 	// clear the combo box
@@ -143,6 +145,7 @@ int CDisplay::ClearDisplayList(void)
 	return 1;
 }
 //-------------------------------------------------------------------------------
+// Add a specific node to the display list
 int CDisplay::AddNodeToDisplayList(
 	unsigned int iIndex, 
 	unsigned int iDepth,
@@ -154,10 +157,8 @@ int CDisplay::AddNodeToDisplayList(
 
 	char chTemp[512];
 
-	if(0 == pcNode->mName.length)
-	{
-		if (iIndex >= 100)
-		{
+	if(0 == pcNode->mName.length)	{
+		if (iIndex >= 100)	{
 			iIndex += iDepth  * 1000;
 		}
 		else if (iIndex >= 10)
@@ -190,8 +191,7 @@ int CDisplay::AddNodeToDisplayList(
 
 	// recursively add all child nodes
 	++iDepth;
-	for (unsigned int i = 0; i< pcNode->mNumChildren;++i)
-	{
+	for (unsigned int i = 0; i< pcNode->mNumChildren;++i){
 		AddNodeToDisplayList(i,iDepth,pcNode->mChildren[i],hTexture);
 	}
 
@@ -203,6 +203,7 @@ int CDisplay::AddNodeToDisplayList(
 	return 1;
 }
 //-------------------------------------------------------------------------------
+// Replace the currently selected texture by another one
 int CDisplay::ReplaceCurrentTexture(const char* szPath)
 {
 	ai_assert(NULL != szPath);
@@ -214,8 +215,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 	szString.length = strlen(szPath);
 	CMaterialManager::Instance().LoadTexture(&piTexture,&szString);
 
-	if (!piTexture)
-	{
+	if (!piTexture)	{
 		CLogDisplay::Instance().AddEntry("[ERROR] Unable to load this texture",
 			D3DCOLOR_ARGB(0xFF,0xFF,0x0,0x0));
 		return 0;
@@ -225,15 +225,15 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 	// view item if the default texture was previously set
 	TVITEMEX tvi; 
 	tvi.mask = TVIF_SELECTEDIMAGE | TVIF_IMAGE;
-	tvi.iImage = this->m_aiImageList[AI_VIEW_IMGLIST_MATERIAL];
-	tvi.iSelectedImage = this->m_aiImageList[AI_VIEW_IMGLIST_MATERIAL];
+	tvi.iImage = m_aiImageList[AI_VIEW_IMGLIST_MATERIAL];
+	tvi.iSelectedImage = m_aiImageList[AI_VIEW_IMGLIST_MATERIAL];
 
 	TreeView_SetItem(GetDlgItem(g_hDlg,IDC_TREE1),
-		this->m_pcCurrentTexture->hTreeItem);
+		m_pcCurrentTexture->hTreeItem);
 
 	// change this in the old aiMaterial structure, too
 	Assimp::MaterialHelper* pcMat = (Assimp::MaterialHelper*)
-		g_pcAsset->pcScene->mMaterials[this->m_pcCurrentTexture->iMatIndex];
+		g_pcAsset->pcScene->mMaterials[m_pcCurrentTexture->iMatIndex];
  	
 	// update all meshes referencing this material
 	for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
@@ -242,137 +242,73 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 			continue;
 
 		AssetHelper::MeshHelper* pcMesh = g_pcAsset->apcMeshes[i];
+		IDirect3DTexture9** tex = NULL;
+		const char* tex_string  = NULL;
+
 		switch (this->m_pcCurrentTexture->iType)
 		{
 		case aiTextureType_DIFFUSE:
-			if (pcMesh->piDiffuseTexture && pcMesh->piDiffuseTexture != piTexture)
-			{
-				pcMesh->piDiffuseTexture->Release();
-				pcMesh->piDiffuseTexture = piTexture;
-				this->m_pcCurrentTexture->piTexture = &pcMesh->piDiffuseTexture;
-
-				if (!pcMesh->bSharedFX)
-				{
-					pcMesh->piEffect->SetTexture("DIFFUSE_TEXTURE",piTexture);
-				}
-			}
+			tex = &pcMesh->piDiffuseTexture;
+			tex_string = "DIFFUSE_TEXTURE";
 			break;
 		case aiTextureType_AMBIENT:
-			if (pcMesh->piAmbientTexture && pcMesh->piAmbientTexture != piTexture)
-			{
-				pcMesh->piAmbientTexture->Release();
-				pcMesh->piAmbientTexture = piTexture;
-				this->m_pcCurrentTexture->piTexture = &pcMesh->piAmbientTexture;
-
-				if (!pcMesh->bSharedFX)
-				{
-					pcMesh->piEffect->SetTexture("AMBIENT_TEXTURE",piTexture);
-				}
-			}
+			tex = &pcMesh->piAmbientTexture;
+			tex_string = "AMBIENT_TEXTURE";
 			break;
 		case aiTextureType_SPECULAR:
-			if (pcMesh->piSpecularTexture && pcMesh->piSpecularTexture != piTexture)
-			{
-				pcMesh->piSpecularTexture->Release();
-				pcMesh->piSpecularTexture = piTexture;
-				this->m_pcCurrentTexture->piTexture = &pcMesh->piSpecularTexture;
-
-				if (!pcMesh->bSharedFX)
-				{
-					pcMesh->piEffect->SetTexture("SPECULAR_TEXTURE",piTexture);
-				}
-			}
+			tex = &pcMesh->piSpecularTexture;
+			tex_string = "SPECULAR_TEXTURE";
 			break;
 		case aiTextureType_EMISSIVE:
-			if (pcMesh->piEmissiveTexture && pcMesh->piEmissiveTexture != piTexture)
-			{
-				pcMesh->piEmissiveTexture->Release();
-				pcMesh->piEmissiveTexture = piTexture;
-				this->m_pcCurrentTexture->piTexture = &pcMesh->piEmissiveTexture;
-
-				if (!pcMesh->bSharedFX)
-				{
-					pcMesh->piEffect->SetTexture("EMISSIVE_TEXTURE",piTexture);
-				}
-			}
+			tex = &pcMesh->piEmissiveTexture;
+			tex_string = "EMISSIVE_TEXTURE";
+			break;
+		case aiTextureType_LIGHTMAP:
+			tex = &pcMesh->piLightmapTexture;
+			tex_string = "LIGHTMAP_TEXTURE";
+			break;
+		case aiTextureType_DISPLACEMENT:
+		case aiTextureType_REFLECTION:
+		case aiTextureType_UNKNOWN:
 			break;
 		case aiTextureType_SHININESS:
-			if (pcMesh->piShininessTexture && pcMesh->piShininessTexture != piTexture)
-			{
-				pcMesh->piShininessTexture->Release();
-				pcMesh->piShininessTexture = piTexture;
-				this->m_pcCurrentTexture->piTexture = &pcMesh->piShininessTexture;
-
-				if (!pcMesh->bSharedFX)
-				{
-					pcMesh->piEffect->SetTexture("SHININESS_TEXTURE",piTexture);
-				}
-			}
+			tex = &pcMesh->piShininessTexture;
+			tex_string = "SHININESS_TEXTURE";
 			break;
 		case aiTextureType_NORMALS:
 		case aiTextureType_HEIGHT:
-			if (pcMesh->piNormalTexture && pcMesh->piNormalTexture != piTexture)
-			{
+
+			// special handling here 
+			if (pcMesh->piNormalTexture && pcMesh->piNormalTexture != piTexture)	{
 				pcMesh->piNormalTexture->Release();
 				pcMesh->piNormalTexture = piTexture;
-				CMaterialManager::Instance().HMtoNMIfNecessary(pcMesh->piNormalTexture,
-					&pcMesh->piNormalTexture,true);
-				this->m_pcCurrentTexture->piTexture = &pcMesh->piNormalTexture;
+				CMaterialManager::Instance().HMtoNMIfNecessary(pcMesh->piNormalTexture,&pcMesh->piNormalTexture,true);
+				m_pcCurrentTexture->piTexture = &pcMesh->piNormalTexture;
 
-				if (!pcMesh->bSharedFX)
-				{
+				if (!pcMesh->bSharedFX)	{
 					pcMesh->piEffect->SetTexture("NORMAL_TEXTURE",piTexture);
 				}
 			}
 			break;
 		default: //case aiTextureType_OPACITY && case aiTextureType_OPACITY | 0x40000000:
-			if (pcMesh->piOpacityTexture && pcMesh->piOpacityTexture != piTexture)
-			{
-				pcMesh->piOpacityTexture->Release();
-				pcMesh->piOpacityTexture = piTexture;
-				this->m_pcCurrentTexture->piTexture = &pcMesh->piOpacityTexture;
-
-				if (!pcMesh->bSharedFX)
-				{
-					pcMesh->piEffect->SetTexture("OPACITY_TEXTURE",piTexture);
-				}
-			}
+			
+			tex = &pcMesh->piOpacityTexture;
+			tex_string = "OPACITY_TEXTURE";
 			break;
 		};
+		if (tex && *tex && *tex != piTexture)
+		{
+			(**tex).Release();
+			*tex = piTexture;
+			m_pcCurrentTexture->piTexture = tex;
+
+			if (!pcMesh->bSharedFX){
+				pcMesh->piEffect->SetTexture(tex_string,piTexture);
+			}
+		}
 	}
 	// now update the material itself
 	aiString szOld;
-	const char* szKey = NULL;
-#if 0
-	switch (this->m_pcCurrentTexture->iType)
-	{
-	case aiTextureType_DIFFUSE:
-		szKey = AI_MATKEY_TEXTURE_DIFFUSE(0);
-		break;
-	case aiTextureType_AMBIENT:
-		szKey = AI_MATKEY_TEXTURE_AMBIENT(0);
-		break;
-	case aiTextureType_SPECULAR:
-		szKey = AI_MATKEY_TEXTURE_SPECULAR(0);
-		break;
-	case aiTextureType_EMISSIVE:
-		szKey = AI_MATKEY_TEXTURE_EMISSIVE(0);
-		break;
-	case aiTextureType_NORMALS:
-		szKey = AI_MATKEY_TEXTURE_NORMALS(0);
-		break;
-	case aiTextureType_HEIGHT:
-		szKey = AI_MATKEY_TEXTURE_HEIGHT(0);
-		break;
-	case aiTextureType_SHININESS:
-		szKey = AI_MATKEY_TEXTURE_SHININESS(0);
-		break;
-	default: //case aiTextureType_OPACITY && case aiTextureType_OPACITY | 0x40000000:
-		szKey = AI_MATKEY_TEXTURE_OPACITY(0);
-		break;
-	};
-#endif
-	ai_assert(NULL != szKey);
 
 	aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE(m_pcCurrentTexture->iType,0),&szOld);
 	pcMat->AddProperty(&szString,AI_MATKEY_TEXTURE(m_pcCurrentTexture->iType,0));
@@ -478,8 +414,7 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
 		szType = "Opacity";
 		break;
 	};
-	if (bIsExtraOpacity)
-	{
+	if (bIsExtraOpacity)	{
 		sprintf(chTemp,"%s %i (<copy of diffuse #1>)",szType,iIndex+1);
 	}
 	else 
@@ -494,8 +429,7 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
 
 	// find out whether this is the default texture or not
 
-	if (piTexture && *piTexture)
-	{
+	if (piTexture && *piTexture)	{
 		// {9785DA94-1D96-426b-B3CB-BADC36347F5E}
 		static const GUID guidPrivateData = 
 			{ 0x9785da94, 0x1d96, 0x426b, 
@@ -651,6 +585,7 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
 	return 1;
 }
 //-------------------------------------------------------------------------------
+// Expand all elements in the treeview
 int CDisplay::ExpandTree()
 {
 	// expand all materials
@@ -671,6 +606,7 @@ int CDisplay::ExpandTree()
 	return 1;
 }
 //-------------------------------------------------------------------------------
+// Get image list for tree view
 int CDisplay::LoadImageList(void)
 {
 	if (!m_hImageList)
@@ -708,6 +644,7 @@ int CDisplay::LoadImageList(void)
 	return 1;
 }
 //-------------------------------------------------------------------------------
+// Fill tree view
 int CDisplay::FillDisplayList(void)
 {
 	LoadImageList();
@@ -750,6 +687,7 @@ int CDisplay::FillDisplayList(void)
 	return 1;
 }
 //-------------------------------------------------------------------------------
+// Main render loop
 int CDisplay::OnRender()
 {
 	// update possible animation
@@ -759,10 +697,17 @@ int CDisplay::OnRender()
 
 		ai_assert( g_pcAsset->mAnimator);
 		if (g_bPlay) {
-			
-
 			g_dCurrent += clock()/ double( CLOCKS_PER_SEC)   -lastPlaying;
-			g_pcAsset->mAnimator->Calculate( g_dCurrent );
+
+			double time = g_dCurrent;
+			aiAnimation* mAnim = g_pcAsset->mAnimator->CurrentAnim();
+			if(  mAnim && mAnim->mDuration > 0.0) {
+				double tps = mAnim->mTicksPerSecond ? mAnim->mTicksPerSecond : 25.f;
+				time = fmod( time, mAnim->mDuration/tps);
+				SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_SETPOS,TRUE,LPARAM(10000 * (time/(mAnim->mDuration/tps))));			
+			}
+
+			g_pcAsset->mAnimator->Calculate( time );
 			lastPlaying = g_dCurrent;
 		}
 	}
@@ -795,6 +740,7 @@ int CDisplay::OnRender()
 	return 1;
 }	
 //-------------------------------------------------------------------------------
+// Update UI
 void UpdateColorFieldsInUI()
 {
 	InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR1),NULL,TRUE);
@@ -806,6 +752,7 @@ void UpdateColorFieldsInUI()
 	UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR3));
 }
 //-------------------------------------------------------------------------------
+// FIll statistics UI
 int CDisplay::FillDefaultStatistics(void)
 {
 	if (!g_pcAsset)
@@ -858,6 +805,7 @@ int CDisplay::FillDefaultStatistics(void)
 	return 1;
 }
 //-------------------------------------------------------------------------------
+// Reset UI
 int CDisplay::Reset(void)
 {
 	// clear all lists
@@ -870,6 +818,7 @@ int CDisplay::Reset(void)
 	return OnSetupNormalView();
 }
 //-------------------------------------------------------------------------------
+// reset to standard statistics view
 void ShowNormalUIComponents()
 {
 	ShowWindow(GetDlgItem(g_hDlg,IDC_NUMNODES),SW_SHOW);
@@ -1089,60 +1038,45 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
 int CDisplay::OnSetup(HTREEITEM p_hTreeItem)
 {
 	// search in our list for the item
-
 	union	{
 		TextureInfo* pcNew;
 		NodeInfo* pcNew2;
-		MaterialInfo* pcNew3;	};
+		MaterialInfo* pcNew3;	
+	};
 
 	pcNew = NULL;
-	for (std::vector<TextureInfo>::iterator
-		i =  this->m_asTextures.begin();
-		i != this->m_asTextures.end();++i)
-	{
-		if (p_hTreeItem == (*i).hTreeItem)
-		{
+	for (std::vector<TextureInfo>::iterator i =  m_asTextures.begin();i != m_asTextures.end();++i){
+		if (p_hTreeItem == (*i).hTreeItem)	{
 			pcNew = &(*i);
 			break;
 		}
 	}
-	if (pcNew)
-	{
-		return this->OnSetupTextureView(pcNew);
+	if (pcNew)	{
+		return OnSetupTextureView(pcNew);
 	}
 
 	// seach the node list
-	for (std::vector<NodeInfo>::iterator
-		i =  this->m_asNodes.begin();
-		i != this->m_asNodes.end();++i)
-	{
-		if (p_hTreeItem == (*i).hTreeItem)
-		{
+	for (std::vector<NodeInfo>::iterator i =  m_asNodes.begin(); i != m_asNodes.end();++i){
+		if (p_hTreeItem == (*i).hTreeItem)	{
 			pcNew2 = &(*i);
 			break;
 		}
 	}
-	if (pcNew2)
-	{
-		return this->OnSetupNodeView(pcNew2);
+	if (pcNew2)	{
+		return OnSetupNodeView(pcNew2);
 	}
 
 	// seach the material list
-	for (std::vector<MaterialInfo>::iterator
-		i =  this->m_asMaterials.begin();
-		i != this->m_asMaterials.end();++i)
-	{
-		if (p_hTreeItem == (*i).hTreeItem)
-		{
+	for (std::vector<MaterialInfo>::iterator i =  m_asMaterials.begin();i != m_asMaterials.end();++i){
+		if (p_hTreeItem == (*i).hTreeItem){
 			pcNew3 = &(*i);
 			break;
 		}
 	}
-	if (pcNew3)
-	{
-		return this->OnSetupMaterialView(pcNew3);
+	if (pcNew3)	{
+		return OnSetupMaterialView(pcNew3);
 	}
-	return this->OnSetupNormalView();
+	return OnSetupNormalView();
 }
 //-------------------------------------------------------------------------------
 int CDisplay::ShowTreeViewContextMenu(HTREEITEM hItem)
@@ -1499,6 +1433,7 @@ int CDisplay::HandleTreeViewPopup2(WPARAM wParam,LPARAM lParam)
 	return 0;
 }
 //-------------------------------------------------------------------------------
+// Setup stereo view
 int CDisplay::SetupStereoView()
 {
 	if (NULL != g_pcAsset && NULL != g_pcAsset->pcScene->mRootNode)
@@ -1515,6 +1450,7 @@ int CDisplay::SetupStereoView()
 	return 1;
 }
 //-------------------------------------------------------------------------------
+// Do the actual rendering pass for the stereo view
 int CDisplay::RenderStereoView(const aiMatrix4x4& m)
 {
 	// and rerender the scene
@@ -1550,6 +1486,7 @@ int CDisplay::RenderStereoView(const aiMatrix4x4& m)
 	return 1;
 }
 //-------------------------------------------------------------------------------
+// Process input for the texture view
 int CDisplay::HandleInputTextureView()
 {
 	HandleMouseInputTextureView();
@@ -1557,6 +1494,7 @@ int CDisplay::HandleInputTextureView()
 	return 1;
 }
 //-------------------------------------------------------------------------------
+// Get input for the current state
 int CDisplay::HandleInput()
 {
 	if(CBackgroundPainter::TEXTURE_CUBE == CBackgroundPainter::Instance().GetMode())
@@ -1608,6 +1546,7 @@ int CDisplay::HandleInput()
 	return 1;
 }
 //-------------------------------------------------------------------------------
+// Process input for an empty scen view to allow for skybox rotations
 int CDisplay::HandleInputEmptyScene()
 {
 	if(CBackgroundPainter::TEXTURE_CUBE == CBackgroundPainter::Instance().GetMode())
@@ -1630,6 +1569,7 @@ int CDisplay::HandleInputEmptyScene()
 	return 1;
 }
 //-------------------------------------------------------------------------------
+// Draw the HUD on top of the scene
 int CDisplay::DrawHUD()
 {
   // HACK: (thom) can't get the effect to work on non-shader cards, therefore deactivated for the moment
@@ -1642,21 +1582,16 @@ int CDisplay::DrawHUD()
 	sRect.right -= sRect.left;
 	sRect.bottom -= sRect.top;
 
-	struct SVertex
-	{
-		float x,y,z,w,u,v;
-	};
-
 	// commit the texture to the shader
 	// FIX: Necessary because the texture view is also using this shader
 	g_piPassThroughEffect->SetTexture("TEXTURE_2D",g_pcTexture);
 
 	// NOTE: The shader might be used for other purposes, too.
 	// So ensure the right technique is there
-  if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
-    g_piPassThroughEffect->SetTechnique( "PassThrough_FF");
-  else
-    g_piPassThroughEffect->SetTechnique("PassThrough");
+	if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
+		g_piPassThroughEffect->SetTechnique( "PassThrough_FF");
+	else
+		g_piPassThroughEffect->SetTechnique("PassThrough");
 
 	// build vertices for drawing from system memory
 	UINT dw;
@@ -1713,10 +1648,17 @@ int CDisplay::DrawHUD()
 	return 1;
 }
 //-------------------------------------------------------------------------------
+// Render the full scene, all nodes
 int CDisplay::RenderFullScene()
 {
 	// reset the color index used for drawing normals
 	g_iCurrentColor = 0;
+
+	aiMatrix4x4 pcProj;
+	GetProjectionMatrix(pcProj);
+
+	vPos = GetCameraMatrix(mViewProjection);
+	mViewProjection = mViewProjection * pcProj;
 
 	// setup wireframe/solid rendering mode
 	if (g_sOptions.eDrawMode == RenderOptions::WIREFRAME)
@@ -1726,6 +1668,24 @@ int CDisplay::RenderFullScene()
 	if (g_sOptions.bCulling)
 		g_piDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
 	else g_piDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_NONE);
+
+	// for high-quality mode, enable anisotropic texture filtering
+	if (g_sOptions.bLowQuality) {
+		for (DWORD d = 0; d < 8;++d) {
+			g_piDevice->SetSamplerState(d,D3DSAMP_MAGFILTER,D3DTEXF_LINEAR);
+			g_piDevice->SetSamplerState(d,D3DSAMP_MINFILTER,D3DTEXF_LINEAR);
+			g_piDevice->SetSamplerState(d,D3DSAMP_MIPFILTER,D3DTEXF_LINEAR);
+		}
+	}
+	else {
+		for (DWORD d = 0; d < 8;++d) {
+			g_piDevice->SetSamplerState(d,D3DSAMP_MAGFILTER,D3DTEXF_ANISOTROPIC);
+			g_piDevice->SetSamplerState(d,D3DSAMP_MINFILTER,D3DTEXF_ANISOTROPIC);
+			g_piDevice->SetSamplerState(d,D3DSAMP_MIPFILTER,D3DTEXF_LINEAR);
+
+			g_piDevice->SetSamplerState(d,D3DSAMP_MAXANISOTROPY,g_sCaps.MaxAnisotropy);
+		}
+	}
 
 	// draw the scene background (clear and texture 2d)
 	CBackgroundPainter::Instance().OnPreRender();
@@ -1761,9 +1721,37 @@ int CDisplay::RenderFullScene()
 	}
 
 	// setup the stereo view if necessary
-	if (g_sOptions.bStereoView)
+	if (g_sOptions.bStereoView) 
 		RenderStereoView(m);
 
+	// render the skeleton if necessary
+	if (g_sOptions.bSkeleton && NULL != g_pcAsset && NULL != g_pcAsset->pcScene->mRootNode) {
+		// disable the z-buffer
+		g_piDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
+
+		if (g_sOptions.eDrawMode != RenderOptions::WIREFRAME) {
+			g_piDevice->SetRenderState(D3DRS_ZENABLE,FALSE);
+		}
+
+		g_piDevice->SetVertexDeclaration( gDefaultVertexDecl);
+		// this is very similar to the code in SetupMaterial()
+		ID3DXEffect* piEnd = g_piNormalsEffect;
+		aiMatrix4x4 pcProj = m * mViewProjection;
+
+		D3DXVECTOR4 vVector(1.f,0.f,0.f,1.f);
+		piEnd->SetVector("OUTPUT_COLOR",&vVector);
+		piEnd->SetMatrix("WorldViewProjection", (const D3DXMATRIX*)&pcProj);
+
+		UINT dwPasses = 0;
+		piEnd->Begin(&dwPasses,0);
+		piEnd->BeginPass(0);
+
+		RenderSkeleton(g_pcAsset->pcScene->mRootNode,m,m);
+
+		piEnd->EndPass();piEnd->End();
+		g_piDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+		g_piDevice->SetRenderState(D3DRS_ZENABLE,TRUE);
+	}
 
 	// draw the HUD texture on top of the rendered scene using
 	// pre-projected vertices
@@ -1778,6 +1766,37 @@ int CDisplay::RenderMaterialView()
 	return 1;
 }
 //-------------------------------------------------------------------------------
+// Render animation skeleton
+int CDisplay::RenderSkeleton (aiNode* piNode,const aiMatrix4x4& piMatrix, const aiMatrix4x4& parent)
+{
+	aiMatrix4x4 me = g_pcAsset->mAnimator->GetGlobalTransform( piNode);
+
+	me.Transpose();
+	//me *= piMatrix;
+
+	if (piNode->mParent) {
+		AssetHelper::LineVertex data[2];
+		data[0].dColorDiffuse = data[1].dColorDiffuse = D3DCOLOR_ARGB(0xff,0xff,0,0);
+		
+		data[0].vPosition.x = parent.d1;
+		data[0].vPosition.y = parent.d2;
+		data[0].vPosition.z = parent.d3;
+
+		data[1].vPosition.x = me.d1;
+		data[1].vPosition.y = me.d2;
+		data[1].vPosition.z = me.d3;
+
+		g_piDevice->DrawPrimitiveUP(D3DPT_LINELIST,1,&data,sizeof(AssetHelper::LineVertex));
+	}
+
+	// render all child nodes
+	for (unsigned int i = 0; i < piNode->mNumChildren;++i)
+		RenderSkeleton(piNode->mChildren[i],piMatrix, me );
+
+	return 1;
+}
+//-------------------------------------------------------------------------------
+// Render a single node
 int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 	bool bAlpha /*= false*/)
 {
@@ -1801,14 +1820,9 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 		bChangedVM = true;
 	}
 
-	aiMatrix4x4 pcProj;
-	GetProjectionMatrix(pcProj);
+	aiMatrix4x4 pcProj = aiMe * mViewProjection;
 
-	aiMatrix4x4 pcCam;
-	aiVector3D vPos = GetCameraMatrix(pcCam);
-	pcProj = (aiMe * pcCam) * pcProj;
-
-	pcCam = aiMe;
+	aiMatrix4x4 pcCam = aiMe;
 	pcCam.Inverse().Transpose();
 
 	// VERY UNOPTIMIZED, much stuff is redundant. Who cares?
@@ -1911,11 +1925,6 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 			const aiMesh* mesh = g_pcAsset->pcScene->mMeshes[piNode->mMeshes[i]];
 			AssetHelper::MeshHelper* helper = g_pcAsset->apcMeshes[piNode->mMeshes[i]];
 
-
-			// fix: Render triangle meshes only
-			if (mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
-				continue;
-
 			// don't render the mesh if the render pass is incorrect
 			if (g_sOptions.bRenderMats && (helper->piOpacityTexture || helper->fOpacity != 1.0f) && !mesh->HasBones())
 			{
@@ -1986,7 +1995,6 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 				ID3DXEffect* piEnd = g_piNormalsEffect;
 
 				piEnd->SetVector("OUTPUT_COLOR",&vVector);
-
 				piEnd->SetMatrix("WorldViewProjection", (const D3DXMATRIX*)&pcProj);
 
 				UINT dwPasses = 0;

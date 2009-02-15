@@ -1180,7 +1180,7 @@ INT_PTR CALLBACK SMMessageProc(HWND hwndDlg,UINT uMsg,
 		if (IDOK == LOWORD(wParam)) {
 			char s[30];
 			GetDlgItemText(hwndDlg,IDC_EDITSM,s,30);
-			g_smoothAngle = atof(s);
+			g_smoothAngle = (float)atof(s);
 
 			EndDialog(hwndDlg,0);
 		}
@@ -1936,6 +1936,10 @@ __DRUNKEN_ALIEN_FROM_MARS:
 					{
 						g_bPlay = !g_bPlay;
 						SetDlgItemText(g_hDlg,IDC_PLAY,(g_bPlay ? "Stop" : "Play"));
+
+						if (g_bPlay)
+							EnableWindow(GetDlgItem(g_hDlg,IDC_SLIDERANIM),FALSE);
+						else EnableWindow(GetDlgItem(g_hDlg,IDC_SLIDERANIM),TRUE);
 					}
 				}
 			// check the file history

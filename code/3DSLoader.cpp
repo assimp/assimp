@@ -669,14 +669,16 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 
 		// This is the "real" name of a $$$DUMMY object
 		{
-			if (mCurrentNode->mName != "$$$DUMMY")	{
-				DefaultLogger::get()->warn("3DS: Skipping dummy object name for non-dummy object");
+			const char* sz = (const char*) stream->GetPtr();
+			while (stream->GetI1());
+			// mCurrentNode->mDummyName = std::string(sz);
+
+			// FIX: if object name is DUMMY, take this one instead
+			if (mCurrentNode->mName == "$$$DUMMY")	{
+				//DefaultLogger::get()->warn("3DS: Skipping dummy object name for non-dummy object");
+				mCurrentNode->mName = std::string(sz);
 				break;
 			}
-
-			const char* sz = (const char*)stream->GetPtr();
-			while (stream->GetI1());
-			mCurrentNode->mDummyName = std::string(sz);
 		}
 		break;
 

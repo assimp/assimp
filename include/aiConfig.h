@@ -159,6 +159,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_CONFIG_IMPORT_MD3_SKIN_NAME \
 	"IMPORT_MD3_SKIN_NAME"
 
+// ---------------------------------------------------------------------------
+/** @brief  Specify the Quake 3 shader file to be used for a particular
+ *  MD3 file. This can also be a search path.
+ *
+ * By default Assimp's behaviour is as follows: If a MD3 file 
+ * <tt><any_path>/models/<any_q3_subdir>/<model_name>/<file_name>.md3</tt> is 
+ * loaded, the library tries to locate the corresponding shader file in
+ * <tt><any_path>/scripts/<model_name>.shader</tt>. This property overrides this
+ * behaviour. It can either specify a full path to the shader to be loaded
+ * or alternatively the path (relative or absolute) to the directory where
+ * the shaders for all MD3s to be loaded reside. Assimp attempts to open 
+ * <tt><dir>/<model_name>.shader</tt> first, <tt><dir>/<file_name>.shader</tt> 
+ * is the fallback file. Note that <dir> should have a terminal (back)slash.
+ * Property type: String. Default value: n/a.
+ */
+#define AI_CONFIG_IMPORT_MD3_SHADER_SRC \
+	"IMPORT_MD3_SHADER_SRC"
+
 
 // ---------------------------------------------------------------------------
 /** @brief  Configures the LWO loader to load just one layer from the model.

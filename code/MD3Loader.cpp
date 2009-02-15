@@ -61,12 +61,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
+// Convert a Q3 shader blend function to the appropriate enum value
+Q3Shader::BlendFunc StringToBlendFunc(const std::string& m)
+{
+	if (m == "GL_ONE") {
+		return Q3Shader::BLEND_GL_ONE;
+	}
+	if (m == "GL_ZERO") {
+		return Q3Shader::BLEND_GL_ZERO;
+	}
+	if (m == "GL_SRC_ALPHA") {
+		return Q3Shader::BLEND_GL_SRC_ALPHA;
+	}
+	if (m == "GL_ONE_MINUS_SRC_ALPHA") {
+		return Q3Shader::BLEND_GL_ONE_MINUS_SRC_ALPHA;
+	}
+	if (m == "GL_ONE_MINUS_DST_COLOR") {
+		return Q3Shader::BLEND_GL_ONE_MINUS_DST_COLOR;
+	}
+	DefaultLogger::get()->error("Q3Shader: Unknown blend function: " + m);
+	return Q3Shader::BLEND_NONE;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Load a Quake 3 shader
-void Q3Shader::LoadShader(ShaderData& fill, const std::string& pFile,IOSystem* io)
+bool Q3Shader::LoadShader(ShaderData& fill, const std::string& pFile,IOSystem* io)
 {
 	boost::scoped_ptr<IOStream> file( io->Open( pFile, "rt"));
 	if (!file.get())
-		return; // if we can't access the file, don't worry and return
+		return false; // if we can't access the file, don't worry and return
 
 	DefaultLogger::get()->info("Loading Quake3 shader file " + pFile);
 
@@ -84,59 +107,93 @@ void Q3Shader::LoadShader(ShaderData& fill, const std::string& pFile,IOSystem* i
 	Q3Shader::ShaderMapBlock*  curMap  = NULL;
 
 	// read line per line
-	for (;;SkipLine(&buff)) {
+	for (;SkipSpacesAndLineEnd(&buff);SkipLine(&buff)) {
 	
-		if(!SkipSpacesAndLineEnd(&buff))
-			break;
-
 		if (*buff == '{') {
+			++buff;
+
 			// append to last section, if any
 			if (!curData) {
 				DefaultLogger::get()->error("Q3Shader: Unexpected shader section token \'{\'");
-				return;
+				return true; // still no failure, the file is there
 			}
 
-			// read this map section
-			for (;;SkipLine(&buff)) {
-				if(!SkipSpacesAndLineEnd(&buff))
-					break;
-
+			// read this data section
+			for (;SkipSpacesAndLineEnd(&buff);SkipLine(&buff)) {
 				if (*buff == '{') {
+					++buff;
 					// add new map section
 					curData->maps.push_back(Q3Shader::ShaderMapBlock());
 					curMap = &curData->maps.back();
 
+					for (;SkipSpacesAndLineEnd(&buff);SkipLine(&buff)) {
+						// 'map' - Specifies texture file name
+						if (TokenMatchI(buff,"map",3) || TokenMatchI(buff,"clampmap",8)) {
+							curMap->name = GetNextToken(buff);
+						}	
+						// 'blendfunc' - Alpha blending mode
+						else if (TokenMatchI(buff,"blendfunc",9)) {	
+							const std::string blend_src = GetNextToken(buff);
+							if (blend_src == "add") {
+								curMap->blend_src  = Q3Shader::BLEND_GL_ONE;
+								curMap->blend_dest = Q3Shader::BLEND_GL_ONE;
+							}
+							else if (blend_src == "filter") {
+								curMap->blend_src  = Q3Shader::BLEND_GL_DST_COLOR;
+								curMap->blend_dest = Q3Shader::BLEND_GL_ZERO;
+							}
+							else if (blend_src == "blend") {
+								curMap->blend_src  = Q3Shader::BLEND_GL_SRC_ALPHA;
+								curMap->blend_dest = Q3Shader::BLEND_GL_ONE_MINUS_SRC_ALPHA;
+							}
+							else {
+								curMap->blend_src  = StringToBlendFunc(blend_src);
+								curMap->blend_dest = StringToBlendFunc(GetNextToken(buff));
+							}
+						}
+						// 'alphafunc' - Alpha testing mode
+						else if (TokenMatchI(buff,"alphafunc",9)) {	
+							const std::string at = GetNextToken(buff);
+							if (at == "GT0") {
+								curMap->alpha_test = Q3Shader::AT_GT0;
+							}
+							else if (at == "LT128") {
+								curMap->alpha_test = Q3Shader::AT_LT128;
+							}
+							else if (at == "GE128") {
+								curMap->alpha_test = Q3Shader::AT_GE128;
+							}
+						}
+						else if (*buff == '}') {
+							++buff;
+							// close this map section
+							curMap = NULL;
+							break;
+						}
+					}
+
 				}
 				else if (*buff == '}') {
-					// close this map section
-					if (curMap)
-						curMap = NULL;
-					else {
-						curData = NULL;					
-						break;
-					}
+					++buff;
+					curData = NULL;					
+					break;
 				}
-				// 'map' - Specifies texture file name
-				else if (TokenMatchI(buff,"map",3) || TokenMatchI(buff,"clampmap",8)) {
-					curMap->name = GetNextToken(buff);
-				}	
-				// 'blendfunc' - Alpha blending mode
-				else if (TokenMatchI(buff,"blendfunc",9)) {	
-					// fixme
-				}
-			}
-		}
 
-		// 'cull' specifies culling behaviour for the model
-		else if (TokenMatch(buff,"cull",4)) {
-			SkipSpaces(&buff);
-			if (!ASSIMP_strincmp(buff,"back",4)) {
-				curData->cull = Q3Shader::CULL_CCW;
+				// 'cull' specifies culling behaviour for the model
+				else if (TokenMatchI(buff,"cull",4)) {
+					SkipSpaces(&buff);
+					if (!ASSIMP_strincmp(buff,"back",4)) {
+						curData->cull = Q3Shader::CULL_CCW;
+					}
+					else if (!ASSIMP_strincmp(buff,"front",5)) {
+						curData->cull = Q3Shader::CULL_CW;
+					}
+					else if (!ASSIMP_strincmp(buff,"none",4) || !ASSIMP_strincmp(buff,"disable",7)) {
+						curData->cull = Q3Shader::CULL_NONE;
+					}
+					else DefaultLogger::get()->error("Q3Shader: Unrecognized cull mode");
+				}
 			}
-			else if (!ASSIMP_strincmp(buff,"front",5)) {
-				curData->cull = Q3Shader::CULL_CW;
-			}
-			//else curData->cull = Q3Shader::CULL_NONE;
 		}
 
 		else {
@@ -148,15 +205,16 @@ void Q3Shader::LoadShader(ShaderData& fill, const std::string& pFile,IOSystem* i
 			curData->name = GetNextToken(buff);
 		}
 	}
+	return true;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Load a Quake 3 skin
-void Q3Shader::LoadSkin(SkinData& fill, const std::string& pFile,IOSystem* io)
+bool Q3Shader::LoadSkin(SkinData& fill, const std::string& pFile,IOSystem* io)
 {
 	boost::scoped_ptr<IOStream> file( io->Open( pFile, "rt"));
 	if (!file.get())
-		return; // if we can't access the file, don't worry and return
+		return false; // if we can't access the file, don't worry and return
 
 	DefaultLogger::get()->info("Loading Quake3 skin file " + pFile);
 
@@ -177,7 +235,7 @@ void Q3Shader::LoadSkin(SkinData& fill, const std::string& pFile,IOSystem* io)
 		std::string ss = GetNextToken(buff);
 		
 		// ignore tokens starting with tag_
-		if (!::strncmp(&ss[0],"_tag",std::min((size_t)4, ss.length())))
+		if (!::strncmp(&ss[0],"tag_",std::min((size_t)4, ss.length())))
 			continue;
 
 		fill.textures.push_back(SkinData::TextureEntry());
@@ -185,6 +243,90 @@ void Q3Shader::LoadSkin(SkinData& fill, const std::string& pFile,IOSystem* io)
 
 		s.first  = ss;
 		s.second = GetNextToken(buff);
+	}
+	return true;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Convert Q3Shader to material
+void Q3Shader::ConvertShaderToMaterial(MaterialHelper* out, const ShaderDataBlock& shader)
+{
+	ai_assert(NULL != out);
+
+	/*  IMPORTANT: This is not a real conversion. Actually we're just guessing and
+	 *  hacking around to build an aiMaterial that looks nearly equal to the
+	 *  original Quake 3 shader. We're missing some important features like
+	 *  animatable material properties in our material system, but at least 
+	 *  multiple textures should be handled correctly.
+	 */ 
+
+	// Two-sided material?
+	if (shader.cull == Q3Shader::CULL_NONE) {
+		const int twosided = 1;
+		out->AddProperty(&twosided,1,AI_MATKEY_TWOSIDED);
+	}
+
+	unsigned int cur_emissive = 0, cur_diffuse = 0, cur_lm =0;
+
+	// Iterate through all textures
+	for (std::list< Q3Shader::ShaderMapBlock >::const_iterator it = shader.maps.begin(); it != shader.maps.end();++it) {
+		
+		// CONVERSION BEHAVIOUR:
+		//
+		//
+		// If the texture is additive
+		//  - if it is the first texture, assume additive blending for the whole material
+		//  - otherwise register it as emissive texture.
+		//
+		// If the texture is using standard blend (or if the blend mode is unknown)
+		//  - if first texture: assume default blending for material
+		//  - in any case: set it as diffuse texture
+		//
+		// If the texture is using 'filter' blending
+		//  - take as lightmap
+		//
+		// Textures with alpha funcs
+		//  - aiTextureFlags_UseAlpha is set (otherwise aiTextureFlags_NoAlpha is explicitly set)
+		aiString s((*it).name);
+		aiTextureType type; unsigned int index;
+
+		if ((*it).blend_src == Q3Shader::BLEND_GL_ONE && (*it).blend_dest == Q3Shader::BLEND_GL_ONE) {
+			if (it == shader.maps.begin()) {
+				const int additive = aiBlendMode_Additive;
+				out->AddProperty(&additive,1,AI_MATKEY_BLEND_FUNC);
+				
+				index = cur_diffuse++;
+				type  = aiTextureType_DIFFUSE;
+			}
+			else {
+				index = cur_emissive++;
+				type  = aiTextureType_EMISSIVE;
+			}
+		}
+		else if ((*it).blend_src == Q3Shader::BLEND_GL_DST_COLOR && Q3Shader::BLEND_GL_ZERO) {
+			index = cur_lm++;
+			type  = aiTextureType_LIGHTMAP;
+		}
+		else {
+			const int blend = aiBlendMode_Default;
+			out->AddProperty(&blend,1,AI_MATKEY_BLEND_FUNC);
+			
+			index = cur_diffuse++;
+			type  = aiTextureType_DIFFUSE;
+		}
+
+		// setup texture
+		out->AddProperty(&s,AI_MATKEY_TEXTURE(type,index));
+
+		// setup texture flags
+		const int use_alpha = ((*it).alpha_test != Q3Shader::AT_NONE ? aiTextureFlags_UseAlpha : aiTextureFlags_IgnoreAlpha);
+		out->AddProperty(&use_alpha,1,AI_MATKEY_TEXFLAGS(type,index));
+	}
+	// If at least one emissive texture was set, set the emissive base color to 1 to ensure
+	// the texture is actually displayed.
+	if (0 != cur_emissive) {
+		aiColor3D one(1.f,1.f,1.f);
+		out->AddProperty(&one,1,AI_MATKEY_COLOR_EMISSIVE);
 	}
 }
 
@@ -291,11 +433,14 @@ void MD3Importer::SetupProperties(const Importer* pImp)
 
 	// AI_CONFIG_IMPORT_MD3_SKIN_NAME
 	configSkinFile = (pImp->GetPropertyString(AI_CONFIG_IMPORT_MD3_SKIN_NAME,"default"));
+
+	// AI_CONFIG_IMPORT_MD3_SHADER_SRC
+	configShaderFile = (pImp->GetPropertyString(AI_CONFIG_IMPORT_MD3_SHADER_SRC,""));
 }
 
 // ------------------------------------------------------------------------------------------------
 // Try to read the skin for a MD3 file
-void MD3Importer::ReadSkin(Q3Shader::SkinData& fill)
+void MD3Importer::ReadSkin(Q3Shader::SkinData& fill) const
 {
 	// skip any postfixes (e.g. lower_1.md3)
 	std::string::size_type s = filename.find_last_of('_');
@@ -306,6 +451,39 @@ void MD3Importer::ReadSkin(Q3Shader::SkinData& fill)
 
 	const std::string skin_file = path + filename.substr(0,s) + "_" + configSkinFile + ".skin";
 	Q3Shader::LoadSkin(fill,skin_file,mIOHandler);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Try to read the shader for a MD3 file
+void MD3Importer::ReadShader(Q3Shader::ShaderData& fill) const
+{
+	// Determine Q3 model name from given path
+	std::string::size_type s = path.find_last_of('\\',path.length()-2);
+	if (s == std::string::npos)
+		s = path.find_last_of('/',path.length()-2);
+
+	const std::string model_file = path.substr(s+1,path.length()-(s+2));
+
+	// If no specific dir or file is given, use our default search behaviour
+	if (!configShaderFile.length()) {
+		if(!Q3Shader::LoadShader(fill,path + "..\\..\\..\\scripts\\" + model_file + ".shader",mIOHandler)) {
+			Q3Shader::LoadShader(fill,path + "..\\..\\..\\scripts\\" + filename + ".shader",mIOHandler);
+		}
+	}
+	else {
+		// If the given string specifies a file, load this file.
+		// Otherwise it's a directory.
+		std::string::size_type st = configShaderFile.find_last_of('.');
+		if (st == std::string::npos) {
+			
+			if(!Q3Shader::LoadShader(fill,configShaderFile + model_file + ".shader",mIOHandler)) {
+				Q3Shader::LoadShader(fill,configShaderFile + filename + ".shader",mIOHandler);
+			}
+		}
+		else {
+			Q3Shader::LoadShader(fill,configShaderFile,mIOHandler);
+		}
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -417,6 +595,45 @@ error_cleanup:
 }
 
 // ------------------------------------------------------------------------------------------------
+// Convert a MD3 path to a proper value
+void MD3Importer::ConvertPath(const char* texture_name, const char* header_name, std::string& out) const
+{
+	// If the MD3's internal path itself and the given path are using
+	// the same directory, remove it completely to get right output paths.
+	const char* end1 = ::strrchr(header_name,'\\');
+	if (!end1)end1   = ::strrchr(header_name,'/');
+
+	const char* end2 = ::strrchr(texture_name,'\\');
+	if (!end2)end2   = ::strrchr(texture_name,'/');
+
+	// HACK: If the paths starts with "models", ignore the
+	// next two hierarchy levels, it specifies just the model name.
+	// Ignored by Q3, it might be not equal to the real model location.
+	if (end2)	{
+
+		size_t len2;
+		const size_t len1 = (size_t)(end1 - header_name);
+		if (!ASSIMP_strincmp(texture_name,"models",6) && (texture_name[6] == '/' || texture_name[6] == '\\')) {
+			len2 = 6; // ignore the seventh - could be slash or backslash
+
+			if (!header_name[0]) {
+				// Use the file name only
+				out = end2+1;
+				return;
+			}
+		}
+		else len2 = std::min (len1, (size_t)(end2 - texture_name ));
+		if (!ASSIMP_strincmp(texture_name,header_name,len2)) {
+			// Use the file name only
+			out = end2+1;
+			return;
+		}
+	}
+	// Use the full path
+	out = texture_name;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void MD3Importer::InternReadFile( const std::string& pFile, 
 	aiScene* pScene, IOSystem* pIOHandler)
@@ -504,12 +721,27 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 	Q3Shader::SkinData skins;
 	ReadSkin(skins);
 
+	// And check whether we can locate a shader file for this model
+	Q3Shader::ShaderData shaders;
+	ReadShader(shaders);
+
+	// Adjust all texture paths in the shader
+	const char* header_name = pcHeader->NAME;
+	if (shaders.blocks.size()) {
+		for (std::list< Q3Shader::ShaderDataBlock >::iterator dit = shaders.blocks.begin(); dit != shaders.blocks.end(); ++dit) {
+			ConvertPath((*dit).name.c_str(),header_name,(*dit).name);
+
+			for (std::list< Q3Shader::ShaderMapBlock >::iterator mit = (*dit).maps.begin(); mit != (*dit).maps.end(); ++mit) {
+				ConvertPath((*mit).name.c_str(),header_name,(*mit).name);
+			}
+		}
+	}
+
 	// Read all surfaces from the file
 	unsigned int iNum = pcHeader->NUM_SURFACES;
 	unsigned int iNumMaterials = 0;
 	unsigned int iDefaultMatIndex = 0xFFFFFFFF;
-	while (iNum-- > 0)
-	{
+	while (iNum-- > 0)	{
 
 		// Ensure correct endianess
 #ifdef AI_BUILD_BIG_ENDIAN
@@ -555,7 +787,96 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 			continue;
 		}
 
-		// Ensure correct endianess
+		// Allocate output mesh
+		pScene->mMeshes[iNum] = new aiMesh();
+		aiMesh* pcMesh = pScene->mMeshes[iNum];
+
+		std::string _texture_name;
+		const char* texture_name = NULL;
+
+		// Check whether we have a texture record for this surface in the .skin file
+		std::list< Q3Shader::SkinData::TextureEntry >::iterator it = std::find( 
+			skins.textures.begin(), skins.textures.end(), pcSurfaces->NAME );
+
+		if (it != skins.textures.end()) {
+			texture_name = &*( _texture_name = (*it).second).begin();
+			DefaultLogger::get()->debug("MD3: Assigning skin texture " + (*it).second + " to surface " + pcSurfaces->NAME);
+			(*it).resolved = true; // mark entry as resolved
+		}
+
+		// Get the first shader (= texture?) assigned to the surface
+		if (!texture_name && pcSurfaces->NUM_SHADER)	{
+			texture_name = pcShaders->NAME;
+		}
+
+		std::string convertedPath;
+		if (texture_name) {
+			ConvertPath(texture_name,header_name,convertedPath);
+		}
+
+		const Q3Shader::ShaderDataBlock* shader = NULL;
+
+		// Now search the current shader for a record with this name (
+		// excluding texture file extension)
+		if (shaders.blocks.size()) {
+
+			std::string::size_type s = convertedPath.find_last_of('.');
+			if (s == std::string::npos)
+				s = convertedPath.length();
+
+			const std::string without_ext = convertedPath.substr(0,s);
+			std::list< Q3Shader::ShaderDataBlock >::const_iterator dit = std::find(shaders.blocks.begin(),shaders.blocks.end(),without_ext);
+			if (dit != shaders.blocks.end()) {
+				// Hurra, wir haben einen. Tolle Sache.
+				shader = &*dit;
+				DefaultLogger::get()->info("Found shader record for " +without_ext );
+			}
+			else DefaultLogger::get()->warn("Unable to find shader record for " +without_ext );
+		}
+
+		MaterialHelper* pcHelper = new MaterialHelper();
+
+		const int iMode = (int)aiShadingMode_Gouraud;
+		pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
+
+		// Add a small ambient color value - Quake 3 seems to have one
+		aiColor3D clr;
+		clr.b = clr.g = clr.r = 0.05f;
+		pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_AMBIENT);
+
+		clr.b = clr.g = clr.r = 1.0f;
+		pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_DIFFUSE);
+		pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_SPECULAR);
+
+		// use surface name + skin_name as material name
+		aiString name;
+		name.Set("MD3_[" + configSkinFile + "][" + pcSurfaces->NAME + "]");
+		pcHelper->AddProperty(&name,AI_MATKEY_NAME);
+
+		if (!shader) {
+			// Setup dummy texture file name to ensure UV coordinates are kept during postprocessing
+			aiString szString;
+			if (convertedPath.length())	{
+				szString.Set(convertedPath);
+			}
+			else	{
+				DefaultLogger::get()->warn("Texture file name has zero length. Using default name");
+				szString.Set("dummy_texture.bmp");
+			}
+			pcHelper->AddProperty(&szString,AI_MATKEY_TEXTURE_DIFFUSE(0));
+
+			// prevent transparency by default
+			int no_alpha = aiTextureFlags_IgnoreAlpha;
+			pcHelper->AddProperty(&no_alpha,1,AI_MATKEY_TEXFLAGS_DIFFUSE(0));
+		}
+		else {
+			Q3Shader::ConvertShaderToMaterial(pcHelper,*shader);
+		}
+
+		pScene->mMaterials[iNumMaterials] = (aiMaterial*)pcHelper;
+		pcMesh->mMaterialIndex = iNumMaterials++;
+
+			// Ensure correct endianess
 #ifdef AI_BUILD_BIG_ENDIAN
 
 		for (uint32_t i = 0; i < pcSurfaces->NUM_VERTICES;++i)
@@ -577,9 +898,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 
 #endif
 
-		// Allocate the output mesh
-		pScene->mMeshes[iNum] = new aiMesh();
-		aiMesh* pcMesh = pScene->mMeshes[iNum];
+		// Fill mesh information
 		pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
 		pcMesh->mNumVertices		= pcSurfaces->NUM_TRIANGLES*3;
@@ -600,6 +919,8 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 			unsigned int iTemp = iCurrent;
 			for (unsigned int c = 0; c < 3;++c,++iCurrent)
 			{
+				pcMesh->mFaces[i].mIndices[c] = iCurrent;
+
 				// Read vertices
 				pcMesh->mVertices[iCurrent].x = pcVertices[ pcTriangles->INDEXES[c]].X*AI_MD3_XYZ_SCALE;
 				pcMesh->mVertices[iCurrent].y = pcVertices[ pcTriangles->INDEXES[c]].Y*AI_MD3_XYZ_SCALE;
@@ -613,100 +934,14 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 				pcMesh->mTextureCoords[0][iCurrent].x = pcUVs[ pcTriangles->INDEXES[c]].U;
 				pcMesh->mTextureCoords[0][iCurrent].y = 1.0f-pcUVs[ pcTriangles->INDEXES[c]].V;
 			}
-			// FIX: flip the face ordering for use with OpenGL
-			pcMesh->mFaces[i].mIndices[0] = iTemp+2;
-			pcMesh->mFaces[i].mIndices[1] = iTemp+1;
-			pcMesh->mFaces[i].mIndices[2] = iTemp+0;
+			// Flip face order if necessary
+			if (!shader || shader->cull == Q3Shader::CULL_CCW) {
+				pcMesh->mFaces[i].mIndices[0] = iTemp+2;
+				pcMesh->mFaces[i].mIndices[1] = iTemp+1;
+				pcMesh->mFaces[i].mIndices[2] = iTemp+0;
+			}
 			pcTriangles++;
 		}
-
-		std::string _texture_name;
-		const char* texture_name = NULL, *header_name = pcHeader->NAME;
-
-		// Check whether we have a texture record for this surface in the .skin file
-		std::list< Q3Shader::SkinData::TextureEntry >::iterator it = std::find( 
-			skins.textures.begin(), skins.textures.end(), pcSurfaces->NAME );
-
-		if (it != skins.textures.end()) {
-			texture_name = &*( _texture_name = (*it).second).begin();
-			DefaultLogger::get()->debug("MD3: Assigning skin texture " + (*it).second + " to surface " + pcSurfaces->NAME);
-			(*it).resolved = true; // mark entry as resolved
-		}
-
-		// Get the first shader (= texture?) assigned to the surface
-		if (!texture_name && pcSurfaces->NUM_SHADER)	{
-			texture_name = pcShaders->NAME;
-		}
-
-		const char* end2 = NULL;
-		if (texture_name) {
-
-			// If the MD3's internal path itself and the given path are using
-			// the same directory, remove it completely to get right output paths.
-			const char* end1 = ::strrchr(header_name,'\\');
-			if (!end1)end1   = ::strrchr(header_name,'/');
-
-			end2 = ::strrchr(texture_name,'\\');
-			if (!end2)end2   = ::strrchr(texture_name,'/');
-
-			// HACK: If the paths starts with "models/players", ignore the
-			// next hierarchy level, it specifies just the model name.
-			// Ignored by Q3, it might be not equal to the real model location.
-			if (end1 && end2)	{
-
-				size_t len2;
-				const size_t len1 = (size_t)(end1 - header_name);
-				if (!ASSIMP_strincmp(header_name,"models/players/",15)) {
-					len2 = 15;
-				}
-				else len2 = std::min (len1, (size_t)(end2 - texture_name ));
-
-				if (!ASSIMP_strincmp(texture_name,header_name,len2)) {
-					// Use the file name only
-					end2++;
-				}
-				else {
-					// Use the full path
-					end2 = (const char*)texture_name;
-				}
-			}
-		}
-
-		MaterialHelper* pcHelper = new MaterialHelper();
-
-		// Setup dummy texture file name to ensure UV coordinates are kept during postprocessing
-		aiString szString;
-		if (end2 && end2[0])	{
-			const size_t iLen = ::strlen(end2);
-			::memcpy(szString.data,end2,iLen);
-			szString.data[iLen] = '\0';
-			szString.length = iLen;
-		}
-		else	{
-			DefaultLogger::get()->warn("Texture file name has zero length. Using default name");
-			szString.Set("dummy_texture.bmp");
-		}
-		pcHelper->AddProperty(&szString,AI_MATKEY_TEXTURE_DIFFUSE(0));
-
-		const int iMode = (int)aiShadingMode_Gouraud;
-		pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
-
-		// Add a small ambient color value - Quake 3 seems to have one
-		aiColor3D clr;
-		clr.b = clr.g = clr.r = 0.05f;
-		pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_AMBIENT);
-
-		clr.b = clr.g = clr.r = 1.0f;
-		pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_DIFFUSE);
-		pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_SPECULAR);
-
-		// use surface name + skin_name as material name
-		aiString name;
-		name.Set("MD3_[" + configSkinFile + "][" + pcSurfaces->NAME + "]");
-		pcHelper->AddProperty(&name,AI_MATKEY_NAME);
-
-		pScene->mMaterials[iNumMaterials] = (aiMaterial*)pcHelper;
-		pcMesh->mMaterialIndex = iNumMaterials++;
 	
 		// Go to the next surface
 		pcSurfaces = (BE_NCONST MD3::Surface*)(((unsigned char*)pcSurfaces) + pcSurfaces->OFS_END);

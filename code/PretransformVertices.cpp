@@ -201,7 +201,7 @@ void CollectData( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
 				// aiFace destructor ...
 				pcMesh->mFaces[planck].mIndices = NULL;
 
-				// FIX: update the mPrimitiveTypes member of the mesh
+				// Update the mPrimitiveTypes member of the mesh
 				switch (pcMesh->mFaces[planck].mNumIndices)
 				{
 				case 0x1:
@@ -249,13 +249,11 @@ void GetVFormatList( aiScene* pcScene, unsigned int iMat,
 // Compute the absolute transformation matrices of each node
 void ComputeAbsoluteTransform( aiNode* pcNode )
 {
-	if (pcNode->mParent)
-	{
+	if (pcNode->mParent)	{
 		pcNode->mTransformation = pcNode->mParent->mTransformation*pcNode->mTransformation;
 	}
 
-	for (unsigned int i = 0;i < pcNode->mNumChildren;++i)
-	{
+	for (unsigned int i = 0;i < pcNode->mNumChildren;++i)	{
 		ComputeAbsoluteTransform(pcNode->mChildren[i]);
 	}
 }
@@ -291,17 +289,13 @@ void PretransformVertices::Execute( aiScene* pScene)
 	std::vector<aiMesh*> apcOutMeshes;
 	apcOutMeshes.reserve(pScene->mNumMaterials<<1u);
 	std::list<unsigned int> aiVFormats;
-	for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
-	{
+	for (unsigned int i = 0; i < pScene->mNumMaterials;++i)	{
 		// get the list of all vertex formats for this material
 		aiVFormats.clear();
 		GetVFormatList(pScene,i,aiVFormats);
 		aiVFormats.sort();
 		aiVFormats.unique();
-		for (std::list<unsigned int>::const_iterator
-			j =  aiVFormats.begin();
-			j != aiVFormats.end();++j)
-		{
+		for (std::list<unsigned int>::const_iterator j =  aiVFormats.begin();j != aiVFormats.end();++j)	{
 			unsigned int iVertices = 0;
 			unsigned int iFaces = 0; 
 			CountVerticesAndFaces(pScene,pScene->mRootNode,i,*j,&iFaces,&iVertices);

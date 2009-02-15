@@ -131,6 +131,12 @@ struct ShaderMapBlock
 	//! Blend and alpha test settings for texture
 	BlendFunc blend_src,blend_dest;
 	AlphaTestFunc alpha_test;
+
+
+	//! For std::find()
+	bool operator== (const std::string& o) const {
+		return !ASSIMP_stricmp(o,name);
+	}
 };
 
 // ---------------------------------------------------------------------------
@@ -150,6 +156,12 @@ struct ShaderDataBlock
 
 	//! Maps defined in the shader
 	std::list<ShaderMapBlock> maps;
+
+
+	//! For std::find()
+	bool operator== (const std::string& o) const {
+		return !ASSIMP_stricmp(o,name);
+	}
 };
 
 // ---------------------------------------------------------------------------
@@ -168,8 +180,18 @@ struct ShaderData
  *  @param fill Receives output data
  *  @param file File to be read.
  *  @param io IOSystem to be used for reading
+ *  @return false if file is not accessible
  */
-void LoadShader(ShaderData& fill, const std::string& file,IOSystem* io);
+bool LoadShader(ShaderData& fill, const std::string& file,IOSystem* io);
+
+
+// ---------------------------------------------------------------------------
+/** @brief Convert a Q3Shader to an aiMaterial
+ *
+ *  @param[out] out Material structure to be filled.
+ *  @param[in] shader Input shader
+ */
+void ConvertShaderToMaterial(MaterialHelper* out, const ShaderDataBlock& shader);
 
 // ---------------------------------------------------------------------------
 /** @brief Load a skin file
@@ -178,8 +200,9 @@ void LoadShader(ShaderData& fill, const std::string& file,IOSystem* io);
  *  @param fill Receives output data
  *  @param file File to be read.
  *  @param io IOSystem to be used for reading
+ *  @return false if file is not accessible
  */
-void LoadSkin(SkinData& fill, const std::string& file,IOSystem* io);
+bool LoadSkin(SkinData& fill, const std::string& file,IOSystem* io);
 
 } // ! namespace Q3SHader
 
@@ -243,7 +266,22 @@ protected:
 	/** Try to read the skin for a MD3 file
 	 *  @param fill Receives output information
 	 */
-	void ReadSkin(Q3Shader::SkinData& fill);
+	void ReadSkin(Q3Shader::SkinData& fill) const;
+
+	// -------------------------------------------------------------------
+	/** Try to read the shader for a MD3 file
+	 *  @param fill Receives output information
+	 */
+	void ReadShader(Q3Shader::ShaderData& fill) const;
+
+	// -------------------------------------------------------------------
+	/** Convert a texture path in a MD3 file to a proper value
+	 *  @param[in] texture_name Path to be converted
+	 *  @param[in] header_path Base path specified in MD3 header
+	 *  @param[out] out Receives the converted output string
+	 */
+	void ConvertPath(const char* texture_name, const char* header_path, 
+		std::string& out) const;
 
 protected:
 
@@ -255,6 +293,9 @@ protected:
 
 	/** Configuration option: name of skin file to be read */
 	std::string configSkinFile;
+
+	/** Configuration option: name or path of shader */
+	std::string configShaderFile;
 
 	/** Header of the MD3 file */
 	BE_NCONST MD3::Header* pcHeader;

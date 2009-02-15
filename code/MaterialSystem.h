@@ -131,8 +131,9 @@ public:
 	 *  proprty and call this method again, the resulting hash value will be 
 	 *  different.
 	 *
-	 *  @param  includeMatName Set to 'true' to take the #AI_MATKEY_NAME property
-	 *    into account. The default value is false.
+	 *  @param  includeMatName Set to 'true' to take all properties with
+	 *    '?' as initial character in their name into account. 
+	 *    Currently #AI_MATKEY_NAME is the only example.
 	 *  @return Unique hash
 	 */
 	uint32_t ComputeHash(bool includeMatName = false);

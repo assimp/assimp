@@ -635,17 +635,15 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 	for (unsigned int i = 0; i < pMaterial->mNumProperties;++i)
 	{
 		aiMaterialProperty* prop = pMaterial->mProperties[i];
-		if (!::strcmp(prop->mKey.data,"$tex.file") && prop->mSemantic == type)
-		{
+		if (!::strcmp(prop->mKey.data,"$tex.file") && prop->mSemantic == type)	{
 			iIndex = std::max(iIndex, (int) prop->mIndex);
 			++iNumIndices;
 
 			if (aiPTI_String != prop->mType)
-				this->ReportError("Material property %s is expected to be a string",prop->mKey.data);
+				ReportError("Material property %s is expected to be a string",prop->mKey.data);
 		}
 	}
-	if (iIndex +1 != iNumIndices)
-	{
+	if (iIndex +1 != iNumIndices)	{
 		ReportError("%s #%i is set, but there are only %i %s textures",
 			szType,iIndex,iNumIndices,szType);
 	}
@@ -666,8 +664,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 				prop->mIndex, iNumIndices, szType);
 		}
 			
-		if (!::strcmp(prop->mKey.data,"$tex.mapping"))
-		{
+		if (!::strcmp(prop->mKey.data,"$tex.mapping"))	{
 			if (aiPTI_Integer != prop->mType || prop->mDataLength < sizeof(aiTextureMapping))
 			{
 				ReportError("Material property %s%i is expected to be an integer (size is %i)",
@@ -675,8 +672,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 			}
 			mappings[prop->mIndex] = *((aiTextureMapping*)prop->mData);
 		}
-		else if (!::strcmp(prop->mKey.data,"$tex.uvtrafo"))
-		{
+		else if (!::strcmp(prop->mKey.data,"$tex.uvtrafo"))	{
 			if (aiPTI_Float != prop->mType || prop->mDataLength < sizeof(aiUVTransform))
 			{
 				ReportError("Material property %s%i is expected to be 5 floats large (size is %i)",
@@ -684,8 +680,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 			}
 			mappings[prop->mIndex] = *((aiTextureMapping*)prop->mData);
 		}
-		else if (!::strcmp(prop->mKey.data,"$tex.uvwsrc"))
-		{
+		else if (!::strcmp(prop->mKey.data,"$tex.uvwsrc")) {
 			if (aiPTI_Integer != prop->mType || sizeof(int) > prop->mDataLength)
 			{
 				ReportError("Material property %s%i is expected to be an integer (size is %i)",
@@ -709,7 +704,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 					while (mesh->HasTextureCoords(iChannels))++iChannels;
 					if (iIndex >= iChannels)
 					{
-						ReportError("Invalid UV index: %i (key %s). Mesh %i has only %i UV channels",
+						ReportWarning("Invalid UV index: %i (key %s). Mesh %i has only %i UV channels",
 							iIndex,prop->mKey.data,a,iChannels);
 					}
 				}
@@ -742,42 +737,37 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 	for (unsigned int i = 0; i < pMaterial->mNumProperties;++i)
 	{
 		const aiMaterialProperty* prop = pMaterial->mProperties[i];
-		if (!prop)
-		{
-			this->ReportError("aiMaterial::mProperties[%i] is NULL (aiMaterial::mNumProperties is %i)",
+		if (!prop)	{
+			ReportError("aiMaterial::mProperties[%i] is NULL (aiMaterial::mNumProperties is %i)",
 				i,pMaterial->mNumProperties);
 		}
-		if (!prop->mDataLength || !prop->mData)
-		{
-			this->ReportError("aiMaterial::mProperties[%i].mDataLength or "
+		if (!prop->mDataLength || !prop->mData)	{
+			ReportError("aiMaterial::mProperties[%i].mDataLength or "
 				"aiMaterial::mProperties[%i].mData is 0",i,i);
 		}
 		// check all predefined types
 		if (aiPTI_String == prop->mType)
 		{
 			// FIX: strings are now stored in a less expensive way ...
-			if (prop->mDataLength < sizeof(size_t) + ((const aiString*)prop->mData)->length + 1)
-			{
-				this->ReportError("aiMaterial::mProperties[%i].mDataLength is "
+			if (prop->mDataLength < sizeof(size_t) + ((const aiString*)prop->mData)->length + 1)	{
+				ReportError("aiMaterial::mProperties[%i].mDataLength is "
 					"too small to contain a string (%i, needed: %i)",
 					i,prop->mDataLength,sizeof(aiString));
 			}
-			this->Validate((const aiString*)prop->mData);
+			Validate((const aiString*)prop->mData);
 		}
 		else if (aiPTI_Float == prop->mType)
 		{
-			if (prop->mDataLength < sizeof(float))
-			{
-				this->ReportError("aiMaterial::mProperties[%i].mDataLength is "
+			if (prop->mDataLength < sizeof(float))	{
+				ReportError("aiMaterial::mProperties[%i].mDataLength is "
 					"too small to contain a float (%i, needed: %i)",
 					i,prop->mDataLength,sizeof(float));
 			}
 		}
 		else if (aiPTI_Integer == prop->mType)
 		{
-			if (prop->mDataLength < sizeof(int))
-			{
-				this->ReportError("aiMaterial::mProperties[%i].mDataLength is "
+			if (prop->mDataLength < sizeof(int))	{
+				ReportError("aiMaterial::mProperties[%i].mDataLength is "
 					"too small to contain an integer (%i, needed: %i)",
 					i,prop->mDataLength,sizeof(int));
 			}
@@ -788,22 +778,19 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 	// make some more specific tests 
 	float fTemp;
 	int iShading;
-	if (AI_SUCCESS == aiGetMaterialInteger( pMaterial,AI_MATKEY_SHADING_MODEL,&iShading))
-	{
+	if (AI_SUCCESS == aiGetMaterialInteger( pMaterial,AI_MATKEY_SHADING_MODEL,&iShading))	{
 		switch ((aiShadingMode)iShading)
 		{
 		case aiShadingMode_Blinn:
 		case aiShadingMode_CookTorrance:
 		case aiShadingMode_Phong:
 
-			if (AI_SUCCESS != aiGetMaterialFloat(pMaterial,AI_MATKEY_SHININESS,&fTemp))
-			{
-				this->ReportWarning("A specular shading model is specified but there is no "
+			if (AI_SUCCESS != aiGetMaterialFloat(pMaterial,AI_MATKEY_SHININESS,&fTemp))	{
+				ReportWarning("A specular shading model is specified but there is no "
 					"AI_MATKEY_SHININESS key");
 			}
-			if (AI_SUCCESS == aiGetMaterialFloat(pMaterial,AI_MATKEY_SHININESS_STRENGTH,&fTemp) && !fTemp)
-			{
-				this->ReportWarning("A specular shading model is specified but the value of the "
+			if (AI_SUCCESS == aiGetMaterialFloat(pMaterial,AI_MATKEY_SHININESS_STRENGTH,&fTemp) && !fTemp)	{
+				ReportWarning("A specular shading model is specified but the value of the "
 					"AI_MATKEY_SHININESS_STRENGTH key is 0.0");
 			}
 			break;
@@ -811,13 +798,13 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 		};
 	}
 
-	if (AI_SUCCESS == aiGetMaterialFloat( pMaterial,AI_MATKEY_OPACITY,&fTemp))
-	{
-		if (!fTemp)
-			ReportWarning("Material is fully transparent ... are you sure you REALLY want this?");
+	if (AI_SUCCESS == aiGetMaterialFloat( pMaterial,AI_MATKEY_OPACITY,&fTemp) && (!fTemp || fTemp > 1.01f))	{
+		ReportWarning("Invalid opacity value (must be 0 < opacity < 1.0)");
 	}
 
-	// check whether there are invalid texture keys
+	// Check whether there are invalid texture keys
+	// TODO: that's a relict of the past, where texture type and index were baked
+	// into the material string ... we could do that in one single pass.
 	SearchForInvalidTextures(pMaterial,aiTextureType_DIFFUSE);
 	SearchForInvalidTextures(pMaterial,aiTextureType_SPECULAR);
 	SearchForInvalidTextures(pMaterial,aiTextureType_AMBIENT);
@@ -826,6 +813,9 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 	SearchForInvalidTextures(pMaterial,aiTextureType_SHININESS);
 	SearchForInvalidTextures(pMaterial,aiTextureType_HEIGHT);
 	SearchForInvalidTextures(pMaterial,aiTextureType_NORMALS);
+	SearchForInvalidTextures(pMaterial,aiTextureType_DISPLACEMENT);
+	SearchForInvalidTextures(pMaterial,aiTextureType_LIGHTMAP);
+	SearchForInvalidTextures(pMaterial,aiTextureType_REFLECTION);
 }
 
 // ------------------------------------------------------------------------------------------------

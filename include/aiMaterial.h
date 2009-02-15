@@ -97,7 +97,8 @@ enum aiPropertyTypeInfo
 };
 
 // ---------------------------------------------------------------------------
-/** @brief Defines how the Nth texture is combined with the N-1th texture.
+/** @brief Defines how the Nth texture of a specific type is combined with
+ *  the result of all previous layers.
  *
  *  Example (left: key, right: value): <br>
  *  @code
@@ -418,8 +419,10 @@ enum aiShadingMode
 // ---------------------------------------------------------------------------
 /** @brief Defines some mixed flags for a particular texture.
  *
- *  Usually you'll tell your artists how textures have to look like ...
- *  however, if you use Assimp for completely generic loadeing purposes you
+ *  Usually you'll tell your cg artists how textures have to look like ...
+ *  and hopefully the follow these rules. If they don't, restrict access
+ *  to the coffee machine for them. That should help. 
+ *  However, if you use Assimp for completely generic loading purposes you
  *  might also need to process these flags in order to display as many 
  *  'unknown' 3D models as possible correctly.
  *
@@ -430,6 +433,25 @@ enum aiTextureFlags
 	/** The texture's color values have to be inverted (componentwise 1-n)
 	 */
 	aiTextureFlags_Invert = 0x1,
+
+
+	/** Explicit request to the application to process the alpha channel
+	 *  of the texture.
+	 *
+	 *  Mutually exclusive with #aiTextureFlags_IgnoreAlpha. These
+	 *  flags are set if the library can say for sure that the alpha
+	 *  channel is used/is not used. If the model format does not
+	 *  define this, it is left to the application to decide whether
+	 *  the texture alpha channel - if any - is evaluated or not.
+	 */
+	aiTextureFlags_UseAlpha = 0x2,
+
+	/** Explicit request to the application to ignore the alpha channel
+	 *  of the texture.
+	 *
+	 *  Mutually exclusive with #aiTextureFlags_IgnoreAlpha. 
+	 */
+	aiTextureFlags_IgnoreAlpha = 0x4,
 
 
 	
@@ -539,6 +561,25 @@ struct aiUVTransform
 
 // ---------------------------------------------------------------------------
 /** @brief Data structure for a single material property
+ *
+ *  As an user, you'll probably never need to deal with this data structure.
+ *  Just use the provided aiGetMaterialXXX() or aiMaterial::Get() family
+ *  of functions to query material properties easily. Processing them 
+ *  manually is faster, but it is not the recommended way. It isn't worth
+ *  the effort. <br>
+ *  Material property names follow a simple scheme:
+ *  @code
+ *    $<name>
+ *    ?<name>
+ *       A public property, there must be corresponding AI_MATKEY_XXX define
+ *       2nd: Public, but ignored by the #aiProcess_RemoveRedundantMaterials 
+ *       post-processing step.
+ *    ~<name>
+ *       A temporary property for internal use. If someone forgets to
+ *       cleanup, some of these might still be contained in the output.
+ *       Don't complain, if you understood what the first paragraph tried
+ *       to tell you, you wouldn't even know. 
+ *  @endcode
  *  @see aiMaterial
  */
 struct aiMaterialProperty
@@ -710,7 +751,7 @@ extern "C" {
  * <b>Type:</b> string (aiString)<br>
  * <b>Default value:</b> <tt>none</tt> <br>
 */
-#define AI_MATKEY_NAME "$mat.name",0,0
+#define AI_MATKEY_NAME "?mat.name",0,0
 
 // ---------------------------------------------------------------------------
 /** @def AI_MATKEY_TWOSIDED

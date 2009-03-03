@@ -60,6 +60,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 using namespace Assimp;
+using namespace irr;
+using namespace irr::io;
 using namespace boost::math;
 
 

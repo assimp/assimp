@@ -77,7 +77,7 @@ protected:
 
 	/** XML reader instance
 	 */
-	IrrXMLReader* reader;
+  irr::io::IrrXMLReader* reader;
 
 	// -------------------------------------------------------------------
 	/** Parse a material description from the XML

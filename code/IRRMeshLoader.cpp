@@ -48,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 
 using namespace Assimp;
+using namespace irr;
+using namespace irr::io;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer

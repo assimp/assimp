@@ -50,6 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 
 using namespace Assimp;
+using namespace irr;
+using namespace irr::io;
 
 // Transformation matrix to convert from Assimp to IRR space
 const aiMatrix4x4 Assimp::AI_TO_IRR_MATRIX = aiMatrix4x4 ( 

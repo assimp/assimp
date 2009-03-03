@@ -6,16 +6,15 @@
 #include "./../contrib/irrXML/irrXML.h"
 #include "./../include/IOStream.h"
 
-namespace Assimp {
-using namespace irr;
-using namespace irr::io;
+namespace Assimp 
+{
 
 // ---------------------------------------------------------------------------------
 /** @brief Utility class to make IrrXML work together with our custom IO system
  *
  *  See the IrrXML docs for more details.
  */
-class CIrrXML_IOStreamReader
+class CIrrXML_IOStreamReader : public irr::io::IFileReadCallBack
 {
 public:
 

@@ -55,7 +55,7 @@ using namespace Assimp::Collada;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-ColladaParser::ColladaParser( const std::string& pFile)
+ColladaParser::ColladaParser( IOSystem* pIOHandler, const std::string& pFile)
 	: mFileName( pFile)
 {
 	mRootNode = NULL;
@@ -65,8 +65,14 @@ ColladaParser::ColladaParser( const std::string& pFile)
 	// We assume the newest file format by default
 	mFormat = FV_1_5_n;
 
+  // open the file
+  boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+  if( file.get() == NULL)
+    throw new ImportErrorException( "Failed to open file " + pFile + ".");
+
 	// generate a XML reader for it
-	mReader = irr::io::createIrrXMLReader( pFile.c_str());
+  boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper( new CIrrXML_IOStreamReader( file.get()));
+	mReader = irr::io::createIrrXMLReader( mIOWrapper.get());
 	if( !mReader)
 		ThrowException( "Collada: Unable to open file.");
 

@@ -62,7 +62,7 @@ class ColladaParser
 
 protected:
 	/** Constructor from XML file */
-	ColladaParser( const std::string& pFile);
+	ColladaParser( IOSystem* pIOHandler, const std::string& pFile);
 
 	/** Destructor */
 	~ColladaParser();
@@ -224,7 +224,7 @@ protected:
 	/** Filename, for a verbose error message */
 	std::string mFileName;
 
-	/** XML reader */
+	/** XML reader, member for everyday use */
 	irr::io::IrrXMLReader* mReader;
 
 	/** All data arrays found in the file by ID. Might be referred to by actually 

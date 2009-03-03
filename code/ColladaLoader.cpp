@@ -110,7 +110,7 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 	mTextures.clear();
 
 	// parse the input file
-	ColladaParser parser( pFile);
+	ColladaParser parser( pIOHandler, pFile);
 
 	if( !parser.mRootNode)
 		throw new ImportErrorException( "Collada: File came out empty. Something is wrong here.");
@@ -153,16 +153,6 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 
 	// store all lights
 	StoreSceneLights( pScene);
-
-	// if we know which camera is the primary camera, copy it to index 0
-	if (0 == parser.mRootNode->mPrimaryCamera.length()) {
-		for (unsigned int i = 1; i < mCameras.size(); ++i) {
-			if (mCameras[i]->mName == parser.mRootNode->mPrimaryCamera) {
-				std::swap(mCameras[i],mCameras[0]);
-				break;
-			}
-		}
-	}
 
 	// store all cameras
 	StoreSceneCameras( pScene);

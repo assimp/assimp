@@ -177,6 +177,7 @@ struct Material
 		:	diffuse (0.6f,0.6f,0.6f)
 		,	ior		(1.f)
 		,	alpha	(1.f)
+		,	shineness (0.0f)
 		,	illumination_model (1)
 	{
 		// empty

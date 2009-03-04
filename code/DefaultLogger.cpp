@@ -313,7 +313,10 @@ DefaultLogger::DefaultLogger(LogSeverity severity)
 
 	:	m_Severity	( severity )
 	,	noRepeatMsg	(false)
-{}
+	,	lastLen( 0 )
+{
+	lastMsg[0] = '\0';
+}
 
 // ----------------------------------------------------------------------------------
 //	Destructor

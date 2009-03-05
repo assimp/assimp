@@ -9,6 +9,7 @@
 #ifdef __cplusplus
 #include "aiMatrix4x4.h"
 #include <algorithm>
+#include <limits>
 
 // ------------------------------------------------------------------------------------------------
 // Construction from a 4x4 matrix. The remaining parts of the matrix are ignored.
@@ -75,6 +76,45 @@ inline aiMatrix3x3& aiMatrix3x3::Transpose()
 	std::swap( (float&)a2, (float&)b1);
 	std::swap( (float&)a3, (float&)c1);
 	std::swap( (float&)b3, (float&)c2);
+	return *this;
+}
+
+// ----------------------------------------------------------------------------------------
+inline float aiMatrix3x3::Determinant() const
+{
+	return a1*b2*c3 - a1*b3*c2 + a2*b3*c1 - a2*b1*c3 + a3*b1*c2 - a3*b2*c1;
+}
+
+// ----------------------------------------------------------------------------------------
+inline aiMatrix3x3& aiMatrix3x3::Inverse()
+{
+	// Compute the reciprocal determinant
+	float det = Determinant();
+	if(det == 0.0f) 
+	{
+		// Matrix not invertible. Setting all elements to nan is not really
+		// correct in a mathematical sense but it is easy to debug for the
+		// programmer.
+		const float nan = std::numeric_limits<float>::quiet_NaN();
+		*this = aiMatrix3x3( nan,nan,nan,nan,nan,nan,nan,nan,nan);
+
+		return *this;
+	}
+
+	float invdet = 1.0f / det;
+
+	aiMatrix3x3 res;
+	res.a1 = invdet  * (b2 * c3 - b3 * c2);
+	res.a2 = -invdet * (a2 * c3 - a3 * c2);
+	res.a3 = invdet  * (a2 * b3 - a3 * b2);
+	res.b1 = -invdet * (b1 * c3 - b3 * c1);
+	res.b2 = invdet  * (a1 * c3 - a3 * c1);
+	res.b3 = -invdet * (a1 * b3 - a3 * b1);
+	res.c1 = invdet  * (b1 * c2 - b2 * c1);
+	res.c2 = -invdet * (a1 * c2 - a2 * c1);
+	res.c3 = invdet  * (a1 * b2 - a2 * b1);
+	*this = res;
+
 	return *this;
 }
 

@@ -304,7 +304,7 @@ inline bool aiMatrix4x4::IsIdentity() const
 			b4 <= epsilon && b4 >= -epsilon &&
 			c1 <= epsilon && c1 >= -epsilon &&
 			c2 <= epsilon && c2 >= -epsilon &&
-			c3 <= epsilon && c3 >= -epsilon &&
+			c4 <= epsilon && c4 >= -epsilon &&
 			d1 <= epsilon && d1 >= -epsilon &&
 			d2 <= epsilon && d2 >= -epsilon &&
 			d3 <= epsilon && d3 >= -epsilon &&

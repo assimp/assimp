@@ -103,6 +103,14 @@ public:
 	 */
 	aiMatrix3x3& Transpose();
 
+	// -------------------------------------------------------------------
+	/** @brief Invert the matrix.
+	 *  If the matrix is not invertible all elements are set to qnan.
+	 *  Beware, use (f != f) to check whether a float f is qnan.
+	 */
+	aiMatrix3x3& Inverse();
+	float Determinant() const;
+
 public:
 	// -------------------------------------------------------------------
 	/** @brief Returns a rotation matrix for a rotation around z

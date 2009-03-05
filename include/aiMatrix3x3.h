@@ -128,7 +128,7 @@ public:
 	 *  @param axis Axis to rotate around
 	 *  @param out To be filled
 	 */
-	static aiMatrix3x3& aiMatrix3x3::Rotation( float a, 
+	static aiMatrix3x3& Rotation( float a, 
 		const aiVector3D& axis, aiMatrix3x3& out);
 
 	// -------------------------------------------------------------------

@@ -59,11 +59,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp	{
 namespace MD3	{
 
-// to make it easier for ourselfes, we test the magic word against both "endianesses"
-#define MD3_MAKE(string) ((uint32_t)((string[0] << 24) + (string[1] << 16) + (string[2] << 8) + string[3]))
-
-#define AI_MD3_MAGIC_NUMBER_BE	MD3_MAKE("IDP3")
-#define AI_MD3_MAGIC_NUMBER_LE	MD3_MAKE("3PDI")
+// to make it easier for us, we test the magic word against both "endianesses"
+#define AI_MD3_MAGIC_NUMBER_BE	AI_MAKE_MAGIC("IDP3")
+#define AI_MD3_MAGIC_NUMBER_LE	AI_MAKE_MAGIC("3PDI")
 
 // common limitations
 #define AI_MD3_VERSION			15

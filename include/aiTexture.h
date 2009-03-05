@@ -143,7 +143,8 @@ struct aiTexture
 	 * file extension of the format without a trailing dot. If there 
 	 * are multiple file extensions for a format, the shortest 
 	 * extension is chosen (JPEG maps to 'jpg', not to 'jpeg').
-	 * E.g. 'dds\\0', 'pcx\\0', 'jpg'.  All characters are lower-case.
+	 * E.g. 'dds\\0', 'pcx\\0', 'jpg\\0'.  All characters are lower-case.
+	 * The fourth character will always be '\\0'.
 	 */
 	char achFormatHint[4];
 
@@ -162,13 +163,13 @@ struct aiTexture
 
 	//! For compressed textures (mHeight == 0): compare the
 	//! format hint against a given string.
-	//! @param s Input string. 4 characters are maximally processed.
+	//! @param s Input string. 3 characters are maximally processed.
 	//!        Example values: "jpg", "png"
 	//! @return true if the given string matches the format hint
 	bool CheckFormat(const char* s) const
 	{
 		ai_assert(s && !mHeight);
-		return (0 == ::strncmp(achFormatHint,s,4));
+		return (0 == ::strncmp(achFormatHint,s,3));
 	}
 
 	// Construction

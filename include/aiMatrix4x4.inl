@@ -386,6 +386,16 @@ inline aiMatrix4x4& aiMatrix4x4::Translation( const aiVector3D& v, aiMatrix4x4& 
 }
 
 // ----------------------------------------------------------------------------------------
+inline aiMatrix4x4& aiMatrix4x4::Scaling( const aiVector3D& v, aiMatrix4x4& out)
+{
+	out = aiMatrix4x4();
+	out.a1 = v.x;
+	out.b2 = v.y;
+	out.c3 = v.z;
+	return out;
+}
+
+// ----------------------------------------------------------------------------------------
 /** A function for creating a rotation matrix that rotates a vector called
  * "from" into another vector called "to".
  * Input : from[3], to[3] which both must be *normalized* non-zero vectors

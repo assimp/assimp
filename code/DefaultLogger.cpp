@@ -51,6 +51,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StdOStreamLogStream.h"
 #include "FileLogStream.h"
 
+#ifndef ASSIMP_BUILD_SINGLETHREADED
+#	include <boost/thread/thread.hpp>
+#	include <boost/thread/mutex.hpp>
+
+boost::mutex loggerMutex;
+#endif
+
 namespace Assimp	{
 
 // ----------------------------------------------------------------------------------
@@ -119,6 +126,11 @@ Logger *DefaultLogger::create(const char* name /*= "AssimpLog.txt"*/,
 	unsigned int defStreams                    /*= DLS_DEBUGGER | DLS_FILE*/,
 	IOSystem* io		                       /*= NULL*/)
 {
+	// enter the mutex here to avoid concurrency problems
+#ifndef ASSIMP_BUILD_SINGLETHREADED
+	boost::mutex::scoped_lock lock(loggerMutex);
+#endif
+
 	if (m_pLogger && !isNullLogger() )
 		delete m_pLogger;
 
@@ -146,31 +158,56 @@ Logger *DefaultLogger::create(const char* name /*= "AssimpLog.txt"*/,
 
 // ----------------------------------------------------------------------------------
 void Logger::debug(const std::string &message)	{
-	ai_assert(message.length()<=Logger::MAX_LOG_MESSAGE_LENGTH);
+
+	// SECURITY FIX: otherwise it's easy to produce overruns ...
+	if (message.length()>MAX_LOG_MESSAGE_LENGTH) {
+		ai_assert(false);
+		return;
+	}
 	return OnDebug(message.c_str());
 }
 
 // ----------------------------------------------------------------------------------
 void Logger::info(const std::string &message)	{
-	ai_assert(message.length()<=Logger::MAX_LOG_MESSAGE_LENGTH);
+	
+	// SECURITY FIX: otherwise it's easy to produce overruns ...
+	if (message.length()>MAX_LOG_MESSAGE_LENGTH) {
+		ai_assert(false);
+		return;
+	}
 	return OnInfo(message.c_str());
 }
 	
 // ----------------------------------------------------------------------------------
 void Logger::warn(const std::string &message)	{
-	ai_assert(message.length()<=Logger::MAX_LOG_MESSAGE_LENGTH);
+	
+	// SECURITY FIX: otherwise it's easy to produce overruns ...
+	if (message.length()>MAX_LOG_MESSAGE_LENGTH) {
+		ai_assert(false);
+		return;
+	}
 	return OnWarn(message.c_str());
 }
 
 // ----------------------------------------------------------------------------------
 void Logger::error(const std::string &message)	{
-	ai_assert(message.length()<=Logger::MAX_LOG_MESSAGE_LENGTH);
+	
+	// SECURITY FIX: otherwise it's easy to produce overruns ...
+	if (message.length()>MAX_LOG_MESSAGE_LENGTH) {
+		ai_assert(false);
+		return;
+	}
 	return OnError(message.c_str());
 }
 
 // ----------------------------------------------------------------------------------
 void DefaultLogger::set( Logger *logger )
 {
+	// enter the mutex here to avoid concurrency problems
+#ifndef ASSIMP_BUILD_SINGLETHREADED
+	boost::mutex::scoped_lock lock(loggerMutex);
+#endif
+
 	if (!logger)logger = &s_pNullLogger;
 	if (m_pLogger && !isNullLogger() )
 		delete m_pLogger;
@@ -195,6 +232,11 @@ Logger *DefaultLogger::get()
 //	Kills the only instance
 void DefaultLogger::kill()
 {
+	// enter the mutex here to avoid concurrency problems
+#ifndef ASSIMP_BUILD_SINGLETHREADED
+	boost::mutex::scoped_lock lock(loggerMutex);
+#endif
+
 	if (m_pLogger != &s_pNullLogger)return;
 	delete m_pLogger;
 	m_pLogger = &s_pNullLogger;
@@ -244,22 +286,13 @@ void DefaultLogger::OnError( const char* message )
 }
 
 // ----------------------------------------------------------------------------------
-//	Severity setter
-void DefaultLogger::setLogSeverity( LogSeverity log_severity )
-{
-	m_Severity = log_severity;
-}
-
-// ----------------------------------------------------------------------------------
 //	Attachs a new stream
-void DefaultLogger::attachStream( LogStream *pStream, unsigned int severity )
+bool DefaultLogger::attachStream( LogStream *pStream, unsigned int severity )
 {
 	if (!pStream)
-		return;
+		return false;
 
-	// fix (Aramis)
-	if (0 == severity)
-	{
+	if (0 == severity)	{
 		severity = Logger::INFO | Logger::ERR | Logger::WARN | Logger::DEBUGGING;
 	}
 
@@ -270,24 +303,23 @@ void DefaultLogger::attachStream( LogStream *pStream, unsigned int severity )
 		if ( (*it)->m_pStream == pStream )
 		{
 			(*it)->m_uiErrorSeverity |= severity;
-			return;
+			return true;
 		}
 	}
 	
 	LogStreamInfo *pInfo = new LogStreamInfo( severity, pStream );
 	m_StreamArray.push_back( pInfo );
+	return true;
 }
 
 // ----------------------------------------------------------------------------------
 //	Detatch a stream
-void DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
+bool DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
 {
 	if (!pStream)
-		return;
+		return false;
 
-	// fix (Aramis)
-	if (0 == severity)
-	{
+	if (0 == severity)	{
 		severity = Logger::INFO | Logger::ERR | Logger::WARN | Logger::DEBUGGING;
 	}
 	
@@ -303,15 +335,17 @@ void DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
 				m_StreamArray.erase( it );
 				break;
 			}
+			return true;
 		}
 	}
+	return false;
 }
 
 // ----------------------------------------------------------------------------------
 //	Constructor
 DefaultLogger::DefaultLogger(LogSeverity severity) 
 
-	:	m_Severity	( severity )
+	:	Logger	( severity )
 	,	noRepeatMsg	(false)
 	,	lastLen( 0 )
 {

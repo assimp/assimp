@@ -57,10 +57,10 @@ namespace Assimp	{
 namespace MDL	{
 
 // magic bytes used in Half Life 2 MDL models
-#define AI_MDL_MAGIC_NUMBER_BE_HL2a	MDL_MAKE("IDST")
-#define AI_MDL_MAGIC_NUMBER_LE_HL2a	MDL_MAKE("TSDI")
-#define AI_MDL_MAGIC_NUMBER_BE_HL2b	MDL_MAKE("IDSQ")
-#define AI_MDL_MAGIC_NUMBER_LE_HL2b	MDL_MAKE("QSDI")
+#define AI_MDL_MAGIC_NUMBER_BE_HL2a	AI_MAKE_MAGIC("IDST")
+#define AI_MDL_MAGIC_NUMBER_LE_HL2a	AI_MAKE_MAGIC("TSDI")
+#define AI_MDL_MAGIC_NUMBER_BE_HL2b	AI_MAKE_MAGIC("IDSQ")
+#define AI_MDL_MAGIC_NUMBER_LE_HL2b	AI_MAKE_MAGIC("QSDI")
 
 // ---------------------------------------------------------------------------
 /** \struct Header_HL2

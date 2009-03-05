@@ -64,26 +64,56 @@ void ScenePreprocessor::ProcessScene ()
 	// Generate a default material if none was specified
 	if (!scene->mNumMaterials && scene->mNumMeshes)
 	{
-		scene->mMaterials      = new aiMaterial*[scene->mNumMaterials = 1];
-		MaterialHelper* helper = new MaterialHelper();
-		scene->mMaterials[0]   = helper;
+		scene->mMaterials      = new aiMaterial*[2];
+		MaterialHelper* helper;
 
-		// gray
-		aiColor3D clr(0.6f,0.6f,0.6f);
-		helper->AddProperty(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
+		aiString name;
 
-		// add a small ambient color value
-		clr = aiColor3D(0.05f,0.05f,0.05f);
-		helper->AddProperty(&clr,1,AI_MATKEY_COLOR_AMBIENT);
+		// Check whether there are meshes with at least one set of uv coordinates ... add a dummy texture for them
+		// meshes without texture coordinates receive a boring gray default material.
+		unsigned int mat0 = 0xffffffff, mat1 = 0xffffffff;
+		for (unsigned int i = 0; i < scene->mNumMeshes;++i) {
+			if (scene->mMeshes[i]->mTextureCoords[0]) {
 
-		// setup the default name
-		aiString name(AI_DEFAULT_MATERIAL_NAME);
-		helper->AddProperty(&name,AI_MATKEY_NAME);
+				if (mat0 == 0xffffffff) {
+					scene->mMaterials[scene->mNumMaterials] = helper = new MaterialHelper();
 
-		for (unsigned int i = 0; i < scene->mNumMeshes;++i)
-			scene->mMeshes[i]->mMaterialIndex = 0;
+					// dummy texture
+					name.Set("texture.png");
+					helper->AddProperty(&name,AI_MATKEY_TEXTURE_DIFFUSE(0));
 
-		DefaultLogger::get()->debug("ScenePreprocessor: Added default material \'" AI_DEFAULT_MATERIAL_NAME  "\'");
+					// setup default name
+					name.Set(AI_DEFAULT_TEXTURED_MATERIAL_NAME);
+					helper->AddProperty(&name,AI_MATKEY_NAME);
+
+					mat0 = scene->mNumMaterials++;
+					DefaultLogger::get()->debug("ScenePreprocessor: Adding textured material \'" AI_DEFAULT_TEXTURED_MATERIAL_NAME  "\'");
+				}
+				scene->mMeshes[i]->mMaterialIndex = mat0;
+			}
+			else
+			{
+				if (mat1 == 0xffffffff) {
+					scene->mMaterials[scene->mNumMaterials] = helper = new MaterialHelper();
+
+					// gray
+					aiColor3D clr(0.6f,0.6f,0.6f);
+					helper->AddProperty(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
+
+					// add a small ambient color value
+					clr = aiColor3D(0.05f,0.05f,0.05f);
+					helper->AddProperty(&clr,1,AI_MATKEY_COLOR_AMBIENT);
+
+					// setup the default name
+					name.Set(AI_DEFAULT_MATERIAL_NAME);
+					helper->AddProperty(&name,AI_MATKEY_NAME);
+
+					mat1 = scene->mNumMaterials++;
+					DefaultLogger::get()->debug("ScenePreprocessor: Adding grey material \'" AI_DEFAULT_MATERIAL_NAME  "\'");
+				}
+				scene->mMeshes[i]->mMaterialIndex = mat1;
+			}
+		}
 	}
 }
 
@@ -96,8 +126,22 @@ void ScenePreprocessor::ProcessMesh (aiMesh* mesh)
 		if (!mesh->mTextureCoords[i])
 			mesh->mNumUVComponents[i] = 0;
 
-		else if( !mesh->mNumUVComponents[i])
-			mesh->mNumUVComponents[i] = 2;
+		else {
+			if( !mesh->mNumUVComponents[i])
+				mesh->mNumUVComponents[i] = 2;
+
+			// Ensure unsued components are zeroed. This will make 1D texture channels work
+			// as if they were 2D channels .. just in case an application doesn't handle
+			// this case
+			if (2 == mesh->mNumUVComponents[i]) {
+				for (aiVector3D* p = mesh->mTextureCoords[i], *end = p+mesh->mNumVertices; p != end; ++p)
+					p->z = 0.f;
+			}
+			else if (1 == mesh->mNumUVComponents[i]) {
+				for (aiVector3D* p = mesh->mTextureCoords[i], *end = p+mesh->mNumVertices; p != end; ++p)
+					p->z = p->y = 0.f;
+			}
+		}
 	}
 
 	// If the information which primitive types are there in the
@@ -125,6 +169,15 @@ void ScenePreprocessor::ProcessMesh (aiMesh* mesh)
 				mesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
 				break;
 			}
+		}
+	}
+
+	// If tangents and normals are given but no bitangents compute them
+	if (mesh->mTangents && mesh->mNormals && !mesh->mBitangents)
+	{
+		mesh->mBitangents = new aiVector3D[mesh->mNumVertices];
+		for (unsigned int i = 0; i < mesh->mNumVertices;++i)	{
+			mesh->mBitangents[i] = mesh->mNormals[i] ^ mesh->mTangents[i];
 		}
 	}
 }

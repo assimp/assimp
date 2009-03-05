@@ -1,4 +1,5 @@
 
+# ---------------------------------------------------------------------------
 # Makefile for Open Asset Import Library (MinGW32-make)
 # aramis_acg@users.sourceforge.net
 #   - just a quick'n'dirty one, could be buggy ...
@@ -15,6 +16,7 @@
 #   SINGLETHREADED=1     Build single-threaded library
 #   DEBUG=1              Build debug build of library
 # 
+# ---------------------------------------------------------------------------
 
 # C++ object files
 OBJECTS   := $(patsubst %.cpp,%.o,  $(wildcard *.cpp)) 
@@ -60,7 +62,7 @@ ifeq ($(DEBUG),1)
 	DEFINEFLAGS   += -D_DEBUG -DDEBUG
 #	NAMESUFFIX    += -debug
 else
-	CPPFLAGS      += -o3
+	CPPFLAGS      += -o3 -s
 	DEFINEFLAGS   += -DNDEBUG -D_NDEBUG
 endif
 

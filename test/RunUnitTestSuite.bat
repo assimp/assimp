@@ -20,8 +20,8 @@ IF %PROCESSOR_ARCHITECTURE% == x86 (
 rem Setup standard paths from here
 SET OUTDIR=results\
 SET BINDIR=..\bin\
-SET FIRSTUTFAILURE=none
-SET FIRSTUTNA=none
+SET FIRSTUTFAILURE=nil
+SET FIRSTUTNA=nil
 
 echo #=====================================================================
 echo # Open Asset Import Library - Unittests                               
@@ -97,11 +97,11 @@ call RunSingleUnitTestSuite unit_debug-dll_%ARCHEXT% debug-dll.txt
 echo.
 echo ----------------------------------------------------------------------
 
-IF NOT FIRSTUTNA==none (
+IF NOT FIRSTUTNA== nil (
    echo One or more test configs are not available.
 )
 
-IF NOT FIRSTUTFAILURE==none (
+IF NOT FIRSTUTFAILURE== nil (
    echo One or more tests failed.
 )
 

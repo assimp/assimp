@@ -38,10 +38,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Declaration of the .LWS (LightWave Scene Format) importer class. */
+/** @file  LWSLoader.h
+ *  @brief Declaration of the LightWave scene importer class. 
+ */
 #ifndef AI_LWSLOADER_H_INCLUDED
 #define AI_LWSLOADER_H_INCLUDED
 
+#include "LWOFileData.h"
+#include "SceneCombiner.h"
 
 namespace Assimp	{
 	namespace LWS	{
@@ -49,17 +53,107 @@ namespace Assimp	{
 // ---------------------------------------------------------------------------
 /** Represents an element in a LWS file.
  *
- *  This can either be a single data line - <name> <value> or it can
- *  be a data group - { name <data_line0> ... n }
+ *  This can either be a single data line - <name> <value> or a data
+ *  group - { name <data_line0> ... n }
  */
 class Element
 {
-	std::string name, data;
+public:
+	Element()
+	{}
+
+	// first: name, second: rest
+	std::string tokens[2];
 	std::list<Element> children;
 
-	void Parse (const char* buffer);
+	//! Recursive parsing function
+	void Parse (const char*& buffer);
 };
 
+#define AI_LWS_MASK (0xffffffff >> 4u)
+
+// ---------------------------------------------------------------------------
+/** Represents a LWS scenegraph element
+ */
+struct NodeDesc
+{
+	NodeDesc()
+		:	number	(0)
+		,	parent	(0)
+		,	name	("")
+		,	parent_resolved (NULL)
+		,	lightIntensity (1.f)
+		,	lightColor (1.f,1.f,1.f)
+		,	lightType (0)
+		,	lightFalloffType (0)
+		,	lightConeAngle (45.f)
+	{}
+
+	enum {
+	
+		OBJECT = 1,
+		LIGHT  = 2,
+		CAMERA = 3,
+		BONE   = 4,
+	} type; // type of node
+
+	// if object: path
+	std::string path;
+	unsigned int id;
+
+	// number of object
+	unsigned int number;
+
+	// index of parent index
+	unsigned int parent;
+
+	// lights & cameras & dummies: name
+	const char* name;
+
+	// animation channels
+	std::list< LWO::Envelope > channels;
+
+	// position of pivot point
+	aiVector3D pivotPos;
+
+
+
+	// color of light source
+	aiColor3D lightColor;
+
+	// intensity of light source
+	float lightIntensity;
+
+	// type of light source
+	unsigned int lightType;
+
+	// falloff type of light source
+	unsigned int lightFalloffType;
+
+	// cone angle of (spot) light source
+	float lightConeAngle;
+
+	// soft cone angle of (spot) light source
+	float lightEdgeAngle;
+
+
+
+	// list of resolved children
+	std::list< NodeDesc* > children;
+
+	// resolved parent node
+	NodeDesc* parent_resolved;
+
+
+	// for std::find()
+	bool operator == (unsigned int num)  const {
+		if (!num)
+			return false;
+		unsigned int _type = num >> 28u;
+		
+		return _type == type && (num & AI_LWS_MASK) == number;
+	}
+};
 
 } // end namespace LWS
 
@@ -84,28 +178,63 @@ protected:
 public:
 
 	// -------------------------------------------------------------------
-	/** Returns whether the class can handle the format of the given file. 
-	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	// Check whether we can read a specific file
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+		bool checkSig) const;
 
 protected:
 
 	// -------------------------------------------------------------------
-	/** Called by Importer::GetExtensionList() for each loaded importer.
-	 * See BaseImporter::GetExtensionList() for details
-	 */
+	// Get list of supported extensions
 	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
-	/** Imports the given file into the given scene structure. 
-	 * See BaseImporter::InternReadFile() for details
-	 */
+	// Import file into given scene data structure
 	void InternReadFile( const std::string& pFile, aiScene* pScene, 
 		IOSystem* pIOHandler);
+
+	// -------------------------------------------------------------------
+	// Setup import properties
+	void SetupProperties(const Importer* pImp);
 
 private:
 
 
+	// -------------------------------------------------------------------
+	// Read an envelope description
+	void ReadEnvelope(const LWS::Element& dad, LWO::Envelope& out );
+
+	// -------------------------------------------------------------------
+	// Read an envelope description for the older LW file format
+	void ReadEnvelope_Old(std::list< LWS::Element >::const_iterator& it, 
+		const std::list< LWS::Element >::const_iterator& end,
+		LWS::NodeDesc& nodes,
+		unsigned int version);
+
+	// -------------------------------------------------------------------
+	// Setup a nice name for a node 
+	void SetupNodeName(aiNode* nd, LWS::NodeDesc& src);
+
+	// -------------------------------------------------------------------
+	// Recursively build the scenegraph
+	void BuildGraph(aiNode* nd, 
+		LWS::NodeDesc& src, 
+		std::vector<AttachmentInfo>& attach,
+		BatchLoader& batch,
+		aiCamera**& camOut,
+		aiLight**& lightOut, 
+		std::vector<aiNodeAnim*>& animOut);
+
+	// -------------------------------------------------------------------
+	// Try several dirs until we find the right location of a LWS file.
+	std::string FindLWOFile(const std::string& in);
+
+private:
+
+	bool configSpeedFlag;
+	IOSystem* io;
+
+	double first,last,fps;
 };
 
 } // end of namespace Assimp

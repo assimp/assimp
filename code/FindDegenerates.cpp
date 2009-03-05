@@ -39,8 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the DeterminePTypeHelperProcess and
- *  SortByPTypeProcess post-process steps.
+/** @file  FindDegenerates.cpp
+ *  @brief Implementation of the FindDegenerates post-process step.
 */
 
 #include "AssimpPCH.h"
@@ -54,8 +54,8 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 FindDegeneratesProcess::FindDegeneratesProcess()
-{
-}
+: configRemoveDegenerates (false)
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
@@ -72,82 +72,143 @@ bool FindDegeneratesProcess::IsActive( unsigned int pFlags) const
 }
 
 // ------------------------------------------------------------------------------------------------
+// Setup import configuration
+void FindDegeneratesProcess::SetupProperties(const Importer* pImp)
+{
+	// Get the current value of AI_CONFIG_PP_FD_REMOVE
+	configRemoveDegenerates = (0 != pImp->GetPropertyInteger(AI_CONFIG_PP_FD_REMOVE,0));
+}
+
+// ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void FindDegeneratesProcess::Execute( aiScene* pScene)
 {
 	DefaultLogger::get()->debug("FindDegeneratesProcess begin");
-	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+	for (unsigned int i = 0; i < pScene->mNumMeshes;++i){
+		ExecuteOnMesh( pScene->mMeshes[i]);
+	}
+	DefaultLogger::get()->debug("FindDegeneratesProcess finished");
+}
+
+// ------------------------------------------------------------------------------------------------
+// Executes the post processing step on the given imported mesh
+void FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh)
+{
+	mesh->mPrimitiveTypes = 0;
+
+	std::vector<bool> remove_me; 
+	if (configRemoveDegenerates)
+		remove_me.resize(mesh->mNumFaces,false);
+
+	unsigned int deg = 0;
+	for (unsigned int a = 0; a < mesh->mNumFaces; ++a)
 	{
-		aiMesh* mesh = pScene->mMeshes[i];
-		mesh->mPrimitiveTypes = 0;
+		aiFace& face = mesh->mFaces[a];
+		bool first = true;
 
-		unsigned int deg = 0;
-		for (unsigned int a = 0; a < mesh->mNumFaces; ++a)
+		// check whether the face contains degenerated entries
+		for (register unsigned int i = 0; i < face.mNumIndices; ++i)
 		{
-			aiFace& face = mesh->mFaces[a];
-			bool first = true;
-
-			// check whether the face contains degenerated entries
-			for (register unsigned int i = 0; i < face.mNumIndices; ++i)
+			for (register unsigned int t = i+1; t < face.mNumIndices; ++t)
 			{
-				for (register unsigned int a = i+1; a < face.mNumIndices; ++a)
+				if (mesh->mVertices[face.mIndices[i]] == mesh->mVertices[face.mIndices[t]])
 				{
-					if (mesh->mVertices[face.mIndices[i]] == mesh->mVertices[face.mIndices[a]])
+					// we have found a matching vertex position
+					// remove the corresponding index from the array
+					--face.mNumIndices;
+					for (unsigned int m = t; m < face.mNumIndices; ++m)
 					{
-						// we have found a matching vertex position
-						// remove the corresponding index from the array
-						for (unsigned int m = a; m < face.mNumIndices-1; ++m)
-						{
-							face.mIndices[m] = face.mIndices[m+1];
-						}
-						--a;
-						--face.mNumIndices;
+						face.mIndices[m] = face.mIndices[m+1];
+					}
+					--t; 
 
-						// NOTE: we set the removed vertex index to an unique value
-						// to make sure the developer gets notified when his
-						// application attemps to access this data.
-						face.mIndices[face.mNumIndices] = 0xdeadbeef;
+					// NOTE: we set the removed vertex index to an unique value
+					// to make sure the developer gets notified when his
+					// application attemps to access this data.
+					face.mIndices[face.mNumIndices] = 0xdeadbeef;
 
+					if(first)
+					{
+						++deg;
+						first = false;
+					}
 
-						if(first)
-						{
-							++deg;
-							first = false;
-						}
+					if (configRemoveDegenerates) {
+						remove_me[a] = true;
+						goto evil_jump_outside; // hrhrhrh ... yeah, this rocks baby!
 					}
 				}
 			}
-
-			// We need to update the primitive flags array of the mesh.
-			// Unfortunately it is not possible to execute
-			// FindDegenerates before DeterminePType. The latter does
-			// nothing if the primitive flags have already been set by
-			// the loader - our changes would be ignored. Although
-			// we could use some tricks regarding - i.e setting 
-			// mPrimitiveTypes to 0 in every case - but this is the cleanest 
-			//  way and causes no additional dependencies in the pipeline.
-			switch (face.mNumIndices)
-			{
-			case 1u:
-				mesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
-				break;
-			case 2u:
-				mesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
-				break;
-			case 3u:
-				mesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
-				break;
-			default:
-				mesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
-				break;
-			};
 		}
-		if (deg && !DefaultLogger::isNullLogger())
+
+		// We need to update the primitive flags array of the mesh.
+		// Unfortunately it is not possible to execute
+		// FindDegenerates before DeterminePType. The latter does
+		// nothing if the primitive flags have already been set by
+		// the loader - our changes would be ignored. Although
+		// we could use some tricks regarding - i.e setting 
+		// mPrimitiveTypes to 0 in every case - but this is the cleanest 
+		//  way and causes no additional dependencies in the pipeline.
+		switch (face.mNumIndices)
 		{
-			char s[64];
-			ASSIMP_itoa10(s,deg); 
-			DefaultLogger::get()->warn(std::string("Found ") + s + " degenerated primitives");
+		case 1u:
+			mesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
+			break;
+		case 2u:
+			mesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
+			break;
+		case 3u:
+			mesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+			break;
+		default:
+			mesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
+			break;
+		};
+evil_jump_outside:
+		continue;
+	}
+
+	// If AI_CONFIG_PP_FD_REMOVE is true, remove degenerated faces from the import
+	if (configRemoveDegenerates && deg) {
+		unsigned int n = 0;
+		for (unsigned int a = 0; a < mesh->mNumFaces; ++a)
+		{
+			aiFace& face_src = mesh->mFaces[a];
+			if (!remove_me[a]) {
+				aiFace& face_dest = mesh->mFaces[n++];
+
+				// Do a manual copy, keep the index array
+				face_dest.mNumIndices = face_src.mNumIndices;
+				face_dest.mIndices    = face_src.mIndices;
+
+				// clear source
+				face_src.mNumIndices = 0;
+				face_src.mIndices = NULL;
+			}
+			else {
+				// Otherwise delete it if we don't need this face
+				delete[] face_src.mIndices;
+				face_src.mIndices = NULL;
+				face_src.mNumIndices = 0;
+			}
+		}
+		// Just leave the rest of the array unreferenced, we don't care for now
+		mesh->mNumFaces = n;
+		if (!mesh->mNumFaces) {
+			// WTF!? 
+			// OK ... for completeness and because I'm not yet tired,
+			// let's write code that willl hopefully never be called
+			// (famous last words)
+
+			// OK ... bad idea.
+			throw new ImportErrorException("Mesh is empty after removal of degenerated primitives ... WTF!?");
 		}
 	}
-	DefaultLogger::get()->debug("FindDegeneratesProcess finished");
+
+	if (deg && !DefaultLogger::isNullLogger())
+	{
+		char s[64];
+		ASSIMP_itoa10(s,deg); 
+		DefaultLogger::get()->warn(std::string("Found ") + s + " degenerated primitives");
+	}
 }

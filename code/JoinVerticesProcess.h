@@ -95,6 +95,8 @@ protected:
 	 * @param meshIndex Index of the mesh to process
 	 */
 	int ProcessMesh( aiMesh* pMesh, unsigned int meshIndex);
+
+private:
 };
 
 } // end of namespace Assimp

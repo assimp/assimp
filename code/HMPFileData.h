@@ -46,17 +46,15 @@ namespace HMP	{
 
 #include "./../include/Compiler/pushpack1.h"
 
-// to make it easier for ourselfes, we test the magic word against both "endianesses"
-#define HMP_MAKE(string) ((uint32_t)((string[0] << 24) + (string[1] << 16) + (string[2] << 8) + string[3]))
+// to make it easier for us, we test the magic word against both "endianesses"
+#define AI_HMP_MAGIC_NUMBER_BE_4	AI_MAKE_MAGIC("HMP4")
+#define AI_HMP_MAGIC_NUMBER_LE_4	AI_MAKE_MAGIC("4PMH")
 
-#define AI_HMP_MAGIC_NUMBER_BE_4	HMP_MAKE("HMP4")
-#define AI_HMP_MAGIC_NUMBER_LE_4	HMP_MAKE("4PMH")
+#define AI_HMP_MAGIC_NUMBER_BE_5	AI_MAKE_MAGIC("HMP5")
+#define AI_HMP_MAGIC_NUMBER_LE_5	AI_MAKE_MAGIC("5PMH")
 
-#define AI_HMP_MAGIC_NUMBER_BE_5	HMP_MAKE("HMP5")
-#define AI_HMP_MAGIC_NUMBER_LE_5	HMP_MAKE("5PMH")
-
-#define AI_HMP_MAGIC_NUMBER_BE_7	HMP_MAKE("HMP7")
-#define AI_HMP_MAGIC_NUMBER_LE_7	HMP_MAKE("7PMH")
+#define AI_HMP_MAGIC_NUMBER_BE_7	AI_MAKE_MAGIC("HMP7")
+#define AI_HMP_MAGIC_NUMBER_LE_7	AI_MAKE_MAGIC("7PMH")
 
 // ---------------------------------------------------------------------------
 /** Data structure for the header of a HMP5 file.

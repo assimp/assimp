@@ -60,11 +60,9 @@ namespace Assimp {
 namespace MDC {
 
 
-// to make it easier for ourselfes, we test the magic word against both "endianesses"
-#define MDC_MAKE(string) ((uint32_t)((string[0] << 24) + (string[1] << 16) + (string[2] << 8) + string[3]))
-
-#define AI_MDC_MAGIC_NUMBER_BE	MDC_MAKE("CPDI")
-#define AI_MDC_MAGIC_NUMBER_LE	MDC_MAKE("IDPC")
+// to make it easier for us, we test the magic word against both "endianesses"
+#define AI_MDC_MAGIC_NUMBER_BE	AI_MAKE_MAGIC("CPDI")
+#define AI_MDC_MAGIC_NUMBER_LE	AI_MAKE_MAGIC("IDPC")
 
 // common limitations
 #define AI_MDC_VERSION			2

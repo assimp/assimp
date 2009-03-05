@@ -46,11 +46,144 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SpatialSort.h"
 #include "BaseProcess.h"
 
+// -------------------------------------------------------------------------------
+// Some extensions to std namespace. Mainly std::min and std::max for all
+// flat data types in the aiScene. They're used to quickly determine the
+// min/max bounds of data arrays.
+#ifdef __cplusplus
+namespace std {
+
+	// std::min for aiVector3D
+	inline ::aiVector3D min (const ::aiVector3D& a, const ::aiVector3D& b)	{
+		return ::aiVector3D (min(a.x,b.x),min(a.y,b.y),min(a.z,b.z));
+	}
+
+	// std::max for aiVector3D
+	inline ::aiVector3D max (const ::aiVector3D& a, const ::aiVector3D& b)	{
+		return ::aiVector3D (max(a.x,b.x),max(a.y,b.y),max(a.z,b.z));
+	}
+
+	// std::min for aiColor4D
+	inline ::aiColor4D min (const ::aiColor4D& a, const ::aiColor4D& b)	{
+		return ::aiColor4D (min(a.r,b.r),min(a.g,b.g),min(a.b,b.b),min(a.a,b.a));
+	}
+
+	// std::max for aiColor4D
+	inline ::aiColor4D max (const ::aiColor4D& a, const ::aiColor4D& b)	{
+		return ::aiColor4D (max(a.r,b.r),max(a.g,b.g),max(a.b,b.b),max(a.a,b.a));
+	}
+
+	// std::min for aiQuaternion
+	inline ::aiQuaternion min (const ::aiQuaternion& a, const ::aiQuaternion& b)	{
+		return ::aiQuaternion (min(a.w,b.w),min(a.x,b.x),min(a.y,b.y),min(a.z,b.z));
+	}
+
+	// std::max for aiQuaternion
+	inline ::aiQuaternion max (const ::aiQuaternion& a, const ::aiQuaternion& b)	{
+		return ::aiQuaternion (max(a.w,b.w),max(a.x,b.x),max(a.y,b.y),max(a.z,b.z));
+	}
+
+	// std::min for aiVectorKey
+	inline ::aiVectorKey min (const ::aiVectorKey& a, const ::aiVectorKey& b)	{
+		return ::aiVectorKey (min(a.mTime,b.mTime),min(a.mValue,b.mValue));
+	}
+
+	// std::max for aiVectorKey
+	inline ::aiVectorKey max (const ::aiVectorKey& a, const ::aiVectorKey& b)	{
+		return ::aiVectorKey (max(a.mTime,b.mTime),max(a.mValue,b.mValue));
+	}
+
+	// std::min for aiQuatKey
+	inline ::aiQuatKey min (const ::aiQuatKey& a, const ::aiQuatKey& b)	{
+		return ::aiQuatKey (min(a.mTime,b.mTime),min(a.mValue,b.mValue));
+	}
+
+	// std::max for aiQuatKey
+	inline ::aiQuatKey max (const ::aiQuatKey& a, const ::aiQuatKey& b)	{
+		return ::aiQuatKey (max(a.mTime,b.mTime),max(a.mValue,b.mValue));
+	}
+
+	// std::min for aiVertexWeight
+	inline ::aiVertexWeight min (const ::aiVertexWeight& a, const ::aiVertexWeight& b)	{
+		return ::aiVertexWeight (min(a.mVertexId,b.mVertexId),min(a.mWeight,b.mWeight));
+	}
+
+	// std::max for aiVertexWeight
+	inline ::aiVertexWeight max (const ::aiVertexWeight& a, const ::aiVertexWeight& b)	{
+		return ::aiVertexWeight (max(a.mVertexId,b.mVertexId),max(a.mWeight,b.mWeight));
+	}
+
+} // end namespace std
+#endif // !! C++
+
 namespace Assimp {
 
-// some aliases to make the whole stuff easier to read
-typedef std::pair	< unsigned int,float > PerVertexWeight;
-typedef std::vector	< PerVertexWeight    > VertexWeightTable;
+// -------------------------------------------------------------------------------
+// Start points for ArrayBounds<T> for all supported Ts
+template <typename T>
+struct MinMaxChooser;
+
+template <> struct MinMaxChooser<float> {
+	void operator ()(float& min,float& max) {
+		max = -10e10f;
+		min =  10e10f;
+}};
+template <> struct MinMaxChooser<double> {
+	void operator ()(double& min,double& max) {
+		max = -10e10;
+		min =  10e10;
+}};
+template <> struct MinMaxChooser<unsigned int> {
+	void operator ()(unsigned int& min,unsigned int& max) {
+		max = 0;
+		min = (1u<<(sizeof(unsigned int)*8-1));
+}};
+
+template <> struct MinMaxChooser<aiVector3D> {
+	void operator ()(aiVector3D& min,aiVector3D& max) {
+		max = aiVector3D(-10e10f,-10e10f,-10e10f);
+		min = aiVector3D( 10e10f, 10e10f, 10e10f);
+}};
+template <> struct MinMaxChooser<aiColor4D> {
+	void operator ()(aiColor4D& min,aiColor4D& max) {
+		max = aiColor4D(-10e10f,-10e10f,-10e10f,-10e10f);
+		min = aiColor4D( 10e10f, 10e10f, 10e10f, 10e10f);
+}};
+
+template <> struct MinMaxChooser<aiQuaternion> {
+	void operator ()(aiQuaternion& min,aiQuaternion& max) {
+		max = aiQuaternion(-10e10f,-10e10f,-10e10f,-10e10f);
+		min = aiQuaternion( 10e10f, 10e10f, 10e10f, 10e10f);
+}};
+
+template <> struct MinMaxChooser<aiVectorKey> {
+	void operator ()(aiVectorKey& min,aiVectorKey& max) {
+		MinMaxChooser<double>()(min.mTime,max.mTime);
+		MinMaxChooser<aiVector3D>()(min.mValue,max.mValue);
+}};
+template <> struct MinMaxChooser<aiQuatKey> {
+	void operator ()(aiQuatKey& min,aiQuatKey& max) {
+		MinMaxChooser<double>()(min.mTime,max.mTime);
+		MinMaxChooser<aiQuaternion>()(min.mValue,max.mValue);
+}};
+
+template <> struct MinMaxChooser<aiVertexWeight> {
+	void operator ()(aiVertexWeight& min,aiVertexWeight& max) {
+		MinMaxChooser<unsigned int>()(min.mVertexId,max.mVertexId);
+		MinMaxChooser<float>()(min.mWeight,max.mWeight);
+}};
+
+// -------------------------------------------------------------------------------
+// Find the min/max values of an array of Ts
+template <typename T>
+inline void ArrayBounds(const T* in, unsigned int size, T& min, T& max) 
+{
+	MinMaxChooser<T> ()(min,max);
+	for (unsigned int i = 0; i < size;++i) {
+		min = std::min(in[i],min);
+		max = std::max(in[i],max);
+	}
+}
 
 // -------------------------------------------------------------------------------
 /** Little helper function to calculate the quadratic difference 
@@ -68,24 +201,6 @@ inline float GetColorDifference( const aiColor4D& pColor1, const aiColor4D& pCol
 }
 
 // -------------------------------------------------------------------------------
-// Compute the AABB of a mesh
-inline void FindAABB (const aiMesh* mesh, aiVector3D& min, aiVector3D& max)
-{
-	min = aiVector3D (10e10f,  10e10f, 10e10f);
-	max = aiVector3D (-10e10f,-10e10f,-10e10f);
-	for (unsigned int i = 0;i < mesh->mNumVertices;++i)
-	{
-		const aiVector3D& v = mesh->mVertices[i];
-		min.x = ::std::min(v.x,min.x);
-		min.y = ::std::min(v.y,min.y);
-		min.z = ::std::min(v.z,min.z);
-		max.x = ::std::max(v.x,max.x);
-		max.y = ::std::max(v.y,max.y);
-		max.z = ::std::max(v.z,max.z);
-	}
-}
-
-// -------------------------------------------------------------------------------
 // Compute the AABB of a mesh after applying a given transform
 inline void FindAABBTransformed (const aiMesh* mesh, aiVector3D& min, aiVector3D& max, 
 	const aiMatrix4x4& m)
@@ -95,12 +210,8 @@ inline void FindAABBTransformed (const aiMesh* mesh, aiVector3D& min, aiVector3D
 	for (unsigned int i = 0;i < mesh->mNumVertices;++i)
 	{
 		const aiVector3D v = m * mesh->mVertices[i];
-		min.x = ::std::min(v.x,min.x);
-		min.y = ::std::min(v.y,min.y);
-		min.z = ::std::min(v.z,min.z);
-		max.x = ::std::max(v.x,max.x);
-		max.y = ::std::max(v.y,max.y);
-		max.z = ::std::max(v.z,max.z);
+		min = std::min(v,min);
+		max = std::max(v,max);
 	}
 }
 
@@ -108,7 +219,7 @@ inline void FindAABBTransformed (const aiMesh* mesh, aiVector3D& min, aiVector3D
 // Helper function to determine the 'real' center of a mesh
 inline void FindMeshCenter (aiMesh* mesh, aiVector3D& out, aiVector3D& min, aiVector3D& max)
 {
-	FindAABB(mesh,min,max);
+	ArrayBounds(mesh->mVertices,mesh->mNumVertices, min,max);
 	out = min + (max-min)*0.5f;
 }
 
@@ -146,7 +257,7 @@ inline float ComputePositionEpsilon(const aiMesh* pMesh)
 
 	// calculate the position bounds so we have a reliable epsilon to check position differences against 
 	aiVector3D minVec, maxVec;
-	FindAABB(pMesh,minVec,maxVec);
+	ArrayBounds(pMesh->mVertices,pMesh->mNumVertices,minVec,maxVec);
 	return (maxVec - minVec).Length() * epsilon;
 }
 
@@ -165,8 +276,10 @@ inline unsigned int GetMeshVFormatUnique(aiMesh* pcMesh)
 	// tangents and bitangents
 	if (pcMesh->HasTangentsAndBitangents())iRet |= 0x4;
 
+#ifdef BOOST_STATIC_ASSERT
 	BOOST_STATIC_ASSERT(8 >= AI_MAX_NUMBER_OF_COLOR_SETS);
 	BOOST_STATIC_ASSERT(8 >= AI_MAX_NUMBER_OF_TEXTURECOORDS);
+#endif
 
 	// texture coordinates
 	unsigned int p = 0;
@@ -183,6 +296,9 @@ inline unsigned int GetMeshVFormatUnique(aiMesh* pcMesh)
 	while (pcMesh->HasVertexColors(p))iRet |= (0x1000000 << p++);
 	return iRet;
 }
+
+typedef std::pair <unsigned int,float> PerVertexWeight;
+typedef std::vector	<PerVertexWeight> VertexWeightTable;
 
 // -------------------------------------------------------------------------------
 // Compute a per-vertex bone weight table
@@ -205,13 +321,14 @@ inline VertexWeightTable* ComputeVertexBoneWeightTable(aiMesh* pMesh)
 	return avPerVertexWeights;
 }
 
-
 // -------------------------------------------------------------------------------
 // Get a string for a given aiTextureType
 inline const char* TextureTypeToString(aiTextureType in)
 {
 	switch (in)
 	{
+	case aiTextureType_NONE:
+		return "n/a";
 	case aiTextureType_DIFFUSE:
 		return "Diffuse";
 	case aiTextureType_SPECULAR:
@@ -237,7 +354,7 @@ inline const char* TextureTypeToString(aiTextureType in)
 	case aiTextureType_UNKNOWN:
 		return "Unknown";
     default:
-        return "HUGE ERROR, please leave the room immediately and call the police";        
+        return  "HUGE ERROR. Expect BSOD (linux guys: kernel panic ...).";          
 	}
 }
 
@@ -260,7 +377,7 @@ inline const char* MappingTypeToString(aiTextureMapping in)
 	case aiTextureMapping_OTHER:
 		return "Other";
     default:
-        return "HUGE ERROR, please leave the room immediately and call the police";        
+        return  "HUGE ERROR. Expect BSOD (linux guys: kernel panic ...).";    
 	}
 }
 

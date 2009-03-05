@@ -68,13 +68,15 @@ public:
 	 *  The stream will be deleted afterwards.
 	 *  @param stream Input stream
 	 */
-	StreamReader(IOStream* stream)
+	StreamReader(IOStream* _stream)
 	{
-		ai_assert(NULL != stream);
-		this->stream = stream;
+		if (!_stream)
+			throw new ImportErrorException("StreamReader: Unable to open file");
+		stream = _stream;
 
 		size_t s = stream->FileSize();
-		if (!s)throw new ImportErrorException("File is empty");
+		if (!s)
+			throw new ImportErrorException("StreamReader: File is empty");
 
 		current = buffer = new int8_t[s];
 		stream->Read(current,s,1);

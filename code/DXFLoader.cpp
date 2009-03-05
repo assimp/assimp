@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the DXF importer class */
+/** @file  DXFLoader.cpp
+ *  @brief Implementation of the DXF importer class
+ */
 
 #include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_DXF_IMPORTER
@@ -77,7 +79,7 @@ static aiColor4D g_aclrDxfIndexColors[] =
 #define AI_DXF_NUM_INDEX_COLORS (sizeof(g_aclrDxfIndexColors)/sizeof(g_aclrDxfIndexColors[0]))
 
 // invalid/unassigned color value
-aiColor4D g_clrInvalid = aiColor4D(std::numeric_limits<float>::quiet_NaN(),0.f,0.f,1.f);
+aiColor4D g_clrInvalid = aiColor4D(get_qnan(),0.f,0.f,1.f);
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -95,19 +97,15 @@ DXFImporter::~DXFImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool DXFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool DXFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)
-		return false;
-	std::string extension = pFile.substr( pos);
+	return SimpleExtensionCheck(pFile,"dxf");
+}
 
-	return !(extension.length() != 4 || extension[0] != '.' ||
-			 extension[1] != 'd' && extension[1] != 'D' ||
-			 extension[2] != 'x' && extension[2] != 'X' ||
-			 extension[3] != 'f' && extension[3] != 'F');
+// ------------------------------------------------------------------------------------------------
+void DXFImporter::GetExtensionList(std::string& append)
+{
+	append.append("*.dxf");
 }
 
 // ------------------------------------------------------------------------------------------------

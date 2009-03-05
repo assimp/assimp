@@ -39,21 +39,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-/** @file Definition of the .MD5 parser class.
-http://www.modwiki.net/wiki/MD5_(file_format)
-*/
+/** @file  MD5Parser.h
+ *  @brief Definition of the .MD5 parser class.
+ *  http://www.modwiki.net/wiki/MD5_(file_format)
+ */
 #ifndef AI_MD5PARSER_H_INCLUDED
 #define AI_MD5PARSER_H_INCLUDED
 
 #include "../include/aiTypes.h"
 #include "ParsingUtils.h"
-#include <vector>
 
 struct aiFace;
 
 namespace Assimp	{
-namespace MD5		{
-
+namespace MD5			{
 
 // ---------------------------------------------------------------------------
 /** Represents a single element in a MD5 file
@@ -335,12 +334,13 @@ public:
 	static void ReportWarning (const char* warn, unsigned int line);
 
 
-	inline void ReportError (const char* error)
-		{return ReportError(error, this->lineNumber);}
+	void ReportError (const char* error) {
+		return ReportError(error, lineNumber);
+	}
 
-	inline void ReportWarning (const char* warn)
-		{return ReportWarning(warn, this->lineNumber);}
-
+	void ReportWarning (const char* warn) {
+		return ReportWarning(warn, lineNumber);
+	}
 
 public:
 
@@ -367,24 +367,22 @@ private:
 
 	// override these functions to make sure the line counter gets incremented
 	// -------------------------------------------------------------------
-	inline bool SkipLine( const char* in, const char** out)
+	bool SkipLine( const char* in, const char** out)
 	{
 		++lineNumber;
 		return Assimp::SkipLine(in,out);
 	}
 	// -------------------------------------------------------------------
-	inline bool SkipLine( )
+	bool SkipLine( )
 	{
 		return SkipLine(buffer,(const char**)&buffer);
 	}
 	// -------------------------------------------------------------------
-	inline bool SkipSpacesAndLineEnd( const char* in, const char** out)
+	bool SkipSpacesAndLineEnd( const char* in, const char** out)
 	{
 		bool bHad = false;
-		while (true) 
-		{
-			if( *in == '\r' || *in == '\n')
-			{
+		while (true)	{
+			if( *in == '\r' || *in == '\n')	{
 				if (!bHad) // we open files in binary mode, so there could be \r\n sequences ...
 				{
 					bHad = true;
@@ -400,12 +398,12 @@ private:
 		return *in != '\0';
 	}
 	// -------------------------------------------------------------------
-	inline bool SkipSpacesAndLineEnd( )
+	bool SkipSpacesAndLineEnd( )
 	{
 		return SkipSpacesAndLineEnd(buffer,(const char**)&buffer);
 	}
 	// -------------------------------------------------------------------
-	inline bool SkipSpaces( )
+	bool SkipSpaces( )
 	{
 		return Assimp::SkipSpaces((const char**)&buffer);
 	}

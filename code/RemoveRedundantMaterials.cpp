@@ -38,12 +38,14 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-/** @file Implementation of the "RemoveRedundantMaterials" post processing step 
+/** @file RemoveRedundantMaterials.cpp
+ *  @brief Implementation of the "RemoveRedundantMaterials" post processing step 
 */
 
 // internal headers
 #include "AssimpPCH.h"
 #include "RemoveRedundantMaterials.h"
+#include "ParsingUtils.h"
 
 using namespace Assimp;
 
@@ -69,6 +71,39 @@ bool RemoveRedundantMatsProcess::IsActive( unsigned int pFlags) const
 }
 
 // ------------------------------------------------------------------------------------------------
+// Setup import properties
+void RemoveRedundantMatsProcess::SetupProperties(const Importer* pImp)
+{
+	// Get value of AI_CONFIG_PP_RRM_EXCLUDE_LIST
+	configFixedMaterials = pImp->GetPropertyString(AI_CONFIG_PP_RRM_EXCLUDE_LIST,"");
+}
+
+// ------------------------------------------------------------------------------------------------
+// Extract single strings from a list of identifiers
+void ConvertListToStrings(const std::string& in, std::list<std::string>& out)
+{
+	const char* s = in.c_str();
+	while (*s) {
+		SkipSpacesAndLineEnd(&s);
+		if (*s == '\'') {
+			const char* base = ++s;
+			while (*s != '\'') {
+				++s;
+				if (*s == '\0') {
+					DefaultLogger::get()->error("RemoveRedundantMaterials: String list is ill-formatted");
+					return;
+				}
+			}
+			out.push_back(std::string(base,(size_t)(s-base)));
+			++s;
+		}
+		else {
+			out.push_back(GetNextToken(s));
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 {
@@ -77,16 +112,49 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 	unsigned int iCnt = 0, unreferenced = 0;
 	if (pScene->mNumMaterials)
 	{
+		// Find out which materials are referenced by meshes
+		std::vector<bool> abReferenced(pScene->mNumMaterials,false);
+		for (unsigned int i = 0;i < pScene->mNumMeshes;++i)
+			abReferenced[pScene->mMeshes[i]->mMaterialIndex] = true;
+
+		// If a list of materials to be excluded was given, match the list with 
+		// our imported materials and 'salt' all positive matches to ensure that
+		// we get unique hashes later.
+		if (configFixedMaterials.length()) {
+
+			std::list<std::string> strings;
+			ConvertListToStrings(configFixedMaterials,strings);
+			
+			for (unsigned int i = 0; i < pScene->mNumMaterials;++i) {
+				aiMaterial* mat = pScene->mMaterials[i];
+
+				aiString name;
+				mat->Get(AI_MATKEY_NAME,name);
+
+				if (name.length) {
+					std::list<std::string>::const_iterator it = std::find(strings.begin(), strings.end(), name.data);
+					if (it != strings.end()) {
+						
+						// Our brilliant 'salt': A single material property with ~ as first
+						// character to mark it as internal and temporary.
+						const int dummy = 1;
+						((MaterialHelper*)mat)->AddProperty(&dummy,1,"~RRM.UniqueMaterial",0,0);
+
+						// Keep this material even if no mesh references it
+						abReferenced[i] = true;
+						DefaultLogger::get()->debug(std::string("Found positive match in exclusion list: \'") + name.data + "\'");
+					}
+				}
+			}
+		}
+
+
 		// TODO: reimplement this algorithm to work in-place
 
 		unsigned int* aiMappingTable = new unsigned int[pScene->mNumMaterials];
 		unsigned int iNewNum = 0;
 
-		std::vector<bool> abReferenced(pScene->mNumMaterials,false);
-		for (unsigned int i = 0;i < pScene->mNumMeshes;++i)
-			abReferenced[pScene->mMeshes[i]->mMaterialIndex] = true;
-
-		// iterate through all materials and calculate a hash for them
+		// Iterate through all materials and calculate a hash for them
 		// store all hashes in a list and so a quick search whether
 		// we do already have a specific hash. This allows us to
 		// determine which materials are identical.
@@ -136,8 +204,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 				else ppcMaterials[idx] = pScene->mMaterials[p];
 			}
 			// update all material indices
-			for (unsigned int p = 0; p < pScene->mNumMeshes;++p)
-			{
+			for (unsigned int p = 0; p < pScene->mNumMeshes;++p)	{
 				aiMesh* mesh = pScene->mMeshes[p];
 				mesh->mMaterialIndex = aiMappingTable[mesh->mMaterialIndex];
 			}

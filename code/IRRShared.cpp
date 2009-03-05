@@ -294,7 +294,11 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 					// material type (shader)
 					if (prop.name == "Type")
 					{
-						if (prop.value == "trans_vertex_alpha")
+						if (prop.value == "solid")
+						{
+							// default material ...
+						}
+						else if (prop.value == "trans_vertex_alpha")
 						{
 							matFlags = AI_IRRMESH_MAT_trans_vertex_alpha;
 						}

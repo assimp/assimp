@@ -65,22 +65,16 @@ NFFImporter::~NFFImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool NFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool NFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)return false;
-	std::string extension = pFile.substr( pos);
+	return SimpleExtensionCheck(pFile,"nff","enff");
+}
 
-	// extensions: enff and nff
-	for( std::string::iterator it = extension.begin(); it != extension.end(); ++it)
-		*it = tolower( *it);
-
-	if( extension == ".nff" || extension == ".enff")
-		return true;
-
-	return false;
+// ------------------------------------------------------------------------------------------------
+// Get the list of all supported file extensions
+void NFFImporter::GetExtensionList(std::string& append)
+{
+	append.append("*.nff;*.enff");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -96,7 +90,7 @@ bool NFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
 
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_SHAPE_INFORMATION() \
-	aiVector3D center, radius(1.0f,std::numeric_limits<float>::quiet_NaN(),std::numeric_limits<float>::quiet_NaN()); \
+	aiVector3D center, radius(1.0f,get_qnan(),get_qnan()); \
 	AI_NFF_PARSE_TRIPLE(center); \
 	AI_NFF_PARSE_TRIPLE(radius); \
 	if (is_qnan(radius.z))radius.z = radius.x; \
@@ -282,7 +276,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 	// check whether this is the NFF2 file format
 	if (TokenMatch(buffer,"nff",3))
 	{
-		const float qnan = std::numeric_limits<float>::quiet_NaN();
+		const float qnan = get_qnan();
 		const aiColor4D  cQNAN = aiColor4D (qnan,0.f,0.f,1.f);
 		const aiVector3D vQNAN = aiVector3D(qnan,0.f,0.f);
 

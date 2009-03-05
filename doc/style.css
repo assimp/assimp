@@ -8,6 +8,7 @@ body, table, div, p, dl {
 h1 {
 	text-align: center;
 	font-size: 150%;
+	color: black;
 }
 
 h2 {
@@ -125,7 +126,7 @@ div.groupText {
 
 body {
 	background: white;
-	color: black;
+	color: #333333;
 	margin-right: 20px;
 	margin-left: 20px;
 }

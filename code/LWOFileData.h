@@ -38,10 +38,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines chunk constants used by the LWO file format
+/** @file LWOFileData.h
+ *  @brief Defines chunk constants used by the LWO file format
 
 The chunks are taken from the official LightWave SDK headers.
-Original copyright notice: "Ernie Wright  17 Sep 00" 
  
 */
 #ifndef AI_LWO_FILEDATA_INCLUDED
@@ -56,6 +56,7 @@ Original copyright notice: "Ernie Wright  17 Sep 00"
 
 // internal headers
 #include "IFF.h"
+#include "LWOAnimation.h"
 
 namespace Assimp {
 namespace LWO {
@@ -254,28 +255,44 @@ namespace LWO {
  */
 struct Face : public aiFace
 {
+	//! Default construction
 	Face() 
 		: surfaceIndex	(0)
 		, smoothGroup	(0)
+		, type			(AI_LWO_FACE)
 	{}
 
-	Face(const Face& f)
-	{
+	//! Construction from given type
+	Face(uint32_t _type) 
+		: surfaceIndex	(0)
+		, smoothGroup	(0)
+		, type			(_type)
+	{}
+
+	//! Copy construction
+	Face(const Face& f)	{
 		*this = f;
 	}
 
+	//! Zero-based index into tags chunk
 	unsigned int surfaceIndex;
+
+	//! Smooth group this face is assigned to
 	unsigned int smoothGroup;
 
-	Face& operator=(const LWO::Face& f)
-	{
+	//! Type of face
+	uint32_t type;
+
+
+	//! Assignment operator
+	Face& operator=(const LWO::Face& f)	{
 		aiFace::operator =(f);
 		surfaceIndex	= f.surfaceIndex;
 		smoothGroup		= f.smoothGroup;
+		type            = f.type;
 		return *this;
 	}
 };
-
 
 // ---------------------------------------------------------------------------
 /** \brief Base structure for all vertex map representations
@@ -473,8 +490,9 @@ struct Clip
 	} type;
 
 	Clip()
-		: type	(UNSUPPORTED)
-		, idx	(0)
+		: type	 (UNSUPPORTED)
+		, idx	 (0)
+		, negate (false)
 	{}
 
 	//! path to the base texture -
@@ -485,6 +503,9 @@ struct Clip
 
 	//! index of the clip
 	unsigned int idx;
+
+	//! Negate the clip?
+	bool negate;
 };
 
 
@@ -529,6 +550,7 @@ struct Surface
 		, mIOR					(1.f) // vakuum
 		, mBumpIntensity		(1.f)
 		, mWireframe			(false)
+		, mAdditiveTransparency (10e10f)
 	{}
 
 	//! Name of the surface
@@ -571,6 +593,9 @@ struct Surface
 
 	//! Wireframe flag
 	bool mWireframe;
+
+	//! Intensity of additive blending
+	float mAdditiveTransparency;
 };
 
 // ---------------------------------------------------------------------------
@@ -592,7 +617,7 @@ typedef std::vector	<	WeightChannel	>	WeightChannelList;
 typedef std::vector	<	VColorChannel	>	VColorChannelList;
 typedef std::vector	<	UVChannel		>	UVChannelList;
 typedef std::vector	<	Clip			>	ClipList;
-
+typedef std::vector	<	Envelope		>	EnvelopeList;
 
 // ---------------------------------------------------------------------------
 /** \brief Represents a layer in the file

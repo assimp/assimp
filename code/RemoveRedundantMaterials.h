@@ -38,7 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines a post processing step to remove redundant materials */
+/** @file RemoveRedundantMaterials.h
+ *  @brief Defines a post processing step to remove redundant materials 
+ */
 #ifndef AI_REMOVEREDUNDANTMATERIALS_H_INC
 #define AI_REMOVEREDUNDANTMATERIALS_H_INC
 
@@ -46,12 +48,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiMesh.h"
 
 class RemoveRedundantMatsTest;
-namespace Assimp
-	{
+namespace Assimp	{
 
 // ---------------------------------------------------------------------------
-/** RemoveRedundantMatsProcess: Class to remove redundant materials
-*/
+/** RemoveRedundantMatsProcess: Postprocessing steo to remove redundant 
+ *  materials from the imported scene.
+ */
 class ASSIMP_API RemoveRedundantMatsProcess : public BaseProcess
 {
 	friend class Importer;
@@ -66,19 +68,38 @@ protected:
 
 public:
 	// -------------------------------------------------------------------
-	/** Returns whether the processing step is present in the given flag field.
-	* @param pFlags The processing flags the importer was called with. A bitwise
-	*   combination of #aiPostProcessSteps.
-	* @return true if the process is present in this flag fields, false if not.
-	*/
+	// Check whether step is active
 	bool IsActive( unsigned int pFlags) const;
 
 	// -------------------------------------------------------------------
-	/** Executes the post processing step on the given imported data.
-	* At the moment a process is not supposed to fail.
-	* @param pScene The imported data to work at.
-	*/
+	// Execute step on a given scene
 	void Execute( aiScene* pScene);
+
+	// -------------------------------------------------------------------
+	// Setup import settings
+	void SetupProperties(const Importer* pImp);
+
+
+	// -------------------------------------------------------------------
+	/** @brief Set list of fixed (unmutable) materials
+	 *  @param fixed See #AI_CONFIG_PP_RRM_EXCLUDE_LIST
+	 */
+	void SetFixedMaterialsString(const std::string& fixed = "") {
+		configFixedMaterials = fixed;
+	}
+
+	// -------------------------------------------------------------------
+	/** @brief Get list of fixed (unmutable) materials
+	 *  @return See #AI_CONFIG_PP_RRM_EXCLUDE_LIST
+	 */
+	const std::string& GetFixedMaterialsString() const {
+		return configFixedMaterials;
+	}
+
+private:
+
+	//! Configuration option: list of all fixed materials
+	std::string configFixedMaterials;
 };
 
 } // end of namespace Assimp

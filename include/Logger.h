@@ -50,6 +50,9 @@ namespace Assimp	{
 
 class LogStream;
 
+// maximum length of a log message. Longer messages are rejected.
+#define MAX_LOG_MESSAGE_LENGTH 1024u
+
 // ----------------------------------------------------------------------------------
 /**	@class	Logger
  *	@brief	Abstract interface for logger implementations.
@@ -85,11 +88,8 @@ public:
 		ERR			= 8		//!< Error log message
 	};
 
-	/** @brief Maximum length for log messages
-	 */
-	static const size_t MAX_LOG_MESSAGE_LENGTH = 1024;
-
 public:
+
 	/** @brief	Virtual destructor */
 	virtual ~Logger();
 
@@ -99,24 +99,28 @@ public:
 	void debug(const std::string &message);
 
 	/** @brief	Writes a info message
-	 *	 @param	message		Info message
+	 *	@param	message		Info message
 	 */
 	void info(const std::string &message);
 
 	/** @brief	Writes a warning message
-	 *	 @param	message		Warn message
+	 *	@param	message		Warn message
 	 */
 	void warn(const std::string &message);
 
 	/** @brief	Writes an error message
-	 *	 @param	message		Error message
+	 *	@param	message		Error message
 	 */
 	void error(const std::string &message);
 
 	/** @brief	Set a new log severity.
-	 *	 @param	log_severity	New severity for logging
+	 *	@param	log_severity	New severity for logging
 	 */
-	virtual void setLogSeverity(LogSeverity log_severity) = 0;
+	void setLogSeverity(LogSeverity log_severity);
+
+	/** @brief	Get the current log severity
+	 */
+	LogSeverity getLogSeverity() const;
 
 	/** @brief	Attach a new logstream
 	 *
@@ -128,8 +132,9 @@ public:
 	 *  @param severity  Message filter, specified which types of log
 	 *    messages are dispatched to the stream. Provide a bitwise
 	 *    combination of the ErrorSeverity flags.
+	 *  @return true if the stream has been attached, false otherwise.
 	 */
-	virtual void attachStream(LogStream *pStream, 
+	virtual bool attachStream(LogStream *pStream, 
 		unsigned int severity = DEBUGGING | ERR | WARN | INFO) = 0;
 
 	/** @brief	Detach a still attached stream from the logger (or 
@@ -139,13 +144,18 @@ public:
 	 *    flags. This value is &~ed with the current flags of the stream,
 	 *    if the result is 0 the stream is detached from the Logger and
 	 *    the caller retakes the possession of the stream.
+	 *  @return true if the stream has been dettached, false otherwise.
 	 */
-	virtual void detatchStream(LogStream *pStream, 
+	virtual bool detatchStream(LogStream *pStream, 
 		unsigned int severity = DEBUGGING | ERR | WARN | INFO) = 0;
 
 protected:
-	/**	@brief	Default constructor	*/
+
+	/** Default constructor */
 	Logger();
+
+	/** Construction with a given log severity */
+	Logger(LogSeverity severity);
 
 	/**  @brief Called as a request to write a specific debug message
 	 *	 @param	message		Debug message. Never longer than
@@ -178,21 +188,43 @@ protected:
 	 *     the function is left.
 	 */
 	virtual void OnError(const char* message) = 0;
+
+protected:
+
+	//!	Logger severity
+	LogSeverity m_Severity;
 };
 
 // ----------------------------------------------------------------------------------
 //	Default constructor
-inline Logger::Logger()
-{
-	//	empty
+inline Logger::Logger()	{
+	setLogSeverity(NORMAL);
 }
 
 // ----------------------------------------------------------------------------------
 //	Virtual destructor
 inline  Logger::~Logger()
 {
-	// empty
 }
+
+// ----------------------------------------------------------------------------------
+// Construction with given logging severity
+inline Logger::Logger(LogSeverity severity)	{
+	setLogSeverity(severity);
+}
+
+// ----------------------------------------------------------------------------------
+// Log severity setter
+inline void Logger::setLogSeverity(LogSeverity log_severity){
+	m_Severity = log_severity;
+}
+
+// ----------------------------------------------------------------------------------
+// Log severity getter
+inline Logger::LogSeverity Logger::getLogSeverity() const {
+	return m_Severity;
+}
+
 // ----------------------------------------------------------------------------------
 
 } // Namespace Assimp

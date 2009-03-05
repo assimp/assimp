@@ -90,16 +90,13 @@ protected:
 public:
 	/** Returns whether the class can handle the format of the given file. 
 	 * See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
 
 protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList( std::string& append)
-	{
-		append.append("*.dae");
-	}
+	void GetExtensionList( std::string& append);
 
 	/** Imports the given file into the given scene structure. 
 	 * See BaseImporter::InternReadFile() for details

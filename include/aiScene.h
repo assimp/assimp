@@ -77,6 +77,10 @@ struct aiNode
 	 * 
 	 * Cameras and lights are assigned to a specific node name - if there
 	 * are multiple nodes with this name, they're assigned to each of them.
+	 * <br>
+	 * There are no limitations regarding the characters contained in
+	 * this text. You should be able to handle stuff like whitespace, tabs,
+	 * linefeeds, quotation marks, ampersands, ... .
 	 */
 	C_STRUCT aiString mName;
 

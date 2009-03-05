@@ -40,6 +40,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
+/** @file BVHLoader.h
+ *  @brief Biovision BVH import
+ */
+
 #ifndef AI_BVHLOADER_H_INC
 #define AI_BVHLOADER_H_INC
 
@@ -48,9 +52,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp
 {
 
-/** Loader class to read Motion Capturing data from a .bvh file. This format only contains a 
-* hierarchy of joints and a series of keyframes for the hierarchy. It contains no actual mesh data,
-* but we generate a dummy mesh inside the loader just to be able to see something.
+// --------------------------------------------------------------------------------
+/** Loader class to read Motion Capturing data from a .bvh file. 
+ *
+ * This format only contains a hierarchy of joints and a series of keyframes for
+ * the hierarchy. It contains no actual mesh data, but we generate a dummy mesh
+ * inside the loader just to be able to see something.
 */
 class BVHLoader : public BaseImporter
 {
@@ -88,7 +95,7 @@ protected:
 public:
 	/** Returns whether the class can handle the format of the given file. 
 	 * See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool cs) const;
 
 protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.

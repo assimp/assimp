@@ -21,6 +21,7 @@
 			Name="debug|Win32"
 			ConfigurationType="4"
 			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\FastSTL.vsprops"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -40,12 +41,15 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				FavorSizeOrSpeed="0"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
@@ -85,7 +89,7 @@
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets=".\shared\FastSTL.vsprops"
+			InheritedPropertySheets=".\shared\FastSTL.vsprops;.\shared\LibShared.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -106,12 +110,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				FavorSizeOrSpeed="0"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="DEBUG, _SCL_SECURE_NO_WARNINGS, _CRT_SECURE_NO_WARNINGS,WIN32"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -166,9 +172,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="2"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
+				FavorSizeOrSpeed="0"
+				OmitFramePointers="true"
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32"
@@ -176,8 +184,10 @@
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="2"
+				FloatingPointModel="2"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="AssimpPCH.h"
+				AssemblerOutput="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 			/>
@@ -235,13 +245,14 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
+				FavorSizeOrSpeed="0"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="NDEBUG, _SCL_SECURE_NO_WARNINGS, _CRT_SECURE_NO_WARNINGS,WIN32"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="0"
+				FloatingPointModel="2"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
@@ -299,13 +310,16 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
+				FavorSizeOrSpeed="0"
+				OmitFramePointers="true"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="2"
+				FloatingPointModel="2"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
@@ -348,7 +362,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="mkdir $(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;"
+				CommandLine="mkdir $(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -377,13 +391,14 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
+				FavorSizeOrSpeed="0"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="0"
+				FloatingPointModel="2"
 				WarningLevel="3"
 			/>
 			<Tool
@@ -424,13 +439,14 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="mkdir $(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;"
+				CommandLine="mkdir $(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="debug-dll|Win32"
 			ConfigurationType="2"
 			InheritedPropertySheets=".\shared\DllShared.vsprops;.\shared\FastSTL.vsprops"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -450,12 +466,15 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				FavorSizeOrSpeed="0"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
@@ -499,7 +518,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="mkdir $(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;"
+				CommandLine="mkdir $(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -526,12 +545,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				FavorSizeOrSpeed="0"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -573,7 +594,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="mkdir $(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;"
+				CommandLine="mkdir $(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -601,13 +622,16 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
+				FavorSizeOrSpeed="0"
+				OmitFramePointers="true"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_BOOST_WORKAROUND"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="2"
+				FloatingPointModel="2"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
@@ -667,13 +691,14 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
+				FavorSizeOrSpeed="0"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_BOOST_WORKAROUND"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="0"
+				FloatingPointModel="2"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
@@ -710,6 +735,7 @@
 			Name="debug-noboost-st|Win32"
 			ConfigurationType="4"
 			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\NoBoostShared.vsprops;.\shared\FastSTL.vsprops"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -729,12 +755,15 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				FavorSizeOrSpeed="0"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_BOOST_WORKAROUND"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
@@ -793,12 +822,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				FavorSizeOrSpeed="0"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_BOOST_WORKAROUND"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -834,6 +865,7 @@
 			Name="debug-st|Win32"
 			ConfigurationType="4"
 			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\SingleThreadedShared.vsprops;.\shared\FastSTL.vsprops"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -853,12 +885,15 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				FavorSizeOrSpeed="0"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
@@ -917,12 +952,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				FavorSizeOrSpeed="0"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="DEBUG, _SCL_SECURE_NO_WARNINGS, _CRT_SECURE_NO_WARNINGS,WIN32"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -979,13 +1016,16 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
+				FavorSizeOrSpeed="0"
+				OmitFramePointers="true"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="2"
+				FloatingPointModel="2"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
@@ -1045,13 +1085,14 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
+				FavorSizeOrSpeed="0"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="NDEBUG, _SCL_SECURE_NO_WARNINGS, _CRT_SECURE_NO_WARNINGS,WIN32"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="0"
+				FloatingPointModel="2"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="AssimpPCH.h"
 				WarningLevel="3"
@@ -1322,6 +1363,22 @@
 			<File
 				RelativePath="..\..\code\MaterialSystem.cpp"
 				>
+				<FileConfiguration
+					Name="release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						GeneratePreprocessedFile="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release-dll|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						GeneratePreprocessedFile="0"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\code\MaterialSystem.h"
@@ -1894,6 +1951,14 @@
 					Name="LWS"
 					>
 					<File
+						RelativePath="..\..\code\LWOAnimation.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\LWOAnimation.h"
+						>
+					</File>
+					<File
 						RelativePath="..\..\code\LWSLoader.cpp"
 						>
 					</File>
@@ -1971,6 +2036,30 @@
 					</File>
 				</Filter>
 				<Filter
+					Name="TER"
+					>
+					<File
+						RelativePath="..\..\code\TerragenLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\TerragenLoader.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Unreal"
+					>
+					<File
+						RelativePath="..\..\code\UnrealLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\UnrealLoader.h"
+						>
+					</File>
+				</Filter>
+				<Filter
 					Name="Collada"
 					>
 					<File
@@ -1994,30 +2083,10 @@
 						>
 					</File>
 				</Filter>
-				<Filter
-					Name="TER"
-					>
-					<File
-						RelativePath="..\..\code\TerragenLoader.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\code\TerragenLoader.h"
-						>
-					</File>
-				</Filter>
-				<Filter
-					Name="CSM"
-					>
-				</Filter>
 			</Filter>
 			<Filter
 				Name="PostProcess"
 				>
-				<File
-					RelativePath="..\..\code\AssimpPCH.h"
-					>
-				</File>
 				<File
 					RelativePath="..\..\code\CalcTangentsProcess.cpp"
 					>
@@ -2101,6 +2170,14 @@
 				<File
 					RelativePath="..\..\code\JoinVerticesProcess.cpp"
 					>
+					<FileConfiguration
+						Name="release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AssemblerOutput="4"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\code\JoinVerticesProcess.h"
@@ -2181,10 +2258,6 @@
 				<Filter
 					Name="util"
 					>
-					<File
-						RelativePath="..\..\code\ProcessHelper.h"
-						>
-					</File>
 				</Filter>
 			</Filter>
 			<Filter
@@ -2290,6 +2363,10 @@
 						/>
 					</FileConfiguration>
 				</File>
+				<File
+					RelativePath="..\..\code\AssimpPCH.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Logging"
@@ -2356,6 +2433,10 @@
 				</File>
 				<File
 					RelativePath="..\..\code\ParsingUtils.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\ProcessHelper.h"
 					>
 				</File>
 				<File
@@ -3381,6 +3462,10 @@
 			</File>
 			<File
 				RelativePath="..\..\doc\dox.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\doc\dox_cmd.h"
 				>
 			</File>
 			<File

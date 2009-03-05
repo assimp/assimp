@@ -52,8 +52,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-// Name for the default material
-#define AI_DEFAULT_MATERIAL_NAME "aiDefaultMat"
+// Name for default materials (2nd is used if meshes have UV coords)
+#define AI_DEFAULT_MATERIAL_NAME          "DefaultMaterial"
+#define AI_DEFAULT_TEXTURED_MATERIAL_NAME "TexturedDefaultMaterial"
 
 // ---------------------------------------------------------------------------
 /** @brief A very primitive RTTI system to store the data type of a 
@@ -577,7 +578,7 @@ struct aiUVTransform
  *    ~<name>
  *       A temporary property for internal use. If someone forgets to
  *       cleanup, some of these might still be contained in the output.
- *       Don't complain, if you understood what the first paragraph tried
+ *       Don't complain! If you understood what the first paragraph tried
  *       to tell you, you wouldn't even know. 
  *  @endcode
  *  @see aiMaterial
@@ -1475,7 +1476,6 @@ extern "C" {
  */
 #define AI_MATKEY_GLOBAL_BACKGROUND_IMAGE "$global.bg.image2d",0,0
 
-
 // ---------------------------------------------------------------------------
 /** @brief Retrieve a material property with a specific key from the material
 *
@@ -1494,7 +1494,6 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialProperty(
 	 C_ENUM aiTextureType type,
     unsigned int  index,
     const C_STRUCT aiMaterialProperty** pPropOut);
-
 
 // ---------------------------------------------------------------------------
 /** @brief Retrieve an array of float values with a specific key 
@@ -1530,7 +1529,6 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
     unsigned int index,
     float* pOut,
     unsigned int* pMax);
-
 
 
 #ifdef __cplusplus

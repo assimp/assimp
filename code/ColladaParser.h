@@ -202,7 +202,7 @@ protected:
 
 	/** Reads the text contents of an element, returns NULL if not given.
 	    Skips leading whitespace. */
-	const char* ColladaParser::TestTextContent();
+	const char* TestTextContent();
 
 	/** Reads a single bool from current text content */
 	bool ReadBoolFromTextContent();

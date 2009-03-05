@@ -1325,6 +1325,14 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\test\unit\utFindDegenerates.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\test\unit\utFindDegenerates.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\test\unit\utFindInvalidData.cpp"
 				>
 			</File>

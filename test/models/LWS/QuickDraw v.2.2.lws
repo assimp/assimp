@@ -10,7 +10,7 @@ PreviewFrameStep 1
 CurrentFrame 0
 FramesPerSecond 30
 
-LoadObjectLayer 1 Objects/WW_QuickDraw/QuickDraw--Chasis.lwo
+LoadObjectLayer 1 ../LWO/LWO2/LWSReferences/QuickDraw--Chasis.lwo
 ShowObject 5 7
 ObjectMotion
 NumChannels 9
@@ -85,7 +85,7 @@ ParentItem 1000000e
 IKAnchor 1
 ShadowOptions 7
 
-LoadObjectLayer 1 Objects/WW_QuickDraw/QuickDraw--Wheels-Back.lwo
+LoadObjectLayer 1 ../LWO/LWO2/LWSReferences/QuickDraw--Wheels-Back.lwo
 ShowObject 5 7
 ObjectMotion
 NumChannels 9
@@ -160,7 +160,7 @@ PivotPosition 0 0.99 2.58
 ParentItem 10000000
 ShadowOptions 7
 
-LoadObjectLayer 1 Objects/WW_QuickDraw/QuickDraw--Wheels-Front.lwo
+LoadObjectLayer 1 ../LWO/LWO2/LWSReferences/QuickDraw--Wheels-Front.lwo
 ShowObject 5 7
 ObjectMotion
 NumChannels 9
@@ -235,7 +235,7 @@ PivotPosition 0 0.6799999 -2.539999
 ParentItem 10000000
 ShadowOptions 7
 
-LoadObjectLayer 1 Objects/WW_QuickDraw/QuickDraw--CabinPortals.lwo
+LoadObjectLayer 1 ../LWO/LWO2/LWSReferences/QuickDraw--CabinPortals.lwo
 ShowObject 5 7
 ObjectMotion
 NumChannels 9
@@ -312,7 +312,7 @@ PivotPosition 0 2.55 -1.61
 ParentItem 10000000
 ShadowOptions 7
 
-LoadObjectLayer 1 Objects/WW_QuickDraw/QuickDraw--Arm-Shoulder.lwo
+LoadObjectLayer 1 ../LWO/LWO2/LWSReferences/QuickDraw--Arm-Shoulder.lwo
 ShowObject 5 7
 ObjectMotion
 NumChannels 9
@@ -390,7 +390,7 @@ PivotPosition 0 1.81 -4.240001
 ParentItem 10000000
 ShadowOptions 7
 
-LoadObjectLayer 1 Objects/WW_QuickDraw/QuickDraw--Arm-ForeArm.lwo
+LoadObjectLayer 1 ../LWO/LWO2/LWSReferences/QuickDraw--Arm-ForeArm.lwo
 ShowObject 5 7
 ObjectMotion
 NumChannels 9
@@ -467,7 +467,7 @@ PivotPosition 0 1.82 -5.410002
 ParentItem 10000004
 ShadowOptions 7
 
-LoadObjectLayer 1 Objects/WW_QuickDraw/QuickDraw--Arm-Tip.lwo
+LoadObjectLayer 1 ../LWO/LWO2/LWSReferences/QuickDraw--Arm-Tip.lwo
 ShowObject 5 7
 ObjectMotion
 NumChannels 9
@@ -544,7 +544,7 @@ PivotPosition 0 3.98 -5.510003
 ParentItem 10000005
 ShadowOptions 7
 
-LoadObjectLayer 1 Objects/WW_QuickDraw/QuickDraw--GP-Pod.lwo
+LoadObjectLayer 1 ../LWO/LWO2/LWSReferences/QuickDraw--GP-Pod.lwo
 ShowObject 5 7
 ObjectMotion
 NumChannels 9
@@ -621,7 +621,7 @@ PivotPosition 0 3.1 -0.870001
 ParentItem 10000000
 ShadowOptions 7
 
-LoadObjectLayer 1 Objects/WW_QuickDraw/QuickDraw--GP-Lid.lwo
+LoadObjectLayer 1 ../LWO/LWO2/LWSReferences/QuickDraw--GP-Lid.lwo
 ShowObject 5 7
 ObjectMotion
 NumChannels 9
@@ -698,7 +698,7 @@ PivotPosition 0 3.13 1.66
 ParentItem 10000007
 ShadowOptions 7
 
-LoadObjectLayer 1 Objects/WW_QuickDraw/QuickDraw--GP-Gun.lwo
+LoadObjectLayer 1 ../LWO/LWO2/LWSReferences/QuickDraw--GP-Gun.lwo
 ShowObject 5 7
 ObjectMotion
 NumChannels 9
@@ -1395,7 +1395,7 @@ LockedChannels 4088
 ParentItem 1000000e
 ShadowOptions 0
 
-LoadObjectLayer 1 Objects/WW_QuickDraw/QuickDraw--Standin-Driver.lwo
+LoadObjectLayer 1 ../LWO/LWO2/LWSReferences/QuickDraw--Standin-Driver.lwo
 ShowObject 5 7
 ObjectMotion
 NumChannels 9

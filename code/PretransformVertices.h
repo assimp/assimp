@@ -38,16 +38,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines a post processing step to pretransform all 
- vertices in the scenegraph */
+/** @file PretransformVertices.h
+ *  @brief Defines a post processing step to pretransform all 
+ *    vertices in the scenegraph 
+ */
 #ifndef AI_PRETRANSFORMVERTICES_H_INC
 #define AI_PRETRANSFORMVERTICES_H_INC
 
 #include "BaseProcess.h"
 #include "../include/aiMesh.h"
 
-namespace Assimp
-{
+class PretransformVerticesTest;
+namespace Assimp	{
 
 // ---------------------------------------------------------------------------
 /** The PretransformVertices pretransforms all vertices in the nodegraph
@@ -57,6 +59,7 @@ namespace Assimp
 class ASSIMP_API PretransformVertices : public BaseProcess
 {
 	friend class Importer;
+	friend class ::PretransformVerticesTest;
 
 protected:
 	/** Constructor to be privately used by Importer */
@@ -66,20 +69,95 @@ protected:
 	~PretransformVertices ();
 
 public:
+
 	// -------------------------------------------------------------------
-	/** Returns whether the processing step is present in the given flag field.
-	* @param pFlags The processing flags the importer was called with. A bitwise
-	*   combination of #aiPostProcessSteps.
-	* @return true if the process is present in this flag fields, false if not.
-	*/
+	// Check whether step is active
 	bool IsActive( unsigned int pFlags) const;
 
 	// -------------------------------------------------------------------
-	/** Executes the post processing step on the given imported data.
-	* At the moment a process is not supposed to fail.
-	* @param pScene The imported data to work at.
-	*/
+	// Execute step on a given scene
 	void Execute( aiScene* pScene);
+
+	// -------------------------------------------------------------------
+	// Setup import settings
+	void SetupProperties(const Importer* pImp);
+
+
+	// -------------------------------------------------------------------
+	/** @brief Toggle the 'keep hierarchy' option
+	 *  @param d hm ... difficult to guess what this means, hu!?
+	 */
+	void KeepHierarchy(bool d) {
+		configKeepHierarchy = d;
+	}
+
+	// -------------------------------------------------------------------
+	/** @brief Check whether 'keep hierarchy' is currently enabled.
+	 *  @return ...
+	 */
+	bool IsHierarchyKept() const {
+		return configKeepHierarchy;
+	}
+
+private:
+
+	// -------------------------------------------------------------------
+	// Count the number of nodes
+	unsigned int CountNodes( aiNode* pcNode );
+
+	// -------------------------------------------------------------------
+	// Get a bitwise combination identifying the vertex format of a mesh
+	unsigned int GetMeshVFormat(aiMesh* pcMesh);
+
+	// -------------------------------------------------------------------
+	// Count the number of vertices in the whole scene and a given
+	// material index
+	void CountVerticesAndFaces( aiScene* pcScene, aiNode* pcNode, 
+		unsigned int iMat,
+		unsigned int iVFormat, 
+		unsigned int* piFaces,
+		unsigned int* piVertices);
+
+	// -------------------------------------------------------------------
+	// Collect vertex/face data
+	void CollectData( aiScene* pcScene, aiNode* pcNode,
+		unsigned int iMat,
+		unsigned int iVFormat, 
+		aiMesh* pcMeshOut, 
+		unsigned int aiCurrent[2],
+		unsigned int* num_refs);
+
+	// -------------------------------------------------------------------
+	// Get a list of all vertex formats that occur for a given material
+	// The output list contains duplicate elements
+	void GetVFormatList( aiScene* pcScene, unsigned int iMat,
+		std::list<unsigned int>& aiOut);
+
+	// -------------------------------------------------------------------
+	// Compute the absolute transformation matrices of each node
+	void ComputeAbsoluteTransform( aiNode* pcNode );
+
+	// -------------------------------------------------------------------
+	// Simple routine to build meshes in worldspace, no further optimization
+	void BuildWCSMeshes(std::vector<aiMesh*>& out, aiMesh** in,
+		unsigned int numIn, aiNode* node);
+
+	// -------------------------------------------------------------------
+	// Apply the node transformation to a mesh
+	void ApplyTransform(aiMesh* mesh, const aiMatrix4x4& mat);
+
+	// -------------------------------------------------------------------
+	// Reset transformation matrices to identity
+	void MakeIdentityTransform(aiNode* nd);
+
+	// -------------------------------------------------------------------
+	// Build reference counters for all meshes
+	void BuildMeshRefCountArray(aiNode* nd, unsigned int * refs);
+
+
+
+	//! Configuration option: keep scene hierarchy as long as possible
+	bool configKeepHierarchy;
 
 };
 

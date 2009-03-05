@@ -89,7 +89,7 @@ aiColor4D MDLImporter::ReplaceTextureWithColor(const aiTexture* pcTexture)
 	ai_assert(NULL != pcTexture);
 
 	aiColor4D clrOut;
-	clrOut.r = std::numeric_limits<float>::quiet_NaN();
+	clrOut.r = get_qnan();
 	if (!pcTexture->mHeight || !pcTexture->mWidth)
 		return clrOut;
 
@@ -572,7 +572,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	// been converted to MDL7 from other formats, such as MDL5
 	aiColor4D clrTexture;
 	if (pcNew)clrTexture = this->ReplaceTextureWithColor(pcNew);
-	else clrTexture.r = std::numeric_limits<float>::quiet_NaN();
+	else clrTexture.r = get_qnan();
 	
 	// check whether a material definition is contained in the skin
 	if (iType & AI_MDL7_SKINTYPE_MATERIAL)

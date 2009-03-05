@@ -118,7 +118,7 @@ struct NodeAttachmentInfo
 /** @def AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY
  * Can be combined with AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES.
  * Unique names are generated, but only if this is absolutely
- * required (if there would be conflicts otherwuse.)
+ * required to avoid name conflicts.
  */
 #define AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY 0x10
 
@@ -132,6 +132,43 @@ struct BoneWithHash : public std::pair<uint32_t,aiString*>	{
 	std::vector<BoneSrcIndex> pSrcBones;
 };
 
+
+// ---------------------------------------------------------------------------
+/** @brief Utility for SceneCombiner
+ */
+struct SceneHelper
+{
+	SceneHelper ()
+		: scene		(NULL)
+		, idlen		(0)
+	{
+		id[0] = 0;
+	}
+
+	SceneHelper (aiScene* _scene)
+		: scene		(_scene)
+		, idlen		(0)
+	{
+		id[0] = 0;
+	}
+
+	AI_FORCE_INLINE aiScene* operator-> () const
+	{
+		return scene;
+	}
+
+	// scene we're working on
+	aiScene* scene;
+
+	// prefix to be added to all identifiers in the scene ...
+	char id [32];
+
+	// and its strlen() 
+	unsigned int idlen;
+
+	// hash table to quickly check whether a name is contained in the scene
+	std::set<unsigned int> hashes;
+};
 
 // ---------------------------------------------------------------------------
 /** \brief Static helper class providing various utilities to merge two
@@ -301,6 +338,26 @@ public:
 
 	// recursive, of course
 	static void Copy     (aiNode** dest, const aiNode* src);
+
+
+private:
+
+	// -------------------------------------------------------------------
+	// Same as AddNodePrefixes, but with an additional check
+	static void AddNodePrefixesChecked(aiNode* node, const char* prefix, 
+		unsigned int len,
+		std::vector<SceneHelper>& input, 
+		unsigned int cur);
+
+	// -------------------------------------------------------------------
+	// Add node identifiers to a hashing set
+	static void AddNodeHashes(aiNode* node, std::set<unsigned int>& hashes);
+
+
+	// -------------------------------------------------------------------
+	// Search for duplicate names
+	static bool FindNameMatch(const aiString& name, 
+		std::vector<SceneHelper>& input, unsigned int cur);
 };
 
 }

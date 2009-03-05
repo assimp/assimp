@@ -51,15 +51,12 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 RemoveVCProcess::RemoveVCProcess()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 RemoveVCProcess::~RemoveVCProcess()
-{
-	// nothing to do here
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

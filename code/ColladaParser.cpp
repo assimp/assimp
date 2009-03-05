@@ -1618,8 +1618,8 @@ void ColladaParser::ReadSceneLibrary()
 		}
 		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
 		{
-			if( strcmp( mReader->getNodeName(), "library_visual_scenes") != 0)
-				ThrowException( "Expected end of \"library_visual_scenes\" element.");
+			if( strcmp( mReader->getNodeName(), "library_visual_scenes") == 0)
+				//ThrowException( "Expected end of \"library_visual_scenes\" element.");
 
 			break;
 		}

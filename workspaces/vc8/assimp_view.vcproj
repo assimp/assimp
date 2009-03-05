@@ -25,6 +25,7 @@
 			ConfigurationType="1"
 			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -44,6 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
@@ -102,8 +104,8 @@
 		</Configuration>
 		<Configuration
 			Name="debug|x64"
-			OutputDirectory="$(SolutionDir)..\..\tools\build\$(ConfigurationName)_$(PlatformName)"
-			IntermediateDirectory="$(SolutionDir)..\..\tools\build\$(ConfigurationName)_$(PlatformName)\obj"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
 			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
@@ -153,7 +155,7 @@
 				AdditionalDependencies="d3d9.lib d3dx9.lib comdlg32.lib assimp.lib winmm.lib comctl32.lib user32.lib advapi32.lib shell32.lib Gdi32.lib"
 				OutputFile="$(OutDir)\assimp_view_debug.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib\assimp_$(ConfigurationName)_$(PlatformName);&quot;$(DXSDK_DIR)lib\x64&quot;"
+				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;;&quot;$(DXSDK_DIR)lib\x64&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="17"
@@ -190,7 +192,7 @@
 			ConfigurationType="1"
 			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
-			WholeProgramOptimization="1"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -209,6 +211,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
@@ -267,8 +270,8 @@
 		</Configuration>
 		<Configuration
 			Name="release|x64"
-			OutputDirectory="$(SolutionDir)..\..\tools\build\$(ConfigurationName)_$(PlatformName)"
-			IntermediateDirectory="$(SolutionDir)..\..\tools\build\$(ConfigurationName)_$(PlatformName)\obj"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
 			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
@@ -355,7 +358,7 @@
 			ConfigurationType="1"
 			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
-			WholeProgramOptimization="1"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -374,6 +377,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
@@ -432,8 +436,8 @@
 		</Configuration>
 		<Configuration
 			Name="release-dll|x64"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
 			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
@@ -520,6 +524,7 @@
 			ConfigurationType="1"
 			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -539,6 +544,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
@@ -597,8 +603,8 @@
 		</Configuration>
 		<Configuration
 			Name="debug-dll|x64"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
 			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
@@ -685,7 +691,7 @@
 			ConfigurationType="1"
 			InheritedPropertySheets=".\shared\NoBoostShared.vsprops;.\shared\FastSTL.vsprops"
 			CharacterSet="2"
-			WholeProgramOptimization="1"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -704,6 +710,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
@@ -762,8 +769,8 @@
 		</Configuration>
 		<Configuration
 			Name="release-noboost-st|x64"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
 			InheritedPropertySheets=".\shared\NoBoostShared.vsprops;.\shared\FastSTL.vsprops"
 			CharacterSet="2"
@@ -850,6 +857,7 @@
 			ConfigurationType="1"
 			InheritedPropertySheets=".\shared\NoBoostShared.vsprops;.\shared\FastSTL.vsprops"
 			CharacterSet="2"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -869,6 +877,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
@@ -927,8 +936,8 @@
 		</Configuration>
 		<Configuration
 			Name="debug-noboost-st|x64"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
 			InheritedPropertySheets=".\shared\NoBoostShared.vsprops;.\shared\FastSTL.vsprops"
 			CharacterSet="2"
@@ -1015,6 +1024,7 @@
 			ConfigurationType="1"
 			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1034,6 +1044,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
@@ -1092,8 +1103,8 @@
 		</Configuration>
 		<Configuration
 			Name="debug-st|x64"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
 			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
@@ -1180,7 +1191,7 @@
 			ConfigurationType="1"
 			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"
-			WholeProgramOptimization="1"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1199,6 +1210,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
@@ -1257,8 +1269,8 @@
 		</Configuration>
 		<Configuration
 			Name="release-st|x64"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="./../../bin/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
 			InheritedPropertySheets=".\shared\FastSTL.vsprops"
 			CharacterSet="2"

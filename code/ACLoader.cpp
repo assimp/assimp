@@ -108,28 +108,38 @@ using namespace Assimp;
 // Constructor to be privately used by Importer
 AC3DImporter::AC3DImporter()
 {
+	// nothing to be done here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
 AC3DImporter::~AC3DImporter()
 {
+	// nothing to be done here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool AC3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool AC3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)return false;
-	std::string extension = pFile.substr( pos);
+	std::string extension = GetExtension(pFile);
 
-	for( std::string::iterator it = extension.begin(); it != extension.end(); ++it)
-		*it = tolower( *it);
+	// fixme: are acc and ac3d *really* used? Some sources say they are
+	if(extension == "ac" || extension == "ac3d" || extension == "acc") {
+		return true;
+	}
+	if (!extension.length() || checkSig) {
+		uint32_t token = AI_MAKE_MAGIC("AC3D");
+		return CheckMagicToken(pIOHandler,pFile,&token,1,0);
+	}
+	return false;
+}
 
-	return( extension == ".ac3d" || extension == ".ac");
+// ------------------------------------------------------------------------------------------------
+// Get list of file extensions handled by this loader
+void AC3DImporter::GetExtensionList(std::string& append)
+{
+	append.append("*.ac;*.acc;*.ac3d");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -139,7 +149,6 @@ bool AC3DImporter::GetNextLine( )
 	SkipLine(&buffer); 
 	return SkipSpaces(&buffer);
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // Parse an object section in an AC file

@@ -57,29 +57,42 @@ extern "C" {
 /** A time-value pair specifying a certain 3D vector for the given time. */
 struct aiVectorKey
 {
-	double mTime;      ///< The time of this key
-	C_STRUCT aiVector3D mValue; ///< The value of this key
+	//! The time of this key
+	double mTime;     
+	//! The value of this key
+	C_STRUCT aiVector3D mValue; 
 
 #ifdef __cplusplus
+
+	//! Default constructor
+	aiVectorKey(){}
+
+	//! Construction from a given time and key value
+	aiVectorKey(double time, const aiVector3D& value)
+		:	mTime	(time)
+		,	mValue	(value)
+	{}
+
+
 	typedef aiVector3D elem_type;
 
-	// time is not compared
-	bool operator == (const aiVectorKey& o) const
-		{return o.mValue == this->mValue;}
+	//! Comparison operators. Just the key value is compared
+	//! For use with std::find();
+	bool operator == (const aiVectorKey& o) const {
+		return o.mValue == this->mValue;
+	}
+	bool operator != (const aiVectorKey& o) const {
+		return o.mValue != this->mValue;
+	}
 
-	bool operator != (const aiVectorKey& o) const
-		{return o.mValue != this->mValue;}
-
-
-
-	// Only time is compared. This operator is defined
-	// for use with std::sort
-	bool operator < (const aiVectorKey& o) const
-		{return mTime < o.mTime;}
-
-	bool operator > (const aiVectorKey& o) const
-		{return mTime > o.mTime;}
-
+	//! Relational operators. Just the key time is compared
+	//! For use with std::sort();
+	bool operator < (const aiVectorKey& o) const {
+		return mTime < o.mTime;
+	}
+	bool operator > (const aiVectorKey& o) const {
+		return mTime > o.mTime;
+	}
 #endif
 };
 
@@ -89,28 +102,41 @@ struct aiVectorKey
  */
 struct aiQuatKey
 {
-	double mTime;      ///< The time of this key
-	C_STRUCT aiQuaternion mValue; ///< The value of this key
+	//! The time of this key
+	double mTime;     
+	//! The value of this key
+	C_STRUCT aiQuaternion mValue; 
 
 #ifdef __cplusplus
+
+	//! Default constructor
+	aiQuatKey(){}
+
+	//! Construction from a given time and key value
+	aiQuatKey(double time, const aiQuaternion& value)
+		:	mTime	(time)
+		,	mValue	(value)
+	{}
+
 	typedef aiQuaternion elem_type;
 
-	// time is not compared
-	bool operator == (const aiQuatKey& o) const
-		{return o.mValue == this->mValue;}
+	//! Comparison operators. Just the key value is compared
+	//! For use with std::find();
+	bool operator == (const aiQuatKey& o) const {
+		return o.mValue == this->mValue;
+	}
+	bool operator != (const aiQuatKey& o) const {
+		return o.mValue != this->mValue;
+	}
 
-	bool operator != (const aiQuatKey& o) const
-		{return o.mValue != this->mValue;}
-
-
-	// Only time is compared. This operator is defined
-	// for use with std::sort
-	bool operator < (const aiQuatKey& o) const
-		{return mTime < o.mTime;}
-
-	bool operator > (const aiQuatKey& o) const
-		{return mTime < o.mTime;}
-
+	//! Relational operators. Just the key time is compared
+	//! For use with std::sort();
+	bool operator < (const aiQuatKey& o) const {
+		return mTime < o.mTime;
+	}
+	bool operator > (const aiQuatKey& o) const {
+		return mTime > o.mTime;
+	}
 #endif
 };
 
@@ -314,7 +340,8 @@ struct Interpolator
 	/** @brief Get the result of the interpolation between a,b.
 	 *
 	 *  The interpolation algorithm depends on the type of the operands.
-	 *  aiVectorKey LERPs, aiQuatKey SLERPs. Any other type lerps, too.
+	 *  aiQuaternion's and aiQuatKey's SLERP, the rest does a simple
+	 *  linear interpolation.
 	 */
 	void operator () (T& out,const T& a, const T& b, float d) const {
 		out = a + (b-a)*d;
@@ -354,5 +381,8 @@ struct Interpolator <aiQuatKey>		{
 
 //! @endcond
 } //  ! end namespace Assimp
+
+
+
 #endif // __cplusplus
 #endif // AI_ANIM_H_INC

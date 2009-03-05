@@ -77,32 +77,41 @@ MDLImporter::~MDLImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool MDLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool MDLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	(void)pIOHandler; //this avoids the compiler warning of unused element
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)
-		return false;
+	const std::string extension = GetExtension(pFile);
+	if (extension == "mdl" )
+		return true;
 
-	std::string extension = pFile.substr( pos);
-	for( std::string::iterator it = extension.begin(); it != extension.end(); ++it)
-		*it = tolower( *it);
-
-	return extension == ".mdl";
+	// if check for extension is not enough, check for the magic tokens 
+	if (!extension.length() || checkSig) {
+		uint32_t tokens[8]; 
+		tokens[0] = AI_MDL_MAGIC_NUMBER_LE_HL2a;
+		tokens[1] = AI_MDL_MAGIC_NUMBER_LE_HL2b;
+		tokens[2] = AI_MDL_MAGIC_NUMBER_LE_GS7;
+		tokens[3] = AI_MDL_MAGIC_NUMBER_LE_GS5b;
+		tokens[4] = AI_MDL_MAGIC_NUMBER_LE_GS5a;
+		tokens[5] = AI_MDL_MAGIC_NUMBER_LE_GS4;
+		tokens[6] = AI_MDL_MAGIC_NUMBER_LE_GS3;
+		tokens[7] = AI_MDL_MAGIC_NUMBER_LE;
+		return CheckMagicToken(pIOHandler,pFile,tokens,7,0);
+	}
+	return false;
 }
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties
 void MDLImporter::SetupProperties(const Importer* pImp)
 {
-	// The AI_CONFIG_IMPORT_MDL_KEYFRAME option overrides the
+	configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_MDL_KEYFRAME,0xffffffff);
+
+	// The 
+	// AI_CONFIG_IMPORT_MDL_KEYFRAME option overrides the
 	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
-	if(0xffffffff == (configFrameID = pImp->GetPropertyInteger(
-		AI_CONFIG_IMPORT_MDL_KEYFRAME,0xffffffff)))
-	{
+	if(0xffffffff == configFrameID)	{
 		configFrameID =  pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
 	}
+
+	// AI_CONFIG_IMPORT_MDL_COLORMAP - pallette file
 	configPalette =  pImp->GetPropertyString(AI_CONFIG_IMPORT_MDL_COLORMAP,"colormap.lmp");
 }
 

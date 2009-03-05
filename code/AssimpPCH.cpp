@@ -1,5 +1,5 @@
 
-// Actually just a dummyy, used by the compiler to build the precompiled header.
+// Actually just a dummy, used by the compiler to build the precompiled header.
 
 #include "AssimpPCH.h"
 #include "./../include/aiVersion.h"
@@ -12,7 +12,7 @@ static const char* LEGAL_INFORMATION =
 "A free C/C++ library to import various 3D file formats into applications\n\n"
 
 "(c) ASSIMP Development Team, 2008-2009\n"
-"License: BSD\n"
+"License: 3-clause BSD license\n"
 "Website: http://assimp.sourceforge.net\n"
 ;
 
@@ -59,10 +59,12 @@ ASSIMP_API unsigned int aiGetCompileFlags ()	{
 	return flags;
 }
 
+// include current build revision
+#include "../mkutil/revision.h"
+
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API unsigned int aiGetVersionRevision ()
 {
-	// TODO: find a way to update the revision number automatically
-	return 306;
+	return SVNRevision;
 }
 

@@ -38,20 +38,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines the helper data structures for importing MD2 files  
-
-**********************************************************************
-File format specification: 
-//http://linux.ucla.edu/~phaethon/q3/formats/md2-schoenblum.html
-**********************************************************************
-
-*/
+/** @file  MD2FileData.h
+ *  @brief Defines helper data structures for importing MD2 files  
+ *  http://linux.ucla.edu/~phaethon/q3/formats/md2-schoenblum.html
+ */
 #ifndef AI_MD2FILEHELPER_H_INC
 #define AI_MD2FILEHELPER_H_INC
-
-#include <string>
-#include <vector>
-#include <sstream>
 
 #include "../include/aiTypes.h"
 #include "../include/aiMesh.h"
@@ -62,11 +54,9 @@ File format specification:
 namespace Assimp	{
 namespace MD2	{
 
-// to make it easier for ourselfes, we test the magic word against both "endianesses"
-#define MD2_MAKE(string) ((uint32_t)((string[0] << 24) + (string[1] << 16) + (string[2] << 8) + string[3]))
-
-#define AI_MD2_MAGIC_NUMBER_BE	MD2_MAKE("IDP2")
-#define AI_MD2_MAGIC_NUMBER_LE	MD2_MAKE("2PDI")
+// to make it easier for us, we test the magic word against both "endianesses"
+#define AI_MD2_MAGIC_NUMBER_BE	AI_MAKE_MAGIC("IDP2")
+#define AI_MD2_MAGIC_NUMBER_LE	AI_MAKE_MAGIC("2PDI")
 
 // common limitations
 #define AI_MD2_VERSION			15

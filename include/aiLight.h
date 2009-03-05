@@ -134,6 +134,7 @@ struct aiLight
 	 *  Atten = 1/( att0 + att1 * d + att2 * d*d)
 	 *  @endcode
 	 *  This member corresponds to the att0 variable in the equation.
+	 *  Naturally undefined for directional lights.
 	 */
 	float mAttenuationConstant;
 
@@ -145,6 +146,7 @@ struct aiLight
 	 *  Atten = 1/( att0 + att1 * d + att2 * d*d)
 	 *  @endcode
 	 *  This member corresponds to the att1 variable in the equation.
+	 *  Naturally undefined for directional lights.
 	 */
 	float mAttenuationLinear;
 
@@ -156,6 +158,7 @@ struct aiLight
 	 *  Atten = 1/( att0 + att1 * d + att2 * d*d)
 	 *  @endcode
 	 *  This member corresponds to the att2 variable in the equation.
+	 *  Naturally undefined for directional lights.
 	 */
 	float mAttenuationQuadratic;
 

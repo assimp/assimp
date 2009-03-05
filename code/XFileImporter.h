@@ -38,7 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Definition of the XFile importer class. */
+/** @file  XFileImporter.h 
+ *  @brief Definition of the XFile importer class. 
+ */
 #ifndef AI_XFILEIMPORTER_H_INC
 #define AI_XFILEIMPORTER_H_INC
 
@@ -51,8 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiNode;
 
-namespace Assimp
-{
+namespace Assimp	{
 struct XFile::Scene;
 struct XFile::Node;
 
@@ -75,7 +76,8 @@ public:
 	// -------------------------------------------------------------------
 	/** Returns whether the class can handle the format of the given file. 
 	 * See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+		bool CheckSig) const;
 
 protected:
 
@@ -83,10 +85,7 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append)
-	{
-		append.append("*.x");
-	}
+	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 

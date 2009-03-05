@@ -67,6 +67,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
 #endif
 
+// size_t to unsigned int, possible loss of data.
+// Yes, the compiler is right with his warning, but this loss of data
+// won't be a problem for us. So shut up little boy.
+#ifdef _MSC_VER
+#	pragma warning (disable : 4267)
+#endif
+
 // Actually that's not required for MSVC (it is included somewhere in 
 // the STL ..) but it is necessary for build with STLport.
 #include <ctype.h>
@@ -75,6 +82,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <list>
 #include <map>
+#include <set>
 #include <string>
 #include <sstream>
 #include <iomanip>

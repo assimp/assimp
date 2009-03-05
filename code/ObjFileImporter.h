@@ -66,9 +66,6 @@ class ObjFileImporter :
 {	
 	friend class Importer;
 
-	//!	OB file extention
-	static const std::string OBJ_EXT;
-
 protected:
 	///	\brief	Default constructor
 	ObjFileImporter();
@@ -79,7 +76,7 @@ protected:
 public:
 	/// \brief	Returns whether the class can handle the format of the given file. 
 	/// \remark	See BaseImporter::CanRead() for details.
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
 
 private:
 

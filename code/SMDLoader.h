@@ -38,10 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-
-//!
-//! @file Definition of SMD importer class
-//!
+/** @file  SMDLoader.h
+ *  @brief Defintion of the Valve SMD file format
+ */
 
 #ifndef AI_SMDLOADER_H_INCLUDED
 #define AI_SMDLOADER_H_INCLUDED
@@ -186,14 +185,16 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Returns whether the class can handle the format of the given file. 
-	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	 * See BaseImporter::CanRead() for details.
+	 */
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+		bool checkSig) const;
 
 	// -------------------------------------------------------------------
 	/** Called prior to ReadFile().
-	* The function is a request to the importer to update its configuration
-	* basing on the Importer's configuration property list.
-	*/
+	 * The function is a request to the importer to update its configuration
+	 * basing on the Importer's configuration property list.
+	 */
 	void SetupProperties(const Importer* pImp);
 
 protected:
@@ -203,10 +204,7 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append)
-	{
-		append.append("*.smd;*.vta");
-	}
+	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 

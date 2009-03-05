@@ -126,7 +126,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	const float angleEpsilon = 0.9999f;
 
 	std::vector<bool> vertexDone( pMesh->mNumVertices, false);
-	const float qnan = std::numeric_limits<float>::quiet_NaN();
+	const float qnan = get_qnan();
 
 	// create space for the tangents and bitangents
 	pMesh->mTangents = new aiVector3D[pMesh->mNumVertices];
@@ -149,8 +149,10 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 			// their tangent vectors are set to qnan.
 			for (unsigned int i = 0; i < face.mNumIndices;++i)
 			{
-				vertexDone[face.mIndices[i]] = true;
-				meshTang  [face.mIndices[i]] = qnan;
+				register unsigned int idx = face.mIndices[i];
+				vertexDone  [idx] = true;
+				meshTang    [idx] = qnan;
+				meshBitang  [idx] = qnan;
 			}
 
 			continue;
@@ -218,10 +220,10 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 		vertexFinder = &_vertexFinder;
 		posEpsilon = ComputePositionEpsilon(pMesh);
 	}
-
 	std::vector<unsigned int> verticesFound;
 
 	const float fLimit = cosf(this->configMaxAngle); 
+	std::vector<unsigned int> closeVertices;
 
 	// in the second pass we now smooth out all tangents and bitangents at the same local position 
 	// if they are not too far off.
@@ -234,11 +236,13 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 		const aiVector3D& origNorm = pMesh->mNormals[a];
 		const aiVector3D& origTang = pMesh->mTangents[a];
 		const aiVector3D& origBitang = pMesh->mBitangents[a];
-		std::vector<unsigned int> closeVertices;
-		closeVertices.push_back( a);
+		closeVertices.clear();
 
 		// find all vertices close to that position
 		vertexFinder->FindPositions( origPos, posEpsilon, verticesFound);
+
+		closeVertices.reserve (verticesFound.size()+5);
+		closeVertices.push_back( a);
 
 		// look among them for other vertices sharing the same normal and a close-enough tangent/bitangent
 		for( unsigned int b = 0; b < verticesFound.size(); b++)

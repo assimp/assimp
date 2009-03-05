@@ -75,7 +75,7 @@ void SpatialSort::Fill( const aiVector3D* pPositions, unsigned int pNumPositions
 	for( unsigned int a = 0; a < pNumPositions; a++)
 	{
 		const char* tempPointer = reinterpret_cast<const char*> (pPositions);
-		const aiVector3D* vec = reinterpret_cast<const aiVector3D*> (tempPointer + a * pElementOffset);
+		const aiVector3D* vec   = reinterpret_cast<const aiVector3D*> (tempPointer + a * pElementOffset);
 
 		// store position by index and distance
 		float distance = *vec * mPlaneNormal;
@@ -90,8 +90,8 @@ void SpatialSort::Fill( const aiVector3D* pPositions, unsigned int pNumPositions
 // Returns an iterator for all positions close to the given position.
 void SpatialSort::FindPositions( const aiVector3D& pPosition, float pRadius, std::vector<unsigned int>& poResults) const
 {
-	float dist = pPosition * mPlaneNormal;
-	float minDist = dist - pRadius, maxDist = dist + pRadius;
+	const float dist = pPosition * mPlaneNormal;
+	const float minDist = dist - pRadius, maxDist = dist + pRadius;
 
 	// clear the array in this strange fashion because a simple clear() would also deallocate
     // the array which we want to avoid
@@ -128,10 +128,10 @@ void SpatialSort::FindPositions( const aiVector3D& pPosition, float pRadius, std
 	// Mow start iterating from there until the first position lays outside of the distance range.
 	// Add all positions inside the distance range within the given radius to the result aray
 	std::vector<Entry>::const_iterator it = mPositions.begin() + index;
-	float squareEpsilon = pRadius * pRadius;
+	const float pSquared = pRadius*pRadius;
 	while( it->mDistance < maxDist)
 	{
-		if( (it->mPosition - pPosition).SquareLength() < squareEpsilon)
+		if( (it->mPosition - pPosition).SquareLength() < pSquared)
 			poResults.push_back( it->mIndex);
 		++it;
 		if( it == mPositions.end())

@@ -112,21 +112,22 @@ void MD5Parser::ParseHeader()
 	if (0 != ASSIMP_strincmp(buffer,"MD5Version",10) ||
 		!IsSpace(*(buffer+=10)))
 	{
-		this->ReportError("Invalid MD5 file: MD5Version tag has not been found");
+		ReportError("Invalid MD5 file: MD5Version tag has not been found");
 	}
 	SkipSpaces();
 	unsigned int iVer = ::strtol10(buffer,(const char**)&buffer);
 	if (10 != iVer)
 	{
-		this->ReportWarning("MD5 version tag is unknown (10 is expected)");
+		ReportWarning("MD5 version tag is unknown (10 is expected)");
 	}
-	this->SkipLine();
+	SkipLine();
 
 	// print the command line options to the console
+	// fix: can break the log length limit ...
 	char* sz = buffer;
 	while (!IsLineEnd( *buffer++));
-	DefaultLogger::get()->info(std::string(sz,(uintptr_t)(buffer-sz)));
-	this->SkipSpacesAndLineEnd();
+	DefaultLogger::get()->info(std::string(sz,std::min((uintptr_t)MAX_LOG_MESSAGE_LENGTH, (uintptr_t)(buffer-sz))));
+	SkipSpacesAndLineEnd();
 }
 // ------------------------------------------------------------------------------------------------
 bool MD5Parser::ParseSection(Section& out)

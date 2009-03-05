@@ -227,7 +227,7 @@ struct BaseNode
 		mName = szTemp;
 
 		// Set mTargetPosition to qnan
-		const float qnan = std::numeric_limits<float>::quiet_NaN();
+		const float qnan = get_qnan();
 		mTargetPosition.x = qnan;
 	}
 

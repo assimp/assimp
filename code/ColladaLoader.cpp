@@ -67,22 +67,16 @@ ColladaLoader::~ColladaLoader()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	// check file extension 
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)
-		return false;
-	std::string extension = pFile.substr( pos);
-	for( std::string::iterator it = extension.begin(); it != extension.end(); ++it)
-		*it = tolower( *it);
-
-	if( extension == ".dae")
+	std::string extension = GetExtension(pFile);
+	
+	if( extension == "dae")
 		return true;
 
 	// XML - too generic, we need to open the file and search for typical keywords
-	if( extension == ".xml")	{
+	if( extension == "xml" || !extension.length() || checkSig)	{
 		/*  If CanRead() is called in order to check whether we
 		 *  support a specific file extension in general pIOHandler
 		 *  might be NULL and it's our duty to return true here.
@@ -92,6 +86,13 @@ bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler) con
 		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
 	}
 	return false;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Get file extension list
+void ColladaLoader::GetExtensionList( std::string& append)
+{
+	append.append("*.dae");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -166,7 +167,8 @@ aiNode* ColladaLoader::BuildHierarchy( const ColladaParser& pParser, const Colla
 	aiNode* node = new aiNode();
 
 	// now setup the name of the node. We take the name if not empty, otherwise the collada ID
-	if (!pNode->mName.empty())
+	// FIX: Workaround for XSI calling the instanced visual scene 'untitled' by default.
+	if (!pNode->mName.empty() && pNode->mName != "untitled")
 		node->mName.Set(pNode->mName);
 	else if (!pNode->mID.empty())
 		node->mName.Set(pNode->mID);
@@ -632,7 +634,7 @@ void ColladaLoader::AddTexture ( Assimp::MaterialHelper& mat, const ColladaParse
 		_AI_MATKEY_TEXTURE_BASE,type,idx);
 
 	// mapping mode
-	int map = map = aiTextureMapMode_Clamp;
+	int map = aiTextureMapMode_Clamp;
 	if (sampler.mWrapU)
 		map = aiTextureMapMode_Wrap;
 	if (sampler.mWrapU && sampler.mMirrorU)

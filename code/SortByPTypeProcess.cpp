@@ -303,7 +303,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 					if (vert)
 					{
 						*vert++ = mesh->mVertices[idx];
-						//mesh->mVertices[idx].x = std::numeric_limits<float>::quiet_NaN();
+						//mesh->mVertices[idx].x = get_qnan();
 					}
 					if (nor )*nor++  = mesh->mNormals[idx];
 					if (tan )

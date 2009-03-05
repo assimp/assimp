@@ -38,7 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Definition of the .MD2 importer class. */
+/** @file  MD2Loader.h
+ *  @brief Declaration of the .MD2 importer class.
+ */
 #ifndef AI_MD2LOADER_H_INCLUDED
 #define AI_MD2LOADER_H_INCLUDED
 
@@ -48,14 +50,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiNode;
 #include "MD2FileData.h"
 
-namespace Assimp
-{
+namespace Assimp	{
 class MaterialHelper;
 
 using namespace MD2;
 
 // ---------------------------------------------------------------------------
-/** Used to load MD2 files
+/** Importer class for MD2
 */
 class MD2Importer : public BaseImporter
 {
@@ -73,7 +74,8 @@ public:
 	// -------------------------------------------------------------------
 	/** Returns whether the class can handle the format of the given file. 
 	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+		bool checkSig) const;
 
 
 	// -------------------------------------------------------------------
@@ -89,10 +91,7 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append)
-	{
-		append.append("*.md2");
-	}
+	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 

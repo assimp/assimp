@@ -281,6 +281,7 @@ inline aiQuaternion aiQuaternion::operator* (const aiQuaternion& t) const
 }
 
 } // end extern "C"
+
 #endif // __cplusplus
 
 #endif // AI_QUATERNION_H_INC

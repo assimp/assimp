@@ -43,6 +43,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 
+/* Uncomment this line to prevent Assimp from catching unknown exceptions.
+ *
+ * Note that any Exception except ImportErrorException may lead to 
+ * undefined behaviour -> loaders could remain in an unusable state and
+ * further imports with the same Importer instance could fail/crash/burn ...
+ */
+#define ASSIMP_CATCH_GLOBAL_EXCEPTIONS
+
 // =======================================================================================
 // Internal headers
 // =======================================================================================
@@ -135,6 +143,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_TERRAGEN_IMPORTER
 #	include "TerragenLoader.h"
 #endif
+//#ifndef AI_BUILD_NO_CSM_IMPORTER
+//#	include "CSMLoader.h"
+//#endif
+#ifndef AI_BUILD_NO_3D_IMPORTER
+#	include "UnrealLoader.h"
+#endif
+
+
+
+
+#ifndef AI_BUILD_NO_LWS_IMPORTER
+#	include "LWSLoader.h"
+#endif
+
 
 // =======================================================================================
 // PostProcess-Steps
@@ -325,6 +347,18 @@ Importer::Importer()
 #if (!defined AI_BUILD_NO_TERRAGEN_IMPORTER)
 	mImporter.push_back( new TerragenImporter());
 #endif
+//#if (!defined AI_BUILD_NO_CSM_IMPORTER)
+//	mImporter.push_back( new CSMImporter());
+//#endif
+#if (!defined AI_BUILD_NO_3D_IMPORTER)
+	mImporter.push_back( new UnrealImporter());
+#endif
+
+
+
+#if (!defined AI_BUILD_NO_LWS_IMPORTER)
+	mImporter.push_back( new LWSImporter());
+#endif
 
 	// ======================================================================
 	// Add an instance of each post processing step here in the order 
@@ -332,10 +366,6 @@ Importer::Importer()
 	// validated - as RegisterPPStep() does - all dependencies must be there.
 	// ======================================================================
 	mPostProcessingSteps.reserve(25);
-
-#if (!defined AI_BUILD_NO_VALIDATEDS_PROCESS)
-	mPostProcessingSteps.push_back( new ValidateDSProcess()); 
-#endif
 
 #if (!defined AI_BUILD_NO_REMOVEVC_PROCESS)
 	mPostProcessingSteps.push_back( new RemoveVCProcess());
@@ -548,10 +578,9 @@ bool Importer::IsDefaultIOHandler()
 	return mIsDefaultHandler;
 }
 
-#ifdef _DEBUG
 // ------------------------------------------------------------------------------------------------
 // Validate post process step flags 
-bool ValidateFlags(unsigned int pFlags)
+bool _ValidateFlags(unsigned int pFlags)
 {
 	if (pFlags & aiProcess_GenSmoothNormals &&
 		pFlags & aiProcess_GenNormals)
@@ -562,7 +591,6 @@ bool ValidateFlags(unsigned int pFlags)
 	}
 	return true;
 }
-#endif // ! DEBUG
 
 // ------------------------------------------------------------------------------------------------
 // Free the current scene
@@ -603,11 +631,49 @@ aiScene* Importer::GetOrphanedScene()
 }
 
 // ------------------------------------------------------------------------------------------------
+// Validate post-processing flags
+bool Importer::ValidateFlags(unsigned int pFlags)
+{
+	// run basic checks for mutually exclusive flags
+	if(!_ValidateFlags(pFlags))
+		return false;
+
+	// ValidateDS does not anymore occur in the pp list, it plays
+	// an awesome extra role ...
+#ifdef AI_BUILD_NO_VALIDATEDS_PROCESS
+	if (pFlags & aiProcess_ValidateDataStructure)
+		return false;
+#endif
+	pFlags &= ~aiProcess_ValidateDataStructure;
+
+	// Now iterate through all bits which are set in
+	// the flags and check whether we find at least
+	// one pp plugin which handles it.
+	for (unsigned int mask = 1; mask < (1 << (sizeof(unsigned int)*8-1));mask <<= 1) {
+		
+		if (pFlags & mask) {
+		
+			bool have = false;
+			for( unsigned int a = 0; a < mPostProcessingSteps.size(); a++)	{
+				if (mPostProcessingSteps[a]-> IsActive(mask) ) {
+				
+					have = true;
+					break;
+				}
+			}
+			if (!have)
+				return false;
+		}
+	}
+	return true;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Reads the given file and returns its contents if successful. 
 const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 {
-	// Validate the flags
-	ai_assert(ValidateFlags(pFlags));
+	// In debug builds, run a basic flag validation
+	ai_assert(_ValidateFlags(pFlags));
 
 	const std::string pFile(_pFile);
 
@@ -616,7 +682,9 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 	// that might be thrown by STL containers or by new(). 
 	// ImportErrorException's are throw by ourselves and caught elsewhere.
 	// ======================================================================
+#ifdef ASSIMP_CATCH_GLOBAL_EXCEPTIONS
 	try
+#endif // ! ASSIMP_CATCH_GLOBAL_EXCEPTIONS
 	{
 		// Check whether this Importer instance has already loaded
 		// a scene. In this case we need to delete the old one
@@ -636,21 +704,35 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 
 		// Find an worker class which can handle the file
 		BaseImporter* imp = NULL;
-		for( unsigned int a = 0; a < mImporter.size(); a++)
-		{
-			if( mImporter[a]->CanRead( pFile, mIOHandler))
-			{
+		for( unsigned int a = 0; a < mImporter.size(); a++)	{
+
+			if( mImporter[a]->CanRead( pFile, mIOHandler, false)) {
 				imp = mImporter[a];
 				break;
 			}
 		}
 
-		// Put a proper error message if no suitable importer was found
-		if( !imp)
+		if (!imp)
 		{
-			mErrorString = "No suitable reader found for the file format of file \"" + pFile + "\".";
-			DefaultLogger::get()->error(mErrorString);
-			return NULL;
+			// not so bad yet ... try format auto detection.
+			std::string::size_type s = pFile.find_last_of('.');
+			if (s != std::string::npos) {
+				DefaultLogger::get()->info("File extension now known, trying signature-based detection");
+				for( unsigned int a = 0; a < mImporter.size(); a++)	{
+
+					if( mImporter[a]->CanRead( pFile, mIOHandler, true)) {
+						imp = mImporter[a];
+						break;
+					}
+				}
+			}
+			// Put a proper error message if no suitable importer was found
+			if( !imp)
+			{
+				mErrorString = "No suitable reader found for the file format of file \"" + pFile + "\".";
+				DefaultLogger::get()->error(mErrorString);
+				return NULL;
+			}
 		}
 
 		// Dispatch the reading to the worker class for this format
@@ -661,7 +743,19 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 		// If successful, apply all active post processing steps to the imported data
 		if( mScene)
 		{
-			// FIRST of all - preprocess the scene 
+#ifndef AI_BUILD_NO_VALIDATEDS_PROCESS
+			// The ValidateDS process is an exception. It is executed first,
+			// even before ScenePreprocessor is called.
+			if (pFlags & aiProcess_ValidateDataStructure)
+			{
+				ValidateDSProcess ds;
+				ds.ExecuteOnScene (this);
+				if (!mScene)
+					return NULL;
+			}
+#endif // no validation
+
+			// Preprocess the scene 
 			ScenePreprocessor pre(mScene);
 			pre.ProcessScene();
 
@@ -669,11 +763,11 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 #ifdef _DEBUG
 			if (bExtraVerbose)
 			{
-#if (!defined AI_BUILD_NO_VALIDATEDS_PROCESS)
+#ifndef AI_BUILD_NO_VALIDATEDS_PROCESS
 
 				DefaultLogger::get()->error("Extra verbose mode not available, library"
 					" wasn't build with the ValidateDS-Step");
-#endif
+#endif  // no validation
 
 
 				pFlags |= aiProcess_ValidateDataStructure;
@@ -694,14 +788,16 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 
 #ifndef AI_BUILD_NO_VALIDATEDS_PROCESS
 				continue;
-#endif
+#endif  // no validation
 
-				// if the extra verbose mode is active execute the
+				// If the extra verbose mode is active execute the
 				// VaidateDataStructureStep again after each step
-				if (bExtraVerbose && a)
+				if (bExtraVerbose)
 				{
 					DefaultLogger::get()->debug("Extra verbose: revalidating data structures");
-					((ValidateDSProcess*)mPostProcessingSteps[0])->ExecuteOnScene (this);
+					
+					ValidateDSProcess ds; 
+					ds.ExecuteOnScene (this);
 					if( !mScene)
 					{
 						DefaultLogger::get()->error("Extra verbose: failed to revalidate data structures");
@@ -712,11 +808,13 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 			}
 		}
 		// if failed, extract the error string
-		else if( !mScene)mErrorString = imp->GetErrorText();
+		else if( !mScene)
+			mErrorString = imp->GetErrorText();
 
 		// clear any data allocated by post-process steps
 		mPPShared->Clean();
 	}
+#ifdef ASSIMP_CATCH_GLOBAL_EXCEPTIONS
 	catch (std::exception &e)
 	{
 #if (defined _MSC_VER) &&	(defined _CPPRTTI) 
@@ -729,6 +827,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 		DefaultLogger::get()->error(mErrorString);
 		delete mScene;mScene = NULL;
 	}
+#endif // ! ASSIMP_CATCH_GLOBAL_EXCEPTIONS
 
 	// either successful or failure - the pointer expresses it anyways
 	return mScene;
@@ -750,7 +849,7 @@ BaseImporter* Importer::FindLoader (const char* _szExtension)
 		i != mImporter.end();++i)
 	{
 		// pass the file extension to the CanRead(..,NULL)-method
-		if ((*i)->CanRead(szExtension,NULL))return *i;
+		if ((*i)->CanRead(szExtension,NULL,false))return *i;
 	}
 	return NULL;
 }
@@ -765,8 +864,10 @@ void Importer::GetExtensionList(aiString& szOut)
 		i =  mImporter.begin();
 		i != mImporter.end();++i,++iNum)
 	{
-		// insert a comma as delimiter character
-		if (0 != iNum)
+		// Insert a comma as delimiter character
+		// FIX: to take lazy loader implementations into account, we are
+		// slightly more tolerant here than we'd need to be.
+		if (0 != iNum && ';' != *(tmp.end()-1))
 			tmp.append(";");
 
 		(*i)->GetExtensionList(tmp);

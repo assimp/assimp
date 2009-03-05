@@ -1,1 +1,2 @@
-"MotionCaptureROM.ase" Recorded at the HTW Aalen using LycosIQ. Converted to VRML with 3DS Max 2008. Free for any purpose
+"MotionCaptureROM.ase" Recorded using ViconIQ.
+Converted to VRML with 3DS Max 2008. 

@@ -344,18 +344,19 @@ MD3Importer::~MD3Importer()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool MD3Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool MD3Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)
-		return false;
-	std::string extension = pFile.substr( pos);
-	for( std::string::iterator it = extension.begin(); it != extension.end(); ++it)
-		*it = tolower( *it);
+	const std::string extension = GetExtension(pFile);
+	if (extension == "md3")
+		return true;
 
-	return ( extension == ".md3");
+	// if check for extension is not enough, check for the magic tokens 
+	if (!extension.length() || checkSig) {
+		uint32_t tokens[1]; 
+		tokens[0] = AI_MD3_MAGIC_NUMBER_LE;
+		return CheckMagicToken(pIOHandler,pFile,tokens,1);
+	}
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -436,6 +437,9 @@ void MD3Importer::SetupProperties(const Importer* pImp)
 
 	// AI_CONFIG_IMPORT_MD3_SHADER_SRC
 	configShaderFile = (pImp->GetPropertyString(AI_CONFIG_IMPORT_MD3_SHADER_SRC,""));
+
+	// AI_CONFIG_FAVOUR_SPEED
+	configSpeedFlag = (0 != pImp->GetPropertyInteger(AI_CONFIG_FAVOUR_SPEED,0));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -458,10 +462,7 @@ void MD3Importer::ReadSkin(Q3Shader::SkinData& fill) const
 void MD3Importer::ReadShader(Q3Shader::ShaderData& fill) const
 {
 	// Determine Q3 model name from given path
-	std::string::size_type s = path.find_last_of('\\',path.length()-2);
-	if (s == std::string::npos)
-		s = path.find_last_of('/',path.length()-2);
-
+	std::string::size_type s = path.find_last_of("\\/",path.length()-2);
 	const std::string model_file = path.substr(s+1,path.length()-(s+2));
 
 	// If no specific dir or file is given, use our default search behaviour
@@ -482,6 +483,24 @@ void MD3Importer::ReadShader(Q3Shader::ShaderData& fill) const
 		}
 		else {
 			Q3Shader::LoadShader(fill,configShaderFile,mIOHandler);
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Tiny helper to remove a single node from its parent' list
+void RemoveSingleNodeFromList(aiNode* nd)
+{
+	if (!nd || nd->mNumChildren || !nd->mParent)return;
+	aiNode* par = nd->mParent;
+	for (unsigned int i = 0; i < par->mNumChildren;++i) {
+		if (par->mChildren[i] == nd) { 
+			--par->mNumChildren;
+			for (;i < par->mNumChildren;++i) {
+				par->mChildren[i] = par->mChildren[i+1];
+			}
+			delete nd;
+			break;
 		}
 	}
 }
@@ -520,32 +539,32 @@ bool MD3Importer::ReadMultipartFile()
 
 		// now read these three files
 		BatchLoader batch(mIOHandler);
-		batch.AddLoadRequest(lower,0,&props);
-		batch.AddLoadRequest(upper,0,&props);
-		batch.AddLoadRequest(head,0,&props);
+		unsigned int _lower = batch.AddLoadRequest(lower,0,&props);
+		unsigned int _upper = batch.AddLoadRequest(upper,0,&props);
+		unsigned int _head  = batch.AddLoadRequest(head,0,&props);
 		batch.LoadAll();
 
 		// now construct a dummy scene to place these three parts in
 		aiScene* master   = new aiScene();
 		aiNode* nd = master->mRootNode = new aiNode();
-		nd->mName.Set("<M3D_Player>");
+		nd->mName.Set("<MD3_Player>");
 
 		// ... and get them. We need all of them.
-		scene_lower = batch.GetImport(lower);
+		scene_lower = batch.GetImport(_lower);
 		if (!scene_lower) {
 			DefaultLogger::get()->error("M3D: Failed to read multipart model, lower.md3 fails to load");
 			failure = "lower";
 			goto error_cleanup;
 		}
 
-		scene_upper = batch.GetImport(upper);
+		scene_upper = batch.GetImport(_upper);
 		if (!scene_upper) {
 			DefaultLogger::get()->error("M3D: Failed to read multipart model, upper.md3 fails to load");
 			failure = "upper";
 			goto error_cleanup;
 		}
 
-		scene_head  = batch.GetImport(head);
+		scene_head  = batch.GetImport(_head);
 		if (!scene_head) {
 			DefaultLogger::get()->error("M3D: Failed to read multipart model, head.md3 fails to load");
 			failure = "head";
@@ -555,6 +574,7 @@ bool MD3Importer::ReadMultipartFile()
 		// build attachment infos. search for typical Q3 tags
 
 		// original root
+		scene_lower->mRootNode->mName.Set("lower");
 		attach.push_back(AttachmentInfo(scene_lower, nd));
 
 		// tag_torso
@@ -563,6 +583,7 @@ bool MD3Importer::ReadMultipartFile()
 			DefaultLogger::get()->error("M3D: Failed to find attachment tag for multipart model: tag_torso expected");
 			goto error_cleanup;
 		}
+		scene_upper->mRootNode->mName.Set("upper");
 		attach.push_back(AttachmentInfo(scene_upper,tag_torso));
 
 		// tag_head
@@ -571,13 +592,21 @@ bool MD3Importer::ReadMultipartFile()
 			DefaultLogger::get()->error("M3D: Failed to find attachment tag for multipart model: tag_head expected");
 			goto error_cleanup;
 		}
+		scene_head->mRootNode->mName.Set("head");
 		attach.push_back(AttachmentInfo(scene_head,tag_head));
+
+		// Remove tag_head and tag_torso from all other model parts ...
+		// this ensures (together with AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY)
+		// that tag_torso/tag_head is also the name of the (unique) output node
+		RemoveSingleNodeFromList (scene_upper->mRootNode->FindNode("tag_torso"));
+		RemoveSingleNodeFromList (scene_head-> mRootNode->FindNode("tag_head" ));
 
 		// and merge the scenes
 		SceneCombiner::MergeScenes(&mScene,master, attach,
-			AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES |
-			AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES |
-			AI_INT_MERGE_SCENE_RESOLVE_CROSS_ATTACHMENTS);
+			AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES          |
+			AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES       |
+			AI_INT_MERGE_SCENE_RESOLVE_CROSS_ATTACHMENTS |
+			(!configSpeedFlag ? AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY : 0));
 
 		return true;
 

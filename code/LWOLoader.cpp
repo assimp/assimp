@@ -68,21 +68,21 @@ LWOImporter::~LWOImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool LWOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool LWOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)return false;
-	std::string extension = pFile.substr( pos);
+	const std::string extension = GetExtension(pFile);
+	if (extension == "lwo" || extension == "lxo")
+		return true;
 
-	if (extension.length() < 4)return false;
-	if (extension[0] != '.')return false;
-
-	return ! (extension[1] != 'l' && extension[1] != 'L' ||
-			  extension[2] != 'w' && extension[2] != 'W' &&
-			  extension[2] != 'x' && extension[2] != 'X' ||
-			  extension[3] != 'o' && extension[3] != 'O');
+	// if check for extension is not enough, check for the magic tokens 
+	if (!extension.length() || checkSig) {
+		uint32_t tokens[3]; 
+		tokens[0] = AI_LWO_FOURCC_LWOB;
+		tokens[1] = AI_LWO_FOURCC_LWO2;
+		tokens[2] = AI_LWO_FOURCC_LXOB;
+		return CheckMagicToken(pIOHandler,pFile,tokens,3,8);
+	}
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -109,21 +109,23 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	if((this->fileSize = (unsigned int)file->FileSize()) < 12)
 		throw new ImportErrorException("LWO: The file is too small to contain the IFF header");
 
-	// allocate storage and copy the contents of the file to a memory buffer
+	// Allocate storage and copy the contents of the file to a memory buffer
 	std::vector< uint8_t > mBuffer(fileSize);
 	file->Read( &mBuffer[0], 1, fileSize);
 	this->pScene = pScene;
 
-	// determine the type of the file
+	// Determine the type of the file
 	uint32_t fileType;
 	const char* sz = IFF::ReadHeader(&mBuffer[0],fileType);
 	if (sz)throw new ImportErrorException(sz);
 
 	mFileBuffer = &mBuffer[0] + 12;
 	fileSize -= 12;
-	hasNamedLayer = false;
 
-	// create temporary storage on the stack but store pointers to it in the class 
+	// Initialize some members with their default values
+	hasNamedLayer   = false;
+
+	// Create temporary storage on the stack but store pointers to it in the class 
 	// instance. Therefore everything will be destructed properly if an exception 
 	// is thrown and we needn't take care of that.
 	LayerList		_mLayers;
@@ -218,6 +220,11 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 			for (FaceList::iterator it = layer.mFaces.begin(), end = layer.mFaces.end();
 				it != end;++it,++i)
 			{
+				// Check whether we support this face's type
+				if ((*it).type != AI_LWO_FACE && (*it).type != AI_LWO_PTCH) {
+					continue;
+				}
+
 				unsigned int idx = (*it).surfaceIndex;
 				if (idx >= mTags->size())
 				{
@@ -282,7 +289,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 					if (0xffffffff == vUVChannelIndices[mui])break;
 					pvUV[mui] = mesh->mTextureCoords[mui] = new aiVector3D[mesh->mNumVertices];
 
-					// LightWave doesn't support more than 2 UV components
+					// LightWave doesn't support more than 2 UV components (?)
 					// so we can directly setup this value
 					mesh->mNumUVComponents[0] = 2;
 				}
@@ -318,6 +325,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 						register unsigned int idx = face.mIndices[q];
 						*pv = layer.mTempPoints[idx] + layer.mPivot;
 						pv->z *= -1.0f; // DX to OGL
+						//std::swap(pv->z,pv->y);
 						pv++;
 
 						// process UV coordinates
@@ -585,7 +593,8 @@ void LWOImporter::GenerateNodeGraph(std::vector<aiNode*>& apcNodes)
 		pScene->mRootNode->mChildren	= apcNewNodes;
 		pScene->mRootNode->mNumChildren	= newSize;
 	}
-	if (!pScene->mRootNode->mNumChildren)throw new ImportErrorException("LWO: Unable to build a valid node graph");
+	if (!pScene->mRootNode->mNumChildren)
+		throw new ImportErrorException("LWO: Unable to build a valid node graph");
 
 	// remove a single root node
 	// TODO: implement directly in the above loop, no need to deallocate here
@@ -717,31 +726,44 @@ void LWOImporter::LoadLWOPoints(unsigned int length)
 void LWOImporter::LoadLWO2Polygons(unsigned int length)
 {
 	LE_NCONST uint16_t* const end	= (LE_NCONST uint16_t*)(mFileBuffer+length);
-	uint32_t type = GetU4();
+	const uint32_t type = GetU4();
 
 	// Determine the type of the polygons
 	switch (type)
 	{
+		// read unsupported stuff too (although we wont process it)
+	case  AI_LWO_BONE:
+		DefaultLogger::get()->warn("LWO2: Encountered unsupported primitive chunk (BONE)");
+		break;
+	case  AI_LWO_MBAL:
+		DefaultLogger::get()->warn("LWO2: Encountered unsupported primitive chunk (METABALL)");
+		break;
+	case  AI_LWO_CURV:
+		DefaultLogger::get()->warn("LWO2: Encountered unsupported primitive chunk (SPLINE)");;
+		break;
+
+		// These are ok with no restrictions
 	case  AI_LWO_PTCH:
 	case  AI_LWO_FACE:
-
 		break;
 	default:
-		DefaultLogger::get()->warn("LWO2: Unsupported polygon type (PTCH and FACE are supported)");
+
+		// hm!? wtf is this? ok ...
+		DefaultLogger::get()->error("LWO2: Encountered unknown polygon type");
+		break;
 	}
 
 	// first find out how many faces and vertices we'll finally need
-	uint16_t* cursor		= (uint16_t*)mFileBuffer;
+	uint16_t* cursor= (uint16_t*)mFileBuffer;
 
 	unsigned int iNumFaces = 0,iNumVertices = 0;
 	CountVertsAndFacesLWO2(iNumVertices,iNumFaces,cursor,end);
 
 	// allocate the output array and copy face indices
-	if (iNumFaces)
-	{
+	if (iNumFaces)	{
 		cursor = (uint16_t*)mFileBuffer;
 
-		mCurLayer->mFaces.resize(iNumFaces);
+		mCurLayer->mFaces.resize(iNumFaces,LWO::Face(type));
 		FaceList::iterator it = mCurLayer->mFaces.begin();
 		CopyFaceIndicesLWO2(it,cursor,end);
 	}
@@ -898,6 +920,7 @@ inline void AddToSingleLinkedList(ReferrerList& refList, unsigned int srcIdx, un
 }
 
 // ------------------------------------------------------------------------------------------------
+// Load LWO2 vertex map
 void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 {
 	LE_NCONST uint8_t* const end = mFileBuffer+length;
@@ -915,24 +938,24 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 	switch (type)
 	{
 	case AI_LWO_TXUV:
-		if (dims != 2)
-		{
+		if (dims != 2)	{
 			DefaultLogger::get()->warn("LWO2: Found UV channel with != 2 components"); 
+			return;
 		}
 		base = FindEntry(mCurLayer->mUVChannels,name,perPoly);
 		break;
 	case AI_LWO_WGHT:
-		if (dims != 1)
-		{
+		if (dims != 1)	{
 			DefaultLogger::get()->warn("LWO2: found vertex weight map with != 1 components"); 
+			return;
 		}
 		base = FindEntry(mCurLayer->mWeightChannels,name,perPoly);
 		break;
 	case AI_LWO_RGB:
 	case AI_LWO_RGBA:
-		if (dims != 3 && dims != 4)
-		{
+		if (dims != 3 && dims != 4)	{
 			DefaultLogger::get()->warn("LWO2: found vertex color map with != 3&4 components"); 
+			return;
 		}
 		base = FindEntry(mCurLayer->mVColorChannels,name,perPoly);
 		break;
@@ -1028,6 +1051,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 }
 
 // ------------------------------------------------------------------------------------------------
+// Load LWO2 clip
 void LWOImporter::LoadLWO2Clip(unsigned int length)
 {
 	AI_LWO_VALIDATE_CHUNK_LENGTH(length,CLIP,10);
@@ -1042,6 +1066,7 @@ void LWOImporter::LoadLWO2Clip(unsigned int length)
 	switch (head->type)
 	{
 	case AI_LWO_STIL:
+		AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,STIL,1);
 
 		// "Normal" texture
 		GetS0(clip.path,head->length);
@@ -1049,7 +1074,7 @@ void LWOImporter::LoadLWO2Clip(unsigned int length)
 		break;
 
 	case AI_LWO_ISEQ:
-
+		AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,ISEQ,16);
 		// Image sequence. We'll later take the first.
 		{
 			uint8_t digits = GetU1();  mFileBuffer++;
@@ -1078,10 +1103,16 @@ void LWOImporter::LoadLWO2Clip(unsigned int length)
 		break;
 
 	case AI_LWO_XREF:
+		AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,XREF,4);
 
 		// Just a cross-reference to another CLIp
 		clip.type = Clip::REF;
 		clip.clipRef = GetU4();
+		break;
+
+	case AI_LWO_NEGA:
+		AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,NEGA,2);
+		clip.negate = (0 != GetU2());
 		break;
 
 	default:
@@ -1090,6 +1121,106 @@ void LWOImporter::LoadLWO2Clip(unsigned int length)
 }
 
 // ------------------------------------------------------------------------------------------------
+// Load envelope description
+void LWOImporter::LoadLWO2Envelope(unsigned int length)
+{
+	LE_NCONST uint8_t* const end = mFileBuffer + length;
+	AI_LWO_VALIDATE_CHUNK_LENGTH(length,ENVL,4);
+
+	mEnvelopes.push_back(LWO::Envelope());
+	LWO::Envelope& envelope = mEnvelopes.back();
+
+	// Get the index of the envelope
+	envelope.index = ReadVSizedIntLWO2(mFileBuffer);
+
+	// ... and read all subchunks
+	while (true)
+	{
+		if (mFileBuffer + 6 >= end)break;
+		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
+
+		if (mFileBuffer + head->length > end)
+			throw new ImportErrorException("LWO2: Invalid envelope chunk length");
+
+		uint8_t* const next = mFileBuffer+head->length;
+		switch (head->type)
+		{
+			// Type & representation of the envelope
+		case AI_LWO_TYPE:
+			AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,TYPE,2);
+			mFileBuffer++; // skip user format
+
+			// Determine type of envelope
+			envelope.type  = (LWO::EnvelopeType)*mFileBuffer;
+			++mFileBuffer;
+			break;
+
+			// precondition
+		case AI_LWO_PRE:
+			AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,PRE,2);
+			envelope.pre = (LWO::PrePostBehaviour)GetU2();
+			break;
+		
+			// postcondition
+		case AI_LWO_POST:
+			AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,POST,2);
+			envelope.post = (LWO::PrePostBehaviour)GetU2();
+			break;
+
+			// keyframe
+		case AI_LWO_KEY: 
+			{
+			AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,KEY,8);
+			
+			envelope.keys.push_back(LWO::Key());
+			LWO::Key& key = envelope.keys.back();
+
+			key.time = GetF4();
+			key.value = GetF4();
+			break;
+			}
+
+			// interval interpolation
+		case AI_LWO_SPAN: 
+			{
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,SPAN,4);
+				if (envelope.keys.size()<2)
+					DefaultLogger::get()->warn("LWO2: Unexpected SPAN chunk");
+				else {
+					LWO::Key& key = envelope.keys.back();
+					switch (GetU4())
+					{
+						case AI_LWO_STEP:
+							key.inter = LWO::IT_STEP;break;
+						case AI_LWO_LINE:
+							key.inter = LWO::IT_LINE;break;
+						case AI_LWO_TCB:
+							key.inter = LWO::IT_TCB;break;
+						case AI_LWO_HERM:
+							key.inter = LWO::IT_HERM;break;
+						case AI_LWO_BEZI:
+							key.inter = LWO::IT_BEZI;break;
+						case AI_LWO_BEZ2:
+							key.inter = LWO::IT_BEZ2;break;
+						default:
+							DefaultLogger::get()->warn("LWO2: Unknown interval interpolation mode");
+					};
+
+					// todo ... read params
+				}
+				break;
+			}
+
+		default:
+			DefaultLogger::get()->warn("LWO2: Encountered unknown ENVL subchunk");
+		}
+		// regardless how much we did actually read, go to the next chunk
+		mFileBuffer = next;
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Load file - master function
 void LWOImporter::LoadLWO2File()
 {
 	bool skip = false;
@@ -1121,8 +1252,7 @@ void LWOImporter::LoadLWO2File()
 				// load this layer or ignore it? Check the layer index property
 				// NOTE: The first layer is the default layer, so the layer
 				// index is one-based now
-				if (0xffffffff != configLayerIndex && configLayerIndex != mLayers->size())
-				{
+				if (0xffffffff != configLayerIndex && configLayerIndex != mLayers->size()-1)	{
 					skip = true;
 				}
 				else skip = false;
@@ -1138,16 +1268,14 @@ void LWOImporter::LoadLWO2File()
 				GetS0(layer.mName,head->length-16);
 
 				// if the name is empty, generate a default name
-				if (layer.mName.empty())
-				{
+				if (layer.mName.empty())	{
 					char buffer[128]; // should be sufficiently large
 					::sprintf(buffer,"Layer_%i", iUnnamed++);
 					layer.mName = buffer;
 				}
 
 				// load this layer or ignore it? Check the layer name property
-				if (configLayerName.length() && configLayerName != layer.mName)
-				{
+				if (configLayerName.length() && configLayerName != layer.mName)	{
 					skip = true;
 				}
 				else hasNamedLayer = true;
@@ -1161,7 +1289,8 @@ void LWOImporter::LoadLWO2File()
 			// vertex list
 		case AI_LWO_PNTS:
 			{
-				if (skip)break;
+				if (skip)
+					break;
 
 				unsigned int old = (unsigned int)mCurLayer->mTempPoints.size();
 				LoadLWOPoints(head->length);
@@ -1178,7 +1307,8 @@ void LWOImporter::LoadLWO2File()
 			// --- intentionally no break here
 		case AI_LWO_VMAP:
 			{
-				if (skip)break;
+				if (skip)
+					break;
 
 				if (mCurLayer->mTempPoints.empty())
 					DefaultLogger::get()->warn("LWO2: Unexpected VMAP chunk");
@@ -1188,7 +1318,8 @@ void LWOImporter::LoadLWO2File()
 			// face list
 		case AI_LWO_POLS:
 			{
-				if (skip)break;
+				if (skip)
+					break;
 
 				unsigned int old = (unsigned int)mCurLayer->mFaces.size();
 				LoadLWO2Polygons(head->length);
@@ -1198,7 +1329,8 @@ void LWOImporter::LoadLWO2File()
 			// polygon tags 
 		case AI_LWO_PTAG:
 			{
-				if (skip)break;
+				if (skip)
+					break;
 
 				if (mCurLayer->mFaces.empty())
 					DefaultLogger::get()->warn("LWO2: Unexpected PTAG");
@@ -1225,6 +1357,13 @@ void LWOImporter::LoadLWO2File()
 		case AI_LWO_CLIP:
 			{
 				LoadLWO2Clip(head->length);
+				break;
+			}
+
+			// envelope chunk
+		case AI_LWO_ENVL:
+			{
+				LoadLWO2Envelope(head->length);
 				break;
 			}
 		}

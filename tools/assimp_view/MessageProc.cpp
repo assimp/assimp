@@ -1571,7 +1571,69 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 				DragQueryFile(hDrop,0,szFile,sizeof(szFile));
 
 				const char* sz = strrchr(szFile,'.');
-					if (sz && 0 != aiIsExtensionSupported(sz))
+				if (!sz)
+					sz = szFile;
+
+				if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode())
+				{
+					// replace the selected texture with the new one ...
+					CDisplay::Instance().ReplaceCurrentTexture(szFile);
+				}
+				else
+				{
+					// check whether it is a typical texture file format ...
+					++sz;
+					if (0 == ASSIMP_stricmp(sz,"png") ||
+						0 == ASSIMP_stricmp(sz,"bmp") ||
+						0 == ASSIMP_stricmp(sz,"jpg") ||
+						0 == ASSIMP_stricmp(sz,"tga") ||
+						0 == ASSIMP_stricmp(sz,"tif") ||
+						0 == ASSIMP_stricmp(sz,"hdr") ||
+						0 == ASSIMP_stricmp(sz,"ppm") ||
+						0 == ASSIMP_stricmp(sz,"pfm"))
+					{
+						CBackgroundPainter::Instance().SetTextureBG(szFile);
+					}
+					else if (0 == Assimp::ASSIMP_stricmp(sz,"dds"))
+					{
+						// DDS files could contain skyboxes, but they could also
+						// contain normal 2D textures. The easiest way to find this
+						// out is to open the file and check the header ...
+						FILE* pFile = fopen(szFile,"rb");
+						if (!pFile)
+							return TRUE;
+
+						// header of a dds file (begin)
+						/*
+						DWORD dwMagic
+						DWORD dwSize 
+						DWORD dwFlags 
+						DWORD dwHeight 
+						DWORD dwWidth 
+						DWORD dwPitchOrLinearSize 
+						DWORD dwDepth  
+						DWORD dwMipMapCount			  -> total with this: 32
+						DWORD dwReserved1[11]		  -> total with this: 76
+						DDPIXELFORMAT ddpfPixelFormat -> total with this: 108
+						DWORD dwCaps1;				  -> total with this: 112	
+						DWORD dwCaps2; ---< here we are!
+						*/
+						DWORD dwCaps = 0;
+						fseek(pFile,112,SEEK_SET);
+						fread(&dwCaps,4,1,pFile);
+
+						if (dwCaps & 0x00000400L /* DDSCAPS2_CUBEMAP_POSITIVEX */)
+						{
+							CLogDisplay::Instance().AddEntry(
+								"[INFO] Assuming this dds file is a skybox ...",
+								D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
+
+							CBackgroundPainter::Instance().SetCubeMapBG(szFile);
+						}
+						else CBackgroundPainter::Instance().SetTextureBG(szFile);
+						fclose(pFile);
+					}
+					else
 					{
 						strcpy(g_szFileName,szFile);
 
@@ -1580,75 +1642,8 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 						UpdateHistory();
 						SaveHistory();
 					}
-					else if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode())
-					{
-						// replace the selected texture with the new one ...
-						CDisplay::Instance().ReplaceCurrentTexture(szFile);
-					}
-					else
-					{
-						if (!sz) goto __DRUNKEN_ALIEN_FROM_MARS;
-
-						// check whether it is a typical texture file format ...
-						++sz;
-						if (0 == ASSIMP_stricmp(sz,"png") ||
-							0 == ASSIMP_stricmp(sz,"bmp") ||
-							0 == ASSIMP_stricmp(sz,"jpg") ||
-							0 == ASSIMP_stricmp(sz,"tga") ||
-							0 == ASSIMP_stricmp(sz,"tif") ||
-							0 == ASSIMP_stricmp(sz,"hdr") ||
-							0 == ASSIMP_stricmp(sz,"ppm") ||
-							0 == ASSIMP_stricmp(sz,"pfm"))
-						{
-							CBackgroundPainter::Instance().SetTextureBG(szFile);
-						}
-						else if (0 == Assimp::ASSIMP_stricmp(sz,"dds"))
-						{
-							// DDS files could contain skyboxes, but they could also
-							// contain normal 2D textures. The easiest way to find this
-							// out is to open the file and check the header ...
-							FILE* pFile = fopen(szFile,"rb");
-							if (!pFile)goto __DRUNKEN_ALIEN_FROM_MARS;
-
-							// header of a dds file (begin)
-							/*
-							DWORD dwMagic
-							DWORD dwSize 
-							DWORD dwFlags 
-							DWORD dwHeight 
-							DWORD dwWidth 
-							DWORD dwPitchOrLinearSize 
-							DWORD dwDepth  
-							DWORD dwMipMapCount			  -> total with this: 32
-							DWORD dwReserved1[11]		  -> total with this: 76
-							DDPIXELFORMAT ddpfPixelFormat -> total with this: 108
-							DWORD dwCaps1;				  -> total with this: 112	
-							DWORD dwCaps2; ---< here we are!
-							*/
-							DWORD dwCaps = 0;
-							fseek(pFile,112,SEEK_SET);
-							fread(&dwCaps,4,1,pFile);
-
-							if (dwCaps & 0x00000400L /* DDSCAPS2_CUBEMAP_POSITIVEX */)
-							{
-								CLogDisplay::Instance().AddEntry(
-									"[INFO] Assuming this dds file is a skybox ...",
-									D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
-
-								CBackgroundPainter::Instance().SetCubeMapBG(szFile);
-							}
-							else CBackgroundPainter::Instance().SetTextureBG(szFile);
-							fclose(pFile);
-						}
-						else
-						{
-__DRUNKEN_ALIEN_FROM_MARS:
-							CLogDisplay::Instance().AddEntry(
-								"[ERROR] File extension is not supported. E.T. can read this.",
-								D3DCOLOR_ARGB(0xFF,0xFF,0,0));
-						}
-					}
-					DragFinish(hDrop);
+				}
+				DragFinish(hDrop);
 			}
 			return TRUE;
 

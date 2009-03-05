@@ -9,7 +9,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION (ImporterTest);
 
 
 bool TestPlugin :: CanRead( const std::string& pFile, 
-	IOSystem* pIOHandler) const
+	IOSystem* pIOHandler, bool test) const
 {
 	std::string::size_type pos = pFile.find_last_of('.');
 	// no file extension - can't read

@@ -280,10 +280,6 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
 				if (!pFile)
 				{
 					if(TryLongerPath(szTemp, p_szString))return 1;
-
-					// still unable to load ... however, don't spew
-					// an error message here, simply let it and wait for
-					// D3DXCreateTextureFromFileEx() to fail ;-)
 				}
 				return 0;
 			}

@@ -66,14 +66,44 @@ protected:
 	~FindDegeneratesProcess();
 
 public:
+	
 	// -------------------------------------------------------------------
+	// Check whether step is active
 	bool IsActive( unsigned int pFlags) const;
 
 	// -------------------------------------------------------------------
+	// Execute step on a given scene
 	void Execute( aiScene* pScene);
+
+	// -------------------------------------------------------------------
+	// Setup import settings
+	void SetupProperties(const Importer* pImp);
+
+	// -------------------------------------------------------------------
+	// Execute step on a given mesh
+	void ExecuteOnMesh( aiMesh* mesh);
+
+
+	// -------------------------------------------------------------------
+	/** @brief Enable the instant removal of degenerated primitives
+	 *  @param d hm ... difficult to guess what this means, hu!?
+	 */
+	void EnableInstantRemoval(bool d) {
+		configRemoveDegenerates = d;
+	}
+
+	// -------------------------------------------------------------------
+	/** @brief Check whether instant removal is currently enabled
+	 *  @return ...
+	 */
+	bool IsInstantRemoval() const {
+		return configRemoveDegenerates;
+	}
 
 private:
 
+	//! Configuration option: remove degenerates faces immediately
+	bool configRemoveDegenerates;
 };
 }
 

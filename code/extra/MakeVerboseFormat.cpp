@@ -114,8 +114,7 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
 
 	// allocate enough memory to hold output bones and vertex weights ...
 	std::vector<aiVertexWeight>* newWeights = new std::vector<aiVertexWeight>[pcMesh->mNumBones];
-	for (unsigned int i = 0;i < pcMesh->mNumBones;++i) 
-	{
+	for (unsigned int i = 0;i < pcMesh->mNumBones;++i) {
 		newWeights[i].reserve(pcMesh->mBones[i]->mNumWeights*3);
 	}
 
@@ -124,7 +123,7 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
 	for (unsigned int a = 0; a< pcMesh->mNumFaces;++a)
 	{
 		aiFace* pcFace = &pcMesh->mFaces[a];
-		for (unsigned int q = 0; q < 3;++q,++iIndex)
+		for (unsigned int q = 0; q < pcFace->mNumIndices;++q,++iIndex)
 		{
 			// need to build a clean list of bones, too
 			for (unsigned int i = 0;i < pcMesh->mNumBones;++i) 

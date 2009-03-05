@@ -54,7 +54,7 @@ namespace Assimp	{
 class IOStream;
 struct LogStreamInfo;
 
-//! Default log file
+//! Default log file name
 #define ASSIMP_DEFAULT_LOG_NAME "AssimpLog.txt"
 
 // ------------------------------------------------------------------------------------
@@ -111,17 +111,13 @@ public:
 	
 	/** @brief	Will kill the singleton instance and setup a NullLogger as logger */
 	static void kill();
-
-
-	/**	@brief	Severity setter	*/
-	/* override */ void setLogSeverity(LogSeverity log_severity);
 	
 	/**	@brief	Attach a stream to the logger. */
-	/* override */ void attachStream(LogStream *pStream,
+	/* override */ bool attachStream(LogStream *pStream,
 		unsigned int severity);
 
 	/**	@brief	Detach a still attached stream from logger */
-	/* override */ void detatchStream(LogStream *pStream, 
+	/* override */ bool detatchStream(LogStream *pStream, 
 		unsigned int severity);
 
 private:
@@ -165,8 +161,6 @@ private:
 	static Logger *m_pLogger;
 	static NullLogger s_pNullLogger;
 
-	//!	Logger severity
-	LogSeverity m_Severity;
 	//!	Attached streams
 	StreamArray	m_StreamArray;
 

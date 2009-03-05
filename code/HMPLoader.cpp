@@ -67,25 +67,34 @@ HMPImporter::~HMPImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool HMPImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool HMPImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool cs) const
 {
-	(void)pIOHandler; //this avoids the compiler warning of unused element
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)return false;
-	std::string extension = pFile.substr( pos);
+	const std::string extension = GetExtension(pFile);
+	if (extension == "hmp" )
+		return true;
 
-	for( std::string::iterator it = extension.begin(); it != extension.end(); ++it)
-		*it = tolower( *it);
+	// if check for extension is not enough, check for the magic tokens 
+	if (!extension.length() || cs) {
+		uint32_t tokens[3]; 
+		tokens[0] = AI_HMP_MAGIC_NUMBER_LE_4;
+		tokens[1] = AI_HMP_MAGIC_NUMBER_LE_5;
+		tokens[2] = AI_HMP_MAGIC_NUMBER_LE_7;
+		return CheckMagicToken(pIOHandler,pFile,tokens,3,0);
+	}
+	return false;
+}
 
-	return extension == ".hmp";
+// ------------------------------------------------------------------------------------------------
+// Get list of all file extensions that are handled by this loader
+void HMPImporter::GetExtensionList(std::string& append)
+{
+	append.append("*.hmp");
 }
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void HMPImporter::InternReadFile( const std::string& pFile, 
-	aiScene* _pScene, IOSystem* _pIOHandler)
+								 aiScene* _pScene, IOSystem* _pIOHandler)
 {
 	pScene     = _pScene;
 	pIOHandler = _pIOHandler;
@@ -225,7 +234,8 @@ void HMPImporter::InternReadFile_HMP5( )
 	}
 
 	// generate texture coordinates if necessary
-	if (pcHeader->numskins)GenerateTextureCoords(width,height);
+	if (pcHeader->numskins)
+		GenerateTextureCoords(width,height);
 
 	// now build a list of faces
 	CreateOutputFaceList(width,height);	
@@ -477,7 +487,7 @@ void HMPImporter::GenerateTextureCoords(
 
 	for (unsigned int y = 0; y < height;++y)	{
 		for (unsigned int x = 0; x < width;++x,++uv)	{
-			uv->y = 1.0f-fY*y;
+			uv->y = fY*y;
 			uv->x = fX*x;
 			uv->z = 0.0f;
 		}

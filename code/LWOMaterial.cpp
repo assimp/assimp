@@ -183,13 +183,30 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, a
 			if (mClips.end() == clip)	{
 				DefaultLogger::get()->error("LWO2: Clip index is out of bounds");
 				temp = 0;
+
+				// fixme: appearently some LWO files shipping with Doom3 don't
+				// have clips at all ... check whether that's true or whether
+				// it's a bug in the loader.
+
+				s.Set("$texture.png");
+
+				//continue;
 			}
-			if (Clip::UNSUPPORTED == (*clip).type)	{
-				DefaultLogger::get()->error("LWO2: Clip type is not supported");
-				continue;
+			else {
+				if (Clip::UNSUPPORTED == (*clip).type)	{
+					DefaultLogger::get()->error("LWO2: Clip type is not supported");
+					continue;
+				}
+				AdjustTexturePath((*clip).path);
+				s.Set((*clip).path);
+
+				// Additional image settings
+				int flags = 0;
+				if ((*clip).negate) {
+					flags |= aiTextureFlags_Invert;
+				}
+				pcMat->AddProperty(&flags,1,AI_MATKEY_TEXFLAGS(type,cur));
 			}
-			AdjustTexturePath((*clip).path);
-			s.Set((*clip).path);
 		}
 		else 
 		{
@@ -232,6 +249,7 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, a
 				DefaultLogger::get()->warn("LWO2: Unsupported texture blend mode: alpha or displacement");
 
 		}
+		// Setup texture operation
 		pcMat->AddProperty<int>((int*)&temp,1,AI_MATKEY_TEXOP(type,cur));
 
 		// setup the mapping mode
@@ -258,12 +276,12 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 	st.Set(surf.mName);
 	pcMat->AddProperty(&st,AI_MATKEY_NAME);
 
-	int i = surf.bDoubleSided ? 1 : 0;
-	pcMat->AddProperty<int>(&i,1,AI_MATKEY_TWOSIDED);
+	const int i = surf.bDoubleSided ? 1 : 0;
+	pcMat->AddProperty(&i,1,AI_MATKEY_TWOSIDED);
 
 	// add the refraction index and the bump intensity
-	pcMat->AddProperty<float>(&surf.mIOR,1,AI_MATKEY_REFRACTI);
-	pcMat->AddProperty<float>(&surf.mBumpIntensity,1,AI_MATKEY_BUMPSCALING);
+	pcMat->AddProperty(&surf.mIOR,1,AI_MATKEY_REFRACTI);
+	pcMat->AddProperty(&surf.mBumpIntensity,1,AI_MATKEY_BUMPSCALING);
 	
 	aiShadingMode m;
 	if (surf.mSpecularValue && surf.mGlossiness)
@@ -281,16 +299,16 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 			else fGloss = 80.0f;
 		}
 
-		pcMat->AddProperty<float>(&surf.mSpecularValue,1,AI_MATKEY_SHININESS_STRENGTH);
-		pcMat->AddProperty<float>(&fGloss,1,AI_MATKEY_SHININESS);
+		pcMat->AddProperty(&surf.mSpecularValue,1,AI_MATKEY_SHININESS_STRENGTH);
+		pcMat->AddProperty(&fGloss,1,AI_MATKEY_SHININESS);
 		m = aiShadingMode_Phong;
 	}
 	else m = aiShadingMode_Gouraud;
 
 	// specular color
 	aiColor3D clr = lerp( aiColor3D(1.f,1.f,1.f), surf.mColor, surf.mColorHighlights );
-	pcMat->AddProperty<aiColor3D>(&clr,1,AI_MATKEY_COLOR_SPECULAR);
-	pcMat->AddProperty<float>(&surf.mSpecularValue,1,AI_MATKEY_SHININESS_STRENGTH);
+	pcMat->AddProperty(&clr,1,AI_MATKEY_COLOR_SPECULAR);
+	pcMat->AddProperty(&surf.mSpecularValue,1,AI_MATKEY_SHININESS_STRENGTH);
 
 	// emissive color
 	// (luminosity is not really the same but it affects the surface in 
@@ -298,12 +316,21 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 	clr.g = clr.b = clr.r = surf.mLuminosity*0.8f;
 	pcMat->AddProperty<aiColor3D>(&clr,1,AI_MATKEY_COLOR_EMISSIVE);
 
-	// opacity
-	if (10e10f != surf.mTransparency)
+	// opacity ... either additive or default-blended, please
+	if (10e10f != surf.mAdditiveTransparency)
 	{
-		float f = 1.0f-surf.mTransparency;
-		pcMat->AddProperty<float>(&f,1,AI_MATKEY_OPACITY);
+		const int add = aiBlendMode_Additive;
+		pcMat->AddProperty(&surf.mAdditiveTransparency,1,AI_MATKEY_OPACITY);
+		pcMat->AddProperty(&add,1,AI_MATKEY_BLEND_FUNC);
 	}
+	else if (10e10f != surf.mTransparency)
+	{
+		const int def = aiBlendMode_Default;
+		const float f = 1.0f-surf.mTransparency;
+		pcMat->AddProperty(&f,1,AI_MATKEY_OPACITY);
+		pcMat->AddProperty(&def,1,AI_MATKEY_BLEND_FUNC);
+	}
+	
 
 	// ADD TEXTURES to the material
 	// TODO: find out how we can handle COLOR textures correctly...
@@ -315,25 +342,21 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 	HandleTextures(pcMat,surf.mOpacityTextures,aiTextureType_OPACITY);
 	HandleTextures(pcMat,surf.mReflectionTextures,aiTextureType_REFLECTION);
 
-	// now we need to know which shader we must use
+	// Now we need to know which shader we must use
 	// iterate through the shader list of the surface and 
-	// search for a name we know 
+	// search for a name which we know ... 
 	for (ShaderList::const_iterator it = surf.mShaders.begin(), end = surf.mShaders.end();
 		 it != end;++it)
 	{
 		//if (!(*it).enabled)continue;
-		if ((*it).functionName == "LW_SuperCelShader" ||
-			(*it).functionName == "AH_CelShader")
-		{
+		if ((*it).functionName == "LW_SuperCelShader" || (*it).functionName == "AH_CelShader")	{
 			DefaultLogger::get()->info("LWO2: Mapping LW_SuperCelShader/AH_CelShader "
 				"to aiShadingMode_Toon");
 
 			m = aiShadingMode_Toon;
 			break;
 		}
-		else if ((*it).functionName == "LW_RealFresnel" ||
-			(*it).functionName == "LW_FastFresnel")
-		{
+		else if ((*it).functionName == "LW_RealFresnel" || (*it).functionName == "LW_FastFresnel")	{
 			DefaultLogger::get()->info("LWO2: Mapping LW_RealFresnel/LW_FastFresnel "
 				"to aiShadingMode_Fresnel");
 
@@ -345,12 +368,13 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 			DefaultLogger::get()->warn("LWO2: Unknown surface shader: " + (*it).functionName);
 		}
 	}
-	if (surf.mMaximumSmoothAngle <= 0.0f)m = aiShadingMode_Flat;
+	if (surf.mMaximumSmoothAngle <= 0.0f)
+		m = aiShadingMode_Flat;
 	pcMat->AddProperty((int*)&m,1,AI_MATKEY_SHADING_MODEL);
 
 	// (the diffuse value is just a scaling factor)
 	// If a diffuse texture is set, we set this value to 1.0
-	clr = (b ? aiColor3D(1.f,1.f,1.f) : surf.mColor);
+	clr = (b && false ? aiColor3D(1.f,1.f,1.f) : surf.mColor);
 	clr.r *= surf.mDiffuseValue;
 	clr.g *= surf.mDiffuseValue;
 	clr.b *= surf.mDiffuseValue;
@@ -365,9 +389,7 @@ void LWOImporter::FindUVChannels(LWO::TextureList& list, LWO::Layer& layer,
 		 it != end;++it)
 	{
 		// Ignore textures with non-UV mappings for the moment.
-		if (!(*it).enabled || !(*it).bCanUse || 0xffffffff != (*it).mRealUVIndex ||
-			(*it).mapMode != LWO::Texture::UV)
-		{
+		if (!(*it).enabled || !(*it).bCanUse || 0xffffffff != (*it).mRealUVIndex || (*it).mapMode != LWO::Texture::UV)	{
 			continue;
 		}
 		for (unsigned int i = 0; i < layer.mUVChannels.size();++i)
@@ -379,6 +401,7 @@ void LWOImporter::FindUVChannels(LWO::TextureList& list, LWO::Layer& layer,
 				{
 					if (i == out[m])	{
 						(*it).mRealUVIndex = m;
+						break;
 					}
 				}
 				if (0xffffffff == (*it).mRealUVIndex)
@@ -710,7 +733,9 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 			// transparency
 		case AI_LWO_TRAN:
 			{
-				if (surf.mTransparency == 10e10f)break;
+				// transparency explicitly disabled?
+				if (surf.mTransparency == 10e10f)
+					break;
 
 				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,TRAN,4);
 				surf.mTransparency = GetF4();
@@ -739,6 +764,13 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 					DefaultLogger::get()->error("LWO2: Unsupported alpha mode: shadow_density");
 					surf.mTransparency = 10e10f;
 				}
+				break;
+			}
+			// additive transparency
+		case AI_LWO_ADTR:
+			{
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,ADTR,4);
+				surf.mAdditiveTransparency = GetF4();
 				break;
 			}
 			// wireframe mode
@@ -788,7 +820,7 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 		case AI_LWO_SMAN:
 			{
 				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,SMAN,4);
-				surf.mMaximumSmoothAngle = GetF4();
+				surf.mMaximumSmoothAngle = fabs( GetF4() );
 				break;
 			}
 			// vertex color channel to be applied to the surface

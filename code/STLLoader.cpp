@@ -64,27 +64,31 @@ STLImporter::~STLImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool STLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool STLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)return false;
-	std::string extension = pFile.substr( pos);
+	const std::string extension = GetExtension(pFile);
 
-	if (extension.length() < 4)return false;
-	if (extension[0] != '.')return false;
-
-	if (extension[1] != 's' && extension[1] != 'S')return false;
-	if (extension[2] != 't' && extension[2] != 'T')return false;
-	if (extension[3] != 'l' && extension[3] != 'L')return false;
-
-	return true;
+	if (extension == "stl")
+		return true;
+	else if (!extension.length() || checkSig)	{
+		if (!pIOHandler)
+			return true;
+		const char* tokens[] = {"STL","solid"};
+		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,2);
+	}
+	return false;
 }
+
+// ------------------------------------------------------------------------------------------------
+void STLImporter::GetExtensionList(std::string& append)
+{
+	append.append("*.stl");
+}
+
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void STLImporter::InternReadFile( 
-	const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
+								 const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
@@ -183,7 +187,7 @@ void STLImporter::LoadASCIIFile()
 	pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
 	pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
 	
-	unsigned int curFace = 0, curVertex = 0;
+	unsigned int curFace = 0, curVertex = 3;
 	while (true)
 	{
 		// go to the next token

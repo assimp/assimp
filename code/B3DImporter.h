@@ -56,7 +56,7 @@ namespace Assimp{
 class B3DImporter : public BaseImporter{
 public:
 
-	virtual bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	virtual bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
 
 protected:
 

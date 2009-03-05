@@ -62,11 +62,8 @@ using namespace Assimp::MD2;
 void MD2::LookupNormalIndex(uint8_t iNormalIndex,aiVector3D& vOut)
 {
 	// make sure the normal index has a valid value
-	if (iNormalIndex >= ARRAYSIZE(g_avNormals))
-	{
-		DefaultLogger::get()->warn("Index overflow in Quake II normal vector list (the "
-			" LUT has only 162 entries). ");
-
+	if (iNormalIndex >= ARRAYSIZE(g_avNormals))	{
+		DefaultLogger::get()->warn("Index overflow in Quake II normal vector list");
 		iNormalIndex = ARRAYSIZE(g_avNormals) - 1;
 	}
 	vOut = *((const aiVector3D*)(&g_avNormals[iNormalIndex]));
@@ -76,31 +73,37 @@ void MD2::LookupNormalIndex(uint8_t iNormalIndex,aiVector3D& vOut)
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 MD2Importer::MD2Importer()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
 MD2Importer::~MD2Importer()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool MD2Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool MD2Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)
-		return false;
-	
-	std::string extension = pFile.substr( pos);
-	for( std::string::iterator it = extension.begin(); it != extension.end(); ++it)
-		*it = tolower( *it);
+	const std::string extension = GetExtension(pFile);
+	if (extension == "md2")
+		return true;
 
-	return ( extension == ".md2");
+	// if check for extension is not enough, check for the magic tokens 
+	if (!extension.length() || checkSig) {
+		uint32_t tokens[1]; 
+		tokens[0] = AI_MD2_MAGIC_NUMBER_LE;
+		return CheckMagicToken(pIOHandler,pFile,tokens,1);
+	}
+	return false;
 }
+
+// ------------------------------------------------------------------------------------------------
+// Get a list of all extensions supported by this loader
+void MD2Importer::GetExtensionList(std::string& append)
+{
+	append.append("*.md2");
+}
+
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties
 void MD2Importer::SetupProperties(const Importer* pImp)
@@ -161,8 +164,8 @@ void MD2Importer::ValidateHeader( )
 
 	if (m_pcHeader->numFrames <= configFrameID )
 		throw new ImportErrorException("The requested frame is not existing the file");
-
 }
+
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void MD2Importer::InternReadFile( const std::string& pFile, 
@@ -319,14 +322,14 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 		pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_AMBIENT);
 
 		aiString szName;
-		szName.Set("MD2Default");
+		szName.Set(AI_DEFAULT_TEXTURED_MATERIAL_NAME);
 		pcHelper->AddProperty(&szName,AI_MATKEY_NAME);
 
 		aiString sz;
 
 		// TODO: Try to guess the name of the texture file from the model file name
 
-		sz.Set("texture_dummmy.bmp");
+		sz.Set("$texture_dummy.bmp");
 		pcHelper->AddProperty(&sz,AI_MATKEY_TEXTURE_DIFFUSE(0));
 	}
 

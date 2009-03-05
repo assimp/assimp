@@ -52,6 +52,10 @@ namespace Assimp	{
 class IOSystem;
 class Importer;
 
+// utility to do char4 to uint32 in a portable manner
+#define AI_MAKE_MAGIC(string) ((uint32_t)((string[0] << 24) + \
+	(string[1] << 16) + (string[2] << 8) + string[3]))
+
 // ---------------------------------------------------------------------------
 /** Simple exception class to be thrown if an error occurs while importing. */
 class ASSIMP_API ImportErrorException 
@@ -97,36 +101,48 @@ protected:
 public:
 	// -------------------------------------------------------------------
 	/** Returns whether the class can handle the format of the given file.
-	* @param pFile Path and file name of the file to be examined.
-	* @param pIOHandler The IO handler to use for accessing any file.
-	* @return true if the class can read this file, false if not.
-	*
-	* @note Sometimes ASSIMP uses this method to determine whether a
-	* a given file extension is generally supported. In this case the
-	* file extension is passed in the pFile parameter, pIOHandler is NULL
-	*/
+	 *
+	 * The implementation should be as quick as possible. A check for
+	 * the file extension is enough. If no suitable loader is found with
+	 * this strategy, CanRead() is called again, the 'checkSig' parameter
+	 * set to true this time. Now the implementation is expected to
+	 * perform a full check of the file format, possibly searching the
+	 * first bytes of the file for magic identifiers or keywords.
+	 *
+	 * @param pFile Path and file name of the file to be examined.
+	 * @param pIOHandler The IO handler to use for accessing any file.
+	 * @param checkSig Set to true if this method is called a second time.
+	 *   This time, the implementation may take more time to examine the
+	 *   contents of the file to be loaded for magic bytes, keywords, etc
+	 *   to be able to load files with unknown/not existent file extensions.
+	 * @return true if the class can read this file, false if not.
+	 *
+	 * @note Sometimes ASSIMP uses this method to determine whether a
+	 * a given file extension is generally supported. In this case the
+	 * file extension is passed in the pFile parameter, pIOHandler is NULL
+	 */
 	virtual bool CanRead( const std::string& pFile, 
-		IOSystem* pIOHandler) const = 0;
+		IOSystem* pIOHandler, bool checkSig) const = 0;
 
 
 	// -------------------------------------------------------------------
 	/** Imports the given file and returns the imported data.
-	* If the import succeeds, ownership of the data is transferred to 
-	* the caller. If the import fails, NULL is returned. The function
-	* takes care that any partially constructed data is destroyed
-	* beforehand.
-	*
-	* @param pFile Path of the file to be imported. 
-	* @param pIOHandler IO-Handler used to open this and possible other files.
-	* @return The imported data or NULL if failed. If it failed a 
-	* human-readable error description can be retrieved by calling 
-	* GetErrorText()
-	*
-	* @note This function is not intended to be overridden. Implement 
-	* InternReadFile() to do the import. If an exception is thrown somewhere 
-	* in InternReadFile(), this function will catch it and transform it into
-	*  a suitable response to the caller.
-	*/
+	 * If the import succeeds, ownership of the data is transferred to 
+	 * the caller. If the import fails, NULL is returned. The function
+	 * takes care that any partially constructed data is destroyed
+	 * beforehand.
+	 *
+	 * @param pFile Path of the file to be imported. 
+	 * @param pIOHandler IO-Handler used to open this and possible other files.
+	 * @return The imported data or NULL if failed. If it failed a 
+	 * human-readable error description can be retrieved by calling 
+	 * GetErrorText()
+	 *
+	 * @note This function is not intended to be overridden. Implement 
+	 * InternReadFile() to do the import. If an exception is thrown somewhere 
+	 * in InternReadFile(), this function will catch it and transform it into
+	 *  a suitable response to the caller.
+	 */
 	aiScene* ReadFile( const std::string& pFile, IOSystem* pIOHandler);
 
 
@@ -135,19 +151,20 @@ public:
 	 * @return A description of the last error that occured. An empty
 	 * string if there was no error.
 	 */
-	inline const std::string& GetErrorText() const 
-		{ return mErrorText; }
+	const std::string& GetErrorText() const {
+		return mErrorText;
+	}
 
 
 	// -------------------------------------------------------------------
 	/** Called prior to ReadFile().
-	* The function is a request to the importer to update its configuration
-	* basing on the Importer's configuration property list.
-	* @param pImp Importer instance
-	* @param ppFlags Post-processing steps to be executed on the data
-	*  returned by the loaders. This value is provided to allow some
-	* internal optimizations.
-	*/
+	 * The function is a request to the importer to update its configuration
+	 * basing on the Importer's configuration property list.
+	 * @param pImp Importer instance
+	 * @param ppFlags Post-processing steps to be executed on the data
+	 *  returned by the loaders. This value is provided to allow some
+	 * internal optimizations.
+	 */
 	virtual void SetupProperties(const Importer* pImp /*,
 		unsigned int ppFlags*/);
 
@@ -157,7 +174,7 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 *  Importer implementations should append all file extensions
 	 *  which they supported to the passed string.
-	 *  Example: "*.blabb;*.quak;*.gug;*.foo" (no comma after the last!)
+	 *  Example: "*.blabb;*.quak;*.gug;*.foo" (no delimiter after the last!)
 	 * @param append Output string
 	 */
 	virtual void GetExtensionList(std::string& append) = 0;
@@ -169,23 +186,36 @@ protected:
 	 * expected to be correct. Override this function to implement the 
 	 * actual importing.
 	 * <br>
-	 * The output scene must meet the following requirements:<br>
-	 * - at least a root node must be there<br>
-	 * - aiMesh::mPrimitiveTypes may be 0. The types of primitives
-	 *   in the mesh are determined automatically in this case.<br>
-	 * - the vertex data is stored in a pseudo-indexed "verbose" format.
+	 *  The output scene must meet the following requirements:<br>
+	 * <ul>
+	 * <li>At least a root node must be there, even if its only purpose
+	 *     is to reference one mesh.</li>
+	 * <li>aiMesh::mPrimitiveTypes may be 0. The types of primitives
+	 *   in the mesh are determined automatically in this case.</li>
+	 * <li>the vertex data is stored in a pseudo-indexed "verbose" format.
 	 *   In fact this means that every vertex that is referenced by
 	 *   a face is unique. Or the other way round: a vertex index may
-	 *   not occur twice in a single aiMesh.
-	 * - aiAnimation::mDuration may be -1. Assimp determines the length
+	 *   not occur twice in a single aiMesh.</li>
+	 * <li>aiAnimation::mDuration may be -1. Assimp determines the length
 	 *   of the animation automatically in this case as the length of
-	 *   the longest animation channel.
-	 *
-	 * If the AI_SCENE_FLAGS_INCOMPLETE-Flag is not set:<br>
-	 * - at least one mesh must be there<br>
-	 * - at least one material must be there<br>
-	 * - there may be no meshes with 0 vertices or faces<br>
-	 * This won't be checked (except by the validation step), Assimp will
+	 *   the longest animation channel.</li>
+	 * <li>aiMesh::mBitangents may be NULL if tangents and normals are
+	 *   given. In this case bitangents are computed as the cross product
+	 *   between normal and tangent.</li>
+	 * <li>There needn't be a material. If none is there a default material
+	 *   is generated. However, it is recommended practice for loaders
+	 *   to generate a default material for yourself that matches the
+	 *   default material setting for the file format better than Assimp's
+	 *   generic default material. Note that default materials *should*
+	 *   be named AI_DEFAULT_MATERIAL_NAME if they're just color-shaded
+	 *   or AI_DEFAULT_TEXTURED_MATERIAL_NAME if they define a (dummy) 
+	 *   texture. </li>
+	 * </ul>
+	 * If the AI_SCENE_FLAGS_INCOMPLETE-Flag is <b>not</b> set:<ul>
+	 * <li> at least one mesh must be there</li>
+	 * <li> there may be no meshes with 0 vertices or faces</li>
+	 * </ul>
+	 * This won't be checked (except by the validation step): Assimp will
 	 * crash if one of the conditions is not met!
 	 *
 	 * @param pFile Path of the file to be imported.
@@ -218,12 +248,53 @@ protected:
 		unsigned int		numTokens,
 		unsigned int		searchBytes = 200);
 
+
+	// -------------------------------------------------------------------
+	/** @brief Check whether a file has a specific file extension
+	 *  @param pFile Input file
+	 *  @param ext0 Extension to check for. Lowercase characters only, no dot!
+	 *  @param ext1 Optional second extension
+	 *  @param ext2 Optional third extension
+	 *  @note Case-insensitive
+	 */
+	static bool SimpleExtensionCheck (const std::string& pFile, 
+		const char* ext0,
+		const char* ext1 = NULL,
+		const char* ext2 = NULL);
+
+	// -------------------------------------------------------------------
+	/** @brief Extract file extension from a string
+	 *  @param pFile Input file
+	 *  @return Extension without trailing dot, all lowercase
+	 */
+	static std::string GetExtension (const std::string& pFile);
+
+	// -------------------------------------------------------------------
+	/** @brief Check whether a file starts with one or more magic tokens
+	 *  @param pFile Input file
+	 *  @param pIOHandler IO system to be used
+	 *  @param magic n magic tokens
+	 *  @params num Size of magic
+	 *  @param offset Offset from file start where tokens are located
+	 *  @param Size of one token, in bytes. Maximally 16 bytes.
+	 *  @return true if one of the given tokens was found
+	 *
+	 *  @note For convinence, the check is also performed for the
+	 *  byte-swapped variant of all tokens (big endian). Only for
+	 *  tokens of size 2,4.
+	 */
+	static bool CheckMagicToken(IOSystem* pIOHandler, const std::string& pFile, 
+		const void* magic,
+		unsigned int num,
+		unsigned int offset = 0,
+		unsigned int size   = 4);
+
 #if 0 /** TODO **/
 	// -------------------------------------------------------------------
 	/** An utility for all text file loaders. It converts a file to our
-	 *  ASCII/UTF8 character set. Special unicode characters are lost.
-	 *
-	 *  @param buffer Input buffer. Needn't be terminated with zero.
+	*  ASCII/UTF8 character set. Special unicode characters are lost.
+	*
+	*  @param buffer Input buffer. Needn't be terminated with zero.
 	 *  @param length Length of the input buffer, in bytes. Receives the
 	 *    number of output characters, excluding the terminal char.
 	 *  @return true if the source format did not match our internal
@@ -266,10 +337,18 @@ public:
 		Importer::IntPropertyMap     ints;
 		Importer::FloatPropertyMap   floats;
 		Importer::StringPropertyMap  strings;
+
+		bool operator == (const PropertyMap& prop) const {
+			return ints == prop.ints && floats == prop.floats && strings == prop.strings; 
+		}
+
+		bool empty () const {
+			return ints.empty() && floats.empty() && strings.empty();
+		}
 	};
 
-
 public:
+	
 
 	/** Construct a batch loader from a given IO system
 	 */
@@ -293,8 +372,10 @@ public:
 	 *  @param file File to be loaded
 	 *  @param steps Steps to be executed on the file
 	 *  @param map Optional configuration properties
+	 *  @return 'Load request channel' - an unique ID that can later
+	 *    be used to access the imported file data.
 	 */
-	void AddLoadRequest	(const std::string& file,
+	unsigned int AddLoadRequest	(const std::string& file,
 		unsigned int steps = 0, const PropertyMap* map = NULL);
 
 
@@ -304,11 +385,11 @@ public:
 	 *  If an import is requested several times, this function
 	 *  can be called several times, too.
 	 *
-	 *  @param file File name of the scene
+	 *  @param which LRWC returned by AddLoadRequest().
 	 *  @return NULL if there is no scene with this file name
 	 *  in the queue of the scene hasn't been loaded yet.
 	 */
-	aiScene* GetImport		(const std::string& file);
+	aiScene* GetImport		(unsigned int which);
 
 
 	/** Waits until all scenes have been loaded.
@@ -320,7 +401,6 @@ private:
 	// No need to have that in the public API ...
 	BatchData* data;
 };
-
 
 } // end of namespace Assimp
 

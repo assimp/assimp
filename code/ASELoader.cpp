@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the ASE importer class */
+/** @file  ASELoader.cpp
+ *  @brief Implementation of the ASE importer class
+ */
 
 #include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_ASE_IMPORTER
@@ -69,23 +71,25 @@ ASEImporter::~ASEImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool cs) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)
-		return false;
+	// check file extension 
+	const std::string extension = GetExtension(pFile);
+	
+	if( extension == "ase" || extension == "ask")
+		return true;
 
-	std::string extension = pFile.substr( pos);
+	if ((!extension.length() || cs) && pIOHandler) {
+		const char* tokens[] = {"*3dsmax_asciiexport"};
+		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
+	}
+	return false;
+}
 
-	// Either ASE, ASC or ASK
-	return  !(extension.length() < 4 || extension[0] != '.' ||
-			  extension[1] != 'a' && extension[1] != 'A' ||
-			  extension[2] != 's' && extension[2] != 'S' ||
-			  extension[3] != 'e' && extension[3] != 'E' &&
-			  extension[3] != 'k' && extension[3] != 'K' &&
-			  extension[3] != 'c' && extension[3] != 'C');
+// ------------------------------------------------------------------------------------------------
+void ASEImporter::GetExtensionList(std::string& append)
+{
+	append.append("*.ase;*.ask");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -108,6 +112,8 @@ void ASEImporter::InternReadFile( const std::string& pFile,
 		throw new ImportErrorException( "Failed to open ASE file " + pFile + ".");
 
 	size_t fileSize = file->FileSize();
+	if (!fileSize)
+		throw new ImportErrorException( "ASE: File is empty");
 
 	// Allocate storage and copy the contents of the file to a memory buffer
 	// (terminate it with zero)
@@ -778,8 +784,7 @@ void ASEImporter::BuildNodes()
 		delete pc;
 	}
 	// The root node should not have at least one child or the file is invalid
-	else if (!pcScene->mRootNode->mNumChildren)
-	{
+	else if (!pcScene->mRootNode->mNumChildren) {
 		throw new ImportErrorException("No nodes loaded. The ASE/ASK file is either empty or corrupt");
 	}
 	return;

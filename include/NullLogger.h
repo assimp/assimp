@@ -58,6 +58,7 @@ namespace Assimp	{
 class ASSIMP_API NullLogger : public Logger 
 {
 public:
+
 	/**	@brief	Logs a debug message */
 	void OnDebug(const char* message) { 
 		(void)message; //this avoids compiler warnings
@@ -78,20 +79,19 @@ public:
 		(void)message; //this avoids compiler warnings
 	}
 
-	/** @brief Log severity setter */
-	void setLogSeverity(LogSeverity log_severity) {
-		(void)log_severity;  //this avoids compiler warnings
+	/**	@brief	Detach a still attached stream from logger */
+	bool attachStream(LogStream *pStream, unsigned int severity) {
+		(void)pStream; (void)severity; //this avoids compiler warnings
+		return false;
 	}
 
 	/**	@brief	Detach a still attached stream from logger */
-	void attachStream(LogStream *pStream, unsigned int severity) {
+	bool detatchStream(LogStream *pStream, unsigned int severity) {
 		(void)pStream; (void)severity; //this avoids compiler warnings
+		return false;
 	}
 
-	/**	@brief	Detach a still attached stream from logger */
-	void detatchStream(LogStream *pStream, unsigned int severity) {
-		(void)pStream; (void)severity; //this avoids compiler warnings
-	}
+private:
 };
 
 }

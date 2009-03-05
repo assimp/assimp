@@ -75,40 +75,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp	{
 
 // ------------------------------------------------------------------------------------------------
-/** This is a small helper data structure simplifying our work
- */
-struct SceneHelper
-{
-	SceneHelper ()
-		: scene		(NULL)
-		, idlen		(0)
-	{
-		id[0] = 0;
-	}
-
-	SceneHelper (aiScene* _scene)
-		: scene		(_scene)
-		, idlen		(0)
-	{
-		id[0] = 0;
-	}
-
-	AI_FORCE_INLINE aiScene* operator-> () const
-	{
-		return scene;
-	}
-
-	// scene we're working on
-	aiScene* scene;
-
-	// prefix to be added to all identifiers in the scene ...
-	char id [32];
-
-	// and its strlen() 
-	unsigned int idlen;
-};
-
-// ------------------------------------------------------------------------------------------------
 // Add a prefix to a string
 inline void PrefixString(aiString& string,const char* prefix, unsigned int len)
 {
@@ -125,6 +91,21 @@ inline void PrefixString(aiString& string,const char* prefix, unsigned int len)
 }
 
 // ------------------------------------------------------------------------------------------------
+// Add node identifiers to a hashing set
+void SceneCombiner::AddNodeHashes(aiNode* node, std::set<unsigned int>& hashes)
+{
+	// Add node name to hashing set if it is non-empty - empty nodes are allowed 
+	// and they can't have any anims assigned so its absolutely safe to duplicate them.
+	if (node->mName.length) {
+		hashes.insert( SuperFastHash(node->mName.data,node->mName.length) );
+	}
+
+	// Process all children recursively
+	for (unsigned int i = 0; i < node->mNumChildren;++i)
+		AddNodeHashes(node->mChildren[i],hashes);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Add a name prefix to all nodes in a hierarchy
 void SceneCombiner::AddNodePrefixes(aiNode* node, const char* prefix, unsigned int len)
 {
@@ -134,6 +115,44 @@ void SceneCombiner::AddNodePrefixes(aiNode* node, const char* prefix, unsigned i
 	// Process all children recursively
 	for (unsigned int i = 0; i < node->mNumChildren;++i)
 		AddNodePrefixes(node->mChildren[i],prefix,len);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Search for matching names
+bool SceneCombiner::FindNameMatch(const aiString& name, std::vector<SceneHelper>& input, unsigned int cur)
+{
+	const unsigned int hash = SuperFastHash(name.data, name.length);
+
+	// Check whether we find a positive match in one of the given sets
+	for (unsigned int i = 0; i < input.size(); ++i) {
+
+		if (cur != i && input[i].hashes.find(hash) != input[i].hashes.end()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Add a name prefix to all nodes in a hierarchy if a hash match is found
+void SceneCombiner::AddNodePrefixesChecked(aiNode* node, const char* prefix, unsigned int len,
+	std::vector<SceneHelper>& input, unsigned int cur)
+{
+	ai_assert(NULL != prefix);
+	const unsigned int hash = SuperFastHash(node->mName.data,node->mName.length);
+
+	// Check whether we find a positive match in one of the given sets
+	for (unsigned int i = 0; i < input.size(); ++i) {
+
+		if (cur != i && input[i].hashes.find(hash) != input[i].hashes.end()) {
+			PrefixString(node->mName,prefix,len);
+			break;
+		}
+	}
+
+	// Process all children recursively
+	for (unsigned int i = 0; i < node->mNumChildren;++i)
+		AddNodePrefixesChecked(node->mChildren[i],prefix,len,input,cur);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -300,6 +319,20 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 
 			const unsigned int random = rndGen();
 			src[i].idlen = ::sprintf(src[i].id,"$%.6X$_",random);
+
+			if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY) {
+				
+				// Compute hashes for all identifiers in this scene and store them
+				// in a sorted table (for convenience I'm using std::set). We hash
+				// just the node and animation channel names, all identifiers except
+				// the material names should be caught by doing this.
+				AddNodeHashes(src[i]->mRootNode,src[i].hashes);
+
+				for (unsigned int a = 0; a < src[i]->mNumAnimations;++a) {
+					aiAnimation* anim = src[i]->mAnimations[a];
+					src[i].hashes.insert(SuperFastHash(anim->mName.data,anim->mName.length));
+				}
+			}
 		}
 	}
 	
@@ -321,7 +354,11 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 		dest->mNumAnimations += (*cur)->mNumAnimations;
 
 		// Combine the flags of all scenes
-		dest->mFlags |= (*cur)->mFlags;
+		// We need to process them flag-by-flag here to get correct results
+		// dest->mFlags ; //|= (*cur)->mFlags;
+		if ((*cur)->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) {
+			dest->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
+		}
 	}
 
 	// generate the output texture list + an offset table for all texture indices
@@ -352,11 +389,10 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 
 	// generate the output material list + an offset table for all material indices
 	if (dest->mNumMaterials)
-	{
+	{ 
 		aiMaterial** pip = dest->mMaterials = new aiMaterial*[dest->mNumMaterials];
 		cnt = 0;
-		for ( unsigned int n = 0; n < src.size();++n )
-		{
+		for ( unsigned int n = 0; n < src.size();++n )	{
 			SceneHelper* cur = &src[n];
 			for (unsigned int i = 0; i < (*cur)->mNumMaterials;++i)
 			{
@@ -369,8 +405,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 				}
 				else *pip = (*cur)->mMaterials[i];
 
-				if ((*cur)->mNumTextures != dest->mNumTextures)
-				{
+				if ((*cur)->mNumTextures != dest->mNumTextures)		{
 					// We need to update all texture indices of the mesh. So we need to search for
 					// a material property called '$tex.file'
 
@@ -391,8 +426,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 						}
 
 						// Need to generate new, unique material names?
-						else if (!::strcmp( prop->mKey.data,"$mat.name" ) &&
-							flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES)
+						else if (!::strcmp( prop->mKey.data,"$mat.name" ) && flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES)
 						{
 							aiString* pcSrc = (aiString*) prop->mData; 
 							PrefixString(*pcSrc, (*cur).id, (*cur).idlen);
@@ -458,7 +492,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 	aiAnimation** ppAnims = dest->mAnimations = (dest->mNumAnimations 
 		? new aiAnimation*[dest->mNumAnimations] : NULL);
 
-	for ( unsigned int n = 0; n < src.size();++n )
+	for ( int n = src.size()-1; n >= 0 ;--n ) /* !!! important !!! */
 	{
 		SceneHelper* cur = &src[n];
 		aiNode* node;
@@ -466,7 +500,9 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 		// To offset or not to offset, this is the question
 		if (n != duplicates[n])
 		{
+			// Get full scenegraph copy
 			Copy( &node, (*cur)->mRootNode );
+			OffsetNodeMeshIndices(node,offset[duplicates[n]]);
 
 			if (flags & AI_INT_MERGE_SCENE_DUPLICATES_DEEP_CPY)	{
 				// (note:) they are already 'offseted' by offset[duplicates[n]] 
@@ -481,6 +517,30 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 		if (n) // src[0] is the master node
 			nodes.push_back(NodeAttachmentInfo( node,srcList[n-1].attachToNode,n ));
 
+		// add name prefixes?
+		if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES) {
+
+			// or the whole scenegraph
+			if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY) {
+				AddNodePrefixesChecked(node,(*cur).id,(*cur).idlen,src,n);
+			}
+			else AddNodePrefixes(node,(*cur).id,(*cur).idlen);
+
+			// meshes
+			for (unsigned int i = 0; i < (*cur)->mNumMeshes;++i)	{
+				aiMesh* mesh = (*cur)->mMeshes[i]; 
+
+				// rename all bones
+				for (unsigned int a = 0; a < mesh->mNumBones;++a)	{
+					if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY) {
+						if (!FindNameMatch(mesh->mBones[a]->mName,src,n))
+							continue;
+					}
+					PrefixString(mesh->mBones[a]->mName,(*cur).id,(*cur).idlen);
+				}
+			}
+		}
+
 		// --------------------------------------------------------------------
 		// Copy light sources
 		for (unsigned int i = 0; i < (*cur)->mNumLights;++i,++ppLights)
@@ -490,6 +550,17 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 				Copy(ppLights, (*cur)->mLights[i]);
 			}
 			else *ppLights = (*cur)->mLights[i];
+
+
+			// Add name prefixes?
+			if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES) {
+				if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY) {
+					if (!FindNameMatch((*ppLights)->mName,src,n))
+						continue;
+				}
+
+				PrefixString((*ppLights)->mName,(*cur).id,(*cur).idlen);
+			}
 		}
 
 		// --------------------------------------------------------------------
@@ -500,6 +571,16 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 				Copy(ppCameras, (*cur)->mCameras[i]);
 			}
 			else *ppCameras = (*cur)->mCameras[i];
+
+			// Add name prefixes?
+			if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES) {
+				if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY) {
+					if (!FindNameMatch((*ppCameras)->mName,src,n))
+						continue;
+				}
+
+				PrefixString((*ppCameras)->mName,(*cur).id,(*cur).idlen);
+			}
 		}
 
 		// --------------------------------------------------------------------
@@ -510,30 +591,26 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 				Copy(ppAnims, (*cur)->mAnimations[i]);
 			}
 			else *ppAnims = (*cur)->mAnimations[i];
-		}
-	}
 
-	for ( unsigned int n = 1; n < src.size();++n )	{
-		SceneHelper* cur = &src[n];
-		// --------------------------------------------------------------------
-		// Add prefixes
-		if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES)
-		{
-			for (unsigned int i = 0; i < (*cur)->mNumLights;++i)
-				PrefixString(dest->mLights[i]->mName,(*cur).id,(*cur).idlen);
+			// Add name prefixes?
+			if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES) {
+				if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY) {
+					if (!FindNameMatch((*ppAnims)->mName,src,n))
+						continue;
+				}
 
-			for (unsigned int i = 0; i < (*cur)->mNumCameras;++i)
-				PrefixString(dest->mCameras[i]->mName,(*cur).id,(*cur).idlen);
-
-			for (unsigned int i = 0; i < (*cur)->mNumAnimations;++i)	{
-				aiAnimation* anim = dest->mAnimations[i]; 
-				PrefixString(anim->mName,(*cur).id,(*cur).idlen);
+				PrefixString((*ppAnims)->mName,(*cur).id,(*cur).idlen);
 
 				// don't forget to update all node animation channels
-				for (unsigned int a = 0; a < anim->mNumChannels;++a)
-					PrefixString(anim->mChannels[a]->mNodeName,(*cur).id,(*cur).idlen);
+				for (unsigned int a = 0; a < (*ppAnims)->mNumChannels;++a) {
+					if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY) {
+						if (!FindNameMatch((*ppAnims)->mChannels[a]->mNodeName,src,n))
+							continue;
+					}
+
+					PrefixString((*ppAnims)->mChannels[a]->mNodeName,(*cur).id,(*cur).idlen);
+				}
 			}
-			AddNodePrefixes(nodes[n-1].node,(*cur).id,(*cur).idlen);
 		}
 	}
 
@@ -585,6 +662,11 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 		delete deleteMe;
 	}
 
+	// Check flags
+	if (!dest->mNumMeshes || !dest->mNumMaterials) {
+		dest->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
+	}
+
 	// We're finished
 }
 
@@ -605,10 +687,8 @@ void SceneCombiner::BuildUniqueBoneList(std::list<BoneWithHash>& asBones,
 			std::list<BoneWithHash>::iterator it2  = asBones.begin();
 			std::list<BoneWithHash>::iterator end2 = asBones.end();
 
-			for (;it2 != end2;++it2)
-			{
-				if ((*it2).first == itml)
-				{
+			for (;it2 != end2;++it2)	{
+				if ((*it2).first == itml)	{
 					(*it2).pSrcBones.push_back(BoneSrcIndex(p,iOffset));
 					break;
 				}
@@ -666,10 +746,7 @@ void SceneCombiner::MergeBones(aiMesh* out,std::vector<aiMesh*>::const_iterator 
 			if (wmit != (*it).pSrcBones.begin() &&
 				pc->mOffsetMatrix != (*wmit).first->mOffsetMatrix)
 			{
-				DefaultLogger::get()->warn("Bones with equal names but different "
-					"offset matrices can't be joined at the moment. If this causes "
-					"problems, deactivate the OptimizeGraph-Step");
-
+				DefaultLogger::get()->warn("Bones with equal names but different offset matrices can't be joined at the moment");
 				continue;
 			}
 			pc->mOffsetMatrix = (*wmit).first->mOffsetMatrix;
@@ -1026,7 +1103,7 @@ void SceneCombiner::Copy     (aiAnimation** _dest, const aiAnimation* src)
 	::memcpy(dest,src,sizeof(aiAnimation));
 
 	// and reallocate all arrays
-	GetArrayCopy( dest->mChannels, dest->mNumChannels );
+	CopyPtrArray( dest->mChannels, src->mChannels, dest->mNumChannels );
 }
 
 // ------------------------------------------------------------------------------------------------

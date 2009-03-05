@@ -176,21 +176,6 @@ AI_FORCE_INLINE  aiVector3D operator - ( const aiVector3D& v)	{
 	return aiVector3D( -v.x, -v.y, -v.z);
 }
 
-#ifdef ASSIMP_INTERNAL_BUILD
-namespace std {
-
-	// std::min for aiVector3D
-	inline ::aiVector3D min (const ::aiVector3D& a, const ::aiVector3D& b)	{
-		return ::aiVector3D (min(a.x,b.x),min(a.y,b.y),min(a.z,b.z));
-	}
-
-	// std::max for aiVector3D
-	inline ::aiVector3D max (const ::aiVector3D& a, const ::aiVector3D& b)	{
-		return ::aiVector3D (max(a.x,b.x),max(a.y,b.y),max(a.z,b.z));
-	}
-
-} // end namespace std
-#endif // !! ASSIMP_INTERNAL_BUILD
 
 #endif // __cplusplus
 #endif // AI_VECTOR3D_INL_INC

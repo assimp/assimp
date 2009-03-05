@@ -69,7 +69,7 @@ void BaseProcess::ExecuteOnScene( Importer* pImp)
 	// catch exceptions thrown inside the PostProcess-Step
 	try
 	{
-		this->Execute(pImp->mScene);
+		Execute(pImp->mScene);
 
 	} catch( ImportErrorException* exception)
 	{

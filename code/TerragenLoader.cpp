@@ -51,6 +51,7 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 TerragenImporter::TerragenImporter()
+: configComputeUVs (false)
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -60,19 +61,24 @@ TerragenImporter::~TerragenImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool TerragenImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool TerragenImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
+	// check file extension 
+	std::string extension = GetExtension(pFile);
+	
+	if( extension == "ter")
+		return true;
 
-	// no file extension - can't read
-	if( pos == std::string::npos)return false;
-	std::string extension = pFile.substr( pos);
-
-	for( std::string::iterator it = extension.begin(); it != extension.end(); ++it)
-		*it = tolower( *it);
-
-	return extension == ".ter";
+	if(  !extension.length() || checkSig)	{
+		/*  If CanRead() is called in order to check whether we
+		 *  support a specific file extension in general pIOHandler
+		 *  might be NULL and it's our duty to return true here.
+		 */
+		if (!pIOHandler)return true;
+		const char* tokens[] = {"terragen"};
+		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
+	}
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -80,6 +86,14 @@ bool TerragenImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) 
 void TerragenImporter::GetExtensionList(std::string& append)
 {
 	append.append("*.ter;");
+}
+
+// ------------------------------------------------------------------------------------------------
+// Setup import properties
+void TerragenImporter::SetupProperties(const Importer* pImp)
+{
+	// AI_CONFIG_IMPORT_TER_MAKE_UVS
+	configComputeUVs = ( 0 != pImp->GetPropertyInteger(AI_CONFIG_IMPORT_TER_MAKE_UVS,0) );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -182,7 +196,14 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
 			// We return quads
 			aiFace* f = m->mFaces = new aiFace[m->mNumFaces = (x-1)*(y-1)];
 			aiVector3D* pv = m->mVertices = new aiVector3D[m->mNumVertices = m->mNumFaces*4];
-
+			
+			aiVector3D* uv;
+			float step_y,step_x;
+			if (configComputeUVs) {
+				uv = m->mTextureCoords[0] = new aiVector3D[m->mNumVertices];
+				step_y = 1.f/y;
+				step_x = 1.f/x;
+			}
 			const int16_t* data = (const int16_t*)reader.GetPtr();
 
 			for (unsigned int yy = 0, t = 0; yy < y-1;++yy)	{
@@ -195,6 +216,14 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
 					*pv++ = aiVector3D(fx,fy+1,  (float)data[(tmp=x*(yy+1)) + xx] * hscale + bheight);
 					*pv++ = aiVector3D(fx+1,fy+1,(float)data[tmp  + xx+1]         * hscale + bheight);
 					*pv++ = aiVector3D(fx+1,fy,  (float)data[tmp2 + xx+1]         * hscale + bheight);
+
+					// also make texture coordinates, if necessary
+					if (configComputeUVs) {
+						*uv++ = aiVector3D( step_x*xx,     step_y*yy,     0.f );
+						*uv++ = aiVector3D( step_x*xx,     step_y*(yy+1), 0.f );
+						*uv++ = aiVector3D( step_x*(xx+1), step_y*(yy+1), 0.f );
+						*uv++ = aiVector3D( step_x*(xx+1), step_y*yy,     0.f );
+					}
 
 					// make indices
 					f->mIndices = new unsigned int[f->mNumIndices = 4];

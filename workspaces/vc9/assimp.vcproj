@@ -1903,6 +1903,14 @@
 					Name="LWS"
 					>
 					<File
+						RelativePath="..\..\code\LWOAnimation.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\LWOAnimation.h"
+						>
+					</File>
+					<File
 						RelativePath="..\..\code\LWSLoader.cpp"
 						>
 					</File>
@@ -2018,6 +2026,18 @@
 				<Filter
 					Name="CSM"
 					>
+				</Filter>
+				<Filter
+					Name="UNREAL"
+					>
+					<File
+						RelativePath="..\..\code\UnrealLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\UnrealLoader.h"
+						>
+					</File>
 				</Filter>
 			</Filter>
 			<Filter

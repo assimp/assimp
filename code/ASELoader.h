@@ -38,7 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Definition of the .ASE importer class. */
+/** @file  ASELoader.h
+ *  @brief Definition of the .ASE importer class.
+ */
 #ifndef AI_ASELOADER_H_INCLUDED
 #define AI_ASELOADER_H_INCLUDED
 
@@ -48,15 +50,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiNode;
 #include "ASEParser.h"
 
-namespace Assimp
-{
+namespace Assimp {
 class MaterialHelper;
 
 using namespace ASE;
 
-// ---------------------------------------------------------------------------
-/** Used to load ASE files
-*/
+// --------------------------------------------------------------------------------
+/** Importer class for the 3DS ASE ASCII format
+ *
+ * fixme: consider code cleanup
+ */
 class ASEImporter : public BaseImporter
 {
 	friend class Importer;
@@ -72,8 +75,10 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Returns whether the class can handle the format of the given file. 
-	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	 * See BaseImporter::CanRead() for details.	
+	 */
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+		bool checkSig) const;
 
 protected:
 
@@ -81,10 +86,7 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append)
-	{
-		append.append("*.ase;*.ask;*.asc");
-	}
+	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 

@@ -111,7 +111,7 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
 
 	// allocate an array to hold the output normals
 	pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
-	const float qnan = std::numeric_limits<float>::quiet_NaN();
+	const float qnan = get_qnan();
 
 	// iterate through all faces and compute per-face normals but store
 	// them per-vertex. 

@@ -70,7 +70,7 @@ inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 	unsigned int iNum = pMax ? *pMax : 1;
 
 	aiMaterialProperty* prop;
-	aiReturn ret = aiGetMaterialProperty(this,pKey,type,idx,&prop);
+	aiReturn ret = ::aiGetMaterialProperty(this,pKey,type,idx,&prop);
 	if ( AI_SUCCESS == ret )
 	{
 		if (prop->mDataLength < sizeof(Type)*iNum)
@@ -92,7 +92,7 @@ inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 	unsigned int idx,Type& pOut) const
 {
 	aiMaterialProperty* prop;
-	aiReturn ret = aiGetMaterialProperty(this,pKey,type,idx,&prop);
+	aiReturn ret = ::aiGetMaterialProperty(this,pKey,type,idx,&prop);
 	if ( AI_SUCCESS == ret )
 	{
 		if (prop->mDataLength < sizeof(Type))

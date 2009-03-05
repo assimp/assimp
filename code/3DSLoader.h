@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Definition of the .3ds importer class. */
+/** @file  3DSLoader.h
+ *  @brief 3DS File format loader
+ */
 #ifndef AI_3DSIMPORTER_H_INC
 #define AI_3DSIMPORTER_H_INC
 
@@ -49,16 +51,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiNode;
 #include "3DSHelper.h"
 
-namespace Assimp
-{
+namespace Assimp	{
 class MaterialHelper;
 
 using namespace D3DS;
 
-// ---------------------------------------------------------------------------
-/** The Discreet3DSImporter is a worker class capable of importing a scene from a
-* 3ds Max 4/5 Files (.3ds)
-*/
+// ---------------------------------------------------------------------------------
+/** Importer class for 3D Studio r3 and r4 3DS files
+ */
 class Discreet3DSImporter : public BaseImporter
 {
 	friend class Importer;
@@ -74,14 +74,16 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Returns whether the class can handle the format of the given file. 
-	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	 * See BaseImporter::CanRead() for details.	
+	 */
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+		bool checkSig) const;
 
 	// -------------------------------------------------------------------
 	/** Called prior to ReadFile().
-	* The function is a request to the importer to update its configuration
-	* basing on the Importer's configuration property list.
-	*/
+	 * The function is a request to the importer to update its configuration
+	 * basing on the Importer's configuration property list.
+	 */
 	void SetupProperties(const Importer* pImp);
 
 protected:
@@ -90,21 +92,18 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append)
-	{
-		append.append("*.3ds");
-	}
+	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 
-	* See BaseImporter::InternReadFile() for details
-	*/
+	 * See BaseImporter::InternReadFile() for details
+	 */
 	void InternReadFile( const std::string& pFile, aiScene* pScene, 
 		IOSystem* pIOHandler);
 
 	// -------------------------------------------------------------------
 	/** Converts a temporary material to the outer representation 
-	*/
+	 */
 	void ConvertMaterial(D3DS::Material& p_cMat,
 		MaterialHelper& p_pcOut);
 
@@ -112,7 +111,7 @@ protected:
 	/** Read a chunk
 	 *
 	 *  @param pcOut Receives the current chunk
-	*/
+	 */
 	void ReadChunk(Discreet3DS::Chunk* pcOut);
 
 	// -------------------------------------------------------------------
@@ -271,6 +270,9 @@ protected:
 	/** Path to the background image of the scene */
 	std::string mBackgroundImage;
 	bool bHasBG;
+
+	/** true if PRJ file */
+	bool bIsPrj;
 };
 
 } // end of namespace Assimp

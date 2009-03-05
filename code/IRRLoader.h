@@ -39,8 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-/** @file Declaration of the .irrMesh (Irrlight Engine Mesh Format)
-    importer class.
+/** @file IRRLoader.h
+ *  @brief Declaration of the .irrMesh (Irrlight Engine Mesh Format)
+ *  importer class.
  */
 #ifndef AI_IRRLOADER_H_INCLUDED
 #define AI_IRRLOADER_H_INCLUDED
@@ -75,7 +76,8 @@ public:
 	/** Returns whether the class can handle the format of the given file. 
 	 *  See BaseImporter::CanRead() for details.	
 	 */
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+		bool checkSig) const;
 
 protected:
 
@@ -203,6 +205,7 @@ private:
 
 		// Meshes: path to the mesh to be loaded
 		std::string meshPath;
+		unsigned int id;
 
 		// Meshes: List of materials to be assigned
 		// along with their corresponding material flags
@@ -297,8 +300,11 @@ private:
 
 private:
 
+	/** Configuration option: desired output FPS */
 	double fps;
 
+	/** Configuration option: speed flag was set? */
+	bool configSpeedFlag;
 };
 
 } // end of namespace Assimp

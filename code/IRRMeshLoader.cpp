@@ -67,26 +67,17 @@ IRRMeshImporter::~IRRMeshImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool IRRMeshImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool IRRMeshImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	/* NOTE: A simple check for the file extension is not enough
 	 * here. Irrmesh and irr are easy, but xml is too generic
 	 * and could be collada, too. So we need to open the file and
 	 * search for typical tokens.
 	 */
+	const std::string extension = GetExtension(pFile);
 
-	std::string::size_type pos = pFile.find_last_of('.');
-
-	// no file extension - can't read
-	if( pos == std::string::npos)
-		return false;
-
-	std::string extension = pFile.substr( pos);
-	for (std::string::iterator i = extension.begin(); i != extension.end();++i)
-		*i = ::tolower(*i);
-
-	if (extension == ".irrmesh")return true;
-	else if (extension == ".xml")
+	if (extension == "irrmesh")return true;
+	else if (extension == "xml" || checkSig)
 	{
 		/*  If CanRead() is called to check whether the loader
 		 *  supports a specific file extension in general we
@@ -97,6 +88,14 @@ bool IRRMeshImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) c
 		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
 	}
 	return false;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Get a list of all file extensions which are handled by this class
+void IRRMeshImporter::GetExtensionList(std::string& append)
+{
+	// fixme: consider cleaner handling of xml extension
+	append.append("*.xml;*.irrmesh");
 }
 
 // ------------------------------------------------------------------------------------------------

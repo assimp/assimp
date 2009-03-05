@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the RAW importer class */
+/** @file  RawLoader.cpp
+ *  @brief Implementation of the RAW importer class 
+ */
 
 #include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_RAW_IMPORTER
@@ -63,21 +65,16 @@ RAWImporter::~RAWImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool RAWImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool RAWImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)return false;
-	std::string extension = pFile.substr( pos);
+	return SimpleExtensionCheck(pFile,"raw");
+}
 
-	if (extension.length() < 4)return false;
-	if (extension[0] != '.')return false;
-
-	return !(extension.length() != 4 || extension[0] != '.' ||
-			 extension[1] != 'r' && extension[1] != 'R' ||
-			 extension[2] != 'a' && extension[2] != 'A' ||
-			 extension[3] != 'w' && extension[3] != 'W');
+// ------------------------------------------------------------------------------------------------
+// Get the list of all supported file extensions
+void RAWImporter::GetExtensionList(std::string& append)
+{
+	append.append("*.raw");
 }
 
 // ------------------------------------------------------------------------------------------------

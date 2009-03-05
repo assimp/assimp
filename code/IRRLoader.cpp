@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the Irr importer class */
+/** @file  IRRLoader.cpp
+ *  @brief Implementation of the Irr importer class 
+ */
 
 #include "AssimpPCH.h"
 
@@ -81,26 +83,17 @@ IRRImporter::~IRRImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool IRRImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool IRRImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	/* NOTE: A simple check for the file extension is not enough
 	 * here. Irrmesh and irr are easy, but xml is too generic
 	 * and could be collada, too. So we need to open the file and
 	 * search for typical tokens.
 	 */
-
-	std::string::size_type pos = pFile.find_last_of('.');
-
-	// no file extension - can't read
-	if( pos == std::string::npos)
-		return false;
-
-	std::string extension = pFile.substr( pos);
-	for (std::string::iterator i = extension.begin(); i != extension.end();++i)
-		*i = ::tolower(*i);
-
-	if (extension == ".irr")return true;
-	else if (extension == ".xml")
+	const std::string extension = GetExtension(pFile);
+	
+	if (extension == "irr")return true;
+	else if (extension == "xml" || checkSig)
 	{
 		/*  If CanRead() is called in order to check whether we
 		 *  support a specific file extension in general pIOHandler
@@ -128,11 +121,13 @@ void IRRImporter::SetupProperties(const Importer* pImp)
 {
 	// read the output frame rate of all node animation channels
 	fps = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_IRR_ANIM_FPS,100);
-	if (!fps)
-	{
+	if (fps < 10.)	{
 		DefaultLogger::get()->error("IRR: Invalid FPS configuration");
 		fps = 100;
 	}
+
+	// AI_CONFIG_FAVOUR_SPEED
+	configSpeedFlag = (0 != pImp->GetPropertyInteger(AI_CONFIG_FAVOUR_SPEED,0));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -595,7 +590,7 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
 
 // ------------------------------------------------------------------------------------------------
 // This function is maybe more generic than we'd need it here
-void SetupMapping (MaterialHelper* mat, aiTextureMapping mode, const aiVector3D& axis = aiVector3D(0.f,1.f,0.f))
+void SetupMapping (MaterialHelper* mat, aiTextureMapping mode, const aiVector3D& axis = aiVector3D(0.f,0.f,-1.f))
 {
 	// Check whether there are texture properties defined - setup
 	// the desired texture mapping mode for all of them and ignore
@@ -650,7 +645,9 @@ void SetupMapping (MaterialHelper* mat, aiTextureMapping mode, const aiVector3D&
 	// rebuild the output array
 	if (p.size() > mat->mNumAllocated)	{
 		delete[] mat->mProperties;
-		mat->mProperties = new aiMaterialProperty*[p.size()];
+		mat->mProperties = new aiMaterialProperty*[p.size()*2];
+
+		mat->mNumAllocated = p.size()*2;
 	}
 	mat->mNumProperties = (unsigned int)p.size();
 	::memcpy(mat->mProperties,&p[0],sizeof(void*)*mat->mNumProperties);
@@ -680,7 +677,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 			// Get the loaded mesh from the scene and add it to
 			// the list of all scenes to be attached to the 
 			// graph we're currently building
-			aiScene* scene = batch.GetImport(root->meshPath);
+			aiScene* scene = batch.GetImport(root->id);
 			if (!scene)
 			{
 				DefaultLogger::get()->error("IRR: Unable to load external file: " 
@@ -688,6 +685,8 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 				break;
 			}
 			attach.push_back(AttachmentInfo(scene,rootOut));
+
+#if 0
 			meshTrafoAssign = 1;
 
 			// If the root node of the scene is animated - and *this* node
@@ -721,8 +720,9 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 					}
 				}
 			}
-			if (1 == meshTrafoAssign)
-				scene->mRootNode->mTransformation *= AI_TO_IRR_MATRIX;
+#endif
+		//	if (1 == meshTrafoAssign)
+		//		scene->mRootNode->mTransformation = AI_TO_IRR_MATRIX * scene->mRootNode->mTransformation;
 	
 
 			// Now combine the material we've loaded for this mesh
@@ -748,7 +748,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 
 			// NOTE: Each mesh should have exactly one material assigned,
 			// but we do it in a separate loop if this behaviour changes
-			// in the future.
+			// in future.
 			for (unsigned int i = 0; i < scene->mNumMeshes;++i)
 			{
 				// Process material flags 
@@ -901,8 +901,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 		rootOut->mNumMeshes = (unsigned int)meshes.size() - oldMeshSize;
 		rootOut->mMeshes    = new unsigned int[rootOut->mNumMeshes];
 
-		for (unsigned int a = 0; a  < rootOut->mNumMeshes;++a)
-		{
+		for (unsigned int a = 0; a  < rootOut->mNumMeshes;++a)	{
 			rootOut->mMeshes[a] = oldMeshSize+a;
 		}
 	}
@@ -913,6 +912,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 	// Now compute the final local transformation matrix of the
 	// node from the given translation, rotation and scaling values.
 	// (the rotation is given in Euler angles, XYZ order)
+	std::swap((float&)root->rotation.z,(float&)root->rotation.y);
 	rootOut->mTransformation.FromEulerAnglesXYZ(AI_DEG_TO_RAD(root->rotation) );
 
 	// apply scaling
@@ -920,20 +920,20 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 	mat.a1 *= root->scaling.x;
 	mat.b1 *= root->scaling.x; 
 	mat.c1 *= root->scaling.x;
-	mat.a2 *= root->scaling.y; 
-	mat.b2 *= root->scaling.y; 
-	mat.c2 *= root->scaling.y;
-	mat.a3 *= root->scaling.z;
-	mat.b3 *= root->scaling.z; 
-	mat.c3 *= root->scaling.z;
+	mat.a2 *= root->scaling.z; 
+	mat.b2 *= root->scaling.z; 
+	mat.c2 *= root->scaling.z;
+	mat.a3 *= root->scaling.y;
+	mat.b3 *= root->scaling.y; 
+	mat.c3 *= root->scaling.y;
 
 	// apply translation
 	mat.a4 += root->position.x; 
-	mat.b4 += root->position.y; 
-	mat.c4 += root->position.z;
+	mat.b4 += root->position.z; 
+	mat.c4 += root->position.y;
 
-	if (meshTrafoAssign == 2)
-		mat *= AI_TO_IRR_MATRIX;
+	//if (meshTrafoAssign == 2)
+	//	mat *= AI_TO_IRR_MATRIX;
 
 	// now compute animations for the node
 	ComputeAnimations(root,rootOut, anims);
@@ -1446,7 +1446,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 										}
 										else
 										{
-											batch.AddLoadRequest(prop.value,pp,&map);
+											curNode->id = batch.AddLoadRequest(prop.value,pp,&map);
 											curNode->meshPath = prop.value;
 										}
 									}
@@ -1528,8 +1528,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 	/*  Now iterate through all cameras and compute their final (horizontal) FOV
 	 */
 	for (std::vector<aiCamera*>::iterator it = cameras.begin(), end = cameras.end();
-		 it != end; ++it)
-	{
+		 it != end; ++it)	{
 		aiCamera* cam = *it;
 		if (cam->mAspect) // screen aspect could be missing
 		{
@@ -1625,8 +1624,8 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 	 *  attachment points in the scenegraph.
 	 */
 	SceneCombiner::MergeScenes(&pScene,tempScene,attach,
-		AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES |
-		AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES);
+		AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES | (!configSpeedFlag ? (
+		AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY | AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES) : 0));
 
 
 	/*  If we have no meshes | no materials now set the INCOMPLETE
@@ -1638,11 +1637,6 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 		DefaultLogger::get()->warn("IRR: No meshes loaded, setting AI_SCENE_FLAGS_INCOMPLETE");
 		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
 	}
-
-
-	// transformation matrix to convert from IRRMESH to ASSIMP coordinates
-	pScene->mRootNode->mTransformation *= AI_TO_IRR_MATRIX;
-
 
 	/* Finished ... everything destructs automatically and all 
 	 * temporary scenes have already been deleted by MergeScenes()

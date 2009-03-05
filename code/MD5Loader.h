@@ -39,8 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-/** @file Definition of the .MD5 importer class.
-http://www.modwiki.net/wiki/MD5_(file_format)
+/** @file   MD5Loader.h
+ *  @brief Definition of the .MD5 importer class.
+ *  http://www.modwiki.net/wiki/MD5_(file_format)
 */
 #ifndef AI_MD5LOADER_H_INCLUDED
 #define AI_MD5LOADER_H_INCLUDED
@@ -74,7 +75,8 @@ public:
 	// -------------------------------------------------------------------
 	/** Returns whether the class can handle the format of the given file. 
 	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+		bool checkSig) const;
 
 protected:
 
@@ -82,11 +84,8 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append)
-	{
-		append.append("*.md5mesh;*.md5anim");
-	}
-
+	void GetExtensionList(std::string& append);
+	
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 
 	* See BaseImporter::InternReadFile() for details

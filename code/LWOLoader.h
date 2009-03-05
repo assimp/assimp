@@ -62,7 +62,7 @@ using namespace LWO;
  *         Methods named "xxxLWOB[xxx]" are used with the older LWOB format.
  *         Methods named "xxxLWO[xxx]" are used with both formats.
  *         Methods named "xxx" are used to preprocess the loaded data -
- *         they aren't specific to one format version, either
+ *         they aren't specific to one format version
 */
 // ---------------------------------------------------------------------------
 class LWOImporter : public BaseImporter
@@ -81,8 +81,10 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Returns whether the class can handle the format of the given file. 
-	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	 * See BaseImporter::CanRead() for details.	
+	 */
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+		bool checkSig) const;
 
 
 	// -------------------------------------------------------------------
@@ -211,6 +213,11 @@ private:
 	*/
 	void LoadLWO2Clip(unsigned int length);
 
+	// -------------------------------------------------------------------
+	/** Load an envelope from an EVL chunk
+	 *  @param length Size of the chunk
+	*/
+	void LoadLWO2Envelope(unsigned int length);
 
 	// -------------------------------------------------------------------
 	/** Count vertices and faces in a LWOB/LWO2 file
@@ -372,6 +379,9 @@ protected:
 	/** Temporary clip list from the file */
 	ClipList mClips;
 
+	/** Temporary envelope list from the file */
+	EnvelopeList mEnvelopes;
+
 	/** file buffer */
 	uint8_t* mFileBuffer;
 
@@ -381,9 +391,16 @@ protected:
 	/** Output scene */
 	aiScene* pScene;
 
+	/** Configuration option: speed flag set? */
 	bool configSpeedFlag;
+
+	/** Configuration option: index of layer to be loaded */
 	unsigned int configLayerIndex;
+
+	/** Configuration option: name of layer to be loaded */
 	std::string  configLayerName;
+
+	/** True if we have a named layer */
 	bool hasNamedLayer;
 };
 

@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the ASE parser class */
+/** @file  ASEParser.cpp
+ *  @brief Implementation of the ASE parser class 
+ */
 
 #include "AssimpPCH.h"
 
@@ -120,8 +122,8 @@ Parser::Parser (const char* szFile, unsigned int fileFormatDefault)
 	iFileFormat = fileFormatDefault;
 
 	// make sure that the color values are invalid
-	m_clrBackground.r = std::numeric_limits<float>::quiet_NaN();
-	m_clrAmbient.r    = std::numeric_limits<float>::quiet_NaN();
+	m_clrBackground.r = get_qnan();
+	m_clrAmbient.r    = get_qnan();
 
 	// setup some default values
 	iLineNumber = 0;

@@ -89,7 +89,7 @@ inline unsigned int ASSIMP_itoa10( char* out, unsigned int max, int32_t number)
 			*out++ = lookup[digit];
 
 			++written;
-			number -= digit*10;
+			number -= digit*cur;
 		}
 		cur /= 10;
 	}

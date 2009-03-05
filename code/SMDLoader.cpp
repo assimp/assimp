@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the SMD importer class */
+/** @file  SMDLoader.cpp 
+ *  @brief Implementation of the SMD importer class 
+ */
 
 #include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_SMD_IMPORTER
@@ -54,56 +56,37 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 SMDImporter::SMDImporter()
-{
-	// nothing to do here
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
 SMDImporter::~SMDImporter()
-{
-	// nothing to do here
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool SMDImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool SMDImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)
-		return false;
-	std::string extension = pFile.substr( pos);
+	// fixme: auto format detection
+	return SimpleExtensionCheck(pFile,"smd","vta");
+}
 
-	if (extension.length() < 4)return false;
-	if (extension[0] != '.')return false;
-
-	// VTA is not really supported as it contains vertex animations.
-	// However, at least the first keyframe can be loaded
-	if ((extension[1] != 's' && extension[1] != 'S') ||
-	    (extension[2] != 'm' && extension[2] != 'M') ||
-	    (extension[3] != 'd' && extension[3] != 'D'))
-	{
-		if ((extension[1] != 'v' && extension[1] != 'V') ||
-			(extension[2] != 't' && extension[2] != 'T') ||
-			(extension[3] != 'a' && extension[3] != 'A'))
-		{
-			return false;
-		}
-	}
-	return true;
+// ------------------------------------------------------------------------------------------------
+// Get a list of all supported file extensions
+void SMDImporter::GetExtensionList(std::string& append)
+{
+	append.append("*.smd;*.vta");
 }
 
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties
 void SMDImporter::SetupProperties(const Importer* pImp)
 {
-	// The AI_CONFIG_IMPORT_SMD_KEYFRAME option overrides the
+	// The 
+	// AI_CONFIG_IMPORT_SMD_KEYFRAME option overrides the
 	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
-	if(0xffffffff == (configFrameID = pImp->GetPropertyInteger(
-		AI_CONFIG_IMPORT_SMD_KEYFRAME,0xffffffff)))
-	{
+	configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_SMD_KEYFRAME,0xffffffff);
+	if(0xffffffff == configFrameID)	{
 		configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
 	}
 }

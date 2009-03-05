@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the b3d importer class */
+/** @file  B3DImporter.cpp
+ *  @brief Implementation of the b3d importer class
+ */
 
 #include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_B3D_IMPORTER
@@ -52,7 +54,7 @@ using namespace Assimp;
 using namespace std;
 
 // ------------------------------------------------------------------------------------------------
-bool B3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const{
+bool B3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const{
 
 	int pos=pFile.find_last_of( '.' );
 	if( pos==string::npos ) return false;

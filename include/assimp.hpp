@@ -301,6 +301,20 @@ public:
 
 
 	// -------------------------------------------------------------------
+	/** @brief Check whether a given set of postprocessing flags
+	 *  is supported.
+	 *
+	 *  Some flags are mutually exclusive, others are probably
+	 *  not available because your excluded them from your
+	 *  Assimp builds. Calling this function is recommended if 
+	 *  you're unsure.
+	 *
+	 *  @param pFlags Bitwise combination of the aiPostProcess flags.
+	 *  @return true if this flag combination is not supported.
+	 */
+	bool ValidateFlags(unsigned int pFlags);
+
+	// -------------------------------------------------------------------
 	/** Reads the given file and returns its contents if successful. 
 	 * 
 	 * If the call succeeds, the contents of the file are returned as a 
@@ -316,6 +330,10 @@ public:
 	 * @return A pointer to the imported data, NULL if the import failed.
 	 *   The pointer to the scene remains in possession of the Importer
 	 *   instance. Use GetOrphanedScene() to take ownership of it.
+	 *
+	 * @note Assimp is able to determine the file format of a file
+	 * automatically. However, you should make sure that the input file
+	 * does not even have a file extension at all to enable this feature.
 	 */
 	const aiScene* ReadFile( const char* pFile, unsigned int pFlags);
 

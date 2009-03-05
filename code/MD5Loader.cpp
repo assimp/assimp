@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the MD5 importer class */
+/** @file  MD5Loader.cpp
+ *  @brief Implementation of the MD5 importer class 
+ */
 
 #include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_MD5_IMPORTER
@@ -56,34 +58,35 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 MD5Importer::MD5Importer()
-{
-	// nothing to do here
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
 MD5Importer::~MD5Importer()
-{
-	// nothing to do here
-}
+{}
+
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool MD5Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool MD5Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)
-		return false;
-	std::string extension = pFile.substr( pos);
+	const std::string extension = GetExtension(pFile);
 
-	if (extension.length() < 4)return false;
-	if (extension[0] != '.')return false;
+	if (extension == "md5anim" || extension == "md5mesh")
+		return true;
+	else if (!extension.length() || checkSig)	{
+		if (!pIOHandler)
+			return true;
+		const char* tokens[] = {"MD5Version"};
+		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
+	}
+	return false;
+}
 
-	if (extension[1] != 'm' && extension[1] != 'M')return false;
-	if (extension[2] != 'd' && extension[2] != 'D')return false;
-	if (extension[3] != '5')return false;
-	return true;
+// ------------------------------------------------------------------------------------------------
+// Get list of all supported extensions
+void MD5Importer::GetExtensionList(std::string& append)
+{
+	append.append("*.md5mesh;*.md5anim");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -93,17 +96,17 @@ void MD5Importer::InternReadFile(
 {
 	// remove the file extension
 	std::string::size_type pos = pFile.find_last_of('.');
-	this->mFile = pFile.substr(0,pos+1);
+	mFile = pFile.substr(0,pos+1);
 	this->pIOHandler = pIOHandler;
 	this->pScene = pScene;
 
 	bHadMD5Mesh = bHadMD5Anim = false;
 
 	// load the animation keyframes
-	this->LoadMD5AnimFile();
+	LoadMD5AnimFile();
 
 	// load the mesh vertices and bones
-	this->LoadMD5MeshFile();
+	LoadMD5MeshFile();
 
 	// make sure we return no incomplete data
 	if (!bHadMD5Mesh && !bHadMD5Anim)
@@ -260,7 +263,7 @@ void MD5Importer::LoadMD5MeshFile ()
 	bHadMD5Mesh = true;
 
 	// now load the file into memory
-	this->LoadFileIntoMemory(file.get());
+	LoadFileIntoMemory(file.get());
 
 	// now construct a parser and parse the file
 	MD5::MD5Parser parser(mBuffer,fileSize);
@@ -341,10 +344,7 @@ void MD5Importer::LoadMD5MeshFile ()
 		unsigned int* piCount = new unsigned int[meshParser.mJoints.size()];
 		::memset(piCount,0,sizeof(unsigned int)*meshParser.mJoints.size());
 
-		for (MD5::VertexList::const_iterator
-			iter =  meshSrc.mVertices.begin();
-			iter != meshSrc.mVertices.end();++iter,++pv)
-		{
+		for (MD5::VertexList::const_iterator iter =  meshSrc.mVertices.begin();iter != meshSrc.mVertices.end();++iter,++pv) {
 			for (unsigned int jub = (*iter).mFirstWeight, w = jub; w < jub + (*iter).mNumWeights;++w)
 			{
 				MD5::WeightDesc& desc = meshSrc.mWeights[w];
@@ -444,7 +444,7 @@ void MD5Importer::LoadMD5MeshFile ()
 // ------------------------------------------------------------------------------------------------
 void MD5Importer::LoadMD5AnimFile ()
 {
-	std::string pFile = this->mFile + "MD5ANIM";
+	std::string pFile = mFile + "MD5ANIM";
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file

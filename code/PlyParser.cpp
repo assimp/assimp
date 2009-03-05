@@ -744,10 +744,9 @@ bool PLY::PropertyInstance::ParseInstanceBinary (
 		unsigned int iNum = PLY::PropertyInstance::ConvertTo<unsigned int>(v,prop->eFirstType);
 
 		// parse all list elements
-		for (unsigned int i = 0; i < iNum;++i)
-		{
-			PLY::PropertyInstance::ParseValueBinary(pCur, &pCur,prop->eType,&v,p_bBE);
-			p_pcOut->avList.push_back(v);
+		p_pcOut->avList.resize(iNum);
+		for (unsigned int i = 0; i < iNum;++i){
+			PLY::PropertyInstance::ParseValueBinary(pCur, &pCur,prop->eType,&p_pcOut->avList[i],p_bBE);
 		}
 	}
 	else

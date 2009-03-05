@@ -201,6 +201,14 @@ public:
 	 */
 	static aiMatrix4x4& Translation( const aiVector3D& v, aiMatrix4x4& out);
 
+	// -------------------------------------------------------------------
+	/** @brief Returns a scaling matrix 
+	 *  @param v Scaling vector
+	 *  @param out Receives the output matrix
+	 *  @return Reference to the output matrix
+	 */
+	static aiMatrix4x4& Scaling( const aiVector3D& v, aiMatrix4x4& out);
+
 
 	// -------------------------------------------------------------------
 	/** @brief A function for creating a rotation matrix that rotates a

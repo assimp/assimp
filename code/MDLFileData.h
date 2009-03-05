@@ -58,30 +58,29 @@ namespace Assimp	{
 namespace MDL	{
 
 // -------------------------------------------------------------------------------------
-// to make it easier for ourselfes, we test the magic word against both "endianesses"
-#define MDL_MAKE(string) ((uint32_t)((string[0] << 24) + (string[1] << 16) + (string[2] << 8) + string[3]))
+// to make it easier for us, we test the magic word against both "endianesses"
 
 // magic bytes used in Quake 1 MDL meshes
-#define AI_MDL_MAGIC_NUMBER_BE	MDL_MAKE("IDPO")
-#define AI_MDL_MAGIC_NUMBER_LE	MDL_MAKE("OPDI")
+#define AI_MDL_MAGIC_NUMBER_BE	AI_MAKE_MAGIC("IDPO")
+#define AI_MDL_MAGIC_NUMBER_LE	AI_MAKE_MAGIC("OPDI")
 
 // magic bytes used in GameStudio A<very  low> MDL meshes
-#define AI_MDL_MAGIC_NUMBER_BE_GS3	MDL_MAKE("MDL2")
-#define AI_MDL_MAGIC_NUMBER_LE_GS3	MDL_MAKE("2LDM")
+#define AI_MDL_MAGIC_NUMBER_BE_GS3	AI_MAKE_MAGIC("MDL2")
+#define AI_MDL_MAGIC_NUMBER_LE_GS3	AI_MAKE_MAGIC("2LDM")
 
 // magic bytes used in GameStudio A4 MDL meshes
-#define AI_MDL_MAGIC_NUMBER_BE_GS4	MDL_MAKE("MDL3")
-#define AI_MDL_MAGIC_NUMBER_LE_GS4	MDL_MAKE("3LDM")
+#define AI_MDL_MAGIC_NUMBER_BE_GS4	AI_MAKE_MAGIC("MDL3")
+#define AI_MDL_MAGIC_NUMBER_LE_GS4	AI_MAKE_MAGIC("3LDM")
 
 // magic bytes used in GameStudio A5+ MDL meshes
-#define AI_MDL_MAGIC_NUMBER_BE_GS5a	MDL_MAKE("MDL4")
-#define AI_MDL_MAGIC_NUMBER_LE_GS5a	MDL_MAKE("4LDM")
-#define AI_MDL_MAGIC_NUMBER_BE_GS5b	MDL_MAKE("MDL5")
-#define AI_MDL_MAGIC_NUMBER_LE_GS5b	MDL_MAKE("5LDM")
+#define AI_MDL_MAGIC_NUMBER_BE_GS5a	AI_MAKE_MAGIC("MDL4")
+#define AI_MDL_MAGIC_NUMBER_LE_GS5a	AI_MAKE_MAGIC("4LDM")
+#define AI_MDL_MAGIC_NUMBER_BE_GS5b	AI_MAKE_MAGIC("MDL5")
+#define AI_MDL_MAGIC_NUMBER_LE_GS5b	AI_MAKE_MAGIC("5LDM")
 
 // magic bytes used in GameStudio A7+ MDL meshes
-#define AI_MDL_MAGIC_NUMBER_BE_GS7	MDL_MAKE("MDL7")
-#define AI_MDL_MAGIC_NUMBER_LE_GS7	MDL_MAKE("7LDM")
+#define AI_MDL_MAGIC_NUMBER_BE_GS7	AI_MAKE_MAGIC("MDL7")
+#define AI_MDL_MAGIC_NUMBER_LE_GS7	AI_MAKE_MAGIC("7LDM")
 
 
 // common limitations for Quake1 meshes. The loader does not check them,

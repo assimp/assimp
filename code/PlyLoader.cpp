@@ -64,27 +64,31 @@ PLYImporter::~PLYImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool PLYImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool PLYImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)
-		return false;
-	std::string extension = pFile.substr( pos);
+	const std::string extension = GetExtension(pFile);
 
-	if (extension.length() < 4)return false;
-	if (extension[0] != '.')   return false;
-	if (extension[1] != 'p' && extension[1] != 'P')return false;
-	if (extension[2] != 'l' && extension[2] != 'L')return false;
-	if (extension[3] != 'y' && extension[3] != 'Y')return false;
-	return true;
+	if (extension == "ply")
+		return true;
+	else if (!extension.length() || checkSig)
+	{
+		if (!pIOHandler)return true;
+		const char* tokens[] = {"ply"};
+		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
+	}
+	return false;
+}
+
+// ------------------------------------------------------------------------------------------------
+void PLYImporter::GetExtensionList(std::string& append)
+{
+	append.append("*.ply");
 }
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void PLYImporter::InternReadFile( 
-	const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
+								 const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
 
@@ -108,8 +112,7 @@ void PLYImporter::InternReadFile(
 	// the beginning of the file must be PLY - magic, magic
 	if (mBuffer[0] != 'P' && mBuffer[0] != 'p' ||
 		mBuffer[1] != 'L' && mBuffer[1] != 'l' ||
-		mBuffer[2] != 'Y' && mBuffer[2] != 'y')
-	{
+		mBuffer[2] != 'Y' && mBuffer[2] != 'y')	{
 		throw new ImportErrorException( "Invalid .ply file: Magic number \'ply\' is no there");
 	}
 
@@ -789,19 +792,17 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 		}
 		else // triangle strips
 		{
-			// HUGE TODO: MAKE THAT FUCK WORK!
-
 			// normally we have only one triangle strip instance where
 			// a value of -1 indicates a restart of the strip
 			for (std::vector<ElementInstance>::const_iterator i =  pcList->alInstances.begin();
 				i != pcList->alInstances.end();++i)
 			{
+				const std::vector<PLY::PropertyInstance::ValueUnion>& quak = (*i).alProperties[iProperty].avList;
+				pvOut->reserve(pvOut->size() + quak.size() + (quak.size()>>2u));
+
 				int aiTable[2] = {-1,-1};
-				for (std::vector<PLY::PropertyInstance::ValueUnion>::const_iterator 
-					a =  (*i).alProperties[iProperty].avList.begin();
-					a != (*i).alProperties[iProperty].avList.end();++a)
-				{
-					int p = PLY::PropertyInstance::ConvertTo<int>(*a,eType);
+				for (std::vector<PLY::PropertyInstance::ValueUnion>::const_iterator a =  quak.begin();a != quak.end();++a)	{
+					const int p = PLY::PropertyInstance::ConvertTo<int>(*a,eType);
 					if (-1 == p)
 					{
 						// restart the strip ...
@@ -819,12 +820,12 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 						continue;
 					}
 				
-					PLY::Face sFace;
+					pvOut->push_back(PLY::Face());
+					PLY::Face& sFace = pvOut->back();
 					sFace.mIndices.push_back((unsigned int)aiTable[0]);
 					sFace.mIndices.push_back((unsigned int)aiTable[1]);
 					sFace.mIndices.push_back((unsigned int)p);
-					pvOut->push_back(sFace);
-
+		
 					aiTable[0] = aiTable[1];
 					aiTable[1] = p;
 				}

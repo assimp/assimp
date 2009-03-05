@@ -38,8 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-
-/** @file Declaration of the .ply importer class. */
+/** @file  PLYLoader.h
+ *  @brief Declaration of the .ply importer class.
+ */
 #ifndef AI_PLYLOADER_H_INCLUDED
 #define AI_PLYLOADER_H_INCLUDED
 
@@ -50,15 +51,13 @@ struct aiNode;
 
 #include "PlyParser.h"
 
-namespace Assimp
-{
+namespace Assimp	{
 class MaterialHelper;
-
 
 using namespace PLY;
 
 // ---------------------------------------------------------------------------
-/** Used to load PLY files
+/** Importer class to load the stanford PLY file format
 */
 class PLYImporter : public BaseImporter
 {
@@ -75,8 +74,10 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Returns whether the class can handle the format of the given file. 
-	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	 * See BaseImporter::CanRead() for details.
+ 	 */
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+		bool checkSig) const;
 
 protected:
 
@@ -84,10 +85,7 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append)
-	{
-		append.append("*.ply");
-	}
+	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 

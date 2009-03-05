@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the Q3D importer class */
+/** @file  Q3DLoader.cpp
+ *  @brief Implementation of the Q3D importer class
+ */
 
 #include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_Q3D_IMPORTER
@@ -54,30 +56,34 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 Q3DImporter::Q3DImporter()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
 Q3DImporter::~Q3DImporter()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool Q3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool Q3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)return false;
+	const std::string extension = GetExtension(pFile);
 
-	std::string extension = pFile.substr( pos);
-	for (std::string::iterator it = extension.begin();
-		it != extension.end(); ++it)
-		*it = ::tolower(*it);
+	if (extension == "q3s" || extension == "q3o")
+		return true;
+	else if (!extension.length() || checkSig)	{
+		if (!pIOHandler)
+			return true;
+		const char* tokens[] = {"quick3Do","quick3Ds"};
+		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,2);
+	}
+	return false;
+}
 
-	return (extension == ".q3o" || extension == ".q3s"); 
+// ------------------------------------------------------------------------------------------------
+void Q3DImporter::GetExtensionList(std::string& append)
+{
+	append.append("*.q3o;*.q3s");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -91,11 +97,11 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 	if (stream.GetRemainingSize() < 22)
 		throw new ImportErrorException("File is either empty or corrupt: " + pFile);
 
-	// Check the file signature
+	// Check the file's signature
 	if (ASSIMP_strincmp( (const char*)stream.GetPtr(), "quick3Do", 8 ) &&
 		ASSIMP_strincmp( (const char*)stream.GetPtr(), "quick3Ds", 8 ))
 	{
-		throw new ImportErrorException("No Quick3D file. Signature is: " + 
+		throw new ImportErrorException("Not a Quick3D file. Signature string is: " + 
 			std::string((const char*)stream.GetPtr(),8));
 	}
 

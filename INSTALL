@@ -1,7 +1,32 @@
-	Open Asset Import Library (Assimp) Install
-	-----------------------------------------
-To take a look into the ASSIMP library just get the code, go to the 
-workspaces-directory and open your prefered build enviroment. Now just build 
-the engine, start the ASSIMP-Viewer application and select one of our basic test-files.
+	
 
-You need boost-1.35 to build the Asset Import Library.
+Open Asset Import Library (Assimp) Install
+------------------------------------------------
+
+Please see the doxygen documentation to learn how to build & use Assimp.
+A CHM file is included in the SVN repos: ./doc/lib_htmp/AssimpDoc.chm.
+At least Windows should be able to read it.
+
+To build the doxygen doc on your own follow these steps:
+
+a) download & install latest doxygen 
+b) ensure doxygen is in the executable search path
+c) navigate to ./doc
+d) and run 'doxygen'
+
+Open the generated HTML (lib_htmp/index.html) in the browser of your choice.
+Windows only: To generate the CHM doc install the 'Microsoft HTML Workshop'
+and configure the path to it in the DOXYFILE. Run doxygen again.
+
+
+You can also find a copy of the doc on our web site:
+http://assimp.sourceforge.net/lib_html/index.html
+
+Beware, it could be outdated. If you're in serious doubt it might be,
+rebuilding the doc is probably a wise choice.
+
+
+
+
+
+

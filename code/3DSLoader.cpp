@@ -39,7 +39,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the 3ds importer class */
+/** @file  3DSLoader.cpp
+ *  @brief Implementation of the 3ds importer class
+ *
+ *  http://www.the-labs.com/Blender/3DS-details.html
+ */
 
 #include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
@@ -53,12 +57,14 @@ using namespace Assimp;
 // Begins a new parsing block
 // - Reads the current chunk and validates it
 // - computes its length
-#define ASSIMP_3DS_BEGIN_CHUNK()                                     \
-	Discreet3DS::Chunk chunk;                                        \
-	ReadChunk(&chunk);                                               \
-	int chunkSize = chunk.Size-sizeof(Discreet3DS::Chunk);	         \
-	const int oldReadLimit = stream->GetReadLimit();                 \
-	stream->SetReadLimit(stream->GetCurrentPos() + chunkSize);
+#define ASSIMP_3DS_BEGIN_CHUNK()                                         \
+	if (stream->GetRemainingSizeToLimit() < sizeof(Discreet3DS::Chunk))  \
+		return;                                                          \
+	Discreet3DS::Chunk chunk;                                            \
+	ReadChunk(&chunk);                                                   \
+	int chunkSize = chunk.Size-sizeof(Discreet3DS::Chunk);	             \
+	const int oldReadLimit = stream->GetReadLimit();                     \
+	stream->SetReadLimit(stream->GetCurrentPos() + chunkSize);		 
 	
 
 // ------------------------------------------------------------------------------------------------
@@ -82,18 +88,27 @@ Discreet3DSImporter::~Discreet3DSImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool Discreet3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool Discreet3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)
-		return false;
-	std::string extension = pFile.substr( pos);
-	for (std::string::iterator i = extension.begin(); i != extension.end();++i)
-		*i = ::tolower(*i);
+	std::string extension = GetExtension(pFile);
+	if(extension == "3ds" || extension == "prj" ) {
+		return true;
+	}
+	if (!extension.length() || checkSig) {
+		uint16_t token[3];
+		token[0] = 0x4d4d;
+		token[1] = 0x3dc2;
+		//token[2] = 0x3daa;
+		return CheckMagicToken(pIOHandler,pFile,token,2,0,2);
+	}
+	return false;
+}
 
-	return (extension == ".3ds");
+// ------------------------------------------------------------------------------------------------
+// Get list of all extension supported by this loader
+void Discreet3DSImporter::GetExtensionList(std::string& append)
+{
+	append.append("*.3ds;*.prj");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -128,6 +143,7 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
 	mMasterScale               = 1.0f;
 	mBackgroundImage           = "";
 	bHasBG                     = false;
+	bIsPrj                     = false;
 
 	// Parse the file
 	ParseMainChunk();
@@ -138,8 +154,7 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
 	// vectors from the smoothing groups we read from the
 	// file.
 	for (std::vector<D3DS::Mesh>::iterator i = mScene->mMeshes.begin(),
-		 end = mScene->mMeshes.end(); i != end;++i)
-	{
+		 end = mScene->mMeshes.end(); i != end;++i)	{
 		CheckIndices(*i);
 		MakeUnique  (*i);
 		ComputeNormalsWithSmoothingsGroups<D3DS::Face>(*i);
@@ -226,6 +241,9 @@ void Discreet3DSImporter::ParseMainChunk()
 	// get chunk type
 	switch (chunk.Flag)
 	{
+	
+	case Discreet3DS::CHUNK_PRJ:
+		bIsPrj = true;
 	case Discreet3DS::CHUNK_MAIN:
 		ParseEditorChunk();
 		break;
@@ -371,9 +389,9 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
 
 		light->mColorDiffuse = aiColor3D(1.f,1.f,1.f);
 
-		// Now check for further subchunks (excluding color)
-		int8_t* p = stream->GetPtr();
-		ParseLightChunk();
+		// Now check for further subchunks
+		if (!bIsPrj) /* fixme */
+			ParseLightChunk();
 
 		// The specular light color is identical the the diffuse light
 		// color. The ambient light color is equal to the ambient base 
@@ -424,6 +442,10 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
 		if (camera->mHorizontalFOV < 0.001f)
 			camera->mHorizontalFOV = AI_DEG_TO_RAD(45.f);
 		}
+
+		// Now check for further subchunks 
+		if (!bIsPrj) /* fixme */
+			ParseCameraChunk();
 		break;
 	};
 	ASSIMP_3DS_END_CHUNK();
@@ -440,7 +462,7 @@ void Discreet3DSImporter::ParseLightChunk()
 	// get chunk type
 	switch (chunk.Flag)
 	{
-	case Discreet3DS::CHUNK_SPOTLIGHT:
+	case Discreet3DS::CHUNK_DL_SPOTLIGHT:
 		// Now we can be sure that the light is a spot light
 		light->mType = aiLightSource_SPOT;
 
@@ -511,7 +533,7 @@ void Discreet3DSImporter::ParseKeyframeChunk()
 	switch (chunk.Flag)
 	{
 	case Discreet3DS::CHUNK_TRACKCAMTGT:
-	case Discreet3DS::CHUNK_SPOTLIGHT:
+	case Discreet3DS::CHUNK_TRACKSPOTL:
 	case Discreet3DS::CHUNK_TRACKCAMERA:
 	case Discreet3DS::CHUNK_TRACKINFO:
 	case Discreet3DS::CHUNK_TRACKLIGHT:
@@ -574,14 +596,11 @@ void Discreet3DSImporter::SkipTCBInfo()
 {
 	unsigned int flags = stream->GetI2();
 
-	if (!flags)
-	{
-		//////////////////////////////////////////////////////////////////////////
+	if (!flags)	{
 		// Currently we can't do anything with these values. They occur
 		// quite rare, so it wouldn't be worth the effort implementing
 		// them. 3DS ist not really suitable for complex animations,
 		// so full support is not required.
-		//////////////////////////////////////////////////////////////////////////
 		DefaultLogger::get()->warn("3DS: Skipping TCB animation info");
 	}
 
@@ -1015,35 +1034,7 @@ void Discreet3DSImporter::ParseMeshChunk()
 		mMesh.mMat.a4 = stream->GetF4();
 		mMesh.mMat.b4 = stream->GetF4();
 		mMesh.mMat.c4 = stream->GetF4();
-
-		// Now check whether the matrix has got a negative determinant
-		// If yes, we need to flip all vertices' Z axis ....
-		// This code has been taken from lib3ds
-		if (mMesh.mMat.Determinant() < 0.0f)	{
-			// Compute the inverse of the matrix
-			aiMatrix4x4 mInv = mMesh.mMat;
-			mInv.Inverse();
-
-			aiMatrix4x4 mMe = mMesh.mMat;
-			mMe.c1 *= -1.0f;
-			mMe.c2 *= -1.0f;
-			mMe.c3 *= -1.0f;
-			mMe.c4 *= -1.0f;
-			mInv = mInv * mMe;
-
-			// Now transform all vertices
-			for (unsigned int i = 0; i < (unsigned int)mMesh.mPositions.size();++i)
-			{
-				aiVector3D a,c;
-				a = mMesh.mPositions[i];
-				c[0]= mInv[0][0]*a[0] + mInv[1][0]*a[1] + mInv[2][0]*a[2] + mInv[3][0];
-				c[1]= mInv[0][1]*a[0] + mInv[1][1]*a[1] + mInv[2][1]*a[2] + mInv[3][1];
-				c[2]= mInv[0][2]*a[0] + mInv[1][2]*a[1] + mInv[2][2]*a[2] + mInv[3][2];
-				mMesh.mPositions[i] = c;
-			}
-
-			DefaultLogger::get()->info("3DS: Flipping mesh Z-Axis");
-		}}
+		}
 		break;
 
 	case Discreet3DS::CHUNK_MAPLIST:
@@ -1353,7 +1344,7 @@ float Discreet3DSImporter::ParsePercentageChunk()
 		return stream->GetF4();
 	else if (Discreet3DS::CHUNK_PERCENTW == chunk.Flag)
 		return (float)((uint16_t)stream->GetI2()) / (float)0xFFFF;
-	return std::numeric_limits<float>::quiet_NaN();
+	return get_qnan();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1364,7 +1355,7 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D* out,
 	ai_assert(out != NULL);
 
 	// error return value
-	const float qnan = std::numeric_limits<float>::quiet_NaN();
+	const float qnan = get_qnan();
 	static const aiColor3D clrError = aiColor3D(qnan,qnan,qnan);
 
 	Discreet3DS::Chunk chunk;

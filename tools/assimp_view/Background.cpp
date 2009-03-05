@@ -440,7 +440,7 @@ void CBackgroundPainter::RecreateNativeResource()
 			(UINT)g_szSkyboxShader.length(),
 			NULL,
 			NULL,
-			D3DXSHADER_USE_LEGACY_D3DX9_31_DLL,
+			AI_SHADER_COMPILE_FLAGS,
 			NULL,
 			&piSkyBoxEffect,&piBuffer)))
 		{

@@ -51,9 +51,6 @@ namespace Assimp	{
 
 using namespace std;
 
-//!	Obj-file-format extention
-const string ObjFileImporter::OBJ_EXT = "obj";
-
 // ------------------------------------------------------------------------------------------------
 //	Default constructor
 ObjFileImporter::ObjFileImporter() :
@@ -76,20 +73,10 @@ ObjFileImporter::~ObjFileImporter()
 
 // ------------------------------------------------------------------------------------------------
 //	Returns true, fi file is an obj file
-bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	if (pFile.empty())
-		return false;
-
-	string::size_type pos = pFile.find_last_of(".");
-	if (string::npos == pos)
-		return false;
-	
-	const string ext = pFile.substr(pos+1, pFile.size() - pos - 1);
-	if (ext == OBJ_EXT)
-		return true;
-
-	return false;
+	// fixme: auto detection
+	return SimpleExtensionCheck(pFile,"obj");
 }
 
 // ------------------------------------------------------------------------------------------------

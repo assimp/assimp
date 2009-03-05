@@ -61,18 +61,19 @@ BVHLoader::~BVHLoader()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool BVHLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool BVHLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool cs) const
 {
 	// check file extension 
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)
-		return false;
-	std::string extension = pFile.substr( pos);
-	for( std::string::iterator it = extension.begin(); it != extension.end(); ++it)
-		*it = tolower( *it);
+	const std::string extension = GetExtension(pFile);
+	
+	if( extension == "bvh")
+		return true;
 
-	return ( extension == ".bvh");
+	if ((!extension.length() || cs) && pIOHandler) {
+		const char* tokens[] = {"HIERARCHY"};
+		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
+	}
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------

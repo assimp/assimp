@@ -165,11 +165,12 @@ inline unsigned int strtol_cppstyle( const char* in, const char** out=0)
 }
 
 // ------------------------------------------------------------------------------------
-// Special version of the function, providing higher accuracy
+// Special version of the function, providing higher accuracy and security
 // It is mainly used bx fast_atof to prevent ugly integer overflows.
 // ------------------------------------------------------------------------------------
-inline uint64_t strtol10_64( const char* in, const char** out=0)
+inline uint64_t strtol10_64( const char* in, const char** out=0, unsigned int* max_inout=0)
 {
+	unsigned int cur = 0;
 	uint64_t value = 0;
 
 	while ( 1 )
@@ -177,14 +178,36 @@ inline uint64_t strtol10_64( const char* in, const char** out=0)
 		if ( *in < '0' || *in > '9' )
 			break;
 
-		value = ( value * 10 ) + ( *in - '0' );
+		const uint64_t new_value = ( value * 10 ) + ( *in - '0' );
+		
+		if (new_value < value) /* numeric overflow */
+			return value;
+
+		value = new_value;
+
 		++in;
+		++cur;
+
+		if (max_inout && *max_inout == cur) {
+					
+			if (out) { /* skip to end */
+				while (*in >= '0' && *in <= '9')++in;
+				*out = in;
+			}
+
+			return value;
+		}
 	}
 	if (out)
 		*out = in;
+
+	if (max_inout)
+		*max_inout = cur;
+
 	return value;
 }
 
+#define AI_FAST_ATOF_RELAVANT_DECIMALS 6
 
 // ------------------------------------------------------------------------------------
 //! Provides a fast function for converting a string into a float,
@@ -216,15 +239,18 @@ inline const char* fast_atof_move( const char* c, float& out)
 		// Casting to double seems to solve the problem.
 		// strtol_64 is used to prevent integer overflow.
 
-		//float pl = (float)strtol(c, &t, 10);
-		double pl = (double) strtol10_64 ( c, &t );
-		pl *= fast_atof_table[t-c];
+		// Another fix: this tends to become 0 if we don't limit
+		// the maximum number of digits
+		unsigned int diff = AI_FAST_ATOF_RELAVANT_DECIMALS;
+		double pl = (double) strtol10_64 ( c, &t, &diff );
+
+		pl *= fast_atof_table[diff];
 
 		f += (float)pl;
 
 		c = t;
 
-		// FIX: a large 'E' should be allowed, too
+		// FIX: a large 'E' should be allowed, too (occurs in some DXF files)
 		if (*c == 'e' || *c == 'E')
 		{
 			++c;

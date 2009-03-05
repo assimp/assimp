@@ -39,8 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the post processing step to validate 
- * the data structure returned by Assimp
+/** @file  ValidateDataStructure.cpp
+ *  @brief Implementation of the post processing step to validate 
+ *    the data structure returned by Assimp.
  */
 
 #include "AssimpPCH.h"
@@ -49,7 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ValidateDataStructure.h"
 #include "BaseImporter.h"
 #include "fast_atof.h"
-
 
 // CRT headers
 #include <stdarg.h>
@@ -85,15 +85,9 @@ void ValidateDSProcess::ReportError(const char* msg,...)
 	va_start(args,msg);
 
 	char szBuffer[3000];
+	const int iLen = vsprintf(szBuffer,msg,args);
+	ai_assert(iLen > 0);
 
-	int iLen;
-	iLen = vsprintf(szBuffer,msg,args);
-
-	if (0 >= iLen)
-	{
-		// :-) should not happen ...
-		throw new ImportErrorException("Idiot ... learn coding!");
-	}
 	va_end(args);
 #ifdef _DEBUG
 	aiAssert( false,szBuffer,__LINE__,__FILE__ );
@@ -109,15 +103,9 @@ void ValidateDSProcess::ReportWarning(const char* msg,...)
 	va_start(args,msg);
 
 	char szBuffer[3000];
+	const int iLen = vsprintf(szBuffer,msg,args);
+	ai_assert(iLen > 0);
 
-	int iLen;
-	iLen = vsprintf(szBuffer,msg,args);
-
-	if (0 >= iLen)
-	{
-		// :-) should not happen ...
-		throw new ImportErrorException("Idiot ... learn coding!");
-	}
 	va_end(args);
 	DefaultLogger::get()->warn("Validation warning: " + std::string(szBuffer,iLen));
 }
@@ -126,8 +114,7 @@ void ValidateDSProcess::ReportWarning(const char* msg,...)
 inline int HasNameMatch(const aiString& in, aiNode* node)
 {
 	int result = (node->mName == in ? 1 : 0 );
-	for (unsigned int i = 0; i < node->mNumChildren;++i)
-	{
+	for (unsigned int i = 0; i < node->mNumChildren;++i)	{
 		result += HasNameMatch(in,node->mChildren[i]);
 	}
 	return result;
@@ -166,8 +153,7 @@ inline void ValidateDSProcess::DoValidationEx(T** parray, unsigned int size,
 	// validate all entries
 	if (size)
 	{
-		if (!parray)
-		{
+		if (!parray)	{
 			ReportError("aiScene::%s is NULL (aiScene::%s is %i)",
 				firstName, secondName, size);
 		}
@@ -205,13 +191,11 @@ inline void ValidateDSProcess::DoValidationWithNameCheck(T** array,
 	for (unsigned int i = 0; i < size;++i)
 	{
 		int res = HasNameMatch(array[i]->mName,mScene->mRootNode);
-		if (!res)
-		{
+		if (!res)	{
 			ReportError("aiScene::%s[%i] has no corresponding node in the scene graph (%s)",
 				firstName,i,array[i]->mName.data);
 		}
-		else if (1 != res)
-		{
+		else if (1 != res)	{
 			ReportError("aiScene::%s[%i]: there are more than one nodes with %s as name",
 				firstName,i,array[i]->mName.data);
 		}
@@ -228,79 +212,68 @@ void ValidateDSProcess::Execute( aiScene* pScene)
 	// validate the node graph of the scene
 	Validate(pScene->mRootNode);
 	
-	// at least one of the mXXX arrays must be non-empty or we'll flag 
-	// the sebe as invalid
+	// At least one of the mXXX arrays must be non-empty or we'll flag 
+	// the scene as invalid
 	bool has = false;
 
 	// validate all meshes
-	if (pScene->mNumMeshes) 
-	{
-		has = true;
+	if (pScene->mNumMeshes) {
+		// has = true;
 		DoValidation(pScene->mMeshes,pScene->mNumMeshes,"mMeshes","mNumMeshes");
 	}
-	else if (!(mScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
-	{
+	else if (!(mScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))	{
 		ReportError("aiScene::mNumMeshes is 0. At least one mesh must be there");
 	}
-	else if (pScene->mMeshes)
-	{
+	else if (pScene->mMeshes)	{
 		ReportError("aiScene::mMeshes is non-null although there are no meshes");
 	}
 	
 	// validate all animations
-	if (pScene->mNumAnimations) 
-	{
-		has = true;
+	if (pScene->mNumAnimations) {
+		// has = true;
 		DoValidation(pScene->mAnimations,pScene->mNumAnimations,
 			"mAnimations","mNumAnimations");
 	}
-	else if (pScene->mAnimations)
-	{
+	else if (pScene->mAnimations)	{
 		ReportError("aiScene::mAnimations is non-null although there are no animations");
 	}
 
 	// validate all cameras
-	if (pScene->mNumCameras) 
-	{
-		has = true;
+	if (pScene->mNumCameras) {
+		// has = true;
 		DoValidationWithNameCheck(pScene->mCameras,pScene->mNumCameras,
 			"mCameras","mNumCameras");
 	}
-	else if (pScene->mCameras)
-	{
+	else if (pScene->mCameras)	{
 		ReportError("aiScene::mCameras is non-null although there are no cameras");
 	}
 
 	// validate all lights
-	if (pScene->mNumLights) 
-	{
-		has = true;
+	if (pScene->mNumLights) {
+		// has = true;
 		DoValidationWithNameCheck(pScene->mLights,pScene->mNumLights,
 			"mLights","mNumLights");
 	}
-	else if (pScene->mLights)
-	{
+	else if (pScene->mLights)	{
 		ReportError("aiScene::mLights is non-null although there are no lights");
 	}
 	
 	// validate all materials
-	if (pScene->mNumMaterials) 
-	{
-		has = true;
+	if (pScene->mNumMaterials) {
+		// has = true;
 		DoValidation(pScene->mMaterials,pScene->mNumMaterials,"mMaterials","mNumMaterials");
 	}
-	else if (!(mScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
-	{
-		// NOTE: ScenePreprocessor generates a default material if none is there
-		// (and at least one mesh is found). So this should never be triggered ...
+#if 0
+	// NOTE: ScenePreprocessor generates a default material if none is there
+	else if (!(mScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))	{
 		ReportError("aiScene::mNumMaterials is 0. At least one material must be there");
 	}
-	else if (pScene->mMaterials)
-	{
+#endif
+	else if (pScene->mMaterials)	{
 		ReportError("aiScene::mMaterials is non-null although there are no materials");
 	}
 
-	if (!has)ReportError("The aiScene data structure is empty");
+//	if (!has)ReportError("The aiScene data structure is empty");
 	DefaultLogger::get()->debug("ValidateDataStructureProcess end");
 }
 
@@ -312,8 +285,7 @@ void ValidateDSProcess::Validate( const aiLight* pLight)
 
 	if (!pLight->mAttenuationConstant &&
 		!pLight->mAttenuationLinear   && 
-		!pLight->mAttenuationQuadratic)
-	{
+		!pLight->mAttenuationQuadratic)	{
 		ReportWarning("aiLight::mAttenuationXXX - all are zero");
 	}
 
@@ -333,6 +305,8 @@ void ValidateDSProcess::Validate( const aiCamera* pCamera)
 	if (pCamera->mClipPlaneFar <= pCamera->mClipPlaneNear)
 		ReportError("aiCamera::mClipPlaneFar must be >= aiCamera::mClipPlaneNear");
 
+	// FIX: there are many 3ds files with invalid FOVs. No reason to
+	// reject them at all ... a warning is appropriate.
 	if (!pCamera->mHorizontalFOV || pCamera->mHorizontalFOV >= (float)AI_MATH_PI)
 		ReportWarning("%f is not a valid value for aiCamera::mHorizontalFOV",pCamera->mHorizontalFOV);
 }
@@ -341,10 +315,10 @@ void ValidateDSProcess::Validate( const aiCamera* pCamera)
 void ValidateDSProcess::Validate( const aiMesh* pMesh)
 {
 	// validate the material index of the mesh
-	if (pMesh->mMaterialIndex >= this->mScene->mNumMaterials)
+	if (mScene->mNumMaterials && pMesh->mMaterialIndex >= mScene->mNumMaterials)
 	{
-		this->ReportError("aiMesh::mMaterialIndex is invalid (value: %i maximum: %i)",
-			pMesh->mMaterialIndex,this->mScene->mNumMaterials-1);
+		ReportError("aiMesh::mMaterialIndex is invalid (value: %i maximum: %i)",
+			pMesh->mMaterialIndex,mScene->mNumMaterials-1);
 	}
 
 	for (unsigned int i = 0; i < pMesh->mNumFaces; ++i)
@@ -356,25 +330,25 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 			switch (face.mNumIndices)
 			{
 			case 0:
-				this->ReportError("aiMesh::mFaces[%i].mNumIndices is 0",i);
+				ReportError("aiMesh::mFaces[%i].mNumIndices is 0",i);
 			case 1:
 				if (0 == (pMesh->mPrimitiveTypes & aiPrimitiveType_POINT))
 				{
-					this->ReportError("aiMesh::mFaces[%i] is a POINT but aiMesh::mPrimtiveTypes "
+					ReportError("aiMesh::mFaces[%i] is a POINT but aiMesh::mPrimtiveTypes "
 						"does not report the POINT flag",i);
 				}
 				break;
 			case 2:
 				if (0 == (pMesh->mPrimitiveTypes & aiPrimitiveType_LINE))
 				{
-					this->ReportError("aiMesh::mFaces[%i] is a LINE but aiMesh::mPrimtiveTypes "
+					ReportError("aiMesh::mFaces[%i] is a LINE but aiMesh::mPrimtiveTypes "
 						"does not report the LINE flag",i);
 				}
 				break;
 			case 3:
 				if (0 == (pMesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE))
 				{
-					this->ReportError("aiMesh::mFaces[%i] is a TRIANGLE but aiMesh::mPrimtiveTypes "
+					ReportError("aiMesh::mFaces[%i] is a TRIANGLE but aiMesh::mPrimtiveTypes "
 						"does not report the TRIANGLE flag",i);
 				}
 				break;
@@ -388,25 +362,23 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 			};
 		}
 
-		if (!face.mIndices)this->ReportError("aiMesh::mFaces[%i].mIndices is NULL",i);
+		if (!face.mIndices)
+			ReportError("aiMesh::mFaces[%i].mIndices is NULL",i);
 	}
 
 	// positions must always be there ...
-	if (!pMesh->mNumVertices || !pMesh->mVertices && !mScene->mFlags)
-	{
-		this->ReportError("The mesh contains no vertices");
+	if (!pMesh->mNumVertices || !pMesh->mVertices && !mScene->mFlags)	{
+		ReportError("The mesh contains no vertices");
 	}
 
 	// if tangents are there there must also be bitangent vectors ...
-	if ((pMesh->mTangents != NULL) != (pMesh->mBitangents != NULL))
-	{
-		this->ReportError("If there are tangents there must also be bitangent vectors");
+	if ((pMesh->mTangents != NULL) != (pMesh->mBitangents != NULL))	{
+		ReportError("If there are tangents there must also be bitangent vectors");
 	}
 
 	// faces, too
-	if (!pMesh->mNumFaces || !pMesh->mFaces && !mScene->mFlags)
-	{
-		this->ReportError("The mesh contains no faces");
+	if (!pMesh->mNumFaces || !pMesh->mFaces && !mScene->mFlags)	{
+		ReportError("The mesh contains no faces");
 	}
 
 	// now check whether the face indexing layout is correct:
@@ -418,8 +390,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 		aiFace& face = pMesh->mFaces[i];
 		for (unsigned int a = 0; a < face.mNumIndices;++a)
 		{
-			if (face.mIndices[a] >= pMesh->mNumVertices)
-			{
+			if (face.mIndices[a] >= pMesh->mNumVertices)	{
 				ReportError("aiMesh::mFaces[%i]::mIndices[%i] is out of range",i,a);
 			}
 			// the MSB flag is temporarily used by the extra verbose
@@ -436,8 +407,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 
 	// check whether there are vertices that aren't referenced by a face
 	bool b = false;
-	for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
-	{
+	for (unsigned int i = 0; i < pMesh->mNumVertices;++i)	{
 		if (!abRefList[i])b = true;
 	}
 	abRefList.clear();
@@ -495,7 +465,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 			if (!pMesh->mBones[i])
 			{
 				delete[] afSum;
-				this->ReportError("aiMesh::mBones[%i] is NULL (aiMesh::mNumBones is %i)",
+				ReportError("aiMesh::mBones[%i] is NULL (aiMesh::mNumBones is %i)",
 					i,pMesh->mNumBones);
 			}
 			Validate(pMesh,pMesh->mBones[i],afSum);
@@ -505,7 +475,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 				if (pMesh->mBones[i]->mName == pMesh->mBones[a]->mName)
 				{
 					delete[] afSum;
-					this->ReportError("aiMesh::mBones[%i] has the same name as "
+					ReportError("aiMesh::mBones[%i] has the same name as "
 						"aiMesh::mBones[%i]",i,a);
 				}
 			}
@@ -513,8 +483,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 		// check whether all bone weights for a vertex sum to 1.0 ...
 		for (unsigned int i = 0; i < pMesh->mNumVertices;++i)
 		{
-			if (afSum[i] && (afSum[i] <= 0.94 || afSum[i] >= 1.05))
-			{
+			if (afSum[i] && (afSum[i] <= 0.94 || afSum[i] >= 1.05))	{
 				ReportWarning("aiMesh::mVertices[%i]: bone weight sum != 1.0 (sum is %f)",i,afSum[i]);
 			}
 		}
@@ -532,21 +501,18 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh,
 {
 	this->Validate(&pBone->mName);
 
-   	if (!pBone->mNumWeights)
-	{
-		this->ReportError("aiBone::mNumWeights is zero");
+   	if (!pBone->mNumWeights)	{
+		ReportError("aiBone::mNumWeights is zero");
 	}
 
 	// check whether all vertices affected by this bone are valid
 	for (unsigned int i = 0; i < pBone->mNumWeights;++i)
 	{
-		if (pBone->mWeights[i].mVertexId >= pMesh->mNumVertices)
-		{
-			this->ReportError("aiBone::mWeights[%i].mVertexId is out of range",i);
+		if (pBone->mWeights[i].mVertexId >= pMesh->mNumVertices)	{
+			ReportError("aiBone::mWeights[%i].mVertexId is out of range",i);
 		}
-		else if (!pBone->mWeights[i].mWeight || pBone->mWeights[i].mWeight > 1.0f)
-		{
-			this->ReportWarning("aiBone::mWeights[%i].mWeight has an invalid value",i);
+		else if (!pBone->mWeights[i].mWeight || pBone->mWeights[i].mWeight > 1.0f)	{
+			ReportWarning("aiBone::mWeights[%i].mWeight has an invalid value",i);
 		}
 		afSum[pBone->mWeights[i].mVertexId] += pBone->mWeights[i].mWeight;
 	}
@@ -555,27 +521,26 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh,
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::Validate( const aiAnimation* pAnimation)
 {
-	this->Validate(&pAnimation->mName);
+	Validate(&pAnimation->mName);
 
 	// validate all materials
-	if (pAnimation->mNumChannels)
+	if (pAnimation->mNumChannels)	
 	{
-		if (!pAnimation->mChannels)
-		{
-			this->ReportError("aiAnimation::mChannels is NULL (aiAnimation::mNumChannels is %i)",
+		if (!pAnimation->mChannels)	{
+			ReportError("aiAnimation::mChannels is NULL (aiAnimation::mNumChannels is %i)",
 				pAnimation->mNumChannels);
 		}
 		for (unsigned int i = 0; i < pAnimation->mNumChannels;++i)
 		{
 			if (!pAnimation->mChannels[i])
 			{
-				this->ReportError("aiAnimation::mChannels[%i] is NULL (aiAnimation::mNumChannels is %i)",
+				ReportError("aiAnimation::mChannels[%i] is NULL (aiAnimation::mNumChannels is %i)",
 					i, pAnimation->mNumChannels);
 			}
-			this->Validate(pAnimation, pAnimation->mChannels[i]);
+			Validate(pAnimation, pAnimation->mChannels[i]);
 		}
 	}
-	else this->ReportError("aiAnimation::mNumChannels is 0. At least one node animation channel must be there.");
+	else ReportError("aiAnimation::mNumChannels is 0. At least one node animation channel must be there.");
 
 	// Animation duration is allowed to be zero in cases where the anim contains only a single key frame.
 	// if (!pAnimation->mDuration)this->ReportError("aiAnimation::mDuration is zero");
@@ -619,7 +584,6 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 	case aiTextureType_HEIGHT:
 		szType = "Height";
         break;
-
     default:
         break;
 	};
@@ -746,8 +710,7 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 				"aiMaterial::mProperties[%i].mData is 0",i,i);
 		}
 		// check all predefined types
-		if (aiPTI_String == prop->mType)
-		{
+		if (aiPTI_String == prop->mType)	{
 			// FIX: strings are now stored in a less expensive way ...
 			if (prop->mDataLength < sizeof(size_t) + ((const aiString*)prop->mData)->length + 1)	{
 				ReportError("aiMaterial::mProperties[%i].mDataLength is "
@@ -756,16 +719,14 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 			}
 			Validate((const aiString*)prop->mData);
 		}
-		else if (aiPTI_Float == prop->mType)
-		{
+		else if (aiPTI_Float == prop->mType)	{
 			if (prop->mDataLength < sizeof(float))	{
 				ReportError("aiMaterial::mProperties[%i].mDataLength is "
 					"too small to contain a float (%i, needed: %i)",
 					i,prop->mDataLength,sizeof(float));
 			}
 		}
-		else if (aiPTI_Integer == prop->mType)
-		{
+		else if (aiPTI_Integer == prop->mType)	{
 			if (prop->mDataLength < sizeof(int))	{
 				ReportError("aiMaterial::mProperties[%i].mDataLength is "
 					"too small to contain an integer (%i, needed: %i)",
@@ -822,29 +783,25 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 void ValidateDSProcess::Validate( const aiTexture* pTexture)
 {
 	// the data section may NEVER be NULL
-	if (!pTexture->pcData)
-	{
-		this->ReportError("aiTexture::pcData is NULL");
+	if (!pTexture->pcData)	{
+		ReportError("aiTexture::pcData is NULL");
 	}
 	if (pTexture->mHeight)
 	{
-		if (!pTexture->mWidth)this->ReportError("aiTexture::mWidth is zero "
+		if (!pTexture->mWidth)ReportError("aiTexture::mWidth is zero "
 			"(aiTexture::mHeight is %i, uncompressed texture)",pTexture->mHeight);
 	}
 	else 
 	{
-		if (!pTexture->mWidth)this->ReportError("aiTexture::mWidth is zero (compressed texture)");
-		if ('.' == pTexture->achFormatHint[0])
-		{
-			char szTemp[5];
-			szTemp[0] = pTexture->achFormatHint[0];
-			szTemp[1] = pTexture->achFormatHint[1];
-			szTemp[2] = pTexture->achFormatHint[2];
-			szTemp[3] = pTexture->achFormatHint[3];
-			szTemp[4] = '\0';
-
-			this->ReportWarning("aiTexture::achFormatHint should contain a file extension "
-				"without a leading dot (format hint: %s).",szTemp);
+		if (!pTexture->mWidth) {
+			ReportError("aiTexture::mWidth is zero (compressed texture)");
+		}
+		if ('\0' != pTexture->achFormatHint[3]) {
+			ReportWarning("aiTexture::achFormatHint must be zero-terminated");
+		}
+		else if ('.'  == pTexture->achFormatHint[0])	{
+			ReportWarning("aiTexture::achFormatHint should contain a file extension "
+				"without a leading dot (format hint: %s).",pTexture->achFormatHint);
 		}
 	}
 
@@ -852,9 +809,8 @@ void ValidateDSProcess::Validate( const aiTexture* pTexture)
  	if (sz[0] >= 'A' && sz[0] <= 'Z' ||
 		sz[1] >= 'A' && sz[1] <= 'Z' ||
 		sz[2] >= 'A' && sz[2] <= 'Z' ||
-		sz[3] >= 'A' && sz[3] <= 'Z')
-	{
-		this->ReportError("aiTexture::achFormatHint contains non-lowercase characters");
+		sz[3] >= 'A' && sz[3] <= 'Z')	{
+		ReportError("aiTexture::achFormatHint contains non-lowercase characters");
 	}
 }
 
@@ -863,6 +819,9 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 	 const aiNodeAnim* pNodeAnim)
 {
 	Validate(&pNodeAnim->mNodeName);
+
+	if (!pNodeAnim->mNumPositionKeys && !pNodeAnim->mScalingKeys && !pNodeAnim->mNumRotationKeys)
+		ReportError("Empty node animation channel");
 
 	// otherwise check whether one of the keys exceeds the total duration of the animation
 	if (pNodeAnim->mNumPositionKeys)
@@ -875,7 +834,8 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 		double dLast = -10e10;
 		for (unsigned int i = 0; i < pNodeAnim->mNumPositionKeys;++i)
 		{
-			if (pNodeAnim->mPositionKeys[i].mTime > pAnimation->mDuration)
+			// ScenePreprocessor will compute the duration if still teh default value
+			if (-1. != pAnimation->mDuration && pNodeAnim->mPositionKeys[i].mTime > pAnimation->mDuration)
 			{
 				ReportError("aiNodeAnim::mPositionKeys[%i].mTime (%.5f) is larger "
 					"than aiAnimation::mDuration (which is %.5f)",i,
@@ -903,7 +863,7 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 		double dLast = -10e10;
 		for (unsigned int i = 0; i < pNodeAnim->mNumRotationKeys;++i)
 		{
-			if (pNodeAnim->mRotationKeys[i].mTime > pAnimation->mDuration)
+			if (-1. != pAnimation->mDuration && pNodeAnim->mRotationKeys[i].mTime > pAnimation->mDuration)
 			{
 				ReportError("aiNodeAnim::mRotationKeys[%i].mTime (%.5f) is larger "
 					"than aiAnimation::mDuration (which is %.5f)",i,
@@ -923,15 +883,14 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 	// scaling keys
 	if (pNodeAnim->mNumScalingKeys)
 	{
-		if (!pNodeAnim->mScalingKeys)
-		{
-			this->ReportError("aiNodeAnim::mScalingKeys is NULL (aiNodeAnim::mNumScalingKeys is %i)",
+		if (!pNodeAnim->mScalingKeys)	{
+			ReportError("aiNodeAnim::mScalingKeys is NULL (aiNodeAnim::mNumScalingKeys is %i)",
 				pNodeAnim->mNumScalingKeys);
 		}
 		double dLast = -10e10;
 		for (unsigned int i = 0; i < pNodeAnim->mNumScalingKeys;++i)
 		{
-			if (pNodeAnim->mScalingKeys[i].mTime > pAnimation->mDuration)
+			if (-1. != pAnimation->mDuration && pNodeAnim->mScalingKeys[i].mTime > pAnimation->mDuration)
 			{
 				ReportError("aiNodeAnim::mScalingKeys[%i].mTime (%.5f) is larger "
 					"than aiAnimation::mDuration (which is %.5f)",i,
@@ -992,13 +951,11 @@ void ValidateDSProcess::Validate( const aiNode* pNode)
 	}
 	if (pNode->mNumChildren)
 	{
-		if (!pNode->mChildren)
-		{
-			this->ReportError("aiNode::mChildren is NULL (aiNode::mNumChildren is %i)",
+		if (!pNode->mChildren)	{
+			ReportError("aiNode::mChildren is NULL (aiNode::mNumChildren is %i)",
 				pNode->mNumChildren);
 		}
-		for (unsigned int i = 0; i < pNode->mNumChildren;++i)
-		{
+		for (unsigned int i = 0; i < pNode->mNumChildren;++i)	{
 			Validate(pNode->mChildren[i]);
 		}
 	}

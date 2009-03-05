@@ -245,6 +245,7 @@ struct aiColor4D
 	float r, g, b, a;
 } PACK_STRUCT;  // !struct aiColor4D
 
+
 #include "./Compiler/poppack1.h"
 
 
@@ -475,6 +476,7 @@ struct aiMemoryInfo
 #include "aiVector3D.inl"
 #include "aiMatrix3x3.inl"
 #include "aiMatrix4x4.inl"
+
 
 
 #endif //!! include guard

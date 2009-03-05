@@ -1,6 +1,7 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
+#include "../../mkutil/revision.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -30,8 +31,7 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ASSIMP_VIEW         ICON                    "assimp_view.ico"
-IDI_SMALL               ICON                    "small.ico"
+IDI_ASSIMP_VIEW         ICON                    "../shared/assimp_tools_icon.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -205,8 +205,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
- PRODUCTVERSION 1,0,0,1
+ FILEVERSION 1,0,SVNRevision,0
+ PRODUCTVERSION 1,0,SVNRevision,1
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -223,12 +223,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "ASSIMP Development Team"
             VALUE "FileDescription", "ASSIMP Viewer Application"
-            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "FileVersion", "1, 0, SVNRevision, 0"
             VALUE "InternalName", "assimp_view"
             VALUE "LegalCopyright", "Licensed under the LGPL"
             VALUE "OriginalFilename", "assimpview32.exe"
             VALUE "ProductName", "ASSIMP Viewer Application"
-            VALUE "ProductVersion", "1, 0, 0, 1"
+            VALUE "ProductVersion", "1, 0, SVNRevision, 0"
         END
     END
     BLOCK "VarFileInfo"

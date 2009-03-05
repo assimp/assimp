@@ -17,6 +17,7 @@ class RemoveRedundantMatsTest : public CPPUNIT_NS :: TestFixture
 {
     CPPUNIT_TEST_SUITE (RemoveRedundantMatsTest);
     CPPUNIT_TEST (testRedundantMaterials);
+	CPPUNIT_TEST (testRedundantMaterialsWithExcludeList);
     CPPUNIT_TEST_SUITE_END ();
 
     public:
@@ -26,7 +27,7 @@ class RemoveRedundantMatsTest : public CPPUNIT_NS :: TestFixture
     protected:
 
         void  testRedundantMaterials (void);
-		
+		void  testRedundantMaterialsWithExcludeList (void);
    
 	private:
 

@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * <br>
  * The algorithm is roughly basing on this paper:
  * http://www.cs.princeton.edu/gfx/pubs/Sander_2007_%3ETR/tipsy.pdf
+ *   ... TODO: implement overdraw reduction
  */
 
 #include "AssimpPCH.h"
@@ -54,16 +55,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-#if _MSC_VER >= 1400
-#	define sprintf sprintf_s
-#endif
-
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-ImproveCacheLocalityProcess::ImproveCacheLocalityProcess()
-{
-	// nothing to do here
-	configCacheDepth = 12; // hardcoded to 12 at the moment
+ImproveCacheLocalityProcess::ImproveCacheLocalityProcess() {
+	configCacheDepth = PP_ICL_PTCACHE_SIZE;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -81,27 +76,47 @@ bool ImproveCacheLocalityProcess::IsActive( unsigned int pFlags) const
 }
 
 // ------------------------------------------------------------------------------------------------
+// Setup configuration
+void ImproveCacheLocalityProcess::SetupProperties(const Importer* pImp)
+{
+	// AI_CONFIG_PP_ICL_PTCACHE_SIZE
+	configCacheDepth = pImp->GetPropertyInteger(AI_CONFIG_PP_ICL_PTCACHE_SIZE,PP_ICL_PTCACHE_SIZE);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void ImproveCacheLocalityProcess::Execute( aiScene* pScene)
 {
-	if (!pScene->mNumMeshes)
-	{
+	if (!pScene->mNumMeshes) {
 		DefaultLogger::get()->debug("ImproveCacheLocalityProcess skipped; there are no meshes");
 		return;
 	}
 
 	DefaultLogger::get()->debug("ImproveCacheLocalityProcess begin");
 
-	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-	{
-		this->ProcessMesh( pScene->mMeshes[a],a);
+	float out = 0.f;
+	unsigned int numf = 0, numm = 0;
+	for( unsigned int a = 0; a < pScene->mNumMeshes; a++){
+		const float res = ProcessMesh( pScene->mMeshes[a],a);
+		if (res) {
+			numf += pScene->mMeshes[a]->mNumFaces;
+			out  += res;
+			++numm;
+		}
 	}
-	DefaultLogger::get()->debug("ImproveCacheLocalityProcess finished. ");
+	if (!DefaultLogger::isNullLogger()) {
+		char szBuff[128]; // should be sufficiently large in every case
+		::sprintf(szBuff,"Cache relevant are %i meshes (%i faces). Average output ACMR is %f",
+			numm,numf,out/numf);
+
+		DefaultLogger::get()->info(szBuff);
+		DefaultLogger::get()->debug("ImproveCacheLocalityProcess finished. ");
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
 // Improves the cache coherency of a specific mesh
-void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshNum)
+float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshNum)
 {
 	ai_assert(NULL != pMesh);
 
@@ -109,52 +124,50 @@ void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshN
 	// - there must be vertices and faces (haha)
 	// - all faces must be triangulated
 	if (!pMesh->HasFaces() || !pMesh->HasPositions())
-		return;
+		return 0.f;
 
-	if (pMesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
-	{
+	if (pMesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)	{
 		DefaultLogger::get()->error("This algorithm works on triangle meshes only");
-		return;
+		return 0.f;
 	}
 
-	// find the input ACMR ...
-	unsigned int* piFIFOStack = new unsigned int[this->configCacheDepth];
-	::memset(piFIFOStack,0xff,this->configCacheDepth*sizeof(unsigned int));
-	unsigned int* piCur = piFIFOStack;
-	const unsigned int* const piCurEnd = piFIFOStack + this->configCacheDepth;
-
-	// count the number of cache misses
-	unsigned int iCacheMisses = 0;
-
+	float fACMR = 3.f;
 	const aiFace* const pcEnd = pMesh->mFaces+pMesh->mNumFaces;
-	for (const aiFace* pcFace = pMesh->mFaces;pcFace != pcEnd;++pcFace)
+
+	// Input ACMR is for logging purposes only
+	if (!DefaultLogger::isNullLogger()) 
 	{
-		for (unsigned int qq = 0; qq < 3;++qq)
+		unsigned int* piFIFOStack = new unsigned int[configCacheDepth];
+		::memset(piFIFOStack,0xff,configCacheDepth*sizeof(unsigned int));
+		unsigned int* piCur = piFIFOStack;
+		const unsigned int* const piCurEnd = piFIFOStack + configCacheDepth;
+
+		// count the number of cache misses
+		unsigned int iCacheMisses = 0;
+		for (const aiFace* pcFace = pMesh->mFaces;pcFace != pcEnd;++pcFace)
 		{
-			bool bInCache = false;
-			for (unsigned int* pp = piFIFOStack;pp < piCurEnd;++pp)
+			for (unsigned int qq = 0; qq < 3;++qq)
 			{
-				if (*pp == pcFace->mIndices[qq])
+				bool bInCache = false;
+				for (unsigned int* pp = piFIFOStack;pp < piCurEnd;++pp)
 				{
-					// the vertex is in cache
-					bInCache = true;
-					break;
+					if (*pp == pcFace->mIndices[qq])	{
+						// the vertex is in cache
+						bInCache = true;
+						break;
+					}
+				}
+				if (!bInCache)
+				{
+					++iCacheMisses;
+					if (piCurEnd == piCur)piCur = piFIFOStack;
+					*piCur++ = pcFace->mIndices[qq];
 				}
 			}
-			if (!bInCache)
-			{
-				++iCacheMisses;
-				if (piCurEnd == piCur)piCur = piFIFOStack;
-				*piCur++ = pcFace->mIndices[qq];
-			}
 		}
-	}
-	delete[] piFIFOStack;
-	float fACMR = (float)iCacheMisses / pMesh->mNumFaces;
-	if (3.0 == fACMR)
-	{
-		if (!DefaultLogger::isNullLogger())
-		{
+		delete[] piFIFOStack;
+		fACMR = (float)iCacheMisses / pMesh->mNumFaces;
+		if (3.0 == fACMR)	{
 			char szBuff[128]; // should be sufficiently large in every case
 
 			// the JoinIdenticalVertices process has not been executed on this
@@ -162,8 +175,8 @@ void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshN
 			// smaller than 3.0 ...
 			::sprintf(szBuff,"Mesh %i: Not suitable for vcache optimization",meshNum);
 			DefaultLogger::get()->warn(szBuff);
+			return 0.f;
 		}
-		return;
 	}
 
 	// first we need to build a vertex-triangle adjacency list
@@ -204,7 +217,7 @@ void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshN
 			iMaxRefTris = std::max(iMaxRefTris,*piCur);
 	}
 	unsigned int* piCandidates = new unsigned int[iMaxRefTris*3];
-	iCacheMisses = 0;
+	unsigned int iCacheMisses = 0;
 
 	/** PSEUDOCODE for the algorithm
 
@@ -236,7 +249,7 @@ void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshN
 
 	int ivdx = 0;
 	int ics = 1;
-	int iStampCnt = this->configCacheDepth+1;
+	int iStampCnt = configCacheDepth+1;
 	while (ivdx >= 0)
 	{
 		unsigned int icnt = piNumTriPtrNoModify[ivdx]; 
@@ -274,7 +287,7 @@ void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshN
 					*piCSIter++ = dp;
 
 					// if the vertex is not yet in cache, set its cache count
-					if (iStampCnt-piCachingStamps[dp] > this->configCacheDepth)
+					if (iStampCnt-piCachingStamps[dp] > configCacheDepth)
 					{
 						piCachingStamps[dp] = iStampCnt++;
 						++iCacheMisses;
@@ -302,7 +315,7 @@ void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshN
 
 				// will the vertex be in cache, even after fanning occurs?
 				unsigned int tmp;
-				if ((tmp = iStampCnt-piCachingStamps[dp]) + 2*piNumTriPtr[dp] <= this->configCacheDepth)
+				if ((tmp = iStampCnt-piCachingStamps[dp]) + 2*piNumTriPtr[dp] <= configCacheDepth)
 					priority = tmp;
 				// keep best candidate
 				if (priority > max_priority)
@@ -344,18 +357,24 @@ void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshN
 			}
 		}
 	}
+	float fACMR2 = 0.0f;
 	if (!DefaultLogger::isNullLogger())
 	{
-		char szBuff[128]; // should be sufficiently large in every case
-		float fACMR2 = (float)iCacheMisses / pMesh->mNumFaces;
+		fACMR2 = (float)iCacheMisses / pMesh->mNumFaces;
 
-		::sprintf(szBuff,"Mesh %i | ACMR in: %f out: %f | ~%.1f%%",meshNum,fACMR,fACMR2,
-			((fACMR - fACMR2) / fACMR) * 100.f);
-		DefaultLogger::get()->info(szBuff);
+		// very intense verbose logging ... prepare for much text if there are many meshes
+		if ( DefaultLogger::get()->getLogSeverity() == Logger::VERBOSE) {
+			char szBuff[128]; // should be sufficiently large in every case
+
+			::sprintf(szBuff,"Mesh %i | ACMR in: %f out: %f | ~%.1f%%",meshNum,fACMR,fACMR2,
+				((fACMR - fACMR2) / fACMR) * 100.f);
+			DefaultLogger::get()->debug(szBuff);
+		}
+
+		fACMR2 *= pMesh->mNumFaces;
 	}
 	// sort the output index buffer back to the input array
 	piCSIter = piIBOutput;
-
 	for (aiFace* pcFace = pMesh->mFaces; pcFace != pcEnd;++pcFace)
 	{
 		pcFace->mIndices[0] = *piCSIter++;
@@ -368,4 +387,5 @@ void ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshN
 	delete[] piIBOutput;
 	delete[] piCandidates;
 	delete[] piNumTriPtrNoModify;
+	return fACMR2;
 }

@@ -296,30 +296,46 @@ enum aiPostProcessSteps
 };
 
 
-/** @def AI_POSTPROCESS_DEFAULT_REALTIME_FASTEST
- *  @brief Default postprocess configuration targeted at realtime applications
- *    which need to load models as fast as possible.
+// ---------------------------------------------------------------------------------------
+/** @def aiProcessPreset_TargetRealtimeUse_Fast
+ *  @brief Default postprocess configuration optimizing the data for real-time rendering.
  *  
- *  If you're using DirectX, don't forget to combine this value with
- * the #aiProcess_ConvertToLeftHanded step.
+ *  Applications would want to use this preset to load models on end-user PCs,
+ *  maybe for direct use in game.
+ *
+ * If you're using DirectX, don't forget to combine this value with
+ * the #aiProcess_ConvertToLeftHanded step. If you don't support UV transformations
+ * in your application apply the #aiProcess_TransformUVCoords step, too.
+ *  @note Please take the time to read the doc to the steps enabled by this preset. 
+ *  Some of them offer further configurable properties, some of them might not be of
+ *  use for you so it might be better to not specify them.
  */
-#define AI_POSTPROCESS_DEFAULT_REALTIME_FASTEST \
+#define aiProcessPreset_TargetRealtime_Fast \
 	aiProcess_CalcTangentSpace		|  \
 	aiProcess_GenNormals			|  \
 	aiProcess_JoinIdenticalVertices |  \
 	aiProcess_Triangulate			|  \
-	aiProcess_GenUVCoords
+	aiProcess_GenUVCoords           |  \
+	aiProcess_SortByPType           |  \
+	0
 
-
- /** @def AI_POSTPROCESS_DEFAULT_REALTIME
- *   @brief Default postprocess configuration targeted at realtime applications.
- *    Unlike AI_POSTPROCESS_DEFAULT_REALTIME_FASTEST, this configuration
- *    performs some extra optimizations.
- *  
- *  If you're using DirectX, don't forget to combine this value with
- * the #aiProcess_ConvertToLeftHanded step.
- */
-#define AI_POSTPROCESS_DEFAULT_REALTIME \
+ // ---------------------------------------------------------------------------------------
+ /** @def aiProcessPreset_TargetRealtime_Quality
+  *  @brief Default postprocess configuration optimizing the data for real-time rendering.
+  *
+  *  Unlike #aiProcessPreset_TargetRealtime_Fast, this configuration
+  *  performs some extra optimizations to improve rendering speed and
+  *  to minimize memory usage. It could be a good choice for a level editor
+  *  environment where import speed is not so important.
+  *  
+  *  If you're using DirectX, don't forget to combine this value with
+  *  the #aiProcess_ConvertToLeftHanded step. If you don't support UV transformations
+  *  in your application apply the #aiProcess_TransformUVCoords step, too.
+  *  @note Please take the time to read the doc to the steps enabled by this preset. 
+  *  Some of them offer further configurable properties, some of them might not be of
+  *  use for you so it might be better to not specify them.
+  */
+#define aiProcessPreset_TargetRealtime_Quality \
 	aiProcess_CalcTangentSpace				|  \
 	aiProcess_GenSmoothNormals				|  \
 	aiProcess_JoinIdenticalVertices			|  \
@@ -327,9 +343,33 @@ enum aiPostProcessSteps
 	aiProcess_LimitBoneWeights				|  \
 	aiProcess_RemoveRedundantMaterials      |  \
 	aiProcess_SplitLargeMeshes				|  \
-	aiProcess_OptimizeGraph					|  \
 	aiProcess_Triangulate					|  \
-	aiProcess_GenUVCoords
+	aiProcess_GenUVCoords                   |  \
+	aiProcess_SortByPType                   |  \
+	aiProcess_FindDegenerates               |  \
+	aiProcess_FindInvalidData               |  \
+	0
+
+ // ---------------------------------------------------------------------------------------
+ /** @def aiProcessPreset_TargetRealtime_MaxQuality
+  *  @brief Default postprocess configuration optimizing the data for real-time rendering.
+  *
+  *  This preset enables almost every optimization step to achieve perfectly
+  *  optimized data. It's your choice for level editor environments where import speed 
+  *  doesn't care.
+  *  
+  *  If you're using DirectX, don't forget to combine this value with
+  *  the #aiProcess_ConvertToLeftHanded step. If you don't support UV transformations
+  *  in your application apply the #aiProcess_TransformUVCoords step, too.
+  *  @note Please take the time to read the doc to the steps enabled by this preset. 
+  *  Some of them offer further configurable properties, some of them might not be of
+  *  use for you so it might be better to not specify them.
+  */
+#define aiProcessPreset_TargetRealtime_MaxQuality \
+	aiProcessPreset_TargetRealtime_Quality   |  \
+	aiProcess_FindInstances                  |  \
+	aiProcess_ValidateDataStructure          |  \
+	0
 
 
 #ifdef __cplusplus

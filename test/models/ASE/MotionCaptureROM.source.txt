@@ -1,6 +1,4 @@
-"MotionCaptureROM.ase" - Recorded at HTW Aalen (http://www.htw-aalen.de) using LycosIQ. 
-Many thanks to Prof. Carsten Lecon!
-
+"MotionCaptureROM.ase" - Recorded using Vicon IQ. 
 
 NOTE: The errors in the middle of the animation are there in the
-original animation track, too. The captured person lost a sensor ...
+original animation track, too. The captured person lost a marker ...

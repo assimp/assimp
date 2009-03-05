@@ -38,7 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Declaration of the .dxf importer class. */
+/** @file  DXFLoader.h 
+ *  @brief Declaration of the .dxf importer class.
+ */
 #ifndef AI_DXFLOADER_H_INCLUDED
 #define AI_DXFLOADER_H_INCLUDED
 
@@ -85,7 +87,8 @@ public:
 	// -------------------------------------------------------------------
 	/** Returns whether the class can handle the format of the given file. 
 	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler, 
+		bool checkSig) const;
 
 protected:
 
@@ -93,10 +96,7 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append)
-	{
-		append.append("*.dxf");
-	}
+	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 

@@ -38,7 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Declaration of the .ter importer class. */
+/** @file  TerragenLoader.h
+ *  @brief Declaration of the .ter importer class. 
+ */
 #ifndef INCLUDED_AI_TERRAGEN_TERRAIN_LOADER_H
 #define INCLUDED_AI_TERRAGEN_TERRAIN_LOADER_H
 
@@ -79,28 +81,24 @@ protected:
 public:
 
 	// -------------------------------------------------------------------
-	/** @brief Returns whether we can handle the format of the given file
-	 *
-	 *  See BaseImporter::CanRead() for details.	
-	 **/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+		bool checkSig) const;
 
 protected:
 
 	// -------------------------------------------------------------------
-	/** @brief Called by Importer::GetExtensionList() 
-	 *
-	 * See BaseImporter::GetExtensionList() for details
-	 */
 	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
-	/** @brief Imports the given file into the given scene structure. 
-	 *
-	 * See BaseImporter::InternReadFile() for details
-	 */
 	void InternReadFile( const std::string& pFile, aiScene* pScene, 
 		IOSystem* pIOHandler);
+
+	// -------------------------------------------------------------------
+	void SetupProperties(const Importer* pImp);
+
+private:
+
+	bool configComputeUVs;
 
 }; //! class TerragenImporter
 

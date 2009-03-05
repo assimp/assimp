@@ -38,7 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Declaration of the NFF importer class. */
+/** @file NFFLoader.h
+ *  @brief Declaration of the NFF importer class.
+ */
 #ifndef AI_NFFLOADER_H_INCLUDED
 #define AI_NFFLOADER_H_INCLUDED
 
@@ -49,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp	{
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 /** NFF (Neutral File Format) Importer class.
  *
  * The class implements both Eric Haynes NFF format and Sense8's NFF (NFF2) format.
@@ -71,8 +73,10 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Returns whether the class can handle the format of the given file. 
-	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	 * See BaseImporter::CanRead() for details.
+	 */
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+		bool checkSig) const;
 
 protected:
 
@@ -80,10 +84,7 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append)
-	{
-		append.append("*.nff;*.enff");
-	}
+	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 

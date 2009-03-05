@@ -51,9 +51,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-#if _MSC_VER >= 1400
-#	define sprintf sprintf_s
-#endif
+// Data structure to keep a vertex in an interlaced format
+struct Vertex
+{
+	aiVector3D mPosition;
+	aiVector3D mNormal;
+	aiVector3D mTangent, mBitangent;
+	aiColor4D  mColors     [AI_MAX_NUMBER_OF_COLOR_SETS];
+	aiVector3D mTexCoords  [AI_MAX_NUMBER_OF_TEXTURECOORDS];
+};
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -75,7 +81,6 @@ bool JoinVerticesProcess::IsActive( unsigned int pFlags) const
 {
 	return (pFlags & aiProcess_JoinIdenticalVertices) != 0;
 }
-
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void JoinVerticesProcess::Execute( aiScene* pScene)
@@ -84,18 +89,19 @@ void JoinVerticesProcess::Execute( aiScene* pScene)
 
 	// get the total number of vertices BEFORE the step is executed
 	int iNumOldVertices = 0;
-	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-	{
-		iNumOldVertices +=	pScene->mMeshes[a]->mNumVertices;
+	if (!DefaultLogger::isNullLogger()) {
+		for( unsigned int a = 0; a < pScene->mNumMeshes; a++)	{
+			iNumOldVertices +=	pScene->mMeshes[a]->mNumVertices;
+		}
 	}
 
 	// execute the step
 	int iNumVertices = 0;
-	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-	{
-		iNumVertices +=	this->ProcessMesh( pScene->mMeshes[a],a);
+	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)	{
+		iNumVertices +=	ProcessMesh( pScene->mMeshes[a],a);
 	}
-	// if logging is active, print detailled statistics
+
+	// if logging is active, print detailed statistics
 	if (!DefaultLogger::isNullLogger())
 	{
 		if (iNumOldVertices == iNumVertices)DefaultLogger::get()->debug("JoinVerticesProcess finished ");
@@ -117,81 +123,103 @@ void JoinVerticesProcess::Execute( aiScene* pScene)
 // Unites identical vertices in the given mesh
 int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 {
-	// helper structure to hold all the data a single vertex can possibly have
-	typedef struct Vertex vertex;
+	BOOST_STATIC_ASSERT( AI_MAX_NUMBER_OF_COLOR_SETS    == 4);
+	BOOST_STATIC_ASSERT( AI_MAX_NUMBER_OF_TEXTURECOORDS == 4);
 
+	// Return early if we don't have any positions
 	if (!pMesh->HasPositions() || !pMesh->HasFaces())
 		return 0;
-	
-	struct Vertex
-	{
-		aiVector3D mPosition;
-		aiVector3D mNormal;
-		aiVector3D mTangent, mBitangent;
-		aiColor4D mColors[AI_MAX_NUMBER_OF_COLOR_SETS];
-		aiVector3D mTexCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
-	};
+
+	// We'll never have more vertices afterwards.
 	std::vector<Vertex> uniqueVertices;
 	uniqueVertices.reserve( pMesh->mNumVertices);
-
-	//unsigned int iOldVerts = pMesh->mNumVertices;
 
 	// For each vertex the index of the vertex it was replaced by. 
 	std::vector<unsigned int> replaceIndex( pMesh->mNumVertices, 0xffffffff);
 	// for each vertex whether it was replaced by an existing unique vertex (true) or a new vertex was created for it (false)
 	std::vector<bool> isVertexUnique( pMesh->mNumVertices, false);
 
-	// a little helper to find locally close vertices faster
+	// A little helper to find locally close vertices faster
 	// FIX: check whether we can reuse the SpatialSort of a previous step
-	const float epsilon = 1e-5f;
-	float posEpsilon;
-	SpatialSort* vertexFinder = NULL;
+	const static float epsilon = 1e-5f;
+	float posEpsilonSqr;
+	SpatialSort*  vertexFinder = NULL;
 	SpatialSort  _vertexFinder;
 	if (shared)
 	{
 		std::vector<std::pair<SpatialSort,float> >* avf;
 		shared->GetProperty(AI_SPP_SPATIAL_SORT,avf);
-		if (avf)
-		{
+		if (avf)	{
 			std::pair<SpatialSort,float>& blubb = avf->operator [] (meshIndex);
-			vertexFinder = &blubb.first;
-			posEpsilon = blubb.second;
+			vertexFinder  = &blubb.first;
+			posEpsilonSqr = blubb.second;
 		}
 	}
-	if (!vertexFinder)
-	{
+	if (!vertexFinder)	{
 		_vertexFinder.Fill(pMesh->mVertices, pMesh->mNumVertices, sizeof( aiVector3D));
 		vertexFinder = &_vertexFinder;
-		posEpsilon = ComputePositionEpsilon(pMesh);
+		posEpsilonSqr = ComputePositionEpsilon(pMesh);
 	}
 
 	// squared because we check against squared length of the vector difference
-	const float squareEpsilon = epsilon * epsilon;
-	std::vector<unsigned int> verticesFound;
+	static const float squareEpsilon = epsilon * epsilon;
 
-	// now check each vertex if it brings something new to the table
+	// again, better waste some bytes than a realloc ...
+	std::vector<unsigned int> verticesFound;
+	verticesFound.reserve(10);
+
+	// run an optimized code path if we don't have multiple UVs or vertex colors
+	const bool complex = (
+		pMesh->mTextureCoords[1]	||
+		pMesh->mTextureCoords[2]	|| 
+		pMesh->mTextureCoords[3]	||
+		pMesh->mColors[0]			|| 
+		pMesh->mColors[1]			|| 
+		pMesh->mColors[2]			||
+		pMesh->mColors[3] );
+
+	// Now check each vertex if it brings something new to the table
 	for( unsigned int a = 0; a < pMesh->mNumVertices; a++)
 	{
 		// collect the vertex data
 		Vertex v;
 		v.mPosition = pMesh->mVertices[a];
-		v.mNormal = (pMesh->mNormals != NULL) ? pMesh->mNormals[a] : aiVector3D( 0, 0, 0);
-		v.mTangent = (pMesh->mTangents != NULL) ? pMesh->mTangents[a] : aiVector3D( 0, 0, 0);
-		v.mBitangent = (pMesh->mBitangents != NULL) ? pMesh->mBitangents[a] : aiVector3D( 0, 0, 0);
-		for( unsigned int b = 0; b < AI_MAX_NUMBER_OF_COLOR_SETS; b++)
-			v.mColors[b] = (pMesh->mColors[b] != NULL) ? pMesh->mColors[b][a] : aiColor4D( 0, 0, 0, 0);
-		for( unsigned int b = 0; b < AI_MAX_NUMBER_OF_TEXTURECOORDS; b++)
-			v.mTexCoords[b] = (pMesh->mTextureCoords[b] != NULL) ? pMesh->mTextureCoords[b][a] : aiVector3D( 0, 0, 0);
+
+		if (pMesh->mNormals)
+			v.mNormal = pMesh->mNormals[a];
+		if (pMesh->mTangents)
+			v.mTangent = pMesh->mTangents[a];
+		if (pMesh->mBitangents)
+			v.mBitangent = pMesh->mBitangents[a];
+
+		if (pMesh->mColors[0]) { // manually unrolled here
+			v.mColors[0] = pMesh->mColors[0][a];
+			if (pMesh->mColors[1]) {
+				v.mColors[1] = pMesh->mColors[1][a];
+				if (pMesh->mColors[2]) {
+					v.mColors[2] = pMesh->mColors[2][a];
+					if (pMesh->mColors[3]) {
+						v.mColors[3] = pMesh->mColors[3][a];
+		}}}}
+		if (pMesh->mTextureCoords[0]) { // manually unrolled here
+			v.mTexCoords[0] = pMesh->mTextureCoords[0][a];
+			if (pMesh->mTextureCoords[1]) {
+				v.mTexCoords[1] = pMesh->mTextureCoords[1][a];
+				if (pMesh->mTextureCoords[2]) {
+					v.mTexCoords[2] = pMesh->mTextureCoords[2][a];
+					if (pMesh->mTextureCoords[3]) {
+						v.mTexCoords[3] = pMesh->mTextureCoords[3][a];
+		}}}}
 
 		// collect all vertices that are close enough to the given position
-		vertexFinder->FindPositions( v.mPosition, posEpsilon, verticesFound);
+		vertexFinder->FindPositions( v.mPosition, posEpsilonSqr, verticesFound);
 
 		unsigned int matchIndex = 0xffffffff;
 		// check all unique vertices close to the position if this vertex is already present among them
 		for( unsigned int b = 0; b < verticesFound.size(); b++)
 		{
-			unsigned int vidx = verticesFound[b];
-			unsigned int uidx = replaceIndex[ vidx];
+			const unsigned int vidx = verticesFound[b];
+			const unsigned int uidx = replaceIndex[ vidx];
 			if( uidx == 0xffffffff || !isVertexUnique[ vidx])
 				continue;
 
@@ -201,33 +229,38 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 			// We just test the other attributes even if they're not present in the mesh.
 			// In this case they're initialized to 0 so the comparision succeeds. 
 			// By this method the non-present attributes are effectively ignored in the comparision.
-			
 			if( (uv.mNormal - v.mNormal).SquareLength() > squareEpsilon)
 				continue;
 			if( (uv.mTangent - v.mTangent).SquareLength() > squareEpsilon)
 				continue;
 			if( (uv.mBitangent - v.mBitangent).SquareLength() > squareEpsilon)
 				continue;
-			// manually unrolled because continue wouldn't work as desired in an inner loop
-			BOOST_STATIC_ASSERT(4 == AI_MAX_NUMBER_OF_COLOR_SETS);
-			if( GetColorDifference( uv.mColors[0], v.mColors[0]) > squareEpsilon)
-				continue;
-			if( GetColorDifference( uv.mColors[1], v.mColors[1]) > squareEpsilon)
-				continue;
-			if( GetColorDifference( uv.mColors[2], v.mColors[2]) > squareEpsilon)
-				continue;
-			if( GetColorDifference( uv.mColors[3], v.mColors[3]) > squareEpsilon)
-				continue;
-			// texture coord matching manually unrolled as well
-			BOOST_STATIC_ASSERT(4 == AI_MAX_NUMBER_OF_TEXTURECOORDS);
+
 			if( (uv.mTexCoords[0] - v.mTexCoords[0]).SquareLength() > squareEpsilon)
 				continue;
-			if( (uv.mTexCoords[1] - v.mTexCoords[1]).SquareLength() > squareEpsilon)
-				continue;
-			if( (uv.mTexCoords[2] - v.mTexCoords[2]).SquareLength() > squareEpsilon)
-				continue;
-			if( (uv.mTexCoords[3] - v.mTexCoords[3]).SquareLength() > squareEpsilon)
-				continue;
+
+			// Usually we won't have vertex colors or multiple UVs, so we can skip from here
+			// Actually this increases runtime performance slightly.
+			if (complex) 
+			{
+				// manually unrolled because continue wouldn't work as desired in an inner loop
+				if( GetColorDifference( uv.mColors[0], v.mColors[0]) > squareEpsilon)
+					continue;
+				if( GetColorDifference( uv.mColors[1], v.mColors[1]) > squareEpsilon)
+					continue;
+				if( GetColorDifference( uv.mColors[2], v.mColors[2]) > squareEpsilon)
+					continue;
+				if( GetColorDifference( uv.mColors[3], v.mColors[3]) > squareEpsilon)
+					continue;
+
+				// texture coord matching manually unrolled as well
+				if( (uv.mTexCoords[1] - v.mTexCoords[1]).SquareLength() > squareEpsilon)
+					continue;
+				if( (uv.mTexCoords[2] - v.mTexCoords[2]).SquareLength() > squareEpsilon)
+					continue;
+				if( (uv.mTexCoords[3] - v.mTexCoords[3]).SquareLength() > squareEpsilon)
+					continue;
+			}
 
 			// we're still here -> this vertex perfectly matches our given vertex
 			matchIndex = uidx;
@@ -250,24 +283,26 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 		}
 	}
 
-	if (!DefaultLogger::isNullLogger())
+	if (!DefaultLogger::isNullLogger() && DefaultLogger::get()->getLogSeverity() == Logger::VERBOSE)
 	{
 		char szBuff[128]; // should be sufficiently large in every case
-		sprintf(szBuff,"Mesh %i | Verts in: %i out: %i | ~%.1f%%",
+		::sprintf(szBuff,"Mesh %i | Verts in: %i out: %i | ~%.1f%%",
 			meshIndex,
 			pMesh->mNumVertices,
 			(int)uniqueVertices.size(),
 			((pMesh->mNumVertices - uniqueVertices.size()) / (float)pMesh->mNumVertices) * 100.f);
-		DefaultLogger::get()->info(szBuff);
+		DefaultLogger::get()->debug(szBuff);
 	}
 
 	// replace vertex data with the unique data sets
 	pMesh->mNumVertices = (unsigned int)uniqueVertices.size();
+
 	// Position
 	delete [] pMesh->mVertices;
 	pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
 	for( unsigned int a = 0; a < pMesh->mNumVertices; a++)
 		pMesh->mVertices[a] = uniqueVertices[a].mPosition;
+
 	// Normals, if present
 	if( pMesh->mNormals)
 	{
@@ -296,7 +331,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
 	{
 		if( !pMesh->mColors[a])
-			continue;
+			break;
 
 		delete [] pMesh->mColors[a];
 		pMesh->mColors[a] = new aiColor4D[pMesh->mNumVertices];
@@ -307,7 +342,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
 	{
 		if( !pMesh->mTextureCoords[a])
-			continue;
+			break;
 
 		delete [] pMesh->mTextureCoords[a];
 		pMesh->mTextureCoords[a] = new aiVector3D[pMesh->mNumVertices];
@@ -319,10 +354,8 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
 	{
 		aiFace& face = pMesh->mFaces[a];
-		for( unsigned int b = 0; b < face.mNumIndices; b++)
-		{
-			const size_t index = face.mIndices[b];
-			face.mIndices[b] = replaceIndex[index];
+		for( unsigned int b = 0; b < face.mNumIndices; b++)	{
+			face.mIndices[b] = replaceIndex[face.mIndices[b]];
 		}
 	}
 

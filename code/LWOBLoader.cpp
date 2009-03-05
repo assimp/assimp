@@ -178,8 +178,8 @@ void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator& it,
 		{
 			surface = -surface;
 
-			// there are detail polygons
-			uint16_t numPolygons = *cursor++;
+			// there are detail polygons. 
+			const uint16_t numPolygons = *cursor++;
 			if (cursor < end)CopyFaceIndicesLWOB(it,cursor,end,numPolygons);
 		}
 		face.surfaceIndex = surface-1;
@@ -194,6 +194,27 @@ LWO::Texture* LWOImporter::SetupNewTextureLWOB(LWO::TextureList& list,unsigned i
 
 	std::string type;
 	GetS0(type,size);
+	const char* s = type.c_str();
+
+	if(strstr(s, "Image Map"))
+	{
+		// Determine mapping type
+		if(strstr(s, "Planar"))
+			tex->mapMode = LWO::Texture::Planar;
+		else if(strstr(s, "Cylindrical"))
+			tex->mapMode = LWO::Texture::Cylindrical;
+		else if(strstr(s, "Spherical"))
+			tex->mapMode = LWO::Texture::Spherical;
+		else if(strstr(s, "Cubic"))
+			tex->mapMode = LWO::Texture::Cubic;
+		else if(strstr(s, "Front"))
+			tex->mapMode = LWO::Texture::FrontProjection;
+	}
+	else
+	{
+		// procedural or gradient, not supported
+		DefaultLogger::get()->error("LWOB: Unsupported legacy texture: " + type);
+	}
 
 	return tex;
 }
@@ -271,7 +292,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		case AI_LWO_SMAN:
 			{
 				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,SMAN,4);
-				surf.mMaximumSmoothAngle = GetF4();
+				surf.mMaximumSmoothAngle = fabs( GetF4() );
 				break;
 			}
 		// glossiness
@@ -323,8 +344,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 				{
 					GetS0(pTex->mFileName,head->length);	
 				}
-				else DefaultLogger::get()->warn("LWOB: TIMG tag was encuntered although "
-					"there was no xTEX tag before");
+				else DefaultLogger::get()->warn("LWOB: Unexpected TIMG chunk");
 				break;
 			}
 		// texture strength
@@ -332,8 +352,28 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 			{
 				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,TVAL,1);
 				if (pTex)pTex->mStrength = (float)GetU1()/ 255.f;
-				else DefaultLogger::get()->warn("LWOB: TVAL tag was encuntered "
-					"although there was no xTEX tag before");
+				else DefaultLogger::get()->warn("LWOB: Unexpected TVAL chunk");
+				break;
+			}
+		// texture flags
+		case AI_LWO_TFLG:
+			{
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,TFLG,2);
+
+				if (pTex) 
+				{
+					const uint16_t s = GetU2();
+					if (s & 1)
+						pTex->majorAxis = LWO::Texture::AXIS_X;
+					else if (s & 2)
+						pTex->majorAxis = LWO::Texture::AXIS_Y;
+					else if (s & 4)
+						pTex->majorAxis = LWO::Texture::AXIS_Z;
+
+					if (s & 16)
+						DefaultLogger::get()->warn("LWOB: Ignoring \'negate\' flag on texture");
+				} 
+				else DefaultLogger::get()->warn("LWOB: Unexpected TFLG chunk");
 				break;
 			}
 		}

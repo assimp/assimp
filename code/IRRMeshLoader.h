@@ -38,8 +38,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Declaration of the .irrMesh (Irrlight Engine Mesh Format)
-    importer class. */
+/** @file IRRMeshLoader.h
+ *  @brief Declaration of the .irrMesh (Irrlight Engine Mesh Format)
+ *  importer class. 
+ */
 #ifndef AI_IRRMESHLOADER_H_INCLUDED
 #define AI_IRRMESHLOADER_H_INCLUDED
 
@@ -72,7 +74,8 @@ public:
 	/** Returns whether the class can handle the format of the given file. 
 	 *  See BaseImporter::CanRead() for details.	
 	 */
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+		bool checkSig) const;
 
 protected:
 
@@ -80,16 +83,7 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append)
-	{
-
-		/*  NOTE: The file extenxsion .xml is too generic. We'll 
-		 *  need to open the file in CanRead() and check whether it is 
-		 *  a real irrlicht file
-		 */
-
-		append.append("*.xml;*.irrmesh");
-	}
+	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 

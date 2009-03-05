@@ -44,7 +44,7 @@ public:
 
 	// overriden
 	bool CanRead( const std::string& pFile, 
-		IOSystem* pIOHandler) const;
+		IOSystem* pIOHandler, bool test) const;
 
 	// overriden
 	void GetExtensionList(std::string& append);

@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the OFF importer class */
+/** @file  OFFLoader.cpp
+ *  @brief Implementation of the OFF importer class 
+ */
 
 #include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_OFF_IMPORTER
@@ -64,25 +66,31 @@ OFFImporter::~OFFImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool OFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool OFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)return false;
-	std::string extension = pFile.substr( pos);
+	const std::string extension = GetExtension(pFile);
 
+	if (extension == "off")
+		return true;
+	else if (!extension.length() || checkSig)
+	{
+		if (!pIOHandler)return true;
+		const char* tokens[] = {"off"};
+		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
+	}
+	return false;
+}
 
-	return !(extension.length() != 4 || extension[0] != '.' ||
-			 extension[1] != 'o' && extension[1] != 'O' ||
-			 extension[2] != 'f' && extension[2] != 'F' ||
-			 extension[3] != 'f' && extension[3] != 'F');
+// ------------------------------------------------------------------------------------------------
+void OFFImporter::GetExtensionList(std::string& append)
+{
+	append.append("*.off");
 }
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void OFFImporter::InternReadFile( const std::string& pFile, 
-	aiScene* pScene, IOSystem* pIOHandler)
+								 aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 

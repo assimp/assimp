@@ -124,11 +124,10 @@ public:
 		CHUNK_PERCENTF	= 0x0031,		// float4  percentage
 		// ********************************************************************
 
-		// Unknown and ignored. Possibly a chunk used by PROJ (
-		// Discreet 3DS max Project File)?
+		// Prj master chunk
 		CHUNK_PRJ       = 0xC23D,
 
-		// Unknown. Possibly a reference to an external .mli file?
+		// MDLI master chunk
 		CHUNK_MLI       = 0x3DAA,
 
 		// Primary main chunk of the .3ds file
@@ -178,7 +177,6 @@ public:
 		CHUNK_MESHCOLOR = 0x4165,
 		CHUNK_TXTINFO   = 0x4170,
 		CHUNK_LIGHT     = 0x4600,
-		CHUNK_SPOTLIGHT = 0x4610,
 		CHUNK_CAMERA    = 0x4700,
 		CHUNK_HIERARCHY = 0x4F00,
 
@@ -330,7 +328,7 @@ struct Texture
 		, mMapMode	(aiTextureMapMode_Wrap)
 		, iUVSrc	(0)
 	{
-		mTextureBlend = std::numeric_limits<float>::quiet_NaN();
+		mTextureBlend = get_qnan();
 	}
 
 	//! Specifies the blend factor for the texture

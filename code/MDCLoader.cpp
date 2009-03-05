@@ -87,23 +87,25 @@ MDCImporter::~MDCImporter()
 }
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool MDCImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool MDCImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of('.');
-	// no file extension - can't read
-	if( pos == std::string::npos)
-		return false;
-	std::string extension = pFile.substr( pos);
+	const std::string extension = GetExtension(pFile);
+	if (extension == "mdc")
+		return true;
 
-	if (extension.length() < 4)return false;
-	if (extension[0] != '.')return false;
-	
-	if( extension[1] != 'M' && extension[1] != 'm')return false; 
-	if( extension[2] != 'D' && extension[2] != 'd')return false; 
-	if( extension[3] != 'C' && extension[3] != 'c')return false; 
+	// if check for extension is not enough, check for the magic tokens 
+	if (!extension.length() || checkSig) {
+		uint32_t tokens[1]; 
+		tokens[0] = AI_MDC_MAGIC_NUMBER_LE;
+		return CheckMagicToken(pIOHandler,pFile,tokens,1);
+	}
+	return false;
+}
 
-	return true;
+// ------------------------------------------------------------------------------------------------
+void MDCImporter::GetExtensionList(std::string& append)
+{
+	append.append("*.mdc");
 }
 
 // ------------------------------------------------------------------------------------------------

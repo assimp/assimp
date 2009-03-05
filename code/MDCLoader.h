@@ -38,7 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Definition of the MDC importer class. */
+/** @file  MDCLoader.h
+ *  @brief Definition of the MDC importer class. 
+ */
 #ifndef AI_MDCLOADER_H_INCLUDED
 #define AI_MDCLOADER_H_INCLUDED
 
@@ -48,12 +50,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MDCFileData.h"
 #include "ByteSwap.h"
 
-namespace Assimp
-{
+namespace Assimp	{
 using namespace MDC;
 
 // ---------------------------------------------------------------------------
-/** Used to load MDC files
+/** Importer class to load the RtCW MDC file format
 */
 class MDCImporter : public BaseImporter
 {
@@ -71,7 +72,8 @@ public:
 	// -------------------------------------------------------------------
 	/** Returns whether the class can handle the format of the given file. 
 	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+		bool checkSig) const;
 
 	// -------------------------------------------------------------------
 	/** Called prior to ReadFile().
@@ -86,10 +88,7 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append)
-	{
-		append.append("*.mdc");
-	}
+	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 

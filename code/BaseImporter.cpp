@@ -39,11 +39,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of BaseImporter */
+/** @file  BaseImporter.cpp
+ *  @brief Implementation of BaseImporter 
+ */
 
 #include "AssimpPCH.h"
 #include "BaseImporter.h"
-
 
 using namespace Assimp;
 
@@ -98,7 +99,7 @@ void BaseImporter::SetupProperties(const Importer* pImp)
 }
 
 // ------------------------------------------------------------------------------------------------
-bool BaseImporter::SearchFileHeaderForToken(IOSystem* pIOHandler,
+/*static*/ bool BaseImporter::SearchFileHeaderForToken(IOSystem* pIOHandler,
 	const std::string&	pFile,
 	const char**		tokens, 
 	unsigned int		numTokens,
@@ -142,17 +143,105 @@ bool BaseImporter::SearchFileHeaderForToken(IOSystem* pIOHandler,
 	return false;
 }
 
+// ------------------------------------------------------------------------------------------------
+// Simple check for file extension
+/*static*/ bool BaseImporter::SimpleExtensionCheck (const std::string& pFile, 
+	const char* ext0,
+	const char* ext1,
+	const char* ext2)
+{
+	std::string::size_type pos = pFile.find_last_of('.');
+
+	// no file extension - can't read
+	if( pos == std::string::npos)
+		return false;
+	
+	const char* ext_real = & pFile[ pos+1 ];
+	if( !ASSIMP_stricmp(ext_real,ext0) )
+		return true;
+
+	// check for other, optional, file extensions
+	if (ext1 && !ASSIMP_stricmp(ext_real,ext1))
+		return true;
+
+	if (ext2 && !ASSIMP_stricmp(ext_real,ext2))
+		return true;
+
+	return false;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Get file extension from path
+/*static*/ std::string BaseImporter::GetExtension (const std::string& pFile)
+{
+	std::string::size_type pos = pFile.find_last_of('.');
+
+	// no file extension at all
+	if( pos == std::string::npos)
+		return "";
+
+	std::string ret = pFile.substr(pos+1);
+	std::transform(ret.begin(),ret.end(),ret.begin(),::tolower); // thanks to Andy Maloney for the hint
+	return ret;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Check for magic bytes at the beginning of the file.
+/* static */ bool BaseImporter::CheckMagicToken(IOSystem* pIOHandler, const std::string& pFile, 
+	const void* _magic, unsigned int num, unsigned int offset, unsigned int size)
+{
+	ai_assert(size <= 16 && _magic && num && pIOHandler);
+
+	const char* magic = (const char*)_magic;
+	boost::scoped_ptr<IOStream> pStream (pIOHandler->Open(pFile));
+	if (pStream.get() )
+	{
+		// skip to offset
+		pStream->Seek(offset,aiOrigin_SET);
+
+		// read 'size' characters from the file
+		char data[16];
+		if(size != pStream->Read(data,1,size))
+			return false;
+
+		for (unsigned int i = 0; i < num; ++i) {
+			// also check against big endian versions of tokens with size 2,4
+			// that's just for convinience, the chance that we cause conflicts
+			// is quite low and it can save some lines and prevent nasty bugs
+			if (2 == size) {
+				int16_t rev = *((int16_t*)magic);
+				ByteSwap::Swap(&rev);
+				if (*((int16_t*)data) == ((int16_t*)magic)[i] || *((int16_t*)data) == rev)
+					return true;
+			}
+			else if (4 == size) {
+				int32_t rev = *((int32_t*)magic);
+				ByteSwap::Swap(&rev);
+				if (*((int32_t*)data) == ((int32_t*)magic)[i] || *((int32_t*)data) == rev)
+					return true;
+			}
+			else {
+				// any length ... just compare
+				if(!::memcmp(magic,data,size))
+					return true;
+			}
+			magic += size;
+		}
+	}
+	return false;
+}
 
 // ------------------------------------------------------------------------------------------------
 // Represents an import request
 struct LoadRequest
 {
-	LoadRequest(const std::string& _file, unsigned int _flags,const BatchLoader::PropertyMap* _map)
+	LoadRequest(const std::string& _file, unsigned int _flags,const BatchLoader::PropertyMap* _map, unsigned int _id)
 		:	file	(_file)
 		,	flags	(_flags)
 		,	refCnt	(1)
 		,	scene	(NULL)            
 		,	loaded	(false)
+		,	id		(_id)
 	{
 		if (_map)
 			map = *_map;
@@ -164,6 +253,7 @@ struct LoadRequest
 	aiScene* scene;
 	bool loaded;
 	BatchLoader::PropertyMap map;
+	unsigned int id;
 
 	bool operator== (const std::string& f) {
 		return file == f;
@@ -174,6 +264,10 @@ struct LoadRequest
 // BatchLoader::pimpl data structure
 struct Assimp::BatchData
 {
+	BatchData()
+		:	next_id(0xffff)
+	{}
+
 	// IO system to be used for all imports
 	IOSystem* pIOSystem;
 
@@ -185,6 +279,9 @@ struct Assimp::BatchData
 
 	// Base path
 	std::string pathBase;
+
+	// Id for next item
+	unsigned int next_id;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -219,13 +316,15 @@ void BatchLoader::SetBasePath (const std::string& pBase)
 	std::string::size_type ss,ss2;
 	if (std::string::npos != (ss = data->pathBase.find_first_of('.')))
 	{
-		if (std::string::npos != (ss2 = data->pathBase.find_last_of('\\')) ||
-			std::string::npos != (ss2 = data->pathBase.find_last_of('/')))
+		if (std::string::npos != (ss2 = data->pathBase.find_last_of("\\/")))
 		{
 			if (ss > ss2)
 				data->pathBase.erase(ss2,data->pathBase.length()-ss2);
 		}
-		else return;
+		else {
+			data->pathBase = "";
+			return;
+		}
 	}
 
 	// make sure the directory is terminated properly
@@ -235,7 +334,7 @@ void BatchLoader::SetBasePath (const std::string& pBase)
 }
 
 // ------------------------------------------------------------------------------------------------
-void BatchLoader::AddLoadRequest	(const std::string& file,
+unsigned int BatchLoader::AddLoadRequest	(const std::string& file,
 	unsigned int steps /*= 0*/, const PropertyMap* map /*= NULL*/)
 {
 	ai_assert(!file.empty());
@@ -245,8 +344,7 @@ void BatchLoader::AddLoadRequest	(const std::string& file,
 
 	// build a full path if this is a relative path and 
 	// we have a new base directory given
-	if (file.length() > 2 && file[1] != ':' && data->pathBase.length())
-	{
+	if (file.length() > 2 && file[1] != ':' && data->pathBase.length()) {
 		real = data->pathBase + file;
 	}
 	else real = file;
@@ -258,32 +356,29 @@ void BatchLoader::AddLoadRequest	(const std::string& file,
 		// Call IOSystem's path comparison function here
 		if (data->pIOSystem->ComparePaths((*it).file,real))
 		{
+			if (map) {
+				if (!((*it).map == *map))
+					continue;
+			}
+			else if (!(*it).map.empty())
+				continue;
+
 			(*it).refCnt++;
-			return;
+			return (*it).id;
 		}
 	}
 
 	// no, we don't have it. So add it to the queue ...
-	data->requests.push_back(LoadRequest(real,steps,map));
+	data->requests.push_back(LoadRequest(real,steps,map,data->next_id));
+	return data->next_id++;
 }
 
 // ------------------------------------------------------------------------------------------------
-aiScene* BatchLoader::GetImport		(const std::string& file)
+aiScene* BatchLoader::GetImport		(unsigned int which)
 {
-	// no threaded implementation for the moment
-	std::string real;
-
-	// build a full path if this is a relative path and 
-	// we have a new base directory given
-	if (file.length() > 2 && file[1] != ':' && data->pathBase.length())
-	{
-		real = data->pathBase + file;
-	}
-	else real = file;
 	for (std::list<LoadRequest>::iterator it = data->requests.begin();it != data->requests.end(); ++it)
 	{
-		// Call IOSystem's path comparison function here
-		if (data->pIOSystem->ComparePaths((*it).file,real) && (*it).loaded)
+		if ((*it).id == which && (*it).loaded)
 		{
 			aiScene* sc = (*it).scene;
 			if (!(--(*it).refCnt))

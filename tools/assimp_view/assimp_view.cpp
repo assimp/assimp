@@ -128,6 +128,9 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 	// get current time
 	double fCur = (double)timeGetTime();
 
+	aiSetImportPropertyInteger(AI_CONFIG_IMPORT_TER_MAKE_UVS,1);
+	//aiSetImportPropertyInteger(AI_CONFIG_PP_PTV_KEEP_HIERARCHY,1);
+
 	// Call ASSIMPs C-API to load the file
 	g_pcAsset->pcScene = (aiScene*)aiImportFile(g_szFileName,
 		aiProcess_CalcTangentSpace		   | // calculate tangents and bitangents if possible
@@ -145,6 +148,7 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 		aiProcess_GenUVCoords              | // convert spherical, cylindrical, box and planar mapping to proper UVs
 		aiProcess_TransformUVCoords        | // preprocess UV transformations (scaling, translation ...)
 		aiProcess_FindInstances            | // search for instanced meshes and remove them by references to one master
+//		aiProcess_PreTransformVertices |
 		0);
 
 	// get the end time of zje operation, calculate delta t
@@ -1012,7 +1016,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 		(UINT)g_szDefaultShader.length(),
 		NULL,
 		NULL,
-		D3DXSHADER_USE_LEGACY_D3DX9_31_DLL,
+		AI_SHADER_COMPILE_FLAGS,
 		NULL,
 		&g_piDefaultEffect,&piBuffer)))
 	{
@@ -1036,7 +1040,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 	// create the shader used to draw the HUD
 	if(FAILED( D3DXCreateEffect(g_piDevice,
 		g_szPassThroughShader.c_str(),(UINT)g_szPassThroughShader.length(),
-		NULL,NULL,D3DXSHADER_USE_LEGACY_D3DX9_31_DLL,NULL,&g_piPassThroughEffect,&piBuffer)))
+		NULL,NULL,AI_SHADER_COMPILE_FLAGS,NULL,&g_piPassThroughEffect,&piBuffer)))
 	{
 		if( piBuffer) 
 		{
@@ -1058,7 +1062,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 	// create the shader used to visualize normal vectors
 	if(FAILED( D3DXCreateEffect(g_piDevice,
 		g_szNormalsShader.c_str(),(UINT)g_szNormalsShader.length(),
-		NULL,NULL,D3DXSHADER_USE_LEGACY_D3DX9_31_DLL,NULL,&g_piNormalsEffect, &piBuffer)))
+		NULL,NULL,AI_SHADER_COMPILE_FLAGS,NULL,&g_piNormalsEffect, &piBuffer)))
 	{
 		if( piBuffer) 
 		{
@@ -1072,6 +1076,8 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 		piBuffer->Release();
 		piBuffer = NULL;
 	}
+
+	//MessageBox( g_hDlg, "Failed to create vertex declaration", "Init", MB_OK);
 
 	// use Fixed Function effect when working with shaderless cards
 	if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))

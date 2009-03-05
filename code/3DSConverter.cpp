@@ -54,14 +54,13 @@ using namespace Assimp;
 // Setup final material indices, generae a default material if necessary
 void Discreet3DSImporter::ReplaceDefaultMaterial()
 {
-	//////////////////////////////////////////////////////////////////////////
+	
 	// Try to find an existing material that matches the
 	// typical default material setting:
 	// - no textures
 	// - diffuse color (in grey!)
 	// NOTE: This is here to workaround the fact that some
 	// exporters are writing a default material, too.
-	//////////////////////////////////////////////////////////////////////////
 	unsigned int idx = 0xcdcdcdcd;
 	for (unsigned int i = 0; i < mScene->mMaterials.size();++i)
 	{
@@ -438,57 +437,65 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 	iArray.reserve(3);
 
 	aiMatrix4x4 abs;
-	/*if (pcIn->mName == "$$$DUMMY")	{
-		// FIX: Append the "real" name of the dummy to the string
-		pcIn->mName = "Dummy." + pcIn->mDummyName;
+
+	// Find all meshes with the same name as the node
+	for (unsigned int a = 0; a < pcSOut->mNumMeshes;++a)
+	{
+		const D3DS::Mesh* pcMesh = (const D3DS::Mesh*)pcSOut->mMeshes[a]->mColors[0];
+		ai_assert(NULL != pcMesh);
+
+		if (pcIn->mName == pcMesh->mName)
+			iArray.push_back(a);
 	}
-	else*/ // if (pcIn->mName != "$$$DUMMY")
-	{		
-		// Find all meshes with the same name as the node
-		for (unsigned int a = 0; a < pcSOut->mNumMeshes;++a)
-		{
-			const D3DS::Mesh* pcMesh = (const D3DS::Mesh*)pcSOut->mMeshes[a]->mColors[0];
-			ai_assert(NULL != pcMesh);
+	if (!iArray.empty())
+	{
+		// The matrix should be identical for all meshes with the 
+		// same name. It HAS to be identical for all meshes .....
+		D3DS::Mesh* imesh = ((D3DS::Mesh*)pcSOut->mMeshes[iArray[0]]->mColors[0]);
 
-			if (pcIn->mName == pcMesh->mName)
-				iArray.push_back(a);
-		}
-		if (!iArray.empty())
-		{
-			// The matrix should be identical for all meshes with the 
-			// same name. It HAS to be identical for all meshes .....
-			aiMatrix4x4 mInv = ((D3DS::Mesh*)pcSOut->mMeshes[iArray[0]]->mColors[0])->mMat;
-			mInv.Inverse();
-			const aiVector3D& pivot = pcIn->vPivot;
+		// Compute the inverse of the transformation matrix to move the
+		// vertices back to their relative and local space
+		aiMatrix4x4 mInv = imesh->mMat, mInvTransposed = imesh->mMat;
+		mInv.Inverse();mInvTransposed.Transpose();
+		aiVector3D pivot = pcIn->vPivot;
 
-			pcOut->mNumMeshes = (unsigned int)iArray.size();
-			pcOut->mMeshes = new unsigned int[iArray.size()];
-			for (unsigned int i = 0;i < iArray.size();++i)
-			{
-				const unsigned int iIndex = iArray[i];
-				aiMesh* const mesh = pcSOut->mMeshes[iIndex];
+		pcOut->mNumMeshes = (unsigned int)iArray.size();
+		pcOut->mMeshes = new unsigned int[iArray.size()];
+		for (unsigned int i = 0;i < iArray.size();++i)	{
+			const unsigned int iIndex = iArray[i];
+			aiMesh* const mesh = pcSOut->mMeshes[iIndex];
 
-				// Pivot point adjustment
-				// See: http://www.zfx.info/DisplayThread.php?MID=235690#235690
-				const aiVector3D* const pvEnd = mesh->mVertices+mesh->mNumVertices;
-				aiVector3D* pvCurrent = mesh->mVertices;
+			// Transform the vertices back into their local space
+			// fixme: consider computing normals after this, so we don't need to transform them
+			const aiVector3D* const pvEnd = mesh->mVertices+mesh->mNumVertices;
+			aiVector3D* pvCurrent = mesh->mVertices, *t2 = mesh->mNormals;
 
-				if(pivot.x || pivot.y || pivot.z)
-				{
-					for (;pvCurrent != pvEnd;++pvCurrent)
-					{
-						*pvCurrent = mInv * (*pvCurrent);
-						*pvCurrent -= pivot;
-					}
-				}
-				else
-				{
-					for (;pvCurrent != pvEnd;++pvCurrent)
-						*pvCurrent = mInv * (*pvCurrent);
-				}
-				// Setup the mesh index
-				pcOut->mMeshes[i] = iIndex;
+			for (;pvCurrent != pvEnd;++pvCurrent,++t2) {
+				*pvCurrent = mInv * (*pvCurrent);
+				*t2 = mInvTransposed * (*t2);
 			}
+
+			// Handle negative transformation matrix determinant -> invert vertex x
+			if (imesh->mMat.Determinant() < 0.0f)
+			{
+				/* we *must* have normals */
+				for (pvCurrent = mesh->mVertices,t2 = mesh->mNormals;pvCurrent != pvEnd;++pvCurrent,++t2) {
+					pvCurrent->x *= -1.f;
+					t2->x *= -1.f;
+				}
+				DefaultLogger::get()->info("3DS: Flipping mesh X-Axis");
+			}
+
+			// Handle pivot point
+			if(pivot.x || pivot.y || pivot.z)
+			{
+				for (pvCurrent = mesh->mVertices;pvCurrent != pvEnd;++pvCurrent)	{
+					*pvCurrent -= pivot;	
+				}
+			}
+
+			// Setup the mesh index
+			pcOut->mMeshes[i] = iIndex;
 		}
 	}
 
@@ -526,7 +533,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 	}
 
 	// Generate animation channels for the node
-	if (pcIn->aPositionKeys.size()  > 1  || pcIn->aRotationKeys.size()   > 1   ||
+	if (pcIn->aPositionKeys.size()  > 1  || pcIn->aRotationKeys.size()   > 1 ||
 		pcIn->aScalingKeys.size()   > 1  || pcIn->aCameraRollKeys.size() > 1 ||
 		pcIn->aTargetPositionKeys.size() > 1)
 	{

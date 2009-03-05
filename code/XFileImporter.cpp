@@ -38,7 +38,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-/** @file Implementation of the XFile importer class */
+/** @file  XFileImporter.cpp
+ *  @brief Implementation of the XFile importer class 
+ */
 
 #include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_X_IMPORTER
@@ -53,29 +55,33 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 XFileImporter::XFileImporter()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
 XFileImporter::~XFileImporter()
-{
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool XFileImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler) const
+bool XFileImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// simple check of file extension is enough for the moment
-	std::string::size_type pos = pFile.find_last_of( '.');
-	// no file extension - can't read
-	if( pos == std::string::npos)
-		return false;
-	std::string extension = pFile.substr( pos);
-	if( extension == ".x" || extension == ".X")
+	std::string extension = GetExtension(pFile);
+	if(extension == "x") {
 		return true;
-
+	}
+	if (!extension.length() || checkSig) {
+		uint32_t token[1];
+		token[0] = AI_MAKE_MAGIC("xof ");
+		return CheckMagicToken(pIOHandler,pFile,token,1,0);
+	}
 	return false;
+}
+
+// ------------------------------------------------------------------------------------------------
+void XFileImporter::GetExtensionList(std::string& append)
+{
+	append.append("*.x");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -611,17 +617,13 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, const std::vector<XFile::
 
 				// find the file name
 				const size_t iLen = sz.length();
-				std::string::size_type s = sz.rfind('\\',iLen-1);
+				std::string::size_type s = sz.find_last_of("\\/");
 				if (std::string::npos == s)
-				{
-					s = sz.rfind('/',iLen-1);
-					if (std::string::npos == s)s = 0;
-				}
+					s = 0;
 
 				// cut off the file extension
-				std::string::size_type sExt = sz.rfind('.',iLen-1);
-				if (std::string::npos != sExt)
-				{
+				std::string::size_type sExt = sz.find_last_of('.');
+				if (std::string::npos != sExt){
 					sz[sExt] = '\0';
 				}
 

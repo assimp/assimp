@@ -225,7 +225,8 @@ public:
 	// -------------------------------------------------------------------
 	/** Returns whether the class can handle the format of the given file. 
 	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler) const;
+	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+		bool checkSig) const;
 
 
 	// -------------------------------------------------------------------
@@ -296,6 +297,9 @@ protected:
 
 	/** Configuration option: name or path of shader */
 	std::string configShaderFile;
+
+	/** Configuration option: speed flag was set? */
+	bool configSpeedFlag;
 
 	/** Header of the MD3 file */
 	BE_NCONST MD3::Header* pcHeader;

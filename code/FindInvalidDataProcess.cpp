@@ -109,7 +109,7 @@ void FindInvalidDataProcess::Execute( aiScene* pScene)
 
 	bool out = false;
 	std::vector<unsigned int> meshMapping(pScene->mNumMeshes);
-	unsigned int real = 0, realAnimations = 0;	
+	unsigned int real = 0;	
 
 	// Process meshes
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)

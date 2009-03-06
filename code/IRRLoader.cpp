@@ -308,7 +308,7 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
 	ai_assert(NULL != root && NULL != real);
 
 	if (root->animators.empty())return;
-	const aiMatrix4x4& transform = real->mTransformation;
+//	const aiMatrix4x4& transform = real->mTransformation;
 
 	unsigned int total = 0;
 	for (std::list<Animator>::iterator it = root->animators.begin();
@@ -409,11 +409,13 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
 				if (360 == lcm)
 					break;
 
+#if 0
 				// This can be a division through zero, but we don't care
 				float f1 = (float)lcm / angles[0];
 				float f2 = (float)lcm / angles[1];
 				float f3 = (float)lcm / angles[2];
-				
+#endif
+
 				// find out how many time units we'll need for the finest
 				// track (in seconds) - this defines the number of output
 				// keys (fps * seconds)
@@ -425,10 +427,8 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
 				if (angles[2])
 					max = std::max(max, (float)lcm / angles[2]);
 
-				
 				anim->mNumRotationKeys = (unsigned int)(max*fps);
 				anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys];
-
 
 				// begin with a zero angle
 				aiVector3D angle;
@@ -445,16 +445,12 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
 				}
 
 				// This animation is repeated and repeated ...
-				anim->mPostState = aiAnimBehaviour_REPEAT;
-				anim->mPreState  = aiAnimBehaviour_CONSTANT;
+				anim->mPostState = anim->mPreState = aiAnimBehaviour_REPEAT;
 			}
 			break;
 
 		case Animator::FLY_CIRCLE:
 			{
-				anim->mPostState = aiAnimBehaviour_REPEAT;
-				anim->mPreState  = aiAnimBehaviour_CONSTANT;
-
 				// -----------------------------------------------------
 				// Find out how much time we'll need to perform a 
 				// full circle. 
@@ -484,14 +480,15 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
 					const float t = (float) ( in.speed * key.mTime );
 					key.mValue = in.circleCenter  + in.circleRadius * ((vecU*::cos(t)) + (vecV*::sin(t)));
 				}
+
+				// This animation is repeated and repeated ...
+				anim->mPostState = anim->mPreState = aiAnimBehaviour_REPEAT;
 			}
 			break;
 
 		case Animator::FLY_STRAIGHT:
 			{
-				anim->mPostState = (in.loop ? aiAnimBehaviour_REPEAT : aiAnimBehaviour_CONSTANT);
-				anim->mPreState  = aiAnimBehaviour_CONSTANT;
-
+				anim->mPostState = anim->mPreState = (in.loop ? aiAnimBehaviour_REPEAT : aiAnimBehaviour_CONSTANT);
 				const double seconds = in.timeForWay / 1000.;
 				const double tdelta = 1000. / fps;
 
@@ -516,9 +513,8 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
 
 		case Animator::FOLLOW_SPLINE:
 			{
-				anim->mPostState = aiAnimBehaviour_REPEAT;
-				anim->mPreState  = aiAnimBehaviour_CONSTANT;
-
+				// repeat outside the defined time range
+				anim->mPostState = anim->mPreState = aiAnimBehaviour_REPEAT;
 				const int size = (int)in.splineKeys.size();
 				if (!size)
 				{
@@ -663,7 +659,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 	unsigned int&				 defMatIdx)
 {
 	unsigned int oldMeshSize = (unsigned int)meshes.size();
-	unsigned int meshTrafoAssign = 0;
+	//unsigned int meshTrafoAssign = 0;
 
 	// Now determine the type of the node 
 	switch (root->type)
@@ -686,7 +682,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 			}
 			attach.push_back(AttachmentInfo(scene,rootOut));
 
-#if 0
+#if 0  /* currently unused */
 			meshTrafoAssign = 1;
 
 			// If the root node of the scene is animated - and *this* node
@@ -695,16 +691,12 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 			for (unsigned int i = 0; i < scene->mNumAnimations;++i)
 			{
 				aiAnimation* anim = scene->mAnimations[i];
-				for (unsigned int a = 0; a < anim->mNumChannels;++a)
-				{
-					if (scene->mRootNode->mName == anim->mChannels[a]->mNodeName)
-					{
-						if (root->animators.empty())
-						{
+				for (unsigned int a = 0; a < anim->mNumChannels;++a)	{
+					if (scene->mRootNode->mName == anim->mChannels[a]->mNodeName)	{
+						if (root->animators.empty())	{
 							meshTrafoAssign = 2;
 						}
-						else 
-						{
+						else {
 							meshTrafoAssign = 3;
 							aiNode* dummy = new aiNode();
 							dummy->mName.Set("$CSpaceSeam$");

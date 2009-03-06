@@ -187,8 +187,6 @@ void SceneCombiner::MergeScenes(aiScene** _dest,std::vector<aiScene*>& src,
 	if (*_dest)(*_dest)->~aiScene();
 	else *_dest = new aiScene();
 
-	aiScene* dest = *_dest;
-
 	// Create a dummy scene to serve as master for the others
 	aiScene* master = new aiScene();
 	master->mRootNode = new aiNode();

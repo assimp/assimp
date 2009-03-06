@@ -190,7 +190,6 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 			continue;
 		}
 		bAnyChanges = true;
-		const unsigned int first = (unsigned int)outMeshes.size();
 
 		// reuse our current mesh arrays for the submesh 
 		// with the largest numer of primitives

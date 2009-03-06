@@ -77,13 +77,12 @@ SkeletonMeshBuilder::SkeletonMeshBuilder( aiScene* pScene)
 void SkeletonMeshBuilder::CreateGeometry( const aiNode* pNode)
 {
 	// add a joint entry for the node. 
-	const unsigned int boneIndex = mBones.size();
 	const unsigned int vertexStartIndex = mVertices.size();
 
 	// now build the geometry. 
 	if( pNode->mNumChildren > 0)
 	{
-		// If the node has childs, we build little pointers to each of them
+		// If the node has children, we build little pointers to each of them
 		for( unsigned int a = 0; a < pNode->mNumChildren; a++)
 		{
 			// find a suitable coordinate system

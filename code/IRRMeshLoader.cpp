@@ -132,7 +132,6 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 	int textMeaning = 0;
 	int vertexFormat = 0; // 0 = normal; 1 = 2 tcoords, 2 = tangents
 	bool useColors = false;
-	bool needLightMap = false;
 
 	// Parse the XML file
 	while (reader->read())

@@ -769,7 +769,6 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 	// Read all surfaces from the file
 	unsigned int iNum = pcHeader->NUM_SURFACES;
 	unsigned int iNumMaterials = 0;
-	unsigned int iDefaultMatIndex = 0xFFFFFFFF;
 	while (iNum-- > 0)	{
 
 		// Ensure correct endianess

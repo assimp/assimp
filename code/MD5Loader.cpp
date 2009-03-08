@@ -52,12 +52,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MD5Loader.h"
 #include "StringComparison.h"
 #include "fast_atof.h"
+#include "SkeletonMeshBuilder.h"
 
 using namespace Assimp;
+
+// Minimum weight value. Weights inside [-n ... n] are ignored
+#define AI_MD5_WEIGHT_EPSILON 1e-5f
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 MD5Importer::MD5Importer()
+: configNoAutoLoad (false)
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -71,7 +76,7 @@ bool MD5Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 {
 	const std::string extension = GetExtension(pFile);
 
-	if (extension == "md5anim" || extension == "md5mesh")
+	if (extension == "md5anim" || extension == "md5mesh" || extension == "md5camera")
 		return true;
 	else if (!extension.length() || checkSig)	{
 		if (!pIOHandler)
@@ -86,72 +91,106 @@ bool MD5Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 // Get list of all supported extensions
 void MD5Importer::GetExtensionList(std::string& append)
 {
-	append.append("*.md5mesh;*.md5anim");
+	append.append("*.md5mesh;*.md5anim;*.md5camera");
+}
+
+// ------------------------------------------------------------------------------------------------
+// Setup import properties
+void MD5Importer::SetupProperties(const Importer* pImp)
+{
+	// AI_CONFIG_IMPORT_MD5_NO_ANIM_AUTOLOAD
+	configNoAutoLoad = (0 !=  pImp->GetPropertyInteger(AI_CONFIG_IMPORT_MD5_NO_ANIM_AUTOLOAD,0));
 }
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
-void MD5Importer::InternReadFile( 
-	const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
+void MD5Importer::InternReadFile( const std::string& pFile, 
+								 aiScene* _pScene, IOSystem* _pIOHandler)
 {
+	pIOHandler = _pIOHandler;
+	pScene     = _pScene;
+	bHadMD5Mesh = bHadMD5Anim = bHadMD5Camera = false;
+
 	// remove the file extension
 	std::string::size_type pos = pFile.find_last_of('.');
-	mFile = pFile.substr(0,pos+1);
-	this->pIOHandler = pIOHandler;
-	this->pScene = pScene;
+	mFile = (std::string::npos == pos ? pFile : pFile.substr(0,pos+1));
 
-	bHadMD5Mesh = bHadMD5Anim = false;
+	const std::string extension = GetExtension(pFile);
+	try {
+		if (extension == "md5camera") {
+			LoadMD5CameraFile();
+		}
+		else if (configNoAutoLoad || extension == "md5anim") {
+			// determine file extension and process just *one* file
+			if (extension.length() == 0) {
+				/* fixme */
+			}
+			if (extension == "md5anim") {
+				LoadMD5AnimFile();
+			}
+			else if (extension == "md5mesh") {
+				LoadMD5MeshFile();
+			}
+		}
+		else {
+			LoadMD5MeshFile();
+			LoadMD5AnimFile();
+		}
+	}
+	catch ( ImportErrorException* ex) {
+		UnloadFileFromMemory();
+		throw ex;
+	}
 
-	// load the animation keyframes
-	LoadMD5AnimFile();
-
-	// load the mesh vertices and bones
-	LoadMD5MeshFile();
-
-	// make sure we return no incomplete data
+	// make sure we have at least one file
 	if (!bHadMD5Mesh && !bHadMD5Anim)
-		throw new ImportErrorException("Failed to read valid data from this MD5");
-	
-	if (!bHadMD5Mesh)pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
+		throw new ImportErrorException("Failed to read valid contents from this MD5 data set");
+
+	// the output scene wouldn't pass the validation without this flag
+	if (!bHadMD5Mesh)
+		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
 }
 
 // ------------------------------------------------------------------------------------------------
+// Load a file into a memory buffer
 void MD5Importer::LoadFileIntoMemory (IOStream* file)
 {
 	ai_assert(NULL != file);
 
-	this->fileSize = (unsigned int)file->FileSize();
+	fileSize = (unsigned int)file->FileSize();
 
 	// allocate storage and copy the contents of the file to a memory buffer
-	this->pScene = pScene;
-	this->mBuffer = new char[this->fileSize+1];
-	file->Read( (void*)mBuffer, 1, this->fileSize);
-	this->iLineNumber = 1;
+	pScene = pScene;
+	mBuffer = new char[fileSize+1];
+	file->Read( (void*)mBuffer, 1, fileSize);
+	iLineNumber = 1;
 
 	// append a terminal 0
-	this->mBuffer[this->fileSize] = '\0';
+	mBuffer[fileSize] = '\0';
 
 	// now remove all line comments from the file
-	CommentRemover::RemoveLineComments("//",this->mBuffer,' ');
+	CommentRemover::RemoveLineComments("//",mBuffer,' ');
 }
 
 // ------------------------------------------------------------------------------------------------
+// Unload the current memory buffer
 void MD5Importer::UnloadFileFromMemory ()
 {
 	// delete the file buffer
-	delete[] this->mBuffer;
-	this->mBuffer = NULL;
-	this->fileSize = 0;
+	delete[] mBuffer;
+	mBuffer = NULL;
+	fileSize = 0;
 }
 
 // ------------------------------------------------------------------------------------------------
-void MakeDataUnique (MD5::MeshDesc& meshSrc)
+// Build unique vertices
+void MD5Importer::MakeDataUnique (MD5::MeshDesc& meshSrc)
 {
 	std::vector<bool> abHad(meshSrc.mVertices.size(),false);
 
 	// allocate enough storage to keep the output structures
-	const unsigned int iNewNum = (unsigned int)meshSrc.mFaces.size()*3;
-	unsigned int iNewIndex = (unsigned int)meshSrc.mVertices.size();
+	const unsigned int iNewNum = meshSrc.mFaces.size()*3;
+	unsigned int iNewIndex = meshSrc.mVertices.size();
 	meshSrc.mVertices.resize(iNewNum);
 
 	// try to guess how much storage we'll need for new weights
@@ -165,26 +204,10 @@ void MakeDataUnique (MD5::MeshDesc& meshSrc)
 		const aiFace& face = *iter;
 		for (unsigned int i = 0; i < 3;++i)
 		{
-			if (abHad[face.mIndices[i]])
-			{
+			if (abHad[face.mIndices[i]])	{
 				// generate a new vertex
 				meshSrc.mVertices[iNewIndex] = meshSrc.mVertices[face.mIndices[i]];
 				face.mIndices[i] = iNewIndex++;
-
-				// FIX: removed this ...
-#if 0
-				// the algorithm in MD5Importer::LoadMD5MeshFile() doesn't work if
-				// a weight is referenced by more than one vertex. This shouldn't 
-				// occur in MD5 files, but we must take care that we generate new
-				// weights now, too.
-
-				vertNew.mFirstWeight = (unsigned int)meshSrc.mWeights.size();
-				meshSrc.mWeights.resize(vertNew.mFirstWeight+vertNew.mNumWeights);
-				for (unsigned int q = 0; q < vertNew.mNumWeights;++q)
-				{
-					meshSrc.mWeights[vertNew.mFirstWeight+q] = meshSrc.mWeights[vertOld.mFirstWeight+q];
-				}
-#endif
 			}
 			else abHad[face.mIndices[i]] = true;
 		}
@@ -192,77 +215,109 @@ void MakeDataUnique (MD5::MeshDesc& meshSrc)
 }
 
 // ------------------------------------------------------------------------------------------------
-void AttachChilds(int iParentID,aiNode* piParent,BoneList& bones)
+// Recursive node graph construction from a MD5MESH
+void MD5Importer::AttachChilds_Mesh(int iParentID,aiNode* piParent, BoneList& bones)
 {
 	ai_assert(NULL != piParent && !piParent->mNumChildren);
-	for (int i = 0; i < (int)bones.size();++i)
-	{
-		// (avoid infinite recursion)
-		if (iParentID != i && bones[i].mParentIndex == iParentID)
-		{
-			// have it ...
+
+	// First find out how many children we'll have
+	for (int i = 0; i < (int)bones.size();++i)	{
+		if (iParentID != i && bones[i].mParentIndex == iParentID)	{
 			++piParent->mNumChildren;
 		}
 	}
-	if (piParent->mNumChildren)
-	{
+	if (piParent->mNumChildren)	{
 		piParent->mChildren = new aiNode*[piParent->mNumChildren];
-		for (int i = 0; i < (int)bones.size();++i)
-		{
+		for (int i = 0; i < (int)bones.size();++i)	{
 			// (avoid infinite recursion)
-			if (iParentID != i && bones[i].mParentIndex == iParentID)
-			{
+			if (iParentID != i && bones[i].mParentIndex == iParentID)	{
 				aiNode* pc;
+				// setup a new node
 				*piParent->mChildren++ = pc = new aiNode();
-				pc->mName = aiString(bones[i].mName);
+				pc->mName = aiString(bones[i].mName); 
 				pc->mParent = piParent;
 
 				// get the transformation matrix from rotation and translational components
-				aiQuaternion quat = aiQuaternion ( bones[i].mRotationQuat );
-				//quat.w *= -1.0f; // DX to OGL
-				pc->mTransformation = aiMatrix4x4 ( quat.GetMatrix());
-				aiMatrix4x4 mTranslate;
-				mTranslate.a4 = bones[i].mPositionXYZ.x;
-				mTranslate.b4 = bones[i].mPositionXYZ.y;
-				mTranslate.c4 = bones[i].mPositionXYZ.z;
-				pc->mTransformation = pc->mTransformation*mTranslate;
+				aiQuaternion quat; 
+				MD5::ConvertQuaternion ( bones[i].mRotationQuat, quat );
+
+				bones[i].mTransform = aiMatrix4x4 ( quat.GetMatrix());
+				bones[i].mTransform.a4 = bones[i].mPositionXYZ.x;
+				bones[i].mTransform.b4 = bones[i].mPositionXYZ.y;
+				bones[i].mTransform.c4 = bones[i].mPositionXYZ.z;
 
 				// store it for later use
-				bones[i].mTransform = bones[i].mInvTransform = pc->mTransformation;
+				pc->mTransformation = bones[i].mInvTransform = bones[i].mTransform;
 				bones[i].mInvTransform.Inverse();
 
-				// the transformations for each bone are absolute,
-				// so we need to multiply them with the inverse
-				// of the absolut matrix of the parent
-				if (-1 != iParentID)
-				{
-					pc->mTransformation = bones[iParentID].mInvTransform*pc->mTransformation;
+				// the transformations for each bone are absolute, so we need to multiply them
+				// with the inverse of the absolute matrix of the parent joint
+				if (-1 != iParentID)	{
+					pc->mTransformation = bones[iParentID].mInvTransform * pc->mTransformation;
 				}
 
 				// add children to this node, too
-				AttachChilds( i, pc, bones);
+				AttachChilds_Mesh( i, pc, bones);
 			}
 		}
-		// undo our nice shift
+		// undo offset computations
 		piParent->mChildren -= piParent->mNumChildren;
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
+// Recursive node graph construction from a MD5ANIM
+void MD5Importer::AttachChilds_Anim(int iParentID,aiNode* piParent, AnimBoneList& bones,const aiNodeAnim** node_anims)
+{
+	ai_assert(NULL != piParent && !piParent->mNumChildren);
+
+	// First find out how many children we'll have
+	for (int i = 0; i < (int)bones.size();++i)	{
+		if (iParentID != i && bones[i].mParentIndex == iParentID)	{
+			++piParent->mNumChildren;
+		}
+	}
+	if (piParent->mNumChildren)	{
+		piParent->mChildren = new aiNode*[piParent->mNumChildren];
+		for (int i = 0; i < (int)bones.size();++i)	{
+			// (avoid infinite recursion)
+			if (iParentID != i && bones[i].mParentIndex == iParentID)
+			{
+				aiNode* pc;
+				// setup a new node
+				*piParent->mChildren++ = pc = new aiNode();
+				pc->mName = aiString(bones[i].mName); 
+				pc->mParent = piParent;
+
+				// get the corresponding animation channel and its first frame
+				const aiNodeAnim** cur = node_anims;
+				while ((**cur).mNodeName != pc->mName)++cur;
+
+				aiMatrix4x4::Translation((**cur).mPositionKeys[0].mValue,pc->mTransformation);
+				pc->mTransformation = pc->mTransformation * aiMatrix4x4((**cur).mRotationKeys[0].mValue.GetMatrix()) ;
+
+				// add children to this node, too
+				AttachChilds_Anim( i, pc, bones,node_anims);
+			}
+		}
+		// undo offset computations
+		piParent->mChildren -= piParent->mNumChildren;
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Load a MD5MESH file
 void MD5Importer::LoadMD5MeshFile ()
 {
-	std::string pFile = this->mFile + "MD5MESH";
+	std::string pFile = mFile + "md5mesh";
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
-	if( file.get() == NULL)
-	{
-		DefaultLogger::get()->warn("Failed to read MD5 mesh file: " + pFile);
+	if( file.get() == NULL)	{
+		DefaultLogger::get()->warn("Failed to read MD5MESH file: " + pFile);
 		return;
 	}
 	bHadMD5Mesh = true;
-
-	// now load the file into memory
 	LoadFileIntoMemory(file.get());
 
 	// now construct a parser and parse the file
@@ -271,29 +326,29 @@ void MD5Importer::LoadMD5MeshFile ()
 	// load the mesh information from it
 	MD5::MD5MeshParser meshParser(parser.mSections);
 
-	// create the bone hierarchy - first the root node 
-	// and dummy nodes for all meshes
-	pScene->mRootNode = new aiNode();
+	// create the bone hierarchy - first the root node and dummy nodes for all meshes
+	pScene->mRootNode = new aiNode("<MD5_Root>");
 	pScene->mRootNode->mNumChildren = 2;
 	pScene->mRootNode->mChildren = new aiNode*[2];
 
-	// now create the hierarchy of animated bones
+	// build the hierarchy from the MD5MESH file
 	aiNode* pcNode = pScene->mRootNode->mChildren[1] = new aiNode();
-	pcNode->mName.Set("MD5Anim");
+	pcNode->mName.Set("<MD5_Hierarchy>");
 	pcNode->mParent = pScene->mRootNode;
-	AttachChilds(-1,pcNode,meshParser.mJoints);
+	AttachChilds_Mesh(-1,pcNode,meshParser.mJoints);
 
 	pcNode = pScene->mRootNode->mChildren[0] = new aiNode();
-	pcNode->mName.Set("MD5Mesh");
+	pcNode->mName.Set("<MD5_Mesh>");
 	pcNode->mParent = pScene->mRootNode;
 
+#if 0
+	if (pScene->mRootNode->mChildren[1]->mNumChildren) /* start at the right hierarchy level */
+		SkeletonMeshBuilder skeleton_maker(pScene,pScene->mRootNode->mChildren[1]->mChildren[0]);
+#else
 	std::vector<MD5::MeshDesc>::const_iterator end = meshParser.mMeshes.end();
 
 	// FIX: MD5 files exported from Blender can have empty meshes
-	for (std::vector<MD5::MeshDesc>::const_iterator 
-		 it  = meshParser.mMeshes.begin(),
-		 end = meshParser.mMeshes.end(); it != end;++it)
-	{
+	for (std::vector<MD5::MeshDesc>::const_iterator it  = meshParser.mMeshes.begin(),end = meshParser.mMeshes.end(); it != end;++it) {
 		if (!(*it).mFaces.empty() && !(*it).mVertices.empty())
 			++pScene->mNumMaterials;
 	}
@@ -310,10 +365,7 @@ void MD5Importer::LoadMD5MeshFile ()
 		pcNode->mMeshes[m] = m;
 
 	unsigned int n = 0;
-	for (std::vector<MD5::MeshDesc>::iterator 
-		 it  = meshParser.mMeshes.begin(),
-		 end = meshParser.mMeshes.end(); it != end;++it)
-	{
+	for (std::vector<MD5::MeshDesc>::iterator it  = meshParser.mMeshes.begin(),end = meshParser.mMeshes.end(); it != end;++it) {
 		MD5::MeshDesc& meshSrc = *it;
 		if (meshSrc.mFaces.empty() || meshSrc.mVertices.empty())
 			continue;
@@ -331,10 +383,7 @@ void MD5Importer::LoadMD5MeshFile ()
 
 		// copy texture coordinates
 		aiVector3D* pv = mesh->mTextureCoords[0];
-		for (MD5::VertexList::const_iterator
-			iter =  meshSrc.mVertices.begin();
-			iter != meshSrc.mVertices.end();++iter,++pv)
-		{
+		for (MD5::VertexList::const_iterator iter =  meshSrc.mVertices.begin();iter != meshSrc.mVertices.end();++iter,++pv) {
 			pv->x = (*iter).mUV.x;
 			pv->y = 1.0f-(*iter).mUV.y; // D3D to OpenGL
 			pv->z = 0.0f;
@@ -348,7 +397,9 @@ void MD5Importer::LoadMD5MeshFile ()
 			for (unsigned int jub = (*iter).mFirstWeight, w = jub; w < jub + (*iter).mNumWeights;++w)
 			{
 				MD5::WeightDesc& desc = meshSrc.mWeights[w];
-				++piCount[desc.mBone]; 
+				/* FIX for some invalid exporters */
+				if (!(desc.mWeight < AI_MD5_WEIGHT_EPSILON && desc.mWeight >= -AI_MD5_WEIGHT_EPSILON ))
+					++piCount[desc.mBone]; 
 			}
 		}
 
@@ -366,50 +417,55 @@ void MD5Importer::LoadMD5MeshFile ()
 				p->mNumWeights = piCount[q];
 				p->mWeights = new aiVertexWeight[p->mNumWeights];
 				p->mName = aiString(meshParser.mJoints[q].mName);
+				p->mOffsetMatrix = meshParser.mJoints[q].mInvTransform;
 
 				// store the index for later use
-				meshParser.mJoints[q].mMap = h++;
+				MD5::BoneDesc& boneSrc = meshParser.mJoints[q];
+				boneSrc.mMap = h++;
+
+				// compute w-component of quaternion
+				MD5::ConvertQuaternion( boneSrc.mRotationQuat, boneSrc.mRotationQuatConverted );
+
+				//boneSrc.mPositionXYZ.z *= -1.f;
+				//boneSrc.mRotationQuatConverted = boneSrc.mRotationQuatConverted * aiQuaternion(-0.5f, -0.5f, -0.5f, 0.5f) ;
 			}
 	
 			//unsigned int g = 0;
 			pv = mesh->mVertices;
-			for (MD5::VertexList::const_iterator
-				iter =  meshSrc.mVertices.begin();
-				iter != meshSrc.mVertices.end();++iter,++pv)
-			{
+			for (MD5::VertexList::const_iterator iter =  meshSrc.mVertices.begin();iter != meshSrc.mVertices.end();++iter,++pv) {
 				// compute the final vertex position from all single weights
 				*pv = aiVector3D();
 
 				// there are models which have weights which don't sum to 1 ...
-				// granite.md5mesh for example
 				float fSum = 0.0f;
 				for (unsigned int jub = (*iter).mFirstWeight, w = jub; w < jub + (*iter).mNumWeights;++w)
 					fSum += meshSrc.mWeights[w].mWeight;
-				if (!fSum)throw new ImportErrorException("The sum of all vertex bone weights is 0");
+				if (!fSum) {
+					DefaultLogger::get()->error("MD5MESH: The sum of all vertex bone weights is 0");
+					continue;
+				}
 
 				// process bone weights
 				for (unsigned int jub = (*iter).mFirstWeight, w = jub; w < jub + (*iter).mNumWeights;++w)
 				{
 					MD5::WeightDesc& desc = meshSrc.mWeights[w];
-					float fNewWeight = desc.mWeight / fSum; 
-					
+					if ( desc.mWeight < AI_MD5_WEIGHT_EPSILON && desc.mWeight >= -AI_MD5_WEIGHT_EPSILON)
+						continue;
+
+					const float fNewWeight = desc.mWeight / fSum; 
+
 					// transform the local position into worldspace
 					MD5::BoneDesc& boneSrc = meshParser.mJoints[desc.mBone];
-					aiVector3D v = desc.vOffsetPosition;
-					aiQuaternion quat = aiQuaternion( boneSrc.mRotationQuat );
-					//quat.w *= -1.0f;
-					v = quat.GetMatrix() * v;
-					v += boneSrc.mPositionXYZ;
+					const aiVector3D v = boneSrc.mRotationQuatConverted.Rotate (desc.vOffsetPosition);
 
 					// use the original weight to compute the vertex position
 					// (some MD5s seem to depend on the invalid weight values ...)
-					pv->operator +=(v * desc.mWeight);
+					*pv += ((boneSrc.mPositionXYZ+v)* desc.mWeight);
 			
 					aiBone* bone = mesh->mBones[boneSrc.mMap];
 					*bone->mWeights++ = aiVertexWeight((unsigned int)(pv-mesh->mVertices),fNewWeight);
 				}
-				// convert from DOOM coordinate system to OGL
-				std::swap((float&)pv->z,(float&)pv->y);
+				//pv->z *= -1.f;
 			}
 
 			// undo our nice offset tricks ...
@@ -433,47 +489,69 @@ void MD5Importer::LoadMD5MeshFile ()
 		// generate a material for the mesh
 		MaterialHelper* mat = new MaterialHelper();
 		pScene->mMaterials[n] = mat;
-		mat->AddProperty(&meshSrc.mShader,AI_MATKEY_TEXTURE_DIFFUSE(0));
+
+		// insert the typical doom3 textures:
+		// nnn_local.tga  - normal map
+		// nnn_h.tga      - height map
+		// nnn_s.tga      - specular map
+		// nnn_d.tga      - diffuse map
+		if (meshSrc.mShader.length && !strchr(meshSrc.mShader.data,'.')) {
+		
+			aiString temp(meshSrc.mShader);
+			temp.Append("_local.tga");
+			mat->AddProperty(&temp,AI_MATKEY_TEXTURE_NORMALS(0));
+
+			temp =  aiString(meshSrc.mShader);
+			temp.Append("_s.tga");
+			mat->AddProperty(&temp,AI_MATKEY_TEXTURE_SPECULAR(0));
+
+			temp =  aiString(meshSrc.mShader);
+			temp.Append("_d.tga");
+			mat->AddProperty(&temp,AI_MATKEY_TEXTURE_DIFFUSE(0));
+
+			temp =  aiString(meshSrc.mShader);
+			temp.Append("_h.tga");
+			mat->AddProperty(&temp,AI_MATKEY_TEXTURE_HEIGHT(0));
+
+			// set this also as material name
+			mat->AddProperty(&meshSrc.mShader,AI_MATKEY_NAME);
+		}
+		else mat->AddProperty(&meshSrc.mShader,AI_MATKEY_TEXTURE_DIFFUSE(0));
 		mesh->mMaterialIndex = n++;
 	}
-
+#endif
 	// delete the file again
 	UnloadFileFromMemory();
 }
 
 // ------------------------------------------------------------------------------------------------
+// Load an MD5ANIM file
 void MD5Importer::LoadMD5AnimFile ()
 {
-	std::string pFile = mFile + "MD5ANIM";
+	std::string pFile = mFile + "md5anim";
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
-	if( file.get() == NULL)
-	{
-		DefaultLogger::get()->warn("Failed to read MD5 anim file: " + pFile);
+	if( file.get() == NULL)	{
+		DefaultLogger::get()->warn("Failed to read MD5ANIM file: " + pFile);
 		return;
 	}
 	bHadMD5Anim = true;
-
-	// now load the file into memory
 	LoadFileIntoMemory(file.get());
 
-	// now construct a parser and parse the file
+	// parse the basic file structure
 	MD5::MD5Parser parser(mBuffer,fileSize);
 
-	// load the animation information from it
+	// load the animation information from the parse tree
 	MD5::MD5AnimParser animParser(parser.mSections);
 
 	// generate and fill the output animation
-	if (!animParser.mAnimatedBones.empty())
-	{
-		pScene->mNumAnimations = 1;
-		pScene->mAnimations = new aiAnimation*[1];
+	if (!animParser.mAnimatedBones.empty())	{
+		pScene->mAnimations = new aiAnimation*[pScene->mNumAnimations = 1];
 		aiAnimation* anim = pScene->mAnimations[0] = new aiAnimation();
 		anim->mNumChannels = (unsigned int)animParser.mAnimatedBones.size();
 		anim->mChannels = new aiNodeAnim*[anim->mNumChannels];
-		for (unsigned int i = 0; i < anim->mNumChannels;++i)
-		{
+		for (unsigned int i = 0; i < anim->mNumChannels;++i)	{
 			aiNodeAnim* node = anim->mChannels[i] = new aiNodeAnim();
 			node->mNodeName = aiString( animParser.mAnimatedBones[i].mName );
 
@@ -486,70 +564,49 @@ void MD5Importer::LoadMD5AnimFile ()
 		// 1 tick == 1 frame
 		anim->mTicksPerSecond = animParser.fFrameRate;
 
-		for (FrameList::const_iterator iter = animParser.mFrames.begin(), 
-			iterEnd = animParser.mFrames.end();iter != iterEnd;++iter)
-		{
+		for (FrameList::const_iterator iter = animParser.mFrames.begin(), iterEnd = animParser.mFrames.end();iter != iterEnd;++iter){
 			double dTime = (double)(*iter).iIndex;
 			if (!(*iter).mValues.empty())
 			{
 				// now process all values in there ... read all joints
 				aiNodeAnim** pcAnimNode = anim->mChannels;
 				MD5::BaseFrameDesc* pcBaseFrame = &animParser.mBaseFrames[0];
-				for (AnimBoneList::const_iterator 
-					iter2		= animParser.mAnimatedBones.begin(), 
-					iterEnd2	= animParser.mAnimatedBones.end();
-					iter2		!= iterEnd2;++iter2,++pcAnimNode,++pcBaseFrame)
+				for (AnimBoneList::const_iterator iter2	= animParser.mAnimatedBones.begin(); iter2 != animParser.mAnimatedBones.end();++iter2,
+					++pcAnimNode,++pcBaseFrame)
 				{
-					if((*iter2).iFirstKeyIndex >= (*iter).mValues.size())
-					{
-						// TODO: add proper array checks for all cases here ...
-						DefaultLogger::get()->error("Keyframe index is out of range. ");
+					if((*iter2).iFirstKeyIndex >= (*iter).mValues.size()) {
+						DefaultLogger::get()->error("MD5: Keyframe index is out of range");
 						continue;
 					}
 					const float* fpCur = &(*iter).mValues[(*iter2).iFirstKeyIndex];
 
 					aiNodeAnim* pcCurAnimBone = *pcAnimNode;
 					aiVectorKey* vKey = pcCurAnimBone->mPositionKeys++;
-
-					// translation on the x axis
-					if ((*iter2).iFlags & AI_MD5_ANIMATION_FLAG_TRANSLATE_X)
-						vKey->mValue.x = *fpCur++;
-					else vKey->mValue.x = pcBaseFrame->vPositionXYZ.x;
-
-					// translation on the y axis
-					if ((*iter2).iFlags & AI_MD5_ANIMATION_FLAG_TRANSLATE_Y)
-						vKey->mValue.y = *fpCur++;
-					else vKey->mValue.y = pcBaseFrame->vPositionXYZ.y;
-
-					// translation on the z axis
-					if ((*iter2).iFlags & AI_MD5_ANIMATION_FLAG_TRANSLATE_Z)
-						vKey->mValue.z = *fpCur++;
-					else vKey->mValue.z = pcBaseFrame->vPositionXYZ.z;
-
-
-					// rotation quaternion, x component
 					aiQuatKey* qKey = pcCurAnimBone->mRotationKeys++;
 					aiVector3D vTemp;
-					if ((*iter2).iFlags & AI_MD5_ANIMATION_FLAG_ROTQUAT_X)
-						vTemp.x = *fpCur++;
-					else vTemp.x = pcBaseFrame->vRotationQuat.x;
 
-					// rotation quaternion, y component
-					if ((*iter2).iFlags & AI_MD5_ANIMATION_FLAG_ROTQUAT_Y)
-						vTemp.y = *fpCur++;
-					else vTemp.y = pcBaseFrame->vRotationQuat.y;
+					// translational component
+					for (unsigned int i = 0; i < 3; ++i) {
+						if ((*iter2).iFlags & (1u << i))
+							vKey->mValue[i] =  *fpCur++;
+						else vKey->mValue[i] = pcBaseFrame->vPositionXYZ[i];
+					}
+					
+					// orientation component
+					for (unsigned int i = 0; i < 3; ++i) {
+						if ((*iter2).iFlags & (8u << i))
+							vTemp[i] =  *fpCur++;
+						else vTemp[i] = pcBaseFrame->vRotationQuat[i];
+					}
 
-					// rotation quaternion, z component
-					if ((*iter2).iFlags & AI_MD5_ANIMATION_FLAG_ROTQUAT_Z)
-						vTemp.z = *fpCur++;
-					else vTemp.z = pcBaseFrame->vRotationQuat.z;
+					MD5::ConvertQuaternion(vTemp, qKey->mValue);
 
-					// compute the w component of the quaternion - invert it (DX to OGL)
-					qKey->mValue = aiQuaternion(vTemp);
-					//qKey->mValue.w *= -1.0f;
+					aiMatrix4x4 m;
+					aiMatrix4x4::Translation(vKey->mValue,m);
+					m = m*aiMatrix4x4( qKey->mValue.GetMatrix() );
+					m.DecomposeNoScaling(qKey->mValue,vKey->mValue);
 
-					qKey->mTime = dTime;
-					vKey->mTime = dTime;
+					qKey->mTime = vKey->mTime = dTime;
 				}
 			}
 			// compute the duration of the animation
@@ -557,16 +614,53 @@ void MD5Importer::LoadMD5AnimFile ()
 		}
 
 		// undo our offset computations
-		for (unsigned int i = 0; i < anim->mNumChannels;++i)
-		{
+		for (unsigned int i = 0; i < anim->mNumChannels;++i)	{
 			aiNodeAnim* node = anim->mChannels[i];
 			node->mPositionKeys -= node->mNumPositionKeys;
 			node->mRotationKeys -= node->mNumPositionKeys;
+		}
+
+		// If we didn't build the hierarchy yet (== we didn't load a MD5MESH),
+		// construct it now from the data given in the MD5ANIM.
+		if (!pScene->mRootNode) {
+			pScene->mRootNode = new aiNode();
+			pScene->mRootNode->mName.Set("<MD5_Hierarchy>");
+			AttachChilds_Anim(-1,pScene->mRootNode,animParser.mAnimatedBones,(const aiNodeAnim**)anim->mChannels);
+
+			// Call SkeletonMeshBuilder to construct a mesh to represent the shape
+			if (pScene->mRootNode->mNumChildren) {
+				SkeletonMeshBuilder skeleton_maker(pScene,pScene->mRootNode->mChildren[0]);
+			}
 		}
 	}
 
 	// delete the file again
 	UnloadFileFromMemory();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Load an MD5CAMERA file
+void MD5Importer::LoadMD5CameraFile ()
+{
+#if 0
+	std::string pFile = mFile + "md5camera";
+	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
+
+	// Check whether we can read from the file
+	if( file.get() == NULL)	{
+		DefaultLogger::get()->warn("Failed to read MD5CAMERA file: " + pFile);
+		return;
+	}
+	bHadMD5Camera = true;
+	LoadFileIntoMemory(file.get());
+
+	// parse the basic file structure
+	MD5::MD5Parser parser(mBuffer,fileSize);
+
+	// load the camera animation data from the parse tree
+	MD5::MD5CameraParser cameraParser(parser.mSections);
+#endif
+	throw new ImportErrorException("MD5Camera is not yet supported");
 }
 
 #endif // !! ASSIMP_BUILD_NO_MD5_IMPORTER

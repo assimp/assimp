@@ -367,6 +367,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_CONFIG_PP_FD_REMOVE \
 	"PP_FD_REMOVE"
 
+
+// ---------------------------------------------------------------------------
+/** @brief  Configures the MD5 loader to not load the MD5ANIM file for
+ *  a MD5MESH file automatically.
+ * 
+ * The default strategy is to look for a file with the same name but the
+ * MD5ANIM extension in the same directory. If it is found, it is loaded
+ * and combined with the MD5MESH file. This configuration option can be
+ * used to disable this behaviour.
+ * 
+ * Property type: integer (0: false; !0: true). Default value: false.
+ */
+#define AI_CONFIG_IMPORT_MD5_NO_ANIM_AUTOLOAD			\
+	"IMPORT_MD5_NO_ANIM_AUTOLOAD"
+
 #if 0
 // ---------------------------------------------------------------------------
 /** @brief Specifies the shape of the scene returned by the CSM format loader.

@@ -57,7 +57,7 @@ class IOStream;
 using namespace Assimp::MD5;
 
 // ---------------------------------------------------------------------------
-/** Used to load MD5 files
+/** Importer class for the MD5 file format
 */
 class MD5Importer : public BaseImporter
 {
@@ -74,7 +74,8 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Returns whether the class can handle the format of the given file. 
-	* See BaseImporter::CanRead() for details.	*/
+	 * See BaseImporter::CanRead() for details.
+ 	 */
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
 		bool checkSig) const;
 
@@ -85,11 +86,18 @@ protected:
 	 * See BaseImporter::GetExtensionList() for details
 	 */
 	void GetExtensionList(std::string& append);
+
+	// -------------------------------------------------------------------
+	/** Called prior to ReadFile().
+	 * The function is a request to the importer to update its configuration
+	 * basing on the Importer's configuration property list.
+	 */
+	void SetupProperties(const Importer* pImp);
 	
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 
-	* See BaseImporter::InternReadFile() for details
-	*/
+	 * See BaseImporter::InternReadFile() for details
+	 */
 	void InternReadFile( const std::string& pFile, aiScene* pScene, 
 		IOSystem* pIOHandler);
 
@@ -97,22 +105,49 @@ protected:
 
 
 	// -------------------------------------------------------------------
-	/** Load the *.MD5MESH file.
-	 * Must be called at first.
-	*/
+	/** Load a *.MD5MESH file.
+	 */
 	void LoadMD5MeshFile ();
 
 	// -------------------------------------------------------------------
-	/** Load the *.MD5ANIM file.
-	*/
+	/** Load a *.MD5ANIM file.
+	 */
 	void LoadMD5AnimFile ();
+
+	// -------------------------------------------------------------------
+	/** Load a *.MD5CAMERA file.
+	 */
+	void LoadMD5CameraFile ();
+
+	// -------------------------------------------------------------------
+	/** Construct node hierarchy from a given MD5ANIM 
+	 *  @param iParentID Current parent ID
+	 *  @param piParent Parent node to attach to
+	 *  @param bones Input bones
+	 *  @param node_anims Generated node animations
+	*/
+	void AttachChilds_Anim(int iParentID,aiNode* piParent, 
+		AnimBoneList& bones,const aiNodeAnim** node_anims);
+
+	// -------------------------------------------------------------------
+	/** Construct node hierarchy from a given MD5MESH 
+	 *  @param iParentID Current parent ID
+	 *  @param piParent Parent node to attach to
+	 *  @param bones Input bones
+	*/
+	void AttachChilds_Mesh(int iParentID,aiNode* piParent,BoneList& bones);
+
+	// -------------------------------------------------------------------
+	/** Build unique vertex buffers from a given MD5ANIM
+	 *  @param meshSrc Input data
+	 */
+	void MakeDataUnique (MD5::MeshDesc& meshSrc);
 
 	// -------------------------------------------------------------------
 	/** Load the contents of a specific file into memory and
 	 *  alocates a buffer to keep it.
 	 *
-	 *  mBuffer is changed to point to this buffer.
-	 *  Don't forget to delete it later ...
+	 *  mBuffer is modified to point to this buffer.
 	 *  @param pFile File stream to be read
 	*/
 	void LoadFileIntoMemory (IOStream* pFile);
@@ -141,11 +176,17 @@ protected:
 	/** (Custom) I/O handler implementation */
 	IOSystem* pIOHandler;
 
-	/** true if the MD5MESH file has already been parsed */
+	/** true if a MD5MESH file has already been parsed */
 	bool bHadMD5Mesh;
 
-	/** true if the MD5ANIM file has already been parsed */
+	/** true if a MD5ANIM file has already been parsed */
 	bool bHadMD5Anim;
+
+	/** true if a MD5CAMERA file has already been parsed */
+	bool bHadMD5Camera;
+
+	/** configuration option: prevent anim autoload */
+	bool configNoAutoLoad;
 };
 
 } // end of namespace Assimp

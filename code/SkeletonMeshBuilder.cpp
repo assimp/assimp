@@ -48,14 +48,17 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // The constructor processes the given scene and adds a mesh there. 
-SkeletonMeshBuilder::SkeletonMeshBuilder( aiScene* pScene)
+SkeletonMeshBuilder::SkeletonMeshBuilder( aiScene* pScene, aiNode* root)
 {
 	// nothing to do if there's mesh data already present at the scene
 	if( pScene->mNumMeshes > 0 || pScene->mRootNode == NULL)
 		return;
 
+	if (!root)
+		root = pScene->mRootNode;
+
 	// build some faces around each node 
-	CreateGeometry( pScene->mRootNode);
+	CreateGeometry( root );
 
 	// create a mesh to hold all the generated faces
 	pScene->mNumMeshes = 1;

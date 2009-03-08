@@ -72,8 +72,11 @@ bool LimitBoneWeightsProcess::IsActive( unsigned int pFlags) const
 // Executes the post processing step on the given imported data.
 void LimitBoneWeightsProcess::Execute( aiScene* pScene)
 {
+	DefaultLogger::get()->debug("LimitBoneWeightsProcess begin");
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 		ProcessMesh( pScene->mMeshes[a]);
+
+	DefaultLogger::get()->debug("LimitBoneWeightsProcess end");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -106,6 +109,8 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
 		}
 	}
 
+	unsigned int removed = 0, old_bones = pMesh->mNumBones;
+
 	// now cut the weight count if it exceeds the maximum
 	bool bChanged = false;
 	for( WeightsPerVertex::iterator vit = vertexWeights.begin(); vit != vertexWeights.end(); ++vit)
@@ -120,7 +125,9 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
 		std::sort( vit->begin(), vit->end());
 
 		// now kill everything beyond the maximum count
+		unsigned int m = vit->size();
 		vit->erase( vit->begin() + mMaxWeights, vit->end());
+		removed += m-vit->size();
 
 		// and renormalize the weights
 		float sum = 0.0f;
@@ -130,9 +137,7 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
 			it->mWeight /= sum;
 	}
 
-	if (bChanged)
-	{
-
+	if (bChanged)	{
 		// rebuild the vertex weight array for all bones 
 		typedef std::vector< std::vector< aiVertexWeight > > WeightsPerBone;
 		WeightsPerBone boneWeights( pMesh->mNumBones);
@@ -183,18 +188,20 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
 			aiBone** ppcCur = pMesh->mBones;
 			aiBone** ppcSrc = ppcCur;
 
-			for (std::vector<bool>::const_iterator
-				iter  = abNoNeed.begin();
-				iter != abNoNeed.end()  ;++iter)
-			{
-				if (*iter)
-				{
+			for (std::vector<bool>::const_iterator iter  = abNoNeed.begin();iter != abNoNeed.end()  ;++iter)	{
+				if (*iter)	{
 					delete *ppcSrc;
 					--pMesh->mNumBones;
 				}
 				else *ppcCur++ = *ppcSrc;
 				++ppcSrc;
 			}
+		}
+
+		if (!DefaultLogger::isNullLogger()) {
+			char buffer[1024];
+			::sprintf(buffer,"Removed %i weights. Input bones: %i. Output bones: %i",removed,old_bones,pMesh->mNumBones);
+			DefaultLogger::get()->info(buffer);
 		}
 	}
 }

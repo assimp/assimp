@@ -84,6 +84,12 @@ struct aiQuaternion
 	/** Normalize the quaternion */
 	aiQuaternion& Normalize();
 
+	/** Compute quaternion conjugate */
+	aiQuaternion& Conjugate ();
+
+	/** Rotate a point by this quaternion */
+	aiVector3D Rotate (const aiVector3D& in);
+
 	/** Multiply two quaternions */
 	aiQuaternion operator* (const aiQuaternion& two) const;
 
@@ -204,13 +210,11 @@ inline aiQuaternion::aiQuaternion( aiVector3D normalized)
 	y = normalized.y;
 	z = normalized.z;
 
-	float t = 1.0f - (normalized.x * normalized.x) - 
-		(normalized.y * normalized.y) - (normalized.z * normalized.z);
+	const float t = 1.0f - (x*x) - (y*y) - (z*z);
 
 	if (t < 0.0f)
 		w = 0.0f;
 	else w = sqrt (t);
-
 }
 
 // ---------------------------------------------------------------------------
@@ -278,6 +282,26 @@ inline aiQuaternion aiQuaternion::operator* (const aiQuaternion& t) const
 		w*t.x + x*t.w + y*t.z - z*t.y,
 		w*t.y + y*t.w + z*t.x - x*t.z,
 		w*t.z + z*t.w + x*t.y - y*t.x);
+}
+
+// ---------------------------------------------------------------------------
+inline aiQuaternion& aiQuaternion::Conjugate ()
+{
+	x = -x;
+	y = -y;
+	z = -z;
+	return *this;
+}
+
+// ---------------------------------------------------------------------------
+inline aiVector3D aiQuaternion::Rotate (const aiVector3D& v)
+{
+	aiQuaternion q2(0.f,v.x,v.y,v.z), q = *this, qinv = q;
+	q.Conjugate();
+
+	q = q*q2*qinv;
+	return aiVector3D(q.x,q.y,q.z);
+
 }
 
 } // end extern "C"

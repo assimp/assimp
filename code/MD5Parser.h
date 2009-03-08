@@ -98,21 +98,28 @@ struct Section
 typedef std::vector< Section> SectionList;
 
 // ---------------------------------------------------------------------------
-/** Represents a bone (joint) descriptor in a MD5Mesh file
+/** Basic information about a joint
 */
-struct BoneDesc
+struct BaseJointDescription
 {
 	//! Name of the bone
 	aiString mName;
 
 	//! Parent index of the bone
 	int mParentIndex;
+};
 
-	//! Relative position of the bone
+// ---------------------------------------------------------------------------
+/** Represents a bone (joint) descriptor in a MD5Mesh file
+*/
+struct BoneDesc : BaseJointDescription
+{
+	//! Absolute position of the bone
 	aiVector3D mPositionXYZ;
 
-	//! Relative rotation of the bone
+	//! Absolute rotation of the bone
 	aiVector3D mRotationQuat;
+	aiQuaternion mRotationQuatConverted;
 
 	//! Absolute transformation of the bone
 	//! (temporary)
@@ -131,14 +138,8 @@ typedef std::vector< BoneDesc > BoneList;
 // ---------------------------------------------------------------------------
 /** Represents a bone (joint) descriptor in a MD5Anim file
 */
-struct AnimBoneDesc
+struct AnimBoneDesc : BaseJointDescription
 {
-	//! Name of the bone
-	aiString mName;
-
-	//! Parent index of the bone
-	int mParentIndex;
-
 	//! Flags (AI_MD5_ANIMATION_FLAG_xxx)
 	unsigned int iFlags;
 
@@ -160,6 +161,15 @@ struct BaseFrameDesc
 
 typedef std::vector< BaseFrameDesc > BaseFrameList;
 
+// ---------------------------------------------------------------------------
+/** Represents a camera animation frame in a MDCamera file
+*/
+struct CameraAnimFrameDesc : BaseFrameDesc
+{
+	float fFOV;
+};
+
+typedef std::vector< CameraAnimFrameDesc > CameraFrameList;
 
 // ---------------------------------------------------------------------------
 /** Represents a frame descriptor in a MD5Anim file
@@ -238,6 +248,21 @@ struct MeshDesc
 typedef std::vector< MeshDesc > MeshList;
 
 // ---------------------------------------------------------------------------
+// Convert a quaternion to its usual representation
+inline void ConvertQuaternion (const aiVector3D& in, aiQuaternion& out) {
+
+	out.x = in.x;
+	out.y = in.y;
+	out.z = in.z;
+
+	const float t = 1.0f - (in.x*in.x) - (in.y*in.y) - (in.z*in.z);
+
+	if (t < 0.0f)
+		out.w = 0.0f;
+	else out.w = sqrt (t);
+}
+
+// ---------------------------------------------------------------------------
 /** Parses the data sections of a MD5 mesh file
 */
 class MD5MeshParser
@@ -258,14 +283,6 @@ public:
 	//! List of all joints
 	BoneList mJoints;
 };
-
-#define AI_MD5_ANIMATION_FLAG_TRANSLATE_X 0x1
-#define AI_MD5_ANIMATION_FLAG_TRANSLATE_Y 0x2
-#define AI_MD5_ANIMATION_FLAG_TRANSLATE_Z 0x4
-
-#define AI_MD5_ANIMATION_FLAG_ROTQUAT_X 0x8
-#define AI_MD5_ANIMATION_FLAG_ROTQUAT_Y 0x10
-#define AI_MD5_ANIMATION_FLAG_ROTQUAT_Z 0x12
 
 // remove this flag if you need to the bounding box data
 #define AI_MD5_PARSE_NO_BOUNDS
@@ -300,6 +317,32 @@ public:
 
 	//! Number of animated components
 	unsigned int mNumAnimatedComponents;
+};
+
+// ---------------------------------------------------------------------------
+/** Parses the data sections of a MD5 camera animation file
+*/
+class MD5CameraParser
+{
+public:
+
+	// -------------------------------------------------------------------
+	/** Constructs a new MD5CameraParser instance from an existing
+	 *  preparsed list of file sections.
+	 *
+	 *  @param mSections List of file sections (output of MD5Parser)
+	 */
+	MD5CameraParser(SectionList& mSections);
+
+	
+	//! Output frame rate
+	float fFrameRate;
+
+	//! List of cuts
+	std::vector<unsigned int> cuts;
+
+	//! Frames
+	CameraFrameList frames;
 };
 
 // ---------------------------------------------------------------------------

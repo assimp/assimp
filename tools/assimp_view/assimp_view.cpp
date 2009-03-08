@@ -148,6 +148,7 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 		aiProcess_GenUVCoords              | // convert spherical, cylindrical, box and planar mapping to proper UVs
 		aiProcess_TransformUVCoords        | // preprocess UV transformations (scaling, translation ...)
 		aiProcess_FindInstances            | // search for instanced meshes and remove them by references to one master
+		aiProcess_LimitBoneWeights         | // limit bone weights to 4 per vertex
 //		aiProcess_PreTransformVertices |
 		0);
 

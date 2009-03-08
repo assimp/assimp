@@ -431,16 +431,16 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 				poskey->mTime = double( fr);
 
 				// Now compute all translations in the right order
-        for( unsigned int channel = 0; channel < 3; ++channel)
-        {
-				  switch( node.mChannels[channel])
-				  {	
-				    case Channel_PositionX: poskey->mValue.x = node.mChannelValues[fr * node.mChannels.size() + channel]; break;
-            case Channel_PositionY: poskey->mValue.y = node.mChannelValues[fr * node.mChannels.size() + channel]; break;
-				    case Channel_PositionZ: poskey->mValue.z = node.mChannelValues[fr * node.mChannels.size() + channel]; break;
-				    default: throw new ImportErrorException( "Unexpected animation channel setup at node " + nodeName );
-				  }
-        }
+				for( unsigned int channel = 0; channel < 3; ++channel)
+				{
+					switch( node.mChannels[channel])
+					{	
+					case Channel_PositionX: poskey->mValue.x = node.mChannelValues[fr * node.mChannels.size() + channel]; break;
+					case Channel_PositionY: poskey->mValue.y = node.mChannelValues[fr * node.mChannels.size() + channel]; break;
+					case Channel_PositionZ: poskey->mValue.z = node.mChannelValues[fr * node.mChannels.size() + channel]; break;
+					default: throw new ImportErrorException( "Unexpected animation channel setup at node " + nodeName );
+					}
+				}
 				++poskey;
 			}
 		} else
@@ -468,23 +468,23 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 			aiQuatKey* rotkey = nodeAnim->mRotationKeys;
 			for( unsigned int fr = 0; fr < mAnimNumFrames; ++fr)
 			{
-        aiMatrix4x4 temp;
-        aiMatrix3x3 rotMatrix;
+				aiMatrix4x4 temp;
+				aiMatrix3x3 rotMatrix;
 
-        for( unsigned int channel = 0; channel < 3; ++channel)
-        {
-				  // translate ZXY euler angels into a quaternion
-				  const float angle = node.mChannelValues[fr * node.mChannels.size() + rotOffset + channel] * float( AI_MATH_PI) / 180.0f;
+				for( unsigned int channel = 0; channel < 3; ++channel)
+				{
+					// translate ZXY euler angels into a quaternion
+					const float angle = node.mChannelValues[fr * node.mChannels.size() + rotOffset + channel] * float( AI_MATH_PI) / 180.0f;
 
-				  // Compute rotation transformations in the right order
-				  switch (node.mChannels[rotOffset+channel]) 
-				  {
-				    case Channel_RotationX: aiMatrix4x4::RotationX( angle, temp); rotMatrix *= aiMatrix3x3( temp); break;
-				    case Channel_RotationY: aiMatrix4x4::RotationY( angle, temp); rotMatrix *= aiMatrix3x3( temp);	break;
-				    case Channel_RotationZ: aiMatrix4x4::RotationZ( angle, temp); rotMatrix *= aiMatrix3x3( temp); break;
-				    default: throw new ImportErrorException( "Unexpected animation channel setup at node " + nodeName );
-				  }
-        }
+					// Compute rotation transformations in the right order
+					switch (node.mChannels[rotOffset+channel]) 
+					{
+					case Channel_RotationX: aiMatrix4x4::RotationX( angle, temp); rotMatrix *= aiMatrix3x3( temp); break;
+					case Channel_RotationY: aiMatrix4x4::RotationY( angle, temp); rotMatrix *= aiMatrix3x3( temp);	break;
+					case Channel_RotationZ: aiMatrix4x4::RotationZ( angle, temp); rotMatrix *= aiMatrix3x3( temp); break;
+					default: throw new ImportErrorException( "Unexpected animation channel setup at node " + nodeName );
+					}
+				}
 
 				rotkey->mTime = double( fr);
 				rotkey->mValue = aiQuaternion( rotMatrix);

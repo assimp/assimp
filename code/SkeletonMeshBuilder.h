@@ -63,8 +63,9 @@ public:
   /** The constructor processes the given scene and adds a mesh there. Does nothing
    * if the scene already has mesh data. 
    * @param pScene The scene for which a skeleton mesh should be constructed.
+   * @param root The node to start with. NULL is the scene root
    */
-  SkeletonMeshBuilder( aiScene* pScene);
+  SkeletonMeshBuilder( aiScene* pScene, aiNode* root = NULL);
 
 protected:
   /** Recursively builds a simple mesh representation for the given node and also creates

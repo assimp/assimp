@@ -53,7 +53,7 @@ namespace {
 	const static aiVector3D base_axis_x(1.f,0.f,0.f);
 	const static aiVector3D base_axis_z(0.f,0.f,1.f);
 	const static float angle_epsilon = 0.95f;
-};
+}
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer

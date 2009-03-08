@@ -42,6 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
+#include "DefaultIOSystem.h"
+
 #include "ObjFileImporter.h"
 #include "ObjFileParser.h"
 #include "ObjFileData.h"
@@ -54,9 +56,11 @@ using namespace std;
 // ------------------------------------------------------------------------------------------------
 //	Default constructor
 ObjFileImporter::ObjFileImporter() :
-	m_pRootObject(NULL),
-	m_strAbsPath("\\")
+	m_pRootObject(NULL)
 {
+    DefaultIOSystem io;
+	m_strAbsPath = io.getOsSeparator();
+    
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -83,6 +87,8 @@ bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, b
 //	Obj-file import implementation
 void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
+    DefaultIOSystem io;
+    
 	// Read file into memory
 	const std::string mode  = "rb";
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, mode));
@@ -100,8 +106,8 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 	assert (readsize == fileSize);
 
 	//
-	std::string strDirectory("\\"), strModelName;
-	std::string::size_type pos = pFile.find_last_of("\\");
+	std::string strDirectory(1,io.getOsSeparator()), strModelName;
+	std::string::size_type pos = pFile.find_last_of(io.getOsSeparator());
 	if (pos != std::string::npos)
 	{
 		strDirectory = pFile.substr(0, pos);

@@ -76,7 +76,7 @@ enum InputType
 	IT_Texcoord,
 	IT_Color,
 	IT_Tangent,
-	IT_Bitangent,
+	IT_Bitangent
 };
 
 /** Contains all data for one of the different transformation types */

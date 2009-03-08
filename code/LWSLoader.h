@@ -94,7 +94,7 @@ struct NodeDesc
 		OBJECT = 1,
 		LIGHT  = 2,
 		CAMERA = 3,
-		BONE   = 4,
+		BONE   = 4
 	} type; // type of node
 
 	// if object: path

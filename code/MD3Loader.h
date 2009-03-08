@@ -86,7 +86,7 @@ enum ShaderCullMode
 {
 	CULL_NONE,
 	CULL_CW,
-	CULL_CCW,
+	CULL_CCW
 };
 
 // ---------------------------------------------------------------------------

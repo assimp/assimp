@@ -160,10 +160,12 @@ bool MD5Parser::ParseSection(Section& out)
 				elem.iLineNumber = lineNumber;
 				elem.szStart = buffer;
 
-				// terminate the line with zero - remove all spaces at the end
+				// terminate the line with zero 
 				while (!IsLineEnd( *buffer))buffer++;
-				do {buffer--;}while (IsSpace(*buffer));
-				buffer++;*buffer++ = '\0';
+				if (*buffer) {
+					++lineNumber;
+					*buffer++ = '\0';
+				}
 			}
 			break;
 		}
@@ -203,17 +205,16 @@ bool MD5Parser::ParseSection(Section& out)
 
 	// parse a string, enclosed in quotation marks or not
 #define AI_MD5_PARSE_STRING(out) \
-	bool bQuota = *sz == '\"'; \
+	bool bQuota = (*sz == '\"'); \
 	const char* szStart = sz; \
 	while (!IsSpaceOrNewLine(*sz))++sz; \
 	const char* szEnd = sz; \
-	if (bQuota) \
-	{ \
+	if (bQuota) { \
 		szStart++; \
-		if ('\"' != *(szEnd-=1)) \
-		{ \
+		if ('\"' != *(szEnd-=1)) { \
 			MD5Parser::ReportWarning("Expected closing quotation marks in string", \
 				(*eit).iLineNumber); \
+			continue; \
 		} \
 	} \
 	out.length = (size_t)(szEnd - szStart); \
@@ -228,17 +229,13 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 
 	// now parse all sections
 	for (SectionList::const_iterator iter =  mSections.begin(), iterEnd = mSections.end();iter != iterEnd;++iter){
-		if ((*iter).mGlobalValue.length())
-		{
-			if ( (*iter).mName == "numMeshes")	{
-				mMeshes.reserve(::strtol10((*iter).mGlobalValue.c_str()));
-			}
-			else if ( (*iter).mName == "numJoints")	{
-				mJoints.reserve(::strtol10((*iter).mGlobalValue.c_str()));
-			}
+		if ( (*iter).mName == "numMeshes")	{
+			mMeshes.reserve(::strtol10((*iter).mGlobalValue.c_str()));
 		}
-		else if ((*iter).mName == "joints")
-		{
+		else if ( (*iter).mName == "numJoints")	{
+			mJoints.reserve(::strtol10((*iter).mGlobalValue.c_str()));
+		}
+		else if ((*iter).mName == "joints")	{
 			// "origin"	-1 ( -0.000000 0.016430 -0.006044 ) ( 0.707107 0.000000 0.707107 )
 			for (ElementList::const_iterator eit = (*iter).mElements.begin(), eitEnd = (*iter).mElements.end();eit != eitEnd; ++eit){
 				mJoints.push_back(BoneDesc());
@@ -248,19 +245,14 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 				AI_MD5_PARSE_STRING(desc.mName);
 				AI_MD5_SKIP_SPACES();
 
-				// negative values can occur here ...
-				bool bNeg = false;
-				if ('-' == *sz){sz++;bNeg = true;}
-				else if ('+' == *sz){sz++;}
-				desc.mParentIndex = (int)::strtol10(sz,&sz);
-				if (bNeg)desc.mParentIndex *= -1;
-
+				// negative values, at least -1, is allowed here
+				desc.mParentIndex = (int)strtol10s(sz,&sz);
+		
 				AI_MD5_READ_TRIPLE(desc.mPositionXYZ);
 				AI_MD5_READ_TRIPLE(desc.mRotationQuat); // normalized quaternion, so w is not there
 			}
 		}
-		else if ((*iter).mName == "mesh")
-		{
+		else if ((*iter).mName == "mesh")	{
 			mMeshes.push_back(MeshDesc());
 			MeshDesc& desc = mMeshes.back();
 
@@ -268,37 +260,28 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 				const char* sz = (*eit).szStart;
 
 				// shader attribute
-				if (TokenMatch(sz,"shader",6))
-				{
-					// don't expect quotation marks
+				if (TokenMatch(sz,"shader",6))	{
 					AI_MD5_SKIP_SPACES();
 					AI_MD5_PARSE_STRING(desc.mShader);
 				}
 				// numverts attribute
-				else if (TokenMatch(sz,"numverts",8))
-				{
-					// reserve enough storage
+				else if (TokenMatch(sz,"numverts",8))	{
 					AI_MD5_SKIP_SPACES();
-					desc.mVertices.resize(::strtol10(sz));
+					desc.mVertices.resize(strtol10(sz));
 				}
 				// numtris attribute
-				else if (TokenMatch(sz,"numtris",7))
-				{
-					// reserve enough storage
+				else if (TokenMatch(sz,"numtris",7))	{
 					AI_MD5_SKIP_SPACES();
-					desc.mFaces.resize(::strtol10(sz));
+					desc.mFaces.resize(strtol10(sz));
 				}
 				// numweights attribute
-				else if (TokenMatch(sz,"numweights",10))
-				{
-					// reserve enough storage
+				else if (TokenMatch(sz,"numweights",10))	{
 					AI_MD5_SKIP_SPACES();
-					desc.mWeights.resize(::strtol10(sz));
+					desc.mWeights.resize(strtol10(sz));
 				}
 				// vert attribute
 				// "vert 0 ( 0.394531 0.513672 ) 0 1"
-				else if (TokenMatch(sz,"vert",4))
-				{
+				else if (TokenMatch(sz,"vert",4))	{
 					AI_MD5_SKIP_SPACES();
 					const unsigned int idx = ::strtol10(sz,&sz);
 					AI_MD5_SKIP_SPACES();
@@ -324,30 +307,28 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 				// "tri 0 15 13 12"
 				else if (TokenMatch(sz,"tri",3)) {
 					AI_MD5_SKIP_SPACES();
-					const unsigned int idx = ::strtol10(sz,&sz);
+					const unsigned int idx = strtol10(sz,&sz);
 					if (idx >= desc.mFaces.size())
 						desc.mFaces.resize(idx+1);
 
 					aiFace& face = desc.mFaces[idx];	
 					face.mIndices = new unsigned int[face.mNumIndices = 3];
-					for (unsigned int i = 0; i < 3;++i)
-					{
+					for (unsigned int i = 0; i < 3;++i)	{
 						AI_MD5_SKIP_SPACES();
-						face.mIndices[i] = ::strtol10(sz,&sz);
+						face.mIndices[i] = strtol10(sz,&sz);
 					}
 				}
 				// weight attribute
 				// "weight 362 5 0.500000 ( -3.553583 11.893474 9.719339 )"
-				else if (TokenMatch(sz,"weight",6))
-				{
+				else if (TokenMatch(sz,"weight",6))	{
 					AI_MD5_SKIP_SPACES();
-					const unsigned int idx = ::strtol10(sz,&sz);
+					const unsigned int idx = strtol10(sz,&sz);
 					AI_MD5_SKIP_SPACES();
 					if (idx >= desc.mWeights.size())
 						desc.mWeights.resize(idx+1);
 
 					WeightDesc& weight = desc.mWeights[idx];	
-					weight.mBone = ::strtol10(sz,&sz);
+					weight.mBone = strtol10(sz,&sz);
 					AI_MD5_SKIP_SPACES();
 					sz = fast_atof_move(sz,weight.mWeight);
 					AI_MD5_READ_TRIPLE(weight.vOffsetPosition);
@@ -366,8 +347,6 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 
 	fFrameRate = 24.0f;
 	mNumAnimatedComponents = 0xffffffff;
-
-	// now parse all sections
 	for (SectionList::const_iterator iter =  mSections.begin(), iterEnd = mSections.end();iter != iterEnd;++iter) {
 		if ((*iter).mName == "hierarchy")	{
 			// "sheath"	0 63 6 
@@ -406,15 +385,14 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 			}
 		}
 		else if((*iter).mName ==  "frame")	{
-			if (!(*iter).mGlobalValue.length())
-			{
+			if (!(*iter).mGlobalValue.length())	{
 				MD5Parser::ReportWarning("A frame section must have a frame index",(*iter).iLineNumber);
 				continue;
 			}
 
 			mFrames.push_back ( FrameDesc () );
 			FrameDesc& desc = mFrames.back();
-			desc.iIndex = ::strtol10((*iter).mGlobalValue.c_str());
+			desc.iIndex = strtol10((*iter).mGlobalValue.c_str());
 
 			// we do already know how much storage we will presumably need
 			if (0xffffffff != mNumAnimatedComponents)
@@ -430,10 +408,10 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 			}
 		}
 		else if((*iter).mName == "numFrames")	{
-			mFrames.reserve(::strtol10((*iter).mGlobalValue.c_str()));
+			mFrames.reserve(strtol10((*iter).mGlobalValue.c_str()));
 		}
 		else if((*iter).mName == "numJoints")	{
-			const unsigned int num = ::strtol10((*iter).mGlobalValue.c_str());
+			const unsigned int num = strtol10((*iter).mGlobalValue.c_str());
 			mAnimatedBones.reserve(num);
 
 			// try to guess the number of animated components if that element is not given
@@ -441,7 +419,7 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 				mNumAnimatedComponents = num * 6;
 		}
 		else if((*iter).mName == "numAnimatedComponents")	{
-			mAnimatedBones.reserve( ::strtol10((*iter).mGlobalValue.c_str()));
+			mAnimatedBones.reserve( strtol10((*iter).mGlobalValue.c_str()));
 		}
 		else if((*iter).mName == "frameRate")	{
 			fast_atof_move((*iter).mGlobalValue.c_str(),fFrameRate);
@@ -457,6 +435,34 @@ MD5CameraParser::MD5CameraParser(SectionList& mSections)
 	DefaultLogger::get()->debug("MD5CameraParser begin");
 	fFrameRate = 24.0f;
 
+	for (SectionList::const_iterator iter =  mSections.begin(), iterEnd = mSections.end();iter != iterEnd;++iter) {
+		if ((*iter).mName == "numFrames")	{
+			frames.reserve(strtol10((*iter).mGlobalValue.c_str()));
+		}
+		else if ((*iter).mName == "frameRate")	{
+			fFrameRate = fast_atof ((*iter).mGlobalValue.c_str());
+		}
+		else if ((*iter).mName == "numCuts")	{
+			cuts.reserve(strtol10((*iter).mGlobalValue.c_str()));
+		}
+		else if ((*iter).mName == "cuts")	{
+			for (ElementList::const_iterator eit = (*iter).mElements.begin(), eitEnd = (*iter).mElements.end(); eit != eitEnd; ++eit){
+				cuts.push_back(strtol10((*eit).szStart)+1);
+			}
+		}
+		else if ((*iter).mName == "camera")	{
+			for (ElementList::const_iterator eit = (*iter).mElements.begin(), eitEnd = (*iter).mElements.end(); eit != eitEnd; ++eit){
+				const char* sz = (*eit).szStart;
+
+				frames.push_back(CameraAnimFrameDesc());
+				CameraAnimFrameDesc& cur = frames.back();
+				AI_MD5_READ_TRIPLE(cur.vPositionXYZ);
+				AI_MD5_READ_TRIPLE(cur.vRotationQuat);
+				AI_MD5_SKIP_SPACES();
+				cur.fFOV = fast_atof(sz);
+			}
+		}
+	}
 	DefaultLogger::get()->debug("MD5CameraParser end");
 }
 

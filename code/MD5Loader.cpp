@@ -143,7 +143,7 @@ void MD5Importer::InternReadFile( const std::string& pFile,
 	}
 
 	// make sure we have at least one file
-	if (!bHadMD5Mesh && !bHadMD5Anim)
+	if (!bHadMD5Mesh && !bHadMD5Anim && !bHadMD5Camera)
 		throw new ImportErrorException("Failed to read valid contents from this MD5 data set");
 
 	// the output scene wouldn't pass the validation without this flag
@@ -425,9 +425,6 @@ void MD5Importer::LoadMD5MeshFile ()
 
 				// compute w-component of quaternion
 				MD5::ConvertQuaternion( boneSrc.mRotationQuat, boneSrc.mRotationQuatConverted );
-
-				//boneSrc.mPositionXYZ.z *= -1.f;
-				//boneSrc.mRotationQuatConverted = boneSrc.mRotationQuatConverted * aiQuaternion(-0.5f, -0.5f, -0.5f, 0.5f) ;
 			}
 	
 			//unsigned int g = 0;
@@ -465,7 +462,6 @@ void MD5Importer::LoadMD5MeshFile ()
 					aiBone* bone = mesh->mBones[boneSrc.mMap];
 					*bone->mWeights++ = aiVertexWeight((unsigned int)(pv-mesh->mVertices),fNewWeight);
 				}
-				//pv->z *= -1.f;
 			}
 
 			// undo our nice offset tricks ...
@@ -642,14 +638,12 @@ void MD5Importer::LoadMD5AnimFile ()
 // Load an MD5CAMERA file
 void MD5Importer::LoadMD5CameraFile ()
 {
-#if 0
 	std::string pFile = mFile + "md5camera";
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)	{
-		DefaultLogger::get()->warn("Failed to read MD5CAMERA file: " + pFile);
-		return;
+		throw new ImportErrorException("Failed to read MD5CAMERA file: " + pFile);
 	}
 	bHadMD5Camera = true;
 	LoadFileIntoMemory(file.get());
@@ -659,8 +653,59 @@ void MD5Importer::LoadMD5CameraFile ()
 
 	// load the camera animation data from the parse tree
 	MD5::MD5CameraParser cameraParser(parser.mSections);
-#endif
-	throw new ImportErrorException("MD5Camera is not yet supported");
+
+	if (cameraParser.frames.empty())
+		throw new ImportErrorException("MD5CAMERA: No frames parsed");
+
+	std::vector<unsigned int>& cuts = cameraParser.cuts;
+	std::vector<MD5::CameraAnimFrameDesc>& frames = cameraParser.frames;
+
+	// Construct output graph - a simple dummy node
+	aiNode* root = pScene->mRootNode = new aiNode();
+	root->mName.Set("<MD5Camera>");
+
+	// ... but with one camera assigned to it
+	pScene->mCameras = new aiCamera*[pScene->mNumCameras = 1];
+	aiCamera* cam = pScene->mCameras[0] = new aiCamera();
+	cam->mName = root->mName;
+
+	// FIXME: Fov is currently set to the first frame's value
+	cam->mHorizontalFOV = AI_DEG_TO_RAD( frames.front().fFOV );
+
+	// every cut is written to a separate aiAnimation
+	if (!cuts.size()) {
+		cuts.push_back(0);
+		cuts.push_back(frames.size()-1);
+	}
+	else {		
+		cuts.insert(cuts.begin(),0);
+
+		if (cuts.back() < frames.size()-1)
+			cuts.push_back(frames.size()-1);
+	}
+
+	pScene->mNumAnimations = cuts.size()-1;
+	aiAnimation** tmp = pScene->mAnimations = new aiAnimation*[pScene->mNumAnimations];
+	for (std::vector<unsigned int>::const_iterator it = cuts.begin(); it != cuts.end()-1; ++it) {
+	
+		aiAnimation* anim = *tmp++ = new aiAnimation();
+		anim->mName.length = ::sprintf(anim->mName.data,"anim%i_from_%i_to_%i",it-cuts.begin(),(*it),*(it+1));
+		
+		anim->mTicksPerSecond = cameraParser.fFrameRate;
+		anim->mChannels = new aiNodeAnim*[anim->mNumChannels = 1];
+		aiNodeAnim* nd  = anim->mChannels[0] = new aiNodeAnim();
+		nd->mNodeName.Set("<MD5Camera>");
+
+		nd->mNumPositionKeys = nd->mNumRotationKeys = *(it+1) - (*it);
+		nd->mPositionKeys = new aiVectorKey[nd->mNumPositionKeys];
+		nd->mRotationKeys = new aiQuatKey  [nd->mNumRotationKeys];
+		for (unsigned int i = 0; i < nd->mNumPositionKeys; ++i) {
+
+			nd->mPositionKeys[i].mValue = frames[*it+i].vPositionXYZ;
+			MD5::ConvertQuaternion(frames[*it+i].vRotationQuat,nd->mRotationKeys[i].mValue);
+			nd->mRotationKeys[i].mTime = nd->mPositionKeys[i].mTime = *it+i;
+		}
+	}
 }
 
 #endif // !! ASSIMP_BUILD_NO_MD5_IMPORTER

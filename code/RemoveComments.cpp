@@ -38,29 +38,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines a helper class, "CommentRemover", which can be
- *  used to remove comments (single and multi line) from a text file.
+/** @file  RemoveComments.cpp
+ *  @brief Defines the CommentRemover utility class
  */
 
 #include "AssimpPCH.h"
 #include "RemoveComments.h"
 #include "ParsingUtils.h"
 
-namespace Assimp
-{
+namespace Assimp	{
 
 // ------------------------------------------------------------------------------------------------
+// Remove line comments from a file
 void CommentRemover::RemoveLineComments(const char* szComment,
 	char* szBuffer, char chReplacement /* = ' ' */)
 {
 	// validate parameters
 	ai_assert(NULL != szComment && NULL != szBuffer && *szComment);
 
-	const size_t len = ::strlen(szComment);
-	while (*szBuffer)
-	{
-		if (!::strncmp(szBuffer,szComment,len))
-		{
+	const size_t len = strlen(szComment);
+	while (*szBuffer)	{
+
+		// skip over quotes
+		if (*szBuffer == '\"' || *szBuffer == '\'')
+			while (*szBuffer++ && *szBuffer != '\"' && *szBuffer != '\'');
+
+		if (!strncmp(szBuffer,szComment,len)) {
 			while (!IsLineEnd(*szBuffer))
 				*szBuffer++ = chReplacement;
 		}
@@ -69,6 +72,7 @@ void CommentRemover::RemoveLineComments(const char* szComment,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Remove multi-line comments from a file
 void CommentRemover::RemoveMultiLineComments(const char* szCommentStart,
 	const char* szCommentEnd,char* szBuffer,
 	char chReplacement)
@@ -77,25 +81,24 @@ void CommentRemover::RemoveMultiLineComments(const char* szCommentStart,
 	ai_assert(NULL != szCommentStart && NULL != szCommentEnd &&
 		NULL != szBuffer && *szCommentStart && *szCommentEnd);
 
-	const size_t len  = ::strlen(szCommentEnd);
-	const size_t len2 = ::strlen(szCommentStart);
+	const size_t len  = strlen(szCommentEnd);
+	const size_t len2 = strlen(szCommentStart);
 
-	while (*szBuffer)
-	{
-		if (!::strncmp(szBuffer,szCommentStart,len2))
-		{
-			while (*szBuffer)
-			{
-				if (!::strncmp(szBuffer,szCommentEnd,len))
-				{
+	while (*szBuffer)	{
+		// skip over quotes
+		if (*szBuffer == '\"' || *szBuffer == '\'')
+			while (*szBuffer++ && *szBuffer != '\"' && *szBuffer != '\'');
+
+		if (!strncmp(szBuffer,szCommentStart,len2))  {
+			while (*szBuffer) {
+				if (!::strncmp(szBuffer,szCommentEnd,len)) {
 					for (unsigned int i = 0; i < len;++i)
 						*szBuffer++ = chReplacement;
-					
+
 					break;
 				}
 			*szBuffer++ = chReplacement;
 			}
-			if (!(*szBuffer))return;
 			continue;
 		}
 		++szBuffer;

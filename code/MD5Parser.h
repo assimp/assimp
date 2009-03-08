@@ -426,8 +426,8 @@ private:
 		bool bHad = false;
 		while (true)	{
 			if( *in == '\r' || *in == '\n')	{
-				if (!bHad) // we open files in binary mode, so there could be \r\n sequences ...
-				{
+				 // we open files in binary mode, so there could be \r\n sequences ...
+				if (!bHad)	{
 					bHad = true;
 					++lineNumber;
 				}
@@ -436,7 +436,6 @@ private:
 			else break;
 			in++;
 		}
-
 		*out = in;
 		return *in != '\0';
 	}

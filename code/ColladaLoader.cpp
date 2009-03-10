@@ -132,18 +132,18 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 	// ... then fill the materials with the now adjusted settings
 	FillMaterials(parser, pScene);
 
-	// Convert to Z_UP, if different orientation
+	// Convert to Y_UP, if different orientation
 	if( parser.mUpDirection == ColladaParser::UP_X)
 		pScene->mRootNode->mTransformation *= aiMatrix4x4( 
 			 0, -1,  0,  0, 
-			 0,  0, -1,  0,
 			 1,  0,  0,  0,
+			 0,  0,  1,  0,
 			 0,  0,  0,  1);
-	else if( parser.mUpDirection == ColladaParser::UP_Y)
+	else if( parser.mUpDirection == ColladaParser::UP_Z)
 		pScene->mRootNode->mTransformation *= aiMatrix4x4( 
 			 1,  0,  0,  0, 
-			 0,  0, -1,  0,
-			 0,  1,  0,  0,
+			 0,  0,  1,  0,
+			 0, -1,  0,  0,
 			 0,  0,  0,  1);
 
 	// store all meshes

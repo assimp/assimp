@@ -616,13 +616,14 @@ void XFileParser::ParseDataObjectMeshVertexColors( Mesh* pMesh)
 			ThrowException( "Vertex color index out of bounds");
 
 		colors[index] = ReadRGBA();
-    // HACK: (thom) Maxon Cinema XPort plugin puts a third separator here. Ignore gracefully
-    if( !mIsBinaryFormat)
-    {
-      FindNextNoneWhiteSpace();
-      if( *P == ';')
-        P++;
-    }
+		// HACK: (thom) Maxon Cinema XPort plugin puts a third separator here, kwxPort puts a comma.
+		// Ignore gracefully.
+		if( !mIsBinaryFormat)
+		{
+			FindNextNoneWhiteSpace();
+			if( *P == ';' || *P == ',')
+				P++;
+		}
 	}
 
 	CheckForClosingBrace();

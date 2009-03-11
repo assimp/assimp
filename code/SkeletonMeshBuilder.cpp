@@ -65,9 +65,9 @@ SkeletonMeshBuilder::SkeletonMeshBuilder( aiScene* pScene, aiNode* root)
 	pScene->mMeshes = new aiMesh*[1];
 	pScene->mMeshes[0] = CreateMesh();
 	// and install it at the root node
-	pScene->mRootNode->mNumMeshes = 1;
-	pScene->mRootNode->mMeshes = new unsigned int[1];
-	pScene->mRootNode->mMeshes[0] = 0;
+	root->mNumMeshes = 1;
+	root->mMeshes = new unsigned int[1];
+	root->mMeshes[0] = 0;
 
 	// create a dummy material for the mesh
 	pScene->mNumMaterials = 1;
@@ -207,6 +207,8 @@ aiMesh* SkeletonMeshBuilder::CreateMesh()
 	mesh->mVertices = new aiVector3D[mesh->mNumVertices];
 	std::copy( mVertices.begin(), mVertices.end(), mesh->mVertices);
 
+	mesh->mNormals = new aiVector3D[mesh->mNumVertices];
+
 	// add faces
 	mesh->mNumFaces = mFaces.size();
 	mesh->mFaces = new aiFace[mesh->mNumFaces];
@@ -219,6 +221,19 @@ aiMesh* SkeletonMeshBuilder::CreateMesh()
 		outface.mIndices[0] = inface.mIndices[0];
 		outface.mIndices[1] = inface.mIndices[1];
 		outface.mIndices[2] = inface.mIndices[2];
+
+		// Compute per-face normals ... we don't want the bones to be
+		// smoothed ... they're built to visualize the skeleton,
+		// so it's good if there's a visual difference to the rest
+		// of the geometry
+		aiVector3D nor = ((mVertices[inface.mIndices[2]] - mVertices[inface.mIndices[0]]) ^ 
+			(mVertices[inface.mIndices[1]] - mVertices[inface.mIndices[0]]));
+
+		if (nor.Length() < 1e-5f) /* ensure that FindInvalidData won't remove us ...*/
+			nor = aiVector3D(1.f,0.f,0.f);
+
+		for (unsigned int n = 0; n < 3; ++n)
+			mesh->mNormals[inface.mIndices[n]] = nor;
 	}
 
 	// add the bones
@@ -239,8 +254,12 @@ aiMaterial* SkeletonMeshBuilder::CreateMaterial()
 	Assimp::MaterialHelper* matHelper = new Assimp::MaterialHelper;
 
 	// Name
-	aiString matName( std::string( "Material"));
+	aiString matName( std::string( "SkeletonMaterial"));
 	matHelper->AddProperty( &matName, AI_MATKEY_NAME);
+
+	// Prevent backface culling
+	const int no_cull = 1;
+	matHelper->AddProperty(&no_cull,1,AI_MATKEY_TWOSIDED);
 
 	return matHelper;
 }

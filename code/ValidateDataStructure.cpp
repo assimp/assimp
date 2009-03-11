@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ValidateDataStructure.h"
 #include "BaseImporter.h"
 #include "fast_atof.h"
+#include "ProcessHelper.h"
 
 // CRT headers
 #include <stdarg.h>
@@ -59,16 +60,12 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ValidateDSProcess::ValidateDSProcess()
-{
-	// nothing to do here
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 ValidateDSProcess::~ValidateDSProcess()
-{
-	// nothing to do here
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
@@ -550,43 +547,7 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation)
 void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 	aiTextureType type)
 {
-	const char* szType = NULL;
-	switch (type)
-	{
-	case aiTextureType_DIFFUSE:
-		szType = "Diffuse";
-        break;
-
-	case aiTextureType_SPECULAR:
-		szType = "Specular";
-        break;
-
-	case aiTextureType_AMBIENT:
-		szType = "Ambient";
-        break;
-
-	case aiTextureType_EMISSIVE:
-		szType = "Emissive";
-        break;
-
-	case aiTextureType_OPACITY:
-		szType = "Opacity";
-        break;
-
-	case aiTextureType_SHININESS:
-		szType = "Shininess";
-        break;
-
-	case aiTextureType_NORMALS:
-		szType = "Normals";
-        break;
-
-	case aiTextureType_HEIGHT:
-		szType = "Height";
-        break;
-    default:
-        break;
-	};
+	const char* szType = TextureTypeToString(type);
 
 	// ****************************************************************************
 	// Search all keys of the material ...
@@ -835,7 +796,7 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 		for (unsigned int i = 0; i < pNodeAnim->mNumPositionKeys;++i)
 		{
 			// ScenePreprocessor will compute the duration if still teh default value
-			if (-1. != pAnimation->mDuration && pNodeAnim->mPositionKeys[i].mTime > pAnimation->mDuration)
+			if (pAnimation->mDuration > 0. && pNodeAnim->mPositionKeys[i].mTime > pAnimation->mDuration)
 			{
 				ReportError("aiNodeAnim::mPositionKeys[%i].mTime (%.5f) is larger "
 					"than aiAnimation::mDuration (which is %.5f)",i,
@@ -863,7 +824,7 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 		double dLast = -10e10;
 		for (unsigned int i = 0; i < pNodeAnim->mNumRotationKeys;++i)
 		{
-			if (-1. != pAnimation->mDuration && pNodeAnim->mRotationKeys[i].mTime > pAnimation->mDuration)
+			if (pAnimation->mDuration > 0. && pNodeAnim->mRotationKeys[i].mTime > pAnimation->mDuration)
 			{
 				ReportError("aiNodeAnim::mRotationKeys[%i].mTime (%.5f) is larger "
 					"than aiAnimation::mDuration (which is %.5f)",i,
@@ -890,7 +851,7 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 		double dLast = -10e10;
 		for (unsigned int i = 0; i < pNodeAnim->mNumScalingKeys;++i)
 		{
-			if (-1. != pAnimation->mDuration && pNodeAnim->mScalingKeys[i].mTime > pAnimation->mDuration)
+			if (pAnimation->mDuration > 0. && pNodeAnim->mScalingKeys[i].mTime > pAnimation->mDuration)
 			{
 				ReportError("aiNodeAnim::mScalingKeys[%i].mTime (%.5f) is larger "
 					"than aiAnimation::mDuration (which is %.5f)",i,

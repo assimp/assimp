@@ -181,12 +181,9 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
 			::memcpy( bone->mWeights, &bw[0], bw.size() * sizeof( aiVertexWeight));
 		}
 
-		if (bChanged)
-		{
-			// the number of new bones is smaller than before, so we can
-			// reuse the old array, too.
-			aiBone** ppcCur = pMesh->mBones;
-			aiBone** ppcSrc = ppcCur;
+		if (bChanged)	{
+			// the number of new bones is smaller than before, so we can reuse the old array
+			aiBone** ppcCur = pMesh->mBones;aiBone** ppcSrc = ppcCur;
 
 			for (std::vector<bool>::const_iterator iter  = abNoNeed.begin();iter != abNoNeed.end()  ;++iter)	{
 				if (*iter)	{

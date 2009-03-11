@@ -145,19 +145,17 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	float posEpsilonSqr;
 	SpatialSort*  vertexFinder = NULL;
 	SpatialSort  _vertexFinder;
-	if (shared)
-	{
+	if (shared)	{
 		std::vector<std::pair<SpatialSort,float> >* avf;
 		shared->GetProperty(AI_SPP_SPATIAL_SORT,avf);
 		if (avf)	{
 			std::pair<SpatialSort,float>& blubb = avf->operator [] (meshIndex);
-			vertexFinder  = &blubb.first;
-			posEpsilonSqr = blubb.second;
+			vertexFinder  = &blubb.first;posEpsilonSqr = blubb.second;
 		}
 	}
 	if (!vertexFinder)	{
 		_vertexFinder.Fill(pMesh->mVertices, pMesh->mNumVertices, sizeof( aiVector3D));
-		vertexFinder = &_vertexFinder;
+		vertexFinder = &_vertexFinder; 
 		posEpsilonSqr = ComputePositionEpsilon(pMesh);
 	}
 
@@ -360,7 +358,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	}
 
 	// adjust bone vertex weights.
-	for( unsigned int a = 0; a < pMesh->mNumBones; a++)
+	for( int a = 0; a < (int)pMesh->mNumBones; a++)
 	{
 		aiBone* bone = pMesh->mBones[a];
 		std::vector<aiVertexWeight> newWeights;
@@ -379,14 +377,38 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 			}
 		}
 
-		// there should be some. At least I think there should be some
-		ai_assert( newWeights.size() > 0);
+		if (newWeights.size() > 0) {
+			// kill the old and replace them with the translated weights
+			delete [] bone->mWeights;
+			bone->mNumWeights = (unsigned int)newWeights.size();
 
-		// kill the old and replace them with the translated weights
-		delete [] bone->mWeights;
-		bone->mNumWeights = (unsigned int)newWeights.size();
-		bone->mWeights = new aiVertexWeight[bone->mNumWeights];
-		memcpy( bone->mWeights, &newWeights[0], bone->mNumWeights * sizeof( aiVertexWeight));
+			bone->mWeights = new aiVertexWeight[bone->mNumWeights];
+			memcpy( bone->mWeights, &newWeights[0], bone->mNumWeights * sizeof( aiVertexWeight));
+		}
+		else {
+		
+			/*  NOTE:
+			 *
+			 *  In the algorithm above we're assuming that there are no vertices
+			 *  with a different bone weight setup at the same position. That wouldn't
+			 *  make sense, but it is not absolutely impossible. SkeletonMeshBuilder
+			 *  for example generates such input data if two skeleton points
+			 *  share the same position. Again this doesn't make sense but is
+			 *  reality for some model formats (MD5 for example uses these special
+			 *  nodes as attachment tags for its weapons). 
+			 *
+			 *  Then it is possible that a bone has no weights anymore .... as a quick
+			 *  workaround, we're just removing these bones. If they're animated,
+			 *  model geometry might be modified but at least there's no risk of a crash.
+			 */
+			delete bone;
+			--pMesh->mNumBones;
+			for (unsigned int n = a; n < pMesh->mNumBones; ++n) 
+				pMesh->mBones[n] = pMesh->mBones[n+1];
+
+			--a; 
+			DefaultLogger::get()->warn("Removing bone -> no weights remaining");
+		}
 	}
 	return pMesh->mNumVertices;
 }

@@ -747,25 +747,25 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* pScene
 		// add textures, if given
 		if( !effect.mTexAmbient.mName.empty()) 
 			 /* It is merely a lightmap */
-			AddTexture( mat, pParser, effect, effect.mTexAmbient,aiTextureType_LIGHTMAP);
+			AddTexture( mat, pParser, effect, effect.mTexAmbient, aiTextureType_LIGHTMAP);
 
 		if( !effect.mTexEmissive.mName.empty())
-			AddTexture( mat, pParser, effect, effect.mTexEmissive,aiTextureType_EMISSIVE);
+			AddTexture( mat, pParser, effect, effect.mTexEmissive, aiTextureType_EMISSIVE);
 
 		if( !effect.mTexSpecular.mName.empty())
-			AddTexture( mat, pParser, effect, effect.mTexSpecular,aiTextureType_SPECULAR);
+			AddTexture( mat, pParser, effect, effect.mTexSpecular, aiTextureType_SPECULAR);
 
 		if( !effect.mTexDiffuse.mName.empty())
-			AddTexture( mat, pParser, effect, effect.mTexDiffuse,aiTextureType_DIFFUSE);
+			AddTexture( mat, pParser, effect, effect.mTexDiffuse, aiTextureType_DIFFUSE);
 
 		if( !effect.mTexBump.mName.empty())
-			AddTexture( mat, pParser, effect, effect.mTexBump,aiTextureType_HEIGHT);
+			AddTexture( mat, pParser, effect, effect.mTexBump, aiTextureType_HEIGHT);
 
 		if( !effect.mTexTransparent.mName.empty())
-			AddTexture( mat, pParser, effect, effect.mTexBump,aiTextureType_OPACITY);
+			AddTexture( mat, pParser, effect, effect.mTexTransparent, aiTextureType_OPACITY);
 
 		if( !effect.mTexReflective.mName.empty())
-			AddTexture( mat, pParser, effect, effect.mTexReflective,aiTextureType_REFLECTION);
+			AddTexture( mat, pParser, effect, effect.mTexReflective, aiTextureType_REFLECTION);
 	}
 }
 

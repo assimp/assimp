@@ -774,20 +774,13 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 		AddNodeToGraph(pcOut,  pcOut->mRootNode, mRootNode,m);
 	}
 
-	// We used the first vertex color set to store some
-	// temporary values so we need to cleanup here
+	// We used the first vertex color set to store some emporary values so we need to cleanup here
 	for (unsigned int a = 0; a < pcOut->mNumMeshes;++a)
 		pcOut->mMeshes[a]->mColors[0] = NULL;
 
-	// if the root node has only one child ... set the child as root node
-	if (1 == pcOut->mRootNode->mNumChildren)
-	{
-		aiNode* pcOld = pcOut->mRootNode;
-		pcOut->mRootNode = pcOut->mRootNode->mChildren[0];
-		pcOut->mRootNode->mParent = NULL;
-		pcOld->mChildren[0] = NULL;
-		delete pcOld;
-	}
+	// Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
+	pcOut->mRootNode->mTransformation = aiMatrix4x4(1.f,0.f,0.f,0.f,
+		0.f,0.f,1.f,0.f,0.f,-1.f,0.f,0.f,0.f,0.f,0.f,1.f) * pcOut->mRootNode->mTransformation;
 
 	// If the root node is unnamed name it "<3DSRoot>"
 	if (::strstr( pcOut->mRootNode->mName.data, "UNNAMED" ) ||

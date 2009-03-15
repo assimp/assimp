@@ -1889,18 +1889,20 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 	sMesh.mNormals.resize(sMesh.mFaces.size()*3,aiVector3D( 0.f, 0.f, 0.f ));
 	unsigned int index, faceIdx = 0xffffffff;
 
+	// FIXME: rewrite this and find out how to interpret the normals
+	// correctly. This is crap.
+
 	// Smooth the vertex and face normals together. The result
 	// will be edgy then, but otherwise everything would be soft ...
-	while (true)
-	{
-		if ('*' == *filePtr)
-		{
+	while (true)	{
+		if ('*' == *filePtr)	{
 			++filePtr;
-			if (faceIdx != 0xffffffff && TokenMatch(filePtr,"MESH_VERTEXNORMAL",17))
-			{
+			if (faceIdx != 0xffffffff && TokenMatch(filePtr,"MESH_VERTEXNORMAL",17))	{
 				aiVector3D vNormal;
 				ParseLV4MeshFloatTriple(&vNormal.x,index);
-
+				if (faceIdx >=  sMesh.mFaces.size())
+					continue;
+					
 				// Make sure we assign it to the correct face
 				const ASE::Face& face = sMesh.mFaces[faceIdx];
 				if (index == face.mIndices[0])
@@ -1909,29 +1911,27 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 					index = 1;
 				else if (index == face.mIndices[2])
 					index = 2;
-				else
-				{
+				else	{
 					DefaultLogger::get()->error("ASE: Invalid vertex index in MESH_VERTEXNORMAL section");
 					continue;
 				}
-
 				// We'll renormalize later
 				sMesh.mNormals[faceIdx*3+index] += vNormal;
 				continue;
 			}
-			if (TokenMatch(filePtr,"MESH_FACENORMAL",15))
-			{
+			if (TokenMatch(filePtr,"MESH_FACENORMAL",15))	{
 				aiVector3D vNormal;
 				ParseLV4MeshFloatTriple(&vNormal.x,faceIdx);
 
-				if (faceIdx >= sMesh.mFaces.size())
-				{
+				if (faceIdx >= sMesh.mFaces.size())	{
 					DefaultLogger::get()->error("ASE: Invalid vertex index in MESH_FACENORMAL section");
 					continue;
 				}
 
 				// We'll renormalize later
 				sMesh.mNormals[faceIdx*3] += vNormal;
+				sMesh.mNormals[faceIdx*3+1] += vNormal;
+				sMesh.mNormals[faceIdx*3+2] += vNormal;
 				continue;
 			}
 		}

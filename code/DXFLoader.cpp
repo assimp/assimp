@@ -84,16 +84,12 @@ aiColor4D g_clrInvalid = aiColor4D(get_qnan(),0.f,0.f,1.f);
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 DXFImporter::DXFImporter()
-{
-	// nothing to do here
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
 DXFImporter::~DXFImporter()
-{
-	// nothing to do here
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
@@ -103,6 +99,7 @@ bool DXFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get a list of all supported file extensions
 void DXFImporter::GetExtensionList(std::string& append)
 {
 	append.append("*.dxf");
@@ -115,8 +112,7 @@ bool DXFImporter::GetNextLine()
 	if(!SkipLine(&buffer))
 		return false;
 	if(!SkipSpaces(&buffer))return GetNextLine();
-	else if (*buffer == '{')
-	{
+	else if (*buffer == '{')	{
 		// some strange meta data ...
 		while (true)
 		{
@@ -135,8 +131,7 @@ bool DXFImporter::GetNextLine()
 // Get the next token in the file
 bool DXFImporter::GetNextToken()
 {
-	if (bRepeat)
-	{
+	if (bRepeat)	{
 		bRepeat = false;
 		return true;
 	}
@@ -181,26 +176,23 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 		throw new ImportErrorException("DXF: Binary files are not supported at the moment");
 
 	// now get all lines of the file
-	while (GetNextToken())
-	{
-		if (2 == groupCode)
-		{
+	while (GetNextToken())	{
+
+		if (2 == groupCode)	{
+
 			// ENTITIES and BLOCKS sections - skip the whole rest, no need to waste our time with them
 			if (!::strcmp(cursor,"ENTITIES") || !::strcmp(cursor,"BLOCKS"))
 				if (!ParseEntities())break; else bRepeat = true;
 
 			// other sections - skip them to make sure there will be no name conflicts
-			else
-			{
-				while (GetNextToken())
-				{
+			else	{
+				while (GetNextToken())	{
 					if (!groupCode && !::strcmp(cursor,"ENDSEC"))break;
 				}
 			}
 		}
 		// print comment strings
-		else if (999 == groupCode)
-		{
+		else if (999 == groupCode)	{
 			DefaultLogger::get()->info(std::string( cursor ));
 		}
 		else if (!groupCode && !::strcmp(cursor,"EOF"))
@@ -208,9 +200,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 	}
 
 	// find out how many valud layers we have
-	for (std::vector<LayerInfo>::const_iterator it = mLayers.begin(),end = mLayers.end();
-		it != end;++it)
-	{
+	for (std::vector<LayerInfo>::const_iterator it = mLayers.begin(),end = mLayers.end(); it != end;++it)	{
 		if (!(*it).vPositions.empty())++pScene->mNumMeshes;
 	}
 
@@ -219,11 +209,10 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 
 	pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];
 	m = 0;
-	for (std::vector<LayerInfo>::const_iterator it = mLayers.begin(),end = mLayers.end();
-		it != end;++it)
-	{
-		if ((*it).vPositions.empty())continue;
-
+	for (std::vector<LayerInfo>::const_iterator it = mLayers.begin(),end = mLayers.end();it != end;++it) {
+		if ((*it).vPositions.empty()) {
+			continue;
+		}
 		// generate the output mesh
 		aiMesh* pMesh = pScene->mMeshes[m++] = new aiMesh();
 		const std::vector<aiVector3D>& vPositions = (*it).vPositions;
@@ -232,11 +221,9 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 		// check whether we need vertex colors here
 		aiColor4D* clrOut = NULL;
 		const aiColor4D* clr = NULL;
-		for (std::vector<aiColor4D>::const_iterator it2 = (*it).vColors.begin(), end2 = (*it).vColors.end();
-			 it2 != end2; ++it2)
-		{
-			if ((*it2).r == (*it2).r) // check against qnan
-			{
+		for (std::vector<aiColor4D>::const_iterator it2 = (*it).vColors.begin(), end2 = (*it).vColors.end();it2 != end2; ++it2)	{
+			
+			if ((*it2).r == (*it2).r) /* qnan? */ {
 				clrOut = pMesh->mColors[0] = new aiColor4D[vPositions.size()];
 				for (unsigned int i = 0; i < vPositions.size();++i)
 					clrOut[i] = aiColor4D(0.6f,0.6f,0.6f,1.0f);
@@ -252,30 +239,25 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 		aiVector3D* vpOut = pMesh->mVertices = new aiVector3D[vPositions.size()];
 		const aiVector3D* vp = &vPositions[0];
 
-		for (unsigned int i = 0; i < pMesh->mNumFaces;++i)
-		{
+		for (unsigned int i = 0; i < pMesh->mNumFaces;++i)	{
 			aiFace& face = pMesh->mFaces[i];
 
 			// check whether we need four, three or two indices here
-			if (vp[1] == vp[2])
-			{
+			if (vp[1] == vp[2])	{
 				face.mNumIndices = 2;
 			}
-			else if (vp[3] == vp[2])
-			{
+			else if (vp[3] == vp[2])	{
 				 face.mNumIndices = 3;
 			}
 			else face.mNumIndices = 4;
 			face.mIndices = new unsigned int[face.mNumIndices];
 
-			for (unsigned int a = 0; a < face.mNumIndices;++a)
-			{
+			for (unsigned int a = 0; a < face.mNumIndices;++a)	{
 				*vpOut++ = vp[a];
-				if (clr)
-				{
-					if (is_not_qnan( clr[a].r ))
+				if (clr)	{
+					if (is_not_qnan( clr[a].r )) {
 						*clrOut = clr[a];
-
+					}
 					++clrOut;
 				}
 				face.mIndices[a] = pMesh->mNumVertices++;
@@ -288,16 +270,14 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 	pScene->mRootNode = new aiNode();
 	pScene->mRootNode->mName.Set("<DXF_ROOT>");
 
-	if (1 == pScene->mNumMeshes)
-	{
+	if (1 == pScene->mNumMeshes)	{
 		pScene->mRootNode->mMeshes = new unsigned int[ pScene->mRootNode->mNumMeshes = 1 ];
 		pScene->mRootNode->mMeshes[0] = 0;
 	}
 	else
 	{
 		pScene->mRootNode->mChildren = new aiNode*[ pScene->mRootNode->mNumChildren = pScene->mNumMeshes ];
-		for (m = 0; m < pScene->mRootNode->mNumChildren;++m)
-		{
+		for (m = 0; m < pScene->mRootNode->mNumChildren;++m)	{
 			aiNode* p = pScene->mRootNode->mChildren[m] = new aiNode();
 			p->mName.length = ::strlen( mLayers[m].name );
 			::strcpy(p->mName.data, mLayers[m].name);
@@ -333,10 +313,8 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 // ------------------------------------------------------------------------------------------------
 bool DXFImporter::ParseEntities()
 {
-	while (GetNextToken())
-	{
-		if (!groupCode)
-		{			
+	while (GetNextToken())	{
+		if (!groupCode)	{			
 			if (!::strcmp(cursor,"3DFACE") || !::strcmp(cursor,"LINE") || !::strcmp(cursor,"3DLINE"))
 				if (!Parse3DFace()) return false; else bRepeat = true;
 
@@ -353,17 +331,13 @@ bool DXFImporter::ParseEntities()
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::SetLayer(LayerInfo*& out)
 {
-	for (std::vector<LayerInfo>::iterator it = mLayers.begin(),end = mLayers.end();
-		it != end;++it)
-	{
-		if (!::strcmp( (*it).name, cursor ))
-		{
+	for (std::vector<LayerInfo>::iterator it = mLayers.begin(),end = mLayers.end();it != end;++it)	{
+		if (!::strcmp( (*it).name, cursor ))	{
 			out = &(*it);
 			break;
 		}
 	}
-	if (!out)
-	{
+	if (!out)	{
 		// we don't have this layer yet
 		mLayers.push_back(LayerInfo());
 		out = &mLayers.back();
@@ -374,8 +348,7 @@ void DXFImporter::SetLayer(LayerInfo*& out)
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::SetDefaultLayer(LayerInfo*& out)
 {
-	if (!mDefaultLayer)
-	{
+	if (!mDefaultLayer)	{
 		mLayers.push_back(LayerInfo());
 		mDefaultLayer = &mLayers.back();
 	}
@@ -393,27 +366,22 @@ bool DXFImporter::ParsePolyLine()
 	std::vector<unsigned int> indices;
 	unsigned int flags = 0;
 
-	while (GetNextToken())
-	{
+	while (GetNextToken())	{
 		switch (groupCode)
 		{
 		case 0:
 			{
-				if (!::strcmp(cursor,"VERTEX"))
-				{
+				if (!::strcmp(cursor,"VERTEX"))	{
 					aiVector3D v;aiColor4D clr(g_clrInvalid);
 					unsigned int idx[4] = {0xffffffff,0xffffffff,0xffffffff,0xffffffff};
 					ParsePolyLineVertex(v, clr, idx);
-					if (0xffffffff == idx[0])
-					{
+					if (0xffffffff == idx[0])	{
 						positions.push_back(v);
 						colors.push_back(clr);
 					}
-					else
-					{
+					else	{
 						// check whether we have a fourth coordinate
-						if (0xffffffff == idx[3])
-						{
+						if (0xffffffff == idx[3])	{
 							idx[3] = idx[2];
 						}
 
@@ -423,8 +391,7 @@ bool DXFImporter::ParsePolyLine()
 					}
 					bRepeat = true;
 				}
-				else if (!::strcmp(cursor,"ENDSEQ"))
-				{
+				else if (!::strcmp(cursor,"ENDSEQ"))	{
 					ret = true;
 				}
 				break;
@@ -433,8 +400,7 @@ bool DXFImporter::ParsePolyLine()
 		// flags --- important that we know whether it is a polyface mesh
 		case 70:
 			{
-				if (!flags)
-				{
+				if (!flags)	{
 					flags = strtol10(cursor);
 				}
 				break;
@@ -462,32 +428,29 @@ bool DXFImporter::ParsePolyLine()
 			}
 		}
 	}
-	if (!(flags & 64))
-	{
+	if (!(flags & 64))	{
 		DefaultLogger::get()->warn("DXF: Only polyface meshes are currently supported");
 		return ret;
 	}
 
-	if (positions.size() < 3 || indices.size() < 3)
-	{
+	if (positions.size() < 3 || indices.size() < 3)	{
 		DefaultLogger::get()->warn("DXF: Unable to parse POLYLINE element - not enough vertices");
 		return ret;
 	}
 
 	// use a default layer if necessary
-	if (!out)SetDefaultLayer(out);
+	if (!out) {
+		SetDefaultLayer(out);
+	}
 
 	flags = (unsigned int)(out->vPositions.size()+indices.size());
 	out->vPositions.reserve(flags);
 	out->vColors.reserve(flags);
 
 	// generate unique vertices
-	for (std::vector<unsigned int>::const_iterator it = indices.begin(), end = indices.end();
-		it != end; ++it)
-	{
+	for (std::vector<unsigned int>::const_iterator it = indices.begin(), end = indices.end();it != end; ++it)	{
 		unsigned int idx = *it;
-		if (idx > positions.size() || !idx)
-		{
+		if (idx > positions.size() || !idx)	{
 			DefaultLogger::get()->error("DXF: Polyface mesh index os out of range");
 			idx = (unsigned int) positions.size();
 		}
@@ -502,11 +465,11 @@ bool DXFImporter::ParsePolyLine()
 bool DXFImporter::ParsePolyLineVertex(aiVector3D& out,aiColor4D& clr, unsigned int* outIdx)
 {
 	bool ret = false;
-	while (GetNextToken())
-	{
+	while (GetNextToken())	{
 		switch (groupCode)
 		{
-		case 0: ret = true;break;
+		case 0: ret = true;
+			break;
 
 		// todo - handle the correct layer for the vertex
 		// At the moment it is assumed that all vertices of 
@@ -530,7 +493,9 @@ bool DXFImporter::ParsePolyLineVertex(aiVector3D& out,aiColor4D& clr, unsigned i
 		// color
 		case 62: clr = g_aclrDxfIndexColors[strtol10(cursor) % AI_DXF_NUM_INDEX_COLORS]; break;
 		};
-		if (ret)break;
+		if (ret) {
+			break;
+		}
 	}
 	return ret;
 }
@@ -547,15 +512,12 @@ bool DXFImporter::Parse3DFace()
 	// this is also used for for parsing line entities
 	bool bThird = false;
 
-	while (GetNextToken())
-	{
-		switch (groupCode)
-		{
+	while (GetNextToken())	{
+		switch (groupCode)	{
 		case 0: ret = true;break;
 
 		// 8 specifies the layer
-		case 8:
-			{
+		case 8:	{
 				SetLayer(out);
 				break;
 			}
@@ -611,8 +573,9 @@ bool DXFImporter::Parse3DFace()
 	if (!bThird)vip[2] = vip[1];
 
 	// use a default layer if necessary
-	if (!out)SetDefaultLayer(out);
-
+	if (!out) {
+		SetDefaultLayer(out);
+	}
 	// add the faces to the face list for this layer
 	out->vPositions.push_back(vip[0]);
 	out->vPositions.push_back(vip[1]);

@@ -136,12 +136,10 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, a
 				break;
 		};
 
-		if (mapping != aiTextureMapping_UV)
-		{
+		if (mapping != aiTextureMapping_UV)	{
 			// Setup the main axis 
 			aiVector3D v;
-			switch ((*it).majorAxis)
-			{
+			switch ((*it).majorAxis)	{
 				case Texture::AXIS_X:
 					v = aiVector3D(1.f,0.f,0.f);
 					break;
@@ -156,8 +154,7 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, a
 			pcMat->AddProperty(&v,1,AI_MATKEY_TEXMAP_AXIS(type,cur));
 
 			// Setup UV scalings for cylindric and spherical projections
-			if (mapping == aiTextureMapping_CYLINDER || mapping == aiTextureMapping_SPHERE)
-			{
+			if (mapping == aiTextureMapping_CYLINDER || mapping == aiTextureMapping_SPHERE)	{
 				aiUVTransform trafo;
 				trafo.mScaling.x = (*it).wrapAmountW;
 				trafo.mScaling.y = (*it).wrapAmountH;

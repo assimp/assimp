@@ -2255,10 +2255,6 @@
 					RelativePath="..\..\code\ValidateDataStructure.h"
 					>
 				</File>
-				<Filter
-					Name="util"
-					>
-				</Filter>
 			</Filter>
 			<Filter
 				Name="PCH"

@@ -62,8 +62,7 @@ void ScenePreprocessor::ProcessScene ()
 		ProcessAnimation(scene->mAnimations[i]);
 
 	// Generate a default material if none was specified
-	if (!scene->mNumMaterials && scene->mNumMeshes)
-	{
+	if (!scene->mNumMaterials && scene->mNumMeshes)	{
 		scene->mMaterials      = new aiMaterial*[2];
 		MaterialHelper* helper;
 
@@ -76,13 +75,11 @@ void ScenePreprocessor::ProcessScene ()
 			if (scene->mMeshes[i]->mTextureCoords[0]) {
 
 				if (mat0 == 0xffffffff) {
-					scene->mMaterials[scene->mNumMaterials] = helper = new MaterialHelper();
 
-					// dummy texture
-					name.Set("texture.png");
+					scene->mMaterials[scene->mNumMaterials] = helper = new MaterialHelper();
+					name.Set("$texture.png");
 					helper->AddProperty(&name,AI_MATKEY_TEXTURE_DIFFUSE(0));
 
-					// setup default name
 					name.Set(AI_DEFAULT_TEXTURED_MATERIAL_NAME);
 					helper->AddProperty(&name,AI_MATKEY_NAME);
 
@@ -94,15 +91,10 @@ void ScenePreprocessor::ProcessScene ()
 			else
 			{
 				if (mat1 == 0xffffffff) {
-					scene->mMaterials[scene->mNumMaterials] = helper = new MaterialHelper();
 
-					// gray
+					scene->mMaterials[scene->mNumMaterials] = helper = new MaterialHelper();
 					aiColor3D clr(0.6f,0.6f,0.6f);
 					helper->AddProperty(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
-
-					// add a small ambient color value
-					clr = aiColor3D(0.05f,0.05f,0.05f);
-					helper->AddProperty(&clr,1,AI_MATKEY_COLOR_AMBIENT);
 
 					// setup the default name
 					name.Set(AI_DEFAULT_MATERIAL_NAME);
@@ -121,8 +113,7 @@ void ScenePreprocessor::ProcessScene ()
 void ScenePreprocessor::ProcessMesh (aiMesh* mesh)
 {
 	// If aiMesh::mNumUVComponents is *not* set assign the default value of 2
-	for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i)
-	{
+	for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i)	{
 		if (!mesh->mTextureCoords[i])
 			mesh->mNumUVComponents[i] = 0;
 
@@ -146,10 +137,8 @@ void ScenePreprocessor::ProcessMesh (aiMesh* mesh)
 
 	// If the information which primitive types are there in the
 	// mesh is currently not available, compute it.
-	if (!mesh->mPrimitiveTypes)
-	{
-		for (unsigned int a = 0; a < mesh->mNumFaces; ++a)
-		{
+	if (!mesh->mPrimitiveTypes)	{
+		for (unsigned int a = 0; a < mesh->mNumFaces; ++a)	{
 			aiFace& face = mesh->mFaces[a];
 			switch (face.mNumIndices)
 			{
@@ -173,8 +162,8 @@ void ScenePreprocessor::ProcessMesh (aiMesh* mesh)
 	}
 
 	// If tangents and normals are given but no bitangents compute them
-	if (mesh->mTangents && mesh->mNormals && !mesh->mBitangents)
-	{
+	if (mesh->mTangents && mesh->mNormals && !mesh->mBitangents)	{
+
 		mesh->mBitangents = new aiVector3D[mesh->mNumVertices];
 		for (unsigned int i = 0; i < mesh->mNumVertices;++i)	{
 			mesh->mBitangents[i] = mesh->mNormals[i] ^ mesh->mTangents[i];
@@ -186,34 +175,30 @@ void ScenePreprocessor::ProcessMesh (aiMesh* mesh)
 void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
 {
 	double first = 10e10, last = -10e10;
-	for (unsigned int i = 0; i < anim->mNumChannels;++i)
-	{
+	for (unsigned int i = 0; i < anim->mNumChannels;++i)	{
 		aiNodeAnim* channel = anim->mChannels[i];
 
 		/*  If the exact duration of the animation is not given
 		 *  compute it now.
 		 */
-		if (anim->mDuration == -1.)
-		{
+		if (anim->mDuration == -1.)	{
+
 			// Position keys
-			for (unsigned int i = 0; i < channel->mNumPositionKeys;++i)
-			{
+			for (unsigned int i = 0; i < channel->mNumPositionKeys;++i)	{
 				aiVectorKey& key = channel->mPositionKeys[i];
 				first = std::min (first, key.mTime);
 				last  = std::max (last,  key.mTime);
 			}
 
 			// Scaling keys
-			for (unsigned int i = 0; i < channel->mNumScalingKeys;++i)
-			{
+			for (unsigned int i = 0; i < channel->mNumScalingKeys;++i)	{
 				aiVectorKey& key = channel->mScalingKeys[i];
 				first = std::min (first, key.mTime);
 				last  = std::max (last,  key.mTime);
 			}
 
 			// Rotation keys
-			for (unsigned int i = 0; i < channel->mNumRotationKeys;++i)
-			{
+			for (unsigned int i = 0; i < channel->mNumRotationKeys;++i)	{
 				aiQuatKey& key = channel->mRotationKeys[i];
 				first = std::min (first, key.mTime);
 				last  = std::max (last,  key.mTime);
@@ -225,8 +210,7 @@ void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
 		 *  track from the information we have in the transformation
 		 *  matrix of the corresponding node.
 		 */
-		if (!channel->mNumRotationKeys || !channel->mNumPositionKeys || !channel->mNumScalingKeys)
-		{
+		if (!channel->mNumRotationKeys || !channel->mNumPositionKeys || !channel->mNumScalingKeys)	{
 			// Find the node that belongs to this animation
 			aiNode* node = scene->mRootNode->FindNode(channel->mNodeName);
 			if (node) // ValidateDS will complain later if 'node' is NULL
@@ -238,8 +222,7 @@ void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
 				node->mTransformation.Decompose(scaling, rotation,position);
 
 				// No rotation keys? Generate a dummy track
-				if (!channel->mNumRotationKeys)
-				{
+				if (!channel->mNumRotationKeys)	{
 					channel->mNumRotationKeys = 1;
 					channel->mRotationKeys = new aiQuatKey[1];
 					aiQuatKey& q = channel->mRotationKeys[0];
@@ -251,8 +234,7 @@ void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
 				}
 
 				// No scaling keys? Generate a dummy track
-				if (!channel->mNumScalingKeys)
-				{
+				if (!channel->mNumScalingKeys)	{
 					channel->mNumScalingKeys = 1;
 					channel->mScalingKeys = new aiVectorKey[1];
 					aiVectorKey& q = channel->mScalingKeys[0];
@@ -264,8 +246,7 @@ void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
 				}
 
 				// No position keys? Generate a dummy track
-				if (!channel->mNumPositionKeys)
-				{
+				if (!channel->mNumPositionKeys)	{
 					channel->mNumPositionKeys = 1;
 					channel->mPositionKeys = new aiVectorKey[1];
 					aiVectorKey& q = channel->mPositionKeys[0];
@@ -278,9 +259,9 @@ void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
 			}
 		}
 	}
-	if (anim->mDuration == -1.)
-	{
-		DefaultLogger::get()->debug("Setting animation duration");
+
+	if (anim->mDuration == -1.)		{
+		DefaultLogger::get()->debug("ScenePreprocessor: Setting animation duration");
 		anim->mDuration = last - std::min( first, 0. );
 	}
 }

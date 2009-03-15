@@ -221,10 +221,10 @@ void SceneAnimator::UpdateTransforms( SceneAnimNode* pNode, const std::vector<ai
 	{
 		ai_assert( pNode->mChannelIndex < pTransforms.size());
 		pNode->mLocalTransform = pTransforms[pNode->mChannelIndex];
-
-		// update global transform as well
-		CalculateGlobalTransform( pNode);
 	}
+
+	// update global transform as well
+	CalculateGlobalTransform( pNode);
 
 	// continue for all children
 	for( std::vector<SceneAnimNode*>::iterator it = pNode->mChildren.begin(); it != pNode->mChildren.end(); ++it)

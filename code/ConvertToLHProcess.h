@@ -38,7 +38,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines a post processing step to convert all data to a left-handed coordinate system.*/
+/** @file  MakeLeftHandedProcess.h
+ *  @brief Defines a bunch of post-processing steps to handle
+ *    coordinate system conversions.
+ *
+ *  - LH to RH
+ *  - UV origin upper-left to lower-left
+ *  - face order cw to ccw 
+ */
 #ifndef AI_CONVERTTOLHPROCESS_H_INC
 #define AI_CONVERTTOLHPROCESS_H_INC
 
@@ -48,72 +55,55 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiMesh;
 struct aiNodeAnim;
 
-namespace Assimp
-{
+namespace Assimp	{
 
-// ---------------------------------------------------------------------------
-/** The ConvertToLHProcess converts all imported data to a left-handed coordinate
- * system. This implies inverting the Z axis for all transformation matrices
- * invert the orientation of all faces, and adapting skinning and animation 
- * data in a similar way.
+// -----------------------------------------------------------------------------------
+/** @brief The MakeLeftHandedProcess converts all imported data to a left-handed
+ *   coordinate system. 
+ *
+ * This implies a mirroring of the Z axis of the coordinate system. But to keep 
+ * transformation matrices free from reflections we shift the reflection to other
+ * places. We mirror the meshes and adapt the rotations.
+ *
+ * @note RH-LH and LH-RH is the same, so this class can be used for both
  */
-class ASSIMP_API ConvertToLHProcess : public BaseProcess
+class ASSIMP_API MakeLeftHandedProcess : public BaseProcess
 {
 	friend class Importer;
 
-protected:
+public:
 	/** Constructor to be privately used by Importer */
-	ConvertToLHProcess();
+	MakeLeftHandedProcess();
 
 	/** Destructor, private as well */
-	~ConvertToLHProcess();
+	~MakeLeftHandedProcess();
 
-public:
 	// -------------------------------------------------------------------
-	/** Returns whether the processing step is present in the given flag field.
-	 * @param pFlags The processing flags the importer was called with. A bitwise
-	 *   combination of #aiPostProcessSteps.
-	 * @return true if the process is present in this flag fields, false if not.
-	*/
 	bool IsActive( unsigned int pFlags) const;
 
 	// -------------------------------------------------------------------
-	/** Executes the post processing step on the given imported data.
-	* At the moment a process is not supposed to fail.
-	* @param pScene The imported data to work at.
-	*/
 	void Execute( aiScene* pScene);
 
-	// -------------------------------------------------------------------
-	/** Static helper function to convert a vector/matrix from DX coords to OGL coords.
-	 * @param poMatrix The matrix to convert.
-	 */
-	static void ConvertToOGL( aiVector3D& poVector);
-	static void ConvertToOGL( aiMatrix3x3& poMatrix);
-	static void ConvertToOGL( aiMatrix4x4& poMatrix);
-
-	// -------------------------------------------------------------------
-	/** Static helper function to convert a vector/matrix from OGL coords back to DX coords.
-	 * @param poMatrix The matrix to convert.
-	 */
-	static void ConvertToDX( aiVector3D& poVector);
-	static void ConvertToDX( aiMatrix3x3& poMatrix);
-	static void ConvertToDX( aiMatrix4x4& poMatrix);
-
 protected:
+
+	// -------------------------------------------------------------------
+	/** Recursively converts a node and all of its children
+	 */
+	void ProcessNode( aiNode* pNode, const aiMatrix4x4& pParentGlobalRotation);
+
 	// -------------------------------------------------------------------
 	/** Converts a single mesh to left handed coordinates. 
-	 * This simply means the order of all faces is inverted.
+	 * This means that positions, normals and tangents are mirrored at
+	 * the local Z axis and the order of all faces are inverted.
 	 * @param pMesh The mesh to convert.
 	 */
 	void ProcessMesh( aiMesh* pMesh);
 
 	// -------------------------------------------------------------------
-	/** Converts a single material to left handed coordinates. 
-	 * This simply means all UV offsets are inverted.
-	 * @param mat The material to convert.
+	/** Converts a single material to left-handed coordinates
+	 * @param pMat Material to convert
 	 */
-	void ProcessMaterial (aiMaterial* mat);
+	void ProcessMaterial( aiMaterial* pMat);
 
 	// -------------------------------------------------------------------
 	/** Converts the given animation to LH coordinates. 
@@ -122,16 +112,56 @@ protected:
 	 * @param pAnim The bone animation to transform
 	 */
 	void ProcessAnimation( aiNodeAnim* pAnim);
+};
 
-	//! true if the transformation matrix for the OGL-to-DX is 
-	//! directly used to transform all vertices.
-	mutable bool bTransformVertices;
+
+// ---------------------------------------------------------------------------
+/** Postprocessing step to flip the face order of the imported data
+ */
+class ASSIMP_API FlipWindingOrderProcess : public BaseProcess
+{
+	friend class Importer;
 
 public:
-	/** The transformation matrix to convert from DirectX coordinates to OpenGL coordinates. */
-	static const aiMatrix3x3 sToOGLTransform;
-	/** The transformation matrix to convert from OpenGL coordinates to DirectX coordinates. */
-	static const aiMatrix3x3 sToDXTransform;
+	/** Constructor to be privately used by Importer */
+	FlipWindingOrderProcess();
+
+	/** Destructor, private as well */
+	~FlipWindingOrderProcess();
+
+	// -------------------------------------------------------------------
+	bool IsActive( unsigned int pFlags) const;
+
+	// -------------------------------------------------------------------
+	void Execute( aiScene* pScene);
+
+protected:
+	void ProcessMesh( aiMesh* pMesh);
+};
+
+// ---------------------------------------------------------------------------
+/** Postprocessing step to flip the UV coordinate system of the import data
+ */
+class ASSIMP_API FlipUVsProcess : public BaseProcess
+{
+	friend class Importer;
+
+public:
+	/** Constructor to be privately used by Importer */
+	FlipUVsProcess();
+
+	/** Destructor, private as well */
+	~FlipUVsProcess();
+
+	// -------------------------------------------------------------------
+	bool IsActive( unsigned int pFlags) const;
+
+	// -------------------------------------------------------------------
+	void Execute( aiScene* pScene);
+
+protected:
+	void ProcessMesh( aiMesh* pMesh);
+	void ProcessMaterial( aiMaterial* mat);
 };
 
 } // end of namespace Assimp

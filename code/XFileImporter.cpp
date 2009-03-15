@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "XFileImporter.h"
 #include "XFileParser.h"
-#include "MaterialSystem.h"
 #include "ConvertToLHProcess.h"
 
 using namespace Assimp;
@@ -141,9 +140,9 @@ void XFileImporter::CreateDataRepresentationFromImport( aiScene* pScene, const X
 		CreateMeshes( pScene, pScene->mRootNode, pData->mGlobalMeshes);
 	}
 
-	// convert the root node's transformation to OGL coords
-	if( pScene->mRootNode)
-		ConvertToLHProcess::ConvertToOGL( pScene->mRootNode->mTransformation);
+	// Convert everything to OpenGL space... it's the same operation as the conversion back, so we can reuse the step directly
+	MakeLeftHandedProcess convertProcess;
+	convertProcess.Execute( pScene);
 
 	// finally: create a dummy material if not material was imported
 	if( pScene->mNumMaterials == 0)
@@ -305,7 +304,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 				// collect vertex data for indices of this face
 				for( unsigned int d = 0; d < df.mNumIndices; d++)
 				{
-					df.mIndices[df.mNumIndices - 1 - d] = newIndex; // inverted face orientation for OGL
+					df.mIndices[d] = newIndex; 
 					orgPoints[newIndex] = pf.mIndices[d];
 
 					// Position
@@ -313,6 +312,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 					// Normal, if present
 					if( mesh->HasNormals())
 						mesh->mNormals[newIndex] = sourceMesh->mNormals[sourceMesh->mNormFaces[f].mIndices[d]];
+
 					// texture coord sets
 					for( unsigned int e = 0; e < AI_MAX_NUMBER_OF_TEXTURECOORDS; e++)
 					{
@@ -413,9 +413,9 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 	for( unsigned int a = 0; a < pData->mAnims.size(); a++)
 	{
 		const XFile::Animation* anim = pData->mAnims[a];
-    // some exporters mock me with empty animation tags.
-    if( anim->mAnims.size() == 0)
-      continue;
+		// some exporters mock me with empty animation tags.
+		if( anim->mAnims.size() == 0)
+			continue;
 
 		// create a new animation to hold the data
 		aiAnimation* nanim = new aiAnimation;
@@ -433,9 +433,6 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 			aiNodeAnim* nbone = new aiNodeAnim;
 			nbone->mNodeName.Set( bone->mBoneName);
 			nanim->mChannels[b] = nbone;
-
-			// apply the LH->RH conversion if the animation affects the root bone
-			bool isRootAnim = (bone->mBoneName == pScene->mRootNode->mName.data);
 
 			// keyframes are given as combined transformation matrix keys
 			if( bone->mTrafoKeys.size() > 0)
@@ -455,8 +452,6 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 
 					// extract position
 					aiVector3D pos( trafo.a4, trafo.b4, trafo.c4);
-					if( isRootAnim)
-						ConvertToLHProcess::ConvertToOGL( pos);
 
 					nbone->mPositionKeys[c].mTime = time;
 					nbone->mPositionKeys[c].mValue = pos;
@@ -475,9 +470,6 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 						trafo.b1 / scale.x, trafo.b2 / scale.y, trafo.b3 / scale.z,
 						trafo.c1 / scale.x, trafo.c2 / scale.y, trafo.c3 / scale.z);
 
-					if( isRootAnim)
-						ConvertToLHProcess::ConvertToOGL( rotmat);
-
 					// and convert it into a quaternion
 					nbone->mRotationKeys[c].mTime = time;
 					nbone->mRotationKeys[c].mValue = aiQuaternion( rotmat);
@@ -493,8 +485,6 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 				for( unsigned int c = 0; c < nbone->mNumPositionKeys; c++)
 				{
 					aiVector3D pos = bone->mPosKeys[c].mValue;
-					if( isRootAnim)
-						ConvertToLHProcess::ConvertToOGL( pos);
 
 					nbone->mPositionKeys[c].mTime = bone->mPosKeys[c].mTime;
 					nbone->mPositionKeys[c].mValue = pos;
@@ -506,8 +496,6 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 				for( unsigned int c = 0; c < nbone->mNumRotationKeys; c++)
 				{
 					aiMatrix3x3 rotmat = bone->mRotKeys[c].mValue.GetMatrix();
-					if( isRootAnim)
-						ConvertToLHProcess::ConvertToOGL( rotmat);
 
 					nbone->mRotationKeys[c].mTime = bone->mRotKeys[c].mTime;
 					nbone->mRotationKeys[c].mValue = aiQuaternion( rotmat);

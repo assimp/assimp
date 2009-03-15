@@ -54,16 +54,12 @@ using namespace irr::io;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 IRRMeshImporter::IRRMeshImporter()
-{
-	// nothing to do here
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
 IRRMeshImporter::~IRRMeshImporter()
-{
-	// nothing to do here
-}
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
@@ -134,23 +130,18 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 	bool useColors = false;
 
 	// Parse the XML file
-	while (reader->read())
-	{
-		switch (reader->getNodeType())
-		{
+	while (reader->read())	{
+		switch (reader->getNodeType())	{
 		case EXN_ELEMENT:
 			
-			if (!ASSIMP_stricmp(reader->getNodeName(),"buffer") && (curMat || curMesh))
-			{
+			if (!ASSIMP_stricmp(reader->getNodeName(),"buffer") && (curMat || curMesh))	{
 				// end of previous buffer. A material and a mesh should be there
-				if ( !curMat || !curMesh)
-				{
+				if ( !curMat || !curMesh)	{
 					DefaultLogger::get()->error("IRRMESH: A buffer must contain a mesh and a material");
 					delete curMat;
 					delete curMesh;
 				}
-				else
-				{
+				else	{
 					materials.push_back(curMat); 
 					meshes.push_back(curMesh);  
 				}
@@ -167,10 +158,8 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 			}
 			
 
-			if (!ASSIMP_stricmp(reader->getNodeName(),"material"))
-			{
-				if (curMat)
-				{
+			if (!ASSIMP_stricmp(reader->getNodeName(),"material"))	{
+				if (curMat)	{
 					DefaultLogger::get()->warn("IRRMESH: Only one material description per buffer, please");
 					delete curMat;curMat = NULL;
 				}
@@ -180,11 +169,8 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 			{
 				int num = reader->getAttributeValueAsInt("vertexCount");
 
-				if (!num)
-				{
-					// This is possible ... remove the mesh from the list
-					// and skip further reading
-
+				if (!num)	{
+					// This is possible ... remove the mesh from the list and skip further reading
 					DefaultLogger::get()->warn("IRRMESH: Found mesh with zero vertices");
 
 					delete curMat;curMat = NULL;
@@ -201,13 +187,11 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 
 				// Determine the file format
 				const char* t = reader->getAttributeValueSafe("type");
-				if (!ASSIMP_stricmp("2tcoords", t))
-				{
+				if (!ASSIMP_stricmp("2tcoords", t))	{
 					curUV2s.reserve (num);
 					vertexFormat = 1;
 
-					if (curMatFlags & AI_IRRMESH_EXTRA_2ND_TEXTURE)
-					{
+					if (curMatFlags & AI_IRRMESH_EXTRA_2ND_TEXTURE)	{
 						// *********************************************************
 						// We have a second texture! So use this UV channel
 						// for it. The 2nd texture can be either a normal
@@ -228,24 +212,20 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 						}
 					}
 				}
-				else if (!ASSIMP_stricmp("tangents", t))
-				{
+				else if (!ASSIMP_stricmp("tangents", t))	{
 					curTangents.reserve (num);
 					curBitangents.reserve (num);
 					vertexFormat = 2;
 				}
-				else if (ASSIMP_stricmp("standard", t))
-				{
+				else if (ASSIMP_stricmp("standard", t))	{
 					delete curMat;
 					DefaultLogger::get()->warn("IRRMESH: Unknown vertex format");
 				}
 				else vertexFormat = 0;
 				textMeaning = 1;
 			}
-			else if (!ASSIMP_stricmp(reader->getNodeName(),"indices"))
-			{
-				if (curVertices.empty() && curMat)
-				{
+			else if (!ASSIMP_stricmp(reader->getNodeName(),"indices"))	{
+				if (curVertices.empty() && curMat)	{
 					delete curMat;
 					throw new ImportErrorException("IRRMESH: indices must come after vertices");
 				}
@@ -257,11 +237,8 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 
 				// allocate storage for all faces
 				curMesh->mNumVertices = reader->getAttributeValueAsInt("indexCount");
-				if (!curMesh->mNumVertices)
-				{
-					// This is possible ... remove the mesh from the list
-					// and skip further reading
-
+				if (!curMesh->mNumVertices)	{
+					// This is possible ... remove the mesh from the list and skip further reading
 					DefaultLogger::get()->warn("IRRMESH: Found mesh with zero indices");
 
 					// mesh - away
@@ -274,8 +251,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 					continue;
 				}
 
-				if (curMesh->mNumVertices % 3)
-				{
+				if (curMesh->mNumVertices % 3)	{
 					DefaultLogger::get()->warn("IRRMESH: Number if indices isn't divisible by 3");
 				}
 
@@ -289,28 +265,22 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 				// allocate storage for all vertices
 				curMesh->mVertices = new aiVector3D[curMesh->mNumVertices];
 
-				if (curNormals.size() == curVertices.size())
-				{
+				if (curNormals.size() == curVertices.size())	{
 					curMesh->mNormals = new aiVector3D[curMesh->mNumVertices];
 				}
-				if (curTangents.size() == curVertices.size())
-				{
+				if (curTangents.size() == curVertices.size())	{
 					curMesh->mTangents = new aiVector3D[curMesh->mNumVertices];
 				}
-				if (curBitangents.size() == curVertices.size())
-				{
+				if (curBitangents.size() == curVertices.size())	{
 					curMesh->mBitangents = new aiVector3D[curMesh->mNumVertices];
 				}
-				if (curColors.size() == curVertices.size() && useColors)
-				{
+				if (curColors.size() == curVertices.size() && useColors)	{
 					curMesh->mColors[0] = new aiColor4D[curMesh->mNumVertices];
 				}
-				if (curUVs.size() == curVertices.size())
-				{
+				if (curUVs.size() == curVertices.size())	{
 					curMesh->mTextureCoords[0] = new aiVector3D[curMesh->mNumVertices];
 				}
-				if (curUV2s.size() == curVertices.size())
-				{
+				if (curUV2s.size() == curVertices.size())	{
 					curMesh->mTextureCoords[1] = new aiVector3D[curMesh->mNumVertices];
 				}
 			}
@@ -319,13 +289,11 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 		case EXN_TEXT:
 			{
 			const char* sz = reader->getNodeData();
-			if (textMeaning == 1)
-			{
+			if (textMeaning == 1)	{
 				textMeaning = 0;
 
 				// read vertices
-				do
-				{
+				do	{
 					SkipSpacesAndLineEnd(&sz);
 					aiVector3D temp;aiColor4D c;
 
@@ -373,8 +341,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 					curUVs.push_back(temp);
 
 					// read the (optional) second UV coordinate set
-					if (vertexFormat == 1)
-					{
+					if (vertexFormat == 1)	{
 						sz = fast_atof_move(sz,(float&)temp.x);
 						SkipSpaces(&sz);
 
@@ -383,8 +350,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 						curUV2s.push_back(temp);
 					}
 					// read optional tangent and bitangent vectors
-					else if (vertexFormat == 2)
-					{
+					else if (vertexFormat == 2)	{
 						// tangents
 						sz = fast_atof_move(sz,(float&)temp.x);
 						SkipSpaces(&sz);
@@ -418,8 +384,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 
 				while (SkipLine(&sz));
 			}
-			else if (textMeaning == 2)
-			{
+			else if (textMeaning == 2)	{
 				textMeaning = 0;
 
 				// read indices
@@ -436,22 +401,18 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 
 				unsigned int curIdx = 0;
 				unsigned int total = 0;
-				while(SkipSpacesAndLineEnd(&sz))
-				{
-					if (curFace >= faceEnd)
-					{
+				while(SkipSpacesAndLineEnd(&sz))	{
+					if (curFace >= faceEnd)	{
 						DefaultLogger::get()->error("IRRMESH: Too many indices");
 						break;
 					}
-					if (!curIdx)
-					{
+					if (!curIdx)	{
 						curFace->mNumIndices = 3;
 						curFace->mIndices = new unsigned int[3];
 					}
 
 					unsigned int idx = strtol10(sz,&sz);
-					if (idx >= curVertices.size())
-					{
+					if (idx >= curVertices.size())	{
 						DefaultLogger::get()->error("IRRMESH: Index out of range");
 						idx = 0;
 					}
@@ -466,8 +427,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 					if (pcT0)*pcT0++ = curUVs[idx];
 					if (pcT1)*pcT1++ = curUV2s[idx];
 
-					if (++curIdx == 3)
-					{
+					if (++curIdx == 3)	{
 						++curFace;
 						curIdx = 0;
 					}
@@ -477,8 +437,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 					DefaultLogger::get()->error("IRRMESH: Not enough indices");
 
 				// Finish processing the mesh - do some small material workarounds
-				if (curMatFlags & AI_IRRMESH_MAT_trans_vertex_alpha && !useColors)
-				{
+				if (curMatFlags & AI_IRRMESH_MAT_trans_vertex_alpha && !useColors)	{
 					// Take the opacity value of the current material
 					// from the common vertex color alpha
 					MaterialHelper* mat = (MaterialHelper*)curMat;
@@ -496,16 +455,13 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 	}
 
 	// End of the last buffer. A material and a mesh should be there
-	if (curMat || curMesh)
-	{
-		if ( !curMat || !curMesh)
-		{
+	if (curMat || curMesh)	{
+		if ( !curMat || !curMesh)	{
 			DefaultLogger::get()->error("IRRMESH: A buffer must contain a mesh and a material");
 			delete curMat;
 			delete curMesh;
 		}
-		else
-		{
+		else	{
 			materials.push_back(curMat); 
 			meshes.push_back(curMesh);  
 		}
@@ -518,8 +474,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 	// now generate the output scene
 	pScene->mNumMeshes = (unsigned int)meshes.size();
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
-	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-	{
+	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)	{
 		pScene->mMeshes[i] = meshes[i];
 
 		// clean this value ...
@@ -537,9 +492,6 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
 		pScene->mRootNode->mMeshes[i] = i;
-
-	// transformation matrix to convert from IRRMESH to ASSIMP coordinates
-	pScene->mRootNode->mTransformation *= AI_TO_IRR_MATRIX;
 
 	// clean up and return
 	delete reader;

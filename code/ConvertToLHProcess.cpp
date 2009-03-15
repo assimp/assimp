@@ -39,136 +39,220 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the post processing step to convert all imported data
- * to a left-handed coordinate system.
+/** @file  MakeLeftHandedProcess.cpp
+ *  @brief Implementation of the post processing step to convert all
+ *  imported data to a left-handed coordinate system.
+ *
+ *  Face order & UV flip are also implemented here, for the sake of a
+ *  better location.
  */
 
 #include "AssimpPCH.h"
 #include "ConvertToLHProcess.h"
 
-
 using namespace Assimp;
 
-// The transformation matrix to convert from DirectX coordinates to OpenGL coordinates.
-const aiMatrix3x3 Assimp::ConvertToLHProcess::sToOGLTransform(
-	1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f
-	);
-// The transformation matrix to convert from OpenGL coordinates to DirectX coordinates.
-const aiMatrix3x3 Assimp::ConvertToLHProcess::sToDXTransform(
-	1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f
-	);
+#ifndef ASSIMP_BUILD_NO_MAKELEFTHANDED_PROCESS
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-ConvertToLHProcess::ConvertToLHProcess()
-{
-	bTransformVertices = false;
-}
+MakeLeftHandedProcess::MakeLeftHandedProcess()
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-ConvertToLHProcess::~ConvertToLHProcess()
-{
-	// nothing to do here
-}
+MakeLeftHandedProcess::~MakeLeftHandedProcess()
+{}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
-bool ConvertToLHProcess::IsActive( unsigned int pFlags) const
+bool MakeLeftHandedProcess::IsActive( unsigned int pFlags) const
 {
-	if (pFlags & aiProcess_ConvertToLeftHanded)
-	{
-		bTransformVertices = (0 != (pFlags & aiProcess_PreTransformVertices) ? true : false);
-		return true;
-	}
-	return false;
+	return 0 != (pFlags & aiProcess_MakeLeftHanded);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void ConvertToLHProcess::Execute( aiScene* pScene)
+void MakeLeftHandedProcess::Execute( aiScene* pScene)
 {
 	// Check for an existent root node to proceed
-	if (NULL == pScene->mRootNode)
-	{
-		DefaultLogger::get()->error("ConvertToLHProcess fails, there is no root node");
-		return;
-	}
+	ai_assert(pScene->mRootNode != NULL);
+	DefaultLogger::get()->debug("MakeLeftHandedProcess begin");
 
-	DefaultLogger::get()->debug("ConvertToLHProcess begin");
+	// recursively convert all the nodes 
+	ProcessNode( pScene->mRootNode, aiMatrix4x4());
 
-	// transform vertex by vertex or change the root transform?
-	// We can't do the coordinate system transformation earlier 
-	// in the pipeline - most steps assume that we're in OGL
-	// space. So we need to transform all vertices a second time
-	// here.
-	if (bTransformVertices)
-	{
-		aiMatrix4x4 mTransform;
-		ConvertToDX(mTransform);
-		for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-		{
-			aiMesh* pcMesh = pScene->mMeshes[i];
-
-			// transform all vertices
-			for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
-				pcMesh->mVertices[n]  = mTransform * pcMesh->mVertices[n];
-		
-			// transform all normals
-			if (pcMesh->HasNormals())
-			{
-				for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
-					pcMesh->mNormals[n]  = mTransform * pcMesh->mNormals[n];
-			}
-			// transform all tangents and all bitangents
-			if (pcMesh->HasTangentsAndBitangents())
-			{
-				for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)
-				{
-					pcMesh->mTangents[n]    = mTransform * pcMesh->mTangents[n];
-					pcMesh->mBitangents[n]  = mTransform * pcMesh->mBitangents[n];
-				}
-			}
-		}
-	}
-	else
-	{
-		// transform the root node of the scene, the other nodes will follow then
-		ConvertToDX( pScene->mRootNode->mTransformation);
-	}
-
-	// transform all meshes accordingly
-	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
+	// process the meshes accordingly
+	for( unsigned int a = 0; a < pScene->mNumMeshes; ++a)
 		ProcessMesh( pScene->mMeshes[a]);
 
-	// process all materials - we need to adjust UV transformations
-	for( unsigned int a = 0; a < pScene->mNumMaterials; a++)
+	// process the materials accordingly
+	for( unsigned int a = 0; a < pScene->mNumMaterials; ++a)
 		ProcessMaterial( pScene->mMaterials[a]);
 
-	// transform all animation channels affecting the root node as well
+	// transform all animation channels as well
 	for( unsigned int a = 0; a < pScene->mNumAnimations; a++)
 	{
 		aiAnimation* anim = pScene->mAnimations[a];
 		for( unsigned int b = 0; b < anim->mNumChannels; b++)
 		{
 			aiNodeAnim* nodeAnim = anim->mChannels[b];
-			if( strcmp( nodeAnim->mNodeName.data, pScene->mRootNode->mName.data) == 0)
-				ProcessAnimation( nodeAnim);
+			ProcessAnimation( nodeAnim);
 		}
 	}
-	DefaultLogger::get()->debug("ConvertToLHProcess finished");
+
+	// flipping a single vector component means inverting face order ...
+	FlipWindingOrderProcess flipper;
+	flipper.Execute(pScene);
+
+	DefaultLogger::get()->debug("MakeLeftHandedProcess finished");
+}
+
+// ------------------------------------------------------------------------------------------------
+// Recursively converts a node, all of its children and all of its meshes
+void MakeLeftHandedProcess::ProcessNode( aiNode* pNode, const aiMatrix4x4& pParentGlobalRotation)
+{
+	// mirror all base vectors at the local Z axis
+	pNode->mTransformation.c1 = -pNode->mTransformation.c1;
+	pNode->mTransformation.c2 = -pNode->mTransformation.c2;
+	pNode->mTransformation.c3 = -pNode->mTransformation.c3;
+	pNode->mTransformation.c4 = -pNode->mTransformation.c4;
+
+	// now invert the Z axis again to keep the matrix determinant positive.
+	// The local meshes will be inverted accordingly so that the result should look just fine again.
+	pNode->mTransformation.a3 = -pNode->mTransformation.a3;
+	pNode->mTransformation.b3 = -pNode->mTransformation.b3;
+	pNode->mTransformation.c3 = -pNode->mTransformation.c3;
+	pNode->mTransformation.d3 = -pNode->mTransformation.d3; // useless, but anyways...
+
+	// continue for all children
+	for( size_t a = 0; a < pNode->mNumChildren; ++a)
+		ProcessNode( pNode->mChildren[a], pParentGlobalRotation * pNode->mTransformation);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Converts a single mesh to left handed coordinates. 
+void MakeLeftHandedProcess::ProcessMesh( aiMesh* pMesh)
+{
+	// mirror positions, normals and stuff along the Z axis
+	for( size_t a = 0; a < pMesh->mNumVertices; ++a)
+	{
+		pMesh->mVertices[a].z *= -1.0f;
+		if( pMesh->HasNormals())
+			pMesh->mNormals[a].z *= -1.0f;
+		if( pMesh->HasTangentsAndBitangents())
+		{
+			pMesh->mTangents[a].z *= -1.0f;
+			pMesh->mBitangents[a].z *= -1.0f;
+		}
+	}
+
+	// mirror offset matrices of all bones
+	for( size_t a = 0; a < pMesh->mNumBones; ++a)
+	{
+		aiBone* bone = pMesh->mBones[a];
+		bone->mOffsetMatrix.a3 = -bone->mOffsetMatrix.a3;
+		bone->mOffsetMatrix.b3 = -bone->mOffsetMatrix.b3;
+		bone->mOffsetMatrix.d3 = -bone->mOffsetMatrix.d3;
+		bone->mOffsetMatrix.c1 = -bone->mOffsetMatrix.c1;
+		bone->mOffsetMatrix.c2 = -bone->mOffsetMatrix.c2;
+		bone->mOffsetMatrix.c4 = -bone->mOffsetMatrix.c4;
+	}
+
+	// mirror bitangents as well as they're derived from the texture coords
+	if( pMesh->HasTangentsAndBitangents())
+	{
+		for( unsigned int a = 0; a < pMesh->mNumVertices; a++)
+			pMesh->mBitangents[a] *= -1.0f;
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
 // Converts a single material to left handed coordinates. 
-void ConvertToLHProcess::ProcessMaterial (aiMaterial* mat)
+void MakeLeftHandedProcess::ProcessMaterial( aiMaterial* _mat)
 {
-	for (unsigned int a = 0; a < mat->mNumProperties;++a)
-	{
+	MaterialHelper* mat = (MaterialHelper*)_mat;
+	for (unsigned int a = 0; a < mat->mNumProperties;++a)	{
 		aiMaterialProperty* prop = mat->mProperties[a];
-		if (!::strcmp( prop->mKey.data, "$tex.uvtrafo"))
-		{
-			ai_assert( prop->mDataLength >= sizeof(aiUVTransform));
+
+		// Mapping axis for UV mappings?
+		if (!::strcmp( prop->mKey.data, "$tex.mapaxis"))	{
+			ai_assert( prop->mDataLength >= sizeof(aiVector3D)); /* something is wrong with the validation if we end up here */ 
+			aiVector3D* pff = (aiVector3D*)prop->mData;
+
+			pff->z *= -1.f;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Converts the given animation to LH coordinates. 
+void MakeLeftHandedProcess::ProcessAnimation( aiNodeAnim* pAnim) 
+{ 
+	// position keys 
+	for( unsigned int a = 0; a < pAnim->mNumPositionKeys; a++) 
+		pAnim->mPositionKeys[a].mValue.z *= -1.0f; 
+
+	// rotation keys 
+	for( unsigned int a = 0; a < pAnim->mNumRotationKeys; a++) 
+	{ 
+		/* That's the safe version, but the float errors add up. So we try the short version instead 
+		aiMatrix3x3 rotmat = pAnim->mRotationKeys[a].mValue.GetMatrix(); 
+		rotmat.a3 = -rotmat.a3; rotmat.b3 = -rotmat.b3; 
+		rotmat.c1 = -rotmat.c1; rotmat.c2 = -rotmat.c2; 
+		aiQuaternion rotquat( rotmat); 
+		pAnim->mRotationKeys[a].mValue = rotquat; 
+		*/ 
+		pAnim->mRotationKeys[a].mValue.x *= -1.0f; 
+		pAnim->mRotationKeys[a].mValue.y *= -1.0f; 
+	} 
+} 
+
+#endif // !!  ASSIMP_BUILD_NO_MAKELEFTHANDED_PROCESS
+#ifndef  ASSIMP_BUILD_NO_FLIPUVS_PROCESS
+// # FlipUVsProcess
+
+// ------------------------------------------------------------------------------------------------
+// Constructor to be privately used by Importer
+FlipUVsProcess::FlipUVsProcess()
+{}
+
+// ------------------------------------------------------------------------------------------------
+// Destructor, private as well
+FlipUVsProcess::~FlipUVsProcess()
+{}
+
+// ------------------------------------------------------------------------------------------------
+// Returns whether the processing step is present in the given flag field.
+bool FlipUVsProcess::IsActive( unsigned int pFlags) const
+{
+	return 0 != (pFlags & aiProcess_FlipUVs);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Executes the post processing step on the given imported data.
+void FlipUVsProcess::Execute( aiScene* pScene)
+{
+	DefaultLogger::get()->debug("FlipUVsProcess begin");
+	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+		ProcessMesh(pScene->mMeshes[i]);
+
+	for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
+		ProcessMaterial(pScene->mMaterials[i]);
+	DefaultLogger::get()->debug("FlipUVsProcess finished");
+}
+
+// ------------------------------------------------------------------------------------------------
+// Converts a single material 
+void FlipUVsProcess::ProcessMaterial (aiMaterial* _mat)
+{
+	MaterialHelper* mat = (MaterialHelper*)_mat;
+	for (unsigned int a = 0; a < mat->mNumProperties;++a)	{
+		aiMaterialProperty* prop = mat->mProperties[a];
+
+		// UV transformation key?
+		if (!::strcmp( prop->mKey.data, "$tex.uvtrafo"))	{
+			ai_assert( prop->mDataLength >= sizeof(aiUVTransform));  /* something is wrong with the validation if we end up here */
 			aiUVTransform* uv = (aiUVTransform*)prop->mData;
 
 			// just flip it, that's everything
@@ -179,8 +263,53 @@ void ConvertToLHProcess::ProcessMaterial (aiMaterial* mat)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Converts a single mesh to left handed coordinates. 
-void ConvertToLHProcess::ProcessMesh( aiMesh* pMesh)
+// Converts a single mesh 
+void FlipUVsProcess::ProcessMesh( aiMesh* pMesh)
+{
+	// mirror texture y coordinate
+	for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)	{
+		if( !pMesh->HasTextureCoords( a))
+			break;
+
+		for( unsigned int b = 0; b < pMesh->mNumVertices; b++)
+			pMesh->mTextureCoords[a][b].y = 1.0f - pMesh->mTextureCoords[a][b].y;
+	}
+}
+
+#endif // !ASSIMP_BUILD_NO_FLIPUVS_PROCESS
+#ifndef  ASSIMP_BUILD_NO_FLIPWINDING_PROCESS
+// # FlipWindingOrderProcess
+
+// ------------------------------------------------------------------------------------------------
+// Constructor to be privately used by Importer
+FlipWindingOrderProcess::FlipWindingOrderProcess()
+{}
+
+// ------------------------------------------------------------------------------------------------
+// Destructor, private as well
+FlipWindingOrderProcess::~FlipWindingOrderProcess()
+{}
+
+// ------------------------------------------------------------------------------------------------
+// Returns whether the processing step is present in the given flag field.
+bool FlipWindingOrderProcess::IsActive( unsigned int pFlags) const
+{
+	return 0 != (pFlags & aiProcess_FlipWindingOrder);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Executes the post processing step on the given imported data.
+void FlipWindingOrderProcess::Execute( aiScene* pScene)
+{
+	DefaultLogger::get()->debug("FlipWindingOrderProcess begin");
+	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+		ProcessMesh(pScene->mMeshes[i]);
+	DefaultLogger::get()->debug("FlipWindingOrderProcess finished");
+}
+
+// ------------------------------------------------------------------------------------------------
+// Converts a single mesh 
+void FlipWindingOrderProcess::ProcessMesh( aiMesh* pMesh)
 {
 	// invert the order of all faces in this mesh
 	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
@@ -189,77 +318,6 @@ void ConvertToLHProcess::ProcessMesh( aiMesh* pMesh)
 		for( unsigned int b = 0; b < face.mNumIndices / 2; b++)
 			std::swap( face.mIndices[b], face.mIndices[ face.mNumIndices - 1 - b]);
 	}
-
-	// mirror texture y coordinate
-	for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
-	{
-		if( pMesh->HasTextureCoords( a))
-		{
-			for( unsigned int b = 0; b < pMesh->mNumVertices; b++)
-				pMesh->mTextureCoords[a][b].y = 1.0f - pMesh->mTextureCoords[a][b].y;
-		}
-	}
-
-	// mirror bitangents as well as they're derived from the texture coords
-	if( pMesh->HasTangentsAndBitangents())
-	{
-		for( unsigned int a = 0; a < pMesh->mNumVertices; a++)
-			pMesh->mBitangents[a] = -pMesh->mBitangents[a];
-	}
 }
 
-// ------------------------------------------------------------------------------------------------
-// Converts the given animation to LH coordinates. 
-void ConvertToLHProcess::ProcessAnimation( aiNodeAnim* pAnim)
-{
-	// position keys
-	for( unsigned int a = 0; a < pAnim->mNumPositionKeys; a++)
-		ConvertToDX( pAnim->mPositionKeys[a].mValue);
-
-	return;
-	// rotation keys
-	for( unsigned int a = 0; a < pAnim->mNumRotationKeys; a++)
-	{
-		aiMatrix3x3 rotmat = pAnim->mRotationKeys[a].mValue.GetMatrix();
-		ConvertToDX( rotmat);
-		pAnim->mRotationKeys[a].mValue = aiQuaternion( rotmat);
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-// Static helper function to convert a vector/matrix from DX to OGL coords
-void ConvertToLHProcess::ConvertToOGL( aiVector3D& poVector)
-{
-	poVector = sToOGLTransform * poVector;
-}
-
-// ------------------------------------------------------------------------------------------------
-void ConvertToLHProcess::ConvertToOGL( aiMatrix3x3& poMatrix)
-{
-	poMatrix = sToOGLTransform * poMatrix;
-}
-
-// ------------------------------------------------------------------------------------------------
-void ConvertToLHProcess::ConvertToOGL( aiMatrix4x4& poMatrix)
-{
-	poMatrix = aiMatrix4x4( sToOGLTransform) * poMatrix;
-}
-
-// ------------------------------------------------------------------------------------------------
-// Static helper function to convert a vector/matrix from OGL back to DX coords
-void ConvertToLHProcess::ConvertToDX( aiVector3D& poVector)
-{
-	poVector = sToDXTransform * poVector;
-}
-
-// ------------------------------------------------------------------------------------------------
-void ConvertToLHProcess::ConvertToDX( aiMatrix3x3& poMatrix)
-{
-	poMatrix = sToDXTransform * poMatrix;
-}
-
-// ------------------------------------------------------------------------------------------------
-void ConvertToLHProcess::ConvertToDX( aiMatrix4x4& poMatrix)
-{
-	poMatrix = aiMatrix4x4(sToDXTransform) * poMatrix;
-}
+#endif // !! ASSIMP_BUILD_NO_FLIPWINDING_PROCESS

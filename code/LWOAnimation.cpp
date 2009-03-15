@@ -549,7 +549,7 @@ void AnimResolver::ExtractAnimChannel(aiNodeAnim** out, unsigned int flags /*= 0
 		for (unsigned int i = 0; i < anim->mNumRotationKeys; ++i) {
 			aiQuatKey& qk = anim->mRotationKeys[i];
 			qk.mTime  = keys[i].mTime;
-			qk.mValue = aiQuaternion( keys[i].mValue.x ,keys[i].mValue.y ,keys[i].mValue.z );
+			qk.mValue = aiQuaternion( keys[i].mValue.x ,keys[i].mValue.z ,keys[i].mValue.y );
 		}
 	}
 

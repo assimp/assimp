@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "B3DImporter.h"
 #include "TextureTransform.h"
+#include "ConvertToLHProcess.h"
 
 using namespace Assimp;
 using namespace std;
@@ -119,11 +120,6 @@ void B3DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 
 	//create root node
 	aiNode *node=new aiNode( "root" );
-	node->mTransformation=aiMatrix4x4(
-	1,0,0,0,
-	0,0,1,0,
-	0,1,0,0,
-	0,0,0,1 );
 	
 	node->mNumMeshes=_meshes.size();
 	node->mMeshes=new unsigned[_meshes.size()];
@@ -131,6 +127,10 @@ void B3DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 		node->mMeshes[i]=i;
 	}
 	pScene->mRootNode=node;
+
+	// convert to RH
+	MakeLeftHandedProcess monster_maker;
+	monster_maker.Execute(pScene);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -348,8 +348,8 @@ void B3DImporter::ReadTRIS(){
 		unsigned *ip=face->mIndices=new unsigned[3];
 		int v[3];
 		v[0]=ReadInt();
-		v[2]=ReadInt();
 		v[1]=ReadInt();
+		v[2]=ReadInt();
 		for( unsigned j=0;j<3;++j ){
 			int k=v[j];
 			const Vertex &v=_vertices[k];

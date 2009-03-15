@@ -65,12 +65,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 	//////////////////////////////////////////////////////////////////////////
 	// Define ASSIMP_BUILD_NO_XX_PROCESS to disable a specific
-	// post-processing step. The spe will be excluded from the
-	// build in this case. 'XX' stands for the name of the loader.
-	// List of defines:
+	// post-processing step. 
+	// Full list of all 'XX':
 	// CALCTANGENTS
 	// JOINVERTICES
-	// CONVERTTOLH
 	// TRIANGULATE
 	// GENFACENORMALS
 	// GENVERTEXNORMALS
@@ -88,6 +86,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	// TRANSFORMTEXCOORDS
 	// GENUVCOORDS
 	// ENTITYMESHBUILDER
+	// MAKELEFTHANDED
+	// FLIPUVS
+	// FLIPWINDINGORDER
+	// *OPTIMIZEMESHES
+	// *OPTIMIZEANIMS
+	// *OPTIMIZENODES
+	// *GENENTITYMESHES
 
 // Compiler specific includes and definitions
 #if (defined _MSC_VER)

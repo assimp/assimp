@@ -338,23 +338,18 @@ void PLYImporter::ReplaceDefaultMaterial(std::vector<PLY::Face>* avFaces,
 {
 	bool bNeedDefaultMat = false;
 
-	for (std::vector<PLY::Face>::iterator
-		i =  avFaces->begin();i != avFaces->end();++i)
-	{
-		if (0xFFFFFFFF == (*i).iMaterialIndex)
-		{
+	for (std::vector<PLY::Face>::iterator i =  avFaces->begin();i != avFaces->end();++i)	{
+		if (0xFFFFFFFF == (*i).iMaterialIndex)	{
 			bNeedDefaultMat = true;
 			(*i).iMaterialIndex = (unsigned int)avMaterials->size();
 		}
-		else if ((*i).iMaterialIndex >= avMaterials->size() )
-		{
+		else if ((*i).iMaterialIndex >= avMaterials->size() )	{
 			// clamp the index
 			(*i).iMaterialIndex = (unsigned int)avMaterials->size()-1;
 		}
 	}
 
-	if (bNeedDefaultMat)
-	{
+	if (bNeedDefaultMat)	{
 		// generate a default material
 		MaterialHelper* pcHelper = new MaterialHelper();
 
@@ -369,6 +364,11 @@ void PLYImporter::ReplaceDefaultMaterial(std::vector<PLY::Face>* avFaces,
 
 		clr.b = clr.g = clr.r = 0.05f;
 		pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_AMBIENT);
+
+		// The face order is absolutely undefined for PLY, so we have to
+		// use two-sided rendering to be sure it's ok.
+		const int two_sided = 1;
+		pcHelper->AddProperty(&two_sided,1,AI_MATKEY_TWOSIDED);
 
 		avMaterials->push_back(pcHelper);
 	}
@@ -997,11 +997,8 @@ void PLYImporter::LoadMaterial(std::vector<MaterialHelper*>* pvOut)
 		}
 	}
 	// check whether we have a valid source for the material data
-	if (NULL != pcList)
-	{
-		for (std::vector<ElementInstance>::const_iterator i =  pcList->alInstances.begin();
-			i != pcList->alInstances.end();++i)
-		{
+	if (NULL != pcList)	{
+		for (std::vector<ElementInstance>::const_iterator i =  pcList->alInstances.begin();i != pcList->alInstances.end();++i)	{
 			aiColor4D clrOut;
 			MaterialHelper* pcHelper = new MaterialHelper();
 	
@@ -1019,16 +1016,12 @@ void PLYImporter::LoadMaterial(std::vector<MaterialHelper*>* pvOut)
 
 			// handle phong power and shading mode
 			int iMode;
-			if (0xFFFFFFFF != iPhong)
-			{
-				float fSpec = PLY::PropertyInstance::ConvertTo<float>(
-					(*i).alProperties[iPhong].avList.front(),ePhong);
+			if (0xFFFFFFFF != iPhong)	{
+				float fSpec = PLY::PropertyInstance::ConvertTo<float>((*i).alProperties[iPhong].avList.front(),ePhong);
 
 				// if shininess is 0 (and the pow() calculation would therefore always
-				// become 1, not depending on the angle) use gouraud lighting
-				if (fSpec)
-				{
-
+				// become 1, not depending on the angle), use gouraud lighting
+				if (fSpec)	{
 					// scale this with 15 ... hopefully this is correct
 					fSpec *= 15;
 					pcHelper->AddProperty<float>(&fSpec, 1, AI_MATKEY_SHININESS);
@@ -1041,13 +1034,15 @@ void PLYImporter::LoadMaterial(std::vector<MaterialHelper*>* pvOut)
 			pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
 
 			// handle opacity
-			if (0xFFFFFFFF != iOpacity)
-			{
-				float fOpacity = PLY::PropertyInstance::ConvertTo<float>(
-					(*i).alProperties[iPhong].avList.front(),eOpacity);
-
+			if (0xFFFFFFFF != iOpacity)	{
+				float fOpacity = PLY::PropertyInstance::ConvertTo<float>((*i).alProperties[iPhong].avList.front(),eOpacity);
 				pcHelper->AddProperty<float>(&fOpacity, 1, AI_MATKEY_OPACITY);
 			}
+
+			// The face order is absolutely undefined for PLY, so we have to
+			// use two-sided rendering to be sure it's ok.
+			const int two_sided = 1;
+			pcHelper->AddProperty(&two_sided,1,AI_MATKEY_TWOSIDED);
 
 			// add the newly created material instance to the list
 			pvOut->push_back(pcHelper);

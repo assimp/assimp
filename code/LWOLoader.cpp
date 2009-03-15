@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SGSpatialSort.h"
 #include "ByteSwap.h"
 #include "ProcessHelper.h"
+#include "ConvertToLHProcess.h"
 
 using namespace Assimp;
 
@@ -314,24 +315,20 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 				// now convert all faces
 				unsigned int vert = 0;
 				std::vector<unsigned int>::iterator outIt = smoothingGroups.begin();
-				for (it = sorted.begin(); it != end;++it,++outIt)
-				{
+				for (it = sorted.begin(); it != end;++it,++outIt)	{
 					const LWO::Face& face = layer.mFaces[*it];
 					*outIt = face.smoothGroup;
 
 					// copy all vertices
-					for (unsigned int q = 0; q  < face.mNumIndices;++q)
-					{
+					for (unsigned int q = 0; q  < face.mNumIndices;++q,++vert)	{
 						register unsigned int idx = face.mIndices[q];
 						*pv = layer.mTempPoints[idx] + layer.mPivot;
-						pv->z *= -1.0f; // DX to OGL
-						//std::swap(pv->z,pv->y);
 						pv++;
 
 						// process UV coordinates
-						for (unsigned int w = 0; w < AI_MAX_NUMBER_OF_TEXTURECOORDS;++w)	
-						{
-							if (0xffffffff == vUVChannelIndices[w])break;
+						for (unsigned int w = 0; w < AI_MAX_NUMBER_OF_TEXTURECOORDS;++w)	{
+							if (0xffffffff == vUVChannelIndices[w])
+								break;
 							aiVector3D*& pp = pvUV[w];
 							const aiVector2D& src = ((aiVector2D*)&layer.mUVChannels[vUVChannelIndices[w]].rawData[0])[idx];
 							pp->x = src.x;
@@ -345,9 +342,9 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 						}
 
 						// process vertex colors
-						for (unsigned int w = 0; w < AI_MAX_NUMBER_OF_COLOR_SETS;++w)	
-						{
-							if (0xffffffff == vVColorIndices[w])break;
+						for (unsigned int w = 0; w < AI_MAX_NUMBER_OF_COLOR_SETS;++w)	{
+							if (0xffffffff == vVColorIndices[w])
+								break;
 							*pvVC[w] = ((aiColor4D*)&layer.mVColorChannels[vVColorIndices[w]].rawData[0])[idx];
 
 							// If a RGB color map is explicitly requested delete the
@@ -364,10 +361,8 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 						{
 						}
 #endif
-						face.mIndices[q] = vert + (face.mNumIndices-q-1);
+						face.mIndices[q] = vert;
 					}
-					vert += face.mNumIndices;
-
 					pf->mIndices = face.mIndices;
 					pf->mNumIndices = face.mNumIndices;
 					unsigned int** p = (unsigned int**)&face.mIndices;*p = NULL; // make sure it won't be deleted
@@ -568,8 +563,7 @@ void LWOImporter::GenerateNodeGraph(std::vector<aiNode*>& apcNodes)
 	for (unsigned int i = 0; i < apcNodes.size();++i)
 		if (apcNodes[i] && apcNodes[i]->mNumMeshes)++extra;
 
-	if (extra)
-	{
+	if (extra)	{
 		// we need to add extra nodes to the root
 		const unsigned int newSize = extra + pScene->mRootNode->mNumChildren;
 		aiNode** const apcNewNodes = new aiNode*[newSize];
@@ -596,15 +590,17 @@ void LWOImporter::GenerateNodeGraph(std::vector<aiNode*>& apcNodes)
 	if (!pScene->mRootNode->mNumChildren)
 		throw new ImportErrorException("LWO: Unable to build a valid node graph");
 
-	// remove a single root node
-	// TODO: implement directly in the above loop, no need to deallocate here
-	if (1 == pScene->mRootNode->mNumChildren)
-	{
+	// Remove a single root node with no meshes assigned ... 
+	if (1 == pScene->mRootNode->mNumChildren)	{
 		aiNode* pc = pScene->mRootNode->mChildren[0];
 		pc->mParent = pScene->mRootNode->mChildren[0] = NULL;
 		delete pScene->mRootNode;
 		pScene->mRootNode = pc;
 	}
+
+	// convert the whole stuff to RH
+	MakeLeftHandedProcess maker;
+	maker.Execute(pScene);
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -144,7 +144,11 @@ void MD5Importer::InternReadFile( const std::string& pFile,
 
 	// make sure we have at least one file
 	if (!bHadMD5Mesh && !bHadMD5Anim && !bHadMD5Camera)
-		throw new ImportErrorException("Failed to read valid contents from this MD5 data set");
+		throw new ImportErrorException("Failed to read valid contents from this MD5* file");
+
+	// Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
+	pScene->mRootNode->mTransformation = aiMatrix4x4(1.f,0.f,0.f,0.f,
+		0.f,0.f,1.f,0.f,0.f,-1.f,0.f,0.f,0.f,0.f,0.f,1.f);
 
 	// the output scene wouldn't pass the validation without this flag
 	if (!bHadMD5Mesh)
@@ -156,7 +160,6 @@ void MD5Importer::InternReadFile( const std::string& pFile,
 void MD5Importer::LoadFileIntoMemory (IOStream* file)
 {
 	ai_assert(NULL != file);
-
 	fileSize = (unsigned int)file->FileSize();
 
 	// allocate storage and copy the contents of the file to a memory buffer
@@ -211,6 +214,8 @@ void MD5Importer::MakeDataUnique (MD5::MeshDesc& meshSrc)
 			}
 			else abHad[face.mIndices[i]] = true;
 		}
+		// swap face order
+		std::swap(face.mIndices[0],face.mIndices[2]);
 	}
 }
 
@@ -443,8 +448,7 @@ void MD5Importer::LoadMD5MeshFile ()
 				}
 
 				// process bone weights
-				for (unsigned int jub = (*iter).mFirstWeight, w = jub; w < jub + (*iter).mNumWeights;++w)
-				{
+				for (unsigned int jub = (*iter).mFirstWeight, w = jub; w < jub + (*iter).mNumWeights;++w)	{
 					if (w >= meshSrc.mWeights.size())
 						throw new ImportErrorException("MD5MESH: Invalid weight index");
 
@@ -478,8 +482,7 @@ void MD5Importer::LoadMD5MeshFile ()
 		// (however, take care that the aiFace destructor doesn't delete the mIndices array)
 		mesh->mNumFaces = (unsigned int)meshSrc.mFaces.size();
 		mesh->mFaces = new aiFace[mesh->mNumFaces];
-		for (unsigned int c = 0; c < mesh->mNumFaces;++c)
-		{
+		for (unsigned int c = 0; c < mesh->mNumFaces;++c)	{
 			mesh->mFaces[c].mNumIndices = 3;
 			mesh->mFaces[c].mIndices = meshSrc.mFaces[c].mIndices;
 			meshSrc.mFaces[c].mIndices = NULL;
@@ -621,6 +624,7 @@ void MD5Importer::LoadMD5AnimFile ()
 		if (!pScene->mRootNode) {
 			pScene->mRootNode = new aiNode();
 			pScene->mRootNode->mName.Set("<MD5_Hierarchy>");
+
 			AttachChilds_Anim(-1,pScene->mRootNode,animParser.mAnimatedBones,(const aiNodeAnim**)anim->mChannels);
 
 			// Call SkeletonMeshBuilder to construct a mesh to represent the shape
@@ -659,14 +663,17 @@ void MD5Importer::LoadMD5CameraFile ()
 	std::vector<unsigned int>& cuts = cameraParser.cuts;
 	std::vector<MD5::CameraAnimFrameDesc>& frames = cameraParser.frames;
 
-	// Construct output graph - a simple dummy node
-	aiNode* root = pScene->mRootNode = new aiNode();
-	root->mName.Set("<MD5Camera>");
+	// Construct output graph - a simple root with a dummy child.
+	// The root node performs the coordinate system conversion
+	aiNode* root = pScene->mRootNode = new aiNode("<MD5CameraRoot>");
+	root->mChildren = new aiNode*[root->mNumChildren = 1];
+	root->mChildren[0] = new aiNode("<MD5Camera>");
+	root->mChildren[0]->mParent = root;
 
 	// ... but with one camera assigned to it
 	pScene->mCameras = new aiCamera*[pScene->mNumCameras = 1];
 	aiCamera* cam = pScene->mCameras[0] = new aiCamera();
-	cam->mName = root->mName;
+	cam->mName = "<MD5Camera>";
 
 	// FIXME: Fov is currently set to the first frame's value
 	cam->mHorizontalFOV = AI_DEG_TO_RAD( frames.front().fFOV );

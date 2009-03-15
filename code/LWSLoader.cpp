@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SceneCombiner.h"
 #include "GenericProperty.h"
 #include "SkeletonMeshBuilder.h"
+#include "ConvertToLHProcess.h"
 
 using namespace Assimp;
 
@@ -858,6 +859,10 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 		std::copy(anims.begin(),anims.end(),anim->mChannels);
 	}
 
+	// convert the master scene to RH
+	MakeLeftHandedProcess monster_cheat;
+	monster_cheat.Execute(master);
+
 	// OK ... finally build the output graph
 	SceneCombiner::MergeScenes(&pScene,master,attach,
 		AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES    | (!configSpeedFlag ? (
@@ -872,4 +877,5 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 			SkeletonMeshBuilder builder(pScene);
 		}
 	}
+
 }

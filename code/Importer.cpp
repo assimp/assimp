@@ -167,7 +167,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_JOINVERTICES_PROCESS
 #	include "JoinVerticesProcess.h"
 #endif
-#ifndef AI_BUILD_NO_CONVERTTOLH_PROCESS
+#if !(defined AI_BUILD_NO_MAKELEFTHANDED_PROCESS && defined AI_BUILD_NO_FLIPUVS_PROCESS && defined AI_BUILD_NO_FLIPWINDINGORDER_PROCESS)
 #	include "ConvertToLHProcess.h"
 #endif
 #ifndef AI_BUILD_NO_TRIANGULATE_PROCESS
@@ -436,8 +436,14 @@ Importer::Importer()
 #if (!defined AI_BUILD_NO_SPLITLARGEMESHES_PROCESS)
 	mPostProcessingSteps.push_back( new SplitLargeMeshesProcess_Vertex());
 #endif
-#if (!defined AI_BUILD_NO_CONVERTTOLH_PROCESS)
-	mPostProcessingSteps.push_back( new ConvertToLHProcess());
+#if (!defined AI_BUILD_NO_MAKELEFTHANDED_PROCESS)
+	mPostProcessingSteps.push_back( new MakeLeftHandedProcess());
+#endif
+#if (!defined AI_BUILD_NO_FLIPUVS_PROCESS)
+	mPostProcessingSteps.push_back( new FlipUVsProcess());
+#endif
+#if (!defined AI_BUILD_NO_FLIPWINDINGORDER_PROCESS)
+	mPostProcessingSteps.push_back( new FlipWindingOrderProcess());
 #endif
 #if (!defined AI_BUILD_NO_LIMITBONEWEIGHTS_PROCESS)
 	mPostProcessingSteps.push_back( new LimitBoneWeightsProcess());

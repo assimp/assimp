@@ -145,7 +145,7 @@ struct ShaderMapBlock
 struct ShaderDataBlock
 {
 	ShaderDataBlock()
-		:	cull	(CULL_CCW)
+		:	cull	(CULL_CW)
 	{}
 
 	//! Name of referenced data element

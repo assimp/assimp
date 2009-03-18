@@ -531,7 +531,7 @@ bool MD3Importer::ReadMultipartFile()
 		aiNode* tag_torso, *tag_head;
 		std::vector<AttachmentInfo> attach;
 
-		DefaultLogger::get()->info("Multi-part MD3 player model: lower, upper and head parts are joined");
+		DefaultLogger::get()->info("Multi part MD3 player model: lower, upper and head parts are joined");
 
 		// ensure we won't try to load ourselves recursively
 		BatchLoader::PropertyMap props;
@@ -552,21 +552,21 @@ bool MD3Importer::ReadMultipartFile()
 		// ... and get them. We need all of them.
 		scene_lower = batch.GetImport(_lower);
 		if (!scene_lower) {
-			DefaultLogger::get()->error("M3D: Failed to read multipart model, lower.md3 fails to load");
+			DefaultLogger::get()->error("M3D: Failed to read multi part model, lower.md3 fails to load");
 			failure = "lower";
 			goto error_cleanup;
 		}
 
 		scene_upper = batch.GetImport(_upper);
 		if (!scene_upper) {
-			DefaultLogger::get()->error("M3D: Failed to read multipart model, upper.md3 fails to load");
+			DefaultLogger::get()->error("M3D: Failed to read multi part model, upper.md3 fails to load");
 			failure = "upper";
 			goto error_cleanup;
 		}
 
 		scene_head  = batch.GetImport(_head);
 		if (!scene_head) {
-			DefaultLogger::get()->error("M3D: Failed to read multipart model, head.md3 fails to load");
+			DefaultLogger::get()->error("M3D: Failed to read multi part model, head.md3 fails to load");
 			failure = "head";
 			goto error_cleanup;
 		}
@@ -580,7 +580,7 @@ bool MD3Importer::ReadMultipartFile()
 		// tag_torso
 		tag_torso = scene_lower->mRootNode->FindNode("tag_torso");
 		if (!tag_torso) {
-			DefaultLogger::get()->error("M3D: Failed to find attachment tag for multipart model: tag_torso expected");
+			DefaultLogger::get()->error("M3D: Failed to find attachment tag for multi part model: tag_torso expected");
 			goto error_cleanup;
 		}
 		scene_upper->mRootNode->mName.Set("upper");
@@ -589,7 +589,7 @@ bool MD3Importer::ReadMultipartFile()
 		// tag_head
 		tag_head = scene_upper->mRootNode->FindNode("tag_head");
 		if (!tag_head) {
-			DefaultLogger::get()->error("M3D: Failed to find attachment tag for multipart model: tag_head expected");
+			DefaultLogger::get()->error("M3D: Failed to find attachment tag for multi part model: tag_head expected");
 			goto error_cleanup;
 		}
 		scene_head->mRootNode->mName.Set("head");
@@ -601,12 +601,22 @@ bool MD3Importer::ReadMultipartFile()
 		RemoveSingleNodeFromList (scene_upper->mRootNode->FindNode("tag_torso"));
 		RemoveSingleNodeFromList (scene_head-> mRootNode->FindNode("tag_head" ));
 
+		// Undo the rotations which we applied to the coordinate systems. We're
+		// working in global Quake space here
+		scene_head->mRootNode->mTransformation  = aiMatrix4x4();
+		scene_lower->mRootNode->mTransformation = aiMatrix4x4();
+		scene_upper->mRootNode->mTransformation = aiMatrix4x4();
+
 		// and merge the scenes
 		SceneCombiner::MergeScenes(&mScene,master, attach,
 			AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES          |
 			AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES       |
 			AI_INT_MERGE_SCENE_RESOLVE_CROSS_ATTACHMENTS |
 			(!configSpeedFlag ? AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY : 0));
+
+		// Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
+		mScene->mRootNode->mTransformation = aiMatrix4x4(1.f,0.f,0.f,0.f,
+			0.f,0.f,1.f,0.f,0.f,-1.f,0.f,0.f,0.f,0.f,0.f,1.f);
 
 		return true;
 
@@ -673,10 +683,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 
 	// get base path and file name
 	// todo ... move to PathConverter
-	std::string::size_type s = mFile.find_last_of('/');
-	if (s == std::string::npos) {
-		s = mFile.find_last_of('\\');
-	}
+	std::string::size_type s = mFile.find_last_of("/\\");
 	if (s == std::string::npos) {
 		s = 0;
 	}
@@ -907,8 +914,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 			// Ensure correct endianess
 #ifdef AI_BUILD_BIG_ENDIAN
 
-		for (uint32_t i = 0; i < pcSurfaces->NUM_VERTICES;++i)
-		{
+		for (uint32_t i = 0; i < pcSurfaces->NUM_VERTICES;++i)	{
 			AI_SWAP2( pcVertices[i].NORMAL );
 			AI_SWAP2( pcVertices[i].X );
 			AI_SWAP2( pcVertices[i].Y );
@@ -917,8 +923,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 			AI_SWAP4( pcUVs[i].U );
 			AI_SWAP4( pcUVs[i].U );
 		}
-		for (uint32_t i = 0; i < pcSurfaces->NUM_TRIANGLES;++i)
-		{
+		for (uint32_t i = 0; i < pcSurfaces->NUM_TRIANGLES;++i)	{
 			AI_SWAP4(pcTriangles[i].INDEXES[0]);
 			AI_SWAP4(pcTriangles[i].INDEXES[1]);
 			AI_SWAP4(pcTriangles[i].INDEXES[2]);
@@ -939,34 +944,31 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 
 		// Fill in all triangles
 		unsigned int iCurrent = 0;
-		for (unsigned int i = 0; i < (unsigned int)pcSurfaces->NUM_TRIANGLES;++i)
-		{
+		for (unsigned int i = 0; i < (unsigned int)pcSurfaces->NUM_TRIANGLES;++i)	{
 			pcMesh->mFaces[i].mIndices = new unsigned int[3];
 			pcMesh->mFaces[i].mNumIndices = 3;
 
 			unsigned int iTemp = iCurrent;
-			for (unsigned int c = 0; c < 3;++c,++iCurrent)
-			{
+			for (unsigned int c = 0; c < 3;++c,++iCurrent)	{
 				pcMesh->mFaces[i].mIndices[c] = iCurrent;
 
 				// Read vertices
-				pcMesh->mVertices[iCurrent].x = pcVertices[ pcTriangles->INDEXES[c]].X*AI_MD3_XYZ_SCALE;
-				pcMesh->mVertices[iCurrent].y = pcVertices[ pcTriangles->INDEXES[c]].Y*AI_MD3_XYZ_SCALE;
-				pcMesh->mVertices[iCurrent].z = pcVertices[ pcTriangles->INDEXES[c]].Z*AI_MD3_XYZ_SCALE;
+				aiVector3D& vec = pcMesh->mVertices[iCurrent];
+				vec.x = pcVertices[ pcTriangles->INDEXES[c]].X*AI_MD3_XYZ_SCALE;
+				vec.y = pcVertices[ pcTriangles->INDEXES[c]].Y*AI_MD3_XYZ_SCALE;
+				vec.z = pcVertices[ pcTriangles->INDEXES[c]].Z*AI_MD3_XYZ_SCALE;
 
 				// Convert the normal vector to uncompressed float3 format
-				LatLngNormalToVec3(pcVertices[pcTriangles->INDEXES[c]].NORMAL,
-					(float*)&pcMesh->mNormals[iCurrent]);
+				aiVector3D& nor = pcMesh->mNormals[iCurrent];
+				LatLngNormalToVec3(pcVertices[pcTriangles->INDEXES[c]].NORMAL,(float*)&nor);
 
 				// Read texture coordinates
 				pcMesh->mTextureCoords[0][iCurrent].x = pcUVs[ pcTriangles->INDEXES[c]].U;
 				pcMesh->mTextureCoords[0][iCurrent].y = 1.0f-pcUVs[ pcTriangles->INDEXES[c]].V;
 			}
 			// Flip face order if necessary
-			if (!shader || shader->cull == Q3Shader::CULL_CCW) {
-				pcMesh->mFaces[i].mIndices[0] = iTemp+2;
-				pcMesh->mFaces[i].mIndices[1] = iTemp+1;
-				pcMesh->mFaces[i].mIndices[2] = iTemp+0;
+			if (!shader || shader->cull == Q3Shader::CULL_CW) {
+				std::swap(pcMesh->mFaces[i].mIndices[2],pcMesh->mFaces[i].mIndices[1]);
 			}
 			pcTriangles++;
 		}
@@ -1008,7 +1010,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 			AI_SWAP4(pcTags->origin.y);
 			AI_SWAP4(pcTags->origin.z);
 
-			// Copy local origin
+			// Copy local origin, again flip z,y
 			nd->mTransformation.a4 = pcTags->origin.x;
 			nd->mTransformation.b4 = pcTags->origin.y;
 			nd->mTransformation.c4 = pcTags->origin.z;
@@ -1025,6 +1027,10 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
 		pScene->mRootNode->mMeshes[i] = i;
+
+	// Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
+	pScene->mRootNode->mTransformation = aiMatrix4x4(1.f,0.f,0.f,0.f,
+		0.f,0.f,1.f,0.f,0.f,-1.f,0.f,0.f,0.f,0.f,0.f,1.f);
 }
 
 #endif // !! ASSIMP_BUILD_NO_MD3_IMPORTER

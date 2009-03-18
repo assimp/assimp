@@ -63,12 +63,14 @@ extern "C" {
  * a special post-processing step which splits meshes with *different*
  * primitive types mixed up (e.g. lines and triangles) in several, 'clean'
  * submeshes. Furthermore there is a configuration option, 
- * AI_CONFIG_PP_SBP_REMOVE, to force SortByPType to remove specific primitive
- * types from the scene - completely. In most cases you'll propably want to
- * set this config to 
+ * #AI_CONFIG_PP_SBP_REMOVE, to force #aiProcess_SortByPType to remove 
+ * specific primitive types from the imported scene - completely. In most cases
+ * you'll probably want to set this setting to 
  * @code 
  * aiPrimitiveType_LINE|aiPrimitiveType_POINT
  * @endcode
+ * @note Take a look at the @link data Data Structures page @endlink for
+ * more information on the layout and winding order of a face.
  */
 struct aiFace
 {

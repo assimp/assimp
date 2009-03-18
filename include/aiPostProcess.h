@@ -436,14 +436,14 @@ enum aiPostProcessSteps
 	aiProcess_FlipUVs = 0x80000000, /* don't change */
 
 	// -------------------------------------------------------------------------
-	/** <hr>This step adjusts the output face winding order to be clock-wise.
+	/** <hr>This step adjusts the output face winding order to be ccw.
 	 *
-	 * The default face winding order is counter-clockwise.
+	 * The default face winding order is clockwise.
 	 * <br><b>Output face order:</b>
 	 * @code
-	 *       x0
+	 *       x1
 	 *           
-	 *                         x1
+	 *                         x0
 	 *  x2
 	 * @endcode
 	*/
@@ -461,10 +461,9 @@ enum aiPostProcessSteps
 /** @def aiProcess_ConvertToLeftHanded
  *  @brief Shortcut flag for Direct3D-based applications. 
  *
- *  Supersedes the #aiProcess_MakeLeftHanded, #aiProcess_FlipUVs and
- *  #aiProcess_FlipWindingOrder flags. The output data matches Direct3D's conventions:
- *  left-handed geometry, upper-left origin for UV coordinates and finally clockwise
- *  face order, suitable for CCW culling.
+ *  Supersedes the #aiProcess_MakeLeftHanded and #aiProcess_FlipUVs and
+ *  The output data matches Direct3D's conventions: left-handed geometry, upper-left
+ *  origin for UV coordinates and finally clockwise face order, suitable for CCW culling.
  *
  *  @deprecated 
  */

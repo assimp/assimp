@@ -310,8 +310,7 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 			DefaultLogger::get()->warn("Texture file name has zero length. It will be skipped.");
 		}
 	}
-	else
-	{
+	else	{
 		// apply a default material
 		aiColor3D clr;
 		clr.b = clr.g = clr.r = 0.6f;
@@ -338,8 +337,7 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 	unsigned int iCurrent = 0;
 
 	float fDivisorU = 1.0f,fDivisorV = 1.0f;
-	if (m_pcHeader->numTexCoords)
-	{
+	if (m_pcHeader->numTexCoords)	{
 		// allocate storage for texture coordinates, too
 		pcMesh->mTextureCoords[0] = new aiVector3D[pcMesh->mNumVertices];
 		pcMesh->mNumUVComponents[0] = 2;
@@ -356,8 +354,7 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 		else fDivisorV = (float)m_pcHeader->skinHeight;
 	}
 
-	for (unsigned int i = 0; i < (unsigned int)m_pcHeader->numTriangles;++i)
-	{
+	for (unsigned int i = 0; i < (unsigned int)m_pcHeader->numTriangles;++i)	{
 		// Allocate the face
 		pScene->mMeshes[0]->mFaces[i].mIndices = new unsigned int[3];
 		pScene->mMeshes[0]->mFaces[i].mNumIndices = 3;
@@ -365,12 +362,11 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 		// copy texture coordinates
 		// check whether they are different from the previous value at this index.
 		// In this case, create a full separate set of vertices/normals/texcoords
-		for (unsigned int c = 0; c < 3;++c,++iCurrent)
-		{
+		for (unsigned int c = 0; c < 3;++c,++iCurrent)	{
+
 			// validate vertex indices
 			register unsigned int iIndex = (unsigned int)pcTriangles[i].vertexIndices[c];
-			if (iIndex >= m_pcHeader->numVertices)
-			{
+			if (iIndex >= m_pcHeader->numVertices)	{
 				DefaultLogger::get()->error("MD2: Vertex index is outside the allowed range");
 				iIndex = m_pcHeader->numVertices-1;
 			}
@@ -391,9 +387,9 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 			aiVector3D& vNormal = pcMesh->mNormals[iCurrent];
 			LookupNormalIndex(pcVerts[iIndex].lightNormalIndex,vNormal);
 
-			// invert z for proper output coordinate system
-			vNormal.z *= -1.0f;
-			vec.z *= -1.0f;
+			// flip z and y to become right-handed
+			std::swap((float&)vNormal.z,(float&)vNormal.y);
+			std::swap((float&)vec.z,(float&)vec.y);
 
 			if (m_pcHeader->numTexCoords)	{
 				// validate texture coordinates

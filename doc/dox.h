@@ -551,12 +551,12 @@ By contrast, some other environments use left-handed coordinate systems, a promi
 DirectX. If you need the imported data to be in a left-handed coordinate system, supply the
 #aiProcess_MakeLeftHanded flag to the ReadFile() function call.
 
-The output face winding is counter-clockwise. Use #aiProcess_FlipWindingOrder to get CW data.
+The output face winding is clockwise. Use #aiProcess_FlipWindingOrder to get CCW data.
 @code
 x0
   
-            x2
-	x1
+            x1
+	x2
 @endcode
 
 The output UV coordinate system has its origin in the lower-left corner:

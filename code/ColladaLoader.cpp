@@ -399,14 +399,33 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 	// add a mesh for each subgroup in each collada mesh
 	BOOST_FOREACH( const Collada::MeshInstance& mid, pNode->mMeshes)
 	{
+		const Collada::Mesh* srcMesh = NULL;
+		const Collada::Controller* srcController = NULL;
+
 		// find the referred mesh
-		ColladaParser::MeshLibrary::const_iterator srcMeshIt = pParser.mMeshLibrary.find( mid.mMesh);
+		ColladaParser::MeshLibrary::const_iterator srcMeshIt = pParser.mMeshLibrary.find( mid.mMeshOrController);
 		if( srcMeshIt == pParser.mMeshLibrary.end())
 		{
-			DefaultLogger::get()->warn( boost::str( boost::format( "Collada: Unable to find geometry for ID \"%s\". Skipping.") % mid.mMesh));
-			continue;
+			// if not found in the mesh-library, it might also be a controller referring to a mesh
+			ColladaParser::ControllerLibrary::const_iterator srcContrIt = pParser.mControllerLibrary.find( mid.mMeshOrController);
+			if( srcContrIt != pParser.mControllerLibrary.end())
+			{
+				srcController = &srcContrIt->second;
+				srcMeshIt = pParser.mMeshLibrary.find( srcController->mMeshId);
+				if( srcMeshIt != pParser.mMeshLibrary.end())
+					srcMesh = srcMeshIt->second;
+			}
+
+			if( !srcMesh)
+			{
+				DefaultLogger::get()->warn( boost::str( boost::format( "Collada: Unable to find geometry for ID \"%s\". Skipping.") % mid.mMeshOrController));
+				continue;
+			}
+		} else
+		{
+			// ID found in the mesh library -> direct reference to an unskinned mesh
+			srcMesh = srcMeshIt->second;
 		}
-		const Collada::Mesh* srcMesh = srcMeshIt->second;
 
 		// build a mesh for each of its subgroups
 		size_t vertexStart = 0, faceStart = 0;
@@ -424,7 +443,7 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 				table = &meshMatIt->second;
 			else {
 				table = NULL;
-				DefaultLogger::get()->warn( boost::str( boost::format( "Collada: No material specified for subgroup \"%s\" in geometry \"%s\".") % submesh.mMaterial % mid.mMesh));
+				DefaultLogger::get()->warn( boost::str( boost::format( "Collada: No material specified for subgroup \"%s\" in geometry \"%s\".") % submesh.mMaterial % mid.mMeshOrController));
 			}
 			const std::string& meshMaterial = table ? table->mMatName : "";
 
@@ -451,7 +470,7 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 			}
 
 			// built lookup index of the Mesh-Submesh-Material combination
-			ColladaMeshIndex index( mid.mMesh, sm, meshMaterial);
+			ColladaMeshIndex index( mid.mMeshOrController, sm, meshMaterial);
 
 			// if we already have the mesh at the library, just add its index to the node's array
 			std::map<ColladaMeshIndex, size_t>::const_iterator dstMeshIt = mMeshIndexByID.find( index);
@@ -843,30 +862,33 @@ const aiString& ColladaLoader::FindFilenameForEffectTexture( const ColladaParser
 
 	// find the image referred by this name in the image library of the scene
 	ColladaParser::ImageLibrary::const_iterator imIt = pParser.mImageLibrary.find( name);
-	if( imIt == pParser.mImageLibrary.end()) {
+	if( imIt == pParser.mImageLibrary.end()) 
+	{
 		throw new ImportErrorException( boost::str( boost::format( 
 			"Collada: Unable to resolve effect texture entry \"%s\", ended up at ID \"%s\".") % pName % name));
 	}
+
 	static aiString result;
 
 	// if this is an embedded texture image setup an aiTexture for it
-	if (imIt->second.mFileName.empty()) {
-		if (imIt->second.mImageData.empty()) {
+	if (imIt->second.mFileName.empty()) 
+	{
+		if (imIt->second.mImageData.empty()) 
 			throw new ImportErrorException("Collada: Invalid texture, no data or file reference given");
-		}
+
 		aiTexture* tex = new aiTexture();
 
 		// setup format hint
-		if (imIt->second.mEmbeddedFormat.length() > 3) {
+		if (imIt->second.mEmbeddedFormat.length() > 3)
 			DefaultLogger::get()->warn("Collada: texture format hint is too long, truncating to 3 characters");
-		}
-		::strncpy(tex->achFormatHint,imIt->second.mEmbeddedFormat.c_str(),3);
+
+		strncpy(tex->achFormatHint,imIt->second.mEmbeddedFormat.c_str(),3);
 
 		// and copy texture data
 		tex->mHeight = 0;
 		tex->mWidth = imIt->second.mImageData.size();
 		tex->pcData = (aiTexel*)new char[tex->mWidth];
-		::memcpy(tex->pcData,&imIt->second.mImageData[0],tex->mWidth);
+		memcpy(tex->pcData,&imIt->second.mImageData[0],tex->mWidth);
 
 		// setup texture reference string
 		result.data[0] = '*';
@@ -875,7 +897,8 @@ const aiString& ColladaLoader::FindFilenameForEffectTexture( const ColladaParser
 		// and add this texture to the list
 		mTextures.push_back(tex);
 	}
-	else {
+	else 
+	{
 		result.Set( imIt->second.mFileName );
 		ConvertPath(result);
 	}
@@ -890,10 +913,10 @@ void ColladaLoader::ConvertPath (aiString& ss)
 	// For the moment we're just stripping the file:// away to make it work.
 	// Windoes doesn't seem to be able to find stuff like
 	// 'file://..\LWO\LWO2\MappingModes\earthSpherical.jpg'
-	if (0 == ::strncmp(ss.data,"file://",7)) 
+	if (0 == strncmp(ss.data,"file://",7)) 
 	{
 		ss.length -= 7;
-		::memmove(ss.data,ss.data+7,ss.length);
+		memmove(ss.data,ss.data+7,ss.length);
 		ss.data[ss.length] = '\0';
 	}
 }

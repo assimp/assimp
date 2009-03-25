@@ -48,7 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "irrXMLWrapper.h"
 #include "ColladaHelper.h"
 
-namespace Assimp	{
+namespace Assimp
+{
 
 // ------------------------------------------------------------------------------------------
 /** Parser helper class for the Collada loader. 
@@ -75,6 +76,18 @@ protected:
 
 	/** Reads asset informations such as coordinate system informations and legal blah */
 	void ReadAssetInfo();
+
+	/** Reads the skeleton controller library */
+	void ReadControllerLibrary();
+
+	/** Reads a controller into the given mesh structure */
+	void ReadController( Collada::Controller& pController);
+
+	/** Reads the joint definitions for the given controller */
+	void ReadControllerJoints( Collada::Controller& pController);
+
+	/** Reads the joint weights for the given controller */
+	void ReadControllerWeights( Collada::Controller& pController);
 
 	/** Reads the image library contents */
 	void ReadImageLibrary();
@@ -127,8 +140,15 @@ protected:
 	/** Reads a mesh from the geometry library */
 	void ReadMesh( Collada::Mesh* pMesh);
 
-	/** Reads a data array holding a number of floats, and stores it in the global library */
-	void ReadFloatArray();
+	/** Reads a source element - a combination of raw data and an accessor defining 
+	 * things that should not be redefinable. Yes, that's another rant.
+	 */
+	void ReadSource();
+
+	/** Reads a data array holding a number of elements, and stores it in the global library.
+	 * Currently supported are array of floats and arrays of strings.
+	 */
+	void ReadDataArray();
 
 	/** Reads an accessor and stores it in the global library under the given ID - 
 	 * accessors use the ID of the parent <source> element
@@ -263,6 +283,10 @@ protected:
 	/** Camera library: surface material by ID */
 	typedef std::map<std::string, Collada::Camera> CameraLibrary;
 	CameraLibrary mCameraLibrary;
+
+	/** Controller library: joint controllers by ID */
+	typedef std::map<std::string, Collada::Controller> ControllerLibrary;
+	ControllerLibrary mControllerLibrary;
 
 	/** Pointer to the root node. Don't delete, it just points to one of 
 	    the nodes in the node library. */

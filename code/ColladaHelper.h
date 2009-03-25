@@ -186,13 +186,15 @@ struct SemanticMappingTable
 	}
 };
 
-/** A reference to a mesh inside a node, including materials assigned to the various subgroups */
+/** A reference to a mesh inside a node, including materials assigned to the various subgroups.
+ * The ID refers to either a mesh or a controller which specifies the mesh
+ */
 struct MeshInstance
 {
-	 ///< ID of the mesh
-	std::string mMesh;
+	///< ID of the mesh or controller to be instanced
+	std::string mMeshOrController;
 
-	 ///< Map of materials by the subgroup ID they're applied to
+	///< Map of materials by the subgroup ID they're applied to
 	std::map<std::string, SemanticMappingTable> mMaterials;
 };
 
@@ -255,10 +257,12 @@ struct Node
 	}
 };
 
-/** Data source array */
+/** Data source array: either floats or strings */
 struct Data
 {
+	bool mIsStringArray;
 	std::vector<float> mValues;
+	std::vector<std::string> mStrings;
 };
 
 /** Accessor to a data array */
@@ -345,6 +349,30 @@ enum PrimitiveType
 	Prim_TriFans,
 	Prim_Polylist,
 	Prim_Polygon
+};
+
+/** A skeleton controller to deform a mesh with the use of joints */
+struct Controller
+{
+	// the URL of the mesh deformed by the controller.
+	std::string mMeshId; 
+
+	// accessor URL of the joint names
+	std::string mJointNameSource;
+
+	// accessor URL of the joint inverse bind matrices
+	std::string mJointOffsetMatrixSource;
+
+	// input channel: joint names. 
+	InputChannel mWeightInputJoints;
+	// input channel: joint weights
+	InputChannel mWeightInputWeights;
+
+	// Number of weights per vertex.
+	std::vector<size_t> mWeightCounts;
+
+	// JointIndex-WeightIndex pairs for all vertices
+	std::vector< std::pair<size_t, size_t> > mWeights;
 };
 
 /** A collada material. Pretty much the only member is a reference to an effect. */

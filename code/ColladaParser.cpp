@@ -160,6 +160,8 @@ void ColladaParser::ReadStructure()
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
 			if( IsElement( "asset"))
 				ReadAssetInfo();
+			else if( IsElement( "library_controllers"))
+				ReadControllerLibrary();
 			else if( IsElement( "library_images"))
 				ReadImageLibrary();
 			else if( IsElement( "library_materials"))
@@ -234,6 +236,244 @@ void ColladaParser::ReadAssetInfo()
 }
 
 // ------------------------------------------------------------------------------------------------
+// Reads the skeleton controller library
+void ColladaParser::ReadControllerLibrary()
+{
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
+		{
+			if( IsElement( "controller"))
+			{
+				// read ID. Ask the spec if it's neccessary or optional... you might be surprised.
+				int attrID = GetAttribute( "id");
+				std::string id = mReader->getAttributeValue( attrID);
+
+				// create an entry and store it in the library under its ID
+				mControllerLibrary[id] = Controller();
+
+				// read on from there
+				ReadController( mControllerLibrary[id]);
+			} else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) 
+		{
+			if( strcmp( mReader->getNodeName(), "library_controllers") != 0)
+				ThrowException( "Expected end of \"library_controllers\" element.");
+
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads a controller into the given mesh structure
+void ColladaParser::ReadController( Collada::Controller& pController)
+{
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
+		{
+			// two types of controllers: "skin" and "morph". Only the first one is relevant, we skip the other
+			if( IsElement( "morph"))
+			{
+				// should skip everything inside, so there's no danger of catching elements inbetween
+				SkipElement();
+			} 
+			else if( IsElement( "skin"))
+			{
+				// read the mesh it refers to. According to the spec this could also be another
+				// controller, but I refuse to implement every bullshit idea they've come up with
+				int sourceIndex = GetAttribute( "source");
+				pController.mMeshId = mReader->getAttributeValue( sourceIndex) + 1;
+			} 
+			else if( IsElement( "bind_shape_matrix"))
+			{
+				// content is 16 floats to define some sort of matrix... I'm going to ignore this
+				// as long as I don't have a clue how to interpret it
+				SkipElement();
+			} 
+			else if( IsElement( "source"))
+			{
+				// data array - we have specialists to handle this
+				ReadSource();
+			} 
+			else if( IsElement( "joints"))
+			{
+				ReadControllerJoints( pController);
+			}
+			else if( IsElement( "vertex_weights"))
+			{
+				ReadControllerWeights( pController);
+			}
+			else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) 
+		{
+			if( strcmp( mReader->getNodeName(), "controller") == 0)
+				break;
+			else if( strcmp( mReader->getNodeName(), "skin") != 0)
+				ThrowException( "Expected end of \"controller\" element.");
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads the joint definitions for the given controller
+void ColladaParser::ReadControllerJoints( Collada::Controller& pController)
+{
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
+		{
+			// Input channels for joint data. Two possible semantics: "JOINT" and "INV_BIND_MATRIX"
+			if( IsElement( "input"))
+			{
+				int indexSemantic = GetAttribute( "semantic");
+				const char* attrSemantic = mReader->getAttributeValue( indexSemantic);
+				int indexSource = GetAttribute( "source");
+				const char* attrSource = mReader->getAttributeValue( indexSource);
+
+				// local URLS always start with a '#'. We don't support global URLs
+				if( attrSource[0] != '#')
+					ThrowException( boost::str( boost::format( "Unsupported URL format in \"%s\"") % attrSource));
+				attrSource++;
+
+				// parse source URL to corresponding source
+				if( strcmp( attrSemantic, "JOINT") == 0)
+					pController.mJointNameSource = attrSource;
+				else if( strcmp( attrSemantic, "INV_BIND_MATRIX") == 0)
+					pController.mJointOffsetMatrixSource = attrSource;
+				else
+					ThrowException( boost::str( boost::format( "Unknown semantic \"%s\" in joint data") % attrSemantic));
+
+				// skip inner data, if present
+				if( !mReader->isEmptyElement())
+					SkipElement();
+			}
+			else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) 
+		{
+			if( strcmp( mReader->getNodeName(), "joints") != 0)
+				ThrowException( "Expected end of \"joints\" element.");
+
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads the joint weights for the given controller
+void ColladaParser::ReadControllerWeights( Collada::Controller& pController)
+{
+	// read vertex count from attributes and resize the array accordingly
+	int indexCount = GetAttribute( "count");
+	size_t vertexCount = (size_t) mReader->getAttributeValueAsInt( indexCount);
+	pController.mWeightCounts.resize( vertexCount);
+
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
+		{
+			// Input channels for weight data. Two possible semantics: "JOINT" and "WEIGHT"
+			if( IsElement( "input"))
+			{
+				InputChannel channel;
+
+				int indexSemantic = GetAttribute( "semantic");
+				const char* attrSemantic = mReader->getAttributeValue( indexSemantic);
+				int indexSource = GetAttribute( "source");
+				const char* attrSource = mReader->getAttributeValue( indexSource);
+				int indexOffset = TestAttribute( "offset");
+				if( indexOffset >= 0)
+					channel.mOffset = mReader->getAttributeValueAsInt( indexOffset);
+
+				// local URLS always start with a '#'. We don't support global URLs
+				if( attrSource[0] != '#')
+					ThrowException( boost::str( boost::format( "Unsupported URL format in \"%s\"") % attrSource));
+				channel.mAccessor = attrSource + 1;
+
+				// parse source URL to corresponding source
+				if( strcmp( attrSemantic, "JOINT") == 0)
+					pController.mWeightInputJoints = channel;
+				else if( strcmp( attrSemantic, "WEIGHT") == 0)
+					pController.mWeightInputWeights = channel;
+				else
+					ThrowException( boost::str( boost::format( "Unknown semantic \"%s\" in vertex_weight data") % attrSemantic));
+
+				// skip inner data, if present
+				if( !mReader->isEmptyElement())
+					SkipElement();
+			}
+			else if( IsElement( "vcount"))
+			{
+				// read weight count per vertex
+				const char* text = GetTextContent();
+				size_t numWeights = 0;
+				for( std::vector<size_t>::iterator it = pController.mWeightCounts.begin(); it != pController.mWeightCounts.end(); ++it)
+				{
+					if( *text == 0)
+						ThrowException( "Out of data while reading vcount");
+
+					*it = strtol10( text, &text);
+					numWeights += *it;
+					SkipSpacesAndLineEnd( &text);
+				}
+
+				TestClosing( "vcount");
+
+				// reserve weight count 
+				pController.mWeights.resize( numWeights);
+			}
+			else if( IsElement( "v"))
+			{
+				// read JointIndex - WeightIndex pairs
+				const char* text = GetTextContent();
+
+				for( std::vector< std::pair<size_t, size_t> >::iterator it = pController.mWeights.begin(); it != pController.mWeights.end(); ++it)
+				{
+					if( *text == 0)
+						ThrowException( "Out of data while reading vertex_weights");
+					it->first = strtol10( text, &text);
+					SkipSpacesAndLineEnd( &text);
+					if( *text == 0)
+						ThrowException( "Out of data while reading vertex_weights");
+					it->second = strtol10( text, &text);
+					SkipSpacesAndLineEnd( &text);
+				}
+
+				TestClosing( "v");
+			}
+			else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) 
+		{
+			if( strcmp( mReader->getNodeName(), "vertex_weights") != 0)
+				ThrowException( "Expected end of \"vertex_weights\" element.");
+
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
 // Reads the image library contents
 void ColladaParser::ReadImageLibrary()
 {
@@ -276,14 +516,15 @@ void ColladaParser::ReadImage( Collada::Image& pImage)
 			// Need to run different code paths here, depending on the Collada XSD version
 			if(  IsElement( "init_from"))
 			{
-				if (mFormat == FV_1_4_n) {
+				if (mFormat == FV_1_4_n) 
+				{
 					// element content is filename - hopefully
 					const char* sz = TestTextContent();
 					if (sz)pImage.mFileName = sz;
 					TestClosing( "init_from");
 				}
-				else if (mFormat == FV_1_5_n) {
-
+				else if (mFormat == FV_1_5_n) 
+				{
 					// make sure we skip over mip and array initializations, which
 					// we don't support, but which could confuse the loader if 
 					// they're not skipped.
@@ -302,7 +543,8 @@ void ColladaParser::ReadImage( Collada::Image& pImage)
 					// TODO: correctly jump over cube and volume maps?
 				}
 			}
-			else if (mFormat == FV_1_5_n) {
+			else if (mFormat == FV_1_5_n) 
+			{
 				if( IsElement( "ref"))
 				{
 					// element content is filename - hopefully
@@ -327,13 +569,14 @@ void ColladaParser::ReadImage( Collada::Image& pImage)
 
 					const unsigned int size = (unsigned int)(cur-data) * 2;
 					pImage.mImageData.resize(size);
-					for (unsigned int i = 0; i < size;++i) {
+					for (unsigned int i = 0; i < size;++i) 
 						pImage.mImageData[i] = HexOctetToDecimal(data+(i<<1));
-					}
+
 					TestClosing( "hex");
 				} 
 			}
-			else	{
+			else	
+			{
 				// ignore the rest
 				SkipElement();
 			}
@@ -351,7 +594,8 @@ void ColladaParser::ReadMaterialLibrary()
 {
 	while( mReader->read())
 	{
-		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
+		{
 			if( IsElement( "material"))
 			{
 				// read ID. By now you propably know my opinion about this "specification"
@@ -366,7 +610,8 @@ void ColladaParser::ReadMaterialLibrary()
 				SkipElement();
 			}
 		}
-		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) 
+		{
 			if( strcmp( mReader->getNodeName(), "library_materials") != 0)
 				ThrowException( "Expected end of \"library_materials\" element.");
 
@@ -999,7 +1244,7 @@ void ColladaParser::ReadGeometry( Collada::Mesh* pMesh)
 		{
 			if( IsElement( "mesh"))
 			{
-        // read on from there
+				// read on from there
 				ReadMesh( pMesh);
 			} else
 			{
@@ -1021,33 +1266,15 @@ void ColladaParser::ReadGeometry( Collada::Mesh* pMesh)
 // Reads a mesh from the geometry library
 void ColladaParser::ReadMesh( Mesh* pMesh)
 {
-	// I'm doing a dirty state parsing here because I don't want to open another submethod for it.
-	// There's a <source> tag defining the name for the accessor inside, and possible a <float_array>
-	// with it's own ID. This string contains the current source's ID if parsing is inside a <source> element.
-	std::string presentSourceID;
-
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
 		{
 			if( IsElement( "source"))
 			{
-				// beginning of a source element - store ID for the inner elements
-				int attrID = GetAttribute( "id");
-				presentSourceID = mReader->getAttributeValue( attrID);
+				// we have professionals dealing with this
+				ReadSource();
 			}
-			else if( IsElement( "float_array"))
-			{
-				ReadFloatArray();
-			}
-			else if( IsElement( "technique_common"))
-			{
-				// I don't fucking care for your profiles bullshit
-			}
-			else if( IsElement( "accessor"))
-			{
-				ReadAccessor( presentSourceID);
-			} 
 			else if( IsElement( "vertices"))
 			{
 				// read per-vertex mesh data
@@ -1066,12 +1293,7 @@ void ColladaParser::ReadMesh( Mesh* pMesh)
 		}
 		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
 		{
-			if( strcmp( mReader->getNodeName(), "source") == 0)
-			{
-				// end of <source> - reset present source ID
-				presentSourceID.clear();
-			}
-			else if( strcmp( mReader->getNodeName(), "technique_common") == 0)
+			if( strcmp( mReader->getNodeName(), "technique_common") == 0)
 			{
 				// end of another meaningless element - read over it
 			} 
@@ -1089,9 +1311,59 @@ void ColladaParser::ReadMesh( Mesh* pMesh)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Reads a data array holding a number of floats, and stores it in the global library
-void ColladaParser::ReadFloatArray()
+// Reads a source element 
+void ColladaParser::ReadSource()
 {
+	int indexID = GetAttribute( "id");
+	std::string sourceID = mReader->getAttributeValue( indexID);
+
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
+		{
+			if( IsElement( "float_array") || IsElement( "IDREF_array"))
+			{
+				ReadDataArray();
+			}
+			else if( IsElement( "technique_common"))
+			{
+				// I don't fucking care for your profiles bullshit
+			}
+			else if( IsElement( "accessor"))
+			{
+				ReadAccessor( sourceID);
+			} else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
+		{
+			if( strcmp( mReader->getNodeName(), "source") == 0)
+			{
+				// end of <source> - we're done
+				break;
+			}
+			else if( strcmp( mReader->getNodeName(), "technique_common") == 0)
+			{
+				// end of another meaningless element - read over it
+			} else
+			{
+				// everything else should be punished
+				ThrowException( "Expected end of \"source\" element.");
+			}
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads a data array holding a number of floats, and stores it in the global library
+void ColladaParser::ReadDataArray()
+{
+	std::string elmName = mReader->getNodeName();
+	bool isStringArray = (elmName == "IDREF_array");
+
 	// read attributes
 	int indexID = GetAttribute( "id");
 	std::string id = mReader->getAttributeValue( indexID);
@@ -1102,22 +1374,45 @@ void ColladaParser::ReadFloatArray()
 	// read values and store inside an array in the data library
 	mDataLibrary[id] = Data();
 	Data& data = mDataLibrary[id];
-	data.mValues.reserve( count);
-	for( unsigned int a = 0; a < count; a++)
-	{
-		if( *content == 0)
-			ThrowException( "Expected more values while reading float_array contents.");
+	data.mIsStringArray = isStringArray;
 
-		float value;
-		// read a number
-		content = fast_atof_move( content, value);
-		data.mValues.push_back( value);
-		// skip whitespace after it
-		SkipSpacesAndLineEnd( &content);
+	if( isStringArray)
+	{
+		data.mStrings.reserve( count);
+		std::string s;
+
+		for( unsigned int a = 0; a < count; a++)
+		{
+			if( *content == 0)
+				ThrowException( "Expected more values while reading IDREF_array contents.");
+
+			s.clear();
+			while( !IsSpaceOrNewLine( *content))
+				s += *content++;
+			data.mStrings.push_back( s);
+
+			SkipSpacesAndLineEnd( &content);
+		}
+	} else
+	{
+		data.mValues.reserve( count);
+
+		for( unsigned int a = 0; a < count; a++)
+		{
+			if( *content == 0)
+				ThrowException( "Expected more values while reading float_array contents.");
+
+			float value;
+			// read a number
+			content = fast_atof_move( content, value);
+			data.mValues.push_back( value);
+			// skip whitespace after it
+			SkipSpacesAndLineEnd( &content);
+		}
 	}
 
 	// test for closing tag
-	TestClosing( "float_array");
+	TestClosing( elmName.c_str());
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1636,7 +1931,8 @@ void ColladaParser::ReadSceneNode( Node* pNode)
 
 	while( mReader->read())
 	{
-		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
+		{
 			if( IsElement( "node"))
 			{
 				Node* child = new Node;
@@ -1651,12 +1947,13 @@ void ColladaParser::ReadSceneNode( Node* pNode)
 				// TODO: (thom) support SIDs
 				// assert( TestAttribute( "sid") == -1);
 
-				if (pNode) {
-
+				if (pNode) 
+				{
 					pNode->mChildren.push_back( child);
 					child->mParent = pNode;
 				}
-				else {
+				else 
+				{
 					// no parent node given, probably called from <library_nodes> element.
 					// create new node in node library
 					mNodeLibrary[child->mID] = pNode = child;
@@ -1689,36 +1986,44 @@ void ColladaParser::ReadSceneNode( Node* pNode)
 				// render a Collada scene. The only thing that is interesting for
 				// us is the primary camera.
 				int attrId = TestAttribute("camera_node");
-				if (-1 != attrId) {
+				if (-1 != attrId) 
+				{
 					const char* s = mReader->getAttributeValue(attrId);
 					if (s[0] != '#')
 						DefaultLogger::get()->error("Collada: Unresolved reference format of camera");
-					else pNode->mPrimaryCamera = s+1;
+					else 
+						pNode->mPrimaryCamera = s+1;
 				}
 			}
-			else if( IsElement( "instance_node")) {
+			else if( IsElement( "instance_node")) 
+			{
 				// find the node in the library
 				int attrID = TestAttribute( "url");
-				if( attrID != -1) {
+				if( attrID != -1) 
+				{
 					const char* s = mReader->getAttributeValue(attrID);
 					if (s[0] != '#')
 						DefaultLogger::get()->error("Collada: Unresolved reference format of node");
-					else {
+					else 
+					{
 						pNode->mNodeInstances.push_back(NodeInstance());
 						pNode->mNodeInstances.back().mNode = s+1;
 					}
 				}
 			} 
-			else if( IsElement( "instance_geometry")) {
-				// Reference to a mesh, with possible material associations
+			else if( IsElement( "instance_geometry") || IsElement( "instance_controller"))
+			{
+				// Reference to a mesh or controller, with possible material associations
 				ReadNodeGeometry( pNode);
 			}
-			else if( IsElement( "instance_light")) {
+			else if( IsElement( "instance_light")) 
+			{
 				// Reference to a light, name given in 'url' attribute
 				int attrID = TestAttribute("url");
 				if (-1 == attrID)
 					DefaultLogger::get()->warn("Collada: Expected url attribute in <instance_light> element");
-				else {
+				else 
+				{
 					const char* url = mReader->getAttributeValue( attrID);
 					if( url[0] != '#')
 						ThrowException( "Unknown reference format in <instance_light> element");
@@ -1727,12 +2032,14 @@ void ColladaParser::ReadSceneNode( Node* pNode)
 					pNode->mLights.back().mLight = url+1;
 				}
 			}
-			else if( IsElement( "instance_camera")) {
+			else if( IsElement( "instance_camera")) 
+			{
 				// Reference to a camera, name given in 'url' attribute
 				int attrID = TestAttribute("url");
 				if (-1 == attrID)
 					DefaultLogger::get()->warn("Collada: Expected url attribute in <instance_camera> element");
-				else {
+				else 
+				{
 					const char* url = mReader->getAttributeValue( attrID);
 					if( url[0] != '#')
 						ThrowException( "Unknown reference format in <instance_camera> element");
@@ -1829,14 +2136,15 @@ void ColladaParser::ReadNodeGeometry( Node* pNode)
 		ThrowException( "Unknown reference format");
 	
 	Collada::MeshInstance instance;
-	instance.mMesh = url+1; // skipping the leading #
+	instance.mMeshOrController = url+1; // skipping the leading #
 
 	if( !mReader->isEmptyElement())
 	{
 		// read material associations. Ignore additional elements inbetween
 		while( mReader->read())
 		{
-			if( mReader->getNodeType() == irr::io::EXN_ELEMENT)	{
+			if( mReader->getNodeType() == irr::io::EXN_ELEMENT)	
+			{
 				if( IsElement( "instance_material"))
 				{
 					// read ID of the geometry subgroup and the target material
@@ -1858,8 +2166,10 @@ void ColladaParser::ReadNodeGeometry( Node* pNode)
 					instance.mMaterials[group] = s;
 				} 
 			} 
-			else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)	{
-				if( strcmp( mReader->getNodeName(), "instance_geometry") == 0)
+			else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)	
+			{
+				if( strcmp( mReader->getNodeName(), "instance_geometry") == 0 
+					|| strcmp( mReader->getNodeName(), "instance_controller") == 0)
 					break;
 			} 
 		}

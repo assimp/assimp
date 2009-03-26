@@ -314,7 +314,7 @@ private:
 	 *  @param parent Index of the node
 	 *  @param apcNodes Flat list of nodes - used nodes are set to NULL.
 	*/
-	void AddChildren(aiNode* node, uintptr_t parent, 
+	void AddChildren(aiNode* node, uint16_t parent, 
 		std::vector<aiNode*>& apcNodes);
 
 	// -------------------------------------------------------------------

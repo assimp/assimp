@@ -379,10 +379,10 @@ Importer::Importer()
 	mPostProcessingSteps.push_back( new FindInstancesProcess());
 #endif
 
-
 #if (!defined AI_BUILD_NO_FINDDEGENERATES_PROCESS)
 	mPostProcessingSteps.push_back( new FindDegeneratesProcess());
 #endif
+
 
 	
 #ifndef AI_BUILD_NO_GENUVCOORDS_PROCESS
@@ -398,6 +398,7 @@ Importer::Importer()
 #if (!defined AI_BUILD_NO_TRIANGULATE_PROCESS)
 	mPostProcessingSteps.push_back( new TriangulateProcess());
 #endif
+	
 #if (!defined AI_BUILD_NO_SORTBYPTYPE_PROCESS)
 	mPostProcessingSteps.push_back( new SortByPTypeProcess());
 #endif

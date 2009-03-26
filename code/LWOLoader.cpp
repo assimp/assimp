@@ -145,8 +145,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	mCurLayer->mName = "<LWODefault>";
 
 	// old lightwave file format (prior to v6)
-	if (AI_LWO_FOURCC_LWOB == fileType)
-	{
+	if (AI_LWO_FOURCC_LWOB == fileType)	{
 		DefaultLogger::get()->info("LWO file format: LWOB (<= LightWave 5.5)");
 
 		mIsLWO2 = false;
@@ -154,13 +153,11 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	}
 
 	// New lightwave format
-	else if (AI_LWO_FOURCC_LWO2 == fileType)
-	{
+	else if (AI_LWO_FOURCC_LWO2 == fileType)	{
 		DefaultLogger::get()->info("LWO file format: LWO2 (>= LightWave 6)");
 	}
 	// MODO file format
-	else if (AI_LWO_FOURCC_LXOB == fileType)
-	{
+	else if (AI_LWO_FOURCC_LXOB == fileType)	{
 		DefaultLogger::get()->info("LWO file format: LXOB (Modo)");
 	}
 	// we don't know this format
@@ -174,8 +171,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		throw new ImportErrorException(std::string("Unknown LWO sub format: ") + szBuff);
 	}
 
-	if (AI_LWO_FOURCC_LWOB != fileType)
-	{
+	if (AI_LWO_FOURCC_LWOB != fileType)	{
 		mIsLWO2 = true;
 		LoadLWO2File();
 
@@ -185,8 +181,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		if (0xffffffff != configLayerIndex && configLayerIndex > mLayers->size())
 			throw new ImportErrorException("LWO2: The requested layer was not found");
 
-		if (configLayerName.length() && !hasNamedLayer)
-		{
+		if (configLayerName.length() && !hasNamedLayer)	{
 			throw new ImportErrorException("LWO2: Unable to find the requested layer: " 
 				+ configLayerName);
 		}
@@ -203,24 +198,21 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	apcMeshes.reserve(mLayers->size()*std::min(((unsigned int)mSurfaces->size()/2u), 1u));
 
 	unsigned int iDefaultSurface = 0xffffffff; // index of the default surface
-	for (LayerList::iterator lit = mLayers->begin(), lend = mLayers->end();
-		lit != lend;++lit)
-	{
+	for (LayerList::iterator lit = mLayers->begin(), lend = mLayers->end();lit != lend;++lit)	{
 		LWO::Layer& layer = *lit;
-		if (layer.skip)continue;
+		if (layer.skip)
+			continue;
 
 		// I don't know whether there could be dummy layers, but it would be possible
 		const unsigned int meshStart = (unsigned int)apcMeshes.size();
-		if (!layer.mFaces.empty() && !layer.mTempPoints.empty())
-		{
+		if (!layer.mFaces.empty() && !layer.mTempPoints.empty())	{
+
 			// now sort all faces by the surfaces assigned to them
 			typedef std::vector<unsigned int> SortedRep;
 			std::vector<SortedRep> pSorted(mSurfaces->size()+1);
 
 			unsigned int i = 0;
-			for (FaceList::iterator it = layer.mFaces.begin(), end = layer.mFaces.end();
-				it != end;++it,++i)
-			{
+			for (FaceList::iterator it = layer.mFaces.begin(), end = layer.mFaces.end();it != end;++it,++i)	{
 				// Check whether we support this face's type
 				if ((*it).type != AI_LWO_FACE && (*it).type != AI_LWO_PTCH) {
 					continue;
@@ -232,10 +224,8 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 					DefaultLogger::get()->warn("LWO: Invalid face surface index");
 					idx = 0xffffffff;
 				}
-				if(0xffffffff == idx || 0xffffffff == (idx = _mMapping[idx]))
-				{
-					if (0xffffffff == iDefaultSurface)
-					{
+				if(0xffffffff == idx || 0xffffffff == (idx = _mMapping[idx]))	{
+					if (0xffffffff == iDefaultSurface)	{
 						iDefaultSurface = (unsigned int)mSurfaces->size();
 						mSurfaces->push_back(LWO::Surface());
 						LWO::Surface& surf = mSurfaces->back();
@@ -246,11 +236,13 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 				}
 				pSorted[idx].push_back(i);
 			}
-			if (0xffffffff == iDefaultSurface)pSorted.erase(pSorted.end()-1);
-			for (unsigned int p = 0,i = 0;i < mSurfaces->size();++i)
-			{
+			if (0xffffffff == iDefaultSurface) {
+				pSorted.erase(pSorted.end()-1);
+			}
+			for (unsigned int p = 0,i = 0;i < mSurfaces->size();++i)	{
 				SortedRep& sorted = pSorted[i];
-				if (sorted.empty())continue;
+				if (sorted.empty())
+					continue;
 
 				// generate the mesh 
 				aiMesh* mesh = new aiMesh();
@@ -259,8 +251,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 
 				// count the number of vertices
 				SortedRep::const_iterator it = sorted.begin(), end = sorted.end();
-				for (;it != end;++it)
-				{
+				for (;it != end;++it)	{
 					mesh->mNumVertices += layer.mFaces[*it].mNumIndices;
 				}
 
@@ -285,13 +276,13 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 
 				// allocate storage for UV and CV channels
 				aiVector3D* pvUV[AI_MAX_NUMBER_OF_TEXTURECOORDS];
-				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_TEXTURECOORDS;++mui )
-				{
-					if (0xffffffff == vUVChannelIndices[mui])break;
+				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_TEXTURECOORDS;++mui )	{
+					if (0xffffffff == vUVChannelIndices[mui])
+						break;
+					
 					pvUV[mui] = mesh->mTextureCoords[mui] = new aiVector3D[mesh->mNumVertices];
 
 					// LightWave doesn't support more than 2 UV components (?)
-					// so we can directly setup this value
 					mesh->mNumUVComponents[0] = 2;
 				}
 
@@ -299,15 +290,12 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 					nrm = mesh->mNormals = new aiVector3D[mesh->mNumVertices];
 		
 				aiColor4D* pvVC[AI_MAX_NUMBER_OF_COLOR_SETS];
-				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_COLOR_SETS;++mui)	
-				{
+				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_COLOR_SETS;++mui)	{
 					if (0xffffffff == vVColorIndices[mui])break;
 					pvVC[mui] = mesh->mColors[mui] = new aiColor4D[mesh->mNumVertices];
 				}
 
 				// we would not need this extra array, but the code is much cleaner if we use it
-				// FIX: we can use the referrer ID array here. invalidate its contents
-				// before we resize it to avoid a unnecessary memcpy 
 				std::vector<unsigned int>& smoothingGroups = layer.mPointReferrers;
 				smoothingGroups.erase (smoothingGroups.begin(),smoothingGroups.end());
 				smoothingGroups.resize(mesh->mNumFaces,0);
@@ -322,8 +310,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 					// copy all vertices
 					for (unsigned int q = 0; q  < face.mNumIndices;++q,++vert)	{
 						register unsigned int idx = face.mIndices[q];
-						*pv = layer.mTempPoints[idx] + layer.mPivot;
-						pv++;
+						*pv++ = layer.mTempPoints[idx] /*- layer.mPivot*/;
 
 						// process UV coordinates
 						for (unsigned int w = 0; w < AI_MAX_NUMBER_OF_TEXTURECOORDS;++w)	{
@@ -338,7 +325,9 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 
 						// process normals (MODO extension)
 						if (nrm)	{
-							*nrm++ = ((aiVector3D*)&layer.mNormals.rawData[0])[idx];
+							*nrm = ((aiVector3D*)&layer.mNormals.rawData[0])[idx];
+							nrm->z *= -1.f;
+							++nrm;
 						}
 
 						// process vertex colors
@@ -365,15 +354,14 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 					}
 					pf->mIndices = face.mIndices;
 					pf->mNumIndices = face.mNumIndices;
-					unsigned int** p = (unsigned int**)&face.mIndices;*p = NULL; // make sure it won't be deleted
+					unsigned int** p = (unsigned int**)&face.mIndices;*p = NULL; // HACK: make sure it won't be deleted
 					pf++;
 				}
 
-				if (!mesh->mNormals)
-				{
+				if (!mesh->mNormals)	{
 					// Compute normal vectors for the mesh - we can't use our GenSmoothNormal-
 					// Step here since it wouldn't handle smoothing groups correctly for LWO.
-					// So we use a separate implementation.
+					// So we use a separate implementation. 
 					ComputeNormals(mesh,smoothingGroups,_mSurfaces[i]);
 				}
 				else DefaultLogger::get()->debug("LWO2: No need to compute normals, they're already there");
@@ -381,16 +369,21 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 			}
 		}
 
-		// Generate nodes to render the mesh. Store the parent index
-		// in the mParent member of the nodes
-		aiNode* pcNode = new aiNode();
-		apcNodes.push_back(pcNode);
-		pcNode->mName.Set(layer.mName);
-		pcNode->mParent = (aiNode*)(uintptr_t)(layer.mParent);
-		pcNode->mNumMeshes = (unsigned int)apcMeshes.size() - meshStart;
-		pcNode->mMeshes = new unsigned int[pcNode->mNumMeshes];
-		for (unsigned int p = 0; p < pcNode->mNumMeshes;++p)
-			pcNode->mMeshes[p] = p + meshStart;
+		// Generate nodes to render the mesh. Store the source layer in the mParent member of the nodes
+		unsigned int num = apcMeshes.size() - meshStart;
+		if (layer.mName != "<LWODefault>" || num > 0) {
+			aiNode* pcNode = new aiNode();
+			apcNodes.push_back(pcNode);
+			pcNode->mName.Set(layer.mName);
+			pcNode->mParent = (aiNode*)&layer;
+			pcNode->mNumMeshes = num;
+
+			if (pcNode->mNumMeshes) {
+				pcNode->mMeshes = new unsigned int[pcNode->mNumMeshes];
+				for (unsigned int p = 0; p < pcNode->mNumMeshes;++p)
+					pcNode->mMeshes[p] = p + meshStart;
+			}
+		}
 	}
 
 	if (apcNodes.empty() || apcMeshes.empty())
@@ -398,19 +391,16 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 
 	// The RemoveRedundantMaterials step will clean this up later
 	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials = (unsigned int)mSurfaces->size()];
-	for (unsigned int mat = 0; mat < pScene->mNumMaterials;++mat)
-	{
+	for (unsigned int mat = 0; mat < pScene->mNumMaterials;++mat)	{
 		MaterialHelper* pcMat = new MaterialHelper();
 		pScene->mMaterials[mat] = pcMat;
 		ConvertMaterial((*mSurfaces)[mat],pcMat);
 	}
 
 	// copy the meshes to the output structure
-	if (apcMeshes.size()) // shouldn't happen, just to be sure we don't crash
-	{
-		pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes = (unsigned int)apcMeshes.size() ];
-		::memcpy(pScene->mMeshes,&apcMeshes[0],pScene->mNumMeshes*sizeof(void*));
-	}
+	pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes = (unsigned int)apcMeshes.size() ];
+	::memcpy(pScene->mMeshes,&apcMeshes[0],pScene->mNumMeshes*sizeof(void*));
+
 
 	// generate the final node graph
 	GenerateNodeGraph(apcNodes);
@@ -523,29 +513,36 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::AddChildren(aiNode* node, uintptr_t parent, std::vector<aiNode*>& apcNodes)
+void LWOImporter::AddChildren(aiNode* node, uint16_t parent, std::vector<aiNode*>& apcNodes)
 {
-	for (uintptr_t i  = 0; i < (uintptr_t)apcNodes.size();++i)
-	{
-		if (i == parent)continue;
-		if (apcNodes[i] && (uintptr_t)apcNodes[i]->mParent == parent)++node->mNumChildren;
+	for (std::vector<aiNode*>::iterator it = apcNodes.begin(); it != apcNodes.end(); ++it)	{
+		if (*it) {
+			LWO::Layer* layer = (LWO::Layer*)(*it)->mParent;
+			if (layer->mParent == parent && layer->mIndex != parent)
+				++node->mNumChildren;
+		}
 	}
 
-	if (node->mNumChildren)
-	{
+	if (node->mNumChildren)	{
+		unsigned int p = 0;
+
 		node->mChildren = new aiNode* [ node->mNumChildren ];
-		for (uintptr_t i = 0, p = 0; i < (uintptr_t)apcNodes.size();++i)
-		{
-			if (i == parent)continue;
+		for (std::vector<aiNode*>::iterator it = apcNodes.begin(); it != apcNodes.end(); ++it)	{
+			if (*it) {
+				LWO::Layer* layer = (LWO::Layer*)(*it)->mParent;
+				if (layer->mParent == parent && layer->mIndex != parent)	{
+					aiNode* nd = node->mChildren[p++] = *it;
+					nd->mParent = node;
 
-			if (apcNodes[i] && parent == (uintptr_t)(apcNodes[i]->mParent))
-			{
-				node->mChildren[p++] = apcNodes[i];
-				apcNodes[i]->mParent = node;
+					// fixme: ignore pivot points for the moment
+					//nd->mTransformation.a4 = layer->mPivot.x;
+					//nd->mTransformation.b4 = layer->mPivot.y;
+					//nd->mTransformation.c4 = layer->mPivot.z;
 
-				// recursively add more children
-				AddChildren(apcNodes[i],i,apcNodes);
-				apcNodes[i] = NULL;
+					// recursively add more children
+					(*it) = NULL;
+					AddChildren(nd,layer->mIndex,apcNodes);
+				}
 			}
 		}
 	}
@@ -554,43 +551,44 @@ void LWOImporter::AddChildren(aiNode* node, uintptr_t parent, std::vector<aiNode
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::GenerateNodeGraph(std::vector<aiNode*>& apcNodes)
 {
-	// now generate the final nodegraph - generate a root node
-	pScene->mRootNode = new aiNode();
-	pScene->mRootNode->mName.Set("<LWORoot>");
-	AddChildren(pScene->mRootNode,0,apcNodes);
+	// now generate the final nodegraph - generate a root node and attach children
+	aiNode* root = pScene->mRootNode = new aiNode();
+	root->mName.Set("<LWORoot>");
+	AddChildren(root,0,apcNodes);
 
+	// check whether we added all layers with meshes assigned to the output graph.
+	// if not, add them to the root node
 	unsigned int extra = 0;
-	for (unsigned int i = 0; i < apcNodes.size();++i)
-		if (apcNodes[i] && apcNodes[i]->mNumMeshes)++extra;
+	for (std::vector<aiNode*>::iterator it = apcNodes.begin(); it != apcNodes.end(); ++it) {
+		if ((*it) && (*it)->mNumMeshes) 
+			++extra;
+	}
 
 	if (extra)	{
-		// we need to add extra nodes to the root
 		const unsigned int newSize = extra + pScene->mRootNode->mNumChildren;
 		aiNode** const apcNewNodes = new aiNode*[newSize];
-		if((extra = pScene->mRootNode->mNumChildren))
-			::memcpy(apcNewNodes,pScene->mRootNode->mChildren,extra*sizeof(void*));
+		if((extra = root->mNumChildren))
+			::memcpy(apcNewNodes,root->mChildren,extra*sizeof(void*));
 
 		aiNode** cc = apcNewNodes+extra;
-		for (unsigned int i = 0; i < apcNodes.size();++i)
-		{
-			if (apcNodes[i] && apcNodes[i]->mNumMeshes)
-			{
-				*cc++ = apcNodes[i];
-				apcNodes[i]->mParent = pScene->mRootNode;
+		for (std::vector<aiNode*>::iterator it = apcNodes.begin(); it != apcNodes.end(); ++it) {
+			if ((*it) && (*it)->mNumMeshes) {
+				aiNode* nd = *cc++ = *it;
+				nd->mParent = pScene->mRootNode;
 
 				// recursively add more children
-				AddChildren(apcNodes[i],i,apcNodes);
-				apcNodes[i] = NULL;
+				(*it) = NULL;
+				AddChildren(nd,((LWO::Layer*)nd->mParent)->mIndex,apcNodes);
 			}
 		}
-		delete[] pScene->mRootNode->mChildren;
-		pScene->mRootNode->mChildren	= apcNewNodes;
-		pScene->mRootNode->mNumChildren	= newSize;
+		delete[] root->mChildren;
+		root->mChildren = apcNewNodes;
+		root->mNumChildren = newSize;
 	}
 	if (!pScene->mRootNode->mNumChildren)
 		throw new ImportErrorException("LWO: Unable to build a valid node graph");
 
-	// Remove a single root node with no meshes assigned ... 
+	// Remove a single root node with no meshes assigned to it ... 
 	if (1 == pScene->mRootNode->mNumChildren)	{
 		aiNode* pc = pScene->mRootNode->mChildren[0];
 		pc->mParent = pScene->mRootNode->mChildren[0] = NULL;
@@ -802,7 +800,7 @@ void LWOImporter::CopyFaceIndicesLWO2(FaceList::iterator& it,
 				}
 			}
 		}
-		else DefaultLogger::get()->warn("LWO2: face has 0 indices");
+		else throw new ImportErrorException("LWO2: face has 0 indices");
 	}
 }
 
@@ -845,9 +843,7 @@ void LWOImporter::LoadLWO2PolygonTags(unsigned int length)
 template <class T>
 VMapEntry* FindEntry(std::vector< T >& list,const std::string& name, bool perPoly)
 {
-	for (typename std::vector< T >::iterator it = list.begin(), end = list.end();
-		 it != end; ++it)
-	{
+	for (typename std::vector< T >::iterator it = list.begin(), end = list.end();it != end; ++it)	{
 		if ((*it).name == name)
 		{
 			if (!perPoly)
@@ -880,10 +876,7 @@ inline void CreateNewEntry(T& chan, unsigned int srcIdx)
 template <class T>
 inline void CreateNewEntry(std::vector< T >& list, unsigned int srcIdx)
 {
-	for (typename std::vector< T >::iterator 
-		it =  list.begin(), end = list.end();
-		it != end;++it)
-	{
+	for (typename std::vector< T >::iterator it =  list.begin(), end = list.end();it != end;++it)	{
 		CreateNewEntry( *it, srcIdx );
 	}
 }
@@ -907,8 +900,7 @@ inline void LWOImporter::DoRecursiveVMAPAssignment(VMapEntry* base, unsigned int
 // ------------------------------------------------------------------------------------------------
 inline void AddToSingleLinkedList(ReferrerList& refList, unsigned int srcIdx, unsigned int destIdx)
 {
-	if(0xffffffff == refList[srcIdx])
-	{
+	if(0xffffffff == refList[srcIdx])	{
 		refList[srcIdx] = destIdx;
 		return;
 	}
@@ -992,20 +984,16 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 	while (mFileBuffer < end)
 	{
 		unsigned int idx = ReadVSizedIntLWO2(mFileBuffer) + mCurLayer->mPointIDXOfs;
-		if (idx >= numPoints)
-		{
+		if (idx >= numPoints)	{
 			DefaultLogger::get()->warn("LWO2: vertex index in vmap/vmad is out of range");
 			mFileBuffer += base->dims*4;continue;
 		}
-		if (perPoly)
-		{
+		if (perPoly)	{
 			unsigned int polyIdx = ReadVSizedIntLWO2(mFileBuffer) + mCurLayer->mFaceIDXOfs;
-			if (base->abAssigned[idx])
-			{
+			if (base->abAssigned[idx])	{
 				// we have already a VMAP entry for this vertex - thus
 				// we need to duplicate the corresponding polygon.
-				if (polyIdx >= numFaces)
-				{
+				if (polyIdx >= numFaces)	{
 					DefaultLogger::get()->warn("LWO2: VMAD polygon index is out of range");
 					mFileBuffer += base->dims*4;
 					continue;
@@ -1015,10 +1003,10 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 
 				// generate a new unique vertex for the corresponding index - but only
 				// if we can find the index in the face
-				for (unsigned int i = 0; i < src.mNumIndices;++i)
-				{
+				for (unsigned int i = 0; i < src.mNumIndices;++i)	{
 					register unsigned int srcIdx = src.mIndices[i];
-					if (idx != srcIdx)continue;
+					if (idx != srcIdx)
+						continue;
 
 					refList.resize(refList.size()+1, 0xffffffff);
 						
@@ -1245,22 +1233,24 @@ void LWOImporter::LoadLWO2File()
 				LWO::Layer& layer = mLayers->back();
 				mCurLayer = &layer;
 
-				// load this layer or ignore it? Check the layer index property
-				// NOTE: The first layer is the default layer, so the layer
-				// index is one-based now
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,LAYR,16);
+
+				// Continue loading this layer or ignore it? Check the layer index property
+				// NOTE: The first layer is the default layer, so the layer index is one-based now
 				if (0xffffffff != configLayerIndex && configLayerIndex != mLayers->size()-1)	{
 					skip = true;
 				}
 				else skip = false;
 
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,LAYR,16);
+				// layer index. that's just for internal parenting, from the scope of a LWS file
+				// all layers are numbered in the oder in which they appear in the file
+				layer.mIndex = GetU2();
 
-				// and parse its properties, e.g. the pivot point
-				mFileBuffer += 2;
+				// pivot point
+				mFileBuffer += 2; /* unknown */
 				mCurLayer->mPivot.x = GetF4();
 				mCurLayer->mPivot.y = GetF4();
 				mCurLayer->mPivot.z = GetF4();
-				mFileBuffer += 2;
 				GetS0(layer.mName,head->length-16);
 
 				// if the name is empty, generate a default name
@@ -1276,6 +1266,7 @@ void LWOImporter::LoadLWO2File()
 				}
 				else hasNamedLayer = true;
 
+				// optional: parent of this layer
 				if (mFileBuffer + 2 <= next)
 					layer.mParent = GetU2();
 

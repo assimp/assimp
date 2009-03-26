@@ -229,14 +229,23 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 	LWO::Texture* pTex = NULL;
 
 	GetS0(surf.mName,size);
-	while (true)
-	{
-		if (mFileBuffer + 6 > end)break;
+	while (true)	{
+		if (mFileBuffer + 6 >= end)
+			break;
 
-		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
+		IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
 
-		if (mFileBuffer + head->length > end)
-			throw new ImportErrorException("LWOB: Invalid surface chunk length");
+		/*  A single test file (sonycam.lwo) seems to have invalid surface chunks.
+		 *  I'm assuming it's the fault of a single, unknown exporter so there are
+		 *  probably THOUSANDS of them. Here's a dirty workaround:
+		 *
+		 *  We don't break if the chunk limit is exceeded. Instead, we're computing 
+		 *  how much storage is actually left and work with this value from now on.
+		 */
+		if (mFileBuffer + head->length > end) {
+			DefaultLogger::get()->error("LWOB: Invalid surface chunk length. Trying to continue.");
+			head->length = end - mFileBuffer;
+		}
 
 		uint8_t* const next = mFileBuffer+head->length;
 		switch (head->type)
@@ -340,8 +349,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		// texture path
 		case AI_LWO_TIMG:
 			{
-				if (pTex)
-				{
+				if (pTex)	{
 					GetS0(pTex->mFileName,head->length);	
 				}
 				else DefaultLogger::get()->warn("LWOB: Unexpected TIMG chunk");
@@ -351,7 +359,9 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		case AI_LWO_TVAL:
 			{
 				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,TVAL,1);
-				if (pTex)pTex->mStrength = (float)GetU1()/ 255.f;
+				if (pTex)	{
+					pTex->mStrength = (float)GetU1()/ 255.f;
+				}
 				else DefaultLogger::get()->warn("LWOB: Unexpected TVAL chunk");
 				break;
 			}

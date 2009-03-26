@@ -550,7 +550,7 @@ struct Surface
 		, mIOR					(1.f) // vakuum
 		, mBumpIntensity		(1.f)
 		, mWireframe			(false)
-		, mAdditiveTransparency (10e10f)
+		, mAdditiveTransparency (0.f)
 	{}
 
 	//! Name of the surface
@@ -628,6 +628,7 @@ struct Layer
 		: mFaceIDXOfs	(0)
 		, mPointIDXOfs	(0)
 		, mParent		(0x0)
+		, mIndex		(0xffff)
 		, skip			(false)
 	{}
 
@@ -662,6 +663,9 @@ struct Layer
 
 	/** Parent index */
 	uint16_t mParent;
+
+	/** Index of the layer */
+	uint16_t mIndex;
 
 	/** Name of the layer */
 	std::string mName;

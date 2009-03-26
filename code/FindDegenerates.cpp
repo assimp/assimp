@@ -142,13 +142,6 @@ void FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh)
 		}
 
 		// We need to update the primitive flags array of the mesh.
-		// Unfortunately it is not possible to execute
-		// FindDegenerates before DeterminePType. The latter does
-		// nothing if the primitive flags have already been set by
-		// the loader - our changes would be ignored. Although
-		// we could use some tricks regarding - i.e setting 
-		// mPrimitiveTypes to 0 in every case - but this is the cleanest 
-		//  way and causes no additional dependencies in the pipeline.
 		switch (face.mNumIndices)
 		{
 		case 1u:
@@ -181,9 +174,11 @@ evil_jump_outside:
 				face_dest.mNumIndices = face_src.mNumIndices;
 				face_dest.mIndices    = face_src.mIndices;
 
-				// clear source
-				face_src.mNumIndices = 0;
-				face_src.mIndices = NULL;
+				if (&face_src != &face_dest) {
+					// clear source
+					face_src.mNumIndices = 0;
+					face_src.mIndices = NULL;
+				}
 			}
 			else {
 				// Otherwise delete it if we don't need this face

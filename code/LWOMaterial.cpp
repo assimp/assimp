@@ -90,10 +90,9 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, a
 	aiString s;
 	bool ret = false;
 
-	for (TextureList::const_iterator it = in.begin(), end = in.end();
-		 it != end;++it)
-	{
-		if (!(*it).enabled || !(*it).bCanUse)continue;
+	for (TextureList::const_iterator it = in.begin(), end = in.end();it != end;++it)	{
+		if (!(*it).enabled || !(*it).bCanUse)
+			continue;
 		ret = true;
 
 		// Convert lightwave's mapping modes to ours. We let them
@@ -121,8 +120,7 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, a
 				break;
 			case LWO::Texture::UV:
 				{
-					if( 0xffffffff == (*it).mRealUVIndex )
-					{
+					if( 0xffffffff == (*it).mRealUVIndex )	{
 						// We have no UV index for this texture, so we can't display it
 						continue;
 					}
@@ -166,13 +164,11 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, a
 
 		// The older LWOB format does not use indirect references to clips.
 		// The file name of a texture is directly specified in the tex chunk.
-		if (mIsLWO2)
-		{
+		if (mIsLWO2)	{
 			// find the corresponding clip
 			ClipList::iterator clip = mClips.begin();
 			temp = (*it).mClipIdx;
-			for (ClipList::iterator end = mClips.end(); clip != end; ++clip)
-			{
+			for (ClipList::iterator end = mClips.end(); clip != end; ++clip)	{
 				if ((*clip).idx == temp)
 					break;
 				
@@ -284,8 +280,7 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 	if (surf.mSpecularValue && surf.mGlossiness)
 	{
 		float fGloss;
-		if (mIsLWO2)
-		{
+		if (mIsLWO2)	{
 			fGloss = pow( surf.mGlossiness*10.0f+2.0f, 2.0f);
 		}
 		else
@@ -314,7 +309,7 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 	pcMat->AddProperty<aiColor3D>(&clr,1,AI_MATKEY_COLOR_EMISSIVE);
 
 	// opacity ... either additive or default-blended, please
-	if (10e10f != surf.mAdditiveTransparency)
+	if (0.f != surf.mAdditiveTransparency)
 	{
 		const int add = aiBlendMode_Additive;
 		pcMat->AddProperty(&surf.mAdditiveTransparency,1,AI_MATKEY_OPACITY);
@@ -437,12 +432,9 @@ void LWOImporter::FindVCChannels(const LWO::Surface& surf, const LWO::Layer& lay
 	unsigned int out[AI_MAX_NUMBER_OF_COLOR_SETS])
 {
 	out[0] = 0xffffffff;
-	if (surf.mVCMap.length())
-	{
-		for (unsigned int i = 0; i < layer.mVColorChannels.size();++i)
-		{
-			if (surf.mVCMap == layer.mVColorChannels[i].name)
-			{
+	if (surf.mVCMap.length())	{
+		for (unsigned int i = 0; i < layer.mVColorChannels.size();++i)	{
+			if (surf.mVCMap == layer.mVColorChannels[i].name)	{
 				out[0] = i;
 				out[1] = 0xffffffff;
 				return;
@@ -598,11 +590,8 @@ void LWOImporter::LoadLWO2TextureBlock(LE_NCONST IFF::SubChunkHeader* head, unsi
 	}
 
 	// now attach the texture to the parent surface - sort by ordinal string
-	for (TextureList::iterator it = listRef->begin();
-		it != listRef->end(); ++it)
-	{
-		if (::strcmp(tex.ordinal.c_str(),(*it).ordinal.c_str()) < 0)
-		{
+	for (TextureList::iterator it = listRef->begin();it != listRef->end(); ++it)	{
+		if (::strcmp(tex.ordinal.c_str(),(*it).ordinal.c_str()) < 0)	{
 			listRef->insert(it,tex);
 			return;
 		}
@@ -652,9 +641,7 @@ void LWOImporter::LoadLWO2ShaderBlock(LE_NCONST IFF::SubChunkHeader* head, unsig
 	}
 
 	// now attach the shader to the parent surface - sort by ordinal string
-	for (ShaderList::iterator it = surf.mShaders.begin();
-		it != surf.mShaders.end(); ++it)
-	{
+	for (ShaderList::iterator it = surf.mShaders.begin();it != surf.mShaders.end(); ++it)	{
 		if (::strcmp(shader.ordinal.c_str(),(*it).ordinal.c_str()) < 0)	{
 			surf.mShaders.insert(it,shader);
 			return;
@@ -676,26 +663,23 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 	// check whether this surface was derived from any other surface
 	std::string derived;
 	GetS0(derived,(unsigned int)(end - mFileBuffer));
-	if (derived.length())
-	{
-
+	if (derived.length())	{
 		// yes, find this surface
-		for (SurfaceList::iterator it = mSurfaces->begin(), end = mSurfaces->end()-1;
-			 it != end; ++it)
-		{
+		for (SurfaceList::iterator it = mSurfaces->begin(), end = mSurfaces->end()-1; it != end; ++it)	{
 			if ((*it).mName == derived)	{
 				// we have it ...
 				surf = *it;
-				derived.clear();
+				derived.clear();break;
 			}
 		}
-		if (!derived.size())
+		if (derived.size())
 			DefaultLogger::get()->warn("LWO2: Unable to find source surface: " + derived);
 	}
 
 	while (true)
 	{
-		if (mFileBuffer + 6 >= end)break;
+		if (mFileBuffer + 6 >= end)
+			break;
 		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
 
 		if (mFileBuffer + head->length > end)
@@ -736,31 +720,6 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 
 				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,TRAN,4);
 				surf.mTransparency = GetF4();
-				break;
-			}
-			// transparency mode
-		case AI_LWO_ALPH:
-			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,ALPH,6);
-				uint16_t mode = GetU2();
-				switch (mode)
-				{
-					// The surface has no effect on the alpha channel when rendered
-				case 0:
-					surf.mTransparency = 10e10f;
-					break;
-
-					// The alpha channel will be written with the constant value
-					// following the mode in the subchunk. 
-				case 1:
-					surf.mTransparency = GetF4();
-					break;
-
-					// The alpha value comes from the shadow density
-				case 3:
-					DefaultLogger::get()->error("LWO2: Unsupported alpha mode: shadow_density");
-					surf.mTransparency = 10e10f;
-				}
 				break;
 			}
 			// additive transparency

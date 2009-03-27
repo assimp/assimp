@@ -480,86 +480,13 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 			} else
 			{
 				// else we have to add the mesh to the collection and store its newly assigned index at the node
-				aiMesh* dstMesh = new aiMesh;
-
-				// count the vertices addressed by its faces
-				const size_t numVertices = std::accumulate( srcMesh->mFaceSize.begin() + faceStart,
-					srcMesh->mFaceSize.begin() + faceStart + submesh.mNumFaces, 0);
-
-				// copy positions
-				dstMesh->mNumVertices = numVertices;
-				dstMesh->mVertices = new aiVector3D[numVertices];
-				std::copy( srcMesh->mPositions.begin() + vertexStart, srcMesh->mPositions.begin() + 
-					vertexStart + numVertices, dstMesh->mVertices);
-
-				// normals, if given. HACK: (thom) Due to the fucking Collada spec we never 
-				// know if we have the same number of normals as there are positions. So we 
-				// also ignore any vertex attribute if it has a different count
-				if( srcMesh->mNormals.size() == srcMesh->mPositions.size())
-				{
-					dstMesh->mNormals = new aiVector3D[numVertices];
-					std::copy( srcMesh->mNormals.begin() + vertexStart, srcMesh->mNormals.begin() +
-						vertexStart + numVertices, dstMesh->mNormals);
-				}
-
-				// tangents, if given. 
-				if( srcMesh->mTangents.size() == srcMesh->mPositions.size())
-				{
-					dstMesh->mTangents = new aiVector3D[numVertices];
-					std::copy( srcMesh->mTangents.begin() + vertexStart, srcMesh->mTangents.begin() + 
-						vertexStart + numVertices, dstMesh->mTangents);
-				}
-
-				// bitangents, if given. 
-				if( srcMesh->mBitangents.size() == srcMesh->mPositions.size())
-				{
-					dstMesh->mBitangents = new aiVector3D[numVertices];
-					std::copy( srcMesh->mBitangents.begin() + vertexStart, srcMesh->mBitangents.begin() + 
-						vertexStart + numVertices, dstMesh->mBitangents);
-				}
-
-				// same for texturecoords, as many as we have
-				for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
-				{
-					if( srcMesh->mTexCoords[a].size() == srcMesh->mPositions.size())
-					{
-						dstMesh->mTextureCoords[a] = new aiVector3D[numVertices];
-						for( size_t b = 0; b < numVertices; ++b)
-							dstMesh->mTextureCoords[a][b] = srcMesh->mTexCoords[a][vertexStart+b];
-						
-						dstMesh->mNumUVComponents[a] = srcMesh->mNumUVComponents[a];
-					}
-				}
-
-				// same for vertex colors, as many as we have
-				for( size_t a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
-				{
-					if( srcMesh->mColors[a].size() == srcMesh->mPositions.size())
-					{
-						dstMesh->mColors[a] = new aiColor4D[numVertices];
-						std::copy( srcMesh->mColors[a].begin() + vertexStart, srcMesh->mColors[a].begin() + vertexStart + numVertices, dstMesh->mColors[a]);
-					}
-				}
-
-				// create faces. Due to the fact that each face uses unique vertices, we can simply count up on each vertex
-				size_t vertex = 0;
-				dstMesh->mNumFaces = submesh.mNumFaces;
-				dstMesh->mFaces = new aiFace[dstMesh->mNumFaces];
-				for( size_t a = 0; a < dstMesh->mNumFaces; ++a)
-				{
-					size_t s = srcMesh->mFaceSize[ faceStart + a];
-					aiFace& face = dstMesh->mFaces[a];
-					face.mNumIndices = s;
-					face.mIndices = new unsigned int[s];
-					for( size_t b = 0; b < s; ++b)
-						face.mIndices[b] = vertex++;
-				}
+				aiMesh* dstMesh = CreateMesh( pParser, srcMesh, submesh, srcController, vertexStart, faceStart);
 
 				// store the mesh, and store its new index in the node
 				newMeshRefs.push_back( mMeshes.size());
 				mMeshIndexByID[index] = mMeshes.size();
 				mMeshes.push_back( dstMesh);
-				vertexStart += numVertices; faceStart += submesh.mNumFaces;
+				vertexStart += dstMesh->mNumVertices; faceStart += submesh.mNumFaces;
 
 				// assign the material index
 				dstMesh->mMaterialIndex = matIdx;
@@ -574,6 +501,192 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 		pTarget->mMeshes = new unsigned int[pTarget->mNumMeshes];
 		std::copy( newMeshRefs.begin(), newMeshRefs.end(), pTarget->mMeshes);
 	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Creates a mesh for the given ColladaMesh face subset and returns the newly created mesh
+aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::Mesh* pSrcMesh, const Collada::SubMesh& pSubMesh, 
+								  const Collada::Controller* pSrcController, size_t pStartVertex, size_t pStartFace)
+{
+	aiMesh* dstMesh = new aiMesh;
+
+	// count the vertices addressed by its faces
+	const size_t numVertices = std::accumulate( pSrcMesh->mFaceSize.begin() + pStartFace,
+		pSrcMesh->mFaceSize.begin() + pStartFace + pSubMesh.mNumFaces, 0);
+
+	// copy positions
+	dstMesh->mNumVertices = numVertices;
+	dstMesh->mVertices = new aiVector3D[numVertices];
+	std::copy( pSrcMesh->mPositions.begin() + pStartVertex, pSrcMesh->mPositions.begin() + 
+		pStartVertex + numVertices, dstMesh->mVertices);
+
+	// normals, if given. HACK: (thom) Due to the fucking Collada spec we never 
+	// know if we have the same number of normals as there are positions. So we 
+	// also ignore any vertex attribute if it has a different count
+	if( pSrcMesh->mNormals.size() == pSrcMesh->mPositions.size())
+	{
+		dstMesh->mNormals = new aiVector3D[numVertices];
+		std::copy( pSrcMesh->mNormals.begin() + pStartVertex, pSrcMesh->mNormals.begin() +
+			pStartVertex + numVertices, dstMesh->mNormals);
+	}
+
+	// tangents, if given. 
+	if( pSrcMesh->mTangents.size() == pSrcMesh->mPositions.size())
+	{
+		dstMesh->mTangents = new aiVector3D[numVertices];
+		std::copy( pSrcMesh->mTangents.begin() + pStartVertex, pSrcMesh->mTangents.begin() + 
+			pStartVertex + numVertices, dstMesh->mTangents);
+	}
+
+	// bitangents, if given. 
+	if( pSrcMesh->mBitangents.size() == pSrcMesh->mPositions.size())
+	{
+		dstMesh->mBitangents = new aiVector3D[numVertices];
+		std::copy( pSrcMesh->mBitangents.begin() + pStartVertex, pSrcMesh->mBitangents.begin() + 
+			pStartVertex + numVertices, dstMesh->mBitangents);
+	}
+
+	// same for texturecoords, as many as we have
+	for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
+	{
+		if( pSrcMesh->mTexCoords[a].size() == pSrcMesh->mPositions.size())
+		{
+			dstMesh->mTextureCoords[a] = new aiVector3D[numVertices];
+			for( size_t b = 0; b < numVertices; ++b)
+				dstMesh->mTextureCoords[a][b] = pSrcMesh->mTexCoords[a][pStartVertex+b];
+			
+			dstMesh->mNumUVComponents[a] = pSrcMesh->mNumUVComponents[a];
+		}
+	}
+
+	// same for vertex colors, as many as we have
+	for( size_t a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
+	{
+		if( pSrcMesh->mColors[a].size() == pSrcMesh->mPositions.size())
+		{
+			dstMesh->mColors[a] = new aiColor4D[numVertices];
+			std::copy( pSrcMesh->mColors[a].begin() + pStartVertex, pSrcMesh->mColors[a].begin() + pStartVertex + numVertices, dstMesh->mColors[a]);
+		}
+	}
+
+	// create faces. Due to the fact that each face uses unique vertices, we can simply count up on each vertex
+	size_t vertex = 0;
+	dstMesh->mNumFaces = pSubMesh.mNumFaces;
+	dstMesh->mFaces = new aiFace[dstMesh->mNumFaces];
+	for( size_t a = 0; a < dstMesh->mNumFaces; ++a)
+	{
+		size_t s = pSrcMesh->mFaceSize[ pStartFace + a];
+		aiFace& face = dstMesh->mFaces[a];
+		face.mNumIndices = s;
+		face.mIndices = new unsigned int[s];
+		for( size_t b = 0; b < s; ++b)
+			face.mIndices[b] = vertex++;
+	}
+
+	// create bones if given
+	if( pSrcController)
+	{
+		// refuse if the vertex count does not match
+//		if( pSrcController->mWeightCounts.size() != dstMesh->mNumVertices)
+//			throw new ImportErrorException( "Joint Controller vertex count does not match mesh vertex count");
+
+		// resolve references - joint names
+		const Collada::Accessor& jointNamesAcc = pParser.ResolveLibraryReference( pParser.mAccessorLibrary, pSrcController->mJointNameSource);
+		const Collada::Data& jointNames = pParser.ResolveLibraryReference( pParser.mDataLibrary, jointNamesAcc.mSource);
+		// joint offset matrices
+		const Collada::Accessor& jointMatrixAcc = pParser.ResolveLibraryReference( pParser.mAccessorLibrary, pSrcController->mJointOffsetMatrixSource);
+		const Collada::Data& jointMatrices = pParser.ResolveLibraryReference( pParser.mDataLibrary, jointMatrixAcc.mSource);
+		// joint vertex_weight name list - should refer to the same list as the joint names above. If not, report and reconsider
+		const Collada::Accessor& weightNamesAcc = pParser.ResolveLibraryReference( pParser.mAccessorLibrary, pSrcController->mWeightInputJoints.mAccessor);
+		if( &weightNamesAcc != &jointNamesAcc)
+			throw new ImportErrorException( "Temporary implementational lazyness. If you read this, please report to the author.");
+		// vertex weights
+		const Collada::Accessor& weightsAcc = pParser.ResolveLibraryReference( pParser.mAccessorLibrary, pSrcController->mWeightInputWeights.mAccessor);
+		const Collada::Data& weights = pParser.ResolveLibraryReference( pParser.mDataLibrary, weightsAcc.mSource);
+
+		if( !jointNames.mIsStringArray || jointMatrices.mIsStringArray || weights.mIsStringArray)
+			throw new ImportErrorException( "Data type mismatch while resolving mesh joints");
+		// sanity check: we rely on the vertex weights always coming as pairs of BoneIndex-WeightIndex
+		if( pSrcController->mWeightInputJoints.mOffset != 0 || pSrcController->mWeightInputWeights.mOffset != 1)
+			throw new ImportErrorException( "Unsupported vertex_weight adresssing scheme. Fucking collada spec.");
+
+		// create containers to collect the weights for each bone
+		size_t numBones = jointNames.mStrings.size();
+		std::vector<std::vector<aiVertexWeight> > dstBones( numBones);
+
+		// build a temporary array of pointers to the start of each vertex's weights
+		typedef std::vector< std::pair<size_t, size_t> > IndexPairVector;
+		std::vector<IndexPairVector::const_iterator> weightStartPerVertex( pSrcController->mWeightCounts.size());
+		IndexPairVector::const_iterator pit = pSrcController->mWeights.begin();
+		for( size_t a = 0; a < pSrcController->mWeightCounts.size(); ++a)
+		{
+			weightStartPerVertex[a] = pit;
+			pit += pSrcController->mWeightCounts[a];
+		}
+
+		// now for each vertex put the corresponding vertex weights into each bone's weight collection
+		for( size_t a = pStartVertex; a < pStartVertex + numVertices; ++a)
+		{
+			// which position index was responsible for this vertex? that's also the index by which
+			// the controller assigns the vertex weights
+			size_t orgIndex = pSrcMesh->mFacePosIndices[a];
+			// find the vertex weights for this vertex
+			IndexPairVector::const_iterator iit = weightStartPerVertex[orgIndex];
+			size_t pairCount = pSrcController->mWeightCounts[orgIndex];
+
+			for( size_t b = 0; b < pairCount; ++b, ++iit)
+			{
+				size_t jointIndex = iit->first;
+				size_t vertexIndex = iit->second;
+
+				aiVertexWeight w;
+				w.mVertexId = a - pStartVertex;
+				w.mWeight = weights.mValues[vertexIndex];
+				dstBones[jointIndex].push_back( w);
+			}
+		}
+
+		// count the number of bones which influence vertices of the current submesh
+		size_t numRemainingBones = 0;
+		for( std::vector<std::vector<aiVertexWeight> >::const_iterator it = dstBones.begin(); it != dstBones.end(); ++it)
+			if( it->size() > 0)
+				numRemainingBones++;
+
+		// create bone array and copy bone weights one by one
+		dstMesh->mNumBones = numRemainingBones;
+		dstMesh->mBones = new aiBone*[numRemainingBones];
+		size_t boneCount = 0;
+		for( size_t a = 0; a < numBones; ++a)
+		{
+			// omit bones without weights
+			if( dstBones[a].size() == 0)
+				continue;
+
+			// create bone with its weights
+			aiBone* bone = new aiBone;
+			bone->mName = jointNames.mStrings[a];
+			bone->mOffsetMatrix.a1 = jointMatrices.mValues[a*16 + 0];
+			bone->mOffsetMatrix.a2 = jointMatrices.mValues[a*16 + 1];
+			bone->mOffsetMatrix.a3 = jointMatrices.mValues[a*16 + 2];
+			bone->mOffsetMatrix.a4 = jointMatrices.mValues[a*16 + 3];
+			bone->mOffsetMatrix.b1 = jointMatrices.mValues[a*16 + 4];
+			bone->mOffsetMatrix.b2 = jointMatrices.mValues[a*16 + 5];
+			bone->mOffsetMatrix.b3 = jointMatrices.mValues[a*16 + 6];
+			bone->mOffsetMatrix.b4 = jointMatrices.mValues[a*16 + 7];
+			bone->mOffsetMatrix.c1 = jointMatrices.mValues[a*16 + 8];
+			bone->mOffsetMatrix.c2 = jointMatrices.mValues[a*16 + 9];
+			bone->mOffsetMatrix.c3 = jointMatrices.mValues[a*16 + 10];
+			bone->mOffsetMatrix.c4 = jointMatrices.mValues[a*16 + 11];
+			bone->mNumWeights = dstBones[a].size();
+			bone->mWeights = new aiVertexWeight[bone->mNumWeights];
+			std::copy( dstBones[a].begin(), dstBones[a].end(), bone->mWeights);
+
+			// and insert bone
+			dstMesh->mBones[boneCount++] = bone;
+		}
+	}
+
+	return dstMesh;
 }
 
 // ------------------------------------------------------------------------------------------------

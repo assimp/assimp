@@ -1758,6 +1758,9 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 	if( pPrimType == Prim_TriFans || pPrimType == Prim_Polygon)
 		numPrimitives = 1;
 
+	pMesh->mFaceSize.reserve( numPrimitives);
+	pMesh->mFacePosIndices.reserve( indices.size() / numOffsets);
+
 	for( size_t a = 0; a < numPrimitives; a++)
 	{
 		// determine number of points for this primitive
@@ -1801,6 +1804,9 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 			// and extract per-index channels using there specified offset
 			BOOST_FOREACH( const InputChannel& input, pPerIndexChannels)
 				ExtractDataObjectFromChannel( input, vindex[input.mOffset], pMesh);
+
+			// store the vertex-data index for later assignment of bone vertex weights
+			pMesh->mFacePosIndices.push_back( vindex[perVertexOffset]);
 		}
 	}
 

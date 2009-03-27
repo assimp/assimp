@@ -333,6 +333,8 @@ struct Mesh
 
 	// Faces. Stored are only the number of vertices for each face. 1 == point, 2 == line, 3 == triangle, 4+ == poly
 	std::vector<size_t> mFaceSize;
+	// Position indices for all faces in the sequence given in mFaceSize - necessary for bone weight assignment
+	std::vector<size_t> mFacePosIndices;
 
 	// Submeshes in this mesh, each with a given material
 	std::vector<SubMesh> mSubMeshes;

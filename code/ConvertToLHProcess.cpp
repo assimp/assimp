@@ -100,11 +100,6 @@ void MakeLeftHandedProcess::Execute( aiScene* pScene)
 			ProcessAnimation( nodeAnim);
 		}
 	}
-
-	// flipping a single vector component means inverting face order ...
-	FlipWindingOrderProcess flipper;
-	flipper.Execute(pScene);
-
 	DefaultLogger::get()->debug("MakeLeftHandedProcess finished");
 }
 

@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "DXFLoader.h"
 #include "ParsingUtils.h"
+#include "ConvertToLHProcess.h"
 #include "fast_atof.h"
 
 using namespace Assimp;
@@ -306,6 +307,10 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 	pScene->mNumMaterials = 1;
 	pScene->mMaterials = new aiMaterial*[1];
 	pScene->mMaterials[0] = pcMat;
+
+	// flip winding order to be ccw
+	FlipWindingOrderProcess flipper;
+	flipper.Execute(pScene);
 
 	// --- everything destructs automatically ---
 }

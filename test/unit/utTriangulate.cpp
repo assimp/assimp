@@ -13,6 +13,7 @@ void TriangulateProcessTest :: setUp (void)
 
 	pcMesh->mNumFaces = 1000;
 	pcMesh->mFaces = new aiFace[1000];
+	pcMesh->mVertices = new aiVector3D[10000];
 
 	pcMesh->mPrimitiveTypes = aiPrimitiveType_POINT | aiPrimitiveType_LINE | 
 		aiPrimitiveType_LINE | aiPrimitiveType_POLYGON;
@@ -32,7 +33,13 @@ void TriangulateProcessTest :: setUp (void)
 		face.mIndices = new unsigned int[face.mNumIndices];
 		for (unsigned int p = 0; p < face.mNumIndices; ++p)
 		{
-			face.mIndices[p] = pcMesh->mNumVertices++;
+			face.mIndices[p] = pcMesh->mNumVertices;
+
+			// construct fully convex input data in ccw winding, xy plane
+			aiVector3D& v = pcMesh->mVertices[pcMesh->mNumVertices++];
+			v.z = 0.f;
+			v.x = cos (p * AI_MATH_TWO_PI/face.mNumIndices);
+			v.y = sin (p * AI_MATH_TWO_PI/face.mNumIndices);
 		}
 	}
 }
@@ -86,4 +93,7 @@ void  TriangulateProcessTest :: testTriangulation (void)
 			}
 		}
 	}
+
+	// we should have no valid normal vectors now necause we aren't a pure polygon mesh
+	CPPUNIT_ASSERT(pcMesh->mNormals == NULL);
 }

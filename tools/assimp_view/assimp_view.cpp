@@ -129,6 +129,7 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 	double fCur = (double)timeGetTime();
 
 	aiSetImportPropertyInteger(AI_CONFIG_IMPORT_TER_MAKE_UVS,1);
+	aiSetImportPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE,80.f);
 	//aiSetImportPropertyInteger(AI_CONFIG_PP_FD_REMOVE,1);
 	//aiSetImportPropertyInteger(AI_CONFIG_PP_PTV_KEEP_HIERARCHY,1);
 

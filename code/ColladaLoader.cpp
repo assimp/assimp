@@ -698,8 +698,8 @@ void ColladaLoader::StoreSceneMeshes( aiScene* pScene)
 	{
 		pScene->mMeshes = new aiMesh*[mMeshes.size()];
 		std::copy( mMeshes.begin(), mMeshes.end(), pScene->mMeshes);
+		mMeshes.clear();
 	}
-	mMeshes.clear();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -711,8 +711,8 @@ void ColladaLoader::StoreSceneCameras( aiScene* pScene)
 	{
 		pScene->mCameras = new aiCamera*[mCameras.size()];
 		std::copy( mCameras.begin(), mCameras.end(), pScene->mCameras);
+		mCameras.clear();
 	}
-	mCameras.clear();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -724,8 +724,8 @@ void ColladaLoader::StoreSceneLights( aiScene* pScene)
 	{
 		pScene->mLights = new aiLight*[mLights.size()];
 		std::copy( mLights.begin(), mLights.end(), pScene->mLights);
+		mLights.clear();
 	}
-	mLights.clear();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -737,8 +737,8 @@ void ColladaLoader::StoreSceneTextures( aiScene* pScene)
 	{
 		pScene->mTextures = new aiTexture*[mTextures.size()];
 		std::copy( mTextures.begin(), mTextures.end(), pScene->mTextures);
+		mTextures.clear();
 	}
-	mTextures.clear();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -746,12 +746,14 @@ void ColladaLoader::StoreSceneTextures( aiScene* pScene)
 void ColladaLoader::StoreSceneMaterials( aiScene* pScene)
 {
 	pScene->mNumMaterials = newMats.size();
-	
-	pScene->mMaterials = new aiMaterial*[newMats.size()];
-	for (unsigned int i = 0; i < newMats.size();++i)
-		pScene->mMaterials[i] = newMats[i].second;
 
-	newMats.clear();
+	if (newMats.size() > 0) {
+		pScene->mMaterials = new aiMaterial*[newMats.size()];
+		for (unsigned int i = 0; i < newMats.size();++i)
+			pScene->mMaterials[i] = newMats[i].second;
+
+		newMats.clear();
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -935,8 +937,10 @@ void ColladaLoader::BuildMaterials( const ColladaParser& pParser, aiScene* pScen
 		mMaterialIndexByName[matIt->first] = newMats.size();
 		newMats.push_back( std::pair<Collada::Effect*, aiMaterial*>(const_cast<Collada::Effect*>(&effect),mat) );
 	}
-
-	// store a dummy material if none were given
+	// ScenePreprocessor generates a default material automatically if none is there.
+	// All further code here in this loader works well without a valid material so
+	// we can safely let it to ScenePreprocessor.
+#if 0
 	if( newMats.size() == 0)
 	{
 		Assimp::MaterialHelper* mat = new Assimp::MaterialHelper;
@@ -952,6 +956,7 @@ void ColladaLoader::BuildMaterials( const ColladaParser& pParser, aiScene* pScen
 		const float specExp = 5.0f;
 		mat->AddProperty( &specExp, 1, AI_MATKEY_SHININESS);
 	}
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -59,12 +59,13 @@ const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
 //	Constructor with loaded data and directories.
 ObjFileParser::ObjFileParser(std::vector<char> &Data, 
 							 const std::string &strAbsPath, 
-							 const std::string &strModelName) :
+							 const std::string &strModelName, IOSystem* _io) :
 	m_strAbsPath(strAbsPath),
 	m_DataIt(Data.begin()),
 	m_DataItEnd(Data.end()),
 	m_pModel(NULL),
-	m_uiLine(0)
+	m_uiLine(0),
+	io(_io)
 {
 	// Create the model instance to store all the data
 	m_pModel = new ObjFile::Model();
@@ -436,44 +437,27 @@ void ObjFileParser::getMaterialLib()
 	char *pStart = &(*m_DataIt);
 	while (!isNewLine(*m_DataIt))
 		m_DataIt++;
-	
-	// TODO: fix path construction
-	// CLEANUP ... who is resposible for *two* identical DefaultIOSystems 
-	// where the IOSystem passed to ReadFile() should be used???
 
 	// Check for existence
-	DefaultIOSystem IOSystem;
 	std::string strMatName(pStart, &(*m_DataIt));
-	std::string absName = m_strAbsPath + IOSystem.getOsSeparator() + strMatName;
-	if ( !IOSystem.Exists( absName.c_str()) )
+	std::string absName = m_strAbsPath + io->getOsSeparator() + strMatName;
+	IOStream *pFile = io->Open(absName.c_str());
+
+	if (!pFile )
 	{
+		DefaultLogger::get()->error("OBJ: Unable to locate material file " + absName);
 		m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 		return;
 	}
 
-	// Extract the extention
-	std::string strExt("");
-	extractExtension( strMatName, strExt );
-	static const std::string mat = "mtl";
+	// Import material library data from file
+	size_t size = pFile->FileSize();
+	std::vector<char> buffer(size);
+	pFile->Read( &buffer[ 0 ], sizeof( char ), size );
+	io->Close( pFile );
 
-	// Load the material library
-	DefaultIOSystem FileSystem;
-	IOStream *pFile = FileSystem.Open(absName.c_str());
-	if (0L != pFile)
-	{
-		// Import material library data from file
-		size_t size = pFile->FileSize();
-		std::vector<char> buffer;
-		buffer.resize( size );
-		pFile->Read( &buffer[ 0 ], sizeof( char ), size );
-		FileSystem.Close( pFile );
-
-		// Importing the material library 
-		ObjFileMtlImporter mtlImporter( buffer, absName, m_pModel );			
-	}
-	
-	// Skip rest of line
-	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
+	// Importing the material library 
+	ObjFileMtlImporter mtlImporter( buffer, absName, m_pModel );			
 }
 
 // -------------------------------------------------------------------
@@ -493,9 +477,7 @@ void ObjFileParser::getNewMaterial()
 	if (it == m_pModel->m_MaterialMap.end())
 	{
 		// Show a warning, if material was not found
-		std::string strWarn ("Unsupported material requested: ");
-		strWarn += strMat;
-		std::cerr << "Warning : " << strWarn << std::endl;
+		DefaultLogger::get()->warn("OBJ: Unsupported material requested: " + strMat);
 		m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
 	}
 	else
@@ -630,27 +612,8 @@ void ObjFileParser::createObject(const std::string &strObjectName)
 //	Shows an error in parsing process.
 void ObjFileParser::reportErrorTokenInFace()
 {		
-	std::string strErr("");
-	
 	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
-	std::cerr <<  "Not supported token in face desc. detected : " << strErr << std::endl;
-}
-
-// -------------------------------------------------------------------
-//	Extracts the extention from a filename
-void ObjFileParser::extractExtension(const std::string &strFile, 
-									 std::string &strExt)
-{
-	strExt = "";
-	if (strFile.empty())
-		return;
-
-	// Search for extention delimiter
-	std::string::size_type pos = strFile.find_last_of(".");
-	if ( pos == std::string::npos )
-		return;
-
-	strExt = strFile.substr(pos, strFile.size() - pos);
+	DefaultLogger::get()->error("OBJ: Not supported token in face description detected");
 }
 // -------------------------------------------------------------------
 

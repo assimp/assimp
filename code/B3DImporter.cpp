@@ -131,6 +131,9 @@ void B3DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 	// convert to RH
 	MakeLeftHandedProcess monster_maker;
 	monster_maker.Execute(pScene);
+
+	FlipWindingOrderProcess flipper;
+	flipper.Execute(pScene);
 }
 
 // ------------------------------------------------------------------------------------------------

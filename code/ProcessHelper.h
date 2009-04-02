@@ -174,7 +174,12 @@ template <> struct MinMaxChooser<aiVertexWeight> {
 }};
 
 // -------------------------------------------------------------------------------
-// Find the min/max values of an array of Ts
+/** @brief Find the min/max values of an array of Ts
+ *  @param in Input array
+ *  @param size Numebr of elements to process
+ *  @param[out] min minimum value
+ *  @param[out] max maximum value
+ */
 template <typename T>
 inline void ArrayBounds(const T* in, unsigned int size, T& min, T& max) 
 {
@@ -184,6 +189,72 @@ inline void ArrayBounds(const T* in, unsigned int size, T& min, T& max)
 		max = std::max(in[i],max);
 	}
 }
+
+// -------------------------------------------------------------------------------
+/** @brief Compute the newell normal of a polygon regardless of its shape
+ *
+ *  @param out Receives the output normal
+ *  @param num Number of input vertices
+ *  @param x X data source. x[ofs_x*n] is the n'th element. 
+ *  @param y Y data source. y[ofs_y*n] is the y'th element 
+ *  @param z Z data source. z[ofs_z*n] is the z'th element 
+ *
+ *  @note The data arrays must have storage for at least num+2 elements. Using
+ *  this method is much faster than the 'other' NewellNormal()
+ */
+template <int ofs_x, int ofs_y, int ofs_z>
+inline void NewellNormal (aiVector3D& out, int num, float* x, float* y, float* z)
+{
+	// Duplicate the first two vertices at the end
+	x[(num+0)*ofs_x] = x[0]; 
+	x[(num+1)*ofs_x] = x[ofs_x]; 
+
+	y[(num+0)*ofs_y] = y[0]; 
+	y[(num+1)*ofs_y] = y[ofs_y]; 
+
+	z[(num+0)*ofs_z] = z[0]; 
+	z[(num+1)*ofs_z] = z[ofs_z]; 
+
+	float sum_xy = 0.0, sum_yz = 0.0, sum_zx = 0.0;
+
+	float *xptr = x +ofs_x, *xlow = x, *xhigh = x + ofs_x*2;
+	float *yptr = y +ofs_y, *ylow = y, *yhigh = y + ofs_y*2;
+	float *zptr = z +ofs_z, *zlow = z, *zhigh = z + ofs_z*2;
+
+	for (int tmp=0; tmp < num; tmp++) {
+		sum_xy += (*xptr) * ( (*yhigh) - (*ylow) );
+		sum_yz += (*yptr) * ( (*zhigh) - (*zlow) );
+		sum_zx += (*zptr) * ( (*xhigh) - (*xlow) );
+
+		xptr  += ofs_x;
+		xlow  += ofs_x;
+		xhigh += ofs_x;
+
+		yptr  += ofs_y;
+		ylow  += ofs_y;
+		yhigh += ofs_y;
+
+		zptr  += ofs_z;
+		zlow  += ofs_z;
+		zhigh += ofs_z;
+	}
+	out = aiVector3D(sum_yz,sum_zx,sum_xy);
+}
+
+#if 0
+// -------------------------------------------------------------------------------
+/** @brief Compute newell normal of a polgon regardless of its shape
+ *
+ *  @param out Receives the output normal
+ *  @param data Input vertices
+ *  @param idx Index buffer
+ *  @param num Number of indices
+ */
+inline void NewellNormal (aiVector3D& out, const aiVector3D* data, unsigned int* idx, unsigned int num )
+{
+	// TODO: intended to be used in GenNormals. 
+}
+#endif
 
 // -------------------------------------------------------------------------------
 /** Little helper function to calculate the quadratic difference 
@@ -201,7 +272,12 @@ inline float GetColorDifference( const aiColor4D& pColor1, const aiColor4D& pCol
 }
 
 // -------------------------------------------------------------------------------
-// Compute the AABB of a mesh after applying a given transform
+/** @brief Compute the AABB of a mesh after applying a given transform
+ *  @param mesh Input mesh
+ *  @param[out] min Receives minimum transformed vertex
+ *  @param[out] max Receives maximum transformed vertex
+ *  @param m Transformation matrix to be applied
+ */
 inline void FindAABBTransformed (const aiMesh* mesh, aiVector3D& min, aiVector3D& max, 
 	const aiMatrix4x4& m)
 {
@@ -216,7 +292,14 @@ inline void FindAABBTransformed (const aiMesh* mesh, aiVector3D& min, aiVector3D
 }
 
 // -------------------------------------------------------------------------------
-// Helper function to determine the 'real' center of a mesh
+/** @brief Helper function to determine the 'real' center of a mesh
+ *
+ *  That is the center of its axis-aligned bounding box.
+ *  @param mesh Input mesh
+ *  @param[out] min Minimum vertex of the mesh
+ *  @param[out] max maximum vertex of the mesh
+ *  @param[out] out Center point
+ */
 inline void FindMeshCenter (aiMesh* mesh, aiVector3D& out, aiVector3D& min, aiVector3D& max)
 {
 	ArrayBounds(mesh->mVertices,mesh->mNumVertices, min,max);

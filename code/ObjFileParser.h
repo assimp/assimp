@@ -75,7 +75,7 @@ public:
 
 public:
 	///	\brief	Constructor with data array.
-	ObjFileParser(std::vector<char> &Data, const std::string &strAbsPath, const std::string &strModelName);
+	ObjFileParser(std::vector<char> &Data, const std::string &strAbsPath, const std::string &strModelName, IOSystem* io);
 	///	\brief	Destructor
 	~ObjFileParser();
 	///	\brief	Model getter.
@@ -113,8 +113,6 @@ private:
 	void createObject(const std::string &strObjectName);
 	///	Error report in token
 	void reportErrorTokenInFace();
-	///	Extractor for extention
-	void extractExtension(const std::string &strFile, std::string &strExt);
 
 private:
 	///	Default material name
@@ -131,6 +129,8 @@ private:
 	unsigned int m_uiLine;
 	//!	Helper buffer
 	char m_buffer[BUFFERSIZE];
+
+	IOSystem* io;
 };
 
 }	// Namespace Assimp

@@ -401,7 +401,6 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes = (unsigned int)apcMeshes.size() ];
 	::memcpy(pScene->mMeshes,&apcMeshes[0],pScene->mNumMeshes*sizeof(void*));
 
-
 	// generate the final node graph
 	GenerateNodeGraph(apcNodes);
 }
@@ -434,7 +433,7 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 		aiVector3D* pV2 = mesh->mVertices + face.mIndices[1];
 		aiVector3D* pV3 = mesh->mVertices + face.mIndices[face.mNumIndices-1];
 
-		aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).Normalize();
+		aiVector3D vNor = ((*pV2 - *pV1) ^(*pV3 - *pV1)).Normalize();
 		for (unsigned int i = 0; i < face.mNumIndices;++i)
 			out[face.mIndices[i]] = vNor;
 	}
@@ -596,9 +595,12 @@ void LWOImporter::GenerateNodeGraph(std::vector<aiNode*>& apcNodes)
 		pScene->mRootNode = pc;
 	}
 
-	// convert the whole stuff to RH
+	// convert the whole stuff to RH with CCW winding
 	MakeLeftHandedProcess maker;
 	maker.Execute(pScene);
+
+	FlipWindingOrderProcess flipper;
+	flipper.Execute(pScene);
 }
 
 // ------------------------------------------------------------------------------------------------

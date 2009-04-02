@@ -436,15 +436,15 @@ enum aiPostProcessSteps
 	aiProcess_FlipUVs = 0x80000000, /* don't change */
 
 	// -------------------------------------------------------------------------
-	/** <hr>This step adjusts the output face winding order to be ccw.
+	/** <hr>This step adjusts the output face winding order to be cw.
 	 *
-	 * The default face winding order is clockwise.
+	 * The default face winding order is counter clockwise.
 	 * <br><b>Output face order:</b>
 	 * @code
-	 *       x1
+	 *       x2
 	 *           
 	 *                         x0
-	 *  x2
+	 *  x1
 	 * @endcode
 	*/
 	aiProcess_FlipWindingOrder  = 0x40000000 /* don't change */
@@ -470,6 +470,7 @@ enum aiPostProcessSteps
 #define aiProcess_ConvertToLeftHanded ( \
 	aiProcess_MakeLeftHanded     | \
 	aiProcess_FlipUVs            | \
+	aiProcess_FlipWindingOrder   | \
 	0 ) 
 
 

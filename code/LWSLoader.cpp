@@ -370,7 +370,7 @@ void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<Attachm
 
 	// .. and construct animation channels
 	aiNodeAnim* anim = NULL;
-#if 0 /* not yet */
+#if 1 /* not yet */
 	if (first != last) {
 		resolver.SetAnimationRange(first,last);
 		resolver.ExtractAnimChannel(&anim,AI_LWO_ANIM_FLAG_SAMPLE_ANIMS|AI_LWO_ANIM_FLAG_START_AT_ZERO);
@@ -862,6 +862,10 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 	// convert the master scene to RH
 	MakeLeftHandedProcess monster_cheat;
 	monster_cheat.Execute(master);
+
+	// .. ccw
+	FlipWindingOrderProcess flipper;
+	flipper.Execute(pScene);
 
 	// OK ... finally build the output graph
 	SceneCombiner::MergeScenes(&pScene,master,attach,

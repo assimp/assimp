@@ -419,6 +419,9 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 	// convert to RH
 	MakeLeftHandedProcess hero;
 	hero.Execute(pScene);
+
+	FlipWindingOrderProcess flipper;
+	flipper.Execute(pScene);
 }
 
 #endif // !! AI_BUILD_NO_3D_IMPORTER

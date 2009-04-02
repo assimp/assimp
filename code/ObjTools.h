@@ -121,6 +121,9 @@ inline char_t skipLine( char_t it, char_t end, unsigned int &uiLine )
 		++it;
 		++uiLine;
 	}
+	 /* fix .. from time to time there are spaces at the beginning of a material line */
+	while ( it != end && (*it == '\t' || *it == ' ') )
+		++it;
 	return it;
 }
 
@@ -187,7 +190,7 @@ inline char_t getFloat( char_t it, char_t end, float &value )
 {
 	static const size_t BUFFERSIZE = 1024;
 	char buffer[ BUFFERSIZE ];
-	memset( buffer, '\0', BUFFERSIZE );
+	//memset( buffer, '\0', BUFFERSIZE );
 	it = CopyNextWord<char_t>( it, end, buffer, BUFFERSIZE );
 	value = (float) fast_atof( buffer );
 

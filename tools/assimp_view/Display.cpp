@@ -970,63 +970,65 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
 
 	// and fill them with data
 	D3DSURFACE_DESC sDesc;
-	(*pcNew->piTexture)->GetLevelDesc(0,&sDesc);
-	char szTemp[128];
+	if (pcNew->piTexture && *pcNew->piTexture) {
+		(*pcNew->piTexture)->GetLevelDesc(0,&sDesc);
+		char szTemp[128];
 
-	sprintf(szTemp,"%i",sDesc.Width);
-	SetWindowText(GetDlgItem(g_hDlg,IDC_EVERT),szTemp);
+		sprintf(szTemp,"%i",sDesc.Width);
+		SetWindowText(GetDlgItem(g_hDlg,IDC_EVERT),szTemp);
 
-	sprintf(szTemp,"%i",sDesc.Height);
-	SetWindowText(GetDlgItem(g_hDlg,IDC_ENODEWND),szTemp);
+		sprintf(szTemp,"%i",sDesc.Height);
+		SetWindowText(GetDlgItem(g_hDlg,IDC_ENODEWND),szTemp);
 
-	sprintf(szTemp,"%i",(*pcNew->piTexture)->GetLevelCount());
-	SetWindowText(GetDlgItem(g_hDlg,IDC_ESHADER),szTemp);
+		sprintf(szTemp,"%i",(*pcNew->piTexture)->GetLevelCount());
+		SetWindowText(GetDlgItem(g_hDlg,IDC_ESHADER),szTemp);
 
-	sprintf(szTemp,"%i",pcNew->iUV);
-	SetWindowText(GetDlgItem(g_hDlg,IDC_EMAT),szTemp);
+		sprintf(szTemp,"%i",pcNew->iUV);
+		SetWindowText(GetDlgItem(g_hDlg,IDC_EMAT),szTemp);
 
-	sprintf(szTemp,"%f",pcNew->fBlend);
-	SetWindowText(GetDlgItem(g_hDlg,IDC_EMESH),szTemp);
+		sprintf(szTemp,"%f",pcNew->fBlend);
+		SetWindowText(GetDlgItem(g_hDlg,IDC_EMESH),szTemp);
 
-	const char* szOp;
-	switch (pcNew->eOp)
-	{
-	case aiTextureOp_Add:
-		szOp = "add";break;
-	case aiTextureOp_Subtract:
-		szOp = "sub";break;
-	case aiTextureOp_Divide:
-		szOp = "div";break;
-	case aiTextureOp_SignedAdd:
-		szOp = "addsign";break;
-	case aiTextureOp_SmoothAdd:
-		szOp = "addsmooth";break;
-	default: szOp = "mul";
-	};
-	SetWindowText(GetDlgItem(g_hDlg,IDC_ELOAD),szOp);
-
-	// NOTE: Format is always ARGB8888 since other formats are
-	// converted to this format ...
-	SetWindowText(GetDlgItem(g_hDlg,IDC_EFACE),"ARGB8");
-
-	// check whether this is the default texture
-	if (pcNew->piTexture)
-	{
-		// {9785DA94-1D96-426b-B3CB-BADC36347F5E}
-		static const GUID guidPrivateData = 
-		{ 0x9785da94, 0x1d96, 0x426b, 
-		{ 0xb3, 0xcb, 0xba, 0xdc, 0x36, 0x34, 0x7f, 0x5e } };
-
-		uint32_t iData = 0;
-		DWORD dwSize = 4;
-		(*pcNew->piTexture)->GetPrivateData(guidPrivateData,&iData,&dwSize);
-
-		if (0xFFFFFFFF == iData)
+		const char* szOp;
+		switch (pcNew->eOp)
 		{
-			CLogDisplay::Instance().AddEntry("[ERROR] Texture could not be loaded. "
-				"The displayed texture is a default texture",
-				D3DCOLOR_ARGB(0xFF,0xFF,0,0));
-			return 0;
+		case aiTextureOp_Add:
+			szOp = "add";break;
+		case aiTextureOp_Subtract:
+			szOp = "sub";break;
+		case aiTextureOp_Divide:
+			szOp = "div";break;
+		case aiTextureOp_SignedAdd:
+			szOp = "addsign";break;
+		case aiTextureOp_SmoothAdd:
+			szOp = "addsmooth";break;
+		default: szOp = "mul";
+		};
+		SetWindowText(GetDlgItem(g_hDlg,IDC_ELOAD),szOp);
+
+		// NOTE: Format is always ARGB8888 since other formats are
+		// converted to this format ...
+		SetWindowText(GetDlgItem(g_hDlg,IDC_EFACE),"ARGB8");
+
+		// check whether this is the default texture
+		if (pcNew->piTexture)
+		{
+			// {9785DA94-1D96-426b-B3CB-BADC36347F5E}
+			static const GUID guidPrivateData = 
+			{ 0x9785da94, 0x1d96, 0x426b, 
+			{ 0xb3, 0xcb, 0xba, 0xdc, 0x36, 0x34, 0x7f, 0x5e } };
+
+			uint32_t iData = 0;
+			DWORD dwSize = 4;
+			(*pcNew->piTexture)->GetPrivateData(guidPrivateData,&iData,&dwSize);
+
+			if (0xFFFFFFFF == iData)
+			{
+				CLogDisplay::Instance().AddEntry("[ERROR] Texture could not be loaded. "
+					"The displayed texture is a default texture",
+					D3DCOLOR_ARGB(0xFF,0xFF,0,0));
+				return 0;
+			}
 		}
 	}
 	// redraw the color fields in the UI --- their purpose has possibly changed
@@ -2181,52 +2183,54 @@ int CDisplay::RenderTextureView()
 	// build a rectangle which centers the texture
 	// scaling is OK, but no stretching
 	D3DSURFACE_DESC sDesc;
-	(*this->m_pcCurrentTexture->piTexture)->GetLevelDesc(0,&sDesc);
+	if ( m_pcCurrentTexture->piTexture && *m_pcCurrentTexture->piTexture) { /* just a dirty fix */
+		(*m_pcCurrentTexture->piTexture)->GetLevelDesc(0,&sDesc);
 
-	struct SVertex{float x,y,z,w,u,v;};
-	SVertex as[4];
+		struct SVertex{float x,y,z,w,u,v;};
+		SVertex as[4];
 
-	const float nx = (float)sRect.right;
-	const float ny = (float)sRect.bottom;
-	const float  x = (float)sDesc.Width;
-	const float  y = (float)sDesc.Height;
-	float f = std::min((nx-30) / x,(ny-30) / y) * (m_fTextureZoom/1000.0f);
-	
-	float fHalfX = (nx - (f * x)) / 2.0f;
-	float fHalfY = (ny - (f * y)) / 2.0f;
-	as[1].x = fHalfX + m_vTextureOffset.x;
-	as[1].y = fHalfY + m_vTextureOffset.y;
-	as[1].z = 0.2f;
-	as[1].w = 1.0f;
-	as[1].u = 0.0f;
-	as[1].v = 0.0f;
-	as[3].x = nx-fHalfX + m_vTextureOffset.x;
-	as[3].y = fHalfY + m_vTextureOffset.y;
-	as[3].z = 0.2f;
-	as[3].w = 1.0f;
-	as[3].u = 1.0f;
-	as[3].v = 0.0f;
-	as[0].x = fHalfX + m_vTextureOffset.x;
-	as[0].y = ny-fHalfY + m_vTextureOffset.y;
-	as[0].z = 0.2f;
-	as[0].w = 1.0f;
-	as[0].u = 0.0f;
-	as[0].v = 1.0f;
-	as[2].x = nx-fHalfX + m_vTextureOffset.x;
-	as[2].y = ny-fHalfY + m_vTextureOffset.y;
-	as[2].z = 0.2f;
-	as[2].w = 1.0f;
-	as[2].u = 1.0f;
-	as[2].v = 1.0f;
-	as[0].x -= 0.5f;as[1].x -= 0.5f;as[2].x -= 0.5f;as[3].x -= 0.5f;
-	as[0].y -= 0.5f;as[1].y -= 0.5f;as[2].y -= 0.5f;as[3].y -= 0.5f;
+		const float nx = (float)sRect.right;
+		const float ny = (float)sRect.bottom;
+		const float  x = (float)sDesc.Width;
+		const float  y = (float)sDesc.Height;
+		float f = std::min((nx-30) / x,(ny-30) / y) * (m_fTextureZoom/1000.0f);
 
-	// draw the rectangle
-	DWORD dw2;g_piDevice->GetFVF(&dw2);
-	g_piDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_TEX1);
-	g_piDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,
-		&as,sizeof(SVertex));
-	g_piDevice->SetFVF(dw2);
+		float fHalfX = (nx - (f * x)) / 2.0f;
+		float fHalfY = (ny - (f * y)) / 2.0f;
+		as[1].x = fHalfX + m_vTextureOffset.x;
+		as[1].y = fHalfY + m_vTextureOffset.y;
+		as[1].z = 0.2f;
+		as[1].w = 1.0f;
+		as[1].u = 0.0f;
+		as[1].v = 0.0f;
+		as[3].x = nx-fHalfX + m_vTextureOffset.x;
+		as[3].y = fHalfY + m_vTextureOffset.y;
+		as[3].z = 0.2f;
+		as[3].w = 1.0f;
+		as[3].u = 1.0f;
+		as[3].v = 0.0f;
+		as[0].x = fHalfX + m_vTextureOffset.x;
+		as[0].y = ny-fHalfY + m_vTextureOffset.y;
+		as[0].z = 0.2f;
+		as[0].w = 1.0f;
+		as[0].u = 0.0f;
+		as[0].v = 1.0f;
+		as[2].x = nx-fHalfX + m_vTextureOffset.x;
+		as[2].y = ny-fHalfY + m_vTextureOffset.y;
+		as[2].z = 0.2f;
+		as[2].w = 1.0f;
+		as[2].u = 1.0f;
+		as[2].v = 1.0f;
+		as[0].x -= 0.5f;as[1].x -= 0.5f;as[2].x -= 0.5f;as[3].x -= 0.5f;
+		as[0].y -= 0.5f;as[1].y -= 0.5f;as[2].y -= 0.5f;as[3].y -= 0.5f;
+
+		// draw the rectangle
+		DWORD dw2;g_piDevice->GetFVF(&dw2);
+		g_piDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_TEX1);
+		g_piDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,
+			&as,sizeof(SVertex));
+		g_piDevice->SetFVF(dw2);
+	}
 
 	g_piPassThroughEffect->EndPass();
 	g_piPassThroughEffect->End();

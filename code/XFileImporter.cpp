@@ -144,6 +144,9 @@ void XFileImporter::CreateDataRepresentationFromImport( aiScene* pScene, const X
 	MakeLeftHandedProcess convertProcess;
 	convertProcess.Execute( pScene);
 
+	FlipWindingOrderProcess flipper;
+	flipper.Execute(pScene);
+
 	// finally: create a dummy material if not material was imported
 	if( pScene->mNumMaterials == 0)
 	{

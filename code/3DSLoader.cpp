@@ -393,9 +393,8 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
 		if (!bIsPrj) /* fixme */
 			ParseLightChunk();
 
-		// The specular light color is identical the the diffuse light
-		// color. The ambient light color is equal to the ambient base 
-		// color of the whole scene.
+		// The specular light color is identical the the diffuse light color. The ambient light color
+		// is equal to the ambient base color of the whole scene.
 		light->mColorSpecular = light->mColorDiffuse;
 		light->mColorAmbient  = mClrAmbient;
 
@@ -414,11 +413,9 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
 
 		camera->mName.Set(std::string(name, num));
 
-		// Camera position and look-at vector are difficult to handle. 
-		// If an animation track is given, we must make sure that
-		// the track is relative to these values - or , easier
-		// we must copy the information here to the node matrix of
-		// the camera's parent in the graph.
+		// Camera position and look-at vector are difficult to handle. If an animation track is given,
+		// we must make sure that the track is relative to these values - or , easier we must copy the
+		// information here to the node matrix of the camera's parent in the graph.
 
 		// First read the position of the camera
 		camera->mPosition.x = stream->GetF4();
@@ -429,10 +426,17 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
 		camera->mLookAt.x = stream->GetF4() - camera->mPosition.x;
 		camera->mLookAt.y = stream->GetF4() - camera->mPosition.y;
 		camera->mLookAt.z = stream->GetF4() - camera->mPosition.z;
-		camera->mLookAt.Normalize();
+		float len = camera->mLookAt.Length();
+		if (len < 1e-5f) {
+			
+			// There are some files with lookat == position. Don't know why or whether it's ok.
+			DefaultLogger::get()->error("3DS: Unable to read proper camera look-at vector");
+			camera->mLookAt = aiVector3D(0.f,1.f,0.f);
 
-		// And finally - the camera rotation angle, in
-		// counter clockwise direction 
+		}
+		else camera->mLookAt /= len;
+
+		// And finally - the camera rotation angle, in counter clockwise direction 
 		const float angle =  AI_DEG_TO_RAD( stream->GetF4() );
 		aiQuaternion quat(camera->mLookAt,angle);
 		camera->mUp = quat.GetMatrix() * aiVector3D(0.f,1.f,0.f);

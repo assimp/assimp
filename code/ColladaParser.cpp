@@ -321,6 +321,9 @@ void ColladaParser::ReadAnimation( Collada::Animation* pParent)
 				// Better add another indirection to that! Can't have enough of those.
 				int indexTarget = GetAttribute( "target");
 				channel.mTarget = mReader->getAttributeValue( indexTarget);
+
+				if( !mReader->isEmptyElement())
+					SkipElement();
 			} 
 			else
 			{

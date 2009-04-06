@@ -77,6 +77,15 @@ protected:
 	/** Reads asset informations such as coordinate system informations and legal blah */
 	void ReadAssetInfo();
 
+	/** Reads the animation library */
+	void ReadAnimationLibrary();
+
+	/** Reads an animation into the given parent structure */
+	void ReadAnimation( Collada::Animation* pParent);
+
+	/** Reads an animation sampler into the given anim channel */
+	void ReadAnimationSampler( Collada::AnimationChannel& pChannel);
+
 	/** Reads the skeleton controller library */
 	void ReadControllerLibrary();
 
@@ -291,6 +300,9 @@ protected:
 	/** Pointer to the root node. Don't delete, it just points to one of 
 	    the nodes in the node library. */
 	Collada::Node* mRootNode;
+
+	/** Root animation container */
+	Collada::Animation mAnims;
 
 	/** Size unit: how large compared to a meter */
 	float mUnitSize;

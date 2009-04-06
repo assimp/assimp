@@ -82,6 +82,7 @@ enum InputType
 /** Contains all data for one of the different transformation types */
 struct Transform
 {
+	std::string mID;  ///< SID of the transform step, by which anim channels address their target node
 	TransformType mType;
 	float f[16]; ///< Interpretation of data depends on the type of the transformation 
 };
@@ -541,6 +542,40 @@ struct Image
 	 */
 	std::string mEmbeddedFormat;
 
+};
+
+/** An animation channel. */
+struct AnimationChannel
+{
+	/** URL of the data to animate. Could be about anything, but we support only the 
+	 * "NodeID/TransformID.SubElement" notation 
+	 */
+	std::string mTarget;
+
+	/** Source URL of the time values. Collada calls them "input". Meh. */
+	std::string mSourceTimes;
+	/** Source URL of the value values. Collada calls them "output". */
+	std::string mSourceValues;
+};
+
+/** An animation. Container for 0-x animation channels or 0-x animations */
+struct Animation
+{
+	/** Anim name */
+	std::string mName;
+
+	/** the animation channels, if any */
+	std::vector<AnimationChannel> mChannels;
+
+	/** the sub-animations, if any */
+	std::vector<Animation*> mSubAnims;
+
+	/** Destructor */
+	~Animation()
+	{
+		for( std::vector<Animation*>::iterator it = mSubAnims.begin(); it != mSubAnims.end(); ++it)
+			delete *it;
+	}
 };
 
 } // end of namespace Collada

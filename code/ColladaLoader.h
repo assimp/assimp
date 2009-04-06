@@ -141,6 +141,21 @@ protected:
 	/** Stores all textures in the given scene */
 	void StoreSceneTextures( aiScene* pScene);
 
+	/** Stores all animations 
+	 * @param pScene target scene to store the anims
+	 */
+	void StoreAnimations( aiScene* pScene, const ColladaParser& pParser);
+
+	/** Stores all animations for the given source anim and its nested child animations
+	 * @param pScene target scene to store the anims
+	 * @param pSrcAnim the source animation to process
+	 * @param pPrefix Prefix to the name in case of nested animations
+	 */
+	void StoreAnimations( aiScene* pScene, const ColladaParser& pParser, const Collada::Animation* pSrcAnim, const std::string pPrefix);
+
+	/** Constructs the animation for the given source anim */
+	void CreateAnimation( aiScene* pScene, const ColladaParser& pParser, const Collada::Animation* pSrcAnim, const std::string& pName);
+	
 	/** Constructs materials from the collada material definitions */
 	void BuildMaterials( const ColladaParser& pParser, aiScene* pScene);
 
@@ -162,7 +177,30 @@ protected:
 		const Collada::Effect& pEffect, const std::string& pName);
 
 	/** Converts a path read from a collada file to the usual representation */
-	void ConvertPath (aiString& ss);
+	void ConvertPath( aiString& ss);
+
+	/** Reads a float value from an accessor and its data array.
+	 * @param pAccessor The accessor to use for reading
+	 * @param pData The data array to read from
+	 * @param pIndex The index of the element to retrieve
+	 * @param pOffset Offset into the element, for multipart elements such as vectors or matrices
+	 * @return the specified value
+	 */
+	float ReadFloat( const Collada::Accessor& pAccessor, const Collada::Data& pData, size_t pIndex, size_t pOffset) const;
+
+	/** Reads a string value from an accessor and its data array.
+	 * @param pAccessor The accessor to use for reading
+	 * @param pData The data array to read from
+	 * @param pIndex The index of the element to retrieve
+	 * @return the specified value
+	 */
+	const std::string& ReadString( const Collada::Accessor& pAccessor, const Collada::Data& pData, size_t pIndex) const;
+
+	/** Recursively collects all nodes into the given array */
+	void CollectNodes( const aiNode* pNode, std::vector<const aiNode*>& poNodes) const;
+
+	/** Finds a node in the collada scene by the given name */
+	const Collada::Node* FindNode( const Collada::Node* pNode, const std::string& pName);
 
 protected:
 	/** Filename, for a verbose error message */
@@ -188,6 +226,9 @@ protected:
 
 	/** Temporary texture list */
 	std::vector<aiTexture*> mTextures;
+
+	/** Accumulated animations for the target scene */
+	std::vector<aiAnimation*> mAnims;
 };
 
 } // end of namespace Assimp

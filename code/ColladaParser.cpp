@@ -160,6 +160,8 @@ void ColladaParser::ReadStructure()
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
 			if( IsElement( "asset"))
 				ReadAssetInfo();
+			else if( IsElement( "library_animations"))
+				ReadAnimationLibrary();
 			else if( IsElement( "library_controllers"))
 				ReadControllerLibrary();
 			else if( IsElement( "library_images"))
@@ -229,6 +231,153 @@ void ColladaParser::ReadAssetInfo()
 		{
 			if( strcmp( mReader->getNodeName(), "asset") != 0)
 				ThrowException( "Expected end of \"asset\" element.");
+
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads the animation library
+void ColladaParser::ReadAnimationLibrary()
+{
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
+		{
+			if( IsElement( "animation"))
+			{
+				// delegate the reading. Depending on the inner elements it will be a container or a anim channel
+				ReadAnimation( &mAnims);
+			} else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) 
+		{
+			if( strcmp( mReader->getNodeName(), "library_animations") != 0)
+				ThrowException( "Expected end of \"library_animations\" element.");
+
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads an animation into the given parent structure
+void ColladaParser::ReadAnimation( Collada::Animation* pParent)
+{
+	// an <animation> element may be a container for grouping sub-elements or an animation channel
+	// this is the channel we're writing to, in case it's a channel
+	AnimationChannel channel;
+	// this is the anim container in case we're a container
+	Animation* anim = NULL;
+
+	// optional name given as an attribute
+	std::string animName;
+	int indexName = TestAttribute( "name");
+	int indexID = TestAttribute( "id");
+	if( indexName >= 0)
+		animName = mReader->getAttributeValue( indexName);
+	else if( indexID >= 0)
+		animName = mReader->getAttributeValue( indexID);
+	else
+		animName = "animation";
+
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
+		{
+			// we have subanimations
+			if( IsElement( "animation"))
+			{
+				// create container from our element
+				if( !anim)
+				{
+					anim = new Animation;
+					anim->mName = animName;
+					pParent->mSubAnims.push_back( anim);
+				}
+
+				// recurse into the subelement
+				ReadAnimation( anim);
+			} 
+			else if( IsElement( "source"))
+			{
+				// possible animation data - we'll never know. Better store it
+				ReadSource();
+			} 
+			else if( IsElement( "sampler"))
+			{
+				// have it read into our channel
+				ReadAnimationSampler( channel);
+			} 
+			else if( IsElement( "channel"))
+			{
+				// the binding element whose whole purpose is to provide the target to animate
+				// Thanks, Collada! A directly posted information would have been too simple, I guess.
+				// Better add another indirection to that! Can't have enough of those.
+				int indexTarget = GetAttribute( "target");
+				channel.mTarget = mReader->getAttributeValue( indexTarget);
+			} 
+			else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) 
+		{
+			if( strcmp( mReader->getNodeName(), "animation") != 0)
+				ThrowException( "Expected end of \"animation\" element.");
+
+			break;
+		}
+	}
+
+	// it turned out to be a channel - add it
+	if( !channel.mTarget.empty())
+		pParent->mChannels.push_back( channel);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads an animation sampler into the given anim channel
+void ColladaParser::ReadAnimationSampler( Collada::AnimationChannel& pChannel)
+{
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
+		{
+			if( IsElement( "input"))
+			{
+				int indexSemantic = GetAttribute( "semantic");
+				const char* semantic = mReader->getAttributeValue( indexSemantic);
+				int indexSource = GetAttribute( "source");
+				const char* source = mReader->getAttributeValue( indexSource);
+				if( source[0] != '#')
+					ThrowException( "Unsupported URL format");
+				source++;
+				
+				if( strcmp( semantic, "INPUT") == 0)
+					pChannel.mSourceTimes = source;
+				else if( strcmp( semantic, "OUTPUT") == 0)
+					pChannel.mSourceValues = source;
+
+				if( !mReader->isEmptyElement())
+					SkipElement();
+			} 
+			else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) 
+		{
+			if( strcmp( mReader->getNodeName(), "sampler") != 0)
+				ThrowException( "Expected end of \"sampler\" element.");
 
 			break;
 		}
@@ -2072,13 +2221,19 @@ void ColladaParser::ReadNodeTransformation( Node* pNode, TransformType pType)
 {
 	std::string tagName = mReader->getNodeName();
 
+	Transform tf;
+	tf.mType = pType;
+	
+	// read SID
+	int indexSID = TestAttribute( "sid");
+	if( indexSID >= 0)
+		tf.mID = mReader->getAttributeValue( indexSID);
+
 	// how many parameters to read per transformation type
 	static const unsigned int sNumParameters[] = { 9, 4, 3, 3, 7, 16 };
 	const char* content = GetTextContent();
 
 	// read as many parameters and store in the transformation
-	Transform tf;
-	tf.mType = pType;
 	for( unsigned int a = 0; a < sNumParameters[pType]; a++)
 	{
 		// read a number

@@ -357,6 +357,11 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
 
+	// IMPLEMENTATION NOTE;
+	// Cameras or lights define their transformation in their parent node and in the
+	// corresponding light or camera chunks. However, we read and process the latter
+	// to to be able to return valid cameras/lights even if no scenegraph is given.
+
 	// get chunk type
 	switch (chunk.Flag)
 	{
@@ -410,12 +415,7 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
 		// This starts a new camera
 		aiCamera* camera = new aiCamera();
 		mScene->mCameras.push_back(camera);
-
 		camera->mName.Set(std::string(name, num));
-
-		// Camera position and look-at vector are difficult to handle. If an animation track is given,
-		// we must make sure that the track is relative to these values - or , easier we must copy the
-		// information here to the node matrix of the camera's parent in the graph.
 
 		// First read the position of the camera
 		camera->mPosition.x = stream->GetF4();
@@ -429,7 +429,7 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
 		float len = camera->mLookAt.Length();
 		if (len < 1e-5f) {
 			
-			// There are some files with lookat == position. Don't know why or whether it's ok.
+			// There are some files with lookat == position. Don't know why or whether it's ok or not.
 			DefaultLogger::get()->error("3DS: Unable to read proper camera look-at vector");
 			camera->mLookAt = aiVector3D(0.f,1.f,0.f);
 
@@ -558,14 +558,15 @@ void Discreet3DSImporter::ParseKeyframeChunk()
 // Little helper function for ParseHierarchyChunk
 void Discreet3DSImporter::InverseNodeSearch(D3DS::Node* pcNode,D3DS::Node* pcCurrent)
 {
-	if (!pcCurrent)
-	{
+	if (!pcCurrent)	{
 		mRootNode->push_back(pcNode);
 		return;
 	}
-	if (pcCurrent->mHierarchyPos == pcNode->mHierarchyPos)
-	{
-		if(pcCurrent->mParent)pcCurrent->mParent->push_back(pcNode);
+
+	if (pcCurrent->mHierarchyPos == pcNode->mHierarchyPos)	{
+		if(pcCurrent->mParent)
+			pcCurrent->mParent->push_back(pcNode);
+
 		else pcCurrent->push_back(pcNode);
 		return;
 	}
@@ -576,12 +577,12 @@ void Discreet3DSImporter::InverseNodeSearch(D3DS::Node* pcNode,D3DS::Node* pcCur
 // Find a node with a specific name in the import hierarchy
 D3DS::Node* FindNode(D3DS::Node* root, const std::string& name)
 {
-	if (root->mName == name)return root;
-	for (std::vector<D3DS::Node*>::iterator it = root->mChildren.begin();
-		it != root->mChildren.end(); ++it)
-	{
+	if (root->mName == name)
+		return root;
+	for (std::vector<D3DS::Node*>::iterator it = root->mChildren.begin();it != root->mChildren.end(); ++it)	{
 		D3DS::Node* nd;
-		if (( nd = FindNode(*it,name)))return nd;
+		if (( nd = FindNode(*it,name)))
+			return nd;
 	}
 	return NULL;
 }
@@ -631,9 +632,8 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 	{
 	case Discreet3DS::CHUNK_TRACKOBJNAME:
 
-		// This is the name of the object to which the track applies
-		// The chunk also defines the position of this object in the
-		// hierarchy.
+		// This is the name of the object to which the track applies. The chunk also
+		// defines the position of this object in the hierarchy.
 		{
 
 		// First of all: get the name of the object
@@ -643,9 +643,8 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 		while (stream->GetI1())++cnt;
 		std::string name = std::string(sz,cnt);
 
-		// Now find out whether we have this node already
-		// (target animation channels are stored with a
-		//  separate object ID)
+		// Now find out whether we have this node already (target animation channels 
+		// are stored with a separate object ID)
 		D3DS::Node* pcNode = FindNode(mRootNode,name);
 		if (pcNode)
 		{
@@ -694,9 +693,8 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 		{
 			const char* sz = (const char*) stream->GetPtr();
 			while (stream->GetI1());
-			// mCurrentNode->mDummyName = std::string(sz);
 
-			// FIX: if object name is DUMMY, take this one instead
+			// If object name is DUMMY, take this one instead
 			if (mCurrentNode->mName == "$$$DUMMY")	{
 				//DefaultLogger::get()->warn("3DS: Skipping dummy object name for non-dummy object");
 				mCurrentNode->mName = std::string(sz);
@@ -933,16 +931,12 @@ void Discreet3DSImporter::ParseFaceChunk()
 	// Get chunk type
 	switch (chunk.Flag)
 	{
-
 	case Discreet3DS::CHUNK_SMOOLIST:
 		{
-		// This is the list of smoothing groups - a bitfield for
-		// every frame. Up to 32 smoothing groups assigned to a
-		// face.
+		// This is the list of smoothing groups - a bitfield for every face. 
+		// Up to 32 smoothing groups assigned to a single face.
 		unsigned int num = chunkSize/4, m = 0;
-		for (std::vector<D3DS::Face>::iterator i =  mMesh.mFaces.begin();
-			 m != num;++i, ++m)
-		{
+		for (std::vector<D3DS::Face>::iterator i =  mMesh.mFaces.begin(); m != num;++i, ++m)	{
 			// nth bit is set for nth smoothing group
 			(*i).iSmoothGroup = stream->GetI4();
 		}}
@@ -956,26 +950,15 @@ void Discreet3DSImporter::ParseFaceChunk()
 
 		// find the index of the material
 		unsigned int idx = 0xcdcdcdcd, cnt = 0;
-		for (std::vector<D3DS::Material>::const_iterator
-			i =  mScene->mMaterials.begin();
-			i != mScene->mMaterials.end();++i,++cnt)
-		{
-			// compare case-independent to be sure it works
-			if ((*i).mName.length() && !ASSIMP_stricmp(sz, (*i).mName.c_str()))
-			{
+		for (std::vector<D3DS::Material>::const_iterator i =  mScene->mMaterials.begin();i != mScene->mMaterials.end();++i,++cnt)	{
+			// use case independent comparisons. hopefully it will work.
+			if ((*i).mName.length() && !ASSIMP_stricmp(sz, (*i).mName.c_str()))	{
 				idx = cnt;
 				break;
 			}
 		}
-		if (0xcdcdcdcd == idx)
-		{
+		if (0xcdcdcdcd == idx)	{
 			DefaultLogger::get()->error(std::string("3DS: Unknown material: ") + sz);
-
-			// --------------------------------------------------------------
-			// This material is not known. Ignore this. We will later
-			// assign the default material to all faces using *this*
-			// material. We use 0xcdcdcdcd as special value to indicate this.
-			// --------------------------------------------------------------
 		}
 
 		// Now continue and read all material indices
@@ -1013,8 +996,7 @@ void Discreet3DSImporter::ParseMeshChunk()
 		// This is the list of all vertices in the current mesh
 		int num = (int)(uint16_t)stream->GetI2();
 		mMesh.mPositions.reserve(num);
-		while (num-- > 0)
-		{
+		while (num-- > 0)	{
 			aiVector3D v;
 			v.x = stream->GetF4();
 			v.y = stream->GetF4();
@@ -1024,8 +1006,8 @@ void Discreet3DSImporter::ParseMeshChunk()
 		break;
 	case Discreet3DS::CHUNK_TRMATRIX:
 		{
-		// This is the RLEATIVE transformation matrix of the
-		// current mesh. However, all vertices are pretransformed
+		// This is the RLEATIVE transformation matrix of the current mesh. Vertices are
+		// pretransformed by this matrix wonder.
 		mMesh.mMat.a1 = stream->GetF4();
 		mMesh.mMat.b1 = stream->GetF4();
 		mMesh.mMat.c1 = stream->GetF4();
@@ -1046,8 +1028,7 @@ void Discreet3DSImporter::ParseMeshChunk()
 		// This is the list of all UV coords in the current mesh
 		int num = (int)(uint16_t)stream->GetI2();
 		mMesh.mTexCoords.reserve(num);
-		while (num-- > 0)
-		{
+		while (num-- > 0)	{
 			aiVector3D v;
 			v.x = stream->GetF4();
 			v.y = stream->GetF4();
@@ -1060,8 +1041,7 @@ void Discreet3DSImporter::ParseMeshChunk()
 		// This is the list of all faces in the current mesh
 		int num = (int)(uint16_t)stream->GetI2();
 		mMesh.mFaces.reserve(num);
-		while (num-- > 0)
-		{
+		while (num-- > 0)	{
 			// 3DS faces are ALWAYS triangles
 			mMesh.mFaces.push_back(D3DS::Face());
 			D3DS::Face& sFace = mMesh.mFaces.back();
@@ -1073,9 +1053,8 @@ void Discreet3DSImporter::ParseMeshChunk()
 			stream->IncPtr(2); // skip edge visibility flag
 		}
 
-		// Resize the material array (0xcdcdcdcd marks the
-		// default material; so if a face is not referenced
-		// by a material $$DEFAULT will be assigned to it)
+		// Resize the material array (0xcdcdcdcd marks the default material; so if a face is 
+		// not referenced by a material, $$DEFAULT will be assigned to it)
 		mMesh.mFaceMaterials.resize(mMesh.mFaces.size(),0xcdcdcdcd);
 
 		// Larger 3DS files could have multiple FACE chunks here
@@ -1095,21 +1074,18 @@ void Discreet3DSImporter::ParseMeshChunk()
 void Discreet3DSImporter::ParseMaterialChunk()
 {
 	ASSIMP_3DS_BEGIN_CHUNK();
-
-	// get chunk type
 	switch (chunk.Flag)
 	{
 	case Discreet3DS::CHUNK_MAT_MATNAME:
 
 		{
-		// The material name string is already zero-terminated, but
-		// we need to be sure ...
+		// The material name string is already zero-terminated, but we need to be sure ...
 		const char* sz = (const char*)stream->GetPtr();
 		unsigned int cnt = 0;
-		while (stream->GetI1())++cnt;
+		while (stream->GetI1())
+			++cnt;
 
-		if (!cnt)
-		{
+		if (!cnt)	{
 			// This may not be, we use the default name instead
 			DefaultLogger::get()->error("3DS: Empty material name");
 		}
@@ -1172,7 +1148,8 @@ void Discreet3DSImporter::ParseMaterialChunk()
 		*pcf = ParsePercentageChunk();
 
 		// NOTE: transparency, not opacity
-		if (is_qnan(*pcf))*pcf = 1.0f;
+		if (is_qnan(*pcf))
+			*pcf = 1.0f;
 		else *pcf = 1.0f - *pcf * (float)0xFFFF / 100.0f;
 		}
 		break;
@@ -1191,7 +1168,8 @@ void Discreet3DSImporter::ParseMaterialChunk()
 		{ // This is the shininess of the material
 		float* pcf = &mScene->mMaterials.back().mSpecularExponent;
 		*pcf = ParsePercentageChunk();
-		if (is_qnan(*pcf))*pcf = 0.0f;
+		if (is_qnan(*pcf))
+			*pcf = 0.0f;
 		else *pcf *= (float)0xFFFF;
 		}
 		break;
@@ -1200,7 +1178,8 @@ void Discreet3DSImporter::ParseMaterialChunk()
 		{ // This is the shininess strength of the material
 		float* pcf = &mScene->mMaterials.back().mShininessStrength;
 		*pcf = ParsePercentageChunk();
-		if (is_qnan(*pcf))*pcf = 0.0f;
+		if (is_qnan(*pcf))
+			*pcf = 0.0f;
 		else *pcf *= (float)0xffff / 100.0f;
 		}
 		break;
@@ -1208,7 +1187,8 @@ void Discreet3DSImporter::ParseMaterialChunk()
 	case Discreet3DS::CHUNK_MAT_SELF_ILPCT:
 		{ // This is the self illumination strength of the material
 		float f = ParsePercentageChunk();
-		if (is_qnan(f))f = 0.0f;
+		if (is_qnan(f))
+			f = 0.0f;
 		else f *= (float)0xFFFF / 100.0f;
 		mScene->mMaterials.back().mEmissive = aiColor3D(f,f,f);
 		}
@@ -1259,11 +1239,11 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
 	{
 	case Discreet3DS::CHUNK_MAPFILE:
 		{
-		// The material name string is already zero-terminated, but
-		// we need to be sure ...
+		// The material name string is already zero-terminated, but we need to be sure ...
 		const char* sz = (const char*)stream->GetPtr();
 		unsigned int cnt = 0;
-		while (stream->GetI1())++cnt;
+		while (stream->GetI1())
+			++cnt;
 		pcOut->mMapName = std::string(sz,cnt);
 		}
 		break;
@@ -1284,8 +1264,7 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
 		pcOut->mScaleU = stream->GetF4();
 		if (0.0f == pcOut->mScaleU)
 		{
-			DefaultLogger::get()->warn("Texture coordinate scaling in the "
-				"x direction is zero. Assuming 1");
+			DefaultLogger::get()->warn("Texture coordinate scaling in the x direction is zero. Assuming 1.");
 			pcOut->mScaleU = 1.0f;
 		}
 		break;
@@ -1294,8 +1273,7 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
 		pcOut->mScaleV = stream->GetF4();
 		if (0.0f == pcOut->mScaleV)
 		{
-			DefaultLogger::get()->warn("Texture coordinate scaling in the "
-				"y direction is zero. Assuming 1");
+			DefaultLogger::get()->warn("Texture coordinate scaling in the y direction is zero. Assuming 1.");
 			pcOut->mScaleV = 1.0f;
 		}
 		break;

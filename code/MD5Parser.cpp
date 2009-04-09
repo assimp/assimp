@@ -115,7 +115,7 @@ void MD5Parser::ParseHeader()
 	SkipSpaces();
 	unsigned int iVer = ::strtol10(buffer,(const char**)&buffer);
 	if (10 != iVer)	{
-		ReportWarning("MD5 version tag is unknown (10 is expected)");
+		ReportError("MD5 version tag is unknown (10 is expected)");
 	}
 	SkipLine();
 

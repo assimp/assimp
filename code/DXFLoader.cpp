@@ -112,7 +112,8 @@ bool DXFImporter::GetNextLine()
 {
 	if(!SkipLine(&buffer))
 		return false;
-	if(!SkipSpaces(&buffer))return GetNextLine();
+	if(!SkipSpaces(&buffer))
+		return GetNextLine();
 	else if (*buffer == '{')	{
 		// some strange meta data ...
 		while (true)
@@ -139,11 +140,12 @@ bool DXFImporter::GetNextToken()
 
 	SkipSpaces(&buffer);
 	groupCode = strtol10s(buffer,&buffer);
-	if(!GetNextLine())return false;
+	if(!GetNextLine())
+		return false;
 	
 	// copy the data line to a separate buffer
 	char* m = cursor, *end = &cursor[4096];
-	while (!IsLineEnd ( *buffer ) && m < end)
+	while (!IsSpaceOrNewLine( *buffer ) && m < end)
 		*m++ = *buffer++;
 	
 	*m = '\0';
@@ -163,7 +165,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 		throw new ImportErrorException( "Failed to open DXF file " + pFile + "");
 
 	// read the contents of the file in a buffer
-	unsigned int m = (unsigned int)file->FileSize();
+	size_t m = file->FileSize();
 	std::vector<char> buffer2(m+1);
 	buffer = &buffer2[0];
 	file->Read( &buffer2[0], m,1);
@@ -182,13 +184,17 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 		if (2 == groupCode)	{
 
 			// ENTITIES and BLOCKS sections - skip the whole rest, no need to waste our time with them
-			if (!::strcmp(cursor,"ENTITIES") || !::strcmp(cursor,"BLOCKS"))
-				if (!ParseEntities())break; else bRepeat = true;
+			if (!::strcmp(cursor,"ENTITIES") || !::strcmp(cursor,"BLOCKS")) {
+				if (!ParseEntities())
+					break; 
+				else bRepeat = true;
+			}
 
 			// other sections - skip them to make sure there will be no name conflicts
 			else	{
-				while (GetNextToken())	{
-					if (!groupCode && !::strcmp(cursor,"ENDSEC"))break;
+				while ( GetNextToken())	{
+					if (!::strcmp(cursor,"ENDSEC"))
+						break;
 				}
 			}
 		}
@@ -202,7 +208,8 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 
 	// find out how many valud layers we have
 	for (std::vector<LayerInfo>::const_iterator it = mLayers.begin(),end = mLayers.end(); it != end;++it)	{
-		if (!(*it).vPositions.empty())++pScene->mNumMeshes;
+		if (!(*it).vPositions.empty())
+			++pScene->mNumMeshes;
 	}
 
 	if (!pScene->mNumMeshes)
@@ -476,8 +483,7 @@ bool DXFImporter::ParsePolyLineVertex(aiVector3D& out,aiColor4D& clr, unsigned i
 		case 0: ret = true;
 			break;
 
-		// todo - handle the correct layer for the vertex
-		// At the moment it is assumed that all vertices of 
+		// todo - handle the correct layer for the vertex. At the moment it is assumed that all vertices of 
 		// a polyline are placed on the same global layer.
 
 		// x position of the first corner
@@ -519,7 +525,9 @@ bool DXFImporter::Parse3DFace()
 
 	while (GetNextToken())	{
 		switch (groupCode)	{
-		case 0: ret = true;break;
+		case 0: 
+			ret = true;
+			break;
 
 		// 8 specifies the layer
 		case 8:	{
@@ -572,10 +580,12 @@ bool DXFImporter::Parse3DFace()
 		// color
 		case 62: clr = g_aclrDxfIndexColors[strtol10(cursor) % AI_DXF_NUM_INDEX_COLORS]; break;
 		};
-		if (ret)break;
+		if (ret)
+			break;
 	}
 
-	if (!bThird)vip[2] = vip[1];
+	if (!bThird)
+		vip[2] = vip[1];
 
 	// use a default layer if necessary
 	if (!out) {

@@ -594,22 +594,22 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 			nda->mPositionKeys = new aiVectorKey[nda->mNumPositionKeys];
 			::memcpy(nda->mPositionKeys,&distanceTrack[0],
 				sizeof(aiVectorKey)*nda->mNumPositionKeys);
-
-			// The target animation is now encoded in the local transformation
-			// matrix of the camera, so we must clear the corresponding
-			// fields in aiCamera or aiLight.
-			for (unsigned int n = 0; n < pcSOut->mNumCameras;++n)	{
-				if (pcSOut->mCameras[n]->mName == pcOut->mName) {
-					pcSOut->mCameras[n]->mLookAt = aiVector3D(0.f,0.f,1.f);
-				}
-			}
-			for (unsigned int n = 0; n < pcSOut->mNumLights;++n)	{
-				if (pcSOut->mLights[n]->mName == pcOut->mName) {
-					pcSOut->mLights[n]->mDirection = aiVector3D(0.f,0.f,1.f);
-				}
-			}
 		}
 #endif
+
+		// Cameras or lights define their transformation in their parent node and in the
+		// corresponding light or camera chunks. However, we read and process the latter
+		// to to be able to return valid cameras/lights even if no scenegraph is given.
+		for (unsigned int n = 0; n < pcSOut->mNumCameras;++n)	{
+			if (pcSOut->mCameras[n]->mName == pcOut->mName) {
+				pcSOut->mCameras[n]->mLookAt = aiVector3D(0.f,0.f,1.f);
+			}
+		}
+		for (unsigned int n = 0; n < pcSOut->mNumLights;++n)	{
+			if (pcSOut->mLights[n]->mName == pcOut->mName) {
+				pcSOut->mLights[n]->mDirection = aiVector3D(0.f,0.f,1.f);
+			}
+		}
 
 		// Allocate a new node anim and setup its name
 		aiNodeAnim* nda = anim->mChannels[anim->mNumChannels++] = new aiNodeAnim();

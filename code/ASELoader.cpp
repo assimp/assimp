@@ -76,7 +76,7 @@ bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 	// check file extension 
 	const std::string extension = GetExtension(pFile);
 	
-	if( extension == "ase" || extension == "ask" || extension == "asc")
+	if( extension == "ase" || extension == "ask")
 		return true;
 
 	if ((!extension.length() || cs) && pIOHandler) {
@@ -89,7 +89,7 @@ bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 // ------------------------------------------------------------------------------------------------
 void ASEImporter::GetExtensionList(std::string& append)
 {
-	append.append("*.ase;*.ask;*.asc");
+	append.append("*.ase;*.ask");
 }
 
 // ------------------------------------------------------------------------------------------------

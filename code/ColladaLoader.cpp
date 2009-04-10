@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "fast_atof.h"
 #include "ParsingUtils.h"
+#include "SkeletonMeshBuilder.h"
 
 #include "time.h"
 
@@ -158,7 +159,16 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 	// store all cameras
 	StoreSceneCameras( pScene);
 
+	// store all animations
 	StoreAnimations( pScene, parser);
+
+
+	// If no meshes have been loaded, it's probably just an animated skeleton.
+	if (!pScene->mNumMeshes) {
+	
+		SkeletonMeshBuilder hero(pScene);
+		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

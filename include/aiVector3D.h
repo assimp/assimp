@@ -78,12 +78,12 @@ public:
 	aiVector3D& operator *= (const aiMatrix4x4& mat);
 
 	// access a single element
-	inline float operator[](unsigned int i) const;
-	inline float& operator[](unsigned int i);
+	float operator[](unsigned int i) const;
+	float& operator[](unsigned int i);
 
 	// comparison
-	inline bool operator== (const aiVector3D& other) const;
-	inline bool operator!= (const aiVector3D& other) const;
+	bool operator== (const aiVector3D& other) const;
+	bool operator!= (const aiVector3D& other) const;
 
 public:
 

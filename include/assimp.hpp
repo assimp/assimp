@@ -273,9 +273,11 @@ public:
 	 *
 	 * The Importer takes ownership of the object and will destroy it 
 	 * afterwards. The previously assigned handler will be deleted.
+	 * Pass NULL to take again ownership of your IOSystem and reset Assimp
+	 * to use its default implementation.
 	 *
 	 * @param pIOHandler The IO handler to be used in all file accesses 
-	 *   of the Importer. NULL resets it to the default handler.
+	 *   of the Importer. 
 	 */
 	void SetIOHandler( IOSystem* pIOHandler);
 

@@ -312,10 +312,10 @@ void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<Attachm
 	// Setup a very cryptic name for the node, we want the user to be happy
 	SetupNodeName(nd,src);
 
-	// If this is an object from an external file - get the scene
-	// and setup proper attachment tags
+	// If this is an object from an external file - get the scene and setup proper attachment tags
+	aiScene* obj = NULL;
 	if (src.type == LWS::NodeDesc::OBJECT && src.path.length() ) {
-		aiScene* obj = batch.GetImport(src.id);
+		obj = batch.GetImport(src.id);
 		if (!obj) {
 			DefaultLogger::get()->error("LWS: Failed to read external file " + src.path);
 		}
@@ -370,7 +370,7 @@ void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<Attachm
 
 	// .. and construct animation channels
 	aiNodeAnim* anim = NULL;
-#if 1 /* not yet */
+
 	if (first != last) {
 		resolver.SetAnimationRange(first,last);
 		resolver.ExtractAnimChannel(&anim,AI_LWO_ANIM_FLAG_SAMPLE_ANIMS|AI_LWO_ANIM_FLAG_START_AT_ZERO);
@@ -379,7 +379,6 @@ void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<Attachm
 			animOut.push_back(anim);
 		}
 	}
-#endif
 
 	// process pivot point, if any
 	if (src.pivotPos != aiVector3D()) {
@@ -397,7 +396,7 @@ void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<Attachm
 			// Maybe the final optimization here will be done during postprocessing.
 
 			aiNode* pivot = new aiNode();
-			pivot->mName.Set("$Pivot");
+			pivot->mName.length = sprintf( pivot->mName.data, "$Pivot_%s",nd->mName.data);
 			pivot->mTransformation = tmp;
 
 			pivot->mChildren = new aiNode*[pivot->mNumChildren = 1];
@@ -406,11 +405,11 @@ void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<Attachm
 			pivot->mParent = nd->mParent;
 			nd->mParent    = pivot;
 			
-			// swap children ad hope the parents wont see a huge difference
+			// swap children and hope the parents wont see a huge difference
 			pivot->mParent->mChildren[pivot->mParent->mNumChildren-1] = pivot;
 		}
 		else {
-			nd->mTransformation = tmp * nd->mTransformation;
+			nd->mTransformation = tmp*nd->mTransformation;
 		}
 	}
 
@@ -484,7 +483,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 
 	// Construct a Batchimporter to read more files recursively
 	BatchLoader batch(pIOHandler);
-	batch.SetBasePath(pFile);
+//	batch.SetBasePath(pFile);
 
 	// Construct an array to receive the flat output graph
 	std::list<LWS::NodeDesc> nodes;

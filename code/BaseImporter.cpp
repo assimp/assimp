@@ -45,9 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 #include "BaseImporter.h"
+#include "FileSystemFilter.h"
 
 using namespace Assimp;
-
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -67,13 +67,16 @@ BaseImporter::~BaseImporter()
 // Imports the given file and returns the imported data.
 aiScene* BaseImporter::ReadFile( const std::string& pFile, IOSystem* pIOHandler)
 {
+	// Construct a file system filter to improve our success ratio reading external files
+	FileSystemFilter filter(pFile,pIOHandler);
+
 	// create a scene object to hold the data
 	aiScene* scene = new aiScene();
 
 	// dispatch importing
 	try
 	{
-		InternReadFile( pFile, scene, pIOHandler);
+		InternReadFile( pFile, scene, &filter);
 	} catch( ImportErrorException* exception)
 	{
 		// extract error description
@@ -291,71 +294,38 @@ BatchLoader::BatchLoader(IOSystem* pIO)
 
 	data = new BatchData();
 	data->pIOSystem = pIO;
+
 	data->pImporter = new Importer();
+	data->pImporter->SetIOHandler(data->pIOSystem);
 }
 
 // ------------------------------------------------------------------------------------------------
 BatchLoader::~BatchLoader()
 {
 	// delete all scenes wthat have not been polled by the user
-	for (std::list<LoadRequest>::iterator it = data->requests.begin();
-		it != data->requests.end(); ++it)
-	{
+	for (std::list<LoadRequest>::iterator it = data->requests.begin();it != data->requests.end(); ++it)	{
+
 		delete (*it).scene;
 	}
+	data->pImporter->SetIOHandler(NULL); /* get pointer back into our posession */
 	delete data->pImporter;
 	delete data;
 }
 
-// ------------------------------------------------------------------------------------------------
-void BatchLoader::SetBasePath (const std::string& pBase)
-{
-	data->pathBase = pBase;
-
-	// file name? we just need the directory
-	std::string::size_type ss,ss2;
-	if (std::string::npos != (ss = data->pathBase.find_first_of('.')))
-	{
-		if (std::string::npos != (ss2 = data->pathBase.find_last_of("\\/")))
-		{
-			if (ss > ss2)
-				data->pathBase.erase(ss2,data->pathBase.length()-ss2);
-		}
-		else {
-			data->pathBase = "";
-			return;
-		}
-	}
-
-	// make sure the directory is terminated properly
-	char s;
-	if ((s = *(data->pathBase.end()-1)) != '\\' && s != '/')
-		data->pathBase.append("\\");
-}
 
 // ------------------------------------------------------------------------------------------------
 unsigned int BatchLoader::AddLoadRequest	(const std::string& file,
 	unsigned int steps /*= 0*/, const PropertyMap* map /*= NULL*/)
 {
 	ai_assert(!file.empty());
-
-	// no threaded implementation for the moment
-	std::string real;
-
-	// build a full path if this is a relative path and 
-	// we have a new base directory given
-	if (file.length() > 2 && file[1] != ':' && data->pathBase.length()) {
-		real = data->pathBase + file;
-	}
-	else real = file;
 	
 	// check whether we have this loading request already
 	std::list<LoadRequest>::iterator it;
-	for (it = data->requests.begin();it != data->requests.end(); ++it)
-	{
+	for (it = data->requests.begin();it != data->requests.end(); ++it)	{
+
 		// Call IOSystem's path comparison function here
-		if (data->pIOSystem->ComparePaths((*it).file,real))
-		{
+		if (data->pIOSystem->ComparePaths((*it).file,file))	{
+
 			if (map) {
 				if (!((*it).map == *map))
 					continue;
@@ -369,20 +339,19 @@ unsigned int BatchLoader::AddLoadRequest	(const std::string& file,
 	}
 
 	// no, we don't have it. So add it to the queue ...
-	data->requests.push_back(LoadRequest(real,steps,map,data->next_id));
+	data->requests.push_back(LoadRequest(file,steps,map,data->next_id));
 	return data->next_id++;
 }
 
 // ------------------------------------------------------------------------------------------------
 aiScene* BatchLoader::GetImport		(unsigned int which)
 {
-	for (std::list<LoadRequest>::iterator it = data->requests.begin();it != data->requests.end(); ++it)
-	{
-		if ((*it).id == which && (*it).loaded)
-		{
+	for (std::list<LoadRequest>::iterator it = data->requests.begin();it != data->requests.end(); ++it)	{
+
+		if ((*it).id == which && (*it).loaded)	{
+
 			aiScene* sc = (*it).scene;
-			if (!(--(*it).refCnt))
-			{
+			if (!(--(*it).refCnt))	{
 				data->requests.erase(it);
 			}
 			return sc;
@@ -395,9 +364,7 @@ aiScene* BatchLoader::GetImport		(unsigned int which)
 void BatchLoader::LoadAll()
 {
 	// no threaded implementation for the moment
-	for (std::list<LoadRequest>::iterator it = data->requests.begin();
-		it != data->requests.end(); ++it)
-	{
+	for (std::list<LoadRequest>::iterator it = data->requests.begin();it != data->requests.end(); ++it)	{
 		// force validation in debug builds
 		unsigned int pp = (*it).flags;
 #ifdef _DEBUG

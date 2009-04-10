@@ -356,17 +356,6 @@ public:
 	~BatchLoader();
 
 
-	/** Sets the base path to be used for all subsequent load
-	 *  calls. This is the working directory of Assimp. 
-	 *
-	 *  Every (inplicit) occurence of '.\' will be replaced with it.
-	 *
-	 *  @param pBase Base path. This *may* also be the path to
-	 *  a file (the directory of the file is taken then, of course)
-	 */
-	void SetBasePath (const std::string& pBase);
-
-
 	/** Add a new file to the list of files to be loaded.
 	 *
 	 *  @param file File to be loaded

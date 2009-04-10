@@ -559,7 +559,8 @@ void Importer::SetIOHandler( IOSystem* pIOHandler)
 	// If the new handler is zero, allocate a default IO implementation.
 	if (!pIOHandler)
 	{
-		delete mIOHandler;
+		// Release pointer in the possession of the caller
+		// delete mIOHandler; 
 		mIOHandler = new DefaultIOSystem();
 		mIsDefaultHandler = true;
 	}

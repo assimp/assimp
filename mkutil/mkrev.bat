@@ -7,7 +7,7 @@ rem It is included by assimp.rc.
 rem -----------------------------------------------------
 
 rem This is not very elegant, but it works.
-rem ./bin shouldn't have any alocal modifications
+rem ./bin shouldn't have any local modifications
 
 cd ..\bin
 svnversion > tmpfile.txt

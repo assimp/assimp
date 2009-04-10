@@ -318,9 +318,9 @@ void AnimResolver::DoInterpolation2(std::vector<LWO::Key>::const_iterator beg,
 void AnimResolver::SubsampleAnimTrack(std::vector<aiVectorKey>& out,
 	double time,double sample_delta)
 {
-	ai_assert(!out.empty() && sample_delta);
+	ai_assert(out.empty() && sample_delta);
 
-	const double time_start = out.back().mTime;
+	//const double time_start = out.back().mTime;
 //	for ()
 }
 
@@ -512,8 +512,7 @@ void AnimResolver::ExtractAnimChannel(aiNodeAnim** out, unsigned int flags /*= 0
 		return;
 	}
 
-	// We won't spawn an animation channel if we don't have at least one
-	// envelope with more than one keyframe defined.
+	// We won't spawn an animation channel if we don't have at least one envelope with more than one keyframe defined.
 	const bool trans = (trans_x && trans_x->keys.size() > 1 || trans_y && trans_y->keys.size() > 1 || trans_z && trans_z->keys.size() > 1);
 	const bool rotat = (rotat_x && rotat_x->keys.size() > 1 || rotat_y && rotat_y->keys.size() > 1 || rotat_z && rotat_z->keys.size() > 1);
 	const bool scale = (scale_x && scale_x->keys.size() > 1 || scale_y && scale_y->keys.size() > 1 || scale_z && scale_z->keys.size() > 1);

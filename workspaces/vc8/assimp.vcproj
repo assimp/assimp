@@ -1353,6 +1353,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\code\FileSystemFilter.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\code\IFF.h"
 				>
 			</File>

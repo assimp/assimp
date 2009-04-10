@@ -1070,8 +1070,9 @@ void ColladaParser::ReadEffect( Collada::Effect& pEffect)
 			else if( IsElement( "reflective")) {
 				ReadEffectColor( pEffect.mReflective, pEffect.mTexReflective);
 			}
-			else if( IsElement( "transparent"))
+			else if( IsElement( "transparent")) {
 				ReadEffectColor( pEffect.mTransparent,pEffect.mTexTransparent);
+			}
 			else if( IsElement( "shininess"))
 				ReadEffectFloat( pEffect.mShininess);
 

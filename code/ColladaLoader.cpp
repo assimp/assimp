@@ -315,18 +315,6 @@ void ColladaLoader::BuildLightsForNode( const ColladaParser& pParser, const Coll
 				if (srcLight->mPenumbraAngle == 10e10f) 
 				{
 					// Need to rely on falloff_exponent. I don't know how to interpret it, so I need to guess ....
-					// ci - inner cone angle
-					// co - outer cone angle
-					// fe - falloff exponent
-					// ld - spot direction - normalized
-					// rd - ray direction - normalized
-					//
-					// Formula is:
-					// 1. (cos(acos (ld dot rd) - ci))^fe == epsilon
-					// 2. (ld dot rd) == cos(acos(epsilon^(1/fe)) + ci)
-					// 3. co == acos (ld dot rd)
-					// 4. co == acos(epsilon^(1/fe)) + ci)
-
 					// epsilon chosen to be 0.1
 					out->mAngleOuterCone = AI_DEG_TO_RAD (acos(pow(0.1f,1.f/srcLight->mFalloffExponent))+
 						srcLight->mFalloffAngle);
@@ -486,10 +474,10 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 
 			// if we already have the mesh at the library, just add its index to the node's array
 			std::map<ColladaMeshIndex, size_t>::const_iterator dstMeshIt = mMeshIndexByID.find( index);
-			if( dstMeshIt != mMeshIndexByID.end())
-			{
+			if( dstMeshIt != mMeshIndexByID.end())	{
 				newMeshRefs.push_back( dstMeshIt->second);
-			} else
+			} 
+			else
 			{
 				// else we have to add the mesh to the collection and store its newly assigned index at the node
 				aiMesh* dstMesh = CreateMesh( pParser, srcMesh, submesh, srcController, vertexStart, faceStart);
@@ -1165,6 +1153,14 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* pScene
 		// scalar properties
 		mat.AddProperty( &effect.mShininess, 1, AI_MATKEY_SHININESS);
 		mat.AddProperty( &effect.mRefractIndex, 1, AI_MATKEY_REFRACTI);
+
+		// transparency, a very hard one. seemingly not all files are following the
+		// specification here .. but we can trick.
+		if (effect.mTransparency > 0.f && effect.mTransparency < 1.f) {
+			effect.mTransparency = 1.f- effect.mTransparency;
+			mat.AddProperty( &effect.mTransparency, 1, AI_MATKEY_OPACITY );
+			mat.AddProperty( &effect.mTransparent, 1, AI_MATKEY_COLOR_TRANSPARENT );
+		}
 
 		// add textures, if given
 		if( !effect.mTexAmbient.mName.empty()) 

@@ -470,24 +470,12 @@ struct Sampler
 	float mMixWithPrevious;
 };
 
-/** Describes different alpha blending modes.  */
-enum AlphaMode
-{
-	AM_RGB_ZERO,
-	AM_RGB_ONE,
-	AM_ALPHA_ONE,
-	AM_ALPHA_ZERO
-};
-
 /** A collada effect. Can contain about anything according to the Collada spec,
     but we limit our version to a reasonable subset. */
 struct Effect
 {
 	// Shading mode
 	ShadeType mShadeType;
-
-	// Alpha mode
-	AlphaMode mAlphaMode;
 
 	// Colors
 	aiColor4D mEmissive, mAmbient, mDiffuse, mSpecular,
@@ -512,7 +500,6 @@ struct Effect
 	
 	Effect()
 		: mShadeType    (Shade_Phong)
-		, mAlphaMode	(AM_ALPHA_ZERO)
 		, mEmissive		( 0, 0, 0, 1)
 		, mAmbient		( 0.1f, 0.1f, 0.1f, 1)
 		, mDiffuse		( 0.6f, 0.6f, 0.6f, 1)

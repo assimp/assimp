@@ -27,7 +27,7 @@ echo #=====================================================================
 echo # Open Asset Import Library - Unittests                               
 echo #=====================================================================
 echo #                                                                     
-echo # Executing the Assimp unit test suite for the following                
+echo # Executes the Assimp library unit test suite for the following                
 echo # build configurations (if available):                                               
 echo #                                                                     
 echo #  Release                                                           
@@ -43,69 +43,52 @@ echo ======================================================================
 echo.
 echo.
 
-echo ======================================================================
-echo Config: Release (Multi-threaded, using boost)
-echo ======================================================================
+
+echo assimp-core release 
+echo **********************************************************************
 call RunSingleUnitTestSuite unit_release_%ARCHEXT% release.txt
 
-
-echo ======================================================================
-echo Config: Release -st (Single-threaded, using boost)
-echo ======================================================================
+echo assimp-core release -st 
+echo **********************************************************************
 call RunSingleUnitTestSuite unit_release-st_%ARCHEXT% release-st.txt
 
-
-echo ======================================================================
-echo Config: Release -noboost (NoBoost workaround, implicit -st)
-echo ======================================================================
+echo assimp-core release -noboost 
+echo **********************************************************************
 call RunSingleUnitTestSuite unit_release-noboost-st_%ARCHEXT% release-st-noboost.txt
 
-
-echo ======================================================================
-echo Config: Release -DLL (Multi-threaded DLL, using boost)
-echo ======================================================================
+echo assimp-core release -dll 
+echo **********************************************************************
 call RunSingleUnitTestSuite unit_release-dll_%ARCHEXT% release-dll.txt
 
-
-echo ======================================================================
-echo Config: Debug (Multi-threaded, using boost)
-echo ======================================================================
+echo assimp-core debug
+echo **********************************************************************
 call RunSingleUnitTestSuite unit_debug_%ARCHEXT% debug.txt
 
-
-
-echo ======================================================================
-echo Config: Debug -st (Single-threaded, using boost)
-echo ======================================================================
+echo assimp-core debug -st 
+echo **********************************************************************
 call RunSingleUnitTestSuite unit_debug-st_%ARCHEXT% debug-st.txt
 
-
-echo ======================================================================
-echo Config: Debug -noboost (NoBoost workaround, implicit -st)
-echo ======================================================================
+echo assimp-core debug -noboost 
+echo **********************************************************************
 call RunSingleUnitTestSuite unit_debug-noboost-st_%ARCHEXT% debug-st-noboost.txt
 
-
-echo ======================================================================
-echo Config: Debug -DLL (Multi-threaded, using boost)
-echo ======================================================================
+echo assimp-core debug -dll 
+echo **********************************************************************
 call RunSingleUnitTestSuite unit_debug-dll_%ARCHEXT% debug-dll.txt
 
 
-
-
-echo.
-echo ----------------------------------------------------------------------
-
-IF NOT FIRSTUTNA== nil (
+echo ======================================================================
+IF %FIRSTUTNA% == nil (
+   echo All test configs have been found.
+) ELSE (
    echo One or more test configs are not available.
 )
 
-IF NOT FIRSTUTFAILURE== nil (
+IF %FIRSTUTFAILURE% == nil (
+   echo All tests have been successful. Everything is fine.
+) ELSE (
    echo One or more tests failed.
 )
-
-echo ----------------------------------------------------------------------
 echo.
 
 pause

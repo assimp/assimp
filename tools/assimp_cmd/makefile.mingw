@@ -60,7 +60,7 @@ all:	$(OBJECTS) $(RCFILES)
 # ---------------------------------------------------------------------------
 .PHONY: clean
 clean:
-	-del *.o
+	-del *.o *.res
 	cd ../../code/ && $(MAKE) -fmakefile.mingw clean
 
 # ---------------------------------------------------------------------------
@@ -68,7 +68,7 @@ clean:
 # ---------------------------------------------------------------------------
 .PHONY: cleanme
 cleanme:
-	-del *.o
+	-del *.o *.res
 
 %.o:%.cpp
 	$(CXX) -g -c  $(CPPFLAGS) $? -o $@ $(INCLUDEFLAGS) $(DEFINEFLAGS)

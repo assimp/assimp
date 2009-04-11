@@ -27,7 +27,7 @@ INCLUDEFLAGS = -I../../include
 LIBRARYFLAGS = -L../../bin/mingw/
 
 # Preprocessor defines for gcc
-DEFINEFLAGS =  
+DEFINEFLAGS =  -DASSIMP_BUILD_BOOST_WORKAROUND
 
 # GCC compiler flags 
 CPPFLAGS=-Wall

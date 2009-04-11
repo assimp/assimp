@@ -39,43 +39,66 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
+/** @file AssimpPCH.h
+ *  PCH master include. Every unit in Assimp has to include it.
+ */
+
 #ifndef ASSIMP_PCH_INCLUDED
 #define ASSIMP_PCH_INCLUDED
-
 #define ASSIMP_INTERNAL_BUILD
 
-// Compile config
+// ----------------------------------------------------------------------------------------
+/* General compile config taken from aiDefines.h. It is important that the user compiles
+ * using exactly the same settings in aiDefines.h. Settings in AssimpPCH.h may differ,
+ * they won't affect the public API.
+ */
 #include "../include/aiDefines.h"
 
-// Undefine the min/max macros defined by some platform headers
+/* Include our stdint.h replacement header for MSVC, take the global header for gcc/mingw
+ */
+#ifdef _MSC_VER
+#	include "../include/Compiler/pstdint.h"
+#else
+#	include <stdint.h>
+#endif
+
+/* Undefine the min/max macros defined by some platform headers (namely Windows.h) to 
+ * avoid obvious conflicts with std::min() and std::max(). 
+ */
 #undef min
 #undef max
 
-// Concatenate two tokens after evaluating them
-#define AI_CONCAT(a,b) a ## b
+/* Concatenate two tokens after evaluating them
+ */
+#define _AI_CONCAT(a,b)  a ## b
+#define  AI_CONCAT(a,b)  _AI_CONCAT(a,b)
 
-// Helper macro that sets a pointer to NULL in debug builds
+/* Helper macro to set a pointer to NULL in debug builds
+ */
 #if (defined _DEBUG)
 #	define AI_DEBUG_INVALIDATE_PTR(x) x = NULL;
 #else
 #	define AI_DEBUG_INVALIDATE_PTR(x)
 #endif
 
-// If we have at least VC8 some C string manipulation functions
-// are mapped to their safe _s counterparts (e.g. _itoa_s).
+/* Beginning with MSVC8 some C string manipulation functions are mapped to their _safe_
+ * counterparts (e.g. _itoa_s). This avoids a lot of trouble with deprecation warnings.
+ */
 #if _MSC_VER >= 1400 && !(defined _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES)
 #	define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
 #endif
 
-// size_t to unsigned int, possible loss of data.
-// Yes, the compiler is right with his warning, but this loss of data
-// won't be a problem for us. So shut up little boy.
+/* size_t to unsigned int, possible loss of data. The compiler is right with his warning
+ * but this loss of data won't be a problem for us. So shut up, little boy.
+ */
 #ifdef _MSC_VER
 #	pragma warning (disable : 4267)
 #endif
 
-// Actually that's not required for MSVC (it is included somewhere in 
-// the STL ..) but it is necessary for build with STLport.
+// ----------------------------------------------------------------------------------------
+/* Actually that's not required for MSVC. It is included somewhere in the deeper parts of
+ * the MSVC STL but it's necessary for proper build with STLport.
+ */
 #include <ctype.h>
 
 // Runtime/STL headers
@@ -109,7 +132,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StreamReader.h"
 #include "qnan.h"
 
-// boost headers - take them from the workaround dir if possible
+// ----------------------------------------------------------------------------------------
+/* boost headers - if -noboost is enabled, take it from the workaround directory
+ * using hardcoded paths. This has the advantage that the user doesn't need to specify
+ * 'include/BoostWorkaround' as additional include path.
+ */
+// ----------------------------------------------------------------------------------------
 #ifdef ASSIMP_BUILD_BOOST_WORKAROUND
 
 #	include "../include/BoostWorkaround/boost/scoped_ptr.hpp"

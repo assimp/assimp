@@ -58,6 +58,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "assimp.hpp"
 #include "LogStream.h"
 #include "DefaultLogger.h"
+
+#include "../../code/AssimpPCH.h" /* HACK */
  
 #include "MaterialSystem.h"   // MaterialHelper clas
 #include "StringComparison.h" // ASSIMP_stricmp and ASSIMP_strincmp

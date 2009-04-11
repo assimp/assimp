@@ -38,21 +38,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Definition of the base class for all importer worker classes. */
+/** @file MaterialSystem.h
+ *  Definition of the #MaterialHelper utility class.
+ */
 #ifndef AI_MATERIALSYSTEM_H_INC
 #define AI_MATERIALSYSTEM_H_INC
 
 #include "../include/aiMaterial.h"
 namespace Assimp	{
 
-
 // ----------------------------------------------------------------------------------------
-/** Internal material helper class. Intended to be used to fill an aiMaterial
-    structure easily. */
+/** Internal material helper class deriving from aiMaterial.
+ *
+ *  Intended to be used to fill an aiMaterial structure more easily.
+ */
 class ASSIMP_API MaterialHelper : public ::aiMaterial
 {
 public:
 
+	// Construction and destruction
 	MaterialHelper();
 	~MaterialHelper();
 
@@ -74,7 +78,6 @@ public:
 		unsigned int index ,
 		aiPropertyTypeInfo pType);
 
-
 	// ------------------------------------------------------------------------------
 	/** @brief Add a string property with a given key and type info to the 
 	 *  material structure 
@@ -88,7 +91,6 @@ public:
 		const char* pKey,
 		unsigned int type  = 0,
 		unsigned int index = 0);
-
 
 	// ------------------------------------------------------------------------------
 	/** @brief Add a property with a given key to the material structure 
@@ -105,7 +107,6 @@ public:
 		unsigned int type  = 0,
 		unsigned int index = 0);
 
-
 	// ------------------------------------------------------------------------------
 	/** @brief Remove a given key from the list.
 	 *
@@ -116,14 +117,12 @@ public:
 		unsigned int type  = 0,
 		unsigned int index = 0);
 
-
 	// ------------------------------------------------------------------------------
 	/** @brief Removes all properties from the material.
 	 *
-	 *  The array remains allocated, so adding new properties is quite fast.
+	 *  The data array remains allocated so adding new properties is quite fast.
 	 */
 	void Clear();
-
 
 	// ------------------------------------------------------------------------------
 	/** Computes a hash (hopefully unique) from all material properties
@@ -138,16 +137,16 @@ public:
 	 */
 	uint32_t ComputeHash(bool includeMatName = false);
 
-
 	// ------------------------------------------------------------------------------
 	/** Copy the property list of a material
-	 *  \param pcDest Destination material
-	 *  \param pcSrc Source material
+	 *  @param pcDest Destination material
+	 *  @param pcSrc Source material
 	 */
 	static void CopyPropertyList(MaterialHelper* pcDest, 
 		const MaterialHelper* pcSrc);
 
-	// For internal use
+public:
+	// For internal use. That's why it's public.
 	void _InternDestruct();
 };
 

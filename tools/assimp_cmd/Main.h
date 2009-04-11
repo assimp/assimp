@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp.hpp>
 #include <DefaultLogger.h>
 
+#include <../code/AssimpPCH.h> /* to get stdint.h */
 #include <../code/fast_atof.h>
 #include <../code/StringComparison.h>
 #include <../code/Hash.h>

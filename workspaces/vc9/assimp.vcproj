@@ -1928,10 +1928,6 @@
 				Name="process"
 				>
 				<File
-					RelativePath="..\..\code\AssimpPCH.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\code\CalcTangentsProcess.cpp"
 					>
 				</File>
@@ -2036,6 +2032,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\ProcessHelper.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\RemoveRedundantMaterials.cpp"
 					>
 				</File>
@@ -2091,14 +2091,6 @@
 					RelativePath="..\..\code\ValidateDataStructure.h"
 					>
 				</File>
-				<Filter
-					Name="util"
-					>
-					<File
-						RelativePath="..\..\code\ProcessHelper.h"
-						>
-					</File>
-				</Filter>
 			</Filter>
 			<Filter
 				Name="pch"
@@ -2202,6 +2194,10 @@
 							UsePrecompiledHeader="1"
 						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\code\AssimpPCH.h"
+					>
 				</File>
 			</Filter>
 			<Filter

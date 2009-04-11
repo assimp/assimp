@@ -1,6 +1,6 @@
 
 # ---------------------------------------------------------------------------
-# Makefile for assimp_cmd (MinGW32-make)
+# Makefile for assimp_cmd (mingw32-make)
 # aramis_acg@users.sourceforge.net
 #
 # Usage: mingw32-make -f makefile.mingw <target> <macros>
@@ -16,24 +16,30 @@
 #   DEBUG=1              Build debug build of Assimp library
 # ---------------------------------------------------------------------------
 
-
 # C++ object files
-OBJECTS   := $(patsubst %.cpp,%.o,  $(wildcard *.cpp)) 
+OBJECTS = $(patsubst %.cpp,%.o,  $(wildcard *.cpp)) 
 
-# Include flags for gcc
+# Windows resource files
+RCFILES = $(patsubst %.rc,%.res,  $(wildcard *.rc)) 
+
+# Specify additional include paths here
 INCLUDEFLAGS = -I../../include
 
-# Library flags for gcc
+# Specify additional library paths here
 LIBRARYFLAGS = -L../../bin/mingw/
 
-# Preprocessor defines for gcc
+# Specify additional cpp definitions here
 DEFINEFLAGS =  -DASSIMP_BUILD_BOOST_WORKAROUND
 
-# GCC compiler flags 
+# Specify additional gcc compiler flags here
 CPPFLAGS=-Wall
 
+# Specify the output executable name here
+OUTPUT = ../../bin/mingw/assimp
 
-# Setup environment for debug build
+# ---------------------------------------------------------------------------
+# Setup environment for debug/release builds
+# ---------------------------------------------------------------------------
 ifeq ($(DEBUG),1)
 	DEFINEFLAGS   += -D_DEBUG -DDEBUG
 else
@@ -41,21 +47,32 @@ else
 	DEFINEFLAGS   += -DNDEBUG -D_NDEBUG
 endif
 
-# Output path of executable
-OUTPUT = ../../bin/mingw/assimp
-
-all:	$(OBJECTS)
+# ---------------------------------------------------------------------------
+# all: Build assimp and assimp_cmd
+# ---------------------------------------------------------------------------
+all:	$(OBJECTS) $(RCFILES)
 	cd ../../code/ && $(MAKE) -fmakefile.mingw static 
-	gcc -s -o$(OUTPUT) $(OBJECTS) $(LIBRARYFLAGS) -lassimp -lstdc++ 
+	gcc -s -o$(OUTPUT) $(OBJECTS) $(RCFILES) $(LIBRARYFLAGS) -lassimp -lstdc++ 
 
-%.o:%.cpp
-	$(CXX) -g -c  $(CPPFLAGS) $? -o $@ $(INCLUDEFLAGS) $(DEFINEFLAGS)
 
+# ---------------------------------------------------------------------------
+# clean: Clean assimp and assimp_cmd
+# ---------------------------------------------------------------------------
 .PHONY: clean
 clean:
 	-del *.o
 	cd ../../code/ && $(MAKE) -fmakefile.mingw clean
 
+# ---------------------------------------------------------------------------
+# cleanme: Clean assimp_cmd only
+# ---------------------------------------------------------------------------
 .PHONY: cleanme
 cleanme:
 	-del *.o
+
+%.o:%.cpp
+	$(CXX) -g -c  $(CPPFLAGS) $? -o $@ $(INCLUDEFLAGS) $(DEFINEFLAGS)
+
+%.res:%.rc
+	windres $? -O coff -o $@
+

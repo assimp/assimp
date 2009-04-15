@@ -375,29 +375,30 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::FindUVChannels(LWO::TextureList& list, LWO::Layer& layer,
-	unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS], unsigned int& next)
+	unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS],
+	unsigned int& next)
 {
-	for (TextureList::iterator it = list.begin(), end = list.end();
-		 it != end;++it)
-	{
+	for (TextureList::iterator it = list.begin(), end = list.end();it != end;++it)	{
+
 		// Ignore textures with non-UV mappings for the moment.
-		if (!(*it).enabled || !(*it).bCanUse || 0xffffffff != (*it).mRealUVIndex || (*it).mapMode != LWO::Texture::UV)	{
+		if (!(*it).enabled || !(*it).bCanUse || (*it).mapMode != LWO::Texture::UV)	{
 			continue;
 		}
-		for (unsigned int i = 0; i < layer.mUVChannels.size();++i)
-		{
-			if ((*it).mUVChannelIndex == layer.mUVChannels[i].name)
-			{
+		for (unsigned int i = 0; i < layer.mUVChannels.size();++i)	{
+
+			bool found = false;
+			if ((*it).mUVChannelIndex == layer.mUVChannels[i].name)	{
 				// check whether we have this channel already
-				for (unsigned int m = 0; m < next;++m)
-				{
+				for (unsigned int m = 0; m < next;++m)	{
+
 					if (i == out[m])	{
 						(*it).mRealUVIndex = m;
+						found = true;
 						break;
 					}
 				}
-				if (0xffffffff == (*it).mRealUVIndex)
-				{
+
+				if (!found)	{
 					(*it).mRealUVIndex = next;
 					out[next++] = i;
 					if (AI_MAX_NUMBER_OF_TEXTURECOORDS != next)

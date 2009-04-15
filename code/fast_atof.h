@@ -41,7 +41,7 @@ const float fast_atof_table[16] =	{  // we write [16] here instead of [] to work
 
 
 // ------------------------------------------------------------------------------------
-// convert a string in decimal format to a number
+// Convert a string in decimal format to a number
 // ------------------------------------------------------------------------------------
 inline unsigned int strtol10( const char* in, const char** out=0)
 {
@@ -60,7 +60,7 @@ inline unsigned int strtol10( const char* in, const char** out=0)
 }
 
 // ------------------------------------------------------------------------------------
-// convert a string in octal format to a number
+// Convert a string in octal format to a number
 // ------------------------------------------------------------------------------------
 inline unsigned int strtol8( const char* in, const char** out=0)
 {
@@ -79,7 +79,7 @@ inline unsigned int strtol8( const char* in, const char** out=0)
 }
 
 // ------------------------------------------------------------------------------------
-// convert a string in hex format to a number
+// Convert a string in hex format to a number
 // ------------------------------------------------------------------------------------
 inline unsigned int strtol16( const char* in, const char** out=0)
 {
@@ -165,8 +165,8 @@ inline unsigned int strtol_cppstyle( const char* in, const char** out=0)
 }
 
 // ------------------------------------------------------------------------------------
-// Special version of the function, providing higher accuracy and security
-// It is mainly used bx fast_atof to prevent ugly integer overflows.
+// Special version of the function, providing higher accuracy and safety
+// It is mainly used by fast_atof to prevent ugly and unwanted integer overflows.
 // ------------------------------------------------------------------------------------
 inline uint64_t strtol10_64( const char* in, const char** out=0, unsigned int* max_inout=0)
 {
@@ -180,7 +180,7 @@ inline uint64_t strtol10_64( const char* in, const char** out=0, unsigned int* m
 
 		const uint64_t new_value = ( value * 10 ) + ( *in - '0' );
 		
-		if (new_value < value) /* numeric overflow */
+		if (new_value < value) /* numeric overflow, we rely on you */
 			return value;
 
 		value = new_value;
@@ -191,7 +191,8 @@ inline uint64_t strtol10_64( const char* in, const char** out=0, unsigned int* m
 		if (max_inout && *max_inout == cur) {
 					
 			if (out) { /* skip to end */
-				while (*in >= '0' && *in <= '9')++in;
+				while (*in >= '0' && *in <= '9')
+					++in;
 				*out = in;
 			}
 
@@ -207,6 +208,7 @@ inline uint64_t strtol10_64( const char* in, const char** out=0, unsigned int* m
 	return value;
 }
 
+// Number of relevant decimals for floating-point parsing.
 #define AI_FAST_ATOF_RELAVANT_DECIMALS 6
 
 // ------------------------------------------------------------------------------------
@@ -216,54 +218,49 @@ inline uint64_t strtol10_64( const char* in, const char** out=0, unsigned int* m
 // ------------------------------------------------------------------------------------
 inline const char* fast_atof_move( const char* c, float& out)
 {
-	bool inv = false;
 	const char *t;
 	float f;
 
-	if (*c=='-')
-	{
+	bool inv = (*c=='-');
+	if (inv || *c=='+')
 		++c;
-		inv = true;
-	}
-	else if (*c=='+')++c;
 
 	f = (float) strtol10_64 ( c, &c );
-	if (*c == '.' || (c[0] == ',' && isdigit( c[1])))
+	if (*c == '.' || (c[0] == ',' && (c[1] >= '0' || c[1] <= '9'))) // allow for commas, too
 	{
 		++c;
 
-		// NOTE: The original implementation is highly unaccurate here
-		// The precision of a single IEEE 754 float is not high enough
-		// everything behind the 6th digit tends to be more inaccurate
-		// than it would need  to be.
-		// Casting to double seems to solve the problem.
+		// NOTE: The original implementation is highly unaccurate here. The precision of a single
+		// IEEE 754 float is not high enough, everything behind the 6th digit tends to be more 
+		// inaccurate than it would need to be. Casting to double seems to solve the problem.
 		// strtol_64 is used to prevent integer overflow.
 
-		// Another fix: this tends to become 0 if we don't limit
-		// the maximum number of digits
+		// Another fix: this tends to become 0 for long numbers if we don't limit the maximum 
+		// number of digits to be read. AI_FAST_ATOF_RELAVANT_DECIMALS can be a value between
+		// 1 and 15.
 		unsigned int diff = AI_FAST_ATOF_RELAVANT_DECIMALS;
 		double pl = (double) strtol10_64 ( c, &t, &diff );
 
 		pl *= fast_atof_table[diff];
 
 		f += (float)pl;
-
 		c = t;
+	}
 
-		// FIX: a large 'E' should be allowed, too (occurs in some DXF files)
-		if (*c == 'e' || *c == 'E')
-		{
+	// A major 'E' must be allowed. Necessary for proper reading of some DXF files.
+	// Thanks to Zhao Lei to point out that this if() must be outside the if (*c == '.' ..)
+	if (*c == 'e' || *c == 'E')
+	{
+		++c;
+		bool einv = (*c=='-');
+		if (einv || *c=='+')
 			++c;
-			bool einv = (*c=='-');
-			if (einv)
-				++c;
 
-			float exp = (float)strtol10(c, &c);
-			if (einv)
-				exp *= -1.0f;
+		float exp = (float)strtol10(c, &c);
+		if (einv)
+			exp *= -1.0f;
 
-			f *= pow(10.0f, exp);
-		}
+		f *= pow(10.0f, exp);
 	}
 
 	if (inv)
@@ -275,6 +272,7 @@ inline const char* fast_atof_move( const char* c, float& out)
 
 
 // ------------------------------------------------------------------------------------
+// The same but more human.
 inline float fast_atof(const char* c)
 {
 	float ret;

@@ -2276,26 +2276,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\ByteSwap.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\fast_atof.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\GenericProperty.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\Hash.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\IFF.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\code\Importer.cpp"
 					>
 				</File>
@@ -2305,14 +2285,6 @@
 				</File>
 				<File
 					RelativePath="..\..\code\MaterialSystem.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\ParsingUtils.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\qnan.h"
 					>
 				</File>
 				<File
@@ -2377,10 +2349,6 @@
 				</File>
 				<File
 					RelativePath="..\..\code\StandardShapes.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\StringComparison.h"
 					>
 				</File>
 				<File
@@ -3403,6 +3371,42 @@
 						>
 					</File>
 				</Filter>
+			</Filter>
+			<Filter
+				Name="util"
+				>
+				<File
+					RelativePath="..\..\code\ByteSwap.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\fast_atof.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\GenericProperty.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\Hash.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\IFF.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\ParsingUtils.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\qnan.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\StringComparison.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter

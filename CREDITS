@@ -13,7 +13,7 @@ Thanks for your help!
 Configuration-Interface, AssImp-Viewer (Win32), Website (Admin and Design), admin.
 
 -Thomas Schulze,
-X-, Collda-, BVH-Loader, Postprocessing framework. Data structure & Interface design, documentation.
+X-, Collada-, BVH-Loader, Postprocessing framework. Data structure & Interface design, documentation.
 
 -R.Schmidt,
 Linux build, eclipse support.
@@ -58,3 +58,6 @@ The GUY who performed some of the CSM mocaps.
 
 - Andy Maloney
 Contributed fixes for the documentation and the doxygen markup
+
+- Zhao Lei
+Contributed several bugfixes fixing memory leaks and improving float parsing 

@@ -124,7 +124,7 @@ void ObjFileParser::parseFile()
 				{
 					// Read in normal vector definition
 					++m_DataIt;
-					getVector3(m_pModel->m_Normals);
+					getVector3( m_pModel->m_Normals );
 				}
 			}
 			break;
@@ -216,7 +216,7 @@ void ObjFileParser::copyNextLine(char *pBuffer, size_t length)
 
 // -------------------------------------------------------------------
 //	Get values for a new 3D vector instance
-void ObjFileParser::getVector3(std::vector<aiVector3D*> &point3d_array)
+void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array)
 {
 	float x, y, z;
 	copyNextWord(m_buffer, BUFFERSIZE);
@@ -228,7 +228,7 @@ void ObjFileParser::getVector3(std::vector<aiVector3D*> &point3d_array)
 	copyNextWord(m_buffer, BUFFERSIZE);
 	z = (float) fast_atof(m_buffer);
 
-	point3d_array.push_back(new aiVector3D(x,y,z));
+	point3d_array.push_back( aiVector3D( x, y, z ) );
 	//skipLine();
 	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }

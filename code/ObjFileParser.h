@@ -47,9 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include "../include/aiTypes.h"
 
-/*struct aiVector2D_t;
-struct aiVector3D_t;*/
-
 namespace Assimp
 {
 
@@ -89,7 +86,7 @@ private:
 	///	Method to copy the new line.
 	void copyNextLine(char *pBuffer, size_t length);
 	///	Stores the following 3d vector.
-	void getVector3( std::vector<aiVector3D*> &point3d_array );
+	void getVector3( std::vector<aiVector3D> &point3d_array );
 	///	Stores the following 3d vector.
 	void getVector2(std::vector<aiVector2D*> &point2d_array);
 	///	Stores the following face.

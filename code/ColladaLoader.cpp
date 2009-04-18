@@ -883,7 +883,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 			continue;
 
 		// resolve the data pointers for all anim channels. Find the minimum time while we're at it
-		float startTime = 1e20, endTime = -1e20;
+		float startTime = 1e20f, endTime = -1e20f;
 		for( std::vector<ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
 		{
 			ChannelEntry& e = *it;
@@ -959,7 +959,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 			resultTrafos.push_back( mat);
 
 			// find next point in time to evaluate. That's the closest frame larger than the current in any channel
-			float nextTime = 1e20;
+			float nextTime = 1e20f;
 			for( std::vector<ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
 			{
 				ChannelEntry& e = *it;

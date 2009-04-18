@@ -25,6 +25,19 @@ add_executable(  assimp_viewer WIN32
 	Shaders.cpp
 	assimp_view.cpp
 	stdafx.cpp
+	assimp_view.rc
+	banner.bmp
+	banner_pure.bmp
+	base_anim.bmp
+	base_display.bmp
+	base_inter.bmp
+	base_rendering.bmp
+	base_stats.bmp
+	fx.bmp
+	n.bmp
+	root.bmp
+	tx.bmp
+	txi.bmp
 )
 
 IF( WIN32 )

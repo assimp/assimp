@@ -235,7 +235,7 @@ void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array)
 
 // -------------------------------------------------------------------
 //	Get values for a new 2D vector instance
-void ObjFileParser::getVector2( std::vector<aiVector2D*> &point2d_array )
+void ObjFileParser::getVector2( std::vector<aiVector2D> &point2d_array )
 {
 	float x, y;
 	copyNextWord(m_buffer, BUFFERSIZE);
@@ -244,7 +244,7 @@ void ObjFileParser::getVector2( std::vector<aiVector2D*> &point2d_array )
 	copyNextWord(m_buffer, BUFFERSIZE);
 	y = (float) fast_atof(m_buffer);
 
-	point2d_array.push_back(new aiVector2D(x, y));
+	point2d_array.push_back(aiVector2D(x, y));
 
 	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }

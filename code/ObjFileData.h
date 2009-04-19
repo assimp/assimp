@@ -253,9 +253,9 @@ struct Model
 	//!	Vector with all generated group
 	std::vector<std::string> m_GroupLib;
 	//!	Vector with all generated vertices
-	std::vector<aiVector3D*> m_Vertices;
+	std::vector<aiVector3D> m_Vertices;
 	//!	vector with all generated normals
-	std::vector<aiVector3D*> m_Normals;
+	std::vector<aiVector3D> m_Normals;
 	//!	Groupmap
 	GroupMap m_Groups;
 	//!	Group to face id assignment
@@ -263,7 +263,7 @@ struct Model
 	//!	Active group
 	std::string m_strActiveGroup;
 	//!	Vector with generated texture coordinates
-	std::vector<aiVector2D*> m_TextureCoord;
+	std::vector<aiVector2D> m_TextureCoord;
 	//!	Current mesh instance
 	Mesh *m_pCurrentMesh;
 	//!	Vector with stored meshes

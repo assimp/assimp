@@ -341,14 +341,14 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 		{
 			unsigned int vertex = pSourceFace->m_pVertices->at( vertexIndex );
 			assert ( vertex < pModel->m_Vertices.size() );
-			pMesh->mVertices[ newIndex ] = *pModel->m_Vertices[ vertex ];
+			pMesh->mVertices[ newIndex ] = pModel->m_Vertices[ vertex ];
 			
 			// Copy all normals 
 			if ( !pSourceFace->m_pNormals->empty() )
 			{
 				const unsigned int normal = pSourceFace->m_pNormals->at( vertexIndex );
 				ai_assert( normal < pModel->m_Normals.size() );
-				pMesh->mNormals[ newIndex ] = *pModel->m_Normals[ normal ];
+				pMesh->mNormals[ newIndex ] = pModel->m_Normals[ normal ];
 			}
 			
 			// Copy all texture coordinates
@@ -362,7 +362,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 					{
 						if ( pMesh->mNumUVComponents[ i ] > 0 )
 						{
-							aiVector2D coord2d = *pModel->m_TextureCoord[ tex ];
+							aiVector2D coord2d = pModel->m_TextureCoord[ tex ];
 							pMesh->mTextureCoords[ i ][ newIndex ] = aiVector3D( coord2d.x, coord2d.y, 0.0 );
 						}
 					}

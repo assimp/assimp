@@ -88,7 +88,7 @@ private:
 	///	Stores the following 3d vector.
 	void getVector3( std::vector<aiVector3D> &point3d_array );
 	///	Stores the following 3d vector.
-	void getVector2(std::vector<aiVector2D*> &point2d_array);
+	void getVector2(std::vector<aiVector2D> &point2d_array);
 	///	Stores the following face.
 	void getFace();
 	void getMaterialDesc();

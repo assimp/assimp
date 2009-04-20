@@ -289,15 +289,17 @@ private:
 	 *    UV/VC channel lists of the layer
 	*/
 	void FindUVChannels(/*const*/ LWO::Surface& surf, 
+		LWO::SortedRep& sorted,
 		/*const*/ LWO::Layer& layer,
 		unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS]);
 
 	// -------------------------------------------------------------------
-	void FindUVChannels(LWO::TextureList& list, LWO::Layer& layer,
-		unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS], unsigned int& next);
+	char FindUVChannels(LWO::TextureList& list,
+		LWO::Layer& layer,LWO::UVChannel& uv, unsigned int next);
 
 	// -------------------------------------------------------------------
 	void FindVCChannels(const LWO::Surface& surf, 
+		LWO::SortedRep& sorted,  
 		const LWO::Layer& layer,
 		unsigned int out[AI_MAX_NUMBER_OF_COLOR_SETS]);
 

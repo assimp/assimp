@@ -308,9 +308,10 @@ struct VMapEntry
 	//! allocates memory for the vertex map
 	virtual void Allocate(unsigned int num)
 	{
-		if (!rawData.empty())return; // return if already allocated
+		if (!rawData.empty())
+			return; // return if already allocated
 
-		register unsigned int m = num*dims;
+		const unsigned int m = num*dims;
 		rawData.reserve(m + (m>>2u)); // 25% as  extra storage for VMADs
 		rawData.resize(m,0.f);
 		abAssigned.resize(num,false);
@@ -318,8 +319,8 @@ struct VMapEntry
 
 	std::string name;
 	unsigned int dims;
-	std::vector<float> rawData;
 
+	std::vector<float> rawData;
 	std::vector<bool> abAssigned;
 };
 
@@ -336,14 +337,15 @@ struct VColorChannel : public VMapEntry
 	//! be initialized to 1.0 by default
 	virtual void Allocate(unsigned int num)
 	{
-		if (!rawData.empty())return; // return if already allocated
+		if (!rawData.empty())
+			return; // return if already allocated
 
 		register unsigned int m = num*dims;
 		rawData.reserve(m + (m>>2u)); // 25% as  extra storage for VMADs
 		rawData.resize(m);
 
 		for (aiColor4D* p = (aiColor4D*)&rawData[0]; p < (aiColor4D*)&rawData[m-1]; ++p)
-			*p = aiColor4D();
+			p->a = 1.f;
 
 		abAssigned.resize(num,false);
 	}
@@ -618,6 +620,7 @@ typedef std::vector	<	VColorChannel	>	VColorChannelList;
 typedef std::vector	<	UVChannel		>	UVChannelList;
 typedef std::vector	<	Clip			>	ClipList;
 typedef std::vector	<	Envelope		>	EnvelopeList;
+typedef std::vector <   unsigned int    >   SortedRep;
 
 // ---------------------------------------------------------------------------
 /** \brief Represents a layer in the file

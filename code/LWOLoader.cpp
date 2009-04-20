@@ -208,7 +208,6 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		if (!layer.mFaces.empty() && !layer.mTempPoints.empty())	{
 
 			// now sort all faces by the surfaces assigned to them
-			typedef std::vector<unsigned int> SortedRep;
 			std::vector<SortedRep> pSorted(mSurfaces->size()+1);
 
 			unsigned int i = 0;
@@ -271,8 +270,8 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 					vVColorIndices[mui] = 0xffffffff;
 #endif
 
-				FindUVChannels(_mSurfaces[i],layer,vUVChannelIndices);
-				FindVCChannels(_mSurfaces[i],layer,vVColorIndices);
+				FindUVChannels(_mSurfaces[i],sorted,layer,vUVChannelIndices);
+				FindVCChannels(_mSurfaces[i],sorted,layer,vVColorIndices);
 
 				// allocate storage for UV and CV channels
 				aiVector3D* pvUV[AI_MAX_NUMBER_OF_TEXTURECOORDS];

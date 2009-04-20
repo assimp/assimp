@@ -285,9 +285,12 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 		}
 		else
 		{
-			if (16.0f >= surf.mGlossiness)fGloss = 6.0f;
-			else if (64.0f >= surf.mGlossiness)fGloss = 20.0f;
-			else if (256.0f >= surf.mGlossiness)fGloss = 50.0f;
+			if (16.0f >= surf.mGlossiness)
+				fGloss = 6.0f;
+			else if (64.0f >= surf.mGlossiness)
+				fGloss = 20.0f;
+			else if (256.0f >= surf.mGlossiness)
+				fGloss = 50.0f;
 			else fGloss = 80.0f;
 		}
 
@@ -303,20 +306,19 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 	pcMat->AddProperty(&surf.mSpecularValue,1,AI_MATKEY_SHININESS_STRENGTH);
 
 	// emissive color
-	// (luminosity is not really the same but it affects the surface in 
-	//  a similar way. However, some scalings seems to be necessary)
+	// luminosity is not really the same but it affects the surface in a similar way. Some scaling looks good.
 	clr.g = clr.b = clr.r = surf.mLuminosity*0.8f;
 	pcMat->AddProperty<aiColor3D>(&clr,1,AI_MATKEY_COLOR_EMISSIVE);
 
 	// opacity ... either additive or default-blended, please
-	if (0.f != surf.mAdditiveTransparency)
-	{
+	if (0.f != surf.mAdditiveTransparency)	{
+
 		const int add = aiBlendMode_Additive;
 		pcMat->AddProperty(&surf.mAdditiveTransparency,1,AI_MATKEY_OPACITY);
 		pcMat->AddProperty(&add,1,AI_MATKEY_BLEND_FUNC);
 	}
-	else if (10e10f != surf.mTransparency)
-	{
+
+	else if (10e10f != surf.mTransparency)	{
 		const int def = aiBlendMode_Default;
 		const float f = 1.0f-surf.mTransparency;
 		pcMat->AddProperty(&f,1,AI_MATKEY_OPACITY);
@@ -334,23 +336,19 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 	HandleTextures(pcMat,surf.mOpacityTextures,aiTextureType_OPACITY);
 	HandleTextures(pcMat,surf.mReflectionTextures,aiTextureType_REFLECTION);
 
-	// Now we need to know which shader we must use
-	// iterate through the shader list of the surface and 
-	// search for a name which we know ... 
-	for (ShaderList::const_iterator it = surf.mShaders.begin(), end = surf.mShaders.end();
-		 it != end;++it)
-	{
+	// Now we need to know which shader to use .. iterate through the shader list of
+	// the surface and  search for a name which we know ... 
+	for (ShaderList::const_iterator it = surf.mShaders.begin(), end = surf.mShaders.end();it != end;++it)	{
 		//if (!(*it).enabled)continue;
+
 		if ((*it).functionName == "LW_SuperCelShader" || (*it).functionName == "AH_CelShader")	{
-			DefaultLogger::get()->info("LWO2: Mapping LW_SuperCelShader/AH_CelShader "
-				"to aiShadingMode_Toon");
+			DefaultLogger::get()->info("LWO2: Mapping LW_SuperCelShader/AH_CelShader to aiShadingMode_Toon");
 
 			m = aiShadingMode_Toon;
 			break;
 		}
 		else if ((*it).functionName == "LW_RealFresnel" || (*it).functionName == "LW_FastFresnel")	{
-			DefaultLogger::get()->info("LWO2: Mapping LW_RealFresnel/LW_FastFresnel "
-				"to aiShadingMode_Fresnel");
+			DefaultLogger::get()->info("LWO2: Mapping LW_RealFresnel/LW_FastFresnel to aiShadingMode_Fresnel");
 
 			m = aiShadingMode_Fresnel;
 			break;
@@ -374,74 +372,148 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::FindUVChannels(LWO::TextureList& list, LWO::Layer& layer,
-	unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS],
-	unsigned int& next)
+char LWOImporter::FindUVChannels(LWO::TextureList& list,
+	LWO::Layer& layer,LWO::UVChannel& uv, unsigned int next)
 {
+	char ret = 0;
 	for (TextureList::iterator it = list.begin(), end = list.end();it != end;++it)	{
 
 		// Ignore textures with non-UV mappings for the moment.
 		if (!(*it).enabled || !(*it).bCanUse || (*it).mapMode != LWO::Texture::UV)	{
 			continue;
 		}
-		for (unsigned int i = 0; i < layer.mUVChannels.size();++i)	{
+		
+		if ((*it).mUVChannelIndex == uv.name) {
+			ret = 1;
+		
+			// got it.
+			if ((*it).mRealUVIndex == 0xffffffff || (*it).mRealUVIndex == next)
+			{
+				(*it).mRealUVIndex = next;
+			}
+			else {
+				// channel mismatch. need to duplicate the material.
+				DefaultLogger::get()->warn("LWO: Channel mismatch, would need to duplicate surface [design bug]");
 
-			bool found = false;
-			if ((*it).mUVChannelIndex == layer.mUVChannels[i].name)	{
-				// check whether we have this channel already
-				for (unsigned int m = 0; m < next;++m)	{
+				// TODO
+			}
+		}
+	}
+	return ret;
+}
 
-					if (i == out[m])	{
-						(*it).mRealUVIndex = m;
-						found = true;
-						break;
+// ------------------------------------------------------------------------------------------------
+void LWOImporter::FindUVChannels(LWO::Surface& surf, 
+	LWO::SortedRep& sorted,LWO::Layer& layer,
+	unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS])
+{
+	unsigned int next = 0, extra = 0, num_extra = 0;
+
+	// Check whether we have an UV entry != 0 for one of the faces in 'sorted'
+	for (unsigned int i = 0; i < layer.mUVChannels.size();++i)	{
+		LWO::UVChannel& uv = layer.mUVChannels[i];
+
+		for (LWO::SortedRep::const_iterator it = sorted.begin(); it != sorted.end(); ++it)	{
+			
+			LWO::Face& face = layer.mFaces[*it];
+
+			for (unsigned int n = 0; n < face.mNumIndices; ++n) {
+				unsigned int idx = face.mIndices[n];
+
+				if (uv.abAssigned[idx] && ((aiVector2D*)&uv.rawData[0])[idx] != aiVector2D()) {
+
+					if (next >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
+
+						DefaultLogger::get()->error("LWO: Maximum number of UV channels for "
+							"this mesh reached. Skipping channel \'" + uv.name + "\'");
+
 					}
-				}
+					else {
+						// Search through all textures assigned to 'surf' and look for this UV channel
+						char had = 0;
+						had |= FindUVChannels(surf.mColorTextures,layer,uv,next);
+						had |= FindUVChannels(surf.mDiffuseTextures,layer,uv,next);
+						had |= FindUVChannels(surf.mSpecularTextures,layer,uv,next);
+						had |= FindUVChannels(surf.mGlossinessTextures,layer,uv,next);
+						had |= FindUVChannels(surf.mOpacityTextures,layer,uv,next);
+						had |= FindUVChannels(surf.mBumpTextures,layer,uv,next);
+						had |= FindUVChannels(surf.mReflectionTextures,layer,uv,next);
 
-				if (!found)	{
-					(*it).mRealUVIndex = next;
-					out[next++] = i;
-					if (AI_MAX_NUMBER_OF_TEXTURECOORDS != next)
-						out[next] = 0xffffffff;
+						if (had != 0) {
+							
+							// We have a texture referencing this UV channel so we have to take special care of it
+							if (num_extra) {
+							
+								for (unsigned int a = next; a < std::min( extra, AI_MAX_NUMBER_OF_TEXTURECOORDS-1u ); ++a) {								
+									out[a+1] = out[a];
+								}
+							}
+							++extra;
+							out[next++] = i;
+						}
+						else {
+						
+							// Bäh ... seems not to be used at all. Push to end if enough space is available.
+							out[extra++] = i;
+							++num_extra;
+						}
+					}
+					it = sorted.end()-1;
 					break;
 				}
 			}
 		}
-		if (0xffffffff == (*it).mRealUVIndex)
-			DefaultLogger::get()->error("LWO2: Unable to find matching UV channel for texture");
+	}
+	if (next != AI_MAX_NUMBER_OF_TEXTURECOORDS) {
+		out[extra] = 0xffffffff;
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::FindUVChannels(LWO::Surface& surf, LWO::Layer& layer,
-	unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS])
-{
-	out[0] = 0xffffffff;
-	unsigned int next = 0;
-
-	FindUVChannels(surf.mColorTextures,layer,out,next);
-	FindUVChannels(surf.mDiffuseTextures,layer,out,next);
-	FindUVChannels(surf.mSpecularTextures,layer,out,next);
-	FindUVChannels(surf.mGlossinessTextures,layer,out,next);
-	FindUVChannels(surf.mOpacityTextures,layer,out,next);
-	FindUVChannels(surf.mBumpTextures,layer,out,next);
-	FindUVChannels(surf.mReflectionTextures,layer,out,next);
-}
-
-// ------------------------------------------------------------------------------------------------
-void LWOImporter::FindVCChannels(const LWO::Surface& surf, const LWO::Layer& layer,
+void LWOImporter::FindVCChannels(const LWO::Surface& surf, LWO::SortedRep& sorted, const LWO::Layer& layer,
 	unsigned int out[AI_MAX_NUMBER_OF_COLOR_SETS])
 {
-	out[0] = 0xffffffff;
-	if (surf.mVCMap.length())	{
-		for (unsigned int i = 0; i < layer.mVColorChannels.size();++i)	{
-			if (surf.mVCMap == layer.mVColorChannels[i].name)	{
-				out[0] = i;
-				out[1] = 0xffffffff;
-				return;
+	unsigned int next = 0;
+
+	// Check whether we have an vc entry != 0 for one of the faces in 'sorted'
+	for (unsigned int i = 0; i < layer.mVColorChannels.size();++i)	{
+		const LWO::VColorChannel& vc = layer.mVColorChannels[i];
+
+		if (surf.mVCMap == vc.name) {
+			// The vertex color map is explicitely requested by the surface so we need to take special care of it
+			for (unsigned int a = 0; a < std::min(next,AI_MAX_NUMBER_OF_COLOR_SETS-1u); ++a) {
+				out[a+1] = out[a];
+			}
+			out[0] = i;
+			++next;
+		}
+		else {
+
+			for (LWO::SortedRep::iterator it = sorted.begin(); it != sorted.end(); ++it)	{
+				const LWO::Face& face = layer.mFaces[*it];
+
+				for (unsigned int n = 0; n < face.mNumIndices; ++n) {
+					unsigned int idx = face.mIndices[n];
+
+					if (vc.abAssigned[idx] && ((aiColor4D*)&vc.rawData[0])[idx] != aiColor4D(0.f,0.f,0.f,1.f)) {
+						if (next >= AI_MAX_NUMBER_OF_COLOR_SETS) {
+
+							DefaultLogger::get()->error("LWO: Maximum number of vertex color channels for "
+								"this mesh reached. Skipping channel \'" + vc.name + "\'");
+
+						}
+						else {
+							out[next++] = i;
+						}
+						it = sorted.end()-1;
+						break;
+					}
+				}
 			}
 		}
-		DefaultLogger::get()->warn("LWO2: Unable to find vertex color channel: " + surf.mVCMap);
+	}
+	if (next != AI_MAX_NUMBER_OF_COLOR_SETS) {
+		out[next] = 0xffffffff;
 	}
 }
 

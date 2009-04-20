@@ -890,7 +890,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 			if (!mesh->mTextureCoords[a])
 				break;
 
-			::fprintf(out,"\t\t<TextureCoords num_components=\"%i\"> \n",mesh->mNumUVComponents[a]);
+			::fprintf(out,"\t\t<TextureCoords set=\"%i\" num_components=\"%i\"> \n",a,mesh->mNumUVComponents[a]);
 			if (!shortened) {
 				for (unsigned int n = 0; n < mesh->mNumVertices; ++n) {
 					::fprintf(out,"\t\t%0 8f %0 8f %0 8f\n",
@@ -908,7 +908,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 		for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; ++a) {
 			if (!mesh->mColors[a])
 				break;
-			::fprintf(out,"\t\t<Color> \n");
+			//::fprintf(out,"\t\t<Colors set=\"%i\"> \n",a);
 			if (!shortened) {
 				for (unsigned int n = 0; n < mesh->mNumVertices; ++n) {
 					::fprintf(out,"\t\t%0 8f %0 8f %0 8f %0 8f\n",

@@ -71,7 +71,7 @@ public:
 		}
 		else {
 			base = "";
-			return;
+		//	return;
 		}
 
 		// make sure the directory is terminated properly

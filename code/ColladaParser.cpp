@@ -1800,6 +1800,18 @@ void ColladaParser::ReadInputChannel( std::vector<InputChannel>& poChannels)
 	if( attrOffset > -1)
 		channel.mOffset = mReader->getAttributeValueAsInt( attrOffset);
 
+	// read set if texture coordinates
+	if(channel.mType == IT_Texcoord || channel.mType == IT_Color){
+		int attrSet = TestAttribute("set");
+		if(attrSet > -1){
+			attrSet = mReader->getAttributeValueAsInt( attrSet);
+			if(attrSet < 0)
+				ThrowException( boost::str( boost::format( "Invalid index \"%i\" for set attribute") % (channel.mIndex+1)));
+			
+			channel.mIndex = attrSet;
+		}
+	}
+
 	// store, if valid type
 	if( channel.mType != IT_Invalid)
 		poChannels.push_back( channel);
@@ -1816,7 +1828,7 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 	// determine number of indices coming per vertex 
 	// find the offset index for all per-vertex channels
 	size_t numOffsets = 1;
-	size_t perVertexOffset = -1; // invalid value
+	size_t perVertexOffset = 0xffffffff; // invalid value
 	BOOST_FOREACH( const InputChannel& channel, pPerIndexChannels)
 	{
 		numOffsets = std::max( numOffsets, channel.mOffset+1);
@@ -1946,7 +1958,7 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 		for( size_t b = 0; b < numPoints; b++)
 		{
 			// read all indices for this vertex. Yes, in a hacky static array
-			assert( numOffsets < 20);
+			assert( numOffsets < 20 && perVertexOffset < 20);
 			static size_t vindex[20];
 			for( size_t offsets = 0; offsets < numOffsets; ++offsets)
 				vindex[offsets] = *idx++;
@@ -2017,8 +2029,9 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
 			break;
 		case IT_Texcoord: // up to 4 texture coord sets are fine, ignore the others
 			if( pInput.mIndex < AI_MAX_NUMBER_OF_TEXTURECOORDS) {
+
 				pMesh->mTexCoords[pInput.mIndex].push_back( aiVector3D( obj[0], obj[1], obj[2]));
-				if (0 != acc.mSubOffset[2]) /* hack ... consider cleaner solution */
+				if (0 != acc.mSubOffset[2] || 0 != acc.mSubOffset[3]) /* hack ... consider cleaner solution */
 					pMesh->mNumUVComponents[pInput.mIndex]=3;
 			}
 			else 

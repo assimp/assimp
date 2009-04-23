@@ -506,7 +506,7 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 // ------------------------------------------------------------------------------------------------
 // Creates a mesh for the given ColladaMesh face subset and returns the newly created mesh
 aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::Mesh* pSrcMesh, const Collada::SubMesh& pSubMesh, 
-								  const Collada::Controller* pSrcController, size_t pStartVertex, size_t pStartFace)
+	const Collada::Controller* pSrcController, size_t pStartVertex, size_t pStartFace)
 {
 	aiMesh* dstMesh = new aiMesh;
 
@@ -547,25 +547,28 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 	}
 
 	// same for texturecoords, as many as we have
-	for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
+	// empty slots are not allowed, need to pack and adjust UV indexes accordingly
+	for( size_t a = 0, real = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
 	{
 		if( pSrcMesh->mTexCoords[a].size() == pSrcMesh->mPositions.size())
 		{
-			dstMesh->mTextureCoords[a] = new aiVector3D[numVertices];
+			dstMesh->mTextureCoords[real] = new aiVector3D[numVertices];
 			for( size_t b = 0; b < numVertices; ++b)
-				dstMesh->mTextureCoords[a][b] = pSrcMesh->mTexCoords[a][pStartVertex+b];
+				dstMesh->mTextureCoords[real][b] = pSrcMesh->mTexCoords[a][pStartVertex+b];
 			
-			dstMesh->mNumUVComponents[a] = pSrcMesh->mNumUVComponents[a];
+			dstMesh->mNumUVComponents[real] = pSrcMesh->mNumUVComponents[a];
+			++real;
 		}
 	}
 
-	// same for vertex colors, as many as we have
-	for( size_t a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
+	// same for vertex colors, as many as we have. again the same packing to avoid empty slots
+	for( size_t a = 0, real = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
 	{
 		if( pSrcMesh->mColors[a].size() == pSrcMesh->mPositions.size())
 		{
-			dstMesh->mColors[a] = new aiColor4D[numVertices];
-			std::copy( pSrcMesh->mColors[a].begin() + pStartVertex, pSrcMesh->mColors[a].begin() + pStartVertex + numVertices, dstMesh->mColors[a]);
+			dstMesh->mColors[real] = new aiColor4D[numVertices];
+			std::copy( pSrcMesh->mColors[a].begin() + pStartVertex, pSrcMesh->mColors[a].begin() + pStartVertex + numVertices,dstMesh->mColors[real]);
+			++real;
 		}
 	}
 
@@ -866,12 +869,12 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 			}
 
 			// determine which transform step is affected by this channel
-			entry.mTransformIndex = -1;
+			entry.mTransformIndex = 0xffffffff;
 			for( size_t a = 0; a < srcNode->mTransforms.size(); ++a)
 				if( srcNode->mTransforms[a].mID == entry.mTransformId)
 					entry.mTransformIndex = a;
 
-			if( entry.mTransformIndex == -1)
+			if( entry.mTransformIndex == 0xffffffff)
 				continue;
 
 			entry.mChannel = &(*cit);
@@ -1075,20 +1078,19 @@ void ColladaLoader::AddTexture ( Assimp::MaterialHelper& mat, const ColladaParse
 	// UV source index ... if we didn't resolve the mapping it is actually just 
 	// a guess but it works in most cases. We search for the frst occurence of a
 	// number in the channel name. We assume it is the zero-based index into the
-	// UV channel array of all corresponding meshes.
+	// UV channel array of all corresponding meshes. It could also be one-based
+	// for some exporters, but we won't care of it unless someone complains about.
 	if (sampler.mUVId != 0xffffffff)
 		map = sampler.mUVId;
 	else {
-		map = 0xffffffff;
-		for (std::string::const_iterator it = sampler.mUVChannel.begin();
-			it != sampler.mUVChannel.end(); ++it)
-		{
+		map = -1;
+		for (std::string::const_iterator it = sampler.mUVChannel.begin();it != sampler.mUVChannel.end(); ++it){
 			if (IsNumeric(*it)) {
 				map = strtol10(&(*it));
 				break;
 			}
 		}
-		if (0xffffffff == map) {
+		if (-1 == map) {
 			DefaultLogger::get()->warn("Collada: unable to determine UV channel for texture");
 			map = 0;
 		}

@@ -319,8 +319,12 @@ struct Mesh
 			mNumUVComponents[i] = 2;
 	}
 
-	std::string mVertexID; // just to check if there's some sophisticated addressing involved... which we don't support, and therefore should warn about.
-	std::vector<InputChannel> mPerVertexData; // Vertex data addressed by vertex indices
+	// just to check if there's some sophisticated addressing involved...
+	// which we don't support, and therefore should warn about.
+	std::string mVertexID; 
+
+	// Vertex data addressed by vertex indices
+	std::vector<InputChannel> mPerVertexData; 
 
 	// actual mesh data, assembled on encounter of a <p> element. Verbose format, not indexed
 	std::vector<aiVector3D> mPositions;
@@ -332,9 +336,12 @@ struct Mesh
 
 	unsigned int mNumUVComponents[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 
-	// Faces. Stored are only the number of vertices for each face. 1 == point, 2 == line, 3 == triangle, 4+ == poly
+	// Faces. Stored are only the number of vertices for each face.
+	// 1 == point, 2 == line, 3 == triangle, 4+ == poly
 	std::vector<size_t> mFaceSize;
-	// Position indices for all faces in the sequence given in mFaceSize - necessary for bone weight assignment
+	
+	// Position indices for all faces in the sequence given in mFaceSize - 
+	// necessary for bone weight assignment
 	std::vector<size_t> mFacePosIndices;
 
 	// Submeshes in this mesh, each with a given material

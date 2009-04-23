@@ -1,523 +1,895 @@
 #-*- coding: UTF-8 -*-
 
-"""
-All ASSIMP C-structures. See the Assimp-headers for all formats.
-"""
-
 from ctypes import POINTER, c_int, c_uint, c_char, c_float, Structure, c_char_p, c_double, c_ubyte
 
 
+class MATRIX3X3(Structure):
+    """
+    See 'aiMatrix3x3.h' for details.
+    """ 
 
-class STRING(Structure):
-    """
-    Represents a String in ASSIMP.
-    """
-    
-    #Maximum length of a string. See "MAXLEN" in "aiTypes.h"
-    MAXLEN = 1024
-    
+
     _fields_ = [
-            #length of the string
-            ("length", c_uint),                                                 #OK
-            
-            #string data
-            ("data", c_char*MAXLEN)                                             #OK
+            ("a1", c_float),("a2", c_float),("a3", c_float),
+            ("b1", c_float),("b2", c_float),("b3", c_float),
+            ("c1", c_float),("c2", c_float),("c3", c_float),
         ]
-
-
 
 class MATRIX4X4(Structure):
     """
-    ASSIMP's 4x4-matrix
-    """
-    
+    See 'aiMatrix4x4.h' for details.
+    """ 
+
+
     _fields_ = [
-        #all the fields
-        ("a1", c_float), ("a2", c_float), ("a3", c_float), ("a4", c_float),     #OK
-        ("b1", c_float), ("b2", c_float), ("b3", c_float), ("b4", c_float),     #OK
-        ("c1", c_float), ("c2", c_float), ("c3", c_float), ("c4", c_float),     #OK
-        ("d1", c_float), ("d2", c_float), ("d3", c_float), ("d4", c_float),     #OK
-    ]
-
-
-
-class NODE(Structure):
-    """
-    A node in the imported hierarchy.
-    
-    Each node has name, a parent node (except for the root node), 
-    a transformation relative to its parent and possibly several child nodes.
-    Simple file formats don't support hierarchical structures, for these formats 
-    the imported scene does consist of only a single root node with no childs.
-    """
-    pass
-
-NODE._fields_ = [
-            #The name of the node
-            ("mName", STRING),
-            
-            #The transformation relative to the node's parent.
-            ("aiMatrix4x4", MATRIX4X4),
-            
-            #Parent node. NULL if this node is the root node.
-            ("mParent", POINTER(NODE)),
-            
-            #The number of child nodes of this node.
-            ("mNumChildren", c_uint),
-            
-            #The child nodes of this node. NULL if mNumChildren is 0.
-            ("mChildren", POINTER(POINTER(NODE))),
-            
-            #The number of meshes of this node.
-            ("mNumMeshes", c_uint),
-            
-            #The meshes of this node. Each entry is an index into the mesh.
-            ("mMeshes", POINTER(c_int))
+            ("a1", c_float),("a2", c_float),("a3", c_float),("a4", c_float),
+            ("b1", c_float),("b2", c_float),("b3", c_float),("b4", c_float),
+            ("c1", c_float),("c2", c_float),("c3", c_float),("c4", c_float),
+            ("d1", c_float),("d2", c_float),("d3", c_float),("d4", c_float),
         ]
-
-
-class VECTOR3D(Structure):
-    """
-    Represents a three-dimensional vector.
-    """
-    
-    _fields_ = [
-            ("x", c_float),
-            ("y", c_float),
-            ("z", c_float)
-        ]
-
-
-class COLOR4D(Structure):
-    """
-    Represents a color in Red-Green-Blue space including an alpha component.
-    """
-    
-    _fields_ = [
-            ("r", c_float),
-            ("g", c_float),
-            ("b", c_float),
-            ("a", c_float)
-        ]
-
 
 class FACE(Structure):
     """
-    A single face in a mesh, referring to multiple vertices. 
-    If mNumIndices is 3, the face is a triangle, 
-    for mNumIndices > 3 it's a polygon.
-    Point and line primitives are rarely used and are NOT supported. However,
-    a load could pass them as degenerated triangles.
-    """
-    
-    _fields_ = [
-            #Number of indices defining this face. 3 for a triangle, >3 for polygon
-            ("mNumIndices", c_uint),                                            #OK
-            
-            #Pointer to the indices array. Size of the array is given in numIndices.
-            ("mIndices", POINTER(c_uint))                                       #OK
-        ]
+    See 'aiMesh.h' for details.
+    """ 
 
+    _fields_ = [
+            # Number of indices defining this face. 3 for a triangle, >3 for polygon
+            ("mNumIndices", c_uint),
+            
+            # Pointer to the indices array. Size of the array is given in numIndices.
+            ("mIndices", POINTER(c_uint)),
+        ]
 
 class VERTEXWEIGHT(Structure):
     """
-    A single influence of a bone on a vertex.
-    """
-    
+    See 'aiMesh.h' for details.
+    """ 
+
     _fields_ = [
-            #Index of the vertex which is influenced by the bone.
-            ("mVertexId", c_uint),                                              #OK
-        
-            #The strength of the influence in the range (0...1).
-            #The influence from all bones at one vertex amounts to 1.
-            ("mWeight", c_float)                                                #OK
+            # Index of the vertex which is influenced by the bone.
+            ("mVertexId", c_uint),
+            
+            # The strength of the influence in the range (0...1).
+            # The influence from all bones at one vertex amounts to 1.
+            ("mWeight", c_float),
         ]
 
+class QUATERNION(Structure):
+    """
+    See 'aiQuaternion.h' for details.
+    """ 
+
+
+    _fields_ = [
+            # w,x,y,z components of the quaternion
+            ("w", c_float),("x", c_float),("y", c_float),("z", c_float),
+        ]
+
+class TEXEL(Structure):
+    """
+    See 'aiTexture.h' for details.
+    """ 
+
+    _fields_ = [
+            ("b", c_ubyte),("g", c_ubyte),("r", c_ubyte),("a", c_ubyte),
+        ]
+
+class PLANE(Structure):
+    """
+    See 'aiTypes.h' for details.
+    """ 
+
+    _fields_ = [
+            # Plane equation
+            ("a", c_float),("b", c_float),("c", c_float),("d", c_float),
+        ]
+
+class COLOR3D(Structure):
+    """
+    See 'aiTypes.h' for details.
+    """ 
+
+    _fields_ = [
+            # Red, green and blue color values
+            ("r", c_float),("g", c_float),("b", c_float),
+        ]
+
+class COLOR4D(Structure):
+    """
+    See 'aiTypes.h' for details.
+    """ 
+
+    _fields_ = [
+            # Red, green, blue and alpha color values
+            ("r", c_float),("g", c_float),("b", c_float),("a", c_float),
+        ]
+
+class STRING(Structure):
+    """
+    See 'aiTypes.h' for details.
+    """ 
+
+    MAXLEN = 1024
+
+    _fields_ = [
+            # Length of the string excluding the terminal 0
+            ("length", c_uint),
+            
+            # String buffer. Size limit is MAXLEN
+            ("data", c_char*MAXLEN),
+        ]
+
+class MEMORYINFO(Structure):
+    """
+    See 'aiTypes.h' for details.
+    """ 
+
+    _fields_ = [
+            # Storage allocated for texture data, in bytes
+            ("textures", c_uint),
+            
+            # Storage allocated for material data, in bytes
+            ("materials", c_uint),
+            
+            # Storage allocated for mesh data, in bytes
+            ("meshes", c_uint),
+            
+            # Storage allocated for node data, in bytes
+            ("nodes", c_uint),
+            
+            # Storage allocated for animation data, in bytes
+            ("animations", c_uint),
+            
+            # Storage allocated for camera data, in bytes
+            ("cameras", c_uint),
+            
+            # Storage allocated for light data, in bytes
+            ("lights", c_uint),
+            
+            # Storage allocated for the full import, in bytes
+            ("total", c_uint),
+        ]
+
+class VECTOR2D(Structure):
+    """
+    See 'aiVector2D.h' for details.
+    """ 
+
+
+    _fields_ = [
+            ("x", c_float),("y", c_float),
+        ]
+
+class VECTOR3D(Structure):
+    """
+    See 'aiVector3D.h' for details.
+    """ 
+
+
+    _fields_ = [
+            ("x", c_float),("y", c_float),("z", c_float),
+        ]
+
+class NODE(Structure):
+    """
+    See 'aiScene.h' for details.
+    """ 
+
+
+NODE._fields_ = [
+            #The name of the node.
+            #   #The name might be empty (length of zero) but all nodes which
+            #need to be accessed afterwards by bones or anims are usually named.
+            #Multiple nodes may have the same name, but nodes which are accessed
+            #by bones (see #aiBone and #aiMesh::mBones) *must* be unique.
+            #
+            #Cameras and lights are assigned to a specific node name - if there
+            #are multiple nodes with this name, they're assigned to each of them.
+            #<br>
+            #There are no limitations regarding the characters contained in
+            #this text. You should be able to handle stuff like whitespace, tabs,
+            #linefeeds, quotation marks, ampersands, ... .
+            #
+            ("mName", STRING),
+            
+            #The transformation relative to the node's parent.#
+            ("mTransformation", MATRIX4X4),
+            
+            #Parent node. NULL if this node is the root node.#
+            ("mParent", POINTER(NODE)),
+            
+            #The number of child nodes of this node.#
+            ("mNumChildren", c_uint),
+            
+            #The child nodes of this node. NULL if mNumChildren is 0.#
+            ("mChildren", POINTER(POINTER(NODE))),
+            
+            #The number of meshes of this node.#
+            ("mNumMeshes", c_uint),
+            
+            #The meshes of this node. Each entry is an index into the mesh#
+            ("mMeshes", POINTER(c_uint)),
+        ]
+
+class VECTORKEY(Structure):
+    """
+    See 'aiAnim.h' for details.
+    """ 
+
+    _fields_ = [
+            # The time of this key
+            ("mTime", c_double),
+            # The value of this key
+            ("mValue", VECTOR3D),
+        ]
+
+class QUATKEY(Structure):
+    """
+    See 'aiAnim.h' for details.
+    """ 
+
+    _fields_ = [
+            # The time of this key
+            ("mTime", c_double),
+            # The value of this key
+            ("mValue", QUATERNION),
+        ]
+
+class NODEANIM(Structure):
+    """
+    See 'aiAnim.h' for details.
+    """ 
+
+    _fields_ = [
+            #The name of the node affected by this animation. The node
+            # must exist and it must be unique.
+            #
+            ("mNodeName", STRING),
+            
+            #The number of position keys#
+            ("mNumPositionKeys", c_uint),
+            
+            #The position keys of this animation channel. Positions are
+            #specified as 3D vector. The array is mNumPositionKeys in size.
+            #   #If there are position keys, there will also be at least one
+            #scaling and one rotation key.
+            #
+            ("mPositionKeys", POINTER(VECTORKEY)),
+            
+            #The number of rotation keys#
+            ("mNumRotationKeys", c_uint),
+            
+            #The rotation keys of this animation channel. Rotations are
+            # given as quaternions,  which are 4D vectors. The array is
+            # mNumRotationKeys in size.
+            #   #If there are rotation keys, there will also be at least one
+            #scaling and one position key.
+            #
+            ("mRotationKeys", POINTER(QUATKEY)),
+            
+            
+            #The number of scaling keys#
+            ("mNumScalingKeys", c_uint),
+            
+            #The scaling keys of this animation channel. Scalings are
+            # specified as 3D vector. The array is mNumScalingKeys in size.
+            #   #If there are scaling keys, there will also be at least one
+            #position and one rotation key.
+            #
+            ("mScalingKeys", POINTER(VECTORKEY)),
+            
+            
+            #Defines how the animation behaves before the first
+            # key is encountered.
+            #   # The default value is aiAnimBehaviour_DEFAULT (the original
+            # transformation matrix of the affected node is used).
+            #
+            ("mPreState", c_uint),
+            
+            #Defines how the animation behaves after the last
+            # key was processed.
+            #   # The default value is aiAnimBehaviour_DEFAULT (the original
+            # transformation matrix of the affected node is taken).
+            #
+            ("mPostState", c_uint),
+        ]
+
+class ANIMATION(Structure):
+    """
+    See 'aiAnim.h' for details.
+    """ 
+
+    _fields_ = [
+            #The name of the animation. If the modeling package this data was
+            # exported from does support only a single animation channel, this
+            # name is usually empty (length is zero).
+            #
+            ("mName", STRING),
+            
+            #Duration of the animation in ticks.
+            #
+            ("mDuration", c_double),
+            
+            #Ticks per second. 0 if not specified in the imported file
+            #
+            ("mTicksPerSecond", c_double),
+            
+            #The number of bone animation channels. Each channel affects
+            # a single node.
+            #
+            ("mNumChannels", c_uint),
+            
+            #The node animation channels. Each channel affects a single node.
+            # The array is mNumChannels in size.
+            #
+            ("mChannels", POINTER(POINTER(NODEANIM))),
+        ]
+
+class CAMERA(Structure):
+    """
+    See 'aiCamera.h' for details.
+    """ 
+
+
+    _fields_ = [
+            #The name of the camera.
+            #   # There must be a node in the scenegraph with the same name.
+            # This node specifies the position of the camera in the scene
+            # hierarchy and can be animated.
+            #
+            ("mName", STRING),
+            
+            #Position of the camera relative to the coordinate space
+            # defined by the corresponding node.
+            #   # The default value is 0|0|0.
+            #
+            ("mPosition", VECTOR3D),
+            
+            
+            #'Up' - vector of the camera coordinate system relative to
+            # the coordinate space defined by the corresponding node.
+            #   # The 'right' vector of the camera coordinate system is
+            # the cross product of  the up and lookAt vectors.
+            # The default value is 0|1|0. The vector
+            # may be normalized, but it needn't.
+            #
+            ("mUp", VECTOR3D),
+            
+            
+            #'LookAt' - vector of the camera coordinate system relative to
+            # the coordinate space defined by the corresponding node.
+            #   # This is the viewing direction of the user.
+            # The default value is 0|0|1. The vector
+            # may be normalized, but it needn't.
+            #
+            ("mLookAt", VECTOR3D),
+            
+            
+            #Half horizontal field of view angle, in radians.
+            #   # The field of view angle is the angle between the center
+            # line of the screen and the left or right border.
+            # The default value is 1/4PI.
+            #
+            ("mHorizontalFOV", c_float),
+            
+            #Distance of the near clipping plane from the camera.
+            #   #The value may not be 0.f (for arithmetic reasons to prevent
+            #a division through zero). The default value is 0.1f.
+            #
+            ("mClipPlaneNear", c_float),
+            
+            #Distance of the far clipping plane from the camera.
+            #   #The far clipping plane must, of course, be farer away than the
+            #near clipping plane. The default value is 1000.f. The ratio
+            #between the near and the far plane should not be too
+            #large (between 1000-10000 should be ok) to avoid floating-point
+            #inaccuracies which could lead to z-fighting.
+            #
+            ("mClipPlaneFar", c_float),
+            
+            
+            #Screen aspect ratio.
+            #   #This is the ration between the width and the height of the
+            #screen. Typical values are 4/3, 1/2 or 1/1. This value is
+            #0 if the aspect ratio is not defined in the source file.
+            #0 is also the default value.
+            #
+            ("mAspect", c_float),
+        ]
+
+class LIGHT(Structure):
+    """
+    See 'aiLight.h' for details.
+    """ 
+
+
+    _fields_ = [
+            #The name of the light source.
+            #   # There must be a node in the scenegraph with the same name.
+            # This node specifies the position of the light in the scene
+            # hierarchy and can be animated.
+            #
+            ("mName", STRING),
+            
+            #The type of the light source.
+            #   #aiLightSource_UNDEFINED is not a valid value for this member.
+            #
+            ("mType", c_uint),
+            
+            #Position of the light source in space. Relative to the
+            # transformation of the node corresponding to the light.
+            #   # The position is undefined for directional lights.
+            #
+            ("mPosition", VECTOR3D),
+            
+            #Direction of the light source in space. Relative to the
+            # transformation of the node corresponding to the light.
+            #   # The direction is undefined for point lights. The vector
+            # may be normalized, but it needn't.
+            #
+            ("mDirection", VECTOR3D),
+            
+            #Constant light attenuation factor.
+            #   # The intensity of the light source at a given distance 'd' from
+            # the light's position is
+            # @code
+            # Atten = 1/( att0 + att1#d + att2#d*d)
+            # @endcode
+            # This member corresponds to the att0 variable in the equation.
+            # Naturally undefined for directional lights.
+            #
+            ("mAttenuationConstant", c_float),
+            
+            #Linear light attenuation factor.
+            #   # The intensity of the light source at a given distance 'd' from
+            # the light's position is
+            # @code
+            # Atten = 1/( att0 + att1#d + att2#d*d)
+            # @endcode
+            # This member corresponds to the att1 variable in the equation.
+            # Naturally undefined for directional lights.
+            #
+            ("mAttenuationLinear", c_float),
+            
+            #Quadratic light attenuation factor.
+            #
+            # The intensity of the light source at a given distance 'd' from
+            # the light's position is
+            # @code
+            # Atten = 1/( att0 + att1#d + att2#d*d)
+            # @endcode
+            # This member corresponds to the att2 variable in the equation.
+            # Naturally undefined for directional lights.
+            #
+            ("mAttenuationQuadratic", c_float),
+            
+            #Diffuse color of the light source
+            #   # The diffuse light color is multiplied with the diffuse
+            # material color to obtain the final color that contributes
+            # to the diffuse shading term.
+            #
+            ("mColorDiffuse", COLOR3D),
+            
+            #Specular color of the light source
+            #   # The specular light color is multiplied with the specular
+            # material color to obtain the final color that contributes
+            # to the specular shading term.
+            #
+            ("mColorSpecular", COLOR3D),
+            
+            #Ambient color of the light source
+            #   # The ambient light color is multiplied with the ambient
+            # material color to obtain the final color that contributes
+            # to the ambient shading term. Most renderers will ignore
+            # this value it, is just a remaining of the fixed-function pipeline
+            # that is still supported by quite many file formats.
+            #
+            ("mColorAmbient", COLOR3D),
+            
+            #Inner angle of a spot light's light cone.
+            #   # The spot light has maximum influence on objects inside this
+            # angle. The angle is given in radians. It is 2PI for point
+            # lights and undefined for directional lights.
+            #
+            ("mAngleInnerCone", c_float),
+            
+            #Outer angle of a spot light's light cone.
+            #   # The spot light does not affect objects outside this angle.
+            # The angle is given in radians. It is 2PI for point lights and
+            # undefined for directional lights. The outer angle must be
+            # greater than or equal to the inner angle.
+            # It is assumed that the application uses a smooth
+            # interpolation between the inner and the outer cone of the
+            # spot light.
+            #
+            ("mAngleOuterCone", c_float),
+        ]
+
+class UVTRANSFORM(Structure):
+    """
+    See 'aiMaterial.h' for details.
+    """ 
+
+    _fields_ = [
+            #Translation on the u and v axes.
+            #   # The default value is (0|0).
+            #
+            ("mTranslation", VECTOR2D),
+            
+            #Scaling on the u and v axes.
+            #   # The default value is (1|1).
+            #
+            ("mScaling", VECTOR2D),
+            
+            #Rotation - in counter-clockwise direction.
+            #   # The rotation angle is specified in radians. The
+            # rotation center is 0.5f|0.5f. The default value
+            # 0.f.
+            #
+            ("mRotation", c_float),
+        ]
+
+class MATERIALPROPERTY(Structure):
+    """
+    See 'aiMaterial.h' for details.
+    """ 
+
+    _fields_ = [
+            #Specifies the name of the property (key)
+            ## Keys are case insensitive.
+            #
+            ("mKey", STRING),
+            
+            #Textures: Specifies the exact usage semantic.
+            #
+            # For non-texture properties, this member is always 0
+            # or #aiTextureType_NONE.
+            #
+            ("mSemantic", c_uint),
+            
+            #Textures: Specifies the index of the texture
+            #   # For non-texture properties, this member is always 0.
+            #
+            ("mIndex", c_uint),
+            
+            #Size of the buffer mData is pointing to, in bytes.
+            #   #This value may not be 0.
+            #
+            ("mDataLength", c_uint),
+            
+            #Type information for the property.
+            ##Defines the data layout inside the data buffer. This is used
+            #by the library internally to perform debug checks and to
+            #utilize proper type conversions.
+            #(It's probably a hacky solution, but it works.)
+            #
+            ("mType", c_uint),
+            
+            #Binary buffer to hold the property's value
+            ##The size of the buffer is always mDataLength.
+            #
+            ("mData", POINTER(c_char)),
+        ]
+
+class MATERIAL(Structure):
+    """
+    See 'aiMaterial.h' for details.
+    """ 
+
+    _fields_ = [
+            #List of all material properties loaded.#
+            ("mProperties", POINTER(POINTER(MATERIALPROPERTY))),
+            
+            #Number of properties in the data base#
+            ("mNumProperties", c_uint),
+            
+            #Storage allocated#
+            ("mNumAllocated", c_uint),
+        ]
 
 class BONE(Structure):
     """
-    A single bone of a mesh. A bone has a name by which it can be found 
-    in the frame hierarchy and by which it can be addressed by animations. 
-    In addition it has a number of influences on vertices.
-    """
-    
-    _fields_ = [
-            #The name of the bone. 
-            ("mName", STRING),                                                  #OK
-        
-            #The number of vertices affected by this bone
-            ("mNumWeights", c_uint),                                            #OK
-        
-            #The vertices affected by this bone
-            ("mWeights", POINTER(VERTEXWEIGHT)),                                #OK
-        
-            #Matrix that transforms from mesh space to bone space in bind pose
-            ("mOffsetMatrix", MATRIX4X4)                                        #OK
-        ]
+    See 'aiMesh.h' for details.
+    """ 
 
+    _fields_ = [
+            # The name of the bone.
+            ("mName", STRING),
+            
+            # The number of vertices affected by this bone
+            ("mNumWeights", c_uint),
+            
+            # The vertices affected by this bone
+            ("mWeights", POINTER(VERTEXWEIGHT)),
+            
+            # Matrix that transforms from mesh space to bone space in bind pose
+            ("mOffsetMatrix", MATRIX4X4),
+        ]
 
 class MESH(Structure):
     """
-    A mesh represents a geometry or model with a single material. 
-    It usually consists of a number of vertices and a series of primitives/faces 
-    referencing the vertices. In addition there might be a series of bones, each 
-    of them addressing a number of vertices with a certain weight. Vertex data 
-    is presented in channels with each channel containing a single per-vertex 
-    information such as a set of texture coords or a normal vector.
-    If a data pointer is non-null, the corresponding data stream is present.
-    
-    A Mesh uses only a single material which is referenced by a material ID.
-    """
-    
-    #Maximum number of texture coord sets (UV(W) channels) per mesh.
-    #See "AI_MAX_NUMBER_OF_TEXTURECOORDS" in "aiMesh.h" for further
-    #information.
-    AI_MAX_NUMBER_OF_TEXTURECOORDS = 4
-    
-    
-    #Maximum number of vertex color sets per mesh.
-    #Normally: Diffuse, specular, ambient and emissive
-    #However one could use the vertex color sets for any other purpose, too.
-    AI_MAX_NUMBER_OF_COLOR_SETS = 4
-    
-    
+    See 'aiMesh.h' for details.
+    """ 
+
+    AI_MAX_NUMBER_OF_COLOR_SETS = 0x4
+    AI_MAX_NUMBER_OF_TEXTURECOORDS = 0x4
+
     _fields_ = [
-            #The number of vertices in this mesh. 
+            #Bitwise combination of the members of the #aiPrimitiveType enum.
+            #This specifies which types of primitives are present in the mesh.
+            #The "SortByPrimitiveType"-Step can be used to make sure the
+            #output meshes consist of one primitive type each.
+            #
+            ("mPrimitiveTypes", c_uint),
+            
+            #The number of vertices in this mesh.
             #This is also the size of all of the per-vertex data arrays
-            ("mNumVertices", c_uint),                                           #OK
-        
-            #The number of primitives (triangles, polygones, lines) in this mesh. 
-            #This is also the size of the mFaces array 
-            ("mNumFaces", c_uint),                                              #OK
-        
-            #Vertex positions. 
-            #This array is always present in a mesh. The array is 
-            #mNumVertices in size. 
-            ("mVertices", POINTER(VECTOR3D)),                                   #OK
-        
-            #Vertex normals. 
-            #The array contains normalized vectors, NULL if not present. 
-            #The array is mNumVertices in size. 
-            ("mNormals", POINTER(VECTOR3D)),                                    #OK
-        
-            #Vertex tangents. 
-            #The tangent of a vertex points in the direction of the positive 
+            #
+            ("mNumVertices", c_uint),
+            
+            #The number of primitives (triangles, polygons, lines) in this  mesh.
+            #This is also the size of the mFaces array
+            #
+            ("mNumFaces", c_uint),
+            
+            #Vertex positions.
+            #This array is always present in a mesh. The array is
+            #mNumVertices in size.
+            #
+            ("mVertices", POINTER(VECTOR3D)),
+            
+            #Vertex normals.
+            #The array contains normalized vectors, NULL if not present.
+            #The array is mNumVertices in size. Normals are undefined for
+            #point and line primitives. A mesh consisting of points and
+            #lines only may not have normal vectors. Meshes with mixed
+            #primitive types (i.e. lines and triangles) may have normals,
+            #but the normals for vertices that are only referenced by
+            #point or line primitives are undefined and set to QNaN (WARN:
+            #qNaN compares to inequal to *everything*, even to qNaN itself.
+            #Use code like this
+            #@code
+            ##define IS_QNAN(f) (f != f)
+            #@endcode
+            #to check whether a field is qnan).
+            #@note Normal vectors computed by Assimp are always unit-length.
+            #However, this needn't apply for normals that have been taken
+            #  directly from the model file.
+            #
+            ("mNormals", POINTER(VECTOR3D)),
+            
+            #Vertex tangents.
+            #The tangent of a vertex points in the direction of the positive
             #X texture axis. The array contains normalized vectors, NULL if
-            #not present. The array is mNumVertices in size. 
-            #@note If the mesh contains tangents, it automatically also 
-            #contains bitangents. 
-            ("mTangents", POINTER(VECTOR3D)),                                   #OK
-        
-            #Vertex bitangents. 
-            #The bitangent of a vertex points in the direction of the positive 
+            #not present. The array is mNumVertices in size. A mesh consisting
+            #of points and lines only may not have normal vectors. Meshes with
+            #mixed primitive types (i.e. lines and triangles) may have
+            #normals, but the normals for vertices that are only referenced by
+            #point or line primitives are undefined and set to QNaN.
+            #@note If the mesh contains tangents, it automatically also
+            #contains bitangents (the bitangent is just the cross product of
+            #tangent and normal vectors).
+            #
+            ("mTangents", POINTER(VECTOR3D)),
+            
+            #Vertex bitangents.
+            #The bitangent of a vertex points in the direction of the positive
             #Y texture axis. The array contains normalized vectors, NULL if not
-            #present. The array is mNumVertices in size. 
+            #present. The array is mNumVertices in size.
             #@note If the mesh contains tangents, it automatically also contains
-            #bitangents. 
-            ("mBitangents", POINTER(VECTOR3D)),                                 #OK
-        
-            #Vertex color sets. 
-            #A mesh may contain 0 to #AI_MAX_NUMBER_OF_COLOR_SETS vertex 
+            #bitangents.
+            #
+            ("mBitangents", POINTER(VECTOR3D)),
+            
+            #Vertex color sets.
+            #A mesh may contain 0 to #AI_MAX_NUMBER_OF_COLOR_SETS vertex
             #colors per vertex. NULL if not present. Each array is
             #mNumVertices in size if present.
-            ("mColors", POINTER(COLOR4D)*AI_MAX_NUMBER_OF_COLOR_SETS),          #OK
-        
+            #
+            ("mColors", POINTER(COLOR4D)*AI_MAX_NUMBER_OF_COLOR_SETS),
+            
             #Vertex texture coords, also known as UV channels.
             #A mesh may contain 0 to AI_MAX_NUMBER_OF_TEXTURECOORDS per
-            #vertex. NULL if not present. The array is mNumVertices in size. 
-            ("mTextureCoords", POINTER(VECTOR3D)*AI_MAX_NUMBER_OF_TEXTURECOORDS),#OK
-        
+            #vertex. NULL if not present. The array is mNumVertices in size.
+            #
+            ("mTextureCoords", POINTER(VECTOR3D)*AI_MAX_NUMBER_OF_TEXTURECOORDS),
+            
             #Specifies the number of components for a given UV channel.
             #Up to three channels are supported (UVW, for accessing volume
             #or cube maps). If the value is 2 for a given channel n, the
             #component p.z of mTextureCoords[n][p] is set to 0.0f.
             #If the value is 1 for a given channel, p.y is set to 0.0f, too.
             #@note 4D coords are not supported
-            ("mNumUVComponents", c_uint*AI_MAX_NUMBER_OF_TEXTURECOORDS),        #OK
-        
-            #The faces the mesh is contstructed from. 
-            #Each face referres to a number of vertices by their indices. 
-            #This array is always present in a mesh, its size is given 
-            #in mNumFaces.
-            ("mFaces", POINTER(FACE)),                                          #OK
-        
-            #The number of bones this mesh contains. 
-            #Can be 0, in which case the mBones array is NULL. 
-            ("mNumBones", c_uint),                                              #OK
-        
-            #The bones of this mesh. 
-            #A bone consists of a name by which it can be found in the
-            #frame hierarchy and a set of vertex weights.
-            ("mBones", POINTER(POINTER(BONE))),                                 #OK
-        
-            #The material used by this mesh. 
-            #A mesh does use only a single material. If an imported model uses
-            #multiple materials, the import splits up the mesh. Use this value 
-            #as index into the scene's material list.
-            ("mMaterialIndex", c_uint)                                          #OK
-        ]
-
-
-class MATERIALPROPERTY(Structure):
-    """
-    Data structure for a single property inside a material.
-    """
-    
-    _fields_ = [
-            #Specifies the name of the property (key)
-            #Keys are case insensitive.
-            ("mKey", STRING),                                                   #OK
-        
-            #Size of the buffer mData is pointing to, in bytes
-            #This value may not be 0.
-            ("mDataLength", c_uint),                                            #OK
-        
-            #Type information for the property.
-            #Defines the data layout inside the
-            #data buffer. This is used by the library
-            #internally to perform debug checks.
-            #THIS IS AN ENUM!
-            ("mType", c_int),                                                   #IGNORED
-        
-            #Binary buffer to hold the property's value
-            #The buffer has no terminal character. However,
-            #if a string is stored inside it may use 0 as terminal,
-            #but it would be contained in mDataLength. This member
-            #is never 0
-            ("mData", c_char_p)                                                 #OK
-        ]
-
-
-class MATERIAL(Structure):
-    """
-    Data structure for a material.
-    
-    Material data is stored using a key-value structure, called property
-    (to guarant that the system is maximally flexible).
-    The library defines a set of standard keys (AI_MATKEY) which should be 
-    enough for nearly all purposes.
-    """
-    
-    _fields_ = [
-            #List of all material properties loaded.
-            ("mProperties", POINTER(POINTER(MATERIALPROPERTY))),                #OK
-        
-            #Number of properties loaded
-            ("mNumProperties", c_uint),                                         #OK
-            ("mNumAllocated", c_uint)                                           #IGNORED
-        ]
-    
-
-class VECTORKEY(Structure):
-    """
-    A time-value pair specifying a certain 3D vector for the given time.
-    """
-    
-    _fields_ = [
-            #The time of this key
-            ("mTime", c_double),
+            #
+            ("mNumUVComponents", c_uint*AI_MAX_NUMBER_OF_TEXTURECOORDS),
             
-            #The value of this key
-            ("mValue", VECTOR3D)
-        ]
-
-
-class QUATERNION(Structure):
-    """
-    Represents a quaternion in a 4D vector.
-    """
-    
-    _fields = [
-               #the components
-               ("w", c_float),
-               ("x", c_float),
-               ("y", c_float),
-               ("z", c_float)
-           ]
-
-
-class QUATKEY(Structure):
-    """
-    A time-value pair specifying a rotation for the given time. For joint
-    animations the rotation is usually expressed using a quaternion.
-    """
-    
-    _fields_ = [
-            #The time of this key
-            ("mTime", c_double),
+            #The faces the mesh is constructed from.
+            #Each face refers to a number of vertices by their indices.
+            #This array is always present in a mesh, its size is given
+            #in mNumFaces. If the AI_SCENE_FLAGS_NON_VERBOSE_FORMAT
+            #is NOT set each face references an unique set of vertices.
+            #
+            ("mFaces", POINTER(FACE)),
             
-            #The value of this key
-            ("mValue", QUATERNION)
-        ]
-
-
-class BONEANIM(Structure):
-    """
-    Describes the animation of a single node. The name specifies the bone/node
-    which is affected by this animation channel. The keyframes are given in
-    three separate series of values, one each for position, rotation and
-    scaling.
-    
-    NOTE: The name "BoneAnim" is misleading. This structure is also used to
-    describe the animation of regular nodes on the node graph. They needn't be
-    nodes.
-    """
-    
-    _fields_ = [
-            #The name of the bone affected by this animation.
-            ("mBoneName", STRING),
-        
-            #The number of position keys
-            ("mNumPositionKeys", c_uint),
-            
-            #The position keys of this animation channel. Positions are
-            #specified as 3D vector. The array is mNumPositionKeys in size.
-            ("mPositionKeys", POINTER(VECTORKEY)),
-        
-            #The number of rotation keys
-            ("mNumRotationKeys", c_uint),
-            
-            #The rotation keys of this animation channel. Rotations are given as
-            #quaternions, which are 4D vectors. The array is mNumRotationKeys in
-            #size.
-            ("mRotationKeys", POINTER(QUATKEY)),
-        
-            #The number of scaling keys
-            ("mNumScalingKeys", c_uint),
-            
-            #The scaling keys of this animation channel. Scalings are specified
-            #as 3D vector. The array is mNumScalingKeys in size.
-            ("mScalingKeys", POINTER(VECTORKEY))
-        ]
-
-
-class ANIMATION(Structure):
-    """
-    An animation consists of keyframe data for a number of bones.
-    For each bone affected by the animation a separate series of data is given.
-    """
-    
-    _fields_ = [
-            #The name of the animation. If the modelling package this data was
-            #exported from does support only a single animation channel, this
-            #name is usually empty (length is zero).
-            ("mName", STRING),
-        
-            #Duration of the animation in ticks.
-            ("mDuration", c_double),
-            
-            #Ticks per second. 0 if not specified in the imported file
-            ("mTicksPerSecond", c_double),
-        
-            #The number of bone animation channels. Each channel affects a
-            #single bone.
+            #The number of bones this mesh contains.
+            #Can be 0, in which case the mBones array is NULL.
+            #
             ("mNumBones", c_uint),
             
-            #The bone animation channels. Each channel affects a single bone.
-            #The array is mNumBones in size.
-            ("mBones", POINTER(POINTER(BONEANIM)))
+            #The bones of this mesh.
+            #A bone consists of a name by which it can be found in the
+            #frame hierarchy and a set of vertex weights.
+            #
+            ("mBones", POINTER(POINTER(BONE))),
+            
+            #The material used by this mesh.
+            #A mesh does use only a single material. If an imported model uses
+            #multiple materials, the import splits up the mesh. Use this value
+            #as index into the scene's material list.
+            #
+            ("mMaterialIndex", c_uint),
         ]
-
-
-class TEXEL(Structure):
-    """
-    Helper structure to represent a texel in ARGB8888 format
-    """
-    
-    _fields_ = [
-            ("b", c_ubyte),
-            ("g", c_ubyte),
-            ("r", c_ubyte),
-            ("a", c_ubyte)
-        ]
-
 
 class TEXTURE(Structure):
     """
-    Helper structure to describe an embedded texture
-    
-    Normally textures are contained in external files but some file formats
-    do embedd them.
-    """
-    
+    See 'aiTexture.h' for details.
+    """ 
+
+
     _fields_ = [
             #Width of the texture, in pixels
-            #If mHeight is zero the texture is compressed in a format
+            #   #If mHeight is zero the texture is compressed in a format
             #like JPEG. In this case mWidth specifies the size of the
             #memory area pcData is pointing to, in bytes.
-            ("mWidth", c_uint),                                                 #OK
-        
+            #
+            ("mWidth", c_uint),
+            
             #Height of the texture, in pixels
-            #If this value is zero, pcData points to an compressed texture
-            #in an unknown format (e.g. JPEG).
-            ("mHeight", c_uint),                                                #OK
-        
+            #   #If this value is zero, pcData points to an compressed texture
+            #in any format (e.g. JPEG).
+            #
+            ("mHeight", c_uint),
+            
             #A hint from the loader to make it easier for applications
-            #to determine the type of embedded compressed textures.
-            #If mHeight != 0 this member is undefined. Otherwise it
-            #will be set to '\0\0\0\0' if the loader has no additional
+            # to determine the type of embedded compressed textures.
+            #   #If mHeight != 0 this member is undefined. Otherwise it
+            #is set set to '\\0\\0\\0\\0' if the loader has no additional
             #information about the texture file format used OR the
-            #file extension of the format without a leading dot.
-            #E.g. 'dds\0', 'pcx\0'.  All characters are lower-case.
-            ("achFormatHint", c_char*4),                                        #OK
-        
+            #file extension of the format without a trailing dot. If there
+            #are multiple file extensions for a format, the shortest
+            #extension is chosen (JPEG maps to 'jpg', not to 'jpeg').
+            #E.g. 'dds\\0', 'pcx\\0', 'jpg\\0'.  All characters are lower-case.
+            #The fourth character will always be '\\0'.
+            #
+            ("achFormatHint", c_char*4),
+            
             #Data of the texture.
-            #Points to an array of mWidth * mHeight aiTexel's.
+            #   #Points to an array of mWidth#mHeight aiTexel's.
             #The format of the texture data is always ARGB8888 to
             #make the implementation for user of the library as easy
             #as possible. If mHeight = 0 this is a pointer to a memory
             #buffer of size mWidth containing the compressed texture
             #data. Good luck, have fun!
-            ("pcData", POINTER(TEXEL))                                          #OK
+            #
+            ("pcData", POINTER(TEXEL)),
         ]
 
+class RAY(Structure):
+    """
+    See 'aiTypes.h' for details.
+    """ 
+
+    _fields_ = [
+            # Position and direction of the ray
+            ("pos", VECTOR3D),("dir", VECTOR3D),
+        ]
 
 class SCENE(Structure):
     """
-    The root structure of the imported data.
-    Everything that was imported from the given file can be accessed from here.
-    """
-    
+    See 'aiScene.h' for details.
+    """ 
+
+    AI_SCENE_FLAGS_INCOMPLETE = 0x1
+    AI_SCENE_FLAGS_VALIDATED = 0x2
+    AI_SCENE_FLAGS_VALIDATION_WARNING =     0x4
+    AI_SCENE_FLAGS_NON_VERBOSE_FORMAT =     0x8
+    AI_SCENE_FLAGS_TERRAIN = 0x10
+
     _fields_ = [
-            #Any combination of the AI_SCENE_FLAGS_XXX flags
-            ("flags", c_uint),                                                  #OK
+            #Any combination of the AI_SCENE_FLAGS_XXX flags. By default
+            #this value is 0, no flags are set. Most applications will
+            #want to reject all scenes with the AI_SCENE_FLAGS_INCOMPLETE
+            #bit set.
+            #
+            ("mFlags", c_uint),
+            
             
             #The root node of the hierarchy.
+            #
             #There will always be at least the root node if the import
-            #was successful. Presence of further nodes depends on the 
-            #format and content of the imported file.
+            #was successful (and no special flags have been set).
+            #Presence of further nodes depends on the format and content
+            #of the imported file.
+            #
             ("mRootNode", POINTER(NODE)),
             
-            #The number of meshes in the scene.
-            ("mNumMeshes", c_uint),                                             #OK
+            
+            
+            #The number of meshes in the scene.#
+            ("mNumMeshes", c_uint),
             
             #The array of meshes.
-            #Use the indices given in the aiNode structure to access 
-            #this array. The array is mNumMeshes in size.
-            ("mMeshes", POINTER(POINTER(MESH))),                                #OK
+            #   #Use the indices given in the aiNode structure to access
+            #this array. The array is mNumMeshes in size. If the
+            #AI_SCENE_FLAGS_INCOMPLETE flag is not set there will always
+            #be at least ONE material.
+            #
+            ("mMeshes", POINTER(POINTER(MESH))),
             
-            #The number of materials in the scene.
-            ("mNumMaterials", c_uint),                                          #OK
+            
+            
+            #The number of materials in the scene.#
+            ("mNumMaterials", c_uint),
             
             #The array of materials.
+            #
             #Use the index given in each aiMesh structure to access this
-            #array. The array is mNumMaterials in size.
-            ("mMaterials", POINTER(POINTER(MATERIAL))),                         #OK
+            #array. The array is mNumMaterials in size. If the
+            #AI_SCENE_FLAGS_INCOMPLETE flag is not set there will always
+            #be at least ONE material.
+            #
+            ("mMaterials", POINTER(POINTER(MATERIAL))),
             
-            #The number of animations in the scene.
+            
+            
+            #The number of animations in the scene.#
             ("mNumAnimations", c_uint),
             
             #The array of animations.
-            #All animations imported from the given file are listed here.
+            #   #All animations imported from the given file are listed here.
             #The array is mNumAnimations in size.
+            #
             ("mAnimations", POINTER(POINTER(ANIMATION))),
             
-            #The number of textures embedded into the file
-            ("mNumTextures", c_uint),                                           #OK
+            
+            
+            #The number of textures embedded into the file#
+            ("mNumTextures", c_uint),
             
             #The array of embedded textures.
-            #Not many file formats embedd their textures into the file.
+            #
+            #Not many file formats embed their textures into the file.
             #An example is Quake's MDL format (which is also used by
-            #some GameStudio(TM) versions)
-            ("mTextures", POINTER(POINTER(TEXTURE)))                            #OK
+            #some GameStudio versions)
+            #
+            ("mTextures", POINTER(POINTER(TEXTURE))),
+            
+            
+            #The number of light sources in the scene. Light sources
+            #are fully optional, in most cases this attribute will be 0
+            #
+            ("mNumLights", c_uint),
+            
+            #The array of light sources.
+            #
+            #All light sources imported from the given file are
+            #listed here. The array is mNumLights in size.
+            #
+            ("mLights", POINTER(POINTER(LIGHT))),
+            
+            
+            #The number of cameras in the scene. Cameras
+            #are fully optional, in most cases this attribute will be 0
+            #
+            ("mNumCameras", c_uint),
+            
+            #The array of cameras.
+            #
+            #All cameras imported from the given file are listed here.
+            #The array is mNumCameras in size. The first camera in the
+            #array (if existing) is the default camera view into
+            #the scene.
+            #
+            ("mCameras", POINTER(POINTER(CAMERA))),
         ]

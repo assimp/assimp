@@ -86,10 +86,20 @@ class Material(object):
             
             #the name
             key = p.mKey.data
-            
+
             #the data
-            value = p.mData[:p.mDataLength]
-            
+            from ctypes import POINTER, cast, c_int, c_float, sizeof
+            if p.mType == 1:
+                arr = cast(p.mData, POINTER(c_float*(p.mDataLength/sizeof(c_float)) )).contents
+                value = [x for x in arr]
+            elif p.mType == 3: #string can't be an array
+                value = cast(p.mData, POINTER(structs.STRING)).contents.data
+            elif p.mType == 4:
+                arr = cast(p.mData, POINTER(c_int*(p.mDataLength/sizeof(c_int)) )).contents
+                value = [x for x in arr]
+            else:
+                value = p.mData[:p.mDataLength]
+                
             result[key] = str(value)
         
         return result
@@ -247,8 +257,10 @@ class Scene(AssimpBase):
     """
     
     #possible flags
-    FLAGS = {1 : "AI_SCENE_FLAGS_ANIM_SKELETON_ONLY"}
-    
+    FLAGS = {}    
+    for key in structs.SCENE.__dict__:
+        if key.startswith("AI_SCENE_FLAGS_"):
+            FLAGS[structs.SCENE.__dict__[key]] = key
     
     def __init__(self, model):
         """
@@ -267,7 +279,7 @@ class Scene(AssimpBase):
         model - pointer to data
         """
         #store scene flags
-        self.flags = model.flags
+        self.flags = model.mFlags
         
         #load mesh-data
         self.meshes = Scene._load_array(model.mMeshes,

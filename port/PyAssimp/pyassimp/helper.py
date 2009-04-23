@@ -30,6 +30,8 @@ def search_library():
     #this path
     folder = os.path.dirname(__file__)
     
+    ctypes.windll.kernel32.SetErrorMode(0x8007)
+    
     candidates = []
     
     #test every file

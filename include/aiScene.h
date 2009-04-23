@@ -299,7 +299,8 @@ struct aiScene
 
 
 	/** The number of light sources in the scene. Light sources
-	  are fully optional, in most cases this attribute will be 0 */
+	* are fully optional, in most cases this attribute will be 0 
+        */
 	unsigned int mNumLights;
 
 	/** The array of light sources.
@@ -311,7 +312,8 @@ struct aiScene
 
 
 	/** The number of cameras in the scene. Cameras
-	  are fully optional, in most cases this attribute will be 0 */
+	* are fully optional, in most cases this attribute will be 0 
+        */
 	unsigned int mNumCameras;
 
 	/** The array of cameras.

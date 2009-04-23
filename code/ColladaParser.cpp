@@ -1806,7 +1806,7 @@ void ColladaParser::ReadInputChannel( std::vector<InputChannel>& poChannels)
 		if(attrSet > -1){
 			attrSet = mReader->getAttributeValueAsInt( attrSet);
 			if(attrSet < 0)
-				ThrowException( boost::str( boost::format( "Invalid index \"%i\" for set attribute") % (channel.mIndex+1)));
+				ThrowException( boost::str( boost::format( "Invalid index \"%i\" for set attribute") % (attrSet)));
 			
 			channel.mIndex = attrSet;
 		}

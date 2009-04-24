@@ -47,6 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AV_SCENEANIMATOR_H_INCLUDED
 #define AV_SCENEANIMATOR_H_INCLUDED
 
+#include <map>
+
 namespace AssimpView	{
 
 // ---------------------------------------------------------------------------------

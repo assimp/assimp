@@ -32,6 +32,26 @@ SOURCE_GROUP( Common FILES
 	StdOStreamLogStream.h
 	StreamReader.h
 	StringComparison.h
+	SGSpatialSort.cpp
+	SGSpatialSort.h
+	VertexTriangleAdjacency.cpp
+	VertexTriangleAdjacency.h
+	GenericProperty.h
+	SpatialSort.cpp
+	SpatialSort.h
+	SceneCombiner.cpp
+	SceneCombiner.h
+	ScenePreprocessor.cpp
+	ScenePreprocessor.h
+	SkeletonMeshBuilder.cpp
+	SkeletonMeshBuilder.h
+	SmoothingGroups.h
+	StandardShapes.cpp
+	StandardShapes.h
+	TargetAnimation.cpp
+	TargetAnimation.h
+	RemoveComments.cpp
+	RemoveComments.h
 )
 
 SOURCE_GROUP( 3DS FILES 
@@ -193,7 +213,6 @@ SOURCE_GROUP( PostProcessing FILES
 	GenFaceNormalsProcess.h
 	GenVertexNormalsProcess.cpp
 	GenVertexNormalsProcess.h
-	GenericProperty.h
 	PretransformVertices.cpp
 	PretransformVertices.h
 	ImproveCacheLocality.cpp
@@ -202,31 +221,14 @@ SOURCE_GROUP( PostProcessing FILES
 	JoinVerticesProcess.h
 	LimitBoneWeightsProcess.cpp
 	LimitBoneWeightsProcess.h
-	RemoveComments.cpp
-	RemoveComments.h
 	RemoveRedundantMaterials.cpp
 	RemoveRedundantMaterials.h
 	RemoveVCProcess.cpp
 	RemoveVCProcess.h
-	SGSpatialSort.cpp
-	SGSpatialSort.h
-	SceneCombiner.cpp
-	SceneCombiner.h
-	ScenePreprocessor.cpp
-	ScenePreprocessor.h
-	SkeletonMeshBuilder.cpp
-	SkeletonMeshBuilder.h
-	SmoothingGroups.h
 	SortByPTypeProcess.cpp
 	SortByPTypeProcess.h
-	SpatialSort.cpp
-	SpatialSort.h
 	SplitLargeMeshes.cpp
 	SplitLargeMeshes.h
-	StandardShapes.cpp
-	StandardShapes.h
-	TargetAnimation.cpp
-	TargetAnimation.h
 	TerragenLoader.cpp
 	TerragenLoader.h
 	TextureTransform.cpp
@@ -235,8 +237,10 @@ SOURCE_GROUP( PostProcessing FILES
 	TriangulateProcess.h
 	ValidateDataStructure.cpp
 	ValidateDataStructure.h
-	VertexTriangleAdjacency.cpp
-	VertexTriangleAdjacency.h
+	OptimizeGraph.cpp
+	OptimizeGraph.h
+	OptimizeMeshes.cpp
+	OptimizeMeshes.h
 )
 
 SOURCE_GROUP( Q3D FILES
@@ -457,6 +461,10 @@ ADD_LIBRARY( assimp SHARED
 	ObjFileParser.cpp
 	ObjFileParser.h
 	ObjTools.h
+	OptimizeGraph.cpp
+	OptimizeGraph.h
+	OptimizeMeshes.cpp
+	OptimizeMeshes.h
 	ParsingUtils.h
 	PlyLoader.cpp
 	PlyLoader.h

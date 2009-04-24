@@ -1328,148 +1328,148 @@
 		<Filter
 			Name="sources"
 			>
-			<File
-				RelativePath="..\..\code\aiAssert.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\Assimp.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\BaseImporter.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\BaseImporter.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\BaseProcess.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\BaseProcess.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\FileSystemFilter.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\IFF.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\Importer.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\MaterialSystem.cpp"
-				>
-				<FileConfiguration
-					Name="release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						GeneratePreprocessedFile="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="release-dll|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						GeneratePreprocessedFile="0"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\code\MaterialSystem.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\RemoveComments.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\RemoveComments.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\SceneCombiner.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\SceneCombiner.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\ScenePreprocessor.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\ScenePreprocessor.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\SGSpatialSort.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\SGSpatialSort.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\SkeletonMeshBuilder.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\SkeletonMeshBuilder.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\SmoothingGroups.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\SmoothingGroups.inl"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\SpatialSort.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\SpatialSort.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\StandardShapes.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\StandardShapes.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\TargetAnimation.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\TargetAnimation.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\VertexTriangleAdjacency.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\code\VertexTriangleAdjacency.h"
-				>
-			</File>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 			<Filter
-				Name="Extra"
+				Name="extra"
 				>
 				<File
 					RelativePath="..\..\code\extra\MakeVerboseFormat.cpp"
@@ -1573,10 +1573,10 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Loaders"
+				Name="import"
 				>
 				<Filter
-					Name="3DS"
+					Name="3ds"
 					>
 					<File
 						RelativePath="..\..\code\3DSConverter.cpp"
@@ -1596,7 +1596,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="ASE"
+					Name="ase"
 					>
 					<File
 						RelativePath="..\..\code\ASELoader.cpp"
@@ -1616,7 +1616,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="HMP"
+					Name="hmp"
 					>
 					<File
 						RelativePath="..\..\code\HMPFileData.h"
@@ -1632,7 +1632,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="LWO"
+					Name="lwo"
 					>
 					<File
 						RelativePath="..\..\code\LWOBLoader.cpp"
@@ -1656,7 +1656,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="MD2"
+					Name="md2"
 					>
 					<File
 						RelativePath="..\..\code\MD2FileData.h"
@@ -1676,7 +1676,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="MD3"
+					Name="md3"
 					>
 					<File
 						RelativePath="..\..\code\MD3FileData.h"
@@ -1692,7 +1692,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="MD5"
+					Name="md5"
 					>
 					<File
 						RelativePath="..\..\code\MD5Loader.cpp"
@@ -1712,7 +1712,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="MDC"
+					Name="mdc"
 					>
 					<File
 						RelativePath="..\..\code\MDCFileData.h"
@@ -1732,7 +1732,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="MDL"
+					Name="mdl"
 					>
 					<File
 						RelativePath="..\..\code\HalfLifeFileData.h"
@@ -1760,7 +1760,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="Obj"
+					Name="obj"
 					>
 					<File
 						RelativePath="..\..\code\ObjFileData.h"
@@ -1796,7 +1796,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="Ply"
+					Name="ply"
 					>
 					<File
 						RelativePath="..\..\code\PlyLoader.cpp"
@@ -1816,7 +1816,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="SMD"
+					Name="smd"
 					>
 					<File
 						RelativePath="..\..\code\SMDLoader.cpp"
@@ -1828,7 +1828,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="STL"
+					Name="stl"
 					>
 					<File
 						RelativePath="..\..\code\STLLoader.cpp"
@@ -1840,7 +1840,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="X"
+					Name="x"
 					>
 					<File
 						RelativePath="..\..\code\XFileHelper.h"
@@ -1864,7 +1864,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="DXF"
+					Name="dxf"
 					>
 					<File
 						RelativePath="..\..\code\DXFLoader.cpp"
@@ -1876,7 +1876,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="RAW"
+					Name="raw"
 					>
 					<File
 						RelativePath="..\..\code\RawLoader.cpp"
@@ -1888,7 +1888,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="NFF"
+					Name="nff"
 					>
 					<File
 						RelativePath="..\..\code\NFFLoader.cpp"
@@ -1900,11 +1900,11 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="VRML97"
+					Name="vrml97"
 					>
 				</Filter>
 				<Filter
-					Name="OFF"
+					Name="off"
 					>
 					<File
 						RelativePath="..\..\code\OFFLoader.cpp"
@@ -1916,7 +1916,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="AC"
+					Name="ac"
 					>
 					<File
 						RelativePath="..\..\code\ACLoader.cpp"
@@ -1952,7 +1952,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="LWS"
+					Name="lws"
 					>
 					<File
 						RelativePath="..\..\code\LWOAnimation.cpp"
@@ -1972,7 +1972,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="BVH"
+					Name="bvh"
 					>
 					<File
 						RelativePath="..\..\code\BVHLoader.cpp"
@@ -1984,7 +1984,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="IRRMesh"
+					Name="irrmesh"
 					>
 					<File
 						RelativePath="..\..\code\IRRMeshLoader.cpp"
@@ -1996,7 +1996,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="IRR"
+					Name="irr"
 					>
 					<File
 						RelativePath="..\..\code\IRRLoader.cpp"
@@ -2016,7 +2016,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="Q3D"
+					Name="q3d"
 					>
 					<File
 						RelativePath="..\..\code\Q3DLoader.cpp"
@@ -2028,7 +2028,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="B3D"
+					Name="b3d"
 					>
 					<File
 						RelativePath="..\..\code\B3DImporter.cpp"
@@ -2040,7 +2040,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="TER"
+					Name="ter"
 					>
 					<File
 						RelativePath="..\..\code\TerragenLoader.cpp"
@@ -2052,7 +2052,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="Unreal"
+					Name="unreal"
 					>
 					<File
 						RelativePath="..\..\code\UnrealLoader.cpp"
@@ -2064,7 +2064,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="Collada"
+					Name="collada"
 					>
 					<File
 						RelativePath="..\..\code\ColladaHelper.h"
@@ -2089,7 +2089,7 @@
 				</Filter>
 			</Filter>
 			<Filter
-				Name="PostProcess"
+				Name="process"
 				>
 				<File
 					RelativePath="..\..\code\CalcTangentsProcess.cpp"
@@ -2196,6 +2196,22 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\OptimizeGraph.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\OptimizeGraph.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\OptimizeMeshes.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\OptimizeMeshes.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\PretransformVertices.cpp"
 					>
 				</File>
@@ -2261,7 +2277,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="PCH"
+				Name="pch"
 				>
 				<File
 					RelativePath="..\..\code\AssimpPCH.cpp"
@@ -2369,7 +2385,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Logging"
+				Name="logging"
 				>
 				<File
 					RelativePath="..\..\code\DefaultLogger.cpp"
@@ -2389,7 +2405,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="FileSystem"
+				Name="fs"
 				>
 				<File
 					RelativePath="..\..\code\DefaultIOStream.cpp"
@@ -2413,7 +2429,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Util"
+				Name="util"
 				>
 				<File
 					RelativePath="..\..\code\ByteSwap.h"
@@ -2449,7 +2465,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Extern"
+				Name="extern"
 				>
 				<Filter
 					Name="irrXML"
@@ -3451,6 +3467,146 @@
 						>
 					</File>
 				</Filter>
+			</Filter>
+			<Filter
+				Name="core"
+				>
+				<File
+					RelativePath="..\..\code\aiAssert.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\Assimp.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\BaseImporter.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\BaseImporter.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\BaseProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\BaseProcess.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\IFF.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\Importer.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\MaterialSystem.cpp"
+					>
+					<FileConfiguration
+						Name="release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							GeneratePreprocessedFile="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release-dll|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							GeneratePreprocessedFile="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\code\MaterialSystem.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\RemoveComments.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\RemoveComments.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\SceneCombiner.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\SceneCombiner.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\ScenePreprocessor.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\ScenePreprocessor.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\SGSpatialSort.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\SGSpatialSort.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\SkeletonMeshBuilder.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\SkeletonMeshBuilder.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\SmoothingGroups.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\SmoothingGroups.inl"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\SpatialSort.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\SpatialSort.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\StandardShapes.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\StandardShapes.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\TargetAnimation.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\TargetAnimation.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\VertexTriangleAdjacency.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\VertexTriangleAdjacency.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter

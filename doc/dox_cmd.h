@@ -305,7 +305,7 @@ more information can be found in the <tt>aiPostProcess.h</tt> header.
 	<td>Find and process degenerates primitives.</td>
   </tr>
   <tr>
-    <td>-slm</tt></td>
+    <td><tt>-slm</tt></td>
     <td>--split-large-meshes</tt></td>
 	<td>Split large meshes over a specific treshold in smaller sub meshes. The default vertex & face limit is 1000000</td>
   </tr>
@@ -373,6 +373,19 @@ more information can be found in the <tt>aiPostProcess.h</tt> header.
 	<td>Search the data structure for instanced meshes and replace them by references. This can
 	reduce vertex/face counts but the postprocessing-step takes some time.</td>
   </tr>
+
+    <tr>
+    <td><tt>-og</tt></td>
+    <td><tt>--optimize-graph</tt></td>
+	<td>Simplify and optimize the scenegraph. Use it with care, all hierarchy information could be lost.
+	Animations remain untouched. </td>
+  </tr>
+
+    <tr>
+    <td><tt>-om</tt></td>
+    <td><tt>--optimize-mesh</tt></td>
+	<td>Optimize mesh usage. Meshes are merged, if possible. Very effective in combination with <tt>--optimize-graph</tt></td>
+  </tr>
 </table>
 
 For convenience some default postprocessing configurations are provided.
@@ -392,17 +405,19 @@ The corresponding command line parameter is <tt>-c<name></tt> (or <tt>--config=<
   </tr>
     <tr>
     <td>default</td>
-    <td>Balanced post processing config, performs most optimizations</td>
+    <td>Balanced post processing config; performs most optimizations</td>
 	<td><tt>-cts, -gsn, -jiv, -icl, -lbw, -rrm, -slm, -tri, -guv, -sbpt, -fd, -fiv</tt></td>
   </tr>
     <tr>
     <td>full</td>
-    <td>Full post processing. May take a while, but results in best output quality for most purposes</td>
-	<td><tt>-cts, -gsn, -jiv, -icl, -lbw, -rrm, -slm, -tri, -guv, -sbpt, -fd, -fiv, -fi, -vds</tt></td>
+    <td>Full post processing. May take a while but results in best output quality for most purposes</td>
+	<td><tt>-cts, -gsn, -jiv, -icl, -lbw, -rrm, -slm, -tri, -guv, -sbpt, -fd, -fiv, -fi, -vds -om</tt></td>
   </tr>
  </table>
 
-There are also some common flags to specify Assimp's logging behaviour:
+ The <tt>-tuv, -ptv, -og</tt> flags always need to be enabled manually.
+
+There are also some common flags to customize Assimp's logging behaviour:
 
 <table border="1">
  
@@ -420,8 +435,8 @@ There are also some common flags to specify Assimp's logging behaviour:
   </tr>
     <tr>
     <td><tt>-v</tt> or <tt>--verbose</tt></td>
-    <td>Enables verbose logging. Debug messages will be produced, too. This will 
-	decrease loading performance and might result in *very* long logs ...</td>
+    <td>Enables verbose logging. Debug messages will be produced too. This might 
+	decrease loading performance and result in *very* long logs ... use with caution if you experience strange issues.</td>
   </tr>
  </table>
  */

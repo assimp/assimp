@@ -39,44 +39,42 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file assimp.hpp
+/** @file  assimp.hpp
  *  @brief Defines the C++-API to the Open Asset Import Library.
  */
 #ifndef INCLUDED_AI_ASSIMP_HPP
 #define INCLUDED_AI_ASSIMP_HPP
 
 #ifndef __cplusplus
-#	error This header requires C++ to be used. Use Assimp's C-API (assimp.h) \
-          to access the library from C code.
+#	error This header requires C++ to be used. Use assimp.h for plain C. 
 #endif
 
-#include <map>
-#include <vector>
-
-// Public ASSIMP data structure headers
+// Public ASSIMP data structures
 #include "aiTypes.h"
 #include "aiConfig.h"
 #include "aiAssert.h"
 
 namespace Assimp	{
-
 	// =======================================================================
 	// Public interface to Assimp 
-	// =======================================================================
 	class Importer;
 	class IOStream;
 	class IOSystem;
 
 	// =======================================================================
 	// Plugin development
-	// Include the following headers for the definitions:
-	// =======================================================================
+	//
+	// Include the following headers for the declarations:
 	// BaseImporter.h
 	// BaseProcess.h
 	class BaseImporter;
 	class BaseProcess;
 	class SharedPostProcessInfo;
 	class BatchLoader;
+
+	// =======================================================================
+	// Holy stuff, only for members of the high council of the Jedi.
+	class ImporterPimpl;
 } //! namespace Assimp
 
 #define AI_PROPERTY_WAS_NOT_EXISTING 0xffffffff
@@ -109,7 +107,7 @@ namespace Assimp	{
 * standard C++ IO logic will be used.
 *
 * @note One Importer instance is not thread-safe. If you use multiple
-* threads for loading each thread should maintain its own Importer instance.
+* threads for loading, each thread should maintain its own Importer instance.
 */
 class ASSIMP_API Importer
 {
@@ -120,20 +118,13 @@ class ASSIMP_API Importer
 
 public:
 
-	typedef unsigned int KeyType;
-	typedef std::map<KeyType, int>  		IntPropertyMap;
-	typedef std::map<KeyType, float>		FloatPropertyMap;
-	typedef std::map<KeyType, std::string>	StringPropertyMap;
-
-public:
-
 	// -------------------------------------------------------------------
 	/** Constructor. Creates an empty importer object. 
 	 * 
-	 * Call ReadFile() to start the import process.
+	 * Call ReadFile() to start the import process. The configuration
+	 * property table is initially empty.
 	 */
 	Importer();
-
 
 	// -------------------------------------------------------------------
 	/** Copy constructor.
@@ -143,7 +134,6 @@ public:
 	 * Call ReadFile() to start the import process.
 	 */
 	Importer(const Importer& other);
-
 
 	// -------------------------------------------------------------------
 	/** Destructor. The object kept ownership of the imported data,
@@ -162,7 +152,6 @@ public:
 	 *   fails if there is already a loader for a specific file extension.
 	 */
 	aiReturn RegisterLoader(BaseImporter* pImp);
-
 
 	// -------------------------------------------------------------------
 	/** Unregisters a loader.
@@ -230,7 +219,6 @@ public:
 	void SetPropertyString(const char* szName, const std::string& sValue, 
 		bool* bWasExisting = NULL);
 
-
 	// -------------------------------------------------------------------
 	/** Get a configuration property.
 	 * @param szName Name of the property. All supported properties
@@ -263,7 +251,6 @@ public:
 	const std::string& GetPropertyString(const char* szName,
 		const std::string& sErrorReturn = "") const;
 
-
 	// -------------------------------------------------------------------
 	/** Supplies a custom IO handler to the importer to use to open and
 	 * access files. If you need the importer to use custion IO logic to 
@@ -281,7 +268,6 @@ public:
 	 */
 	void SetIOHandler( IOSystem* pIOHandler);
 
-
 	// -------------------------------------------------------------------
 	/** Retrieves the IO handler that is currently set.
 	 * You can use IsDefaultIOHandler() to check whether the returned
@@ -292,7 +278,6 @@ public:
 	 */
 	IOSystem* GetIOHandler();
 
-
 	// -------------------------------------------------------------------
 	/** Checks whether a default IO handler is active 
 	 * A default handler is active as long the application doesn't 
@@ -300,7 +285,6 @@ public:
 	 * @return true by default
 	 */
 	bool IsDefaultIOHandler();
-
 
 	// -------------------------------------------------------------------
 	/** @brief Check whether a given set of postprocessing flags
@@ -348,7 +332,6 @@ public:
 	 */
 	const aiScene* ReadFile( const std::string& pFile, unsigned int pFlags);
 
-
 	// -------------------------------------------------------------------
 	/** Frees the current scene.
 	 *
@@ -358,25 +341,26 @@ public:
 	 */
 	void FreeScene( );
 
-
 	// -------------------------------------------------------------------
 	/** Returns an error description of an error that occurred in ReadFile(). 
-	*
-	* Returns an empty string if no error occurred.
-	* @return A description of the last error, an empty string if no 
-	*   error occurred.
-	*/
-	const std::string& GetErrorString() const;
-
+	 *
+	 * Returns an empty string if no error occurred.
+	 * @return A description of the last error, an empty string if no 
+	 *   error occurred. The string is never NULL.
+	 *
+	 * @note The returned function remains valid until one of the 
+	 * following methods is called: #ReadFile(), #FreeScene().
+	 */
+	const char* GetErrorString() const;
 
 	// -------------------------------------------------------------------
 	/** Returns whether a given file extension is supported by ASSIMP.
-	*
-	* @param szExtension Extension to be checked.
-	*   Must include a trailing dot '.'. Example: ".3ds", ".md3".
-	*   Cases-insensitive.
-	* @return true if the extension is supported, false otherwise
-	*/
+	 *
+	 * @param szExtension Extension to be checked.
+	 *   Must include a trailing dot '.'. Example: ".3ds", ".md3".
+	 *   Cases-insensitive.
+	 * @return true if the extension is supported, false otherwise
+	 */
 	bool IsExtensionSupported(const char* szExtension);
 
 	// -------------------------------------------------------------------
@@ -386,18 +370,17 @@ public:
 	 * See the const char* version for detailled docs.
 	 * @see IsExtensionSupported(const char*)
 	 */
-	bool IsExtensionSupported(const std::string& szExtension);
-
+	inline bool IsExtensionSupported(const std::string& szExtension);
 
 	// -------------------------------------------------------------------
 	/** Get a full list of all file extensions supported by ASSIMP.
-	*
-	* If a file extension is contained in the list this does, of course, not
-	* mean that ASSIMP is able to load all files with this extension.
-	* @param szOut String to receive the extension list. It just means there
-    *   is a loader which handles such files.
-	*   Format of the list: "*.3ds;*.obj;*.dae". 
-	*/
+	 *
+	 * If a file extension is contained in the list this does of course not
+	 * mean that ASSIMP is able to load all files with this extension.
+	 * @param szOut String to receive the extension list. It just means there
+     *   is a loader which handles such files.
+	 *   Format of the list: "*.3ds;*.obj;*.dae". 
+	 */
 	void GetExtensionList(aiString& szOut);
 
 	// -------------------------------------------------------------------
@@ -408,7 +391,6 @@ public:
 	 * @see GetExtensionList(aiString&)
 	 */
 	inline void GetExtensionList(std::string& szOut);
-
 
 	// -------------------------------------------------------------------
 	/** Find the loader corresponding to a specific file extension.
@@ -421,14 +403,12 @@ public:
 	*/
 	BaseImporter* FindLoader (const char* szExtension);
 
-
 	// -------------------------------------------------------------------
 	/** Returns the scene loaded by the last successful call to ReadFile()
 	 *
 	 * @return Current scene or NULL if there is currently no scene loaded
 	 */
 	const aiScene* GetScene() const;
-
 
 	// -------------------------------------------------------------------
 	/** Returns the scene loaded by the last successful call to ReadFile()
@@ -438,62 +418,34 @@ public:
 	 *  will return NULL - until a new scene has been loaded via ReadFile().
 	 *
 	 * @return Current scene or NULL if there is currently no scene loaded
+	 * @note Under windows, deleting the returned scene manually will 
+	 * probably not work properly in applications using static runtime linkage.
 	 */
 	aiScene* GetOrphanedScene();
 
-
 	// -------------------------------------------------------------------
-	/** Returns the storage allocated by ASSIMP to hold the asset data
+	/** Returns the storage allocated by ASSIMP to hold the scene data
 	 * in memory.
-	 * \param in Data structure to be filled. 
+	 *
+	 * This refers to the currently loaded file, see #ReadFile().
+	 * @param in Data structure to be filled. 
 	*/
 	void GetMemoryRequirements(aiMemoryInfo& in) const;
 
-
 	// -------------------------------------------------------------------
-	/** Enables the "extra verbose" mode. In this mode the data 
-	* structure is validated after each post-process step to make sure
-	* all steps behave consequently in the same manner when modifying
-	* data structures.
-	*/
+	/** Enables "extra verbose" mode. 
+	 *
+	 * In this mode the data structure is validated after every single
+	 * post processing step to make sure everyone modifies the data
+	 * structure in the defined manner. This is a debug feature and not
+	 * intended for public use.
+	 */
 	void SetExtraVerbose(bool bDo);
 
 protected:
 
-	/** IO handler to use for all file accesses. */
-	IOSystem* mIOHandler;
-	bool mIsDefaultHandler;
-
-	/** Format-specific importer worker objects - 
-	 * one for each format we can read. */
-	std::vector<BaseImporter*> mImporter;
-
-	/** Post processing steps we can apply at the imported data. */
-	std::vector<BaseProcess*> mPostProcessingSteps;
-
-	/** The imported data, if ReadFile() was successful,
-	 * NULL otherwise. */
-	aiScene* mScene;
-
-	/** The error description, if there was one. */
-	std::string mErrorString;
-
-	/** List of integer properties */
-	IntPropertyMap mIntProperties;
-
-	/** List of floating-point properties */
-	FloatPropertyMap mFloatProperties;
-
-	/** List of string properties */
-	StringPropertyMap mStringProperties;
-
-	/** Used for testing - extra verbose mode causes the
-	    validateDataStructure-Step to be executed before
-		 and after every single postprocess step */
-	bool bExtraVerbose;
-
-	/** Used by post-process steps to share data */
-	SharedPostProcessInfo* mPPShared;
+	// Just because we don't want you to know how we're hacking around.
+	ImporterPimpl* pimpl;
 }; //! class Importer
 
 

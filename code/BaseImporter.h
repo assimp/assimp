@@ -77,6 +77,62 @@ private:
 };
 
 // ---------------------------------------------------------------------------
+/** @brief Internal PIMPL implementation for Assimp::Importer
+ *
+ *  Using this idiom here allows us to drop the dependency from
+ *  std::vector and std::map in the public headers. Furthermore we are dropping
+ *  any STL interface problems caused by mismatching STL settings. All
+ *  size calculation are now done by us, not the app heap.
+ */
+class ASSIMP_API ImporterPimpl 
+{
+public:
+
+	// Data type to store the key hash
+	typedef unsigned int KeyType;
+	
+	// typedefs for our three configuration maps.
+	// We don't need more, so there is no need for a generic solution
+	typedef std::map<KeyType, int> IntPropertyMap;
+	typedef std::map<KeyType, float> FloatPropertyMap;
+	typedef std::map<KeyType, std::string> StringPropertyMap;
+
+public:
+
+	/** IO handler to use for all file accesses. */
+	IOSystem* mIOHandler;
+	bool mIsDefaultHandler;
+
+	/** Format-specific importer worker objects - one for each format we can read.*/
+	std::vector<BaseImporter*> mImporter;
+
+	/** Post processing steps we can apply at the imported data. */
+	std::vector<BaseProcess*> mPostProcessingSteps;
+
+	/** The imported data, if ReadFile() was successful, NULL otherwise. */
+	aiScene* mScene;
+
+	/** The error description, if there was one. */
+	std::string mErrorString;
+
+	/** List of integer properties */
+	IntPropertyMap mIntProperties;
+
+	/** List of floating-point properties */
+	FloatPropertyMap mFloatProperties;
+
+	/** List of string properties */
+	StringPropertyMap mStringProperties;
+
+	/** Used for testing - extra verbose mode causes the ValidateDataStructure-Step
+	 *  to be executed before and after every single postprocess step */
+	bool bExtraVerbose;
+
+	/** Used by post-process steps to share data */
+	SharedPostProcessInfo* mPPShared;
+};
+
+// ---------------------------------------------------------------------------
 /** The BaseImporter defines a common interface for all importer worker 
  *  classes.
  *
@@ -334,11 +390,12 @@ public:
 	 */
 	struct PropertyMap
 	{
-		Importer::IntPropertyMap     ints;
-		Importer::FloatPropertyMap   floats;
-		Importer::StringPropertyMap  strings;
+		ImporterPimpl::IntPropertyMap     ints;
+		ImporterPimpl::FloatPropertyMap   floats;
+		ImporterPimpl::StringPropertyMap  strings;
 
 		bool operator == (const PropertyMap& prop) const {
+			// fixme: really isocpp? gcc complains
 			return ints == prop.ints && floats == prop.floats && strings == prop.strings; 
 		}
 

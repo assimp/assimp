@@ -67,9 +67,9 @@ static ImporterMap gActiveImports;
 static std::string gLastErrorString;
 
 /** Configuration properties */
-static Importer::IntPropertyMap			gIntProperties;
-static Importer::FloatPropertyMap		gFloatProperties;
-static Importer::StringPropertyMap		gStringProperties;
+static ImporterPimpl::IntPropertyMap		gIntProperties;
+static ImporterPimpl::FloatPropertyMap		gFloatProperties;
+static ImporterPimpl::StringPropertyMap		gStringProperties;
 
 #if (defined AI_C_THREADSAFE)
 /** Global mutex to manage the access to the importer map */
@@ -214,9 +214,9 @@ const aiScene* aiImportFileEx( const char* pFile, unsigned int pFlags,
 
 	// copy the global property lists to the Importer instance
 	// (we are a friend of Importer)
-	imp->mIntProperties		= gIntProperties;
-	imp->mFloatProperties	= gFloatProperties;
-	imp->mStringProperties	= gStringProperties;
+	imp->pimpl->mIntProperties = gIntProperties;
+	imp->pimpl->mFloatProperties = gFloatProperties;
+	imp->pimpl->mStringProperties = gStringProperties;
 
 	// setup a custom IO system if necessary
 	if (pFS)

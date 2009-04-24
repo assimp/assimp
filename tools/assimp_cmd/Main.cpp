@@ -190,12 +190,15 @@ int ProcessStandardArguments(ImportData& fill, const char** params,
 	// -lh     --convert-to-lh
 	// -fuv    --flip-uv
 	// -fwo    --flip-winding-order
-	// -ett    --evaluate-texture-transform
+	// -tuv    --transform-uv-coords
 	// -guv    --gen-uvcoords
 	// -fid    --find-invalid-data
 	// -fixn   --fix normals
 	// -tri    --triangulate
 	// -fi     --find-instances
+	// -fi     --find-instances
+	// -og     --optimize-graph
+	// -om     --optimize-meshes
 	//
 	// -c<file> --config-file=<file>
 
@@ -248,7 +251,7 @@ int ProcessStandardArguments(ImportData& fill, const char** params,
 		else if (! ::strcmp(params[i], "-fwo") || ! ::strcmp(params[i], "--flip-winding-order")) {
 			fill.ppFlags |= aiProcess_ConvertToLeftHanded;
 		}
-		else if (! ::strcmp(params[i], "-ett") || ! ::strcmp(params[i], "--evaluate-texture-transform")) {
+		else if (! ::strcmp(params[i], "-tuv") || ! ::strcmp(params[i], "--transform-uv-coords")) {
 			fill.ppFlags |= aiProcess_TransformUVCoords;
 		}
 		else if (! ::strcmp(params[i], "-guv") || ! ::strcmp(params[i], "--gen-uvcoords")) {
@@ -269,6 +272,25 @@ int ProcessStandardArguments(ImportData& fill, const char** params,
 		else if (! ::strcmp(params[i], "-fi") || ! ::strcmp(params[i], "--find-instances")) {
 			fill.ppFlags |= aiProcess_FindInstances;
 		}
+		else if (! ::strcmp(params[i], "-og") || ! ::strcmp(params[i], "--optimize-graph")) {
+			fill.ppFlags |= aiProcess_OptimizeGraph;
+		}
+		else if (! ::strcmp(params[i], "-om") || ! ::strcmp(params[i], "--optimize-meshes")) {
+			fill.ppFlags |= aiProcess_OptimizeMeshes;
+		}
+
+#if 0
+		else if (! ::strcmp(params[i], "-oa") || ! ::strcmp(params[i], "--optimize-anims")) {
+			fill.ppFlags |= aiProcess_OptimizeAnims;
+		}
+		else if (! ::strcmp(params[i], "-gem") || ! ::strcmp(params[i], "--gen-entity-meshes")) {
+			fill.ppFlags |= aiProcess_GenEntityMeshes;
+		}
+		else if (! ::strcmp(params[i], "-ftp") || ! ::strcmp(params[i], "--fix-texture-paths")) {
+			fill.ppFlags |= aiProcess_FixTexturePaths;
+		}
+#endif
+
 		else if (! ::strncmp(params[i], "-c",2) || ! ::strncmp(params[i], "--config=",9)) {
 			
 			const unsigned int ofs = (params[i][1] == '-' ? 9 : 2);

@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssimpPCH.h"
 #include "RemoveRedundantMaterials.h"
 #include "ParsingUtils.h"
+#include "ProcessHelper.h"
 
 using namespace Assimp;
 
@@ -76,31 +77,6 @@ void RemoveRedundantMatsProcess::SetupProperties(const Importer* pImp)
 {
 	// Get value of AI_CONFIG_PP_RRM_EXCLUDE_LIST
 	configFixedMaterials = pImp->GetPropertyString(AI_CONFIG_PP_RRM_EXCLUDE_LIST,"");
-}
-
-// ------------------------------------------------------------------------------------------------
-// Extract single strings from a list of identifiers
-void ConvertListToStrings(const std::string& in, std::list<std::string>& out)
-{
-	const char* s = in.c_str();
-	while (*s) {
-		SkipSpacesAndLineEnd(&s);
-		if (*s == '\'') {
-			const char* base = ++s;
-			while (*s != '\'') {
-				++s;
-				if (*s == '\0') {
-					DefaultLogger::get()->error("RemoveRedundantMaterials: String list is ill-formatted");
-					return;
-				}
-			}
-			out.push_back(std::string(base,(size_t)(s-base)));
-			++s;
-		}
-		else {
-			out.push_back(GetNextToken(s));
-		}
-	}
 }
 
 // ------------------------------------------------------------------------------------------------

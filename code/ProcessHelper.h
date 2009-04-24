@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SpatialSort.h"
 #include "BaseProcess.h"
+#include "ParsingUtils.h"
 
 // -------------------------------------------------------------------------------
 // Some extensions to std namespace. Mainly std::min and std::max for all
@@ -187,6 +188,35 @@ inline void ArrayBounds(const T* in, unsigned int size, T& min, T& max)
 	for (unsigned int i = 0; i < size;++i) {
 		min = std::min(in[i],min);
 		max = std::max(in[i],max);
+	}
+}
+
+// -------------------------------------------------------------------------------
+/** @brief Extract single strings from a list of identifiers
+ *  @param in Input string list. 
+ *  @param out Receives a list of clean output strings
+ *  @sdee #AI_CONFIG_PP_OG_EXCLUDE_LIST
+ */
+inline void ConvertListToStrings(const std::string& in, std::list<std::string>& out)
+{
+	const char* s = in.c_str();
+	while (*s) {
+		SkipSpacesAndLineEnd(&s);
+		if (*s == '\'') {
+			const char* base = ++s;
+			while (*s != '\'') {
+				++s;
+				if (*s == '\0') {
+					DefaultLogger::get()->error("ConvertListToString: String list is ill-formatted");
+					return;
+				}
+			}
+			out.push_back(std::string(base,(size_t)(s-base)));
+			++s;
+		}
+		else {
+			out.push_back(GetNextToken(s));
+		}
 	}
 }
 

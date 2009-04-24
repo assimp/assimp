@@ -2024,6 +2024,22 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\OptimizeGraph.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\OptimizeGraph.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\OptimizeMeshes.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\OptimizeMeshes.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\PretransformVertices.cpp"
 					>
 				</File>

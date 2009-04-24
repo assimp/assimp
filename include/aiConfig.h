@@ -58,6 +58,123 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_CONFIG_H
 #define INCLUDED_AI_CONFIG_H
 
+
+// ###########################################################################
+// POST PROCESSING SETTINGS
+// Various stuff to fine-tune the behavior of a specific post processing step.
+// ###########################################################################
+
+// ---------------------------------------------------------------------------
+/** @brief  Specifies the maximum angle that may be between two vertex tangents
+ *         that their tangents and bitangents are smoothed.
+ *
+ * This applies to the CalcTangentSpace-Step. The angle is specified
+ * in degrees, so 180 is PI. The default value is
+ * 45 degrees. The maximum value is 175.
+ * Property type: float. 
+ */
+#define AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE \
+	"PP_CT_MAX_SMOOTHING_ANGLE"
+
+// ---------------------------------------------------------------------------
+/** @brief  Specifies the maximum angle that may be between two face normals
+ *          at the same vertex position that their are smoothed together.
+ *
+ * Sometimes referred to as 'crease angle'.
+ * This applies to the GenSmoothNormals-Step. The angle is specified
+ * in degrees, so 180 is PI. The default value is 175 degrees (all vertex 
+ * normals are smoothed). The maximum value is 175, too. Property type: float. 
+ * Warning: setting this option may cause a severe loss of performance. The
+ * performance is unaffected if the #AI_CONFIG_FAVOUR_SPEED flag is set but
+ * the output quality may be reduced.
+ */
+#define AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE \
+	"PP_GSN_MAX_SMOOTHING_ANGLE"
+
+// ---------------------------------------------------------------------------
+/** @brief Sets the colormap (= palette) to be used to decode embedded
+ *         textures in MDL (Quake or 3DGS) files.
+ *
+ * This must be a valid path to a file. The file is 768 (256*3) bytes
+ * large and contains RGB triplets for each of the 256 palette entries.
+ * The default value is colormap.lmp. If the file is not found,
+ * a default palette (from Quake 1) is used. 
+ * Property type: string.
+ */
+#define AI_CONFIG_IMPORT_MDL_COLORMAP		\
+	"IMPORT_MDL_COLORMAP"
+
+// ---------------------------------------------------------------------------
+/** @brief Configures the #aiProcess_RemoveRedundantMaterials step to 
+ *  keep materials matching a name in a given list.
+ *
+ * This is a list of 1 to n strings, ' ' serves as delimiter character.
+ * Identifiers containing whitespaces must be enclosed in *single*
+ * quotation marks. For example:<tt>
+ * "keep-me and_me_to anotherMaterialToBeKept \'name with whitespace\'"</tt>.
+ * If a material matches on of these names, it will not be modified or
+ * removed by the postprocessing step nor will other materials be replaced
+ * by a reference to it. <br> 
+ * This option might be useful if you are using some magic material names
+ * to pass additional semantics through the content pipeline. This ensures
+ * they won't be optimized away, but a general optimization is still 
+ * performed for materials not contained in the list.
+ * Property type: String. Default value: n/a
+ * @note Linefeeds, tabs or carriage returns are treated as whitespace.
+ *   Material names are case sensitive.
+ */
+#define AI_CONFIG_PP_RRM_EXCLUDE_LIST	\
+	"PP_RRM_EXCLUDE_LIST"
+
+// ---------------------------------------------------------------------------
+/** @brief Configures the #aiProcess_PretransformVertices step to
+ *  keep the scene hierarchy. Meshes are moved to worldspace, but
+ *  no optimization is performed (means: meshes are not joined. The total
+ *  number of meshes won't change).
+ *
+ * This option could be of use for you if the scene hierarchy contains
+ * important additional information which you want to interpret. 
+ * For rendering, you can still render all meshes in the scene without
+ * any transformations.
+ * Property type: integer (0: false; !0: true). Default value: false.
+ */
+#define AI_CONFIG_PP_PTV_KEEP_HIERARCHY		\
+	"PP_PTV_KEEP_HIERARCHY"
+
+// ---------------------------------------------------------------------------
+/** @brief Configures the #aiProcess_FindDegenerates step to
+ *  remove degenerated primitives from the import - immediately.
+ *
+ * The default behaviour converts degenerated triangles to lines and
+ * degenerated lines to points. See the documentation to the
+ * #aiProcess_FindDegenerates step for a detailed example of the various ways
+ * to get rid of these lines and points if you don't want them.
+ * Property type: integer (0: false; !0: true). Default value: false.
+ */
+#define AI_CONFIG_PP_FD_REMOVE \
+	"PP_FD_REMOVE"
+
+// ---------------------------------------------------------------------------
+/** @brief Configures the #aiProcess_OptimizeGraph step to preserve nodes
+ * matching a name in a given list.
+ *
+ * This is a list of 1 to n strings, ' ' serves as delimiter character.
+ * Identifiers containing whitespaces must be enclosed in *single*
+ * quotation marks. For example:<tt>
+ * "keep-me and_me_to anotherNodeToBeKept \'name with whitespace\'"</tt>.
+ * If a node matches on of these names, it will not be modified or
+ * removed by the postprocessing step.<br> 
+ * This option might be useful if you are using some magic node names
+ * to pass additional semantics through the content pipeline. This ensures
+ * they won't be optimized away, but a general optimization is still 
+ * performed for nodes not contained in the list.
+ * Property type: String. Default value: n/a
+ * @note Linefeeds, tabs or carriage returns are treated as whitespace.
+ *   Node names are case sensitive.
+ */
+#define AI_CONFIG_PP_OG_EXCLUDE_LIST	\
+	"PP_OG_EXCLUDE_LIST"
+
 // ---------------------------------------------------------------------------
 /** @brief  Set the maximum number of vertices in a mesh.
  *
@@ -123,6 +240,151 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Property type: integer.
  */
 #define AI_CONFIG_PP_ICL_PTCACHE_SIZE	"PP_ICL_PTCACHE_SIZE"
+
+// ---------------------------------------------------------------------------
+/** @brief Enumerates components of the aiScene and aiMesh data structures
+ *  that can be excluded from the import by using the RemoveComponent step.
+ *
+ *  See the documentation to #aiProcess_RemoveComponent for more details.
+ */
+enum aiComponent
+{
+	/** Normal vectors
+	 */
+	aiComponent_NORMALS = 0x2u,
+
+	/** Tangents and bitangents go always together ...
+	 */
+	aiComponent_TANGENTS_AND_BITANGENTS = 0x4u,
+
+	/** ALL color sets
+	 * Use aiComponent_COLORn(N) to specify the N'th set 
+	 */
+	aiComponent_COLORS = 0x8,
+
+	/** ALL texture UV sets
+	 * aiComponent_TEXCOORDn(N) to specify the N'th set 
+	 */
+	aiComponent_TEXCOORDS = 0x10,
+
+	/** Removes all bone weights from all meshes.
+	 * The scenegraph nodes corresponding to the bones are NOT removed.
+	 * use the #aiProcess_OptimizeGraph step to do this
+	 */
+	aiComponent_BONEWEIGHTS = 0x20,
+
+	/** Removes all node animations (aiScene::mAnimations).
+	 * The scenegraph nodes corresponding to the bones are NOT removed.
+	 * use the #aiProcess_OptimizeGraph step to do this
+	 */
+	aiComponent_ANIMATIONS = 0x40,
+
+	/** Removes all embedded textures (aiScene::mTextures)
+	 */
+	aiComponent_TEXTURES = 0x80,
+
+	/** Removes all light sources (aiScene::mLights).
+	 * The scenegraph nodes corresponding to the bones are NOT removed.
+	 * use the #aiProcess_OptimizeGraph step to do this
+	 */
+	aiComponent_LIGHTS = 0x100,
+
+	/** Removes all light sources (aiScene::mCameras).
+	 * The scenegraph nodes corresponding to the bones are NOT removed.
+	 * use the #aiProcess_OptimizeGraph step to do this
+	 */
+	aiComponent_CAMERAS = 0x200,
+
+	/** Removes all meshes (aiScene::mMeshes). 
+	 */
+	aiComponent_MESHES = 0x400,
+
+	/** Removes all materials. One default material will
+	 * be generated, so aiScene::mNumMaterials will be 1.
+	 */
+	aiComponent_MATERIALS = 0x800,
+
+
+	/** This value is not used. It is just there to force the
+	 *  compiler to map this enum to a 32 Bit integer.
+	 */
+	_aiComponent_Force32Bit = 0x9fffffff
+};
+
+// Remove a specific color channel 'n'
+#define aiComponent_COLORSn(n) (1u << (n+20u))
+
+// Remove a specific UV channel 'n'
+#define aiComponent_TEXCOORDSn(n) (1u << (n+25u))
+
+// ---------------------------------------------------------------------------
+/** @brief Input parameter to the #aiProcess_RemoveComponent step:
+ *  Specifies the parts of the data structure to be removed.
+ *
+ * See the documentation to this step for further details. The property
+ * is expected to be an integer, a bitwise combination of the
+ * #aiComponent flags defined above in this header. The default
+ * value is 0. Important: if no valid mesh is remaining after the
+ * step has been executed (e.g you thought it was funny to specify ALL
+ * of the flags defined above) the import FAILS. Mainly because there is
+ * no data to work on anymore ...
+ */
+#define AI_CONFIG_PP_RVC_FLAGS				\
+	"PP_RVC_FLAGS"
+
+// ---------------------------------------------------------------------------
+/** @brief Input parameter to the #aiProcess_SortByPType step:
+ *  Specifies which primitive types are removed by the step.
+ *
+ *  This is a bitwise combination of the aiPrimitiveType flags.
+ *  Specifying all of them is illegal, of course. A typical use would
+ *  be to exclude all line and point meshes from the import. This
+ *  is an integer property, its default value is 0.
+ */
+#define AI_CONFIG_PP_SBP_REMOVE				\
+	"PP_SBP_REMOVE"
+
+
+// TransformUVCoords evaluates UV scalings
+#define AI_UVTRAFO_SCALING 0x1
+
+// TransformUVCoords evaluates UV rotations
+#define AI_UVTRAFO_ROTATION 0x2
+
+// TransformUVCoords evaluates UV translation
+#define AI_UVTRAFO_TRANSLATION 0x4
+
+// Everything baked together -> default value
+#define AI_UVTRAFO_ALL (AI_UVTRAFO_SCALING | AI_UVTRAFO_ROTATION | AI_UVTRAFO_TRANSLATION)
+
+// ---------------------------------------------------------------------------
+/** @brief Input parameter to the #aiProcess_TransformUVCoords step:
+ *  Specifies which UV transformations are evaluated.
+ *
+ *  This is a bitwise combination of the AI_UVTRAFO_XXX flags (integer
+ *  property, of course). By default all transformations are enabled 
+ * (AI_UVTRAFO_ALL).
+ */
+#define AI_CONFIG_PP_TUV_EVALUATE				\
+	"PP_TUV_EVALUATE"
+
+// ---------------------------------------------------------------------------
+/** @brief A hint to assimp to favour speed against import quality.
+ *
+ * Enabling this option may result in faster loading, but it needn't.
+ * It represents just a hint to loaders and post-processing steps to use
+ * faster code paths, if possible. 
+ * This property is expected to be an integer, != 0 stands for true.
+ * The default value is 0.
+ */
+#define AI_CONFIG_FAVOUR_SPEED				\
+ "FAVOUR_SPEED"
+
+
+// ###########################################################################
+// IMPORTER SETTINGS
+// Various stuff to fine-tune the behaviour of a specific importer plugin.
+// ###########################################################################
 
 
 // ---------------------------------------------------------------------------
@@ -244,6 +506,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_CONFIG_IMPORT_LWO_ONE_LAYER_ONLY			\
 	"IMPORT_LWO_ONE_LAYER_ONLY"
 
+// ---------------------------------------------------------------------------
+/** @brief  Configures the MD5 loader to not load the MD5ANIM file for
+ *  a MD5MESH file automatically.
+ * 
+ * The default strategy is to look for a file with the same name but the
+ * MD5ANIM extension in the same directory. If it is found, it is loaded
+ * and combined with the MD5MESH file. This configuration option can be
+ * used to disable this behaviour.
+ * 
+ * Property type: integer (0: false; !0: true). Default value: false.
+ */
+#define AI_CONFIG_IMPORT_MD5_NO_ANIM_AUTOLOAD			\
+	"IMPORT_MD5_NO_ANIM_AUTOLOAD"
+
+#if 0
+// ---------------------------------------------------------------------------
+/** @brief Specifies the shape of the scene returned by the CSM format loader.
+ * 
+ * If this property is set to 1, the loader tries to build a hierarchy from
+ * the capture points laoded from the file. A dummy mesh representing the
+ * recorded human is build. Otherwise, no meshes are returned, there's just
+ * a single root node with several children. These children represent the
+ * capture points, their translation channel is absolute.
+ * Property type: integer. Default value: 1
+ */
+#define AI_CONFIG_IMPORT_CSM_BUILD_HIERARCHY	"imp.csm.mkhier"
+#endif
 
 // ---------------------------------------------------------------------------
 /** @brief Defines the begin of the time range for which the LWS loader
@@ -277,252 +566,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_CONFIG_IMPORT_IRR_ANIM_FPS				\
 	"IMPORT_IRR_ANIM_FPS"
 
-// ---------------------------------------------------------------------------
-/** @brief  Specifies the maximum angle that may be between two vertex tangents
- *         that their tangents and bitangents are smoothed.
- *
- * This applies to the CalcTangentSpace-Step. The angle is specified
- * in degrees, so 180 is PI. The default value is
- * 45 degrees. The maximum value is 175.
- * Property type: float. 
- */
-#define AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE \
-	"PP_CT_MAX_SMOOTHING_ANGLE"
 
-// ---------------------------------------------------------------------------
-/** @brief  Specifies the maximum angle that may be between two face normals
- *          at the same vertex position that their are smoothed together.
- *
- * Sometimes referred to as 'crease angle'.
- * This applies to the GenSmoothNormals-Step. The angle is specified
- * in degrees, so 180 is PI. The default value is 175 degrees (all vertex 
- * normals are smoothed). The maximum value is 175. Property type: float. 
- * Warning: setting this option may cause a severe loss of performance. The
- * performance is unaffected if the AI_CONFIG_FAVOUR_SPEED flag is set, but
- * the output quality may be reduced.
- */
-#define AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE \
-	"PP_GSN_MAX_SMOOTHING_ANGLE"
-
-// ---------------------------------------------------------------------------
-/** @brief Sets the colormap (= palette) to be used to decode embedded
- *         textures in MDL (Quake or 3DGS) files.
- *
- * This must be a valid path to a file. The file is 768 (256*3) bytes
- * large and contains RGB triplets for each of the 256 palette entries.
- * The default value is colormap.lmp. If the file is not found,
- * a default palette (from Quake 1) is used. 
- * Property type: string.
- */
-#define AI_CONFIG_IMPORT_MDL_COLORMAP		\
-	"IMPORT_MDL_COLORMAP"
-
-// ---------------------------------------------------------------------------
-/** @brief Configures the #aiProcess_RemoveRedundantMaterials step to 
- *  keep materials matching a name in a given list.
- *
- * This is a list of 1 to n strings, ' ' serves as delimiter character.
- * Identifiers containing whitespaces must be enclosed in *single*
- * quotation marks. For example:<tt>
- * "keep-me and_me_to anotherMaterialToBeKept \'name with whitespace\'"</tt>.
- * If a material matches on of these names, it will not be modified or
- * removed by the postprocessing step nor will other materials be replaced
- * by a reference to it. <br> 
- * This option might be useful if you are using some magic material names
- * to pass additional semantics through the content pipeline. This ensures
- * they won't be optimized away, but a general optimization is still 
- * performed for materials not contained in the list.
- * Property type: String. Default value: n/a
- * @note Linefeeds, tabs or carriage returns are treated as whitespace.
- *   Material names are case sensitive.
- */
-#define AI_CONFIG_PP_RRM_EXCLUDE_LIST	\
-	"PP_RRM_EXCLUDE_LIST"
-
-// ---------------------------------------------------------------------------
-/** @brief Configures the #aiProcess_PretransformVertices step to
- *  keep the scene hierarchy. Meshes are moved to worldspace, but
- *  no optimization is performed (means: meshes are not joined. The total
- *  number of meshes won't change).
- *
- * This option could be of use for you if the scene hierarchy contains
- * important additional information which you want to interpret. 
- * For rendering, you can still render all meshes in the scene without
- * any transformations.
- * Property type: integer (0: false; !0: true). Default value: false.
- */
-#define AI_CONFIG_PP_PTV_KEEP_HIERARCHY		\
-	"PP_PTV_KEEP_HIERARCHY"
-
-// ---------------------------------------------------------------------------
-/** @brief Configures the #aiProcess_FindDegenerates step to
- *  remove degenerated primitives from the import - immediately.
- *
- * The default behaviour converts degenerated triangles to lines and
- * degenerated lines to points. See the documentation to the
- * #aiProcess_FindDegenerates step for a detailed example of the various ways
- * to get rid of these lines and points if you don't want them.
- * Property type: integer (0: false; !0: true). Default value: false.
- */
-#define AI_CONFIG_PP_FD_REMOVE \
-	"PP_FD_REMOVE"
-
-
-// ---------------------------------------------------------------------------
-/** @brief  Configures the MD5 loader to not load the MD5ANIM file for
- *  a MD5MESH file automatically.
- * 
- * The default strategy is to look for a file with the same name but the
- * MD5ANIM extension in the same directory. If it is found, it is loaded
- * and combined with the MD5MESH file. This configuration option can be
- * used to disable this behaviour.
- * 
- * Property type: integer (0: false; !0: true). Default value: false.
- */
-#define AI_CONFIG_IMPORT_MD5_NO_ANIM_AUTOLOAD			\
-	"IMPORT_MD5_NO_ANIM_AUTOLOAD"
-
-#if 0
-// ---------------------------------------------------------------------------
-/** @brief Specifies the shape of the scene returned by the CSM format loader.
- * 
- * If this property is set to 1, the loader tries to build a hierarchy from
- * the capture points laoded from the file. A dummy mesh representing the
- * recorded human is build. Otherwise, no meshes are returned, there's just
- * a single root node with several children. These children represent the
- * capture points, their translation channel is absolute.
- * Property type: integer. Default value: 1
- */
-#define AI_CONFIG_IMPORT_CSM_BUILD_HIERARCHY	"imp.csm.mkhier"
-#endif
-
-// ---------------------------------------------------------------------------
-/** @brief Enumerates components of the aiScene and aiMesh data structures
- *  that can be excluded from the import with the RemoveComponent step.
- *
- *  See the documentation to #aiProcess_RemoveComponent for more details.
- */
-enum aiComponent
-{
-	//! Normal vectors
-	aiComponent_NORMALS = 0x2u,
-
-	//! Tangents and bitangents go always together ...
-	aiComponent_TANGENTS_AND_BITANGENTS = 0x4u,
-
-	//! ALL color sets
-	//! Use aiComponent_COLORn(N) to specify the N'th set 
-	aiComponent_COLORS = 0x8,
-
-	//! ALL texture UV sets
-	//! aiComponent_TEXCOORDn(N) to specify the N'th set 
-	aiComponent_TEXCOORDS = 0x10,
-
-	//! Removes all bone weights from all meshes.
-	//! The scenegraph nodes corresponding to the
-	//! bones are removed
-	aiComponent_BONEWEIGHTS = 0x20,
-
-	//! Removes all bone animations (aiScene::mAnimations)
-	aiComponent_ANIMATIONS = 0x40,
-
-	//! Removes all embedded textures (aiScene::mTextures)
-	aiComponent_TEXTURES = 0x80,
-
-	//! Removes all light sources (aiScene::mLights)
-	//! The scenegraph nodes corresponding to the
-	//! light sources are removed.
-	aiComponent_LIGHTS = 0x100,
-
-	//! Removes all light sources (aiScene::mCameras)
-	//! The scenegraph nodes corresponding to the
-	//! cameras are removed.
-	aiComponent_CAMERAS = 0x200,
-
-	//! Removes all meshes (aiScene::mMeshes). 
-	aiComponent_MESHES = 0x400,
-
-	//! Removes all materials. One default material will
-	//! be generated, so aiScene::mNumMaterials will be 1.
-	//! This makes no real sense without the aiComponent_TEXTURES flag.
-	aiComponent_MATERIALS = 0x800,
-
-
-	/** This value is not used. It is just there to force the
-	 *  compiler to map this enum to a 32 Bit integer.
-	 */
-	_aiComponent_Force32Bit = 0x9fffffff
-};
-
-// Remove a specific color channel 'n'
-#define aiComponent_COLORSn(n) (1u << (n+20u))
-
-// Remove a specific UV channel 'n'
-#define aiComponent_TEXCOORDSn(n) (1u << (n+25u))
-
-
-// ---------------------------------------------------------------------------
-/** @brief Input parameter to the #aiProcess_RemoveComponent step:
- *  Specifies the parts of the data structure to be removed.
- *
- * See the documentation to this step for further details. The property
- * is expected to be an integer, a bitwise combination of the
- * #aiComponent flags defined above in this header. The default
- * value is 0. Important: if no valid mesh is remaining after the
- * step has been executed (e.g you thought it was funny to specify ALL
- * of the flags defined above) the import FAILS. Mainly because there is
- * no data to work on anymore ...
- */
-#define AI_CONFIG_PP_RVC_FLAGS				\
-	"PP_RVC_FLAGS"
-
-// ---------------------------------------------------------------------------
-/** @brief Input parameter to the #aiProcess_SortByPType step:
- *  Specifies which primitive types are removed by the step.
- *
- *  This is a bitwise combination of the aiPrimitiveType flags.
- *  Specifying all of them is illegal, of course. A typical use would
- *  be to exclude all line and point meshes from the import. This
- *  is an integer property, its default value is 0.
- */
-#define AI_CONFIG_PP_SBP_REMOVE				\
-	"PP_SBP_REMOVE"
-
-
-// TransformUVCoords evaluates UV scalings
-#define AI_UVTRAFO_SCALING 0x1
-
-// TransformUVCoords evaluates UV rotations
-#define AI_UVTRAFO_ROTATION 0x2
-
-// TransformUVCoords evaluates UV translation
-#define AI_UVTRAFO_TRANSLATION 0x4
-
-// Everything baked together -> default value
-#define AI_UVTRAFO_ALL (AI_UVTRAFO_SCALING | AI_UVTRAFO_ROTATION | AI_UVTRAFO_TRANSLATION)
-
-// ---------------------------------------------------------------------------
-/** @brief Input parameter to the #aiProcess_TransformUVCoords step:
- *  Specifies which UV transformations are evaluated.
- *
- *  This is a bitwise combination of the AI_UVTRAFO_XXX flags (integer
- *  property, of course). By default all transformations are enabled 
- * (AI_UVTRAFO_ALL).
- */
-#define AI_CONFIG_PP_TUV_EVALUATE				\
-	"PP_TUV_EVALUATE"
-
-
-// ---------------------------------------------------------------------------
-/** @brief A hint to assimp to favour speed against import quality.
- *
- * Enabling this option may result in faster loading, but it needn't.
- * It represents just a hint to loaders and post-processing steps to use
- * faster code paths, if possible. 
- * This property is expected to be an integer, != 0 stands for true.
- * The default value is 0.
- */
-#define AI_CONFIG_FAVOUR_SPEED				\
- "FAVOUR_SPEED"
 
 #endif // !! AI_CONFIG_H_INC

@@ -44,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_JOINVERTICES_PROCESS
 
-// internal headers
 #include "JoinVerticesProcess.h"
 #include "ProcessHelper.h"
 
@@ -412,3 +412,5 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	}
 	return pMesh->mNumVertices;
 }
+
+#endif // !! ASSIMP_BUILD_NO_JOINVERTICES_PROCESS

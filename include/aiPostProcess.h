@@ -417,6 +417,46 @@ enum aiPostProcessSteps
 	aiProcess_FindInstances = 0x100000,
 
 	// -------------------------------------------------------------------------
+	/** <hr>A postprocessing step to reduce the number of meshes.
+	 *
+	 *  In fact, it will reduce the number of drawcalls.
+	 *
+	 *  This is a very effective optimization and is recommended to be used
+	 *  together with #aiProcess_OptimizeGraph, if possible. The flag is fully
+	 *  compatible with both #aiProcess_SplitLargeMeshes and #aiProcess_SortByPType.
+	*/
+	aiProcess_OptimizeMeshes  = 0x200000, 
+
+
+	// -------------------------------------------------------------------------
+	/** <hr>A postprocessing step to optimize the scene hierarchy. 
+	 *
+	 *  Nodes with no animations, bones, lights or cameras assigned are 
+	 *  collapsed and joined.
+	 *
+	 *  Node names can be lost during this step. If you use special 'tag nodes'
+	 *  to pass additional information through your content pipeline, use the
+	 *  <tt>#AI_CONFIG_PP_OG_EXCLUDE_LIST<7tt> setting to specify a list of node 
+	 *  names you want to be kept. Nodes matching one of the names in this list won't
+	 *  be touched or modified.
+	 *
+	 *  Use this flag with caution. Most simple files will be collapsed to a 
+	 *  single node, complex hierarchies are usually completely lost. That's not
+	 *  the right choice for editor environments, but probably a very effective
+	 *  optimization if you just want to get the model data, convert it to your
+	 *  own format and render it as fast as possible. 
+	 *
+	 *  This flag is designed to be used with #aiProcess_OptimizeMeshes for best
+	 *  results.
+	 *
+	 *  @note 'crappy' scenes with thousands of extremely small meshes packed
+	 *  in deeply nested nodes exist for almost all file formats.
+	 *  #aiProcess_OptimizeMeshes in combination with #aiProcess_OptimizeGraph 
+	 *  usually fixes them all and makes them renderable. 
+	*/
+	aiProcess_OptimizeGraph  = 0x400000, 
+
+	// -------------------------------------------------------------------------
 	/** <hr>This step flips all UV coordinates along the y-axis and adjusts
 	 * material settings and bitangents accordingly.
 	 * <br><b>Output UV coordinate system:</b>
@@ -433,7 +473,7 @@ enum aiPostProcessSteps
 	 * setting and boundles all conversions typically required for D3D-based
 	 * applications.
 	*/
-	aiProcess_FlipUVs = 0x80000000, /* don't change */
+	aiProcess_FlipUVs = 0x800000, 
 
 	// -------------------------------------------------------------------------
 	/** <hr>This step adjusts the output face winding order to be cw.
@@ -447,13 +487,11 @@ enum aiPostProcessSteps
 	 *  x1
 	 * @endcode
 	*/
-	aiProcess_FlipWindingOrder  = 0x40000000 /* don't change */
-
-
+	aiProcess_FlipWindingOrder  = 0x1000000
 
 	// aiProcess_GenEntityMeshes = 0x100000,
 	// aiProcess_OptimizeAnimations = 0x200000
-	// aiProcess_OptimizeNodes      = 0x400000
+	// aiProcess_FixTexturePaths = 0x200000
 };
 
 
@@ -547,6 +585,7 @@ enum aiPostProcessSteps
 	aiProcessPreset_TargetRealtime_Quality   |  \
 	aiProcess_FindInstances                  |  \
 	aiProcess_ValidateDataStructure          |  \
+	aiProcess_OptimizeMeshes                 |  \
 	0 )
 
 

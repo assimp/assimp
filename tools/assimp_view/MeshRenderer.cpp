@@ -85,6 +85,9 @@ int CMeshRenderer::DrawSorted(unsigned int iIndex,const aiMatrix4x4& mWorld)
 	AssetHelper::MeshHelper* pcHelper = g_pcAsset->apcMeshes[iIndex]; 
 	const aiMesh* pcMesh = g_pcAsset->pcScene->mMeshes[iIndex];
 
+	if (!pcHelper || !pcMesh || !pcHelper->piIB)
+		return -5;
+
 	if (pcMesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
 		return DrawUnsorted(iIndex);
 	if (pcMesh->HasBones())

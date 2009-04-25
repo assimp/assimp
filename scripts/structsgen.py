@@ -59,7 +59,7 @@ def restructure( match ):
     elif match.group("struct") == "C_ENUM ":
         type = "c_uint"
     else:
-        type = GetType(type[2:].upper(), '')
+        type = GetType(type[2:], '')
     if match.group("index"):
         type = type + "*" + match.group("index")
         
@@ -123,11 +123,11 @@ def Structify(fileName):
     fileName = os.path.basename(fileName)
     print fileName
     for r in rs:
-        name = r.group('name')[2:].upper()
+        name = r.group('name')[2:]
         desc = r.group('desc')
         
         # Skip some structs
-        if name == "FILEIO" or name == "FILE" or name == "LOCATEFROMASSIMPHEAP":
+        if name == "FileIO" or name == "File" or name == "locateFromAssimpHeap":
             continue
 
         text = r.group('code')
@@ -152,7 +152,7 @@ def Structify(fileName):
         # Whether it's selfreferencing: ex. struct Node { Node* parent; };
         selfreferencing = text.find('POINTER('+name+')') != -1
         
-        complex = name == "SCENE"
+        complex = name == "Scene"
         
         # Create description
         description = ""
@@ -176,7 +176,7 @@ def Structify(fileName):
         text = text.replace('$DESCRIPTION$', description)
         text = text.replace('$FIELDS$', fields)
         
-        if ((name == fileName.split('.')[0][2:].upper()) and (name != 'MATERIAL')) or name == "STRING":
+        if ((name.lower() == fileName.split('.')[0][2:].lower()) and (name != 'Material')) or name == "String":
             text = text.replace('$DEFINES$', defines)
         else:
             text = text.replace('$DEFINES$', '')

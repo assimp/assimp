@@ -11,7 +11,7 @@ import os
 #get a model out of assimp's test-data
 MODEL = os.path.join(os.path.dirname(__file__),
                      "..", "..",
-                     "test", "MDLFiles", "MDL3 (3DGS A4)", "minigun.MDL")
+                     "test", "models", "MDL", "MDL3 (3DGS A4)", "minigun.MDL")
 
 def main():
     scene = pyassimp.load(MODEL)
@@ -22,7 +22,6 @@ def main():
     
     #write some statistics
     print "SCENE:"
-    print "  flags:", ", ".join(scene.list_flags())
     print "  meshes:", len(scene.meshes)
     print "  materials:", len(scene.materials)
     print "  textures:", len(scene.textures)
@@ -31,6 +30,7 @@ def main():
     print "MESHES:"
     for index, mesh in enumerate(scene.meshes):
         print "  MESH", index+1
+        print "    material:", mesh.mMaterialIndex+1
         print "    vertices:", len(mesh.vertices)
         print "    first:", mesh.vertices[:3]
         print "    colors:", len(mesh.colors)
@@ -39,26 +39,29 @@ def main():
         print "    texture-coords 2:", len(tc[1]), "first:", tc[1][:3]
         print "    texture-coords 3:", len(tc[2]), "first:", tc[2][:3]
         print "    texture-coords 4:", len(tc[3]), "first:", tc[3][:3]
-        print "    uv-counts:", mesh.uvsize
-        print "    faces:", len(mesh.faces), "first:", mesh.faces[:3]
-        print "    bones:", len(mesh.bones), "first:", mesh.bones[:3]
+        print "    uv-component-count:", len(mesh.mNumUVComponents)
+        print "    faces:", len(mesh.faces), "first:", [f.indices for f in mesh.faces[:3]]
+        print "    bones:", len(mesh.bones), "first:", [b.mName for b in mesh.bones[:3]]
         print
-    
+
     print "MATERIALS:"
     for index, material in enumerate(scene.materials):
         print "  MATERIAL", index+1
-        for key, value in material.properties.iteritems():
-            print "    %s: %s" % (key, value)
+        properties = pyassimp.GetMaterialProperties(material)
+        for key in properties:
+            print "    %s: %s" % (key, properties[key])
     print
     
     print "TEXTURES:"
     for index, texture in enumerate(scene.textures):
         print "  TEXTURE", index+1
-        print "    width:", texture.width
-        print "    height:", texture.height
-        print "    hint:", texture.hint
-        print "    data (size):", len(texture.data)
-    
+        print "    width:", texture.mWidth
+        print "    height:", texture.mHeight
+        print "    hint:", texture.achFormatHint
+        print "    data (size):", texture.mWidth*texture.mHeight
+   
+    # Finally release the model
+    pyassimp.release(scene)
 
 if __name__ == "__main__":
     main()

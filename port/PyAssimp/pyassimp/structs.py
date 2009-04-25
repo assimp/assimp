@@ -3,7 +3,7 @@
 from ctypes import POINTER, c_int, c_uint, c_char, c_float, Structure, c_char_p, c_double, c_ubyte
 
 
-class MATRIX3X3(Structure):
+class Matrix3x3(Structure):
     """
     See 'aiMatrix3x3.h' for details.
     """ 
@@ -15,7 +15,7 @@ class MATRIX3X3(Structure):
             ("c1", c_float),("c2", c_float),("c3", c_float),
         ]
 
-class MATRIX4X4(Structure):
+class Matrix4x4(Structure):
     """
     See 'aiMatrix4x4.h' for details.
     """ 
@@ -28,7 +28,7 @@ class MATRIX4X4(Structure):
             ("d1", c_float),("d2", c_float),("d3", c_float),("d4", c_float),
         ]
 
-class FACE(Structure):
+class Face(Structure):
     """
     See 'aiMesh.h' for details.
     """ 
@@ -41,7 +41,7 @@ class FACE(Structure):
             ("mIndices", POINTER(c_uint)),
         ]
 
-class VERTEXWEIGHT(Structure):
+class VertexWeight(Structure):
     """
     See 'aiMesh.h' for details.
     """ 
@@ -55,7 +55,7 @@ class VERTEXWEIGHT(Structure):
             ("mWeight", c_float),
         ]
 
-class QUATERNION(Structure):
+class Quaternion(Structure):
     """
     See 'aiQuaternion.h' for details.
     """ 
@@ -66,7 +66,7 @@ class QUATERNION(Structure):
             ("w", c_float),("x", c_float),("y", c_float),("z", c_float),
         ]
 
-class TEXEL(Structure):
+class Texel(Structure):
     """
     See 'aiTexture.h' for details.
     """ 
@@ -75,7 +75,7 @@ class TEXEL(Structure):
             ("b", c_ubyte),("g", c_ubyte),("r", c_ubyte),("a", c_ubyte),
         ]
 
-class PLANE(Structure):
+class Plane(Structure):
     """
     See 'aiTypes.h' for details.
     """ 
@@ -85,7 +85,7 @@ class PLANE(Structure):
             ("a", c_float),("b", c_float),("c", c_float),("d", c_float),
         ]
 
-class COLOR3D(Structure):
+class Color3D(Structure):
     """
     See 'aiTypes.h' for details.
     """ 
@@ -95,7 +95,7 @@ class COLOR3D(Structure):
             ("r", c_float),("g", c_float),("b", c_float),
         ]
 
-class COLOR4D(Structure):
+class Color4D(Structure):
     """
     See 'aiTypes.h' for details.
     """ 
@@ -105,7 +105,7 @@ class COLOR4D(Structure):
             ("r", c_float),("g", c_float),("b", c_float),("a", c_float),
         ]
 
-class STRING(Structure):
+class String(Structure):
     """
     See 'aiTypes.h' for details.
     """ 
@@ -120,7 +120,7 @@ class STRING(Structure):
             ("data", c_char*MAXLEN),
         ]
 
-class MEMORYINFO(Structure):
+class MemoryInfo(Structure):
     """
     See 'aiTypes.h' for details.
     """ 
@@ -151,7 +151,7 @@ class MEMORYINFO(Structure):
             ("total", c_uint),
         ]
 
-class VECTOR2D(Structure):
+class Vector2D(Structure):
     """
     See 'aiVector2D.h' for details.
     """ 
@@ -161,7 +161,7 @@ class VECTOR2D(Structure):
             ("x", c_float),("y", c_float),
         ]
 
-class VECTOR3D(Structure):
+class Vector3D(Structure):
     """
     See 'aiVector3D.h' for details.
     """ 
@@ -171,13 +171,13 @@ class VECTOR3D(Structure):
             ("x", c_float),("y", c_float),("z", c_float),
         ]
 
-class NODE(Structure):
+class Node(Structure):
     """
     See 'aiScene.h' for details.
     """ 
 
 
-NODE._fields_ = [
+Node._fields_ = [
             #The name of the node.
             #   #The name might be empty (length of zero) but all nodes which
             #need to be accessed afterwards by bones or anims are usually named.
@@ -191,19 +191,19 @@ NODE._fields_ = [
             #this text. You should be able to handle stuff like whitespace, tabs,
             #linefeeds, quotation marks, ampersands, ... .
             #
-            ("mName", STRING),
+            ("mName", String),
             
             #The transformation relative to the node's parent.#
-            ("mTransformation", MATRIX4X4),
+            ("mTransformation", Matrix4x4),
             
             #Parent node. NULL if this node is the root node.#
-            ("mParent", POINTER(NODE)),
+            ("mParent", POINTER(Node)),
             
             #The number of child nodes of this node.#
             ("mNumChildren", c_uint),
             
             #The child nodes of this node. NULL if mNumChildren is 0.#
-            ("mChildren", POINTER(POINTER(NODE))),
+            ("mChildren", POINTER(POINTER(Node))),
             
             #The number of meshes of this node.#
             ("mNumMeshes", c_uint),
@@ -212,7 +212,7 @@ NODE._fields_ = [
             ("mMeshes", POINTER(c_uint)),
         ]
 
-class VECTORKEY(Structure):
+class VectorKey(Structure):
     """
     See 'aiAnim.h' for details.
     """ 
@@ -221,10 +221,10 @@ class VECTORKEY(Structure):
             # The time of this key
             ("mTime", c_double),
             # The value of this key
-            ("mValue", VECTOR3D),
+            ("mValue", Vector3D),
         ]
 
-class QUATKEY(Structure):
+class QuatKey(Structure):
     """
     See 'aiAnim.h' for details.
     """ 
@@ -233,10 +233,10 @@ class QUATKEY(Structure):
             # The time of this key
             ("mTime", c_double),
             # The value of this key
-            ("mValue", QUATERNION),
+            ("mValue", Quaternion),
         ]
 
-class NODEANIM(Structure):
+class NodeAnim(Structure):
     """
     See 'aiAnim.h' for details.
     """ 
@@ -245,7 +245,7 @@ class NODEANIM(Structure):
             #The name of the node affected by this animation. The node
             # must exist and it must be unique.
             #
-            ("mNodeName", STRING),
+            ("mNodeName", String),
             
             #The number of position keys#
             ("mNumPositionKeys", c_uint),
@@ -255,7 +255,7 @@ class NODEANIM(Structure):
             #   #If there are position keys, there will also be at least one
             #scaling and one rotation key.
             #
-            ("mPositionKeys", POINTER(VECTORKEY)),
+            ("mPositionKeys", POINTER(VectorKey)),
             
             #The number of rotation keys#
             ("mNumRotationKeys", c_uint),
@@ -266,7 +266,7 @@ class NODEANIM(Structure):
             #   #If there are rotation keys, there will also be at least one
             #scaling and one position key.
             #
-            ("mRotationKeys", POINTER(QUATKEY)),
+            ("mRotationKeys", POINTER(QuatKey)),
             
             
             #The number of scaling keys#
@@ -277,7 +277,7 @@ class NODEANIM(Structure):
             #   #If there are scaling keys, there will also be at least one
             #position and one rotation key.
             #
-            ("mScalingKeys", POINTER(VECTORKEY)),
+            ("mScalingKeys", POINTER(VectorKey)),
             
             
             #Defines how the animation behaves before the first
@@ -295,7 +295,7 @@ class NODEANIM(Structure):
             ("mPostState", c_uint),
         ]
 
-class ANIMATION(Structure):
+class Animation(Structure):
     """
     See 'aiAnim.h' for details.
     """ 
@@ -305,7 +305,7 @@ class ANIMATION(Structure):
             # exported from does support only a single animation channel, this
             # name is usually empty (length is zero).
             #
-            ("mName", STRING),
+            ("mName", String),
             
             #Duration of the animation in ticks.
             #
@@ -323,10 +323,10 @@ class ANIMATION(Structure):
             #The node animation channels. Each channel affects a single node.
             # The array is mNumChannels in size.
             #
-            ("mChannels", POINTER(POINTER(NODEANIM))),
+            ("mChannels", POINTER(POINTER(NodeAnim))),
         ]
 
-class CAMERA(Structure):
+class Camera(Structure):
     """
     See 'aiCamera.h' for details.
     """ 
@@ -338,13 +338,13 @@ class CAMERA(Structure):
             # This node specifies the position of the camera in the scene
             # hierarchy and can be animated.
             #
-            ("mName", STRING),
+            ("mName", String),
             
             #Position of the camera relative to the coordinate space
             # defined by the corresponding node.
             #   # The default value is 0|0|0.
             #
-            ("mPosition", VECTOR3D),
+            ("mPosition", Vector3D),
             
             
             #'Up' - vector of the camera coordinate system relative to
@@ -354,7 +354,7 @@ class CAMERA(Structure):
             # The default value is 0|1|0. The vector
             # may be normalized, but it needn't.
             #
-            ("mUp", VECTOR3D),
+            ("mUp", Vector3D),
             
             
             #'LookAt' - vector of the camera coordinate system relative to
@@ -363,7 +363,7 @@ class CAMERA(Structure):
             # The default value is 0|0|1. The vector
             # may be normalized, but it needn't.
             #
-            ("mLookAt", VECTOR3D),
+            ("mLookAt", Vector3D),
             
             
             #Half horizontal field of view angle, in radians.
@@ -398,7 +398,7 @@ class CAMERA(Structure):
             ("mAspect", c_float),
         ]
 
-class LIGHT(Structure):
+class Light(Structure):
     """
     See 'aiLight.h' for details.
     """ 
@@ -410,7 +410,7 @@ class LIGHT(Structure):
             # This node specifies the position of the light in the scene
             # hierarchy and can be animated.
             #
-            ("mName", STRING),
+            ("mName", String),
             
             #The type of the light source.
             #   #aiLightSource_UNDEFINED is not a valid value for this member.
@@ -421,14 +421,14 @@ class LIGHT(Structure):
             # transformation of the node corresponding to the light.
             #   # The position is undefined for directional lights.
             #
-            ("mPosition", VECTOR3D),
+            ("mPosition", Vector3D),
             
             #Direction of the light source in space. Relative to the
             # transformation of the node corresponding to the light.
             #   # The direction is undefined for point lights. The vector
             # may be normalized, but it needn't.
             #
-            ("mDirection", VECTOR3D),
+            ("mDirection", Vector3D),
             
             #Constant light attenuation factor.
             #   # The intensity of the light source at a given distance 'd' from
@@ -469,14 +469,14 @@ class LIGHT(Structure):
             # material color to obtain the final color that contributes
             # to the diffuse shading term.
             #
-            ("mColorDiffuse", COLOR3D),
+            ("mColorDiffuse", Color3D),
             
             #Specular color of the light source
             #   # The specular light color is multiplied with the specular
             # material color to obtain the final color that contributes
             # to the specular shading term.
             #
-            ("mColorSpecular", COLOR3D),
+            ("mColorSpecular", Color3D),
             
             #Ambient color of the light source
             #   # The ambient light color is multiplied with the ambient
@@ -485,7 +485,7 @@ class LIGHT(Structure):
             # this value it, is just a remaining of the fixed-function pipeline
             # that is still supported by quite many file formats.
             #
-            ("mColorAmbient", COLOR3D),
+            ("mColorAmbient", Color3D),
             
             #Inner angle of a spot light's light cone.
             #   # The spot light has maximum influence on objects inside this
@@ -506,7 +506,7 @@ class LIGHT(Structure):
             ("mAngleOuterCone", c_float),
         ]
 
-class UVTRANSFORM(Structure):
+class UVTransform(Structure):
     """
     See 'aiMaterial.h' for details.
     """ 
@@ -515,12 +515,12 @@ class UVTRANSFORM(Structure):
             #Translation on the u and v axes.
             #   # The default value is (0|0).
             #
-            ("mTranslation", VECTOR2D),
+            ("mTranslation", Vector2D),
             
             #Scaling on the u and v axes.
             #   # The default value is (1|1).
             #
-            ("mScaling", VECTOR2D),
+            ("mScaling", Vector2D),
             
             #Rotation - in counter-clockwise direction.
             #   # The rotation angle is specified in radians. The
@@ -530,7 +530,7 @@ class UVTRANSFORM(Structure):
             ("mRotation", c_float),
         ]
 
-class MATERIALPROPERTY(Structure):
+class MaterialProperty(Structure):
     """
     See 'aiMaterial.h' for details.
     """ 
@@ -539,7 +539,7 @@ class MATERIALPROPERTY(Structure):
             #Specifies the name of the property (key)
             ## Keys are case insensitive.
             #
-            ("mKey", STRING),
+            ("mKey", String),
             
             #Textures: Specifies the exact usage semantic.
             #
@@ -572,14 +572,14 @@ class MATERIALPROPERTY(Structure):
             ("mData", POINTER(c_char)),
         ]
 
-class MATERIAL(Structure):
+class Material(Structure):
     """
     See 'aiMaterial.h' for details.
     """ 
 
     _fields_ = [
             #List of all material properties loaded.#
-            ("mProperties", POINTER(POINTER(MATERIALPROPERTY))),
+            ("mProperties", POINTER(POINTER(MaterialProperty))),
             
             #Number of properties in the data base#
             ("mNumProperties", c_uint),
@@ -588,26 +588,26 @@ class MATERIAL(Structure):
             ("mNumAllocated", c_uint),
         ]
 
-class BONE(Structure):
+class Bone(Structure):
     """
     See 'aiMesh.h' for details.
     """ 
 
     _fields_ = [
             # The name of the bone.
-            ("mName", STRING),
+            ("mName", String),
             
             # The number of vertices affected by this bone
             ("mNumWeights", c_uint),
             
             # The vertices affected by this bone
-            ("mWeights", POINTER(VERTEXWEIGHT)),
+            ("mWeights", POINTER(VertexWeight)),
             
             # Matrix that transforms from mesh space to bone space in bind pose
-            ("mOffsetMatrix", MATRIX4X4),
+            ("mOffsetMatrix", Matrix4x4),
         ]
 
-class MESH(Structure):
+class Mesh(Structure):
     """
     See 'aiMesh.h' for details.
     """ 
@@ -637,7 +637,7 @@ class MESH(Structure):
             #This array is always present in a mesh. The array is
             #mNumVertices in size.
             #
-            ("mVertices", POINTER(VECTOR3D)),
+            ("mVertices", POINTER(Vector3D)),
             
             #Vertex normals.
             #The array contains normalized vectors, NULL if not present.
@@ -657,7 +657,7 @@ class MESH(Structure):
             #However, this needn't apply for normals that have been taken
             #  directly from the model file.
             #
-            ("mNormals", POINTER(VECTOR3D)),
+            ("mNormals", POINTER(Vector3D)),
             
             #Vertex tangents.
             #The tangent of a vertex points in the direction of the positive
@@ -671,7 +671,7 @@ class MESH(Structure):
             #contains bitangents (the bitangent is just the cross product of
             #tangent and normal vectors).
             #
-            ("mTangents", POINTER(VECTOR3D)),
+            ("mTangents", POINTER(Vector3D)),
             
             #Vertex bitangents.
             #The bitangent of a vertex points in the direction of the positive
@@ -680,20 +680,20 @@ class MESH(Structure):
             #@note If the mesh contains tangents, it automatically also contains
             #bitangents.
             #
-            ("mBitangents", POINTER(VECTOR3D)),
+            ("mBitangents", POINTER(Vector3D)),
             
             #Vertex color sets.
             #A mesh may contain 0 to #AI_MAX_NUMBER_OF_COLOR_SETS vertex
             #colors per vertex. NULL if not present. Each array is
             #mNumVertices in size if present.
             #
-            ("mColors", POINTER(COLOR4D)*AI_MAX_NUMBER_OF_COLOR_SETS),
+            ("mColors", POINTER(Color4D)*AI_MAX_NUMBER_OF_COLOR_SETS),
             
             #Vertex texture coords, also known as UV channels.
             #A mesh may contain 0 to AI_MAX_NUMBER_OF_TEXTURECOORDS per
             #vertex. NULL if not present. The array is mNumVertices in size.
             #
-            ("mTextureCoords", POINTER(VECTOR3D)*AI_MAX_NUMBER_OF_TEXTURECOORDS),
+            ("mTextureCoords", POINTER(Vector3D)*AI_MAX_NUMBER_OF_TEXTURECOORDS),
             
             #Specifies the number of components for a given UV channel.
             #Up to three channels are supported (UVW, for accessing volume
@@ -710,7 +710,7 @@ class MESH(Structure):
             #in mNumFaces. If the AI_SCENE_FLAGS_NON_VERBOSE_FORMAT
             #is NOT set each face references an unique set of vertices.
             #
-            ("mFaces", POINTER(FACE)),
+            ("mFaces", POINTER(Face)),
             
             #The number of bones this mesh contains.
             #Can be 0, in which case the mBones array is NULL.
@@ -721,7 +721,7 @@ class MESH(Structure):
             #A bone consists of a name by which it can be found in the
             #frame hierarchy and a set of vertex weights.
             #
-            ("mBones", POINTER(POINTER(BONE))),
+            ("mBones", POINTER(POINTER(Bone))),
             
             #The material used by this mesh.
             #A mesh does use only a single material. If an imported model uses
@@ -731,7 +731,7 @@ class MESH(Structure):
             ("mMaterialIndex", c_uint),
         ]
 
-class TEXTURE(Structure):
+class Texture(Structure):
     """
     See 'aiTexture.h' for details.
     """ 
@@ -772,20 +772,20 @@ class TEXTURE(Structure):
             #buffer of size mWidth containing the compressed texture
             #data. Good luck, have fun!
             #
-            ("pcData", POINTER(TEXEL)),
+            ("pcData", POINTER(Texel)),
         ]
 
-class RAY(Structure):
+class Ray(Structure):
     """
     See 'aiTypes.h' for details.
     """ 
 
     _fields_ = [
             # Position and direction of the ray
-            ("pos", VECTOR3D),("dir", VECTOR3D),
+            ("pos", Vector3D),("dir", Vector3D),
         ]
 
-class SCENE(Structure):
+class Scene(Structure):
     """
     See 'aiScene.h' for details.
     """ 
@@ -812,7 +812,7 @@ class SCENE(Structure):
             #Presence of further nodes depends on the format and content
             #of the imported file.
             #
-            ("mRootNode", POINTER(NODE)),
+            ("mRootNode", POINTER(Node)),
             
             
             
@@ -825,7 +825,7 @@ class SCENE(Structure):
             #AI_SCENE_FLAGS_INCOMPLETE flag is not set there will always
             #be at least ONE material.
             #
-            ("mMeshes", POINTER(POINTER(MESH))),
+            ("mMeshes", POINTER(POINTER(Mesh))),
             
             
             
@@ -839,7 +839,7 @@ class SCENE(Structure):
             #AI_SCENE_FLAGS_INCOMPLETE flag is not set there will always
             #be at least ONE material.
             #
-            ("mMaterials", POINTER(POINTER(MATERIAL))),
+            ("mMaterials", POINTER(POINTER(Material))),
             
             
             
@@ -850,7 +850,7 @@ class SCENE(Structure):
             #   #All animations imported from the given file are listed here.
             #The array is mNumAnimations in size.
             #
-            ("mAnimations", POINTER(POINTER(ANIMATION))),
+            ("mAnimations", POINTER(POINTER(Animation))),
             
             
             
@@ -863,7 +863,7 @@ class SCENE(Structure):
             #An example is Quake's MDL format (which is also used by
             #some GameStudio versions)
             #
-            ("mTextures", POINTER(POINTER(TEXTURE))),
+            ("mTextures", POINTER(POINTER(Texture))),
             
             
             #The number of light sources in the scene. Light sources
@@ -876,7 +876,7 @@ class SCENE(Structure):
             #All light sources imported from the given file are
             #listed here. The array is mNumLights in size.
             #
-            ("mLights", POINTER(POINTER(LIGHT))),
+            ("mLights", POINTER(POINTER(Light))),
             
             
             #The number of cameras in the scene. Cameras
@@ -891,5 +891,5 @@ class SCENE(Structure):
             #array (if existing) is the default camera view into
             #the scene.
             #
-            ("mCameras", POINTER(POINTER(CAMERA))),
+            ("mCameras", POINTER(POINTER(Camera))),
         ]

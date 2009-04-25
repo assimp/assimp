@@ -54,9 +54,9 @@ def search_library():
                 pass
             else:
                 #Library found!
-                load.restype = POINTER(structs.SCENE)
+                load.restype = POINTER(structs.Scene)
                 
-                candidates.append((library, load, release))
+                candidates.append((library, load, release, dll))
     
     if not candidates:
         #no library found

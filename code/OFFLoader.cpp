@@ -203,6 +203,9 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 	aiColor4D clr(0.6f,0.6f,0.6f,1.0f);
 	pcMat->AddProperty(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
 	pScene->mMaterials[0] = pcMat;
+
+	const int twosided =1;
+	pcMat->AddProperty(&twosided,1,AI_MATKEY_TWOSIDED);
 }
 
 #endif // !! ASSIMP_BUILD_NO_OFF_IMPORTER

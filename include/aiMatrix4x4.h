@@ -157,7 +157,6 @@ public:
 	void FromEulerAnglesXYZ(float x, float y, float z);
 	void FromEulerAnglesXYZ(const aiVector3D& blubb);
 
-
 public:
 	// -------------------------------------------------------------------
 	/** @brief Returns a rotation matrix for a rotation around the x axis
@@ -208,7 +207,6 @@ public:
 	 *  @return Reference to the output matrix
 	 */
 	static aiMatrix4x4& Scaling( const aiVector3D& v, aiMatrix4x4& out);
-
 
 	// -------------------------------------------------------------------
 	/** @brief A function for creating a rotation matrix that rotates a

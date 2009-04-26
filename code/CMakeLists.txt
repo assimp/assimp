@@ -95,6 +95,11 @@ SOURCE_GROUP(DXF FILES
 	DXFLoader.h
 )
 
+SOURCE_GROUP(CSM FILES
+	CSMLoader.cpp
+	CSMLoader.h
+)
+
 SOURCE_GROUP(HMP FILES
 	HMPFileData.h
 	HMPLoader.cpp
@@ -380,6 +385,8 @@ ADD_LIBRARY( assimp SHARED
 	ConvertToLHProcess.h
 	DXFLoader.cpp
 	DXFLoader.h
+	CSMLoader.cpp
+	CSMLoader.h
 	DefaultIOStream.cpp
 	DefaultIOStream.h
 	DefaultIOSystem.cpp

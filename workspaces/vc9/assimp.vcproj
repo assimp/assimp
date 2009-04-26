@@ -1910,6 +1910,14 @@
 				<Filter
 					Name="csm"
 					>
+					<File
+						RelativePath="..\..\code\CSMLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\CSMLoader.h"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="unreal"

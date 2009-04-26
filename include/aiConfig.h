@@ -520,20 +520,6 @@ enum aiComponent
 #define AI_CONFIG_IMPORT_MD5_NO_ANIM_AUTOLOAD			\
 	"IMPORT_MD5_NO_ANIM_AUTOLOAD"
 
-#if 0
-// ---------------------------------------------------------------------------
-/** @brief Specifies the shape of the scene returned by the CSM format loader.
- * 
- * If this property is set to 1, the loader tries to build a hierarchy from
- * the capture points laoded from the file. A dummy mesh representing the
- * recorded human is build. Otherwise, no meshes are returned, there's just
- * a single root node with several children. These children represent the
- * capture points, their translation channel is absolute.
- * Property type: integer. Default value: 1
- */
-#define AI_CONFIG_IMPORT_CSM_BUILD_HIERARCHY	"imp.csm.mkhier"
-#endif
-
 // ---------------------------------------------------------------------------
 /** @brief Defines the begin of the time range for which the LWS loader
  *    evaluates animations and computes aiNodeAnim's.

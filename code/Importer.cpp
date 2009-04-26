@@ -143,9 +143,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_TERRAGEN_IMPORTER
 #	include "TerragenLoader.h"
 #endif
-//#ifndef AI_BUILD_NO_CSM_IMPORTER
-//#	include "CSMLoader.h"
-//#endif
+#ifndef AI_BUILD_NO_CSM_IMPORTER
+#	include "CSMLoader.h"
+#endif
 #ifndef AI_BUILD_NO_3D_IMPORTER
 #	include "UnrealLoader.h"
 #endif
@@ -351,9 +351,9 @@ Importer::Importer()
 #if (!defined AI_BUILD_NO_TERRAGEN_IMPORTER)
 	pimpl->mImporter.push_back( new TerragenImporter());
 #endif
-//#if (!defined AI_BUILD_NO_CSM_IMPORTER)
-//	mImporter.push_back( new CSMImporter());
-//#endif
+#if (!defined AI_BUILD_NO_CSM_IMPORTER)
+	pimpl->mImporter.push_back( new CSMImporter());
+#endif
 #if (!defined AI_BUILD_NO_3D_IMPORTER)
 	pimpl->mImporter.push_back( new UnrealImporter());
 #endif

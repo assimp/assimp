@@ -1,5 +1,3 @@
-/** Implementation of a little class to construct a dummy mesh for a skeleton */
-
 /*
 Open Asset Import Library (ASSIMP)
 ----------------------------------------------------------------------
@@ -40,6 +38,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
+/** @file  SkeletonMeshBuilder.cpp
+ *  @brief Implementation of a little class to construct a dummy mesh for a skeleton 
+ */
+
 #include "AssimpPCH.h"
 #include "../include/aiScene.h"
 #include "SkeletonMeshBuilder.h"
@@ -48,7 +50,7 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // The constructor processes the given scene and adds a mesh there. 
-SkeletonMeshBuilder::SkeletonMeshBuilder( aiScene* pScene, aiNode* root)
+SkeletonMeshBuilder::SkeletonMeshBuilder( aiScene* pScene, aiNode* root, bool bKnobsOnly)
 {
 	// nothing to do if there's mesh data already present at the scene
 	if( pScene->mNumMeshes > 0 || pScene->mRootNode == NULL)
@@ -56,6 +58,8 @@ SkeletonMeshBuilder::SkeletonMeshBuilder( aiScene* pScene, aiNode* root)
 
 	if (!root)
 		root = pScene->mRootNode;
+
+	mKnobsOnly = bKnobsOnly;
 
 	// build some faces around each node 
 	CreateGeometry( root );
@@ -83,7 +87,7 @@ void SkeletonMeshBuilder::CreateGeometry( const aiNode* pNode)
 	const unsigned int vertexStartIndex = mVertices.size();
 
 	// now build the geometry. 
-	if( pNode->mNumChildren > 0)
+	if( pNode->mNumChildren > 0 && !mKnobsOnly)
 	{
 		// If the node has children, we build little pointers to each of them
 		for( unsigned int a = 0; a < pNode->mNumChildren; a++)
@@ -103,7 +107,7 @@ void SkeletonMeshBuilder::CreateGeometry( const aiNode* pNode)
 			aiVector3D front = (up ^ orth).Normalize();
 			aiVector3D side = (front ^ up).Normalize();
 
-	  		unsigned int localVertexStart = mVertices.size();
+			unsigned int localVertexStart = mVertices.size();
 			mVertices.push_back( -front * distanceToChild * 0.1f);
 			mVertices.push_back( childpos);
 			mVertices.push_back( -side * distanceToChild * 0.1f);
@@ -222,10 +226,8 @@ aiMesh* SkeletonMeshBuilder::CreateMesh()
 		outface.mIndices[1] = inface.mIndices[1];
 		outface.mIndices[2] = inface.mIndices[2];
 
-		// Compute per-face normals ... we don't want the bones to be
-		// smoothed ... they're built to visualize the skeleton,
-		// so it's good if there's a visual difference to the rest
-		// of the geometry
+		// Compute per-face normals ... we don't want the bones to be smoothed ... they're built to visualize
+		// the skeleton, so it's good if there's a visual difference to the rest of the geometry
 		aiVector3D nor = ((mVertices[inface.mIndices[2]] - mVertices[inface.mIndices[0]]) ^ 
 			(mVertices[inface.mIndices[1]] - mVertices[inface.mIndices[0]]));
 

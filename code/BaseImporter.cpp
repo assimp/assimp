@@ -108,11 +108,12 @@ void BaseImporter::SetupProperties(const Importer* pImp)
 	unsigned int		numTokens,
 	unsigned int		searchBytes /* = 200 */)
 {
-	ai_assert(NULL != tokens && 0 != numTokens && NULL != pIOHandler && 0 != searchBytes);
+	ai_assert(NULL != tokens && 0 != numTokens && 0 != searchBytes);
+	if (!pIOHandler)
+		return false;
 
 	boost::scoped_ptr<IOStream> pStream (pIOHandler->Open(pFile));
-	if (pStream.get() )
-	{
+	if (pStream.get() )	{
 		// read 200 characters from the file
 		boost::scoped_array<char> _buffer (new char[searchBytes+1 /* for the '\0' */]);
 		char* buffer = _buffer.get();
@@ -126,18 +127,17 @@ void BaseImporter::SetupProperties(const Importer* pImp)
 		// It is not a proper handling of unicode files here ...
 		// ehm ... but it works in most cases.
 		char* cur = buffer,*cur2 = buffer,*end = &buffer[read];
-		while (cur != end)
-		{
-			if (*cur)*cur2++ = *cur;
+		while (cur != end)	{
+			if (*cur)
+				*cur2++ = *cur;
 			++cur;
 		}
 		*cur2 = '\0';
 
-		for (unsigned int i = 0; i < numTokens;++i)
-		{
+		for (unsigned int i = 0; i < numTokens;++i)	{
 			ai_assert(NULL != tokens[i]);
-			if (::strstr(buffer,tokens[i]))
-			{
+
+			if (::strstr(buffer,tokens[i]))	{
 				DefaultLogger::get()->debug(std::string("Found positive match for header keyword: ") + tokens[i]);
 				return true;
 			}
@@ -193,12 +193,15 @@ void BaseImporter::SetupProperties(const Importer* pImp)
 /* static */ bool BaseImporter::CheckMagicToken(IOSystem* pIOHandler, const std::string& pFile, 
 	const void* _magic, unsigned int num, unsigned int offset, unsigned int size)
 {
-	ai_assert(size <= 16 && _magic && num && pIOHandler);
+	ai_assert(size <= 16 && _magic);
+
+	if (!pIOHandler)
+		return false;
 
 	const char* magic = (const char*)_magic;
 	boost::scoped_ptr<IOStream> pStream (pIOHandler->Open(pFile));
-	if (pStream.get() )
-	{
+	if (pStream.get() )	{
+
 		// skip to offset
 		pStream->Seek(offset,aiOrigin_SET);
 

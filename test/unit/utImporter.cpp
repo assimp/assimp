@@ -13,7 +13,8 @@ bool TestPlugin :: CanRead( const std::string& pFile,
 {
 	std::string::size_type pos = pFile.find_last_of('.');
 	// no file extension - can't read
-	if( pos == std::string::npos)return false;
+	if( pos == std::string::npos)
+		return false;
 	std::string extension = pFile.substr( pos);
 
 	// todo ... make case-insensitive
@@ -80,6 +81,9 @@ void ImporterTest :: testPluginInterface (void)
 	CPPUNIT_ASSERT(pImp->IsExtensionSupported(".mac"));
 	CPPUNIT_ASSERT(pImp->IsExtensionSupported(".linux"));
 	CPPUNIT_ASSERT(pImp->IsExtensionSupported(".windows"));
+	CPPUNIT_ASSERT(pImp->IsExtensionSupported(".x")); /* x and 3ds must be available of course */
+	CPPUNIT_ASSERT(pImp->IsExtensionSupported(".3ds"));
+	CPPUNIT_ASSERT(!pImp->IsExtensionSupported("."));
 
 	TestPlugin* p = (TestPlugin*) pImp->FindLoader(".windows");
 	CPPUNIT_ASSERT(NULL != p);

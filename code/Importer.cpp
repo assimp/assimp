@@ -845,13 +845,22 @@ bool Importer::IsExtensionSupported(const char* szExtension)
 }
 
 // ------------------------------------------------------------------------------------------------
+// Find a loader plugin for a given file extension
 BaseImporter* Importer::FindLoader (const char* _szExtension)
 {
-	const std::string szExtension(_szExtension);
-	for (std::vector<BaseImporter*>::const_iterator i =  pimpl->mImporter.begin();i != pimpl->mImporter.end();++i)
-	{
+	std::string ext(_szExtension);
+	if (ext.length() <= 1)
+		return NULL;
+
+	if (ext[0] != '.') {
+		// trailing dot is explicitly requested in the doc but we don't care for now ..
+		ext.erase(0,1);
+	}
+
+	for (std::vector<BaseImporter*>::const_iterator i =  pimpl->mImporter.begin();i != pimpl->mImporter.end();++i)	{
+
 		// pass the file extension to the CanRead(..,NULL)-method
-		if ((*i)->CanRead(szExtension,NULL,false))
+		if ((*i)->CanRead(ext,NULL,false))
 			return *i;
 	}
 	return NULL;

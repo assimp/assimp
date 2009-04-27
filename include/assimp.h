@@ -147,8 +147,8 @@ ASSIMP_API void aiGetExtensionList(C_STRUCT aiString* szOut);
 
 // ---------------------------------------------------------------------------
 /** Get the storage required by an imported asset
- * \param pIn Input asset.
- * \param in Data structure to be filled. 
+ * @param pIn Input asset.
+ * @param in Data structure to be filled. 
  */
 // ---------------------------------------------------------------------------
 ASSIMP_API void aiGetMemoryRequirements(const C_STRUCT aiScene* pIn,
@@ -160,23 +160,36 @@ ASSIMP_API void aiGetMemoryRequirements(const C_STRUCT aiScene* pIn,
  *  #Assimp::Importer::SetPropertyInteger(). In the C-API properties are shared by
  *  all imports. It is not possible to specify them per asset.
  *
- * \param szName Name of the configuration property to be set. All constants
+ * @param szName Name of the configuration property to be set. All constants
  *   are defined in the aiConfig.h header file.
- * \param value New value for the property
+ * @param value New value for the property
  */
 // ---------------------------------------------------------------------------
 ASSIMP_API void aiSetImportPropertyInteger(const char* szName, int value);
 
 // ---------------------------------------------------------------------------
-/**  @see aiSetImportPropertyInteger()
+/** @see aiSetImportPropertyInteger()
  */
 ASSIMP_API void aiSetImportPropertyFloat(const char* szName, float value);
 
 // ---------------------------------------------------------------------------
-/**  @see aiSetImportPropertyInteger()
+/** @see aiSetImportPropertyInteger()
  */
 ASSIMP_API void aiSetImportPropertyString(const char* szName,
 	const C_STRUCT aiString* st);
+
+// ---------------------------------------------------------------------------
+/** @see aiQuaternion(const aiMatrix3x3& pRotMatrix)
+ */
+void aiCreateQuaternionFromMatrix(C_STRUCT aiQuaternion* quat,const C_STRUCT aiMatrix3x3* mat);
+
+// ---------------------------------------------------------------------------
+/** @see aiMatrix4x4::Decompose (aiVector3D&, aiQuaternion&, aiVector3D&) const;
+ */
+void aiDecomposeMatrix(const C_STRUCT aiMatrix4x4* mat,
+	C_STRUCT aiVector3D* scaling, 
+	C_STRUCT aiQuaternion* rotation,
+	C_STRUCT aiVector3D* position);
 
 
 #ifdef __cplusplus

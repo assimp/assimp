@@ -366,3 +366,16 @@ ASSIMP_API void aiSetImportPropertyString(const char* szName,
 	SetGenericProperty<std::string>(gStringProperties,szName,
 		std::string( st->data ),NULL);
 }
+
+// ------------------------------------------------------------------------------------------------
+void aiCreateQuaternionFromMatrix(aiQuaternion* quat,const aiMatrix3x3* mat)
+{
+	*quat = aiQuaternion(*mat);
+}
+
+// ------------------------------------------------------------------------------------------------
+void aiDecomposeMatrix(const aiMatrix4x4* mat, aiVector3D* scaling,
+	aiQuaternion* rotation,aiVector3D* position)
+{
+	mat->Decompose(*scaling,*rotation,*position);
+}

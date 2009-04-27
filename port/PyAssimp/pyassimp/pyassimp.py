@@ -96,12 +96,19 @@ class aiTuple:
             return self._GetData(c)
             
     def __getitem__(self, index):
+        if isinstance(index, slice):
+            indices = index.indices(len(self))
+            return [self.__getitem__(i) for i in range(*indices)]
+            
         if index < 0 or index >= self._GetSize():
             raise IndexError("aiTuple index out of range")
         return self._GetData(index)
         
     def __iter__(self):
         return self
+        
+    def __len__(self):
+        return int(self._GetSize())
         
     def __str__(self):
         return str([x for x in self])
@@ -218,7 +225,7 @@ def aiGetMaterialString(material, key):
                                             byref(out))
                                             
     if (r != AI_SUCCESS):    
-        raise AssimpError("aiGetMaterialFloatArray failed!")
+        raise AssimpError("aiGetMaterialString failed!")
         
     return str(out.data)
  
@@ -249,3 +256,16 @@ def GetMaterialProperties(material):
         result[key] = value
 
     return result
+    
+    
+def aiDecomposeMatrix(matrix):
+    if not isinstance(matrix, structs.Matrix4x4):
+        raise AssimpError("aiDecomposeMatrix failed: Not a aiMatrix4x4!")
+    
+    scaling = structs.Vector3D()
+    rotation = structs.Quaternion()
+    position = structs.Vector3D()
+    
+    from ctypes import byref, pointer
+    _assimp_lib.dll.aiDecomposeMatrix(pointer(matrix), byref(scaling), byref(rotation), byref(position))
+    return scaling._init(), rotation._init(), position._init()

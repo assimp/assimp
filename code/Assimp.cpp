@@ -368,13 +368,13 @@ ASSIMP_API void aiSetImportPropertyString(const char* szName,
 }
 
 // ------------------------------------------------------------------------------------------------
-void aiCreateQuaternionFromMatrix(aiQuaternion* quat,const aiMatrix3x3* mat)
+ASSIMP_API void aiCreateQuaternionFromMatrix(aiQuaternion* quat,const aiMatrix3x3* mat)
 {
 	*quat = aiQuaternion(*mat);
 }
 
 // ------------------------------------------------------------------------------------------------
-void aiDecomposeMatrix(const aiMatrix4x4* mat, aiVector3D* scaling,
+ASSIMP_API void aiDecomposeMatrix(const aiMatrix4x4* mat, aiVector3D* scaling,
 	aiQuaternion* rotation,aiVector3D* position)
 {
 	mat->Decompose(*scaling,*rotation,*position);

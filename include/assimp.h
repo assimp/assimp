@@ -181,12 +181,12 @@ ASSIMP_API void aiSetImportPropertyString(const char* szName,
 // ---------------------------------------------------------------------------
 /** @see aiQuaternion(const aiMatrix3x3& pRotMatrix)
  */
-void aiCreateQuaternionFromMatrix(C_STRUCT aiQuaternion* quat,const C_STRUCT aiMatrix3x3* mat);
+ASSIMP_API void aiCreateQuaternionFromMatrix(C_STRUCT aiQuaternion* quat,const C_STRUCT aiMatrix3x3* mat);
 
 // ---------------------------------------------------------------------------
 /** @see aiMatrix4x4::Decompose (aiVector3D&, aiQuaternion&, aiVector3D&) const;
  */
-void aiDecomposeMatrix(const C_STRUCT aiMatrix4x4* mat,
+ASSIMP_API void aiDecomposeMatrix(const C_STRUCT aiMatrix4x4* mat,
 	C_STRUCT aiVector3D* scaling, 
 	C_STRUCT aiQuaternion* rotation,
 	C_STRUCT aiVector3D* position);

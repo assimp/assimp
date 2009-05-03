@@ -141,11 +141,14 @@ inline uint8_t HexOctetToDecimal(const char* in)
 // ------------------------------------------------------------------------------------
 inline int strtol10s( const char* in, const char** out=0)
 {
-	bool bNeg = false;
-	if ('-' == *in){++in;bNeg = true;}
-	if ('+' == *in)++in;
+	bool inv = (*in=='-');
+	if (inv || *in=='+')
+		++in;
+
 	int value = strtol10(in,out);
-	if (bNeg)value = -value;
+	if (inv) {
+		value = -value;
+	}
 	return value;
 }
 
@@ -218,14 +221,13 @@ inline uint64_t strtol10_64( const char* in, const char** out=0, unsigned int* m
 // ------------------------------------------------------------------------------------
 inline const char* fast_atof_move( const char* c, float& out)
 {
-	const char *t;
 	float f;
 
 	bool inv = (*c=='-');
 	if (inv || *c=='+')
 		++c;
 
-	f = (float) strtol10_64 ( c, &c );
+	f = (float) strtol10_64 ( c, &c);
 	if (*c == '.' || (c[0] == ',' && (c[1] >= '0' || c[1] <= '9'))) // allow for commas, too
 	{
 		++c;
@@ -239,12 +241,10 @@ inline const char* fast_atof_move( const char* c, float& out)
 		// number of digits to be read. AI_FAST_ATOF_RELAVANT_DECIMALS can be a value between
 		// 1 and 15.
 		unsigned int diff = AI_FAST_ATOF_RELAVANT_DECIMALS;
-		double pl = (double) strtol10_64 ( c, &t, &diff );
+		double pl = (double) strtol10_64 ( c, &c, &diff );
 
 		pl *= fast_atof_table[diff];
-
 		f += (float)pl;
-		c = t;
 	}
 
 	// A major 'E' must be allowed. Necessary for proper reading of some DXF files.
@@ -256,7 +256,7 @@ inline const char* fast_atof_move( const char* c, float& out)
 		if (einv || *c=='+')
 			++c;
 
-		float exp = (float)strtol10(c, &c);
+		float exp = (float)strtol10_64(c, &c);
 		if (einv)
 			exp *= -1.0f;
 

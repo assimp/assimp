@@ -48,7 +48,8 @@ ifeq ($(NOBOOST),1)
 	DEFINEFLAGS   += -DASSIMP_BUILD_BOOST_WORKAROUND 
 #	NAMESUFFIX    += -noboost
 else
-	INCLUDEFLAGS  += -I"C:/Program Files/boost/boost_1_35_0"
+	# adjust this manually if your boost is stored elsewhere
+	INCLUDEFLAGS  += -I"C:/Program Files/boost/boost_1_38"
 endif
 
 # Setup environment for st build

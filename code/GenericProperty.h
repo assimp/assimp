@@ -50,23 +50,19 @@ inline void SetGenericProperty(std::map< unsigned int, T >& list,
 	const char* szName, const T& value, bool* bWasExisting = NULL)
 {
 	ai_assert(NULL != szName);
+	const uint32_t hash = SuperFastHash(szName);
 
-	typedef std::map<  unsigned int, T >  GenericPropertyMap;
-	typedef std::pair< unsigned int, T > GenericPair;
-
-	uint32_t hash = SuperFastHash(szName);
-
-	typename GenericPropertyMap::iterator it = list.find(hash);
-	if (it == list.end())
-	{
-		if (bWasExisting)*bWasExisting = false;
-		list.insert(GenericPair( hash, value ));
+	typename std::map<unsigned int, T>::iterator it = list.find(hash);
+	if (it == list.end())	{
+		if (bWasExisting)
+			*bWasExisting = false;
+		list.insert(std::pair<unsigned int, T>( hash, value ));
 		return;
 	}
 	(*it).second = value;
-	if (bWasExisting)*bWasExisting = true;
+	if (bWasExisting)
+		*bWasExisting = true;
 }
-
 
 // ------------------------------------------------------------------------------------------------
 template <class T>
@@ -74,17 +70,14 @@ inline const T& GetGenericProperty(const std::map< unsigned int, T >& list,
 	const char* szName, const T& errorReturn)
 {
 	ai_assert(NULL != szName);
+	const uint32_t hash = SuperFastHash(szName);
 
-	typedef std::map<  unsigned int, T >  GenericPropertyMap;
-	typedef std::pair< unsigned int, T > GenericPair;
-
-	uint32_t hash = SuperFastHash(szName);
-
-	typename GenericPropertyMap::const_iterator it = list.find(hash);
-	if (it == list.end())return errorReturn;
+	typename std::map<unsigned int, T>::const_iterator it = list.find(hash);
+	if (it == list.end())
+		return errorReturn;
+	
 	return (*it).second;
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // Special version for pointer types - they will be deleted when replaced with another value
@@ -94,29 +87,25 @@ inline void SetGenericPropertyPtr(std::map< unsigned int, T* >& list,
 	const char* szName, T* value, bool* bWasExisting = NULL)
 {
 	ai_assert(NULL != szName);
+	const uint32_t hash = SuperFastHash(szName);
 
-	typedef std::map<  unsigned int, T* >  GenericPropertyMap;
-	typedef std::pair< unsigned int, T* > GenericPair;
-
-	uint32_t hash = SuperFastHash(szName);
-
-	typename GenericPropertyMap::iterator it = list.find(hash);
-	if (it == list.end())
-	{
-		if (bWasExisting)*bWasExisting = false;
-		list.insert(GenericPair( hash, value ));
+	typename std::map<unsigned int, T*>::iterator it = list.find(hash);
+	if (it == list.end())	{
+		if (bWasExisting)
+			*bWasExisting = false;
+		
+		list.insert(std::pair<unsigned int,T*>( hash, value ));
 		return;
 	}
-	if ((*it).second != value)
-	{
+	if ((*it).second != value)	{
 		delete (*it).second;
 		(*it).second = value;
 	}
-	if (!value)
-	{
+	if (!value)	{
 		list.erase(it);
 	}
-	if (bWasExisting)*bWasExisting = true;
+	if (bWasExisting)
+		*bWasExisting = true;
 }
 
 

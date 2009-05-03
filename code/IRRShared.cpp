@@ -210,6 +210,7 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 
 	matFlags = 0; // zero output flags
 	int cnt  = 0; // number of used texture channels
+	unsigned int nd = 0;
 
 	// Continue reading from the file
 	while (reader->read())
@@ -363,7 +364,7 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 						s.Set(prop.value);
 						mat->AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(0));
 					}
-					else if (prop.name == "Texture2")
+					else if (prop.name == "Texture2" && cnt == 1)
 					{
 						// 2-layer material lightmapped?
 						if (matFlags & AI_IRRMESH_MAT_lightmap)	{
@@ -388,25 +389,27 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 							++cnt;
 							s.Set(prop.value);
 							mat->AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(1));
+							++nd;
 
 							// set the corresponding material flag
 							matFlags |= AI_IRRMESH_EXTRA_2ND_TEXTURE;
 						}
 						else DefaultLogger::get()->warn("IRRmat: Skipping second texture");
 					}
-					else if (prop.name == "Texture3")
+
+					else if (prop.name == "Texture3" && cnt == 2)
 					{
 						// Irrlicht does not seem to use these channels.
 						++cnt;
 						s.Set(prop.value);
-						mat->AddProperty(&s,AI_MATKEY_TEXTURE_UNKNOWN(0));
+						mat->AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(nd+1));
 					}
-					else if (prop.name == "Texture4" )
+					else if (prop.name == "Texture4" && cnt == 3)
 					{
 						// Irrlicht does not seem to use these channels.
 						++cnt;
 						s.Set(prop.value);
-						mat->AddProperty(&s,AI_MATKEY_TEXTURE_UNKNOWN(1));
+						mat->AddProperty(&s,AI_MATKEY_TEXTURE_DIFFUSE(nd+2));
 					}
 
 					// Texture mapping options
@@ -435,14 +438,14 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 					else if (prop.name == "TextureWrap3" && cnt >= 3)
 					{
 						int map = ConvertMappingMode(prop.value);
-						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_UNKNOWN(0));
-						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_UNKNOWN(0));
+						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_DIFFUSE(nd+1));
+						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_DIFFUSE(nd+1));
 					}
 					else if (prop.name == "TextureWrap4" && cnt >= 4)
 					{
 						int map = ConvertMappingMode(prop.value);
-						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_UNKNOWN(1));
-						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_UNKNOWN(1));
+						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_DIFFUSE(nd+2));
+						mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_DIFFUSE(nd+2));
 					}
 				}
 			}
@@ -455,25 +458,24 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 					/* IRR     */ !ASSIMP_stricmp(reader->getNodeName(),"attributes"))
 				{
 					// Now process lightmapping flags
-					// We should have at least one texture, however
-					// if there are multiple textures we assign the
-					// lightmap settings to the last texture.
+					// We should have at least one textur to do that ..
 					if (cnt && matFlags & AI_IRRMESH_MAT_lightmap)
 					{
 						float f = 1.f;
+						unsigned int unmasked = matFlags&~AI_IRRMESH_MAT_lightmap;
 
 						// Additive lightmap?
-						int op = (matFlags & AI_IRRMESH_MAT_lightmap_add
+						int op = (unmasked & AI_IRRMESH_MAT_lightmap_add
 							? aiTextureOp_Add : aiTextureOp_Multiply);
 
 						// Handle Irrlicht's lightmapping scaling factor
-						if (matFlags & AI_IRRMESH_MAT_lightmap_m2 ||
-							matFlags & AI_IRRMESH_MAT_lightmap_light_m2)
+						if (unmasked & AI_IRRMESH_MAT_lightmap_m2 ||
+							unmasked & AI_IRRMESH_MAT_lightmap_light_m2)
 						{
 							f = 2.f;
 						}
-						else if (matFlags & AI_IRRMESH_MAT_lightmap_m4 ||
-							matFlags & AI_IRRMESH_MAT_lightmap_light_m4)
+						else if (unmasked & AI_IRRMESH_MAT_lightmap_m4 ||
+							unmasked & AI_IRRMESH_MAT_lightmap_light_m4)
 						{
 							f = 4.f;
 						}

@@ -669,9 +669,8 @@ public:
      *  from the material
      *
      * @param pKey Key to search for. One of the AI_MATKEY_XXX constants.
-     * @param type Specifies the type of the texture to be retrieved (
-     *    e.g. diffuse, specular, height map ...)
-     * @param idx Index of the texture to be retrieved.
+     * @param type .. set by AI_MATKEY_XXX
+     * @param idx .. set by AI_MATKEY_XXX
      * @param pOut Pointer to a buffer to receive the result. 
      * @param pMax Specifies the size of the given buffer, in Type's.
      * Receives the number of values (not bytes!) read. 
@@ -747,171 +746,23 @@ extern "C" {
 #endif
 
 // ---------------------------------------------------------------------------
-/** @def AI_MATKEY_NAME
- *  Defines the name of the material. <br>
- * <b>Type:</b> string (aiString)<br>
- * <b>Default value:</b> <tt>none</tt> <br>
-*/
 #define AI_MATKEY_NAME "?mat.name",0,0
-
-// ---------------------------------------------------------------------------
-/** @def AI_MATKEY_TWOSIDED
- *  Indicates that the material must be rendered two-sided (means: no 
- *  backface culling). <br>
- * <b>Type:</b> int <br>
- * <b>Default value:</b> <tt>0</tt> <br>
-*/
 #define AI_MATKEY_TWOSIDED "$mat.twosided",0,0
-
-// ---------------------------------------------------------------------------
-/** @def AI_MATKEY_SHADING_MODEL
- *  Defines the shading model to be used for this material. See the doc for
- *  #aiShadingMode for a complete list of all predefined values.
- * <br>
- * <b>Type:</b> int (aiShadingMode)<br>
- * <b>Default value:</b> <tt>aiShadingMode_Gouraud</tt>
-*/
 #define AI_MATKEY_SHADING_MODEL "$mat.shadingm",0,0
-
-// ---------------------------------------------------------------------------
-/** @def AI_MATKEY_ENABLE_WIREFRAME
- *  Integer property. 1 to enable wireframe mode for rendering.
- *  A material with this property set to 1 should appear as wireframe, even
- *  if the scene is rendered solid.
- *  <br>
- *  <b>Type:</b> int <br>
- *  <b>Default value:</b> <tt>0</tt>
-*/
 #define AI_MATKEY_ENABLE_WIREFRAME "$mat.wireframe",0,0
-
-// ---------------------------------------------------------------------------
-/** @def AI_MATKEY_BLEND_FUNC
- *  Integer property (one of the #aiBlendMode enumerated values). Defines
- *  the blend function to be used to combine the material color for a specific
- *  pixel with the previous framebuffer color at this position. This 
- *  corresponds to the #AI_MATKEY_OPACITY and #AI_MATKEY_COLOR_TRANSPARENT
- *  property. No alpha-blending needs to be turned on if the opacity for all
- *  color channels is 1.0 and the blend mode is set to #aiBlendMode_Default.
- *  <br>
- *  <b>Type:</b> int (#aiBlendMode)<br>
- *  <b>Default value:</b> <tt>#aiBlendMode_Default</tt>
-*/
 #define AI_MATKEY_BLEND_FUNC "$mat.blend",0,0
-
-// ---------------------------------------------------------------------------
-/** @def AI_MATKEY_OPACITY
- *  Defines the base opacity of the material. To get the opacity value for
- *  a particular channel, this value is multiplied with the corresponding
- *  channel of the #AI_MATKEY_COLOR_TRANSPARENT property. The final value
- *  is fed in the blend function defined by the #AI_MATKEY_BLEND_FUNC
- *  property.
- * <br>
- * <b>Type:</b> float<br>
- * <b>Default value:</b> <tt>1.0f</tt><br>
- */
 #define AI_MATKEY_OPACITY "$mat.opacity",0,0
-
-// ---------------------------------------------------------------------------
-/** @def AI_MATKEY_BUMPSCALING
- *  Defines the height scaling of a bump map (for stuff like Parallax
- *  Occlusion Mapping). The actual interpretation/range depends on the
- *  3D applications which wrote a particular model. <br>
- *
- * <b>Type:</b> float<br>
- * <b>Default value:</b> <tt>1.0f</tt>
- */
 #define AI_MATKEY_BUMPSCALING "$mat.bumpscaling",0,0
-
-// ---------------------------------------------------------------------------
-/** @def AI_MATKEY_SHININESS
- *  Defines the base shininess of the material
- *  This is the exponent of the Phong and Phong-Blinn shading equations.
- *  The range is undefined and depends on the shader being used. The
- *  value will not be negative, though. <br>
- *
- * <b>Type:</b> float<br>
- * <b>Default value:</b> <tt>0.0f</tt>
- */
 #define AI_MATKEY_SHININESS "$mat.shininess",0,0
-
-// ---------------------------------------------------------------------------
-/** @def AI_MATKEY_SHININESS_STRENGTH
- * Defines the strength of the specular highlight.
- * This simply scales the specular lighting coefficient. <br>
- * 
- * <b>Type:</b> float <br>
- * <b>Default value:</b> <tt>1.0f</tt>
- * @note The same effect could be achieved by scaling the specular material
- * color. However, most 3D modelers keep this property separate and so
- * do we. OK!?
- */
 #define AI_MATKEY_SHININESS_STRENGTH "$mat.shinpercent",0,0
-
-// ---------------------------------------------------------------------------
-/** @def AI_MATKEY_REFRACTI
- * Index of refraction of the material. This is used by some shading models,
- * e.g. Cook-Torrance. The value is the ratio of the speed of light in a
- * vacuum to the speed of light in the material. <br>
- *
- * <b>Type:</b> float <br>
- * <b>Default value:</b> <tt>1.0f </tt>
- */
 #define AI_MATKEY_REFRACTI "$mat.refracti",0,0
-
-// ---------------------------------------------------------------------------
-/** @def AI_MATKEY_COLOR_DIFFUSE
- *  Defines the diffuse base color of the material.  
- *  If stored as 4-component color, the alpha channel is ignored.<br>
- * <b>Type:</b> color (#aiColor4D or #aiColor3D)     <br>
- * <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f     </tt>    
-*/
 #define AI_MATKEY_COLOR_DIFFUSE "$clr.diffuse",0,0
-
-/** @def AI_MATKEY_COLOR_AMBIENT
- *  Declares the amount of ambient light emitted from
- *  the surface of this object. If stored as 4-component color, 
- *  the alpha channel is ignored.<br><br>
- *  <b>Type:</b> color (#aiColor4D or #aiColor3D)     <br>
- *  <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f     </tt>       
-*/
 #define AI_MATKEY_COLOR_AMBIENT "$clr.ambient",0,0
-
-/** @def AI_MATKEY_COLOR_SPECULAR
- *  Declares the color of light specularly reflected from
- *  the surface of this object. If stored as 4-component color, the 
- *  alpha channel is ignored.<br><br>
- *  <b>Type:</b> color (#aiColor4D or #aiColor3D)     <br>
- *  <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f     </tt>
-*/
 #define AI_MATKEY_COLOR_SPECULAR "$clr.specular",0,0
-
-/** @def AI_MATKEY_COLOR_EMISSIVE
- *  Declares the amount of light emitted from the
- *  surface of this object. If stored as 4-component color, the alpha
- *  channel is ignored.<br><br>
- *  <b>Type:</b> color (#aiColor4D or #aiColor3D)     <br>
- *  <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f     </tt>
-*/
 #define AI_MATKEY_COLOR_EMISSIVE "$clr.emissive",0,0
-
-/** @def AI_MATKEY_COLOR_TRANSPARENT
- *  Defines the transparent base color of the material. If stored as 
- *  4-component color, the alpha channel is ignored. This 
- *  corresponds to the #AI_MATKEY_OPACITY and #AI_MATKEY_BLEND_FUNC
- *  material properties.<br> <br>
- *  <b>Type:</b> color (#aiColor4D or #aiColor3D)        <br>
- *  <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f        </tt>
-*/
 #define AI_MATKEY_COLOR_TRANSPARENT "$clr.transparent",0,0
-
-/** @def AI_MATKEY_COLOR_REFLECTIVE
- *  Declares the color of a perfect mirror reflection. If stored as
- *  4-component color, the alpha channel is ignored.<br> <br>
- *  <b>Type:</b> color (#aiColor4D or #aiColor3D)       <br>
- *  <b>Default value:</b> <tt>0.0f|0.0f|0.0f|1.0f       </tt>
-*/
 #define AI_MATKEY_COLOR_REFLECTIVE "$clr.reflective",0,0
-
+#define AI_MATKEY_GLOBAL_BACKGROUND_IMAGE "?bg.global",0,0
 
 // ---------------------------------------------------------------------------
 // Pure key names for all texture-related properties
@@ -928,17 +779,6 @@ extern "C" {
 #define _AI_MATKEY_TEXFLAGS_BASE		"$tex.flags"
 //! @endcond
 
-// ---------------------------------------------------------------------------
-/** 
- * @def AI_MATKEY_TEXTURE
- * Specifies the path to the Nth texture of type "type".
- * This can either be a path to the texture or a string of the form '*i'
- * where i is an index into the array of embedded textures that has been
- * imported along with the scene. See #aiTexture for more details.
- * <br>
- * <b>Type:</b> #aiString<br>
- * <b>Default value if key is not defined:</b> <tt>n/a</tt><br>
- */
 // ---------------------------------------------------------------------------
 #define AI_MATKEY_TEXTURE(type, N) _AI_MATKEY_TEXTURE_BASE,type,N
 
@@ -977,25 +817,8 @@ extern "C" {
 #define AI_MATKEY_TEXTURE_REFLECTION(N)	\
 	AI_MATKEY_TEXTURE(aiTextureType_REFLECTION,N)
 
-#define AI_MATKEY_TEXTURE_UNKNOWN(N)	\
-	AI_MATKEY_TEXTURE(aiTextureType_UNKNOWN,N)
-
 //! @endcond
 
-// ---------------------------------------------------------------------------
-/** 
- * @def AI_MATKEY_UVWSRC
- * Specifies which UV channel is used as source for the mapping coordinates 
- * of the Nth texture of type "type". If the requested mapping channel does
- * not exist in a mesh associated with the material, decrement the index by
- * one until you find a working UV channel. Please note that this property
- * is mutually exlusive with AI_MATKEY_MAPPING(type,N) set to 'UV'.
- * <br>
- * <b>Type:</b> int<br>
- * <b>Default value if key is not defined:</b><tt>0</tt><br>
- * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N) 
- * and AI_MATKEY_MAPPING(type,N) == UV<br>
- */
 // ---------------------------------------------------------------------------
 #define AI_MATKEY_UVWSRC(type, N) _AI_MATKEY_UVWSRC_BASE,type,N
 
@@ -1034,20 +857,7 @@ extern "C" {
 #define AI_MATKEY_UVWSRC_REFLECTION(N)	\
 	AI_MATKEY_UVWSRC(aiTextureType_REFLECTION,N)
 
-#define AI_MATKEY_UVWSRC_UNKNOWN(N)	\
-	AI_MATKEY_UVWSRC(aiTextureType_UNKNOWN,N)
-
 //! @endcond
-// ---------------------------------------------------------------------------
-/** 
- * @def AI_MATKEY_TEXOP 
- * Specifies how the Nth texture of type "type" is combined with
- * the result of all color values from all previous texture layers combined.
- * <br>
- * <b>Type:</b> int (#aiTextureOp)<br>
- * <b>Default value if key is not defined:</b> <tt>#aiTextureOp_Multiply</tt><br>
- * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N)<br>
- */
 // ---------------------------------------------------------------------------
 #define AI_MATKEY_TEXOP(type, N) _AI_MATKEY_TEXOP_BASE,type,N
 
@@ -1086,19 +896,7 @@ extern "C" {
 #define AI_MATKEY_TEXOP_REFLECTION(N)	\
 	AI_MATKEY_TEXOP(aiTextureType_REFLECTION,N)
 
-#define AI_MATKEY_TEXOP_UNKNOWN(N)	\
-	AI_MATKEY_TEXOP(aiTextureType_UNKNOWN,N)
-
 //! @endcond
-// ---------------------------------------------------------------------------
-/** 
- * @def AI_MATKEY_MAPPING 
- * Specifies how the Nth texture of type "type" is mapped.
- * <br>
- * <b>Type:</b> int (#aiTextureMapping)<br>
- * <b>Default value if key is not defined:</b> <tt>#aiTextureMapping_UV</tt><br>
- * <b>Requires:</b>#AI_MATKEY_TEXTURE(type,N)<br>
- */
 // ---------------------------------------------------------------------------
 #define AI_MATKEY_MAPPING(type, N) _AI_MATKEY_MAPPING_BASE,type,N
 
@@ -1137,21 +935,7 @@ extern "C" {
 #define AI_MATKEY_MAPPING_REFLECTION(N)	\
 	AI_MATKEY_MAPPING(aiTextureType_REFLECTION,N)
 
-#define AI_MATKEY_MAPPING_UNKNOWN(N)	\
-	AI_MATKEY_MAPPING(aiTextureType_UNKNOWN,N)
-
 //! @endcond
-// ---------------------------------------------------------------------------
-/** 
- * @def AI_MATKEY_TEXBLEND 
- * Specifies the strength of the <N>th texture of type <type>. This is just
- * a multiplier for the texture's color values. It may have any value, even
- * outside [0..1].
- * <br>
- * <b>Type:</b> float<br>
- * <b>Default value if this key is not defined:</b><tt>1.f</tt><br>
- * <b>Requires:</b> #AI_MATKEY_TEXTURE(type,N)<br>
- */
 // ---------------------------------------------------------------------------
 #define AI_MATKEY_TEXBLEND(type, N) _AI_MATKEY_TEXBLEND_BASE,type,N
 
@@ -1190,22 +974,7 @@ extern "C" {
 #define AI_MATKEY_TEXBLEND_REFLECTION(N)	\
 	AI_MATKEY_TEXBLEND(aiTextureType_REFLECTION,N)
 
-#define AI_MATKEY_TEXBLEND_UNKNOWN(N)	\
-	AI_MATKEY_TEXBLEND(aiTextureType_UNKNOWN,N)
-
 //! @endcond
-// ---------------------------------------------------------------------------
-/** 
- * @def AI_MATKEY_MAPPINGMODE_U 
- * Specifies the texture mapping mode for the <N>th texture of type <type> in
- * the u (x) direction.
- * <br>
- * <b>Type:</b> int (#aiTextureMapMode)<br>
- * <b>Default value if key is not defined:</b><tt>#aiTextureMapMode_Wrap</tt><br>
- * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N)<br>
-  * @note There's no equivalent property for the 'w' axis of volume textures,
- *   just because no formats exports this information.
- */
 // ---------------------------------------------------------------------------
 #define AI_MATKEY_MAPPINGMODE_U(type, N) _AI_MATKEY_MAPPINGMODE_U_BASE,type,N
 
@@ -1244,22 +1013,7 @@ extern "C" {
 #define AI_MATKEY_MAPPINGMODE_U_REFLECTION(N)	\
 	AI_MATKEY_MAPPINGMODE_U(aiTextureType_REFLECTION,N)
 
-#define AI_MATKEY_MAPPINGMODE_U_UNKNOWN(N)	\
-	AI_MATKEY_MAPPINGMODE_U(aiTextureType_UNKNOWN,N)
-
 //! @endcond
-// ---------------------------------------------------------------------------
-/** 
- * @def AI_MATKEY_MAPPINGMODE_V 
- * Specifies the texture mapping mode for the <N>th texture of type <type> in
- * the w (z) direction.
- * <br>
- * <b>Type:</b> int (#aiTextureMapMode)<br>
- * <b>Default value if key is not defined:</b><tt>#aiTextureMapMode_Wrap</tt><br>
- * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N)<br>
- * @note There's no equivalent property for the 'w' axis of volume textures,
- *   just because no formats exports this information.
- */
 // ---------------------------------------------------------------------------
 #define AI_MATKEY_MAPPINGMODE_V(type, N) _AI_MATKEY_MAPPINGMODE_V_BASE,type,N
 
@@ -1298,22 +1052,7 @@ extern "C" {
 #define AI_MATKEY_MAPPINGMODE_V_REFLECTION(N)	\
 	AI_MATKEY_MAPPINGMODE_V(aiTextureType_REFLECTION,N)
 
-#define AI_MATKEY_MAPPINGMODE_V_UNKNOWN(N)	\
-	AI_MATKEY_MAPPINGMODE_V(aiTextureType_UNKNOWN,N)
-
 //! @endcond
-// ---------------------------------------------------------------------------
-/** 
- * @def AI_MATKEY_TEXMAP_AXIS
- * Specifies the main mapping axis of the Nth texture of type "type".
- * This applies to non-UV mapped textures. For spherical, cylindrical and
- * planar this is the main axis of the corresponding geometric shape.
- * <br>
- * <b>Type:</b> float[3] (#aiVector3D)<br>
- * <b>Default value if key is not defined:</b> <tt>aiVector3D(0.f,1.f,0.f)</tt> <br>
- * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N) and 
- * AI_MATKEY_MAPPING(type,N) != UV<br>
- */
 // ---------------------------------------------------------------------------
 #define AI_MATKEY_TEXMAP_AXIS(type, N) _AI_MATKEY_TEXMAP_AXIS_BASE,type,N
 
@@ -1352,24 +1091,7 @@ extern "C" {
 #define AI_MATKEY_TEXMAP_AXIS_REFLECTION(N)	\
 	AI_MATKEY_TEXMAP_AXIS(aiTextureType_REFLECTION,N)
 
-#define AI_MATKEY_TEXMAP_AXIS_UNKNOWN(N)	\
-	AI_MATKEY_TEXMAP_AXIS(aiTextureType_UNKNOWN,N)
-
 //! @endcond
-// ---------------------------------------------------------------------------
-/** 
- * @def AI_MATKEY_UVTRANSFORM 
- * Specifies how the UV mapping coordinates for the Nth texture of type
- * "type" are transformed before they're used for mapping. This is an array
- * of five floats - use the aiUVTransform structure for simplicity. 
- * <br>
- * <b>Type:</b> Array of 5 floats<br>
- * <b>Default value if key is not defined:</b><tt>0.f,0.f,1.f,1.f,0.f</tt><br>
- * <b>Requires:</b> AI_MATKEY_TEXTURE(type,N) and 
- * AI_MATKEY_MAPPING(type,N) == UV<br>
- * <b>Note:</b>Transformed 3D texture coordinates are not *yet* supported.
- * And they'll probably never be, no format exports such rubbish.
- */
 // ---------------------------------------------------------------------------
 #define AI_MATKEY_UVTRANSFORM(type, N) _AI_MATKEY_UVTRANSFORM_BASE,type,N
 
@@ -1413,16 +1135,6 @@ extern "C" {
 
 //! @endcond
 // ---------------------------------------------------------------------------
-/** 
- * @def AI_MATKEY_TEXFLAGS
- * Specifies flags for the Nth texture of type 'type'. The key is a bitwise
- * combination of the #aiTextureFlags enumerated values.
- * <br>
- * <b>Type:</b> int (#aiTextureFlags)<br>
- * <b>Default value if key is not defined:</b> <tt>0</tt><br>
- * <b>Requires:</b>#AI_MATKEY_TEXTURE(type,N)<br>
- */
-// ---------------------------------------------------------------------------
 #define AI_MATKEY_TEXFLAGS(type, N) _AI_MATKEY_TEXFLAGS_BASE,type,N
 
 // For backward compatibility and simplicity
@@ -1462,19 +1174,6 @@ extern "C" {
 
 #define AI_MATKEY_TEXFLAGS_UNKNOWN(N)	\
 	AI_MATKEY_TEXFLAGS(aiTextureType_UNKNOWN,N)
-
-
-#define AI_MATKEY_ORENNAYAR_ROUGHNESS	 "$shading.orennayar.roughness",0,0
-#define AI_MATKEY_MINNAERT_DARKNESS		 "$shading.minnaert.darkness",0,0
-#define AI_MATKEY_COOK_TORRANCE_PARAM	 "$shading.cookt.param",0,0
-
-/** @def AI_MATKEY_GLOBAL_BACKGROUND_IMAGE
- *  Global property defined by some loaders. Contains the path to 
- *  the image file to be used as background image.
- *
- *  @deprecated
- */
-#define AI_MATKEY_GLOBAL_BACKGROUND_IMAGE "$global.bg.image2d",0,0
 
 // ---------------------------------------------------------------------------
 /** @brief Retrieve a material property with a specific key from the material

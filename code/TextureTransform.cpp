@@ -101,8 +101,7 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
 		{
 			out -= rounded*(float)AI_MATH_PI;
 
-			sprintf(szTemp,"Texture coordinate rotation %f can "
-				"be simplified to %f",info.mRotation,out);
+			sprintf(szTemp,"Texture coordinate rotation %f can be simplified to %f",info.mRotation,out);
 			DefaultLogger::get()->info(szTemp);
 		}
 
@@ -120,36 +119,29 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
 	 * type (e.g. if mirroring is active there IS a difference between
 	 * offset 2 and 3)
 	 */
-	if ((rounded  = (int)info.mTranslation.x))
-	{
+	if ((rounded  = (int)info.mTranslation.x))	{
 		float out;
 		szTemp[0] = 0;
-		if (aiTextureMapMode_Wrap == info.mapU)
-		{
+		if (aiTextureMapMode_Wrap == info.mapU)	{
 			// Wrap - simple take the fraction of the field
 			out = info.mTranslation.x-(float)rounded;
-			sprintf(szTemp,"[w] UV U offset %f can "
-				"be simplified to %f",info.mTranslation.x,out);
+			sprintf(szTemp,"[w] UV U offset %f can be simplified to %f",info.mTranslation.x,out);
 		}
-		else if (aiTextureMapMode_Mirror == info.mapU && 1 != rounded)
-		{
+		else if (aiTextureMapMode_Mirror == info.mapU && 1 != rounded)	{
 			// Mirror 
-			if (rounded % 2)rounded--;
+			if (rounded % 2)
+				rounded--;
 			out = info.mTranslation.x-(float)rounded;
 
-			sprintf(szTemp,"[m/d] UV U offset %f can "
-				"be simplified to %f",info.mTranslation.x,out);
+			sprintf(szTemp,"[m/d] UV U offset %f can be simplified to %f",info.mTranslation.x,out);
 		}
-		else if (aiTextureMapMode_Clamp == info.mapU || aiTextureMapMode_Decal == info.mapU)
-		{
+		else if (aiTextureMapMode_Clamp == info.mapU || aiTextureMapMode_Decal == info.mapU)	{
 			// Clamp - translations beyond 1,1 are senseless
-			sprintf(szTemp,"[c] UV U offset %f can "
-				"be clamped to 1.0f",info.mTranslation.x);
+			sprintf(szTemp,"[c] UV U offset %f can be clamped to 1.0f",info.mTranslation.x);
 
 			out = 1.f;
 		}
-		if (szTemp[0])
-		{
+		if (szTemp[0])		{
 			DefaultLogger::get()->info(szTemp);
 			info.mTranslation.x = out;
 		}
@@ -160,36 +152,29 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
 	 * type (e.g. if mirroring is active there IS a difference between
 	 * offset 2 and 3)
 	 */
-	if ((rounded  = (int)info.mTranslation.y))
-	{
+	if ((rounded  = (int)info.mTranslation.y))	{
 		float out;
 		szTemp[0] = 0;
-		if (aiTextureMapMode_Wrap == info.mapV)
-		{
+		if (aiTextureMapMode_Wrap == info.mapV)	{
 			// Wrap - simple take the fraction of the field
 			out = info.mTranslation.y-(float)rounded;
-			sprintf(szTemp,"[w] UV V offset %f can "
-				"be simplified to %f",info.mTranslation.y,out);
+			sprintf(szTemp,"[w] UV V offset %f can be simplified to %f",info.mTranslation.y,out);
 		}
-		else if (aiTextureMapMode_Mirror == info.mapV  && 1 != rounded)
-		{
+		else if (aiTextureMapMode_Mirror == info.mapV  && 1 != rounded)	{
 			// Mirror 
-			if (rounded % 2)rounded--;
+			if (rounded % 2)
+				rounded--;
 			out = info.mTranslation.x-(float)rounded;
 
-			sprintf(szTemp,"[m/d] UV V offset %f can "
-				"be simplified to %f",info.mTranslation.y,out);
+			sprintf(szTemp,"[m/d] UV V offset %f can be simplified to %f",info.mTranslation.y,out);
 		}
-		else if (aiTextureMapMode_Clamp == info.mapV || aiTextureMapMode_Decal == info.mapV)
-		{
+		else if (aiTextureMapMode_Clamp == info.mapV || aiTextureMapMode_Decal == info.mapV)	{
 			// Clamp - translations beyond 1,1 are senseless
-			sprintf(szTemp,"[c] UV V offset %f can"
-				"be clamped to 1.0f",info.mTranslation.y);
+			sprintf(szTemp,"[c] UV V offset %f canbe clamped to 1.0f",info.mTranslation.y);
 
 			out = 1.f;
 		}
-		if (szTemp[0])
-		{
+		if (szTemp[0])	{
 			DefaultLogger::get()->info(szTemp);
 			info.mTranslation.y = out;
 		}
@@ -201,9 +186,7 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
 void UpdateUVIndex(const std::list<TTUpdateInfo>& l, unsigned int n)
 {
 	// Don't set if == 0 && wasn't set before
-	for (std::list<TTUpdateInfo>::const_iterator it = l.begin();
-		 it != l.end(); ++it)
-	{
+	for (std::list<TTUpdateInfo>::const_iterator it = l.begin();it != l.end(); ++it) {
 		const TTUpdateInfo& info = *it;
 
 		if (info.directShortcut)
@@ -241,14 +224,13 @@ void TextureTransformStep::Execute( aiScene* pScene)
 	typedef std::list<STransformVecInfo> MeshTrafoList;
 	std::vector<MeshTrafoList> meshLists(pScene->mNumMeshes);
 
-	for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
-	{
+	for (unsigned int i = 0; i < pScene->mNumMaterials;++i)	{
+
 		aiMaterial* mat = pScene->mMaterials[i];
-		for (unsigned int a = 0; a < mat->mNumProperties;++a)
-		{
+		for (unsigned int a = 0; a < mat->mNumProperties;++a)	{
+
 			aiMaterialProperty* prop = mat->mProperties[a];
-			if (!::strcmp( prop->mKey.data, "$tex.file"))
-			{
+			if (!::strcmp( prop->mKey.data, "$tex.file"))	{
 				STransformVecInfo info;
 
 				// Setup a shortcut structure to allow for a fast updating
@@ -313,15 +295,14 @@ void TextureTransformStep::Execute( aiScene* pScene)
 				// Find out whether this material is used by more than
 				// one mesh. This will make our task much, much more difficult!
 				unsigned int cnt = 0;
-				for (unsigned int n = 0; n < pScene->mNumMeshes;++n)
-				{
+				for (unsigned int n = 0; n < pScene->mNumMeshes;++n)	{
 					if (pScene->mMeshes[n]->mMaterialIndex == i)
 						++cnt;
 				}
 
-				if (!cnt)continue;
-				else if (1 != cnt)
-				{
+				if (!cnt)
+					continue;
+				else if (1 != cnt)	{
 					// This material is referenced by more than one mesh!
 					// So we need to make sure the UV index for the texture
 					// is identical for each of it ...
@@ -329,16 +310,14 @@ void TextureTransformStep::Execute( aiScene* pScene)
 				}
 
 				// Get all coresponding meshes
-				for (unsigned int n = 0; n < pScene->mNumMeshes;++n)
-				{
+				for (unsigned int n = 0; n < pScene->mNumMeshes;++n)	{
 					aiMesh* mesh = pScene->mMeshes[n];
-					if (mesh->mMaterialIndex != i || !mesh->mTextureCoords[0]) continue;
+					if (mesh->mMaterialIndex != i || !mesh->mTextureCoords[0])
+						continue;
 
 					unsigned int uv = info.uvIndex;
-					if (!mesh->mTextureCoords[uv])
-					{
-						// If the requested UV index is not available,
-						// take the first one instead.
+					if (!mesh->mTextureCoords[uv])	{
+						// If the requested UV index is not available, take the first one instead.
 						uv = 0;
 					}
 					
@@ -350,15 +329,15 @@ void TextureTransformStep::Execute( aiScene* pScene)
 					MeshTrafoList::iterator it;
 
 					// Check whether we have this transform setup already
-					for (it = meshLists[n].begin();it != meshLists[n].end(); ++it)
-					{
+					for (it = meshLists[n].begin();it != meshLists[n].end(); ++it)	{
+
 						if ((*it) == info && (*it).uvIndex == uv)	{
 							(*it).updateList.push_back(update);
 							break;
 						}
 					}
-					if (it == meshLists[n].end())
-					{
+
+					if (it == meshLists[n].end())	{
 						meshLists[n].push_back(info);
 						meshLists[n].back().uvIndex = uv;
 						meshLists[n].back().updateList.push_back(update);
@@ -373,66 +352,67 @@ void TextureTransformStep::Execute( aiScene* pScene)
 
 	// Now process all meshes. Important: we don't remove unreferenced UV channels.
 	// This is a job for the RemoveUnreferencedData-Step.
-	for (unsigned int q = 0; q < pScene->mNumMeshes;++q)
-	{
+	for (unsigned int q = 0; q < pScene->mNumMeshes;++q)	{
+
 		aiMesh* mesh = pScene->mMeshes[q];
 		MeshTrafoList& trafo =  meshLists[q];
 
 		inChannels += mesh->GetNumUVChannels();
 
-		if (!mesh->mTextureCoords[0] || trafo.empty() || 
-			trafo.size() == 1 && trafo.begin()->IsUntransformed())
-		{
+		if (!mesh->mTextureCoords[0] || trafo.empty() ||  trafo.size() == 1 && trafo.begin()->IsUntransformed()) {
 			outChannels += mesh->GetNumUVChannels();
 			continue;
 		}
 
-		// Move untransformed UV channels to the first
-		// position in the list .... except if we need
-		// a new locked index which should be as small as possible
-		bool veto = false;
+		// Move untransformed UV channels to the first position in the list .... 
+		// except if we need a new locked index which should be as small as possible
+		bool veto = false, need = false;
 		unsigned int cnt = 0;
 		unsigned int untransformed = 0;
 
 		MeshTrafoList::iterator it,it2;
-		for (it = trafo.begin();it != trafo.end(); ++it,++cnt)
-		{
-			if ((*it).lockedPos == AI_TT_UV_IDX_LOCK_TBD)
-			{
+		for (it = trafo.begin(), it2;it != trafo.end(); ++it,++cnt)	{
+
+			if (!(*it).IsUntransformed())
+				need = true;
+
+			if ((*it).lockedPos == AI_TT_UV_IDX_LOCK_TBD)	{
 				// Lock this index and make sure it won't be changed
 				(*it).lockedPos = cnt;
 				veto = true;
 				continue;
 			}
 
-			if (!veto && it != trafo.begin() && (*it).IsUntransformed())
-			{
-				trafo.push_front((*it));
+			if (!veto && it != trafo.begin() && (*it).IsUntransformed())	{
+				for (it2 = trafo.begin();it2 != it; ++it2) {
+					if (!(*it2).IsUntransformed()) 
+						break;
+				}
+				trafo.insert(it2,*it);
 				trafo.erase(it);
-
 				break;
 			}
 		}
+		if (!need)
+			continue;
 
-		// Find all that are not at their 'locked' position 
-		// and move them to it. Conflicts are possible but
-		// quite unlikely.
+		// Find all that are not at their 'locked' position and move them to it. 
+		// Conflicts are possible but quite unlikely.
 		cnt = 0;
-		for (it = trafo.begin();it != trafo.end(); ++it,++cnt)
-		{
-			if ((*it).lockedPos != AI_TT_UV_IDX_LOCK_NONE && (*it).lockedPos != cnt)
-			{
+		for (it = trafo.begin();it != trafo.end(); ++it,++cnt) {
+			if ((*it).lockedPos != AI_TT_UV_IDX_LOCK_NONE && (*it).lockedPos != cnt) {
 				it2 = trafo.begin();unsigned int t = 0;
-				while (t != (*it).lockedPos)++it2;
+				while (t != (*it).lockedPos)
+					++it2;
 
-				if ((*it2).lockedPos != AI_TT_UV_IDX_LOCK_NONE)
-				{
-					DefaultLogger::get()->error("Channel mismatch, can't compute all transformations properly");
+				if ((*it2).lockedPos != AI_TT_UV_IDX_LOCK_NONE) {
+					DefaultLogger::get()->error("Channel mismatch, can't compute all transformations properly [design bug]");
 					continue;
 				}
 
 				std::swap(*it2,*it);
-				if ((*it).lockedPos == untransformed)untransformed = cnt;
+				if ((*it).lockedPos == untransformed)
+					untransformed = cnt;
 			}
 		}
 
@@ -445,9 +425,9 @@ void TextureTransformStep::Execute( aiScene* pScene)
 		for (it = trafo.begin();it != trafo.end(); ++it)
 			ref[(*it).uvIndex] = true;
 
-		for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_TEXTURECOORDS;++n)
-		{
-			if (ref[n])continue;
+		for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_TEXTURECOORDS;++n) {
+			if (ref[n])
+				continue;
 			trafo.push_back(STransformVecInfo());
 			trafo.back().uvIndex = n;
 		}
@@ -456,10 +436,9 @@ void TextureTransformStep::Execute( aiScene* pScene)
 		// The unimportant ones are at the end of the list, so
 		// it shouldn't be too worse if we remove them.
 		unsigned int size = (unsigned int)trafo.size();
-		if (size > AI_MAX_NUMBER_OF_TEXTURECOORDS)
-		{
-			if (!DefaultLogger::isNullLogger())
-			{
+		if (size > AI_MAX_NUMBER_OF_TEXTURECOORDS) {
+
+			if (!DefaultLogger::isNullLogger()) {
 				::sprintf(buffer,"%i UV channels required but just %i available", 
 					trafo.size(),AI_MAX_NUMBER_OF_TEXTURECOORDS);
 
@@ -476,10 +455,9 @@ void TextureTransformStep::Execute( aiScene* pScene)
 		// Now continue and generate the output channels. Channels
 		// that we're not going to need later can be overridden.
 		it = trafo.begin();
-		for (unsigned int n = 0; n < trafo.size();++n,++it)
-		{
-			if (n >= size)
-			{
+		for (unsigned int n = 0; n < trafo.size();++n,++it)	{
+
+			if (n >= size)	{
 				// Try to use an untransformed channel for all channels we threw over board
 				UpdateUVIndex((*it).updateList,untransformed);
 				continue;
@@ -488,8 +466,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 			outChannels++;
 
 			// Write to the log
-			if (!DefaultLogger::isNullLogger())
-			{
+			if (!DefaultLogger::isNullLogger())	{
 				sprintf(buffer,"Mesh %i, channel %i: t(%.3f,%.3f), s(%.3f,%.3f), r(%.3f), %s%s",
 					q,n,
 					(*it).mTranslation.x,
@@ -504,11 +481,11 @@ void TextureTransformStep::Execute( aiScene* pScene)
 			}
 
 			// Check whether we need a new buffer here
-			if (mesh->mTextureCoords[n])
-			{
+			if (mesh->mTextureCoords[n])	{
+
 				it2 = it;++it2;
-				for (unsigned int m = n+1; m < size;++m, ++it2)
-				{
+				for (unsigned int m = n+1; m < size;++m, ++it2)	{
+
 					if ((*it2).uvIndex == n){
 						it2 = trafo.begin();
 						break;
@@ -533,11 +510,11 @@ void TextureTransformStep::Execute( aiScene* pScene)
 			end = dest + mesh->mNumVertices;
 
 			// Build a transformation matrix and transform all UV coords with it
-			if (!(*it).IsUntransformed())
-			{
+			if (!(*it).IsUntransformed()) {
 				const aiVector2D& trl = (*it).mTranslation;
 				const aiVector2D& scl = (*it).mScaling;
 
+				// fixme: simplify ..
 				++transformedChannels;
 				aiMatrix3x3 matrix;
 
@@ -555,7 +532,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 				m5.a3 += trl.x; m5.b3 += trl.y;
 				matrix = m2 * m4 * matrix * m3 * m5;
 				
-				for (src = dest; src != end; ++src)	{
+				for (src = dest; src != end; ++src)	{ /* manual homogenious divide */
 					src->z = 1.f;
 					*src = matrix * *src;
 					src->x /= src->z;
@@ -570,10 +547,9 @@ void TextureTransformStep::Execute( aiScene* pScene)
 	}
 
 	// Print some detailled statistics into the log
-	if (!DefaultLogger::isNullLogger())
-	{
-		if (transformedChannels)
-		{
+	if (!DefaultLogger::isNullLogger())	{
+
+		if (transformedChannels)	{
 			::sprintf(buffer,"TransformUVCoordsProcess end: %i output channels (in: %i, modified: %i)",
 				outChannels,inChannels,transformedChannels);
 

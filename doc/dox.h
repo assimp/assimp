@@ -664,173 +664,7 @@ the bone information is described later on.
 
 @section material Materials
 
-All materials are stored in an array of aiMaterial inside the aiScene. Each aiMesh refers to one 
-material by its index in the array. Due to the vastly diverging definitions and usages of material
-parameters there is no hard definition of a material structure. Instead a material is defined by
-a set of properties accessible by their names. Have a look at aiMaterial.h to see what types of 
-properties are defined. In this file there are also various functions defined to test for the
-presence of certain properties in a material and retrieve their values.
-
-Example to convert from an ASSIMP material to a Direct3D 9 material for use with the fixed 
-function pipeline. Textures are not handled, only colors and the specular power, sometimes
-also refered to as "shininess":
-@code
-
-void ConvertColor ( const aiColor4D& clrIn, D3DCOLORVALUE& clrOut )
-{
-   clrOut.r = clrIn.r;
-   clrOut.g = clrIn.g;
-   clrOut.b = clrIn.b;
-   clrOut.a = clrIn.a;
-}
-
-void ConvertMaterial( aiMaterial* matIn, D3DMATERIAL9* matOut )
-{ 
-   // ***** DIFFUSE MATERIAL COLOR
-   aiColor4D clr(0.0f,0.0f,0.0f,1.0f);
-   // if the material property is not existing, the passed color pointer
-   // won't be modified, therefore the diffuse color would be BLACK in this case
-   aiGetMaterialColor(matIn,AI_MATKEY_COLOR_DIFFUSE,&clr);
-   ConvertColor ( clr, matOut.Diffuse ); 
-
-   // ***** SPECULAR MATERIAL COLOR
-   clr = aiColor4D(1.0f,1.0f,1.0f,1.0f);
-   aiGetMaterialColor(matIn,AI_MATKEY_COLOR_SPECULAR,&clr);
-   ConvertColor ( clr, matOut.Specular ); 
-
-   // ***** AMBIENT MATERIAL COLOR
-   clr = aiColor4D(0.0f,0.0f,0.0f,1.0f);
-   aiGetMaterialColor(matIn,AI_MATKEY_COLOR_AMBIENT,&clr);
-   ConvertColor ( clr, matOut.Ambient ); 
-
-   // ***** EMISIVE MATERIAL COLOR (Self illumination)
-   clr = aiColor4D(0.0f,0.0f,0.0f,1.0f);
-   aiGetMaterialColor(matIn,AI_MATKEY_COLOR_EMISSIVE,&clr);
-   ConvertColor ( clr, matOut.Emissive ); 
-
-   // ***** SHININESS (Phong power)  
-   matOut.Power = 0.0f;
-   aiGetMaterialFloat(matIn,AI_MATKEY_COLOR_EMISSIVE,&matOut.Power);
-}
-@endcode
-
-Textures:
-
-Textures can have various types and intended purposes. Sometimes ASSIMP is not able to
-determine the exact designated use of a texture. Normally it will assume a texture to be
-a diffuse color map by default. Texture types:
-
-<b>1. Diffuse textures.</b> Diffuse textures are combined with the result of the diffuse lighting term.
-<br>
-<b>2. Specular textures.</b> Specular textures are combined with the result of the specular lighting term.
-Generally speaking, they can be used to map a texture onto specular highlights.
-<br>
-<b>3. Ambient textures.</b> Ambient textures are combined with the result of the ambient lighting term. 
-<br>
-<b>4. Emissive textures.</b> Emissive textures are combined with the emissive base color of the material. 
-The result is then added to the final pixel color. Emissive textures are sometimes called
-"Self ilumination maps".
-<br>
-<b>5. Opacity textures.</b> Opacity textures specify the opacity of a texel. They are 
-normally grayscale images, black stands for fully transparent, white for fully opaque.
-<br>
-<b>6. Height maps.</b> Height maps specify the relative height of a point on a triangle on a
-per-texel base. Normally height maps (sometimes called "Bump maps") are converted to normal
-maps before rendering. Height maps are normally grayscale textures. Height maps could also
-be used as displacement maps on highly tesselated surfaces.
-<br>
-<b>7. Normal maps.</b> Normal maps contain normal vectors for a single texel, in tangent space.
-They are not bound to an object. However, all lighting computations must be done in tangent space. 
-There are many resources on Normal Mapping on the internet.
-<br>
-<b>8. Shininess maps</b> Shininess maps (sometimes called "Gloss" or "SpecularMap") specify
-the shininess of a texel mapped on a surface. They are normally used together with normal maps
-to make flat surfaces look as if they were real 3d objects.
-<br>
-
-Textures are generally defined by a set of parameters including
-<br>
-<b>1. The path to the texture.</b>  This property is always set. If it is not set, a texture 
-is not existing. This can either be a valid path (beware, sometimes
-it could be a 8.3 file name!) or an asterisk (*) suceeded by a zero-based index, the latter being
-a reference to an embedded texture (see the "Textures" section for more details). I suggest using code
-like this to find out whether a texture is embedded or not:
-@code
-aiString path; // contains the path obtained via aiGetMaterialString()
-const aiScene* scene; // valid aiScene instance
-
-const char* szData = path.data;
-if ('*' == *szData)
-{
-   int index = atoi(szData+1);
-   ai_assert(index < scene->mNumTextures);
-
-   // your loading code for loading from aiTexture's ...
-}
-else // your loading code to load from a path ...
-@endcode
-<br>
-<b>2. An UV coordinate index.</b> This is an index into the UV coordinate set list of the
-corresponding mesh. Note: Some formats don't define this, so beware, it could be that
-a second diffuse texture in a mesh was originally intended to use a second UV channel although
-ASSIMP says it uses the first one. UV coordinate source indices are defined by the
-<i>AI_MATKEY_UVWSRC_&lt;textype&gt;(&lt;texindex&gt;)</i> material property. Assume 0 as default value if
-this property is not set.
-<br>
-<b>3. A blend factor.</b> This is used if multiple textures are assigned to a slot, e.g. two
-or more textures on the diffuse channel. A texture's color value is multiplied with its
-blend factor before it is combined with the previous color value (from the last texture or the 
-diffuse/specular/ambient/emissive base color) using
-a blend operation (see 4.). Blend factor are defined by the
-<i>AI_MATKEY_TEXBLEND_&lt;textype&gt;(&lt;texindex&gt;)</i> material property. Assume 1.0f as default value 
-if this property is not set.
-<br>
-<b>4. A blend operation.</b> This is used if multiple textures are assigned to a slot, e.g. two
-or more textures on the diffuse channel. After a texture's color value has been multiplied
-with its blend factor, the blend operation is used to combine it with the previous color value 
-(from the last texture or the diffuse/specular/ambient/emissive base color).
-Blend operations are stored as integer property, however their type is aiTextureOp.
-Blend factor are defined by the <i>AI_TEXOP_BLEND_&lt;textype&gt;(&lt;texindex&gt;)</i> material property. Assume
-aiTextureOp_Multiply as default value if this property is not set.
-<br>
-<b>5. Mapping modes for all axes </b> The mapping mode for an axis specifies how the rendering
-system should deal with UV coordinates beyond the 0-1 range. Mapping modes are
-defined by the <i>AI_MATKEY_MAPPINGMODE_&lt;axis&gt;_&lt;textype&gt;(&lt;texindex&gt;)</i> material property.
-&lt;axis&gt; is either U,V or W. The data type is int, however the real type is aiTextureMapMode.
-The default value is aiTextureMapMode_Wrap.
-
-You can use the aiGetMaterialTexture() function to read all texture parameters at once (maybe
-if you're too lazy to read 4 or 5 values manually if there's a smart helper function 
-doing all the work for you ...).
-
-@code
-if (AI_SUCCESS != aiGetMaterialTexture(
-   pcMat,               // aiMaterial structure
-   0,                   // we want the first diffuse texture
-   AI_TEXTYPE_DIFFUSE,  // we want the first diffuse texture
-   &path,               // receives the path of the texture
-   &uv,                 // receives the UV index of the texture
-   &blend,              // receives the blend factor of the texture
-   &op,                 // receives the blend operation of the texture
-   &mmodes,				// receives an array of three aiMappingMode's, each specifying
-	                    // the mapping mode for a particular axis. Order: UV(W)
-   // (you may also specify 0 for a parameter if you don't need it)
-   )) 
-{
-   // cry, jump out of the window, but don't take drugs if this occurs!
-}
-@endcode
-
-<br>
-As you can see, there's much undefined and subject to speculations. When implementing
-ASSIMP's material system the most important point was to keep it as flexible as possible.
-The first step you should do when you implement ASSIMP materials into your application is
-to make a list of all material properties your rendering engine supports, too. Then I suggest
-you to take a look at the remaining material properties: many of them can be simplified and replaced
-with other properties, e.g. a diffuse texture blend factor can often be premultiplied 
-with the diffuse base color! At last a few properties you do not support will remain. Forget them.
-Most models won't look worse if only small details of its material cannot be rendered as it was intended
-by the artist.
+See the @link materials Material System Page. @endlink
 
 @section bones Bones
 
@@ -895,7 +729,6 @@ If you need hints on how to convert to or from quaternions, have a look at the
 using logarithmic interpolation for the scaling keys if you happen to need them - usually you don't
 need them at all.
 
-
 @section textures Textures
 
 Normally textures used by assets are stored in separate files, however,
@@ -920,6 +753,356 @@ aiTexture::mWidth specifies the size of the texture data in bytes, aiTexture::pc
 a pointer to the raw image data and aiTexture::achFormatHint is either zeroed or
 containing the file extension of the format of the embedded texture. This is only
 set if ASSIMP is able to determine the file format.
+*/
+
+/**
+@page materials Material System
+
+@section General Overview
+
+THIS SECTION IS NOT YET COMPLETE AND WIP!<br>
+All materials are stored in an array of aiMaterial inside the aiScene. 
+
+Each aiMesh refers to one 
+material by its index in the array. Due to the vastly diverging definitions and usages of material
+parameters there is no hard definition of a material structure. Instead a material is defined by
+a set of properties accessible by their names. Have a look at aiMaterial.h to see what types of 
+properties are defined. In this file there are also various functions defined to test for the
+presence of certain properties in a material and retrieve their values.
+
+@section keys Constants
+
+All material key constants start with 'AI_MATKEY' (it's an ugly macro for historical reasons, don't ask). 
+
+<table border="1">
+  <tr>
+    <th>Name</th>
+    <th>Data Type</th>
+    <th>Default Value</th>
+	<th>Meaning</th>
+	<th>Notes</th>
+  </tr>
+  <tr>
+    <td><tt>NAME</tt></td>
+    <td>aiString</td>
+    <td>n/a</td>
+	<td>The name of the material, if available. </td>
+	<td>Ignored by <tt>aiProcess_RemoveRedundantMaterials</tt>. Materials are considered equal even if their names are different.</td>
+  </tr>
+  <tr>
+    <td><tt>COLOR_DIFFUSE</tt></td>
+    <td>aiColor3D</td>
+    <td>black (0,0,0)</td>
+	<td>Diffuse color of the material. This is typically scaled by the amount of incoming diffuse light (e.g. using gouraud shading) </td>
+	<td>---</td>
+  </tr>
+  <tr>
+    <td><tt>COLOR_SPECULAR</tt></td>
+    <td>aiColor3D</td>
+    <td>black (0,0,0)</td>
+	<td>Specular color of the material. This is typically scaled by the amount of incoming specular light (e.g. using phong shading) </td>
+	<td>---</td>
+  </tr>
+  <tr>
+    <td><tt>COLOR_AMBIENT</tt></td>
+    <td>aiColor3D</td>
+    <td>black (0,0,0)</td>
+	<td>Ambient color of the material. This is typically scaled by the amount of ambient light </td>
+	<td>---</td>
+  </tr>
+  <tr>
+    <td><tt>COLOR_EMISSIVE</tt></td>
+    <td>aiColor3D</td>
+    <td>black (0,0,0)</td>
+	<td>Emissive color of the material. This is the amount of light emitted by the object. In real time applications it will usually not affect surrounding objects, but raytracing applications may wish to treat emissive objects as light sources. </td>
+	<td>---</tt></td>
+  </tr>
+
+  <tr>
+    <td><tt>COLOR_TRANSPARENT</tt></td>
+    <td>aiColor3D</td>
+    <td>black (0,0,0)</td>
+	<td>Defines the transparent color of the material, this is the color to be multiplied with the color of 
+	translucent light to construct the final 'destination color' for a particular position in the screen buffer. T </td>
+	<td>---</tt></td>
+  </tr>
+
+  <tr>
+    <td><tt>WIREFRAME</tt></td>
+    <td>int</td>
+    <td>false</td>
+	<td>Specifies whether wireframe rendering must be turned on for the material. 0 for false, !0 for true. </td>
+	<td>---</tt></td>
+  </tr>
+
+  <tr>
+    <td><tt>TWOSIDED</tt></td>
+    <td>int</td>
+    <td>false</td>
+	<td>Specifies whether meshes using this material must be rendered without backface culling. 0 for false, !0 for true. </td>
+	<td>Some importers set this property if they don't know whether the output face oder is right. As long as it is not set, you may safely enable backface culling.</tt></td>
+  </tr>
+
+  <tr>
+    <td><tt>SHADING_MODEL</tt></td>
+    <td>int</td>
+    <td>gouraud</td>
+	<td>One of the #aiShadingMode enumerated values. Defines the library shading model to use for (real time) rendering to approximate the original look of the material as closely as possible. </td>
+	<td>The presence of this key might indicate a more complex material. If absent, assume phong shading only if a specular exponent is given.</tt></td>
+  </tr>
+
+  <tr>
+    <td><tt>BLEND_FUNC</tt></td>
+    <td>int</td>
+    <td>false</td>
+	<td>One of the #aiBlendMode enumerated values. Defines how the final color value in the screen buffer is computed from the given color at that position and the newly computed color from the material. Simply said, alpha blending settings.</td>
+	<td>-</td>
+  </tr>
+
+  <tr>
+    <td><tt>OPACITY</tt></td>
+    <td>float</td>
+    <td>1.0</td>
+	<td>Defines the opacity of the material in a range between 0..1.</td>
+	<td>Use this value to decide whether you have to activate alpha blending for rendering. <tt>OPACITY</tt> != 1 usually also implies TWOSIDED=1 to avoid cull artifacts.</td>
+  </tr>
+
+  <tr>
+    <td><tt>SHININESS</tt></td>
+    <td>float</td>
+    <td>0.f</td>
+	<td>Defines the shininess of a phong-shaded material. This is actually the exponent of the phong specular equation</td>
+	<td><tt>SHININESS</tt>=0 is equivalent to <tt>SHADING_MODEL</tt>=<tt>aiShadingMode_Gouraud</tt>.</td>
+  </tr>
+
+  <tr>
+    <td><tt>SHININESS_STRENGTH</tt></td>
+    <td>float</td>
+    <td>1.0</td>
+	<td>Scales the specular color of the material.</td>
+	<td>This value is kept separate from the specular color by most modelers, and so do we.</td>
+  </tr>
+
+  <tr>
+    <td><tt>REFRACTI</tt></td>
+    <td>float</td>
+    <td>1.0</td>
+	<td>Defines the Index Of Refraction for the material. That's not supported by most file formats.</td>
+	<td>Might be of interest for raytracing.</td>
+  </tr>
+
+  <tr>
+    <td><tt>TEXTURE(t,n)</tt></td>
+    <td>aiString</td>
+    <td>n/a</td>
+	<td>Defines the path to the n'th texture on the stack 't', where 'n' is any value >= 0 and 't' is one of the #aiTextureType enumerated values.</td>
+	<td>See the 'Textures' section below.</td>
+  </tr>
+
+</table>
+
+@section cpp C++-API
+
+Retrieving a property from a material is done using various utility functions. For C++ it's simply calling aiMaterial::Get()
+
+@code
+
+aiMaterial* mat = .....
+
+// The generic way
+if(AI_SUCCESS != mat->Get(<material-key>,<where-to-store>)) {
+   // handle epic failure here
+}
+
+@endcode
+
+Simple, isn't it? To get the name of a material you would use
+
+@code
+
+aiString name;
+mat->Get(AI_MATKEY_NAME,name);
+
+@endcode
+
+Or for the diffuse color ('color' won't be modified if the property is not set)
+
+@code
+
+aiColor3D color (0.f,0.f,0.f);
+mat->Get(AI_MATKEY_COLOR_DIFFUSE,color);
+
+@endcode
+
+<b>Note:</b> Get() is actually a template with explicit specializations for aiColor3D, aiColor4D, aiString, float, int and some others.
+Make sure that the type of the second parameter is matching the expected data type of the material property (no compile-time check yet!). 
+Don't follow this advice if you wish to encounter very strange results.
+
+@section C C-API
+
+For good old C it's slightly different. Take a look at the aiGetMaterialGet<data-type> functions.
+
+@code
+
+aiMaterial* mat = .....
+
+if(AI_SUCCESS != aiGetMaterialFloat(mat,<material-key>,<where-to-store>)) {
+   // handle epic failure here
+}
+
+@endcode
+
+To get the name of a material you would use
+
+@code
+
+aiString name;
+aiGetMaterialString(mat,AI_MATKEY_NAME,&name);
+
+@endcode
+
+Or for the diffuse color ('color' won't be modified if the property is not set)
+
+@code
+
+aiColor3D color (0.f,0.f,0.f);
+aiGetMaterialColor(mat,AI_MATKEY_COLOR_DIFFUSE,&color);
+
+@endcode
+
+@section pseudo Pseudo Code Listing
+
+For completeness, the following is a very rough pseudo-code sample showing how to evaluate Assimp materials in your 
+shading pipeline. You'll probably want to limit your handling of all those material keys to a reasonable subset suitable for your purposes 
+(for example most 3d engines won't support highly complex multi-layer materials, but many 3d modellers do).
+
+Also note that this sample is targeted at a (shader-based) rendering pipeline for real time graphics.
+
+INCOMPLETE! WIP!
+
+@code
+
+// ---------------------------------------------------------------------------------------
+// Evaluate multiple textures stacked on top of each other
+float3 EvaluateStack(stack)
+{
+  // For the 'diffuse' stack stack.base_color would be COLOR_DIFFUSE
+  // and TEXTURE(aiTextureType_DIFFUSE,n) the n'th texture.
+
+  float3 base = stack.base_color;
+  for (every texture in stack)
+  {
+    // assuming we have explicit & pretransformed UVs for this texture
+    float3 color = SampleTexture(texture,uv); 
+
+    // scale by texture blend factor
+    color *= texture.blend;
+
+    if (texture.op == add)
+      base += color;
+    else if (texture.op == multiply)
+      base *= color;
+    else // other blend ops go here
+  }
+  return base;
+}
+
+// ---------------------------------------------------------------------------------------
+// Compute the diffuse contribution for a pixel
+float3 ComputeDiffuseContribution()
+{
+  if (shading == none)
+     return float3(1,1,1);
+
+  float3 intensity (0,0,0);
+  for (all lights in range)
+  {
+    float fac = 1.f;
+    if (shading == gouraud)
+      fac =  lambert-term ..
+    else // other shading modes go here
+
+    // handling of different types of lights, such as point or spot lights
+    // ...
+
+    // and finally sum the contribution of this single light ...
+    intensity += light.diffuse_color * fac;
+  }
+  // ... and combine the final incoming light with the diffuse color
+  return EvaluateStack(diffuse) * intensity;
+}
+
+// ---------------------------------------------------------------------------------------
+// Compute the specular contribution for a pixel
+float3 ComputeSpecularContribution()
+{
+  if (shading == gouraud || specular_strength == 0 || specular_exponent == 0)
+    return float3(0,0,0);
+
+  float3 intensity (0,0,0);
+  for (all lights in range)
+  {
+    float fac = 1.f;
+    if (shading == phong)
+      fac =  phong-term ..
+    else // other specular shading modes go here
+
+    // handling of different types of lights, such as point or spot lights
+    // ...
+
+    // and finally sum the specular contribution of this single light ...
+    intensity += light.specular_color * fac;
+  }
+  // ... and combine the final specular light with the specular color
+  return EvaluateStack(specular) * intensity * specular_strength;
+}
+
+// ---------------------------------------------------------------------------------------
+// Compute the ambient contribution for a pixel
+float3 ComputeAmbientContribution()
+{
+  if (shading == none)
+     return float3(0,0,0);
+
+  float3 intensity (0,0,0);
+  for (all lights in range)
+  {
+    float fac = 1.f;
+
+    // handling of different types of lights, such as point or spot lights
+    // ...
+
+    // and finally sum the ambient contribution of this single light ...
+    intensity += light.ambient_color * fac;
+  }
+  // ... and combine the final ambient light with the ambient color
+  return EvaluateStack(ambient) * intensity;
+}
+
+// ---------------------------------------------------------------------------------------
+// Compute the final color value for a pixel
+// @param prev Previous color at that position in the framebuffer
+float4 PimpMyPixel (float4 prev)
+{
+  // .. handle displacement mapping per vertex
+  // .. handle bump/normal mapping
+
+  // Get all single light contribution terms
+  float3 diff = ComputeDiffuseContribution();
+  float3 spec = ComputeSpecularContribution(); 
+  float3 ambi = ComputeAmbientContribution();
+
+  // .. and compute the final color value for this pixel
+  float3 color = diff + spec + ambi;
+
+  float3 opac  = EvaluateStack(opacity);
+
+  if (blend_func == multiply)
+       return prev
+}
+
+@endcode
+
 */
 
 /** 

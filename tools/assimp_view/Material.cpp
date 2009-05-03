@@ -1020,6 +1020,7 @@ int CMaterialManager::CreateMaterial(
 		sMacro[iCurrent].Definition = "1";
 		++iCurrent;
 	}
+	char buff[32];
 	if (pcMesh->piLightmapTexture)
 	{
 		sMacro[iCurrent].Name = "AV_LIGHTMAP_TEXTURE";
@@ -1036,6 +1037,13 @@ int CMaterialManager::CreateMaterial(
 		}
 		else sMacro[iCurrent].Definition = "IN.TexCoord0";
 		sMacro[iCurrent].Name = "AV_LIGHTMAP_TEXTURE_UV_COORD";
+
+		++iCurrent;float f= 1.f;
+		aiGetMaterialFloat(pcMat,AI_MATKEY_TEXBLEND_LIGHTMAP(0),&f);
+		sprintf(buff,"%f",f);
+
+		sMacro[iCurrent].Name = "LM_STRENGTH";
+		sMacro[iCurrent].Definition = buff;
 		++iCurrent;
 	}
 	if (pcMesh->piNormalTexture && !bib)
@@ -1346,7 +1354,7 @@ int CMaterialManager::EndMaterial (AssetHelper::MeshHelper* pcMesh)
 	// reenable culling if necessary
 	if (pcMesh->twosided && g_sOptions.bCulling) {
 		g_piDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
-	}
+	}		
 
 	return 1;
 }

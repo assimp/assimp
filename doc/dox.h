@@ -760,8 +760,7 @@ set if ASSIMP is able to determine the file format.
 
 @section General Overview
 
-THIS SECTION IS NOT YET COMPLETE AND WIP!<br>
-All materials are stored in an array of aiMaterial inside the aiScene. 
+Warn, WIP. All materials are stored in an array of aiMaterial inside the aiScene. 
 
 Each aiMesh refers to one 
 material by its index in the array. Due to the vastly diverging definitions and usages of material
@@ -769,6 +768,33 @@ parameters there is no hard definition of a material structure. Instead a materi
 a set of properties accessible by their names. Have a look at aiMaterial.h to see what types of 
 properties are defined. In this file there are also various functions defined to test for the
 presence of certain properties in a material and retrieve their values.
+
+@section mat_tex Textures
+
+Textures are organized in stacks, each stack being evaluated independently. The final color value from a particular texture stack is used in the shading equation. For example, the computed color value of the diffuse texture stack (aiTextureType_DIFFUSE) is multipled with the amount of incoming diffuse light to obtain the final diffuse color of a pixel.
+
+@code
+
+ Stack                               Resulting equation
+
+------------------------
+| Constant base color  |             color
+------------------------ 
+| Blend operation 0    |             +
+------------------------
+| Strength factor 0    |             0.25*
+------------------------
+| Texture 0            |             texture_0
+------------------------ 
+| Blend operation 1    |             *
+------------------------
+| Strength factor 1    |             1.0*
+------------------------
+| Texture 1            |             texture_1
+------------------------
+  ...                                ...
+
+@endcode
 
 @section keys Constants
 
@@ -896,7 +922,71 @@ All material key constants start with 'AI_MATKEY' (it's an ugly macro for histor
     <td>aiString</td>
     <td>n/a</td>
 	<td>Defines the path to the n'th texture on the stack 't', where 'n' is any value >= 0 and 't' is one of the #aiTextureType enumerated values.</td>
-	<td>See the 'Textures' section below.</td>
+	<td>See the 'Textures' section above.</td>
+  </tr>
+
+  <tr>
+    <td><tt>TEXBLEND(t,n)</tt></td>
+    <td>float</td>
+    <td>n/a</td>
+	<td>Defines the strength the n'th texture on the stack 't'. All color components (rgb) are multipled with this factor *before* any further processing is done.</td>
+	<td>-</td>
+  </tr>
+
+  <tr>
+    <td><tt>TEXOP(t,n)</tt></td>
+    <td>int</td>
+    <td>n/a</td>
+	<td>One of the #aiTextureOp enumerated values. Defines the arithmetic operation to be used to combine the n'th texture on the stack 't' with the n-1'th. <tt>TEXOP(t,0)</tt> refers to the blend operation between the base color for this stack (e.g. <tt>COLOR_DIFFUSE</tt> for the diffuse stack) and the first texture.</td>
+	<td>-</td>
+  </tr>
+
+  <tr>
+    <td><tt>MAPPING(t,n)</tt></td>
+    <td>int</td>
+    <td>n/a</td>
+	<td>Defines how the input mapping coordinates for sampling the n'th texture on the stack 't' are computed. Usually explicit UV coordinates are provided, but some model file formats might also be using basic shapes, such as spheres or cylinders, to project textures onto meshes.</td>
+	<td>See the 'Textures' section below. #aiProcess_GenUVCoords can be used to let Assimp compute proper UV coordinates from projective mappings.</td>
+  </tr>
+
+  <tr>
+    <td><tt>UVWSRC(t,n)</tt></td>
+    <td>int</td>
+    <td>n/a</td>
+	<td>Defines the UV channel to be used as input mapping coordinates for sampling the n'th texture on the stack 't'. All meshes assigned to this material share the same UV channel setup</td>
+	<td>Presence of this key implies <tt>MAPPING(t,n)</tt> to be #aiTextureMapping_UV</td>
+  </tr>
+
+  <tr>
+    <td><tt>MAPPINGMODE_U(t,n)</tt></td>
+    <td>int</td>
+    <td>n/a</td>
+	<td>Any of the #aiTextureMapMode enumerated values. Defines the texture wrapping mode on the x axis for sampling the n'th texture on the stack 't'. 'Wrapping' occurs whenever UVs lie outside the 0..1 range. </td>
+	<td>-</td>
+  </tr>
+
+  <tr>
+    <td><tt>MAPPINGMODE_V(t,n)</tt></td>
+    <td>int</td>
+    <td>n/a</td>
+	<td>Wrap mode on the v axis. See <tt>MAPPINGMODE_U</tt>. </td>
+	<td>-</td>
+  </tr>
+
+   <tr>
+    <td><tt>TEXMAP_AXIS(t,n)</tt></td>
+    <td>aiVector3D</td>
+    <td>n/a</td>
+	<td></tt> Defines the base axis to to compute the mapping coordinates for the n'th texture on the stack 't' from. This is not required for UV-mapped textures. For instance, if <tt>MAPPING(t,n)</tt> is #aiTextureMapping_SPHERE, U and V would map to longitude and latitude of a sphere around the given axis. The axis is given in local mesh space.</td>
+	<td>-</td>
+  </tr>
+
+  <tr>
+    <td><tt>TEXFLAGS(t,n)</tt></td>
+    <td>int</td>
+    <td>n/a</td>
+	<td></tt> Defines miscellaneous flag for the n'th texture on the stack 't'. This is a bitwise combination of the #aiTextureFlags enumerated values.</td>
+	<td>-</td>
   </tr>
 
 </table>

@@ -344,11 +344,13 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 						}
 
 #if 0
-						// process vertex weights - not yet supported
+						// process vertex weights. We can't properly reconstruct the whole skeleton for now,
+						// but we can create dummy bones for all weight channels which we have.
 						for (unsigned int w = 0; w < layer.mWeightChannels.size();++w)
 						{
 						}
 #endif
+
 						face.mIndices[q] = vert;
 					}
 					pf->mIndices = face.mIndices;
@@ -607,14 +609,14 @@ void LWOImporter::ResolveTags()
 {
 	// --- this function is used for both LWO2 and LWOB
 	mMapping->resize(mTags->size(),0xffffffff);
-	for (unsigned int a = 0; a  < mTags->size();++a)
-	{
+	for (unsigned int a = 0; a  < mTags->size();++a)	{
+
 		const std::string& c = (*mTags)[a];
-		for (unsigned int i = 0; i < mSurfaces->size();++i)
-		{
+		for (unsigned int i = 0; i < mSurfaces->size();++i)	{
+
 			const std::string& d = (*mSurfaces)[i].mName;
-			if (!ASSIMP_stricmp(c,d))
-			{
+			if (!ASSIMP_stricmp(c,d))	{
+
 				(*mMapping)[a] = i;
 				break;
 			}
@@ -625,24 +627,23 @@ void LWOImporter::ResolveTags()
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::ResolveClips()
 {
-	for( unsigned int i = 0; i < mClips.size();++i)
-	{
+	for( unsigned int i = 0; i < mClips.size();++i)	{
+
 		Clip& clip = mClips[i];
-		if (Clip::REF == clip.type)
-		{
-			if (clip.clipRef >= mClips.size())
-			{
+		if (Clip::REF == clip.type)	{
+
+			if (clip.clipRef >= mClips.size())	{
 				DefaultLogger::get()->error("LWO2: Clip referrer index is out of range");
 				clip.clipRef = 0;
 			}
+
 			Clip& dest = mClips[clip.clipRef];
-			if (Clip::REF == dest.type)
-			{
+			if (Clip::REF == dest.type) {
 				DefaultLogger::get()->error("LWO2: Clip references another clip reference");
 				clip.type = Clip::UNSUPPORTED;
 			}
-			else
-			{
+
+			else	{
 				clip.path = dest.path;
 				clip.type = dest.type;
 			}
@@ -654,17 +655,16 @@ void LWOImporter::ResolveClips()
 void LWOImporter::AdjustTexturePath(std::string& out)
 {
 	// --- this function is used for both LWO2 and LWOB
-	if (!mIsLWO2 && ::strstr(out.c_str(), "(sequence)"))
-	{
+	if (!mIsLWO2 && ::strstr(out.c_str(), "(sequence)"))	{
+
 		// remove the (sequence) and append 000
 		DefaultLogger::get()->info("LWOB: Sequence of animated texture found. It will be ignored");
 		out = out.substr(0,out.length()-10) + "000";
 	}
 
-	// format: drive:path/file - we need to insert a slash after the drive
+	// format: drive:path/file - we just need to insert a slash after the drive
 	std::string::size_type n = out.find_first_of(':');
-	if (std::string::npos != n)
-	{
+	if (std::string::npos != n)	{
 		out.insert(n+1,"/");
 	}
 }
@@ -744,7 +744,7 @@ void LWOImporter::LoadLWO2Polygons(unsigned int length)
 	default:
 
 		// hm!? wtf is this? ok ...
-		DefaultLogger::get()->error("LWO2: Encountered unknown polygon type");
+		DefaultLogger::get()->error("LWO2: Ignoring unknown polygon type.");
 		break;
 	}
 
@@ -785,23 +785,22 @@ void LWOImporter::CopyFaceIndicesLWO2(FaceList::iterator& it,
 	uint16_t*& cursor, 
 	const uint16_t* const end)
 {
-	while (cursor < end)
-	{
-		LWO::Face& face = *it;++it;
-		if((face.mNumIndices = (*cursor++) & 0x03FF)) // swapping has already been done
-		{
+	while (cursor < end)	{
+
+		LWO::Face& face = *it++;;
+		if((face.mNumIndices = (*cursor++) & 0x03FF)) /* byte swapping has already been done */ {
 			face.mIndices = new unsigned int[face.mNumIndices];
 			for(unsigned int i = 0; i < face.mNumIndices; i++)
 			{
 				face.mIndices[i] = ReadVSizedIntLWO2((uint8_t*&)cursor) + mCurLayer->mPointIDXOfs;
 				if(face.mIndices[i] > mCurLayer->mTempPoints.size())
 				{
-					DefaultLogger::get()->warn("LWO2: face index is out of range");
+					DefaultLogger::get()->warn("LWO2: Failure evaluating face record, index is out of range");
 					face.mIndices[i] = (unsigned int)mCurLayer->mTempPoints.size()-1;
 				}
 			}
 		}
-		else throw new ImportErrorException("LWO2: face has 0 indices");
+		else throw new ImportErrorException("LWO2: Encountered invalid face record with zero indices");
 	}
 }
 
@@ -817,23 +816,22 @@ void LWOImporter::LoadLWO2PolygonTags(unsigned int length)
 	if (type != AI_LWO_SURF && type != AI_LWO_SMGP)
 		return;
 
-	while (mFileBuffer < end)
-	{
+	while (mFileBuffer < end)	{
+
 		unsigned int i = ReadVSizedIntLWO2(mFileBuffer) + mCurLayer->mFaceIDXOfs;
 		unsigned int j = GetU2();
 
-		if (i >= mCurLayer->mFaces.size())
-		{
+		if (i >= mCurLayer->mFaces.size())	{
 			DefaultLogger::get()->warn("LWO2: face index in PTAG is out of range");
 			continue;
 		}
 
-		switch (type)
-		{
+		switch (type)	{
+
 		case AI_LWO_SURF:
 			mCurLayer->mFaces[i].surfaceIndex = j;
 			break;
-		case AI_LWO_SMGP:
+		case AI_LWO_SMGP: /* is that really used? */
 			mCurLayer->mFaces[i].smoothGroup = j;
 			break;
 		};
@@ -845,10 +843,8 @@ template <class T>
 VMapEntry* FindEntry(std::vector< T >& list,const std::string& name, bool perPoly)
 {
 	for (typename std::vector< T >::iterator it = list.begin(), end = list.end();it != end; ++it)	{
-		if ((*it).name == name)
-		{
-			if (!perPoly)
-			{
+		if ((*it).name == name)	{
+			if (!perPoly)	{
 				DefaultLogger::get()->warn("LWO2: Found two VMAP sections with equal names");
 			}
 			return &(*it);
@@ -864,7 +860,8 @@ VMapEntry* FindEntry(std::vector< T >& list,const std::string& name, bool perPol
 template <class T>
 inline void CreateNewEntry(T& chan, unsigned int srcIdx)
 {
-	if (!chan.name.length())return;
+	if (!chan.name.length())
+		return;
 
 	chan.abAssigned[srcIdx] = true;
 	chan.abAssigned.resize(chan.abAssigned.size()+1,false);
@@ -891,11 +888,13 @@ inline void LWOImporter::DoRecursiveVMAPAssignment(VMapEntry* base, unsigned int
 	unsigned int i;
 
 	base->abAssigned[idx] = true;
-	for (i = 0; i < numRead;++i) 
+	for (i = 0; i < numRead;++i) {
 		base->rawData[idx*base->dims+i]= data[i];
+	}
 
-	if (0xffffffff != (i = refList[idx]))
+	if (0xffffffff != (i = refList[idx])) {
 		DoRecursiveVMAPAssignment(base,numRead,i,data);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -928,29 +927,33 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 	{
 	case AI_LWO_TXUV:
 		if (dims != 2)	{
-			DefaultLogger::get()->warn("LWO2: Found UV channel with != 2 components"); 
+			DefaultLogger::get()->warn("LWO2: Skipping UV channel \'" 
+			+ name + "\' with !2 components"); 
 			return;
 		}
 		base = FindEntry(mCurLayer->mUVChannels,name,perPoly);
 		break;
 	case AI_LWO_WGHT:
+	case AI_LWO_MNVW:
 		if (dims != 1)	{
-			DefaultLogger::get()->warn("LWO2: found vertex weight map with != 1 components"); 
+			DefaultLogger::get()->warn("LWO2: Skipping Weight Channel \'" 
+			+ name + "\' with !1 components"); 
 			return;
 		}
-		base = FindEntry(mCurLayer->mWeightChannels,name,perPoly);
+		base = FindEntry((type == AI_LWO_WGHT ? mCurLayer->mWeightChannels
+			: mCurLayer->mSWeightChannels),name,perPoly);
 		break;
 	case AI_LWO_RGB:
 	case AI_LWO_RGBA:
 		if (dims != 3 && dims != 4)	{
-			DefaultLogger::get()->warn("LWO2: found vertex color map with != 3&4 components"); 
+			DefaultLogger::get()->warn("LWO2: Skipping Color Map \'" 
+			+ name + "\' with a dimension > 4 or < 3"); 
 			return;
 		}
 		base = FindEntry(mCurLayer->mVColorChannels,name,perPoly);
 		break;
 
 	case AI_LWO_MODO_NORM:
-
 		/*  This is a non-standard extension chunk used by Luxology's MODO.
 		 *  It stores per-vertex normals. This VMAP exists just once, has
 		 *  3 dimensions and is btw extremely beautiful.
@@ -958,20 +961,26 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 		if (name != "vert_normals" || dims != 3 || mCurLayer->mNormals.name.length())
 			return;
 
-		DefaultLogger::get()->info("Non-standard extension: MODO VMAP.NORM.vert_normals");
+		DefaultLogger::get()->info("Processing non-standard extension: MODO VMAP.NORM.vert_normals");
 		
 		mCurLayer->mNormals.name = name;
 		base = & mCurLayer->mNormals;
 		break;
 
+	case AI_LWO_PICK: /* these VMAPs are just silently dropped */
+	case AI_LWO_MORF:
+	case AI_LWO_SPOT:
+		return;
+
 	default: 
+		DefaultLogger::get()->warn("LWO2: Skipping unknown VMAP/VMAD channel \'" + name + "\'"); 
 		return;
 	};
 	base->Allocate((unsigned int)mCurLayer->mTempPoints.size());
 
 	// now read all entries in the map
 	type = std::min(dims,base->dims); 
-	const unsigned int diff = (dims - type)<<2;
+	const unsigned int diff = (dims - type)<<2u;
 
 	LWO::FaceList& list	= mCurLayer->mFaces;
 	LWO::PointList& pointList = mCurLayer->mTempPoints;
@@ -982,12 +991,13 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 	const unsigned int numPoints = (unsigned int)pointList.size();
 	const unsigned int numFaces  = (unsigned int)list.size();
 
-	while (mFileBuffer < end)
-	{
+	while (mFileBuffer < end)	{
+
 		unsigned int idx = ReadVSizedIntLWO2(mFileBuffer) + mCurLayer->mPointIDXOfs;
 		if (idx >= numPoints)	{
-			DefaultLogger::get()->warn("LWO2: vertex index in vmap/vmad is out of range");
-			mFileBuffer += base->dims*4;continue;
+			DefaultLogger::get()->warn("LWO2: Failure evaluating VMAP/VMAD entry \'" + name + "\', vertex index is out of range");
+			mFileBuffer += base->dims<<2u;
+			continue;
 		}
 		if (perPoly)	{
 			unsigned int polyIdx = ReadVSizedIntLWO2(mFileBuffer) + mCurLayer->mFaceIDXOfs;
@@ -995,8 +1005,8 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 				// we have already a VMAP entry for this vertex - thus
 				// we need to duplicate the corresponding polygon.
 				if (polyIdx >= numFaces)	{
-					DefaultLogger::get()->warn("LWO2: VMAD polygon index is out of range");
-					mFileBuffer += base->dims*4;
+					DefaultLogger::get()->warn("LWO2: Failure evaluating VMAD entry \'" + name + "\', polygon index is out of range");
+					mFileBuffer += base->dims<<2u;
 					continue;
 				}
 
@@ -1004,11 +1014,19 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 
 				// generate a new unique vertex for the corresponding index - but only
 				// if we can find the index in the face
+				bool had = false;
 				for (unsigned int i = 0; i < src.mNumIndices;++i)	{
-					register unsigned int srcIdx = src.mIndices[i];
-					if (idx != srcIdx)
+
+					unsigned int srcIdx = src.mIndices[i], tmp = idx;
+					do {
+						if (tmp == srcIdx)
+							break;
+					}
+					while ((tmp = refList[tmp]) != 0xffffffff);
+					if (tmp == 0xffffffff)
 						continue;
 
+					had = true;
 					refList.resize(refList.size()+1, 0xffffffff);
 						
 					idx = (unsigned int)pointList.size();
@@ -1023,7 +1041,12 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 					CreateNewEntry(mCurLayer->mVColorChannels,	srcIdx );
 					CreateNewEntry(mCurLayer->mUVChannels,		srcIdx );
 					CreateNewEntry(mCurLayer->mWeightChannels,	srcIdx );
-					CreateNewEntry(mCurLayer->mNormals,	srcIdx );
+					CreateNewEntry(mCurLayer->mSWeightChannels,	srcIdx );
+					CreateNewEntry(mCurLayer->mNormals, srcIdx );	
+				}
+				if (!had) {
+					DefaultLogger::get()->warn("LWO2: Failure evaluating VMAD entry \'" + name + "\', vertex index wasn't found in that polygon");
+					ai_assert(had);
 				}
 			}
 		}

@@ -243,6 +243,11 @@ namespace LWO {
 #define AI_LWO_RGBA  AI_IFF_FOURCC('R','G','B','A')
 #define AI_LWO_WGHT  AI_IFF_FOURCC('W','G','H','T')
 
+#define AI_LWO_MNVW  AI_IFF_FOURCC('M','N','V','W')
+#define AI_LWO_MORF  AI_IFF_FOURCC('M','O','R','F')
+#define AI_LWO_SPOT  AI_IFF_FOURCC('S','P','O','T')
+#define AI_LWO_PICK  AI_IFF_FOURCC('P','I','C','K')
+
 // MODO extension - per-vertex normal vectors
 #define AI_LWO_MODO_NORM AI_IFF_FOURCC('N', 'O', 'R', 'M')
 
@@ -645,6 +650,9 @@ struct Layer
 
 	/** Weight channel list from the file */
 	WeightChannelList mWeightChannels;
+
+	/** Subdivision weight channel list from the file */
+	WeightChannelList mSWeightChannels;
 
 	/** Vertex color list from the file */
 	VColorChannelList mVColorChannels;

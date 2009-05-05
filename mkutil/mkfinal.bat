@@ -86,18 +86,20 @@ copy ..\CREDITS final\%OUT_BIN%\CREDITS
 copy bin_readme.txt final\%OUT_BIN%\README
 copy bin_readme.txt final\%OUT_BIN%\README
 
-copy ..\doc\AssimpCmdDOc_Html\AssimpCmdDoc.chm  final\%OUT_BIN%\CommandLine.chm
+copy ..\doc\AssimpCmdDoc_Html\AssimpCmdDoc.chm  final\%OUT_BIN%\CommandLine.chm
 
 rem -----------------------------------------------------
 rem Do a clean export of the repository and build SDK
 rem
-rem We take the current revision and remove ./mkutil
-rem and ./port. 
+rem We take the current revision and remove some stuff
+rem that is nto yet ready to be published.
 rem -----------------------------------------------------
 
 svn export .\..\  final\%OUT_SDK%
-RD  /s /q final\%OUT_SDK%\mkutil
-RD  /s /q final\%OUT_SDK%\port
+rem RD  /s /q final\%OUT_SDK%\mkutil
+RD  /s /q final\%OUT_SDK%\port\jAssimp
+RD  /s /q final\%OUT_SDK%\port\Assimp.net
+RD  /s /q final\%OUT_SDK%\workspaces\jidea5.1
 
 rem Copy doc to a suitable place
 move final\%OUT_SDK%\doc\AssimpDoc_Html\AssimpDoc.chm final\%OUT_SDK%\Documentation.chm

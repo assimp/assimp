@@ -284,10 +284,7 @@ void ObjFileMtlImporter::getTexture()
 	}
 
 	std::string strTexture;
-	m_DataIt = getName<DataArrayIt>( m_DataIt, m_DataItEnd, strTexture );
-	if ( m_DataItEnd == m_DataIt )
-		return;
-
+	getName<DataArrayIt>( m_DataIt, m_DataItEnd, strTexture );
 	out->Set( strTexture );
 }
 

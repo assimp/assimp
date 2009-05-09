@@ -76,6 +76,25 @@ IDirect3DTexture9* g_pcTexture		= NULL;
 bool g_bPlay						= false;
 double g_dCurrent = 0.;
 
+// default pp steps
+unsigned int ppsteps = aiProcess_CalcTangentSpace | // calculate tangents and bitangents if possible
+		aiProcess_JoinIdenticalVertices    | // join identical vertices/ optimize indexing
+		aiProcess_ValidateDataStructure    | // perform a full validation of the loader's output
+		aiProcess_ImproveCacheLocality     | // improve the cache locality of the output vertices
+		aiProcess_RemoveRedundantMaterials | // remove redundant materials
+		aiProcess_FindDegenerates          | // remove degenerated polygons from the import
+		aiProcess_FindInvalidData          | // detect invalid model data, such as invalid normal vectors
+		aiProcess_GenUVCoords              | // convert spherical, cylindrical, box and planar mapping to proper UVs
+		aiProcess_TransformUVCoords        | // preprocess UV transformations (scaling, translation ...)
+		aiProcess_FindInstances            | // search for instanced meshes and remove them by references to one master
+		aiProcess_LimitBoneWeights         | // limit bone weights to 4 per vertex
+		aiProcess_OptimizeMeshes		   | // join small meshes, if possible;
+		0;
+
+unsigned int ppstepsdefault = ppsteps;
+
+bool nopointslines = false;
+
 extern bool g_bWasFlipped			/*= false*/;
 
 aiMatrix4x4 g_mWorld;
@@ -129,31 +148,21 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 	double fCur = (double)timeGetTime();
 
 	aiSetImportPropertyInteger(AI_CONFIG_IMPORT_TER_MAKE_UVS,1);
-	aiSetImportPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE,80.f);
+	aiSetImportPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE,g_smoothAngle);
+	aiSetImportPropertyInteger(AI_CONFIG_PP_SBP_REMOVE,nopointslines ? aiPrimitiveType_LINE | aiPrimitiveType_POINT : 0 );
+
 	//aiSetImportPropertyInteger(AI_CONFIG_PP_FD_REMOVE,1);
 	//aiSetImportPropertyInteger(AI_CONFIG_PP_PTV_KEEP_HIERARCHY,1);
 
 	// Call ASSIMPs C-API to load the file
 	g_pcAsset->pcScene = (aiScene*)aiImportFile(g_szFileName,
-		aiProcess_CalcTangentSpace		   | // calculate tangents and bitangents if possible
-		aiProcess_JoinIdenticalVertices    | // join identical vertices/ optimize indexing
-		aiProcess_Triangulate			   | // triangulate polygons with more than 3 edges
+
+		ppsteps | /* configurable pp steps */
 		aiProcess_GenSmoothNormals		   | // generate smooth normal vectors if not existing
-		aiProcess_ConvertToLeftHanded	   | // convert everything to D3D left handed space
 		aiProcess_SplitLargeMeshes         | // split large, unrenderable meshes into submeshes
-		aiProcess_ValidateDataStructure    | // perform a full validation of the loader's output
-		aiProcess_ImproveCacheLocality     | // improve the cache locality of the output vertices
-		aiProcess_RemoveRedundantMaterials | // remove redundant materials
+		aiProcess_Triangulate			   | // triangulate polygons with more than 3 edges
+		aiProcess_ConvertToLeftHanded	   | // convert everything to D3D left handed space
 		aiProcess_SortByPType              | // make 'clean' meshes which consist of a single typ of primitives
-		aiProcess_FindDegenerates          | // remove degenerated polygons from the import
-		aiProcess_FindInvalidData          | // detect invalid model data, such as invalid normal vectors
-		aiProcess_GenUVCoords              | // convert spherical, cylindrical, box and planar mapping to proper UVs
-		aiProcess_TransformUVCoords        | // preprocess UV transformations (scaling, translation ...)
-		aiProcess_FindInstances            | // search for instanced meshes and remove them by references to one master
-		aiProcess_LimitBoneWeights         | // limit bone weights to 4 per vertex
-		aiProcess_OptimizeMeshes		   | // join small meshes, if possible
-//		aiProcess_OptimizeGraph            | // optimize unneeded nodes away
-//		aiProcess_PreTransformVertices |
 		0);
 
 	// get the end time of zje operation, calculate delta t

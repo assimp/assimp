@@ -80,15 +80,22 @@ void MakeFileAssociations()
 
 	HKEY g_hRegistry;
 
-	aiString list;
+	aiString list, tmp;
 	aiGetExtensionList(&list);
+	tmp = list;
 
-	while (1) 
+	const char* sz = strtok(list.data,";");
+	do
 	{
-		RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\.3ds",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
+		char buf[256];
+		assert(sz[0] == '*');
+		sprintf(buf,"Software\\Classes\\%s",sz+1);
+
+		RegCreateKeyEx(HKEY_CURRENT_USER,buf,NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
 		RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
 		RegCloseKey(g_hRegistry);
 	}
+	while (sz = strtok(NULL,";"));
 
 	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\ASSIMPVIEW_CLASS",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
 	RegCloseKey(g_hRegistry);
@@ -100,11 +107,7 @@ void MakeFileAssociations()
 	CLogDisplay::Instance().AddEntry("[OK] File assocations have been registered",
 		D3DCOLOR_ARGB(0xFF,0,0xFF,0));
 
-	aiString sz;
-	aiGetExtensionList(&sz);
-	CLogDisplay::Instance().AddEntry(sz.data,
-		D3DCOLOR_ARGB(0xFF,0,0xFF,0));
-	return;
+	CLogDisplay::Instance().AddEntry(tmp.data,D3DCOLOR_ARGB(0xFF,0,0xFF,0));
 	}
 
 
@@ -193,6 +196,16 @@ void LoadCheckerPatternColors()
 }
 
 //-------------------------------------------------------------------------------
+// Changed pp setup
+//-------------------------------------------------------------------------------
+void UpdatePPSettings()
+{
+	DWORD dwValue = ppsteps;
+	RegSetValueExA(g_hRegistry,"PostProcessing",0,REG_DWORD,(const BYTE*)&dwValue,4);
+	UpdateWindow(g_hDlg);
+}
+
+//-------------------------------------------------------------------------------
 // Toggle the "Display Normals" state
 //-------------------------------------------------------------------------------
 void ToggleNormals()
@@ -203,7 +216,6 @@ void ToggleNormals()
 	DWORD dwValue = 0;
 	if (g_sOptions.bRenderNormals)dwValue = 1;
 	RegSetValueExA(g_hRegistry,"RenderNormals",0,REG_DWORD,(const BYTE*)&dwValue,4);
-	UpdateWindow(g_hDlg);
 }
 
 //-------------------------------------------------------------------------------
@@ -232,7 +244,6 @@ void ToggleFPSView()
 	DWORD dwValue = 0;
 	if (g_bFPSView)dwValue = 1;
 	RegSetValueExA(g_hRegistry,"FPSView",0,REG_DWORD,(const BYTE*)&dwValue,4);
-	UpdateWindow(g_hDlg);
 }
 
 //-------------------------------------------------------------------------------
@@ -246,7 +257,6 @@ void ToggleMultipleLights()
 	DWORD dwValue = 0;
 	if (g_sOptions.b3Lights)dwValue = 1;
 	RegSetValueExA(g_hRegistry,"MultipleLights",0,REG_DWORD,(const BYTE*)&dwValue,4);
-	UpdateWindow(g_hDlg);
 }
 
 //-------------------------------------------------------------------------------
@@ -260,7 +270,6 @@ void ToggleLightRotate()
 	DWORD dwValue = 0;
 	if (g_sOptions.bLightRotate)dwValue = 1;
 	RegSetValueExA(g_hRegistry,"LightRotate",0,REG_DWORD,(const BYTE*)&dwValue,4);
-	UpdateWindow(g_hDlg);
 }
 
 //-------------------------------------------------------------------------------
@@ -274,7 +283,6 @@ void ToggleLowQuality()
 	DWORD dwValue = 0;
 	if (g_sOptions.bLowQuality)dwValue = 1;
 	RegSetValueExA(g_hRegistry,"LowQuality",0,REG_DWORD,(const BYTE*)&dwValue,4);
-	UpdateWindow(g_hDlg);
 }
 
 //-------------------------------------------------------------------------------
@@ -291,7 +299,6 @@ void ToggleSpecular()
 
 	// update all specular materials
 	CMaterialManager::Instance().UpdateSpecularMaterials();
-	UpdateWindow(g_hDlg);
 }
 
 //-------------------------------------------------------------------------------
@@ -308,7 +315,6 @@ void ToggleMats()
 
 	// update all specular materials
 	CMaterialManager::Instance().UpdateSpecularMaterials();
-	UpdateWindow(g_hDlg);
 }
 
 //-------------------------------------------------------------------------------
@@ -350,7 +356,6 @@ void ToggleWireFrame()
 	DWORD dwValue = 0;
 	if (RenderOptions::WIREFRAME == g_sOptions.eDrawMode)dwValue = 1;
 	RegSetValueExA(g_hRegistry,"Wireframe",0,REG_DWORD,(const BYTE*)&dwValue,4);
-	UpdateWindow(g_hDlg);
 }
 
 
@@ -386,7 +391,6 @@ void ToggleMS()
 	DWORD dwValue = 0;
 	if (g_sOptions.bMultiSample)dwValue = 1;
 	RegSetValueExA(g_hRegistry,"MultiSampling",0,REG_DWORD,(const BYTE*)&dwValue,4);
-	UpdateWindow(g_hDlg);
 }
 
 //-------------------------------------------------------------------------------
@@ -959,6 +963,28 @@ void OpenAsset()
 }
 
 //-------------------------------------------------------------------------------
+void SetupPPUIState()
+{
+	
+	// fucking hell, that's ugly. anyone willing to rewrite me from scratch?
+	HMENU hMenu = GetMenu(g_hDlg);
+	CheckMenuItem(hMenu,ID_VIEWER_PP_JIV,ppsteps & aiProcess_JoinIdenticalVertices ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hMenu,ID_VIEWER_PP_CTS,ppsteps & aiProcess_CalcTangentSpace ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hMenu,ID_VIEWER_PP_FD,ppsteps & aiProcess_FindDegenerates ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hMenu,ID_VIEWER_PP_FID,ppsteps & aiProcess_FindInvalidData ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hMenu,ID_VIEWER_PP_FIM,ppsteps & aiProcess_FindInstances ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hMenu,ID_VIEWER_PP_FIN,ppsteps & aiProcess_FixInfacingNormals ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hMenu,ID_VIEWER_PP_GUV,ppsteps & aiProcess_GenUVCoords ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hMenu,ID_VIEWER_PP_ICL,ppsteps & aiProcess_ImproveCacheLocality ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hMenu,ID_VIEWER_PP_OG,ppsteps & aiProcess_OptimizeGraph ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hMenu,ID_VIEWER_PP_OM,ppsteps & aiProcess_OptimizeMeshes ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hMenu,ID_VIEWER_PP_PTV,ppsteps & aiProcess_PreTransformVertices ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hMenu,ID_VIEWER_PP_RRM2,ppsteps & aiProcess_RemoveRedundantMaterials ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hMenu,ID_VIEWER_PP_TUV,ppsteps & aiProcess_TransformUVCoords ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hMenu,ID_VIEWER_PP_VDS,ppsteps & aiProcess_ValidateDataStructure ? MF_CHECKED : MF_UNCHECKED);
+}
+
+//-------------------------------------------------------------------------------
 // Initialize the user interface
 //-------------------------------------------------------------------------------
 void InitUI()
@@ -1149,6 +1175,12 @@ void InitUI()
 		g_sOptions.eDrawMode = RenderOptions::WIREFRAME;
 		CheckDlgButton(g_hDlg,IDC_TOGGLEWIRE,BST_CHECKED);
 	}
+
+	if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"PostProcessing",NULL,NULL,(BYTE*)&dwValue,&dwTemp))
+		ppsteps = ppstepsdefault;
+	else ppsteps = dwValue;
+
+	SetupPPUIState();
 	LoadCheckerPatternColors();
 
 	SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_SETRANGEMIN,TRUE,0);
@@ -1649,6 +1681,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
 		case WM_COMMAND:
 
+			HMENU hMenu = GetMenu(g_hDlg);
 			if (ID_VIEWER_QUIT == LOWORD(wParam))
 				{
 				PostQuitMessage(0);
@@ -1679,6 +1712,22 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 			else if (ID_TOOLS_LOGWINDOW == LOWORD(wParam))
 				{
 					CLogWindow::Instance().Show();
+				}
+			else if (ID__WEBSITE == LOWORD(wParam))
+				{
+					ShellExecute(NULL,"open","http://assimp.sourceforge.net","","",SW_SHOW);
+				}
+			else if (ID__WEBSITESF == LOWORD(wParam))
+				{
+					ShellExecute(NULL,"open","https://sourceforge.net/projects/assimp","","",SW_SHOW);
+				}
+			else if (ID_REPORTBUG == LOWORD(wParam))
+				{
+					ShellExecute(NULL,"open","https://sourceforge.net/tracker/?func=add&group_id=226462&atid=1067632","","",SW_SHOW);
+				}
+			else if (ID_FR == LOWORD(wParam))
+				{
+					ShellExecute(NULL,"open","https://sourceforge.net/forum/forum.php?forum_id=817653","","",SW_SHOW);
 				}
 			else if (ID_TOOLS_CLEARLOG == LOWORD(wParam))
 				{
@@ -1727,34 +1776,122 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 					g_pcAsset->FlipNormals();
 					}
 				}
+
+			// fucking hell, this is ugly. anyone willing to rewrite it from scratch using wxwidgets or similar?
+			else if (ID_VIEWER_PP_JIV == LOWORD(wParam))	{
+				ppsteps ^= aiProcess_JoinIdenticalVertices;
+				CheckMenuItem(hMenu,ID_VIEWER_PP_JIV,ppsteps & aiProcess_JoinIdenticalVertices ? MF_CHECKED : MF_UNCHECKED);
+				UpdatePPSettings();
+			}
+			else if (ID_VIEWER_PP_CTS == LOWORD(wParam))	{
+				ppsteps ^= aiProcess_CalcTangentSpace;
+				CheckMenuItem(hMenu,ID_VIEWER_PP_CTS,ppsteps & aiProcess_CalcTangentSpace ? MF_CHECKED : MF_UNCHECKED);
+				UpdatePPSettings();
+			}
+			else if (ID_VIEWER_PP_FD == LOWORD(wParam))	{
+				ppsteps ^= aiProcess_FindDegenerates;
+				CheckMenuItem(hMenu,ID_VIEWER_PP_FD,ppsteps & aiProcess_FindDegenerates ? MF_CHECKED : MF_UNCHECKED);
+				UpdatePPSettings();
+			}
+			else if (ID_VIEWER_PP_FID == LOWORD(wParam))	{
+				ppsteps ^= aiProcess_FindInvalidData;
+				CheckMenuItem(hMenu,ID_VIEWER_PP_FID,ppsteps & aiProcess_FindInvalidData ? MF_CHECKED : MF_UNCHECKED);
+				UpdatePPSettings();
+			}
+			else if (ID_VIEWER_PP_FIM == LOWORD(wParam))	{
+				ppsteps ^= aiProcess_FindInstances;
+				CheckMenuItem(hMenu,ID_VIEWER_PP_FIM,ppsteps & aiProcess_FindInstances ? MF_CHECKED : MF_UNCHECKED);
+				UpdatePPSettings();
+			}
+			else if (ID_VIEWER_PP_FIN == LOWORD(wParam))	{
+				ppsteps ^= aiProcess_FixInfacingNormals;
+				CheckMenuItem(hMenu,ID_VIEWER_PP_FIN,ppsteps & aiProcess_FixInfacingNormals ? MF_CHECKED : MF_UNCHECKED);
+				UpdatePPSettings();
+			}
+			else if (ID_VIEWER_PP_GUV == LOWORD(wParam))	{
+				ppsteps ^= aiProcess_GenUVCoords;
+				CheckMenuItem(hMenu,ID_VIEWER_PP_GUV,ppsteps & aiProcess_GenUVCoords ? MF_CHECKED : MF_UNCHECKED);
+				UpdatePPSettings();
+			}
+			else if (ID_VIEWER_PP_ICL == LOWORD(wParam))	{
+				ppsteps ^= aiProcess_ImproveCacheLocality;
+				CheckMenuItem(hMenu,ID_VIEWER_PP_ICL,ppsteps & aiProcess_ImproveCacheLocality ? MF_CHECKED : MF_UNCHECKED);
+				UpdatePPSettings();
+			}
+			else if (ID_VIEWER_PP_OG == LOWORD(wParam))	{
+				if (ppsteps & aiProcess_PreTransformVertices) {
+					CLogDisplay::Instance().AddEntry("[ERROR] This setting is incompatible with \'Pretransform Vertices\'");
+				}
+				else {
+					ppsteps ^= aiProcess_OptimizeGraph;
+					CheckMenuItem(hMenu,ID_VIEWER_PP_OG,ppsteps & aiProcess_OptimizeGraph ? MF_CHECKED : MF_UNCHECKED);
+					UpdatePPSettings();
+				}
+			}
+			else if (ID_VIEWER_PP_OM == LOWORD(wParam))	{
+				ppsteps ^= aiProcess_OptimizeMeshes;
+				CheckMenuItem(hMenu,ID_VIEWER_PP_OM,ppsteps & aiProcess_OptimizeMeshes ? MF_CHECKED : MF_UNCHECKED);
+				UpdatePPSettings();
+			}
+			else if (ID_VIEWER_PP_PTV == LOWORD(wParam))	{
+				if (ppsteps & aiProcess_OptimizeGraph) {
+					CLogDisplay::Instance().AddEntry("[ERROR] This setting is incompatible with \'Optimize Scenegraph\'");
+				}
+				else {
+					ppsteps ^= aiProcess_PreTransformVertices;
+					CheckMenuItem(hMenu,ID_VIEWER_PP_PTV,ppsteps & aiProcess_PreTransformVertices ? MF_CHECKED : MF_UNCHECKED);
+					UpdatePPSettings();
+				}
+			}
+			else if (ID_VIEWER_PP_RRM2 == LOWORD(wParam))	{
+				ppsteps ^= aiProcess_RemoveRedundantMaterials;
+				CheckMenuItem(hMenu,ID_VIEWER_PP_RRM2,ppsteps & aiProcess_RemoveRedundantMaterials ? MF_CHECKED : MF_UNCHECKED);
+				UpdatePPSettings();
+			}
+			else if (ID_VIEWER_PP_TUV == LOWORD(wParam))	{
+				ppsteps ^= aiProcess_TransformUVCoords;
+				CheckMenuItem(hMenu,ID_VIEWER_PP_TUV,ppsteps & aiProcess_TransformUVCoords ? MF_CHECKED : MF_UNCHECKED);
+				UpdatePPSettings();
+			}
+			else if (ID_VIEWER_PP_VDS == LOWORD(wParam))	{
+				ppsteps ^= aiProcess_ValidateDataStructure;
+				CheckMenuItem(hMenu,ID_VIEWER_PP_VDS,ppsteps & aiProcess_ValidateDataStructure ? MF_CHECKED : MF_UNCHECKED);
+				UpdatePPSettings();
+			}
+			else if (ID_VIEWER_RELOAD == LOWORD(wParam))
+			{
+				DeleteAsset();
+				LoadAsset();
+			}
+			else if (ID_IMPORTSETTINGS_RESETTODEFAULT == LOWORD(wParam))
+			{
+				ppsteps = ppstepsdefault;
+				UpdatePPSettings();
+				SetupPPUIState();
+			}
+			else if (ID_IMPORTSETTINGS_OPENPOST == LOWORD(wParam))
+			{
+				ShellExecute(NULL,"open","http://assimp.sourceforge.net/lib_html/ai_post_process_8h.html","","",SW_SHOW);
+			}
 			else if (ID_TOOLS_ORIGINALNORMALS == LOWORD(wParam))
 			{
 				if (g_pcAsset && g_pcAsset->pcScene)
 					{
 					g_pcAsset->SetNormalSet(AssimpView::AssetHelper::ORIGINAL);
-
-					HMENU hMenu = GetMenu(g_hDlg);
-					ModifyMenu(hMenu,ID_TOOLS_ORIGINALNORMALS,
-						MF_BYCOMMAND | MF_CHECKED | MF_STRING,ID_TOOLS_ORIGINALNORMALS,"Original normals");
-					ModifyMenu(hMenu,ID_TOOLS_HARDNORMALS,
-						MF_BYCOMMAND | MF_UNCHECKED | MF_STRING,ID_TOOLS_HARDNORMALS,"Hard normals");
-					ModifyMenu(hMenu,ID_TOOLS_SMOOTHNORMALS,
-						MF_BYCOMMAND | MF_UNCHECKED | MF_STRING,ID_TOOLS_SMOOTHNORMALS,"Smooth normals");
+					CheckMenuItem(hMenu,ID_TOOLS_ORIGINALNORMALS,MF_BYCOMMAND | MF_CHECKED);
+					CheckMenuItem(hMenu,ID_TOOLS_HARDNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
+					CheckMenuItem(hMenu,ID_TOOLS_SMOOTHNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
 					}
 				}
+
 			else if (ID_TOOLS_SMOOTHNORMALS == LOWORD(wParam))
 				{
 				if (g_pcAsset && g_pcAsset->pcScene)
 					{
 					g_pcAsset->SetNormalSet(AssimpView::AssetHelper::SMOOTH);
-
-					HMENU hMenu = GetMenu(g_hDlg);
-					ModifyMenu(hMenu,ID_TOOLS_SMOOTHNORMALS,
-						MF_BYCOMMAND | MF_CHECKED | MF_STRING,ID_TOOLS_SMOOTHNORMALS,"Smooth normals");
-					ModifyMenu(hMenu,ID_TOOLS_HARDNORMALS,
-						MF_BYCOMMAND | MF_UNCHECKED | MF_STRING,ID_TOOLS_HARDNORMALS,"Hard normals");
-					ModifyMenu(hMenu,ID_TOOLS_ORIGINALNORMALS,
-						MF_BYCOMMAND | MF_UNCHECKED | MF_STRING,ID_TOOLS_ORIGINALNORMALS,"Original normals");
+					CheckMenuItem(hMenu,ID_TOOLS_ORIGINALNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
+					CheckMenuItem(hMenu,ID_TOOLS_HARDNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
+					CheckMenuItem(hMenu,ID_TOOLS_SMOOTHNORMALS,MF_BYCOMMAND | MF_CHECKED);
 					}
 				}
 			else if (ID_TOOLS_HARDNORMALS == LOWORD(wParam))
@@ -1762,14 +1899,9 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 				if (g_pcAsset && g_pcAsset->pcScene)
 					{
 					g_pcAsset->SetNormalSet(AssimpView::AssetHelper::HARD);
-
-					HMENU hMenu = GetMenu(g_hDlg);
-					ModifyMenu(hMenu,ID_TOOLS_HARDNORMALS,
-						MF_BYCOMMAND | MF_CHECKED | MF_STRING,ID_TOOLS_HARDNORMALS,"Hard normals");
-					ModifyMenu(hMenu,ID_TOOLS_ORIGINALNORMALS,
-						MF_BYCOMMAND | MF_UNCHECKED | MF_STRING,ID_TOOLS_ORIGINALNORMALS,"Original normals");
-					ModifyMenu(hMenu,ID_TOOLS_SMOOTHNORMALS,
-						MF_BYCOMMAND | MF_UNCHECKED | MF_STRING,ID_TOOLS_SMOOTHNORMALS,"Smooth normals");
+					CheckMenuItem(hMenu,ID_TOOLS_ORIGINALNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
+					CheckMenuItem(hMenu,ID_TOOLS_HARDNORMALS,MF_BYCOMMAND | MF_CHECKED);
+					CheckMenuItem(hMenu,ID_TOOLS_SMOOTHNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
 					}
 				}
 			else if (ID_TOOLS_STEREOVIEW == LOWORD(wParam))
@@ -2107,7 +2239,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			"ASSIMP ModelViewer",MB_OK);
 		return -4;
 		}
-	CLogDisplay::Instance().AddEntry("[OK] assimp_view has been initialized successfully");
+	CLogDisplay::Instance().AddEntry("[OK] Here we go!");
 
 	// create the log window
 	CLogWindow::Instance().Init();

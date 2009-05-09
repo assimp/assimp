@@ -276,7 +276,10 @@ enum EClickPos
 	extern bool g_bPlay						/*= false*/;
 
 	extern double g_dCurrent;
-	extern float g_smoothAngle /*= 90.f*/;
+	extern float g_smoothAngle /*= 80.f*/;
+
+	extern unsigned int ppsteps,ppstepsdefault;
+	extern bool nopointslines;
 	}
 
 #endif // !! AV_MAIN_H_INCLUDED

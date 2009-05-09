@@ -87,7 +87,7 @@ private:
 		this->m_aiImageList[4] = 4;
 
 		this->m_avCheckerColors[0].x = this->m_avCheckerColors[0].y = this->m_avCheckerColors[0].z = 0.4f;
-		this->m_avCheckerColors[0].x = this->m_avCheckerColors[1].y = this->m_avCheckerColors[2].z = 0.6f;
+		this->m_avCheckerColors[1].x = this->m_avCheckerColors[1].y = this->m_avCheckerColors[1].z = 0.6f;
 	}
 
 public:

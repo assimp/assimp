@@ -41,6 +41,7 @@
 #define IDR_TXPOPUP                     156
 #define IDR_MATPOPUP                    157
 #define IDD_DIALOGSMOOTH                159
+#define SVNRevision                     412
 #define IDC_CHECK1                      1000
 #define IDC_TOGGLEMS                    1000
 #define IDC_CHECK2                      1001
@@ -187,6 +188,33 @@
 #define ID_SMOOTHANGLE_120              32849
 #define ID_SMOOTHANGLE_NONE             32850
 #define ID_TOOLS_SETANGLELIMIT          32851
+#define ID_VIEWER_PP_JIV                32852
+#define ID_VIEWER_PP_RRM                32852
+#define ID_VIEWER_PP_OM                 32853
+#define ID_VIEWER_PP_OG                 32854
+#define ID_VIEWER_PP_FIM                32855
+#define ID_VIEWER_PP_VDS                32856
+#define ID_VIEWER_PP_PTV                32857
+#define ID_VIEWER_PP_ICL                32858
+#define ID_VIEWER_PP_FIN                32859
+#define ID_VIEWER_PP_FD                 32860
+#define ID_VIEWER_PP_FID                32861
+#define ID_VIEWER_PP_GUV                32862
+#define ID_VIEWER_PP_TUV                32863
+#define ID_VIEWER_PP_RLINE_PNT          32864
+#define ID_REPORTBUG                    32865
+#define ID_FR                           32866
+#define ID__WEBSITE                     32867
+#define ID__SF                          32868
+#define ID__                            32869
+#define ID__WEBSITESF                   32870
+#define ID_IMPORTSETTINGS_CALCULATETANGENTSPACE 32871
+#define ID_VIEWER_CTS                   32872
+#define ID_VIEWER_PP_CTS                32873
+#define ID_VIEWER_RELOAD                32874
+#define ID_VIEWER_PP_RRM2               32875
+#define ID_IMPORTSETTINGS_RESETTODEFAULT 32876
+#define ID_IMPORTSETTINGS_OPENPOST      32877
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -195,7 +223,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        160
-#define _APS_NEXT_COMMAND_VALUE         32852
+#define _APS_NEXT_COMMAND_VALUE         32878
 #define _APS_NEXT_CONTROL_VALUE         1057
 #define _APS_NEXT_SYMED_VALUE           110
 #endif

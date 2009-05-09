@@ -61,3 +61,6 @@ Contributed fixes for the documentation and the doxygen markup
 
 - Zhao Lei
 Contributed several bugfixes fixing memory leaks and improving float parsing 
+
+- sueastside
+Updated PyAssimp to the latest Assimp data structures and provided a script to keep the Python binding up-to-date.

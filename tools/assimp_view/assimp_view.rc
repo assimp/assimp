@@ -1,7 +1,6 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
-#include "../../mkutil/revision.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -38,26 +37,24 @@ IDI_ASSIMP_VIEW         ICON                    "../shared/assimp_tools_icon.ico
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOGEX 22, 17, 283, 169
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_CAPTION | WS_SYSMENU
+IDD_ABOUTBOX DIALOGEX 22, 17, 283, 149
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_CAPTION | WS_SYSMENU
 CAPTION "About Open Asset Import Library"
-FONT 10, "MS Shell Dlg", 400, 0, 0x0
+FONT 9, "Courier New", 400, 0, 0x0
 BEGIN
-    LTEXT           "Open Asset Import Library (Assimp)",IDC_STATIC,77,13,121,12
-    LTEXT           "A free C/C++ library for game && graphics developers. Developed by members of the german game development community www.zfx.info",IDC_STATIC,47,26,204,24
-    LTEXT           "Thomas Schulze \t\taka <Schrompf> ",IDC_STATIC,55,80,192,8
-    LTEXT           "Kim Kulling \t\t\taka <Kimmi> ",IDC_STATIC,55,92,186,8
-    LTEXT           "Rainer Schmidt \t\t\taka <Guru>",IDC_STATIC,55,104,180,8
-    LTEXT           "Alexander Gessler\t\taka <Aramis>",IDC_STATIC,55,68,186,8
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,60,282,1
-    LTEXT           "assimp.sourceforge.net",IDC_STATIC,7,137,78,8
-    DEFPUSHBUTTON   "Love this library",IDOK,200,128,67,14
+    LTEXT           "Open Asset Import Library (Assimp)",IDC_STATIC,30,14,144,9
+    LTEXT           "A free C/C++ library to read various well-known 3D model formats into a straightforward in-memory format that can be easily read and processed by applications. Licensed under a 3-clause BSD license.",IDC_STATIC,31,34,204,24
+    LTEXT           "(c) 2008-2009. Assimp Development Team. See the CREDITS file for a list of all contributors.",IDC_STATIC,30,65,204,23
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,27,282,1
+    LTEXT           "http://assimp.sourceforge.net  http://www.zfx.info",IDC_STATIC,31,101,127,22
+    DEFPUSHBUTTON   "Love this library",IDOK,186,110,84,14
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,148,283,1
-    CONTROL         130,IDC_STATIC,"Static",SS_BITMAP,0,149,514,20
+    CONTROL         130,IDC_STATIC,"Static",SS_BITMAP,0,129,514,20
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,10,281,1
 END
 
-IDD_DIALOGMAIN DIALOGEX 0, 0, 594, 380
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_DIALOGMAIN DIALOGEX 0, 0, 594, 381
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
 CAPTION "Open Asset Import Library - ModelViewer "
 MENU IDR_MENU1
@@ -74,9 +71,9 @@ BEGIN
     CONTROL         "Display normals",IDC_TOGGLENORMALS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,271,65,10
     CONTROL         "Toggle AutoRotate",IDC_AUTOROTATE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,348,74,10
     EDITTEXT        IDC_EVERT,504,11,32,12,ES_AUTOHSCROLL | ES_READONLY
-    EDITTEXT        IDC_EFACE,562,11,29,12,ES_AUTOHSCROLL | ES_READONLY
-    EDITTEXT        IDC_EMAT,562,24,29,12,ES_AUTOHSCROLL | ES_READONLY
-    EDITTEXT        IDC_EFPS,562,50,29,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EFACE,565,11,29,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EMAT,565,24,29,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EFPS,565,50,29,12,ES_AUTOHSCROLL | ES_READONLY
     CONTROL         "Rotate light sources",IDC_LIGHTROTATE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,368,74,10
     CONTROL         "Two lights",IDC_3LIGHTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,473,281,48,10
     LTEXT           "Time:",IDC_LOADTIME,475,51,29,8
@@ -101,16 +98,16 @@ BEGIN
     CONTROL         148,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,470,229,114,9
     CONTROL         147,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,470,336,114,9
     CONTROL         146,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,470,65,114,9
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDVERT,469,0,1,380
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDVERT,469,0,1,381
     CONTROL         149,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,584,0,10,9
     CONTROL         149,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,584,65,10,9
-    CONTROL         149,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,583,229,10,9
+    CONTROL         149,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,584,229,10,9
     CONTROL         149,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,584,336,10,9
     LTEXT           "Nodes:",IDC_NUMNODES,476,26,24,8
     EDITTEXT        IDC_ENODEWND,504,24,32,12,ES_AUTOHSCROLL | ES_READONLY
-    CONTROL         "",IDC_TREE1,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,470,74,123,155
+    CONTROL         "",IDC_TREE1,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,471,74,123,155
     LTEXT           "Mesh:",IDC_NUMMESHES,540,39,20,8
-    EDITTEXT        IDC_EMESH,562,37,29,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EMESH,565,37,29,12,ES_AUTOHSCROLL | ES_READONLY
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDVERT,567,238,1,93
     CONTROL         "Button1",IDC_LCOLOR1,"Button",BS_OWNERDRAW | WS_TABSTOP,570,242,21,17
     CONTROL         "Button1",IDC_LCOLOR2,"Button",BS_OWNERDRAW | WS_TABSTOP,570,262,21,17
@@ -156,18 +153,20 @@ BEGIN
     CONTROL         "",IDC_EDIT1,"RichEdit20A",ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | ES_NUMBER | WS_VSCROLL | WS_TABSTOP,3,4,358,174,WS_EX_STATICEDGE
 END
 
-IDD_DIALOGSMOOTH DIALOGEX 0, 0, 253, 86
+IDD_DIALOGSMOOTH DIALOGEX 0, 0, 278, 141
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Set smooth limit "
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,195,53,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,143,53,50,14
-    EDITTEXT        IDC_EDITSM,107,7,139,14,ES_AUTOHSCROLL | ES_NUMBER
+    DEFPUSHBUTTON   "OK",IDOK,213,94,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,161,94,50,14
+    EDITTEXT        IDC_EDITSM,99,7,175,14,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "Angle limit (in degrees):",IDC_STATIC,13,10,76,8
-    LTEXT           "The angle limit defines the maximum angle that may be between two adjacent face normals that they're smoothed together.",IDC_STATIC,13,27,231,19
-    LTEXT           "NOTE: use 'Smooth normals' to update the normals to the new settings",IDC_STATIC,12,75,230,8
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,73,239,1
+    LTEXT           "The angle limit defines the maximum angle that may be between two adjacent face normals that they're smoothed together.",IDC_STATIC,13,31,253,19
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,113,278,1
+    LTEXT           "This setting is also used during import, but it can be overriden by single model importers to match the original look of a model as closely as possible. Examples include 3DS, ASE and LWO, all of them relying on smoothing groups and their own angle limits. ",IDC_STATIC,13,51,254,33
+    LTEXT           "NOTE: New settings don't take effect immediately, use 'Smooth Normals' or 'Reload' to update the model.",IDC_STATIC,14,118,254,22
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,90,277,1
 END
 
 
@@ -205,8 +204,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,SVNRevision,0
- PRODUCTVERSION 1,0,SVNRevision,1
+ FILEVERSION 1,0,412,0
+ PRODUCTVERSION 1,0,412,1
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -249,7 +248,7 @@ BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
         TOPMARGIN, 1
-        BOTTOMMARGIN, 158
+        BOTTOMMARGIN, 138
     END
 
     IDD_LOADDIALOG, DIALOG
@@ -277,9 +276,9 @@ BEGIN
     IDD_DIALOGSMOOTH, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 246
+        RIGHTMARGIN, 271
         TOPMARGIN, 7
-        BOTTOMMARGIN, 79
+        BOTTOMMARGIN, 134
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -313,8 +312,36 @@ BEGIN
     BEGIN
         MENUITEM "Open Asset",                  ID_VIEWER_OPEN
         MENUITEM "Close Asset",                 ID_VIEWER_CLOSEASSET
+        MENUITEM "Reload",                      ID_VIEWER_RELOAD
+        POPUP "Import settings"
+        BEGIN
+            MENUITEM "Calculate Tangent Space",     ID_VIEWER_PP_CTS
+            MENUITEM "Compute Indexed Meshes",      ID_VIEWER_PP_JIV
+            MENUITEM "Optimize Materials",          ID_VIEWER_PP_RRM2
+            MENUITEM "Optimize Meshes",             ID_VIEWER_PP_OM
+            MENUITEM "Optimize Scenegraph",         ID_VIEWER_PP_OG
+            MENUITEM "Find Instanced Meshes",       ID_VIEWER_PP_FIM
+            MENUITEM "Run Full Validation",         ID_VIEWER_PP_VDS
+            MENUITEM "Pretransform Vertices",       ID_VIEWER_PP_PTV
+            MENUITEM "VCache Optimization",         ID_VIEWER_PP_ICL
+            MENUITEM "Fix Infacing Normals",        ID_VIEWER_PP_FIN
+            MENUITEM "Find Degenerates",            ID_VIEWER_PP_FD
+            MENUITEM "Find Invalid Data",           ID_VIEWER_PP_FID
+            MENUITEM "Generate UV Coords",          ID_VIEWER_PP_GUV
+            MENUITEM "Transform UV Coords",         ID_VIEWER_PP_TUV
+            MENUITEM "Remove Lines and Points",     ID_VIEWER_PP_RLINE_PNT, GRAYED
+            MENUITEM SEPARATOR
+            MENUITEM "(required) Triangulate",      ID_VIEWER_PP_JIV, GRAYED
+            MENUITEM "(required) Limit Bone Weights", ID_VIEWER_PP_JIV, GRAYED
+            MENUITEM "(required) Split Large Meshes", ID_VIEWER_PP_JIV, GRAYED
+            MENUITEM "(required) Sort by primitive type", ID_VIEWER_PP_JIV, GRAYED
+            MENUITEM "(required) Convert to Left-Handed", ID_VIEWER_PP_JIV, GRAYED
+            MENUITEM SEPARATOR
+            MENUITEM "Reset to default",            ID_IMPORTSETTINGS_RESETTODEFAULT
+            MENUITEM "Open Post-Process Short Reference", ID_IMPORTSETTINGS_OPENPOST
+        END
         MENUITEM SEPARATOR
-        MENUITEM "Screenshot",                  ID_VIEWER_SAVESCREENSHOTTOFILE
+        MENUITEM "Save Screenshot",             ID_VIEWER_SAVESCREENSHOTTOFILE
         MENUITEM "Reset view",                  ID_VIEWER_RESETVIEW
         MENUITEM "Memory consumption",          ID_VIEWER_MEMORYCONSUMATION
         MENUITEM SEPARATOR
@@ -352,12 +379,15 @@ BEGIN
     BEGIN
         POPUP "Feedback"
         BEGIN
-            MENUITEM "Report bug",                  ID_FEEDBACK_GH
-            MENUITEM "Feature request",             ID_FEEDBACK_FEATUREREQUEST
+            MENUITEM "Report bug",                  ID_REPORTBUG
+            MENUITEM "Feature request/discuss",     ID_FR
         END
         MENUITEM "Help",                        ID__HELP
         MENUITEM SEPARATOR
         MENUITEM "About",                       ID__ABOUT
+        MENUITEM SEPARATOR
+        MENUITEM "Website",                     ID__WEBSITE
+        MENUITEM "SF.net Project Page",         ID__WEBSITESF
     END
 END
 

@@ -284,7 +284,7 @@ void ObjFileMtlImporter::getTexture()
 	}
 
 	std::string strTexture;
-	getName<DataArrayIt>( m_DataIt, m_DataItEnd, strTexture );
+	m_DataIt = getName<DataArrayIt>( m_DataIt, m_DataItEnd, strTexture );
 	out->Set( strTexture );
 }
 

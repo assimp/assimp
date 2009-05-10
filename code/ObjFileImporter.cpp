@@ -448,6 +448,7 @@ void ObjFileImporter::createMaterial(const ObjFile::Model* pModel, const ObjFile
 		mat->AddProperty( &pCurrentMaterial->diffuse, 1, AI_MATKEY_COLOR_DIFFUSE );
 		mat->AddProperty( &pCurrentMaterial->specular, 1, AI_MATKEY_COLOR_SPECULAR );
 		mat->AddProperty( &pCurrentMaterial->shineness, 1, AI_MATKEY_SHININESS );
+		mat->AddProperty( &pCurrentMaterial->alpha, 1, AI_MATKEY_OPACITY );
 
 		// Adding refraction index
 		mat->AddProperty( &pCurrentMaterial->ior, 1, AI_MATKEY_REFRACTI );

@@ -134,7 +134,7 @@ void FindInstancesProcess::Execute( aiScene* pScene)
 			aiMesh* inst = pScene->mMeshes[i];
 			hashes[i] = GetMeshHash(inst);
 
-			for (int a = i-1; a > 0; --a) {
+			for (int a = i-1; a >= 0; --a) {
 				if (hashes[i] == hashes[a])
 				{
 					aiMesh* orig = pScene->mMeshes[a];
@@ -253,6 +253,7 @@ void FindInstancesProcess::Execute( aiScene* pScene)
 					// Delete the instanced mesh, we don't need it anymore
 					delete inst;
 					pScene->mMeshes[i] = NULL;
+					break;
 				}
 			}
 

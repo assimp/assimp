@@ -443,6 +443,9 @@ void ObjFileImporter::createMaterial(const ObjFile::Model* pModel, const ObjFile
 		}
 		mat->AddProperty<int>( &sm, 1, AI_MATKEY_SHADING_MODEL);
 
+		// multiplying the specular exponent with 2 seems to yield better results
+		pCurrentMaterial->shineness *= 4.f;
+
 		// Adding material colors
 		mat->AddProperty( &pCurrentMaterial->ambient, 1, AI_MATKEY_COLOR_AMBIENT );
 		mat->AddProperty( &pCurrentMaterial->diffuse, 1, AI_MATKEY_COLOR_DIFFUSE );

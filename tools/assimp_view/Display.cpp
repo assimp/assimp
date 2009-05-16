@@ -280,6 +280,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 
 			// special handling here 
 			if (pcMesh->piNormalTexture && pcMesh->piNormalTexture != piTexture)	{
+				piTexture->AddRef();
 				pcMesh->piNormalTexture->Release();
 				pcMesh->piNormalTexture = piTexture;
 				CMaterialManager::Instance().HMtoNMIfNecessary(pcMesh->piNormalTexture,&pcMesh->piNormalTexture,true);
@@ -302,9 +303,9 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 			*tex = piTexture;
 			m_pcCurrentTexture->piTexture = tex;
 
-			if (!pcMesh->bSharedFX){
+			//if (!pcMesh->bSharedFX){
 				pcMesh->piEffect->SetTexture(tex_string,piTexture);
-			}
+			//}
 		}
 	}
 	// now update the material itself

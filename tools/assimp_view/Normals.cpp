@@ -103,6 +103,10 @@ void AssetHelper::FlipNormalsInt()
 	for (unsigned int i = 0; i < this->pcScene->mNumMeshes;++i)
 	{
 		aiMesh* pcMesh = this->pcScene->mMeshes[i];
+	
+		if (!pcMesh->mNormals)
+			continue;
+
 		for (unsigned int a = 0; a < pcMesh->mNumVertices;++a){
 			pcMesh->mNormals[a] *= -1.0f;
 		}

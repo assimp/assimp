@@ -456,6 +456,7 @@ void CMaterialManager::DeleteMaterial(AssetHelper::MeshHelper* pcIn)
 		pcIn->piLightmapTexture->Release();
 		pcIn->piLightmapTexture = NULL;
 	}
+	pcIn->piEffect = NULL;
 }
 //-------------------------------------------------------------------------------
 void CMaterialManager::HMtoNMIfNecessary(

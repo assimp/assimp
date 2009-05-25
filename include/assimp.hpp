@@ -164,17 +164,18 @@ public:
 	 */
 	aiReturn UnregisterLoader(BaseImporter* pImp);
 
-#if 0
 	// -------------------------------------------------------------------
 	/** Registers a new post-process step.
 	 *
+	 * At the moment, there's a small limitation: new post processing 
+	 * steps are added to end of the list, or in other words, executed 
+	 * last, after all built-in steps.
 	 * @param pImp Post-process step to be added. The Importer instance 
 	 *   takes ownership of the pointer, so it will be automatically 
 	 *   deleted with the Importer instance.
-	 * @return AI_SUCCESS if the step has been added.
+	 * @return AI_SUCCESS if the step has been added correctly.
 	 */
 	aiReturn RegisterPPStep(BaseProcess* pImp);
-
 
 	// -------------------------------------------------------------------
 	/** Unregisters a post-process step.
@@ -186,7 +187,7 @@ public:
 	 *   if it has not yet been registered.
 	 */
 	aiReturn UnregisterPPStep(BaseProcess* pImp);
-#endif
+
 
 	// -------------------------------------------------------------------
 	/** Set an integer configuration property.
@@ -312,7 +313,9 @@ public:
 	 * @param pFile Path and filename to the file to be imported.
 	 * @param pFlags Optional post processing steps to be executed after 
 	 *   a successful import. Provide a bitwise combination of the 
-	 *   #aiPostProcessSteps flags.
+	 *   #aiPostProcessSteps flags. If you wish to inspect the imported
+	 *   scene first in order to fine-tune your post-processing setup,
+	 *   consider to use #ApplyPostProcessing().
 	 * @return A pointer to the imported data, NULL if the import failed.
 	 *   The pointer to the scene remains in possession of the Importer
 	 *   instance. Use GetOrphanedScene() to take ownership of it.
@@ -322,6 +325,27 @@ public:
 	 * does not even have a file extension at all to enable this feature.
 	 */
 	const aiScene* ReadFile( const char* pFile, unsigned int pFlags);
+
+	// -------------------------------------------------------------------
+	/** Apply post-processing to an already-imported scene.
+	 *
+	 *  This is strictly equivalent to calling #ReadFile() with the same
+	 *  flags. However, you can use this separate function to inspect
+	 *  the imported scene first to fine-tune your post-processing setup.
+	 *  @param pFlags Provide a bitwise combination of the 
+	 *   #aiPostProcessSteps flags.
+	 *  @return A pointer to the post-processed data. This is still the
+	 *   same as the pointer returned by #ReadFile(). However, if
+	 *   post-processing fails severly the scene could now be NULL.
+	 *   That's quite a rare case, post processing steps are not really
+	 *   designed to 'fail'. To be exact, the #aiProcess_ValidateDS
+	 *   flag is currently the only post processing step which can actually
+	 *   cause the scene to be reset to NULL.
+	 *
+	 *  @note The method does nothing if no scene is currently bound
+	 *    to the #Importer instance. 
+	 */
+	const aiScene* ApplyPostProcessing(unsigned int pFlags);
 
 	// -------------------------------------------------------------------
 	/** @brief Reads the given file and returns its contents if successful. 

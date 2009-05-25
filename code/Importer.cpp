@@ -39,21 +39,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the CPP-API class #Importer */
+/** @file  Importer.cpp
+ *  @brief Implementation of the CPP-API class #Importer
+ */
 
 #include "AssimpPCH.h"
 
+// .......................................................................................
 /* Uncomment this line to prevent Assimp from catching unknown exceptions.
  *
  * Note that any Exception except ImportErrorException may lead to 
  * undefined behaviour -> loaders could remain in an unusable state and
  * further imports with the same Importer instance could fail/crash/burn ...
  */
+// .......................................................................................
 #define ASSIMP_CATCH_GLOBAL_EXCEPTIONS
 
-// =======================================================================================
+// .......................................................................................
 // Internal headers
-// =======================================================================================
+// .......................................................................................
 #include "BaseImporter.h"
 #include "BaseProcess.h"
 #include "DefaultIOStream.h"
@@ -62,9 +66,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProcessHelper.h"
 #include "ScenePreprocessor.h"
 
-// =======================================================================================
+// .......................................................................................
 // Importers
-// =======================================================================================
+// .......................................................................................
 #ifndef AI_BUILD_NO_X_IMPORTER
 #	include "XFileImporter.h"
 #endif
@@ -149,17 +153,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_3D_IMPORTER
 #	include "UnrealLoader.h"
 #endif
-
-
-
-
 #ifndef AI_BUILD_NO_LWS_IMPORTER
 #	include "LWSLoader.h"
 #endif
 
-// =======================================================================================
+// .......................................................................................
 // PostProcess-Steps
-// =======================================================================================
+// .......................................................................................
 #ifndef AI_BUILD_NO_CALCTANGENTS_PROCESS
 #	include "CalcTangentsProcess.h"
 #endif
@@ -230,11 +230,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace Assimp::Intern;
 
-// =======================================================================================
+// .......................................................................................
 // Intern::AllocateFromAssimpHeap serves as abstract base class. It overrides
 // new and delete (and their array counterparts) of public API classes (e.g. Logger) to
 // utilize our DLL heap
-// =======================================================================================
+// .......................................................................................
 void* AllocateFromAssimpHeap::operator new ( size_t num_bytes)	{
 	return ::operator new(num_bytes);
 }
@@ -272,7 +272,6 @@ Importer::Importer()
 	// used more frequently than others should be at the beginning.
 	// ----------------------------------------------------------------------------
 	pimpl->mImporter.reserve(25);
-
 #if (!defined AI_BUILD_NO_X_IMPORTER)
 	pimpl->mImporter.push_back( new XFileImporter());
 #endif
@@ -366,9 +365,7 @@ Importer::Importer()
 	// of sequence it is executed. Steps that are added here are not
 	// validated - as RegisterPPStep() does - all dependencies must be given.
 	// ----------------------------------------------------------------------------
-
 	pimpl->mPostProcessingSteps.reserve(25);
-
 #if (!defined AI_BUILD_NO_REMOVEVC_PROCESS)
 	pimpl->mPostProcessingSteps.push_back( new RemoveVCProcess());
 #endif
@@ -415,8 +412,10 @@ Importer::Importer()
 	pimpl->mPostProcessingSteps.push_back( new GenFaceNormalsProcess());
 #endif
 
+	// .........................................................................
 	// DON'T change the order of these five!
 	pimpl->mPostProcessingSteps.push_back( new ComputeSpatialSortProcess());
+	// .........................................................................
 
 #if (!defined AI_BUILD_NO_GENVERTEXNORMALS_PROCESS)
 	pimpl->mPostProcessingSteps.push_back( new GenVertexNormalsProcess());
@@ -428,7 +427,9 @@ Importer::Importer()
 	pimpl->mPostProcessingSteps.push_back( new JoinVerticesProcess());
 #endif
 
+	// .........................................................................
 	pimpl->mPostProcessingSteps.push_back( new DestroySpatialSortProcess());
+	// .........................................................................
 
 #if (!defined AI_BUILD_NO_SPLITLARGEMESHES_PROCESS)
 	pimpl->mPostProcessingSteps.push_back( new SplitLargeMeshesProcess_Vertex());
@@ -449,12 +450,12 @@ Importer::Importer()
 	pimpl->mPostProcessingSteps.push_back( new ImproveCacheLocalityProcess());
 #endif
 
-	// Allocate a SharedPostProcessInfo object and store pointers to it
-	// in all post-process steps in the list.
+	// Allocate a SharedPostProcessInfo object and store pointers to it in all post-process steps in the list.
 	pimpl->mPPShared = new SharedPostProcessInfo();
-	for (std::vector<BaseProcess*>::iterator it = pimpl->mPostProcessingSteps.begin(), 
-		end =  pimpl->mPostProcessingSteps.end(); it != end; ++it)
-	{
+	for (std::vector<BaseProcess*>::iterator it =  pimpl->mPostProcessingSteps.begin();
+		it != pimpl->mPostProcessingSteps.end(); 
+		++it)	{
+
 		(*it)->SetSharedData(pimpl->mPPShared);
 	}
 }
@@ -490,9 +491,20 @@ Importer::Importer(const Importer &other)
 {
 	new(this) Importer();
 
-	pimpl->mIntProperties = other.pimpl->mIntProperties;
-	pimpl->mFloatProperties = other.pimpl->mFloatProperties;
+	pimpl->mIntProperties    = other.pimpl->mIntProperties;
+	pimpl->mFloatProperties  = other.pimpl->mFloatProperties;
 	pimpl->mStringProperties = other.pimpl->mStringProperties;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Register a custom post-processing step
+aiReturn Importer::RegisterPPStep(BaseProcess* pImp)
+{
+	ai_assert(NULL != pImp);
+
+	pimpl->mPostProcessingSteps.push_back(pImp);
+	DefaultLogger::get()->info("Registering custom post-processing step");
+	return AI_SUCCESS;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -503,16 +515,15 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp)
 
 	// --------------------------------------------------------------------
 	// Check whether we would have two loaders for the same file extension 
-	// This is absolutely OK but we should warn the developer of the new
-	// loader that his code will probably never be called.
+	// This is absolutely OK, but we should warn the developer of the new
+	// loader that his code will probably never be called.s
 	// --------------------------------------------------------------------
 	std::string st;
 	pImp->GetExtensionList(st);
 
 #ifdef _DEBUG
-	const char* sz = ::strtok(const_cast<char*>(st.c_str()),";");
-	while (sz)
-	{
+	const char* sz = ::strtok(const_cast<char*>(st.c_str()),";"); // evil
+	while (sz)	{
 		if (IsExtensionSupported(std::string(sz)))
 			DefaultLogger::get()->warn(std::string( "The file extension " ) + sz + " is already in use");
 		
@@ -540,7 +551,22 @@ aiReturn Importer::UnregisterLoader(BaseImporter* pImp)
 		DefaultLogger::get()->info("Unregistering custom importer: " + st);
 		return AI_SUCCESS;
 	}
-	DefaultLogger::get()->warn("Unable to remove importer: importer object not found in table");
+	DefaultLogger::get()->warn("Unable to remove custom importer: I can't find you ...");
+	return AI_FAILURE;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Unregister a custom loader plugin
+aiReturn Importer::UnregisterPPStep(BaseProcess* pImp)
+{
+	ai_assert(NULL != pImp);
+	std::vector<BaseProcess*>::iterator it = std::find(pimpl->mPostProcessingSteps.begin(),pimpl->mPostProcessingSteps.end(),pImp);
+	if (it != pimpl->mPostProcessingSteps.end())	{
+		pimpl->mPostProcessingSteps.erase(it);
+		DefaultLogger::get()->info("Unregistering custom post-processing step");
+		return AI_SUCCESS;
+	}
+	DefaultLogger::get()->warn("Unable to remove custom post-processing step: I can't find you ..");
 	return AI_FAILURE;
 }
 
@@ -582,11 +608,12 @@ bool Importer::IsDefaultIOHandler()
 // Validate post process step flags 
 bool _ValidateFlags(unsigned int pFlags)
 {
-	if (pFlags & aiProcess_GenSmoothNormals &&
-		pFlags & aiProcess_GenNormals)
-	{
-		DefaultLogger::get()->error("aiProcess_GenSmoothNormals and "
-			"aiProcess_GenNormals may not be specified together");
+	if (pFlags & aiProcess_GenSmoothNormals && pFlags & aiProcess_GenNormals)	{
+		DefaultLogger::get()->error("#aiProcess_GenSmoothNormals and #aiProcess_GenNormals are incompatible");
+		return false;
+	}
+	if (pFlags & aiProcess_OptimizeGraph && pFlags & aiProcess_PreTransformVertices)	{
+		DefaultLogger::get()->error("#aiProcess_OptimizeGraph and #aiProcess_PreTransformVertices are incompatible");
 		return false;
 	}
 	return true;
@@ -675,8 +702,6 @@ bool Importer::ValidateFlags(unsigned int pFlags)
 // Reads the given file and returns its contents if successful. 
 const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 {
-	// In debug builds: run a basic flag validation
-	ai_assert(_ValidateFlags(pFlags));
 	const std::string pFile(_pFile);
 
 	// ----------------------------------------------------------------------
@@ -684,6 +709,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 	// that might be thrown by STL containers or by new(). 
 	// ImportErrorException's are throw by ourselves and caught elsewhere.
 	//-----------------------------------------------------------------------
+
 #ifdef ASSIMP_CATCH_GLOBAL_EXCEPTIONS
 	try
 #endif // ! ASSIMP_CATCH_GLOBAL_EXCEPTIONS
@@ -743,77 +769,31 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 		pimpl->mScene = imp->ReadFile( pFile, pimpl->mIOHandler);
 
 		// If successful, apply all active post processing steps to the imported data
-		if( pimpl->mScene)
-		{
+		if( pimpl->mScene)	{
+
 #ifndef AI_BUILD_NO_VALIDATEDS_PROCESS
-			// The ValidateDS process is an exception. It is executed first,
-			// even before ScenePreprocessor is called.
+			// The ValidateDS process is an exception. It is executed first, even before ScenePreprocessor is called.
 			if (pFlags & aiProcess_ValidateDataStructure)
 			{
 				ValidateDSProcess ds;
 				ds.ExecuteOnScene (this);
-				if (!pimpl->mScene)
+				if (!pimpl->mScene) {
 					return NULL;
+				}
 			}
 #endif // no validation
 
-			// Preprocess the scene 
+			// Preprocess the scene and prepare it for post-processing 
 			ScenePreprocessor pre(pimpl->mScene);
 			pre.ProcessScene();
 
-			DefaultLogger::get()->info("Import successful, entering postprocessing-steps");
-#ifdef _DEBUG
-			if (pimpl->bExtraVerbose)
-			{
-#ifndef AI_BUILD_NO_VALIDATEDS_PROCESS
-
-				DefaultLogger::get()->error("Extra verbose mode not available, library"
-					" wasn't build with the ValidateDS-Step");
-#endif  // no validation
-
-
-				pFlags |= aiProcess_ValidateDataStructure;
-			}
-#else
-			if (pimpl->bExtraVerbose)
-				DefaultLogger::get()->warn("Not a debug build, ignoring extra verbose setting");
-#endif // ! DEBUG
-			for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++)
-			{
-				BaseProcess* process = pimpl->mPostProcessingSteps[a];
-				if( process->IsActive( pFlags))
-				{
-					process->SetupProperties( this );
-					process->ExecuteOnScene	( this );
-				}
-				if( !pimpl->mScene)
-					break; 
-#ifdef _DEBUG
-
-#ifndef AI_BUILD_NO_VALIDATEDS_PROCESS
-				continue;
-#endif  // no validation
-
-				// If the extra verbose mode is active execute the
-				// VaidateDataStructureStep again after each step
-				if (pimpl->bExtraVerbose)
-				{
-					DefaultLogger::get()->debug("Extra verbose: revalidating data structures");
-					
-					ValidateDSProcess ds; 
-					ds.ExecuteOnScene (this);
-					if( !pimpl->mScene)
-					{
-						DefaultLogger::get()->error("Extra verbose: failed to revalidate data structures");
-						break; 
-					}
-				}
-#endif // ! DEBUG
-			}
+			// Ensure that the validation process won't be called twice
+			ApplyPostProcessing(pFlags & (~aiProcess_ValidateDataStructure));
 		}
 		// if failed, extract the error string
-		else if( !pimpl->mScene)
+		else if( !pimpl->mScene) {
 			pimpl->mErrorString = imp->GetErrorText();
+		}
 
 		// clear any data allocated by post-process steps
 		pimpl->mPPShared->Clean();
@@ -834,6 +814,85 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 #endif // ! ASSIMP_CATCH_GLOBAL_EXCEPTIONS
 
 	// either successful or failure - the pointer expresses it anyways
+	return pimpl->mScene;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Apply post-processing to the currently bound scene
+const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
+{
+	// Return immediately if no scene is active
+	if (!pimpl->mScene) {
+		return NULL;
+	}
+
+	// If no flags are given, return the current scene with no further action
+	if (!pFlags) {
+		return pimpl->mScene;
+	}
+
+	// In debug builds: run basic flag validation
+	ai_assert(_ValidateFlags(pFlags));
+	DefaultLogger::get()->info("Entering post processing pipeline");
+
+#ifndef AI_BUILD_NO_VALIDATEDS_PROCESS
+	// The ValidateDS process plays an exceptional role. It isn't contained in the global
+	// list of post-processing steps, so we need to call it manually.
+	if (pFlags & aiProcess_ValidateDataStructure)
+	{
+		ValidateDSProcess ds;
+		ds.ExecuteOnScene (this);
+		if (!pimpl->mScene) {
+			return NULL;
+		}
+	}
+#endif // no validation
+#ifdef _DEBUG
+	if (pimpl->bExtraVerbose)
+	{
+#ifndef AI_BUILD_NO_VALIDATEDS_PROCESS
+		DefaultLogger::get()->error("Verbose Import is not available due to build settings");
+#endif  // no validation
+		pFlags |= aiProcess_ValidateDataStructure;
+	}
+#else
+	if (pimpl->bExtraVerbose)
+		DefaultLogger::get()->warn("Not a debug build, ignoring extra verbose setting");
+#endif // ! DEBUG
+	for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++)	{
+
+		BaseProcess* process = pimpl->mPostProcessingSteps[a];
+		if( process->IsActive( pFlags))	{
+
+			process->SetupProperties( this );
+			process->ExecuteOnScene	( this );
+		}
+		if( !pimpl->mScene) {
+			break; 
+		}
+#ifdef _DEBUG
+
+#ifndef AI_BUILD_NO_VALIDATEDS_PROCESS
+		continue;
+#endif  // no validation
+
+		// If the extra verbose mode is active, execute the ValidateDataStructureStep again - after each step
+		if (pimpl->bExtraVerbose)	{
+			DefaultLogger::get()->debug("Verbose Import: revalidating data structures");
+
+			ValidateDSProcess ds; 
+			ds.ExecuteOnScene (this);
+			if( !pimpl->mScene)	{
+				DefaultLogger::get()->error("Verbose Import: failed to revalidate data structures");
+				break; 
+			}
+		}
+#endif // ! DEBUG
+	}
+
+	// clear any data allocated by post-process steps
+	pimpl->mPPShared->Clean();
+	DefaultLogger::get()->info("Leaving post processing pipeline");
 	return pimpl->mScene;
 }
 

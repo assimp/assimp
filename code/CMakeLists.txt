@@ -328,7 +328,6 @@ ADD_LIBRARY( assimp SHARED
 	${HEADER_PATH}/LogStream.h
 	${HEADER_PATH}/Logger.h
 	${HEADER_PATH}/NullLogger.h
-	${HEADER_PATH}/TDepGraphNode.h
 	${HEADER_PATH}/aiAnim.h
 	${HEADER_PATH}/aiAssert.h
 	${HEADER_PATH}/aiCamera.h

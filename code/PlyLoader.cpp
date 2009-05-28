@@ -794,38 +794,39 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 		{
 			// normally we have only one triangle strip instance where
 			// a value of -1 indicates a restart of the strip
-			for (std::vector<ElementInstance>::const_iterator i =  pcList->alInstances.begin();
-				i != pcList->alInstances.end();++i)
-			{
+			bool flip = false;
+			for (std::vector<ElementInstance>::const_iterator i = pcList->alInstances.begin();i != pcList->alInstances.end();++i) {
 				const std::vector<PLY::PropertyInstance::ValueUnion>& quak = (*i).alProperties[iProperty].avList;
 				pvOut->reserve(pvOut->size() + quak.size() + (quak.size()>>2u));
 
 				int aiTable[2] = {-1,-1};
 				for (std::vector<PLY::PropertyInstance::ValueUnion>::const_iterator a =  quak.begin();a != quak.end();++a)	{
 					const int p = PLY::PropertyInstance::ConvertTo<int>(*a,eType);
-					if (-1 == p)
-					{
+
+					if (-1 == p)	{
 						// restart the strip ...
 						aiTable[0] = aiTable[1] = -1;
+						flip = false;
 						continue;
 					}
-					if (-1 == aiTable[0])
-					{
+					if (-1 == aiTable[0]) {
 						aiTable[0] = p;
 						continue;
 					}
-					if (-1 == aiTable[1])
-					{
+					if (-1 == aiTable[1]) {
 						aiTable[1] = p;
 						continue;
 					}
 				
 					pvOut->push_back(PLY::Face());
 					PLY::Face& sFace = pvOut->back();
-					sFace.mIndices.push_back((unsigned int)aiTable[0]);
-					sFace.mIndices.push_back((unsigned int)aiTable[1]);
-					sFace.mIndices.push_back((unsigned int)p);
-		
+					sFace.mIndices[0] = aiTable[0];
+					sFace.mIndices[1] = aiTable[1];
+					sFace.mIndices[2] = p;
+					if ((flip = !flip)) {
+						std::swap(sFace.mIndices[0],sFace.mIndices[1]);
+					}
+					
 					aiTable[0] = aiTable[1];
 					aiTable[1] = p;
 				}

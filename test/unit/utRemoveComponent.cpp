@@ -50,6 +50,7 @@ void RemoveVCProcessTest :: setUp (void)
 	// COMPILE TEST: MaterialHelper may no add any extra members,
 	// so we don't need a virtual destructor
 	char check[sizeof(MaterialHelper) == sizeof(aiMaterial) ? 10 : -1];
+	check[0] = 0; 
 }
 
 void RemoveVCProcessTest :: tearDown (void)

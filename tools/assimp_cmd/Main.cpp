@@ -129,9 +129,9 @@ const aiScene* ImportModel(const ImportData& imp, const std::string& path)
 		
 		unsigned int flags = 0;
 		if (imp.logFile.length())
-			flags |= DLS_FILE;
+			flags |= aiDefaultLogStream_FILE;
 		if (imp.showLog)
-			flags |= DLS_CERR;
+			flags |= aiDefaultLogStream_STDERR;
 
 		DefaultLogger::create(imp.logFile.c_str(),imp.verbose ? Logger::VERBOSE : Logger::NORMAL,flags);
 	}

@@ -13,8 +13,6 @@ rem    FIRSTUTNA       - if the test wasn't found, receives the test name
 rem    FIRSTUTFAILUR   - if the test failed, receives the test name
 rem
 rem ------------------------------------------------------------------------------
-
-rem Check whether the 
 IF NOT EXIST %BINDIR%\%1\unit.exe (
 
    echo NOT AVAILABLE. Please rebuild this configuration

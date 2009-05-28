@@ -57,47 +57,6 @@ extern "C" {
 #define AI_DEFAULT_TEXTURED_MATERIAL_NAME "TexturedDefaultMaterial"
 
 // ---------------------------------------------------------------------------
-/** @brief A very primitive RTTI system to store the data type of a 
- *         material property.
- */
-enum aiPropertyTypeInfo
-{
-    /** Array of single-precision (32 Bit) floats
-	 *
-	 *  It is possible to use aiGetMaterialInteger[Array]() (or the C++-API 
-	 *  aiMaterial::Get()) to query properties stored in floating-point format. 
-	 *  The material system performs the type conversion automatically.
-    */
-    aiPTI_Float   = 0x1,
-
-    /** The material property is an aiString.
-	 *
-	 *  Arrays of strings aren't possible, aiGetMaterialString() (or the 
-	 *  C++-API aiMaterial::Get()) *must* be used to query a string property.
-    */
-    aiPTI_String  = 0x3,
-
-    /** Array of (32 Bit) integers
-	 *
-	 *  It is possible to use aiGetMaterialFloat[Array]() (or the C++-API 
-	 *  aiMaterial::Get()) to query properties stored in integer format. 
-	 *  The material system performs the type conversion automatically.
-    */
-    aiPTI_Integer = 0x4,
-
-
-    /** Simple binary buffer, content undefined. Not convertible to anything.
-    */
-    aiPTI_Buffer  = 0x5,
-
-
-	 /** This value is not used. It is just there to force the
-	 *  compiler to map this enum to a 32 Bit integer.
-	 */
-	_aiPTI_Force32Bit = 0x9fffffff
-};
-
-// ---------------------------------------------------------------------------
 /** @brief Defines how the Nth texture of a specific type is combined with
  *  the result of all previous layers.
  *
@@ -420,12 +379,11 @@ enum aiShadingMode
 // ---------------------------------------------------------------------------
 /** @brief Defines some mixed flags for a particular texture.
  *
- *  Usually you'll tell your cg artists how textures have to look like ...
- *  and hopefully the follow these rules. If they don't, restrict access
- *  to the coffee machine for them. That should help. 
- *  However, if you use Assimp for completely generic loading purposes you
- *  might also need to process these flags in order to display as many 
- *  'unknown' 3D models as possible correctly.
+ *  Usually you'll instruct your cg artists how textures have to look like ...
+ *  and how they will be processed in your application. However, if you use
+ *  Assimp for completely generic loading purposes you might also need to 
+ *  process these flags in order to display as many 'unknown' 3D models as 
+ *  possible correctly.
  *
  *  This corresponds to the #AI_MATKEY_TEXFLAGS property.
 */
@@ -434,7 +392,6 @@ enum aiTextureFlags
 	/** The texture's color values have to be inverted (componentwise 1-n)
 	 */
 	aiTextureFlags_Invert = 0x1,
-
 
 	/** Explicit request to the application to process the alpha channel
 	 *  of the texture.
@@ -450,11 +407,9 @@ enum aiTextureFlags
 	/** Explicit request to the application to ignore the alpha channel
 	 *  of the texture.
 	 *
-	 *  Mutually exclusive with #aiTextureFlags_IgnoreAlpha. 
+	 *  Mutually exclusive with #aiTextureFlags_UseAlpha. 
 	 */
 	aiTextureFlags_IgnoreAlpha = 0x4,
-
-
 	
 	 /** @cond never 
 	  *  This value is not used. It forces the compiler to use at least
@@ -560,6 +515,48 @@ struct aiUVTransform
 
 #include "./Compiler/poppack1.h"
 
+//! @cond AI_DOX_INCLUDE_INTERNAL
+// ---------------------------------------------------------------------------
+/** @brief A very primitive RTTI system for the contents of material 
+ *  properties.
+ */
+enum aiPropertyTypeInfo
+{
+    /** Array of single-precision (32 Bit) floats
+	 *
+	 *  It is possible to use aiGetMaterialInteger[Array]() (or the C++-API 
+	 *  aiMaterial::Get()) to query properties stored in floating-point format. 
+	 *  The material system performs the type conversion automatically.
+    */
+    aiPTI_Float   = 0x1,
+
+    /** The material property is an aiString.
+	 *
+	 *  Arrays of strings aren't possible, aiGetMaterialString() (or the 
+	 *  C++-API aiMaterial::Get()) *must* be used to query a string property.
+    */
+    aiPTI_String  = 0x3,
+
+    /** Array of (32 Bit) integers
+	 *
+	 *  It is possible to use aiGetMaterialFloat[Array]() (or the C++-API 
+	 *  aiMaterial::Get()) to query properties stored in integer format. 
+	 *  The material system performs the type conversion automatically.
+    */
+    aiPTI_Integer = 0x4,
+
+
+    /** Simple binary buffer, content undefined. Not convertible to anything.
+    */
+    aiPTI_Buffer  = 0x5,
+
+
+	 /** This value is not used. It is just there to force the
+	 *  compiler to map this enum to a 32 Bit integer.
+	 */
+	_aiPTI_Force32Bit = 0x9fffffff
+};
+
 // ---------------------------------------------------------------------------
 /** @brief Data structure for a single material property
  *
@@ -576,37 +573,30 @@ struct aiUVTransform
  *       2nd: Public, but ignored by the #aiProcess_RemoveRedundantMaterials 
  *       post-processing step.
  *    ~<name>
- *       A temporary property for internal use. If someone forgets to
- *       cleanup, some of these might still be contained in the output.
- *       Don't complain! If you understood what the first paragraph tried
- *       to tell you, you wouldn't even know. 
+ *       A temporary property for internal use. 
  *  @endcode
  *  @see aiMaterial
  */
 struct aiMaterialProperty
 {
     /** Specifies the name of the property (key)
-     *
-     *  Keys are case insensitive. 
+     *  Keys are generally  case insensitive. 
      */
     C_STRUCT aiString mKey;
 
-	/** Textures: Specifies the exact usage semantic.
-	 *  
-	 *  For non-texture properties, this member is always 0 
-	 *  or #aiTextureType_NONE.
+	/** Textures: Specifies their exact usage semantic.
+	 * For non-texture properties, this member is always 0 
+	 * (or, better-said, #aiTextureType_NONE).
 	 */
 	unsigned int mSemantic;
 
-	/** Textures: Specifies the index of the texture
-	 *
+	/** Textures: Specifies the index of the texture.
 	 *  For non-texture properties, this member is always 0.
 	 */
 	unsigned int mIndex;
 
     /**	Size of the buffer mData is pointing to, in bytes.
-	 *
-	 * This value may not be 0.
+	 *  This value may not be 0.
      */
     unsigned int mDataLength;
 
@@ -619,8 +609,7 @@ struct aiMaterialProperty
      */
     C_ENUM aiPropertyTypeInfo mType;
 
-    /**	Binary buffer to hold the property's value
-	 *
+    /**	Binary buffer to hold the property's value.
      * The size of the buffer is always mDataLength.
      */
     char* mData;
@@ -638,6 +627,7 @@ struct aiMaterialProperty
 
 #endif
 };
+//! @endcond
 
 #ifdef __cplusplus
 } // We need to leave the "C" block here to allow template member functions
@@ -1177,15 +1167,15 @@ extern "C" {
 
 // ---------------------------------------------------------------------------
 /** @brief Retrieve a material property with a specific key from the material
-*
-*  @param pMat Pointer to the input material. May not be NULL
-*  @param pKey Key to search for. One of the AI_MATKEY_XXX constants.
-*  @param type Specifies the type of the texture to be retrieved (
-*    e.g. diffuse, specular, height map ...)
-*  @param index Index of the texture to be retrieved.
-*  @param pPropOut Pointer to receive a pointer to a valid aiMaterialProperty
-*         structure or NULL if the key has not been found. 
-*/
+ *
+ * @param pMat Pointer to the input material. May not be NULL
+ * @param pKey Key to search for. One of the AI_MATKEY_XXX constants.
+ * @param type Specifies the type of the texture to be retrieved (
+ *    e.g. diffuse, specular, height map ...)
+ * @param index Index of the texture to be retrieved.
+ * @param pPropOut Pointer to receive a pointer to a valid aiMaterialProperty
+ *        structure or NULL if the key has not been found. 
+ */
 // ---------------------------------------------------------------------------
 ASSIMP_API C_ENUM aiReturn aiGetMaterialProperty(
 	 const C_STRUCT aiMaterial* pMat, 
@@ -1196,30 +1186,30 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialProperty(
 
 // ---------------------------------------------------------------------------
 /** @brief Retrieve an array of float values with a specific key 
-*  from the material
-*
-* Pass one of the AI_MATKEY_XXX constants for the last three parameters (the
-* example reads the #AI_MATKEY_UVTRANSFORM property of the first diffuse texture)
-* @code
-* aiUVTransform trafo;
-* unsigned int max = sizeof(aiUVTransform);
-* if (AI_SUCCESS != aiGetMaterialFloatArray(mat, AI_MATKEY_UVTRANSFORM(aiTextureType_DIFFUSE,0),
-*    (float*)&trafo, &max) || sizeof(aiUVTransform) != max)
-* {
-*   // error handling 
-* }
-* @endcode
-*
-* @param pMat Pointer to the input material. May not be NULL
-* @param pKey Key to search for. One of the AI_MATKEY_XXX constants.
-* @param pOut Pointer to a buffer to receive the result. 
-* @param pMax Specifies the size of the given buffer, in float's.
-*        Receives the number of values (not bytes!) read. 
-* @param type (see the code sample above)
-* @param index (see the code sample above)
-* @return Specifies whether the key has been found. If not, the output
-*   arrays remains unmodified and pMax is set to 0.
-*/
+ *  from the material
+ *
+ * Pass one of the AI_MATKEY_XXX constants for the last three parameters (the
+ * example reads the #AI_MATKEY_UVTRANSFORM property of the first diffuse texture)
+ * @code
+ * aiUVTransform trafo;
+ * unsigned int max = sizeof(aiUVTransform);
+ * if (AI_SUCCESS != aiGetMaterialFloatArray(mat, AI_MATKEY_UVTRANSFORM(aiTextureType_DIFFUSE,0),
+ *    (float*)&trafo, &max) || sizeof(aiUVTransform) != max)
+ * {
+ *   // error handling 
+ * }
+ * @endcode
+ *
+ * @param pMat Pointer to the input material. May not be NULL
+ * @param pKey Key to search for. One of the AI_MATKEY_XXX constants.
+ * @param pOut Pointer to a buffer to receive the result. 
+ * @param pMax Specifies the size of the given buffer, in float's.
+ *        Receives the number of values (not bytes!) read. 
+ * @param type (see the code sample above)
+ * @param index (see the code sample above)
+ * @return Specifies whether the key has been found. If not, the output
+ *   arrays remains unmodified and pMax is set to 0.
+ */
 // ---------------------------------------------------------------------------
 ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
 	 const C_STRUCT aiMaterial* pMat, 
@@ -1272,11 +1262,10 @@ inline aiReturn aiGetMaterialFloat(const aiMaterial* pMat,
 
 // ---------------------------------------------------------------------------
 /** @brief Retrieve an array of integer values with a specific key 
-*  from a material
-*
-* See the sample for aiGetMaterialFloatArray for more information.
-*/
-// ---------------------------------------------------------------------------
+ *  from a material
+ *
+ * See the sample for aiGetMaterialFloatArray for more information.
+ */
 ASSIMP_API C_ENUM aiReturn aiGetMaterialIntegerArray(const C_STRUCT aiMaterial* pMat, 
     const char* pKey,
 	 unsigned int  type,
@@ -1289,9 +1278,9 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialIntegerArray(const C_STRUCT aiMaterial* 
 
 // ---------------------------------------------------------------------------
 /** @brief Retrieve an integer property with a specific key from a material
-*
-* See the sample for aiGetMaterialFloat for more information.
-*/
+ *
+ * See the sample for aiGetMaterialFloat for more information.
+ */
 // ---------------------------------------------------------------------------
 inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial* pMat, 
 	const char* pKey,

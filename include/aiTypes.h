@@ -40,12 +40,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file aiTypes.h
-*/
-
+ *  Basic data types and primitives, such as vectors or colors. 
+ */
 #ifndef AI_TYPES_H_INC
 #define AI_TYPES_H_INC
 
-// Some CRT headers
+// Some runtime headers
 #include <sys/types.h>
 #include <memory.h>
 #include <math.h>
@@ -67,17 +67,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp	{
 namespace Intern		{
 
+	// --------------------------------------------------------------------
 	/** @brief Internal helper class to utilize our internal new/delete 
 	 *    routines for allocating object of this and derived classes.
 	 *
 	 * By doing this you can safely share class objects between Assimp
 	 * and the application - it works even over DLL boundaries. A good
-	 * example is the IOSystem where the application allocates its custom
-	 * IOSystem, then calls Importer::SetIOSystem(). When the Importer
-	 * destructs, Assimp calls operator delete on the stored IOSystem.
+	 * example is the #IOSystem where the application allocates its custom
+	 * #IOSystem, then calls #Importer::SetIOSystem(). When the Importer
+	 * destructs, Assimp calls operator delete on the stored #IOSystem.
 	 * If it lies on a different heap than Assimp is working with,
 	 * the application is determined to crash.
 	 */
+	// --------------------------------------------------------------------
 	struct ASSIMP_API AllocateFromAssimpHeap	{
 
 		// new/delete overload
@@ -122,7 +124,6 @@ struct aiPlane
 	float a,b,c,d;
 } PACK_STRUCT; // !struct aiPlane
 
-
 // ----------------------------------------------------------------------------------
 /** Represents a ray
 */
@@ -141,8 +142,6 @@ struct aiRay
 	C_STRUCT aiVector3D pos, dir;
 } PACK_STRUCT; // !struct aiRay
 
-
-
 // ----------------------------------------------------------------------------------
 /** Represents a color in Red-Green-Blue space. 
 */
@@ -153,43 +152,48 @@ struct aiColor3D
 	aiColor3D (float _r, float _g, float _b) : r(_r), g(_g), b(_b) {}
 	aiColor3D (const aiColor3D& o) : r(o.r), g(o.g), b(o.b) {}
 	
-	// Component-wise comparison 
+	/** Component-wise comparison */
 	// TODO: add epsilon?
 	bool operator == (const aiColor3D& other) const
 		{return r == other.r && g == other.g && b == other.b;}
 
-	// Component-wise inverse comparison 
+	/** Component-wise inverse comparison */
 	// TODO: add epsilon?
 	bool operator != (const aiColor3D& other) const
 		{return r != other.r || g != other.g || b != other.b;}
 
-	// Component-wise addition
+	/** Component-wise addition */
 	aiColor3D operator+(const aiColor3D& c) const {
 		return aiColor3D(r+c.r,g+c.g,b+c.b);
 	}
 
-	// Component-wise subtraction
+	/** Component-wise subtraction */
 	aiColor3D operator-(const aiColor3D& c) const {
 		return aiColor3D(r+c.r,g+c.g,b+c.b);
 	}
 
-	// Component-wise multiplication
+	/** Component-wise multiplication */
 	aiColor3D operator*(const aiColor3D& c) const {
 		return aiColor3D(r*c.r,g*c.g,b*c.b);
 	}
 	
-	// Multiply with a scalar
+	/** Multiply with a scalar */
 	aiColor3D operator*(float f) const {
 		return aiColor3D(r*f,g*f,b*f);
 	}
 
-	// Access a specific color component
-	float operator[](unsigned int i) const {return *(&r + i);}
-	float& operator[](unsigned int i) {return *(&r + i);}
+	/** Access a specific color component */
+	float operator[](unsigned int i) const {
+		return *(&r + i);
+	}
 
-	// Check whether a color is black
-	bool IsBlack() const
-	{
+	/** Access a specific color component */
+	float& operator[](unsigned int i) {
+		return *(&r + i);
+	}
+
+	/** Check whether a color is black */
+	bool IsBlack() const {
 		static const float epsilon = 10e-3f;
 		return fabs( r ) < epsilon && fabs( g ) < epsilon && fabs( b ) < epsilon;
 	}
@@ -214,24 +218,28 @@ struct aiColor4D
 	aiColor4D (const aiColor4D& o) 
 		: r(o.r), g(o.g), b(o.b), a(o.a) {}
 	
-	// Component-wise comparison 
+	/** Component-wise comparison */
 	// TODO: add epsilon?
 	bool operator == (const aiColor4D& other) const {
 		return r == other.r && g == other.g && b == other.b && a == other.a;
 	}
 
-	// Component-wise inverse comparison 
+	/** Component-wise inverse comparison */
 	// TODO: add epsilon?
 	bool operator != (const aiColor4D& other) const {
 		return r != other.r || g != other.g || b != other.b || a != other.a;
 	}
 
-	// Access a specific color component
-	inline float operator[](unsigned int i) const {return *(&r + i);}
-	inline float& operator[](unsigned int i) {return *(&r + i);}
+	/** Access a specific color component */
+	inline float operator[](unsigned int i) const {
+		return *(&r + i);
+	}
+	/** Access a specific color component */
+	inline float& operator[](unsigned int i) {
+		return *(&r + i);
+	}
 
-	// Check whether a color is black
-	// TODO: add epsilon?
+	/** Check whether a color is black */
 	inline bool IsBlack() const
 	{
 		// The alpha component doesn't care here. black is black.
@@ -244,10 +252,7 @@ struct aiColor4D
 	//! Red, green, blue and alpha color values
 	float r, g, b, a;
 } PACK_STRUCT;  // !struct aiColor4D
-
-
 #include "./Compiler/poppack1.h"
-
 
 // ----------------------------------------------------------------------------------
 /** Represents a string, zero byte terminated.
@@ -258,8 +263,7 @@ struct aiColor4D
 struct aiString
 {
 #ifdef __cplusplus
-
-	//! Default constructor, the string is set to have zero length
+	/** Default constructor, the string is set to have zero length */
 	aiString() :
 		length(0) 
 	{
@@ -271,7 +275,7 @@ struct aiString
 #endif
 	}
 
-	//! Copy constructor
+	/** Copy constructor */
 	aiString(const aiString& rOther) : 
 		length(rOther.length) 
 	{
@@ -279,7 +283,7 @@ struct aiString
 		data[length] = '\0';
 	}
 
-	//! Constructor from std::string
+	/** Constructor from std::string */
 	aiString(const std::string& pString) : 
 		length(pString.length()) 
 	{
@@ -287,69 +291,65 @@ struct aiString
 		data[length] = '\0';
 	}
 
-	//! Copy a std::string to the aiString
-	void Set( const std::string& pString)
-	{
-		if( pString.length() > MAXLEN - 1)
+	/** Copy a std::string to the aiString */
+	void Set( const std::string& pString) {
+		if( pString.length() > MAXLEN - 1) {
 			return;
+		}
 		length = pString.length();
 		::memcpy( data, pString.c_str(), length);
 		data[length] = 0;
 	}
 
-	//! Copy a const char* to the aiString
-	void Set( const char* sz)
-	{
+	/** Copy a const char* to the aiString */
+	void Set( const char* sz) {
 		const size_t len = ::strlen(sz);
-		if( len > MAXLEN - 1)
+		if( len > MAXLEN - 1) {
 			return;
+		}
 		length = len;
 		::memcpy( data, sz, len);
 		data[len] = 0;
 	}
 
-	// Assign a const char* to the string
-	aiString& operator = (const char* sz)
-	{
+	/** Assign a const char* to the string */
+	aiString& operator = (const char* sz) {
 		Set(sz);
 		return *this;
 	}
 
-	// Assign a cstd::string to the string
-	aiString& operator = ( const std::string& pString)
-	{
+	/** Assign a cstd::string to the string */
+	aiString& operator = ( const std::string& pString) {
 		Set(pString);
 		return *this;
 	}
 
-	//! Comparison operator
-	bool operator==(const aiString& other) const
-	{
+	/** Comparison operator */
+	bool operator==(const aiString& other) const {
 		return  (length == other.length && 0 == strcmp(this->data,other.data));
 	}
 
-	//! Inverse comparison operator
-	bool operator!=(const aiString& other) const
-	{
+	/** Inverse comparison operator */
+	bool operator!=(const aiString& other) const {
 		return  (length != other.length || 0 != ::strcmp(this->data,other.data));
 	}
 
-	//! Append a string to the string
-	void Append (const char* app)
-	{
+	/** Append a string to the string */
+	void Append (const char* app)	{
 		const size_t len = ::strlen(app);
-		if (!len)return;
-
-		if (length + len >= MAXLEN)
+		if (!len) {
 			return;
+		}
+		if (length + len >= MAXLEN) {
+			return;
+		}
 
 		::memcpy(&data[length],app,len+1);
 		length += len;
 	}
 
-	//! Clear the string - reset its length to zero
-	void Clear ()
-	{
+	/** Clear the string - reset its length to zero */
+	void Clear ()	{
 		length  = 0;
 		data[0] = '\0';
 
@@ -361,74 +361,107 @@ struct aiString
 
 #endif // !__cplusplus
 
-	//! Length of the string excluding the terminal 0
+	/** Length of the string excluding the terminal 0 */
 	size_t length;
 
-	//! String buffer. Size limit is MAXLEN
+	/** String buffer. Size limit is MAXLEN */
 	char data[MAXLEN];
 } ;  // !struct aiString
 
 
 // ----------------------------------------------------------------------------------
-/**	Standard return type for all library functions.
-*
-* To check whether or not a function failed check against
-* AI_SUCCESS. The error codes are mainly used by the C-API.
-*/
+/**	Standard return type for some library functions.
+ * Rarely used, and if, mostly in the C API.
+ */
 enum aiReturn
 {
-	//! Indicates that a function was successful
-	AI_SUCCESS = 0x0,
+	/** Indicates that a function was successful */
+	aiReturn_SUCCESS = 0x0,
 
-	//! Indicates that a function failed
-	AI_FAILURE = -0x1,
+	/** Indicates that a function failed */
+	aiReturn_FAILURE = -0x1,
 
-	//! Indicates that a file was invalid
-	AI_INVALIDFILE = -0x2,
+	/** Indicates that not enough memory was available
+	 * to perform the requested operation 
+	 */
+	aiReturn_OUTOFMEMORY = -0x3,
 
-	//! Indicates that not enough memory was available
-	//! to perform the requested operation
-	AI_OUTOFMEMORY = -0x3,
-
-	//! Indicates that an illegal argument has been
-	//! passed to a function. This is rarely used,
-	//! most functions assert in this case.
-	AI_INVALIDARG = -0x4,
-
-	//! Force 32-bit size enum 
+	/** @cond never 
+	 *  Force 32-bit size enum
+	 */
 	_AI_ENFORCE_ENUM_SIZE = 0x7fffffff 
 };  // !enum aiReturn
 
+// just for backwards compatibility, don't use these constants anymore
+#define AI_SUCCESS     aiReturn_SUCCESS
+#define AI_FAILURE     aiReturn_FAILURE
+#define AI_OUTOFMEMORY aiReturn_OUTOFMEMORY
 
 // ----------------------------------------------------------------------------------
-/** Seek origins (for the virtual file system API)
-*/
+/** Seek origins (for the virtual file system API).
+ *  Much cooler than using SEEK_SET, SEEK_CUR or SEEK_END.
+ */
 enum aiOrigin
 {
-	//! Beginning of the file
+	/** Beginning of the file */
 	aiOrigin_SET = 0x0,	
 
-	//! Current position of the file pointer
+	/** Current position of the file pointer */
 	aiOrigin_CUR = 0x1,		
 
-	//! End of the file, offsets must be negative
+	/** End of the file, offsets must be negative */
 	aiOrigin_END = 0x2,
 
-	//! Force 32-bit size enum 
+	/**  @cond never 
+	 *   Force 32-bit size enum 
+	 */
 	_AI_ORIGIN_ENFORCE_ENUM_SIZE = 0x7fffffff 
 }; // !enum aiOrigin
 
+// ----------------------------------------------------------------------------------
+/** @brief Enumerates predefined log streaming destinations. 
+ *  Logging to these streams can be enabled with a single call to 
+ *   #LogStream::createDefaultStream or #aiAttachPredefinedLogStream(),
+ *   respectively.
+ */
+enum aiDefaultLogStream	
+{
+	/** Stream the log to a file */
+	aiDefaultLogStream_FILE = 0x1,
+
+	/** Stream the log to std::cout */
+	aiDefaultLogStream_STDOUT = 0x2,
+
+	/** Stream the log to std::cerr */
+	aiDefaultLogStream_STDERR = 0x4,
+
+	/** MSVC only: Stream the log the the debugger
+	 * (this relies on OutputDebugString from the Win32 SDK)
+	 */
+	aiDefaultLogStream_DEBUGGER = 0x8,
+
+	/** @cond never 
+	 *  Force 32-bit size enum 
+	 */
+	_AI_DLS_ENFORCE_ENUM_SIZE = 0x7fffffff 
+}; // !enum aiDefaultLogStream
+
+// just for backwards compatibility, don't use these constants anymore
+#define DLS_FILE     aiDefaultLogStream_FILE
+#define DLS_STDOUT   aiDefaultLogStream_STDOUT
+#define DLS_STDERR   aiDefaultLogStream_STDERR
+#define DLS_DEBUGGER aiDefaultLogStream_DEBUGGER
 
 // ----------------------------------------------------------------------------------
-/** Stores the memory requirements for different parts (e.g. meshes, materials,
- *  animations) of an import.
+/** Stores the memory requirements for different components (e.g. meshes, materials,
+ *  animations) of an import. All sizes are in bytes.
  *  @see Importer::GetMemoryRequirements()
 */
 struct aiMemoryInfo
 {
 #ifdef __cplusplus
 
-	//! Default constructor
+	/** Default constructor */
 	aiMemoryInfo()
 		: textures   (0)
 		, materials  (0)
@@ -442,31 +475,30 @@ struct aiMemoryInfo
 
 #endif
 
-	//! Storage allocated for texture data, in bytes
+	/** Storage allocated for texture data */
 	unsigned int textures;
 
-	//! Storage allocated for material data, in bytes
+	/** Storage allocated for material data  */
 	unsigned int materials;
 
-	//! Storage allocated for mesh data, in bytes
+	/** Storage allocated for mesh data */
 	unsigned int meshes;
 
-	//! Storage allocated for node data, in bytes
+	/** Storage allocated for node data */
 	unsigned int nodes;
 
-	//! Storage allocated for animation data, in bytes
+	/** Storage allocated for animation data */
 	unsigned int animations;
 
-	//! Storage allocated for camera data, in bytes
+	/** Storage allocated for camera data */
 	unsigned int cameras;
 
-	//! Storage allocated for light data, in bytes
+	/** Storage allocated for light data */
 	unsigned int lights;
 
-	//! Storage allocated for the full import, in bytes
+	/** Total storage allocated for the full import. */
 	unsigned int total;
 }; // !struct aiMemoryInfo 
-
 
 #ifdef __cplusplus
 }
@@ -476,8 +508,4 @@ struct aiMemoryInfo
 #include "aiVector3D.inl"
 #include "aiMatrix3x3.inl"
 #include "aiMatrix4x4.inl"
-
-
-
 #endif //!! include guard
-

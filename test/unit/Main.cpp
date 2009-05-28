@@ -18,9 +18,19 @@ int main (int argc, char* argv[])
 	time_t t;time(&t);
 	srand((unsigned int)t);
 
-	// create a logger
-	Assimp::DefaultLogger::create("AssimpLog.txt",Assimp::Logger::VERBOSE,
-		Assimp::DLS_DEBUGGER | Assimp::DLS_FILE);
+	// ............................................................................
+
+	// create a logger from both CPP 
+	Assimp::DefaultLogger::create("AssimpLog_Cpp.txt",Assimp::Logger::VERBOSE,
+	 	aiDefaultLogStream_DEBUGGER | aiDefaultLogStream_FILE);
+
+	// .. and C. They should smoothly work together
+	aiEnableVerboseLogging(AI_TRUE);
+	aiAttachLogStream(&aiGetPredefinedLogStream(
+		aiDefaultLogStream_FILE,
+		"AssimpLog_C.txt"));
+
+	// ............................................................................
 
     // Informiert Test-Listener ueber Testresultate
     CPPUNIT_NS :: TestResult testresult;
@@ -49,8 +59,13 @@ int main (int argc, char* argv[])
     xml.write ();
 #endif
 
-	// kill the logger again
-	Assimp::DefaultLogger::kill();
+	// ............................................................................
+	// but shutdown must be done from C to ensure proper deallocation
+	aiDetachAllLogStreams();
+	if (!Assimp::DefaultLogger::isNullLogger()) {
+		return 1;
+	}
+	// ............................................................................
 
     // Rueckmeldung, ob Tests erfolgreich waren
     return collectedresults.wasSuccessful () ? 0 : 1;

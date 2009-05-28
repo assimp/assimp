@@ -45,15 +45,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_NULLLOGGER_H
 #define INCLUDED_AI_NULLLOGGER_H
 
-#include "../include/Logger.h"
-
+#include "Logger.h"
 namespace Assimp	{
-
 // ---------------------------------------------------------------------------
 /** @class	NullLogger
- *	 @brief	Empty logging implementation. Does nothing. Used by default
- *  if the application hasn't specified a custom logger (or DefaultLogger)
- *  via DefaultLogger::set() or DefaultLogger::create();
+ *	@brief	Empty logging implementation.
+ *
+ * Does nothing. Used by default if the application hasn't requested a 
+ * custom logger via #DefaultLogger::set() or #DefaultLogger::create();
  */
 class ASSIMP_API NullLogger : public Logger 
 {
@@ -93,7 +92,5 @@ public:
 
 private:
 };
-
 }
-
 #endif // !! AI_NULLLOGGER_H_INCLUDED

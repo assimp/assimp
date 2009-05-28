@@ -38,42 +38,63 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-/** @file Implementation of the Plain-C API */
-
-
+/** @file  Assimp.cpp
+ *  @brief Implementation of the Plain-C API
+ */
 
 #include "AssimpPCH.h"
 #include "../include/assimp.h"
-
-// public ASSIMP headers
 #include "../include/aiFileIO.h"
 
 #include "GenericProperty.h"
 
-#if (defined AI_C_THREADSAFE)
+// ------------------------------------------------------------------------------------------------
+#ifdef AI_C_THREADSAFE
 #	include <boost/thread/thread.hpp>
 #	include <boost/thread/mutex.hpp>
 #endif
-
+// ------------------------------------------------------------------------------------------------
 using namespace Assimp;
-
 /** Stores the importer objects for all active import processes */
-typedef std::map< const aiScene*, Assimp::Importer* > ImporterMap;
+typedef std::map<const aiScene*, Assimp::Importer*> ImporterMap;
+
+/** Stores the LogStream objects for all active C log streams */
+struct mpred {
+	bool operator  () (const aiLogStream& s0, const aiLogStream& s1) const  {
+		return s0.callback<s1.callback&&s0.user<s1.user;
+	}
+};
+typedef std::map<aiLogStream, Assimp::LogStream*, mpred> LogStreamMap;
+
+/** Stores the LogStream objects allocated by #aiGetPredefinedLogStream */
+typedef std::list<Assimp::LogStream*> PredefLogStreamMap;
 
 /** Local storage of all active import processes */
 static ImporterMap gActiveImports;
 
+/** Local storage of all active log streams */
+static LogStreamMap gActiveLogStreams;
+
+/** Local storage of LogStreams allocated by #aiGetPredefinedLogStream */
+static PredefLogStreamMap gPredefinedStreams;
+
 /** Error message of the last failed import process */
 static std::string gLastErrorString;
 
-/** Configuration properties */
-static ImporterPimpl::IntPropertyMap		gIntProperties;
-static ImporterPimpl::FloatPropertyMap		gFloatProperties;
-static ImporterPimpl::StringPropertyMap		gStringProperties;
+/** Verbose logging active or not? */
+static aiBool gVerboseLogging = false;
 
-#if (defined AI_C_THREADSAFE)
+/** Configuration properties */
+static ImporterPimpl::IntPropertyMap gIntProperties;
+static ImporterPimpl::FloatPropertyMap gFloatProperties;
+static ImporterPimpl::StringPropertyMap	gStringProperties;
+
+#ifdef AI_C_THREADSAFE
 /** Global mutex to manage the access to the importer map */
 static boost::mutex gMutex;
+
+/** Global mutex to manage the access to the logstream map */
+static boost::mutex gLogStreamMutex;
 #endif
 
 class CIOSystemWrapper;
@@ -90,46 +111,43 @@ public:
 		: mFile(pFile)
 	{}
 
-	// -------------------------------------------------------------------
+	// ...................................................................
 	size_t Read(void* pvBuffer, 
 		size_t pSize, 
-		size_t pCount)
-	{
+		size_t pCount
+	){
 		// need to typecast here as C has no void*
 		return mFile->ReadProc(mFile,(char*)pvBuffer,pSize,pCount);
 	}
 
-	// -------------------------------------------------------------------
+	// ...................................................................
 	size_t Write(const void* pvBuffer, 
 		size_t pSize,
-		size_t pCount)
-	{
+		size_t pCount
+	){
 		// need to typecast here as C has no void*
 		return mFile->WriteProc(mFile,(const char*)pvBuffer,pSize,pCount);
 	}
 
-	// -------------------------------------------------------------------
+	// ...................................................................
 	aiReturn Seek(size_t pOffset,
-		aiOrigin pOrigin)
-	{
+		aiOrigin pOrigin
+	){
 		return mFile->SeekProc(mFile,pOffset,pOrigin);
 	}
 
-	// -------------------------------------------------------------------
-	size_t Tell(void) const
-	{
+	// ...................................................................
+	size_t Tell(void) const {
 		return mFile->TellProc(mFile);
 	}
 
-	// -------------------------------------------------------------------
-	size_t	FileSize() const
-	{
+	// ...................................................................
+	size_t	FileSize() const {
 		return mFile->FileSizeProc(mFile);
 	}
 
-	// -------------------------------------------------------------------
-	void Flush ()
-	{
+	// ...................................................................
+	void Flush () {
 		return mFile->FlushProc(mFile);
 	}
 
@@ -137,20 +155,17 @@ private:
 	aiFile* mFile;
 };
 
-
 // ------------------------------------------------------------------------------------------------
 // Custom IOStream implementation for the C-API
 class CIOSystemWrapper : public IOSystem
 {
 public:
-
 	CIOSystemWrapper(aiFileIO* pFile)
 		: mFileSystem(pFile)
 	{}
 
-	// -------------------------------------------------------------------
-	bool Exists( const char* pFile) const
-	{
+	// ...................................................................
+	bool Exists( const char* pFile) const {
 		CIOSystemWrapper* pip = const_cast<CIOSystemWrapper*>(this);
 		IOStream* p = pip->Open(pFile);
 		if (p){
@@ -160,40 +175,80 @@ public:
 		return false;
 	}
 
-	// -------------------------------------------------------------------
-	char getOsSeparator() const
-	{
-		// FIXME
+	// ...................................................................
+	char getOsSeparator() const {
+#ifndef _WIN32
 		return '/';
+#else
+		return '\\';
+#endif
 	}
 
-	// -------------------------------------------------------------------
-	IOStream* Open(const char* pFile,const char* pMode = "rb")
-	{
+	// ...................................................................
+	IOStream* Open(const char* pFile,const char* pMode = "rb") {
 		aiFile* p = mFileSystem->OpenProc(mFileSystem,pFile,pMode);
-		if (!p)return NULL;
+		if (!p) {
+			return NULL;
+		}
 		return new CIOStreamWrapper(p);
 	}
 
-	// -------------------------------------------------------------------
-	void Close( IOStream* pFile)
-	{
-		if (!pFile)return;
+	// ...................................................................
+	void Close( IOStream* pFile) {
+		if (!pFile) {
+			return;
+		}
 		mFileSystem->CloseProc(mFileSystem,((CIOStreamWrapper*) pFile)->mFile);
 		delete pFile;
 	}
+private:
+	aiFileIO* mFileSystem;
+};
 
+// ------------------------------------------------------------------------------------------------
+// Custom LogStream implementation for the C-API
+class LogToCallbackRedirector : public LogStream
+{
+public:
+	LogToCallbackRedirector(const aiLogStream& s) 
+		: stream (s)	{
+			ai_assert(NULL != s.callback);
+	}
+
+	~LogToCallbackRedirector()	{
+#ifdef AI_C_THREADSAFE
+		boost::mutex::scoped_lock lock(gLogStreamMutex);
+#endif
+		// (HACK) Check whether the 'stream.user' pointer points to a
+		// custom LogStream allocated by #aiGetPredefinedLogStream.
+		// In this case, we need to delete it, too. Of course, this 
+		// might cause strange problems, but the chance is quite low.
+
+		PredefLogStreamMap::iterator it = std::find(gPredefinedStreams.begin(), 
+			gPredefinedStreams.end(), (Assimp::LogStream*)stream.user);
+
+		if (it != gPredefinedStreams.end()) {
+			delete *it;
+			gPredefinedStreams.erase(it);
+		}
+	}
+
+	/** @copydoc LogStream::write */
+	void write(const char* message)	{
+		stream.callback(message,stream.user);
+	}
 
 private:
-
-	aiFileIO* mFileSystem;
+	aiLogStream stream;
 };
 
 // ------------------------------------------------------------------------------------------------
 void ReportSceneNotFoundError()
 {
-	DefaultLogger::get()->error("Unable to find the Importer instance for this scene. "
-		"Are you sure it has been created by aiImportFile(ex)(...)?");
+	DefaultLogger::get()->error("Unable to find the Assimp::Importer for this aiScene. "
+		"Are you playing fools with us? Don't mix cpp and c API. Thanks.");
+
+	assert(false);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -208,19 +263,23 @@ const aiScene* aiImportFileEx( const char* pFile, unsigned int pFlags,
 	aiFileIO* pFS)
 {
 	ai_assert(NULL != pFile);
-
 	// create an Importer for this file
 	Assimp::Importer* imp = new Assimp::Importer;
 
+#ifdef AI_C_THREADSAFE
+	boost::mutex::scoped_lock lock(gMutex);
+#endif
 	// copy the global property lists to the Importer instance
-	// (we are a friend of Importer)
 	imp->pimpl->mIntProperties = gIntProperties;
 	imp->pimpl->mFloatProperties = gFloatProperties;
 	imp->pimpl->mStringProperties = gStringProperties;
 
+#ifdef AI_C_THREADSAFE
+	lock.unlock();
+#endif
+
 	// setup a custom IO system if necessary
-	if (pFS)
-	{
+	if (pFS)	{
 		imp->SetIOHandler( new CIOSystemWrapper (pFS) );
 	}
 
@@ -228,15 +287,13 @@ const aiScene* aiImportFileEx( const char* pFile, unsigned int pFlags,
 	const aiScene* scene = imp->ReadFile( pFile, pFlags);
 
 	// if succeeded, place it in the collection of active processes
-	if( scene)
-	{
-#if (defined AI_C_THREADSAFE)
-		boost::mutex::scoped_lock lock(gMutex);
+	if( scene)	{
+#ifdef AI_C_THREADSAFE
+		lock.lock();
 #endif
 		gActiveImports[scene] = imp;
 	} 
-	else
-	{
+	else	{
 		// if failed, extract error code and destroy the import
 		gLastErrorString = imp->GetErrorString();
 		delete imp;
@@ -250,18 +307,18 @@ const aiScene* aiImportFileEx( const char* pFile, unsigned int pFlags,
 // Releases all resources associated with the given import process. 
 void aiReleaseImport( const aiScene* pScene)
 {
-	if (!pScene)return;
+	if (!pScene) {
+		return;
+	}
 
-	// lock the mutex
-#if (defined AI_C_THREADSAFE)
+#ifdef AI_C_THREADSAFE
 	boost::mutex::scoped_lock lock(gMutex);
 #endif
 
 	// find the importer associated with this data
 	ImporterMap::iterator it = gActiveImports.find( pScene);
 	// it should be there... else the user is playing fools with us
-	if( it == gActiveImports.end())
-	{
+	if( it == gActiveImports.end())	{
 		ReportSceneNotFoundError();
 		return;
 	}
@@ -269,6 +326,120 @@ void aiReleaseImport( const aiScene* pScene)
 	// kill the importer, the data dies with it
 	delete it->second;
 	gActiveImports.erase( it);
+}
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API const aiScene* aiApplyPostProcessing(const aiScene* pScene,
+	unsigned int pFlags)
+{
+#ifdef AI_C_THREADSAFE
+	boost::mutex::scoped_lock lock(gMutex);
+#endif
+	// find the importer associated with this data
+	ImporterMap::iterator it = gActiveImports.find( pScene);
+	// it should be there... else the user is playing fools with us
+	if( it == gActiveImports.end())	{
+		ReportSceneNotFoundError();
+		return NULL;
+	}
+#ifdef AI_C_THREADSAFE
+	lock.unlock();
+#endif
+	const aiScene* sc = it->second->ApplyPostProcessing(pFlags);
+#ifdef AI_C_THREADSAFE
+	lock.lock();
+#endif
+	if (!sc) {
+		// kill the importer, the data dies with it
+		delete it->second;
+		gActiveImports.erase( it);
+		return NULL;
+	}
+
+	return it->first;
+}
+
+// ------------------------------------------------------------------------------------------------
+void CallbackToLogRedirector (const char* msg, char* dt)
+{
+	ai_assert(NULL != msg && NULL != dt);
+	LogStream* s = (LogStream*)dt;
+
+	s->write(msg);
+}
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API aiLogStream aiGetPredefinedLogStream(aiDefaultLogStream pStream,const char* file)
+{
+	aiLogStream sout;
+	LogStream* stream = LogStream::createDefaultStream(pStream,file);
+	if (!stream) {
+		sout.callback = NULL;
+	}
+	else {
+		sout.callback = &CallbackToLogRedirector;
+		sout.user = (char*)stream;
+	}
+	gPredefinedStreams.push_back(stream);
+	return sout;
+}
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API void aiAttachLogStream( const aiLogStream* stream )
+{
+#ifdef AI_C_THREADSAFE
+	boost::mutex::scoped_lock lock(gLogStreamMutex);
+#endif
+	LogStream* lg = new LogToCallbackRedirector(*stream);
+	gActiveLogStreams[*stream] = lg;
+
+	if (DefaultLogger::isNullLogger()) {
+		DefaultLogger::create(NULL,(gVerboseLogging == AI_TRUE ? Logger::VERBOSE : Logger::NORMAL));
+	}
+	DefaultLogger::get()->attachStream(lg);
+}
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API aiReturn aiDetachLogStream( const aiLogStream* stream)
+{
+#ifdef AI_C_THREADSAFE
+	boost::mutex::scoped_lock lock(gLogStreamMutex);
+#endif
+	// find the logstream associated with this data
+	LogStreamMap::iterator it = gActiveLogStreams.find( *stream);
+	// it should be there... else the user is playing fools with us
+	if( it == gActiveLogStreams.end())	{
+		return AI_FAILURE;
+	}
+	delete it->second;
+	gActiveLogStreams.erase( it);
+
+	if (gActiveLogStreams.empty()) {
+		DefaultLogger::kill();
+	}
+	return AI_SUCCESS;
+}
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API void aiDetachAllLogStreams(void)
+{
+#ifdef AI_C_THREADSAFE
+	boost::mutex::scoped_lock lock(gLogStreamMutex);
+#endif
+	for (LogStreamMap::iterator it = gActiveLogStreams.begin(); it != gActiveLogStreams.end(); ++it) {
+		delete it->second;
+	}
+	gActiveLogStreams.clear();
+	DefaultLogger::kill();
+}
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API void aiEnableVerboseLogging(aiBool d)
+{
+	if (!DefaultLogger::isNullLogger()) {
+		DefaultLogger::get()->setLogSeverity((d == AI_TRUE ? Logger::VERBOSE : Logger::NORMAL));
+	}
+	gVerboseLogging = d;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -280,25 +451,20 @@ const char* aiGetErrorString()
 
 // ------------------------------------------------------------------------------------------------
 // Returns the error text of the last failed import process. 
-int aiIsExtensionSupported(const char* szExtension)
+aiBool aiIsExtensionSupported(const char* szExtension)
 {
 	ai_assert(NULL != szExtension);
-
-	// lock the mutex
-#if (defined AI_C_THREADSAFE)
+#ifdef AI_C_THREADSAFE
 	boost::mutex::scoped_lock lock(gMutex);
 #endif
 
 	if (!gActiveImports.empty())	{
-		return (int)((*(gActiveImports.begin())).second->IsExtensionSupported( szExtension ));
+		return ((*(gActiveImports.begin())).second->IsExtensionSupported( szExtension )) ? AI_TRUE : AI_FALSE;
 	}
 
-	// need to create a temporary Importer instance.
-	// TODO: Find a better solution ...
-	Assimp::Importer* pcTemp = new Assimp::Importer();
-	int i = (int)pcTemp->IsExtensionSupported(std::string(szExtension));
-	delete pcTemp;
-	return i;
+	// fixme: no need to create a temporary Importer instance just for that .. 
+	Assimp::Importer tmp;
+	return tmp.IsExtensionSupported(std::string(szExtension)) ? AI_TRUE : AI_FALSE;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -306,9 +472,7 @@ int aiIsExtensionSupported(const char* szExtension)
 void aiGetExtensionList(aiString* szOut)
 {
 	ai_assert(NULL != szOut);
-
-	// lock the mutex
-#if (defined AI_C_THREADSAFE)
+#ifdef AI_C_THREADSAFE
 	boost::mutex::scoped_lock lock(gMutex);
 #endif
 
@@ -317,65 +481,85 @@ void aiGetExtensionList(aiString* szOut)
 		(*(gActiveImports.begin())).second->GetExtensionList(*szOut);
 		return;
 	}
-	// need to create a temporary Importer instance.
-	// TODO: Find a better solution ...
-	Assimp::Importer* pcTemp = new Assimp::Importer();
-	pcTemp->GetExtensionList(*szOut);
-	delete pcTemp;
+	// fixme: no need to create a temporary Importer instance just for that .. 
+	Assimp::Importer tmp;
+	tmp.GetExtensionList(*szOut);
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get the memory requirements for a particular import.
 void aiGetMemoryRequirements(const C_STRUCT aiScene* pIn,
 	C_STRUCT aiMemoryInfo* in)
 {
-// lock the mutex
-#if (defined AI_C_THREADSAFE)
+#ifdef AI_C_THREADSAFE
 	boost::mutex::scoped_lock lock(gMutex);
 #endif
 
 	// find the importer associated with this data
 	ImporterMap::iterator it = gActiveImports.find( pIn);
 	// it should be there... else the user is playing fools with us
-	if( it == gActiveImports.end())
-	{
+	if( it == gActiveImports.end())	{
 		ReportSceneNotFoundError();
 		return;
 	}
 	// get memory statistics
+#ifdef AI_C_THREADSAFE
+	lock.unlock();
+#endif
 	it->second->GetMemoryRequirements(*in);
 }
 
 // ------------------------------------------------------------------------------------------------
+// Importer::SetPropertyInteger
 ASSIMP_API void aiSetImportPropertyInteger(const char* szName, int value)
 {
+#ifdef AI_C_THREADSAFE
+	boost::mutex::scoped_lock lock(gMutex);
+#endif
 	SetGenericProperty<int>(gIntProperties,szName,value,NULL);
 }
 
 // ------------------------------------------------------------------------------------------------
+// Importer::SetPropertyFloat
 ASSIMP_API void aiSetImportPropertyFloat(const char* szName, float value)
 {
+#ifdef AI_C_THREADSAFE
+	boost::mutex::scoped_lock lock(gMutex);
+#endif
 	SetGenericProperty<float>(gFloatProperties,szName,value,NULL);
 }
 
 // ------------------------------------------------------------------------------------------------
+// Importer::SetPropertyString
 ASSIMP_API void aiSetImportPropertyString(const char* szName,
 	const C_STRUCT aiString* st)
 {
-	if (!st)return;
-
+	if (!st) {
+		return;
+	}
+#ifdef AI_C_THREADSAFE
+	boost::mutex::scoped_lock lock(gMutex);
+#endif
 	SetGenericProperty<std::string>(gStringProperties,szName,
 		std::string( st->data ),NULL);
 }
 
 // ------------------------------------------------------------------------------------------------
+// Rotation matrix to quaternion
 ASSIMP_API void aiCreateQuaternionFromMatrix(aiQuaternion* quat,const aiMatrix3x3* mat)
 {
+	ai_assert(NULL != quat && NULL != mat);
 	*quat = aiQuaternion(*mat);
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API void aiDecomposeMatrix(const aiMatrix4x4* mat, aiVector3D* scaling,
-	aiQuaternion* rotation,aiVector3D* position)
+// Affline matrix decomposition
+ASSIMP_API void aiDecomposeMatrix(const aiMatrix4x4* mat,aiVector3D* scaling,
+	aiQuaternion* rotation,
+	aiVector3D* position)
 {
+	ai_assert(NULL != rotation && NULL != position && NULL != scaling && NULL != mat);
 	mat->Decompose(*scaling,*rotation,*position);
 }
+
+

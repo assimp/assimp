@@ -336,7 +336,7 @@ public:
 	 *   #aiPostProcessSteps flags.
 	 *  @return A pointer to the post-processed data. This is still the
 	 *   same as the pointer returned by #ReadFile(). However, if
-	 *   post-processing fails severly the scene could now be NULL.
+	 *   post-processing fails, the scene could now be NULL.
 	 *   That's quite a rare case, post processing steps are not really
 	 *   designed to 'fail'. To be exact, the #aiProcess_ValidateDS
 	 *   flag is currently the only post processing step which can actually

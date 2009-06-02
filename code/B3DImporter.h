@@ -65,41 +65,60 @@ protected:
 
 private:
 
-	struct Vec2{ float x,y; };
-	struct Vec3{ float x,y,z; };
-	struct Vec4{ float x,y,z,w; };
-	struct Texture{ std::string name; };
-	struct Vertex{ Vec3 position,normal,texcoords; };
-
 	int ReadByte();
 	int ReadInt();
 	float ReadFloat();
-	Vec2 ReadVec2();
-	Vec3 ReadVec3();
-	Vec4 ReadVec4();
+	aiVector2D ReadVec2();
+	aiVector3D ReadVec3();
+	aiQuaternion ReadQuat();
 	std::string ReadString();
 	std::string ReadChunk();
 	void ExitChunk();
 	unsigned ChunkSize();
 
+	template<class T>
+	T *to_array( const std::vector<T> &v );
+
+	struct Vertex{
+		aiVector3D vertex;
+		aiVector3D normal;
+		aiVector3D texcoords;
+		unsigned char bones[4];
+		float weights[4];
+	};
+
+	void Oops();
+	void Fail( std::string str );
+
 	void ReadTEXS();
 	void ReadBRUS();
+
 	void ReadVRTS();
-	void ReadTRIS();
+	void ReadTRIS( int v0 );
 	void ReadMESH();
-	void ReadNODE();
-	void ReadBB3D();
+	void ReadBONE( int id );
+	void ReadKEYS( aiNodeAnim *nodeAnim );
+	void ReadANIM();
+
+	aiNode *ReadNODE( aiNode *parent );
+
+	void ReadBB3D( aiScene *scene );
 
 	unsigned _pos;
 	unsigned _size;
 	std::vector<unsigned char> _buf;
 	std::vector<unsigned> _stack;
 	
-	int _vertFlags,_tcSets,_tcSize;
-	std::vector<Texture> _textures;
-	std::vector<MaterialHelper*> _materials;
+	std::vector<std::string> _textures;
+	std::vector<aiMaterial*> _materials;
+
+	int _vflags,_tcsets,_tcsize;
 	std::vector<Vertex> _vertices;
+
+	std::vector<aiNode*> _nodes;
 	std::vector<aiMesh*> _meshes;
+	std::vector<aiNodeAnim*> _nodeAnims;
+	std::vector<aiAnimation*> _animations;
 };
 
 }

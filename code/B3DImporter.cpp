@@ -54,6 +54,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace std;
 
+//#define DEBUG_B3D
+
 // ------------------------------------------------------------------------------------------------
 bool B3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const{
 
@@ -71,8 +73,19 @@ void B3DImporter::GetExtensionList( std::string& append ){
 	append.append("*.b3d");
 }
 
+#ifdef DEBUG_B3D
+	extern "C"{ void _stdcall AllocConsole(); }
+#endif
 // ------------------------------------------------------------------------------------------------
 void B3DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler){
+
+#ifdef DEBUG_B3D
+	AllocConsole();
+	freopen( "conin$","r",stdin );
+	freopen( "conout$","w",stdout );
+	freopen( "conout$","w",stderr );
+	cout<<"Hello world from the B3DImporter!"<<endl;
+#endif
 
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
 
@@ -89,57 +102,27 @@ void B3DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 	_buf.resize( fileSize );
 	file->Read( &_buf[0],1,fileSize );
 	_stack.clear();
-	_textures.clear();
-	_materials.size();
-	_vertices.clear();
-	_meshes.clear();
 
-	ReadBB3D();
-	
-	//materials
-	if( _materials.size() ){
-		aiMaterial **mats=new aiMaterial*[_materials.size()];
-		for( unsigned i=0;i<_materials.size();++i ){
-			mats[i]=_materials[i];
-		}
-		pScene->mNumMaterials=_materials.size();
-		pScene->mMaterials=mats;
-	}
-	
-	//meshes
-	if( _meshes.size() ){
-		aiMesh **meshes=new aiMesh*[_meshes.size()];
-		for( unsigned i=0;i<_meshes.size();++i ){
-			meshes[i]=_meshes[i];
-		}
-		pScene->mNumMeshes=_meshes.size();
-		pScene->mMeshes=meshes;
-	}else{
-		throw new ImportErrorException( "B3D: No meshes loaded" );
-	}
+	ReadBB3D( pScene );
+}
 
-	//create root node
-	aiNode *node=new aiNode( "root" );
-	
-	node->mNumMeshes=_meshes.size();
-	node->mMeshes=new unsigned[_meshes.size()];
-	for( unsigned i=0;i<_meshes.size();++i ){
-		node->mMeshes[i]=i;
-	}
-	pScene->mRootNode=node;
+// ------------------------------------------------------------------------------------------------
+void B3DImporter::Oops(){
+	throw new ImportErrorException( "B3D Importer - INTERNAL ERROR" );
+}
 
-	// convert to RH
-	MakeLeftHandedProcess monster_maker;
-	monster_maker.Execute(pScene);
-
-	FlipWindingOrderProcess flipper;
-	flipper.Execute(pScene);
+// ------------------------------------------------------------------------------------------------
+void B3DImporter::Fail( string str ){
+#ifdef DEBUG_B3D
+	cout<<"Error in B3D file data: "<<str<<endl;
+#endif
+	throw new ImportErrorException( "B3D Importer - error in B3D file data: "+str );
 }
 
 // ------------------------------------------------------------------------------------------------
 int B3DImporter::ReadByte(){
 	if( _pos<_buf.size() ) return _buf[_pos++];
-	throw new ImportErrorException( "B3D EOF Error" );
+	Fail( "EOF" );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -149,7 +132,7 @@ int B3DImporter::ReadInt(){
 		_pos+=4;
 		return n;
 	}
-	throw new ImportErrorException( "B3D EOF Error" );
+	Fail( "EOF" );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -159,34 +142,31 @@ float B3DImporter::ReadFloat(){
 		_pos+=4;
 		return n;
 	}
-	throw new ImportErrorException( "B3D EOF Error" );
+	Fail( "EOF" );
 }
 
 // ------------------------------------------------------------------------------------------------
-B3DImporter::Vec2 B3DImporter::ReadVec2(){
-	Vec2 t;
-	t.x=ReadFloat();
-	t.y=ReadFloat();
-	return t;
+aiVector2D B3DImporter::ReadVec2(){
+	float x=ReadFloat();
+	float y=ReadFloat();
+	return aiVector2D( x,y );
 }
 
 // ------------------------------------------------------------------------------------------------
-B3DImporter::Vec3 B3DImporter::ReadVec3(){
-	Vec3 t;
-	t.x=ReadFloat();
-	t.y=ReadFloat();
-	t.z=ReadFloat();
-	return t;
+aiVector3D B3DImporter::ReadVec3(){
+	float x=ReadFloat();
+	float y=ReadFloat();
+	float z=ReadFloat();
+	return aiVector3D( x,y,z );
 }
 
 // ------------------------------------------------------------------------------------------------
-B3DImporter::Vec4 B3DImporter::ReadVec4(){
-	Vec4 t;
-	t.x=ReadFloat();
-	t.y=ReadFloat();
-	t.z=ReadFloat();
-	t.w=ReadFloat();
-	return t;
+aiQuaternion B3DImporter::ReadQuat(){
+	float w=ReadFloat();
+	float x=ReadFloat();
+	float y=ReadFloat();
+	float z=ReadFloat();
+	return aiQuaternion( w,x,y,z );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -197,7 +177,7 @@ string B3DImporter::ReadString(){
 		if( !c ) return str;
 		str+=c;
 	}
-	throw new ImportErrorException( "B3D EOF Error" );
+	Fail( "EOF" );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -206,7 +186,9 @@ string B3DImporter::ReadChunk(){
 	for( int i=0;i<4;++i ){
 		tag+=char( ReadByte() );
 	}
+#ifdef DEBUG_B3D
 //	cout<<"ReadChunk:"<<tag<<endl;
+#endif
 	unsigned sz=(unsigned)ReadInt();
 	_stack.push_back( _pos+sz );
 	return tag;
@@ -222,6 +204,17 @@ void B3DImporter::ExitChunk(){
 unsigned B3DImporter::ChunkSize(){
 	return _stack.back()-_pos;
 }
+// ------------------------------------------------------------------------------------------------
+
+template<class T>
+T *B3DImporter::to_array( const vector<T> &v ){
+	if( !v.size() ) return 0;
+	T *p=new T[v.size()];
+	for( int i=0;i<v.size();++i ){
+		p[i]=v[i];
+	}
+	return p;
+}
 
 // ------------------------------------------------------------------------------------------------
 void B3DImporter::ReadTEXS(){
@@ -229,22 +222,24 @@ void B3DImporter::ReadTEXS(){
 		string name=ReadString();
 		int flags=ReadInt();
 		int blend=ReadInt();
-		Vec2 pos=ReadVec2();
-		Vec2 scale=ReadVec2();
+		aiVector2D pos=ReadVec2();
+		aiVector2D scale=ReadVec2();
 		float rot=ReadFloat();
 
-		Texture tex;
-		tex.name=name;
-		_textures.push_back( tex );
+		_textures.push_back( name );
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
 void B3DImporter::ReadBRUS(){
 	int n_texs=ReadInt();
+	if( n_texs<0 || n_texs>8 ){
+		Fail( "Bad texture count" );
+	}
 	while( ChunkSize() ){
 		string name=ReadString();
-		Vec4 color=ReadVec4();
+		aiVector3D color=ReadVec3();
+		float alpha=ReadFloat();
 		float shiny=ReadFloat();
 		int blend=ReadInt();
 		int fx=ReadInt();
@@ -257,11 +252,10 @@ void B3DImporter::ReadBRUS(){
 		mat->AddProperty( &ainame,AI_MATKEY_NAME );
 		
 		// Diffuse color 
-		aiColor3D diffcolor( color.x,color.y,color.z ); 
-		mat->AddProperty( &diffcolor,1,AI_MATKEY_COLOR_DIFFUSE );
+		mat->AddProperty( &color,1,AI_MATKEY_COLOR_DIFFUSE );
 
 		// Opacity
-		mat->AddProperty( &color.w,1,AI_MATKEY_OPACITY );
+		mat->AddProperty( &alpha,1,AI_MATKEY_OPACITY );
 
 		// Specular color
 		aiColor3D speccolor( shiny,shiny,shiny );
@@ -280,10 +274,11 @@ void B3DImporter::ReadBRUS(){
 		//Textures
 		for( int i=0;i<n_texs;++i ){
 			int texid=ReadInt();
-			if( !i && texid>=0 && texid<(int)_textures.size() ){
-				//just use tex 0 for now
-				const Texture &tex=_textures[texid];
-				aiString texname( tex.name );
+			if( texid<-1 || (texid>=0 && texid>=_textures.size()) ){
+				Fail( "Bad texture id" );
+			}
+			if( i==0 && texid>=0 ){
+				aiString texname( _textures[texid] );
 				mat->AddProperty( &texname,AI_MATKEY_TEXTURE_DIFFUSE(0) );
 			}
 		}
@@ -292,75 +287,80 @@ void B3DImporter::ReadBRUS(){
 
 // ------------------------------------------------------------------------------------------------
 void B3DImporter::ReadVRTS(){
-	_vertFlags=ReadInt();
-	_tcSets=ReadInt();
-	_tcSize=ReadInt();
+	_vflags=ReadInt();
+	_tcsets=ReadInt();
+	_tcsize=ReadInt();
+	if( _tcsets<0 || _tcsets>4 || _tcsize<0 || _tcsize>4 ){
+		Fail( "Bad texcoord data" );
+	}
 
-	if( _tcSets<0 || _tcSets>4 || _tcSize<0 || _tcSize>4 ) throw new ImportErrorException( "B3D Param Error" );
+	int sz=12+(_vflags&1?12:0)+(_vflags&2?16:0)+(_tcsets*_tcsize*4);
+	int n_verts=ChunkSize()/sz;
 
-	while( ChunkSize() ){
-		Vertex vert;
+	_vertices.clear();
+	_vertices.resize( n_verts );
 
-		vert.position=ReadVec3();
+	for( int i=0;i<n_verts;++i ){
+		Vertex &v=_vertices[i];
 
-		if( _vertFlags & 1 ){
-			vert.normal=ReadVec3();
-		}
+		memset( v.bones,0,sizeof(v.bones) );
+		memset( v.weights,0,sizeof(v.weights) );
 
-		if( _vertFlags & 2 ){
-			Vec4 color=ReadVec4();
-		}
+		v.vertex=ReadVec3();
 
-		for( int i=0;i<_tcSets;++i ){
-			float texcoords[4]={0,0,0,0};
-			for( int j=0;j<_tcSize;++j ){
-				texcoords[j]=ReadFloat();
+		if( _vflags & 1 ) v.normal=ReadVec3();
+
+		if( _vflags & 2 ) ReadQuat();	//skip v 4bytes...
+
+		for( int i=0;i<_tcsets;++i ){
+			float t[4]={0,0,0,0};
+			for( int j=0;j<_tcsize;++j ){
+				t[j]=ReadFloat();
 			}
-			texcoords[1]=1-texcoords[1];
-			if( !i ) memcpy( &vert.texcoords.x,texcoords,12 );
+			t[1]=1-t[1];
+			if( !i ) v.texcoords=aiVector3D( t[0],t[1],t[2] );
 		}
-		_vertices.push_back( vert );
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
-void B3DImporter::ReadTRIS(){
+void B3DImporter::ReadTRIS( int v0 ){
 	int matid=ReadInt();
+	if( matid==-1 ){
+		matid=0;
+	}else if( matid<0 || matid>=_materials.size() ){
+#ifdef DEBUG_B3D
+		cout<<"material id="<<matid<<endl;
+#endif
+		Fail( "Bad material id" );
+	}
 
-	unsigned n_tris=ChunkSize()/12;
-	unsigned n_verts=n_tris*3;
-	
+	int n_tris=ChunkSize()/12;
+
 	aiMesh *mesh=new aiMesh;
 	_meshes.push_back( mesh );
 
 	mesh->mMaterialIndex=matid;
-	mesh->mNumVertices=n_verts;
 	mesh->mNumFaces=n_tris;
 	mesh->mPrimitiveTypes=aiPrimitiveType_TRIANGLE;
 
-	aiVector3D *mv,*mn=0,*mc=0;
-	
-	mv=mesh->mVertices=new aiVector3D[n_verts];
-	if( _vertFlags & 1 ) mn=mesh->mNormals=new aiVector3D[n_verts];
-	if( _tcSets ) mc=mesh->mTextureCoords[0]=new aiVector3D[n_verts];
-	
 	aiFace *face=mesh->mFaces=new aiFace[n_tris];
 
-	for( unsigned i=0;i<n_verts;i+=3 ){
-		face->mNumIndices=3;
-		unsigned *ip=face->mIndices=new unsigned[3];
-		int v[3];
-		v[0]=ReadInt();
-		v[1]=ReadInt();
-		v[2]=ReadInt();
-		for( unsigned j=0;j<3;++j ){
-			int k=v[j];
-			const Vertex &v=_vertices[k];
-			memcpy( mv++,&v.position.x,12 );
-			if( mn ) memcpy( mn++,&v.normal.x,12 );
-			if( mc ) memcpy( mc++,&v.texcoords.x,12 );
-			*ip++=i+j;
+	for( int i=0;i<n_tris;++i ){
+		int i0=ReadInt()+v0;
+		int i1=ReadInt()+v0;
+		int i2=ReadInt()+v0;
+		if( i0<0 || i0>=_vertices.size() || i1<0 || i1>=_vertices.size() || i2<0 || i2>=_vertices.size() ){
+#ifdef DEBUG_B3D
+			cout<<"i0="<<i0<<", i1="<<i1<<", i2="<<i2<<endl;
+#endif
+			Fail( "Bad triangle index" );
 		}
+		face->mNumIndices=3;
+		face->mIndices=new unsigned[3];
+		face->mIndices[0]=i0;
+		face->mIndices[1]=i1;
+		face->mIndices[2]=i2;
 		++face;
 	}
 }
@@ -369,40 +369,168 @@ void B3DImporter::ReadTRIS(){
 void B3DImporter::ReadMESH(){
 	int matid=ReadInt();
 
-	_vertices.clear();
-	
+	int v0=_vertices.size();
+
 	while( ChunkSize() ){
 		string t=ReadChunk();
 		if( t=="VRTS" ){
 			ReadVRTS();
 		}else if( t=="TRIS" ){
-			ReadTRIS();
+			ReadTRIS( v0 );
 		}
 		ExitChunk();
 	}
-
-	_vertices.clear();
 }
 
 // ------------------------------------------------------------------------------------------------
-void B3DImporter::ReadNODE(){
+void B3DImporter::ReadBONE( int id ){
+	while( ChunkSize() ){
+		int vertex=ReadInt();
+		float weight=ReadFloat();
+		if( vertex<0 || vertex>=_vertices.size() ){
+			Fail( "Bad vertex index" );
+		}
+
+		Vertex &v=_vertices[vertex];
+		int i;
+		for( i=0;i<4;++i ){
+			if( !v.weights[i] ){
+				v.bones[i]=id;
+				v.weights[i]=weight;
+				break;
+			}
+		}
+#ifdef DEBUG_B3D
+		if( i==4 ){
+			cout<<"Too many bone weights"<<endl;
+		}
+#endif
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void B3DImporter::ReadKEYS( aiNodeAnim *nodeAnim ){
+	vector<aiVectorKey> trans,scale;
+	vector<aiQuatKey> rot;
+	int flags=ReadInt();
+	while( ChunkSize() ){
+		int frame=ReadInt();
+		if( flags & 1 ){
+			trans.push_back( aiVectorKey( frame,ReadVec3() ) );
+		}
+		if( flags & 2 ){
+			scale.push_back( aiVectorKey( frame,ReadVec3() ) );
+		}
+		if( flags & 4 ){
+			rot.push_back( aiQuatKey( frame,ReadQuat() ) );
+		}
+	}
+
+	if( flags & 1 ){
+		nodeAnim->mNumPositionKeys=trans.size();
+		nodeAnim->mPositionKeys=to_array( trans );
+	}
+
+	if( flags & 2 ){
+		nodeAnim->mNumScalingKeys=scale.size();
+		nodeAnim->mScalingKeys=to_array( scale );
+	}
+
+	if( flags & 4 ){
+		nodeAnim->mNumRotationKeys=rot.size();
+		nodeAnim->mRotationKeys=to_array( rot );
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void B3DImporter::ReadANIM(){
+	int flags=ReadInt();
+	int frames=ReadInt();
+	float fps=ReadFloat();
+
+	aiAnimation *anim=new aiAnimation;
+	_animations.push_back( anim );
+
+	anim->mDuration=frames;
+	anim->mTicksPerSecond=fps;
+}
+
+// ------------------------------------------------------------------------------------------------
+aiNode *B3DImporter::ReadNODE( aiNode *parent ){
 
 	string name=ReadString();
-	Vec3 trans=ReadVec3();
-	Vec3 scale=ReadVec3();
-	Vec4 rot=ReadVec4();
+	aiVector3D t=ReadVec3();
+	aiVector3D s=ReadVec3();
+	aiQuaternion r=ReadQuat();
+
+	aiMatrix4x4 trans,scale,rot;
+
+	aiMatrix4x4::Translation( t,trans );
+	aiMatrix4x4::Scaling( s,scale );
+	rot=aiMatrix4x4( r.GetMatrix() );
+
+	aiMatrix4x4 tform=trans * rot * scale;
+
+	int nodeid=_nodes.size();
+
+	aiNode *node=new aiNode( name );
+	_nodes.push_back( node );
+
+	node->mParent=parent;
+	node->mTransformation=tform;
+
+	aiNodeAnim *nodeAnim=0;
+	vector<unsigned> meshes;
+	vector<aiNode*> children;
 
 	while( ChunkSize() ){
 		string t=ReadChunk();
 		if( t=="MESH" ){
+			int n=_meshes.size();
 			ReadMESH();
+			for( int i=n;i<_meshes.size();++i ){
+				meshes.push_back( i );
+			}
+		}else if( t=="BONE" ){
+			ReadBONE( nodeid );
+		}else if( t=="ANIM" ){
+			ReadANIM();
+		}else if( t=="KEYS" ){
+			if( !nodeAnim ){
+				nodeAnim=new aiNodeAnim;
+				_nodeAnims.push_back( nodeAnim );
+				nodeAnim->mNodeName=node->mName;
+			}
+			ReadKEYS( nodeAnim );
+		}else if( t=="NODE" ){
+			aiNode *child=ReadNODE( node );
+			children.push_back( child );
 		}
 		ExitChunk();
 	}
+
+	node->mNumMeshes=meshes.size();
+	node->mMeshes=to_array( meshes );
+
+	node->mNumChildren=children.size();
+	node->mChildren=to_array( children );
+
+	return node;
 }
 
 // ------------------------------------------------------------------------------------------------
-void B3DImporter::ReadBB3D(){
+void B3DImporter::ReadBB3D( aiScene *scene ){
+
+	_textures.clear();
+	_materials.size();
+
+	_vertices.clear();
+	_meshes.clear();
+
+	_nodes.clear();
+	_nodeAnims.clear();
+	_animations.clear();
+
 	string t=ReadChunk();
 	if( t=="BB3D" ){
 		int version=ReadInt();
@@ -413,12 +541,114 @@ void B3DImporter::ReadBB3D(){
 			}else if( t=="BRUS" ){
 				ReadBRUS();
 			}else if( t=="NODE" ){
-				ReadNODE();
+				ReadNODE( 0 );
 			}
 			ExitChunk();
 		}
 	}
 	ExitChunk();
+
+	if( !_nodes.size() ) Fail( "No nodes" );
+
+	if( !_meshes.size() ) Fail( "No meshes" );
+
+	//Fix nodes/meshes/bones
+	for( int i=0;i<_nodes.size();++i ){
+		aiNode *node=_nodes[i];
+
+		for( int j=0;j<node->mNumMeshes;++j ){
+			aiMesh *mesh=_meshes[node->mMeshes[j]];
+
+			int n_tris=mesh->mNumFaces;
+			int n_verts=mesh->mNumVertices=n_tris * 3;
+
+			aiVector3D *mv=mesh->mVertices=new aiVector3D[ n_verts ],*mn=0,*mc=0;
+			if( _vflags & 1 ) mn=mesh->mNormals=new aiVector3D[ n_verts ];
+			if( _tcsets ) mc=mesh->mTextureCoords[0]=new aiVector3D[ n_verts ];
+
+			aiFace *face=mesh->mFaces;
+
+			vector< vector<aiVertexWeight> > vweights( _nodes.size() );
+
+			for( int i=0;i<n_verts;i+=3 ){
+				for( int j=0;j<3;++j ){
+					Vertex &v=_vertices[face->mIndices[j]];
+
+					*mv++=v.vertex;
+					if( mn ) *mn++=v.normal;
+					if( mc ) *mc++=v.texcoords;
+
+					face->mIndices[j]=i+j;
+
+					for( int k=0;k<4;++k ){
+						if( !v.weights[k] ) break;
+
+						int bone=v.bones[k];
+						float weight=v.weights[k];
+
+						vweights[bone].push_back( aiVertexWeight(i+j,weight) );
+					}
+				}
+				++face;
+			}
+
+			vector<aiBone*> bones;
+			for( int i=0;i<vweights.size();++i ){
+				vector<aiVertexWeight> &weights=vweights[i];
+				if( !weights.size() ) continue;
+
+				aiBone *bone=new aiBone;
+				bones.push_back( bone );
+
+				aiNode *bnode=_nodes[i];
+
+				bone->mName=bnode->mName;
+				bone->mNumWeights=weights.size();
+				bone->mWeights=to_array( weights );
+
+				aiMatrix4x4 mat=bnode->mTransformation;
+				while( bnode->mParent ){
+					bnode=bnode->mParent;
+					mat=bnode->mTransformation * mat;
+				}
+				bone->mOffsetMatrix=mat.Inverse();
+			}
+			mesh->mNumBones=bones.size();
+			mesh->mBones=to_array( bones );
+		}
+	}
+
+	//nodes
+	scene->mRootNode=_nodes[0];
+
+	//materials
+	if( !_materials.size() ){
+		_materials.push_back( new MaterialHelper );
+	}
+	scene->mNumMaterials=_materials.size();
+	scene->mMaterials=to_array( _materials );
+	
+	//meshes
+	scene->mNumMeshes=_meshes.size();
+	scene->mMeshes=to_array( _meshes );
+
+	//animations
+	if( _animations.size()==1 && _nodeAnims.size() ){
+
+		aiAnimation *anim=_animations.back();
+		anim->mNumChannels=_nodeAnims.size();
+		anim->mChannels=to_array( _nodeAnims );
+
+		scene->mNumAnimations=_animations.size();
+		scene->mAnimations=to_array( _animations );
+	}
+
+	// convert to RH
+	MakeLeftHandedProcess makeleft;
+	makeleft.Execute( scene );
+
+	FlipWindingOrderProcess flip;
+	flip.Execute( scene );
 }
 
 #endif // !! ASSIMP_BUILD_NO_B3D_IMPORTER

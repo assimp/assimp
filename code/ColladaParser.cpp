@@ -1474,7 +1474,7 @@ void ColladaParser::ReadSource()
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
 		{
-			if( IsElement( "float_array") || IsElement( "IDREF_array"))
+			if( IsElement( "float_array") || IsElement( "IDREF_array") || IsElement( "Name_array"))
 			{
 				ReadDataArray();
 			}
@@ -1515,7 +1515,7 @@ void ColladaParser::ReadSource()
 void ColladaParser::ReadDataArray()
 {
 	std::string elmName = mReader->getNodeName();
-	bool isStringArray = (elmName == "IDREF_array");
+	bool isStringArray = (elmName == "IDREF_array" || elmName == "Name_array");
 
 	// read attributes
 	int indexID = GetAttribute( "id");
@@ -1975,6 +1975,7 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 		}
 	}
 
+
 	// if I ever get my hands on that guy who invented this steaming pile of indirection...
 	TestClosing( "p");
 }
@@ -2009,39 +2010,71 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
 			else 
 				DefaultLogger::get()->error("Collada: just one vertex position stream supported");
 			break;
-		case IT_Normal: // ignore all normal streams except 0 - there can be only one normal
-			if( pInput.mIndex == 0)
+		case IT_Normal: 
+      // pad to current vertex count if necessary
+      if( pMesh->mNormals.size() < pMesh->mPositions.size()-1)
+        pMesh->mNormals.insert( pMesh->mNormals.end(), pMesh->mPositions.size() - pMesh->mNormals.size() - 1, aiVector3D( 0, 1, 0));
+
+      // ignore all normal streams except 0 - there can be only one normal
+      if( pInput.mIndex == 0)
 				pMesh->mNormals.push_back( aiVector3D( obj[0], obj[1], obj[2])); 
 			else 
 				DefaultLogger::get()->error("Collada: just one vertex normal stream supported");
 			break;
-		case IT_Tangent: // ignore all tangent streams except 0 - there can be only one tangent
-			if( pInput.mIndex == 0)
+		case IT_Tangent: 
+      // pad to current vertex count if necessary
+      if( pMesh->mTangents.size() < pMesh->mPositions.size()-1)
+        pMesh->mTangents.insert( pMesh->mTangents.end(), pMesh->mPositions.size() - pMesh->mTangents.size() - 1, aiVector3D( 1, 0, 0));
+
+      // ignore all tangent streams except 0 - there can be only one tangent
+      if( pInput.mIndex == 0)
 				pMesh->mTangents.push_back( aiVector3D( obj[0], obj[1], obj[2])); 
 			else 
 				DefaultLogger::get()->error("Collada: just one vertex tangent stream supported");
 			break;
-		case IT_Bitangent: // ignore all bitangent streams except 0 - there can be only one bitangent
-			if( pInput.mIndex == 0)
+		case IT_Bitangent: 
+      // pad to current vertex count if necessary
+      if( pMesh->mBitangents.size() < pMesh->mPositions.size()-1)
+        pMesh->mBitangents.insert( pMesh->mBitangents.end(), pMesh->mPositions.size() - pMesh->mBitangents.size() - 1, aiVector3D( 0, 0, 1));
+
+      // ignore all bitangent streams except 0 - there can be only one bitangent
+      if( pInput.mIndex == 0)
 				pMesh->mBitangents.push_back( aiVector3D( obj[0], obj[1], obj[2])); 
 			else 
 				DefaultLogger::get()->error("Collada: just one vertex bitangent stream supported");
 			break;
-		case IT_Texcoord: // up to 4 texture coord sets are fine, ignore the others
-			if( pInput.mIndex < AI_MAX_NUMBER_OF_TEXTURECOORDS) {
+		case IT_Texcoord: 
+      // up to 4 texture coord sets are fine, ignore the others
+			if( pInput.mIndex < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
+      {
+        // pad to current vertex count if necessary
+        if( pMesh->mTexCoords[pInput.mIndex].size() < pMesh->mPositions.size()-1)
+          pMesh->mTexCoords[pInput.mIndex].insert( pMesh->mTexCoords[pInput.mIndex].end(), 
+            pMesh->mPositions.size() - pMesh->mTexCoords[pInput.mIndex].size() - 1, aiVector3D( 0, 0, 0));
 
 				pMesh->mTexCoords[pInput.mIndex].push_back( aiVector3D( obj[0], obj[1], obj[2]));
 				if (0 != acc.mSubOffset[2] || 0 != acc.mSubOffset[3]) /* hack ... consider cleaner solution */
 					pMesh->mNumUVComponents[pInput.mIndex]=3;
-			}
-			else 
+			}	else 
+      {
 				DefaultLogger::get()->error("Collada: too many texture coordinate sets. Skipping.");
+      }
 			break;
-		case IT_Color: // up to 4 color sets are fine, ignore the others
+		case IT_Color: 
+      // up to 4 color sets are fine, ignore the others
 			if( pInput.mIndex < AI_MAX_NUMBER_OF_COLOR_SETS)
+      {
+        // pad to current vertex count if necessary
+        if( pMesh->mColors[pInput.mIndex].size() < pMesh->mPositions.size()-1)
+          pMesh->mColors[pInput.mIndex].insert( pMesh->mColors[pInput.mIndex].end(), 
+            pMesh->mPositions.size() - pMesh->mColors[pInput.mIndex].size() - 1, aiColor4D( 0, 0, 0, 1));
+
 				pMesh->mColors[pInput.mIndex].push_back( aiColor4D( obj[0], obj[1], obj[2], obj[3])); 
-			else 
+      } else 
+      {
 				DefaultLogger::get()->error("Collada: too many vertex color sets. Skipping.");
+      }
+
 			break;
 	}
 }
@@ -2525,9 +2558,20 @@ aiMatrix4x4 ColladaParser::CalculateResultTransform( const std::vector<Transform
 		switch( tf.mType)
 		{
 			case TF_LOOKAT:
-				// TODO: (thom)
-				assert( false);
+      {
+        aiVector3D pos( tf.f[0], tf.f[1], tf.f[2]);
+        aiVector3D dstPos( tf.f[3], tf.f[4], tf.f[5]);
+        aiVector3D up = aiVector3D( tf.f[6], tf.f[7], tf.f[8]).Normalize();
+        aiVector3D dir = aiVector3D( dstPos - pos).Normalize();
+        aiVector3D right = (dir ^ up).Normalize();
+
+        res *= aiMatrix4x4( 
+          right.x, up.x, -dir.x, pos.x, 
+          right.y, up.y, -dir.y, pos.y,
+          right.z, up.z, -dir.z, pos.z,
+          0, 0, 0, 1);
 				break;
+      }
 			case TF_ROTATE:
 			{
 				aiMatrix4x4 rot;

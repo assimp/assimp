@@ -523,7 +523,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 	// normals, if given. HACK: (thom) Due to the fucking Collada spec we never 
 	// know if we have the same number of normals as there are positions. So we 
 	// also ignore any vertex attribute if it has a different count
-	if( pSrcMesh->mNormals.size() == pSrcMesh->mPositions.size())
+	if( pSrcMesh->mNormals.size() >= pStartVertex + numVertices)
 	{
 		dstMesh->mNormals = new aiVector3D[numVertices];
 		std::copy( pSrcMesh->mNormals.begin() + pStartVertex, pSrcMesh->mNormals.begin() +
@@ -531,7 +531,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 	}
 
 	// tangents, if given. 
-	if( pSrcMesh->mTangents.size() == pSrcMesh->mPositions.size())
+	if( pSrcMesh->mTangents.size() >= pStartVertex + numVertices)
 	{
 		dstMesh->mTangents = new aiVector3D[numVertices];
 		std::copy( pSrcMesh->mTangents.begin() + pStartVertex, pSrcMesh->mTangents.begin() + 
@@ -539,7 +539,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 	}
 
 	// bitangents, if given. 
-	if( pSrcMesh->mBitangents.size() == pSrcMesh->mPositions.size())
+	if( pSrcMesh->mBitangents.size() >= pStartVertex + numVertices)
 	{
 		dstMesh->mBitangents = new aiVector3D[numVertices];
 		std::copy( pSrcMesh->mBitangents.begin() + pStartVertex, pSrcMesh->mBitangents.begin() + 
@@ -550,7 +550,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 	// empty slots are not allowed, need to pack and adjust UV indexes accordingly
 	for( size_t a = 0, real = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
 	{
-		if( pSrcMesh->mTexCoords[a].size() == pSrcMesh->mPositions.size())
+		if( pSrcMesh->mTexCoords[a].size() >= pStartVertex + numVertices)
 		{
 			dstMesh->mTextureCoords[real] = new aiVector3D[numVertices];
 			for( size_t b = 0; b < numVertices; ++b)
@@ -564,7 +564,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 	// same for vertex colors, as many as we have. again the same packing to avoid empty slots
 	for( size_t a = 0, real = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
 	{
-		if( pSrcMesh->mColors[a].size() == pSrcMesh->mPositions.size())
+		if( pSrcMesh->mColors[a].size() >= pStartVertex + numVertices)
 		{
 			dstMesh->mColors[real] = new aiColor4D[numVertices];
 			std::copy( pSrcMesh->mColors[a].begin() + pStartVertex, pSrcMesh->mColors[a].begin() + pStartVertex + numVertices,dstMesh->mColors[real]);

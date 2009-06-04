@@ -9,12 +9,16 @@ extern "C" {
 #endif
 #undef assimp_Importer_PROPERTY_WAS_NOT_EXISTING
 #define assimp_Importer_PROPERTY_WAS_NOT_EXISTING -1L
+
+#undef assimp_Importer_ABI_VERSION
+#define assimp_Importer_ABI_VERSION 1
+
 /*
  * Class:     assimp_Importer
  * Method:    _NativeInitContext
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeInitContext
+JNIEXPORT jlong JNICALL Java_assimp_Importer__1NativeInitContext
   (JNIEnv *, jobject, jint);
 
 /*
@@ -28,10 +32,10 @@ JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeFreeContext
 /*
  * Class:     assimp_Importer
  * Method:    _NativeLoad
- * Signature: (Ljava/lang/String;IJ)I
+ * Signature: (Ljava/lang/String;JJ)I
  */
 JNIEXPORT jint JNICALL Java_assimp_Importer__1NativeLoad
-  (JNIEnv *, jobject, jstring, jint, jlong);
+  (JNIEnv *, jobject, jstring, jlong, jlong);
 
 /*
  * Class:     assimp_Importer

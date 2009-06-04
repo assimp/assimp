@@ -1,0 +1,54 @@
+
+..................................................................................
+README for jAssimp
+..................................................................................
+
+Last updated: May 2009
+
+
+ABSTRACT
+..................................................................................
+
+jAssimp is a Java port of the full interface of the Open Asset Import Library.
+It features almost everything and provides a Java interface that is quite 
+similar to the core C++ interface. However, some improvements on thread-safety
+and type-safety were included. jAssimp doesn't provide any rendering 
+functionality. It loads 3d files and returns their data, but further processing
+is left to the user. jAssimp has been developed and tested with JRE 1.6, but at 
+least JRE 1.5 should work fine as well.
+
+Of course, using C++ components in Java applications is not really 'portable'.
+However, you can achieve acceptable portability by building the native jAssimp
+modules for all platforms you wish your application to run on. The Java Runtime
+will always load the right module for the right platform.
+
+CUSTOM BUILD
+..................................................................................
+
+In order to use jAssimp, you'll need to compile both the native Assimp library 
+and the Java bridge module (assimpjbridge) for all target platforms. 
+
+If you're using Visual Studio 2005 or 2008 (or any later version to be supported
+in future releases), go to workspaces/vc8 (or vc9 or vc10, ..), open the solution 
+and compile both 'assimp' and 'assimpjbridge' as 'release-dll' (Win32 and/or x64).
+Note that assimpjbridge doesn't work together with -noboost builds of the core Assimp
+library, in other words you'll need boost for compiling. See the 'Installation
+Page' of the C/C++ documentation for more information. it's not that difficult :-)
+
+Makefile guys (either gcc or mingw) simply need to do a
+ ... to be continued
+ ...
+
+NOTE: in order to compile assimpjbridge, 'JDK DIR' must point to your local copy of
+the Java Development Kit.
+
+
+TROUBLESHOOTING
+..................................................................................
+
+>> assimp.Importer keeps throwing assimp.NativeException.
+The native library is probably not in the root directory of your application,
+or it isn't compatible with your platform. 
+
+
+

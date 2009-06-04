@@ -30,8 +30,6 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 // Version
 //
 
-#if (!defined ASSIMP_JNI_EXPORT)
-
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION 1,0,SVNRevision, 0
  PRODUCTVERSION 1,0,SVNRevision,0
@@ -54,7 +52,7 @@ BEGIN
             VALUE "FileDescription", "Open Asset Import Library"
             VALUE "FileVersion", 1,0,SVNRevision,0
             VALUE "InternalName", "assimp "
-            VALUE "LegalCopyright", "Copyright (C) 2008"
+            VALUE "LegalCopyright", "Copyright (C) 2006-2009"
             VALUE "OriginalFilename", "assimpNN.dll"
             VALUE "ProductName", "Open Asset Import Library"
             VALUE "ProductVersion", 1,0,SVNRevision,0
@@ -67,12 +65,8 @@ BEGIN
     END
 END
 
-
-#endif // !!ASSIMP_JNI_EXPORT 
-
 #endif    // Deutsch (Deutschland) resources
 /////////////////////////////////////////////////////////////////////////////
-
 
 
 #ifndef APSTUDIO_INVOKED
@@ -80,7 +74,6 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED

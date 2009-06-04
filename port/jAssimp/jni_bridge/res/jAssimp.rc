@@ -1,6 +1,7 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
+#include "..\..\..\..\mkutil\revision.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -29,11 +30,9 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 // Version
 //
 
-#if (defined ASSIMP_JNI_EXPORT)
-
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
- PRODUCTVERSION 1,0,0,1
+ FILEVERSION 1,0,SVNRevision, 0
+ PRODUCTVERSION 1,0,SVNRevision,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -50,13 +49,14 @@ BEGIN
         BEGIN
             VALUE "Comments", "Licensed under a 3-clause BSD license"
             VALUE "CompanyName", "ASSIMP Development Team"
-            VALUE "FileDescription", "ASSIMP-JNI bridge module"
-            VALUE "FileVersion", "1, 0, 0, 0"
-            VALUE "InternalName", "jassimp"
-            VALUE "LegalCopyright", "Copyright (C) 2008"
-            VALUE "OriginalFilename", "jAssimpNN.dll"
-            VALUE "ProductName", "ASSIMP-JNI bridge module"
-            VALUE "ProductVersion", "1, 0, 0, 0"
+            VALUE "FileDescription", "Assimp2Java Bridge Module"
+            VALUE "FileVersion", 1,0,SVNRevision,0
+            VALUE "InternalName", "assimp "
+            VALUE "LegalCopyright", "Copyright (C) 2006-2009"
+            VALUE "OriginalFilename", "assimpNN.dll"
+            VALUE "ProductName", "Assimp2Java Bridge Module"
+            VALUE "ProductVersion", 1,0,SVNRevision,0
+		,0
         END
     END
     BLOCK "VarFileInfo"
@@ -65,11 +65,8 @@ BEGIN
     END
 END
 
-#endif // !!ASSIMP_JNI_EXPORT 
-
 #endif    // Deutsch (Deutschland) resources
 /////////////////////////////////////////////////////////////////////////////
-
 
 
 #ifndef APSTUDIO_INVOKED

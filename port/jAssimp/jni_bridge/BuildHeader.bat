@@ -1,2 +1,2 @@
-javah -classpath ".\..\classes" -d "." "assimp.Importer"
+javah -classpath ".\..\java\bin" -d "." "assimp.Importer"
 

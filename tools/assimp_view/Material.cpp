@@ -219,9 +219,8 @@ bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
 int CMaterialManager::FindValidPath(aiString* p_szString)
 {
 	ai_assert(NULL != p_szString);
-
-	if ('*' ==  p_szString->data[0])
-	{
+	aiString pcpy = *p_szString;
+	if ('*' ==  p_szString->data[0])	{
 		// '*' as first character indicates an embedded file
 		return 5;
 	}
@@ -231,10 +230,10 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
 	if (pFile)fclose(pFile);
 	else
 	{
-		// check whether we can use the directory of 
-		// the asset as relative base
-		char szTemp[MAX_PATH*2];
+		// check whether we can use the directory of  the asset as relative base
+		char szTemp[MAX_PATH*2], tmp2[MAX_PATH*2];
 		strcpy(szTemp, g_szFileName);
+		strcpy(tmp2,szTemp);
 
 		char* szData = p_szString->data;
 		if (*szData == '\\' || *szData == '/')++szData;
@@ -248,6 +247,7 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
 		szEnd++;
 		*szEnd = 0;
 		strcat(szEnd,szData);
+
 
 		pFile = fopen(szTemp,"rb");
 		if (!pFile)
@@ -281,6 +281,24 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
 				{
 					if(TryLongerPath(szTemp, p_szString))return 1;
 				}
+
+				// patch by mark sibly to look for textures files in the asset's base directory.
+				const char *path=pcpy.data; 
+				const char *p=strrchr( path,'/' ); 
+				if( !p ) p=strrchr( path,'\\' ); 
+				if( p ){ 
+					char *q=strrchr( tmp2,'/' ); 
+					if( !q ) q=strrchr( tmp2,'\\' ); 
+					if( q ){ 
+						strcpy( q+1,p+1 ); 
+						if(pFile=fopen( tmp2,"r" ) ){ 
+							fclose( pFile ); 
+							strcpy(p_szString->data,tmp2);
+							p_szString->length = strlen(tmp2);
+							return 1;
+						} 
+					} 
+				}
 				return 0;
 			}
 		}
@@ -292,6 +310,7 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
 		iLen2 = iLen2 > MAXLEN ? MAXLEN : iLen2;
 		memcpy(p_szString->data,szTemp,iLen2);
 		p_szString->length = iLen;
+
 	}
 	return 1;
 }

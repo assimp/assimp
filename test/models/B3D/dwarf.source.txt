@@ -1,0 +1,51 @@
+Dwarf lowpoly model Pack
+Copyright 2004, Psionic Design
+e-mail: psionic@blueyonder.co.uk
+Used with permission.
+
+
+INSTALLATION INSTRUCTIONS:
+
+To install, simply unzip to your hard drive with the "Use Folder Names" option turned on.  And that's it you're ready to go!
+
+
+
+USAGE INFORMATION:
+
+Each zip contains the models, textures and animation info for that particular format!
+
+Please Read the "animationinfo.txt" file included in each zip for the exact frames of animation to use
+
+Credits to me "Psionic" are really appreciated but are not essential ;-)
+
+Any questions, screenshots of him in use etc drop by my site or email me at:-
+
+website: http://www.psionic3d.co.uk
+email: psionic@blueyonder.co.uk
+
+
+
+
+WHAT'S INCLUDED IN THE ZIP:
+
+ReadMe.txt - This file
+b3d.zip - Blitz 3D Format models and textures
+ms3d.zip - Milkshape 3D Format models and textures
+x.zip - DarkBasic Direct X 8 Format models and textures
+
+
+
+RESTRICTIONS:
+
+This model pack is available for use in freeware, shareware, commercial games/software with the following restrictions:-
+
+**You may not sell/re-sell this model pack or claim it as your own.
+***You may not redistribute this pack in  some other model pack through a website or on a compilation CD of any kind, without my written consent.
+
+
+Psi
+http://www.psionic3d.co.uk
+
+
+
+

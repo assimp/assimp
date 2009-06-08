@@ -297,11 +297,11 @@ void B3DImporter::ReadVRTS(){
 	int sz=12+(_vflags&1?12:0)+(_vflags&2?16:0)+(_tcsets*_tcsize*4);
 	int n_verts=ChunkSize()/sz;
 
-	_vertices.clear();
-	_vertices.resize( n_verts );
+	int v0=_vertices.size();
+	_vertices.resize( v0+n_verts );
 
 	for( int i=0;i<n_verts;++i ){
-		Vertex &v=_vertices[i];
+		Vertex &v=_vertices[v0+i];
 
 		memset( v.bones,0,sizeof(v.bones) );
 		memset( v.weights,0,sizeof(v.weights) );
@@ -335,15 +335,14 @@ void B3DImporter::ReadTRIS( int v0 ){
 		Fail( "Bad material id" );
 	}
 
-	int n_tris=ChunkSize()/12;
-
 	aiMesh *mesh=new aiMesh;
 	_meshes.push_back( mesh );
 
 	mesh->mMaterialIndex=matid;
-	mesh->mNumFaces=n_tris;
+	mesh->mNumFaces=0;
 	mesh->mPrimitiveTypes=aiPrimitiveType_TRIANGLE;
 
+	int n_tris=ChunkSize()/12;
 	aiFace *face=mesh->mFaces=new aiFace[n_tris];
 
 	for( int i=0;i<n_tris;++i ){
@@ -352,15 +351,17 @@ void B3DImporter::ReadTRIS( int v0 ){
 		int i2=ReadInt()+v0;
 		if( i0<0 || i0>=_vertices.size() || i1<0 || i1>=_vertices.size() || i2<0 || i2>=_vertices.size() ){
 #ifdef DEBUG_B3D
-			cout<<"i0="<<i0<<", i1="<<i1<<", i2="<<i2<<endl;
+			cout<<"Bad triangle index: i0="<<i0<<", i1="<<i1<<", i2="<<i2<<endl;
 #endif
 			Fail( "Bad triangle index" );
+			continue;
 		}
 		face->mNumIndices=3;
 		face->mIndices=new unsigned[3];
 		face->mIndices[0]=i0;
 		face->mIndices[1]=i1;
 		face->mIndices[2]=i2;
+		++mesh->mNumFaces;
 		++face;
 	}
 }

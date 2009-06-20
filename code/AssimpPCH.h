@@ -116,6 +116,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <numeric>
 #include <new>
+#include <cstdio>
 
 // Public ASSIMP headers
 #include "../include/DefaultLogger.h"

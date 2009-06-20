@@ -184,13 +184,13 @@ void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
 void ComputeUVMappingProcess::ComputeSphereMapping(aiMesh* mesh,const aiVector3D& axis, aiVector3D* out)
 {
 	aiVector3D center, min, max;
+	FindMeshCenter(mesh, center, min, max);
 
 	// If the axis is one of x,y,z run a faster code path. It's worth the extra effort ...
 	// currently the mapping axis will always be one of x,y,z, except if the
 	// PretransformVertices step is used (it transforms the meshes into worldspace, 
 	// thus changing the mapping axis)
 	if (axis * base_axis_x >= angle_epsilon)	{
-		FindMeshCenter(mesh, center, min, max);
 
 		// For each point get a normalized projection vector in the sphere,
 		// get its longitude and latitude and map them to their respective
@@ -204,48 +204,38 @@ void ComputeUVMappingProcess::ComputeSphereMapping(aiMesh* mesh,const aiVector3D
 		// Thus we can derive:
 		// lat  = arcsin (z)
 		// lon  = arctan (y/x)
-		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	
-		{
+		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
 			const aiVector3D diff = (mesh->mVertices[pnt]-center).Normalize();
-			out[pnt] = aiVector3D((atan2 (diff.z, diff.y) + (float)AI_MATH_PI ) / (float)AI_MATH_TWO_PI,
-				(asin  (diff.x) + (float)AI_MATH_HALF_PI) / (float)AI_MATH_PI, 0.f);
+			out[pnt] = aiVector3D((atan2 (diff.z, diff.y) + AI_MATH_PI_F ) / AI_MATH_TWO_PI_F,
+				(asin  (diff.x) + AI_MATH_HALF_PI_F) / AI_MATH_PI_F, 0.f);
 		}
 	}
 	else if (axis * base_axis_y >= angle_epsilon)	{
-		FindMeshCenter(mesh, center, min, max);
-
 		// ... just the same again
-		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	
-		{
+		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
 			const aiVector3D diff = (mesh->mVertices[pnt]-center).Normalize();
-			out[pnt] = aiVector3D((atan2 (diff.x, diff.z) + (float)AI_MATH_PI ) / (float)AI_MATH_TWO_PI,
-				(asin  (diff.y) + (float)AI_MATH_HALF_PI) / (float)AI_MATH_PI, 0.f);
+			out[pnt] = aiVector3D((atan2 (diff.x, diff.z) + AI_MATH_PI_F ) / AI_MATH_TWO_PI_F,
+				(asin  (diff.y) + AI_MATH_HALF_PI_F) / AI_MATH_PI_F, 0.f);
 		}
 	}
 	else if (axis * base_axis_z >= angle_epsilon)	{
-		FindMeshCenter(mesh, center, min, max);
-
 		// ... just the same again
-		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	
-		{
+		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
 			const aiVector3D diff = (mesh->mVertices[pnt]-center).Normalize();
-			out[pnt] = aiVector3D((atan2 (diff.y, diff.x) + (float)AI_MATH_PI ) / (float)AI_MATH_TWO_PI,
-				(asin  (diff.z) + (float)AI_MATH_HALF_PI) / (float)AI_MATH_PI, 0.f);
+			out[pnt] = aiVector3D((atan2 (diff.y, diff.x) + AI_MATH_PI_F ) / AI_MATH_TWO_PI_F,
+				(asin  (diff.z) + AI_MATH_HALF_PI_F) / AI_MATH_PI_F, 0.f);
 		}
 	}
 	// slower code path in case the mapping axis is not one of the coordinate system axes
-	else
-	{
+	else	{
 		aiMatrix4x4 mTrafo;
 		aiMatrix4x4::FromToMatrix(axis,base_axis_y,mTrafo);
-		FindMeshCenterTransformed(mesh, center, min, max,mTrafo);
 
 		// again the same, except we're applying a transformation now
-		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	
-		{
+		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
 			const aiVector3D diff = ((mTrafo*mesh->mVertices[pnt])-center).Normalize();
-			out[pnt] = aiVector3D((atan2 (diff.y, diff.x) + (float)AI_MATH_PI ) / (float)AI_MATH_TWO_PI,
-				(asin  (diff.z) + (float)AI_MATH_HALF_PI) / (float)AI_MATH_PI, 0.f);
+			out[pnt] = aiVector3D((atan2 (diff.y, diff.x) + AI_MATH_PI_F ) / AI_MATH_TWO_PI_F,
+				(asin  (diff.z) + AI_MATH_HALF_PI_F) / AI_MATH_PI_F, 0.f);
 		}
 	}
 	

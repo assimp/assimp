@@ -553,13 +553,81 @@ ASSIMP_API void aiCreateQuaternionFromMatrix(aiQuaternion* quat,const aiMatrix3x
 }
 
 // ------------------------------------------------------------------------------------------------
-// Affline matrix decomposition
+// Matrix decomposition
 ASSIMP_API void aiDecomposeMatrix(const aiMatrix4x4* mat,aiVector3D* scaling,
 	aiQuaternion* rotation,
 	aiVector3D* position)
 {
 	ai_assert(NULL != rotation && NULL != position && NULL != scaling && NULL != mat);
 	mat->Decompose(*scaling,*rotation,*position);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Matrix transpose
+ASSIMP_API void aiTransposeMatrix3(aiMatrix3x3* mat)
+{
+	ai_assert(NULL != mat);
+	mat->Transpose();
+}
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API void aiTransposeMatrix4(aiMatrix4x4* mat)
+{
+	ai_assert(NULL != mat);
+	mat->Transpose();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Vector transformation
+ASSIMP_API void aiTransformVecByMatrix3(C_STRUCT aiVector3D* vec, 
+	const C_STRUCT aiMatrix3x3* mat)
+{
+	ai_assert(NULL != mat && NULL != vec);
+	*vec *= (*mat);
+}
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API void aiTransformVecByMatrix4(C_STRUCT aiVector3D* vec, 
+	const C_STRUCT aiMatrix4x4* mat)
+{
+	ai_assert(NULL != mat && NULL != vec);
+	*vec *= (*mat);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Matrix multiplication
+ASSIMP_API void aiMultiplyMatrix4(
+	C_STRUCT aiMatrix4x4* dst, 
+	const C_STRUCT aiMatrix4x4* src)
+{
+	ai_assert(NULL != dst && NULL != src);
+	*dst = (*dst) * (*src);
+}
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API void aiMultiplyMatrix3(
+	C_STRUCT aiMatrix3x3* dst, 
+	const C_STRUCT aiMatrix3x3* src)
+{
+	ai_assert(NULL != dst && NULL != src);
+	*dst = (*dst) * (*src);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Matrix identity
+ASSIMP_API void aiIdentityMatrix3(
+	C_STRUCT aiMatrix3x3* mat)
+{
+	ai_assert(NULL != mat);
+	*mat = aiMatrix3x3();
+}
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API void aiIdentityMatrix4(
+	C_STRUCT aiMatrix4x4* mat)
+{
+	ai_assert(NULL != mat);
+	*mat = aiMatrix4x4();
 }
 
 

@@ -208,14 +208,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	define ASSIMP_BUILD_DEBUG
 #endif
 
-/* This is PI. Hi PI.
- */
-#define AI_MATH_PI		(3.1415926538)
-#define AI_MATH_TWO_PI	(AI_MATH_PI * 2.0)
-#define AI_MATH_HALF_PI	(AI_MATH_PI * 0.5)
+/* This is PI. Hi PI. */
+#define AI_MATH_PI			(3.141592653589793238462643383279 )
+#define AI_MATH_TWO_PI		(AI_MATH_PI * 2.0)
+#define AI_MATH_HALF_PI		(AI_MATH_PI * 0.5)
 
-/* Tiny macro to convert from radians to degrees and the opposite
- */
+/* And this is to avoid endless (float) casts */
+#define AI_MATH_PI_F		(3.1415926538f)
+#define AI_MATH_TWO_PI_F	(AI_MATH_PI_F * 2.0f)
+#define AI_MATH_HALF_PI_F	(AI_MATH_PI_F * 0.5f)
+
+/* Tiny macro to convert from radians to degrees and back */
 #define AI_DEG_TO_RAD(x) (x*0.0174532925f)
 #define AI_RAD_TO_DEG(x) (x*57.2957795f)
 

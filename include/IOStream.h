@@ -77,10 +77,9 @@ public:
 
 	// -------------------------------------------------------------------
 	/** @brief Read from the file
-	*
-	* See fread() for more details
-	* This fails for write-only files
-	*/
+	 *
+	 * See fread() for more details
+	 * This fails for write-only files */
     virtual size_t Read(void* pvBuffer, 
 		size_t pSize, 
 		size_t pCount) = 0;
@@ -89,39 +88,34 @@ public:
 	/** @brief Write to the file
 	*
 	* See fwrite() for more details
-	* This fails for read-only files
-	*/
+	* This fails for read-only files */
     virtual size_t Write(const void* pvBuffer, 
 		size_t pSize,
 		size_t pCount) = 0;
 
 	// -------------------------------------------------------------------
 	/** @brief Set the read/write cursor of the file
-	*
-	* See fseek() for more details
-	*/
+	 *
+	 * Note that the offset is _negative_ for aiOrigin_END.
+	 * See fseek() for more details */
 	virtual aiReturn Seek(size_t pOffset,
 		aiOrigin pOrigin) = 0;
 
 	// -------------------------------------------------------------------
 	/** @brief Get the current position of the read/write cursor
-	*
-	* See ftell() for more details
-	*/
+	 *
+	 * See ftell() for more details */
     virtual size_t Tell() const = 0;
 
 	// -------------------------------------------------------------------
 	/**	@brief Returns filesize
-	*
-	*	Returns the filesize.
-	*/
+	 *	Returns the filesize. */
 	virtual size_t FileSize() const = 0;
 
 	// -------------------------------------------------------------------
-	/**	@brief Flush the contents of the file buffer (for writers)
-	*
-	*	See fflush() for more details.
-	*/
+	/**	@brief Flush the contents of the file buffer (for writers) 
+	 *	See fflush() for more details.
+	 */
 	virtual void Flush() = 0;
 }; //! class IOStream
 

@@ -53,10 +53,10 @@ using namespace Assimp;
 // ----------------------------------------------------------------------------------
 DefaultIOStream::~DefaultIOStream()
 {
-	if (mFile)
+	if (mFile) {
 		::fclose(mFile);
+	}
 }
-
 
 // ----------------------------------------------------------------------------------
 size_t DefaultIOStream::Read(void* pvBuffer, 
@@ -67,7 +67,6 @@ size_t DefaultIOStream::Read(void* pvBuffer,
 	return (mFile ? ::fread(pvBuffer, pSize, pCount, mFile) : 0);
 }
 
-
 // ----------------------------------------------------------------------------------
 size_t DefaultIOStream::Write(const void* pvBuffer, 
 	size_t pSize,
@@ -77,13 +76,13 @@ size_t DefaultIOStream::Write(const void* pvBuffer,
 	return (mFile ? ::fwrite(pvBuffer, pSize, pCount, mFile) : 0);
 }
 
-
 // ----------------------------------------------------------------------------------
 aiReturn DefaultIOStream::Seek(size_t pOffset,
 	 aiOrigin pOrigin)
 {
-	if (!mFile)
+	if (!mFile) {
 		return AI_FAILURE;
+	}
 
 	// Just to check whether our enum maps one to one with the CRT constants
 	BOOST_STATIC_ASSERT(aiOrigin_CUR == SEEK_CUR && 
@@ -93,20 +92,21 @@ aiReturn DefaultIOStream::Seek(size_t pOffset,
 	return (0 == ::fseek(mFile, (long)pOffset,(int)pOrigin) ? AI_SUCCESS : AI_FAILURE);
 }
 
-
 // ----------------------------------------------------------------------------------
 size_t DefaultIOStream::Tell() const
 {
-	if (!mFile)return 0;
+	if (!mFile) {
+		return 0;
+	}
 	return ::ftell(mFile);
 }
-
 
 // ----------------------------------------------------------------------------------
 size_t DefaultIOStream::FileSize() const
 {
-	if (! mFile || mFilename.empty())
+	if (! mFile || mFilename.empty()) {
 		return 0;
+	}
 	
 	if (0xffffffff == cachedSize) {
 
@@ -131,8 +131,9 @@ size_t DefaultIOStream::FileSize() const
 // ----------------------------------------------------------------------------------
 void DefaultIOStream::Flush()
 {
-	if (mFile)
+	if (mFile) {
 		::fflush(mFile);
+	}
 }
 
 // ----------------------------------------------------------------------------------

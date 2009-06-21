@@ -82,6 +82,8 @@ namespace Assimp	{
 struct aiScene;
 struct aiFileIO;
 extern "C" ASSIMP_API const aiScene* aiImportFileEx( const char*, unsigned int, aiFileIO*);
+extern "C" ASSIMP_API const aiScene* aiImportFileFromMemory( const char*,
+	unsigned int,unsigned int,const char*);
 
 namespace Assimp	{
 
@@ -109,12 +111,14 @@ namespace Assimp	{
 * @note One Importer instance is not thread-safe. If you use multiple
 * threads for loading, each thread should maintain its own Importer instance.
 */
-class ASSIMP_API Importer
-{
-	// used internally
+class ASSIMP_API Importer	{
+
+	// for internal use
 	friend class BaseProcess;
 	friend class BatchLoader;
 	friend const aiScene* ::aiImportFileEx( const char*, unsigned int, aiFileIO*);
+	friend const aiScene* ::aiImportFileFromMemory( const char*,
+		unsigned int,unsigned int,const char*);
 
 public:
 
@@ -321,10 +325,51 @@ public:
 	 *   instance. Use GetOrphanedScene() to take ownership of it.
 	 *
 	 * @note Assimp is able to determine the file format of a file
-	 * automatically. However, you should make sure that the input file
-	 * does not even have a file extension at all to enable this feature.
+	 * automatically. However, to enable automatic detection of the file
+	 * format, the input path *must* not have an extension at all.
 	 */
 	const aiScene* ReadFile( const char* pFile, unsigned int pFlags);
+
+	// -------------------------------------------------------------------
+	/** Reads the given file from a memory buffer and returns its
+	 *  contents if successful.
+	 * 
+	 * If the call succeeds, the contents of the file are returned as a 
+	 * pointer to an aiScene object. The returned data is intended to be 
+	 * read-only, the importer object keeps ownership of the data and will
+	 * destroy it upon destruction. If the import fails, NULL is returned.
+	 * A human-readable error description can be retrieved by calling 
+	 * GetErrorString(). The previous scene will be deleted during this call.
+	 * Calling this method doesn't affect the active IOSystem.
+	 * @param pBuffer Pointer to the file data
+	 * @param pLength Length of pBuffer, in bytes
+	 * @param pFlags Optional post processing steps to be executed after 
+	 *   a successful import. Provide a bitwise combination of the 
+	 *   #aiPostProcessSteps flags. If you wish to inspect the imported
+	 *   scene first in order to fine-tune your post-processing setup,
+	 *   consider to use #ApplyPostProcessing().
+	 * @param pHint An additional hint to the library. If this is a non
+	 *   empty string, the library looks for a loader to support 
+	 *   the file extension specified by pHint and passes the file to
+	 *   the first matching loader. If this loader is unable to completely
+	 *   the request, the library continues and tries to determine the
+	 *   file format on its own, a task that may or may not be successful.
+	 *   Check the return value, and you'll know ...
+	 * @return A pointer to the imported data, NULL if the import failed.
+	 *   The pointer to the scene remains in possession of the Importer
+	 *   instance. Use GetOrphanedScene() to take ownership of it.
+	 *
+	 * @note This is a straightforward way to decode models from memory
+	 * buffers, but it doesn't handle model formats spreading their 
+	 * data across multiple files or even directories. Examples include
+	 * OBJ or MD3, which outsource parts of their material stuff into
+	 * external scripts. f you need the full functionality, provide
+	 * a custom IOSystem to make Assimp find these files.
+	 */
+	const aiScene* ReadFileFromMemory( const void* pBuffer,
+		size_t pLength,
+		unsigned int pFlags,
+		const char* pHint = "");
 
 	// -------------------------------------------------------------------
 	/** Apply post-processing to an already-imported scene.

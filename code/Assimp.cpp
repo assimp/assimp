@@ -264,7 +264,7 @@ const aiScene* aiImportFileEx( const char* pFile, unsigned int pFlags,
 {
 	ai_assert(NULL != pFile);
 	// create an Importer for this file
-	Assimp::Importer* imp = new Assimp::Importer;
+	Assimp::Importer* imp = new Assimp::Importer();
 
 #ifdef AI_C_THREADSAFE
 	boost::mutex::scoped_lock lock(gMutex);
@@ -299,6 +299,49 @@ const aiScene* aiImportFileEx( const char* pFile, unsigned int pFlags,
 		delete imp;
 	}
 
+	// return imported data. If the import failed the pointer is NULL anyways
+	return scene;
+}
+
+// ------------------------------------------------------------------------------------------------
+const aiScene* aiImportFileFromMemory( 
+	const char* pBuffer,
+	unsigned int pLength,
+	unsigned int pFlags,
+	const char* pHint)
+{
+	ai_assert(NULL != pBuffer && 0 != pLength);
+
+	// create an Importer for this file
+	Assimp::Importer* imp = new Assimp::Importer();
+
+#ifdef AI_C_THREADSAFE
+	boost::mutex::scoped_lock lock(gMutex);
+#endif
+	// copy the global property lists to the Importer instance
+	imp->pimpl->mIntProperties = gIntProperties;
+	imp->pimpl->mFloatProperties = gFloatProperties;
+	imp->pimpl->mStringProperties = gStringProperties;
+
+#ifdef AI_C_THREADSAFE
+	lock.unlock();
+#endif
+
+	// and have it read the file from the memory buffer
+	const aiScene* scene = imp->ReadFileFromMemory( pBuffer, pLength, pFlags,pHint);
+
+	// if succeeded, place it in the collection of active processes
+	if( scene)	{
+#ifdef AI_C_THREADSAFE
+		lock.lock();
+#endif
+		gActiveImports[scene] = imp;
+	} 
+	else	{
+		// if failed, extract error code and destroy the import
+		gLastErrorString = imp->GetErrorString();
+		delete imp;
+	}
 	// return imported data. If the import failed the pointer is NULL anyways
 	return scene;
 }

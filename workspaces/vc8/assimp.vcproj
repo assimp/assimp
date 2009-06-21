@@ -2308,6 +2308,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\MemoryIOWrapper.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\StreamReader.h"
 					>
 				</File>

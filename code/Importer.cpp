@@ -65,6 +65,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "GenericProperty.h"
 #include "ProcessHelper.h"
 #include "ScenePreprocessor.h"
+#include "MemoryIOWrapper.h"
 
 // .......................................................................................
 // Importers
@@ -699,6 +700,37 @@ bool Importer::ValidateFlags(unsigned int pFlags)
 }
 
 // ------------------------------------------------------------------------------------------------
+const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
+	size_t pLength,
+	unsigned int pFlags,
+	const char* pHint /*= ""*/)
+{
+	if (!pHint) {
+		pHint = "";
+	}
+
+	if (!pBuffer || !pLength || strlen(pHint) > 100) {
+		pimpl->mErrorString = "Invalid parameters passed to ReadFileFromMemory()";
+		return NULL;
+	}
+
+	// prevent deletion of the previous IOHandler
+	IOSystem* io = pimpl->mIOHandler;
+	pimpl->mIOHandler = NULL;
+
+	SetIOHandler(new MemoryIOSystem((const uint8_t*)pBuffer,pLength));
+
+	// read the file and recover the previous IOSystem
+	char fbuff[128];
+	sprintf(fbuff,"%s.%s",AI_MEMORYIO_MAGIC_FILENAME,pHint);
+
+	ReadFile(fbuff,pFlags);
+	SetIOHandler(io);
+
+	return pimpl->mScene;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Reads the given file and returns its contents if successful. 
 const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 {
@@ -755,8 +787,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 				}
 			}
 			// Put a proper error message if no suitable importer was found
-			if( !imp)
-			{
+			if( !imp)	{
 				pimpl->mErrorString = "No suitable reader found for the file format of file \"" + pFile + "\".";
 				DefaultLogger::get()->error(pimpl->mErrorString);
 				return NULL;

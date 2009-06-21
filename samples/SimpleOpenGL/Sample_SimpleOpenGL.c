@@ -5,7 +5,7 @@
 // settings and displays it.
 //
 // If you intend to _use_ this code sample in your app, do yourself a favour 
-// and replace glVertex3D with VBOs ...
+// and replace immediate mode calls with VBOs ...
 //
 // The vc8 solution links against assimp-release-dll_win32 - be sure to
 // have this configuration built.

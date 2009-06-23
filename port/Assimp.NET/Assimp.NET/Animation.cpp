@@ -8,4 +8,8 @@ Animation::Animation(void)
 {
 }
 
+Animation::~Animation(void)
+{
+}
+
 }//namespace

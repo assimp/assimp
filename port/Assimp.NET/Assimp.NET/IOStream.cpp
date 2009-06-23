@@ -8,4 +8,8 @@ IOStream::IOStream(void)
 {
 }
 
+IOStream::~IOStream(void)
+{
+}
+
 }//namespace

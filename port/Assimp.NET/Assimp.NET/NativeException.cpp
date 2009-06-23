@@ -8,4 +8,8 @@ NativeException::NativeException(void)
 {
 }
 
+NativeException::~NativeException(void)
+{
+}
+
 }//namespace

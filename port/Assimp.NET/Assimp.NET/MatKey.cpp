@@ -8,4 +8,8 @@ MatKey::MatKey(void)
 {
 }
 
+MatKey::~MatKey(void)
+{
+}
+
 }//namespace

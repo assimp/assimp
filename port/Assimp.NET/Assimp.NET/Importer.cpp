@@ -8,4 +8,8 @@ Importer::Importer(void)
 {
 }
 
+Importer::~Importer(void)
+{
+}
+
 }//namespace

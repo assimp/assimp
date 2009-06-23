@@ -8,4 +8,8 @@ Node::Node(void)
 {
 }
 
+Node::~Node(void)
+{
+}
+
 }//namespace

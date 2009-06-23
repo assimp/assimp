@@ -8,4 +8,8 @@ Texture::Texture(void)
 {
 }
 
+Texture::~Texture(void)
+{
+}
+
 }//namespace

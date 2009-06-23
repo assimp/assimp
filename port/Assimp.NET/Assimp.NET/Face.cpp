@@ -8,4 +8,9 @@ Face::Face(void)
 {
 }
 
+Face::~Face(void)
+{
+}
+
+
 }//namespace

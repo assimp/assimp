@@ -8,4 +8,8 @@ CompressedTexture::CompressedTexture(void)
 {
 }
 
+CompressedTexture::~CompressedTexture(void)
+{
+}
+
 }//namespace

@@ -8,4 +8,8 @@ Scene::Scene(void)
 {
 }
 
+Scene::~Scene(void)
+{
+}
+
 }//namespace

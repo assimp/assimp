@@ -8,4 +8,8 @@ ConfigProperty::ConfigProperty(void)
 {
 }
 
+ConfigProperty::~ConfigProperty(void)
+{
+}
+
 }//namespace

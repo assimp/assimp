@@ -8,4 +8,8 @@ IOSystem::IOSystem(void)
 {
 }
 
+IOSystem::~IOSystem(void)
+{
+}
+
 }//namespace

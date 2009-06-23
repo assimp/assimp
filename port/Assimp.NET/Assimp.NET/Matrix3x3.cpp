@@ -8,4 +8,8 @@ Matrix3x3::Matrix3x3(void)
 {
 }
 
+Matrix3x3::~Matrix3x3(void)
+{
+}
+
 }//namespace

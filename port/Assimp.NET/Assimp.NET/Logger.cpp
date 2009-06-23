@@ -8,4 +8,8 @@ Logger::Logger(void)
 {
 }
 
+Logger::~Logger(void)
+{
+}
+
 }//namespace

@@ -8,4 +8,8 @@ LogStream::LogStream(void)
 {
 }
 
+LogStream::~LogStream(void)
+{
+}
+
 }//namespace

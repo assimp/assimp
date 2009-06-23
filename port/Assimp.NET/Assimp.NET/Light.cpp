@@ -8,4 +8,8 @@ Light::Light(void)
 {
 }
 
+Light::~Light(void)
+{
+}
+
 }//namespace

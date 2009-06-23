@@ -8,4 +8,8 @@ Mesh::Mesh(void)
 {
 }
 
+Mesh::~Mesh(void)
+{
+}
+
 }//namespace

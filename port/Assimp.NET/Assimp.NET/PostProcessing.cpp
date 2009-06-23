@@ -8,4 +8,8 @@ PostProcessing::PostProcessing(void)
 {
 }
 
+PostProcessing::~PostProcessing(void)
+{
+}
+
 }//namespace

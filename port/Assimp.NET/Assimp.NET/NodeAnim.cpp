@@ -8,4 +8,8 @@ NodeAnim::NodeAnim(void)
 {
 }
 
+NodeAnim::~NodeAnim(void)
+{
+}
+
 }//namespace

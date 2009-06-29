@@ -339,6 +339,7 @@ void WriteBinaryDump(const aiScene* scene, FILE* out, const char* src, const cha
 		WriteInteger(mesh->mNumBones,out);
 		WriteInteger(mesh->mNumFaces,out);
 		WriteInteger(mesh->mNumVertices,out);
+		WriteInteger(mesh->mMaterialIndex,out);
 
 		// write bones
 		if (mesh->mNumBones) {
@@ -780,12 +781,13 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 		// mesh header
 		::fprintf(out,"\t<Mesh types=\"%s %s %s %s\">\n"
 			"\t\t<Integer name=\"num_verts\" > %i </Integer>\n"
-			"\t\t<Integer name=\"num_faces\" > %i </Integer>\n",
+			"\t\t<Integer name=\"num_faces\" > %i </Integer>\n"
+			"\t\t<Integer name=\"mat_index\" > %i </Integer>\n",
 			(mesh->mPrimitiveTypes & aiPrimitiveType_POINT    ? "points"    : ""),
 			(mesh->mPrimitiveTypes & aiPrimitiveType_LINE     ? "lines"     : ""),
 			(mesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE ? "triangles" : ""),
 			(mesh->mPrimitiveTypes & aiPrimitiveType_POLYGON  ? "polygons"  : ""),
-			mesh->mNumVertices,mesh->mNumFaces);
+			mesh->mNumVertices,mesh->mNumFaces,mesh->mMaterialIndex);
 
 		// bones
 		for (unsigned int n = 0; n < mesh->mNumBones;++n) {
@@ -991,7 +993,7 @@ int Assimp_Dump (const char** params, unsigned int num)
 			s = in.length();
 
 		out = in.substr(0,s);
-		out.append((binary ? ".assfile" : ".xml"));
+		out.append((binary ? ".assbin" : ".assxml"));
 		if (shortened && binary)
 			out.append(".regress");
 	}

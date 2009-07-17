@@ -11,7 +11,7 @@
 // have this configuration built.
 // ----------------------------------------------------------------------------
 
-#include "Gl/glut.h"
+#include "GL/glut.h"
 
 // assimp include files. These three are usually needed.
 #include "assimp.h"

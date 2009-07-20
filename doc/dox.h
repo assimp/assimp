@@ -251,8 +251,8 @@ worth a try if the library is too slow for you.
 @section access_cpp Access by C++ class interface
 
 The ASSIMP library can be accessed by both a class or flat function interface. The C++ class
-interface is the preferred way of interaction: you create an instance of class ASSIMP::Importer, 
-maybe adjust some settings of it and then call ASSIMP::Importer::ReadFile(). The class will
+interface is the preferred way of interaction: you create an instance of class Assimp::Importer, 
+maybe adjust some settings of it and then call Assimp::Importer::ReadFile(). The class will
 read the files and process its data, handing back the imported data as a pointer to an aiScene 
 to you. You can now extract the data you need from the file. The importer manages all the resources
 for itsself. If the importer is destroyed, all the data that was created/read by it will be 
@@ -262,14 +262,13 @@ results and then simply let it go out of scope.
 C++ example:
 @code
 #include <assimp.hpp>      // C++ importer interface
-#include <aiScene.h>       // Outptu data structure
+#include <aiScene.h>       // Output data structure
 #include <aiPostProcess.h> // Post processing flags
-
 
 bool DoTheImportThing( const std::string& pFile)
 {
   // Create an instance of the Importer class
-  ASSIMP::Importer importer;
+  Assimp::Importer importer;
 
   // And have it read the given file with some example postprocessing
   // Usually - if speed is not the most important aspect for you - you'll 
@@ -301,7 +300,7 @@ imported data are listed at #aiPostProcessSteps. See the @link pp Post proccessi
 
 Note that the aiScene data structure returned is declared 'const'. Yes, you can get rid of 
 these 5 letters with a simple cast. Yes, you may do that. No, it's not recommended (and it's 
-suicide in DLL builds ...). 
+suicide in DLL builds if you try to use new or delete on any of the arrays in the scene). 
 
 @section access_c Access by plain-c function interface
 
@@ -345,7 +344,7 @@ bool DoTheImportThing( const char* pFile)
 }
 @endcode
 
-@section custom_io Using custom IO logic
+@section custom_io Using custom IO logic with the C++ class interface
 
 The ASSIMP library needs to access files internally. This of course applies to the file you want
 to read, but also to additional files in the same folder for certain file formats. By default,
@@ -387,7 +386,7 @@ class MyIOSystem : public ASSIMP::IOSystem
     .. 
   }
 
-  // Get the path delimiter character we'd like to get
+  // Get the path delimiter character we'd like to see
   char GetOsSeparator() const { 
     return '/'; 
   }
@@ -402,12 +401,12 @@ class MyIOSystem : public ASSIMP::IOSystem
 @endcode
 
 Now that your IO system is implemented, supply an instance of it to the Importer object by calling 
-ASSIMP::Importer::SetIOHandler(). 
+Assimp::Importer::SetIOHandler(). 
 
 @code
 void DoTheImportThing( const std::string& pFile)
 {
-  ASSIMP::Importer importer;
+  Assimp::Importer importer;
   // put my custom IO handling in place
   importer.SetIOHandler( new MyIOSystem());
 
@@ -419,7 +418,14 @@ void DoTheImportThing( const std::string& pFile)
 
 @section custom_io_c Using custom IO logic with the plain-c function interface
 
-// TODO
+The C interface also provides a way to override the file system. Control is not as fine-grained as for C++ although
+surely enough for almost any purpose. The process is simple:
+
+<ul>
+<li> Include aiFileIO.h
+<li> Fill an aiFileIO structure with custom file system callbacks (they're self-explanatory as they work similar to the CRT's fXXX functions)
+<li> .. and pass it as last parameter to #aiImportFileEx
+</ul>
 
 @section threadsafety Thread-safety and internal multi-threading
 
@@ -432,12 +438,13 @@ following prerequisites are fulfilled:
    load as many models as you want).</li>
 <li> The C-API is threadsafe as long as AI_C_THREADSAFE is defined. That's the default. </li>
 <li> When supplying custom IO logic, make sure your underyling implementation is thead-safe.</li>
+<li> Custom log streams or logger replacements have to be thread-safe, too.</li>
 </ul>
 
 See the @link assimp_st Single-threaded build section @endlink to learn how to build a lightweight variant
 of ASSIMP which is not thread-safe and does not utilize multiple threads for loading.
 
-@section  logging Logging in the AssetImporter
+@section  logging Logging 
 
 The ASSIMP library provides an easy mechanism to log messages. For instance if you want to check the state of your 
 import and you just want to see, after which preprocessing step the import-process was aborted you can take a look 
@@ -446,15 +453,16 @@ Per default the ASSIMP-library provides a default log implementation, where you 
 by calling it as a singleton with the requested logging-type. To see how this works take a look to this:
 
 @code
+using namespace Assimp;
 
 // Create a logger instance 
-ASSIMP::DefaultLogger::create("",ASSIMP::Logger::VERBOSE);
+DefaultLogger::create("",Logger::VERBOSE);
 
 // Now I am ready for logging my stuff
-ASSIMP::DefaultLogger::get()->info("this is my info-call");
+DefaultLogger::get()->info("this is my info-call");
 
 // Kill it after the work is done
-ASSIMP::DefaultLogger::kill();
+DefaultLogger::kill();
 @endcode
 
 At first you have to create the default-logger-instance (create). Now you are ready to rock and can log a 
@@ -490,15 +498,11 @@ public:
 	}
 };
 
-// Attaching it to the default logger instance:
-unsigned int severity = 0;
-severity |= Logger::DEBUGGING;
-severity |= Logger::INFO;
-severity |= Logger::WARN;
-severity |= Logger::ERR;
+// Select the kinds of messages you want to receive on this log stream
+const unsigned int severity = Logger::DEBUGGING|Logger::INFO|Logger::ERR|Logger::WARN;
 
 // Attaching it to the default logger
-ASSIMP::DefaultLogger::get()->attachStream( new myStream(), severity );
+Assimp::DefaultLogger::get()->attachStream( new myStream(), severity );
 
 @endcode
 
@@ -514,25 +518,25 @@ unsigned int severity = 0;
 severity |= Logger::DEBUGGING;
 
 // Detach debug messages from you self defined stream
-ASSIMP::DefaultLogger::get()->attachStream( new myStream(), severity );
+Assimp::DefaultLogger::get()->attachStream( new myStream(), severity );
 
 @endcode
 
-If you want to implement your own logger just build a derivate from the abstract base class 
-Logger and overwrite the methods debug, info, warn and error. 
+If you want to implement your own logger just derive from the abstract base class 
+#Logger and overwrite the methods debug, info, warn and error. 
 
 If you want to see the debug-messages in a debug-configured build, the Logger-interface 
 provides a logging-severity. You can set it calling the following method:
 
 @code
 
-Logger::setLogSeverity( LogSeverity log_severity );
+Assimp::DefaultLogger::get()->setLogSeverity( LogSeverity log_severity );
 
 @endcode
 
 The normal logging severity supports just the basic stuff like, info, warnings and errors. 
-In the verbose level debug messages will be logged, too.
-
+In the verbose level very fine-grained debug messages will be logged, too. Note that this
+kind kind of logging might decrease import performance.
 */
 
 /** 
@@ -744,14 +748,14 @@ both Direct3D and OpenGL (swizzling the order of the color components might be n
 RGBA8888 has been chosen because it is well-known, easy to use and natively
 supported by nearly all graphics APIs.
 <br>
-<b>2)</b> This is the case for aiTexture::mHeight == 0. The texture is stored in a
+<b>2)</b> This applies if aiTexture::mHeight == 0 is fullfilled. Then, texture is stored in a
 "compressed" format such as DDS or PNG. The term "compressed" does not mean that the
-texture data must actually be compressed, however the texture was stored in the
+texture data must actually be compressed, however the texture was found in the
 model file as if it was stored in a separate file on the harddisk. Appropriate
 decoders (such as libjpeg, libpng, D3DX, DevIL) are required to load theses textures.
 aiTexture::mWidth specifies the size of the texture data in bytes, aiTexture::pcData is
 a pointer to the raw image data and aiTexture::achFormatHint is either zeroed or
-containing the file extension of the format of the embedded texture. This is only
+contains the most common file extension of the embedded texture's format. This value is only
 set if ASSIMP is able to determine the file format.
 */
 
@@ -759,8 +763,7 @@ set if ASSIMP is able to determine the file format.
 @page materials Material System
 
 @section General Overview
-
-Warn, WIP. All materials are stored in an array of aiMaterial inside the aiScene. 
+All materials are stored in an array of aiMaterial inside the aiScene. 
 
 Each aiMesh refers to one 
 material by its index in the array. Due to the vastly diverging definitions and usages of material

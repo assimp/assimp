@@ -98,7 +98,7 @@ See the @link wildcard wildcards page @endlink for more information.
 <tt>
 out<br></tt><br>
 Optional. Relative or absolute path to write the output dump to. If it is ommitted,
-the dump is written to <tt><model>-dump.txt</tt>
+the dump is written to <tt>&lt;model&gt;-dump.txt</tt>
 </p>
 
 <p>
@@ -109,12 +109,12 @@ The long form of this parameter is <tt>--binary</tt>.
 </p>
 
 <p>
-<tt>-s<n><br>
+<tt>-s&lt;n&gt;<br>
 </tt><br>
 Optional. If this switch is specified, the dumb is shortened to include only
 min/max values for all vertex components and animation channels. The resulting
 file is much smaller, but the original model can't be reconstructed from it. This is 
-used by Assimp's regression test suite,comapring those minidumps provides
+used by Assimp's regression test suite, comparing those minidumps provides
 a fast way to verify whether a loader works correctly or not.
 The long form of this parameter is <tt>--short</tt>.
 </p>
@@ -176,8 +176,8 @@ See the @link wildcard wildcards page @endlink for more information.
 out<br></tt><br>
 Optional. Relative or absolute path to write the output images to. If the file name is
 ommitted the output images are named <tt><model-filename></tt><br>
-The suffix <tt>_img<n></tt> is appended to the file name if the -s switch is not specified 
-(where <tt><n></tt> is the zero-based index of the texture in the model file).<br>
+The suffix <tt>_img&lt;n&gt;</tt> is appended to the file name if the -s switch is not specified 
+(where <tt>&lt;n&gt;</tt> is the zero-based index of the texture in the model file).<br>
 
 The output file format is determined from the given file extension. Supported
 formats are BMP and TGA. If the file format can't be determined,
@@ -188,34 +188,34 @@ written in their native file format (e.g. jpg).
 </p>
 
 <p>
-<tt>-t<n><br>
+<tt>-t&lt;n&gt;<br>
 </tt><br>
 Optional. Specifies the (zero-based) index of the embedded texture to be extracted from 
 the model. If this option is *not* specified all textures found are exported.
-The long form of this parameter is <tt>--texture=<n></tt>.
+The long form of this parameter is <tt>--texture=&lt;n&gt;</tt>.
 </p>
 
 <p>
-<tt>-t<n><br>
+<tt>-ba&lt;n&gt;<br>
 </tt><br>
 Optional. Specifies whether output BMPs contain an alpha channel or not.
-The long form of this parameter is <tt>--bmp-with-alpha=<n></tt>.
+The long form of this parameter is <tt>--bmp-with-alpha=&lt;n&gt;</tt>.
 </p>
 
 
 <p>
-<tt>-f<n><br>
+<tt>-f&lt;n&gt;<br>
 </tt><br>
 Optional. Specifies the output file format. Supported
 formats are BMP and TGA. The default value is BMP (if a full output filename is
 specified, the output file format is taken from its extension, not from here).
-The long form of this parameter is <tt>--format=<n></tt>.
+The long form of this parameter is <tt>--format=&lt;n&gt;</tt>.
 </p>
 
 <p>
-<tt>-s<n><br>
+<tt>-s&lt;n&gt;<br>
 </tt><br>
-Optional. Prevents the tool from adding the <tt>_img<n></tt> suffix to all filenames. This option
+Optional. Prevents the tool from adding the <tt>_img&lt;n&gt;</tt> suffix to all filenames. This option
 must be specified together with -t to ensure that just one image is written.
 The long form of this parameter is <tt>--nosuffix</tt>.
 </p>
@@ -306,7 +306,7 @@ more information can be found in the <tt>aiPostProcess.h</tt> header.
   </tr>
   <tr>
     <td><tt>-slm</tt></td>
-    <td>--split-large-meshes</tt></td>
+    <td><tt>--split-large-meshes</tt></td>
 	<td>Split large meshes over a specific treshold in smaller sub meshes. The default vertex & face limit is 1000000</td>
   </tr>
   <tr>
@@ -389,7 +389,7 @@ more information can be found in the <tt>aiPostProcess.h</tt> header.
 </table>
 
 For convenience some default postprocessing configurations are provided.
-The corresponding command line parameter is <tt>-c<name></tt> (or <tt>--config=<name></tt>).
+The corresponding command line parameter is <tt>-c&lt;name&gt;</tt> (or <tt>--config=&lt;name&gt;</tt>).
 
 <table border="1">
  
@@ -430,8 +430,8 @@ There are also some common flags to customize Assimp's logging behaviour:
     <td>Show log file on console window (stderr)</td>
   </tr>
     <tr>
-    <td><tt>-lo<file></tt> or <tt>--log-out=<file></tt></td>
-    <td>Streams the log to <file></td>
+    <td><tt>-lo&lt;file&gt;</tt> or <tt>--log-out=&lt;file&gt;</tt></td>
+    <td>Streams the log to &lt;file&gt;</td>
   </tr>
     <tr>
     <td><tt>-v</tt> or <tt>--verbose</tt></td>

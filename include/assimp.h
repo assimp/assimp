@@ -181,12 +181,14 @@ ASSIMP_API const C_STRUCT aiScene* aiApplyPostProcessing(
  *  access Assimp's log system. Attaching a log stream can slightly reduce Assimp's
  *  overall import performance. 
  *
- *  Usage is rather simple:
+ *  Usage is rather simple (this will stream the log to a file, named log.txt, and
+ *  the stdout stream of the process:
  *  @code
- *    aiLogStreamCallback c = aiGetPredefinedLogStream(aiDefaultLogStream_FILE,"log.txt",NULL);
- *    if (NULL != c) {
- *       aiAttachLogStream(c);
- *    }
+ *    struct aiLogStream c;
+ *    c = aiGetPredefinedLogStream(aiDefaultLogStream_FILE,"log.txt");
+ *    aiAttachLogStream(&c);
+ *    c = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT,NULL);
+ *    aiAttachLogStream(&c);
  *  @endcode
  *
  *  @param One of the #aiDefaultLogStream enumerated values. 

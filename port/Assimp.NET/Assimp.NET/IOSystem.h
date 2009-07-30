@@ -47,7 +47,7 @@ using namespace System;
 
 namespace AssimpNET
 {
-	ref class IOSystem
+	public ref class IOSystem
 	{
 	public:
 		IOSystem(void);

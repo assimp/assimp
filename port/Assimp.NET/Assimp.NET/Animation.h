@@ -47,7 +47,7 @@ using namespace System;
 
 namespace AssimpNET
 {
-	ref class Animation
+	public ref class Animation
 	{
 	public:
 		Animation(void);

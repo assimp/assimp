@@ -48,7 +48,7 @@ using namespace System;
 
 namespace AssimpNET
 {
-	enum AnimBehaviour
+	public enum AnimBehaviour
 	{
 		aiAnimBehaviour_DEFAULT = 0x0,
 		aiAnimBehaviour_CONSTANT = 0x1,
@@ -57,7 +57,7 @@ namespace AssimpNET
 		_aiAnimBehaviour_Force32Bit = 0x8fffffff
 	};
 
-	ref class NodeAnim
+	public ref class NodeAnim
 	{
 	public:
 		NodeAnim(void);

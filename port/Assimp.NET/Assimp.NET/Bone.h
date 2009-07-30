@@ -48,7 +48,7 @@ using namespace System;
 
 namespace AssimpNET
 {
-	ref class Bone
+	public ref class Bone
 	{
 	public:
 		Bone(void);

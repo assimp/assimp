@@ -50,7 +50,7 @@ using namespace System;
 
 namespace AssimpNET
 {
-	ref class Mesh
+	public ref class Mesh
 	{
 	public:
 		Mesh(void);

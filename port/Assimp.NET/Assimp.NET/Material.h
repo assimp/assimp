@@ -49,7 +49,7 @@ using namespace System;
 
 namespace AssimpNET
 {
-	ref class Material
+	public ref class Material
 	{
 	public:
 		Material(void);

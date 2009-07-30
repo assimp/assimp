@@ -52,7 +52,7 @@ namespace AssimpNET
 {
 	ref class Matrix3x3;
 
-	ref class Quaternion
+	public ref class Quaternion
 	{
 	public:
 		Quaternion(void);

@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace AssimpNET
 {
-	ref class Matrix4x4
+	public ref class Matrix4x4
 	{
 	public:
 		Matrix4x4(void);

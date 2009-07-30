@@ -49,7 +49,7 @@ using namespace System;
 
 namespace AssimpNET
 {
-	ref class DefaultLogger : Logger
+	public ref class DefaultLogger : Logger
 	{
 	public:
 		DefaultLogger(void);

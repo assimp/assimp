@@ -48,7 +48,7 @@ using namespace System;
 
 namespace AssimpNET
 {
-	enum LightSourceType
+	public enum LightSourceType
 	{
 		aiLightSource_UNDEFINED = 0x0,
 		aiLightSource_DIRECTIONAL = 0x1,
@@ -57,7 +57,7 @@ namespace AssimpNET
 		_aiLightSource_Force32Bit = 0x9fffffff
 	};
 
-	ref class Light
+	public ref class Light
 	{
 	public:
 		Light(void);

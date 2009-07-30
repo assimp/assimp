@@ -48,7 +48,7 @@ using namespace System;
 
 namespace AssimpNET
 {
-	ref class Camera
+	public ref class Camera
 	{
 	public:
 		Camera(void);

@@ -48,7 +48,7 @@ using namespace System;
 namespace AssimpNET
 {
 
-	enum TextureType
+	public enum TextureType
 	{
 		aiTextureType_NONE,
 		aiTextureType_DIFFUSE,
@@ -65,7 +65,7 @@ namespace AssimpNET
 		aiTextureType_UNKNOWN
 	};
 
-	enum TextureMapping
+	public enum TextureMapping
 	{
 		aiTextureMapping_UV,
 		aiTextureMapping_SPHERE,
@@ -75,7 +75,7 @@ namespace AssimpNET
 		aiTextureMapping_OTHER
 	};
 
-	enum TextureOP
+	public enum TextureOP
 	{
 		aiTextureOp_Multiply,
 		aiTextureOp_Add,
@@ -85,7 +85,7 @@ namespace AssimpNET
 		aiTextureOp_SignedAdd
 	};
 
-	enum TextureMapMode
+	public enum TextureMapMode
 	{
 		TextureMapMode_Wrap,
 		TextureMapMode_Clamp,
@@ -93,7 +93,7 @@ namespace AssimpNET
 		TextureMapMode_Mirror
 	};
 
-	ref class Texture
+	public ref class Texture
 	{
 	public:
 		Texture(void);

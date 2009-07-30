@@ -47,13 +47,13 @@ using namespace System;
 
 namespace AssimpNET
 {
-	enum LogSeverity
+	public enum LogSeverity
 	{
 		NORMAL,
 		VERBOSE,
 	};
 
-	ref class Logger
+	public ref class Logger
 	{
 	public:
 		~Logger(void);

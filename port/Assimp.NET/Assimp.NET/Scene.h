@@ -53,7 +53,7 @@ using namespace System;
 
 namespace AssimpNET
 {
-	ref class Scene
+	public ref class Scene
 	{
 	public:
 		Scene(void);

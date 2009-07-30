@@ -48,7 +48,7 @@ using namespace System;
 
 namespace AssimpNET
 {
-	ref class Importer
+	public ref class Importer
 	{
 	public:
 		Importer(void);

@@ -47,7 +47,7 @@ using namespace System;
 
 namespace AssimpNET
 {
-	public ref class IOStream
+	public ref class IOStream abstract
 	{
 	public:
 		

@@ -48,12 +48,85 @@ using namespace System;
 
 namespace AssimpNET
 {
+	public ref struct aiMemoryInfo
+	{
+		property unsigned int animations
+		{
+			unsigned int get() { throw gcnew System::NotImplementedException();}
+			void set(unsigned int value) { throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int cameras
+		{
+			unsigned int get() { throw gcnew System::NotImplementedException();}
+			void set(unsigned int value) { throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int lights
+		{
+			unsigned int get() { throw gcnew System::NotImplementedException();}
+			void set(unsigned int value) { throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int materials
+		{
+			unsigned int get() { throw gcnew System::NotImplementedException();}
+			void set(unsigned int value) { throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int meshes
+		{
+			unsigned int get() { throw gcnew System::NotImplementedException();}
+			void set(unsigned int value) { throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int nodes
+		{
+			unsigned int get() { throw gcnew System::NotImplementedException();}
+			void set(unsigned int value) { throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int textures
+		{
+			unsigned int get() { throw gcnew System::NotImplementedException();}
+			void set(unsigned int value) { throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int total
+		{
+			unsigned int get() { throw gcnew System::NotImplementedException();}
+			void set(unsigned int value) { throw gcnew System::NotImplementedException();}
+		}
+	};
+	
 	public ref class Importer
 	{
 	public:
 		Importer(void);
+		Importer(const Importer^ other);
 		~Importer(void);
 
-
+		void FreeScene();
+		array<char>^ GetErrorString();
+		void GetExtensionsList(String^ extensions);
+		IOSystem^ GetIOHandler();
+		void GetMemoryRequrements(aiMemoryInfo^ in);
+		Scene^ getOrphanedScene( );
+		float GetPropertyFloat(array<char>^ propName);
+		int GetPropertyInt(array<char>^ propName);
+		String^ GetPrpertyString(array<char>^ propName);
+		Scene^ getScene();
+		bool IsDefaultIOHandler();
+		bool IsExtensionSupported(array<char>^ extension);
+		bool IsExtensionSupported(String^ extension);
+		Scene^ ReadFile(array<char>^ fileName, unsigned int flags);
+		Scene^ ReadFile(String^ fileName, unsigned int flags);
+		void SetExtraVerbose(bool verbose);
+		void SetIOHanlder(IOSystem^ ioHandler);
+		void SetPropertyFloat(array<char>^ propName, float value);
+		void SetPropertyInt(array<char>^ propName, int value);
+		void SetPrpertyString(array<char>^ propName, String^ value);
+		bool ValidateFlags(unsigned int flags);
+	
 	};
 }//namespace

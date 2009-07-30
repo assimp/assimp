@@ -53,7 +53,7 @@ namespace AssimpNET
 		VERBOSE,
 	};
 
-	public ref class Logger
+	public ref class Logger	abstract
 	{
 	public:
 		~Logger(void);

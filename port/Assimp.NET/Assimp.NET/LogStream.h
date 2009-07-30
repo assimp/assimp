@@ -57,7 +57,7 @@ namespace AssimpNET
 	};
 
 
-	ref class LogStream
+	public ref class LogStream abstract
 	{
 	public:		
 		virtual ~LogStream(void);

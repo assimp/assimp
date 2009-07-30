@@ -41,12 +41,98 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "Vector3D.h"
+#include "Color3D.h"
+
+using namespace System;
+
 namespace AssimpNET
 {
+	enum LightSourceType
+	{
+		aiLightSource_UNDEFINED = 0x0,
+		aiLightSource_DIRECTIONAL = 0x1,
+		aiLightSource_POINT = 0x2,
+		aiLightSource_SPOT = 0x3,
+		_aiLightSource_Force32Bit = 0x9fffffff
+	};
+
 	ref class Light
 	{
 	public:
 		Light(void);
 		~Light(void);
+
+		property float AngleInnerCone
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+
+		property float AngleOuterCone
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+
+		property float AttenuationConstant
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+
+		property float AttenuationLinear
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+
+		property float AttenuationQuadratic
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+
+		property Color3D^ ColorAmbient
+		{
+			Color3D^ get(){throw gcnew System::NotImplementedException();}
+			void set(Color3D^ value){throw gcnew System::NotImplementedException();}
+		}
+		
+		property Color3D^ ColorDiffuse
+		{
+			Color3D^ get(){throw gcnew System::NotImplementedException();}
+			void set(Color3D^ value){throw gcnew System::NotImplementedException();}
+		}
+		
+		property Color3D^ ColorSpecular
+		{
+			Color3D^ get(){throw gcnew System::NotImplementedException();}
+			void set(Color3D^ value){throw gcnew System::NotImplementedException();}
+		}
+		
+		property Vector3D^ Direction
+		{
+			Vector3D^ get(){throw gcnew System::NotImplementedException();}
+			void set(Vector3D^ value){throw gcnew System::NotImplementedException();}
+		}
+	
+		property Vector3D^ Position
+		{
+			Vector3D^ get(){throw gcnew System::NotImplementedException();}
+			void set(Vector3D^ value){throw gcnew System::NotImplementedException();}
+		}
+		
+		property String^ Name
+		{
+			String^ get(){throw gcnew System::NotImplementedException();}
+			void set(String^ value){throw gcnew System::NotImplementedException();}
+		}
+		
+		property LightSourceType Type
+		{
+			LightSourceType get(){throw gcnew System::NotImplementedException();}
+			void set(LightSourceType value){throw gcnew System::NotImplementedException();}
+		}
 	};
 }//namespace

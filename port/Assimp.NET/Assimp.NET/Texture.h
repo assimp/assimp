@@ -41,13 +41,84 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "Texel.h"
+
+using namespace System;
+
 namespace AssimpNET
 {
+
+	enum TextureType
+	{
+		aiTextureType_NONE,
+		aiTextureType_DIFFUSE,
+		aiTextureType_SPECULAR,
+		aiTextureType_AMBIENT,
+		aiTextureType_EMISSIVE,
+		aiTextureType_HEIGHT,
+		aiTextureType_NORMALS,
+		aiTextureType_SHININESS,
+		aiTextureType_OPACITY,
+		aiTextureType_DISPLACEMENT,
+		aiTextureType_LIGHTMAP,
+		aiTextureType_REFLECTION,
+		aiTextureType_UNKNOWN
+	};
+
+	enum TextureMapping
+	{
+		aiTextureMapping_UV,
+		aiTextureMapping_SPHERE,
+		aiTextureMapping_CYLINDER,
+		aiTextureMapping_BOX,
+		aiTextureMapping_PLANE,
+		aiTextureMapping_OTHER
+	};
+
+	enum TextureOP
+	{
+		aiTextureOp_Multiply,
+		aiTextureOp_Add,
+		aiTextureOp_Subtract,
+		aiTextureOp_Divide,
+		aiTextureOp_SmoothAdd,
+		aiTextureOp_SignedAdd
+	};
+
+	enum TextureMapMode
+	{
+		TextureMapMode_Wrap,
+		TextureMapMode_Clamp,
+		TextureMapMode_Decal,
+		TextureMapMode_Mirror
+	};
 
 	ref class Texture
 	{
 	public:
 		Texture(void);
 		~Texture(void);
+
+		bool CheckFormat(array<char>^ s);
+
+		property array<char, 4>^ achFormatHint
+		{
+			array<char, 4>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<char, 4>^ value){throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int mHeight
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int mWidth
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+
+		property Texel^ pcData;
 	};
 }//namespace

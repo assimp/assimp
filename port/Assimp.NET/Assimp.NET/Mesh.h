@@ -41,6 +41,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "Vector3D.h"
+#include "Bone.h"
+#include "Color4D.h"
+#include "Face.h"
+
+using namespace System;
+
 namespace AssimpNET
 {
 	ref class Mesh
@@ -48,5 +55,100 @@ namespace AssimpNET
 	public:
 		Mesh(void);
 		~Mesh(void);
+
+		unsigned int GetNumColorChannels();
+		unsigned int GetNumUVChannels();
+		bool HasBones();
+		bool HasFaces();
+		bool HasNormals();
+		bool HasPositions();
+		bool HasTangentsAndBitangents();
+		bool HasTextureCoords();
+		bool HasVertexColors();
+		
+		property array<Vector3D^>^ mBitangents
+		{
+			array<Vector3D^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<Vector3D^>^ value){throw gcnew System::NotImplementedException();}
+		}
+
+		property array<Bone^>^ mBones
+		{
+			array<Bone^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<Bone^>^ value){throw gcnew System::NotImplementedException();}
+		}
+
+		property array<Color4D^>^ mColors
+		{
+			array<Color4D^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<Color4D^>^ value){throw gcnew System::NotImplementedException();}
+		}
+
+		property array<Face^>^ mFaces
+		{
+			array<Face^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<Face^>^ value){throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int mMaterialIndex
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+
+		property array<Vector3D^>^ mNormals
+		{
+			array<Vector3D^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<Vector3D^>^ value){throw gcnew System::NotImplementedException();}
+		}
+		
+		property unsigned int mNumBones
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int mNumFaces
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int mNumUVComponents
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int mNumVertices
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int mPrimitveTypes
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+
+		property array<Vector3D^>^ mTangents
+		{
+			array<Vector3D^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<Vector3D^>^ value){throw gcnew System::NotImplementedException();}
+		}
+
+		property array<Vector3D^>^ mTextureCoords
+		{
+			array<Vector3D^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<Vector3D^>^ value){throw gcnew System::NotImplementedException();}
+		}
+
+		property array<Vector3D^>^ mVertices
+		{
+			array<Vector3D^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<Vector3D^>^ value){throw gcnew System::NotImplementedException();}
+		}
+
 	};
 }//namespace

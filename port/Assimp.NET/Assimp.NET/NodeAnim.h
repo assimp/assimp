@@ -41,12 +41,81 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "VectorKey.h"
+#include "QuatKey.h"
+
+using namespace System;
+
 namespace AssimpNET
 {
+	enum AnimBehaviour
+	{
+		aiAnimBehaviour_DEFAULT = 0x0,
+		aiAnimBehaviour_CONSTANT = 0x1,
+		aiAnimBehaviour_LINEAR = 0x2,
+		aiAnimBehaviour_REPEAT = 0x3,
+		_aiAnimBehaviour_Force32Bit = 0x8fffffff
+	};
+
 	ref class NodeAnim
 	{
 	public:
 		NodeAnim(void);
 		~NodeAnim(void);
+
+		property String^ mNodeName
+		{
+			String^ get(){throw gcnew System::NotImplementedException();}
+			void set(String^ value){throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int mNumPositionKeys
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int mNumRotationKeys
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int mNumScalingKeys
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+
+		property array<VectorKey^>^ mPositionKeys
+		{
+			array<VectorKey^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<VectorKey^>^ value){throw gcnew System::NotImplementedException();}
+		}
+
+		property AnimBehaviour mPosState
+		{
+			AnimBehaviour get(){throw gcnew System::NotImplementedException();}
+			void set(AnimBehaviour value){throw gcnew System::NotImplementedException();}
+		}
+
+		property AnimBehaviour mPreState
+		{
+			AnimBehaviour get(){throw gcnew System::NotImplementedException();}
+			void set(AnimBehaviour value){throw gcnew System::NotImplementedException();}
+		}
+
+		property array<QuatKey^>^ mRotationKeys
+		{
+			array<QuatKey^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<QuatKey^>^ value){throw gcnew System::NotImplementedException();}
+		}
+
+		property array<VectorKey^>^ mScalingKeys
+		{
+			array<VectorKey^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<VectorKey^>^ value){throw gcnew System::NotImplementedException();}
+		}
+
 	};
 }//namespace

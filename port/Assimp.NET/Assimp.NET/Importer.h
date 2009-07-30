@@ -41,6 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "IOSystem.h"
+#include "Scene.h"
+
+using namespace System;
+
 namespace AssimpNET
 {
 	ref class Importer
@@ -49,6 +54,6 @@ namespace AssimpNET
 		Importer(void);
 		~Importer(void);
 
-		
+
 	};
 }//namespace

@@ -41,6 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "Enums.h"
+#include "MaterialProperty.h"
+#include "Texture.h"
+
+using namespace System;
+
 namespace AssimpNET
 {
 	ref class Material
@@ -48,5 +54,33 @@ namespace AssimpNET
 	public:
 		Material(void);
 		~Material(void);
+
+		generic<typename T>
+		aiReturn Get(array<char>^ pKey, unsigned int type, unsigned int idx, T pOut);
+
+		generic<typename T>
+		aiReturn Get(array<char>^ pKey, unsigned int type, unsigned int idx, T pOut, unsigned int^ pMax);
+
+		aiReturn GetTexture(TextureType type, unsigned int index, String^ path, TextureMapping& mapping, unsigned int^ uvindex, float^ blend,
+							TextureOP& op, TextureMapMode& mapMode);
+
+		property unsigned int mNumAllocated
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int mNumProperties
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+
+		property array<MaterialProperty^>^ mProperties
+		{
+			array<MaterialProperty^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<MaterialProperty^>^ value){throw gcnew System::NotImplementedException();}
+		}
+
 	};
 }//namespace

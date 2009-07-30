@@ -41,6 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "NodeAnim.h"
+
+using namespace System;
+
 namespace AssimpNET
 {
 	ref class Animation
@@ -48,5 +52,33 @@ namespace AssimpNET
 	public:
 		Animation(void);
 		~Animation(void);
+
+		property array<NodeAnim^>^ mAnimChannels
+		{
+			array<NodeAnim^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<NodeAnim^>^ value){throw gcnew System::NotImplementedException();}
+		}
+		property unsigned int mNumAnimChannels
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+		property double mDuration
+		{
+			double get(){throw gcnew System::NotImplementedException();}
+			void set(double value){throw gcnew System::NotImplementedException();}
+		}
+		property double mTicksPerSecond
+		{
+			double get(){throw gcnew System::NotImplementedException();}
+			void set(double value){throw gcnew System::NotImplementedException();}
+		}
+		property String^ mName
+		{
+			String^ get(){throw gcnew System::NotImplementedException();}
+			void set(String^ value){throw gcnew System::NotImplementedException();}
+		}
+		
 	};
 }//namespace
+

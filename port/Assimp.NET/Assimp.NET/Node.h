@@ -41,6 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "Matrix4x4.h"
+
+using namespace System;
+
 namespace AssimpNET
 {
 	ref class Node
@@ -48,5 +52,51 @@ namespace AssimpNET
 	public:
 		Node(void);
 		~Node(void);
+
+		Node^ findNode(array<char>^ name);
+		Node^ findNode(const String^ name);
+
+		property array<Node^>^ mChildren
+		{
+			array<Node^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<Node^>^ value){throw gcnew System::NotImplementedException();}
+		}
+
+		property array<unsigned int>^ mMeshes
+		{
+			array<unsigned int>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<unsigned int>^ value){throw gcnew System::NotImplementedException();}
+		}
+
+		property String^ mName
+		{
+			String^ get(){throw gcnew System::NotImplementedException();}
+			void set(String^ value){throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int mNumChildren
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int mNumMeshes
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+
+		property Matrix4x4^ mTransformation
+		{
+			Matrix4x4^ get(){throw gcnew System::NotImplementedException();}
+			void set(Matrix4x4^ value){throw gcnew System::NotImplementedException();}
+		}
+
+		property Node^ mParent
+		{
+			Node^ get(){throw gcnew System::NotImplementedException();}
+			void set(Node^ value){throw gcnew System::NotImplementedException();}
+		}
+
 	};
 }//namespace

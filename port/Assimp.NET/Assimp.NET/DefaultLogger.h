@@ -41,12 +41,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "Logger.h"
+#include "LogStream.h"
+#include "IOSystem.h"
+
+using namespace System;
+
 namespace AssimpNET
 {
-	ref class DefaultLogger
+	ref class DefaultLogger : Logger
 	{
 	public:
 		DefaultLogger(void);
 		~DefaultLogger(void);
+
+		virtual bool attachStream(LogStream^ stream, unsigned int severity) override;
+		virtual bool detachStream(LogStream^ stream, unsigned int severity) override;
+
+		static Logger^ create(const String^ name, LogSeverity severity, unsigned int defStream, IOSystem^ io);
+		static Logger^ get();
+		static bool isNullLogger();
+		static void kill();
+		static void set(Logger^ logger);
 	};
 }//namespace

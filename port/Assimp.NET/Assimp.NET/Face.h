@@ -47,6 +47,23 @@ namespace AssimpNET
 	{
 	public:
 		Face(void);
+		Face(const Face^ other);
 		~Face(void);
+
+		bool operator != (const Face^ other);
+		Face^ operator = (const Face^ other);
+		bool operator == (const Face^ other);
+
+		property array<unsigned int>^ mIndices
+		{
+			array<unsigned int>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<unsigned int>^ value){throw gcnew System::NotImplementedException();}
+		}
+
+		property unsigned int mNumIndices
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
 	};
 }//namespace

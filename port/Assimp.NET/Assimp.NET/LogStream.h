@@ -41,12 +41,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "IOSystem.h"
+
+using namespace System;
+
 namespace AssimpNET
 {
+
+	enum DefaulLogStreams
+	{
+		DLS_FILE, 	
+		DLS_COUT,
+		DLS_CERR,
+		DLS_DEBUGGER
+	};
+
+
 	ref class LogStream
 	{
-	public:
+	public:		
+		virtual ~LogStream(void);
+		virtual void write(array<char>^ message) = 0;
+
+		static LogStream^ createDefaultStream(DefaulLogStreams streams, array<char>^ name, IOSystem^ io);
+
+	protected:
 		LogStream(void);
-		~LogStream(void);
 	};
 }//namespace

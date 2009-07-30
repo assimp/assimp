@@ -108,7 +108,6 @@ Global
 		{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}.debug|x64.ActiveCfg = debug|x64
 		{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}.debug|x64.Build.0 = debug|x64
 		{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}.debug-dll|Win32.ActiveCfg = debug-dll|Win32
-		{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}.debug-dll|Win32.Build.0 = debug-dll|Win32
 		{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}.debug-dll|x64.ActiveCfg = debug-dll|x64
 		{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}.debug-dll|x64.Build.0 = debug-dll|x64
 		{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}.debug-noboost-st|Win32.ActiveCfg = debug-noboost-st|Win32

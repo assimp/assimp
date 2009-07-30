@@ -41,12 +41,61 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "Vector3D.h"
+//#include "Matrix3x3.h"
+
+
+
+using namespace System;
+
 namespace AssimpNET
 {
+	ref class Matrix3x3;
+
 	ref class Quaternion
 	{
 	public:
 		Quaternion(void);
+		Quaternion(Vector3D^ normalized);
+		Quaternion(Vector3D^ axis, float angle);
+		Quaternion(float rotx, float roty, float rotz);
+		Quaternion(const Matrix3x3^ rotMatrix);
+		Quaternion(float _w, float _x, float _y, float _z);
 		~Quaternion(void);
+
+		Quaternion^ Conjugate();
+		Matrix3x3^ GetMatrix();
+		Quaternion^ Nomalize();
+		bool operator != (const Quaternion^ q);
+		bool operator == (const Quaternion^ q);
+		Quaternion^ operator* (const Quaternion^ q);
+		Vector3D^ Rotate(const Vector3D^ in);
+
+		static void Interpolate(Quaternion^ pOut, const Quaternion^ pStart, const Quaternion^ pEnd, float factor);
+
+		property float x
+		{
+			float get() { throw gcnew System::NotImplementedException();}
+			void set(float value) { throw gcnew System::NotImplementedException();}
+		}
+
+		property float y
+		{
+			float get() { throw gcnew System::NotImplementedException();}
+			void set(float value) { throw gcnew System::NotImplementedException();}
+		}
+
+		property float z
+		{
+			float get() { throw gcnew System::NotImplementedException();}
+			void set(float value) { throw gcnew System::NotImplementedException();}
+		}
+
+		property float w
+		{
+			float get() { throw gcnew System::NotImplementedException();}
+			void set(float value) { throw gcnew System::NotImplementedException();}
+		}
+
 	};
 }//namespace

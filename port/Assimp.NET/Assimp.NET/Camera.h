@@ -41,6 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "Matrix4x4.h"
+#include "Vector3D.h"
+
+using namespace System;
+
 namespace AssimpNET
 {
 	ref class Camera
@@ -48,5 +53,51 @@ namespace AssimpNET
 	public:
 		Camera(void);
 		~Camera(void);
+
+		void GetCameraMatrix(Matrix4x4^ out);
+
+		property float mAspect
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+		property float mNearClipPlane
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+		property float mFarClipPlane
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+		property float mHorizontalFOV
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+
+		property Vector3D^ mLookAt
+		{
+			Vector3D^ get(){throw gcnew System::NotImplementedException();}
+			void set(Vector3D^ value){throw gcnew System::NotImplementedException();}
+		}
+		property Vector3D^ mPosition
+		{
+			Vector3D^ get(){throw gcnew System::NotImplementedException();}
+			void set(Vector3D^ value){throw gcnew System::NotImplementedException();}
+		}
+		property Vector3D^ mUp
+		{
+			Vector3D^ get(){throw gcnew System::NotImplementedException();}
+			void set(Vector3D^ value){throw gcnew System::NotImplementedException();}
+		}
+
+		property String^ mName
+		{
+			String^ get(){throw gcnew System::NotImplementedException();}
+			void set(String^ value){throw gcnew System::NotImplementedException();}
+		}
+
 	};
 }//namespace

@@ -41,12 +41,39 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "Matrix4x4.h"
+#include "VertexWeight.h"
+
+using namespace System;
+
 namespace AssimpNET
 {
 	ref class Bone
 	{
 	public:
 		Bone(void);
+		Bone(const Bone^ other);
 		~Bone(void);
+
+		property String^ mName
+		{
+			String^ get(){throw gcnew System::NotImplementedException();}
+			void set(String^ value){throw gcnew System::NotImplementedException();}
+		}
+		property unsigned int mNumWeights
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+		property Matrix4x4^ mOffsetMatrix
+		{
+			Matrix4x4^ get(){throw gcnew System::NotImplementedException();}
+			void set(Matrix4x4^ value){throw gcnew System::NotImplementedException();}
+		}
+		property array<VertexWeight^>^ mWeights
+		{
+			array<VertexWeight^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<VertexWeight^>^ value){throw gcnew System::NotImplementedException();}
+		}
 	};
 }//namespace

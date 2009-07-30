@@ -41,12 +41,89 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "Vector3D.h"
+#include "Vector2D.h"
+#include "Matrix4x4.h"
+
 namespace AssimpNET
 {
 	ref class Matrix3x3
 	{
 	public:
 		Matrix3x3(void);
+		Matrix3x3(const Matrix4x4^ matrix);
+		Matrix3x3(	float _a1, float _a2, float _a3,
+					float _b1, float _b2, float _b3,
+					float _c1, float _c2, float _c3);
 		~Matrix3x3(void);
+
+		float Determinant();
+
+		Matrix3x3^ Inverse();
+		Matrix3x3^ Transpose();
+		bool operator != (const Matrix3x3^ m);
+		bool operator == (const Matrix3x3^ m);
+		Matrix3x3^ operator* (const Matrix3x3^ m);
+		Matrix3x3^ operator*= (const Matrix3x3^ m);
+		float operator[](unsigned int i);
+
+		static Matrix3x3^ FromToMatrix(Vector3D^ from, Vector3D^ to, Matrix3x3^ out);
+		static Matrix3x3^ Rotation(float a, const Vector3D^ axis, Matrix3x3^ out);
+		static Matrix3x3^ RotationZ(float a, Matrix3x3^ out);
+		static Matrix3x3^ Translation(const Vector2D^ v, Matrix3x3^ out);
+
+		property float a1
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+
+		property float a2
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+
+		property float a3
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+
+		property float b1
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+
+		property float b2
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+
+		property float b3
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+
+		property float c1
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+
+		property float c2
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+		property float c3
+		{
+			float get(){throw gcnew System::NotImplementedException();}
+			void set(float value){throw gcnew System::NotImplementedException();}
+		}
+
 	};
 }//namespace

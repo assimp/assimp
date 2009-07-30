@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="..\..\..\bin\$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="..\..\..\obj\$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="2"
 			CharacterSet="1"
 			ManagedExtensions="1"
@@ -88,8 +88,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="..\..\..\lib\$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+			IntermediateDirectory="..\..\..\obj\$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="1"
 			CharacterSet="1"
 			ManagedExtensions="1"
@@ -182,11 +182,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CompressedTexture.cpp"
+				RelativePath=".\Color3D.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ConfigProperty.cpp"
+				RelativePath=".\Color4D.cpp"
 				>
 			</File>
 			<File
@@ -226,7 +226,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\MatKey.cpp"
+				RelativePath=".\MaterialProperty.cpp"
 				>
 			</File>
 			<File
@@ -239,10 +239,6 @@
 			</File>
 			<File
 				RelativePath=".\Mesh.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\NativeException.cpp"
 				>
 			</File>
 			<File
@@ -262,11 +258,35 @@
 				>
 			</File>
 			<File
+				RelativePath=".\QuatKey.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Scene.cpp"
 				>
 			</File>
 			<File
+				RelativePath=".\Texel.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Texture.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Vector2D.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Vector3D.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\VectorKey.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\VertexWeight.cpp"
 				>
 			</File>
 		</Filter>
@@ -288,15 +308,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CompressedTexture.h"
+				RelativePath=".\Color3D.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ConfigProperty.h"
+				RelativePath=".\Color4D.h"
 				>
 			</File>
 			<File
 				RelativePath=".\DefaultLogger.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Enums.h"
 				>
 			</File>
 			<File
@@ -332,7 +356,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\MatKey.h"
+				RelativePath=".\MaterialProperty.h"
 				>
 			</File>
 			<File
@@ -345,10 +369,6 @@
 			</File>
 			<File
 				RelativePath=".\Mesh.h"
-				>
-			</File>
-			<File
-				RelativePath=".\NativeException.h"
 				>
 			</File>
 			<File
@@ -368,11 +388,35 @@
 				>
 			</File>
 			<File
+				RelativePath=".\QuatKey.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Scene.h"
 				>
 			</File>
 			<File
+				RelativePath=".\Texel.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Texture.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Vector2D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Vector3D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\VectorKey.h"
+				>
+			</File>
+			<File
+				RelativePath=".\VertexWeight.h"
 				>
 			</File>
 		</Filter>

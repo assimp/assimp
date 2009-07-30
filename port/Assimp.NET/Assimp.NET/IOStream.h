@@ -41,12 +41,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "Enums.h"
+
+using namespace System;
+
 namespace AssimpNET
 {
 	ref class IOStream
 	{
 	public:
+		
+		virtual ~IOStream(void);
+
+		virtual size_t FileSize() = 0;
+		virtual void Flush() = 0;
+		virtual size_t Read(Object ^Buffer, size_t Size, size_t Count) = 0;
+		virtual aiReturn Seek(size_t Offset, aiOrigin Origin) = 0;
+		virtual size_t Tell()= 0;
+		virtual size_t Write( Object ^Buffer, size_t Size, size_t Count) = 0;
+
+	protected:
 		IOStream(void);
-		~IOStream(void);
 	};
 }//namespace

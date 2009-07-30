@@ -41,12 +41,45 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "LogStream.h"
+
+using namespace System;
+
 namespace AssimpNET
 {
+	enum LogSeverity
+	{
+		NORMAL,
+		VERBOSE,
+	};
+
 	ref class Logger
 	{
 	public:
-		Logger(void);
 		~Logger(void);
+
+		virtual bool attachStream(LogStream^ stream, unsigned int severity) = 0;
+		void debug (const String^ message);
+		virtual bool detachStream(LogStream^ stream, unsigned int severity) = 0;
+		void error(const String^ message);
+		LogSeverity getLogSeverity();
+		void info(const String^ message);		
+		void setLogSverity(LogSeverity log_severity);
+		void warn(const String^ message);
+
+	protected:
+		Logger(LogSeverity);
+		Logger();
+		virtual void OnDebug(array<char>^ message) = 0;
+		virtual void OnError(array<char>^ message) = 0;
+		virtual void OnInfo(array<char>^ message) = 0;
+		virtual void OnWarn(array<char>^ message) = 0;
+
+		property LogSeverity m_Severity
+		{
+			LogSeverity get(){throw gcnew System::NotImplementedException();}
+			void set(LogSeverity value){throw gcnew System::NotImplementedException();}
+		}
+
 	};
 }//namespace

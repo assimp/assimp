@@ -41,6 +41,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "Animation.h"
+#include "Camera.h"
+#include "Light.h"
+#include "Material.h"
+#include "Mesh.h"
+#include "Node.h"
+#include "Texture.h"
+
+using namespace System;
+
 namespace AssimpNET
 {
 	ref class Scene
@@ -48,5 +58,83 @@ namespace AssimpNET
 	public:
 		Scene(void);
 		~Scene(void);
+		bool HasAnimations();
+		bool HasCameras();
+		bool HasLights();
+		bool HasMaterials();
+		bool HasMeshes();
+		bool HasTextures();
+		
+		property array<Animation^>^ mAnimations
+		{
+			array<Animation^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<Animation^>^ value){throw gcnew System::NotImplementedException();}
+		}
+		property array<Camera^>^ mCameras
+		{
+			array<Camera^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<Camera^>^ value){throw gcnew System::NotImplementedException();}
+		}
+		property unsigned int mFlags
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+		property array<Light^>^ mLights
+		{
+			array<Light^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<Light^>^ value){throw gcnew System::NotImplementedException();}
+		}
+		property array<Material^>^ mMaterials
+		{
+			array<Material^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<Material^>^ value){throw gcnew System::NotImplementedException();}
+		}
+		property array<Mesh^>^ mMeshes
+		{
+			array<Mesh^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<Mesh^>^ value){throw gcnew System::NotImplementedException();}
+		}
+		property unsigned int mNumAnimations
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+		property unsigned int mNumCameras
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+		property unsigned int mNumLights
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+		property unsigned int mNumMaterials
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+		property unsigned int mNumMeshes
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+		property unsigned int mNumTextures
+		{
+			unsigned int get(){throw gcnew System::NotImplementedException();}
+			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+		}
+		property Node^ mRootNode
+		{
+			Node^ get(){throw gcnew System::NotImplementedException();}
+			void set(Node^ value){throw gcnew System::NotImplementedException();}
+		}
+		property array<Texture^>^ mTextures
+		{
+			array<Texture^>^ get(){throw gcnew System::NotImplementedException();}
+			void set(array<Texture^>^ value){throw gcnew System::NotImplementedException();}
+		}
+
 	};
 }//namespace

@@ -8,4 +8,10 @@ You should be able to create sufficient DDoc documentation for the bindings
 using your favourite build tool (such as Rebuild). Please refer to the main
 (Doxygen-generated) documentation for general topics.
 
+Currently, there is a bug which causes aiGetMaterialProperty() to receive a
+wrong name in the dynamic library (the C++ symbol naming convention is used
+instead of the plain C name). Since the bindings loader looks up all function
+adresses at runtime using the symbol name, this function is not accessible
+at the moment.
+
 Please contact <klickverbot@gmail.com> for any bindings-specific issues.

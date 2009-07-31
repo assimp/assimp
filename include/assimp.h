@@ -148,7 +148,7 @@ ASSIMP_API const C_STRUCT aiScene* aiImportFileEx(
  * @note This is a straightforward way to decode models from memory buffers, but it 
  * doesn't handle model formats spreading their data across multiple files or even
  * directories. Examples include OBJ or MD3, which outsource parts of their material
- * stuff into external scripts. f you need the full functionality, provide a custom 
+ * stuff into external scripts. If you need the full functionality, provide a custom 
  * IOSystem to make Assimp find these files.
  */
 ASSIMP_API const C_STRUCT aiScene* aiImportFileFromMemory( 
@@ -191,7 +191,7 @@ ASSIMP_API const C_STRUCT aiScene* aiApplyPostProcessing(
  *    aiAttachLogStream(&c);
  *  @endcode
  *
- *  @param One of the #aiDefaultLogStream enumerated values. 
+ *  @param pStreams One of the #aiDefaultLogStream enumerated values. 
  *  @param file Solely for the #aiDefaultLogStream_FILE flag: specifies the file to write to.
  *    Pass NULL for all other flags.
  *  @return The log stream. callback is set to NULL if something went wrong.

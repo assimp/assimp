@@ -176,11 +176,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	"PP_OG_EXCLUDE_LIST"
 
 // ---------------------------------------------------------------------------
-/** @brief  Set the maximum number of vertices in a mesh.
+/** @brief  Set the maximum number of triangles in a mesh.
  *
  * This is used by the "SplitLargeMeshes" PostProcess-Step to determine
  * whether a mesh must be split or not.
- * @note The default value is AI_SLM_DEFAULT_MAX_VERTICES
+ * @note The default value is AI_SLM_DEFAULT_MAX_TRIANGLES
  * Property type: integer.
  */
 #define AI_CONFIG_PP_SLM_TRIANGLE_LIMIT	\
@@ -192,11 +192,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 // ---------------------------------------------------------------------------
-/** @brief  Set the maximum number of triangles in a mesh.
+/** @brief  Set the maximum number of vertices in a mesh.
  *
  * This is used by the "SplitLargeMeshes" PostProcess-Step to determine
  * whether a mesh must be split or not.
- * @note The default value is AI_SLM_DEFAULT_MAX_TRIANGLES
+ * @note The default value is AI_SLM_DEFAULT_MAX_VERTICES
  * Property type: integer.
  */
 #define AI_CONFIG_PP_SLM_VERTEX_LIMIT \
@@ -274,7 +274,7 @@ enum aiComponent
 	aiComponent_BONEWEIGHTS = 0x20,
 
 	/** Removes all node animations (aiScene::mAnimations).
-	 * The scenegraph nodes corresponding to the bones are NOT removed.
+	 * The corresponding scenegraph nodes are NOT removed.
 	 * use the #aiProcess_OptimizeGraph step to do this
 	 */
 	aiComponent_ANIMATIONS = 0x40,
@@ -284,13 +284,13 @@ enum aiComponent
 	aiComponent_TEXTURES = 0x80,
 
 	/** Removes all light sources (aiScene::mLights).
-	 * The scenegraph nodes corresponding to the bones are NOT removed.
+	 * The corresponding scenegraph nodes are NOT removed.
 	 * use the #aiProcess_OptimizeGraph step to do this
 	 */
 	aiComponent_LIGHTS = 0x100,
 
 	/** Removes all light sources (aiScene::mCameras).
-	 * The scenegraph nodes corresponding to the bones are NOT removed.
+	 * The corresponding scenegraph nodes are NOT removed.
 	 * use the #aiProcess_OptimizeGraph step to do this
 	 */
 	aiComponent_CAMERAS = 0x200,

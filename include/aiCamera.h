@@ -151,7 +151,7 @@ struct aiCamera
 
 	/** Distance of the far clipping plane from the camera.
 	 *
-	 * The far clipping plane must, of course, be farer away than the
+	 * The far clipping plane must, of course, be further away than the
 	 * near clipping plane. The default value is 1000.f. The ratio
 	 * between the near and the far plane should not be too
 	 * large (between 1000-10000 should be ok) to avoid floating-point

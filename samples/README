@@ -1,8 +1,8 @@
 
 ----------------------------------------------------------------------------
 This directory contains various samples to illustrate Assimp's
-use in various real-worl environments. Workspaces for all samples
-are bundled in ./workspaces, makesfiles can be found in the 
+use in various real-world environments. Workspaces for all samples
+are bundled in ./workspaces, makefiles can be found in the 
 respective directories of the samples.
 
 All GL-based samples depend on GLUT. For use with the VS workspaces,
@@ -15,7 +15,7 @@ directory of the sample.
 
 SimpleOpenGL
 
-  A very simple and streightforward OpenGL sample. It loads a
+  A very simple and straightforward OpenGL sample. It loads a
   model (gets the path to it on the command line, default is dwarf.x)
   and displays the model as wireframe. Animations and materials are
   not evaluated at all. This samples uses the C interface to Assimp.

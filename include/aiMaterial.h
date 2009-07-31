@@ -230,7 +230,7 @@ enum aiTextureType
 
 	/** The texture is a height map.
 	 *
-	 *  By convention, higher grey-scale values stand for
+	 *  By convention, higher gray-scale values stand for
 	 *  higher elevations from the base height.
      */
     aiTextureType_HEIGHT = 0x5,
@@ -239,7 +239,7 @@ enum aiTextureType
 	 *
 	 *  Again, there are several conventions for tangent-space
 	 *  normal maps. Assimp does (intentionally) not 
-	 *  differenciate here.
+	 *  distinguish here.
      */
     aiTextureType_NORMALS = 0x6,
 
@@ -270,7 +270,7 @@ enum aiTextureType
 	 *
 	 *  Both 'Lightmaps' and dedicated 'ambient occlusion maps' are
 	 *  covered by this material property. The texture contains a
-	 *  scaling value for the final color value of a pixel. It's
+	 *  scaling value for the final color value of a pixel. Its
 	 *  intensity is not affected by incoming light.
     */
     aiTextureType_LIGHTMAP = 0xA,
@@ -278,7 +278,7 @@ enum aiTextureType
 	/** Reflection texture
 	 *
 	 * Contains the color of a perfect mirror reflection.
-	 * Rarely used, almost nevery for real-time applications.
+	 * Rarely used, almost never for real-time applications.
     */
     aiTextureType_REFLECTION = 0xB,
 
@@ -424,7 +424,7 @@ enum aiTextureFlags
 /** @brief Defines alpha-blend flags.
  *
  *  If you're familiar with OpenGL or D3D, these flags aren't new to you.
- *  The define *how* the final color value of a pixel is computed, basing
+ *  They define *how* the final color value of a pixel is computed, basing
  *  on the previous color at that pixel and the new color value from the
  *  material.
  *  The blend formula is:
@@ -580,7 +580,7 @@ enum aiPropertyTypeInfo
 struct aiMaterialProperty
 {
     /** Specifies the name of the property (key)
-     *  Keys are generally  case insensitive. 
+     *  Keys are generally case insensitive. 
      */
     C_STRUCT aiString mKey;
 
@@ -1340,19 +1340,19 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialString(const C_STRUCT aiMaterial* pMat,
  *  @param[in] index Index of the texture layer to be read. The function 
  *      fails if the requested layer is not available. 
  *  @param[out] path Receives the output path
- *      This parameter mist be non-null.
+ *      This parameter must be non-null.
  *  @param mapping The texture mapping mode to be used.
- *      Pass NULL if you'e not interested in this information.
+ *      Pass NULL if you're not interested in this information.
  *  @param[out] uvindex For UV-mapped textures: receives the index of the UV
  *      source channel. Unmodified otherwise.
- *      Pass NULL if you'e not interested in this information.
+ *      Pass NULL if you're not interested in this information.
  *  @param[out] blend Receives the blend factor for the texture
- *      Pass NULL if you'e not interested in this information.
+ *      Pass NULL if you're not interested in this information.
  *  @param[out] op Receives the texture blend operation to be perform between
  *		this texture and the previous texture.
- *      Pass NULL if you'e not interested in this information.
+ *      Pass NULL if you're not interested in this information.
  *  @param[out] mapmode Receives the mapping modes to be used for the texture.
- *      Pass NULL if you'e not interested in this information. Otherwise,
+ *      Pass NULL if you're not interested in this information. Otherwise,
  *      pass a pointer to an array of two aiTextureMapMode's (one for each
  *      axis, UV order).
  *  @return AI_SUCCESS on success, something else otherwise. Have fun.

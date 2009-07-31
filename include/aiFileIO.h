@@ -59,7 +59,7 @@ typedef size_t   (*aiFileTellProc)  (C_STRUCT aiFile*);
 typedef void     (*aiFileFlushProc) (C_STRUCT aiFile*);
 typedef aiReturn (*aiFileSeek)(C_STRUCT aiFile*, size_t, aiOrigin);
 
-// aiFileIO callbackss
+// aiFileIO callbacks
 typedef aiFile* (*aiFileOpenProc)  (C_STRUCT aiFileIO*, const char*, const char*);
 typedef void    (*aiFileCloseProc) (C_STRUCT aiFileIO*, C_STRUCT aiFile*);
 

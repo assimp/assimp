@@ -844,8 +844,8 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 				continue;
 			if( srcChannel.mTarget.find( '/', slashPos+1) != std::string::npos)
 				continue;
-			std::string targetName = srcChannel.mTarget.substr( 0, slashPos);
-			if( targetName != nodeName)
+			std::string targetID = srcChannel.mTarget.substr( 0, slashPos);
+			if( targetID != srcNode->mID)
 				continue;
 
 			// find the dot that separates the transformID - there should be only one or zero
@@ -860,6 +860,12 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 				std::string subElement = srcChannel.mTarget.substr( dotPos+1);
 				if( subElement == "ANGLE")
 					entry.mSubElement = 3; // last number in an Axis-Angle-Transform is the angle
+				else if( subElement == "X")
+					entry.mSubElement = 0;
+				else if( subElement == "Y")
+					entry.mSubElement = 1;
+				else if( subElement == "Z")
+					entry.mSubElement = 2;
 				else 
 					DefaultLogger::get()->warn( boost::str( boost::format( "Unknown anim subelement \"%s\". Ignoring") % subElement));
 			} else

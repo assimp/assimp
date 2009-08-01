@@ -270,8 +270,9 @@ void ColladaParser::ReadAnimationLibrary()
 void ColladaParser::ReadAnimation( Collada::Animation* pParent)
 {
 	// an <animation> element may be a container for grouping sub-elements or an animation channel
-	// this is the channel we're writing to, in case it's a channel
-	AnimationChannel channel;
+	// this is the channel collection by ID, in case it has channels
+	typedef std::map<std::string, AnimationChannel> ChannelMap;
+	ChannelMap channels;
 	// this is the anim container in case we're a container
 	Animation* anim = NULL;
 
@@ -311,8 +312,13 @@ void ColladaParser::ReadAnimation( Collada::Animation* pParent)
 			} 
 			else if( IsElement( "sampler"))
 			{
-				// have it read into our channel
-				ReadAnimationSampler( channel);
+				// read the ID to assign the corresponding collada channel afterwards.
+				int indexID = GetAttribute( "id");
+				std::string id = mReader->getAttributeValue( indexID);
+				ChannelMap::iterator newChannel = channels.insert( std::make_pair( id, AnimationChannel())).first;
+
+				// have it read into a channel
+				ReadAnimationSampler( newChannel->second);
 			} 
 			else if( IsElement( "channel"))
 			{
@@ -320,7 +326,13 @@ void ColladaParser::ReadAnimation( Collada::Animation* pParent)
 				// Thanks, Collada! A directly posted information would have been too simple, I guess.
 				// Better add another indirection to that! Can't have enough of those.
 				int indexTarget = GetAttribute( "target");
-				channel.mTarget = mReader->getAttributeValue( indexTarget);
+				int indexSource = GetAttribute( "source");
+				const char* sourceId = mReader->getAttributeValue( indexSource);
+				if( sourceId[0] == '#')
+					sourceId++;
+				ChannelMap::iterator cit = channels.find( sourceId);
+				if( cit != channels.end())
+					cit->second.mTarget = mReader->getAttributeValue( indexTarget);
 
 				if( !mReader->isEmptyElement())
 					SkipElement();
@@ -340,9 +352,26 @@ void ColladaParser::ReadAnimation( Collada::Animation* pParent)
 		}
 	}
 
-	// it turned out to be a channel - add it
-	if( !channel.mTarget.empty())
-		pParent->mChannels.push_back( channel);
+	// it turned out to have channels - add them
+	if( !channels.empty())
+	{
+		// special filtering for stupid exporters packing each channel into a separate animation
+		if( channels.size() == 1)
+		{
+			pParent->mChannels.push_back( channels.begin()->second);
+		} else
+		{
+			// else create the animation, if not done yet, and store the channels
+			if( !anim)
+			{
+				anim = new Animation;
+				anim->mName = animName;
+				pParent->mSubAnims.push_back( anim);
+			}
+			for( ChannelMap::const_iterator it = channels.begin(); it != channels.end(); ++it)
+				anim->mChannels.push_back( it->second);
+		}
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -2364,10 +2393,10 @@ void ColladaParser::ReadNodeGeometry( Node* pNode)
 					int attrMaterial = GetAttribute( "target");
 					const char* urlMat = mReader->getAttributeValue( attrMaterial);
 					Collada::SemanticMappingTable s;
-					if( urlMat[0] != '#')
-						ThrowException( "Unknown reference format");
+					if( urlMat[0] == '#')
+            urlMat++;
 
-					s.mMatName = urlMat+1;
+					s.mMatName = urlMat;
 
 					// resolve further material details + THIS UGLY AND NASTY semantic mapping stuff
 					if( !mReader->isEmptyElement())

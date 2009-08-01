@@ -644,10 +644,14 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 
 				float weight = ReadFloat( weightsAcc, weights, vertexIndex, 0);
 
-				aiVertexWeight w;
-				w.mVertexId = a - pStartVertex;
-				w.mWeight = weight;
-				dstBones[jointIndex].push_back( w);
+        // one day I gonna kill that XSI Collada exporter
+        if( weight > 0.0f)
+        {
+				  aiVertexWeight w;
+				  w.mVertexId = a - pStartVertex;
+				  w.mWeight = weight;
+				  dstBones[jointIndex].push_back( w);
+        }
 			}
 		}
 
@@ -1364,7 +1368,7 @@ void ColladaLoader::CollectNodes( const aiNode* pNode, std::vector<const aiNode*
 // Finds a node in the collada scene by the given name
 const Collada::Node* ColladaLoader::FindNode( const Collada::Node* pNode, const std::string& pName)
 {
-	if( pNode->mName == pName)
+	if( pNode->mName == pName || pNode->mID == pName)
 		return pNode;
 
 	for( size_t a = 0; a < pNode->mChildren.size(); ++a)

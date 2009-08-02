@@ -302,10 +302,10 @@ void ObjFileParser::getFace()
 			//OBJ USES 1 Base ARRAYS!!!!
 			const int iVal = atoi( pPtr );
 			int tmp = iVal;
-			while ((tmp = tmp / 10)!=0)
+			while ( ( tmp = tmp / 10 )!=0 )
 				++iStep;
 
-			if ( 0 != iVal )
+			if ( iVal > 0 )
 			{
 				// Store parsed index
 				if ( 0 == iPos )

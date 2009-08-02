@@ -13,7 +13,8 @@ SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin )
 
 # Libs
 add_subdirectory( code/ )
-
+add_subdirectory( test/ )
+add_subdirectory( tools/assimp_cmd/ )
 IF( WIN32 )
 	add_subdirectory( tools/assimp_view/ )
 ENDIF( WIN32 )

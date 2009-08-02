@@ -62,7 +62,7 @@ ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer,
 	ai_assert( NULL != m_pModel );
 	if ( NULL == m_pModel->m_pDefaultMaterial )
 	{
-		m_pModel->m_pDefaultMaterial = new ObjFile::Material();
+		m_pModel->m_pDefaultMaterial = new ObjFile::Material;
 		m_pModel->m_pDefaultMaterial->MaterialName.Set( "default" );
 	}
 	load();
@@ -220,7 +220,7 @@ void ObjFileMtlImporter::getFloatValue( float &value )
 //	Creates a material from loaded data.
 void ObjFileMtlImporter::createMaterial()
 {	
-	std::string strName;
+	std::string strName( "" );
 	m_DataIt = getName<DataArrayIt>( m_DataIt, m_DataItEnd, strName );
 	if ( m_DataItEnd == m_DataIt )
 		return;

@@ -101,14 +101,15 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 		throw new ImportErrorException( "OBJ-file is too small.");
 
 	// Allocate buffer and read file into it
-	m_Buffer.resize( fileSize );
-	const size_t readsize = file->Read(&m_Buffer.front(), sizeof(char), fileSize);
-	assert (readsize == fileSize);
+	m_Buffer.resize( fileSize + 1 );
+	m_Buffer[ fileSize ] = '\0';
+	const size_t readsize = file->Read( &m_Buffer.front(), sizeof(char), fileSize );
+	assert( readsize == fileSize );
 
 	//
-	std::string strDirectory(1,io.getOsSeparator()), strModelName;
-	std::string::size_type pos = pFile.find_last_of(io.getOsSeparator());
-	if (pos != std::string::npos)
+	std::string strDirectory( 1, io.getOsSeparator() ), strModelName;
+	std::string::size_type pos = pFile.find_last_of( io.getOsSeparator() );
+	if ( pos != std::string::npos )
 	{
 		strDirectory = pFile.substr(0, pos);
 		strModelName = pFile.substr(pos+1, pFile.size() - pos - 1);
@@ -314,16 +315,8 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 	// Allocate buffer for texture coordinates
 	if ( !pModel->m_TextureCoord.empty() && pObjMesh->m_uiUVCoordinates[0] )
 	{
-		// FIXME (@Kimmi): cleanup, I don't see the intention behind this
-		// for ( size_t i=0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++ )
-		// {
-		//	const unsigned int num_uv = pObjMesh->m_uiUVCoordinates[ i ];
-		//	if ( num_uv > 0 )
-		//	{
-				pMesh->mNumUVComponents[ 0 ] = 2;
-				pMesh->mTextureCoords[ 0 ]   = new aiVector3D[ pMesh->mNumVertices ];
-		//	}
-		// }
+		pMesh->mNumUVComponents[ 0 ] = 2;
+		pMesh->mTextureCoords[ 0 ]   = new aiVector3D[ pMesh->mNumVertices ];
 	}
 	
 	// Copy vertices, normals and textures into aiMesh instance

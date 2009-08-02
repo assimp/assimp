@@ -186,7 +186,7 @@ void ObjFileParser::copyNextWord(char *pBuffer, size_t length)
 {
 	size_t index = 0;
 	m_DataIt = getNextWord<DataArrayIt>(m_DataIt, m_DataItEnd);
-	while (!isSpace(*m_DataIt) && m_DataIt != m_DataItEnd)
+	while ( !isSeparator(*m_DataIt) && m_DataIt != m_DataItEnd )
 	{
 		pBuffer[index] = *m_DataIt;
 		index++;
@@ -293,7 +293,7 @@ void ObjFileParser::getFace()
 			}
 			iPos++;
 		}
-		else if (isSpace(*pPtr))
+		else if ( isSeparator(*pPtr) )
 		{
 			iPos = 0;
 		}
@@ -374,7 +374,7 @@ void ObjFileParser::getMaterialDesc()
 		return;
 
 	char *pStart = &(*m_DataIt);
-	while ( !isSpace(*m_DataIt) && m_DataIt != m_DataItEnd )
+	while ( !isSeparator(*m_DataIt) && m_DataIt != m_DataItEnd )
 		++m_DataIt;
 
 	// Get name
@@ -452,7 +452,8 @@ void ObjFileParser::getMaterialLib()
 
 	// Import material library data from file
 	size_t size = pFile->FileSize();
-	std::vector<char> buffer(size);
+	std::vector<char> buffer( size + 1 );
+	buffer[ size ] = '\0';
 	pFile->Read( &buffer[ 0 ], sizeof( char ), size );
 	io->Close( pFile );
 
@@ -471,7 +472,7 @@ void ObjFileParser::getNewMaterial()
 
 	char *pStart = &(*m_DataIt);
 	std::string strMat(pStart, *m_DataIt);
-	while (isSpace(*m_DataIt))
+	while ( isSeparator( *m_DataIt ) )
 		m_DataIt++;
 	std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( strMat );
 	if (it == m_pModel->m_MaterialMap.end())
@@ -514,12 +515,12 @@ void ObjFileParser::getGroupName()
 	// Get next word from data buffer
 	m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
 	m_DataIt = getNextWord<DataArrayIt>(m_DataIt, m_DataItEnd);
-	if ( m_DataIt == m_DataItEnd )
+	if ( isEndOfBuffer( m_DataIt, m_DataItEnd ) )
 		return;
 
 	// Store groupname in group library 
 	char *pStart = &(*m_DataIt);
-	while (!isSpace(*m_DataIt))
+	while ( !isSeparator(*m_DataIt) )
 		m_DataIt++;
 	std::string strGroupName(pStart, &(*m_DataIt));
 
@@ -564,7 +565,7 @@ void ObjFileParser::getObjectName()
 	if (m_DataIt == m_DataItEnd)
 		return;
 	char *pStart = &(*m_DataIt);
-	while (!isSpace(*m_DataIt))
+	while (!isSeparator(*m_DataIt))
 		m_DataIt++;
 
 	std::string strObjectName(pStart, &(*m_DataIt));

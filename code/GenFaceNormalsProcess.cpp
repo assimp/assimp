@@ -76,17 +76,17 @@ void GenFaceNormalsProcess::Execute( aiScene* pScene)
 {
 	DefaultLogger::get()->debug("GenFaceNormalsProcess begin");
 
-	if (pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT)
+	if (pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) {
 		throw new ImportErrorException("Post-processing order mismatch: expecting pseudo-indexed (\"verbose\") vertices here");
+	}
 
 	bool bHas = false;
-	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-	{
-		if(this->GenMeshFaceNormals( pScene->mMeshes[a]))
+	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)	{
+		if(this->GenMeshFaceNormals( pScene->mMeshes[a])) {
 			bHas = true;
+		}
 	}
-	if (bHas)
-	{
+	if (bHas)	{
 		DefaultLogger::get()->info("GenFaceNormalsProcess finished. "
 			"Face normals have been calculated");
 	}
@@ -98,13 +98,14 @@ void GenFaceNormalsProcess::Execute( aiScene* pScene)
 // Executes the post processing step on the given imported data.
 bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
 {
-	if (NULL != pMesh->mNormals)return false;
+	if (NULL != pMesh->mNormals) {
+		return false;
+	}
 
 	// If the mesh consists of lines and/or points but not of
 	// triangles or higher-order polygons the normal vectors
 	// are undefined.
-	if (!(pMesh->mPrimitiveTypes & (aiPrimitiveType_TRIANGLE | aiPrimitiveType_POLYGON)))
-	{
+	if (!(pMesh->mPrimitiveTypes & (aiPrimitiveType_TRIANGLE | aiPrimitiveType_POLYGON)))	{
 		DefaultLogger::get()->info("Normal vectors are undefined for line and point meshes");
 		return false;
 	}
@@ -113,26 +114,25 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
 	pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
 	const float qnan = get_qnan();
 
-	// iterate through all faces and compute per-face normals but store
-	// them per-vertex. 
-	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
-	{
+	// iterate through all faces and compute per-face normals but store them per-vertex. 
+	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)	{
 		const aiFace& face = pMesh->mFaces[a];
-		if (face.mNumIndices < 3)
-		{
+		if (face.mNumIndices < 3)	{
 			// either a point or a line -> no well-defined normal vector
-			for (unsigned int i = 0;i < face.mNumIndices;++i)
+			for (unsigned int i = 0;i < face.mNumIndices;++i) {
 				pMesh->mNormals[face.mIndices[i]] = qnan;
+			}
 			continue;
 		}
 
-		aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
-		aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
-		aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices-1]];
-		aiVector3D vNor = (*pV2 - *pV1) ^ (*pV3 - *pV1).Normalize();
+		const aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
+		const aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
+		const aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices-1]];
+		aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).Normalize();
 
-		for (unsigned int i = 0;i < face.mNumIndices;++i)
+		for (unsigned int i = 0;i < face.mNumIndices;++i) {
 			pMesh->mNormals[face.mIndices[i]] = vNor;
+		}
 	}
 	return true;
 }

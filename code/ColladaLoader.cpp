@@ -796,23 +796,6 @@ void ColladaLoader::StoreAnimations( aiScene* pScene, const ColladaParser& pPars
 		CreateAnimation( pScene, pParser, pSrcAnim, animName);
 }
 
-/** Description of a collada animation channel which has been determined to affect the current node */
-struct ChannelEntry
-{
-	const Collada::AnimationChannel* mChannel; ///> the source channel
-	std::string mTransformId;   // the ID of the transformation step of the node which is influenced
-	size_t mTransformIndex; // Index into the node's transform chain to apply the channel to
-	size_t mSubElement; // starting index inside the transform data
-
-	// resolved data references
-	const Collada::Accessor* mTimeAccessor; ///> Collada accessor to the time values
-	const Collada::Data* mTimeData; ///> Source data array for the time values
-	const Collada::Accessor* mValueAccessor; ///> Collada accessor to the key value values
-	const Collada::Data* mValueData; ///> Source datat array for the key value values
-
-	ChannelEntry() { mChannel = NULL; mSubElement = 0; }
-};
-
 // ------------------------------------------------------------------------------------------------
 // Constructs the animation for the given source anim
 void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pParser, const Collada::Animation* pSrcAnim, const std::string& pName)
@@ -825,7 +808,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 	for( std::vector<const aiNode*>::const_iterator nit = nodes.begin(); nit != nodes.end(); ++nit)
 	{
 		// find all the collada anim channels which refer to the current node
-		std::vector<ChannelEntry> entries;
+		std::vector<Collada::ChannelEntry> entries;
 		std::string nodeName = (*nit)->mName.data;
 
 		// find the collada node corresponding to the aiNode
@@ -839,7 +822,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 			cit != pSrcAnim->mChannels.end(); ++cit)
 		{
 			const Collada::AnimationChannel& srcChannel = *cit;
-			ChannelEntry entry;
+			Collada::ChannelEntry entry;
 
 			// we except the animation target to be of type "nodeName/transformID.subElement". Ignore all others
 			// find the slash that separates the node name - there should be only one
@@ -897,9 +880,9 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 
 		// resolve the data pointers for all anim channels. Find the minimum time while we're at it
 		float startTime = 1e20f, endTime = -1e20f;
-		for( std::vector<ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
+		for( std::vector<Collada::ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
 		{
-			ChannelEntry& e = *it;
+			Collada::ChannelEntry& e = *it;
 			e.mTimeAccessor = &pParser.ResolveLibraryReference( pParser.mAccessorLibrary, e.mChannel->mSourceTimes);
 			e.mTimeData = &pParser.ResolveLibraryReference( pParser.mDataLibrary, e.mTimeAccessor->mSource);
 			e.mValueAccessor = &pParser.ResolveLibraryReference( pParser.mAccessorLibrary, e.mChannel->mSourceValues);
@@ -923,9 +906,9 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 		std::vector<aiMatrix4x4> resultTrafos;
 		while( 1)
 		{
-			for( std::vector<ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
+			for( std::vector<Collada::ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
 			{
-				ChannelEntry& e = *it;
+				Collada::ChannelEntry& e = *it;
 
 				// find the keyframe behind the current point in time
 				size_t pos = 0;
@@ -973,9 +956,9 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 
 			// find next point in time to evaluate. That's the closest frame larger than the current in any channel
 			float nextTime = 1e20f;
-			for( std::vector<ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
+			for( std::vector<Collada::ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
 			{
-				ChannelEntry& e = *it;
+				Collada::ChannelEntry& e = *it;
 
 				// find the next time value larger than the current
 				size_t pos = 0;

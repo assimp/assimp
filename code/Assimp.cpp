@@ -55,34 +55,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 // ------------------------------------------------------------------------------------------------
 using namespace Assimp;
-/** Stores the importer objects for all active import processes */
-typedef std::map<const aiScene*, Assimp::Importer*> ImporterMap;
 
-/** Stores the LogStream objects for all active C log streams */
-struct mpred {
-	bool operator  () (const aiLogStream& s0, const aiLogStream& s1) const  {
-		return s0.callback<s1.callback&&s0.user<s1.user;
-	}
-};
-typedef std::map<aiLogStream, Assimp::LogStream*, mpred> LogStreamMap;
+namespace Assimp
+{
+	/** Stores the importer objects for all active import processes */
+	typedef std::map<const aiScene*, Assimp::Importer*> ImporterMap;
 
-/** Stores the LogStream objects allocated by #aiGetPredefinedLogStream */
-typedef std::list<Assimp::LogStream*> PredefLogStreamMap;
+	/** Stores the LogStream objects for all active C log streams */
+	struct mpred {
+		bool operator  () (const aiLogStream& s0, const aiLogStream& s1) const  {
+			return s0.callback<s1.callback&&s0.user<s1.user;
+		}
+	};
+	typedef std::map<aiLogStream, Assimp::LogStream*, mpred> LogStreamMap;
 
-/** Local storage of all active import processes */
-static ImporterMap gActiveImports;
+	/** Stores the LogStream objects allocated by #aiGetPredefinedLogStream */
+	typedef std::list<Assimp::LogStream*> PredefLogStreamMap;
 
-/** Local storage of all active log streams */
-static LogStreamMap gActiveLogStreams;
+	/** Local storage of all active import processes */
+	static ImporterMap gActiveImports;
 
-/** Local storage of LogStreams allocated by #aiGetPredefinedLogStream */
-static PredefLogStreamMap gPredefinedStreams;
+	/** Local storage of all active log streams */
+	static LogStreamMap gActiveLogStreams;
 
-/** Error message of the last failed import process */
-static std::string gLastErrorString;
+	/** Local storage of LogStreams allocated by #aiGetPredefinedLogStream */
+	static PredefLogStreamMap gPredefinedStreams;
 
-/** Verbose logging active or not? */
-static aiBool gVerboseLogging = false;
+	/** Error message of the last failed import process */
+	static std::string gLastErrorString;
+
+	/** Verbose logging active or not? */
+	static aiBool gVerboseLogging = false;
+}
 
 /** Configuration properties */
 static ImporterPimpl::IntPropertyMap gIntProperties;

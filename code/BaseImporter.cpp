@@ -238,33 +238,31 @@ void BaseImporter::SetupProperties(const Importer* pImp)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Represents an import request
-struct LoadRequest
+namespace Assimp
 {
-	LoadRequest(const std::string& _file, unsigned int _flags,const BatchLoader::PropertyMap* _map, unsigned int _id)
-		:	file	(_file)
-		,	flags	(_flags)
-		,	refCnt	(1)
-		,	scene	(NULL)            
-		,	loaded	(false)
-		,	id		(_id)
+	// Represents an import request
+	struct LoadRequest
 	{
-		if (_map)
-			map = *_map;
-	}
+		LoadRequest(const std::string& _file, unsigned int _flags,const BatchLoader::PropertyMap* _map, unsigned int _id)
+			: file(_file), flags(_flags), refCnt(1),scene(NULL), loaded(false), id(_id)
+		{
+			if (_map)
+				map = *_map;
+		}
 
-	const std::string file;
-	unsigned int flags;
-	unsigned int refCnt;
-	aiScene* scene;
-	bool loaded;
-	BatchLoader::PropertyMap map;
-	unsigned int id;
+		const std::string file;
+		unsigned int flags;
+		unsigned int refCnt;
+		aiScene* scene;
+		bool loaded;
+		BatchLoader::PropertyMap map;
+		unsigned int id;
 
-	bool operator== (const std::string& f) {
-		return file == f;
-	}
-};
+		bool operator== (const std::string& f) {
+			return file == f;
+		}
+	};
+}
 
 // ------------------------------------------------------------------------------------------------
 // BatchLoader::pimpl data structure

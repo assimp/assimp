@@ -51,15 +51,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-// Data structure to keep a vertex in an interlaced format
-struct Vertex
+namespace Assimp
 {
-	aiVector3D mPosition;
-	aiVector3D mNormal;
-	aiVector3D mTangent, mBitangent;
-	aiColor4D  mColors     [AI_MAX_NUMBER_OF_COLOR_SETS];
-	aiVector3D mTexCoords  [AI_MAX_NUMBER_OF_TEXTURECOORDS];
-};
+	// Data structure to keep a vertex in an interlaced format
+	struct Vertex
+	{
+		aiVector3D mPosition;
+		aiVector3D mNormal;
+		aiVector3D mTangent, mBitangent;
+		aiColor4D  mColors     [AI_MAX_NUMBER_OF_COLOR_SETS];
+		aiVector3D mTexCoords  [AI_MAX_NUMBER_OF_TEXTURECOORDS];
+	};
+}
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -97,15 +100,16 @@ void JoinVerticesProcess::Execute( aiScene* pScene)
 
 	// execute the step
 	int iNumVertices = 0;
-	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)	{
+	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 		iNumVertices +=	ProcessMesh( pScene->mMeshes[a],a);
-	}
 
 	// if logging is active, print detailed statistics
 	if (!DefaultLogger::isNullLogger())
 	{
-		if (iNumOldVertices == iNumVertices)DefaultLogger::get()->debug("JoinVerticesProcess finished ");
-		else
+		if (iNumOldVertices == iNumVertices)
+		{
+			DefaultLogger::get()->debug("JoinVerticesProcess finished ");
+		} else
 		{
 			char szBuff[128]; // should be sufficiently large in every case
 			sprintf(szBuff,"JoinVerticesProcess finished | Verts in: %i out: %i | ~%.1f%%",

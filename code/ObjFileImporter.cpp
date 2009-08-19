@@ -77,10 +77,10 @@ ObjFileImporter::~ObjFileImporter()
 
 // ------------------------------------------------------------------------------------------------
 //	Returns true, fi file is an obj file
-bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
+bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem* /* pIOHandler */, bool /*checkSig */) const
 {
 	// fixme: auto detection
-	return SimpleExtensionCheck(pFile,"obj");
+	return SimpleExtensionCheck( pFile,"obj" );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -390,7 +390,7 @@ void ObjFileImporter::countObjects(const std::vector<ObjFile::Object*> &rObjects
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Creates tha material 
+//	Creates the material 
 void ObjFileImporter::createMaterial(const ObjFile::Model* pModel, const ObjFile::Object* pData, 
 									 aiScene* pScene)
 {
@@ -420,19 +420,20 @@ void ObjFileImporter::createMaterial(const ObjFile::Model* pModel, const ObjFile
 
 		// convert illumination model
 		int sm;
-		switch (pCurrentMaterial->illumination_model) {
-			case 0:
-				sm = aiShadingMode_NoShading;
-				break;
-			case 1:
-				sm = aiShadingMode_Gouraud;
-				break;
-			case 2:
-				sm = aiShadingMode_Phong;
-				break;
-			default:
-				sm = aiShadingMode_Gouraud;
-				DefaultLogger::get()->error("OBJ/MTL: Unexpected illumination model (0-2 recognized)");
+		switch (pCurrentMaterial->illumination_model) 
+		{
+		case 0:
+			sm = aiShadingMode_NoShading;
+			break;
+		case 1:
+			sm = aiShadingMode_Gouraud;
+			break;
+		case 2:
+			sm = aiShadingMode_Phong;
+			break;
+		default:
+			sm = aiShadingMode_Gouraud;
+			DefaultLogger::get()->error("OBJ/MTL: Unexpected illumination model (0-2 recognized)");
 		}
 		mat->AddProperty<int>( &sm, 1, AI_MATKEY_SHADING_MODEL);
 

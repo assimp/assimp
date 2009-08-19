@@ -52,7 +52,7 @@ namespace Assimp	{
 // -------------------------------------------------------------------
 //	Constructor
 ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer, 
-									   const std::string &strAbsPath,
+									   const std::string & /*strAbsPath*/,
 									   ObjFile::Model *pModel ) :
 	m_DataIt( buffer.begin() ),
 	m_DataItEnd( buffer.end() ),
@@ -77,15 +77,14 @@ ObjFileMtlImporter::~ObjFileMtlImporter()
 
 // -------------------------------------------------------------------
 //	Private copy constructor
-ObjFileMtlImporter::ObjFileMtlImporter(const ObjFileMtlImporter &rOther)
+ObjFileMtlImporter::ObjFileMtlImporter(const ObjFileMtlImporter & /* rOther */ )
 {
 	// empty
 }
 	
 // -------------------------------------------------------------------
 //	Private copy constructor
-ObjFileMtlImporter &ObjFileMtlImporter::operator = (
-	const ObjFileMtlImporter &rOther)
+ObjFileMtlImporter &ObjFileMtlImporter::operator = ( const ObjFileMtlImporter & /*rOther */ )
 {
 	return *this;
 }
@@ -245,7 +244,7 @@ void ObjFileMtlImporter::createMaterial()
 //	Gets a texture name from data.
 void ObjFileMtlImporter::getTexture()
 {
-	aiString* out = NULL;
+	aiString *out = NULL;
 
 	// FIXME: just a quick'n'dirty hack, consider cleanup later
 

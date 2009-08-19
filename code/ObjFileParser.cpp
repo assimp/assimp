@@ -411,9 +411,10 @@ void ObjFileParser::getMaterialDesc()
 //	Get a comment, values will be skipped
 void ObjFileParser::getComment()
 {
-	while (true)
+	bool running = true;
+	while (running)
 	{
-		if ('\n' == (*m_DataIt) || m_DataIt == m_DataItEnd) 
+		if ( '\n' == (*m_DataIt) || m_DataIt == m_DataItEnd ) 
 		{
 			++m_DataIt;
 			break;
@@ -587,13 +588,8 @@ void ObjFileParser::getObjectName()
 		}
 
 		// Allocate a new object, if current one wasn´t found before
-		if (m_pModel->m_pCurrent == NULL)
-		{
+		if ( NULL == m_pModel->m_pCurrent )
 			createObject(strObjectName);
-			/*m_pModel->m_pCurrent = new ObjFile::Object();
-			m_pModel->m_pCurrent->m_strObjName = strObjectName;
-			m_pModel->m_Objects.push_back(m_pModel->m_pCurrent);*/
-		}
 	}
 	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }

@@ -90,25 +90,25 @@ void OFFImporter::GetExtensionList(std::string& append)
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void OFFImporter::InternReadFile( const std::string& pFile, 
-								 aiScene* pScene, IOSystem* pIOHandler)
+	aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
-	if( file.get() == NULL)
+	if( file.get() == NULL) {
 		throw new ImportErrorException( "Failed to open OFF file " + pFile + ".");
-
-	unsigned int fileSize = (unsigned int)file->FileSize();
-
+	}
+	
 	// allocate storage and copy the contents of the file to a memory buffer
-	std::vector<char> mBuffer2(fileSize+1);
-	file->Read(&mBuffer2[0], 1, fileSize);
-	mBuffer2[fileSize] = '\0';
+	std::vector<char> mBuffer2;
+	TextFileToBuffer(file.get(),mBuffer2);
 	const char* buffer = &mBuffer2[0];
 
 	char line[4096];
 	GetNextLine(buffer,line);
-	if ('O' == line[0])GetNextLine(buffer,line); // skip the 'OFF' line
+	if ('O' == line[0]) {
+		GetNextLine(buffer,line); // skip the 'OFF' line
+	}
 
 	const char* sz = line; SkipSpaces(&sz);
 	const unsigned int numVertices = strtol10(sz,&sz);SkipSpaces(&sz);

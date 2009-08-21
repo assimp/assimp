@@ -117,8 +117,7 @@ void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo>& output,
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( path, "rb"));
 
 	// Check whether we can read from the file
-	if( !file.get())
-	{
+	if( !file.get())	{
 		DefaultLogger::get()->error("NFF2: Unable to open material library " + path + ".");
 		return;
 	}
@@ -129,16 +128,14 @@ void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo>& output,
 	// allocate storage and copy the contents of the file to a memory buffer
 	// (terminate it with zero)
 	std::vector<char> mBuffer2(m+1);
-	file->Read(&mBuffer2[0],m,1);
+	TextFileToBuffer(file.get(),mBuffer2);
 	const char* buffer = &mBuffer2[0];
-	mBuffer2[m] = '\0';
 
 	// First of all: remove all comments from the file
 	CommentRemover::RemoveLineComments("//",&mBuffer2[0]);
 
 	// The file should start with the magic sequence "mat"
-	if (!TokenMatch(buffer,"mat",3))
-	{
+	if (!TokenMatch(buffer,"mat",3))	{
 		DefaultLogger::get()->error("NFF2: Not a valid material library " + path + ".");
 		return;
 	}
@@ -229,13 +226,11 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 
 	// allocate storage and copy the contents of the file to a memory buffer
 	// (terminate it with zero)
-	std::vector<char> mBuffer2(m+1);
-	file->Read(&mBuffer2[0],m,1);
+	std::vector<char> mBuffer2;
+	TextFileToBuffer(file.get(),mBuffer2);
 	const char* buffer = &mBuffer2[0];
-	mBuffer2[m] = '\0';
 
-	// mesh arrays - separate here to make the handling of
-	// the pointers below easier.
+	// mesh arrays - separate here to make the handling of the pointers below easier.
 	std::vector<MeshInfo> meshes;
 	std::vector<MeshInfo> meshesWithNormals;
 	std::vector<MeshInfo> meshesWithUVCoords;

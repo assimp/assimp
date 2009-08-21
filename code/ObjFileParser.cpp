@@ -452,10 +452,8 @@ void ObjFileParser::getMaterialLib()
 	}
 
 	// Import material library data from file
-	size_t size = pFile->FileSize();
-	std::vector<char> buffer( size + 1 );
-	buffer[ size ] = '\0';
-	pFile->Read( &buffer[ 0 ], sizeof( char ), size );
+	std::vector<char> buffer;
+	BaseImporter::TextFileToBuffer(pFile,buffer);
 	io->Close( pFile );
 
 	// Importing the material library 

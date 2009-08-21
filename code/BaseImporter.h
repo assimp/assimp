@@ -201,7 +201,6 @@ public:
 	 */
 	aiScene* ReadFile( const std::string& pFile, IOSystem* pIOHandler);
 
-
 	// -------------------------------------------------------------------
 	/** Returns the error description of the last error that occured. 
 	 * @return A description of the last error that occured. An empty
@@ -210,7 +209,6 @@ public:
 	const std::string& GetErrorText() const {
 		return mErrorText;
 	}
-
 
 	// -------------------------------------------------------------------
 	/** Called prior to ReadFile().
@@ -283,6 +281,7 @@ protected:
 	virtual void InternReadFile( const std::string& pFile, 
 		aiScene* pScene, IOSystem* pIOHandler) = 0;
 
+public: // static utilities
 
 	// -------------------------------------------------------------------
 	/** A utility for CanRead().
@@ -345,20 +344,24 @@ protected:
 		unsigned int offset = 0,
 		unsigned int size   = 4);
 
-#if 0 /** TODO **/
 	// -------------------------------------------------------------------
 	/** An utility for all text file loaders. It converts a file to our
-	*  ASCII/UTF8 character set. Special unicode characters are lost.
-	*
-	*  @param buffer Input buffer. Needn't be terminated with zero.
-	 *  @param length Length of the input buffer, in bytes. Receives the
-	 *    number of output characters, excluding the terminal char.
-	 *  @return true if the source format did not match our internal
-	 *    format so it was converted.
-	 */
-	static bool ConvertToUTF8(const char* buffer, 
-		unsigned int& length);
-#endif
+	 *   UTF8 character set. Errors are reported, but ignored.
+	 *
+	 *  @param data File buffer to be converted to UTF8 data. The buffer 
+	 *  is resized as appropriate. */
+	static void ConvertToUTF8(std::vector<char>& data);
+
+	// -------------------------------------------------------------------
+	/** Utility for text file loaders which copies the contents of the
+	 *  file into a memory buffer and converts it to our UTF8
+	 *  representation.
+	 *  @param stream Stream to read from. 
+	 *  @param data Output buffer to be resized and filled with the
+	 *   converted text file data. The buffer is terminated with
+	 *   a binary 0. */
+	static void TextFileToBuffer(IOStream* stream,
+		std::vector<char>& data);
 
 protected:
 

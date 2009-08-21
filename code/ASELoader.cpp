@@ -108,18 +108,13 @@ void ASEImporter::InternReadFile( const std::string& pFile,
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
-	if( file.get() == NULL)
+	if( file.get() == NULL) {
 		throw new ImportErrorException( "Failed to open ASE file " + pFile + ".");
-
-	size_t fileSize = file->FileSize();
-	if (!fileSize)
-		throw new ImportErrorException( "ASE: File is empty");
+	}
 
 	// Allocate storage and copy the contents of the file to a memory buffer
-	// (terminate it with zero)
-	std::vector<char> mBuffer2(fileSize+1);
-	file->Read( &mBuffer2[0], 1, fileSize);
-	mBuffer2[fileSize] = '\0';
+	std::vector<char> mBuffer2;
+	TextFileToBuffer(file.get(),mBuffer2);
 
 	this->mBuffer = &mBuffer2[0];
 	this->pcScene = pScene;
@@ -131,8 +126,8 @@ void ASEImporter::InternReadFile( const std::string& pFile,
 	// ------------------------------------------------------------------
 	unsigned int defaultFormat;
 	std::string::size_type s = pFile.length()-1;
-	switch (pFile.c_str()[s])
-	{
+	switch (pFile.c_str()[s])	{
+
 	case 'C':
 	case 'c':
 		defaultFormat = AI_ASE_OLD_FILE_FORMAT;
@@ -150,8 +145,8 @@ void ASEImporter::InternReadFile( const std::string& pFile,
 	// Check whether we god at least one mesh. If we did - generate
 	// materials and copy meshes. 
 	// ------------------------------------------------------------------
-	if ( !mParser->m_vMeshes.empty())
-	{
+	if ( !mParser->m_vMeshes.empty())	{
+
 		// If absolutely no material has been loaded from the file
 		// we need to generate a default material
 		GenerateDefaultMaterial();
@@ -161,12 +156,15 @@ void ASEImporter::InternReadFile( const std::string& pFile,
 		std::vector<aiMesh*> avOutMeshes;
 		avOutMeshes.reserve(mParser->m_vMeshes.size()*2);
 		for (std::vector<ASE::Mesh>::iterator i =  mParser->m_vMeshes.begin();i != mParser->m_vMeshes.end();++i)	{
-			if ((*i).bSkip)continue;
+			if ((*i).bSkip) {
+				continue;
+			}
 			BuildUniqueRepresentation(*i);
 
 			// Need to generate proper vertex normals if necessary
-			if(GenerateNormals(*i))
+			if(GenerateNormals(*i)) {
 				tookNormals = true;
+			}
 
 			// Convert all meshes to aiMesh objects
 			ConvertMeshes(*i,avOutMeshes);
@@ -181,7 +179,9 @@ void ASEImporter::InternReadFile( const std::string& pFile,
 		pScene->mNumMeshes = (unsigned int)avOutMeshes.size();
 		aiMesh** pp = pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 		for (std::vector<aiMesh*>::const_iterator i =  avOutMeshes.begin();i != avOutMeshes.end();++i) {
-			if (!(*i)->mNumFaces)continue;
+			if (!(*i)->mNumFaces) {
+				continue;
+			}
 			*pp++ = *i;
 		}
 		pScene->mNumMeshes = (unsigned int)(pp - pScene->mMeshes);

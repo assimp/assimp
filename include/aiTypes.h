@@ -255,10 +255,24 @@ struct aiColor4D
 #include "./Compiler/poppack1.h"
 
 // ----------------------------------------------------------------------------------
-/** Represents a string, zero byte terminated.
+/** Represents an UTF-8 string, zero byte terminated.
  *
- *  We use this representation to be C-compatible. The length of such a string is
- *  limited to MAXLEN characters (excluding the terminal zero).
+ *  The character set of an aiString is explicitly defined to be UTF-8. This Unicode
+ *  transformation was chosen in the belief that most strings in 3d files are limited
+ *  to the ASCII characters, thus the character set needed to be ASCII compatible.
+ *  
+ *  Most text file loaders provide proper Unicode input file handling, special unicode
+ *  characters are correctly transcoded to UTF8 and are kept throughout the libraries'
+ *  import pipeline. 
+ *
+ *  For most applications, it will be absolutely sufficient to interpret the
+ *  aiString as ASCII data and work with it as one would work with a plain char*. 
+ *  Windows users in need of proper support for i.e asian characters can use the
+ *  #MultiByteToWideChar(), #WideCharToMultiByte() WinAPI functionality to convert the
+ *  UTF-8 strings to their working character set (i.e. MBCS, WideChar).
+ *
+ *  We use this representation instead of std::string to be C-compatible. The 
+ *  (binary) length of such a string is limited to MAXLEN characters (excluding the 0).
 */
 struct aiString
 {
@@ -271,7 +285,7 @@ struct aiString
 
 #ifdef _DEBUG
 		// Debug build: overwrite the string on its full length with ESC (27)
-		::memset(data+1,27,MAXLEN-1);
+		memset(data+1,27,MAXLEN-1);
 #endif
 	}
 
@@ -279,7 +293,7 @@ struct aiString
 	aiString(const aiString& rOther) : 
 		length(rOther.length) 
 	{
-		::memcpy( data, rOther.data, rOther.length);
+		memcpy( data, rOther.data, rOther.length);
 		data[length] = '\0';
 	}
 
@@ -344,7 +358,7 @@ struct aiString
 			return;
 		}
 
-		::memcpy(&data[length],app,len+1);
+		memcpy(&data[length],app,len+1);
 		length += len;
 	}
 
@@ -355,13 +369,15 @@ struct aiString
 
 #ifdef _DEBUG
 		// Debug build: overwrite the string on its full length with ESC (27)
-		::memset(data+1,27,MAXLEN-1);
+		memset(data+1,27,MAXLEN-1);
 #endif
 	}
 
 #endif // !__cplusplus
 
-	/** Length of the string excluding the terminal 0 */
+	/** Binary length of the string excluding the terminal 0. This is NOT the 
+	 *  logical length of strings containing UTF-8 multibyte sequences! It's
+	 *  the number of bytes from the beginning of the string to its end.*/
 	size_t length;
 
 	/** String buffer. Size limit is MAXLEN */

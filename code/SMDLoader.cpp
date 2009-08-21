@@ -99,8 +99,7 @@ void SMDImporter::InternReadFile(
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rt"));
 
 	// Check whether we can read from the file
-	if( file.get() == NULL)
-	{
+	if( file.get() == NULL)	{
 		throw new ImportErrorException( "Failed to open SMD/VTA file " + pFile + ".");
 	}
 
@@ -110,8 +109,7 @@ void SMDImporter::InternReadFile(
 	this->pScene = pScene;
 
 	std::vector<char> buff(iFileSize+1);
-	file->Read( &buff[0], 1, iFileSize);
-	buff[iFileSize] = '\0';
+	TextFileToBuffer(file.get(),buff);
 	mBuffer = &buff[0];
 
 	iSmallestFrame = (1 << 31);

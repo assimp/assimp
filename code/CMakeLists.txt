@@ -298,6 +298,11 @@ SOURCE_GROUP( IrrXML FILES
 	../contrib/irrXML/irrXML.h
 )
 
+SOURCE_GROUP( ConvertUTF FILES
+	../contrib/ConvertUTF/ConvertUTF.h
+	../contrib/ConvertUTF/ConvertUTF.c
+)
+
 SOURCE_GROUP( zlib FILES
 	../contrib/zlib/adler32.c
 	../contrib/zlib/compress.c
@@ -567,6 +572,7 @@ ADD_LIBRARY( assimp SHARED
 	../contrib/zlib/zlib.h
 	../contrib/zlib/zutil.c
 	../contrib/zlib/zutil.h
+	../contrib/ConvertUTF/ConvertUTF.c
 )
 ADD_DEFINITIONS(-DASSIMP_BUILD_DLL_EXPORT)
 

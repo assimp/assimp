@@ -195,8 +195,9 @@ void BaseImporter::SetupProperties(const Importer* pImp)
 {
 	ai_assert(size <= 16 && _magic);
 
-	if (!pIOHandler)
+	if (!pIOHandler) {
 		return false;
+	}
 
 	const char* magic = (const char*)_magic;
 	boost::scoped_ptr<IOStream> pStream (pIOHandler->Open(pFile));
@@ -207,8 +208,9 @@ void BaseImporter::SetupProperties(const Importer* pImp)
 
 		// read 'size' characters from the file
 		char data[16];
-		if(size != pStream->Read(data,1,size))
+		if(size != pStream->Read(data,1,size)) {
 			return false;
+		}
 
 		for (unsigned int i = 0; i < num; ++i) {
 			// also check against big endian versions of tokens with size 2,4
@@ -217,24 +219,144 @@ void BaseImporter::SetupProperties(const Importer* pImp)
 			if (2 == size) {
 				int16_t rev = *((int16_t*)magic);
 				ByteSwap::Swap(&rev);
-				if (*((int16_t*)data) == ((int16_t*)magic)[i] || *((int16_t*)data) == rev)
+				if (*((int16_t*)data) == ((int16_t*)magic)[i] || *((int16_t*)data) == rev) {
 					return true;
+				}
 			}
 			else if (4 == size) {
 				int32_t rev = *((int32_t*)magic);
 				ByteSwap::Swap(&rev);
-				if (*((int32_t*)data) == ((int32_t*)magic)[i] || *((int32_t*)data) == rev)
+				if (*((int32_t*)data) == ((int32_t*)magic)[i] || *((int32_t*)data) == rev) {
 					return true;
+				}
 			}
 			else {
 				// any length ... just compare
-				if(!::memcmp(magic,data,size))
+				if(!memcmp(magic,data,size)) {
 					return true;
+				}
 			}
 			magic += size;
 		}
 	}
 	return false;
+}
+
+#include "../contrib/ConvertUTF/ConvertUTF.h"
+
+// ------------------------------------------------------------------------------------------------
+void ReportResult(ConversionResult res)
+{
+	if(res == sourceExhausted) {
+		DefaultLogger::get()->error("Source ends with incomplete character sequence, Unicode transformation to UTF-8 fails");
+	}
+	else if(res == sourceIllegal) {
+		DefaultLogger::get()->error("Source contains illegal character sequence, Unicode transformation to UTF-8 fails");
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Convert to UTF8 data
+void BaseImporter::ConvertToUTF8(std::vector<char>& data)
+{
+	ConversionResult result;
+	if(data.size() < 8) {
+		throw new ImportErrorException("File is too small");
+	}
+
+	// UTF 8 with BOM
+	if((uint8_t)data[0] == 0xEF && (uint8_t)data[1] == 0xBB && (uint8_t)data[2] == 0xBF) {
+		DefaultLogger::get()->debug("Found UTF-8 BOM ...");
+
+		std::copy(data.begin()+3,data.end(),data.begin());
+		data.resize(data.size()-3);
+		return;
+	}
+
+	// UTF 32 BE with BOM
+	if(*((uint32_t*)&data.front()) == 0xFFFE0000) {
+	
+		// swap the endianess ..
+		for(uint32_t* p = (uint32_t*)&data.front(), *end = (uint32_t*)&data.back(); p <= end; ++p) {
+			AI_SWAP4P(p);
+		}
+	}
+	
+	// UTF 32 LE with BOM
+	if(*((uint32_t*)&data.front()) == 0x0000FFFE) {
+		DefaultLogger::get()->debug("Found UTF-32 BOM ...");
+
+		const uint32_t* sstart = (uint32_t*)&data.front()+1, *send = (uint32_t*)&data.back()+1;
+		char* dstart,*dend;
+		std::vector<char> output;
+		do {
+			output.resize(output.size()?output.size()*3/2:data.size()/2);
+			dstart = &output.front(),dend = &output.back()+1;
+
+			result = ConvertUTF32toUTF8((const UTF32**)&sstart,(const UTF32*)send,(UTF8**)&dstart,(UTF8*)dend,lenientConversion);
+		} while(result == targetExhausted);
+
+		ReportResult(result);
+
+		// copy to output buffer. 
+		const size_t outlen = (size_t)(dstart-&output.front());
+		data.assign(output.begin(),output.begin()+outlen);
+		return;
+	}
+
+	// UTF 16 BE with BOM
+	if(*((uint16_t*)&data.front()) == 0xFFFE) {
+	
+		// swap the endianess ..
+		for(uint16_t* p = (uint16_t*)&data.front(), *end = (uint16_t*)&data.back(); p <= end; ++p) {
+			ByteSwap::Swap2(p);
+		}
+	}
+	
+	// UTF 16 LE with BOM
+	if(*((uint16_t*)&data.front()) == 0xFEFF) {
+		DefaultLogger::get()->debug("Found UTF-16 BOM ...");
+
+		const uint16_t* sstart = (uint16_t*)&data.front()+1, *send = (uint16_t*)&data.back()+1;
+		char* dstart,*dend;
+		std::vector<char> output;
+		do {
+			output.resize(output.size()?output.size()*3/2:data.size()*3/4);
+			dstart = &output.front(),dend = &output.back()+1;
+
+			result = ConvertUTF16toUTF8((const UTF16**)&sstart,(const UTF16*)send,(UTF8**)&dstart,(UTF8*)dend,lenientConversion);
+		} while(result == targetExhausted);
+
+		ReportResult(result);
+
+		// copy to output buffer.
+		const size_t outlen = (size_t)(dstart-&output.front());
+		data.assign(output.begin(),output.begin()+outlen);
+		return;
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void BaseImporter::TextFileToBuffer(IOStream* stream,
+	std::vector<char>& data)
+{
+	ai_assert(NULL != stream);
+
+	const size_t fileSize = stream->FileSize();
+	if(!fileSize) {
+		throw new ImportErrorException("File is empty");
+	}
+
+	data.reserve(fileSize+1); 
+	data.resize(fileSize); 
+	if(fileSize != stream->Read( &data[0], 1, fileSize)) {
+		throw new ImportErrorException("File read error");
+	}
+
+	ConvertToUTF8(data);
+
+	// append a binary zero to simplify string parsing
+	data.push_back(0);
 }
 
 // ------------------------------------------------------------------------------------------------

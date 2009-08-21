@@ -249,8 +249,9 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 	ParseFile();
 
 	// filter the imported hierarchy for some degenerated cases
-	if( mScene->mRootNode)
+	if( mScene->mRootNode) {
 		FilterHierarchy( mScene->mRootNode);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

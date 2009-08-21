@@ -726,19 +726,18 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 	if( file.get() == NULL)
 		throw new ImportErrorException( "Failed to open AC3D file " + pFile + ".");
 
-	const unsigned int fileSize = (unsigned int)file->FileSize();
-
 	// allocate storage and copy the contents of the file to a memory buffer
-	std::vector<char> mBuffer2(fileSize+1);
-	file->Read(&mBuffer2[0], 1, fileSize);
-	mBuffer2[fileSize] = '\0';
+	std::vector<char> mBuffer2;
+	TextFileToBuffer(file.get(),mBuffer2);
+
 	buffer = &mBuffer2[0];
 	mNumMeshes = 0;
 
 	lights = polys = worlds = groups = 0;
 
-	if (::strncmp(buffer,"AC3D",4))
+	if (::strncmp(buffer,"AC3D",4)) {
 		throw new ImportErrorException("AC3D: No valid AC3D file, magic sequence not found");
+	}
 
 	// print the file format version to the console
 	unsigned int version = HexDigitToDecimal( buffer[4] );

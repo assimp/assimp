@@ -1,6 +1,3 @@
-
-# UNTESTED!!!!
-
 # Makefile for Open Asset Import Library (GNU-make)
 # aramis_acg@users.sourceforge.net
 
@@ -23,8 +20,9 @@ OBJECTS   := $(patsubst %.cpp,%.o,  $(wildcard *.cpp))
 OBJECTS   += $(patsubst %.cpp,%.o,  $(wildcard extra/*.cpp)) 
 OBJECTS   += $(patsubst %.cpp,%.o,  $(wildcard ./../contrib/irrXML/*.cpp)) 
 
-# C object files (mainly from zlib)
+# C object files
 OBJECTSC  := $(patsubst %.c,%.oc,   $(wildcard ./../contrib/zlib/*.c))
+OBJECTSC  += $(patsubst %.c,%.oc,   $(wildcard ./../contrib/ConvertUTF/*.c))
 
 # Include flags for gcc
 INCLUDEFLAGS =

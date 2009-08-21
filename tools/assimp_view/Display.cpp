@@ -170,10 +170,15 @@ int CDisplay::AddNodeToDisplayList(
 	}
 	else strcpy(chTemp,pcNode->mName.data);
 
-	TVITEMEX tvi; 
-	TVINSERTSTRUCT sNew;
-	tvi.pszText = chTemp;
-	tvi.cchTextMax = (int)strlen(chTemp);
+	TVITEMEXW tvi; 
+	TVINSERTSTRUCTW sNew;
+	
+	wchar_t tmp[512];
+	int t = MultiByteToWideChar(CP_UTF8,0,chTemp,-1,tmp,512);
+	
+	tvi.pszText = tmp;
+	tvi.cchTextMax = (int)t;
+
 	tvi.mask = TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_IMAGE | TVIF_HANDLE | TVIF_PARAM;
 	tvi.iImage = this->m_aiImageList[AI_VIEW_IMGLIST_NODE];
 	tvi.iSelectedImage = this->m_aiImageList[AI_VIEW_IMGLIST_NODE];
@@ -185,7 +190,7 @@ int CDisplay::AddNodeToDisplayList(
 
 	// add the item to the list
 	HTREEITEM hTexture = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1), 
-		TVM_INSERTITEM, 
+		TVM_INSERTITEMW, 
 		0,
 		(LPARAM)(LPTVINSERTSTRUCT)&sNew);
 
@@ -511,10 +516,14 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
 	{
 		sprintf(chTemp,"%s (%i)",szOut.data,iIndex+1);
 	}
-	TVITEMEX tvi; 
-	TVINSERTSTRUCT sNew;
-	tvi.pszText = chTemp;
-	tvi.cchTextMax = (int)strlen(chTemp);
+	TVITEMEXW tvi; 
+	TVINSERTSTRUCTW sNew;
+
+	wchar_t tmp[512];
+	int t = MultiByteToWideChar(CP_UTF8,0,chTemp,-1,tmp,512);
+	
+	tvi.pszText = tmp;
+	tvi.cchTextMax = (int)t;
 	tvi.mask = TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_IMAGE | TVIF_HANDLE | TVIF_PARAM ;
 	tvi.iImage = m_aiImageList[AI_VIEW_IMGLIST_MATERIAL];
 	tvi.iSelectedImage = m_aiImageList[AI_VIEW_IMGLIST_MATERIAL];
@@ -527,7 +536,7 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
 
 	// add the item to the list
 	HTREEITEM hTexture = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1), 
-		TVM_INSERTITEM, 
+		TVM_INSERTITEMW, 
 		0,
 		(LPARAM)(LPTVINSERTSTRUCT)&sNew);
 

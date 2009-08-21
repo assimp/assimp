@@ -87,27 +87,20 @@ void PLYImporter::GetExtensionList(std::string& append)
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
-void PLYImporter::InternReadFile( 
-								 const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
+void PLYImporter::InternReadFile( const std::string& pFile, 
+	aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
 
 	// Check whether we can read from the file
-	if( file.get() == NULL)
+	if( file.get() == NULL) {
 		throw new ImportErrorException( "Failed to open PLY file " + pFile + ".");
-
-	// check whether the ply file is large enough to contain
-	// at least the file header
-	size_t fileSize = file->FileSize();
-	if( fileSize < 10)
-		throw new ImportErrorException( "PLY File is too small.");
+	}
 
 	// allocate storage and copy the contents of the file to a memory buffer
-	// (terminate it with zero)
-	std::vector<unsigned char> mBuffer2(fileSize+1);
-	file->Read( &mBuffer2[0], 1, fileSize);
-	mBuffer = &mBuffer2[0];
-	mBuffer[fileSize] = '\0';
+	std::vector<char> mBuffer2;
+	TextFileToBuffer(file.get(),mBuffer2);
+	mBuffer = (unsigned char*)&mBuffer2[0];
 
 	// the beginning of the file must be PLY - magic, magic
 	if (mBuffer[0] != 'P' && mBuffer[0] != 'p' ||

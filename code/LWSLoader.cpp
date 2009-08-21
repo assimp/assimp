@@ -469,13 +469,13 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
-	if( file.get() == NULL)
+	if( file.get() == NULL) {
 		throw new ImportErrorException( "Failed to open LWS file " + pFile + ".");
+	}
 
 	// Allocate storage and copy the contents of the file to a memory buffer
-	const size_t fileSize = file->FileSize();
-	std::vector< char > mBuffer(fileSize);
-	file->Read( &mBuffer[0], 1, fileSize);
+	std::vector< char > mBuffer;
+	TextFileToBuffer(file.get(),mBuffer);
 	
 	// Parse the file structure
 	LWS::Element root; const char* dummy = &mBuffer[0];

@@ -103,15 +103,13 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
-	if( file.get() == NULL)
+	if( file.get() == NULL) {
 		throw new ImportErrorException( "Failed to open CSM file " + pFile + ".");
-
-	size_t fileSize = file->FileSize();
+	}
 
 	// allocate storage and copy the contents of the file to a memory buffer
-	std::vector<char> mBuffer2(fileSize+1);
-	file->Read(&mBuffer2[0], 1, fileSize);mBuffer2[fileSize] = '\0';
-
+	std::vector<char> mBuffer2;
+	TextFileToBuffer(file.get(),mBuffer2);
 	const char* buffer = &mBuffer2[0];
 
 	aiAnimation* anim = new aiAnimation();

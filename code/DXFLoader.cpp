@@ -161,15 +161,14 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
 
 	// Check whether we can read from the file
-	if( file.get() == NULL)
+	if( file.get() == NULL) {
 		throw new ImportErrorException( "Failed to open DXF file " + pFile + "");
+	}
 
 	// read the contents of the file in a buffer
-	size_t m = file->FileSize();
-	std::vector<char> buffer2(m+1);
+	std::vector<char> buffer2;
+	TextFileToBuffer(file.get(),buffer2);
 	buffer = &buffer2[0];
-	file->Read( &buffer2[0], m,1);
-	buffer2[m] = '\0';
 
 	bRepeat = false;
 	mDefaultLayer = NULL;
@@ -216,7 +215,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 		throw new ImportErrorException("DXF: this file contains no 3d data");
 
 	pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];
-	m = 0;
+	unsigned int m = 0;
 	for (std::vector<LayerInfo>::const_iterator it = mLayers.begin(),end = mLayers.end();it != end;++it) {
 		if ((*it).vPositions.empty()) {
 			continue;
@@ -288,7 +287,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 		for (m = 0; m < pScene->mRootNode->mNumChildren;++m)	{
 			aiNode* p = pScene->mRootNode->mChildren[m] = new aiNode();
 			p->mName.length = ::strlen( mLayers[m].name );
-			::strcpy(p->mName.data, mLayers[m].name);
+			strcpy(p->mName.data, mLayers[m].name);
 
 			p->mMeshes = new unsigned int[p->mNumMeshes = 1];
 			p->mMeshes[0] = m;

@@ -85,17 +85,14 @@ void RAWImporter::InternReadFile( const std::string& pFile,
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
-	if( file.get() == NULL)
+	if( file.get() == NULL) {
 		throw new ImportErrorException( "Failed to open RAW file " + pFile + ".");
-
-	unsigned int fileSize = (unsigned int)file->FileSize();
+	}
 
 	// allocate storage and copy the contents of the file to a memory buffer
 	// (terminate it with zero)
-	std::vector<char> mBuffer2(fileSize+1);
-	
-	file->Read(&mBuffer2[0], 1, fileSize);
-	mBuffer2[fileSize] = '\0';
+	std::vector<char> mBuffer2;
+	TextFileToBuffer(file.get(),mBuffer2);
 	const char* buffer = &mBuffer2[0];
 
 	// list of groups loaded from the file

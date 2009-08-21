@@ -101,10 +101,7 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 		throw new ImportErrorException( "OBJ-file is too small.");
 
 	// Allocate buffer and read file into it
-	m_Buffer.resize( fileSize + 1 );
-	m_Buffer[ fileSize ] = '\0';
-	const size_t readsize = file->Read( &m_Buffer.front(), sizeof(char), fileSize );
-	assert( readsize == fileSize );
+	TextFileToBuffer(file.get(),m_Buffer);
 
 	//
 	std::string strDirectory( 1, io.getOsSeparator() ), strModelName;
@@ -124,6 +121,9 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 
 	// And create the proper return structures out of it
 	CreateDataFromImport(parser.GetModel(), pScene);
+
+	// Clean up allocated storage for the next import 
+	m_Buffer.clear();
 }
 
 // ------------------------------------------------------------------------------------------------

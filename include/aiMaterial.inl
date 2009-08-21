@@ -62,6 +62,12 @@ inline aiReturn aiMaterial::GetTexture( aiTextureType type,
 }
 
 // ---------------------------------------------------------------------------
+inline unsigned int aiMaterial::GetTextureCount(aiTextureType type) const
+{
+	return ::aiGetMaterialTextureCount(this,type);
+}
+
+// ---------------------------------------------------------------------------
 template <typename Type>
 inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 	unsigned int idx, Type* pOut,
@@ -71,17 +77,20 @@ inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 
 	aiMaterialProperty* prop;
 	aiReturn ret = ::aiGetMaterialProperty(this,pKey,type,idx,&prop);
-	if ( AI_SUCCESS == ret )
-	{
-		if (prop->mDataLength < sizeof(Type)*iNum)
+	if ( AI_SUCCESS == ret )	{
+
+		if (prop->mDataLength < sizeof(Type)*iNum) {
 			return AI_FAILURE;
+		}
 
 	//	if (::strcmp(prop->mData,(char*)aiPTI_Buffer)!=0)
 	//		return AI_FAILURE;
 
 		iNum = std::min((size_t)iNum,prop->mDataLength / sizeof(Type));
-		::memcpy(pOut,prop->mData,iNum * sizeof(Type));
-		if (pMax)*pMax = iNum;
+		memcpy(pOut,prop->mData,iNum * sizeof(Type));
+		if (pMax) {
+			*pMax = iNum;
+		}
 	}
 	return ret;
 }
@@ -93,15 +102,17 @@ inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 {
 	aiMaterialProperty* prop;
 	aiReturn ret = ::aiGetMaterialProperty(this,pKey,type,idx,&prop);
-	if ( AI_SUCCESS == ret )
-	{
-		if (prop->mDataLength < sizeof(Type))
-			return AI_FAILURE;
+	if ( AI_SUCCESS == ret )	{
 
-		if (::strcmp(prop->mData,(char*)aiPTI_Buffer)!=0)
+		if (prop->mDataLength < sizeof(Type)) {
 			return AI_FAILURE;
+		}
 
-		::memcpy(&pOut,prop->mData,sizeof(Type));
+		if (strcmp(prop->mData,(char*)aiPTI_Buffer)!=0) {
+			return AI_FAILURE;
+		}
+
+		memcpy(&pOut,prop->mData,sizeof(Type));
 	}
 	return ret;
 }

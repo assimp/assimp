@@ -54,6 +54,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace std;
 
+// (fixme, Aramis) quick workaround to get rid of all those signed to unsigned warnings
+#ifdef _MSC_VER 
+#	pragma warning (disable: 4018)
+#endif
+
 //#define DEBUG_B3D
 
 // ------------------------------------------------------------------------------------------------

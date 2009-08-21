@@ -61,14 +61,14 @@ aiReturn aiGetMaterialProperty(const aiMaterial* pMat,
 
 	/*  Just search for a property with exactly this name ..
 	 *  could be improved by hashing, but it's possibly 
-	 *  no worth the effort.
-	 */
+	 *  no worth the effort (we're bound to C structures,
+	 *  thus std::map or derivates are not applicable. */
 	for (unsigned int i = 0; i < pMat->mNumProperties;++i) {
 		aiMaterialProperty* prop = pMat->mProperties[i];
 
 		if (prop /* just for safety ... */
-			&& 0 == ::strcmp( prop->mKey.data, pKey ) 
-			&& (0xffffffff == type  || prop->mSemantic == type) /* 0xffffffff is a wildcard */ 
+			&& 0 == strcmp( prop->mKey.data, pKey ) 
+			&& (0xffffffff == type  || prop->mSemantic == type) /* 0xffffffff is a wildcard, but this is undocumented */ 
 			&& (0xffffffff == index || prop->mIndex == index))
 		{
 			*pPropOut = pMat->mProperties[i];
@@ -180,8 +180,10 @@ aiReturn aiGetMaterialColor(const aiMaterial* pMat,
 	aiReturn eRet = aiGetMaterialFloatArray(pMat,pKey,type,index,(float*)pOut,&iMax);
 
 	// if no alpha channel is defined: set it to 1.0
-	if (3 == iMax)
+	if (3 == iMax) {
 		pOut->a = 1.0f;
+	}
+
 	return eRet;
 }
 
@@ -197,19 +199,91 @@ aiReturn aiGetMaterialString(const aiMaterial* pMat,
 
 	aiMaterialProperty* prop;
 	aiGetMaterialProperty(pMat,pKey,type,index,(const aiMaterialProperty**)&prop);
-	if (!prop)
+	if (!prop) {
 		return AI_FAILURE;
+	}
 
 	if( aiPTI_String == prop->mType) {
 
 		// WARN: There's not the whole string stored ..
 		const aiString* pcSrc = (const aiString*)prop->mData; 
-		::memcpy (pOut->data, pcSrc->data, (pOut->length = pcSrc->length)+1);
+		memcpy (pOut->data, pcSrc->data, (pOut->length = pcSrc->length)+1);
 	}
 	// Wrong type
 	else {
 		DefaultLogger::get()->error("Material property" + std::string(pKey) + " was found, but is no string" );	
 		return AI_FAILURE;
+	}
+	return AI_SUCCESS;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Get the number of textures on a particular texture stack
+ASSIMP_API unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMat,  
+	C_ENUM aiTextureType type)
+{
+	ai_assert (pMat != NULL);
+
+	/* Textures are always stored with ascending indices (ValidateDS provides a check, so we don't need to check) */
+	unsigned int max = 0;
+	for (unsigned int i = 0; i < pMat->mNumProperties;++i) {
+		aiMaterialProperty* prop = pMat->mProperties[i];
+
+		if (prop /* just a sanity check ... */ 
+			&& 0 == strcmp( prop->mKey.data, _AI_MATKEY_TEXTURE_BASE )
+			&& prop->mSemantic == type) {
+	
+			max = std::max(max,prop->mIndex+1);
+		}
+	}
+	return max;
+}
+
+// ------------------------------------------------------------------------------------------------
+aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
+    aiTextureType type,
+    unsigned int  index,
+    C_STRUCT aiString* path,
+	aiTextureMapping* _mapping	/*= NULL*/,
+    unsigned int* uvindex		/*= NULL*/,
+    float* blend				/*= NULL*/,
+    aiTextureOp* op				/*= NULL*/,
+	aiTextureMapMode* mapmode	/*= NULL*/,
+	unsigned int* flags         /*= NULL*/
+	)
+{
+	ai_assert(NULL != mat && NULL != path);
+
+	// Get the path to the texture
+	if (AI_SUCCESS != aiGetMaterialString(mat,AI_MATKEY_TEXTURE(type,index),path))	{
+		return AI_FAILURE;
+	}
+	// Determine mapping type 
+	aiTextureMapping mapping = aiTextureMapping_UV;
+	aiGetMaterialInteger(mat,AI_MATKEY_MAPPING(type,index),(int*)&mapping);
+	if (_mapping)
+		*_mapping = mapping;
+
+	// Get UV index 
+	if (aiTextureMapping_UV == mapping && uvindex)	{
+		aiGetMaterialInteger(mat,AI_MATKEY_UVWSRC(type,index),(int*)uvindex);
+	}
+	// Get blend factor 
+	if (blend)	{
+		aiGetMaterialFloat(mat,AI_MATKEY_TEXBLEND(type,index),blend);
+	}
+	// Get texture operation 
+	if (op){
+		aiGetMaterialInteger(mat,AI_MATKEY_TEXOP(type,index),(int*)op);
+	}
+	// Get texture mapping modes
+	if (mapmode)	{
+		aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_U(type,index),(int*)&mapmode[0]);
+		aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_V(type,index),(int*)&mapmode[1]);		
+	}
+	// Get texture flags
+	if (flags){
+		aiGetMaterialInteger(mat,AI_MATKEY_TEXFLAGS(type,index),(int*)flags);
 	}
 	return AI_SUCCESS;
 }
@@ -425,8 +499,9 @@ void MaterialHelper::CopyPropertyList(MaterialHelper* pcDest,
 	pcDest->mProperties = new aiMaterialProperty*[pcDest->mNumAllocated];
 
 	if (iOldNum && pcOld)	{
-		for (unsigned int i = 0; i < iOldNum;++i)
+		for (unsigned int i = 0; i < iOldNum;++i) {
 			pcDest->mProperties[i] = pcOld[i];
+		}
 
 		delete[] pcOld;
 	}
@@ -444,8 +519,9 @@ void MaterialHelper::CopyPropertyList(MaterialHelper* pcDest,
 				delete prop;
 
 				// collapse the whole array ...
-				::memmove(&pcDest->mProperties[q],&pcDest->mProperties[q+1],i-q);
-				i--;pcDest->mNumProperties--;
+				memmove(&pcDest->mProperties[q],&pcDest->mProperties[q+1],i-q);
+				i--;
+				pcDest->mNumProperties--;
 			}
 		}
 
@@ -458,57 +534,8 @@ void MaterialHelper::CopyPropertyList(MaterialHelper* pcDest,
 		prop->mIndex = propSrc->mIndex;
 
 		prop->mData = new char[propSrc->mDataLength];
-		::memcpy(prop->mData,propSrc->mData,prop->mDataLength);
+		memcpy(prop->mData,propSrc->mData,prop->mDataLength);
 	}
 	return;
-}
-
-// ------------------------------------------------------------------------------------------------
-aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
-    aiTextureType type,
-    unsigned int  index,
-    C_STRUCT aiString* path,
-	aiTextureMapping* _mapping	/*= NULL*/,
-    unsigned int* uvindex		/*= NULL*/,
-    float* blend				/*= NULL*/,
-    aiTextureOp* op				/*= NULL*/,
-	aiTextureMapMode* mapmode	/*= NULL*/,
-	unsigned int* flags         /*= NULL*/
-	)
-{
-	ai_assert(NULL != mat && NULL != path);
-
-	// Get the path to the texture
-	if (AI_SUCCESS != aiGetMaterialString(mat,AI_MATKEY_TEXTURE(type,index),path))	{
-		return AI_FAILURE;
-	}
-	// Determine mapping type 
-	aiTextureMapping mapping = aiTextureMapping_UV;
-	aiGetMaterialInteger(mat,AI_MATKEY_MAPPING(type,index),(int*)&mapping);
-	if (_mapping)
-		*_mapping = mapping;
-
-	// Get UV index 
-	if (aiTextureMapping_UV == mapping && uvindex)	{
-		aiGetMaterialInteger(mat,AI_MATKEY_UVWSRC(type,index),(int*)uvindex);
-	}
-	// Get blend factor 
-	if (blend)	{
-		aiGetMaterialFloat(mat,AI_MATKEY_TEXBLEND(type,index),blend);
-	}
-	// Get texture operation 
-	if (op){
-		aiGetMaterialInteger(mat,AI_MATKEY_TEXOP(type,index),(int*)op);
-	}
-	// Get texture mapping modes
-	if (mapmode)	{
-		aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_U(type,index),(int*)&mapmode[0]);
-		aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_V(type,index),(int*)&mapmode[1]);		
-	}
-	// Get texture flags
-	if (flags){
-		aiGetMaterialInteger(mat,AI_MATKEY_TEXFLAGS(type,index),(int*)flags);
-	}
-	return AI_SUCCESS;
 }
 

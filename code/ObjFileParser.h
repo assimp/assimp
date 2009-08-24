@@ -72,7 +72,7 @@ public:
 
 public:
 	///	\brief	Constructor with data array.
-	ObjFileParser(std::vector<char> &Data, const std::string &strAbsPath, const std::string &strModelName, IOSystem* io);
+	ObjFileParser(std::vector<char> &Data,const std::string &strModelName, IOSystem* io);
 	///	\brief	Destructor
 	~ObjFileParser();
 	///	\brief	Model getter.
@@ -114,8 +114,6 @@ private:
 private:
 	///	Default material name
 	static const std::string DEFAULT_MATERIAL;/* = "defaultmaterial";*/
-	//!	Absolute filepath to model
-	std::string m_strAbsPath;
 	//!	Iterator to current position in buffer
 	DataArrayIt m_DataIt;
 	//!	Iterator to end position of buffer

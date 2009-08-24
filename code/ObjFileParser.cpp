@@ -57,10 +57,7 @@ const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
 
 // -------------------------------------------------------------------
 //	Constructor with loaded data and directories.
-ObjFileParser::ObjFileParser(std::vector<char> &Data, 
-							 const std::string &strAbsPath, 
-							 const std::string &strModelName, IOSystem* _io) :
-	m_strAbsPath(strAbsPath),
+ObjFileParser::ObjFileParser(std::vector<char> &Data,const std::string &strModelName, IOSystem* _io) :
 	m_DataIt(Data.begin()),
 	m_DataItEnd(Data.end()),
 	m_pModel(NULL),
@@ -440,13 +437,12 @@ void ObjFileParser::getMaterialLib()
 		m_DataIt++;
 
 	// Check for existence
-	std::string strMatName(pStart, &(*m_DataIt));
-	std::string absName = m_strAbsPath + io->getOsSeparator() + strMatName;
-	IOStream *pFile = io->Open(absName.c_str());
+	const std::string strMatName(pStart, &(*m_DataIt));
+	IOStream *pFile = io->Open(strMatName);
 
 	if (!pFile )
 	{
-		DefaultLogger::get()->error("OBJ: Unable to locate material file " + absName);
+		DefaultLogger::get()->error("OBJ: Unable to locate material file " + strMatName);
 		m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 		return;
 	}
@@ -457,7 +453,7 @@ void ObjFileParser::getMaterialLib()
 	io->Close( pFile );
 
 	// Importing the material library 
-	ObjFileMtlImporter mtlImporter( buffer, absName, m_pModel );			
+	ObjFileMtlImporter mtlImporter( buffer, strMatName, m_pModel );			
 }
 
 // -------------------------------------------------------------------

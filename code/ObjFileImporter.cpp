@@ -104,11 +104,9 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 	TextFileToBuffer(file.get(),m_Buffer);
 
 	//
-	std::string strDirectory( 1, io.getOsSeparator() ), strModelName;
-	std::string::size_type pos = pFile.find_last_of( io.getOsSeparator() );
-	if ( pos != std::string::npos )
-	{
-		strDirectory = pFile.substr(0, pos);
+	std::string  strModelName;
+	std::string::size_type pos = pFile.find_last_of( "\\/" );
+	if ( pos != std::string::npos )	{
 		strModelName = pFile.substr(pos+1, pFile.size() - pos - 1);
 	}
 	else
@@ -117,7 +115,7 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 	}
 	
 	// parse the file into a temporary representation
-	ObjFileParser parser(m_Buffer, strDirectory, strModelName, pIOHandler);
+	ObjFileParser parser(m_Buffer, strModelName, pIOHandler);
 
 	// And create the proper return structures out of it
 	CreateDataFromImport(parser.GetModel(), pScene);

@@ -579,17 +579,33 @@ extern ( C ) {
    ) aiGetMaterialString;
 
    /**
-    * Helper function for retrieving a texture from the material.
+    * Get the number of textures for a particular texture type.
+    *
+    * Params:
+    *    pMat = Pointer to the input material. May not be NULL
+    *    type = Texture type to check for
+    *
+    * Returns:
+    *    Number of textures for this type.
+    */
+   uint function( aiMaterial* pMat, aiTextureType type ) aiGetMaterialTextureCount;
+
+   /**
+    * Helper function to get all values pertaining to a particular texture slot
+    * from a material structure.
     *
     * This function is provided just for convenience. You could also read the
-    * texture by reading all of its properties manually. This function bundles
-    * all of them in a huge function-monster.
+    * texture by parsing all of its properties manually. This function bundles
+    * all of them in a huge function monster.
     *
     * Params:
     *    mat = Pointer to the input material. May not be null.
-    *    type = Specifies the <code>aiTextureType</code> of the texture to be
-    *       retrieved.
-    *    index = Index of the texture to be retrieved.
+    *    type = Specifies the texture stack (<code>aiTextureType</code>) to
+    *       read from.
+    *    index = Index of the texture. The function fails if the requested
+    *       index is not available for this texture type.
+    *       <code>aiGetMaterialTextureCount()</code> can be used to determine
+    *       the number of textures in a particular texture stack.
     *    path = Receives the output path. null is not a valid value.
     *    mapping = Recieves the texture mapping mode to be used.
     *       Pass null if you are not interested in this information.
@@ -606,7 +622,7 @@ extern ( C ) {
     *       UV order) or null if you are not interested in this information.
     *
     * Returns:
-    *    <code>aiReturn.SUCCESS</code> on success, something else otherwise.
+    *    <code>aiReturn.SUCCESS</code> on success, otherwise something else.
     */
    aiReturn function(
       aiMaterial* mat,

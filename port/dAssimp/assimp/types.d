@@ -85,10 +85,23 @@ extern ( C ) {
    const size_t MAXLEN = 1024;
 
    /**
-    * Represents a string, zero byte terminated.
+    * Represents an UTF-8 string, zero byte terminated.
     *
-    * The length of such a string is limited to <code>MAXLEN</code> characters
+    * The length of such a string is limited to <code>MAXLEN</code> bytes
     * (excluding the terminal \0).
+    *
+    * The character set of an aiString is explicitly defined to be UTF-8. This
+    * Unicode transformation was chosen in the belief that most strings in 3d
+    * model files are limited to ASCII characters, thus the character set
+    * needed to be ASCII compatible.
+    *
+    * Most text file loaders provide proper Unicode input file handling,
+    * special unicode characters are correctly transcoded to UTF-8 and are kept
+    * throughout the libraries' import pipeline.
+    *
+    * For most applications, it will be absolutely sufficient to interpret the
+    * aiString as ASCII data and work with it as one would work with a plain
+    * char[].
     *
     * To access an aiString from D you might want to use something like the
     * following piece of code:
@@ -101,6 +114,10 @@ extern ( C ) {
    struct aiString {
       /**
        * Length of the string (excluding the terminal \0).
+       *
+       * This is <em>not</em> the logical length of strings containing UTF-8
+       * multibyte sequences, but the number of bytes from the beginning of the
+       * string to its end.
        */
       size_t length;
 

@@ -152,6 +152,7 @@ public:
          bind( aiGetMaterialIntegerArray )( "aiGetMaterialIntegerArray" );
          bind( aiGetMaterialColor )( "aiGetMaterialColor" );
          bind( aiGetMaterialString )( "aiGetMaterialString" );
+         bind( aiGetMaterialTextureCount )( "aiGetMaterialTextureCount" );
          bind( aiGetMaterialTexture )( "aiGetMaterialTexture" );
       }
       ++m_sRefCount;

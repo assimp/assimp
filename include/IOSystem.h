@@ -57,15 +57,13 @@ namespace Assimp	{
 class IOStream;
 
 // ---------------------------------------------------------------------------
-/** @class IOSystem
- *  @brief Interface to the file system.
+/** @brief CPP-API: Interface to the file system.
  *
  *  Derive an own implementation from this interface to supply custom file handling
  *  to the importer library. If you implement this interface, you also want to
  *  supply a custom implementation for IOStream.
  *
- *  @see Importer::SetIOHandler()
- */
+ *  @see Importer::SetIOHandler() */
 class ASSIMP_API IOSystem : public Intern::AllocateFromAssimpHeap
 {
 public:

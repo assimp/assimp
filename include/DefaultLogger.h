@@ -57,8 +57,7 @@ struct LogStreamInfo;
 #define ASSIMP_DEFAULT_LOG_NAME "AssimpLog.txt"
 
 // ------------------------------------------------------------------------------------
-/** @class	DefaultLogger
- *	@brief	Primary logging implementation of Assimp. 
+/** @brief CPP-API: Primary logging facility of Assimp. 
  *
  *  The library stores its primary #Logger as a static member of this class.
  *  #get() returns this primary logger. By default the underlying implementation is
@@ -69,10 +68,10 @@ struct LogStreamInfo;
  *  
  *  If you wish to customize the logging at an even deeper level supply your own
  *  implementation of #Logger to #set().
- *  @note The whole logging stuff causes a small extra overhead for all imports. 
- */
+ *  @note The whole logging stuff causes a small extra overhead for all imports. */
 class ASSIMP_API DefaultLogger :
 	public Logger	{
+
 public:
 
 	// ----------------------------------------------------------------------
@@ -86,10 +85,7 @@ public:
 	 *    passed for 'name', no log file is created at all.
 	 *  @param  io IOSystem to be used to open external files (such as the 
 	 *   log file). Pass NULL to rely on the default implementation.
-	 *
-	 *  This replaces the default #NullLogger with a #DefaultLogger instance.
-	 *  @note You can't
-	 */
+	 *  This replaces the default #NullLogger with a #DefaultLogger instance. */
 	static Logger *create(const char* name = ASSIMP_DEFAULT_LOG_NAME,
 		LogSeverity severity    = NORMAL,
 		unsigned int defStreams = aiDefaultLogStream_DEBUGGER | aiDefaultLogStream_FILE,
@@ -102,40 +98,34 @@ public:
 	 *  your needs. If the provided message formatting is OK for you,
 	 *  it's much easier to use #create() and to attach your own custom 
 	 *  output streams to it.
-	 *  @param logger Pass NULL to setup a default NullLogger
-	 */
+	 *  @param logger Pass NULL to setup a default NullLogger*/
 	static void set (Logger *logger);
 	
 	// ----------------------------------------------------------------------
 	/** @brief	Getter for singleton instance
 	 *	 @return Only instance. This is never null, but it could be a 
-	 *  NullLogger. Use isNullLogger to check this.
-	 */
+	 *  NullLogger. Use isNullLogger to check this.*/
 	static Logger *get();
 
 	// ----------------------------------------------------------------------
 	/** @brief  Return whether a #NullLogger is currently active
 	 *  @return true if the current logger is a #NullLogger.
 	 *  Use create() or set() to setup a logger that does actually do
-	 *  something else than just rejecting all log messages.
-	 */
+	 *  something else than just rejecting all log messages. */
 	static bool isNullLogger();
 	
 	// ----------------------------------------------------------------------
 	/** @brief	Kills the current singleton logger and replaces it with a
-	 *  #NullLogger instance.
-	 */
+	 *  #NullLogger instance. */
 	static void kill();
 	
 	// ----------------------------------------------------------------------
-	/**	@copydoc Logger::attachStream  
-	 */
+	/**	@copydoc Logger::attachStream   */
 	bool attachStream(LogStream *pStream,
 		unsigned int severity);
 
 	// ----------------------------------------------------------------------
-	/**	@copydoc Logger::detatchStream 
-	 */
+	/**	@copydoc Logger::detatchStream */
 	bool detatchStream(LogStream *pStream, 
 		unsigned int severity);
 
@@ -144,8 +134,7 @@ private:
 
 	// ----------------------------------------------------------------------
 	/** @briefPrivate construction for internal use by create().
-	 *  @param severity Logging granularity
-	 */
+	 *  @param severity Logging granularity  */
 	DefaultLogger(LogSeverity severity);
 	
 	// ----------------------------------------------------------------------

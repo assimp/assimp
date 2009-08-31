@@ -41,7 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file LogStream.h
  *  @brief Abstract base class 'LogStream', representing an output log stream.
  */
-
 #ifndef INCLUDED_AI_LOGSTREAM_H
 #define INCLUDED_AI_LOGSTREAM_H
 #include "aiTypes.h"
@@ -49,13 +48,11 @@ namespace Assimp	{
 class IOSystem;
 
 // ------------------------------------------------------------------------------------
-/** @class	LogStream
- *	@brief	Abstract interface for log stream implementations.
+/** @brief CPP-API: Abstract interface for log stream implementations.
  *
  *  Several default implementations are provided, see #aiDefaultLogStream for more
  *  details. Writing your own implementation of LogStream is just necessary if these
- *  are not enough for your purposes.
- */
+ *  are not enough for your purpose. */
 class ASSIMP_API LogStream 
 	: public Intern::AllocateFromAssimpHeap	{
 protected:
@@ -75,8 +72,7 @@ public:
 	 *  (e.g. generate HTML), supply a custom instance of Logger to
 	 *  #DefaultLogger:set(). Usually you can *expect* that a log message
 	 *  is exactly one line and terminated with a single \n character.
-	 *  @param message Message to be written
-  	 */
+	 *  @param message Message to be written */
 	virtual void write(const char* message) = 0;
 
 	// -------------------------------------------------------------------
@@ -85,8 +81,7 @@ public:
 	 *  @param name For aiDefaultLogStream_FILE: name of the output file
 	 *  @param io For aiDefaultLogStream_FILE: IOSystem to be used to open the output 
 	 *   file. Pass NULL for the default implementation.
-	 *  @return New LogStream instance.
-	 */
+	 *  @return New LogStream instance.  */
 	static LogStream* createDefaultStream(aiDefaultLogStream stream,
 		const char* name = "AssimpLog.txt",
 		IOSystem* io = NULL);

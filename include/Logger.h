@@ -52,15 +52,12 @@ class LogStream;
 #define MAX_LOG_MESSAGE_LENGTH 1024u
 
 // ----------------------------------------------------------------------------------
-/**	@class	Logger
- *	@brief	Abstract interface for logger implementations.
+/**	@brief CPP-API: Abstract interface for logger implementations.
  *  Assimp provides a default implementation and uses it for almost all 
  *  logging stuff ('DefaultLogger'). This class defines just basic logging
- *  behaviour and is not of interest for you.
- */
+ *  behaviour and is not of interest for you. Instead, take a look at #DefaultLogger. */
 class ASSIMP_API Logger 
-	: public Intern::AllocateFromAssimpHeap
-{
+	: public Intern::AllocateFromAssimpHeap	{
 public:
 
 	// ----------------------------------------------------------------------
@@ -96,37 +93,31 @@ public:
 
 	// ----------------------------------------------------------------------
 	/** @brief	Writes a debug message
-	 *	 @param	message	Debug message
-	 */
+	 *	 @param	message	Debug message*/
 	void debug(const std::string &message);
 
 	// ----------------------------------------------------------------------
 	/** @brief	Writes a info message
-	 *	@param	message Info message
-	 */
+	 *	@param	message Info message*/
 	void info(const std::string &message);
 
 	// ----------------------------------------------------------------------
 	/** @brief	Writes a warning message
-	 *	@param	message Warn message
-	 */
+	 *	@param	message Warn message*/
 	void warn(const std::string &message);
 
 	// ----------------------------------------------------------------------
 	/** @brief	Writes an error message
-	 *	@param	message	Error message
-	 */
+	 *	@param	message	Error message*/
 	void error(const std::string &message);
 
 	// ----------------------------------------------------------------------
 	/** @brief	Set a new log severity.
-	 *	@param	log_severity New severity for logging
-	 */
+	 *	@param	log_severity New severity for logging*/
 	void setLogSeverity(LogSeverity log_severity);
 
 	// ----------------------------------------------------------------------
-	/** @brief Get the current log severity
-	 */
+	/** @brief Get the current log severity*/
 	LogSeverity getLogSeverity() const;
 
 	// ----------------------------------------------------------------------
@@ -140,8 +131,7 @@ public:
 	 *  @param severity  Message filter, specified which types of log
 	 *    messages are dispatched to the stream. Provide a bitwise
 	 *    combination of the ErrorSeverity flags.
-	 *  @return true if the stream has been attached, false otherwise.
-	 */
+	 *  @return true if the stream has been attached, false otherwise.*/
 	virtual bool attachStream(LogStream *pStream, 
 		unsigned int severity = DEBUGGING | ERR | WARN | INFO) = 0;
 
@@ -153,8 +143,7 @@ public:
 	 *    flags. This value is &~ed with the current flags of the stream,
 	 *    if the result is 0 the stream is detached from the Logger and
 	 *    the caller retakes the possession of the stream.
-	 *  @return true if the stream has been dettached, false otherwise.
-	 */
+	 *  @return true if the stream has been dettached, false otherwise.*/
 	virtual bool detatchStream(LogStream *pStream, 
 		unsigned int severity = DEBUGGING | ERR | WARN | INFO) = 0;
 

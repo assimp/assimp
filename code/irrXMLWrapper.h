@@ -48,7 +48,24 @@ namespace Assimp	{
 
 // ---------------------------------------------------------------------------------
 /** @brief Utility class to make IrrXML work together with our custom IO system
- *  See the IrrXML docs for more details.*/
+ *  See the IrrXML docs for more details.
+ *
+ *  Construct IrrXML-Reader in BaseImporter::InternReadFile():
+ *  @code
+ * // open the file
+ * boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+ * if( file.get() == NULL) {
+ *	  throw new ImportErrorException( "Failed to open file " + pFile + ".");
+ * }
+ *
+ * // generate a XML reader for it
+ * boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper( new CIrrXML_IOStreamReader( file.get()));
+ * mReader = irr::io::createIrrXMLReader( mIOWrapper.get());
+ * if( !mReader) {
+ *    ThrowException( "xxxx: Unable to open file.");
+ * }
+ * @endcode
+ **/
 class CIrrXML_IOStreamReader 
 	: public irr::io::IFileReadCallBack
 {

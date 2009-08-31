@@ -85,10 +85,11 @@ extern "C" ASSIMP_API const aiScene* aiImportFileEx( const char*, unsigned int, 
 extern "C" ASSIMP_API const aiScene* aiImportFileFromMemory( const char*,
 	unsigned int,unsigned int,const char*);
 
+/** @namespace Assimp Assimp's CPP-API and all internal APIs */
 namespace Assimp	{
 
 // ----------------------------------------------------------------------------------
-/** The Importer class forms an C++ interface to the functionality of the 
+/** CPP-API: The Importer class forms an C++ interface to the functionality of the 
 *   Open Asset Import Library.
 *
 * Create an object of this class and call ReadFile() to import a file. 

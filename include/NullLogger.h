@@ -48,14 +48,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Logger.h"
 namespace Assimp	{
 // ---------------------------------------------------------------------------
-/** @class	NullLogger
- *	@brief	Empty logging implementation.
+/** @brief CPP-API: Empty logging implementation.
  *
- * Does nothing. Used by default if the application hasn't requested a 
- * custom logger via #DefaultLogger::set() or #DefaultLogger::create();
- */
-class ASSIMP_API NullLogger : public Logger 
-{
+ * Does nothing! Used by default if the application hasn't requested a 
+ * custom logger via #DefaultLogger::set() or #DefaultLogger::create(); */
+class ASSIMP_API NullLogger 
+	: public Logger	{
+
 public:
 
 	/**	@brief	Logs a debug message */

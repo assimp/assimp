@@ -4,7 +4,7 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = assimp
+PROJECT_NAME           = Assimp
 PROJECT_NUMBER         = r400
 OUTPUT_DIRECTORY       = 
 CREATE_SUBDIRS         = NO
@@ -96,7 +96,8 @@ WARN_LOGFILE           =
 # configuration options related to the input files
 #---------------------------------------------------------------------------
 INPUT                  = ../include/ \
-                         ../doc/dox.h
+                         ../doc/dox.h \
+                         ../code/BaseImporter.h
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cc \

@@ -67,13 +67,12 @@ typedef void    (*aiFileCloseProc) (C_STRUCT aiFileIO*, C_STRUCT aiFile*);
 typedef char* aiUserData;
 
 // ----------------------------------------------------------------------------------
-/** @class aiFileIO
- *  @brief Defines Assimp's way of accessing files.
+/** @brief C-API: File system callbacks
  *
  *  Provided are functions to open and close files. Supply a custom structure to
- *  the import function. If you don't, a default implementation is used. Use this
- *  to enable reading from other sources, such as ZIPs or memory locations.
-*/
+ *  the import function. If you don't, a default implementation is used. Use custom
+ *  file systems to enable reading from other sources, such as ZIPs 
+ *  or memory locations. */
 struct aiFileIO
 {
 	/** Function used to open a new file
@@ -89,17 +88,15 @@ struct aiFileIO
 };
 
 // ----------------------------------------------------------------------------------
-/** @class aiFile
- *  @brief Represents a read/write file
+/** @brief C-API: File callbacks
  *
  *  Actually, it's a data structure to wrap a set of fXXXX (e.g fopen) 
- *  replacement functions
+ *  replacement functions.
  *
  *  The default implementation of the functions utilizes the fXXX functions from 
  *  the CRT. However, you can supply a custom implementation to Assimp by
  *  delivering a custom aiFileIO. Use this to enable reading from other sources, 
- *  such as ZIP archives or memory locations.
- */
+ *  such as ZIP archives or memory locations. */
 struct aiFile
 {
 	/** Callback to read from a file */

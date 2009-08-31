@@ -55,12 +55,11 @@ struct aiFileIO; // aiFileIO.h
 typedef void (*aiLogStreamCallback)(const char* /* message */, char* /* user */);
 
 // --------------------------------------------------------------------------------
-/** Represents a log stream. A log stream receives all log messages and streams
- *  them somewhere.
+/** C-API: Represents a log stream. A log stream receives all log messages and
+ *  streams them _somewhere_.
  *  @see aiGetPredefinedLogStream
  *  @see aiAttachLogStream
- *  @see aiDetachLogStream
- */
+ *  @see aiDetachLogStream */
 // --------------------------------------------------------------------------------
 struct aiLogStream
 {

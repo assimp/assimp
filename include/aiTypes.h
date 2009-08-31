@@ -65,8 +65,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include <string> // for aiString::Set(const std::string&)
 
 namespace Assimp	{
-namespace Intern		{
 
+	//! @cond never
+namespace Intern		{
 	// --------------------------------------------------------------------
 	/** @brief Internal helper class to utilize our internal new/delete 
 	 *    routines for allocating object of this and derived classes.
@@ -90,9 +91,10 @@ namespace Intern		{
 		void *operator new[]    ( size_t num_bytes);
 		void  operator delete[] ( void* data);
 
-	}; //! struct AllocateFromAssimpHeap
-} //! namespace Intern
-} //! namespace Assimp
+	}; // struct AllocateFromAssimpHeap
+} // namespace Intern
+	//! @endcond
+} // namespace Assimp
 
 extern "C" {
 #endif

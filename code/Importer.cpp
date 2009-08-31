@@ -69,6 +69,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // .......................................................................................
 // Importers
+// (include_new_importers_here)
 // .......................................................................................
 #ifndef AI_BUILD_NO_X_IMPORTER
 #	include "XFileImporter.h"
@@ -269,8 +270,7 @@ Importer::Importer()
 
 	// ----------------------------------------------------------------------------
 	// Add an instance of each worker class here
-	// The order doesn't really care. File formats that are
-	// used more frequently than others should be at the beginning.
+	// (register_new_importers_here)
 	// ----------------------------------------------------------------------------
 	pimpl->mImporter.reserve(25);
 #if (!defined AI_BUILD_NO_X_IMPORTER)

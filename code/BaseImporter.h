@@ -57,7 +57,8 @@ class Importer;
 	(string[1] << 16) + (string[2] << 8) + string[3]))
 
 // ---------------------------------------------------------------------------
-/** Simple exception class to be thrown if an error occurs while importing. */
+/** FOR IMPORTER PLUGINS ONLY: Simple exception class to be thrown if an 
+ *  error occurs while importing. */
 class ASSIMP_API ImportErrorException 
 {
 public:
@@ -76,14 +77,14 @@ private:
 	std::string mErrorText;
 };
 
+//! @cond never
 // ---------------------------------------------------------------------------
 /** @brief Internal PIMPL implementation for Assimp::Importer
  *
  *  Using this idiom here allows us to drop the dependency from
  *  std::vector and std::map in the public headers. Furthermore we are dropping
  *  any STL interface problems caused by mismatching STL settings. All
- *  size calculation are now done by us, not the app heap.
- */
+ *  size calculation are now done by us, not the app heap. */
 class ASSIMP_API ImporterPimpl 
 {
 public:
@@ -131,10 +132,11 @@ public:
 	/** Used by post-process steps to share data */
 	SharedPostProcessInfo* mPPShared;
 };
+//! @endcond
 
 // ---------------------------------------------------------------------------
-/** The BaseImporter defines a common interface for all importer worker 
- *  classes.
+/** FOR IMPORTER PLUGINS ONLY: The BaseImporter defines a common interface 
+ *  for all importer worker classes.
  *
  * The interface defines two functions: CanRead() is used to check if the 
  * importer can handle the format of the given file. If an implementation of 
@@ -372,25 +374,23 @@ protected:
 struct BatchData;
 
 // ---------------------------------------------------------------------------
-/** A helper class that can be used by importers which need to load many
- *  extern meshes recursively.
+/** FOR IMPORTER PLUGINS ONLY: A helper class for the pleasure of importers 
+ *  which need to load many extern meshes recursively.
  *
  *  The class uses several threads to load these meshes (or at least it
  *  could, this has not yet been implemented at the moment).
  *
- *  @note The class may not be used by more than one thread
- */
+ *  @note The class may not be used by more than one thread*/
 class ASSIMP_API BatchLoader
 {
 	// friend of Importer
 
 public:
 
-	/** Represents a full list of configuration properties
-	 *  for the importer.
-	 *
-	 *  Properties can be set using SetGenericProperty
-	 */
+	//! @cond never
+	// -------------------------------------------------------------------
+	/** Wraps a full list of configuration properties for an importer.
+	 *  Properties can be set using SetGenericProperty */
 	struct PropertyMap
 	{
 		ImporterPimpl::IntPropertyMap     ints;
@@ -406,43 +406,40 @@ public:
 			return ints.empty() && floats.empty() && strings.empty();
 		}
 	};
+	//! @endcond
 
 public:
 	
 
-	/** Construct a batch loader from a given IO system
-	 */
+	// -------------------------------------------------------------------
+	/** Construct a batch loader from a given IO system to be used to acess external files */
 	BatchLoader(IOSystem* pIO);
 	~BatchLoader();
 
-
+	// -------------------------------------------------------------------
 	/** Add a new file to the list of files to be loaded.
-	 *
 	 *  @param file File to be loaded
-	 *  @param steps Steps to be executed on the file
+	 *  @param steps Post-processing steps to be executed on the file
 	 *  @param map Optional configuration properties
 	 *  @return 'Load request channel' - an unique ID that can later
 	 *    be used to access the imported file data.
-	 */
+	 *  @see GetImport */
 	unsigned int AddLoadRequest	(const std::string& file,
 		unsigned int steps = 0, const PropertyMap* map = NULL);
 
-
+	// -------------------------------------------------------------------
 	/** Get an imported scene.
-	 *
 	 *  This polls the import from the internal request list.
 	 *  If an import is requested several times, this function
 	 *  can be called several times, too.
 	 *
 	 *  @param which LRWC returned by AddLoadRequest().
 	 *  @return NULL if there is no scene with this file name
-	 *  in the queue of the scene hasn't been loaded yet.
-	 */
-	aiScene* GetImport		(unsigned int which);
+	 *  in the queue of the scene hasn't been loaded yet. */
+	aiScene* GetImport	(unsigned int which);
 
-
-	/** Waits until all scenes have been loaded.
-	 */
+	// -------------------------------------------------------------------
+	/** Waits until all scenes have been loaded.  */
 	void LoadAll();
 
 private:

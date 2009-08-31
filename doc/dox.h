@@ -91,6 +91,13 @@ When the importer successfully completed its job, the imported data is returned 
 point from where you can access all the various data types that a scene/model file can possibly contain. The 
 @link data Data Structures page @endlink describes how to interpret this data.
 
+@section ext Extending the library
+
+There are many 3d file formats in the world, and we're happy to support as many as possible. If you need support for
+a particular file format, why not implement it yourself and add it to the library? Writing importer plugins for
+ASSIMP is considerably easy, as the whole postprocessing infrastructure is available and does much of the work for you.
+See the @link extend Extending the library @endlink page for more information.
+
 @section main_viewer The Viewer
 
 The ASSIMP viewer is a standalone Windows/DirectX application that was developed along with the library. It is very useful 
@@ -758,6 +765,182 @@ a pointer to the raw image data and aiTexture::achFormatHint is either zeroed or
 contains the most common file extension of the embedded texture's format. This value is only
 set if ASSIMP is able to determine the file format.
 */
+
+/**
+@page extend Extending the Library
+
+@section General
+
+Or - how to write your own loaders. It's easy. You just need to implement the #Assimp::BaseImporter class,
+which defines a few abstract methods, register your loader, test it carefully, and provide test models for it.
+
+OK, that sounds too easy :-). The whole procedure for a new loader merely looks like this:
+
+<ul>
+<li>Create a header (<tt><i>FormatName</i>Importer.h</tt>) and a unit (<tt><i>FormatName</i>Importer.cpp</tt>) in the <tt>&lt;root&gt;/code/</tt> directory</li>
+<li>Add them to the following workspaces: vc8, vc9, CMAKE</li>
+<li>Include <i>AssimpPCH.h</i> - this is the PCH file, and it includes already most Assimp-internal stuff. </li>
+<li>Open Importer.cpp and include your header just below the <i>(include_new_importers_here)</i> line, 
+guarded by a #define 
+@code
+#if (!defined ASSIMP_BUILD_NO_FormatName_IMPORTER)
+	...
+#endif
+@endcode
+Wrap the same guard around your .cpp!</li>
+
+<li>No advance to the <i>(register_new_importers_here)</i> line in the Importer.cpp and register your importer there - just like all the others do.</li>
+<li>Setup a suitable test environment (i.e. use AssimpView or your own application), make sure to enable 
+the #aiProcess_ValidateDataStructure flag and enable verbose logging. That is, simply call before you import anything:
+@code
+DefaultLogger::create("AssimpLog.txt",Logger::VERBOSE)
+@endcode
+</li>
+<li>
+Implement the Assimp::BaseImporter::CanRead(), Assimp::BaseImporter::InternReadFile() and Assimp::BaseImporter::GetExtensionList(). 
+Just copy'n'paste the template from Appendix A and adapt it for your needs.
+</li>
+<li>
+Make sure the loader compiles against all build configurations on all supported platforms. This includes <i>-noboost</i>! To avoid problems,
+see the boost section on this page for a list of all 'allowed' boost classes (again, this grew historically when we had to accept that boost
+is not THAT widely spread that one could rely on it being available everywhere).
+</li>
+<li>
+Provide some _free_ test models in <tt>&lt;root&gt;/test/models/&lt;FormatName&gt;/</tt> and credit their authors.
+Test files for a file format shouldn't be too large (<i>~500 KiB in total</i>), and not too repetive. Try to cover all format features with test data.
+</li>
+<li>
+Done! Please, share your loader that everyone can profit from it!
+</li>
+</ul>
+
+@section tnote Notes for text importers
+
+<ul>
+<li>Try to make your parser as flexible as possible. Don't rely on particular layout, whitespace/tab style,
+except if the file format has a strict definition.</li>
+<li>Call Assimp::BaseImporter::ConvertToUTF8() before you parse anything to convert foreign encodings to UTF-8. 
+ That's not necessary for XML importers, which must use the provided IrrXML for reading. </li>
+</ul>
+
+@section bnote Notes for binary importers
+
+<ul>
+<li>
+Take care of endianess issues! Assimp importers mostly support big-endian platforms, which define the <tt>AI_BUILD_BIG_ENDIAN</tt> constant.
+See the next section for a list of utilities to simplify this task.
+</li>
+<li>
+Don't trust the input data! Check all offsets!
+</li>
+</ul>
+
+@section util Utilities
+
+Mixed stuff for internal use by loaders, mostly documented (most of them are already included by <i>AssimpPCH.h</i>):
+<ul>
+<li><b>ByteSwap</b> (<i>ByteSwap.h</i>) - manual byte swapping stuff for binary loaders.</li>
+<li><b>StreamReader</b> (<i>StreamReader.h</i>) - safe, endianess-correct, binary reading.</li>
+<li><b>IrrXML</b> (<i>irrXMLWrapper.h</i>)  - for XML-parsing (SAX.</li>
+<li><b>CommentRemover</b> (<i>RemoveComments.h</i>) - remove single-line and multi-line comments from a text file.</li>
+<li>fast_atof, strtol10, strtol16, SkipSpaceAndLineEnd, SkipToNextToken .. large family of low-level 
+parsing functions, mostly declared in <i>fast_atof.h</i>, <i>StringComparison.h</i> and <i>ParsingUtils.h</i> (a collection that grew
+historically, so don't expect perfect organization). </li>
+<li><b>ComputeNormalsWithSmoothingsGroups()</b> (<i>SmoothingGroups.h</i>) - Computes normal vectors from plain old smoothing groups. </li>
+<li><b>SkeletonMeshBuilder</b> (<i>SkeletonMeshBuilder.h</i>) - generate a dummy mesh from a given (animation) skeleton. </li>
+<li><b>StandardShapes</b> (<i>StandardShapes.h</i>) - generate meshes for standard solids, such as platonic primitives, cylinders or spheres. </li>
+<li><b>BatchLoader</b> (<i>BaseImporter.h</i>) - manage imports from external files. Useful for file formats
+which spread their data across multiple files. </li>
+<li><b>SceneCombiner</b> (<i>SceneCombiner.h</i>) - exhaustive toolset to merge multiple scenes. Useful for file formats
+which spread their data across multiple files. </li>
+</ul>
+
+@section mat Filling materials
+
+The required definitions zo set/remove/query keys in #aiMaterial structures are declared in <i>MaterialSystem.h</i>, in a
+#aiMaterial derivate called #Assimp::MaterialHelper. The header is included by AssimpPCH.h, so you don't need to bother.
+
+@code
+MaterialHelper* mat = new MaterialHelper();
+
+const float spec = 16.f;
+mat->AddProperty(&spec, 1, AI_MATKEY_SHININESS);
+@endcode
+
+@section boost Boost
+
+The boost whitelist:
+<ul>
+<li><i>boost.scoped_ptr</i></li>
+<li><i>boost.scoped_array</i></li>
+<li><i>boost.format</i> </li>
+<li><i>boost.random</i> </li>
+<li><i>boost.common_factor</i> </li>
+<li><i>boost.foreach</i> </li>
+<li><i>boost.tuple</i></li>
+</ul>
+
+(if you happen to need something else, i.e. boost::thread, make this an optional feature.
+<tt>ASSIMP_BUILD_BOOST_WORKAROUND</tt> is defined for <i>-noboost</i> builds)
+
+@section appa Appendix A - Template for BaseImporter's abstract methods
+
+@code
+// -------------------------------------------------------------------------------
+// Returns whether the class can handle the format of the given file. 
+bool xxxxImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, 
+	bool checkSig) const
+{
+	const std::string extension = GetExtension(pFile);
+	if(extension == "xxxx") {
+		return true;
+	}
+	if (!extension.length() || checkSig) {
+		// no extension given, or we're called a second time because no 
+		// suitable loader was found yet. This means, we're trying to open 
+		// the file and look for and hints to identify the file format.
+		// #Assimp::BaseImporter provides some utilities:
+		//
+		// #Assimp::BaseImporter::SearchFileHeaderForToken - for text files.
+		// It reads the first lines of the file and does a substring check
+		// against a given list of 'magic' strings.
+		//
+		// #Assimp::BaseImporter::CheckMagicToken - for binary files. It goes
+		// to a particular offset in the file and and compares the next words 
+		// against a given list of 'magic' tokens.
+
+		// These checks MUST be done (even if !checkSig) if the file extension 
+		// is not exclusive to your format. For example, .xml is very common 
+		// and (co)used by many formats.
+	}
+	return false;
+}
+
+// -------------------------------------------------------------------------------
+// Get list of file extensions handled by this loader
+void xxxxImporter::GetExtensionList(std::string& append)
+{
+	append.append("*.xxx");
+}
+
+// -------------------------------------------------------------------------------
+void xxxxImporter::InternReadFile( const std::string& pFile, 
+	aiScene* pScene, IOSystem* pIOHandler)
+{
+	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
+
+	// Check whether we can read from the file
+	if( file.get() == NULL) {
+		throw new ImportErrorException( "Failed to open xxxx file " + pFile + ".");
+	}
+	
+	// Your task: fill pScene
+	// Throw a ImportErrorException with a meaningful (!) error message if 
+	// something goes wrong.
+}
+
+@endcode
+ */
 
 /**
 @page materials Material System

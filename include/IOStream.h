@@ -55,8 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp	{
 
 // ----------------------------------------------------------------------------------
-/** @class IOStream
- *  @brief Class to handle file I/O for C++
+/** @brief CPP-API: Class to handle file I/O for C++
  *
  *  Derive an own implementation from this interface to provide custom IO handling
  *  to the Importer. If you implement this interface, be sure to also provide an

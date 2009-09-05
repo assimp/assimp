@@ -1943,6 +1943,18 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="ogre"
+					>
+					<File
+						RelativePath="..\..\code\OgreImporter.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\OgreImporter.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="process"

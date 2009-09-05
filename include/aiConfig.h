@@ -552,6 +552,12 @@ enum aiComponent
 #define AI_CONFIG_IMPORT_IRR_ANIM_FPS				\
 	"IMPORT_IRR_ANIM_FPS"
 
+/// Ogre Importer will try to load this Materialfile
+/**
+Ogre Mehs contain only the MaterialName, not the MaterialFile. If there is no material file
+with the same name as the material, Ogre Importer will try to load this file and search the material in it.
+*/
+#define AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE "IMPORT_OGRE_MATERIAL_FILE"
 
 
 #endif // !! AI_CONFIG_H_INC

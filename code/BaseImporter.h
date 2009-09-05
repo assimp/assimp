@@ -217,12 +217,8 @@ public:
 	 * The function is a request to the importer to update its configuration
 	 * basing on the Importer's configuration property list.
 	 * @param pImp Importer instance
-	 * @param ppFlags Post-processing steps to be executed on the data
-	 *  returned by the loaders. This value is provided to allow some
-	 * internal optimizations.
 	 */
-	virtual void SetupProperties(const Importer* pImp /*,
-		unsigned int ppFlags*/);
+	virtual void SetupProperties(const Importer* pImp);
 
 protected:
 

@@ -158,6 +158,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_LWS_IMPORTER
 #	include "LWSLoader.h"
 #endif
+#ifndef AI_BUILD_NO_OGRE_IMPORTER
+#	include "OgreImporter.h"
+#endif
 
 // .......................................................................................
 // PostProcess-Steps
@@ -360,6 +363,10 @@ Importer::Importer()
 #if (!defined AI_BUILD_NO_LWS_IMPORTER)
 	pimpl->mImporter.push_back( new LWSImporter());
 #endif
+#if (!defined AI_BUILD_NO_OGRE_IMPORTER)
+	pimpl->mImporter.push_back( new Ogre::OgreImporter());
+#endif
+
 
 	// ----------------------------------------------------------------------------
 	// Add an instance of each post processing step here in the order 

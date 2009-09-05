@@ -49,8 +49,11 @@ that it has not yet been implemented, and some formats have not completely been 
 <b>Object File Format </b> ( <i>*.off</i> ). <br>	
 <b>Terragen Terrain </b> ( <i>*.ter</i> ) <br>
 <b>3D GameStudio Model </b> ( <i>*.mdl</i> ) <br>
-<b>3D GameStudio Terrain</b> ( <i>*.hmp</i> )<br><br><br>
+<b>3D GameStudio Terrain</b> ( <i>*.hmp</i> )<br>
+<b>Ogre</b> (<i>.mesh.xml, .skeleton.xml, .material</i>)<br><br>
 </tt>
+See the @link importer_notes Importer Notes Page @endlink for informations, what a specific importer can do and what not.<br>
+
 <sup>3</sup>: These formats support animations, but ASSIMP doesn't yet support them (or they're buggy)
 <br>
 <hr>
@@ -778,7 +781,8 @@ OK, that sounds too easy :-). The whole procedure for a new loader merely looks 
 
 <ul>
 <li>Create a header (<tt><i>FormatName</i>Importer.h</tt>) and a unit (<tt><i>FormatName</i>Importer.cpp</tt>) in the <tt>&lt;root&gt;/code/</tt> directory</li>
-<li>Add them to the following workspaces: vc8, vc9, CMAKE</li>
+<li>Add them to the following workspaces: vc8 and vc9 (the files are in the workspaces directory), CMAKE (code/CMakeLists.txt, create a new
+source group for your importer and put them also to ADD_LIBRARY( assimp SHARED))</li>
 <li>Include <i>AssimpPCH.h</i> - this is the PCH file, and it includes already most Assimp-internal stuff. </li>
 <li>Open Importer.cpp and include your header just below the <i>(include_new_importers_here)</i> line, 
 guarded by a #define 
@@ -789,7 +793,7 @@ guarded by a #define
 @endcode
 Wrap the same guard around your .cpp!</li>
 
-<li>No advance to the <i>(register_new_importers_here)</i> line in the Importer.cpp and register your importer there - just like all the others do.</li>
+<li>Now advance to the <i>(register_new_importers_here)</i> line in the Importer.cpp and register your importer there - just like all the others do.</li>
 <li>Setup a suitable test environment (i.e. use AssimpView or your own application), make sure to enable 
 the #aiProcess_ValidateDataStructure flag and enable verbose logging. That is, simply call before you import anything:
 @code
@@ -813,6 +817,14 @@ Test files for a file format shouldn't be too large (<i>~500 KiB in total</i>), 
 Done! Please, share your loader that everyone can profit from it!
 </li>
 </ul>
+
+@section properties Properties
+
+You can use properties to chance the behavior of you importer. In order to do so, you have to overide BaseImporter::SetupProperties, and specify
+you custom properties in aiConfig.h. Just have a look to the other AI_CONFIG_IMPORT_* defines and you will understand, how it works.
+
+The properties can be set with Importer::SetProperty***() and can be accessed in your SetupProperties function with Importer::GetProperty***(). You can
+store the properties as a member variable of your importer, they are thread safe.
 
 @section tnote Notes for text importers
 
@@ -865,6 +877,12 @@ MaterialHelper* mat = new MaterialHelper();
 
 const float spec = 16.f;
 mat->AddProperty(&spec, 1, AI_MATKEY_SHININESS);
+
+//set the name of the material:
+NewMaterial->AddProperty(&aiString(MaterialName.c_str()), AI_MATKEY_NAME);//MaterialName is a std::string
+
+//set the first diffuse texture
+NewMaterial->AddProperty(&aiString(Texturename.c_str()), AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));//again, Texturename is a std::string
 @endcode
 
 @section boost Boost
@@ -1390,3 +1408,34 @@ Build: alles von CustomBuild + DirectX + MFC?
 
 
 
+/**
+@page importer_notes Importer Notes
+
+@section ogre Ogre
+Ogre importer is WIP and optimized for the Blender Ogre exporter!
+
+XML Format: There is a binary and a XML mesh Format from Ogre. This loader can only
+Handle xml files, but don't panic, there is a command line converter, which you can use
+to create XML files from Binary Files. Just look on the Ogre page for it.
+
+Currently you can only load meshes. So you will need to import the *.mesh.xml file, the loader will
+try to find the appendant material and skeleton file.
+
+The skeleton file must have the same name as the mesh file, e.g. fish.mesh.xml and fish.skeleton.xml.
+
+The material file can have the same name as the mesh file, or you can use
+Importer::Importer::SetPropertyString(AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE, "materiafile.material") to specify
+the name of the material file. This is especially usefull if multiply materials a stored in a single file.
+The importer will first try to load the material with the same name as the mesh and only if this can't be open try
+to load the alternate material file. The default material filename is "Scene.material".
+
+What will be loaded?
+
+Mesh: Faces, Positions, Normals and one Uv pair. The Materialname will be used to load the material
+
+Material: The right material in the file will be searched, the importer should work with materials who
+have 1 technique and 1 pass in this technique. From there, the texturename will be loaded. Also, the
+materialname will be set.
+
+Skeleton: Nothing, yet.
+*/

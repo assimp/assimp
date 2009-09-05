@@ -804,6 +804,9 @@ DefaultLogger::create("AssimpLog.txt",Logger::VERBOSE)
 Implement the Assimp::BaseImporter::CanRead(), Assimp::BaseImporter::InternReadFile() and Assimp::BaseImporter::GetExtensionList(). 
 Just copy'n'paste the template from Appendix A and adapt it for your needs.
 </li>
+<li>For error handling, throw a dynamic allocated ImportErrorException (see Appendix A) for critical errors, and log errors, warnings, infos and debuginfos
+with DefaultLogger::get()->[error, warn, debug, info].
+</li>
 <li>
 Make sure the loader compiles against all build configurations on all supported platforms. This includes <i>-noboost</i>! To avoid problems,
 see the boost section on this page for a list of all 'allowed' boost classes (again, this grew historically when we had to accept that boost
@@ -1429,12 +1432,18 @@ the name of the material file. This is especially usefull if multiply materials 
 The importer will first try to load the material with the same name as the mesh and only if this can't be open try
 to load the alternate material file. The default material filename is "Scene.material".
 
+We suggest that you use custom materials, because they support multiple textures (like colormap and normalmap). First of all you
+should read the custom material sektion in the Ogre Blender exporter Help File, and than use the assimp.tlp template, which you
+can find in scripts/OgreImpoter/Assimp.tlp. If you don't set all values, don't worry, they will be ignored during import.
+
+If you want more propertiesin custom materials, you can easily expand the ogre material loader, it will be just a few lines for each property.
+
 What will be loaded?
 
 Mesh: Faces, Positions, Normals and one Uv pair. The Materialname will be used to load the material
 
 Material: The right material in the file will be searched, the importer should work with materials who
-have 1 technique and 1 pass in this technique. From there, the texturename will be loaded. Also, the
+have 1 technique and 1 pass in this technique. From there, the texturename (for 1 color- and 1 normalmap) will be loaded. Also, the
 materialname will be set.
 
 Skeleton: Nothing, yet.

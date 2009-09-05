@@ -55,7 +55,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 		throw new ImportErrorException("Failed to create XML Reader for "+pFile);
 
 
-	DefaultLogger::get()->info("Mesh File opened");
+	DefaultLogger::get()->debug("Mesh File opened");
 	
 	//Read root Node:
 	if(!(XmlRead(MeshFile) && string(MeshFile->getNodeName())=="mesh"))
@@ -76,7 +76,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	{
 		SubMesh NewSubMesh;
 		NewSubMesh.MaterialName=GetAttribute<string>(MeshFile, "material");
-		DefaultLogger::get()->info("Loading Submehs with Material: "+NewSubMesh.MaterialName);
+		DefaultLogger::get()->debug("Loading Submehs with Material: "+NewSubMesh.MaterialName);
 		ReadSubMesh(NewSubMesh, MeshFile);
 	}
 	//_______________________________________________________________-
@@ -124,7 +124,7 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 			//some info logging:
 			unsigned int NumFaces=GetAttribute<int>(Reader, "count");
 			stringstream ss; ss <<"Submesh has " << NumFaces << " Faces.";
-			DefaultLogger::get()->info(ss.str());
+			DefaultLogger::get()->debug(ss.str());
 
 			while(XmlRead(Reader) && Reader->getNodeName()==string("face"))
 			{
@@ -145,7 +145,7 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 			//some info logging:
 			unsigned int NumVertices=GetAttribute<int>(Reader, "vertexcount");
 			stringstream ss; ss<<"VertexCount: "<<NumVertices;
-			DefaultLogger::get()->info(ss.str());
+			DefaultLogger::get()->debug(ss.str());
 			
 			//General Informations about vertices
 			XmlRead(Reader);
@@ -193,7 +193,7 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 					XmlRead(Reader);
 					aiVector3D NewUv;
 					NewUv.x=GetAttribute<float>(Reader, "u");
-					NewUv.y=GetAttribute<float>(Reader, "v");
+					NewUv.y=GetAttribute<float>(Reader, "v")*(-1)+1;//flip the uv vertikal, blender exports them so!
 					Uvs.push_back(NewUv);
 				}
 				XmlRead(Reader);
@@ -201,7 +201,7 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 
 		}
 	}
-	DefaultLogger::get()->info(str(format("Positionen: %1% Normale: %2% TexCoords: %3%") % Positions.size() % Normals.size() % Uvs.size()));
+	DefaultLogger::get()->debug(str(format("Positionen: %1% Normale: %2% TexCoords: %3%") % Positions.size() % Normals.size() % Uvs.size()));
 
 
 	//Make all Vertexes unique: (this is required by assimp)
@@ -407,8 +407,36 @@ aiMaterial* OgreImporter::LoadMaterial(std::string MaterialName)
 								}
 							}
 						}//end of technique
+
+						
 					}
-					
+
+
+					DefaultLogger::get()->info(Line);
+					//read informations from a custom material:
+					if(Line=="set")
+					{
+						ss >> Line;
+						if(Line=="$specular")//todo load this values:
+						{
+						}
+						if(Line=="$diffuse")
+						{
+						}
+						if(Line=="$ambient")
+						{
+						}
+						if(Line=="$colormap")
+						{
+							ss >> Line;
+							NewMaterial->AddProperty(&aiString(Line.c_str()), AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+						}
+						if(Line=="$normalmap")
+						{
+							ss >> Line;
+							NewMaterial->AddProperty(&aiString(Line.c_str()), AI_MATKEY_TEXTURE(aiTextureType_NORMALS, 0));
+						}
+					}					
 				}//end of material
 			}
 			else {} //this is the wrong material, proceed the file until we reach the next material

@@ -1440,11 +1440,11 @@ If you want more propertiesin custom materials, you can easily expand the ogre m
 
 What will be loaded?
 
-Mesh: Faces, Positions, Normals and one Uv pair. The Materialname will be used to load the material
+Mesh: Faces, Positions, Normals and one Uv pair. The Materialname will be used to load the material. No Bone-Assignments yet.
 
 Material: The right material in the file will be searched, the importer should work with materials who
 have 1 technique and 1 pass in this technique. From there, the texturename (for 1 color- and 1 normalmap) will be loaded. Also, the
 materialname will be set.
 
-Skeleton: Nothing, yet.
+Skeleton: Skeleton with Bone hierarchie, names and transformations, but no animations.
 */

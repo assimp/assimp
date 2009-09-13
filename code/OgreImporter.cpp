@@ -7,6 +7,7 @@
 using namespace std;
 
 #include "boost/format.hpp"
+#include "boost/foreach.hpp"
 using namespace boost;
 
 #include "OgreImporter.h"
@@ -79,19 +80,28 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 		DefaultLogger::get()->debug("Loading Submehs with Material: "+NewSubMesh.MaterialName);
 		ReadSubMesh(NewSubMesh, MeshFile);
 	}
-	//_______________________________________________________________-
+	//____________________________________________________________
 
 
-
-	//-----------------Read the skeleton:----------------------
-	//Create the root node
+	//-----------------Create the root node-----------------------
 	pScene->mRootNode=new aiNode("root");
 
 	//link the mesh with the root node:
 	pScene->mRootNode->mMeshes=new unsigned int[1];
 	pScene->mRootNode->mMeshes[0]=0;
 	pScene->mRootNode->mNumMeshes=1;
-	//_________________________________________________________
+	//____________________________________________________________
+
+
+	//----------------Load the skeleton: -------------------------------
+	if(MeshFile->getNodeName()==string("skeletonlink"))
+	{
+		string SkeletonFile=GetAttribute<string>(MeshFile, "name");
+		LoadSkeleton(SkeletonFile);
+	}
+	//__________________________________________________________________
+
+
 }
 
 
@@ -113,11 +123,12 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 	vector<aiVector3D> Positions; bool HasPositions=false;
 	vector<aiVector3D> Normals; bool HasNormals=false;
 	vector<aiVector3D> Uvs; unsigned int NumUvs=0;//nearly always 2d, but assimp has always 3d texcoords
+	vector< vector<Weight> > Weights;
 
 	XmlRead(Reader);
-	//TODO: maybe we have alsways just 1 faces and 1 geometry and always in this order. this loop will only work korrekt, wenn the order
+	//TODO: maybe we have alsways just 1 faces and 1 geometry and always in this order. this loop will only work correct, wenn the order
 	//of faces and geometry changed, and not if we habe more than one of one
-	while(Reader->getNodeName()==string("faces") || string(Reader->getNodeName())=="geometry")
+	while(Reader->getNodeName()==string("faces") || string(Reader->getNodeName())=="geometry" || Reader->getNodeName()==string("boneassignments"))
 	{
 		if(string(Reader->getNodeName())=="faces")//Read the face list
 		{
@@ -139,7 +150,7 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 				FaceList.push_back(NewFace);
 			}
 
-		}
+		}//end of faces
 		else if(string(Reader->getNodeName())=="geometry")//Read the vertexdata
 		{	
 			//some info logging:
@@ -199,16 +210,36 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 				XmlRead(Reader);
 			}
 
-		}
+		}//end of "geometry
+		else if(string(Reader->getNodeName())=="boneassignments")
+		{
+			Weights.resize(Positions.size());
+			XmlRead(Reader);
+			while(XmlRead(Reader) && Reader->getNodeName()==string("vertexboneassignment"))
+			{
+				Weight NewWeight;
+				unsigned int VertexId=GetAttribute<int>(Reader, "vertexindex");
+				NewWeight.BoneId=GetAttribute<int>(Reader, "boneindex");
+				NewWeight.Value=GetAttribute<float>(Reader, "weight");
+				
+				Weights[VertexId].push_back(NewWeight);
+
+				XmlRead(Reader);
+			}
+
+		}//end of boneassignments
 	}
 	DefaultLogger::get()->debug(str(format("Positionen: %1% Normale: %2% TexCoords: %3%") % Positions.size() % Normals.size() % Uvs.size()));
+	DefaultLogger::get()->debug(Reader->getNodeName());
 
 
-	//Make all Vertexes unique: (this is required by assimp)
+
+	//---------------Make all Vertexes unique: (this is required by assimp)-----------------------
 	vector<Face> UniqueFaceList(FaceList.size());
 	vector<aiVector3D> UniquePositions(FaceList.size()*3);//*3 because each face consits of 3 vertexes, because we only support triangles^^
 	vector<aiVector3D> UniqueNormals(FaceList.size()*3);
 	vector<aiVector3D> UniqueUvs(FaceList.size()*3);
+	vector< vector<Weight> > UniqueWeights(FaceList.size()*3);
 
 	for(unsigned int i=0; i<FaceList.size(); ++i)
 	{
@@ -224,14 +255,20 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 		UniqueUvs[3*i+1]=Uvs[FaceList[i].VertexIndices[1]];
 		UniqueUvs[3*i+2]=Uvs[FaceList[i].VertexIndices[2]];
 
+		UniqueWeights[3*i+0]=UniqueWeights[FaceList[i].VertexIndices[0]];
+		UniqueWeights[3*i+1]=UniqueWeights[FaceList[i].VertexIndices[1]];
+		UniqueWeights[3*i+2]=UniqueWeights[FaceList[i].VertexIndices[2]];
+
 		UniqueFaceList[i].VertexIndices[0]=3*i+0;
 		UniqueFaceList[i].VertexIndices[1]=3*i+1;
 		UniqueFaceList[i].VertexIndices[2]=3*i+2;
 	}
+	//_________________________________________________________________________________________
 
 	//----------------Load the Material:-------------------------------
 	aiMaterial* MeshMat=LoadMaterial(theSubMesh.MaterialName);
 	//_________________________________________________________________
+
 
 	//Mesh is fully loaded, copy it into the aiScene:
 	if(m_CurrentScene->mNumMeshes!=0)
@@ -255,6 +292,11 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 	NewAiMesh->mTextureCoords[0]= new aiVector3D[UniqueUvs.size()];
 	memcpy(NewAiMesh->mTextureCoords[0], &UniqueUvs[0], UniqueUvs.size()*sizeof(aiVector3D));
 
+	//Bones
+	
+
+
+
 	//Faces
 	NewAiMesh->mFaces=new aiFace[UniqueFaceList.size()];
 	for(unsigned int i=0; i<UniqueFaceList.size(); ++i)
@@ -275,17 +317,13 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 	m_CurrentScene->mMaterials=new aiMaterial*[1];
 	m_CurrentScene->mNumMaterials=1;
 	m_CurrentScene->mMaterials[0]=MeshMat;
-	//________________________________________________________________
+	//_____________________________________________________________________________
 
 
 	//Attach the mesh to the scene:
 	m_CurrentScene->mNumMeshes=1;
 	m_CurrentScene->mMeshes=new aiMesh*;
 	m_CurrentScene->mMeshes[0]=NewAiMesh;
-
-
-	//stringstream ss; ss <<"Last Node: <" << Reader->getNodeName() << ">";
-	//throw new ImportErrorException(ss.str());
 }
 
 aiMaterial* OgreImporter::LoadMaterial(std::string MaterialName)
@@ -446,6 +484,179 @@ aiMaterial* OgreImporter::LoadMaterial(std::string MaterialName)
 
 	return NewMaterial;
 }
+
+void OgreImporter::LoadSkeleton(std::string FileName)
+{
+	//most likely the skeleton file will only end with .skeleton
+	//But this is a xml reader, so we need: .skeleton.xml
+	FileName+=".xml";
+
+	DefaultLogger::get()->debug(string("Loading Skeleton: ")+FileName);
+
+	//Open the File:
+	boost::scoped_ptr<IOStream> File(m_CurrentIOHandler->Open(FileName));
+	if(NULL==File.get())
+		throw new ImportErrorException("Failed to open skeleton file "+FileName+".");
+
+	//Read the Mesh File:
+	boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(File.get()));
+	XmlReader* SkeletonFile = irr::io::createIrrXMLReader(mIOWrapper.get());
+	if(!SkeletonFile)
+		throw new ImportErrorException(string("Failed to create XML Reader for ")+FileName);
+
+	//Variables to store the data from the skeleton file:
+	vector<Bone> Bones;
+
+	//Quick note: Whoever read this should know this one thing: irrXml fucking sucks!!!
+
+	XmlRead(SkeletonFile);
+	if(string("skeleton")!=SkeletonFile->getNodeName())
+		throw new ImportErrorException("No <skeleton> node in SkeletonFile: "+FileName);
+
+	//load bones
+	XmlRead(SkeletonFile);
+	if(string("bones")==SkeletonFile->getNodeName())
+	{
+		XmlRead(SkeletonFile);
+		while(string("bone")==SkeletonFile->getNodeName())
+		{
+			//TODO: Maybe we can have bone ids for the errrors, but normaly, they should never appera, so what....
+
+			//read a new bone:
+			Bone NewBone;
+			NewBone.Id=GetAttribute<int>(SkeletonFile, "id");
+			NewBone.Name=GetAttribute<string>(SkeletonFile, "name");
+
+			//load the position:
+			XmlRead(SkeletonFile);
+			if(string("position")!=SkeletonFile->getNodeName())
+				throw new ImportErrorException("Position is not first node in Bone!");
+			NewBone.Position.x=GetAttribute<float>(SkeletonFile, "x");
+			NewBone.Position.y=GetAttribute<float>(SkeletonFile, "y");
+			NewBone.Position.z=GetAttribute<float>(SkeletonFile, "z");
+
+			//Rotation:
+			XmlRead(SkeletonFile);
+			if(string("rotation")!=SkeletonFile->getNodeName())
+				throw new ImportErrorException("Rotation is not the second node in Bone!");
+			NewBone.RotationAngle=GetAttribute<float>(SkeletonFile, "angle");
+			XmlRead(SkeletonFile);
+			if(string("axis")!=SkeletonFile->getNodeName())
+				throw new ImportErrorException("No axis specified for bone rotation!");
+			NewBone.RotationAxis.x=GetAttribute<float>(SkeletonFile, "x");
+			NewBone.RotationAxis.y=GetAttribute<float>(SkeletonFile, "y");
+			NewBone.RotationAxis.z=GetAttribute<float>(SkeletonFile, "z");
+
+			//append the newly loaded bone to the bone list
+			Bones.push_back(NewBone);
+
+			//Proceed to the next bone:
+			XmlRead(SkeletonFile);
+		}
+	}
+	//The bones in the file a not neccesarly ordered by there id's so we do it now:
+	sort(Bones.begin(), Bones.end());
+	//now the id of each bone should be equal to its position in the vector:
+	//so we do a simple check:
+	{
+		bool IdsOk=true;
+		for(int i=0; i<static_cast<signed int>(Bones.size()); ++i)//i is signed, because all Id's are also signed!
+		{
+			if(Bones[i].Id!=i)
+				IdsOk=false;
+		}
+		if(!IdsOk)
+			throw new ImportErrorException("Bone Ids are not valid!"+FileName);
+	}
+
+	DefaultLogger::get()->debug(str(format("Number of bones: %1%") % Bones.size()));
+
+
+
+
+
+
+	//load bonehierarchy
+	if(string("bonehierarchy")==SkeletonFile->getNodeName())
+	{
+		DefaultLogger::get()->debug("loading bonehierarchy...");
+		XmlRead(SkeletonFile);
+		while(string("boneparent")==SkeletonFile->getNodeName())
+		{
+			string Child, Parent;
+			Child=GetAttribute<string>(SkeletonFile, "bone");
+			Parent=GetAttribute<string>(SkeletonFile, "parent");
+
+			unsigned int ChildId, ParentId;
+			ChildId=find(Bones.begin(), Bones.end(), Child)->Id;
+			ParentId=find(Bones.begin(), Bones.end(), Parent)->Id;
+
+			Bones[ChildId].ParentId=ParentId;
+			Bones[ParentId].Children.push_back(ChildId);
+
+			XmlRead(SkeletonFile);//i once forget this line, which led to an endless loop, did i mentioned, that irrxml sucks??
+		}
+	}
+	
+
+
+
+	//load animations
+
+
+
+
+
+
+	//-----------------skeleton is completly loaded, now but it in the assimp scene:-------------------------------
+	
+	if(!m_CurrentScene->mRootNode)
+		throw new ImportErrorException("No root node exists!!");
+	if(0!=m_CurrentScene->mRootNode->mNumChildren)
+		throw new ImportErrorException("Root Node already has childnodes!");
+
+	//create a node for all root bones:
+	DefaultLogger::get()->debug("Root Bones");
+	vector<aiNode*> RootBoneNodes;
+	BOOST_FOREACH(Bone theBone, Bones)
+	{
+		if(-1==theBone.ParentId) //the bone is a root bone
+		{
+			DefaultLogger::get()->debug(theBone.Name);
+			RootBoneNodes.push_back(CreateAiNodeFromBone(theBone.Id, Bones, m_CurrentScene->mRootNode));
+		}
+	}
+	m_CurrentScene->mRootNode->mNumChildren=RootBoneNodes.size();
+	m_CurrentScene->mRootNode->mChildren=new aiNode*[RootBoneNodes.size()];
+	memcpy(m_CurrentScene->mRootNode->mChildren, &RootBoneNodes[0], sizeof(aiNode*)*RootBoneNodes.size());
+}
+
+aiNode* CreateAiNodeFromBone(int BoneId, std::vector<Bone> Bones, aiNode* ParentNode)
+{
+	//----Create the node for this bone and set its values-----
+	aiNode* NewNode=new aiNode(Bones[BoneId].Name);
+	NewNode->mParent=ParentNode;
+	//create a matrix from the transformation values of the ogre bone
+	NewNode->mTransformation=aiMatrix4x4::Translation(Bones[BoneId].Position, aiMatrix4x4())
+							*
+							aiMatrix4x4::Rotation(Bones[BoneId].RotationAngle, Bones[BoneId].RotationAxis, aiMatrix4x4())
+							;
+	//__________________________________________________________
+
+
+	//----recursivly create all children Nodes:------
+	NewNode->mNumChildren=Bones[BoneId].Children.size();
+	NewNode->mChildren=new aiNode*[Bones[BoneId].Children.size()];
+	for(unsigned int i=0; i<Bones[BoneId].Children.size(); ++i)
+	{
+		NewNode->mChildren[i]=CreateAiNodeFromBone(Bones[BoneId].Children[i], Bones, NewNode);
+	}
+	//____________________________________________________
+
+
+	return NewNode;
+}
+
 
 }//namespace Ogre
 }//namespace Assimp

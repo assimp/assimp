@@ -14,7 +14,12 @@ typedef irr::io::IrrXMLReader XmlReader;
 
 //Forward declarations:
 struct Face;
+struct Weight;
 struct SubMesh;
+struct Bone;
+struct Animation;
+struct Track;
+struct Keyframe;
 
 ///The Main Ogre Importer Class
 class OgreImporter : public BaseImporter
@@ -30,6 +35,7 @@ private:
 	/** @param Filename We need this to check for a material File with the same name.*/
 	void ReadSubMesh(SubMesh& theSubMesh, XmlReader* Reader);
 	aiMaterial* LoadMaterial(std::string MaterialName);
+	void LoadSkeleton(std::string FileName);
 
 	//Now we don't have to give theses parameters to all functions
 	std::string m_CurrentFilename;
@@ -110,12 +116,63 @@ struct Face
 	unsigned int VertexIndices[3];
 };
 
+struct Weight
+{
+	unsigned int BoneId;
+	float Value;
+};
+
 /// Helper Class to describe a complete SubMesh
 struct SubMesh
 {
 	std::string Name;
 	std::string MaterialName;
 	std::vector<Face> Faces;
+};
+
+
+/// Helper Class to describe an ogre-bone
+/** All Id's are signed ints, because than we have -1 as a simple INVALID_ID Value (we start from 0 so 0 is a valid bone ID!*/
+struct Bone
+{
+	int Id;
+	int ParentId;
+	std::string Name;
+	aiVector3D Position;
+	float RotationAngle;
+	aiVector3D RotationAxis;
+	std::vector<int> Children;
+
+	///ctor
+	Bone(): Id(-1), ParentId(-1), RotationAngle(0.0f) {}
+	///this operator is needed to sort the bones after Id's
+	bool operator<(const Bone& rval)
+		{return Id<rval.Id; }
+	///this operator is needed to find a bone by its name in a vector<Bone>
+	bool operator==(const std::string& rval)
+		{return Name==rval; }
+	
+};
+
+///Recursivly creates a filled aiNode from a given root bone
+aiNode* CreateAiNodeFromBone(int BoneId, std::vector<Bone> Bones, aiNode* ParentNode);
+
+
+///Describes an Ogre Animation
+struct Animation
+{
+	std::string Name;
+	float Length;
+};
+
+///a track (keyframes for one bone) from an animation
+struct Track
+{
+};
+
+/// keyframe (bone transformation) from a track from a animation
+struct Keyframe
+{
 };
 
 }//namespace Ogre

@@ -1,0 +1,259 @@
+<mesh>
+	<submeshes>
+		<submesh material="Material" usesharedvertices="false">
+			<faces count="28">
+				<face v1="0" v2="1" v3="2"/>
+				<face v1="0" v2="2" v3="3"/>
+				<face v1="4" v2="5" v3="7"/>
+				<face v1="5" v2="6" v3="7"/>
+				<face v1="8" v2="9" v3="11"/>
+				<face v1="9" v2="10" v3="11"/>
+				<face v1="12" v2="13" v3="15"/>
+				<face v1="13" v2="14" v3="15"/>
+				<face v1="16" v2="17" v3="18"/>
+				<face v1="16" v2="18" v3="19"/>
+				<face v1="5" v2="4" v3="21"/>
+				<face v1="4" v2="20" v3="21"/>
+				<face v1="19" v2="18" v3="23"/>
+				<face v1="18" v2="22" v3="23"/>
+				<face v1="9" v2="8" v3="24"/>
+				<face v1="9" v2="24" v3="25"/>
+				<face v1="0" v2="3" v3="27"/>
+				<face v1="3" v2="26" v3="27"/>
+				<face v1="27" v2="26" v3="29"/>
+				<face v1="26" v2="28" v3="29"/>
+				<face v1="25" v2="24" v3="30"/>
+				<face v1="25" v2="30" v3="31"/>
+				<face v1="23" v2="22" v3="32"/>
+				<face v1="23" v2="32" v3="33"/>
+				<face v1="21" v2="20" v3="35"/>
+				<face v1="20" v2="34" v3="35"/>
+				<face v1="36" v2="37" v3="39"/>
+				<face v1="37" v2="38" v3="39"/>
+			</faces>
+			<geometry vertexcount="40">
+				<vertexbuffer positions="true" normals="true">
+					<vertex>
+						<position x="1.000000" y="1.000000" z="-1.000000"/>
+						<normal x="0.000000" y="-0.000000" z="-1.000000"/>
+					</vertex>
+					<vertex>
+						<position x="1.000000" y="-1.000000" z="-1.000000"/>
+						<normal x="0.000000" y="-0.000000" z="-1.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-1.000000" y="-1.000000" z="-1.000000"/>
+						<normal x="0.000000" y="-0.000000" z="-1.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-1.000000" y="1.000000" z="-1.000000"/>
+						<normal x="0.000000" y="-0.000000" z="-1.000000"/>
+					</vertex>
+					<vertex>
+						<position x="1.000000" y="0.999999" z="1.000000"/>
+						<normal x="0.000000" y="0.000000" z="1.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-1.000000" y="1.000000" z="1.000000"/>
+						<normal x="0.000000" y="0.000000" z="1.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-1.000000" y="-1.000000" z="1.000000"/>
+						<normal x="0.000000" y="0.000000" z="1.000000"/>
+					</vertex>
+					<vertex>
+						<position x="0.999999" y="-1.000001" z="1.000000"/>
+						<normal x="0.000000" y="0.000000" z="1.000000"/>
+					</vertex>
+					<vertex>
+						<position x="1.000000" y="1.000000" z="-1.000000"/>
+						<normal x="1.000000" y="-0.000001" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="1.000000" y="0.999999" z="1.000000"/>
+						<normal x="1.000000" y="-0.000001" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="0.999999" y="-1.000001" z="1.000000"/>
+						<normal x="1.000000" y="-0.000001" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="1.000000" y="-1.000000" z="-1.000000"/>
+						<normal x="1.000000" y="-0.000001" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="1.000000" y="-1.000000" z="-1.000000"/>
+						<normal x="-0.000000" y="-1.000000" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="0.999999" y="-1.000001" z="1.000000"/>
+						<normal x="-0.000000" y="-1.000000" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-1.000000" y="-1.000000" z="1.000000"/>
+						<normal x="-0.000000" y="-1.000000" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-1.000000" y="-1.000000" z="-1.000000"/>
+						<normal x="-0.000000" y="-1.000000" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-1.000000" y="-1.000000" z="-1.000000"/>
+						<normal x="-1.000000" y="0.000000" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-1.000000" y="-1.000000" z="1.000000"/>
+						<normal x="-1.000000" y="0.000000" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-1.000000" y="1.000000" z="1.000000"/>
+						<normal x="-1.000000" y="0.000000" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-1.000000" y="1.000000" z="-1.000000"/>
+						<normal x="-1.000000" y="0.000000" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="1.000001" y="3.000000" z="1.000000"/>
+						<normal x="-0.000000" y="-0.000000" z="1.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-0.999999" y="3.000000" z="1.000000"/>
+						<normal x="-0.000000" y="-0.000000" z="1.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-0.999999" y="3.000000" z="1.000000"/>
+						<normal x="-1.000000" y="0.000000" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-0.999999" y="3.000000" z="-1.000000"/>
+						<normal x="-1.000000" y="0.000000" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="1.000000" y="3.000000" z="-1.000000"/>
+						<normal x="1.000000" y="-0.000000" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="1.000001" y="3.000000" z="1.000000"/>
+						<normal x="1.000000" y="-0.000000" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-0.999999" y="3.000000" z="-1.000000"/>
+						<normal x="0.000000" y="0.000000" z="-1.000000"/>
+					</vertex>
+					<vertex>
+						<position x="1.000000" y="3.000000" z="-1.000000"/>
+						<normal x="0.000000" y="0.000000" z="-1.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-0.999999" y="5.000000" z="-0.999999"/>
+						<normal x="0.000000" y="0.000000" z="-1.000000"/>
+					</vertex>
+					<vertex>
+						<position x="1.000001" y="5.000000" z="-0.999999"/>
+						<normal x="0.000000" y="0.000000" z="-1.000000"/>
+					</vertex>
+					<vertex>
+						<position x="1.000001" y="5.000000" z="-0.999999"/>
+						<normal x="1.000000" y="-0.000000" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="1.000001" y="5.000000" z="1.000001"/>
+						<normal x="1.000000" y="-0.000000" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-0.999999" y="5.000000" z="1.000001"/>
+						<normal x="-1.000000" y="0.000000" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-0.999999" y="5.000000" z="-0.999999"/>
+						<normal x="-1.000000" y="0.000000" z="-0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="1.000001" y="5.000000" z="1.000001"/>
+						<normal x="-0.000000" y="-0.000000" z="1.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-0.999999" y="5.000000" z="1.000001"/>
+						<normal x="-0.000000" y="-0.000000" z="1.000000"/>
+					</vertex>
+					<vertex>
+						<position x="1.000001" y="5.000000" z="1.000001"/>
+						<normal x="0.000000" y="1.000000" z="0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="1.000001" y="5.000000" z="-0.999999"/>
+						<normal x="0.000000" y="1.000000" z="0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-0.999999" y="5.000000" z="-0.999999"/>
+						<normal x="0.000000" y="1.000000" z="0.000000"/>
+					</vertex>
+					<vertex>
+						<position x="-0.999999" y="5.000000" z="1.000001"/>
+						<normal x="0.000000" y="1.000000" z="0.000000"/>
+					</vertex>
+				</vertexbuffer>
+			</geometry>
+			<boneassignments>
+				<vertexboneassignment vertexindex="0" boneindex="1" weight="0.906643"/>
+				<vertexboneassignment vertexindex="0" boneindex="0" weight="0.093356"/>
+				<vertexboneassignment vertexindex="1" boneindex="1" weight="0.980516"/>
+				<vertexboneassignment vertexindex="2" boneindex="1" weight="0.980662"/>
+				<vertexboneassignment vertexindex="3" boneindex="1" weight="0.906108"/>
+				<vertexboneassignment vertexindex="3" boneindex="0" weight="0.093892"/>
+				<vertexboneassignment vertexindex="4" boneindex="1" weight="0.907323"/>
+				<vertexboneassignment vertexindex="4" boneindex="0" weight="0.092677"/>
+				<vertexboneassignment vertexindex="5" boneindex="1" weight="0.907298"/>
+				<vertexboneassignment vertexindex="5" boneindex="0" weight="0.092702"/>
+				<vertexboneassignment vertexindex="6" boneindex="1" weight="0.980827"/>
+				<vertexboneassignment vertexindex="7" boneindex="1" weight="0.980624"/>
+				<vertexboneassignment vertexindex="8" boneindex="1" weight="0.906643"/>
+				<vertexboneassignment vertexindex="8" boneindex="0" weight="0.093356"/>
+				<vertexboneassignment vertexindex="9" boneindex="1" weight="0.907323"/>
+				<vertexboneassignment vertexindex="9" boneindex="0" weight="0.092677"/>
+				<vertexboneassignment vertexindex="10" boneindex="1" weight="0.980624"/>
+				<vertexboneassignment vertexindex="11" boneindex="1" weight="0.980516"/>
+				<vertexboneassignment vertexindex="12" boneindex="1" weight="0.980516"/>
+				<vertexboneassignment vertexindex="13" boneindex="1" weight="0.980624"/>
+				<vertexboneassignment vertexindex="14" boneindex="1" weight="0.980827"/>
+				<vertexboneassignment vertexindex="15" boneindex="1" weight="0.980662"/>
+				<vertexboneassignment vertexindex="16" boneindex="1" weight="0.980662"/>
+				<vertexboneassignment vertexindex="17" boneindex="1" weight="0.980827"/>
+				<vertexboneassignment vertexindex="18" boneindex="1" weight="0.907298"/>
+				<vertexboneassignment vertexindex="18" boneindex="0" weight="0.092702"/>
+				<vertexboneassignment vertexindex="19" boneindex="1" weight="0.906108"/>
+				<vertexboneassignment vertexindex="19" boneindex="0" weight="0.093892"/>
+				<vertexboneassignment vertexindex="20" boneindex="1" weight="0.092568"/>
+				<vertexboneassignment vertexindex="20" boneindex="0" weight="0.907432"/>
+				<vertexboneassignment vertexindex="21" boneindex="1" weight="0.092574"/>
+				<vertexboneassignment vertexindex="21" boneindex="0" weight="0.907426"/>
+				<vertexboneassignment vertexindex="22" boneindex="1" weight="0.092574"/>
+				<vertexboneassignment vertexindex="22" boneindex="0" weight="0.907426"/>
+				<vertexboneassignment vertexindex="23" boneindex="1" weight="0.092465"/>
+				<vertexboneassignment vertexindex="23" boneindex="0" weight="0.907535"/>
+				<vertexboneassignment vertexindex="24" boneindex="1" weight="0.092519"/>
+				<vertexboneassignment vertexindex="24" boneindex="0" weight="0.907481"/>
+				<vertexboneassignment vertexindex="25" boneindex="1" weight="0.092568"/>
+				<vertexboneassignment vertexindex="25" boneindex="0" weight="0.907432"/>
+				<vertexboneassignment vertexindex="26" boneindex="1" weight="0.092465"/>
+				<vertexboneassignment vertexindex="26" boneindex="0" weight="0.907535"/>
+				<vertexboneassignment vertexindex="27" boneindex="1" weight="0.092519"/>
+				<vertexboneassignment vertexindex="27" boneindex="0" weight="0.907481"/>
+				<vertexboneassignment vertexindex="28" boneindex="0" weight="0.980879"/>
+				<vertexboneassignment vertexindex="29" boneindex="0" weight="0.980707"/>
+				<vertexboneassignment vertexindex="30" boneindex="0" weight="0.980707"/>
+				<vertexboneassignment vertexindex="31" boneindex="0" weight="0.980864"/>
+				<vertexboneassignment vertexindex="32" boneindex="0" weight="0.980699"/>
+				<vertexboneassignment vertexindex="33" boneindex="0" weight="0.980879"/>
+				<vertexboneassignment vertexindex="34" boneindex="0" weight="0.980864"/>
+				<vertexboneassignment vertexindex="35" boneindex="0" weight="0.980699"/>
+				<vertexboneassignment vertexindex="36" boneindex="0" weight="0.980864"/>
+				<vertexboneassignment vertexindex="37" boneindex="0" weight="0.980707"/>
+				<vertexboneassignment vertexindex="38" boneindex="0" weight="0.980879"/>
+				<vertexboneassignment vertexindex="39" boneindex="0" weight="0.980699"/>
+			</boneassignments>
+		</submesh>
+	</submeshes>
+	<skeletonlink name="Arm.skeleton"/>
+</mesh>

@@ -59,7 +59,7 @@ template<> inline int GetAttribute<int>(XmlReader* Reader, std::string Name)
 	if(Value)
 		return atoi(Value);
 	else
-		throw ImportErrorException(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
+		throw new ImportErrorException(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
 }
 
 template<> inline float GetAttribute<float>(XmlReader* Reader, std::string Name)
@@ -68,7 +68,7 @@ template<> inline float GetAttribute<float>(XmlReader* Reader, std::string Name)
 	if(Value)
 		return fast_atof(Value);
 	else
-		throw ImportErrorException(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
+		throw new ImportErrorException(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
 }
 
 template<> inline std::string GetAttribute<std::string>(XmlReader* Reader, std::string Name)
@@ -163,16 +163,23 @@ struct Animation
 {
 	std::string Name;
 	float Length;
+	std::vector<Track> Tracks;
 };
 
 ///a track (keyframes for one bone) from an animation
 struct Track
 {
+	std::string BoneName;
+	std::vector<Keyframe> Keyframes;
 };
 
 /// keyframe (bone transformation) from a track from a animation
 struct Keyframe
 {
+	float Time;
+	aiVector3D Position;
+	aiQuaternion Rotation;
+	aiVector3D Scaling;
 };
 
 }//namespace Ogre

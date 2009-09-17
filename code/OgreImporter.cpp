@@ -99,6 +99,8 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 		string SkeletonFile=GetAttribute<string>(MeshFile, "name");
 		LoadSkeleton(SkeletonFile);
 	}
+	else
+		DefaultLogger::get()->warn(MeshFile->getNodeName());
 	//__________________________________________________________________
 
 
@@ -166,7 +168,10 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 			}
 			HasPositions=GetAttribute<bool>(Reader, "positions");
 			HasNormals=GetAttribute<bool>(Reader, "normals");
-			NumUvs=GetAttribute<int>(Reader, "texture_coords");
+			if(!Reader->getAttributeValue("texture_coords"))//we can have 1 or 0 uv channels, and if the mesh has no uvs, it also doesn't have the attribute
+				NumUvs=0;
+			else
+				NumUvs=GetAttribute<int>(Reader, "texture_coords");
 			if(NumUvs>1)
 				throw new ImportErrorException("too many texcoords (just 1 supported!)");
 
@@ -214,7 +219,6 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 		else if(string(Reader->getNodeName())=="boneassignments")
 		{
 			Weights.resize(Positions.size());
-			XmlRead(Reader);
 			while(XmlRead(Reader) && Reader->getNodeName()==string("vertexboneassignment"))
 			{
 				Weight NewWeight;
@@ -224,13 +228,13 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 				
 				Weights[VertexId].push_back(NewWeight);
 
-				XmlRead(Reader);
+				//XmlRead(Reader);//Once i had this line, and than i got only every second boneassignment, but my first test models had even boneassignment counts, so i thougt, everything would work. And yes, i HATE irrXML!!!
 			}
 
 		}//end of boneassignments
 	}
 	DefaultLogger::get()->debug(str(format("Positionen: %1% Normale: %2% TexCoords: %3%") % Positions.size() % Normals.size() % Uvs.size()));
-	DefaultLogger::get()->debug(Reader->getNodeName());
+	DefaultLogger::get()->warn(Reader->getNodeName());
 
 
 
@@ -251,9 +255,12 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 		UniqueNormals[3*i+1]=Normals[FaceList[i].VertexIndices[1]];
 		UniqueNormals[3*i+2]=Normals[FaceList[i].VertexIndices[2]];
 
-		UniqueUvs[3*i+0]=Uvs[FaceList[i].VertexIndices[0]];
-		UniqueUvs[3*i+1]=Uvs[FaceList[i].VertexIndices[1]];
-		UniqueUvs[3*i+2]=Uvs[FaceList[i].VertexIndices[2]];
+		if(1==NumUvs)
+		{
+			UniqueUvs[3*i+0]=Uvs[FaceList[i].VertexIndices[0]];
+			UniqueUvs[3*i+1]=Uvs[FaceList[i].VertexIndices[1]];
+			UniqueUvs[3*i+2]=Uvs[FaceList[i].VertexIndices[2]];
+		}
 
 		UniqueWeights[3*i+0]=UniqueWeights[FaceList[i].VertexIndices[0]];
 		UniqueWeights[3*i+1]=UniqueWeights[FaceList[i].VertexIndices[1]];
@@ -287,13 +294,17 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 	memcpy(NewAiMesh->mNormals, &UniqueNormals[0], UniqueNormals.size()*sizeof(aiVector3D));
 
 	//Uvs
-	NewAiMesh->mNumUVComponents[0]=2;
-	//NewAiMesh->mTextureCoords=new aiVector3D*[1];
-	NewAiMesh->mTextureCoords[0]= new aiVector3D[UniqueUvs.size()];
-	memcpy(NewAiMesh->mTextureCoords[0], &UniqueUvs[0], UniqueUvs.size()*sizeof(aiVector3D));
+	if(0!=NumUvs)
+	{
+		NewAiMesh->mNumUVComponents[0]=2;
+		NewAiMesh->mTextureCoords[0]= new aiVector3D[UniqueUvs.size()];
+		memcpy(NewAiMesh->mTextureCoords[0], &UniqueUvs[0], UniqueUvs.size()*sizeof(aiVector3D));
+	}
 
 	//Bones
-	
+	/*NewAiMesh->mNumBones=UniqueWeights.size();
+	NewAiMesh->mBones=new aiBone*[UniqueWeights.size()];
+	for(un*/
 
 
 
@@ -513,46 +524,49 @@ void OgreImporter::LoadSkeleton(std::string FileName)
 	if(string("skeleton")!=SkeletonFile->getNodeName())
 		throw new ImportErrorException("No <skeleton> node in SkeletonFile: "+FileName);
 
-	//load bones
+
+
+	//------------------------------------load bones-----------------------------------------
 	XmlRead(SkeletonFile);
-	if(string("bones")==SkeletonFile->getNodeName())
+	if(string("bones")!=SkeletonFile->getNodeName())
+		throw new ImportErrorException("No bones node in skeleton "+FileName);
+
+	XmlRead(SkeletonFile);
+
+	while(string("bone")==SkeletonFile->getNodeName())
 	{
+		//TODO: Maybe we can have bone ids for the errrors, but normaly, they should never appera, so what....
+
+		//read a new bone:
+		Bone NewBone;
+		NewBone.Id=GetAttribute<int>(SkeletonFile, "id");
+		NewBone.Name=GetAttribute<string>(SkeletonFile, "name");
+
+		//load the position:
 		XmlRead(SkeletonFile);
-		while(string("bone")==SkeletonFile->getNodeName())
-		{
-			//TODO: Maybe we can have bone ids for the errrors, but normaly, they should never appera, so what....
+		if(string("position")!=SkeletonFile->getNodeName())
+			throw new ImportErrorException("Position is not first node in Bone!");
+		NewBone.Position.x=GetAttribute<float>(SkeletonFile, "x");
+		NewBone.Position.y=GetAttribute<float>(SkeletonFile, "y");
+		NewBone.Position.z=GetAttribute<float>(SkeletonFile, "z");
 
-			//read a new bone:
-			Bone NewBone;
-			NewBone.Id=GetAttribute<int>(SkeletonFile, "id");
-			NewBone.Name=GetAttribute<string>(SkeletonFile, "name");
+		//Rotation:
+		XmlRead(SkeletonFile);
+		if(string("rotation")!=SkeletonFile->getNodeName())
+			throw new ImportErrorException("Rotation is not the second node in Bone!");
+		NewBone.RotationAngle=GetAttribute<float>(SkeletonFile, "angle");
+		XmlRead(SkeletonFile);
+		if(string("axis")!=SkeletonFile->getNodeName())
+			throw new ImportErrorException("No axis specified for bone rotation!");
+		NewBone.RotationAxis.x=GetAttribute<float>(SkeletonFile, "x");
+		NewBone.RotationAxis.y=GetAttribute<float>(SkeletonFile, "y");
+		NewBone.RotationAxis.z=GetAttribute<float>(SkeletonFile, "z");
 
-			//load the position:
-			XmlRead(SkeletonFile);
-			if(string("position")!=SkeletonFile->getNodeName())
-				throw new ImportErrorException("Position is not first node in Bone!");
-			NewBone.Position.x=GetAttribute<float>(SkeletonFile, "x");
-			NewBone.Position.y=GetAttribute<float>(SkeletonFile, "y");
-			NewBone.Position.z=GetAttribute<float>(SkeletonFile, "z");
+		//append the newly loaded bone to the bone list
+		Bones.push_back(NewBone);
 
-			//Rotation:
-			XmlRead(SkeletonFile);
-			if(string("rotation")!=SkeletonFile->getNodeName())
-				throw new ImportErrorException("Rotation is not the second node in Bone!");
-			NewBone.RotationAngle=GetAttribute<float>(SkeletonFile, "angle");
-			XmlRead(SkeletonFile);
-			if(string("axis")!=SkeletonFile->getNodeName())
-				throw new ImportErrorException("No axis specified for bone rotation!");
-			NewBone.RotationAxis.x=GetAttribute<float>(SkeletonFile, "x");
-			NewBone.RotationAxis.y=GetAttribute<float>(SkeletonFile, "y");
-			NewBone.RotationAxis.z=GetAttribute<float>(SkeletonFile, "z");
-
-			//append the newly loaded bone to the bone list
-			Bones.push_back(NewBone);
-
-			//Proceed to the next bone:
-			XmlRead(SkeletonFile);
-		}
+		//Proceed to the next bone:
+		XmlRead(SkeletonFile);
 	}
 	//The bones in the file a not neccesarly ordered by there id's so we do it now:
 	sort(Bones.begin(), Bones.end());
@@ -568,41 +582,115 @@ void OgreImporter::LoadSkeleton(std::string FileName)
 		if(!IdsOk)
 			throw new ImportErrorException("Bone Ids are not valid!"+FileName);
 	}
-
 	DefaultLogger::get()->debug(str(format("Number of bones: %1%") % Bones.size()));
+	//________________________________________________________________________________
 
 
 
 
 
 
-	//load bonehierarchy
-	if(string("bonehierarchy")==SkeletonFile->getNodeName())
+	//----------------------------load bonehierarchy--------------------------------
+	if(string("bonehierarchy")!=SkeletonFile->getNodeName())
+		throw new ImportErrorException("no bonehierarchy node in "+FileName);
+
+	DefaultLogger::get()->debug("loading bonehierarchy...");
+	XmlRead(SkeletonFile);
+	while(string("boneparent")==SkeletonFile->getNodeName())
 	{
-		DefaultLogger::get()->debug("loading bonehierarchy...");
-		XmlRead(SkeletonFile);
-		while(string("boneparent")==SkeletonFile->getNodeName())
-		{
-			string Child, Parent;
-			Child=GetAttribute<string>(SkeletonFile, "bone");
-			Parent=GetAttribute<string>(SkeletonFile, "parent");
+		string Child, Parent;
+		Child=GetAttribute<string>(SkeletonFile, "bone");
+		Parent=GetAttribute<string>(SkeletonFile, "parent");
 
-			unsigned int ChildId, ParentId;
-			ChildId=find(Bones.begin(), Bones.end(), Child)->Id;
-			ParentId=find(Bones.begin(), Bones.end(), Parent)->Id;
+		unsigned int ChildId, ParentId;
+		ChildId=find(Bones.begin(), Bones.end(), Child)->Id;
+		ParentId=find(Bones.begin(), Bones.end(), Parent)->Id;
 
-			Bones[ChildId].ParentId=ParentId;
-			Bones[ParentId].Children.push_back(ChildId);
+		Bones[ChildId].ParentId=ParentId;
+		Bones[ParentId].Children.push_back(ChildId);
 
-			XmlRead(SkeletonFile);//i once forget this line, which led to an endless loop, did i mentioned, that irrxml sucks??
-		}
+		XmlRead(SkeletonFile);//i once forget this line, which led to an endless loop, did i mentioned, that irrxml sucks??
 	}
+	//_____________________________________________________________________________
+
 	
 
 
+	//---------------------------load animations-----------------------------
+	vector<Animation> Animations;
+	if(string("animations")==SkeletonFile->getNodeName())//animations are optional values
+	{
+		DefaultLogger::get()->debug("Loading Animations");
+		XmlRead(SkeletonFile);
+		while(string("animation")==SkeletonFile->getNodeName())
+		{
+			Animation NewAnimation;
+			NewAnimation.Name=GetAttribute<string>(SkeletonFile, "name");
+			NewAnimation.Length=GetAttribute<float>(SkeletonFile, "length");
+			
+			//Load all Tracks
+			XmlRead(SkeletonFile);
+			if(string("tracks")!=SkeletonFile->getNodeName())
+				throw new ImportErrorException("no tracks node in animation");
+			XmlRead(SkeletonFile);
+			while(string("track")==SkeletonFile->getNodeName())
+			{
+				Track NewTrack;
+				NewTrack.BoneName=GetAttribute<string>(SkeletonFile, "bone");
 
-	//load animations
+				//Load all keyframes;
+				XmlRead(SkeletonFile);
+				if(string("keyframes")!=SkeletonFile->getNodeName())
+					throw new ImportErrorException("no keyframes node!");
+				XmlRead(SkeletonFile);
+				while(string("keyframe")==SkeletonFile->getNodeName())
+				{
+					Keyframe NewKeyframe;
+					NewKeyframe.Time=GetAttribute<float>(SkeletonFile, "time");
 
+					//Position:
+					XmlRead(SkeletonFile);
+					if(string("translate")!=SkeletonFile->getNodeName())
+						throw new ImportErrorException("translate node not first in keyframe");
+					NewKeyframe.Position.x=GetAttribute<float>(SkeletonFile, "x");
+					NewKeyframe.Position.y=GetAttribute<float>(SkeletonFile, "y");
+					NewKeyframe.Position.z=GetAttribute<float>(SkeletonFile, "z");
+
+					//Rotation:
+					XmlRead(SkeletonFile);
+					if(string("rotate")!=SkeletonFile->getNodeName())
+						throw new ImportErrorException("rotate is not second node in keyframe");
+					float RotationAngle=GetAttribute<float>(SkeletonFile, "angle");
+					aiVector3D RotationAxis;
+					XmlRead(SkeletonFile);
+					if(string("axis")!=SkeletonFile->getNodeName())
+						throw new ImportErrorException("No axis for keyframe rotation!");
+					RotationAxis.x=GetAttribute<float>(SkeletonFile, "x");
+					RotationAxis.y=GetAttribute<float>(SkeletonFile, "y");
+					RotationAxis.z=GetAttribute<float>(SkeletonFile, "z");
+					NewKeyframe.Rotation=aiQuaternion(RotationAxis, RotationAngle);
+
+					//Scaling:
+					XmlRead(SkeletonFile);
+					if(string("scale")!=SkeletonFile->getNodeName())
+						throw new ImportErrorException("no scalling key in keyframe!");
+					NewKeyframe.Scaling.x=GetAttribute<float>(SkeletonFile, "x");
+					NewKeyframe.Scaling.y=GetAttribute<float>(SkeletonFile, "y");
+					NewKeyframe.Scaling.z=GetAttribute<float>(SkeletonFile, "z");
+
+
+					NewTrack.Keyframes.push_back(NewKeyframe);
+					XmlRead(SkeletonFile);
+				}
+
+
+				NewAnimation.Tracks.push_back(NewTrack);
+			}
+
+			Animations.push_back(NewAnimation);
+		}
+	}
+	//_____________________________________________________________________________
 
 
 
@@ -615,7 +703,7 @@ void OgreImporter::LoadSkeleton(std::string FileName)
 	if(0!=m_CurrentScene->mRootNode->mNumChildren)
 		throw new ImportErrorException("Root Node already has childnodes!");
 
-	//create a node for all root bones:
+	//--------------Creatre the assimp bone hierarchy-----------------
 	DefaultLogger::get()->debug("Root Bones");
 	vector<aiNode*> RootBoneNodes;
 	BOOST_FOREACH(Bone theBone, Bones)
@@ -629,7 +717,62 @@ void OgreImporter::LoadSkeleton(std::string FileName)
 	m_CurrentScene->mRootNode->mNumChildren=RootBoneNodes.size();
 	m_CurrentScene->mRootNode->mChildren=new aiNode*[RootBoneNodes.size()];
 	memcpy(m_CurrentScene->mRootNode->mChildren, &RootBoneNodes[0], sizeof(aiNode*)*RootBoneNodes.size());
+	//_______________________________________________________________
+
+
+	//-----------------Create the Assimp Animations --------------------
+	if(Animations.size()>0)//Maybe the model had only a skeleton and no animations. (If it also has no skeleton, this function would'nt have benn called
+	{
+		m_CurrentScene->mNumAnimations=Animations.size();
+		m_CurrentScene->mAnimations=new aiAnimation*[Animations.size()];
+		for(unsigned int i=0; i<Animations.size(); ++i)//create all animations
+		{
+			aiAnimation* NewAnimation=new aiAnimation();
+			NewAnimation->mName=Animations[i].Name;
+			NewAnimation->mDuration=Animations[i].Length;
+			NewAnimation->mTicksPerSecond=0.05f;
+
+			//Create all tracks in this animation
+			NewAnimation->mNumChannels=Animations[i].Tracks.size();
+			NewAnimation->mChannels=new aiNodeAnim*[Animations[i].Tracks.size()];
+			for(unsigned int j=0; j<Animations[i].Tracks.size(); ++j)
+			{
+				aiNodeAnim* NewNodeAnim=new aiNodeAnim();
+				NewNodeAnim->mNodeName=Animations[i].Tracks[j].BoneName;
+
+				//Create the keyframe arrays...
+				unsigned int KeyframeCount=Animations[i].Tracks[j].Keyframes.size();
+				NewNodeAnim->mNumPositionKeys=KeyframeCount;
+				NewNodeAnim->mPositionKeys=new aiVectorKey[KeyframeCount];
+				NewNodeAnim->mNumRotationKeys=KeyframeCount;
+				NewNodeAnim->mRotationKeys=new aiQuatKey[KeyframeCount];
+				NewNodeAnim->mNumScalingKeys=KeyframeCount;
+				NewNodeAnim->mScalingKeys=new aiVectorKey[KeyframeCount];
+				
+				//...and fill them
+				for(unsigned int k=0; k<KeyframeCount; ++k)
+				{
+					NewNodeAnim->mPositionKeys[k].mTime=Animations[i].Tracks[j].Keyframes[k].Time;
+					NewNodeAnim->mPositionKeys[k].mValue=Animations[i].Tracks[j].Keyframes[k].Position;
+					
+					NewNodeAnim->mRotationKeys[k].mTime=Animations[i].Tracks[j].Keyframes[k].Time;
+					NewNodeAnim->mRotationKeys[k].mValue=Animations[i].Tracks[j].Keyframes[k].Rotation;
+
+					NewNodeAnim->mScalingKeys[k].mTime=Animations[i].Tracks[j].Keyframes[k].Time;
+					NewNodeAnim->mScalingKeys[k].mValue=Animations[i].Tracks[j].Keyframes[k].Scaling;
+				}
+				
+				NewAnimation->mChannels[j]=NewNodeAnim;
+			}
+
+			m_CurrentScene->mAnimations[i]=NewAnimation;
+		}
+	}
+	//__________________________________________________________________
 }
+
+
+
 
 aiNode* CreateAiNodeFromBone(int BoneId, std::vector<Bone> Bones, aiNode* ParentNode)
 {

@@ -358,12 +358,16 @@ enum aiPostProcessSteps
 
 	// -------------------------------------------------------------------------
 	/** <hr>This step searches all meshes for invalid data, such as zeroed
-	 *  normal vectors or invalid UV coords and removes them.
+	 *  normal vectors or invalid UV coords and removes/fixes them. This is
+	 *  intended to get rid of some common exporter errors.
 	 *
 	 * This is especially useful for normals. If they are invalid, and
 	 * the step recognizes this, they will be removed and can later
-	 * be computed by one of the other steps.<br>
-	 * The step will also remove meshes that are infinitely small.
+	 * be recomputed, i.e. by the #aiProcess_GenSmoothNormals flag.<br>
+	 * The step will also remove meshes that are infinitely small and reduce
+	 * animation tracks consisting of hundreds if redundant keys to a single
+	 * key. The <tt>AI_CONFIG_PP_FID_ANIM_ACCURACY</tt> config property decides
+	 * the accuracy of the check for duplicate animation tracks.
 	*/
 	aiProcess_FindInvalidData = 0x20000,
 

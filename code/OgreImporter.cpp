@@ -6,8 +6,8 @@
 #include <sstream>
 using namespace std;
 
-#include "boost/format.hpp"
-#include "boost/foreach.hpp"
+//#include "boost/format.hpp"
+//#include "boost/foreach.hpp"
 using namespace boost;
 
 #include "OgreImporter.h"
@@ -340,7 +340,9 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 aiMaterial* OgreImporter::LoadMaterial(std::string MaterialName)
 {
 	MaterialHelper *NewMaterial=new MaterialHelper();
-	NewMaterial->AddProperty(&aiString(MaterialName.c_str()), AI_MATKEY_NAME);
+
+	aiString ts(MaterialName.c_str());
+	NewMaterial->AddProperty(&ts, AI_MATKEY_NAME);
 	/*For bettetr understanding of the material parser, here is a material example file:
 
 	material Sarg
@@ -449,7 +451,8 @@ aiMaterial* OgreImporter::LoadMaterial(std::string MaterialName)
 											if(Line=="texture")
 											{
 												ss >> Line;
-												NewMaterial->AddProperty(&aiString(Line.c_str()), AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+												aiString ts(Line.c_str());
+												NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
 											}
 										}//end of texture unit
 									}
@@ -478,12 +481,14 @@ aiMaterial* OgreImporter::LoadMaterial(std::string MaterialName)
 						if(Line=="$colormap")
 						{
 							ss >> Line;
-							NewMaterial->AddProperty(&aiString(Line.c_str()), AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+							aiString ts(Line.c_str());
+							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
 						}
 						if(Line=="$normalmap")
 						{
 							ss >> Line;
-							NewMaterial->AddProperty(&aiString(Line.c_str()), AI_MATKEY_TEXTURE(aiTextureType_NORMALS, 0));
+							aiString ts(Line.c_str());
+							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_NORMALS, 0));
 						}
 					}					
 				}//end of material
@@ -569,7 +574,7 @@ void OgreImporter::LoadSkeleton(std::string FileName)
 		XmlRead(SkeletonFile);
 	}
 	//The bones in the file a not neccesarly ordered by there id's so we do it now:
-	sort(Bones.begin(), Bones.end());
+	std::sort(Bones.begin(), Bones.end());
 	//now the id of each bone should be equal to its position in the vector:
 	//so we do a simple check:
 	{
@@ -779,10 +784,12 @@ aiNode* CreateAiNodeFromBone(int BoneId, std::vector<Bone> Bones, aiNode* Parent
 	//----Create the node for this bone and set its values-----
 	aiNode* NewNode=new aiNode(Bones[BoneId].Name);
 	NewNode->mParent=ParentNode;
+
+	aiMatrix4x4 t0,t1;
 	//create a matrix from the transformation values of the ogre bone
-	NewNode->mTransformation=aiMatrix4x4::Translation(Bones[BoneId].Position, aiMatrix4x4())
+	NewNode->mTransformation=aiMatrix4x4::Translation(Bones[BoneId].Position, t0)
 							*
-							aiMatrix4x4::Rotation(Bones[BoneId].RotationAngle, Bones[BoneId].RotationAxis, aiMatrix4x4())
+							aiMatrix4x4::Rotation(Bones[BoneId].RotationAngle, Bones[BoneId].RotationAxis, t1)
 							;
 	//__________________________________________________________
 

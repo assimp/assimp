@@ -197,7 +197,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * This is used by the "SplitLargeMeshes" PostProcess-Step to determine
  * whether a mesh must be split or not.
  * @note The default value is AI_SLM_DEFAULT_MAX_VERTICES
- * Property type: integer.
+ * Property type: integer. 
  */
 #define AI_CONFIG_PP_SLM_VERTEX_LIMIT \
 	"PP_SLM_VERTEX_LIMIT"
@@ -212,8 +212,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This is used by the #aiProcess_LimitBoneWeights PostProcess-Step.
  * @note The default value is AI_LBW_MAX_WEIGHTS
- * Property type: integer.
- */
+ * Property type: integer.*/
 #define AI_CONFIG_PP_LBW_MAX_WEIGHTS	\
 	"PP_LBW_MAX_WEIGHTS"
 
@@ -243,71 +242,59 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ---------------------------------------------------------------------------
 /** @brief Enumerates components of the aiScene and aiMesh data structures
- *  that can be excluded from the import by using the RemoveComponent step.
+ *  that can be excluded from the import using the #aiPrpcess_RemoveComponent step.
  *
  *  See the documentation to #aiProcess_RemoveComponent for more details.
  */
 enum aiComponent
 {
-	/** Normal vectors
-	 */
+	/** Normal vectors */
 	aiComponent_NORMALS = 0x2u,
 
-	/** Tangents and bitangents go always together ...
-	 */
+	/** Tangents and bitangents go always together ... */
 	aiComponent_TANGENTS_AND_BITANGENTS = 0x4u,
 
 	/** ALL color sets
-	 * Use aiComponent_COLORn(N) to specify the N'th set 
-	 */
+	 * Use aiComponent_COLORn(N) to specify the N'th set */
 	aiComponent_COLORS = 0x8,
 
 	/** ALL texture UV sets
-	 * aiComponent_TEXCOORDn(N) to specify the N'th set 
-	 */
+	 * aiComponent_TEXCOORDn(N) to specify the N'th set  */
 	aiComponent_TEXCOORDS = 0x10,
 
 	/** Removes all bone weights from all meshes.
 	 * The scenegraph nodes corresponding to the bones are NOT removed.
-	 * use the #aiProcess_OptimizeGraph step to do this
-	 */
+	 * use the #aiProcess_OptimizeGraph step to do this */
 	aiComponent_BONEWEIGHTS = 0x20,
 
 	/** Removes all node animations (aiScene::mAnimations).
 	 * The corresponding scenegraph nodes are NOT removed.
-	 * use the #aiProcess_OptimizeGraph step to do this
-	 */
+	 * use the #aiProcess_OptimizeGraph step to do this */
 	aiComponent_ANIMATIONS = 0x40,
 
-	/** Removes all embedded textures (aiScene::mTextures)
-	 */
+	/** Removes all embedded textures (aiScene::mTextures) */
 	aiComponent_TEXTURES = 0x80,
 
 	/** Removes all light sources (aiScene::mLights).
 	 * The corresponding scenegraph nodes are NOT removed.
-	 * use the #aiProcess_OptimizeGraph step to do this
-	 */
+	 * use the #aiProcess_OptimizeGraph step to do this */
 	aiComponent_LIGHTS = 0x100,
 
 	/** Removes all light sources (aiScene::mCameras).
 	 * The corresponding scenegraph nodes are NOT removed.
-	 * use the #aiProcess_OptimizeGraph step to do this
-	 */
+	 * use the #aiProcess_OptimizeGraph step to do this */
 	aiComponent_CAMERAS = 0x200,
 
-	/** Removes all meshes (aiScene::mMeshes). 
-	 */
+	/** Removes all meshes (aiScene::mMeshes). */
 	aiComponent_MESHES = 0x400,
 
 	/** Removes all materials. One default material will
-	 * be generated, so aiScene::mNumMaterials will be 1.
-	 */
+	 * be generated, so aiScene::mNumMaterials will be 1. */
 	aiComponent_MATERIALS = 0x800,
 
 
 	/** This value is not used. It is just there to force the
-	 *  compiler to map this enum to a 32 Bit integer.
-	 */
+	 *  compiler to map this enum to a 32 Bit integer. */
 	_aiComponent_Force32Bit = 0x9fffffff
 };
 
@@ -343,6 +330,18 @@ enum aiComponent
  */
 #define AI_CONFIG_PP_SBP_REMOVE				\
 	"PP_SBP_REMOVE"
+
+// ---------------------------------------------------------------------------
+/** @brief Input parameter to the #aiProcess_FindInvalidData step:
+ *  Specifies the floating-point accuracy for animation values. The step
+ *  checks for animation tracks where all frame values are absolutely equal
+ *  and removes them. This tweakable controls the epsilon for floating-point
+ *  comparisons - two keys are considered equal if the invariant 
+ *  abs(n0-n1)>epsilon holds true for all vector respectively quaternion
+ *  components. The default value is 0.f - comparisons are exact then.
+ */
+#define AI_CONFIG_PP_FID_ANIM_ACCURACY				\
+	"PP_FID_ANIM_ACCURACY"
 
 
 // TransformUVCoords evaluates UV scalings
@@ -552,11 +551,13 @@ enum aiComponent
 #define AI_CONFIG_IMPORT_IRR_ANIM_FPS				\
 	"IMPORT_IRR_ANIM_FPS"
 
-/// Ogre Importer will try to load this Materialfile
-/**
-Ogre Mehs contain only the MaterialName, not the MaterialFile. If there is no material file
-with the same name as the material, Ogre Importer will try to load this file and search the material in it.
-*/
+
+// ---------------------------------------------------------------------------
+/** Ogre Importer will try to load this Materialfile
+ * Ogre Mehs contain only the MaterialName, not the MaterialFile. If there 
+ * is no material file with the same name as the material, Ogre Importer will 
+ * try to load this file and search the material in it.
+ */
 #define AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE "IMPORT_OGRE_MATERIAL_FILE"
 
 

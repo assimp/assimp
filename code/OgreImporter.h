@@ -146,10 +146,10 @@ struct Bone
 	///ctor
 	Bone(): Id(-1), ParentId(-1), RotationAngle(0.0f) {}
 	///this operator is needed to sort the bones after Id's
-	bool operator<(const Bone& rval)
+	bool operator<(const Bone& rval) const
 		{return Id<rval.Id; }
 	///this operator is needed to find a bone by its name in a vector<Bone>
-	bool operator==(const std::string& rval)
+	bool operator==(const std::string& rval) const
 		{return Name==rval; }
 	
 };

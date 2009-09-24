@@ -6,27 +6,33 @@ namespace AssimpNET
 
 Vector2D::Vector2D(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiVector2D();
 }
 
-Vector2D::Vector2D(const Vector2D^ o)
+Vector2D::Vector2D(Vector2D% o)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiVector2D(*(o.getNative()));
 }
 
 Vector2D::Vector2D(float _xy)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiVector2D(_xy);
 }
 
 Vector2D::Vector2D(float _x, float _y)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiVector2D(_x, _y);
+}
+
+Vector2D::Vector2D(aiVector2D* native)
+{
+	this->p_native = native;
 }
 
 Vector2D::~Vector2D(void)
 {
-	throw gcnew System::NotImplementedException();
+	if(this->p_native)
+		delete this->p_native;
 }
 
 float Vector2D::Length()
@@ -92,6 +98,11 @@ float Vector2D::SquareLength()
 Vector2D^ Vector2D::SymMul(const Vector2D^ o)
 {
 	throw gcnew System::NotImplementedException();
+}
+
+aiVector2D* Vector2D::getNative()
+{
+	return this->p_native;
 }
 
 

@@ -41,8 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//managed includes
 #include "Matrix4x4.h"
 #include "Vector3D.h"
+
+//native includes
+#include "aiCamera.h"
 
 using namespace System;
 
@@ -52,6 +56,7 @@ namespace AssimpNET
 	{
 	public:
 		Camera(void);
+		Camera(aiCamera* native);
 		~Camera(void);
 
 		void GetCameraMatrix(Matrix4x4^ out);
@@ -98,6 +103,10 @@ namespace AssimpNET
 			String^ get(){throw gcnew System::NotImplementedException();}
 			void set(String^ value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiCamera* getNative();	
+	private:
+		aiCamera *p_native;
 
 	};
 }//namespace

@@ -41,9 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//managed includes
 #include "Vector3D.h"
-//#include "Matrix3x3.h"
 
+//native includes
+#include "aiTypes.h"
+#include "aiQuaternion.h"
 
 
 using namespace System;
@@ -59,8 +62,9 @@ namespace AssimpNET
 		Quaternion(Vector3D^ normalized);
 		Quaternion(Vector3D^ axis, float angle);
 		Quaternion(float rotx, float roty, float rotz);
-		Quaternion(const Matrix3x3^ rotMatrix);
+		Quaternion(Matrix3x3^ rotMatrix);
 		Quaternion(float _w, float _x, float _y, float _z);
+		Quaternion(aiQuaternion* native);
 		~Quaternion(void);
 
 		Quaternion^ Conjugate();
@@ -96,6 +100,10 @@ namespace AssimpNET
 			float get() { throw gcnew System::NotImplementedException();}
 			void set(float value) { throw gcnew System::NotImplementedException();}
 		}
+
+		aiQuaternion* getNative();	
+	private:
+		aiQuaternion *p_native;
 
 	};
 }//namespace

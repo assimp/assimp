@@ -41,6 +41,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//native includes
+#include "aiMaterial.h"
+
 using namespace System;
 
 namespace AssimpNET
@@ -58,6 +61,7 @@ namespace AssimpNET
 	{
 		public:
 			MaterialProperty(void);
+			MaterialProperty(aiMaterialProperty* native);
 			~MaterialProperty(void);
 
 		property array<char>^ mData
@@ -95,5 +99,9 @@ namespace AssimpNET
 			PropertyTypeInfo get(){throw gcnew System::NotImplementedException();}
 			void set(PropertyTypeInfo value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiMaterialProperty* getNative();
+		private:
+		aiMaterialProperty *p_native;
 	};
 }//namespace

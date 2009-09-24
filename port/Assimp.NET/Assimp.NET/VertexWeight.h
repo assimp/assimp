@@ -42,7 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 
-//#include "Matrix4x4.h"
+//native includes
+#include "aiMesh.h"
 
 using namespace System;
 
@@ -53,6 +54,7 @@ namespace AssimpNET
 	public:
 		VertexWeight(void);
 		VertexWeight(unsigned int pID, float pWeight);
+		VertexWeight(aiVertexWeight* native);
 		~VertexWeight(void);
 
 		property unsigned int mVertexId
@@ -66,6 +68,10 @@ namespace AssimpNET
 			float get(){throw gcnew System::NotImplementedException();}
 			void set(float value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiVertexWeight* getNative();
+	private:
+		aiVertexWeight *p_native;
 	};
 
 }//namespace

@@ -41,8 +41,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//managed includes
 #include "Matrix4x4.h"
 #include "VertexWeight.h"
+
+
+//native includes
+#include "aiMesh.h"
 
 using namespace System;
 
@@ -52,7 +57,8 @@ namespace AssimpNET
 	{
 	public:
 		Bone(void);
-		Bone(const Bone^ other);
+		Bone(Bone% other);
+		Bone(aiBone* native);
 		~Bone(void);
 
 		property String^ mName
@@ -75,5 +81,9 @@ namespace AssimpNET
 			array<VertexWeight^>^ get(){throw gcnew System::NotImplementedException();}
 			void set(array<VertexWeight^>^ value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiBone* getNative();
+		private:
+		aiBone *p_native;
 	};
 }//namespace

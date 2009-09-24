@@ -41,7 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//managend includes
 #include "Texel.h"
+
+//native includs
+#include "aiTexture.h"
 
 using namespace System;
 
@@ -97,6 +101,7 @@ namespace AssimpNET
 	{
 	public:
 		Texture(void);
+		Texture(aiTexture* native);
 		~Texture(void);
 
 		bool CheckFormat(array<char>^ s);
@@ -120,5 +125,9 @@ namespace AssimpNET
 		}
 
 		property Texel^ pcData;
+
+		aiTexture* getNative();	
+	private:
+		aiTexture *p_native;
 	};
 }//namespace

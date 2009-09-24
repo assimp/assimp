@@ -41,7 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//managend includes
 #include "Vector3D.h"
+
+//native includes
+#include "aiAnim.h"
 
 using namespace System;
 
@@ -52,7 +56,8 @@ namespace AssimpNET
 	{
 	public:
 		VectorKey();
-		VectorKey(double time, const Vector3D^ value);
+		VectorKey(double time, Vector3D^ value);
+		VectorKey(aiVectorKey* native);
 		~VectorKey(void);
 
 		bool operator != (const VectorKey^ o);
@@ -71,5 +76,9 @@ namespace AssimpNET
 			Vector3D^ get() {throw gcnew System::NotImplementedException();}
 			void set(Vector3D^ value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiVectorKey* getNative();	
+	private:
+		aiVectorKey *p_native;
 	};
 }

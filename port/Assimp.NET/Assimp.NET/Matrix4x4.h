@@ -45,7 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Vector3D.h"
 #include "Quaternion.h"
 
-
+//native includes
+#include "aiVector3D.h"
+#include "aiMatrix4x4.h"
 
 namespace AssimpNET
 {
@@ -53,11 +55,12 @@ namespace AssimpNET
 	{
 	public:
 		Matrix4x4(void);
-		Matrix4x4(const Matrix3x3 other);
+		Matrix4x4(Matrix3x3^ other);
 		Matrix4x4(	float _a1, float _a2, float _a3, float _a4,
 					float _b1, float _b2, float _b3, float _b4,
 					float _c1, float _c2, float _c3, float _c4,
 					float _d1, float _d2, float _d3, float _d4);
+		Matrix4x4(aiMatrix4x4* native);
 		~Matrix4x4(void);
 
 		void Decompose(Vector3D^ scaling, Quaternion^ rotation, Vector3D^ position);
@@ -179,6 +182,10 @@ namespace AssimpNET
 			float get(){throw gcnew System::NotImplementedException();}
 			void set(float value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiMatrix4x4* getNative();
+		private:
+		aiMatrix4x4 *p_native;
 
 	};
 }//namespace

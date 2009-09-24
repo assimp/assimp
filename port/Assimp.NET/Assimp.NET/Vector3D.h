@@ -41,8 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-
-//#include "Matrix4x4.h"
+//native includes
+#include "aiTypes.h"
 
 using namespace System;
 
@@ -54,9 +54,10 @@ namespace AssimpNET
 	{
 	public:
 		Vector3D(void);
-		Vector3D(const Vector3D^ o);
+		Vector3D(Vector3D% o);
 		Vector3D(float _xyz);
 		Vector3D(float _x, float _y, float _z);
+		Vector3D(aiVector3D* native);
 		~Vector3D(void);
 		float Length();
 		Vector3D^ Normalize();
@@ -91,7 +92,9 @@ namespace AssimpNET
 			void set(float value){throw gcnew System::NotImplementedException();}
 		}
 
-
+		aiVector3D* getNative();	
+	private:
+		aiVector3D *p_native;
 
 	};
 }//namespace

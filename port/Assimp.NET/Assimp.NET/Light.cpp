@@ -6,12 +6,23 @@ namespace AssimpNET
 
 Light::Light(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiLight();
+}
+
+Light::Light(aiLight* native)
+{
+	this->p_native = native;
 }
 
 Light::~Light(void)
 {
-	throw gcnew System::NotImplementedException();
+	if(this->p_native)
+		delete this->p_native;
+}
+
+aiLight* Light::getNative()
+{
+	return this->p_native;
 }
 
 }//namespace

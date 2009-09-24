@@ -6,12 +6,18 @@ namespace AssimpNET
 
 Node::Node(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiNode();
+}
+
+Node::Node(aiNode* native)
+{
+	this->p_native = native;
 }
 
 Node::~Node(void)
 {
-	throw gcnew System::NotImplementedException();
+	if(this->p_native)
+		delete this->p_native;
 }
 
 Node^ Node::findNode(array<char>^ name)
@@ -22,6 +28,11 @@ Node^ Node::findNode(array<char>^ name)
 Node^ Node::findNode(const String^ name)
 {
 	throw gcnew System::NotImplementedException();
+}
+
+aiNode* Node::getNative()
+{
+	return this->p_native;
 }
 
 }//namespace

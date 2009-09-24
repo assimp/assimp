@@ -41,9 +41,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//managed includes
 #include "Enums.h"
 #include "MaterialProperty.h"
 #include "Texture.h"
+
+//native includes
+#include "aiMaterial.h"
 
 using namespace System;
 
@@ -53,6 +57,7 @@ namespace AssimpNET
 	{
 	public:
 		Material(void);
+		Material(aiMaterial* native);
 		~Material(void);
 
 		generic<typename T>
@@ -81,6 +86,10 @@ namespace AssimpNET
 			array<MaterialProperty^>^ get(){throw gcnew System::NotImplementedException();}
 			void set(array<MaterialProperty^>^ value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiMaterial* getNative();
+		private:
+		aiMaterial *p_native;
 
 	};
 }//namespace

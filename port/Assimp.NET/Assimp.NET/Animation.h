@@ -41,7 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//managed includes
 #include "NodeAnim.h"
+
+//native includes
+#include "aiAnim.h"
 
 using namespace System;
 
@@ -51,6 +55,7 @@ namespace AssimpNET
 	{
 	public:
 		Animation(void);
+		Animation(aiAnimation* native);
 		~Animation(void);
 
 		property array<NodeAnim^>^ mAnimChannels
@@ -78,6 +83,10 @@ namespace AssimpNET
 			String^ get(){throw gcnew System::NotImplementedException();}
 			void set(String^ value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiAnimation* getNative();
+		private:
+		aiAnimation *p_native;
 		
 	};
 }//namespace

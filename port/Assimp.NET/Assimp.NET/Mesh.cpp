@@ -6,12 +6,18 @@ namespace AssimpNET
 
 Mesh::Mesh(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiMesh();
+}
+
+Mesh::Mesh(aiMesh* native)
+{
+	this->p_native = native;
 }
 
 Mesh::~Mesh(void)
 {
-	throw gcnew System::NotImplementedException();
+	if(this->p_native)
+		delete this->p_native;
 }
 
 unsigned int Mesh::GetNumColorChannels()
@@ -57,6 +63,11 @@ bool Mesh::HasTextureCoords()
 bool Mesh::HasVertexColors()
 {
 	throw gcnew System::NotImplementedException();
+}
+
+aiMesh* Mesh::getNative()
+{
+	return this->p_native;
 }
 
 }//namespace

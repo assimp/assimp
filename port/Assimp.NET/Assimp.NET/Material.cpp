@@ -6,12 +6,18 @@ namespace AssimpNET
 
 Material::Material(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiMaterial();
+}
+
+Material::Material(aiMaterial* native)
+{
+	this->p_native = native;
 }
 
 Material::~Material(void)
 {
-	throw gcnew System::NotImplementedException();
+	if(this->p_native)
+		delete this->p_native;
 }
 
 generic<typename T>
@@ -30,6 +36,11 @@ aiReturn Material::GetTexture(TextureType type, unsigned int index, String^ path
 					TextureOP& op, TextureMapMode& mapMode)
 {
 	throw gcnew System::NotImplementedException();
+}
+
+aiMaterial* Material::getNative()
+{
+	return this->p_native;
 }
 
 }//namespace

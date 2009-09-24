@@ -6,27 +6,33 @@ namespace AssimpNET
 
 Vector3D::Vector3D(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiVector3D();
 }
 
-Vector3D::Vector3D(const Vector3D^ o)
+Vector3D::Vector3D(Vector3D% o)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiVector3D(*(o.getNative()));
 }
 
 Vector3D::Vector3D(float _xyz)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiVector3D(_xyz);
 }
 
 Vector3D::Vector3D(float _x, float _y, float _z)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiVector3D(_x, _y, _z);
+}
+
+Vector3D::Vector3D(aiVector3D* native)
+{
+	this->p_native = native;
 }
 
 Vector3D::~Vector3D(void)
 {
-	throw gcnew System::NotImplementedException();
+	if(this->p_native)
+		delete this->p_native;
 }
 
 float Vector3D::Length()
@@ -97,6 +103,11 @@ float Vector3D::SquareLength()
 Vector3D^ Vector3D::SymMul(const Vector3D^ o)
 {
 	throw gcnew System::NotImplementedException();
+}
+
+aiVector3D* Vector3D::getNative()
+{
+	return this->p_native;
 }
 
 }

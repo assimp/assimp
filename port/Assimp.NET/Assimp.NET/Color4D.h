@@ -1,5 +1,8 @@
 #pragma once
 
+//native includes
+#include "aiTypes.h"
+
 using namespace System;
 
 namespace AssimpNET
@@ -9,8 +12,9 @@ namespace AssimpNET
 	{
 	public:
 		Color4D(void);
-		Color4D (const Color4D^ other);
+		Color4D (Color4D% other);
  		Color4D (float _r, float _g, float _b, float _a);
+		Color4D (aiColor4D* native);
 
 		bool IsBlack ();
 		bool operator!= (const Color4D^ other);
@@ -42,6 +46,9 @@ namespace AssimpNET
 			void set(float value){throw gcnew System::NotImplementedException();}
 		}
 
+		aiColor4D* getNative();	
+	private:
+		aiColor4D *p_native;
 
 	};
 

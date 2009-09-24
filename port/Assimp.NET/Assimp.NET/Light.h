@@ -41,8 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//managed includes
 #include "Vector3D.h"
 #include "Color3D.h"
+
+//natvie includes
+#include "aiLight.h"
 
 using namespace System;
 
@@ -61,6 +65,7 @@ namespace AssimpNET
 	{
 	public:
 		Light(void);
+		Light(aiLight* native);
 		~Light(void);
 
 		property float AngleInnerCone
@@ -134,5 +139,9 @@ namespace AssimpNET
 			LightSourceType get(){throw gcnew System::NotImplementedException();}
 			void set(LightSourceType value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiLight* getNative();
+		private:
+		aiLight *p_native;
 	};
 }//namespace

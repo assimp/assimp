@@ -6,27 +6,33 @@ namespace AssimpNET
 
 Importer::Importer(void)
 {
-	throw gcnew System::NotImplementedException();
+	p_native = new Assimp::Importer();
 }
 
-Importer::Importer(const Importer^ other)
+Importer::Importer(Importer% other)
 {
-	throw gcnew System::NotImplementedException();
+	p_native = other.getNative();
+}
+
+Importer::Importer(Assimp::Importer* native)
+{
+	this->p_native = native;
 }
 
 Importer::~Importer(void)
 {
-	throw gcnew System::NotImplementedException();
+	if(this->p_native)
+		delete this->p_native;
 }
 
 void Importer::FreeScene()
 {
-	throw gcnew System::NotImplementedException();
+	p_native->FreeScene();
 }
 
-array<char>^ Importer::GetErrorString()
+System::String^ Importer::GetErrorString()
 {
-	throw gcnew System::NotImplementedException();
+	return gcnew System::String(p_native->GetErrorString());
 }
 
 void Importer::GetExtensionsList(String^ extensions)
@@ -49,19 +55,22 @@ Scene^ Importer::getOrphanedScene( )
 	throw gcnew System::NotImplementedException();
 }
 
-float Importer::GetPropertyFloat(array<char>^ propName)
+float Importer::GetPropertyFloat(String^ propName)
 {
 	throw gcnew System::NotImplementedException();
+	//return p_native->GetPropertyFloat(propName->ToCharArray());
 }
 
-int Importer::GetPropertyInt(array<char>^ propName)
+int Importer::GetPropertyInt(String^ propName)
 {
 	throw gcnew System::NotImplementedException();
+	//return p_native->GetPropertyInteger((IntPtr)propName->ToCharArray());
 }
 
-String^ Importer::GetPrpertyString(array<char>^ propName)
+String^ Importer::GetPrpertyString(String^ propName)
 {
 	throw gcnew System::NotImplementedException();
+	//return System::String(p_native->GetPropertyString(propName->ToCharArray()));
 }
 
 Scene^ Importer::getScene()
@@ -71,20 +80,10 @@ Scene^ Importer::getScene()
 
 bool Importer::IsDefaultIOHandler()
 {
-	throw gcnew System::NotImplementedException();
-}
-
-bool Importer::IsExtensionSupported(array<char>^ extension)
-{
-	throw gcnew System::NotImplementedException();
+	return p_native->IsDefaultIOHandler();
 }
 
 bool Importer::IsExtensionSupported(String^ extension)
-{
-	throw gcnew System::NotImplementedException();
-}
-
-Scene^ Importer::ReadFile(array<char>^ fileName, unsigned int flags)
 {
 	throw gcnew System::NotImplementedException();
 }
@@ -96,7 +95,7 @@ Scene^ Importer::ReadFile(String^ fileName, unsigned int flags)
 
 void Importer::SetExtraVerbose(bool verbose)
 {
-	throw gcnew System::NotImplementedException();
+	p_native->SetExtraVerbose(verbose);
 }
 
 void Importer::SetIOHanlder(IOSystem^ ioHandler)
@@ -104,24 +103,29 @@ void Importer::SetIOHanlder(IOSystem^ ioHandler)
 	throw gcnew System::NotImplementedException();
 }
 
-void Importer::SetPropertyFloat(array<char>^ propName, float value)
+void Importer::SetPropertyFloat(String^ propName, float value)
 {
 	throw gcnew System::NotImplementedException();
 }
 
-void Importer::SetPropertyInt(array<char>^ propName, int value)
+void Importer::SetPropertyInt(String^ propName, int value)
 {
 	throw gcnew System::NotImplementedException();
 }
 
-void Importer::SetPrpertyString(array<char>^ propName, String^ value)
+void Importer::SetPrpertyString(String^ propName, String^ value)
 {
 	throw gcnew System::NotImplementedException();
 }
 
 bool Importer::ValidateFlags(unsigned int flags)
 {
-	throw gcnew System::NotImplementedException();
+	return p_native->ValidateFlags(flags);
+}
+
+Assimp::Importer* Importer::getNative()
+{
+	return this->p_native;
 }
 
 

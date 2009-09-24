@@ -41,10 +41,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//managed includes
 #include "Vector3D.h"
 #include "Bone.h"
 #include "Color4D.h"
 #include "Face.h"
+
+//native includes
+#include "aiMesh.h"
 
 using namespace System;
 
@@ -54,6 +58,7 @@ namespace AssimpNET
 	{
 	public:
 		Mesh(void);
+		Mesh(aiMesh* native);
 		~Mesh(void);
 
 		unsigned int GetNumColorChannels();
@@ -149,6 +154,10 @@ namespace AssimpNET
 			array<Vector3D^>^ get(){throw gcnew System::NotImplementedException();}
 			void set(array<Vector3D^>^ value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiMesh* getNative();
+		private:
+		aiMesh *p_native;
 
 	};
 }//namespace

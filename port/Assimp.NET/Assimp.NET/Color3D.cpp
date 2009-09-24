@@ -6,17 +6,22 @@ namespace AssimpNET
 
 Color3D::Color3D(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiColor3D();
 }
 
-Color3D::Color3D(const Color3D^ other)
+Color3D::Color3D(Color3D% other)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = other.getNative();
 }
 
 Color3D::Color3D(float _r, float _g, float _b)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiColor3D(_r, _g, _b);
+}
+
+Color3D::Color3D(aiColor3D* native)
+{
+	this->p_native = native;
 }
 
 bool Color3D::IsBlack()
@@ -57,6 +62,11 @@ bool Color3D::operator== (const Color3D^ other)
 float^ Color3D::operator[] (unsigned int i)
 {
 	throw gcnew System::NotImplementedException();
+}
+
+aiColor3D* Color3D::getNative()
+{
+	return this->p_native;
 }
 
 }

@@ -6,17 +6,28 @@ namespace AssimpNET
 
 Texture::Texture(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiTexture();
+}
+
+Texture::Texture(aiTexture* native)
+{
+	this->p_native = native;
 }
 
 Texture::~Texture(void)
 {
-	throw gcnew System::NotImplementedException();
+	if(this->p_native)
+		delete this->p_native;
 }
 
 bool Texture::CheckFormat(array<char>^ s)
 {
 	throw gcnew System::NotImplementedException();
+}
+
+aiTexture* Texture::getNative()
+{
+	return this->p_native;
 }
 
 }//namespace

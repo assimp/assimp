@@ -6,12 +6,23 @@ namespace AssimpNET
 
 MaterialProperty::MaterialProperty(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiMaterialProperty();
+}
+
+MaterialProperty::MaterialProperty(aiMaterialProperty* native)
+{
+	this->p_native = native;
 }
 
 MaterialProperty::~MaterialProperty(void)
 {
-	throw gcnew System::NotImplementedException();
+	if(this->p_native)
+		delete this->p_native;
+}
+
+aiMaterialProperty* MaterialProperty::getNative()
+{
+	return this->p_native;
 }
 
 }//namespace

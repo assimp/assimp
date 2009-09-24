@@ -41,7 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//managed includes
 #include "Matrix4x4.h"
+
+//native inclueds
+#include "aiScene.h"
 
 using namespace System;
 
@@ -51,6 +55,7 @@ namespace AssimpNET
 	{
 	public:
 		Node(void);
+		Node(aiNode* native);
 		~Node(void);
 
 		Node^ findNode(array<char>^ name);
@@ -97,6 +102,10 @@ namespace AssimpNET
 			Node^ get(){throw gcnew System::NotImplementedException();}
 			void set(Node^ value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiNode* getNative();	
+	private:
+		aiNode *p_native;
 
 	};
 }//namespace

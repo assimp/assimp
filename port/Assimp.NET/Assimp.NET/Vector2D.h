@@ -41,6 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//native includes
+#include "aiTypes.h"
 
 namespace AssimpNET
 {
@@ -49,9 +51,10 @@ namespace AssimpNET
 	{
 	public:
 		Vector2D(void);
-		Vector2D(const Vector2D^ o);
+		Vector2D(Vector2D% o);
  		Vector2D(float _xy);
  		Vector2D(float _x, float _y);
+		Vector2D(aiVector2D* native);
 		~Vector2D(void);
 		float Length();
 		Vector2D^ Normalize();
@@ -78,6 +81,10 @@ namespace AssimpNET
 			float get(){throw gcnew System::NotImplementedException();}
 			void set(float value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiVector2D* getNative();	
+	private:
+		aiVector2D *p_native;
 	};
 
 }//namespace

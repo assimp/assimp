@@ -5,17 +5,23 @@ namespace AssimpNET
 
 QuatKey::QuatKey(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiQuatKey();
 }
 
-QuatKey::QuatKey(double time, const Quaternion^ value)
+QuatKey::QuatKey(double time, Quaternion% value)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiQuatKey(time, *(value.getNative()));
+}
+
+QuatKey::QuatKey(aiQuatKey* native)
+{
+	this->p_native = native;
 }
 
 QuatKey::~QuatKey()
 {
-	throw gcnew System::NotImplementedException();
+	if(this->p_native)
+		delete this->p_native;
 }
 
 bool QuatKey::operator != (const QuatKey^ o)
@@ -36,6 +42,11 @@ bool QuatKey::operator == (const QuatKey^ o)
 bool QuatKey::operator > (const QuatKey^ o)
 {
 	throw gcnew System::NotImplementedException();
+}
+
+aiQuatKey* QuatKey::getNative()
+{
+	return this->p_native;
 }
 
 }

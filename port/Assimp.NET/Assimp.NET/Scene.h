@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//managend includes
 #include "Animation.h"
 #include "Camera.h"
 #include "Light.h"
@@ -48,6 +49,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Mesh.h"
 #include "Node.h"
 #include "Texture.h"
+
+//native includes
+#include "aiScene.h"
+
 
 using namespace System;
 
@@ -57,7 +62,9 @@ namespace AssimpNET
 	{
 	public:
 		Scene(void);
+		Scene(aiScene* native);
 		~Scene(void);
+
 		bool HasAnimations();
 		bool HasCameras();
 		bool HasLights();
@@ -135,6 +142,10 @@ namespace AssimpNET
 			array<Texture^>^ get(){throw gcnew System::NotImplementedException();}
 			void set(array<Texture^>^ value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiScene* getNative();	
+	private:
+		aiScene *p_native;
 
 	};
 }//namespace

@@ -41,9 +41,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//managed includes
 #include "Vector3D.h"
 #include "Vector2D.h"
 #include "Matrix4x4.h"
+
+//native includes
+#include "aiVector3D.h"
+#include "aiMatrix3x3.h"
 
 namespace AssimpNET
 {
@@ -51,10 +56,11 @@ namespace AssimpNET
 	{
 	public:
 		Matrix3x3(void);
-		Matrix3x3(const Matrix4x4^ matrix);
+		Matrix3x3(Matrix4x4^ matrix);
 		Matrix3x3(	float _a1, float _a2, float _a3,
 					float _b1, float _b2, float _b3,
 					float _c1, float _c2, float _c3);
+		Matrix3x3(aiMatrix3x3* native);
 		~Matrix3x3(void);
 
 		float Determinant();
@@ -124,6 +130,10 @@ namespace AssimpNET
 			float get(){throw gcnew System::NotImplementedException();}
 			void set(float value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiMatrix3x3* getNative();	
+	private:
+		aiMatrix3x3 *p_native;
 
 	};
 }//namespace

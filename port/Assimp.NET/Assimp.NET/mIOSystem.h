@@ -41,27 +41,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "Logger.h"
-#include "LogStream.h"
+//managed includes
+#include "mIOStream.h"
+
+//native includes
 #include "IOSystem.h"
 
 using namespace System;
 
 namespace AssimpNET
 {
-	public ref class DefaultLogger abstract : Logger 
+	public ref class IOSystem abstract
 	{
 	public:
-		DefaultLogger(void);
-		~DefaultLogger(void);
+		IOSystem(void);
+		IOSystem(Assimp::IOSystem* native);
+		virtual ~IOSystem(void);
+	
+		virtual void 	Close (IOStream^ pFile) = 0;
+		bool ComparePaths (const String^ one, const String^ second);
+		virtual bool ComparePaths (array<char>^ one, array<char>^ second);
+		virtual bool Exists(array<char>^ pFile) = 0;
+		bool Exists(const String^ pFile);
+		virtual char getOsSeperator() = 0;
+		IOStream^ Open(const String^ pFile, const String^ pMode);
+		virtual IOStream^ Open(array<char>^ pFile, array<char>^ pMode) = 0;
 
-		virtual bool attachStream(LogStream^ stream, unsigned int severity) override;
-		virtual bool detachStream(LogStream^ stream, unsigned int severity) override;
-
-		static Logger^ create(const String^ name, LogSeverity severity, unsigned int defStream, IOSystem^ io);
-		static Logger^ get();
-		static bool isNullLogger();
-		static void kill();
-		static void set(Logger^ logger);
+		Assimp::IOSystem* getNative();
+		private:
+		Assimp::IOSystem *p_native;
 	};
 }//namespace
+
+
+
+

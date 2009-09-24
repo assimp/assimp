@@ -1,6 +1,10 @@
 #pragma once
 
+//managend includes
 #include "Color4D.h"
+
+//native includes
+#include "aiTexture.h"
 
 using namespace System;
 
@@ -11,6 +15,7 @@ public ref class Texel
 {
 	public:
 		Texel(void);
+		Texel(aiTexel* native);
 		~Texel(void);
 
 		operator Color4D();
@@ -40,6 +45,10 @@ public ref class Texel
 			unsigned char get(){throw gcnew System::NotImplementedException();}
 			void set(unsigned char value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiTexel* getNative();	
+	private:
+		aiTexel *p_native;
 };
 
 }//namespace

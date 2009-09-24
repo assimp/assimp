@@ -41,13 +41,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//native includes
+#include "aiMesh.h"
+
 namespace AssimpNET
 {
 	public ref class Face
 	{
 	public:
 		Face(void);
-		Face(const Face^ other);
+		Face(Face% other);
+		Face(aiFace* native);
 		~Face(void);
 
 		bool operator != (const Face^ other);
@@ -65,5 +69,9 @@ namespace AssimpNET
 			unsigned int get(){throw gcnew System::NotImplementedException();}
 			void set(unsigned int value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiFace* getNative();
+		private:
+		aiFace *p_native;
 	};
 }//namespace

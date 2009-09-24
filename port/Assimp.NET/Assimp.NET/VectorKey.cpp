@@ -6,17 +6,23 @@ namespace AssimpNET
 
 VectorKey::VectorKey(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiVectorKey();
 }
 
-VectorKey::VectorKey(double time, const Vector3D^ value)
+VectorKey::VectorKey(double time, Vector3D^ value)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiVectorKey(time, *(value->getNative()));
+}
+
+VectorKey::VectorKey(aiVectorKey* native)
+{
+	this->p_native = native;
 }
 
 VectorKey::~VectorKey(void)
 {
-	throw gcnew System::NotImplementedException();
+	if(this->p_native)
+		delete this->p_native;
 }
 
 bool VectorKey::operator != (const VectorKey^ o)
@@ -37,6 +43,11 @@ bool VectorKey::operator == (const VectorKey^ o)
 bool VectorKey::operator > (const VectorKey^ o)
 {
 	throw gcnew System::NotImplementedException();
+}
+
+aiVectorKey* VectorKey::getNative()
+{
+	return this->p_native;
 }
 
 }

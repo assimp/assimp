@@ -41,7 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "LogStream.h"
+//managed includes
+#include "mLogStream.h"
+
+//native includes
+#include "Logger.h"
 
 using namespace System;
 
@@ -69,6 +73,7 @@ namespace AssimpNET
 
 	protected:
 		Logger(LogSeverity);
+		Logger(Assimp::Logger* native);
 		Logger();
 		virtual void OnDebug(array<char>^ message) = 0;
 		virtual void OnError(array<char>^ message) = 0;
@@ -80,6 +85,10 @@ namespace AssimpNET
 			LogSeverity get(){throw gcnew System::NotImplementedException();}
 			void set(LogSeverity value){throw gcnew System::NotImplementedException();}
 		}
+
+		Assimp::Logger* getNative();
+		private:
+		Assimp::Logger *p_native;
 
 	};
 }//namespace

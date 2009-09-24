@@ -41,8 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//managend includes
 #include "VectorKey.h"
 #include "QuatKey.h"
+
+//native includes
+#include "aiAnim.h"
 
 using namespace System;
 
@@ -61,6 +65,7 @@ namespace AssimpNET
 	{
 	public:
 		NodeAnim(void);
+		NodeAnim(aiNodeAnim* native);
 		~NodeAnim(void);
 
 		property String^ mNodeName
@@ -116,6 +121,10 @@ namespace AssimpNET
 			array<VectorKey^>^ get(){throw gcnew System::NotImplementedException();}
 			void set(array<VectorKey^>^ value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiNodeAnim* getNative();	
+	private:
+		aiNodeAnim *p_native;
 
 	};
 }//namespace

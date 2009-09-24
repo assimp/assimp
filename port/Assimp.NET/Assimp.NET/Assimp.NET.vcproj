@@ -42,6 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="..\..\..\include"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				RuntimeLibrary="3"
 				WarningLevel="3"
@@ -58,8 +59,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(NoInherit)"
+				AdditionalDependencies="assimp.lib $(NOINHERIT)"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
 				TargetMachine="1"
@@ -316,10 +318,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\DefaultLogger.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Enums.h"
 				>
 			</File>
@@ -332,23 +330,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\IOStream.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IOSystem.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Light.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Logger.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LogStream.h"
 				>
 			</File>
 			<File
@@ -368,7 +350,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\mDefaultLogger.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Mesh.h"
+				>
+			</File>
+			<File
+				RelativePath=".\mIOStream.h"
+				>
+			</File>
+			<File
+				RelativePath=".\mIOSystem.h"
+				>
+			</File>
+			<File
+				RelativePath=".\mLogger.h"
+				>
+			</File>
+			<File
+				RelativePath=".\mLogStream.h"
 				>
 			</File>
 			<File

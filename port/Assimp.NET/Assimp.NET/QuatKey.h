@@ -41,7 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+//managend includes
 #include "Quaternion.h"
+
+//native includes
+#include "aiAnim.h"
 
 using namespace System;
 
@@ -51,7 +55,8 @@ namespace AssimpNET
 	{
 	public:
 		QuatKey();
-		QuatKey(double time, const Quaternion^ value);
+		QuatKey(double time, Quaternion% value);
+		QuatKey(aiQuatKey* native);
 		~QuatKey();
 
 		bool operator != (const QuatKey^ o);
@@ -70,5 +75,9 @@ namespace AssimpNET
 			Quaternion^ get() {throw gcnew System::NotImplementedException();}
 			void set(Quaternion^ value){throw gcnew System::NotImplementedException();}
 		}
+
+		aiQuatKey* getNative();	
+	private:
+		aiQuatKey *p_native;
 	};
 }

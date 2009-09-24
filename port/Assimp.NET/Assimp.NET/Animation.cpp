@@ -6,12 +6,23 @@ namespace AssimpNET
 
 Animation::Animation(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiAnimation();
+}
+
+Animation::Animation(aiAnimation* native)
+{
+	this->p_native = native;
 }
 
 Animation::~Animation(void)
 {
-	throw gcnew System::NotImplementedException();
-}	
+	if(this->p_native)
+		delete this->p_native;
+}
+
+aiAnimation* Animation::getNative()
+{
+	return this->p_native;
+}
 
 }//namespace

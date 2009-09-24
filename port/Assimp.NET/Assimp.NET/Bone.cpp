@@ -7,17 +7,28 @@ namespace AssimpNET
 
 Bone::Bone(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiBone();
 }
 
-Bone::Bone(const Bone^ other)
+Bone::Bone(Bone% other)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = other.getNative();
+}
+
+Bone::Bone(aiBone* native)
+{
+	this->p_native = native;
 }
 
 Bone::~Bone(void)
 {
-	throw gcnew System::NotImplementedException();
+	if(this->p_native)
+		delete this->p_native;
+}
+
+aiBone* Bone::getNative()
+{
+	return this->p_native;
 }
 
 }//namespace

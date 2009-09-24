@@ -6,12 +6,18 @@ namespace AssimpNET
 
 Scene::Scene(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiScene();
+}
+
+Scene::Scene(aiScene* native)
+{
+	this->p_native = native;
 }
 
 Scene::~Scene(void)
 {
-	throw gcnew System::NotImplementedException();
+	if(this->p_native)
+		delete this->p_native;
 }
 
 bool Scene::HasAnimations()
@@ -42,6 +48,11 @@ bool Scene::HasMeshes()
 bool Scene::HasTextures()
 {
 	throw gcnew System::NotImplementedException();
+}
+
+aiScene* Scene::getNative()
+{
+	return this->p_native;
 }
 
 }//namespace

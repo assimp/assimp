@@ -6,17 +6,28 @@ namespace AssimpNET
 
 Camera::Camera(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiCamera();
+}
+
+Camera::Camera(aiCamera* native)
+{
+	this->p_native = native;
 }
 
 Camera::~Camera(void)
 {
-	throw gcnew System::NotImplementedException();
+	if(this->p_native)
+		delete this->p_native;
 }
 
 void Camera::GetCameraMatrix(Matrix4x4^ out)
 {
 	throw gcnew System::NotImplementedException();
+}
+
+aiCamera* Camera::getNative()
+{
+	return this->p_native;
 }
 
 }//namespace

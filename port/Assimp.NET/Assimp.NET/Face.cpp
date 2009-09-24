@@ -6,17 +6,23 @@ namespace AssimpNET
 
 Face::Face(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiFace();
 }
 
-Face::Face(const Face^ other)
+Face::Face(Face% other)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = other.getNative();
+}
+
+Face::Face(aiFace* native)
+{
+	this->p_native = native;
 }
 
 Face::~Face(void)
 {
-	throw gcnew System::NotImplementedException();
+	if(this->p_native)
+		delete this->p_native;
 }
 
 bool Face::operator != (const Face^ other)
@@ -32,6 +38,11 @@ Face^ Face::operator = (const Face^ other)
 bool Face::operator == (const Face^ other)
 {
 	throw gcnew System::NotImplementedException();
+}
+
+aiFace* Face::getNative()
+{
+	return this->p_native;
 }
 
 

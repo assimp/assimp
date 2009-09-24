@@ -6,12 +6,12 @@ namespace AssimpNET
 
 Matrix4x4::Matrix4x4(void)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiMatrix4x4();
 }
 
-Matrix4x4::Matrix4x4(const Matrix3x3 other)
+Matrix4x4::Matrix4x4(Matrix3x3^ other)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiMatrix4x4(*(other->getNative()));
 }
 
 Matrix4x4::Matrix4x4(	float _a1, float _a2, float _a3, float _a4,
@@ -19,12 +19,21 @@ Matrix4x4::Matrix4x4(	float _a1, float _a2, float _a3, float _a4,
 						float _c1, float _c2, float _c3, float _c4,
 						float _d1, float _d2, float _d3, float _d4)
 {
-	throw gcnew System::NotImplementedException();
+	this->p_native = new aiMatrix4x4(	_a1, _a2, _a3, _a4,
+										_b1, _b2, _b3, _b4,
+										_c1, _c2, _c3, _c4,
+										_d1, _c2, _d3, _d4);
+}
+
+Matrix4x4::Matrix4x4(aiMatrix4x4* native)
+{
+	this->p_native = native;
 }
 
 Matrix4x4::~Matrix4x4(void)
 {
-	throw gcnew System::NotImplementedException();
+	if(this->p_native)
+		delete this->p_native;
 }
 
 void Matrix4x4::Decompose(Vector3D^ scaling, Quaternion^ rotation, Vector3D^ position)
@@ -125,6 +134,11 @@ Matrix4x4^ Matrix4x4::Scaling (const Vector3D^ v, Matrix4x4^ out)
 Matrix4x4^ Matrix4x4::Translation (const Vector3D^ v, Matrix4x4^ out)
 {
 	throw gcnew System::NotImplementedException();
+}
+
+aiMatrix4x4* Matrix4x4::getNative()
+{
+	return this->p_native;
 }
 
 }//namespace

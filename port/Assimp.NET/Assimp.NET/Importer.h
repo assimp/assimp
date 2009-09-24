@@ -41,8 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "IOSystem.h"
+//managed includes
+#include "mIOSystem.h"
 #include "Scene.h"
+
+//native includes
+#include "assimp.hpp"
 
 using namespace System;
 
@@ -103,30 +107,33 @@ namespace AssimpNET
 	{
 	public:
 		Importer(void);
-		Importer(const Importer^ other);
+		Importer(Importer% other);
+		Importer(Assimp::Importer* native);
 		~Importer(void);
 
 		void FreeScene();
-		array<char>^ GetErrorString();
+		System::String^ GetErrorString();
 		void GetExtensionsList(String^ extensions);
 		IOSystem^ GetIOHandler();
 		void GetMemoryRequrements(aiMemoryInfo^ in);
 		Scene^ getOrphanedScene( );
-		float GetPropertyFloat(array<char>^ propName);
-		int GetPropertyInt(array<char>^ propName);
-		String^ GetPrpertyString(array<char>^ propName);
+		float GetPropertyFloat(String^ propName);
+		int GetPropertyInt(String^ propName);
+		String^ GetPrpertyString(String^ propName);
 		Scene^ getScene();
 		bool IsDefaultIOHandler();
-		bool IsExtensionSupported(array<char>^ extension);
 		bool IsExtensionSupported(String^ extension);
-		Scene^ ReadFile(array<char>^ fileName, unsigned int flags);
 		Scene^ ReadFile(String^ fileName, unsigned int flags);
 		void SetExtraVerbose(bool verbose);
 		void SetIOHanlder(IOSystem^ ioHandler);
-		void SetPropertyFloat(array<char>^ propName, float value);
-		void SetPropertyInt(array<char>^ propName, int value);
-		void SetPrpertyString(array<char>^ propName, String^ value);
+		void SetPropertyFloat(String^ propName, float value);
+		void SetPropertyInt(String^ propName, int value);
+		void SetPrpertyString(String^ propName, String^ value);
 		bool ValidateFlags(unsigned int flags);
-	
+
+		Assimp::Importer* getNative();
+
+	private:
+		Assimp::Importer *p_native;
 	};
 }//namespace

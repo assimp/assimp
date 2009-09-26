@@ -202,8 +202,13 @@ void ColladaParser::ReadAssetInfo()
 			if( IsElement( "unit"))
 			{
 				// read unit data from the element's attributes
-				int attrIndex = GetAttribute( "meter");
-				mUnitSize = mReader->getAttributeValueAsFloat( attrIndex);
+				const int attrIndex = TestAttribute( "meter");
+				if (attrIndex == -1) {
+					mUnitSize = 1.f;
+				}
+				else {
+					mUnitSize = mReader->getAttributeValueAsFloat( attrIndex);
+				}
 
 				// consume the trailing stuff
 				if( !mReader->isEmptyElement())

@@ -223,6 +223,21 @@ If you're working with the provided solutions for Visual Studio use the <i>-nobo
 See the @link assimp_st next @endlink section
 for more details.
 
+
+@section assimp_make Build with MAKE
+
+To build Assimp with MAKE, navigate to the <tt>code</tt> directory and run 
+@code
+make
+@endcode
+respectively 
+@code
+make -fmakefile.mingw
+@endcode
+for mingw-make. For a <i>-noboost</i>-Build, append 
+@codeNOBOOST=1
+@endcode
+
 @section assimp_st Single-threaded build
 
 -- currently there is no difference between single-thread and normal builds --
@@ -559,8 +574,8 @@ ASSIMP::Importer::ReadFile(), aiImportFile() or aiImportFileEx() - see the @link
 for further information on how to use the library.
 
 By default, all 3D data is provided in a right-handed coordinate system such as OpenGL uses. In
-this coordinate system, +X points to the right, +Y points away from the viewer into the screen and
-+Z points upwards. Several modeling packages such as 3D Studio Max use this coordinate system as well.
+this coordinate system, +X points to the right, -Z points away from the viewer into the screen and
++Y points upwards. Several modeling packages such as 3D Studio Max use this coordinate system as well (or a rotated variant of it).
 By contrast, some other environments use left-handed coordinate systems, a prominent example being
 DirectX. If you need the imported data to be in a left-handed coordinate system, supply the
 #aiProcess_MakeLeftHanded flag to the ReadFile() function call.

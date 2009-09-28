@@ -1954,6 +1954,10 @@
 						RelativePath="..\..\code\OgreImporter.h"
 						>
 					</File>
+					<File
+						RelativePath="..\..\code\OgreXmlHelper.h"
+						>
+					</File>
 				</Filter>
 			</Filter>
 			<Filter

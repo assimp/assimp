@@ -2,20 +2,19 @@
 
 #include <vector>
 
+#include "OgreXmlHelper.h"
 #include "irrXMLWrapper.h"
-#include "fast_atof.h"
 
 namespace Assimp
 {
 namespace Ogre
 {
 
-typedef irr::io::IrrXMLReader XmlReader;
 
 //Forward declarations:
+struct SubMesh;
 struct Face;
 struct Weight;
-struct SubMesh;
 struct Bone;
 struct Animation;
 struct Track;
@@ -32,10 +31,15 @@ public:
 private:
 
 	///Helper Functions to read parts of the XML File
-	/** @param Filename We need this to check for a material File with the same name.*/
-	void ReadSubMesh(SubMesh& theSubMesh, XmlReader* Reader);
-	aiMaterial* LoadMaterial(std::string MaterialName);
-	void LoadSkeleton(std::string FileName);
+	void ReadSubMesh(SubMesh& theSubMesh, XmlReader* Reader);//the submesh reference is the result value
+	void LoadSkeleton(std::string FileName, std::vector<Bone> &Bones, std::vector<Animation> &Animations);///< writes the results in Bones and Animations, Filename is not const, because its call-by-value and the function will change it!
+	void CreateAssimpSubMesh(const SubMesh &theSubMesh, const std::vector<Bone>& Bones);
+	void CreateAssimpSkeleton(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations);
+
+	aiMaterial* LoadMaterial(const std::string MaterialName);
+	
+	///Recursivly creates a filled aiNode from a given root bone
+	aiNode* CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &Bones, aiNode* ParentNode);
 
 	//Now we don't have to give theses parameters to all functions
 	std::string m_CurrentFilename;
@@ -44,71 +48,21 @@ private:
 	aiScene *m_CurrentScene;
 };
 
+///A submesh from Ogre
+struct SubMesh
+{	
+	std::string Name;
+	std::string MaterialName;
+	std::vector<Face> FaceList;
+	std::vector<aiVector3D> Positions; bool HasPositions;
+	std::vector<aiVector3D> Normals; bool HasNormals;
+	std::vector<aiVector3D> Uvs; unsigned int NumUvs;//nearly always 2d, but assimp has always 3d texcoords
+	std::vector< std::vector<Weight> > Weights;//a list of bones for each vertex
+	int MaterialIndex;///< The Index in the Assimp Materialarray from the material witch is attached to this submesh
+	unsigned int BonesUsed;//the highest index of a bone from a bone weight, this is needed to create the assimp bone structur (converting from Vertex-Bones to Bone-Vertices)
 
-
-//------------Helper Funktion to Get a Attribute Save---------------
-template<typename t> inline t GetAttribute(XmlReader* Reader, std::string Name)
-{
-	throw std::exception("unimplemented Funtcion used!");
-	return t();
-}
-
-template<> inline int GetAttribute<int>(XmlReader* Reader, std::string Name)
-{
-	const char* Value=Reader->getAttributeValue(Name.c_str());
-	if(Value)
-		return atoi(Value);
-	else
-		throw new ImportErrorException(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
-}
-
-template<> inline float GetAttribute<float>(XmlReader* Reader, std::string Name)
-{
-	const char* Value=Reader->getAttributeValue(Name.c_str());
-	if(Value)
-		return fast_atof(Value);
-	else
-		throw new ImportErrorException(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
-}
-
-template<> inline std::string GetAttribute<std::string>(XmlReader* Reader, std::string Name)
-{
-	const char* Value=Reader->getAttributeValue(Name.c_str());
-	if(Value)
-		return std::string(Value);
-	else
-		throw new ImportErrorException(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
-}
-
-template<> inline bool GetAttribute<bool>(XmlReader* Reader, std::string Name)
-{
-	const char* Value=Reader->getAttributeValue(Name.c_str());
-	if(Value)
-	{
-		if(Value==std::string("true"))
-			return true;
-		else if(Value==std::string("false"))
-			return false;
-		else
-			throw new ImportErrorException(std::string("Bool value has invalid value: "+Name+" / "+Value+" / "+Reader->getNodeName()));
-	}
-	else
-		throw new ImportErrorException(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
-}
-//__________________________________________________________________
-
-inline bool XmlRead(XmlReader* Reader)
-{
-	do
-	{
-		if(!Reader->read())
-			return false;
-	}
-	while(Reader->getNodeType()!=irr::io::EXN_ELEMENT);
-	return true;
-}
-
-
+	SubMesh(): HasPositions(false), HasNormals(false), NumUvs(0), MaterialIndex(-1), BonesUsed(0) {}//initialize everything
+};
 
 ///For the moment just triangles, no other polygon types!
 struct Face
@@ -116,22 +70,21 @@ struct Face
 	unsigned int VertexIndices[3];
 };
 
+struct BoneAssignment
+{
+	unsigned int BoneId;//this is, what we get from ogre
+	std::string BoneName;//this is, what we need for assimp
+};
+
+///for a vertex->bone structur
 struct Weight
 {
 	unsigned int BoneId;
 	float Value;
 };
 
-/// Helper Class to describe a complete SubMesh
-struct SubMesh
-{
-	std::string Name;
-	std::string MaterialName;
-	std::vector<Face> Faces;
-};
 
-
-/// Helper Class to describe an ogre-bone
+/// Helper Class to describe an ogre-bone for the skeleton:
 /** All Id's are signed ints, because than we have -1 as a simple INVALID_ID Value (we start from 0 so 0 is a valid bone ID!*/
 struct Bone
 {
@@ -142,6 +95,7 @@ struct Bone
 	float RotationAngle;
 	aiVector3D RotationAxis;
 	std::vector<int> Children;
+	aiMatrix4x4 WorldToBoneSpace;
 
 	///ctor
 	Bone(): Id(-1), ParentId(-1), RotationAngle(0.0f) {}
@@ -151,11 +105,11 @@ struct Bone
 	///this operator is needed to find a bone by its name in a vector<Bone>
 	bool operator==(const std::string& rval) const
 		{return Name==rval; }
+
+	void CalculateWorldToBoneSpaceMatrix(std::vector<Bone>& Bones);
 	
 };
 
-///Recursivly creates a filled aiNode from a given root bone
-aiNode* CreateAiNodeFromBone(int BoneId, std::vector<Bone> Bones, aiNode* ParentNode);
 
 
 ///Describes an Ogre Animation

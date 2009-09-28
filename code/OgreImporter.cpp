@@ -71,15 +71,30 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	}
 
 
-	//-------------------Read all submeshs:-----------------------
+	//-------------------Read the submesh:-----------------------
+	SubMesh theSubMesh;
 	XmlRead(MeshFile);
-	while(string(MeshFile->getNodeName())=="submesh")//read the index values (the faces):
+	if(MeshFile->getNodeName()==string("submesh"))
 	{
-		SubMesh NewSubMesh;
-		NewSubMesh.MaterialName=GetAttribute<string>(MeshFile, "material");
-		DefaultLogger::get()->debug("Loading Submehs with Material: "+NewSubMesh.MaterialName);
-		ReadSubMesh(NewSubMesh, MeshFile);
+		theSubMesh.MaterialName=GetAttribute<string>(MeshFile, "material");
+		DefaultLogger::get()->debug("Loading Submehs with Material: "+theSubMesh.MaterialName);
+		ReadSubMesh(theSubMesh, MeshFile);
+		
+		//Load the Material:
+		aiMaterial* MeshMat=LoadMaterial(theSubMesh.MaterialName);
+		
+		//Set the Material:
+		if(m_CurrentScene->mMaterials)
+			throw new ImportErrorException("only 1 material supported at this time!");
+		m_CurrentScene->mMaterials=new aiMaterial*[1];
+		m_CurrentScene->mNumMaterials=1;
+		m_CurrentScene->mMaterials[0]=MeshMat;
+		theSubMesh.MaterialIndex=0;
 	}
+	//check for second root node:
+	if(MeshFile->getNodeName()==string("submesh"))
+		throw new ImportErrorException("more than one submesh in the file, abording!");
+
 	//____________________________________________________________
 
 
@@ -94,16 +109,22 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 
 
 	//----------------Load the skeleton: -------------------------------
+	vector<Bone> Bones;
+	vector<Animation> Animations;
 	if(MeshFile->getNodeName()==string("skeletonlink"))
 	{
 		string SkeletonFile=GetAttribute<string>(MeshFile, "name");
-		LoadSkeleton(SkeletonFile);
+		LoadSkeleton(SkeletonFile, Bones, Animations);
 	}
 	else
+	{
+		DefaultLogger::get()->warn("No skeleton file will be loaded");
 		DefaultLogger::get()->warn(MeshFile->getNodeName());
+	}
 	//__________________________________________________________________
 
-
+	CreateAssimpSubMesh(theSubMesh, Bones);
+	CreateAssimpSkeleton(Bones, Animations);
 }
 
 
@@ -121,12 +142,6 @@ void OgreImporter::SetupProperties(const Importer* pImp)
 
 void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 {
-	vector<Face> FaceList;
-	vector<aiVector3D> Positions; bool HasPositions=false;
-	vector<aiVector3D> Normals; bool HasNormals=false;
-	vector<aiVector3D> Uvs; unsigned int NumUvs=0;//nearly always 2d, but assimp has always 3d texcoords
-	vector< vector<Weight> > Weights;
-
 	XmlRead(Reader);
 	//TODO: maybe we have alsways just 1 faces and 1 geometry and always in this order. this loop will only work correct, wenn the order
 	//of faces and geometry changed, and not if we habe more than one of one
@@ -149,7 +164,7 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 				{
 					throw new ImportErrorException("Submesh has quads, only traingles are supported!");
 				}
-				FaceList.push_back(NewFace);
+				theSubMesh.FaceList.push_back(NewFace);
 			}
 
 		}//end of faces
@@ -166,13 +181,13 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 			{
 				throw new ImportErrorException("vertexbuffer node is not first in geometry node!");
 			}
-			HasPositions=GetAttribute<bool>(Reader, "positions");
-			HasNormals=GetAttribute<bool>(Reader, "normals");
+			theSubMesh.HasPositions=GetAttribute<bool>(Reader, "positions");
+			theSubMesh.HasNormals=GetAttribute<bool>(Reader, "normals");
 			if(!Reader->getAttributeValue("texture_coords"))//we can have 1 or 0 uv channels, and if the mesh has no uvs, it also doesn't have the attribute
-				NumUvs=0;
+				theSubMesh.NumUvs=0;
 			else
-				NumUvs=GetAttribute<int>(Reader, "texture_coords");
-			if(NumUvs>1)
+				theSubMesh.NumUvs=GetAttribute<int>(Reader, "texture_coords");
+			if(theSubMesh.NumUvs>1)
 				throw new ImportErrorException("too many texcoords (just 1 supported!)");
 
 			//read all the vertices:
@@ -182,35 +197,35 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 				//read all vertex attributes:
 
 				//Position
-				if(HasPositions)
+				if(theSubMesh.HasPositions)
 				{
 					XmlRead(Reader);
 					aiVector3D NewPos;
 					NewPos.x=GetAttribute<float>(Reader, "x");
 					NewPos.y=GetAttribute<float>(Reader, "y");
 					NewPos.z=GetAttribute<float>(Reader, "z");
-					Positions.push_back(NewPos);
+					theSubMesh.Positions.push_back(NewPos);
 				}
 				
 				//Normal
-				if(HasNormals)
+				if(theSubMesh.HasNormals)
 				{
 					XmlRead(Reader);
 					aiVector3D NewNormal;
 					NewNormal.x=GetAttribute<float>(Reader, "x");
 					NewNormal.y=GetAttribute<float>(Reader, "y");
 					NewNormal.z=GetAttribute<float>(Reader, "z");
-					Normals.push_back(NewNormal);
+					theSubMesh.Normals.push_back(NewNormal);
 				}
 
 				//Uv:
-				if(1==NumUvs)
+				if(1==theSubMesh.NumUvs)
 				{
 					XmlRead(Reader);
 					aiVector3D NewUv;
 					NewUv.x=GetAttribute<float>(Reader, "u");
 					NewUv.y=GetAttribute<float>(Reader, "v")*(-1)+1;//flip the uv vertikal, blender exports them so!
-					Uvs.push_back(NewUv);
+					theSubMesh.Uvs.push_back(NewUv);
 				}
 				XmlRead(Reader);
 			}
@@ -218,126 +233,168 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 		}//end of "geometry
 		else if(string(Reader->getNodeName())=="boneassignments")
 		{
-			Weights.resize(Positions.size());
+			theSubMesh.Weights.resize(theSubMesh.Positions.size());
 			while(XmlRead(Reader) && Reader->getNodeName()==string("vertexboneassignment"))
 			{
 				Weight NewWeight;
 				unsigned int VertexId=GetAttribute<int>(Reader, "vertexindex");
 				NewWeight.BoneId=GetAttribute<int>(Reader, "boneindex");
 				NewWeight.Value=GetAttribute<float>(Reader, "weight");
+				theSubMesh.BonesUsed=max(theSubMesh.BonesUsed, NewWeight.BoneId+1);//calculate the number of bones used (this is the highest id +1 becuase bone ids start at 0)
 				
-				Weights[VertexId].push_back(NewWeight);
+				theSubMesh.Weights[VertexId].push_back(NewWeight);
 
 				//XmlRead(Reader);//Once i had this line, and than i got only every second boneassignment, but my first test models had even boneassignment counts, so i thougt, everything would work. And yes, i HATE irrXML!!!
 			}
 
 		}//end of boneassignments
 	}
-	DefaultLogger::get()->debug(str(format("Positionen: %1% Normale: %2% TexCoords: %3%") % Positions.size() % Normals.size() % Uvs.size()));
+	DefaultLogger::get()->debug(str(format("Positionen: %1% Normale: %2% TexCoords: %3%") % theSubMesh.Positions.size() % theSubMesh.Normals.size() % theSubMesh.Uvs.size()));
 	DefaultLogger::get()->warn(Reader->getNodeName());
 
 
 
 	//---------------Make all Vertexes unique: (this is required by assimp)-----------------------
-	vector<Face> UniqueFaceList(FaceList.size());
-	vector<aiVector3D> UniquePositions(FaceList.size()*3);//*3 because each face consits of 3 vertexes, because we only support triangles^^
-	vector<aiVector3D> UniqueNormals(FaceList.size()*3);
-	vector<aiVector3D> UniqueUvs(FaceList.size()*3);
-	vector< vector<Weight> > UniqueWeights(FaceList.size()*3);
+	vector<Face> UniqueFaceList(theSubMesh.FaceList.size());
+	unsigned int UniqueVertexCount=theSubMesh.FaceList.size()*3;//*3 because each face consists of 3 vertexes, because we only support triangles^^
+	vector<aiVector3D> UniquePositions(UniqueVertexCount);
+	vector<aiVector3D> UniqueNormals(UniqueVertexCount);
+	vector<aiVector3D> UniqueUvs(UniqueVertexCount);
+	vector< vector<Weight> > UniqueWeights(UniqueVertexCount);
 
-	for(unsigned int i=0; i<FaceList.size(); ++i)
+	for(unsigned int i=0; i<theSubMesh.FaceList.size(); ++i)
 	{
-		UniquePositions[3*i+0]=Positions[FaceList[i].VertexIndices[0]];
-		UniquePositions[3*i+1]=Positions[FaceList[i].VertexIndices[1]];
-		UniquePositions[3*i+2]=Positions[FaceList[i].VertexIndices[2]];
+		//We precalculate the index vlaues her, because we need them in all vertex attributes
+		unsigned int Vertex1=theSubMesh.FaceList[i].VertexIndices[0];
+		unsigned int Vertex2=theSubMesh.FaceList[i].VertexIndices[1];
+		unsigned int Vertex3=theSubMesh.FaceList[i].VertexIndices[2];
 
-		UniqueNormals[3*i+0]=Normals[FaceList[i].VertexIndices[0]];
-		UniqueNormals[3*i+1]=Normals[FaceList[i].VertexIndices[1]];
-		UniqueNormals[3*i+2]=Normals[FaceList[i].VertexIndices[2]];
+		UniquePositions[3*i+0]=theSubMesh.Positions[Vertex1];
+		UniquePositions[3*i+1]=theSubMesh.Positions[Vertex2];
+		UniquePositions[3*i+2]=theSubMesh.Positions[Vertex3];
 
-		if(1==NumUvs)
+		UniqueNormals[3*i+0]=theSubMesh.Normals[Vertex1];
+		UniqueNormals[3*i+1]=theSubMesh.Normals[Vertex2];
+		UniqueNormals[3*i+2]=theSubMesh.Normals[Vertex3];
+
+		if(1==theSubMesh.NumUvs)
 		{
-			UniqueUvs[3*i+0]=Uvs[FaceList[i].VertexIndices[0]];
-			UniqueUvs[3*i+1]=Uvs[FaceList[i].VertexIndices[1]];
-			UniqueUvs[3*i+2]=Uvs[FaceList[i].VertexIndices[2]];
+			UniqueUvs[3*i+0]=theSubMesh.Uvs[Vertex1];
+			UniqueUvs[3*i+1]=theSubMesh.Uvs[Vertex2];
+			UniqueUvs[3*i+2]=theSubMesh.Uvs[Vertex3];
 		}
 
-		UniqueWeights[3*i+0]=UniqueWeights[FaceList[i].VertexIndices[0]];
-		UniqueWeights[3*i+1]=UniqueWeights[FaceList[i].VertexIndices[1]];
-		UniqueWeights[3*i+2]=UniqueWeights[FaceList[i].VertexIndices[2]];
+		UniqueWeights[3*i+0]=theSubMesh.Weights[Vertex1];
+		UniqueWeights[3*i+1]=theSubMesh.Weights[Vertex2];
+		UniqueWeights[3*i+2]=theSubMesh.Weights[Vertex3];
 
+		//The indexvalues a just continuous numbers (0, 1, 2, 3, 4, 5, 6...)
 		UniqueFaceList[i].VertexIndices[0]=3*i+0;
 		UniqueFaceList[i].VertexIndices[1]=3*i+1;
 		UniqueFaceList[i].VertexIndices[2]=3*i+2;
 	}
 	//_________________________________________________________________________________________
 
-	//----------------Load the Material:-------------------------------
-	aiMaterial* MeshMat=LoadMaterial(theSubMesh.MaterialName);
-	//_________________________________________________________________
+	//now we have the unique datas, but want them in the SubMesh, so we swap all the containers:
+	theSubMesh.FaceList.swap(UniqueFaceList);
+	theSubMesh.Positions.swap(UniquePositions);
+	theSubMesh.Normals.swap(UniqueNormals);
+	theSubMesh.Uvs.swap(UniqueUvs);
+	theSubMesh.Weights.swap(UniqueWeights);
+}
 
 
+void OgreImporter::CreateAssimpSubMesh(const SubMesh& theSubMesh, const vector<Bone>& Bones)
+{
 	//Mesh is fully loaded, copy it into the aiScene:
 	if(m_CurrentScene->mNumMeshes!=0)
 		throw new ImportErrorException("Currently only one mesh per File is allowed!!");
 
-	//---------------------Create the aiMesh:-----------------------
 	aiMesh* NewAiMesh=new aiMesh();
 	
-	//Positions
-	NewAiMesh->mVertices=new aiVector3D[UniquePositions.size()];
-	memcpy(NewAiMesh->mVertices, &UniquePositions[0], UniquePositions.size()*sizeof(aiVector3D));
-	NewAiMesh->mNumVertices=UniquePositions.size();
-
-	//Normals
-	NewAiMesh->mNormals=new aiVector3D[UniqueNormals.size()];
-	memcpy(NewAiMesh->mNormals, &UniqueNormals[0], UniqueNormals.size()*sizeof(aiVector3D));
-
-	//Uvs
-	if(0!=NumUvs)
-	{
-		NewAiMesh->mNumUVComponents[0]=2;
-		NewAiMesh->mTextureCoords[0]= new aiVector3D[UniqueUvs.size()];
-		memcpy(NewAiMesh->mTextureCoords[0], &UniqueUvs[0], UniqueUvs.size()*sizeof(aiVector3D));
-	}
-
-	//Bones
-	/*NewAiMesh->mNumBones=UniqueWeights.size();
-	NewAiMesh->mBones=new aiBone*[UniqueWeights.size()];
-	for(un*/
-
-
-
-	//Faces
-	NewAiMesh->mFaces=new aiFace[UniqueFaceList.size()];
-	for(unsigned int i=0; i<UniqueFaceList.size(); ++i)
-	{
-		NewAiMesh->mFaces[i].mNumIndices=3;
-		NewAiMesh->mFaces[i].mIndices=new unsigned int[3];
-
-		NewAiMesh->mFaces[i].mIndices[0]=UniqueFaceList[i].VertexIndices[0];
-		NewAiMesh->mFaces[i].mIndices[1]=UniqueFaceList[i].VertexIndices[1];
-		NewAiMesh->mFaces[i].mIndices[2]=UniqueFaceList[i].VertexIndices[2];
-	}
-	NewAiMesh->mNumFaces=UniqueFaceList.size();
-
-	//Set the Material:
-	NewAiMesh->mMaterialIndex=0;
-	if(m_CurrentScene->mMaterials)
-		throw new ImportErrorException("only 1 material supported at this time!");
-	m_CurrentScene->mMaterials=new aiMaterial*[1];
-	m_CurrentScene->mNumMaterials=1;
-	m_CurrentScene->mMaterials[0]=MeshMat;
-	//_____________________________________________________________________________
-
-
 	//Attach the mesh to the scene:
 	m_CurrentScene->mNumMeshes=1;
 	m_CurrentScene->mMeshes=new aiMesh*;
 	m_CurrentScene->mMeshes[0]=NewAiMesh;
+
+	
+	//Positions
+	NewAiMesh->mVertices=new aiVector3D[theSubMesh.Positions.size()];
+	memcpy(NewAiMesh->mVertices, &theSubMesh.Positions[0], theSubMesh.Positions.size()*sizeof(aiVector3D));
+	NewAiMesh->mNumVertices=theSubMesh.Positions.size();
+
+	//Normals
+	NewAiMesh->mNormals=new aiVector3D[theSubMesh.Normals.size()];
+	memcpy(NewAiMesh->mNormals, &theSubMesh.Normals[0], theSubMesh.Normals.size()*sizeof(aiVector3D));
+
+	//Uvs
+	if(0!=theSubMesh.NumUvs)
+	{
+		NewAiMesh->mNumUVComponents[0]=2;
+		NewAiMesh->mTextureCoords[0]= new aiVector3D[theSubMesh.Uvs.size()];
+		memcpy(NewAiMesh->mTextureCoords[0], &theSubMesh.Uvs[0], theSubMesh.Uvs.size()*sizeof(aiVector3D));
+	}
+
+
+	//---------------------------------------- Bones --------------------------------------------
+	//Copy the weights in in Bone-Vertices Struktur
+	//(we have them in a Vertex-Bones Struktur, this is much easier for making them unique, which is required by assimp
+	vector< vector<aiVertexWeight> > aiWeights(theSubMesh.BonesUsed);//now the outer list are the bones, and the inner vector the vertices
+	for(unsigned int VertexId=0; VertexId<theSubMesh.Weights.size(); ++VertexId)//iterate over all vertices
+	{
+		for(unsigned int BoneId=0; BoneId<theSubMesh.Weights[VertexId].size(); ++BoneId)//iterate over all bones
+		{
+			aiVertexWeight NewWeight;
+			NewWeight.mVertexId=VertexId;//the current Vertex, we can't use the Id form the submehs weights, because they are bone id's
+			NewWeight.mWeight=theSubMesh.Weights[VertexId][BoneId].Value;
+			aiWeights[theSubMesh.Weights[VertexId][BoneId].BoneId].push_back(NewWeight);
+		}
+	}
+
+	vector<aiBone*> aiBones;
+	aiBones.reserve(theSubMesh.BonesUsed);//the vector might be smaller, because there might be empty bones (bones that are not attached to any vertex)
+	
+	//create all the bones and fill them with informations
+	for(unsigned int i=0; i<theSubMesh.BonesUsed; ++i)
+	{
+		if(aiWeights[i].size()>0)
+		{
+			aiBone* NewBone=new aiBone();
+			NewBone->mNumWeights=aiWeights[i].size();
+			NewBone->mWeights=new aiVertexWeight[aiWeights[i].size()];
+			memcpy(NewBone->mWeights, &(aiWeights[i][0]), sizeof(aiVertexWeight)*aiWeights[i].size());
+			NewBone->mName=Bones[i].Name;//The bone list should be sorted after its ids, this was done in LoadSkeleton
+			NewBone->mOffsetMatrix=aiMatrix4x4(Bones[i].WorldToBoneSpace).Inverse();//we suggest, that the mesh space is the world space!
+				
+			aiBones.push_back(NewBone);
+		}
+	}
+	NewAiMesh->mNumBones=aiBones.size();
+	NewAiMesh->mBones=new aiBone* [aiBones.size()];
+	memcpy(NewAiMesh->mBones, &(aiBones[0]), aiBones.size()*sizeof(aiBone*));
+
+	//______________________________________________________________________________________________________
+
+
+
+	//Faces
+	NewAiMesh->mFaces=new aiFace[theSubMesh.FaceList.size()];
+	for(unsigned int i=0; i<theSubMesh.FaceList.size(); ++i)
+	{
+		NewAiMesh->mFaces[i].mNumIndices=3;
+		NewAiMesh->mFaces[i].mIndices=new unsigned int[3];
+
+		NewAiMesh->mFaces[i].mIndices[0]=theSubMesh.FaceList[i].VertexIndices[0];
+		NewAiMesh->mFaces[i].mIndices[1]=theSubMesh.FaceList[i].VertexIndices[1];
+		NewAiMesh->mFaces[i].mIndices[2]=theSubMesh.FaceList[i].VertexIndices[2];
+	}
+	NewAiMesh->mNumFaces=theSubMesh.FaceList.size();
+
+	//Link the material:
+	NewAiMesh->mMaterialIndex=theSubMesh.MaterialIndex;//the index is set by the function who called ReadSubMesh
 }
 
-aiMaterial* OgreImporter::LoadMaterial(std::string MaterialName)
+aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName)
 {
 	MaterialHelper *NewMaterial=new MaterialHelper();
 
@@ -501,7 +558,8 @@ aiMaterial* OgreImporter::LoadMaterial(std::string MaterialName)
 	return NewMaterial;
 }
 
-void OgreImporter::LoadSkeleton(std::string FileName)
+
+void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vector<Animation> &Animations)
 {
 	//most likely the skeleton file will only end with .skeleton
 	//But this is a xml reader, so we need: .skeleton.xml
@@ -519,9 +577,6 @@ void OgreImporter::LoadSkeleton(std::string FileName)
 	XmlReader* SkeletonFile = irr::io::createIrrXMLReader(mIOWrapper.get());
 	if(!SkeletonFile)
 		throw new ImportErrorException(string("Failed to create XML Reader for ")+FileName);
-
-	//Variables to store the data from the skeleton file:
-	vector<Bone> Bones;
 
 	//Quick note: Whoever read this should know this one thing: irrXml fucking sucks!!!
 
@@ -618,11 +673,19 @@ void OgreImporter::LoadSkeleton(std::string FileName)
 	}
 	//_____________________________________________________________________________
 
+
+	//--------- Calculate the WorldToBoneSpace Matrix recursivly for all bones: ------------------
+	BOOST_FOREACH(Bone theBone, Bones)
+	{
+		if(-1==theBone.ParentId) //the bone is a root bone
+		{
+			theBone.CalculateWorldToBoneSpaceMatrix(Bones);
+		}
+	}
+	//_______________________________________________________________________
 	
 
-
 	//---------------------------load animations-----------------------------
-	vector<Animation> Animations;
 	if(string("animations")==SkeletonFile->getNodeName())//animations are optional values
 	{
 		DefaultLogger::get()->debug("Loading Animations");
@@ -697,10 +760,11 @@ void OgreImporter::LoadSkeleton(std::string FileName)
 	}
 	//_____________________________________________________________________________
 
+}
 
 
-
-
+void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations)
+{
 	//-----------------skeleton is completly loaded, now but it in the assimp scene:-------------------------------
 	
 	if(!m_CurrentScene->mRootNode)
@@ -708,7 +772,7 @@ void OgreImporter::LoadSkeleton(std::string FileName)
 	if(0!=m_CurrentScene->mRootNode->mNumChildren)
 		throw new ImportErrorException("Root Node already has childnodes!");
 
-	//--------------Creatre the assimp bone hierarchy-----------------
+	//--------------Createt the assimp bone hierarchy-----------------
 	DefaultLogger::get()->debug("Root Bones");
 	vector<aiNode*> RootBoneNodes;
 	BOOST_FOREACH(Bone theBone, Bones)
@@ -735,7 +799,7 @@ void OgreImporter::LoadSkeleton(std::string FileName)
 			aiAnimation* NewAnimation=new aiAnimation();
 			NewAnimation->mName=Animations[i].Name;
 			NewAnimation->mDuration=Animations[i].Length;
-			NewAnimation->mTicksPerSecond=0.05f;
+			NewAnimation->mTicksPerSecond=1.0f;
 
 			//Create all tracks in this animation
 			NewAnimation->mNumChannels=Animations[i].Tracks.size();
@@ -778,8 +842,7 @@ void OgreImporter::LoadSkeleton(std::string FileName)
 
 
 
-
-aiNode* CreateAiNodeFromBone(int BoneId, std::vector<Bone> Bones, aiNode* ParentNode)
+aiNode* OgreImporter::CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &Bones, aiNode* ParentNode)
 {
 	//----Create the node for this bone and set its values-----
 	aiNode* NewNode=new aiNode(Bones[BoneId].Name);
@@ -794,7 +857,7 @@ aiNode* CreateAiNodeFromBone(int BoneId, std::vector<Bone> Bones, aiNode* Parent
 	//__________________________________________________________
 
 
-	//----recursivly create all children Nodes:------
+	//---------- recursivly create all children Nodes: ----------
 	NewNode->mNumChildren=Bones[BoneId].Children.size();
 	NewNode->mChildren=new aiNode*[Bones[BoneId].Children.size()];
 	for(unsigned int i=0; i<Bones[BoneId].Children.size(); ++i)
@@ -807,6 +870,31 @@ aiNode* CreateAiNodeFromBone(int BoneId, std::vector<Bone> Bones, aiNode* Parent
 	return NewNode;
 }
 
+
+void Bone::CalculateWorldToBoneSpaceMatrix(vector<Bone> &Bones)
+{
+	//Calculate the matrix for this bone:
+	if(-1==ParentId)
+	{
+		WorldToBoneSpace= aiMatrix4x4::Translation(Position, aiMatrix4x4())
+						* aiMatrix4x4::Rotation(RotationAngle, RotationAxis, aiMatrix4x4())
+						;
+	}
+	else
+	{
+		WorldToBoneSpace= Bones[ParentId].WorldToBoneSpace
+						* aiMatrix4x4::Translation(Position, aiMatrix4x4())
+						* aiMatrix4x4::Rotation(RotationAngle, RotationAxis, aiMatrix4x4())
+						;
+
+	}
+
+	//and recursivly for all children:
+	BOOST_FOREACH(int theChildren, Children)
+	{
+		Bones[theChildren].CalculateWorldToBoneSpaceMatrix(Bones);
+	}
+}
 
 }//namespace Ogre
 }//namespace Assimp

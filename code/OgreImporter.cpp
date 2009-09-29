@@ -874,17 +874,18 @@ aiNode* OgreImporter::CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &
 void Bone::CalculateWorldToBoneSpaceMatrix(vector<Bone> &Bones)
 {
 	//Calculate the matrix for this bone:
+	aiMatrix4x4 t0,t1;
 	if(-1==ParentId)
 	{
-		WorldToBoneSpace= aiMatrix4x4::Translation(Position, aiMatrix4x4())
-						* aiMatrix4x4::Rotation(RotationAngle, RotationAxis, aiMatrix4x4())
+		WorldToBoneSpace= aiMatrix4x4::Translation(Position, t0)
+						* aiMatrix4x4::Rotation(RotationAngle, RotationAxis, t1)
 						;
 	}
 	else
 	{
 		WorldToBoneSpace= Bones[ParentId].WorldToBoneSpace
-						* aiMatrix4x4::Translation(Position, aiMatrix4x4())
-						* aiMatrix4x4::Rotation(RotationAngle, RotationAxis, aiMatrix4x4())
+						* aiMatrix4x4::Translation(Position, t0)
+						* aiMatrix4x4::Rotation(RotationAngle, RotationAxis, t1)
 						;
 
 	}

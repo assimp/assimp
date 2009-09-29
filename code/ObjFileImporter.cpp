@@ -188,8 +188,10 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 	for (unsigned int meshIndex = 0; meshIndex < pModel->m_Meshes.size(); meshIndex++)
 	{
 		pMesh = new aiMesh();
-		MeshArray.push_back( pMesh );
 		createTopology( pModel, pData, meshIndex, pMesh );	
+		if (pMesh->mNumVertices > 0) {
+			MeshArray.push_back( pMesh );
+		}
 	}
 
 	// Create all nodes from the subobjects stored in the current object
@@ -299,7 +301,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 
 	// Get current mesh
 	ObjFile::Mesh *pObjMesh = pModel->m_Meshes[ uiMeshIndex ];
-	if ( NULL == pObjMesh )
+	if ( NULL == pObjMesh || pObjMesh->m_uiNumIndices < 1)
 		return;
 
 	// Copy vertices of this mesh instance

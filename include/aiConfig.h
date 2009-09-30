@@ -129,17 +129,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_PretransformVertices step to
  *  keep the scene hierarchy. Meshes are moved to worldspace, but
- *  no optimization is performed (means: meshes are not joined. The total
- *  number of meshes won't change).
+ *  no optimization is performed (read: meshes with equal materials are not 
+ *  joined. The total number of meshes won't change).
  *
  * This option could be of use for you if the scene hierarchy contains
- * important additional information which you want to interpret. 
+ * important additional information which you intend to parse. 
  * For rendering, you can still render all meshes in the scene without
  * any transformations.
  * Property type: integer (0: false; !0: true). Default value: false.
  */
 #define AI_CONFIG_PP_PTV_KEEP_HIERARCHY		\
 	"PP_PTV_KEEP_HIERARCHY"
+
+// ---------------------------------------------------------------------------
+/** @brief Configures the #aiProcess_PretransformVertices step to normalize
+ *  all vertex components into the -1...1 range. That is, a bounding box
+ *  for the whole scene is computed, the maximum component is taken and all
+ *  meshes are scaled appropriately (uniformly of course!).
+ *  This might be useful if you don't know the spatial dimension of the input 
+ *  data*/
+#define AI_CONFIG_PP_PTV_NORMALIZE	\
+	"PP_PTV_NORMALIZE"
 
 // ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_FindDegenerates step to

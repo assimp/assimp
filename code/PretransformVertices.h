@@ -157,7 +157,7 @@ private:
 
 
 	//! Configuration option: keep scene hierarchy as long as possible
-	bool configKeepHierarchy;
+	bool configKeepHierarchy, configNormalize;
 
 };
 

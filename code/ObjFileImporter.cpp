@@ -77,10 +77,17 @@ ObjFileImporter::~ObjFileImporter()
 
 // ------------------------------------------------------------------------------------------------
 //	Returns true, fi file is an obj file
-bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem* /* pIOHandler */, bool /*checkSig */) const
+bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem*  pIOHandler , bool checkSig ) const
 {
-	// fixme: auto detection
-	return SimpleExtensionCheck( pFile,"obj" );
+	if(!checkSig) //Check File Extension
+	{
+		return SimpleExtensionCheck(pFile,"obj");
+	}
+	else //Check file Header
+	{
+		const char* tokens[] = {"mtllib","usemtl","vt ","vn ","o "};
+		return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, tokens, 5);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

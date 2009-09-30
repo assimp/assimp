@@ -203,12 +203,15 @@ enum aiPostProcessSteps
 	* each mesh referencing one material. For rendering, you can
 	* simply render all meshes in order, you don't need to pay
 	* attention to local transformations and the node hierarchy.
-	* Animations are removed during this step. 
-	* This step is intended for applications that have no scenegraph.
+	* Animations are removed during this step.
+	* This step is intended for applications without a scenegraph.
 	* The step CAN cause some problems: if e.g. a mesh of the asset
 	* contains normals and another, using the same material index, does not, 
 	* they will be brought together, but the first meshes's part of
-	* the normal list will be zeroed.
+	* the normal list is zeroed. However, these artifacts are rare.
+	* @note The <tt>#AI_CONFIG_PP_PTV_NORMALIZE</tt> configuration property
+	* can be set to normalize the scene's spatial dimension to the -1...1
+	* range. 
 	*/
 	aiProcess_PreTransformVertices = 0x100,
 

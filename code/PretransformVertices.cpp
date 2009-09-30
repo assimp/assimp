@@ -79,8 +79,9 @@ bool PretransformVertices::IsActive( unsigned int pFlags) const
 // Setup import configuration
 void PretransformVertices::SetupProperties(const Importer* pImp)
 {
-	// Get the current value of AI_CONFIG_PP_PTV_KEEP_HIERARCHY
+	// Get the current value of AI_CONFIG_PP_PTV_KEEP_HIERARCHY and AI_CONFIG_PP_PTV_NORMALIZE
 	configKeepHierarchy = (0 != pImp->GetPropertyInteger(AI_CONFIG_PP_PTV_KEEP_HIERARCHY,0));
+	configNormalize = (0 != pImp->GetPropertyInteger(AI_CONFIG_PP_PTV_NORMALIZE,0));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -468,8 +469,8 @@ void PretransformVertices::Execute( aiScene* pScene)
 		if (apcOutMeshes.size() > 0) {
 			aiMesh** npp = new aiMesh*[pScene->mNumMeshes + apcOutMeshes.size()];
 
-			::memcpy(npp,pScene->mMeshes,sizeof(aiMesh*)*pScene->mNumMeshes);
-			::memcpy(npp+pScene->mNumMeshes,&apcOutMeshes[0],sizeof(aiMesh*)*apcOutMeshes.size());
+			memcpy(npp,pScene->mMeshes,sizeof(aiMesh*)*pScene->mNumMeshes);
+			memcpy(npp+pScene->mNumMeshes,&apcOutMeshes[0],sizeof(aiMesh*)*apcOutMeshes.size());
 
 			pScene->mNumMeshes  += apcOutMeshes.size();
 			delete[] pScene->mMeshes; pScene->mMeshes = npp;
@@ -661,6 +662,32 @@ void PretransformVertices::Execute( aiScene* pScene)
 		MakeIdentityTransform(pScene->mRootNode);
 	}
 
+	if (configNormalize) {
+		// compute the boundary of all meshes
+		aiVector3D min,max;
+		MinMaxChooser<aiVector3D> ()(min,max);
+
+		for (unsigned int a = 0; a <  pScene->mNumMeshes; ++a) {
+			aiMesh* m = pScene->mMeshes[a];
+			for (unsigned int i = 0; i < m->mNumVertices;++i) {
+				min = std::min(m->mVertices[i],min);
+				max = std::max(m->mVertices[i],max);
+			}
+		}
+
+		// find the dominant axis
+		aiVector3D d = max-min;
+		const float div = std::max(d.x,std::max(d.y,d.z))*0.5f;
+	
+		d = min+d*0.5f;
+		for (unsigned int a = 0; a <  pScene->mNumMeshes; ++a) {
+			aiMesh* m = pScene->mMeshes[a];
+			for (unsigned int i = 0; i < m->mNumVertices;++i) {
+				m->mVertices[i] = (m->mVertices[i]-d)/div;
+			}
+		}
+	}
+
 	// print statistics
 	if (!DefaultLogger::isNullLogger())
 	{
@@ -668,15 +695,15 @@ void PretransformVertices::Execute( aiScene* pScene)
 
 		DefaultLogger::get()->debug("PretransformVerticesProcess finished");
 
-		::sprintf(buffer,"Removed %i nodes and %i animation channels (%i output nodes)",
+		sprintf(buffer,"Removed %i nodes and %i animation channels (%i output nodes)",
 			iOldNodes,iOldAnimationChannels,CountNodes(pScene->mRootNode));
 		DefaultLogger::get()->info(buffer);
 
-		::sprintf(buffer,"Kept %i lights and %i cameras",
+		sprintf(buffer,"Kept %i lights and %i cameras",
 			pScene->mNumLights,pScene->mNumCameras);
 		DefaultLogger::get()->info(buffer);
 
-		::sprintf(buffer,"Moved %i meshes to WCS (number of output meshes: %i)",
+		sprintf(buffer,"Moved %i meshes to WCS (number of output meshes: %i)",
 			iOldMeshes,pScene->mNumMeshes);
 		DefaultLogger::get()->info(buffer);
 	}

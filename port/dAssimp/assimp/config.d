@@ -131,11 +131,11 @@ extern ( C ) {
    /**
     * Configures the <code>PretransformVertices</code> step to keep the scene
     * hierarchy. Meshes are moved to worldspace, but no optimization is
-    * performed (means: meshes are not joined. The total number of meshes won't
-    * change).
+    * performed (meshes with equal materials are not joined, the total number
+    * of meshes will not change).
     *
     * This option could be of use for you if the scene hierarchy contains
-    * important additional information which you want to interpret.
+    * important additional information which you intend to parse.
     * For rendering, you can still render all meshes in the scene without
     * any transformations.
     *
@@ -144,6 +144,17 @@ extern ( C ) {
     * Property type: integer (0: false; !0: true).
     */
    const char* AI_CONFIG_PP_PTV_KEEP_HIERARCHY = "PP_PTV_KEEP_HIERARCHY";
+
+   /**
+    * Configures the <code>PretransformVertices</code> step to normalize all
+    * vertex components into the -1...1 range. That is, a bounding box for the
+    * whole scene is computed, the maximum component is taken and all meshes
+    * are scaled appropriately (uniformly of course!).
+    *
+    * This might be useful if you don't know the spatial dimension of the input
+    * data.
+    */
+   const char* AI_CONFIG_PP_PTV_NORMALIZE = "PP_PTV_NORMALIZE";
 
    /**
     * Configures the <code>FindDegenerates</code> step to remove degenerated
@@ -380,6 +391,21 @@ extern ( C ) {
     */
    const char* AI_CONFIG_PP_SBP_REMOVE = "PP_SBP_REMOVE";
 
+   /**
+    * Input parameter to the <code>FindInvalidData</code> step:
+    * Specifies the floating-point accuracy for animation values.
+    *
+    * The step checks for animation tracks where all frame values are
+    * absolutely equal and removes them. This tweakable controls the epsilon
+    * for floating-point comparisons – two keys are considered equal if the
+    * invariant abs(n0-n1) > epsilon holds true for all vector respectively
+    * quaternion components.
+    *
+    * Default value: 0 (exact comparison).
+    *
+    * Property type: float.
+    */
+   const char* AI_CONFIG_PP_FID_ANIM_ACCURACY = "PP_FID_ANIM_ACCURACY";
 
    /**
     * The <code>TransformUVCoords</code> step evaluates UV scalings.
@@ -623,4 +649,15 @@ extern ( C ) {
     * Property type: integer.
     */
    const char* AI_CONFIG_IMPORT_IRR_ANIM_FPS = "IMPORT_IRR_ANIM_FPS";
+
+   /**
+    * Ogre Importer will try to load this material file.
+    *
+    * Ogre Mehs contain only the material name, not the material file. If there
+    * is no material file with the same name as the material, Ogre Importer
+    * will try to load this file and search the material in it.
+    *
+    * Property type: string. Default value: "Scene.material".
+    */
+   const char* AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE = "IMPORT_OGRE_MATERIAL_FILE";
 }

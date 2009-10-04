@@ -199,10 +199,15 @@ extern ( C ) {
        * this step.
        *
        * This step is intended for applications that have no scenegraph.
+       *
        * The step <em>can</em> cause some problems: if e.g. a mesh of the asset
        * contains normals and another, using the same material index, does not,
        * they will be brought together, but the first meshes's part of the
-       * normal list will be zeroed.
+       * normal list is zeroed. However, these artifacts are rare.
+       *
+       * Note: The <code>AI_CONFIG_PP_PTV_NORMALIZE</code> configuration
+       *    property can be set to normalize the scene's spatial dimension
+       *    to the -1...1 range.
        */
       PreTransformVertices = 0x100,
 
@@ -358,13 +363,17 @@ extern ( C ) {
 
       /**
        * This step searches all meshes for invalid data, such as zeroed normal
-       * vectors or invalid UV coords and removes them.
+       * vectors or invalid UV coords and removes/fixes them. This is intended
+       * to get rid of some common exporter errors.
        *
        * This is especially useful for normals. If they are invalid, and the
-       * step recognizes this, they will be removed and can later be computed
-       * by one of the other steps.
+       * step recognizes this, they will be removed and can later be
+       * recomputed, e.g. by the <code>GenSmoothNormals</code> step.
        *
-       * The step will also remove meshes that are infinitely small.
+       * The step will also remove meshes that are infinitely small and reduce
+       * animation tracks consisting of hundreds if redundant keys to a single
+       * key. The <code>AI_CONFIG_PP_FID_ANIM_ACCURACY</code> config property
+       * decides the accuracy of the check for duplicate animation tracks.
        */
       FindInvalidData = 0x20000,
 

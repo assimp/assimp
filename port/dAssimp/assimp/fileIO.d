@@ -64,12 +64,12 @@ extern ( C ) {
    alias char* aiUserData;
 
    /**
-    * Defines Assimp's way of accessing files.
+    * File system callbacks.
     *
     * Provided are functions to open and close files. Supply a custom structure
     * to the import function. If you don't, a default implementation is used.
-    * Use this to enable reading from other sources, such as ZIPs or memory
-    * locations.
+    * Use custom file systems to enable reading from other sources, such as
+    * ZIPs or memory locations.
     */
    struct aiFileIO {
       /**
@@ -89,7 +89,7 @@ extern ( C ) {
    }
 
    /**
-    * Represents a read/write file.
+    * File callbacks.
     *
     * Actually, it's a data structure to wrap a set of <code>fXXXX</code>
     * (e.g <code>fopen()</code>) replacement functions.

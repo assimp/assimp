@@ -315,8 +315,8 @@ void AnimResolver::DoInterpolation2(std::vector<LWO::Key>::const_iterator beg,
 
 // ------------------------------------------------------------------------------------------------
 // Subsample animation track by given key values
-void AnimResolver::SubsampleAnimTrack(std::vector<aiVectorKey>& out,
-	double time,double sample_delta)
+void AnimResolver::SubsampleAnimTrack(std::vector<aiVectorKey>& /*out*/,
+	double /*time*/ ,double /*sample_delta*/ )
 {
 	ai_assert(out.empty() && sample_delta);
 

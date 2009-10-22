@@ -61,7 +61,7 @@ MD5Parser::MD5Parser(char* _buffer, unsigned int /*_fileSize*/ )
 	ai_assert(NULL != _buffer && 0 != _fileSize);
 
 	buffer = _buffer;
-	fileSize = fileSize;
+	fileSize = _fileSize;
 	lineNumber = 0;
 
 	DefaultLogger::get()->debug("MD5Parser begin");

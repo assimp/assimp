@@ -704,10 +704,16 @@ void ColladaParser::ReadImage( Collada::Image& pImage)
 			{
 				if (mFormat == FV_1_4_n) 
 				{
-					// element content is filename - hopefully
-					const char* sz = TestTextContent();
-					if (sz)pImage.mFileName = sz;
-					TestClosing( "init_from");
+					// FIX: C4D exporter writes empty <init_from/> tags
+					if (!mReader->isEmptyElement()) {
+						// element content is filename - hopefully
+						const char* sz = TestTextContent();
+						if (sz)pImage.mFileName = sz;
+						TestClosing( "init_from");
+					}
+					if (!pImage.mFileName.length()) {
+						pImage.mFileName = "unknown_texture";
+					}
 				}
 				else if (mFormat == FV_1_5_n) 
 				{

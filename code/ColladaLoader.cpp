@@ -1270,15 +1270,16 @@ const aiString& ColladaLoader::FindFilenameForEffectTexture( const ColladaParser
 	// if this is an embedded texture image setup an aiTexture for it
 	if (imIt->second.mFileName.empty()) 
 	{
-		if (imIt->second.mImageData.empty()) 
+		if (imIt->second.mImageData.empty())  {
 			throw new ImportErrorException("Collada: Invalid texture, no data or file reference given");
+		}
 
 		aiTexture* tex = new aiTexture();
 
 		// setup format hint
-		if (imIt->second.mEmbeddedFormat.length() > 3)
+		if (imIt->second.mEmbeddedFormat.length() > 3) {
 			DefaultLogger::get()->warn("Collada: texture format hint is too long, truncating to 3 characters");
-
+		}
 		strncpy(tex->achFormatHint,imIt->second.mEmbeddedFormat.c_str(),3);
 
 		// and copy texture data

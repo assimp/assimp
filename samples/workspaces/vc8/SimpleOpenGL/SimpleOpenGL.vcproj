@@ -63,7 +63,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="glut32.lib assimp.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\glut;&quot;..\..\..\..\lib\assimp_release-dll_win32&quot;"
+				AdditionalLibraryDirectories="..\..\..\glut;&quot;..\..\..\..\lib\assimp_debug_win32&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"

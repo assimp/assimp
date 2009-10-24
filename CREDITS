@@ -19,7 +19,7 @@ X-, Collada-, BVH-Loader, Postprocessing framework. Data structure & Interface d
 Linux build, eclipse support.
 
 - Kim Kulling:
-Obj-Loader, Logging, SCons-build environment.
+Obj-Loader, Logging, Scons-build environment, CMake build enviroment, Linux build.
 
 - Matthias Gubisch,
 Assimp.net
@@ -67,3 +67,6 @@ Updated PyAssimp to the latest Assimp data structures and provided a script to k
 
 - Tobias Rittig
 Collada testing with Cinema 4D
+
+- Brad Grantham
+Improvements in OpenGL-sample

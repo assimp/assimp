@@ -120,9 +120,9 @@ inline aiQuaternion::aiQuaternion( const aiMatrix3x3 &pRotMatrix)
 	if( t > 0.001f)
 	{
 		float s = sqrt( t) * 2.0f;
-		x = (pRotMatrix.b3 - pRotMatrix.c2) / s;
-		y = (pRotMatrix.c1 - pRotMatrix.a3) / s;
-		z = (pRotMatrix.a2 - pRotMatrix.b1) / s;
+		x = (pRotMatrix.c2 - pRotMatrix.b3) / s;
+		y = (pRotMatrix.a3 - pRotMatrix.c1) / s;
+		z = (pRotMatrix.b1 - pRotMatrix.a2) / s;
 		w = 0.25f * s;
 	} // else we have to check several cases
 	else if( pRotMatrix.a1 > pRotMatrix.b2 && pRotMatrix.a1 > pRotMatrix.c3 )  
@@ -130,26 +130,26 @@ inline aiQuaternion::aiQuaternion( const aiMatrix3x3 &pRotMatrix)
     // Column 0: 
 		float s = sqrt( 1.0f + pRotMatrix.a1 - pRotMatrix.b2 - pRotMatrix.c3) * 2.0f;
 		x = 0.25f * s;
-		y = (pRotMatrix.a2 + pRotMatrix.b1) / s;
-		z = (pRotMatrix.c1 + pRotMatrix.a3) / s;
-		w = (pRotMatrix.b3 - pRotMatrix.c2) / s;
+		y = (pRotMatrix.b1 + pRotMatrix.a2) / s;
+		z = (pRotMatrix.a3 + pRotMatrix.c1) / s;
+		w = (pRotMatrix.c2 - pRotMatrix.b3) / s;
 	} 
 	else if( pRotMatrix.b2 > pRotMatrix.c3) 
 	{ 
     // Column 1: 
 		float s = sqrt( 1.0f + pRotMatrix.b2 - pRotMatrix.a1 - pRotMatrix.c3) * 2.0f;
-		x = (pRotMatrix.a2 + pRotMatrix.b1) / s;
+		x = (pRotMatrix.b1 + pRotMatrix.a2) / s;
 		y = 0.25f * s;
-		z = (pRotMatrix.b3 + pRotMatrix.c2) / s;
-		w = (pRotMatrix.c1 - pRotMatrix.a3) / s;
+		z = (pRotMatrix.c2 + pRotMatrix.b3) / s;
+		w = (pRotMatrix.a3 - pRotMatrix.c1) / s;
 	} else 
 	{ 
     // Column 2:
 		float s = sqrt( 1.0f + pRotMatrix.c3 - pRotMatrix.a1 - pRotMatrix.b2) * 2.0f;
-		x = (pRotMatrix.c1 + pRotMatrix.a3) / s;
-		y = (pRotMatrix.b3 + pRotMatrix.c2) / s;
+		x = (pRotMatrix.a3 + pRotMatrix.c1) / s;
+		y = (pRotMatrix.c2 + pRotMatrix.b3) / s;
 		z = 0.25f * s;
-		w = (pRotMatrix.a2 - pRotMatrix.b1) / s;
+		w = (pRotMatrix.b1 - pRotMatrix.a2) / s;
 	}
 }
 
@@ -177,13 +177,13 @@ inline aiMatrix3x3 aiQuaternion::GetMatrix() const
 {
 	aiMatrix3x3 resMatrix;
 	resMatrix.a1 = 1.0f - 2.0f * (y * y + z * z);
-	resMatrix.a2 = 2.0f * (x * y + z * w);
-	resMatrix.a3 = 2.0f * (x * z - y * w);
-	resMatrix.b1 = 2.0f * (x * y - z * w);
+	resMatrix.a2 = 2.0f * (x * y - z * w);
+	resMatrix.a3 = 2.0f * (x * z + y * w);
+	resMatrix.b1 = 2.0f * (x * y + z * w);
 	resMatrix.b2 = 1.0f - 2.0f * (x * x + z * z);
-	resMatrix.b3 = 2.0f * (y * z + x * w);
-	resMatrix.c1 = 2.0f * (x * z + y * w);
-	resMatrix.c2 = 2.0f * (y * z - x * w);
+	resMatrix.b3 = 2.0f * (y * z - x * w);
+	resMatrix.c1 = 2.0f * (x * z - y * w);
+	resMatrix.c2 = 2.0f * (y * z + x * w);
 	resMatrix.c3 = 1.0f - 2.0f * (x * x + y * y);
 
 	return resMatrix;

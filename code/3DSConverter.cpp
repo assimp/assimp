@@ -505,6 +505,12 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 	// Now build the transformation matrix of the node
 	// ROTATION
 	if (pcIn->aRotationKeys.size()){
+
+		// FIX to get to Assimp's quaternion conventions
+		for (std::vector<aiQuatKey>::iterator it = pcIn->aRotationKeys.begin(); it != pcIn->aRotationKeys.end(); ++it) {
+			(*it).mValue.w *= -1.f;
+		}
+
 		pcOut->mTransformation = aiMatrix4x4( pcIn->aRotationKeys[0].mValue.GetMatrix() );
 	}
 	else if (pcIn->aCameraRollKeys.size()) 
@@ -554,7 +560,9 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 				aiFloatKey& f = pcIn->aCameraRollKeys[i];
 
 				q.mTime  = f.mTime;
-				q.mValue = aiQuaternion(0.f,0.f,AI_DEG_TO_RAD(- f.mValue));
+
+				// FIX to get to Assimp quaternion conventions
+				q.mValue = aiQuaternion(0.f,0.f,AI_DEG_TO_RAD( /*-*/ f.mValue));
 			}
 		}
 #if 0

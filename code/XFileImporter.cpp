@@ -504,6 +504,7 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 
 					nbone->mRotationKeys[c].mTime = bone->mRotKeys[c].mTime;
 					nbone->mRotationKeys[c].mValue = aiQuaternion( rotmat);
+					nbone->mRotationKeys[c].mValue.w *= -1.0f; // needs quat inversion
 				}
 
 				// scaling

@@ -375,6 +375,9 @@ void ASEImporter::BuildAnimations()
 							q.mValue = cur.Normalize();
 						}
 						nd->mRotationKeys[a] = q; 
+
+						// need this to get to Assimp quaternion conventions
+						nd->mRotationKeys[a].mValue.w *= -1.f;
 					}
 				}
 				// copy scaling keys

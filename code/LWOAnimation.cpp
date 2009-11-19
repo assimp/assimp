@@ -507,6 +507,11 @@ void AnimResolver::ExtractAnimChannel(aiNodeAnim** out, unsigned int flags /*= 0
 {
 	*out = NULL;
 
+
+	//FIXME: crashes if more than one component is animated at different timings, to be resolved.
+	return;
+
+#if 0
 	// If we have no envelopes, return NULL
 	if (envelopes.empty()) {
 		return;
@@ -560,6 +565,7 @@ void AnimResolver::ExtractAnimChannel(aiNodeAnim** out, unsigned int flags /*= 0
 		anim->mScalingKeys = new aiVectorKey[ anim->mNumScalingKeys = keys.size() ];
 		std::copy(keys.begin(),keys.end(),anim->mScalingKeys);
 	}
+#endif
 }
 
 

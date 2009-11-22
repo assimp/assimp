@@ -1069,9 +1069,29 @@ void ColladaParser::ReadEffectLibrary()
 void ColladaParser::ReadEffect( Collada::Effect& pEffect)
 {
 	// for the moment we don't support any other type of effect.
-	// TODO: (thom) Rewrite this so that it ignores the whole effect instead of bailing out
-	TestOpening( "profile_COMMON");
+	while( mReader->read())
+	{
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
+		{
+			if( IsElement( "profile_COMMON"))
+				ReadEffectProfileCommon( pEffect);
+			else
+				SkipElement();
+		}
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) 
+		{
+			if( strcmp( mReader->getNodeName(), "effect") != 0)
+				ThrowException( "Expected end of \"effect\" element.");
 
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads an COMMON effect profile
+void ColladaParser::ReadEffectProfileCommon( Collada::Effect& pEffect)
+{
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
@@ -1144,16 +1164,26 @@ void ColladaParser::ReadEffect( Collada::Effect& pEffect)
 				pEffect.mFaceted = ReadBoolFromTextContent();
 				TestClosing( "faceted");
 			}
-#if 0
-			else {
+			else 
+			{
 				// ignore the rest
 				SkipElement();
 			}
-#endif
 		}
-		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-			if( strcmp( mReader->getNodeName(), "effect") == 0)
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) 
+		{
+			if( strcmp( mReader->getNodeName(), "technique") == 0)
+			{
+				// ignore silently - just syntactic sugar
+			}
+			else if( strcmp( mReader->getNodeName(), "profile_COMMON") == 0)
+			{
 				break;
+			} else
+			{
+				// might also be the end of "phong", "blinn", "constant" or "lambert"
+				// ThrowException( "Expected end of \"profile_COMMON\" element.");
+			}
 		}
 	}
 }
@@ -2669,9 +2699,9 @@ Collada::InputType ColladaParser::GetTypeForSemantic( const std::string& pSemant
 		return IT_Color;
 	else if( pSemantic == "VERTEX")
 		return IT_Vertex;
-	else if( pSemantic == "BINORMAL")
+	else if( pSemantic == "BINORMAL" || pSemantic ==  "TEXBINORMAL")
 		return IT_Bitangent;
-	else if( pSemantic == "TANGENT")
+	else if( pSemantic == "TANGENT" || pSemantic == "TEXTANGENT")
 		return IT_Tangent;
 
 	DefaultLogger::get()->warn( boost::str( boost::format( "Unknown vertex input type \"%s\". Ignoring.") % pSemantic));

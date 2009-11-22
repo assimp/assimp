@@ -493,7 +493,7 @@ struct Effect
 		mTexTransparent, mTexBump, mTexReflective;
 
 	// Scalar factory
-	float mShininess, mRefractIndex;
+	float mShininess, mRefractIndex, mReflectivity;
 	float mTransparency;
 
 	// local params referring to each other by their SID
@@ -518,6 +518,7 @@ struct Effect
 		, mDoubleSided	(false)
 		, mWireframe    (false)
 		, mFaceted      (false)
+		, mReflectivity (1.f)
 	{ 
 	}
 };

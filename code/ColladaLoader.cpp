@@ -1147,6 +1147,7 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* pScene
 
 		// scalar properties
 		mat.AddProperty( &effect.mShininess, 1, AI_MATKEY_SHININESS);
+		mat.AddProperty( &effect.mReflectivity, 1, AI_MATKEY_REFLECTIVITY);
 		mat.AddProperty( &effect.mRefractIndex, 1, AI_MATKEY_REFRACTI);
 
 		// transparency, a very hard one. seemingly not all files are following the

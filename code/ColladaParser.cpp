@@ -1135,6 +1135,8 @@ void ColladaParser::ReadEffectProfileCommon( Collada::Effect& pEffect)
 			}
 			else if( IsElement( "shininess"))
 				ReadEffectFloat( pEffect.mShininess);
+			else if( IsElement( "reflectivity"))
+				ReadEffectFloat( pEffect.mReflectivity);
 
 			/* Single scalar properties */
 			else if( IsElement( "transparency"))

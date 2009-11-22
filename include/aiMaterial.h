@@ -754,6 +754,7 @@ extern "C" {
 #define AI_MATKEY_OPACITY "$mat.opacity",0,0
 #define AI_MATKEY_BUMPSCALING "$mat.bumpscaling",0,0
 #define AI_MATKEY_SHININESS "$mat.shininess",0,0
+#define AI_MATKEY_REFLECTIVITY "$mat.reflectivity",0,0
 #define AI_MATKEY_SHININESS_STRENGTH "$mat.shinpercent",0,0
 #define AI_MATKEY_REFRACTI "$mat.refracti",0,0
 #define AI_MATKEY_COLOR_DIFFUSE "$clr.diffuse",0,0

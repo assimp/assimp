@@ -1,13 +1,13 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimpview", "assimp_view.vcproj", "{B17B959B-BB8A-4596-AF0F-A8C8DBBC3C5E}"
-	ProjectSection(ProjectDependencies) = postProject
-		{5691E159-2D9B-407F-971F-EA5C592DC524} = {5691E159-2D9B-407F-971F-EA5C592DC524}
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{5691E159-2D9B-407F-971F-EA5C592DC524} = {5691E159-2D9B-407F-971F-EA5C592DC524}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimp", "assimp.vcproj", "{5691E159-2D9B-407F-971F-EA5C592DC524}"
@@ -17,21 +17,21 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimp", "assimp.vcproj", "
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unit", "UnitTest.vcproj", "{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}"
-	ProjectSection(ProjectDependencies) = postProject
-		{5691E159-2D9B-407F-971F-EA5C592DC524} = {5691E159-2D9B-407F-971F-EA5C592DC524}
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{5691E159-2D9B-407F-971F-EA5C592DC524} = {5691E159-2D9B-407F-971F-EA5C592DC524}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimpcmd", "assimp_cmd.vcproj", "{7C8F7B44-C990-4EA8-A2A5-9028472E0AD3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{5691E159-2D9B-407F-971F-EA5C592DC524} = {5691E159-2D9B-407F-971F-EA5C592DC524}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimp_cmd", "assimp_cmd.vcproj", "{7C8F7B44-C990-4EA8-A2A5-9028472E0AD3}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{5691E159-2D9B-407F-971F-EA5C592DC524} = {5691E159-2D9B-407F-971F-EA5C592DC524}
 	EndProjectSection
 EndProject
 Global

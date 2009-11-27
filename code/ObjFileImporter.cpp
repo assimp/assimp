@@ -155,7 +155,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
 	std::vector<aiMesh*> MeshArray;
 	for (size_t index = 0; index < pModel->m_Objects.size(); index++)
 	{
-		createNodes(pModel, pModel->m_Objects[ index ], pScene->mRootNode, pScene, MeshArray);
+		createNodes(pModel, pModel->m_Objects[ index ], index, pScene->mRootNode, pScene, MeshArray);
 	}
 
 	// Create mesh pointer buffer for this scene
@@ -178,6 +178,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
 // ------------------------------------------------------------------------------------------------
 //	Creates all nodes of the model
 aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile::Object* pData, 
+									 unsigned int uiMeshIndex,
 									 aiNode *pParent, aiScene* pScene, 
 									 std::vector<aiMesh*> &MeshArray)
 {
@@ -192,10 +193,10 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 		this->appendChildToParentNode(pParent, pNode);
 
 	aiMesh *pMesh = NULL;
-	for (unsigned int meshIndex = 0; meshIndex < pModel->m_Meshes.size(); meshIndex++)
+	//for (unsigned int meshIndex = 0; meshIndex < pModel->m_Meshes.size(); meshIndex++)
 	{
 		pMesh = new aiMesh();
-		createTopology( pModel, pData, meshIndex, pMesh );	
+		createTopology( pModel, pData, uiMeshIndex, pMesh );	
 		if (pMesh->mNumVertices > 0) {
 			MeshArray.push_back( pMesh );
 		}

@@ -69,4 +69,7 @@ Updated PyAssimp to the latest Assimp data structures and provided a script to k
 Collada testing with Cinema 4D
 
 - Brad Grantham
-Improvements in OpenGL-sample
+Improvements in OpenGL-Sample.
+
+- Robert Ramirez
+Add group loading feature to Obj-Loader.

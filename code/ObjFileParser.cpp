@@ -385,9 +385,9 @@ void ObjFileParser::getMaterialDesc()
 	{
 		// Not found, use default material
 		m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
-		m_pModel->m_pCurrentMesh = new ObjFile::Mesh();
-		m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
-		m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( DEFAULT_MATERIAL );
+		//m_pModel->m_pCurrentMesh = new ObjFile::Mesh();
+		//m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
+		//m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( DEFAULT_MATERIAL );
 	}
 	else
 	{
@@ -395,9 +395,9 @@ void ObjFileParser::getMaterialDesc()
 		m_pModel->m_pCurrentMaterial = (*it).second;
 
 		// Create a new mesh for a new material
-		m_pModel->m_pCurrentMesh = new ObjFile::Mesh();
-		m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
-		m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( strName );
+		//m_pModel->m_pCurrentMesh = new ObjFile::Mesh();
+		//m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
+		//m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( strName );
 	}
 
 	// Skip rest of line
@@ -597,6 +597,16 @@ void ObjFileParser::createObject(const std::string &strObjectName)
 	m_pModel->m_pCurrent = new ObjFile::Object();
 	m_pModel->m_pCurrent->m_strObjName = strObjectName;
 	m_pModel->m_Objects.push_back(m_pModel->m_pCurrent);
+	
+	m_pModel->m_pCurrentMesh = new ObjFile::Mesh();
+	m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
+
+	if(m_pModel->m_pCurrentMaterial)
+	{
+		m_pModel->m_pCurrentMesh->m_uiMaterialIndex = 
+			getMaterialIndex( m_pModel->m_pCurrentMaterial->MaterialName.data );
+		m_pModel->m_pCurrentMesh->m_pMaterial = m_pModel->m_pCurrentMaterial;
+	}		
 }
 
 // -------------------------------------------------------------------

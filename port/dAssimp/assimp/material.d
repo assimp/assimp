@@ -613,6 +613,7 @@ extern ( C ) {
    const char* AI_MATKEY_OPACITY = "$mat.opacity"; /// ditto
    const char* AI_MATKEY_BUMPSCALING = "$mat.bumpscaling"; /// ditto
    const char* AI_MATKEY_SHININESS = "$mat.shininess"; /// ditto
+   const char* AI_MATKEY_REFLECTIVITY = "$mat.reflectivity"; /// ditto
    const char* AI_MATKEY_SHININESS_STRENGTH = "$mat.shinpercent"; /// ditto
    const char* AI_MATKEY_REFRACTI = "$mat.refracti"; /// ditto
    const char* AI_MATKEY_COLOR_DIFFUSE = "$clr.diffuse"; /// ditto

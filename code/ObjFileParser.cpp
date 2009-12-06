@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjTools.h"
 #include "ObjFileData.h"
 #include "fast_atof.h"
-
+#include "../include/aiTypes.h"
 #include "DefaultIOSystem.h"
 
 namespace Assimp	{
@@ -57,12 +57,12 @@ const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
 
 // -------------------------------------------------------------------
 //	Constructor with loaded data and directories.
-ObjFileParser::ObjFileParser(std::vector<char> &Data,const std::string &strModelName, IOSystem* _io) :
+ObjFileParser::ObjFileParser(std::vector<char> &Data,const std::string &strModelName, IOSystem *io ) :
 	m_DataIt(Data.begin()),
 	m_DataItEnd(Data.end()),
 	m_pModel(NULL),
 	m_uiLine(0),
-	io(_io)
+	m_pIO( io )
 {
 	// Create the model instance to store all the data
 	m_pModel = new ObjFile::Model();
@@ -438,7 +438,7 @@ void ObjFileParser::getMaterialLib()
 
 	// Check for existence
 	const std::string strMatName(pStart, &(*m_DataIt));
-	IOStream *pFile = io->Open(strMatName);
+	IOStream *pFile = m_pIO->Open(strMatName);
 
 	if (!pFile )
 	{
@@ -450,7 +450,7 @@ void ObjFileParser::getMaterialLib()
 	// Import material library data from file
 	std::vector<char> buffer;
 	BaseImporter::TextFileToBuffer(pFile,buffer);
-	io->Close( pFile );
+	m_pIO->Close( pFile );
 
 	// Importing the material library 
 	ObjFileMtlImporter mtlImporter( buffer, strMatName, m_pModel );			

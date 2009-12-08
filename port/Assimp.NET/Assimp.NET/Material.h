@@ -71,14 +71,26 @@ namespace AssimpNET
 
 		property unsigned int mNumAllocated
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumAllocated;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumAllocated = value;
+			}
 		}
 
 		property unsigned int mNumProperties
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumProperties;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumProperties = value;
+			}
 		}
 
 		property array<MaterialProperty^>^ mProperties

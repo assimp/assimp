@@ -89,98 +89,194 @@ namespace AssimpNET
 
 		property float a1
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->a1;
+			}
+			void set(float value)
+			{
+				this->p_native->a1 = value;
+			}
 		}
 
 		property float a2
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->a2;
+			}
+			void set(float value)
+			{
+				this->p_native->a2 = value;
+			}
 		}
 
 		property float a3
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->a3;
+			}
+			void set(float value)
+			{
+				this->p_native->a3 = value;
+			}
 		}
 
 		property float a4
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->a4;
+			}
+			void set(float value)
+			{
+				this->p_native->a4 = value;
+			}
 		}
 
 		property float b1
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->b1;
+			}
+			void set(float value)
+			{
+				this->p_native->b1 = value;
+			}
 		}
 
 		property float b2
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->b2;
+			}
+			void set(float value)
+			{
+				this->p_native->b2 = value;
+			}
 		}
 
 		property float b3
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->b3;
+			}
+			void set(float value)
+			{
+				this->p_native->b3 = value;
+			}
 		}
 
 		property float b4
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->b4;
+			}
+			void set(float value)
+			{
+				this->p_native->b4 = value;
+			}
 		}
 
 		property float c1
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->c1;
+			}
+			void set(float value)
+			{
+				this->p_native->c1 = value;
+			}
 		}
 
 		property float c2
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->c2;
+			}
+			void set(float value)
+			{
+				this->p_native->c2 = value;
+			}
 		}
 
 		property float c3
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->c3;
+			}
+			void set(float value)
+			{
+				this->p_native->c3 = value;
+			}
 		}
 
 		property float c4
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->c4;
+			}
+			void set(float value)
+			{
+				this->p_native->c4 = value;
+			}
 		}
 
 		property float d1
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->d1;
+			}
+			void set(float value)
+			{
+				this->p_native->d1 = value;
+			}
 		}
 
 		property float d2
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->d2;
+			}
+			void set(float value)
+			{
+				this->p_native->d2 = value;
+			}
 		}
 
 		property float d3
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->d3;
+			}
+			void set(float value)
+			{
+				this->p_native->d3 = value;
+			}
 		}
 
 		property float d4
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->d4;
+			}
+			void set(float value)
+			{
+				this->p_native->d4 = value;
+			}
 		}
 
 		aiMatrix4x4* getNative();

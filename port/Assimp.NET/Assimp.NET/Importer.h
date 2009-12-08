@@ -56,7 +56,7 @@ namespace AssimpNET
 	{
 		property unsigned int animations
 		{
-			unsigned int get() { throw gcnew System::NotImplementedException();}
+			unsigned int get(){throw gcnew System::NotImplementedException();}
 			void set(unsigned int value) { throw gcnew System::NotImplementedException();}
 		}
 

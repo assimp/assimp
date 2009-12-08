@@ -60,28 +60,58 @@ namespace AssimpNET
 
 		property array<NodeAnim^>^ mAnimChannels
 		{
-			array<NodeAnim^>^ get(){throw gcnew System::NotImplementedException();}
-			void set(array<NodeAnim^>^ value){throw gcnew System::NotImplementedException();}
+			array<NodeAnim^>^ get()
+			{
+				throw gcnew System::NotImplementedException();
+			}
+			void set(array<NodeAnim^>^ value)
+			{
+				throw gcnew System::NotImplementedException();		
+			}
 		}
 		property unsigned int mNumAnimChannels
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumChannels;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumChannels = value;
+			}
 		}
 		property double mDuration
 		{
-			double get(){throw gcnew System::NotImplementedException();}
-			void set(double value){throw gcnew System::NotImplementedException();}
+			double get()
+			{
+				return this->p_native->mDuration;
+			}
+			void set(double value)
+			{
+				this->p_native->mDuration = value;
+			}
 		}
 		property double mTicksPerSecond
 		{
-			double get(){throw gcnew System::NotImplementedException();}
-			void set(double value){throw gcnew System::NotImplementedException();}
+			double get()
+			{
+				return this->p_native->mTicksPerSecond;
+			}
+			void set(double value)
+			{
+				this->p_native->mTicksPerSecond = value;
+			}
 		}
 		property String^ mName
 		{
-			String^ get(){throw gcnew System::NotImplementedException();}
-			void set(String^ value){throw gcnew System::NotImplementedException();}
+			String^ get()
+			{
+				return gcnew String(this->p_native->mName.data);
+			}
+			void set(String^ value)
+			{
+				this->p_native->mName.Set((char *) System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(value).ToPointer());
+			}
 		}
 
 		aiAnimation* getNative();

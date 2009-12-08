@@ -97,8 +97,14 @@ namespace AssimpNET
 
 		property unsigned int mMaterialIndex
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mMaterialIndex;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mMaterialIndex = value;
+			}
 		}
 
 		property array<Vector3D^>^ mNormals
@@ -109,32 +115,62 @@ namespace AssimpNET
 		
 		property unsigned int mNumBones
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumBones;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumBones = value;
+			}
 		}
 
 		property unsigned int mNumFaces
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumFaces;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumFaces = value;
+			}
 		}
 
-		property unsigned int mNumUVComponents
+		property array<unsigned int>^ mNumUVComponents
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			array<unsigned int>^get()
+			{
+				throw gcnew System::NotImplementedException();
+			}
+			void set(array<unsigned int>^ value)
+			{
+				throw gcnew System::NotImplementedException();
+			}
 		}
 
 		property unsigned int mNumVertices
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumVertices;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumVertices = value;
+			}
 		}
 
 		property unsigned int mPrimitveTypes
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mPrimitiveTypes;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mPrimitiveTypes = value;
+			}
 		}
 
 		property array<Vector3D^>^ mTangents

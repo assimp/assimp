@@ -24,26 +24,50 @@ namespace AssimpNET
 
 		property float Red
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->r;
+			}
+			void set(float value)
+			{
+				this->p_native->r = value;
+			}
 		}
 
 		property float Green
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->g;
+			}
+			void set(float value)
+			{
+				this->p_native->g = value;
+			}
 		}
 
 		property float Blue
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->b;
+			}
+			void set(float value)
+			{
+				this->p_native->b = value;
+			}
 		}
 
 		property float Alpha
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->a;
+			}
+			void set(float value)
+			{
+				this->p_native->a = value;
+			}
 		}
 
 		aiColor4D* getNative();	

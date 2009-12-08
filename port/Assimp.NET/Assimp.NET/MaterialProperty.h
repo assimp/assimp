@@ -72,26 +72,50 @@ namespace AssimpNET
 
 		property unsigned int mDataLength
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mDataLength;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mDataLength = value;
+			}
 		}
 
 		property unsigned int mIndex
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mIndex;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mIndex = value;
+			}
 		}
 
 		property String^ mKey
 		{
-			String^ get(){throw gcnew System::NotImplementedException();}
-			void set(String^ value){throw gcnew System::NotImplementedException();}
+			String^ get()
+			{
+				return gcnew String(this->p_native->mKey.data);
+			}
+			void set(String^ value)
+			{
+				this->p_native->mKey.Set((char*)System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(value).ToPointer());
+			}
 		}
 
 		property unsigned int mSemantic
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mSemantic;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mSemantic = value;
+			}
 		}
 
 		property PropertyTypeInfo mType

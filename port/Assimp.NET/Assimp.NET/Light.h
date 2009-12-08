@@ -70,68 +70,134 @@ namespace AssimpNET
 
 		property float AngleInnerCone
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->mAngleInnerCone;
+			}
+			void set(float value)
+			{
+				this->p_native->mAngleInnerCone = value;
+			}
 		}
 
 		property float AngleOuterCone
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->mAngleOuterCone;
+			}
+			void set(float value)
+			{
+				this->p_native->mAngleOuterCone = value;
+			}
 		}
 
 		property float AttenuationConstant
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->mAttenuationConstant;
+			}
+			void set(float value)
+			{
+				this->p_native->mAttenuationConstant = value;
+			}
 		}
 
 		property float AttenuationLinear
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->mAttenuationLinear;
+			}
+			void set(float value)
+			{
+				this->p_native->mAttenuationLinear = value;
+			}
 		}
 
 		property float AttenuationQuadratic
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->mAttenuationQuadratic;
+			}
+			void set(float value)
+			{
+				this->p_native->mAttenuationQuadratic = value;
+			}
 		}
 
 		property Color3D^ ColorAmbient
 		{
-			Color3D^ get(){throw gcnew System::NotImplementedException();}
-			void set(Color3D^ value){throw gcnew System::NotImplementedException();}
+			Color3D^ get()
+			{
+				return gcnew Color3D(&this->p_native->mColorAmbient);
+			}
+			void set(Color3D^ value)
+			{
+				this->p_native->mColorAmbient = aiColor3D(*value->getNative());
+			}
 		}
 		
 		property Color3D^ ColorDiffuse
 		{
-			Color3D^ get(){throw gcnew System::NotImplementedException();}
-			void set(Color3D^ value){throw gcnew System::NotImplementedException();}
+			Color3D^ get()
+			{
+				return gcnew Color3D(&this->p_native->mColorDiffuse);
+			}
+			void set(Color3D^ value)
+			{
+				this->p_native->mColorDiffuse = aiColor3D(*value->getNative());
+			}
 		}
 		
 		property Color3D^ ColorSpecular
 		{
-			Color3D^ get(){throw gcnew System::NotImplementedException();}
-			void set(Color3D^ value){throw gcnew System::NotImplementedException();}
+			Color3D^ get()
+			{
+				return gcnew Color3D(&this->p_native->mColorSpecular);
+			}
+			void set(Color3D^ value)
+			{
+				this->p_native->mColorSpecular = aiColor3D(*value->getNative());
+			}
 		}
 		
 		property Vector3D^ Direction
 		{
-			Vector3D^ get(){throw gcnew System::NotImplementedException();}
-			void set(Vector3D^ value){throw gcnew System::NotImplementedException();}
+			Vector3D^ get()
+			{
+				return gcnew Vector3D(&this->p_native->mDirection);
+			}
+			void set(Vector3D^ value)
+			{
+				this->p_native->mDirection = aiVector3D(*value->getNative());
+			}
 		}
 	
 		property Vector3D^ Position
 		{
-			Vector3D^ get(){throw gcnew System::NotImplementedException();}
-			void set(Vector3D^ value){throw gcnew System::NotImplementedException();}
+			Vector3D^ get()
+			{
+				return gcnew Vector3D(&this->p_native->mPosition);
+			}
+			void set(Vector3D^ value)
+			{
+				this->p_native->mPosition = aiVector3D(*value->getNative());
+			}
 		}
 		
 		property String^ Name
 		{
-			String^ get(){throw gcnew System::NotImplementedException();}
-			void set(String^ value){throw gcnew System::NotImplementedException();}
+			String^ get()
+			{
+				return gcnew String(this->p_native->mName.data);	
+			}
+			void set(String^ value)
+			{
+				this->p_native->mName.Set((char*)System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(value).ToPointer());
+			}
 		}
 		
 		property LightSourceType Type

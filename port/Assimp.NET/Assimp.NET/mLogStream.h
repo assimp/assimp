@@ -41,68 +41,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-//managed includes
-#include "Matrix4x4.h"
-#include "VertexWeight.h"
-
+//managned includes
+#include "mIOSystem.h"
 
 //native includes
-#include "aiMesh.h"
+#include "LogStream.h"
 
 using namespace System;
 
 namespace AssimpNET
 {
-	public ref class Bone
+
+	enum DefaulLogStreams
 	{
-	public:
-		Bone(void);
-		Bone(Bone% other);
-		Bone(aiBone* native);
-		~Bone(void);
+		DLS_FILE, 	
+		DLS_COUT,
+		DLS_CERR,
+		DLS_DEBUGGER
+	};
 
-		property String^ mName
-		{
-			String^ get()
-			{
-				return gcnew String(this->p_native->mName.data);
-			}
-			void set(String^ value)
-			{
-				throw gcnew System::NotImplementedException();
-				this->p_native->mName.Set((char*)System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(value).ToPointer());
-			}
-		}
-		property unsigned int mNumWeights
-		{
-			unsigned int get()
-			{
-				return this->p_native->mNumWeights;
-			}
-			void set(unsigned int value)
-			{
-				this->p_native->mNumWeights = value;
-			}
-		}
-		property Matrix4x4^ mOffsetMatrix
-		{
-			Matrix4x4^ get()
-			{
-				return gcnew Matrix4x4(&this->p_native->mOffsetMatrix);
-			}
-			void set(Matrix4x4^ value)
-			{
-				this->p_native->mOffsetMatrix = aiMatrix4x4(*value->getNative());
-			}
-		}
-		property array<VertexWeight^>^ mWeights
-		{
-			array<VertexWeight^>^ get(){throw gcnew System::NotImplementedException();}
-			void set(array<VertexWeight^>^ value){throw gcnew System::NotImplementedException();}
-		}
 
-		aiBone* getNative();
-		private:
-		aiBone *p_native;
+	public ref class LogStream abstract
+	{
+	public:		
+		virtual ~LogStream(void);
+		virtual void write(array<char>^ message) = 0;
+
+		static LogStream^ createDefaultStream(DefaulLogStreams streams, array<char>^ name, IOSystem^ io);
+
+	protected:
+		LogStream(void);
+		LogStream(Assimp::LogStream* native);
+
+		Assimp::LogStream* getNative();
+	private:
+		Assimp::LogStream *p_native;
 	};
 }//namespace

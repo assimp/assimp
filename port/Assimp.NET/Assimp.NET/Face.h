@@ -66,8 +66,15 @@ namespace AssimpNET
 
 		property unsigned int mNumIndices
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumIndices;
+			
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumIndices = value;
+			}
 		}
 
 		aiFace* getNative();

@@ -70,8 +70,14 @@ namespace AssimpNET
 
 		property String^ mNodeName
 		{
-			String^ get(){throw gcnew System::NotImplementedException();}
-			void set(String^ value){throw gcnew System::NotImplementedException();}
+			String^ get()
+			{
+				return gcnew String(this->p_native->mNodeName.data);
+			}
+			void set(String^ value)
+			{
+				this->p_native->mNodeName.Set((char*)System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(value).ToPointer());
+			}
 		}
 
 		property unsigned int mNumPositionKeys

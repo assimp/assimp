@@ -63,45 +63,93 @@ namespace AssimpNET
 
 		property float mAspect
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->mAspect;
+			}
+			void set(float value)
+			{
+				this->p_native->mAspect = value;
+			}
 		}
 		property float mNearClipPlane
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->mClipPlaneNear;
+			}
+			void set(float value)
+			{
+				this->p_native->mClipPlaneNear;
+			}
 		}
 		property float mFarClipPlane
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->mClipPlaneFar;
+			}
+			void set(float value)
+			{
+				this->p_native->mClipPlaneFar = value;
+			}
 		}
 		property float mHorizontalFOV
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->mHorizontalFOV;
+			}
+			void set(float value)
+			{
+				this->p_native->mHorizontalFOV = value;
+			}
 		}
 
 		property Vector3D^ mLookAt
 		{
-			Vector3D^ get(){throw gcnew System::NotImplementedException();}
-			void set(Vector3D^ value){throw gcnew System::NotImplementedException();}
+			Vector3D^ get()
+			{
+				return gcnew Vector3D(&this->p_native->mLookAt);
+			}
+			void set(Vector3D^ value)
+			{
+				this->p_native->mLookAt = aiVector3D(*value->getNative());
+			}
 		}
 		property Vector3D^ mPosition
 		{
-			Vector3D^ get(){throw gcnew System::NotImplementedException();}
-			void set(Vector3D^ value){throw gcnew System::NotImplementedException();}
+			Vector3D^ get()
+			{
+				return gcnew Vector3D(&this->p_native->mPosition);
+			}
+			void set(Vector3D^ value)
+			{
+				this->p_native->mPosition = aiVector3D(*value->getNative());
+			}
 		}
 		property Vector3D^ mUp
 		{
-			Vector3D^ get(){throw gcnew System::NotImplementedException();}
-			void set(Vector3D^ value){throw gcnew System::NotImplementedException();}
+			Vector3D^ get()
+			{
+				return gcnew Vector3D(&this->p_native->mUp);
+			}
+			void set(Vector3D^ value)
+			{
+				this->p_native->mUp = aiVector3D(*value->getNative());
+			}
 		}
 
 		property String^ mName
 		{
-			String^ get(){throw gcnew System::NotImplementedException();}
-			void set(String^ value){throw gcnew System::NotImplementedException();}
+			String^ get()
+			{
+				return gcnew String(this->p_native->mName.data);
+			}
+			void set(String^ value)
+			{
+				this->p_native->mName.Set((char*)System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(value).ToPointer());
+			}
 		}
 
 		aiCamera* getNative();	

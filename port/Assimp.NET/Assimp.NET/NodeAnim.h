@@ -82,20 +82,38 @@ namespace AssimpNET
 
 		property unsigned int mNumPositionKeys
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumPositionKeys;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumPositionKeys = value;
+			}
 		}
 
 		property unsigned int mNumRotationKeys
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumRotationKeys;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumRotationKeys = value;
+			}
 		}
 
 		property unsigned int mNumScalingKeys
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumScalingKeys;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumScalingKeys = value;
+			}
 		}
 
 		property array<VectorKey^>^ mPositionKeys

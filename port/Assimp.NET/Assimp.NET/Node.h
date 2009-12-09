@@ -69,8 +69,16 @@ namespace AssimpNET
 
 		property array<unsigned int>^ mMeshes
 		{
-			array<unsigned int>^ get(){throw gcnew System::NotImplementedException();}
-			void set(array<unsigned int>^ value){throw gcnew System::NotImplementedException();}
+			array<unsigned int>^ get()
+			{
+				array<unsigned int>^ tmp = gcnew array<unsigned int>(this->p_native->mNumMeshes);
+				System::Runtime::InteropServices::Marshal::Copy((System::IntPtr)this->p_native->mMeshes,(array<int>^)tmp,0,this->p_native->mNumMeshes);
+				return tmp;
+			}
+			void set(array<unsigned int>^ value)
+			{
+				System::Runtime::InteropServices::Marshal::Copy((array<int>^)value,0,(System::IntPtr)this->p_native->mMeshes,this->p_native->mNumMeshes);
+			}
 		}
 
 		property String^ mName
@@ -87,26 +95,50 @@ namespace AssimpNET
 
 		property unsigned int mNumChildren
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumChildren;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumChildren = value;
+			}
 		}
 
 		property unsigned int mNumMeshes
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumMeshes;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumMeshes = value;
+			}
 		}
 
 		property Matrix4x4^ mTransformation
 		{
-			Matrix4x4^ get(){throw gcnew System::NotImplementedException();}
-			void set(Matrix4x4^ value){throw gcnew System::NotImplementedException();}
+			Matrix4x4^ get()
+			{
+				return gcnew Matrix4x4(&this->p_native->mTransformation);
+			}
+			void set(Matrix4x4^ value)
+			{
+				this->p_native->mTransformation = aiMatrix4x4(*value->getNative());
+			}
 		}
 
 		property Node^ mParent
 		{
-			Node^ get(){throw gcnew System::NotImplementedException();}
-			void set(Node^ value){throw gcnew System::NotImplementedException();}
+			Node^ get()
+			{
+				return gcnew Node(this->p_native->mParent);
+			}
+			void set(Node^ value)
+			{
+				this->p_native->mParent = new aiNode(*value->getNative());
+			}
 		}
 
 		aiNode* getNative();	

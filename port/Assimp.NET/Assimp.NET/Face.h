@@ -60,8 +60,16 @@ namespace AssimpNET
 
 		property array<unsigned int>^ mIndices
 		{
-			array<unsigned int>^ get(){throw gcnew System::NotImplementedException();}
-			void set(array<unsigned int>^ value){throw gcnew System::NotImplementedException();}
+			array<unsigned int>^ get()
+			{
+				array<unsigned int>^ tmp = gcnew array<unsigned int>(this->p_native->mNumIndices);
+				System::Runtime::InteropServices::Marshal::Copy((System::IntPtr)this->p_native->mIndices, (array<int>^)tmp, 0, tmp->Length);
+				return tmp;
+			}
+			void set(array<unsigned int>^ value)
+			{
+				System::Runtime::InteropServices::Marshal::Copy((array<int>^)value, 0, (System::IntPtr)this->p_native->mIndices, value->Length);
+			}
 		}
 
 		property unsigned int mNumIndices

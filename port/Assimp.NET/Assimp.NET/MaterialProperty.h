@@ -66,8 +66,16 @@ namespace AssimpNET
 
 		property array<char>^ mData
 		{
-			array<char>^ get(){throw gcnew System::NotImplementedException();}
-			void set(array<char>^ value){throw gcnew System::NotImplementedException();}
+			array<char>^ get()
+			{
+				array<char>^ tmp = gcnew array<char>(this->p_native->mDataLength);
+				System::Runtime::InteropServices::Marshal::Copy((System::IntPtr)this->p_native->mData, (array<unsigned char>^)tmp, 0, this->p_native->mDataLength);
+				return tmp;				
+			}
+			void set(array<char>^ value)
+			{
+				System::Runtime::InteropServices::Marshal::Copy((array<unsigned char>^)value, 0, (System::IntPtr)this->p_native->mData, value->Length);
+			}
 		}
 
 		property unsigned int mDataLength

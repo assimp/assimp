@@ -108,23 +108,53 @@ namespace AssimpNET
 
 		property array<char, 4>^ achFormatHint
 		{
-			array<char, 4>^ get(){throw gcnew System::NotImplementedException();}
-			void set(array<char, 4>^ value){throw gcnew System::NotImplementedException();}
+			array<char, 4>^ get()
+			{
+				array<char, 4>^ tmp = array<char, 4>();
+				System::Runtime::InteropServices::Marshal::Copy((System::IntPtr)this->p_native->achFormatHint,(array<unsigned char>^)tmp,0,4);
+				return tmp;
+			}
+			void set(array<char, 4>^ value)
+			{
+				System::Runtime::InteropServices::Marshal::Copy((array<unsigned char>^)value,0,(System::IntPtr)this->p_native->achFormatHint,4);
+			}
 		}
 
 		property unsigned int mHeight
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mHeight;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mHeight = value;
+			}
 		}
 
 		property unsigned int mWidth
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mWidth;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mWidth = value;
+			}
 		}
 
-		property Texel^ pcData;
+		property Texel^ pcData
+		{
+			Texel^ get()
+			{
+				return gcnew Texel(this->p_native->pcData);
+			}
+			void set(Texel^ value)
+			{
+				this->p_native->pcData = new aiTexel(*value->getNative());
+			}
+		}
 
 		aiTexture* getNative();	
 	private:

@@ -66,7 +66,7 @@ namespace AssimpNET
 			}
 			void set(array<NodeAnim^>^ value)
 			{
-				throw gcnew System::NotImplementedException();		
+				throw gcnew System::NotImplementedException();
 			}
 		}
 		property unsigned int mNumAnimChannels

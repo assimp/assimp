@@ -76,20 +76,38 @@ namespace AssimpNET
 
 		property float x
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->x;
+			}
+			void set(float value)
+			{
+				this->p_native->x = value;
+			}
 		}
 
 		property float y
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->y;
+			}
+			void set(float value)
+			{
+				this->p_native->y = value;
+			}
 		}
 
 		property float z
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->z;
+			}
+			void set(float value)
+			{
+				this->p_native->z = value;
+			}
 		}
 
 		aiVector3D* getNative();	

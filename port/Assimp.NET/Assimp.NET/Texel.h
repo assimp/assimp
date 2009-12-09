@@ -24,26 +24,50 @@ public ref class Texel
 
 		property unsigned char a
 		{
-			unsigned char get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned char value){throw gcnew System::NotImplementedException();}
+			unsigned char get()
+			{
+				return this->p_native->a;
+			}
+			void set(unsigned char value)
+			{
+				this->p_native->a = value;
+			}
 		}
 
 		property unsigned char r
 		{
-			unsigned char get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned char value){throw gcnew System::NotImplementedException();}
+			unsigned char get()
+			{
+				return this->p_native->r;
+			}
+			void set(unsigned char value)
+			{
+				this->p_native->r = value;
+			}
 		}
 
 		property unsigned char g
 		{
-			unsigned char get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned char value){throw gcnew System::NotImplementedException();}
+			unsigned char get()
+			{
+				return this->p_native->g;
+			}
+			void set(unsigned char value)
+			{
+				this->p_native->g = value;
+			}
 		}
 
 		property unsigned char b
 		{
-			unsigned char get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned char value){throw gcnew System::NotImplementedException();}
+			unsigned char get()
+			{
+				return this->p_native->b;
+			}
+			void set(unsigned char value)
+			{
+				this->p_native->b = value;
+			}
 		}
 
 		aiTexel* getNative();	

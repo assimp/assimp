@@ -84,8 +84,14 @@ namespace AssimpNET
 		}
 		property unsigned int mFlags
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mFlags;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mFlags = value;
+			}
 		}
 		property array<Light^>^ mLights
 		{
@@ -104,38 +110,81 @@ namespace AssimpNET
 		}
 		property unsigned int mNumAnimations
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumAnimations;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumAnimations = value;
+			}
 		}
 		property unsigned int mNumCameras
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumCameras;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumCameras = value;
+			}
 		}
 		property unsigned int mNumLights
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumLights;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumLights = value;
+			}
 		}
 		property unsigned int mNumMaterials
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumMaterials;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumMaterials = value;
+			}
 		}
 		property unsigned int mNumMeshes
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumMeshes;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumMeshes = value;
+			}
 		}
 		property unsigned int mNumTextures
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mNumTextures;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mNumTextures = value;
+			}
 		}
 		property Node^ mRootNode
 		{
-			Node^ get(){throw gcnew System::NotImplementedException();}
-			void set(Node^ value){throw gcnew System::NotImplementedException();}
+			Node^ get()
+			{
+				return gcnew Node(this->p_native->mRootNode);
+			}
+			void set(Node^ value)
+			{
+				//this->p_native->mRootNode = new aiNode(value->getNative());
+				this->p_native->mRootNode = value->getNative();
+			}
 		}
 		property array<Texture^>^ mTextures
 		{

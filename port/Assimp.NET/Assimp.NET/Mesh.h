@@ -141,11 +141,13 @@ namespace AssimpNET
 		{
 			array<unsigned int>^get()
 			{
-				throw gcnew System::NotImplementedException();
+				array<unsigned int>^ tmp = gcnew array<unsigned int>(AI_MAX_NUMBER_OF_TEXTURECOORDS);
+				System::Runtime::InteropServices::Marshal::Copy((System::IntPtr)this->p_native->mNumUVComponents,(array<int>^)tmp,0,AI_MAX_NUMBER_OF_TEXTURECOORDS);
+				return tmp;
 			}
 			void set(array<unsigned int>^ value)
 			{
-				throw gcnew System::NotImplementedException();
+				System::Runtime::InteropServices::Marshal::Copy((array<int>^)value,0,(System::IntPtr)this->p_native->mNumUVComponents, AI_MAX_NUMBER_OF_TEXTURECOORDS);
 			}
 		}
 

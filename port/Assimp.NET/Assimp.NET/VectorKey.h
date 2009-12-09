@@ -67,14 +67,26 @@ namespace AssimpNET
 
 		property double mTime
 		{
-			double get(){throw gcnew System::NotImplementedException();}
-			void set(double value){System::NotImplementedException();}
+			double get()
+			{
+				return this->p_native->mTime;
+			}
+			void set(double value)
+			{
+				this->p_native->mTime = value;
+			}
 		}
 
 		property Vector3D^ mValue
 		{
-			Vector3D^ get() {throw gcnew System::NotImplementedException();}
-			void set(Vector3D^ value){throw gcnew System::NotImplementedException();}
+			Vector3D^ get() 
+			{
+				return gcnew Vector3D(&this->p_native->mValue);
+			}
+			void set(Vector3D^ value)
+			{
+				this->p_native->mValue = aiVector3D(*value->getNative());
+			}
 		}
 
 		aiVectorKey* getNative();	

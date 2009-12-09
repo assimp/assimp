@@ -66,14 +66,26 @@ namespace AssimpNET
 
 		property double mTime
 		{
-			double get(){throw gcnew System::NotImplementedException();}
-			void set(double value){System::NotImplementedException();}
+			double get()
+			{
+				return this->p_native->mTime;
+			}
+			void set(double value)
+			{
+				this->p_native->mTime = value;
+			}
 		}
 
 		property Quaternion^ mValue
 		{
-			Quaternion^ get() {throw gcnew System::NotImplementedException();}
-			void set(Quaternion^ value){throw gcnew System::NotImplementedException();}
+			Quaternion^ get()
+			{
+				return gcnew Quaternion(&this->p_native->mValue);
+			}
+			void set(Quaternion^ value)
+			{
+				this->p_native->mValue = aiQuaternion(*value->getNative());
+			}
 		}
 
 		aiQuatKey* getNative();	

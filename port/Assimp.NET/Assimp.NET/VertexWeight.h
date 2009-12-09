@@ -59,14 +59,26 @@ namespace AssimpNET
 
 		property unsigned int mVertexId
 		{
-			unsigned int get(){throw gcnew System::NotImplementedException();}
-			void set(unsigned int value){throw gcnew System::NotImplementedException();}
+			unsigned int get()
+			{
+				return this->p_native->mVertexId;
+			}
+			void set(unsigned int value)
+			{
+				this->p_native->mVertexId = value;
+			}
 		}
 
 		property float mWeight
 		{
-			float get(){throw gcnew System::NotImplementedException();}
-			void set(float value){throw gcnew System::NotImplementedException();}
+			float get()
+			{
+				return this->p_native->mWeight;
+			}
+			void set(float value)
+			{
+				this->p_native->mWeight = value;
+			}
 		}
 
 		aiVertexWeight* getNative();

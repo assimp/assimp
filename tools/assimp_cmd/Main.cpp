@@ -246,10 +246,10 @@ int ProcessStandardArguments(ImportData& fill, const char** params,
 			fill.ppFlags |= aiProcess_ConvertToLeftHanded;
 		}
 		else if (! ::strcmp(params[i], "-fuv") || ! ::strcmp(params[i], "--flip-uv")) {
-			fill.ppFlags |= aiProcess_ConvertToLeftHanded;
+			fill.ppFlags |= aiProcess_FlipUVs;
 		}
 		else if (! ::strcmp(params[i], "-fwo") || ! ::strcmp(params[i], "--flip-winding-order")) {
-			fill.ppFlags |= aiProcess_ConvertToLeftHanded;
+			fill.ppFlags |= aiProcess_FlipWindingOrder;
 		}
 		else if (! ::strcmp(params[i], "-tuv") || ! ::strcmp(params[i], "--transform-uv-coords")) {
 			fill.ppFlags |= aiProcess_TransformUVCoords;

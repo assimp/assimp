@@ -79,10 +79,10 @@ typedef unsigned short wchar_t;
 #endif // microsoft compiler
 
 //! define a break macro for debugging only in Win32 mode.
-// WORKAROUND (ASSIMP): __asm int 3 not av. for x64
+// WORKAROUND (ASSIMP): remove __asm
 #if defined(WIN32) && defined(_MSC_VER) && defined(_DEBUG)
 #if defined(_M_IX86)
-#define _IRR_DEBUG_BREAK_IF( _CONDITION_ ) if (_CONDITION_) {_asm int 3}
+#define _IRR_DEBUG_BREAK_IF( _CONDITION_ ) /*if (_CONDITION_) {_asm int 3}*/
 #else
 #define _IRR_DEBUG_BREAK_IF( _CONDITION_ )
 #endif
@@ -96,8 +96,10 @@ When you call unmanaged code that returns a bool type value of false from manage
 the return value may appear as true. See 
 http://support.microsoft.com/default.aspx?kbid=823071 for details. 
 Compiler version defines: VC6.0 : 1200, VC7.0 : 1300, VC7.1 : 1310, VC8.0 : 1400*/
+
+// WORKAROUND (ASSIMP): remove __asm 
 #if defined(WIN32) && defined(_MSC_VER) && (_MSC_VER > 1299) && (_MSC_VER < 1400)
-#define _IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX __asm mov eax,100
+#define _IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX /*__asm mov eax,100*/
 #else
 #define _IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX
 #endif // _IRR_MANAGED_MARSHALLING_BUGFIX

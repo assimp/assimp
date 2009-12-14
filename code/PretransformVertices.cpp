@@ -105,13 +105,13 @@ unsigned int PretransformVertices::GetMeshVFormat(aiMesh* pcMesh)
 	// from scratch. The pointer is unused as animations are lost
 	// during PretransformVertices.
 	if (pcMesh->mBones)
-		return (unsigned int)(unsigned long)pcMesh->mBones;
+		return (unsigned int)(uint64_t)pcMesh->mBones;
 
 
 	const unsigned int iRet = GetMeshVFormatUnique(pcMesh);
 
 	// store the value for later use
-	pcMesh->mBones = (aiBone**)(unsigned long)iRet;
+	pcMesh->mBones = (aiBone**)(uint64_t)iRet;
 	return iRet;
 }
 

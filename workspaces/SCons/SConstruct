@@ -30,8 +30,8 @@ if ARGUMENTS.get('debug', 0):
 else:
 	ccflags = ccflags + ' -Os -fno-strict-aliasing -msse -Wall -pedantic'
     
-#if ARGUMENTS.get('noboost', 0):
-#    ccflags = ccflags + ' -DASSIMP_BUILD_BOOST_WORKAROUND '
+if ARGUMENTS.get('noboost', 0):
+	ccflags = ccflags + ' -DASSIMP_BUILD_BOOST_WORKAROUND '
 	
 env = Environment(CCFLAGS = ccflags, CPPPATH = g_IncPath, LIBPATH=g_LibPath)
 conf = Configure( env )
@@ -42,6 +42,12 @@ conf = Configure( env )
 env = conf.Finish()
 
 # Build library
-env.StaticLibrary(target = "assimp", source = g_assimp_lib_Source, 
+
+if ARGUMENTS.get("shared",0):
+	env.SharedLibrary(target = "assimp", source = g_assimp_lib_Source,
+		LIBPATH = g_LibPath)
+
+else:
+	env.StaticLibrary(target = "assimp", source = g_assimp_lib_Source, 
 		LIBPATH = g_LibPath)
 

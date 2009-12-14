@@ -1,7 +1,7 @@
 	Open Asset Import Library (Assimp) Readme
 	-----------------------------------------
 
-Here you can find information regarding the Asset Import Library:
+Here you can find information regarding Open Asset Import Library:
 
 	1.		Overview
 	1.1		Supported file formats
@@ -31,10 +31,15 @@ The Asset Import Library provides a lot of model formats:
 	- LWO
 	- OBJ
 	- SMD
+	- Collada
+	- LWO
+	- Ogre XML
+	- partly LWS
+	- .. maybe some more ...
 
 1.2 File structure
 
-The Asset Import Library is implemented in C++ and provides a c-interface. The directories 
+Open Asset Import Library is implemented in C++ and provides a c-interface. The directories 
 are:
 
 	/bin			Binaries of the Asset Import Library.

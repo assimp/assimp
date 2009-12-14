@@ -3,7 +3,10 @@
 Open Asset Import Library (Assimp) Install
 ------------------------------------------------
 
-Please see the doxygen documentation to learn how to build & use Assimp.
+
+=======================================================================
+Please see the doxygen documentation for full install instructions:
+
 A CHM file is included in the SVN repos: ./doc/AssimpDoc_Html/AssimpDoc.chm.
 At least Windows should be able to read it.
 
@@ -24,6 +27,17 @@ http://assimp.sourceforge.net/lib_html/index.html
 
 Beware, it could be outdated. If you're in serious doubt it might be,
 rebuilding the doc is probably a wise choice.
+
+=======================================================================
+For the inpatient:
+
+Windows: go to ./workspaces/vc8 or ./workspaces/vc9, open the
+VS Solution and build your preferred build target ...
+
+Linux: try make in the ./code dir. Alternatively, run scons from
+./workspaces/SCons.
+
+
 
 
 

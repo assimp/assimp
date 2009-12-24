@@ -61,9 +61,9 @@ namespace Assimp	{
 */
 struct TTUpdateInfo
 {
-	TTUpdateInfo()
-		:	mat				(NULL)
-		,	directShortcut	(NULL)
+	TTUpdateInfo() :
+			directShortcut	(NULL)
+		,	mat				(NULL)
 		,	semantic		(0)
 		,	index			(0)
 	{}
@@ -72,7 +72,7 @@ struct TTUpdateInfo
 	unsigned int* directShortcut;
 
 	//! Material 
-	MaterialHelper* mat;
+	MaterialHelper *mat;
 
 	//! Texture type and index
 	unsigned int semantic, index;

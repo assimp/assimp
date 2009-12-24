@@ -792,7 +792,7 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 
 	// If the root node is unnamed name it "<3DSRoot>"
 	if (::strstr( pcOut->mRootNode->mName.data, "UNNAMED" ) ||
-		pcOut->mRootNode->mName.data[0] == '$' && pcOut->mRootNode->mName.data[1] == '$')
+		(pcOut->mRootNode->mName.data[0] == '$' && pcOut->mRootNode->mName.data[1] == '$') )
 	{
 		pcOut->mRootNode->mName.Set("<3DSRoot>");
 	}

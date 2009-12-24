@@ -131,7 +131,7 @@ inline bool GetNextLine(const char_t*& buffer, char_t out[4096])
 template <class char_t>
 AI_FORCE_INLINE bool IsNumeric( char_t in)
 {
-	return in >= '0' && in <= '9' || '-' == in || '+' == in;
+	return ( in >= '0' && in <= '9' ) || '-' == in || '+' == in;
 }
 // ---------------------------------------------------------------------------------
 AI_FORCE_INLINE bool TokenMatch(char*& in, const char* token, unsigned int len)

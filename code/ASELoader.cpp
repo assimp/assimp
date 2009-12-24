@@ -967,7 +967,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 				p_pcOut->mNumFaces = (unsigned int)aiSplit[p].size();
 
 				// receive output vertex weights
-				std::vector<std::pair<unsigned int, float> >* avOutputBones;
+				std::vector<std::pair<unsigned int, float> > *avOutputBones = NULL;
 				if (!mesh.mBones.empty())	{
 					avOutputBones = new std::vector<std::pair<unsigned int, float> >[mesh.mBones.size()];
 				}
@@ -1293,7 +1293,7 @@ bool ASEImporter::GenerateNormals(ASE::Mesh& mesh)	{
 			}
 		}
 	}
-	// The array ís reused
+	// The array ï¿½s reused
 	ComputeNormalsWithSmoothingsGroups<ASE::Face>(mesh);
 	return false;
 }

@@ -197,8 +197,8 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
 			aiFace* f = m->mFaces = new aiFace[m->mNumFaces = (x-1)*(y-1)];
 			aiVector3D* pv = m->mVertices = new aiVector3D[m->mNumVertices = m->mNumFaces*4];
 			
-			aiVector3D* uv;
-			float step_y,step_x;
+			aiVector3D *uv( NULL );
+			float step_y( 0.0f ),step_x( 0.0f );
 			if (configComputeUVs) {
 				uv = m->mTextureCoords[0] = new aiVector3D[m->mNumVertices];
 				step_y = 1.f/y;

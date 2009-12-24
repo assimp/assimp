@@ -1040,7 +1040,7 @@ void Discreet3DSImporter::ParseMeshChunk()
 
 		// Larger 3DS files could have multiple FACE chunks here
 		chunkSize = stream->GetRemainingSizeToLimit();
-		if (chunkSize > sizeof(Discreet3DS::Chunk))
+		if ( chunkSize > (int) sizeof(Discreet3DS::Chunk ) )
 			ParseFaceChunk();
 		}
 		break;

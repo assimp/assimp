@@ -115,6 +115,22 @@ protected:
 	// Represents an AC3D object
 	struct Object
 	{
+		Object()
+			:	type	(World)
+			,	name( "" )
+			,	children()
+			,	texture( "" )
+			,	texRepeat( 1.f, 1.f )
+			,	texOffset( 0.0f, 0.0f )
+			,	rotation()
+			,	translation()
+			,	vertices()
+			,	surfaces()
+			,	numRefs (0)
+			,	subDiv	(0)                
+		{}
+
+		// Type description
 		enum Type
 		{
 			World = 0x0,
@@ -122,14 +138,6 @@ protected:
 			Group = 0x2,
 			Light = 0x4
 		} type;
-
-
-		Object()
-			:	texRepeat(1.f,1.f)
-			,	numRefs (0)
-			,	type	(World)
-			,	subDiv	(0)                
-		{}
 
 		// name of the object
 		std::string name;

@@ -87,7 +87,7 @@ void ValidateDSProcess::ReportError(const char* msg,...)
 
 	va_end(args);
 #ifdef _DEBUG
-	aiAssert( false,szBuffer,__LINE__,__FILE__ );
+	aiAssert( szBuffer,__LINE__,__FILE__ );
 #endif
 	throw new ImportErrorException("Validation failed: " + std::string(szBuffer,iLen));
 }

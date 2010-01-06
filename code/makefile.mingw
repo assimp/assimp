@@ -64,7 +64,7 @@ ifeq ($(DEBUG),1)
 	DEFINEFLAGS   += -D_DEBUG -DDEBUG
 #	NAMESUFFIX    += -debug
 else
-	CPPFLAGS      += -o3 -s
+	CPPFLAGS      += -O3 -s
 	DEFINEFLAGS   += -DNDEBUG -D_NDEBUG
 endif
 

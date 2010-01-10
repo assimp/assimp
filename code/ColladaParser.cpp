@@ -1705,8 +1705,8 @@ void ColladaParser::ReadAccessor( const std::string& pID)
 					/* Generic extra data, interpreted as UV data, too*/
 					else if( name == "U") acc.mSubOffset[0] = acc.mParams.size();
 					else if( name == "V") acc.mSubOffset[1] = acc.mParams.size();
-					else
-						DefaultLogger::get()->warn( boost::str( boost::format( "Unknown accessor parameter \"%s\". Ignoring data channel.") % name));
+					//else
+					//	DefaultLogger::get()->warn( boost::str( boost::format( "Unknown accessor parameter \"%s\". Ignoring data channel.") % name));
 				}
 
 				acc.mParams.push_back( name);
@@ -2216,6 +2216,9 @@ void ColladaParser::ReadSceneNode( Node* pNode)
 				int attrID = TestAttribute( "id");
 				if( attrID > -1)
 					child->mID = mReader->getAttributeValue( attrID);
+        int attrSID = TestAttribute( "sid");
+        if( attrSID > -1)
+          child->mSID = mReader->getAttributeValue( attrSID);
 
 				int attrName = TestAttribute( "name");
 				if( attrName > -1)

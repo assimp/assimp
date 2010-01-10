@@ -225,6 +225,7 @@ struct Node
 {
 	std::string mName;
 	std::string mID;
+  std::string mSID;
 	Node* mParent;
 	std::vector<Node*> mChildren;
 

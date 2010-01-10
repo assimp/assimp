@@ -200,7 +200,12 @@ protected:
 	void CollectNodes( const aiNode* pNode, std::vector<const aiNode*>& poNodes) const;
 
 	/** Finds a node in the collada scene by the given name */
-	const Collada::Node* FindNode( const Collada::Node* pNode, const std::string& pName);
+	const Collada::Node* FindNode( const Collada::Node* pNode, const std::string& pName) const;
+  /** Finds a node in the collada scene by the given SID */
+  const Collada::Node* FindNodeBySID( const Collada::Node* pNode, const std::string& pSID) const;
+
+  /** Finds a proper name for a node derived from the collada-node's properties */
+  std::string FindNameForNode( const Collada::Node* pNode) const;
 
 protected:
 	/** Filename, for a verbose error message */

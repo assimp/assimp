@@ -178,23 +178,9 @@ aiNode* ColladaLoader::BuildHierarchy( const ColladaParser& pParser, const Colla
 	// create a node for it
 	aiNode* node = new aiNode();
 
-	// now setup the name of the node. We take the name if not empty, otherwise the collada ID
-	// FIX: Workaround for XSI calling the instanced visual scene 'untitled' by default.
-	if (!pNode->mName.empty() && pNode->mName != "untitled")
-		node->mName.Set(pNode->mName);
-	else if (!pNode->mID.empty())
-		node->mName.Set(pNode->mID);
-	else
-	{
-		// No need to worry. Unnamed nodes are no problem at all, except
-		// if cameras or lights need to be assigned to them.
-		if (!pNode->mLights.empty() || !pNode->mCameras.empty()) {
-	
-			::strcpy(node->mName.data,"$ColladaAutoName$_");
-			node->mName.length = 17 + ASSIMP_itoa10(node->mName.data+18,MAXLEN-18,(uint32_t)clock());
-		}
-	}
-	
+  // find a name for the new node. It's more complicated than you might think
+  node->mName.Set( FindNameForNode( pNode));
+
 	// calculate the transformation matrix for it
 	node->mTransformation = pParser.CalculateResultTransform( pNode->mTransforms);
 
@@ -690,7 +676,21 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 			bone->mWeights = new aiVertexWeight[bone->mNumWeights];
 			std::copy( dstBones[a].begin(), dstBones[a].end(), bone->mWeights);
 
-			// and insert bone
+      // HACK: (thom) Some exporters address the bone nodes by SID, others address them by ID or even name.
+      // Therefore I added a little name replacement here: I search for the bone's node by either name, ID or SID,
+      // and replace the bone's name by the node's name so that the user can use the standard
+      // find-by-name method to associate nodes with bones.
+      const Collada::Node* bnode = FindNode( pParser.mRootNode, bone->mName.data);
+      if( !bnode)
+        bnode = FindNodeBySID( pParser.mRootNode, bone->mName.data);
+
+      // assign the name that we would have assigned for the source node
+      if( bnode)
+        bone->mName.Set( FindNameForNode( bnode));
+      else
+        DefaultLogger::get()->warn( boost::str( boost::format( "ColladaLoader::CreateMesh(): could not find corresponding node for joint \"%s\".") % bone->mName.data));
+
+      // and insert bone
 			dstMesh->mBones[boneCount++] = bone;
 		}
 	}
@@ -1351,7 +1351,7 @@ void ColladaLoader::CollectNodes( const aiNode* pNode, std::vector<const aiNode*
 
 // ------------------------------------------------------------------------------------------------
 // Finds a node in the collada scene by the given name
-const Collada::Node* ColladaLoader::FindNode( const Collada::Node* pNode, const std::string& pName)
+const Collada::Node* ColladaLoader::FindNode( const Collada::Node* pNode, const std::string& pName) const
 {
 	if( pNode->mName == pName || pNode->mID == pName)
 		return pNode;
@@ -1364,6 +1364,43 @@ const Collada::Node* ColladaLoader::FindNode( const Collada::Node* pNode, const 
 	}
 
 	return NULL;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Finds a node in the collada scene by the given SID
+const Collada::Node* ColladaLoader::FindNodeBySID( const Collada::Node* pNode, const std::string& pSID) const
+{
+  if( pNode->mSID == pSID)
+    return pNode;
+
+  for( size_t a = 0; a < pNode->mChildren.size(); ++a)
+  {
+    const Collada::Node* node = FindNodeBySID( pNode->mChildren[a], pSID);
+    if( node)
+      return node;
+  }
+
+  return NULL;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Finds a proper name for a node derived from the collada-node's properties
+std::string ColladaLoader::FindNameForNode( const Collada::Node* pNode) const
+{
+	// now setup the name of the node. We take the name if not empty, otherwise the collada ID
+	// FIX: Workaround for XSI calling the instanced visual scene 'untitled' by default.
+	if (!pNode->mName.empty() && pNode->mName != "untitled")
+		return pNode->mName;
+	else if (!pNode->mID.empty())
+		return pNode->mID;
+	else if (!pNode->mSID.empty())
+    return pNode->mSID;
+  else
+	{
+		// No need to worry. Unnamed nodes are no problem at all, except
+		// if cameras or lights need to be assigned to them.
+    return boost::str( boost::format( "$ColladaAutoName$_%d") % clock());
+	}
 }
 
 #endif // !! ASSIMP_BUILD_NO_DAE_IMPORTER

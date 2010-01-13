@@ -185,7 +185,8 @@ http://www.boost-consulting.com/products/free</a>. Choose the appropriate versio
 
 <b>If you don't want to use boost</b>, you can build against our <i>"Boost-Workaround"</i>. It consists of very small (dummy)
 implementations of the various boost utility classes used. However, you'll loose functionality (e.g. threading) by doing this. 
-So, if it is possible to use boost, you should use boost. See the @link use_noboost NoBoost @endlink for more details.
+So, if it is possible to use boost, you should use boost. See the @link use_noboost NoBoost-Section @endlink 
+later on this page for more details.
 
 Once boost is working, you have to set up a project for the ASSIMP library in your favourite IDE. If you use VC2005 or
 VC2008, you can simply load the solution or project files in the workspaces/ folder, otherwise you have to create a new 
@@ -613,6 +614,14 @@ X3  Y3  Z3  T3
 ... with (X1, X2, X3) being the X base vector, (Y1, Y2, Y3) being the Y base vector, (Z1, Z2, Z3) 
 being the Z base vector and (T1, T2, T3) being the translation part. If you want to use these matrices
 in DirectX functions, you have to transpose them.
+
+<hr>
+
+<b>11.24.09:</b> We changed the orientation of our quaternions to the most common convention to avoid confusion. 
+However, if you're a previous user of Assimp and you update the library to revisions beyond SVNREV 502, 
+you have to adapt your animation loading code to match the new quaternion orientation. 
+
+<hr>
 
 @section hierarchy The Node Hierarchy
 
@@ -1406,11 +1415,16 @@ float4 PimpMyPixel (float4 prev)
 
   // .. and compute the final color value for this pixel
   float3 color = diff + spec + ambi;
-
   float3 opac  = EvaluateStack(opacity);
 
-  if (blend_func == multiply)
-       return prev
+  // note the *slightly* strange meaning of additive and multiplicative blending here ...
+  // those names will most likely be changed in future versions
+  if (blend_func == add)
+       return prev+color*opac;
+  else if (blend_func == multiply)
+       return prev*(1.0-opac)+prev*opac;
+
+   return color;
 }
 
 @endcode

@@ -39,7 +39,7 @@ supplied a bugfix concerning the scaling in the md3 loader.
 submitted patches to make Assimp compile with GCC-4, a makefile and the xcode3 workspace.
 
 - Andreas Nagel
-tested Assimp under Windows Vista 64 Bit.
+first Assimp testing & verification under Windows Vista 64 Bit.
 
 - Marius Schröder
 allowed us to use many of his models for screenshots and testing.
@@ -48,7 +48,7 @@ allowed us to use many of his models for screenshots and testing.
 supplied various XFiles for testing purposes.
 
 - Tizian Wieland
-searched the web for several thousands of test models for internal use
+searched the web for hundreds of test models for internal use
 
 - John Connors
 supplied patches for linux and SCons.
@@ -73,3 +73,6 @@ Improvements in OpenGL-Sample.
 
 - Robert Ramirez
 Add group loading feature to Obj-Loader.
+
+- Chris Maiwald
+Many bugreports, improving Assimp's portability, regular testing & feedback.

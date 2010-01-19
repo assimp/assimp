@@ -978,7 +978,7 @@ void PLYImporter::LoadMaterial(std::vector<MaterialHelper*>* pvOut)
 				}
 				else if (PLY::EST_AmbientBlue == (*a).Semantic)
 				{
-					aaiPositions[22][2]	= _a;
+					aaiPositions[2][2]	= _a;
 					aaiTypes[2][2]		= (*a).eType;
 				}
 				else if (PLY::EST_AmbientAlpha == (*a).Semantic)

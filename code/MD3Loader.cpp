@@ -303,7 +303,7 @@ void Q3Shader::ConvertShaderToMaterial(MaterialHelper* out, const ShaderDataBloc
 				type  = aiTextureType_EMISSIVE;
 			}
 		}
-		else if ((*it).blend_src == Q3Shader::BLEND_GL_DST_COLOR && Q3Shader::BLEND_GL_ZERO) {
+		else if ((*it).blend_src == Q3Shader::BLEND_GL_DST_COLOR && (*it).blend_dest == Q3Shader::BLEND_GL_ZERO) {
 			index = cur_lm++;
 			type  = aiTextureType_LIGHTMAP;
 		}

@@ -125,8 +125,7 @@ private:
  * 3DS and ASE store the differently to Assimp - there is an animation
  * channel for the camera/spot light itself and a separate position
  * animation channels specifying the position of the camera/spot light
- * look-at target
-*/
+ * look-at target */
 class ASSIMP_API TargetAnimationHelper
 {
 public:
@@ -143,8 +142,7 @@ public:
 	 *  This channel specifies the position of the camera/spot light
 	 *  target at a specific position.
 	 *
-	 *  @param targetPositions Translation channel
-	 */
+	 *  @param targetPositions Translation channel*/
 	void SetTargetAnimationChannel (const 
 		std::vector<aiVectorKey>* targetPositions);
 
@@ -152,23 +150,20 @@ public:
 	// ------------------------------------------------------------------
 	/** Sets the main animation channel
 	 *
-	 *  @param objectPositions Translation channel
-	 */
+	 *  @param objectPositions Translation channel */
 	void SetMainAnimationChannel ( const
 		std::vector<aiVectorKey>* objectPositions);
 
 	// ------------------------------------------------------------------
 	/** Sets the main animation channel to a fixed value 
 	 *
-	 *  @param fixed Fixed value for the main animation channel
-	 */
+	 *  @param fixed Fixed value for the main animation channel*/
 	void SetFixedMainAnimationChannel(const aiVector3D& fixed);
 
 
 	// ------------------------------------------------------------------
 	/** Computes final animation channels
-	 *
-	 */
+	 * @param distanceTrack Receive camera translation keys ... != NULL. */
 	void Process( std::vector<aiVectorKey>* distanceTrack );
 
 

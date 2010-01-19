@@ -168,7 +168,6 @@ inline aiMatrix3x3& aiMatrix3x3::Translation( const aiVector2D& v, aiMatrix3x3& 
 inline aiMatrix3x3& aiMatrix3x3::FromToMatrix(const aiVector3D& from, 
 	const aiVector3D& to, aiMatrix3x3& mtx)
 {
-	const aiVector3D v = from ^ to;
 	const float e = from * to;
 	const float f = (e < 0)? -e:e;
 
@@ -223,6 +222,7 @@ inline aiMatrix3x3& aiMatrix3x3::FromToMatrix(const aiVector3D& from,
 	}
 	else  /* the most common case, unless "from"="to", or "from"=-"to" */
 	{
+		const aiVector3D v = from ^ to;
 		/* ... use this hand optimized version (9 mults less) */
 		const float h = 1.0f/(1.0f + e);      /* optimization by Gottfried Chen */
 		const float hvx = h * v.x;

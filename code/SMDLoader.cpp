@@ -96,7 +96,7 @@ void SMDImporter::SetupProperties(const Importer* pImp)
 void SMDImporter::InternReadFile( 
 	const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rt"));
+	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)	{

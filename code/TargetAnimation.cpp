@@ -92,8 +92,9 @@ inline T Interpolate(const T& one, const T& two, float val)
 void KeyIterator::operator ++()
 {
 	// If we are already at the end of all keyframes, return
-	if (reachedEnd)return;
-
+	if (reachedEnd) {
+		return;
+	}
 
 	// Now search in all arrays for the time value closest
 	// to our current position on the time line
@@ -125,8 +126,7 @@ void KeyIterator::operator ++()
 		curTime = d0;
 
 		// interpolate the other
-		if (1 == targetObjPos->size() || !nextTargetObjPos)
-		{
+		if (1 == targetObjPos->size() || !nextTargetObjPos)	{
 			curTargetPosition = targetObjPos->at(0).mValue;
 		}
 		else
@@ -147,8 +147,7 @@ void KeyIterator::operator ++()
 		curTime = d1;
 
 		// interpolate the other
-		if (1 == objPos->size() || !nextObjPos)
-		{
+		if (1 == objPos->size() || !nextObjPos)	{
 			curPosition = objPos->at(0).mValue;
 		}
 		else
@@ -199,15 +198,12 @@ void TargetAnimationHelper::SetFixedMainAnimationChannel(
 // ------------------------------------------------------------------------------------------------
 void TargetAnimationHelper::Process(std::vector<aiVectorKey>* distanceTrack)
 {
-	ai_assert(NULL != targetPositions);
+	ai_assert(NULL != targetPositions && NULL != distanceTrack);
 
 	// TODO: in most cases we won't need the extra array
-	std::vector<aiVectorKey>* fill = NULL;
 	std::vector<aiVectorKey>  real;
-	if (distanceTrack)
-	{
-		fill = (distanceTrack == objectPositions ? &real : distanceTrack);
-	}
+	
+	std::vector<aiVectorKey>* fill = (distanceTrack == objectPositions ? &real : distanceTrack);
 	fill->reserve(std::max( objectPositions->size(), targetPositions->size() ));
 
 	// Iterate through all object keys and interpolate their values if necessary.
@@ -238,11 +234,13 @@ void TargetAnimationHelper::Process(std::vector<aiVectorKey>* distanceTrack)
 		}
 		else
 		{
+			// FIXME: handle this
 		}
 
 		// diff is now the vector in which our camera is pointing
 	}
 
-	if (real.size())
+	if (real.size()) {
 		*distanceTrack = real;
+	}
 }

@@ -1097,6 +1097,8 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
 	if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
 		g_piNormalsEffect->SetTechnique( "RenderNormals_FF");
 
+	g_piDevice->SetRenderState(D3DRS_DITHERENABLE,TRUE);
+
 	// create the texture for the HUD
 	CreateHUDTexture();
 	CBackgroundPainter::Instance().RecreateNativeResource();

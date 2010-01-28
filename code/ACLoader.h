@@ -169,6 +169,9 @@ protected:
 		// number of subdivisions to be performed on the 
 		// imported data
 		unsigned int subDiv;
+
+		// max angle limit for smoothing
+		float crease;
 	};
 
 
@@ -185,41 +188,34 @@ protected:
 
 	// -------------------------------------------------------------------
 	/** Called by Importer::GetExtensionList() for each loaded importer.
-	 * See BaseImporter::GetExtensionList() for details
-	 */
+	 * See BaseImporter::GetExtensionList() for details */
 	void GetExtensionList(std::string& append);
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 
-	 * See BaseImporter::InternReadFile() for details
-	 */
+	 * See BaseImporter::InternReadFile() for details*/
 	void InternReadFile( const std::string& pFile, aiScene* pScene, 
 		IOSystem* pIOHandler);
 
 	// -------------------------------------------------------------------
 	/** Called prior to ReadFile().
 	* The function is a request to the importer to update its configuration
-	* basing on the Importer's configuration property list.
-	*/
+	* basing on the Importer's configuration property list.*/
 	void SetupProperties(const Importer* pImp);
 
 private:
 
 	// -------------------------------------------------------------------
 	/** Get the next line from the file.
-	 *  @return false if the end of the file was reached
-	 */
+	 *  @return false if the end of the file was reached*/
 	bool GetNextLine();
-
 
 	// -------------------------------------------------------------------
 	/** Load the object section. This method is called recursively to
 	 *  load subobjects, the method returns after a 'kids 0' was 
 	 *  encountered.
-	 *  @objects List of output objects
-	 */
+	 *  @objects List of output objects*/
 	void LoadObjectSection(std::vector<Object>& objects);
-
 
 	// -------------------------------------------------------------------
 	/** Convert all objects into meshes and nodes.
@@ -227,21 +223,18 @@ private:
 	 *  @param meshes Pointer to the list of output meshes
 	 *  @param outMaterials List of output materials
 	 *  @param materials Material list
-	 *  @param Scenegraph node for the object
-	 */
+	 *  @param Scenegraph node for the object */
 	aiNode* ConvertObjectSection(Object& object,
 		std::vector<aiMesh*>& meshes,
 		std::vector<MaterialHelper*>& outMaterials,
 		const std::vector<Material>& materials,
 		aiNode* parent = NULL);
 
-
 	// -------------------------------------------------------------------
 	/** Convert a material
 	 *  @param object Current object
 	 *  @param matSrc Source material description
-	 *  @param matDest Destination material to be filled
-	 */
+	 *  @param matDest Destination material to be filled */
 	void ConvertMaterial(const Object& object,
 		const Material& matSrc,
 		MaterialHelper& matDest);
@@ -256,6 +249,10 @@ private:
 	// are generated per material: those faces who have 
 	// their bf cull flags set are separated.
 	bool configSplitBFCull;
+
+	// Configuration switch: subdivision surfaces are only
+	// evaluated if the value is true.
+	bool configEvalSubdivision;
 
 	// counts how many objects we have in the tree.
 	// basing on this information we can find a

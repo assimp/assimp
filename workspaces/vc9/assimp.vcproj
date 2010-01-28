@@ -2404,6 +2404,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\Subdivision.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\Subdivision.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\TargetAnimation.cpp"
 					>
 				</File>
@@ -3533,6 +3541,10 @@
 				</File>
 				<File
 					RelativePath="..\..\code\StringComparison.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\Vertex.h"
 					>
 				</File>
 			</Filter>

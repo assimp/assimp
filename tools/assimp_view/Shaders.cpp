@@ -818,7 +818,7 @@ std::string g_szMaterialShader = std::string(
 		"#endif \n"
 		"float3 ViewDir = normalize(IN.ViewDir);\n"
 		"#ifdef AV_SPECULAR_COMPONENT\n"
-			"float3 Reflect = -normalize(reflect (ViewDir,Normal));\n"
+			"float3 Reflect = normalize(reflect (-ViewDir,Normal));\n"
 		"#endif // !AV_SPECULAR_COMPONENT\n"
 
 		"{\n"

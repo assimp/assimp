@@ -46,92 +46,110 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiAssert.h"
 #include "../include/aiTypes.h"
 
-namespace Assimp
-{
+#if _MSC_VER >= 1400 
+#include <stdlib.h>
+#endif
 
-// ---------------------------------------------------------------------------
-/** \brief Defines some useful byte order swap routines.
+namespace Assimp	{
+// --------------------------------------------------------------------------------------
+/** Defines some useful byte order swap routines.
  * 
- * This can e.g. be used for the conversion from and to littel and big endian.
- * This is required by some loaders since some model formats
- */
+ * This is required to read big-endian model formats on little-endian machines,
+ * and vice versa. Direct use of this class is DEPRECATED. Use #StreamReader instead. */
+// --------------------------------------------------------------------------------------
 class ByteSwap
 {
 	ByteSwap() {}
 
 public:
-	//! Swap the byte oder of 2 byte of data
-	//! \param szOut Buffer to be swapped
+
+	// ----------------------------------------------------------------------
+	/** Swap two bytes of data
+	 *  @param[inout] _szOut A void* to save the reintcasts for the caller. */
 	static inline void Swap2(void* _szOut)
 	{
-		ai_assert(NULL != _szOut);
-		int8_t* szOut = (int8_t*)_szOut;
+		ai_assert(_szOut);
+
+#if _MSC_VER >= 1400
+		uint16_t* const szOut = reinterpret_cast<uint16_t*>(_szOut);
+		*szOut = _byteswap_ushort(*szOut);
+#else
+		uint8_t* const szOut = reinterpret_cast<uint8_t*>(_szOut);
 		std::swap(szOut[0],szOut[1]);
+#endif
 	}
 
-	//! Swap the byte oder of 4 byte of data
-	//! \param szOut Buffer to be swapped
+	// ----------------------------------------------------------------------
+	/** Swap four bytes of data
+	 *  @param[inout] _szOut A void* to save the reintcasts for the caller. */
 	static inline void Swap4(void* _szOut)
 	{
-		ai_assert(NULL != _szOut);
+		ai_assert(_szOut);
 
-#if _MSC_VER >= 1400 && (defined _M_X86)
-		__asm
-		{
-			mov edi, _szOut
-			mov eax, dword_ptr[edi]
-			bswap eax
-			mov dword_ptr[edi], eax
-		};
+#if _MSC_VER >= 1400
+		uint32_t* const szOut = reinterpret_cast<uint32_t*>(_szOut);
+		*szOut = _byteswap_ulong(*szOut);
 #else
-		int8_t* szOut = (int8_t*)_szOut;
+		uint8_t* const szOut = reinterpret_cast<uint8_t*>(_szOut);
 		std::swap(szOut[0],szOut[3]);
 		std::swap(szOut[1],szOut[2]);
 #endif
 	}
 
-	//! Swap the byte oder of 8 byte of data
-	//! \param szOut Buffer to be swapped
+	// ----------------------------------------------------------------------
+	/** Swap eight bytes of data
+	 *  @param[inout] _szOut A void* to save the reintcasts for the caller. */
 	static inline void Swap8(void* _szOut)
 	{
-		ai_assert(NULL != _szOut);
-		int8_t* szOut = (int8_t*)_szOut;
+	ai_assert(_szOut);
+
+#if _MSC_VER >= 1400
+		uint64_t* const szOut = reinterpret_cast<uint64_t*>(_szOut);
+		*szOut = _byteswap_uint64(*szOut);
+#else
+		uint8_t* const szOut = reinterpret_cast<uint8_t*>(_szOut);
 		std::swap(szOut[0],szOut[7]);
 		std::swap(szOut[1],szOut[6]);
 		std::swap(szOut[2],szOut[5]);
 		std::swap(szOut[3],szOut[4]);
+#endif
 	}
 
-	//! Swap a single precision float
-	//! \param fOut Float value to be swapped
+	// ----------------------------------------------------------------------
+	/** ByteSwap a float. Not a joke.
+	 *  @param[inout] fOut ehm. .. */
 	static inline void Swap(float* fOut)
 	{
 		Swap4(fOut);
 	}
 
-	//! Swap a double precision float
-	//! \param fOut Double value to be swapped
+	// ----------------------------------------------------------------------
+	/** ByteSwap a double. Not a joke.
+	 *  @param[inout] fOut ehm. .. */
 	static inline void Swap(double* fOut)
 	{
 		Swap8(fOut);
 	}
 
-	//! Swap a 16 bit integer
-	//! \param fOut Integer to be swapped
+	// ----------------------------------------------------------------------
+	/** ByteSwap an int16t. Not a joke.
+	 *  @param[inout] fOut ehm. .. */
 	static inline void Swap(int16_t* fOut)
 	{
 		Swap2(fOut);
 	}
 
-	//! Swap a 32 bit integer
-	//! \param fOut Integer to be swapped
+	// ----------------------------------------------------------------------
+	/** ByteSwap an int32t. Not a joke.
+	 *  @param[inout] fOut ehm. .. */
 	static inline void Swap(int32_t* fOut)	
 	{
 		Swap4(fOut);
 	}
 
-	//! Swap a 64 bit integer
-	//! \param fOut Integer to be swapped
+	// ----------------------------------------------------------------------
+	/** ByteSwap an int64t. Not a joke.
+	 *  @param[inout] fOut ehm. .. */
 	static inline void Swap(int64_t* fOut)
 	{
 		Swap8(fOut);
@@ -140,7 +158,10 @@ public:
 
 } // Namespace Assimp
 
-// byteswap macros for BigEndian/LittleEndian support 
+
+// --------------------------------------------------------------------------------------
+// ByteSwap macros for BigEndian/LittleEndian support 
+// --------------------------------------------------------------------------------------
 #if (defined AI_BUILD_BIG_ENDIAN)
 #	define AI_LSWAP2(p)
 #	define AI_LSWAP4(p)

@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Some types moved to separate header due to size of operators
 #include "aiVector3D.h"
 #include "aiVector2D.h"
+#include "aiColor4D.h"
 #include "aiMatrix3x3.h"
 #include "aiMatrix4x4.h"
 #include "aiQuaternion.h"
@@ -205,55 +206,6 @@ struct aiColor3D
 	//! Red, green and blue color values
 	float r, g, b;
 } PACK_STRUCT;  // !struct aiColor3D
-
-
-// ----------------------------------------------------------------------------------
-/** Represents a color in Red-Green-Blue space including an 
-*   alpha component. 
-*/
-struct aiColor4D
-{
-#ifdef __cplusplus
-	aiColor4D () : r(0.0f), g(0.0f), b(0.0f), a(0.0f) {}
-	aiColor4D (float _r, float _g, float _b, float _a) 
-		: r(_r), g(_g), b(_b), a(_a) {}
-	aiColor4D (const aiColor4D& o) 
-		: r(o.r), g(o.g), b(o.b), a(o.a) {}
-	
-	/** Component-wise comparison */
-	// TODO: add epsilon?
-	bool operator == (const aiColor4D& other) const {
-		return r == other.r && g == other.g && b == other.b && a == other.a;
-	}
-
-	/** Component-wise inverse comparison */
-	// TODO: add epsilon?
-	bool operator != (const aiColor4D& other) const {
-		return r != other.r || g != other.g || b != other.b || a != other.a;
-	}
-
-	/** Access a specific color component */
-	inline float operator[](unsigned int i) const {
-		return *(&r + i);
-	}
-	/** Access a specific color component */
-	inline float& operator[](unsigned int i) {
-		return *(&r + i);
-	}
-
-	/** Check whether a color is black */
-	inline bool IsBlack() const
-	{
-		// The alpha component doesn't care here. black is black.
-		static const float epsilon = 10e-3f;
-		return fabs( r ) < epsilon && fabs( g ) < epsilon && fabs( b ) < epsilon;
-	}
-
-#endif // !__cplusplus
-
-	//! Red, green, blue and alpha color values
-	float r, g, b, a;
-} PACK_STRUCT;  // !struct aiColor4D
 #include "./Compiler/poppack1.h"
 
 // ----------------------------------------------------------------------------------
@@ -524,6 +476,7 @@ struct aiMemoryInfo
 
 // Include implementations
 #include "aiVector3D.inl"
+#include "aiColor4D.inl"
 #include "aiMatrix3x3.inl"
 #include "aiMatrix4x4.inl"
-#endif //!! include guard
+#endif 

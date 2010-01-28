@@ -50,8 +50,20 @@ using namespace Assimp;
 // Constructs a spatially sorted representation from the given position array.
 SpatialSort::SpatialSort( const aiVector3D* pPositions, unsigned int pNumPositions, 
 	unsigned int pElementOffset)
+
+	// define the reference plane. We choose some arbitrary vector away from all basic axises 
+	// in the hope that no model spreads all its vertices along this plane.
+	: mPlaneNormal(0.8523f, 0.34321f, 0.5736f)
 {
+	mPlaneNormal.Normalize();
 	Fill(pPositions,pNumPositions,pElementOffset);
+}
+
+// ------------------------------------------------------------------------------------------------
+SpatialSort :: SpatialSort()
+: mPlaneNormal(0.8523f, 0.34321f, 0.5736f)
+{
+	mPlaneNormal.Normalize();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -63,15 +75,27 @@ SpatialSort::~SpatialSort()
 
 // ------------------------------------------------------------------------------------------------
 void SpatialSort::Fill( const aiVector3D* pPositions, unsigned int pNumPositions, 
-	unsigned int pElementOffset)
+	unsigned int pElementOffset,
+	bool pFinalize /*= true */)
 {
-	// define the reference plane. We choose some arbitrary vector away from all basic axises 
-	// in the hope that no model spreads all its vertices along this plane.
-	mPlaneNormal.Set( 0.8523f, 0.34321f, 0.5736f);
-	mPlaneNormal.Normalize();
+	mPositions.clear();
+	Append(pPositions,pNumPositions,pElementOffset,pFinalize);
+}
 
+// ------------------------------------------------------------------------------------------------
+void SpatialSort :: Finalize()
+{
+	std::sort( mPositions.begin(), mPositions.end());
+}
+
+// ------------------------------------------------------------------------------------------------
+void SpatialSort::Append( const aiVector3D* pPositions, unsigned int pNumPositions, 
+	unsigned int pElementOffset,
+	bool pFinalize /*= true */)
+{
 	// store references to all given positions along with their distance to the reference plane
-	mPositions.reserve( pNumPositions);
+	const size_t initial = mPositions.size();
+	mPositions.reserve(initial + (pFinalize?pNumPositions:pNumPositions*2));
 	for( unsigned int a = 0; a < pNumPositions; a++)
 	{
 		const char* tempPointer = reinterpret_cast<const char*> (pPositions);
@@ -79,16 +103,19 @@ void SpatialSort::Fill( const aiVector3D* pPositions, unsigned int pNumPositions
 
 		// store position by index and distance
 		float distance = *vec * mPlaneNormal;
-		mPositions.push_back( Entry( a, *vec, distance));
+		mPositions.push_back( Entry( a+initial, *vec, distance));
 	}
 
-	// now sort the array ascending by distance.
-	std::sort( mPositions.begin(), mPositions.end());
+	if (pFinalize) {
+		// now sort the array ascending by distance.
+		Finalize();
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns an iterator for all positions close to the given position.
-void SpatialSort::FindPositions( const aiVector3D& pPosition, float pRadius, std::vector<unsigned int>& poResults) const
+void SpatialSort::FindPositions( const aiVector3D& pPosition, 
+	float pRadius, std::vector<unsigned int>& poResults) const
 {
 	const float dist = pPosition * mPlaneNormal;
 	const float minDist = dist - pRadius, maxDist = dist + pRadius;
@@ -141,4 +168,36 @@ void SpatialSort::FindPositions( const aiVector3D& pPosition, float pRadius, std
 	// that's it
 }
 
+// ------------------------------------------------------------------------------------------------
+unsigned int SpatialSort::GenerateMappingTable(std::vector<unsigned int>& fill,float pRadius) const
+{
+	fill.resize(mPositions.size(),0xffffffff);
+	float dist, maxDist;
+
+	unsigned int t=0;
+	const float pSquared = pRadius*pRadius;
+	for (size_t i = 0; i < mPositions.size();) {
+		dist = mPositions[i].mPosition * mPlaneNormal;
+		maxDist = dist + pRadius;
+
+		fill[mPositions[i].mIndex] = t;
+		const aiVector3D& oldpos = mPositions[i].mPosition;
+		for (++i; i < fill.size() && mPositions[i].mDistance < maxDist 
+			&& (mPositions[i].mPosition - oldpos).SquareLength() < pSquared; ++i) 
+		{
+			fill[mPositions[i].mIndex] = t;
+		}
+		++t;
+	}
+
+#ifdef _DEBUG
+
+	// debug invariant: mPositions[i].mIndex values must range from 0 to mPositions.size()-1
+	for (size_t i = 0; i < fill.size(); ++i) {
+		ai_assert(fill[i]<mPositions.size());
+	}
+
+#endif
+	return t;
+}
 

@@ -429,6 +429,17 @@ enum aiComponent
 	"IMPORT_AC_SEPARATE_BFCULL"
 
 // ---------------------------------------------------------------------------
+/** @brief  Configures whether the AC loader evaluates subdivision surfaces (
+ *  indicated by the presence of the 'subdiv' attribute in the file). By
+ *  default, Assimp performs the subdivision using the standard 
+ *  Catmull-Clark algorithm
+ *
+ * Property type: integer (0: false; !0: true). Default value: true.
+ */
+#define AI_CONFIG_IMPORT_AC_EVAL_SUBDIVISION	\
+	"IMPORT_AC_EVAL_SUBDIVISION"
+
+// ---------------------------------------------------------------------------
 /** @brief  Configures the UNREAL 3D loader to separate faces with different
  *    surface flags (e.g. two-sided vs. single-sided).
  *

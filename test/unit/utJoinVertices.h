@@ -10,7 +10,7 @@
 
 using namespace std;
 using namespace Assimp;
-
+namespace Assimp {
 class JoinVerticesTest : public CPPUNIT_NS :: TestFixture
 {
     CPPUNIT_TEST_SUITE (JoinVerticesTest);
@@ -32,5 +32,5 @@ class JoinVerticesTest : public CPPUNIT_NS :: TestFixture
 		aiMesh* pcMesh;
 
 };
-
+}
 #endif 

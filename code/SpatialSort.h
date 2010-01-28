@@ -54,48 +54,83 @@ namespace Assimp
  * by their indices and sorts them by their distance to an arbitrary chosen plane.
  * You can then query the instance for all vertices close to a given position in an average O(log n) 
  * time, with O(n) worst case complexity when all vertices lay on the plane. The plane is chosen
- * so that it avoids common planes in usual data sets.
- */
+ * so that it avoids common planes in usual data sets. */
+// ------------------------------------------------------------------------------------------------
 class ASSIMP_API SpatialSort
 {
 public:
 
-	SpatialSort() {/* This is unintialized. This is evil. This is OK. */}
+	SpatialSort();
 
+	// ------------------------------------------------------------------------------------
 	/** Constructs a spatially sorted representation from the given position array.
 	 * Supply the positions in its layout in memory, the class will only refer to them
 	 * by index.
 	 * @param pPositions Pointer to the first position vector of the array.
 	 * @param pNumPositions Number of vectors to expect in that array.
 	 * @param pElementOffset Offset in bytes from the beginning of one vector in memory 
-	 *   to the beginning of the next vector.
-	 */
+	 *   to the beginning of the next vector. */
 	SpatialSort( const aiVector3D* pPositions, unsigned int pNumPositions, 
 		unsigned int pElementOffset);
-
-
-	/** Sets the input data for the SpatialSort. This replaces the old data.
-	 *
-	 * @param pPositions Pointer to the first position vector of the array.
-	 * @param pNumPositions Number of vectors to expect in that array.
-	 * @param pElementOffset Offset in bytes from the beginning of one vector in memory 
-	 *   to the beginning of the next vector.
-	 */
-	void Fill( const aiVector3D* pPositions, unsigned int pNumPositions, 
-		unsigned int pElementOffset);
-
 
 	/** Destructor */
 	~SpatialSort();
 
+public:
+
+	// ------------------------------------------------------------------------------------
+	/** Sets the input data for the SpatialSort. This replaces existing data, if any.
+	 *  The new data receives new indices in ascending order.
+	 *
+	 * @param pPositions Pointer to the first position vector of the array.
+	 * @param pNumPositions Number of vectors to expect in that array.
+	 * @param pElementOffset Offset in bytes from the beginning of one vector in memory 
+	 *   to the beginning of the next vector. 
+	 * @param pFinalize Specifies whether the SpatialSort's internal representation
+	 *   is finalized after the new data has been added. Finalization is
+	 *   required in order to use #FindPosition() or #GenerateMappingTable().
+	 *   If you don't finalize yet, you can use #Append() to add data from
+	 *   other sources.*/
+	void Fill( const aiVector3D* pPositions, unsigned int pNumPositions, 
+		unsigned int pElementOffset,
+		bool pFinalize = true);
+
+
+	// ------------------------------------------------------------------------------------
+	/** Same as #Fill(), except the method appends to existing data in the #SpatialSort. */
+	void Append( const aiVector3D* pPositions, unsigned int pNumPositions, 
+		unsigned int pElementOffset,
+		bool pFinalize = true);
+
+
+	// ------------------------------------------------------------------------------------
+	/** Finalize the spatial hash data structure. This can be useful after
+	 *  multiple calls to #Append() with the pFinalize parameter set to false.
+	 *  This is finally required before one of #FindPositions() and #GenerateMappingTable()
+	 *  can be called to query the spatial sort.*/
+	void Finalize();
+
+	// ------------------------------------------------------------------------------------
 	/** Returns an iterator for all positions close to the given position.
 	 * @param pPosition The position to look for vertices.
 	 * @param pRadius Maximal distance from the position a vertex may have to be counted in.
-	 * @param poResults The container to store the indices of the found positions. Will be emptied
-	 *   by the call so it may contain anything.
-	 * @return An iterator to iterate over all vertices in the given area.
-	 */
-	void FindPositions( const aiVector3D& pPosition, float pRadius, std::vector<unsigned int>& poResults) const;
+	 * @param poResults The container to store the indices of the found positions. 
+	 *   Will be emptied by the call so it may contain anything.
+	 * @return An iterator to iterate over all vertices in the given area.*/
+	void FindPositions( const aiVector3D& pPosition, float pRadius, 
+		std::vector<unsigned int>& poResults) const;
+
+
+	// ------------------------------------------------------------------------------------
+	/** Compute a table that maps each vertex ID referring to a spatially close
+	 *  enough position to the same output ID. Output IDs are assigned in ascending order
+	 *  from 0...n.
+	 * @param fill Will be filled with numPositions entries. 
+	 * @param pRadius Maximal distance from the position a vertex may have to
+	 *   be counted in.
+	 *  @return Number of unique vertices (n).  */
+	unsigned int GenerateMappingTable(std::vector<unsigned int>& fill,
+		float pRadius) const;
 
 protected:
 	/** Normal of the sorting plane, normalized. The center is always at (0, 0, 0) */

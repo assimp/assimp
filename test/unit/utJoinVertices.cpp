@@ -2,7 +2,6 @@
 #include "UnitTestPCH.h"
 #include "utJoinVertices.h"
 
-
 CPPUNIT_TEST_SUITE_REGISTRATION (JoinVerticesTest);
 
 // ------------------------------------------------------------------------------------------------
@@ -87,3 +86,4 @@ void JoinVerticesTest :: testProcess(void)
 	}
 	CPPUNIT_ASSERT(fSum == 150.f*299.f*3.f); // gaussian sum equation
 }
+

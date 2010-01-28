@@ -52,6 +52,9 @@ SOURCE_GROUP( Common FILES
 	TargetAnimation.h
 	RemoveComments.cpp
 	RemoveComments.h
+	Subdivision.cpp
+	Subdivision.h
+	Vertex.h
 )
 
 SOURCE_GROUP( 3DS FILES 
@@ -580,6 +583,9 @@ ADD_LIBRARY( assimp SHARED
 	../contrib/zlib/zutil.c
 	../contrib/zlib/zutil.h
 	../contrib/ConvertUTF/ConvertUTF.c
+	Subdivision.cpp
+	Subdivision.h
+	Vertex.h
 )
 ADD_DEFINITIONS(-DASSIMP_BUILD_DLL_EXPORT)
 

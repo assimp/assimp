@@ -493,6 +493,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\Assimp32d.dll"
+				GenerateDebugInformation="true"
 				ImportLibrary="$(SolutionDir)..\..\lib\$(ProjectName)_$(ConfigurationName)_$(PlatformName)\assimp.lib"
 			/>
 			<Tool
@@ -1257,6 +1258,14 @@
 				</File>
 				<File
 					RelativePath="..\..\include\aiCamera.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\aiColor4D.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\aiColor4D.inl"
 					>
 				</File>
 				<File
@@ -2365,6 +2374,10 @@
 				</File>
 				<File
 					RelativePath="..\..\code\StringComparison.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\Vertex.h"
 					>
 				</File>
 			</Filter>
@@ -3569,6 +3582,14 @@
 				</File>
 				<File
 					RelativePath="..\..\code\StandardShapes.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\Subdivision.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\Subdivision.h"
 					>
 				</File>
 				<File

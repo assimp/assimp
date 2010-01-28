@@ -1,1 +1,1 @@
-#define SVNRevision  501 
+#define SVNRevision  526 

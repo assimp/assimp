@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ACLoader.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
-//#include "Subdivision.h"
+#include "Subdivision.h"
 
 using namespace Assimp;
 
@@ -250,6 +250,11 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 		{
 			SkipSpaces(&buffer);
 			obj.subDiv = strtol10(buffer,&buffer);
+		}
+		else if (TokenMatch(buffer,"crease",6))
+		{
+			SkipSpaces(&buffer);
+			obj.crease = fast_atof(buffer);
 		}
 		else if (TokenMatch(buffer,"numvert",7))
 		{
@@ -529,6 +534,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 			}
 			unsigned int* pip = node->mMeshes = new unsigned int[node->mNumMeshes];
 			unsigned int mat = 0;
+			const size_t oldm = meshes.size();
 			for (MatTable::const_iterator cit = needMat.begin(), cend = needMat.end();
 				cit != cend; ++cit, ++mat)
 			{
@@ -621,6 +627,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 									++uv;
 								}
 
+
 								if (0x1 == type && tmp-1 == m)
 								{
 									// if this is a closed line repeat its beginning now
@@ -641,20 +648,26 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 						}
 					}
 				}
-#if 0
-				// Now apply catmull clark subdivision if necessary. However, this is
-				// not *absolutely* correct: it might be we split a mesh up into 
-				// multiple sub meshes, one for each material. AC3D doesn't do that
-				// in its subdivision implementation, so our output *could* look
-				// different in some cases.
+			}
 
-				if (object.subDiv)
-				{
-					Subdivider* div = Subdivider::Create(Subdivider::CATMULL_CLARKE);
-					div->Subdivide(mesh,object.subDiv);
-					delete div;
+			// Now apply catmull clark subdivision if necessary. We split meshes into
+			// materials which is not done by AC3D during smoothing, so we need to
+			// collect all meshes using the same material group.
+			if (object.subDiv)	{
+				if (configEvalSubdivision) {
+					boost::scoped_ptr<Subdivider> div(Subdivider::Create(Subdivider::CATMULL_CLARKE));
+					DefaultLogger::get()->info("AC3D: Evaluating subdivision surface: "+object.name);
+
+					std::vector<aiMesh*> cpy(meshes.size()-oldm,NULL);
+					div->Subdivide(&meshes[oldm],cpy.size(),&cpy.front(),object.subDiv,true);
+					std::copy(cpy.begin(),cpy.end(),meshes.begin()+oldm);
+
+					// previous meshes are deleted vy Subdivide().
 				}
-#endif
+				else {
+					DefaultLogger::get()->info("AC3D: Letting the subdivision surface untouched due to my configuration: "
+						+object.name);
+				}
 			}
 		}
 	}
@@ -713,6 +726,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 void AC3DImporter::SetupProperties(const Importer* pImp)
 {
 	configSplitBFCull = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_AC_SEPARATE_BFCULL,1) ? true : false;
+	configEvalSubdivision =  pImp->GetPropertyInteger(AI_CONFIG_IMPORT_AC_EVAL_SUBDIVISION,1) ? true : false;
 }
 
 // ------------------------------------------------------------------------------------------------

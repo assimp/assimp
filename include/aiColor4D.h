@@ -38,92 +38,56 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-/** @file aiVector3D.h
- *  @brief 3D vector structure, including operators when compiling in C++
+/** @file aiColor4D.h
+ *  @brief RGBA color structure, including operators when compiling in C++
  */
-#ifndef AI_VECTOR3D_H_INC
-#define AI_VECTOR3D_H_INC
-
-#include <math.h>
+#ifndef AI_COLOR4D_H_INC
+#define AI_COLOR4D_H_INC
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "./Compiler/pushpack1.h"
-
-struct aiMatrix3x3;
-struct aiMatrix4x4;
-
-// ---------------------------------------------------------------------------
-/** Represents a three-dimensional vector. */
-struct aiVector3D
+// ----------------------------------------------------------------------------------
+/** Represents a color in Red-Green-Blue space including an 
+*   alpha component. Color values range from 0 to 1. */
+// ----------------------------------------------------------------------------------
+struct aiColor4D
 {
 #ifdef __cplusplus
-	aiVector3D () : x(0.0f), y(0.0f), z(0.0f) {}
-	aiVector3D (float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
-	aiVector3D (float _xyz) : x(_xyz), y(_xyz), z(_xyz) {}
-	aiVector3D (const aiVector3D& o) : x(o.x), y(o.y), z(o.z) {}
-
-public:
+	aiColor4D () : r(0.0f), g(0.0f), b(0.0f), a(0.0f) {}
+	aiColor4D (float _r, float _g, float _b, float _a) 
+		: r(_r), g(_g), b(_b), a(_a) {}
+	aiColor4D (const aiColor4D& o) 
+		: r(o.r), g(o.g), b(o.b), a(o.a) {}
 
 	// combined operators
-	const aiVector3D& operator += (const aiVector3D& o);
-	const aiVector3D& operator -= (const aiVector3D& o);
-	const aiVector3D& operator *= (float f);
-	const aiVector3D& operator /= (float f);
-
-	// transform vector by matrix
-	aiVector3D& operator *= (const aiMatrix3x3& mat);
-	aiVector3D& operator *= (const aiMatrix4x4& mat);
-
-	// access a single element
-	float operator[](unsigned int i) const;
-	float& operator[](unsigned int i);
+	const aiColor4D& operator += (const aiColor4D& o);
+	const aiColor4D& operator -= (const aiColor4D& o);
+	const aiColor4D& operator *= (float f);
+	const aiColor4D& operator /= (float f);
 
 	// comparison
-	bool operator== (const aiVector3D& other) const;
-	bool operator!= (const aiVector3D& other) const;
+	bool operator == (const aiColor4D& other) const;
+	bool operator != (const aiColor4D& other) const;
 
-public:
+	// color tuple access, rgba order
+	inline float operator[](unsigned int i) const;
+	inline float& operator[](unsigned int i);
 
-	/** @brief Set the components of a vector
-	 *  @param pX X component
-	 *  @param pY Y component
-	 *  @param pZ Z component  */
-	void Set( float pX, float pY, float pZ = 0.f);
+	/** check whether a color is (close to) black */
+	inline bool IsBlack() const;
 
-	/** @brief Get the squared length of the vector
-	 *  @return Square length */
-	float SquareLength() const;
+#endif // !__cplusplus
 
-
-	/** @brief Get the length of the vector
-	 *  @return length */
-	float Length() const;
-
-
-	/** @brief Normalize the vector */
-	aiVector3D& Normalize();
-
-	
-	/** @brief Componentwise multiplication of two vectors
-	 *  
-	 *  Note that vec*vec yields the dot product.
-	 *  @param o Second factor */
-	const aiVector3D SymMul(const aiVector3D& o);
-
-#endif // __cplusplus
-
-	float x, y, z;	
-} PACK_STRUCT;
+	// Red, green, blue and alpha color values 
+	float r, g, b, a;
+} PACK_STRUCT;  // !struct aiColor4D
 
 #include "./Compiler/poppack1.h"
-
 #ifdef __cplusplus
 } // end extern "C"
 
-
 #endif // __cplusplus
-
 #endif // AI_VECTOR3D_H_INC

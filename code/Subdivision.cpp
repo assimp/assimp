@@ -177,7 +177,8 @@ void CatmullClarkSubdivider::Subdivide (
 	// point meshes are simply passed through.
 	for (size_t s = 0; s < nmesh; ++s) {
 		const aiMesh* i = smesh[s];
-		if ((i->mPrimitiveTypes & aiPrimitiveType_LINE|aiPrimitiveType_POINT)==i->mPrimitiveTypes) {
+		// FIX - mPrimitiveTypes might not yet be initialized
+		if (i->mPrimitiveTypes && (i->mPrimitiveTypes & (aiPrimitiveType_LINE|aiPrimitiveType_POINT))==i->mPrimitiveTypes) {
 			DefaultLogger::get()->debug("Catmull-Clark Subdivider: Skipping pure line/point mesh");
 
 			if (discard_input) {
@@ -296,7 +297,7 @@ void CatmullClarkSubdivider::InternSubdivide (
 	// face points and original points. Every edge exists twice
 	// if there is a neighboring face.
 	// ---------------------------------------------------------------------
-	for (size_t t = 0, n = 0; t < nmesh; ++t) {
+	for (size_t t = 0; t < nmesh; ++t) {
 		const aiMesh* mesh = smesh[t];
 
 		for (unsigned int i = 0; i < mesh->mNumFaces;++i)	{
@@ -342,8 +343,8 @@ void CatmullClarkSubdivider::InternSubdivide (
 		// faces in the mesh. They occur at outer model boundaries in non-closed
 		// shapes.
 		char tmp[512];
-		sprintf(tmp,"Catmull-Clark Subdivider: got %i bad edges touching only one face (totally %i edges). ",
-			bad_cnt,edges.size());
+		sprintf(tmp,"Catmull-Clark Subdivider: got %u bad edges touching only one face (totally %u edges). ",
+			bad_cnt,static_cast<unsigned int>(edges.size()));
 
 		DefaultLogger::get()->debug(tmp);
 	}}

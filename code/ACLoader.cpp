@@ -176,7 +176,8 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 		light->mAttenuationConstant = 1.f;
 
 		// Generate a default name for both the light source and the node
-		light->mName.length = ::sprintf(light->mName.data,"ACLight_%i",mLights->size()-1);
+		// FIXME - what's the right way to print a size_t? Is 'zu' universally available? stick with the safe version.
+		light->mName.length = ::sprintf(light->mName.data,"ACLight_%i",static_cast<unsigned int>(mLights->size())-1);
 		obj.name = std::string( light->mName.data );
 
 		DefaultLogger::get()->debug("AC3D: Light source encountered");

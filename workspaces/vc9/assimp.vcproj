@@ -1236,6 +1236,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\include\aiColor4D.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\aiColor4D.inl"
+					>
+				</File>
+				<File
 					RelativePath="..\..\include\aiConfig.h"
 					>
 				</File>

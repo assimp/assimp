@@ -359,7 +359,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 
 		inChannels += mesh->GetNumUVChannels();
 
-		if (!mesh->mTextureCoords[0] || trafo.empty() ||  trafo.size() == 1 && trafo.begin()->IsUntransformed()) {
+		if (!mesh->mTextureCoords[0] || trafo.empty() ||  (trafo.size() == 1 && trafo.begin()->IsUntransformed())) {
 			outChannels += mesh->GetNumUVChannels();
 			continue;
 		}
@@ -371,10 +371,11 @@ void TextureTransformStep::Execute( aiScene* pScene)
 		unsigned int untransformed = 0;
 
 		MeshTrafoList::iterator it,it2;
-		for (it = trafo.begin(), it2;it != trafo.end(); ++it,++cnt)	{
+		for (it = trafo.begin();it != trafo.end(); ++it,++cnt)	{
 
-			if (!(*it).IsUntransformed())
+			if (!(*it).IsUntransformed()) {
 				need = true;
+			}
 
 			if ((*it).lockedPos == AI_TT_UV_IDX_LOCK_TBD)	{
 				// Lock this index and make sure it won't be changed
@@ -439,8 +440,8 @@ void TextureTransformStep::Execute( aiScene* pScene)
 		if (size > AI_MAX_NUMBER_OF_TEXTURECOORDS) {
 
 			if (!DefaultLogger::isNullLogger()) {
-				::sprintf(buffer,"%i UV channels required but just %i available", 
-					trafo.size(),AI_MAX_NUMBER_OF_TEXTURECOORDS);
+				::sprintf(buffer,"%u UV channels required but just %u available", 
+					static_cast<unsigned int>(trafo.size()),AI_MAX_NUMBER_OF_TEXTURECOORDS);
 
 				DefaultLogger::get()->error(buffer);
 			}
@@ -467,7 +468,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 
 			// Write to the log
 			if (!DefaultLogger::isNullLogger())	{
-				sprintf(buffer,"Mesh %i, channel %i: t(%.3f,%.3f), s(%.3f,%.3f), r(%.3f), %s%s",
+				sprintf(buffer,"Mesh %u, channel %u: t(%.3f,%.3f), s(%.3f,%.3f), r(%.3f), %s%s",
 					q,n,
 					(*it).mTranslation.x,
 					(*it).mTranslation.y,
@@ -550,7 +551,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 	if (!DefaultLogger::isNullLogger())	{
 
 		if (transformedChannels)	{
-			::sprintf(buffer,"TransformUVCoordsProcess end: %i output channels (in: %i, modified: %i)",
+			::sprintf(buffer,"TransformUVCoordsProcess end: %u output channels (in: %u, modified: %u)",
 				outChannels,inChannels,transformedChannels);
 
 			DefaultLogger::get()->info(buffer);

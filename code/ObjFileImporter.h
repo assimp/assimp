@@ -105,8 +105,7 @@ private:
 	void countObjects(const std::vector<ObjFile::Object*> &rObjects, int &iNumMeshes);
 
 	//!	\brief	Material creation.
-	void createMaterial(const ObjFile::Model* pModel, const ObjFile::Object* pData, 
-		aiScene* pScene);
+	void createMaterials(const ObjFile::Model* pModel, aiScene* pScene);
 
 	//!	\brief	Appends a child node to a parentnode and updates the datastructures.
 	void appendChildToParentNode(aiNode *pParent, aiNode *pChild);

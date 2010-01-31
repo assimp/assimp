@@ -385,19 +385,11 @@ void ObjFileParser::getMaterialDesc()
 	{
 		// Not found, use default material
 		m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
-		//m_pModel->m_pCurrentMesh = new ObjFile::Mesh();
-		//m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
-		//m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( DEFAULT_MATERIAL );
 	}
 	else
 	{
 		// Found, using detected material
 		m_pModel->m_pCurrentMaterial = (*it).second;
-
-		// Create a new mesh for a new material
-		//m_pModel->m_pCurrentMesh = new ObjFile::Mesh();
-		//m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
-		//m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( strName );
 	}
 
 	// Skip rest of line
@@ -525,8 +517,11 @@ void ObjFileParser::getGroupName()
 		// Search for already existing entry
 		ObjFile::Model::ConstGroupMapIt it = m_pModel->m_Groups.find(&strGroupName);
 		
+		// We are mapping groups into the object structure
+		/// TODO: Is this the right way to do it????
+		createObject( strGroupName );
+		
 		// New group name, creating a new entry
-		//ObjFile::Object *pObject = m_pModel->m_pCurrent;
 		if (it == m_pModel->m_Groups.end())
 		{
 			std::vector<unsigned int> *pFaceIDArray = new std::vector<unsigned int>;

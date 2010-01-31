@@ -110,10 +110,11 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 	// Allocate buffer and read file into it
 	TextFileToBuffer(file.get(),m_Buffer);
 
-	//
+	// Get the model name
 	std::string  strModelName;
 	std::string::size_type pos = pFile.find_last_of( "\\/" );
-	if ( pos != std::string::npos )	{
+	if ( pos != std::string::npos )	
+	{
 		strModelName = pFile.substr(pos+1, pFile.size() - pos - 1);
 	}
 	else
@@ -169,10 +170,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
 	}
 
 	// Create all materials
-	for (size_t index = 0; index < pModel->m_Objects.size(); index++)
-	{
-		createMaterial( pModel, pModel->m_Objects[ index ], pScene );
-	}
+	createMaterials( pModel, pScene );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -182,49 +180,35 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 									 aiNode *pParent, aiScene* pScene, 
 									 std::vector<aiMesh*> &MeshArray)
 {
+	ai_assert( NULL != pModel );
 	if (NULL == pData)
 		return NULL;
 	
 	// Store older mesh size to be able to computate mesh offsets for new mesh instances
-	size_t oldMeshSize = MeshArray.size();
+	const size_t oldMeshSize = MeshArray.size();
 	aiNode *pNode = new aiNode();
 	
 	if (pParent != NULL)
 		this->appendChildToParentNode(pParent, pNode);
 
-	aiMesh *pMesh = NULL;
-	//for (unsigned int meshIndex = 0; meshIndex < pModel->m_Meshes.size(); meshIndex++)
+	aiMesh *pMesh = new aiMesh;
+	createTopology( pModel, pData, uiMeshIndex, pMesh );	
+	if ( pMesh->mNumVertices > 0 ) 
 	{
-		pMesh = new aiMesh();
-		createTopology( pModel, pData, uiMeshIndex, pMesh );	
-		if (pMesh->mNumVertices > 0) {
-			MeshArray.push_back( pMesh );
-		}
+		MeshArray.push_back( pMesh );
+	}
+	else
+	{
+		delete pMesh;
 	}
 
 	// Create all nodes from the subobjects stored in the current object
-	if (!pData->m_SubObjects.empty())
+	if ( !pData->m_SubObjects.empty() )
 	{
 		pNode->mNumChildren = (unsigned int)pData->m_SubObjects.size();
 		pNode->mChildren = new aiNode*[pData->m_SubObjects.size()];
 		pNode->mNumMeshes = 1;
 		pNode->mMeshes = new unsigned int[1];
-
-		// Loop over all child objects, TODO
-		/*for (size_t index = 0; index < pData->m_SubObjects.size(); index++)
-		{
-			// Create all child nodes
-			pNode->mChildren[ index ] = createNodes( pModel, pData, pNode, pScene, MeshArray );
-			for (unsigned int meshIndex = 0; meshIndex < pData->m_SubObjects[ index ]->m_Meshes.size(); meshIndex++)
-			{
-				pMesh = new aiMesh();
-				MeshArray.push_back( pMesh );
-				createTopology( pModel, pData, meshIndex, pMesh );
-			}			
-			
-			// Create material of this object
-			createMaterial(pModel, pData->m_SubObjects[ index ], pScene);
-		}*/
 	}
 
 	// Set mesh instances into scene- and node-instances
@@ -399,11 +383,10 @@ void ObjFileImporter::countObjects(const std::vector<ObjFile::Object*> &rObjects
 
 // ------------------------------------------------------------------------------------------------
 //	Creates the material 
-void ObjFileImporter::createMaterial(const ObjFile::Model* pModel, const ObjFile::Object* pData, 
-									 aiScene* pScene)
+void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pScene )
 {
-	ai_assert (NULL != pScene);
-	if (NULL == pData)
+	ai_assert( NULL != pScene );
+	if ( NULL == pScene )
 		return;
 
 	const unsigned int numMaterials = (unsigned int) pModel->m_MaterialLib.size();

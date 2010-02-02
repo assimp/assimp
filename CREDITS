@@ -76,3 +76,6 @@ Add group loading feature to Obj-Loader.
 
 - Chris Maiwald
 Many bugreports, improving Assimp's portability, regular testing & feedback.
+
+- Stepan Hrbek
+BUgreport and fix for a obj-materialloader crash.

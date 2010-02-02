@@ -484,14 +484,14 @@ int ObjFileParser::getMaterialIndex( const std::string &strMaterialName )
 	int mat_index = -1;
 	if ( strMaterialName.empty() )
 		return mat_index;
-		for (size_t index = 0; index < m_pModel->m_MaterialLib.size(); ++index)
+	for (size_t index = 0; index < m_pModel->m_MaterialLib.size(); ++index)
+	{
+		if ( strMaterialName == m_pModel->m_MaterialLib[ index ])
 		{
-			if ( strMaterialName == m_pModel->m_MaterialLib[ index ])
-			{
-				mat_index = (int)index;
-				break;
-			}
+			mat_index = (int)index;
+			break;
 		}
+	}
 	return mat_index;
 }
 
@@ -591,12 +591,12 @@ void ObjFileParser::createObject(const std::string &strObjectName)
 
 	m_pModel->m_pCurrent = new ObjFile::Object();
 	m_pModel->m_pCurrent->m_strObjName = strObjectName;
-	m_pModel->m_Objects.push_back(m_pModel->m_pCurrent);
+	m_pModel->m_Objects.push_back( m_pModel->m_pCurrent );
 	
 	m_pModel->m_pCurrentMesh = new ObjFile::Mesh();
 	m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
 
-	if(m_pModel->m_pCurrentMaterial)
+	if( m_pModel->m_pCurrentMaterial )
 	{
 		m_pModel->m_pCurrentMesh->m_uiMaterialIndex = 
 			getMaterialIndex( m_pModel->m_pCurrentMaterial->MaterialName.data );

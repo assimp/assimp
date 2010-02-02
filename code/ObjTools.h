@@ -93,7 +93,7 @@ inline Char_T getNextWord( Char_T pBuffer, Char_T pEnd )
 {
 	while ( !isEndOfBuffer( pBuffer, pEnd ) )
 	{
-		if ( !isSeparator( *pBuffer ) )
+		if ( !isSeparator( *pBuffer ) || isNewLine( *pBuffer ) )
 			break;
 		pBuffer++;
 	}
@@ -126,7 +126,7 @@ inline Char_T getNextToken( Char_T pBuffer, Char_T pEnd )
 template<class char_t>
 inline char_t skipLine( char_t it, char_t end, unsigned int &uiLine )
 {
-	while ( !isEndOfBuffer( it, end ) && *it != '\n' )
+	while ( !isEndOfBuffer( it, end ) && !isNewLine( *it ) )
 		++it;
 	if ( it != end )
 	{

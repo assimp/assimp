@@ -95,7 +95,7 @@ clean:
 
 # target: static
 # usage : build a static library (*.a)
-static:    $(STATIC) name_static
+static:    $(STATIC)
 $(STATIC):    $(OBJECTS) $(OBJECTSC)
 	ar rcs $@ $(OBJECTS) $(OBJECTSC)
 
@@ -103,5 +103,5 @@ install:
 	mkdir -p $(INSTALLDIR)
 	mkdir -p $(INSTALLDIR)/include
 	mkdir -p $(INSTALLDIR)/lib
-	mv $(BINPATH)/libassimp$(NAMESUFFIX).* $(INSTALLDIR)/lib
-	mv $(INCPATH)/* $(INSTALLDIR)/include
+	cp $(BINPATH)/libassimp$(NAMESUFFIX).* $(INSTALLDIR)/lib
+	cp $(INCPATH)/* $(INSTALLDIR)/include

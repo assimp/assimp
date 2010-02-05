@@ -247,7 +247,9 @@ struct aiString
 	aiString(const aiString& rOther) : 
 		length(rOther.length) 
 	{
-		memcpy( data, rOther.data, rOther.length);
+		// Crop the string to the maximum length
+		length = length>=MAXLEN?MAXLEN-1:length;
+		memcpy( data, rOther.data, length);
 		data[length] = '\0';
 	}
 
@@ -255,6 +257,7 @@ struct aiString
 	aiString(const std::string& pString) : 
 		length(pString.length()) 
 	{
+		length = length>=MAXLEN?MAXLEN-1:length;
 		memcpy( data, pString.c_str(), length);
 		data[length] = '\0';
 	}

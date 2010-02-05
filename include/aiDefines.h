@@ -119,11 +119,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #		define ASSIMP_API 
 #	endif
 
-	/* Force the compiler to inline a function, if supported
+	/* Force the compiler to inline a function, if possible
 	 */
 #	define AI_FORCE_INLINE __forceinline
 
+	/* Tells the compiler that a function never returns. Used in code analysis
+	 * to skip dead paths (e.g. after an assertion evaluated false).
+	 */
+#	define AI_WONT_RETURN __declspec(noreturn)
 #else
+	
+#	define AI_WONT_RETURN
+
 #	define ASSIMP_API
 #	define AI_FORCE_INLINE inline
 #endif // (defined _MSC_VER)
@@ -213,7 +220,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_MATH_TWO_PI		(AI_MATH_PI * 2.0)
 #define AI_MATH_HALF_PI		(AI_MATH_PI * 0.5)
 
-/* And this is to avoid endless (float) casts */
+/* And this is to avoid endless casts to float */
 #define AI_MATH_PI_F		(3.1415926538f)
 #define AI_MATH_TWO_PI_F	(AI_MATH_PI_F * 2.0f)
 #define AI_MATH_HALF_PI_F	(AI_MATH_PI_F * 0.5f)

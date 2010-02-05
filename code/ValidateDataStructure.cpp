@@ -74,7 +74,7 @@ bool ValidateDSProcess::IsActive( unsigned int pFlags) const
 	return (pFlags & aiProcess_ValidateDataStructure) != 0;
 }
 // ------------------------------------------------------------------------------------------------
-void ValidateDSProcess::ReportError(const char* msg,...)
+AI_WONT_RETURN void ValidateDSProcess::ReportError(const char* msg,...)
 {
 	ai_assert(NULL != msg);
 

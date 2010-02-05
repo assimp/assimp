@@ -10,7 +10,7 @@
 
 // Set a breakpoint using win32, else line, file and message will be returned and progam ends with 
 // errrocode = 1
-void Assimp::aiAssert (const std::string &message, unsigned int uiLine, const std::string &file)
+AI_WONT_RETURN void Assimp::aiAssert (const std::string &message, unsigned int uiLine, const std::string &file)
 {
   // moved expression testing out of the function and into the macro to avoid constructing
   // two std::string on every single ai_assert test

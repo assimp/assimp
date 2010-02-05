@@ -58,9 +58,10 @@ struct aiString;
 
 namespace Assimp	{
 
-// ---------------------------------------------------------------------------
-/** Validates the ASSIMP data structure
- */
+// --------------------------------------------------------------------------------------
+/** Validates the whole ASSIMP scene data structure for correctness.
+ *  ImportErrorException is thrown of the scene is corrupt.*/
+// --------------------------------------------------------------------------------------
 class ASSIMP_API ValidateDSProcess : public BaseProcess
 {
 	friend class Importer;
@@ -84,55 +85,49 @@ protected:
 	// -------------------------------------------------------------------
 	/** Report a validation error. This will throw an exception,
 	 *  control won't return.
-	 * @param msg Format string for sprintf().
-	 */
-	void ReportError(const char* msg,...);
+	 * @param msg Format string for sprintf().*/
+	AI_WONT_RETURN void ReportError(const char* msg,...);
+
 
 	// -------------------------------------------------------------------
 	/** Report a validation warning. This won't throw an exception,
 	 *  control will return to the callera.
-	 * @param msg Format string for sprintf().
-	 */
+	 * @param msg Format string for sprintf().*/
 	void ReportWarning(const char* msg,...);
+
 
 	// -------------------------------------------------------------------
 	/** Validates a mesh
-	 * @param pMesh Input mesh
-	 */
+	 * @param pMesh Input mesh*/
 	void Validate( const aiMesh* pMesh);
 
 	// -------------------------------------------------------------------
 	/** Validates a bone
 	 * @param pMesh Input mesh
-	 * @param pBone Input bone
-	 */
+	 * @param pBone Input bone*/
 	void Validate( const aiMesh* pMesh,const aiBone* pBone,float* afSum);
 
 	// -------------------------------------------------------------------
 	/** Validates an animation
-	 * @param pAnimation Input animation
-	 */
+	 * @param pAnimation Input animation*/
 	void Validate( const aiAnimation* pAnimation);
 
 	// -------------------------------------------------------------------
 	/** Validates a material
-	 * @param pMaterial Input material
-	 */
+	 * @param pMaterial Input material*/
 	void Validate( const aiMaterial* pMaterial);
 
 	// -------------------------------------------------------------------
 	/** Search the material data structure for invalid or corrupt
 	 *  texture keys.
 	 * @param pMaterial Input material
-	 * @param type Type of the texture
-	 */
+	 * @param type Type of the texture*/
 	void SearchForInvalidTextures(const aiMaterial* pMaterial,
 		aiTextureType type);
 
 	// -------------------------------------------------------------------
 	/** Validates a texture
-	 * @param pTexture Input texture
-	 */
+	 * @param pTexture Input texture*/
 	void Validate( const aiTexture* pTexture);
 	
 	// -------------------------------------------------------------------
@@ -143,28 +138,24 @@ protected:
 	
 	// -------------------------------------------------------------------
 	/** Validates a camera
-	 * @param pCamera Input camera
-	 */
+	 * @param pCamera Input camera*/
 	void Validate( const aiCamera* pCamera);
 
 	// -------------------------------------------------------------------
 	/** Validates a bone animation channel
 	 * @param pAnimation Animation channel.
-	 * @param pBoneAnim Input bone animation
-	 */
+	 * @param pBoneAnim Input bone animation */
 	void Validate( const aiAnimation* pAnimation,
 		const aiNodeAnim* pBoneAnim);
 
 	// -------------------------------------------------------------------
 	/** Validates a node and all of its subnodes
-	 * @param Node Input node
-	 */
+	 * @param Node Input node*/
 	void Validate( const aiNode* pNode);
 
 	// -------------------------------------------------------------------
 	/** Validates a string
-	 * @param pString Input string
-	 */
+	 * @param pString Input string*/
 	void Validate( const aiString* pString);
 
 private:

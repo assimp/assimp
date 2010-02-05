@@ -47,15 +47,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // include resource definitions
 #include "resource.h"
 
-// Include ASSIMP headers
+// Include ASSIMP headers (XXX: do we really need all of them?)
+#include "assimp.h"
+#include "assimp.hpp"
 #include "aiAssert.h"
 #include "aiFileIO.h"
 #include "aiPostProcess.h"
 #include "aiScene.h"
 #include "IOSystem.h"
 #include "IOStream.h"
-#include "assimp.h"
-#include "assimp.hpp"
 #include "LogStream.h"
 #include "DefaultLogger.h"
 

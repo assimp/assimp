@@ -355,7 +355,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 	}
 
 	// positions must always be there ...
-	if (!pMesh->mNumVertices || !pMesh->mVertices && !mScene->mFlags)	{
+	if (!pMesh->mNumVertices || (!pMesh->mVertices && !mScene->mFlags))	{
 		ReportError("The mesh contains no vertices");
 	}
 
@@ -365,7 +365,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 	}
 
 	// faces, too
-	if (!pMesh->mNumFaces || !pMesh->mFaces && !mScene->mFlags)	{
+	if (!pMesh->mNumFaces || (!pMesh->mFaces && !mScene->mFlags))	{
 		ReportError("The mesh contains no faces");
 	}
 
@@ -758,10 +758,10 @@ void ValidateDSProcess::Validate( const aiTexture* pTexture)
 	}
 
 	const char* sz = pTexture->achFormatHint;
- 	if (sz[0] >= 'A' && sz[0] <= 'Z' ||
-		sz[1] >= 'A' && sz[1] <= 'Z' ||
-		sz[2] >= 'A' && sz[2] <= 'Z' ||
-		sz[3] >= 'A' && sz[3] <= 'Z')	{
+ 	if ((sz[0] >= 'A' && sz[0] <= 'Z') ||
+		(sz[1] >= 'A' && sz[1] <= 'Z') ||
+		(sz[2] >= 'A' && sz[2] <= 'Z') ||
+		(sz[3] >= 'A' && sz[3] <= 'Z'))	{
 		ReportError("aiTexture::achFormatHint contains non-lowercase characters");
 	}
 }

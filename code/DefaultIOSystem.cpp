@@ -118,19 +118,32 @@ bool IOSystem::ComparePaths (const char* one, const char* second) const
 	return !ASSIMP_stricmp(one,second);
 }
 
-// this should be sufficient for all platforms :D -- not really :->
-#define PATHLIMIT 4096 
+// maximum path length
+// XXX http://insanecoding.blogspot.com/2007/11/pathmax-simply-isnt.html 
+#ifdef PATH_MAX
+#	define PATHLIMIT PATH_MAX
+#else
+#	define PATHLIMIT 4096
+#endif
 
 // ------------------------------------------------------------------------------------------------
 // Convert a relative path into an absolute path
 inline void MakeAbsolutePath (const char* in, char* _out)
 {
+	ai_assert(in & _out);
+	char* ret;
 #ifdef _WIN32
-	::_fullpath(_out, in,PATHLIMIT);
+	ret = ::_fullpath(_out, in,PATHLIMIT);
 #else
-    // use realpath
-    realpath(in, _out);
-#endif    
+    	// use realpath
+    	ret = realpath(in, _out);
+#endif  
+	if(!ret) {
+		// preserve the input path, maybe someone else is able to fix
+		// the path before it is accessed (e.g. our file system filter)
+		DefaultLogger::get()->warn("Invalid path: "+std::string(in));
+		strcpy(_out,in);
+	}  
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -610,7 +610,7 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, const std::vector<XFile::
 
 
 				// find the file name
-				const size_t iLen = sz.length();
+				//const size_t iLen = sz.length();
 				std::string::size_type s = sz.find_last_of("\\/");
 				if (std::string::npos == s)
 					s = 0;

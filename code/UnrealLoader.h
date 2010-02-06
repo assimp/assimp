@@ -114,17 +114,25 @@ struct Vertex
 	// UNREAL vertex compression
 inline void CompressVertex(const aiVector3D& v, uint32_t& out)
 {
-	Vertex n;
+	union {
+		Vertex n;
+		int32_t t;
+	};
 	n.X = (int32_t)v.x;
 	n.Y = (int32_t)v.y;
 	n.Z = (int32_t)v.z;
-	out = *((uint32_t*)&n);
+	out = t;
 }
 
 	// UNREAL vertex decompression
 inline void DecompressVertex(aiVector3D& v, int32_t in)
 {
-	Vertex n = *((Vertex*)&in);
+	union {
+		Vertex n;
+		int32_t i;
+	}; 
+	i = in;
+	
 	v.x = (float)n.X;
 	v.y = (float)n.Y;
 	v.z = (float)n.Z;

@@ -584,15 +584,16 @@ void MD5Importer::LoadMD5AnimFile ()
 				for (AnimBoneList::const_iterator iter2	= animParser.mAnimatedBones.begin(); iter2 != animParser.mAnimatedBones.end();++iter2,
 					++pcAnimNode,++pcBaseFrame)
 				{
-					const float* fpCur;
 					if((*iter2).iFirstKeyIndex >= (*iter).mValues.size()) {
 
 						// Allow for empty frames
 						if ((*iter2).iFlags != 0) {
 							throw new ImportErrorException("MD5: Keyframe index is out of range");
+						
 						}
+						continue;
 					}
-					else fpCur = &(*iter).mValues[(*iter2).iFirstKeyIndex];
+					const float* fpCur = &(*iter).mValues[(*iter2).iFirstKeyIndex];
 					aiNodeAnim* pcCurAnimBone = *pcAnimNode;
 
 					aiVectorKey* vKey = &pcCurAnimBone->mPositionKeys[pcCurAnimBone->mNumPositionKeys++];
@@ -701,7 +702,7 @@ void MD5Importer::LoadMD5CameraFile ()
 	for (std::vector<unsigned int>::const_iterator it = cuts.begin(); it != cuts.end()-1; ++it) {
 	
 		aiAnimation* anim = *tmp++ = new aiAnimation();
-		anim->mName.length = ::sprintf(anim->mName.data,"anim%i_from_%i_to_%i",it-cuts.begin(),(*it),*(it+1));
+		anim->mName.length = ::sprintf(anim->mName.data,"anim%u_from_%u_to_%u",(unsigned int)(it-cuts.begin()),(*it),*(it+1));
 		
 		anim->mTicksPerSecond = cameraParser.fFrameRate;
 		anim->mChannels = new aiNodeAnim*[anim->mNumChannels = 1];

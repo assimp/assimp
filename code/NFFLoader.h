@@ -173,9 +173,9 @@ private:
 		MeshInfo(PatchType _pType, bool bL = false)
 			: pType     (_pType)
 			, bLocked   (bL)
-			, matIndex  (0)
 			, radius	(1.f,1.f,1.f)
 			, dir		(0.f,1.f,0.f)
+			, matIndex  (0)
 		{
 			name[0] = '\0'; // by default meshes are unnamed
 		}

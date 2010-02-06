@@ -496,7 +496,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 		aiNode* node;
 
 		// To offset or not to offset, this is the question
-		if (n != duplicates[n])
+		if (n != (int)duplicates[n])
 		{
 			// Get full scenegraph copy
 			Copy( &node, (*cur)->mRootNode );
@@ -543,7 +543,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 		// Copy light sources
 		for (unsigned int i = 0; i < (*cur)->mNumLights;++i,++ppLights)
 		{
-			if (n != duplicates[n]) // duplicate scene? 
+			if (n != (int)duplicates[n]) // duplicate scene? 
 			{
 				Copy(ppLights, (*cur)->mLights[i]);
 			}
@@ -564,7 +564,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 		// --------------------------------------------------------------------
 		// Copy cameras
 		for (unsigned int i = 0; i < (*cur)->mNumCameras;++i,++ppCameras)	{
-			if (n != duplicates[n]) // duplicate scene? 
+			if (n != (int)duplicates[n]) // duplicate scene? 
 			{
 				Copy(ppCameras, (*cur)->mCameras[i]);
 			}
@@ -584,7 +584,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 		// --------------------------------------------------------------------
 		// Copy animations
 		for (unsigned int i = 0; i < (*cur)->mNumAnimations;++i,++ppAnims)	{
-			if (n != duplicates[n]) // duplicate scene? 
+			if (n != (int)duplicates[n]) // duplicate scene? 
 			{
 				Copy(ppAnims, (*cur)->mAnimations[i]);
 			}

@@ -422,6 +422,7 @@ ASSIMP_API aiLogStream aiGetPredefinedLogStream(aiDefaultLogStream pStream,const
 	LogStream* stream = LogStream::createDefaultStream(pStream,file);
 	if (!stream) {
 		sout.callback = NULL;
+		sout.user = NULL;
 	}
 	else {
 		sout.callback = &CallbackToLogRedirector;

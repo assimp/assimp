@@ -198,8 +198,12 @@ void BaseImporter::SetupProperties(const Importer* pImp)
 	if (!pIOHandler) {
 		return false;
 	}
-
-	const char* magic = (const char*)_magic;
+	union {
+		const char* magic;
+		const uint16_t* magic_u16;
+		const uint32_t* magic_u32;
+	};
+	magic = reinterpret_cast<const char*>(_magic);
 	boost::scoped_ptr<IOStream> pStream (pIOHandler->Open(pFile));
 	if (pStream.get() )	{
 
@@ -207,7 +211,11 @@ void BaseImporter::SetupProperties(const Importer* pImp)
 		pStream->Seek(offset,aiOrigin_SET);
 
 		// read 'size' characters from the file
-		char data[16];
+		union {
+			char data[16];
+			uint16_t data_u16[8];
+			uint32_t data_u32[4];
+		};
 		if(size != pStream->Read(data,1,size)) {
 			return false;
 		}
@@ -217,16 +225,16 @@ void BaseImporter::SetupProperties(const Importer* pImp)
 			// that's just for convinience, the chance that we cause conflicts
 			// is quite low and it can save some lines and prevent nasty bugs
 			if (2 == size) {
-				int16_t rev = *((int16_t*)magic);
+				uint16_t rev = *magic_u16; 
 				ByteSwap::Swap(&rev);
-				if (*((int16_t*)data) == ((int16_t*)magic)[i] || *((int16_t*)data) == rev) {
+				if (data_u16[0] == *magic_u16 || data_u16[0] == rev) {
 					return true;
 				}
 			}
 			else if (4 == size) {
-				int32_t rev = *((int32_t*)magic);
+				uint32_t rev = *magic_u32;
 				ByteSwap::Swap(&rev);
-				if (*((int32_t*)data) == ((int32_t*)magic)[i] || *((int32_t*)data) == rev) {
+				if (data_u32[0] == *magic_u32 || data_u32[0] == rev) {
 					return true;
 				}
 			}
@@ -248,10 +256,10 @@ void BaseImporter::SetupProperties(const Importer* pImp)
 void ReportResult(ConversionResult res)
 {
 	if(res == sourceExhausted) {
-		DefaultLogger::get()->error("Source ends with incomplete character sequence, Unicode transformation to UTF-8 fails");
+		DefaultLogger::get()->error("Source ends with incomplete character sequence, transformation to UTF-8 fails");
 	}
 	else if(res == sourceIllegal) {
-		DefaultLogger::get()->error("Source contains illegal character sequence, Unicode transformation to UTF-8 fails");
+		DefaultLogger::get()->error("Source contains illegal character sequence, transformation to UTF-8 fails");
 	}
 }
 

@@ -515,11 +515,11 @@ struct Effect
 		, mTransparent	( 0, 0, 0, 1)
 		, mShininess    (10.0f)
 		, mRefractIndex (1.f)
+		, mReflectivity (1.f)
 		, mTransparency (0.f)
 		, mDoubleSided	(false)
 		, mWireframe    (false)
 		, mFaceted      (false)
-		, mReflectivity (1.f)
 	{ 
 	}
 };

@@ -2148,6 +2148,9 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
       }
 
 			break;
+	default:
+		// IT_Invalid and IT_Vertex 
+		ai_assert(false && "shouldn't ever get here");
 	}
 }
 

@@ -912,7 +912,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 
 				// find the keyframe behind the current point in time
 				size_t pos = 0;
-				float postTime;
+				float postTime = 0.f;
 				while( 1)
 				{
 					if( pos >= e.mTimeAccessor->mCount)

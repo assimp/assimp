@@ -140,8 +140,7 @@ public:
 	template <typename T>
 	bool GetProperty( const char* name, T*& out ) const
 	{
-		THeapData<T>* t;
-		GetProperty(name,(Base*&)t);
+		THeapData<T>* t = (THeapData<T>*)GetPropertyInternal(name);
 		if(!t)
 		{
 			out = NULL;
@@ -155,8 +154,7 @@ public:
 	template <typename T>
 	bool GetProperty( const char* name, T& out ) const
 	{
-		TStaticData<T>* t;
-		GetProperty(name,(Base*&)t);
+		TStaticData<T>* t = (TStaticData<T>*)GetPropertyInternal(name);
 		if(!t)return false;
 		out = t->data;
 		return true;
@@ -169,14 +167,12 @@ public:
 
 private:
 
-	//! Internal
 	void AddProperty( const char* name, Base* data)	{
 		SetGenericPropertyPtr<Base>(pmap,name,data);
 	}
 
-	//! Internal
-	void GetProperty( const char* name, Base*& data) const	{
-		data = GetGenericProperty<Base*>(pmap,name,NULL);
+	Base* GetPropertyInternal( const char* name) const	{
+		return GetGenericProperty<Base*>(pmap,name,NULL);
 	}
 
 private:

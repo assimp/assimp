@@ -687,7 +687,7 @@ bool Importer::ValidateFlags(unsigned int pFlags)
 
 	// Now iterate through all bits which are set in the flags and check whether we find at least
 	// one pp plugin which handles it.
-	for (unsigned int mask = 1; mask < (1 << (sizeof(unsigned int)*8-1));mask <<= 1) {
+	for (unsigned int mask = 1; mask < (1u << (sizeof(unsigned int)*8-1));mask <<= 1) {
 		
 		if (pFlags & mask) {
 		

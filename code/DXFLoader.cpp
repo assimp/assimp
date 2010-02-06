@@ -326,14 +326,25 @@ bool DXFImporter::ParseEntities()
 {
 	while (GetNextToken())	{
 		if (!groupCode)	{			
-			if (!::strcmp(cursor,"3DFACE") || !::strcmp(cursor,"LINE") || !::strcmp(cursor,"3DLINE"))
-				if (!Parse3DFace()) return false; else bRepeat = true;
-
-			if (!::strcmp(cursor,"POLYLINE") || !::strcmp(cursor,"LWPOLYLINE"))
-				if (!ParsePolyLine()) return false; else bRepeat = true;
-
-			if (!::strcmp(cursor,"ENDSEC"))
+			if (!::strcmp(cursor,"3DFACE") || !::strcmp(cursor,"LINE") || !::strcmp(cursor,"3DLINE")){
+				if (!Parse3DFace()) {
+					 return false;
+				}
+				else {
+					 bRepeat = true;
+				}
+			}
+			if (!::strcmp(cursor,"POLYLINE") || !::strcmp(cursor,"LWPOLYLINE")){
+				if (!ParsePolyLine()) {
+					 return false; 
+				}
+				else {
+					 bRepeat = true;
+				}
+			}
+			if (!::strcmp(cursor,"ENDSEC")) {
 				return true;
+			}
 		}
 	}
 	return false;

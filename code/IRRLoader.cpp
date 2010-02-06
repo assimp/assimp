@@ -298,6 +298,10 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
 {
 	ai_assert(NULL != root && NULL != real);
 
+	// XXX totally WIP - doesn't produce proper results, need to evaluate
+	// whether there's any use for Irrlicht's proprietary scene format
+	// outside Irrlicht ...
+
 	if (root->animators.empty()) {
 		return;
 	}
@@ -404,7 +408,7 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
 				// find out how many time units we'll need for the finest
 				// track (in seconds) - this defines the number of output
 				// keys (fps * seconds)
-				float max ;
+				float max  = 0.f;
 				if (angles[0])
 					max = (float)lcm / angles[0];
 				if (angles[1])
@@ -554,6 +558,9 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
 					key.mTime  = (double) i;
 				}
 			}
+			break;
+		default:
+			// UNKNOWN , OTHER
 			break;
 		};
 		if (anim)	{
@@ -812,6 +819,9 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 			// to support terrains, we'd need to have a texture decoder
 			DefaultLogger::get()->error("IRR: Unsupported node - TERRAIN");
 		}
+		break;
+	default:
+		// DUMMY
 		break;
 	};
 
@@ -1182,8 +1192,8 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 								}
 								// radius of the sphere to be generated -
 								// or alternatively, size of the cube
-								else if (Node::SPHERE == curNode->type && prop.name == "Radius" 
-									|| Node::CUBE == curNode->type   && prop.name == "Size" )	{
+								else if ((Node::SPHERE == curNode->type && prop.name == "Radius") 
+									|| (Node::CUBE == curNode->type   && prop.name == "Size" ))	{
 									
 										curNode->sphereRadius = prop.value;
 								}
@@ -1248,7 +1258,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 										DefaultLogger::get()->error("Ignoring light of unknown type: " + prop.value);
 									}
 								}
-								else if (prop.name == "Mesh" && Node::MESH == curNode->type ||
+								else if ((prop.name == "Mesh" && Node::MESH == curNode->type) ||
 									Node::ANIMMESH == curNode->type)
 								{
 									/*  This is the file name of the mesh - either

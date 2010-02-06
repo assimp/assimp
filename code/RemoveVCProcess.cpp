@@ -140,7 +140,7 @@ bool UpdateNodeGraph(aiNode* node,std::list<aiNode*>& childsOfParent,bool root)
 void RemoveVCProcess::Execute( aiScene* pScene)
 {
 	DefaultLogger::get()->debug("RemoveVCProcess begin");
-	bool bHas = false,bMasked = false;
+	bool bHas = false; //,bMasked = false;
 
 	mScene = pScene;
 

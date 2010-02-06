@@ -452,7 +452,7 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName)
 
 	string Line;
 	ss >> Line;
-	unsigned int Level=0;//Hierarchielevels in the material file, like { } blocks into another
+//	unsigned int Level=0;//Hierarchielevels in the material file, like { } blocks into another
 	while(!ss.eof())
 	{
 		if(Line=="material")

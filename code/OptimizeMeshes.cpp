@@ -202,8 +202,8 @@ bool OptimizeMeshesProcess::CanJoin ( unsigned int a, unsigned int b, unsigned i
 
 	aiMesh* ma = mScene->mMeshes[a], *mb = mScene->mMeshes[b];
 
-	if (0xffffffff != max_verts && verts+mb->mNumVertices > max_verts ||
-		0xffffffff != max_faces && faces+mb->mNumFaces    > max_faces) {
+	if ((0xffffffff != max_verts && verts+mb->mNumVertices > max_verts) ||
+		(0xffffffff != max_faces && faces+mb->mNumFaces    > max_faces)) {
 		return false;
 	}
 

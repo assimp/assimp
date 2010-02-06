@@ -54,8 +54,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiNode;
 
 namespace Assimp	{
-struct XFile::Scene;
-struct XFile::Node;
+
+namespace XFile {
+struct Scene;
+struct Node;
+}
 
 // ---------------------------------------------------------------------------
 /** The XFileImporter is a worker class capable of importing a scene from a

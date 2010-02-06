@@ -540,13 +540,11 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 			{
 				for (unsigned int y = 0; y < 8;++y)
 				{
-					bool bSet = false;
-					if (0 == x % 2 && 0 != y % 2 ||
-						0 != x % 2 && 0 == y % 2)bSet = true;
+					const bool bSet = ((0 == x % 2 && 0 != y % 2) ||
+						(0 != x % 2 && 0 == y % 2));
 				
 					aiTexel* pc = &pcNew->pcData[y * 8 + x];
-					if (bSet)pc->r = pc->b = pc->g = 0xFF;
-					else pc->r = pc->b = pc->g = 0;
+					pc->r = pc->b = pc->g = (bSet?0xFF:0);
 					pc->a = 0xFF;
 				}
 			}

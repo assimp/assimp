@@ -137,9 +137,9 @@ bool FixInfacingNormalsProcess::ProcessMesh( aiMesh* pcMesh, unsigned int index)
 	const float fDelta1_z = (vMax1.z - vMin1.z);
 
 	// Check whether the boxes are overlapping
-	if (fDelta0_x > 0.0f != fDelta1_x > 0.0f)return false;
-	if (fDelta0_y > 0.0f != fDelta1_y > 0.0f)return false;
-	if (fDelta0_z > 0.0f != fDelta1_z > 0.0f)return false;
+	if ((fDelta0_x > 0.0f) != (fDelta1_x > 0.0f))return false;
+	if ((fDelta0_y > 0.0f) != (fDelta1_y > 0.0f))return false;
+	if ((fDelta0_z > 0.0f) != (fDelta1_z > 0.0f))return false;
 
 	// Check whether this is a planar surface
 	const float fDelta1_yz = fDelta1_y * fDelta1_z;

@@ -539,9 +539,9 @@ bool MD3Importer::ReadMultipartFile()
 
 		// now read these three files
 		BatchLoader batch(mIOHandler);
-		unsigned int _lower = batch.AddLoadRequest(lower,0,&props);
-		unsigned int _upper = batch.AddLoadRequest(upper,0,&props);
-		unsigned int _head  = batch.AddLoadRequest(head,0,&props);
+		const unsigned int _lower = batch.AddLoadRequest(lower,0,&props);
+		const unsigned int _upper = batch.AddLoadRequest(upper,0,&props);
+		const unsigned int _head  = batch.AddLoadRequest(head,0,&props);
 		batch.LoadAll();
 
 		// now construct a dummy scene to place these three parts in
@@ -948,7 +948,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 			pcMesh->mFaces[i].mIndices = new unsigned int[3];
 			pcMesh->mFaces[i].mNumIndices = 3;
 
-			unsigned int iTemp = iCurrent;
+			//unsigned int iTemp = iCurrent;
 			for (unsigned int c = 0; c < 3;++c,++iCurrent)	{
 				pcMesh->mFaces[i].mIndices[c] = iCurrent;
 

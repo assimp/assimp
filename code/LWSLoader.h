@@ -81,12 +81,12 @@ struct NodeDesc
 		:	number	(0)
 		,	parent	(0)
 		,	name	("")
-		,	parent_resolved (NULL)
-		,	lightIntensity (1.f)
 		,	lightColor (1.f,1.f,1.f)
+		,	lightIntensity (1.f)
 		,	lightType (0)
 		,	lightFalloffType (0)
 		,	lightConeAngle (45.f)
+		,	parent_resolved (NULL)
 	{}
 
 	enum {
@@ -151,7 +151,7 @@ struct NodeDesc
 			return false;
 		unsigned int _type = num >> 28u;
 		
-		return _type == type && (num & AI_LWS_MASK) == number;
+		return _type == static_cast<unsigned int>(type) && (num & AI_LWS_MASK) == number;
 	}
 };
 

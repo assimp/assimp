@@ -118,40 +118,48 @@ public:
 	// ----------------------------------------------------------------------
 	/** ByteSwap a float. Not a joke.
 	 *  @param[inout] fOut ehm. .. */
-	static inline void Swap(float* fOut)
-	{
+	static inline void Swap(float* fOut) {
 		Swap4(fOut);
 	}
 
 	// ----------------------------------------------------------------------
 	/** ByteSwap a double. Not a joke.
 	 *  @param[inout] fOut ehm. .. */
-	static inline void Swap(double* fOut)
-	{
+	static inline void Swap(double* fOut) {
 		Swap8(fOut);
 	}
+
 
 	// ----------------------------------------------------------------------
 	/** ByteSwap an int16t. Not a joke.
 	 *  @param[inout] fOut ehm. .. */
-	static inline void Swap(int16_t* fOut)
-	{
+	static inline void Swap(int16_t* fOut) {
+		Swap2(fOut);
+	}
+
+	static inline void Swap(uint16_t* fOut) {
 		Swap2(fOut);
 	}
 
 	// ----------------------------------------------------------------------
 	/** ByteSwap an int32t. Not a joke.
 	 *  @param[inout] fOut ehm. .. */
-	static inline void Swap(int32_t* fOut)	
-	{
+	static inline void Swap(int32_t* fOut){
+		Swap4(fOut);
+	}
+
+	static inline void Swap(uint32_t* fOut){
 		Swap4(fOut);
 	}
 
 	// ----------------------------------------------------------------------
 	/** ByteSwap an int64t. Not a joke.
 	 *  @param[inout] fOut ehm. .. */
-	static inline void Swap(int64_t* fOut)
-	{
+	static inline void Swap(int64_t* fOut) {
+		Swap8(fOut);
+	}
+
+	static inline void Swap(uint64_t* fOut) {
 		Swap8(fOut);
 	}
 };

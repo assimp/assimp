@@ -1996,6 +1996,18 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="ms3d"
+					>
+					<File
+						RelativePath="..\..\code\MS3DLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\MS3DLoader.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="process"

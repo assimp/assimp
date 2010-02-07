@@ -207,6 +207,11 @@ SOURCE_GROUP( Ply FILES
 	PlyParser.h
 )
 
+SOURCE_GROUP(MS3D FILES
+	MS3DLoader.cpp
+	MS3DLoader.h
+)
+
 SOURCE_GROUP( PostProcessing FILES
 	CalcTangentsProcess.cpp
 	CalcTangentsProcess.h
@@ -586,6 +591,8 @@ ADD_LIBRARY( assimp SHARED
 	Subdivision.cpp
 	Subdivision.h
 	Vertex.h
+	MS3DLoader.h
+	MS3DLoader.cpp
 )
 ADD_DEFINITIONS(-DASSIMP_BUILD_DLL_EXPORT)
 

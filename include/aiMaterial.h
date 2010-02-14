@@ -1190,7 +1190,7 @@ extern "C" {
 ASSIMP_API C_ENUM aiReturn aiGetMaterialProperty(
 	 const C_STRUCT aiMaterial* pMat, 
     const char* pKey,
-	 C_ENUM aiTextureType type,
+	 unsigned int type,
     unsigned int  index,
     const C_STRUCT aiMaterialProperty** pPropOut);
 

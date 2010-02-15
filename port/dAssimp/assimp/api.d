@@ -483,7 +483,7 @@ extern ( C ) {
    aiReturn function(
      aiMaterial* pMat,
      char* pKey,
-     aiTextureType type,
+     uint type,
      uint index,
      aiMaterialProperty** pPropOut
    ) aiGetMaterialProperty;

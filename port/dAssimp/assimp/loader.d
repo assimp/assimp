@@ -147,7 +147,7 @@ public:
          bind( aiIdentityMatrix4 )( "aiIdentityMatrix4" );
 
          // Material system
-         //bind( aiGetMaterialProperty )( "aiGetMaterialProperty" );
+         bind( aiGetMaterialProperty )( "aiGetMaterialProperty" );
          bind( aiGetMaterialFloatArray )( "aiGetMaterialFloatArray" );
          bind( aiGetMaterialIntegerArray )( "aiGetMaterialIntegerArray" );
          bind( aiGetMaterialColor )( "aiGetMaterialColor" );

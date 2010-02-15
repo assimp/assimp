@@ -49,6 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace System;
 
+#pragma managed
+
 namespace AssimpNET
 {
 	public ref class Animation
@@ -120,4 +122,7 @@ namespace AssimpNET
 		
 	};
 }//namespace
+
+
+
 

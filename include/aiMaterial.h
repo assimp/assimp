@@ -100,7 +100,9 @@ enum aiTextureOp
 	 *  This value is not used. It forces the compiler to use at least
 	 *  32 Bit integers to represent this enum.
 	 */
+#ifndef SWIG
 	_aiTextureOp_Force32Bit = 0x9fffffff
+#endif
 	//! @endcond
 };
 
@@ -134,7 +136,9 @@ enum aiTextureMapMode
 	  *  This value is not used. It forces the compiler to use at least
 	  *  32 Bit integers to represent this enum.
 	  */
+#ifndef SWIG
 	_aiTextureMapMode_Force32Bit = 0x9fffffff
+#endif
 	//! @endcond
 };
 
@@ -177,7 +181,9 @@ enum aiTextureMapping
 	  *  This value is not used. It forces the compiler to use at least
 	  *  32 Bit integers to represent this enum.
 	  */
+#ifndef SWIG
 	_aiTextureMapping_Force32Bit = 0x9fffffff
+#endif
 	//! @endcond
 };
 
@@ -295,7 +301,9 @@ enum aiTextureType
 	  *  This value is not used. It forces the compiler to use at least
 	  *  32 Bit integers to represent this enum.
 	  */
+#ifndef SWIG
 	_aiTextureType_Force32Bit = 0x9fffffff
+#endif
 	//! @endcond
 };
 
@@ -371,7 +379,9 @@ enum aiShadingMode
 	  *  This value is not used. It forces the compiler to use at least
 	  *  32 Bit integers to represent this enum.
 	  */
+#ifndef SWIG
 	_aiShadingMode_Force32Bit = 0x9fffffff
+#endif
 	//! @endcond
 };
 
@@ -415,7 +425,9 @@ enum aiTextureFlags
 	  *  This value is not used. It forces the compiler to use at least
 	  *  32 Bit integers to represent this enum.
 	  */
-	_aiTextureFlags_Force32Bit = 0x9fffffff
+#ifndef SWIG
+	  _aiTextureFlags_Force32Bit = 0x9fffffff
+#endif
 	//! @endcond
 };
 
@@ -462,7 +474,9 @@ enum aiBlendMode
 	  *  This value is not used. It forces the compiler to use at least
 	  *  32 Bit integers to represent this enum.
 	  */
+#ifndef SWIG
 	_aiBlendMode_Force32Bit = 0x9fffffff
+#endif
 	//! @endcond
 };
 
@@ -554,7 +568,9 @@ enum aiPropertyTypeInfo
 	 /** This value is not used. It is just there to force the
 	 *  compiler to map this enum to a 32 Bit integer.
 	 */
-	_aiPTI_Force32Bit = 0x9fffffff
+#ifndef SWIG
+	 _aiPTI_Force32Bit = 0x9fffffff
+#endif
 };
 
 // ---------------------------------------------------------------------------

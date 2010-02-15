@@ -79,7 +79,9 @@ enum aiLightSourceType
 	/** This value is not used. It is just there to force the
 	 *  compiler to map this enum to a 32 Bit integer.
 	 */
+#ifndef SWIG
 	_aiLightSource_Force32Bit = 0x9fffffff
+#endif
 };
 
 // ---------------------------------------------------------------------------

@@ -130,7 +130,7 @@ bool IOSystem::ComparePaths (const char* one, const char* second) const
 // Convert a relative path into an absolute path
 inline void MakeAbsolutePath (const char* in, char* _out)
 {
-	ai_assert(in & _out);
+	ai_assert(in && _out);
 	char* ret;
 #ifdef _WIN32
 	ret = ::_fullpath(_out, in,PATHLIMIT);

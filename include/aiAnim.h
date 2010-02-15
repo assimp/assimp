@@ -166,7 +166,9 @@ enum aiAnimBehaviour
 
 	/** This value is not used, it is just here to force the
 	 *  the compiler to map this enum to a 32 Bit integer  */
+#ifndef SWIG
 	_aiAnimBehaviour_Force32Bit = 0x8fffffff
+#endif
 };
 
 // ---------------------------------------------------------------------------

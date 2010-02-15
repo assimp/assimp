@@ -259,10 +259,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 enum aiComponent
 {
 	/** Normal vectors */
+#ifdef SWIG
+	aiComponent_NORMALS = 0x2,
+#else
 	aiComponent_NORMALS = 0x2u,
+#endif
 
 	/** Tangents and bitangents go always together ... */
+#ifdef SWIG
+	aiComponent_TANGENTS_AND_BITANGENTS = 0x4,
+#else
 	aiComponent_TANGENTS_AND_BITANGENTS = 0x4u,
+#endif
 
 	/** ALL color sets
 	 * Use aiComponent_COLORn(N) to specify the N'th set */
@@ -305,7 +313,9 @@ enum aiComponent
 
 	/** This value is not used. It is just there to force the
 	 *  compiler to map this enum to a 32 Bit integer. */
+#ifndef SWIG
 	_aiComponent_Force32Bit = 0x9fffffff
+#endif
 };
 
 // Remove a specific color channel 'n'

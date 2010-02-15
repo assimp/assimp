@@ -293,7 +293,9 @@ enum aiPrimitiveType
 	/** This value is not used. It is just here to force the
 	 *  compiler to map this enum to a 32 Bit integer.
 	 */
+#ifndef SWIG
 	_aiPrimitiveType_Force32Bit = 0x9fffffff
+#endif
 }; //! enum aiPrimitiveType
 
 // Get the #aiPrimitiveType flag for a specific number of face indices

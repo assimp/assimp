@@ -81,11 +81,11 @@ public:
          }
 
          // Versioning
-         bind( aiGetLegalString )( "aiGetLegalString" );
-         bind( aiGetVersionMinor )( "aiGetVersionMinor" );
-         bind( aiGetVersionMajor )( "aiGetVersionMajor" );
-         bind( aiGetVersionRevision )( "aiGetVersionRevision" );
-         bind( aiGetCompileFlags )( "aiGetCompileFlags" );
+         mixin( bindCode( "aiGetLegalString" ) );
+         mixin( bindCode( "aiGetVersionMinor" ) );
+         mixin( bindCode( "aiGetVersionMajor" ) );
+         mixin( bindCode( "aiGetVersionRevision" ) );
+         mixin( bindCode( "aiGetCompileFlags" ) );
 
          // Check for version mismatch between the external, dynamically loaded
          // library and the version the bindings were created against.
@@ -116,44 +116,44 @@ public:
          }
 
          // General API
-         bind( aiImportFile )( "aiImportFile" );
-         bind( aiImportFileEx )( "aiImportFileEx" );
-         bind( aiImportFileFromMemory )( "aiImportFileFromMemory" );
-         bind( aiApplyPostProcessing )( "aiApplyPostProcessing" );
-         bind( aiGetPredefinedLogStream )( "aiGetPredefinedLogStream" );
-         bind( aiAttachLogStream )( "aiAttachLogStream" );
-         bind( aiEnableVerboseLogging )( "aiEnableVerboseLogging" );
-         bind( aiDetachLogStream )( "aiDetachLogStream" );
-         bind( aiDetachAllLogStreams )( "aiDetachAllLogStreams" );
-         bind( aiReleaseImport )( "aiReleaseImport" );
-         bind( aiGetErrorString )( "aiGetErrorString" );
-         bind( aiIsExtensionSupported )( "aiIsExtensionSupported" );
-         bind( aiGetExtensionList )( "aiGetExtensionList" );
-         bind( aiGetMemoryRequirements )( "aiGetMemoryRequirements" );
-         bind( aiSetImportPropertyInteger )( "aiSetImportPropertyInteger" );
-         bind( aiSetImportPropertyFloat )( "aiSetImportPropertyFloat" );
-         bind( aiSetImportPropertyString )( "aiSetImportPropertyString" );
+         mixin( bindCode( "aiImportFile" ) );
+         mixin( bindCode( "aiImportFileEx" ) );
+         mixin( bindCode( "aiImportFileFromMemory" ) );
+         mixin( bindCode( "aiApplyPostProcessing" ) );
+         mixin( bindCode( "aiGetPredefinedLogStream" ) );
+         mixin( bindCode( "aiAttachLogStream" ) );
+         mixin( bindCode( "aiEnableVerboseLogging" ) );
+         mixin( bindCode( "aiDetachLogStream" ) );
+         mixin( bindCode( "aiDetachAllLogStreams" ) );
+         mixin( bindCode( "aiReleaseImport" ) );
+         mixin( bindCode( "aiGetErrorString" ) );
+         mixin( bindCode( "aiIsExtensionSupported" ) );
+         mixin( bindCode( "aiGetExtensionList" ) );
+         mixin( bindCode( "aiGetMemoryRequirements" ) );
+         mixin( bindCode( "aiSetImportPropertyInteger" ) );
+         mixin( bindCode( "aiSetImportPropertyFloat" ) );
+         mixin( bindCode( "aiSetImportPropertyString" ) );
 
          // Mathematical functions
-         bind( aiCreateQuaternionFromMatrix )( "aiCreateQuaternionFromMatrix" );
-         bind( aiDecomposeMatrix )( "aiDecomposeMatrix" );
-         bind( aiTransposeMatrix4 )( "aiTransposeMatrix4" );
-         bind( aiTransposeMatrix3 )( "aiTransposeMatrix3" );
-         bind( aiTransformVecByMatrix3 )( "aiTransformVecByMatrix3" );
-         bind( aiTransformVecByMatrix4 )( "aiTransformVecByMatrix4" );
-         bind( aiMultiplyMatrix4 )( "aiMultiplyMatrix4" );
-         bind( aiMultiplyMatrix3 )( "aiMultiplyMatrix3" );
-         bind( aiIdentityMatrix3 )( "aiIdentityMatrix3" );
-         bind( aiIdentityMatrix4 )( "aiIdentityMatrix4" );
+         mixin( bindCode( "aiCreateQuaternionFromMatrix" ) );
+         mixin( bindCode( "aiDecomposeMatrix" ) );
+         mixin( bindCode( "aiTransposeMatrix4" ) );
+         mixin( bindCode( "aiTransposeMatrix3" ) );
+         mixin( bindCode( "aiTransformVecByMatrix3" ) );
+         mixin( bindCode( "aiTransformVecByMatrix4" ) );
+         mixin( bindCode( "aiMultiplyMatrix4" ) );
+         mixin( bindCode( "aiMultiplyMatrix3" ) );
+         mixin( bindCode( "aiIdentityMatrix3" ) );
+         mixin( bindCode( "aiIdentityMatrix4" ) );
 
          // Material system
-         bind( aiGetMaterialProperty )( "aiGetMaterialProperty" );
-         bind( aiGetMaterialFloatArray )( "aiGetMaterialFloatArray" );
-         bind( aiGetMaterialIntegerArray )( "aiGetMaterialIntegerArray" );
-         bind( aiGetMaterialColor )( "aiGetMaterialColor" );
-         bind( aiGetMaterialString )( "aiGetMaterialString" );
-         bind( aiGetMaterialTextureCount )( "aiGetMaterialTextureCount" );
-         bind( aiGetMaterialTexture )( "aiGetMaterialTexture" );
+         mixin( bindCode( "aiGetMaterialProperty" ) );
+         mixin( bindCode( "aiGetMaterialFloatArray" ) );
+         mixin( bindCode( "aiGetMaterialIntegerArray" ) );
+         mixin( bindCode( "aiGetMaterialColor" ) );
+         mixin( bindCode( "aiGetMaterialString" ) );
+         mixin( bindCode( "aiGetMaterialTextureCount" ) );
+         mixin( bindCode( "aiGetMaterialTexture" ) );
       }
       ++m_sRefCount;
    }
@@ -172,33 +172,18 @@ public:
    }
 
 private:
-   // The binding magic is heavily inspired by the Derelict loading code.
-   struct Binder {
-   public:
-      static Binder opCall( void** functionPointerAddress ) {
-         Binder binder;
-         binder.m_functionPointerAddress = functionPointerAddress;
-         return binder;
-      }
-
-      void opCall( char* name ) {
-         *m_functionPointerAddress = m_sLibrary.getSymbol( name );
-      }
-
-   private:
-       void** m_functionPointerAddress;
-   }
-
-   template bind( Function ) {
-      static Binder bind( inout Function a ) {
-         Binder binder = Binder( cast( void** ) &a );
-         return binder;
-      }
-   }
-
    /// Current number of references to the library.
    static uint m_sRefCount;
 
    /// Library handle.
    static SharedLib m_sLibrary;
+}
+
+/**
+ * Private helper function which constructs the bind command for a symbol to
+ * keep the code DRY.
+ */
+private char[] bindCode( char[] symbol ) {
+   return symbol ~ " = cast( typeof( " ~ symbol ~
+      " ) )m_sLibrary.getSymbol( `" ~ symbol ~ "` );";
 }

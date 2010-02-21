@@ -1,11 +1,11 @@
 /* File : example.i */
-%module(directors="1") AssimpNET_SWIG
+%module Assimp
 %{
 //#include "..\..\..\include\aiAssert.h"
 #include "..\..\..\include\aiDefines.h"
 #include "..\..\..\include\aiConfig.h"
 #include "..\..\..\include\aiTypes.h"
-#include "..\..\..\include\aiVersion.h"
+//#include "..\..\..\include\aiVersion.h"
 #include "..\..\..\include\aiPostProcess.h"
 #include "..\..\..\include\aiVector2D.h"
 #include "..\..\..\include\aiVector3D.h"
@@ -15,8 +15,8 @@
 #include "..\..\..\include\aiLight.h"
 #include "..\..\..\include\aiAnim.h"
 #include "..\..\..\include\aiMesh.h"
-#include "..\..\..\include\aiFileIO.h"
-//#include "..\..\..\include\aiMaterial.h"
+//#include "..\..\..\include\aiFileIO.h"
+#include "..\..\..\include\aiMaterial.h"
 #include "..\..\..\include\aiQuaternion.h"
 #include "..\..\..\include\aiScene.h"
 #include "..\..\..\include\aiTexture.h"
@@ -25,7 +25,7 @@
 #include "..\..\..\include\IOStream.h"
 #include "..\..\..\include\Logger.h"
 #include "..\..\..\include\LogStream.h"
-#include "..\..\..\include\NullLogger.h"
+//#include "..\..\..\include\NullLogger.h"
 %}
 
 #define C_STRUCT
@@ -48,13 +48,15 @@
 %rename(__greater__) operator>;
 %rename(__smaller__) operator<;
 
+//%rename(Node) aiNode;
+
 %include "std_string.i"
 
 //%include "..\..\..\include\aiAssert.h"
 %include "..\..\..\include\aiDefines.h"
 %include "..\..\..\include\aiConfig.h"
 %include "..\..\..\include\aiTypes.h"
-%include "..\..\..\include\aiVersion.h"
+//%include "..\..\..\include\aiVersion.h"
 %include "..\..\..\include\aiPostProcess.h"
 %include "..\..\..\include\aiVector2D.h"
 %include "..\..\..\include\aiVector3D.h"
@@ -64,8 +66,8 @@
 %include "..\..\..\include\aiLight.h"
 %include "..\..\..\include\aiAnim.h"
 %include "..\..\..\include\aiMesh.h"
-%include "..\..\..\include\aiFileIO.h"
-//%include "..\..\..\include\aiMaterial.h"
+//%include "..\..\..\include\aiFileIO.h"
+%include "..\..\..\include\aiMaterial.h"
 %include "..\..\..\include\aiQuaternion.h"
 %include "..\..\..\include\aiScene.h"
 %include "..\..\..\include\aiTexture.h"
@@ -74,7 +76,7 @@
 %include "..\..\..\include\IOStream.h"
 %include "..\..\..\include\Logger.h"
 %include "..\..\..\include\LogStream.h"
-%include "..\..\..\include\NullLogger.h"
+//%include "..\..\..\include\NullLogger.h"
 
 
 

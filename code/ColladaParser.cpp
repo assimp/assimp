@@ -479,9 +479,19 @@ void ColladaParser::ReadController( Collada::Controller& pController)
 			} 
 			else if( IsElement( "bind_shape_matrix"))
 			{
-				// content is 16 floats to define some sort of matrix... I'm going to ignore this
-				// as long as I don't have a clue how to interpret it
-				SkipElement();
+				// content is 16 floats to define a matrix... it seems to be important for some models
+	      const char* content = GetTextContent();
+
+	      // read the 16 floats
+	      for( unsigned int a = 0; a < 16; a++)
+	      {
+		      // read a number
+          content = fast_atof_move( content, pController.mBindShapeMatrix[a]);
+		      // skip whitespace after it
+		      SkipSpacesAndLineEnd( &content);
+	      }
+
+        TestClosing( "bind_shape_matrix");
 			} 
 			else if( IsElement( "source"))
 			{

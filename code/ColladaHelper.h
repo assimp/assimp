@@ -371,6 +371,9 @@ struct Controller
 	// accessor URL of the joint names
 	std::string mJointNameSource;
 
+  ///< The bind shape matrix, as array of floats. I'm not sure what this matrix actually describes, but it can't be ignored in all cases
+  float mBindShapeMatrix[16];
+
 	// accessor URL of the joint inverse bind matrices
 	std::string mJointOffsetMatrixSource;
 

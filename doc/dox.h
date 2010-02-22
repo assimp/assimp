@@ -236,7 +236,8 @@ respectively
 make -fmakefile.mingw
 @endcode
 for mingw-make. For a <i>-noboost</i>-Build, append 
-@codeNOBOOST=1
+@code
+NOBOOST=1
 @endcode
 
 @section assimp_st Single-threaded build

@@ -227,7 +227,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="mkdir $(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;"
+				CommandLine="mkdir &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)&quot;&#x0D;&#x0A;mkdir &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)&quot;&#x0D;&#x0A;mkdir &quot;$(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)&quot;&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -303,7 +303,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="mkdir $(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;"
+				CommandLine="mkdir &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)&quot;&#x0D;&#x0A;mkdir &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)&quot;&#x0D;&#x0A;mkdir &quot;$(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)&quot;&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration

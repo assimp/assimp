@@ -160,7 +160,7 @@ def _init(self):
 Python magic to add the _init() function to all C struct classes.
 """
 for struct in dir(structs):
-    if not (struct.startswith('_') or struct.startswith('c_') or struct == "Structure"):
+    if not (struct.startswith('_') or struct.startswith('c_') or struct == "Structure" or struct == "POINTER"):
         setattr(getattr(structs, struct), '_init', _init)
 
 

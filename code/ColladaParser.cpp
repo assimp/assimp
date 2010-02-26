@@ -1677,6 +1677,7 @@ void ColladaParser::ReadAccessor( const std::string& pID)
 	acc.mOffset = offset;
 	acc.mStride = stride;
 	acc.mSource = source+1; // ignore the leading '#'
+	acc.mSize = 0; // gets incremented with every param
 
 	// and read the components
 	while( mReader->read())
@@ -1717,6 +1718,20 @@ void ColladaParser::ReadAccessor( const std::string& pID)
 					else if( name == "V") acc.mSubOffset[1] = acc.mParams.size();
 					//else
 					//	DefaultLogger::get()->warn( boost::str( boost::format( "Unknown accessor parameter \"%s\". Ignoring data channel.") % name));
+				}
+
+				// read data type
+				int attrType = TestAttribute( "type");
+				if( attrType)
+				{
+					// for the moment we only distinguish between a 4x4 matrix and anything else. 
+					// TODO: (thom) I don't have a spec here at work. Check if there are other multi-value types
+					// which should be tested for here.
+					std::string type = mReader->getAttributeValue( attrType);
+					if( type == "float4x4")
+						acc.mSize += 16;
+					else 
+						acc.mSize += 1;
 				}
 
 				acc.mParams.push_back( name);

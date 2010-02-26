@@ -271,6 +271,7 @@ struct Data
 struct Accessor
 {
 	size_t mCount;   // in number of objects
+	size_t mSize;    // size of an object, in elements (floats or strings, mostly 1)
 	size_t mOffset;  // in number of values
 	size_t mStride;  // Stride in number of values
 	std::vector<std::string> mParams; // names of the data streams in the accessors. Empty string tells to ignore. 
@@ -281,7 +282,7 @@ struct Accessor
 
 	Accessor() 
 	{ 
-		mCount = 0; mOffset = 0; mStride = 0; mData = NULL; 
+		mCount = 0; mSize = 0; mOffset = 0; mStride = 0; mData = NULL; 
 		mSubOffset[0] = mSubOffset[1] = mSubOffset[2] = mSubOffset[3] = 0;
 	}
 };

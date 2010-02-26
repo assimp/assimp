@@ -947,7 +947,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 
 				// read values from there
 				float temp[16];
-				for( size_t c = 0; c < e.mValueAccessor->mParams.size(); ++c)
+				for( size_t c = 0; c < e.mValueAccessor->mSize; ++c)
 					temp[c] = ReadFloat( *e.mValueAccessor, *e.mValueData, pos, c);
 
 				// if not exactly at the key time, interpolate with previous value set
@@ -956,7 +956,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 					float preTime = ReadFloat( *e.mTimeAccessor, *e.mTimeData, pos-1, 0);
 					float factor = (time - postTime) / (preTime - postTime);
 
-					for( size_t c = 0; c < e.mValueAccessor->mParams.size(); ++c)
+					for( size_t c = 0; c < e.mValueAccessor->mSize; ++c)
 					{
 						float v = ReadFloat( *e.mValueAccessor, *e.mValueData, pos-1, c);
 						temp[c] += (v - temp[c]) * factor;
@@ -964,7 +964,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 				}
 
 				// Apply values to current transformation
-				std::copy( temp, temp + e.mValueAccessor->mParams.size(), transforms[e.mTransformIndex].f + e.mSubElement);
+				std::copy( temp, temp + e.mValueAccessor->mSize, transforms[e.mTransformIndex].f + e.mSubElement);
 			}
 
 			// Calculate resulting transformation

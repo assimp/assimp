@@ -12,10 +12,10 @@ Thanks for your help!
 3DS-, ASE-, DXF-, HMP-, MDL-, MD2-, MD3-, MD5-, MDC-, NFF-, PLY-, STL-, RAW-, OFF- and LWO-Loader, 
 Configuration-Interface, AssImp-Viewer (Win32), Website (Admin and Design), admin.
 
--Thomas Schulze,
+- Thomas Schulze,
 X-, Collada-, BVH-Loader, Postprocessing framework. Data structure & Interface design, documentation.
 
--R.Schmidt,
+- R.Schmidt,
 Linux build, eclipse support.
 
 - Kim Kulling:
@@ -78,4 +78,7 @@ Add group loading feature to Obj-Loader.
 Many bugreports, improving Assimp's portability, regular testing & feedback.
 
 - Stepan Hrbek
-BUgreport and fix for a obj-materialloader crash.
+Bugreport and fix for a obj-materialloader crash.
+
+- klickverbot ( real name? ):
+D-bindings, CMake install support.

@@ -1,4 +1,4 @@
-SET( HEADER_PATH ../include/ )
+SET( HEADER_PATH ../include )
 
 SET( COMPILER_HEADERS
 	${HEADER_PATH}/Compiler/pushpack1.h
@@ -6,41 +6,70 @@ SET( COMPILER_HEADERS
 ) 
 
 SET( PUBLIC_HEADERS
-	aiAnim.h
-	aiAssert.h
-	aiCamera.h
-	aiColor4D.h
-	aiColor4D.inl
-	aiConfig.h
-	aiDefines.h
-	aiFileIO.h
-	aiLight.h
-	aiMaterial.h
-	aiMaterial.inl
-	aiMatrix3x3.h
-	aiMatrix3x3.inl
-	aiMatrix4x4.h
-	aiMatrix4x4.inl
-	aiMesh.h
-	aiPostProcess.h
-	aiQuaternion.h
-	aiScene.h
-	aiTexture.h
-	aiTypes.h
-	aiVector2D.h
-	aiVector3D.h
-	aiVector3D.inl
-	aiVersion.h
-	assimp.h
-	assimp.hpp
-	BoostWorkaround
-	Compiler
-	DefaultLogger.h
-	IOStream.h
-	IOSystem.h
-	Logger.h
-	LogStream.h
-	NullLogger.h
+	${HEADER_PATH}/aiAnim.h
+	${HEADER_PATH}/aiAssert.h
+	${HEADER_PATH}/aiCamera.h
+	${HEADER_PATH}/aiColor4D.h
+	${HEADER_PATH}/aiColor4D.inl
+	${HEADER_PATH}/aiConfig.h
+	${HEADER_PATH}/aiDefines.h
+	${HEADER_PATH}/aiFileIO.h
+	${HEADER_PATH}/aiLight.h
+	${HEADER_PATH}/aiMaterial.h
+	${HEADER_PATH}/aiMaterial.inl
+	${HEADER_PATH}/aiMatrix3x3.h
+	${HEADER_PATH}/aiMatrix3x3.inl
+	${HEADER_PATH}/aiMatrix4x4.h
+	${HEADER_PATH}/aiMatrix4x4.inl
+	${HEADER_PATH}/aiMesh.h
+	${HEADER_PATH}/aiPostProcess.h
+	${HEADER_PATH}/aiQuaternion.h
+	${HEADER_PATH}/aiScene.h
+	${HEADER_PATH}/aiTexture.h
+	${HEADER_PATH}/aiTypes.h
+	${HEADER_PATH}/aiVector2D.h
+	${HEADER_PATH}/aiVector3D.h
+	${HEADER_PATH}/aiVector3D.inl
+	${HEADER_PATH}/aiVersion.h
+	${HEADER_PATH}/assimp.h
+	${HEADER_PATH}/assimp.hpp
+	${HEADER_PATH}/DefaultLogger.h
+	${HEADER_PATH}/IOStream.h
+	${HEADER_PATH}/IOSystem.h
+	${HEADER_PATH}/Logger.h
+	${HEADER_PATH}/LogStream.h
+	${HEADER_PATH}/NullLogger.h
+	${HEADER_PATH}/Compiler/pushpack1.h
+	${HEADER_PATH}/Compiler/poppack1.h
+	${HEADER_PATH}/BoostWorkaround/boost/common_factor_rt.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/foreach.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/format.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/random/mersenne_twister.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/random/uniform_int.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/random/variate_generator.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/scoped_array.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/scoped_ptr.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/static_assert.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/tuple/tuple.hpp
+)
+
+SOURCE_GROUP( Compiler FILES
+	${HEADER_PATH}/Compiler/pushpack1.h
+	${HEADER_PATH}/Compiler/poppack1.h
+)
+
+SOURCE_GROUP( Boost FILES
+	${HEADER_PATH}/BoostWorkaround/boost/common_factor_rt.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/foreach.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/format.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/random
+	${HEADER_PATH}/BoostWorkaround/boost/random/mersenne_twister.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/random/uniform_int.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/random/variate_generator.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/scoped_array.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/scoped_ptr.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/static_assert.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/tuple/tuple.hpp
 )
 
 SOURCE_GROUP( Logging FILES 
@@ -308,11 +337,12 @@ SOURCE_GROUP( Q3D FILES
 	Q3DLoader.cpp
 	Q3DLoader.h
 )
+
 #SOURCE_GROUP( Q3BSP FILES
-#	Q3BSPFileParser.h
-#	Q3BSPFileParser.cpp
-#	Q3BSPFileImporter.h
-#	Q3BSPFileImporter.cpp
+	#Q3BSPFileParser.h
+	#Q3BSPFileParser.cpp
+	#Q3BSPFileImporter.h
+	#Q3BSPFileImporter.cpp
 #)
 
 SOURCE_GROUP( Raw FILES
@@ -415,6 +445,19 @@ ADD_LIBRARY( assimp SHARED
 	${HEADER_PATH}/aiVector3D.h
 	${HEADER_PATH}/aiVersion.h
 	${HEADER_PATH}/assimp.h
+	${HEADER_PATH}/Compiler/pushpack1.h
+	${HEADER_PATH}/Compiler/poppack1.h
+	${HEADER_PATH}/BoostWorkaround/boost/common_factor_rt.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/foreach.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/format.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/random
+	${HEADER_PATH}/BoostWorkaround/boost/random/mersenne_twister.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/random/uniform_int.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/random/variate_generator.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/scoped_array.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/scoped_ptr.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/static_assert.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/tuple/tuple.hpp
 
 	3DSConverter.cpp
 	3DSHelper.h
@@ -550,10 +593,10 @@ ADD_LIBRARY( assimp SHARED
 	ProcessHelper.h
 	Q3DLoader.cpp
 	Q3DLoader.h
-	#Q3BSPFileParser.h
-	#Q3BSPFileParser.cpp
-	#Q3BSPFileImporter.h
-	#Q3BSPFileImporter.cpp
+#	Q3BSPFileParser.h
+#	Q3BSPFileParser.cpp
+#	Q3BSPFileImporter.h
+#	Q3BSPFileImporter.cpp
 	RawLoader.cpp
 	RawLoader.h
 	RemoveComments.cpp

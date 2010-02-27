@@ -390,6 +390,7 @@ void ObjFileParser::getMaterialDesc()
 	{
 		// Found, using detected material
 		m_pModel->m_pCurrentMaterial = (*it).second;
+		m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( strName );
 	}
 
 	// Skip rest of line

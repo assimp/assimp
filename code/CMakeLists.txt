@@ -1,5 +1,47 @@
-
 SET( HEADER_PATH ../include/ )
+
+SET( COMPILER_HEADERS
+	${HEADER_PATH}/Compiler/pushpack1.h
+	${HEADER_PATH}/Compiler/poppack1.h
+) 
+
+SET( PUBLIC_HEADERS
+	aiAnim.h
+	aiAssert.h
+	aiCamera.h
+	aiColor4D.h
+	aiColor4D.inl
+	aiConfig.h
+	aiDefines.h
+	aiFileIO.h
+	aiLight.h
+	aiMaterial.h
+	aiMaterial.inl
+	aiMatrix3x3.h
+	aiMatrix3x3.inl
+	aiMatrix4x4.h
+	aiMatrix4x4.inl
+	aiMesh.h
+	aiPostProcess.h
+	aiQuaternion.h
+	aiScene.h
+	aiTexture.h
+	aiTypes.h
+	aiVector2D.h
+	aiVector3D.h
+	aiVector3D.inl
+	aiVersion.h
+	assimp.h
+	assimp.hpp
+	BoostWorkaround
+	Compiler
+	DefaultLogger.h
+	IOStream.h
+	IOSystem.h
+	Logger.h
+	LogStream.h
+	NullLogger.h
+)
 
 SOURCE_GROUP( Logging FILES 
 	${HEADER_PATH}/DefaultLogger.h 
@@ -11,6 +53,7 @@ SOURCE_GROUP( Logging FILES
 	DefaultLogger.cpp
 	FileLogStream.h
 )
+
 SOURCE_GROUP( Common FILES 
 	aiAssert.cpp
 	fast_atof.h	
@@ -265,6 +308,12 @@ SOURCE_GROUP( Q3D FILES
 	Q3DLoader.cpp
 	Q3DLoader.h
 )
+#SOURCE_GROUP( Q3BSP FILES
+#	Q3BSPFileParser.h
+#	Q3BSPFileParser.cpp
+#	Q3BSPFileImporter.h
+#	Q3BSPFileImporter.cpp
+#)
 
 SOURCE_GROUP( Raw FILES
 	RawLoader.cpp
@@ -501,6 +550,10 @@ ADD_LIBRARY( assimp SHARED
 	ProcessHelper.h
 	Q3DLoader.cpp
 	Q3DLoader.h
+	#Q3BSPFileParser.h
+	#Q3BSPFileParser.cpp
+	#Q3BSPFileImporter.h
+	#Q3BSPFileImporter.cpp
 	RawLoader.cpp
 	RawLoader.h
 	RemoveComments.cpp
@@ -601,4 +654,17 @@ if (WIN32)
 		ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
 		ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
 	endif( MSVC80 )
+	if ( MSVC90 )
+		ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
+		ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
+	endif( MSVC90 )
 endif (WIN32)
+ 
+SET_TARGET_PROPERTIES( assimp PROPERTIES
+	VERSION ${LIBRARY_VERSION}
+	SOVERSION ${LIBRARY_SOVERSION}
+)
+
+INSTALL( TARGETS assimp DESTINATION ${LIB_INSTALL_DIR} )
+INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${INCLUDE_INSTALL_DIR}/assimp )
+INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${INCLUDE_INSTALL_DIR}/assimp/Compiler ) 

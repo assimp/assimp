@@ -41,9 +41,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ----------------------------------------------------------------------------
 /** @file Implements Assimp::SceneCombiner. This is a smart utility
- *    class that can be used to combine several scenes, meshes, ...
- *    in one. Currently these utilities are used by the IRR and LWS
- *    loaders and by the OptimizeGraph step.
+ *    class that combines multiple scenes, meshes, ... into one. Currently 
+ *    these utilities are used by the IRR and LWS loaders and the
+ *    OptimizeGraph step.
  */
 // ----------------------------------------------------------------------------
 #include "AssimpPCH.h"
@@ -51,26 +51,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 #include "Hash.h"
 #include "time.h"
-
-// ----------------------------------------------------------------------------
-// We need boost::random here. The workaround uses rand() instead of a proper
-// Mersenne twister, but I think it should still be 'random' enough for our
-// purposes. 
-// ----------------------------------------------------------------------------
-#ifdef ASSIMP_BUILD_BOOST_WORKAROUND
-
-#	include "../include/BoostWorkaround/boost/random/uniform_int.hpp"
-#	include "../include/BoostWorkaround/boost/random/variate_generator.hpp"
-#	include "../include/BoostWorkaround/boost/random/mersenne_twister.hpp"
-
-#else
-
-#	include <boost/random/uniform_int.hpp>
-#	include <boost/random/variate_generator.hpp>
-#	include <boost/random/mersenne_twister.hpp>
-
-#endif
-
 
 namespace Assimp	{
 
@@ -299,11 +279,12 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 	// Generate unique names for all named stuff?
 	if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES)
 	{
+#if 0
 		// Construct a proper random number generator
-		boost::mt19937 rng( ::clock() );
+		boost::mt19937 rng(  );
 		boost::uniform_int<> dist(1u,1 << 24u);
 		boost::variate_generator<boost::mt19937&, boost::uniform_int<> > rndGen(rng, dist);   
-
+#endif
 		for (unsigned int i = 1; i < src.size();++i)
 		{
 			//if (i != duplicates[i]) 
@@ -315,8 +296,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 			//	continue;
 			//}
 
-			const unsigned int random = rndGen();
-			src[i].idlen = ::sprintf(src[i].id,"$%.6X$_",random);
+			src[i].idlen = ::sprintf(src[i].id,"$%.6X$_",i);
 
 			if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY) {
 				

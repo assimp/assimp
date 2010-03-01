@@ -31,9 +31,18 @@ VS Solution and build for your preferred build target ...
 release-dll is usually the best choice. Adjust the runtime library to
 your needs, multithreaded-dll is preconfigured by default.
 
-Unix: try running 'make' in the ./code dir. Or SCons from
-./workspaces/SCons. Or CMAKE, from the CMakelists.txt. Choose whatever
-buildtool you like most.
+These solutions are currently hand-maintained, they copy all
+the resulting binaries to ./bin/config-name at the moment. 
+
+Unix & Family:
+
+CMake is now our preferred build tool. Run cmake with your
+favourite build script generator from *here* and have fun.
+If you use cmake only to get a makefile, run 
+'make' and 'make install' afterwards. 
+
+Note that running make from ./code is deprecated, although there
+is still a suitable makefile in it.
 
 
 

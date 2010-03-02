@@ -13,6 +13,7 @@ SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin )
 SET( LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib" )
 
 SET( INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include" )
+SET( BIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/bin" )
 SET( LIBRARY_VERSION "1.0.0" )
 SET( LIBRARY_SOVERSION "1" )
 
@@ -20,9 +21,8 @@ SET( LIBRARY_SOVERSION "1" )
 add_subdirectory( code/ )
 IF( WIN32 )
 	add_subdirectory( test/ )
-	add_subdirectory( tools/assimp_cmd/ )
 	add_subdirectory( tools/assimp_view/ )
 ENDIF( WIN32 )
 
-
+add_subdirectory( tools/assimp_cmd/ )
 

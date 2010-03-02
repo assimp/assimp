@@ -41,6 +41,10 @@ favourite build script generator from *here* and have fun.
 If you use cmake only to get a makefile, run 
 'make' and 'make install' afterwards. 
 
+NOTE: in order to use the assimp command line tools, you may
+need to run ldconfig as root to make the so loader find
+the assimp shared library --
+
 Note that running make from ./code is deprecated, although there
 is still a suitable makefile in it.
 

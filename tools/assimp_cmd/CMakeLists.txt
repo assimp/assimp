@@ -39,38 +39,11 @@ add_executable(  assimp_cmd
 	WriteDumb.cpp
 )
 
-IF( WIN32 )
-	SET( PSDK_PATH "C:/Program Files/Microsoft Platform SDK/Bin" )
-	SET( PSDK_INC "C:/Program Files/Microsoft Platform SDK/Include" )
 
-	FIND_PATH(DX9_INCLUDE_PATH d3d9.h
-		PATHS
-			"$ENV{DXSDK_DIR}/Include"
-			"$ENV{PROGRAMFILES}/Microsoft DirectX SDK/Include"
-		DOC "The directory where D3D9.h resides")
-
-
-	FIND_LIBRARY(D3D9_LIBRARY d3d9.lib
-		PATHS
-			"$ENV{DXSDK_DIR}/Lib/x86"
-			"$ENV{PROGRAMFILES}/Microsoft DirectX SDK/Lib/x86"
-		DOC "The directory where d3d9.lib resides")
-
-	FIND_LIBRARY(D3DX9_LIBRARY d3dx9.lib
-		PATHS
-			"$ENV{DXSDK_DIR}/Lib/x86"
-			"$ENV{PROGRAMFILES}/Microsoft DirectX SDK/Lib/x86"
-		DOC "The directory where d3dx9.lib resides")
-
-	SET( DX9_LIBRARIES ${D3D9_LIBRARY} ${D3DX9_LIBRARY} )
-	
-	FIND_LIBRARY( WIN32_COMCTRL comctl32.lib 
-		PATHS 
-			"C:/Programme/Microsoft Platform SDK for Windows Server 2003 R2/Lib" 	
-		DOC "Path to psdk"
-	) 
-ENDIF( WIN32 )
-
-# Link the executable to the Hello library.
-target_link_libraries ( assimp_cmd assimp ${DX9_LIBRARIES} comctl32.lib Winmm.lib  ) 
+# Link the executable to the assimp library and rename it to assimp as well :-)
+target_link_libraries ( assimp_cmd assimp  )
+INSTALL(PROGRAMS ../../bin/assimp_cmd 
+	DESTINATION "${BIN_INSTALL_DIR}"
+	RENAME assimp
+) 
 

@@ -40,7 +40,7 @@ inline Win32DebugLogStream::~Win32DebugLogStream()
 //	Write method
 inline void Win32DebugLogStream::write(const char* message)
 {
-	OutputDebugString( message);
+	OutputDebugStringA( message);
 }
 
 // ---------------------------------------------------------------------------

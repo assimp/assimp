@@ -103,7 +103,7 @@ int main (int argc, char* argv[])
 	// Display some basic help
 	if (! ::strcmp(argv[1], "help")) {
 		
-		printf(AICMD_MSG_HELP);
+		printf("%s",AICMD_MSG_HELP);
 		return 0;
 	}
 
@@ -117,7 +117,7 @@ int main (int argc, char* argv[])
 		aiString s;
 		imp.GetExtensionList(s);
 
-		printf(s.data);
+		printf("%s",s.data);
 		return 0;
 	}
 

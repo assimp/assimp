@@ -131,7 +131,7 @@ int SaveAsBMP (FILE* file, const aiTexel* data, unsigned int width, unsigned int
 	}
 
 	BITMAPFILEHEADER header;
-	header.bfType      = 'MB';
+	header.bfType      = 'B' | (int('M') << 8u);
 	header.bfOffBits   = sizeof(BITMAPFILEHEADER)+sizeof(BITMAPINFOHEADER);
 	header.bfSize      = header.bfOffBits+width*height*numc;
 	header.bfReserved1 = header.bfReserved2 = 0;
@@ -221,13 +221,13 @@ int Assimp_Extract (const char** params, unsigned int num)
 
 	// --help
 	if (!::strcmp( params[0], "-h") || !::strcmp( params[0], "--help") || !::strcmp( params[0], "-?") ) {
-		printf(AICMD_MSG_DUMP_HELP_E);
+		printf("%s",AICMD_MSG_DUMP_HELP_E);
 		return 0;
 	}
 
 	// asssimp extract in out [options]
 	if (num < 1) {
-		printf("assimp extract: Invalid number of arguments. See \'assimp dump --help\'\n");
+		printf("assimp extract: Invalid number of arguments. See \'assimp extract --help\'\n");
 		return 1;
 	}
 

@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 const char* AICMD_MSG_DUMP_HELP = 
 "todo assimp dumb help";
 
+
 // -----------------------------------------------------------------------------------
 // Compress a binary dump file (beginning at offset head_size)
 void CompressBinaryDump(const char* file, unsigned int head_size)
@@ -623,25 +624,28 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 
 		// mesh header
 		::fprintf(out,"\t<Texture> \n"
-			"\t\t<Integer   name=\"width\"      > %i </Integer>\n",
-			"\t\t<Integer   name=\"height\"     > %i </Integer>\n",
+			"\t\t<Integer   name=\"width\"      > %i </Integer>\n"
+			"\t\t<Integer   name=\"height\"     > %i </Integer>\n"
 			"\t\t<Boolean   name=\"compressed\" > %s </Boolean>\n",
-			(compressed ? -1 : tex->mWidth),(compressed ? -1 : tex->mHeight),
+			(compressed ? -1 : tex->mWidth),
+			(compressed ? -1 : tex->mHeight),
 			(compressed ? "true" : "false"));
 
 		if (compressed) {
-			::fprintf(out,"\t\t<Data length=\"%i\"> %i \n",tex->mWidth);
+			::fprintf(out,"\t\t<Data length=\"%i\">\n",tex->mWidth);
 
 			if (!shortened) {
+				const uint8_t* dat = reinterpret_cast<uint8_t*>(tex->pcData);
 				for (unsigned int n = 0; n < tex->mWidth;++n) {
-					::fprintf(out,"\t\t\t%2x",tex->pcData[n]);
-					if (n && !(n % 50))
+					::fprintf(out,"\t\t\t%2x",dat[n]);
+					if (n && !(n % 50)) {
 						::fprintf(out,"\n");
+					}
 				}
 			}
 		}
 		else if (!shortened){
-			::fprintf(out,"\t\t<Data length=\"%i\"> %i \n",tex->mWidth*tex->mHeight*4);
+			::fprintf(out,"\t\t<Data length=\"%i\"> \n",tex->mWidth*tex->mHeight*4);
 
 			const unsigned int width = (unsigned int)log10((double)std::max(tex->mHeight,tex->mWidth))+1;
 			for (unsigned int y = 0; y < tex->mHeight;++y) {
@@ -687,7 +691,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 			if (prop->mType == aiPTI_Float) {
 				::fprintf(out,
 				" size=\"%i\">\n\t\t\t",
-				prop->mDataLength/sizeof(float));
+				static_cast<unsigned int>(prop->mDataLength/sizeof(float)));
 				
 				for (unsigned int p = 0; p < prop->mDataLength/sizeof(float);++p)
 					::fprintf(out,"%f ",*((float*)(prop->mData+p*sizeof(float))));
@@ -695,7 +699,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 			else if (prop->mType == aiPTI_Integer) {
 				::fprintf(out,
 				" size=\"%i\">\n\t\t\t",
-				prop->mDataLength/sizeof(int));
+				static_cast<unsigned int>(prop->mDataLength/sizeof(int)));
 
 				for (unsigned int p = 0; p < prop->mDataLength/sizeof(int);++p)
 					::fprintf(out,"%i ",*((int*)(prop->mData+p*sizeof(int))));
@@ -940,7 +944,7 @@ int Assimp_Dump (const char** params, unsigned int num)
 
 	// --help
 	if (!::strcmp( params[0], "-h") || !::strcmp( params[0], "--help") || !::strcmp( params[0], "-?") ) {
-		printf(AICMD_MSG_DUMP_HELP);
+		printf("%s",AICMD_MSG_DUMP_HELP);
 		return 0;
 	}
 

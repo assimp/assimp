@@ -80,9 +80,9 @@ bool STLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 }
 
 // ------------------------------------------------------------------------------------------------
-void STLImporter::GetExtensionList(std::string& append)
+void STLImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.stl");
+	extensions.insert("stl");
 }
 
 // ------------------------------------------------------------------------------------------------

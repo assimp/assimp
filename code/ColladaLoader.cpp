@@ -91,9 +91,9 @@ bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, boo
 
 // ------------------------------------------------------------------------------------------------
 // Get file extension list
-void ColladaLoader::GetExtensionList( std::string& append)
+void ColladaLoader::GetExtensionList( std::set<std::string>& extensions )
 {
-	append.append("*.dae");
+	extensions.insert("dae");
 }
 
 // ------------------------------------------------------------------------------------------------

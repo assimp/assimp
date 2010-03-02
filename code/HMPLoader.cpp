@@ -86,9 +86,9 @@ bool HMPImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 
 // ------------------------------------------------------------------------------------------------
 // Get list of all file extensions that are handled by this loader
-void HMPImporter::GetExtensionList(std::string& append)
+void HMPImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.hmp");
+	extensions.insert("hmp");
 }
 
 // ------------------------------------------------------------------------------------------------

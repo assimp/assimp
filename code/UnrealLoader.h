@@ -171,7 +171,7 @@ protected:
 	 *
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append);
+	void GetExtensionList(std::set<std::string>& extensions);
 
 
 	// -------------------------------------------------------------------

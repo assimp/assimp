@@ -72,9 +72,9 @@ bool RAWImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 
 // ------------------------------------------------------------------------------------------------
 // Get the list of all supported file extensions
-void RAWImporter::GetExtensionList(std::string& append)
+void RAWImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.raw");
+	extensions.insert("raw");
 }
 
 // ------------------------------------------------------------------------------------------------

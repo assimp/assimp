@@ -81,7 +81,7 @@ public:
 private:
 
 	//! \brief	Appends the supported extention.
-	void GetExtensionList(std::string& append);
+	void GetExtensionList(std::set<std::string>& extensions);
 
 	//!	\brief	File import implementation.
 	void InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
@@ -124,9 +124,9 @@ private:
 
 // ------------------------------------------------------------------------------------------------
 //	
-inline void ObjFileImporter::GetExtensionList(std::string& append)
+inline void ObjFileImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.obj");
+	extensions.insert("obj");
 }
 
 // ------------------------------------------------------------------------------------------------

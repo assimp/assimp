@@ -109,9 +109,10 @@ bool Discreet3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandle
 
 // ------------------------------------------------------------------------------------------------
 // Get list of all extension supported by this loader
-void Discreet3DSImporter::GetExtensionList(std::string& append)
+void Discreet3DSImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.3ds;*.prj");
+	extensions.insert("3ds");
+	extensions.insert("prj");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -130,8 +131,9 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
 	this->stream = &stream;
 
 	// We should have at least one chunk
-	if (stream.GetRemainingSize() < 16)
+	if (stream.GetRemainingSize() < 16) {
 		throw new ImportErrorException("3DS file is either empty or corrupt: " + pFile);
+	}
 
 	// Allocate our temporary 3DS representation
 	mScene = new D3DS::Scene();

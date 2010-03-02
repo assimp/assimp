@@ -401,20 +401,27 @@ void MD3Importer::ValidateSurfaceHeaderOffsets(const MD3::Surface* pcSurf)
 
 	// Check whether all requirements for Q3 files are met. We don't
 	// care, but probably someone does.
-	if (pcSurf->NUM_TRIANGLES > AI_MD3_MAX_TRIANGLES)
+	if (pcSurf->NUM_TRIANGLES > AI_MD3_MAX_TRIANGLES) {
 		DefaultLogger::get()->warn("MD3: Quake III triangle limit exceeded");
-	if (pcSurf->NUM_SHADER > AI_MD3_MAX_SHADERS)
+	}
+
+	if (pcSurf->NUM_SHADER > AI_MD3_MAX_SHADERS) {
 		DefaultLogger::get()->warn("MD3: Quake III shader limit exceeded");
-	if (pcSurf->NUM_VERTICES > AI_MD3_MAX_VERTS)
+	}
+
+	if (pcSurf->NUM_VERTICES > AI_MD3_MAX_VERTS) {
 		DefaultLogger::get()->warn("MD3: Quake III vertex limit exceeded");
-	if (pcSurf->NUM_FRAMES > AI_MD3_MAX_FRAMES)
+	}
+
+	if (pcSurf->NUM_FRAMES > AI_MD3_MAX_FRAMES) {
 		DefaultLogger::get()->warn("MD3: Quake III frame limit exceeded");
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
-void MD3Importer::GetExtensionList(std::string& append)
+void MD3Importer::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.md3");
+	extensions.insert("md3");
 }
 
 // ------------------------------------------------------------------------------------------------

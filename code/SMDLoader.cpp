@@ -73,9 +73,10 @@ bool SMDImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool)
 
 // ------------------------------------------------------------------------------------------------
 // Get a list of all supported file extensions
-void SMDImporter::GetExtensionList(std::string& append)
+void SMDImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.smd;*.vta");
+	extensions.insert("smd");
+	extensions.insert("vta");
 }
 
 // ------------------------------------------------------------------------------------------------

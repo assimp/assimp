@@ -89,9 +89,11 @@ bool MD5Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 
 // ------------------------------------------------------------------------------------------------
 // Get list of all supported extensions
-void MD5Importer::GetExtensionList(std::string& append)
+void MD5Importer::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.md5mesh;*.md5anim;*.md5camera");
+	extensions.insert("md5anim");
+	extensions.insert("md5mesh");
+	extensions.insert("md5camera");
 }
 
 // ------------------------------------------------------------------------------------------------

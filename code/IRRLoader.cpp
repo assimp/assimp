@@ -103,13 +103,10 @@ bool IRRImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 }
 
 // ------------------------------------------------------------------------------------------------
-void IRRImporter::GetExtensionList(std::string& append)
+void IRRImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	/*  NOTE: The file extenxsion .xml is too generic. We'll 
-	*  need to open the file in CanRead() and check whether it is 
-	*  a real irrlicht file
-	*/
-	append.append("*.xml;*.irr");
+	extensions.insert("irr");
+	extensions.insert("xml");
 }
 
 // ------------------------------------------------------------------------------------------------

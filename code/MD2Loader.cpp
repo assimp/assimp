@@ -99,9 +99,9 @@ bool MD2Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 
 // ------------------------------------------------------------------------------------------------
 // Get a list of all extensions supported by this loader
-void MD2Importer::GetExtensionList(std::string& append)
+void MD2Importer::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.md2");
+	extensions.insert("md2");
 }
 
 // ------------------------------------------------------------------------------------------------

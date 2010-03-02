@@ -117,9 +117,9 @@ void MDLImporter::SetupProperties(const Importer* pImp)
 
 // ------------------------------------------------------------------------------------------------
 // Get a list of all supported extensions
-void MDLImporter::GetExtensionList(std::string& append)
+void MDLImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append( ".mdl" );
+	extensions.insert( "mdl" );
 }
 
 // ------------------------------------------------------------------------------------------------

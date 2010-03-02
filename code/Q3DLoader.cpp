@@ -81,9 +81,10 @@ bool Q3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 }
 
 // ------------------------------------------------------------------------------------------------
-void Q3DImporter::GetExtensionList(std::string& append)
+void Q3DImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.q3o;*.q3s");
+	extensions.insert("q3o");
+	extensions.insert("q3s");
 }
 
 // ------------------------------------------------------------------------------------------------

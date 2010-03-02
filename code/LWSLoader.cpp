@@ -140,9 +140,10 @@ bool LWSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler,bool c
 
 // ------------------------------------------------------------------------------------------------
 // Get list of file extensions
-void LWSImporter::GetExtensionList(std::string& append)
+void LWSImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.lws;*.mot");
+	extensions.insert("lws");
+	extensions.insert("mot");
 }
 
 // ------------------------------------------------------------------------------------------------

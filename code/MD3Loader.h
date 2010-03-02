@@ -242,7 +242,7 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append);
+	void GetExtensionList(std::set<std::string>& extensions);
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 

@@ -87,9 +87,10 @@ bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 }
 
 // ------------------------------------------------------------------------------------------------
-void ASEImporter::GetExtensionList(std::string& append)
+void ASEImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.ase;*.ask");
+	extensions.insert("ase");
+	extensions.insert("ask");
 }
 
 // ------------------------------------------------------------------------------------------------

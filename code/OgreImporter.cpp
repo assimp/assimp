@@ -129,9 +129,9 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 
 
 
-void OgreImporter::GetExtensionList(std::string &append)
+void OgreImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append+="*.mesh.xml";
+	extensions.insert("mesh.xml");
 }
 
 

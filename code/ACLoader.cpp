@@ -137,9 +137,11 @@ bool AC3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool
 
 // ------------------------------------------------------------------------------------------------
 // Get list of file extensions handled by this loader
-void AC3DImporter::GetExtensionList(std::string& append)
+void AC3DImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.ac;*.acc;*.ac3d");
+	extensions.insert("ac");
+	extensions.insert("acc");
+	extensions.insert("ac3d");
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -76,7 +76,7 @@ public:
 protected:
 
 	// -------------------------------------------------------------------
-	void GetExtensionList(std::string& append);
+	void GetExtensionList(std::set<std::string>& extensions);
 
 
 	// -------------------------------------------------------------------

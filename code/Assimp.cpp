@@ -524,8 +524,7 @@ void aiGetExtensionList(aiString* szOut)
 	boost::mutex::scoped_lock lock(gMutex);
 #endif
 
-	if (!gActiveImports.empty())
-	{
+	if (!gActiveImports.empty()) {
 		(*(gActiveImports.begin())).second->GetExtensionList(*szOut);
 		return;
 	}

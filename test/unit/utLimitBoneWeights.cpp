@@ -37,15 +37,15 @@ void LimitBoneWeightsTest :: setUp (void)
 // ------------------------------------------------------------------------------------------------
 void LimitBoneWeightsTest :: tearDown (void)
 {
-	delete this->pcMesh;
-	delete this->piProcess;
+	delete pcMesh;
+	delete piProcess;
 }
 
 // ------------------------------------------------------------------------------------------------
 void LimitBoneWeightsTest :: testProcess(void)
 {
 	// execute the step on the given data
-	this->piProcess->ProcessMesh(this->pcMesh);
+	piProcess->ProcessMesh(pcMesh);
 
 	// check whether everything is ok ...
 	typedef std::vector<LimitBoneWeightsProcess::Weight> VertexWeightList;

@@ -2,7 +2,6 @@
 #include "UnitTestPCH.h"
 #include "utImporter.h"
 
-
 #define InputData_BLOCK_SIZE 1310
 
 // test data for Importer::ReadFileFromMemory() - ./test/3DS/CameraRollAnim.3ds
@@ -71,9 +70,12 @@ bool TestPlugin :: CanRead( const std::string& pFile,
 		extension == ".linux" || extension == ".windows" );
 }
 
-void TestPlugin :: GetExtensionList(std::string& append)
+void TestPlugin :: GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.apple;*.mac;*.linux;*.windows");
+	extensions.insert("apple");
+	extensions.insert("mac");
+	extensions.insert("linux");
+	extensions.insert("windows");
 }
 
 void TestPlugin :: InternReadFile( const std::string& pFile, 
@@ -135,12 +137,13 @@ void ImporterTest :: testStringProperty (void)
 
 void ImporterTest :: testPluginInterface (void)
 {
+	
 	pImp->RegisterLoader(new TestPlugin());
 	CPPUNIT_ASSERT(pImp->IsExtensionSupported(".apple"));
 	CPPUNIT_ASSERT(pImp->IsExtensionSupported(".mac"));
-	CPPUNIT_ASSERT(pImp->IsExtensionSupported(".linux"));
-	CPPUNIT_ASSERT(pImp->IsExtensionSupported(".windows"));
-	CPPUNIT_ASSERT(pImp->IsExtensionSupported(".x")); /* x and 3ds must be available of course */
+	CPPUNIT_ASSERT(pImp->IsExtensionSupported("*.linux"));
+	CPPUNIT_ASSERT(pImp->IsExtensionSupported("windows"));
+	CPPUNIT_ASSERT(pImp->IsExtensionSupported(".x")); /* x and 3ds must be available in this Assimp build, of course! */
 	CPPUNIT_ASSERT(pImp->IsExtensionSupported(".3ds"));
 	CPPUNIT_ASSERT(!pImp->IsExtensionSupported("."));
 

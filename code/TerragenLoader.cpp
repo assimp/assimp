@@ -83,9 +83,9 @@ bool TerragenImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, 
 
 // ------------------------------------------------------------------------------------------------
 // Build a string of all file extensions supported
-void TerragenImporter::GetExtensionList(std::string& append)
+void TerragenImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.ter;");
+	extensions.insert("ter");
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -329,7 +329,9 @@ public:
 	 * automatically. However, to enable automatic detection of the file
 	 * format, the input path *must* not have an extension at all.
 	 */
-	const aiScene* ReadFile( const char* pFile, unsigned int pFlags);
+	const aiScene* ReadFile(
+		const char* pFile, 
+		unsigned int pFlags);
 
 	// -------------------------------------------------------------------
 	/** Reads the given file from a memory buffer and returns its
@@ -367,7 +369,8 @@ public:
 	 * external scripts. f you need the full functionality, provide
 	 * a custom IOSystem to make Assimp find these files.
 	 */
-	const aiScene* ReadFileFromMemory( const void* pBuffer,
+	const aiScene* ReadFileFromMemory( 
+		const void* pBuffer,
 		size_t pLength,
 		unsigned int pFlags,
 		const char* pHint = "");
@@ -389,8 +392,7 @@ public:
 	 *   cause the scene to be reset to NULL.
 	 *
 	 *  @note The method does nothing if no scene is currently bound
-	 *    to the #Importer instance. 
-	 */
+	 *    to the #Importer instance.  */
 	const aiScene* ApplyPostProcessing(unsigned int pFlags);
 
 	// -------------------------------------------------------------------
@@ -398,17 +400,17 @@ public:
 	 *
 	 * This function is provided for backward compatibility.
 	 * See the const char* version for detailled docs.
-	 * @see ReadFile(const char*, pFlags)
-	 */
-	const aiScene* ReadFile( const std::string& pFile, unsigned int pFlags);
+	 * @see ReadFile(const char*, pFlags)  */
+	const aiScene* ReadFile(
+		const std::string& pFile, 
+		unsigned int pFlags);
 
 	// -------------------------------------------------------------------
 	/** Frees the current scene.
 	 *
 	 *  The function does nothing if no scene has previously been 
 	 *  read via ReadFile(). FreeScene() is called automatically by the
-	 *  destructor and ReadFile() itself.
-	 */
+	 *  destructor and ReadFile() itself.  */
 	void FreeScene( );
 
 	// -------------------------------------------------------------------
@@ -419,9 +421,9 @@ public:
 	 *   error occurred. The string is never NULL.
 	 *
 	 * @note The returned function remains valid until one of the 
-	 * following methods is called: #ReadFile(), #FreeScene().
-	 */
+	 * following methods is called: #ReadFile(), #FreeScene(). */
 	const char* GetErrorString() const;
+
 
 	// -------------------------------------------------------------------
 	/** Returns whether a given file extension is supported by ASSIMP.
@@ -429,55 +431,56 @@ public:
 	 * @param szExtension Extension to be checked.
 	 *   Must include a trailing dot '.'. Example: ".3ds", ".md3".
 	 *   Cases-insensitive.
-	 * @return true if the extension is supported, false otherwise
-	 */
+	 * @return true if the extension is supported, false otherwise */
 	bool IsExtensionSupported(const char* szExtension);
 
 	// -------------------------------------------------------------------
 	/** @brief Returns whether a given file extension is supported by ASSIMP.
 	 *
 	 * This function is provided for backward compatibility.
-	 * See the const char* version for detailled docs.
-	 * @see IsExtensionSupported(const char*)
-	 */
+	 * See the const char* version for detailed and up-to-date docs.
+	 * @see IsExtensionSupported(const char*) */
 	inline bool IsExtensionSupported(const std::string& szExtension);
+
 
 	// -------------------------------------------------------------------
 	/** Get a full list of all file extensions supported by ASSIMP.
 	 *
 	 * If a file extension is contained in the list this does of course not
-	 * mean that ASSIMP is able to load all files with this extension.
-	 * @param szOut String to receive the extension list. It just means there
-     *   is a loader which handles such files.
-	 *   Format of the list: "*.3ds;*.obj;*.dae". 
-	 */
+	 * mean that ASSIMP is able to load all files with this extension ---
+     * it simply means there is an importer loaded which claims to handle
+	 * files with this file extension.
+	 * @param szOut String to receive the extension list. 
+	 *   Format of the list: "*.3ds;*.obj;*.dae". This is useful for
+	 *   use with the WinAPI call GetOpenFileName(Ex). */
 	void GetExtensionList(aiString& szOut);
 
 	// -------------------------------------------------------------------
 	/** @brief Get a full list of all file extensions supported by ASSIMP.
 	 *
 	 * This function is provided for backward compatibility.
-	 * See the aiString version for detailled docs.
-	 * @see GetExtensionList(aiString&)
-	 */
+	 * See the aiString version for detailed and up-to-date docs.
+	 * @see GetExtensionList(aiString&)*/
 	inline void GetExtensionList(std::string& szOut);
+
 
 	// -------------------------------------------------------------------
 	/** Find the loader corresponding to a specific file extension.
 	*
 	*  This is quite similar to IsExtensionSupported() except a
 	*  BaseImporter instance is returned.
-	*  @param szExtension Extension to be checked, cases insensitive,
-	*    must include a trailing dot.
-	*  @return NULL if there is no loader for the extension.
-	*/
+	*  @param szExtension Extension to check for. The following formats
+	*    are recgnized (BAH being the file extension): "BAH" (comparison
+	*    is case-insensitive), ".bah", "*.bah" (wild card and dot
+	*    characters at the beginning of the extension are skipped).
+	*  @return NULL if there is no loader for the extension.*/
 	BaseImporter* FindLoader (const char* szExtension);
+
 
 	// -------------------------------------------------------------------
 	/** Returns the scene loaded by the last successful call to ReadFile()
 	 *
-	 * @return Current scene or NULL if there is currently no scene loaded
-	 */
+	 * @return Current scene or NULL if there is currently no scene loaded */
 	const aiScene* GetScene() const;
 
 	// -------------------------------------------------------------------
@@ -488,9 +491,9 @@ public:
 	 *  will return NULL - until a new scene has been loaded via ReadFile().
 	 *
 	 * @return Current scene or NULL if there is currently no scene loaded
-	 * @note Under windows, deleting the returned scene manually will 
-	 * probably not work properly in applications using static runtime linkage.
-	 */
+	 * @note --- you know that the aiScene is allocated on Assimp's heap,
+	 *   so you need to call Assimp's delete if the heap is not shared?
+	 *   And that's why you shouldn't use this method at all. Thanks.*/
 	aiScene* GetOrphanedScene();
 
 	// -------------------------------------------------------------------
@@ -499,17 +502,18 @@ public:
 	 *
 	 * This refers to the currently loaded file, see #ReadFile().
 	 * @param in Data structure to be filled. 
-	*/
+	 * @note The returned memory statistics refer to the actual
+	 *   size of the use data of the aiScene. Heap-related overhead
+	 *   is (naturally) not included.*/
 	void GetMemoryRequirements(aiMemoryInfo& in) const;
 
 	// -------------------------------------------------------------------
 	/** Enables "extra verbose" mode. 
 	 *
-	 * In this mode the data structure is validated after every single
-	 * post processing step to make sure everyone modifies the data
-	 * structure in the defined manner. This is a debug feature and not
-	 * intended for public use.
-	 */
+	 * 'Extra verbose' means the data structure is validated after *every*
+	 * single post processing step to make sure everyone modifies the data
+	 * structure in a well-defined manner. This is a debug feature and not
+	 * intended for use in production environments. */
 	void SetExtraVerbose(bool bDo);
 
 protected:

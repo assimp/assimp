@@ -103,9 +103,9 @@ bool MDCImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 }
 
 // ------------------------------------------------------------------------------------------------
-void MDCImporter::GetExtensionList(std::string& append)
+void MDCImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.mdc");
+	extensions.insert("mdc");
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -49,7 +49,7 @@ public:
 		IOSystem* pIOHandler, bool test) const;
 
 	// overriden
-	void GetExtensionList(std::string& append);
+	void GetExtensionList(std::set<std::string>& extensions);
 
 	// overriden
 	void InternReadFile( const std::string& pFile, 

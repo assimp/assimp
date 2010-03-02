@@ -79,9 +79,10 @@ bool UnrealImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bo
 
 // ------------------------------------------------------------------------------------------------
 // Build a string of all file extensions supported
-void UnrealImporter::GetExtensionList(std::string& append)
+void UnrealImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.3d;*.uc");
+	extensions.insert("3d");
+	extensions.insert("uc");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -322,7 +323,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 			++pScene->mNumMeshes;
 		}
 		else {
-			tri.matIndex = nt-materials.begin();
+			tri.matIndex = static_cast<unsigned int>(nt-materials.begin());
 			++nt->numFaces;
 		}
 	}

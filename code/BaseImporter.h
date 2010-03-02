@@ -63,8 +63,7 @@ class ASSIMP_API ImportErrorException
 {
 public:
 	/** Constructor with arguments */
-	ImportErrorException( const std::string& pErrorText)
-	{
+	ImportErrorException( const std::string& pErrorText) {
 		mErrorText = pErrorText;
 	}
 
@@ -164,7 +163,7 @@ public:
 	 * the file extension is enough. If no suitable loader is found with
 	 * this strategy, CanRead() is called again, the 'checkSig' parameter
 	 * set to true this time. Now the implementation is expected to
-	 * perform a full check of the file format, possibly searching the
+	 * perform a full check of the file structure, possibly searching the
 	 * first bytes of the file for magic identifiers or keywords.
 	 *
 	 * @param pFile Path and file name of the file to be examined.
@@ -174,14 +173,12 @@ public:
 	 *   contents of the file to be loaded for magic bytes, keywords, etc
 	 *   to be able to load files with unknown/not existent file extensions.
 	 * @return true if the class can read this file, false if not.
-	 *
-	 * @note Sometimes ASSIMP uses this method to determine whether a
-	 * a given file extension is generally supported. In this case the
-	 * file extension is passed in the pFile parameter, pIOHandler is NULL
 	 */
-	virtual bool CanRead( const std::string& pFile, 
-		IOSystem* pIOHandler, bool checkSig) const = 0;
-
+	virtual bool CanRead( 
+		const std::string& pFile, 
+		IOSystem* pIOHandler, 
+		bool checkSig
+		) const = 0;
 
 	// -------------------------------------------------------------------
 	/** Imports the given file and returns the imported data.
@@ -201,7 +198,10 @@ public:
 	 * in InternReadFile(), this function will catch it and transform it into
 	 *  a suitable response to the caller.
 	 */
-	aiScene* ReadFile( const std::string& pFile, IOSystem* pIOHandler);
+	aiScene* ReadFile(
+		const std::string& pFile, 
+		IOSystem* pIOHandler
+		);
 
 	// -------------------------------------------------------------------
 	/** Returns the error description of the last error that occured. 
@@ -218,18 +218,22 @@ public:
 	 * basing on the Importer's configuration property list.
 	 * @param pImp Importer instance
 	 */
-	virtual void SetupProperties(const Importer* pImp);
+	virtual void SetupProperties(
+		const Importer* pImp
+		);
 
 protected:
 
 	// -------------------------------------------------------------------
 	/** Called by Importer::GetExtensionList() for each loaded importer.
-	 *  Importer implementations should append all file extensions
-	 *  which they supported to the passed string.
-	 *  Example: "*.blabb;*.quak;*.gug;*.foo" (no delimiter after the last!)
-	 * @param append Output string
-	 */
-	virtual void GetExtensionList(std::string& append) = 0;
+	 *  Implementations are expected to insert() all file extensions
+	 *  handled by them into the extension set. A loader capable of
+	 *  reading certain files with the extension BLA would place the
+	 *  string bla (lower-case!) in the output set.
+	 * @param extensions Output set. */
+	virtual void GetExtensionList(
+		std::set<std::string>& extensions
+		) = 0;
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. The 
@@ -274,10 +278,12 @@ protected:
 	 * @param pScene The scene object to hold the imported data.
 	 * NULL is not a valid parameter.
 	 * @param pIOHandler The IO handler to use for any file access.
-	 * NULL is not a valid parameter.
-	 */
-	virtual void InternReadFile( const std::string& pFile, 
-		aiScene* pScene, IOSystem* pIOHandler) = 0;
+	 * NULL is not a valid parameter. */
+	virtual void InternReadFile( 
+		const std::string& pFile, 
+		aiScene* pScene, 
+		IOSystem* pIOHandler
+		) = 0;
 
 public: // static utilities
 
@@ -295,11 +301,12 @@ public: // static utilities
 	 *  @param numTokens Size of the token array
 	 *  @param searchBytes Number of bytes to be searched for the tokens.
 	 */
-	static bool SearchFileHeaderForToken(IOSystem* pIOSystem, 
+	static bool SearchFileHeaderForToken(
+		IOSystem* pIOSystem, 
 		const std::string&	file,
-		const char**		tokens, 
-		unsigned int		numTokens,
-		unsigned int		searchBytes = 200);
+		const char** tokens, 
+		unsigned int numTokens,
+		unsigned int searchBytes = 200);
 
 
 	// -------------------------------------------------------------------
@@ -310,7 +317,8 @@ public: // static utilities
 	 *  @param ext2 Optional third extension
 	 *  @note Case-insensitive
 	 */
-	static bool SimpleExtensionCheck (const std::string& pFile, 
+	static bool SimpleExtensionCheck (
+		const std::string& pFile, 
 		const char* ext0,
 		const char* ext1 = NULL,
 		const char* ext2 = NULL);
@@ -320,7 +328,8 @@ public: // static utilities
 	 *  @param pFile Input file
 	 *  @return Extension without trailing dot, all lowercase
 	 */
-	static std::string GetExtension (const std::string& pFile);
+	static std::string GetExtension (
+		const std::string& pFile);
 
 	// -------------------------------------------------------------------
 	/** @brief Check whether a file starts with one or more magic tokens
@@ -336,7 +345,9 @@ public: // static utilities
 	 *  byte-swapped variant of all tokens (big endian). Only for
 	 *  tokens of size 2,4.
 	 */
-	static bool CheckMagicToken(IOSystem* pIOHandler, const std::string& pFile, 
+	static bool CheckMagicToken(
+		IOSystem* pIOHandler, 
+		const std::string& pFile, 
 		const void* magic,
 		unsigned int num,
 		unsigned int offset = 0,
@@ -348,7 +359,8 @@ public: // static utilities
 	 *
 	 *  @param data File buffer to be converted to UTF8 data. The buffer 
 	 *  is resized as appropriate. */
-	static void ConvertToUTF8(std::vector<char>& data);
+	static void ConvertToUTF8(
+		std::vector<char>& data);
 
 	// -------------------------------------------------------------------
 	/** Utility for text file loaders which copies the contents of the
@@ -358,7 +370,8 @@ public: // static utilities
 	 *  @param data Output buffer to be resized and filled with the
 	 *   converted text file data. The buffer is terminated with
 	 *   a binary 0. */
-	static void TextFileToBuffer(IOStream* stream,
+	static void TextFileToBuffer(
+		IOStream* stream,
 		std::vector<char>& data);
 
 protected:
@@ -377,7 +390,7 @@ struct BatchData;
  *  could, this has not yet been implemented at the moment).
  *
  *  @note The class may not be used by more than one thread*/
-class ASSIMP_API BatchLoader
+class ASSIMP_API BatchLoader 
 {
 	// friend of Importer
 
@@ -408,9 +421,11 @@ public:
 	
 
 	// -------------------------------------------------------------------
-	/** Construct a batch loader from a given IO system to be used to acess external files */
+	/** Construct a batch loader from a given IO system to be used 
+	 *  to acess external files */
 	BatchLoader(IOSystem* pIO);
 	~BatchLoader();
+
 
 	// -------------------------------------------------------------------
 	/** Add a new file to the list of files to be loaded.
@@ -420,8 +435,12 @@ public:
 	 *  @return 'Load request channel' - an unique ID that can later
 	 *    be used to access the imported file data.
 	 *  @see GetImport */
-	unsigned int AddLoadRequest	(const std::string& file,
-		unsigned int steps = 0, const PropertyMap* map = NULL);
+	unsigned int AddLoadRequest	(
+		const std::string& file,
+		unsigned int steps = 0, 
+		const PropertyMap* map = NULL
+		);
+
 
 	// -------------------------------------------------------------------
 	/** Get an imported scene.
@@ -432,10 +451,14 @@ public:
 	 *  @param which LRWC returned by AddLoadRequest().
 	 *  @return NULL if there is no scene with this file name
 	 *  in the queue of the scene hasn't been loaded yet. */
-	aiScene* GetImport	(unsigned int which);
+	aiScene* GetImport(
+		unsigned int which
+		);
+
 
 	// -------------------------------------------------------------------
-	/** Waits until all scenes have been loaded.  */
+	/** Waits until all scenes have been loaded. This returns
+	 *  immediately if no scenes are queued.*/
 	void LoadAll();
 
 private:

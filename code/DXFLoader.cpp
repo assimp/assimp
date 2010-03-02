@@ -101,9 +101,9 @@ bool DXFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 
 // ------------------------------------------------------------------------------------------------
 // Get a list of all supported file extensions
-void DXFImporter::GetExtensionList(std::string& append)
+void DXFImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.dxf");
+	extensions.insert("dxf");
 }
 
 // ------------------------------------------------------------------------------------------------

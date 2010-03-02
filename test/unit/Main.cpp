@@ -30,6 +30,7 @@ int main (int argc, char* argv[])
 		aiDefaultLogStream_FILE,
 		"AssimpLog_C.txt"));
 
+
 	// ............................................................................
 
     // Informiert Test-Listener ueber Testresultate

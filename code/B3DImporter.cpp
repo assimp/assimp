@@ -74,8 +74,8 @@ bool B3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 }
 
 // ------------------------------------------------------------------------------------------------
-void B3DImporter::GetExtensionList( std::string& append ){
-	append.append("*.b3d");
+void B3DImporter::GetExtensionList( std::set<std::string>& extensions ){
+	extensions.insert("b3d");
 }
 
 #ifdef DEBUG_B3D

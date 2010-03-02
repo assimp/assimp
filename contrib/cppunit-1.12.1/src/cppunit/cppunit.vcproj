@@ -653,11 +653,11 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\include\cppunit\ui\text\TextTestRunner.h"
+				RelativePath="..\..\include\cppunit\TextTestRunner.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\cppunit\TextTestRunner.h"
+				RelativePath="..\..\include\cppunit\ui\text\TextTestRunner.h"
 				>
 			</File>
 		</Filter>
@@ -2694,11 +2694,11 @@
 			>
 		</File>
 		<File
-			RelativePath="Makefile.am"
+			RelativePath="..\..\include\cppunit\Makefile.am"
 			>
 		</File>
 		<File
-			RelativePath="..\..\include\cppunit\Makefile.am"
+			RelativePath="Makefile.am"
 			>
 		</File>
 	</Files>

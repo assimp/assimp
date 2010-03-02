@@ -72,9 +72,10 @@ bool NFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 
 // ------------------------------------------------------------------------------------------------
 // Get the list of all supported file extensions
-void NFFImporter::GetExtensionList(std::string& append)
+void NFFImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.nff;*.enff");
+	extensions.insert("enff");
+	extensions.insert("nff");
 }
 
 // ------------------------------------------------------------------------------------------------

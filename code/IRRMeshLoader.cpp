@@ -88,10 +88,10 @@ bool IRRMeshImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, b
 
 // ------------------------------------------------------------------------------------------------
 // Get a list of all file extensions which are handled by this class
-void IRRMeshImporter::GetExtensionList(std::string& append)
+void IRRMeshImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	// fixme: consider cleaner handling of xml extension
-	append.append("*.xml;*.irrmesh");
+	extensions.insert("xml");
+	extensions.insert("irrmesh");
 }
 
 // ------------------------------------------------------------------------------------------------

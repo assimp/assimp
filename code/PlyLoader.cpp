@@ -80,9 +80,9 @@ bool PLYImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 }
 
 // ------------------------------------------------------------------------------------------------
-void PLYImporter::GetExtensionList(std::string& append)
+void PLYImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.ply");
+	extensions.insert("ply");
 }
 
 // ------------------------------------------------------------------------------------------------

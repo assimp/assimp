@@ -186,7 +186,7 @@ protected:
 
 	// -------------------------------------------------------------------
 	// Get list of supported extensions
-	void GetExtensionList(std::string& append);
+	void GetExtensionList(std::set<std::string>& extensions);
 
 	// -------------------------------------------------------------------
 	// Import file into given scene data structure

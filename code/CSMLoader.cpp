@@ -83,9 +83,9 @@ bool CSMImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 
 // ------------------------------------------------------------------------------------------------
 // Build a string of all file extensions supported
-void CSMImporter::GetExtensionList(std::string& append)
+void CSMImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.csm");
+	extensions.insert("csm");
 }
 
 // ------------------------------------------------------------------------------------------------

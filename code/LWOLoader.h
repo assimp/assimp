@@ -100,9 +100,10 @@ protected:
 	/** Called by Importer::GetExtensionList() for each loaded importer.
 	 * See BaseImporter::GetExtensionList() for details
 	 */
-	void GetExtensionList(std::string& append)
+	void GetExtensionList(std::set<std::string>& extensions)
 	{
-		append.append("*.lwo;*.lxo");
+		extensions.insert("lxo");
+		extensions.insert("lwo");
 	}
 
 	// -------------------------------------------------------------------

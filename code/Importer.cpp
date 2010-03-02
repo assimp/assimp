@@ -530,24 +530,26 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp)
 	// --------------------------------------------------------------------
 	// Check whether we would have two loaders for the same file extension 
 	// This is absolutely OK, but we should warn the developer of the new
-	// loader that his code will probably never be called.s
+	// loader that his code will probably never be called if the first 
+	// loader is a bit too lazy in his file checking.
 	// --------------------------------------------------------------------
-	std::string st;
+	std::set<std::string> st;
+	std::string baked;
 	pImp->GetExtensionList(st);
 
+	for(std::set<std::string>::const_iterator it = st.begin(); it != st.end(); ++it) {
+
 #ifdef _DEBUG
-	const char* sz = ::strtok(const_cast<char*>(st.c_str()),";"); // evil
-	while (sz)	{
-		if (IsExtensionSupported(std::string(sz)))
-			DefaultLogger::get()->warn(std::string( "The file extension " ) + sz + " is already in use");
-		
-		sz = ::strtok(NULL,";");
-	}
+		if (IsExtensionSupported(*it)) {
+			DefaultLogger::get()->warn("The file extension " + *it + " is already in use");
+		}
 #endif
+		baked += *it;
+	}
 
 	// add the loader
 	pimpl->mImporter.push_back(pImp);
-	DefaultLogger::get()->info("Registering custom importer: " + st);
+	DefaultLogger::get()->info("Registering custom importer for these file extensions: " + baked);
 	return AI_SUCCESS;
 }
 
@@ -555,14 +557,19 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp)
 // Unregister a custom loader plugin
 aiReturn Importer::UnregisterLoader(BaseImporter* pImp)
 {
-	ai_assert(NULL != pImp);
+	if(!pImp) {
+		// unregistering a NULL importer is no problem for us ... really!
+		return AI_SUCCESS;
+	}
+
 	std::vector<BaseImporter*>::iterator it = std::find(pimpl->mImporter.begin(),pimpl->mImporter.end(),pImp);
 	if (it != pimpl->mImporter.end())	{
 		pimpl->mImporter.erase(it);
 
-		std::string st;
+		std::set<std::string> st;
 		pImp->GetExtensionList(st);
-		DefaultLogger::get()->info("Unregistering custom importer: " + st);
+
+		DefaultLogger::get()->info("Unregistering custom importer: ");
 		return AI_SUCCESS;
 	}
 	DefaultLogger::get()->warn("Unable to remove custom importer: I can't find you ...");
@@ -573,7 +580,11 @@ aiReturn Importer::UnregisterLoader(BaseImporter* pImp)
 // Unregister a custom loader plugin
 aiReturn Importer::UnregisterPPStep(BaseProcess* pImp)
 {
-	ai_assert(NULL != pImp);
+	if(!pImp) {
+		// unregistering a NULL ppstep is no problem for us ... really!
+		return AI_SUCCESS;
+	}
+
 	std::vector<BaseProcess*>::iterator it = std::find(pimpl->mPostProcessingSteps.begin(),pimpl->mPostProcessingSteps.end(),pImp);
 	if (it != pimpl->mPostProcessingSteps.end())	{
 		pimpl->mPostProcessingSteps.erase(it);
@@ -949,22 +960,27 @@ bool Importer::IsExtensionSupported(const char* szExtension)
 
 // ------------------------------------------------------------------------------------------------
 // Find a loader plugin for a given file extension
-BaseImporter* Importer::FindLoader (const char* _szExtension)
+BaseImporter* Importer::FindLoader (const char* szExtension)
 {
-	std::string ext(_szExtension);
+	ai_assert(szExtension);
+
+	// skip over wildcard and dot characters at string head --
+	for(;*szExtension == '*' || *szExtension == '.'; ++szExtension);
+
+	std::string ext(szExtension);
 	if (ext.length() <= 1)
 		return NULL;
 
-	if (ext[0] != '.') {
-		// trailing dot is explicitly requested in the doc but we don't care for now ..
-		ext.erase(0,1);
-	}
-
+	std::set<std::string> str;
 	for (std::vector<BaseImporter*>::const_iterator i =  pimpl->mImporter.begin();i != pimpl->mImporter.end();++i)	{
+		str.clear();
 
-		// pass the file extension to the CanRead(..,NULL)-method
-		if ((*i)->CanRead(ext,NULL,false))
-			return *i;
+		(*i)->GetExtensionList(str);
+		for (std::set<std::string>::const_iterator it = str.begin(); it != str.end(); ++it) {
+			if (ext == *it) {
+				return (*i);
+			}
+		}
 	}
 	return NULL;
 }
@@ -973,20 +989,20 @@ BaseImporter* Importer::FindLoader (const char* _szExtension)
 // Helper function to build a list of all file extensions supported by ASSIMP
 void Importer::GetExtensionList(aiString& szOut)
 {
-	unsigned int iNum = 0;
-	std::string tmp; 
-	for (std::vector<BaseImporter*>::const_iterator i = pimpl->mImporter.begin();i != pimpl->mImporter.end();++i,++iNum)
-	{
-		// Insert a comma as delimiter character
-		// FIX: to take lazy loader implementations into account, we are
-		// slightly more tolerant here than we'd need to be.
-		if (0 != iNum && ';' != *(tmp.end()-1))
-			tmp.append(";");
-
-		(*i)->GetExtensionList(tmp);
+	std::set<std::string> str;
+	for (std::vector<BaseImporter*>::const_iterator i =  pimpl->mImporter.begin();i != pimpl->mImporter.end();++i)	{
+		(*i)->GetExtensionList(str);
 	}
-	szOut.Set(tmp);
-	return;
+
+	for (std::set<std::string>::const_iterator it = str.begin();; ) {
+		szOut.Append("*.");
+		szOut.Append((*it).c_str());
+
+		if (++it == str.end()) {
+			break;
+		}
+		szOut.Append(";");
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1044,8 +1060,10 @@ inline void AddNodeWeight(unsigned int& iScene,const aiNode* pcNode)
 	iScene += sizeof(aiNode);
 	iScene += sizeof(unsigned int) * pcNode->mNumMeshes;
 	iScene += sizeof(void*) * pcNode->mNumChildren;
-	for (unsigned int i = 0; i < pcNode->mNumChildren;++i)
+	
+	for (unsigned int i = 0; i < pcNode->mNumChildren;++i) {
 		AddNodeWeight(iScene,pcNode->mChildren[i]);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1066,32 +1084,33 @@ void Importer::GetMemoryRequirements(aiMemoryInfo& in) const
 	for (unsigned int i = 0; i < mScene->mNumMeshes;++i)
 	{
 		in.meshes += sizeof(aiMesh);
-		if (mScene->mMeshes[i]->HasPositions())
+		if (mScene->mMeshes[i]->HasPositions()) {
 			in.meshes += sizeof(aiVector3D) * mScene->mMeshes[i]->mNumVertices;
+		}
 
-		if (mScene->mMeshes[i]->HasNormals())
+		if (mScene->mMeshes[i]->HasNormals()) {
 			in.meshes += sizeof(aiVector3D) * mScene->mMeshes[i]->mNumVertices;
+		}
 
-		if (mScene->mMeshes[i]->HasTangentsAndBitangents())
+		if (mScene->mMeshes[i]->HasTangentsAndBitangents()) {
 			in.meshes += sizeof(aiVector3D) * mScene->mMeshes[i]->mNumVertices * 2;
+		}
 
-		for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS;++a)
-		{
-			if (mScene->mMeshes[i]->HasVertexColors(a))
+		for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS;++a) {
+			if (mScene->mMeshes[i]->HasVertexColors(a)) {
 				in.meshes += sizeof(aiColor4D) * mScene->mMeshes[i]->mNumVertices;
+			}
 			else break;
 		}
-		for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS;++a)
-		{
-			if (mScene->mMeshes[i]->HasTextureCoords(a))
+		for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS;++a) {
+			if (mScene->mMeshes[i]->HasTextureCoords(a)) {
 				in.meshes += sizeof(aiVector3D) * mScene->mMeshes[i]->mNumVertices;
+			}
 			else break;
 		}
-		if (mScene->mMeshes[i]->HasBones())
-		{
+		if (mScene->mMeshes[i]->HasBones()) {
 			in.meshes += sizeof(void*) * mScene->mMeshes[i]->mNumBones;
-			for (unsigned int p = 0; p < mScene->mMeshes[i]->mNumBones;++p)
-			{
+			for (unsigned int p = 0; p < mScene->mMeshes[i]->mNumBones;++p) {
 				in.meshes += sizeof(aiBone);
 				in.meshes += mScene->mMeshes[i]->mBones[p]->mNumWeights * sizeof(aiVertexWeight);
 			}
@@ -1101,12 +1120,10 @@ void Importer::GetMemoryRequirements(aiMemoryInfo& in) const
     in.total += in.meshes;
 
 	// add all embedded textures
-	for (unsigned int i = 0; i < mScene->mNumTextures;++i)
-	{
+	for (unsigned int i = 0; i < mScene->mNumTextures;++i) {
 		const aiTexture* pc = mScene->mTextures[i];
 		in.textures += sizeof(aiTexture);
-		if (pc->mHeight)
-		{
+		if (pc->mHeight) {
 			in.textures += 4 * pc->mHeight * pc->mWidth;
 		}
 		else in.textures += pc->mWidth;
@@ -1114,14 +1131,12 @@ void Importer::GetMemoryRequirements(aiMemoryInfo& in) const
 	in.total += in.textures;
 
 	// add all animations
-	for (unsigned int i = 0; i < mScene->mNumAnimations;++i)
-	{
+	for (unsigned int i = 0; i < mScene->mNumAnimations;++i) {
 		const aiAnimation* pc = mScene->mAnimations[i];
 		in.animations += sizeof(aiAnimation);
 
 		// add all bone anims
-		for (unsigned int a = 0; a < pc->mNumChannels; ++a)
-		{
+		for (unsigned int a = 0; a < pc->mNumChannels; ++a) {
 			const aiNodeAnim* pc2 = pc->mChannels[i];
 			in.animations += sizeof(aiNodeAnim);
 			in.animations += pc2->mNumPositionKeys * sizeof(aiVectorKey);
@@ -1140,13 +1155,12 @@ void Importer::GetMemoryRequirements(aiMemoryInfo& in) const
 	in.total += in.nodes;
 
 	// add all materials
-	for (unsigned int i = 0; i < mScene->mNumMaterials;++i)
-	{
+	for (unsigned int i = 0; i < mScene->mNumMaterials;++i) {
 		const aiMaterial* pc = mScene->mMaterials[i];
 		in.materials += sizeof(aiMaterial);
 		in.materials += pc->mNumAllocated * sizeof(void*);
-		for (unsigned int a = 0; a < pc->mNumProperties;++a)
-		{
+
+		for (unsigned int a = 0; a < pc->mNumProperties;++a) {
 			in.materials += pc->mProperties[a]->mDataLength;
 		}
 	}

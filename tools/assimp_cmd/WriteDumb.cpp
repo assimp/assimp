@@ -934,7 +934,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 int Assimp_Dump (const char** params, unsigned int num)
 {
 	if (num < 1) {
-		::printf("assimp dump: Invalid number of arguments. See \'assimp extract --help\'\r\n");
+		::printf("assimp dump: Invalid number of arguments. See \'assimp dump --help\'\r\n");
 		return 1;
 	}
 

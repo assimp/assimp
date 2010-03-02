@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 const char* AICMD_MSG_ABOUT = 
 "------------------------------------------------------ \n"
 "Open Asset Import Library (Assimp) \n"
+"http://assimp.sourceforge.net \n"
 "Command-line tools \n"
 "------------------------------------------------------ \n\n"
 
@@ -58,8 +59,15 @@ const char* AICMD_MSG_ABOUT =
 
 
 const char* AICMD_MSG_HELP = 
-"todo help";
-
+"assimp <verb> <arguments>\n\n"
+"\tverbs:\n"
+"\t\tversion - Display Assimp version\n"
+"\t\tlistext - List all known file extension\n"
+"\t\tknowext - Check whether a file extension is recognized by Assimp\n"
+"\t\textract - Extract an embedded texture from a model\n"
+"\t\tdump    - Convert a model to binary or XML dumps (ASSBIN/ASSXML)\n"
+"\n\n\tUse \'assimp <verb> --help\' to get detailed help for a command.\n"
+;
 
 /*extern*/ Assimp::Importer* globalImporter = NULL;
 
@@ -102,6 +110,28 @@ int main (int argc, char* argv[])
 	// construct a global Assimp::Importer instance
 	Assimp::Importer imp;
 	globalImporter = &imp;
+
+	// assimp listext
+	// List all file extensions supported by Assimp
+	if (! ::strcmp(argv[1], "listext")) {
+		aiString s;
+		imp.GetExtensionList(s);
+
+		printf(s.data);
+		return 0;
+	}
+
+	// assimp knowext
+	// Check whether a particular file extension is known by us, return 0 on success
+	if (! ::strcmp(argv[1], "knowext")) {
+		if (argc<3) {
+			printf("Expected a file extension to check for!");
+			return -10;
+		}
+		const bool b = imp.IsExtensionSupported(argv[2]);
+		printf("File extension %s is %sknown",argv[2],(b?"":"not "));
+		return b?0:-1;
+	}
 
 	// assimp dump 
 	// Dump a model to a file 

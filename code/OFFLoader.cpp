@@ -82,9 +82,9 @@ bool OFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 }
 
 // ------------------------------------------------------------------------------------------------
-void OFFImporter::GetExtensionList(std::string& append)
+void OFFImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.off");
+	extensions.insert("off");
 }
 
 // ------------------------------------------------------------------------------------------------

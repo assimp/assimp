@@ -84,9 +84,9 @@ bool MS3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool
 }
 
 // ------------------------------------------------------------------------------------------------
-void MS3DImporter::GetExtensionList(std::string& append)
+void MS3DImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.ms3d");
+	extensions.insert("ms3d");
 }
 
 // ------------------------------------------------------------------------------------------------

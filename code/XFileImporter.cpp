@@ -78,9 +78,9 @@ bool XFileImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, boo
 }
 
 // ------------------------------------------------------------------------------------------------
-void XFileImporter::GetExtensionList(std::string& append)
+void XFileImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.x");
+	extensions.insert("x");
 }
 
 // ------------------------------------------------------------------------------------------------

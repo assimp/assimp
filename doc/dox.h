@@ -964,9 +964,9 @@ bool xxxxImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler,
 
 // -------------------------------------------------------------------------------
 // Get list of file extensions handled by this loader
-void xxxxImporter::GetExtensionList(std::string& append)
+void xxxxImporter::GetExtensionList(std::set<std::string>& extensions)
 {
-	append.append("*.xxx");
+	extensions.insert("xxx");
 }
 
 // -------------------------------------------------------------------------------

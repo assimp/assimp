@@ -194,7 +194,8 @@ def load(filename, processing=0):
     return model.contents._init()
 
 def release(scene):
-    _assimp_lib.release(scene)
+    from ctypes import pointer
+    _assimp_lib.release(pointer(scene))
     
 def aiGetMaterialFloatArray(material, key):
     AI_SUCCESS = 0

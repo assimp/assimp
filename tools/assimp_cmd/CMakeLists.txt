@@ -1,11 +1,11 @@
 # Make sure the compiler can find include files from our Hello library.
 include_directories (
-	${AssetImporter_SOURCE_DIR}/include
-	${AssetImporter_SOURCE_DIR}/code
+	${Assimp_SOURCE_DIR}/include
+	${Assimp_SOURCE_DIR}/code
 )
 
 # Make sure the linker can find the Hello library once it is built.
-link_directories (${AssetImporter_BINARY_DIR} ${AssetImporter_BINARY_DIR}/lib)
+link_directories (${Assimp_BINARY_DIR} ${AssetImporter_BINARY_DIR}/lib)
 
 # Add executable called "helloDemo" that is built from the source files
 # "demo.cxx" and "demo_b.cxx". The extensions are automatically found.

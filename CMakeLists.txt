@@ -1,5 +1,5 @@
 cmake_minimum_required( VERSION 2.6 )
-PROJECT( AssetImporter )
+PROJECT( Assimp )
 
 INCLUDE_DIRECTORIES( include )
 

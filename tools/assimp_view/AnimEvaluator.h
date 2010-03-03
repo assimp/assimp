@@ -43,11 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AV_ANIMEVALUATOR_H_INCLUDED
 #define AV_ANIMEVALUATOR_H_INCLUDED
 
-#ifdef ASSIMP_BUILD_BOOST_WORKAROUND
-#	include "BoostWorkaround/boost/tuple/tuple.hpp"
-#else
-#	include <boost/tuple/tuple.hpp>
-#endif
+#include <boost/tuple/tuple.hpp>
 
 namespace AssimpView
 {

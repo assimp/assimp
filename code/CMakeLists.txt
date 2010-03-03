@@ -1,11 +1,35 @@
 SET( LIBRARY_VERSION "1.0.0" )
 SET( LIBRARY_SOVERSION "1" )
 
+IF ( ENABLE_BOOST_WORKAROUND )
+	INCLUDE_DIRECTORIES( BoostWorkaround )
+	ADD_DEFINITIONS( -DASSIMP_BUILD_BOOST_WORKAROUND )
+	MESSAGE( STATUS "Building a non-boost version of Assimp." )
+ELSE ( ENABLE_BOOST_WORKAROUND )
+	FIND_PACKAGE( Boost 1.35 )
+
+	IF ( NOT Boost_FOUND )
+		MESSAGE( FATAL_ERROR
+			"Boost libraries (http://www.boost.org/) not found. "
+			"You can build a non-boost version of Assimp with slightly reduced "
+			"functionality by specifying -DENABLE_BOOST_WORKAROUND=ON."
+		)
+	ENDIF ( NOT Boost_FOUND )
+
+	INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIRS} )
+ENDIF ( ENABLE_BOOST_WORKAROUND )
+
+
+#
+# Listing and grouping of all the source files for use with IDE project
+# generators.
+#
 SET( HEADER_PATH ../include )
 
 SET( COMPILER_HEADERS
 	${HEADER_PATH}/Compiler/pushpack1.h
 	${HEADER_PATH}/Compiler/poppack1.h
+	pstdint.h
 )
 
 SET( PUBLIC_HEADERS
@@ -44,19 +68,18 @@ SET( PUBLIC_HEADERS
 	${HEADER_PATH}/NullLogger.h
 )
 
-SOURCE_GROUP( Compiler FILES
-	${HEADER_PATH}/Compiler/pushpack1.h
+SOURCE_GROUP( Compiler FILES	${HEADER_PATH}/Compiler/pushpack1.h
 	${HEADER_PATH}/Compiler/poppack1.h
 )
 
 SOURCE_GROUP( Boost FILES
-	${HEADER_PATH}/BoostWorkaround/boost/common_factor_rt.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/foreach.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/format.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/scoped_array.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/scoped_ptr.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/static_assert.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/tuple/tuple.hpp
+	BoostWorkaround/boost/math/common_factor_rt.hpp
+	BoostWorkaround/boost/foreach.hpp
+	BoostWorkaround/boost/format.hpp
+	BoostWorkaround/boost/scoped_array.hpp
+	BoostWorkaround/boost/scoped_ptr.hpp
+	BoostWorkaround/boost/static_assert.hpp
+	BoostWorkaround/boost/tuple/tuple.hpp
 )
 
 SOURCE_GROUP( Logging FILES 
@@ -638,13 +661,13 @@ ADD_LIBRARY( assimp SHARED
 	MS3DLoader.cpp
 
 	# Necessary to show the headers in the project when using the VC++ generator:
-	${HEADER_PATH}/BoostWorkaround/boost/common_factor_rt.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/foreach.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/format.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/scoped_array.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/scoped_ptr.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/static_assert.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/tuple/tuple.hpp
+	BoostWorkaround/boost/math/common_factor_rt.hpp
+	BoostWorkaround/boost/foreach.hpp
+	BoostWorkaround/boost/format.hpp
+	BoostWorkaround/boost/scoped_array.hpp
+	BoostWorkaround/boost/scoped_ptr.hpp
+	BoostWorkaround/boost/static_assert.hpp
+	BoostWorkaround/boost/tuple/tuple.hpp
 	${PUBLIC_HEADERS}
 	${COMPILER_HEADERS}
 )

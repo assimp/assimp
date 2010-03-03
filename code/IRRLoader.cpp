@@ -55,16 +55,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 // We need boost::common_factor to compute the lcm/gcd of a number
-#ifdef ASSIMP_BUILD_BOOST_WORKAROUND
-#	include "../include/BoostWorkaround/boost/common_factor_rt.hpp"
-#else
-#	include	<boost/math/common_factor_rt.hpp> 
-#endif
+#include <boost/math/common_factor_rt.hpp>
 
 using namespace Assimp;
 using namespace irr;
 using namespace irr::io;
-using namespace boost::math;
 
 
 // ------------------------------------------------------------------------------------------------

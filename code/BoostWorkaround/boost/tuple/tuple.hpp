@@ -26,7 +26,7 @@ namespace boost	{
 
 		// Predeclare some stuff
 		template <typename, unsigned, typename, bool, unsigned> struct value_getter;
-		
+
 		// Helper to obtain the type of a tuple element
 		template <typename T, unsigned NIDX, typename TNEXT, unsigned N /*= 0*/>
 		struct type_getter	{
@@ -126,9 +126,9 @@ namespace boost	{
 			typedef value_getter<typename TNEXT::type,NIDX+1,typename TNEXT::next_type,
 				IS_CONST, N> next_value_getter;
 
-			typename ConstIf<IS_CONST,typename type_getter<T,NIDX,TNEXT,N>::type>::t& 
+			typename ConstIf<IS_CONST,typename type_getter<T,NIDX,TNEXT,N>::type>::t&
 				operator () (typename ConstIf<IS_CONST,outer_elem >::t& me) {
-				
+
 				next_value_getter s;
 				return s(me.next);
 			}
@@ -156,8 +156,8 @@ namespace boost	{
 
 	private:
 
-		typedef detail::list_elem<T0,0, 
-					detail::list_elem<T1,1, 
+		typedef detail::list_elem<T0,0,
+					detail::list_elem<T1,1,
 						detail::list_elem<T2,2,
 							detail::list_elem<T3,3,
 								detail::list_elem<T4,4,
@@ -219,7 +219,7 @@ namespace boost	{
 	template <typename T0,typename T1,typename T2,typename T3,typename T4>
 	inline tuple <T0,T1,T2,T3,T4> make_tuple (const T0& t0,
 		const T1& t1,const T2& t2,const T3& t3,const T4& t4) {
-		
+
 		tuple <T0,T1,T2,T3,T4> t;
 		t.get<0>() = t0;
 		t.get<1>() = t1;

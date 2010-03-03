@@ -1,10 +1,11 @@
-include_directories (
+INCLUDE_DIRECTORIES(
 	${AssetImporter_SOURCE_DIR}/include
 	${AssetImporter_SOURCE_DIR}/code
 )
 
-# Make sure the linker can find the Hello library once it is built.
-link_directories (${AssetImporter_BINARY_DIR} ${AssetImporter_BINARY_DIR}/lib)
+# Add the temporary output directories to the library path to make sure the
+# Assimp library can be found, even if it is not installed system-wide yet.
+LINK_DIRECTORIES( ${AssetImporter_BINARY_DIR} ${AssetImporter_BINARY_DIR}/lib )
 
 SOURCE_GROUP( unit FILES 
 	unit/CCompilerTest.c
@@ -115,7 +116,6 @@ IF( WIN32 )
 			"$ENV{PROGRAMFILES}/Microsoft DirectX SDK/Include"
 		DOC "The directory where D3D9.h resides")
 
-
 	FIND_LIBRARY(D3D9_LIBRARY d3d9.lib
 		PATHS
 			"$ENV{DXSDK_DIR}/Lib/x86"
@@ -137,6 +137,5 @@ IF( WIN32 )
 	) 
 ENDIF( WIN32 )
 
-# Link the executable to the Hello library.
-target_link_libraries ( unit assimp ${DX9_LIBRARIES} comctl32.lib Winmm.lib  ) 
-
+# TODO: Port to non-Windows platforms.
+target_link_libraries ( unit assimp ${DX9_LIBRARIES} comctl32.lib Winmm.lib ) 

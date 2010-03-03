@@ -333,7 +333,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="0"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories=""
+				AdditionalIncludeDirectories="..\..\code\BoostWorkaround"
 				PreprocessorDefinitions="NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_BOOST_WORKAROUND"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -396,7 +396,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=""
+				AdditionalIncludeDirectories="..\..\code\BoostWorkaround"
 				PreprocessorDefinitions="DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_BOOST_WORKAROUND"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
@@ -872,7 +872,7 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories=""
+				AdditionalIncludeDirectories="..\..\code\BoostWorkaround"
 				PreprocessorDefinitions="NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_BOOST_WORKAROUND"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -934,7 +934,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=""
+				AdditionalIncludeDirectories="..\..\code\BoostWorkaround"
 				PreprocessorDefinitions="DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_BOOST_WORKAROUND"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
@@ -1112,7 +1112,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\Compiler\pstdint.h"
+					RelativePath="..\..\code\pstdint.h"
 					>
 				</File>
 				<File
@@ -1124,50 +1124,38 @@
 				Name="BoostWorkaround"
 				>
 				<File
-					RelativePath="..\..\include\BoostWorkaround\boost\common_factor_rt.hpp"
+					RelativePath="..\..\code\BoostWorkaround\boost\foreach.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\BoostWorkaround\boost\foreach.hpp"
+					RelativePath="..\..\code\BoostWorkaround\boost\format.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\BoostWorkaround\boost\format.hpp"
+					RelativePath="..\..\code\BoostWorkaround\boost\scoped_array.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\BoostWorkaround\boost\scoped_array.hpp"
+					RelativePath="..\..\code\BoostWorkaround\boost\scoped_ptr.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\BoostWorkaround\boost\scoped_ptr.hpp"
+					RelativePath="..\..\code\BoostWorkaround\boost\static_assert.hpp"
 					>
 				</File>
-				<File
-					RelativePath="..\..\include\BoostWorkaround\boost\static_assert.hpp"
-					>
-				</File>
-				<Filter
-					Name="random"
-					>
-					<File
-						RelativePath="..\..\include\BoostWorkaround\boost\random\mersenne_twister.hpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\BoostWorkaround\boost\random\uniform_int.hpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\BoostWorkaround\boost\random\variate_generator.hpp"
-						>
-					</File>
-				</Filter>
 				<Filter
 					Name="tuple"
 					>
 					<File
-						RelativePath="..\..\include\BoostWorkaround\boost\tuple\tuple.hpp"
+						RelativePath="..\..\code\BoostWorkaround\boost\tuple\tuple.hpp"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="math"
+					>
+					<File
+						RelativePath="..\..\code\BoostWorkaround\boost\math\common_factor_rt.hpp"
 						>
 					</File>
 				</Filter>

@@ -1,6 +1,4 @@
-
-
-#include "../../../include/BoostWorkaround/boost/tuple/tuple.hpp"
+#include "BoostWorkaround/boost/tuple/tuple.hpp"
 
 struct another
 {int dummy;};

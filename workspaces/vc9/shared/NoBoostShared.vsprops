@@ -6,6 +6,7 @@
 	>
 	<Tool
 		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="..\..\code\BoostWorkaround"
 		PreprocessorDefinitions="ASSIMP_BUILD_BOOST_WORKAROUND;ASSIMP_BUILD_SINGLETHREADED"
 	/>
 </VisualStudioPropertySheet>

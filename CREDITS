@@ -80,5 +80,5 @@ Many bugreports, improving Assimp's portability, regular testing & feedback.
 - Stepan Hrbek
 Bugreport and fix for a obj-materialloader crash.
 
-- klickverbot ( real name? ):
-D-bindings, CMake install support.
+- David Nadlinger
+D bindings, CMake install support.

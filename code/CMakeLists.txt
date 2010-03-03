@@ -1,9 +1,12 @@
+SET( LIBRARY_VERSION "1.0.0" )
+SET( LIBRARY_SOVERSION "1" )
+
 SET( HEADER_PATH ../include )
 
 SET( COMPILER_HEADERS
 	${HEADER_PATH}/Compiler/pushpack1.h
 	${HEADER_PATH}/Compiler/poppack1.h
-) 
+)
 
 SET( PUBLIC_HEADERS
 	${HEADER_PATH}/aiAnim.h
@@ -39,18 +42,6 @@ SET( PUBLIC_HEADERS
 	${HEADER_PATH}/Logger.h
 	${HEADER_PATH}/LogStream.h
 	${HEADER_PATH}/NullLogger.h
-	${HEADER_PATH}/Compiler/pushpack1.h
-	${HEADER_PATH}/Compiler/poppack1.h
-	${HEADER_PATH}/BoostWorkaround/boost/common_factor_rt.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/foreach.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/format.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/random/mersenne_twister.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/random/uniform_int.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/random/variate_generator.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/scoped_array.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/scoped_ptr.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/static_assert.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/tuple/tuple.hpp
 )
 
 SOURCE_GROUP( Compiler FILES
@@ -62,10 +53,6 @@ SOURCE_GROUP( Boost FILES
 	${HEADER_PATH}/BoostWorkaround/boost/common_factor_rt.hpp
 	${HEADER_PATH}/BoostWorkaround/boost/foreach.hpp
 	${HEADER_PATH}/BoostWorkaround/boost/format.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/random
-	${HEADER_PATH}/BoostWorkaround/boost/random/mersenne_twister.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/random/uniform_int.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/random/variate_generator.hpp
 	${HEADER_PATH}/BoostWorkaround/boost/scoped_array.hpp
 	${HEADER_PATH}/BoostWorkaround/boost/scoped_ptr.hpp
 	${HEADER_PATH}/BoostWorkaround/boost/static_assert.hpp
@@ -157,7 +144,7 @@ SOURCE_GROUP( BVH FILES
 	BVHLoader.h
 )
 
-SOURCE_GROUP(Collada FILES
+SOURCE_GROUP( Collada FILES
 	ColladaHelper.h
 	ColladaLoader.cpp
 	ColladaLoader.h
@@ -165,24 +152,24 @@ SOURCE_GROUP(Collada FILES
 	ColladaParser.h
 )
 
-SOURCE_GROUP(DXF FILES
+SOURCE_GROUP( DXF FILES
 	DXFLoader.cpp
 	DXFLoader.h
 )
 
-SOURCE_GROUP(CSM FILES
+SOURCE_GROUP( CSM FILES
 	CSMLoader.cpp
 	CSMLoader.h
 )
 
-SOURCE_GROUP(HMP FILES
+SOURCE_GROUP( HMP FILES
 	HMPFileData.h
 	HMPLoader.cpp
 	HMPLoader.h
 	HalfLifeFileData.h
 )
 
-SOURCE_GROUP(Irr FILES
+SOURCE_GROUP( Irr FILES
 	IRRLoader.cpp
 	IRRLoader.h
 	IRRMeshLoader.cpp
@@ -191,7 +178,7 @@ SOURCE_GROUP(Irr FILES
 	IRRShared.h
 )
 
-SOURCE_GROUP(LWO FILES
+SOURCE_GROUP( LWO FILES
 	LWOAnimation.cpp
 	LWOAnimation.h
 	LWOBLoader.cpp
@@ -201,12 +188,12 @@ SOURCE_GROUP(LWO FILES
 	LWOMaterial.cpp
 )
 
-SOURCE_GROUP(LWS FILES
+SOURCE_GROUP( LWS FILES
 	LWSLoader.cpp
 	LWSLoader.h
 )
 
-SOURCE_GROUP(MD2 FILES
+SOURCE_GROUP( MD2 FILES
 	MD2FileData.h
 	MD2Loader.cpp
 	MD2Loader.h
@@ -419,46 +406,6 @@ SOURCE_GROUP( zlib FILES
 )
 
 ADD_LIBRARY( assimp SHARED
-	${HEADER_PATH}/DefaultLogger.h
-	${HEADER_PATH}/IOStream.h
-	${HEADER_PATH}/IOSystem.h
-	${HEADER_PATH}/LogStream.h
-	${HEADER_PATH}/Logger.h
-	${HEADER_PATH}/NullLogger.h
-	${HEADER_PATH}/aiAnim.h
-	${HEADER_PATH}/aiAssert.h
-	${HEADER_PATH}/aiCamera.h
-	${HEADER_PATH}/aiConfig.h
-	${HEADER_PATH}/aiDefines.h
-	${HEADER_PATH}/aiFileIO.h
-	${HEADER_PATH}/aiLight.h
-	${HEADER_PATH}/aiMaterial.h
-	${HEADER_PATH}/aiMatrix3x3.h
-	${HEADER_PATH}/aiMatrix4x4.h
-	${HEADER_PATH}/aiMesh.h
-	${HEADER_PATH}/aiPostProcess.h
-	${HEADER_PATH}/aiQuaternion.h
-	${HEADER_PATH}/aiScene.h
-	${HEADER_PATH}/aiTexture.h
-	${HEADER_PATH}/aiTypes.h
-	${HEADER_PATH}/aiVector2D.h
-	${HEADER_PATH}/aiVector3D.h
-	${HEADER_PATH}/aiVersion.h
-	${HEADER_PATH}/assimp.h
-	${HEADER_PATH}/Compiler/pushpack1.h
-	${HEADER_PATH}/Compiler/poppack1.h
-	${HEADER_PATH}/BoostWorkaround/boost/common_factor_rt.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/foreach.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/format.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/random
-	${HEADER_PATH}/BoostWorkaround/boost/random/mersenne_twister.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/random/uniform_int.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/random/variate_generator.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/scoped_array.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/scoped_ptr.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/static_assert.hpp
-	${HEADER_PATH}/BoostWorkaround/boost/tuple/tuple.hpp
-
 	3DSConverter.cpp
 	3DSHelper.h
 	3DSLoader.cpp
@@ -689,19 +636,27 @@ ADD_LIBRARY( assimp SHARED
 	Vertex.h
 	MS3DLoader.h
 	MS3DLoader.cpp
-)
-ADD_DEFINITIONS(-DASSIMP_BUILD_DLL_EXPORT)
 
-if (WIN32)
-	if ( MSVC80 )
+	# Necessary to show the headers in the project when using the VC++ generator:
+	${HEADER_PATH}/BoostWorkaround/boost/common_factor_rt.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/foreach.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/format.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/scoped_array.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/scoped_ptr.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/static_assert.hpp
+	${HEADER_PATH}/BoostWorkaround/boost/tuple/tuple.hpp
+	${PUBLIC_HEADERS}
+	${COMPILER_HEADERS}
+)
+
+ADD_DEFINITIONS( -DASSIMP_BUILD_DLL_EXPORT )
+
+if ( WIN32 )
+	if ( MSVC80 OR MSVC90 )
 		ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
 		ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
-	endif( MSVC80 )
-	if ( MSVC90 )
-		ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
-		ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
-	endif( MSVC90 )
-endif (WIN32)
+	endif ( MSVC80 OR MSVC90 )
+endif ( WIN32 )
  
 SET_TARGET_PROPERTIES( assimp PROPERTIES
 	VERSION ${LIBRARY_VERSION}
@@ -710,4 +665,4 @@ SET_TARGET_PROPERTIES( assimp PROPERTIES
 
 INSTALL( TARGETS assimp DESTINATION ${LIB_INSTALL_DIR} )
 INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${INCLUDE_INSTALL_DIR}/assimp )
-INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${INCLUDE_INSTALL_DIR}/assimp/Compiler ) 
+INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${INCLUDE_INSTALL_DIR}/assimp/Compiler )

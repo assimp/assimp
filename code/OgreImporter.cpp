@@ -14,7 +14,6 @@ using namespace boost;
 #include "irrXMLWrapper.h"
 
 
-
 namespace Assimp
 {
 namespace Ogre
@@ -364,7 +363,7 @@ void OgreImporter::CreateAssimpSubMesh(const SubMesh& theSubMesh, const vector<B
 			NewBone->mWeights=new aiVertexWeight[aiWeights[i].size()];
 			memcpy(NewBone->mWeights, &(aiWeights[i][0]), sizeof(aiVertexWeight)*aiWeights[i].size());
 			NewBone->mName=Bones[i].Name;//The bone list should be sorted after its ids, this was done in LoadSkeleton
-			NewBone->mOffsetMatrix=aiMatrix4x4(Bones[i].WorldToBoneSpace).Inverse();//we suggest, that the mesh space is the world space!
+			NewBone->mOffsetMatrix=aiMatrix4x4();//(Bones[i].WorldToBoneSpace).Inverse();//we suggest, that the mesh space is the world space!
 				
 			aiBones.push_back(NewBone);
 		}
@@ -717,12 +716,13 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 					NewKeyframe.Time=GetAttribute<float>(SkeletonFile, "time");
 
 					//Position:
+					//It seams that we have to flip some axies, i really dont know why
 					XmlRead(SkeletonFile);
 					if(string("translate")!=SkeletonFile->getNodeName())
 						throw new ImportErrorException("translate node not first in keyframe");
-					NewKeyframe.Position.x=GetAttribute<float>(SkeletonFile, "x");
-					NewKeyframe.Position.y=GetAttribute<float>(SkeletonFile, "y");
-					NewKeyframe.Position.z=GetAttribute<float>(SkeletonFile, "z");
+					NewKeyframe.Position.x=GetAttribute<float>(SkeletonFile, "y");
+					NewKeyframe.Position.y=-GetAttribute<float>(SkeletonFile, "z");
+					NewKeyframe.Position.z=-GetAttribute<float>(SkeletonFile, "x");
 
 					//Rotation:
 					XmlRead(SkeletonFile);
@@ -884,8 +884,8 @@ void Bone::CalculateWorldToBoneSpaceMatrix(vector<Bone> &Bones)
 	else
 	{
 		WorldToBoneSpace= Bones[ParentId].WorldToBoneSpace
-						* aiMatrix4x4::Translation(Position, t0)
 						* aiMatrix4x4::Rotation(RotationAngle, RotationAxis, t1)
+						* aiMatrix4x4::Translation(Position, t0)
 						;
 
 	}

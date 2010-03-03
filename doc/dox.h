@@ -1445,30 +1445,13 @@ Build: alles von CustomBuild + DirectX + MFC?
 @page importer_notes Importer Notes
 
 @section ogre Ogre
-Ogre importer is WIP and optimized for the Blender Ogre exporter!
 
-XML Format: There is a binary and a XML mesh Format from Ogre. This loader can only
-Handle xml files, but don't panic, there is a command line converter, which you can use
-to create XML files from Binary Files. Just look on the Ogre page for it.
+@subsection overview Overview
+Ogre importer is currently optimized for the Blender Ogre exporter, because thats the only one that i use.
 
-Currently you can only load meshes. So you will need to import the *.mesh.xml file, the loader will
-try to find the appendant material and skeleton file.
+You can find the Blender Ogre exporter at: http://www.ogre3d.org/forums/viewtopic.php?f=8&t=45922
 
-The skeleton file must have the same name as the mesh file, e.g. fish.mesh.xml and fish.skeleton.xml.
-
-The material file can have the same name as the mesh file, or you can use
-Importer::Importer::SetPropertyString(AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE, "materiafile.material") to specify
-the name of the material file. This is especially usefull if multiply materials a stored in a single file.
-The importer will first try to load the material with the same name as the mesh and only if this can't be open try
-to load the alternate material file. The default material filename is "Scene.material".
-
-We suggest that you use custom materials, because they support multiple textures (like colormap and normalmap). First of all you
-should read the custom material sektion in the Ogre Blender exporter Help File, and than use the assimp.tlp template, which you
-can find in scripts/OgreImpoter/Assimp.tlp. If you don't set all values, don't worry, they will be ignored during import.
-
-If you want more propertiesin custom materials, you can easily expand the ogre material loader, it will be just a few lines for each property.
-
-What will be loaded?
+@subsection what What will be loaded?
 
 Mesh: Faces, Positions, Normals and one Uv pair. The Materialname will be used to load the material. No Bone-Assignments yet.
 
@@ -1478,4 +1461,35 @@ materialname will be set.
 
 Skeleton: Skeleton with Bone hierarchy (Position and Rotation, but no Scaling in the skeleton is supported), names and transformations,
 animations with rotation, translation and scaling keys.
+
+@subsection export_Blender How to export Files from Blender
+You can find informations about how to use the Ogreexporter by your own, so here are just some options that you need, so the assimp
+importer will load everything correctly:
+- Use either "Rendering Material" or "Custom Material" see @ref material
+- do not use "Flip Up Axies to Y"
+- use "Skeleton name follow mesh"
+
+
+@subsection xml XML Format
+There is a binary and a XML mesh Format from Ogre. This loader can only
+Handle xml files, but don't panic, there is a command line converter, which you can use
+to create XML files from Binary Files. Just look on the Ogre page for it.
+
+Currently you can only load meshes. So you will need to import the *.mesh.xml file, the loader will
+try to find the appendant material and skeleton file.
+
+The skeleton file must have the same name as the mesh file, e.g. fish.mesh.xml and fish.skeleton.xml.
+
+@subsection material Materials
+The material file can have the same name as the mesh file, or you can use
+Importer::Importer::SetPropertyString(AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE, "materiafile.material") to specify
+the name of the material file. This is especially usefull if multiply materials a stored in a single file.
+The importer will first try to load the material with the same name as the mesh and only if this can't be open try
+to load the alternate material file. The default material filename is "Scene.material".
+
+We suggest that you use custom materials, because they support multiple textures (like colormap and normalmap). First of all you
+should read the custom material sektion in the Ogre Blender exporter Help File, and than use the assimp.tlp template, which you
+can find in scripts/OgreImpoter/Assimp.tlp in the assimp source. If you don't set all values, don't worry, they will be ignored during import.
+
+If you want more properties in custom materials, you can easily expand the ogre material loader, it will be just a few lines for each property.
 */

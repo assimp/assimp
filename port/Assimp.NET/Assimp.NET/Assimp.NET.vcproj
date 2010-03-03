@@ -26,7 +26,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="copy ..\..\..\scripts\SWIG_WIP\AssimpSwigPort.i AssimpSwigPort.i"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -209,7 +209,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="echo Invoking SWIG...&#x0D;&#x0A;echo on&#x0D;&#x0A;swig.exe -c++ -csharp &quot;$(InputPath)&quot;&#x0D;&#x0A;@echo off"
+					CommandLine="echo Invoking SWIG...&#x0D;&#x0A;echo on&#x0D;&#x0A;swig.exe -c++ -csharp &quot;$(InputPath)&quot;&#x0D;&#x0A;@echo off&#x0D;&#x0A;"
 					Outputs="$(InputName)_wrap.cxx"
 				/>
 			</FileConfiguration>

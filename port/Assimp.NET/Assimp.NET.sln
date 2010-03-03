@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Assimp.NET", "Assimp.NET\Assimp.NET.vcproj", "{A86A8AF2-3B4D-4381-BB01-9CA2AE88450E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assimp.NET_CS", "Assimp.NET_CS\Assimp.NET_CS.csproj", "{398AA9C3-5C12-4C51-84A3-32D563618F57}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A86A8AF2-3B4D-4381-BB01-9CA2AE88450E} = {A86A8AF2-3B4D-4381-BB01-9CA2AE88450E}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

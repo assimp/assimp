@@ -1,5 +1,3 @@
-
-
 ===============================================================
 Open Asset Import Library (Assimp)
 Developers and Contributors
@@ -82,3 +80,6 @@ Bugreport and fix for a obj-materialloader crash.
 
 - David Nadlinger
 D bindings, CMake install support.
+
+- Dario Accornero
+added no-boost targets to the XCode project.

@@ -1,15 +1,11 @@
-# Make sure the compiler can find include files from our Hello library.
-include_directories (
+INCLUDE_DIRECTORIES(
 	${Assimp_SOURCE_DIR}/include
 	${Assimp_SOURCE_DIR}/code
 )
 
-# Make sure the linker can find the Hello library once it is built.
-link_directories (${Assimp_BINARY_DIR} ${AssetImporter_BINARY_DIR}/lib)
+LINK_DIRECTORIES( ${Assimp_BINARY_DIR} ${Assimp_BINARY_DIR}/lib )
 
-# Add executable called "helloDemo" that is built from the source files
-# "demo.cxx" and "demo_b.cxx". The extensions are automatically found.
-add_executable(  assimp_cmd
+ADD_EXECUTABLE( assimp_cmd
 	../../contrib/zlib/adler32.c
 	../../contrib/zlib/compress.c
 	../../contrib/zlib/crc32.c
@@ -39,11 +35,11 @@ add_executable(  assimp_cmd
 	WriteDumb.cpp
 )
 
+TARGET_LINK_LIBRARIES( assimp_cmd assimp )
+SET_TARGET_PROPERTIES( assimp_cmd PROPERTIES
+	OUTPUT_NAME assimp
+)
 
-# Link the executable to the assimp library and rename it to assimp as well :-)
-target_link_libraries ( assimp_cmd assimp  )
-INSTALL(PROGRAMS ../../bin/assimp_cmd 
+INSTALL( TARGETS assimp_cmd
 	DESTINATION "${BIN_INSTALL_DIR}"
-	RENAME assimp
 ) 
-

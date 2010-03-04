@@ -47,15 +47,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const char* AICMD_MSG_ABOUT = 
 "------------------------------------------------------ \n"
-"Open Asset Import Library (Assimp) \n"
+"Open Asset Import Library - Assimp \n"
 "http://assimp.sourceforge.net \n"
 "Command-line tools \n"
 "------------------------------------------------------ \n\n"
 
-"Major version: %i\n"
-"Minor version: %i\n"
-"SVN revision : %i\n"
-"Build flags  : %s %s %s %s %s\n\n";
+"Version %i.%i-%s%s%s%s%s (SVNREV %i)\n\n";
 
 
 const char* AICMD_MSG_HELP = 
@@ -82,27 +79,26 @@ int main (int argc, char* argv[])
 	}
 
 	// assimp version
-	// Display a version string
+	// Display version information
 	if (! ::strcmp(argv[1], "version")) {
-		
 		const unsigned int flags = aiGetCompileFlags();
 		printf(AICMD_MSG_ABOUT,
 			aiGetVersionMajor(),
 			aiGetVersionMinor(),
-			aiGetVersionRevision(),
-			(flags & ASSIMP_CFLAGS_DEBUG ?			"-debug"   : ""),
-			(flags & ASSIMP_CFLAGS_NOBOOST ?		"-noboost" : ""),
-			(flags & ASSIMP_CFLAGS_SHARED ?			"-shared"  : ""),
-			(flags & ASSIMP_CFLAGS_SINGLETHREADED ? "-st"      : ""),
-			(flags & ASSIMP_CFLAGS_STLPORT ?		"-stlport" : ""));
+			(flags & ASSIMP_CFLAGS_DEBUG ?			"-debug "   : ""),
+			(flags & ASSIMP_CFLAGS_NOBOOST ?		"-noboost " : ""),
+			(flags & ASSIMP_CFLAGS_SHARED ?			"-shared "  : ""),
+			(flags & ASSIMP_CFLAGS_SINGLETHREADED ? "-st "      : ""),
+			(flags & ASSIMP_CFLAGS_STLPORT ?		"-stlport " : ""),
+			aiGetVersionRevision());
 
 		return 0;
 	}
 
 	// assimp help
-	// Display some basic help
-	if (! ::strcmp(argv[1], "help")) {
-		
+	// Display some basic help (--help and -h work as well 
+	// because people could try them intuitively)
+	if (!strcmp(argv[1], "help") || !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
 		printf("%s",AICMD_MSG_HELP);
 		return 0;
 	}
@@ -113,7 +109,7 @@ int main (int argc, char* argv[])
 
 	// assimp listext
 	// List all file extensions supported by Assimp
-	if (! ::strcmp(argv[1], "listext")) {
+	if (! strcmp(argv[1], "listext")) {
 		aiString s;
 		imp.GetExtensionList(s);
 
@@ -123,7 +119,7 @@ int main (int argc, char* argv[])
 
 	// assimp knowext
 	// Check whether a particular file extension is known by us, return 0 on success
-	if (! ::strcmp(argv[1], "knowext")) {
+	if (! strcmp(argv[1], "knowext")) {
 		if (argc<3) {
 			printf("Expected a file extension to check for!");
 			return -10;
@@ -133,19 +129,25 @@ int main (int argc, char* argv[])
 		return b?0:-1;
 	}
 
+	// assimp info
+	// Print basic model statistics
+	if (! strcmp(argv[1], "info")) {
+		return Assimp_Info ((const char**)&argv[2],argc-2);
+	}
+
 	// assimp dump 
 	// Dump a model to a file 
-	if (! ::strcmp(argv[1], "dump")) {
+	if (! strcmp(argv[1], "dump")) {
 		return Assimp_Dump ((const char**)&argv[2],argc-2);
 	}
 
 	// assimp extract 
 	// Extract an embedded texture from a file
-	if (! ::strcmp(argv[1], "extract")) {
+	if (! strcmp(argv[1], "extract")) {
 		return Assimp_Extract ((const char**)&argv[2],argc-2);
 	}
 
-	::printf("Unrecognized command. Use \'assimp help\' for a detailed command list\n");
+	printf("Unrecognized command. Use \'assimp help\' for a detailed command list\n");
 	return 1;
 }
 
@@ -155,34 +157,35 @@ const aiScene* ImportModel(const ImportData& imp, const std::string& path)
 {
 	// Attach log streams
 	if (imp.log) {
-		::printf("\nAttaching log stream   ...           OK\n");
+		printf("\nAttaching log stream   ...           OK\n");
 		
 		unsigned int flags = 0;
-		if (imp.logFile.length())
+		if (imp.logFile.length()) {
 			flags |= aiDefaultLogStream_FILE;
-		if (imp.showLog)
+		}
+		if (imp.showLog) {
 			flags |= aiDefaultLogStream_STDERR;
-
+		}
 		DefaultLogger::create(imp.logFile.c_str(),imp.verbose ? Logger::VERBOSE : Logger::NORMAL,flags);
 	}
-	::printf("Launching model import ...           OK\n");
+	printf("Launching model import ...           OK\n");
 
 	// Now validate this flag combination
 	if(!globalImporter->ValidateFlags(imp.ppFlags)) {
 		::printf("ERROR: Unsupported post-processing flags \n");
 		return NULL;
 	}
-	::printf("Validating postprocessing flags ...  OK\n");
+	printf("Validating postprocessing flags ...  OK\n");
 	if (imp.showLog) 
 		::printf("-----------------------------------------------------------------\n");
 
 	// do the actual import, measure time
-	const clock_t first = ::clock();
+	const clock_t first = clock();
 	const aiScene* scene = globalImporter->ReadFile(path,imp.ppFlags);
 
-	if (imp.showLog)
-		::printf("-----------------------------------------------------------------\n");
-
+	if (imp.showLog) {
+		printf("-----------------------------------------------------------------\n");
+	}
 	if (!scene) {
 		printf("ERROR: Failed to load file\n");	
 		return NULL;
@@ -191,7 +194,7 @@ const aiScene* ImportModel(const ImportData& imp, const std::string& path)
 	const clock_t second = ::clock();
 	const float seconds = (float)(second-first) / CLOCKS_PER_SEC;
 
-	::printf("Importing file ...                   OK \n   import took approx. %.5f seconds\n"
+	printf("Importing file ...                   OK \n   import took approx. %.5f seconds\n"
 		"\n",seconds);
 
 	if (imp.log) { 
@@ -239,109 +242,109 @@ int ProcessStandardArguments(ImportData& fill, const char** params,
 		}
 
 		bool has = true;
-		if (! ::strcmp(params[i], "-ptv") || ! ::strcmp(params[i], "--pretransform-vertices")) {
+		if (! strcmp(params[i], "-ptv") || ! strcmp(params[i], "--pretransform-vertices")) {
 			fill.ppFlags |= aiProcess_PreTransformVertices;
 		}
-		else if (! ::strcmp(params[i], "-gsn") || ! ::strcmp(params[i], "--gen-smooth-normals")) {
+		else if (! strcmp(params[i], "-gsn") || ! strcmp(params[i], "--gen-smooth-normals")) {
 			fill.ppFlags |= aiProcess_GenSmoothNormals;
 		}
-		else if (! ::strcmp(params[i], "-gn") || ! ::strcmp(params[i], "--gen-normals")) {
+		else if (! strcmp(params[i], "-gn") || ! strcmp(params[i], "--gen-normals")) {
 			fill.ppFlags |= aiProcess_GenNormals;
 		}
-		else if (! ::strcmp(params[i], "-jiv") || ! ::strcmp(params[i], "--join-identical-vertices")) {
+		else if (! strcmp(params[i], "-jiv") || ! strcmp(params[i], "--join-identical-vertices")) {
 			fill.ppFlags |= aiProcess_JoinIdenticalVertices;
 		}
-		else if (! ::strcmp(params[i], "-rrm") || ! ::strcmp(params[i], "--remove-redundant-materials")) {
+		else if (! strcmp(params[i], "-rrm") || ! strcmp(params[i], "--remove-redundant-materials")) {
 			fill.ppFlags |= aiProcess_RemoveRedundantMaterials;
 		}
-		else if (! ::strcmp(params[i], "-fd") || ! ::strcmp(params[i], "--find-degenerates")) {
+		else if (! strcmp(params[i], "-fd") || ! strcmp(params[i], "--find-degenerates")) {
 			fill.ppFlags |= aiProcess_FindDegenerates;
 		}
-		else if (! ::strcmp(params[i], "-slm") || ! ::strcmp(params[i], "--split-large-meshes")) {
+		else if (! strcmp(params[i], "-slm") || ! strcmp(params[i], "--split-large-meshes")) {
 			fill.ppFlags |= aiProcess_SplitLargeMeshes;
 		}
-		else if (! ::strcmp(params[i], "-lbw") || ! ::strcmp(params[i], "--limit-bone-weights")) {
+		else if (! strcmp(params[i], "-lbw") || ! strcmp(params[i], "--limit-bone-weights")) {
 			fill.ppFlags |= aiProcess_LimitBoneWeights;
 		}
-		else if (! ::strcmp(params[i], "-vds") || ! ::strcmp(params[i], "--validate-data-structure")) {
+		else if (! strcmp(params[i], "-vds") || ! strcmp(params[i], "--validate-data-structure")) {
 			fill.ppFlags |= aiProcess_ValidateDataStructure;
 		}
-		else if (! ::strcmp(params[i], "-icl") || ! ::strcmp(params[i], "--improve-cache-locality")) {
+		else if (! strcmp(params[i], "-icl") || ! strcmp(params[i], "--improve-cache-locality")) {
 			fill.ppFlags |= aiProcess_ImproveCacheLocality;
 		}
-		else if (! ::strcmp(params[i], "-sbpt") || ! ::strcmp(params[i], "--sort-by-ptype")) {
+		else if (! strcmp(params[i], "-sbpt") || ! strcmp(params[i], "--sort-by-ptype")) {
 			fill.ppFlags |= aiProcess_SortByPType;
 		}
-		else if (! ::strcmp(params[i], "-lh") || ! ::strcmp(params[i], "--left-handed")) {
+		else if (! strcmp(params[i], "-lh") || ! strcmp(params[i], "--left-handed")) {
 			fill.ppFlags |= aiProcess_ConvertToLeftHanded;
 		}
-		else if (! ::strcmp(params[i], "-fuv") || ! ::strcmp(params[i], "--flip-uv")) {
+		else if (! strcmp(params[i], "-fuv") || ! strcmp(params[i], "--flip-uv")) {
 			fill.ppFlags |= aiProcess_FlipUVs;
 		}
-		else if (! ::strcmp(params[i], "-fwo") || ! ::strcmp(params[i], "--flip-winding-order")) {
+		else if (! strcmp(params[i], "-fwo") || ! strcmp(params[i], "--flip-winding-order")) {
 			fill.ppFlags |= aiProcess_FlipWindingOrder;
 		}
-		else if (! ::strcmp(params[i], "-tuv") || ! ::strcmp(params[i], "--transform-uv-coords")) {
+		else if (! strcmp(params[i], "-tuv") || ! strcmp(params[i], "--transform-uv-coords")) {
 			fill.ppFlags |= aiProcess_TransformUVCoords;
 		}
-		else if (! ::strcmp(params[i], "-guv") || ! ::strcmp(params[i], "--gen-uvcoords")) {
+		else if (! strcmp(params[i], "-guv") || ! strcmp(params[i], "--gen-uvcoords")) {
 			fill.ppFlags |= aiProcess_GenUVCoords;
 		}
-		else if (! ::strcmp(params[i], "-fid") || ! ::strcmp(params[i], "--find-invalid-data")) {
+		else if (! strcmp(params[i], "-fid") || ! strcmp(params[i], "--find-invalid-data")) {
 			fill.ppFlags |= aiProcess_FindInvalidData;
 		}
-		else if (! ::strcmp(params[i], "-fixn") || ! ::strcmp(params[i], "--fix-normals")) {
+		else if (! strcmp(params[i], "-fixn") || ! strcmp(params[i], "--fix-normals")) {
 			fill.ppFlags |= aiProcess_FixInfacingNormals;
 		}
-		else if (! ::strcmp(params[i], "-tri") || ! ::strcmp(params[i], "--triangulate")) {
+		else if (! strcmp(params[i], "-tri") || ! strcmp(params[i], "--triangulate")) {
 			fill.ppFlags |= aiProcess_Triangulate;
 		}
-		else if (! ::strcmp(params[i], "-cts") || ! ::strcmp(params[i], "--calc-tangent-space")) {
+		else if (! strcmp(params[i], "-cts") || ! strcmp(params[i], "--calc-tangent-space")) {
 			fill.ppFlags |= aiProcess_CalcTangentSpace;
 		}
-		else if (! ::strcmp(params[i], "-fi") || ! ::strcmp(params[i], "--find-instances")) {
+		else if (! strcmp(params[i], "-fi") || ! strcmp(params[i], "--find-instances")) {
 			fill.ppFlags |= aiProcess_FindInstances;
 		}
-		else if (! ::strcmp(params[i], "-og") || ! ::strcmp(params[i], "--optimize-graph")) {
+		else if (! strcmp(params[i], "-og") || ! strcmp(params[i], "--optimize-graph")) {
 			fill.ppFlags |= aiProcess_OptimizeGraph;
 		}
-		else if (! ::strcmp(params[i], "-om") || ! ::strcmp(params[i], "--optimize-meshes")) {
+		else if (! strcmp(params[i], "-om") || ! strcmp(params[i], "--optimize-meshes")) {
 			fill.ppFlags |= aiProcess_OptimizeMeshes;
 		}
 
 #if 0
-		else if (! ::strcmp(params[i], "-oa") || ! ::strcmp(params[i], "--optimize-anims")) {
+		else if (! strcmp(params[i], "-oa") || ! strcmp(params[i], "--optimize-anims")) {
 			fill.ppFlags |= aiProcess_OptimizeAnims;
 		}
-		else if (! ::strcmp(params[i], "-gem") || ! ::strcmp(params[i], "--gen-entity-meshes")) {
+		else if (! strcmp(params[i], "-gem") || ! strcmp(params[i], "--gen-entity-meshes")) {
 			fill.ppFlags |= aiProcess_GenEntityMeshes;
 		}
-		else if (! ::strcmp(params[i], "-ftp") || ! ::strcmp(params[i], "--fix-texture-paths")) {
+		else if (! strcmp(params[i], "-ftp") || ! strcmp(params[i], "--fix-texture-paths")) {
 			fill.ppFlags |= aiProcess_FixTexturePaths;
 		}
 #endif
 
-		else if (! ::strncmp(params[i], "-c",2) || ! ::strncmp(params[i], "--config=",9)) {
+		else if (! strncmp(params[i], "-c",2) || ! strncmp(params[i], "--config=",9)) {
 			
 			const unsigned int ofs = (params[i][1] == '-' ? 9 : 2);
 
 			// use default configurations
-			if (! ::strncmp(params[i]+ofs,"full",4))
+			if (! strncmp(params[i]+ofs,"full",4))
 				fill.ppFlags |= aiProcessPreset_TargetRealtime_MaxQuality;
 
-			else if (! ::strncmp(params[i]+ofs,"default",7))
+			else if (! strncmp(params[i]+ofs,"default",7))
 				fill.ppFlags |= aiProcessPreset_TargetRealtime_Quality;
 
-			else if (! ::strncmp(params[i]+ofs,"fast",4))
+			else if (! strncmp(params[i]+ofs,"fast",4))
 				fill.ppFlags |= aiProcessPreset_TargetRealtime_Fast;
 		}
-		else if (! ::strcmp(params[i], "-l") || ! ::strcmp(params[i], "--show-log")) { 
+		else if (! strcmp(params[i], "-l") || ! strcmp(params[i], "--show-log")) { 
 			fill.showLog = true;
 		}
-		else if (! ::strcmp(params[i], "-v") || ! ::strcmp(params[i], "--verbose")) { 
+		else if (! strcmp(params[i], "-v") || ! strcmp(params[i], "--verbose")) { 
 			fill.verbose = true;
 		}
-		else if (! ::strncmp(params[i], "--log-out=",10) || ! ::strncmp(params[i], "-lo",3)) { 
+		else if (! strncmp(params[i], "--log-out=",10) || ! strncmp(params[i], "-lo",3)) { 
 			fill.logFile = std::string(params[i]+(params[i][1] == '-' ? 10 : 3));
 			if (!fill.logFile.length())
 				fill.logFile = "assimp-log.txt";

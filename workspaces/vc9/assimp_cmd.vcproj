@@ -1455,6 +1455,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\tools\assimp_cmd\Info.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tools\assimp_cmd\Main.cpp"
 				>
 			</File>

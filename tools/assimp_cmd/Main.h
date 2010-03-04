@@ -120,7 +120,7 @@ const aiScene* ImportModel(const ImportData& imp, const std::string& path);
 
 
 // ------------------------------------------------------------------------------
-/** @brief assimp_dump utility
+/** @brief assimp dump utility
  *  @param params Command line parameters to 'assimp dumb'
  *  @param Number of params
  *  @return 0 for success
@@ -128,11 +128,19 @@ const aiScene* ImportModel(const ImportData& imp, const std::string& path);
 int Assimp_Dump (const char** params, unsigned int num);
 
 // ------------------------------------------------------------------------------
-/** @brief assimp_extract utility
+/** @brief assimp extract utility
  *  @param params Command line parameters to 'assimp extract'
  *  @param Number of params
  *  @return 0 for success
  */
 int Assimp_Extract (const char** params, unsigned int num);
+
+// ------------------------------------------------------------------------------
+/** @brief assimp info utility
+ *  @param params Command line parameters to 'assimp info'
+ *  @param Number of params
+ *  @return 0 for success
+ */
+int Assimp_Info (const char** params, unsigned int num);
 
 #endif // !! AICMD_MAIN_INCLUDED

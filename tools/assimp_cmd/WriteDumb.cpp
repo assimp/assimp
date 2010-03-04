@@ -938,7 +938,8 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 int Assimp_Dump (const char** params, unsigned int num)
 {
 	if (num < 1) {
-		::printf("assimp dump: Invalid number of arguments. See \'assimp dump --help\'\r\n");
+		::printf("assimp dump: Invalid number of arguments. "
+			"See \'assimp dump --help\'\r\n");
 		return 1;
 	}
 
@@ -950,7 +951,8 @@ int Assimp_Dump (const char** params, unsigned int num)
 
 	// asssimp dump in out [options]
 	if (num < 1) {
-		::printf("assimp dump: Invalid number of arguments. See \'assimp dump --help\'\r\n");
+		::printf("assimp dump: Invalid number of arguments. "
+			"See \'assimp dump --help\'\r\n");
 		return 1;
 	}
 
@@ -974,13 +976,13 @@ int Assimp_Dump (const char** params, unsigned int num)
 	// process other flags
 	for (unsigned int i = 1; i < num;++i)		{
 		if (!params[i])continue;
-		if (!::strcmp( params[i], "-b") || !::strcmp( params[i], "--binary")) {
+		if (!::strcmp( params[i],"-b") || !::strcmp( params[i],"--binary")) {
 			binary = true;
 		}
-		else if (!::strcmp( params[i], "-s") || !::strcmp( params[i], "--short")) {
+		else if (!::strcmp( params[i],"-s") || !::strcmp( params[i],"--short")) {
 			shortened = true;
 		}
-		else if (!::strcmp( params[i], "-z") || !::strcmp( params[i], "--compressed")) {
+		else if (!::strcmp( params[i],"-z") || !::strcmp( params[i],"--compressed")) {
 			compressed = true;
 		}
 		else if (i > 2 || params[i][0] == '-') {
@@ -1005,14 +1007,16 @@ int Assimp_Dump (const char** params, unsigned int num)
 	// import the main model
 	const aiScene* scene = ImportModel(import,in);
 	if (!scene) {
-		::printf("assimp dump: Unable to load input file %s\n",in.c_str());
+		::printf("assimp dump: Unable to load input file %s\n",
+			in.c_str());
 		return 5;
 	}
 
 	// open the output file and build the dump
 	FILE* o = ::fopen(out.c_str(),(binary ? "wb" : "wt"));
 	if (!o) {
-		::printf("assimp dump: Unable to open output file %s\n",out.c_str());
+		::printf("assimp dump: Unable to open output file %s\n",
+			out.c_str());
 		return 12;
 	}
 

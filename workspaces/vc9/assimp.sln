@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+# Visual C++ Express 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimpview", "assimp_view.vcproj", "{B17B959B-BB8A-4596-AF0F-A8C8DBBC3C5E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5691E159-2D9B-407F-971F-EA5C592DC524} = {5691E159-2D9B-407F-971F-EA5C592DC524}
@@ -14,11 +14,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unit", "UnitTest.vcproj", "
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimpcmd", "assimp_cmd.vcproj", "{7C8F7B44-C990-4EA8-A2A5-9028472E0AD3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{5691E159-2D9B-407F-971F-EA5C592DC524} = {5691E159-2D9B-407F-971F-EA5C592DC524}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Assimp.NET", "..\..\port\Assimp.NET\Assimp.NET\Assimp.NET.vcproj", "{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5691E159-2D9B-407F-971F-EA5C592DC524} = {5691E159-2D9B-407F-971F-EA5C592DC524}
 	EndProjectSection
@@ -161,30 +156,6 @@ Global
 		{7C8F7B44-C990-4EA8-A2A5-9028472E0AD3}.release-st|Win32.ActiveCfg = release-st|Win32
 		{7C8F7B44-C990-4EA8-A2A5-9028472E0AD3}.release-st|Win32.Build.0 = release-st|Win32
 		{7C8F7B44-C990-4EA8-A2A5-9028472E0AD3}.release-st|x64.ActiveCfg = release-st|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.debug|Win32.ActiveCfg = Debug|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.debug|Win32.Build.0 = Debug|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.debug|x64.ActiveCfg = Debug|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.debug-dll|Win32.ActiveCfg = Debug|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.debug-dll|Win32.Build.0 = Debug|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.debug-dll|x64.ActiveCfg = Debug|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.debug-noboost-st|Win32.ActiveCfg = Debug|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.debug-noboost-st|Win32.Build.0 = Debug|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.debug-noboost-st|x64.ActiveCfg = Debug|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.debug-st|Win32.ActiveCfg = Debug|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.debug-st|Win32.Build.0 = Debug|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.debug-st|x64.ActiveCfg = Debug|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.release|Win32.ActiveCfg = Release|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.release|Win32.Build.0 = Release|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.release|x64.ActiveCfg = Release|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.release-dll|Win32.ActiveCfg = Release|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.release-dll|Win32.Build.0 = Release|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.release-dll|x64.ActiveCfg = Release|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.release-noboost-st|Win32.ActiveCfg = Release|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.release-noboost-st|Win32.Build.0 = Release|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.release-noboost-st|x64.ActiveCfg = Release|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.release-st|Win32.ActiveCfg = Release|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.release-st|Win32.Build.0 = Release|Win32
-		{4922D7BD-5E7A-44DD-BC1D-7F6F0BD82894}.release-st|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

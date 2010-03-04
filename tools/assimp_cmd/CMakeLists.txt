@@ -33,6 +33,7 @@ ADD_EXECUTABLE( assimp_cmd
 	Main.h
 	resource.h
 	WriteDumb.cpp
+	Info.cpp
 )
 
 TARGET_LINK_LIBRARIES( assimp_cmd assimp )

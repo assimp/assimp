@@ -41,11 +41,11 @@ rem -----------------------------------------------------
 rem Build output file names
 rem -----------------------------------------------------
 
-cd ..\bin
+cd ..\..\bin
 svnversion > tmpfile.txt
 SET /p REVISIONBASE= < tmpfile.txt
 DEL /q tmpfile.txt
-cd ..\mkutil
+cd ..\packaging\windows-mkzip
 
 SET VERSIONBASE=1.0.%REVISIONBASE%
 
@@ -72,21 +72,21 @@ rem -----------------------------------------------------
 SET BINCFG_x86=release-dll_win32
 SET BINCFG_x64=release-dll_x64
 
-copy /Y ..\bin\assimpview_%BINCFG_x86%\assimp_view.exe "final\%OUT_BIN%\x86\assimp_view.exe"
-copy /Y ..\bin\assimpview_%BINCFG_x64%\assimp_view.exe "final\%OUT_BIN%\x64\assimp_view.exe"
+copy /Y ..\..\bin\assimpview_%BINCFG_x86%\assimp_view.exe "final\%OUT_BIN%\x86\assimp_view.exe"
+copy /Y ..\..\bin\assimpview_%BINCFG_x64%\assimp_view.exe "final\%OUT_BIN%\x64\assimp_view.exe"
 
-copy /Y ..\bin\assimpcmd_%BINCFG_x86%\assimp.exe "final\%OUT_BIN%\x86\assimp.exe"
-copy /Y ..\bin\assimpcmd_%BINCFG_x64%\assimp.exe "final\%OUT_BIN%\x64\assimp.exe"
+copy /Y ..\..\bin\assimpcmd_%BINCFG_x86%\assimp.exe "final\%OUT_BIN%\x86\assimp.exe"
+copy /Y ..\..\bin\assimpcmd_%BINCFG_x64%\assimp.exe "final\%OUT_BIN%\x64\assimp.exe"
 
-copy /Y ..\bin\assimp_%BINCFG_x86%\Assimp32.dll    "final\%OUT_BIN%\x86\Assimp32.dll"
-copy /Y ..\bin\assimp_%BINCFG_x64%\Assimp64.dll    "final\%OUT_BIN%\x64\Assimp64.dll"
+copy /Y ..\..\bin\assimp_%BINCFG_x86%\Assimp32.dll    "final\%OUT_BIN%\x86\Assimp32.dll"
+copy /Y ..\..\bin\assimp_%BINCFG_x64%\Assimp64.dll    "final\%OUT_BIN%\x64\Assimp64.dll"
 
-copy ..\LICENSE final\%OUT_BIN%\LICENSE
-copy ..\CREDITS final\%OUT_BIN%\CREDITS
+copy ..\..\LICENSE final\%OUT_BIN%\LICENSE
+copy ..\..\CREDITS final\%OUT_BIN%\CREDITS
 copy bin_readme.txt final\%OUT_BIN%\README
 copy bin_readme.txt final\%OUT_BIN%\README
 
-copy ..\doc\AssimpCmdDoc_Html\AssimpCmdDoc.chm  final\%OUT_BIN%\CommandLine.chm
+copy ..\..\doc\AssimpCmdDoc_Html\AssimpCmdDoc.chm  final\%OUT_BIN%\CommandLine.chm
 
 rem -----------------------------------------------------
 rem Do a clean export of the repository and build SDK
@@ -95,11 +95,9 @@ rem We take the current revision and remove some stuff
 rem that is nto yet ready to be published.
 rem -----------------------------------------------------
 
-svn export .\..\  final\%OUT_SDK%
-rem RD  /s /q final\%OUT_SDK%\mkutil
-RD  /s /q final\%OUT_SDK%\port\jAssimp
-RD  /s /q final\%OUT_SDK%\port\Assimp.net
-RD  /s /q final\%OUT_SDK%\workspaces\jidea5.1
+svn export .\..\..\  final\%OUT_SDK%
+rem RD  /s /q final\%OUT_SDK%\packaging
+
 
 rem Copy doc to a suitable place
 move final\%OUT_SDK%\doc\AssimpDoc_Html\AssimpDoc.chm final\%OUT_SDK%\Documentation.chm

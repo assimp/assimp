@@ -120,13 +120,42 @@ unsigned int GetAvgVertsPerMesh(const aiScene* scene) {
 	return static_cast<unsigned int>(CountVertices(scene)/scene->mNumMeshes);
 }
 
-#if 0
+// -----------------------------------------------------------------------------------
+void FindSpecialPoints(const aiScene* scene,const aiNode* root,aiVector3D special_points[3],const aiMatrix4x4& mat=aiMatrix4x4())
+{
+	// XXX that could be greatly simplified by using code from code/ProcessHelper.h
+	// XXX I just don't want to include it here.
+	const aiMatrix4x4 trafo = root->mTransformation*mat;
+	for(unsigned int i = 0; i < root->mNumMeshes; ++i) {
+		const aiMesh* mesh = scene->mMeshes[root->mMeshes[i]];
+
+		for(unsigned int a = 0; a < mesh->mNumVertices; ++a) {
+			aiVector3D v = trafo*mesh->mVertices[a];
+
+			special_points[0].x = std::min(special_points[0].x,v.x);
+			special_points[0].y = std::min(special_points[0].y,v.y);
+			special_points[0].z = std::min(special_points[0].z,v.z);
+
+			special_points[1].x = std::max(special_points[1].x,v.x);
+			special_points[1].y = std::max(special_points[1].y,v.y);
+			special_points[1].z = std::max(special_points[1].z,v.z);
+		}
+	}
+
+	for(unsigned int i = 0; i < root->mNumChildren; ++i) {
+		FindSpecialPoints(scene,root->mChildren[i],special_points,trafo);
+	}
+}
+
 // -----------------------------------------------------------------------------------
 void FindSpecialPoints(const aiScene* scene,aiVector3D special_points[3])
 {
-	// XXX include code/ProcessHelper.h from here or rewrite everything from scratch?
+	special_points[0] = aiVector3D(1e10f,1e10f,1e10f);
+	special_points[1] = aiVector3D(-1e10f,-1e10f,-1e10f);
+
+	FindSpecialPoints(scene,scene->mRootNode,special_points);
+	special_points[2] = 0.5f*(special_points[0]+special_points[1]);
 }
-#endif
 
 // -----------------------------------------------------------------------------------
 std::string FindPTypes(const aiScene* scene)
@@ -233,18 +262,14 @@ int Assimp_Info (const char** params, unsigned int num)
 		"Primitive Types:    %s\n"
 		"Average faces/mesh  %i\n"
 		"Average verts/mesh  %i\n"
-#if 0
-		"Center point       (%f %f %f)\n"
 		"Minimum point      (%f %f %f)\n"
 		"Maximum point      (%f %f %f)\n"
-#endif
+		"Center point       (%f %f %f)\n"
+
 		;
 
-#if 0
 	aiVector3D special_points[3];
 	FindSpecialPoints(scene,special_points);
-#endif
-
 	printf(format_string,
 		mem.total,
 		CountNodes(scene->mRootNode),
@@ -261,13 +286,10 @@ int Assimp_Info (const char** params, unsigned int num)
 		CountAnimChannels(scene),
 		FindPTypes(scene).c_str(),
 		GetAvgFacePerMesh(scene),
-		GetAvgVertsPerMesh(scene)
-#if 0
-		,
-		special_points[0],
-		special_points[1],
-		special_points[2]
-#endif
+		GetAvgVertsPerMesh(scene),
+		special_points[0][0],special_points[0][1],special_points[0][2],
+		special_points[1][0],special_points[1][1],special_points[1][2],
+		special_points[2][0],special_points[2][1],special_points[2][2]
 		)
 	;
 	unsigned int total=0;

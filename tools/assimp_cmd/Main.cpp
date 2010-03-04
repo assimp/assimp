@@ -54,10 +54,10 @@ const char* AICMD_MSG_ABOUT =
 
 "Version %i.%i-%s%s%s%s%s (SVNREV %i)\n\n";
 
-
 const char* AICMD_MSG_HELP = 
 "assimp <verb> <arguments>\n\n"
 "\tverbs:\n"
+"\t\tinfo    - Display statistics and structure of a 3D model\n"
 "\t\tversion - Display Assimp version\n"
 "\t\tlistext - List all known file extension\n"
 "\t\tknowext - Check whether a file extension is recognized by Assimp\n"

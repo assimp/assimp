@@ -147,6 +147,130 @@
 		3AF45B660E4B716800207D74 /* XFileImporter.h in Headers */ = {isa = PBXBuildFile; fileRef = 3AF45AF60E4B716800207D74 /* XFileImporter.h */; };
 		3AF45B670E4B716800207D74 /* XFileParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3AF45AF70E4B716800207D74 /* XFileParser.cpp */; };
 		3AF45B680E4B716800207D74 /* XFileParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 3AF45AF80E4B716800207D74 /* XFileParser.h */; };
+		7411B14A11416D1D00BCD793 /* aiColor4D.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B14811416D1D00BCD793 /* aiColor4D.h */; };
+		7411B14B11416D1D00BCD793 /* aiColor4D.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B14811416D1D00BCD793 /* aiColor4D.h */; };
+		7411B14C11416D1D00BCD793 /* aiColor4D.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B14811416D1D00BCD793 /* aiColor4D.h */; };
+		7411B14D11416D1D00BCD793 /* aiColor4D.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B14811416D1D00BCD793 /* aiColor4D.h */; };
+		7411B15011416D5E00BCD793 /* CSMLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B14E11416D5E00BCD793 /* CSMLoader.cpp */; };
+		7411B15111416D5E00BCD793 /* CSMLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B14F11416D5E00BCD793 /* CSMLoader.h */; };
+		7411B15211416D5E00BCD793 /* CSMLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B14E11416D5E00BCD793 /* CSMLoader.cpp */; };
+		7411B15311416D5E00BCD793 /* CSMLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B14F11416D5E00BCD793 /* CSMLoader.h */; };
+		7411B15411416D5E00BCD793 /* CSMLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B14E11416D5E00BCD793 /* CSMLoader.cpp */; };
+		7411B15511416D5E00BCD793 /* CSMLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B14F11416D5E00BCD793 /* CSMLoader.h */; };
+		7411B15611416D5E00BCD793 /* CSMLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B14E11416D5E00BCD793 /* CSMLoader.cpp */; };
+		7411B15711416D5E00BCD793 /* CSMLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B14F11416D5E00BCD793 /* CSMLoader.h */; };
+		7411B15B11416DDD00BCD793 /* LWSLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B15911416DDD00BCD793 /* LWSLoader.cpp */; };
+		7411B15C11416DDD00BCD793 /* LWSLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B15A11416DDD00BCD793 /* LWSLoader.h */; };
+		7411B15D11416DDD00BCD793 /* LWSLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B15911416DDD00BCD793 /* LWSLoader.cpp */; };
+		7411B15E11416DDD00BCD793 /* LWSLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B15A11416DDD00BCD793 /* LWSLoader.h */; };
+		7411B15F11416DDD00BCD793 /* LWSLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B15911416DDD00BCD793 /* LWSLoader.cpp */; };
+		7411B16011416DDD00BCD793 /* LWSLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B15A11416DDD00BCD793 /* LWSLoader.h */; };
+		7411B16111416DDD00BCD793 /* LWSLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B15911416DDD00BCD793 /* LWSLoader.cpp */; };
+		7411B16211416DDD00BCD793 /* LWSLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B15A11416DDD00BCD793 /* LWSLoader.h */; };
+		7411B16511416DF400BCD793 /* LWOAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B16311416DF400BCD793 /* LWOAnimation.cpp */; };
+		7411B16611416DF400BCD793 /* LWOAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B16411416DF400BCD793 /* LWOAnimation.h */; };
+		7411B16711416DF400BCD793 /* LWOAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B16311416DF400BCD793 /* LWOAnimation.cpp */; };
+		7411B16811416DF400BCD793 /* LWOAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B16411416DF400BCD793 /* LWOAnimation.h */; };
+		7411B16911416DF400BCD793 /* LWOAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B16311416DF400BCD793 /* LWOAnimation.cpp */; };
+		7411B16A11416DF400BCD793 /* LWOAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B16411416DF400BCD793 /* LWOAnimation.h */; };
+		7411B16B11416DF400BCD793 /* LWOAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B16311416DF400BCD793 /* LWOAnimation.cpp */; };
+		7411B16C11416DF400BCD793 /* LWOAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B16411416DF400BCD793 /* LWOAnimation.h */; };
+		7411B17211416E2500BCD793 /* MS3DLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B17011416E2500BCD793 /* MS3DLoader.cpp */; };
+		7411B17311416E2500BCD793 /* MS3DLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B17111416E2500BCD793 /* MS3DLoader.h */; };
+		7411B17411416E2500BCD793 /* MS3DLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B17011416E2500BCD793 /* MS3DLoader.cpp */; };
+		7411B17511416E2500BCD793 /* MS3DLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B17111416E2500BCD793 /* MS3DLoader.h */; };
+		7411B17611416E2500BCD793 /* MS3DLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B17011416E2500BCD793 /* MS3DLoader.cpp */; };
+		7411B17711416E2500BCD793 /* MS3DLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B17111416E2500BCD793 /* MS3DLoader.h */; };
+		7411B17811416E2500BCD793 /* MS3DLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B17011416E2500BCD793 /* MS3DLoader.cpp */; };
+		7411B17911416E2500BCD793 /* MS3DLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B17111416E2500BCD793 /* MS3DLoader.h */; };
+		7411B17E11416E9400BCD793 /* OgreImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B17B11416E9400BCD793 /* OgreImporter.cpp */; };
+		7411B17F11416E9400BCD793 /* OgreImporter.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B17C11416E9400BCD793 /* OgreImporter.h */; };
+		7411B18011416E9400BCD793 /* OgreXmlHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B17D11416E9400BCD793 /* OgreXmlHelper.h */; };
+		7411B18111416E9400BCD793 /* OgreImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B17B11416E9400BCD793 /* OgreImporter.cpp */; };
+		7411B18211416E9400BCD793 /* OgreImporter.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B17C11416E9400BCD793 /* OgreImporter.h */; };
+		7411B18311416E9400BCD793 /* OgreXmlHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B17D11416E9400BCD793 /* OgreXmlHelper.h */; };
+		7411B18411416E9400BCD793 /* OgreImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B17B11416E9400BCD793 /* OgreImporter.cpp */; };
+		7411B18511416E9400BCD793 /* OgreImporter.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B17C11416E9400BCD793 /* OgreImporter.h */; };
+		7411B18611416E9400BCD793 /* OgreXmlHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B17D11416E9400BCD793 /* OgreXmlHelper.h */; };
+		7411B18711416E9400BCD793 /* OgreImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B17B11416E9400BCD793 /* OgreImporter.cpp */; };
+		7411B18811416E9400BCD793 /* OgreImporter.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B17C11416E9400BCD793 /* OgreImporter.h */; };
+		7411B18911416E9400BCD793 /* OgreXmlHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B17D11416E9400BCD793 /* OgreXmlHelper.h */; };
+		7411B18D11416EBC00BCD793 /* UnrealLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B18B11416EBC00BCD793 /* UnrealLoader.cpp */; };
+		7411B18E11416EBC00BCD793 /* UnrealLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B18C11416EBC00BCD793 /* UnrealLoader.h */; };
+		7411B18F11416EBC00BCD793 /* UnrealLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B18B11416EBC00BCD793 /* UnrealLoader.cpp */; };
+		7411B19011416EBC00BCD793 /* UnrealLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B18C11416EBC00BCD793 /* UnrealLoader.h */; };
+		7411B19111416EBC00BCD793 /* UnrealLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B18B11416EBC00BCD793 /* UnrealLoader.cpp */; };
+		7411B19211416EBC00BCD793 /* UnrealLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B18C11416EBC00BCD793 /* UnrealLoader.h */; };
+		7411B19311416EBC00BCD793 /* UnrealLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B18B11416EBC00BCD793 /* UnrealLoader.cpp */; };
+		7411B19411416EBC00BCD793 /* UnrealLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B18C11416EBC00BCD793 /* UnrealLoader.h */; };
+		7411B1A611416EF400BCD793 /* FileSystemFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19711416EF400BCD793 /* FileSystemFilter.h */; };
+		7411B1A711416EF400BCD793 /* GenericProperty.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19811416EF400BCD793 /* GenericProperty.h */; };
+		7411B1A811416EF400BCD793 /* MemoryIOWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19911416EF400BCD793 /* MemoryIOWrapper.h */; };
+		7411B1A911416EF400BCD793 /* OptimizeGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B19A11416EF400BCD793 /* OptimizeGraph.cpp */; };
+		7411B1AA11416EF400BCD793 /* OptimizeGraph.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19B11416EF400BCD793 /* OptimizeGraph.h */; };
+		7411B1AB11416EF400BCD793 /* OptimizeMeshes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B19C11416EF400BCD793 /* OptimizeMeshes.cpp */; };
+		7411B1AC11416EF400BCD793 /* OptimizeMeshes.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19D11416EF400BCD793 /* OptimizeMeshes.h */; };
+		7411B1AD11416EF400BCD793 /* ProcessHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19E11416EF400BCD793 /* ProcessHelper.h */; };
+		7411B1AE11416EF400BCD793 /* StdOStreamLogStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19F11416EF400BCD793 /* StdOStreamLogStream.h */; };
+		7411B1AF11416EF400BCD793 /* StreamReader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B1A011416EF400BCD793 /* StreamReader.h */; };
+		7411B1B011416EF400BCD793 /* Subdivision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B1A111416EF400BCD793 /* Subdivision.cpp */; };
+		7411B1B111416EF400BCD793 /* Subdivision.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B1A211416EF400BCD793 /* Subdivision.h */; };
+		7411B1B211416EF400BCD793 /* TargetAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B1A311416EF400BCD793 /* TargetAnimation.cpp */; };
+		7411B1B311416EF400BCD793 /* TargetAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B1A411416EF400BCD793 /* TargetAnimation.h */; };
+		7411B1B411416EF400BCD793 /* Vertex.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B1A511416EF400BCD793 /* Vertex.h */; };
+		7411B1B511416EF400BCD793 /* FileSystemFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19711416EF400BCD793 /* FileSystemFilter.h */; };
+		7411B1B611416EF400BCD793 /* GenericProperty.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19811416EF400BCD793 /* GenericProperty.h */; };
+		7411B1B711416EF400BCD793 /* MemoryIOWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19911416EF400BCD793 /* MemoryIOWrapper.h */; };
+		7411B1B811416EF400BCD793 /* OptimizeGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B19A11416EF400BCD793 /* OptimizeGraph.cpp */; };
+		7411B1B911416EF400BCD793 /* OptimizeGraph.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19B11416EF400BCD793 /* OptimizeGraph.h */; };
+		7411B1BA11416EF400BCD793 /* OptimizeMeshes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B19C11416EF400BCD793 /* OptimizeMeshes.cpp */; };
+		7411B1BB11416EF400BCD793 /* OptimizeMeshes.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19D11416EF400BCD793 /* OptimizeMeshes.h */; };
+		7411B1BC11416EF400BCD793 /* ProcessHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19E11416EF400BCD793 /* ProcessHelper.h */; };
+		7411B1BD11416EF400BCD793 /* StdOStreamLogStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19F11416EF400BCD793 /* StdOStreamLogStream.h */; };
+		7411B1BE11416EF400BCD793 /* StreamReader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B1A011416EF400BCD793 /* StreamReader.h */; };
+		7411B1BF11416EF400BCD793 /* Subdivision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B1A111416EF400BCD793 /* Subdivision.cpp */; };
+		7411B1C011416EF400BCD793 /* Subdivision.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B1A211416EF400BCD793 /* Subdivision.h */; };
+		7411B1C111416EF400BCD793 /* TargetAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B1A311416EF400BCD793 /* TargetAnimation.cpp */; };
+		7411B1C211416EF400BCD793 /* TargetAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B1A411416EF400BCD793 /* TargetAnimation.h */; };
+		7411B1C311416EF400BCD793 /* Vertex.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B1A511416EF400BCD793 /* Vertex.h */; };
+		7411B1C411416EF400BCD793 /* FileSystemFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19711416EF400BCD793 /* FileSystemFilter.h */; };
+		7411B1C511416EF400BCD793 /* GenericProperty.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19811416EF400BCD793 /* GenericProperty.h */; };
+		7411B1C611416EF400BCD793 /* MemoryIOWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19911416EF400BCD793 /* MemoryIOWrapper.h */; };
+		7411B1C711416EF400BCD793 /* OptimizeGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B19A11416EF400BCD793 /* OptimizeGraph.cpp */; };
+		7411B1C811416EF400BCD793 /* OptimizeGraph.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19B11416EF400BCD793 /* OptimizeGraph.h */; };
+		7411B1C911416EF400BCD793 /* OptimizeMeshes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B19C11416EF400BCD793 /* OptimizeMeshes.cpp */; };
+		7411B1CA11416EF400BCD793 /* OptimizeMeshes.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19D11416EF400BCD793 /* OptimizeMeshes.h */; };
+		7411B1CB11416EF400BCD793 /* ProcessHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19E11416EF400BCD793 /* ProcessHelper.h */; };
+		7411B1CC11416EF400BCD793 /* StdOStreamLogStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19F11416EF400BCD793 /* StdOStreamLogStream.h */; };
+		7411B1CD11416EF400BCD793 /* StreamReader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B1A011416EF400BCD793 /* StreamReader.h */; };
+		7411B1CE11416EF400BCD793 /* Subdivision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B1A111416EF400BCD793 /* Subdivision.cpp */; };
+		7411B1CF11416EF400BCD793 /* Subdivision.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B1A211416EF400BCD793 /* Subdivision.h */; };
+		7411B1D011416EF400BCD793 /* TargetAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B1A311416EF400BCD793 /* TargetAnimation.cpp */; };
+		7411B1D111416EF400BCD793 /* TargetAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B1A411416EF400BCD793 /* TargetAnimation.h */; };
+		7411B1D211416EF400BCD793 /* Vertex.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B1A511416EF400BCD793 /* Vertex.h */; };
+		7411B1D311416EF400BCD793 /* FileSystemFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19711416EF400BCD793 /* FileSystemFilter.h */; };
+		7411B1D411416EF400BCD793 /* GenericProperty.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19811416EF400BCD793 /* GenericProperty.h */; };
+		7411B1D511416EF400BCD793 /* MemoryIOWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19911416EF400BCD793 /* MemoryIOWrapper.h */; };
+		7411B1D611416EF400BCD793 /* OptimizeGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B19A11416EF400BCD793 /* OptimizeGraph.cpp */; };
+		7411B1D711416EF400BCD793 /* OptimizeGraph.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19B11416EF400BCD793 /* OptimizeGraph.h */; };
+		7411B1D811416EF400BCD793 /* OptimizeMeshes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B19C11416EF400BCD793 /* OptimizeMeshes.cpp */; };
+		7411B1D911416EF400BCD793 /* OptimizeMeshes.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19D11416EF400BCD793 /* OptimizeMeshes.h */; };
+		7411B1DA11416EF400BCD793 /* ProcessHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19E11416EF400BCD793 /* ProcessHelper.h */; };
+		7411B1DB11416EF400BCD793 /* StdOStreamLogStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B19F11416EF400BCD793 /* StdOStreamLogStream.h */; };
+		7411B1DC11416EF400BCD793 /* StreamReader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B1A011416EF400BCD793 /* StreamReader.h */; };
+		7411B1DD11416EF400BCD793 /* Subdivision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B1A111416EF400BCD793 /* Subdivision.cpp */; };
+		7411B1DE11416EF400BCD793 /* Subdivision.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B1A211416EF400BCD793 /* Subdivision.h */; };
+		7411B1DF11416EF400BCD793 /* TargetAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7411B1A311416EF400BCD793 /* TargetAnimation.cpp */; };
+		7411B1E011416EF400BCD793 /* TargetAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B1A411416EF400BCD793 /* TargetAnimation.h */; };
+		7411B1E111416EF400BCD793 /* Vertex.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B1A511416EF400BCD793 /* Vertex.h */; };
+		7411B22D114172C400BCD793 /* ConvertUTF.c in Sources */ = {isa = PBXBuildFile; fileRef = 7411B22C114172C400BCD793 /* ConvertUTF.c */; };
+		7411B22E114172C400BCD793 /* ConvertUTF.c in Sources */ = {isa = PBXBuildFile; fileRef = 7411B22C114172C400BCD793 /* ConvertUTF.c */; };
+		7411B22F114172C400BCD793 /* ConvertUTF.c in Sources */ = {isa = PBXBuildFile; fileRef = 7411B22C114172C400BCD793 /* ConvertUTF.c */; };
+		7411B230114172C400BCD793 /* ConvertUTF.c in Sources */ = {isa = PBXBuildFile; fileRef = 7411B22C114172C400BCD793 /* ConvertUTF.c */; };
+		7411B233114172DB00BCD793 /* ConvertUTF.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B232114172DB00BCD793 /* ConvertUTF.h */; };
+		7411B234114172DB00BCD793 /* ConvertUTF.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B232114172DB00BCD793 /* ConvertUTF.h */; };
+		7411B235114172DB00BCD793 /* ConvertUTF.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B232114172DB00BCD793 /* ConvertUTF.h */; };
+		7411B236114172DB00BCD793 /* ConvertUTF.h in Headers */ = {isa = PBXBuildFile; fileRef = 7411B232114172DB00BCD793 /* ConvertUTF.h */; };
 		7437C959113F18C70067B9B9 /* foreach.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 7437C950113F18C70067B9B9 /* foreach.hpp */; };
 		7437C95A113F18C70067B9B9 /* format.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 7437C951113F18C70067B9B9 /* format.hpp */; };
 		7437C95B113F18C70067B9B9 /* common_factor_rt.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 7437C953113F18C70067B9B9 /* common_factor_rt.hpp */; };
@@ -996,6 +1120,38 @@
 		3AF45AF60E4B716800207D74 /* XFileImporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XFileImporter.h; sourceTree = "<group>"; };
 		3AF45AF70E4B716800207D74 /* XFileParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XFileParser.cpp; sourceTree = "<group>"; };
 		3AF45AF80E4B716800207D74 /* XFileParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XFileParser.h; sourceTree = "<group>"; };
+		7411B14811416D1D00BCD793 /* aiColor4D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aiColor4D.h; path = ../../include/aiColor4D.h; sourceTree = SOURCE_ROOT; };
+		7411B14911416D1D00BCD793 /* aiColor4D.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = aiColor4D.inl; path = ../../include/aiColor4D.inl; sourceTree = SOURCE_ROOT; };
+		7411B14E11416D5E00BCD793 /* CSMLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CSMLoader.cpp; path = ../../code/CSMLoader.cpp; sourceTree = SOURCE_ROOT; };
+		7411B14F11416D5E00BCD793 /* CSMLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CSMLoader.h; path = ../../code/CSMLoader.h; sourceTree = SOURCE_ROOT; };
+		7411B15911416DDD00BCD793 /* LWSLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LWSLoader.cpp; path = ../../code/LWSLoader.cpp; sourceTree = SOURCE_ROOT; };
+		7411B15A11416DDD00BCD793 /* LWSLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LWSLoader.h; path = ../../code/LWSLoader.h; sourceTree = SOURCE_ROOT; };
+		7411B16311416DF400BCD793 /* LWOAnimation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LWOAnimation.cpp; path = ../../code/LWOAnimation.cpp; sourceTree = SOURCE_ROOT; };
+		7411B16411416DF400BCD793 /* LWOAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LWOAnimation.h; path = ../../code/LWOAnimation.h; sourceTree = SOURCE_ROOT; };
+		7411B17011416E2500BCD793 /* MS3DLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MS3DLoader.cpp; path = ../../code/MS3DLoader.cpp; sourceTree = SOURCE_ROOT; };
+		7411B17111416E2500BCD793 /* MS3DLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MS3DLoader.h; path = ../../code/MS3DLoader.h; sourceTree = SOURCE_ROOT; };
+		7411B17B11416E9400BCD793 /* OgreImporter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OgreImporter.cpp; path = ../../code/OgreImporter.cpp; sourceTree = SOURCE_ROOT; };
+		7411B17C11416E9400BCD793 /* OgreImporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OgreImporter.h; path = ../../code/OgreImporter.h; sourceTree = SOURCE_ROOT; };
+		7411B17D11416E9400BCD793 /* OgreXmlHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OgreXmlHelper.h; path = ../../code/OgreXmlHelper.h; sourceTree = SOURCE_ROOT; };
+		7411B18B11416EBC00BCD793 /* UnrealLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UnrealLoader.cpp; path = ../../code/UnrealLoader.cpp; sourceTree = SOURCE_ROOT; };
+		7411B18C11416EBC00BCD793 /* UnrealLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UnrealLoader.h; path = ../../code/UnrealLoader.h; sourceTree = SOURCE_ROOT; };
+		7411B19711416EF400BCD793 /* FileSystemFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileSystemFilter.h; path = ../../code/FileSystemFilter.h; sourceTree = SOURCE_ROOT; };
+		7411B19811416EF400BCD793 /* GenericProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GenericProperty.h; path = ../../code/GenericProperty.h; sourceTree = SOURCE_ROOT; };
+		7411B19911416EF400BCD793 /* MemoryIOWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MemoryIOWrapper.h; path = ../../code/MemoryIOWrapper.h; sourceTree = SOURCE_ROOT; };
+		7411B19A11416EF400BCD793 /* OptimizeGraph.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptimizeGraph.cpp; path = ../../code/OptimizeGraph.cpp; sourceTree = SOURCE_ROOT; };
+		7411B19B11416EF400BCD793 /* OptimizeGraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OptimizeGraph.h; path = ../../code/OptimizeGraph.h; sourceTree = SOURCE_ROOT; };
+		7411B19C11416EF400BCD793 /* OptimizeMeshes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptimizeMeshes.cpp; path = ../../code/OptimizeMeshes.cpp; sourceTree = SOURCE_ROOT; };
+		7411B19D11416EF400BCD793 /* OptimizeMeshes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OptimizeMeshes.h; path = ../../code/OptimizeMeshes.h; sourceTree = SOURCE_ROOT; };
+		7411B19E11416EF400BCD793 /* ProcessHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProcessHelper.h; path = ../../code/ProcessHelper.h; sourceTree = SOURCE_ROOT; };
+		7411B19F11416EF400BCD793 /* StdOStreamLogStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StdOStreamLogStream.h; path = ../../code/StdOStreamLogStream.h; sourceTree = SOURCE_ROOT; };
+		7411B1A011416EF400BCD793 /* StreamReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StreamReader.h; path = ../../code/StreamReader.h; sourceTree = SOURCE_ROOT; };
+		7411B1A111416EF400BCD793 /* Subdivision.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Subdivision.cpp; path = ../../code/Subdivision.cpp; sourceTree = SOURCE_ROOT; };
+		7411B1A211416EF400BCD793 /* Subdivision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Subdivision.h; path = ../../code/Subdivision.h; sourceTree = SOURCE_ROOT; };
+		7411B1A311416EF400BCD793 /* TargetAnimation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TargetAnimation.cpp; path = ../../code/TargetAnimation.cpp; sourceTree = SOURCE_ROOT; };
+		7411B1A411416EF400BCD793 /* TargetAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TargetAnimation.h; path = ../../code/TargetAnimation.h; sourceTree = SOURCE_ROOT; };
+		7411B1A511416EF400BCD793 /* Vertex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vertex.h; path = ../../code/Vertex.h; sourceTree = SOURCE_ROOT; };
+		7411B22C114172C400BCD793 /* ConvertUTF.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ConvertUTF.c; path = ../../contrib/ConvertUTF/ConvertUTF.c; sourceTree = SOURCE_ROOT; };
+		7411B232114172DB00BCD793 /* ConvertUTF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ConvertUTF.h; path = ../../contrib/ConvertUTF/ConvertUTF.h; sourceTree = SOURCE_ROOT; };
 		7437C950113F18C70067B9B9 /* foreach.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = foreach.hpp; path = ../../code/BoostWorkaround/boost/foreach.hpp; sourceTree = SOURCE_ROOT; };
 		7437C951113F18C70067B9B9 /* format.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = format.hpp; path = ../../code/BoostWorkaround/boost/format.hpp; sourceTree = SOURCE_ROOT; };
 		7437C953113F18C70067B9B9 /* common_factor_rt.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = common_factor_rt.hpp; path = ../../code/BoostWorkaround/boost/math/common_factor_rt.hpp; sourceTree = SOURCE_ROOT; };
@@ -1175,6 +1331,8 @@
 		3AB8A3A80E50D5F400606590 /* LWO */ = {
 			isa = PBXGroup;
 			children = (
+				7411B16311416DF400BCD793 /* LWOAnimation.cpp */,
+				7411B16411416DF400BCD793 /* LWOAnimation.h */,
 				F90BB0270F5DDA9200124155 /* LWOBLoader.cpp */,
 				3AB8A3B70E50D6DB00606590 /* LWOFileData.h */,
 				3AB8A3B80E50D6DB00606590 /* LWOLoader.cpp */,
@@ -1188,6 +1346,8 @@
 		3AF45A520E4B715000207D74 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				7411B14811416D1D00BCD793 /* aiColor4D.h */,
+				7411B14911416D1D00BCD793 /* aiColor4D.inl */,
 				3AF45A530E4B715000207D74 /* aiAnim.h */,
 				3AF45A540E4B715000207D74 /* aiAssert.h */,
 				F90BAFBF0F5DD7EB00124155 /* aiCamera.h */,
@@ -1238,8 +1398,8 @@
 				3AF45A960E4B716800207D74 /* ByteSwap.h */,
 				3AF45A970E4B716800207D74 /* CalcTangentsProcess.cpp */,
 				3AF45A980E4B716800207D74 /* CalcTangentsProcess.h */,
-				F90BB04C0F5DDB8D00124155 /* ComputeUVMappingProcess.h */,
 				F90BB04D0F5DDB8D00124155 /* ComputeUVMappingProcess.cpp */,
+				F90BB04C0F5DDB8D00124155 /* ComputeUVMappingProcess.h */,
 				3AF45A990E4B716800207D74 /* ConvertToLHProcess.cpp */,
 				3AF45A9A0E4B716800207D74 /* ConvertToLHProcess.h */,
 				3AF45A9B0E4B716800207D74 /* DefaultIOStream.cpp */,
@@ -1249,14 +1409,16 @@
 				3AF45A9F0E4B716800207D74 /* DefaultLogger.cpp */,
 				3AF45AA30E4B716800207D74 /* fast_atof.h */,
 				3AF45AA40E4B716800207D74 /* FileLogStream.h */,
-				F90BB0470F5DDB6100124155 /* FindDegenerates.h */,
+				7411B19711416EF400BCD793 /* FileSystemFilter.h */,
 				F90BB0480F5DDB6100124155 /* FindDegenerates.cpp */,
-				F90BB0560F5DDBBF00124155 /* FindInstancesProcess.h */,
+				F90BB0470F5DDB6100124155 /* FindDegenerates.h */,
 				F90BB0570F5DDBBF00124155 /* FindInstancesProcess.cpp */,
+				F90BB0560F5DDBBF00124155 /* FindInstancesProcess.h */,
 				F90BB05F0F5DDBE600124155 /* FindInvalidDataProcess.cpp */,
 				F90BB0600F5DDBE600124155 /* FindInvalidDataProcess.h */,
 				3AB8A3B30E50D69D00606590 /* FixNormalsStep.cpp */,
 				3AB8A3B40E50D69D00606590 /* FixNormalsStep.h */,
+				7411B19811416EF400BCD793 /* GenericProperty.h */,
 				3AF45AA50E4B716800207D74 /* GenFaceNormalsProcess.cpp */,
 				3AF45AA60E4B716800207D74 /* GenFaceNormalsProcess.h */,
 				3AF45AA70E4B716800207D74 /* GenVertexNormalsProcess.cpp */,
@@ -1272,41 +1434,54 @@
 				3AF45AB50E4B716800207D74 /* LimitBoneWeightsProcess.h */,
 				3AF45AB60E4B716800207D74 /* MaterialSystem.cpp */,
 				3AF45AB70E4B716800207D74 /* MaterialSystem.h */,
+				7411B19911416EF400BCD793 /* MemoryIOWrapper.h */,
+				7411B19A11416EF400BCD793 /* OptimizeGraph.cpp */,
+				7411B19B11416EF400BCD793 /* OptimizeGraph.h */,
+				7411B19C11416EF400BCD793 /* OptimizeMeshes.cpp */,
+				7411B19D11416EF400BCD793 /* OptimizeMeshes.h */,
 				3AF45AD30E4B716800207D74 /* ParsingUtils.h */,
 				3AF45AD80E4B716800207D74 /* PretransformVertices.cpp */,
 				3AF45AD90E4B716800207D74 /* PretransformVertices.h */,
+				7411B19E11416EF400BCD793 /* ProcessHelper.h */,
 				3AF45ADA0E4B716800207D74 /* qnan.h */,
 				3AF45ADB0E4B716800207D74 /* RemoveComments.cpp */,
 				3AF45ADC0E4B716800207D74 /* RemoveComments.h */,
 				3AF45ADD0E4B716800207D74 /* RemoveRedundantMaterials.cpp */,
 				3AF45ADE0E4B716800207D74 /* RemoveRedundantMaterials.h */,
-				F90BB05A0F5DDBCB00124155 /* RemoveVCProcess.h */,
 				F90BB05B0F5DDBCB00124155 /* RemoveVCProcess.cpp */,
-				F90BB0390F5DDB3200124155 /* ScenePreprocessor.h */,
+				F90BB05A0F5DDBCB00124155 /* RemoveVCProcess.h */,
 				F90BB03A0F5DDB3200124155 /* SceneCombiner.cpp */,
 				F90BB03B0F5DDB3200124155 /* SceneCombiner.h */,
 				F90BB03C0F5DDB3200124155 /* ScenePreprocessor.cpp */,
+				F90BB0390F5DDB3200124155 /* ScenePreprocessor.h */,
 				F90BAFFC0F5DD9A000124155 /* SGSpatialSort.cpp */,
 				F90BAFFB0F5DD9A000124155 /* SGSpatialSort.h */,
-				F90BB0640F5DDC0700124155 /* SkeletonMeshBuilder.h */,
 				F90BB0650F5DDC0700124155 /* SkeletonMeshBuilder.cpp */,
+				F90BB0640F5DDC0700124155 /* SkeletonMeshBuilder.h */,
 				F90BB0690F5DDC1E00124155 /* SmoothingGroups.h */,
 				F90BB06A0F5DDC1E00124155 /* SmoothingGroups.inl */,
-				F90BB0420F5DDB4600124155 /* SortByPTypeProcess.h */,
 				F90BB0430F5DDB4600124155 /* SortByPTypeProcess.cpp */,
+				F90BB0420F5DDB4600124155 /* SortByPTypeProcess.h */,
 				3AF45AE40E4B716800207D74 /* SpatialSort.cpp */,
 				3AF45AE50E4B716800207D74 /* SpatialSort.h */,
 				3AF45AE60E4B716800207D74 /* SplitLargeMeshes.cpp */,
 				3AF45AE70E4B716800207D74 /* SplitLargeMeshes.h */,
-				F90BB0510F5DDBA800124155 /* StandardShapes.h */,
 				F90BB0520F5DDBA800124155 /* StandardShapes.cpp */,
+				F90BB0510F5DDBA800124155 /* StandardShapes.h */,
+				7411B19F11416EF400BCD793 /* StdOStreamLogStream.h */,
+				7411B1A011416EF400BCD793 /* StreamReader.h */,
 				3AF45AEA0E4B716800207D74 /* StringComparison.h */,
+				7411B1A111416EF400BCD793 /* Subdivision.cpp */,
+				7411B1A211416EF400BCD793 /* Subdivision.h */,
+				7411B1A311416EF400BCD793 /* TargetAnimation.cpp */,
+				7411B1A411416EF400BCD793 /* TargetAnimation.h */,
 				3AF45AEB0E4B716800207D74 /* TextureTransform.cpp */,
 				3AF45AEC0E4B716800207D74 /* TextureTransform.h */,
 				3AF45AED0E4B716800207D74 /* TriangulateProcess.cpp */,
 				3AF45AEE0E4B716800207D74 /* TriangulateProcess.h */,
 				3AF45AEF0E4B716800207D74 /* ValidateDataStructure.cpp */,
 				3AF45AF00E4B716800207D74 /* ValidateDataStructure.h */,
+				7411B1A511416EF400BCD793 /* Vertex.h */,
 				3AF45AF10E4B716800207D74 /* VertexTriangleAdjacency.cpp */,
 				3AF45AF20E4B716800207D74 /* VertexTriangleAdjacency.h */,
 				3AF45AF30E4B716800207D74 /* Win32DebugLogStream.h */,
@@ -1470,6 +1645,52 @@
 			path = ../../code;
 			sourceTree = "<group>";
 		};
+		7411B14711416C3F00BCD793 /* CSM */ = {
+			isa = PBXGroup;
+			children = (
+				7411B14E11416D5E00BCD793 /* CSMLoader.cpp */,
+				7411B14F11416D5E00BCD793 /* CSMLoader.h */,
+			);
+			name = CSM;
+			sourceTree = "<group>";
+		};
+		7411B15811416D6600BCD793 /* LWS */ = {
+			isa = PBXGroup;
+			children = (
+				7411B15911416DDD00BCD793 /* LWSLoader.cpp */,
+				7411B15A11416DDD00BCD793 /* LWSLoader.h */,
+			);
+			name = LWS;
+			sourceTree = "<group>";
+		};
+		7411B16F11416E0400BCD793 /* MS3D */ = {
+			isa = PBXGroup;
+			children = (
+				7411B17011416E2500BCD793 /* MS3DLoader.cpp */,
+				7411B17111416E2500BCD793 /* MS3DLoader.h */,
+			);
+			name = MS3D;
+			sourceTree = "<group>";
+		};
+		7411B17A11416E2E00BCD793 /* Ogre */ = {
+			isa = PBXGroup;
+			children = (
+				7411B17B11416E9400BCD793 /* OgreImporter.cpp */,
+				7411B17C11416E9400BCD793 /* OgreImporter.h */,
+				7411B17D11416E9400BCD793 /* OgreXmlHelper.h */,
+			);
+			name = Ogre;
+			sourceTree = "<group>";
+		};
+		7411B18A11416EA100BCD793 /* Unreal */ = {
+			isa = PBXGroup;
+			children = (
+				7411B18B11416EBC00BCD793 /* UnrealLoader.cpp */,
+				7411B18C11416EBC00BCD793 /* UnrealLoader.h */,
+			);
+			name = Unreal;
+			sourceTree = "<group>";
+		};
 		7437C94E113F18C70067B9B9 /* BoostWorkaround */ = {
 			isa = PBXGroup;
 			children = (
@@ -1623,6 +1844,8 @@
 		F90BB0700F5DDD7000124155 /* 3rd party libs */ = {
 			isa = PBXGroup;
 			children = (
+				7411B22C114172C400BCD793 /* ConvertUTF.c */,
+				7411B232114172DB00BCD793 /* ConvertUTF.h */,
 				F90BB0710F5DDD7B00124155 /* irrXML */,
 			);
 			name = "3rd party libs";
@@ -1651,24 +1874,29 @@
 				F90BB0850F5DDDF800124155 /* B3D */,
 				F90BB00A0F5DD9E800124155 /* BVH */,
 				F90BAFE60F5DD91F00124155 /* COLLADA */,
+				7411B14711416C3F00BCD793 /* CSM */,
 				F90BB01F0F5DDA4A00124155 /* DXF */,
 				3AF45B6C0E4B72C600207D74 /* HMP */,
 				F90BAFD40F5DD8F200124155 /* IRR */,
 				3AB8A3A80E50D5F400606590 /* LWO */,
+				7411B15811416D6600BCD793 /* LWS */,
 				3AF45B870E4B74DA00207D74 /* MD2 */,
 				3AF45B880E4B751000207D74 /* MD3 */,
 				3AF45B8A0E4B755E00207D74 /* MD5 */,
 				3AB8A3A70E50D59500606590 /* MDC */,
 				3AF45B8B0E4B75BC00207D74 /* MDL */,
+				7411B16F11416E0400BCD793 /* MS3D */,
 				F90BAFF30F5DD95600124155 /* NFF */,
 				3AF45B8C0E4B75F200207D74 /* Obj */,
 				F90BB0110F5DDA0B00124155 /* OFF */,
+				7411B17A11416E2E00BCD793 /* Ogre */,
 				3AF45B8D0E4B761A00207D74 /* Ply */,
 				F90BB0040F5DD9CD00124155 /* Q3D */,
 				F90BB0190F5DDA3100124155 /* RAW */,
 				3AF45B8E0E4B764400207D74 /* SMD */,
 				3AF45B910E4B77BE00207D74 /* STL */,
 				F90BB02A0F5DDAA900124155 /* Terragen */,
+				7411B18A11416EA100BCD793 /* Unreal */,
 				3AF45B8F0E4B766700207D74 /* X */,
 			);
 			name = importers;
@@ -1825,6 +2053,26 @@
 				7437C964113F18C70067B9B9 /* scoped_ptr.hpp in Headers */,
 				7437C965113F18C70067B9B9 /* static_assert.hpp in Headers */,
 				7437C966113F18C70067B9B9 /* tuple.hpp in Headers */,
+				7411B14B11416D1D00BCD793 /* aiColor4D.h in Headers */,
+				7411B15311416D5E00BCD793 /* CSMLoader.h in Headers */,
+				7411B15E11416DDD00BCD793 /* LWSLoader.h in Headers */,
+				7411B16811416DF400BCD793 /* LWOAnimation.h in Headers */,
+				7411B17511416E2500BCD793 /* MS3DLoader.h in Headers */,
+				7411B18211416E9400BCD793 /* OgreImporter.h in Headers */,
+				7411B18311416E9400BCD793 /* OgreXmlHelper.h in Headers */,
+				7411B19011416EBC00BCD793 /* UnrealLoader.h in Headers */,
+				7411B1B511416EF400BCD793 /* FileSystemFilter.h in Headers */,
+				7411B1B611416EF400BCD793 /* GenericProperty.h in Headers */,
+				7411B1B711416EF400BCD793 /* MemoryIOWrapper.h in Headers */,
+				7411B1B911416EF400BCD793 /* OptimizeGraph.h in Headers */,
+				7411B1BB11416EF400BCD793 /* OptimizeMeshes.h in Headers */,
+				7411B1BC11416EF400BCD793 /* ProcessHelper.h in Headers */,
+				7411B1BD11416EF400BCD793 /* StdOStreamLogStream.h in Headers */,
+				7411B1BE11416EF400BCD793 /* StreamReader.h in Headers */,
+				7411B1C011416EF400BCD793 /* Subdivision.h in Headers */,
+				7411B1C211416EF400BCD793 /* TargetAnimation.h in Headers */,
+				7411B1C311416EF400BCD793 /* Vertex.h in Headers */,
+				7411B234114172DB00BCD793 /* ConvertUTF.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1967,6 +2215,26 @@
 				7437C95D113F18C70067B9B9 /* scoped_ptr.hpp in Headers */,
 				7437C95E113F18C70067B9B9 /* static_assert.hpp in Headers */,
 				7437C95F113F18C70067B9B9 /* tuple.hpp in Headers */,
+				7411B14A11416D1D00BCD793 /* aiColor4D.h in Headers */,
+				7411B15111416D5E00BCD793 /* CSMLoader.h in Headers */,
+				7411B15C11416DDD00BCD793 /* LWSLoader.h in Headers */,
+				7411B16611416DF400BCD793 /* LWOAnimation.h in Headers */,
+				7411B17311416E2500BCD793 /* MS3DLoader.h in Headers */,
+				7411B17F11416E9400BCD793 /* OgreImporter.h in Headers */,
+				7411B18011416E9400BCD793 /* OgreXmlHelper.h in Headers */,
+				7411B18E11416EBC00BCD793 /* UnrealLoader.h in Headers */,
+				7411B1A611416EF400BCD793 /* FileSystemFilter.h in Headers */,
+				7411B1A711416EF400BCD793 /* GenericProperty.h in Headers */,
+				7411B1A811416EF400BCD793 /* MemoryIOWrapper.h in Headers */,
+				7411B1AA11416EF400BCD793 /* OptimizeGraph.h in Headers */,
+				7411B1AC11416EF400BCD793 /* OptimizeMeshes.h in Headers */,
+				7411B1AD11416EF400BCD793 /* ProcessHelper.h in Headers */,
+				7411B1AE11416EF400BCD793 /* StdOStreamLogStream.h in Headers */,
+				7411B1AF11416EF400BCD793 /* StreamReader.h in Headers */,
+				7411B1B111416EF400BCD793 /* Subdivision.h in Headers */,
+				7411B1B311416EF400BCD793 /* TargetAnimation.h in Headers */,
+				7411B1B411416EF400BCD793 /* Vertex.h in Headers */,
+				7411B233114172DB00BCD793 /* ConvertUTF.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2102,6 +2370,26 @@
 				F90BB07F0F5DDD8A00124155 /* heapsort.h in Headers */,
 				F90BB0800F5DDD8A00124155 /* CXMLReaderImpl.h in Headers */,
 				F90BB0890F5DDE0700124155 /* B3DImporter.h in Headers */,
+				7411B14C11416D1D00BCD793 /* aiColor4D.h in Headers */,
+				7411B15511416D5E00BCD793 /* CSMLoader.h in Headers */,
+				7411B16011416DDD00BCD793 /* LWSLoader.h in Headers */,
+				7411B16A11416DF400BCD793 /* LWOAnimation.h in Headers */,
+				7411B17711416E2500BCD793 /* MS3DLoader.h in Headers */,
+				7411B18511416E9400BCD793 /* OgreImporter.h in Headers */,
+				7411B18611416E9400BCD793 /* OgreXmlHelper.h in Headers */,
+				7411B19211416EBC00BCD793 /* UnrealLoader.h in Headers */,
+				7411B1C411416EF400BCD793 /* FileSystemFilter.h in Headers */,
+				7411B1C511416EF400BCD793 /* GenericProperty.h in Headers */,
+				7411B1C611416EF400BCD793 /* MemoryIOWrapper.h in Headers */,
+				7411B1C811416EF400BCD793 /* OptimizeGraph.h in Headers */,
+				7411B1CA11416EF400BCD793 /* OptimizeMeshes.h in Headers */,
+				7411B1CB11416EF400BCD793 /* ProcessHelper.h in Headers */,
+				7411B1CC11416EF400BCD793 /* StdOStreamLogStream.h in Headers */,
+				7411B1CD11416EF400BCD793 /* StreamReader.h in Headers */,
+				7411B1CF11416EF400BCD793 /* Subdivision.h in Headers */,
+				7411B1D111416EF400BCD793 /* TargetAnimation.h in Headers */,
+				7411B1D211416EF400BCD793 /* Vertex.h in Headers */,
+				7411B235114172DB00BCD793 /* ConvertUTF.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2237,6 +2525,26 @@
 				F962E9550F5DE6E2009A5495 /* heapsort.h in Headers */,
 				F962E9560F5DE6E2009A5495 /* CXMLReaderImpl.h in Headers */,
 				F962E9570F5DE6E2009A5495 /* B3DImporter.h in Headers */,
+				7411B14D11416D1D00BCD793 /* aiColor4D.h in Headers */,
+				7411B15711416D5E00BCD793 /* CSMLoader.h in Headers */,
+				7411B16211416DDD00BCD793 /* LWSLoader.h in Headers */,
+				7411B16C11416DF400BCD793 /* LWOAnimation.h in Headers */,
+				7411B17911416E2500BCD793 /* MS3DLoader.h in Headers */,
+				7411B18811416E9400BCD793 /* OgreImporter.h in Headers */,
+				7411B18911416E9400BCD793 /* OgreXmlHelper.h in Headers */,
+				7411B19411416EBC00BCD793 /* UnrealLoader.h in Headers */,
+				7411B1D311416EF400BCD793 /* FileSystemFilter.h in Headers */,
+				7411B1D411416EF400BCD793 /* GenericProperty.h in Headers */,
+				7411B1D511416EF400BCD793 /* MemoryIOWrapper.h in Headers */,
+				7411B1D711416EF400BCD793 /* OptimizeGraph.h in Headers */,
+				7411B1D911416EF400BCD793 /* OptimizeMeshes.h in Headers */,
+				7411B1DA11416EF400BCD793 /* ProcessHelper.h in Headers */,
+				7411B1DB11416EF400BCD793 /* StdOStreamLogStream.h in Headers */,
+				7411B1DC11416EF400BCD793 /* StreamReader.h in Headers */,
+				7411B1DE11416EF400BCD793 /* Subdivision.h in Headers */,
+				7411B1E011416EF400BCD793 /* TargetAnimation.h in Headers */,
+				7411B1E111416EF400BCD793 /* Vertex.h in Headers */,
+				7411B236114172DB00BCD793 /* ConvertUTF.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2414,6 +2722,17 @@
 				745FF8FA113ECB080020C31B /* SkeletonMeshBuilder.cpp in Sources */,
 				745FF8FB113ECB080020C31B /* irrXML.cpp in Sources */,
 				745FF8FC113ECB080020C31B /* B3DImporter.cpp in Sources */,
+				7411B15211416D5E00BCD793 /* CSMLoader.cpp in Sources */,
+				7411B15D11416DDD00BCD793 /* LWSLoader.cpp in Sources */,
+				7411B16711416DF400BCD793 /* LWOAnimation.cpp in Sources */,
+				7411B17411416E2500BCD793 /* MS3DLoader.cpp in Sources */,
+				7411B18111416E9400BCD793 /* OgreImporter.cpp in Sources */,
+				7411B18F11416EBC00BCD793 /* UnrealLoader.cpp in Sources */,
+				7411B1B811416EF400BCD793 /* OptimizeGraph.cpp in Sources */,
+				7411B1BA11416EF400BCD793 /* OptimizeMeshes.cpp in Sources */,
+				7411B1BF11416EF400BCD793 /* Subdivision.cpp in Sources */,
+				7411B1C111416EF400BCD793 /* TargetAnimation.cpp in Sources */,
+				7411B22E114172C400BCD793 /* ConvertUTF.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2498,6 +2817,17 @@
 				745FF9DD113ECC660020C31B /* SkeletonMeshBuilder.cpp in Sources */,
 				745FF9DE113ECC660020C31B /* irrXML.cpp in Sources */,
 				745FF9DF113ECC660020C31B /* B3DImporter.cpp in Sources */,
+				7411B15011416D5E00BCD793 /* CSMLoader.cpp in Sources */,
+				7411B15B11416DDD00BCD793 /* LWSLoader.cpp in Sources */,
+				7411B16511416DF400BCD793 /* LWOAnimation.cpp in Sources */,
+				7411B17211416E2500BCD793 /* MS3DLoader.cpp in Sources */,
+				7411B17E11416E9400BCD793 /* OgreImporter.cpp in Sources */,
+				7411B18D11416EBC00BCD793 /* UnrealLoader.cpp in Sources */,
+				7411B1A911416EF400BCD793 /* OptimizeGraph.cpp in Sources */,
+				7411B1AB11416EF400BCD793 /* OptimizeMeshes.cpp in Sources */,
+				7411B1B011416EF400BCD793 /* Subdivision.cpp in Sources */,
+				7411B1B211416EF400BCD793 /* TargetAnimation.cpp in Sources */,
+				7411B22D114172C400BCD793 /* ConvertUTF.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2582,6 +2912,17 @@
 				F90BB0670F5DDC0700124155 /* SkeletonMeshBuilder.cpp in Sources */,
 				F90BB07B0F5DDD8A00124155 /* irrXML.cpp in Sources */,
 				F90BB08A0F5DDE0700124155 /* B3DImporter.cpp in Sources */,
+				7411B15411416D5E00BCD793 /* CSMLoader.cpp in Sources */,
+				7411B15F11416DDD00BCD793 /* LWSLoader.cpp in Sources */,
+				7411B16911416DF400BCD793 /* LWOAnimation.cpp in Sources */,
+				7411B17611416E2500BCD793 /* MS3DLoader.cpp in Sources */,
+				7411B18411416E9400BCD793 /* OgreImporter.cpp in Sources */,
+				7411B19111416EBC00BCD793 /* UnrealLoader.cpp in Sources */,
+				7411B1C711416EF400BCD793 /* OptimizeGraph.cpp in Sources */,
+				7411B1C911416EF400BCD793 /* OptimizeMeshes.cpp in Sources */,
+				7411B1CE11416EF400BCD793 /* Subdivision.cpp in Sources */,
+				7411B1D011416EF400BCD793 /* TargetAnimation.cpp in Sources */,
+				7411B22F114172C400BCD793 /* ConvertUTF.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2666,6 +3007,17 @@
 				F962E8D50F5DE6C8009A5495 /* SkeletonMeshBuilder.cpp in Sources */,
 				F962E8D60F5DE6C8009A5495 /* irrXML.cpp in Sources */,
 				F962E8D70F5DE6C8009A5495 /* B3DImporter.cpp in Sources */,
+				7411B15611416D5E00BCD793 /* CSMLoader.cpp in Sources */,
+				7411B16111416DDD00BCD793 /* LWSLoader.cpp in Sources */,
+				7411B16B11416DF400BCD793 /* LWOAnimation.cpp in Sources */,
+				7411B17811416E2500BCD793 /* MS3DLoader.cpp in Sources */,
+				7411B18711416E9400BCD793 /* OgreImporter.cpp in Sources */,
+				7411B19311416EBC00BCD793 /* UnrealLoader.cpp in Sources */,
+				7411B1D611416EF400BCD793 /* OptimizeGraph.cpp in Sources */,
+				7411B1D811416EF400BCD793 /* OptimizeMeshes.cpp in Sources */,
+				7411B1DD11416EF400BCD793 /* Subdivision.cpp in Sources */,
+				7411B1DF11416EF400BCD793 /* TargetAnimation.cpp in Sources */,
+				7411B230114172C400BCD793 /* ConvertUTF.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2682,8 +3034,6 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_GLIBCXX_DEBUG=1",
 					"_GLIBCXX_DEBUG_PEDANTIC=1",
@@ -2704,8 +3054,6 @@
 				DEBUG_INFORMATION_FORMAT = stabs;
 				EXECUTABLE_PREFIX = lib;
 				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../boost_1_35_0/bin.v2/libs/date_time/build/darwin/release/architecture-combined/macosx-version-10.4/threading-multi\"",
@@ -2721,7 +3069,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				ARCHS = i386;
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				GCC_DEBUGGING_SYMBOLS = full;
@@ -2745,7 +3092,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = i386;
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				GCC_PREPROCESSOR_DEFINITIONS = NDEBUG;
@@ -2773,8 +3119,6 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_GLIBCXX_DEBUG=1",
 					"_GLIBCXX_DEBUG_PEDANTIC=1",
@@ -2793,8 +3137,6 @@
 				DEBUG_INFORMATION_FORMAT = stabs;
 				EXECUTABLE_PREFIX = lib;
 				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NDEBUG,
 					ASSIMP_BUILD_BOOST_WORKAROUND,
@@ -2819,7 +3161,6 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_GLIBCXX_DEBUG=1",
 					"_GLIBCXX_DEBUG_PEDANTIC=1",
@@ -2873,7 +3214,6 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_GLIBCXX_DEBUG=1",
 					"_GLIBCXX_DEBUG_PEDANTIC=1",

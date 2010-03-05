@@ -82,4 +82,4 @@ Bugreport and fix for a obj-materialloader crash.
 D bindings, CMake install support.
 
 - Dario Accornero
-added no-boost targets to the XCode project.
+contributed several patches regarding Mac OS/XCode targets.

@@ -229,4 +229,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_DEG_TO_RAD(x) (x*0.0174532925f)
 #define AI_RAD_TO_DEG(x) (x*57.2957795f)
 
+/* Support for big-endian builds on Mac OS X. */
+#if defined(__APPLE__) && defined(__BIG_ENDIAN__)
+#define AI_BUILD_BIG_ENDIAN
+#endif
+
 #endif // !! INCLUDED_AI_DEFINES_H

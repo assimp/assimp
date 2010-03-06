@@ -326,8 +326,7 @@ public:
 	 *   instance. Use GetOrphanedScene() to take ownership of it.
 	 *
 	 * @note Assimp is able to determine the file format of a file
-	 * automatically. However, to enable automatic detection of the file
-	 * format, the input path *must* not have an extension at all.
+	 * automatically. 
 	 */
 	const aiScene* ReadFile(
 		const char* pFile, 
@@ -366,7 +365,7 @@ public:
 	 * buffers, but it doesn't handle model formats spreading their 
 	 * data across multiple files or even directories. Examples include
 	 * OBJ or MD3, which outsource parts of their material stuff into
-	 * external scripts. f you need the full functionality, provide
+	 * external scripts. If you need the full functionality, provide
 	 * a custom IOSystem to make Assimp find these files.
 	 */
 	const aiScene* ReadFileFromMemory( 

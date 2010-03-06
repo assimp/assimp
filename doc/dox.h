@@ -21,7 +21,7 @@ some file formats contain data not supported by ASSIMP, some stuff would require
 that it has not yet been implemented, and some formats have not completely been documented by their inventors):
 <hr>
 <br><tt>
-<b>Collada</b> ( <i>*.dae;*.xml</i> ) <sup>3</sup><br>
+<b>Collada</b> ( <i>*.dae;*.xml</i> )<br>
 <b>Biovision BVH </b> ( <i>*.bvh</i> ) <br>
 <b>3D Studio Max 3DS</b> ( <i>*.3ds</i> ) <br>
 <b>3D Studio Max ASE</b> ( <i>*.ase</i> ) <br>
@@ -51,6 +51,7 @@ that it has not yet been implemented, and some formats have not completely been 
 <b>3D GameStudio Model </b> ( <i>*.mdl</i> ) <br>
 <b>3D GameStudio Terrain</b> ( <i>*.hmp</i> )<br>
 <b>Ogre</b> (<i>.mesh.xml, .skeleton.xml, .material</i>)<br><br>
+<b>Milkshape 3D files</b> ( <i>*.ms3d</i> )<br>
 </tt>
 See the @link importer_notes Importer Notes Page @endlink for informations, what a specific importer can do and what not.<br>
 

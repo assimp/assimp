@@ -490,9 +490,17 @@ public:
 	 *  will return NULL - until a new scene has been loaded via ReadFile().
 	 *
 	 * @return Current scene or NULL if there is currently no scene loaded
-	 * @note --- you know that the aiScene is allocated on Assimp's heap,
-	 *   so you need to call Assimp's delete if the heap is not shared?
-	 *   And that's why you shouldn't use this method at all. Thanks.*/
+	 * @note Use this method with maximal caution, and only if you have to.
+	 *   By design, aiScene's are exclusively maintained, allocated and
+	 *   deallocated by Assimp and no one else. The reasoning behind this
+	 *   is the golden rule that deallocations should always be done
+	 *   by the module that did the original allocation because heaps
+	 *   are not necessarily shared. GetOrphanedScene() enforces you
+	 *   to delete the returned scene by yourself, but this will only
+	 *   be fine if and only if you're using the same heap as assimp.
+	 *   On Windows, it's typically fine when everything is linked
+	 *   against the multithreaded-dll version of the runtime library.
+	 *   It will work as well for static linkage with Assimp.*/
 	aiScene* GetOrphanedScene();
 
 	// -------------------------------------------------------------------

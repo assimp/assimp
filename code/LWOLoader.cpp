@@ -973,6 +973,9 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 		return;
 
 	default: 
+		if (name == "APS.Level") {
+			// XXX handle this (seems to be subdivision-related).
+		}
 		DefaultLogger::get()->warn("LWO2: Skipping unknown VMAP/VMAD channel \'" + name + "\'"); 
 		return;
 	};

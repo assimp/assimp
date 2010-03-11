@@ -82,4 +82,4 @@ Bugreport and fix for a obj-materialloader crash.
 D bindings, CMake install support.
 
 - Dario Accornero
-contributed several patches regarding Mac OS/XCode targets.
+contributed several patches regarding Mac OS/XCode targets, bug reports.

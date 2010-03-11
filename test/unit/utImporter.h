@@ -19,6 +19,7 @@ class ImporterTest : public CPPUNIT_NS :: TestFixture
 	CPPUNIT_TEST (testPluginInterface);
 	CPPUNIT_TEST (testExtensionCheck);
 	CPPUNIT_TEST (testMemoryRead);
+	CPPUNIT_TEST (testMultipleReads);
     CPPUNIT_TEST_SUITE_END ();
 
     public:
@@ -34,6 +35,8 @@ class ImporterTest : public CPPUNIT_NS :: TestFixture
 		void  testPluginInterface (void);
 		void  testExtensionCheck (void);
 		void  testMemoryRead (void);
+
+		void  testMultipleReads (void);
 
 	private:
 

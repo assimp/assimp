@@ -171,5 +171,31 @@ void ImporterTest :: testExtensionCheck (void)
 	std::string s;
 	pImp->GetExtensionList(s);
 
-	// todo ..
+	//  TODO
+}
+
+void  ImporterTest :: testMultipleReads (void)
+{
+	// see http://sourceforge.net/projects/assimp/forums/forum/817654/topic/3591099
+	// Check whether reading and post-processing multiple times using
+	// the same objects is *generally* fine.
+
+	const unsigned int flags = 
+		aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices |
+		aiProcess_GenSmoothNormals |
+		aiProcess_ValidateDataStructure |
+		aiProcess_RemoveRedundantMaterials |
+		aiProcess_SortByPType |
+		aiProcess_FindDegenerates |
+		aiProcess_FindInvalidData |
+		aiProcess_GenUVCoords |
+		aiProcess_OptimizeMeshes |
+		aiProcess_OptimizeGraph;
+
+	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/test.x",flags));
+	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/dwarf.x",flags));
+	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/Testwuson.x",flags));
+	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/anim_test.x",flags));
+	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/dwarf.x",flags));
 }

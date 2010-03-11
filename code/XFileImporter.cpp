@@ -96,6 +96,10 @@ void XFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, I
 	if( fileSize < 16)
 		throw new ImportErrorException( "XFile is too small.");
 
+	// need to clear members - this method might be called multiple
+	// times on a single XFileImporter instance.
+	mImportedMats.clear();
+
 	// in the hope that binary files will never start with a BOM ...
 	mBuffer.resize( fileSize);
 	file->Read( &mBuffer.front(), 1, fileSize);

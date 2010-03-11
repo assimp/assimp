@@ -45,12 +45,14 @@ CPPFLAGS=-Wall
 # Setup environment for noboost build
 ifeq ($(NOBOOST),1)
 	SINGLETHREADED = 1
-	INCLUDEFLAGS  += -I../include/BoostWorkaround/
+	INCLUDEFLAGS  += -I/BoostWorkaround/
 	DEFINEFLAGS   += -DASSIMP_BUILD_BOOST_WORKAROUND 
 #	NAMESUFFIX    += -noboost
 else
 	# adjust this manually if your boost is stored elsewhere
 	INCLUDEFLAGS  += -I"C:/Program Files/boost/boost_1_38"
+	#INCLUDEFLAGS  += -I"$(BOOST_DIR)"
+
 endif
 
 # Setup environment for st build

@@ -103,6 +103,10 @@ void OptimizeMeshesProcess::Execute( aiScene* pScene)
 	DefaultLogger::get()->debug("OptimizeMeshesProcess begin");
 	mScene = pScene;
 
+	// need to clear persistent members from previous runs
+	merge_list.clear();
+	output.clear();
+
 	merge_list.reserve(pScene->mNumMeshes);
 	output.reserve(pScene->mNumMeshes);
 

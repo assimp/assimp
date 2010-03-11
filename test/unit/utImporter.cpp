@@ -178,7 +178,8 @@ void  ImporterTest :: testMultipleReads (void)
 {
 	// see http://sourceforge.net/projects/assimp/forums/forum/817654/topic/3591099
 	// Check whether reading and post-processing multiple times using
-	// the same objects is *generally* fine.
+	// the same objects is *generally* fine. This test doesn't target 
+	// importers. Testing post-processing stability is the main point.
 
 	const unsigned int flags = 
 		aiProcess_Triangulate |
@@ -197,5 +198,9 @@ void  ImporterTest :: testMultipleReads (void)
 	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/dwarf.x",flags));
 	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/Testwuson.x",flags));
 	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/anim_test.x",flags));
+	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/dwarf.x",flags));
+
+	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/anim_test.x",flags));
+	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/bcn_epileptic.x",flags));
 	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/dwarf.x",flags));
 }

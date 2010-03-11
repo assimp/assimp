@@ -63,10 +63,6 @@ int main (int argc, char* argv[])
 	// ............................................................................
 	// but shutdown must be done from C to ensure proper deallocation
 	aiDetachAllLogStreams();
-	if (!Assimp::DefaultLogger::isNullLogger()) {
-		return 1;
-	}
-	// ............................................................................
 
     // Rueckmeldung, ob Tests erfolgreich waren
     return collectedresults.wasSuccessful () ? 0 : 1;

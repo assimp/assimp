@@ -968,7 +968,7 @@ BaseImporter* Importer::FindLoader (const char* szExtension)
 	for(;*szExtension == '*' || *szExtension == '.'; ++szExtension);
 
 	std::string ext(szExtension);
-	if (ext.length() <= 1)
+	if (ext.empty())
 		return NULL;
 
 	std::set<std::string> str;

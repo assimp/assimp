@@ -39,103 +39,93 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the VertexTriangleAdjacency helper class */
+/** @file Implementation of the VertexTriangleAdjacency helper class
+ */
+
 #include "AssimpPCH.h"
 
 // internal headers
 #include "VertexTriangleAdjacency.h"
+
 using namespace Assimp;
 
-// ------------------------------------------------------------------------------------------------
-// Compute a vertex-to-faces adjacency table. To save small memory allocations, the information
-// is encoded in three continous buffers - the offset table maps a single vertex index to an
-// entry in the adjacency table, which in turn contains n entries, which are the faces adjacent
-// to the vertex. n is taken from the third buffer, which stores face counts per vertex.
 // ------------------------------------------------------------------------------------------------
 VertexTriangleAdjacency::VertexTriangleAdjacency(aiFace *pcFaces,
 	unsigned int iNumFaces,
 	unsigned int iNumVertices /*= 0*/,
 	bool bComputeNumTriangles /*= false*/)
 {
-	// ---------------------------------------------------------------------
-	// 0: compute the number of referenced vertices if not 
-	// specified by the caller.
-	// ---------------------------------------------------------------------
+	// compute the number of referenced vertices if it wasn't specified by the caller
 	const aiFace* const pcFaceEnd = pcFaces + iNumFaces;
 	if (!iNumVertices)	{
 
 		for (aiFace* pcFace = pcFaces; pcFace != pcFaceEnd; ++pcFace)	{
-			for (unsigned int i = 0; i < pcFace->mNumIndices; ++i) {
-				iNumVertices = std::max(iNumVertices,pcFace->mIndices[i]);
-			}
+			ai_assert(3 == pcFace->mNumIndices);
+			iNumVertices = std::max(iNumVertices,pcFace->mIndices[0]);
+			iNumVertices = std::max(iNumVertices,pcFace->mIndices[1]);
+			iNumVertices = std::max(iNumVertices,pcFace->mIndices[2]);
 		}
 	}
 	unsigned int* pi;
 
-	// ---------------------------------------------------------------------
-	// 1. Allocate output storage
-	// ---------------------------------------------------------------------
+	// allocate storage
 	if (bComputeNumTriangles)	{
 		pi = mLiveTriangles = new unsigned int[iNumVertices+1];
 		memset(mLiveTriangles,0,sizeof(unsigned int)*(iNumVertices+1));
-
 		mOffsetTable = new unsigned int[iNumVertices+2]+1;
 	}
 	else {
 		pi = mOffsetTable = new unsigned int[iNumVertices+2]+1;
 		memset(mOffsetTable,0,sizeof(unsigned int)*(iNumVertices+1));
-		 // important, otherwise the d'tor would crash
-		mLiveTriangles = NULL;
+		mLiveTriangles = NULL; // important, otherwise the d'tor would crash
 	}
 
+	// get a pointer to the end of the buffer
 	unsigned int* piEnd = pi+iNumVertices;
 	*piEnd++ = 0u;
 
-	// ---------------------------------------------------------------------
-	// 2. Compute the number of faces referencing each vertex
-	// ---------------------------------------------------------------------
-	for (aiFace* pcFace = pcFaces; pcFace != pcFaceEnd; ++pcFace)	{
-		for (unsigned int i = 0; i < pcFace->mNumIndices; ++i) {
-			pi[pcFace->mIndices[i]]++;	
-		}
+	// first pass: compute the number of faces referencing each vertex
+	for (aiFace* pcFace = pcFaces; pcFace != pcFaceEnd; ++pcFace)
+	{
+		pi[pcFace->mIndices[0]]++;	
+		pi[pcFace->mIndices[1]]++;	
+		pi[pcFace->mIndices[2]]++;	
 	}
 
-	// ---------------------------------------------------------------------
-	// 3. Compute the offset table to map each face to a
-	// start position in the adjacency table.
-	// ---------------------------------------------------------------------
+	// second pass: compute the final offset table
 	unsigned int iSum = 0;
-	unsigned int* piCurOut = mOffsetTable;
+	unsigned int* piCurOut = this->mOffsetTable;
 	for (unsigned int* piCur = pi; piCur != piEnd;++piCur,++piCurOut)	{
 
 		unsigned int iLastSum = iSum;
 		iSum += *piCur; 
 		*piCurOut = iLastSum;
 	}
-	pi = mOffsetTable;
+	pi = this->mOffsetTable;
 
-	// ---------------------------------------------------------------------
-	// 4. Compute the final adjacency table
-	// ---------------------------------------------------------------------
-	mAdjacencyTable = new unsigned int[iSum];
+	// third pass: compute the final table
+	this->mAdjacencyTable = new unsigned int[iSum];
 	iSum = 0;
 	for (aiFace* pcFace = pcFaces; pcFace != pcFaceEnd; ++pcFace,++iSum)	{
-		
-		for (unsigned int i = 0; i < pcFace->mNumIndices; ++i) {
-			mAdjacencyTable[pi[pcFace->mIndices[i]]++] = iSum;
-		}
-	}
 
-	// ---------------------------------------------------------------------
-	// 5. Undo the offset computations made during step 4
-	// ---------------------------------------------------------------------
+		unsigned int idx = pcFace->mIndices[0];
+		mAdjacencyTable[pi[idx]++] = iSum;
+
+		idx = pcFace->mIndices[1];
+		mAdjacencyTable[pi[idx]++] = iSum;
+
+		idx = pcFace->mIndices[2];
+		mAdjacencyTable[pi[idx]++] = iSum;
+	}
+	// fourth pass: undo the offset computations made during the third pass
+	// We could do this in a separate buffer, but this would be TIMES slower.
 	--mOffsetTable;
 	*mOffsetTable = 0u;
 }
-
 // ------------------------------------------------------------------------------------------------
 VertexTriangleAdjacency::~VertexTriangleAdjacency()
 {
+	// delete allocated storage
 	delete[] mOffsetTable;
 	delete[] mAdjacencyTable;
 	delete[] mLiveTriangles;

@@ -1,0 +1,97 @@
+Assimp Regression Test Suite
+============================
+
+1) How does it work?
+---------------------------------------------------------------------------------
+run.py checks all model in the <root>/test/models folder and compares the result
+against a regression database provided by us (db.zip). If the test passes
+successfully, Assimp definitely WORKS perfectly on your system. A few failures
+are totally fine as well (see sections 7+). You need to worry if a huge
+majority of all files in a particular format or post-processing configuration 
+fails - this might be a sign of a recent regression in assimp's codebase. 
+
+2) What do I need?
+---------------------------------------------------------------------------------
+ - you need Python installed - 3.x !!
+ - you need to build tools/assimp_cmd as described in the INSTALL file (
+	make && make install on unixes,release-dll target with msvc).
+
+3) How to add more test files?
+---------------------------------------------------------------------------------
+Use the following procedure:
+ - verify the correctness of your assimp build - run the regression suite.
+   DO NOT continue if one or more tests fail.
+ - add your additional test files to <root>/test/models/<fileformat>, where
+   <fileformat> is the file type (typically the file extension)
+ - rebuild the regression database using gen_db.py
+ - run the regression suite again - all tests should pass, including
+   those for the new files.
+
+ - contributors: commit the db.zip plus your additional test files to
+   the SVN repository. 
+
+4) I made a change/fix/.. to a loader, how to update the database?
+---------------------------------------------------------------------------------
+ - rebuild the regression database using gen_db.py
+ - run the suite - all tests should pass now. If they do not, don't continue
+ 
+ - contributors: commit the db.zip to the SVN repository 
+
+5) How to add my whole model repository to the suite?
+---------------------------------------------------------------------------------
+
+Edit the reg_settings.py file and add the path to your repository to
+<<model_directories>>. Then, rebuild the suite.
+
+6) So what is actually verified?
+---------------------------------------------------------------------------------
+The regression database includes mini dumps of the aiScene data structure -
+the scene hierarchy plus the sizes of all data arrays MUST match. Floating-point
+data buffers, such as vertex positions, are handled less strictly: min,max and
+average values are stored with lower precision. This takes hardware- or 
+compiler-specific differences in floating-point computations into account. 
+Generally, almost all significant regressions will be detected while the
+number of false positives is relatively low.
+
+7) The test suite fails, what do do?
+---------------------------------------------------------------------------------
+Get back to ../results and check out regression_suite_failures.txt 
+It contains a list of all files which failed the test ... they're copied to
+../results/tmp. Both an EXPECTED and an ACTUAL file is produced per test.
+The output of `assimp cmpdump` is written to regressions_suite_output.txt. 
+To quickly find all all reports pertaining to tests which failed, I'd
+recommend grepping for 'but' because its a constituent of all error messages
+produced by assimp_cmd :) Error reports contain detailed information
+regarding the point of failure inside the data structure, the values of
+the two corresponding fields that were found to be different from EXPECTED
+and ACTUAL, respectively, ... this should offer you enough information to start
+debugging.
+
+8) fp:fast vs fp:precise fails the test suite (same for gcc equivalents)
+---------------------------------------------------------------------------------
+As mentioned above, floating-point inaccuracies between differently optimized
+builds are not considered regressions and all float comparisons done by the test
+suite involve an epsilon. Changing floating-point optimizations can, however,
+ lead to *real* changes in the output data structure, such as different number 
+of vertices or faces, ... this violates one of our primary targets, that is
+produce reliable and portable output. We're working hard on removing these
+issues, but at the moment you have to live with few of them.
+
+Currently, the regression database is build on Windows using MSVC8 with 
+fp:precise. This leads to a small number of failures with fp:fast and
+virtally every build with gcc. Be patient, it will be fixed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

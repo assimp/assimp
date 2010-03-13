@@ -206,7 +206,10 @@ void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char* szData,
 			delete[] pc;
 		}
 	}
-	else delete pcNew;
+	else {
+		pcNew->pcData = NULL;
+		delete pcNew;
+	}
 	return;
 }
 

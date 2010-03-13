@@ -46,11 +46,20 @@
 def hashing(file,pp):
     """ Map an input file and a postprocessing config to an unique hash.
 
-    The hash is used to store the item in the database. The buildin
-    hash() function is used. The hash is a string.
-
+    The hash is used to store the item in the database. It 
+    needs to be persistent across different python implementations
+    and platforms, so we implement the hashing manually.
     """
-    return hex(hash(file+":"+pp))
+
+    def myhash(instring):
+        # sdbm hash
+        res = 0
+        for t in instring:
+            res = (ord(t) + (res<<6) + (res<<16) - res) % 2**32
+            os
+        return res
+
+    return hex(myhash(file.replace('\\','/')+":"+pp))
 
 
 assimp_bin_path = None
@@ -87,19 +96,21 @@ def find_assimp_or_die():
             search = [os.path.join("..","..","bin","assimpcmd_release-dll_x64","assimp.exe"),
                 os.path.join("..","..","bin","x64","assimp")]
         
+        assimp_bin_path = locate_file(search)
+        if assimp_bin_path is None:
+            print("Can't locate assimp_cmd binary")
+            sys.exit(-5)
+
+        print("Located assimp/assimp_cmd binary at ",assimp_bin_path)
     elif os.name == "posix":
-        search = [os.path.join("..","..","bin","gcc","assimp"),
-            os.path.join("/usr","local","bin")]
+        #search = [os.path.join("..","..","bin","gcc","assimp"),
+        #    os.path.join("/usr","local","bin",'assimp')]
+        assimp_bin_path = "assimp"
+        print("Taking system-wide assimp binary")
     else:
         print("Unsupported operating system")
         sys.exit(-5)
 
-    assimp_bin_path = locate_file(search)
-    if assimp_bin_path is None:
-        print("Can't locate assimp_cmd binary")
-        sys.exit(-5)
-
-    print("Located assimp/assimp_cmd binary at ",assimp_bin_path)
 
 
 if __name__ == '__main__':

@@ -68,9 +68,7 @@ def process_dir(d, outfile, file_filter):
                 outf = os.path.join(os.getcwd(), settings.database_name,
                     utils.hashing(fullp, pp))
 
-                cmd = utils.assimp_bin_path + " dump \"" + fullp + \
-                    "\" " + outf + " -b -s " + pp
-
+                cmd = [utils.assimp_bin_path,"dump",fullp,outf,"-b","-s",pp]
                 outfile.write("assimp dump "+"-"*80+"\n")
                 outfile.flush()
                 if subprocess.call(cmd, stdout=outfile, stderr=outfile, shell=False):

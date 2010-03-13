@@ -178,8 +178,8 @@ def process_dir(d, outfile_results, zipin, result):
             outfile_expect = mkoutputdir_andgetpath(fullpath, filehash, "EXPECT")
             outfile_results.write("assimp dump    "+"-"*80+"\n")
             outfile_results.flush()
-            command = utils.assimp_bin_path + " dump \"" + fullpath + \
-                "\" " + outfile_actual + " -b -s " + pppreset
+
+            command = [utils.assimp_bin_path,"dump",fullpath,outfile_actual,"-b","-s",pppreset]
             r = subprocess.call(command, **shellparams)
 
             if r and not failure:
@@ -202,13 +202,14 @@ def process_dir(d, outfile_results, zipin, result):
 
             outfile_results.write("assimp cmpdump "+"-"*80+"\n")
             outfile_results.flush()
-            command = utils.assimp_bin_path + ' cmpdump "' + outfile_actual + '" "' \
-                + outfile_expect + '"'
-            
+
+            command = [utils.assimp_bin_path,'cmpdump',outfile_actual,outfile_expect]
             if subprocess.call(command, **shellparams) != 0:
                 result.fail(fullpath, outfile_expect, pppreset, DATABASE_VALUE_MISMATCH)
                 continue 
-            result.ok(fullpath, pppreset, COMPARE_SUCCESS, len(input_expected))     
+            
+            result.ok(fullpath, pppreset, COMPARE_SUCCESS, 
+                len(input_expected))     
 
 # -------------------------------------------------------------------------------
 def del_folder_with_contents(folder):

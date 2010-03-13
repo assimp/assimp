@@ -56,7 +56,6 @@ def hashing(file,pp):
         res = 0
         for t in instring:
             res = (ord(t) + (res<<6) + (res<<16) - res) % 2**32
-            os
         return res
 
     return hex(myhash(file.replace('\\','/')+":"+pp))

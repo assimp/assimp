@@ -664,7 +664,7 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 		// check all predefined types
 		if (aiPTI_String == prop->mType)	{
 			// FIX: strings are now stored in a less expensive way ...
-			if (prop->mDataLength < sizeof(size_t) + ((const aiString*)prop->mData)->length + 1)	{
+			if (prop->mDataLength < 5 || prop->mDataLength < 4 + *reinterpret_cast<uint32_t*>(prop->mData) + 1)	{
 				ReportError("aiMaterial::mProperties[%i].mDataLength is "
 					"too small to contain a string (%i, needed: %i)",
 					i,prop->mDataLength,sizeof(aiString));

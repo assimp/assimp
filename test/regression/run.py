@@ -179,7 +179,7 @@ def process_dir(d, outfile_results, zipin, result):
             outfile_results.write("assimp dump    "+"-"*80+"\n")
             outfile_results.flush()
 
-            command = [utils.assimp_bin_path,"dump",fullpath,outfile_actual,"-b","-s",pppreset]
+            command = [utils.assimp_bin_path,"dump",fullpath,outfile_actual,"-b","-s","-l",pppreset]
             r = subprocess.call(command, **shellparams)
 
             if r and not failure:

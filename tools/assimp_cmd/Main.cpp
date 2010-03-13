@@ -63,6 +63,7 @@ const char* AICMD_MSG_HELP =
 "\t\tknowext - Check whether a file extension is recognized by Assimp\n"
 "\t\textract - Extract an embedded texture from a model\n"
 "\t\tdump    - Convert a model to binary or XML dumps (ASSBIN/ASSXML)\n"
+"\t\tcmpdump - Compare two file dumps produced with \'assimp dump <file> -s ...\'\n"
 "\n\n\tUse \'assimp <verb> --help\' to get detailed help for a command.\n"
 ;
 
@@ -73,14 +74,13 @@ const char* AICMD_MSG_HELP =
 int main (int argc, char* argv[])
 {
 	if (argc <= 1)	{
-
 		printf("assimp: No command specified. Use \'assimp help\' for a detailed command list\n");
 		return 0;
 	}
 
 	// assimp version
 	// Display version information
-	if (! ::strcmp(argv[1], "version")) {
+	if (! strcmp(argv[1], "version")) {
 		const unsigned int flags = aiGetCompileFlags();
 		printf(AICMD_MSG_ABOUT,
 			aiGetVersionMajor(),
@@ -103,7 +103,14 @@ int main (int argc, char* argv[])
 		return 0;
 	}
 
+	// assimp cmpdump
+	// Compare two mini model dumps (regression suite) 
+	if (! strcmp(argv[1], "cmpdump")) {
+		return Assimp_CompareDump (&argv[2],argc-2);
+	}
+
 	// construct a global Assimp::Importer instance
+	// because all further tools rely on it
 	Assimp::Importer imp;
 	globalImporter = &imp;
 
@@ -138,13 +145,13 @@ int main (int argc, char* argv[])
 	// assimp dump 
 	// Dump a model to a file 
 	if (! strcmp(argv[1], "dump")) {
-		return Assimp_Dump ((const char**)&argv[2],argc-2);
+		return Assimp_Dump (&argv[2],argc-2);
 	}
 
 	// assimp extract 
 	// Extract an embedded texture from a file
 	if (! strcmp(argv[1], "extract")) {
-		return Assimp_Extract ((const char**)&argv[2],argc-2);
+		return Assimp_Extract (&argv[2],argc-2);
 	}
 
 	printf("Unrecognized command. Use \'assimp help\' for a detailed command list\n");
@@ -153,7 +160,9 @@ int main (int argc, char* argv[])
 
 // ------------------------------------------------------------------------------
 // Import a specific file
-const aiScene* ImportModel(const ImportData& imp, const std::string& path)
+const aiScene* ImportModel(
+	const ImportData& imp, 
+	const std::string& path)
 {
 	// Attach log streams
 	if (imp.log) {
@@ -172,12 +181,12 @@ const aiScene* ImportModel(const ImportData& imp, const std::string& path)
 
 	// Now validate this flag combination
 	if(!globalImporter->ValidateFlags(imp.ppFlags)) {
-		::printf("ERROR: Unsupported post-processing flags \n");
+		printf("ERROR: Unsupported post-processing flags \n");
 		return NULL;
 	}
 	printf("Validating postprocessing flags ...  OK\n");
 	if (imp.showLog) 
-		::printf("-----------------------------------------------------------------\n");
+		printf("-----------------------------------------------------------------\n");
 
 	// do the actual import, measure time
 	const clock_t first = clock();
@@ -205,7 +214,9 @@ const aiScene* ImportModel(const ImportData& imp, const std::string& path)
 
 // ------------------------------------------------------------------------------
 // Process standard arguments
-int ProcessStandardArguments(ImportData& fill, const char** params,
+int ProcessStandardArguments(
+	ImportData& fill, 
+	const char* const * params,
 	unsigned int num)
 {
 	// -ptv    --pretransform-vertices
@@ -237,11 +248,11 @@ int ProcessStandardArguments(ImportData& fill, const char** params,
 
 	for (unsigned int i = 0; i < num;++i) 
 	{
-		if (!params[i]) { // could happen if some args have already been processed
-			continue;
-		}
+		//if (!params[i]) { // could happen if some args have already been processed
+		//	continue;
+		//}
 
-		bool has = true;
+		// bool has = true;
 		if (! strcmp(params[i], "-ptv") || ! strcmp(params[i], "--pretransform-vertices")) {
 			fill.ppFlags |= aiProcess_PreTransformVertices;
 		}
@@ -350,10 +361,10 @@ int ProcessStandardArguments(ImportData& fill, const char** params,
 				fill.logFile = "assimp-log.txt";
 		}
 
-		else has = false;
-		if (has) {
-			params[i] = NULL;
-		}
+		//else has = false;
+		//if (has) {
+		//	params[i] = NULL;
+		//}
 	}
 
 	if (fill.logFile.length() || fill.showLog || fill.verbose)

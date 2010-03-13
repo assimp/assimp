@@ -71,8 +71,7 @@ using namespace Assimp;
 extern Assimp::Importer* globalImporter;
 
 // ------------------------------------------------------------------------------
-/** @brief Defines common import parameters
- */
+/** Defines common import parameters */
 struct ImportData
 {
 	ImportData()
@@ -101,39 +100,52 @@ struct ImportData
 };
 
 // ------------------------------------------------------------------------------
-/** @brief Process standard arguments
+/** Process standard arguments
  *
  *  @param fill Filled by function
  *  @param params Command line parameters to be processed
  *  @param num NUmber of params
- *  @return 0 for success
- */
-int ProcessStandardArguments(ImportData& fill, const char** params,
+ *  @return 0 for success */
+int ProcessStandardArguments(ImportData& fill, 
+	const char* const* params,
 	unsigned int num);
 
 // ------------------------------------------------------------------------------
-/** @brief Import a specific model file
+/** Import a specific model file
  *  @param imp Import configuration to be used
- *  @param path Path to the file to be opened
- */
-const aiScene* ImportModel(const ImportData& imp, const std::string& path);
+ *  @param path Path to the file to be opened */
+const aiScene* ImportModel(
+	const ImportData& imp, 
+	const std::string& path);
 
 
 // ------------------------------------------------------------------------------
-/** @brief assimp dump utility
+/** assimp_dump utility
  *  @param params Command line parameters to 'assimp dumb'
  *  @param Number of params
- *  @return 0 for success
- */
-int Assimp_Dump (const char** params, unsigned int num);
+ *  @return 0 for success*/
+int Assimp_Dump (
+	const char* const* params, 
+	unsigned int num);
 
 // ------------------------------------------------------------------------------
-/** @brief assimp extract utility
+/** assimp_extract utility
  *  @param params Command line parameters to 'assimp extract'
  *  @param Number of params
- *  @return 0 for success
- */
-int Assimp_Extract (const char** params, unsigned int num);
+ *  @return 0 for success*/
+int Assimp_Extract (
+	const char* const* params, 
+	unsigned int num);
+
+// ------------------------------------------------------------------------------
+/** assimp_cmpdump utility
+ *  @param params Command line parameters to 'assimp cmpdump'
+ *  @param Number of params
+ *  @return 0 for success*/
+int Assimp_CompareDump (
+	const char* const* params, 
+	unsigned int num);
+
 
 // ------------------------------------------------------------------------------
 /** @brief assimp info utility

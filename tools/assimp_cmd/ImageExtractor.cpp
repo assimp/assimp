@@ -46,11 +46,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Main.h"
 
 const char* AICMD_MSG_DUMP_HELP_E = 
-"todo assimp extract help";
-
+"assimp extract <model> [<out>] [-t<n>] [-f<fmt>] [-ba] [-s] [common parameters]\n"
+"\t -ba   Writes BMP's with alpha channel\n"
+"\t -t<n> Zero-based index of the texture to be extracted \n"
+"\t -f<f> Specify the file format if <out> is ommitted  \n"
+"\t[See the assimp_cmd docs for a full list of all common parameters]  \n"
+"\t -cfast    Fast post processing preset, runs just a few important steps \n"
+"\t -cdefault Default post processing: runs all recommended steps\n"
+"\t -cfull    Fires almost all post processing steps \n"
+;
 
 #define AI_EXTRACT_WRITE_BMP_ALPHA 0x1
-
 #include "Compiler/pushpack1.h"
 
 // -----------------------------------------------------------------------------------
@@ -136,7 +142,7 @@ int SaveAsBMP (FILE* file, const aiTexel* data, unsigned int width, unsigned int
 	header.bfSize      = header.bfOffBits+width*height*numc;
 	header.bfReserved1 = header.bfReserved2 = 0;
 
-	::fwrite(&header,sizeof(BITMAPFILEHEADER),1,file);
+	fwrite(&header,sizeof(BITMAPFILEHEADER),1,file);
 
 	BITMAPINFOHEADER info;
 	info.biSize     = 40;
@@ -151,13 +157,13 @@ int SaveAsBMP (FILE* file, const aiTexel* data, unsigned int width, unsigned int
 	info.biClrUsed = 0;
 	info.biClrImportant = 0;
 
-	::fwrite(&info,sizeof(BITMAPINFOHEADER),1,file);
+	fwrite(&info,sizeof(BITMAPINFOHEADER),1,file);
 
 	unsigned char* temp = buffer+info.biSizeImage;
 	const unsigned int row = width*numc;
 
 	for (int y = 0; temp -= row,y < info.biHeight;++y)	{
-		::fwrite(temp,row,1,file);
+		fwrite(temp,row,1,file);
 	}
 
 	// delete the buffer
@@ -179,11 +185,11 @@ int SaveAsTGA (FILE* file, const aiTexel* data, unsigned int width, unsigned int
 	head.descriptor |= (1u<<5);
 
 	head.imagetype = 2; // actually it's RGBA
-	::fwrite(&head,sizeof(TGA_HEADER),1,file);
+	fwrite(&head,sizeof(TGA_HEADER),1,file);
 
 	for (unsigned int y = 0; y < height; ++y) {
 		for (unsigned int x = 0; x < width; ++x) {
-			::fwrite(data + y*width+x,4,1,file);
+			fwrite(data + y*width+x,4,1,file);
 		}
 	}
 
@@ -212,7 +218,7 @@ int DoExport(const aiTexture* tx, FILE* p, const std::string& extension,
 
 // -----------------------------------------------------------------------------------
 // Implementation of the assimp extract utility
-int Assimp_Extract (const char** params, unsigned int num)
+int Assimp_Extract (const char* const* params, unsigned int num)
 {
 	if (num < 1) {
 		printf("assimp extract: Invalid number of arguments. See \'assimp extract --help\'\n");
@@ -220,7 +226,7 @@ int Assimp_Extract (const char** params, unsigned int num)
 	}
 
 	// --help
-	if (!::strcmp( params[0], "-h") || !::strcmp( params[0], "--help") || !::strcmp( params[0], "-?") ) {
+	if (!strcmp( params[0], "-h") || !strcmp( params[0], "--help") || !strcmp( params[0], "-?") ) {
 		printf("%s",AICMD_MSG_DUMP_HELP_E);
 		return 0;
 	}
@@ -246,28 +252,30 @@ int Assimp_Extract (const char** params, unsigned int num)
 	for (unsigned int i = (out[0] == '-' ? 1 : 2); i < num;++i)		{
 		if (!params[i])continue;
 
-		if (!::strncmp( params[i], "-f",2)) {
+		if (!strncmp( params[i], "-f",2)) {
 			extension = std::string(params[i]+2);
 		}
-		else if ( !::strncmp( params[i], "--format=",9)) {
+		else if ( !strncmp( params[i], "--format=",9)) {
 			extension = std::string(params[i]+9);
 		}
-		else if ( !::strcmp( params[i], "--nosuffix") || !::strcmp(params[i],"-s")) {
+		else if ( !strcmp( params[i], "--nosuffix") || !strcmp(params[i],"-s")) {
 			nosuffix = true;
 		}
-		else if ( !::strncmp( params[i], "--texture=",10)) {
+		else if ( !strncmp( params[i], "--texture=",10)) {
 			texIdx = ::strtol10(params[i]+10);
 		}
-		else if ( !::strncmp( params[i], "-t",2)) {
+		else if ( !strncmp( params[i], "-t",2)) {
 			texIdx = ::strtol10(params[i]+2);
 		}
-		else if ( !::strcmp( params[i], "-ba") ||  !::strcmp( params[i], "--bmp-with-alpha")) {
+		else if ( !strcmp( params[i], "-ba") ||  !strcmp( params[i], "--bmp-with-alpha")) {
 			flags |= AI_EXTRACT_WRITE_BMP_ALPHA;
 		}
+#if 0
 		else {
 			printf("Unknown parameter: %s\n",params[i]);
 			return 10;
 		}
+#endif
 	}
 	for (std::string::iterator it = extension.begin();it != extension.end();++it)
 		*it = ::tolower(*it); 
@@ -310,10 +318,10 @@ int Assimp_Extract (const char** params, unsigned int num)
 	}
 
 	// now write all output textures
-	for (unsigned int i = 0; i < scene->mNumTextures;++i)
-	{
-		if (texIdx != 0xffffffff && texIdx != i)
+	for (unsigned int i = 0; i < scene->mNumTextures;++i)	{
+		if (texIdx != 0xffffffff && texIdx != i) {
 			continue;
+		}
 
 		const aiTexture* tex = scene->mTextures[i];
 		std::string out_cpy = out, out_ext = extension;
@@ -347,7 +355,7 @@ int Assimp_Extract (const char** params, unsigned int num)
 		int m;
 
 		if (!tex->mHeight) {
-			m = (1 != ::fwrite(tex->pcData,tex->mWidth,1,p));
+			m = (1 != fwrite(tex->pcData,tex->mWidth,1,p));
 		}
 		else m = DoExport(tex,p,extension,flags);
 		::fclose(p);

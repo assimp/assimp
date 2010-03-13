@@ -157,7 +157,8 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, a
 				trafo.mScaling.x = (*it).wrapAmountW;
 				trafo.mScaling.y = (*it).wrapAmountH;
 
-				pcMat->AddProperty((float*)&trafo,sizeof(aiUVTransform),AI_MATKEY_UVTRANSFORM(type,cur));
+				BOOST_STATIC_ASSERT(sizeof(aiUVTransform)/sizeof(float) == 5);
+				pcMat->AddProperty((float*)&trafo,5,AI_MATKEY_UVTRANSFORM(type,cur));
 			}
 			DefaultLogger::get()->debug("LWO2: Setting up non-UV mapping");
 		}

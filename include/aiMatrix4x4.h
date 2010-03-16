@@ -154,8 +154,8 @@ public:
 	 *  @param y Rotation angle for the y-axis, in radians
 	 *  @param z Rotation angle for the z-axis, in radians
 	 */
-	void FromEulerAnglesXYZ(float x, float y, float z);
-	void FromEulerAnglesXYZ(const aiVector3D& blubb);
+	aiMatrix4x4& FromEulerAnglesXYZ(float x, float y, float z);
+	aiMatrix4x4& FromEulerAnglesXYZ(const aiVector3D& blubb);
 
 public:
 	// -------------------------------------------------------------------

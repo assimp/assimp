@@ -93,9 +93,6 @@ void MS3DImporter::GetExtensionList(std::set<std::string>& extensions)
 void ReadColor(StreamReaderLE& stream, aiColor4D& ambient)
 {
 	// aiColor4D is packed on gcc, implicit binding to float& fails therefore.
-	// But I guess casting is fine (it could cause alignment faults on some
-	// architectures in general, but we're not touched because aiColor4D
-	// should be properly aligned & packed due to its uniform structure)
 	stream >> (float&)ambient.r >> (float&)ambient.g >> (float&)ambient.b >> (float&)ambient.a;
 }
 
@@ -104,6 +101,84 @@ void ReadVector(StreamReaderLE& stream, aiVector3D& pos)
 {
 	// See note in ReadColor()
 	stream >> (float&)pos.x >> (float&)pos.y >> (float&)pos.z;
+}
+
+// ------------------------------------------------------------------------------------------------
+template<typename T> 
+void MS3DImporter :: ReadComments(StreamReaderLE& stream, std::vector<T>& outp)
+{
+	uint16_t cnt;
+	stream >> cnt;
+
+	for(unsigned int i = 0; i < cnt; ++i) {
+		uint32_t index, clength;
+		stream >> index >> clength;
+
+		if(index >= outp.size()) {
+			DefaultLogger::get()->warn("MS3D: Invalid index in comment section");
+		}
+		else {
+			outp[index].comment = std::string(reinterpret_cast<char*>(stream.GetPtr()),clength);
+		}
+		stream.IncPtr(clength);
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+template <typename T, typename T2, typename T3> bool inrange(const T& in, const T2& lower, const T3& higher)
+{
+	return in > lower && in <= higher;
+}
+
+// ------------------------------------------------------------------------------------------------
+void MS3DImporter :: CollectChildJoints(const std::vector<TempJoint>& joints,
+	std::vector<bool>& hadit, 
+	aiNode* nd, 
+	const aiMatrix4x4& absTrafo)
+{
+	unsigned int cnt = 0;
+	for(size_t i = 0; i < joints.size(); ++i) {
+		if (!hadit[i] && !strcmp(joints[i].parentName,nd->mName.data)) {
+			++cnt;
+		}
+	}
+
+	nd->mChildren = new aiNode*[nd->mNumChildren = cnt];
+	cnt = 0;
+	for(size_t i = 0; i < joints.size(); ++i) {
+		if (!hadit[i] && !strcmp(joints[i].parentName,nd->mName.data)) {
+			aiNode* ch = nd->mChildren[cnt++] = new aiNode(joints[i].name);
+			ch->mParent = nd;
+
+			const aiVector3D& qin = joints[i].rotation;
+			ch->mTransformation = aiMatrix4x4().FromEulerAnglesXYZ(qin.x,qin.y,qin.z)*
+				aiMatrix4x4::Translation(joints[i].position,ch->mTransformation);
+
+			const aiMatrix4x4 abs = absTrafo*ch->mTransformation;
+			for(unsigned int a = 0; a < mScene->mNumMeshes; ++a) {
+				aiMesh* const msh = mScene->mMeshes[a];
+				for(unsigned int n = 0; n < msh->mNumBones; ++n) {
+					aiBone* const bone = msh->mBones[n];
+
+					if(bone->mName == ch->mName) {
+						bone->mOffsetMatrix = aiMatrix4x4(abs).Inverse();
+					}
+				}
+			}
+
+			hadit[i] = true;
+			CollectChildJoints(joints,hadit,ch,abs);
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void MS3DImporter :: CollectChildJoints(const std::vector<TempJoint>& joints, aiNode* nd)
+{
+	 std::vector<bool> hadit(joints.size(),false);
+	 aiMatrix4x4 trafo;
+
+	 CollectChildJoints(joints,hadit,nd,trafo);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -116,6 +191,8 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 	// CanRead() should have done this already
 	char head[10];
 	int32_t version;
+
+	mScene = pScene;
 
 
 	// 1 ------------ read into temporary data structures mirroring the original file
@@ -139,8 +216,12 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
 		stream.IncPtr(1);
 		ReadVector(stream,v.pos);
-		v.bone_id = static_cast<unsigned int>(stream.GetI1()); // signed in original spec !! intentional bit hack.
-		v.ref_cnt = static_cast<unsigned int>(stream.GetI1());
+		v.bone_id[0] = stream.GetI1(); 
+		v.ref_cnt = stream.GetI1();
+
+		v.bone_id[1] = v.bone_id[2] = v.bone_id[3] = 0xffffffff;
+		v.weights[1] = v.weights[2] = v.weights[3] = 0.f;
+		v.weights[0] = 1.f;
 	}
 
 	uint16_t tris;
@@ -152,7 +233,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
 		stream.IncPtr(2);
 		for (unsigned int i = 0; i < 3; ++i) {
-			t.indices[i] = static_cast<unsigned int>(stream.GetI2());
+			t.indices[i] = stream.GetI2();
 		}
 
 		for (unsigned int i = 0; i < 3; ++i) {
@@ -166,8 +247,8 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 			stream >> (float&)(t.uv[i].y);
 		}
 
-		t.sg    = static_cast<unsigned int>(stream.GetI1()); 
-		t.group = static_cast<unsigned int>(stream.GetI1()); 
+		t.sg    = stream.GetI1(); 
+		t.group = stream.GetI1(); 
 	}
 
 	uint16_t grp;
@@ -187,9 +268,9 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
 		t.triangles.resize(num);
 		for (unsigned int i = 0; i < num; ++i) {
-			t.triangles[i] = static_cast<unsigned int>(stream.GetI2()); 
+			t.triangles[i] = stream.GetI2(); 
 		}
-		t.mat = static_cast<unsigned int>(stream.GetI1()); 
+		t.mat = stream.GetI1(); 
 		if (t.mat == 0xff) {
 			need_default = true;
 		}
@@ -220,8 +301,71 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 		t.alphamap[128] = '\0';
 	}
 
+	float animfps, currenttime;
+	uint32_t totalframes;
+	stream >> animfps >> currenttime >> totalframes;
 
-	// 2 ------------ convert to proper aiXX data structures
+	uint16_t joint;
+	stream >> joint;
+
+	std::vector<TempJoint> joints(joint);
+	for(unsigned int i = 0; i < joint; ++i) {
+		TempJoint& j = joints[i];
+
+		stream.IncPtr(1);
+		stream.CopyAndAdvance(j.name,32);
+		j.name[32] = '\0';
+
+		stream.CopyAndAdvance(j.parentName,32);
+		j.parentName[32] = '\0';
+
+	//	DefaultLogger::get()->debug(j.name);
+	//	DefaultLogger::get()->debug(j.parentName);
+
+		ReadVector(stream,j.rotation);
+		ReadVector(stream,j.position);
+
+		j.rotFrames.resize(stream.GetI2());
+		j.posFrames.resize(stream.GetI2());
+
+		for(unsigned int a = 0; a < j.rotFrames.size(); ++a) {
+			TempKeyFrame& kf = j.rotFrames[a];
+			stream >> kf.time;
+			ReadVector(stream,kf.value);
+		}
+		for(unsigned int a = 0; a < j.posFrames.size(); ++a) {
+			TempKeyFrame& kf = j.posFrames[a];
+			stream >> kf.time;
+			ReadVector(stream,kf.value);
+		}
+	}
+
+	if(stream.GetRemainingSize() > 4) {
+		uint32_t subversion;
+		stream >> subversion;
+		if (subversion == 1) {
+			ReadComments<TempGroup>(stream,groups);
+			ReadComments<TempMaterial>(stream,materials);
+			ReadComments<TempJoint>(stream,joints);
+			ReadComments<TempModel>(stream,std::vector<TempModel>() = std::vector<TempModel>());
+
+			if(stream.GetRemainingSize() > 4 && inrange((stream >> subversion,subversion),1u,3u)) {
+				for(unsigned int i = 0; i < verts; ++i) {
+					TempVertex& v = vertices[i];
+					v.weights[3]=1.f;
+					for(unsigned int n = 0; n < 3; v.weights[3]-=v.weights[n++]) {
+						v.bone_id[n+1] = stream.GetI1();
+						v.weights[n] = static_cast<float>(static_cast<unsigned int>(stream.GetI1()))/255.f;
+					}
+					stream.IncPtr((subversion-1)<<2u);
+				}
+
+				// even further extra data is not of interest for us, at least now now.
+			}
+		}
+	}
+
+	// 2 ------------ convert to proper aiXX data structures -----------------------------------
 
 	if (need_default && materials.size()) {
 		DefaultLogger::get()->warn("MS3D: Found group with no material assigned, spawning default material");
@@ -308,6 +452,9 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 		m->mTextureCoords[0] = new aiVector3D[m->mNumVertices];
 		m->mNumUVComponents[0] = 2;
 
+		typedef std::map<unsigned int,unsigned int> BoneSet;
+		BoneSet mybones;
+
 		for (unsigned int i = 0,n = 0; i < m->mNumFaces; ++i) {
 			aiFace& f = m->mFaces[i];
 			if (g.triangles[i]>triangles.size()) {
@@ -322,12 +469,61 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 					throw new ImportErrorException("MS3D: Encountered invalid vertex index, file is malformed");
 				}
 
+				const TempVertex& v = vertices[t.indices[i]];
+				for(unsigned int a = 0; a < 4; ++a) {
+					if (v.bone_id[a] != 0xffffffff) {
+						if (v.bone_id[a] >= joints.size()) {
+							throw new ImportErrorException("MS3D: Encountered invalid bone index, file is malformed");
+						}
+						if (mybones.find(v.bone_id[a]) == mybones.end()) {
+							 mybones[v.bone_id[a]] = 1;
+						}
+						else ++mybones[v.bone_id[a]];
+					}
+				}
+
 				// collect vertex components
-				m->mVertices[n] = vertices[t.indices[i]].pos;
+				m->mVertices[n] = v.pos;
 
 				m->mNormals[n] = t.normals[i];
-				m->mTextureCoords[0][n] = aiVector3D(t.uv[i].x,t.uv[i].y,0.0);
+				m->mTextureCoords[0][n] = aiVector3D(t.uv[i].x,1.f-t.uv[i].y,0.0);
 				f.mIndices[i] = n;
+			}
+		}
+
+		// allocate storage for bones
+		if(mybones.size()) {
+			std::vector<unsigned int> bmap(joints.size());
+			m->mBones = new aiBone*[mybones.size()];
+			for(BoneSet::const_iterator it = mybones.begin(); it != mybones.end(); ++it) {
+				aiBone* const bn = m->mBones[m->mNumBones] = new aiBone();
+				const TempJoint& jnt = joints[(*it).first]; 
+
+				bn->mName.Set(jnt.name);
+				bn->mWeights = new aiVertexWeight[(*it).second];
+
+				bmap[(*it).first] = m->mNumBones++;
+			}
+
+			// .. and collect bone weights
+			for (unsigned int i = 0,n = 0; i < m->mNumFaces; ++i) {
+				TempTriangle& t = triangles[g.triangles[i]];
+
+				for (unsigned int i = 0; i < 3; ++i,++n) {
+					const TempVertex& v = vertices[t.indices[i]];
+					for(unsigned int a = 0; a < 4; ++a) {
+						const unsigned int bone = v.bone_id[a];
+						if(bone==0xffffffff){
+							continue;
+						}
+
+						aiBone* const outbone = m->mBones[bmap[bone]];
+						aiVertexWeight& outwght = outbone->mWeights[outbone->mNumWeights++];
+
+						outwght.mVertexId = n;
+						outwght.mWeight = v.weights[a];
+					}
+				}
 			}
 		}
 	}
@@ -335,9 +531,9 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 	// ... add dummy nodes under a single root, each holding a reference to one
 	// mesh. If we didn't do this, we'd loose the group name.
 	aiNode* rt = pScene->mRootNode = new aiNode("<MS3DRoot>");
-	rt->mChildren = new aiNode*[rt->mNumChildren=pScene->mNumMeshes];
+	rt->mChildren = new aiNode*[rt->mNumChildren=pScene->mNumMeshes+(joints.size()?1:0)];
 
-	for (unsigned int i = 0; i < rt->mNumChildren; ++i) {
+	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
 		aiNode* nd = rt->mChildren[i] = new aiNode();
 
 		const TempGroup& g = groups[i];
@@ -346,6 +542,62 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
 		nd->mMeshes = new unsigned int[nd->mNumMeshes = 1];
 		nd->mMeshes[0] = i;
+	}
+
+	// convert animations as well
+	if(joints.size()) {
+		aiNode* jt = rt->mChildren[pScene->mNumMeshes] = new aiNode();
+		jt->mParent = rt;
+		CollectChildJoints(joints,jt);
+		jt->mName.Set("<MS3DJointRoot>");
+
+		pScene->mAnimations = new aiAnimation*[ pScene->mNumAnimations = 1 ];
+		aiAnimation* const anim = pScene->mAnimations[0] = new aiAnimation();
+
+		anim->mName.Set("<MS3DMasterAnim>");
+
+		// carry the fps info to the user by scaling all times with it
+		anim->mTicksPerSecond = animfps;
+		
+		// leave duration at its default, so ScenePreprocessor will fill an appropriate
+		// value (the values taken from some MS3D files seem to be too unreliable
+		// to pass the validation)
+		// anim->mDuration = totalframes/animfps;
+
+		anim->mChannels = new aiNodeAnim*[joints.size()]();
+		for(std::vector<TempJoint>::const_iterator it = joints.begin(); it != joints.end(); ++it) {
+			if ((*it).rotFrames.empty() && (*it).posFrames.empty()) {
+				continue;
+			}
+
+			aiNodeAnim* nd = anim->mChannels[anim->mNumChannels++] = new aiNodeAnim();
+			nd->mNodeName.Set((*it).name);
+
+			if ((*it).rotFrames.size()) {
+				nd->mRotationKeys = new aiQuatKey[(*it).rotFrames.size()];
+				for(std::vector<TempKeyFrame>::const_iterator rot = (*it).rotFrames.begin(); rot != (*it).rotFrames.end(); ++rot) {
+					aiQuatKey& q = nd->mRotationKeys[nd->mNumRotationKeys++];
+
+					q.mTime = (*rot).time*animfps;
+					q.mValue = aiQuaternion((*rot).value.x,(*rot).value.y,(*rot).value.z)*
+						aiQuaternion((*it).rotation.x,(*it).rotation.y,(*it).rotation.z);
+				}
+			}
+
+			if ((*it).posFrames.size()) {
+				nd->mPositionKeys = new aiVectorKey[(*it).posFrames.size()];
+				for(std::vector<TempKeyFrame>::const_iterator pos = (*it).posFrames.begin(); pos != (*it).posFrames.end(); ++pos) {
+					aiVectorKey& v = nd->mPositionKeys[nd->mNumPositionKeys++];
+
+					v.mTime = (*pos).time*animfps;
+					v.mValue = (*pos).value + (*it).position;
+				}
+			}
+		}
+		// fixup to pass the validation if not a single animation channel is non-trivial
+		if (!anim->mNumChannels) {
+			anim->mChannels = NULL;
+		}
 	}
 }
 

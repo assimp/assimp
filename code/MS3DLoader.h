@@ -75,6 +75,7 @@ protected:
 	 * See BaseImporter::GetExtensionList() for details */
 	void GetExtensionList(std::set<std::string>& extensions);
 
+
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 
 	* See BaseImporter::InternReadFile() for details */
@@ -84,10 +85,23 @@ protected:
 
 private:
 
+	struct TempJoint;
+	void CollectChildJoints(const std::vector<TempJoint>& joints, std::vector<bool>& hadit, aiNode* nd,const aiMatrix4x4& absTrafo);
+	void CollectChildJoints(const std::vector<TempJoint>& joints, aiNode* nd);
+
+	template<typename T> void ReadComments(StreamReaderLE& stream, std::vector<T>& outp);
+
+private:
+
+	aiScene* mScene;
+
+private:
+
 	struct TempVertex
 	{
 		aiVector3D pos;
-		unsigned int bone_id, ref_cnt;
+		unsigned int bone_id[4], ref_cnt;
+		float weights[4];
 	};
 
 	struct TempTriangle
@@ -104,6 +118,7 @@ private:
 		char name[33]; // +0
 		std::vector<unsigned int> triangles;
 		unsigned int mat; // 0xff is no material
+		std::string comment;
 	};
 
 	struct TempMaterial
@@ -115,6 +130,28 @@ private:
 
 		aiColor4D diffuse,specular,ambient,emissive;
 		float shininess,transparency;
+		std::string comment;
+	};
+
+	struct TempKeyFrame 
+	{
+		float time;
+		aiVector3D value;
+	};
+
+	struct TempJoint
+	{
+		char name[33];
+		char parentName[33];
+		aiVector3D rotation, position;
+
+		std::vector<TempKeyFrame> rotFrames;
+		std::vector<TempKeyFrame> posFrames;
+		std::string comment;
+	};
+
+	struct TempModel {
+		std::string comment;
 	};
 };
 

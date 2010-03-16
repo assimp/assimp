@@ -791,8 +791,10 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 		double dLast = -10e10;
 		for (unsigned int i = 0; i < pNodeAnim->mNumPositionKeys;++i)
 		{
-			// ScenePreprocessor will compute the duration if still teh default value
-			if (pAnimation->mDuration > 0. && pNodeAnim->mPositionKeys[i].mTime > pAnimation->mDuration)
+			// ScenePreprocessor will compute the duration if still the default value
+			// (Aramis) Add small epsilon, comparison tended to fail if max_time == duration,
+			//  seems to be due the compilers register usage/width.
+			if (pAnimation->mDuration > 0. && pNodeAnim->mPositionKeys[i].mTime > pAnimation->mDuration+0.001)
 			{
 				ReportError("aiNodeAnim::mPositionKeys[%i].mTime (%.5f) is larger "
 					"than aiAnimation::mDuration (which is %.5f)",i,
@@ -820,7 +822,7 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 		double dLast = -10e10;
 		for (unsigned int i = 0; i < pNodeAnim->mNumRotationKeys;++i)
 		{
-			if (pAnimation->mDuration > 0. && pNodeAnim->mRotationKeys[i].mTime > pAnimation->mDuration)
+			if (pAnimation->mDuration > 0. && pNodeAnim->mRotationKeys[i].mTime > pAnimation->mDuration+0.001)
 			{
 				ReportError("aiNodeAnim::mRotationKeys[%i].mTime (%.5f) is larger "
 					"than aiAnimation::mDuration (which is %.5f)",i,
@@ -847,7 +849,7 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 		double dLast = -10e10;
 		for (unsigned int i = 0; i < pNodeAnim->mNumScalingKeys;++i)
 		{
-			if (pAnimation->mDuration > 0. && pNodeAnim->mScalingKeys[i].mTime > pAnimation->mDuration)
+			if (pAnimation->mDuration > 0. && pNodeAnim->mScalingKeys[i].mTime > pAnimation->mDuration+0.001)
 			{
 				ReportError("aiNodeAnim::mScalingKeys[%i].mTime (%.5f) is larger "
 					"than aiAnimation::mDuration (which is %.5f)",i,

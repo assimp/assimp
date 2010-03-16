@@ -256,13 +256,13 @@ inline void aiMatrix4x4::DecomposeNoScaling (aiQuaternion& rotation,
 }
 
 // ----------------------------------------------------------------------------------------
-inline void aiMatrix4x4::FromEulerAnglesXYZ(const aiVector3D& blubb)
+inline aiMatrix4x4& aiMatrix4x4::FromEulerAnglesXYZ(const aiVector3D& blubb)
 {
-	FromEulerAnglesXYZ(blubb.x,blubb.y,blubb.z);
+	return FromEulerAnglesXYZ(blubb.x,blubb.y,blubb.z);
 }
 
 // ----------------------------------------------------------------------------------------
-inline void aiMatrix4x4::FromEulerAnglesXYZ(float x, float y, float z)
+inline aiMatrix4x4& aiMatrix4x4::FromEulerAnglesXYZ(float x, float y, float z)
 {
 	aiMatrix4x4& _this = *this;
 
@@ -288,6 +288,7 @@ inline void aiMatrix4x4::FromEulerAnglesXYZ(float x, float y, float z)
 	_this.c2 =  crsp*sy-sr*cy ;
 	_this.c3 = cr*cp ;
 
+	return *this;
 }
 
 // ----------------------------------------------------------------------------------------

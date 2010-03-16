@@ -201,9 +201,10 @@ void ObjFileParser::copyNextLine(char *pBuffer, size_t length)
 	size_t index = 0;
 	while (m_DataIt != m_DataItEnd)
 	{
-		if (*m_DataIt == '\n' || *m_DataIt == '\r')
+		// (Aramis) removed assertion (index<length-1) in favour of an explicit check
+		if (*m_DataIt == '\n' || *m_DataIt == '\r' || index == length-1)
 			break;
-		assert (index+1 <= length);
+
 		pBuffer[ index ] = *m_DataIt;
 		++index;
 		++m_DataIt;

@@ -90,7 +90,6 @@ private:
 	void CollectChildJoints(const std::vector<TempJoint>& joints, aiNode* nd);
 
 	template<typename T> void ReadComments(StreamReaderLE& stream, std::vector<T>& outp);
-
 private:
 
 	aiScene* mScene;
@@ -150,9 +149,9 @@ private:
 		std::string comment;
 	};
 
-	struct TempModel {
-		std::string comment;
-	};
+	//struct TempModel {
+	//	std::string comment;
+	//};
 };
 
 }

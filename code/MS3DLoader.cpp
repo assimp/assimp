@@ -117,6 +117,9 @@ void MS3DImporter :: ReadComments(StreamReaderLE& stream, std::vector<T>& outp)
 		if(index >= outp.size()) {
 			DefaultLogger::get()->warn("MS3D: Invalid index in comment section");
 		}
+		else if (clength > stream.GetRemainingSize()) {
+			throw new ImportErrorException("MS3D: Failure reading comment, length field is out of range");
+		}
 		else {
 			outp[index].comment = std::string(reinterpret_cast<char*>(stream.GetPtr()),clength);
 		}
@@ -150,9 +153,9 @@ void MS3DImporter :: CollectChildJoints(const std::vector<TempJoint>& joints,
 			aiNode* ch = nd->mChildren[cnt++] = new aiNode(joints[i].name);
 			ch->mParent = nd;
 
-			const aiVector3D& qin = joints[i].rotation;
-			ch->mTransformation = aiMatrix4x4().FromEulerAnglesXYZ(qin.x,qin.y,qin.z)*
-				aiMatrix4x4::Translation(joints[i].position,ch->mTransformation);
+			ch->mTransformation = aiMatrix4x4::Translation(joints[i].position,aiMatrix4x4()=aiMatrix4x4())*
+				// XXX actually, I don't *know* why we need the inverse here. Probably column vs. row order?
+				aiMatrix4x4().FromEulerAnglesXYZ(joints[i].rotation).Transpose();
 
 			const aiMatrix4x4 abs = absTrafo*ch->mTransformation;
 			for(unsigned int a = 0; a < mScene->mNumMeshes; ++a) {
@@ -165,7 +168,7 @@ void MS3DImporter :: CollectChildJoints(const std::vector<TempJoint>& joints,
 					}
 				}
 			}
-
+	
 			hadit[i] = true;
 			CollectChildJoints(joints,hadit,ch,abs);
 		}
@@ -271,7 +274,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 			t.triangles[i] = stream.GetI2(); 
 		}
 		t.mat = stream.GetI1(); 
-		if (t.mat == 0xff) {
+		if (t.mat == 0xffffffff) {
 			need_default = true;
 		}
 	}
@@ -347,7 +350,16 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 			ReadComments<TempGroup>(stream,groups);
 			ReadComments<TempMaterial>(stream,materials);
 			ReadComments<TempJoint>(stream,joints);
-			ReadComments<TempModel>(stream,std::vector<TempModel>() = std::vector<TempModel>());
+			
+			// model comment - print it for we have such a nice log.
+			if (stream.GetI4()) {
+				const size_t len = static_cast<size_t>(stream.GetI4());
+				if (len > stream.GetRemainingSize()) {
+					throw new ImportErrorException("MS3D: Model comment is too long");
+				}
+
+				const std::string& s = std::string(reinterpret_cast<char*>(stream.GetPtr()),len);
+			}
 
 			if(stream.GetRemainingSize() > 4 && inrange((stream >> subversion,subversion),1u,3u)) {
 				for(unsigned int i = 0; i < verts; ++i) {
@@ -380,9 +392,12 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 		m.transparency = 1.f;
 		m.shininess = 0.f;
 
+		// this is because these TempXXX struct's have no c'tors.
+		m.texture[0] = m.alphamap[0] = '\0';
+
 		for (unsigned int i = 0; i < groups.size(); ++i) {
 			TempGroup& g = groups[i];
-			if (g.mat == 0xff) {
+			if (g.mat == 0xffffffff) {
 				g.mat = materials.size()-1;
 			}
 		}
@@ -390,11 +405,11 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
 	// convert materials to our generic key-value dict-alike
 	if (materials.size()) {
-		pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials=static_cast<unsigned int>(materials.size())];
-		for (unsigned int i = 0; i < pScene->mNumMaterials; ++i) {
+		pScene->mMaterials = new aiMaterial*[materials.size()];
+		for (size_t i = 0; i < materials.size(); ++i) {
 
 			MaterialHelper* mo = new MaterialHelper();
-			pScene->mMaterials[i] = mo;
+			pScene->mMaterials[pScene->mNumMaterials++] = mo;
 
 			const TempMaterial& mi = materials[i];
 
@@ -430,7 +445,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 		throw new ImportErrorException("MS3D: Didn't get any group records, file is malformed");
 	}
 
-	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes=static_cast<unsigned int>(groups.size())];
+	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes=static_cast<unsigned int>(groups.size())]();
 	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
 	
 		aiMesh* m = pScene->mMeshes[i] = new aiMesh();
@@ -494,7 +509,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 		// allocate storage for bones
 		if(mybones.size()) {
 			std::vector<unsigned int> bmap(joints.size());
-			m->mBones = new aiBone*[mybones.size()];
+			m->mBones = new aiBone*[mybones.size()]();
 			for(BoneSet::const_iterator it = mybones.begin(); it != mybones.end(); ++it) {
 				aiBone* const bn = m->mBones[m->mNumBones] = new aiBone();
 				const TempJoint& jnt = joints[(*it).first]; 
@@ -531,7 +546,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 	// ... add dummy nodes under a single root, each holding a reference to one
 	// mesh. If we didn't do this, we'd loose the group name.
 	aiNode* rt = pScene->mRootNode = new aiNode("<MS3DRoot>");
-	rt->mChildren = new aiNode*[rt->mNumChildren=pScene->mNumMeshes+(joints.size()?1:0)];
+	rt->mChildren = new aiNode*[rt->mNumChildren=pScene->mNumMeshes+(joints.size()?1:0)]();
 
 	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
 		aiNode* nd = rt->mChildren[i] = new aiNode();
@@ -579,18 +594,23 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 					aiQuatKey& q = nd->mRotationKeys[nd->mNumRotationKeys++];
 
 					q.mTime = (*rot).time*animfps;
-					q.mValue = aiQuaternion((*rot).value.x,(*rot).value.y,(*rot).value.z)*
-						aiQuaternion((*it).rotation.x,(*it).rotation.y,(*it).rotation.z);
+
+					// XXX it seems our matrix&quaternion code has faults in its conversion routines --
+					// aiQuaternion(x,y,z) seems to besomething different as quat(matrix.fromeuler(x,y,z)).
+					q.mValue = aiQuaternion(aiMatrix3x3(aiMatrix4x4().FromEulerAnglesXYZ((*rot).value)*
+						aiMatrix4x4().FromEulerAnglesXYZ((*it).rotation)).Transpose());
 				}
 			}
 
 			if ((*it).posFrames.size()) {
 				nd->mPositionKeys = new aiVectorKey[(*it).posFrames.size()];
-				for(std::vector<TempKeyFrame>::const_iterator pos = (*it).posFrames.begin(); pos != (*it).posFrames.end(); ++pos) {
+
+				aiQuatKey* qu = nd->mRotationKeys;
+				for(std::vector<TempKeyFrame>::const_iterator pos = (*it).posFrames.begin(); pos != (*it).posFrames.end(); ++pos,++qu) {
 					aiVectorKey& v = nd->mPositionKeys[nd->mNumPositionKeys++];
 
 					v.mTime = (*pos).time*animfps;
-					v.mValue = (*pos).value + (*it).position;
+					v.mValue = (*it).position + (*pos).value;
 				}
 			}
 		}

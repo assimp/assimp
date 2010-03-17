@@ -45,7 +45,7 @@ CPPFLAGS=-Wall
 # Setup environment for noboost build
 ifeq ($(NOBOOST),1)
 	SINGLETHREADED = 1
-	INCLUDEFLAGS  += -I/BoostWorkaround/
+	INCLUDEFLAGS  += -I./BoostWorkaround/
 	DEFINEFLAGS   += -DASSIMP_BUILD_BOOST_WORKAROUND 
 #	NAMESUFFIX    += -noboost
 else

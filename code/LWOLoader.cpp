@@ -170,6 +170,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		szBuff[1] = (char)(fileType >> 16u);
 		szBuff[2] = (char)(fileType >> 8u);
 		szBuff[3] = (char)(fileType);
+		szBuff[4] = '\0';
 		throw DeadlyImportError(std::string("Unknown LWO sub format: ") + szBuff);
 	}
 

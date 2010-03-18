@@ -94,7 +94,7 @@ void PLYImporter::InternReadFile( const std::string& pFile,
 
 	// Check whether we can read from the file
 	if( file.get() == NULL) {
-		throw new ImportErrorException( "Failed to open PLY file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open PLY file " + pFile + ".");
 	}
 
 	// allocate storage and copy the contents of the file to a memory buffer
@@ -106,7 +106,7 @@ void PLYImporter::InternReadFile( const std::string& pFile,
 	if ((mBuffer[0] != 'P' && mBuffer[0] != 'p') ||
 		(mBuffer[1] != 'L' && mBuffer[1] != 'l') ||
 		(mBuffer[2] != 'Y' && mBuffer[2] != 'y'))	{
-		throw new ImportErrorException( "Invalid .ply file: Magic number \'ply\' is no there");
+		throw DeadlyImportError( "Invalid .ply file: Magic number \'ply\' is no there");
 	}
 
 	char* szMe = (char*)&this->mBuffer[3];
@@ -120,7 +120,7 @@ void PLYImporter::InternReadFile( const std::string& pFile,
 		{
 			SkipLine(szMe,(const char**)&szMe);
 			if(!PLY::DOM::ParseInstance(szMe,&sPlyDom))
-				throw new ImportErrorException( "Invalid .ply file: Unable to build DOM (#1)");
+				throw DeadlyImportError( "Invalid .ply file: Unable to build DOM (#1)");
 		}
 		else if (!::strncmp(szMe,"binary_",7))
 		{
@@ -138,15 +138,15 @@ void PLYImporter::InternReadFile( const std::string& pFile,
 			// skip the line, parse the rest of the header and build the DOM
 			SkipLine(szMe,(const char**)&szMe);
 			if(!PLY::DOM::ParseInstanceBinary(szMe,&sPlyDom,bIsBE))
-				throw new ImportErrorException( "Invalid .ply file: Unable to build DOM (#2)");
+				throw DeadlyImportError( "Invalid .ply file: Unable to build DOM (#2)");
 		}
-		else throw new ImportErrorException( "Invalid .ply file: Unknown file format");
+		else throw DeadlyImportError( "Invalid .ply file: Unknown file format");
 	}
 	else
 	{
 		delete[] this->mBuffer;
 		AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
-		throw new ImportErrorException( "Invalid .ply file: Missing format specification");
+		throw DeadlyImportError( "Invalid .ply file: Missing format specification");
 	}
 	this->pcDOM = &sPlyDom;
 
@@ -155,7 +155,7 @@ void PLYImporter::InternReadFile( const std::string& pFile,
 	this->LoadVertices(&avPositions,false);
 
 	if (avPositions.empty())
-		throw new ImportErrorException( "Invalid .ply file: No vertices found. "
+		throw DeadlyImportError( "Invalid .ply file: No vertices found. "
 			"Unable to parse the data format of the PLY file.");
 
 	// now load a list of normals. 
@@ -172,7 +172,7 @@ void PLYImporter::InternReadFile( const std::string& pFile,
 	{
 		if (avPositions.size() < 3)
 		{
-			throw new ImportErrorException( "Invalid .ply file: Not enough "
+			throw DeadlyImportError( "Invalid .ply file: Not enough "
 				"vertices to build a proper face list. ");
 		}
 
@@ -211,7 +211,7 @@ void PLYImporter::InternReadFile( const std::string& pFile,
 		&avColors,&avTexCoords,&avMaterials,&avMeshes);
 
 	if (avMeshes.empty())
-		throw new ImportErrorException( "Invalid .ply file: Unable to extract mesh data ");
+		throw DeadlyImportError( "Invalid .ply file: Unable to extract mesh data ");
 
 	// now generate the output scene object. Fill the material list
 	pScene->mNumMaterials = (unsigned int)avMaterials.size();

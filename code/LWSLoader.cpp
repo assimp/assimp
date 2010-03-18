@@ -471,7 +471,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 
 	// Check whether we can read from the file
 	if( file.get() == NULL) {
-		throw new ImportErrorException( "Failed to open LWS file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open LWS file " + pFile + ".");
 	}
 
 	// Allocate storage and copy the contents of the file to a memory buffer
@@ -500,7 +500,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 		motion_file = true;
 
 	if ((*it).tokens[0] != "LWSC" && !motion_file)
-		throw new ImportErrorException("LWS: Not a LightWave scene, magic tag LWSC not found");
+		throw DeadlyImportError("LWS: Not a LightWave scene, magic tag LWSC not found");
 
 	// get file format version and print to log
 	++it;
@@ -808,7 +808,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 			++ no_parent;
 	}
 	if (!no_parent)
-		throw new ImportErrorException("LWS: Unable to find scene root node");
+		throw DeadlyImportError("LWS: Unable to find scene root node");
 
 
 	// Load all subsequent files

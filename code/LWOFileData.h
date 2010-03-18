@@ -609,7 +609,7 @@ struct Surface
 #define AI_LWO_VALIDATE_CHUNK_LENGTH(length,name,size) \
 	if (length < size) \
 	{ \
-		throw new ImportErrorException("LWO: "#name" chunk is too small"); \
+		throw DeadlyImportError("LWO: "#name" chunk is too small"); \
 	} \
 
 

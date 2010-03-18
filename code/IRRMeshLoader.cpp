@@ -103,7 +103,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
-		throw new ImportErrorException( "Failed to open IRRMESH file " + pFile + "");
+		throw DeadlyImportError( "Failed to open IRRMESH file " + pFile + "");
 
 	// Construct the irrXML parser
 	CIrrXML_IOStreamReader st(file.get());
@@ -227,7 +227,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 			else if (!ASSIMP_stricmp(reader->getNodeName(),"indices"))	{
 				if (curVertices.empty() && curMat)	{
 					delete curMat;
-					throw new ImportErrorException("IRRMESH: indices must come after vertices");
+					throw DeadlyImportError("IRRMESH: indices must come after vertices");
 				}
 
 				textMeaning = 2;
@@ -468,7 +468,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 	}
 
 	if (materials.empty())
-		throw new ImportErrorException("IRRMESH: Unable to read a mesh from this file");
+		throw DeadlyImportError("IRRMESH: Unable to read a mesh from this file");
 
 
 	// now generate the output scene

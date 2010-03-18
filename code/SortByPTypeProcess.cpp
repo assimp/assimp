@@ -369,7 +369,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 	if (outMeshes.empty())
 	{
 		// This should not occur
-		throw new ImportErrorException("No meshes remaining");
+		throw DeadlyImportError("No meshes remaining");
 	}
 
 	// If we added at least one mesh process all nodes in the node

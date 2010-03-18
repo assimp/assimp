@@ -1,1 +1,1 @@
-#define SVNRevision  613 
+#define SVNRevision  613

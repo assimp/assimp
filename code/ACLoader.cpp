@@ -741,7 +741,7 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
-		throw new ImportErrorException( "Failed to open AC3D file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open AC3D file " + pFile + ".");
 
 	// allocate storage and copy the contents of the file to a memory buffer
 	std::vector<char> mBuffer2;
@@ -753,7 +753,7 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 	lights = polys = worlds = groups = 0;
 
 	if (::strncmp(buffer,"AC3D",4)) {
-		throw new ImportErrorException("AC3D: No valid AC3D file, magic sequence not found");
+		throw DeadlyImportError("AC3D: No valid AC3D file, magic sequence not found");
 	}
 
 	// print the file format version to the console
@@ -800,7 +800,7 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 
 	if (rootObjects.empty() || !mNumMeshes)
 	{
-		throw new ImportErrorException("AC3D: No meshes have been loaded");
+		throw DeadlyImportError("AC3D: No meshes have been loaded");
 	}
 	if (materials.empty())
 	{
@@ -834,7 +834,7 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
 	// copy meshes
 	if (meshes.empty())
 	{
-		throw new ImportErrorException("An unknown error occured during converting");
+		throw DeadlyImportError("An unknown error occured during converting");
 	}
 	pScene->mNumMeshes = (unsigned int)meshes.size();
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];

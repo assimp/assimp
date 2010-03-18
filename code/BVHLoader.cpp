@@ -85,11 +85,11 @@ void BVHLoader::InternReadFile( const std::string& pFile, aiScene* pScene, IOSys
 	// read file into memory
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
 	if( file.get() == NULL)
-		throw new ImportErrorException( "Failed to open file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open file " + pFile + ".");
 
 	size_t fileSize = file->FileSize();
 	if( fileSize == 0)
-		throw new ImportErrorException( "File is too small.");
+		throw DeadlyImportError( "File is too small.");
 
 	mBuffer.resize( fileSize);
 	file->Read( &mBuffer.front(), 1, fileSize);
@@ -386,7 +386,7 @@ float BVHLoader::GetNextTokenAsFloat()
 // Aborts the file reading with an exception
 void BVHLoader::ThrowException( const std::string& pError)
 {
-	throw new ImportErrorException( boost::str( boost::format( "%s:%d - %s") % mFileName % mLine % pError));
+	throw DeadlyImportError( boost::str( boost::format( "%s:%d - %s") % mFileName % mLine % pError));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -438,7 +438,7 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 					case Channel_PositionX: poskey->mValue.x = node.mChannelValues[fr * node.mChannels.size() + channel]; break;
 					case Channel_PositionY: poskey->mValue.y = node.mChannelValues[fr * node.mChannels.size() + channel]; break;
 					case Channel_PositionZ: poskey->mValue.z = node.mChannelValues[fr * node.mChannels.size() + channel]; break;
-					default: throw new ImportErrorException( "Unexpected animation channel setup at node " + nodeName );
+					default: throw DeadlyImportError( "Unexpected animation channel setup at node " + nodeName );
 					}
 				}
 				++poskey;
@@ -482,7 +482,7 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 					case Channel_RotationX: aiMatrix4x4::RotationX( angle, temp); rotMatrix *= aiMatrix3x3( temp); break;
 					case Channel_RotationY: aiMatrix4x4::RotationY( angle, temp); rotMatrix *= aiMatrix3x3( temp);	break;
 					case Channel_RotationZ: aiMatrix4x4::RotationZ( angle, temp); rotMatrix *= aiMatrix3x3( temp); break;
-					default: throw new ImportErrorException( "Unexpected animation channel setup at node " + nodeName );
+					default: throw DeadlyImportError( "Unexpected animation channel setup at node " + nodeName );
 					}
 				}
 

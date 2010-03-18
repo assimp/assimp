@@ -73,13 +73,13 @@ public:
 	StreamReader(IOStream* _stream)
 	{
 		if (!_stream) {
-			throw new ImportErrorException("StreamReader: Unable to open file");
+			throw DeadlyImportError("StreamReader: Unable to open file");
 		}
 		stream = _stream;
 
 		const size_t s = stream->FileSize();
 		if (!s) {
-			throw new ImportErrorException("StreamReader: File is empty");
+			throw DeadlyImportError("StreamReader: File is empty");
 		}
 
 		current = buffer = new int8_t[s];
@@ -181,7 +181,7 @@ public:
 	void IncPtr(unsigned int plus)	{
 		current += plus;
 		if (current > end) {
-			throw new ImportErrorException("End of file was reached");
+			throw DeadlyImportError("End of file was reached");
 		}
 	}
 
@@ -202,7 +202,7 @@ public:
 
 		current = p;
 		if (current > end || current < buffer) {
-			throw new ImportErrorException("End of file was reached");
+			throw DeadlyImportError("End of file was reached");
 		}
 	}
 
@@ -240,7 +240,7 @@ public:
 
 		limit = buffer + _limit;
 		if (limit > end) {
-			throw new ImportErrorException("StreamReader: Invalid read limit");
+			throw DeadlyImportError("StreamReader: Invalid read limit");
 		}
 	}
 
@@ -286,7 +286,7 @@ private:
 	template <typename T>
 	T Get()	{
 		if (current + sizeof(T) > limit) {
-			throw new ImportErrorException("End of file or stream limit was reached");
+			throw DeadlyImportError("End of file or stream limit was reached");
 		}
 
 		T f = *((const T*)current);

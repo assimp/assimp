@@ -528,7 +528,7 @@ void LWOImporter::LoadLWO2ImageMap(unsigned int size, LWO::Texture& tex )
 		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
 
 		if (mFileBuffer + head->length > end)
-			throw new ImportErrorException("LWO2: Invalid SURF.BLOCK chunk length");
+			throw DeadlyImportError("LWO2: Invalid SURF.BLOCK chunk length");
 
 		uint8_t* const next = mFileBuffer+head->length;
 		switch (head->type)
@@ -596,7 +596,7 @@ void LWOImporter::LoadLWO2TextureHeader(unsigned int size, LWO::Texture& tex )
 		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
 
 		if (mFileBuffer + head->length > end)
-			throw new ImportErrorException("LWO2: Invalid texture header chunk length");
+			throw DeadlyImportError("LWO2: Invalid texture header chunk length");
 
 		uint8_t* const next = mFileBuffer+head->length;
 		switch (head->type)
@@ -699,7 +699,7 @@ void LWOImporter::LoadLWO2ShaderBlock(LE_NCONST IFF::SubChunkHeader* head, unsig
 		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
 
 		if (mFileBuffer + head->length > end)
-			throw new ImportErrorException("LWO2: Invalid shader header chunk length");
+			throw DeadlyImportError("LWO2: Invalid shader header chunk length");
 
 		uint8_t* const next = mFileBuffer+head->length;
 		switch (head->type)
@@ -757,7 +757,7 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
 
 		if (mFileBuffer + head->length > end)
-			throw new ImportErrorException("LWO2: Invalid surface chunk length");
+			throw DeadlyImportError("LWO2: Invalid surface chunk length");
 
 		uint8_t* const next = mFileBuffer+head->length;
 		switch (head->type)

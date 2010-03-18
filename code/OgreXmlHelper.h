@@ -23,7 +23,7 @@ template<> inline int GetAttribute<int>(XmlReader* Reader, std::string Name)
 	if(Value)
 		return atoi(Value);
 	else
-		throw new ImportErrorException(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
+		throw DeadlyImportError(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
 }
 
 template<> inline float GetAttribute<float>(XmlReader* Reader, std::string Name)
@@ -32,7 +32,7 @@ template<> inline float GetAttribute<float>(XmlReader* Reader, std::string Name)
 	if(Value)
 		return fast_atof(Value);
 	else
-		throw new ImportErrorException(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
+		throw DeadlyImportError(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
 }
 
 template<> inline std::string GetAttribute<std::string>(XmlReader* Reader, std::string Name)
@@ -41,7 +41,7 @@ template<> inline std::string GetAttribute<std::string>(XmlReader* Reader, std::
 	if(Value)
 		return std::string(Value);
 	else
-		throw new ImportErrorException(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
+		throw DeadlyImportError(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
 }
 
 template<> inline bool GetAttribute<bool>(XmlReader* Reader, std::string Name)
@@ -54,10 +54,10 @@ template<> inline bool GetAttribute<bool>(XmlReader* Reader, std::string Name)
 		else if(Value==std::string("false"))
 			return false;
 		else
-			throw new ImportErrorException(std::string("Bool value has invalid value: "+Name+" / "+Value+" / "+Reader->getNodeName()));
+			throw DeadlyImportError(std::string("Bool value has invalid value: "+Name+" / "+Value+" / "+Reader->getNodeName()));
 	}
 	else
-		throw new ImportErrorException(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
+		throw DeadlyImportError(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
 }
 //__________________________________________________________________
 

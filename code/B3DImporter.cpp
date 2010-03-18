@@ -96,12 +96,12 @@ void B3DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
-		throw new ImportErrorException( "Failed to open B3D file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open B3D file " + pFile + ".");
 
 	// check whether the .b3d file is large enough to contain
 	// at least one chunk.
 	size_t fileSize = file->FileSize();
-	if( fileSize<8 ) throw new ImportErrorException( "B3D File is too small.");
+	if( fileSize<8 ) throw DeadlyImportError( "B3D File is too small.");
 
 	_pos=0;
 	_buf.resize( fileSize );
@@ -113,7 +113,7 @@ void B3DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 
 // ------------------------------------------------------------------------------------------------
 void B3DImporter::Oops(){
-	throw new ImportErrorException( "B3D Importer - INTERNAL ERROR" );
+	throw DeadlyImportError( "B3D Importer - INTERNAL ERROR" );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -121,7 +121,7 @@ void B3DImporter::Fail( string str ){
 #ifdef DEBUG_B3D
 	cout<<"Error in B3D file data: "<<str<<endl;
 #endif
-	throw new ImportErrorException( "B3D Importer - error in B3D file data: "+str );
+	throw DeadlyImportError( "B3D Importer - error in B3D file data: "+str );
 }
 
 // ------------------------------------------------------------------------------------------------

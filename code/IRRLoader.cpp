@@ -883,7 +883,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
-		throw new ImportErrorException( "Failed to open IRR file " + pFile + "");
+		throw DeadlyImportError( "Failed to open IRR file " + pFile + "");
 
 	// Construct the irrXML parser
 	CIrrXML_IOStreamReader st(file.get());

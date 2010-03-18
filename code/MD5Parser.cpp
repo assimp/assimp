@@ -92,7 +92,7 @@ MD5Parser::MD5Parser(char* _buffer, unsigned int _fileSize )
 {
 	char szBuffer[1024];
 	::sprintf(szBuffer,"[MD5] Line %i: %s",line,error);
-	throw new ImportErrorException(szBuffer);
+	throw DeadlyImportError(szBuffer);
 }
 
 // ------------------------------------------------------------------------------------------------

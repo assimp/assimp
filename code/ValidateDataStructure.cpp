@@ -89,7 +89,7 @@ AI_WONT_RETURN void ValidateDSProcess::ReportError(const char* msg,...)
 #ifdef _DEBUG
 	aiAssert( szBuffer,__LINE__,__FILE__ );
 #endif
-	throw new ImportErrorException("Validation failed: " + std::string(szBuffer,iLen));
+	throw DeadlyImportError("Validation failed: " + std::string(szBuffer,iLen));
 }
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::ReportWarning(const char* msg,...)

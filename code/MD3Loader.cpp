@@ -365,7 +365,7 @@ void MD3Importer::ValidateHeaderOffsets()
 	// Check magic number
 	if (pcHeader->IDENT != AI_MD3_MAGIC_NUMBER_BE &&
 		pcHeader->IDENT != AI_MD3_MAGIC_NUMBER_LE)
-			throw new ImportErrorException( "Invalid MD3 file: Magic bytes not found");
+			throw DeadlyImportError( "Invalid MD3 file: Magic bytes not found");
 
 	// Check file format version
 	if (pcHeader->VERSION > 15)
@@ -373,15 +373,15 @@ void MD3Importer::ValidateHeaderOffsets()
 
 	// Check some offset values whether they are valid
 	if (!pcHeader->NUM_SURFACES)
-		throw new ImportErrorException( "Invalid md3 file: NUM_SURFACES is 0");
+		throw DeadlyImportError( "Invalid md3 file: NUM_SURFACES is 0");
 
 	if (pcHeader->OFS_FRAMES >= fileSize || pcHeader->OFS_SURFACES >= fileSize || 
 		pcHeader->OFS_EOF > fileSize) {
-		throw new ImportErrorException("Invalid MD3 header: some offsets are outside the file");
+		throw DeadlyImportError("Invalid MD3 header: some offsets are outside the file");
 	}
 
 	if (pcHeader->NUM_FRAMES <= configFrameID )
-		throw new ImportErrorException("The requested frame is not existing the file");
+		throw DeadlyImportError("The requested frame is not existing the file");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -396,7 +396,7 @@ void MD3Importer::ValidateSurfaceHeaderOffsets(const MD3::Surface* pcSurf)
 		pcSurf->OFS_ST + ofs + pcSurf->NUM_VERTICES * sizeof(MD3::TexCoord) > fileSize          ||
 		pcSurf->OFS_XYZNORMAL + ofs + pcSurf->NUM_VERTICES * sizeof(MD3::Vertex) > fileSize)	{
 
-		throw new ImportErrorException("Invalid MD3 surface header: some offsets are outside the file");
+		throw DeadlyImportError("Invalid MD3 surface header: some offsets are outside the file");
 	}
 
 	// Check whether all requirements for Q3 files are met. We don't
@@ -634,7 +634,7 @@ error_cleanup:
 		delete master;
 
 		if (failure == mod_filename) {
-			throw new ImportErrorException("MD3: failure to read multipart host file");
+			throw DeadlyImportError("MD3: failure to read multipart host file");
 		}
 	}
 	return false;
@@ -709,12 +709,12 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
-		throw new ImportErrorException( "Failed to open MD3 file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open MD3 file " + pFile + ".");
 
 	// Check whether the md3 file is large enough to contain the header
 	fileSize = (unsigned int)file->FileSize();
 	if( fileSize < sizeof(MD3::Header))
-		throw new ImportErrorException( "MD3 File is too small.");
+		throw DeadlyImportError( "MD3 File is too small.");
 
 	// Allocate storage and copy the contents of the file to a memory buffer
 	std::vector<unsigned char> mBuffer2 (fileSize);
@@ -994,7 +994,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 	}
 
 	if (!pScene->mNumMeshes)
-		throw new ImportErrorException( "MD3: File contains no valid mesh");
+		throw DeadlyImportError( "MD3: File contains no valid mesh");
 	pScene->mNumMaterials = iNumMaterials;
 
 	// Now we need to generate an empty node graph

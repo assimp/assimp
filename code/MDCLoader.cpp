@@ -130,7 +130,7 @@ void MDCImporter::ValidateHeader()
 		szBuffer[3] = ((char*)&pcHeader->ulIdent)[3];
 		szBuffer[4] = '\0';
 
-		throw new ImportErrorException("Invalid MDC magic word: should be IDPC, the "
+		throw DeadlyImportError("Invalid MDC magic word: should be IDPC, the "
 			"magic word found is " + std::string( szBuffer ));
 	}
 
@@ -140,12 +140,12 @@ void MDCImporter::ValidateHeader()
 	if (pcHeader->ulOffsetBorderFrames + pcHeader->ulNumFrames * sizeof(MDC::Frame) > this->fileSize ||
 		pcHeader->ulOffsetSurfaces + pcHeader->ulNumSurfaces * sizeof(MDC::Surface) > this->fileSize)
 	{
-		throw new ImportErrorException("Some of the offset values in the MDC header are invalid "
+		throw DeadlyImportError("Some of the offset values in the MDC header are invalid "
 			"and point to something behind the file.");
 	}
 
 	if (this->configFrameID >= this->pcHeader->ulNumFrames)
-		throw new ImportErrorException("The requested frame is not available");
+		throw DeadlyImportError("The requested frame is not available");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -176,7 +176,7 @@ void MDCImporter::ValidateSurfaceHeader(BE_NCONST MDC::Surface* pcSurf)
         pcSurf->ulOffsetFrameBaseFrames + pcSurf->ulNumBaseFrames * 2						> iMax ||
         (pcSurf->ulNumCompFrames && pcSurf->ulOffsetFrameCompFrames + pcSurf->ulNumCompFrames * 2	> iMax))
     {
-        throw new ImportErrorException("Some of the offset values in the MDC surface header "
+        throw DeadlyImportError("Some of the offset values in the MDC surface header "
             "are invalid and point somewhere behind the file.");
     }
 }
@@ -203,12 +203,12 @@ void MDCImporter::InternReadFile(
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
-		throw new ImportErrorException( "Failed to open MDC file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open MDC file " + pFile + ".");
 
 	// check whether the mdc file is large enough to contain the file header
 	fileSize = (unsigned int)file->FileSize();
 	if( fileSize < sizeof(MDC::Header))
-		throw new ImportErrorException( "MDC File is too small.");
+		throw DeadlyImportError( "MDC File is too small.");
 
 	std::vector<unsigned char> mBuffer2(fileSize);
 	file->Read( &mBuffer2[0], 1, fileSize);
@@ -406,7 +406,7 @@ void MDCImporter::InternReadFile(
 
 	// create a flat node graph with a root node and one child for each surface
 	if (!pScene->mNumMeshes)
-		throw new ImportErrorException( "Invalid MDC file: File contains no valid mesh");
+		throw DeadlyImportError( "Invalid MDC file: File contains no valid mesh");
 	else if (1 == pScene->mNumMeshes)
 	{
 		pScene->mRootNode = new aiNode();

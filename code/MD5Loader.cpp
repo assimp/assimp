@@ -139,14 +139,15 @@ void MD5Importer::InternReadFile( const std::string& pFile,
 			LoadMD5AnimFile();
 		}
 	}
-	catch ( ImportErrorException* ex) {
+	catch ( std::exception&) {
+		// XXX use more idiomatic RAII solution
 		UnloadFileFromMemory();
-		throw ex;
+		throw;
 	}
 
 	// make sure we have at least one file
 	if (!bHadMD5Mesh && !bHadMD5Anim && !bHadMD5Camera)
-		throw new ImportErrorException("Failed to read valid contents from this MD5* file");
+		throw DeadlyImportError("Failed to read valid contents from this MD5* file");
 
 	// Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
 	pScene->mRootNode->mTransformation = aiMatrix4x4(1.f,0.f,0.f,0.f,
@@ -207,7 +208,7 @@ void MD5Importer::MakeDataUnique (MD5::MeshDesc& meshSrc)
 		const aiFace& face = *iter;
 		for (unsigned int i = 0; i < 3;++i) {
 			if (face.mIndices[0] >= meshSrc.mVertices.size())
-				throw new ImportErrorException("MD5MESH: Invalid vertex index");
+				throw DeadlyImportError("MD5MESH: Invalid vertex index");
 
 			if (abHad[face.mIndices[i]])	{
 				// generate a new vertex
@@ -455,7 +456,7 @@ void MD5Importer::LoadMD5MeshFile ()
 				// process bone weights
 				for (unsigned int jub = (*iter).mFirstWeight, w = jub; w < jub + (*iter).mNumWeights;++w)	{
 					if (w >= meshSrc.mWeights.size())
-						throw new ImportErrorException("MD5MESH: Invalid weight index");
+						throw DeadlyImportError("MD5MESH: Invalid weight index");
 
 					MD5::WeightDesc& desc = meshSrc.mWeights[w];
 					if ( desc.mWeight < AI_MD5_WEIGHT_EPSILON && desc.mWeight >= -AI_MD5_WEIGHT_EPSILON)
@@ -590,7 +591,7 @@ void MD5Importer::LoadMD5AnimFile ()
 
 						// Allow for empty frames
 						if ((*iter2).iFlags != 0) {
-							throw new ImportErrorException("MD5: Keyframe index is out of range");
+							throw DeadlyImportError("MD5: Keyframe index is out of range");
 						
 						}
 						continue;
@@ -655,7 +656,7 @@ void MD5Importer::LoadMD5CameraFile ()
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)	{
-		throw new ImportErrorException("Failed to read MD5CAMERA file: " + pFile);
+		throw DeadlyImportError("Failed to read MD5CAMERA file: " + pFile);
 	}
 	bHadMD5Camera = true;
 	LoadFileIntoMemory(file.get());
@@ -667,7 +668,7 @@ void MD5Importer::LoadMD5CameraFile ()
 	MD5::MD5CameraParser cameraParser(parser.mSections);
 
 	if (cameraParser.frames.empty())
-		throw new ImportErrorException("MD5CAMERA: No frames parsed");
+		throw DeadlyImportError("MD5CAMERA: No frames parsed");
 
 	std::vector<unsigned int>& cuts = cameraParser.cuts;
 	std::vector<MD5::CameraAnimFrameDesc>& frames = cameraParser.frames;

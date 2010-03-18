@@ -515,9 +515,12 @@ Importer::Importer(const Importer &other)
 aiReturn Importer::RegisterPPStep(BaseProcess* pImp)
 {
 	ai_assert(NULL != pImp);
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 
-	pimpl->mPostProcessingSteps.push_back(pImp);
-	DefaultLogger::get()->info("Registering custom post-processing step");
+		pimpl->mPostProcessingSteps.push_back(pImp);
+		DefaultLogger::get()->info("Registering custom post-processing step");
+	
+	ASSIMP_END_EXCEPTION_REGION(aiReturn);
 	return AI_SUCCESS;
 }
 
@@ -526,6 +529,7 @@ aiReturn Importer::RegisterPPStep(BaseProcess* pImp)
 aiReturn Importer::RegisterLoader(BaseImporter* pImp)
 {
 	ai_assert(NULL != pImp);
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 
 	// --------------------------------------------------------------------
 	// Check whether we would have two loaders for the same file extension 
@@ -550,6 +554,7 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp)
 	// add the loader
 	pimpl->mImporter.push_back(pImp);
 	DefaultLogger::get()->info("Registering custom importer for these file extensions: " + baked);
+	ASSIMP_END_EXCEPTION_REGION(aiReturn);
 	return AI_SUCCESS;
 }
 
@@ -562,6 +567,7 @@ aiReturn Importer::UnregisterLoader(BaseImporter* pImp)
 		return AI_SUCCESS;
 	}
 
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 	std::vector<BaseImporter*>::iterator it = std::find(pimpl->mImporter.begin(),pimpl->mImporter.end(),pImp);
 	if (it != pimpl->mImporter.end())	{
 		pimpl->mImporter.erase(it);
@@ -573,6 +579,7 @@ aiReturn Importer::UnregisterLoader(BaseImporter* pImp)
 		return AI_SUCCESS;
 	}
 	DefaultLogger::get()->warn("Unable to remove custom importer: I can't find you ...");
+	ASSIMP_END_EXCEPTION_REGION(aiReturn);
 	return AI_FAILURE;
 }
 
@@ -585,6 +592,7 @@ aiReturn Importer::UnregisterPPStep(BaseProcess* pImp)
 		return AI_SUCCESS;
 	}
 
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 	std::vector<BaseProcess*>::iterator it = std::find(pimpl->mPostProcessingSteps.begin(),pimpl->mPostProcessingSteps.end(),pImp);
 	if (it != pimpl->mPostProcessingSteps.end())	{
 		pimpl->mPostProcessingSteps.erase(it);
@@ -592,6 +600,7 @@ aiReturn Importer::UnregisterPPStep(BaseProcess* pImp)
 		return AI_SUCCESS;
 	}
 	DefaultLogger::get()->warn("Unable to remove custom post-processing step: I can't find you ..");
+	ASSIMP_END_EXCEPTION_REGION(aiReturn);
 	return AI_FAILURE;
 }
 
@@ -599,6 +608,7 @@ aiReturn Importer::UnregisterPPStep(BaseProcess* pImp)
 // Supplies a custom IO handler to the importer to open and access files.
 void Importer::SetIOHandler( IOSystem* pIOHandler)
 {
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 	// If the new handler is zero, allocate a default IO implementation.
 	if (!pIOHandler)
 	{
@@ -613,6 +623,7 @@ void Importer::SetIOHandler( IOSystem* pIOHandler)
 		pimpl->mIOHandler = pIOHandler;
 		pimpl->mIsDefaultHandler = false;
 	}
+	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -648,10 +659,12 @@ bool _ValidateFlags(unsigned int pFlags)
 // Free the current scene
 void Importer::FreeScene( )
 {
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 	delete pimpl->mScene;
 	pimpl->mScene = NULL;
 
 	pimpl->mErrorString = "";
+	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -681,9 +694,12 @@ const aiScene* Importer::GetScene() const
 aiScene* Importer::GetOrphanedScene()
 {
 	aiScene* s = pimpl->mScene;
+
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 	pimpl->mScene = NULL;
 
 	pimpl->mErrorString = ""; /* reset error string */
+	ASSIMP_END_EXCEPTION_REGION(aiScene*);
 	return s;
 }
 
@@ -691,9 +707,11 @@ aiScene* Importer::GetOrphanedScene()
 // Validate post-processing flags
 bool Importer::ValidateFlags(unsigned int pFlags)
 {
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 	// run basic checks for mutually exclusive flags
-	if(!_ValidateFlags(pFlags))
+	if(!_ValidateFlags(pFlags)) {
 		return false;
+	}
 
 	// ValidateDS does not anymore occur in the pp list, it plays an awesome extra role ...
 #ifdef AI_BUILD_NO_VALIDATEDS_PROCESS
@@ -720,6 +738,7 @@ bool Importer::ValidateFlags(unsigned int pFlags)
 				return false;
 		}
 	}
+	ASSIMP_END_EXCEPTION_REGION(bool);
 	return true;
 }
 
@@ -729,6 +748,7 @@ const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
 	unsigned int pFlags,
 	const char* pHint /*= ""*/)
 {
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 	if (!pHint) {
 		pHint = "";
 	}
@@ -751,6 +771,7 @@ const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
 	ReadFile(fbuff,pFlags);
 	SetIOHandler(io);
 
+	ASSIMP_END_EXCEPTION_REGION(const aiScene*);
 	return pimpl->mScene;
 }
 
@@ -758,6 +779,7 @@ const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
 // Reads the given file and returns its contents if successful. 
 const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 {
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 	const std::string pFile(_pFile);
 
 	// ----------------------------------------------------------------------
@@ -869,6 +891,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 #endif // ! ASSIMP_CATCH_GLOBAL_EXCEPTIONS
 
 	// either successful or failure - the pointer expresses it anyways
+	ASSIMP_END_EXCEPTION_REGION(const aiScene*);
 	return pimpl->mScene;
 }
 
@@ -876,6 +899,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 // Apply post-processing to the currently bound scene
 const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 {
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 	// Return immediately if no scene is active
 	if (!pimpl->mScene) {
 		return NULL;
@@ -948,6 +972,8 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 	// clear any data allocated by post-process steps
 	pimpl->mPPShared->Clean();
 	DefaultLogger::get()->info("Leaving post processing pipeline");
+
+	ASSIMP_END_EXCEPTION_REGION(const aiScene*);
 	return pimpl->mScene;
 }
 
@@ -963,6 +989,7 @@ bool Importer::IsExtensionSupported(const char* szExtension)
 BaseImporter* Importer::FindLoader (const char* szExtension)
 {
 	ai_assert(szExtension);
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 
 	// skip over wildcard and dot characters at string head --
 	for(;*szExtension == '*' || *szExtension == '.'; ++szExtension);
@@ -982,6 +1009,7 @@ BaseImporter* Importer::FindLoader (const char* szExtension)
 			}
 		}
 	}
+	ASSIMP_END_EXCEPTION_REGION(BaseImporter*);
 	return NULL;
 }
 
@@ -989,6 +1017,7 @@ BaseImporter* Importer::FindLoader (const char* szExtension)
 // Helper function to build a list of all file extensions supported by ASSIMP
 void Importer::GetExtensionList(aiString& szOut)
 {
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 	std::set<std::string> str;
 	for (std::vector<BaseImporter*>::const_iterator i =  pimpl->mImporter.begin();i != pimpl->mImporter.end();++i)	{
 		(*i)->GetExtensionList(str);
@@ -1003,6 +1032,7 @@ void Importer::GetExtensionList(aiString& szOut)
 		}
 		szOut.Append(";");
 	}
+	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1010,7 +1040,9 @@ void Importer::GetExtensionList(aiString& szOut)
 void Importer::SetPropertyInteger(const char* szName, int iValue, 
 	bool* bWasExisting /*= NULL*/)
 {
-	SetGenericProperty<int>(pimpl->mIntProperties, szName,iValue,bWasExisting);	
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+		SetGenericProperty<int>(pimpl->mIntProperties, szName,iValue,bWasExisting);	
+	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1018,7 +1050,9 @@ void Importer::SetPropertyInteger(const char* szName, int iValue,
 void Importer::SetPropertyFloat(const char* szName, float iValue, 
 	bool* bWasExisting /*= NULL*/)
 {
-	SetGenericProperty<float>(pimpl->mFloatProperties, szName,iValue,bWasExisting);	
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+		SetGenericProperty<float>(pimpl->mFloatProperties, szName,iValue,bWasExisting);	
+	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1026,7 +1060,21 @@ void Importer::SetPropertyFloat(const char* szName, float iValue,
 void Importer::SetPropertyString(const char* szName, const std::string& value, 
 	bool* bWasExisting /*= NULL*/)
 {
-	SetGenericProperty<std::string>(pimpl->mStringProperties, szName,value,bWasExisting);	
+	try {
+		std::cout << "";
+	}
+	catch (...) {
+		try {
+			throw;
+		}
+		catch(std::exception&) {
+			return;
+		}
+	}
+
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+		SetGenericProperty<std::string>(pimpl->mStringProperties, szName,value,bWasExisting);	
+	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------

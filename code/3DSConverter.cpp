@@ -425,7 +425,7 @@ void Discreet3DSImporter::ConvertMeshes(aiScene* pcOut)
 
 	// We should have at least one face here
 	if (!iFaceCnt)
-		throw new ImportErrorException("No faces loaded. The mesh is empty");
+		throw DeadlyImportError("No faces loaded. The mesh is empty");
 }
 
 // ------------------------------------------------------------------------------------------------

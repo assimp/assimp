@@ -118,7 +118,7 @@ void MS3DImporter :: ReadComments(StreamReaderLE& stream, std::vector<T>& outp)
 			DefaultLogger::get()->warn("MS3D: Invalid index in comment section");
 		}
 		else if (clength > stream.GetRemainingSize()) {
-			throw new ImportErrorException("MS3D: Failure reading comment, length field is out of range");
+			throw DeadlyImportError("MS3D: Failure reading comment, length field is out of range");
 		}
 		else {
 			outp[index].comment = std::string(reinterpret_cast<char*>(stream.GetPtr()),clength);
@@ -203,11 +203,11 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 	stream.CopyAndAdvance(head,10);
 	stream >> version;
 	if (strncmp(head,"MS3D000000",10)) {
-		throw new ImportErrorException("Not a MS3D file, magic string MS3D000000 not found: "+pFile);
+		throw DeadlyImportError("Not a MS3D file, magic string MS3D000000 not found: "+pFile);
 	}
 
 	if (version != 4) {
-		throw new ImportErrorException("MS3D: Unsupported file format version, 4 was expected");
+		throw DeadlyImportError("MS3D: Unsupported file format version, 4 was expected");
 	}
 
 	uint16_t verts;
@@ -355,7 +355,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 			if (stream.GetI4()) {
 				const size_t len = static_cast<size_t>(stream.GetI4());
 				if (len > stream.GetRemainingSize()) {
-					throw new ImportErrorException("MS3D: Model comment is too long");
+					throw DeadlyImportError("MS3D: Model comment is too long");
 				}
 
 				const std::string& s = std::string(reinterpret_cast<char*>(stream.GetPtr()),len);
@@ -442,7 +442,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
 	// convert groups to meshes
 	if (groups.empty()) {
-		throw new ImportErrorException("MS3D: Didn't get any group records, file is malformed");
+		throw DeadlyImportError("MS3D: Didn't get any group records, file is malformed");
 	}
 
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes=static_cast<unsigned int>(groups.size())]();
@@ -452,7 +452,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 		const TempGroup& g = groups[i];
 
 		if (pScene->mNumMaterials && g.mat > pScene->mNumMaterials) {
-			throw new ImportErrorException("MS3D: Encountered invalid material index, file is malformed");
+			throw DeadlyImportError("MS3D: Encountered invalid material index, file is malformed");
 		} // no error if no materials at all - scenepreprocessor adds one then
 
 		m->mMaterialIndex  = g.mat;
@@ -473,7 +473,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 		for (unsigned int i = 0,n = 0; i < m->mNumFaces; ++i) {
 			aiFace& f = m->mFaces[i];
 			if (g.triangles[i]>triangles.size()) {
-				throw new ImportErrorException("MS3D: Encountered invalid triangle index, file is malformed");
+				throw DeadlyImportError("MS3D: Encountered invalid triangle index, file is malformed");
 			}
 
 			TempTriangle& t = triangles[g.triangles[i]];
@@ -481,14 +481,14 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 			
 			for (unsigned int i = 0; i < 3; ++i,++n) {
 				if (t.indices[i]>vertices.size()) {
-					throw new ImportErrorException("MS3D: Encountered invalid vertex index, file is malformed");
+					throw DeadlyImportError("MS3D: Encountered invalid vertex index, file is malformed");
 				}
 
 				const TempVertex& v = vertices[t.indices[i]];
 				for(unsigned int a = 0; a < 4; ++a) {
 					if (v.bone_id[a] != 0xffffffff) {
 						if (v.bone_id[a] >= joints.size()) {
-							throw new ImportErrorException("MS3D: Encountered invalid bone index, file is malformed");
+							throw DeadlyImportError("MS3D: Encountered invalid bone index, file is malformed");
 						}
 						if (mybones.find(v.bone_id[a]) == mybones.end()) {
 							 mybones[v.bone_id[a]] = 1;

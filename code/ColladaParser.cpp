@@ -68,7 +68,7 @@ ColladaParser::ColladaParser( IOSystem* pIOHandler, const std::string& pFile)
   // open the file
   boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
   if( file.get() == NULL)
-    throw new ImportErrorException( "Failed to open file " + pFile + ".");
+    throw DeadlyImportError( "Failed to open file " + pFile + ".");
 
 	// generate a XML reader for it
   boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper( new CIrrXML_IOStreamReader( file.get()));
@@ -2531,7 +2531,7 @@ void ColladaParser::ReadScene()
 // Aborts the file reading with an exception
 void ColladaParser::ThrowException( const std::string& pError) const
 {
-	throw new ImportErrorException( boost::str( boost::format( "Collada: %s - %s") % mFileName % pError));
+	throw DeadlyImportError( boost::str( boost::format( "Collada: %s - %s") % mFileName % pError));
 }
 
 // ------------------------------------------------------------------------------------------------

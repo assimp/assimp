@@ -81,7 +81,7 @@ void TestPlugin :: GetExtensionList(std::set<std::string>& extensions)
 void TestPlugin :: InternReadFile( const std::string& pFile, 
 	aiScene* pScene, IOSystem* pIOHandler)
 {
-	throw new ImportErrorException(AIUT_DEF_ERROR_TEXT);
+	throw DeadlyImportError(AIUT_DEF_ERROR_TEXT);
 }
 
 

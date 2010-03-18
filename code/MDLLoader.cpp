@@ -132,17 +132,20 @@ void MDLImporter::InternReadFile( const std::string& pFile,
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
 
 	// Check whether we can read from the file
-	if( file.get() == NULL)
-		throw new ImportErrorException( "Failed to open MDL file " + pFile + ".");
+	if( file.get() == NULL) {
+		throw DeadlyImportError( "Failed to open MDL file " + pFile + ".");
+	}
 
 	// This should work for all other types of MDL files, too ...
 	// the quake header is one of the smallest, afaik
 	iFileSize = (unsigned int)file->FileSize();
-	if( iFileSize < sizeof(MDL::Header))
-		throw new ImportErrorException( "MDL File is too small.");
+	if( iFileSize < sizeof(MDL::Header)) {
+		throw DeadlyImportError( "MDL File is too small.");
+	}
 
 	// Allocate storage and copy the contents of the file to a memory buffer
-	mBuffer = new unsigned char[iFileSize+1];
+	std::vector<unsigned char> buffer(iFileSize+1);
+	mBuffer = &buffer[0];
 	file->Read( (void*)mBuffer, 1, iFileSize);
 
 	// Append a binary zero to the end of the buffer.
@@ -152,64 +155,55 @@ void MDLImporter::InternReadFile( const std::string& pFile,
 	const uint32_t iMagicWord = *((uint32_t*)mBuffer);
 
 	// Determine the file subtype and call the appropriate member function
-	try {
-		// Original Quake1 format
-		if (AI_MDL_MAGIC_NUMBER_BE == iMagicWord ||	AI_MDL_MAGIC_NUMBER_LE == iMagicWord)	{
-			DefaultLogger::get()->debug("MDL subtype: Quake 1, magic word is IDPO");
-			iGSFileVersion = 0;
-			InternReadFile_Quake1();
-		}
-		// GameStudio A<old> MDL2 format - used by some test models that come with 3DGS
-		else if (AI_MDL_MAGIC_NUMBER_BE_GS3 == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS3 == iMagicWord)	{
-			DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A2, magic word is MDL2");
-			iGSFileVersion = 2;
-			InternReadFile_Quake1();
-		}
-		// GameStudio A4 MDL3 format
-		else if (AI_MDL_MAGIC_NUMBER_BE_GS4 == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS4 == iMagicWord)	{
-			DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A4, magic word is MDL3");
-			iGSFileVersion = 3;
-			InternReadFile_3DGS_MDL345();
-		}
-		// GameStudio A5+ MDL4 format
-		else if (AI_MDL_MAGIC_NUMBER_BE_GS5a == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS5a == iMagicWord)	{
-			DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A4, magic word is MDL4");
-			iGSFileVersion = 4;
-			InternReadFile_3DGS_MDL345();
-		}
-		// GameStudio A5+ MDL5 format
-		else if (AI_MDL_MAGIC_NUMBER_BE_GS5b == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS5b == iMagicWord)	{
-			DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A5, magic word is MDL5");
-			iGSFileVersion = 5;
-			InternReadFile_3DGS_MDL345();
-		}
-		// GameStudio A7 MDL7 format
-		else if (AI_MDL_MAGIC_NUMBER_BE_GS7 == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS7 == iMagicWord)	{
-			DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A7, magic word is MDL7");
-			iGSFileVersion = 7;
-			InternReadFile_3DGS_MDL7();
-		}
-		// IDST/IDSQ Format (CS:S/HL�, etc ...)
-		else if (AI_MDL_MAGIC_NUMBER_BE_HL2a == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2a == iMagicWord ||
-			AI_MDL_MAGIC_NUMBER_BE_HL2b == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2b == iMagicWord)
-		{
-			DefaultLogger::get()->debug("MDL subtype: CS:S\\HL�, magic word is IDST/IDSQ");
-			iGSFileVersion = 0;
-			InternReadFile_HL2();
-		}
-		else	{
-			// print the magic word to the log file
-			throw new ImportErrorException( "Unknown MDL subformat " + pFile +
-				". Magic word (" + std::string((char*)&iMagicWord,4) + ") is not known");
-		}
 
-	} 
-	catch (ImportErrorException* ex) {
-		delete[] mBuffer;
-		AI_DEBUG_INVALIDATE_PTR(mBuffer);
-		AI_DEBUG_INVALIDATE_PTR(pIOHandler);
-		AI_DEBUG_INVALIDATE_PTR(pScene);
-		throw ex;
+	// Original Quake1 format
+	if (AI_MDL_MAGIC_NUMBER_BE == iMagicWord ||	AI_MDL_MAGIC_NUMBER_LE == iMagicWord)	{
+		DefaultLogger::get()->debug("MDL subtype: Quake 1, magic word is IDPO");
+		iGSFileVersion = 0;
+		InternReadFile_Quake1();
+	}
+	// GameStudio A<old> MDL2 format - used by some test models that come with 3DGS
+	else if (AI_MDL_MAGIC_NUMBER_BE_GS3 == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS3 == iMagicWord)	{
+		DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A2, magic word is MDL2");
+		iGSFileVersion = 2;
+		InternReadFile_Quake1();
+	}
+	// GameStudio A4 MDL3 format
+	else if (AI_MDL_MAGIC_NUMBER_BE_GS4 == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS4 == iMagicWord)	{
+		DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A4, magic word is MDL3");
+		iGSFileVersion = 3;
+		InternReadFile_3DGS_MDL345();
+	}
+	// GameStudio A5+ MDL4 format
+	else if (AI_MDL_MAGIC_NUMBER_BE_GS5a == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS5a == iMagicWord)	{
+		DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A4, magic word is MDL4");
+		iGSFileVersion = 4;
+		InternReadFile_3DGS_MDL345();
+	}
+	// GameStudio A5+ MDL5 format
+	else if (AI_MDL_MAGIC_NUMBER_BE_GS5b == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS5b == iMagicWord)	{
+		DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A5, magic word is MDL5");
+		iGSFileVersion = 5;
+		InternReadFile_3DGS_MDL345();
+	}
+	// GameStudio A7 MDL7 format
+	else if (AI_MDL_MAGIC_NUMBER_BE_GS7 == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS7 == iMagicWord)	{
+		DefaultLogger::get()->debug("MDL subtype: 3D GameStudio A7, magic word is MDL7");
+		iGSFileVersion = 7;
+		InternReadFile_3DGS_MDL7();
+	}
+	// IDST/IDSQ Format (CS:S/HL�, etc ...)
+	else if (AI_MDL_MAGIC_NUMBER_BE_HL2a == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2a == iMagicWord ||
+		AI_MDL_MAGIC_NUMBER_BE_HL2b == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2b == iMagicWord)
+	{
+		DefaultLogger::get()->debug("MDL subtype: CS:S\\HL�, magic word is IDST/IDSQ");
+		iGSFileVersion = 0;
+		InternReadFile_HL2();
+	}
+	else	{
+		// print the magic word to the log file
+		throw DeadlyImportError( "Unknown MDL subformat " + pFile +
+			". Magic word (" + std::string((char*)&iMagicWord,4) + ") is not known");
 	}
 
 	// Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
@@ -217,7 +211,6 @@ void MDLImporter::InternReadFile( const std::string& pFile,
 		0.f,0.f,1.f,0.f,0.f,-1.f,0.f,0.f,0.f,0.f,0.f,1.f);
 
 	// delete the file buffer and cleanup
-	delete[] mBuffer;
 	AI_DEBUG_INVALIDATE_PTR(mBuffer);
 	AI_DEBUG_INVALIDATE_PTR(pIOHandler);
 	AI_DEBUG_INVALIDATE_PTR(pScene);
@@ -229,7 +222,7 @@ void MDLImporter::SizeCheck(const void* szPos)
 {
 	if (!szPos || (const unsigned char*)szPos > this->mBuffer + this->iFileSize)
 	{
-		throw new ImportErrorException("Invalid MDL file. The file is too small "
+		throw DeadlyImportError("Invalid MDL file. The file is too small "
 			"or contains invalid data.");
 	}
 }
@@ -253,7 +246,7 @@ void MDLImporter::SizeCheck(const void* szPos, const char* szFile, unsigned int 
 		::sprintf(szBuffer,"Invalid MDL file. The file is too small "
 			"or contains invalid data (File: %s Line: %i)",szFilePtr,iLine);
 
-		throw new ImportErrorException(szBuffer);
+		throw DeadlyImportError(szBuffer);
 	}
 }
 
@@ -263,13 +256,13 @@ void MDLImporter::ValidateHeader_Quake1(const MDL::Header* pcHeader)
 {
 	// some values may not be NULL
 	if (!pcHeader->num_frames)
-		throw new ImportErrorException( "[Quake 1 MDL] There are no frames in the file");
+		throw DeadlyImportError( "[Quake 1 MDL] There are no frames in the file");
 
 	if (!pcHeader->num_verts)
-		throw new ImportErrorException( "[Quake 1 MDL] There are no vertices in the file");
+		throw DeadlyImportError( "[Quake 1 MDL] There are no vertices in the file");
 
 	if (!pcHeader->num_tris)
-		throw new ImportErrorException( "[Quake 1 MDL] There are no triangles in the file");
+		throw DeadlyImportError( "[Quake 1 MDL] There are no triangles in the file");
 
 	// check whether the maxima are exceeded ...however, this applies for Quake 1 MDLs only
 	if (!this->iGSFileVersion)
@@ -837,21 +830,21 @@ void MDLImporter::ValidateHeader_3DGS_MDL7(const MDL::Header_MDL7* pcHeader)
 
 	// There are some fixed sizes ...
 	if (sizeof(MDL::ColorValue_MDL7) != pcHeader->colorvalue_stc_size)	{
-		throw new ImportErrorException( 
+		throw DeadlyImportError( 
 			"[3DGS MDL7] sizeof(MDL::ColorValue_MDL7) != pcHeader->colorvalue_stc_size");
 	}
 	if (sizeof(MDL::TexCoord_MDL7) != pcHeader->skinpoint_stc_size)	{
-		throw new ImportErrorException( 
+		throw DeadlyImportError( 
 			"[3DGS MDL7] sizeof(MDL::TexCoord_MDL7) != pcHeader->skinpoint_stc_size");
 	}
 	if (sizeof(MDL::Skin_MDL7) != pcHeader->skin_stc_size)	{
-		throw new ImportErrorException( 
+		throw DeadlyImportError( 
 			"sizeof(MDL::Skin_MDL7) != pcHeader->skin_stc_size");
 	}
 
 	// if there are no groups ... how should we load such a file?
 	if(!pcHeader->groups_num)	{
-		throw new ImportErrorException( "[3DGS MDL7] No frames found");
+		throw DeadlyImportError( "[3DGS MDL7] No frames found");
 	}
 }
 

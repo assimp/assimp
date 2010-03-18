@@ -100,12 +100,12 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 	const std::string mode  = "rb";
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, mode));
 	if (NULL == file.get())
-		throw new ImportErrorException( "Failed to open file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open file " + pFile + ".");
 
 	// Get the filesize and vaslidate it, throwing an exception when failes
 	size_t fileSize = file->FileSize();
 	if( fileSize < 16)
-		throw new ImportErrorException( "OBJ-file is too small.");
+		throw DeadlyImportError( "OBJ-file is too small.");
 
 	// Allocate buffer and read file into it
 	TextFileToBuffer(file.get(),m_Buffer);

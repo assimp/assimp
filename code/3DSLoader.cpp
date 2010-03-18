@@ -132,7 +132,7 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
 
 	// We should have at least one chunk
 	if (stream.GetRemainingSize() < 16) {
-		throw new ImportErrorException("3DS file is either empty or corrupt: " + pFile);
+		throw DeadlyImportError("3DS file is either empty or corrupt: " + pFile);
 	}
 
 	// Allocate our temporary 3DS representation
@@ -220,7 +220,7 @@ void Discreet3DSImporter::ReadChunk(Discreet3DS::Chunk* pcOut)
 	pcOut->Size = stream->GetI4();
 
 	if (pcOut->Size - sizeof(Discreet3DS::Chunk) > stream->GetRemainingSize())
-		throw new ImportErrorException("Chunk is too large");
+		throw DeadlyImportError("Chunk is too large");
 	
 	if (pcOut->Size - sizeof(Discreet3DS::Chunk) > stream->GetRemainingSizeToLimit())
 		DefaultLogger::get()->error("3DS: Chunk overflow");

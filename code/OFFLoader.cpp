@@ -96,7 +96,7 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 
 	// Check whether we can read from the file
 	if( file.get() == NULL) {
-		throw new ImportErrorException( "Failed to open OFF file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open OFF file " + pFile + ".");
 	}
 	
 	// allocate storage and copy the contents of the file to a memory buffer
@@ -158,7 +158,7 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 	}
 
 	if (!mesh->mNumVertices)
-		throw new ImportErrorException("OFF: There are no valid faces");
+		throw DeadlyImportError("OFF: There are no valid faces");
 
 	// allocate storage for the output vertices
 	aiVector3D* verts = mesh->mVertices = new aiVector3D[mesh->mNumVertices];

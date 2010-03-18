@@ -392,7 +392,7 @@ void ComputeUVMappingProcess::Execute( aiScene* pScene)
 	char buffer[1024];
 
 	if (pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT)
-		throw new ImportErrorException("Post-processing order mismatch: expecting pseudo-indexed (\"verbose\") vertices here");
+		throw DeadlyImportError("Post-processing order mismatch: expecting pseudo-indexed (\"verbose\") vertices here");
 
 	std::list<MappingInfo> mappingStack;
 

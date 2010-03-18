@@ -93,7 +93,7 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 
 	// check header
 	if( strncmp( P, "xof ", 4) != 0)
-		throw new ImportErrorException( "Header mismatch, file is not an XFile.");
+		throw DeadlyImportError( "Header mismatch, file is not an XFile.");
 
 	// read version. It comes in a four byte format such as "0302"
 	mMajorVersion = (unsigned int)(P[4] - 48) * 10 + (unsigned int)(P[5] - 48);
@@ -140,7 +140,7 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 	if (compressed)
 	{
 #ifdef ASSIMP_BUILD_NO_COMPRESSED_X
-		throw new ImportErrorException("Assimp was built without compressed X support");
+		throw DeadlyImportError("Assimp was built without compressed X support");
 #else
 		/* ///////////////////////////////////////////////////////////////////////  
 		 * COMPRESSED X FILE FORMAT
@@ -185,14 +185,14 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 			AI_SWAP2(ofs); P1 += 2;
 
 			if (ofs >= MSZIP_BLOCK)
-				throw new ImportErrorException("X: Invalid offset to next MSZIP compressed block");
+				throw DeadlyImportError("X: Invalid offset to next MSZIP compressed block");
 
 			// check magic word
 			uint16_t magic = *((uint16_t*)P1);
 			AI_SWAP2(magic); P1 += 2;
 
 			if (magic != MSZIP_MAGIC)
-				throw new ImportErrorException("X: Unsupported compressed format, expected MSZIP header");
+				throw DeadlyImportError("X: Unsupported compressed format, expected MSZIP header");
 
 			// and advance to the next offset
 			P1 += ofs;
@@ -217,7 +217,7 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 			// and decompress the data ....
 			int ret = ::inflate( &stream, Z_SYNC_FLUSH );
 			if (ret != Z_OK && ret != Z_STREAM_END)
-				throw new ImportErrorException("X: Failed to decompress MSZIP-compressed data");
+				throw DeadlyImportError("X: Failed to decompress MSZIP-compressed data");
 
 			::inflateReset( &stream );
 			::inflateSetDictionary( &stream, (const Bytef*)out , MSZIP_BLOCK - stream.avail_out );
@@ -1377,9 +1377,9 @@ aiColor3D XFileParser::ReadRGB()
 void XFileParser::ThrowException( const std::string& pText)
 {
 	if( mIsBinaryFormat)
-		throw new ImportErrorException( pText);
+		throw DeadlyImportError( pText);
 	else
-		throw new ImportErrorException( boost::str( boost::format( "Line %d: %s") % mLineNumber % pText));
+		throw DeadlyImportError( boost::str( boost::format( "Line %d: %s") % mLineNumber % pText));
 }
 
 

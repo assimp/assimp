@@ -104,7 +104,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 
 	// Check whether we can read from the file
 	if( file.get() == NULL) {
-		throw new ImportErrorException( "Failed to open CSM file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open CSM file " + pFile + ".");
 	}
 
 	// allocate storage and copy the contents of the file to a memory buffer
@@ -159,7 +159,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 
 				anim->mNumChannels = anims_temp.size();
 				if (!anim->mNumChannels)
-					throw new ImportErrorException("CSM: Empty $order section");
+					throw DeadlyImportError("CSM: Empty $order section");
 
 				// copy over to the output animation
 				anim->mChannels = new aiNodeAnim*[anim->mNumChannels];
@@ -167,7 +167,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 			}
 			else if (TokenMatchI(buffer,"points",6))	{
 				if (!anim->mNumChannels)
-					throw new ImportErrorException("CSM: \'$order\' section is required to appear prior to \'$points\'");
+					throw DeadlyImportError("CSM: \'$order\' section is required to appear prior to \'$points\'");
 
 				// If we know how many frames we'll read, we can preallocate some storage
 				unsigned int alloc = 100;
@@ -205,7 +205,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 
 						// read x,y,z
 						if(!SkipSpacesAndLineEnd(&buffer))
-							throw new ImportErrorException("CSM: Unexpected EOF occured reading sample x coord");
+							throw DeadlyImportError("CSM: Unexpected EOF occured reading sample x coord");
 
 						if (TokenMatchI(buffer, "DROPOUT", 7))	{
 							// seems this is invalid marker data; at least the doc says it's possible
@@ -217,11 +217,11 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 							buffer = fast_atof_move(buffer, (float&)sub->mValue.x);
 
 							if(!SkipSpacesAndLineEnd(&buffer))
-								throw new ImportErrorException("CSM: Unexpected EOF occured reading sample y coord");
+								throw DeadlyImportError("CSM: Unexpected EOF occured reading sample y coord");
 							buffer = fast_atof_move(buffer, (float&)sub->mValue.y);
 
 							if(!SkipSpacesAndLineEnd(&buffer))
-								throw new ImportErrorException("CSM: Unexpected EOF occured reading sample z coord");
+								throw DeadlyImportError("CSM: Unexpected EOF occured reading sample z coord");
 							buffer = fast_atof_move(buffer, (float&)sub->mValue.z);
 
 							++s->mNumPositionKeys;
@@ -238,7 +238,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 				for (unsigned int i = 0; i < anim->mNumChannels;++i)	{
 
 					if (!anim->mChannels[i]->mNumPositionKeys)
-						throw new ImportErrorException("CSM: Invalid marker track");
+						throw DeadlyImportError("CSM: Invalid marker track");
 				}
 			}
 		}

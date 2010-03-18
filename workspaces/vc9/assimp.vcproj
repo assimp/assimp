@@ -2336,6 +2336,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\Exceptional.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\Importer.cpp"
 					>
 				</File>

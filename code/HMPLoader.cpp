@@ -102,13 +102,13 @@ void HMPImporter::InternReadFile( const std::string& pFile,
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
-		throw new ImportErrorException( "Failed to open HMP file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open HMP file " + pFile + ".");
 
 	// Check whether the HMP file is large enough to contain
 	// at least the file header
 	const size_t fileSize = file->FileSize();
 	if( fileSize < 50)
-		throw new ImportErrorException( "HMP File is too small.");
+		throw DeadlyImportError( "HMP File is too small.");
 
 	// Allocate storage and copy the contents of the file to a memory buffer
 	std::vector<uint8_t> buffer(fileSize);
@@ -151,7 +151,7 @@ void HMPImporter::InternReadFile( const std::string& pFile,
 		szBuffer[4] = '\0';
 
 		// We're definitely unable to load this file
-		throw new ImportErrorException( "Unknown HMP subformat " + pFile +
+		throw DeadlyImportError( "Unknown HMP subformat " + pFile +
 			". Magic word (" + szBuffer + ") is not known");
 	}
 
@@ -168,25 +168,25 @@ void HMPImporter::ValidateHeader_HMP457( )
 
 	if (120 > iFileSize)
 	{
-		throw new ImportErrorException("HMP file is too small (header size is "
+		throw DeadlyImportError("HMP file is too small (header size is "
 			"120 bytes, this file is smaller)");
 	}
 
 	if (!pcHeader->ftrisize_x || !pcHeader->ftrisize_y)
-		throw new ImportErrorException("Size of triangles in either  x or y direction is zero");
+		throw DeadlyImportError("Size of triangles in either  x or y direction is zero");
 	
 	if(pcHeader->fnumverts_x < 1.0f || (pcHeader->numverts/pcHeader->fnumverts_x) < 1.0f)
-		throw new ImportErrorException("Number of triangles in either x or y direction is zero");
+		throw DeadlyImportError("Number of triangles in either x or y direction is zero");
 	
 	if(!pcHeader->numframes)
-		throw new ImportErrorException("There are no frames. At least one should be there");
+		throw DeadlyImportError("There are no frames. At least one should be there");
 
 }
 
 // ------------------------------------------------------------------------------------------------ 
 void HMPImporter::InternReadFile_HMP4( )
 {
-	throw new ImportErrorException("HMP4 is currently not supported");
+	throw DeadlyImportError("HMP4 is currently not supported");
 }
 
 // ------------------------------------------------------------------------------------------------ 
@@ -439,7 +439,7 @@ void HMPImporter::ReadFirstSkin(unsigned int iNumSkins, const unsigned char* szC
 		szCursor += sizeof(uint32_t) * 2;
 		iType = *((uint32_t*)szCursor);szCursor += sizeof(uint32_t);
 		if (!iType)
-			throw new ImportErrorException("Unable to read HMP7 skin chunk");
+			throw DeadlyImportError("Unable to read HMP7 skin chunk");
 		
 	}
 	// read width and height

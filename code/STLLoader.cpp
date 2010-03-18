@@ -94,7 +94,7 @@ void STLImporter::InternReadFile( const std::string& pFile,
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)	{
-		throw new ImportErrorException( "Failed to open STL file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open STL file " + pFile + ".");
 	}
 
 	fileSize = (unsigned int)file->FileSize();
@@ -276,7 +276,7 @@ void STLImporter::LoadASCIIFile()
 
 	if (!curFace)	{
 		pMesh->mNumFaces = 0;
-		throw new ImportErrorException("STL: ASCII file is empty or invalid; no data loaded");
+		throw DeadlyImportError("STL: ASCII file is empty or invalid; no data loaded");
 	}
 	pMesh->mNumFaces = curFace;
 	pMesh->mNumVertices = curFace*3;
@@ -289,7 +289,7 @@ bool STLImporter::LoadBinaryFile()
 {
 	// skip the first 80 bytes
 	if (fileSize < 84) {
-		throw new ImportErrorException("STL: file is too small for the header");
+		throw DeadlyImportError("STL: file is too small for the header");
 	}
 	bool bIsMaterialise = false;
 
@@ -321,11 +321,11 @@ bool STLImporter::LoadBinaryFile()
 	sz += 4;
 
 	if (fileSize < 84 + pMesh->mNumFaces*50) {
-		throw new ImportErrorException("STL: file is too small to hold all facets");
+		throw DeadlyImportError("STL: file is too small to hold all facets");
 	}
 
 	if (!pMesh->mNumFaces) {
-		throw new ImportErrorException("STL: file is empty. There are no facets defined");
+		throw DeadlyImportError("STL: file is empty. There are no facets defined");
 	}
 
 	pMesh->mNumVertices = pMesh->mNumFaces*3;

@@ -129,7 +129,7 @@ void OptimizeMeshesProcess::Execute( aiScene* pScene)
 	// and process all nodes in the scenegraoh recursively
 	ProcessNode(pScene->mRootNode);
 	if (!output.size()) {
-		throw new ImportErrorException("OptimizeMeshes: No meshes remaining; there's definitely something wrong");
+		throw DeadlyImportError("OptimizeMeshes: No meshes remaining; there's definitely something wrong");
 	}
 
 	meshes.clear();

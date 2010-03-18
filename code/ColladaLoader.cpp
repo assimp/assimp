@@ -115,7 +115,7 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 	ColladaParser parser( pIOHandler, pFile);
 
 	if( !parser.mRootNode)
-		throw new ImportErrorException( "Collada: File came out empty. Something is wrong here.");
+		throw DeadlyImportError( "Collada: File came out empty. Something is wrong here.");
 
 	// reserve some storage to avoid unnecessary reallocs
 	newMats.reserve(parser.mMaterialLibrary.size()*2);
@@ -577,7 +577,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 	{
 		// refuse if the vertex count does not match
 //		if( pSrcController->mWeightCounts.size() != dstMesh->mNumVertices)
-//			throw new ImportErrorException( "Joint Controller vertex count does not match mesh vertex count");
+//			throw DeadlyImportError( "Joint Controller vertex count does not match mesh vertex count");
 
 		// resolve references - joint names
 		const Collada::Accessor& jointNamesAcc = pParser.ResolveLibraryReference( pParser.mAccessorLibrary, pSrcController->mJointNameSource);
@@ -588,16 +588,16 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 		// joint vertex_weight name list - should refer to the same list as the joint names above. If not, report and reconsider
 		const Collada::Accessor& weightNamesAcc = pParser.ResolveLibraryReference( pParser.mAccessorLibrary, pSrcController->mWeightInputJoints.mAccessor);
 		if( &weightNamesAcc != &jointNamesAcc)
-			throw new ImportErrorException( "Temporary implementational lazyness. If you read this, please report to the author.");
+			throw DeadlyImportError( "Temporary implementational lazyness. If you read this, please report to the author.");
 		// vertex weights
 		const Collada::Accessor& weightsAcc = pParser.ResolveLibraryReference( pParser.mAccessorLibrary, pSrcController->mWeightInputWeights.mAccessor);
 		const Collada::Data& weights = pParser.ResolveLibraryReference( pParser.mDataLibrary, weightsAcc.mSource);
 
 		if( !jointNames.mIsStringArray || jointMatrices.mIsStringArray || weights.mIsStringArray)
-			throw new ImportErrorException( "Data type mismatch while resolving mesh joints");
+			throw DeadlyImportError( "Data type mismatch while resolving mesh joints");
 		// sanity check: we rely on the vertex weights always coming as pairs of BoneIndex-WeightIndex
 		if( pSrcController->mWeightInputJoints.mOffset != 0 || pSrcController->mWeightInputWeights.mOffset != 1)
-			throw new ImportErrorException( "Unsupported vertex_weight adresssing scheme. Fucking collada spec.");
+			throw DeadlyImportError( "Unsupported vertex_weight adresssing scheme. Fucking collada spec.");
 
 		// create containers to collect the weights for each bone
 		size_t numBones = jointNames.mStrings.size();
@@ -910,7 +910,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 
 			// time count and value count must match
 			if( e.mTimeAccessor->mCount != e.mValueAccessor->mCount)
-				throw new ImportErrorException( boost::str( boost::format( "Time count / value count mismatch in animation channel \"%s\".") % e.mChannel->mTarget));
+				throw DeadlyImportError( boost::str( boost::format( "Time count / value count mismatch in animation channel \"%s\".") % e.mChannel->mTarget));
 
 			// find bounding times
 			startTime = std::min( startTime, ReadFloat( *e.mTimeAccessor, *e.mTimeData, 0, 0));
@@ -1282,7 +1282,7 @@ const aiString& ColladaLoader::FindFilenameForEffectTexture( const ColladaParser
 	ColladaParser::ImageLibrary::const_iterator imIt = pParser.mImageLibrary.find( name);
 	if( imIt == pParser.mImageLibrary.end()) 
 	{
-		throw new ImportErrorException( boost::str( boost::format( 
+		throw DeadlyImportError( boost::str( boost::format( 
 			"Collada: Unable to resolve effect texture entry \"%s\", ended up at ID \"%s\".") % pName % name));
 	}
 
@@ -1292,7 +1292,7 @@ const aiString& ColladaLoader::FindFilenameForEffectTexture( const ColladaParser
 	if (imIt->second.mFileName.empty()) 
 	{
 		if (imIt->second.mImageData.empty())  {
-			throw new ImportErrorException("Collada: Invalid texture, no data or file reference given");
+			throw DeadlyImportError("Collada: Invalid texture, no data or file reference given");
 		}
 
 		aiTexture* tex = new aiTexture();

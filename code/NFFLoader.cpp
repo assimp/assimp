@@ -221,7 +221,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 
 	// Check whether we can read from the file
 	if( !file.get())
-		throw new ImportErrorException( "Failed to open NFF file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open NFF file " + pFile + ".");
 
 	unsigned int m = (unsigned int)file->FileSize();
 
@@ -428,7 +428,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				}
 
 				AI_NFF2_GET_NEXT_TOKEN();
-				if (!num)throw new ImportErrorException("NFF2: There are zero vertices");
+				if (!num)throw DeadlyImportError("NFF2: There are zero vertices");
 				num = ::strtol10(sz,&sz);
 
 				std::vector<unsigned int> tempIdx;
@@ -637,7 +637,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 						}
 					}
 				}
-				if (!num)throw new ImportErrorException("NFF2: There are zero faces");
+				if (!num)throw DeadlyImportError("NFF2: There are zero faces");
 			}
 		}
 		camLookAt = camLookAt + camPos;
@@ -1108,7 +1108,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 		}
 	}
 
-	if (!pScene->mNumMeshes)throw new ImportErrorException("NFF: No meshes loaded");
+	if (!pScene->mNumMeshes)throw DeadlyImportError("NFF: No meshes loaded");
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials = pScene->mNumMeshes];
 	for (it = meshes.begin(), m = 0; it != end;++it)

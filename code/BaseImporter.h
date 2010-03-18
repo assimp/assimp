@@ -42,6 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_BASEIMPORTER_H
 #define INCLUDED_AI_BASEIMPORTER_H
 
+#include "Exceptional.h"
+
 #include <string>
 #include "./../include/aiTypes.h"
 
@@ -56,25 +58,6 @@ class Importer;
 #define AI_MAKE_MAGIC(string) ((uint32_t)((string[0] << 24) + \
 	(string[1] << 16) + (string[2] << 8) + string[3]))
 
-// ---------------------------------------------------------------------------
-/** FOR IMPORTER PLUGINS ONLY: Simple exception class to be thrown if an 
- *  error occurs while importing. */
-class ASSIMP_API ImportErrorException 
-{
-public:
-	/** Constructor with arguments */
-	ImportErrorException( const std::string& pErrorText) {
-		mErrorText = pErrorText;
-	}
-
-	// -------------------------------------------------------------------
-	/** Returns the error text provided when throwing the exception */
-	inline const std::string& GetErrorText() const 
-	{ return mErrorText; }
-
-private:
-	std::string mErrorText;
-};
 
 //! @cond never
 // ---------------------------------------------------------------------------

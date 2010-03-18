@@ -63,6 +63,25 @@ BaseImporter::~BaseImporter()
 	// nothing to do here
 }
 
+template <typename T>
+struct tinyguard
+{
+	tinyguard(T* obj) : obj(obj), mdismiss() {}
+	~tinyguard () throw() {if (!mdismiss) {delete obj;} obj = NULL;} 
+
+	void dismiss() {
+		mdismiss=true;
+	}
+
+	operator T*() {
+		return obj;
+	}
+
+private:
+	T* obj;
+	bool mdismiss;
+};
+
 // ------------------------------------------------------------------------------------------------
 // Imports the given file and returns the imported data.
 aiScene* BaseImporter::ReadFile( const std::string& pFile, IOSystem* pIOHandler)
@@ -71,28 +90,23 @@ aiScene* BaseImporter::ReadFile( const std::string& pFile, IOSystem* pIOHandler)
 	FileSystemFilter filter(pFile,pIOHandler);
 
 	// create a scene object to hold the data
-	aiScene* scene = new aiScene();
+	tinyguard<aiScene> sc(new aiScene());
 
 	// dispatch importing
 	try
 	{
-		InternReadFile( pFile, scene, &filter);
-	} catch( ImportErrorException* exception)
-	{
+		InternReadFile( pFile, sc, &filter);
+
+	} catch( const std::exception& err )	{
 		// extract error description
-		mErrorText = exception->GetErrorText();
-
+		mErrorText = err.what();
 		DefaultLogger::get()->error(mErrorText);
-
-		delete exception;
-
-		// and kill the partially imported data
-		delete scene;
-		scene = NULL;
+		return NULL;
 	}
 
 	// return what we gathered from the import. 
-	return scene;
+	sc.dismiss();
+	return sc;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -269,7 +283,7 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
 {
 	ConversionResult result;
 	if(data.size() < 8) {
-		throw new ImportErrorException("File is too small");
+		throw DeadlyImportError("File is too small");
 	}
 
 	// UTF 8 with BOM
@@ -352,13 +366,13 @@ void BaseImporter::TextFileToBuffer(IOStream* stream,
 
 	const size_t fileSize = stream->FileSize();
 	if(!fileSize) {
-		throw new ImportErrorException("File is empty");
+		throw DeadlyImportError("File is empty");
 	}
 
 	data.reserve(fileSize+1); 
 	data.resize(fileSize); 
 	if(fileSize != stream->Read( &data[0], 1, fileSize)) {
-		throw new ImportErrorException("File read error");
+		throw DeadlyImportError("File read error");
 	}
 
 	ConvertToUTF8(data);

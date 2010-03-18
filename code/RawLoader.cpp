@@ -86,7 +86,7 @@ void RAWImporter::InternReadFile( const std::string& pFile,
 
 	// Check whether we can read from the file
 	if( file.get() == NULL) {
-		throw new ImportErrorException( "Failed to open RAW file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open RAW file " + pFile + ".");
 	}
 
 	// allocate storage and copy the contents of the file to a memory buffer
@@ -218,7 +218,7 @@ void RAWImporter::InternReadFile( const std::string& pFile,
 
 	if (!pScene->mNumMeshes)
 	{
-		throw new ImportErrorException("RAW: No meshes loaded. The file seems to be corrupt or empty.");
+		throw DeadlyImportError("RAW: No meshes loaded. The file seems to be corrupt or empty.");
 	}
 
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];

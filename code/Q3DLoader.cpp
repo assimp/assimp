@@ -96,13 +96,13 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 
 	// The header is 22 bytes large
 	if (stream.GetRemainingSize() < 22)
-		throw new ImportErrorException("File is either empty or corrupt: " + pFile);
+		throw DeadlyImportError("File is either empty or corrupt: " + pFile);
 
 	// Check the file's signature
 	if (ASSIMP_strincmp( (const char*)stream.GetPtr(), "quick3Do", 8 ) &&
 		ASSIMP_strincmp( (const char*)stream.GetPtr(), "quick3Ds", 8 ))
 	{
-		throw new ImportErrorException("Not a Quick3D file. Signature string is: " + 
+		throw DeadlyImportError("Not a Quick3D file. Signature string is: " + 
 			std::string((const char*)stream.GetPtr(),8));
 	}
 
@@ -148,7 +148,7 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 					// read all vertices
 					unsigned int numVerts = (unsigned int)stream.GetI4();
 					if (!numVerts)
-						throw new ImportErrorException("Quick3D: Found mesh with zero vertices");
+						throw DeadlyImportError("Quick3D: Found mesh with zero vertices");
 
 					std::vector<aiVector3D>& verts = mesh.verts;
 					verts.resize(numVerts);
@@ -163,7 +163,7 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 					// read all faces
 					numVerts = (unsigned int)stream.GetI4();
 					if (!numVerts)
-						throw new ImportErrorException("Quick3D: Found mesh with zero faces");
+						throw DeadlyImportError("Quick3D: Found mesh with zero faces");
 
 					std::vector<Face >& faces = mesh.faces;
 					faces.reserve(numVerts);
@@ -173,7 +173,7 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 					{
 						faces.push_back(Face(stream.GetI2()) );
 						if (faces.back().indices.empty())
-							throw new ImportErrorException("Quick3D: Found face with zero indices");
+							throw DeadlyImportError("Quick3D: Found face with zero indices");
 					}
 
 					// indices
@@ -300,7 +300,7 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 				tex->mHeight = (unsigned int)stream.GetI4();
 
 				if (!tex->mWidth || !tex->mHeight)
-					throw new ImportErrorException("Quick3D: Invalid texture. Width or height is zero");
+					throw DeadlyImportError("Quick3D: Invalid texture. Width or height is zero");
 
 				register unsigned int mul = tex->mWidth * tex->mHeight;
 				aiTexel* begin = tex->pcData = new aiTexel[mul];
@@ -383,7 +383,7 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 			break;
 
 		default:
-			throw new ImportErrorException("Quick3D: Unknown chunk");
+			throw DeadlyImportError("Quick3D: Unknown chunk");
 			break;
 		};
 	}
@@ -391,7 +391,7 @@ outer:
 
 	// If we have no mesh loaded - break here
 	if (meshes.empty())
-		throw new ImportErrorException("Quick3D: No meshes loaded");
+		throw DeadlyImportError("Quick3D: No meshes loaded");
 
 	// If we have no materials loaded - generate a default mat
 	if (materials.empty())

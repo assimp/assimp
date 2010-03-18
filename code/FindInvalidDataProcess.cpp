@@ -147,7 +147,7 @@ void FindInvalidDataProcess::Execute( aiScene* pScene)
 	if (out)	{
 		if ( real != pScene->mNumMeshes)	{
 			if (!real) {
-				throw new ImportErrorException("No meshes remaining");
+				throw DeadlyImportError("No meshes remaining");
 			}
 			
 			// we need to remove some meshes.

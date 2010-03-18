@@ -90,11 +90,11 @@ void XFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, I
 	// read file into memory
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
 	if( file.get() == NULL)
-		throw new ImportErrorException( "Failed to open file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open file " + pFile + ".");
 
 	size_t fileSize = file->FileSize();
 	if( fileSize < 16)
-		throw new ImportErrorException( "XFile is too small.");
+		throw DeadlyImportError( "XFile is too small.");
 
 	// need to clear members - this method might be called multiple
 	// times on a single XFileImporter instance.
@@ -113,7 +113,7 @@ void XFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, I
 
 	// if nothing came from it, report it as error
 	if( !pScene->mRootNode)
-		throw new ImportErrorException( "XFile is ill-formatted - no content imported.");
+		throw DeadlyImportError( "XFile is ill-formatted - no content imported.");
 }
 
 // ------------------------------------------------------------------------------------------------

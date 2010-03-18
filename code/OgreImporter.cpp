@@ -46,13 +46,13 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	//Open the File:
 	boost::scoped_ptr<IOStream> file(pIOHandler->Open(pFile));
 	if( file.get() == NULL)
-		throw new ImportErrorException("Failed to open file "+pFile+".");
+		throw DeadlyImportError("Failed to open file "+pFile+".");
 
 	//Read the Mesh File:
 	boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper( new CIrrXML_IOStreamReader( file.get()));
 	XmlReader* MeshFile = irr::io::createIrrXMLReader(mIOWrapper.get());
 	if(!MeshFile)//parse the xml file
-		throw new ImportErrorException("Failed to create XML Reader for "+pFile);
+		throw DeadlyImportError("Failed to create XML Reader for "+pFile);
 
 
 	DefaultLogger::get()->debug("Mesh File opened");
@@ -60,13 +60,13 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	//Read root Node:
 	if(!(XmlRead(MeshFile) && string(MeshFile->getNodeName())=="mesh"))
 	{
-		throw new ImportErrorException("Root Node is not <mesh>! "+pFile+"  "+MeshFile->getNodeName());
+		throw DeadlyImportError("Root Node is not <mesh>! "+pFile+"  "+MeshFile->getNodeName());
 	}
 
 	//Go to the submeshs:
 	if(!(XmlRead(MeshFile) && string(MeshFile->getNodeName())=="submeshes"))
 	{
-		throw new ImportErrorException("No <submeshes> node in <mesh> node! "+pFile);
+		throw DeadlyImportError("No <submeshes> node in <mesh> node! "+pFile);
 	}
 
 
@@ -84,7 +84,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 		
 		//Set the Material:
 		if(m_CurrentScene->mMaterials)
-			throw new ImportErrorException("only 1 material supported at this time!");
+			throw DeadlyImportError("only 1 material supported at this time!");
 		m_CurrentScene->mMaterials=new aiMaterial*[1];
 		m_CurrentScene->mNumMaterials=1;
 		m_CurrentScene->mMaterials[0]=MeshMat;
@@ -92,7 +92,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	}
 	//check for second root node:
 	if(MeshFile->getNodeName()==string("submesh"))
-		throw new ImportErrorException("more than one submesh in the file, abording!");
+		throw DeadlyImportError("more than one submesh in the file, abording!");
 
 	//____________________________________________________________
 
@@ -161,7 +161,7 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 				NewFace.VertexIndices[2]=GetAttribute<int>(Reader, "v3");
 				if(Reader->getAttributeValue("v4"))//this should be supported in the future
 				{
-					throw new ImportErrorException("Submesh has quads, only traingles are supported!");
+					throw DeadlyImportError("Submesh has quads, only traingles are supported!");
 				}
 				theSubMesh.FaceList.push_back(NewFace);
 			}
@@ -178,7 +178,7 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 			XmlRead(Reader);
 			if(!(Reader->getNodeName()==string("vertexbuffer")))
 			{
-				throw new ImportErrorException("vertexbuffer node is not first in geometry node!");
+				throw DeadlyImportError("vertexbuffer node is not first in geometry node!");
 			}
 			theSubMesh.HasPositions=GetAttribute<bool>(Reader, "positions");
 			theSubMesh.HasNormals=GetAttribute<bool>(Reader, "normals");
@@ -187,7 +187,7 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 			else
 				theSubMesh.NumUvs=GetAttribute<int>(Reader, "texture_coords");
 			if(theSubMesh.NumUvs>1)
-				throw new ImportErrorException("too many texcoords (just 1 supported!)");
+				throw DeadlyImportError("too many texcoords (just 1 supported!)");
 
 			//read all the vertices:
 			XmlRead(Reader);
@@ -307,7 +307,7 @@ void OgreImporter::CreateAssimpSubMesh(const SubMesh& theSubMesh, const vector<B
 {
 	//Mesh is fully loaded, copy it into the aiScene:
 	if(m_CurrentScene->mNumMeshes!=0)
-		throw new ImportErrorException("Currently only one mesh per File is allowed!!");
+		throw DeadlyImportError("Currently only one mesh per File is allowed!!");
 
 	aiMesh* NewAiMesh=new aiMesh();
 	
@@ -461,7 +461,7 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName)
 			{
 				ss >> Line;
 				if(Line!="{")
-					throw new ImportErrorException("empty material!");
+					throw DeadlyImportError("empty material!");
 
 				while(Line!="}")//read until the end of the material
 				{
@@ -471,7 +471,7 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName)
 					{
 						ss >> Line;
 						if(Line!="{")
-							throw new ImportErrorException("empty technique!");
+							throw DeadlyImportError("empty technique!");
 						while(Line!="}")//read until the end of the technique
 						{
 							ss >> Line;
@@ -479,7 +479,7 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName)
 							{
 								ss >> Line;
 								if(Line!="{")
-									throw new ImportErrorException("empty pass!");
+									throw DeadlyImportError("empty pass!");
 								while(Line!="}")//read until the end of the pass
 								{
 									ss >> Line;
@@ -500,7 +500,7 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName)
 									{
 										ss >> Line;
 										if(Line!="{")
-											throw new ImportErrorException("empty texture unit!");
+											throw DeadlyImportError("empty texture unit!");
 										while(Line!="}")//read until the end of the texture_unit
 										{
 											ss >> Line;
@@ -569,26 +569,26 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 	//Open the File:
 	boost::scoped_ptr<IOStream> File(m_CurrentIOHandler->Open(FileName));
 	if(NULL==File.get())
-		throw new ImportErrorException("Failed to open skeleton file "+FileName+".");
+		throw DeadlyImportError("Failed to open skeleton file "+FileName+".");
 
 	//Read the Mesh File:
 	boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(File.get()));
 	XmlReader* SkeletonFile = irr::io::createIrrXMLReader(mIOWrapper.get());
 	if(!SkeletonFile)
-		throw new ImportErrorException(string("Failed to create XML Reader for ")+FileName);
+		throw DeadlyImportError(string("Failed to create XML Reader for ")+FileName);
 
 	//Quick note: Whoever read this should know this one thing: irrXml fucking sucks!!!
 
 	XmlRead(SkeletonFile);
 	if(string("skeleton")!=SkeletonFile->getNodeName())
-		throw new ImportErrorException("No <skeleton> node in SkeletonFile: "+FileName);
+		throw DeadlyImportError("No <skeleton> node in SkeletonFile: "+FileName);
 
 
 
 	//------------------------------------load bones-----------------------------------------
 	XmlRead(SkeletonFile);
 	if(string("bones")!=SkeletonFile->getNodeName())
-		throw new ImportErrorException("No bones node in skeleton "+FileName);
+		throw DeadlyImportError("No bones node in skeleton "+FileName);
 
 	XmlRead(SkeletonFile);
 
@@ -604,7 +604,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 		//load the position:
 		XmlRead(SkeletonFile);
 		if(string("position")!=SkeletonFile->getNodeName())
-			throw new ImportErrorException("Position is not first node in Bone!");
+			throw DeadlyImportError("Position is not first node in Bone!");
 		NewBone.Position.x=GetAttribute<float>(SkeletonFile, "x");
 		NewBone.Position.y=GetAttribute<float>(SkeletonFile, "y");
 		NewBone.Position.z=GetAttribute<float>(SkeletonFile, "z");
@@ -612,11 +612,11 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 		//Rotation:
 		XmlRead(SkeletonFile);
 		if(string("rotation")!=SkeletonFile->getNodeName())
-			throw new ImportErrorException("Rotation is not the second node in Bone!");
+			throw DeadlyImportError("Rotation is not the second node in Bone!");
 		NewBone.RotationAngle=GetAttribute<float>(SkeletonFile, "angle");
 		XmlRead(SkeletonFile);
 		if(string("axis")!=SkeletonFile->getNodeName())
-			throw new ImportErrorException("No axis specified for bone rotation!");
+			throw DeadlyImportError("No axis specified for bone rotation!");
 		NewBone.RotationAxis.x=GetAttribute<float>(SkeletonFile, "x");
 		NewBone.RotationAxis.y=GetAttribute<float>(SkeletonFile, "y");
 		NewBone.RotationAxis.z=GetAttribute<float>(SkeletonFile, "z");
@@ -639,7 +639,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 				IdsOk=false;
 		}
 		if(!IdsOk)
-			throw new ImportErrorException("Bone Ids are not valid!"+FileName);
+			throw DeadlyImportError("Bone Ids are not valid!"+FileName);
 	}
 	DefaultLogger::get()->debug(str(format("Number of bones: %1%") % Bones.size()));
 	//________________________________________________________________________________
@@ -651,7 +651,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 
 	//----------------------------load bonehierarchy--------------------------------
 	if(string("bonehierarchy")!=SkeletonFile->getNodeName())
-		throw new ImportErrorException("no bonehierarchy node in "+FileName);
+		throw DeadlyImportError("no bonehierarchy node in "+FileName);
 
 	DefaultLogger::get()->debug("loading bonehierarchy...");
 	XmlRead(SkeletonFile);
@@ -698,7 +698,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 			//Load all Tracks
 			XmlRead(SkeletonFile);
 			if(string("tracks")!=SkeletonFile->getNodeName())
-				throw new ImportErrorException("no tracks node in animation");
+				throw DeadlyImportError("no tracks node in animation");
 			XmlRead(SkeletonFile);
 			while(string("track")==SkeletonFile->getNodeName())
 			{
@@ -708,7 +708,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 				//Load all keyframes;
 				XmlRead(SkeletonFile);
 				if(string("keyframes")!=SkeletonFile->getNodeName())
-					throw new ImportErrorException("no keyframes node!");
+					throw DeadlyImportError("no keyframes node!");
 				XmlRead(SkeletonFile);
 				while(string("keyframe")==SkeletonFile->getNodeName())
 				{
@@ -719,7 +719,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 					//It seams that we have to flip some axies, i really dont know why
 					XmlRead(SkeletonFile);
 					if(string("translate")!=SkeletonFile->getNodeName())
-						throw new ImportErrorException("translate node not first in keyframe");
+						throw DeadlyImportError("translate node not first in keyframe");
 					NewKeyframe.Position.x=GetAttribute<float>(SkeletonFile, "y");
 					NewKeyframe.Position.y=-GetAttribute<float>(SkeletonFile, "z");
 					NewKeyframe.Position.z=-GetAttribute<float>(SkeletonFile, "x");
@@ -727,12 +727,12 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 					//Rotation:
 					XmlRead(SkeletonFile);
 					if(string("rotate")!=SkeletonFile->getNodeName())
-						throw new ImportErrorException("rotate is not second node in keyframe");
+						throw DeadlyImportError("rotate is not second node in keyframe");
 					float RotationAngle=GetAttribute<float>(SkeletonFile, "angle");
 					aiVector3D RotationAxis;
 					XmlRead(SkeletonFile);
 					if(string("axis")!=SkeletonFile->getNodeName())
-						throw new ImportErrorException("No axis for keyframe rotation!");
+						throw DeadlyImportError("No axis for keyframe rotation!");
 					RotationAxis.x=GetAttribute<float>(SkeletonFile, "x");
 					RotationAxis.y=GetAttribute<float>(SkeletonFile, "y");
 					RotationAxis.z=GetAttribute<float>(SkeletonFile, "z");
@@ -741,7 +741,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 					//Scaling:
 					XmlRead(SkeletonFile);
 					if(string("scale")!=SkeletonFile->getNodeName())
-						throw new ImportErrorException("no scalling key in keyframe!");
+						throw DeadlyImportError("no scalling key in keyframe!");
 					NewKeyframe.Scaling.x=GetAttribute<float>(SkeletonFile, "x");
 					NewKeyframe.Scaling.y=GetAttribute<float>(SkeletonFile, "y");
 					NewKeyframe.Scaling.z=GetAttribute<float>(SkeletonFile, "z");
@@ -768,9 +768,9 @@ void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const st
 	//-----------------skeleton is completly loaded, now but it in the assimp scene:-------------------------------
 	
 	if(!m_CurrentScene->mRootNode)
-		throw new ImportErrorException("No root node exists!!");
+		throw DeadlyImportError("No root node exists!!");
 	if(0!=m_CurrentScene->mRootNode->mNumChildren)
-		throw new ImportErrorException("Root Node already has childnodes!");
+		throw DeadlyImportError("Root Node already has childnodes!");
 
 	//--------------Createt the assimp bone hierarchy-----------------
 	DefaultLogger::get()->debug("Root Bones");

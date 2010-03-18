@@ -131,7 +131,7 @@ void MD2Importer::ValidateHeader( )
 		szBuffer[3] = ((char*)&m_pcHeader->magic)[3];
 		szBuffer[4] = '\0';
 
-		throw new ImportErrorException("Invalid MD2 magic word: should be IDP2, the "
+		throw DeadlyImportError("Invalid MD2 magic word: should be IDP2, the "
 			"magic word found is " + std::string(szBuffer));
 	}
 
@@ -141,10 +141,10 @@ void MD2Importer::ValidateHeader( )
 
 	// check some values whether they are valid
 	if (0 == m_pcHeader->numFrames)
-		throw new ImportErrorException( "Invalid md2 file: NUM_FRAMES is 0");
+		throw DeadlyImportError( "Invalid md2 file: NUM_FRAMES is 0");
 
 	if (m_pcHeader->offsetEnd > (uint32_t)fileSize)
-		throw new ImportErrorException( "Invalid md2 file: File is too small");
+		throw DeadlyImportError( "Invalid md2 file: File is too small");
 
 	if (m_pcHeader->offsetSkins		+ m_pcHeader->numSkins * sizeof (MD2::Skin)			>= fileSize ||
 		m_pcHeader->offsetTexCoords	+ m_pcHeader->numTexCoords * sizeof (MD2::TexCoord)	>= fileSize ||
@@ -152,7 +152,7 @@ void MD2Importer::ValidateHeader( )
 		m_pcHeader->offsetFrames		+ m_pcHeader->numFrames * sizeof (MD2::Frame)			>= fileSize ||
 		m_pcHeader->offsetEnd			> fileSize)
 	{
-		throw new ImportErrorException("Invalid MD2 header: some offsets are outside the file");
+		throw DeadlyImportError("Invalid MD2 header: some offsets are outside the file");
 	}
 
 	if (m_pcHeader->numSkins > AI_MD2_MAX_SKINS)
@@ -163,7 +163,7 @@ void MD2Importer::ValidateHeader( )
 		DefaultLogger::get()->warn("The model contains more vertices than Quake 2 supports");
 
 	if (m_pcHeader->numFrames <= configFrameID )
-		throw new ImportErrorException("The requested frame is not existing the file");
+		throw DeadlyImportError("The requested frame is not existing the file");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -175,13 +175,13 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
-		throw new ImportErrorException( "Failed to open MD2 file " + pFile + "");
+		throw DeadlyImportError( "Failed to open MD2 file " + pFile + "");
 
 	// check whether the md3 file is large enough to contain
 	// at least the file header
 	fileSize = (unsigned int)file->FileSize();
 	if( fileSize < sizeof(MD2::Header))
-		throw new ImportErrorException( "MD2 File is too small");
+		throw DeadlyImportError( "MD2 File is too small");
 
 	std::vector<uint8_t> mBuffer2(fileSize);
 	file->Read(&mBuffer2[0], 1, fileSize);

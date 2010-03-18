@@ -179,7 +179,7 @@ void Parser::LogError(const char* szWarn)
 #endif
 
 	// throw an exception
-	throw new ImportErrorException(szTemp);
+	throw DeadlyImportError(szTemp);
 }
 
 // ------------------------------------------------------------------------------------------------

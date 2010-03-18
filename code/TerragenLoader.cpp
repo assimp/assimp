@@ -105,19 +105,19 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
 
 	// Check whether we can read from the file
 	if( file == NULL)
-		throw new ImportErrorException( "Failed to open TERRAGEN TERRAIN file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open TERRAGEN TERRAIN file " + pFile + ".");
 
 	// Construct a stream reader to read all data in the correct endianess
 	StreamReaderLE reader(file);
 	if(reader.GetRemainingSize() < 16)
-		throw new ImportErrorException( "TER: file is too small" );
+		throw DeadlyImportError( "TER: file is too small" );
 
 	// Check for the existence of the two magic strings 'TERRAGEN' and 'TERRAIN '
 	if (::strncmp((const char*)reader.GetPtr(),AI_TERR_BASE_STRING,8))
-		throw new ImportErrorException( "TER: Magic string \'TERRAGEN\' not found" );
+		throw DeadlyImportError( "TER: Magic string \'TERRAGEN\' not found" );
 
 	if (::strncmp((const char*)reader.GetPtr()+8,AI_TERR_TERRAIN_STRING,8))
-		throw new ImportErrorException( "TER: Magic string \'TERRAIN\' not found" );
+		throw DeadlyImportError( "TER: Magic string \'TERRAIN\' not found" );
 
 	unsigned int x = 0,y = 0,mode = 0;
 	float rad  = 6370.f;
@@ -184,10 +184,10 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
 
 			// Ensure we have enough data
 			if (reader.GetRemainingSize() < x*y*2)
-				throw new ImportErrorException("TER: ALTW chunk is too small");
+				throw DeadlyImportError("TER: ALTW chunk is too small");
 
 			if (x <= 1 || y <= 1)
-				throw new ImportErrorException("TER: Invalid terrain size");
+				throw DeadlyImportError("TER: Invalid terrain size");
 
 			// Allocate the output mesh
 			pScene->mMeshes = new aiMesh*[pScene->mNumMeshes = 1];
@@ -245,7 +245,7 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
 
 	// Check whether we have a mesh now
 	if (pScene->mNumMeshes != 1)
-		throw new ImportErrorException("TER: Unable to load terrain");
+		throw DeadlyImportError("TER: Unable to load terrain");
 
 	// Set the AI_SCENE_FLAGS_TERRAIN bit
 	pScene->mFlags |= AI_SCENE_FLAGS_TERRAIN;

@@ -267,6 +267,10 @@ const aiScene* aiImportFileEx( const char* pFile, unsigned int pFlags,
 	aiFileIO* pFS)
 {
 	ai_assert(NULL != pFile);
+
+	const aiScene* scene = NULL;
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+
 	// create an Importer for this file
 	Assimp::Importer* imp = new Assimp::Importer();
 
@@ -288,7 +292,7 @@ const aiScene* aiImportFileEx( const char* pFile, unsigned int pFlags,
 	}
 
 	// and have it read the file
-	const aiScene* scene = imp->ReadFile( pFile, pFlags);
+	scene = imp->ReadFile( pFile, pFlags);
 
 	// if succeeded, place it in the collection of active processes
 	if( scene)	{
@@ -304,6 +308,7 @@ const aiScene* aiImportFileEx( const char* pFile, unsigned int pFlags,
 	}
 
 	// return imported data. If the import failed the pointer is NULL anyways
+	ASSIMP_END_EXCEPTION_REGION(const aiScene*);
 	return scene;
 }
 
@@ -315,6 +320,9 @@ const aiScene* aiImportFileFromMemory(
 	const char* pHint)
 {
 	ai_assert(NULL != pBuffer && 0 != pLength);
+
+	const aiScene* scene = NULL;
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 
 	// create an Importer for this file
 	Assimp::Importer* imp = new Assimp::Importer();
@@ -332,7 +340,7 @@ const aiScene* aiImportFileFromMemory(
 #endif
 
 	// and have it read the file from the memory buffer
-	const aiScene* scene = imp->ReadFileFromMemory( pBuffer, pLength, pFlags,pHint);
+	scene = imp->ReadFileFromMemory( pBuffer, pLength, pFlags,pHint);
 
 	// if succeeded, place it in the collection of active processes
 	if( scene)	{
@@ -347,6 +355,7 @@ const aiScene* aiImportFileFromMemory(
 		delete imp;
 	}
 	// return imported data. If the import failed the pointer is NULL anyways
+	ASSIMP_END_EXCEPTION_REGION(const aiScene*);
 	return scene;
 }
 
@@ -358,10 +367,12 @@ void aiReleaseImport( const aiScene* pScene)
 		return;
 	}
 
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+
 #ifdef AI_C_THREADSAFE
 	boost::mutex::scoped_lock lock(gMutex);
 #endif
-
+	
 	// find the importer associated with this data
 	ImporterMap::iterator it = gActiveImports.find( pScene);
 	// it should be there... else the user is playing fools with us
@@ -373,12 +384,18 @@ void aiReleaseImport( const aiScene* pScene)
 	// kill the importer, the data dies with it
 	delete it->second;
 	gActiveImports.erase( it);
+	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API const aiScene* aiApplyPostProcessing(const aiScene* pScene,
 	unsigned int pFlags)
 {
+	const aiScene* sc = NULL;
+	
+
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+
 #ifdef AI_C_THREADSAFE
 	boost::mutex::scoped_lock lock(gMutex);
 #endif
@@ -392,7 +409,7 @@ ASSIMP_API const aiScene* aiApplyPostProcessing(const aiScene* pScene,
 #ifdef AI_C_THREADSAFE
 	lock.unlock();
 #endif
-	const aiScene* sc = it->second->ApplyPostProcessing(pFlags);
+	sc = it->second->ApplyPostProcessing(pFlags);
 #ifdef AI_C_THREADSAFE
 	lock.lock();
 #endif
@@ -403,7 +420,8 @@ ASSIMP_API const aiScene* aiApplyPostProcessing(const aiScene* pScene,
 		return NULL;
 	}
 
-	return it->first;
+	ASSIMP_END_EXCEPTION_REGION(const aiScene*);
+	return sc;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -419,6 +437,8 @@ void CallbackToLogRedirector (const char* msg, char* dt)
 ASSIMP_API aiLogStream aiGetPredefinedLogStream(aiDefaultLogStream pStream,const char* file)
 {
 	aiLogStream sout;
+
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 	LogStream* stream = LogStream::createDefaultStream(pStream,file);
 	if (!stream) {
 		sout.callback = NULL;
@@ -429,15 +449,19 @@ ASSIMP_API aiLogStream aiGetPredefinedLogStream(aiDefaultLogStream pStream,const
 		sout.user = (char*)stream;
 	}
 	gPredefinedStreams.push_back(stream);
+	ASSIMP_END_EXCEPTION_REGION(aiLogStream);
 	return sout;
 }
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API void aiAttachLogStream( const aiLogStream* stream )
 {
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+
 #ifdef AI_C_THREADSAFE
 	boost::mutex::scoped_lock lock(gLogStreamMutex);
 #endif
+
 	LogStream* lg = new LogToCallbackRedirector(*stream);
 	gActiveLogStreams[*stream] = lg;
 
@@ -445,11 +469,14 @@ ASSIMP_API void aiAttachLogStream( const aiLogStream* stream )
 		DefaultLogger::create(NULL,(gVerboseLogging == AI_TRUE ? Logger::VERBOSE : Logger::NORMAL));
 	}
 	DefaultLogger::get()->attachStream(lg);
+	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API aiReturn aiDetachLogStream( const aiLogStream* stream)
 {
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+
 #ifdef AI_C_THREADSAFE
 	boost::mutex::scoped_lock lock(gLogStreamMutex);
 #endif
@@ -465,12 +492,14 @@ ASSIMP_API aiReturn aiDetachLogStream( const aiLogStream* stream)
 	if (gActiveLogStreams.empty()) {
 		DefaultLogger::kill();
 	}
+	ASSIMP_END_EXCEPTION_REGION(aiReturn);
 	return AI_SUCCESS;
 }
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API void aiDetachAllLogStreams(void)
 {
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 #ifdef AI_C_THREADSAFE
 	boost::mutex::scoped_lock lock(gLogStreamMutex);
 #endif
@@ -479,6 +508,7 @@ ASSIMP_API void aiDetachAllLogStreams(void)
 	}
 	gActiveLogStreams.clear();
 	DefaultLogger::kill();
+	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -502,6 +532,9 @@ const char* aiGetErrorString()
 aiBool aiIsExtensionSupported(const char* szExtension)
 {
 	ai_assert(NULL != szExtension);
+	aiBool candoit=AI_FALSE;
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+
 #ifdef AI_C_THREADSAFE
 	boost::mutex::scoped_lock lock(gMutex);
 #endif
@@ -512,7 +545,10 @@ aiBool aiIsExtensionSupported(const char* szExtension)
 
 	// fixme: no need to create a temporary Importer instance just for that .. 
 	Assimp::Importer tmp;
-	return tmp.IsExtensionSupported(std::string(szExtension)) ? AI_TRUE : AI_FALSE;
+	candoit = tmp.IsExtensionSupported(std::string(szExtension)) ? AI_TRUE : AI_FALSE;
+
+	ASSIMP_END_EXCEPTION_REGION(aiBool);
+	return candoit;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -520,6 +556,8 @@ aiBool aiIsExtensionSupported(const char* szExtension)
 void aiGetExtensionList(aiString* szOut)
 {
 	ai_assert(NULL != szOut);
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+
 #ifdef AI_C_THREADSAFE
 	boost::mutex::scoped_lock lock(gMutex);
 #endif
@@ -531,6 +569,8 @@ void aiGetExtensionList(aiString* szOut)
 	// fixme: no need to create a temporary Importer instance just for that .. 
 	Assimp::Importer tmp;
 	tmp.GetExtensionList(*szOut);
+
+	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -538,6 +578,7 @@ void aiGetExtensionList(aiString* szOut)
 void aiGetMemoryRequirements(const C_STRUCT aiScene* pIn,
 	C_STRUCT aiMemoryInfo* in)
 {
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 #ifdef AI_C_THREADSAFE
 	boost::mutex::scoped_lock lock(gMutex);
 #endif
@@ -554,26 +595,31 @@ void aiGetMemoryRequirements(const C_STRUCT aiScene* pIn,
 	lock.unlock();
 #endif
 	it->second->GetMemoryRequirements(*in);
+	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Importer::SetPropertyInteger
 ASSIMP_API void aiSetImportPropertyInteger(const char* szName, int value)
 {
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 #ifdef AI_C_THREADSAFE
 	boost::mutex::scoped_lock lock(gMutex);
 #endif
 	SetGenericProperty<int>(gIntProperties,szName,value,NULL);
+	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Importer::SetPropertyFloat
 ASSIMP_API void aiSetImportPropertyFloat(const char* szName, float value)
 {
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 #ifdef AI_C_THREADSAFE
 	boost::mutex::scoped_lock lock(gMutex);
 #endif
 	SetGenericProperty<float>(gFloatProperties,szName,value,NULL);
+	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -584,11 +630,13 @@ ASSIMP_API void aiSetImportPropertyString(const char* szName,
 	if (!st) {
 		return;
 	}
+	ASSIMP_BEGIN_EXCEPTION_REGION();
 #ifdef AI_C_THREADSAFE
 	boost::mutex::scoped_lock lock(gMutex);
 #endif
 	SetGenericProperty<std::string>(gStringProperties,szName,
 		std::string( st->data ),NULL);
+	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------

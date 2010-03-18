@@ -203,7 +203,7 @@ evil_jump_outside:
 			// (famous last words)
 
 			// OK ... bad idea.
-			throw new ImportErrorException("Mesh is empty after removal of degenerated primitives ... WTF!?");
+			throw DeadlyImportError("Mesh is empty after removal of degenerated primitives ... WTF!?");
 		}
 	}
 

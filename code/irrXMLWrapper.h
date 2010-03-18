@@ -55,7 +55,7 @@ namespace Assimp	{
  * // open the file
  * boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
  * if( file.get() == NULL) {
- *	  throw new ImportErrorException( "Failed to open file " + pFile + ".");
+ *	  throw DeadlyImportError( "Failed to open file " + pFile + ".");
  * }
  *
  * // generate a XML reader for it

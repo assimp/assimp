@@ -101,7 +101,7 @@ void SMDImporter::InternReadFile(
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)	{
-		throw new ImportErrorException( "Failed to open SMD/VTA file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open SMD/VTA file " + pFile + ".");
 	}
 
 	iFileSize = (unsigned int)file->FileSize();
@@ -136,7 +136,7 @@ void SMDImporter::InternReadFile(
 	{
 		if (asBones.empty())
 		{
-			throw new ImportErrorException("SMD: No triangles and no bones have "
+			throw DeadlyImportError("SMD: No triangles and no bones have "
 				"been found in the file. This file seems to be invalid.");
 		}
 

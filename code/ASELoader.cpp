@@ -110,7 +110,7 @@ void ASEImporter::InternReadFile( const std::string& pFile,
 
 	// Check whether we can read from the file
 	if( file.get() == NULL) {
-		throw new ImportErrorException( "Failed to open ASE file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open ASE file " + pFile + ".");
 	}
 
 	// Allocate storage and copy the contents of the file to a memory buffer
@@ -703,7 +703,7 @@ void ASEImporter::BuildNodes()	{
 
 	// The root node should not have at least one child or the file is valid
 	if (!pcScene->mRootNode->mNumChildren) {
-		throw new ImportErrorException("ASE: No nodes loaded. The file is either empty or corrupt");
+		throw DeadlyImportError("ASE: No nodes loaded. The file is either empty or corrupt");
 	}
 	
 	// Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system

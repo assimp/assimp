@@ -363,6 +363,9 @@ protected:
 	/** true if the file is a LWO2 file*/
 	bool mIsLWO2;
 
+	/** true if the file is a LXOB file*/
+	bool mIsLXOB;
+
 	/** Temporary list of layers from the file */
 	LayerList* mLayers;
 

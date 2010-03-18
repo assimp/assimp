@@ -19,7 +19,8 @@
  * for internal or external distribution as long as this notice
  * remains attached.
  */
-
+#ifndef CONVERTUTF_H
+#define CONVERTUTF_H
 /* ---------------------------------------------------------------------
 
     Conversions between UTF32, UTF-16, and UTF-8.  Header file.
@@ -147,3 +148,4 @@ Boolean isLegalUTF8Sequence(const UTF8 *source, const UTF8 *sourceEnd);
 #endif
 
 /* --------------------------------------------------------------------- */
+#endif  // CONVERTUTF_H

@@ -118,6 +118,7 @@ namespace LWO {
 #define AI_LWO_PTCH  AI_IFF_FOURCC('P','T','C','H')
 #define AI_LWO_MBAL  AI_IFF_FOURCC('M','B','A','L')
 #define AI_LWO_BONE  AI_IFF_FOURCC('B','O','N','E')
+#define AI_LWO_SUBD  AI_IFF_FOURCC('S','U','B','D')
 
 /* polygon tags */
 #define AI_LWO_SURF  AI_IFF_FOURCC('S','U','R','F')

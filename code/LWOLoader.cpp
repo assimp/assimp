@@ -149,15 +149,17 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		DefaultLogger::get()->info("LWO file format: LWOB (<= LightWave 5.5)");
 
 		mIsLWO2 = false;
+        mIsLXOB = false;
 		LoadLWOBFile();
 	}
-
 	// New lightwave format
 	else if (AI_LWO_FOURCC_LWO2 == fileType)	{
+        mIsLXOB = false;
 		DefaultLogger::get()->info("LWO file format: LWO2 (>= LightWave 6)");
 	}
 	// MODO file format
 	else if (AI_LWO_FOURCC_LXOB == fileType)	{
+        mIsLXOB = true;
 		DefaultLogger::get()->info("LWO file format: LXOB (Modo)");
 	}
 	// we don't know this format
@@ -727,9 +729,6 @@ void LWOImporter::LoadLWO2Polygons(unsigned int length)
 	switch (type)
 	{
 		// read unsupported stuff too (although we wont process it)
-	case  AI_LWO_BONE:
-		DefaultLogger::get()->warn("LWO2: Encountered unsupported primitive chunk (BONE)");
-		break;
 	case  AI_LWO_MBAL:
 		DefaultLogger::get()->warn("LWO2: Encountered unsupported primitive chunk (METABALL)");
 		break;
@@ -740,6 +739,8 @@ void LWOImporter::LoadLWO2Polygons(unsigned int length)
 		// These are ok with no restrictions
 	case  AI_LWO_PTCH:
 	case  AI_LWO_FACE:
+	case  AI_LWO_BONE:
+	case  AI_LWO_SUBD:
 		break;
 	default:
 
@@ -1143,6 +1144,18 @@ void LWOImporter::LoadLWO2Envelope(unsigned int length)
 
 	// Get the index of the envelope
 	envelope.index = ReadVSizedIntLWO2(mFileBuffer);
+
+	// It looks like there might be an extra U4 right after the index,
+	// at least in modo (LXOB) files: we'll ignore it if it's zero,
+	// otherwise it represents the start of a subchunk, so we backtrack.
+	if (mIsLXOB)
+	{
+        uint32_t extra = GetU4();
+        if (extra)
+        {
+            mFileBuffer -= 4;
+        }
+	}
 
 	// ... and read all subchunks
 	while (true)

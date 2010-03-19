@@ -216,7 +216,8 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 			unsigned int i = 0;
 			for (FaceList::iterator it = layer.mFaces.begin(), end = layer.mFaces.end();it != end;++it,++i)	{
 				// Check whether we support this face's type
-				if ((*it).type != AI_LWO_FACE && (*it).type != AI_LWO_PTCH) {
+				if ((*it).type != AI_LWO_FACE && (*it).type != AI_LWO_PTCH &&
+				    (*it).type != AI_LWO_BONE && (*it).type != AI_LWO_SUBD) {
 					continue;
 				}
 

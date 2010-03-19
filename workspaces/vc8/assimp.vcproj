@@ -1944,6 +1944,10 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\code\OgreImporterMaterial.cpp"
+						>
+					</File>
+					<File
 						RelativePath="..\..\code\OgreXmlHelper.h"
 						>
 					</File>

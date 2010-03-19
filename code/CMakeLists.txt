@@ -280,6 +280,7 @@ SOURCE_GROUP( Obj FILES
 SOURCE_GROUP( Ogre FILES
 	OgreImporter.h
 	OgreImporter.cpp
+	OgreImporterMaterial.cpp
 )
 
 SOURCE_GROUP( Ply FILES
@@ -549,6 +550,7 @@ ADD_LIBRARY( assimp SHARED
 	ObjTools.h
 	OgreImporter.h
 	OgreImporter.cpp
+	OgreImporterMaterial.cpp"
 	OptimizeGraph.cpp
 	OptimizeGraph.h
 	OptimizeMeshes.cpp

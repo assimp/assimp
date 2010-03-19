@@ -147,7 +147,7 @@ protected:
 
 	// -------------------------------------------------------------------
 	/** Check whether a given position is inside the valid range
-	 *  Throw a new ImportErrorException if it is not
+	 *  Throw a DeadlyImportError if it is not
 	 * \param szPos Cursor position
 	 * \param szFile Name of the source file from which the function was called
 	 * \param iLine Source code line from which the function was called

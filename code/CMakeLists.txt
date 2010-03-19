@@ -550,7 +550,7 @@ ADD_LIBRARY( assimp SHARED
 	ObjTools.h
 	OgreImporter.h
 	OgreImporter.cpp
-	OgreImporterMaterial.cpp"
+	OgreImporterMaterial.cpp
 	OptimizeGraph.cpp
 	OptimizeGraph.h
 	OptimizeMeshes.cpp

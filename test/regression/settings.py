@@ -50,7 +50,7 @@ import os
 # List of file extensions to be excluded from the regression suite
 # File extensions are case insensitive
 # -------------------------------------------------------------------------------
-exclude_extensions = [".lws",".assbin",".assxml"]
+exclude_extensions = [".lws",".assbin",".assxml",".txt",".jpeg",".jpg",".png",".gif",".tga",".bmp"]
 
 # -------------------------------------------------------------------------------
 # Post processing configurations to be included in the test. The

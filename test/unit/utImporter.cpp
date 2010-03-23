@@ -153,9 +153,9 @@ void ImporterTest :: testPluginInterface (void)
 	try {
 	p->InternReadFile("",0,NULL);
 	}
-	catch ( ImportErrorException* ex)
+	catch ( const DeadlyImportError& dead)
 	{
-		CPPUNIT_ASSERT(ex->GetErrorText() == AIUT_DEF_ERROR_TEXT);
+		CPPUNIT_ASSERT(!strcmp(dead.what(),AIUT_DEF_ERROR_TEXT));
 
 		// unregister the plugin and delete it
 		pImp->UnregisterLoader(p);

@@ -57,14 +57,47 @@ environment.
 /**
 @page version 'version'-Command
 
-
+Display the version/revision of Assimp used.
  */
 
 /**
 @page help 'help'-Command
 
-
+Display a really helpful text.
  */
+
+//----------------------------------------------------------------------------------------------
+// ASSIMP CMPDUMP
+
+/**
+@page cmpdump 'cmpdump'-Command
+
+<b>Used for Assimp's internal regression testing.</b> Compare two mini dumps (produced using <tt>assimp dump .. -b -s</tt>) and
+report any differences. In the regression test suite, this facility is used to build a database of
+'known-to-be-fine' mini dumps, which are regularly compared against current results to detect regressions.
+
+<h3>Syntax:</h3>
+
+@code
+assimp cmpdmp actual expected
+@endcode
+
+
+<h3>Parameters:</h3>
+
+<p>
+<tt>
+actual<br></tt><br>
+Required. Mini dump now.
+</p>
+<p>
+<tt>
+expected<br></tt><br>
+Required. Archived dump from some point in the past.
+</p>
+
+*/
+
 
 //----------------------------------------------------------------------------------------------
 // ASSIMP DUMP
@@ -77,7 +110,7 @@ regression test suite but it could also be useful for other developers to quickl
 examine the contents of a model. Note that text dumps are not intended to be used as
 intermediate format, Assimp is not able to read them again, nor is the file format
 stable or well-defined. It may change with every revision without notice. 
-Binary dumps (*.assfile) are backward- and forward-compatible.
+Binary dumps (*.assbin) are backwards- and forwards-compatible.
 
 <h3>Syntax:</h3>
 
@@ -91,8 +124,7 @@ assimp dump <model> [<out>] [-b] [-s] [common parameters]
 <p>
 <tt>
 model<br></tt><br>
-Required. Relative or absolute path to the input model. A wildcard may be specified.
-See the @link wildcard wildcards page @endlink for more information.
+Required. Relative or absolute path to the input model. 
 </p>
 <p>
 <tt>
@@ -168,8 +200,7 @@ assimp extract <model> [<out>] [-t<n>] [-f<fmt>] [-ba] [-s] [common parameters]
 <p>
 <tt>
 model<br></tt><br>
-Required. Relative or absolute path to the input model. A wildcard may be specified.
-See the @link wildcard wildcards page @endlink for more information.
+Required. Relative or absolute path to the input model. 
 </p>
 <p>
 <tt>

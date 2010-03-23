@@ -154,6 +154,14 @@ int main (int argc, char* argv[])
 		return Assimp_Extract (&argv[2],argc-2);
 	}
 
+	// assimp testbatchload
+	// Used by /test/other/streamload.py to load a list of files
+	// using the same importer instance to check for incompatible
+	// importers.
+	if (! strcmp(argv[1], "testbatchload")) {
+		return Assimp_TestBatchLoad (&argv[2],argc-2);
+	}
+
 	printf("Unrecognized command. Use \'assimp help\' for a detailed command list\n");
 	return 1;
 }
@@ -370,5 +378,17 @@ int ProcessStandardArguments(
 	if (fill.logFile.length() || fill.showLog || fill.verbose)
 		fill.log = true;
 
+	return 0;
+}
+
+// ------------------------------------------------------------------------------
+int Assimp_TestBatchLoad (
+	const char* const* params, 
+	unsigned int num)
+{
+	for(unsigned int i = 0; i < num; ++i) {
+		globalImporter->ReadFile(params[i],aiProcessPreset_TargetRealtime_MaxQuality);
+		// we're totally silent. scene destructs automatically.
+	}
 	return 0;
 }

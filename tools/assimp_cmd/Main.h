@@ -146,13 +146,23 @@ int Assimp_CompareDump (
 	const char* const* params, 
 	unsigned int num);
 
-
 // ------------------------------------------------------------------------------
 /** @brief assimp info utility
  *  @param params Command line parameters to 'assimp info'
  *  @param Number of params
- *  @return 0 for success
- */
-int Assimp_Info (const char** params, unsigned int num);
+ *  @return 0 for success */
+int Assimp_Info (
+	const char* const* params, 
+	unsigned int num);
+
+// ------------------------------------------------------------------------------
+/** @brief assimp testbatchload utility
+ *  @param params Command line parameters to 'assimp testbatchload'
+ *  @param Number of params
+ *  @return 0 for success */
+int Assimp_TestBatchLoad (
+	const char* const* params, 
+	unsigned int num);
+
 
 #endif // !! AICMD_MAIN_INCLUDED

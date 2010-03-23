@@ -205,7 +205,7 @@ void PrintHierarchy(const aiNode* root, unsigned int maxnest, unsigned int maxli
 
 // -----------------------------------------------------------------------------------
 // Implementation of the assimp info utility to print basic file info
-int Assimp_Info (const char** params, unsigned int num)
+int Assimp_Info (const char* const* params, unsigned int num)
 {
 	if (num < 1) {
 		printf("assimp info: Invalid number of arguments. "

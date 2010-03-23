@@ -132,6 +132,8 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, a
 					mapping = aiTextureMapping_UV;
 				}
 				break;
+			default:
+				ai_assert(false);
 		};
 
 		if (mapping != aiTextureMapping_UV)	{

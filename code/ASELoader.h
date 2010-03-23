@@ -53,15 +53,11 @@ struct aiNode;
 namespace Assimp {
 class MaterialHelper;
 
-using namespace ASE;
-
 // --------------------------------------------------------------------------------
-/** Importer class for the 3DS ASE ASCII format
+/** Importer class for the 3DS ASE ASCII format.
  *
- * fixme: consider code cleanup
  */
-class ASEImporter : public BaseImporter
-{
+class ASEImporter : public BaseImporter	{
 	friend class Importer;
 
 protected:
@@ -88,6 +84,7 @@ protected:
 	 */
 	void GetExtensionList(std::set<std::string>& extensions);
 
+
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 
 	* See BaseImporter::InternReadFile() for details
@@ -95,12 +92,16 @@ protected:
 	void InternReadFile( const std::string& pFile, aiScene* pScene,
 		IOSystem* pIOHandler);
 
+
 	// -------------------------------------------------------------------
 	/** Called prior to ReadFile().
 	* The function is a request to the importer to update its configuration
 	* basing on the Importer's configuration property list.
 	*/
 	void SetupProperties(const Importer* pImp);
+
+
+private:
 
 	// -------------------------------------------------------------------
 	/** Generate normal vectors basing on smoothing groups
@@ -110,6 +111,7 @@ protected:
 	 */
 	bool GenerateNormals(ASE::Mesh& mesh);
 
+
 	// -------------------------------------------------------------------
 	/** Create valid vertex/normal/UV/color/face lists.
 	 *  All elements are unique, faces have only one set of indices
@@ -118,11 +120,13 @@ protected:
 	 */
 	void BuildUniqueRepresentation(ASE::Mesh& mesh);
 
+
 	/** Create one-material-per-mesh meshes ;-)
 	 * \param mesh Mesh to work with
 	 *  \param Receives the list of all created meshes
 	 */
 	void ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOut);
+
 
 	// -------------------------------------------------------------------
 	/** Convert a material to a MaterialHelper object
@@ -130,30 +134,36 @@ protected:
 	 */
 	void ConvertMaterial(ASE::Material& mat);
 
+
 	// -------------------------------------------------------------------
 	/** Setup the final material indices for each mesh
 	 */
 	void BuildMaterialIndices();
 
+
 	// -------------------------------------------------------------------
 	/** Build the node graph
 	 */
-	void BuildNodes();
+	void BuildNodes(std::vector<ASE::BaseNode*>& nodes);
+
 
 	// -------------------------------------------------------------------
 	/** Build output cameras
 	 */
 	void BuildCameras();
 
+
 	// -------------------------------------------------------------------
 	/** Build output lights
 	 */
 	void BuildLights();
 
+
 	// -------------------------------------------------------------------
 	/** Build output animations
 	 */
-	void BuildAnimations();
+	void BuildAnimations(const std::vector<ASE::BaseNode*>& nodes);
+
 
 	// -------------------------------------------------------------------
 	/** Add sub nodes to a node
@@ -161,10 +171,10 @@ protected:
 	 *  \param szName Name of the parent node
 	 *  \param matrix Current transform
 	 */
-	void AddNodes(std::vector<BaseNode*>& nodes,
+	void AddNodes(const std::vector<ASE::BaseNode*>& nodes,
 		aiNode* pcParent,const char* szName);
 
-	void AddNodes(std::vector<BaseNode*>& nodes,
+	void AddNodes(const std::vector<ASE::BaseNode*>& nodes,
 		aiNode* pcParent,const char* szName,
 		const aiMatrix4x4& matrix);
 
@@ -187,8 +197,6 @@ protected:
 
 	/** Scene to be filled */
 	aiScene* pcScene;
-
-	std::vector<BaseNode*> nodes;
 
 	/** Config options: Recompute the normals in every case - WA
 	    for 3DS Max broken ASE normal export */

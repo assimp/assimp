@@ -248,7 +248,8 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 
 		}//end of boneassignments
 	}
-	DefaultLogger::get()->debug(str(format("Positionen: %1% Normale: %2% TexCoords: %3%") % theSubMesh.Positions.size() % theSubMesh.Normals.size() % theSubMesh.Uvs.size()));
+	DefaultLogger::get()->debug(str(format("Positionen: %1% Normale: %2% TexCoords: %3%")
+								% theSubMesh.Positions.size() % theSubMesh.Normals.size() % theSubMesh.Uvs.size()));
 	DefaultLogger::get()->warn(Reader->getNodeName());
 
 
@@ -661,12 +662,12 @@ void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const st
 				{
 					aiMatrix4x4 t0, t1, t2, t3, t4;
 					//Create a matrix to transfrom a vector from the bones default pose to the bone bones in this animation key
-					aiMatrix4x4 PoseToKey=aiMatrix4x4::Translation(Animations[i].Tracks[j].Keyframes[k].Position, t0)
-									* aiMatrix4x4(Animations[i].Tracks[j].Keyframes[k].Rotation.GetMatrix())
-									* aiMatrix4x4::Scaling(Animations[i].Tracks[j].Keyframes[k].Scaling, t1);
+					aiMatrix4x4 PoseToKey=aiMatrix4x4::Scaling(Animations[i].Tracks[j].Keyframes[k].Scaling, t1)	//scale
+									* aiMatrix4x4(Animations[i].Tracks[j].Keyframes[k].Rotation.GetMatrix())		//rot
+									* aiMatrix4x4::Translation(Animations[i].Tracks[j].Keyframes[k].Position, t0);	//pos
 
-					aiMatrix4x4 DefBonePose=aiMatrix4x4::Translation(CurBone->Position, t2)
-									* aiMatrix4x4::Rotation(CurBone->RotationAngle, CurBone->RotationAxis, t3);
+					aiMatrix4x4 DefBonePose=aiMatrix4x4::Rotation(CurBone->RotationAngle, CurBone->RotationAxis, t3)
+									* aiMatrix4x4::Translation(CurBone->Position, t2);
 									//The defautl bone pose doesnt have a scaling value
 
 					//calculate the complete transformation from world space to bone space
@@ -687,18 +688,6 @@ void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const st
 
 					NewNodeAnim->mScalingKeys[k].mTime=Animations[i].Tracks[j].Keyframes[k].Time;
 					NewNodeAnim->mScalingKeys[k].mValue=Scale;
-
-					/*NewNodeAnim->mPositionKeys[k].mTime=Animations[i].Tracks[j].Keyframes[k].Time;
-					NewNodeAnim->mPositionKeys[k].mValue=CurBone->Position
-														+	Animations[i].Tracks[j].Keyframes[k].Position;
-					
-					NewNodeAnim->mRotationKeys[k].mTime=Animations[i].Tracks[j].Keyframes[k].Time;
-					NewNodeAnim->mRotationKeys[k].mValue=aiQuaternion(CurBone->RotationAxis, CurBone->RotationAngle)
-														*	Animations[i].Tracks[j].Keyframes[k].Rotation;
-
-					NewNodeAnim->mScalingKeys[k].mTime=Animations[i].Tracks[j].Keyframes[k].Time;
-					NewNodeAnim->mScalingKeys[k].mValue=1.0f	//TODO currently bones don't save scaling! we need to change this, if we want to support them!
-														*	Animations[i].Tracks[j].Keyframes[k].Scaling;*/
 				}
 				
 				NewAnimation->mChannels[j]=NewNodeAnim;
@@ -755,7 +744,7 @@ void Bone::CalculateBoneToWorldSpaceMatrix(vector<Bone> &Bones)
 	}
 	else
 	{
-		BoneToWorldSpace=Bones[ParentId].BoneToWorldSpace * Transf;
+		BoneToWorldSpace=Transf*Bones[ParentId].BoneToWorldSpace;
 	}
 
 	//and recursivly for all children:

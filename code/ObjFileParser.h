@@ -65,7 +65,7 @@ class IOSystem;
 class ObjFileParser
 {
 public:
-	static const size_t BUFFERSIZE = 1024;
+	static const size_t BUFFERSIZE = 4096;
 	typedef std::vector<char> DataArray;
 	typedef std::vector<char>::iterator DataArrayIt;
 	typedef std::vector<char>::const_iterator ConstDataArrayIt;

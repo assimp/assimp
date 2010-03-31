@@ -78,10 +78,11 @@ public:
 		char s;
 
 		if (base.length() == 0) {
-			base = ".\\";
+			base = ".";
+			base += getOsSeparator();
 		}
 		else if ((s = *(base.end()-1)) != '\\' && s != '/')
-			base.append("\\"); 
+			base += getOsSeparator();
 
 		DefaultLogger::get()->info("Import root directory is \'" + base + "\'");
 	}

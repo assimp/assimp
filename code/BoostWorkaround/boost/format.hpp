@@ -1,5 +1,11 @@
 
 
+
+/* DEPRECATED placebo workaround, use code/TinyFormatter.h instead.
+ *
+ *
+ * */
+
 #ifndef AI_BOOST_FORMAT_DUMMY_INCLUDED
 #define AI_BOOST_FORMAT_DUMMY_INCLUDED
 

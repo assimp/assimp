@@ -54,7 +54,7 @@ namespace boost {
 			static yes foo(DEST*);
 			static no  foo(...);
 
-			enum {result = sizeof foo((SRC*)0) == sizeof yes};	
+			enum {result = (sizeof(foo((SRC*)0)) == sizeof(yes) ? 1 : 0)};	
 		};
 
 		template <bool> struct enable_if {};
@@ -74,7 +74,7 @@ namespace boost {
 template <class T>
 class shared_ptr
 {
-	friend class shared_ptr;
+	template <typename TT> friend class shared_ptr;
 public:
 
 	// provide a default construtctor

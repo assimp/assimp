@@ -20,13 +20,16 @@ namespace boost {
 
 			template <typename T>
 			controller(T* ptr)
-				: cnt(1)
+				: cnt(ptr?1:0)
 			{}
 		
 		public:
 
 			template <typename T>
 			controller* decref(T* pt) {
+				if (!pt) {
+					return NULL;
+				}
 				if (--cnt <= 0) {
 					delete this;
 					delete pt;

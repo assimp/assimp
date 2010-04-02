@@ -1140,6 +1140,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\BoostWorkaround\boost\shared_ptr.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\BoostWorkaround\boost\static_assert.hpp"
 					>
 				</File>
@@ -1740,10 +1744,6 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="vrml97"
-					>
-				</Filter>
-				<Filter
 					Name="off"
 					>
 					<File
@@ -1968,6 +1968,22 @@
 					</File>
 					<File
 						RelativePath="..\..\code\MS3DLoader.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="cob"
+					>
+					<File
+						RelativePath="..\..\code\COBLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\COBLoader.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\COBScene.h"
 						>
 					</File>
 				</Filter>
@@ -2348,6 +2364,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\LineSplitter.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\MaterialSystem.cpp"
 					>
 				</File>
@@ -2433,6 +2453,10 @@
 				</File>
 				<File
 					RelativePath="..\..\code\TargetAnimation.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\TinyFormatter.h"
 					>
 				</File>
 				<File

@@ -105,7 +105,7 @@ private:
 	void ReadBB3D( aiScene *scene );
 
 	unsigned _pos;
-	unsigned _size;
+//	unsigned _size;
 	std::vector<unsigned char> _buf;
 	std::vector<unsigned> _stack;
 	

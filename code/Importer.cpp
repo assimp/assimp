@@ -164,6 +164,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BUILD_NO_MS3D_IMPORTER
 #	include "MS3DLoader.h"
 #endif
+#ifndef AI_BUILD_NO_COB_IMPORTER
+#	include "COBLoader.h"
+#endif
 
 // .......................................................................................
 // PostProcess-Steps
@@ -278,7 +281,7 @@ Importer::Importer()
 	// Add an instance of each worker class here
 	// (register_new_importers_here)
 	// ----------------------------------------------------------------------------
-	pimpl->mImporter.reserve(25);
+	pimpl->mImporter.reserve(64);
 #if (!defined AI_BUILD_NO_X_IMPORTER)
 	pimpl->mImporter.push_back( new XFileImporter());
 #endif
@@ -372,7 +375,9 @@ Importer::Importer()
 #if (!defined AI_BUILD_NO_MS3D_IMPORTER)
 	pimpl->mImporter.push_back( new MS3DImporter());
 #endif
-
+#if (!defined AI_BUILD_NO_COB_IMPORTER)
+	pimpl->mImporter.push_back( new COBImporter());
+#endif
 
 	// ----------------------------------------------------------------------------
 	// Add an instance of each post processing step here in the order 

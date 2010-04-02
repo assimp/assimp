@@ -92,7 +92,7 @@ public:
 
 public:
 
-	operator string () {
+	operator string () const {
 		return underlying.str();
 	}
 

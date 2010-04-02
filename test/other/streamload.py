@@ -31,6 +31,9 @@ def process_dir(thisdir):
                 res += process_dir(fullpath) 
             continue
 
+        # import twice, importing the same file again introduces extra risk
+        # to crash due to garbage data lying around in the importer.
+        command.append(fullpath)
         command.append(fullpath)
 
     if len(command)>2:

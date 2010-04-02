@@ -59,6 +59,7 @@ struct aiColor4D
 	aiColor4D () : r(0.0f), g(0.0f), b(0.0f), a(0.0f) {}
 	aiColor4D (float _r, float _g, float _b, float _a) 
 		: r(_r), g(_g), b(_b), a(_a) {}
+	aiColor4D (float _r) : r(_r), g(_r), b(_r), a(_r) {}
 	aiColor4D (const aiColor4D& o) 
 		: r(o.r), g(o.g), b(o.b), a(o.a) {}
 

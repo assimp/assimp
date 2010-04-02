@@ -137,6 +137,8 @@ SOURCE_GROUP( Common FILES
 	Subdivision.cpp
 	Subdivision.h
 	Vertex.h
+	LineSplitter.h
+	TinyFormatter.h
 )
 
 SOURCE_GROUP( 3DS FILES 
@@ -293,6 +295,12 @@ SOURCE_GROUP( Ply FILES
 SOURCE_GROUP(MS3D FILES
 	MS3DLoader.cpp
 	MS3DLoader.h
+)
+
+SOURCE_GROUP(COB FILES
+	COBLoader.cpp
+	COBLoader.h
+	COBScene.h
 )
 
 SOURCE_GROUP( PostProcessing FILES
@@ -661,6 +669,11 @@ ADD_LIBRARY( assimp SHARED
 	Vertex.h
 	MS3DLoader.h
 	MS3DLoader.cpp
+	COBLoader.cpp
+	COBLoader.h
+	COBScene.h
+	TinyFormatter.h
+	LineSplitter.h
 
 	# Necessary to show the headers in the project when using the VC++ generator:
 	BoostWorkaround/boost/math/common_factor_rt.hpp

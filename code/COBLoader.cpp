@@ -1,0 +1,882 @@
+/*
+Open Asset Import Library (ASSIMP)
+----------------------------------------------------------------------
+
+Copyright (c) 2006-2008, ASSIMP Development Team
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the 
+following conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------------------------------------
+*/
+
+/** @file  COBLoader.cpp
+ *  @brief Implementation of the TrueSpace COB/SCN importer class.
+ */
+#include "AssimpPCH.h"
+
+#ifndef AI_BUILD_NO_COB_IMPORTER
+#include "COBLoader.h"
+#include "COBScene.h"
+
+#include "StreamReader.h"
+#include "ParsingUtils.h"
+#include "fast_atof.h"
+
+#include "LineSplitter.h"
+#include "TinyFormatter.h"
+
+using namespace Assimp;
+using namespace Assimp::COB;
+using namespace Assimp::Formatter;
+
+#define for_each BOOST_FOREACH
+
+
+// ------------------------------------------------------------------------------------------------
+// Constructor to be privately used by Importer
+COBImporter::COBImporter()
+{}
+
+// ------------------------------------------------------------------------------------------------
+// Destructor, private as well 
+COBImporter::~COBImporter()
+{}
+
+// ------------------------------------------------------------------------------------------------
+// Returns whether the class can handle the format of the given file. 
+bool COBImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
+{
+	const std::string& extension = GetExtension(pFile);
+	if (extension == "cob" || extension == "scn") {
+		return true;
+	}
+
+	else if (!extension.length() || checkSig)	{
+		if (!pIOHandler) {
+			return true;
+		}
+		const char* tokens[] = {"Caligary"};
+		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
+	}
+	return false;
+}
+
+// ------------------------------------------------------------------------------------------------
+// List all extensions handled by this loader
+void COBImporter::GetExtensionList(std::set<std::string>& app)
+{
+	app.insert("cob");
+	app.insert("scn");
+}
+
+// ------------------------------------------------------------------------------------------------
+// Setup configuration properties for the loader
+void COBImporter::SetupProperties(const Importer* pImp)
+{
+	// nothing to be done for the moment
+}
+
+// ------------------------------------------------------------------------------------------------
+/*static*/ void COBImporter::ThrowException(const std::string& msg)
+{
+	throw DeadlyImportError("COB: "+msg);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Imports the given file into the given scene structure. 
+void COBImporter::InternReadFile( const std::string& pFile, 
+	aiScene* pScene, IOSystem* pIOHandler)
+{
+	COB::Scene scene;
+	boost::scoped_ptr<StreamReaderLE> stream(new StreamReaderLE( 
+		pIOHandler->Open(pFile,"rb")) );
+
+	// check header
+	char head[32];
+	stream->CopyAndAdvance(head,32);
+	if (strncmp(head,"Caligari ",9)) {
+		ThrowException("Could not found magic id: `Caligari`");
+	}
+
+	DefaultLogger::get()->info("File format tag: "+std::string(head+9,6));
+	void (COBImporter::* load)(Scene&,StreamReaderLE*)= head[15]=='A'?&COBImporter::ReadAsciiFile:&COBImporter::ReadBinaryFile;
+	if (head[16]!='L') {
+		ThrowException("File is big-endian, which is not supported");
+	}
+	
+	// load data into intermediate structures
+	(this->*load)(scene,stream.get());
+	if(scene.nodes.empty()) {
+		ThrowException("No nodes loaded");
+	}
+
+	// sort faces by material indices
+	for_each(boost::shared_ptr< Node >& n,scene.nodes) {
+		try {
+			Mesh& mesh = dynamic_cast<Mesh&>(*n.get());
+			for_each(Face& f,mesh.faces) {
+				mesh.temp_map[f.material].push_back(&f);
+			}
+		} catch (std::bad_cast&) {}
+	}
+
+	// count meshes
+	for_each(boost::shared_ptr< Node >& n,scene.nodes) {
+		try {
+			Mesh& mesh = dynamic_cast<Mesh&>(*n.get());
+			if (mesh.vertex_positions.size() && mesh.texture_coords.size()) {
+				pScene->mNumMeshes += mesh.temp_map.size();
+			}
+		} catch (std::bad_cast&) {}
+	}
+	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes]();
+	pScene->mMaterials = new aiMaterial*[pScene->mNumMeshes]();
+	pScene->mNumMeshes = 0;
+
+	// count lights and cameras
+	for_each(boost::shared_ptr< Node >& n,scene.nodes) {
+		if (n->type == Node::TYPE_LIGHT) {
+			++pScene->mNumLights;
+		}
+		else if (n->type == Node::TYPE_CAMERA) {
+			++pScene->mNumCameras;
+		}
+	}
+
+	if (pScene->mNumLights) {
+		pScene->mLights  = new aiLight*[pScene->mNumLights]();
+	}
+	if (pScene->mNumCameras) {
+		pScene->mCameras = new aiCamera*[pScene->mNumCameras]();
+	}
+	pScene->mNumLights = pScene->mNumCameras = 0;
+
+	// resolve parents by their IDs and build the output graph
+	boost::scoped_ptr<Node> root(new Group());
+	for(size_t n = 0; n < scene.nodes.size(); ++n) {
+		const Node& nn = *scene.nodes[n].get();
+		if(nn.parent_id==0) {
+			root->temp_children.push_back(&nn);
+		}
+
+		for(size_t m = n; m < scene.nodes.size(); ++m) {
+			const Node& mm = *scene.nodes[m].get();
+			if (mm.parent_id == nn.id) {
+				nn.temp_children.push_back(&mm);
+			}
+		}
+	}
+
+	pScene->mRootNode = BuildNodes(*root.get(),scene,pScene);
+}
+
+// ------------------------------------------------------------------------------------------------
+aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill)
+{
+	aiNode* nd = new aiNode();
+	nd->mName.Set(root.name);
+	nd->mTransformation = root.transform;
+
+	// Note to everybody believing Voodoo is appropriate here:
+	// I know polymorphism, run as fast as you can ;-)
+	if (Node::TYPE_MESH == root.type) {
+		const Mesh& ndmesh = dynamic_cast<const Mesh&>(root);
+		if (ndmesh.vertex_positions.size() && ndmesh.texture_coords.size()) {
+
+			typedef std::pair<unsigned int,Mesh::FaceRefList> Entry;
+			for_each(const Entry& reflist,ndmesh.temp_map) {
+				{	// create mesh
+					size_t n = 0;
+					for_each(Face* f, reflist.second) {
+						n += f->indices.size();
+					}
+					if (!n) {
+						continue;
+					}
+					aiMesh* outmesh = fill->mMeshes[fill->mNumMeshes++] = new aiMesh();
+					++nd->mNumMeshes;
+
+					outmesh->mVertices = new aiVector3D[n];
+					outmesh->mTextureCoords[0] = new aiVector3D[n];
+
+					outmesh->mFaces = new aiFace[reflist.second.size()]();
+					for_each(Face* f, reflist.second) {
+						if (f->indices.empty()) {
+							continue;
+						}
+
+						aiFace& fout = outmesh->mFaces[outmesh->mNumFaces++];
+						fout.mIndices = new unsigned int[f->indices.size()];
+
+						for_each(VertexIndex& v, f->indices) {
+							if (v.pos_idx >= ndmesh.vertex_positions.size()) {
+								ThrowException("Position index out of range");
+							}
+							if (v.uv_idx >= ndmesh.texture_coords.size()) {
+								ThrowException("UV index out of range");
+							}
+							outmesh->mVertices[outmesh->mNumVertices] = ndmesh.vertex_positions[ v.pos_idx ]; 
+							outmesh->mTextureCoords[0][outmesh->mNumVertices] = aiVector3D( 
+								ndmesh.texture_coords[ v.uv_idx ].x,
+								ndmesh.texture_coords[ v.uv_idx ].y,
+								0.f
+							);
+
+							fout.mIndices[fout.mNumIndices++] = outmesh->mNumVertices++;
+						}
+					}
+					outmesh->mMaterialIndex = fill->mNumMaterials;
+				}{	// create material
+					const Material* min = NULL;
+					for_each(const Material& m, scin.materials) {
+						if (m.parent_id == ndmesh.id && m.matnum == reflist.first) {
+							min = &m;
+							break;
+						}
+					}
+					boost::scoped_ptr<const Material> defmat;
+					if(!min) {
+						DefaultLogger::get()->debug(format()<<"Could not resolve material index "
+							<<reflist.first<<" - creating default material for this slot");
+
+						defmat.reset(min=new Material());
+					}
+
+					MaterialHelper* mat = new MaterialHelper();
+					fill->mMaterials[fill->mNumMaterials++] = mat;
+					aiString s;
+					s.Set(min->type);
+
+					mat->AddProperty(&s,AI_MATKEY_NAME);
+
+					if(int tmp = ndmesh.draw_flags & Mesh::WIRED ? 1 : 0) {
+						mat->AddProperty(&tmp,1,AI_MATKEY_ENABLE_WIREFRAME);
+					}
+
+					{	int shader;
+						switch(min->shader) 
+						{
+						case Material::FLAT:
+							shader = aiShadingMode_Gouraud;
+							break;
+
+						case Material::PHONG:
+							shader = aiShadingMode_Phong;
+							break;
+
+						case Material::METAL:
+							shader = aiShadingMode_CookTorrance;
+							break;
+
+						default:
+							ai_assert(false); // shouldn't be here
+						}
+						mat->AddProperty(&shader,1,AI_MATKEY_SHADING_MODEL);
+						if(shader != aiShadingMode_Gouraud) {
+							mat->AddProperty(&min->exp,1,AI_MATKEY_SHININESS);
+						}
+					}
+
+					mat->AddProperty(&min->ior,1,AI_MATKEY_REFRACTI);
+					mat->AddProperty(&min->rgb,1,AI_MATKEY_COLOR_DIFFUSE);
+
+					aiColor3D c = aiColor3D(min->rgb)*min->ks;
+					mat->AddProperty(&c,1,AI_MATKEY_COLOR_SPECULAR);
+
+					c = aiColor3D(min->rgb)*min->ka;
+					mat->AddProperty(&c,1,AI_MATKEY_COLOR_AMBIENT);
+				}
+			}
+		}
+	}
+	else if (Node::TYPE_LIGHT == root.type) {
+		const Light& ndlight = dynamic_cast<const Light&>(root);
+	}
+	else if (Node::TYPE_CAMERA == root.type) {
+		const Camera& ndcam = dynamic_cast<const Camera&>(root);
+	}
+
+	// add meshes
+	if (nd->mNumMeshes) { // mMeshes must be NULL if count is 0
+		nd->mMeshes = new unsigned int[nd->mNumMeshes];
+		for(unsigned int i = 0; i < nd->mNumMeshes;++i) {
+			nd->mMeshes[i] = fill->mNumMeshes-i-1;
+		}
+	}
+
+	// add children recursively
+	nd->mChildren = new aiNode*[root.temp_children.size()]();
+	for_each(const Node* n, root.temp_children) {
+		(nd->mChildren[nd->mNumChildren++] = BuildNodes(*n,scin,fill))->mParent = nd;
+	}
+
+	return nd;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Read an ASCII file into the given scene data structure
+void COBImporter::ReadAsciiFile(Scene& out, StreamReaderLE* stream)
+{
+	ChunkInfo ci;
+	for(LineSplitter splitter(*stream);splitter;++splitter) {
+
+		// add all chunks to be recognized here. /else ../ ommitted intentionally.
+		if (splitter.match_start("PolH ")) {
+			ReadChunkInfo_Ascii(ci,splitter);
+			ReadPolH_Ascii(out,splitter,ci);
+		}
+		if (splitter.match_start("BitM ")) {
+			ReadChunkInfo_Ascii(ci,splitter);
+			ReadBitM_Ascii(out,splitter,ci);
+		}
+		if (splitter.match_start("Mat1 ")) {
+			ReadChunkInfo_Ascii(ci,splitter);
+			ReadMat1_Ascii(out,splitter,ci);
+		}
+		if (splitter.match_start("Grou ")) {
+			ReadChunkInfo_Ascii(ci,splitter);
+			ReadGrou_Ascii(out,splitter,ci);
+		}
+		if (splitter.match_start("Lght ")) {
+			ReadChunkInfo_Ascii(ci,splitter);
+			ReadLght_Ascii(out,splitter,ci);
+		}
+		if (splitter.match_start("Came ")) {
+			ReadChunkInfo_Ascii(ci,splitter);
+			ReadCame_Ascii(out,splitter,ci);
+		}
+		if (splitter.match_start("Bone ")) {
+			ReadChunkInfo_Ascii(ci,splitter);
+			ReadBone_Ascii(out,splitter,ci);
+		}
+		if (splitter.match_start("Chan ")) {
+			ReadChunkInfo_Ascii(ci,splitter);
+			ReadChan_Ascii(out,splitter,ci);
+		}
+		if (splitter.match_start("Unit ")) {
+			ReadChunkInfo_Ascii(ci,splitter);
+			ReadUnit_Ascii(out,splitter,ci);
+		}
+		if (splitter.match_start("END ")) {
+			// we don't need this, but I guess there is a reason this
+			// chunk has been implemented into COB for.
+			return;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadChunkInfo_Ascii(ChunkInfo& out, const LineSplitter& splitter)
+{
+	const char* all_tokens[8];
+	splitter.get_tokens(all_tokens);
+
+	out.version = (all_tokens[1][1]-'0')*100+(all_tokens[1][3]-'0')*10+(all_tokens[1][4]-'0');
+	out.id	= strtol10(all_tokens[3]);
+	out.parent_id = strtol10(all_tokens[5]);
+	out.size = strtol10s(all_tokens[7]);
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::UnsupportedChunk_Ascii(LineSplitter& splitter, const ChunkInfo& nfo, const char* name)
+{
+	std::string error = "Encountered unsupported chunk: "; error += name;
+
+	// we can recover if the chunk size was specified.
+	if(nfo.size) {
+		DefaultLogger::get()->error(error);
+
+		// (HACK) - our current position in the stream is the beginning of the
+		// head line of the next chunk. That's fine, but the caller is going
+		// to call ++ on `splitter`, which we need to swallow to avoid 
+		// missing the next line.
+		splitter.get_stream().IncPtr(nfo.size);
+		splitter.swallow_next_increment();
+	}
+	else ThrowException(error);
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::LogWarn_Ascii(const LineSplitter& splitter, const format& message)	{
+	LogWarn_Ascii(message << " [at line "<< splitter.get_index()<<"]");
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::LogError_Ascii(const LineSplitter& splitter, const format& message)	{
+	LogError_Ascii(message << " [at line "<< splitter.get_index()<<"]");
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::LogInfo_Ascii(const LineSplitter& splitter, const format& message)	{
+	LogInfo_Ascii(message << " [at line "<< splitter.get_index()<<"]");
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::LogDebug_Ascii(const LineSplitter& splitter, const format& message)	{
+	LogDebug_Ascii(message << " [at line "<< splitter.get_index()<<"]");
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::LogWarn_Ascii(const std::string& message)	{
+	DefaultLogger::get()->warn("COB: "+message);
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::LogError_Ascii(const std::string& message)	{
+	DefaultLogger::get()->error("COB: "+message);
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::LogInfo_Ascii(const std::string& message)	{
+	DefaultLogger::get()->info("COB: "+message);
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::LogDebug_Ascii(const std::string& message)	{
+	DefaultLogger::get()->debug("COB: "+message);
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadBasicNodeInfo_Ascii(Node& msh, LineSplitter& splitter, const ChunkInfo& nfo)
+{
+	for(;splitter;++splitter) {
+		if (splitter.match_start("Name")) {
+			msh.name = std::string(splitter[1]);
+
+			// make nice names by merging the dupe count
+			std::replace(msh.name.begin(),msh.name.end(),
+				',','_');
+		}
+		else if (splitter.match_start("Transform")) {
+			for(unsigned int y = 0; y < 4 && ++splitter; ++y) {
+				const char* s = splitter->c_str();
+				for(unsigned int x = 0; x < 4; ++x) {
+					SkipSpaces(&s);
+					msh.transform[y][x] = fast_atof(&s);
+				}
+			}
+			// we need the transform chunk, so we won't return until we have it.
+			return;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+template <typename T>
+void COBImporter::ReadFloat3Tuple_Ascii(T& fill, const char** in) 
+{
+	const char* rgb = *in;
+	for(unsigned int i = 0; i < 3; ++i) {
+		SkipSpaces(&rgb);
+		if (*rgb == ',')++rgb;
+		SkipSpaces(&rgb);
+		
+		fill[i] = fast_atof(&rgb);
+	}
+	*in = rgb;
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadMat1_Ascii(Scene& out, LineSplitter& splitter, const ChunkInfo& nfo)
+{
+	if(nfo.version > 8) {
+		return UnsupportedChunk_Ascii(splitter,nfo,"Mat1");
+	}
+
+	++splitter;
+	if (!splitter.match_start("mat# ")) {
+		LogWarn_Ascii(splitter,format()<<
+			"Expected `mat#` line in `Mat1` chunk "<<nfo.id);
+		return;
+	}
+
+	out.materials.push_back(Material());
+	Material& mat = out.materials.back();
+	mat = nfo;
+
+	mat.matnum = strtol10(splitter[1]);
+	++splitter;
+
+	if (!splitter.match_start("shader: ")) {
+		LogWarn_Ascii(splitter,format()<<
+			"Expected `mat#` line in `Mat1` chunk "<<nfo.id);
+		return;
+	}
+	std::string shader = std::string(splitter[1]);
+	shader = shader.substr(0,shader.find_first_of(" \t"));
+
+	if (shader == "metal") {
+		mat.shader = Material::METAL;
+	}
+	else if (shader == "phong") {
+		mat.shader = Material::PHONG;
+	}
+	else if (shader != "flat") {
+		LogWarn_Ascii(splitter,format()<<
+			"Unknown value for `shader` in `Mat1` chunk "<<nfo.id);
+	}
+
+	++splitter;
+	if (!splitter.match_start("rgb ")) {
+		LogWarn_Ascii(splitter,format()<<
+			"Expected `rgb` line in `Mat1` chunk "<<nfo.id);
+	}
+
+	const char* rgb = splitter[1];
+	ReadFloat3Tuple_Ascii(mat.rgb,&rgb);
+
+	++splitter;
+	if (!splitter.match_start("alpha ")) {
+		LogWarn_Ascii(splitter,format()<<
+			"Expected `alpha` line in `Mat1` chunk "<<nfo.id);
+	}
+
+	const char* tokens[10];
+	splitter.get_tokens(tokens);
+
+	mat.alpha	= fast_atof( tokens[1] );
+	mat.ka		= fast_atof( tokens[3] );
+	mat.ks		= fast_atof( tokens[5] );
+	mat.exp		= fast_atof( tokens[7] );
+	mat.ior		= fast_atof( tokens[9] );
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadUnit_Ascii(Scene& out, LineSplitter& splitter, const ChunkInfo& nfo)
+{
+	if(nfo.version > 1) {
+		return UnsupportedChunk_Ascii(splitter,nfo,"Unit");
+	}
+	++splitter;
+	if (!splitter.match_start("Units ")) {
+		LogWarn_Ascii(splitter,format()<<
+			"Expected `Units` line in `Unit` chunk "<<nfo.id);
+		return;
+	}
+
+	// parent chunks preceede their childs, so we should have the
+	// corresponding chunk already.
+	for_each(boost::shared_ptr< Node >& nd, out.nodes) {
+		if (nd->id == nfo.parent_id) {
+			unsigned int t;
+			static const float units[] = {1000.f,100.f,1.f,0.001f,
+				1.f/0.0254f,1.f/0.3048f,1.f/0.9144f,1.f/1609.344f
+			};	
+			nd->unit_scale = (t=strtol10(splitter[1]))>=sizeof(units)/sizeof(units[0])?(
+				LogWarn_Ascii(splitter,format()<<t<<" is not a valid value for `Units` attribute in `Unit chunk` "<<nfo.id)
+				,1.f):units[t];
+			return;
+		}
+	}
+	LogWarn_Ascii(splitter,format()<<"`Unit` chunk "<<nfo.id<<" is a child of "
+		<<nfo.parent_id<<" which does not exist");
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadChan_Ascii(Scene& out, LineSplitter& splitter, const ChunkInfo& nfo)
+{
+	if(nfo.version > 8) {
+		return UnsupportedChunk_Ascii(splitter,nfo,"Chan");
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadLght_Ascii(Scene& out, LineSplitter& splitter, const ChunkInfo& nfo)
+{
+	if(nfo.version > 8) {
+		return UnsupportedChunk_Ascii(splitter,nfo,"Lght");
+	}
+
+	out.nodes.push_back(boost::shared_ptr<Light>(new Light()));
+	Light& msh = *dynamic_cast<Light*>(out.nodes.back().get());
+	msh = nfo;
+
+	ReadBasicNodeInfo_Ascii(msh,++splitter,nfo);
+
+	if (splitter.match_start("Infinite ")) {
+		msh.ltype = Light::INFINITE;
+	}
+	else if (splitter.match_start("Local ")) {
+		msh.ltype = Light::LOCAL;
+	}
+	else if (splitter.match_start("Spot ")) {
+		msh.ltype = Light::SPOT;
+	}
+	else {
+		LogWarn_Ascii(splitter,format()<<
+			"Unknown kind of light source in `Lght` chunk "<<nfo.id<<" : "<<*splitter);
+		msh.ltype = Light::SPOT;
+	}
+	
+	++splitter;
+	if (!splitter.match_start("color ")) {
+		LogWarn_Ascii(splitter,format()<<
+			"Expected `color` line in `Lght` chunk "<<nfo.id);
+	}
+
+	const char* rgb = splitter[1];
+	ReadFloat3Tuple_Ascii(msh.color ,&rgb);
+
+	SkipSpaces(&rgb);
+	if (strncmp(rgb,"cone angle",10)) {
+		LogWarn_Ascii(splitter,format()<<
+			"Expected `cone angle` entity in `color` line in `Lght` chunk "<<nfo.id);
+	}
+	SkipSpaces(rgb+10,&rgb);
+	msh.angle = fast_atof(&rgb);
+
+	SkipSpaces(&rgb);
+	if (strncmp(rgb,"inner angle",11)) {
+		LogWarn_Ascii(splitter,format()<<
+			"Expected `inner angle` entity in `color` line in `Lght` chunk "<<nfo.id);
+	}
+	SkipSpaces(rgb+11,&rgb);
+	msh.inner_angle = fast_atof(&rgb);
+
+	// skip the rest for we can't handle this kind of physically-based lighting information.
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadCame_Ascii(Scene& out, LineSplitter& splitter, const ChunkInfo& nfo)
+{
+	if(nfo.version > 2) {
+		return UnsupportedChunk_Ascii(splitter,nfo,"Came");
+	}
+
+	out.nodes.push_back(boost::shared_ptr<Camera>(new Camera()));
+	Camera& msh = *dynamic_cast<Camera*>(out.nodes.back().get());
+	msh = nfo;
+
+	ReadBasicNodeInfo_Ascii(msh,++splitter,nfo);
+
+	// skip the next line, we don't know this differenciation between a
+	// standard camera and a panoramic camera.
+	++splitter;
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadBone_Ascii(Scene& out, LineSplitter& splitter, const ChunkInfo& nfo)
+{
+	if(nfo.version > 5) {
+		return UnsupportedChunk_Ascii(splitter,nfo,"Bone");
+	}
+
+	out.nodes.push_back(boost::shared_ptr<Bone>(new Bone()));
+	Bone& msh = *dynamic_cast<Bone*>(out.nodes.back().get());
+	msh = nfo;
+
+	ReadBasicNodeInfo_Ascii(msh,++splitter,nfo);
+
+	// TODO
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadGrou_Ascii(Scene& out, LineSplitter& splitter, const ChunkInfo& nfo)
+{
+	if(nfo.version > 1) {
+		return UnsupportedChunk_Ascii(splitter,nfo,"Grou");
+	}
+
+	out.nodes.push_back(boost::shared_ptr<Group>(new Group()));
+	Group& msh = *dynamic_cast<Group*>(out.nodes.back().get());
+	msh = nfo;
+
+	ReadBasicNodeInfo_Ascii(msh,++splitter,nfo);
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadPolH_Ascii(Scene& out, LineSplitter& splitter, const ChunkInfo& nfo)
+{
+	if(nfo.version > 8) {
+		return UnsupportedChunk_Ascii(splitter,nfo,"PolH");
+	}
+
+	out.nodes.push_back(boost::shared_ptr<Mesh>(new Mesh()));
+	Mesh& msh = *dynamic_cast<Mesh*>(out.nodes.back().get());
+	msh = nfo;
+
+	ReadBasicNodeInfo_Ascii(msh,++splitter,nfo);
+
+	// the chunk has a fixed order of components, but some are not interesting of us so
+	// we're just looking for keywords in arbitrary order. The end of the chunk is
+	// either the last `Face` or the `DrawFlags` attribute, depending on the format ver.
+	for(;splitter;++splitter) {
+		if (splitter.match_start("World Vertices")) {
+			const unsigned int cnt = strtol10(splitter[2]);
+			msh.vertex_positions.resize(cnt);
+
+			for(unsigned int cur = 0;cur < cnt && ++splitter;++cur) {
+				const char* s = splitter->c_str();
+
+				aiVector3D& v = msh.vertex_positions[cur]; 
+
+				SkipSpaces(&s);
+				v.x = fast_atof(&s);
+				SkipSpaces(&s);
+				v.y = fast_atof(&s);
+				SkipSpaces(&s);
+				v.z = fast_atof(&s);
+			}
+		}
+		else if (splitter.match_start("Texture Vertices")) {
+			const unsigned int cnt = strtol10(splitter[2]);
+			msh.texture_coords.resize(cnt);
+
+			for(unsigned int cur = 0;cur < cnt && ++splitter;++cur) {
+				const char* s = splitter->c_str();
+
+				aiVector2D& v = msh.texture_coords[cur]; 
+
+				SkipSpaces(&s);
+				v.x = fast_atof(&s);
+				SkipSpaces(&s);
+				v.y = fast_atof(&s);
+			}
+		}
+		else if (splitter.match_start("Faces")) {
+			const unsigned int cnt = strtol10(splitter[1]);
+			msh.faces.reserve(cnt);
+
+			for(unsigned int cur = 0; cur < cnt && ++splitter ;++cur) {
+				if (splitter.match_start("Hole")) {
+					LogWarn_Ascii(splitter,"Skipping unsupported `Hole` line");
+					continue;
+				}
+
+				if (!splitter.match_start("Face")) {
+					ThrowException("Expected Face line");
+				}
+
+				std::back_inserter(msh.faces) = Face();
+				Face& face = msh.faces.back();
+
+				face.indices.resize(strtol10(splitter[2]));
+				face.flags = strtol10(splitter[4]);
+				face.material = strtol10(splitter[6]);
+
+				const char* s = (++splitter)->c_str();
+				for(size_t i = 0; i < face.indices.size(); ++i) {
+					if(!SkipSpaces(&s)) {
+						ThrowException("Expected EOL token in Face entry");
+					}
+					if ('<' != *s++) {
+						ThrowException("Expected < token in Face entry");
+					}
+					face.indices[i].pos_idx = strtol10(s,&s);
+					if (',' != *s++) {
+						ThrowException("Expected , token in Face entry");
+					}
+					face.indices[i].uv_idx = strtol10(s,&s);
+					if ('>' != *s++) {
+						ThrowException("Expected < token in Face entry");
+					}
+				}
+			}
+			if (nfo.version <= 4) {
+				break;
+			}
+		}
+		else if (splitter.match_start("DrawFlags")) {
+			msh.draw_flags = strtol10(splitter[1]);
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadBitM_Ascii(Scene& out, LineSplitter& splitter, const ChunkInfo& nfo)
+{
+	if(nfo.version > 1) {
+		return UnsupportedChunk_Ascii(splitter,nfo,"BitM");
+	}
+/*
+	"\nThumbNailHdrSize %ld"
+	"\nThumbHeader: %02hx 02hx %02hx "
+	"\nColorBufSize %ld"		
+	"\nColorBufZipSize %ld"		
+	"\nZippedThumbnail: %02hx 02hx %02hx "
+*/
+
+	const unsigned int head = strtol10((++splitter)[1]);
+	if (head != sizeof(Bitmap::BitmapHeader)) {
+		LogWarn_Ascii(splitter,"Unexpected ThumbNailHdrSize, skipping this chunk");
+		return;
+	}
+
+	//union {
+	//	Bitmap::BitmapHeader data;
+	//	char opaq[sizeof Bitmap::BitmapHeader];
+	//};
+//	ReadHexOctets(opaq,head,(++splitter)[1]);
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadBinaryFile(Scene& out, StreamReaderLE* stream)
+{
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadPolH_Binary(COB::Scene& out, StreamReaderLE& reader)
+{
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadBitM_Binary(COB::Scene& out, StreamReaderLE& reader)
+{
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadMat1_Binary(COB::Scene& out, StreamReaderLE& reader)
+{
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadBone_Binary(COB::Scene& out, StreamReaderLE& reader)
+{
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadCame_Binary(COB::Scene& out, StreamReaderLE& reader)
+{
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadLght_Binary(COB::Scene& out, StreamReaderLE& reader)
+{
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadGrou_Binary(COB::Scene& out, StreamReaderLE& reader)
+{
+}
+
+#endif

@@ -178,7 +178,7 @@ public:
 
 	// ---------------------------------------------------------------------
 	/** Increase the file pointer (relative seeking)  */
-	void IncPtr(unsigned int plus)	{
+	void IncPtr(int plus)	{
 		current += plus;
 		if (current > end) {
 			throw DeadlyImportError("End of file was reached");

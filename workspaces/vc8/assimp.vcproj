@@ -1150,46 +1150,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="BoostWorkaround"
-				>
-				<File
-					RelativePath="..\..\include\BoostWorkaround\boost\foreach.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\BoostWorkaround\boost\format.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\BoostWorkaround\boost\scoped_array.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\BoostWorkaround\boost\scoped_ptr.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\BoostWorkaround\boost\static_assert.hpp"
-					>
-				</File>
-				<Filter
-					Name="tuple"
-					>
-					<File
-						RelativePath="..\..\include\BoostWorkaround\boost\tuple\tuple.hpp"
-						>
-					</File>
-				</Filter>
-				<Filter
-					Name="math"
-					>
-					<File
-						RelativePath="..\..\include\BoostWorkaround\boost\math\common_factor_rt.hpp"
-						>
-					</File>
-				</Filter>
-			</Filter>
-			<Filter
 				Name="C"
 				>
 				<File
@@ -1503,6 +1463,10 @@
 				<Filter
 					Name="lwo"
 					>
+					<File
+						RelativePath="..\..\code\IFF.h"
+						>
+					</File>
 					<File
 						RelativePath="..\..\code\LWOBLoader.cpp"
 						>
@@ -1997,6 +1961,22 @@
 					</File>
 					<File
 						RelativePath="..\..\code\MS3DLoader.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="cob"
+					>
+					<File
+						RelativePath="..\..\code\COBLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\COBLoader.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\COBScene.h"
 						>
 					</File>
 				</Filter>
@@ -3557,11 +3537,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\IFF.h"
+					RelativePath="..\..\code\Importer.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\Importer.cpp"
+					RelativePath="..\..\code\LineSplitter.h"
 					>
 				</File>
 				<File
@@ -3669,11 +3649,51 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\TinyFormatter.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\VertexTriangleAdjacency.cpp"
 					>
 				</File>
 				<File
 					RelativePath="..\..\code\VertexTriangleAdjacency.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="noboost"
+				>
+				<File
+					RelativePath="..\..\code\BoostWorkaround\boost\math\common_factor_rt.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\BoostWorkaround\boost\foreach.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\BoostWorkaround\boost\format.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\BoostWorkaround\boost\scoped_array.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\BoostWorkaround\boost\scoped_ptr.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\BoostWorkaround\boost\shared_ptr.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\BoostWorkaround\boost\static_assert.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\BoostWorkaround\boost\tuple\tuple.hpp"
 					>
 				</File>
 			</Filter>

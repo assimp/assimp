@@ -274,13 +274,29 @@ inline const char* fast_atof_move( const char* c, float& out)
 	return c;
 }
 
-
 // ------------------------------------------------------------------------------------
 // The same but more human.
 inline float fast_atof(const char* c)
 {
 	float ret;
 	fast_atof_move(c, ret);
+	return ret;
+}
+
+
+inline float fast_atof( const char* c, const char** cout)
+{
+	float ret;
+	*cout = fast_atof_move(c, ret);
+
+	return ret;
+}
+
+inline float fast_atof( const char** inout)
+{
+	float ret;
+	*inout = fast_atof_move(*inout, ret);
+
 	return ret;
 }
 

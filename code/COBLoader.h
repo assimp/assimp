@@ -148,21 +148,25 @@ private:
 	static void LogInfo_Ascii (const LineSplitter& splitter, const Formatter::format& message);
 	static void LogDebug_Ascii(const LineSplitter& splitter, const Formatter::format& message);
 
-	static void LogWarn_Ascii  (const std::string& message);
-	static void LogError_Ascii (const std::string& message);
-	static void LogInfo_Ascii  (const std::string& message);
-	static void LogDebug_Ascii (const std::string& message);
+	static void LogWarn_Ascii  (const Formatter::format& message);
+	static void LogError_Ascii (const Formatter::format& message);
+	static void LogInfo_Ascii  (const Formatter::format& message);
+	static void LogDebug_Ascii (const Formatter::format& message);
 
 
 	// Binary file support
 
-	void ReadPolH_Binary(COB::Scene& out, StreamReaderLE& reader);
-	void ReadBitM_Binary(COB::Scene& out, StreamReaderLE& reader);
-	void ReadMat1_Binary(COB::Scene& out, StreamReaderLE& reader);
-	void ReadBone_Binary(COB::Scene& out, StreamReaderLE& reader);
-	void ReadCame_Binary(COB::Scene& out, StreamReaderLE& reader);
-	void ReadLght_Binary(COB::Scene& out, StreamReaderLE& reader);
-	void ReadGrou_Binary(COB::Scene& out, StreamReaderLE& reader);
+	void UnsupportedChunk_Binary(StreamReaderLE& reader, const COB::ChunkInfo& nfo, const char* name);
+	void ReadString_Binary(std::string& out, StreamReaderLE& reader);
+	void ReadBasicNodeInfo_Binary(COB::Node& msh, StreamReaderLE& reader, const COB::ChunkInfo& nfo);
+
+	void ReadPolH_Binary(COB::Scene& out, StreamReaderLE& reader, const COB::ChunkInfo& nfo);
+	void ReadBitM_Binary(COB::Scene& out, StreamReaderLE& reader, const COB::ChunkInfo& nfo);
+	void ReadMat1_Binary(COB::Scene& out, StreamReaderLE& reader, const COB::ChunkInfo& nfo);
+	void ReadCame_Binary(COB::Scene& out, StreamReaderLE& reader, const COB::ChunkInfo& nfo);
+	void ReadLght_Binary(COB::Scene& out, StreamReaderLE& reader, const COB::ChunkInfo& nfo);
+	void ReadGrou_Binary(COB::Scene& out, StreamReaderLE& reader, const COB::ChunkInfo& nfo);
+	void ReadUnit_Binary(COB::Scene& out, StreamReaderLE& reader, const COB::ChunkInfo& nfo);
 
 
 }; // !class COBImporter

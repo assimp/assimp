@@ -61,6 +61,17 @@ using namespace Assimp::Formatter;
 #define for_each BOOST_FOREACH
 
 
+static const float units[] = {
+	1000.f,
+	100.f,
+	1.f,
+	0.001f,
+	1.f/0.0254f,
+	1.f/0.3048f,
+	1.f/0.9144f,
+	1.f/1609.344f
+};	
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 COBImporter::COBImporter()
@@ -409,10 +420,11 @@ void COBImporter::ReadChunkInfo_Ascii(ChunkInfo& out, const LineSplitter& splitt
 // ------------------------------------------------------------------------------------------------
 void COBImporter::UnsupportedChunk_Ascii(LineSplitter& splitter, const ChunkInfo& nfo, const char* name)
 {
-	std::string error = "Encountered unsupported chunk: "; error += name;
+	const std::string error = format("Encountered unsupported chunk: ") <<  name <<
+		" [version: "<<nfo.version<<", size: "<<nfo.size<<"]";
 
 	// we can recover if the chunk size was specified.
-	if(nfo.size) {
+	if(nfo.size != static_cast<unsigned int>(-1)) {
 		DefaultLogger::get()->error(error);
 
 		// (HACK) - our current position in the stream is the beginning of the
@@ -446,23 +458,23 @@ void COBImporter::LogDebug_Ascii(const LineSplitter& splitter, const format& mes
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::LogWarn_Ascii(const std::string& message)	{
-	DefaultLogger::get()->warn("COB: "+message);
+void COBImporter::LogWarn_Ascii(const Formatter::format& message)	{
+	DefaultLogger::get()->warn(std::string("COB: ")+=message);
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::LogError_Ascii(const std::string& message)	{
-	DefaultLogger::get()->error("COB: "+message);
+void COBImporter::LogError_Ascii(const Formatter::format& message)	{
+	DefaultLogger::get()->error(std::string("COB: ")+=message);
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::LogInfo_Ascii(const std::string& message)	{
-	DefaultLogger::get()->info("COB: "+message);
+void COBImporter::LogInfo_Ascii(const Formatter::format& message)	{
+	DefaultLogger::get()->info(std::string("COB: ")+=message);
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::LogDebug_Ascii(const std::string& message)	{
-	DefaultLogger::get()->debug("COB: "+message);
+void COBImporter::LogDebug_Ascii(const Formatter::format& message)	{
+	DefaultLogger::get()->debug(std::string("COB: ")+=message);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -587,11 +599,9 @@ void COBImporter::ReadUnit_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 	// corresponding chunk already.
 	for_each(boost::shared_ptr< Node >& nd, out.nodes) {
 		if (nd->id == nfo.parent_id) {
-			unsigned int t;
-			static const float units[] = {1000.f,100.f,1.f,0.001f,
-				1.f/0.0254f,1.f/0.3048f,1.f/0.9144f,1.f/1609.344f
-			};	
-			nd->unit_scale = (t=strtol10(splitter[1]))>=sizeof(units)/sizeof(units[0])?(
+			const unsigned int t=strtol10(splitter[1]);
+		
+			nd->unit_scale = t>=sizeof(units)/sizeof(units[0])?(
 				LogWarn_Ascii(splitter,format()<<t<<" is not a valid value for `Units` attribute in `Unit chunk` "<<nfo.id)
 				,1.f):units[t];
 			return;
@@ -617,7 +627,7 @@ void COBImporter::ReadLght_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 	}
 
 	out.nodes.push_back(boost::shared_ptr<Light>(new Light()));
-	Light& msh = *dynamic_cast<Light*>(out.nodes.back().get());
+	Light& msh = dynamic_cast<Light&>(*out.nodes.back().get());
 	msh = nfo;
 
 	ReadBasicNodeInfo_Ascii(msh,++splitter,nfo);
@@ -673,7 +683,7 @@ void COBImporter::ReadCame_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 	}
 
 	out.nodes.push_back(boost::shared_ptr<Camera>(new Camera()));
-	Camera& msh = *dynamic_cast<Camera*>(out.nodes.back().get());
+	Camera& msh = dynamic_cast<Camera&>(*out.nodes.back().get());
 	msh = nfo;
 
 	ReadBasicNodeInfo_Ascii(msh,++splitter,nfo);
@@ -691,7 +701,7 @@ void COBImporter::ReadBone_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 	}
 
 	out.nodes.push_back(boost::shared_ptr<Bone>(new Bone()));
-	Bone& msh = *dynamic_cast<Bone*>(out.nodes.back().get());
+	Bone& msh = dynamic_cast<Bone&>(*out.nodes.back().get());
 	msh = nfo;
 
 	ReadBasicNodeInfo_Ascii(msh,++splitter,nfo);
@@ -707,7 +717,7 @@ void COBImporter::ReadGrou_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 	}
 
 	out.nodes.push_back(boost::shared_ptr<Group>(new Group()));
-	Group& msh = *dynamic_cast<Group*>(out.nodes.back().get());
+	Group& msh = dynamic_cast<Group&>(*out.nodes.back().get());
 	msh = nfo;
 
 	ReadBasicNodeInfo_Ascii(msh,++splitter,nfo);
@@ -721,7 +731,7 @@ void COBImporter::ReadPolH_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 	}
 
 	out.nodes.push_back(boost::shared_ptr<Mesh>(new Mesh()));
-	Mesh& msh = *dynamic_cast<Mesh*>(out.nodes.back().get());
+	Mesh& msh = dynamic_cast<Mesh&>(*out.nodes.back().get());
 	msh = nfo;
 
 	ReadBasicNodeInfo_Ascii(msh,++splitter,nfo);
@@ -832,51 +842,370 @@ void COBImporter::ReadBitM_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 		return;
 	}
 
-	//union {
-	//	Bitmap::BitmapHeader data;
-	//	char opaq[sizeof Bitmap::BitmapHeader];
-	//};
+	/*union {
+		Bitmap::BitmapHeader data;
+		char opaq[sizeof Bitmap::BitmapHeader()];
+	};*/
 //	ReadHexOctets(opaq,head,(++splitter)[1]);
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::ReadBinaryFile(Scene& out, StreamReaderLE* stream)
+void COBImporter::ReadString_Binary(std::string& out, StreamReaderLE& reader)
 {
+	out.resize( reader.GetI2());
+	for_each(char& c,out) {
+		c = reader.GetI1();
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::ReadPolH_Binary(COB::Scene& out, StreamReaderLE& reader)
+void COBImporter::ReadBasicNodeInfo_Binary(Node& msh, StreamReaderLE& reader, const ChunkInfo& nfo)
 {
+	const unsigned int dupes = reader.GetI2();
+	ReadString_Binary(msh.name,reader);
+
+	msh.name = format(msh.name)<<'_'<<dupes;
+
+	// skip local axes for the moment
+	reader.IncPtr(48);
+
+	msh.transform = aiMatrix4x4();
+	for(unsigned int y = 0; y < 3; ++y) {
+		for(unsigned int x =0; x < 4; ++x) {
+			msh.transform[y][x] = reader.GetF4();
+		}
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::ReadBitM_Binary(COB::Scene& out, StreamReaderLE& reader)
+void COBImporter::UnsupportedChunk_Binary( StreamReaderLE& reader, const ChunkInfo& nfo, const char* name)
 {
+	const std::string error = format("Encountered unsupported chunk: ") <<  name <<
+		" [version: "<<nfo.version<<", size: "<<nfo.size<<"]";
+
+	// we can recover if the chunk size was specified.
+	if(nfo.size != static_cast<unsigned int>(-1)) {
+		DefaultLogger::get()->error(error);
+		reader.IncPtr(nfo.size);
+	}
+	else ThrowException(error);
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::ReadMat1_Binary(COB::Scene& out, StreamReaderLE& reader)
+void COBImporter::ReadBinaryFile(Scene& out, StreamReaderLE* reader)
 {
+	while(1) {
+		std::string type;
+		 type += reader -> GetI1()
+		,type += reader -> GetI1()
+		,type += reader -> GetI1()
+		,type += reader -> GetI1()
+		;
+
+		ChunkInfo nfo;
+		nfo.version  = reader -> GetI2()*10;
+		nfo.version += reader -> GetI2();
+
+		nfo.id = reader->GetI4();
+		nfo.parent_id = reader->GetI4();
+		nfo.size = reader->GetI4();
+
+		if (type == "PolH") {
+			ReadPolH_Binary(out,*reader,nfo);
+		}
+		else if (type == "BitM") {
+			ReadBitM_Binary(out,*reader,nfo);
+		}
+		else if (type == "Grou") {
+			ReadGrou_Binary(out,*reader,nfo);
+		}
+		else if (type == "Lght") {
+			ReadLght_Binary(out,*reader,nfo);
+		}
+		else if (type == "Came") {
+			ReadCame_Binary(out,*reader,nfo);
+		}
+		else if (type == "Mat1") {
+			ReadMat1_Binary(out,*reader,nfo);
+		}
+	/*	else if (type == "Bone") {
+			ReadBone_Binary(out,*reader,nfo);
+		}
+		else if (type == "Chan") {
+			ReadChan_Binary(out,*reader,nfo);
+		}*/
+		else if (type == "Unit") {
+			ReadUnit_Binary(out,*reader,nfo);
+		}
+		else if (type == "OLay") {
+			// ignore layer index silently.
+			if(nfo.size != static_cast<unsigned int>(-1) ) {
+				reader->IncPtr(nfo.size);
+			}
+			else return UnsupportedChunk_Binary(*reader,nfo,type.c_str());
+		}
+		else if (type == "END ") {
+			return;
+		}
+		else UnsupportedChunk_Binary(*reader,nfo,type.c_str());
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::ReadBone_Binary(COB::Scene& out, StreamReaderLE& reader)
+void COBImporter::ReadPolH_Binary(COB::Scene& out, StreamReaderLE& reader, const ChunkInfo& nfo)
 {
+	if(nfo.version > 8) {
+		return UnsupportedChunk_Binary(reader,nfo,"PolH");
+	}
+
+	out.nodes.push_back(boost::shared_ptr<Mesh>(new Mesh()));
+	Mesh& msh = dynamic_cast<Mesh&>(*out.nodes.back().get());
+	msh = nfo;
+
+	ReadBasicNodeInfo_Binary(msh,reader,nfo);
+
+	msh.vertex_positions.resize(reader.GetI4());
+	for_each(aiVector3D& v,msh.vertex_positions) {
+		v.x = reader.GetF4();
+		v.y = reader.GetF4();
+		v.z = reader.GetF4();
+	}
+
+	msh.texture_coords.resize(reader.GetI4());
+	for_each(aiVector2D& v,msh.texture_coords) {
+		v.x = reader.GetF4();
+		v.y = reader.GetF4();
+	}
+
+	const size_t numfuck = reader.GetI4();
+	msh.faces.reserve(numfuck);
+	for(size_t i = 0; i < numfuck; ++i) {
+		// XXX backface culling flag is 0x10 in flags
+
+		// hole?
+		bool hole;
+		if ((hole = (reader.GetI1() & 0x08) != 0)) {
+			// XXX Basically this should just work fine - then triangulator
+			// should output properly triangulated data even for polygons
+			// with holes. Test data specific to COB is needed to confirm it.
+			if (msh.faces.empty()) {
+				ThrowException(format("A hole is the first entity in the `PolH` chunk with id ") << nfo.id);
+			}	
+		}
+		else msh.faces.push_back(Face());
+		Face& f = msh.faces.back();
+
+		const size_t num = reader.GetI2();
+		f.indices.reserve(f.indices.size() + num);
+
+		if(!hole) {
+			f.material = reader.GetI2();
+			f.flags = 0;
+		}
+
+		for(size_t x = 0; x < num; ++x) {
+			f.indices.push_back(VertexIndex());
+
+			VertexIndex& v = f.indices.back();
+			v.pos_idx = reader.GetI4();
+			v.uv_idx = reader.GetI4();
+		}
+
+		if(hole) {
+			std::reverse(f.indices.rbegin(),f.indices.rbegin()+num);
+		}
+	}
+	if (nfo.version>4) {
+		msh.draw_flags = reader.GetI4();	
+	}
+	nfo.version>5 && nfo.version<8 ? reader.GetI4() : 0;
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::ReadCame_Binary(COB::Scene& out, StreamReaderLE& reader)
+void COBImporter::ReadBitM_Binary(COB::Scene& out, StreamReaderLE& reader, const ChunkInfo& nfo)
 {
+	if(nfo.version > 1) {
+		return UnsupportedChunk_Binary(reader,nfo,"BitM");
+	}
+
+	const uint32_t len = reader.GetI4();
+	reader.IncPtr(len);
+
+	reader.GetI4();
+	reader.IncPtr(reader.GetI4());
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::ReadLght_Binary(COB::Scene& out, StreamReaderLE& reader)
+void COBImporter::ReadMat1_Binary(COB::Scene& out, StreamReaderLE& reader, const ChunkInfo& nfo)
 {
+	if(nfo.version > 8) {
+		return UnsupportedChunk_Binary(reader,nfo,"Mat1");
+	}
+
+	out.materials.push_back(Material());
+	Material& mat = out.materials.back();
+	mat = nfo;
+
+	mat.matnum = reader.GetI2();
+	switch(reader.GetI1()) {
+		case 'f':
+			mat.type = Material::FLAT;
+			break;
+		case 'p':
+			mat.type = Material::PHONG;
+			break;
+		case 'm':
+			mat.type = Material::METAL;
+			break;
+		default:
+			LogError_Ascii(format("Unrecognized shader type in `Mat1` chunk with id ")<<nfo.id);
+			mat.type = Material::FLAT;
+	}
+
+	switch(reader.GetI1()) {
+		case 'f':
+			mat.autofacet = Material::FACETED;
+			break;
+		case 'a':
+			mat.autofacet = Material::AUTOFACETED;
+			break;
+		case 's':
+			mat.autofacet = Material::SMOOTH;
+			break;
+		default:
+			LogError_Ascii(format("Unrecognized faceting mode in `Mat1` chunk with id ")<<nfo.id);
+			mat.autofacet = Material::FACETED;
+	}
+	mat.autofacet_angle = static_cast<float>(reader.GetI1());
+
+	mat.rgb.r = reader.GetF4();
+	mat.rgb.g = reader.GetF4();
+	mat.rgb.b = reader.GetF4();
+
+	mat.alpha = reader.GetF4();
+	mat.ka    = reader.GetF4();
+	mat.ks    = reader.GetF4();
+	mat.exp   = reader.GetF4();
+	mat.ior   = reader.GetF4();
+
+	char id[2];
+	id[0] = reader.GetI1(),id[1] = reader.GetI1();
+
+	if (id[0] == 'e' && id[1] == ':') {
+		mat.tex_env.reset(new Texture());
+
+		reader.GetI1();
+		ReadString_Binary(mat.tex_env->path,reader);
+
+		// advance to next texture-id
+		id[0] = reader.GetI1(),id[1] = reader.GetI1();
+	}
+
+	if (id[0] == 't' && id[1] == ':') {
+		mat.tex_color.reset(new Texture());
+
+		reader.GetI1();
+		ReadString_Binary(mat.tex_color->path,reader);
+
+		mat.tex_color->transform.mTranslation.x = reader.GetF4();
+		mat.tex_color->transform.mTranslation.y = reader.GetF4();
+
+		mat.tex_color->transform.mScaling.x = reader.GetF4();
+		mat.tex_color->transform.mScaling.y = reader.GetF4();
+
+		// advance to next texture-id
+		id[0] = reader.GetI1(),id[1] = reader.GetI1();
+	}
+
+	if (id[0] == 'b' && id[1] == ':') {
+		mat.tex_bump.reset(new Texture());
+
+		reader.GetI1();
+		ReadString_Binary(mat.tex_bump->path,reader);
+
+		mat.tex_bump->transform.mTranslation.x = reader.GetF4();
+		mat.tex_bump->transform.mTranslation.y = reader.GetF4();
+
+		mat.tex_bump->transform.mScaling.x = reader.GetF4();
+		mat.tex_bump->transform.mScaling.y = reader.GetF4();
+
+		// skip amplitude for I don't know its purpose.
+		reader.GetF4();
+	}
+	reader.IncPtr(-2);
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::ReadGrou_Binary(COB::Scene& out, StreamReaderLE& reader)
+void COBImporter::ReadCame_Binary(COB::Scene& out, StreamReaderLE& reader, const ChunkInfo& nfo)
 {
+	if(nfo.version > 2) {
+		return UnsupportedChunk_Binary(reader,nfo,"Came");
+	}
+
+	out.nodes.push_back(boost::shared_ptr<Camera>(new Camera()));
+	Camera& msh = dynamic_cast<Camera&>(*out.nodes.back().get());
+	msh = nfo;
+
+	ReadBasicNodeInfo_Binary(msh,reader,nfo);
+
+	// the rest is not interesting for us, so we skip over it.
+	if(nfo.version > 1) {
+		if (reader.GetI2()==512) {
+			reader.IncPtr(42);
+		}
+	}
 }
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadLght_Binary(COB::Scene& out, StreamReaderLE& reader, const ChunkInfo& nfo)
+{
+	if(nfo.version > 2) {
+		return UnsupportedChunk_Binary(reader,nfo,"Lght");
+	}
+
+	out.nodes.push_back(boost::shared_ptr<Light>(new Light()));
+	Light& msh = dynamic_cast<Light&>(*out.nodes.back().get());
+	msh = nfo;
+
+	ReadBasicNodeInfo_Binary(msh,reader,nfo);
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadGrou_Binary(COB::Scene& out, StreamReaderLE& reader, const ChunkInfo& nfo)
+{
+	if(nfo.version > 2) {
+		return UnsupportedChunk_Binary(reader,nfo,"Grou");
+	}
+
+	out.nodes.push_back(boost::shared_ptr<Group>(new Group()));
+	Group& msh = dynamic_cast<Group&>(*out.nodes.back().get());
+	msh = nfo;
+
+	ReadBasicNodeInfo_Binary(msh,reader,nfo);
+}
+
+// ------------------------------------------------------------------------------------------------
+void COBImporter::ReadUnit_Binary(COB::Scene& out, StreamReaderLE& reader, const ChunkInfo& nfo)
+{
+	 if(nfo.version > 1) {
+		return UnsupportedChunk_Binary(reader,nfo,"Unit");
+	}
+
+	// parent chunks preceede their childs, so we should have the
+	// corresponding chunk already.
+	for_each(boost::shared_ptr< Node >& nd, out.nodes) {
+		if (nd->id == nfo.parent_id) {
+			const unsigned int t=reader.GetI2();
+			nd->unit_scale = t>=sizeof(units)/sizeof(units[0])?(
+				LogWarn_Ascii(format()<<t<<" is not a valid value for `Units` attribute in `Unit chunk` "<<nfo.id)
+				,1.f):units[t];
+
+			return;
+		}
+	}
+	LogWarn_Ascii(format()<<"`Unit` chunk "<<nfo.id<<" is a child of "
+		<<nfo.parent_id<<" which does not exist");
+}
+
 
 #endif

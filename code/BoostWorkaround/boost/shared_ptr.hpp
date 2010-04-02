@@ -15,7 +15,7 @@ namespace boost {
 		public:
 
 			controller()
-				: cnt()
+				: cnt(0)
 			{}
 
 			template <typename T>
@@ -85,7 +85,7 @@ public:
 	}
 
 	// construction from an existing object of type T
-	shared_ptr(T* _ptr)
+	explicit shared_ptr(T* _ptr)
 		: ptr(_ptr)
 		, ctr(new detail::controller(ptr))
 	{

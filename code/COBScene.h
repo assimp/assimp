@@ -197,6 +197,14 @@ struct Camera : public Node
 };
 
 // ------------------
+/** COB Texture data structure */
+struct Texture
+{
+	std::string path;
+	aiUVTransform transform;
+};
+
+// ------------------
 /** COB Material data structure */
 struct Material : ChunkInfo
 {
@@ -205,7 +213,16 @@ struct Material : ChunkInfo
 		FLAT,PHONG,METAL
 	};
 
-	Material() : alpha(),exp(),ior(),ka(),ks(1.f),matnum(0xffffffff),shader(FLAT) {}
+	enum AutoFacet {
+		FACETED,AUTOFACETED,SMOOTH
+	};
+
+	Material() : alpha(),exp(),ior(),ka(),ks(1.f),
+		matnum(0xffffffff),
+		shader(FLAT),autofacet(FACETED),
+		autofacet_angle()
+	{}
+
 	std::string type;
 
 	aiColor3D rgb;
@@ -213,6 +230,11 @@ struct Material : ChunkInfo
 
 	unsigned int matnum;
 	Shader shader; 
+
+	AutoFacet autofacet;
+	float autofacet_angle;
+
+	boost::shared_ptr<Texture> tex_env,tex_bump,tex_color;
 };
 
 // ------------------

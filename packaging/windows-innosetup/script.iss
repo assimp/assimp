@@ -12,7 +12,9 @@ SetupIconFile=..\..\tools\shared\assimp_tools_icon.ico
 WizardImageFile=compiler:WizModernImage-IS.BMP
 WizardSmallImageFile=compiler:WizModernSmallImage-IS.BMP
 LicenseFile=License.rtf
-
+OutputBaseFileName=assimp-sdk-1.1rc-setup
+VersionInfoVersion=1.1.0.0
+VersionInfoTextVersion=1.1rc
 
 [Types]
 Name: "full"; Description: "Full installation"

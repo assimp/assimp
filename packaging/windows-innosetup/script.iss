@@ -23,6 +23,7 @@ Name: "custom"; Description: "Custom installation"; Flags: iscustom
 Name: "main"; Description: "Main Files"; Types: full compact custom; Flags: fixed
 Name: "tools"; Description: "Asset Viewer & Command Line Tools"; Types: full compact
 Name: "help"; Description: "Help Files"; Types: full compact
+Name: "samples"; Description: "Samples"; Types: full
 ;Name: "wsource"; Description: "Source Code"; Types: full
 Name: "test"; Description: "Test Models"; Types: full
 Name: "pyassimp"; Description: "Python Bindings"; Types: full
@@ -56,8 +57,11 @@ Source: "..\..\doc\datastructure.xml"; DestDir: "{app}\doc"; Components: help
 Source: "..\..\lib\assimp_release-dll_Win32\assimp.lib"; DestDir: "{app}\lib\x86"
 Source: "..\..\lib\assimp_release-dll_x64\assimp.lib"; DestDir: "{app}\lib\x64"
 
+; Samples
+Source: "..\..\samples\*"; DestDir: "{app}\samples"; Flags: recursesubdirs; Components: samples
+
 ; Include files
-Source: "..\..\include\*"; DestDir: "{app}\include"
+Source: "..\..\include\*"; DestDir: "{app}\include"; Flags: recursesubdirs
 
 ; dAssimp
 Source: "..\..\port\dAssimp\*"; DestDir: "{app}\port\D"; Flags: recursesubdirs; Components: dassimp

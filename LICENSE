@@ -1,5 +1,7 @@
+Open Asset Import Library (Assimp)
 
-Copyright (c) 2006-2008, ASSIMP Development Team
+
+Copyright (c) 2006-2010, Assimp Development Team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms, 
@@ -34,10 +36,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-----------------------------------------------------------------------
 AN EXCEPTION applies to all files in the ./test/models subfolder.
 These are 3d models for testing purposes, from various free sources
 on the internet. They are - unless otherwise stated - copyright of
 their respective creators. For a specific 3d model, see 
-<model>.source.txt for more legal information.
-----------------------------------------------------------------------
+<model>.source.txt for more legal information. If you're such a 
+copyright holder and you believe we credited you inproperly or you 
+don't want your files to appear in our repository, contact us.
+

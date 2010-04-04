@@ -15,6 +15,8 @@ LicenseFile=License.rtf
 OutputBaseFileName=assimp-sdk-1.1rc-setup
 VersionInfoVersion=1.1.0.0
 VersionInfoTextVersion=1.1rc
+VersionInfoCompany=Assimp Development Team
+ArchitecturesInstallIn64BitMode=x64
 
 [Types]
 Name: "full"; Description: "Full installation"
@@ -33,7 +35,17 @@ Name: "dassimp"; Description: "D Bindings"; Types: full
 ;Name: "vc8"; Description: "VC8 project files"; Types: full
 ;Name: "vc9"; Description: "VC9 project files"; Types: full
 
+[Run]
+Filename: "{app}\stub\vcredist_x86.exe"; StatusMsg: "Installing VS2005 SP1 redistributable package (32 Bit)"; Check: not IsWin64
+Filename: "{app}\stub\vcredist_x64.exe"; StatusMsg: "Installing VS2005 SP1 redistributable package (64 Bit)"; Check: IsWin64
+
 [Files]
+
+Source: "readme_installer.txt"; DestDir: "{app}"; Flags: isreadme
+
+; Installer stub
+Source: "vcredist_x86.exe"; DestDir: "{app}\stub\"; Check: not IsWin64
+Source: "vcredist_x64.exe"; DestDir: "{app}\stub\"; Check: IsWin64
 
 ; Common stuff
 Source: "..\..\CREDITS"; DestDir: "{app}"
@@ -86,4 +98,5 @@ Source: "..\..\test\models\*"; DestDir: "{app}\test\models"; Flags: recursesubdi
 [Icons]
 Name: "{group}\Assimp Manual"; Filename: "{app}\doc\AssimpDoc.chm" ; Components: help
 Name: "{group}\Assimp Command Line Manual"; Filename: "{app}\doc\AssimpCmdDoc.chm"; Components: help
-Name: "{group}\AssimpView"; Filename: "{app}\bin\x86\assimp_view.exe"; Components: tools
+Name: "{group}\AssimpView"; Filename: "{app}\bin\x64\assimp_view.exe"; Components: tools; Check: IsWin64
+Name: "{group}\AssimpView"; Filename: "{app}\bin\x86\assimp_view.exe"; Components: tools; Check: not IsWin64

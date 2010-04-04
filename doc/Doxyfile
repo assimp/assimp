@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = Assimp
-PROJECT_NUMBER         = r590
+PROJECT_NUMBER         = "v1.1 (April 2010)"
 OUTPUT_DIRECTORY       = 
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
@@ -172,7 +172,7 @@ DOCSET_FEEDNAME        = "Doxygen generated docs"
 DOCSET_BUNDLE_ID       = org.doxygen.Project
 GENERATE_HTMLHELP      = YES
 CHM_FILE               = AssimpDoc.chm
-HHC_LOCATION           = "C:/Program Files/HTML Help Workshop/hhc.exe"
+HHC_LOCATION           = "C:\Program Files (x86)\HTML Help Workshop/hhc.exe"
 GENERATE_CHI           = NO
 CHM_INDEX_ENCODING     = 
 BINARY_TOC             = NO

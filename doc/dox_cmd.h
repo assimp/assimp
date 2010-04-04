@@ -46,6 +46,14 @@ The following commands are available:
     <td><b>@link extract extract @endlink</b></td>
     <td>Extract an embedded texture image</td>
   </tr>
+   <tr>
+    <td><b>@link iinfo info @endlink</b></td>
+    <td>Load a model and print basic statistics</td>
+  </tr>
+   <tr>
+    <td><b>@link cmpdump cmpdump @endlink</b></td>
+    <td>Regression checking tool</td>
+  </tr>
 </table>
 
 If you use assimp's command line frequently, consider adding assimp to your PATH
@@ -66,6 +74,73 @@ Display the version/revision of Assimp used.
 Display a really helpful text.
  */
 
+//----------------------------------------------------------------------------------------------
+// ASSIMP INFO
+
+/**
+@page iinfo 'info'-Command
+
+Load a model file and print basic statistics. Full postprocessing is applied unless the <tt>-r</tt> switch is specified. Sample output (<tt>assimp info ./test/models/3DS/mar_rifle.3ds</tt>):
+
+@verbatim
+Launching model import ...           OK
+Validating postprocessing flags ...  OK
+Importing file ...                   OK
+   import took approx. 0.02400 seconds
+
+Memory consumption: 69444 B
+Nodes:              2
+Maximum depth       2
+Meshes:             1
+Animations:         0
+Textures (embed.):  0
+Materials:          1
+Cameras:            0
+Lights:             0
+Vertices:           843
+Faces:              572
+Bones:              0
+Animation Channels: 0
+Primitive Types:    triangles
+Average faces/mesh  572
+Average verts/mesh  843
+Minimum point      (-3.522588 -11.573204 -40.340359)
+Maximum point      (3.522622 30.196556 75.941292)
+Center point       (0.000017 9.311676 17.800467)
+
+Named Materials:
+    'mat1'
+
+Texture Refs:
+    'm_rifl.bmp'
+
+Node hierarchy:
+'<3DSRoot>', meshes: 0
+-- 'm_rifle', meshes: 1
+<--
+@endverbatim
+
+<h3>Syntax:</h3>
+
+@code
+assimp info file [-r]
+@endcode
+
+
+<h3>Parameters:</h3>
+
+<p>
+<tt>
+file<br></tt><br>
+Required. Input file.
+</p>
+<p>
+<tt>
+-r</tt><br>
+Optional. Don't perform any postprocessing. The long form of this parameter is <tt>--raw</tt>.
+</p>
+
+*/
 //----------------------------------------------------------------------------------------------
 // ASSIMP CMPDUMP
 

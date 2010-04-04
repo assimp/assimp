@@ -51,8 +51,8 @@ import assimp.api;
 import tango.io.Stdout;
 import tango.sys.SharedLib;
 
-const uint ASSIMP_BINDINGS_MAJOR = 0;
-const uint ASSIMP_BINDINGS_MINOR = 5;
+const uint ASSIMP_BINDINGS_MAJOR = 1;
+const uint ASSIMP_BINDINGS_MINOR = 1;
 
 /**
  * Loader class for dynamically loading the Assimp library.

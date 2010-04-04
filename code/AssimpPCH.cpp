@@ -25,13 +25,13 @@ ASSIMP_API const char*  aiGetLegalString  ()	{
 // ------------------------------------------------------------------------------------------------
 // Get Assimp minor version
 ASSIMP_API unsigned int aiGetVersionMinor ()	{
-	return 5;
+	return 1;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Get Assimp major version
 ASSIMP_API unsigned int aiGetVersionMajor ()	{
-	return 0;
+	return 1;
 }
 
 // ------------------------------------------------------------------------------------------------

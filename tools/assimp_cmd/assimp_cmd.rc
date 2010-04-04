@@ -42,8 +42,8 @@ IDI_ASSIMP_VIEW         ICON                    "../shared/assimp_tools_icon.ico
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,SVNRevision,0
- PRODUCTVERSION 1,0,SVNRevision,1
+ FILEVERSION 1,1,SVNRevision,0
+ PRODUCTVERSION 1,1,SVNRevision,1
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -60,12 +60,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "ASSIMP Development Team"
             VALUE "FileDescription", "ASSIMP Command-line Tools"
-            VALUE "FileVersion", "1, 0, SVNRevision, 0"
+            VALUE "FileVersion", "1, 1, SVNRevision, 0"
             VALUE "InternalName", "assimp_view"
             VALUE "LegalCopyright", "Licensed under the LGPL"
-            VALUE "OriginalFilename", "assimp_cmd32.exe"
+            VALUE "OriginalFilename", "assimp.exe"
             VALUE "ProductName", "ASSIMP Command-line Tools"
-            VALUE "ProductVersion", "1, 0, SVNRevision, 0"
+            VALUE "ProductVersion", "1, 1, SVNRevision, 0"
         END
     END
     BLOCK "VarFileInfo"

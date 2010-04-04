@@ -50,7 +50,10 @@ Source: "vcredist_x64.exe"; DestDir: "{app}\stub\"; Check: IsWin64
 ; Common stuff
 Source: "..\..\CREDITS"; DestDir: "{app}"
 Source: "..\..\LICENSE"; DestDir: "{app}"
+Source: "..\..\README"; DestDir: "{app}"
 Source: "WEB"; DestDir: "{app}"
+
+Source: "..\..\scripts\*"; DestDir: "{app}\scripts"; Flags: recursesubdirs
 
 ; x86 binaries
 Source: "..\..\bin\assimp_release-dll_Win32\Assimp32.dll"; DestDir: "{app}\bin\x86"
@@ -85,6 +88,7 @@ Source: "..\..\port\PyAssimp\*"; DestDir: "{app}\port\Python"; Excludes: "*.pyc,
 
 ; Test repository
 Source: "..\..\test\models\*"; DestDir: "{app}\test\models"; Flags: recursesubdirs; Components: test
+Source: "..\..\test\regression\*"; DestDir: "{app}\test\regression"; Flags: recursesubdirs; Components: test
 
 ; Source Code & Workspaces
 ;Source: "..\..\code\*"; Excludes: "*.o"; DestDir: "{app}\code"; Flags: recursesubdirs; Components: wsource

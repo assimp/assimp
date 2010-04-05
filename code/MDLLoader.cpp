@@ -1922,6 +1922,7 @@ void MDLImporter::JoinSkins_3DGS_MDL7(
 void MDLImporter::InternReadFile_HL2( )
 {
 	//const MDL::Header_HL2* pcHeader = (const MDL::Header_HL2*)this->mBuffer;
+	throw DeadlyImportError("HL2 MDLs are not implemented");
 }
 
 #endif // !! ASSIMP_BUILD_NO_MDL_IMPORTER

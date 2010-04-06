@@ -938,8 +938,9 @@ public:
 
 	~chunk_guard() {
 		// don't do anything if the size is not given
-		nfo.size != static_cast<unsigned int>(-1) ? reader.IncPtr(static_cast<int>(nfo.size)-
-			reader.GetCurrentPos()+cur) : 0;
+		if(nfo.size != static_cast<unsigned int>(-1)) {
+			reader.IncPtr(static_cast<int>(nfo.size)-reader.GetCurrentPos()+cur);
+		}
 	}
 
 private:

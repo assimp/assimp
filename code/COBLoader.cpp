@@ -152,22 +152,22 @@ void COBImporter::InternReadFile( const std::string& pFile,
 
 	// sort faces by material indices
 	for_each(boost::shared_ptr< Node >& n,scene.nodes) {
-		try {
-			Mesh& mesh = dynamic_cast<Mesh&>(*n.get());
+		if (n->type == Node::TYPE_MESH) {
+			Mesh& mesh = (Mesh&)(*n.get());
 			for_each(Face& f,mesh.faces) {
 				mesh.temp_map[f.material].push_back(&f);
 			}
-		} catch (std::bad_cast&) {}
+		} 
 	}
 
 	// count meshes
 	for_each(boost::shared_ptr< Node >& n,scene.nodes) {
-		try {
-			Mesh& mesh = dynamic_cast<Mesh&>(*n.get());
+		if (n->type == Node::TYPE_MESH) {
+			Mesh& mesh = (Mesh&)(*n.get());
 			if (mesh.vertex_positions.size() && mesh.texture_coords.size()) {
 				pScene->mNumMeshes += mesh.temp_map.size();
 			}
-		} catch (std::bad_cast&) {}
+		} 
 	}
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes]();
 	pScene->mMaterials = new aiMaterial*[pScene->mNumMeshes]();
@@ -228,7 +228,7 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
 	// Note to everybody believing Voodoo is appropriate here:
 	// I know polymorphism, run as fast as you can ;-)
 	if (Node::TYPE_MESH == root.type) {
-		const Mesh& ndmesh = dynamic_cast<const Mesh&>(root);
+		const Mesh& ndmesh = (const Mesh&)(root);
 		if (ndmesh.vertex_positions.size() && ndmesh.texture_coords.size()) {
 
 			typedef std::pair<unsigned int,Mesh::FaceRefList> Entry;
@@ -349,7 +349,7 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
 		}
 	}
 	else if (Node::TYPE_LIGHT == root.type) {
-		const Light& ndlight = dynamic_cast<const Light&>(root);
+		const Light& ndlight = (const Light&)(root);
 		aiLight* outlight = fill->mLights[fill->mNumLights++] = new aiLight();
 		
 		outlight->mName.Set(ndlight.name);
@@ -362,7 +362,7 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
 		outlight->mType = ndlight.ltype==Light::SPOT ? aiLightSource_SPOT : aiLightSource_DIRECTIONAL;
 	}
 	else if (Node::TYPE_CAMERA == root.type) {
-		const Camera& ndcam = dynamic_cast<const Camera&>(root);
+		const Camera& ndcam = (const Camera&)(root);
 		aiCamera* outcam = fill->mCameras[fill->mNumCameras++] = new aiCamera();
 
 		outcam->mName.Set(ndcam.name);
@@ -659,7 +659,7 @@ void COBImporter::ReadLght_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 	}
 
 	out.nodes.push_back(boost::shared_ptr<Light>(new Light()));
-	Light& msh = dynamic_cast<Light&>(*out.nodes.back().get());
+	Light& msh = (Light&)(*out.nodes.back().get());
 	msh = nfo;
 
 	ReadBasicNodeInfo_Ascii(msh,++splitter,nfo);
@@ -715,7 +715,7 @@ void COBImporter::ReadCame_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 	}
 
 	out.nodes.push_back(boost::shared_ptr<Camera>(new Camera()));
-	Camera& msh = dynamic_cast<Camera&>(*out.nodes.back().get());
+	Camera& msh = (Camera&)(*out.nodes.back().get());
 	msh = nfo;
 
 	ReadBasicNodeInfo_Ascii(msh,++splitter,nfo);
@@ -733,7 +733,7 @@ void COBImporter::ReadBone_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 	}
 
 	out.nodes.push_back(boost::shared_ptr<Bone>(new Bone()));
-	Bone& msh = dynamic_cast<Bone&>(*out.nodes.back().get());
+	Bone& msh = (Bone&)(*out.nodes.back().get());
 	msh = nfo;
 
 	ReadBasicNodeInfo_Ascii(msh,++splitter,nfo);
@@ -749,7 +749,7 @@ void COBImporter::ReadGrou_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 	}
 
 	out.nodes.push_back(boost::shared_ptr<Group>(new Group()));
-	Group& msh = dynamic_cast<Group&>(*out.nodes.back().get());
+	Group& msh = (Group&)(*out.nodes.back().get());
 	msh = nfo;
 
 	ReadBasicNodeInfo_Ascii(msh,++splitter,nfo);
@@ -763,7 +763,7 @@ void COBImporter::ReadPolH_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 	}
 
 	out.nodes.push_back(boost::shared_ptr<Mesh>(new Mesh()));
-	Mesh& msh = dynamic_cast<Mesh&>(*out.nodes.back().get());
+	Mesh& msh = (Mesh&)(*out.nodes.back().get());
 	msh = nfo;
 
 	ReadBasicNodeInfo_Ascii(msh,++splitter,nfo);
@@ -1019,7 +1019,7 @@ void COBImporter::ReadPolH_Binary(COB::Scene& out, StreamReaderLE& reader, const
 	const chunk_guard cn(nfo,reader);
 
 	out.nodes.push_back(boost::shared_ptr<Mesh>(new Mesh()));
-	Mesh& msh = dynamic_cast<Mesh&>(*out.nodes.back().get());
+	Mesh& msh = (Mesh&)(*out.nodes.back().get());
 	msh = nfo;
 
 	ReadBasicNodeInfo_Binary(msh,reader,nfo);
@@ -1209,7 +1209,7 @@ void COBImporter::ReadCame_Binary(COB::Scene& out, StreamReaderLE& reader, const
 	const chunk_guard cn(nfo,reader);
 
 	out.nodes.push_back(boost::shared_ptr<Camera>(new Camera()));
-	Camera& msh = dynamic_cast<Camera&>(*out.nodes.back().get());
+	Camera& msh = (Camera&)(*out.nodes.back().get());
 	msh = nfo;
 
 	ReadBasicNodeInfo_Binary(msh,reader,nfo);
@@ -1232,7 +1232,7 @@ void COBImporter::ReadLght_Binary(COB::Scene& out, StreamReaderLE& reader, const
 	const chunk_guard cn(nfo,reader);
 
 	out.nodes.push_back(boost::shared_ptr<Light>(new Light()));
-	Light& msh = dynamic_cast<Light&>(*out.nodes.back().get());
+	Light& msh = (Light&)(*out.nodes.back().get());
 	msh = nfo;
 
 	ReadBasicNodeInfo_Binary(msh,reader,nfo);
@@ -1248,7 +1248,7 @@ void COBImporter::ReadGrou_Binary(COB::Scene& out, StreamReaderLE& reader, const
 	const chunk_guard cn(nfo,reader);
 
 	out.nodes.push_back(boost::shared_ptr<Group>(new Group()));
-	Group& msh = dynamic_cast<Group&>(*out.nodes.back().get());
+	Group& msh = (Group&)(*out.nodes.back().get());
 	msh = nfo;
 
 	ReadBasicNodeInfo_Binary(msh,reader,nfo);

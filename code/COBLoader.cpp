@@ -292,9 +292,8 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
 
 					MaterialHelper* mat = new MaterialHelper();
 					fill->mMaterials[fill->mNumMaterials++] = mat;
-					aiString s;
-					s.Set(min->type);
 
+					const aiString s(format("#mat_")<<fill->mNumMeshes<<"_"<<min->matnum);
 					mat->AddProperty(&s,AI_MATKEY_NAME);
 
 					if(int tmp = ndmesh.draw_flags & Mesh::WIRED ? 1 : 0) {

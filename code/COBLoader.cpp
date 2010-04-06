@@ -335,9 +335,15 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
 					mat->AddProperty(&c,1,AI_MATKEY_COLOR_AMBIENT);
 
 					// convert textures if some exist.
-					min->tex_color ? ConvertTexture(min->tex_color,mat,aiTextureType_DIFFUSE) : 0;
-					min->tex_env   ? ConvertTexture(min->tex_env  ,mat,aiTextureType_UNKNOWN) : 0;
-					min->tex_bump  ? ConvertTexture(min->tex_bump ,mat,aiTextureType_HEIGHT ) : 0;
+					if(min->tex_color) {
+						ConvertTexture(min->tex_color,mat,aiTextureType_DIFFUSE);
+					}
+					if(min->tex_env) {
+						ConvertTexture(min->tex_env  ,mat,aiTextureType_UNKNOWN);
+					}
+					if(min->tex_bump) {
+						ConvertTexture(min->tex_bump ,mat,aiTextureType_HEIGHT);
+					}
 				}
 			}
 		}

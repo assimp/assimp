@@ -127,6 +127,10 @@ public:
 		return ptr;
 	}
 
+	inline operator bool () const {
+		return ptr != NULL;
+	}
+
 	inline void reset (T* t = 0)	{
 		ctr = ctr->decref(ptr);
 		ptr = t;

@@ -211,6 +211,14 @@ void COBImporter::InternReadFile( const std::string& pFile,
 }
 
 // ------------------------------------------------------------------------------------------------
+void ConvertTexture(boost::shared_ptr< Texture > tex, MaterialHelper* out, aiTextureType type)
+{
+	const aiString path( tex->path );
+	out->AddProperty(&path,AI_MATKEY_TEXTURE(type,0));
+	out->AddProperty(&tex->transform,sizeof(aiUVTransform)/sizeof(float),AI_MATKEY_UVTRANSFORM(type,0));
+}
+
+// ------------------------------------------------------------------------------------------------
 aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill)
 {
 	aiNode* nd = new aiNode();
@@ -325,15 +333,33 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
 
 					c = aiColor3D(min->rgb)*min->ka;
 					mat->AddProperty(&c,1,AI_MATKEY_COLOR_AMBIENT);
+
+					// convert textures if some exist.
+					min->tex_color ? ConvertTexture(min->tex_color,mat,aiTextureType_DIFFUSE) : 0;
+					min->tex_env   ? ConvertTexture(min->tex_env  ,mat,aiTextureType_UNKNOWN) : 0;
+					min->tex_bump  ? ConvertTexture(min->tex_bump ,mat,aiTextureType_HEIGHT ) : 0;
 				}
 			}
 		}
 	}
 	else if (Node::TYPE_LIGHT == root.type) {
 		const Light& ndlight = dynamic_cast<const Light&>(root);
+		aiLight* outlight = fill->mLights[fill->mNumLights++] = new aiLight();
+		
+		outlight->mName.Set(ndlight.name);
+		outlight->mColorDiffuse = outlight->mColorAmbient = outlight->mColorSpecular = ndlight.color;
+
+		outlight->mAngleOuterCone = AI_DEG_TO_RAD(ndlight.angle);
+		outlight->mAngleInnerCone = AI_DEG_TO_RAD(ndlight.inner_angle);
+
+		// XXX
+		outlight->mType = ndlight.ltype==Light::SPOT ? aiLightSource_SPOT : aiLightSource_DIRECTIONAL;
 	}
 	else if (Node::TYPE_CAMERA == root.type) {
 		const Camera& ndcam = dynamic_cast<const Camera&>(root);
+		aiCamera* outcam = fill->mCameras[fill->mNumCameras++] = new aiCamera();
+
+		outcam->mName.Set(ndcam.name);
 	}
 
 	// add meshes
@@ -892,6 +918,32 @@ void COBImporter::UnsupportedChunk_Binary( StreamReaderLE& reader, const ChunkIn
 }
 
 // ------------------------------------------------------------------------------------------------
+// tiny utility guard to aid me at staying within chunk boundaries.
+class chunk_guard {
+
+public:
+
+	chunk_guard(const COB::ChunkInfo& nfo, StreamReaderLE& reader)
+		: nfo(nfo)
+		, reader(reader)
+		, cur(reader.GetCurrentPos())
+	{
+	}
+
+	~chunk_guard() {
+		// don't do anything if the size is not given
+		nfo.size != static_cast<unsigned int>(-1) ? reader.IncPtr(static_cast<int>(nfo.size)-
+			reader.GetCurrentPos()+cur) : 0;
+	}
+
+private:
+
+	const COB::ChunkInfo& nfo;
+	StreamReaderLE& reader;
+	long cur;
+};
+
+// ------------------------------------------------------------------------------------------------
 void COBImporter::ReadBinaryFile(Scene& out, StreamReaderLE* reader)
 {
 	while(1) {
@@ -957,6 +1009,7 @@ void COBImporter::ReadPolH_Binary(COB::Scene& out, StreamReaderLE& reader, const
 	if(nfo.version > 8) {
 		return UnsupportedChunk_Binary(reader,nfo,"PolH");
 	}
+	const chunk_guard cn(nfo,reader);
 
 	out.nodes.push_back(boost::shared_ptr<Mesh>(new Mesh()));
 	Mesh& msh = dynamic_cast<Mesh&>(*out.nodes.back().get());
@@ -1028,6 +1081,8 @@ void COBImporter::ReadBitM_Binary(COB::Scene& out, StreamReaderLE& reader, const
 		return UnsupportedChunk_Binary(reader,nfo,"BitM");
 	}
 
+	const chunk_guard cn(nfo,reader);
+
 	const uint32_t len = reader.GetI4();
 	reader.IncPtr(len);
 
@@ -1041,6 +1096,8 @@ void COBImporter::ReadMat1_Binary(COB::Scene& out, StreamReaderLE& reader, const
 	if(nfo.version > 8) {
 		return UnsupportedChunk_Binary(reader,nfo,"Mat1");
 	}
+
+	const chunk_guard cn(nfo,reader);
 
 	out.materials.push_back(Material());
 	Material& mat = out.materials.back();
@@ -1142,6 +1199,8 @@ void COBImporter::ReadCame_Binary(COB::Scene& out, StreamReaderLE& reader, const
 		return UnsupportedChunk_Binary(reader,nfo,"Came");
 	}
 
+	const chunk_guard cn(nfo,reader);
+
 	out.nodes.push_back(boost::shared_ptr<Camera>(new Camera()));
 	Camera& msh = dynamic_cast<Camera&>(*out.nodes.back().get());
 	msh = nfo;
@@ -1163,6 +1222,8 @@ void COBImporter::ReadLght_Binary(COB::Scene& out, StreamReaderLE& reader, const
 		return UnsupportedChunk_Binary(reader,nfo,"Lght");
 	}
 
+	const chunk_guard cn(nfo,reader);
+
 	out.nodes.push_back(boost::shared_ptr<Light>(new Light()));
 	Light& msh = dynamic_cast<Light&>(*out.nodes.back().get());
 	msh = nfo;
@@ -1177,6 +1238,8 @@ void COBImporter::ReadGrou_Binary(COB::Scene& out, StreamReaderLE& reader, const
 		return UnsupportedChunk_Binary(reader,nfo,"Grou");
 	}
 
+	const chunk_guard cn(nfo,reader);
+
 	out.nodes.push_back(boost::shared_ptr<Group>(new Group()));
 	Group& msh = dynamic_cast<Group&>(*out.nodes.back().get());
 	msh = nfo;
@@ -1190,6 +1253,8 @@ void COBImporter::ReadUnit_Binary(COB::Scene& out, StreamReaderLE& reader, const
 	 if(nfo.version > 1) {
 		return UnsupportedChunk_Binary(reader,nfo,"Unit");
 	}
+
+	 const chunk_guard cn(nfo,reader);
 
 	// parent chunks preceede their childs, so we should have the
 	// corresponding chunk already.

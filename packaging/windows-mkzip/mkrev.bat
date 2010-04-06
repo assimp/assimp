@@ -17,7 +17,7 @@ echo #define SVNRevision > tmpfile.txt
 
 if exist ..\..\revision.h del /q ..\..\revision.h
 for /f "delims=" %%l in (tmpfile.txt) Do (
-	for /f "delims=M" %%r in ("%addtext%") Do (
+	for /f "delims=M:" %%r in ("%addtext%") Do (
       		echo %%l %%r >> ..\..\revision.h
 	)
 )

@@ -817,7 +817,7 @@ void COBImporter::ReadPolH_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 					ThrowException("Expected Face line");
 				}
 
-				std::back_inserter(msh.faces) = Face();
+				msh.faces.push_back(Face());
 				Face& face = msh.faces.back();
 
 				face.indices.resize(strtol10(splitter[2]));

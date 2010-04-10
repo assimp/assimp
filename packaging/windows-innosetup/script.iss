@@ -24,8 +24,8 @@ Name: "compact"; Description: "Compact installation, no test models or language 
 Name: "custom"; Description: "Custom installation"; Flags: iscustom
 
 [Components]
-Name: "main"; Description: "Main Files"; Types: full compact custom; Flags: fixed
-Name: "tools"; Description: "Asset Viewer & Command Line Tools"; Types: full compact
+Name: "main"; Description: "Main Files (32 and 64 Bit)"; Types: full compact custom; Flags: fixed
+Name: "tools"; Description: "Asset Viewer & Command Line Tools (32 and 64 Bit)"; Types: full compact
 Name: "help"; Description: "Help Files"; Types: full compact
 Name: "samples"; Description: "Samples"; Types: full
 ;Name: "wsource"; Description: "Source Code"; Types: full
@@ -58,11 +58,15 @@ Source: "..\..\scripts\*"; DestDir: "{app}\scripts"; Flags: recursesubdirs
 ; x86 binaries
 Source: "..\..\bin\assimp_release-dll_Win32\Assimp32.dll"; DestDir: "{app}\bin\x86"
 Source: "..\..\bin\assimpview_release-dll_Win32\assimp_view.exe"; DestDir: "{app}\bin\x86"; Components: tools
+Source: "D3DCompiler_42.dll"; DestDir: "{app}\bin\x86"; Components: tools
+Source: "D3DX9_42.dll"; DestDir: "{app}\bin\x86"; Components: tools
 Source: "..\..\bin\assimpcmd_release-dll_Win32\assimp.exe"; DestDir: "{app}\bin\x86"; Components: tools
 
 ; x64 binaries
 Source: "..\..\bin\assimp_release-dll_x64\Assimp64.dll"; DestDir: "{app}\bin\x64"
 Source: "..\..\bin\assimpview_release-dll_x64\assimp_view.exe"; DestDir: "{app}\bin\x64"; Components: tools
+Source: "D3DCompiler_42_x64.dll"; DestDir: "{app}\bin\x64"; DestName: "D3DCompiler_42.dll"; Components: tools
+Source: "D3DX9_42_x64.dll"; DestDir: "{app}\bin\x64"; DestName: "D3DX9_42.dll"; Components: tools
 Source: "..\..\bin\assimpcmd_release-dll_x64\assimp.exe"; DestDir: "{app}\bin\x64"; Components: tools
 
 ; Documentation

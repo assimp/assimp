@@ -142,7 +142,7 @@ mixed the runtimes. Recheck the project configuration (project properties -&gt; 
 static runtimes (Multithreaded / Multithreaded Debug) or dynamic runtimes (Multithreaded DLL / Multithreaded Debug DLL).
 Choose the ASSIMP linker lib accordingly. 
 <br>
-Please don't forget to also read the @link assimp_stl section on MSVC and the STL @endlink 
+Please don't forget to also read the @ref assimp_stl section on MSVC and the STL.
 
 @section assimp_stl Microsoft Compilers & STL
 
@@ -171,7 +171,7 @@ the vc project file.
 your application uses the same STL settings or not.
 <br><br>
 Another option is to build against a different STL implementation, for example STlport. There's a special 
-@link assimp_stlport section @endlink describing how to achieve this.
+@ref assimp_stlport section which describes how to achieve this.
 
 
 @section install_own Building the library from scratch
@@ -222,7 +222,7 @@ your compiler's list of predefined macros:
 If you're working with the provided solutions for Visual Studio use the <i>-noboost</i> build configs. <br>
 
 <b>ASSIMP_BUILD_BOOST_WORKAROUND</b> implies <b>ASSIMP_BUILD_SINGLETHREADED</b>. <br>
-See the @link assimp_st next @endlink section
+See the @ref assimp_st section
 for more details.
 
 
@@ -322,9 +322,8 @@ bool DoTheImportThing( const std::string& pFile)
 }
 @endcode
 
-What exactly is read from the files and how you interpret it is described at the @link data Data 
-Structures page. @endlink The post processing steps that the ASSIMP library can apply to the
-imported data are listed at #aiPostProcessSteps. See the @link pp Post proccessing page @endlink for more details.
+What exactly is read from the files and how you interpret it is described at the @ref data page. @endlink The post processing steps that the ASSIMP library can apply to the
+imported data are listed at #aiPostProcessSteps. See the @ref pp Post proccessing page for more details.
 
 Note that the aiScene data structure returned is declared 'const'. Yes, you can get rid of 
 these 5 letters with a simple cast. Yes, you may do that. No, it's not recommended (and it's 
@@ -469,7 +468,7 @@ following prerequisites are fulfilled:
 <li> Custom log streams or logger replacements have to be thread-safe, too.</li>
 </ul>
 
-See the @link assimp_st Single-threaded build section @endlink to learn how to build a lightweight variant
+See the @ref assimp_st section @endlink to learn how to build a lightweight variant
 of ASSIMP which is not thread-safe and does not utilize multiple threads for loading.
 
 @section  logging Logging 
@@ -1187,7 +1186,7 @@ All material key constants start with 'AI_MATKEY' (it's an ugly macro for histor
     <td>int</td>
     <td>n/a</td>
 	<td>Defines the UV channel to be used as input mapping coordinates for sampling the n'th texture on the stack 't'. All meshes assigned to this material share the same UV channel setup</td>
-	<td>Presence of this key implies <tt>MAPPING(t,n)</tt> to be #aiTextureMapping_UV</td>
+	<td>Presence of this key implies <tt>MAPPING(t,n)</tt> to be #aiTextureMapping_UV. See @ref uvwsrc for more details. </td>
   </tr>
 
   <tr>
@@ -1293,6 +1292,27 @@ aiGetMaterialColor(mat,AI_MATKEY_COLOR_DIFFUSE,&color);
 
 @endcode
 
+@section uvwsrc How to map UV channels to textures (MATKEY_UVWSRC)
+
+The MATKEY_UVWSRC property is only present if the source format doesn't specify an explicit mapping from
+textures to UV channels. Many formats don't do this and ASSIMP is not aware of a perfect rule either.
+
+Your handling of UV channels needs to be flexible therefore. Our recommendation is to use logic like this
+to handle most cases properly:
+
+@verbatim
+have only one uv channel?
+   assign channel 0 to all textures and break
+
+for all textures
+   have uvwsrc for this texture?
+      assign channel specified in uvwsrc
+   else
+      assign channels in ascending order for all texture stacks, 
+	    i.e. diffuse1 gets channel 1, opacity0 gets channel 0.
+
+@endverbatim
+
 @section pseudo Pseudo Code Listing
 
 For completeness, the following is a very rough pseudo-code sample showing how to evaluate Assimp materials in your 
@@ -1300,8 +1320,6 @@ shading pipeline. You'll probably want to limit your handling of all those mater
 (for example most 3d engines won't support highly complex multi-layer materials, but many 3d modellers do).
 
 Also note that this sample is targeted at a (shader-based) rendering pipeline for real time graphics.
-
-INCOMPLETE! WIP!
 
 @code
 

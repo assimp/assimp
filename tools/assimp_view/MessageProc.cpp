@@ -2214,7 +2214,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	// initialise the default logger if neccessary
 	Assimp::DefaultLogger::create("",Assimp::Logger::VERBOSE);
-	Assimp::DefaultLogger::get()->attachStream((Assimp::LogStream*)&CLogWindow::Instance().pcStream,
+
+	CLogWindow::Instance().pcStream = new CMyLogStream();
+	Assimp::DefaultLogger::get()->attachStream(CLogWindow::Instance().pcStream,
 		Assimp::DefaultLogger::DEBUGGING | Assimp::DefaultLogger::INFO |
 		Assimp::DefaultLogger::ERR | Assimp::DefaultLogger::WARN);
 

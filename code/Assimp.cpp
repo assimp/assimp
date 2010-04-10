@@ -486,7 +486,9 @@ ASSIMP_API aiReturn aiDetachLogStream( const aiLogStream* stream)
 	if( it == gActiveLogStreams.end())	{
 		return AI_FAILURE;
 	}
+	DefaultLogger::get()->detatchStream( it->second );
 	delete it->second;
+
 	gActiveLogStreams.erase( it);
 
 	if (gActiveLogStreams.empty()) {
@@ -504,6 +506,7 @@ ASSIMP_API void aiDetachAllLogStreams(void)
 	boost::mutex::scoped_lock lock(gLogStreamMutex);
 #endif
 	for (LogStreamMap::iterator it = gActiveLogStreams.begin(); it != gActiveLogStreams.end(); ++it) {
+		DefaultLogger::get()->detatchStream( it->second );
 		delete it->second;
 	}
 	gActiveLogStreams.clear();

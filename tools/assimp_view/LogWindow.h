@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *         log window.
 */
 //-------------------------------------------------------------------------------
-class CMyLogStream : Assimp::LogStream
+class CMyLogStream : public Assimp::LogStream
 {
 public:
 	/**	@brief	Implementation of the abstract method	*/
@@ -122,7 +122,7 @@ private:
 
 public:
 	// associated log stream
-	CMyLogStream pcStream;
+	CMyLogStream* pcStream;
 	};
 
 #endif // AV_LOG_DISPLA

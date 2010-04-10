@@ -82,7 +82,7 @@ struct LogStreamInfo
 	// Destructor
 	~LogStreamInfo()
 	{
-		// empty
+		delete m_pStream;
 	}
 };
 
@@ -237,7 +237,7 @@ void DefaultLogger::kill()
 	boost::mutex::scoped_lock lock(loggerMutex);
 #endif
 
-	if (m_pLogger != &s_pNullLogger)return;
+	if (m_pLogger == &s_pNullLogger)return;
 	delete m_pLogger;
 	m_pLogger = &s_pNullLogger;
 }
@@ -332,6 +332,9 @@ bool DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
 			(*it)->m_uiErrorSeverity &= ~severity;
 			if ( (*it)->m_uiErrorSeverity == 0 )
 			{
+				// don't delete the underlying stream 'cause the caller gains ownership again
+				(**it).m_pStream = NULL;
+				delete *it;
 				m_StreamArray.erase( it );
 				break;
 			}
@@ -356,8 +359,10 @@ DefaultLogger::DefaultLogger(LogSeverity severity)
 //	Destructor
 DefaultLogger::~DefaultLogger()
 {
-	for ( StreamIt it = m_StreamArray.begin(); it != m_StreamArray.end(); ++it )
+	for ( StreamIt it = m_StreamArray.begin(); it != m_StreamArray.end(); ++it ) {
+		// also frees the underlying stream, we are its owner.
 		delete *it;
+	}
 }
 
 // ----------------------------------------------------------------------------------

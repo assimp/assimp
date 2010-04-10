@@ -124,8 +124,8 @@ public:
 	/** @brief	Attach a new logstream
 	 *
 	 *  The logger takes ownership of the stream and is responsible
-	 *  for its destruction (which is done when the logger itself 
-	 *  is destroyed). Call detachStream to detach a stream and to
+	 *  for its destruction (which is done using ::delete when the logger
+	 *  itself is destroyed). Call detachStream to detach a stream and to
 	 *  gain ownership of it again.
 	 *	 @param	pStream	 Logstream to attach
 	 *  @param severity  Message filter, specified which types of log

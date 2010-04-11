@@ -78,6 +78,8 @@ SOURCE_GROUP( Boost FILES
 	BoostWorkaround/boost/format.hpp
 	BoostWorkaround/boost/scoped_array.hpp
 	BoostWorkaround/boost/scoped_ptr.hpp
+	BoostWorkaround/boost/shared_array.hpp
+	BoostWorkaround/boost/shared_ptr.hpp
 	BoostWorkaround/boost/static_assert.hpp
 	BoostWorkaround/boost/tuple/tuple.hpp
 )
@@ -681,6 +683,8 @@ ADD_LIBRARY( assimp SHARED
 	BoostWorkaround/boost/format.hpp
 	BoostWorkaround/boost/scoped_array.hpp
 	BoostWorkaround/boost/scoped_ptr.hpp
+	BoostWorkaround/boost/shared_array.hpp
+	BoostWorkaround/boost/shared_ptr.hpp
 	BoostWorkaround/boost/static_assert.hpp
 	BoostWorkaround/boost/tuple/tuple.hpp
 	${PUBLIC_HEADERS}

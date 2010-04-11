@@ -1,8 +1,8 @@
 
-#ifndef INCLUDED_AI_BOOST_SHARED_PTR
-#define INCLUDED_AI_BOOST_SHARED_PTR
+#ifndef INCLUDED_AI_BOOST_SHARED_ARRAY
+#define INCLUDED_AI_BOOST_SHARED_ARRAY
 
-#ifndef BOOST_SCOPED_PTR_HPP_INCLUDED
+#ifndef BOOST_SCOPED_ARRAY_HPP_INCLUDED
 
 // ------------------------------
 // Internal stub
@@ -30,7 +30,7 @@ namespace boost {
 				}
 				if (--cnt <= 0) {
 					delete this;
-					delete pt;
+					delete[] pt;
 				}
 				return NULL;
 			}
@@ -73,17 +73,17 @@ namespace boost {
 	}
 
 // ------------------------------
-// Small replacement for boost::shared_ptr, not threadsafe because no
+// Small replacement for boost::shared_array, not threadsafe because no
 // atomic reference counter is in use.
 // ------------------------------
 template <class T>
-class shared_ptr
+class shared_array
 {
-	template <typename TT> friend class shared_ptr;
+	template <typename TT> friend class shared_array;
 
-	template<class TT> friend bool operator== (const shared_ptr<TT>& a, const shared_ptr<TT>& b);
-	template<class TT> friend bool operator!= (const shared_ptr<TT>& a, const shared_ptr<TT>& b);
-	template<class TT> friend bool operator<  (const shared_ptr<TT>& a, const shared_ptr<TT>& b);
+	template<class TT> friend bool operator== (const shared_array<TT>& a, const shared_array<TT>& b);
+	template<class TT> friend bool operator!= (const shared_array<TT>& a, const shared_array<TT>& b);
+	template<class TT> friend bool operator<  (const shared_array<TT>& a, const shared_array<TT>& b);
 
 public:
 
@@ -92,27 +92,27 @@ public:
 public:
 
 	// provide a default constructor
-	shared_ptr()
+	shared_array()
 		: ptr()
 		, ctr(new detail::controller())
 	{
 	}
 
 	// construction from an existing object of type T
-	explicit shared_ptr(T* _ptr)
+	explicit shared_array(T* _ptr)
 		: ptr(_ptr)
 		, ctr(new detail::controller(ptr))
 	{
 	}
 
 	template <typename Y>
-	shared_ptr(const shared_ptr<Y>& o,typename detail::is_convertible<T,Y>::result = detail::empty())
+	shared_array(const shared_array<Y>& o,typename detail::is_convertible<T,Y>::result = detail::empty())
 		: ptr(o.ptr)
 		, ctr(o.ctr->incref())
 	{
 	}
 
-	shared_ptr& operator= (const shared_ptr& r) {
+	shared_array& operator= (const shared_array& r) {
 		if(r == *this) {
 			return;
 		}
@@ -123,7 +123,7 @@ public:
 
 	// automatic destruction of the wrapped object when all
 	// references are freed.
-	~shared_ptr()	{
+	~shared_array()	{
 		ctr = ctr->decref(ptr);
 	}
 
@@ -161,7 +161,7 @@ public:
 		}
 	}
 
-	void swap(shared_ptr & b)	{
+	void swap(shared_array & b)	{
 		std::swap(ptr, b.ptr);
 		std::swap(ctr, b.ctr);
 	}
@@ -176,22 +176,22 @@ private:
 };
 
 template<class T>
-inline void swap(shared_ptr<T> & a, shared_ptr<T> & b)
+inline void swap(shared_array<T> & a, shared_array<T> & b)
 {
 	a.swap(b);
 }
 
 template<class T>
-bool operator== (const shared_ptr<T>& a, const shared_ptr<T>& b) {
+bool operator== (const shared_array<T>& a, const shared_array<T>& b) {
 	return a.ptr == b.ptr;
 }
 template<class T>
-bool operator!= (const shared_ptr<T>& a, const shared_ptr<T>& b) {
+bool operator!= (const shared_array<T>& a, const shared_array<T>& b) {
 	return a.ptr != b.ptr;
 }
 	
 template<class T>
-bool operator< (const shared_ptr<T>& a, const shared_ptr<T>& b) {
+bool operator< (const shared_array<T>& a, const shared_array<T>& b) {
 	return a.ptr < b.ptr;
 }
 
@@ -199,6 +199,6 @@ bool operator< (const shared_ptr<T>& a, const shared_ptr<T>& b) {
 } // end of namespace boost
 
 #else
-#	error "shared_ptr.h was already included"
+#	error "shared_array.h was already included"
 #endif
-#endif // INCLUDED_AI_BOOST_SCOPED_PTR
+#endif // INCLUDED_AI_BOOST_SHARED_ARRAY

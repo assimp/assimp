@@ -4,8 +4,6 @@
 
 #ifndef BOOST_SCOPED_PTR_HPP_INCLUDED
 
-#include <assert.h>
-
 namespace boost {
 
 // small replacement for boost::scoped_ptr

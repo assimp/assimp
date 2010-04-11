@@ -91,10 +91,7 @@ bool COBImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 		return true;
 	}
 
-	else if (!extension.length() || checkSig)	{
-		if (!pIOHandler) {
-			return true;
-		}
+	else if ((!extension.length() || checkSig) && pIOHandler)	{
 		const char* tokens[] = {"Caligary"};
 		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
 	}
@@ -215,7 +212,7 @@ void ConvertTexture(boost::shared_ptr< Texture > tex, MaterialHelper* out, aiTex
 {
 	const aiString path( tex->path );
 	out->AddProperty(&path,AI_MATKEY_TEXTURE(type,0));
-	out->AddProperty(&tex->transform,sizeof(aiUVTransform)/sizeof(float),AI_MATKEY_UVTRANSFORM(type,0));
+	out->AddProperty(&tex->transform,1,AI_MATKEY_UVTRANSFORM(type,0));
 }
 
 // ------------------------------------------------------------------------------------------------

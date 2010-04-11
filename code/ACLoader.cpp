@@ -396,7 +396,7 @@ void AC3DImporter::ConvertMaterial(const Object& object,
 			aiUVTransform transform;
 			transform.mScaling = object.texRepeat;
 			transform.mTranslation = object.texOffset;
-			matDest.AddProperty<float>((float*)&transform,sizeof(aiUVTransform),
+			matDest.AddProperty<float>((float*)&transform,sizeof(aiUVTransform)/sizeof(float),
 				AI_MATKEY_UVTRANSFORM_DIFFUSE(0));
 		}
 	}

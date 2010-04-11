@@ -45,19 +45,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 
-// .......................................................................................
+// ------------------------------------------------------------------------------------------------
 /* Uncomment this line to prevent Assimp from catching unknown exceptions.
  *
- * Note that any Exception except ImportErrorException may lead to 
+ * Note that any Exception except DeadlyImportError may lead to 
  * undefined behaviour -> loaders could remain in an unusable state and
  * further imports with the same Importer instance could fail/crash/burn ...
  */
-// .......................................................................................
+// ------------------------------------------------------------------------------------------------
 #define ASSIMP_CATCH_GLOBAL_EXCEPTIONS
 
-// .......................................................................................
+
+// ------------------------------------------------------------------------------------------------
 // Internal headers
-// .......................................................................................
+// ------------------------------------------------------------------------------------------------
 #include "BaseImporter.h"
 #include "BaseProcess.h"
 #include "DefaultIOStream.h"
@@ -67,10 +68,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ScenePreprocessor.h"
 #include "MemoryIOWrapper.h"
 
-// .......................................................................................
+// ------------------------------------------------------------------------------------------------
 // Importers
 // (include_new_importers_here)
-// .......................................................................................
+// ------------------------------------------------------------------------------------------------
 #ifndef AI_BUILD_NO_X_IMPORTER
 #	include "XFileImporter.h"
 #endif
@@ -168,9 +169,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include "COBLoader.h"
 #endif
 
-// .......................................................................................
-// PostProcess-Steps
-// .......................................................................................
+// ------------------------------------------------------------------------------------------------
+// Post processing-Steps
+// ------------------------------------------------------------------------------------------------
 #ifndef AI_BUILD_NO_CALCTANGENTS_PROCESS
 #	include "CalcTangentsProcess.h"
 #endif
@@ -241,13 +242,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace Assimp::Intern;
 
-// .......................................................................................
+// ------------------------------------------------------------------------------------------------
 // Intern::AllocateFromAssimpHeap serves as abstract base class. It overrides
 // new and delete (and their array counterparts) of public API classes (e.g. Logger) to
-// utilize our DLL heap
-// .......................................................................................
+// utilize our DLL heap.
+// See http://www.gotw.ca/publications/mill15.htm
+// ------------------------------------------------------------------------------------------------
 void* AllocateFromAssimpHeap::operator new ( size_t num_bytes)	{
 	return ::operator new(num_bytes);
+}
+
+void* AllocateFromAssimpHeap::operator new ( size_t num_bytes, const std::nothrow_t& )	{
+	try	{
+		return AllocateFromAssimpHeap::operator new( num_bytes );
+	}
+	catch( ... )	{
+		return NULL;
+	}
 }
 
 void AllocateFromAssimpHeap::operator delete ( void* data)	{
@@ -256,6 +267,15 @@ void AllocateFromAssimpHeap::operator delete ( void* data)	{
 
 void* AllocateFromAssimpHeap::operator new[] ( size_t num_bytes)	{
 	return ::operator new[](num_bytes);
+}
+
+void* AllocateFromAssimpHeap::operator new[] ( size_t num_bytes, const std::nothrow_t& )	{
+	try	{
+		return AllocateFromAssimpHeap::operator new[]( num_bytes );
+	}
+	catch( ... )	{
+		return NULL;
+	}
 }
 
 void AllocateFromAssimpHeap::operator delete[] ( void* data)	{

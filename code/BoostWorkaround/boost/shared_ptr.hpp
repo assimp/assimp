@@ -114,11 +114,12 @@ public:
 
 	shared_ptr& operator= (const shared_ptr& r) {
 		if(r == *this) {
-			return;
+			return *this;
 		}
 		ctr->decref(ptr);
 		ctr = r.ctr->incref();
 		ptr = r.ptr;
+		return *this;
 	}
 
 	// automatic destruction of the wrapped object when all

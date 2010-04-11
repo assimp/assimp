@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the post processing step "MakeVerboseFormat"
 */
 
-#include "../AssimpPCH.h"
+#include "AssimpPCH.h"
 #include "MakeVerboseFormat.h"
 
 using namespace Assimp;

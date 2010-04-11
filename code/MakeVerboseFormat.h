@@ -40,14 +40,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Defines a post processing step to bring a given scene
  into the verbose format that is expected by most postprocess steps. 
- This is the inverse of the "JoinIdenticalVertices" steps */
+ This is the inverse of the "JoinIdenticalVertices" step. */
 #ifndef AI_MAKEVERBOSEFORMAT_H_INC
 #define AI_MAKEVERBOSEFORMAT_H_INC
 
-#include "../BaseProcess.h"
-#include "../../include/aiMesh.h"
-namespace Assimp
-	{
+#include "BaseProcess.h"
+namespace Assimp	{
 
 // ---------------------------------------------------------------------------
 /** MakeVerboseFormatProcess: Class to convert an asset to the verbose 
@@ -57,16 +55,18 @@ namespace Assimp
  * This step has no official flag (since it wouldn't make sense to run it 
  * during import). It is intended for applications intending to modify the 
  * returned aiScene. After this step has been executed, they can execute
- * other postprocess steps on the data.
+ * other postprocess steps on the data. The code might also be useful to
+ * quickly adapt code that doesn't result in a verbose representation of
+ * the scene data.
  * The step has been added because it was required by the viewer, however
  * it has been moved to the main library since others might find it
- * useful, too.
-*/
+ * useful, too. */
 class ASSIMP_API MakeVerboseFormatProcess : public BaseProcess
 {
 	friend class Importer;
 
 protected:
+
 	/** Constructor to be privately used by Importer, or by applications
 	which know what they are doing if they modify the aiScene object */
 	MakeVerboseFormatProcess();
@@ -75,12 +75,12 @@ protected:
 	~MakeVerboseFormatProcess();
 
 public:
+
 	// -------------------------------------------------------------------
 	/** Returns whether the processing step is present in the given flag field.
 	* @param pFlags The processing flags the importer was called with. A bitwise
 	*   combination of #aiPostProcessSteps.
-	* @return true if the process is present in this flag fields, false if not.
-	*/
+	* @return true if the process is present in this flag fields, false if not */
 	bool IsActive( unsigned int /*pFlags*/ ) const 
 	{
 		// NOTE: There is no direct flag that corresponds to
@@ -91,8 +91,7 @@ public:
 	// -------------------------------------------------------------------
 	/** Executes the post processing step on the given imported data.
 	* At the moment a process is not supposed to fail.
-	* @param pScene The imported data to work at.
-	*/
+	* @param pScene The imported data to work at. */
 	void Execute( aiScene* pScene);
 
 

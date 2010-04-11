@@ -393,9 +393,9 @@ SOURCE_GROUP( XFile FILES
 )
 
 SOURCE_GROUP( Extra FILES
-	extra/MakeVerboseFormat.cpp
-	extra/MakeVerboseFormat.h
-	extra/MD4FileData.h
+	MakeVerboseFormat.cpp
+	MakeVerboseFormat.h
+	MD4FileData.h
 )
 
 SOURCE_GROUP( IrrXML FILES
@@ -633,9 +633,9 @@ ADD_LIBRARY( assimp SHARED
 	fast_atof.h
 	irrXMLWrapper.h
 	qnan.h
-	extra/MakeVerboseFormat.cpp
-	extra/MakeVerboseFormat.h
-	extra/MD4FileData.h
+	MakeVerboseFormat.cpp
+	MakeVerboseFormat.h
+	MD4FileData.h
 	../contrib/irrXML/CXMLReaderImpl.h
 	../contrib/irrXML/heapsort.h
 	../contrib/irrXML/irrArray.h

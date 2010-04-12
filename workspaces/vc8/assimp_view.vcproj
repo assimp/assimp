@@ -711,7 +711,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
+				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code;..\..\code\BoostWorkaround"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
@@ -794,7 +794,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
+				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code;..\..\code\BoostWorkaround"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
@@ -878,7 +878,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
+				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code;..\..\code\BoostWorkaround"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -961,7 +961,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code"
+				AdditionalIncludeDirectories="&quot;$(DXSDK_DIR)include&quot;;..\..\include;..\..\code;..\..\code\BoostWorkaround"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"

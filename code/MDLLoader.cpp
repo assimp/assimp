@@ -510,6 +510,8 @@ void MDLImporter::SetupMaterialProperties_3DGS_MDL5_Quake1( )
 		if (is_not_qnan(clr.r))	{
 			delete pScene->mTextures[0];
 			delete[] pScene->mTextures;
+
+			pScene->mTextures = NULL;
 			pScene->mNumTextures = 0;
 		}
 		else	{

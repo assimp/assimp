@@ -101,7 +101,8 @@ aiColor4D MDLImporter::ReplaceTextureWithColor(const aiTexture* pcTexture)
 	{
 		if (*pcTexel != *(pcTexel-1))
 		{
-			pcTexel = NULL;break;
+			pcTexel = NULL;
+			break;
 		}
 		++pcTexel;
 	}
@@ -458,7 +459,10 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char* szData,
 			delete[] pc;
 		}
 	}
-	else delete pcNew;
+	else {
+		pcNew->pcData = NULL;
+		delete pcNew;
+	}
 	return;
 }
 
@@ -638,7 +642,9 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 		// opacity like this .... ARRRGGHH!
 		clrTemp.r = pcMatIn->Ambient.a;
 		AI_SWAP4(clrTemp.r);  
-		if (is_not_qnan(clrTexture.r))clrTemp.r *= clrTexture.a;
+		if (is_not_qnan(clrTexture.r)) {
+			clrTemp.r *= clrTexture.a;
+		}
 		pcMatOut->AddProperty<float>(&clrTemp.r,1,AI_MATKEY_OPACITY);
 
 		// read phong power

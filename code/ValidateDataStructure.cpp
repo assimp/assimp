@@ -246,6 +246,15 @@ void ValidateDSProcess::Execute( aiScene* pScene)
 	else if (pScene->mLights)	{
 		ReportError("aiScene::mLights is non-null although there are no lights");
 	}
+
+	// validate all textures
+	if (pScene->mNumTextures) {
+		DoValidation(pScene->mTextures,pScene->mNumTextures,
+			"mTextures","mNumTextures");
+	}
+	else if (pScene->mTextures)	{
+		ReportError("aiScene::mTextures is non-null although there are no textures");
+	}
 	
 	// validate all materials
 	if (pScene->mNumMaterials) {
@@ -767,7 +776,7 @@ void ValidateDSProcess::Validate( const aiTexture* pTexture)
 		(sz[1] >= 'A' && sz[1] <= 'Z') ||
 		(sz[2] >= 'A' && sz[2] <= 'Z') ||
 		(sz[3] >= 'A' && sz[3] <= 'Z'))	{
-		ReportError("aiTexture::achFormatHint contains non-lowercase characters");
+		ReportError("aiTexture::achFormatHint contains non-lowercase letters");
 	}
 }
 

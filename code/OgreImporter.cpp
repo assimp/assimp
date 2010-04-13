@@ -260,7 +260,7 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 	vector<aiVector3D> UniquePositions(UniqueVertexCount);
 	vector<aiVector3D> UniqueNormals(UniqueVertexCount);
 	vector<aiVector3D> UniqueUvs(UniqueVertexCount);
-	vector< vector<Weight> > UniqueWeights(UniqueVertexCount);
+	vector< vector<Weight> > UniqueWeights((theSubMesh.Weights.size() ? UniqueVertexCount : 0));
 
 	for(unsigned int i=0; i<theSubMesh.FaceList.size(); ++i)
 	{
@@ -284,9 +284,11 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 			UniqueUvs[3*i+2]=theSubMesh.Uvs[Vertex3];
 		}
 
-		UniqueWeights[3*i+0]=theSubMesh.Weights[Vertex1];
-		UniqueWeights[3*i+1]=theSubMesh.Weights[Vertex2];
-		UniqueWeights[3*i+2]=theSubMesh.Weights[Vertex3];
+		if (theSubMesh.Weights.size()) {
+			UniqueWeights[3*i+0]=theSubMesh.Weights[Vertex1];
+			UniqueWeights[3*i+1]=theSubMesh.Weights[Vertex2];
+			UniqueWeights[3*i+2]=theSubMesh.Weights[Vertex3];
+		}
 
 		//The indexvalues a just continuous numbers (0, 1, 2, 3, 4, 5, 6...)
 		UniqueFaceList[i].VertexIndices[0]=3*i+0;
@@ -370,8 +372,12 @@ void OgreImporter::CreateAssimpSubMesh(const SubMesh& theSubMesh, const vector<B
 		}
 	}
 	NewAiMesh->mNumBones=aiBones.size();
-	NewAiMesh->mBones=new aiBone* [aiBones.size()];
-	memcpy(NewAiMesh->mBones, &(aiBones[0]), aiBones.size()*sizeof(aiBone*));
+	
+	// mBones must be NULL if mNumBones is non 0 or the validation fails.
+	if (aiBones.size()) {
+		NewAiMesh->mBones=new aiBone* [aiBones.size()];
+		memcpy(NewAiMesh->mBones, &(aiBones[0]), aiBones.size()*sizeof(aiBone*));
+	}
 
 	//______________________________________________________________________________________________________
 

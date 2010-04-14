@@ -196,7 +196,7 @@ void MDLImporter::InternReadFile( const std::string& pFile,
 	else if (AI_MDL_MAGIC_NUMBER_BE_HL2a == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2a == iMagicWord ||
 		AI_MDL_MAGIC_NUMBER_BE_HL2b == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2b == iMagicWord)
 	{
-		DefaultLogger::get()->debug("MDL subtype: CS:S\\HL², magic word is IDST/IDSQ");
+		DefaultLogger::get()->debug("MDL subtype: Source(tm) Engine, magic word is IDST/IDSQ");
 		iGSFileVersion = 0;
 		InternReadFile_HL2();
 	}

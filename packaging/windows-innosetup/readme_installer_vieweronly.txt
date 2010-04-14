@@ -1,24 +1,12 @@
 
 ------------------------------------------------------------------------------------
-Open Asset Import Library (Assimp) SDK Installer
+Open Asset Import Library (Assimp) Viewer Installer
 Release Notes
 ------------------------------------------------------------------------------------
 
 
 Known Bugs & Limitations
 ========================
-
-
-Assimp
-
-- IRR, DXF, MOT, LWS support is limited 
-
-(the following issues are most likely to be addressed in a near bugfix update to 1.1)
-
-- COB is pretty new on the list, test coverage is bad. Please give feedback.
-- Ogre XML loader fails to load animations properly.
-- ColladaLoader handles instanced nodes not entirely correct.
-
 
 Viewer
 
@@ -42,4 +30,4 @@ Reinstall Microsoft Visual C++ 2005 SP1 Redistributable (x86 or x64, depending o
 Add it to PATH. That's not a bug, the installer does not alter the PATH.
 
 4. Crashes immediately
-You CPU lacks SSE2 support. Build Assimp from scratch to suit your CPU, sorry.ut mostly fine).
+You CPU lacks SSE2 support. Build Assimp from scratch to suit your CPU, sorry.

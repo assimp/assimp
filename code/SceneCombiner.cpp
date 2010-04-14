@@ -62,6 +62,12 @@ inline void PrefixString(aiString& string,const char* prefix, unsigned int len)
 	if (string.length >= 1 && string.data[0] == '$')
 		return;
 
+	if (len+string.length>=MAXLEN-1) {
+		DefaultLogger::get()->debug("Can't add an unique prefix because the string is too long");
+		ai_assert(false);
+		return;
+	}
+
 	// Add the prefix
 	::memmove(string.data+len,string.data,string.length+1);
 	::memcpy (string.data, prefix, len);

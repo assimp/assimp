@@ -230,7 +230,8 @@ struct aiColor3D
  *  UTF-8 strings to their working character set (i.e. MBCS, WideChar).
  *
  *  We use this representation instead of std::string to be C-compatible. The 
- *  (binary) length of such a string is limited to MAXLEN characters (excluding the 0).
+ *  (binary) length of such a string is limited to MAXLEN characters (including the
+ *  the terminating zero).
 */
 struct aiString
 {

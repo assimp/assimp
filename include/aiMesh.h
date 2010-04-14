@@ -355,11 +355,13 @@ struct aiMesh
 	* but the normals for vertices that are only referenced by
 	* point or line primitives are undefined and set to QNaN (WARN:
 	* qNaN compares to inequal to *everything*, even to qNaN itself.
-	* Use code like this
+	* Using code like this to check whether a field is qnan is:
 	* @code
 	* #define IS_QNAN(f) (f != f)
 	* @endcode
-	* to check whether a field is qnan).
+	* still dangerous because even 1.f == 1.f could evaluate to false! (
+	* remember the subtleties of IEEE754 artithmetics). Use stuff like
+	* @c fpclassify instead.
 	* @note Normal vectors computed by Assimp are always unit-length.
 	* However, this needn't apply for normals that have been taken
 	*   directly from the model file.
@@ -373,7 +375,8 @@ struct aiMesh
 	* of points and lines only may not have normal vectors. Meshes with 
 	* mixed primitive types (i.e. lines and triangles) may have 
 	* normals, but the normals for vertices that are only referenced by
-	* point or line primitives are undefined and set to QNaN. 
+	* point or line primitives are undefined and set to qNaN.  See
+	* the #mNormals member for a detailled discussion of qNaNs.
 	* @note If the mesh contains tangents, it automatically also 
 	* contains bitangents (the bitangent is just the cross product of
 	* tangent and normal vectors). 
@@ -385,7 +388,7 @@ struct aiMesh
 	* Y texture axis. The array contains normalized vectors, NULL if not
 	* present. The array is mNumVertices in size. 
 	* @note If the mesh contains tangents, it automatically also contains
-	* bitangents. 
+	* bitangents.  
 	*/
 	C_STRUCT aiVector3D* mBitangents;
 

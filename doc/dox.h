@@ -18,7 +18,7 @@ or conversion from right-handed to left-handed coordinate systems.
 
 ASSIMP currently supports the following file formats (note that some loaders lack some features of their formats because 
 some file formats contain data not supported by ASSIMP, some stuff would require so much conversion work
-that it has not yet been implemented, and some formats have not completely been documented by their inventors):
+that it has not been implemented yet and some (most ...) formats lack proper specifications):
 <hr>
 <br><tt>
 <b>Collada</b> ( <i>*.dae;*.xml</i> )<br>
@@ -30,8 +30,6 @@ that it has not yet been implemented, and some formats have not completely been 
 <b>AutoCAD DXF</b> ( <i>*.dxf</i> ) <sup>2</sup><br>
 <b>Neutral File Format</b> ( <i>*.nff</i> ) <br>
 <b>Sense8 WorldToolkit</b> ( <i>*.nff</i> ) <br>
-<b>LightWave Model</b> ( <i>*.lwo</i> ) <br>
-<b>MODO model</b> ( <i>*.lxo</i> ) <br>
 <b>Valve Model</b> ( <i>*.smd,*.vta</i> ) <sup>3</sup> <br>
 <b>Quake I</b> ( <i>*.mdl</i> ) <br>
 <b>Quake II</b> ( <i>*.md2</i> ) <br>
@@ -50,10 +48,19 @@ that it has not yet been implemented, and some formats have not completely been 
 <b>Terragen Terrain </b> ( <i>*.ter</i> ) <br>
 <b>3D GameStudio Model </b> ( <i>*.mdl</i> ) <br>
 <b>3D GameStudio Terrain</b> ( <i>*.hmp</i> )<br>
-<b>Ogre</b> (<i>.mesh.xml, .skeleton.xml, .material</i>)<br><br>
-<b>Milkshape 3D files</b> ( <i>*.ms3d</i> )<br>
+<b>Ogre</b> (<i>*.mesh.xml, *.skeleton.xml, *.material</i>)<sup>3</sup> <br>
+<b>Milkshape 3D</b> ( <i>*.ms3d</i> )<br>
+<b>LightWave Model</b> ( <i>*.lwo</i> )<br>
+<b>LightWave Scene</b> ( <i>*.lws</i> )<br>
+<b>Modo Model</b> ( <i>*.lxo</i> )<br>
+<b>CharacterStudio Motion</b> ( <i>*.csm</i> )<br>
+<b>Stanford Ply</b> ( <i>*.ply</i> )<br>
+<b>TrueSpace</b> ( <i>*.cob, *.scn</i> )<br><br>
 </tt>
-See the @link importer_notes Importer Notes Page @endlink for informations, what a specific importer can do and what not.<br>
+See the @link importer_notes Importer Notes Page @endlink for informations, what a specific importer can do and what not. 
+Note that although this paper claims to be the official documentation, 
+http://assimp.sourceforge.net/main_features_formats.html 
+<br>is usually the most up-to-date list of file formats supported by the library. <br>
 
 <sup>3</sup>: These formats support animations, but ASSIMP doesn't yet support them (or they're buggy)
 <br>

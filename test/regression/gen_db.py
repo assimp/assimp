@@ -52,18 +52,37 @@ import zipfile
 import settings
 import utils
 
+usage = """gen_db [-i=...] [-e=...] [-p] [-n]
+
+(lists of file extensions are comma delimited, i.e. `3ds,lwo,x`)
+-i,--include: List of file extensions to update dumps for. If ommitted,
+         all file extensions are updated except those in `exclude`.
+
+-e,--exclude: Merged with settings.exclude_extensions to produce a
+         list of all file extensions to ignore. If dumps exist,
+         they are not altered. If not, theu are not created.
+
+-p,--preview: Preview list of file extensions touched by the update.
+         Dont' change anything.
+
+-n,--nozip: Don't pack to ZIP archive. Keep all dumps in individual files.
+"""
+
 # -------------------------------------------------------------------------------
 def process_dir(d, outfile, file_filter):
     """ Generate small dump records for all files in 'd' """
     print("Processing directory " + d)
+
+    num = 0
     for f in os.listdir(d):
         fullp = os.path.join(d, f)
         if os.path.isdir(fullp) and not f == ".svn":
-            process_dir(fullp, outfile, file_filter)
+            num += process_dir(fullp, outfile, file_filter)
             continue
 
         if file_filter(f):
             for pp in settings.pp_configs_to_test:
+                num += 1
                 print("DUMP " + fullp + "\n post-processing: " + pp)
                 outf = os.path.join(os.getcwd(), settings.database_name,
                     utils.hashing(fullp, pp))
@@ -73,11 +92,16 @@ def process_dir(d, outfile, file_filter):
                 outfile.flush()
                 if subprocess.call(cmd, stdout=outfile, stderr=outfile, shell=False):
                     print("Failure processing " + fullp)
+    return num
                     
 
 # -------------------------------------------------------------------------------
 def make_zip():
-    """Zip the contents of ./<settings.database_name>"""
+    """Zip the contents of ./<settings.database_name>
+    to <settings.database_name>.zip using DEFLATE
+    compression to minimize the file size. """
+
+    num = 0
     zipout = zipfile.ZipFile(settings.database_name + ".zip", "w", zipfile.ZIP_DEFLATED)
     for f in os.listdir(settings.database_name):
         p = os.path.join(settings.database_name, f)
@@ -85,44 +109,95 @@ def make_zip():
         if settings.remove_old:
             os.remove(p)
 
+        num += 1
+
     if settings.remove_old:
         os.rmdir(settings.database_name)
 
     bad = zipout.testzip()
     assert bad is None
-    
+
+    print("="*60)
+    print("Database contains {0} entries".format(num))
+
 
 # -------------------------------------------------------------------------------
-def gen_db():
-    """Generate the crash dump database in ./<settings.database_name>"""
+def extract_zip():
+    """Unzip <settings.database_name>.zip to
+    ./<settings.database_name>"""
+    try:
+        zipout = zipfile.ZipFile(settings.database_name + ".zip", "r", 0)
+        zipout.extractall(path=settings.database_name)
+    except RuntimeError as r:
+        print(r)
+        print("failed to extract previous ZIP contents. "\
+              "DB is generated from scratch.")
+        
+
+# -------------------------------------------------------------------------------
+def gen_db(ext_list,outfile):
+    """Generate the crash dump database in
+    ./<settings.database_name>"""
     try:
         os.mkdir(settings.database_name)
     except OSError:
         pass
-    
-    outfile = open(os.path.join("..", "results", "gen_regression_db_output.txt"), "w")
-    (ext_list, err) = subprocess.Popen([utils.assimp_bin_path, "listext"],
-        stdout=subprocess.PIPE).communicate()
-    
-    ext_list = str(ext_list).lower().split(";")
-    ext_list = list(filter(
-        lambda f: not f in settings.exclude_extensions, map(
-            lambda f: f.strip("b* \'"), ext_list)))
 
-    print(ext_list)
+    num = 0
     for tp in settings.model_directories:
-        process_dir(tp, outfile,
+        num += process_dir(tp, outfile,
             lambda x: os.path.splitext(x)[1] in ext_list)
+
+    print("="*60)
+    print("Updated {0} entries".format(num))
         
 
 # -------------------------------------------------------------------------------
 if __name__ == "__main__":
     utils.find_assimp_or_die()
-    gen_db()
+    def clean(f):
+        f = f.strip("* \'")
+        return "."+f if f[:1] != '.' else f
+
+    if len(sys.argv)>1 and (sys.argv[1] == "--help" or sys.argv[1] == "-h"):
+        print(usage)
+        sys.exit(0)
+
+    ext_list, preview, nozip = None, False, False
+    for m in sys.argv[1:]:
+        if m[:10]=="--exclude=":
+            settings.exclude_extensions += map(clean, m[10:].split(","))
+        elif m[:3]=="-e=":
+            settings.exclude_extensions += map(clean, m[3:].split(","))
+        elif m[:10]=="--include=":
+            ext_list = m[10:].split(",")
+        elif m[:3]=="-i=":
+            ext_list = m[3:].split(",")
+        elif m=="-p" or m == "--preview":
+            preview = True
+        elif m=="-n" or m == "--nozip":
+            nozip = True
+            
+    outfile = open(os.path.join("..", "results", "gen_regression_db_output.txt"), "w")
+    if ext_list is None:
+        (ext_list, err) = subprocess.Popen([utils.assimp_bin_path, "listext"],
+            stdout=subprocess.PIPE).communicate()
+        ext_list = str(ext_list).lower().split(";")
+
+    ext_list = list(filter(lambda f: not f in settings.exclude_extensions,
+        map(clean, ext_list)))
+
+    if preview:
+        print(','.join(ext_list))
+        sys.exit(1)
+
+    extract_zip()    
+    gen_db(ext_list,outfile)
     make_zip()
 
     print("="*60)
     input("Press any key to continue")
+    sys.exit(0)
     
 # vim: ai ts=4 sts=4 et sw=4    
 

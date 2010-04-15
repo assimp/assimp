@@ -11,11 +11,14 @@ typedef irr::io::IrrXMLReader XmlReader;
 
 
 //------------Helper Funktion to Get a Attribute Save---------------
-template<typename t> inline t GetAttribute(XmlReader* Reader, std::string Name)
+template<typename t> inline t GetAttribute(XmlReader* Reader, std::string Name);
+
+/*
 {
-	throw std::exception("unimplemented Funtcion used!");
+	BOOST_STATIC_ASSERT(false);
 	return t();
 }
+*/
 
 template<> inline int GetAttribute<int>(XmlReader* Reader, std::string Name)
 {

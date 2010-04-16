@@ -230,6 +230,8 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 			}
 
 		}//end of "geometry
+
+
 		else if(string(Reader->getNodeName())=="boneassignments")
 		{
 			theSubMesh.Weights.resize(theSubMesh.Positions.size());
@@ -303,6 +305,29 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 	theSubMesh.Normals.swap(UniqueNormals);
 	theSubMesh.Uvs.swap(UniqueUvs);
 	theSubMesh.Weights.swap(UniqueWeights);
+
+	//------------- normalize weights -----------------------------
+	//The Blender exporter doesn't care about whether the sum of all boneweights for a single vertex equals 1 or not,
+	//so we have to make this sure:
+	for(unsigned int VertexId=0; VertexId<theSubMesh.Weights.size(); ++VertexId)//iterate over all vertices
+	{
+		float WeightSum=0.0f;
+		for(unsigned int BoneId=0; BoneId<theSubMesh.Weights[VertexId].size(); ++BoneId)//iterate over all bones
+		{
+			WeightSum+=theSubMesh.Weights[VertexId][BoneId].Value;
+		}
+		
+		//check if the sum is too far away from 1
+		if(WeightSum<1.0f-0.05f || WeightSum>1.0f+0.05f)
+		{
+			//normalize all weights:
+			for(unsigned int BoneId=0; BoneId<theSubMesh.Weights[VertexId].size(); ++BoneId)//iterate over all bones
+			{
+				theSubMesh.Weights[VertexId][BoneId].Value/=WeightSum;
+			}
+		}
+	}
+	//_________________________________________________________
 }
 
 
@@ -339,8 +364,9 @@ void OgreImporter::CreateAssimpSubMesh(const SubMesh& theSubMesh, const vector<B
 
 
 	//---------------------------------------- Bones --------------------------------------------
+
 	//Copy the weights in in Bone-Vertices Struktur
-	//(we have them in a Vertex-Bones Struktur, this is much easier for making them unique, which is required by assimp
+	//(we have them in a Vertex-Bones Structur, this is much easier for making them unique, which is required by assimp
 	vector< vector<aiVertexWeight> > aiWeights(theSubMesh.BonesUsed);//now the outer list are the bones, and the inner vector the vertices
 	for(unsigned int VertexId=0; VertexId<theSubMesh.Weights.size(); ++VertexId)//iterate over all vertices
 	{
@@ -352,6 +378,8 @@ void OgreImporter::CreateAssimpSubMesh(const SubMesh& theSubMesh, const vector<B
 			aiWeights[theSubMesh.Weights[VertexId][BoneId].BoneId].push_back(NewWeight);
 		}
 	}
+
+	
 
 	vector<aiBone*> aiBones;
 	aiBones.reserve(theSubMesh.BonesUsed);//the vector might be smaller, because there might be empty bones (bones that are not attached to any vertex)
@@ -653,6 +681,10 @@ void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const st
 
 				//we need this, to acces the bones default pose, which we need to make keys absolute
 				vector<Bone>::const_iterator CurBone=find(Bones.begin(), Bones.end(), NewNodeAnim->mNodeName);
+				aiMatrix4x4 t0, t1;
+				aiMatrix4x4 DefBonePose=//The default bone pose doesnt have a scaling value
+								  aiMatrix4x4::Rotation(CurBone->RotationAngle, CurBone->RotationAxis, t0)
+								* aiMatrix4x4::Translation(CurBone->Position, t1);
 
 				//Create the keyframe arrays...
 				unsigned int KeyframeCount=Animations[i].Tracks[j].Keyframes.size();
@@ -666,15 +698,13 @@ void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const st
 				//...and fill them
 				for(unsigned int k=0; k<KeyframeCount; ++k)
 				{
-					aiMatrix4x4 t0, t1, t2, t3, t4;
-					//Create a matrix to transfrom a vector from the bones default pose to the bone bones in this animation key
-					aiMatrix4x4 PoseToKey=aiMatrix4x4::Scaling(Animations[i].Tracks[j].Keyframes[k].Scaling, t1)	//scale
-									* aiMatrix4x4(Animations[i].Tracks[j].Keyframes[k].Rotation.GetMatrix())		//rot
-									* aiMatrix4x4::Translation(Animations[i].Tracks[j].Keyframes[k].Position, t0);	//pos
+					aiMatrix4x4 t2, t3;
 
-					aiMatrix4x4 DefBonePose=aiMatrix4x4::Rotation(CurBone->RotationAngle, CurBone->RotationAxis, t3)
-									* aiMatrix4x4::Translation(CurBone->Position, t2);
-									//The defautl bone pose doesnt have a scaling value
+				//Create a matrix to transfrom a vector from the bones default pose to the bone bones in this animation key
+				aiMatrix4x4 PoseToKey=aiMatrix4x4::Scaling(Animations[i].Tracks[j].Keyframes[k].Scaling, t2)	//scale
+								* aiMatrix4x4(Animations[i].Tracks[j].Keyframes[k].Rotation.GetMatrix())		//rot
+								* aiMatrix4x4::Translation(Animations[i].Tracks[j].Keyframes[k].Position, t3);	//pos
+									
 
 					//calculate the complete transformation from world space to bone space
 					aiMatrix4x4 CompleteTransform=DefBonePose * PoseToKey;
@@ -702,6 +732,8 @@ void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const st
 			m_CurrentScene->mAnimations[i]=NewAnimation;
 		}
 	}
+//TODO: Auf nicht vorhandene Animationskeys achten!
+#pragma warning (s.o.)
 	//__________________________________________________________________
 }
 

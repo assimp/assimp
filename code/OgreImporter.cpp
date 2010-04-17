@@ -733,7 +733,7 @@ void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const st
 		}
 	}
 //TODO: Auf nicht vorhandene Animationskeys achten!
-#pragma warning (s.o.)
+//#pragma warning (s.o.)
 	//__________________________________________________________________
 }
 

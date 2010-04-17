@@ -35,7 +35,7 @@ Troubleshooting
 1. Missing d3dx9_42.dll? 
 Install the latest DirectX runtime or grab the file from somewhere (that's evil but mostly fine).
 
-2. Application configuration not correct?
+2. Application configuration not correct / missing msvcr***.dll?
 Reinstall Microsoft Visual C++ 2005 SP1 Redistributable (x86 or x64, depending on your system)
 
 3. assimp.exe not in PATH

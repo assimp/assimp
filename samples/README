@@ -19,4 +19,5 @@ SimpleOpenGL
   model (gets the path to it on the command line, default is dwarf.x)
   and displays the model as wireframe. Animations and materials are
   not evaluated at all. This samples uses the C interface to Assimp.
+  Basic materials are displayed, but no textures.
 ----------------------------------------------------------------------------

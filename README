@@ -11,6 +11,7 @@ Here you can find information regarding Open Asset Import Library:
 	4.		License
 
 
+
 1.	Overview
 1.1	Supported file formats
 
@@ -31,30 +32,35 @@ The Asset Import Library provides a lot of model formats:
 	- LWO
 	- OBJ
 	- SMD
+	
 	- Collada
+	
 	- LWO
+	
 	- Ogre XML
+	
 	- partly LWS
-	- .. maybe some more ...
+	
+	- .. + many more, see http://assimp.sourceforge.net/main_features_formats.html for a full list.
 
-1.2 File structure
 
-Open Asset Import Library is implemented in C++ and provides a c-interface. The directories 
-are:
+1.2 Repository structure
+
+Open Asset Import Library is implemented in C++ and provides a C-interface. The directory structure is:
 
 	/bin			Binaries of the Asset Import Library.
 	/code			Code of the Asset Import Library.
 	/contrib		Third-party-libraries used by the Asset Import Library.
-	/doc			Documentation (doxygen generated and data structure as a xml-file)
+	/doc			Documentation (doxygen generated and data structure as a xml file)
 	/include		Public headers.
-	/lib			Static libraries.
-	/obj			Object files.
-	/port			Ports to other languages.  The Java port is not yet finished, but
-                        the Java part of the interface is fixed. So: you can't use it, but
-                        you can see how it will look like.
-	/test			Unit- and regression tests.
-	/tools			Tools.
-	/workspaces		Build enviroments.
+	/lib			Static library location for Windows.
+	/obj			Object file location for Windows.
+	/port			Ports to other languages. 
+	
+	/test			Unit- and regression tests, model test suite.
+	/tools			Tools (viewer, command line `assimp`).
+	/workspaces		Build enviroments for vc,xcode,...
+
 
 
 2. Build the Asset Import Library
@@ -62,12 +68,12 @@ are:
 Take a look into the INSTALL file.
 
 
+
 3. Help
 
-For more help go to http://assimp.sourceforge.net/ or go to http://www.zfx.info. Or take a look 
-into the /doc-directory.
+For more help go to http://assimp.sourceforge.net/ (or, for germans, http://www.zfx.info). Or take a look into the doc-folder, which contains the doxygen-generated documentation in HTMl format (CHMs for Windows are as well contained in some distributions and located right here in the root folder).
 
 
 4. License
 
-The license of the Asset Import Library is based on the BSD-License.
+The license of the Asset Import Library is based on the BSD-License. It is contained in the LICENSE file.

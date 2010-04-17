@@ -31,25 +31,25 @@ PyAssimp (first version)
 Compile-Bugfixes for mingw, add enviroment for static library support in make.
 
 - Jonathan Pokrass
-supplied a bugfix concerning the scaling in the md3 loader.
+Supplied a bugfix concerning the scaling in the md3 loader.
 
 - Andrew Galante,
-submitted patches to make Assimp compile with GCC-4, a makefile and the xcode3 workspace.
+Submitted patches to make Assimp compile with GCC-4, a makefile and the xcode3 workspace.
 
 - Andreas Nagel
-first Assimp testing & verification under Windows Vista 64 Bit.
+First Assimp testing & verification under Windows Vista 64 Bit.
 
 - Marius Schröder
-allowed us to use many of his models for screenshots and testing.
+Allowed us to use many of his models for screenshots and testing.
 
 - Christian Schubert
-supplied various XFiles for testing purposes.
+Supplied various XFiles for testing purposes.
 
 - Tizian Wieland
-searched the web for hundreds of test models for internal use
+Searched the web for hundreds of test models for internal use
 
 - John Connors
-supplied patches for linux and SCons.
+Supplied patches for linux and SCons.
 
 - T. R.
 The GUY who performed some of the CSM mocaps.
@@ -82,4 +82,4 @@ Bugreport and fix for a obj-materialloader crash.
 D bindings, CMake install support. 
 
 - Dario Accornero
-contributed several patches regarding Mac OS/XCode targets, bug reports.
+Contributed several patches regarding Mac OS/XCode targets, bug reports.

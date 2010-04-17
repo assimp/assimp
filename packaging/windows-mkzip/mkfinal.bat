@@ -101,6 +101,13 @@ rem -----------------------------------------------------
 
 svn export .\..\..\  final\%OUT_SDK%
 
+mkdir final\%OUT_SDK%\doc\assimp_html
+mkdir final\%OUT_SDK%\doc\assimpcmd_html
+copy .\..\..\doc\AssimpDoc_Html\* final\%OUT_SDK%\doc\assimp_html
+copy .\..\..\doc\AssimpCmdDoc_Html\* final\%OUT_SDK%\doc\assimpcmd_html
+del final\%OUT_SDK%\doc\assimpcmd_html\AssimpCmdDoc.chm
+del final\%OUT_SDK%\doc\assimp_html\AssimpDoc.chm
+
 rem Copy doc to a suitable place
 move final\%OUT_SDK%\doc\AssimpDoc_Html\AssimpDoc.chm final\%OUT_SDK%\Documentation.chm
 move final\%OUT_SDK%\doc\AssimpCmdDoc_Html\AssimpCmdDoc.chm final\%OUT_SDK%\CommandLine.chm
@@ -140,10 +147,12 @@ mkdir "final\%OUT_SDK%\bin\assimp_%BINCFG_x64%"
 mkdir "final\%OUT_SDK%\bin\assimp_%BINCFG_x86_DEBUG%"
 mkdir "final\%OUT_SDK%\bin\assimp_%BINCFG_x64_DEBUG%"
 
+
 copy /Y ..\..\bin\assimp_%BINCFG_x86%\Assimp32.dll    "final\%OUT_SDK%\bin\assimp_%BINCFG_x86%\"
 copy /Y ..\..\bin\assimp_%BINCFG_x64%\Assimp64.dll    "final\%OUT_SDK%\bin\assimp_%BINCFG_x64%\"
 copy /Y ..\..\bin\assimp_%BINCFG_x86_DEBUG%\Assimp32d.dll    "final\%OUT_SDK%\bin\assimp_%BINCFG_x86_DEBUG%\"
 copy /Y ..\..\bin\assimp_%BINCFG_x64_DEBUG%\Assimp64d.dll    "final\%OUT_SDK%\bin\assimp_%BINCFG_x64_DEBUG%\"
+
 
 rem -----------------------------------------------------
 rem Make final-bin.zip and final-sdk.zip

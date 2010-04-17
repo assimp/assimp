@@ -3,21 +3,21 @@ Open Asset Import Library (Assimp)
 Developers and Contributors
 ===============================================================
 
-The following is the list of all constributors.
+The following is the list of all constributors.  
 Thanks for your help!
 
 - Alexander Gessler,
-3DS-, ASE-, DXF-, HMP-, MDL-, MD2-, MD3-, MD5-, MDC-, NFF-, PLY-, STL-, RAW-, OFF- and LWO-Loader, 
-Configuration-Interface, AssImp-Viewer (Win32), Website (Admin and Design), admin.
+3DS-, ASE-, DXF-, HMP-, MDL-, MD2-, MD3-, MD5-, MDC-, NFF-, PLY-, STL-, RAW-, OFF-, MS3D-, Q3D- and LWO-Loader, 
+AssImp-Viewer (Win32), noboost, Website (Admin and Design).
 
 - Thomas Schulze,
 X-, Collada-, BVH-Loader, Postprocessing framework. Data structure & Interface design, documentation.
 
+- Kim Kulling,
+Obj-Loader, Logging system, Scons-build environment, CMake build environment, Linux build.
+
 - R.Schmidt,
 Linux build, eclipse support.
-
-- Kim Kulling:
-Obj-Loader, Logging, Scons-build environment, CMake build enviroment, Linux build.
 
 - Matthias Gubisch,
 Assimp.net
@@ -27,7 +27,7 @@ Visual Studio 9 support, bugfixes.
 B3D-Loader, Assimp testing
 
 - Sebastian Hempel,
-PyAssimp
+PyAssimp (first version)
 Compile-Bugfixes for mingw, add enviroment for static library support in make.
 
 - Jonathan Pokrass
@@ -79,7 +79,7 @@ Many bugreports, improving Assimp's portability, regular testing & feedback.
 Bugreport and fix for a obj-materialloader crash.
 
 - David Nadlinger
-D bindings, CMake install support.
+D bindings, CMake install support. 
 
 - Dario Accornero
 contributed several patches regarding Mac OS/XCode targets, bug reports.

@@ -1,3 +1,6 @@
+### USE OF THIS MAKEFILE IS NOT RECOMMENDED.
+### It is no longer maintained. Use CMAKE instead.
+
 # Makefile for Open Asset Import Library (GNU-make)
 # aramis_acg@users.sourceforge.net
 

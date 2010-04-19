@@ -70,40 +70,35 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	}
 
 
-	//-------------------Read the submesh:-----------------------
-	SubMesh theSubMesh;
+	//-------------------Read the submeshs and materials:-----------------------
+	std::list<shared_ptr<SubMesh> > SubMeshes;
+	vector<aiMaterial*> Materials;
 	XmlRead(MeshFile);
-	if(MeshFile->getNodeName()==string("submesh"))
+	while(MeshFile->getNodeName()==string("submesh"))
 	{
-		theSubMesh.MaterialName=GetAttribute<string>(MeshFile, "material");
-		DefaultLogger::get()->debug("Loading Submehs with Material: "+theSubMesh.MaterialName);
-		ReadSubMesh(theSubMesh, MeshFile);
-		
+		SubMesh* theSubMesh=new SubMesh();
+		theSubMesh->MaterialName=GetAttribute<string>(MeshFile, "material");
+		DefaultLogger::get()->debug("Loading Submehs with Material: "+theSubMesh->MaterialName);
+		ReadSubMesh(*theSubMesh, MeshFile);
+
+		//just a index in a array, we add a mesh in each loop cycle, so we get indicies like 0, 1, 2 ... n;
+		//so it is important to do this before pushing the mesh in the vector!
+		theSubMesh->MaterialIndex=SubMeshes.size();
+
+		SubMeshes.push_back(shared_ptr<SubMesh>(theSubMesh));
+
 		//Load the Material:
-		aiMaterial* MeshMat=LoadMaterial(theSubMesh.MaterialName);
+		aiMaterial* MeshMat=LoadMaterial(theSubMesh->MaterialName);
 		
 		//Set the Material:
-		if(m_CurrentScene->mMaterials)
-			throw DeadlyImportError("only 1 material supported at this time!");
-		m_CurrentScene->mMaterials=new aiMaterial*[1];
-		m_CurrentScene->mNumMaterials=1;
-		m_CurrentScene->mMaterials[0]=MeshMat;
-		theSubMesh.MaterialIndex=0;
+		Materials.push_back(MeshMat);
 	}
-	//check for second root node:
-	if(MeshFile->getNodeName()==string("submesh"))
-		throw DeadlyImportError("more than one submesh in the file, abording!");
 
-	//____________________________________________________________
+	if(SubMeshes.empty())
+		throw DeadlyImportError("no submesh loaded!");
+	if(SubMeshes.size()!=Materials.size())
+		throw DeadlyImportError("materialcount doesn't match mesh count!");
 
-
-	//-----------------Create the root node-----------------------
-	pScene->mRootNode=new aiNode("root");
-
-	//link the mesh with the root node:
-	pScene->mRootNode->mMeshes=new unsigned int[1];
-	pScene->mRootNode->mMeshes[0]=0;
-	pScene->mRootNode->mNumMeshes=1;
 	//____________________________________________________________
 
 
@@ -122,8 +117,39 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	}
 	//__________________________________________________________________
 
-	CreateAssimpSubMesh(theSubMesh, Bones);
+	
+	//----------------- Now fill the Assimp scene ---------------------------
+	
+	//put the aiMaterials in the scene:
+	m_CurrentScene->mMaterials=new aiMaterial*[Materials.size()];
+	m_CurrentScene->mNumMaterials=Materials.size();
+	for(unsigned int i=0; i<Materials.size(); ++i)
+		m_CurrentScene->mMaterials[i]=Materials[i];
+
+	//create the aiMehs... 
+	vector<aiMesh*> aiMeshes;
+	BOOST_FOREACH(shared_ptr<SubMesh> theSubMesh, SubMeshes)
+	{
+		aiMeshes.push_back(CreateAssimpSubMesh(*theSubMesh, Bones));
+	}
+	//... and put them in the scene:
+	m_CurrentScene->mNumMeshes=aiMeshes.size();
+	m_CurrentScene->mMeshes=new aiMesh*[aiMeshes.size()];
+	memcpy(m_CurrentScene->mMeshes, &(aiMeshes[0]), sizeof(aiMeshes[0])*aiMeshes.size());
+
+	//Create the root node
+	m_CurrentScene->mRootNode=new aiNode("root");
+
+	//link the meshs with the root node:
+	m_CurrentScene->mRootNode->mMeshes=new unsigned int[SubMeshes.size()];
+	m_CurrentScene->mRootNode->mNumMeshes=SubMeshes.size();
+	for(unsigned int i=0; i<SubMeshes.size(); ++i)
+		m_CurrentScene->mRootNode->mMeshes[i]=i;
+
+	
+
 	CreateAssimpSkeleton(Bones, Animations);
+	//___________________________________________________________
 }
 
 
@@ -331,20 +357,12 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 }
 
 
-void OgreImporter::CreateAssimpSubMesh(const SubMesh& theSubMesh, const vector<Bone>& Bones)
+aiMesh* OgreImporter::CreateAssimpSubMesh(const SubMesh& theSubMesh, const vector<Bone>& Bones) const
 {
-	//Mesh is fully loaded, copy it into the aiScene:
-	if(m_CurrentScene->mNumMeshes!=0)
-		throw DeadlyImportError("Currently only one mesh per File is allowed!!");
+	const aiScene* const m_CurrentScene=this->m_CurrentScene;//make sure, that we can access but not change the scene
 
 	aiMesh* NewAiMesh=new aiMesh();
-	
-	//Attach the mesh to the scene:
-	m_CurrentScene->mNumMeshes=1;
-	m_CurrentScene->mMeshes=new aiMesh*;
-	m_CurrentScene->mMeshes[0]=NewAiMesh;
-
-	
+		
 	//Positions
 	NewAiMesh->mVertices=new aiVector3D[theSubMesh.Positions.size()];
 	memcpy(NewAiMesh->mVertices, &theSubMesh.Positions[0], theSubMesh.Positions.size()*sizeof(aiVector3D));
@@ -426,11 +444,16 @@ void OgreImporter::CreateAssimpSubMesh(const SubMesh& theSubMesh, const vector<B
 
 	//Link the material:
 	NewAiMesh->mMaterialIndex=theSubMesh.MaterialIndex;//the index is set by the function who called ReadSubMesh
+
+	return NewAiMesh;
 }
 
 
-void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vector<Animation> &Animations)
+void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vector<Animation> &Animations) const
 {
+	const aiScene* const m_CurrentScene=this->m_CurrentScene;//make sure, that we can access but not change the scene
+
+
 	//most likely the skeleton file will only end with .skeleton
 	//But this is a xml reader, so we need: .skeleton.xml
 	FileName+=".xml";
@@ -500,6 +523,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 	}
 	//The bones in the file a not neccesarly ordered by there id's so we do it now:
 	std::sort(Bones.begin(), Bones.end());
+
 	//now the id of each bone should be equal to its position in the vector:
 	//so we do a simple check:
 	{
@@ -633,8 +657,10 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 }
 
 
-void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations)
+void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations) const
 {
+	const aiScene* const m_CurrentScene=this->m_CurrentScene;//make sure, that we can access but not change the scene
+
 	//-----------------skeleton is completly loaded, now put it in the assimp scene:-------------------------------
 	
 	if(!m_CurrentScene->mRootNode)
@@ -657,8 +683,11 @@ void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const st
 	m_CurrentScene->mRootNode->mChildren=new aiNode*[RootBoneNodes.size()];
 	memcpy(m_CurrentScene->mRootNode->mChildren, &RootBoneNodes[0], sizeof(aiNode*)*RootBoneNodes.size());
 	//_______________________________________________________________
+}
 
 
+void OgreImporter::PutAnimationsInScene(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations)
+{
 	//-----------------Create the Assimp Animations --------------------
 	if(Animations.size()>0)//Maybe the model had only a skeleton and no animations. (If it also has no skeleton, this function would'nt have benn called
 	{
@@ -739,8 +768,10 @@ void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const st
 
 
 
-aiNode* OgreImporter::CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &Bones, aiNode* ParentNode)
+aiNode* OgreImporter::CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &Bones, aiNode* ParentNode) const
 {
+	const aiScene* const m_CurrentScene=this->m_CurrentScene;//make sure, that we can access but not change the scene
+
 	//----Create the node for this bone and set its values-----
 	aiNode* NewNode=new aiNode(Bones[BoneId].Name);
 	NewNode->mParent=ParentNode;

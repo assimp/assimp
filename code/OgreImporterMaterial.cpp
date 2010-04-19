@@ -26,8 +26,10 @@ namespace Ogre
 
 
 
-aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName)
+aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 {
+	const aiScene* const m_CurrentScene=this->m_CurrentScene;//make sure, that we can access but not change the scene
+
 	MaterialHelper *NewMaterial=new MaterialHelper();
 
 	aiString ts(MaterialName.c_str());
@@ -70,7 +72,7 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName)
 			MatFilePtr=m_CurrentIOHandler->Open(m_MaterialLibFilename);
 			if(NULL==MatFilePtr)
 			{
-				DefaultLogger::get()->error(m_MaterialLibFilename+" and "+MaterialFileName + " could not be opned, Material will not be loaded!");
+				DefaultLogger::get()->error(m_MaterialLibFilename+" and "+MaterialFileName + " could not be opened, Material will not be loaded!");
 				return NewMaterial;
 			}
 		}
@@ -118,16 +120,27 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName)
 									ss >> Line;
 									if(Line=="ambient")
 									{
-										//read the ambient light values:
+										aiColor3D Color;
+										ss >> Color.r >> Color.g >> Color.b;
+										NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_AMBIENT);
 									}
 									else if(Line=="diffuse")
 									{
+										aiColor3D Color;
+										ss >> Color.r >> Color.g >> Color.b;
+										NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_DIFFUSE);
 									}
 									else if(Line=="specular")
 									{
+										aiColor3D Color;
+										ss >> Color.r >> Color.g >> Color.b;
+										NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_SPECULAR);
 									}
 									else if(Line=="emmisive")
 									{
+										aiColor3D Color;
+										ss >> Color.r >> Color.g >> Color.b;
+										NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_EMISSIVE);
 									}
 									else if(Line=="texture_unit")
 									{

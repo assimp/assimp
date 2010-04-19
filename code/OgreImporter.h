@@ -30,16 +30,25 @@ public:
 	virtual void SetupProperties(const Importer* pImp);
 private:
 
-	///Helper Functions to read parts of the XML File
+	/// Helper Functions to read parts of the XML File
 	void ReadSubMesh(SubMesh& theSubMesh, XmlReader* Reader);//the submesh reference is the result value
-	void LoadSkeleton(std::string FileName, std::vector<Bone> &Bones, std::vector<Animation> &Animations);///< writes the results in Bones and Animations, Filename is not const, because its call-by-value and the function will change it!
-	void CreateAssimpSubMesh(const SubMesh &theSubMesh, const std::vector<Bone>& Bones);
-	void CreateAssimpSkeleton(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations);
 
-	aiMaterial* LoadMaterial(const std::string MaterialName);
+	/// writes the results in Bones and Animations, Filename is not const, because its call-by-value and the function will change it!
+	void LoadSkeleton(std::string FileName, std::vector<Bone> &Bones, std::vector<Animation> &Animations) const;
+
+	/// converts the animations in aiAnimations and puts them into the scene
+	void PutAnimationsInScene(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations);
+
+	/// uses the bone data to convert a SubMesh into a aiMesh which will be created and returned
+	aiMesh* CreateAssimpSubMesh(const SubMesh &theSubMesh, const std::vector<Bone>& Bones) const;
+
+
+	void CreateAssimpSkeleton(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations) const;
+
+	aiMaterial* LoadMaterial(const std::string MaterialName) const;
 	
 	///Recursivly creates a filled aiNode from a given root bone
-	aiNode* CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &Bones, aiNode* ParentNode);
+	aiNode* CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &Bones, aiNode* ParentNode) const;
 
 	//Now we don't have to give theses parameters to all functions
 	std::string m_CurrentFilename;

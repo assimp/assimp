@@ -552,7 +552,12 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 		aiNode* nd = rt->mChildren[i] = new aiNode();
 
 		const TempGroup& g = groups[i];
-		nd->mName = aiString(g.name);
+
+		// we need to generate an unique name for all mesh nodes.
+		// since we want to keep the group name, a prefix is
+		// prepended.
+		nd->mName = aiString("<MS3DMesh>_");
+		nd->mName.Append(g.name);
 		nd->mParent = rt;
 
 		nd->mMeshes = new unsigned int[nd->mNumMeshes = 1];

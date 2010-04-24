@@ -1,0 +1,44 @@
+----------------------------------------------------------------------
+CHANGELOG
+----------------------------------------------------------------------
+
+1.1 (2010-04-17)
+This is the list of relevant changes from the 1.0 (r412) release to 1.1 (r700).
+
+FEATURES:
+  - Vastly improved Collada support
+  - Add MS3D (Milkshape 3D) support
+  - Add support for Ogre XML static meshes
+  - Add experimental COB (TrueSpace) support
+  - Automatic test suite to quickly locate regressions
+  - D bindings (`dAssimp`)
+  - Python 2.n bindings (`PyAssimp`)
+  - Add basic support for Unicode input files (utf8, utf16 and utf32)
+  - Add further utilities to the `assimp` tool (xml/binary dumps, quick file stats)
+  - Switch to a CMAKE-based build system including an install target for unix'es
+  - Automatic evaluation of subdivision surfaces for some formats.
+  - Add `Importer::ReadFileFromMemory` and the corresponding C-API `aiReadFileFromMemory`
+  - Expose further math utilities via the C-API (i.e. `aiMultiplyMatrix4`)
+
+  - Move noboost files away from the public include directory
+  - Many, many bugfixes and improvements in existing loaders and postprocessing steps
+  - Documentation improved and clarified in many places.
+  - Add a sample on using Assimp in conjunction with OpenGL
+
+  - Distribution/packaging: comfortable SDK installer for Windows
+  - Distribution/packaging: improved release packages for other architectures
+
+CRITICAL FIXES:
+  - Resolve problems with clashing heap managers, STL ABIs and runtime libraries (win32)
+  - Fix automatic detection of file type if no file extension is given
+  - Improved exception safety and robustness, prevent leaking of exceptions through the C interface
+  - Fix possible heap corruption due to material properties pulled in incorrectly
+  - Avoid leaking in certain error scenarios
+  - Fix 64 bit compatibility problems in some loaders (i.e. MDL)
+
+BREAKING API CHANGES:
+  - None -
+
+MINOR API BEHAVIOUR CHANGES:
+ - Change quaternion orientation to suit to the more common convention (-w).
+ - aiString is utf8 now. Not yet consistent, however.

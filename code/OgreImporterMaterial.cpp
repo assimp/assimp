@@ -120,26 +120,30 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 									ss >> Line;
 									if(Line=="ambient")
 									{
-										aiColor3D Color;
-										ss >> Color.r >> Color.g >> Color.b;
+										float r,g,b;
+										ss >> r >> g >> b;
+										const aiColor3D Color(r,g,b);
 										NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_AMBIENT);
 									}
 									else if(Line=="diffuse")
 									{
-										aiColor3D Color;
-										ss >> Color.r >> Color.g >> Color.b;
+										float r,g,b;
+										ss >> r >> g >> b;
+										const aiColor3D Color(r,g,b);
 										NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_DIFFUSE);
 									}
 									else if(Line=="specular")
 									{
-										aiColor3D Color;
-										ss >> Color.r >> Color.g >> Color.b;
+										float r,g,b;
+										ss >> r >> g >> b;
+										const aiColor3D Color(r,g,b);
 										NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_SPECULAR);
 									}
 									else if(Line=="emmisive")
 									{
-										aiColor3D Color;
-										ss >> Color.r >> Color.g >> Color.b;
+										float r,g,b;
+										ss >> r >> g >> b;
+										const aiColor3D Color(r,g,b);
 										NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_EMISSIVE);
 									}
 									else if(Line=="texture_unit")

@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A0CE9ED2-A27E-40AE-95F5-FEF94BB7E131}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Assimp.NET_CS</RootNamespace>
+    <AssemblyName>Assimp.NET_CS</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\port_bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="aiAnimation.cs" />
+    <Compile Include="aiAnimBehaviour.cs" />
+    <Compile Include="aiBlendMode.cs" />
+    <Compile Include="aiBone.cs" />
+    <Compile Include="aiCamera.cs" />
+    <Compile Include="aiColor3D.cs" />
+    <Compile Include="aiComponent.cs" />
+    <Compile Include="aiDefaultLogStream.cs" />
+    <Compile Include="aiFace.cs" />
+    <Compile Include="aiFile.cs" />
+    <Compile Include="aiFileIO.cs" />
+    <Compile Include="aiLight.cs" />
+    <Compile Include="aiLightSourceType.cs" />
+    <Compile Include="aiMaterial.cs" />
+    <Compile Include="aiMaterialProperty.cs" />
+    <Compile Include="aiMatrix3x3.cs" />
+    <Compile Include="aiMatrix4x4.cs" />
+    <Compile Include="aiMemoryInfo.cs" />
+    <Compile Include="aiMesh.cs" />
+    <Compile Include="aiNode.cs" />
+    <Compile Include="aiNodeAnim.cs" />
+    <Compile Include="aiOrigin.cs" />
+    <Compile Include="aiPlane.cs" />
+    <Compile Include="aiPostProcessSteps.cs" />
+    <Compile Include="aiPrimitiveType.cs" />
+    <Compile Include="aiPropertyTypeInfo.cs" />
+    <Compile Include="aiQuaternion.cs" />
+    <Compile Include="aiQuatKey.cs" />
+    <Compile Include="aiRay.cs" />
+    <Compile Include="aiReturn.cs" />
+    <Compile Include="aiScene.cs" />
+    <Compile Include="aiShadingMode.cs" />
+    <Compile Include="aiString.cs" />
+    <Compile Include="aiTexel.cs" />
+    <Compile Include="aiTexture.cs" />
+    <Compile Include="aiTextureFlags.cs" />
+    <Compile Include="aiTextureMapMode.cs" />
+    <Compile Include="aiTextureMapping.cs" />
+    <Compile Include="aiTextureOp.cs" />
+    <Compile Include="aiTextureType.cs" />
+    <Compile Include="aiUVTransform.cs" />
+    <Compile Include="aiVector2D.cs" />
+    <Compile Include="aiVector3D.cs" />
+    <Compile Include="aiVectorKey.cs" />
+    <Compile Include="aiVertexWeight.cs" />
+    <Compile Include="AllocateFromAssimpHeap.cs" />
+    <Compile Include="Assimp.cs" />
+    <Compile Include="AssimpPINVOKE.cs" />
+    <Compile Include="Importer.cs" />
+    <Compile Include="IOStream.cs" />
+    <Compile Include="IOSystem.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="LogStream.cs" />
+    <Compile Include="NullLogger.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SWIGTYPE_p_aiColor4D.cs" />
+    <Compile Include="SWIGTYPE_p_aiTextureMapMode.cs" />
+    <Compile Include="SWIGTYPE_p_aiTextureMapping.cs" />
+    <Compile Include="SWIGTYPE_p_aiTextureOp.cs" />
+    <Compile Include="SWIGTYPE_p_Assimp__BaseImporter.cs" />
+    <Compile Include="SWIGTYPE_p_Assimp__BaseProcess.cs" />
+    <Compile Include="SWIGTYPE_p_bool.cs" />
+    <Compile Include="SWIGTYPE_p_float.cs" />
+    <Compile Include="SWIGTYPE_p_f_p_aiFileIO_p_aiFile__void.cs" />
+    <Compile Include="SWIGTYPE_p_f_p_aiFileIO_p_q_const__char_p_q_const__char__p_aiFile.cs" />
+    <Compile Include="SWIGTYPE_p_f_p_aiFile_p_char_size_t_size_t__size_t.cs" />
+    <Compile Include="SWIGTYPE_p_f_p_aiFile_p_q_const__char_size_t_size_t__size_t.cs" />
+    <Compile Include="SWIGTYPE_p_f_p_aiFile_size_t_enum_aiOrigin__aiReturn.cs" />
+    <Compile Include="SWIGTYPE_p_f_p_aiFile__size_t.cs" />
+    <Compile Include="SWIGTYPE_p_f_p_aiFile__void.cs" />
+    <Compile Include="SWIGTYPE_p_int.cs" />
+    <Compile Include="SWIGTYPE_p_p_aiAnimation.cs" />
+    <Compile Include="SWIGTYPE_p_p_aiBone.cs" />
+    <Compile Include="SWIGTYPE_p_p_aiCamera.cs" />
+    <Compile Include="SWIGTYPE_p_p_aiColor4D.cs" />
+    <Compile Include="SWIGTYPE_p_p_aiLight.cs" />
+    <Compile Include="SWIGTYPE_p_p_aiMaterial.cs" />
+    <Compile Include="SWIGTYPE_p_p_aiMaterialProperty.cs" />
+    <Compile Include="SWIGTYPE_p_p_aiMesh.cs" />
+    <Compile Include="SWIGTYPE_p_p_aiNode.cs" />
+    <Compile Include="SWIGTYPE_p_p_aiNodeAnim.cs" />
+    <Compile Include="SWIGTYPE_p_p_aiTexture.cs" />
+    <Compile Include="SWIGTYPE_p_p_aiVector3D.cs" />
+    <Compile Include="SWIGTYPE_p_std__string.cs" />
+    <Compile Include="SWIGTYPE_p_unsigned_int.cs" />
+    <Compile Include="SWIGTYPE_p_void.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Assimp.NET\Assimp.NET.vcproj">
+      <Project>{A86A8AF2-3B4D-4381-BB01-9CA2AE88450E}</Project>
+      <Name>Assimp.NET</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

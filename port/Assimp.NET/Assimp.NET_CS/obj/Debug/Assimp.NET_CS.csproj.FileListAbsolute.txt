@@ -1,0 +1,5 @@
+D:\Projekte\Assimp\trunk\port\Assimp.NET\port_bin\Assimp.NET_CS.dll
+D:\Projekte\Assimp\trunk\port\Assimp.NET\port_bin\Assimp.NET_CS.pdb
+D:\Projekte\Assimp\trunk\port\Assimp.NET\Assimp.NET_CS\obj\Debug\ResolveAssemblyReference.cache
+D:\Projekte\Assimp\trunk\port\Assimp.NET\Assimp.NET_CS\obj\Debug\Assimp.NET_CS.dll
+D:\Projekte\Assimp\trunk\port\Assimp.NET\Assimp.NET_CS\obj\Debug\Assimp.NET_CS.pdb

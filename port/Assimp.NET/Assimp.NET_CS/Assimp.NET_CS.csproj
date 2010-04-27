@@ -101,6 +101,7 @@
     <Compile Include="NullLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SWIGTYPE_p_aiColor4D.cs" />
+    <Compile Include="SWIGTYPE_p_aiFileIO.cs" />
     <Compile Include="SWIGTYPE_p_aiTextureMapMode.cs" />
     <Compile Include="SWIGTYPE_p_aiTextureMapping.cs" />
     <Compile Include="SWIGTYPE_p_aiTextureOp.cs" />

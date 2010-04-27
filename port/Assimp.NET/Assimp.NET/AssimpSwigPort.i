@@ -15,7 +15,7 @@
 #include "..\..\..\include\aiLight.h"
 #include "..\..\..\include\aiAnim.h"
 #include "..\..\..\include\aiMesh.h"
-//#include "..\..\..\include\aiFileIO.h"
+#include "..\..\..\include\aiFileIO.h"
 #include "..\..\..\include\aiMaterial.h"
 #include "..\..\..\include\aiQuaternion.h"
 #include "..\..\..\include\aiScene.h"
@@ -25,7 +25,7 @@
 #include "..\..\..\include\IOStream.h"
 #include "..\..\..\include\Logger.h"
 #include "..\..\..\include\LogStream.h"
-//#include "..\..\..\include\NullLogger.h"
+#include "..\..\..\include\NullLogger.h"
 %}
 
 #define C_STRUCT
@@ -66,7 +66,7 @@
 %include "..\..\..\include\aiLight.h"
 %include "..\..\..\include\aiAnim.h"
 %include "..\..\..\include\aiMesh.h"
-//%include "..\..\..\include\aiFileIO.h"
+%include "..\..\..\include\aiFileIO.h"
 %include "..\..\..\include\aiMaterial.h"
 %include "..\..\..\include\aiQuaternion.h"
 %include "..\..\..\include\aiScene.h"
@@ -76,7 +76,7 @@
 %include "..\..\..\include\IOStream.h"
 %include "..\..\..\include\Logger.h"
 %include "..\..\..\include\LogStream.h"
-//%include "..\..\..\include\NullLogger.h"
+%include "..\..\..\include\NullLogger.h"
 
 
 

@@ -162,6 +162,40 @@ public:
 	static inline void Swap(uint64_t* fOut) {
 		Swap8(fOut);
 	}
+
+	// ----------------------------------------------------------------------
+	//! Templatized ByteSwap
+	//! \returns param tOut as swapped
+	template<typename Type> 
+	static inline Type Swapped(Type tOut)
+	{
+		return _swapper<Type,sizeof(Type)>()(tOut);
+	}
+
+private:
+
+	template <typename T, size_t size> struct _swapper;
+};
+
+template <typename T> struct ByteSwap::_swapper<T,2> {
+	T operator() (T tOut) {
+		Swap2(&tOut); 
+		return tOut;
+	}
+};
+
+template <typename T> struct ByteSwap::_swapper<T,4> {
+	T operator() (T tOut) {
+		Swap4(&tOut); 
+		return tOut;
+	}
+};
+
+template <typename T> struct ByteSwap::_swapper<T,8> {
+	T operator() (T tOut) {
+		Swap8(&tOut); 
+		return tOut;
+	}
 };
 
 } // Namespace Assimp
@@ -171,6 +205,8 @@ public:
 // ByteSwap macros for BigEndian/LittleEndian support 
 // --------------------------------------------------------------------------------------
 #if (defined AI_BUILD_BIG_ENDIAN)
+#	define AI_LE(t)	(t)
+#	define AI_BE(t) ByteSwap::Swapped(t)
 #	define AI_LSWAP2(p)
 #	define AI_LSWAP4(p)
 #	define AI_LSWAP8(p)
@@ -186,6 +222,8 @@ public:
 #	define AI_SWAP8P(p) ByteSwap::Swap8((p))
 #	define BE_NCONST
 #else
+#	define AI_BE(t)	(t)
+#	define AI_LE(t) ByteSwap::Swapped(t)
 #	define AI_SWAP2(p)
 #	define AI_SWAP4(p)
 #	define AI_SWAP8(p)

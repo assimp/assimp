@@ -134,6 +134,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "qnan.h"
 
 // ----------------------------------------------------------------------------------------
+#include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/format.hpp>

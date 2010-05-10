@@ -57,9 +57,10 @@ extern "C" {
 /** A time-value pair specifying a certain 3D vector for the given time. */
 struct aiVectorKey
 {
-	//! The time of this key
+	/** The time of this key */
 	double mTime;     
-	//! The value of this key
+	
+	/** The value of this key */
 	C_STRUCT aiVector3D mValue; 
 
 #ifdef __cplusplus
@@ -76,8 +77,7 @@ struct aiVectorKey
 
 	typedef aiVector3D elem_type;
 
-	//! Comparison operators. Just the key value is compared
-	//! For use with std::find();
+	// Comparison operators. For use with std::find();
 	bool operator == (const aiVectorKey& o) const {
 		return o.mValue == this->mValue;
 	}
@@ -85,8 +85,7 @@ struct aiVectorKey
 		return o.mValue != this->mValue;
 	}
 
-	//! Relational operators. Just the key time is compared
-	//! For use with std::sort();
+	// Relational operators. For use with std::sort();
 	bool operator < (const aiVectorKey& o) const {
 		return mTime < o.mTime;
 	}
@@ -97,22 +96,21 @@ struct aiVectorKey
 };
 
 // ---------------------------------------------------------------------------
-/** A time-value pair specifying a rotation for the given time. For joint 
- *  animations the rotation is usually expressed using a quaternion.
- */
+/** A time-value pair specifying a rotation for the given time. 
+ *  Rotations are expressed with quaternions. */
 struct aiQuatKey
 {
-	//! The time of this key
+	/** The time of this key */
 	double mTime;     
-	//! The value of this key
+
+	/** The value of this key */
 	C_STRUCT aiQuaternion mValue; 
 
 #ifdef __cplusplus
+	aiQuatKey(){
+	}
 
-	//! Default constructor
-	aiQuatKey(){}
-
-	//! Construction from a given time and key value
+	/** Construction from a given time and key value */
 	aiQuatKey(double time, const aiQuaternion& value)
 		:	mTime	(time)
 		,	mValue	(value)
@@ -120,8 +118,7 @@ struct aiQuatKey
 
 	typedef aiQuaternion elem_type;
 
-	//! Comparison operators. Just the key value is compared
-	//! For use with std::find();
+	// Comparison operators. For use with std::find();
 	bool operator == (const aiQuatKey& o) const {
 		return o.mValue == this->mValue;
 	}
@@ -129,14 +126,58 @@ struct aiQuatKey
 		return o.mValue != this->mValue;
 	}
 
-	//! Relational operators. Just the key time is compared
-	//! For use with std::sort();
+	// Relational operators. For use with std::sort();
 	bool operator < (const aiQuatKey& o) const {
 		return mTime < o.mTime;
 	}
 	bool operator > (const aiQuatKey& o) const {
 		return mTime > o.mTime;
 	}
+#endif
+};
+
+// ---------------------------------------------------------------------------
+/** Binds a anim mesh to a specific point in time. */
+struct aiMeshKey 
+{
+	/** The time of this key */
+	double mTime;
+
+	/** Index into the aiMesh::mAnimMeshes array of the 
+	 *  mesh coresponding to the #aiMeshAnim hosting this
+	 *  key frame. The referenced anim mesh is evaluated
+	 *  according to the rules defined in the docs for #aiAnimMesh.*/
+	unsigned int mValue;
+
+#ifdef __cplusplus
+
+	aiMeshKey() {
+	}
+
+	/** Construction from a given time and key value */
+	aiMeshKey(double time, const unsigned int value)
+		:	mTime	(time)
+		,	mValue	(value)
+	{}
+
+	typedef unsigned int elem_type;
+
+	// Comparison operators. For use with std::find();
+	bool operator == (const aiMeshKey& o) const {
+		return o.mValue == this->mValue;
+	}
+	bool operator != (const aiMeshKey& o) const {
+		return o.mValue != this->mValue;
+	}
+
+	// Relational operators. For use with std::sort();
+	bool operator < (const aiMeshKey& o) const {
+		return mTime < o.mTime;
+	}
+	bool operator > (const aiMeshKey& o) const {
+		return mTime > o.mTime;
+	}
+
 #endif
 };
 
@@ -184,8 +225,8 @@ enum aiAnimBehaviour
  *
  *  @note All keys are returned in their correct, chronological order.
  *  Duplicate keys don't pass the validation step. Most likely there
- *  will be no negative time values, but they are not forbidden ( so you should
- *  be able to handle them ) */
+ *  will be no negative time values, but they are not forbidden also ( so 
+ *  implementations need to cope with them! ) */
 struct aiNodeAnim
 {
 	/** The name of the node affected by this animation. The node 
@@ -259,6 +300,41 @@ struct aiNodeAnim
 };
 
 // ---------------------------------------------------------------------------
+/** Describes vertex-based animations for a single mesh or a group of
+ *  meshes. Meshes carry the animation data for each frame in their
+ *  aiMesh::mAnimMeshes array. The purpose of aiMeshAnim is to 
+ *  define keyframes linking each mesh attachment to a particular
+ *  point in time. */
+struct aiMeshAnim
+{
+	/** Name of the mesh to be animated. An empty string is not allowed,
+	 *  animated meshes need to be named (not necessarily uniquely,
+	 *  the name can basically serve as wildcard to select a group
+	 *  of meshes with similar animation setup)*/
+	C_STRUCT aiString mName;
+
+	/** Size of the #mKeys array. Must be 1, at least. */
+	unsigned int mNumKeys;
+
+	/** Key frames of the animation. May not be NULL. */
+	C_STRUCT aiMeshKey* mKeys;
+
+#ifdef __cplusplus
+
+	aiMeshAnim()
+		: mNumKeys()
+		, mKeys()
+	{}
+
+	~aiMeshAnim()
+	{
+		delete[] mKeys;
+	}
+
+#endif
+};
+
+// ---------------------------------------------------------------------------
 /** An animation consists of keyframe data for a number of nodes. For 
  *  each node affected by the animation a separate series of data is given.*/
 struct aiAnimation
@@ -282,23 +358,42 @@ struct aiAnimation
 	 *  The array is mNumChannels in size. */
 	C_STRUCT aiNodeAnim** mChannels;
 
+
+	/** The number of mesh animation channels. Each channel affects
+	 *  a single mesh and defines vertex-based animation. */
+	unsigned int mNumMeshChannels;
+
+	/** The mesh animation channels. Each channel affects a single mesh. 
+	 *  The array is mNumMeshChannels in size. */
+	C_STRUCT aiMeshAnim** mMeshChannels;
+
 #ifdef __cplusplus
 	aiAnimation()
+		: mDuration(-1.)
+		, mTicksPerSecond()
+		, mNumChannels()
+		, mChannels()
+		, mNumMeshChannels()
+		, mMeshChannels()
 	{
-		mDuration = -1.;
-		mTicksPerSecond = 0;
-		mNumChannels = 0; mChannels = NULL;
 	}
 
 	~aiAnimation()
 	{
 		// DO NOT REMOVE THIS ADDITIONAL CHECK
-		if (mNumChannels && mChannels)
-		{
-			for( unsigned int a = 0; a < mNumChannels; a++)
+		if (mNumChannels && mChannels)	{
+			for( unsigned int a = 0; a < mNumChannels; a++) {
 				delete mChannels[a];
+			}
 
 		delete [] mChannels;
+		}
+		if (mNumMeshChannels && mMeshChannels)	{
+			for( unsigned int a = 0; a < mNumMeshChannels; a++) {
+				delete mMeshChannels[a];
+			}
+
+		delete [] mMeshChannels;
 		}
 	}
 #endif // __cplusplus
@@ -342,6 +437,15 @@ struct Interpolator	<aiQuaternion>	{
 }; // ! Interpolator <aiQuaternion>
 
 template <>
+struct Interpolator	<unsigned int>	{	
+	void operator () (unsigned int& out,unsigned int a, 
+		unsigned int b, float d) const
+	{
+		out = d>0.5f ? b : a;
+	}
+}; // ! Interpolator <aiQuaternion>
+
+template <>
 struct Interpolator	 <aiVectorKey>	{	
 	void operator () (aiVector3D& out,const aiVectorKey& a,
 		const aiVectorKey& b, float d) const	
@@ -357,6 +461,16 @@ struct Interpolator <aiQuatKey>		{
 		const aiQuatKey& b, float d) const
 	{
 		Interpolator<aiQuaternion> ipl;
+		ipl(out,a.mValue,b.mValue,d);
+	}
+}; // ! Interpolator <aiQuatKey>
+
+template <>
+struct Interpolator <aiMeshKey>		{
+	void operator () (unsigned int& out, const aiMeshKey a,
+		const aiMeshKey& b, float d) const
+	{
+		Interpolator<unsigned int> ipl;
 		ipl(out,a.mValue,b.mValue,d);
 	}
 }; // ! Interpolator <aiQuatKey>

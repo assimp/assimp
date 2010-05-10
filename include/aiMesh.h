@@ -302,6 +302,110 @@ enum aiPrimitiveType
 #define AI_PRIMITIVE_TYPE_FOR_N_INDICES(n) \
 	((n) > 3 ? aiPrimitiveType_POLYGON : (aiPrimitiveType)(1u << ((n)-1)))
 
+
+// ---------------------------------------------------------------------------
+/** @brief An AnimMesh is an attachment to an #aiMesh stores per-vertex 
+ *  animations for a particular frame.
+ *  
+ *  You may think of an #aiAnimMesh as a `patch` for the host mesh, which
+ *  replaces only certain vertex data streams at a particular time. 
+ *  Each mesh stores n attached attached meshes (#aiMesh::mAnimMeshes).
+ *  The actual relationship between the time line and anim meshes is 
+ *  established by #aiMeshAnim, which references singular mesh attachments
+ *  by their ID and binds them to a time offset.
+*/
+struct aiAnimMesh
+{
+	/** Replacement for aiMesh::mVertices. If this array is non-NULL, 
+	 *  it *must* contain aiMesh::mNumVertices entries. The corresponding
+	 *  array in the host mesh must be non-NULL as well - animation
+	 *  meshes may neither add or nor remove vertex components (if
+	 *  a replacement array is NULL and the corresponding source
+	 *  array is not, the source data is taken instead)*/
+	C_STRUCT aiVector3D* mVertices;
+
+	/** Replacement for aiMesh::mNormals.  */
+	C_STRUCT aiVector3D* mNormals;
+
+	/** Replacement for aiMesh::mTangents. */
+	C_STRUCT aiVector3D* mTangents;
+
+	/** Replacement for aiMesh::mBitangents. */
+	C_STRUCT aiVector3D* mBitangents;
+
+	/** Replacement for aiMesh::mColors */
+	C_STRUCT aiColor4D* mColors[AI_MAX_NUMBER_OF_COLOR_SETS];
+
+	/** Replacement for aiMesh::mTextureCoords */
+	C_STRUCT aiVector3D* mTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
+
+#ifdef __cplusplus
+
+	aiAnimMesh()
+		: mVertices()
+		, mNormals()
+		, mTangents()
+		, mBitangents()
+	{
+		// fixme consider moving this to the ctor initializer list as well
+		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++){
+			mTextureCoords[a] = NULL;
+		}
+		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++) {
+			mColors[a] = NULL;
+		}
+	}
+	
+	~aiAnimMesh()
+	{
+		delete [] mVertices; 
+		delete [] mNormals;
+		delete [] mTangents;
+		delete [] mBitangents;
+		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++) {
+			delete [] mTextureCoords[a];
+		}
+		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++) {
+			delete [] mColors[a];
+		}
+	}
+
+	/** Check whether the anim mesh overrides the vertex positions 
+	 *  of its host mesh*/ 
+	bool HasPositions() const {
+		return mVertices != NULL; 
+	}
+
+	/** Check whether the anim mesh overrides the vertex normals
+	 *  of its host mesh*/ 
+	bool HasNormals() const { 
+		return mNormals != NULL; 
+	}
+
+	/** Check whether the anim mesh overrides the vertex tangents
+	 *  and bitangents of its host mesh. As for aiMesh,
+	 *  tangents and bitangents always go together. */ 
+	bool HasTangentsAndBitangents() const { 
+		return mTangents != NULL; 
+	}
+
+	/** Check whether the anim mesh overrides a particular
+	 * set of vertex colors on his host mesh. 
+	 *  @param pIndex 0<index<AI_MAX_NUMBER_OF_COLOR_SETS */ 
+	bool HasVertexColors( unsigned int pIndex) const	{ 
+		return pIndex >= AI_MAX_NUMBER_OF_COLOR_SETS ? false : mColors[pIndex] != NULL; 
+	}
+
+	/** Check whether the anim mesh overrides a particular
+	 * set of texture coordinates on his host mesh. 
+	 *  @param pIndex 0<index<AI_MAX_NUMBER_OF_TEXTURECOORDS */ 
+	bool HasTextureCoords( unsigned int pIndex) const	{ 
+		return pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS ? false : mTextureCoords[pIndex] != NULL; 
+	}
+
+#endif
+};
+
 // ---------------------------------------------------------------------------
 /** @brief A mesh represents a geometry or model with a single material. 
 *
@@ -453,6 +557,14 @@ struct aiMesh
 	 **/
 	aiString mName;
 
+	/** The number of attachment meshes */
+	unsigned int mNumAnimMeshes;
+
+	/** Attachment meshes for this mesh, for vertex-based animation. 
+	 *  Attachment meshes carry replacement data for some of the
+	 *  mesh'es vertex components (usually positions, normals). */
+	C_STRUCT aiAnimMesh** mAnimMeshes;
+
 #ifdef __cplusplus
 
 	//! Default constructor. Initializes all members to 0
@@ -460,10 +572,12 @@ struct aiMesh
 	{
 		mNumVertices    = 0; 
 		mNumFaces       = 0;
+		mNumAnimMeshes = 0;
 		mPrimitiveTypes = 0;
 		mVertices = NULL; mFaces    = NULL;
 		mNormals  = NULL; mTangents = NULL;
 		mBitangents = NULL;
+		mAnimMeshes = NULL;
 		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
 		{
 			mNumUVComponents[a] = 0;
@@ -482,24 +596,33 @@ struct aiMesh
 		delete [] mNormals;
 		delete [] mTangents;
 		delete [] mBitangents;
-		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
+		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++) {
 			delete [] mTextureCoords[a];
-		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
+		}
+		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++) {
 			delete [] mColors[a];
+		}
 
 		// DO NOT REMOVE THIS ADDITIONAL CHECK
-		if (mNumBones && mBones)
-		{
-			for( unsigned int a = 0; a < mNumBones; a++)
+		if (mNumBones && mBones)	{
+			for( unsigned int a = 0; a < mNumBones; a++) {
 				delete mBones[a];
+			}
 			delete [] mBones;
 		}
+		if (mNumAnimMeshes && mAnimMeshes)	{
+			for( unsigned int a = 0; a < mNumAnimMeshes; a++) {
+				delete mAnimMeshes[a];
+			}
+			delete [] mBones;
+		}
+
 		delete [] mFaces;
 	}
 
-	//! Check whether the mesh contains positions. If no special scene flags
-	//! (such as AI_SCENE_FLAGS_ANIM_SKELETON_ONLY) are set this will
-	//! always return true 
+	//! Check whether the mesh contains positions. Provided no special
+	//! scene flags are set (such as AI_SCENE_FLAGS_ANIM_SKELETON_ONLY), 
+	//! this will always be true 
 	bool HasPositions() const 
 		{ return mVertices != NULL && mNumVertices > 0; }
 
@@ -561,6 +684,7 @@ struct aiMesh
 
 #endif // __cplusplus
 };
+
 
 #ifdef __cplusplus
 }

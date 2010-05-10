@@ -221,6 +221,9 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 			outMeshes.push_back(new aiMesh());
 			aiMesh* out = outMeshes.back();
 
+			// the name carries the adjacency information between the meshes
+			out->mName = mesh->mName;
+
 			// copy data members
 			out->mPrimitiveTypes = 1u << real;
 			out->mMaterialIndex = mesh->mMaterialIndex;

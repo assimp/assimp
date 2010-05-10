@@ -168,6 +168,9 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
 			pcMesh->mNumFaces		= iOutFaceNum;
 			pcMesh->mMaterialIndex	= pMesh->mMaterialIndex;
 
+			// the name carries the adjacency information between the meshes
+			pcMesh->mName = pMesh->mName;
+
 			if (i == iSubMeshes-1)
 			{
 				pcMesh->mNumFaces = iOutFaceNum + (
@@ -441,6 +444,9 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
 			aiMesh* pcMesh			= new aiMesh;			
 			pcMesh->mNumVertices	= 0;
 			pcMesh->mMaterialIndex	= pMesh->mMaterialIndex;
+
+			// the name carries the adjacency information between the meshes
+			pcMesh->mName = pMesh->mName;
 
 			typedef std::vector<aiVertexWeight> BoneWeightList;
 			if (pMesh->HasBones())

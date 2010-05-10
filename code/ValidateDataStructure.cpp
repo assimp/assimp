@@ -318,6 +318,8 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 			pMesh->mMaterialIndex,mScene->mNumMaterials-1);
 	}
 
+	Validate(&pMesh->mName);
+
 	for (unsigned int i = 0; i < pMesh->mNumFaces; ++i)
 	{
 		aiFace& face = pMesh->mFaces[i];

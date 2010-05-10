@@ -440,6 +440,19 @@ struct aiMesh
 	 */
 	unsigned int mMaterialIndex;
 
+	/** Name of the mesh. Meshes can be named, but this is not a
+	 *  requirement and leaving this field empty is totally fine.
+	 *  There are mainly three uses for mesh names: 
+	 *   - some formats name nodes and meshes independently.
+	 *   - importers tend to split meshes up to meet the
+	 *      one-material-per-mesh requirement. Assigning
+	 *      the same (dummy) name to each of the result meshes
+	 *      aids the caller at recovering the original mesh
+	 *      partitioning.
+	 *   - Vertex animations refer to meshes by their names.
+	 **/
+	aiString mName;
+
 #ifdef __cplusplus
 
 	//! Default constructor. Initializes all members to 0

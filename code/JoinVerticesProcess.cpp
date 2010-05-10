@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "JoinVerticesProcess.h"
 #include "ProcessHelper.h"
 #include "Vertex.h"
+#include "TinyFormatter.h"
 
 using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
@@ -251,13 +252,17 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	}
 
 	if (!DefaultLogger::isNullLogger() && DefaultLogger::get()->getLogSeverity() == Logger::VERBOSE)	{
-		char szBuff[128]; // should be sufficiently large in every case
-		::sprintf(szBuff,"Mesh %i | Verts in: %i out: %i | ~%.1f%%",
-			meshIndex,
-			pMesh->mNumVertices,
-			(int)uniqueVertices.size(),
-			((pMesh->mNumVertices - uniqueVertices.size()) / (float)pMesh->mNumVertices) * 100.f);
-		DefaultLogger::get()->debug(szBuff);
+		DefaultLogger::get()->debug((Formatter::format(),
+			"Mesh ",meshIndex,
+			" (",
+			(pMesh->mName.length ? pMesh->mName.data : "unnamed"),
+			") | Verts in: ",pMesh->mNumVertices,
+			" out: ",
+			uniqueVertices.size(),
+			" | ~",
+			((pMesh->mNumVertices - uniqueVertices.size()) / (float)pMesh->mNumVertices) * 100.f,
+			"%"
+		));
 	}
 
 	// replace vertex data with the unique data sets

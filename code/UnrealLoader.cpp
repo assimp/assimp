@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 
-#ifndef AI_BUILD_NO_3D_IMPORTER
+#ifndef ASSIMP_BUILD_NO_3D_IMPORTER
 
 #include "UnrealLoader.h"
 #include "StreamReader.h"
@@ -423,4 +423,4 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 	flipper.Execute(pScene);
 }
 
-#endif // !! AI_BUILD_NO_3D_IMPORTER
+#endif // !! ASSIMP_BUILD_NO_3D_IMPORTER

@@ -47,6 +47,47 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ByteSwap.h"
 namespace Assimp	{
+	namespace Intern {
+
+// --------------------------------------------------------------------------------------------
+template <typename T, bool doit>
+struct ByteSwapper	{
+	void operator() (T* inout) {
+		ByteSwap::Swap(inout);
+	}
+};
+
+template <typename T> 
+struct ByteSwapper<T,false>	{
+	void operator() (T*) {
+	}
+};
+
+// --------------------------------------------------------------------------------------------
+template <bool SwapEndianess, typename T, bool RuntimeSwitch>
+struct Getter {
+	void operator() (T* inout, bool le) {
+#ifdef AI_BUILD_BIG_ENDIAN
+		le =  le;
+#else
+		le =  !le;
+#endif
+		if (le) {
+			ByteSwapper<T,(sizeof(T)>1?true:false)> () (inout);
+		}
+		else ByteSwapper<T,false> () (inout);
+	}
+};
+
+template <bool SwapEndianess, typename T> 
+struct Getter<SwapEndianess,T,false> {
+	void operator() (T* inout, bool le) {
+
+		// static branch
+		ByteSwapper<T,(SwapEndianess && sizeof(T)>1)> () (inout);
+	}
+};
+} // end Intern
 
 // --------------------------------------------------------------------------------------------
 /** Wrapper class around IOStream to allow for consistent reading of binary data in both 
@@ -58,39 +99,51 @@ namespace Assimp	{
  *
  *  XXX switch from unsigned int for size types to size_t? or ptrdiff_t?*/
 // --------------------------------------------------------------------------------------------
-template <bool SwapEndianess = false>
+template <bool SwapEndianess = false, bool RuntimeSwitch = false>
 class StreamReader
 {
+
+public:
+
+	// FIXME: use these data types throughout the whole library,
+	// then change them to 64 bit values :-)
+	
+	typedef int diff;
+	typedef unsigned int pos;
+
 public:
 
 
 	// ---------------------------------------------------------------------
-	/** Construction from a given stream with a well-defined endianess
+	/** Construction from a given stream with a well-defined endianess.
 	 * 
-	 *  The stream will be deleted afterwards.
-	 *  @param stream Input stream
-	 */
-	StreamReader(IOStream* _stream)
+	 *  The StreamReader holds a permanent strong reference to the
+	 *  stream, which is released upon destruction.
+	 *  @param stream Input stream. The stream is not restarted if
+	 *    its file pointer is not at 0. Instead, the stream reader
+	 *    reads from the current position to the end of the stream.
+	 *  @param le If @c RuntimeSwitch is true: specifies whether the
+	 *    stream is in little endian byte order. Otherwise the
+	 *    endianess information is contained in the @c SwapEndianess
+	 *    template parameter and this parameter is meaningless.  */
+	StreamReader(boost::shared_ptr<IOStream> stream, bool le = false)
+		: stream(stream)
+		, le(le)
 	{
-		if (!_stream) {
-			throw DeadlyImportError("StreamReader: Unable to open file");
-		}
-		stream = _stream;
-
-		const size_t s = stream->FileSize();
-		if (!s) {
-			throw DeadlyImportError("StreamReader: File is empty");
-		}
-
-		current = buffer = new int8_t[s];
-		stream->Read(current,s,1);
-		end = limit = &buffer[s];
+		_Begin();
 	}
 
-	~StreamReader() 
+	// ---------------------------------------------------------------------
+	StreamReader(IOStream* stream, bool le = false)
+		: stream(boost::shared_ptr<IOStream>(stream))
+		, le(le)
 	{
+		_Begin();
+	}
+
+	// ---------------------------------------------------------------------
+	~StreamReader() {
 		delete[] buffer;
-		delete stream;
 	}
 
 public:
@@ -180,8 +233,8 @@ public:
 	/** Increase the file pointer (relative seeking)  */
 	void IncPtr(int plus)	{
 		current += plus;
-		if (current > end) {
-			throw DeadlyImportError("End of file was reached");
+		if (current > limit) {
+			throw DeadlyImportError("End of file or read limit was reached");
 		}
 	}
 
@@ -201,8 +254,8 @@ public:
 	void SetPtr(int8_t* p)	{
 
 		current = p;
-		if (current > end || current < buffer) {
-			throw DeadlyImportError("End of file was reached");
+		if (current > limit || current < buffer) {
+			throw DeadlyImportError("End of file or read limit was reached");
 		}
 	}
 
@@ -223,6 +276,10 @@ public:
 	/** Get the current offset from the beginning of the file */
 	int GetCurrentPos() const	{
 		return (unsigned int)(current - buffer);
+	}
+
+	void SetCurrentPos(size_t pos) {
+		SetPtr(buffer + pos);
 	}
 
 	// ---------------------------------------------------------------------
@@ -268,19 +325,6 @@ public:
 
 private:
 
-	template <typename T, bool doit>
-	struct ByteSwapper	{
-		void operator() (T* inout) {
-			ByteSwap::Swap(inout);
-		}
-	};
-
-	template <typename T>
-	struct ByteSwapper<T,false>	{
-		void operator() (T*) {
-		}
-	};
-
 	// ---------------------------------------------------------------------
 	/** Generic read method. ByteSwap::Swap(T*) *must* be defined */
 	template <typename T>
@@ -290,19 +334,39 @@ private:
 		}
 
 		T f = *((const T*)current);
-		ByteSwapper<T,(SwapEndianess && sizeof(T)>1)> swapper;
-		swapper(&f);
+		Intern :: Getter<SwapEndianess,T,RuntimeSwitch>() (&f,le);
 
 		current += sizeof(T);
 		return f;
 	}
 
-	IOStream* stream;
+	// ---------------------------------------------------------------------
+	void _Begin() {
+		if (!stream) {
+			throw DeadlyImportError("StreamReader: Unable to open file");
+		}
+
+		const size_t s = stream->FileSize() - stream->Tell();
+		if (!s) {
+			throw DeadlyImportError("StreamReader: File is empty or EOF is already reached");
+		}
+
+		current = buffer = new int8_t[s];
+		stream->Read(current,s,1);
+		end = limit = &buffer[s];
+	}
+
+private:
+
+
+	boost::shared_ptr<IOStream> stream;
 	int8_t *buffer, *current, *end, *limit;
+	bool le;
 };
 
 
 // --------------------------------------------------------------------------------------------
+// `static` StreamReaders. Their byte order is fixed and they might be a little bit faster.
 #ifdef AI_BUILD_BIG_ENDIAN
 	typedef StreamReader<true>  StreamReaderLE;
 	typedef StreamReader<false> StreamReaderBE;
@@ -310,6 +374,10 @@ private:
 	typedef StreamReader<true>  StreamReaderBE;
 	typedef StreamReader<false> StreamReaderLE;
 #endif
+
+// `dynamic` StreamReader. The byte order of the input data is specified in the
+// c'tor. This involves runtime branching and might be a little bit slower.
+typedef StreamReader<true,true> StreamReaderAny;
 
 } // end namespace Assimp
 

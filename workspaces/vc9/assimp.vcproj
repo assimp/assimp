@@ -1121,50 +1121,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="BoostWorkaround"
-				>
-				<File
-					RelativePath="..\..\code\BoostWorkaround\boost\foreach.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\BoostWorkaround\boost\format.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\BoostWorkaround\boost\scoped_array.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\BoostWorkaround\boost\scoped_ptr.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\BoostWorkaround\boost\shared_ptr.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\BoostWorkaround\boost\static_assert.hpp"
-					>
-				</File>
-				<Filter
-					Name="tuple"
-					>
-					<File
-						RelativePath="..\..\code\BoostWorkaround\boost\tuple\tuple.hpp"
-						>
-					</File>
-				</Filter>
-				<Filter
-					Name="math"
-					>
-					<File
-						RelativePath="..\..\code\BoostWorkaround\boost\math\common_factor_rt.hpp"
-						>
-					</File>
-				</Filter>
-			</Filter>
-			<Filter
 				Name="Cpp"
 				>
 				<File
@@ -1891,6 +1847,42 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="blend"
+					>
+					<File
+						RelativePath="..\..\code\BlenderDNA.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderDNA.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderDNA.inl"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderLoader.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderScene.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderScene.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderSceneGen.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="process"
@@ -2227,10 +2219,6 @@
 					RelativePath="..\..\code\FileSystemFilter.h"
 					>
 				</File>
-				<File
-					RelativePath="..\..\code\StreamReader.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="core"
@@ -2260,7 +2248,27 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\ByteSwap.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\Exceptional.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\fast_atof.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\GenericProperty.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\Hash.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\IFF.h"
 					>
 				</File>
 				<File
@@ -2376,6 +2384,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\ParsingUtils.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\qnan.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\RemoveComments.cpp"
 					>
 				</File>
@@ -2440,6 +2456,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\StreamReader.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\StringComparison.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\Subdivision.cpp"
 					>
 				</File>
@@ -2457,6 +2481,10 @@
 				</File>
 				<File
 					RelativePath="..\..\code\TinyFormatter.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\Vertex.h"
 					>
 				</File>
 				<File
@@ -3549,44 +3577,56 @@
 				</Filter>
 			</Filter>
 			<Filter
-				Name="util"
+				Name="noboost"
 				>
 				<File
-					RelativePath="..\..\code\ByteSwap.h"
+					RelativePath="..\..\code\BoostWorkaround\boost\foreach.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\fast_atof.h"
+					RelativePath="..\..\code\BoostWorkaround\boost\format.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\GenericProperty.h"
+					RelativePath="..\..\code\BoostWorkaround\boost\pointer_cast.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\Hash.h"
+					RelativePath="..\..\code\BoostWorkaround\boost\scoped_array.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\IFF.h"
+					RelativePath="..\..\code\BoostWorkaround\boost\scoped_ptr.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\ParsingUtils.h"
+					RelativePath="..\..\code\BoostWorkaround\boost\shared_array.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\qnan.h"
+					RelativePath="..\..\code\BoostWorkaround\boost\shared_ptr.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\StringComparison.h"
+					RelativePath="..\..\code\BoostWorkaround\boost\static_assert.hpp"
 					>
 				</File>
-				<File
-					RelativePath="..\..\code\Vertex.h"
+				<Filter
+					Name="tuple"
 					>
-				</File>
+					<File
+						RelativePath="..\..\code\BoostWorkaround\boost\tuple\tuple.hpp"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="math"
+					>
+					<File
+						RelativePath="..\..\code\BoostWorkaround\boost\math\common_factor_rt.hpp"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

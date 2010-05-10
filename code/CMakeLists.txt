@@ -305,6 +305,17 @@ SOURCE_GROUP(COB FILES
 	COBScene.h
 )
 
+SOURCE_GROUP(BLENDER FILES
+	BlenderLoader.cpp
+	BlenderLoader.h
+	BlenderDNA.cpp
+	BlenderDNA.h
+	BlenderDNA.inl
+	BlenderScene.cpp
+	BlenderScene.h
+	BlenderSceneGen.h
+)
+
 SOURCE_GROUP( PostProcessing FILES
 	CalcTangentsProcess.cpp
 	CalcTangentsProcess.h
@@ -676,6 +687,14 @@ ADD_LIBRARY( assimp SHARED
 	COBScene.h
 	TinyFormatter.h
 	LineSplitter.h
+	BlenderLoader.cpp
+	BlenderLoader.h
+	BlenderDNA.cpp
+	BlenderDNA.h
+	BlenderDNA.inl
+	BlenderScene.cpp
+	BlenderScene.h
+	BlenderSceneGen.h
 
 	# Necessary to show the headers in the project when using the VC++ generator:
 	BoostWorkaround/boost/math/common_factor_rt.hpp

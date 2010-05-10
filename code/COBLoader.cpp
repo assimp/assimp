@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "AssimpPCH.h"
 
-#ifndef AI_BUILD_NO_COB_IMPORTER
+#ifndef ASSIMP_BUILD_NO_COB_IMPORTER
 #include "COBLoader.h"
 #include "COBScene.h"
 
@@ -125,8 +125,7 @@ void COBImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	COB::Scene scene;
-	boost::scoped_ptr<StreamReaderLE> stream(new StreamReaderLE( 
-		pIOHandler->Open(pFile,"rb")) );
+	boost::scoped_ptr<StreamReaderLE> stream(new StreamReaderLE( pIOHandler->Open(pFile,"rb")) );
 
 	// check header
 	char head[32];

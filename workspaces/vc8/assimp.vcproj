@@ -1884,6 +1884,42 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="blender"
+					>
+					<File
+						RelativePath="..\..\code\BlenderDNA.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderDNA.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderDNA.inl"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderLoader.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderScene.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderScene.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderSceneGen.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="process"
@@ -2226,46 +2262,6 @@
 				</File>
 				<File
 					RelativePath="..\..\code\StreamReader.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="util"
-				>
-				<File
-					RelativePath="..\..\code\ByteSwap.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\fast_atof.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\GenericProperty.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\Hash.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\ParsingUtils.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\ProcessHelper.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\qnan.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\StringComparison.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\Vertex.h"
 					>
 				</File>
 			</Filter>
@@ -3441,6 +3437,22 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\ByteSwap.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\fast_atof.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\GenericProperty.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\Hash.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\Importer.cpp"
 					>
 				</File>
@@ -3569,6 +3581,18 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\ParsingUtils.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\ProcessHelper.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\qnan.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\RemoveComments.cpp"
 					>
 				</File>
@@ -3633,6 +3657,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\StringComparison.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\Subdivision.cpp"
 					>
 				</File>
@@ -3650,6 +3678,10 @@
 				</File>
 				<File
 					RelativePath="..\..\code\TinyFormatter.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\Vertex.h"
 					>
 				</File>
 				<File

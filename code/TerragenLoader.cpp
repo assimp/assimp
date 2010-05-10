@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 
-#ifndef AI_BUILD_NO_TERRAGEN_IMPORTER
+#ifndef ASSIMP_BUILD_NO_TERRAGEN_IMPORTER
 #include "TerragenLoader.h"
 
 using namespace Assimp;
@@ -251,4 +251,4 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
 	pScene->mFlags |= AI_SCENE_FLAGS_TERRAIN;
 }
 
-#endif // !! AI_BUILD_NO_TERRAGEN_IMPORTER
+#endif // !! ASSIMP_BUILD_NO_TERRAGEN_IMPORTER

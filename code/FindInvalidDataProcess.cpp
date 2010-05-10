@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 
-#ifndef AI_BUILD_NO_FINDINVALIDDATA_PROCESS
+#ifndef ASSIMP_BUILD_NO_FINDINVALIDDATA_PROCESS
 
 // internal headers
 #include "FindInvalidDataProcess.h"
@@ -416,4 +416,4 @@ int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 }
 
 
-#endif // !! AI_BUILD_NO_FINDINVALIDDATA_PROCESS
+#endif // !! ASSIMP_BUILD_NO_FINDINVALIDDATA_PROCESS

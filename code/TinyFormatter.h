@@ -113,6 +113,20 @@ public:
 		return *this;
 	}
 
+
+	// comma operator overloaded as well, choose your preferred way.
+	template <typename TToken>
+	const basic_formatter& operator, (const TToken& s) const {
+		underlying << s;
+		return *this;
+	}
+
+	template <typename TToken>
+	basic_formatter& operator, (const TToken& s) {
+		underlying << s;
+		return *this;
+	}
+
 private:
 	mutable stringstream underlying;
 };

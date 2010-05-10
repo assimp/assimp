@@ -58,6 +58,35 @@ class Importer;
 #define AI_MAKE_MAGIC(string) ((uint32_t)((string[0] << 24) + \
 	(string[1] << 16) + (string[2] << 8) + string[3]))
 
+// ---------------------------------------------------------------------------
+template <typename T>
+struct ScopeGuard
+{
+	ScopeGuard(T* obj) : obj(obj), mdismiss() {}
+	~ScopeGuard () throw() {
+		if (!mdismiss) {
+			delete obj;
+		}
+		obj = NULL;
+	} 
+
+	T* dismiss() {
+		mdismiss=true;
+		return obj;
+	}
+
+	operator T*() {
+		return obj;
+	}
+
+	T* operator -> () {
+		return obj;
+	}
+
+private:
+	T* obj;
+	bool mdismiss;
+};
 
 //! @cond never
 // ---------------------------------------------------------------------------

@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 
-#ifndef AI_BUILD_NO_CSM_IMPORTER
+#ifndef ASSIMP_BUILD_NO_CSM_IMPORTER
 
 #include "CSMLoader.h"
 #include "SkeletonMeshBuilder.h"
@@ -278,4 +278,4 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 	SkeletonMeshBuilder maker(pScene,pScene->mRootNode,true);
 }
 
-#endif // !! AI_BUILD_NO_CSM_IMPORTER
+#endif // !! ASSIMP_BUILD_NO_CSM_IMPORTER

@@ -63,25 +63,6 @@ BaseImporter::~BaseImporter()
 	// nothing to do here
 }
 
-template <typename T>
-struct tinyguard
-{
-	tinyguard(T* obj) : obj(obj), mdismiss() {}
-	~tinyguard () throw() {if (!mdismiss) {delete obj;} obj = NULL;} 
-
-	void dismiss() {
-		mdismiss=true;
-	}
-
-	operator T*() {
-		return obj;
-	}
-
-private:
-	T* obj;
-	bool mdismiss;
-};
-
 // ------------------------------------------------------------------------------------------------
 // Imports the given file and returns the imported data.
 aiScene* BaseImporter::ReadFile( const std::string& pFile, IOSystem* pIOHandler)
@@ -90,7 +71,7 @@ aiScene* BaseImporter::ReadFile( const std::string& pFile, IOSystem* pIOHandler)
 	FileSystemFilter filter(pFile,pIOHandler);
 
 	// create a scene object to hold the data
-	tinyguard<aiScene> sc(new aiScene());
+	ScopeGuard<aiScene> sc(new aiScene());
 
 	// dispatch importing
 	try

@@ -31,7 +31,7 @@ public:
 		delete ptr;
 	}
 
-	inline T* get()
+	inline T* get() const
 	{
 		return ptr;
 	}

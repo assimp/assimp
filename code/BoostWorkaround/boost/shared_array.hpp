@@ -7,27 +7,18 @@
 // ------------------------------
 // Internal stub
 namespace boost {
-	namespace detail {
+	namespace array_detail {
 		class controller {
-
 		public:
 
 			controller()
-				: cnt(0)
-			{}
-
-			template <typename T>
-			controller(T* ptr)
-				: cnt(ptr?1:0)
+				: cnt(1)
 			{}
 		
 		public:
 
 			template <typename T>
 			controller* decref(T* pt) {
-				if (!pt) {
-					return NULL;
-				}
 				if (--cnt <= 0) {
 					delete this;
 					delete[] pt;
@@ -94,39 +85,61 @@ public:
 	// provide a default constructor
 	shared_array()
 		: ptr()
-		, ctr(new detail::controller())
+		, ctr(NULL)
 	{
 	}
 
 	// construction from an existing object of type T
-	explicit shared_array(T* _ptr)
-		: ptr(_ptr)
-		, ctr(new detail::controller(ptr))
+	explicit shared_array(T* ptr)
+		: ptr(ptr)
+		, ctr(ptr ? new array_detail::controller() : NULL)
+	{
+	}
+
+	shared_array(const shared_array& r)
+		: ptr(r.ptr)
+		, ctr(r.ctr ? r.ctr->incref() : NULL)
 	{
 	}
 
 	template <typename Y>
-	shared_array(const shared_array<Y>& o,typename detail::is_convertible<T,Y>::result = detail::empty())
-		: ptr(o.ptr)
-		, ctr(o.ctr->incref())
+	shared_array(const shared_array<Y>& r,typename detail::is_convertible<T,Y>::result = detail::empty())
+		: ptr(r.ptr)
+		, ctr(r.ctr ? r.ctr->incref() : NULL)
 	{
-	}
-
-	shared_array& operator= (const shared_array& r) {
-		if(r == *this) {
-			return *this;
-		}
-		ctr->decref(ptr);
-		ctr = r.ctr->incref();
-		ptr = r.ptr;
-
-		return *this;
 	}
 
 	// automatic destruction of the wrapped object when all
 	// references are freed.
 	~shared_array()	{
-		ctr = ctr->decref(ptr);
+		if (ctr) {
+			ctr = ctr->decref(ptr);
+		}
+	}
+
+	shared_array& operator=(const shared_array& r) {
+		if (this == &r) {
+			return *this;
+		}
+		if (ctr) {
+			ctr->decref(ptr);
+		}
+		ptr = r.ptr;
+		ctr = ptr?r.ctr->incref():NULL;
+		return *this;
+	}
+
+	template <typename Y>
+	shared_array& operator=(const shared_array<Y>& r) {
+		if (this == &r) {
+			return *this;
+		}
+		if (ctr) {
+			ctr->decref(ptr);
+		}
+		ptr = r.ptr;
+		ctr = ptr?r.ctr->incref():NULL;
+		return *this;
 	}
 
 	// pointer access
@@ -134,12 +147,20 @@ public:
 		return ptr;
 	}
 
-	inline T* operator-> ()	{
+	inline T* operator-> () const	{
 		return ptr;
 	}
 
 	// standard semantics
-	inline T* get()	{
+	inline T* get() {
+		return ptr;
+	}
+
+	T& operator[] (std::ptrdiff_t index) const {
+		return ptr[index];
+	}
+
+	inline const T* get() const	{
 		return ptr;
 	}
 
@@ -156,11 +177,11 @@ public:
 	}
 
 	inline void reset (T* t = 0)	{
-		ctr = ctr->decref(ptr);
-		ptr = t;
-		if(ptr) {
-			ctr = new detail::controller(ptr);
+		if (ctr) {
+			ctr->decref(ptr);
 		}
+		ptr = t;
+		ctr = ptr?new array_detail::controller():NULL;
 	}
 
 	void swap(shared_array & b)	{
@@ -168,13 +189,14 @@ public:
 		std::swap(ctr, b.ctr);
 	}
 
+
 private:
 
 	// encapsulated object pointer
 	T* ptr;
 
 	// control block
-	detail::controller* ctr;
+	array_detail::controller* ctr;
 };
 
 template<class T>

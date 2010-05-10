@@ -53,11 +53,11 @@ using namespace std;
 
 //#include "boost/format.hpp"
 //#include "boost/foreach.hpp"
-using namespace boost;
+//using namespace boost;
 
 #include "OgreImporter.h"
 #include "irrXMLWrapper.h"
-
+#include "TinyFormatter.h"
 
 namespace Assimp
 {
@@ -100,8 +100,8 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 	*/
 
 
-	string MaterialFileName=m_CurrentFilename.substr(0, m_CurrentFilename.find('.'))+".material";
-	DefaultLogger::get()->info(str(format("Trying to load %1%") % MaterialFileName));
+	const string MaterialFileName=m_CurrentFilename.substr(0, m_CurrentFilename.find('.'))+".material";
+	DefaultLogger::get()->info("Trying to load " +MaterialFileName);
 
 	//Read the file into memory and put it in a stringstream
 	stringstream ss;
@@ -116,7 +116,7 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 				return NewMaterial;
 			}
 		}
-		scoped_ptr<IOStream> MaterialFile(MatFilePtr);
+		boost::scoped_ptr<IOStream> MaterialFile(MatFilePtr);
 		vector<char> FileData(MaterialFile->FileSize());
 		MaterialFile->Read(&FileData[0], MaterialFile->FileSize(), 1);
 		BaseImporter::ConvertToUTF8(FileData);

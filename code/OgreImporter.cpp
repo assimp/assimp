@@ -50,7 +50,9 @@ using namespace std;
 
 //#include "boost/format.hpp"
 //#include "boost/foreach.hpp"
-using namespace boost;
+//using namespace boost;
+
+#include "TinyFormatter.h"
 
 #include "OgreImporter.h"
 #include "irrXMLWrapper.h"
@@ -113,7 +115,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 
 
 	//-------------------Read the submeshs and materials:-----------------------
-	std::list<shared_ptr<SubMesh> > SubMeshes;
+	std::list<boost::shared_ptr<SubMesh> > SubMeshes;
 	vector<aiMaterial*> Materials;
 	XmlRead(MeshFile);
 	while(MeshFile->getNodeName()==string("submesh"))
@@ -127,7 +129,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 		//so it is important to do this before pushing the mesh in the vector!
 		theSubMesh->MaterialIndex=SubMeshes.size();
 
-		SubMeshes.push_back(shared_ptr<SubMesh>(theSubMesh));
+		SubMeshes.push_back(boost::shared_ptr<SubMesh>(theSubMesh));
 
 		//Load the Material:
 		aiMaterial* MeshMat=LoadMaterial(theSubMesh->MaterialName);
@@ -170,7 +172,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 
 	//create the aiMehs... 
 	vector<aiMesh*> aiMeshes;
-	BOOST_FOREACH(shared_ptr<SubMesh> theSubMesh, SubMeshes)
+	BOOST_FOREACH(boost::shared_ptr<SubMesh> theSubMesh, SubMeshes)
 	{
 		aiMeshes.push_back(CreateAssimpSubMesh(*theSubMesh, Bones));
 	}
@@ -318,8 +320,11 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 
 		}//end of boneassignments
 	}
-	DefaultLogger::get()->debug(str(format("Positionen: %1% Normale: %2% TexCoords: %3%")
-								% theSubMesh.Positions.size() % theSubMesh.Normals.size() % theSubMesh.Uvs.size()));
+	DefaultLogger::get()->debug((Formatter::format(),
+		"Positionen: ",theSubMesh.Positions.size(),
+		" Normale: ",theSubMesh.Normals.size(),
+		" TexCoords: ",theSubMesh.Uvs.size()
+	));							
 	DefaultLogger::get()->warn(Reader->getNodeName());
 
 
@@ -578,7 +583,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 		if(!IdsOk)
 			throw DeadlyImportError("Bone Ids are not valid!"+FileName);
 	}
-	DefaultLogger::get()->debug(str(format("Number of bones: %1%") % Bones.size()));
+	DefaultLogger::get()->debug((Formatter::format(),"Number of bones: ",Bones.size()));
 	//________________________________________________________________________________
 
 

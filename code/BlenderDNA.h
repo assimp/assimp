@@ -595,8 +595,9 @@ template <> class ObjectCache<boost::shared_array>
 public:
 
 	ObjectCache(const FileDatabase&) {}
-	void get(...) {}
-	void set(...) {}
+
+	template <typename T> void get(const Structure&, boost::shared_array<T>&t, const Pointer&) {}
+	template <typename T> void set(const Structure&, const boost::shared_array<T>&, const Pointer&) {}
 };
 
 #ifdef _MSC_VER

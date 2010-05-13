@@ -101,7 +101,6 @@
     <Compile Include="NullLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SWIGTYPE_p_aiColor4D.cs" />
-    <Compile Include="SWIGTYPE_p_aiFileIO.cs" />
     <Compile Include="SWIGTYPE_p_aiTextureMapMode.cs" />
     <Compile Include="SWIGTYPE_p_aiTextureMapping.cs" />
     <Compile Include="SWIGTYPE_p_aiTextureOp.cs" />
@@ -129,6 +128,7 @@
     <Compile Include="SWIGTYPE_p_p_aiNodeAnim.cs" />
     <Compile Include="SWIGTYPE_p_p_aiTexture.cs" />
     <Compile Include="SWIGTYPE_p_p_aiVector3D.cs" />
+    <Compile Include="SWIGTYPE_p_std__nothrow_t.cs" />
     <Compile Include="SWIGTYPE_p_std__string.cs" />
     <Compile Include="SWIGTYPE_p_unsigned_int.cs" />
     <Compile Include="SWIGTYPE_p_void.cs" />

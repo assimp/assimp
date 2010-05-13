@@ -30,6 +30,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+				CommandLine="move *.cs ..\Assimp.NET_CS\&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"

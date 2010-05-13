@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
+# Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimpview", "assimp_view.vcproj", "{B17B959B-BB8A-4596-AF0F-A8C8DBBC3C5E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5691E159-2D9B-407F-971F-EA5C592DC524} = {5691E159-2D9B-407F-971F-EA5C592DC524}
@@ -107,7 +107,6 @@ Global
 		{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}.debug|x64.Build.0 = debug|x64
 		{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}.debug-dll|Win32.ActiveCfg = debug-dll|Win32
 		{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}.debug-dll|x64.ActiveCfg = debug-dll|x64
-		{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}.debug-dll|x64.Build.0 = debug-dll|x64
 		{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}.debug-noboost-st|Win32.ActiveCfg = debug-noboost-st|Win32
 		{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}.debug-noboost-st|Win32.Build.0 = debug-noboost-st|Win32
 		{9B9D1C90-8A03-409A-B547-AE7B48B90F1A}.debug-noboost-st|x64.ActiveCfg = debug-noboost-st|x64

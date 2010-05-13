@@ -149,7 +149,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
 	else
 	{
 		// This is an error, so break down the application
-		ai_assert (false);
+		ai_assert(false);
 	}
 
 	// Create nodes for the whole scene	
@@ -325,7 +325,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 		for ( size_t vertexIndex = 0; vertexIndex < pSourceFace->m_pVertices->size(); vertexIndex++ )
 		{
 			unsigned int vertex = pSourceFace->m_pVertices->at( vertexIndex );
-			assert ( vertex < pModel->m_Vertices.size() );
+			ai_assert( vertex < pModel->m_Vertices.size() );
 			pMesh->mVertices[ newIndex ] = pModel->m_Vertices[ vertex ];
 			
 			// Copy all normals 

@@ -107,13 +107,13 @@ struct Face
 //!	\brief	Stores all objects of an objfile object definition
 struct Object
 {
-	//!	Obejct name
+	//!	Object name
 	std::string m_strObjName;
 	//!	Assigend face instances
 	std::vector<Face*> m_Faces;
 	//!	Transformation matrix, stored in OpenGL format
 	aiMatrix4x4 m_Transformation;
-	//!	All subobjects references by this object
+	//!	All sub-objects referenced by this object
 	std::vector<Object*> m_SubObjects;
 
 	//!	\brief	Default constructor

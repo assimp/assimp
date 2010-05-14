@@ -60,36 +60,37 @@ namespace Assimp	{
  * @param out Output buffer
  * @param max Maximum number of characters to be written, including '\0'
  * @param number Number to be written
- * @return Number of bytes written. Including the terminal zero.
+ * @return Number of bytes written.
  */
 inline unsigned int ASSIMP_itoa10( char* out, unsigned int max, int32_t number)
 {
 	ai_assert(NULL != out);
 
-	static const char lookup[] = {'0','1','2','3','4','5','6','7','8','9'};
-
 	// write the unary minus to indicate we have a negative number
 	unsigned int written = 1u;
-	if (number < 0 && written < max)
-	{
+	if (number < 0 && written < max)	{
 		*out++ = '-';
 		++written;
+		number = -number;
 	}
 
 	// We begin with the largest number that is not zero. 
 	int32_t cur = 1000000000; // 2147483648
 	bool mustPrint = false;
-	while (cur > 0 && written <= max)
-	{
-		unsigned int digit = number / cur;
-		if (digit > 0 || mustPrint || 1 == cur)
-		{
-			// print all future zero's from now
+	while (written < max)	{
+
+		const unsigned int digit = number / cur;
+		if (mustPrint || digit > 0 || 1 == cur)	{
+			// print all future zeroes from now
 			mustPrint = true;	
-			*out++ = lookup[digit];
+
+			*out++ = '0'+digit;
 
 			++written;
 			number -= digit*cur;
+			if (1 == cur) {
+				break;
+			}
 		}
 		cur /= 10;
 	}

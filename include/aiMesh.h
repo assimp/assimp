@@ -555,7 +555,7 @@ struct aiMesh
 	 *      partitioning.
 	 *   - Vertex animations refer to meshes by their names.
 	 **/
-	aiString mName;
+	C_STRUCT aiString mName;
 
 	/** The number of attachment meshes */
 	unsigned int mNumAnimMeshes;

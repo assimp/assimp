@@ -1976,8 +1976,9 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 		ThrowException( "Expected different index count in <p> element.");
 
 	// find the data for all sources
-	BOOST_FOREACH( InputChannel& input, pMesh->mPerVertexData)
+  for( std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it)
 	{
+    InputChannel& input = *it;
 		if( input.mResolved)
 			continue;
 
@@ -1989,8 +1990,9 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 			acc->mData = &ResolveLibraryReference( mDataLibrary, acc->mSource);
 	}
 	// and the same for the per-index channels
-	BOOST_FOREACH( InputChannel& input, pPerIndexChannels)
-	{
+  for( std::vector<InputChannel>::iterator it = pPerIndexChannels.begin(); it != pPerIndexChannels.end(); ++it)
+  {
+    InputChannel& input = *it;
 		if( input.mResolved)
 			continue;
 
@@ -2061,11 +2063,11 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 				vindex[offsets] = *idx++;
 
 			// extract per-vertex channels using the global per-vertex offset
-			BOOST_FOREACH( const InputChannel& input, pMesh->mPerVertexData)
-				ExtractDataObjectFromChannel( input, vindex[perVertexOffset], pMesh);
+      for( std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it)
+        ExtractDataObjectFromChannel( *it, vindex[perVertexOffset], pMesh);
 			// and extract per-index channels using there specified offset
-			BOOST_FOREACH( const InputChannel& input, pPerIndexChannels)
-				ExtractDataObjectFromChannel( input, vindex[input.mOffset], pMesh);
+      for( std::vector<InputChannel>::iterator it = pPerIndexChannels.begin(); it != pPerIndexChannels.end(); ++it)
+				ExtractDataObjectFromChannel( *it, vindex[it->mOffset], pMesh);
 
 			// store the vertex-data index for later assignment of bone vertex weights
 			pMesh->mFacePosIndices.push_back( vindex[perVertexOffset]);

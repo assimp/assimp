@@ -52,6 +52,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StreamReader.h"
 using namespace Assimp;
 
+// ASSIMP_BUILD_MS3D_ONE_NODE_PER_MESH
+//   (enable old code path, which generates extra nodes per mesh while
+//    the newer code uses aiMesh::mName to express the name of the
+//    meshes (a.k.a. groups in MS3D))
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 MS3DImporter::MS3DImporter()
@@ -546,6 +551,8 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 	// ... add dummy nodes under a single root, each holding a reference to one
 	// mesh. If we didn't do this, we'd loose the group name.
 	aiNode* rt = pScene->mRootNode = new aiNode("<MS3DRoot>");
+	
+#ifdef ASSIMP_BUILD_MS3D_ONE_NODE_PER_MESH
 	rt->mChildren = new aiNode*[rt->mNumChildren=pScene->mNumMeshes+(joints.size()?1:0)]();
 
 	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
@@ -563,9 +570,18 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 		nd->mMeshes = new unsigned int[nd->mNumMeshes = 1];
 		nd->mMeshes[0] = i;
 	}
+#else
+	rt->mMeshes = new unsigned int[pScene->mNumMeshes];
+	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
+		rt->mMeshes[rt->mNumMeshes++] = i;
+	}
+#endif
 
 	// convert animations as well
 	if(joints.size()) {
+#ifndef ASSIMP_BUILD_MS3D_ONE_NODE_PER_MESH
+		rt->mChildren = new aiNode*[1]();
+#endif
 		aiNode* jt = rt->mChildren[pScene->mNumMeshes] = new aiNode();
 		jt->mParent = rt;
 		CollectChildJoints(joints,jt);

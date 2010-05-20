@@ -1147,9 +1147,10 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 // -----------------------------------------------------------------------------------
 int Assimp_Dump (const char* const* params, unsigned int num)
 {
+	const char* fail = "assimp dump: Invalid number of arguments. "
+			"See \'assimp dump --help\'\r\n";
 	if (num < 1) {
-		::printf("assimp dump: Invalid number of arguments. "
-			"See \'assimp dump --help\'\r\n");
+		printf(fail);
 		return 1;
 	}
 
@@ -1161,8 +1162,7 @@ int Assimp_Dump (const char* const* params, unsigned int num)
 
 	// asssimp dump in out [options]
 	if (num < 1) {
-		::printf("assimp dump: Invalid number of arguments. "
-			"See \'assimp dump --help\'\r\n");
+		printf(fail);
 		return 1;
 	}
 
@@ -1206,28 +1206,28 @@ int Assimp_Dump (const char* const* params, unsigned int num)
 	if (out[0] == '-') {
 		// take file name from input file
 		std::string::size_type s = in.find_last_of('.');
-		if (s == std::string::npos)
+		if (s == std::string::npos) {
 			s = in.length();
+		}
 
 		out = in.substr(0,s);
 		out.append((binary ? ".assbin" : ".assxml"));
-		if (shortened && binary)
+		if (shortened && binary) {
 			out.append(".regress");
+		}
 	}
 
 	// import the main model
 	const aiScene* scene = ImportModel(import,in);
 	if (!scene) {
-		::printf("assimp dump: Unable to load input file %s\n",
-			in.c_str());
+		printf("assimp dump: Unable to load input file %s\n",in.c_str());
 		return 5;
 	}
 
 	// open the output file and build the dump
 	FILE* o = ::fopen(out.c_str(),(binary ? "wb" : "wt"));
 	if (!o) {
-		::printf("assimp dump: Unable to open output file %s\n",
-			out.c_str());
+		printf("assimp dump: Unable to open output file %s\n",out.c_str());
 		return 12;
 	}
 
@@ -1235,13 +1235,13 @@ int Assimp_Dump (const char* const* params, unsigned int num)
 		WriteBinaryDump (scene,o,in.c_str(),cmd.c_str(),shortened,compressed,import);
 	}
 	else WriteDump (scene,o,in.c_str(),cmd.c_str(),shortened);
-	::fclose(o);
+	fclose(o);
 
 	if (compressed && binary) {
 		CompressBinaryDump(out.c_str(),ASSBIN_HEADER_LENGTH);
 	}
 
-	::printf("assimp dump: Wrote output dump %s\n",out.c_str());
+	printf("assimp dump: Wrote output dump %s\n",out.c_str());
 	return 0;
 }
 

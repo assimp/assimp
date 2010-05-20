@@ -348,14 +348,14 @@ void Discreet3DSImporter::ConvertMeshes(aiScene* pcOut)
 	std::vector<aiMesh*> avOutMeshes;
 	avOutMeshes.reserve(mScene->mMeshes.size() * 2);
 
-	unsigned int iFaceCnt = 0;
+	unsigned int iFaceCnt = 0,num = 0;
+	aiString name;
 
 	// we need to split all meshes by their materials
-	for (std::vector<D3DS::Mesh>::iterator i =  mScene->mMeshes.begin();
-		i != mScene->mMeshes.end();++i)	
-	{
-		std::vector<unsigned int>* aiSplit = new std::vector<unsigned int>[
-			mScene->mMaterials.size()];
+	for (std::vector<D3DS::Mesh>::iterator i =  mScene->mMeshes.begin(); i != mScene->mMeshes.end();++i)	{
+		boost::scoped_array< std::vector<unsigned int> > aiSplit(new std::vector<unsigned int>[mScene->mMaterials.size()]);
+
+		name.length = ASSIMP_itoa10(name.data,num++);
 
 		unsigned int iNum = 0;
 		for (std::vector<unsigned int>::const_iterator a =  (*i).mFaceMaterials.begin();
@@ -366,66 +366,68 @@ void Discreet3DSImporter::ConvertMeshes(aiScene* pcOut)
 		// now generate submeshes
 		for (unsigned int p = 0; p < mScene->mMaterials.size();++p)
 		{
-			if (aiSplit[p].size())
+			if (aiSplit[p].empty())	{
+				continue;
+			}
+			aiMesh* meshOut = new aiMesh();
+			meshOut->mName = name;
+			meshOut->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
+
+			// be sure to setup the correct material index
+			meshOut->mMaterialIndex = p;
+
+			// use the color data as temporary storage
+			meshOut->mColors[0] = (aiColor4D*)(&*i);
+			avOutMeshes.push_back(meshOut);
+
+			// convert vertices
+			meshOut->mNumFaces = (unsigned int)aiSplit[p].size();
+			meshOut->mNumVertices = meshOut->mNumFaces*3;
+
+			// allocate enough storage for faces
+			meshOut->mFaces = new aiFace[meshOut->mNumFaces];
+			iFaceCnt += meshOut->mNumFaces;
+
+			meshOut->mVertices = new aiVector3D[meshOut->mNumVertices];
+			meshOut->mNormals  = new aiVector3D[meshOut->mNumVertices];
+			if ((*i).mTexCoords.size())
 			{
-				aiMesh* meshOut = new aiMesh();
-				meshOut->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
+				meshOut->mTextureCoords[0] = new aiVector3D[meshOut->mNumVertices];
+			}
+			for (unsigned int q = 0, base = 0; q < aiSplit[p].size();++q)
+			{
+				register unsigned int index = aiSplit[p][q];
+				aiFace& face = meshOut->mFaces[q];
 
-				// be sure to setup the correct material index
-				meshOut->mMaterialIndex = p;
+				face.mIndices = new unsigned int[3];
+				face.mNumIndices = 3;
 
-				// use the color data as temporary storage
-				meshOut->mColors[0] = (aiColor4D*)(&*i);
-				avOutMeshes.push_back(meshOut);
-				
-				// convert vertices
-				meshOut->mNumFaces = (unsigned int)aiSplit[p].size();
-				meshOut->mNumVertices = meshOut->mNumFaces*3;
-
-				// allocate enough storage for faces
-				meshOut->mFaces = new aiFace[meshOut->mNumFaces];
-				iFaceCnt += meshOut->mNumFaces;
-			
-				meshOut->mVertices = new aiVector3D[meshOut->mNumVertices];
-				meshOut->mNormals  = new aiVector3D[meshOut->mNumVertices];
-				if ((*i).mTexCoords.size())
+				for (unsigned int a = 0; a < 3;++a,++base)
 				{
-					meshOut->mTextureCoords[0] = new aiVector3D[meshOut->mNumVertices];
-				}
-				for (unsigned int q = 0, base = 0; q < aiSplit[p].size();++q)
-				{
-					register unsigned int index = aiSplit[p][q];
-					aiFace& face = meshOut->mFaces[q];
+					unsigned int idx = (*i).mFaces[index].mIndices[a];
+					meshOut->mVertices[base]  = (*i).mPositions[idx];
+					meshOut->mNormals [base]  = (*i).mNormals[idx];
 
-					face.mIndices = new unsigned int[3];
-					face.mNumIndices = 3;
+					if ((*i).mTexCoords.size())
+						meshOut->mTextureCoords[0][base] = (*i).mTexCoords[idx];
 
-					for (unsigned int a = 0; a < 3;++a,++base)
-					{
-						unsigned int idx = (*i).mFaces[index].mIndices[a];
-						meshOut->mVertices[base]  = (*i).mPositions[idx];
-						meshOut->mNormals [base]  = (*i).mNormals[idx];
-
-						if ((*i).mTexCoords.size())
-							meshOut->mTextureCoords[0][base] = (*i).mTexCoords[idx];
-
-						face.mIndices[a] = base;
-					}
+					face.mIndices[a] = base;
 				}
 			}
 		}
-		delete[] aiSplit;
 	}
 
 	// Copy them to the output array
 	pcOut->mNumMeshes = (unsigned int)avOutMeshes.size();
 	pcOut->mMeshes = new aiMesh*[pcOut->mNumMeshes]();
-	for (unsigned int a = 0; a < pcOut->mNumMeshes;++a)
+	for (unsigned int a = 0; a < pcOut->mNumMeshes;++a) {
 		pcOut->mMeshes[a] = avOutMeshes[a];
+	}
 
 	// We should have at least one face here
-	if (!iFaceCnt)
+	if (!iFaceCnt) {
 		throw DeadlyImportError("No faces loaded. The mesh is empty");
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

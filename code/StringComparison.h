@@ -58,9 +58,10 @@ namespace Assimp	{
  * to have a small replacement function here. No need to use a full sprintf()
  * if we just want to print a number ...
  * @param out Output buffer
- * @param max Maximum number of characters to be written, including '\0'
+ * @param max Maximum number of characters to be written, including '\0'.
+ *   This parameter may not be 0.
  * @param number Number to be written
- * @return Number of bytes written.
+ * @return Length of the output string, excluding the '\0'
  */
 inline unsigned int ASSIMP_itoa10( char* out, unsigned int max, int32_t number)
 {
@@ -97,15 +98,15 @@ inline unsigned int ASSIMP_itoa10( char* out, unsigned int max, int32_t number)
 
 	// append a terminal zero
 	*out++ = '\0';
-	return written;
+	return written-1;
 }
 
 // -------------------------------------------------------------------------------
 /** @brief itoa with a fixed base 10 (Secure template overload)
- *  The compiler should choose this function if he is able to determine the
+ *  The compiler should choose this function if he or she is able to determine the
  *  size of the array automatically.
  */
-template <unsigned int length>
+template <size_t length>
 inline unsigned int ASSIMP_itoa10( char(& out)[length], int32_t number)
 {
 	return ASSIMP_itoa10(out,length,number);

@@ -1113,7 +1113,7 @@ void ColladaParser::ReadEffectProfileCommon( Collada::Effect& pEffect)
 				pEffect.mParams[sid] = EffectParam();
 				ReadEffectParam( pEffect.mParams[sid]);
 			} 
-			else if( IsElement( "technique"))
+			else if( IsElement( "technique") || IsElement( "extra"))
 			{
 				// just syntactic sugar
 			}
@@ -1182,20 +1182,11 @@ void ColladaParser::ReadEffectProfileCommon( Collada::Effect& pEffect)
 				SkipElement();
 			}
 		}
-		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) 
-		{
-			if( strcmp( mReader->getNodeName(), "technique") == 0)
-			{
-				// ignore silently - just syntactic sugar
-			}
-			else if( strcmp( mReader->getNodeName(), "profile_COMMON") == 0)
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
+			if( strcmp( mReader->getNodeName(), "profile_COMMON") == 0)
 			{
 				break;
-			} else
-			{
-				// might also be the end of "phong", "blinn", "constant" or "lambert"
-				// ThrowException( "Expected end of \"profile_COMMON\" element.");
-			}
+			} 
 		}
 	}
 }
@@ -1221,7 +1212,7 @@ void ColladaParser::ReadSamplerProperties( Sampler& out )
 				out.mWrapU = ReadBoolFromTextContent();
 				TestClosing( "wrapV");
 			}
-			if( IsElement( "mirrorU"))		{
+			else if( IsElement( "mirrorU"))		{
 				out.mMirrorU = ReadBoolFromTextContent();
 				TestClosing( "mirrorU");
 			}
@@ -1348,7 +1339,7 @@ void ColladaParser::ReadEffectColor( aiColor4D& pColor, Sampler& pSampler)
 				}
 				else SkipElement();
 			}
-			else
+			else if( !IsElement( "extra"))
 			{
 				// ignore the rest
 				SkipElement();

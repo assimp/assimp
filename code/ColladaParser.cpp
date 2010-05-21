@@ -1713,7 +1713,7 @@ void ColladaParser::ReadAccessor( const std::string& pID)
 
 				// read data type
 				int attrType = TestAttribute( "type");
-				if( attrType)
+				if( attrType > -1)
 				{
 					// for the moment we only distinguish between a 4x4 matrix and anything else. 
 					// TODO: (thom) I don't have a spec here at work. Check if there are other multi-value types

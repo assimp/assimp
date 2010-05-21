@@ -198,10 +198,10 @@ int LoadAsset(void)
 	char szTemp[MAX_PATH+64];
 	sprintf(szTemp,"Starting to load %s",g_szFileName);
 	CLogWindow::Instance().WriteLine(
-		"****************************************************************************");
+		"----------------------------------------------------------------------------");
 	CLogWindow::Instance().WriteLine(szTemp);
 	CLogWindow::Instance().WriteLine(
-		"****************************************************************************");
+		"----------------------------------------------------------------------------");
 	CLogWindow::Instance().SetAutoUpdate(false);
 
 	// create a helper thread to load the asset

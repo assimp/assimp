@@ -41,6 +41,7 @@
 #define IDR_TXPOPUP                     156
 #define IDR_MATPOPUP                    157
 #define IDD_DIALOGSMOOTH                159
+#define SVNRevision                     700
 #define IDC_CHECK1                      1000
 #define IDC_TOGGLEMS                    1000
 #define IDC_CHECK2                      1001

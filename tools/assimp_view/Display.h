@@ -151,6 +151,17 @@ public:
 	};
 
 	//------------------------------------------------------------------
+	// represents a mesh in the tree view
+	struct MeshInfo
+	{
+		// the mesh object
+		aiMesh* psMesh;
+
+		// corresponding tree view item
+		HTREEITEM hTreeItem;
+	};
+
+	//------------------------------------------------------------------
 	// represents a material in the tree view
 	struct MaterialInfo
 	{
@@ -240,7 +251,7 @@ public:
 
 	//------------------------------------------------------------------
 	// Add a node to the display list
-	// Recusrivly add all subnodes
+	// Recusrivly adds all subnodes as well
 	// iIndex - Index of the node in the parent's child list
 	// iDepth - Current depth of the node
 	// pcNode - Node object
@@ -249,6 +260,14 @@ public:
 		unsigned int iIndex, 
 		unsigned int iDepth,
 		aiNode* pcNode,
+		HTREEITEM hRoot);
+
+	//------------------------------------------------------------------
+	// Add a mesh to the display list
+	// iIndex - Index of the mesh in the scene's mesh list
+	// hRoot - Parent tree view node
+	int AddMeshToDisplayList(
+		unsigned int iIndex, 
 		HTREEITEM hRoot);
 
 	//------------------------------------------------------------------
@@ -348,6 +367,13 @@ public:
 	inline void AddNode(const NodeInfo& info)
 	{
 		this->m_asNodes.push_back(info);
+	}
+
+	//------------------------------------------------------------------
+	// add a new mesh to the list
+	inline void AddMesh(const MeshInfo& info)
+	{
+		this->m_asMeshes.push_back(info);
 	}
 
 	//------------------------------------------------------------------
@@ -468,6 +494,9 @@ private:
 
 	// List of all node in the display CB
 	std::vector<NodeInfo> m_asNodes;
+
+	// List of all node in the display CB
+	std::vector<MeshInfo> m_asMeshes;
 
 	// current Node or NULL if no Node is active
 	NodeInfo* m_pcCurrentNode;

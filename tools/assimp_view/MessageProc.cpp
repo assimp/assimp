@@ -412,7 +412,7 @@ void ToggleUIState()
 	DWORD dwValue;
 	if (BST_UNCHECKED == IsDlgButtonChecked(g_hDlg,IDC_BLUBB))
 	{
-		SetWindowPos(g_hDlg,NULL,0,0,sRect.right-188,sRect.bottom,
+		SetWindowPos(g_hDlg,NULL,0,0,sRect.right-214,sRect.bottom,
 			SWP_NOMOVE | SWP_NOZORDER);
 
 		dwValue = 0;
@@ -421,7 +421,7 @@ void ToggleUIState()
 	}
 	else
 	{
-		SetWindowPos(g_hDlg,NULL,0,0,sRect.right+188,sRect.bottom,
+		SetWindowPos(g_hDlg,NULL,0,0,sRect.right+214,sRect.bottom,
 			SWP_NOMOVE | SWP_NOZORDER);
 
 		dwValue = 1;
@@ -1027,7 +1027,7 @@ void InitUI()
 		sRect2.left -= sRect.left;
 		sRect2.top -= sRect.top;
 
-		SetWindowPos(g_hDlg,NULL,0,0,sRect.right-188,sRect.bottom,
+		SetWindowPos(g_hDlg,NULL,0,0,sRect.right-214,sRect.bottom,
 			SWP_NOMOVE | SWP_NOZORDER);
 		SetWindowText(GetDlgItem(g_hDlg,IDC_BLUBB),">>");
 	}
@@ -1361,7 +1361,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 						r = (unsigned char)(CDisplay::Instance().GetFirstCheckerColor()->x * 255.0f);
 						g = (unsigned char)(CDisplay::Instance().GetFirstCheckerColor()->y * 255.0f);
 						b = (unsigned char)(CDisplay::Instance().GetFirstCheckerColor()->z * 255.0f);
-						szText = "B0";
+						szText = "Background #0";
 					}
 					else if (!g_pcAsset)
 					{
@@ -1372,7 +1372,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 						r = (unsigned char)((g_avLightColors[0] >> 16) & 0xFF);
 						g = (unsigned char)((g_avLightColors[0] >> 8) & 0xFF);
 						b = (unsigned char)((g_avLightColors[0]) & 0xFF);
-						szText = "L0";
+						szText = "Light #0";
 					}
 					HBRUSH hbr = CreateSolidBrush(RGB(r,g,b));
 
@@ -1381,7 +1381,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
 					SetTextColor(pcStruct->hDC,RGB(0xFF-r,0xFF-g,0xFF-b));
 					SetBkMode(pcStruct->hDC,TRANSPARENT);
-					TextOut(pcStruct->hDC,4,1,szText,2);
+					TextOut(pcStruct->hDC,4,1,szText,strlen(szText));
 					bDraw = true;
 				}
 				else if(IDC_LCOLOR2 == pcStruct->CtlID)
@@ -1394,7 +1394,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 						r = (unsigned char)(CDisplay::Instance().GetSecondCheckerColor()->x * 255.0f);
 						g = (unsigned char)(CDisplay::Instance().GetSecondCheckerColor()->y * 255.0f);
 						b = (unsigned char)(CDisplay::Instance().GetSecondCheckerColor()->z * 255.0f);
-						szText = "B1";
+						szText = "Background #1";
 					}
 					else if (!g_pcAsset)
 					{
@@ -1405,14 +1405,14 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 						r = (unsigned char)((g_avLightColors[1] >> 16) & 0xFF);
 						g = (unsigned char)((g_avLightColors[1] >> 8) & 0xFF);
 						b = (unsigned char)((g_avLightColors[1]) & 0xFF);
-						szText = "L1";
+						szText = "Light #1";
 					}
 					HBRUSH hbr = CreateSolidBrush(RGB(r,g,b));
 					FillRect(pcStruct->hDC,&sRect,hbr);
 
 					SetTextColor(pcStruct->hDC,RGB(0xFF-r,0xFF-g,0xFF-b));
 					SetBkMode(pcStruct->hDC,TRANSPARENT);
-					TextOut(pcStruct->hDC,4,1,szText,2);
+					TextOut(pcStruct->hDC,4,1,szText,strlen(szText));
 					bDraw = true;
 				}
 				else if(IDC_LCOLOR3 == pcStruct->CtlID)
@@ -1434,14 +1434,14 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 						r = (unsigned char)((g_avLightColors[2] >> 16) & 0xFF);
 						g = (unsigned char)((g_avLightColors[2] >> 8) & 0xFF);
 						b = (unsigned char)((g_avLightColors[2]) & 0xFF);
-						szText = "A0";
+						szText = "Ambient";
 					}
 					HBRUSH hbr = CreateSolidBrush(RGB(r,g,b));
 					FillRect(pcStruct->hDC,&sRect,hbr);
 				
 					SetTextColor(pcStruct->hDC,RGB(0xFF-r,0xFF-g,0xFF-b));
 					SetBkMode(pcStruct->hDC,TRANSPARENT);
-					TextOut(pcStruct->hDC,4,1,szText,2);
+					TextOut(pcStruct->hDC,4,1,szText,strlen(szText));
 					bDraw = true;
 				}
 				// draw the black border around the rects

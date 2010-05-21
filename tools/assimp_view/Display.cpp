@@ -155,7 +155,7 @@ int CDisplay::AddNodeToDisplayList(
 	ai_assert(NULL != pcNode);
 	ai_assert(NULL != hRoot);
 
-	char chTemp[512];
+	char chTemp[MAXLEN];
 
 	if(0 == pcNode->mName.length)	{
 		if (iIndex >= 100)	{
@@ -166,9 +166,11 @@ int CDisplay::AddNodeToDisplayList(
 			iIndex += iDepth  * 100;
 		}
 		else iIndex += iDepth  * 10;
-		sprintf(chTemp,"Node %i",iIndex);
+		sprintf(chTemp,"Node %i (%i meshes)",iIndex,pcNode->mNumMeshes);
 	}
-	else strcpy(chTemp,pcNode->mName.data);
+	else {
+		sprintf(chTemp,"%s (%i meshes)",pcNode->mName.data,pcNode->mNumMeshes);
+	}
 
 	TVITEMEXW tvi; 
 	TVINSERTSTRUCTW sNew;
@@ -207,6 +209,53 @@ int CDisplay::AddNodeToDisplayList(
 	this->AddNode(info);
 	return 1;
 }
+
+//-------------------------------------------------------------------------------
+int CDisplay::AddMeshToDisplayList(unsigned int iIndex, HTREEITEM hRoot)
+{
+	aiMesh* pcMesh = g_pcAsset->pcScene->mMeshes[iIndex];
+
+	char chTemp[MAXLEN];
+
+	if(0 == pcMesh->mName.length)	{
+		sprintf(chTemp,"Mesh %i (%i faces)",iIndex,pcMesh->mNumFaces);
+	}
+	else {
+		sprintf(chTemp,"%s (%i faces)",pcMesh->mName.data,pcMesh->mNumFaces);
+	}
+
+	TVITEMEXW tvi; 
+	TVINSERTSTRUCTW sNew;
+	
+	wchar_t tmp[512];
+	int t = MultiByteToWideChar(CP_UTF8,0,chTemp,-1,tmp,512);
+	
+	tvi.pszText = tmp;
+	tvi.cchTextMax = (int)t;
+
+	tvi.mask = TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_IMAGE | TVIF_HANDLE | TVIF_PARAM;
+	tvi.iImage = this->m_aiImageList[AI_VIEW_IMGLIST_NODE];
+	tvi.iSelectedImage = this->m_aiImageList[AI_VIEW_IMGLIST_NODE];
+	tvi.lParam = (LPARAM)5; 
+
+	sNew.itemex = tvi; 
+	sNew.hInsertAfter = TVI_LAST; 
+	sNew.hParent = hRoot;
+
+	// add the item to the list
+	HTREEITEM hTexture = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1), 
+		TVM_INSERTITEMW, 
+		0,
+		(LPARAM)(LPTVINSERTSTRUCT)&sNew);
+
+	// add the mesh to the list of all mesh entries in the scene browser
+	MeshInfo info;
+	info.hTreeItem = hTexture;
+	info.psMesh = pcMesh;
+	AddMesh(info);
+	return 1;
+}
+
 //-------------------------------------------------------------------------------
 // Replace the currently selected texture by another one
 int CDisplay::ReplaceCurrentTexture(const char* szPath)
@@ -685,6 +734,10 @@ int CDisplay::FillDisplayList(void)
 	for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMaterials;++i)
 		AddMaterialToDisplayList(m_hRoot,i);
 
+	// add each mesh to the tree
+	for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
+		AddMeshToDisplayList(i,m_hRoot);
+
 	// now add all loaded nodes recursively
 	AddNodeToDisplayList(0,0,g_pcAsset->pcScene->mRootNode,m_hRoot);
 
@@ -822,6 +875,7 @@ int CDisplay::Reset(void)
 	m_asMaterials.clear();
 	m_asTextures.clear();
 	m_asNodes.clear();
+	m_asMeshes.clear();
 
 	m_hRoot = NULL;
 
@@ -1645,6 +1699,9 @@ int CDisplay::DrawHUD()
 
 	as[0].x -= 0.5f;as[1].x -= 0.5f;as[2].x -= 0.5f;as[3].x -= 0.5f;
 	as[0].y -= 0.5f;as[1].y -= 0.5f;as[2].y -= 0.5f;as[3].y -= 0.5f;
+
+	g_piDevice->SetSamplerState(0,D3DSAMP_MAGFILTER,D3DTEXF_LINEAR);
+	g_piDevice->SetSamplerState(0,D3DSAMP_MINFILTER,D3DTEXF_LINEAR);
 
 	// draw the screen-filling squad
 	DWORD dw2;g_piDevice->GetFVF(&dw2);

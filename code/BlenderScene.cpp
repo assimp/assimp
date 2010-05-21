@@ -58,18 +58,18 @@ template <> void Structure :: Convert<Object> (
     ) const
 { 
 
-    ReadField<ErrorPolicy_Igno>(dest.id,"id",db);
-    ReadField<ErrorPolicy_Igno>((int&)dest.type,"type",db);
-    ReadFieldArray2<ErrorPolicy_Igno>(dest.obmat,"obmat",db);
-    ReadFieldArray2<ErrorPolicy_Igno>(dest.parentinv,"parentinv",db);
-    ReadFieldArray<ErrorPolicy_Igno>(dest.parsubstr,"parsubstr",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.parent,"*parent",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.track,"*track",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.proxy,"*proxy",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.proxy_from,"*proxy_from",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.proxy_group,"*proxy_group",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.dup_group,"*dup_group",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.data,"*data",db);
+    ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
+    ReadField<ErrorPolicy_Fail>((int&)dest.type,"type",db);
+    ReadFieldArray2<ErrorPolicy_Warn>(dest.obmat,"obmat",db);
+    ReadFieldArray2<ErrorPolicy_Warn>(dest.parentinv,"parentinv",db);
+    ReadFieldArray<ErrorPolicy_Warn>(dest.parsubstr,"parsubstr",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.parent,"*parent",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.track,"*track",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.proxy,"*proxy",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.proxy_from,"*proxy_from",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.proxy_group,"*proxy_group",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.dup_group,"*dup_group",db);
+    ReadFieldPtr<ErrorPolicy_Fail>(dest.data,"*data",db);
 
 	db.reader->IncPtr(size);
 }
@@ -81,7 +81,7 @@ template <> void Structure :: Convert<Group> (
     ) const
 { 
 
-    ReadField<ErrorPolicy_Igno>(dest.id,"id",db);
+    ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
     ReadField<ErrorPolicy_Igno>(dest.layer,"layer",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.gobject,"*gobject",db);
 
@@ -110,10 +110,10 @@ template <> void Structure :: Convert<MTex> (
     ReadField<ErrorPolicy_Igno>(dest.colormodel,"colormodel",db);
     ReadField<ErrorPolicy_Igno>(dest.pmapto,"pmapto",db);
     ReadField<ErrorPolicy_Igno>(dest.pmaptoneg,"pmaptoneg",db);
-    ReadField<ErrorPolicy_Igno>(dest.r,"r",db);
-    ReadField<ErrorPolicy_Igno>(dest.g,"g",db);
-    ReadField<ErrorPolicy_Igno>(dest.b,"b",db);
-    ReadField<ErrorPolicy_Igno>(dest.k,"k",db);
+    ReadField<ErrorPolicy_Warn>(dest.r,"r",db);
+    ReadField<ErrorPolicy_Warn>(dest.g,"g",db);
+    ReadField<ErrorPolicy_Warn>(dest.b,"b",db);
+    ReadField<ErrorPolicy_Warn>(dest.k,"k",db);
     ReadField<ErrorPolicy_Igno>(dest.colspecfac,"colspecfac",db);
     ReadField<ErrorPolicy_Igno>(dest.mirrfac,"mirrfac",db);
     ReadField<ErrorPolicy_Igno>(dest.alphafac,"alphafac",db);
@@ -132,8 +132,8 @@ template <> void Structure :: Convert<TFace> (
     ) const
 { 
 
-    ReadFieldArray2<ErrorPolicy_Igno>(dest.uv,"uv",db);
-    ReadFieldArray<ErrorPolicy_Igno>(dest.col,"col",db);
+    ReadFieldArray2<ErrorPolicy_Fail>(dest.uv,"uv",db);
+    ReadFieldArray<ErrorPolicy_Fail>(dest.col,"col",db);
     ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
     ReadField<ErrorPolicy_Igno>(dest.mode,"mode",db);
     ReadField<ErrorPolicy_Igno>(dest.tile,"tile",db);
@@ -149,11 +149,11 @@ template <> void Structure :: Convert<MFace> (
     ) const
 { 
 
-    ReadField<ErrorPolicy_Igno>(dest.v1,"v1",db);
-    ReadField<ErrorPolicy_Igno>(dest.v2,"v2",db);
-    ReadField<ErrorPolicy_Igno>(dest.v3,"v3",db);
-    ReadField<ErrorPolicy_Igno>(dest.v4,"v4",db);
-    ReadField<ErrorPolicy_Igno>(dest.mat_nr,"mat_nr",db);
+    ReadField<ErrorPolicy_Fail>(dest.v1,"v1",db);
+    ReadField<ErrorPolicy_Fail>(dest.v2,"v2",db);
+    ReadField<ErrorPolicy_Fail>(dest.v3,"v3",db);
+    ReadField<ErrorPolicy_Fail>(dest.v4,"v4",db);
+    ReadField<ErrorPolicy_Fail>(dest.mat_nr,"mat_nr",db);
     ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
 
 	db.reader->IncPtr(size);
@@ -166,15 +166,15 @@ template <> void Structure :: Convert<Lamp> (
     ) const
 { 
 
-    ReadField<ErrorPolicy_Igno>(dest.id,"id",db);
-    ReadField<ErrorPolicy_Igno>((int&)dest.type,"type",db);
+    ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
+    ReadField<ErrorPolicy_Fail>((int&)dest.type,"type",db);
     ReadField<ErrorPolicy_Igno>(dest.flags,"flags",db);
     ReadField<ErrorPolicy_Igno>(dest.colormodel,"colormodel",db);
     ReadField<ErrorPolicy_Igno>(dest.totex,"totex",db);
-    ReadField<ErrorPolicy_Igno>(dest.r,"r",db);
-    ReadField<ErrorPolicy_Igno>(dest.g,"g",db);
-    ReadField<ErrorPolicy_Igno>(dest.b,"b",db);
-    ReadField<ErrorPolicy_Igno>(dest.k,"k",db);
+    ReadField<ErrorPolicy_Warn>(dest.r,"r",db);
+    ReadField<ErrorPolicy_Warn>(dest.g,"g",db);
+    ReadField<ErrorPolicy_Warn>(dest.b,"b",db);
+    ReadField<ErrorPolicy_Warn>(dest.k,"k",db);
     ReadField<ErrorPolicy_Igno>(dest.energy,"energy",db);
     ReadField<ErrorPolicy_Igno>(dest.dist,"dist",db);
     ReadField<ErrorPolicy_Igno>(dest.spotsize,"spotsize",db);
@@ -194,8 +194,8 @@ template <> void Structure :: Convert<MDeformWeight> (
     ) const
 { 
 
-    ReadField<ErrorPolicy_Igno>(dest.def_nr,"def_nr",db);
-    ReadField<ErrorPolicy_Igno>(dest.weight,"weight",db);
+    ReadField<ErrorPolicy_Fail>(dest.def_nr,"def_nr",db);
+    ReadField<ErrorPolicy_Fail>(dest.weight,"weight",db);
 
 	db.reader->IncPtr(size);
 }
@@ -218,9 +218,9 @@ template <> void Structure :: Convert<Base> (
     ) const
 { 
 
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.prev,"*prev",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.next,"*next",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.object,"*object",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.prev,"*prev",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next,"*next",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.object,"*object",db);
 
 	db.reader->IncPtr(size);
 }
@@ -232,7 +232,7 @@ template <> void Structure :: Convert<MTFace> (
     ) const
 { 
 
-    ReadFieldArray2<ErrorPolicy_Igno>(dest.uv,"uv",db);
+    ReadFieldArray2<ErrorPolicy_Fail>(dest.uv,"uv",db);
     ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
     ReadField<ErrorPolicy_Igno>(dest.mode,"mode",db);
     ReadField<ErrorPolicy_Igno>(dest.tile,"tile",db);
@@ -248,29 +248,29 @@ template <> void Structure :: Convert<Material> (
     ) const
 { 
 
-    ReadField<ErrorPolicy_Igno>(dest.id,"id",db);
-    ReadField<ErrorPolicy_Igno>(dest.r,"r",db);
-    ReadField<ErrorPolicy_Igno>(dest.g,"g",db);
-    ReadField<ErrorPolicy_Igno>(dest.b,"b",db);
-    ReadField<ErrorPolicy_Igno>(dest.specr,"specr",db);
-    ReadField<ErrorPolicy_Igno>(dest.specg,"specg",db);
-    ReadField<ErrorPolicy_Igno>(dest.specb,"specb",db);
-    ReadField<ErrorPolicy_Igno>(dest.ambir,"ambir",db);
-    ReadField<ErrorPolicy_Igno>(dest.ambig,"ambig",db);
-    ReadField<ErrorPolicy_Igno>(dest.ambib,"ambib",db);
+    ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
+    ReadField<ErrorPolicy_Warn>(dest.r,"r",db);
+    ReadField<ErrorPolicy_Warn>(dest.g,"g",db);
+    ReadField<ErrorPolicy_Warn>(dest.b,"b",db);
+    ReadField<ErrorPolicy_Warn>(dest.specr,"specr",db);
+    ReadField<ErrorPolicy_Warn>(dest.specg,"specg",db);
+    ReadField<ErrorPolicy_Warn>(dest.specb,"specb",db);
+    ReadField<ErrorPolicy_Warn>(dest.ambir,"ambir",db);
+    ReadField<ErrorPolicy_Warn>(dest.ambig,"ambig",db);
+    ReadField<ErrorPolicy_Warn>(dest.ambib,"ambib",db);
     ReadField<ErrorPolicy_Igno>(dest.mirr,"mirr",db);
     ReadField<ErrorPolicy_Igno>(dest.mirg,"mirg",db);
     ReadField<ErrorPolicy_Igno>(dest.mirb,"mirb",db);
-    ReadField<ErrorPolicy_Igno>(dest.emit,"emit",db);
-    ReadField<ErrorPolicy_Igno>(dest.alpha,"alpha",db);
+    ReadField<ErrorPolicy_Warn>(dest.emit,"emit",db);
+    ReadField<ErrorPolicy_Warn>(dest.alpha,"alpha",db);
     ReadField<ErrorPolicy_Igno>(dest.ref,"ref",db);
     ReadField<ErrorPolicy_Igno>(dest.translucency,"translucency",db);
     ReadField<ErrorPolicy_Igno>(dest.roughness,"roughness",db);
     ReadField<ErrorPolicy_Igno>(dest.darkness,"darkness",db);
     ReadField<ErrorPolicy_Igno>(dest.refrac,"refrac",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.group,"*group",db);
-    ReadField<ErrorPolicy_Igno>(dest.diff_shader,"diff_shader",db);
-    ReadField<ErrorPolicy_Igno>(dest.spec_shader,"spec_shader",db);
+    ReadField<ErrorPolicy_Warn>(dest.diff_shader,"diff_shader",db);
+    ReadField<ErrorPolicy_Warn>(dest.spec_shader,"spec_shader",db);
 
 	db.reader->IncPtr(size);
 }
@@ -282,21 +282,22 @@ template <> void Structure :: Convert<Mesh> (
     ) const
 { 
 
-    ReadField<ErrorPolicy_Igno>(dest.id,"id",db);
-    ReadField<ErrorPolicy_Igno>(dest.totface,"totface",db);
-    ReadField<ErrorPolicy_Igno>(dest.totedge,"totedge",db);
-    ReadField<ErrorPolicy_Igno>(dest.totvert,"totvert",db);
+    ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
+    ReadField<ErrorPolicy_Fail>(dest.totface,"totface",db);
+    ReadField<ErrorPolicy_Fail>(dest.totedge,"totedge",db);
+    ReadField<ErrorPolicy_Fail>(dest.totvert,"totvert",db);
     ReadField<ErrorPolicy_Igno>(dest.subdiv,"subdiv",db);
     ReadField<ErrorPolicy_Igno>(dest.subdivr,"subdivr",db);
     ReadField<ErrorPolicy_Igno>(dest.subsurftype,"subsurftype",db);
     ReadField<ErrorPolicy_Igno>(dest.smoothresh,"smoothresh",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.mface,"*mface",db);
+    ReadFieldPtr<ErrorPolicy_Fail>(dest.mface,"*mface",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.mtface,"*mtface",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.tface,"*tface",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.mvert,"*mvert",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.medge,"*medge",db);
+    ReadFieldPtr<ErrorPolicy_Fail>(dest.mvert,"*mvert",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.medge,"*medge",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.dvert,"*dvert",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.mcol,"*mcol",db);
+    ReadFieldPtr<ErrorPolicy_Fail>(dest.mat,"**mat",db);
 
 	db.reader->IncPtr(size);
 }
@@ -308,7 +309,7 @@ template <> void Structure :: Convert<MDeformVert> (
     ) const
 { 
 
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.dw,"*dw",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.dw,"*dw",db);
     ReadField<ErrorPolicy_Igno>(dest.totweight,"totweight",db);
 
 	db.reader->IncPtr(size);
@@ -321,7 +322,7 @@ template <> void Structure :: Convert<World> (
     ) const
 { 
 
-    ReadField<ErrorPolicy_Igno>(dest.id,"id",db);
+    ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
 
 	db.reader->IncPtr(size);
 }
@@ -333,11 +334,11 @@ template <> void Structure :: Convert<MVert> (
     ) const
 { 
 
-    ReadFieldArray<ErrorPolicy_Igno>(dest.co,"co",db);
-    ReadFieldArray<ErrorPolicy_Igno>(dest.no,"no",db);
+    ReadFieldArray<ErrorPolicy_Fail>(dest.co,"co",db);
+    ReadFieldArray<ErrorPolicy_Fail>(dest.no,"no",db);
     ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
-    ReadField<ErrorPolicy_Igno>(dest.mat_nr,"mat_nr",db);
-    ReadField<ErrorPolicy_Igno>(dest.bweight,"bweight",db);
+    ReadField<ErrorPolicy_Warn>(dest.mat_nr,"mat_nr",db);
+    ReadField<ErrorPolicy_Fail>(dest.bweight,"bweight",db);
 
 	db.reader->IncPtr(size);
 }
@@ -349,8 +350,8 @@ template <> void Structure :: Convert<MEdge> (
     ) const
 { 
 
-    ReadField<ErrorPolicy_Igno>(dest.v1,"v1",db);
-    ReadField<ErrorPolicy_Igno>(dest.v2,"v2",db);
+    ReadField<ErrorPolicy_Fail>(dest.v1,"v1",db);
+    ReadField<ErrorPolicy_Fail>(dest.v2,"v2",db);
     ReadField<ErrorPolicy_Igno>(dest.crease,"crease",db);
     ReadField<ErrorPolicy_Igno>(dest.bweight,"bweight",db);
     ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
@@ -365,8 +366,8 @@ template <> void Structure :: Convert<GroupObject> (
     ) const
 { 
 
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.prev,"*prev",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.next,"*next",db);
+    ReadFieldPtr<ErrorPolicy_Fail>(dest.prev,"*prev",db);
+    ReadFieldPtr<ErrorPolicy_Fail>(dest.next,"*next",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.ob,"*ob",db);
 
 	db.reader->IncPtr(size);
@@ -392,7 +393,7 @@ template <> void Structure :: Convert<ID> (
     ) const
 { 
 
-    ReadFieldArray<ErrorPolicy_Igno>(dest.name,"name",db);
+    ReadFieldArray<ErrorPolicy_Warn>(dest.name,"name",db);
     ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
 
 	db.reader->IncPtr(size);
@@ -405,10 +406,10 @@ template <> void Structure :: Convert<MCol> (
     ) const
 { 
 
-    ReadField<ErrorPolicy_Igno>(dest.r,"r",db);
-    ReadField<ErrorPolicy_Igno>(dest.g,"g",db);
-    ReadField<ErrorPolicy_Igno>(dest.b,"b",db);
-    ReadField<ErrorPolicy_Igno>(dest.a,"a",db);
+    ReadField<ErrorPolicy_Fail>(dest.r,"r",db);
+    ReadField<ErrorPolicy_Fail>(dest.g,"g",db);
+    ReadField<ErrorPolicy_Fail>(dest.b,"b",db);
+    ReadField<ErrorPolicy_Fail>(dest.a,"a",db);
 
 	db.reader->IncPtr(size);
 }
@@ -420,8 +421,8 @@ template <> void Structure :: Convert<Image> (
     ) const
 { 
 
-    ReadField<ErrorPolicy_Igno>(dest.id,"id",db);
-    ReadFieldArray<ErrorPolicy_Igno>(dest.name,"name",db);
+    ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
+    ReadFieldArray<ErrorPolicy_Warn>(dest.name,"name",db);
     ReadField<ErrorPolicy_Igno>(dest.ok,"ok",db);
     ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
     ReadField<ErrorPolicy_Igno>(dest.source,"source",db);
@@ -453,10 +454,10 @@ template <> void Structure :: Convert<Scene> (
     ) const
 { 
 
-    ReadField<ErrorPolicy_Igno>(dest.id,"id",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.camera,"*camera",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.world,"*world",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.basact,"*basact",db);
+    ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.camera,"*camera",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.world,"*world",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.basact,"*basact",db);
     ReadField<ErrorPolicy_Igno>(dest.base,"base",db);
 
 	db.reader->IncPtr(size);
@@ -469,10 +470,10 @@ template <> void Structure :: Convert<Library> (
     ) const
 { 
 
-    ReadField<ErrorPolicy_Igno>(dest.id,"id",db);
-    ReadFieldArray<ErrorPolicy_Igno>(dest.name,"name",db);
-    ReadFieldArray<ErrorPolicy_Igno>(dest.filename,"filename",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.parent,"*parent",db);
+    ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
+    ReadFieldArray<ErrorPolicy_Warn>(dest.name,"name",db);
+    ReadFieldArray<ErrorPolicy_Fail>(dest.filename,"filename",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.parent,"*parent",db);
 
 	db.reader->IncPtr(size);
 }
@@ -484,8 +485,8 @@ template <> void Structure :: Convert<Tex> (
     ) const
 { 
 
-    ReadField<ErrorPolicy_Igno>((int&)dest.type,"type",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.ima,"*ima",db);
+    ReadField<ErrorPolicy_Fail>((int&)dest.type,"type",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.ima,"*ima",db);
 
 	db.reader->IncPtr(size);
 }
@@ -497,10 +498,10 @@ template <> void Structure :: Convert<Camera> (
     ) const
 { 
 
-    ReadField<ErrorPolicy_Igno>(dest.id,"id",db);
-    ReadField<ErrorPolicy_Igno>((int&)dest.type,"type",db);
-    ReadField<ErrorPolicy_Igno>((int&)dest.flag,"flag",db);
-    ReadField<ErrorPolicy_Igno>(dest.angle,"angle",db);
+    ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
+    ReadField<ErrorPolicy_Warn>((int&)dest.type,"type",db);
+    ReadField<ErrorPolicy_Warn>((int&)dest.flag,"flag",db);
+    ReadField<ErrorPolicy_Warn>(dest.angle,"angle",db);
 
 	db.reader->IncPtr(size);
 }

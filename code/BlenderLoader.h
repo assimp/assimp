@@ -71,6 +71,7 @@ namespace Assimp	{
 	// BlenderLoader.cpp
 	namespace Blender {
 		struct ConversionData;
+		template <template <typename,typename> class TCLASS, typename T> struct TempArray;
 	}
 
 
@@ -168,10 +169,11 @@ private:
 	); 
 
 	// --------------------
-	aiMesh* ConvertMesh(const Blender::Scene& in, 
+	void ConvertMesh(const Blender::Scene& in, 
 		const Blender::Object* obj, 
 		const Blender::Mesh* mesh, 
-		Blender::ConversionData& conv_data
+		Blender::ConversionData& conv_data,
+		Blender::TempArray<std::vector,aiMesh>& temp
 	); 
 
 	// --------------------
@@ -187,6 +189,9 @@ private:
 		const Blender::Camera* mesh, 
 		Blender::ConversionData& conv_data
 	); 
+
+	// --------------------
+	void BuildMaterials(Blender::ConversionData& conv_data) ;
 
 private: // static stuff, mostly logging and error reporting.
 

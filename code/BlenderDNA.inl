@@ -242,48 +242,80 @@ template <template <typename> class TOUT, typename T>
 void Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const FileDatabase& db, const Field& f) const 
 {
 	out.reset();
-	if (ptrval.val) { 
-		const Structure& s = db.dna[f.type];
-
-		// find the file block the pointer is pointing to
-		const FileBlockHead* block = LocateFileBlockForAddress(ptrval,db);
-
-		// also determine the target type from the block header
-		// and check if it matches the type which we expect.
-		const Structure& ss = db.dna[block->dna_index];
-		if (ss != s) {
-			throw Error((Formatter::format(),"Expected target to be of type `",s.name,
-				"` but seemingly it is a `",ss.name,"` instead"
-			));
-		}
-
-		// try to retrieve the object from the cache
-		db.cache(out).get(s,out,ptrval); 
-		if (out) {
-			return;
-		}
-
-		// seek to this location, but save the previous stream pointer.
-		const StreamReaderAny::pos pold = db.reader->GetCurrentPos();
-		db.reader->SetCurrentPos(block->start+ static_cast<size_t>((ptrval.val - block->address.val) ));
-		// FIXME: basically, this could cause problems with 64 bit pointers on 32 bit systems.
-		// I really ought to improve StreamReader to work with 64 bit indices exclusively.
-
-		// continue conversion after allocating the required storage
-		size_t num = block->size / ss.size; 
-		_allocate(out,num);
-
-		// cache the object before we convert it to avoid
-		// cyclic recursion.
-		db.cache(out).set(s,out,ptrval); 
-
-		T* o = out.get();
-		for (size_t i = 0; i < num; ++i,++o) {
-			s.Convert(*o,db);
-		}
-
-		db.reader->SetCurrentPos(pold);
+	if (!ptrval.val) { 
+		return;
 	}
+	const Structure& s = db.dna[f.type];
+	// find the file block the pointer is pointing to
+	const FileBlockHead* block = LocateFileBlockForAddress(ptrval,db);
+
+	// also determine the target type from the block header
+	// and check if it matches the type which we expect.
+	const Structure& ss = db.dna[block->dna_index];
+	if (ss != s) {
+		throw Error((Formatter::format(),"Expected target to be of type `",s.name,
+			"` but seemingly it is a `",ss.name,"` instead"
+			));
+	}
+
+	// try to retrieve the object from the cache
+	db.cache(out).get(s,out,ptrval); 
+	if (out) {
+		return;
+	}
+
+	// seek to this location, but save the previous stream pointer.
+	const StreamReaderAny::pos pold = db.reader->GetCurrentPos();
+	db.reader->SetCurrentPos(block->start+ static_cast<size_t>((ptrval.val - block->address.val) ));
+	// FIXME: basically, this could cause problems with 64 bit pointers on 32 bit systems.
+	// I really ought to improve StreamReader to work with 64 bit indices exclusively.
+
+	// continue conversion after allocating the required storage
+	size_t num = block->size / ss.size; 
+	T* o = _allocate(out,num);
+
+	// cache the object before we convert it to avoid cyclic recursion.
+	db.cache(out).set(s,out,ptrval); 
+
+	for (size_t i = 0; i < num; ++i,++o) {
+		s.Convert(*o,db);
+	}
+
+	db.reader->SetCurrentPos(pold);
+}
+
+//--------------------------------------------------------------------------------
+template <template <typename> class TOUT, typename T>
+void Structure :: ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval, const FileDatabase& db, const Field& f) const 
+{
+	// This is a function overload, not a template specialization. According to
+	// the partial ordering rules, it should be selected by the compiler
+	// for array-of-pointer inputs, i.e. Object::mats.
+
+	out.reset();
+	if (!ptrval.val) { 
+		return;
+	}
+
+	// find the file block the pointer is pointing to
+	const FileBlockHead* block = LocateFileBlockForAddress(ptrval,db);
+	const size_t num = block->size / (db.i64bit?8:4); 
+
+	// keep the old stream position
+	const StreamReaderAny::pos pold = db.reader->GetCurrentPos();
+	db.reader->SetCurrentPos(block->start+ static_cast<size_t>((ptrval.val - block->address.val) ));
+
+	// allocate raw storage for the array
+	out.resize(num);
+	for (size_t i = 0; i< num; ++i) {
+		Pointer val;
+		Convert(val,db);
+
+		// and resolve the pointees
+		ResolvePointer(out[i],val,db,f); 
+	}
+
+	db.reader->SetCurrentPos(pold);
 }
 
 //--------------------------------------------------------------------------------
@@ -297,47 +329,49 @@ template <> void Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::
 	// Less secure than in the `strongly-typed` case.
 
 	out.reset();
-	if (ptrval.val) { 
-		// find the file block the pointer is pointing to
-		const FileBlockHead* block = LocateFileBlockForAddress(ptrval,db);
-
-		// determine the target type from the block header
-		const Structure& s = db.dna[block->dna_index];
-
-		// try to retrieve the object from the cache
-		db.cache(out).get(s,out,ptrval); 
-		if (out) {
-			return;
-		}
-
-		// seek to this location, but save the previous stream pointer.
-		const StreamReaderAny::pos pold = db.reader->GetCurrentPos();
-		db.reader->SetCurrentPos(block->start+ static_cast<size_t>((ptrval.val - block->address.val) ));
-		// FIXME: basically, this could cause problems with 64 bit pointers on 32 bit systems.
-		// I really ought to improve StreamReader to work with 64 bit indices exclusively.
-
-		// continue conversion after allocating the required storage
-		out = db.dna.ConvertBlobToStructure(s,db);
-		db.reader->SetCurrentPos(pold);
-		if (!out) {
-			// this might happen if DNA::RegisterConverters hasn't been called so far
-			// or if the target type is not contained in `our` DNA.
-			out.reset();
-			DefaultLogger::get()->warn((Formatter::format(),
-				"Failed to find a converter for the `",s.name,"` structure"
-			));
-			return;
-		}
-
-		// store a pointer to the name string of the actual type
-		// in the object itself. This allows the conversion code
-		// to perform additional type checking.
-		out->dna_type = s.name.c_str();
-
-		// cache the object now that construction is complete
-		// FIXME we need to do this in ConvertBlobToStructure
-		db.cache(out).set(s,out,ptrval);
+	if (!ptrval.val) { 
+		return;
 	}
+
+	// find the file block the pointer is pointing to
+	const FileBlockHead* block = LocateFileBlockForAddress(ptrval,db);
+
+	// determine the target type from the block header
+	const Structure& s = db.dna[block->dna_index];
+
+	// try to retrieve the object from the cache
+	db.cache(out).get(s,out,ptrval); 
+	if (out) {
+		return;
+	}
+
+	// seek to this location, but save the previous stream pointer.
+	const StreamReaderAny::pos pold = db.reader->GetCurrentPos();
+	db.reader->SetCurrentPos(block->start+ static_cast<size_t>((ptrval.val - block->address.val) ));
+	// FIXME: basically, this could cause problems with 64 bit pointers on 32 bit systems.
+	// I really ought to improve StreamReader to work with 64 bit indices exclusively.
+
+	// continue conversion after allocating the required storage
+	out = db.dna.ConvertBlobToStructure(s,db);
+	db.reader->SetCurrentPos(pold);
+	if (!out) {
+		// this might happen if DNA::RegisterConverters hasn't been called so far
+		// or if the target type is not contained in `our` DNA.
+		out.reset();
+		DefaultLogger::get()->warn((Formatter::format(),
+			"Failed to find a converter for the `",s.name,"` structure"
+			));
+		return;
+	}
+
+	// store a pointer to the name string of the actual type
+	// in the object itself. This allows the conversion code
+	// to perform additional type checking.
+	out->dna_type = s.name.c_str();
+
+	// cache the object now that construction is complete
+	// FIXME we need to do this in ConvertBlobToStructure
+	db.cache(out).set(s,out,ptrval);
 }
 
 //--------------------------------------------------------------------------------
@@ -352,7 +386,7 @@ const FileBlockHead* Structure :: LocateFileBlockForAddress(const Pointer & ptrv
 	// which are only used for structures starting with an ID.
 	// We don't need to make this distinction, our algorithm
 	// works regardless where the data is stored.
-	std::vector<FileBlockHead>::const_iterator it = std::lower_bound(db.entries.begin(),db.entries.end(),ptrval);
+	vector<FileBlockHead>::const_iterator it = std::lower_bound(db.entries.begin(),db.entries.end(),ptrval);
 	if (it == db.entries.end()) {
 		// this is crucial, pointers may not be invalid.
 		// this is either a corrupted file or an attempted attack.

@@ -111,6 +111,27 @@ struct Pointer
 	uint64_t val;
 };
 
+// -------------------------------------------------------------------------------
+/** Dummy derivate of std::vector to be able to use it in templates simultaenously
+ *  with boost::shared_ptr, which takes only one template argument 
+ *  while std::vector takes three. Also we need to provide some special member
+ *  functions of shared_ptr */
+// -------------------------------------------------------------------------------
+template <typename T>
+class vector : public std::vector<T>
+{
+public:
+	using std::vector<T>::resize;
+	using std::vector<T>::empty;
+
+	void reset() {
+		resize(0);
+	}
+
+	operator bool () const {
+		return !empty();
+	}
+};
 
 // -------------------------------------------------------------------------------
 /** Mixed flags for use in #Field */
@@ -181,7 +202,7 @@ public:
 
 	// publicly accessible members
 	std::string name;
-	std::vector< Field > fields;
+	vector< Field > fields;
 	std::map<std::string, size_t> indices;
 
 	size_t size;
@@ -256,6 +277,11 @@ private:
 		const FileDatabase& db, const Field& f) const;
 
 	// --------------------------------------------------------
+	template <template <typename> class TOUT, typename T>
+	void ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval, 
+		const FileDatabase& db, const Field& f) const;
+
+	// --------------------------------------------------------
 	inline const FileBlockHead* LocateFileBlockForAddress(
 		const Pointer & ptrval,
 		const FileDatabase& db) const;
@@ -263,13 +289,15 @@ private:
 private:
 
 	// ------------------------------------------------------------------------------
-	template <typename T> void _allocate(boost::shared_ptr<T>& out, size_t& s) const {
+	template <typename T> T* _allocate(boost::shared_ptr<T>& out, size_t& s) const {
 		out = boost::shared_ptr<T>(new T());
 		s = 1;
+		return out.get();
 	}
 
-	template <typename T> void _allocate(boost::shared_array<T>& out, size_t& s) const {
-		out = boost::shared_array<T>(new T[s]);
+	template <typename T> T* _allocate(vector<T>& out, size_t& s) const {
+		out.resize(s);
+		return s ? &out.front() : NULL;
 	}
 
 	// --------------------------------------------------------
@@ -346,7 +374,7 @@ public:
 	typedef boost::shared_ptr<ElemBase> (Structure::*ConvertProcPtr) (const FileDatabase& ) const;
 	
 	std::map<std::string, ConvertProcPtr> converters;
-	std::vector<Structure > structures;
+	vector<Structure > structures;
 	std::map<std::string, size_t> indices;
 
 public:
@@ -585,19 +613,20 @@ public:
 
 private:
 
-	mutable std::vector<StructureCache> caches;
+	mutable vector<StructureCache> caches;
 	const FileDatabase& db;
 };
 
 // -------------------------------------------------------------------------------
-template <> class ObjectCache<boost::shared_array> 
+// -------------------------------------------------------------------------------
+template <> class ObjectCache<Blender::vector> 
 {
 public:
 
 	ObjectCache(const FileDatabase&) {}
 
-	template <typename T> void get(const Structure&, boost::shared_array<T>&t, const Pointer&) {}
-	template <typename T> void set(const Structure&, const boost::shared_array<T>&, const Pointer&) {}
+	template <typename T> void get(const Structure&, vector<T>&t, const Pointer&) {}
+	template <typename T> void set(const Structure&, const vector<T>&, const Pointer&) {}
 };
 
 #ifdef _MSC_VER
@@ -629,7 +658,7 @@ public:
 
 	DNA dna;
 	boost::shared_ptr< StreamReaderAny > reader;
-	std::vector< FileBlockHead > entries;
+	vector< FileBlockHead > entries;
 
 public:
 
@@ -637,7 +666,7 @@ public:
 		return _stats;
 	}
 
-	// For all our templates to work on both shared_ptr's and shared_array's
+	// For all our templates to work on both shared_ptr's and vector's
 	// using the same code, a dummy cache for arrays is provided. Actually,
 	// arrays of objects are never cached because we can't easily 
 	// ensure their proper destruction.
@@ -647,7 +676,7 @@ public:
 	}
 
 	template <typename T>
-	ObjectCache<boost::shared_array>& cache(boost::shared_array<T>& in) const {
+	ObjectCache<vector>& cache(vector<T>& in) const {
 		return _cacheArrays;
 	}
 
@@ -658,7 +687,7 @@ private:
 	mutable Statistics _stats;
 #endif
 
-	mutable ObjectCache<boost::shared_array> _cacheArrays;
+	mutable ObjectCache<vector> _cacheArrays;
 	mutable ObjectCache<boost::shared_ptr> _cache;
 
 	mutable size_t next_cache_idx;

@@ -101,10 +101,13 @@ def main():
     flags = re.ASCII|re.DOTALL|re.MULTILINE
     #stripcoms = re.compile(r"/\*(.*?)*\/",flags)
     getstruct = re.compile(r"struct\s+(\w+?)\s*(:\s*ElemBase)?\s*\{(.*?)^\}\s*;",flags)
+    getsmartx = re.compile(r"(std\s*::\s*)?(vector)\s*<\s*(boost\s*::\s*)?shared_(ptr)\s*<\s*(\w+)\s*>\s*>\s*",flags)
     getsmartp = re.compile(r"(boost\s*::\s*)?shared_(ptr)\s*<\s*(\w+)\s*>\s*",flags)
-    getsmarta = re.compile(r"(boost\s*::\s*)?shared_(array)\s*<\s*(\w+)\s*>\s*",flags)
-    getpolicy = re.compile(r"\s*(WARN|FAIL|IGNO|)",flags)
+    getsmarta = re.compile(r"(std\s*::\s*)?(vector)\s*<\s*(\w+)\s*>\s*",flags)
+    getpolicy = re.compile(r"\s*(WARN|FAIL|IGNO)",flags)
     stripenum = re.compile(r"enum\s+(\w+)\s*{.*?\}\s*;",flags)
+
+    assert getsmartx and getsmartp and getsmarta and getpolicy and stripenum
     
     enums = set()
     #re.sub(stripcoms," ",input)
@@ -136,28 +139,27 @@ def main():
     for k,v in hits.items():
         out = []
         for line in v:
-            tok = line.split(None,1)
-            if len(tok) <= 1:
-                continue
+           
+            policy = "IGNO"
+            py = re.search(getpolicy,line) 
+            if not py is None:
+                policy = py.groups()[0]
+                line = re.sub(getpolicy,"",line)
 
-            #print(tok)
-
-            ty = re.match(getsmartp,tok[0]) or re.match(getsmarta,tok[0]) or tok[0]
-            if not isinstance(ty,str):
+            ty = re.match(getsmartx,line) or re.match(getsmartp,line)  or re.match(getsmarta,line) 
+            if ty is None:
+                ty = line.split(None,1)[0]
+            else:
                 if ty.groups()[1] == "ptr":
                     ty = ty.groups()[2] + "*"
-                elif ty.groups()[1] == "array":
-                    ty = ty.groups()[2] + "*"
+                elif ty.groups()[1] == "vector":
+                    ty = ty.groups()[-1] + ("*" if len(ty.groups()) == 3 else "**")
 
-            policy = "IGNO"
-            py = re.search(getpolicy,tok[1]) or tok[1]
-            if not isinstance(py,str):
-                policy = py.groups()[0]
-                py = re.sub(getpolicy,"",tok[1])
-
-            #print(py)
-            for m in py.split(','):
-                out.append((ty,m,policy))
+            #print(line)
+            sp = line.split(',')
+            out.append((ty,sp[0].split(None)[-1].strip(),policy))
+            for m in sp[1:]:
+                out.append((ty,m.strip(),policy))
                 
         v[:] = out
         print("Structure {0}".format(k))

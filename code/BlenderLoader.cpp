@@ -58,7 +58,7 @@ using namespace Assimp;
 using namespace Assimp::Blender;
 using namespace Assimp::Formatter;
 
-#define for_each BOOST_FOREACH
+#define for_each(x,y) BOOST_FOREACH(x,y)
 
 static const aiLoaderDesc blenderDesc = {
 	"Blender 3D Importer \nhttp://www.blender3d.org",
@@ -75,9 +75,13 @@ static const aiLoaderDesc blenderDesc = {
 namespace Assimp {
 namespace Blender {
 
-	/** Mini smart-array to avoid pulling in even more boost stuff */
+	/** Mini smart-array to avoid pulling in even more boost stuff. usable with vector and deque */
 	template <template <typename,typename> class TCLASS, typename T>
 	struct TempArray	{
+
+		TempArray() {
+		}
+
 		~TempArray () {
 			for_each(T* elem, arr) {
 				delete elem;
@@ -96,6 +100,26 @@ namespace Blender {
 			return arr;
 		}
 
+		TCLASS< T*,std::allocator<T*> >& get () {
+			return arr;
+		}
+
+		const TCLASS< T*,std::allocator<T*> >& get () const {
+			return arr;
+		}
+
+		T* operator[] (size_t idx) const {
+			return arr[idx];
+		}
+
+	private:
+		// no copy semantics
+		void operator= (const TempArray&)  {
+		}
+
+		TempArray(const TempArray& arr) {
+		}
+
 	private:
 		TCLASS< T*,std::allocator<T*> > arr;
 	};
@@ -109,6 +133,9 @@ namespace Blender {
 		TempArray <std::vector, aiCamera> cameras;
 		TempArray <std::vector, aiLight> lights;
 		TempArray <std::vector, aiMaterial> materials;
+
+		// set of all materials referenced by at least one mesh in the scene
+		std::deque< boost::shared_ptr< Material > > materials_raw;
 	};
 }
 }
@@ -304,6 +331,8 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in)
 		root->mChildren[i]->mParent = root;
 	}
 
+	BuildMaterials(conv);
+
 	if (conv.meshes->size()) {
 		out->mMeshes = new aiMesh*[out->mNumMeshes = static_cast<unsigned int>( conv.meshes->size() )];
 		std::copy(conv.meshes->begin(),conv.meshes->end(),out->mMeshes);
@@ -332,9 +361,64 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in)
 	// acknowledge that the scene might come out incomplete
 	// by Assimps definition of `complete`: blender scenes
 	// can consist of thousands of cameras or lights with
-	// not a single mesh in them.
+	// not a single mesh between them.
 	if (!out->mNumMeshes) {
 		out->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void BlenderImporter::BuildMaterials(ConversionData& conv_data) 
+{
+	conv_data.materials->reserve(conv_data.materials_raw.size());
+
+	// add a default material if necessary
+	unsigned int index = static_cast<unsigned int>( -1 );
+	for_each( aiMesh* mesh, conv_data.meshes.get() ) {
+		if (mesh->mMaterialIndex == static_cast<unsigned int>( -1 )) {
+
+			if (index == static_cast<unsigned int>( -1 )) {
+
+				// ok, we need to add a dedicated default material for some poor material-less meshes
+				boost::shared_ptr<Material> p(new Material());
+				strcpy( p->id.name, "$AssimpDefault" );
+
+				p->r = p->g = p->b = 0.6f;
+				p->specr = p->specg = p->specb = 0.6f;
+				p->ambir = p->ambig = p->ambib = 0.0f;
+				p->emit = 0.f;
+				p->alpha = 0.f;
+
+				// XXX add more / or add default c'tor to Material
+
+				index = static_cast<unsigned int>( conv_data.materials_raw.size() );
+				conv_data.materials_raw.push_back(p);
+
+				LogInfo("Adding default material ...");
+			}
+			mesh->mMaterialIndex = index;
+		}
+	}
+
+	for_each(boost::shared_ptr<Material> mat, conv_data.materials_raw) {
+	
+		MaterialHelper* mout = new MaterialHelper();
+		conv_data.materials->push_back(mout);
+
+		// set material name
+		aiString name = aiString(mat->id.name);
+		mout->AddProperty(&name,AI_MATKEY_NAME);
+
+
+		// basic material colors
+		aiColor3D col(mat->r,mat->g,mat->b);
+		mout->AddProperty(&col,1,AI_MATKEY_COLOR_DIFFUSE);
+
+		col = aiColor3D(mat->specr,mat->specg,mat->specb);
+		mout->AddProperty(&col,1,AI_MATKEY_COLOR_SPECULAR);
+
+		col = aiColor3D(mat->ambir,mat->ambig,mat->ambib);
+		mout->AddProperty(&col,1,AI_MATKEY_COLOR_AMBIENT);
 	}
 }
 
@@ -357,25 +441,93 @@ void BlenderImporter::NotSupportedObjectType(const Object* obj, const char* type
 }
 
 // ------------------------------------------------------------------------------------------------
-aiMesh* BlenderImporter::ConvertMesh(const Scene& in, const Object* obj, const Mesh* mesh, ConversionData& conv_data) 
+void BlenderImporter::ConvertMesh(const Scene& in, const Object* obj, const Mesh* mesh, 
+	ConversionData& conv_data, TempArray<std::vector,aiMesh>&  temp
+	) 
 {
+	typedef std::pair<const int,size_t> MyPair;
 	if (!mesh->totface || !mesh->totvert) {
-		return NULL;
+		return;
 	}
 
-	ScopeGuard<aiMesh> out(new aiMesh());
+	// some sanity checks
+	if (mesh->totface > mesh->mface.size() ){
+		ThrowException("Number of faces is larger than the corresponding array");
+	}
 
-	aiVector3D* vo = out->mVertices = new aiVector3D[mesh->totface*4];
-	aiVector3D* vn = out->mNormals  = new aiVector3D[mesh->totface*4];
+	if (mesh->totvert > mesh->mvert.size()) {
+		ThrowException("Number of vertices is larger than the corresponding array");
+	}
 
-	out->mNumFaces = mesh->totface;
-	out->mFaces = new aiFace[out->mNumFaces]();
-
-	for (unsigned int i = 0; i < out->mNumFaces; ++i) {
-		aiFace& f = out->mFaces[i];
+	// collect per-submesh numbers
+	std::map<int,size_t> per_mat;
+	for (int i = 0; i < mesh->totface; ++i) {
 
 		const MFace& mf = mesh->mface[i];
+		per_mat[ mf.mat_nr ]++;
+	}
+
+	// ... and allocate the corresponding meshes
+	const size_t old = temp->size();
+	temp->reserve(temp->size() + per_mat.size());
+
+	std::map<size_t,size_t> mat_num_to_mesh_idx;
+	for_each(MyPair& it, per_mat) {
+
+		mat_num_to_mesh_idx[it.first] = temp->size();
+		temp->push_back(new aiMesh());
+
+		aiMesh* out = temp->back();
+		out->mVertices = new aiVector3D[it.second*4];
+		out->mNormals  = new aiVector3D[it.second*4];
+
+		//out->mNumFaces = 0
+		//out->mNumVertices = 0
+		out->mFaces = new aiFace[it.second]();
+
+		// all submeshes created from this mesh are named equally. this allows
+		// curious users to recover the original adjacency.
+		out->mName = aiString(mesh->id.name);
+
+		// resolve the material reference and add this material to the set of
+		// output materials. The (temporary) material index is the index 
+		// of the material entry within the list of resolved materials.
+		if (mesh->mat) {
+
+			if (it.first >= mesh->mat.size() ) {
+				ThrowException("Material index is out of range");
+			}
+
+			boost::shared_ptr<Material> mat = mesh->mat[it.first];
+			const std::deque< boost::shared_ptr<Material> >::iterator has = std::find(
+					conv_data.materials_raw.begin(),
+					conv_data.materials_raw.end(),mat
+			);
+
+			if (has != conv_data.materials_raw.end()) {
+				out->mMaterialIndex = static_cast<unsigned int>( std::distance(conv_data.materials_raw.begin(),has));
+			}
+			else {
+				out->mMaterialIndex = static_cast<unsigned int>( conv_data.materials_raw.size() );
+				conv_data.materials_raw.push_back(mat);
+			}
+		}
+		else out->mMaterialIndex = static_cast<unsigned int>( -1 );
+	}
+
+	for (int i = 0; i < mesh->totface; ++i) {
+
+		const MFace& mf = mesh->mface[i];
+
+		aiMesh* const out = temp[ mat_num_to_mesh_idx[ mf.mat_nr ] ];
+		aiFace& f = out->mFaces[out->mNumFaces++];
+
 		f.mIndices = new unsigned int[ f.mNumIndices = mf.v4?4:3 ];
+		aiVector3D* vo = out->mVertices + out->mNumVertices;
+		aiVector3D* vn = out->mNormals + out->mNumVertices;
+
+		// XXX we can't fold this easily, because we are restricted
+		// to the member names from the BLEND file (v1,v2,v3,v4) ..
 
 		if (mf.v1 >= mesh->totvert) {
 			ThrowException("Vertex index v1 out of range");
@@ -426,56 +578,97 @@ aiMesh* BlenderImporter::ConvertMesh(const Scene& in, const Object* obj, const M
 		}
 		//	if (f.mNumIndices >= 4) {
 		if (mf.v4) {
-		v = &mesh->mvert[mf.v4];
-		vo->x = v->co[0];
-		vo->y = v->co[1];
-		vo->z = v->co[2];
-		vn->x = v->no[0];
-		vn->y = v->no[1];
-		vn->z = v->no[2];
-		f.mIndices[3] = out->mNumVertices++;
-		++vo;
-		++vn;
+			v = &mesh->mvert[mf.v4];
+			vo->x = v->co[0];
+			vo->y = v->co[1];
+			vo->z = v->co[2];
+			vn->x = v->no[0];
+			vn->y = v->no[1];
+			vn->z = v->no[2];
+			f.mIndices[3] = out->mNumVertices++;
+			++vo;
+			++vn;
+
+			out->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
 		}
-	
+		else out->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+
 		//	}
 		//	}
 		//	}
 	}
 
+	// collect texture coordinates, they're stored in a separate per-face buffer
 	if (mesh->mtface) {
-		vo = out->mTextureCoords[0] = new aiVector3D[out->mNumVertices];
+		if (mesh->totface > mesh->mtface.size()) {
+			ThrowException("Number of UV faces is larger than the corresponding UV face array (#1)");
+		}
+		for (std::vector<aiMesh*>::iterator it = temp->begin()+old; it != temp->end(); ++it) {
+			ai_assert((*it)->mNumVertices && (*it)->mNumFaces);
 
-		for (unsigned int i = 0; i < out->mNumFaces; ++i) {
-			const aiFace& f = out->mFaces[i];
+			(*it)->mTextureCoords[0] = new aiVector3D[(*it)->mNumVertices];
+			(*it)->mNumFaces = (*it)->mNumVertices = 0;
+		}
 
+		for (int i = 0; i < mesh->totface; ++i) {
 			const MTFace* v = &mesh->mtface[i];
-			for (unsigned int i = 0; i < f.mNumIndices; ++i,++vo) {
-				vo->x = v->uv[i][0];
-				vo->y = v->uv[i][1];
-			}
-		}
-	}
 
-	if (mesh->tface) {
-		vo = out->mTextureCoords[0] = new aiVector3D[out->mNumVertices];
-
-		for (unsigned int i = 0; i < out->mNumFaces; ++i) {
-			const aiFace& f = out->mFaces[i];
-
-			const TFace* v = &mesh->tface[i];
-			for (unsigned int i = 0; i < f.mNumIndices; ++i,++vo) {
-				vo->x = v->uv[i][0];
-				vo->y = v->uv[i][1];
-			}
-		}
-	}
-
-	if (mesh->mcol) {
-		aiColor4D* vo = out->mColors[0] = new aiColor4D[out->mNumVertices];
-		for (unsigned int i = 0; i <  out->mNumFaces; ++i) {
+			aiMesh* const out = temp[ mat_num_to_mesh_idx[ mesh->mface[i].mat_nr ] ];
+			const aiFace& f = out->mFaces[out->mNumFaces++];
 			
-			for (unsigned int n = 0; n < 4; ++n, ++vo) {
+			aiVector3D* vo = &out->mTextureCoords[0][out->mNumVertices];
+			for (unsigned int i = 0; i < f.mNumIndices; ++i,++vo,++out->mNumVertices) {
+				vo->x = v->uv[i][0];
+				vo->y = v->uv[i][1];
+			}
+		}
+	}
+
+	// collect texture coordinates, old-style (marked as deprecated in current blender sources)
+	if (mesh->tface) {
+		if (mesh->totface > mesh->mtface.size()) {
+			ThrowException("Number of faces is larger than the corresponding UV face array (#2)");
+		}
+		for (std::vector<aiMesh*>::iterator it = temp->begin()+old; it != temp->end(); ++it) {
+			ai_assert((*it)->mNumVertices && (*it)->mNumFaces);
+
+			(*it)->mTextureCoords[0] = new aiVector3D[(*it)->mNumVertices];
+			(*it)->mNumFaces = (*it)->mNumVertices = 0;
+		}
+
+		for (int i = 0; i < mesh->totface; ++i) {
+			const TFace* v = &mesh->tface[i];
+
+			aiMesh* const out = temp[ mat_num_to_mesh_idx[ mesh->mface[i].mat_nr ] ];
+			const aiFace& f = out->mFaces[out->mNumFaces++];
+			
+			aiVector3D* vo = &out->mTextureCoords[0][out->mNumVertices];
+			for (unsigned int i = 0; i < f.mNumIndices; ++i,++vo,++out->mNumVertices) {
+				vo->x = v->uv[i][0];
+				vo->y = v->uv[i][1];
+			}
+		}
+	}
+
+	// collect vertex colors, stored separately as well
+	if (mesh->mcol) {
+		if (mesh->totface > (mesh->mcol.size()/4)) {
+			ThrowException("Number of faces is larger than the corresponding color face array");
+		}
+		for (std::vector<aiMesh*>::iterator it = temp->begin()+old; it != temp->end(); ++it) {
+			ai_assert((*it)->mNumVertices && (*it)->mNumFaces);
+
+			(*it)->mColors[0] = new aiColor4D[(*it)->mNumVertices];
+			(*it)->mNumFaces = (*it)->mNumVertices = 0;
+		}
+
+		for (int i = 0; i < mesh->totface; ++i) {
+
+			aiMesh* const out = temp[ mat_num_to_mesh_idx[ mesh->mface[i].mat_nr ] ];
+			const aiFace& f = out->mFaces[out->mNumFaces++];
+			
+			aiColor4D* vo = &out->mColors[0][out->mNumVertices];
+			for (unsigned int n = 0; n < f.mNumIndices; ++n, ++vo,++out->mNumVertices) {
 				const MCol* col = &mesh->mcol[(i<<2)+n];
 
 				vo->r = col->r;
@@ -483,10 +676,11 @@ aiMesh* BlenderImporter::ConvertMesh(const Scene& in, const Object* obj, const M
 				vo->b = col->b;
 				vo->a = col->a;
 			}
+			for (unsigned int n = f.mNumIndices; n < 4; ++n);
 		}
 	}
 
-	return out.dismiss();
+	return;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -509,15 +703,15 @@ aiLight* BlenderImporter::ConvertLight(const Scene& in, const Object* obj, const
 aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, ConversionData& conv_data) 
 {
 	std::deque<const Object*> children;
-	for(std::set<const Object*>::iterator it = conv_data.objects.begin(); it != conv_data.objects.end() ;++it) {
+	for(std::set<const Object*>::iterator it = conv_data.objects.begin(); it != conv_data.objects.end() ;) {
 		const Object* object = *it;
 		if (object->parent.get() == obj) {
 			children.push_back(object);
+
 			conv_data.objects.erase(it++);
-			if(it == conv_data.objects.end()) {
-				break;
-			}
+			continue;
 		}
+		++it;
 	}
 
 	ScopeGuard<aiNode> node(new aiNode(obj->id.name));
@@ -530,15 +724,16 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
 
 			// supported object types
 		case Object :: Type_MESH: {
+			const size_t old = conv_data.meshes->size();
+
 			CheckActualType(obj->data.get(),"Mesh");
-			aiMesh* mesh = ConvertMesh(in,obj,static_cast<const Mesh*>(
-				obj->data.get()),conv_data);
+			ConvertMesh(in,obj,static_cast<const Mesh*>(obj->data.get()),conv_data,conv_data.meshes);
 
-			if (mesh) {
-				node->mMeshes = new unsigned int[node->mNumMeshes = 1u];
-				node->mMeshes[0] = conv_data.meshes->size();
-
-				conv_data.meshes->push_back(mesh);
+			if (conv_data.meshes->size() > old) {
+				node->mMeshes = new unsigned int[node->mNumMeshes = static_cast<unsigned int>(conv_data.meshes->size()-old)];
+				for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
+					node->mMeshes[i] = i + old;
+				}
 			}}
 			break;
 		case Object :: Type_LAMP: {

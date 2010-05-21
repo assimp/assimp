@@ -197,7 +197,7 @@ struct MDeformWeight : ElemBase  {
 // -------------------------------------------------------------------------------
 struct MDeformVert : ElemBase  {
 
-	boost::shared_array<MDeformWeight> dw WARN;
+	vector<MDeformWeight> dw WARN;
 	int totweight;
 };
 
@@ -238,13 +238,15 @@ struct Mesh : ElemBase {
 	short subsurftype;
 	short smoothresh;
 
-	boost::shared_array<MFace> mface FAIL;
-	boost::shared_array<MTFace> mtface;
-	boost::shared_array<TFace> tface;
-	boost::shared_array<MVert> mvert FAIL;
-	boost::shared_array<MEdge> medge WARN;
-	boost::shared_array<MDeformVert> dvert;
-	boost::shared_array<MCol> mcol;
+	vector<MFace> mface FAIL;
+	vector<MTFace> mtface;
+	vector<TFace> tface;
+	vector<MVert> mvert FAIL;
+	vector<MEdge> medge WARN;
+	vector<MDeformVert> dvert;
+	vector<MCol> mcol;
+
+	vector< boost::shared_ptr<Material> > mat FAIL;
 };
 
 // -------------------------------------------------------------------------------

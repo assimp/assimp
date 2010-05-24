@@ -207,6 +207,9 @@ template <> void Structure :: Convert<PackedFile> (
     ) const
 { 
 
+    ReadField<ErrorPolicy_Warn>(dest.size,"size",db);
+    ReadField<ErrorPolicy_Warn>(dest.seek,"seek",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.data,"*data",db);
 
 	db.reader->IncPtr(size);
 }
@@ -271,6 +274,7 @@ template <> void Structure :: Convert<Material> (
     ReadFieldPtr<ErrorPolicy_Igno>(dest.group,"*group",db);
     ReadField<ErrorPolicy_Warn>(dest.diff_shader,"diff_shader",db);
     ReadField<ErrorPolicy_Warn>(dest.spec_shader,"spec_shader",db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.mtex,"*mtex",db);
 
 	db.reader->IncPtr(size);
 }
@@ -338,7 +342,7 @@ template <> void Structure :: Convert<MVert> (
     ReadFieldArray<ErrorPolicy_Fail>(dest.no,"no",db);
     ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
     ReadField<ErrorPolicy_Warn>(dest.mat_nr,"mat_nr",db);
-    ReadField<ErrorPolicy_Fail>(dest.bweight,"bweight",db);
+    ReadField<ErrorPolicy_Igno>(dest.bweight,"bweight",db);
 
 	db.reader->IncPtr(size);
 }

@@ -66,6 +66,9 @@ namespace Assimp	{
 		struct Mesh;
 		struct Camera;
 		struct Lamp;
+		struct MTex;
+		struct Image;
+		struct Material;
 	}
 
 	// BlenderLoader.cpp
@@ -157,7 +160,8 @@ protected:
 
 	// --------------------
 	void ConvertBlendFile(aiScene* out,
-		const Blender::Scene& in
+		const Blender::Scene& in,
+		const Blender::FileDatabase& file
 	);
 
 private:
@@ -191,7 +195,33 @@ private:
 	); 
 
 	// --------------------
-	void BuildMaterials(Blender::ConversionData& conv_data) ;
+	void BuildMaterials(
+		Blender::ConversionData& conv_data
+	) ;
+
+	// --------------------
+	void ResolveTexture(
+		MaterialHelper* out, 
+		const Blender::Material* mat, 
+		const Blender::MTex* tex,
+		Blender::ConversionData& conv_data
+	);
+
+	// --------------------
+	void ResolveImage(
+		MaterialHelper* out, 
+		const Blender::Material* mat, 
+		const Blender::MTex* tex, 
+		const Blender::Image* img,
+		Blender::ConversionData& conv_data
+	);
+
+	void AddSentinelTexture(
+		MaterialHelper* out, 
+		const Blender::Material* mat,
+		const Blender::MTex* tex, 
+		Blender::ConversionData& conv_data
+	);
 
 private: // static stuff, mostly logging and error reporting.
 

@@ -75,9 +75,12 @@ static const aiLoaderDesc blenderDesc = {
 namespace Assimp {
 namespace Blender {
 
+	// --------------------------------------------------------------------
 	/** Mini smart-array to avoid pulling in even more boost stuff. usable with vector and deque */
+	// --------------------------------------------------------------------
 	template <template <typename,typename> class TCLASS, typename T>
 	struct TempArray	{
+		typedef TCLASS< T*,std::allocator<T*> > mywrap;
 
 		TempArray() {
 		}
@@ -92,19 +95,23 @@ namespace Blender {
 			arr.clear();
 		}
 
-		TCLASS< T*,std::allocator<T*> >* operator -> () {
+		mywrap* operator -> () {
 			return &arr;
 		}
 
-		operator TCLASS< T*,std::allocator<T*> > () {
+		operator mywrap& () {
 			return arr;
 		}
 
-		TCLASS< T*,std::allocator<T*> >& get () {
+		operator const mywrap& () const {
 			return arr;
 		}
 
-		const TCLASS< T*,std::allocator<T*> >& get () const {
+		mywrap& get () {
+			return arr;
+		}
+
+		const mywrap& get () const {
 			return arr;
 		}
 
@@ -121,24 +128,73 @@ namespace Blender {
 		}
 
 	private:
-		TCLASS< T*,std::allocator<T*> > arr;
+		mywrap arr;
 	};
 	
+#ifdef _MSC_VER
+#	pragma warning(disable:4351)
+#endif
+	// --------------------------------------------------------------------
 	/** ConversionData acts as intermediate storage location for
 	 *  the various ConvertXXX routines in BlenderImporter.*/
-	struct ConversionData	{
+	// --------------------------------------------------------------------
+	struct ConversionData	
+	{
+		ConversionData(const FileDatabase& db)
+			: sentinel_cnt()
+			, next_texture()
+			, db(db)
+		{}
+
 		std::set<const Object*> objects;
 
 		TempArray <std::vector, aiMesh> meshes;
 		TempArray <std::vector, aiCamera> cameras;
 		TempArray <std::vector, aiLight> lights;
 		TempArray <std::vector, aiMaterial> materials;
+		TempArray <std::vector, aiTexture> textures;
 
 		// set of all materials referenced by at least one mesh in the scene
 		std::deque< boost::shared_ptr< Material > > materials_raw;
+
+		// counter to name sentinel textures inserted as substitutes for procedural textures.
+		unsigned int sentinel_cnt;
+
+		// next texture ID for each texture type, respectively
+		unsigned int next_texture[aiTextureType_UNKNOWN+1];
+
+		// original file data
+		const FileDatabase& db;
 	};
+#ifdef _MSC_VER
+#	pragma warning(default:4351)
+#endif
+
+// ------------------------------------------------------------------------------------------------
+const char* GetTextureTypeDisplayString(Tex::Type t)
+{
+	switch (t)	{
+	case Tex::Type_CLOUDS		:  return  "Clouds";			
+	case Tex::Type_WOOD			:  return  "Wood";			
+	case Tex::Type_MARBLE		:  return  "Marble";			
+	case Tex::Type_MAGIC		:  return  "Magic";		
+	case Tex::Type_BLEND		:  return  "Blend";			
+	case Tex::Type_STUCCI		:  return  "Stucci";			
+	case Tex::Type_NOISE		:  return  "Noise";			
+	case Tex::Type_PLUGIN		:  return  "Plugin";			
+	case Tex::Type_MUSGRAVE		:  return  "Musgrave";		
+	case Tex::Type_VORONOI		:  return  "Voronoi";			
+	case Tex::Type_DISTNOISE	:  return  "DistortedNoise";	
+	case Tex::Type_ENVMAP		:  return  "EnvMap";	
+	case Tex::Type_IMAGE		:  return  "Image";	
+	default: 
+		break;
+	}
+	return "<Unknown>";
 }
-}
+
+} // ! Blender
+} // ! Assimp
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -220,7 +276,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
 	Scene scene;
 	ExtractScene(scene,file);
 
-	ConvertBlendFile(pScene,scene);
+	ConvertBlendFile(pScene,scene,file);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -294,9 +350,9 @@ void BlenderImporter::ExtractScene(Scene& out, const FileDatabase& file)
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in) 
+void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileDatabase& file) 
 {
-	ConversionData conv;
+	ConversionData conv(file);
 
 	// FIXME it must be possible to take the hierarchy directly from
 	// the file. This is terrible. Here, we're first looking for
@@ -357,6 +413,11 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in)
 		conv.materials.dismiss();
 	}
 
+	if (conv.textures->size()) {
+		out->mTextures = new aiTexture*[out->mNumTextures = static_cast<unsigned int>( conv.textures->size() )];
+		std::copy(conv.textures->begin(),conv.textures->end(),out->mTextures);
+		conv.textures.dismiss();
+	}
 
 	// acknowledge that the scene might come out incomplete
 	// by Assimps definition of `complete`: blender scenes
@@ -365,6 +426,113 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in)
 	if (!out->mNumMeshes) {
 		out->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
 	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void BlenderImporter::ResolveImage(MaterialHelper* out, const Material* mat, const MTex* tex, const Image* img, ConversionData& conv_data)
+{
+	mat; tex; conv_data;
+	aiString name;
+
+	// check if the file contents are bundled with the BLEND file
+	if (img->packedfile) {
+		name.data[0] = '*';
+		name.length = 1+ ASSIMP_itoa10(name.data+1,MAXLEN-1,conv_data.textures->size());
+
+		conv_data.textures->push_back(new aiTexture());
+		aiTexture* tex = conv_data.textures->back();
+
+		// usually 'img->name' will be the original file name of the embedded textures,
+		// so we can extract the file extension from it.
+		const size_t nlen = strlen( img->name );
+		const char* s = img->name+nlen, *e = s;
+
+		while (s >= img->name && *s != '.')--s;
+
+		tex->achFormatHint[0] = s+1>e ? '\0' : s[1];
+		tex->achFormatHint[1] = s+2>e ? '\0' : s[2];
+		tex->achFormatHint[2] = s+3>e ? '\0' : s[3];
+		tex->achFormatHint[3] = '\0';
+
+		// tex->mHeight = 0;
+		tex->mWidth = img->packedfile->size;
+		uint8_t* ch = new uint8_t[tex->mWidth];
+
+		conv_data.db.reader->SetCurrentPos(img->packedfile->data->val);
+		conv_data.db.reader->CopyAndAdvance(ch,tex->mWidth);
+
+		tex->pcData = reinterpret_cast<aiTexel*>(ch);
+
+		LogInfo("Reading embedded texture, original file was "+std::string(img->name));
+	}
+	else {
+		name = aiString( img->name );
+	}
+	out->AddProperty(&name,AI_MATKEY_TEXTURE_DIFFUSE(
+		conv_data.next_texture[aiTextureType_DIFFUSE]++)
+	);
+}
+
+// ------------------------------------------------------------------------------------------------
+void BlenderImporter::AddSentinelTexture(MaterialHelper* out, const Material* mat, const MTex* tex, ConversionData& conv_data)
+{
+	mat; tex; conv_data;
+
+	aiString name;
+	name.length = sprintf(name.data, "Procedural,num=%i,type=%s",conv_data.sentinel_cnt++,
+		GetTextureTypeDisplayString(tex->tex->type)
+	);
+	out->AddProperty(&name,AI_MATKEY_TEXTURE_DIFFUSE(
+		conv_data.next_texture[aiTextureType_DIFFUSE]++)
+	);
+}
+
+// ------------------------------------------------------------------------------------------------
+void BlenderImporter::ResolveTexture(MaterialHelper* out, const Material* mat, const MTex* tex, ConversionData& conv_data)
+{
+	const Tex* rtex = tex->tex.get();
+	if(!rtex || !rtex->type) {
+		return;
+	}
+	
+	// We can't support most of the texture types because the're mostly procedural.
+	// These are substituted by a dummy texture.
+	const char* dispnam = "";
+	switch( rtex->type ) 
+	{
+			// these are listed in blender's UI
+		case Tex::Type_CLOUDS		:  
+		case Tex::Type_WOOD			:  
+		case Tex::Type_MARBLE		:  
+		case Tex::Type_MAGIC		: 
+		case Tex::Type_BLEND		:  
+		case Tex::Type_STUCCI		: 
+		case Tex::Type_NOISE		: 
+		case Tex::Type_PLUGIN		: 
+		case Tex::Type_MUSGRAVE		:  
+		case Tex::Type_VORONOI		:  
+		case Tex::Type_DISTNOISE	:  
+		case Tex::Type_ENVMAP		:  
+
+			// these do no appear in the UI, why?
+		case Tex::Type_POINTDENSITY	:  
+		case Tex::Type_VOXELDATA	: 
+
+			LogWarn(std::string("Encountered a texture with an unsupported type: ")+dispnam);
+			AddSentinelTexture(out, mat, tex, conv_data);
+			break;
+
+		case Tex::Type_IMAGE		:
+			if (!rtex->ima) {
+				LogError("A texture claims to be an Image, but no image reference is given");
+				break;
+			}
+			ResolveImage(out, mat, tex, rtex->ima.get(),conv_data);
+			break;
+
+		default:
+			ai_assert(false);
+	};
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -386,6 +554,7 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 				p->r = p->g = p->b = 0.6f;
 				p->specr = p->specg = p->specb = 0.6f;
 				p->ambir = p->ambig = p->ambib = 0.0f;
+				p->mirr = p->mirg = p->mirb = 0.0f;
 				p->emit = 0.f;
 				p->alpha = 0.f;
 
@@ -401,6 +570,11 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 	}
 
 	for_each(boost::shared_ptr<Material> mat, conv_data.materials_raw) {
+
+		// reset per material global counters
+		for (size_t i = 0; i < sizeof(conv_data.next_texture)/sizeof(conv_data.next_texture[0]);++i) {
+			conv_data.next_texture[i] = 0 ;
+		}
 	
 		MaterialHelper* mout = new MaterialHelper();
 		conv_data.materials->push_back(mout);
@@ -419,6 +593,17 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 
 		col = aiColor3D(mat->ambir,mat->ambig,mat->ambib);
 		mout->AddProperty(&col,1,AI_MATKEY_COLOR_AMBIENT);
+
+		col = aiColor3D(mat->mirr,mat->mirg,mat->mirb);
+		mout->AddProperty(&col,1,AI_MATKEY_COLOR_REFLECTIVE);
+
+		for(size_t i = 0; i < sizeof(mat->mtex) / sizeof(mat->mtex[0]); ++i) {
+			if (!mat->mtex[i]) {
+				continue;
+			}
+
+			ResolveTexture(mout,mat.get(),mat->mtex[i].get(),conv_data);
+		}
 	}
 }
 
@@ -451,11 +636,11 @@ void BlenderImporter::ConvertMesh(const Scene& in, const Object* obj, const Mesh
 	}
 
 	// some sanity checks
-	if (mesh->totface > mesh->mface.size() ){
+	if (static_cast<size_t> ( mesh->totface ) > mesh->mface.size() ){
 		ThrowException("Number of faces is larger than the corresponding array");
 	}
 
-	if (mesh->totvert > mesh->mvert.size()) {
+	if (static_cast<size_t> ( mesh->totvert ) > mesh->mvert.size()) {
 		ThrowException("Number of vertices is larger than the corresponding array");
 	}
 

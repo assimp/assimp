@@ -181,8 +181,7 @@ void Structure :: ReadFieldPtr(TOUT<T>& out, const char* name, const FileDatabas
 		// sanity check, should never happen if the genblenddna script is right
 		if (!(f->flags & FieldFlag_Pointer)) {
 			throw Error((Formatter::format(),"Field `",name,"` of structure `",
-				this->name,"` ought to be a pointer"
-				));
+				this->name,"` ought to be a pointer"));
 		}
 
 		db.reader->IncPtr(f->offset);
@@ -204,9 +203,57 @@ void Structure :: ReadFieldPtr(TOUT<T>& out, const char* name, const FileDatabas
 	db.reader->SetCurrentPos(old);
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
-	if (out) {
-		++db.stats().pointers_resolved;
+	++db.stats().fields_read;
+#endif
+}
+
+//--------------------------------------------------------------------------------
+template <int error_policy, template <typename> class TOUT, typename T, size_t N>
+void Structure :: ReadFieldPtr(TOUT<T> (&out)[N], const char* name, 
+	const FileDatabase& db) const
+{
+	// XXX see if we can reduce this to call to the 'normal' ReadFieldPtr
+	const StreamReaderAny::pos old = db.reader->GetCurrentPos();
+	Pointer ptrval[N];
+	const Field* f;
+	try {
+		f = &(*this)[name];
+
+		// sanity check, should never happen if the genblenddna script is right
+		if ((FieldFlag_Pointer|FieldFlag_Pointer) != (f->flags & (FieldFlag_Pointer|FieldFlag_Pointer))) {
+			throw Error((Formatter::format(),"Field `",name,"` of structure `",
+				this->name,"` ought to be a pointer AND an array"));
+		}
+
+		db.reader->IncPtr(f->offset);
+
+		size_t i = 0;
+		for(; i < std::min(f->array_sizes[0],N); ++i) {
+			Convert(ptrval[i],db);
+		}
+		for(; i < N; ++i) {
+			_defaultInitializer<ErrorPolicy_Igno>()(ptrval[i]);
+		}
+
+		// actually it is meaningless on which Structure the Convert is called
+		// because the `Pointer` argument triggers a special implementation.
 	}
+	catch (const Error& e) {
+		_defaultInitializer<error_policy>()(out,e.what());
+		for(size_t i = 0; i < N; ++i) {
+			out[i].reset();
+		}
+		return;
+	}
+	for(size_t i = 0; i < N; ++i) {
+		// resolve the pointer and load the corresponding structure
+		ResolvePointer(out[i],ptrval[i],db,*f);
+	}
+
+	// and recover the previous stream position
+	db.reader->SetCurrentPos(old);
+
+#ifndef ASSIMP_BUILD_BLENDER_NO_STATS
 	++db.stats().fields_read;
 #endif
 }
@@ -282,6 +329,29 @@ void Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const Fil
 	}
 
 	db.reader->SetCurrentPos(pold);
+
+#ifndef ASSIMP_BUILD_BLENDER_NO_STATS
+	if(out) {
+		++db.stats().pointers_resolved;
+	}
+#endif
+}
+
+//--------------------------------------------------------------------------------
+inline void Structure :: ResolvePointer( boost::shared_ptr< FileOffset >& out, const Pointer & ptrval, const FileDatabase& db, const Field& f) const
+{
+	// Currently used exclusively by PackedFile::data to represent
+	// a simple offset into the mapped BLEND file. 
+	out.reset();
+	if (!ptrval.val) { 
+		return;
+	}
+
+	// find the file block the pointer is pointing to
+	const FileBlockHead* block = LocateFileBlockForAddress(ptrval,db);
+
+	out =  boost::shared_ptr< FileOffset > (new FileOffset());
+	out->val = block->start+ static_cast<size_t>((ptrval.val - block->address.val) );
 }
 
 //--------------------------------------------------------------------------------
@@ -372,6 +442,10 @@ template <> void Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::
 	// cache the object now that construction is complete
 	// FIXME we need to do this in ConvertBlobToStructure
 	db.cache(out).set(s,out,ptrval);
+
+#ifndef ASSIMP_BUILD_BLENDER_NO_STATS
+	++db.stats().pointers_resolved;
+#endif
 }
 
 //--------------------------------------------------------------------------------

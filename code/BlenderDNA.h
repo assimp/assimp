@@ -112,6 +112,15 @@ struct Pointer
 };
 
 // -------------------------------------------------------------------------------
+/** Represents a generic offset within a BLEND file */
+// -------------------------------------------------------------------------------
+struct FileOffset
+{
+	FileOffset() : val() {}
+	uint64_t val;
+};
+
+// -------------------------------------------------------------------------------
 /** Dummy derivate of std::vector to be able to use it in templates simultaenously
  *  with boost::shared_ptr, which takes only one template argument 
  *  while std::vector takes three. Also we need to provide some special member
@@ -264,6 +273,13 @@ public:
 		const FileDatabase& db) const;
 
 	// --------------------------------------------------------
+	// field parsing for static arrays of pointer or dynamic
+	// array types (boost::shared_ptr[] or boost::shared_array[])
+	template <int error_policy, template <typename> class TOUT, typename T, size_t N>
+	void ReadFieldPtr(TOUT<T> (&out)[N], const char* name, 
+		const FileDatabase& db) const;
+
+	// --------------------------------------------------------
 	// field parsing for `normal` values
 	template <int error_policy, typename T>
 	void ReadField(T& out, const char* name, 
@@ -279,6 +295,10 @@ private:
 	// --------------------------------------------------------
 	template <template <typename> class TOUT, typename T>
 	void ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval, 
+		const FileDatabase& db, const Field& f) const;
+
+	// --------------------------------------------------------
+	void ResolvePointer( boost::shared_ptr< FileOffset >& out, const Pointer & ptrval, 
 		const FileDatabase& db, const Field& f) const;
 
 	// --------------------------------------------------------

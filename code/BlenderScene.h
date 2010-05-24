@@ -92,6 +92,7 @@ namespace Assimp	{
 #define FAIL // fail the import if the field does not exist
 
 struct Object;
+struct MTex;
 
 #define AI_BLEND_MESH_MAX_VERTS 2000000000L
 
@@ -112,9 +113,9 @@ struct ListBase : ElemBase {
 
 // -------------------------------------------------------------------------------
 struct PackedFile : ElemBase {
-     // int size;
-     // int seek;
-     // void* data;
+     int size WARN;
+     int seek WARN;
+	 boost::shared_ptr< FileOffset > data WARN;
 };
 
 // -------------------------------------------------------------------------------
@@ -144,7 +145,7 @@ struct MVert : ElemBase {
 	float no[3] FAIL;
 	char flag;
 	int mat_nr WARN;
-	int bweight FAIL;
+	int bweight;
 };
 
 // -------------------------------------------------------------------------------
@@ -222,7 +223,7 @@ struct Material : ElemBase {
 	short diff_shader WARN;
 	short spec_shader WARN;
 
-	//MTex *mtex[18];
+	boost::shared_ptr<MTex> mtex[18];
 };
 
 // -------------------------------------------------------------------------------

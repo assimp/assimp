@@ -1595,45 +1595,47 @@ void ColladaParser::ReadDataArray()
 	std::string id = mReader->getAttributeValue( indexID);
 	int indexCount = GetAttribute( "count");
 	unsigned int count = (unsigned int) mReader->getAttributeValueAsInt( indexCount);
-	const char* content = GetTextContent();
+	const char* content = TestTextContent();
+	if (content) { // some exporters write empty data arrays, silently skip over them
 
-	// read values and store inside an array in the data library
-	mDataLibrary[id] = Data();
-	Data& data = mDataLibrary[id];
-	data.mIsStringArray = isStringArray;
+		// read values and store inside an array in the data library
+		mDataLibrary[id] = Data();
+		Data& data = mDataLibrary[id];
+		data.mIsStringArray = isStringArray;
 
-	if( isStringArray)
-	{
-		data.mStrings.reserve( count);
-		std::string s;
-
-		for( unsigned int a = 0; a < count; a++)
+		if( isStringArray)
 		{
-			if( *content == 0)
-				ThrowException( "Expected more values while reading IDREF_array contents.");
+			data.mStrings.reserve( count);
+			std::string s;
 
-			s.clear();
-			while( !IsSpaceOrNewLine( *content))
-				s += *content++;
-			data.mStrings.push_back( s);
+			for( unsigned int a = 0; a < count; a++)
+			{
+				if( *content == 0)
+					ThrowException( "Expected more values while reading IDREF_array contents.");
 
-			SkipSpacesAndLineEnd( &content);
-		}
-	} else
-	{
-		data.mValues.reserve( count);
+				s.clear();
+				while( !IsSpaceOrNewLine( *content))
+					s += *content++;
+				data.mStrings.push_back( s);
 
-		for( unsigned int a = 0; a < count; a++)
+				SkipSpacesAndLineEnd( &content);
+			}
+		} else
 		{
-			if( *content == 0)
-				ThrowException( "Expected more values while reading float_array contents.");
+			data.mValues.reserve( count);
 
-			float value;
-			// read a number
-			content = fast_atof_move( content, value);
-			data.mValues.push_back( value);
-			// skip whitespace after it
-			SkipSpacesAndLineEnd( &content);
+			for( unsigned int a = 0; a < count; a++)
+			{
+				if( *content == 0)
+					ThrowException( "Expected more values while reading float_array contents.");
+
+				float value;
+				// read a number
+				content = fast_atof_move( content, value);
+				data.mValues.push_back( value);
+				// skip whitespace after it
+				SkipSpacesAndLineEnd( &content);
+			}
 		}
 	}
 

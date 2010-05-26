@@ -637,7 +637,7 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 
 				// ok, we need to add a dedicated default material for some poor material-less meshes
 				boost::shared_ptr<Material> p(new Material());
-				strcpy( p->id.name, "$AssimpDefault" );
+				strcpy( p->id.name+2, AI_DEFAULT_MATERIAL_NAME );
 
 				p->r = p->g = p->b = 0.6f;
 				p->specr = p->specg = p->specb = 0.6f;
@@ -668,7 +668,7 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 		conv_data.materials->push_back(mout);
 
 		// set material name
-		aiString name = aiString(mat->id.name);
+		aiString name = aiString(mat->id.name+2); // skip over the name prefix 'MA'
 		mout->AddProperty(&name,AI_MATKEY_NAME);
 
 
@@ -760,7 +760,8 @@ void BlenderImporter::ConvertMesh(const Scene& in, const Object* obj, const Mesh
 
 		// all submeshes created from this mesh are named equally. this allows
 		// curious users to recover the original adjacency.
-		out->mName = aiString(mesh->id.name);
+		out->mName = aiString(mesh->id.name+2);  
+			// skip over the name prefix 'ME'
 
 		// resolve the material reference and add this material to the set of
 		// output materials. The (temporary) material index is the index 
@@ -987,7 +988,7 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
 		++it;
 	}
 
-	ScopeGuard<aiNode> node(new aiNode(obj->id.name));
+	ScopeGuard<aiNode> node(new aiNode(obj->id.name+2)); // skip over the name prefix 'OB'
 	if (obj->data) {
 		switch (obj->type)
 		{

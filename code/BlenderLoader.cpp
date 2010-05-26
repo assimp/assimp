@@ -43,6 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "AssimpPCH.h"
 
+//#define ASSIMP_BUILD_NO_COMPRESSED_BLEND
+// Uncomment this to disable support for (gzip)compressed .BLEND files
+
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
 #include "BlenderLoader.h"
 #include "BlenderDNA.h"
@@ -51,8 +54,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StreamReader.h"
 #include "TinyFormatter.h"
+#include "MemoryIOWrapper.h"
 
-//#include <boost/make_shared.hpp>
+// zlib is needed for compressed blend files 
+#ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
+#	include "../contrib/zlib/zlib.h"
+#endif
 
 using namespace Assimp;
 using namespace Assimp::Blender;
@@ -216,6 +223,7 @@ bool BlenderImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, b
 	}
 
 	else if ((!extension.length() || checkSig) && pIOHandler)	{
+		// note: this won't catch compressed files
 		const char* tokens[] = {"BLENDER"};
 		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
 	}
@@ -243,11 +251,26 @@ void BlenderImporter::SetupProperties(const Importer* pImp)
 	// nothing to be done for the moment
 }
 
+struct free_it
+{
+	free_it(void* free) : free(free) {}
+	~free_it() {
+		::free(this->free);
+	}
+
+	void* free;
+};
+
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void BlenderImporter::InternReadFile( const std::string& pFile, 
 	aiScene* pScene, IOSystem* pIOHandler)
 {
+#ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
+	Bytef* dest = NULL;
+	free_it free_it_really(dest);
+#endif
+
 	FileDatabase file; 
 	boost::shared_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
 	if (!stream) {
@@ -257,7 +280,72 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
 	char magic[8] = {0};
 	stream->Read(magic,7,1);
 	if (strcmp(magic,"BLENDER")) {
-		ThrowException("BLENDER magic bytes are missing");
+		// Check for presence of the gzip header. If yes, assume it is a
+		// compressed blend file and try uncompressing it, else fail. This is to
+		// avoid uncompressing random files which our loader might end up with.
+#ifdef ASSIMP_BUILD_NO_COMPRESSED_BLEND
+		ThrowException("BLENDER magic bytes are missing, is this file compressed (Assimp was built without decompression support)?");
+#else
+
+		if (magic[0] != 0x1f || static_cast<uint8_t>(magic[1]) != 0x8b) {
+			ThrowException("BLENDER magic bytes are missing, couldn't find GZIP header either");
+		}
+
+		LogDebug("Found no BLENDER magic word but a GZIP header, might be a compressed file");
+		if (magic[2] != 8) {
+			ThrowException("Unsupported GZIP compression method");
+		}
+
+		// http://www.gzip.org/zlib/rfc-gzip.html#header-trailer
+		stream->Seek(0L,aiOrigin_SET);
+		boost::shared_ptr<StreamReaderLE> reader = boost::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
+
+		// build a zlib stream
+		z_stream zstream;
+		zstream.opaque = Z_NULL;
+		zstream.zalloc = Z_NULL;
+		zstream.zfree  = Z_NULL;
+		zstream.data_type = Z_BINARY;
+
+		// http://hewgill.com/journal/entries/349-how-to-decompress-gzip-stream-with-zlib
+		inflateInit2(&zstream, 16+MAX_WBITS);
+
+		zstream.next_in   = reinterpret_cast<Bytef*>( reader->GetPtr() );
+		zstream.avail_in  = reader->GetRemainingSize();
+
+		size_t total = 0l;
+
+		// and decompress the data .... do 1k chunks in the hope that we won't kill the stack
+#define MYBLOCK 1024
+		Bytef block[MYBLOCK];
+		int ret;
+		do {
+			zstream.avail_out = MYBLOCK;
+			zstream.next_out = block;
+			ret = inflate(&zstream, Z_NO_FLUSH);
+
+			if (ret != Z_STREAM_END && ret != Z_OK) {
+				ThrowException("Failure decompressing this file using gzip, seemingly it is NOT a compressed .BLEND file");
+			}
+			const size_t have = MYBLOCK - zstream.avail_out;
+			total += have;
+			dest = reinterpret_cast<Bytef*>( realloc(dest,total) );
+			memcpy(dest + total - have,block,have);
+		} 
+		while (ret != Z_STREAM_END);
+
+		// terminate zlib
+		inflateEnd(&zstream);
+
+		// replace the input stream with a memory stream
+		stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t*>(dest),total)); 
+
+		// .. and retry
+		stream->Read(magic,7,1);
+		if (strcmp(magic,"BLENDER")) {
+			ThrowException("Found no BLENDER magic word in decompressed GZIP file");
+		}
+#endif
 	}
 
 	file.i64bit = (stream->Read(magic,1,1),magic[0]=='-');

@@ -61,14 +61,12 @@ using namespace Assimp::XFile;
 
 // ------------------------------------------------------------------------------------------------
 // Dummy memory wrappers for use with zlib
-void* dummy_alloc (void* /*opaque*/, unsigned int items, unsigned int size)	{
-
-	// we're using calloc to make it easier to debug the whole stuff
-	return ::calloc(items,size);
+static void* dummy_alloc (void* /*opaque*/, unsigned int items, unsigned int size)	{
+	return ::operator new(items*size);
 }
 
-void  dummy_free  (void* /*opaque*/, void* address)	{
-	return ::free(address);
+static void  dummy_free  (void* /*opaque*/, void* address)	{
+	return ::operator delete(address);
 }
 
 #endif // !! ASSIMP_BUILD_NO_COMPRESSED_X

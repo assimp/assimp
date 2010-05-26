@@ -48,9 +48,11 @@ namespace Assimp	{
 
 // ----------------------------------------------------------------------------------
 /** Implementation of IOStream to read directly from a memory buffer */
-class MemoryIOStream : public IOStream	{
-	friend class MemoryIOSystem;
-protected:
+// ----------------------------------------------------------------------------------
+class MemoryIOStream : public IOStream
+{
+	//friend class MemoryIOSystem;
+public:
 	MemoryIOStream (const uint8_t* buff, size_t len) 
 		: buffer (buff), length(len), pos((size_t)0) {
 	}

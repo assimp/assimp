@@ -166,11 +166,12 @@ int CDisplay::AddNodeToDisplayList(
 			iIndex += iDepth  * 100;
 		}
 		else iIndex += iDepth  * 10;
-		sprintf(chTemp,"Node %i (%i meshes)",iIndex,pcNode->mNumMeshes);
+		sprintf(chTemp,"Node %i",iIndex);
 	}
 	else {
-		sprintf(chTemp,"%s (%i meshes)",pcNode->mName.data,pcNode->mNumMeshes);
+		sprintf(chTemp,"%s",pcNode->mName.data);
 	}
+	sprintf(chTemp+strlen(chTemp),  iIndex ? " (%i)" : " (%i meshes)",pcNode->mNumMeshes);
 
 	TVITEMEXW tvi; 
 	TVINSERTSTRUCTW sNew;
@@ -218,11 +219,12 @@ int CDisplay::AddMeshToDisplayList(unsigned int iIndex, HTREEITEM hRoot)
 	char chTemp[MAXLEN];
 
 	if(0 == pcMesh->mName.length)	{
-		sprintf(chTemp,"Mesh %i (%i faces)",iIndex,pcMesh->mNumFaces);
+		sprintf(chTemp,"Mesh %i",iIndex);
 	}
 	else {
-		sprintf(chTemp,"%s (%i faces)",pcMesh->mName.data,pcMesh->mNumFaces);
+		sprintf(chTemp,"%s",pcMesh->mName.data);
 	}
+	sprintf(chTemp+strlen(chTemp),  iIndex ? " (%i)" : " (%i faces)",pcMesh->mNumFaces);
 
 	TVITEMEXW tvi; 
 	TVINSERTSTRUCTW sNew;

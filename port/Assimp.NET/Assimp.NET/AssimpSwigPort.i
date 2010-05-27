@@ -1,5 +1,5 @@
 /* File : example.i */
-%module Assimp
+%module Assimp_NET
 %{
 //#include "..\..\..\include\aiAssert.h"
 #include "..\..\..\include\aiDefines.h"
@@ -54,6 +54,10 @@
 
 %rename(opDelete) operator delete;
 %rename(opDeleteArray) operator delete[];
+
+%rename(ReadFile_s) ReadFile(std::string const &,unsigned int);
+//%rename(ReadFile_c) ReadFile(char const *,unsigned int);
+
 
 
 //%rename(Node) aiNode;

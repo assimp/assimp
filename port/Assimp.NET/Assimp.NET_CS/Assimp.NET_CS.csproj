@@ -45,27 +45,46 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Assimp.NET\Assimp.NET.vcproj">
+      <Project>{A86A8AF2-3B4D-4381-BB01-9CA2AE88450E}</Project>
+      <Name>Assimp_NET</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="aiAnimation.cs" />
+    <Compile Include="aiAnimationVector.cs" />
     <Compile Include="aiAnimBehaviour.cs" />
+    <Compile Include="aiAnimMesh.cs" />
     <Compile Include="aiBlendMode.cs" />
     <Compile Include="aiBone.cs" />
     <Compile Include="aiCamera.cs" />
+    <Compile Include="aiCameraVector.cs" />
     <Compile Include="aiColor3D.cs" />
+    <Compile Include="aiColor4DVector.cs" />
+    <Compile Include="aiColor4DVectorVector.cs" />
     <Compile Include="aiComponent.cs" />
     <Compile Include="aiDefaultLogStream.cs" />
     <Compile Include="aiFace.cs" />
+    <Compile Include="aiFaceVector.cs" />
     <Compile Include="aiFile.cs" />
     <Compile Include="aiFileIO.cs" />
     <Compile Include="aiLight.cs" />
     <Compile Include="aiLightSourceType.cs" />
+    <Compile Include="aiLightVector.cs" />
     <Compile Include="aiMaterial.cs" />
     <Compile Include="aiMaterialProperty.cs" />
+    <Compile Include="aiMaterialVector.cs" />
     <Compile Include="aiMatrix3x3.cs" />
     <Compile Include="aiMatrix4x4.cs" />
     <Compile Include="aiMemoryInfo.cs" />
     <Compile Include="aiMesh.cs" />
+    <Compile Include="aiMeshAnim.cs" />
+    <Compile Include="aiMeshKey.cs" />
+    <Compile Include="aiMeshVector.cs" />
     <Compile Include="aiNode.cs" />
     <Compile Include="aiNodeAnim.cs" />
+    <Compile Include="aiNodeAnimVector.cs" />
+    <Compile Include="aiNodeVector.cs" />
     <Compile Include="aiOrigin.cs" />
     <Compile Include="aiPlane.cs" />
     <Compile Include="aiPostProcessSteps.cs" />
@@ -85,21 +104,22 @@
     <Compile Include="aiTextureMapping.cs" />
     <Compile Include="aiTextureOp.cs" />
     <Compile Include="aiTextureType.cs" />
+    <Compile Include="aiTextureVector.cs" />
     <Compile Include="aiUVTransform.cs" />
     <Compile Include="aiVector2D.cs" />
     <Compile Include="aiVector3D.cs" />
+    <Compile Include="aiVector3DVector.cs" />
+    <Compile Include="aiVector3DVectorVector.cs" />
     <Compile Include="aiVectorKey.cs" />
     <Compile Include="aiVertexWeight.cs" />
-    <Compile Include="AllocateFromAssimpHeap.cs" />
-    <Compile Include="Assimp.cs" />
-    <Compile Include="AssimpPINVOKE.cs" />
+    <Compile Include="Assimp_NET.cs" />
+    <Compile Include="Assimp_NETPINVOKE.cs" />
     <Compile Include="Importer.cs" />
     <Compile Include="IOStream.cs" />
     <Compile Include="IOSystem.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="LogStream.cs" />
     <Compile Include="NullLogger.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SWIGTYPE_p_aiColor4D.cs" />
     <Compile Include="SWIGTYPE_p_aiTextureMapMode.cs" />
     <Compile Include="SWIGTYPE_p_aiTextureMapping.cs" />
@@ -117,6 +137,7 @@
     <Compile Include="SWIGTYPE_p_f_p_aiFile__void.cs" />
     <Compile Include="SWIGTYPE_p_int.cs" />
     <Compile Include="SWIGTYPE_p_p_aiAnimation.cs" />
+    <Compile Include="SWIGTYPE_p_p_aiAnimMesh.cs" />
     <Compile Include="SWIGTYPE_p_p_aiBone.cs" />
     <Compile Include="SWIGTYPE_p_p_aiCamera.cs" />
     <Compile Include="SWIGTYPE_p_p_aiColor4D.cs" />
@@ -124,20 +145,18 @@
     <Compile Include="SWIGTYPE_p_p_aiMaterial.cs" />
     <Compile Include="SWIGTYPE_p_p_aiMaterialProperty.cs" />
     <Compile Include="SWIGTYPE_p_p_aiMesh.cs" />
+    <Compile Include="SWIGTYPE_p_p_aiMeshAnim.cs" />
     <Compile Include="SWIGTYPE_p_p_aiNode.cs" />
     <Compile Include="SWIGTYPE_p_p_aiNodeAnim.cs" />
     <Compile Include="SWIGTYPE_p_p_aiTexture.cs" />
     <Compile Include="SWIGTYPE_p_p_aiVector3D.cs" />
-    <Compile Include="SWIGTYPE_p_std__nothrow_t.cs" />
     <Compile Include="SWIGTYPE_p_std__string.cs" />
     <Compile Include="SWIGTYPE_p_unsigned_int.cs" />
     <Compile Include="SWIGTYPE_p_void.cs" />
+    <Compile Include="UintVector.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Assimp.NET\Assimp.NET.vcproj">
-      <Project>{A86A8AF2-3B4D-4381-BB01-9CA2AE88450E}</Project>
-      <Name>Assimp.NET</Name>
-    </ProjectReference>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

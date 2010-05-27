@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="Assimp.NET"
+	Name="Assimp_NET"
 	ProjectGUID="{A86A8AF2-3B4D-4381-BB01-9CA2AE88450E}"
 	RootNamespace="AssimpNET"
 	Keyword="ManagedCProj"
@@ -30,7 +30,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="move *.cs ..\Assimp.NET_CS\&#x0D;&#x0A;"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -46,8 +46,9 @@
 				Optimization="0"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -62,11 +63,17 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="assimp.lib"
+				OutputFile="$(OutDir)\Assimp_NET.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)"
+				AdditionalLibraryDirectories="&quot;D:\Projekte\Assimp\trunk\lib\assimp_debug-dll_Win32&quot;"
+				EnableUAC="false"
+				AddModuleNamesToAssembly=""
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
+				SubSystem="2"
 				TargetMachine="1"
+				CLRThreadAttribute="1"
+				CLRUnmanagedCodeCheck="false"
 			/>
 			<Tool
 				Name="VCALinkTool"

@@ -807,7 +807,7 @@ const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
 }
 
 // ------------------------------------------------------------------------------------------------
-// Reads the given file and returns its contents if successful. 
+// Reads the given file and returns its contents if successful.
 const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 {
 	ASSIMP_BEGIN_EXCEPTION_REGION();
@@ -925,6 +925,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 	ASSIMP_END_EXCEPTION_REGION(const aiScene*);
 	return pimpl->mScene;
 }
+
 
 // ------------------------------------------------------------------------------------------------
 // Apply post-processing to the currently bound scene

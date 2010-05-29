@@ -246,6 +246,9 @@ void ColladaParser::ReadAssetInfo()
 // Reads the animation library
 void ColladaParser::ReadAnimationLibrary()
 {
+	if (mReader->isEmptyElement()) {
+		return;
+	}
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
@@ -425,6 +428,9 @@ void ColladaParser::ReadAnimationSampler( Collada::AnimationChannel& pChannel)
 // Reads the skeleton controller library
 void ColladaParser::ReadControllerLibrary()
 {
+	if (mReader->isEmptyElement()) {
+		return;
+	}
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
@@ -673,6 +679,9 @@ void ColladaParser::ReadControllerWeights( Collada::Controller& pController)
 // Reads the image library contents
 void ColladaParser::ReadImageLibrary()
 {
+	if (mReader->isEmptyElement()) {
+		return;
+	}
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
@@ -794,6 +803,9 @@ void ColladaParser::ReadImage( Collada::Image& pImage)
 // Reads the material library
 void ColladaParser::ReadMaterialLibrary()
 {
+	if (mReader->isEmptyElement()) {
+		return;
+	}
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
@@ -826,6 +838,9 @@ void ColladaParser::ReadMaterialLibrary()
 // Reads the light library
 void ColladaParser::ReadLightLibrary()
 {
+	if (mReader->isEmptyElement()) {
+		return;
+	}
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
@@ -857,6 +872,9 @@ void ColladaParser::ReadLightLibrary()
 // Reads the camera library
 void ColladaParser::ReadCameraLibrary()
 {
+	if (mReader->isEmptyElement()) {
+		return;
+	}
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
@@ -1043,6 +1061,10 @@ void ColladaParser::ReadCamera( Collada::Camera& pCamera)
 // Reads the effect library
 void ColladaParser::ReadEffectLibrary()
 {
+	if (mReader->isEmptyElement()) {
+		return;
+	}
+
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
@@ -1195,8 +1217,9 @@ void ColladaParser::ReadEffectProfileCommon( Collada::Effect& pEffect)
 // Read texture wrapping + UV transform settings from a profile==Maya chunk
 void ColladaParser::ReadSamplerProperties( Sampler& out )
 {
-	if (mReader->isEmptyElement())
+	if (mReader->isEmptyElement()) {
 		return;
+	}
 
 	while( mReader->read())
 	{

@@ -50,7 +50,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiTypes.h"
 #include "DefaultIOSystem.h"
 
-namespace Assimp	{
+namespace Assimp	
+{
+
 // -------------------------------------------------------------------
 const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME; 
 // fix: changed that to our standard default name
@@ -78,6 +80,7 @@ ObjFileParser::ObjFileParser(std::vector<char> &Data,const std::string &strModel
 }
 
 // -------------------------------------------------------------------
+//	Destrcutor.
 ObjFileParser::~ObjFileParser()
 {
 	delete m_pModel->m_pDefaultMaterial;
@@ -88,12 +91,14 @@ ObjFileParser::~ObjFileParser()
 }
 
 // -------------------------------------------------------------------
+//	Returns a pointer to the model instance.
 ObjFile::Model *ObjFileParser::GetModel() const
 {
 	return m_pModel;
 }
 
 // -------------------------------------------------------------------
+//	File parsing method.
 void ObjFileParser::parseFile()
 {
 	if (m_DataIt == m_DataItEnd)
@@ -201,7 +206,6 @@ void ObjFileParser::copyNextLine(char *pBuffer, size_t length)
 	size_t index = 0;
 	while (m_DataIt != m_DataItEnd)
 	{
-		// (Aramis) removed assertion (index<length-1) in favour of an explicit check
 		if (*m_DataIt == '\n' || *m_DataIt == '\r' || index == length-1)
 			break;
 
@@ -265,7 +269,6 @@ void ObjFileParser::getFace()
 	std::vector<unsigned int> *pTexID = new std::vector<unsigned int>;
 	std::vector<unsigned int> *pNormalID = new std::vector<unsigned int>;
 	bool hasNormal = false;
-	
 
 	bool vt = (!m_pModel->m_TextureCoord.empty());
 	bool vn = (!m_pModel->m_Normals.empty());
@@ -329,7 +332,7 @@ void ObjFileParser::getFace()
 			++pPtr;
 	}
 
-	ObjFile::Face *face = new ObjFile::Face(pIndices, pNormalID, pTexID);
+	ObjFile::Face *face = new ObjFile::Face( pIndices, pNormalID, pTexID );
 	
 	// Set active material, if one set
 	if (NULL != m_pModel->m_pCurrentMaterial) 
@@ -339,23 +342,20 @@ void ObjFileParser::getFace()
 
 	// Create a default object, if nothing there
 	if ( NULL == m_pModel->m_pCurrent )
-		createObject("defaultobject");
-
-	// Store the new instance
-	m_pModel->m_pCurrent->m_Faces.push_back(face);
+		createObject( "defaultobject" );
 	
 	// Assign face to mesh
 	if ( NULL == m_pModel->m_pCurrentMesh )
 	{
-		m_pModel->m_pCurrentMesh = new ObjFile::Mesh();
-		m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
+		createMesh();
 	}
 	
 	// Store the face
 	m_pModel->m_pCurrentMesh->m_Faces.push_back( face );
 	m_pModel->m_pCurrentMesh->m_uiNumIndices += (unsigned int)face->m_pVertices->size();
 	m_pModel->m_pCurrentMesh->m_uiUVCoordinates[ 0 ] += (unsigned int)face->m_pTexturCoords[0].size(); 
-	if(!m_pModel->m_pCurrentMesh->m_hasNormals && hasNormal) {
+	if( !m_pModel->m_pCurrentMesh->m_hasNormals && hasNormal ) 
+	{
 		m_pModel->m_pCurrentMesh->m_hasNormals = true;
 	}
 	// Skip the rest of the line
@@ -391,6 +391,10 @@ void ObjFileParser::getMaterialDesc()
 	{
 		// Found, using detected material
 		m_pModel->m_pCurrentMaterial = (*it).second;
+		if ( needsNewMesh( strName ))
+		{
+			createMesh();	
+		}
 		m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( strName );
 	}
 
@@ -460,11 +464,11 @@ void ObjFileParser::getNewMaterial()
 		return;
 
 	char *pStart = &(*m_DataIt);
-	std::string strMat(pStart, *m_DataIt);
+	std::string strMat( pStart, *m_DataIt );
 	while ( isSeparator( *m_DataIt ) )
 		m_DataIt++;
 	std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( strMat );
-	if (it == m_pModel->m_MaterialMap.end())
+	if ( it == m_pModel->m_MaterialMap.end() )
 	{
 		// Show a warning, if material was not found
 		DefaultLogger::get()->warn("OBJ: Unsupported material requested: " + strMat);
@@ -473,7 +477,10 @@ void ObjFileParser::getNewMaterial()
 	else
 	{
 		// Set new material
-		m_pModel->m_pCurrentMaterial = (*it).second;
+		if ( needsNewMesh( strMat ) )
+		{
+			createMesh();	
+		}
 		m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( strMat );
 	}
 
@@ -514,13 +521,12 @@ void ObjFileParser::getGroupName()
 	std::string strGroupName(pStart, &(*m_DataIt));
 
 	// Change active group, if necessary
-	if (m_pModel->m_strActiveGroup != strGroupName)
+	if ( m_pModel->m_strActiveGroup != strGroupName )
 	{
 		// Search for already existing entry
 		ObjFile::Model::ConstGroupMapIt it = m_pModel->m_Groups.find(&strGroupName);
 		
 		// We are mapping groups into the object structure
-		/// TODO: Is this the right way to do it????
 		createObject( strGroupName );
 		
 		// New group name, creating a new entry
@@ -557,8 +563,8 @@ void ObjFileParser::getObjectName()
 	if (m_DataIt == m_DataItEnd)
 		return;
 	char *pStart = &(*m_DataIt);
-	while (!isSeparator(*m_DataIt))
-		m_DataIt++;
+	while ( !isSeparator( *m_DataIt ) )
+		++m_DataIt;
 
 	std::string strObjectName(pStart, &(*m_DataIt));
 	if (!strObjectName.empty()) 
@@ -588,15 +594,15 @@ void ObjFileParser::getObjectName()
 //	Creates a new object instance
 void ObjFileParser::createObject(const std::string &strObjectName)
 {
-	ai_assert (NULL != m_pModel);
-	ai_assert (!strObjectName.empty());
+	ai_assert( NULL != m_pModel );
+	ai_assert( !strObjectName.empty() );
 
-	m_pModel->m_pCurrent = new ObjFile::Object();
+	m_pModel->m_pCurrent = new ObjFile::Object;
 	m_pModel->m_pCurrent->m_strObjName = strObjectName;
 	m_pModel->m_Objects.push_back( m_pModel->m_pCurrent );
 	
-	m_pModel->m_pCurrentMesh = new ObjFile::Mesh();
-	m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
+
+	createMesh();
 
 	if( m_pModel->m_pCurrentMaterial )
 	{
@@ -604,6 +610,39 @@ void ObjFileParser::createObject(const std::string &strObjectName)
 			getMaterialIndex( m_pModel->m_pCurrentMaterial->MaterialName.data );
 		m_pModel->m_pCurrentMesh->m_pMaterial = m_pModel->m_pCurrentMaterial;
 	}		
+}
+// -------------------------------------------------------------------
+//	Creates a new mesh
+void ObjFileParser::createMesh()
+{
+	ai_assert( NULL != m_pModel );
+	m_pModel->m_pCurrentMesh = new ObjFile::Mesh;
+	m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
+	unsigned int meshId = m_pModel->m_Meshes.size()-1;
+	if ( NULL != m_pModel->m_pCurrent )
+	{
+		m_pModel->m_pCurrent->m_Meshes.push_back( meshId );
+	}
+	else
+	{
+		DefaultLogger::get()->error("OBJ: No object detected to attach a new mesh instance.");
+	}
+}
+
+// -------------------------------------------------------------------
+//	Returns true, if a new mesh must be created.
+bool ObjFileParser::needsNewMesh( const std::string &rMaterialName )
+{
+	bool newMat = false;
+	int matIdx = getMaterialIndex( rMaterialName );
+	int curMatIdx = m_pModel->m_pCurrentMesh->m_uiMaterialIndex;
+	if ( curMatIdx != ObjFile::Mesh::NoMaterial || curMatIdx != matIdx )
+	{
+		// New material -> only one material per mesh, so we need to create a new 
+		// material
+		newMat = true;
+	}
+	return newMat;
 }
 
 // -------------------------------------------------------------------
@@ -613,6 +652,7 @@ void ObjFileParser::reportErrorTokenInFace()
 	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 	DefaultLogger::get()->error("OBJ: Not supported token in face description detected");
 }
+
 // -------------------------------------------------------------------
 
 }	// Namespace Assimp

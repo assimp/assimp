@@ -108,6 +108,10 @@ private:
 	void getObjectName();
 	/// Creates a new object.
 	void createObject(const std::string &strObjectName);
+	///	Creates a new mesh.
+	void createMesh(); 
+	///	Returns true, if a new mesh instance must be created.
+	bool needsNewMesh( const std::string &rMaterialName );
 	///	Error report in token
 	void reportErrorTokenInFace();
 

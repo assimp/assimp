@@ -107,14 +107,20 @@ struct Face
 //!	\brief	Stores all objects of an objfile object definition
 struct Object
 {
+	enum ObjectType
+	{
+		ObjType,
+		GroupType
+	};
+
 	//!	Object name
 	std::string m_strObjName;
-	//!	Assigend face instances
-	std::vector<Face*> m_Faces;
 	//!	Transformation matrix, stored in OpenGL format
 	aiMatrix4x4 m_Transformation;
 	//!	All sub-objects referenced by this object
 	std::vector<Object*> m_SubObjects;
+	///	Assigned meshes
+	std::vector<unsigned int> m_Meshes;
 
 	//!	\brief	Default constructor
 	Object() :
@@ -189,6 +195,8 @@ struct Material
 //!	\brief	Data structure to store a mesh
 struct Mesh
 {
+	static const unsigned int NoMaterial = 999999999;
+
 	///	Array with pointer to all stored faces
 	std::vector<Face*> m_Faces;
 	///	Assigned material
@@ -205,7 +213,7 @@ struct Mesh
 	Mesh() :
 		m_pMaterial(NULL),
 		m_uiNumIndices(0),
-		m_uiMaterialIndex(0),
+		m_uiMaterialIndex( NoMaterial ),
 		m_hasNormals(false)
 	{
 		memset(m_uiUVCoordinates, 0, sizeof( unsigned int ) * AI_MAX_NUMBER_OF_TEXTURECOORDS);
@@ -305,7 +313,6 @@ struct Model
 		}
 		
 		m_Groups.clear();
-		
 	}
 };
 

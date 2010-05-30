@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
 #include "DefaultIOSystem.h"
-
 #include "ObjFileImporter.h"
 #include "ObjFileParser.h"
 #include "ObjFileData.h"
@@ -140,8 +139,8 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
 		return;
 		
 	// Create the root node of the scene
-	pScene->mRootNode = new aiNode();
-	if (!pModel->m_ModelName.empty())
+	pScene->mRootNode = new aiNode;
+	if ( !pModel->m_ModelName.empty() )
 	{
 		// Set the name of the scene
 		pScene->mRootNode->mName.Set(pModel->m_ModelName);
@@ -175,40 +174,46 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
 
 // ------------------------------------------------------------------------------------------------
 //	Creates all nodes of the model
-aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile::Object* pData, 
+aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile::Object* pObject, 
 									 unsigned int uiMeshIndex,
 									 aiNode *pParent, aiScene* pScene, 
-									 std::vector<aiMesh*> &MeshArray)
+									 std::vector<aiMesh*> &MeshArray )
 {
 	ai_assert( NULL != pModel );
-	if (NULL == pData)
+	if ( NULL == pObject )
 		return NULL;
 	
 	// Store older mesh size to be able to computate mesh offsets for new mesh instances
 	const size_t oldMeshSize = MeshArray.size();
-	aiNode *pNode = new aiNode();
+	aiNode *pNode = new aiNode;
 	
 	if (pParent != NULL)
-		this->appendChildToParentNode(pParent, pNode);
+		appendChildToParentNode(pParent, pNode);
 
-	aiMesh *pMesh = new aiMesh;
-	createTopology( pModel, pData, uiMeshIndex, pMesh );	
-	if ( pMesh->mNumVertices > 0 ) 
+	
+	for ( unsigned int i=0; i< pObject->m_Meshes.size(); i++ )
 	{
-		MeshArray.push_back( pMesh );
-	}
-	else
-	{
-		delete pMesh;
+		unsigned int meshId = pObject->m_Meshes[ i ];
+		aiMesh *pMesh = new aiMesh;
+		createTopology( pModel, pObject, meshId, pMesh );	
+		if ( pMesh->mNumVertices > 0 ) 
+		{
+			MeshArray.push_back( pMesh );
+		}
+		else
+		{
+			delete pMesh;
+		}
 	}
 
-	// Create all nodes from the subobjects stored in the current object
-	if ( !pData->m_SubObjects.empty() )
+	// Create all nodes from the sub-objects stored in the current object
+	if ( !pObject->m_SubObjects.empty() )
 	{
-		pNode->mNumChildren = (unsigned int)pData->m_SubObjects.size();
-		pNode->mChildren = new aiNode*[pData->m_SubObjects.size()];
+		size_t numChilds = pObject->m_SubObjects.size();
+		pNode->mNumChildren = static_cast<unsigned int>( numChilds );
+		pNode->mChildren = new aiNode*[ numChilds ];
 		pNode->mNumMeshes = 1;
-		pNode->mMeshes = new unsigned int[1];
+		pNode->mMeshes = new unsigned int[ 1 ];
 	}
 
 	// Set mesh instances into scene- and node-instances
@@ -216,7 +221,7 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 	if ( meshSizeDiff > 0 )
 	{
 		pNode->mMeshes = new unsigned int[ meshSizeDiff ];
-		pNode->mNumMeshes = (unsigned int)meshSizeDiff;
+		pNode->mNumMeshes = static_cast<unsigned int>( meshSizeDiff );
 		size_t index = 0;
 		for (size_t i = oldMeshSize; i < MeshArray.size(); i++)
 		{
@@ -248,7 +253,10 @@ void ObjFileImporter::createTopology(const ObjFile::Model* pModel,
 	if ( pMesh->mNumFaces > 0 )
 	{
 		pMesh->mFaces = new aiFace[ pMesh->mNumFaces ];
-		pMesh->mMaterialIndex = pObjMesh->m_uiMaterialIndex;
+		if ( pObjMesh->m_uiMaterialIndex != ObjFile::Mesh::NoMaterial )
+		{
+			pMesh->mMaterialIndex = pObjMesh->m_uiMaterialIndex;
+		}
 
 		// Copy all data from all stored meshes
 		for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++)
@@ -278,7 +286,7 @@ void ObjFileImporter::createTopology(const ObjFile::Model* pModel,
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Creates a vretex array
+//	Creates a vertex array
 void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel, 
 										const ObjFile::Object* pCurrentObject, 
 										unsigned int uiMeshIndex,
@@ -288,7 +296,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 	ai_assert( NULL != pCurrentObject );
 	
 	// Break, if no faces are stored in object
-	if (pCurrentObject->m_Faces.empty())
+	if ( pCurrentObject->m_Meshes.empty() )
 		return;
 
 	// Get current mesh
@@ -366,10 +374,10 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 void ObjFileImporter::countObjects(const std::vector<ObjFile::Object*> &rObjects, int &iNumMeshes)
 {
 	iNumMeshes = 0;
-	if (rObjects.empty())	
+	if ( rObjects.empty() )	
 		return;
 
-	iNumMeshes += (unsigned int)rObjects.size();
+	iNumMeshes += static_cast<unsigned int>( rObjects.size() );
 	for (std::vector<ObjFile::Object*>::const_iterator it = rObjects.begin();
 		it != rObjects.end(); 
 		++it)
@@ -400,17 +408,18 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 		Assimp::MaterialHelper* mat = new Assimp::MaterialHelper();
 		
 		// Store material name
-		std::map<std::string, ObjFile::Material*>::const_iterator it = pModel->m_MaterialMap.find( pModel->m_MaterialLib[ matIndex ] );
+		std::map<std::string, ObjFile::Material*>::const_iterator it;
+		it = pModel->m_MaterialMap.find( pModel->m_MaterialLib[ matIndex ] );
 		
 		// No material found, use the default material
-		if ( pModel->m_MaterialMap.end() == it)
+		if ( pModel->m_MaterialMap.end() == it )
 			continue;
 
 		ObjFile::Material *pCurrentMaterial = (*it).second;
 		mat->AddProperty( &pCurrentMaterial->MaterialName, AI_MATKEY_NAME );
 
 		// convert illumination model
-		int sm;
+		int sm = 0;
 		switch (pCurrentMaterial->illumination_model) 
 		{
 		case 0:
@@ -474,8 +483,8 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 void ObjFileImporter::appendChildToParentNode(aiNode *pParent, aiNode *pChild)
 {
 	// Checking preconditions
-	ai_assert (NULL != pParent);
-	ai_assert (NULL != pChild);
+	ai_assert( NULL != pParent );
+	ai_assert( NULL != pChild );
 
 	// Assign parent to child
 	pChild->mParent = pParent;
@@ -486,7 +495,7 @@ void ObjFileImporter::appendChildToParentNode(aiNode *pParent, aiNode *pChild)
 	if (pParent->mChildren != NULL)
 	{
 		sNumChildren = pParent->mNumChildren;
-		ai_assert (0 != sNumChildren);
+		ai_assert( 0 != sNumChildren );
 		for (size_t index = 0; index < pParent->mNumChildren; index++)
 		{
 			temp.push_back(pParent->mChildren [ index ] );

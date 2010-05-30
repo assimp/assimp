@@ -584,7 +584,7 @@ void ObjFileParser::getObjectName()
 			}
 		}
 
-		// Allocate a new object, if current one wasn´t found before
+		// Allocate a new object, if current one was not found before
 		if ( NULL == m_pModel->m_pCurrent )
 			createObject(strObjectName);
 	}

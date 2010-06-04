@@ -1288,7 +1288,7 @@ const aiString& ColladaLoader::FindFilenameForEffectTexture( const ColladaParser
 			"Collada: Unable to resolve effect texture entry \"%s\", ended up at ID \"%s\".") % pName % name));
 	}
 
-	static aiString result;
+	aiString result;
 
 	// if this is an embedded texture image setup an aiTexture for it
 	if (imIt->second.mFileName.empty()) 

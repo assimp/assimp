@@ -157,7 +157,8 @@ void ColladaParser::ReadStructure()
 	while( mReader->read())
 	{
 		// beginning of elements
-		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
+		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
+		{
 			if( IsElement( "asset"))
 				ReadAssetInfo();
 			else if( IsElement( "library_animations"))
@@ -185,7 +186,8 @@ void ColladaParser::ReadStructure()
 			else
 				SkipElement();
 		} 
-		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
+		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) 
+		{
 			break;
 		}
 	}
@@ -2072,9 +2074,9 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 		// gather that number of vertices
 		for( size_t b = 0; b < numPoints; b++)
 		{
-			// read all indices for this vertex. Yes, in a hacky static array
+			// read all indices for this vertex. Yes, in a hacky local array
 			assert( numOffsets < 20 && perVertexOffset < 20);
-			static size_t vindex[20];
+			size_t vindex[20];
 			for( size_t offsets = 0; offsets < numOffsets; ++offsets)
 				vindex[offsets] = *idx++;
 

@@ -178,8 +178,8 @@ aiNode* ColladaLoader::BuildHierarchy( const ColladaParser& pParser, const Colla
 	// create a node for it
 	aiNode* node = new aiNode();
 
-  // find a name for the new node. It's more complicated than you might think
-  node->mName.Set( FindNameForNode( pNode));
+	// find a name for the new node. It's more complicated than you might think
+	node->mName.Set( FindNameForNode( pNode));
 
 	// calculate the transformation matrix for it
 	node->mTransformation = pParser.CalculateResultTransform( pNode->mTransforms);
@@ -192,18 +192,17 @@ aiNode* ColladaLoader::BuildHierarchy( const ColladaParser& pParser, const Colla
 	node->mNumChildren = pNode->mChildren.size()+instances.size();
 	node->mChildren = new aiNode*[node->mNumChildren];
 
-	unsigned int a = 0;
-	for(; a < pNode->mChildren.size(); a++)
+	for( size_t a = 0; a < pNode->mChildren.size(); a++)
 	{
 		node->mChildren[a] = BuildHierarchy( pParser, pNode->mChildren[a]);
 		node->mChildren[a]->mParent = node;
 	}
 
 	// ... and finally the resolved node instances
-	for(; a < node->mNumChildren; a++)
+	for( size_t a = 0; a < instances.size(); a++)
 	{
-		node->mChildren[a] = BuildHierarchy( pParser, instances[a-pNode->mChildren.size()]);
-		node->mChildren[a]->mParent = node;
+		node->mChildren[pNode->mChildren.size() + a] = BuildHierarchy( pParser, instances[a]);
+		node->mChildren[pNode->mChildren.size() + a]->mParent = node;
 	}
 
 	// construct meshes
@@ -1263,7 +1262,7 @@ void ColladaLoader::BuildMaterials( const ColladaParser& pParser, aiScene* pScen
 
 // ------------------------------------------------------------------------------------------------
 // Resolves the texture name for the given effect texture entry
-const aiString& ColladaLoader::FindFilenameForEffectTexture( const ColladaParser& pParser,
+aiString ColladaLoader::FindFilenameForEffectTexture( const ColladaParser& pParser,
 	const Collada::Effect& pEffect, const std::string& pName)
 {
 	// recurse through the param references until we end up at an image

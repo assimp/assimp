@@ -173,7 +173,7 @@ protected:
 		aiTextureType type, unsigned int idx = 0);
 
 	/** Resolves the texture name for the given effect texture entry */
-	const aiString& FindFilenameForEffectTexture( const ColladaParser& pParser, 
+	aiString FindFilenameForEffectTexture( const ColladaParser& pParser, 
 		const Collada::Effect& pEffect, const std::string& pName);
 
 	/** Converts a path read from a collada file to the usual representation */
@@ -201,11 +201,11 @@ protected:
 
 	/** Finds a node in the collada scene by the given name */
 	const Collada::Node* FindNode( const Collada::Node* pNode, const std::string& pName) const;
-  /** Finds a node in the collada scene by the given SID */
-  const Collada::Node* FindNodeBySID( const Collada::Node* pNode, const std::string& pSID) const;
+	/** Finds a node in the collada scene by the given SID */
+	const Collada::Node* FindNodeBySID( const Collada::Node* pNode, const std::string& pSID) const;
 
-  /** Finds a proper name for a node derived from the collada-node's properties */
-  std::string FindNameForNode( const Collada::Node* pNode) const;
+	/** Finds a proper name for a node derived from the collada-node's properties */
+	std::string FindNameForNode( const Collada::Node* pNode) const;
 
 protected:
 	/** Filename, for a verbose error message */

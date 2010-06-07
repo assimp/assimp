@@ -2264,9 +2264,9 @@ void ColladaParser::ReadSceneNode( Node* pNode)
 				int attrID = TestAttribute( "id");
 				if( attrID > -1)
 					child->mID = mReader->getAttributeValue( attrID);
-        int attrSID = TestAttribute( "sid");
-        if( attrSID > -1)
-          child->mSID = mReader->getAttributeValue( attrSID);
+				int attrSID = TestAttribute( "sid");
+				if( attrSID > -1)
+					child->mSID = mReader->getAttributeValue( attrSID);
 
 				int attrName = TestAttribute( "name");
 				if( attrName > -1)
@@ -2284,7 +2284,7 @@ void ColladaParser::ReadSceneNode( Node* pNode)
 				{
 					// no parent node given, probably called from <library_nodes> element.
 					// create new node in node library
-					mNodeLibrary[child->mID] = pNode = child;
+					mNodeLibrary[child->mID] = child;
 				}
 
 				// read on recursively from there

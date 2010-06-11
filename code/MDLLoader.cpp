@@ -80,11 +80,9 @@ MDLImporter::~MDLImporter()
 bool MDLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	const std::string extension = GetExtension(pFile);
-	if (extension == "mdl" )
-		return true;
 
 	// if check for extension is not enough, check for the magic tokens 
-	if (!extension.length() || checkSig) {
+	if (extension == "mdl"  || !extension.length() || checkSig) {
 		uint32_t tokens[8]; 
 		tokens[0] = AI_MDL_MAGIC_NUMBER_LE_HL2a;
 		tokens[1] = AI_MDL_MAGIC_NUMBER_LE_HL2b;
@@ -94,10 +92,11 @@ bool MDLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 		tokens[5] = AI_MDL_MAGIC_NUMBER_LE_GS4;
 		tokens[6] = AI_MDL_MAGIC_NUMBER_LE_GS3;
 		tokens[7] = AI_MDL_MAGIC_NUMBER_LE;
-		return CheckMagicToken(pIOHandler,pFile,tokens,7,0);
+		return CheckMagicToken(pIOHandler,pFile,tokens,8,0);
 	}
 	return false;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties
 void MDLImporter::SetupProperties(const Importer* pImp)

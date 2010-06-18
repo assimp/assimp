@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exceptional.h"
 
 #include <string>
+#include <map>
+#include <vector>
 #include "./../include/aiTypes.h"
 
 struct aiScene;
@@ -53,6 +55,10 @@ namespace Assimp	{
 
 class IOSystem;
 class Importer;
+class BaseImporter;
+class BaseProcess;
+class SharedPostProcessInfo;
+class IOStream;
 
 // utility to do char4 to uint32 in a portable manner
 #define AI_MAKE_MAGIC(string) ((uint32_t)((string[0] << 24) + \

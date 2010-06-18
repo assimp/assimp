@@ -171,6 +171,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_COB_IMPORTER
 #	include "BlenderLoader.h"
 #endif
+#ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
+#	include "Q3BSPFileImporter.h"
+#endif
 
 // ------------------------------------------------------------------------------------------------
 // Post processing-Steps
@@ -403,6 +406,9 @@ Importer::Importer()
 #endif
 #if (!defined ASSIMP_BUILD_NO_BLEND_IMPORTER)
 	pimpl->mImporter.push_back( new BlenderImporter());
+#endif
+#if (!defined ASSIMP_BUILD_NO_Q3BSP_IMPORTER)
+	pimpl->mImporter.push_back( new Q3BSPFileImporter );
 #endif
 
 	// ----------------------------------------------------------------------------

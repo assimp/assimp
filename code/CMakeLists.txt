@@ -370,12 +370,15 @@ SOURCE_GROUP( Q3D FILES
 	Q3DLoader.h
 )
 
-#SOURCE_GROUP( Q3BSP FILES
-	#Q3BSPFileParser.h
-	#Q3BSPFileParser.cpp
-	#Q3BSPFileImporter.h
-	#Q3BSPFileImporter.cpp
-#)
+SOURCE_GROUP( Q3BSP FILES
+	Q3BSPFileData.h
+	Q3BSPFileParser.h
+	Q3BSPFileParser.cpp
+	Q3BSPFileImporter.h
+	Q3BSPFileImporter.cpp
+	Q3BSPZipArchive.h
+	Q3BSPZipArchive.cpp
+)
 
 SOURCE_GROUP( Raw FILES
 	RawLoader.cpp
@@ -448,6 +451,14 @@ SOURCE_GROUP( zlib FILES
 	../contrib/zlib/zlib.h
 	../contrib/zlib/zutil.c
 	../contrib/zlib/zutil.h
+)
+
+SOURCE_GROUP( unzip FILES
+	../contrib/unzip/crypt.h
+	../contrib/unzip/ioapi.c
+	../contrib/unzip/ioapi.h
+	../contrib/unzip/unzip.c
+	../contrib/unzip/unzip.h
 )
 
 ADD_LIBRARY( assimp SHARED
@@ -586,10 +597,13 @@ ADD_LIBRARY( assimp SHARED
 	ProcessHelper.h
 	Q3DLoader.cpp
 	Q3DLoader.h
-#	Q3BSPFileParser.h
-#	Q3BSPFileParser.cpp
-#	Q3BSPFileImporter.h
-#	Q3BSPFileImporter.cpp
+	Q3BSPFileData.h
+	Q3BSPFileParser.h
+	Q3BSPFileParser.cpp
+	Q3BSPFileImporter.h
+	Q3BSPFileImporter.cpp
+	Q3BSPZipArchive.h
+	Q3BSPZipArchive.cpp
 	RawLoader.cpp
 	RawLoader.h
 	RemoveComments.cpp
@@ -677,6 +691,11 @@ ADD_LIBRARY( assimp SHARED
 	../contrib/zlib/zutil.c
 	../contrib/zlib/zutil.h
 	../contrib/ConvertUTF/ConvertUTF.c
+	../contrib/unzip/crypt.h
+	../contrib/unzip/ioapi.c
+	../contrib/unzip/ioapi.h
+	../contrib/unzip/unzip.c
+	../contrib/unzip/unzip.h
 	Subdivision.cpp
 	Subdivision.h
 	Vertex.h

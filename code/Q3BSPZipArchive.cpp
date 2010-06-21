@@ -37,6 +37,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
+
+#include "AssimpPCH.h"
 #include "Q3BSPZipArchive.h"
 #include <algorithm>
 #include <cassert>

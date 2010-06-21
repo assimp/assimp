@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../contrib/zlib/zlib.h"
+#include "../../contrib/zlib/zlib.h"
 #include "ioapi.h"
 
 

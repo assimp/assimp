@@ -50,7 +50,7 @@ extern "C" {
 #endif
 
 #ifndef _ZLIB_H
-#include "../contrib/zlib/zlib.h"
+#include "../../contrib/zlib/zlib.h"
 #endif
 
 #ifndef _ZLIBIOAPI_H

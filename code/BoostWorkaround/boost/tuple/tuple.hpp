@@ -152,6 +152,11 @@ namespace boost	{
 			  typename T4  = detail::nulltype>
 	class tuple	{
 
+		template <typename T0b,
+		      typename T1b,
+			  typename T2b,
+			  typename T3b,
+			  typename T4b >
 		friend class tuple;
 
 	private:

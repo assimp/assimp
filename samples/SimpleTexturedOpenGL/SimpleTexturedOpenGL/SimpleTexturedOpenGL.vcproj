@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
-	Name="SimpleOpenGL"
-	ProjectGUID="{A53D047C-2C35-44FB-B7DB-2066FE520950}"
-	RootNamespace="SimpleOpenGL"
+	Version="9,00"
+	Name="SimpleTexturedOpenGL"
+	ProjectGUID="{A03DCB69-BBC5-4F55-A7D1-B9100E821BBE}"
+	RootNamespace="SimpleTexturedOpenGL"
 	Keyword="Win32Proj"
+	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
 		<Platform
@@ -17,10 +18,10 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)..\..\SimpleOpenGL"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="1"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -40,14 +41,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\glut;..\..\..\..\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				AdditionalIncludeDirectories=".\include;..\..\DevIL\include;..\..\..\include"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -61,11 +61,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glut32.lib assimp.lib"
+				AdditionalDependencies="OpenGL32.lib GLu32.lib DevIL.lib assimp.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\glut;&quot;..\..\..\..\lib\assimp_debug_win32&quot;"
+				AdditionalLibraryDirectories="..\..\DevIL\lib;  ..\..\..\lib\assimp_debug-dll_win32"
 				GenerateDebugInformation="true"
-				SubSystem="1"
+				SubSystem="2"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -87,19 +87,16 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy $(SolutionDir)..\..\..\bin\assimp_release-dll_win32\Assimp32.dll $(SolutionDir)..\..\SimpleOpenGL\"
+				CommandLine="copy &quot;$(SolutionDir)..\..\bin\assimp_debug-dll_win32\Assimp32d.dll&quot; &quot;$(SolutionDir)\Debug&quot;&#x0D;&#x0A;copy &quot;$(SolutionDir)..\DevIL\lib\DevIL.dll&quot; &quot;$(SolutionDir)\Debug&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)..\..\SimpleOpenGL"
+			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="1"
+			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -119,12 +116,14 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\glut;..\..\..\..\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				Optimization="2"
+				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories=".\include;..\..\DevIL\include;..\..\..\include"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -138,11 +137,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glut32.lib assimp.lib"
+				AdditionalDependencies="OpenGL32.lib GLu32.lib DevIL.lib assimp.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\glut;&quot;..\..\..\..\lib\assimp_release-dll_win32&quot;"
+				AdditionalLibraryDirectories="..\..\DevIL\lib;  ..\..\..\lib\assimp_release-dll_win32"
 				GenerateDebugInformation="true"
-				SubSystem="1"
+				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -166,11 +165,8 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy $(SolutionDir)..\..\..\bin\assimp_release-dll_win32\Assimp32.dll $(SolutionDir)..\..\SimpleOpenGL\"
+				CommandLine="copy $(TargetDir)\$(TargetFileName) ..\..\bin&#x0D;&#x0A;copy ..\..\..\bin\assimp_release-dll_Win32\Assimp32.dll ..\bin&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -178,20 +174,30 @@
 	</References>
 	<Files>
 		<Filter
-			Name="res"
+			Name="Source Files"
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
+			<File
+				RelativePath=".\src\model_loading.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
-			Name="source"
+			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\..\SimpleOpenGL\Sample_SimpleOpenGL.c"
+				RelativePath=".\include\boost_includes.h"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
 		</Filter>
 	</Files>
 	<Globals>

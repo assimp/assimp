@@ -1,9 +1,25 @@
+// ----------------------------------------------------------------------------
+// Another Assimp OpenGL sample including texturing.
+// Note that it is very basic and will only read and apply the model's diffuse 
+// textures (by their material ids)
+//
+// Don't worry about the "Couldn't load Image: ...dwarf2.jpg" Message.
+// It's caused by a bad texture reference in the model file (I guess)
+//
+// If you intend to _use_ this code sample in your app, do yourself a favour 
+// and replace immediate mode calls with VBOs ...
+//
+// Thanks to NeHe on whose OpenGL tutorials this one's based on! :)
+// http://nehe.gamedev.net/
+// ----------------------------------------------------------------------------
+
+
+
 #include <windows.h>
 #include <stdio.h>
 #include <gl\GL.h>
 #include <gl\GLU.h>
 #include <IL\il.h>
-//#include <boost_includes.h>
 
 #include <fstream>
 
@@ -18,6 +34,11 @@
 #include "aiScene.h"
 #include "DefaultLogger.h"
 #include "LogStream.h"
+
+
+// currently these are hardcoded
+static const std::string basepath = "../../test/models/X/";
+static const std::string modelname = "dwarf.x";
 
 
 HGLRC		hRC=NULL;			// Permanent Rendering Context
@@ -57,12 +78,6 @@ GLuint*		textureIds;							// pointer to texture Array
 // Create an instance of the Importer class
 Assimp::Importer importer;	
 
-/*
-std::string toString(int i)
-{
-	return boost::lexical_cast<std::string>(i);
-}
-*/
 
 void createAILogger()
 {	
@@ -85,7 +100,6 @@ void destroyAILogger()
 	Assimp::DefaultLogger::kill();
 }
 
-//void logInfo(const char* logString)
 void logInfo(std::string logString)
 {
 	//Will add message to File with "info" Tag
@@ -114,8 +128,6 @@ bool Import3DFromFile( const std::string& pFile)
 		return false;
 	}
 	
-
-	scene = new aiScene();
 	scene = importer.ReadFile( pFile, aiProcessPreset_TargetRealtime_Quality);
 
 	// If the import failed, report it
@@ -127,12 +139,9 @@ bool Import3DFromFile( const std::string& pFile)
 
 	// Now we can access the file's contents. 
 	logInfo("Import of scene " + pFile + " succeeded.");
-	//logInfo("Scene has " + toString(scene->mNumMeshes) + " meshes.");
-	//logInfo("RootNode has " + toString(scene->mRootNode->mNumMeshes) + " meshes.");
 
 	// We're done. Everything will be cleaned up by the importer destructor
-	return true;
-	
+	return true;	
 }
 
 
@@ -166,8 +175,7 @@ int LoadGLTextures(const aiScene* scene)
 	{
 		ILint test = ilGetInteger(IL_VERSION_NUM);
 		/// wrong DevIL version ///		
-		std::string err_msg = "Wrong DevIL version. Old devil.dll in system32/SysWow64?";
-		//std::string err_msg = "Wrong DevIL version: IL_VERSION_NUM:" + toString(ilGetInteger(IL_VERSION_NUM)) + " IL_VERSION:" + toString(IL_VERSION);
+		std::string err_msg = "Wrong DevIL version. Old devil.dll in system32/SysWow64?";		
 		char* cErr_msg = (char *) err_msg.c_str();
 		abortGLInit(cErr_msg);
 		return -1;
@@ -207,7 +215,6 @@ int LoadGLTextures(const aiScene* scene)
 	glGenTextures(numTextures, textureIds); /* Texture name generation */
 
 	/* define texture path */
-	std::string texturepath = "../../test/models/X/";
 	//std::string texturepath = "../../../test/models/Obj/";
 
 	/* get iterator */
@@ -223,7 +230,7 @@ int LoadGLTextures(const aiScene* scene)
 
 
 		ilBindImage(imageIds[i]); /* Binding of DevIL image name */
-		std::string fileloc = texturepath + filename;	/* Loading of image */
+		std::string fileloc = basepath + filename;	/* Loading of image */
 		success = ilLoadImage(fileloc.c_str());
 
 		if (success) /* If no error occured: */
@@ -251,8 +258,6 @@ int LoadGLTextures(const aiScene* scene)
 		{
 			/* Error occured */
 			MessageBox(NULL, ("Couldn't load Image: " + fileloc).c_str() , "ERROR", MB_OK | MB_ICONEXCLAMATION);
-			//abortGLInit((char *)("Couldn't load Image: " + fn).c_str()) ;
-			//return -1;
 		}
 
 
@@ -347,17 +352,10 @@ void apply_material(const struct aiMaterial *mtl)
 
 	if(AI_SUCCESS == mtl->GetTexture(aiTextureType_DIFFUSE, texIndex, &texPath))
 	{
-		unsigned int texId = *textureIdMap[texPath.data];
-		glBindTexture(GL_TEXTURE_2D, texId);
 		//bind texture
+		unsigned int texId = *textureIdMap[texPath.data];
+		glBindTexture(GL_TEXTURE_2D, texId);		
 	}
-
-	/*
-	set_float4(c, 0.8f, 0.8f, 0.8f, 1.0f);
-	if(AI_SUCCESS == mtl->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse))
-		color4_to_float4(&diffuse, c);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, c);
-	*/
 
 	set_float4(c, 0.8f, 0.8f, 0.8f, 1.0f);
 	if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &diffuse))
@@ -423,7 +421,6 @@ void recursive_render (const struct aiScene *sc, const struct aiNode* nd, float 
 	for (; n < nd->mNumMeshes; ++n) 
 	{
 		const struct aiMesh* mesh = scene->mMeshes[nd->mMeshes[n]];
-		//const aiMesh* mesh;
 
 		apply_material(sc->mMaterials[mesh->mMaterialIndex]);
 
@@ -697,11 +694,6 @@ BOOL CreateGLWindow(char* title, int width, int height, int bits, bool fullscree
 	{
 		abortGLInit("Can't Create A GL Device Context.");
 		return FALSE;
-		/*
-		KillGLWindow();									// Reset Display
-		MessageBox(NULL, "Can't Create A GL Device Context."), "ERROR", MB_OK|MB_ICONEXCLAMATION);
-		return FALSE;									// quit and return False
-		*/
 	}
 
 	if (!(PixelFormat=ChoosePixelFormat(hDC, &pfd)))	// Did We Find a matching pixel Format?
@@ -820,14 +812,9 @@ int WINAPI WinMain( __in HINSTANCE hInstance,				// Instance
 
 	// load scene
 	
-	if (!Import3DFromFile("../../test/models/X/dwarf.x")) return 0;
-	//if (!Import3DFromFile("../../../test/models/Obj/spider.obj")) return 0;
-	logInfo("=============== Post Import ====================");
-	//logInfo("Scene has " + toString(scene->mNumMeshes) + " meshes.");
-	//logInfo("RootNode has " + toString(scene->mRootNode->mNumMeshes) + " meshes.");
+	if (!Import3DFromFile(basepath+modelname)) return 0;
 
-	//logInfo("Scene imported. Scene Meshes:" + toString(scene->mNumMeshes));
-	
+	logInfo("=============== Post Import ====================");
 	
 
 	// Ask The User Which Screen Mode They Prefer
@@ -888,6 +875,20 @@ int WINAPI WinMain( __in HINSTANCE hInstance,				// Instance
 			}
 		}
 	}
+
+	// *** cleanup ***
+
+	// clear map
+	textureIdMap.clear(); //no need to delete pointers in it manually here. (Pointers point to textureIds deleted in next step)
+
+	// clear texture ids
+	if (textureIds)
+	{
+		delete[] textureIds;
+		textureIds = NULL;
+	}
+
+	// *** cleanup end ***
 
 	// Shutdown
 	destroyAILogger();

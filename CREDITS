@@ -83,3 +83,6 @@ D bindings, CMake install support.
 
 - Dario Accornero
 Contributed several patches regarding Mac OS/XCode targets, bug reports.
+
+- Martin Walser (Samhayne)
+Contributed the 'SimpleTexturedOpenGl' sample.

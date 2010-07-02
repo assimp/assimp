@@ -18,7 +18,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="2"
@@ -62,6 +62,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="OpenGL32.lib GLu32.lib DevIL.lib assimp.lib"
+				OutputFile="$(OutDir)\$(ProjectName)_Debug.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\DevIL\lib;  ..\..\..\lib\assimp_debug-dll_win32"
 				GenerateDebugInformation="true"
@@ -88,7 +89,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(SolutionDir)..\..\bin\assimp_debug-dll_win32\Assimp32d.dll&quot; &quot;$(SolutionDir)\Debug&quot;&#x0D;&#x0A;copy &quot;$(SolutionDir)..\DevIL\lib\DevIL.dll&quot; &quot;$(SolutionDir)\Debug&quot;&#x0D;&#x0A;"
+				CommandLine="copy &quot;$(TargetDir)\$(TargetFileName)&quot; ..\..\bin&#x0D;&#x0A;copy ..\..\..\bin\assimp_debug-dll_Win32\Assimp32d.dll ..\..\bin&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -166,7 +167,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy $(TargetDir)\$(TargetFileName) ..\..\bin&#x0D;&#x0A;copy ..\..\..\bin\assimp_release-dll_Win32\Assimp32.dll ..\bin&#x0D;&#x0A;"
+				CommandLine="copy &quot;$(TargetDir)\$(TargetFileName)&quot; ..\..\bin&#x0D;&#x0A;copy ..\..\..\bin\assimp_release-dll_Win32\Assimp32.dll ..\..\bin&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>

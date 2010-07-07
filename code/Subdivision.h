@@ -58,6 +58,11 @@ public:
 
 public:
 
+	virtual ~Subdivider() {
+	}
+
+public:
+
 	// ---------------------------------------------------------------
 	/** Create a subdivider of a specific type
 	 *
@@ -92,13 +97,14 @@ public:
 	 *    verbose format.
 	 *  @param nmesh Number of meshes in smesh.
 	 *  @param out Receives the output meshes. The array must be
-	 *    sufficiently large (at least @c nmesh elements). Output meshes
-	 *    map one-to-one to their corresponding input meshes. The
-	 *    meshes are allocated by the function.
-	*  @param discard_input If true is passed, input meshes are
+	 *    sufficiently large (at least @c nmesh elements) and may not
+	 *    overlap the input array. Output meshes map one-to-one to
+	 *    their corresponding input meshes. The meshes are allocated 
+	 *    by the function.
+	 *  @param discard_input If true is passed, input meshes are
 	 *    deleted after the subdivision is complete. This can 
 	 *    improve performance because it allows the optimization
-	 *    to reuse existing meshes for intermediate results.
+	 *    of reusing existing meshes for intermediate results.
 	 *  @param num Number of subdivisions to perform.
 	 *  @pre nmesh != 0, smesh and out may not overlap*/
 	virtual void Subdivide (

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="assimp"
 	ProjectGUID="{5691E159-2D9B-407F-971F-EA5C592DC524}"
 	RootNamespace="assimp"
@@ -427,7 +427,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="mkdir $(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;"
+				CommandLine="mkdir &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)&quot;&#x0D;&#x0A;mkdir &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)&quot;&#x0D;&#x0A;mkdir &quot;$(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)&quot;&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -574,7 +574,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="mkdir $(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;mkdir $(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;"
+				CommandLine="mkdir &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)&quot;&#x0D;&#x0A;mkdir &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)&quot;&#x0D;&#x0A;mkdir &quot;$(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)&quot;&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\unit_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpview_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;copy &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(SolutionDir)..\..\bin\assimpcmd_$(ConfigurationName)_$(PlatformName)\&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -1354,26 +1354,6 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="md2"
-					>
-					<File
-						RelativePath="..\..\code\MD2FileData.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\code\MD2Loader.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\code\MD2Loader.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\code\MD2NormalTable.h"
-						>
-					</File>
-				</Filter>
-				<Filter
 					Name="md3"
 					>
 					<File
@@ -1664,6 +1644,26 @@
 						RelativePath="..\..\code\LWSLoader.h"
 						>
 					</File>
+					<Filter
+						Name="md2"
+						>
+						<File
+							RelativePath="..\..\code\MD2FileData.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\code\MD2Loader.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\code\MD2Loader.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\code\MD2NormalTable.h"
+							>
+						</File>
+					</Filter>
 				</Filter>
 				<Filter
 					Name="bvh"
@@ -1857,11 +1857,23 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\code\BlenderIntermediate.h"
+						>
+					</File>
+					<File
 						RelativePath="..\..\code\BlenderLoader.cpp"
 						>
 					</File>
 					<File
 						RelativePath="..\..\code\BlenderLoader.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderModifier.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderModifier.h"
 						>
 					</File>
 					<File

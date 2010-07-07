@@ -367,6 +367,92 @@ struct Lamp : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
+struct ModifierData : ElemBase  {
+	enum ModifierType {
+      eModifierType_None = 0,
+      eModifierType_Subsurf,
+      eModifierType_Lattice,
+      eModifierType_Curve,
+      eModifierType_Build,
+      eModifierType_Mirror,
+      eModifierType_Decimate,
+      eModifierType_Wave,
+      eModifierType_Armature,
+      eModifierType_Hook,
+      eModifierType_Softbody,
+      eModifierType_Boolean,
+      eModifierType_Array,
+      eModifierType_EdgeSplit,
+      eModifierType_Displace,
+      eModifierType_UVProject,
+      eModifierType_Smooth,
+      eModifierType_Cast,
+      eModifierType_MeshDeform,
+      eModifierType_ParticleSystem,
+      eModifierType_ParticleInstance,
+      eModifierType_Explode,
+      eModifierType_Cloth,
+      eModifierType_Collision,
+      eModifierType_Bevel,
+      eModifierType_Shrinkwrap,
+      eModifierType_Fluidsim,
+      eModifierType_Mask,
+      eModifierType_SimpleDeform,
+      eModifierType_Multires,
+      eModifierType_Surface,
+      eModifierType_Smoke,
+      eModifierType_ShapeKey
+	};
+
+	boost::shared_ptr<ElemBase> next WARN;
+	boost::shared_ptr<ElemBase> prev WARN;
+
+	int type, mode;
+	char name[32];
+};
+
+// -------------------------------------------------------------------------------
+struct SubsurfModifierData : ElemBase  {
+
+	enum Type {
+		
+		TYPE_CatmullClarke = 0x0,
+		TYPE_Simple = 0x1
+	};
+
+	enum Flags {
+		// some ommitted
+		FLAGS_SubsurfUV		=1<<3
+	};
+
+	ModifierData modifier FAIL;
+	short subdivType WARN;
+	short levels FAIL;
+	short renderLevels ;
+	short flags;
+};
+
+// -------------------------------------------------------------------------------
+struct MirrorModifierData : ElemBase {
+
+	enum Flags {
+		Flags_CLIPPING      =1<<0,
+		Flags_MIRROR_U      =1<<1,
+		Flags_MIRROR_V      =1<<2,
+		Flags_AXIS_X        =1<<3,
+		Flags_AXIS_Y        =1<<4,
+		Flags_AXIS_Z        =1<<5,
+		Flags_VGROUP        =1<<6
+	};
+
+	ModifierData modifier FAIL;
+
+	short axis, flag;
+	float tolerance;
+	boost::shared_ptr<Object> mirror_ob;
+};
+
+// -------------------------------------------------------------------------------
 struct Object : ElemBase  {
 	ID id FAIL;
 
@@ -396,6 +482,8 @@ struct Object : ElemBase  {
 	boost::shared_ptr<Object> proxy,proxy_from,proxy_group WARN;
 	boost::shared_ptr<Group> dup_group WARN;
 	boost::shared_ptr<ElemBase> data FAIL;
+
+	ListBase modifiers;
 };
 
 

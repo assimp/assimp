@@ -274,12 +274,25 @@ boost::shared_ptr< ElemBase > DNA :: ConvertBlobToStructure(
 	const FileDatabase& db
 ) const 
 {
-	std::map<std::string, ConvertProcPtr>::const_iterator it = converters.find(structure.name);
+	std::map<std::string, FactoryPair >::const_iterator it = converters.find(structure.name);
 	if (it == converters.end()) {
 		return boost::shared_ptr< ElemBase >();
 	}
 
-	return (structure.*((*it).second))(db);
+	boost::shared_ptr< ElemBase > ret = (structure.*((*it).second.first))();
+	(structure.*((*it).second.second))(ret,db);
+	
+	return ret;
+}
+
+// ------------------------------------------------------------------------------------------------
+DNA::FactoryPair DNA :: GetBlobToStructureConverter(
+	const Structure& structure,
+	const FileDatabase& db
+) const 
+{
+	std::map<std::string,  FactoryPair>::const_iterator it = converters.find(structure.name);
+	return it == converters.end() ? FactoryPair(NULL,NULL) : (*it).second;
 }
 
 // basing on http://www.blender.org/development/architecture/notes-on-sdna/

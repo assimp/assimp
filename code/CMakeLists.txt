@@ -314,6 +314,9 @@ SOURCE_GROUP(BLENDER FILES
 	BlenderScene.cpp
 	BlenderScene.h
 	BlenderSceneGen.h
+	BlenderIntermediate.h
+	BlenderModifier.h
+	BlenderModifier.cpp
 )
 
 SOURCE_GROUP( PostProcessing FILES
@@ -714,6 +717,9 @@ ADD_LIBRARY( assimp SHARED
 	BlenderScene.cpp
 	BlenderScene.h
 	BlenderSceneGen.h
+	BlenderIntermediate.h
+	BlenderModifier.h
+	BlenderModifier.cpp
 
 	# Necessary to show the headers in the project when using the VC++ generator:
 	BoostWorkaround/boost/math/common_factor_rt.hpp

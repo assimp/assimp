@@ -62,6 +62,13 @@ const Field& Structure :: operator [] (const std::string& ss) const
 }
 
 //--------------------------------------------------------------------------------
+const Field* Structure :: Get (const std::string& ss) const
+{
+	std::map<std::string, size_t>::const_iterator it = indices.find(ss);
+	return it == indices.end() ? NULL : &fields[(*it).second];
+}
+
+//--------------------------------------------------------------------------------
 const Field& Structure :: operator [] (const size_t i) const 
 {
 	if (i >= fields.size()) {
@@ -74,14 +81,17 @@ const Field& Structure :: operator [] (const size_t i) const
 }
 
 //--------------------------------------------------------------------------------
-template <typename T> boost::shared_ptr<ElemBase> Structure :: Convert(
+template <typename T> boost::shared_ptr<ElemBase> Structure :: Allocate() const 
+{
+	return boost::shared_ptr<T>(new T()); 
+}
+
+//--------------------------------------------------------------------------------
+template <typename T> void Structure :: Convert(
+	boost::shared_ptr<ElemBase> in,
 	const FileDatabase& db) const 
 {
-	// FIXME: use boost::make_shared
-	boost::shared_ptr<T> s = boost::shared_ptr<T>(new T()); 
-	Convert<T> (*s.get(),db);
-
-	return s;
+	Convert<T> (*static_cast<T*> ( in.get() ),db);
 }
 
 //--------------------------------------------------------------------------------
@@ -422,9 +432,8 @@ template <> void Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::
 	// I really ought to improve StreamReader to work with 64 bit indices exclusively.
 
 	// continue conversion after allocating the required storage
-	out = db.dna.ConvertBlobToStructure(s,db);
-	db.reader->SetCurrentPos(pold);
-	if (!out) {
+	DNA::FactoryPair builders = db.dna.GetBlobToStructureConverter(s,db);
+	if (!builders.first) {
 		// this might happen if DNA::RegisterConverters hasn't been called so far
 		// or if the target type is not contained in `our` DNA.
 		out.reset();
@@ -434,14 +443,23 @@ template <> void Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::
 		return;
 	}
 
+	// allocate the object hull
+	out = (s.*builders.first)();
+	
+	// cache the object immediately to prevent infinite recursion in a 
+	// circular list with a single element (i.e. a self-referencing element).
+	db.cache(out).set(s,out,ptrval);
+
+	// and do the actual conversion
+	(s.*builders.second)(out,db);
+	db.reader->SetCurrentPos(pold);
+	
 	// store a pointer to the name string of the actual type
 	// in the object itself. This allows the conversion code
 	// to perform additional type checking.
 	out->dna_type = s.name.c_str();
 
-	// cache the object now that construction is complete
-	// FIXME we need to do this in ConvertBlobToStructure
-	db.cache(out).set(s,out,ptrval);
+	
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
 	++db.stats().pointers_resolved;
@@ -610,6 +628,13 @@ const Structure& DNA :: operator [] (const std::string& ss) const
 	}
 
 	return structures[(*it).second];
+}
+
+//--------------------------------------------------------------------------------
+const Structure* DNA :: Get (const std::string& ss) const
+{
+	std::map<std::string, size_t>::const_iterator it = indices.find(ss);
+	return it == indices.end() ? NULL : &structures[(*it).second];
 }
 
 //--------------------------------------------------------------------------------

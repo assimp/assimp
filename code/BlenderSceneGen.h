@@ -72,6 +72,12 @@ template <> void Structure :: Convert<TFace> (
     ) const
 ;
 
+template <> void Structure :: Convert<SubsurfModifierData> (
+    SubsurfModifierData& dest,
+    const FileDatabase& db
+    ) const
+;
+
 template <> void Structure :: Convert<MFace> (
     MFace& dest,
     const FileDatabase& db
@@ -156,6 +162,12 @@ template <> void Structure :: Convert<ListBase> (
     ) const
 ;
 
+template <> void Structure :: Convert<ModifierData> (
+    ModifierData& dest,
+    const FileDatabase& db
+    ) const
+;
+
 template <> void Structure :: Convert<ID> (
     ID& dest,
     const FileDatabase& db
@@ -194,6 +206,12 @@ template <> void Structure :: Convert<Tex> (
 
 template <> void Structure :: Convert<Camera> (
     Camera& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<MirrorModifierData> (
+    MirrorModifierData& dest,
     const FileDatabase& db
     ) const
 ;

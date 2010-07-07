@@ -94,7 +94,7 @@ struct ElemBase
 	 * as the DNA is not modified. The dna_type is only set if the
 	 * data type is not static, i.e. a boost::shared_ptr<ElemBase>
 	 * in the scene description would have its type resolved 
-	 * at runtime. */
+	 * at runtime, so this member is always set. */
 	const char* dna_type;
 };
 
@@ -219,8 +219,10 @@ public:
 public:
 
 	// --------------------------------------------------------
-	/** Access a field of the structure by its canonical name */
+	/** Access a field of the structure by its canonical name. The pointer version
+	 *  returns NULL on failure while the reference version raises an import error. */
 	inline const Field& operator [] (const std::string& ss) const;
+	inline const Field* Get (const std::string& ss) const;
 
 	// --------------------------------------------------------
 	/** Access a field of the structure by its index */
@@ -248,10 +250,18 @@ public:
 	template <typename T> inline void Convert (T& dest,
 		const FileDatabase& db) const;
 
+
+
 	// --------------------------------------------------------
+	// generic converter
 	template <typename T>
-	boost::shared_ptr<ElemBase> Convert(
-		const FileDatabase& db) const;
+	void Convert(boost::shared_ptr<ElemBase> in,const FileDatabase& db) const;
+
+	// --------------------------------------------------------
+	// generic allocator
+	template <typename T> boost::shared_ptr<ElemBase> Allocate() const;
+
+
 
 	// --------------------------------------------------------
 	// field parsing for 1d arrays
@@ -391,17 +401,29 @@ class DNA
 {
 public:
 
-	typedef boost::shared_ptr<ElemBase> (Structure::*ConvertProcPtr) (const FileDatabase& ) const;
+	typedef void (Structure::*ConvertProcPtr) (
+		boost::shared_ptr<ElemBase> in, 
+		const FileDatabase&
+	) const;
+
+	typedef boost::shared_ptr<ElemBase> (
+		Structure::*AllocProcPtr) () const;
 	
-	std::map<std::string, ConvertProcPtr> converters;
+	typedef std::pair< AllocProcPtr, ConvertProcPtr > FactoryPair;
+
+public:
+
+	std::map<std::string, FactoryPair > converters;
 	vector<Structure > structures;
 	std::map<std::string, size_t> indices;
 
 public:
 
 	// --------------------------------------------------------
-	/** Access a structure by its canonical name */
+	/** Access a structure by its canonical name, the pointer version returns NULL on failure 
+	  * while the reference version raises an error. */
 	inline const Structure& operator [] (const std::string& ss) const;
+	inline const Structure* Get (const std::string& ss) const;
 
 	// --------------------------------------------------------
 	/** Access a structure by its index */
@@ -425,12 +447,26 @@ public:
 
 
 	// --------------------------------------------------------
-	/** Take an input blob, interpret it according to a its structure name and
-	 *  convert it to the intermediate representation. 
+	/** Take an input blob from the stream, interpret it according to 
+	 *  a its structure name and convert it to the intermediate
+	 *  representation. 
 	 *  @param structure Destination structure definition
 	 *  @param db File database.
 	 *  @return A null pointer if no appropriate converter is available.*/
 	boost::shared_ptr< ElemBase > ConvertBlobToStructure(
+		const Structure& structure,
+		const FileDatabase& db
+		) const;
+
+	// --------------------------------------------------------
+	/** Find a suitable conversion function for a given Structure.
+	 *  Such a converter function takes a blob from the input 
+	 *  stream, reads as much as it needs, and builds up a
+	 *  complete object in intermediate representation.
+	 *  @param structure Destination structure definition
+	 *  @param db File database.
+	 *  @return A null pointer in .first if no appropriate converter is available.*/
+	FactoryPair GetBlobToStructureConverter(
 		const Structure& structure,
 		const FileDatabase& db
 		) const;

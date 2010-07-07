@@ -81,7 +81,7 @@ DNA_RegisterConverters_decl = """
 void DNA::RegisterConverters() """
 
 DNA_RegisterConverters_add = """
-    converters["{a}"] = &Structure::Convert<{a}>;"""
+    converters["{a}"] = DNA::FactoryPair( &Structure::Allocate<{a}>, &Structure::Convert<{a}> );"""
 
 
 map_policy = {

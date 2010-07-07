@@ -70,6 +70,7 @@ template <> void Structure :: Convert<Object> (
     ReadFieldPtr<ErrorPolicy_Warn>(dest.proxy_group,"*proxy_group",db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.dup_group,"*dup_group",db);
     ReadFieldPtr<ErrorPolicy_Fail>(dest.data,"*data",db);
+    ReadField<ErrorPolicy_Igno>(dest.modifiers,"modifiers",db);
 
 	db.reader->IncPtr(size);
 }
@@ -138,6 +139,22 @@ template <> void Structure :: Convert<TFace> (
     ReadField<ErrorPolicy_Igno>(dest.mode,"mode",db);
     ReadField<ErrorPolicy_Igno>(dest.tile,"tile",db);
     ReadField<ErrorPolicy_Igno>(dest.unwrap,"unwrap",db);
+
+	db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <> void Structure :: Convert<SubsurfModifierData> (
+    SubsurfModifierData& dest,
+    const FileDatabase& db
+    ) const
+{ 
+
+    ReadField<ErrorPolicy_Fail>(dest.modifier,"modifier",db);
+    ReadField<ErrorPolicy_Igno>(dest.subdivType,"subdivType",db);
+    ReadField<ErrorPolicy_Igno>(dest.levels,"levels",db);
+    ReadField<ErrorPolicy_Igno>(dest.renderLevels,"renderLevels",db);
+    ReadField<ErrorPolicy_Igno>(dest.flags,"flags",db);
 
 	db.reader->IncPtr(size);
 }
@@ -391,6 +408,22 @@ template <> void Structure :: Convert<ListBase> (
 }
 
 //--------------------------------------------------------------------------------
+template <> void Structure :: Convert<ModifierData> (
+    ModifierData& dest,
+    const FileDatabase& db
+    ) const
+{ 
+
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next,"*next",db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.prev,"*prev",db);
+    ReadField<ErrorPolicy_Igno>(dest.type,"type",db);
+    ReadField<ErrorPolicy_Igno>(dest.mode,"mode",db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.name,"name",db);
+
+	db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
 template <> void Structure :: Convert<ID> (
     ID& dest,
     const FileDatabase& db
@@ -511,33 +544,52 @@ template <> void Structure :: Convert<Camera> (
 }
 
 //--------------------------------------------------------------------------------
+template <> void Structure :: Convert<MirrorModifierData> (
+    MirrorModifierData& dest,
+    const FileDatabase& db
+    ) const
+{ 
+
+    ReadField<ErrorPolicy_Fail>(dest.modifier,"modifier",db);
+    ReadField<ErrorPolicy_Igno>(dest.axis,"axis",db);
+    ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
+    ReadField<ErrorPolicy_Igno>(dest.tolerance,"tolerance",db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.mirror_ob,"*mirror_ob",db);
+
+	db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
 void DNA::RegisterConverters() {
 
-    converters["Object"] = &Structure::Convert<Object>;
-    converters["Group"] = &Structure::Convert<Group>;
-    converters["MTex"] = &Structure::Convert<MTex>;
-    converters["TFace"] = &Structure::Convert<TFace>;
-    converters["MFace"] = &Structure::Convert<MFace>;
-    converters["Lamp"] = &Structure::Convert<Lamp>;
-    converters["MDeformWeight"] = &Structure::Convert<MDeformWeight>;
-    converters["PackedFile"] = &Structure::Convert<PackedFile>;
-    converters["Base"] = &Structure::Convert<Base>;
-    converters["MTFace"] = &Structure::Convert<MTFace>;
-    converters["Material"] = &Structure::Convert<Material>;
-    converters["Mesh"] = &Structure::Convert<Mesh>;
-    converters["MDeformVert"] = &Structure::Convert<MDeformVert>;
-    converters["World"] = &Structure::Convert<World>;
-    converters["MVert"] = &Structure::Convert<MVert>;
-    converters["MEdge"] = &Structure::Convert<MEdge>;
-    converters["GroupObject"] = &Structure::Convert<GroupObject>;
-    converters["ListBase"] = &Structure::Convert<ListBase>;
-    converters["ID"] = &Structure::Convert<ID>;
-    converters["MCol"] = &Structure::Convert<MCol>;
-    converters["Image"] = &Structure::Convert<Image>;
-    converters["Scene"] = &Structure::Convert<Scene>;
-    converters["Library"] = &Structure::Convert<Library>;
-    converters["Tex"] = &Structure::Convert<Tex>;
-    converters["Camera"] = &Structure::Convert<Camera>;
+    converters["Object"] = DNA::FactoryPair( &Structure::Allocate<Object>, &Structure::Convert<Object> );
+    converters["Group"] = DNA::FactoryPair( &Structure::Allocate<Group>, &Structure::Convert<Group> );
+    converters["MTex"] = DNA::FactoryPair( &Structure::Allocate<MTex>, &Structure::Convert<MTex> );
+    converters["TFace"] = DNA::FactoryPair( &Structure::Allocate<TFace>, &Structure::Convert<TFace> );
+    converters["SubsurfModifierData"] = DNA::FactoryPair( &Structure::Allocate<SubsurfModifierData>, &Structure::Convert<SubsurfModifierData> );
+    converters["MFace"] = DNA::FactoryPair( &Structure::Allocate<MFace>, &Structure::Convert<MFace> );
+    converters["Lamp"] = DNA::FactoryPair( &Structure::Allocate<Lamp>, &Structure::Convert<Lamp> );
+    converters["MDeformWeight"] = DNA::FactoryPair( &Structure::Allocate<MDeformWeight>, &Structure::Convert<MDeformWeight> );
+    converters["PackedFile"] = DNA::FactoryPair( &Structure::Allocate<PackedFile>, &Structure::Convert<PackedFile> );
+    converters["Base"] = DNA::FactoryPair( &Structure::Allocate<Base>, &Structure::Convert<Base> );
+    converters["MTFace"] = DNA::FactoryPair( &Structure::Allocate<MTFace>, &Structure::Convert<MTFace> );
+    converters["Material"] = DNA::FactoryPair( &Structure::Allocate<Material>, &Structure::Convert<Material> );
+    converters["Mesh"] = DNA::FactoryPair( &Structure::Allocate<Mesh>, &Structure::Convert<Mesh> );
+    converters["MDeformVert"] = DNA::FactoryPair( &Structure::Allocate<MDeformVert>, &Structure::Convert<MDeformVert> );
+    converters["World"] = DNA::FactoryPair( &Structure::Allocate<World>, &Structure::Convert<World> );
+    converters["MVert"] = DNA::FactoryPair( &Structure::Allocate<MVert>, &Structure::Convert<MVert> );
+    converters["MEdge"] = DNA::FactoryPair( &Structure::Allocate<MEdge>, &Structure::Convert<MEdge> );
+    converters["GroupObject"] = DNA::FactoryPair( &Structure::Allocate<GroupObject>, &Structure::Convert<GroupObject> );
+    converters["ListBase"] = DNA::FactoryPair( &Structure::Allocate<ListBase>, &Structure::Convert<ListBase> );
+    converters["ModifierData"] = DNA::FactoryPair( &Structure::Allocate<ModifierData>, &Structure::Convert<ModifierData> );
+    converters["ID"] = DNA::FactoryPair( &Structure::Allocate<ID>, &Structure::Convert<ID> );
+    converters["MCol"] = DNA::FactoryPair( &Structure::Allocate<MCol>, &Structure::Convert<MCol> );
+    converters["Image"] = DNA::FactoryPair( &Structure::Allocate<Image>, &Structure::Convert<Image> );
+    converters["Scene"] = DNA::FactoryPair( &Structure::Allocate<Scene>, &Structure::Convert<Scene> );
+    converters["Library"] = DNA::FactoryPair( &Structure::Allocate<Library>, &Structure::Convert<Library> );
+    converters["Tex"] = DNA::FactoryPair( &Structure::Allocate<Tex>, &Structure::Convert<Tex> );
+    converters["Camera"] = DNA::FactoryPair( &Structure::Allocate<Camera>, &Structure::Convert<Camera> );
+    converters["MirrorModifierData"] = DNA::FactoryPair( &Structure::Allocate<MirrorModifierData>, &Structure::Convert<MirrorModifierData> );
 }
 
 

@@ -71,12 +71,17 @@ namespace Assimp	{
 		struct Material;
 	}
 
-	// BlenderLoader.cpp
+	// BlenderIntermediate.h
 	namespace Blender {
 		struct ConversionData;
 		template <template <typename,typename> class TCLASS, typename T> struct TempArray;
 	}
 
+	// BlenderModifier.h
+	namespace Blender {
+		class BlenderModifierShowcase;
+		class BlenderModifier;
+	}
 
 enum aiLoaderFlags 
 {
@@ -247,6 +252,8 @@ private: // static stuff, mostly logging and error reporting.
 	static void LogDebug (const Formatter::format& message); //! @ingroup blog
 
 private:
+
+	Blender::BlenderModifierShowcase* modifier_cache;
 
 }; // !class BlenderImporter
 

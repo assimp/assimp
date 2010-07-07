@@ -47,10 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Uncomment this to disable support for (gzip)compressed .BLEND files
 
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
-#include "BlenderLoader.h"
-#include "BlenderDNA.h"
-#include "BlenderScene.h"
-#include "BlenderSceneGen.h"
+
+#include "BlenderIntermediate.h"
+#include "BlenderModifier.h"
 
 #include "StreamReader.h"
 #include "TinyFormatter.h"
@@ -65,8 +64,6 @@ using namespace Assimp;
 using namespace Assimp::Blender;
 using namespace Assimp::Formatter;
 
-#define for_each(x,y) BOOST_FOREACH(x,y)
-
 static const aiLoaderDesc blenderDesc = {
 	"Blender 3D Importer \nhttp://www.blender3d.org",
 	"Alexander Gessler <alexander.gessler@gmx.net>",
@@ -79,139 +76,18 @@ static const aiLoaderDesc blenderDesc = {
 	50
 };
 
-namespace Assimp {
-namespace Blender {
-
-	// --------------------------------------------------------------------
-	/** Mini smart-array to avoid pulling in even more boost stuff. usable with vector and deque */
-	// --------------------------------------------------------------------
-	template <template <typename,typename> class TCLASS, typename T>
-	struct TempArray	{
-		typedef TCLASS< T*,std::allocator<T*> > mywrap;
-
-		TempArray() {
-		}
-
-		~TempArray () {
-			for_each(T* elem, arr) {
-				delete elem;
-			}
-		}
-
-		void dismiss() {
-			arr.clear();
-		}
-
-		mywrap* operator -> () {
-			return &arr;
-		}
-
-		operator mywrap& () {
-			return arr;
-		}
-
-		operator const mywrap& () const {
-			return arr;
-		}
-
-		mywrap& get () {
-			return arr;
-		}
-
-		const mywrap& get () const {
-			return arr;
-		}
-
-		T* operator[] (size_t idx) const {
-			return arr[idx];
-		}
-
-	private:
-		// no copy semantics
-		void operator= (const TempArray&)  {
-		}
-
-		TempArray(const TempArray& arr) {
-		}
-
-	private:
-		mywrap arr;
-	};
-	
-#ifdef _MSC_VER
-#	pragma warning(disable:4351)
-#endif
-	// --------------------------------------------------------------------
-	/** ConversionData acts as intermediate storage location for
-	 *  the various ConvertXXX routines in BlenderImporter.*/
-	// --------------------------------------------------------------------
-	struct ConversionData	
-	{
-		ConversionData(const FileDatabase& db)
-			: sentinel_cnt()
-			, next_texture()
-			, db(db)
-		{}
-
-		std::set<const Object*> objects;
-
-		TempArray <std::vector, aiMesh> meshes;
-		TempArray <std::vector, aiCamera> cameras;
-		TempArray <std::vector, aiLight> lights;
-		TempArray <std::vector, aiMaterial> materials;
-		TempArray <std::vector, aiTexture> textures;
-
-		// set of all materials referenced by at least one mesh in the scene
-		std::deque< boost::shared_ptr< Material > > materials_raw;
-
-		// counter to name sentinel textures inserted as substitutes for procedural textures.
-		unsigned int sentinel_cnt;
-
-		// next texture ID for each texture type, respectively
-		unsigned int next_texture[aiTextureType_UNKNOWN+1];
-
-		// original file data
-		const FileDatabase& db;
-	};
-#ifdef _MSC_VER
-#	pragma warning(default:4351)
-#endif
-
-// ------------------------------------------------------------------------------------------------
-const char* GetTextureTypeDisplayString(Tex::Type t)
-{
-	switch (t)	{
-	case Tex::Type_CLOUDS		:  return  "Clouds";			
-	case Tex::Type_WOOD			:  return  "Wood";			
-	case Tex::Type_MARBLE		:  return  "Marble";			
-	case Tex::Type_MAGIC		:  return  "Magic";		
-	case Tex::Type_BLEND		:  return  "Blend";			
-	case Tex::Type_STUCCI		:  return  "Stucci";			
-	case Tex::Type_NOISE		:  return  "Noise";			
-	case Tex::Type_PLUGIN		:  return  "Plugin";			
-	case Tex::Type_MUSGRAVE		:  return  "Musgrave";		
-	case Tex::Type_VORONOI		:  return  "Voronoi";			
-	case Tex::Type_DISTNOISE	:  return  "DistortedNoise";	
-	case Tex::Type_ENVMAP		:  return  "EnvMap";	
-	case Tex::Type_IMAGE		:  return  "Image";	
-	default: 
-		break;
-	}
-	return "<Unknown>";
-}
-
-} // ! Blender
-} // ! Assimp
-
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 BlenderImporter::BlenderImporter()
+: modifier_cache(new BlenderModifierShowcase())
 {}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well 
 BlenderImporter::~BlenderImporter()
-{}
+{
+	delete modifier_cache;
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
@@ -1079,6 +955,9 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
 			(*nd++)->mParent = node;
 		}
 	}
+
+	// apply modifiers
+	modifier_cache->ApplyModifiers(*node,conv_data,in,*obj);
 
 	return node.dismiss();
 }

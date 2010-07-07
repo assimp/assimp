@@ -26,6 +26,7 @@ OBJECTS   += $(patsubst %.cpp,%.o,  $(wildcard ./../contrib/irrXML/*.cpp))
 # C object files
 OBJECTSC  := $(patsubst %.c,%.oc,   $(wildcard ./../contrib/zlib/*.c))
 OBJECTSC  += $(patsubst %.c,%.oc,   $(wildcard ./../contrib/ConvertUTF/*.c))
+OBJECTSC  += $(patsubst %.c,%.oc,   $(wildcard ./../contrib/unzip/*.c))
 
 # Directory for install
 INSTALLDIR = /usr/bin/assimp

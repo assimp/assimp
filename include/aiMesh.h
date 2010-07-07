@@ -317,7 +317,7 @@ enum aiPrimitiveType
 struct aiAnimMesh
 {
 	/** Replacement for aiMesh::mVertices. If this array is non-NULL, 
-	 *  it *must* contain aiMesh::mNumVertices entries. The corresponding
+	 *  it *must* contain mNumVertices entries. The corresponding
 	 *  array in the host mesh must be non-NULL as well - animation
 	 *  meshes may neither add or nor remove vertex components (if
 	 *  a replacement array is NULL and the corresponding source
@@ -338,6 +338,16 @@ struct aiAnimMesh
 
 	/** Replacement for aiMesh::mTextureCoords */
 	C_STRUCT aiVector3D* mTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
+
+	/** The number of vertices in the aiAnimMesh, and thus the length of all
+	 * the member arrays.
+	 *
+	 * This has always the same value as the mNumVertices property in the
+	 * corresponding aiMesh. It is duplicated here merely to make the length
+	 * of the member arrays accessible even if the aiMesh is not known, e.g.
+	 * from language bindings.
+	 */
+	unsigned int mNumVertices;
 
 #ifdef __cplusplus
 

@@ -114,21 +114,27 @@
 %include "interface/IOSystem.i"
 
 
-// We have to "instanciate" the templates at the end to avoid running into
-// forward reference issues (SWIG would spit out the vector helper functions
-// before the header includes otherwise).
+// We have to "instanciate" the templates used by the ASSSIMP_*_ARRAY macros
+// here at the end to avoid running into forward reference issues (SWIG would
+// spit out the helper functions before the header includes for the element
+// types otherwise).
 
 %template(UintVector) std::vector<unsigned int>;
 %template(aiAnimationVector) std::vector<aiAnimation *>;
+%template(aiAnimMeshVector) std::vector<aiAnimMesh *>;
+%template(aiBonesVector) std::vector<aiBone *>;
 %template(aiCameraVector) std::vector<aiCamera *>;
 %template(aiColor4DVector) std::vector<aiColor4D *>;
 %template(aiColor4DVectorVector) std::vector<std::vector<aiColor4D *> >;
 %template(aiFaceVector) std::vector<aiFace *>;
 %template(aiLightVector) std::vector<aiLight *>;
 %template(aiMaterialVector) std::vector<aiMaterial *>;
+%template(aiMaterialPropertyVector) std::vector<aiMaterialProperty *>;
+%template(aiMeshAnimVector) std::vector<aiMeshAnim *>;
 %template(aiMeshVector) std::vector<aiMesh *>;
 %template(aiNodeVector) std::vector<aiNode *>;
 %template(aiNodeAnimVector) std::vector<aiNodeAnim *>;
 %template(aiTextureVector) std::vector<aiTexture *>;
 %template(aiVector3DVector) std::vector<aiVector3D *>;
 %template(aiVector3DVectorVector) std::vector<std::vector<aiVector3D *> >;
+%template(aiVertexWeightVector) std::vector<aiVertexWeight *>;

@@ -2,6 +2,8 @@
 #include "aiMaterial.h"
 %}
 
+ASSIMP_ARRAY(aiMaterial, aiMaterialProperty*, mProperties, $self->mNumProperties)
+
 %include "aiMaterial.h"
 
 %include <typemaps.i>

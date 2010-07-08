@@ -60,6 +60,44 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 // ###########################################################################
+// LIBRARY SETTINGS
+// General, global settings
+// ###########################################################################
+
+// ---------------------------------------------------------------------------
+/** @brief Enables time measurements.
+ *
+ *  If enabled, measures the time needed for each part of the loading
+ *  process (i.e. IO time, importing, postprocessing, ..) and dumps
+ *  these timings to the DefaultLogger. See the @link perf Performance
+ *  Page@endlink for more information on this topic.
+ * 
+ * Property type: bool. Default value: false.
+ */
+#define AI_CONFIG_GLOB_MEASURE_TIME  \
+	"GLOB_MEASURE_TIME"
+
+# if 0 // not implemented yet
+// ---------------------------------------------------------------------------
+/** @brief Set Assimp's multithreading policy.
+ *
+ * This setting is ignored if Assimp was built without boost.thread
+ * support (ASSIMP_BUILD_NO_THREADING, which is implied by ASSIMP_BUILD_BOOST_WORKAROUND).
+ * Possible values are: -1 to let Assimp decide what to do, 0 to disable
+ * multithreading entirely and any number larger than 0 to force a specific
+ * number of threads. Assimp is always free to ignore this settings, which is
+ * merely a hint. Usually, the default value (-1) will be fine. However, if
+ * Assimp is used concurrently from multiple user threads, it might be useful
+ * to limit each Importer instance to a specific number of cores.
+ *
+ * For more information, see the @link threading Threading page@endlink.
+ * Property type: int, default value: -1.
+ */
+#define AI_CONFIG_GLOB_MULTITHREADING  \
+	"GLOB_MULTITHREADING"
+#endif
+
+// ###########################################################################
 // POST PROCESSING SETTINGS
 // Various stuff to fine-tune the behavior of a specific post processing step.
 // ###########################################################################
@@ -136,7 +174,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * important additional information which you intend to parse. 
  * For rendering, you can still render all meshes in the scene without
  * any transformations.
- * Property type: integer (0: false; !0: true). Default value: false.
+ * Property type: bool. Default value: false.
  */
 #define AI_CONFIG_PP_PTV_KEEP_HIERARCHY		\
 	"PP_PTV_KEEP_HIERARCHY"
@@ -159,7 +197,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * degenerated lines to points. See the documentation to the
  * #aiProcess_FindDegenerates step for a detailed example of the various ways
  * to get rid of these lines and points if you don't want them.
- * Property type: integer (0: false; !0: true). Default value: false.
+ * Property type: bool. Default value: false.
  */
 #define AI_CONFIG_PP_FD_REMOVE \
 	"PP_FD_REMOVE"
@@ -402,7 +440,7 @@ enum aiComponent
 
 // ###########################################################################
 // IMPORTER SETTINGS
-// Various stuff to fine-tune the behaviour of a specific importer plugin.
+// Various stuff to fine-tune the behaviour of specific importer plugins.
 // ###########################################################################
 
 
@@ -433,7 +471,7 @@ enum aiComponent
 /** @brief  Configures the AC loader to collect all surfaces which have the
  *    "Backface cull" flag set in separate meshes. 
  *
- * Property type: integer (0: false; !0: true). Default value: true.
+ *  Property type: bool. Default value: true.
  */
 #define AI_CONFIG_IMPORT_AC_SEPARATE_BFCULL	\
 	"IMPORT_AC_SEPARATE_BFCULL"
@@ -444,7 +482,7 @@ enum aiComponent
  *  default, Assimp performs the subdivision using the standard 
  *  Catmull-Clark algorithm
  *
- * Property type: integer (0: false; !0: true). Default value: true.
+ * * Property type: bool. Default value: true.
  */
 #define AI_CONFIG_IMPORT_AC_EVAL_SUBDIVISION	\
 	"IMPORT_AC_EVAL_SUBDIVISION"
@@ -453,7 +491,7 @@ enum aiComponent
 /** @brief  Configures the UNREAL 3D loader to separate faces with different
  *    surface flags (e.g. two-sided vs. single-sided).
  *
- * Property type: integer (0: false; !0: true). Default value: true.
+ * * Property type: bool. Default value: true.
  */
 #define AI_CONFIG_IMPORT_UNREAL_HANDLE_FLAGS \
 	"UNREAL_HANDLE_FLAGS"
@@ -466,7 +504,7 @@ enum aiComponent
  * want to compute them on your own, if you need them. This option is intended
  * for model viewers which want to offer an easy way to apply textures to
  * terrains.
- * Property type: integer (0: false; !0: true). Default value: false.
+ * * Property type: bool. Default value: false.
  */
 #define AI_CONFIG_IMPORT_TER_MAKE_UVS \
 	"IMPORT_TER_MAKE_UVS"
@@ -475,19 +513,20 @@ enum aiComponent
 /** @brief  Configures the ASE loader to always reconstruct normal vectors
  *	basing on the smoothing groups loaded from the file.
  * 
- * Many ASE files have invalid normals (they're not orthonormal).
- * Property type: integer (0: false; !0: true). Default value: true.
+ * Some ASE files have carry invalid normals, other don't.
+ * * Property type: bool. Default value: true.
  */
 #define AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS	\
 	"IMPORT_ASE_RECONSTRUCT_NORMALS"
 
 // ---------------------------------------------------------------------------
-/** @brief  Configures the M3D loader to process multi-part player models.
+/** @brief  Configures the M3D loader to detect and process multi-part 
+ *    Quake player models.
  *
  * These models usually consist of 3 files, lower.md3, upper.md3 and
  * head.md3. If this property is set to true, Assimp will try to load and
  * combine all three files if one of them is loaded. 
- * Property type: integer (0: false; !0: true). Default value: true.
+ * Property type: bool. Default value: true.
  */
 #define AI_CONFIG_IMPORT_MD3_HANDLE_MULTIPART \
 	"IMPORT_MD3_HANDLE_MULTIPART"
@@ -545,7 +584,7 @@ enum aiComponent
  * and combined with the MD5MESH file. This configuration option can be
  * used to disable this behaviour.
  * 
- * Property type: integer (0: false; !0: true). Default value: false.
+ * * Property type: bool. Default value: false.
  */
 #define AI_CONFIG_IMPORT_MD5_NO_ANIM_AUTOLOAD			\
 	"IMPORT_MD5_NO_ANIM_AUTOLOAD"

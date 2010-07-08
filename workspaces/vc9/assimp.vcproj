@@ -2426,6 +2426,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\Profiler.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\qnan.h"
 					>
 				</File>

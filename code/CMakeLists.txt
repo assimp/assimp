@@ -141,6 +141,7 @@ SOURCE_GROUP( Common FILES
 	Vertex.h
 	LineSplitter.h
 	TinyFormatter.h
+	Profiler.h
 )
 
 SOURCE_GROUP( 3DS FILES 
@@ -720,6 +721,7 @@ ADD_LIBRARY( assimp SHARED
 	BlenderIntermediate.h
 	BlenderModifier.h
 	BlenderModifier.cpp
+	Profiler.h
 
 	# Necessary to show the headers in the project when using the VC++ generator:
 	BoostWorkaround/boost/math/common_factor_rt.hpp

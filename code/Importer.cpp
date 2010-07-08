@@ -67,6 +67,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProcessHelper.h"
 #include "ScenePreprocessor.h"
 #include "MemoryIOWrapper.h"
+#include "Profiler.h"
+
+using namespace Assimp::Profiling;
 
 // ------------------------------------------------------------------------------------------------
 // Importers
@@ -837,18 +840,23 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 	{
 		// Check whether this Importer instance has already loaded
 		// a scene. In this case we need to delete the old one
-		if (pimpl->mScene)
-		{
-			DefaultLogger::get()->debug("Deleting previous scene");
+		if (pimpl->mScene)	{
+
+			DefaultLogger::get()->debug("(Deleting previous scene)");
 			FreeScene();
 		}
 
 		// First check if the file is accessable at all
-		if( !pimpl->mIOHandler->Exists( pFile))
-		{
+		if( !pimpl->mIOHandler->Exists( pFile))	{
+
 			pimpl->mErrorString = "Unable to open file \"" + pFile + "\".";
 			DefaultLogger::get()->error(pimpl->mErrorString);
 			return NULL;
+		}
+
+		boost::scoped_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,0)?new Profiler():NULL);
+		if (profiler) {
+			profiler->BeginRegion("total");
 		}
 
 		// Find an worker class which can handle the file
@@ -861,10 +869,9 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 			}
 		}
 
-		if (!imp)
-		{
+		if (!imp)	{
 			// not so bad yet ... try format auto detection.
-			std::string::size_type s = pFile.find_last_of('.');
+			const std::string::size_type s = pFile.find_last_of('.');
 			if (s != std::string::npos) {
 				DefaultLogger::get()->info("File extension now known, trying signature-based detection");
 				for( unsigned int a = 0; a < pimpl->mImporter.size(); a++)	{
@@ -885,8 +892,17 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 
 		// Dispatch the reading to the worker class for this format
 		DefaultLogger::get()->info("Found a matching importer for this file format");
+
+		if (profiler) {
+			profiler->BeginRegion("import");
+		}
+
 		imp->SetupProperties( this );
 		pimpl->mScene = imp->ReadFile( pFile, pimpl->mIOHandler);
+
+		if (profiler) {
+			profiler->EndRegion("import");
+		}
 
 		// If successful, apply all active post processing steps to the imported data
 		if( pimpl->mScene)	{
@@ -904,8 +920,16 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 #endif // no validation
 
 			// Preprocess the scene and prepare it for post-processing 
+			if (profiler) {
+				profiler->BeginRegion("preprocess");
+			}
+
 			ScenePreprocessor pre(pimpl->mScene);
 			pre.ProcessScene();
+
+			if (profiler) {
+				profiler->EndRegion("preprocess");
+			}
 
 			// Ensure that the validation process won't be called twice
 			ApplyPostProcessing(pFlags & (~aiProcess_ValidateDataStructure));
@@ -917,6 +941,10 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 
 		// clear any data allocated by post-process steps
 		pimpl->mPPShared->Clean();
+
+		if (profiler) {
+			profiler->EndRegion("total");
+		}
 	}
 #ifdef ASSIMP_CATCH_GLOBAL_EXCEPTIONS
 	catch (std::exception &e)
@@ -979,16 +1007,27 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 		pFlags |= aiProcess_ValidateDataStructure;
 	}
 #else
-	if (pimpl->bExtraVerbose)
+	if (pimpl->bExtraVerbose) {
 		DefaultLogger::get()->warn("Not a debug build, ignoring extra verbose setting");
+	}
 #endif // ! DEBUG
+
+	boost::scoped_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,0)?new Profiler():NULL);
 	for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++)	{
 
 		BaseProcess* process = pimpl->mPostProcessingSteps[a];
 		if( process->IsActive( pFlags))	{
 
+			if (profiler) {
+				profiler->BeginRegion("postprocess");
+			}
+
 			process->SetupProperties( this );
 			process->ExecuteOnScene	( this );
+
+			if (profiler) {
+				profiler->EndRegion("postprocess");
+			}
 		}
 		if( !pimpl->mScene) {
 			break; 

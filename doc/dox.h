@@ -461,23 +461,6 @@ surely enough for almost any purpose. The process is simple:
 <li> .. and pass it as last parameter to #aiImportFileEx
 </ul>
 
-@section threadsafety Thread-safety and internal multi-threading
-
-The ASSIMP library can be accessed by multiple threads simultaneously, as long as the
-following prerequisites are fulfilled: 
-<ul>
-<li> When using the C++-API make sure you create a new Importer instance for each thread.
-   Constructing instances of Importer is expensive, so it might be a good idea to
-   let every thread maintain its own thread-local instance (use it to 
-   load as many models as you want).</li>
-<li> The C-API is threadsafe as long as AI_C_THREADSAFE is defined. That's the default. </li>
-<li> When supplying custom IO logic, make sure your underyling implementation is thead-safe.</li>
-<li> Custom log streams or logger replacements have to be thread-safe, too.</li>
-</ul>
-
-See the @ref assimp_st section @endlink to learn how to build a lightweight variant
-of ASSIMP which is not thread-safe and does not utilize multiple threads for loading.
-
 @section  logging Logging 
 
 The ASSIMP library provides an easy mechanism to log messages. For instance if you want to check the state of your 
@@ -1264,7 +1247,7 @@ mat->Get(AI_MATKEY_COLOR_DIFFUSE,color);
 @endcode
 
 <b>Note:</b> Get() is actually a template with explicit specializations for aiColor3D, aiColor4D, aiString, float, int and some others.
-Make sure that the type of the second parameter is matching the expected data type of the material property (no compile-time check yet!). 
+Make sure that the type of the second parameter matches the expected data type of the material property (no compile-time check yet!). 
 Don't follow this advice if you wish to encounter very strange results.
 
 @section C C-API
@@ -1466,16 +1449,139 @@ Build: alles von CustomBuild + DirectX + MFC?
 */
 
 
+/** 
+@page perf Performance
+
+@section perf_overview Overview
+
+This page discusses Assimps general performance and some ways to finetune and profile it. You will see that an
+intelligent choice of postprocessing steps is essential for quick loading.
+
+@section perf_profile Profiling
+
+Assimp has builtin support for basic profiling and reporting. To turn it on, set the <tt>GLOB_MEASURE_TIME</tt>
+configuration switch to <tt>true</tt> (nonzero). Results are dumped to the logfile, so you need to setup
+an appropriate logger implementation with at least one output stream first. See the @link logging Logging Page @endlink
+for the details.
+
+A sample report looks like this (some unrelated log messages omitted, grouped entries for clarity):
+
+@verbatim
+Debug, T5488: START `total`
+Info,  T5488: Found a matching importer for this file format
+
+Debug, T5488: START `import`
+Info,  T5488: BlendModifier: Applied the `Subdivision` modifier to `OBMonkey`
+Debug, T5488: END   `import`, dt= 3.516 s
+
+
+Debug, T5488: START `preprocess`
+Debug, T5488: END   `preprocess`, dt= 0.001 s
+Info,  T5488: Entering post processing pipeline
+
+Debug, T5488: START `postprocess`
+Debug, T5488: RemoveRedundantMatsProcess begin
+Debug, T5488: RemoveRedundantMatsProcess finished 
+Debug, T5488: END   `postprocess`, dt= 0.001 s
+
+Debug, T5488: START `postprocess`
+Debug, T5488: TriangulateProcess begin
+Info,  T5488: TriangulateProcess finished. All polygons have been triangulated.
+Debug, T5488: END   `postprocess`, dt= 3.415 s
+
+Debug, T5488: START `postprocess`
+Debug, T5488: SortByPTypeProcess begin
+Info,  T5488: Points: 0, Lines: 0, Triangles: 1, Polygons: 0 (Meshes, X = removed)
+Debug, T5488: SortByPTypeProcess finished
+Debug, T5488: START `postprocess`
+Debug, T5488: JoinVerticesProcess begin
+Debug, T5488: Mesh 0 (unnamed) | Verts in: 503808 out: 126345 | ~74.922
+Info,  T5488: JoinVerticesProcess finished | Verts in: 503808 out: 126345 | ~74.9
+Debug, T5488: END   `postprocess`, dt= 2.052 s
+Debug, T5488: START `postprocess`
+Debug, T5488: FlipWindingOrderProcess begin
+Debug, T5488: FlipWindingOrderProcess finished
+Debug, T5488: END   `postprocess`, dt= 0.006 s
+
+Debug, T5488: START `postprocess`
+Debug, T5488: LimitBoneWeightsProcess begin
+Debug, T5488: LimitBoneWeightsProcess end
+Debug, T5488: END   `postprocess`, dt= 0.001 s
+
+Debug, T5488: START `postprocess`
+Debug, T5488: ImproveCacheLocalityProcess begin
+Debug, T5488: Mesh 0 | ACMR in: 0.851622 out: 0.718139 | ~15.7
+Info,  T5488: Cache relevant are 1 meshes (251904 faces). Average output ACMR is 0.718139
+Debug, T5488: ImproveCacheLocalityProcess finished. 
+Debug, T5488: END   `postprocess`, dt= 1.903 s
+
+Info,  T5488: Leaving post processing pipeline
+Debug, T5488: END   `total`, dt= 11.269 s
+@endverbatim
+
+So, only one fourth of the total import time was used for the actual model import, while the rest of the
+time was consumed by the #aiProcess_Triangulate, #aiProcess_JoinIdenticalVertices and #aiProcess_ImproveCacheLocality 
+postprocessing steps. It is therefore not a good idea to specify *all* postprocessing flags just because they
+sound so nice.
+*/
+
+/** 
+@page threading Threading
+
+@section overview Overview
+
+This page discusses both Assimps scalability in threaded environments, the precautions to be taken in order to
+use it from multiple threads concurrently and finally its own ability to parallelize certain tasks internally.
+
+@section threadsafety Thread-safety / Using Assimp concurrently from several threads
+
+The library can be accessed by multiple threads simultaneously, as long as the
+following prerequisites are fulfilled: 
+<ul>
+<li> When using the C++-API make sure you create a new Importer instance for each thread.
+   Constructing instances of Importer is expensive, so it might be a good idea to
+   let every thread maintain its own thread-local instance (use it to 
+   load as many models as you want).</li>
+<li> The C-API is threadsafe as long as AI_C_THREADSAFE is defined. That's the default. </li>
+<li> When supplying custom IO logic, make sure your underyling implementation is thead-safe.</li>
+<li> Custom log streams or logger replacements have to be thread-safe, too.</li>
+</ul>
+
+
+
+Multiple concurrent imports may or may not be beneficial, however. For certain file formats in conjunction with 
+little postprocessing IO times tend to be the performance bottleneck, using multiple threads does therefore not 
+help. Intense postprocessing (especially the O(nlogn) steps #aiProcess_JoinIdenticalVertices,
+#aiProcess_GenSmoothNormals and #aiProcess_CalcTangentSpace) together with file formats like X or Collada, 
+which are slow to parse, might scale well with multiple concurrent imports. 
+
+
+@section automt Internal threading
+
+Automatic multi-threading is not currently implemented. 
+*/
 
 /**
 @page importer_notes Importer Notes
 
+@section blender Blender
+@subsection bl_overview Overview
+
+Assimp provides a self-contained reimplementation of Blender's so called SDNA system (http://www.blender.org/development/architecture/notes-on-sdna/). 
+SDNA allows Blender to be fully backward AND forward compatible and to exchange
+files created on any of the various platforms blender runs on with any other. Quick processing is another design goal - 
+BLEND is a fully-fledged binary monster and Assimp tries to read the most of it. Naturally, if Blender is the only modelling tool 
+in your asset work flow, consider writing a custom exporter from Blender if Assimp's format coverage does not meet your requirements.
+
+@subsection bl_status Current status
+
+@subsection bl_notes Notes
+
+
+
 @section ogre Ogre
-
 @subsection overview Overview
-Ogre importer is currently optimized for the Blender Ogre exporter, because thats the only one that i use.
-
-You can find the Blender Ogre exporter at: http://www.ogre3d.org/forums/viewtopic.php?f=8&t=45922
+Ogre importer is currently optimized for the Blender Ogre exporter, because thats the only one that i use. You can find the Blender Ogre exporter at: http://www.ogre3d.org/forums/viewtopic.php?f=8&t=45922
 
 @subsection what What will be loaded?
 

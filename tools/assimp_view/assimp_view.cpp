@@ -151,7 +151,7 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 	aiSetImportPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE,g_smoothAngle);
 	aiSetImportPropertyInteger(AI_CONFIG_PP_SBP_REMOVE,nopointslines ? aiPrimitiveType_LINE | aiPrimitiveType_POINT : 0 );
 
-	//aiSetImportPropertyInteger(AI_CONFIG_PP_FD_REMOVE,1);
+	aiSetImportPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,1);
 	//aiSetImportPropertyInteger(AI_CONFIG_PP_PTV_KEEP_HIERARCHY,1);
 
 	// Call ASSIMPs C-API to load the file

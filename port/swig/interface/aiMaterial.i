@@ -4,9 +4,20 @@
 
 ASSIMP_ARRAY(aiMaterial, aiMaterialProperty*, mProperties, $self->mNumProperties)
 
+%include <typemaps.i>
+%apply enum SWIGTYPE *OUTPUT { aiTextureMapping* mapping };
+%apply unsigned int *OUTPUT { unsigned int* uvindex };
+%apply float *OUTPUT { float* blend };
+%apply enum SWIGTYPE *OUTPUT { aiTextureOp* op };
+
 %include "aiMaterial.h"
 
-%include <typemaps.i>
+%clear aiTextureOp* op;
+%clear float *blend;
+%clear unsigned int* uvindex;
+%clear aiTextureMapping* mapping;
+
+
 %apply int &OUTPUT { int &pOut };
 %apply float &OUTPUT { float &pOut };
 

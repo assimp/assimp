@@ -48,22 +48,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjFileData.h"
 
 namespace Assimp	{
-// ------------------------------------------------------------------------------------------------
 
 using namespace std;
 
 // ------------------------------------------------------------------------------------------------
 //	Default constructor
 ObjFileImporter::ObjFileImporter() :
-	m_pRootObject(NULL)
+	m_Buffer(),	
+	m_pRootObject( NULL ),
+	m_strAbsPath( "" )
 {
     DefaultIOSystem io;
 	m_strAbsPath = io.getOsSeparator();
-    
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Destructor
+//	Destructor.
 ObjFileImporter::~ObjFileImporter()
 {
 	// Release root object instance
@@ -75,7 +75,7 @@ ObjFileImporter::~ObjFileImporter()
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Returns true, fi file is an obj file
+//	Returns true, if file is an obj file.
 bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem*  pIOHandler , bool checkSig ) const
 {
 	if(!checkSig) //Check File Extension

@@ -63,6 +63,7 @@ Q3BSPFileParser::Q3BSPFileParser( const std::string &rMapName, Q3BSPZipArchive *
 		return;
 
 	m_pModel = new Q3BSPModel;
+	m_pModel->m_ModelName = rMapName;
 	if ( !parseFile() )
 	{
 		delete m_pModel;
@@ -84,7 +85,7 @@ Q3BSP::Q3BSPModel *Q3BSPFileParser::getModel() const
 }
 
 // ------------------------------------------------------------------------------------------------
-bool Q3BSPFileParser::readData(const std::string &rMapName)
+bool Q3BSPFileParser::readData( const std::string &rMapName )
 {
 	if ( !m_pZipArchive->Exists( rMapName.c_str() ) )
 		return false;

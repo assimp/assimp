@@ -42,12 +42,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseImporter.h"
 
+struct aiMesh;
+
 namespace Assimp
 {
-
 namespace Q3BSP
 {
-	class Q3BSPZipArchive;
+
+class Q3BSPZipArchive;
+struct Q3BSPModel;
+struct sQ3BSPFace;
+
 }
 
 class Q3BSPFileImporter : BaseImporter
@@ -55,7 +60,7 @@ class Q3BSPFileImporter : BaseImporter
 	friend class Importer;
 
 protected:
-	///	\brief	Default constructor,
+	///	\brief	Default constructor.
 	Q3BSPFileImporter();
 
 	///	\brief	Destructor.
@@ -67,10 +72,25 @@ public:
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig ) const;
 
 private:
+	typedef std::map<std::string, std::vector<Q3BSP::sQ3BSPFace*>*> FaceMap;
+	typedef std::map<std::string, std::vector<Q3BSP::sQ3BSPFace*>* >::iterator FaceMapIt;
+	typedef std::map<std::string, std::vector<Q3BSP::sQ3BSPFace*>*>::const_iterator FaceMapConstIt;
+
 	void GetExtensionList(std::set<std::string>& extensions);
 	void InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
 	void separateMapName( const std::string &rImportName, std::string &rArchiveName, std::string &rMapName );
 	bool findFirstMapInArchive( Q3BSP::Q3BSPZipArchive &rArchive, std::string &rMapName );
+	void CreateDataFromImport( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene );
+	void CreateNodes( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, aiNode *pParent );
+	aiNode *CreateTopology( const Q3BSP::Q3BSPModel *pModel, std::vector<Q3BSP::sQ3BSPFace*> &rArray, aiMesh* pMesh );
+	void createTriangleTopology( const Q3BSP::Q3BSPModel *pModel, Q3BSP::sQ3BSPFace *pQ3BSPFace, aiMesh* pMesh, unsigned int &rFaceIdx, 
+		unsigned int &rVertIdx  );
+	void createMaterials();
+	size_t countData( const std::vector<Q3BSP::sQ3BSPFace*> &rArray ) const;
+	size_t countFaces( const std::vector<Q3BSP::sQ3BSPFace*> &rArray ) const;
+
+private:
+	aiMesh *m_pCurrentMesh;
 };
 
 } // Namespace Assimp

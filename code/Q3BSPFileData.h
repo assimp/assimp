@@ -37,8 +37,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#ifndef ASSIMP_Q§BSPFILEDATA_H_INC
-#define ASSIMP_Q§BSPFILEDATA_H_INC
+#ifndef ASSIMP_Q3BSPFILEDATA_H_INC
+#define ASSIMP_Q3BSPFILEDATA_H_INC
 
 #include <vector>
 
@@ -102,7 +102,7 @@ struct sQ3BSPFace
 	int iNumOfVerts;				///< Number of vertices
 	int	iMeshVertexIndex;			///< Index of first mesh vertex
 	int iNumOfMeshVerts;			///< Anzahl der Meshvertices
-	int iLightmapID;				///< Index in das Lightmaparray
+	int iLightmapID;				///< Index in das Lightmap array
 	int iLMapCorner[ 2 ];			///< Die Ecke der Lightmap in der Textur
 	int iLMapSize[ 2 ];				///< Size of the lightmap stored on the texture
 	vec3f vLMapPos;					///< 3D-Ursprung der Lightmap
@@ -114,12 +114,12 @@ struct sQ3BSPFace
 /// A quake3 texture name.
 struct sQ3BSPTexture 
 {
-	char strName[ 64 ];		//!< Name of the texture without extention
-	int iFlags;			//!< Not used
-	int iContents;		//!< Not used
+	char strName[ 64 ];		///< Name of the texture without extention
+	int iFlags;				///< Not used
+	int iContents;			///< Not used
 };
 
-//! A lightmap of the level, size 128 x 128, RGB components
+///	A lightmap of the level, size 128 x 128, RGB components.
 struct sQ3BSPLightmap 
 {
 	unsigned char bLMapData[CE_BSP_LIGHTMAPSIZE];
@@ -173,6 +173,7 @@ struct Q3BSPModel
 	std::vector<sQ3BSPTexture*> m_Textures;
 	std::vector<sQ3BSPLightmap*> m_Lightmaps;
 	std::vector<char> m_EntityData;
+	std::string m_ModelName;
 
 	Q3BSPModel() :
 		m_Data(),
@@ -191,4 +192,4 @@ struct Q3BSPModel
 }
 }
 
-#endif // ASSIMP_Q§BSPFILEDATA_H_INC
+#endif // ASSIMP_Q3BSPFILEDATA_H_INC

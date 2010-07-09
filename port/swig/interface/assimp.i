@@ -37,5 +37,9 @@ namespace Assimp {
   return ret;
 }
 
+%include <typemaps.i>
+%apply bool *OUTPUT { bool *bWasExisting };
 
 %include "assimp.hpp"
+
+%clear bool *bWasExisting;

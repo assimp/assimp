@@ -9,9 +9,11 @@ ASSIMP_ARRAY(aiMaterial, aiMaterialProperty*, mProperties, $self->mNumProperties
 %apply unsigned int *OUTPUT { unsigned int* uvindex };
 %apply float *OUTPUT { float* blend };
 %apply enum SWIGTYPE *OUTPUT { aiTextureOp* op };
+%apply unsigned int *OUTPUT { unsigned int* flags };
 
 %include "aiMaterial.h"
 
+%clear unsigned int* flags;
 %clear aiTextureOp* op;
 %clear float *blend;
 %clear unsigned int* uvindex;

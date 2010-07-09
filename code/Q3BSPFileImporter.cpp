@@ -316,7 +316,7 @@ void Q3BSPFileImporter::createTriangleTopology( const Q3BSP::Q3BSPModel *pModel,
 											  aiMesh* pMesh, unsigned int &rFaceIdx, 
 											  unsigned int &rVertIdx )
 {
-	ai_assert( faceIdx < pMesh->mNumFaces );
+	ai_assert( rFaceIdx < pMesh->mNumFaces );
 	aiFace *pFace = &pMesh->mFaces[ rFaceIdx ];
 	ai_assert( NULL != pFace );
 	rFaceIdx++;

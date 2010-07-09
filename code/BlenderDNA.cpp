@@ -292,7 +292,7 @@ DNA::FactoryPair DNA :: GetBlobToStructureConverter(
 ) const 
 {
 	std::map<std::string,  FactoryPair>::const_iterator it = converters.find(structure.name);
-	return it == converters.end() ? FactoryPair(NULL,NULL) : (*it).second;
+	return it == converters.end() ? FactoryPair() : (*it).second;
 }
 
 // basing on http://www.blender.org/development/architecture/notes-on-sdna/

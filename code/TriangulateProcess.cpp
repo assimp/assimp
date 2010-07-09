@@ -205,19 +205,33 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 		}
 #endif
 
-		// if it's a simple primitive, just copy it
+		// if it's a simple point,line or triangle: just copy it
 		if( face.mNumIndices <= 3)
 		{
 			aiFace& nface = *curOut++;
 			nface.mNumIndices = face.mNumIndices;
 			nface.mIndices    = face.mIndices;
 		} 
+		// quadrilaterals can't have ears. trifanning will always work
+		else if ( face.mNumIndices == 4) {
+			aiFace& nface = *curOut++;
+			nface.mNumIndices = 3;
+			nface.mIndices = face.mIndices;
+
+			aiFace& sface = *curOut++;
+			sface.mNumIndices = 3;
+			sface.mIndices = new unsigned int[3];
+
+			sface.mIndices[0] = face.mIndices[0];
+			sface.mIndices[1] = face.mIndices[2];
+			sface.mIndices[2] = face.mIndices[3];
+		}
 		else
 		{
 			// A polygon with more than 3 vertices can be either concave or convex.
 			// Usually everything we're getting is convex and we could easily
 			// triangulate by trifanning. However, LightWave is probably the only
-			// modeller making extensive use of highly concave monster polygons ...
+			// modeller to make extensive use of highly concave monster polygons ...
 			// so we need to apply the full 'ear cutting' algorithm.
 
 			// RERQUIREMENT: polygon is expected to be simple and *nearly* planar.
@@ -226,8 +240,9 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
 			// Collect all vertices of of the polygon.
 			aiVector3D* verts = pMesh->mVertices;
-			for (tmp = 0; tmp < max; ++tmp)
+			for (tmp = 0; tmp < max; ++tmp) {
 				temp_verts[tmp] = verts[idx[tmp]];
+			}
 
 			// Get newell normal of the polygon. Store it for future use if it's a polygon-only mesh
 			aiVector3D n;
@@ -278,16 +293,18 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 					// break after we looped two times without a positive match
 					for (next=ear+1;done[(next>max-1?next=0:next)];++next);
 					if (next < ear) {
-						if (++num_found == 2)
+						if (++num_found == 2) {
 							break;
+						}
 					}
 					const aiVector2D* pnt1 = (const aiVector2D*)&temp_verts[ear], 
 						*pnt0 = (const aiVector2D*)&temp_verts[prev], 
 						*pnt2 = (const aiVector2D*)&temp_verts[next];
 			
 					// Must be a convex point. Assuming ccw winding, it must be on the right of the line between p-1 and p+1.
-					if (OnLeftSideOfLine (*pnt0,*pnt2,*pnt1))
+					if (OnLeftSideOfLine (*pnt0,*pnt2,*pnt1)) {
 						continue;
+					}
 
 					// and no other point may be contained in this triangle
 					for ( tmp = 0; tmp < max; ++tmp) {
@@ -304,8 +321,9 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 							break;		
 
 					}
-					if (tmp != max)
+					if (tmp != max) {
 						continue;
+					}
 							
 					// this vertex is an ear
 					break;
@@ -339,8 +357,9 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 				aiFace& nface = *curOut++;
 				nface.mNumIndices = 3;
 
-				if (!nface.mIndices)
+				if (!nface.mIndices) {
 					nface.mIndices = new unsigned int[3];
+				}
 
 				// setup indices for the new triangle ...
 				nface.mIndices[0] = idx[prev];

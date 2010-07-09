@@ -1469,7 +1469,8 @@ A sample report looks like this (some unrelated log messages omitted, grouped en
 @verbatim
 Debug, T5488: START `total`
 Info,  T5488: Found a matching importer for this file format
-
+
+
 Debug, T5488: START `import`
 Info,  T5488: BlendModifier: Applied the `Subdivision` modifier to `OBMonkey`
 Debug, T5488: END   `import`, dt= 3.516 s
@@ -1478,43 +1479,51 @@ Debug, T5488: END   `import`, dt= 3.516 s
 Debug, T5488: START `preprocess`
 Debug, T5488: END   `preprocess`, dt= 0.001 s
 Info,  T5488: Entering post processing pipeline
-
+
+
 Debug, T5488: START `postprocess`
 Debug, T5488: RemoveRedundantMatsProcess begin
 Debug, T5488: RemoveRedundantMatsProcess finished 
 Debug, T5488: END   `postprocess`, dt= 0.001 s
-
+
+
 Debug, T5488: START `postprocess`
 Debug, T5488: TriangulateProcess begin
 Info,  T5488: TriangulateProcess finished. All polygons have been triangulated.
 Debug, T5488: END   `postprocess`, dt= 3.415 s
-
+
+
 Debug, T5488: START `postprocess`
 Debug, T5488: SortByPTypeProcess begin
 Info,  T5488: Points: 0, Lines: 0, Triangles: 1, Polygons: 0 (Meshes, X = removed)
-Debug, T5488: SortByPTypeProcess finished
+Debug, T5488: SortByPTypeProcess finished
+
 Debug, T5488: START `postprocess`
 Debug, T5488: JoinVerticesProcess begin
 Debug, T5488: Mesh 0 (unnamed) | Verts in: 503808 out: 126345 | ~74.922
 Info,  T5488: JoinVerticesProcess finished | Verts in: 503808 out: 126345 | ~74.9
-Debug, T5488: END   `postprocess`, dt= 2.052 s
+Debug, T5488: END   `postprocess`, dt= 2.052 s
+
 Debug, T5488: START `postprocess`
 Debug, T5488: FlipWindingOrderProcess begin
 Debug, T5488: FlipWindingOrderProcess finished
 Debug, T5488: END   `postprocess`, dt= 0.006 s
-
+
+
 Debug, T5488: START `postprocess`
 Debug, T5488: LimitBoneWeightsProcess begin
 Debug, T5488: LimitBoneWeightsProcess end
 Debug, T5488: END   `postprocess`, dt= 0.001 s
-
+
+
 Debug, T5488: START `postprocess`
 Debug, T5488: ImproveCacheLocalityProcess begin
 Debug, T5488: Mesh 0 | ACMR in: 0.851622 out: 0.718139 | ~15.7
 Info,  T5488: Cache relevant are 1 meshes (251904 faces). Average output ACMR is 0.718139
 Debug, T5488: ImproveCacheLocalityProcess finished. 
 Debug, T5488: END   `postprocess`, dt= 1.903 s
-
+
+
 Info,  T5488: Leaving post processing pipeline
 Debug, T5488: END   `total`, dt= 11.269 s
 @endverbatim

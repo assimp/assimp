@@ -198,10 +198,10 @@ public:
 	/** Set an integer configuration property.
 	 * @param szName Name of the property. All supported properties
 	 *   are defined in the aiConfig.g header (all constants share the
-	 *   prefix AI_CONFIG_XXX).
+	 *   prefix AI_CONFIG_XXX and are simple strings).
 	 * @param iValue New value of the property
 	 * @param bWasExisting Optional pointer to receive true if the
-	 *   property was set before. The new value replaced the old value
+	 *   property was set before. The new value replaces the previous value
 	 *   in this case.
 	 * @note Property of different types (float, int, string ..) are kept
 	 *   on different stacks, so calling SetPropertyInteger() for a 
@@ -210,6 +210,17 @@ public:
 	 */
 	void SetPropertyInteger(const char* szName, int iValue, 
 		bool* bWasExisting = NULL);
+
+	// -------------------------------------------------------------------
+	/** Set a boolean configuration property. Boolean properties
+	 *  are stored on the integer stack internally so it's possible
+	 *  to set them via #SetPropertyBool and query them with
+	 *  #GetPropertyBool and vice versa.
+	 * @see SetPropertyInteger()
+	 */
+	void SetPropertyBool(const char* szName, bool value, bool* bWasExisting = NULL)	{
+		SetPropertyInteger(szName,value);
+	}
 
 	// -------------------------------------------------------------------
 	/** Set a floating-point configuration property.
@@ -240,6 +251,17 @@ public:
 	 */
 	int GetPropertyInteger(const char* szName, 
 		int iErrorReturn = 0xffffffff) const;
+
+	// -------------------------------------------------------------------
+	/** Get a boolean configuration property. Boolean properties
+	 *  are stored on the integer stack internally so it's possible
+	 *  to set them via #SetPropertyBool and query them with
+	 *  #GetPropertyBool and vice versa.
+	 * @see GetPropertyInteger()
+	 */
+	bool GetPropertyBool(const char* szName, bool bErrorReturn = false) const {
+		return GetPropertyInteger(szName,bErrorReturn)!=0;
+	}
 
 	// -------------------------------------------------------------------
 	/** Get a floating-point configuration property

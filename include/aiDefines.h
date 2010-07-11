@@ -60,9 +60,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	 *
 	 * Other (mixed) configuration switches are listed here:
 	 *    ASSIMP_BUILD_NO_COMPRESSED_X 
-	 *      - Disable support for compressed X files */
+	 *      - Disable support for compressed X files
+	 *    ASSIMP_BUILD_NO_COMPRESSED_BLEND
+	 *      - Disable support for compressed Blender files*/
 	//////////////////////////////////////////////////////////////////////////
+
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_X
+#	define ASSIMP_BUILD_NEED_Z_INFLATE
+#endif
+
+#ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
 #	define ASSIMP_BUILD_NEED_Z_INFLATE
 #endif
 
@@ -98,14 +105,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	 * FIXTEXTUREPATHS */
 	//////////////////////////////////////////////////////////////////////////
 
-// Compiler specific includes and definitions
-#if (defined _MSC_VER)
+#ifdef _MSC_VER
 #	undef ASSIMP_API
 
 	//////////////////////////////////////////////////////////////////////////
 	/* Define 'ASSIMP_BUILD_DLL_EXPORT' to build a DLL of the library */
 	//////////////////////////////////////////////////////////////////////////
-#	if (defined ASSIMP_BUILD_DLL_EXPORT)
+#	ifdef ASSIMP_BUILD_DLL_EXPORT
 #		define ASSIMP_API __declspec(dllexport)
 #		pragma warning (disable : 4251)
 
@@ -124,8 +130,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	define AI_FORCE_INLINE __forceinline
 
 	/* Tells the compiler that a function never returns. Used in code analysis
-	 * to skip dead paths (e.g. after an assertion evaluated false).
-	 */
+	 * to skip dead paths (e.g. after an assertion evaluated to false). */
 #	define AI_WONT_RETURN __declspec(noreturn)
 #else
 	
@@ -174,8 +179,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if (defined(__BORLANDC__) || defined (__BCPLUSPLUS__))
-
-#error Currently Borland is unsupported. Feel free to port Assimp.
+#error Currently, Borland is unsupported. Feel free to port Assimp.
 
 // "W8059 Packgröße der Struktur geändert"
 
@@ -210,10 +214,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	define AI_C_THREADSAFE
 #endif // !! ASSIMP_BUILD_SINGLETHREADED
 
-
 #if (defined _DEBUG || defined DEBUG) // one of the two should be defined ..
 #	define ASSIMP_BUILD_DEBUG
 #endif
+
+	//////////////////////////////////////////////////////////////////////////
+	/* ASSIMP_BUILD_XXXX_NNBIT_ARCHITECTURE */
+	//////////////////////////////////////////////////////////////////////////
+#if defined(_MSC_VER)
+	// See http://msdn.microsoft.com/en-us/library/b0084kay.
+#	if defined(_M_IX86)
+#		define ASSIMP_BUILD_X86_32BIT_ARCHITECTURE
+#	elif defined(_M_X64)
+#		define ASSIMP_BUILD_X86_64BIT_ARCHITECTURE
+#	elif defined(_M_IA64)
+#		define ASSIMP_BUILD_IA_64BIT_ARCHITECTURE
+#	else
+#		error unknown architecture
+#	endif
+#elif defined(__GNUC__)
+	// See http://gcc.gnu.org/onlinedocs/cpp/Predefined-Macros.html.
+#	if defined(__x86_32__) || defined(__i386__)
+#		define ASSIMP_BUILD_X86_32BIT_ARCHITECTURE
+#	elif defined(__x86_64__)
+#		define ASSIMP_BUILD_FOR_X86_64BIT_ARCHITECTURE
+#	else
+#		error unknown architecture
+#	endif
+#else
+#	error unknown compiler
+#endif
+
+	//////////////////////////////////////////////////////////////////////////
+	/* Useful constants */
+	//////////////////////////////////////////////////////////////////////////
 
 /* This is PI. Hi PI. */
 #define AI_MATH_PI			(3.141592653589793238462643383279 )

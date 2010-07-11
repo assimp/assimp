@@ -361,7 +361,7 @@
 			Name="release-dll|x64"
 			ConfigurationType="2"
 			InheritedPropertySheets=".\shared\DllShared.vsprops"
-			WholeProgramOptimization="0"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -381,6 +381,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="3"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"

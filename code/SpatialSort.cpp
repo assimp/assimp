@@ -46,6 +46,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+// CHAR_BIT seems to be defined under MVSC, but not under GCC. Pray that the correct value is 8.
+#ifndef CHAR_BIT
+#	define CHAR_BIT 8
+#endif
+
 // ------------------------------------------------------------------------------------------------
 // Constructs a spatially sorted representation from the given position array.
 SpatialSort::SpatialSort( const aiVector3D* pPositions, unsigned int pNumPositions, 
@@ -160,6 +165,140 @@ void SpatialSort::FindPositions( const aiVector3D& pPosition,
 	{
 		if( (it->mPosition - pPosition).SquareLength() < pSquared)
 			poResults.push_back( it->mIndex);
+		++it;
+		if( it == mPositions.end())
+			break;
+	}
+
+	// that's it
+}
+
+namespace {
+
+	// Binary, signed-integer representation of a single-precision floating-point value.
+	// IEEE 754 says: "If two floating-point numbers in the same format are ordered then they are
+	//	ordered the same way when their bits are reinterpreted as sign-magnitude integers."
+	// This allows us to convert all floating-point numbers to signed integers of arbitrary size
+	//	and then use them to work with ULPs (Units in the Last Place, for high-precision
+	//	computations) or to compare them (integer comparisons are faster than floating-point
+	//	comparisons on many platforms).
+	typedef signed int BinFloat;
+
+	// --------------------------------------------------------------------------------------------
+	// Converts the bit pattern of a floating-point number to its signed integer representation.
+	BinFloat ToBinary( const float & pValue) {
+
+		// If this assertion fails, signed int is not big enough to store a float on your platform.
+		//	Please correct the declaration of BinFloat a few lines above - but do it in a portable,
+		//	#ifdef'd manner!
+		BOOST_STATIC_ASSERT( sizeof(BinFloat) >= sizeof(float));
+
+		#if defined( _MSC_VER)
+			// If this assertion fails, Visual C++ has finally moved to ILP64. This means that this
+			//	code has just become legacy code! Find out the current value of _MSC_VER and modify
+			//	the #if above so it evaluates false on the current and all upcoming VC versions (or
+			//	on the current platform, if LP64 or LLP64 are still used on other platforms).
+			BOOST_STATIC_ASSERT( sizeof(BinFloat) == sizeof(float));
+
+			// This works best on Visual C++, but other compilers have their problems with it.
+			const BinFloat binValue = reinterpret_cast<BinFloat const &>(pValue);
+		#else
+			// On many compilers, reinterpreting a float address as an integer causes aliasing
+			// problems. This is an ugly but more or less safe way of doing it.
+			union {
+				float		asFloat;
+				BinFloat	asBin;
+			} conversion;
+			conversion.asBin	= 0; // zero empty space in case sizeof(BinFloat) > sizeof(float)
+			conversion.asFloat	= pValue;
+			const BinFloat binValue = conversion.asBin;
+		#endif
+
+		// floating-point numbers are of sign-magnitude format, so find out what signed number
+		//	representation we must convert negative values to.
+		// See http://en.wikipedia.org/wiki/Signed_number_representations.
+
+		// Two's complement?
+		if( (-42 == (~42 + 1)) && (binValue & 0x80000000))
+			return BinFloat(1 << (CHAR_BIT * sizeof(BinFloat) - 1)) - binValue;
+		// One's complement?
+		else if( (-42 == ~42) && (binValue & 0x80000000))
+			return BinFloat(-0) - binValue;
+		// Sign-magnitude?
+		else if( (-42 == (42 | (-0))) && (binValue & 0x80000000)) // -0 = 1000... binary
+			return binValue;
+		else
+			return binValue;
+	}
+
+} // namespace
+
+// ------------------------------------------------------------------------------------------------
+// Fills an array with indices of all positions indentical to the given position. In opposite to
+// FindPositions(), not an epsilon is used but a (very low) tolerance of four floating-point units.
+void SpatialSort::FindIdenticalPositions( const aiVector3D& pPosition, 
+	std::vector<unsigned int>& poResults) const
+{
+	// Epsilons have a huge disadvantage: they are of constant precision, while floating-point
+	//	values are of log2 precision. If you apply e=0.01 to 100, the epsilon is rather small, but
+	//	if you apply it to 0.001, it is enormous.
+
+	// The best way to overcome this is the unit in the last place (ULP). A precision of 2 ULPs
+	//	tells us that a float does not differ more than 2 bits from the "real" value. ULPs are of
+	//	logarithmic precision - around 1, they are 1÷(2^24) and around 10000, they are 0.00125.
+
+	// For standard C math, we can assume a precision of 0.5 ULPs according to IEEE 754. The
+	//	incoming vertex positions might have already been transformed, probably using rather
+	//	inaccurate SSE instructions, so we assume a tolerance of 4 ULPs to safely identify
+	//	identical vertex positions.
+	static const int toleranceInULPs = 4;
+	// An interesting point is that the inaccuracy grows linear with the number of operations:
+	//	multiplying to numbers, each inaccurate to four ULPs, results in an inaccuracy of four ULPs
+	//	plus 0.5 ULPs for the multiplication.
+	// To compute the distance to the plane, a dot product is needed - that is a multiplication and
+	//	an addition on each number.
+	static const int distanceToleranceInULPs = toleranceInULPs + 1;
+	// The squared distance between two 3D vectors is computed the same way, but with an additional
+	//	subtraction.
+	static const int distance3DToleranceInULPs = distanceToleranceInULPs + 1;
+
+	// Convert the plane distance to its signed integer representation so the ULPs tolerance can be
+	//	applied. For some reason, VC won't optimize two calls of the bit pattern conversion.
+	const BinFloat minDistBinary = ToBinary( pPosition * mPlaneNormal) - distanceToleranceInULPs;
+	const BinFloat maxDistBinary = minDistBinary + 2 * distanceToleranceInULPs;
+
+	// clear the array in this strange fashion because a simple clear() would also deallocate
+    // the array which we want to avoid
+	poResults.erase( poResults.begin(), poResults.end());
+
+	// do a binary search for the minimal distance to start the iteration there
+	unsigned int index = (unsigned int)mPositions.size() / 2;
+	unsigned int binaryStepSize = (unsigned int)mPositions.size() / 4;
+	while( binaryStepSize > 1)
+	{
+		// Ugly, but conditional jumps are faster with integers than with floats
+		if( minDistBinary > ToBinary(mPositions[index].mDistance))
+			index += binaryStepSize;
+		else
+			index -= binaryStepSize;
+
+		binaryStepSize /= 2;
+	}
+
+	// depending on the direction of the last step we need to single step a bit back or forth
+	// to find the actual beginning element of the range
+	while( index > 0 && minDistBinary < ToBinary(mPositions[index].mDistance) )
+		index--;
+	while( index < (mPositions.size() - 1) && minDistBinary > ToBinary(mPositions[index].mDistance))
+		index++;
+
+	// Now start iterating from there until the first position lays outside of the distance range.
+	// Add all positions inside the distance range within the tolerance to the result aray
+	std::vector<Entry>::const_iterator it = mPositions.begin() + index;
+	while( ToBinary(it->mDistance) < maxDistBinary)
+	{
+		if( distance3DToleranceInULPs >= ToBinary((it->mPosition - pPosition).SquareLength()))
+			poResults.push_back(it->mIndex);
 		++it;
 		if( it == mPositions.end())
 			break;

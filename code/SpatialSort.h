@@ -120,6 +120,15 @@ public:
 	void FindPositions( const aiVector3D& pPosition, float pRadius, 
 		std::vector<unsigned int>& poResults) const;
 
+	// ------------------------------------------------------------------------------------
+	/** Fills an array with indices of all positions indentical to the given position. In
+	 *  opposite to FindPositions(), not an epsilon is used but a (very low) tolerance of
+	 *  four floating-point units.
+	 * @param pPosition The position to look for vertices.
+	 * @param poResults The container to store the indices of the found positions. 
+	 *   Will be emptied by the call so it may contain anything.*/
+	void FindIdenticalPositions( const aiVector3D& pPosition,
+		std::vector<unsigned int>& poResults) const;
 
 	// ------------------------------------------------------------------------------------
 	/** Compute a table that maps each vertex ID referring to a spatially close

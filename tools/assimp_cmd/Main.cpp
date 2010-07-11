@@ -112,6 +112,7 @@ int main (int argc, char* argv[])
 	// construct a global Assimp::Importer instance
 	// because all further tools rely on it
 	Assimp::Importer imp;
+	imp.SetPropertyBool("GLOB_MEASURE_TIME",true);
 	globalImporter = &imp;
 
 	// assimp listext

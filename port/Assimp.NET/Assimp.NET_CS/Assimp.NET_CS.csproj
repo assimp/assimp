@@ -3,15 +3,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{A0CE9ED2-A27E-40AE-95F5-FEF94BB7E131}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Assimp.NET_CS</RootNamespace>
-    <AssemblyName>Assimp.NET_CS</AssemblyName>
+    <RootNamespace>Assimp</RootNamespace>
+    <AssemblyName>Assimp.Interop</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,6 +33,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.DirectX, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -55,19 +58,20 @@
     <Compile Include="aiAnimationVector.cs" />
     <Compile Include="aiAnimBehaviour.cs" />
     <Compile Include="aiAnimMesh.cs" />
+    <Compile Include="aiAnimMeshVector.cs" />
     <Compile Include="aiBlendMode.cs" />
     <Compile Include="aiBone.cs" />
+    <Compile Include="aiBoneVector.cs" />
     <Compile Include="aiCamera.cs" />
     <Compile Include="aiCameraVector.cs" />
     <Compile Include="aiColor3D.cs" />
+    <Compile Include="aiColor4D.cs" />
     <Compile Include="aiColor4DVector.cs" />
     <Compile Include="aiColor4DVectorVector.cs" />
     <Compile Include="aiComponent.cs" />
     <Compile Include="aiDefaultLogStream.cs" />
     <Compile Include="aiFace.cs" />
     <Compile Include="aiFaceVector.cs" />
-    <Compile Include="aiFile.cs" />
-    <Compile Include="aiFileIO.cs" />
     <Compile Include="aiLight.cs" />
     <Compile Include="aiLightSourceType.cs" />
     <Compile Include="aiLightVector.cs" />
@@ -79,7 +83,9 @@
     <Compile Include="aiMemoryInfo.cs" />
     <Compile Include="aiMesh.cs" />
     <Compile Include="aiMeshAnim.cs" />
+    <Compile Include="aiMeshAnimVector.cs" />
     <Compile Include="aiMeshKey.cs" />
+    <Compile Include="aiMeshKeyVector.cs" />
     <Compile Include="aiMeshVector.cs" />
     <Compile Include="aiNode.cs" />
     <Compile Include="aiNodeAnim.cs" />
@@ -92,6 +98,7 @@
     <Compile Include="aiPropertyTypeInfo.cs" />
     <Compile Include="aiQuaternion.cs" />
     <Compile Include="aiQuatKey.cs" />
+    <Compile Include="aiQuatKeyVector.cs" />
     <Compile Include="aiRay.cs" />
     <Compile Include="aiReturn.cs" />
     <Compile Include="aiScene.cs" />
@@ -111,48 +118,13 @@
     <Compile Include="aiVector3DVector.cs" />
     <Compile Include="aiVector3DVectorVector.cs" />
     <Compile Include="aiVectorKey.cs" />
+    <Compile Include="aiVectorKeyVector.cs" />
     <Compile Include="aiVertexWeight.cs" />
-    <Compile Include="Assimp_NET.cs" />
-    <Compile Include="Assimp_NETPINVOKE.cs" />
+    <Compile Include="aiVertexWeightVector.cs" />
+    <Compile Include="Assimp.cs" />
+    <Compile Include="AssimpPINVOKE.cs" />
+    <Compile Include="FloatVector.cs" />
     <Compile Include="Importer.cs" />
-    <Compile Include="IOStream.cs" />
-    <Compile Include="IOSystem.cs" />
-    <Compile Include="Logger.cs" />
-    <Compile Include="LogStream.cs" />
-    <Compile Include="NullLogger.cs" />
-    <Compile Include="SWIGTYPE_p_aiColor4D.cs" />
-    <Compile Include="SWIGTYPE_p_aiTextureMapMode.cs" />
-    <Compile Include="SWIGTYPE_p_aiTextureMapping.cs" />
-    <Compile Include="SWIGTYPE_p_aiTextureOp.cs" />
-    <Compile Include="SWIGTYPE_p_Assimp__BaseImporter.cs" />
-    <Compile Include="SWIGTYPE_p_Assimp__BaseProcess.cs" />
-    <Compile Include="SWIGTYPE_p_bool.cs" />
-    <Compile Include="SWIGTYPE_p_float.cs" />
-    <Compile Include="SWIGTYPE_p_f_p_aiFileIO_p_aiFile__void.cs" />
-    <Compile Include="SWIGTYPE_p_f_p_aiFileIO_p_q_const__char_p_q_const__char__p_aiFile.cs" />
-    <Compile Include="SWIGTYPE_p_f_p_aiFile_p_char_size_t_size_t__size_t.cs" />
-    <Compile Include="SWIGTYPE_p_f_p_aiFile_p_q_const__char_size_t_size_t__size_t.cs" />
-    <Compile Include="SWIGTYPE_p_f_p_aiFile_size_t_enum_aiOrigin__aiReturn.cs" />
-    <Compile Include="SWIGTYPE_p_f_p_aiFile__size_t.cs" />
-    <Compile Include="SWIGTYPE_p_f_p_aiFile__void.cs" />
-    <Compile Include="SWIGTYPE_p_int.cs" />
-    <Compile Include="SWIGTYPE_p_p_aiAnimation.cs" />
-    <Compile Include="SWIGTYPE_p_p_aiAnimMesh.cs" />
-    <Compile Include="SWIGTYPE_p_p_aiBone.cs" />
-    <Compile Include="SWIGTYPE_p_p_aiCamera.cs" />
-    <Compile Include="SWIGTYPE_p_p_aiColor4D.cs" />
-    <Compile Include="SWIGTYPE_p_p_aiLight.cs" />
-    <Compile Include="SWIGTYPE_p_p_aiMaterial.cs" />
-    <Compile Include="SWIGTYPE_p_p_aiMaterialProperty.cs" />
-    <Compile Include="SWIGTYPE_p_p_aiMesh.cs" />
-    <Compile Include="SWIGTYPE_p_p_aiMeshAnim.cs" />
-    <Compile Include="SWIGTYPE_p_p_aiNode.cs" />
-    <Compile Include="SWIGTYPE_p_p_aiNodeAnim.cs" />
-    <Compile Include="SWIGTYPE_p_p_aiTexture.cs" />
-    <Compile Include="SWIGTYPE_p_p_aiVector3D.cs" />
-    <Compile Include="SWIGTYPE_p_std__string.cs" />
-    <Compile Include="SWIGTYPE_p_unsigned_int.cs" />
-    <Compile Include="SWIGTYPE_p_void.cs" />
     <Compile Include="UintVector.cs" />
   </ItemGroup>
   <ItemGroup>

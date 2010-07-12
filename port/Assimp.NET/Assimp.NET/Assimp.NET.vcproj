@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="Assimp_NET"
 	ProjectGUID="{A86A8AF2-3B4D-4381-BB01-9CA2AE88450E}"
 	RootNamespace="AssimpNET"
@@ -62,10 +62,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib"
-				OutputFile="$(OutDir)\Assimp_NET.dll"
+				OutputFile="$(OutDir)\Assimp.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;D:\Projekte\Assimp\trunk\lib\assimp_debug-dll_Win32&quot;"
+				AdditionalLibraryDirectories=""
 				EnableUAC="false"
 				AddModuleNamesToAssembly=""
 				GenerateDebugInformation="true"
@@ -126,7 +125,7 @@
 				Name="VCCLCompilerTool"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				RuntimeLibrary="2"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -142,6 +141,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="$(NoInherit)"
+				OutputFile="$(OutDir)\Assimp.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				TargetMachine="1"

@@ -45,7 +45,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Q3BSPZipArchive.h"
 #include "Q3BSPFileParser.h"
 #include "Q3BSPFileData.h"
-#include "../contrib/zlib/zlib.h"
+
+#	ifdef ASSIMP_BUILD_NO_OWN_ZLIB
+#		include <zlib.h>
+#	else
+#		include "../contrib/zlib/zlib.h"
+#	endif
+
+
 #include "../include/aiTypes.h"
 #include "../include/aiMesh.h"
 #include <vector>

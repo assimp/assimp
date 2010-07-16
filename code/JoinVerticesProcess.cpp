@@ -132,6 +132,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	//	whether a new vertex was created for the index (true) or if it was replaced by an existing
 	//	unique vertex (false). This saves an additional std::vector<bool> and greatly enhances
 	//	branching performance.
+	BOOST_STATIC_ASSERT(AI_MAX_VERTICES == 0x7fffffff);
 	std::vector<unsigned int> replaceIndex( pMesh->mNumVertices, 0xffffffff);
 
 	// A little helper to find locally close vertices faster.

@@ -53,6 +53,54 @@ extern "C" {
 #endif
 
 // ---------------------------------------------------------------------------
+// Limits. These values are required to match the settings Assimp was 
+// compiled against. Therfore, do not redefine them unless you build the 
+// library from source using the same definitions.
+// ---------------------------------------------------------------------------
+
+/** @def AI_MAX_FACE_INDICES
+ *  Maximum number of indices per face (polygon). */
+
+#ifndef AI_MAX_FACE_INDICES 
+#	define AI_MAX_FACE_INDICES 0x7fff
+#endif
+
+/** @def AI_MAX_BONE_WEIGHTS
+ *  Maximum number of indices per face (polygon). */
+
+#ifndef AI_MAX_BONE_WEIGHTS
+#	define AI_MAX_BONE_WEIGHTS 0x7fffffff
+#endif
+
+/** @def AI_MAX_VERTICES
+ *  Maximum number of vertices per mesh.  */
+
+#ifndef AI_MAX_VERTICES
+#	define AI_MAX_VERTICES 0x7fffffff
+#endif
+
+/** @def AI_MAX_FACES
+ *  Maximum number of faces per mesh. */
+
+#ifndef AI_MAX_FACES
+#	define AI_MAX_FACES 0x7fffffff
+#endif
+
+/** @def AI_MAX_NUMBER_OF_COLOR_SETS
+ *  Supported number of vertex color sets per mesh. */
+
+#ifndef AI_MAX_NUMBER_OF_COLOR_SETS
+#	define AI_MAX_NUMBER_OF_COLOR_SETS 0x4
+#endif // !! AI_MAX_NUMBER_OF_COLOR_SETS
+
+/** @def AI_MAX_NUMBER_OF_TEXTURECOORDS
+ *  Supported number of texture coord sets (UV(W) channels) per mesh */
+
+#ifndef AI_MAX_NUMBER_OF_TEXTURECOORDS
+#	define AI_MAX_NUMBER_OF_TEXTURECOORDS 0x4
+#endif // !! AI_MAX_NUMBER_OF_TEXTURECOORDS
+
+// ---------------------------------------------------------------------------
 /** @brief A single face in a mesh, referring to multiple vertices. 
  *
  * If mNumIndices is 3, we call the face 'triangle', for mNumIndices > 3 
@@ -76,7 +124,8 @@ extern "C" {
  */
 struct aiFace
 {
-	//! Number of indices defining this face. 3 for a triangle, >3 for polygon
+	//! Number of indices defining this face. 
+	//! The maximum value for this member is #AI_MAX_FACE_INDICES.
 	unsigned int mNumIndices; 
 
 	//! Pointer to the indices array. Size of the array is given in numIndices.
@@ -181,6 +230,7 @@ struct aiBone
 	C_STRUCT aiString mName;
 
 	//! The number of vertices affected by this bone
+	//! The maximum value for this member is #AI_MAX_BONE_WEIGHTS.
 	unsigned int mNumWeights;
 
 	//! The vertices affected by this bone
@@ -218,36 +268,6 @@ struct aiBone
 	}
 #endif // __cplusplus
 };
-
-#ifndef AI_MAX_NUMBER_OF_COLOR_SETS
-// ---------------------------------------------------------------------------
-/** @def AI_MAX_NUMBER_OF_COLOR_SETS
- *  Maximum number of vertex color sets per mesh.
- *
- *  Normally: Diffuse, specular, ambient and emissive
- *  However one could use the vertex color sets for any other purpose, too.
- *
- *  @note Some internal structures expect (and assert) this value
- *    to be at least 4. For the moment it is absolutely safe to assume that
- *    this will never change.
- */
-#	define AI_MAX_NUMBER_OF_COLOR_SETS 0x4
-#endif // !! AI_MAX_NUMBER_OF_COLOR_SETS
-
-#ifndef AI_MAX_NUMBER_OF_TEXTURECOORDS
-// ---------------------------------------------------------------------------
-/** @def AI_MAX_NUMBER_OF_TEXTURECOORDS
- *  Maximum number of texture coord sets (UV(W) channels) per mesh 
- *
- *  The material system uses the AI_MATKEY_UVWSRC_XXX keys to specify 
- *  which UVW channel serves as data source for a texture.
- *
- *  @note Some internal structures expect (and assert) this value
- *    to be at least 4. For the moment it is absolutely safe to assume that
- *    this will never change.
-*/
-#	define AI_MAX_NUMBER_OF_TEXTURECOORDS 0x4
-#endif // !! AI_MAX_NUMBER_OF_TEXTURECOORDS
 
 
 // ---------------------------------------------------------------------------
@@ -430,7 +450,7 @@ struct aiAnimMesh
 *
 * A Mesh uses only a single material which is referenced by a material ID.
 * @note The mPositions member is usually not optional. However, vertex positions 
-* *could* be missing if the AI_SCENE_FLAGS_INCOMPLETE flag is set in 
+* *could* be missing if the #AI_SCENE_FLAGS_INCOMPLETE flag is set in 
 * @code
 * aiScene::mFlags
 * @endcode
@@ -445,12 +465,14 @@ struct aiMesh
 	unsigned int mPrimitiveTypes;
 
 	/** The number of vertices in this mesh. 
-	* This is also the size of all of the per-vertex data arrays
+	* This is also the size of all of the per-vertex data arrays.
+	* The maximum value for this member is #AI_MAX_VERTICES.
 	*/
 	unsigned int mNumVertices;
 
 	/** The number of primitives (triangles, polygons, lines) in this  mesh. 
-	* This is also the size of the mFaces array 
+	* This is also the size of the mFaces array.
+	* The maximum value for this member is #AI_MAX_FACES.
 	*/
 	unsigned int mNumFaces;
 
@@ -531,7 +553,7 @@ struct aiMesh
 	/** The faces the mesh is constructed from. 
 	* Each face refers to a number of vertices by their indices. 
 	* This array is always present in a mesh, its size is given 
-	* in mNumFaces. If the AI_SCENE_FLAGS_NON_VERBOSE_FORMAT
+	* in mNumFaces. If the #AI_SCENE_FLAGS_NON_VERBOSE_FORMAT
 	* is NOT set each face references an unique set of vertices.
 	*/
 	C_STRUCT aiFace* mFaces;
@@ -631,7 +653,7 @@ struct aiMesh
 	}
 
 	//! Check whether the mesh contains positions. Provided no special
-	//! scene flags are set (such as AI_SCENE_FLAGS_ANIM_SKELETON_ONLY), 
+	//! scene flags are set (such as #AI_SCENE_FLAGS_ANIM_SKELETON_ONLY), 
 	//! this will always be true 
 	bool HasPositions() const 
 		{ return mVertices != NULL && mNumVertices > 0; }

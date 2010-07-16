@@ -10,7 +10,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../contrib/zlib/zlib.h"
+#	ifdef ASSIMP_BUILD_NO_OWN_ZLIB
+#		include <zlib.h>
+#	else
+#		include "../zlib/zlib.h"
+#	endif
 #include "ioapi.h"
 
 

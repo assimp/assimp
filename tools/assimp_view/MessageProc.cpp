@@ -1262,7 +1262,8 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
 		case WM_HSCROLL:
 
-			if (GetDlgItem(g_hDlg, IDC_SLIDERANIM) == (HWND)lParam)
+			// XXX quick and dirty fix for #3029892
+			if (GetDlgItem(g_hDlg, IDC_SLIDERANIM) == (HWND)lParam && g_pcAsset && g_pcAsset->pcScene->mAnimations)
 			{
 				double num = (double)SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_GETPOS,0,0);
 				const aiAnimation* anim = g_pcAsset->pcScene->mAnimations[ g_pcAsset->mAnimator->CurrentAnimIndex() ];

@@ -184,7 +184,7 @@ namespace Assimp.Viewer
                 (aiPostProcessSteps)0);
 
             importer = new Importer();
-            var path = "../../../../../test/models/3DS/jeep1.3ds";
+            var path = "../../../../../../test/models/3DS/jeep1.3ds";
             //var path = "man.3ds";
             scene = importer.ReadFile(path, flags);
             if (scene != null) {

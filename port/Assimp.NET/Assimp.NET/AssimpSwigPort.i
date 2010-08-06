@@ -473,6 +473,7 @@ ASSIMP_POINTER_POINTER(aiScene,aiTexture,mTextures,$self->mNumTextures);
 %ignore Assimp::Importer::SetPropertyInteger;
 %ignore Assimp::Importer::SetPropertyFloat;
 %ignore Assimp::Importer::SetPropertyString;
+%ignore Assimp::Importer::SetPropertyBool;
 %ignore Assimp::Importer::UnregisterLoader;
 %ignore Assimp::Importer::UnregisterPPStep;
 %extend Assimp::Importer {

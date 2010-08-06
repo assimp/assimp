@@ -3301,6 +3301,16 @@ SWIGEXPORT double SWIGSTDCALL CSharp_AI_MATH_HALF_PI_F_get() {
 }
 
 
+SWIGEXPORT char * SWIGSTDCALL CSharp_AI_CONFIG_GLOB_MEASURE_TIME_get() {
+  char * jresult ;
+  char *result = 0 ;
+  
+  result = (char *)("GLOB_MEASURE_TIME");
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
 SWIGEXPORT char * SWIGSTDCALL CSharp_AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE_get() {
   char * jresult ;
   char *result = 0 ;
@@ -8245,6 +8255,66 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_aiAnimation_GetmMeshChannels(void * jarg1) 
 }
 
 
+SWIGEXPORT int SWIGSTDCALL CSharp_AI_MAX_FACE_INDICES_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x7fff);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_AI_MAX_BONE_WEIGHTS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x7fffffff);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_AI_MAX_VERTICES_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x7fffffff);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_AI_MAX_FACES_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x7fffffff);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_AI_MAX_NUMBER_OF_COLOR_SETS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_AI_MAX_NUMBER_OF_TEXTURECOORDS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x4);
+  jresult = result; 
+  return jresult;
+}
+
+
 SWIGEXPORT void SWIGSTDCALL CSharp_aiFace_mNumIndices_set(void * jarg1, unsigned int jarg2) {
   aiFace *arg1 = (aiFace *) 0 ;
   unsigned int arg2 ;
@@ -8555,26 +8625,6 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_aiBone_GetmWeights(void * jarg1) {
 }
 
 
-SWIGEXPORT int SWIGSTDCALL CSharp_AI_MAX_NUMBER_OF_COLOR_SETS_get() {
-  int jresult ;
-  int result;
-  
-  result = (int)(0x4);
-  jresult = result; 
-  return jresult;
-}
-
-
-SWIGEXPORT int SWIGSTDCALL CSharp_AI_MAX_NUMBER_OF_TEXTURECOORDS_get() {
-  int jresult ;
-  int result;
-  
-  result = (int)(0x4);
-  jresult = result; 
-  return jresult;
-}
-
-
 SWIGEXPORT void SWIGSTDCALL CSharp_aiAnimMesh_mBitangents_set(void * jarg1, void * jarg2) {
   aiAnimMesh *arg1 = (aiAnimMesh *) 0 ;
   aiVector3D *arg2 = (aiVector3D *) 0 ;
@@ -8593,6 +8643,28 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_aiAnimMesh_mBitangents_get(void * jarg1) {
   arg1 = (aiAnimMesh *)jarg1; 
   result = (aiVector3D *) ((arg1)->mBitangents);
   jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_aiAnimMesh_mNumVertices_set(void * jarg1, unsigned int jarg2) {
+  aiAnimMesh *arg1 = (aiAnimMesh *) 0 ;
+  unsigned int arg2 ;
+  
+  arg1 = (aiAnimMesh *)jarg1; 
+  arg2 = (unsigned int)jarg2; 
+  if (arg1) (arg1)->mNumVertices = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_aiAnimMesh_mNumVertices_get(void * jarg1) {
+  unsigned int jresult ;
+  aiAnimMesh *arg1 = (aiAnimMesh *) 0 ;
+  unsigned int result;
+  
+  arg1 = (aiAnimMesh *)jarg1; 
+  result = (unsigned int) ((arg1)->mNumVertices);
+  jresult = result; 
   return jresult;
 }
 
@@ -11044,6 +11116,36 @@ SWIGEXPORT int SWIGSTDCALL CSharp_Importer_GetPropertyInteger__SWIG_1(void * jar
   arg1 = (Assimp::Importer *)jarg1; 
   arg2 = (char *)jarg2; 
   result = (int)((Assimp::Importer const *)arg1)->GetPropertyInteger((char const *)arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Importer_GetPropertyBool__SWIG_0(void * jarg1, char * jarg2, unsigned int jarg3) {
+  unsigned int jresult ;
+  Assimp::Importer *arg1 = (Assimp::Importer *) 0 ;
+  char *arg2 = (char *) 0 ;
+  bool arg3 ;
+  bool result;
+  
+  arg1 = (Assimp::Importer *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  result = (bool)((Assimp::Importer const *)arg1)->GetPropertyBool((char const *)arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Importer_GetPropertyBool__SWIG_1(void * jarg1, char * jarg2) {
+  unsigned int jresult ;
+  Assimp::Importer *arg1 = (Assimp::Importer *) 0 ;
+  char *arg2 = (char *) 0 ;
+  bool result;
+  
+  arg1 = (Assimp::Importer *)jarg1; 
+  arg2 = (char *)jarg2; 
+  result = (bool)((Assimp::Importer const *)arg1)->GetPropertyBool((char const *)arg2);
   jresult = result; 
   return jresult;
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="Assimp_NET"
 	ProjectGUID="{A86A8AF2-3B4D-4381-BB01-9CA2AE88450E}"
 	RootNamespace="AssimpNET"
@@ -217,7 +217,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="echo Invoking SWIG...&#x0D;&#x0A;echo on&#x0D;&#x0A;swig.exe -c++ -csharp &quot;$(InputPath)&quot;&#x0D;&#x0A;@echo off&#x0D;&#x0A;"
+					CommandLine="echo Invoking SWIG...&#x0D;&#x0A;echo on&#x0D;&#x0A;swig.exe -c++ -csharp -cpperraswarn &quot;$(InputPath)&quot;&#x0D;&#x0A;@echo off&#x0D;&#x0A;"
 					Outputs="$(InputName)_wrap.cxx"
 				/>
 			</FileConfiguration>

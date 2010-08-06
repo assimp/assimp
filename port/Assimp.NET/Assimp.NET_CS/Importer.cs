@@ -57,6 +57,16 @@ public class Importer : IDisposable {
     return ret;
   }
 
+  public bool GetPropertyBool(string szName, bool bErrorReturn) {
+    bool ret = AssimpPINVOKE.Importer_GetPropertyBool__SWIG_0(swigCPtr, szName, bErrorReturn);
+    return ret;
+  }
+
+  public bool GetPropertyBool(string szName) {
+    bool ret = AssimpPINVOKE.Importer_GetPropertyBool__SWIG_1(swigCPtr, szName);
+    return ret;
+  }
+
   public float GetPropertyFloat(string szName, float fErrorReturn) {
     float ret = AssimpPINVOKE.Importer_GetPropertyFloat__SWIG_0(swigCPtr, szName, fErrorReturn);
     return ret;

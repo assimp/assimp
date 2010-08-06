@@ -51,6 +51,16 @@ public class aiAnimMesh : IDisposable {
     } 
   }
 
+  public uint mNumVertices {
+    set {
+      AssimpPINVOKE.aiAnimMesh_mNumVertices_set(swigCPtr, value);
+    } 
+    get {
+      uint ret = AssimpPINVOKE.aiAnimMesh_mNumVertices_get(swigCPtr);
+      return ret;
+    } 
+  }
+
   public aiAnimMesh() : this(AssimpPINVOKE.new_aiAnimMesh(), true) {
   }
 

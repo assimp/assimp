@@ -103,6 +103,7 @@ public class Assimp {
   public static readonly double AI_MATH_PI_F = AssimpPINVOKE.AI_MATH_PI_F_get();
   public static readonly double AI_MATH_TWO_PI_F = AssimpPINVOKE.AI_MATH_TWO_PI_F_get();
   public static readonly double AI_MATH_HALF_PI_F = AssimpPINVOKE.AI_MATH_HALF_PI_F_get();
+  public static readonly string AI_CONFIG_GLOB_MEASURE_TIME = AssimpPINVOKE.AI_CONFIG_GLOB_MEASURE_TIME_get();
   public static readonly string AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE = AssimpPINVOKE.AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE_get();
   public static readonly string AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE = AssimpPINVOKE.AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE_get();
   public static readonly string AI_CONFIG_IMPORT_MDL_COLORMAP = AssimpPINVOKE.AI_CONFIG_IMPORT_MDL_COLORMAP_get();
@@ -154,6 +155,10 @@ public class Assimp {
   public static readonly int ASSIMP_CFLAGS_DEBUG = AssimpPINVOKE.ASSIMP_CFLAGS_DEBUG_get();
   public static readonly int ASSIMP_CFLAGS_NOBOOST = AssimpPINVOKE.ASSIMP_CFLAGS_NOBOOST_get();
   public static readonly int ASSIMP_CFLAGS_SINGLETHREADED = AssimpPINVOKE.ASSIMP_CFLAGS_SINGLETHREADED_get();
+  public static readonly int AI_MAX_FACE_INDICES = AssimpPINVOKE.AI_MAX_FACE_INDICES_get();
+  public static readonly int AI_MAX_BONE_WEIGHTS = AssimpPINVOKE.AI_MAX_BONE_WEIGHTS_get();
+  public static readonly int AI_MAX_VERTICES = AssimpPINVOKE.AI_MAX_VERTICES_get();
+  public static readonly int AI_MAX_FACES = AssimpPINVOKE.AI_MAX_FACES_get();
   public static readonly int AI_MAX_NUMBER_OF_COLOR_SETS = AssimpPINVOKE.AI_MAX_NUMBER_OF_COLOR_SETS_get();
   public static readonly int AI_MAX_NUMBER_OF_TEXTURECOORDS = AssimpPINVOKE.AI_MAX_NUMBER_OF_TEXTURECOORDS_get();
   public static readonly string AI_DEFAULT_MATERIAL_NAME = AssimpPINVOKE.AI_DEFAULT_MATERIAL_NAME_get();

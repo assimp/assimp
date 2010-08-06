@@ -206,6 +206,9 @@ class AssimpPINVOKE {
   [DllImport("Assimp", EntryPoint="CSharp_AI_MATH_HALF_PI_F_get")]
   public static extern double AI_MATH_HALF_PI_F_get();
 
+  [DllImport("Assimp", EntryPoint="CSharp_AI_CONFIG_GLOB_MEASURE_TIME_get")]
+  public static extern string AI_CONFIG_GLOB_MEASURE_TIME_get();
+
   [DllImport("Assimp", EntryPoint="CSharp_AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE_get")]
   public static extern string AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE_get();
 
@@ -1397,6 +1400,24 @@ class AssimpPINVOKE {
   [DllImport("Assimp", EntryPoint="CSharp_aiAnimation_GetmMeshChannels")]
   public static extern IntPtr aiAnimation_GetmMeshChannels(HandleRef jarg1);
 
+  [DllImport("Assimp", EntryPoint="CSharp_AI_MAX_FACE_INDICES_get")]
+  public static extern int AI_MAX_FACE_INDICES_get();
+
+  [DllImport("Assimp", EntryPoint="CSharp_AI_MAX_BONE_WEIGHTS_get")]
+  public static extern int AI_MAX_BONE_WEIGHTS_get();
+
+  [DllImport("Assimp", EntryPoint="CSharp_AI_MAX_VERTICES_get")]
+  public static extern int AI_MAX_VERTICES_get();
+
+  [DllImport("Assimp", EntryPoint="CSharp_AI_MAX_FACES_get")]
+  public static extern int AI_MAX_FACES_get();
+
+  [DllImport("Assimp", EntryPoint="CSharp_AI_MAX_NUMBER_OF_COLOR_SETS_get")]
+  public static extern int AI_MAX_NUMBER_OF_COLOR_SETS_get();
+
+  [DllImport("Assimp", EntryPoint="CSharp_AI_MAX_NUMBER_OF_TEXTURECOORDS_get")]
+  public static extern int AI_MAX_NUMBER_OF_TEXTURECOORDS_get();
+
   [DllImport("Assimp", EntryPoint="CSharp_aiFace_mNumIndices_set")]
   public static extern void aiFace_mNumIndices_set(HandleRef jarg1, uint jarg2);
 
@@ -1475,17 +1496,17 @@ class AssimpPINVOKE {
   [DllImport("Assimp", EntryPoint="CSharp_aiBone_GetmWeights")]
   public static extern IntPtr aiBone_GetmWeights(HandleRef jarg1);
 
-  [DllImport("Assimp", EntryPoint="CSharp_AI_MAX_NUMBER_OF_COLOR_SETS_get")]
-  public static extern int AI_MAX_NUMBER_OF_COLOR_SETS_get();
-
-  [DllImport("Assimp", EntryPoint="CSharp_AI_MAX_NUMBER_OF_TEXTURECOORDS_get")]
-  public static extern int AI_MAX_NUMBER_OF_TEXTURECOORDS_get();
-
   [DllImport("Assimp", EntryPoint="CSharp_aiAnimMesh_mBitangents_set")]
   public static extern void aiAnimMesh_mBitangents_set(HandleRef jarg1, HandleRef jarg2);
 
   [DllImport("Assimp", EntryPoint="CSharp_aiAnimMesh_mBitangents_get")]
   public static extern IntPtr aiAnimMesh_mBitangents_get(HandleRef jarg1);
+
+  [DllImport("Assimp", EntryPoint="CSharp_aiAnimMesh_mNumVertices_set")]
+  public static extern void aiAnimMesh_mNumVertices_set(HandleRef jarg1, uint jarg2);
+
+  [DllImport("Assimp", EntryPoint="CSharp_aiAnimMesh_mNumVertices_get")]
+  public static extern uint aiAnimMesh_mNumVertices_get(HandleRef jarg1);
 
   [DllImport("Assimp", EntryPoint="CSharp_new_aiAnimMesh")]
   public static extern IntPtr new_aiAnimMesh();
@@ -2101,6 +2122,12 @@ class AssimpPINVOKE {
 
   [DllImport("Assimp", EntryPoint="CSharp_Importer_GetPropertyInteger__SWIG_1")]
   public static extern int Importer_GetPropertyInteger__SWIG_1(HandleRef jarg1, string jarg2);
+
+  [DllImport("Assimp", EntryPoint="CSharp_Importer_GetPropertyBool__SWIG_0")]
+  public static extern bool Importer_GetPropertyBool__SWIG_0(HandleRef jarg1, string jarg2, bool jarg3);
+
+  [DllImport("Assimp", EntryPoint="CSharp_Importer_GetPropertyBool__SWIG_1")]
+  public static extern bool Importer_GetPropertyBool__SWIG_1(HandleRef jarg1, string jarg2);
 
   [DllImport("Assimp", EntryPoint="CSharp_Importer_GetPropertyFloat__SWIG_0")]
   public static extern float Importer_GetPropertyFloat__SWIG_0(HandleRef jarg1, string jarg2, float jarg3);

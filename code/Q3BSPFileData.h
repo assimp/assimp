@@ -50,6 +50,14 @@ namespace Q3BSP
 static const unsigned int CE_BSP_LIGHTMAPSIZE = 128*128*3;	///< = 128( width ) * 128 ( height ) * 3 ( channels / RGB ).
 static const int VERION_Q3LEVEL = 46;					///< Supported version.
 
+enum Q3BSPGeoType
+{
+	Polygon = 1,
+	Patch, 
+	Mesh,
+	Billboard 
+};
+
 ///	Integer vector.
 struct ceVec3i 
 {
@@ -100,9 +108,9 @@ struct sQ3BSPFace
 	int iType;						///< 1=Polygon, 2=Patch, 3=Mesh, 4=Billboard
 	int iVertexIndex;				///< Start index of polygon
 	int iNumOfVerts;				///< Number of vertices
-	int	iMeshVertexIndex;			///< Index of first mesh vertex
-	int iNumOfMeshVerts;			///< Anzahl der Meshvertices
-	int iLightmapID;				///< Index in das Lightmap array
+	int	iFaceVertexIndex;			///< Index of first mesh vertex
+	int iNumOfFaceVerts;			///< Anzahl der Meshvertices
+	int iLightmapID;				///< Index to the lightmap array
 	int iLMapCorner[ 2 ];			///< Die Ecke der Lightmap in der Textur
 	int iLMapSize[ 2 ];				///< Size of the lightmap stored on the texture
 	vec3f vLMapPos;					///< 3D-Ursprung der Lightmap
@@ -122,8 +130,11 @@ struct sQ3BSPTexture
 ///	A lightmap of the level, size 128 x 128, RGB components.
 struct sQ3BSPLightmap 
 {
-	unsigned char bLMapData[CE_BSP_LIGHTMAPSIZE];
-	sQ3BSPLightmap() {	memset(bLMapData, 0, CE_BSP_LIGHTMAPSIZE); }
+	unsigned char bLMapData[ CE_BSP_LIGHTMAPSIZE ];
+	sQ3BSPLightmap() 
+	{	
+		memset(bLMapData, 0, CE_BSP_LIGHTMAPSIZE ); 
+	}
 };
 
 struct sRenderVertex 

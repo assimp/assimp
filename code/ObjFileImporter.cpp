@@ -332,7 +332,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 		// Copy all index arrays
 		for ( size_t vertexIndex = 0; vertexIndex < pSourceFace->m_pVertices->size(); vertexIndex++ )
 		{
-			unsigned int vertex = pSourceFace->m_pVertices->at( vertexIndex );
+			const unsigned int vertex = pSourceFace->m_pVertices->at( vertexIndex );
 			ai_assert( vertex < pModel->m_Vertices.size() );
 			pMesh->mVertices[ newIndex ] = pModel->m_Vertices[ vertex ];
 			
@@ -405,7 +405,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 	pScene->mMaterials = new aiMaterial*[ numMaterials ];
 	for ( unsigned int matIndex = 0; matIndex < numMaterials; matIndex++ )
 	{
-		Assimp::MaterialHelper* mat = new Assimp::MaterialHelper();
+		Assimp::MaterialHelper* mat = new Assimp::MaterialHelper;
 		
 		// Store material name
 		std::map<std::string, ObjFile::Material*>::const_iterator it;

@@ -82,15 +82,18 @@ private:
 	bool findFirstMapInArchive( Q3BSP::Q3BSPZipArchive &rArchive, std::string &rMapName );
 	void CreateDataFromImport( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene );
 	void CreateNodes( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, aiNode *pParent );
-	aiNode *CreateTopology( const Q3BSP::Q3BSPModel *pModel, std::vector<Q3BSP::sQ3BSPFace*> &rArray, aiMesh* pMesh );
+	aiNode *CreateTopology( const Q3BSP::Q3BSPModel *pModel, unsigned int materialIdx, 
+		std::vector<Q3BSP::sQ3BSPFace*> &rArray, aiMesh* pMesh );
 	void createTriangleTopology( const Q3BSP::Q3BSPModel *pModel, Q3BSP::sQ3BSPFace *pQ3BSPFace, aiMesh* pMesh, unsigned int &rFaceIdx, 
 		unsigned int &rVertIdx  );
-	void createMaterials();
+	void createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene );
 	size_t countData( const std::vector<Q3BSP::sQ3BSPFace*> &rArray ) const;
 	size_t countFaces( const std::vector<Q3BSP::sQ3BSPFace*> &rArray ) const;
+	void createMaterialMap( const Q3BSP::Q3BSPModel *pModel);
 
 private:
 	aiMesh *m_pCurrentMesh;
+	FaceMap m_MaterialLookupMap;
 };
 
 } // Namespace Assimp

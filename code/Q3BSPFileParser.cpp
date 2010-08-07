@@ -117,7 +117,10 @@ bool Q3BSPFileParser::parseFile()
 	if ( !validateFormat() )
 		return false;
 
+	// Import the dictionary
 	getLumps();
+
+	// Conunt data and prepare model data 
 	countLumps();
 
 	// Read in Vertices

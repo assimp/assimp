@@ -266,6 +266,11 @@ SOURCE_GROUP( NFF FILES
 	NFFLoader.h
 )
 
+SOURCE_GROUP( NDO FILES
+	NDOLoader.cpp
+	NDOLoader.h
+)
+
 SOURCE_GROUP( OFFFormat FILES
 	OFFLoader.cpp
 	OFFLoader.h
@@ -722,6 +727,8 @@ ADD_LIBRARY( assimp SHARED
 	BlenderModifier.h
 	BlenderModifier.cpp
 	Profiler.h
+	NDOLoader.cpp
+	NDOLoader.h
 
 	# Necessary to show the headers in the project when using the VC++ generator:
 	BoostWorkaround/boost/math/common_factor_rt.hpp

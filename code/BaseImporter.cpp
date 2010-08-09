@@ -113,8 +113,9 @@ void BaseImporter::SetupProperties(const Importer* pImp)
 		boost::scoped_array<char> _buffer (new char[searchBytes+1 /* for the '\0' */]);
 		char* buffer = _buffer.get();
 
-		unsigned int read = (unsigned int)pStream->Read(buffer,1,searchBytes);
-		if (!read)return false;
+		const unsigned int read = pStream->Read(buffer,1,searchBytes);
+		if (!read)
+			return false;
 
 		for (unsigned int i = 0; i < read;++i)
 			buffer[i] = ::tolower(buffer[i]);

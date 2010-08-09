@@ -180,6 +180,9 @@ using namespace Assimp::Profiling;
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
 #	include "Q3BSPFileImporter.h"
 #endif
+#ifndef ASSIMP_BUILD_NO_NDO_IMPORTER
+#	include "NDOLoader.h"
+#endif
 
 // ------------------------------------------------------------------------------------------------
 // Post processing-Steps
@@ -417,7 +420,10 @@ Importer::Importer()
 //	pimpl->mImporter.push_back( new SomImporter());
 //#endif
 #if (!defined ASSIMP_BUILD_NO_Q3BSP_IMPORTER)
-	pimpl->mImporter.push_back( new Q3BSPFileImporter );
+	pimpl->mImporter.push_back( new Q3BSPFileImporter() );
+#endif
+#if (!defined ASSIMP_BUILD_NO_NDO_IMPORTER)
+	pimpl->mImporter.push_back( new NDOImporter() );
 #endif
 
 	// ----------------------------------------------------------------------------

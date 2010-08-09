@@ -130,20 +130,17 @@ inline int ASSIMP_stricmp(const char *s1, const char *s2)
 #if (defined _MSC_VER)
 
 	return ::_stricmp(s1,s2);
-
 #elif defined( __GNUC__ )
-
+	
 	return ::strcasecmp(s1,s2);
-
 #else
+	
 	register char c1, c2;
-	do 
-	{
+	do	{
 		c1 = tolower(*s1++);
 		c2 = tolower(*s2++);
 	} 
 	while ( c1 && (c1 == c2) );
-
 	return c1 - c2;
 #endif
 }

@@ -197,6 +197,9 @@ void ColladaParser::ReadStructure()
 // Reads asset informations such as coordinate system informations and legal blah
 void ColladaParser::ReadAssetInfo()
 {
+	if( mReader->isEmptyElement())
+		return;
+
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
@@ -248,9 +251,9 @@ void ColladaParser::ReadAssetInfo()
 // Reads the animation library
 void ColladaParser::ReadAnimationLibrary()
 {
-	if (mReader->isEmptyElement()) {
+	if (mReader->isEmptyElement())
 		return;
-	}
+
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
@@ -279,6 +282,9 @@ void ColladaParser::ReadAnimationLibrary()
 // Reads an animation into the given parent structure
 void ColladaParser::ReadAnimation( Collada::Animation* pParent)
 {
+	if( mReader->isEmptyElement())
+		return;
+
 	// an <animation> element may be a container for grouping sub-elements or an animation channel
 	// this is the channel collection by ID, in case it has channels
 	typedef std::map<std::string, AnimationChannel> ChannelMap;
@@ -430,9 +436,9 @@ void ColladaParser::ReadAnimationSampler( Collada::AnimationChannel& pChannel)
 // Reads the skeleton controller library
 void ColladaParser::ReadControllerLibrary()
 {
-	if (mReader->isEmptyElement()) {
+	if (mReader->isEmptyElement())
 		return;
-	}
+
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
@@ -681,9 +687,9 @@ void ColladaParser::ReadControllerWeights( Collada::Controller& pController)
 // Reads the image library contents
 void ColladaParser::ReadImageLibrary()
 {
-	if (mReader->isEmptyElement()) {
+	if( mReader->isEmptyElement())
 		return;
-	}
+
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
@@ -805,9 +811,9 @@ void ColladaParser::ReadImage( Collada::Image& pImage)
 // Reads the material library
 void ColladaParser::ReadMaterialLibrary()
 {
-	if (mReader->isEmptyElement()) {
+	if( mReader->isEmptyElement())
 		return;
-	}
+
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
@@ -840,9 +846,9 @@ void ColladaParser::ReadMaterialLibrary()
 // Reads the light library
 void ColladaParser::ReadLightLibrary()
 {
-	if (mReader->isEmptyElement()) {
+	if( mReader->isEmptyElement())
 		return;
-	}
+
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
@@ -874,9 +880,9 @@ void ColladaParser::ReadLightLibrary()
 // Reads the camera library
 void ColladaParser::ReadCameraLibrary()
 {
-	if (mReader->isEmptyElement()) {
+	if( mReader->isEmptyElement())
 		return;
-	}
+
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
@@ -1450,6 +1456,9 @@ void ColladaParser::ReadEffectParam( Collada::EffectParam& pParam)
 // Reads the geometry library contents
 void ColladaParser::ReadGeometryLibrary()
 {
+	if( mReader->isEmptyElement())
+		return;
+
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
@@ -1489,6 +1498,9 @@ void ColladaParser::ReadGeometryLibrary()
 // Reads a geometry from the geometry library.
 void ColladaParser::ReadGeometry( Collada::Mesh* pMesh)
 {
+	if( mReader->isEmptyElement())
+		return;
+
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
@@ -1517,6 +1529,9 @@ void ColladaParser::ReadGeometry( Collada::Mesh* pMesh)
 // Reads a mesh from the geometry library
 void ColladaParser::ReadMesh( Mesh* pMesh)
 {
+	if( mReader->isEmptyElement())
+		return;
+
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
@@ -2203,6 +2218,9 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
 // Reads the library of node hierarchies and scene parts
 void ColladaParser::ReadSceneLibrary()
 {
+	if( mReader->isEmptyElement())
+		return;
+
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
@@ -2219,9 +2237,6 @@ void ColladaParser::ReadSceneLibrary()
 				const char* attrName = "unnamed";
 				if( indexName > -1)
 					attrName = mReader->getAttributeValue( indexName);
-
-				// TODO: (thom) support SIDs
-				// assert( TestAttribute( "sid") == -1);
 
 				// create a node and store it in the library under its ID
 				Node* node = new Node;
@@ -2392,6 +2407,9 @@ void ColladaParser::ReadSceneNode( Node* pNode)
 // Reads a node transformation entry of the given type and adds it to the given node's transformation list.
 void ColladaParser::ReadNodeTransformation( Node* pNode, TransformType pType)
 {
+	if( mReader->isEmptyElement())
+		return;
+
 	std::string tagName = mReader->getNodeName();
 
 	Transform tf;
@@ -2418,7 +2436,7 @@ void ColladaParser::ReadNodeTransformation( Node* pNode, TransformType pType)
 	// place the transformation at the queue of the node
 	pNode->mTransforms.push_back( tf);
 
-	// and consum the closing tag
+	// and consume the closing tag
 	TestClosing( tagName.c_str());
 }
 
@@ -2488,7 +2506,7 @@ void ColladaParser::ReadNodeGeometry( Node* pNode)
 					const char* urlMat = mReader->getAttributeValue( attrMaterial);
 					Collada::SemanticMappingTable s;
 					if( urlMat[0] == '#')
-            urlMat++;
+						urlMat++;
 
 					s.mMatName = urlMat;
 
@@ -2517,6 +2535,9 @@ void ColladaParser::ReadNodeGeometry( Node* pNode)
 // Reads the collada scene
 void ColladaParser::ReadScene()
 {
+	if( mReader->isEmptyElement())
+		return;
+
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT)	{

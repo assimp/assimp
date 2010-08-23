@@ -3,6 +3,7 @@
 
 namespace noboost {
 
+#define ASSIMP_FORCE_NOBOOST
 #include "..\..\code\BoostWorkaround\boost\format.hpp"
 	using boost::format;
 	using boost::str;

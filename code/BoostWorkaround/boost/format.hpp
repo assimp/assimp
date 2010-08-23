@@ -9,7 +9,7 @@
 #ifndef AI_BOOST_FORMAT_DUMMY_INCLUDED
 #define AI_BOOST_FORMAT_DUMMY_INCLUDED
 
-#ifndef BOOST_FORMAT_HPP
+#if (!defined BOOST_FORMAT_HPP) || (defined ASSIMP_FORCE_NOBOOST)
 
 #include <string>
 #include <vector>

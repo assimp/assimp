@@ -119,15 +119,29 @@ public:
 	/** Open a new file with a given path. */
 	IOStream* Open( const char* pFile, const char* pMode = "rb")
 	{
-		std::string tmp = pFile;
+		ai_assert(pFile);
+		ai_assert(pMode);
 
-		// Currently this IOSystem is also used to open THE ONE FILE.
-		if (tmp != src_file)	{
+		// First try the unchanged path
+		IOStream* s = wrapped->Open(pFile,pMode);
+
+		if (!s)	{
+			std::string tmp = pFile;
+
+			// Try to convert between absolute and relative paths
 			BuildPath(tmp);
-			Cleanup(tmp);
-		}
+			s = wrapped->Open(tmp,pMode);
 
-		return wrapped->Open(tmp,pMode);
+			if (!s) {
+				// Finally, look for typical issues with paths
+				// and try to correct them. This is our last
+				// resort.
+				Cleanup(tmp);
+				s = wrapped->Open(tmp,pMode);
+			}
+		}
+		
+		return s;
 	}
 
 	// -------------------------------------------------------------------
@@ -158,7 +172,7 @@ private:
 			return;
 		}
 
-		// Determine whether this is a relative path. 
+		// Determine whether this is a relative path (Windows-specific - most assets are packaged on Windows). 
 		if (in[1] != ':') {
 		
 			// append base path and try 
@@ -179,7 +193,7 @@ private:
 		char last = 0;
 
 		// Remove a very common issue when we're parsing file names: spaces at the
-		// beginning of the path.
+		// beginning of the path. 
 		std::string::iterator it = in.begin();
 		while (IsSpaceOrNewLine( *it ))++it;
 		if (it != in.begin())
@@ -187,9 +201,18 @@ private:
 
 		const char sep = getOsSeparator();
 		for (it = in.begin(); it != in.end(); ++it) {
-			
-			// Both Windows and Linux accept both separators, but to avoid conflicts
-			// or mixed seperators in a single path we're cleaning up.
+			// Exclude :// and \\, which remain untouched.
+			// https://sourceforge.net/tracker/?func=detail&aid=3031725&group_id=226462&atid=1067632
+			if ( !strncmp(&*it, "://", 3 )) {
+				it += 3;
+				continue;
+			}
+			if (it == in.begin() && !strncmp(&*it, "\\\\", 2)) {
+				it += 2;
+				continue;
+			}
+
+			// Cleanup path delimiters
 			if (*it == '/' || (*it) == '\\') {
 				*it = sep;
 
@@ -202,7 +225,7 @@ private:
 			}
 			else if (*it == '%' && in.end() - it > 2) {
 			
-				// Hex sequence, common _artifact_ in URIs
+				// Hex sequence in URIs
 				uint32_t tmp;
 				if( 0xffffffff != (tmp = HexOctetToDecimal(&*it))) {
 					*it = (char)tmp;

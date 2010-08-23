@@ -1,5 +1,6 @@
 cmake_minimum_required( VERSION 2.6 )
 PROJECT( Assimp )
+SET ( PROJECT_VERSION "1.1" )
 
 INCLUDE_DIRECTORIES( include )
 
@@ -19,6 +20,9 @@ SET( INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH
 	"Path the header files are installed to." )
 SET( BIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH
 	"Path the tool executables are installed to." )
+
+CONFIGURE_FILE (assimp.pc.in assimp.pc @ONLY )
+INSTALL( FILES assimp.pc.in DESTINATION ${LIB_INSTALL_DIR}/pkgconfig/assimp.pc )
 
 # Libs
 ADD_SUBDIRECTORY( code/ )

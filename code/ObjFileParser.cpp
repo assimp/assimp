@@ -595,7 +595,7 @@ void ObjFileParser::getObjectName()
 void ObjFileParser::createObject(const std::string &strObjectName)
 {
 	ai_assert( NULL != m_pModel );
-	ai_assert( !strObjectName.empty() );
+	//ai_assert( !strObjectName.empty() );
 
 	m_pModel->m_pCurrent = new ObjFile::Object;
 	m_pModel->m_pCurrent->m_strObjName = strObjectName;

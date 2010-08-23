@@ -112,6 +112,8 @@ SOURCE_GROUP( tests FILES
 	unit/utTriangulate.h
 	unit/utVertexTriangleAdjacency.cpp
 	unit/utVertexTriangleAdjacency.h
+	unit/utNoBoostTest.cpp
+	unit/utNoBoostTest.h
 )
 
 add_executable(  unit
@@ -158,6 +160,8 @@ add_executable(  unit
 	unit/utTriangulate.h
 	unit/utVertexTriangleAdjacency.cpp
 	unit/utVertexTriangleAdjacency.h
+	unit/utNoBoostTest.cpp
+	unit/utNoBoostTest.h
 	unit/BoostWorkaround/tupletest.cpp	
 	../contrib/cppunit-1.12.1/src/cppunit/AdditionalMessage.cpp
 	../contrib/cppunit-1.12.1/src/cppunit/Asserter.cpp

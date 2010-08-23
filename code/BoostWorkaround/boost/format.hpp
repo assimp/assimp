@@ -1,7 +1,7 @@
 
 
 
-/* DEPRECATED placebo workaround, use code/TinyFormatter.h instead.
+/* DEPRECATED! - use code/TinyFormatter.h instead.
  *
  *
  * */
@@ -12,14 +12,14 @@
 #ifndef BOOST_FORMAT_HPP
 
 #include <string>
+#include <vector>
 
 namespace boost
 {
-	class str;
+
 
 	class format
 	{
-		friend class str;
 	public:
 		format (const std::string& _d)
 			: d(_d)
@@ -27,25 +27,52 @@ namespace boost
 		}
 
 		template <typename T>
-		const format& operator % (T in) const
+		format& operator % (T in) 
 		{
+			// XXX add replacement for boost::lexical_cast?
+			
+			std::stringstream ss;
+			ss << in; // note: ss cannot be an rvalue, or  the global operator << (const char*) is not called for T == const char*.
+			chunks.push_back( ss.str());
 			return *this;
+		}
+
+
+		operator std::string () const {
+			std::string res; // pray for NRVO to kick in
+
+			size_t start = 0, last = 0;
+
+			std::vector<std::string>::const_iterator chunkin = chunks.begin();
+
+			for ( start = d.find('%');start != std::string::npos;  start = d.find('%',last)) {
+				res += d.substr(last,start-last);
+				last = start+2;
+				if (d[start+1] == '%') {
+					res += "%";
+					continue;
+				}
+
+				if (chunkin == chunks.end()) {
+					break;
+				}
+
+				res += *chunkin++;
+			}
+			res += d.substr(last);
+			return res;
 		}
 
 	private:
 		std::string d;
+		std::vector<std::string> chunks;
 	};
 
-	class str : public std::string
-	{
-	public:
-
-		str(const format& f)
-		{
-			*((std::string* const)this) = std::string( f.d );
-		}
-	};
+	inline std::string str(const std::string& s) {
+		return s;
+	} 
 }
+
 
 #else
 #	error "format.h was already included"

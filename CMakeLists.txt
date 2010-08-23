@@ -22,7 +22,7 @@ SET( BIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH
 	"Path the tool executables are installed to." )
 
 CONFIGURE_FILE (assimp.pc.in assimp.pc @ONLY )
-INSTALL( FILES assimp.pc.in DESTINATION ${LIB_INSTALL_DIR}/pkgconfig/assimp.pc )
+INSTALL( FILES assimp.pc DESTINATION ${LIB_INSTALL_DIR}/pkgconfig/ )
 
 # Libs
 ADD_SUBDIRECTORY( code/ )

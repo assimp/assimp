@@ -727,7 +727,10 @@ void ColladaParser::ReadImage( Collada::Image& pImage)
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT){
 			// Need to run different code paths here, depending on the Collada XSD version
-			if(  IsElement( "init_from"))
+			if (IsElement("image")) {
+                SkipElement();
+            }
+			else if(  IsElement( "init_from"))
 			{
 				if (mFormat == FV_1_4_n) 
 				{
@@ -922,7 +925,10 @@ void ColladaParser::ReadMaterial( Collada::Material& pMaterial)
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-			if( IsElement( "instance_effect"))
+			if (IsElement("material")) {
+                SkipElement();
+            }
+			else if( IsElement( "instance_effect"))
 			{
 				// referred effect by URL
 				int attrUrl = GetAttribute( "url");
@@ -955,7 +961,10 @@ void ColladaParser::ReadLight( Collada::Light& pLight)
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-			if (IsElement("spot")) {
+            if (IsElement("light")) {
+                SkipElement();
+            }
+			else if (IsElement("spot")) {
 				pLight.mType = aiLightSource_SPOT;
 			}
 			else if (IsElement("ambient")) {
@@ -967,7 +976,6 @@ void ColladaParser::ReadLight( Collada::Light& pLight)
 			else if (IsElement("point")) {
 				pLight.mType = aiLightSource_POINT;
 			}
-
 			else if (IsElement("color")) {
 				// text content contains 3 floats
 				const char* content = GetTextContent();
@@ -1033,8 +1041,10 @@ void ColladaParser::ReadCamera( Collada::Camera& pCamera)
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-
-			if (IsElement("orthographic")) {
+			if (IsElement("camera")) {
+                SkipElement();
+            }
+			else if (IsElement("orthographic")) {
 				pCamera.mOrtho = true;
 			}
 			else if (IsElement("xfov") || IsElement("xmag")) {

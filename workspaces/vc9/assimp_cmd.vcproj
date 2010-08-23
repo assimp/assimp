@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="assimpcmd"
 	ProjectGUID="{7C8F7B44-C990-4EA8-A2A5-9028472E0AD3}"
 	RootNamespace="assimp_cmd"
@@ -66,7 +66,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib"
+				AdditionalDependencies="assimp.lib zlib1.lib"
 				OutputFile="$(OutDir)\assimp_debug.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;"
@@ -146,7 +146,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib"
+				AdditionalDependencies="assimp.lib zlib1.lib"
 				OutputFile="$(OutDir)\assimp_debug.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;"
@@ -221,7 +221,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib"
+				AdditionalDependencies="assimp.lib zlib1.lib"
 				OutputFile="$(OutDir)\assimp.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;"
@@ -301,7 +301,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib"
+				AdditionalDependencies="assimp.lib zlib1.lib"
 				OutputFile="$(OutDir)\assimp.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;"
@@ -458,7 +458,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib"
+				AdditionalDependencies="assimp.lib zlib1.lib"
 				OutputFile="$(OutDir)\assimp.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;"
@@ -535,7 +535,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib"
+				AdditionalDependencies="assimp.lib zlib1.lib"
 				OutputFile="$(OutDir)\assimp.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;"
@@ -615,7 +615,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib"
+				AdditionalDependencies="assimp.lib zlib1.lib"
 				OutputFile="$(OutDir)\assimp.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;"
@@ -694,7 +694,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib"
+				AdditionalDependencies="assimp.lib zlib1.lib"
 				OutputFile="$(OutDir)\assimp_debug.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;"
@@ -774,7 +774,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib"
+				AdditionalDependencies="assimp.lib zlib1.lib"
 				OutputFile="$(OutDir)\assimp_debug.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;"
@@ -851,7 +851,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib"
+				AdditionalDependencies="assimp.lib zlib1.lib"
 				OutputFile="$(OutDir)\assimp_debug.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;"
@@ -931,7 +931,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib"
+				AdditionalDependencies="assimp.lib zlib1.lib"
 				OutputFile="$(OutDir)\assimp_debug.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;"
@@ -1008,7 +1008,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib"
+				AdditionalDependencies="assimp.lib zlib1.lib"
 				OutputFile="$(OutDir)\assimp_debug.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;"
@@ -1088,7 +1088,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib"
+				AdditionalDependencies="assimp.lib zlib1.lib"
 				OutputFile="$(OutDir)\assimp_debug.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;"
@@ -1163,7 +1163,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib"
+				AdditionalDependencies="assimp.lib zlib1.lib"
 				OutputFile="$(OutDir)\assimp.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;"
@@ -1243,7 +1243,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib"
+				AdditionalDependencies="assimp.lib zlib1.lib"
 				OutputFile="$(OutDir)\assimp.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;"
@@ -1446,6 +1446,34 @@
 				RelativePath="..\..\tools\assimp_cmd\WriteDumb.cpp"
 				>
 			</File>
+			<Filter
+				Name="zlib"
+				>
+				<File
+					RelativePath="..\..\contrib\zlib\adler32.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\zlib\compress.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\zlib\crc32.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\zlib\deflate.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\zlib\trees.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\zlib\zutil.c"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

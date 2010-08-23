@@ -426,7 +426,7 @@ void BlenderImporter::ResolveImage(MaterialHelper* out, const Material* mat, con
 		tex->mWidth = img->packedfile->size;
 		uint8_t* ch = new uint8_t[tex->mWidth];
 
-		conv_data.db.reader->SetCurrentPos(img->packedfile->data->val);
+		conv_data.db.reader->SetCurrentPos(static_cast<size_t>( img->packedfile->data->val));
 		conv_data.db.reader->CopyAndAdvance(ch,tex->mWidth);
 
 		tex->pcData = reinterpret_cast<aiTexel*>(ch);
@@ -648,7 +648,7 @@ void BlenderImporter::ConvertMesh(const Scene& in, const Object* obj, const Mesh
 		// of the material entry within the list of resolved materials.
 		if (mesh->mat) {
 
-			if (it.first >= mesh->mat.size() ) {
+			if (static_cast<size_t> ( it.first ) >= mesh->mat.size() ) {
 				ThrowException("Material index is out of range");
 			}
 
@@ -754,7 +754,7 @@ void BlenderImporter::ConvertMesh(const Scene& in, const Object* obj, const Mesh
 
 	// collect texture coordinates, they're stored in a separate per-face buffer
 	if (mesh->mtface) {
-		if (mesh->totface > mesh->mtface.size()) {
+		if (mesh->totface > static_cast<int> ( mesh->mtface.size())) {
 			ThrowException("Number of UV faces is larger than the corresponding UV face array (#1)");
 		}
 		for (std::vector<aiMesh*>::iterator it = temp->begin()+old; it != temp->end(); ++it) {
@@ -780,7 +780,7 @@ void BlenderImporter::ConvertMesh(const Scene& in, const Object* obj, const Mesh
 
 	// collect texture coordinates, old-style (marked as deprecated in current blender sources)
 	if (mesh->tface) {
-		if (mesh->totface > mesh->mtface.size()) {
+		if (mesh->totface > static_cast<int> ( mesh->mtface.size())) {
 			ThrowException("Number of faces is larger than the corresponding UV face array (#2)");
 		}
 		for (std::vector<aiMesh*>::iterator it = temp->begin()+old; it != temp->end(); ++it) {
@@ -806,7 +806,7 @@ void BlenderImporter::ConvertMesh(const Scene& in, const Object* obj, const Mesh
 
 	// collect vertex colors, stored separately as well
 	if (mesh->mcol) {
-		if (mesh->totface > (mesh->mcol.size()/4)) {
+		if (mesh->totface > static_cast<int> ( (mesh->mcol.size()/4)) ) {
 			ThrowException("Number of faces is larger than the corresponding color face array");
 		}
 		for (std::vector<aiMesh*>::iterator it = temp->begin()+old; it != temp->end(); ++it) {

@@ -1,25 +1,6 @@
 SET( LIBRARY_VERSION "1.0.0" )
 SET( LIBRARY_SOVERSION "1" )
 
-IF ( ENABLE_BOOST_WORKAROUND )
-	INCLUDE_DIRECTORIES( BoostWorkaround )
-	ADD_DEFINITIONS( -DASSIMP_BUILD_BOOST_WORKAROUND )
-	MESSAGE( STATUS "Building a non-boost version of Assimp." )
-ELSE ( ENABLE_BOOST_WORKAROUND )
-	FIND_PACKAGE( Boost 1.35 )
-
-	IF ( NOT Boost_FOUND )
-		MESSAGE( FATAL_ERROR
-			"Boost libraries (http://www.boost.org/) not found. "
-			"You can build a non-boost version of Assimp with slightly reduced "
-			"functionality by specifying -DENABLE_BOOST_WORKAROUND=ON."
-		)
-	ENDIF ( NOT Boost_FOUND )
-
-	INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIRS} )
-ENDIF ( ENABLE_BOOST_WORKAROUND )
-
-
 #
 # Listing and grouping of all the source files for use with IDE project
 # generators.
@@ -84,8 +65,8 @@ SOURCE_GROUP( Boost FILES
 	BoostWorkaround/boost/tuple/tuple.hpp
 )
 
-SOURCE_GROUP( Logging FILES 
-	${HEADER_PATH}/DefaultLogger.h 
+SOURCE_GROUP( Logging FILES
+	${HEADER_PATH}/DefaultLogger.h
 	${HEADER_PATH}/IOStream.h
 	${HEADER_PATH}/LogStream.h
 	${HEADER_PATH}/Logger.h
@@ -95,9 +76,9 @@ SOURCE_GROUP( Logging FILES
 	FileLogStream.h
 )
 
-SOURCE_GROUP( Common FILES 
+SOURCE_GROUP( Common FILES
 	aiAssert.cpp
-	fast_atof.h	
+	fast_atof.h
 	qnan.h
 	BaseImporter.cpp
 	BaseImporter.h
@@ -144,7 +125,7 @@ SOURCE_GROUP( Common FILES
 	Profiler.h
 )
 
-SOURCE_GROUP( 3DS FILES 
+SOURCE_GROUP( 3DS FILES
 	3DSConverter.cpp
 	3DSHelper.h
 	3DSLoader.cpp
@@ -752,7 +733,7 @@ if ( WIN32 )
 		ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
 	endif ( MSVC80 OR MSVC90 )
 endif ( WIN32 )
- 
+
 SET_TARGET_PROPERTIES( assimp PROPERTIES
 	VERSION ${LIBRARY_VERSION}
 	SOVERSION ${LIBRARY_SOVERSION}

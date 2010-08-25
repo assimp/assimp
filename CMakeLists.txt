@@ -21,14 +21,33 @@ SET( INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH
 SET( BIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH
 	"Path the tool executables are installed to." )
 
-CONFIGURE_FILE (assimp.pc.in assimp.pc @ONLY )
-INSTALL( FILES assimp.pc DESTINATION ${LIB_INSTALL_DIR}/pkgconfig/ )
+# Generate a pkg-config .pc for the Assimp library.
+CONFIGURE_FILE( "${CMAKE_SOURCE_DIR}/assimp.pc.in" "${CMAKE_BINARY_DIR}/assimp.pc" @ONLY )
+INSTALL( FILES "${CMAKE_BINARY_DIR}/assimp.pc" DESTINATION ${LIB_INSTALL_DIR}/pkgconfig/ )
 
-# Libs
+# Globally enbale Boost resp. the Boost workaround – it is also needed by the
+# tools which include the Assimp headers.
+IF ( ENABLE_BOOST_WORKAROUND )
+	INCLUDE_DIRECTORIES( BoostWorkaround )
+	ADD_DEFINITIONS( -DASSIMP_BUILD_BOOST_WORKAROUND )
+	MESSAGE( STATUS "Building a non-boost version of Assimp." )
+ELSE ( ENABLE_BOOST_WORKAROUND )
+	FIND_PACKAGE( Boost 1.35 )
+
+	IF ( NOT Boost_FOUND )
+		MESSAGE( FATAL_ERROR
+			"Boost libraries (http://www.boost.org/) not found. "
+			"You can build a non-boost version of Assimp with slightly reduced "
+			"functionality by specifying -DENABLE_BOOST_WORKAROUND=ON."
+		)
+	ENDIF ( NOT Boost_FOUND )
+
+	INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIRS} )
+ENDIF ( ENABLE_BOOST_WORKAROUND )
+
 ADD_SUBDIRECTORY( code/ )
 IF ( WIN32 )
 	ADD_SUBDIRECTORY( test/ )
 	ADD_SUBDIRECTORY( tools/assimp_view/ )
 ENDIF ( WIN32 )
-
 ADD_SUBDIRECTORY( tools/assimp_cmd/ )

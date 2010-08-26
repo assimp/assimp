@@ -121,6 +121,10 @@ public:
 	IOSystem* mIOHandler;
 	bool mIsDefaultHandler;
 
+	/** Progress handler for feedback. */
+	ProgressHandler* mProgressHandler;
+	bool mIsDefaultProgressHandler;
+
 	/** Format-specific importer worker objects - one for each format we can read.*/
 	std::vector<BaseImporter*> mImporter;
 
@@ -205,6 +209,7 @@ public:
 	 * takes care that any partially constructed data is destroyed
 	 * beforehand.
 	 *
+	 * @param pImp #Importer object hosting this loader.
 	 * @param pFile Path of the file to be imported. 
 	 * @param pIOHandler IO-Handler used to open this and possible other files.
 	 * @return The imported data or NULL if failed. If it failed a 
@@ -217,6 +222,7 @@ public:
 	 *  a suitable response to the caller.
 	 */
 	aiScene* ReadFile(
+		const Importer* pImp, 
 		const std::string& pFile, 
 		IOSystem* pIOHandler
 		);
@@ -396,6 +402,9 @@ protected:
 
 	/** Error description in case there was one. */
 	std::string mErrorText;
+
+	/** Currently set progress handler */
+	ProgressHandler* progress;
 };
 
 struct BatchData;

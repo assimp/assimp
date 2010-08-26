@@ -64,6 +64,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseProcess.h"
 #include "DefaultIOStream.h"
 #include "DefaultIOSystem.h"
+#include "DefaultProgressHandler.h"
 #include "GenericProperty.h"
 #include "ProcessHelper.h"
 #include "ScenePreprocessor.h"
@@ -314,6 +315,9 @@ Importer::Importer()
 	pimpl->mIOHandler = new DefaultIOSystem;
 	pimpl->mIsDefaultHandler = true; 
 	pimpl->bExtraVerbose     = false; // disable extra verbose mode by default
+
+	pimpl->mProgressHandler = new DefaultProgressHandler();
+	pimpl->mIsDefaultProgressHandler = true;
 
 	// ----------------------------------------------------------------------------
 	// Add an instance of each worker class here
@@ -623,7 +627,9 @@ aiReturn Importer::UnregisterLoader(BaseImporter* pImp)
 	}
 
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-	std::vector<BaseImporter*>::iterator it = std::find(pimpl->mImporter.begin(),pimpl->mImporter.end(),pImp);
+	std::vector<BaseImporter*>::iterator it = std::find(pimpl->mImporter.begin(),
+		pimpl->mImporter.end(),pImp);
+
 	if (it != pimpl->mImporter.end())	{
 		pimpl->mImporter.erase(it);
 
@@ -648,7 +654,9 @@ aiReturn Importer::UnregisterPPStep(BaseProcess* pImp)
 	}
 
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-	std::vector<BaseProcess*>::iterator it = std::find(pimpl->mPostProcessingSteps.begin(),pimpl->mPostProcessingSteps.end(),pImp);
+	std::vector<BaseProcess*>::iterator it = std::find(pimpl->mPostProcessingSteps.begin(),
+		pimpl->mPostProcessingSteps.end(),pImp);
+
 	if (it != pimpl->mPostProcessingSteps.end())	{
 		pimpl->mPostProcessingSteps.erase(it);
 		DefaultLogger::get()->info("Unregistering custom post-processing step");
@@ -683,21 +691,57 @@ void Importer::SetIOHandler( IOSystem* pIOHandler)
 
 // ------------------------------------------------------------------------------------------------
 // Get the currently set IO handler
-IOSystem* Importer::GetIOHandler()
+IOSystem* Importer::GetIOHandler() const
 {
 	return pimpl->mIOHandler;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Check whether a custom IO handler is currently set
-bool Importer::IsDefaultIOHandler()
+bool Importer::IsDefaultIOHandler() const
 {
 	return pimpl->mIsDefaultHandler;
 }
 
 // ------------------------------------------------------------------------------------------------
+// Supplies a custom progress handler to get regular callbacks during importing
+void Importer::SetProgressHandler ( ProgressHandler* pHandler )
+{
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+	// If the new handler is zero, allocate a default implementation.
+	if (!pHandler)
+	{
+		// Release pointer in the possession of the caller
+		pimpl->mProgressHandler = new DefaultProgressHandler();
+		pimpl->mIsDefaultProgressHandler = true;
+	}
+	// Otherwise register the custom handler
+	else if (pimpl->mProgressHandler != pHandler)
+	{
+		delete pimpl->mProgressHandler;
+		pimpl->mProgressHandler = pHandler;
+		pimpl->mIsDefaultProgressHandler = false;
+	}
+	ASSIMP_END_EXCEPTION_REGION(void);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Get the currently set progress handler
+ProgressHandler* Importer::GetProgressHandler() const
+{
+	return pimpl->mProgressHandler;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Check whether a custom progress handler is currently set
+bool Importer::IsDefaultProgressHandler() const
+{
+	return pimpl->mIsDefaultProgressHandler;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Validate post process step flags 
-bool _ValidateFlags(unsigned int pFlags)
+bool _ValidateFlags(unsigned int pFlags) 
 {
 	if (pFlags & aiProcess_GenSmoothNormals && pFlags & aiProcess_GenNormals)	{
 		DefaultLogger::get()->error("#aiProcess_GenSmoothNormals and #aiProcess_GenNormals are incompatible");
@@ -760,7 +804,7 @@ aiScene* Importer::GetOrphanedScene()
 
 // ------------------------------------------------------------------------------------------------
 // Validate post-processing flags
-bool Importer::ValidateFlags(unsigned int pFlags)
+bool Importer::ValidateFlags(unsigned int pFlags) const
 {
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 	// run basic checks for mutually exclusive flags
@@ -770,8 +814,9 @@ bool Importer::ValidateFlags(unsigned int pFlags)
 
 	// ValidateDS does not anymore occur in the pp list, it plays an awesome extra role ...
 #ifdef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
-	if (pFlags & aiProcess_ValidateDataStructure)
+	if (pFlags & aiProcess_ValidateDataStructure) {
 		return false;
+	}
 #endif
 	pFlags &= ~aiProcess_ValidateDataStructure;
 
@@ -789,8 +834,9 @@ bool Importer::ValidateFlags(unsigned int pFlags)
 					break;
 				}
 			}
-			if (!have)
+			if (!have) {
 				return false;
+			}
 		}
 	}
 	ASSIMP_END_EXCEPTION_REGION(bool);
@@ -953,13 +999,14 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 
 		// Dispatch the reading to the worker class for this format
 		DefaultLogger::get()->info("Found a matching importer for this file format");
+		pimpl->mProgressHandler->Update();
 
 		if (profiler) {
 			profiler->BeginRegion("import");
 		}
 
-		imp->SetupProperties( this );
-		pimpl->mScene = imp->ReadFile( pFile, pimpl->mIOHandler);
+		pimpl->mScene = imp->ReadFile( this, pFile, pimpl->mIOHandler);
+		pimpl->mProgressHandler->Update();
 
 		if (profiler) {
 			profiler->EndRegion("import");
@@ -988,6 +1035,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 			ScenePreprocessor pre(pimpl->mScene);
 			pre.ProcessScene();
 
+			pimpl->mProgressHandler->Update();
 			if (profiler) {
 				profiler->EndRegion("preprocess");
 			}
@@ -1083,8 +1131,8 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 				profiler->BeginRegion("postprocess");
 			}
 
-			process->SetupProperties( this );
 			process->ExecuteOnScene	( this );
+			pimpl->mProgressHandler->Update();
 
 			if (profiler) {
 				profiler->EndRegion("postprocess");
@@ -1123,14 +1171,14 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 
 // ------------------------------------------------------------------------------------------------
 // Helper function to check whether an extension is supported by ASSIMP
-bool Importer::IsExtensionSupported(const char* szExtension)
+bool Importer::IsExtensionSupported(const char* szExtension) const
 {
 	return NULL != FindLoader(szExtension);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Find a loader plugin for a given file extension
-BaseImporter* Importer::FindLoader (const char* szExtension)
+BaseImporter* Importer::FindLoader (const char* szExtension) const
 {
 	ai_assert(szExtension);
 	ASSIMP_BEGIN_EXCEPTION_REGION();
@@ -1159,7 +1207,7 @@ BaseImporter* Importer::FindLoader (const char* szExtension)
 
 // ------------------------------------------------------------------------------------------------
 // Helper function to build a list of all file extensions supported by ASSIMP
-void Importer::GetExtensionList(aiString& szOut)
+void Importer::GetExtensionList(aiString& szOut) const
 {
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 	std::set<std::string> str;

@@ -1150,6 +1150,10 @@
 					RelativePath="..\..\include\NullLogger.h"
 					>
 				</File>
+				<File
+					RelativePath="..\..\include\ProgressHandler.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="C"
@@ -2300,6 +2304,10 @@
 				</File>
 				<File
 					RelativePath="..\..\code\ByteSwap.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\DefaultProgressHandler.h"
 					>
 				</File>
 				<File

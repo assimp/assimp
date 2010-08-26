@@ -42,6 +42,7 @@ SET( PUBLIC_HEADERS
 	${HEADER_PATH}/assimp.h
 	${HEADER_PATH}/assimp.hpp
 	${HEADER_PATH}/DefaultLogger.h
+	${HEADER_PATH}/ProgressHandler.h
 	${HEADER_PATH}/IOStream.h
 	${HEADER_PATH}/IOSystem.h
 	${HEADER_PATH}/Logger.h
@@ -86,6 +87,7 @@ SOURCE_GROUP( Common FILES
 	BaseProcess.h
 	ByteSwap.h
 	ProcessHelper.h
+	DefaultProgressHandler.h
 	DefaultIOStream.cpp
 	DefaultIOStream.h
 	DefaultIOSystem.cpp
@@ -493,6 +495,7 @@ ADD_LIBRARY( assimp SHARED
 	DefaultIOStream.h
 	DefaultIOSystem.cpp
 	DefaultIOSystem.h
+	DefaultProgressHandler.h
 	DefaultLogger.cpp
 	FileLogStream.h
 	FindDegenerates.cpp

@@ -148,7 +148,8 @@ Global
 		{7C8F7B44-C990-4EA8-A2A5-9028472E0AD3}.release|x64.ActiveCfg = Release|Win32
 		{7C8F7B44-C990-4EA8-A2A5-9028472E0AD3}.release-dll|Win32.ActiveCfg = release-dll|Win32
 		{7C8F7B44-C990-4EA8-A2A5-9028472E0AD3}.release-dll|Win32.Build.0 = release-dll|Win32
-		{7C8F7B44-C990-4EA8-A2A5-9028472E0AD3}.release-dll|x64.ActiveCfg = release-dll|Win32
+		{7C8F7B44-C990-4EA8-A2A5-9028472E0AD3}.release-dll|x64.ActiveCfg = release-dll|x64
+		{7C8F7B44-C990-4EA8-A2A5-9028472E0AD3}.release-dll|x64.Build.0 = release-dll|x64
 		{7C8F7B44-C990-4EA8-A2A5-9028472E0AD3}.release-noboost-st|Win32.ActiveCfg = release-noboost-st|Win32
 		{7C8F7B44-C990-4EA8-A2A5-9028472E0AD3}.release-noboost-st|Win32.Build.0 = release-noboost-st|Win32
 		{7C8F7B44-C990-4EA8-A2A5-9028472E0AD3}.release-noboost-st|x64.ActiveCfg = release-noboost-st|Win32

@@ -458,7 +458,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="assimp.lib zlib1.lib"
+				AdditionalDependencies="assimp.lib "
 				OutputFile="$(OutDir)\assimp.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\..\lib\assimp_$(ConfigurationName)_$(PlatformName)&quot;"

@@ -60,6 +60,7 @@ namespace Assimp	{
 	class Importer;
 	class IOStream;
 	class IOSystem;
+	class ProgressHandler;
 
 	// =======================================================================
 	// Plugin development
@@ -298,21 +299,52 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Retrieves the IO handler that is currently set.
-	 * You can use IsDefaultIOHandler() to check whether the returned
+	 * You can use #IsDefaultIOHandler() to check whether the returned
 	 * interface is the default IO handler provided by ASSIMP. The default
 	 * handler is active as long the application doesn't supply its own
-	 * custom IO handler via SetIOHandler().
-	 * @return A valid IOSystem interface
+	 * custom IO handler via #SetIOHandler().
+	 * @return A valid IOSystem interface, never NULL.
 	 */
-	IOSystem* GetIOHandler();
+	IOSystem* GetIOHandler() const;
 
 	// -------------------------------------------------------------------
 	/** Checks whether a default IO handler is active 
 	 * A default handler is active as long the application doesn't 
-	 * supply its own custom IO handler via SetIOHandler().
+	 * supply its own custom IO handler via #SetIOHandler().
 	 * @return true by default
 	 */
-	bool IsDefaultIOHandler();
+	bool IsDefaultIOHandler() const;
+
+	// -------------------------------------------------------------------
+	/** Supplies a custom progress handler to the importer. This 
+	 *  interface exposes a #Update() callback, which is called
+	 *  more or less periodically (please don't sue us if it
+	 *  isn't as periodically as you'd like it to have ...).
+	 *  This can be used to implement progress bars and loading
+	 *  timeouts. 
+	 *  @param pHandler Progress callback interface. Pass NULL to 
+	 *    disable progress reporting. 
+	 *  @note Progress handlers can be used to abort the loading
+	 *    at almost any time.*/
+	void SetProgressHandler ( ProgressHandler* pHandler );
+
+	// -------------------------------------------------------------------
+	/** Retrieves the progress handler that is currently set. 
+	 * You can use #IsDefaultProgressHandler() to check whether the returned
+	 * interface is the default handler provided by ASSIMP. The default
+	 * handler is active as long the application doesn't supply its own
+	 * custom handler via #SetProgressHandler().
+	 * @return A valid ProgressHandler interface, never NULL.
+	 */
+	ProgressHandler* GetProgressHandler() const;
+
+	// -------------------------------------------------------------------
+	/** Checks whether a default progress handler is active 
+	 * A default handler is active as long the application doesn't 
+	 * supply its own custom progress handler via #SetProgressHandler().
+	 * @return true by default
+	 */
+	bool IsDefaultProgressHandler() const;
 
 	// -------------------------------------------------------------------
 	/** @brief Check whether a given set of postprocessing flags
@@ -324,9 +356,9 @@ public:
 	 *  you're unsure.
 	 *
 	 *  @param pFlags Bitwise combination of the aiPostProcess flags.
-	 *  @return true if this flag combination is not supported.
+	 *  @return true if this flag combination is fine.
 	 */
-	bool ValidateFlags(unsigned int pFlags);
+	bool ValidateFlags(unsigned int pFlags) const;
 
 	// -------------------------------------------------------------------
 	/** Reads the given file and returns its contents if successful. 
@@ -453,7 +485,7 @@ public:
 	 *   Must include a trailing dot '.'. Example: ".3ds", ".md3".
 	 *   Cases-insensitive.
 	 * @return true if the extension is supported, false otherwise */
-	bool IsExtensionSupported(const char* szExtension);
+	bool IsExtensionSupported(const char* szExtension) const;
 
 	// -------------------------------------------------------------------
 	/** @brief Returns whether a given file extension is supported by ASSIMP.
@@ -461,7 +493,7 @@ public:
 	 * This function is provided for backward compatibility.
 	 * See the const char* version for detailed and up-to-date docs.
 	 * @see IsExtensionSupported(const char*) */
-	inline bool IsExtensionSupported(const std::string& szExtension);
+	inline bool IsExtensionSupported(const std::string& szExtension) const;
 
 
 	// -------------------------------------------------------------------
@@ -474,7 +506,7 @@ public:
 	 * @param szOut String to receive the extension list. 
 	 *   Format of the list: "*.3ds;*.obj;*.dae". This is useful for
 	 *   use with the WinAPI call GetOpenFileName(Ex). */
-	void GetExtensionList(aiString& szOut);
+	void GetExtensionList(aiString& szOut) const;
 
 	// -------------------------------------------------------------------
 	/** @brief Get a full list of all file extensions supported by ASSIMP.
@@ -482,7 +514,7 @@ public:
 	 * This function is provided for backward compatibility.
 	 * See the aiString version for detailed and up-to-date docs.
 	 * @see GetExtensionList(aiString&)*/
-	inline void GetExtensionList(std::string& szOut);
+	inline void GetExtensionList(std::string& szOut) const;
 
 
 	// -------------------------------------------------------------------
@@ -495,7 +527,7 @@ public:
 	*    is case-insensitive), ".bah", "*.bah" (wild card and dot
 	*    characters at the beginning of the extension are skipped).
 	*  @return NULL if there is no loader for the extension.*/
-	BaseImporter* FindLoader (const char* szExtension);
+	BaseImporter* FindLoader (const char* szExtension) const;
 
 
 	// -------------------------------------------------------------------
@@ -559,22 +591,17 @@ protected:
 // ----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE const aiScene* Importer::ReadFile( const std::string& pFile,
-	unsigned int pFlags)
-{
+AI_FORCE_INLINE const aiScene* Importer::ReadFile( const std::string& pFile,unsigned int pFlags){
 	return ReadFile(pFile.c_str(),pFlags);
 }
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE void Importer::GetExtensionList(std::string& szOut)
-{
+AI_FORCE_INLINE void Importer::GetExtensionList(std::string& szOut) const	{
 	aiString s;
 	GetExtensionList(s);
 	szOut = s.data;
 }
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE bool Importer::IsExtensionSupported(
-	const std::string& szExtension)
-{
+AI_FORCE_INLINE bool Importer::IsExtensionSupported(const std::string& szExtension) const	{
 	return IsExtensionSupported(szExtension.c_str());
 }
 

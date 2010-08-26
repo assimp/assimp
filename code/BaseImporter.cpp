@@ -52,6 +52,7 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 BaseImporter::BaseImporter()
+: progress()
 {
 	// nothing to do here
 }
@@ -65,9 +66,15 @@ BaseImporter::~BaseImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file and returns the imported data.
-aiScene* BaseImporter::ReadFile( const std::string& pFile, IOSystem* pIOHandler)
+aiScene* BaseImporter::ReadFile(const Importer* pImp, const std::string& pFile, IOSystem* pIOHandler)
 {
-	// Construct a file system filter to improve our success ratio reading external files
+	progress = pImp->GetProgressHandler();
+	ai_assert(progress);
+
+	// Gather configuration properties for this run
+	SetupProperties( pImp );
+
+	// Construct a file system filter to improve our success ratio at reading external files
 	FileSystemFilter filter(pFile,pIOHandler);
 
 	// create a scene object to hold the data

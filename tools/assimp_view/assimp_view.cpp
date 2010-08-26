@@ -195,13 +195,13 @@ int LoadAsset(void)
 	g_mWorldRotate = aiMatrix4x4();
 	g_mWorld = aiMatrix4x4();
 
-	char szTemp[MAX_PATH+64];
-	sprintf(szTemp,"Starting to load %s",g_szFileName);
+//	char szTemp[MAX_PATH+64];
+//	sprintf(szTemp,"Starting to load %s",g_szFileName);
 	CLogWindow::Instance().WriteLine(
 		"----------------------------------------------------------------------------");
-	CLogWindow::Instance().WriteLine(szTemp);
-	CLogWindow::Instance().WriteLine(
-		"----------------------------------------------------------------------------");
+//	CLogWindow::Instance().WriteLine(szTemp);
+//	CLogWindow::Instance().WriteLine(
+//		"----------------------------------------------------------------------------");
 	CLogWindow::Instance().SetAutoUpdate(false);
 
 	// create a helper thread to load the asset

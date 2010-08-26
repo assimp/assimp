@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "AssimpPCH.h"
+#include "../include/aiVersion.h"
 
 // ------------------------------------------------------------------------------------------------
 /* Uncomment this line to prevent Assimp from catching unknown exceptions.
@@ -68,8 +69,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ScenePreprocessor.h"
 #include "MemoryIOWrapper.h"
 #include "Profiler.h"
+#include "TinyFormatter.h"
 
 using namespace Assimp::Profiling;
+using namespace Assimp::Formatter;
 
 // ------------------------------------------------------------------------------------------------
 // Importers
@@ -828,6 +831,56 @@ const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
 }
 
 // ------------------------------------------------------------------------------------------------
+void WriteLogOpening(const std::string& file)
+{
+	Logger* l = DefaultLogger::get();
+	if (!l) {
+		return;
+	}
+	l->info("Load " + file);
+
+	// print a full version dump. This is nice because we don't
+	// need to ask the authors of incoming bug reports for
+	// the library version they're using - a log dump is
+	// sufficient.
+	const unsigned int flags = aiGetCompileFlags();
+	l->debug(format()
+		<< "Assimp "
+		<< aiGetVersionMajor() 
+		<< "." 
+		<< aiGetVersionMinor() 
+		<< "." 
+		<< aiGetVersionRevision()
+
+#if defined(ASSIMP_BUILD_X86_32BIT_ARCHITECTURE)
+		<< " x86"
+#elif defined(ASSIMP_BUILD_X86_64BIT_ARCHITECTURE)
+		<< " amd64"
+#elif defined(ASSIMP_BUILD_IA_64BIT_ARCHITECTURE)
+		<< " itanium"
+#else
+#	error unknown architecture
+#endif
+
+#if defined(_MSC_VER)
+		<< " msvc"
+#elif defined(__GNUC__)
+		<< " gcc"
+#else
+#	error unknown compiler
+#endif
+
+#ifndef NDEBUG
+		<< " debug"
+#endif
+
+		<< (flags & ASSIMP_CFLAGS_NOBOOST ? " noboost" : "")
+		<< (flags & ASSIMP_CFLAGS_SHARED  ? " shared" : "")
+		<< (flags & ASSIMP_CFLAGS_SINGLETHREADED  ? " singlethreaded" : "")
+		);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Reads the given file and returns its contents if successful.
 const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 {
@@ -839,6 +892,8 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 	// that might be thrown by STL containers or by new(). 
 	// ImportErrorException's are throw by ourselves and caught elsewhere.
 	//-----------------------------------------------------------------------
+
+	WriteLogOpening(pFile);
 
 #ifdef ASSIMP_CATCH_GLOBAL_EXCEPTIONS
 	try

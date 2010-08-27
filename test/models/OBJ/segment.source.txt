@@ -1,0 +1,4 @@
+Obj exported from Blender
+
+http://toychest.in.tum.de/wiki/projects:kuka_lwr
+License: Creative-Commons-by-Attribution-3.0

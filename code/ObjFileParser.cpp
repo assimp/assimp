@@ -633,6 +633,11 @@ void ObjFileParser::createMesh()
 //	Returns true, if a new mesh must be created.
 bool ObjFileParser::needsNewMesh( const std::string &rMaterialName )
 {
+	if(m_pModel->m_pCurrentMesh == 0)
+	{
+		// No mesh data yet
+		return true;
+	}
 	bool newMat = false;
 	int matIdx = getMaterialIndex( rMaterialName );
 	int curMatIdx = m_pModel->m_pCurrentMesh->m_uiMaterialIndex;

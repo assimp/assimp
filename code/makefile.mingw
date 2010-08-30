@@ -67,9 +67,10 @@ endif
 # Setup environment for debug build
 ifeq ($(DEBUG),1)
 	DEFINEFLAGS   += -D_DEBUG -DDEBUG
+	CPPFLAGS      += -g
 #	NAMESUFFIX    += -debug
 else
-	CPPFLAGS      += -O3 -s
+	CPPFLAGS      += -O2 -s
 	DEFINEFLAGS   += -DNDEBUG -D_NDEBUG
 endif
 
@@ -86,15 +87,15 @@ all:	$(SHARED_TARGET)
 $(SHARED_TARGET):  $(OBJECTS)  $(OBJECTSC)
 	gcc -o $@ $(OBJECTS) $(OBJECTSC) -shared -lstdc++ 
 %.o:%.cpp
-	$(CXX) -g -c  $(CPPFLAGS) $? -o $@ $(INCLUDEFLAGS) $(DEFINEFLAGS)
+	$(CXX) -c  $(CPPFLAGS) $? -o $@ $(INCLUDEFLAGS) $(DEFINEFLAGS)
 %.oc:%.c
-	$(CXX) -x c -g -c -ansi $(CPPFLAGS) $? -o $@ 
+	$(CXX) -x c -c -ansi $(CPPFLAGS) $? -o $@ 
 
 # target: clean
 # usage : cleanup all object files, prepare for a rebuild
 .PHONY: clean
 clean:
-	-del *.o .\..\contrib\irrXML\*.o .\..\contrib\zlib\*.oc
+	-del *.o .\..\contrib\irrXML\*.o .\..\contrib\zlib\*.oc .\..\contrib\unzip\*.oc .\..\contrib\ConvertUTF\*.oc
 
 # target: static
 # usage : build a static library (*.a)

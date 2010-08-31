@@ -101,7 +101,7 @@ aiMatrix4x4 g_mWorld;
 aiMatrix4x4 g_mWorldRotate;
 aiVector3D g_vRotateSpeed			= aiVector3D(0.5f,0.5f,0.5f);
 
-// NOTE: The second light direction is no computed from the first
+// NOTE: The second light direction is now computed from the first
 aiVector3D g_avLightDirs[1] = 
 {	aiVector3D(-0.5f,0.6f,0.2f)  };
 

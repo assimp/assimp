@@ -1601,14 +1601,6 @@ int CDisplay::HandleInput()
 		D3DXVec3TransformNormal((D3DXVECTOR3*)&g_avLightDirs[0],
 			(D3DXVECTOR3*)&g_avLightDirs[0],(D3DXMATRIX*)&mMat);
 
-		// 2 lights to rotate?
-		if (g_sOptions.b3Lights)
-		{
-			D3DXVec3TransformNormal((D3DXVECTOR3*)&g_avLightDirs[1],
-				(D3DXVECTOR3*)&g_avLightDirs[1],(D3DXMATRIX*)&mMat);
-
-			g_avLightDirs[1].Normalize();
-		}
 		g_avLightDirs[0].Normalize();
 	}
 	return 1;

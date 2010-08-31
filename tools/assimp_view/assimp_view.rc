@@ -15,7 +15,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (Deutschland) resources
+// German (Germany) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 #ifdef _WIN32
@@ -95,7 +95,7 @@ BEGIN
     COMBOBOX        IDC_COMBO1,317,373,112,30,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Nodes:",IDC_NUMNODES,221,413,28,9
     EDITTEXT        IDC_ENODEWND,253,411,37,14,ES_AUTOHSCROLL | ES_READONLY
-    CONTROL         "",IDC_TREE1,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,474,0,141,484
+    CONTROL         "",IDC_TREE1,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_SHOWSELALWAYS | WS_BORDER | WS_HSCROLL | WS_TABSTOP,474,0,141,484
     LTEXT           "Mesh:",IDC_NUMMESHES,295,428,23,9
     EDITTEXT        IDC_EMESH,322,426,34,14,ES_AUTOHSCROLL | ES_READONLY
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDVERT,100,392,1,87
@@ -117,6 +117,7 @@ BEGIN
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDVERT,472,0,1,484
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDVERT,365,392,1,70
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,1,367,471,1
+    CONTROL         "No transparency",IDC_NOAB,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,109,439,68,12
 END
 
 IDD_LOADDIALOG DIALOGEX 0, 0, 143, 60
@@ -442,7 +443,7 @@ IDR_TEXT1               TEXT                    "text1.bin"
 
 IDR_HUD                 RCDATA                  "HUD.png"
 IDR_HUDMASK             RCDATA                  "HUDMask.png"
-#endif    // Deutsch (Deutschland) resources
+#endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

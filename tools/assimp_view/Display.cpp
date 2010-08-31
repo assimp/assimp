@@ -1778,9 +1778,14 @@ int CDisplay::RenderFullScene()
 	if (NULL != g_pcAsset && NULL != g_pcAsset->pcScene->mRootNode)
 	{
 		// disable the z-buffer
-		g_piDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
+		if (!g_sOptions.bNoAlphaBlending) {
+			g_piDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
+		}
 		RenderNode(g_pcAsset->pcScene->mRootNode,m,true);
-		g_piDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+
+		if (!g_sOptions.bNoAlphaBlending) {
+			g_piDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+		}
 	}
 
 	// setup the stereo view if necessary
@@ -2042,6 +2047,11 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
 			}
 			g_piDevice->SetVertexDeclaration( gDefaultVertexDecl);
 
+			if (g_sOptions.bNoAlphaBlending) {
+				// manually disable alphablending
+				g_piDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
+			}
+
 			if (bAlpha)CMeshRenderer::Instance().DrawSorted(piNode->mMeshes[i],aiMe);
 			else CMeshRenderer::Instance().DrawUnsorted(piNode->mMeshes[i]);
 
@@ -2235,7 +2245,7 @@ int CDisplay::RenderTextureView()
 	g_piPassThroughEffect->BeginPass(0);
 
 	if (aiTextureType_HEIGHT == m_pcCurrentTexture->iType ||
-		aiTextureType_NORMALS == m_pcCurrentTexture->iType)
+		aiTextureType_NORMALS == m_pcCurrentTexture->iType || g_sOptions.bNoAlphaBlending)
 	{
 		// manually disable alpha blending
 		g_piDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);

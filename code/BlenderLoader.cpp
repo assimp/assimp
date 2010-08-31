@@ -554,7 +554,12 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 
 		// basic material colors
 		aiColor3D col(mat->r,mat->g,mat->b);
-		mout->AddProperty(&col,1,AI_MATKEY_COLOR_DIFFUSE);
+		if (mat->r || mat->g || mat->b ) {
+			
+			// Usually, zero diffuse color means no diffuse color at all in the equation - seemingly.
+			// So we ommit this member to express this intent.
+			mout->AddProperty(&col,1,AI_MATKEY_COLOR_DIFFUSE);
+		}
 
 		col = aiColor3D(mat->specr,mat->specg,mat->specb);
 		mout->AddProperty(&col,1,AI_MATKEY_COLOR_SPECULAR);
@@ -681,7 +686,10 @@ void BlenderImporter::ConvertMesh(const Scene& in, const Object* obj, const Mesh
 		aiVector3D* vn = out->mNormals + out->mNumVertices;
 
 		// XXX we can't fold this easily, because we are restricted
-		// to the member names from the BLEND file (v1,v2,v3,v4) ..
+		// to the member names from the BLEND file (v1,v2,v3,v4) 
+		// which are assigned by the genblenddna.py script and
+		// cannot be changed without breaking the entire
+		// import process.
 
 		if (mf.v1 >= mesh->totvert) {
 			ThrowException("Vertex index v1 out of range");

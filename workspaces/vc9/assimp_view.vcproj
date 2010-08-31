@@ -1564,6 +1564,10 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
+				RelativePath="..\..\tools\shared\assimp_tools_icon.ico"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tools\assimp_view\assimp_view.ico"
 				>
 			</File>

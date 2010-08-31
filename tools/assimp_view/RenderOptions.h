@@ -37,7 +37,10 @@ class RenderOptions
 			bNoSpecular		(false),
 			bStereoView		(false),
 			bCulling		(false),
-			bSkeleton		(false) {}
+			bSkeleton		(false),
+			bNoAlphaBlending(false)
+			
+			{}
 
 		bool bMultiSample;
 
@@ -67,6 +70,8 @@ class RenderOptions
 
 		// enable stereo view
 		bool bStereoView;
+
+		bool bNoAlphaBlending;
 
 		// wireframe or solid rendering?
 		DrawMode eDrawMode;

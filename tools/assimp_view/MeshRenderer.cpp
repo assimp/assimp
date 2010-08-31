@@ -88,10 +88,9 @@ int CMeshRenderer::DrawSorted(unsigned int iIndex,const aiMatrix4x4& mWorld)
 	if (!pcHelper || !pcMesh || !pcHelper->piIB)
 		return -5;
 
-	if (pcMesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
+	if (pcMesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE || pcMesh->HasBones() || g_sOptions.bNoAlphaBlending)
 		return DrawUnsorted(iIndex);
-	if (pcMesh->HasBones())
-		return DrawUnsorted(iIndex);
+
 
 	// compute the position of the camera in worldspace
 	aiMatrix4x4 mWorldInverse = mWorld;

@@ -273,6 +273,19 @@ void ToggleLightRotate()
 }
 
 //-------------------------------------------------------------------------------
+// Toggle the "NoTransparency" state
+//-------------------------------------------------------------------------------
+void ToggleTransparency()
+{
+	g_sOptions.bNoAlphaBlending = !g_sOptions.bNoAlphaBlending;
+
+	// store this in the registry, too
+	DWORD dwValue = 0;
+	if (g_sOptions.bNoAlphaBlending)dwValue = 1;
+	RegSetValueExA(g_hRegistry,"NoTransparency",0,REG_DWORD,(const BYTE*)&dwValue,4);
+}
+
+//-------------------------------------------------------------------------------
 // Toggle the "LowQuality" state
 //-------------------------------------------------------------------------------
 void ToggleLowQuality()
@@ -777,13 +790,13 @@ void DisplayMemoryConsumption()
 
 	char szOut[2048];
 	sprintf(szOut,
-		"(1 KB = 1024 Byte)\n\n"
-		"ASSIMP Import Data: \t%i KB\n"
-		"Texture data:\t\t%i KB\n"
-		"Vertex buffers:\t\t%i KB\n"
-		"Index buffers:\t\t%i KB\n"
-		"Video Memory:\t\t%i KB\n\n"
-		"Total: \t\t\t%i KB",
+		"(1 KiB = 1024 bytes)\n\n"
+		"ASSIMP Import Data: \t%i KiB\n"
+		"Texture data:\t\t%i KiB\n"
+		"Vertex buffers:\t\t%i KiB\n"
+		"Index buffers:\t\t%i KiB\n"
+		"Video Memory:\t\t%i KiB\n\n"
+		"Total: \t\t\t%i KiB",
 		iScene / 1024,iTexture / 1024,iVB / 1024,iIB / 1024,iVRAM / 1024,
 		(iScene + iTexture + iVB + iIB + iVRAM) / 1024);
 	MessageBox(g_hDlg,szOut,"Memory consumption",MB_OK);
@@ -1104,6 +1117,20 @@ void InitUI()
 	{
 		g_sOptions.bLowQuality = true;
 		CheckDlgButton(g_hDlg,IDC_LOWQUALITY,BST_CHECKED);
+	}
+
+	// LowQuality
+	if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"NoTransparency",NULL,NULL,
+		(BYTE*)&dwValue,&dwTemp))dwValue = 0;
+	if (0 == dwValue)
+	{
+		g_sOptions.bNoAlphaBlending = false;
+		CheckDlgButton(g_hDlg,IDC_NOAB,BST_UNCHECKED);
+	}
+	else 
+	{
+		g_sOptions.bNoAlphaBlending = true;
+		CheckDlgButton(g_hDlg,IDC_NOAB,BST_CHECKED);
 	}
 
 	// DisplayNormals
@@ -2019,6 +2046,10 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 				else if (IDC_NOSPECULAR == LOWORD(wParam))
 					{
 					ToggleSpecular();
+					}
+				else if (IDC_NOAB == LOWORD(wParam))
+					{
+					ToggleTransparency();
 					}
 				else if (IDC_ZOOM == LOWORD(wParam))
 					{

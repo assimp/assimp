@@ -79,6 +79,8 @@
 #define IDC_CHECK9                      1024
 #define IDC_NOSPECULAR                  1024
 #define IDC_PLAYANIM                    1025
+#define IDC_3LIGHTS2                    1025
+#define IDC_NOAB                        1025
 #define IDC_SPEED                       1026
 #define IDC_COMBO1                      1027
 #define IDC_PINORDER                    1028

@@ -333,19 +333,20 @@ int CMaterialManager::LoadTexture(IDirect3DTexture9** p_ppiOut,aiString* szPath)
 			{
 				// it is an embedded file ... don't need the file format hint,
 				// simply let D3DX load the file
+				D3DXIMAGE_INFO info;
 				if (FAILED(D3DXCreateTextureFromFileInMemoryEx(g_piDevice,
 					g_pcAsset->pcScene->mTextures[iIndex]->pcData,
 					g_pcAsset->pcScene->mTextures[iIndex]->mWidth,
 					D3DX_DEFAULT,
 					D3DX_DEFAULT,
-					0,
+					1,
 					D3DUSAGE_AUTOGENMIPMAP,
 					D3DFMT_UNKNOWN,
 					D3DPOOL_MANAGED,
 					D3DX_DEFAULT,
 					D3DX_DEFAULT,
 					0,
-					NULL,
+					&info,
 					NULL,
 					p_ppiOut)))
 				{

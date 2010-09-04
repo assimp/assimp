@@ -793,6 +793,58 @@ void ColladaLoader::StoreAnimations( aiScene* pScene, const ColladaParser& pPars
 	// recursivly collect all animations from the collada scene
 	StoreAnimations( pScene, pParser, &pParser.mAnims, "");
 
+	// catch special case: many animations with the same length, each affecting only a single node.
+	// we need to unite all those single-node-anims to a proper combined animation
+	for( size_t a = 0; a < mAnims.size(); ++a)
+	{
+		aiAnimation* templateAnim = mAnims[a];
+		if( templateAnim->mNumChannels == 1)
+		{
+			// search for other single-channel-anims with the same duration
+			std::vector<size_t> collectedAnimIndices;
+			for( size_t b = a+1; b < mAnims.size(); ++b)
+			{
+				aiAnimation* other = mAnims[b];
+				if( other->mNumChannels == 1 && other->mDuration == templateAnim->mDuration && other->mTicksPerSecond == templateAnim->mTicksPerSecond )
+					collectedAnimIndices.push_back( b);
+			}
+
+			// if there are other animations which fit the template anim, combine all channels into a single anim
+			if( !collectedAnimIndices.empty() )
+			{
+				aiAnimation* combinedAnim = new aiAnimation();
+				combinedAnim->mName = aiString( std::string( "combinedAnim_") + char( '0' + a));
+				combinedAnim->mDuration = templateAnim->mDuration;
+				combinedAnim->mTicksPerSecond = templateAnim->mTicksPerSecond;
+				combinedAnim->mNumChannels = collectedAnimIndices.size() + 1;
+				combinedAnim->mChannels = new aiNodeAnim*[combinedAnim->mNumChannels];
+				// add the template anim as first channel by moving its aiNodeAnim to the combined animation
+				combinedAnim->mChannels[0] = templateAnim->mChannels[0];
+				templateAnim->mChannels[0] = NULL;
+				delete templateAnim;
+				// combined animation replaces template animation in the anim array
+				mAnims[a] = combinedAnim;
+
+				// move the memory of all other anims to the combined anim and erase them from the source anims
+				for( size_t b = 0; b < collectedAnimIndices.size(); ++b)
+				{
+					aiAnimation* srcAnimation = mAnims[collectedAnimIndices[b]];
+					combinedAnim->mChannels[1 + b] = srcAnimation->mChannels[0];
+					srcAnimation->mChannels[0] = NULL;
+					delete srcAnimation;
+				}
+
+				// in a second go, delete all the single-channel-anims that we've stripped from their channels
+				// back to front to preserve indices - you know, removing an element from a vector moves all elements behind the removed one
+				while( !collectedAnimIndices.empty() )
+				{
+					mAnims.erase( mAnims.begin() + collectedAnimIndices.back());
+					collectedAnimIndices.pop_back();
+				}
+			}
+		}
+	}
+
 	// now store all anims in the scene
 	if( !mAnims.empty())
 	{

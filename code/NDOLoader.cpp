@@ -220,6 +220,9 @@ void NDOImporter::InternReadFile( const std::string& pFile,
 	aiNode** cc = root->mChildren = new aiNode* [ root->mNumChildren = static_cast<unsigned int>( objects.size()) ] ();
 	pScene->mMeshes = new aiMesh* [ root->mNumChildren] ();
 
+	std::vector<aiVector3D> vertices;
+	std::vector<unsigned int> indices;
+
 	for_each(const Object& obj,objects) {
 		aiNode* nd = *cc++ = new aiNode(obj.name);
 		nd->mParent = root;
@@ -240,9 +243,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
 		aiMesh* mesh = new aiMesh();
 		aiFace* faces = mesh->mFaces = new aiFace[mesh->mNumFaces=face_table.size()];
 
-		std::vector<aiVector3D> vertices;
-		std::vector<unsigned int> indices;
-
+		vertices.clear();
 		vertices.reserve(4 * face_table.size()); // arbitrarily choosen 
 		for_each(FaceTable::value_type& v, face_table) {
 			indices.clear();

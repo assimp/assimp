@@ -229,13 +229,18 @@ void ColladaLoader::ResolveNodeInstances( const ColladaParser& pParser, const Co
 		 end = pNode->mNodeInstances.end(); it != end; ++it)
 	{
 		// find the corresponding node in the library
-		ColladaParser::NodeLibrary::const_iterator fnd = pParser.mNodeLibrary.find((*it).mNode);
-		if (fnd == pParser.mNodeLibrary.end()) 
+
+		// FIX for http://sourceforge.net/tracker/?func=detail&aid=3054873&group_id=226462&atid=1067632
+		// need to check for both name and ID to catch all. The const_cast is legal
+		// because we won't attempt to modify the instanced node although it is kept
+		// non-const.
+		Collada::Node* nd = const_cast<Collada::Node*>(FindNode(pParser.mRootNode,(*it).mNode));
+		if (!nd) 
 			DefaultLogger::get()->error("Collada: Unable to resolve reference to instanced node " + (*it).mNode);
 		
 		else {
 			//	attach this node to the list of children
-			resolved.push_back((*fnd).second);
+			resolved.push_back(nd);
 		}
 	}
 }

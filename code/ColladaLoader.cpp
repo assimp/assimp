@@ -185,7 +185,7 @@ aiNode* ColladaLoader::BuildHierarchy( const ColladaParser& pParser, const Colla
 	node->mTransformation = pParser.CalculateResultTransform( pNode->mTransforms);
 
 	// now resolve node instances
-	std::vector<Collada::Node*> instances;
+	std::vector<const Collada::Node*> instances;
 	ResolveNodeInstances(pParser,pNode,instances);
 
 	// add children. first the *real* ones
@@ -219,7 +219,7 @@ aiNode* ColladaLoader::BuildHierarchy( const ColladaParser& pParser, const Colla
 // ------------------------------------------------------------------------------------------------
 // Resolve node instances
 void ColladaLoader::ResolveNodeInstances( const ColladaParser& pParser, const Collada::Node* pNode,
-	std::vector<Collada::Node*>& resolved)
+	std::vector<const Collada::Node*>& resolved)
 {
 	// reserve enough storage
 	resolved.reserve(pNode->mNodeInstances.size());
@@ -229,12 +229,15 @@ void ColladaLoader::ResolveNodeInstances( const ColladaParser& pParser, const Co
 		 end = pNode->mNodeInstances.end(); it != end; ++it)
 	{
 		// find the corresponding node in the library
+		const ColladaParser::NodeLibrary::const_iterator itt = pParser.mNodeLibrary.find((*it).mNode);
+		Collada::Node* nd = itt == pParser.mNodeLibrary.end() ? NULL : (*itt).second;
 
 		// FIX for http://sourceforge.net/tracker/?func=detail&aid=3054873&group_id=226462&atid=1067632
-		// need to check for both name and ID to catch all. The const_cast is legal
-		// because we won't attempt to modify the instanced node although it is kept
-		// non-const.
-		Collada::Node* nd = const_cast<Collada::Node*>(FindNode(pParser.mRootNode,(*it).mNode));
+		// need to check for both name and ID to catch all. To avoid breaking valid files,
+		// the workaround is only enabled when the first attempt to resolve the node has failed.
+		if (!nd) {
+			nd = const_cast<Collada::Node*>(FindNode(pParser.mRootNode,(*it).mNode));
+		}
 		if (!nd) 
 			DefaultLogger::get()->error("Collada: Unable to resolve reference to instanced node " + (*it).mNode);
 		

@@ -108,7 +108,7 @@ protected:
 
 	/** Resolve node instances */
 	void ResolveNodeInstances( const ColladaParser& pParser, const Collada::Node* pNode,
-		std::vector<Collada::Node*>& resolved);
+		std::vector<const Collada::Node*>& resolved);
 
 	/** Builds meshes for the given node and references them */
 	void BuildMeshesForNode( const ColladaParser& pParser, const Collada::Node* pNode, 

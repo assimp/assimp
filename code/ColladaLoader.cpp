@@ -1117,8 +1117,8 @@ void ColladaLoader::AddTexture ( Assimp::MaterialHelper& mat, const ColladaParse
 	aiTextureType type, unsigned int idx)
 {
 	// first of all, basic file name
-	mat.AddProperty( &FindFilenameForEffectTexture( pParser, effect, sampler.mName), 
-		_AI_MATKEY_TEXTURE_BASE,type,idx);
+	const aiString name = FindFilenameForEffectTexture( pParser, effect, sampler.mName );
+	mat.AddProperty( &name, _AI_MATKEY_TEXTURE_BASE, type, idx );
 
 	// mapping mode
 	int map = aiTextureMapMode_Clamp;

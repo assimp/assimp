@@ -89,10 +89,13 @@ private:
 	void createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene );
 	size_t countData( const std::vector<Q3BSP::sQ3BSPFace*> &rArray ) const;
 	size_t countFaces( const std::vector<Q3BSP::sQ3BSPFace*> &rArray ) const;
+	size_t countTriangles( const std::vector<Q3BSP::sQ3BSPFace*> &rArray ) const;
 	void createMaterialMap( const Q3BSP::Q3BSPModel *pModel);
+	aiFace *getNextFace( aiMesh *pMesh, unsigned int &rFaceIdx );
 
 private:
 	aiMesh *m_pCurrentMesh;
+	aiFace *m_pCurrentFace;
 	FaceMap m_MaterialLookupMap;
 };
 

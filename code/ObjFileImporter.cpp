@@ -351,7 +351,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 				{
 					const unsigned int tex = pSourceFace->m_pTexturCoords->at( vertexIndex );
 					ai_assert( tex < pModel->m_TextureCoord.size() );
-					for ( size_t i=0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++)
+					for ( size_t i=0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++ )
 					{
 						if ( pMesh->mNumUVComponents[ i ] > 0 )
 						{

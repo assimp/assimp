@@ -76,6 +76,7 @@ void get_bounding_box_for_node (const struct aiNode* nd,
 }
 
 // ----------------------------------------------------------------------------
+
 void get_bounding_box (struct aiVector3D* min, struct aiVector3D* max)
 {
 	struct aiMatrix4x4 trafo;
@@ -95,6 +96,8 @@ void color4_to_float4(const struct aiColor4D *c, float f[4])
 	f[2] = c->b;
 	f[3] = c->a;
 }
+
+// ----------------------------------------------------------------------------
 
 void set_float4(float f[4], float a, float b, float c, float d)
 {

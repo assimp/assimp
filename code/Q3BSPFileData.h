@@ -54,7 +54,7 @@ enum Q3BSPGeoType
 {
 	Polygon = 1,
 	Patch, 
-	Mesh,
+	TriangleMesh,
 	Billboard 
 };
 
@@ -137,17 +137,8 @@ struct sQ3BSPLightmap
 	}
 };
 
-struct sRenderVertex 
-{
-	vec3f vPosition;
-	vec2f vTC;
-	vec2f vTCLightmap;
-};
-
 struct SubPatch
 {
-	std::vector<sRenderVertex> controlPoints;
-	std::vector<sRenderVertex> vertices;
 	std::vector<size_t> indices;
 	int lightmapID;
 };

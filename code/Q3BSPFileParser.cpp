@@ -250,7 +250,6 @@ void Q3BSPFileParser::getLightMaps()
 		sQ3BSPLightmap *pLightmap = new sQ3BSPLightmap;
 		memcpy( pLightmap, &m_Data[ Offset ], sizeof( sQ3BSPLightmap ) );
 		Offset += sizeof( sQ3BSPLightmap );
-		//ChangeGamma( (unsigned char*) &pLightmap->bLMapData[ 0 ], sizeof( sQ3BSPLightmap ), 3.0f);
 		m_pModel->m_Lightmaps[ idx ] = pLightmap;
 	}
 }

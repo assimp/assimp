@@ -49,9 +49,26 @@ ELSE ( ENABLE_BOOST_WORKAROUND )
 	INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIRS} )
 ENDIF ( ENABLE_BOOST_WORKAROUND )
 
+
 ADD_SUBDIRECTORY( code/ )
-IF ( WIN32 )
-	ADD_SUBDIRECTORY( test/ )
-	ADD_SUBDIRECTORY( tools/assimp_view/ )
-ENDIF ( WIN32 )
-ADD_SUBDIRECTORY( tools/assimp_cmd/ )
+
+SET ( BUILD_ASSIMP_TOOLS ON CACHE BOOL
+	"If the supplementary tools for Assimp are built in addition to the library."
+)
+IF ( BUILD_ASSIMP_TOOLS )
+	IF ( WIN32 )
+		ADD_SUBDIRECTORY( tools/assimp_view/ )
+	ENDIF ( WIN32 )
+	ADD_SUBDIRECTORY( tools/assimp_cmd/ )
+ENDIF ( BUILD_ASSIMP_TOOLS )
+
+SET ( BUILD_TESTS OFF CACHE BOOL
+	"If the test suite for Assimp is built in addition to the library."
+)
+IF ( BUILD_TESTS )
+	IF ( WIN32 )
+		ADD_SUBDIRECTORY( test/ )
+	ELSE ( WIN32 )
+		MESSAGE( WARNING "The Assimp test suite is currently Windows-only." )
+	ENDIF ( WIN32 )
+ENDIF ( BUILD_TESTS )

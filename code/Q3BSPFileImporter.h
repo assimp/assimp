@@ -55,20 +55,22 @@ struct sQ3BSPFace;
 
 }
 
+/**	Loader to import BSP-levels from a PK3 archive or from a unpacked BSP-level.
+ */
 class Q3BSPFileImporter : BaseImporter
 {
 	friend class Importer;
 
 protected:
-	///	\brief	Default constructor.
+	///	@brief	Default constructor.
 	Q3BSPFileImporter();
 
-	///	\brief	Destructor.
+	///	@brief	Destructor.
 	~Q3BSPFileImporter();
 
 public:
-	/// \brief	Returns whether the class can handle the format of the given file. 
-	/// \remark	See BaseImporter::CanRead() for details.
+	/// @brief	Returns whether the class can handle the format of the given file. 
+	/// @remark	See BaseImporter::CanRead() for details.
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig ) const;
 
 private:

@@ -48,8 +48,9 @@ namespace Q3BSP
 {
 
 static const unsigned int CE_BSP_LIGHTMAPSIZE = 128*128*3;	///< = 128( width ) * 128 ( height ) * 3 ( channels / RGB ).
-static const int VERION_Q3LEVEL = 46;					///< Supported version.
+static const int VERION_Q3LEVEL = 46;						///< Supported version.
 
+///	Geometric type enumeration
 enum Q3BSPGeoType
 {
 	Polygon = 1,

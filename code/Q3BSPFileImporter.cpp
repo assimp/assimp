@@ -93,6 +93,34 @@ static void extractIds( const std::string &rKey, int &rId1, int &rId2 )
 }
 
 // ------------------------------------------------------------------------------------------------
+static void normalizePathName( const std::string &rPath, std::string &rNormalizedPath )
+{
+	rNormalizedPath = "";
+	if ( rPath.empty() )
+		return;
+
+#ifdef _WIN32
+	std::string sep = "\\";
+#else
+	std::string sep = "/";
+#endif
+
+	static const unsigned int numDelimiters = 2;
+	const char delimiters[ numDelimiters ] = { '/', '\\' };
+	rNormalizedPath = rPath;
+	for ( unsigned int i=0; i<numDelimiters; i++ )
+	{
+		for ( size_t j=0; j<rNormalizedPath.size(); j++ )
+		{
+			if ( rNormalizedPath[j] == delimiters[ i ] )
+			{
+				rNormalizedPath[ j ] = sep[0];
+			}
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
 //	Constructor.
 Q3BSPFileImporter::Q3BSPFileImporter() :
 	m_pCurrentMesh( NULL ),
@@ -142,6 +170,7 @@ void Q3BSPFileImporter::GetExtensionList( std::set<std::string>& extensions )
 }
 
 // ------------------------------------------------------------------------------------------------
+//	Import method.
 void Q3BSPFileImporter::InternReadFile(const std::string &rFile, aiScene* pScene, IOSystem* pIOHandler)
 {
 	Q3BSPZipArchive Archive( rFile );
@@ -375,7 +404,7 @@ void Q3BSPFileImporter::createTriangleTopology( const Q3BSP::Q3BSPModel *pModel,
 	m_pCurrentFace->mIndices = new unsigned int[ m_pCurrentFace->mNumIndices ];
 	
 	size_t idx = 0;
-	for ( size_t i = 0; i < pQ3BSPFace->iNumOfFaceVerts; i++ )
+	for ( size_t i = 0; i < (size_t) pQ3BSPFace->iNumOfFaceVerts; i++ )
 	{
 		const size_t index = pQ3BSPFace->iVertexIndex + pModel->m_Indices[ pQ3BSPFace->iFaceVertexIndex + i ];
 		ai_assert( index < pModel->m_Vertices.size() );
@@ -429,7 +458,9 @@ void Q3BSPFileImporter::createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScen
 	{
 		const std::string matName = (*it).first;
 		if ( matName.empty() )
+		{
 			continue;
+		}
 
 		aiString aiMatName;
 		aiMatName.Set( matName );
@@ -445,8 +476,9 @@ void Q3BSPFileImporter::createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScen
 			sQ3BSPTexture *pTexture = pModel->m_Textures[ textureId ];
 			if ( NULL != pTexture )
 			{
-				std::string texName( pTexture->strName );
-				texName += ".jpg";
+				std::string tmp( pTexture->strName ), texName( "" );
+				tmp += ".jpg";
+				normalizePathName( tmp, texName );
 				aiString textureName(  texName.c_str() );
 				pMatHelper->AddProperty( &textureName, AI_MATKEY_TEXTURE_DIFFUSE( 0 ) );
 			}

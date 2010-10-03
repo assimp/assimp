@@ -1182,10 +1182,4 @@ aiVector3D GetCameraMatrix (aiMatrix4x4& p_mOut)
 	return g_sCamera.vPos;
 }
 
-};
-
-
-
-
-
-
+}

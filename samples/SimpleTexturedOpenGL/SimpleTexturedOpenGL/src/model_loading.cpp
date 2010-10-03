@@ -798,7 +798,6 @@ LRESULT CALLBACK WndProc(HWND hWnd,				// Handles for this Window
 }
 
 
-
 int WINAPI WinMain( __in HINSTANCE hInstance,				// Instance
 				   __in_opt HINSTANCE hPrevInstance,		// Previous Instance
 				   __in_opt LPSTR lpCmdLine,				// Command Line Parameters
@@ -895,8 +894,3 @@ int WINAPI WinMain( __in HINSTANCE hInstance,				// Instance
 	KillGLWindow();
 	return (msg.wParam);	// Exit The Program
 }
-
-
-
-
-

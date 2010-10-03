@@ -51,13 +51,14 @@ ENDIF ( ENABLE_BOOST_WORKAROUND )
 
 
 ADD_SUBDIRECTORY( code/ )
-
 SET ( BUILD_ASSIMP_TOOLS ON CACHE BOOL
 	"If the supplementary tools for Assimp are built in addition to the library."
 )
 IF ( BUILD_ASSIMP_TOOLS )
 	IF ( WIN32 )
 		ADD_SUBDIRECTORY( tools/assimp_view/ )
+		ADD_SUBDIRECTORY( samples/SimpleOpenGL/ )
+		ADD_SUBDIRECTORY( samples/SimpleTexturedOpenGL/ )
 	ENDIF ( WIN32 )
 	ADD_SUBDIRECTORY( tools/assimp_cmd/ )
 ENDIF ( BUILD_ASSIMP_TOOLS )

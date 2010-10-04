@@ -2005,8 +2005,9 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 	const char* content = GetTextContent();
 	while( *content != 0)
 	{
-		// read a value 
-		unsigned int value = strtol10( content, &content);
+		// read a value. 
+    // Hack: (thom) Some exporters put negative indices sometimes. We just try to carry on anyways.
+    int value = std::max( 0, strtol10s( content, &content));
 		indices.push_back( size_t( value));
 		// skip whitespace after it
 		SkipSpacesAndLineEnd( &content);

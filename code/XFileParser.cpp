@@ -710,6 +710,8 @@ void XFileParser::ParseDataObjectMaterial( Material* pMaterial)
 {
 	std::string matName;
 	readHeadOfDataObject( &matName);
+	if( matName.empty())
+		matName = std::string( "material") + boost::lexical_cast<std::string>( mLineNumber);
 	pMaterial->mName = matName;
 	pMaterial->mIsReference = false;
 

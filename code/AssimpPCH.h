@@ -128,6 +128,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/format.hpp>
 #include <boost/foreach.hpp>
 #include <boost/static_assert.hpp>
+#include <boost/lexical_cast.hpp>
 
 // Public ASSIMP headers
 #include "../include/DefaultLogger.h"

@@ -1001,6 +1001,22 @@ void XFileParser::CheckForSeparator()
 }
 
 // ------------------------------------------------------------------------------------------------
+// tests and possibly consumes a separator char, but does nothing if there was no separator
+void XFileParser::TestForSeparator()
+{
+  if( mIsBinaryFormat)
+    return;
+
+  FindNextNoneWhiteSpace();
+  if( P >= End)
+    return;
+
+  // test and skip
+  if( *P == ';' || *P == ',')
+    P++;
+}
+
+// ------------------------------------------------------------------------------------------------
 void XFileParser::readHeadOfDataObject( std::string* poName)
 {
 	std::string nameOrBrace = GetNextToken();
@@ -1332,7 +1348,7 @@ aiVector2D XFileParser::ReadVector2()
 	aiVector2D vector;
 	vector.x = ReadFloat();
 	vector.y = ReadFloat();
-	CheckForSeparator();
+	TestForSeparator();
 
 	return vector;
 }
@@ -1344,7 +1360,7 @@ aiVector3D XFileParser::ReadVector3()
 	vector.x = ReadFloat();
 	vector.y = ReadFloat();
 	vector.z = ReadFloat();
-	CheckForSeparator();
+	TestForSeparator();
 
 	return vector;
 }
@@ -1357,7 +1373,7 @@ aiColor4D XFileParser::ReadRGBA()
 	color.g = ReadFloat();
 	color.b = ReadFloat();
 	color.a = ReadFloat();
-	CheckForSeparator();
+	TestForSeparator();
 
 	return color;
 }
@@ -1369,7 +1385,7 @@ aiColor3D XFileParser::ReadRGB()
 	color.r = ReadFloat();
 	color.g = ReadFloat();
 	color.b = ReadFloat();
-	CheckForSeparator();
+	TestForSeparator();
 
 	return color;
 }

@@ -116,6 +116,9 @@ protected:
 	//! checks for a separator char, either a ',' or a ';'
 	void CheckForSeparator();
 
+  /// tests and possibly consumes a separator char, but does nothing if there was no separator
+  void TestForSeparator();
+
 	//! reads a x file style string
 	void GetNextTokenAsString( std::string& poString);
 

@@ -1187,8 +1187,10 @@ BaseImporter* Importer::FindLoader (const char* szExtension) const
 	for(;*szExtension == '*' || *szExtension == '.'; ++szExtension);
 
 	std::string ext(szExtension);
-	if (ext.empty())
+	if (ext.empty()) {
 		return NULL;
+	}
+	std::transform(ext.begin(),ext.end(), ext.begin(), tolower);
 
 	std::set<std::string> str;
 	for (std::vector<BaseImporter*>::const_iterator i =  pimpl->mImporter.begin();i != pimpl->mImporter.end();++i)	{

@@ -1,0 +1,1 @@
+SimpleOpenGL.exe ..\..\test\models\X\Testwuson.X

@@ -6,7 +6,7 @@ Model copyright: Elias Tsiantas
 =====================================================================
 
 Downloaded 4th November 2008 (Obama ftw!).
-Notice found on the page:
+Notices found on the page:
 
 "
 Free the models is a site that offers free 3d models in 3ds, bryce, poser,
@@ -15,6 +15,10 @@ your favorite modelling and rendering program. All the content is free
 for any use. In the future more 3d formats will be added and some other
 sections such as wallpapers, 3d screensavers, 3d coding source code and 
 tutorials.
+"
+
+"
+'Free the models' is a site dedicated to provide free content for 3d applications and 3d/game engines. The license of the content is that what you download from here is one step away from public domain. So, everything you download from here is free for any use EXCEPT it cannot be included in another free web or cd collection and it cannot be sold. Otherwise you can use it in your commercial game, 3d application or render work. You don't have to provide credit but It would be nice if you do.
 "
 
 INFO

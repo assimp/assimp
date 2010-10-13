@@ -37,8 +37,8 @@
 
 
 // currently these are hardcoded
-static const std::string basepath = "../../test/models/X/";
-static const std::string modelname = "dwarf.x";
+static const std::string basepath = "../../test/models/OBJ/";
+static const std::string modelname = "spider.obj";
 
 
 HGLRC		hRC=NULL;			// Permanent Rendering Context

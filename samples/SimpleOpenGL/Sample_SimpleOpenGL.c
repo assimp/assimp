@@ -339,8 +339,10 @@ int main(int argc, char **argv)
 	stream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE,"assimp_log.txt");
 	aiAttachLogStream(&stream);
 
-	if( 0 != loadasset( argc >= 2 ? argv[1] : "../../test/models/X/dwarf.x")) {
-		if( argc != 1 || 0 != loadasset( "../../../../test/models/X/dwarf.x")) { 
+	// the model name can be specified on the command line. we try to locate
+	// one of the more expressive test models from the repository.
+	if( 0 != loadasset( argc >= 2 ? argv[1] : "../../test/models-nonbsd/X/dwarf.x")) {
+		if( argc != 1 || 0 != loadasset( "../../../../test/models-nonbsd/X/dwarf.x") && 0 != loadasset( "../../test/models/X/Testwuson.X")) { 
 			return -1;
 		}
 	}

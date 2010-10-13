@@ -86,7 +86,8 @@ database_name = "db"
 # List of directories to be processed. Paths are processed recursively.
 # -------------------------------------------------------------------------------
 model_directories = [
-os.path.join("..","models")
+os.path.join("..","models"),
+os.path.join("..","models-nonbsd")
 ]
 
 # -------------------------------------------------------------------------------

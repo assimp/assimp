@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
 
+#include <windows.h>
 #include "DefaultIOSystem.h"
 #include "Q3BSPFileImporter.h"
 #include "Q3BSPZipArchive.h"
@@ -85,7 +86,7 @@ static void extractIds( const std::string &rKey, int &rId1, int &rId2 )
 	if ( std::string::npos == pos )
 		return;
 
-	std::string tmp1 = rKey.substr( 0, pos - 1 );
+	std::string tmp1 = rKey.substr( 0, pos );
 	std::string tmp2 = rKey.substr( pos + 1, rKey.size() - pos - 1 );
 	rId1 = atoi( tmp1.c_str() );
 	rId2 = atoi( tmp2.c_str() );
@@ -141,6 +142,12 @@ Q3BSPFileImporter::~Q3BSPFileImporter()
 	for ( FaceMap::iterator it = m_MaterialLookupMap.begin(); it != m_MaterialLookupMap.end();
 		++it )
 	{
+		const std::string matName = (*it).first;
+		if ( matName.empty() )
+		{
+			continue;
+		}
+
 		std::vector<Q3BSP::sQ3BSPFace*> *pCurFaceArray = (*it).second;
 		if ( NULL != pCurFaceArray )
 		{
@@ -298,8 +305,8 @@ void Q3BSPFileImporter::CreateNodes( const Q3BSP::Q3BSPModel *pModel, aiScene* p
 			{
 				delete pMesh;
 			}
-			matIdx++;
 		}
+		matIdx++;
 	}
 
 	pScene->mNumMeshes = MeshArray.size();
@@ -343,7 +350,7 @@ aiNode *Q3BSPFileImporter::CreateTopology( const Q3BSP::Q3BSPModel *pModel,
 		return NULL;
 
 	size_t numTriangles = countTriangles( rArray );
-	//pMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
+	pMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
 	pMesh->mFaces = new aiFace[ numTriangles ];
 	pMesh->mNumFaces = numTriangles;

@@ -86,3 +86,6 @@ Contributed several patches regarding Mac OS/XCode targets, bug reports.
 
 - Martin Walser (Samhayne)
 Contributed the 'SimpleTexturedOpenGl' sample.
+
+- Matthias Fauconneau
+Contributed a fix for the Q3-BSP loader.

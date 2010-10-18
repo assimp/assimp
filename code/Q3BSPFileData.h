@@ -186,13 +186,40 @@ struct Q3BSPModel
 		m_Indices(),
 		m_Textures(),
 		m_Lightmaps(),
-		m_EntityData()
+		m_EntityData(),
+		m_ModelName( "" )
 	{
 		// empty
 	}
+
+	~Q3BSPModel()
+	{
+		for ( unsigned int i=0; i<m_Lumps.size(); i++ )
+			if ( NULL != m_Lumps[i] )
+				delete m_Lumps[i];
+		
+		for ( unsigned int i=0; i<m_Vertices.size(); i++ )
+			if ( NULL != m_Vertices[ i ] )
+				delete m_Vertices[ i ];
+		for ( unsigned int i=0; i<m_Faces.size(); i++ )
+			if ( NULL != m_Faces[ i ] )
+				delete m_Faces[ i ];
+		for ( unsigned int i=0; i<m_Textures.size(); i++ )
+			if ( NULL != m_Textures[ i ] )
+				delete m_Textures[ i ];
+		for ( unsigned int i=0; i<m_Lightmaps.size(); i++ )
+			if ( NULL != m_Lightmaps[ i ] )
+				delete m_Lightmaps[ i ];
+
+		m_Lumps.clear();
+		m_Vertices.clear();
+		m_Faces.clear();
+		m_Textures.clear();
+		m_Lightmaps.clear();
+	}
 };
 
-}
-}
+} // Namespace Q3BSP
+} // Namespace Assimp
 
 #endif // ASSIMP_Q3BSPFILEDATA_H_INC

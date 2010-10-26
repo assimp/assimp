@@ -57,7 +57,14 @@ namespace Assimp
 template<class char_t>
 inline bool isEndOfBuffer(  char_t it, char_t end )
 {
-	end--;
+	if ( it == end )
+	{
+		return true;
+	}
+	else
+	{
+		end--;
+	}
 	return ( it == end );	
 }
 

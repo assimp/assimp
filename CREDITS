@@ -89,3 +89,6 @@ Contributed the 'SimpleTexturedOpenGl' sample.
 
 - Matthias Fauconneau
 Contributed a fix for the Q3-BSP loader.
+
+- Jørgen P. Tjernø
+Contributed updated and improved xcode workspaces

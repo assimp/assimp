@@ -904,6 +904,8 @@ void WriteLogOpening(const std::string& file)
 		<< " amd64"
 #elif defined(ASSIMP_BUILD_IA_64BIT_ARCHITECTURE)
 		<< " itanium"
+#elif defined(ASSIMP_BUILD_PPC_32BIT_ARCHITECTURE)
+		<< " ppc32"
 #else
 #	error unknown architecture
 #endif

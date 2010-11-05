@@ -175,7 +175,7 @@ using namespace Assimp::Formatter;
 #ifndef ASSIMP_BUILD_NO_COB_IMPORTER
 #	include "COBLoader.h"
 #endif
-#ifndef ASSIMP_BUILD_NO_COB_IMPORTER
+#ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
 #	include "BlenderLoader.h"
 #endif
 //#ifndef ASSIMP_BUILD_NO_SWORDOFMOONLIGHT_IMPORTER

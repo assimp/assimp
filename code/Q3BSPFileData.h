@@ -47,6 +47,9 @@ namespace Assimp
 namespace Q3BSP
 {
 
+static const unsigned int CE_BSP_LIGHTMAPWIDTH = 128;
+static const unsigned int CE_BSP_LIGHTMAPHEIGHT = 128;
+
 static const unsigned int CE_BSP_LIGHTMAPSIZE = 128*128*3;	///< = 128( width ) * 128 ( height ) * 3 ( channels / RGB ).
 static const int VERION_Q3LEVEL = 46;						///< Supported version.
 

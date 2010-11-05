@@ -112,12 +112,16 @@ bool Q3BSPFileParser::readData( const std::string &rMapName )
 bool Q3BSPFileParser::parseFile()
 {
 	if ( m_Data.empty() )
+	{
 		return false;
+	}
 
 	if ( !validateFormat() )
+	{
 		return false;
+	}
 
-	// Import the dictionary
+	// Imports the dictionary of the level
 	getLumps();
 
 	// Conunt data and prepare model data 

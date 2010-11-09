@@ -26,6 +26,9 @@ Visual Studio 9 support, bugfixes.
 - Mark Sibly
 B3D-Loader, Assimp testing
 
+- Jonathan Klein
+Ogre Loader
+
 - Sebastian Hempel,
 PyAssimp (first version)
 Compile-Bugfixes for mingw, add enviroment for static library support in make.

@@ -42,8 +42,8 @@ private:
 	/// uses the bone data to convert a SubMesh into a aiMesh which will be created and returned
 	aiMesh* CreateAssimpSubMesh(const SubMesh &theSubMesh, const std::vector<Bone>& Bones) const;
 
-
-	void CreateAssimpSkeleton(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations) const;
+	//creates the aiskeleton in current scene
+	void CreateAssimpSkeleton(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations);
 
 	aiMaterial* LoadMaterial(const std::string MaterialName) const;
 	

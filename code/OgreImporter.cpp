@@ -193,6 +193,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	
 
 	CreateAssimpSkeleton(Bones, Animations);
+	PutAnimationsInScene(Bones, Animations);
 	//___________________________________________________________
 }
 
@@ -212,8 +213,8 @@ void OgreImporter::SetupProperties(const Importer* pImp)
 void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 {
 	XmlRead(Reader);
-	//TODO: maybe we have alsways just 1 faces and 1 geometry and always in this order. this loop will only work correct, wenn the order
-	//of faces and geometry changed, and not if we habe more than one of one
+	//TODO: maybe we have alsways just 1 faces and 1 geometry and always in this order. this loop will only work correct, when the order
+	//of faces and geometry changed, and not if we have more than one of one
 	while(Reader->getNodeName()==string("faces") || string(Reader->getNodeName())=="geometry" || Reader->getNodeName()==string("boneassignments"))
 	{
 		if(string(Reader->getNodeName())=="faces")//Read the face list
@@ -704,18 +705,15 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 }
 
 
-void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations) const
+void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations)
 {
-	const aiScene* const m_CurrentScene=this->m_CurrentScene;//make sure, that we can access but not change the scene
-
-	//-----------------skeleton is completly loaded, now put it in the assimp scene:-------------------------------
-	
 	if(!m_CurrentScene->mRootNode)
 		throw DeadlyImportError("No root node exists!!");
 	if(0!=m_CurrentScene->mRootNode->mNumChildren)
 		throw DeadlyImportError("Root Node already has childnodes!");
 
-	//--------------Createt the assimp bone hierarchy-----------------
+
+	//Createt the assimp bone hierarchy
 	DefaultLogger::get()->debug("Root Bones");
 	vector<aiNode*> RootBoneNodes;
 	BOOST_FOREACH(Bone theBone, Bones)
@@ -729,14 +727,13 @@ void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const st
 	m_CurrentScene->mRootNode->mNumChildren=RootBoneNodes.size();
 	m_CurrentScene->mRootNode->mChildren=new aiNode*[RootBoneNodes.size()];
 	memcpy(m_CurrentScene->mRootNode->mChildren, &RootBoneNodes[0], sizeof(aiNode*)*RootBoneNodes.size());
-	//_______________________________________________________________
 }
 
 
 void OgreImporter::PutAnimationsInScene(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations)
 {
 	//-----------------Create the Assimp Animations --------------------
-	if(Animations.size()>0)//Maybe the model had only a skeleton and no animations. (If it also has no skeleton, this function would'nt have benn called
+	if(Animations.size()>0)//Maybe the model had only a skeleton and no animations. (If it also has no skeleton, this function would'nt have been called
 	{
 		m_CurrentScene->mNumAnimations=Animations.size();
 		m_CurrentScene->mAnimations=new aiAnimation*[Animations.size()];

@@ -1594,11 +1594,11 @@ Ogre importer is currently optimized for the Blender Ogre exporter, because that
 
 @subsection what What will be loaded?
 
-Mesh: Faces, Positions, Normals and one Uv pair. The Materialname will be used to load the material. No Bone-Assignments yet.
+Mesh: Faces, Positions, Normals and one Uv pair. The Materialname will be used to load the material.
 
 Material: The right material in the file will be searched, the importer should work with materials who
-have 1 technique and 1 pass in this technique. From there, the texturename (for 1 color- and 1 normalmap) will be loaded. Also, the
-materialname will be set.
+have 1 technique and 1 pass in this technique. From there, the texturename (for 1 color- and 1 normalmap) and the
+materialcolors (but not in custom materials) will be loaded. Also, the materialname will be set.
 
 Skeleton: Skeleton with Bone hierarchy (Position and Rotation, but no Scaling in the skeleton is supported), names and transformations,
 animations with rotation, translation and scaling keys.
@@ -1633,4 +1633,11 @@ should read the custom material sektion in the Ogre Blender exporter Help File, 
 can find in scripts/OgreImpoter/Assimp.tlp in the assimp source. If you don't set all values, don't worry, they will be ignored during import.
 
 If you want more properties in custom materials, you can easily expand the ogre material loader, it will be just a few lines for each property.
+
+@subsection todo Todo
+- Load colors in custom materials
+- extend custom and normal material loading
+- fix bone hierarchy bug
+- tes everything elaboratly
+- check for non existent animation keys (what happens if a one time not all bones have a key?)
 */

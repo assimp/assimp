@@ -19,7 +19,7 @@
 %define ASSIMP_ARRAY(CLASS, TYPE, NAME, LENGTH)
 %newobject CLASS::NAME;
 %extend CLASS {
-  std::vector<TYPE > *NAME() {
+  std::vector<TYPE > *NAME() const {
     std::vector<TYPE > *result = new std::vector<TYPE >;
     result->reserve(LENGTH);
 
@@ -36,7 +36,7 @@
 %define ASSIMP_POINTER_ARRAY(CLASS, TYPE, NAME, LENGTH)
 %newobject CLASS::NAME;
 %extend CLASS {
-  std::vector<TYPE *> *NAME() {
+  std::vector<TYPE *> *NAME() const {
     std::vector<TYPE *> *result = new std::vector<TYPE *>;
     result->reserve(LENGTH);
 
@@ -56,7 +56,7 @@
 %define ASSIMP_POINTER_ARRAY_ARRAY(CLASS, TYPE, NAME, OUTER_LENGTH, INNER_LENGTH)
 %newobject CLASS::NAME;
 %extend CLASS {
-  std::vector<std::vector<TYPE *> > *NAME() {
+  std::vector<std::vector<TYPE *> > *NAME() const {
     std::vector<std::vector<TYPE *> > *result = new std::vector<std::vector<TYPE *> >;
     result->reserve(OUTER_LENGTH);
 

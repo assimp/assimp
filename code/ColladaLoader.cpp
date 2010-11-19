@@ -431,16 +431,21 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 				continue;
 
 			// find material assigned to this submesh
+			std::string meshMaterial;
 			std::map<std::string, Collada::SemanticMappingTable >::const_iterator meshMatIt = mid.mMaterials.find( submesh.mMaterial);
 
-			const Collada::SemanticMappingTable* table;
+			const Collada::SemanticMappingTable* table = NULL;
 			if( meshMatIt != mid.mMaterials.end())
+			{
 				table = &meshMatIt->second;
-			else {
-				table = NULL;
-				DefaultLogger::get()->warn( boost::str( boost::format( "Collada: No material specified for subgroup \"%s\" in geometry \"%s\".") % submesh.mMaterial % mid.mMeshOrController));
+				meshMaterial = table->mMatName;
 			}
-			const std::string& meshMaterial = table ? table->mMatName : "";
+			else 
+			{
+				DefaultLogger::get()->warn( boost::str( boost::format( "Collada: No material specified for subgroup \"%s\" in geometry \"%s\".") % submesh.mMaterial % mid.mMeshOrController));
+				if( !mid.mMaterials.empty() )
+					meshMaterial = mid.mMaterials.begin()->second.mMatName;
+			}
 
 			// OK ... here the *real* fun starts ... we have the vertex-input-to-effect-semantic-table
 			// given. The only mapping stuff which we do actually support is the UV channel.

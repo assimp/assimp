@@ -2633,7 +2633,11 @@ void ColladaParser::TestOpening( const char* pName)
 // Tests for the closing tag of the given element, throws an exception if not found
 void ColladaParser::TestClosing( const char* pName)
 {
-	// read closing tag
+	// check if we're already on the closing tag and return right away
+	if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END && strcmp( mReader->getNodeName(), pName) == 0)
+		return;
+
+	// if not, read some more
 	if( !mReader->read())
 		ThrowException( boost::str( boost::format( "Unexpected end of file while reading end of \"%s\" element.") % pName));
 	// whitespace in front is ok, just read again if found
@@ -2641,6 +2645,7 @@ void ColladaParser::TestClosing( const char* pName)
 		if( !mReader->read())
 			ThrowException( boost::str( boost::format( "Unexpected end of file while reading end of \"%s\" element.") % pName));
 
+	// but this has the be the closing tag, or we're lost
 	if( mReader->getNodeType() != irr::io::EXN_ELEMENT_END || strcmp( mReader->getNodeName(), pName) != 0)
 		ThrowException( boost::str( boost::format( "Expected end of \"%s\" element.") % pName));
 }

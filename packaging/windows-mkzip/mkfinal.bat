@@ -121,6 +121,9 @@ rem Insert 'dummy' files into empty folders
 echo. > final\%OUT_SDK%\lib\dummy
 echo. > final\%OUT_SDK%\obj\dummy
 
+
+RD  /s /q final\%OUT_SDK%\port\swig
+
 rem Also, repackaging is not a must-have feature
 RD  /s /q final\%OUT_SDK%\packaging
 

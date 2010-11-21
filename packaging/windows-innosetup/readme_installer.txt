@@ -4,35 +4,13 @@ Open Asset Import Library (Assimp) SDK Installer
 Release Notes
 ------------------------------------------------------------------------------------
 
+http://assimp.sf.net
 
-Known Bugs & Limitations
-========================
-
-
-Assimp
-
-- IRR, DXF, MOT, LWS support is limited 
-
-(the following issues are most likely to be addressed in a near bugfix update to 1.1)
-
-- COB is pretty new on the list, test coverage is bad. Please give feedback.
-- Ogre XML loader fails to load animations properly.
-- ColladaLoader handles instanced nodes not entirely correct.
-
-
-Viewer
-
-- If you toggle all UI components quickly, the app gets confused.
-- For files more than one embedded texture, only the first is loaded.
-- Normals appear flipped from time to time when either of the normals-related menu items was hit.
-- Alpha-sorting is implemented, but still causes artifacts when models are moved quickly.
-- Several important texture file formats (such as GIF) are not supported.
-- HUD is blurred on the right side. ATI/AMD hardware only.
 
 Troubleshooting
 ===============
 
-1. Missing d3dx9_42.dll? 
+1. Missing d3dx9_(some-number).dll? 
 Install the latest DirectX runtime or grab the file from somewhere (that's evil but mostly fine).
 
 2. Application configuration not correct / missing msvcr***.dll?
@@ -42,4 +20,4 @@ Reinstall Microsoft Visual C++ 2005 SP1 Redistributable (x86 or x64, depending o
 Add it to PATH. That's not a bug, the installer does not alter the PATH.
 
 4. Crashes immediately
-You CPU lacks SSE2 support. Build Assimp from scratch to suit your CPU, sorry.ut mostly fine).
+You CPU lacks SSE2 support. Build Assimp from scratch to suit your CPU, sorry.

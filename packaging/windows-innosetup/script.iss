@@ -2,7 +2,7 @@
 
 [Setup]
 AppName=Open Asset Import Library - SDK
-AppVerName=Open Asset Import Library - SDK (v1.1)
+AppVerName=Open Asset Import Library - SDK (v2.0)
 DefaultDirName={pf}\Assimp
 DefaultGroupName=Assimp
 UninstallDisplayIcon={app}\bin\x86\assimp.exe
@@ -12,9 +12,9 @@ SetupIconFile=..\..\tools\shared\assimp_tools_icon.ico
 WizardImageFile=compiler:WizModernImage-IS.BMP
 WizardSmallImageFile=compiler:WizModernSmallImage-IS.BMP
 LicenseFile=License.rtf
-OutputBaseFileName=assimp-sdk-1.1-setup
-VersionInfoVersion=1.1.0.0
-VersionInfoTextVersion=1.1
+OutputBaseFileName=assimp-sdk-2.0-setup
+VersionInfoVersion=2.0.0.0
+VersionInfoTextVersion=2.0
 VersionInfoCompany=Assimp Development Team
 ArchitecturesInstallIn64BitMode=x64
 
@@ -29,9 +29,11 @@ Name: "tools"; Description: "Asset Viewer & Command Line Tools (32 and 64 Bit)";
 Name: "help"; Description: "Help Files"; Types: full compact
 Name: "samples"; Description: "Samples"; Types: full
 ;Name: "wsource"; Description: "Source Code"; Types: full
-Name: "test"; Description: "Test Models"; Types: full
+Name: "test"; Description: "Test Models (BSD-licensed)"; Types: full
+Name: "test_nonbsd"; Description: "Test Models (other (free) licenses)"; Types: full
 Name: "pyassimp"; Description: "Python Bindings"; Types: full
 Name: "dassimp"; Description: "D Bindings"; Types: full
+Name: "assimp_net"; Description: "C#/.NET Bindings"; Types: full
 ;Name: "vc8"; Description: "VC8 project files"; Types: full
 ;Name: "vc9"; Description: "VC9 project files"; Types: full
 
@@ -86,6 +88,10 @@ Source: "..\..\include\*"; DestDir: "{app}\include"; Flags: recursesubdirs
 
 ; dAssimp
 Source: "..\..\port\dAssimp\*"; DestDir: "{app}\port\D"; Flags: recursesubdirs; Components: dassimp
+Source: "..\..\port\swig\*"; DestDir: "{app}\port\D_SwigExperimental"; Flags: recursesubdirs; Components: dassimp
+
+; Assimp.NET
+Source: "..\..\port\Assimp.NET\*"; DestDir: "{app}\port\C#"; Flags: recursesubdirs; Components: assimp_net
 
 ; PyAssimp
 Source: "..\..\port\PyAssimp\*"; DestDir: "{app}\port\Python"; Excludes: "*.pyc,*.dll"; Flags: recursesubdirs; Components: pyassimp
@@ -93,6 +99,7 @@ Source: "..\..\port\PyAssimp\*"; DestDir: "{app}\port\Python"; Excludes: "*.pyc,
 ; Test repository
 Source: "..\..\test\models\*"; DestDir: "{app}\test\models"; Flags: recursesubdirs; Components: test
 Source: "..\..\test\regression\*"; DestDir: "{app}\test\regression"; Flags: recursesubdirs; Components: test
+Source: "..\..\test\models-nonbsd\*"; DestDir: "{app}\test\models-nonbsd"; Flags: recursesubdirs; Components: test_nonbsd
 
 ; Source Code & Workspaces
 ;Source: "..\..\code\*"; Excludes: "*.o"; DestDir: "{app}\code"; Flags: recursesubdirs; Components: wsource

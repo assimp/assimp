@@ -49,7 +49,7 @@ SET /p REVISIONBASE= < tmpfile.txt
 DEL /q tmpfile.txt
 cd ..\packaging\windows-mkzip
 
-SET VERSIONBASE=1.1.%REVISIONBASE%
+SET VERSIONBASE=2.0.%REVISIONBASE%
 
 SET OUT_SDK=assimp--%VERSIONBASE%-sdk
 SET OUT_BIN=assimp--%VERSIONBASE%-bin
@@ -99,7 +99,7 @@ rem We take the current revision and remove some stuff
 rem that is nto yet ready to be published.
 rem -----------------------------------------------------
 
-svn export .\..\..\  final\%OUT_SDK%
+svn export .\..\..\  .\final\%OUT_SDK%
 
 mkdir final\%OUT_SDK%\doc\assimp_html
 mkdir final\%OUT_SDK%\doc\assimpcmd_html
@@ -120,12 +120,6 @@ RD  /s /q final\%OUT_SDK%\doc\AssimpCmdDoc_Html
 rem Insert 'dummy' files into empty folders
 echo. > final\%OUT_SDK%\lib\dummy
 echo. > final\%OUT_SDK%\obj\dummy
-
-rem Remove WIP ports and language bindings
-RD  /s /q final\%OUT_SDK%\port\Assimp.NET
-RD  /s /q final\%OUT_SDK%\port\jAssimp
-RD  /s /q final\%OUT_SDK%\port\BrainFuckAssimp
-RD  /s /q final\%OUT_SDK%\port\swig
 
 rem Also, repackaging is not a must-have feature
 RD  /s /q final\%OUT_SDK%\packaging

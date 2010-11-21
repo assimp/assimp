@@ -4,14 +4,13 @@ Open Asset Import Library (Assimp) Viewer Installer
 Release Notes
 ------------------------------------------------------------------------------------
 
+http://assimp.sf.net
 
 Known Bugs & Limitations
 ========================
 
 Viewer
 
-- If you toggle all UI components quickly, the app gets confused.
-- For files more than one embedded texture, only the first is loaded.
 - Normals appear flipped from time to time when either of the normals-related menu items was hit.
 - Alpha-sorting is implemented, but still causes artifacts when models are moved quickly.
 - Several important texture file formats (such as GIF) are not supported.
@@ -20,7 +19,7 @@ Viewer
 Troubleshooting
 ===============
 
-1. Missing d3dx9_42.dll? 
+1. Missing d3dx9_(number).dll? 
 Install the latest DirectX runtime or grab the file from somewhere (that's evil but mostly fine).
 
 2. Application configuration not correct / missing msvcr***.dll?

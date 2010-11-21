@@ -22,6 +22,7 @@ that it has not been implemented yet and some (most ...) formats lack proper spe
 <hr>
 <br><tt>
 <b>Collada</b> ( <i>*.dae;*.xml</i> )<br>
+<b>Blender</b> ( <i>*.blend</i> ) <sup>3</sup><br>
 <b>Biovision BVH </b> ( <i>*.bvh</i> ) <br>
 <b>3D Studio Max 3DS</b> ( <i>*.3ds</i> ) <br>
 <b>3D Studio Max ASE</b> ( <i>*.ase</i> ) <br>
@@ -34,6 +35,7 @@ that it has not been implemented yet and some (most ...) formats lack proper spe
 <b>Quake I</b> ( <i>*.mdl</i> ) <br>
 <b>Quake II</b> ( <i>*.md2</i> ) <br>
 <b>Quake III</b> ( <i>*.md3</i> ) <br>
+<b>Quake 3 BSP</b> ( <i>*.pk3</i> )  <sup>1</sup> <br>
 <b>RtCW</b> ( <i>*.mdc</i> )<br>
 <b>Doom 3</b> ( <i>*.md5mesh;*.md5anim;*.md5camera</i> ) <br>
 <b>DirectX X </b> ( <i>*.x</i> ). <br>		
@@ -55,14 +57,16 @@ that it has not been implemented yet and some (most ...) formats lack proper spe
 <b>Modo Model</b> ( <i>*.lxo</i> )<br>
 <b>CharacterStudio Motion</b> ( <i>*.csm</i> )<br>
 <b>Stanford Ply</b> ( <i>*.ply</i> )<br>
-<b>TrueSpace</b> ( <i>*.cob, *.scn</i> )<br><br>
+<b>TrueSpace</b> ( <i>*.cob, *.scn</i> )<sup>2</sup><br><br>
 </tt>
 See the @link importer_notes Importer Notes Page @endlink for informations, what a specific importer can do and what not. 
 Note that although this paper claims to be the official documentation, 
 http://assimp.sourceforge.net/main_features_formats.html 
 <br>is usually the most up-to-date list of file formats supported by the library. <br>
 
-<sup>3</sup>: These formats support animations, but ASSIMP doesn't yet support them (or they're buggy)
+<sup>1</sup>: Experimental loaders<br>
+<sup>2</sup>: Indicates very limited support - many of the format's features don't map to Assimp's data structures.<br>
+<sup>3</sup>: These formats support animations, but ASSIMP doesn't yet support them (or they're buggy)<br>
 <br>
 <hr>
 

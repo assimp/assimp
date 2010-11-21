@@ -8,9 +8,6 @@ NOTE: This has only been tested on 32-bit Windows 7 in .NET 3.5SP1 compiled
       under Visual Studio 2008 with the 'Debug' and 'Release' targets.
 
 
-The Viewer is very minimalistic, don't expect all files to be displayed 
-properly. Feel free to extend it ;-)
-
 
 How To Build
 ------------
@@ -40,8 +37,14 @@ to the main assimp source from the C# viewer application.
 
 4) Build and run Assimp.NET_DEMO.
 
-The demo application is currently hardcoded to load a specific 3DS file from
-the test directory. Change this in Assimp.NET\AssimpView.cs to load a different file.
+
+By default, the viewer application loads a pre-defined 3DS test file from
+the /test/models/3DS folder. To load another file, pass it on the
+command line.
+
+The viewer is very minimalistic, don't expect all files to be displayed 
+properly. Feel free to extend it ;-)
+
 
 
 License

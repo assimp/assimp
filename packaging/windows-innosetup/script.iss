@@ -38,8 +38,8 @@ Name: "assimp_net"; Description: "C#/.NET Bindings"; Types: full
 ;Name: "vc9"; Description: "VC9 project files"; Types: full
 
 [Run]
-Filename: "{app}\stub\vcredist_x86.exe"; StatusMsg: "Installing VS2008 SP1 redistributable package (32 Bit)"; Check: not IsWin64
-Filename: "{app}\stub\vcredist_x64.exe"; StatusMsg: "Installing VS2008 SP1 redistributable package (64 Bit)"; Check: IsWin64
+Filename: "{app}\stub\vcredist_x86.exe"; Parameters: "/qb"; StatusMsg: "Installing VS2008 SP1 redistributable package (32 Bit)"; Check: not IsWin64
+Filename: "{app}\stub\vcredist_x64.exe"; Parameters: "/qb"; StatusMsg: "Installing VS2008 SP1 redistributable package (64 Bit)"; Check: IsWin64
 
 [Files]
 

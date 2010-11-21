@@ -17,6 +17,8 @@ FEATURES:
      to the scene hierarchy window
      
    - Add C# bindings ('Assimp.NET')
+   - Keep BSD-licensed and otherwise free test files in separate 
+     folders (./test/models and ./test/models-nonbsd).
 
 FIXES:
    - Many Collada bugfixes, improve faul tolerance

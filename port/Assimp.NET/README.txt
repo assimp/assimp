@@ -8,6 +8,10 @@ NOTE: This has only been tested on 32-bit Windows 7 in .NET 3.5SP1 compiled
       under Visual Studio 2008 with the 'Debug' and 'Release' targets.
 
 
+The Viewer is very minimalistic, don't expect all files to be displayed 
+properly. Feel free to extend it ;-)
+
+
 How To Build
 ------------
 

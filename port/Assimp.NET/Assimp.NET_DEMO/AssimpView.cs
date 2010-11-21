@@ -183,15 +183,28 @@ namespace Assimp.Viewer
                 aiPostProcessSteps.aiProcess_SortByPType | // make 'clean' meshes which consist of a single typ of primitives
                 (aiPostProcessSteps)0);
 
+            // default model
+            var path = "../../../../../../test/models/3DS/test1.3ds";
+
             importer = new Importer();
-            var path = "../../../../../../test/models/3DS/jeep1.3ds";
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Length > 1) {
+                path = args[1];
+            }
+
+            
             //var path = "man.3ds";
             scene = importer.ReadFile(path, flags);
-            if (scene != null) {
+            if (scene != null)
+            {
                 directory = Path.GetDirectoryName(path);
                 CacheMaterials(scene.mMaterials);
                 CacheMeshes(scene.mMeshes);
                 SetupCamera(scene.mCameras);
+            }
+            else {
+                MessageBox.Show("Failed to open file: " + path + ". Either Assimp screwed up or the path is not valid.");
+                Application.Exit();
             }
         }
 

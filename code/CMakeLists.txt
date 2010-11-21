@@ -1,5 +1,5 @@
-SET( LIBRARY_VERSION "1.0.0" )
-SET( LIBRARY_SOVERSION "1" )
+SET( LIBRARY_VERSION "2.0.0" )
+SET( LIBRARY_SOVERSION "2" )
 
 #
 # Listing and grouping of all the source files for use with IDE project

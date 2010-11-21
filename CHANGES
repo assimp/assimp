@@ -2,6 +2,48 @@
 CHANGELOG
 ----------------------------------------------------------------------
 
+
+
+2.0 (2010-11-21)
+
+FEATURES:
+   - Add support for static Blender (*.blend) scenes
+   - Add support for Q3BSP scenes
+   - Add a windows-based OpenGL sample featuring texturing & basic materials
+   - Add an experimental progress feedback interface.
+   - Vastly improved performance (up to 500%, depending on mesh size and
+     spatial structure) in some expensive postprocessing steps
+   - AssimpView now uses a reworked layout which leaves more space
+     to the scene hierarchy window
+     
+   - Add C# bindings ('Assimp.NET')
+
+FIXES:
+   - Many Collada bugfixes, improve faul tolerance
+   - Fix possible crashes in the Obj loader
+   - Improve the Ogre XML loader
+   - OpenGL-sample now works with MinGW
+   - Fix Importer::FindLoader failing on uppercase file extensions
+   - Fix flawed path handling when locating external files
+   - Limit the maximum number of vertices, faces, face indices and 
+     weights that Assimp is able to handle. This is to avoid
+     crashes due to overflowing counters.
+   
+   - Updated XCode project files
+   - Further CMAKE build improvements
+   
+
+API CHANGES:
+   - Add data structures for vertex-based animations (These are not
+     currently used, however ...)
+   - Some Assimp::Importer methods are const now.
+ 
+ 
+
+
+
+
+
 1.1 (2010-04-17)
 This is the list of relevant changes from the 1.0 (r412) release to 1.1 (r700).
 

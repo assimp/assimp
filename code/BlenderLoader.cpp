@@ -68,9 +68,10 @@ using namespace Assimp;
 using namespace Assimp::Blender;
 using namespace Assimp::Formatter;
 
+
 static const aiLoaderDesc blenderDesc = {
 	"Blender 3D Importer \nhttp://www.blender3d.org",
-	"Alexander Gessler <alexander.gessler@gmx.net>",
+	"Assimp Team",
 	"",
 	"",
 	aiLoaderFlags_SupportBinaryFlavour | aiLoaderFlags_Experimental,
@@ -79,6 +80,7 @@ static const aiLoaderDesc blenderDesc = {
 	2,
 	50
 };
+
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer

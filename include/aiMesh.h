@@ -323,8 +323,9 @@ enum aiPrimitiveType
 	((n) > 3 ? aiPrimitiveType_POLYGON : (aiPrimitiveType)(1u << ((n)-1)))
 
 
+
 // ---------------------------------------------------------------------------
-/** @brief An AnimMesh is an attachment to an #aiMesh stores per-vertex 
+/** @brief NOT CURRENTLY IN USE. An AnimMesh is an attachment to an #aiMesh stores per-vertex 
  *  animations for a particular frame.
  *  
  *  You may think of an #aiAnimMesh as a `patch` for the host mesh, which
@@ -435,6 +436,7 @@ struct aiAnimMesh
 
 #endif
 };
+
 
 // ---------------------------------------------------------------------------
 /** @brief A mesh represents a geometry or model with a single material. 
@@ -589,13 +591,15 @@ struct aiMesh
 	 **/
 	C_STRUCT aiString mName;
 
-	/** The number of attachment meshes */
+
+	/** NOT CURRENTLY IN USE. The number of attachment meshes */
 	unsigned int mNumAnimMeshes;
 
-	/** Attachment meshes for this mesh, for vertex-based animation. 
+	/** NOT CURRENTLY IN USE. Attachment meshes for this mesh, for vertex-based animation. 
 	 *  Attachment meshes carry replacement data for some of the
 	 *  mesh'es vertex components (usually positions, normals). */
 	C_STRUCT aiAnimMesh** mAnimMeshes;
+
 
 #ifdef __cplusplus
 
@@ -604,12 +608,15 @@ struct aiMesh
 	{
 		mNumVertices    = 0; 
 		mNumFaces       = 0;
+
 		mNumAnimMeshes = 0;
+
 		mPrimitiveTypes = 0;
 		mVertices = NULL; mFaces    = NULL;
 		mNormals  = NULL; mTangents = NULL;
 		mBitangents = NULL;
 		mAnimMeshes = NULL;
+
 		for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
 		{
 			mNumUVComponents[a] = 0;
@@ -642,11 +649,12 @@ struct aiMesh
 			}
 			delete [] mBones;
 		}
+
 		if (mNumAnimMeshes && mAnimMeshes)	{
 			for( unsigned int a = 0; a < mNumAnimMeshes; a++) {
 				delete mAnimMeshes[a];
 			}
-			delete [] mBones;
+			delete [] mAnimMeshes;
 		}
 
 		delete [] mFaces;

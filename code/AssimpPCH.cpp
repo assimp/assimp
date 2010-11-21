@@ -11,9 +11,9 @@ static const char* LEGAL_INFORMATION =
 "Open Asset Import Library (Assimp).\n"
 "A free C/C++ library to import various 3D file formats into applications\n\n"
 
-"(c) ASSIMP Development Team, 2008-2010\n"
-"License: 3-clause BSD license\n"
-"Website: http://assimp.sourceforge.net\n"
+"(c) 2008-2010, ASSIMP Development Team\n"
+"License under the terms and conditions of the 3-clause BSD license\n"
+"http://assimp.sourceforge.net\n"
 ;
 
 // ------------------------------------------------------------------------------------------------
@@ -25,13 +25,13 @@ ASSIMP_API const char*  aiGetLegalString  ()	{
 // ------------------------------------------------------------------------------------------------
 // Get Assimp minor version
 ASSIMP_API unsigned int aiGetVersionMinor ()	{
-	return 1;
+	return 0;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Get Assimp major version
 ASSIMP_API unsigned int aiGetVersionMajor ()	{
-	return 1;
+	return 2;
 }
 
 // ------------------------------------------------------------------------------------------------

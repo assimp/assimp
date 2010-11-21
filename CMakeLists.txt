@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 2.6 )
 PROJECT( Assimp )
-SET ( PROJECT_VERSION "1.1" )
+SET ( PROJECT_VERSION "2.0" )
 
 INCLUDE_DIRECTORIES( include )
 

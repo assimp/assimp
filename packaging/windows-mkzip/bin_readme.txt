@@ -10,7 +10,6 @@ Known Bugs & Limitations
 
 Viewer
 
-- If you toggle all UI components quickly, the app gets confused.
 - For files more than one embedded texture, only the first is loaded.
 - Normals appear flipped from time to time when either of the normals-related menu items was hit.
 - Alpha-sorting is implemented, but still causes artifacts when models are moved quickly.

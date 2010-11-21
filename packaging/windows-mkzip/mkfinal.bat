@@ -161,8 +161,8 @@ IF NOT EXIST 7za.exe	(
 	echo build ZIP archives. Download: http://www.7-zip.org/download.html
 	pause
 ) else (
-7za.exe a -tzip "final\%OUT_BIN%.zip" ".\final\%OUT_BIN%\*"
-7za.exe a -tzip "final\%OUT_SDK%.zip" ".\final\%OUT_SDK%\*"
+7za.exe a -tzip "final\%OUT_BIN%.zip" ".\final\%OUT_BIN%"
+7za.exe a -tzip "final\%OUT_SDK%.zip" ".\final\%OUT_SDK%"
 )
 
 rem OK. We should have the release packages now.

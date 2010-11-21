@@ -125,8 +125,8 @@ extern ( C ) {
     *
     * Note: All keys are returned in their correct, chronological order.
     *    Duplicate keys don't pass the validation step. Most likely there will
-    *    be no negative time values, but they are not forbidden (so you should
-    *    be able to handle them).
+    *    be no negative time values, but they are not forbidden (so
+    *    implementations need to cope with them!).
     */
    struct aiNodeAnim {
       /**

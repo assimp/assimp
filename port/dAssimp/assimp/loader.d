@@ -51,8 +51,8 @@ import assimp.api;
 import tango.io.Stdout;
 import tango.sys.SharedLib;
 
-const uint ASSIMP_BINDINGS_MAJOR = 1;
-const uint ASSIMP_BINDINGS_MINOR = 1;
+const uint ASSIMP_BINDINGS_MAJOR = 2;
+const uint ASSIMP_BINDINGS_MINOR = 0;
 
 /**
  * Loader class for dynamically loading the Assimp library.
@@ -74,7 +74,11 @@ public:
    static void load() {
       if ( m_sRefCount == 0 ) {
          version ( Posix ) {
-            m_sLibrary = SharedLib.load( "libassimp.so" );
+            version ( OSX ) {
+               m_sLibrary = SharedLib.load( "libassimp.dylib" );
+            } else {
+               m_sLibrary = SharedLib.load( "libassimp.so" );
+            }
          }
          version ( Win32 ) {
             m_sLibrary = SharedLib.load( "Assimp32.dll" );

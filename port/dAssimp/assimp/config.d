@@ -50,6 +50,47 @@ module assimp.config;
 
 extern ( C ) {
    /*
+    * Library settings.
+    *
+    * General, global settings.
+    */
+
+   /**
+    * Enables time measurements.
+    *
+    * If enabled, measures the time needed for each part of the loading
+    * process (i.e. IO time, importing, postprocessing, ..) and dumps these
+    * timings to the DefaultLogger. See the performance page in the main
+    * Assimp docs information on this topic.
+    *
+    * Property type: bool. Default value: false.
+    */
+   const char* AI_CONFIG_GLOB_MEASURE_TIME = "GLOB_MEASURE_TIME";
+
+   version( none ) { // not implemented yet
+   /**
+    * Set Assimp's multithreading policy.
+    *
+    * This setting is ignored if Assimp was built without boost.thread support
+    * (<code>ASSIMP_BUILD_NO_THREADING</code>, which is implied by
+    * <code>ASSIMP_BUILD_BOOST_WORKAROUND</code>).
+    *
+    * Possible values are: -1 to let Assimp decide what to do, 0 to disable
+    * multithreading entirely and any number larger than 0 to force a specific
+    * number of threads. Assimp is always free to ignore this settings, which
+    * is merely a hint. Usually, the default value (-1) will be fine. However,
+    * if Assimp is used concurrently from multiple user threads, it might be
+    * useful to limit each Importer instance to a specific number of cores.
+    *
+    * For more information, see the threading page in the main Assimp docs.
+    *
+    * Property type: int, default value: -1.
+    */
+   const char* AI_CONFIG_GLOB_MULTITHREADING = "GLOB_MULTITHREADING";
+   }
+
+
+   /*
     * Post processing settings.
     *
     * Various options to fine-tune the behavior of a specific post processing step.
@@ -141,7 +182,7 @@ extern ( C ) {
     *
     * Default value: false.
     *
-    * Property type: integer (0: false; !0: true).
+    * Property type: bool.
     */
    const char* AI_CONFIG_PP_PTV_KEEP_HIERARCHY = "PP_PTV_KEEP_HIERARCHY";
 
@@ -167,7 +208,7 @@ extern ( C ) {
     *
     * Default value: false.
     *
-    * Property type: integer (0: false; !0: true).
+    * Property type: bool.
     */
    const char* AI_CONFIG_PP_FD_REMOVE = "PP_FD_REMOVE";
 
@@ -450,7 +491,7 @@ extern ( C ) {
     *
     * Default value: false.
     *
-    * Property type: integer (0: false; !0: true).
+    * Property type: bool.
     */
    const char* AI_CONFIG_FAVOUR_SPEED = "FAVOUR_SPEED";
 
@@ -458,7 +499,7 @@ extern ( C ) {
    /*
     * Importer settings.
     *
-    * Various stuff to fine-tune the behaviour of a specific importer plugin.
+    * Various stuff to fine-tune the behaviour of specific importer plugins.
     */
 
    /**
@@ -493,7 +534,7 @@ extern ( C ) {
     *
     * Default value: true.
     *
-    * Property type: integer (0: false; !0: true).
+    * Property type: bool.
     */
    const char* AI_CONFIG_IMPORT_AC_SEPARATE_BFCULL = "IMPORT_AC_SEPARATE_BFCULL";
 
@@ -503,7 +544,7 @@ extern ( C ) {
     *
     * Default value: true.
     *
-    * Property type: integer (0: false; !0: true).
+    * Property type: bool.
     */
    const char* AI_CONFIG_IMPORT_UNREAL_HANDLE_FLAGS = "UNREAL_HANDLE_FLAGS";
 
@@ -518,7 +559,7 @@ extern ( C ) {
     *
     * Default value: false.
     *
-    * Property type: integer (0: false; !0: true).
+    * Property type: bool.
     */
    const char* AI_CONFIG_IMPORT_TER_MAKE_UVS = "IMPORT_TER_MAKE_UVS";
 
@@ -530,12 +571,13 @@ extern ( C ) {
     *
     * Default value: true.
     *
-    * Property type: integer (0: false; !0: true).
+    * Property type: bool.
     */
    const char* AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS = "IMPORT_ASE_RECONSTRUCT_NORMALS";
 
    /**
-    * Configures the M3D loader to process multi-part player models.
+    * Configures the M3D loader to detect and process multi-part Quake player
+    * models.
     *
     * These models usually consist of three files, <code>lower.md3</code>,
     * <code>upper.md3</code> and <code>head.md3</code>. If this property is set
@@ -544,7 +586,7 @@ extern ( C ) {
     *
     * Default value: true.
     *
-    * Property type: integer (0: false; !0: true).
+    * Property type: bool.
     */
    const char* AI_CONFIG_IMPORT_MD3_HANDLE_MULTIPART = "IMPORT_MD3_HANDLE_MULTIPART";
 
@@ -610,7 +652,7 @@ extern ( C ) {
     *
     * Default value: false.
     *
-    * Property type: integer (0: false; !0: true).
+    * Property type: bool.
     */
    const char* AI_CONFIG_IMPORT_MD5_NO_ANIM_AUTOLOAD = "IMPORT_MD5_NO_ANIM_AUTOLOAD";
 

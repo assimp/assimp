@@ -49,6 +49,43 @@ import assimp.math;
 import assimp.types;
 
 extern ( C ) {
+   /*
+    * These limits are required to match the settings Assimp was compiled
+    * against. Therfore, do not redefine them unless you build the library
+    * from source using the same definitions.
+    */
+
+   /**
+    * Maximum number of indices per face (polygon).
+    */
+   const AI_MAX_FACE_INDICES = 0x7fff;
+
+   /**
+    * Maximum number of indices per face (polygon).
+    */
+   const AI_MAX_BONE_WEIGHTS = 0x7fffffff;
+
+   /**
+    * Maximum number of vertices per mesh.
+    */
+   const AI_MAX_VERTICES = 0x7fffffff;
+
+   /**
+    * Maximum number of faces per mesh.
+    */
+   const AI_MAX_FACES = 0x7fffffff;
+
+   /**
+    * Supported number of vertex color sets per mesh.
+    */
+   const AI_MAX_NUMBER_OF_COLOR_SETS = 0x4;
+
+   /**
+    * Supported number of texture coord sets (UV(W) channels) per mesh.
+    */
+   const AI_MAX_NUMBER_OF_TEXTURECOORDS = 0x4;
+
+
    /**
     * A single face in a mesh, referring to multiple vertices.
     *
@@ -71,8 +108,9 @@ extern ( C ) {
     */
    struct aiFace {
       /**
-       * Number of indices defining this face (3 for a triangle, >3 for a
-       * polygon).
+       * Number of indices defining this face.
+       *
+       * The maximum value for this member is <code>AI_MAX_FACE_INDICES</code>.
        */
       uint mNumIndices;
 
@@ -116,6 +154,8 @@ extern ( C ) {
 
       /**
        * The number of vertices affected by this bone.
+       *
+       * The maximum value for this member is <code>AI_MAX_BONE_WEIGHTS</code>.
        */
       uint mNumWeights;
 
@@ -132,30 +172,6 @@ extern ( C ) {
        */
       aiMatrix4x4 mOffsetMatrix;
    }
-
-   /**
-    * Maximum number of vertex color sets per mesh.
-    *
-    * Normally: Diffuse, specular, ambient and emissive. However, one could use
-    * the vertex color sets for any other purpose, too.
-    *
-    * Note: Some internal structures expect (and assert) this value to be at
-    *    least 4. For the moment it is absolutely safe to assume that this will
-    *    not change.
-    */
-   const uint AI_MAX_NUMBER_OF_COLOR_SETS = 0x4;
-
-   /**
-    * Maximum number of texture coord sets (UV(W) channels) per mesh
-    *
-    * The material system uses the <code>AI_MATKEY_UVWSRC_XXX</code> keys to
-    * specify which UVW channel serves as data source for a texture.
-    *
-    * Note: Some internal structures expect (and assert) this value to be at
-    *    least 4. For the moment it is absolutely safe to assume that this will
-    *    not change.
-    */
-   const uint AI_MAX_NUMBER_OF_TEXTURECOORDS = 0x4;
 
    /**
     * Enumerates the types of geometric primitives supported by Assimp.
@@ -198,6 +214,58 @@ extern ( C ) {
    // Note: The AI_PRIMITIVE_TYPE_FOR_N_INDICES(n) macro from the C headers is
    // missing since there is probably not much use for it when just reading
    // scene files.
+   
+   /**
+    * NOT CURRENTLY IN USE. An AnimMesh is an attachment to an #aiMesh stores
+    * per-vertex animations for a particular frame.
+    *  
+    * You may think of an <code>aiAnimMesh</code> as a `patch` for the host
+    * mesh, which replaces only certain vertex data streams at a particular
+    * time.
+    * 
+    * Each mesh stores n attached attached meshes (<code>aiMesh.mAnimMeshes</code>).
+    * The actual relationship between the time line and anim meshes is 
+    * established by #aiMeshAnim, which references singular mesh attachments
+    * by their ID and binds them to a time offset.
+    */
+   struct aiAnimMesh {
+   	/**
+   	 * Replacement for aiMesh.mVertices.
+   	 * 
+   	 * If this array is non-null, it *must* contain mNumVertices entries.
+   	 * The corresponding array in the host mesh must be non-null as well -
+   	 * animation meshes may neither add or nor remove vertex components (if
+   	 * a replacement array is NULL and the corresponding source array is
+   	 * not, the source data is taken instead).
+   	 */
+   	aiVector3D* mVertices;
+
+   	/// Replacement for <code>aiMesh.mNormals</code>.
+   	aiVector3D* mNormals;
+
+   	/// Replacement for <code>aiMesh.mTangents</code>.
+   	aiVector3D* mTangents;
+
+   	/// Replacement for <code>aiMesh.mBitangents</code>.
+   	aiVector3D* mBitangents;
+
+   	/// Replacement for <code>aiMesh.mColors</code>.
+   	aiColor4D* mColors[ AI_MAX_NUMBER_OF_COLOR_SETS ];
+
+   	/// Replacement for <code>aiMesh.mTextureCoords</code>.
+   	aiVector3D* mTextureCoords[ AI_MAX_NUMBER_OF_TEXTURECOORDS ];
+
+   	/**
+   	 * The number of vertices in the aiAnimMesh, and thus the length of all
+   	 * the member arrays.
+   	 *
+   	 * This has always the same value as the mNumVertices property in the
+   	 * corresponding aiMesh. It is duplicated here merely to make the length
+   	 * of the member arrays accessible even if the aiMesh is not known, e.g.
+   	 * from language bindings.
+   	 */
+   	uint mNumVertices;
+   }
 
    /**
     * A mesh represents a geometry or model with a single material.
@@ -230,13 +298,16 @@ extern ( C ) {
       /**
        * The number of vertices in this mesh.
        *
-       * This is also the size of all of the per-vertex data arrays.
+       * This is also the size of all of the per-vertex data arrays. The
+       * maximum value for this member is <code>AI_MAX_VERTICES</code>.
        */
       uint mNumVertices;
 
       /**
-       * The number of primitives (triangles, polygons, lines) in this  mesh.
-       * This is also the size of the <code>mFaces</code> array.
+       * The number of primitives (triangles, polygons, lines) in this mesh.
+       *
+       * This is also the size of the <code>mFaces</code> array. The maximum
+       * value for this member is <code>AI_MAX_FACES</code>.
        */
       uint mNumFaces;
 
@@ -363,5 +434,32 @@ extern ( C ) {
        * index into the scene's material list.
        */
       uint mMaterialIndex;
+
+      /**
+       * Name of the mesh.
+       *
+       * Meshes can be named, but this is not a requirement and leaving this
+       * field empty is totally fine.
+       *
+       * There are mainly three uses for mesh names:
+       *  - Some formats name nodes and meshes independently.
+       *  - Importers tend to split meshes up to meet the one-material-per-mesh
+       *    requirement. Assigning the same (dummy) name to each of the result
+       *    meshes aids the caller at recovering the original mesh partitioning.
+       *  - Vertex animations refer to meshes by their names.
+       */
+      aiString mName;
+      
+      /// NOT CURRENTLY IN USE. The number of attachment meshes.
+      uint mNumAnimMeshes;
+
+      /** 
+       * NOT CURRENTLY IN USE. Attachment meshes for this mesh, for vertex-
+       * based animation. 
+       * 
+       * Attachment meshes carry replacement data for some of the mesh's 
+       * vertex components (usually positions, normals).
+       */
+      aiAnimMesh** mAnimMeshes;
    }
 }

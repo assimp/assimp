@@ -7,8 +7,7 @@ The following is the list of all constributors.
 Thanks for your help!
 
 - Alexander Gessler,
-3DS-, ASE-, DXF-, HMP-, MDL-, MD2-, MD3-, MD5-, MDC-, NFF-, PLY-, STL-, RAW-, OFF-, MS3D-, Q3D- and LWO-Loader, 
-AssImp-Viewer (Win32), noboost, Website (Admin and Design).
+3DS-, BLEND-, ASE-, DXF-, HMP-, MDL-, MD2-, MD3-, MD5-, MDC-, NFF-, PLY-, STL-, RAW-, OFF-, MS3D-, Q3D- and LWO-Loader, Assimp-Viewer, assimp-cmd, -noboost, Website (Admin and Design).
 
 - Thomas Schulze,
 X-, Collada-, BVH-Loader, Postprocessing framework. Data structure & Interface design, documentation.
@@ -95,3 +94,6 @@ Contributed a fix for the Q3-BSP loader.
 
 - Jørgen P. Tjernø
 Contributed updated and improved xcode workspaces
+
+- drparallax
+Contributed the /samples/SimpleAssimpViewX sample

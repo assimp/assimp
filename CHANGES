@@ -21,7 +21,7 @@ FEATURES:
      folders (./test/models and ./test/models-nonbsd).
 
 FIXES:
-   - Many Collada bugfixes, improve faul tolerance
+   - Many Collada bugfixes, improve fault tolerance
    - Fix possible crashes in the Obj loader
    - Improve the Ogre XML loader
    - OpenGL-sample now works with MinGW

@@ -2,7 +2,7 @@
 
 [Setup]
 AppName=Open Asset Import Library - Viewer
-AppVerName=Open Asset Import Library - Viewer (v1.1)
+AppVerName=Open Asset Import Library - Viewer (v2.0)
 DefaultDirName={pf}\AssimpView
 DefaultGroupName=AssimpView
 UninstallDisplayIcon={app}\bin\x86\assimp.exe
@@ -13,8 +13,8 @@ WizardImageFile=compiler:WizModernImage-IS.BMP
 WizardSmallImageFile=compiler:WizModernSmallImage-IS.BMP
 LicenseFile=License.rtf
 OutputBaseFileName=assimp-view-1.1-setup
-VersionInfoVersion=1.1.0.0
-VersionInfoTextVersion=1.1
+VersionInfoVersion=2.0.0.0
+VersionInfoTextVersion=2.0
 VersionInfoCompany=Assimp Development Team
 ArchitecturesInstallIn64BitMode=x64
 

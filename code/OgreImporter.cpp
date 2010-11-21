@@ -724,9 +724,12 @@ void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const st
 			RootBoneNodes.push_back(CreateAiNodeFromBone(theBone.Id, Bones, m_CurrentScene->mRootNode));//which will recursily add all other nodes
 		}
 	}
-	m_CurrentScene->mRootNode->mNumChildren=RootBoneNodes.size();
-	m_CurrentScene->mRootNode->mChildren=new aiNode*[RootBoneNodes.size()];
-	memcpy(m_CurrentScene->mRootNode->mChildren, &RootBoneNodes[0], sizeof(aiNode*)*RootBoneNodes.size());
+	
+	if (RootBoneNodes.size()) {
+		m_CurrentScene->mRootNode->mNumChildren=RootBoneNodes.size();	
+		m_CurrentScene->mRootNode->mChildren=new aiNode*[RootBoneNodes.size()];
+		memcpy(m_CurrentScene->mRootNode->mChildren, &RootBoneNodes[0], sizeof(aiNode*)*RootBoneNodes.size());
+	}
 }
 
 

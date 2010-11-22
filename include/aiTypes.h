@@ -261,7 +261,7 @@ struct aiString
 	}
 
 	/** Constructor from std::string */
-	aiString(const std::string& pString) : 
+	explicit aiString(const std::string& pString) : 
 		length(pString.length()) 
 	{
 		length = length>=MAXLEN?MAXLEN-1:length;

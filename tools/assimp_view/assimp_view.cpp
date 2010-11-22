@@ -89,6 +89,7 @@ unsigned int ppsteps = aiProcess_CalcTangentSpace | // calculate tangents and bi
 		aiProcess_FindInstances            | // search for instanced meshes and remove them by references to one master
 		aiProcess_LimitBoneWeights         | // limit bone weights to 4 per vertex
 		aiProcess_OptimizeMeshes		   | // join small meshes, if possible;
+		aiProcess_SplitByBoneCount         | // split meshes with too many bones. Necessary for our (limited) hardware skinning shader
 		0;
 
 unsigned int ppstepsdefault = ppsteps;

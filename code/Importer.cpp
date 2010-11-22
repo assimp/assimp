@@ -257,6 +257,9 @@ using namespace Assimp::Formatter;
 #ifndef ASSIMP_BUILD_NO_OPTIMIZEGRAPH_PROCESS
 #	include "OptimizeGraph.h"
 #endif
+#ifndef ASSIMP_BUILD_NO_SPLITBYBONECOUNT_PROCESS
+#	include "SplitByBoneCountProcess.h"
+#endif
 
 using namespace Assimp;
 using namespace Assimp::Intern;
@@ -477,6 +480,9 @@ Importer::Importer()
 #endif
 #if (!defined ASSIMP_BUILD_NO_FIXINFACINGNORMALS_PROCESS)
 	pimpl->mPostProcessingSteps.push_back( new FixInfacingNormalsProcess());
+#endif
+#if (!defined ASSIMP_BUILD_NO_SPLITBYBONECOUNT_PROCESS)
+	pimpl->mPostProcessingSteps.push_back( new SplitByBoneCountProcess());
 #endif
 #if (!defined ASSIMP_BUILD_NO_SPLITLARGEMESHES_PROCESS)
 	pimpl->mPostProcessingSteps.push_back( new SplitLargeMeshesProcess_Triangle());

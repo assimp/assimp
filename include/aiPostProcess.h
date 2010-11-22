@@ -494,7 +494,13 @@ enum aiPostProcessSteps
 	 *  x1
 	 * @endcode
 	*/
-	aiProcess_FlipWindingOrder  = 0x1000000
+	aiProcess_FlipWindingOrder  = 0x1000000,
+
+	// -------------------------------------------------------------------------
+	/** <hr>This step splits meshes with many bones into submeshes so that each
+	 * submesh has fewer or as many bones as a given limit. 
+    */
+	aiProcess_SplitByBoneCount  = 0x2000000
 
 	// aiProcess_GenEntityMeshes = 0x100000,
 	// aiProcess_OptimizeAnimations = 0x200000

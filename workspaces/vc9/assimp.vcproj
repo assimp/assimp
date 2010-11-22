@@ -2091,6 +2091,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\SplitByBoneCountProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\SplitByBoneCountProcess.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\SplitLargeMeshes.cpp"
 					>
 				</File>

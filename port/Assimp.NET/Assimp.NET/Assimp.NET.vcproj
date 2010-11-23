@@ -94,7 +94,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="move *.cs ..\Assimp.NET_CS\"
+				CommandLine=""
 			/>
 		</Configuration>
 		<Configuration
@@ -217,7 +217,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="echo Invoking SWIG...&#x0D;&#x0A;echo on&#x0D;&#x0A;swig.exe -c++ -csharp -cpperraswarn -outdir &quot;$(SolutionDir)\Assimp.NET_CS&quot; &quot;$(InputPath)&quot; &#x0D;&#x0A;@echo off&#x0D;&#x0A;"
+					CommandLine="echo Invoking SWIG...&#x0D;&#x0A;echo on&#x0D;&#x0A;swig.exe -c++ -csharp -cpperraswarn -outdir &quot;$(SolutionDir)\Assimp.NET_CS&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;@echo off&#x0D;&#x0A;"
 					Outputs="$(InputName)_wrap.cxx"
 				/>
 			</FileConfiguration>
@@ -226,7 +226,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="echo Invoking SWIG...&#x0D;&#x0A;echo on&#x0D;&#x0A;swig.exe -c++ -csharp -cpperraswarn -outdir &quot;$(SolutionDir)\Assimp.NET_CS&quot; &quot;$(InputPath)&quot; &#x0D;&#x0A;@echo off&#x0D;&#x0A;"
+					CommandLine="echo Invoking SWIG...&#x0D;&#x0A;echo on&#x0D;&#x0A;swig.exe -c++ -csharp -cpperraswarn -outdir &quot;$(SolutionDir)\Assimp.NET_CS&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;@echo off&#x0D;&#x0A;"
 					Outputs="$(InputName)_wrap.cxx"
 				/>
 			</FileConfiguration>

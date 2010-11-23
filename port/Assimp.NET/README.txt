@@ -22,6 +22,11 @@ to the main assimp source from the C# viewer application.
 1) Download SWIG 2.0.0 or later (http://sourceforge.net/projects/swig/)
    Install it somewhere like (C:\Program Files\swigwin-2.0.0).
 
+   NOTE: you can leave this step out, provided the SWIG-generated
+   files in the repository are up-to-date. This will usually be
+   the case in release versions, but not necessarily in TRUNK.
+
+
 2) Download Boost 1.43.0 or later (http://www.boost.org/)
    Install it somewhere like (C:\Program Files\Boost\boost_1_43_0).
 

@@ -10,20 +10,20 @@
 using System;
 using System.Runtime.InteropServices;
 
-public class aiVertexWeight : IDisposable {
+public class ProgressHandler : IDisposable {
   private HandleRef swigCPtr;
   protected bool swigCMemOwn;
 
-  internal aiVertexWeight(IntPtr cPtr, bool cMemoryOwn) {
+  internal ProgressHandler(IntPtr cPtr, bool cMemoryOwn) {
     swigCMemOwn = cMemoryOwn;
     swigCPtr = new HandleRef(this, cPtr);
   }
 
-  internal static HandleRef getCPtr(aiVertexWeight obj) {
+  internal static HandleRef getCPtr(ProgressHandler obj) {
     return (obj == null) ? new HandleRef(null, IntPtr.Zero) : obj.swigCPtr;
   }
 
-  ~aiVertexWeight() {
+  ~ProgressHandler() {
     Dispose();
   }
 
@@ -32,7 +32,7 @@ public class aiVertexWeight : IDisposable {
       if (swigCPtr.Handle != IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          AssimpPINVOKE.delete_aiVertexWeight(swigCPtr);
+          AssimpPINVOKE.delete_ProgressHandler(swigCPtr);
         }
         swigCPtr = new HandleRef(null, IntPtr.Zero);
       }
@@ -40,30 +40,14 @@ public class aiVertexWeight : IDisposable {
     }
   }
 
-  public uint mVertexId {
-    set {
-      AssimpPINVOKE.aiVertexWeight_mVertexId_set(swigCPtr, value);
-    } 
-    get {
-      uint ret = AssimpPINVOKE.aiVertexWeight_mVertexId_get(swigCPtr);
-      return ret;
-    } 
+  public virtual bool Update(float percentage) {
+    bool ret = AssimpPINVOKE.ProgressHandler_Update__SWIG_0(swigCPtr, percentage);
+    return ret;
   }
 
-  public float mWeight {
-    set {
-      AssimpPINVOKE.aiVertexWeight_mWeight_set(swigCPtr, value);
-    } 
-    get {
-      float ret = AssimpPINVOKE.aiVertexWeight_mWeight_get(swigCPtr);
-      return ret;
-    } 
-  }
-
-  public aiVertexWeight() : this(AssimpPINVOKE.new_aiVertexWeight__SWIG_0(), true) {
-  }
-
-  public aiVertexWeight(uint pID, float pWeight) : this(AssimpPINVOKE.new_aiVertexWeight__SWIG_1(pID, pWeight), true) {
+  public virtual bool Update() {
+    bool ret = AssimpPINVOKE.ProgressHandler_Update__SWIG_1(swigCPtr);
+    return ret;
   }
 
 }

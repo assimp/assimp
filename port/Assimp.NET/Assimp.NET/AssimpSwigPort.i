@@ -68,6 +68,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "..\..\..\include\Logger.h"
 #include "..\..\..\include\LogStream.h"
 #include "..\..\..\include\NullLogger.h"
+#include "..\..\..\include\ProgressHandler.h"
 %}
 
 #define C_STRUCT
@@ -206,7 +207,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %newobject aiMaterial::Get##NAME;
 %extend aiMaterial {
   bool Get##NAME(TYPE* INOUT) {
-	  return aiGetMaterial##XXX($self, KEY, INOUT) == AI_SUCCESS;
+         return aiGetMaterial##XXX($self, KEY, INOUT) == AI_SUCCESS;
   }
 }
 %enddef
@@ -523,6 +524,7 @@ ASSIMP_POINTER_POINTER(aiScene,aiTexture,mTextures,$self->mNumTextures);
 %include "..\..\..\include\aiScene.h"
 %include "..\..\..\include\aiTexture.h"
 %include "..\..\..\include\assimp.hpp"
+%include "..\..\..\include\ProgressHandler.h"
 //%include "..\..\..\include\IOSystem.h"
 //%include "..\..\..\include\IOStream.h"
 //%include "..\..\..\include\Logger.h"

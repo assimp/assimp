@@ -19,7 +19,7 @@ AI_WONT_RETURN void aiAssert(const std::string &message, unsigned int uiLine, co
 
 //!	\def	ai_assert
 //!	\brief	ASSIMP specific assertion test
-#ifdef DEBUG  
+#ifdef _DEBUG  
 #  define	ai_assert(expression) if( !(expression)) Assimp::aiAssert( #expression, __LINE__, __FILE__);
 #else
 #  define	ai_assert(expression)

@@ -397,7 +397,6 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
 	unsigned int iMesh		/*= 0*/)
 {
 	ai_assert(NULL != szPath);
-	ai_assert(NULL != pcMat);
 
 	char chTemp[512];
 	char chTempEmb[256];

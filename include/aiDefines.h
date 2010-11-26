@@ -214,7 +214,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	define AI_C_THREADSAFE
 #endif // !! ASSIMP_BUILD_SINGLETHREADED
 
-#if (defined _DEBUG || defined DEBUG) // one of the two should be defined ..
+#ifdef _DEBUG 
 #	define ASSIMP_BUILD_DEBUG
 #endif
 

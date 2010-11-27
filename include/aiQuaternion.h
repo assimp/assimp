@@ -264,13 +264,14 @@ inline void aiQuaternion::Interpolate( aiQuaternion& pOut, const aiQuaternion& p
 inline aiQuaternion& aiQuaternion::Normalize()
 {
 	// compute the magnitude and divide through it
-	const float mag = x*x+y*y+z*z+w*w;
+	const float mag = sqrt(x*x + y*y + z*z + w*w);
 	if (mag)
 	{
-		x /= mag;
-		y /= mag;
-		z /= mag;
-		w /= mag;
+		const float invMag = 1.0f/mag;
+		x *= invMag;
+		y *= invMag;
+		z *= invMag;
+		w *= invMag;
 	}
 	return *this;
 }

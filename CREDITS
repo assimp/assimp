@@ -97,3 +97,6 @@ Contributed updated and improved xcode workspaces
 
 - drparallax
 Contributed the /samples/SimpleAssimpViewX sample
+
+- Carsten Fuchs
+Contributed a fix for the Normalize method in aiQuaternion.

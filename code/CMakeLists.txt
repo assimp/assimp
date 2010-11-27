@@ -112,6 +112,8 @@ SOURCE_GROUP( Common FILES
 	ScenePreprocessor.h
 	SkeletonMeshBuilder.cpp
 	SkeletonMeshBuilder.h
+	SplitByBoneCountProcess.cpp
+	SplitByBoneCountProcess.h
 	SmoothingGroups.h
 	StandardShapes.cpp
 	StandardShapes.h
@@ -615,6 +617,8 @@ ADD_LIBRARY( assimp SHARED
 	SceneCombiner.h
 	ScenePreprocessor.cpp
 	ScenePreprocessor.h
+	SplitByBoneCountProcess.cpp
+	SplitByBoneCountProcess.h
 	SkeletonMeshBuilder.cpp
 	SkeletonMeshBuilder.h
 	SmoothingGroups.h

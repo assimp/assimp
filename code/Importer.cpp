@@ -1262,18 +1262,6 @@ void Importer::SetPropertyFloat(const char* szName, float iValue,
 void Importer::SetPropertyString(const char* szName, const std::string& value, 
 	bool* bWasExisting /*= NULL*/)
 {
-	try {
-		std::cout << "";
-	}
-	catch (...) {
-		try {
-			throw;
-		}
-		catch(std::exception&) {
-			return;
-		}
-	}
-
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 		SetGenericProperty<std::string>(pimpl->mStringProperties, szName,value,bWasExisting);	
 	ASSIMP_END_EXCEPTION_REGION(void);

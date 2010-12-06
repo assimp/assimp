@@ -184,7 +184,7 @@ void Q3BSPFileImporter::InternReadFile(const std::string &rFile, aiScene* pScene
 	Q3BSPZipArchive Archive( rFile );
 	if ( !Archive.isOpen() )
 	{
-		throw new DeadlyImportError( "Failed to open file " + rFile + "." );
+		throw DeadlyImportError( "Failed to open file " + rFile + "." );
 	}
 
 	std::string archiveName( "" ), mapName( "" );

@@ -551,8 +551,9 @@ Importer::~Importer()
 	for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++)
 		delete pimpl->mPostProcessingSteps[a];
 
-	// Delete the assigned IO handler
+	// Delete the assigned IO and progress handler
 	delete pimpl->mIOHandler;
+	delete pimpl->mProgressHandler;
 
 	// Kill imported scene. Destructors should do that recursivly
 	delete pimpl->mScene;

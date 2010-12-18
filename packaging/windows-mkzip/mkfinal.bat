@@ -135,8 +135,8 @@ mkdir "final\%OUT_SDK%\lib\assimp_%BINCFG_x64_DEBUG%"
 
 copy /Y ..\..\lib\assimp_%BINCFG_x86%\assimp.lib    "final\%OUT_SDK%\lib\assimp_%BINCFG_x86%"
 copy /Y ..\..\lib\assimp_%BINCFG_x64%\assimp.lib    "final\%OUT_SDK%\lib\assimp_%BINCFG_x64%\"
-copy /Y ..\..\lib\assimp_%BINCFG_x86%\assimp.lib    "final\%OUT_SDK%\lib\assimp_%BINCFG_x86_DEBUG%\"
-copy /Y ..\..\lib\assimp_%BINCFG_x64%\assimp.lib    "final\%OUT_SDK%\lib\assimp_%BINCFG_x64_DEBUG%\"
+copy /Y ..\..\lib\assimp_%BINCFG_x86_DEBUG%\assimp.lib    "final\%OUT_SDK%\lib\assimp_%BINCFG_x86_DEBUG%\"
+copy /Y ..\..\lib\assimp_%BINCFG_x64_DEBUG%\assimp.lib    "final\%OUT_SDK%\lib\assimp_%BINCFG_x64_DEBUG%\"
 
 rem Copy prebuilt DLLs
 mkdir "final\%OUT_SDK%\bin\assimp_%BINCFG_x86%"

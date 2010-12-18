@@ -14,7 +14,7 @@ namespace Assimp {
 //!	\brief	ASSIMP specific assertion test, only works in debug mode
 //!	\param	uiLine	Line in file
 //!	\param	file	Source file
-AI_WONT_RETURN void aiAssert(const std::string &message, unsigned int uiLine, const std::string &file);
+ASSIMP_API AI_WONT_RETURN void aiAssert(const std::string &message, unsigned int uiLine, const std::string &file);
 
 
 //!	\def	ai_assert

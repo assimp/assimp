@@ -58,6 +58,7 @@ namespace Assimp	{
 	// =======================================================================
 	// Public interface to Assimp 
 	class Importer;
+	class Exporter; // export.hpp
 	class IOStream;
 	class IOSystem;
 	class ProgressHandler;

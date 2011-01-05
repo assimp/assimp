@@ -200,7 +200,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_PretransformVertices step to normalize
- *  all vertex components into the -1...1 range. That is, a bounding box
+ *  all vertex components into the [-1,1] range. That is, a bounding box
  *  for the whole scene is computed, the maximum component is taken and all
  *  meshes are scaled appropriately (uniformly of course!).
  *  This might be useful if you don't know the spatial dimension of the input 

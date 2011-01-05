@@ -52,19 +52,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp
 {
 
-// NOTE: If you change these limits, don't forget to change the
-// corresponding values in all Assimp ports
-
-// **********************************************************
-// Java: ConfigProperty.java, 
-//  ConfigProperty.DEFAULT_VERTEX_SPLIT_LIMIT
-//  ConfigProperty.DEFAULT_TRIANGLE_SPLIT_LIMIT
-// **********************************************************
-
-// default limit for bone count 
-#if (!defined AI_SBBC_DEFAULT_MAX_BONES)
-#	define AI_SBBC_DEFAULT_MAX_BONES		60
-#endif
 
 /** Postprocessing filter to split meshes with many bones into submeshes
  * so that each submesh has a certain max bone count.

@@ -75,7 +75,7 @@ bool SplitByBoneCountProcess::IsActive( unsigned int pFlags) const
 // Updates internal properties
 void SplitByBoneCountProcess::SetupProperties(const Importer* pImp)
 {
-	// ein andermal.
+	mMaxBoneCount = pImp->GetPropertyInteger(AI_CONFIG_PP_SBBC_MAX_BONES,AI_SBBC_DEFAULT_MAX_BONES);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -174,9 +174,9 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
 		subMeshFaces.reserve( pMesh->mNumFaces);
 		// accumulated vertex count of all the faces in this submesh
 		size_t numSubMeshVertices = 0;
-    // a small local array of new bones for the current face. State of all used bones for that face
-    // can only be updated AFTER the face is completely analysed. Thanks to imre for the fix.
-    std::vector<size_t> newBonesAtCurrentFace;
+		// a small local array of new bones for the current face. State of all used bones for that face
+		// can only be updated AFTER the face is completely analysed. Thanks to imre for the fix.
+		std::vector<size_t> newBonesAtCurrentFace;
 
 		// add faces to the new submesh as long as all bones affecting the faces' vertices fit in the limit
 		for( size_t a = 0; a < pMesh->mNumFaces; ++a)
@@ -197,25 +197,25 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
 						continue;
 
 					// if it's not used, yet, we would need to add it. Store its bone index
-          newBonesAtCurrentFace.push_back( vb[c].first);
+					newBonesAtCurrentFace.push_back( vb[c].first);
 				}
 			}
 
-      // leave out the face if the new bones required for this face don't fit the bone count limit anymore
-      if( numBones + newBonesAtCurrentFace.size() > mMaxBoneCount )
+			// leave out the face if the new bones required for this face don't fit the bone count limit anymore
+			if( numBones + newBonesAtCurrentFace.size() > mMaxBoneCount )
 				continue;
 
-      // mark all new bones as necessary
-      while( !newBonesAtCurrentFace.empty() )
-      {
-        size_t newIndex = newBonesAtCurrentFace.back();
-        newBonesAtCurrentFace.pop_back(); // this also avoids the deallocation which comes with a clear()
-        if( isBoneUsed[newIndex] ) 
-          continue;
+			// mark all new bones as necessary
+			while( !newBonesAtCurrentFace.empty() )
+			{
+				size_t newIndex = newBonesAtCurrentFace.back();
+				newBonesAtCurrentFace.pop_back(); // this also avoids the deallocation which comes with a clear()
+				if( isBoneUsed[newIndex] ) 
+					continue;
 
-        isBoneUsed[newIndex] = true;
-        numBones++;
-      }
+				isBoneUsed[newIndex] = true;
+				numBones++;
+			}
 
 			// store the face index and the vertex count
 			subMeshFaces.push_back( a);

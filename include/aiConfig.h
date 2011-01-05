@@ -103,6 +103,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ###########################################################################
 
 // ---------------------------------------------------------------------------
+/** @brief Maximum bone count per mesh for the SplitbyBoneCount step.
+ *
+ * Meshes are split until the maximum number of bones is reached. The default
+ * value is AI_SBBC_DEFAULT_MAX_BONES, which may be altered at
+ * compile-time.
+ * Property data type: integer.
+ */
+// ---------------------------------------------------------------------------
+#define AI_CONFIG_PP_SBBC_MAX_BONES \
+	"PP_SBBC_MAX_BONES"
+
+
+// default limit for bone count 
+#if (!defined AI_SBBC_DEFAULT_MAX_BONES)
+#	define AI_SBBC_DEFAULT_MAX_BONES		60
+#endif
+
+
+// ---------------------------------------------------------------------------
 /** @brief  Specifies the maximum angle that may be between two vertex tangents
  *         that their tangents and bitangents are smoothed.
  *

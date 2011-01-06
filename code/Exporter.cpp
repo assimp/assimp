@@ -41,60 +41,66 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 
-#if 0
+#ifndef ASSIMP_BUILD_NO_EXPORT
 
-// ------------------------------------------------------------------------------------------------
-// Exporters
-// ------------------------------------------------------------------------------------------------
-#ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
-//#	include "ColladaExporter.h"
-void ExportSceneCollada (aiExportDataBlob*, const aiScene*);
-#endif
-#ifndef ASSIMP_BUILD_NO_3DS_EXPORTER
-void ExportScene3DS(aiExportDataBlob*, const aiScene*);
-#endif
-
-
-// ------------------------------------------------------------------------------------------------
-// Table of export format descriptors along with the corresponding exporter functions
-// ------------------------------------------------------------------------------------------------
 namespace Assimp {
 
-	typedef void (*fpExportFunc) (aiExportDataBlob*, const aiScene*) /* throw DeadlyExportError */;
+// ------------------------------------------------------------------------------------------------
+// Exporter worker function prototypes. Should not be necessary to #ifndef them, it's just a prototype
+void ExportSceneCollada(aiExportDataBlob*, const aiScene*);
+void ExportScene3DS(aiExportDataBlob*, const aiScene*);
 
-	//
-	aiExportFormatDesc g_aExportInfo[] = {
-		{
-			  "collada"
-			, "COLLADA Open Standard for Painful Asset Interchange"
-			, "dae"
-		},
-		{
-			  "3ds"
-			, "Autodesk(tm) 3DS file format"
-			, "3ds"
-		}
-	};
+/// Function pointer type of a Export worker function
+typedef void (*fpExportFunc)(aiExportDataBlob*, const aiScene*);
 
-	fpExportFunc g_aExportFunctions[] = {
-		ExportSceneCollada,
-		ExportScene3DS
-	};
-}
+// ------------------------------------------------------------------------------------------------
+/// Internal description of an Assimp export format option
+struct ExportFormatEntry
+{
+	/// Public description structure to be returned by aiGetExportFormatDescription()
+	aiExportFormatDesc mDescription;
 
+	// Worker function to do the actual exporting
+	fpExportFunc mExportFunction;
 
+	// Constructor to fill all entries
+	ExportFormatEntry( const char* pId, const char* pDesc, fpExportFunc pFunction)
+	{
+		mDescription.id = pId;
+		mDescription.description = pDesc;
+		mExportFunction = pFunction;
+	}
+};
+
+// ------------------------------------------------------------------------------------------------
+// global array of all export formats which Assimp supports in its current build
+ExportFormatEntry gExporters[] = 
+{
+#ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
+	ExportFormatEntry( "collada", "Collada .dae", &ExportSceneCollada),
+#endif
+
+#ifndef ASSIMP_BUILD_NO_3DS_EXPORTER
+	ExportFormatEntry( "3ds", "Autodesk .3ds", &ExportScene3DS),
+#endif
+};
+
+} // end of namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API size_t aiGetExportFormatCount(void)
 {
-	return 0;
+	return sizeof( Assimp::gExporters) / sizeof( Assimp::ExportFormatEntry);
 }
 
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API const C_STRUCT aiExportFormatDesc* aiGetExportFormatDescription( size_t pIndex)
 {
-	return NULL;
+	if( pIndex >= aiGetExportFormatCount() )
+		return NULL;
+
+	return &Assimp::gExporters[pIndex].mDescription;
 }
 
 
@@ -118,5 +124,4 @@ ASSIMP_API C_STRUCT void aiReleaseExportData( const aiExportDataBlob* pData )
 	delete pData;
 }
 
-
-#endif
+#endif // !ASSIMP_BUILD_NO_EXPORT

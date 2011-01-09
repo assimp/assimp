@@ -48,6 +48,8 @@ SET( PUBLIC_HEADERS
 	${HEADER_PATH}/Logger.h
 	${HEADER_PATH}/LogStream.h
 	${HEADER_PATH}/NullLogger.h
+	${HEADER_PATH}/export.h
+	${HEADER_PATH}/export.hpp
 )
 
 SOURCE_GROUP( Compiler FILES	${HEADER_PATH}/Compiler/pushpack1.h
@@ -499,6 +501,7 @@ ADD_LIBRARY( assimp SHARED
 	DefaultIOSystem.h
 	DefaultProgressHandler.h
 	DefaultLogger.cpp
+	Exporter.cpp
 	FileLogStream.h
 	FindDegenerates.cpp
 	FindDegenerates.h
@@ -732,7 +735,7 @@ ADD_LIBRARY( assimp SHARED
 	${COMPILER_HEADERS}
 )
 
-ADD_DEFINITIONS( -DASSIMP_BUILD_DLL_EXPORT )
+ADD_DEFINITIONS( -DASSIMP_BUILD_DLL_EXPORT -DASSIMP_BUILD_NO_EXPORT )
 
 if ( MSVC80 OR MSVC90 OR MSVC10 )
 	ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )

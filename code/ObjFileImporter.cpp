@@ -183,9 +183,11 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 	if ( NULL == pObject )
 		return NULL;
 	
-	// Store older mesh size to be able to computate mesh offsets for new mesh instances
+	// Store older mesh size to be able to computes mesh offsets for new mesh instances
 	const size_t oldMeshSize = MeshArray.size();
 	aiNode *pNode = new aiNode;
+
+	pNode->mName = pObject->m_strObjName;
 	
 	if (pParent != NULL)
 		appendChildToParentNode(pParent, pNode);

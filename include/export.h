@@ -50,6 +50,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "aiTypes.h"
 
 #ifdef __cplusplus
+#include <boost/utility.hpp>
+#endif  //__cplusplus
+
+#ifdef __cplusplus
 extern "C" {
 #endif
 

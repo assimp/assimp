@@ -50,10 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "aiTypes.h"
 
 #ifdef __cplusplus
-#include <boost/utility.hpp>
-#endif  //__cplusplus
-
-#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -116,34 +112,51 @@ struct aiExportDataBlob
 
 
 // --------------------------------------------------------------------------------
+/** Exports the given scene to a chosen file format and writes the result file(s) to disk.
+* @param pScene The scene to export. Stays in possession of the caller, is not changed by the function.
+* @param pFormatId ID string to specify to which format you want to export to. Use 
+* aiGetExportFormatCount() / aiGetExportFormatDescription() to learn which export formats are available.
+* @param pFileName Output file to write
+* @param pIO custom IO implementation to be used. Use this if you use your own storage methods.
+*   If none is supplied, a default implementation using standard file IO is used. Note that
+*   #aiExportSceneToBlob is provided as convienience function to export to memory buffers.
+* @return a status code indicating the result of the export
+*/
+ASSIMP_API aiReturn aiExportScene( const C_STRUCT aiScene* pScene, const char* pFormatId, const char* pFileName);
+
+
+// --------------------------------------------------------------------------------
+/** Exports the given scene to a chosen file format using custom IO logic supplied by you.
+* @param pScene The scene to export. Stays in possession of the caller, is not changed by the function.
+* @param pFormatId ID string to specify to which format you want to export to. Use 
+* aiGetExportFormatCount() / aiGetExportFormatDescription() to learn which export formats are available.
+* @param pFileName Output file to write
+* @param pIO custom IO implementation to be used. Use this if you use your own storage methods.
+*   If none is supplied, a default implementation using standard file IO is used. Note that
+*   #aiExportSceneToBlob is provided as convienience function to export to memory buffers.
+* @return a status code indicating the result of the export
+*/
+ASSIMP_API aiReturn aiExportSceneEx( const C_STRUCT aiScene* pScene, const char* pFormatId, const char* pFileName, const C_STRUCT aiFileIO* pIO );
+
+// --------------------------------------------------------------------------------
 /** Exports the given scene to a chosen file format. Returns the exported data as a binary blob which
-* you can write into a file or something. When you're done with the data, use aiReleaseExportedData()
+* you can write into a file or something. When you're done with the data, use aiReleaseExportedBlob()
 * to free the resources associated with the export. 
 * @param pScene The scene to export. Stays in possession of the caller, is not changed by the function.
 * @param pFormatId ID string to specify to which format you want to export to. Use 
 * aiGetExportFormatCount() / aiGetExportFormatDescription() to learn which export formats are available.
 * @return the exported data or NULL in case of error
 */
-ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportScene( const C_STRUCT aiScene* pScene, const char* pFormatId );
+ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportSceneToBlob( const C_STRUCT aiScene* pScene, const char* pFormatId );
 
-
-// --------------------------------------------------------------------------------
-/** Convenience function to write a blob to a file. The file is written using standard C
- *  file IO functionality or via a user-supplied IOSystem implementation. 
- *  @param pBlob A data blob obtained from a previous call to #aiExportScene. Must not be NULL.
- *  @param pPath Full target file name. Target must be accessible.
- *  @param pIOSystem Custom IO implementation to be used for writing. Pass NULL to
- *    use the default implementation, which uses the standard C file IO functionality.
- *  @return AI_SUCCESS if everything was fine. */
-ASSIMP_API aiReturn aiWriteBlobToFile( const C_STRUCT aiExportDataBlob* pBlob, const char* pPath, const C_STRUCT aiFileIO* pIOSystem );
 
 
 // --------------------------------------------------------------------------------
 /** Releases the memory associated with the given exported data. Use this function to free a data blob
 * returned by aiExportScene(). 
-* @param pData the data blob returned by aiExportScene
+* @param pData the data blob returned by aiExportScenetoBlob
 */
-ASSIMP_API C_STRUCT void aiReleaseExportData( const C_STRUCT aiExportDataBlob* pData );
+ASSIMP_API C_STRUCT void aiReleaseExportBlob( const C_STRUCT aiExportDataBlob* pData );
 
 #ifdef __cplusplus
 }

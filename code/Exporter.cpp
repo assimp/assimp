@@ -39,16 +39,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
+/** @file Exporter.cpp
+
+Assimp export interface. While it's public interface bears many similarities
+to the import interface (in fact, it is largely symmetric), the internal
+implementations differs a lot. Exporters are considered stateless and are
+simple callbacks which we maintain in a global list along with their
+description strings.
+*/
+
 #include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
+
+#include "DefaultIOStream.h"
+#include "DefaultIOSystem.h"
 
 namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 // Exporter worker function prototypes. Should not be necessary to #ifndef them, it's just a prototype
-void ExportSceneCollada(aiExportDataBlob*, const aiScene*);
-void ExportScene3DS(aiExportDataBlob*, const aiScene*);
+	void ExportSceneCollada(aiExportDataBlob*, const aiScene*) {
+	}
+
+	void ExportScene3DS(aiExportDataBlob*, const aiScene*) {
+	}
 
 /// Function pointer type of a Export worker function
 typedef void (*fpExportFunc)(aiExportDataBlob*, const aiScene*);
@@ -85,7 +100,140 @@ ExportFormatEntry gExporters[] =
 #endif
 };
 
+
+class ExporterPimpl {
+public:
+
+	ExporterPimpl()
+		: blob()
+		, mIOSystem(new Assimp::DefaultIOSystem())
+		, mIsDefaultIOHandler(true)
+	{
+		
+	}
+
+	~ExporterPimpl() 
+	{
+		delete blob;
+	}
+
+public:
+		
+	aiExportDataBlob* blob;
+	boost::shared_ptr< Assimp::IOSystem > mIOSystem;
+	bool mIsDefaultIOHandler;
+};
+
 } // end of namespace Assimp
+
+
+
+
+
+using namespace Assimp;
+
+
+// ------------------------------------------------------------------------------------------------
+Exporter :: Exporter() 
+: pimpl(new ExporterPimpl())
+{
+}
+
+
+// ------------------------------------------------------------------------------------------------
+Exporter :: ~Exporter()
+{
+	delete pimpl;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void Exporter :: SetIOHandler( IOSystem* pIOHandler)
+{
+	pimpl->mIsDefaultIOHandler = !pIOHandler;
+	pimpl->mIOSystem.reset(pIOHandler);
+}
+
+
+// ------------------------------------------------------------------------------------------------
+IOSystem* Exporter :: GetIOHandler() const
+{
+	return pimpl->mIOSystem.get();
+}
+
+
+// ------------------------------------------------------------------------------------------------
+bool Exporter :: IsDefaultIOHandler() const
+{
+	return pimpl->mIsDefaultIOHandler;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const char* pFormatId )
+{
+	if (pimpl->blob) {
+		delete pimpl->blob;
+		pimpl->blob = NULL;
+	}
+
+	/* TODO (ALEX)
+
+	boost::shared_ptr<IOSystem*> old = pimpl->mIOSystem;
+
+	BlobIOSystem* blobio;
+	pimpl->mIOSystem = blobio = new BlobIOSystem();
+
+	if (AI_SUCCESS != Export(pScene,pFormatId)) {
+		pimpl->mIOSystem = old;
+		return NULL;
+	}
+
+	pimpl->blob = blobio->GetBlob();
+	pimpl->mIOSystem = old;
+
+	return pimpl->blob;
+	*/
+	return NULL;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const char* pPath )
+{
+	return AI_FAILURE;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+const aiExportDataBlob* Exporter :: GetBlob() const 
+{
+	return pimpl->blob;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+const aiExportDataBlob* Exporter :: GetOrphanedBlob() const 
+{
+	const aiExportDataBlob* tmp = pimpl->blob;
+	pimpl->blob = NULL;
+	return tmp;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+size_t Exporter :: aiGetExportFormatCount() const 
+{
+	return ::aiGetExportFormatCount();
+}
+
+// ------------------------------------------------------------------------------------------------
+const aiExportFormatDesc* Exporter :: aiGetExportFormatDescription( size_t pIndex ) const 
+{
+	return ::aiGetExportFormatDescription(pIndex);
+}
+
+
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API size_t aiGetExportFormatCount(void)
@@ -95,7 +243,7 @@ ASSIMP_API size_t aiGetExportFormatCount(void)
 
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API const C_STRUCT aiExportFormatDesc* aiGetExportFormatDescription( size_t pIndex)
+ASSIMP_API const aiExportFormatDesc* aiGetExportFormatDescription( size_t pIndex)
 {
 	if( pIndex >= aiGetExportFormatCount() )
 		return NULL;
@@ -105,18 +253,25 @@ ASSIMP_API const C_STRUCT aiExportFormatDesc* aiGetExportFormatDescription( size
 
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportScene( const aiScene* pScene, const char* pFormatId )
+ASSIMP_API aiReturn aiExportScene( const aiScene* pScene, const char* pFormatId, const char* pFileName )
 {
-	return NULL;
+	return ::aiExportSceneEx(pScene,pFormatId,pFileName,NULL);
 }
 
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API C_STRUCT aiReturn aiWriteBlobToFile( const C_STRUCT aiExportDataBlob* pBlob, const char* pPath, const aiFileIO* pIOSystem )
+ASSIMP_API aiReturn aiExportSceneEx( const aiScene* pScene, const char* pFormatId, const char* pFileName, const aiFileIO* pIO)
 {
 	return AI_FAILURE;
 }
 
+
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportSceneToBlob( const aiScene* pScene, const char* pFormatId )
+{
+	return NULL;
+}
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API C_STRUCT void aiReleaseExportData( const aiExportDataBlob* pData )

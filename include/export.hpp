@@ -50,26 +50,66 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "export.h"
 
 namespace Assimp	{
+	class ExporterPimpl;
 
+// ----------------------------------------------------------------------------------
+/** CPP-API: The Exporter class forms an C++ interface to the export functionality 
+ * of the Open Asset Import Library. Note that the export interface is available
+ * only if Assimp has been built with ASSIMP_BUILD_NO_EXPORT not defined.
+ * 
+ * The interface is modelled after the importer interface and mostly
+ * symmetric. The same rules for threading etc. apply.
+*/
 class ASSIMP_API Exporter
-#ifdef __cplusplus
-	: public boost::noncopyable
-#endif // __cplusplus
+	// TODO: causes good ol' base class has no dll interface warning
+//#ifdef __cplusplus
+//	: public boost::noncopyable
+//#endif // __cplusplus
 {
 public:
 
 	
-	Exporter() : blob() {
-	}
-
-
-	~Exporter() {
-		if (blob) {
-			::aiReleaseExportData(blob);
-		}
-	}
+	Exporter();
+	~Exporter();
 
 public:
+
+
+	// -------------------------------------------------------------------
+	/** Supplies a custom IO handler to the exporter to use to open and
+	 * access files. If you need the exporter to use custion IO logic to 
+	 * access the files, you need to supply a custom implementation of 
+	 * IOSystem and IOFile to the exporter. 
+	 *
+	 * #Exporter takes ownership of the object and will destroy it 
+	 * afterwards. The previously assigned handler will be deleted.
+	 * Pass NULL to take again ownership of your IOSystem and reset Assimp
+	 * to use its default implementation, which uses plain file IO.
+	 *
+	 * @param pIOHandler The IO handler to be used in all file accesses 
+	 *   of the Importer. 
+	 */
+	void SetIOHandler( IOSystem* pIOHandler);
+
+	// -------------------------------------------------------------------
+	/** Retrieves the IO handler that is currently set.
+	 * You can use #IsDefaultIOHandler() to check whether the returned
+	 * interface is the default IO handler provided by ASSIMP. The default
+	 * handler is active as long the application doesn't supply its own
+	 * custom IO handler via #SetIOHandler().
+	 * @return A valid IOSystem interface, never NULL.
+	 */
+	IOSystem* GetIOHandler() const;
+
+	// -------------------------------------------------------------------
+	/** Checks whether a default IO handler is active 
+	 * A default handler is active as long the application doesn't 
+	 * supply its own custom IO handler via #SetIOHandler().
+	 * @return true by default
+	 */
+	bool IsDefaultIOHandler() const;
+
+
 
 	// -------------------------------------------------------------------
 	/** Exports the given scene to a chosen file format. Returns the exported 
@@ -85,77 +125,37 @@ public:
 	* @return the exported data or NULL in case of error.
 	* @note If the Exporter instance did already hold a blob from
 	*   a previous call to #ExportToBlob, it will be disposed. */
-	const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const char* pFormatId ) {
-		if (blob) {
-			::aiReleaseExportData(blob);
-		}
-
-		return blob = ::aiExportScene(pScene,pFormatId);
-	}
+	const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const char* pFormatId );
 
 
 	// -------------------------------------------------------------------
-	/** Convenience function to export directly to a file.
+	/** Convenience function to export directly to a file. Use
+	 *  #SetIOSystem to supply a custom IOSystem to gain fine-grained control
+	 *  about the output data flow of the export process.
 	 * @param pBlob A data blob obtained from a previous call to #aiExportScene. Must not be NULL.
 	 * @param pPath Full target file name. Target must be accessible.
 	 * @return AI_SUCCESS if everything was fine. */
-	aiReturn ExportToFile( const aiScene* pScene, const char* pFormatId, const char* pPath ) {
-		
-		if(!ExportToBlob(pScene,pFormatId)) {
-			return AI_FAILURE;
-		}
+	aiReturn Export( const aiScene* pScene, const char* pFormatId, const char* pPath );
 
-
-		return WriteBlobToFile(pPath);
-	}
-
-
-	// -------------------------------------------------------------------
-	/** Convenience function to write a blob to a file. 
-	 * @param pBlob A data blob obtained from a previous call to #aiExportScene. Must not be NULL.
-	 * @param pPath Full target file name. Target must be accessible.
-	 * @return AI_SUCCESS if everything was fine. */
-	aiReturn WriteBlobToFile( const char* pPath ) const {
-		if (!blob) {
-			return AI_FAILURE;
-		}
-
-		// TODO
-		return AI_FAILURE; // ::aiWriteBlobToFile(blob,pPath,mIOSystem);
-	}
-
-
-	// -------------------------------------------------------------------
-	aiReturn WriteBlobToFile( const std::string& pPath ) const {
-		return WriteBlobToFile(pPath.c_str());
-	}
 
 
 	// -------------------------------------------------------------------
 	/** Return the blob obtained from the last call to #ExportToBlob */
-	const aiExportDataBlob* GetBlob() const {
-		return blob;
-	}
+	const aiExportDataBlob* GetBlob() const;
 
 
 	// -------------------------------------------------------------------
-	/** Orphan the blob from the last call to #ExportToBlob. That means
+	/** Orphan the blob from the last call to #ExportToBlob. This means
 	 *  the caller takes ownership and is thus responsible for calling
 	 *  #aiReleaseExportData to free the data again. */
-	const aiExportDataBlob* GetOrphanedBlob() const {
-		const aiExportDataBlob* tmp = blob;
-		blob = NULL;
-		return tmp;
-	}
+	const aiExportDataBlob* GetOrphanedBlob() const;
 
 
 	// -------------------------------------------------------------------
 	/** Returns the number of export file formats available in the current
 	 *  Assimp build. Use #Exporter::GetExportFormatDescription to
 	 *  retrieve infos of a specific export format */
-	size_t aiGetExportFormatCount() const {
-		return ::aiGetExportFormatCount();
-	}
+	size_t aiGetExportFormatCount() const;
 
 
 	// -------------------------------------------------------------------
@@ -166,15 +166,13 @@ public:
 	 *  for. Valid range is 0 to #Exporter::GetExportFormatCount
 	 * @return A description of that specific export format. 
 	 *  NULL if pIndex is out of range. */
-	const aiExportFormatDesc* aiGetExportFormatDescription( size_t pIndex ) const {
-		return ::aiGetExportFormatDescription(pIndex);
-	}
+	const aiExportFormatDesc* aiGetExportFormatDescription( size_t pIndex ) const;
 
 
-private:
+protected:
 
-	const aiExportDataBlob* blob;
-	Assimp::IOSystem* mIOSystem;
+	// Just because we don't want you to know how we're hacking around.
+	ExporterPimpl* pimpl;
 };
 
 } // namespace Assimp

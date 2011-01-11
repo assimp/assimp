@@ -72,11 +72,12 @@ namespace Assimp	{
 	class BaseImporter;
 	class BaseProcess;
 	class SharedPostProcessInfo;
-	class BatchLoader;
+	class BatchLoader; 
 
 	// =======================================================================
 	// Holy stuff, only for members of the high council of the Jedi.
 	class ImporterPimpl;
+	class ExporterPimpl; // export.hpp
 } //! namespace Assimp
 
 #define AI_PROPERTY_WAS_NOT_EXISTING 0xffffffff

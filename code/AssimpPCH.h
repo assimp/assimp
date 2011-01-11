@@ -137,7 +137,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/aiScene.h"
 #include "../include/aiPostProcess.h"
 #include "../include/assimp.hpp"
-#include "../include/export.h"
+#include "../include/export.hpp"
 
 // Internal utility headers
 #include "BaseImporter.h"

@@ -419,9 +419,9 @@ void BlenderImporter::ResolveImage(MaterialHelper* out, const Material* mat, con
 
 		while (s >= img->name && *s != '.')--s;
 
-		tex->achFormatHint[0] = s+1>e ? '\0' : s[1];
-		tex->achFormatHint[1] = s+2>e ? '\0' : s[2];
-		tex->achFormatHint[2] = s+3>e ? '\0' : s[3];
+		tex->achFormatHint[0] = s+1>e ? '\0' : ::tolower( s[1] );
+		tex->achFormatHint[1] = s+2>e ? '\0' : ::tolower( s[2] );
+		tex->achFormatHint[2] = s+3>e ? '\0' : ::tolower( s[3] );
 		tex->achFormatHint[3] = '\0';
 
 		// tex->mHeight = 0;
@@ -523,7 +523,7 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 
 				p->r = p->g = p->b = 0.6f;
 				p->specr = p->specg = p->specb = 0.6f;
-				p->ambir = p->ambig = p->ambib = 0.0f;
+				p->ambr = p->ambg = p->ambb = 0.0f;
 				p->mirr = p->mirg = p->mirb = 0.0f;
 				p->emit = 0.f;
 				p->alpha = 0.f;
@@ -566,7 +566,7 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 		col = aiColor3D(mat->specr,mat->specg,mat->specb);
 		mout->AddProperty(&col,1,AI_MATKEY_COLOR_SPECULAR);
 
-		col = aiColor3D(mat->ambir,mat->ambig,mat->ambib);
+		col = aiColor3D(mat->ambr,mat->ambg,mat->ambb);
 		mout->AddProperty(&col,1,AI_MATKEY_COLOR_AMBIENT);
 
 		col = aiColor3D(mat->mirr,mat->mirg,mat->mirb);

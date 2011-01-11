@@ -151,8 +151,8 @@ template <> void Structure :: Convert<SubsurfModifierData> (
 { 
 
     ReadField<ErrorPolicy_Fail>(dest.modifier,"modifier",db);
-    ReadField<ErrorPolicy_Igno>(dest.subdivType,"subdivType",db);
-    ReadField<ErrorPolicy_Igno>(dest.levels,"levels",db);
+    ReadField<ErrorPolicy_Warn>(dest.subdivType,"subdivType",db);
+    ReadField<ErrorPolicy_Fail>(dest.levels,"levels",db);
     ReadField<ErrorPolicy_Igno>(dest.renderLevels,"renderLevels",db);
     ReadField<ErrorPolicy_Igno>(dest.flags,"flags",db);
 
@@ -275,9 +275,9 @@ template <> void Structure :: Convert<Material> (
     ReadField<ErrorPolicy_Warn>(dest.specr,"specr",db);
     ReadField<ErrorPolicy_Warn>(dest.specg,"specg",db);
     ReadField<ErrorPolicy_Warn>(dest.specb,"specb",db);
-    ReadField<ErrorPolicy_Warn>(dest.ambir,"ambir",db);
-    ReadField<ErrorPolicy_Warn>(dest.ambig,"ambig",db);
-    ReadField<ErrorPolicy_Warn>(dest.ambib,"ambib",db);
+    ReadField<ErrorPolicy_Warn>(dest.ambr,"ambr",db);
+    ReadField<ErrorPolicy_Warn>(dest.ambg,"ambg",db);
+    ReadField<ErrorPolicy_Warn>(dest.ambb,"ambb",db);
     ReadField<ErrorPolicy_Igno>(dest.mirr,"mirr",db);
     ReadField<ErrorPolicy_Igno>(dest.mirg,"mirg",db);
     ReadField<ErrorPolicy_Igno>(dest.mirb,"mirb",db);

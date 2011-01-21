@@ -192,12 +192,14 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
 				const std::vector<BoneWeight>& vb = vertexBones[face.mIndices[b]];
 				for( size_t c = 0; c < vb.size(); ++c)
 				{
+					size_t boneIndex = vb[c].first;
 					// if the bone is already used in this submesh, it's ok
-					if( isBoneUsed[ vb[c].first ] )
+					if( isBoneUsed[boneIndex] )
 						continue;
 
 					// if it's not used, yet, we would need to add it. Store its bone index
-					newBonesAtCurrentFace.push_back( vb[c].first);
+					if( std::find( newBonesAtCurrentFace.begin(), newBonesAtCurrentFace.end(), boneIndex) == newBonesAtCurrentFace.end() )
+						newBonesAtCurrentFace.push_back( boneIndex);
 				}
 			}
 

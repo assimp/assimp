@@ -59,11 +59,8 @@ namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 // Exporter worker function prototypes. Should not be necessary to #ifndef them, it's just a prototype
-	void ExportSceneCollada(aiExportDataBlob*, const aiScene*) {
-	}
-
-	void ExportScene3DS(aiExportDataBlob*, const aiScene*) {
-	}
+void ExportSceneCollada(aiExportDataBlob*, const aiScene*);
+void ExportScene3DS(aiExportDataBlob*, const aiScene*) { }
 
 /// Function pointer type of a Export worker function
 typedef void (*fpExportFunc)(aiExportDataBlob*, const aiScene*);
@@ -270,7 +267,26 @@ ASSIMP_API aiReturn aiExportSceneEx( const aiScene* pScene, const char* pFormatI
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportSceneToBlob( const aiScene* pScene, const char* pFormatId )
 {
-	return NULL;
+	// find a suitable exporter
+	const Assimp::ExportFormatEntry* exporter = NULL;
+	for( size_t a = 0; a < aiGetExportFormatCount(); ++a )
+	{
+		if( strcmp( Assimp::gExporters[a].mDescription.id, pFormatId) == 0 )
+			exporter = Assimp::gExporters + a;
+	}
+	
+	if( !exporter )
+		return NULL;
+
+	aiExportDataBlob* blob = new aiExportDataBlob;
+	exporter->mExportFunction( blob, pScene);
+	if( !blob->data || blob->size == 0 )
+	{
+		delete blob;
+		return NULL;
+	}
+
+	return blob;
 }
 
 // ------------------------------------------------------------------------------------------------

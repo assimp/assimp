@@ -156,7 +156,7 @@ ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportSceneToBlob( const C_STRUCT 
 * returned by aiExportScene(). 
 * @param pData the data blob returned by aiExportScenetoBlob
 */
-ASSIMP_API C_STRUCT void aiReleaseExportBlob( const C_STRUCT aiExportDataBlob* pData );
+ASSIMP_API C_STRUCT void aiReleaseExportData( const C_STRUCT aiExportDataBlob* pData );
 
 #ifdef __cplusplus
 }

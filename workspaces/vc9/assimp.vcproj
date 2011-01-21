@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="assimp"
 	ProjectGUID="{5691E159-2D9B-407F-971F-EA5C592DC524}"
 	RootNamespace="assimp"
@@ -4054,6 +4054,18 @@
 						>
 					</File>
 				</Filter>
+			</Filter>
+			<Filter
+				Name="export"
+				>
+				<File
+					RelativePath="..\..\code\ColladaExporter.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\ColladaExporter.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter

@@ -80,10 +80,10 @@ public:
 	 */
 	enum ErrorSeverity
 	{
-		DEBUGGING	= 1,	//!< Debug log message
-		INFO		= 2, 	//!< Info log message
-		WARN		= 4,	//!< Warn log message
-		ERR			= 8		//!< Error log message
+		Debugging	= 1,	//!< Debug log message
+		Info		= 2, 	//!< Info log message
+		Warn		= 4,	//!< Warn log message
+		Err			= 8		//!< Error log message
 	};
 
 public:
@@ -121,31 +121,31 @@ public:
 	LogSeverity getLogSeverity() const;
 
 	// ----------------------------------------------------------------------
-	/** @brief	Attach a new logstream
+	/** @brief	Attach a new log-stream
 	 *
 	 *  The logger takes ownership of the stream and is responsible
 	 *  for its destruction (which is done using ::delete when the logger
 	 *  itself is destroyed). Call detachStream to detach a stream and to
 	 *  gain ownership of it again.
-	 *	 @param	pStream	 Logstream to attach
+	 *	 @param	pStream	 Log-stream to attach
 	 *  @param severity  Message filter, specified which types of log
 	 *    messages are dispatched to the stream. Provide a bitwise
 	 *    combination of the ErrorSeverity flags.
 	 *  @return true if the stream has been attached, false otherwise.*/
 	virtual bool attachStream(LogStream *pStream, 
-		unsigned int severity = DEBUGGING | ERR | WARN | INFO) = 0;
+		unsigned int severity = Debugging | Err | Warn | Info) = 0;
 
 	// ----------------------------------------------------------------------
 	/** @brief	Detach a still attached stream from the logger (or 
 	 *          modify the filter flags bits)
-	 *	 @param	pStream	Logstream instance for detaching
+	 *	 @param	pStream	Log-stream instance for detaching
 	 *  @param severity Provide a bitwise combination of the ErrorSeverity
 	 *    flags. This value is &~ed with the current flags of the stream,
 	 *    if the result is 0 the stream is detached from the Logger and
 	 *    the caller retakes the possession of the stream.
-	 *  @return true if the stream has been dettached, false otherwise.*/
+	 *  @return true if the stream has been detached, false otherwise.*/
 	virtual bool detatchStream(LogStream *pStream, 
-		unsigned int severity = DEBUGGING | ERR | WARN | INFO) = 0;
+		unsigned int severity = Debugging | Err | Warn | Info) = 0;
 
 protected:
 
@@ -158,7 +158,7 @@ protected:
 	// ----------------------------------------------------------------------
 	/** @brief Called as a request to write a specific debug message
 	 *	@param	message	Debug message. Never longer than
-	 *    MAX_LOG_MESSAGE_LENGTH characters (exluding the '0').
+	 *    MAX_LOG_MESSAGE_LENGTH characters (excluding the '0').
 	 *  @note  The message string is only valid until the scope of
 	 *    the function is left.
 	 */
@@ -167,7 +167,7 @@ protected:
 	// ----------------------------------------------------------------------
 	/** @brief Called as a request to write a specific info message
 	 *	@param	message	Info message. Never longer than
-	 *    MAX_LOG_MESSAGE_LENGTH characters (exluding the '0').
+	 *    MAX_LOG_MESSAGE_LENGTH characters (ecxluding the '0').
 	 *  @note  The message string is only valid until the scope of
 	 *    the function is left.
 	 */

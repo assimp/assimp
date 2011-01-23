@@ -64,8 +64,10 @@ namespace Assimp	{
 NullLogger DefaultLogger::s_pNullLogger;
 Logger *DefaultLogger::m_pLogger = &DefaultLogger::s_pNullLogger;
 
+static const unsigned int SeverityAll = Logger::Info | Logger::Err | Logger::Warn | Logger::Debugging;
+
 // ----------------------------------------------------------------------------------
-// Represents a logstream + its error severity
+// Represents a log-stream + its error severity
 struct LogStreamInfo
 {
 	unsigned int m_uiErrorSeverity;
@@ -252,7 +254,7 @@ void DefaultLogger::OnDebug( const char* message )
 	char msg[MAX_LOG_MESSAGE_LENGTH*2];
 	::sprintf(msg,"Debug, T%i: %s", GetThreadID(), message );
 
-	WriteToStreams( msg, Logger::DEBUGGING );
+	WriteToStreams( msg, Logger::Debugging );
 }
 
 // ----------------------------------------------------------------------------------
@@ -262,7 +264,7 @@ void DefaultLogger::OnInfo( const char* message )
 	char msg[MAX_LOG_MESSAGE_LENGTH*2];
 	::sprintf(msg,"Info,  T%i: %s", GetThreadID(), message );
 
-	WriteToStreams( msg , Logger::INFO );
+	WriteToStreams( msg , Logger::Info );
 }
 
 // ----------------------------------------------------------------------------------
@@ -272,7 +274,7 @@ void DefaultLogger::OnWarn( const char* message )
 	char msg[MAX_LOG_MESSAGE_LENGTH*2];
 	::sprintf(msg,"Warn,  T%i: %s", GetThreadID(), message );
 
-	WriteToStreams( msg, Logger::WARN );
+	WriteToStreams( msg, Logger::Warn );
 }
 
 // ----------------------------------------------------------------------------------
@@ -282,18 +284,18 @@ void DefaultLogger::OnError( const char* message )
 	char msg[MAX_LOG_MESSAGE_LENGTH*2];
 	::sprintf(msg,"Error, T%i: %s", GetThreadID(), message );
 
-	WriteToStreams( msg, Logger::ERR );
+	WriteToStreams( msg, Logger::Err );
 }
 
 // ----------------------------------------------------------------------------------
-//	Attachs a new stream
+//	Will attach a new stream
 bool DefaultLogger::attachStream( LogStream *pStream, unsigned int severity )
 {
 	if (!pStream)
 		return false;
 
 	if (0 == severity)	{
-		severity = Logger::INFO | Logger::ERR | Logger::WARN | Logger::DEBUGGING;
+		severity = Logger::Info | Logger::Err | Logger::Warn | Logger::Debugging;
 	}
 
 	for ( StreamIt it = m_StreamArray.begin();
@@ -320,7 +322,7 @@ bool DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
 		return false;
 
 	if (0 == severity)	{
-		severity = Logger::INFO | Logger::ERR | Logger::WARN | Logger::DEBUGGING;
+		severity = SeverityAll;
 	}
 	
 	for ( StreamIt it = m_StreamArray.begin();

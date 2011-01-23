@@ -2244,13 +2244,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	// ensure we get high priority
 	::SetPriorityClass(GetCurrentProcess(),HIGH_PRIORITY_CLASS);
 
-	// initialise the default logger if neccessary
+	// initialize the default logger if necessary
 	Assimp::DefaultLogger::create("",Assimp::Logger::VERBOSE);
 
 	CLogWindow::Instance().pcStream = new CMyLogStream();
 	Assimp::DefaultLogger::get()->attachStream(CLogWindow::Instance().pcStream,
-		Assimp::DefaultLogger::DEBUGGING | Assimp::DefaultLogger::INFO |
-		Assimp::DefaultLogger::ERR | Assimp::DefaultLogger::WARN);
+		Assimp::DefaultLogger::Debugging | Assimp::DefaultLogger::Info |
+		Assimp::DefaultLogger::Err | Assimp::DefaultLogger::Warn);
 
 	if (NULL == hDlg)
 		{

@@ -294,7 +294,9 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		
 				aiColor4D* pvVC[AI_MAX_NUMBER_OF_COLOR_SETS];
 				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_COLOR_SETS;++mui)	{
-					if (0xffffffff == vVColorIndices[mui])break;
+					if (0xffffffff == vVColorIndices[mui]) {
+						break;
+					}
 					pvVC[mui] = mesh->mColors[mui] = new aiColor4D[mesh->mNumVertices];
 				}
 

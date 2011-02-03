@@ -425,7 +425,7 @@ void LWOImporter::FindUVChannels(LWO::Surface& surf,
 
 				if (uv.abAssigned[idx] && ((aiVector2D*)&uv.rawData[0])[idx] != aiVector2D()) {
 
-					if (next >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
+					if (extra >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
 
 						DefaultLogger::get()->error("LWO: Maximum number of UV channels for "
 							"this mesh reached. Skipping channel \'" + uv.name + "\'");
@@ -442,9 +442,9 @@ void LWOImporter::FindUVChannels(LWO::Surface& surf,
 						had |= FindUVChannels(surf.mBumpTextures,layer,uv,next);
 						had |= FindUVChannels(surf.mReflectionTextures,layer,uv,next);
 
+						// We have a texture referencing this UV channel so we have to take special care
+						// and are willing to drop unreferenced channels in favour of it.
 						if (had != 0) {
-							
-							// We have a texture referencing this UV channel so we have to take special care of it
 							if (num_extra) {
 							
 								for (unsigned int a = next; a < std::min( extra, AI_MAX_NUMBER_OF_TEXTURECOORDS-1u ); ++a) {								
@@ -454,9 +454,8 @@ void LWOImporter::FindUVChannels(LWO::Surface& surf,
 							++extra;
 							out[next++] = i;
 						}
+						// Bäh ... seems not to be used at all. Push to end if enough space is available.
 						else {
-						
-							// Bäh ... seems not to be used at all. Push to end if enough space is available.
 							out[extra++] = i;
 							++num_extra;
 						}
@@ -467,7 +466,7 @@ void LWOImporter::FindUVChannels(LWO::Surface& surf,
 			}
 		}
 	}
-	if (next != AI_MAX_NUMBER_OF_TEXTURECOORDS) {
+	if (extra < AI_MAX_NUMBER_OF_TEXTURECOORDS) {
 		out[extra] = 0xffffffff;
 	}
 }

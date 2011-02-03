@@ -90,14 +90,14 @@ extern "C" {
  *  Supported number of vertex color sets per mesh. */
 
 #ifndef AI_MAX_NUMBER_OF_COLOR_SETS
-#	define AI_MAX_NUMBER_OF_COLOR_SETS 0x4
+#	define AI_MAX_NUMBER_OF_COLOR_SETS 0x8
 #endif // !! AI_MAX_NUMBER_OF_COLOR_SETS
 
 /** @def AI_MAX_NUMBER_OF_TEXTURECOORDS
  *  Supported number of texture coord sets (UV(W) channels) per mesh */
 
 #ifndef AI_MAX_NUMBER_OF_TEXTURECOORDS
-#	define AI_MAX_NUMBER_OF_TEXTURECOORDS 0x4
+#	define AI_MAX_NUMBER_OF_TEXTURECOORDS 0x8
 #endif // !! AI_MAX_NUMBER_OF_TEXTURECOORDS
 
 // ---------------------------------------------------------------------------

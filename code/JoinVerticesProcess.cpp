@@ -115,8 +115,8 @@ void JoinVerticesProcess::Execute( aiScene* pScene)
 // Unites identical vertices in the given mesh
 int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 {
-	BOOST_STATIC_ASSERT( AI_MAX_NUMBER_OF_COLOR_SETS    == 4);
-	BOOST_STATIC_ASSERT( AI_MAX_NUMBER_OF_TEXTURECOORDS == 4);
+	BOOST_STATIC_ASSERT( AI_MAX_NUMBER_OF_COLOR_SETS    == 8);
+	BOOST_STATIC_ASSERT( AI_MAX_NUMBER_OF_TEXTURECOORDS == 8);
 
 	// Return early if we don't have any positions
 	if (!pMesh->HasPositions() || !pMesh->HasFaces()) {
@@ -168,14 +168,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 
 	// Run an optimized code path if we don't have multiple UVs or vertex colors.
 	// This should yield false in more than 99% of all imports ...
-	const bool complex = (
-		pMesh->mTextureCoords[1]	||
-		pMesh->mTextureCoords[2]	|| 
-		pMesh->mTextureCoords[3]	||
-		pMesh->mColors[0]			|| 
-		pMesh->mColors[1]			|| 
-		pMesh->mColors[2]			||
-		pMesh->mColors[3] );
+	const bool complex = ( pMesh->GetNumColorChannels() > 0 || pMesh->GetNumUVChannels() > 1);
 
 	// Now check each vertex if it brings something new to the table
 	for( unsigned int a = 0; a < pMesh->mNumVertices; a++)	{
@@ -213,22 +206,48 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 			// Actually this increases runtime performance slightly, at least if branch
 			// prediction is on our side.
 			if (complex){
-				// manually unrolled because continue wouldn't work as desired in an inner loop
+				// manually unrolled because continue wouldn't work as desired in an inner loop, 
+				// also because some compilers seem to fail the task. Colors and UV coords
+				// are interleaved since the higher entries are most likely to be
+				// zero and thus useless. By interleaving the arrays, vertices are,
+				// on average, rejected earlier.
+
+				if( (uv.texcoords[1] - v.texcoords[1]).SquareLength() > squareEpsilon)
+					continue;
 				if( GetColorDifference( uv.colors[0], v.colors[0]) > squareEpsilon)
+					continue;
+
+				if( (uv.texcoords[2] - v.texcoords[2]).SquareLength() > squareEpsilon)
 					continue;
 				if( GetColorDifference( uv.colors[1], v.colors[1]) > squareEpsilon)
 					continue;
+
+				if( (uv.texcoords[3] - v.texcoords[3]).SquareLength() > squareEpsilon)
+					continue;
 				if( GetColorDifference( uv.colors[2], v.colors[2]) > squareEpsilon)
+					continue;
+
+				if( (uv.texcoords[4] - v.texcoords[4]).SquareLength() > squareEpsilon)
 					continue;
 				if( GetColorDifference( uv.colors[3], v.colors[3]) > squareEpsilon)
 					continue;
 
-				// texture coord matching manually unrolled as well
-				if( (uv.texcoords[1] - v.texcoords[1]).SquareLength() > squareEpsilon)
+				if( (uv.texcoords[5] - v.texcoords[5]).SquareLength() > squareEpsilon)
 					continue;
-				if( (uv.texcoords[2] - v.texcoords[2]).SquareLength() > squareEpsilon)
+				if( GetColorDifference( uv.colors[4], v.colors[4]) > squareEpsilon)
 					continue;
-				if( (uv.texcoords[3] - v.texcoords[3]).SquareLength() > squareEpsilon)
+
+				if( (uv.texcoords[6] - v.texcoords[6]).SquareLength() > squareEpsilon)
+					continue;
+				if( GetColorDifference( uv.colors[5], v.colors[5]) > squareEpsilon)
+					continue;
+
+				if( (uv.texcoords[7] - v.texcoords[7]).SquareLength() > squareEpsilon)
+					continue;
+				if( GetColorDifference( uv.colors[6], v.colors[6]) > squareEpsilon)
+					continue;
+				
+				if( GetColorDifference( uv.colors[7], v.colors[7]) > squareEpsilon)
 					continue;
 			}
 

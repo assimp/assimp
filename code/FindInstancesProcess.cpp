@@ -175,43 +175,32 @@ void FindInstancesProcess::Execute( aiScene* pScene)
 					// use a constant epsilon for colors and UV coordinates
 					static const float uvEpsilon = 10e-4f;
 
-					BOOST_STATIC_ASSERT(4 == AI_MAX_NUMBER_OF_COLOR_SETS);
-
-					// as in JIV: manually unrolled as continue wouldn't work as desired in inner loops
-					if (orig->mTextureCoords[0]) {
-						if(!CompareArrays(orig->mTextureCoords[0],inst->mTextureCoords[0],orig->mNumVertices,uvEpsilon))
-							continue;
-						if (orig->mTextureCoords[1]) {
-							if(!CompareArrays(orig->mTextureCoords[1],inst->mTextureCoords[1],orig->mNumVertices,uvEpsilon))
+					{
+						unsigned int i, end = orig->GetNumUVChannels();
+						for(i = 0; i < end; ++i) {
+							if (!orig->mTextureCoords[i]) {
 								continue;
-							if (orig->mTextureCoords[2]) {
-								if(!CompareArrays(orig->mTextureCoords[2],inst->mTextureCoords[2],orig->mNumVertices,uvEpsilon))
-									continue;
-								if (orig->mTextureCoords[3]) {
-									if(!CompareArrays(orig->mTextureCoords[3],inst->mTextureCoords[3],orig->mNumVertices,uvEpsilon))
-										continue;
-								}
+							}
+							if(!CompareArrays(orig->mTextureCoords[i],inst->mTextureCoords[i],orig->mNumVertices,uvEpsilon)) {
+								break;	
 							}
 						}
-					}
-
-					BOOST_STATIC_ASSERT(4 == AI_MAX_NUMBER_OF_COLOR_SETS);
-
-					// and the same nasty stuff for vertex colors ...
-					if (orig->mColors[0]) {
-						if(!CompareArrays(orig->mColors[0],inst->mColors[0],orig->mNumVertices,uvEpsilon))
+						if (i != end) {
 							continue;
-						if (orig->mTextureCoords[1]) {
-							if(!CompareArrays(orig->mColors[1],inst->mColors[1],orig->mNumVertices,uvEpsilon))
+						}
+					}
+					{
+						unsigned int i, end = orig->GetNumColorChannels();
+						for(i = 0; i < end; ++i) {
+							if (!orig->mColors[i]) {
 								continue;
-							if (orig->mTextureCoords[2]) {
-								if(!CompareArrays(orig->mColors[2],inst->mColors[2],orig->mNumVertices,uvEpsilon))
-									continue;
-								if (orig->mTextureCoords[3]) {
-									if(!CompareArrays(orig->mColors[3],inst->mColors[3],orig->mNumVertices,uvEpsilon))
-										continue;
-								}
 							}
+							if(!CompareArrays(orig->mColors[i],inst->mColors[i],orig->mNumVertices,uvEpsilon)) {
+								break;	
+							}
+						}
+						if (i != end) {
+							continue;
 						}
 					}
 

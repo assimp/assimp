@@ -699,6 +699,14 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 	time_t tt = ::time(NULL);
 	tm* p     = ::gmtime(&tt);
 
+	std::string c = cmd;
+	std::string::size_type s; 
+
+	// https://sourceforge.net/tracker/?func=detail&aid=3167364&group_id=226462&atid=1067632
+	// -- not allowed in XML comments
+	while((s = c.find("--")) != std::string::npos) {
+		c[s] = '?';
+	}
 	aiString name;
 
 	// write header
@@ -715,7 +723,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 		" \n\n"
 		"<Scene flags=\"%i\" postprocessing=\"%i\">\n",
 		
-		aiGetVersionMajor(),aiGetVersionMinor(),aiGetVersionRevision(),src,cmd,asctime(p),
+		aiGetVersionMajor(),aiGetVersionMinor(),aiGetVersionRevision(),src,c.c_str(),asctime(p),
 		scene->mFlags,
 		0 /*globalImporter->GetEffectivePostProcessing()*/);
 

@@ -66,7 +66,7 @@ class XFileParser
 {
 public:
 	/** Constructor. Creates a data structure out of the XFile given in the memory block. 
-	 * @param pBuffer Memory buffer containing the XFile
+	 * @param pBuffer Null-terminated memory buffer containing the XFile
 	 */
 	XFileParser( const std::vector<char>& pBuffer);
 

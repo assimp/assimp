@@ -147,7 +147,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 			uint32_t me = aiHashes[i] = ((MaterialHelper*)pScene->mMaterials[i])->ComputeHash();
 			for (unsigned int a = 0; a < i;++a)
 			{
-				if (me == aiHashes[a])	{				
+				if (abReferenced[a] && me == aiHashes[a]) {
 					++iCnt;
 					me = 0;
 					aiMappingTable[i] = aiMappingTable[a];

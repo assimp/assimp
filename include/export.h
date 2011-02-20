@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "aiTypes.h"
 
 #ifdef __cplusplus
+#include <boost/noncopyable.hpp>
 extern "C" {
 #endif
 

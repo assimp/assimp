@@ -236,9 +236,9 @@ struct Mesh
 //!	\brief	Data structure to store all obj-specific model datas
 struct Model
 {
-	typedef std::map<std::string*, std::vector<unsigned int>* > GroupMap;
-	typedef std::map<std::string*, std::vector<unsigned int>* >::iterator GroupMapIt;
-	typedef std::map<std::string*, std::vector<unsigned int>* >::const_iterator ConstGroupMapIt;
+	typedef std::map<std::string, std::vector<unsigned int>* > GroupMap;
+	typedef std::map<std::string, std::vector<unsigned int>* >::iterator GroupMapIt;
+	typedef std::map<std::string, std::vector<unsigned int>* >::const_iterator ConstGroupMapIt;
 
 	//!	Model name
 	std::string m_ModelName;

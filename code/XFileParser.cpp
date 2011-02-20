@@ -91,7 +91,7 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 
 	// set up memory pointers
 	P = &pBuffer.front();
-	End = P + pBuffer.size();
+	End = P + pBuffer.size() - 1;
 
 	// check header
 	if( strncmp( P, "xof ", 4) != 0)
@@ -180,7 +180,8 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 		// First find out how much storage we'll need. Count sections.
 		const char* P1       = P;
 		unsigned int est_out = 0;
-		while (P1 < End)
+
+		while (P1 + 3 < End)
 		{
 			// read next offset
 			uint16_t ofs = *((uint16_t*)P1);
@@ -199,12 +200,16 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 			// and advance to the next offset
 			P1 += ofs;
 			est_out += MSZIP_BLOCK; // one decompressed block is 32786 in size
+
+			// this block would continue past the file end, abort
+			if (P1 > End)
+				throw DeadlyImportError("X: Unexpected end of file while uncompressing");
 		}
 		
-		// Allocate storage and do the actual uncompressing
-		uncompressed.resize(est_out);
+		// Allocate storage and terminating zero and do the actual uncompressing
+		uncompressed.resize(est_out + 1);
 		char* out = &uncompressed.front();
-		while (P < End)
+		while (P + 3 < End)
 		{
 			uint16_t ofs = *((uint16_t*)P);
 			AI_SWAP2(ofs); 
@@ -592,6 +597,9 @@ void XFileParser::ParseDataObjectMeshNormals( Mesh* pMesh)
 void XFileParser::ParseDataObjectMeshTextureCoords( Mesh* pMesh)
 {
 	readHeadOfDataObject();
+	if( pMesh->mNumTextures + 1 > AI_MAX_NUMBER_OF_TEXTURECOORDS)
+		ThrowException( "Too many sets of texture coordinates");
+
 	std::vector<aiVector2D>& coords = pMesh->mTexCoords[pMesh->mNumTextures++];
 
 	unsigned int numCoords = ReadInt();
@@ -609,6 +617,8 @@ void XFileParser::ParseDataObjectMeshTextureCoords( Mesh* pMesh)
 void XFileParser::ParseDataObjectMeshVertexColors( Mesh* pMesh)
 {
 	readHeadOfDataObject();
+	if( pMesh->mNumColorSets + 1 > AI_MAX_NUMBER_OF_COLOR_SETS)
+		ThrowException( "Too many colorsets");
 	std::vector<aiColor4D>& colors = pMesh->mColors[pMesh->mNumColorSets++];
 
 	unsigned int numColors = ReadInt();
@@ -659,7 +669,7 @@ void XFileParser::ParseDataObjectMeshMaterialList( Mesh* pMesh)
 	// commented out version check, as version 03.03 exported from blender also has 2 semicolons
 	if( !mIsBinaryFormat) // && MajorVersion == 3 && MinorVersion <= 2)
 	{
-		if( *P == ';')
+		if(P < End && *P == ';')
 			++P;
 	}
 
@@ -1043,6 +1053,7 @@ std::string XFileParser::GetNextToken()
 		// in binary mode it will only return NAME and STRING token
 		// and (correctly) skip over other tokens.
 
+		if( End - P < 2) return s;
 		unsigned int tok = ReadBinWord();
 		unsigned int len;
 
@@ -1051,13 +1062,17 @@ std::string XFileParser::GetNextToken()
 		{
 			case 1:
 				// name token
+				if( End - P < 4) return s;
 				len = ReadBinDWord();
+				if( End - P < len) return s;
 				s = std::string(P, len);
 				P += len;
 				return s;
 			case 2:
 				// string token
+				if( End - P < 4) return s;
 				len = ReadBinDWord();
+				if( End - P < len) return s;
 				s = std::string(P, len);
 				P += (len + 2);
 				return s;
@@ -1070,10 +1085,12 @@ std::string XFileParser::GetNextToken()
 				P += 16;
 				return "<guid>";
 			case 6:
+				if( End - P < 4) return s;
 				len = ReadBinDWord();
 				P += (len * 4);
 				return "<int_list>";
 			case 7:
+				if( End - P < 4) return s;
 				len = ReadBinDWord();
 				P += (len * mBinaryFloatSize);
 				return "<flt_list>";
@@ -1227,6 +1244,7 @@ void XFileParser::ReadUntilEndOfLine()
 // ------------------------------------------------------------------------------------------------
 unsigned short XFileParser::ReadBinWord()
 {
+	assert(End - P >= 2);
 	const unsigned char* q = (const unsigned char*) P;
 	unsigned short tmp = q[0] | (q[1] << 8);
 	P += 2;
@@ -1236,6 +1254,7 @@ unsigned short XFileParser::ReadBinWord()
 // ------------------------------------------------------------------------------------------------
 unsigned int XFileParser::ReadBinDWord()
 {
+	assert(End - P >= 4);
 	const unsigned char* q = (const unsigned char*) P;
 	unsigned int tmp = q[0] | (q[1] << 8) | (q[2] << 16) | (q[3] << 24);
 	P += 4;
@@ -1247,17 +1266,22 @@ unsigned int XFileParser::ReadInt()
 {
 	if( mIsBinaryFormat)
 	{
-		if( mBinaryNumCount == 0)
+		if( mBinaryNumCount == 0 && End - P >= 2)
 		{
 			unsigned short tmp = ReadBinWord(); // 0x06 or 0x03
-			if( tmp == 0x06) // array of ints follows
+			if( tmp == 0x06 && End - P >= 4) // array of ints follows
 				mBinaryNumCount = ReadBinDWord();
 			else // single int follows
 				mBinaryNumCount = 1; 
 		}
 
 		--mBinaryNumCount;
-		return ReadBinDWord();
+		if ( End - P >= 4) {
+			return ReadBinDWord();
+		} else {
+			P = End;
+			return 0;
+		}
 	} else
 	{
 		FindNextNoneWhiteSpace();
@@ -1296,10 +1320,10 @@ float XFileParser::ReadFloat()
 {
 	if( mIsBinaryFormat)
 	{
-		if( mBinaryNumCount == 0)
+		if( mBinaryNumCount == 0 && End - P >= 2)
 		{
 			unsigned short tmp = ReadBinWord(); // 0x07 or 0x42
-			if( tmp == 0x07) // array of floats following
+			if( tmp == 0x07 && End - P >= 4) // array of floats following
 				mBinaryNumCount = ReadBinDWord();
 			else // single float following
 				mBinaryNumCount = 1; 
@@ -1308,14 +1332,24 @@ float XFileParser::ReadFloat()
 		--mBinaryNumCount;
 		if( mBinaryFloatSize == 8)
 		{
-			float result = (float) (*(double*) P);
-			P += 8;
-			return result;
+			if( End - P >= 8) {
+				float result = (float) (*(double*) P);
+				P += 8;
+				return result;
+			} else {
+				P = End;
+				return 0;
+			}
 		} else
 		{
-			float result = *(float*) P;
-			P += 4;
-			return result;
+			if( End - P >= 4) {
+				float result = *(float*) P;
+				P += 4;
+				return result;
+			} else {
+				P = End;
+				return 0;
+			}
 		}
 	}
 
@@ -1323,6 +1357,7 @@ float XFileParser::ReadFloat()
 	FindNextNoneWhiteSpace();
 	// check for various special strings to allow reading files from faulty exporters
 	// I mean you, Blender!
+	// Reading is safe because of the terminating zero
 	if( strncmp( P, "-1.#IND00", 9) == 0 || strncmp( P, "1.#IND00", 8) == 0)
 	{ 
 		P += 9;

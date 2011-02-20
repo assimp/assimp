@@ -47,6 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers of the post-processing framework
 #include "SplitByBoneCountProcess.h"
 
+#include <limits>
+
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
@@ -262,7 +264,7 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
 		// and copy over the data, generating faces with linear indices along the way
 		newMesh->mFaces = new aiFace[subMeshFaces.size()];
 		size_t nvi = 0; // next vertex index
-		std::vector<size_t> previousVertexIndices( numSubMeshVertices, SIZE_MAX); // per new vertex: its index in the source mesh
+		std::vector<size_t> previousVertexIndices( numSubMeshVertices, std::numeric_limits<size_t>::max()); // per new vertex: its index in the source mesh
 		for( size_t a = 0; a < subMeshFaces.size(); ++a )
 		{
 			const aiFace& srcFace = pMesh->mFaces[subMeshFaces[a]];
@@ -306,7 +308,7 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
 		newMesh->mNumBones = 0;
 		newMesh->mBones = new aiBone*[numBones];
 
-		std::vector<size_t> mappedBoneIndex( pMesh->mNumBones, SIZE_MAX);
+		std::vector<size_t> mappedBoneIndex( pMesh->mNumBones, std::numeric_limits<size_t>::max());
 		for( size_t a = 0; a < pMesh->mNumBones; ++a )
 		{
 			if( !isBoneUsed[a] )
@@ -333,7 +335,7 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
 			for( size_t b = 0; b < bonesOnThisVertex.size(); ++b )
 			{
 				size_t newBoneIndex = mappedBoneIndex[ bonesOnThisVertex[b].first ];
-				if( newBoneIndex != SIZE_MAX )
+				if( newBoneIndex != std::numeric_limits<size_t>::max() )
 					newMesh->mBones[newBoneIndex]->mNumWeights++;
 			}
 		}
@@ -359,7 +361,7 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
 			for( size_t b = 0; b < bonesOnThisVertex.size(); ++b)
 			{
 				size_t newBoneIndex = mappedBoneIndex[ bonesOnThisVertex[b].first ];
-				ai_assert( newBoneIndex != SIZE_MAX );
+				ai_assert( newBoneIndex != std::numeric_limits<size_t>::max() );
 				aiVertexWeight* dstWeight = newMesh->mBones[newBoneIndex]->mWeights + newMesh->mBones[newBoneIndex]->mNumWeights;
 				newMesh->mBones[newBoneIndex]->mNumWeights++;
 

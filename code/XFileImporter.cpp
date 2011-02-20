@@ -101,7 +101,7 @@ void XFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, I
 	mImportedMats.clear();
 
 	// in the hope that binary files will never start with a BOM ...
-	mBuffer.resize( fileSize);
+	mBuffer.resize( fileSize + 1);
 	file->Read( &mBuffer.front(), 1, fileSize);
 	ConvertToUTF8(mBuffer);
 

@@ -107,7 +107,7 @@ struct aiExportDataBlob
 	/// Default constructor
 	aiExportDataBlob() { size = 0; data = NULL; }
 	/// Releases the data
-	~aiExportDataBlob() { delete data; }
+	~aiExportDataBlob() { delete static_cast<char*>( data ); }
 #endif // __cplusplus
 };
 

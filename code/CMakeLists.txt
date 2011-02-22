@@ -170,6 +170,7 @@ SOURCE_GROUP( Collada FILES
 SOURCE_GROUP( DXF FILES
 	DXFLoader.cpp
 	DXFLoader.h
+	DXFHelper.h
 )
 
 SOURCE_GROUP( CSM FILES
@@ -493,6 +494,7 @@ ADD_LIBRARY( assimp SHARED
 	ConvertToLHProcess.h
 	DXFLoader.cpp
 	DXFLoader.h
+	DXFHelper.h
 	CSMLoader.cpp
 	CSMLoader.h
 	DefaultIOStream.cpp

@@ -79,10 +79,14 @@ public:
 public:
 
 	// -----------------------------------------
-	/** construct from existing stream reader */
-	LineSplitter(StreamReaderLE& stream)
+	/** construct from existing stream reader 
+	note: trim is *always* assumed true if skyp_empty_lines==true
+	*/
+	LineSplitter(StreamReaderLE& stream, bool skip_empty_lines = true, bool trim = true)
 		: stream(stream)
 		, swallow()
+		, skip_empty_lines(skip_empty_lines)
+		, trim(trim)
 	{
 		cur.reserve(1024);
 		operator++();
@@ -106,20 +110,41 @@ public:
 
 		char s;
 
-		cur.clear(); // I will kill you if you deallocate.
+		cur.clear();
 		while(stream.GetRemainingSize() && (s = stream.GetI1(),1)) {
 			if (s == '\n' || s == '\r') {
+				if (skip_empty_lines) {
 					while (stream.GetRemainingSize() && ((s = stream.GetI1()) == ' ' || s == '\r' || s == '\n'));
 					if (stream.GetRemainingSize()) {
 						stream.IncPtr(-1);
 					}
-					break;
+				}
+				else {
+					// skip both potential line terminators but don't read past this line.
+					if (stream.GetRemainingSize() && (s == '\r' && stream.GetI1() != '\n')) {
+						stream.IncPtr(-1);
+					}
+
+					if (trim) {
+						while (stream.GetRemainingSize() && ((s = stream.GetI1()) == ' ') || s == '\t');
+						if (stream.GetRemainingSize()) {
+							stream.IncPtr(-1);
+						}
+					}
+				}
+				
+				break;
 			}
 			cur += s;
 		}
 
 		++idx;
 		return *this;
+	}
+
+	// -----------------------------------------
+	LineSplitter& operator++(int) {
+		return ++(*this);
 	}
 
 	// -----------------------------------------
@@ -210,7 +235,7 @@ private:
 	line_idx idx;
 	std::string cur;
 	StreamReaderLE& stream;
-	bool swallow;
+	bool swallow, skip_empty_lines, trim;
 };
 
 }

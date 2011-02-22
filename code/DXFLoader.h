@@ -47,9 +47,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 
 namespace Assimp	{
+	namespace DXF {
+	
+		class LineReader;
+		struct FileData;
+		struct PolyLine;
+		struct Block;
+		struct InsertBlock;
+
+		typedef std::map<std::string, const DXF::Block*> BlockMap;
+	}
+
 
 // ---------------------------------------------------------------------------
-/** DXF importer class
+/** DXF importer implementation.
+ *
 */
 class DXFImporter : public BaseImporter
 {
@@ -61,25 +73,6 @@ protected:
 
 	/** Destructor, private as well */
 	~DXFImporter();
-
-
-	// describes a single layer in the DXF file
-	struct LayerInfo
-	{
-		LayerInfo()
-		{
-			name[0] = '\0';
-		}
-
-		char name[4096];
-
-		// face buffer - order is x,y,z v1,v2,v3,v4 
-		// if v2 = v3:    line
-		// elsif v3 = v2: triangle
-		// else: polygon
-		std::vector<aiVector3D> vPositions;
-		std::vector<aiColor4D>  vColors;
-	};
 
 
 public:
@@ -94,89 +87,68 @@ protected:
 
 	// -------------------------------------------------------------------
 	/** Called by Importer::GetExtensionList() for each loaded importer.
-	 * See BaseImporter::GetExtensionList() for details
-	 */
+	 * See BaseImporter::GetExtensionList() for details*/
 	void GetExtensionList(std::set<std::string>& extensions);
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 
-	 * See BaseImporter::InternReadFile() for details
-	 */
-	void InternReadFile( const std::string& pFile, aiScene* pScene, 
+	 * See BaseImporter::InternReadFile() for details */
+	void InternReadFile( const std::string& pFile, 
+		aiScene* pScene, 
 		IOSystem* pIOHandler);
-
-	// -------------------------------------------------------------------
-	/** Get the next line from the file.
-	 *  @return false if the end of the file was reached
-	 */
-	bool GetNextLine();
-
-	// -------------------------------------------------------------------
-	/** Get the next token (group code + data line) from the file.
-	 *  @return false if the end of the file was reached
-	 */
-	bool GetNextToken();
-
-	// -------------------------------------------------------------------
-	/** Parses the ENTITIES section in the file
-	 *  @return false if the end of the file was reached
-	 */
-	bool ParseEntities();
-
-	// -------------------------------------------------------------------
-	/** Parses a 3DFACE section in the file
-	 *  @return false if the end of the file was reached
-	 */
-	bool Parse3DFace();
-
-	// -------------------------------------------------------------------
-	/** Parses a POLYLINE section in the file
-	 *  @return false if the end of the file was reached
-	 */
-	bool ParsePolyLine();
-
-	// -------------------------------------------------------------------
-	/** Sets the current layer - cursor must point to the name of it.
-	 *  @param out Receives a handle to the layer
-	 */
-	void SetLayer(LayerInfo*& out);
-
-	// -------------------------------------------------------------------
-	/** Creates a default layer.
-	 *  @param out Receives a handle to the default layer
-	 */
-	void SetDefaultLayer(LayerInfo*& out);
-
-	// -------------------------------------------------------------------
-	/** Parses a VERTEX element in a POLYLINE/POLYFACE
-	 *  @param out Receives the output vertex. 
-	 *  @param clr Receives the output vertex color - won't be modified
-	 *    if it is not existing. 
-	 *  @param outIdx Receives the output vertex indices, if present.
-	 *    Wont't be modified otherwise. Size must be at least 4.
-	 *  @return false if the end of the file was reached
-	 */
-	bool ParsePolyLineVertex(aiVector3D& out, aiColor4D& clr, 
-		unsigned int* outIdx);
 
 private:
 
-	// points to the next section 
-	const char* buffer;
+	// -----------------------------------------------------
+	void SkipSection(DXF::LineReader& reader);
 
-	// specifies the current group code
-	int groupCode;
+	// -----------------------------------------------------
+	void ParseHeader(DXF::LineReader& reader,
+		DXF::FileData& output);
 
-	// contains the current data line
-	char cursor[4096];
+	// -----------------------------------------------------
+	void ParseEntities(DXF::LineReader& reader,
+		DXF::FileData& output);
 
-	// specifies whether the next call to GetNextToken()
-	// should return the current token a second time
-	bool bRepeat;
+	// -----------------------------------------------------
+	void ParseBlocks(DXF::LineReader& reader, 
+		DXF::FileData& output);
 
-	// list of all loaded layers
-	std::vector<LayerInfo> mLayers;
-	LayerInfo* mDefaultLayer;
+	// -----------------------------------------------------
+	void ParseBlock(DXF::LineReader& reader, 
+		DXF::FileData& output);
+
+	// -----------------------------------------------------
+	void ParseInsertion(DXF::LineReader& reader, 
+		DXF::FileData& output);
+
+	// -----------------------------------------------------
+	void ParsePolyLine(DXF::LineReader& reader, 
+		DXF::FileData& output);
+
+	// -----------------------------------------------------
+	void ParsePolyLineVertex(DXF::LineReader& reader, 
+		DXF::PolyLine& line);
+
+	// -----------------------------------------------------
+	void Parse3DFace(DXF::LineReader& reader, 
+		DXF::FileData& output);
+
+	// -----------------------------------------------------
+	void ConvertMeshes(aiScene* pScene, 
+		DXF::FileData& output);
+
+	// -----------------------------------------------------
+	void GenerateHierarchy(aiScene* pScene, 
+		DXF::FileData& output);
+
+	// -----------------------------------------------------
+	void GenerateMaterials(aiScene* pScene, 
+		DXF::FileData& output);
+
+	// -----------------------------------------------------
+	void ExpandBlockReferences(DXF::Block& bl,
+		const DXF::BlockMap& blocks_by_name);
 };
 
 } // end of namespace Assimp

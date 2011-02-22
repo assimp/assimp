@@ -51,13 +51,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ConvertToLHProcess.h"
 #include "fast_atof.h"
 
+#include "DXFHelper.h"
+
 using namespace Assimp;
 
 // AutoCAD Binary DXF<CR><LF><SUB><NULL> 
 #define AI_DXF_BINARY_IDENT ("AutoCAD Binary DXF\r\n\x1a\0")
 #define AI_DXF_BINARY_IDENT_LEN (24)
 
-// color indices for DXF - 16 are supported
+// default vertex color that all uncolored vertices will receive
+#define AI_DXF_DEFAULT_COLOR aiColor4D(0.6f,0.6f,0.6f,0.6f)
+
+// color indices for DXF - 16 are supported, the table is 
+// taken directly from the DXF spec.
 static aiColor4D g_aclrDxfIndexColors[] =
 {
 	aiColor4D (0.6f, 0.6f, 0.6f, 1.0f),
@@ -78,9 +84,7 @@ static aiColor4D g_aclrDxfIndexColors[] =
 	aiColor4D (0.6f, 0.0f, 1.0f, 1.0f)  // violet
 };
 #define AI_DXF_NUM_INDEX_COLORS (sizeof(g_aclrDxfIndexColors)/sizeof(g_aclrDxfIndexColors[0]))
-
-// invalid/unassigned color value
-aiColor4D g_clrInvalid = aiColor4D(get_qnan(),0.f,0.f,1.f);
+#define AI_DXF_ENTITIES_MAGIC_BLOCK "$ASSIMP_ENTITIES_MAGIC"
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -107,201 +111,287 @@ void DXFImporter::GetExtensionList(std::set<std::string>& extensions)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Get a copy of the next data line, skip strange data
-bool DXFImporter::GetNextLine()
-{
-	if(!SkipLine(&buffer))
-		return false;
-	if(!SkipSpaces(&buffer))
-		return GetNextLine();
-	else if (*buffer == '{')	{
-		// some strange meta data ...
-		while (true)
-		{
-			if(!SkipLine(&buffer))
-				return false;
-
-			if(SkipSpaces(&buffer) && *buffer == '}')
-				break;
-		}
-		return GetNextLine();
-	}
-	return true;
-}
-
-// ------------------------------------------------------------------------------------------------
-// Get the next token in the file
-bool DXFImporter::GetNextToken()
-{
-	if (bRepeat)	{
-		bRepeat = false;
-		return true;
-	}
-
-	SkipSpaces(&buffer);
-	groupCode = strtol10s(buffer,&buffer);
-	if(!GetNextLine())
-		return false;
-	
-	// copy the data line to a separate buffer
-	char* m = cursor, *end = &cursor[4096];
-	while (!IsSpaceOrNewLine( *buffer ) && m < end)
-		*m++ = *buffer++;
-	
-	*m = '\0';
-	GetNextLine(); 
-	return true;
-}
-
-// ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
 void DXFImporter::InternReadFile( const std::string& pFile, 
-	aiScene* pScene, IOSystem* pIOHandler)
+	aiScene* pScene, 
+	IOSystem* pIOHandler)
 {
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
-
-	// Check whether we can read from the file
+	boost::shared_ptr<IOStream> file = boost::shared_ptr<IOStream>( pIOHandler->Open( pFile) );
+	
+	// Check whether we can read the file
 	if( file.get() == NULL) {
 		throw DeadlyImportError( "Failed to open DXF file " + pFile + "");
 	}
 
-	// read the contents of the file in a buffer
-	std::vector<char> buffer2;
-	TextFileToBuffer(file.get(),buffer2);
-	buffer = &buffer2[0];
-
-	bRepeat = false;
-	mDefaultLayer = NULL;
-
 	// check whether this is a binaray DXF file - we can't read binary DXF files :-(
-	if (!strncmp(AI_DXF_BINARY_IDENT,buffer,AI_DXF_BINARY_IDENT_LEN))
+	char buff[AI_DXF_BINARY_IDENT_LEN+1] = {0};
+	file->Read(buff,AI_DXF_BINARY_IDENT_LEN,1);
+
+	if (!strncmp(AI_DXF_BINARY_IDENT,buff,AI_DXF_BINARY_IDENT_LEN)) {
 		throw DeadlyImportError("DXF: Binary files are not supported at the moment");
+	}
 
-	// now get all lines of the file
-	while (GetNextToken())	{
+	// DXF files can grow very large, so read them via the StreamReader,
+	// which will choose a suitable strategy.
+	file->Seek(0,aiOrigin_SET);
+	StreamReaderLE stream( file );
+	
+	DXF::LineReader reader (stream);
+	DXF::FileData output;
 
-		if (2 == groupCode)	{
+	// now get all lines of the file and process top-level sections
+	bool eof = false;
+	while(!reader.End()) {
 
-			// ENTITIES and BLOCKS sections - skip the whole rest, no need to waste our time with them
-			if (!::strcmp(cursor,"ENTITIES") || !::strcmp(cursor,"BLOCKS")) {
-				if (!ParseEntities())
-					break; 
-				else bRepeat = true;
+		// blocks table - these 'build blocks' are later (in ENTITIES)
+		// referenced an included via INSERT statements.
+		if (reader.Is(2,"BLOCKS")) {
+			ParseBlocks(reader,output);
+			continue;
+		}
+	
+		// primary entity table
+		if (reader.Is(2,"ENTITIES")) {
+			ParseEntities(reader,output);
+			continue;
+		}
+
+		// skip unneeded sections entirely to avoid any problems with them 
+		// alltogether.
+		else if (reader.Is(2,"CLASSES") || reader.Is(2,"TABLES")) {
+			SkipSection(reader);
+			continue;
+		}
+
+		else if (reader.Is(2,"HEADER")) {
+			ParseHeader(reader,output);
+			continue;
+		}
+
+		// comments
+		else if (reader.Is(999)) {
+			DefaultLogger::get()->info("DXF Comment: " + reader.Value());
+		}
+
+		// don't read past the official EOF sign
+		else if (reader.Is(0,"EOF")) {
+			eof = true;
+			break;
+		}
+
+		++reader;
+	}
+	if (!eof) {
+		DefaultLogger::get()->warn("DXF: EOF reached, but did not encounter DXF EOF marker");
+	}
+
+	ConvertMeshes(pScene,output);
+	
+	// flip winding order to be ccw
+	FlipWindingOrderProcess flipper;
+	flipper.Execute(pScene);
+
+	// --- everything destructs automatically ---
+}
+
+// ------------------------------------------------------------------------------------------------
+void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
+{
+	// the process of resolving all the INSERT statements can grow the
+	// polycount excessively, so log the original number.
+	// XXX Option to import blocks as separate nodes?
+	if (!DefaultLogger::isNullLogger()) {
+
+		unsigned int vcount = 0, icount = 0;
+		BOOST_FOREACH (const DXF::Block& bl, output.blocks) {
+			BOOST_FOREACH (boost::shared_ptr<const DXF::PolyLine> pl, bl.lines) {
+				vcount += pl->positions.size();
+				icount += pl->counts.size();
 			}
+		}
 
-			// other sections - skip them to make sure there will be no name conflicts
-			else	{
-				while ( GetNextToken())	{
-					if (!::strcmp(cursor,"ENDSEC"))
+		DefaultLogger::get()->debug((Formatter::format("DXF: Unexpanded polycount is "),
+			icount,", vertex count is ",vcount
+		));
+	}
+
+	if (! output.blocks.size()  ) {
+		throw DeadlyImportError("DXF: no data blocks loaded");
+	}
+
+	// index blocks by name
+	DXF::BlockMap blocks_by_name;
+	BOOST_FOREACH (const DXF::Block& bl, output.blocks) {
+		blocks_by_name[bl.name] = &bl;
+	}
+
+	const DXF::BlockMap::iterator bit = blocks_by_name.find(AI_DXF_ENTITIES_MAGIC_BLOCK);
+	if (bit == blocks_by_name.end()) {
+		throw DeadlyImportError("DXF: no ENTITIES data block loaded");
+	}
+
+	// ENTITIES is currently the only block that needs to be modified,
+	// this is the reason that blocks_by_name stores const by default.
+	DXF::Block& entities = const_cast<DXF::Block&>( *(*bit).second );
+	typedef std::map<std::string, unsigned int> LayerMap;
+
+	LayerMap layers;
+	std::vector< std::vector< const DXF::PolyLine*> > corr;
+
+	// now expand all block references in the primary ENTITIES block
+	// XXX this involves heavy memory copying, consider a faster solution for future versions.
+	ExpandBlockReferences(entities,blocks_by_name);
+
+	unsigned int cur = 0;
+	BOOST_FOREACH (boost::shared_ptr<const DXF::PolyLine> pl, entities.lines) {
+		if (pl->positions.size()) {
+
+			std::map<std::string, unsigned int>::iterator it = layers.find(pl->layer);
+			if (it == layers.end()) {
+				++pScene->mNumMeshes;
+
+				layers[pl->layer] = cur++;
+
+				std::vector< const DXF::PolyLine* > pv;
+				pv.push_back(&*pl);
+
+				corr.push_back(pv);
+			}
+			else {
+				corr[(*it).second].push_back(&*pl);
+			}
+		}
+	}
+
+	if (!pScene->mNumMeshes) {
+		throw DeadlyImportError("DXF: this file contains no 3d data");
+	}
+
+	pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];
+
+	BOOST_FOREACH(const LayerMap::value_type& elem, layers){
+		aiMesh* const mesh =  pScene->mMeshes[elem.second] = new aiMesh();
+		mesh->mName.Set(elem.first);
+
+		unsigned int cvert = 0,cface = 0;
+		BOOST_FOREACH(const DXF::PolyLine* pl, corr[elem.second]){
+			// sum over all faces since we need to 'verbosify' them.
+			cvert += std::accumulate(pl->counts.begin(),pl->counts.end(),0); 
+			cface += pl->counts.size();
+		}
+
+		aiVector3D* verts = mesh->mVertices = new aiVector3D[cvert];
+		aiColor4D* colors = mesh->mColors[0] = new aiColor4D[cvert];
+		aiFace* faces = mesh->mFaces = new aiFace[cface];
+
+		mesh->mNumVertices = cvert;
+		mesh->mNumFaces = cface;
+
+		unsigned int prims = 0;
+		unsigned int overall_indices = 0;
+		BOOST_FOREACH(const DXF::PolyLine* pl, corr[elem.second]){
+
+			std::vector<unsigned int>::const_iterator it = pl->indices.begin();
+			BOOST_FOREACH(unsigned int facenumv,pl->counts) {
+				aiFace& face = *faces++;
+				face.mIndices = new unsigned int[face.mNumIndices = facenumv];
+
+				for (unsigned int i = 0; i < facenumv; ++i) {
+					face.mIndices[i] = overall_indices++;
+
+					ai_assert(pl->positions.size() == pl->colors.size());
+					if (*it >= pl->positions.size()) {
+						throw DeadlyImportError("DXF: vertex index out of bounds");
+					}
+
+					*verts++ = pl->positions[*it];
+					*colors++ = pl->colors[*it++];
+				}
+
+				// set primitive flags now, this saves the extra pass in ScenePreprocessor.
+				switch(face.mNumIndices) {
+					case 1:
+						prims |= aiPrimitiveType_POINT;
+						break;
+					case 2:
+						prims |= aiPrimitiveType_LINE;
+						break;
+					case 3:
+						prims |= aiPrimitiveType_TRIANGLE;
+						break;
+					default:
+						prims |= aiPrimitiveType_POLYGON;
 						break;
 				}
 			}
 		}
-		// print comment strings
-		else if (999 == groupCode)	{
-			DefaultLogger::get()->info(std::string( cursor ));
-		}
-		else if (!groupCode && !::strcmp(cursor,"EOF"))
-			break;
+
+		mesh->mPrimitiveTypes = prims;
+		mesh->mMaterialIndex = 0;
 	}
 
-	// find out how many valud layers we have
-	for (std::vector<LayerInfo>::const_iterator it = mLayers.begin(),end = mLayers.end(); it != end;++it)	{
-		if (!(*it).vPositions.empty())
-			++pScene->mNumMeshes;
-	}
+	GenerateHierarchy(pScene,output);
+	GenerateMaterials(pScene,output);
+}
 
-	if (!pScene->mNumMeshes)
-		throw DeadlyImportError("DXF: this file contains no 3d data");
 
-	pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];
-	unsigned int m = 0;
-	for (std::vector<LayerInfo>::const_iterator it = mLayers.begin(),end = mLayers.end();it != end;++it) {
-		if ((*it).vPositions.empty()) {
+// ------------------------------------------------------------------------------------------------
+void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& blocks_by_name)
+{
+	BOOST_FOREACH (const DXF::InsertBlock& insert, bl.insertions) {
+
+		// first check if the referenced blocks exists ...
+		const DXF::BlockMap::const_iterator it = blocks_by_name.find(insert.name);
+		if (it == blocks_by_name.end()) {
+			DefaultLogger::get()->error((Formatter::format("DXF: Failed to resolve block reference: "),
+				insert.name,"; skipping"
+			));
 			continue;
 		}
-		// generate the output mesh
-		aiMesh* pMesh = pScene->mMeshes[m++] = new aiMesh();
-		const std::vector<aiVector3D>& vPositions = (*it).vPositions;
-		const std::vector<aiColor4D>& vColors = (*it).vColors;
 
-		// check whether we need vertex colors here
-		aiColor4D* clrOut = NULL;
-		const aiColor4D* clr = NULL;
-		for (std::vector<aiColor4D>::const_iterator it2 = (*it).vColors.begin(), end2 = (*it).vColors.end();it2 != end2; ++it2)	{
-			
-			if ((*it2).r == (*it2).r) /* qnan? */ {
-				clrOut = pMesh->mColors[0] = new aiColor4D[vPositions.size()];
-				for (unsigned int i = 0; i < vPositions.size();++i)
-					clrOut[i] = aiColor4D(0.6f,0.6f,0.6f,1.0f);
+		// XXX this would be the place to implement recursive expansion if needed.
+		const DXF::Block& bl_src = *(*it).second;
+		
+		BOOST_FOREACH (boost::shared_ptr<const DXF::PolyLine> pl_in, bl_src.lines) {
+			boost::shared_ptr<DXF::PolyLine> pl_out = boost::shared_ptr<DXF::PolyLine>(new DXF::PolyLine(*pl_in));
 
-				clr = &vColors[0];
-				break;
-			}
-		}
+			if (bl_src.base.Length() || insert.scale.x!=1.f || insert.scale.y!=1.f || insert.scale.z!=1.f || insert.angle || insert.pos.Length()) {
+				// manual coordinate system transformation
+				// XXX order
+				aiMatrix4x4 trafo, tmp;
+				aiMatrix4x4::Translation(-bl_src.base,trafo);
+				trafo *= aiMatrix4x4::Scaling(insert.scale,tmp);
+				trafo *= aiMatrix4x4::Translation(insert.pos,tmp);
 
-		pMesh->mNumFaces = (unsigned int)vPositions.size() / 4u;
-		pMesh->mFaces = new aiFace[pMesh->mNumFaces];
-
-		aiVector3D* vpOut = pMesh->mVertices = new aiVector3D[vPositions.size()];
-		const aiVector3D* vp = &vPositions[0];
-
-		for (unsigned int i = 0; i < pMesh->mNumFaces;++i)	{
-			aiFace& face = pMesh->mFaces[i];
-
-			// check whether we need four, three or two indices here
-			if (vp[1] == vp[2])	{
-				face.mNumIndices = 2;
-			}
-			else if (vp[3] == vp[2])	{
-				 face.mNumIndices = 3;
-			}
-			else face.mNumIndices = 4;
-			face.mIndices = new unsigned int[face.mNumIndices];
-
-			for (unsigned int a = 0; a < face.mNumIndices;++a)	{
-				*vpOut++ = vp[a];
-				if (clr)	{
-					if (is_not_qnan( clr[a].r )) {
-						*clrOut = clr[a];
-					}
-					++clrOut;
+				// XXX rotation currently ignored - I didn't find an appropriate sample model.
+				if (insert.angle != 0.f) {
+					DefaultLogger::get()->warn("DXF: BLOCK rotation not currently implemented");
 				}
-				face.mIndices[a] = pMesh->mNumVertices++;
+
+				BOOST_FOREACH (aiVector3D& v, pl_out->positions) {
+					v *= trafo;
+				}
 			}
-			vp += 4;
+
+			bl.lines.push_back(pl_out);
 		}
 	}
+}
 
-	// generate the output scene graph
-	pScene->mRootNode = new aiNode();
-	pScene->mRootNode->mName.Set("<DXF_ROOT>");
 
-	if (1 == pScene->mNumMeshes)	{
-		pScene->mRootNode->mMeshes = new unsigned int[ pScene->mRootNode->mNumMeshes = 1 ];
-		pScene->mRootNode->mMeshes[0] = 0;
-	}
-	else
-	{
-		pScene->mRootNode->mChildren = new aiNode*[ pScene->mRootNode->mNumChildren = pScene->mNumMeshes ];
-		for (m = 0; m < pScene->mRootNode->mNumChildren;++m)	{
-			aiNode* p = pScene->mRootNode->mChildren[m] = new aiNode();
-			p->mName.length = ::strlen( mLayers[m].name );
-			strcpy(p->mName.data, mLayers[m].name);
-
-			p->mMeshes = new unsigned int[p->mNumMeshes = 1];
-			p->mMeshes[0] = m;
-			p->mParent = pScene->mRootNode;
-		}
-	}
-
+// ------------------------------------------------------------------------------------------------
+void DXFImporter::GenerateMaterials(aiScene* pScene, DXF::FileData& output)
+{
+	// generate an almost-white default material. Reason:
+	// the default vertex color is GREY, so we are
+	// already at Assimp's usual default color.
 	// generate a default material
 	MaterialHelper* pcMat = new MaterialHelper();
 	aiString s;
 	s.Set(AI_DEFAULT_MATERIAL_NAME);
 	pcMat->AddProperty(&s, AI_MATKEY_NAME);
 
-	aiColor4D clrDiffuse(0.6f,0.6f,0.6f,1.0f);
+	aiColor4D clrDiffuse(0.9f,0.9f,0.9f,1.0f);
 	pcMat->AddProperty(&clrDiffuse,1,AI_MATKEY_COLOR_DIFFUSE);
 
 	clrDiffuse = aiColor4D(1.0f,1.0f,1.0f,1.0f);
@@ -313,296 +403,474 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 	pScene->mNumMaterials = 1;
 	pScene->mMaterials = new aiMaterial*[1];
 	pScene->mMaterials[0] = pcMat;
-
-	// flip winding order to be ccw
-	FlipWindingOrderProcess flipper;
-	flipper.Execute(pScene);
-
-	// --- everything destructs automatically ---
 }
 
+
 // ------------------------------------------------------------------------------------------------
-bool DXFImporter::ParseEntities()
+void DXFImporter::GenerateHierarchy(aiScene* pScene, DXF::FileData& output)
 {
-	while (GetNextToken())	{
-		if (!groupCode)	{			
-			if (!::strcmp(cursor,"3DFACE") || !::strcmp(cursor,"LINE") || !::strcmp(cursor,"3DLINE")){
-				//http://sourceforge.net/tracker/index.php?func=detail&aid=2970566&group_id=226462&atid=1067632
-				Parse3DFace();
-				bRepeat = true;
-			}
-			if (!::strcmp(cursor,"POLYLINE") || !::strcmp(cursor,"LWPOLYLINE")){
-				ParsePolyLine();
-				bRepeat = true;
-			}
-			if (!::strcmp(cursor,"ENDSEC")) {
-				return true;
-			}
+	// generate the output scene graph, which is just the root node with a single child for each layer.
+	pScene->mRootNode = new aiNode();
+	pScene->mRootNode->mName.Set("<DXF_ROOT>");
+
+	if (1 == pScene->mNumMeshes)	{
+		pScene->mRootNode->mMeshes = new unsigned int[ pScene->mRootNode->mNumMeshes = 1 ];
+		pScene->mRootNode->mMeshes[0] = 0;
+	}
+	else
+	{
+		pScene->mRootNode->mChildren = new aiNode*[ pScene->mRootNode->mNumChildren = pScene->mNumMeshes ];
+		for (unsigned int m = 0; m < pScene->mRootNode->mNumChildren;++m)	{
+			aiNode* p = pScene->mRootNode->mChildren[m] = new aiNode();
+			p->mName = pScene->mMeshes[m]->mName;
+
+			p->mMeshes = new unsigned int[p->mNumMeshes = 1];
+			p->mMeshes[0] = m;
+			p->mParent = pScene->mRootNode;
 		}
 	}
-	return false;
 }
 
+
 // ------------------------------------------------------------------------------------------------
-void DXFImporter::SetLayer(LayerInfo*& out)
-{
-	for (std::vector<LayerInfo>::iterator it = mLayers.begin(),end = mLayers.end();it != end;++it)	{
-		if (!::strcmp( (*it).name, cursor ))	{
-			out = &(*it);
+void DXFImporter::SkipSection(DXF::LineReader& reader)
+{	
+	for( ;!reader.End() && !reader.Is(0,"ENDSEC"); reader++);
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void DXFImporter::ParseHeader(DXF::LineReader& reader, DXF::FileData& output)
+{	
+	for( ;!reader.End() && !reader.Is(0,"ENDSEC"); reader++);
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void DXFImporter::ParseBlocks(DXF::LineReader& reader, DXF::FileData& output)
+{	
+	while( !reader.End() && !reader.Is(0,"ENDSEC")) {
+		if (reader.Is(0,"BLOCK")) {
+			ParseBlock(++reader,output);
+			continue;
+		}
+		++reader;
+	}
+
+	DefaultLogger::get()->debug((Formatter::format("DXF: got "),
+		output.blocks.size()," entries in BLOCKS"
+	));
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void DXFImporter::ParseBlock(DXF::LineReader& reader, DXF::FileData& output)
+{	
+	// push a new block onto the stack.
+	output.blocks.push_back( DXF::Block() );
+	DXF::Block& block = output.blocks.back();
+
+	while( !reader.End() && !reader.Is(0,"ENDBLK")) {
+
+		switch(reader.GroupCode()) {
+			case 2:
+				block.name = reader.Value();
+				break;
+
+			case 10:
+				block.base.x = reader.ValueAsFloat();
+				break;
+			case 20:
+				block.base.y = reader.ValueAsFloat();
+				break;
+			case 30:
+				block.base.z = reader.ValueAsFloat();
+				break;
+		}
+
+		if (reader.Is(0,"POLYLINE")) {
+			ParsePolyLine(++reader,output);
+			continue;
+		}
+
+		// XXX is this a valid case?
+		if (reader.Is(0,"INSERT")) {
+			DefaultLogger::get()->warn("DXF: INSERT within a BLOCK not currently supported; skipping");
+			for( ;!reader.End() && !reader.Is(0,"ENDBLK"); ++reader);
 			break;
 		}
-	}
-	if (!out)	{
-		// we don't have this layer yet
-		mLayers.push_back(LayerInfo());
-		out = &mLayers.back();
-		::strcpy(out->name,cursor);
+
+		else if (reader.Is(0,"3DFACE") || reader.Is(0,"LINE") || reader.Is(0,"3DLINE")) {
+			//http://sourceforge.net/tracker/index.php?func=detail&aid=2970566&group_id=226462&atid=1067632
+			Parse3DFace(++reader, output);
+			continue;
+		}
+		++reader;
 	}
 }
 
+
 // ------------------------------------------------------------------------------------------------
-void DXFImporter::SetDefaultLayer(LayerInfo*& out)
-{
-	if (!mDefaultLayer)	{
-		mLayers.push_back(LayerInfo());
-		mDefaultLayer = &mLayers.back();
+void DXFImporter::ParseEntities(DXF::LineReader& reader, DXF::FileData& output)
+{	
+	// push a new block onto the stack.
+	output.blocks.push_back( DXF::Block() );
+	DXF::Block& block = output.blocks.back();
+
+	block.name = AI_DXF_ENTITIES_MAGIC_BLOCK;
+
+	while( !reader.End() && !reader.Is(0,"ENDSEC")) {
+		if (reader.Is(0,"POLYLINE")) {
+			ParsePolyLine(++reader,output);
+			continue;
+		}
+
+		else if (reader.Is(0,"INSERT")) {
+			ParseInsertion(++reader,output);
+			continue;
+		}
+
+		else if (reader.Is(0,"3DFACE") || reader.Is(0,"LINE") || reader.Is(0,"3DLINE")) {
+			//http://sourceforge.net/tracker/index.php?func=detail&aid=2970566&group_id=226462&atid=1067632
+			Parse3DFace(++reader, output);
+			continue;
+		}
+
+		++reader;
 	}
-	out = mDefaultLayer;
+
+	DefaultLogger::get()->debug((Formatter::format("DXF: got "),
+		block.lines.size()," polylines and ", block.insertions.size() ," inserted blocks in ENTITIES"
+	));
 }
 
 // ------------------------------------------------------------------------------------------------
-bool DXFImporter::ParsePolyLine()
+void DXFImporter::ParseInsertion(DXF::LineReader& reader, DXF::FileData& output)
+{	
+	output.blocks.back().insertions.push_back( DXF::InsertBlock() );
+	DXF::InsertBlock& bl = output.blocks.back().insertions.back();
+
+	while( !reader.End() && !reader.Is(0)) {
+
+		switch(reader.GroupCode()) 
+		{
+			// name of referenced block
+		case 2:
+			bl.name = reader.Value();
+			break;
+
+			// translation
+		case 10:
+			bl.pos.x = reader.ValueAsFloat();
+			break;
+		case 20:
+			bl.pos.y = reader.ValueAsFloat();
+			break;
+		case 30:
+			bl.pos.z = reader.ValueAsFloat();
+			break;
+
+			// scaling
+		case 41:
+			bl.scale.x = reader.ValueAsFloat();
+			break;
+		case 42:
+			bl.scale.y = reader.ValueAsFloat();
+			break;
+		case 43:
+			bl.scale.z = reader.ValueAsFloat();
+			break;
+
+			// rotation angle
+		case 50:
+			bl.angle = reader.ValueAsFloat();
+			break;
+		}
+		reader++;
+	}
+}
+
+
+#define DXF_POLYLINE_FLAG_3D_POLYLINE  0x8
+#define DXF_POLYLINE_FLAG_3D_POLYMESH  0x10
+#define DXF_POLYLINE_FLAG_POLYFACEMESH 0x40
+
+// ------------------------------------------------------------------------------------------------
+void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output)
 {
 	bool ret = false;
-	LayerInfo* out = NULL;
 
-	std::vector<aiVector3D> positions;
-	std::vector<aiColor4D>  colors;
-	std::vector<unsigned int> indices;
-	unsigned int flags = 0;
+	output.blocks.back().lines.push_back( boost::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() ) );
+	DXF::PolyLine& line = *output.blocks.back().lines.back();
 
-	while (GetNextToken())	{
-		switch (groupCode)
-		{
-		case 0:
-			{
-				if (!::strcmp(cursor,"VERTEX"))	{
-					aiVector3D v;aiColor4D clr(g_clrInvalid);
-					unsigned int idx[4] = {0xffffffff,0xffffffff,0xffffffff,0xffffffff};
-					ParsePolyLineVertex(v, clr, idx);
-					if (0xffffffff == idx[0])	{
-						positions.push_back(v);
-						colors.push_back(clr);
-					}
-					else	{
-						// check whether we have a fourth coordinate
-						if (0xffffffff == idx[3])	{
-							idx[3] = idx[2];
-						}
-
-						indices.reserve(indices.size()+4);
-						for (unsigned int m = 0; m < 4;++m)
-							indices.push_back(idx[m]);
-					}
-					bRepeat = true;
-				}
-				else if (!::strcmp(cursor,"ENDSEQ"))	{
-					ret = true;
-				}
+	unsigned int iguess = 0, vguess = 0;
+	while( !reader.End() && !reader.Is(0,"ENDSEC")) {
+	
+		if (reader.Is(0,"VERTEX")) {
+			ParsePolyLineVertex(++reader,line);
+			if (reader.Is(0,"SEQEND")) {
 				break;
 			}
+			continue;
+		}
 
-		// flags --- important that we know whether it is a polyface mesh
+		switch(reader.GroupCode())	
+		{
+		// flags --- important that we know whether it is a 
+		// polyface mesh or 'just' a line.
 		case 70:
-			{
-				if (!flags)	{
-					flags = strtol10(cursor);
-				}
-				break;
-			};
+			if (!line.flags)	{
+				line.flags = reader.ValueAsSignedInt();
+			}
+			break;
 
 		// optional number of vertices
 		case 71:
-			{
-				positions.reserve(strtol10(cursor));
-				break;
-			}
+			vguess = reader.ValueAsSignedInt();
+			line.positions.reserve(vguess);
+			break;
 
 		// optional number of faces
 		case 72:
-			{
-				indices.reserve(strtol10(cursor));
-				break;
-			}
-
-		// 8 specifies the layer
-		case 8:
-			{
-				SetLayer(out);
-				break;
-			}
-		}
-	}
-	if (!(flags & 64))	{
-		DefaultLogger::get()->warn("DXF: Only polyface meshes are currently supported");
-		return ret;
-	}
-
-	if (positions.size() < 3 || indices.size() < 3)	{
-		DefaultLogger::get()->warn("DXF: Unable to parse POLYLINE element - not enough vertices");
-		return ret;
-	}
-
-	// use a default layer if necessary
-	if (!out) {
-		SetDefaultLayer(out);
-	}
-
-	flags = (unsigned int)(out->vPositions.size()+indices.size());
-	out->vPositions.reserve(flags);
-	out->vColors.reserve(flags);
-
-	// generate unique vertices
-	for (std::vector<unsigned int>::const_iterator it = indices.begin(), end = indices.end();it != end; ++it)	{
-		unsigned int idx = *it;
-		if (idx > positions.size() || !idx)	{
-			DefaultLogger::get()->error("DXF: Polyface mesh index os out of range");
-			idx = (unsigned int) positions.size();
-		}
-		out->vPositions.push_back(positions[idx-1]); // indices are one-based.
-		out->vColors.push_back(colors[idx-1]); // indices are one-based.
-	}
-
-	return ret;
-}
-
-// ------------------------------------------------------------------------------------------------
-bool DXFImporter::ParsePolyLineVertex(aiVector3D& out,aiColor4D& clr, unsigned int* outIdx)
-{
-	bool ret = false;
-	while (GetNextToken())	{
-		switch (groupCode)
-		{
-		case 0: ret = true;
+			iguess = reader.ValueAsSignedInt();
+			line.indices.reserve(iguess);
 			break;
 
-		// todo - handle the correct layer for the vertex. At the moment it is assumed that all vertices of 
-		// a polyline are placed on the same global layer.
+		// 8 specifies the layer on which this line is placed on
+		case 8:
+			line.layer = reader.Value();
+			break;
+		}
 
-		// x position of the first corner
-		case 10: out.x = fast_atof(cursor);break;
+		reader++;
+	}
 
-		// y position of the first corner
-		case 20: out.y = -fast_atof(cursor);break;
+	if (!(line.flags & DXF_POLYLINE_FLAG_POLYFACEMESH))	{
+		DefaultLogger::get()->warn((Formatter::format("DXF: polyline not currently supported: "),line.flags));
+		output.blocks.back().lines.pop_back();
+		return;
+	}
 
-		// z position of the first corner
-		case 30: out.z = fast_atof(cursor);break;
+	if (line.positions.size() < 3 || line.indices.size() < 3)	{
+			DefaultLogger::get()->warn("DXF: not enough vertices for polymesh; ignoring");
+			output.blocks.back().lines.pop_back();
+			return;
+	}
+
+	// if these numbers are wrong, parsing might have gone wild. 
+	// however, the docs state that applications are not required
+	// to set the 71 and 72 fields, respectively, to valid values.
+	// So just fire a warning.
+	if (line.positions.size() != vguess) {
+		DefaultLogger::get()->warn((Formatter::format("DXF: unexpected vertex count in polymesh: "),
+			line.positions.size(),", expected ", vguess
+		));
+	}
+	if (line.counts.size() != iguess) {
+		DefaultLogger::get()->warn((Formatter::format("DXF: unexpected face count in polymesh: "),
+			line.counts.size(),", expected ", iguess
+		));
+	}
+}
+
+#define DXF_VERTEX_FLAG_PART_OF_POLYFACE 0x80
+#define DXF_VERTEX_FLAG_HAS_POSITIONS 0x40
+
+// ------------------------------------------------------------------------------------------------
+void DXFImporter::ParsePolyLineVertex(DXF::LineReader& reader, DXF::PolyLine& line)
+{
+	unsigned int cnti = 0, flags = 0;
+	unsigned int indices[4];
+
+	aiVector3D out;
+	aiColor4D clr = AI_DXF_DEFAULT_COLOR;
+
+	while( !reader.End() ) {
+
+		if (reader.Is(0)) { // SEQEND or another VERTEX
+			break;
+		}
+
+		switch (reader.GroupCode())
+		{
+		case 8:
+				// layer to which the vertex belongs to - assume that
+				// this is always the layer the top-level polyline
+				// entity resides on as well.
+				if(reader.Value() != line.layer) {
+					DefaultLogger::get()->warn("DXF: expected vertex to be part of a polyface but the 0x128 flag isn't set");
+				}
+				break;
+
+		case 70:
+				flags = reader.ValueAsUnsignedInt();
+				break;
+
+		// VERTEX COORDINATES
+		case 10: out.x = reader.ValueAsFloat();break;
+		case 20: out.y = reader.ValueAsFloat();break;
+		case 30: out.z = reader.ValueAsFloat();break;
 
 		// POLYFACE vertex indices
-		case 71: outIdx[0] = strtol10(cursor);break;
-		case 72: outIdx[1] = strtol10(cursor);break;
-		case 73: outIdx[2] = strtol10(cursor);break;
-	//	case 74: outIdx[3] = strtol10(cursor);break;
+		case 71: 
+		case 72:
+		case 73:
+		case 74: 
+			if (cnti == 4) {
+				DefaultLogger::get()->warn("DXF: more than 4 indices per face not supported; ignoring");
+				break;
+			}
+			indices[cnti++] = reader.ValueAsUnsignedInt();
+			break;
 
 		// color
-		case 62: clr = g_aclrDxfIndexColors[strtol10(cursor) % AI_DXF_NUM_INDEX_COLORS]; break;
-		};
-		if (ret) {
+		case 62: 
+			clr = g_aclrDxfIndexColors[reader.ValueAsUnsignedInt() % AI_DXF_NUM_INDEX_COLORS]; 
 			break;
+		};
+	
+		reader++;
+	}
+	
+	if (!(flags & DXF_VERTEX_FLAG_PART_OF_POLYFACE)) {
+		DefaultLogger::get()->warn("DXF: expected vertex to be part of a polyface but the 0x128 flag isn't set");
+	}
+
+	if (flags & DXF_VERTEX_FLAG_HAS_POSITIONS) {
+		line.positions.push_back(out);
+		line.colors.push_back(clr);
+	}
+	else {
+		line.counts.push_back(cnti);
+		for (unsigned int i = 0; i < cnti; ++i) {
+			// IMPORTANT NOTE: POLYMESH indices are ONE-BASED
+			if (indices[i] == 0) {
+				DefaultLogger::get()->warn("DXF: invalid vertex index, indices are one-based.");
+				--line.counts.back();
+				continue;
+			}
+			line.indices.push_back(indices[i]-1);
 		}
 	}
-	return ret;
 }
 
 // ------------------------------------------------------------------------------------------------
-bool DXFImporter::Parse3DFace()
+void DXFImporter::Parse3DFace(DXF::LineReader& reader, DXF::FileData& output)
 {
-	bool ret = false;
-	LayerInfo* out = NULL;
+	// (note) this is also used for for parsing line entities, so we
+	// must handle the vertex_count == 2 case as well.
 
-	aiVector3D vip[4]; // -- vectors are initialized to zero
-	aiColor4D  clr(g_clrInvalid);
+	output.blocks.back().lines.push_back( boost::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() )  );
+	DXF::PolyLine& line = *output.blocks.back().lines.back();
 
-	// this is also used for for parsing line entities
-	bool bThird = false;
+	aiVector3D vip[4];
+	aiColor4D  clr = AI_DXF_DEFAULT_COLOR;
+	
+	bool b[4] = {false,false,false,false};
+	while( !reader.End() ) {
 
-	while (GetNextToken())	{
-		switch (groupCode)	{
-		case 0: 
-			ret = true;
+		// next entity with a groupcode == 0 is probably already the next vertex or polymesh entity
+		if (reader.GroupCode() == 0) {
 			break;
+		}
+		switch (reader.GroupCode())	
+		{
 
 		// 8 specifies the layer
-		case 8:	{
-				SetLayer(out);
-				break;
-			}
+		case 8:	
+			line.layer = reader.Value();
+			break;
 
 		// x position of the first corner
-		case 10: vip[0].x = fast_atof(cursor);break;
+		case 10: vip[0].x = reader.ValueAsFloat();
+			b[2] = true;
+			break;
 
 		// y position of the first corner
-		case 20: vip[0].y = -fast_atof(cursor);break;
+		case 20: vip[0].y = reader.ValueAsFloat();
+			b[2] = true;
+			break;
 
 		// z position of the first corner
-		case 30: vip[0].z = fast_atof(cursor);break;
+		case 30: vip[0].z = reader.ValueAsFloat();
+			b[2] = true;
+			break;
 
 		// x position of the second corner
-		case 11: vip[1].x = fast_atof(cursor);break;
+		case 11: vip[1].x = reader.ValueAsFloat();
+			b[3] = true;
+			break;
 
 		// y position of the second corner
-		case 21: vip[1].y = -fast_atof(cursor);break;
+		case 21: vip[1].y = reader.ValueAsFloat();
+			b[3] = true;
+			break;
 
 		// z position of the second corner
-		case 31: vip[1].z = fast_atof(cursor);break;
+		case 31: vip[1].z = reader.ValueAsFloat();
+			b[3] = true;
+			break;
 
 		// x position of the third corner
-		case 12: vip[2].x = fast_atof(cursor);
-			bThird = true;break;
+		case 12: vip[2].x = reader.ValueAsFloat();
+			b[0] = true;
+			break;
 
 		// y position of the third corner
-		case 22: vip[2].y = -fast_atof(cursor);
-			bThird = true;break;
+		case 22: vip[2].y = reader.ValueAsFloat();
+			b[0] = true;
+			break;
 
 		// z position of the third corner
-		case 32: vip[2].z = fast_atof(cursor);
-			bThird = true;break;
+		case 32: vip[2].z = reader.ValueAsFloat();
+			b[0] = true;
+			break;
 
 		// x position of the fourth corner
-		case 13: vip[3].x = fast_atof(cursor);
-			bThird = true;break;
+		case 13: vip[3].x = reader.ValueAsFloat();
+			b[1] = true;
+			break;
 
 		// y position of the fourth corner
-		case 23: vip[3].y = -fast_atof(cursor);
-			bThird = true;break;
+		case 23: vip[3].y = reader.ValueAsFloat();
+			b[1] = true;
+			break;
 
 		// z position of the fourth corner
-		case 33: vip[3].z = fast_atof(cursor);
-			bThird = true;break;
+		case 33: vip[3].z = reader.ValueAsFloat();
+			b[1] = true;
+			break;
 
 		// color
-		case 62: clr = g_aclrDxfIndexColors[strtol10(cursor) % AI_DXF_NUM_INDEX_COLORS]; break;
-		};
-		if (ret)
+		case 62: 
+			clr = g_aclrDxfIndexColors[reader.ValueAsUnsignedInt() % AI_DXF_NUM_INDEX_COLORS]; 
 			break;
+		};
+
+		++reader;
 	}
 
-	if (!bThird)
-		vip[2] = vip[1];
-
-	// use a default layer if necessary
-	if (!out) {
-		SetDefaultLayer(out);
+	// the fourth corner may even be identical to the third,
+	// in this case we treat it as if it didn't exist.
+	if (vip[3] == vip[2]) {
+		b[1] = false;
 	}
-	// add the faces to the face list for this layer
-	out->vPositions.push_back(vip[0]);
-	out->vPositions.push_back(vip[1]);
-	out->vPositions.push_back(vip[2]);
-	out->vPositions.push_back(vip[3]); // might be equal to the third
+	
+	// sanity checks to see if we got something meaningful
+	if (b[1] && !b[0] || !b[2] || !b[3]) {
+		DefaultLogger::get()->warn("DXF: unexpected vertex setup in 3DFACE/LINE/FACE entity; ignoring");
+		output.blocks.back().lines.pop_back();
+		return;
+	}
 
-	for (unsigned int i = 0; i < 4;++i)
-		out->vColors.push_back(clr);
-	return ret;
+	const unsigned int cnt = (2+(b[0]?1:0)+(b[1]?1:0));
+	line.counts.push_back(cnt);
+
+	for (unsigned int i = 0; i < cnt; ++i) {
+		line.indices.push_back(line.positions.size());
+		line.positions.push_back(vip[i]);
+		line.colors.push_back(clr);
+	}
 }
 
 #endif // !! ASSIMP_BUILD_NO_DXF_IMPORTER

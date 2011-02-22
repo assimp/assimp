@@ -127,6 +127,15 @@ public:
 		return *this;
 	}
 
+	// Fix for MSVC8
+	// See https://sourceforge.net/projects/assimp/forums/forum/817654/topic/4372824
+	template <typename TToken>
+	basic_formatter& operator, (TToken& s) {
+		underlying << s;
+		return *this;
+	}
+
+
 private:
 	mutable stringstream underlying;
 };

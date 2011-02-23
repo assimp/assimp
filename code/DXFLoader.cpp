@@ -267,7 +267,7 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
 		throw DeadlyImportError("DXF: this file contains no 3d data");
 	}
 
-	pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];
+	pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ] ();
 
 	BOOST_FOREACH(const LayerMap::value_type& elem, layers){
 		aiMesh* const mesh =  pScene->mMeshes[elem.second] = new aiMesh();
@@ -590,10 +590,10 @@ void DXFImporter::ParseInsertion(DXF::LineReader& reader, DXF::FileData& output)
 	}
 }
 
-
-#define DXF_POLYLINE_FLAG_3D_POLYLINE  0x8
-#define DXF_POLYLINE_FLAG_3D_POLYMESH  0x10
-#define DXF_POLYLINE_FLAG_POLYFACEMESH 0x40
+#define DXF_POLYLINE_FLAG_CLOSED		0x1
+#define DXF_POLYLINE_FLAG_3D_POLYLINE	0x8
+#define DXF_POLYLINE_FLAG_3D_POLYMESH	0x10
+#define DXF_POLYLINE_FLAG_POLYFACEMESH	0x40
 
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output)
@@ -645,31 +645,54 @@ void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output)
 		reader++;
 	}
 
-	if (!(line.flags & DXF_POLYLINE_FLAG_POLYFACEMESH))	{
-		DefaultLogger::get()->warn((Formatter::format("DXF: polyline not currently supported: "),line.flags));
-		output.blocks.back().lines.pop_back();
-		return;
-	}
+	//if (!(line.flags & DXF_POLYLINE_FLAG_POLYFACEMESH))	{
+	//	DefaultLogger::get()->warn((Formatter::format("DXF: polyline not currently supported: "),line.flags));
+	//	output.blocks.back().lines.pop_back();
+	//	return;
+	//}
 
-	if (line.positions.size() < 3 || line.indices.size() < 3)	{
-			DefaultLogger::get()->warn("DXF: not enough vertices for polymesh; ignoring");
-			output.blocks.back().lines.pop_back();
-			return;
-	}
-
-	// if these numbers are wrong, parsing might have gone wild. 
-	// however, the docs state that applications are not required
-	// to set the 71 and 72 fields, respectively, to valid values.
-	// So just fire a warning.
-	if (line.positions.size() != vguess) {
+	if (vguess && line.positions.size() != vguess) {
 		DefaultLogger::get()->warn((Formatter::format("DXF: unexpected vertex count in polymesh: "),
 			line.positions.size(),", expected ", vguess
 		));
 	}
-	if (line.counts.size() != iguess) {
-		DefaultLogger::get()->warn((Formatter::format("DXF: unexpected face count in polymesh: "),
-			line.counts.size(),", expected ", iguess
-		));
+
+	if (line.flags & DXF_POLYLINE_FLAG_POLYFACEMESH ) {
+		if (line.positions.size() < 3 || line.indices.size() < 3)	{
+				DefaultLogger::get()->warn("DXF: not enough vertices for polymesh; ignoring");
+				output.blocks.back().lines.pop_back();
+				return;
+		}
+
+		// if these numbers are wrong, parsing might have gone wild. 
+		// however, the docs state that applications are not required
+		// to set the 71 and 72 fields, respectively, to valid values.
+		// So just fire a warning.
+		if (iguess && line.counts.size() != iguess) {
+			DefaultLogger::get()->warn((Formatter::format("DXF: unexpected face count in polymesh: "),
+				line.counts.size(),", expected ", iguess
+			));
+		}
+	}
+	else if (!line.indices.size() && !line.counts.size()) {
+		// a polyline - so there are no indices yet.
+		size_t guess = line.positions.size() + (line.flags & DXF_POLYLINE_FLAG_CLOSED ? 1 : 0);
+		line.indices.reserve(guess);
+
+		line.counts.reserve(guess/2);
+		for (unsigned int i = 0; i < line.positions.size()/2; ++i) {
+			line.indices.push_back(i*2);
+			line.indices.push_back(i*2+1);
+			line.counts.push_back(2);
+		}
+
+		// closed polyline?
+		if (line.flags & DXF_POLYLINE_FLAG_CLOSED) {
+			line.indices.push_back(line.positions.size()-1);
+			line.indices.push_back(0);
+
+			line.counts.push_back(2);
+		}
 	}
 }
 
@@ -732,15 +755,11 @@ void DXFImporter::ParsePolyLineVertex(DXF::LineReader& reader, DXF::PolyLine& li
 		reader++;
 	}
 	
-	if (!(flags & DXF_VERTEX_FLAG_PART_OF_POLYFACE)) {
+	if (line.flags & DXF_POLYLINE_FLAG_POLYFACEMESH && !(flags & DXF_VERTEX_FLAG_PART_OF_POLYFACE)) {
 		DefaultLogger::get()->warn("DXF: expected vertex to be part of a polyface but the 0x128 flag isn't set");
 	}
 
-	if (flags & DXF_VERTEX_FLAG_HAS_POSITIONS) {
-		line.positions.push_back(out);
-		line.colors.push_back(clr);
-	}
-	else {
+	if (cnti) {
 		line.counts.push_back(cnti);
 		for (unsigned int i = 0; i < cnti; ++i) {
 			// IMPORTANT NOTE: POLYMESH indices are ONE-BASED
@@ -751,6 +770,10 @@ void DXFImporter::ParsePolyLineVertex(DXF::LineReader& reader, DXF::PolyLine& li
 			}
 			line.indices.push_back(indices[i]-1);
 		}
+	}
+	else {
+		line.positions.push_back(out);
+		line.colors.push_back(clr);
 	}
 }
 

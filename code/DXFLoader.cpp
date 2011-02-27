@@ -188,8 +188,8 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 	ConvertMeshes(pScene,output);
 	
 	// flip winding order to be ccw
-	FlipWindingOrderProcess flipper;
-	flipper.Execute(pScene);
+	//FlipWindingOrderProcess flipper;
+	//flipper.Execute(pScene);
 
 	// --- everything destructs automatically ---
 }

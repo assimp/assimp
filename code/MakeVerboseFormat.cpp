@@ -98,11 +98,8 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
 		pvBitangents = new aiVector3D[iNumVerts];
 	}
 
-	ai_assert(AI_MAX_NUMBER_OF_TEXTURECOORDS == 4);
-	ai_assert(AI_MAX_NUMBER_OF_COLOR_SETS == 4);
-
-	aiVector3D* apvTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS] = {NULL,NULL,NULL,NULL};
-	aiColor4D* apvColorSets[AI_MAX_NUMBER_OF_COLOR_SETS] = {NULL,NULL,NULL,NULL};
+	aiVector3D* apvTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS] = {0};
+	aiColor4D* apvColorSets[AI_MAX_NUMBER_OF_COLOR_SETS] = {0};
 
 	unsigned int p = 0;
 	while (pcMesh->HasTextureCoords(p))

@@ -186,12 +186,13 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 	}
 
 	ConvertMeshes(pScene,output);
-	
-	// flip winding order to be ccw
-	//FlipWindingOrderProcess flipper;
-	//flipper.Execute(pScene);
 
-	// --- everything destructs automatically ---
+	// Now rotate the whole scene by 90 degrees around the x axis to convert from AutoCAD's to Assimp's coordinate system
+	pScene->mRootNode->mTransformation = aiMatrix4x4(
+		1.f,0.f,0.f,0.f,
+		0.f,0.f,1.f,0.f,
+		0.f,-1.f,0.f,0.f,
+		0.f,0.f,0.f,1.f) * pScene->mRootNode->mTransformation;
 }
 
 // ------------------------------------------------------------------------------------------------

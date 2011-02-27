@@ -788,9 +788,12 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 	for (unsigned int a = 0; a < pcOut->mNumMeshes;++a)
 		pcOut->mMeshes[a]->mColors[0] = NULL;
 
-	// Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
-	pcOut->mRootNode->mTransformation = aiMatrix4x4(1.f,0.f,0.f,0.f,
-		0.f,0.f,1.f,0.f,0.f,-1.f,0.f,0.f,0.f,0.f,0.f,1.f) * pcOut->mRootNode->mTransformation;
+	// No need for coordinate space adjustment, 3ds' coordinate system equals Assimp's. 
+	/*pcOut->mRootNode->mTransformation = aiMatrix4x4(
+		1.f,0.f,0.f,0.f,
+		0.f,0.f,1.f,0.f,
+		0.f,-1.f,0.f,0.f,
+		0.f,0.f,0.f,1.f) * pcOut->mRootNode->mTransformation;*/
 
 	// If the root node is unnamed name it "<3DSRoot>"
 	if (::strstr( pcOut->mRootNode->mName.data, "UNNAMED" ) ||

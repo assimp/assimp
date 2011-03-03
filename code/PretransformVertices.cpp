@@ -196,15 +196,15 @@ void PretransformVertices::CollectData( aiScene* pcScene, aiNode* pcNode, unsign
 					// copy normals, transform them to worldspace
 					for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)	{
 						pcMeshOut->mNormals[aiCurrent[AI_PTVS_VERTEX]+n] = 
-							m * pcMesh->mNormals[n];
+							(m * pcMesh->mNormals[n]).Normalize();
 					}
 				}
 				if (iVFormat & 0x4)
 				{
 					// copy tangents and bitangents, transform them to worldspace
 					for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)	{
-						pcMeshOut->mTangents  [aiCurrent[AI_PTVS_VERTEX]+n] = m * pcMesh->mTangents[n];
-						pcMeshOut->mBitangents[aiCurrent[AI_PTVS_VERTEX]+n] = m * pcMesh->mBitangents[n];
+						pcMeshOut->mTangents  [aiCurrent[AI_PTVS_VERTEX]+n] = (m * pcMesh->mTangents[n]).Normalize();
+						pcMeshOut->mBitangents[aiCurrent[AI_PTVS_VERTEX]+n] = (m * pcMesh->mBitangents[n]).Normalize();
 					}
 				}
 			}
@@ -334,13 +334,13 @@ void PretransformVertices::ApplyTransform(aiMesh* mesh, const aiMatrix4x4& mat)
 
 			if (mesh->HasNormals()) {
 				for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-					mesh->mNormals[i] = m * mesh->mNormals[i];
+					mesh->mNormals[i] = (m * mesh->mNormals[i]).Normalize();
 				}
 			}
 			if (mesh->HasTangentsAndBitangents()) {
 				for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-					mesh->mTangents[i]   = m * mesh->mTangents[i];
-					mesh->mBitangents[i] = m * mesh->mBitangents[i];
+					mesh->mTangents[i]   = (m * mesh->mTangents[i]).Normalize();
+					mesh->mBitangents[i] = (m * mesh->mBitangents[i]).Normalize();
 				}
 			}
 		}

@@ -46,48 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_STREAMREADER_H_INCLUDED
 
 #include "ByteSwap.h"
-namespace Assimp	{
-	namespace Intern {
 
-// --------------------------------------------------------------------------------------------
-template <typename T, bool doit>
-struct ByteSwapper	{
-	void operator() (T* inout) {
-		ByteSwap::Swap(inout);
-	}
-};
-
-template <typename T> 
-struct ByteSwapper<T,false>	{
-	void operator() (T*) {
-	}
-};
-
-// --------------------------------------------------------------------------------------------
-template <bool SwapEndianess, typename T, bool RuntimeSwitch>
-struct Getter {
-	void operator() (T* inout, bool le) {
-#ifdef AI_BUILD_BIG_ENDIAN
-		le =  le;
-#else
-		le =  !le;
-#endif
-		if (le) {
-			ByteSwapper<T,(sizeof(T)>1?true:false)> () (inout);
-		}
-		else ByteSwapper<T,false> () (inout);
-	}
-};
-
-template <bool SwapEndianess, typename T> 
-struct Getter<SwapEndianess,T,false> {
-	void operator() (T* inout, bool le) {
-
-		// static branch
-		ByteSwapper<T,(SwapEndianess && sizeof(T)>1)> () (inout);
-	}
-};
-} // end Intern
+namespace Assimp {
 
 // --------------------------------------------------------------------------------------------
 /** Wrapper class around IOStream to allow for consistent reading of binary data in both 
@@ -130,6 +90,7 @@ public:
 		: stream(stream)
 		, le(le)
 	{
+		ai_assert(stream); 
 		_Begin();
 	}
 
@@ -138,6 +99,7 @@ public:
 		: stream(boost::shared_ptr<IOStream>(stream))
 		, le(le)
 	{
+		ai_assert(stream);
 		_Begin();
 	}
 

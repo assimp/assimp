@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="assimp"
 	ProjectGUID="{5691E159-2D9B-407F-971F-EA5C592DC524}"
 	RootNamespace="assimp"
@@ -1276,15 +1276,7 @@
 			Name="sources"
 			>
 			<Filter
-				Name="extra"
-				>
-				<File
-					RelativePath="..\..\code\MD4FileData.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="import"
+				Name="importers"
 				>
 				<Filter
 					Name="3ds"
@@ -1557,6 +1549,10 @@
 				<Filter
 					Name="dxf"
 					>
+					<File
+						RelativePath="..\..\code\DXFHelper.h"
+						>
+					</File>
 					<File
 						RelativePath="..\..\code\DXFLoader.cpp"
 						>
@@ -1948,7 +1944,7 @@
 				</Filter>
 			</Filter>
 			<Filter
-				Name="process"
+				Name="postprocessing"
 				>
 				<File
 					RelativePath="..\..\code\CalcTangentsProcess.cpp"
@@ -2268,8 +2264,12 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="fs"
+				Name="filesystem"
 				>
+				<File
+					RelativePath="..\..\code\CInterfaceIOWrapper.h"
+					>
+				</File>
 				<File
 					RelativePath="..\..\code\DefaultIOStream.cpp"
 					>
@@ -2290,9 +2290,13 @@
 					RelativePath="..\..\code\FileSystemFilter.h"
 					>
 				</File>
+				<File
+					RelativePath="..\..\code\MemoryIOWrapper.h"
+					>
+				</File>
 			</Filter>
 			<Filter
-				Name="core"
+				Name="core_import"
 				>
 				<File
 					RelativePath="..\..\code\aiAssert.cpp"
@@ -2328,10 +2332,6 @@
 				</File>
 				<File
 					RelativePath="..\..\code\Exceptional.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\code\Exporter.cpp"
 					>
 				</File>
 				<File
@@ -4056,16 +4056,40 @@
 				</Filter>
 			</Filter>
 			<Filter
-				Name="export"
+				Name="core_export"
 				>
 				<File
-					RelativePath="..\..\code\ColladaExporter.cpp"
+					RelativePath="..\..\code\AssimpCExport.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\ColladaExporter.h"
+					RelativePath="..\..\code\BlobIOSystem.h"
 					>
 				</File>
+				<File
+					RelativePath="..\..\code\Exporter.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="exporters"
+				>
+				<Filter
+					Name="collada"
+					>
+					<File
+						RelativePath="..\..\code\ColladaExporter.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\ColladaExporter.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="3ds"
+					>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

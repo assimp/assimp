@@ -149,7 +149,7 @@ public:
 	/** @brief Compares two paths and check whether the point to
 	 *         identical files.
 	 *  
-	 * The dummy implementation of this virtual performs a 
+	 * The dummy implementation of this virtual member performs a 
 	 * case-insensitive comparison of the given strings. The default IO
 	 * system implementation uses OS mechanisms to convert relative into
 	 * absolute paths, so the result can be trusted.

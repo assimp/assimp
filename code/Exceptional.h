@@ -65,6 +65,8 @@ public:
 private:
 };
 
+typedef DeadlyImportError DeadlyExportError;
+
 #ifdef _MSC_VER
 #	pragma warning(default : 4275)
 #endif

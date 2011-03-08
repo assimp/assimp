@@ -91,6 +91,10 @@ ASSIMP_API const C_STRUCT aiExportFormatDesc* aiGetExportFormatDescription( size
 * exported scene. The memory referred by this structure is owned by Assimp. Use aiReleaseExportedFile()
 * to free its resources. Don't try to free the memory on your side - it will crash for most build configurations
 * due to conflicting heaps.
+*
+* Blobs can be nested - each blob may reference another blob, which may in turn reference another blob and so on.
+* This is used when exporters write more than one output file for a given #aiScene. See the remarks for
+* #aiExportDataBlob::name for more information.
 */
 struct aiExportDataBlob 
 #ifdef __cplusplus
@@ -103,11 +107,28 @@ struct aiExportDataBlob
 	/// The data. 
 	void* data;
 
+	/** Name of the blob. An empty string always
+	    indicates the first (and primary) blob,
+	    which contains the actual file data.
+        Any other blobs are auxiliary files produced
+	    by exporters (i.e. material files). Existence
+	    of such files depends on the file format. Most
+	    formats don't split assets across multiple files.
+
+		If used, blob names usually contain the file
+		extension that should be used when writing 
+		the data to disc.
+	 */
+	aiString name;
+
+	/** Pointer to the next blob in the chain or NULL if there is none. */
+	aiExportDataBlob * next;
+
 #ifdef __cplusplus
 	/// Default constructor
-	aiExportDataBlob() { size = 0; data = NULL; }
+	aiExportDataBlob() { size = 0; data = next = NULL; }
 	/// Releases the data
-	~aiExportDataBlob() { delete static_cast<char*>( data ); }
+	~aiExportDataBlob() { delete static_cast<char*>( data ); delete next; }
 #endif // __cplusplus
 };
 
@@ -137,7 +158,7 @@ ASSIMP_API aiReturn aiExportScene( const C_STRUCT aiScene* pScene, const char* p
 *   #aiExportSceneToBlob is provided as convienience function to export to memory buffers.
 * @return a status code indicating the result of the export
 */
-ASSIMP_API aiReturn aiExportSceneEx( const C_STRUCT aiScene* pScene, const char* pFormatId, const char* pFileName, const C_STRUCT aiFileIO* pIO );
+ASSIMP_API aiReturn aiExportSceneEx( const C_STRUCT aiScene* pScene, const char* pFormatId, const char* pFileName, C_STRUCT aiFileIO* pIO );
 
 // --------------------------------------------------------------------------------
 /** Exports the given scene to a chosen file format. Returns the exported data as a binary blob which

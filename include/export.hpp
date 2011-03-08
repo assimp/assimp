@@ -59,6 +59,16 @@ namespace Assimp	{
  * 
  * The interface is modelled after the importer interface and mostly
  * symmetric. The same rules for threading etc. apply.
+ *
+ * In a nutshell, there are two export interfaces: #Export, which writes the
+ * output file(s) either to the regular file system or to a user-supplied 
+ * #IOSystem, and #ExportToBlob which returns a linked list of memory
+ * buffers (blob), each referring to one output file (in most cases
+ * there will be only one output file of course, but this extra complexity is
+ * needed since Assimp aims at supporting a wide range of file formats). 
+ * 
+ * #ExportToBlob is especially useful if you intend to work 
+ * with the data in-memory. 
 */
 class ASSIMP_API Exporter
 	// TODO: causes good ol' base class has no dll interface warning
@@ -77,9 +87,11 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Supplies a custom IO handler to the exporter to use to open and
-	 * access files. If you need the exporter to use custion IO logic to 
-	 * access the files, you need to supply a custom implementation of 
-	 * IOSystem and IOFile to the exporter. 
+	 * access files. 
+	 * 
+	 * If you need #Export to use custom IO logic to access the files, 
+	 * you need to supply a custom implementation of IOSystem and 
+	 * IOFile to the exporter. 
 	 *
 	 * #Exporter takes ownership of the object and will destroy it 
 	 * afterwards. The previously assigned handler will be deleted.
@@ -124,7 +136,8 @@ public:
 	*   export formats are available.
 	* @return the exported data or NULL in case of error.
 	* @note If the Exporter instance did already hold a blob from
-	*   a previous call to #ExportToBlob, it will be disposed. */
+	*   a previous call to #ExportToBlob, it will be disposed. 
+	*   Any IO handlers set via #SetIOHandler are ignored here.*/
 	const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const char* pFormatId );
 
 
@@ -155,7 +168,7 @@ public:
 	/** Returns the number of export file formats available in the current
 	 *  Assimp build. Use #Exporter::GetExportFormatDescription to
 	 *  retrieve infos of a specific export format */
-	size_t aiGetExportFormatCount() const;
+	size_t GetExportFormatCount() const;
 
 
 	// -------------------------------------------------------------------
@@ -166,7 +179,7 @@ public:
 	 *  for. Valid range is 0 to #Exporter::GetExportFormatCount
 	 * @return A description of that specific export format. 
 	 *  NULL if pIndex is out of range. */
-	const aiExportFormatDesc* aiGetExportFormatDescription( size_t pIndex ) const;
+	const aiExportFormatDesc* GetExportFormatDescription( size_t pIndex ) const;
 
 
 protected:

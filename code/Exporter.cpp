@@ -46,24 +46,26 @@ to the import interface (in fact, it is largely symmetric), the internal
 implementations differs a lot. Exporters are considered stateless and are
 simple callbacks which we maintain in a global list along with their
 description strings.
+
+Here we implement only the C++ interface (Assimp::Exporter).
 */
 
 #include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
-#include "DefaultIOStream.h"
 #include "DefaultIOSystem.h"
+#include "BlobIOSystem.h" 
 
 namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 // Exporter worker function prototypes. Should not be necessary to #ifndef them, it's just a prototype
-void ExportSceneCollada(aiExportDataBlob*, const aiScene*);
-void ExportScene3DS(aiExportDataBlob*, const aiScene*) { }
+void ExportSceneCollada(const char*,IOSystem*, const aiScene*);
+void ExportScene3DS(const char*, IOSystem*, const aiScene*) {}
 
 /// Function pointer type of a Export worker function
-typedef void (*fpExportFunc)(aiExportDataBlob*, const aiScene*);
+typedef void (*fpExportFunc)(const char*,IOSystem*,const aiScene*);
 
 // ------------------------------------------------------------------------------------------------
 /// Internal description of an Assimp export format option
@@ -76,10 +78,11 @@ struct ExportFormatEntry
 	fpExportFunc mExportFunction;
 
 	// Constructor to fill all entries
-	ExportFormatEntry( const char* pId, const char* pDesc, fpExportFunc pFunction)
+	ExportFormatEntry( const char* pId, const char* pDesc, const char* pExtension, fpExportFunc pFunction)
 	{
 		mDescription.id = pId;
 		mDescription.description = pDesc;
+		mDescription.fileExtension = pExtension;
 		mExportFunction = pFunction;
 	}
 };
@@ -89,11 +92,11 @@ struct ExportFormatEntry
 ExportFormatEntry gExporters[] = 
 {
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
-	ExportFormatEntry( "collada", "Collada .dae", &ExportSceneCollada),
+	ExportFormatEntry( "collada", "COLLADA - Digital Asset Exchange Schema", "dae", &ExportSceneCollada),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_3DS_EXPORTER
-	ExportFormatEntry( "3ds", "Autodesk .3ds", &ExportScene3DS),
+	ExportFormatEntry( "3ds", "Autodesk 3DS (legacy format)", "3ds" , &ExportScene3DS),
 #endif
 };
 
@@ -120,6 +123,8 @@ public:
 	boost::shared_ptr< Assimp::IOSystem > mIOSystem;
 	bool mIsDefaultIOHandler;
 };
+
+#define ASSIMP_NUM_EXPORTERS (sizeof(gExporters)/sizeof(gExporters[0]))
 
 } // end of namespace Assimp
 
@@ -174,30 +179,43 @@ const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const 
 		pimpl->blob = NULL;
 	}
 
-	/* TODO (ALEX)
 
-	boost::shared_ptr<IOSystem*> old = pimpl->mIOSystem;
+	boost::shared_ptr<IOSystem> old = pimpl->mIOSystem;
 
-	BlobIOSystem* blobio;
-	pimpl->mIOSystem = blobio = new BlobIOSystem();
+	BlobIOSystem* blobio = new BlobIOSystem();
+	pimpl->mIOSystem = boost::shared_ptr<IOSystem>( blobio );
 
-	if (AI_SUCCESS != Export(pScene,pFormatId)) {
+	if (AI_SUCCESS != Export(pScene,pFormatId,blobio->GetMagicFileName())) {
 		pimpl->mIOSystem = old;
 		return NULL;
 	}
 
-	pimpl->blob = blobio->GetBlob();
+	pimpl->blob = blobio->GetBlobChain();
 	pimpl->mIOSystem = old;
 
 	return pimpl->blob;
-	*/
-	return NULL;
 }
 
 
 // ------------------------------------------------------------------------------------------------
 aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const char* pPath )
 {
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+	for (size_t i = 0; i < ASSIMP_NUM_EXPORTERS; ++i) {
+		if (!strcmp(gExporters[i].mDescription.id,pFormatId)) {
+
+			try {
+				gExporters[i].mExportFunction(pPath,pimpl->mIOSystem.get(),pScene);
+			}
+			catch (DeadlyExportError& err) {
+				// XXX what to do with the error message? Maybe introduce extra member to hold it, similar to Assimp.Importer
+				DefaultLogger::get()->error(err.what());
+				return AI_FAILURE;
+			}
+			return AI_SUCCESS;
+		}
+	}
+	ASSIMP_END_EXCEPTION_REGION(aiReturn);
 	return AI_FAILURE;
 }
 
@@ -219,80 +237,20 @@ const aiExportDataBlob* Exporter :: GetOrphanedBlob() const
 
 
 // ------------------------------------------------------------------------------------------------
-size_t Exporter :: aiGetExportFormatCount() const 
+size_t Exporter :: GetExportFormatCount() const 
 {
-	return ::aiGetExportFormatCount();
+	return ASSIMP_NUM_EXPORTERS;
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiExportFormatDesc* Exporter :: aiGetExportFormatDescription( size_t pIndex ) const 
+const aiExportFormatDesc* Exporter :: GetExportFormatDescription( size_t pIndex ) const 
 {
-	return ::aiGetExportFormatDescription(pIndex);
-}
-
-
-
-// ------------------------------------------------------------------------------------------------
-ASSIMP_API size_t aiGetExportFormatCount(void)
-{
-	return sizeof( Assimp::gExporters) / sizeof( Assimp::ExportFormatEntry);
-}
-
-
-// ------------------------------------------------------------------------------------------------
-ASSIMP_API const aiExportFormatDesc* aiGetExportFormatDescription( size_t pIndex)
-{
-	if( pIndex >= aiGetExportFormatCount() )
-		return NULL;
-
-	return &Assimp::gExporters[pIndex].mDescription;
-}
-
-
-// ------------------------------------------------------------------------------------------------
-ASSIMP_API aiReturn aiExportScene( const aiScene* pScene, const char* pFormatId, const char* pFileName )
-{
-	return ::aiExportSceneEx(pScene,pFormatId,pFileName,NULL);
-}
-
-
-// ------------------------------------------------------------------------------------------------
-ASSIMP_API aiReturn aiExportSceneEx( const aiScene* pScene, const char* pFormatId, const char* pFileName, const aiFileIO* pIO)
-{
-	return AI_FAILURE;
-}
-
-
-
-// ------------------------------------------------------------------------------------------------
-ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportSceneToBlob( const aiScene* pScene, const char* pFormatId )
-{
-	// find a suitable exporter
-	const Assimp::ExportFormatEntry* exporter = NULL;
-	for( size_t a = 0; a < aiGetExportFormatCount(); ++a )
-	{
-		if( strcmp( Assimp::gExporters[a].mDescription.id, pFormatId) == 0 )
-			exporter = Assimp::gExporters + a;
-	}
-	
-	if( !exporter )
-		return NULL;
-
-	aiExportDataBlob* blob = new aiExportDataBlob;
-	exporter->mExportFunction( blob, pScene);
-	if( !blob->data || blob->size == 0 )
-	{
-		delete blob;
+	if (pIndex >= ASSIMP_NUM_EXPORTERS) {
 		return NULL;
 	}
 
-	return blob;
+	return &gExporters[pIndex].mDescription;
 }
 
-// ------------------------------------------------------------------------------------------------
-ASSIMP_API C_STRUCT void aiReleaseExportData( const aiExportDataBlob* pData )
-{
-	delete pData;
-}
 
 #endif // !ASSIMP_BUILD_NO_EXPORT

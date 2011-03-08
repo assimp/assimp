@@ -44,9 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 #include "../include/assimp.h"
-#include "../include/aiFileIO.h"
 
 #include "GenericProperty.h"
+#include "CInterfaceIOWrapper.h"
 
 // ------------------------------------------------------------------------------------------------
 #ifdef AI_C_THREADSAFE
@@ -58,6 +58,7 @@ using namespace Assimp;
 
 namespace Assimp
 {
+
 	/** Stores the importer objects for all active import processes */
 	typedef std::map<const aiScene*, Assimp::Importer*> ImporterMap;
 
@@ -101,113 +102,8 @@ static boost::mutex gMutex;
 static boost::mutex gLogStreamMutex;
 #endif
 
-class CIOSystemWrapper;
-class CIOStreamWrapper;
 
-// ------------------------------------------------------------------------------------------------
-// Custom IOStream implementation for the C-API
-class CIOStreamWrapper : public IOStream
-{
-	friend class CIOSystemWrapper;
-public:
 
-	CIOStreamWrapper(aiFile* pFile)
-		: mFile(pFile)
-	{}
-
-	// ...................................................................
-	size_t Read(void* pvBuffer, 
-		size_t pSize, 
-		size_t pCount
-	){
-		// need to typecast here as C has no void*
-		return mFile->ReadProc(mFile,(char*)pvBuffer,pSize,pCount);
-	}
-
-	// ...................................................................
-	size_t Write(const void* pvBuffer, 
-		size_t pSize,
-		size_t pCount
-	){
-		// need to typecast here as C has no void*
-		return mFile->WriteProc(mFile,(const char*)pvBuffer,pSize,pCount);
-	}
-
-	// ...................................................................
-	aiReturn Seek(size_t pOffset,
-		aiOrigin pOrigin
-	){
-		return mFile->SeekProc(mFile,pOffset,pOrigin);
-	}
-
-	// ...................................................................
-	size_t Tell(void) const {
-		return mFile->TellProc(mFile);
-	}
-
-	// ...................................................................
-	size_t	FileSize() const {
-		return mFile->FileSizeProc(mFile);
-	}
-
-	// ...................................................................
-	void Flush () {
-		return mFile->FlushProc(mFile);
-	}
-
-private:
-	aiFile* mFile;
-};
-
-// ------------------------------------------------------------------------------------------------
-// Custom IOStream implementation for the C-API
-class CIOSystemWrapper : public IOSystem
-{
-public:
-	CIOSystemWrapper(aiFileIO* pFile)
-		: mFileSystem(pFile)
-	{}
-
-	// ...................................................................
-	bool Exists( const char* pFile) const {
-		CIOSystemWrapper* pip = const_cast<CIOSystemWrapper*>(this);
-		IOStream* p = pip->Open(pFile);
-		if (p){
-			pip->Close(p);
-			return true;
-		}
-		return false;
-	}
-
-	// ...................................................................
-	char getOsSeparator() const {
-#ifndef _WIN32
-		return '/';
-#else
-		return '\\';
-#endif
-	}
-
-	// ...................................................................
-	IOStream* Open(const char* pFile,const char* pMode = "rb") {
-		aiFile* p = mFileSystem->OpenProc(mFileSystem,pFile,pMode);
-		if (!p) {
-			return NULL;
-		}
-		return new CIOStreamWrapper(p);
-	}
-
-	// ...................................................................
-	void Close( IOStream* pFile) {
-		if (!pFile) {
-			return;
-		}
-		mFileSystem->CloseProc(mFileSystem,((CIOStreamWrapper*) pFile)->mFile);
-		delete pFile;
-	}
-private:
-	aiFileIO* mFileSystem;
-};
 
 // ------------------------------------------------------------------------------------------------
 // Custom LogStream implementation for the C-API

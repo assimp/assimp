@@ -46,18 +46,18 @@ using namespace Assimp;
 namespace Assimp
 {
 
-	// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to Collada. Prototyped and registered in Exporter.cpp
-void ExportSceneCollada( aiExportDataBlob* pBlob, const aiScene* pScene)
+void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene)
 {
 	// invoke the exporter 
 	ColladaExporter iDoTheExportThing( pScene);
 
-	// we're still here - export successfully completed. Load result into given blob
-	pBlob->size = iDoTheExportThing.mOutput.tellp();
-	pBlob->data = new char[pBlob->size];
-	iDoTheExportThing.mOutput.seekg( 0);
-	iDoTheExportThing.mOutput.read( (char*) pBlob->data, pBlob->size);
+	// we're still here - export successfully completed. Write result to the given IOSYstem
+	boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+
+	// XXX maybe use a small wrapper around IOStream that behaves like std::stringstream in order to avoid the extra copy.
+	outfile->Write( iDoTheExportThing.mOutput.str().c_str(),  iDoTheExportThing.mOutput.tellp(),1);
 }
 
 } // end of namespace Assimp

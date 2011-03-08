@@ -94,6 +94,7 @@ SOURCE_GROUP( Common FILES
 	DefaultIOStream.h
 	DefaultIOSystem.cpp
 	DefaultIOSystem.h
+	CInterfaceIOWrapper.h
 	Hash.h
 	Importer.cpp
 	IFF.h
@@ -405,6 +406,14 @@ SOURCE_GROUP( XFile FILES
 	XFileParser.h
 )
 
+SOURCE_GROUP( Exporter FILES
+	Exporter.cpp
+	AssimpCExport.cpp
+	BlobIOSystem.h
+)
+
+
+
 SOURCE_GROUP( Extra FILES
 	MakeVerboseFormat.cpp
 	MakeVerboseFormat.h
@@ -504,6 +513,9 @@ ADD_LIBRARY( assimp SHARED
 	DefaultProgressHandler.h
 	DefaultLogger.cpp
 	Exporter.cpp
+	AssimpCExport.cpp
+	CInterfaceIOWrapper.h
+	BlobIOSystem.h
 	FileLogStream.h
 	FindDegenerates.cpp
 	FindDegenerates.h

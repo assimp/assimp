@@ -184,6 +184,7 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 		return 1;
 	}
 
+#ifdef ASSIMP_BUILD_NO_EXPORT
 	// testweise wieder rausschreiben
 	const aiExportDataBlob* blob = aiExportSceneToBlob( g_pcAsset->pcScene, "collada");
 	if( blob )
@@ -194,6 +195,7 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 
 		aiReleaseExportData( blob);
 	}
+#endif // ASSIMP_BUILD_NO_EXPORT
 
 	return 0;
 }

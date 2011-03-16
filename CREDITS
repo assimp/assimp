@@ -100,3 +100,6 @@ Contributed the /samples/SimpleAssimpViewX sample
 
 - Carsten Fuchs
 Contributed a fix for the Normalize method in aiQuaternion.
+
+- dbburgess
+Contributes a Android-specific build issue: log the hardware architecture for ARM.

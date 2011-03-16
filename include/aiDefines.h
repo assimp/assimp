@@ -240,8 +240,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #		define ASSIMP_BUILD_X86_64BIT_ARCHITECTURE
 #	elif defined(__ppc__)
 #		define ASSIMP_BUILD_PPC_32BIT_ARCHITECTURE
+#   elif defined(__arm__)
+#       define ASSIMP_BUILD_ARM_32BIT_ARCHITECTURE
 #	else
-#		error unknown architecture
+#		error "unknown architecture"
 #	endif
 #else
 #	error unknown compiler

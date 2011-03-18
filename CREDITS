@@ -103,3 +103,6 @@ Contributed a fix for the Normalize method in aiQuaternion.
 
 - dbburgess
 Contributes a Android-specific build issue: log the hardware architecture for ARM.
+
+-  alfiereinre7
+Contributes a obj-fileparser fix: missing tokens in the obj-token list.

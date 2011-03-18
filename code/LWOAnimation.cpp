@@ -426,8 +426,8 @@ void AnimResolver::GetKeys(std::vector<aiVectorKey>& out,
 		sample_delta = 1.f / sr; 
 
 		reserve = (size_t)(
-			std::max( envl_x->keys.end()->time,
-			std::max( envl_y->keys.end()->time, envl_z->keys.end()->time )) * sr);
+			std::max( envl_x->keys.rbegin()->time,
+			std::max( envl_y->keys.rbegin()->time, envl_z->keys.rbegin()->time )) * sr);
 	}
 	else reserve = std::max(envl_x->keys.size(),std::max(envl_x->keys.size(),envl_z->keys.size()));
 	out.reserve(reserve+(reserve>>1));
@@ -459,16 +459,6 @@ void AnimResolver::GetKeys(std::vector<aiVectorKey>& out,
 			if (flags & AI_LWO_ANIM_FLAG_SAMPLE_ANIMS) {
 				//SubsampleAnimTrack(out,cur_x, cur_y, cur_z, d, sample_delta);
 			}
-
-			if (cur_x != envl_x->keys.end()-1)
-				++cur_x;
-			else end_x = true;
-			if (cur_y != envl_y->keys.end()-1)
-				++cur_y;
-			else end_y = true;
-			if (cur_z != envl_z->keys.end()-1)
-				++cur_z;
-			else end_z = true;
 		}
 
 		// Find key with lowest time value
@@ -481,8 +471,8 @@ void AnimResolver::GetKeys(std::vector<aiVectorKey>& out,
 				InterpolateTrack(out,fill,(*cur_x).time);
 			}
 		}
-		else if ((*cur_z).time <= (*cur_y).time && !end_z)	{
-			InterpolateTrack(out,fill,(*cur_z).time);
+		else if ((*cur_z).time <= (*cur_y).time && !end_y)	{
+			InterpolateTrack(out,fill,(*cur_y).time);
 		}
 		else if (!end_y) {
 			// welcome on the server, y
@@ -504,6 +494,22 @@ void AnimResolver::GetKeys(std::vector<aiVectorKey>& out,
 		lasttime = fill.mTime;
 		out.push_back(fill);
 
+		if (lasttime >= (*cur_x).time) {
+			if (cur_x != envl_x->keys.end()-1)
+				++cur_x;
+			else end_x = true;
+		}
+		if (lasttime >= (*cur_y).time) {
+			if (cur_y != envl_y->keys.end()-1)
+				++cur_y;
+			else end_y = true;
+		}
+		if (lasttime >= (*cur_z).time) {
+			if (cur_z != envl_z->keys.end()-1)
+				++cur_z;
+			else end_z = true;
+		}
+
 		if( end_x && end_y && end_z ) /* finished? */
 			break;
 	}
@@ -522,9 +528,7 @@ void AnimResolver::ExtractAnimChannel(aiNodeAnim** out, unsigned int flags /*= 0
 
 
 	//FIXME: crashes if more than one component is animated at different timings, to be resolved.
-	return;
-
-#if 0
+	
 	// If we have no envelopes, return NULL
 	if (envelopes.empty()) {
 		return;
@@ -566,7 +570,7 @@ void AnimResolver::ExtractAnimChannel(aiNodeAnim** out, unsigned int flags /*= 0
 		for (unsigned int i = 0; i < anim->mNumRotationKeys; ++i) {
 			aiQuatKey& qk = anim->mRotationKeys[i];
 			qk.mTime  = keys[i].mTime;
-			qk.mValue = aiQuaternion( keys[i].mValue.x ,keys[i].mValue.z ,keys[i].mValue.y );
+			qk.mValue = aiQuaternion( -keys[i].mValue.x ,-keys[i].mValue.z ,-keys[i].mValue.y );
 		}
 	}
 
@@ -578,7 +582,6 @@ void AnimResolver::ExtractAnimChannel(aiNodeAnim** out, unsigned int flags /*= 0
 		anim->mScalingKeys = new aiVectorKey[ anim->mNumScalingKeys = keys.size() ];
 		std::copy(keys.begin(),keys.end(),anim->mScalingKeys);
 	}
-#endif
 }
 
 

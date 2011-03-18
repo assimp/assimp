@@ -84,8 +84,8 @@ bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem*  pIOHandler ,
 	}
 	else //Check file Header
 	{
-		const char* tokens[] = {"mtllib","usemtl","vt ","vn ","o "};
-		return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, tokens, 5);
+		static const char *pTokens[] = { "mtllib", "usemtl", "v ", "vt ", "vn ", "o ", "g ", "s ", "f " };
+		return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens, 9 );
 	}
 }
 

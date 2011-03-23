@@ -222,7 +222,7 @@ public:
 	 * @see SetPropertyInteger()
 	 */
 	void SetPropertyBool(const char* szName, bool value, bool* bWasExisting = NULL)	{
-		SetPropertyInteger(szName,value);
+		SetPropertyInteger(szName,value,bWasExisting);
 	}
 
 	// -------------------------------------------------------------------

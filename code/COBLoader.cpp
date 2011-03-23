@@ -439,9 +439,9 @@ void COBImporter::ReadChunkInfo_Ascii(ChunkInfo& out, const LineSplitter& splitt
 	splitter.get_tokens(all_tokens);
 
 	out.version = (all_tokens[1][1]-'0')*100+(all_tokens[1][3]-'0')*10+(all_tokens[1][4]-'0');
-	out.id	= strtol10(all_tokens[3]);
-	out.parent_id = strtol10(all_tokens[5]);
-	out.size = strtol10s(all_tokens[7]);
+	out.id	= strtoul10(all_tokens[3]);
+	out.parent_id = strtoul10(all_tokens[5]);
+	out.size = strtol10(all_tokens[7]);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -562,7 +562,7 @@ void COBImporter::ReadMat1_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 	Material& mat = out.materials.back();
 	mat = nfo;
 
-	mat.matnum = strtol10(splitter[1]);
+	mat.matnum = strtoul10(splitter[1]);
 	++splitter;
 
 	if (!splitter.match_start("shader: ")) {
@@ -626,7 +626,7 @@ void COBImporter::ReadUnit_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 	// corresponding chunk already.
 	for_each(boost::shared_ptr< Node >& nd, out.nodes) {
 		if (nd->id == nfo.parent_id) {
-			const unsigned int t=strtol10(splitter[1]);
+			const unsigned int t=strtoul10(splitter[1]);
 		
 			nd->unit_scale = t>=sizeof(units)/sizeof(units[0])?(
 				LogWarn_Ascii(splitter,format()<<t<<" is not a valid value for `Units` attribute in `Unit chunk` "<<nfo.id)
@@ -768,7 +768,7 @@ void COBImporter::ReadPolH_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 	// either the last `Face` or the `DrawFlags` attribute, depending on the format ver.
 	for(;splitter;++splitter) {
 		if (splitter.match_start("World Vertices")) {
-			const unsigned int cnt = strtol10(splitter[2]);
+			const unsigned int cnt = strtoul10(splitter[2]);
 			msh.vertex_positions.resize(cnt);
 
 			for(unsigned int cur = 0;cur < cnt && ++splitter;++cur) {
@@ -785,7 +785,7 @@ void COBImporter::ReadPolH_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 			}
 		}
 		else if (splitter.match_start("Texture Vertices")) {
-			const unsigned int cnt = strtol10(splitter[2]);
+			const unsigned int cnt = strtoul10(splitter[2]);
 			msh.texture_coords.resize(cnt);
 
 			for(unsigned int cur = 0;cur < cnt && ++splitter;++cur) {
@@ -800,7 +800,7 @@ void COBImporter::ReadPolH_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 			}
 		}
 		else if (splitter.match_start("Faces")) {
-			const unsigned int cnt = strtol10(splitter[1]);
+			const unsigned int cnt = strtoul10(splitter[1]);
 			msh.faces.reserve(cnt);
 
 			for(unsigned int cur = 0; cur < cnt && ++splitter ;++cur) {
@@ -816,9 +816,9 @@ void COBImporter::ReadPolH_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 				msh.faces.push_back(Face());
 				Face& face = msh.faces.back();
 
-				face.indices.resize(strtol10(splitter[2]));
-				face.flags = strtol10(splitter[4]);
-				face.material = strtol10(splitter[6]);
+				face.indices.resize(strtoul10(splitter[2]));
+				face.flags = strtoul10(splitter[4]);
+				face.material = strtoul10(splitter[6]);
 
 				const char* s = (++splitter)->c_str();
 				for(size_t i = 0; i < face.indices.size(); ++i) {
@@ -828,11 +828,11 @@ void COBImporter::ReadPolH_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 					if ('<' != *s++) {
 						ThrowException("Expected < token in Face entry");
 					}
-					face.indices[i].pos_idx = strtol10(s,&s);
+					face.indices[i].pos_idx = strtoul10(s,&s);
 					if (',' != *s++) {
 						ThrowException("Expected , token in Face entry");
 					}
-					face.indices[i].uv_idx = strtol10(s,&s);
+					face.indices[i].uv_idx = strtoul10(s,&s);
 					if ('>' != *s++) {
 						ThrowException("Expected < token in Face entry");
 					}
@@ -843,7 +843,7 @@ void COBImporter::ReadPolH_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 			}
 		}
 		else if (splitter.match_start("DrawFlags")) {
-			msh.draw_flags = strtol10(splitter[1]);
+			msh.draw_flags = strtoul10(splitter[1]);
 			break;
 		}
 	}
@@ -863,7 +863,7 @@ void COBImporter::ReadBitM_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 	"\nZippedThumbnail: %02hx 02hx %02hx "
 */
 
-	const unsigned int head = strtol10((++splitter)[1]);
+	const unsigned int head = strtoul10((++splitter)[1]);
 	if (head != sizeof(Bitmap::BitmapHeader)) {
 		LogWarn_Ascii(splitter,"Unexpected ThumbNailHdrSize, skipping this chunk");
 		return;

@@ -199,7 +199,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 		if (TokenMatch(buffer,"kids",4))
 		{
 			SkipSpaces(&buffer);
-			unsigned int num = strtol10(buffer,&buffer);
+			unsigned int num = strtoul10(buffer,&buffer);
 			GetNextLine();
 			if (num)
 			{
@@ -252,7 +252,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 		else if (TokenMatch(buffer,"subdiv",6))
 		{
 			SkipSpaces(&buffer);
-			obj.subDiv = strtol10(buffer,&buffer);
+			obj.subDiv = strtoul10(buffer,&buffer);
 		}
 		else if (TokenMatch(buffer,"crease",6))
 		{
@@ -263,7 +263,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 		{
 			SkipSpaces(&buffer);
 
-			unsigned int t = strtol10(buffer,&buffer);
+			unsigned int t = strtoul10(buffer,&buffer);
 			obj.vertices.reserve(t);
 			for (unsigned int i = 0; i < t;++i)
 			{
@@ -289,7 +289,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 			
 			bool Q3DWorkAround = false;
 
-			const unsigned int t = strtol10(buffer,&buffer);
+			const unsigned int t = strtoul10(buffer,&buffer);
 			obj.surfaces.reserve(t);
 			for (unsigned int i = 0; i < t;++i)
 			{
@@ -311,7 +311,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 				SkipSpaces(&buffer);
 				obj.surfaces.push_back(Surface());
 				Surface& surf = obj.surfaces.back();
-				surf.flags = strtol_cppstyle(buffer);
+				surf.flags = strtoul_cppstyle(buffer);
 			
 				while (1)
 				{
@@ -323,7 +323,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 					if (TokenMatch(buffer,"mat",3))
 					{
 						SkipSpaces(&buffer);
-						surf.mat = strtol10(buffer);
+						surf.mat = strtoul10(buffer);
 					}
 					else if (TokenMatch(buffer,"refs",4))
 					{
@@ -338,7 +338,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 						}
 
 						SkipSpaces(&buffer);
-						const unsigned int m = strtol10(buffer);
+						const unsigned int m = strtoul10(buffer);
 						surf.entries.reserve(m);
 
 						obj.numRefs += m;
@@ -353,7 +353,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 							surf.entries.push_back(Surface::SurfaceEntry());
 							Surface::SurfaceEntry& entry = surf.entries.back();
 
-							entry.first = strtol10(buffer,&buffer);
+							entry.first = strtoul10(buffer,&buffer);
 							SkipSpaces(&buffer);
 							AI_AC_CHECKED_LOAD_FLOAT_ARRAY("",0,2,&entry.second);
 						}

@@ -1563,7 +1563,7 @@ void Parser::ParseLV4MeshBones(unsigned int iNumBones,ASE::Mesh& mesh)
 				// parse an index ...
 				if(SkipSpaces(&filePtr))
 				{
-					unsigned int iIndex = strtol10(filePtr,&filePtr);
+					unsigned int iIndex = strtoul10(filePtr,&filePtr);
 					if (iIndex >= iNumBones)
 					{
 						continue;
@@ -1593,7 +1593,7 @@ void Parser::ParseLV4MeshBonesVertices(unsigned int iNumVertices,ASE::Mesh& mesh
 			if (TokenMatch(filePtr,"MESH_BONE_VERTEX" ,16))
 			{
 				// read the vertex index
-				unsigned int iIndex = strtol10(filePtr,&filePtr);
+				unsigned int iIndex = strtoul10(filePtr,&filePtr);
 				if (iIndex >= mesh.mPositions.size())
 				{
 					iIndex = (unsigned int)mesh.mPositions.size()-1;
@@ -1610,7 +1610,7 @@ void Parser::ParseLV4MeshBonesVertices(unsigned int iNumVertices,ASE::Mesh& mesh
 				{
 					// first parse the bone index ...
 					if (!SkipSpaces(&filePtr))break;
-					pairOut.first = strtol10(filePtr,&filePtr);
+					pairOut.first = strtoul10(filePtr,&filePtr);
 
 					// then parse the vertex weight
 					if (!SkipSpaces(&filePtr))break;
@@ -1951,7 +1951,7 @@ void Parser::ParseLV4MeshFace(ASE::Face& out)
 	}
 
 	// parse the face index
-	out.iFace = strtol10(filePtr,&filePtr);
+	out.iFace = strtoul10(filePtr,&filePtr);
 
 	// next character should be ':'
 	if(!SkipSpaces(&filePtr))
@@ -2012,7 +2012,7 @@ void Parser::ParseLV4MeshFace(ASE::Face& out)
 			SkipToNextToken();
 			return;
 		}
-		out.mIndices[iIndex] = strtol10(filePtr,&filePtr);
+		out.mIndices[iIndex] = strtoul10(filePtr,&filePtr);
 	}
 
 	// now we need to skip the AB, BC, CA blocks. 
@@ -2044,7 +2044,7 @@ void Parser::ParseLV4MeshFace(ASE::Face& out)
 		{
 			if (*filePtr < '9' && *filePtr >= '0')
 			{
-				out.iSmoothGroup |= (1 << strtol10(filePtr,&filePtr));
+				out.iSmoothGroup |= (1 << strtoul10(filePtr,&filePtr));
 			}
 			SkipSpaces(&filePtr);
 			if (',' != *filePtr)
@@ -2076,7 +2076,7 @@ void Parser::ParseLV4MeshFace(ASE::Face& out)
 			SkipToNextToken();
 			return;
 		}
-		out.iMaterial = strtol10(filePtr,&filePtr);
+		out.iMaterial = strtoul10(filePtr,&filePtr);
 	}
 	return;
 }
@@ -2146,5 +2146,5 @@ void Parser::ParseLV4MeshLong(unsigned int& iOut)
 		return;
 	}
 	// parse the value
-	iOut = strtol10(filePtr,&filePtr);
+	iOut = strtoul10(filePtr,&filePtr);
 }

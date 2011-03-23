@@ -638,7 +638,7 @@ void ColladaParser::ReadControllerWeights( Collada::Controller& pController)
 					if( *text == 0)
 						ThrowException( "Out of data while reading vcount");
 
-					*it = strtol10( text, &text);
+					*it = strtoul10( text, &text);
 					numWeights += *it;
 					SkipSpacesAndLineEnd( &text);
 				}
@@ -657,11 +657,11 @@ void ColladaParser::ReadControllerWeights( Collada::Controller& pController)
 				{
 					if( *text == 0)
 						ThrowException( "Out of data while reading vertex_weights");
-					it->first = strtol10( text, &text);
+					it->first = strtoul10( text, &text);
 					SkipSpacesAndLineEnd( &text);
 					if( *text == 0)
 						ThrowException( "Out of data while reading vertex_weights");
-					it->second = strtol10( text, &text);
+					it->second = strtoul10( text, &text);
 					SkipSpacesAndLineEnd( &text);
 				}
 
@@ -1887,7 +1887,7 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 						if( *content == 0)
 							ThrowException( "Expected more values while reading vcount contents.");
 						// read a number
-						vcount.push_back( (size_t) strtol10( content, &content));
+						vcount.push_back( (size_t) strtoul10( content, &content));
 						// skip whitespace after it
 						SkipSpacesAndLineEnd( &content);
 					}
@@ -2007,7 +2007,7 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 	{
 		// read a value. 
     // Hack: (thom) Some exporters put negative indices sometimes. We just try to carry on anyways.
-    int value = std::max( 0, strtol10s( content, &content));
+    int value = std::max( 0, strtol10( content, &content));
 		indices.push_back( size_t( value));
 		// skip whitespace after it
 		SkipSpacesAndLineEnd( &content);

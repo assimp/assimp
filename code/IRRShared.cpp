@@ -73,7 +73,7 @@ void IrrlichtBase::ReadHexProperty    (HexProperty&    out)
 		else if (!ASSIMP_stricmp(reader->getAttributeName(i),"value"))
 		{
 			// parse the hexadecimal value
-			out.value = strtol16(reader->getAttributeValue(i));
+			out.value = strtoul16(reader->getAttributeValue(i));
 		}
 	}
 }
@@ -91,7 +91,7 @@ void IrrlichtBase::ReadIntProperty    (IntProperty&    out)
 		else if (!ASSIMP_stricmp(reader->getAttributeName(i),"value"))
 		{
 			// parse the ecimal value
-			out.value = strtol10s(reader->getAttributeValue(i));
+			out.value = strtol10(reader->getAttributeValue(i));
 		}
 	}
 }

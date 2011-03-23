@@ -386,7 +386,7 @@ bool PLY::Element::ParseElement (const char* pCur,
 	if (!SkipSpaces(&pCur))return false;
 	
 	//parse the number of occurences of this element
-	pOut->NumOccur = strtol10(pCur,&pCur);
+	pOut->NumOccur = strtoul10(pCur,&pCur);
 
 	// go to the next line
 	SkipSpacesAndLineEnd(pCur,&pCur);
@@ -799,14 +799,14 @@ bool PLY::PropertyInstance::ParseValue(
 	case EDT_UShort:
 	case EDT_UChar:
 
-		out->iUInt = (uint32_t)strtol10(pCur, &pCur);
+		out->iUInt = (uint32_t)strtoul10(pCur, &pCur);
 		break;
 
 	case EDT_Int:
 	case EDT_Short:
 	case EDT_Char:
 
-		out->iInt = (int32_t)strtol10s(pCur, &pCur);
+		out->iInt = (int32_t)strtol10(pCur, &pCur);
 		break;
 
 	case EDT_Float:

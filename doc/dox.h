@@ -877,7 +877,7 @@ Mixed stuff for internal use by loaders, mostly documented (most of them are alr
 <li><b>StreamReader</b> (<i>StreamReader.h</i>) - safe, endianess-correct, binary reading.</li>
 <li><b>IrrXML</b> (<i>irrXMLWrapper.h</i>)  - for XML-parsing (SAX.</li>
 <li><b>CommentRemover</b> (<i>RemoveComments.h</i>) - remove single-line and multi-line comments from a text file.</li>
-<li>fast_atof, strtol10, strtol16, SkipSpaceAndLineEnd, SkipToNextToken .. large family of low-level 
+<li>fast_atof, strtoul10, strtoul16, SkipSpaceAndLineEnd, SkipToNextToken .. large family of low-level 
 parsing functions, mostly declared in <i>fast_atof.h</i>, <i>StringComparison.h</i> and <i>ParsingUtils.h</i> (a collection that grew
 historically, so don't expect perfect organization). </li>
 <li><b>ComputeNormalsWithSmoothingsGroups()</b> (<i>SmoothingGroups.h</i>) - Computes normal vectors from plain old smoothing groups. </li>

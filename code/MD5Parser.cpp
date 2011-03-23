@@ -114,7 +114,7 @@ void MD5Parser::ParseHeader()
 		ReportError("Invalid MD5 file: MD5Version tag has not been found");
 	}
 	SkipSpaces();
-	unsigned int iVer = ::strtol10(buffer,(const char**)&buffer);
+	unsigned int iVer = ::strtoul10(buffer,(const char**)&buffer);
 	if (10 != iVer)	{
 		ReportError("MD5 version tag is unknown (10 is expected)");
 	}
@@ -233,10 +233,10 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 	// now parse all sections
 	for (SectionList::const_iterator iter =  mSections.begin(), iterEnd = mSections.end();iter != iterEnd;++iter){
 		if ( (*iter).mName == "numMeshes")	{
-			mMeshes.reserve(::strtol10((*iter).mGlobalValue.c_str()));
+			mMeshes.reserve(::strtoul10((*iter).mGlobalValue.c_str()));
 		}
 		else if ( (*iter).mName == "numJoints")	{
-			mJoints.reserve(::strtol10((*iter).mGlobalValue.c_str()));
+			mJoints.reserve(::strtoul10((*iter).mGlobalValue.c_str()));
 		}
 		else if ((*iter).mName == "joints")	{
 			// "origin"	-1 ( -0.000000 0.016430 -0.006044 ) ( 0.707107 0.000000 0.707107 )
@@ -249,7 +249,7 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 				AI_MD5_SKIP_SPACES();
 
 				// negative values, at least -1, is allowed here
-				desc.mParentIndex = (int)strtol10s(sz,&sz);
+				desc.mParentIndex = (int)strtol10(sz,&sz);
 		
 				AI_MD5_READ_TRIPLE(desc.mPositionXYZ);
 				AI_MD5_READ_TRIPLE(desc.mRotationQuat); // normalized quaternion, so w is not there
@@ -270,23 +270,23 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 				// numverts attribute
 				else if (TokenMatch(sz,"numverts",8))	{
 					AI_MD5_SKIP_SPACES();
-					desc.mVertices.resize(strtol10(sz));
+					desc.mVertices.resize(strtoul10(sz));
 				}
 				// numtris attribute
 				else if (TokenMatch(sz,"numtris",7))	{
 					AI_MD5_SKIP_SPACES();
-					desc.mFaces.resize(strtol10(sz));
+					desc.mFaces.resize(strtoul10(sz));
 				}
 				// numweights attribute
 				else if (TokenMatch(sz,"numweights",10))	{
 					AI_MD5_SKIP_SPACES();
-					desc.mWeights.resize(strtol10(sz));
+					desc.mWeights.resize(strtoul10(sz));
 				}
 				// vert attribute
 				// "vert 0 ( 0.394531 0.513672 ) 0 1"
 				else if (TokenMatch(sz,"vert",4))	{
 					AI_MD5_SKIP_SPACES();
-					const unsigned int idx = ::strtol10(sz,&sz);
+					const unsigned int idx = ::strtoul10(sz,&sz);
 					AI_MD5_SKIP_SPACES();
 					if (idx >= desc.mVertices.size())
 						desc.mVertices.resize(idx+1);
@@ -302,15 +302,15 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 					if (')' != *sz++)
 						MD5Parser::ReportWarning("Unexpected token: ) was expected",(*eit).iLineNumber);
 					AI_MD5_SKIP_SPACES();
-					vert.mFirstWeight = ::strtol10(sz,&sz);
+					vert.mFirstWeight = ::strtoul10(sz,&sz);
 					AI_MD5_SKIP_SPACES();
-					vert.mNumWeights = ::strtol10(sz,&sz);
+					vert.mNumWeights = ::strtoul10(sz,&sz);
 				}
 				// tri attribute
 				// "tri 0 15 13 12"
 				else if (TokenMatch(sz,"tri",3)) {
 					AI_MD5_SKIP_SPACES();
-					const unsigned int idx = strtol10(sz,&sz);
+					const unsigned int idx = strtoul10(sz,&sz);
 					if (idx >= desc.mFaces.size())
 						desc.mFaces.resize(idx+1);
 
@@ -318,20 +318,20 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 					face.mIndices = new unsigned int[face.mNumIndices = 3];
 					for (unsigned int i = 0; i < 3;++i)	{
 						AI_MD5_SKIP_SPACES();
-						face.mIndices[i] = strtol10(sz,&sz);
+						face.mIndices[i] = strtoul10(sz,&sz);
 					}
 				}
 				// weight attribute
 				// "weight 362 5 0.500000 ( -3.553583 11.893474 9.719339 )"
 				else if (TokenMatch(sz,"weight",6))	{
 					AI_MD5_SKIP_SPACES();
-					const unsigned int idx = strtol10(sz,&sz);
+					const unsigned int idx = strtoul10(sz,&sz);
 					AI_MD5_SKIP_SPACES();
 					if (idx >= desc.mWeights.size())
 						desc.mWeights.resize(idx+1);
 
 					WeightDesc& weight = desc.mWeights[idx];	
-					weight.mBone = strtol10(sz,&sz);
+					weight.mBone = strtoul10(sz,&sz);
 					AI_MD5_SKIP_SPACES();
 					sz = fast_atof_move(sz,weight.mWeight);
 					AI_MD5_READ_TRIPLE(weight.vOffsetPosition);
@@ -362,17 +362,17 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 				AI_MD5_SKIP_SPACES();
 
 				// parent index - negative values are allowed (at least -1)
-				desc.mParentIndex = ::strtol10s(sz,&sz);
+				desc.mParentIndex = ::strtol10(sz,&sz);
 
 				// flags (highest is 2^6-1)
 				AI_MD5_SKIP_SPACES();
-				if(63 < (desc.iFlags = ::strtol10(sz,&sz))){
+				if(63 < (desc.iFlags = ::strtoul10(sz,&sz))){
 					MD5Parser::ReportWarning("Invalid flag combination in hierarchy section",(*eit).iLineNumber);
 				}
 				AI_MD5_SKIP_SPACES();
 
 				// index of the first animation keyframe component for this joint
-				desc.iFirstKeyIndex = ::strtol10(sz,&sz);
+				desc.iFirstKeyIndex = ::strtoul10(sz,&sz);
 			}
 		}
 		else if((*iter).mName == "baseframe")	{
@@ -395,7 +395,7 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 
 			mFrames.push_back ( FrameDesc () );
 			FrameDesc& desc = mFrames.back();
-			desc.iIndex = strtol10((*iter).mGlobalValue.c_str());
+			desc.iIndex = strtoul10((*iter).mGlobalValue.c_str());
 
 			// we do already know how much storage we will presumably need
 			if (0xffffffff != mNumAnimatedComponents)
@@ -411,10 +411,10 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 			}
 		}
 		else if((*iter).mName == "numFrames")	{
-			mFrames.reserve(strtol10((*iter).mGlobalValue.c_str()));
+			mFrames.reserve(strtoul10((*iter).mGlobalValue.c_str()));
 		}
 		else if((*iter).mName == "numJoints")	{
-			const unsigned int num = strtol10((*iter).mGlobalValue.c_str());
+			const unsigned int num = strtoul10((*iter).mGlobalValue.c_str());
 			mAnimatedBones.reserve(num);
 
 			// try to guess the number of animated components if that element is not given
@@ -422,7 +422,7 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 				mNumAnimatedComponents = num * 6;
 		}
 		else if((*iter).mName == "numAnimatedComponents")	{
-			mAnimatedBones.reserve( strtol10((*iter).mGlobalValue.c_str()));
+			mAnimatedBones.reserve( strtoul10((*iter).mGlobalValue.c_str()));
 		}
 		else if((*iter).mName == "frameRate")	{
 			fast_atof_move((*iter).mGlobalValue.c_str(),fFrameRate);
@@ -440,17 +440,17 @@ MD5CameraParser::MD5CameraParser(SectionList& mSections)
 
 	for (SectionList::const_iterator iter =  mSections.begin(), iterEnd = mSections.end();iter != iterEnd;++iter) {
 		if ((*iter).mName == "numFrames")	{
-			frames.reserve(strtol10((*iter).mGlobalValue.c_str()));
+			frames.reserve(strtoul10((*iter).mGlobalValue.c_str()));
 		}
 		else if ((*iter).mName == "frameRate")	{
 			fFrameRate = fast_atof ((*iter).mGlobalValue.c_str());
 		}
 		else if ((*iter).mName == "numCuts")	{
-			cuts.reserve(strtol10((*iter).mGlobalValue.c_str()));
+			cuts.reserve(strtoul10((*iter).mGlobalValue.c_str()));
 		}
 		else if ((*iter).mName == "cuts")	{
 			for (ElementList::const_iterator eit = (*iter).mElements.begin(), eitEnd = (*iter).mElements.end(); eit != eitEnd; ++eit){
-				cuts.push_back(strtol10((*eit).szStart)+1);
+				cuts.push_back(strtoul10((*eit).szStart)+1);
 			}
 		}
 		else if ((*iter).mName == "camera")	{

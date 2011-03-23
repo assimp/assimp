@@ -1165,7 +1165,7 @@ void ColladaLoader::AddTexture ( Assimp::MaterialHelper& mat, const ColladaParse
 		map = -1;
 		for (std::string::const_iterator it = sampler.mUVChannel.begin();it != sampler.mUVChannel.end(); ++it){
 			if (IsNumeric(*it)) {
-				map = strtol10(&(*it));
+				map = strtoul10(&(*it));
 				break;
 			}
 		}

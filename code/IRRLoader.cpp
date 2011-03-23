@@ -1073,7 +1073,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 
 										// and parse its properties
 										key.mValue = prop.value;
-										key.mTime  = strtol10(&prop.name[5]);
+										key.mTime  = strtoul10(&prop.name[5]);
 									}
 								}
 								else if (curAnim->type == Animator::FLY_CIRCLE)	{

@@ -320,7 +320,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 					curNormals.push_back(temp);
 
 					// read the vertex colors
-					uint32_t clr = strtol16(sz,&sz);	
+					uint32_t clr = strtoul16(sz,&sz);	
 					ColorFromARGBPacked(clr,c);
 
 					if (!curColors.empty() && c != *(curColors.end()-1))
@@ -411,7 +411,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 						curFace->mIndices = new unsigned int[3];
 					}
 
-					unsigned int idx = strtol10(sz,&sz);
+					unsigned int idx = strtoul10(sz,&sz);
 					if (idx >= curVertices.size())	{
 						DefaultLogger::get()->error("IRRMESH: Index out of range");
 						idx = 0;

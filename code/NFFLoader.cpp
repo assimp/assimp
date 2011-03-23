@@ -359,7 +359,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				}
 
 				// read the numbr of vertices
-				unsigned int num = ::strtol10(sz,&sz);
+				unsigned int num = ::strtoul10(sz,&sz);
 				
 				// temporary storage
 				std::vector<aiColor4D>  tempColors;
@@ -388,7 +388,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 						if (TokenMatch(sz,"0x",2))
 						{
 							hasColor = true;
-							register unsigned int numIdx = ::strtol16(sz,&sz);
+							register unsigned int numIdx = ::strtoul16(sz,&sz);
 							aiColor4D clr;
 							clr.a = 1.f;
 
@@ -429,7 +429,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 
 				AI_NFF2_GET_NEXT_TOKEN();
 				if (!num)throw DeadlyImportError("NFF2: There are zero vertices");
-				num = ::strtol10(sz,&sz);
+				num = ::strtoul10(sz,&sz);
 
 				std::vector<unsigned int> tempIdx;
 				tempIdx.reserve(10);
@@ -437,7 +437,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 				{
 					AI_NFF2_GET_NEXT_TOKEN();
 					SkipSpaces(line,&sz);
-					unsigned int numIdx = ::strtol10(sz,&sz);
+					unsigned int numIdx = ::strtoul10(sz,&sz);
 
 					// read all faces indices
 					if (numIdx)
@@ -449,7 +449,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 						for (unsigned int a = 0; a < numIdx;++a)
 						{
 							SkipSpaces(sz,&sz);
-							m = ::strtol10(sz,&sz);
+							m = ::strtoul10(sz,&sz);
 							if (m >= (unsigned int)tempPositions.size())
 							{
 								DefaultLogger::get()->error("NFF2: Vertex index overflow");
@@ -477,7 +477,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 						{
 							hasColor = true;
 							const char* sz2 = sz;
-							numIdx = ::strtol16(sz,&sz);
+							numIdx = ::strtoul16(sz,&sz);
 							const unsigned int diff = (unsigned int)(sz-sz2);
 
 							// 0xRRGGBB
@@ -555,7 +555,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 						else if (!materialTable.empty() && TokenMatch(sz,"matid",5))
 						{
 							SkipSpaces(&sz);
-							matIdx = ::strtol10(sz,&sz);
+							matIdx = ::strtoul10(sz,&sz);
 							if (matIdx >= materialTable.size())
 							{
 								DefaultLogger::get()->error("NFF2: Material index overflow.");
@@ -718,7 +718,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 					sz = &line[1];out = currentMesh;
 				}
 				SkipSpaces(sz,&sz);
-				m = strtol10(sz);
+				m = strtoul10(sz);
 
 				// ---- flip the face order
 				out->vertices.resize(out->vertices.size()+m);
@@ -977,7 +977,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			else if (TokenMatch(sz,"tess",4))
 			{
 				SkipSpaces(&sz);
-				iTesselation = strtol10(sz);
+				iTesselation = strtoul10(sz);
 			}
 			// 'from' - camera position
 			else if (TokenMatch(sz,"from",4))

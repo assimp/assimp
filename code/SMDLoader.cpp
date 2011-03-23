@@ -680,7 +680,7 @@ void SMDImporter::ParseFile()
 		if (TokenMatch(szCurrent,"version",7))
 		{
 			if(!SkipSpaces(szCurrent,&szCurrent)) break;
-			if (1 != strtol10(szCurrent,&szCurrent))
+			if (1 != strtoul10(szCurrent,&szCurrent))
 			{
 				DefaultLogger::get()->warn("SMD.version is not 1. This "
 					"file format is not known. Continuing happily ...");
@@ -1030,7 +1030,7 @@ bool SMDImporter::ParseUnsignedInt(const char* szCurrent,
 	if(!SkipSpaces(&szCurrent))
 		return false;
 
-	out = strtol10(szCurrent,szCurrentOut);
+	out = strtoul10(szCurrent,szCurrentOut);
 	return true;
 }
 
@@ -1042,7 +1042,7 @@ bool SMDImporter::ParseSignedInt(const char* szCurrent,
 	if(!SkipSpaces(&szCurrent))
 		return false;
 
-	out = strtol10s(szCurrent,szCurrentOut);
+	out = strtol10(szCurrent,szCurrentOut);
 	return true;
 }
 

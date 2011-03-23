@@ -209,7 +209,7 @@ aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat,
 		const char* cur =  prop->mData+4;
 		ai_assert(prop->mDataLength>=5 && !prop->mData[prop->mDataLength-1]);
 		for (unsigned int a = 0; ;++a) {	
-			pOut[a] = strtol10s(cur,&cur);
+			pOut[a] = strtol10(cur,&cur);
 			if(a==iWrite-1) {
 				break;
 			}

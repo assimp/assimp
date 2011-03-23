@@ -111,8 +111,8 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 	}
 
 	const char* sz = line; SkipSpaces(&sz);
-	const unsigned int numVertices = strtol10(sz,&sz);SkipSpaces(&sz);
-	const unsigned int numFaces = strtol10(sz,&sz);
+	const unsigned int numVertices = strtoul10(sz,&sz);SkipSpaces(&sz);
+	const unsigned int numFaces = strtoul10(sz,&sz);
 
 	pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes = 1 ];
 	aiMesh* mesh = pScene->mMeshes[0] = new aiMesh();
@@ -147,7 +147,7 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 			break;
 		}
 		sz = line;SkipSpaces(&sz);
-		if(!(faces->mNumIndices = strtol10(sz,&sz)) || faces->mNumIndices > 9)
+		if(!(faces->mNumIndices = strtoul10(sz,&sz)) || faces->mNumIndices > 9)
 		{
 			DefaultLogger::get()->error("OFF: Faces with zero indices aren't allowed");
 			--mesh->mNumFaces;
@@ -171,14 +171,14 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 
 		unsigned int idx;
 		sz = line;SkipSpaces(&sz);
-		if(!(idx = strtol10(sz,&sz)) || idx > 9)
+		if(!(idx = strtoul10(sz,&sz)) || idx > 9)
 			continue;
 
 		faces->mIndices = new unsigned int [faces->mNumIndices];
 		for (unsigned int m = 0; m < faces->mNumIndices;++m)
 		{
 			SkipSpaces(&sz);
-			if ((idx = strtol10(sz,&sz)) >= numVertices)
+			if ((idx = strtoul10(sz,&sz)) >= numVertices)
 			{
 				DefaultLogger::get()->error("OFF: Vertex index is out of range");
 				idx = numVertices-1;

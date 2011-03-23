@@ -125,11 +125,11 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 			++buffer;
 			if (TokenMatchI(buffer,"firstframe",10))	{
 				SkipSpaces(&buffer);
-				first = strtol10s(buffer,&buffer);
+				first = strtol10(buffer,&buffer);
 			}
 			else if (TokenMatchI(buffer,"lastframe",9))		{
 				SkipSpaces(&buffer);
-				last = strtol10s(buffer,&buffer);
+				last = strtol10(buffer,&buffer);
 			}
 			else if (TokenMatchI(buffer,"rate",4))	{
 				SkipSpaces(&buffer);
@@ -189,7 +189,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 					}
 
 					// read frame
-					const int frame = ::strtol10(buffer,&buffer);
+					const int frame = ::strtoul10(buffer,&buffer);
 					last  = std::max(frame,last);
 					first = std::min(frame,last);
 					for (unsigned int i = 0; i < anim->mNumChannels;++i)	{

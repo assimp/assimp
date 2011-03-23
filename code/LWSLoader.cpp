@@ -177,7 +177,7 @@ void LWSImporter::ReadEnvelope(const LWS::Element& dad, LWO::Envelope& fill )
 
 	// reserve enough storage
 	std::list< LWS::Element >::const_iterator it = dad.children.begin();;
-	fill.keys.reserve(strtol10(it->tokens[1].c_str()));
+	fill.keys.reserve(strtoul10(it->tokens[1].c_str()));
 
 	for (++it; it != dad.children.end(); ++it) {
 		const char* c = (*it).tokens[1].c_str();
@@ -194,7 +194,7 @@ void LWSImporter::ReadEnvelope(const LWS::Element& dad, LWO::Envelope& fill )
 
 			key.time = f;
 
-			unsigned int span = strtol10(c,&c), num = 0;
+			unsigned int span = strtoul10(c,&c), num = 0;
 			switch (span) {
 			
 				case 0:
@@ -228,9 +228,9 @@ void LWSImporter::ReadEnvelope(const LWS::Element& dad, LWO::Envelope& fill )
 		}
 		else if ((*it).tokens[0] == "Behaviors") {
 			SkipSpaces(&c);
-			fill.pre = (LWO::PrePostBehaviour) strtol10(c,&c);
+			fill.pre = (LWO::PrePostBehaviour) strtoul10(c,&c);
 			SkipSpaces(&c);
-			fill.post = (LWO::PrePostBehaviour) strtol10(c,&c);
+			fill.post = (LWO::PrePostBehaviour) strtoul10(c,&c);
 		}
 	}
 }
@@ -246,7 +246,7 @@ void LWSImporter::ReadEnvelope_Old(
 	unsigned int num,sub_num;
 	if (++it == end)goto unexpected_end;
 
-	num = strtol10((*it).tokens[0].c_str());
+	num = strtoul10((*it).tokens[0].c_str());
 	for (unsigned int i = 0; i < num; ++i) {
 	
 		nodes.channels.push_back(LWO::Envelope());
@@ -256,7 +256,7 @@ void LWSImporter::ReadEnvelope_Old(
 		envl.type  = (LWO::EnvelopeType)(i+1);
 	
 		if (++it == end)goto unexpected_end;
-		sub_num = strtol10((*it).tokens[0].c_str());
+		sub_num = strtoul10((*it).tokens[0].c_str());
 
 		for (unsigned int n = 0; n < sub_num;++n) {
 
@@ -504,7 +504,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 
 	// get file format version and print to log
 	++it;
-	unsigned int version = strtol10((*it).tokens[0].c_str());
+	unsigned int version = strtoul10((*it).tokens[0].c_str());
 	DefaultLogger::get()->info("LWS file format version is " + (*it).tokens[0]);
 	first = 0.;
 	last  = 60.;
@@ -517,25 +517,25 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 		// 'FirstFrame': begin of animation slice
 		if ((*it).tokens[0] == "FirstFrame") {
 			if (150392. != first           /* see SetupProperties() */)
-				first = strtol10(c,&c)-1.; /* we're zero-based */
+				first = strtoul10(c,&c)-1.; /* we're zero-based */
 		}
 
 		// 'LastFrame': end of animation slice
 		else if ((*it).tokens[0] == "LastFrame") {
 			if (150392. != last      /* see SetupProperties() */)
-				last = strtol10(c,&c)-1.; /* we're zero-based */
+				last = strtoul10(c,&c)-1.; /* we're zero-based */
 		}
 
 		// 'FramesPerSecond': frames per second
 		else if ((*it).tokens[0] == "FramesPerSecond") {
-			fps = strtol10(c,&c);
+			fps = strtoul10(c,&c);
 		}
 
 		// 'LoadObjectLayer': load a layer of a specific LWO file
 		else if ((*it).tokens[0] == "LoadObjectLayer") {
 
 			// get layer index
-			const int layer = strtol10(c,&c);
+			const int layer = strtoul10(c,&c);
 
 			// setup the layer to be loaded
 			BatchLoader::PropertyMap props;
@@ -546,7 +546,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 			d.type = LWS::NodeDesc::OBJECT;
 			if (version >= 4) { // handle LWSC 4 explicit ID
 				SkipSpaces(&c);
-				d.number = strtol16(c,&c) & AI_LWS_MASK;
+				d.number = strtoul16(c,&c) & AI_LWS_MASK;
 			}
 			else d.number = cur_object++;
 
@@ -567,7 +567,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 			d.type = LWS::NodeDesc::OBJECT;
 			
 			if (version >= 4) { // handle LWSC 4 explicit ID
-				d.number = strtol16(c,&c) & AI_LWS_MASK;
+				d.number = strtoul16(c,&c) & AI_LWS_MASK;
 				SkipSpaces(&c);
 			}
 			else d.number = cur_object++;
@@ -586,7 +586,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 			d.type = LWS::NodeDesc::OBJECT;
 			d.name = c;
 			if (version >= 4) { // handle LWSC 4 explicit ID
-				d.number = strtol16(c,&c) & AI_LWS_MASK;
+				d.number = strtoul16(c,&c) & AI_LWS_MASK;
 			}
 			else d.number = cur_object++;
 			nodes.push_back(d);
@@ -616,7 +616,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 			nodes.back().channels.push_back(LWO::Envelope());
 			LWO::Envelope& env = nodes.back().channels.back();
 			
-			env.index = strtol10(c);
+			env.index = strtoul10(c);
 
 			// currently we can just interpret the standard channels 0...9
 			// (hack) assume that index-i yields the binary channel type from LWO
@@ -650,8 +650,8 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 				for (std::list<LWO::Envelope>::iterator it = nodes.back().channels.begin(); it != nodes.back().channels.end(); ++it) {
 					// two ints per envelope
 					LWO::Envelope& env = *it;
-					env.pre  = (LWO::PrePostBehaviour) strtol10(c,&c); SkipSpaces(&c);
-					env.post = (LWO::PrePostBehaviour) strtol10(c,&c); SkipSpaces(&c);
+					env.pre  = (LWO::PrePostBehaviour) strtoul10(c,&c); SkipSpaces(&c);
+					env.post = (LWO::PrePostBehaviour) strtoul10(c,&c); SkipSpaces(&c);
 				}
 			}
 		}
@@ -660,7 +660,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 			if (nodes.empty())
 				DefaultLogger::get()->error("LWS: Unexpected keyword: \'ParentItem\'");
 
-			else nodes.back().parent = strtol16(c,&c);
+			else nodes.back().parent = strtoul16(c,&c);
 		}
 		// 'ParentObject': deprecated one for older formats
 		else if (version < 3 && (*it).tokens[0] == "ParentObject") {
@@ -668,7 +668,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 				DefaultLogger::get()->error("LWS: Unexpected keyword: \'ParentObject\'");
 
 			else { 
-				nodes.back().parent = strtol10(c,&c) | (1u << 28u);
+				nodes.back().parent = strtoul10(c,&c) | (1u << 28u);
 			}
 		}
 		// 'AddCamera': add a camera to the scenegraph
@@ -679,7 +679,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 			d.type = LWS::NodeDesc::CAMERA;
 
 			if (version >= 4) { // handle LWSC 4 explicit ID
-				d.number = strtol16(c,&c) & AI_LWS_MASK;
+				d.number = strtoul16(c,&c) & AI_LWS_MASK;
 			}
 			else d.number = cur_camera++;
 			nodes.push_back(d);
@@ -701,7 +701,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 			d.type = LWS::NodeDesc::LIGHT;
 
 			if (version >= 4) { // handle LWSC 4 explicit ID
-				d.number = strtol16(c,&c) & AI_LWS_MASK;
+				d.number = strtoul16(c,&c) & AI_LWS_MASK;
 			}
 			else d.number = cur_light++;
 			nodes.push_back(d);
@@ -728,7 +728,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 			if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT)
 				DefaultLogger::get()->error("LWS: Unexpected keyword: \'LightType\'");
 
-			else nodes.back().lightType = strtol10(c);
+			else nodes.back().lightType = strtoul10(c);
 			
 		}
 		// 'LightFalloffType': set falloff type of currently active light
@@ -736,7 +736,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 			if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT)
 				DefaultLogger::get()->error("LWS: Unexpected keyword: \'LightFalloffType\'");
 
-			else nodes.back().lightFalloffType = strtol10(c);
+			else nodes.back().lightFalloffType = strtoul10(c);
 			
 		}
 		// 'LightConeAngle': set cone angle of currently active light

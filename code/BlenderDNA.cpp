@@ -259,13 +259,13 @@ void DNA :: DumpToFile()
 	if (pos++ == std::string::npos) {
 		return;
 	}
-	array_sizes[0] = strtol10(&out[pos]);
+	array_sizes[0] = strtoul10(&out[pos]);
 
 	pos = out.find('[',pos);
 	if (pos++ == std::string::npos) {
 		return;
 	}
-	array_sizes[1] = strtol10(&out[pos]);
+	array_sizes[1] = strtoul10(&out[pos]);
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -99,12 +99,12 @@ public:
 
 	// -----------------------------------------
 	unsigned int ValueAsUnsignedInt() const {
-		return strtol10(value.c_str());
+		return strtoul10(value.c_str());
 	}
 
 	// -----------------------------------------
 	int ValueAsSignedInt() const {
-		return strtol10s(value.c_str());
+		return strtol10(value.c_str());
 	}
 
 	// -----------------------------------------
@@ -125,7 +125,7 @@ public:
 		}
 
 		try {
-			groupcode = strtol10s(splitter->c_str());
+			groupcode = strtol10(splitter->c_str());
 			splitter++;
 
 			value = *splitter;

@@ -1286,7 +1286,7 @@ unsigned int XFileParser::ReadInt()
 	{
 		FindNextNoneWhiteSpace();
 
-		// TODO: consider using strtol10s instead???
+		// TODO: consider using strtol10 instead???
 
 		// check preceeding minus sign
 		bool isNegative = false;

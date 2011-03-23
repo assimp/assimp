@@ -265,7 +265,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 						for (;!IsLineEnd(*data);++data)	{
 							if (!::ASSIMP_strincmp(data,"NUM=",4))	{
 								data += 4;
-								me.first = strtol10(data,&data);
+								me.first = strtoul10(data,&data);
 							}
 							else if (!::ASSIMP_strincmp(data,"TEXTURE=",8))	{
 								data += 8;

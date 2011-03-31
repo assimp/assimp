@@ -62,10 +62,10 @@ namespace Assimp
 
 using namespace Q3BSP;
 
-static const std::string Q3BSPExtention = "pk3";
+static const std::string Q3BSPExtension = "pk3";
 
 // ------------------------------------------------------------------------------------------------
-//	Local fnction to create a material keyname.
+//	Local function to create a material key name.
 static void createKey( int id1, int id2, std::string &rKey )
 {
 	std::stringstream str;

@@ -22,8 +22,8 @@ SET( BIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH
 	"Path the tool executables are installed to." )
 
 # Generate a pkg-config .pc for the Assimp library.
-CONFIGURE_FILE( "${CMAKE_SOURCE_DIR}/assimp.pc.in" "${CMAKE_BINARY_DIR}/assimp.pc" @ONLY )
-INSTALL( FILES "${CMAKE_BINARY_DIR}/assimp.pc" DESTINATION ${LIB_INSTALL_DIR}/pkgconfig/ )
+CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/assimp.pc.in" "${PROJECT_BINARY_DIR}/assimp.pc" @ONLY )
+INSTALL( FILES "${PROJECT_BINARY_DIR}/assimp.pc" DESTINATION ${LIB_INSTALL_DIR}/pkgconfig/ )
 
 # Globally enbale Boost resp. the Boost workaround – it is also needed by the
 # tools which include the Assimp headers.

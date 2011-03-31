@@ -165,7 +165,9 @@ bool Q3BSPFileImporter::CanRead( const std::string& rFile, IOSystem* pIOHandler,
 {
 	bool isBSPData = false;
 	if ( checkSig )
-		isBSPData = SimpleExtensionCheck( rFile, Q3BSPExtention.c_str() );
+	{
+		isBSPData = SimpleExtensionCheck( rFile, Q3BSPExtension .c_str() );
+	}
 
 	return isBSPData;
 }
@@ -174,7 +176,7 @@ bool Q3BSPFileImporter::CanRead( const std::string& rFile, IOSystem* pIOHandler,
 //	Adds extensions.
 void Q3BSPFileImporter::GetExtensionList( std::set<std::string>& extensions )
 {
-	extensions.insert( Q3BSPExtention );
+	extensions.insert( Q3BSPExtension  );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -629,6 +631,9 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pMode
 												 Q3BSP::Q3BSPZipArchive *pArchive, aiScene* pScene,
 												 Assimp::MaterialHelper *pMatHelper, int textureId )
 {
+	std::vector<std::string> supportedExtensions;
+	supportedExtensions.push_back( ".jpg" );
+	supportedExtensions.push_back( ".png" );
 	if ( NULL == pArchive || NULL == pArchive || NULL == pMatHelper )
 	{
 		return false;
@@ -680,7 +685,7 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pMode
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Imports a lightmap file.
+//	Imports a light map file.
 bool Q3BSPFileImporter::importLightmap( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, 
 									   Assimp::MaterialHelper *pMatHelper, int lightmapId )
 {

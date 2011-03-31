@@ -106,3 +106,6 @@ Contributes a Android-specific build issue: log the hardware architecture for AR
 
 -  alfiereinre7
 Contributes a obj-fileparser fix: missing tokens in the obj-token list.
+
+- Roman Kharitonov
+Contributes a fix for the configure script environment.

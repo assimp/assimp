@@ -1427,6 +1427,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\tools\assimp_cmd\Export.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tools\assimp_cmd\ImageExtractor.cpp"
 				>
 			</File>

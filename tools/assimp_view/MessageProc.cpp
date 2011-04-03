@@ -61,6 +61,9 @@ float g_fACMR = 3.0f;
 #define AI_VIEW_NUM_RECENT_FILES 0x8
 #define AI_VIEW_RECENT_FILE_ID(_n_) (5678 + _n_)
 
+#define AI_VIEW_EXPORT_FMT_BASE 7912
+#define AI_VIEW_EXPORT_FMT_ID(_n_)  (AI_VIEW_EXPORT_FMT_BASE + _n_)
+
 void UpdateHistory();
 void SaveHistory();
 
@@ -997,6 +1000,92 @@ void SetupPPUIState()
 	CheckMenuItem(hMenu,ID_VIEWER_PP_VDS,ppsteps & aiProcess_ValidateDataStructure ? MF_CHECKED : MF_UNCHECKED);
 }
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+//-------------------------------------------------------------------------------
+// Fill the 'export' top level menu with a list of all supported export formats
+//-------------------------------------------------------------------------------
+void PopulateExportMenu()
+{
+	// add sub items for all recent files
+	Exporter exp;
+	HMENU hm = ::CreateMenu();
+	for(size_t i = 0; i < exp.GetExportFormatCount(); ++i) 
+	{
+		const aiExportFormatDesc* const e = exp.GetExportFormatDescription(i);
+		char tmp[256];
+		sprintf(tmp,"%s (%s)",e->description,e->id);
+
+		AppendMenu(hm,MF_STRING,AI_VIEW_EXPORT_FMT_ID(i),tmp);
+	}
+
+	ModifyMenu(GetMenu(g_hDlg),ID_EXPORT,MF_BYCOMMAND | MF_POPUP,
+		(UINT_PTR)hm,"Export");
+}
+
+//-------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
+void DoExport(size_t formatId)
+{
+	Exporter exp;
+	const aiExportFormatDesc* const e = exp.GetExportFormatDescription(formatId);
+	assert(e);
+
+	char szFileName[MAX_PATH*2];
+	DWORD dwTemp;
+	if(ERROR_SUCCESS == RegQueryValueEx(g_hRegistry,"ModelExportDest",NULL,NULL,(BYTE*)szFileName,&dwTemp)) {
+		// invent a nice default file name 
+		char* sz = std::max(strrchr(szFileName,'\\'),strrchr(szFileName,'/'));
+		if (sz) {
+			strcpy(sz,std::max(strrchr(g_szFileName,'\\'),strrchr(g_szFileName,'/')));
+		}
+	}
+	else {
+		// Key was not found. Use the folder where the asset comes from
+		strcpy(szFileName,g_szFileName);
+	}
+
+	// fix file extension
+	{	char * const sz = strrchr(szFileName,'.');
+		if(sz) strcpy(sz+1,e->fileExtension);
+	}
+
+	// build the stupid info string for GetSaveFileName() - can't use sprintf() because the string must contain binary zeros.
+	char desc[256] = {0};
+	char* c = strcpy(desc,e->description) + strlen(e->description)+1;
+	c += sprintf(c,"*.%s",e->fileExtension)+1;
+	strcpy(c, "*.*\0");
+
+	const std::string ext = "."+std::string(e->fileExtension);
+	OPENFILENAME sFilename1 = {
+		sizeof(OPENFILENAME),
+		g_hDlg,GetModuleHandle(NULL), 
+		desc, NULL, 0, 1, 
+		szFileName, MAX_PATH, NULL, 0, NULL, 
+		"Export asset",
+		OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR, 
+		0, 1, ext.c_str(), 0, NULL, NULL
+	};
+	if(::GetSaveFileName(&sFilename1) == 0) {
+		return;
+	}
+
+	// Now store the file in the registry unless the user decided to stay in the model directory
+	const std::string sFinal = szFileName, sub = sFinal.substr(0,sFinal.find_last_of("\\/"));
+	if (strncmp(sub.c_str(),g_szFileName,sub.length())) {
+		RegSetValueExA(g_hRegistry,"ModelExportDest",0,REG_SZ,(const BYTE*)szFileName,MAX_PATH);
+	}
+
+	// export the file
+	const aiReturn res = exp.Export(g_pcAsset->pcScene,e->id,sFinal.c_str());
+	if (res == aiReturn_SUCCESS) {
+		CLogDisplay::Instance().AddEntry("[INFO] Exported file " + sFinal,D3DCOLOR_ARGB(0xFF,0x00,0xFF,0x00));
+		return;
+	}
+	CLogDisplay::Instance().AddEntry("[INFO] Failure exporting file " +
+		sFinal,D3DCOLOR_ARGB(0xFF,0xFF,0x00,0x00));
+}
+#endif
+
 //-------------------------------------------------------------------------------
 // Initialize the user interface
 //-------------------------------------------------------------------------------
@@ -1009,6 +1098,10 @@ void InitUI()
 	SetDlgItemText(g_hDlg,IDC_ENODEWND,"0");
 	SetDlgItemText(g_hDlg,IDC_ETEX,"0");
 	SetDlgItemText(g_hDlg,IDC_EMESH,"0");
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+	PopulateExportMenu();
+#endif
 
 	// setup the default window title
 	SetWindowText(g_hDlg,AI_VIEW_CAPTION_BASE);
@@ -2116,6 +2209,12 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 					SaveHistory();
 				}
 			}
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+			if (LOWORD(wParam) >= AI_VIEW_EXPORT_FMT_BASE && LOWORD(wParam) < AI_VIEW_EXPORT_FMT_BASE+Assimp::Exporter().GetExportFormatCount()) {
+				DoExport(LOWORD(wParam) - AI_VIEW_EXPORT_FMT_BASE);
+			}
+#endif
 
 			// handle popup menus for the tree window
 			CDisplay::Instance().HandleTreeViewPopup(wParam,lParam);

@@ -109,7 +109,6 @@
 #define IDC_SHOWSKELETON                1054
 #define IDC_BFCULL                      1055
 #define IDC_EDITSM                      1056
-#define IDC_TAB1                        1058
 #define ID_VIEWER_OPEN                  32771
 #define ID_VIEWER_CLOSETHIS             32772
 #define ID_VIEWER_CLOSEASSET            32773
@@ -218,6 +217,7 @@
 #define ID_VIEWER_PP_RRM2               32875
 #define ID_IMPORTSETTINGS_RESETTODEFAULT 32876
 #define ID_IMPORTSETTINGS_OPENPOST      32877
+#define ID_EXPORT                       32878
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -226,7 +226,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        160
-#define _APS_NEXT_COMMAND_VALUE         32878
+#define _APS_NEXT_COMMAND_VALUE         32879
 #define _APS_NEXT_CONTROL_VALUE         1059
 #define _APS_NEXT_SYMED_VALUE           110
 #endif

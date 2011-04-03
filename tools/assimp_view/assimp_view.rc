@@ -376,6 +376,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Clear",                       ID_BACKGROUND_CLEAR
     END
+    MENUITEM "Export",                      32878
     POPUP "?"
     BEGIN
         POPUP "Feedback"

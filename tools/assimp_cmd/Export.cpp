@@ -128,7 +128,7 @@ int Assimp_Export(const char* const* params, unsigned int num)
 
 			if (outfi == SIZE_MAX) {
 				// still no match -> failure
-				printf("assimp export: no output format specified and I failed to guess it");
+				printf("assimp export: no output format specified and I failed to guess it\n");
 				return -23;
 			}
 		}
@@ -152,6 +152,9 @@ int Assimp_Export(const char* const* params, unsigned int num)
 	
 	// import the  model
 	const aiScene* scene = ImportModel(import,in);
+	if (!scene) {
+		return -39;
+	}
 
 	// derive the final file name
 	out += "."+outext;
@@ -160,7 +163,7 @@ int Assimp_Export(const char* const* params, unsigned int num)
 	if(!ExportModel(scene, import, out,e->id)) {
 		return -25;
 	}
-	printf("assimp export: wrote output file: %s",out.c_str());
+	printf("assimp export: wrote output file: %s\n",out.c_str());
 	return 0;
 }
 

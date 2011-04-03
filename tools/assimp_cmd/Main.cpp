@@ -62,14 +62,13 @@ const char* AICMD_MSG_HELP =
 #ifndef ASSIMP_BUILD_NO_EXPORT
 " \texport     - Export a file to one of the supported output formats\n"
 " \tlistexport - List all supported export formats\n"
-" \tknowexport - Check whether a particular export format is supported\n"
 " \texportinfo - Show basic information on a specific export format\n"
 #endif
 " \textract    - Extract embedded texture images\n"
 " \tdump       - Convert models to a binary or textual dump (ASSBIN/ASSXML)\n"
 " \tcmpdump    - Compare dumps created using \'assimp dump <file> -s ...\'\n"
 " \tversion    - Display Assimp version\n"
-"\n\n Use \'assimp <verb> --help\' for detailed help on a command.\n"
+"\n Use \'assimp <verb> --help\' for detailed help on a command.\n"
 ;
 
 /*extern*/ Assimp::Importer* globalImporter = NULL;
@@ -135,7 +134,7 @@ int main (int argc, char* argv[])
 		aiString s;
 		imp.GetExtensionList(s);
 
-		printf("%s",s.data);
+		printf("%s\n",s.data);
 		return 0;
 	}
 
@@ -153,9 +152,10 @@ int main (int argc, char* argv[])
 			}
 		}
 
-		printf("%s",s.data);
+		printf("%s\n",s.data);
 		return 0;
 	}
+
 
 	// assimp exportinfo
 	// stat an export format
@@ -163,19 +163,19 @@ int main (int argc, char* argv[])
 		aiString s;
 
 		if (argc<3) {
-			printf("Expected file format id");
+			printf("Expected file format id\n");
 			return -11;
 		}
 
 		for(size_t i = 0, end = exp.GetExportFormatCount(); i < end; ++i) {
 			const aiExportFormatDesc* const e = exp.GetExportFormatDescription(i);
 			if (!strcmp(e->id,argv[2])) {
-				printf("%s\n%s\n%s",e->id,e->fileExtension,e->description);
+				printf("%s\n%s\n%s\n",e->id,e->fileExtension,e->description);
 				return 0;
 			}
 		}
 		
-		printf("Unknown file format id: %s",argv[2]);
+		printf("Unknown file format id: \'%s\'\n",argv[2]);
 		return -12;
 	}
 
@@ -195,7 +195,7 @@ int main (int argc, char* argv[])
 			return -10;
 		}
 		const bool b = imp.IsExtensionSupported(argv[2]);
-		printf("File extension %s is %sknown",argv[2],(b?"":"not "));
+		printf("File extension \'%s\'  is %sknown\n",argv[2],(b?"":"not "));
 		return b?0:-1;
 	}
 

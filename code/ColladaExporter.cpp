@@ -39,6 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AssimpPCH.h"
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
 #include "ColladaExporter.h"
 
 using namespace Assimp;
@@ -362,3 +364,6 @@ void ColladaExporter::WriteNode( const aiNode* pNode)
 	PopTag();
 	mOutput << startstr << "</node>" << endstr;
 }
+
+#endif
+

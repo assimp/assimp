@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <limits>
 
 #include <aiPostProcess.h>
 #include <aiVersion.h>
@@ -68,6 +69,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <../code/Hash.h>
 
 #include <../contrib/zlib/zlib.h>
+
+#ifndef SIZE_MAX
+#	define SIZE_MAX (std::numeric_limits<size_t>::max())
+#endif
+
 
 using namespace Assimp;
 

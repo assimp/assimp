@@ -166,6 +166,8 @@ SOURCE_GROUP( Collada FILES
 	ColladaLoader.h
 	ColladaParser.cpp
 	ColladaParser.h
+	ColladaExporter.h
+	ColladaExporter.cpp
 )
 
 SOURCE_GROUP( DXF FILES
@@ -734,6 +736,8 @@ ADD_LIBRARY( assimp SHARED
 	Profiler.h
 	NDOLoader.cpp
 	NDOLoader.h
+	ColladaExporter.h
+	ColladaExporter.cpp
 
 	# Necessary to show the headers in the project when using the VC++ generator:
 	BoostWorkaround/boost/math/common_factor_rt.hpp

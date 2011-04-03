@@ -50,6 +50,15 @@ ELSE ( ENABLE_BOOST_WORKAROUND )
 ENDIF ( ENABLE_BOOST_WORKAROUND )
 
 
+SET ( NO_EXPORT OFF CACHE BOOL
+	"Disable Assimp's export functionality." 
+)
+
+IF ( NO_EXPORT )
+	ADD_DEFINITIONS( -DASSIMP_BUILD_NO_EXPORT)
+	MESSAGE( STATUS "Build an import-only version of Assimp." )
+ENDIF( NO_EXPORT )
+
 ADD_SUBDIRECTORY( code/ )
 SET ( BUILD_ASSIMP_TOOLS ON CACHE BOOL
 	"If the supplementary tools for Assimp are built in addition to the library."

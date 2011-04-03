@@ -219,7 +219,7 @@ struct aiColor3D
  *
  *  The character set of an aiString is explicitly defined to be UTF-8. This Unicode
  *  transformation was chosen in the belief that most strings in 3d files are limited
- *  to the ASCII characters, thus the character set needed to be ASCII compatible.
+ *  to ASCII, thus the character set needed to be strictly ASCII compatible.
  *  
  *  Most text file loaders provide proper Unicode input file handling, special unicode
  *  characters are correctly transcoded to UTF8 and are kept throughout the libraries'
@@ -275,7 +275,7 @@ struct aiString
 			return;
 		}
 		length = pString.length();
-		::memcpy( data, pString.c_str(), length);
+		memcpy( data, pString.c_str(), length);
 		data[length] = 0;
 	}
 
@@ -286,7 +286,7 @@ struct aiString
 			return;
 		}
 		length = len;
-		::memcpy( data, sz, len);
+		memcpy( data, sz, len);
 		data[len] = 0;
 	}
 
@@ -304,17 +304,17 @@ struct aiString
 
 	/** Comparison operator */
 	bool operator==(const aiString& other) const {
-		return  (length == other.length && 0 == strcmp(this->data,other.data));
+		return  (length == other.length && 0 == memcmp(data,other.data,length));
 	}
 
 	/** Inverse comparison operator */
 	bool operator!=(const aiString& other) const {
-		return  (length != other.length || 0 != ::strcmp(this->data,other.data));
+		return  (length != other.length || 0 != memcmp(data,other.data,length));
 	}
 
 	/** Append a string to the string */
 	void Append (const char* app)	{
-		const size_t len = ::strlen(app);
+		const size_t len = strlen(app);
 		if (!len) {
 			return;
 		}

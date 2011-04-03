@@ -68,7 +68,7 @@ static const std::string Q3BSPExtension = "pk3";
 //	Local function to create a material key name.
 static void createKey( int id1, int id2, std::string &rKey )
 {
-	std::stringstream str;
+	std::ostringstream str;
 	str << id1 << "." << id2;
 	rKey = str.str();
 }

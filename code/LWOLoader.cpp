@@ -1097,7 +1097,8 @@ void LWOImporter::LoadLWO2Clip(unsigned int length)
 			int16_t offset = GetU2();  mFileBuffer+=4;
 			int16_t start  = GetU2();  mFileBuffer+=4;
 
-			std::string s;std::stringstream ss;
+			std::string s;
+			std::ostringstream ss;
 			GetS0(s,head->length);
 
 			head->length -= (unsigned int)s.length()+1;

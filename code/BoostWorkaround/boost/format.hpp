@@ -31,7 +31,7 @@ namespace boost
 		{
 			// XXX add replacement for boost::lexical_cast?
 			
-			std::stringstream ss;
+			std::ostringstream ss;
 			ss << in; // note: ss cannot be an rvalue, or  the global operator << (const char*) is not called for T == const char*.
 			chunks.push_back( ss.str());
 			return *this;

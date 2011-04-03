@@ -94,22 +94,26 @@ public:
 	// ----------------------------------------------------------------------
 	/** @brief	Writes a debug message
 	 *	 @param	message	Debug message*/
-	void debug(const std::string &message);
+	void debug(const char* message);
+	inline void debug(const std::string &message);
 
 	// ----------------------------------------------------------------------
 	/** @brief	Writes a info message
 	 *	@param	message Info message*/
-	void info(const std::string &message);
+	void info(const char* message);
+	inline void info(const std::string &message);
 
 	// ----------------------------------------------------------------------
 	/** @brief	Writes a warning message
 	 *	@param	message Warn message*/
-	void warn(const std::string &message);
+	void warn(const char* message);
+	inline void warn(const std::string &message);
 
 	// ----------------------------------------------------------------------
 	/** @brief	Writes an error message
 	 *	@param	message	Error message*/
-	void error(const std::string &message);
+	void error(const char* message);
+	inline void error(const std::string &message);
 
 	// ----------------------------------------------------------------------
 	/** @brief	Set a new log severity.
@@ -225,6 +229,30 @@ inline void Logger::setLogSeverity(LogSeverity log_severity){
 // Log severity getter
 inline Logger::LogSeverity Logger::getLogSeverity() const {
 	return m_Severity;
+}
+
+// ----------------------------------------------------------------------------------
+inline void Logger::debug(const std::string &message)
+{
+	return debug(message.c_str());
+}
+
+// ----------------------------------------------------------------------------------
+inline void Logger::error(const std::string &message)
+{
+	return error(message.c_str());
+}
+
+// ----------------------------------------------------------------------------------
+inline void Logger::warn(const std::string &message)
+{
+	return warn(message.c_str());
+}
+
+// ----------------------------------------------------------------------------------
+inline void Logger::info(const std::string &message)
+{
+	return info(message.c_str());
 }
 
 // ----------------------------------------------------------------------------------

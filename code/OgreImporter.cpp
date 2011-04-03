@@ -221,7 +221,7 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 		{
 			//some info logging:
 			unsigned int NumFaces=GetAttribute<int>(Reader, "count");
-			stringstream ss; ss <<"Submesh has " << NumFaces << " Faces.";
+			ostringstream ss; ss <<"Submesh has " << NumFaces << " Faces.";
 			DefaultLogger::get()->debug(ss.str());
 
 			while(XmlRead(Reader) && Reader->getNodeName()==string("face"))
@@ -242,7 +242,7 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 		{	
 			//some info logging:
 			unsigned int NumVertices=GetAttribute<int>(Reader, "vertexcount");
-			stringstream ss; ss<<"VertexCount: "<<NumVertices;
+			ostringstream ss; ss<<"VertexCount: "<<NumVertices;
 			DefaultLogger::get()->debug(ss.str());
 			
 			//General Informations about vertices

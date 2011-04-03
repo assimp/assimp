@@ -58,6 +58,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp.hpp>
 #include <DefaultLogger.h>
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+#	include <export.hpp>
+#endif
+
 #include <../code/AssimpPCH.h> /* to get stdint.h */
 #include <../code/fast_atof.h>
 #include <../code/StringComparison.h>
@@ -67,8 +71,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+
 // Global assimp importer instance
 extern Assimp::Importer* globalImporter;
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+// Global assimp exporter instance
+extern Assimp::Exporter* globalExporter;
+#endif
 
 // ------------------------------------------------------------------------------
 /** Defines common import parameters */
@@ -113,11 +123,24 @@ int ProcessStandardArguments(ImportData& fill,
 // ------------------------------------------------------------------------------
 /** Import a specific model file
  *  @param imp Import configuration to be used
- *  @param path Path to the file to be opened */
+ *  @param path Path to the file to be read */
 const aiScene* ImportModel(
 	const ImportData& imp, 
 	const std::string& path);
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
+// ------------------------------------------------------------------------------
+/** Export a specific model file
+ *  @param imp Import configuration to be used
+ *  @param path Path to the file to be written
+ *  @param format Format id*/
+bool ExportModel(const aiScene* pOut, 
+	const ImportData& imp, 
+	const std::string& path,
+	const char* pID);
+
+#endif
 
 // ------------------------------------------------------------------------------
 /** assimp_dump utility
@@ -125,6 +148,15 @@ const aiScene* ImportModel(
  *  @param Number of params
  *  @return 0 for success*/
 int Assimp_Dump (
+	const char* const* params, 
+	unsigned int num);
+
+// ------------------------------------------------------------------------------
+/** assimp_export utility
+ *  @param params Command line parameters to 'assimp export'
+ *  @param Number of params
+ *  @return 0 for success*/
+int Assimp_Export (
 	const char* const* params, 
 	unsigned int num);
 

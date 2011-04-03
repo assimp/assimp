@@ -47,27 +47,36 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const char* AICMD_MSG_ABOUT = 
 "------------------------------------------------------ \n"
-"Open Asset Import Library - Assimp \n"
-"http://assimp.sourceforge.net \n"
-"Command-line tools \n"
+"Open Asset Import Library (\"Assimp\", http://assimp.sourceforge.net) \n"
+" -- Commandline toolchain --\n"
 "------------------------------------------------------ \n\n"
 
 "Version %i.%i-%s%s%s%s%s (SVNREV %i)\n\n";
 
 const char* AICMD_MSG_HELP = 
-"assimp <verb> <arguments>\n\n"
-"\tverbs:\n"
-"\t\tinfo    - Display statistics and structure of a 3D model\n"
-"\t\tversion - Display Assimp version\n"
-"\t\tlistext - List all known file extension\n"
-"\t\tknowext - Check whether a file extension is recognized by Assimp\n"
-"\t\textract - Extract an embedded texture from a model\n"
-"\t\tdump    - Convert a model to binary or XML dumps (ASSBIN/ASSXML)\n"
-"\t\tcmpdump - Compare two file dumps produced with \'assimp dump <file> -s ...\'\n"
-"\n\n\tUse \'assimp <verb> --help\' to get detailed help for a command.\n"
+"assimp <verb> <parameters>\n\n"
+" verbs:\n"
+" \tinfo       - Quick file stats\n"
+" \tlistext    - List all known file extensions available for import\n"
+" \tknowext    - Check whether a file extension is recognized by Assimp\n"
+#ifndef ASSIMP_BUILD_NO_EXPORT
+" \texport     - Export a file to one of the supported output formats\n"
+" \tlistexport - List all supported export formats\n"
+" \tknowexport - Check whether a particular export format is supported\n"
+" \texportinfo - Show basic information on a specific export format\n"
+#endif
+" \textract    - Extract embedded texture images\n"
+" \tdump       - Convert models to a binary or textual dump (ASSBIN/ASSXML)\n"
+" \tcmpdump    - Compare dumps created using \'assimp dump <file> -s ...\'\n"
+" \tversion    - Display Assimp version\n"
+"\n\n Use \'assimp <verb> --help\' for detailed help on a command.\n"
 ;
 
 /*extern*/ Assimp::Importer* globalImporter = NULL;
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+/*extern*/ Assimp::Exporter* globalExporter = NULL;
+#endif
 
 // ------------------------------------------------------------------------------
 // Application entry point
@@ -109,11 +118,16 @@ int main (int argc, char* argv[])
 		return Assimp_CompareDump (&argv[2],argc-2);
 	}
 
-	// construct a global Assimp::Importer instance
-	// because all further tools rely on it
+	// construct global importer and exporter instances
 	Assimp::Importer imp;
 	imp.SetPropertyBool("GLOB_MEASURE_TIME",true);
 	globalImporter = &imp;
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+	// 
+	Assimp::Exporter exp;
+	globalExporter = &exp;
+#endif
 
 	// assimp listext
 	// List all file extensions supported by Assimp
@@ -125,11 +139,59 @@ int main (int argc, char* argv[])
 		return 0;
 	}
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+	// assimp listexport
+	// List all export file formats supported by Assimp (not the file extensions, just the format identifiers!)
+	if (! strcmp(argv[1], "listexport")) {
+		aiString s;
+		
+		for(size_t i = 0, end = exp.GetExportFormatCount(); i < end; ++i) {
+			const aiExportFormatDesc* const e = exp.GetExportFormatDescription(i);
+			s.Append( e->id );
+			if (i!=end-1) {
+				s.Append("\n");
+			}
+		}
+
+		printf("%s",s.data);
+		return 0;
+	}
+
+	// assimp exportinfo
+	// stat an export format
+	if (! strcmp(argv[1], "exportinfo")) {
+		aiString s;
+
+		if (argc<3) {
+			printf("Expected file format id");
+			return -11;
+		}
+
+		for(size_t i = 0, end = exp.GetExportFormatCount(); i < end; ++i) {
+			const aiExportFormatDesc* const e = exp.GetExportFormatDescription(i);
+			if (!strcmp(e->id,argv[2])) {
+				printf("%s\n%s\n%s",e->id,e->fileExtension,e->description);
+				return 0;
+			}
+		}
+		
+		printf("Unknown file format id: %s",argv[2]);
+		return -12;
+	}
+
+	// assimp export
+	// Export a model to a file
+	if (! strcmp(argv[1], "export")) {
+		return Assimp_Export (&argv[2],argc-2);
+	}
+
+#endif
+
 	// assimp knowext
 	// Check whether a particular file extension is known by us, return 0 on success
 	if (! strcmp(argv[1], "knowext")) {
 		if (argc<3) {
-			printf("Expected a file extension to check for!");
+			printf("Expected file extension");
 			return -10;
 		}
 		const bool b = imp.IsExtensionSupported(argv[2]);
@@ -167,6 +229,37 @@ int main (int argc, char* argv[])
 	return 1;
 }
 
+
+// ------------------------------------------------------------------------------
+void SetLogStreams(const ImportData& imp)
+{
+	printf("\nAttaching log stream   ...           OK\n");
+		
+	unsigned int flags = 0;
+	if (imp.logFile.length()) {
+		flags |= aiDefaultLogStream_FILE;
+	}
+	if (imp.showLog) {
+		flags |= aiDefaultLogStream_STDERR;
+	}
+	DefaultLogger::create(imp.logFile.c_str(),imp.verbose ? Logger::VERBOSE : Logger::NORMAL,flags);
+}
+
+
+// ------------------------------------------------------------------------------
+void FreeLogStreams()
+{
+	DefaultLogger::kill();
+}
+
+
+// ------------------------------------------------------------------------------
+void PrintHorBar()
+{
+	printf("-----------------------------------------------------------------\n");
+}
+
+
 // ------------------------------------------------------------------------------
 // Import a specific file
 const aiScene* ImportModel(
@@ -175,18 +268,9 @@ const aiScene* ImportModel(
 {
 	// Attach log streams
 	if (imp.log) {
-		printf("\nAttaching log stream   ...           OK\n");
-		
-		unsigned int flags = 0;
-		if (imp.logFile.length()) {
-			flags |= aiDefaultLogStream_FILE;
-		}
-		if (imp.showLog) {
-			flags |= aiDefaultLogStream_STDERR;
-		}
-		DefaultLogger::create(imp.logFile.c_str(),imp.verbose ? Logger::VERBOSE : Logger::NORMAL,flags);
+		SetLogStreams(imp);
 	}
-	printf("Launching model import ...           OK\n");
+	printf("Launching asset import ...           OK\n");
 
 	// Now validate this flag combination
 	if(!globalImporter->ValidateFlags(imp.ppFlags)) {
@@ -194,15 +278,17 @@ const aiScene* ImportModel(
 		return NULL;
 	}
 	printf("Validating postprocessing flags ...  OK\n");
-	if (imp.showLog) 
-		printf("-----------------------------------------------------------------\n");
+	if (imp.showLog) {
+		PrintHorBar();
+	}
+		
 
 	// do the actual import, measure time
 	const clock_t first = clock();
 	const aiScene* scene = globalImporter->ReadFile(path,imp.ppFlags);
 
 	if (imp.showLog) {
-		printf("-----------------------------------------------------------------\n");
+		PrintHorBar();
 	}
 	if (!scene) {
 		printf("ERROR: Failed to load file\n");	
@@ -210,16 +296,59 @@ const aiScene* ImportModel(
 	}
 
 	const clock_t second = ::clock();
-	const float seconds = (float)(second-first) / CLOCKS_PER_SEC;
+	const double seconds = static_cast<double>(second-first) / CLOCKS_PER_SEC;
 
 	printf("Importing file ...                   OK \n   import took approx. %.5f seconds\n"
 		"\n",seconds);
 
 	if (imp.log) { 
-		DefaultLogger::kill();
+		FreeLogStreams();
 	}
 	return scene;
 }
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+// ------------------------------------------------------------------------------
+bool ExportModel(const aiScene* pOut,  
+	const ImportData& imp, 
+	const std::string& path,
+	const char* pID)
+{
+	// Attach log streams
+	if (imp.log) {
+		SetLogStreams(imp);
+	}
+	printf("Launching asset export ...           OK\n");
+
+	if (imp.showLog) {
+		PrintHorBar();
+	}
+
+	// do the actual export, measure time
+	const clock_t first = clock();
+	const aiReturn res = globalExporter->Export(pOut,pID,path);
+
+	if (imp.showLog) {
+		PrintHorBar();
+	}
+	if (res != AI_SUCCESS) {
+		printf("ERROR: Failed to write file\n");	
+		return false;
+	}
+
+	const clock_t second = ::clock();
+	const double seconds = static_cast<double>(second-first) / CLOCKS_PER_SEC;
+
+	printf("Exporting file ...                   OK \n   export took approx. %.5f seconds\n"
+		"\n",seconds);
+
+	if (imp.log) { 
+		FreeLogStreams();
+	}
+
+	return true;
+}
+#endif
 
 // ------------------------------------------------------------------------------
 // Process standard arguments

@@ -109,3 +109,6 @@ Contributes a obj-fileparser fix: missing tokens in the obj-token list.
 
 - Roman Kharitonov
 Contributes a fix for the configure script environment.
+
+-rdb 
+Contributes a bundle of fixes and improvments for the bsp-importer.

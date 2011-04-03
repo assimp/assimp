@@ -139,6 +139,7 @@ public:
 	*   a previous call to #ExportToBlob, it will be disposed. 
 	*   Any IO handlers set via #SetIOHandler are ignored here.*/
 	const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const char* pFormatId );
+	inline const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const std::string& pFormatId );
 
 
 	// -------------------------------------------------------------------
@@ -149,6 +150,7 @@ public:
 	 * @param pPath Full target file name. Target must be accessible.
 	 * @return AI_SUCCESS if everything was fine. */
 	aiReturn Export( const aiScene* pScene, const char* pFormatId, const char* pPath );
+	inline aiReturn Export( const aiScene* pScene, const std::string& pFormatId, const std::string& pPath );
 
 
 
@@ -187,6 +189,19 @@ protected:
 	// Just because we don't want you to know how we're hacking around.
 	ExporterPimpl* pimpl;
 };
+
+
+// ----------------------------------------------------------------------------------
+inline const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const std::string& pFormatId ) 
+{
+	return ExportToBlob(pScene,pFormatId.c_str());
+}
+
+// ----------------------------------------------------------------------------------
+inline aiReturn Exporter :: Export( const aiScene* pScene, const std::string& pFormatId, const std::string& pPath )
+{
+	return Export(pScene,pFormatId.c_str(),pPath.c_str());
+}
 
 } // namespace Assimp
 #endif // ASSIMP_BUILD_NO_EXPORT

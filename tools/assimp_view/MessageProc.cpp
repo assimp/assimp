@@ -1026,6 +1026,10 @@ void PopulateExportMenu()
 //-------------------------------------------------------------------------------
 void DoExport(size_t formatId)
 {
+	if (!g_szFileName) {
+		return;
+	}
+
 	Exporter exp;
 	const aiExportFormatDesc* const e = exp.GetExportFormatDescription(formatId);
 	assert(e);

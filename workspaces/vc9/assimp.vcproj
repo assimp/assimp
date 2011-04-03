@@ -1653,26 +1653,6 @@
 						RelativePath="..\..\code\LWSLoader.h"
 						>
 					</File>
-					<Filter
-						Name="md2"
-						>
-						<File
-							RelativePath="..\..\code\MD2FileData.h"
-							>
-						</File>
-						<File
-							RelativePath="..\..\code\MD2Loader.cpp"
-							>
-						</File>
-						<File
-							RelativePath="..\..\code\MD2Loader.h"
-							>
-						</File>
-						<File
-							RelativePath="..\..\code\MD2NormalTable.h"
-							>
-						</File>
-					</Filter>
 				</Filter>
 				<Filter
 					Name="bvh"
@@ -1939,6 +1919,26 @@
 					</File>
 					<File
 						RelativePath="..\..\code\Q3BSPZipArchive.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="md2"
+					>
+					<File
+						RelativePath="..\..\code\MD2FileData.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\MD2Loader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\MD2Loader.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\MD2NormalTable.h"
 						>
 					</File>
 				</Filter>

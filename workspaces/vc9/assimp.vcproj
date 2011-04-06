@@ -2299,10 +2299,6 @@
 				Name="core_import"
 				>
 				<File
-					RelativePath="..\..\code\aiAssert.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\code\Assimp.cpp"
 					>
 				</File>

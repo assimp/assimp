@@ -87,7 +87,7 @@ AI_WONT_RETURN void ValidateDSProcess::ReportError(const char* msg,...)
 
 	va_end(args);
 #ifdef _DEBUG
-	aiAssert( szBuffer,__LINE__,__FILE__ );
+	ai_assert( false );
 #endif
 	throw DeadlyImportError("Validation failed: " + std::string(szBuffer,iLen));
 }

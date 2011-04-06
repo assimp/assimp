@@ -80,7 +80,6 @@ SOURCE_GROUP( Logging FILES
 )
 
 SOURCE_GROUP( Common FILES
-	aiAssert.cpp
 	fast_atof.h
 	qnan.h
 	BaseImporter.cpp
@@ -672,7 +671,6 @@ ADD_LIBRARY( assimp SHARED
 	XFileImporter.h
 	XFileParser.cpp
 	XFileParser.h
-	aiAssert.cpp
 	fast_atof.h
 	irrXMLWrapper.h
 	qnan.h

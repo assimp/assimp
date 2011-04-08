@@ -104,11 +104,14 @@ Contributed a fix for the Normalize method in aiQuaternion.
 - dbburgess
 Contributes a Android-specific build issue: log the hardware architecture for ARM.
 
--  alfiereinre7
+- alfiereinre7
 Contributes a obj-fileparser fix: missing tokens in the obj-token list.
 
 - Roman Kharitonov
 Contributes a fix for the configure script environment.
 
--rdb 
+- Ed Diana
+Contributed AssimpDelphi (/port/AssimpDelphi).
+
+- rdb 
 Contributes a bundle of fixes and improvments for the bsp-importer.

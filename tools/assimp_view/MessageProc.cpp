@@ -998,6 +998,7 @@ void SetupPPUIState()
 	CheckMenuItem(hMenu,ID_VIEWER_PP_RRM2,ppsteps & aiProcess_RemoveRedundantMaterials ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hMenu,ID_VIEWER_PP_TUV,ppsteps & aiProcess_TransformUVCoords ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hMenu,ID_VIEWER_PP_VDS,ppsteps & aiProcess_ValidateDataStructure ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hMenu,ID_VIEWER_PP_DB,ppsteps & aiProcess_Debone ? MF_CHECKED : MF_UNCHECKED);
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
@@ -1976,6 +1977,11 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 			else if (ID_VIEWER_PP_TUV == LOWORD(wParam))	{
 				ppsteps ^= aiProcess_TransformUVCoords;
 				CheckMenuItem(hMenu,ID_VIEWER_PP_TUV,ppsteps & aiProcess_TransformUVCoords ? MF_CHECKED : MF_UNCHECKED);
+				UpdatePPSettings();
+			}
+			else if (ID_VIEWER_PP_DB == LOWORD(wParam))	{
+				ppsteps ^= aiProcess_Debone;
+				CheckMenuItem(hMenu,ID_VIEWER_PP_DB,ppsteps & aiProcess_Debone ? MF_CHECKED : MF_UNCHECKED);
 				UpdatePPSettings();
 			}
 			else if (ID_VIEWER_PP_VDS == LOWORD(wParam))	{

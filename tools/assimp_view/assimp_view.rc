@@ -331,6 +331,7 @@ BEGIN
             MENUITEM "Generate UV Coords",          ID_VIEWER_PP_GUV
             MENUITEM "Transform UV Coords",         ID_VIEWER_PP_TUV
             MENUITEM "Remove Lines and Points",     ID_VIEWER_PP_RLINE_PNT, GRAYED
+            MENUITEM "Remove dummy bones (De-bone)", ID_VIEWER_PP_DB
             MENUITEM SEPARATOR
             MENUITEM "(required) Triangulate",      ID_VIEWER_PP_JIV, GRAYED
             MENUITEM "(required) Limit Bone Weights", ID_VIEWER_PP_JIV, GRAYED

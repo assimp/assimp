@@ -1971,6 +1971,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\DeboneProcess.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\DeboneProcess.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\FindDegenerates.cpp"
 					>
 				</File>
@@ -2064,6 +2072,10 @@
 				</File>
 				<File
 					RelativePath="..\..\code\PretransformVertices.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\code\ProcessHelper.cpp"
 					>
 				</File>
 				<File

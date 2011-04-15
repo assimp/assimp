@@ -175,7 +175,7 @@ template <typename T>
 inline uint32_t WriteBounds(const T* in, unsigned int size)
 {
 	T minc,maxc;
-	ArrayBounds(in,size,minc,maxc);
+	Assimp::ArrayBounds(in,size,minc,maxc);
 	fwrite(&minc,sizeof(T),1,out);
 	fwrite(&maxc,sizeof(T),1,out);
 	return sizeof(T)*2;
@@ -691,6 +691,44 @@ void WriteNode(const aiNode* node, FILE* out, unsigned int depth)
 	}
 	fprintf(out,"%s</Node>\n",prefix);
 }
+
+
+// -------------------------------------------------------------------------------
+const char* TextureTypeToString(aiTextureType in)
+{
+	switch (in)
+	{
+	case aiTextureType_NONE:
+		return "n/a";
+	case aiTextureType_DIFFUSE:
+		return "Diffuse";
+	case aiTextureType_SPECULAR:
+		return "Specular";
+	case aiTextureType_AMBIENT:
+		return "Ambient";
+	case aiTextureType_EMISSIVE:
+		return "Emissive";
+	case aiTextureType_OPACITY:
+		return "Opacity";
+	case aiTextureType_NORMALS:
+		return "Normals";
+	case aiTextureType_HEIGHT:
+		return "Height";
+	case aiTextureType_SHININESS:
+		return "Shininess";
+	case aiTextureType_DISPLACEMENT:
+		return "Displacement";
+	case aiTextureType_LIGHTMAP:
+		return "Lightmap";
+	case aiTextureType_REFLECTION:
+		return "Reflection";
+	case aiTextureType_UNKNOWN:
+		return "Unknown";   
+	}
+	ai_assert(false); 
+	return  "BUG";    
+}
+
 
 // -----------------------------------------------------------------------------------
 // Write a text model dump

@@ -381,16 +381,13 @@ int ProcessStandardArguments(
 	// -fi     --find-instances
 	// -og     --optimize-graph
 	// -om     --optimize-meshes
+	// -db     --debone
+	// -sbc    --split-by-bone-count
 	//
 	// -c<file> --config-file=<file>
 
 	for (unsigned int i = 0; i < num;++i) 
 	{
-		//if (!params[i]) { // could happen if some args have already been processed
-		//	continue;
-		//}
-
-		// bool has = true;
 		if (! strcmp(params[i], "-ptv") || ! strcmp(params[i], "--pretransform-vertices")) {
 			fill.ppFlags |= aiProcess_PreTransformVertices;
 		}
@@ -460,32 +457,28 @@ int ProcessStandardArguments(
 		else if (! strcmp(params[i], "-om") || ! strcmp(params[i], "--optimize-meshes")) {
 			fill.ppFlags |= aiProcess_OptimizeMeshes;
 		}
+		else if (! strcmp(params[i], "-db") || ! strcmp(params[i], "--debone")) {
+			fill.ppFlags |= aiProcess_Debone;
+		}
+		else if (! strcmp(params[i], "-sbc") || ! strcmp(params[i], "--split-by-bone-count")) {
+			fill.ppFlags |= aiProcess_SplitByBoneCount;
+		}
 
-#if 0
-		else if (! strcmp(params[i], "-oa") || ! strcmp(params[i], "--optimize-anims")) {
-			fill.ppFlags |= aiProcess_OptimizeAnims;
-		}
-		else if (! strcmp(params[i], "-gem") || ! strcmp(params[i], "--gen-entity-meshes")) {
-			fill.ppFlags |= aiProcess_GenEntityMeshes;
-		}
-		else if (! strcmp(params[i], "-ftp") || ! strcmp(params[i], "--fix-texture-paths")) {
-			fill.ppFlags |= aiProcess_FixTexturePaths;
-		}
-#endif
 
 		else if (! strncmp(params[i], "-c",2) || ! strncmp(params[i], "--config=",9)) {
 			
 			const unsigned int ofs = (params[i][1] == '-' ? 9 : 2);
 
 			// use default configurations
-			if (! strncmp(params[i]+ofs,"full",4))
+			if (! strncmp(params[i]+ofs,"full",4)) {
 				fill.ppFlags |= aiProcessPreset_TargetRealtime_MaxQuality;
-
-			else if (! strncmp(params[i]+ofs,"default",7))
+			}
+			else if (! strncmp(params[i]+ofs,"default",7)) {
 				fill.ppFlags |= aiProcessPreset_TargetRealtime_Quality;
-
-			else if (! strncmp(params[i]+ofs,"fast",4))
+			}
+			else if (! strncmp(params[i]+ofs,"fast",4)) {
 				fill.ppFlags |= aiProcessPreset_TargetRealtime_Fast;
+			}
 		}
 		else if (! strcmp(params[i], "-l") || ! strcmp(params[i], "--show-log")) { 
 			fill.showLog = true;
@@ -495,18 +488,15 @@ int ProcessStandardArguments(
 		}
 		else if (! strncmp(params[i], "--log-out=",10) || ! strncmp(params[i], "-lo",3)) { 
 			fill.logFile = std::string(params[i]+(params[i][1] == '-' ? 10 : 3));
-			if (!fill.logFile.length())
+			if (!fill.logFile.length()) {
 				fill.logFile = "assimp-log.txt";
+			}
 		}
-
-		//else has = false;
-		//if (has) {
-		//	params[i] = NULL;
-		//}
 	}
 
-	if (fill.logFile.length() || fill.showLog || fill.verbose)
+	if (fill.logFile.length() || fill.showLog || fill.verbose) {
 		fill.log = true;
+	}
 
 	return 0;
 }

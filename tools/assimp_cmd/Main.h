@@ -64,10 +64,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <../code/AssimpPCH.h> /* to get stdint.h */
-#include <../code/fast_atof.h>
-#include <../code/StringComparison.h>
-#include <../code/Hash.h>
-
 #include <../contrib/zlib/zlib.h>
 
 #ifndef SIZE_MAX

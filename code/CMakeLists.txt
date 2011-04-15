@@ -87,7 +87,6 @@ SOURCE_GROUP( Common FILES
 	BaseProcess.cpp
 	BaseProcess.h
 	ByteSwap.h
-	ProcessHelper.h
 	DefaultProgressHandler.h
 	DefaultIOStream.cpp
 	DefaultIOStream.h
@@ -362,6 +361,10 @@ SOURCE_GROUP( PostProcessing FILES
 	OptimizeGraph.h
 	OptimizeMeshes.cpp
 	OptimizeMeshes.h
+	DeboneProcess.cpp
+	DeboneProcess.h
+	ProcessHelper.h
+	ProcessHelper.cp
 )
 
 SOURCE_GROUP( Q3D FILES
@@ -608,6 +611,7 @@ ADD_LIBRARY( assimp SHARED
 	PretransformVertices.cpp
 	PretransformVertices.h
 	ProcessHelper.h
+	ProcessHelper.cpp
 	Q3DLoader.cpp
 	Q3DLoader.h
 	Q3BSPFileData.h
@@ -734,6 +738,8 @@ ADD_LIBRARY( assimp SHARED
 	Profiler.h
 	NDOLoader.cpp
 	NDOLoader.h
+	DeboneProcess.cpp
+	DeboneProcess.h
 	ColladaExporter.h
 	ColladaExporter.cpp
 

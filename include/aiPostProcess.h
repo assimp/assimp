@@ -500,7 +500,21 @@ enum aiPostProcessSteps
 	/** <hr>This step splits meshes with many bones into submeshes so that each
 	 * submesh has fewer or as many bones as a given limit. 
     */
-	aiProcess_SplitByBoneCount  = 0x2000000
+	aiProcess_SplitByBoneCount  = 0x2000000,
+
+	// -------------------------------------------------------------------------
+	/** <hr>This step removes bones losslessly or according to some threshold.
+	 *  In some cases (i.e. format that require it) exporters are forced to
+	 *  assign dummy bone weights to otherwise static meshes assigned to
+	 *  animated meshes. Since full, weight-based skinning is expensive but
+	 *  animating nodes is extremely cheap, this step is offered to cleanup
+	 *  the data in that regard. 
+	 *																
+	 *  Use <tt>#AI_CONFIG_PP_DB_THRESHOLD</tt> to control this. 
+	 *  Use <tt>#AI_CONFIG_PP_DB_ALL_OR_NONE</tt> if you want bones removed if and 
+	 *	only if all bones within the scene qualify for removal.
+    */
+	aiProcess_Debone  = 0x4000000
 
 	// aiProcess_GenEntityMeshes = 0x100000,
 	// aiProcess_OptimizeAnimations = 0x200000
@@ -600,6 +614,7 @@ enum aiPostProcessSteps
 	aiProcess_FindInstances                  |  \
 	aiProcess_ValidateDataStructure          |  \
 	aiProcess_OptimizeMeshes                 |  \
+	aiProcess_Debone						 |  \
 	0 )
 
 

@@ -288,6 +288,29 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	define AI_LMW_MAX_WEIGHTS	0x4
 #endif // !! AI_LMW_MAX_WEIGHTS
 
+// ---------------------------------------------------------------------------
+/** @brief Set the deboning threshold higher to remove more bones
+ *
+ * This is used by the #aiProcess_Debone PostProcess-Step.
+ * @note The default value is AI_DEBONE_THRESHOLD
+ * Property type: float.*/
+#define AI_CONFIG_PP_DB_THRESHOLD \
+	"PP_DB_THRESHOLD"
+
+// default value for AI_CONFIG_PP_LBW_MAX_WEIGHTS
+#if (!defined AI_DEBONE_THRESHOLD)
+#	define AI_DEBONE_THRESHOLD	1.0f
+#endif // !! AI_DEBONE_THRESHOLD
+
+// ---------------------------------------------------------------------------
+/** @brief Require all bones qualify for deboning before removing any
+ *
+ * This is used by the #aiProcess_Debone PostProcess-Step.
+ * @note The default value is 0
+ * Property type: bool.*/
+#define AI_CONFIG_PP_DB_ALL_OR_NONE \
+	"PP_DB_ALL_OR_NONE"
+
 /** @brief Default value for the #AI_CONFIG_PP_ICL_PTCACHE_SIZE property
  */
 #ifndef PP_ICL_PTCACHE_SIZE

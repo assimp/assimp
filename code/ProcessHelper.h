@@ -191,34 +191,6 @@ inline void ArrayBounds(const T* in, unsigned int size, T& min, T& max)
 	}
 }
 
-// -------------------------------------------------------------------------------
-/** @brief Extract single strings from a list of identifiers
- *  @param in Input string list. 
- *  @param out Receives a list of clean output strings
- *  @sdee #AI_CONFIG_PP_OG_EXCLUDE_LIST
- */
-inline void ConvertListToStrings(const std::string& in, std::list<std::string>& out)
-{
-	const char* s = in.c_str();
-	while (*s) {
-		SkipSpacesAndLineEnd(&s);
-		if (*s == '\'') {
-			const char* base = ++s;
-			while (*s != '\'') {
-				++s;
-				if (*s == '\0') {
-					DefaultLogger::get()->error("ConvertListToString: String list is ill-formatted");
-					return;
-				}
-			}
-			out.push_back(std::string(base,(size_t)(s-base)));
-			++s;
-		}
-		else {
-			out.push_back(GetNextToken(s));
-		}
-	}
-}
 
 // -------------------------------------------------------------------------------
 /** @brief Compute the newell normal of a polygon regardless of its shape
@@ -271,55 +243,37 @@ inline void NewellNormal (aiVector3D& out, int num, float* x, float* y, float* z
 	out = aiVector3D(sum_yz,sum_zx,sum_xy);
 }
 
-#if 0
-// -------------------------------------------------------------------------------
-/** @brief Compute newell normal of a polgon regardless of its shape
- *
- *  @param out Receives the output normal
- *  @param data Input vertices
- *  @param idx Index buffer
- *  @param num Number of indices
- */
-inline void NewellNormal (aiVector3D& out, const aiVector3D* data, unsigned int* idx, unsigned int num )
-{
-	// TODO: intended to be used in GenNormals. 
-}
-#endif
+
 
 // -------------------------------------------------------------------------------
 /** Little helper function to calculate the quadratic difference 
  * of two colours. 
  * @param pColor1 First color
  * @param pColor2 second color
- * @return Quadratic color difference
- */
+ * @return Quadratic color difference */
 inline float GetColorDifference( const aiColor4D& pColor1, const aiColor4D& pColor2) 
 {
-	const aiColor4D c (pColor1.r - pColor2.r, pColor1.g - pColor2.g, 
-		pColor1.b - pColor2.b, pColor1.a - pColor2.a);
-
+	const aiColor4D c (pColor1.r - pColor2.r, pColor1.g - pColor2.g, pColor1.b - pColor2.b, pColor1.a - pColor2.a);
 	return c.r*c.r + c.g*c.g + c.b*c.b + c.a*c.a;
 }
+
+
+// -------------------------------------------------------------------------------
+/** @brief Extract single strings from a list of identifiers
+ *  @param in Input string list. 
+ *  @param out Receives a list of clean output strings
+ *  @sdee #AI_CONFIG_PP_OG_EXCLUDE_LIST */
+void ConvertListToStrings(const std::string& in, std::list<std::string>& out);
+
 
 // -------------------------------------------------------------------------------
 /** @brief Compute the AABB of a mesh after applying a given transform
  *  @param mesh Input mesh
  *  @param[out] min Receives minimum transformed vertex
  *  @param[out] max Receives maximum transformed vertex
- *  @param m Transformation matrix to be applied
- */
-inline void FindAABBTransformed (const aiMesh* mesh, aiVector3D& min, aiVector3D& max, 
-	const aiMatrix4x4& m)
-{
-	min = aiVector3D (10e10f,  10e10f, 10e10f);
-	max = aiVector3D (-10e10f,-10e10f,-10e10f);
-	for (unsigned int i = 0;i < mesh->mNumVertices;++i)
-	{
-		const aiVector3D v = m * mesh->mVertices[i];
-		min = std::min(v,min);
-		max = std::max(v,max);
-	}
-}
+ *  @param m Transformation matrix to be applied */
+void FindAABBTransformed (const aiMesh* mesh, aiVector3D& min, aiVector3D& max, const aiMatrix4x4& m);
+
 
 // -------------------------------------------------------------------------------
 /** @brief Helper function to determine the 'real' center of a mesh
@@ -328,191 +282,65 @@ inline void FindAABBTransformed (const aiMesh* mesh, aiVector3D& min, aiVector3D
  *  @param mesh Input mesh
  *  @param[out] min Minimum vertex of the mesh
  *  @param[out] max maximum vertex of the mesh
- *  @param[out] out Center point
- */
-inline void FindMeshCenter (aiMesh* mesh, aiVector3D& out, aiVector3D& min, aiVector3D& max)
-{
-	ArrayBounds(mesh->mVertices,mesh->mNumVertices, min,max);
-	out = min + (max-min)*0.5f;
-}
+ *  @param[out] out Center point */
+void FindMeshCenter (aiMesh* mesh, aiVector3D& out, aiVector3D& min, aiVector3D& max);
+
 
 // -------------------------------------------------------------------------------
 // Helper function to determine the 'real' center of a mesh after applying a given transform
-inline void FindMeshCenterTransformed (aiMesh* mesh, aiVector3D& out, aiVector3D& min,
-	aiVector3D& max, const aiMatrix4x4& m)
-{
-	FindAABBTransformed(mesh,min,max,m);
-	out = min + (max-min)*0.5f;
-}
+void FindMeshCenterTransformed (aiMesh* mesh, aiVector3D& out, aiVector3D& min,aiVector3D& max, const aiMatrix4x4& m);
+
 
 // -------------------------------------------------------------------------------
 // Helper function to determine the 'real' center of a mesh
-inline void FindMeshCenter (aiMesh* mesh, aiVector3D& out)
-{
-	aiVector3D min,max;
-	FindMeshCenter(mesh,out,min,max);
-}
+void FindMeshCenter (aiMesh* mesh, aiVector3D& out);
+
 
 // -------------------------------------------------------------------------------
 // Helper function to determine the 'real' center of a mesh after applying a given transform
-inline void FindMeshCenterTransformed (aiMesh* mesh, aiVector3D& out,
-	const aiMatrix4x4& m)
-{
-	aiVector3D min,max;
-	FindMeshCenterTransformed(mesh,out,min,max,m);
-}
+void FindMeshCenterTransformed (aiMesh* mesh, aiVector3D& out,const aiMatrix4x4& m);
+
 
 // -------------------------------------------------------------------------------
 // Compute a good epsilon value for position comparisons on a mesh
-inline float ComputePositionEpsilon(const aiMesh* pMesh)
-{
-	const float epsilon = 1e-4f;
+float ComputePositionEpsilon(const aiMesh* pMesh);
 
-	// calculate the position bounds so we have a reliable epsilon to check position differences against 
-	aiVector3D minVec, maxVec;
-	ArrayBounds(pMesh->mVertices,pMesh->mNumVertices,minVec,maxVec);
-	return (maxVec - minVec).Length() * epsilon;
-}
 
 // -------------------------------------------------------------------------------
 // Compute a good epsilon value for position comparisons on a array of meshes
-inline float ComputePositionEpsilon(const aiMesh* const* pMeshes, size_t num)
-{
-	const float epsilon = 1e-4f;
+float ComputePositionEpsilon(const aiMesh* const* pMeshes, size_t num);
 
-	// calculate the position bounds so we have a reliable epsilon to check position differences against 
-	aiVector3D minVec, maxVec, mi, ma;
-	MinMaxChooser<aiVector3D>()(minVec,maxVec);
-
-	for (size_t a = 0; a < num; ++a) {
-		const aiMesh* pMesh = pMeshes[a];
-		ArrayBounds(pMesh->mVertices,pMesh->mNumVertices,mi,ma);
-
-		minVec = std::min(minVec,mi);
-		maxVec = std::max(maxVec,ma);
-	}
-	return (maxVec - minVec).Length() * epsilon;
-}
 
 // -------------------------------------------------------------------------------
 // Compute an unique value for the vertex format of a mesh
-inline unsigned int GetMeshVFormatUnique(aiMesh* pcMesh)
-{
-	ai_assert(NULL != pcMesh);
+unsigned int GetMeshVFormatUnique(const aiMesh* pcMesh);
 
-	// FIX: the hash may never be 0. Otherwise a comparison against
-	// nullptr could be successful
-	unsigned int iRet = 1;
 
-	// normals
-	if (pcMesh->HasNormals())iRet |= 0x2;
-	// tangents and bitangents
-	if (pcMesh->HasTangentsAndBitangents())iRet |= 0x4;
-
-#ifdef BOOST_STATIC_ASSERT
-	BOOST_STATIC_ASSERT(8 >= AI_MAX_NUMBER_OF_COLOR_SETS);
-	BOOST_STATIC_ASSERT(8 >= AI_MAX_NUMBER_OF_TEXTURECOORDS);
-#endif
-
-	// texture coordinates
-	unsigned int p = 0;
-	while (pcMesh->HasTextureCoords(p))
-	{
-		iRet |= (0x100 << p);
-		if (3 == pcMesh->mNumUVComponents[p])
-			iRet |= (0x10000 << p);
-
-		++p;
-	}
-	// vertex colors
-	p = 0;
-	while (pcMesh->HasVertexColors(p))iRet |= (0x1000000 << p++);
-	return iRet;
-}
-
+// defs for ComputeVertexBoneWeightTable()
 typedef std::pair <unsigned int,float> PerVertexWeight;
 typedef std::vector	<PerVertexWeight> VertexWeightTable;
 
 // -------------------------------------------------------------------------------
 // Compute a per-vertex bone weight table
-// please .... delete result with operator delete[] ...
-inline VertexWeightTable* ComputeVertexBoneWeightTable(aiMesh* pMesh)
-{
-	if (!pMesh || !pMesh->mNumVertices || !pMesh->mNumBones)
-		return NULL;
+VertexWeightTable* ComputeVertexBoneWeightTable(const aiMesh* pMesh);
 
-	VertexWeightTable* avPerVertexWeights = new VertexWeightTable[pMesh->mNumVertices];
-	for (unsigned int i = 0; i < pMesh->mNumBones;++i)
-	{
-		aiBone* bone = pMesh->mBones[i];
-		for (unsigned int a = 0; a < bone->mNumWeights;++a)	{
-			const aiVertexWeight& weight = bone->mWeights[a];
-			avPerVertexWeights[weight.mVertexId].push_back( 
-				std::pair<unsigned int,float>(i,weight.mWeight));
-		}
-	}
-	return avPerVertexWeights;
-}
 
 // -------------------------------------------------------------------------------
 // Get a string for a given aiTextureType
-inline const char* TextureTypeToString(aiTextureType in)
-{
-	switch (in)
-	{
-	case aiTextureType_NONE:
-		return "n/a";
-	case aiTextureType_DIFFUSE:
-		return "Diffuse";
-	case aiTextureType_SPECULAR:
-		return "Specular";
-	case aiTextureType_AMBIENT:
-		return "Ambient";
-	case aiTextureType_EMISSIVE:
-		return "Emissive";
-	case aiTextureType_OPACITY:
-		return "Opacity";
-	case aiTextureType_NORMALS:
-		return "Normals";
-	case aiTextureType_HEIGHT:
-		return "Height";
-	case aiTextureType_SHININESS:
-		return "Shininess";
-	case aiTextureType_DISPLACEMENT:
-		return "Displacement";
-	case aiTextureType_LIGHTMAP:
-		return "Lightmap";
-	case aiTextureType_REFLECTION:
-		return "Reflection";
-	case aiTextureType_UNKNOWN:
-		return "Unknown";
-    default:
-        return  "HUGE ERROR. Expect BSOD (linux guys: kernel panic ...).";          
-	}
-}
+const char* TextureTypeToString(aiTextureType in);
+
 
 // -------------------------------------------------------------------------------
 // Get a string for a given aiTextureMapping
-inline const char* MappingTypeToString(aiTextureMapping in)
-{
-	switch (in)
-	{
-	case aiTextureMapping_UV:
-		return "UV";
-	case aiTextureMapping_BOX:
-		return "Box";
-	case aiTextureMapping_SPHERE:
-		return "Sphere";
-	case aiTextureMapping_CYLINDER:
-		return "Cylinder";
-	case aiTextureMapping_PLANE:
-		return "Plane";
-	case aiTextureMapping_OTHER:
-		return "Other";
-    default:
-        return  "HUGE ERROR. Expect BSOD (linux guys: kernel panic ...).";    
-	}
-}
+const char* MappingTypeToString(aiTextureMapping in);
+
+
+// flags for MakeSubmesh()
+#define AI_SUBMESH_FLAGS_SANS_BONES	0x1
+
+// -------------------------------------------------------------------------------
+// Split a mesh given a list of faces to be contained in the sub mesh
+aiMesh* MakeSubmesh(const aiMesh *superMesh, const std::vector<unsigned int> &subMeshFaces, unsigned int subFlags);
 
 // -------------------------------------------------------------------------------
 // Utility postprocess step to share the spatial sort tree between
@@ -559,6 +387,8 @@ class DestroySpatialSortProcess : public BaseProcess
 		shared->RemoveProperty(AI_SPP_SPATIAL_SORT);
 	}
 };
+
+
 
 } // ! namespace Assimp
 #endif // !! AI_PROCESS_HELPER_H_INCLUDED

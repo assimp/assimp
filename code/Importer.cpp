@@ -178,9 +178,6 @@ using namespace Assimp::Formatter;
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
 #	include "BlenderLoader.h"
 #endif
-//#ifndef ASSIMP_BUILD_NO_SWORDOFMOONLIGHT_IMPORTER
-//#	include "SomLoader.h"
-//#endif
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
 #	include "Q3BSPFileImporter.h"
 #endif
@@ -259,6 +256,9 @@ using namespace Assimp::Formatter;
 #endif
 #ifndef ASSIMP_BUILD_NO_SPLITBYBONECOUNT_PROCESS
 #	include "SplitByBoneCountProcess.h"
+#endif
+#ifndef ASSIMP_BUILD_NO_DEBONE_PROCESS
+#	include "DeboneProcess.h"
 #endif
 
 using namespace Assimp;
@@ -426,9 +426,6 @@ Importer::Importer()
 #if (!defined ASSIMP_BUILD_NO_BLEND_IMPORTER)
 	pimpl->mImporter.push_back( new BlenderImporter());
 #endif
-//#if (!defined ASSIMP_BUILD_NO_SWORDOFMOONLIGHT_IMPORTER)
-//	pimpl->mImporter.push_back( new SomImporter());
-//#endif
 #if (!defined ASSIMP_BUILD_NO_Q3BSP_IMPORTER)
 	pimpl->mImporter.push_back( new Q3BSPFileImporter() );
 #endif
@@ -521,6 +518,9 @@ Importer::Importer()
 #endif
 #if (!defined ASSIMP_BUILD_NO_FLIPWINDINGORDER_PROCESS)
 	pimpl->mPostProcessingSteps.push_back( new FlipWindingOrderProcess());
+#endif
+#if (!defined ASSIMP_BUILD_DEBONE_PROCESS)
+	pimpl->mPostProcessingSteps.push_back( new DeboneProcess());
 #endif
 #if (!defined ASSIMP_BUILD_NO_LIMITBONEWEIGHTS_PROCESS)
 	pimpl->mPostProcessingSteps.push_back( new LimitBoneWeightsProcess());

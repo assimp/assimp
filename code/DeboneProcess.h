@@ -111,7 +111,7 @@ protected:
 	/// Splits the given mesh by bone count.
 	/// @param pMesh the Mesh to split. Is not changed at all, but might be superfluous in case it was split.
 	/// @param poNewMeshes Array of submeshes created in the process. Empty if splitting was not necessary.
-	void SplitMesh(const aiMesh* pMesh, std::vector<std::pair<aiMesh*,const aiBone*>>& poNewMeshes) const;
+	void SplitMesh(const aiMesh* pMesh, std::vector< std::pair< aiMesh*,const aiBone* > >& poNewMeshes) const;
 
 	/// Recursively updates the node's mesh list to account for the changed mesh list
 	void UpdateNode(aiNode* pNode) const;

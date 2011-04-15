@@ -256,7 +256,7 @@ bool DeboneProcess::ConsiderMesh(const aiMesh* pMesh)
 
 // ------------------------------------------------------------------------------------------------
 // Splits the given mesh by bone count.
-void DeboneProcess::SplitMesh( const aiMesh* pMesh, std::vector<std::pair<aiMesh*,const aiBone*>>& poNewMeshes) const
+void DeboneProcess::SplitMesh( const aiMesh* pMesh, std::vector< std::pair< aiMesh*,const aiBone* > >& poNewMeshes) const
 {
 	// same deal here as ConsiderMesh basically
 
@@ -390,7 +390,7 @@ void DeboneProcess::UpdateNode(aiNode* pNode) const
 	for(unsigned int a=0;a<m;a++)	{
 
 		unsigned int srcIndex = pNode->mMeshes[a];
-		const std::vector<std::pair<unsigned int,aiNode*>> &subMeshes = mSubMeshIndices[srcIndex];
+		const std::vector< std::pair< unsigned int,aiNode* > > &subMeshes = mSubMeshIndices[srcIndex];
 		unsigned int nSubmeshes = subMeshes.size();
 
 		for(unsigned int b=0;b<nSubmeshes;b++) {
@@ -404,7 +404,7 @@ void DeboneProcess::UpdateNode(aiNode* pNode) const
 
 	for(unsigned int a=0;a<n;a++)
 	{
-		const std::vector<std::pair<unsigned int,aiNode*>> &subMeshes = mSubMeshIndices[a];
+		const std::vector< std::pair< unsigned int,aiNode* > > &subMeshes = mSubMeshIndices[a];
 		unsigned int nSubmeshes = subMeshes.size();
 
 		for(unsigned int b=0;b<nSubmeshes;b++) {

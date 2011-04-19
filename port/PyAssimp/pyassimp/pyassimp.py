@@ -6,6 +6,10 @@ PyAssimp
 This is the main-module of PyAssimp.
 """
 
+import sys
+if sys.version_info < (2,5):
+	raise 'pyassimp: need python 2.5 or newer'
+
 import structs
 import ctypes
 import os
@@ -160,7 +164,7 @@ def _init(self):
 Python magic to add the _init() function to all C struct classes.
 """
 for struct in dir(structs):
-    if not (struct.startswith('_') or struct.startswith('c_') or struct == "Structure" or struct == "POINTER"):
+    if not (struct.startswith('_') or struct.startswith('c_') or struct == "Structure" or struct == "POINTER") and not isinstance(getattr(structs, struct),int):
         setattr(getattr(structs, struct), '_init', _init)
 
 

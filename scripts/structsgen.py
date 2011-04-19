@@ -79,7 +79,7 @@ RErmifdef = re.compile(r''
                 
 # Replace comments
 RErpcom = re.compile(r''
-                r'[ ]*(/\*\*\s|\*/|\B\*\s|//!)'             # /**
+                r'\s*(/\*+\s|\*+/|\B\*\s|///?!?)'             # /**
                 r'(?P<line>.*?)'                            #  * line 
                 , re.IGNORECASE + re.DOTALL)
                 
@@ -88,6 +88,14 @@ def GetType(type, prefix='c_'):
     t = type
     while t.endswith('*'):
         t = t[:-1]
+    if t[:5] == 'const':
+        t = t[5:]
+
+    # skip some types
+    if t in skiplist:
+           return None
+
+    t = t.strip()
     types = {'unsigned int':'uint', 'unsigned char':'ubyte', 'size_t':'uint',}
     if t in types:
         t = types[t]
@@ -105,6 +113,8 @@ def restructure( match ):
         type = "c_uint"
     else:
         type = GetType(type[2:], '')
+        if type is None:
+           return ''
     if match.group("index"):
         type = type + "*" + match.group("index")
         
@@ -144,6 +154,9 @@ $NAME$._fields_ = [
             $FIELDS$
         ]
 """
+
+skiplist = ("FileIO", "File", "locateFromAssimpHeap",'LogStream','MeshAnim','AnimMesh')
+
 #============================================================
 def Structify(fileName):
     file = open(fileName, 'r')
@@ -160,7 +173,14 @@ def Structify(fileName):
         # Replace comments
         desc = RErpcom.sub('#\g<line>', desc)
         defines += desc
-        defines += " "*4 + define[1] + " = " + define[2] + "\n"  
+	if len(define[2].strip()):
+            # skip non-integral defines, we can support them right now
+            try:
+                int(define[2],0)
+            except:
+                continue
+            defines += " "*4 + define[1] + " = " + define[2] + "\n"  
+            
     
     # Get structs
     rs = REstructs.finditer(text)
@@ -172,7 +192,7 @@ def Structify(fileName):
         desc = r.group('desc')
         
         # Skip some structs
-        if name == "FileIO" or name == "File" or name == "locateFromAssimpHeap":
+        if name in skiplist:
             continue
 
         text = r.group('code')

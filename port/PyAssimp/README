@@ -3,8 +3,13 @@
 
 
 -- a simple Python wrapper for Assimp using ctypes to access
-the library. Tested for Python 2.6, should work with
-older versions as well.
+the library. Tested for Python 2.6. Known not to work with
+Python 2.4.
+
+
+Note that pyassimp is by no means considered mature. It works,
+but it is far away from wrapping Assimp perfectly.
+
 
 USAGE
 =====

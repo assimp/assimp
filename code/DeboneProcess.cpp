@@ -47,8 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProcessHelper.h"
 #include "DeboneProcess.h"
 
-#include <limits>
-
 
 using namespace Assimp;
 

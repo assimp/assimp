@@ -64,6 +64,7 @@ exclude_extensions = [".lws",".assbin",".assxml",".txt",".jpeg",".jpg",".png",".
 # '-og -om'   :run optimize-scenegraph in combination with optimize-meshes.
 # '-vds -jiv' :join-identical-vertices alone. This is a hotspot where
 #              floating-point inaccuracies can cause severe damage.
+# '-ptv':      transform all meshes to world-space
 
 # As you can see, not all possible combinations of pp steps are covered - 
 # but at least each step is executed at least once on each model. 
@@ -71,7 +72,13 @@ exclude_extensions = [".lws",".assbin",".assxml",".txt",".jpeg",".jpg",".png",".
 pp_configs_to_test = [
     "-cfull",
     "-og -om -vds",
-    "-vds -jiv"
+    "-vds -jiv",
+    "-ptv -gsn -cts -db",
+
+    # this is especially important: if no failures are present with this 
+    # preset, the regression is most likely caused by the post
+    # processing pipeline.
+    ""
 ]
 # -------------------------------------------------------------------------------
 # Name of the regression database file to be used

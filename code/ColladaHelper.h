@@ -429,7 +429,7 @@ struct Sampler
 		,	mMirrorU	()
 		,	mMirrorV	()
 		,	mOp			(aiTextureOp_Multiply)
-		,	mUVId		(0xffffffff)
+		,	mUVId		(UINT_MAX)
 		,	mWeighting  (1.f)
 		,	mMixWithPrevious (1.f)
 	{}
@@ -466,7 +466,7 @@ struct Sampler
 	 */
 	std::string mUVChannel;
 
-	/** Resolved UV channel index or 0xffffffff if not known
+	/** Resolved UV channel index or UINT_MAX if not known
 	 */
 	unsigned int mUVId;
 

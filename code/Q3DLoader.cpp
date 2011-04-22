@@ -225,7 +225,7 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 								if (!i && !a)
 									mesh.prevUVIdx = vec.uvindices[a];
 								else if (vec.uvindices[a] != mesh.prevUVIdx)
-									mesh.prevUVIdx = 0xffffffff;
+									mesh.prevUVIdx = UINT_MAX;
 							}
 						}
 					}

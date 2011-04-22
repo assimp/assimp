@@ -101,12 +101,12 @@ bool MDLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 // Setup configuration properties
 void MDLImporter::SetupProperties(const Importer* pImp)
 {
-	configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_MDL_KEYFRAME,0xffffffff);
+	configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_MDL_KEYFRAME,-1);
 
 	// The 
 	// AI_CONFIG_IMPORT_MDL_KEYFRAME option overrides the
 	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
-	if(0xffffffff == configFrameID)	{
+	if(static_cast<unsigned int>(-1) == configFrameID)	{
 		configFrameID =  pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
 	}
 
@@ -356,8 +356,8 @@ void MDLImporter::InternReadFile_Quake1( )
 		else
 		{
 			szCurrent += sizeof(uint32_t);
-			unsigned int iSkip = i ? 0xffffffff : 0;
-			this->CreateTexture_3DGS_MDL4(szCurrent,pcSkin->group,&iSkip);
+			unsigned int iSkip = i ? UINT_MAX : 0;
+			CreateTexture_3DGS_MDL4(szCurrent,pcSkin->group,&iSkip);
 			szCurrent += iSkip;
 		}
 	}
@@ -552,7 +552,7 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 		pcSkin = (BE_NCONST  MDL::Skin*)szCurrent;
 		AI_SWAP4( pcSkin->group);
 		// create one output image
-		unsigned int iSkip = i ? 0xffffffff : 0;
+		unsigned int iSkip = i ? UINT_MAX : 0;
 		if (5 <= iGSFileVersion)
 		{
 			// MDL5 format could contain MIPmaps
@@ -1240,14 +1240,14 @@ void MDLImporter::SortByMaterials_3DGS_MDL7(
 			if (iMatIndex >= iNumMaterials)	{
 				// sometimes MED writes -1, but normally only if there is only
 				// one skin assigned. No warning in this case
-				if(0xffffffff != iMatIndex)
+				if(UINT_MAX != iMatIndex)
 					DefaultLogger::get()->warn("Index overflow in MDL7 material list [#1]");
 				iMatIndex = iNumMaterials-1;
 			}
 			unsigned int iMatIndex2 = groupData.pcFaces[iFace].iMatIndex[1];
 
 			unsigned int iNum = iMatIndex;
-			if (0xffffffff != iMatIndex2 && iMatIndex != iMatIndex2)	{
+			if (UINT_MAX != iMatIndex2 && iMatIndex != iMatIndex2)	{
 				if (iMatIndex2 >= iNumMaterials)	{
 					// sometimes MED writes -1, but normally only if there is only
 					// one skin assigned. No warning in this case
@@ -1447,7 +1447,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 			groupData.vPositions.resize(iNumVertices);
 			groupData.vNormals.resize(iNumVertices);
 
-			if (sharedData.apcOutBones)groupData.aiBones.resize(iNumVertices,0xffffffff);
+			if (sharedData.apcOutBones)groupData.aiBones.resize(iNumVertices,UINT_MAX);
 
 			// it is also possible that there are 0 UV coordinate sets
 			if (groupInfo.pcGroup->num_stpts){
@@ -1847,7 +1847,7 @@ void MDLImporter::GenerateOutputMeshes_3DGS_MDL7(
 					// iterate through all face indices
 					for (unsigned int c = 0; c < 3;++c)	{
 						unsigned int iBone = groupData.aiBones[ oldFace.mIndices[c] ];
-						if (0xffffffff != iBone)	{
+						if (UINT_MAX != iBone)	{
 							if (iBone >= iNumOutBones)	{
 								DefaultLogger::get()->error("Bone index overflow. "
 									"The bone index of a vertex exceeds the allowed range. ");

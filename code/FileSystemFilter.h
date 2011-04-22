@@ -50,6 +50,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsingUtils.h"
 namespace Assimp	{
 
+inline bool IsHex(char s) {
+	return (s>='0' && s<='9') || (s>='a' && s<='f') || (s>='A' && s<='F');	
+}
+
 // ---------------------------------------------------------------------------
 /** File system filter  
  */
@@ -226,9 +230,8 @@ private:
 			else if (*it == '%' && in.end() - it > 2) {
 			
 				// Hex sequence in URIs
-				uint32_t tmp;
-				if( 0xffffffff != (tmp = HexOctetToDecimal(&*it))) {
-					*it = (char)tmp;
+				if( IsHex((&*it)[0]) && IsHex((&*it)[1]) ) {
+					*it = HexOctetToDecimal(&*it);
 					it = in.erase(it+1,it+2);
 					--it;
 				}

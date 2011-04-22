@@ -187,10 +187,8 @@ void MDCImporter::SetupProperties(const Importer* pImp)
 {
 	// The AI_CONFIG_IMPORT_MDC_KEYFRAME option overrides the
 	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
-	if(0xffffffff == (this->configFrameID = pImp->GetPropertyInteger(
-		AI_CONFIG_IMPORT_MDC_KEYFRAME,0xffffffff)))
-	{
-		this->configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
+	if(static_cast<unsigned int>(-1) == (configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_MDC_KEYFRAME,-1))){
+		configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
 	}
 }
 
@@ -251,7 +249,7 @@ void MDCImporter::InternReadFile(
 		pScene->mMeshes[i] = NULL;
 
 	// now read all surfaces
-	unsigned int iDefaultMatIndex = 0xffffffff;
+	unsigned int iDefaultMatIndex = UINT_MAX;
 	for (unsigned int i = 0, iNum = 0; i < pcHeader->ulNumSurfaces;++i)
 	{
 		if (!pcSurface->ulNumVertices || !pcSurface->ulNumTriangles)continue;
@@ -276,7 +274,7 @@ void MDCImporter::InternReadFile(
 				::strlen(pcShader->ucName),sizeof(pcShader->ucName)) ));
 		}
 		// need to create a default material
-		else if (0xffffffff == iDefaultMatIndex)
+		else if (UINT_MAX == iDefaultMatIndex)
 		{
 			pcMesh->mMaterialIndex = iDefaultMatIndex = (unsigned int)aszShaders.size();
 			aszShaders.push_back(std::string());

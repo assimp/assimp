@@ -401,7 +401,7 @@ void StandardShapes::MakeCone(float height,float radius1,
 		std::swap(radius2,radius1);
 		halfHeight = -halfHeight;
 	}
-	else old = 0xffffffff;
+	else old = SIZE_MAX;
 
 	// Use a large epsilon to check whether the cone is pointy
 	if (radius1 < (radius2-radius1)*10e-3f)radius1 = 0.f;
@@ -460,10 +460,10 @@ void StandardShapes::MakeCone(float height,float radius1,
 	}
 
 	// Need to flip face order?
-	if (0xffffffff != old )
-	{
-		for (size_t s = old; s < positions.size();s += 3)
+	if ( SIZE_MAX != old )	{
+		for (size_t s = old; s < positions.size();s += 3) {
 			std::swap(positions[s],positions[s+1]);
+		}
 	}
 }
 

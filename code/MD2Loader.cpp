@@ -111,8 +111,8 @@ void MD2Importer::SetupProperties(const Importer* pImp)
 	// The 
 	// AI_CONFIG_IMPORT_MD2_KEYFRAME option overrides the
 	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
-	configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_MD2_KEYFRAME,0xffffffff);
-	if(0xffffffff == configFrameID){
+	configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_MD2_KEYFRAME,-1);
+	if(static_cast<unsigned int>(-1) == configFrameID){
 		configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
 	}
 }

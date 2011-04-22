@@ -92,7 +92,7 @@ void UpdateNodes(const std::vector<unsigned int>& replaceMeshIndex, aiNode* node
 			unsigned int add = node->mMeshes[m]<<2;
 			for (unsigned int i = 0; i < 4;++i)
 			{
-				if (0xffffffff != replaceMeshIndex[add+i])++newSize;
+				if (UINT_MAX != replaceMeshIndex[add+i])++newSize;
 			}
 		}
 		if (!newSize)
@@ -112,7 +112,7 @@ void UpdateNodes(const std::vector<unsigned int>& replaceMeshIndex, aiNode* node
 				unsigned int add = node->mMeshes[m]<<2;
 				for (unsigned int i = 0; i < 4;++i)
 				{
-					if (0xffffffff != replaceMeshIndex[add+i])
+					if (UINT_MAX != replaceMeshIndex[add+i])
 						*newMeshes++ = replaceMeshIndex[add+i];
 				}
 			}
@@ -147,7 +147,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 
 	bool bAnyChanges = false;
 
-	std::vector<unsigned int> replaceMeshIndex(pScene->mNumMeshes*4,0xffffffff);
+	std::vector<unsigned int> replaceMeshIndex(pScene->mNumMeshes*4,UINT_MAX);
 	std::vector<unsigned int>::iterator meshIdx = replaceMeshIndex.begin();
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
 	{

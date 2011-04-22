@@ -349,7 +349,7 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 	DefaultLogger::get()->debug("MD5AnimParser begin");
 
 	fFrameRate = 24.0f;
-	mNumAnimatedComponents = 0xffffffff;
+	mNumAnimatedComponents = UINT_MAX;
 	for (SectionList::const_iterator iter =  mSections.begin(), iterEnd = mSections.end();iter != iterEnd;++iter) {
 		if ((*iter).mName == "hierarchy")	{
 			// "sheath"	0 63 6 
@@ -398,8 +398,9 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 			desc.iIndex = strtoul10((*iter).mGlobalValue.c_str());
 
 			// we do already know how much storage we will presumably need
-			if (0xffffffff != mNumAnimatedComponents)
+			if (UINT_MAX != mNumAnimatedComponents) {
 				desc.mValues.reserve(mNumAnimatedComponents);
+			}
 
 			// now read all elements (continous list of floats)
 			for (ElementList::const_iterator eit = (*iter).mElements.begin(), eitEnd = (*iter).mElements.end(); eit != eitEnd; ++eit){
@@ -418,8 +419,9 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 			mAnimatedBones.reserve(num);
 
 			// try to guess the number of animated components if that element is not given
-			if (0xffffffff == mNumAnimatedComponents)
+			if (UINT_MAX  == mNumAnimatedComponents) {
 				mNumAnimatedComponents = num * 6;
+			}
 		}
 		else if((*iter).mName == "numAnimatedComponents")	{
 			mAnimatedBones.reserve( strtoul10((*iter).mGlobalValue.c_str()));

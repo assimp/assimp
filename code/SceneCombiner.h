@@ -76,7 +76,7 @@ struct NodeAttachmentInfo
 		:	node			(NULL)
 		,	attachToNode	(NULL)
 		,	resolved		(false)
-		,	src_idx			(0xffffffff)
+		,	src_idx			(SIZE_MAX)
 	{}
 
 	NodeAttachmentInfo(aiNode* _scene, aiNode* _attachToNode,size_t idx)

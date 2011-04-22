@@ -279,7 +279,7 @@ private:
 	 *
 	 *  @param materials Receives an output material
 	 *  @param inmaterials List of input materials
-	 *  @param defMatIdx Default material index - 0xffffffff if not there
+	 *  @param defMatIdx Default material index - UINT_MAX if not present
 	 *  @param mesh Mesh to work on
 	 */
 	void CopyMaterial(std::vector<aiMaterial*>&	 materials,

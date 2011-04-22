@@ -111,11 +111,11 @@ inline unsigned int strtoul16( const char* in, const char** out=0)
 
 // ------------------------------------------------------------------------------------
 // Convert just one hex digit
-// Return value is 0xffffffff if the input is not hex
+// Return value is UINT_MAX if the input character is not a hex digit.
 // ------------------------------------------------------------------------------------
 inline unsigned int HexDigitToDecimal(char in)
 {
-	unsigned int out = 0xffffffff;
+	unsigned int out = UINT_MAX;
 	if (in >= '0' && in <= '9')
 		out = in - '0';
 
@@ -125,13 +125,12 @@ inline unsigned int HexDigitToDecimal(char in)
 	else if (in >= 'A' && in <= 'F')
 		out = 10u + in - 'A';
 
-	// return value is 0xffffffff if the input is not a hex digit
+	// return value is UINT_MAX if the input is not a hex digit
 	return out;
 }
 
 // ------------------------------------------------------------------------------------
-// Convert a hex-encoded octet (2 characters processed)
-// Return value is 0xffffffff if the input is not hex
+// Convert a hex-encoded octet (2 characters, i.e. df or 1a).
 // ------------------------------------------------------------------------------------
 inline uint8_t HexOctetToDecimal(const char* in)
 {

@@ -243,7 +243,7 @@ void IRRImporter::CopyMaterial(std::vector<aiMaterial*>& materials,
 {
 	if (inmaterials.empty())	{
 		// Do we have a default material? If not we need to create one
-		if (0xffffffff == defMatIdx)
+		if (UINT_MAX == defMatIdx)
 		{
 			defMatIdx = (unsigned int)materials.size();
 			MaterialHelper* mat = new MaterialHelper();
@@ -1397,7 +1397,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 	/* Now process our scenegraph recursively: generate final
 	 * meshes and generate animation channels for all nodes.
 	 */
-	unsigned int defMatIdx = 0xffffffff;
+	unsigned int defMatIdx = UINT_MAX;
 	GenerateGraph(root,tempScene->mRootNode, tempScene,
 		batch, meshes, anims, attach, materials, defMatIdx);
 

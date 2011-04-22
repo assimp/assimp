@@ -248,11 +248,11 @@ public:
 	/** Setup a temporary read limit
 	 * 
 	 *  @param limit Maximum number of bytes to be read from
-	 *    the beginning of the file. Passing 0xffffffff
+	 *    the beginning of the file. Specifying UINT_MAX
 	 *    resets the limit to the original end of the stream. */
 	void SetReadLimit(unsigned int _limit)	{
 
-		if (0xffffffff == _limit) {
+		if (UINT_MAX == _limit) {
 			limit = end;
 			return;
 		}

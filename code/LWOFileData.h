@@ -431,10 +431,10 @@ struct Texture
 	};
 
 	Texture()
-		: mClipIdx(0xffffffff)
+		: mClipIdx(UINT_MAX)
 		, mStrength			(1.0f)
 		, mUVChannelIndex	("unknown")
-		, mRealUVIndex		(0xffffffff)
+		, mRealUVIndex		(UINT_MAX)
 		, enabled			(true)
 		, blendType			(Additive)
 		, bCanUse			(true)
@@ -645,7 +645,7 @@ struct Layer
 	PointList mTempPoints;
 
 	/** Lists for every point the index of another point
-	    that has been copied from *this* point or 0xffffffff if
+	    that has been copied from *this* point or UINT_MAX if
 		no copy of the point has been made */
 	ReferrerList mPointReferrers;
 

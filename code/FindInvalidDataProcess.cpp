@@ -90,7 +90,7 @@ void UpdateMeshReferences(aiNode* node, const std::vector<unsigned int>& meshMap
 		for (unsigned int a = 0; a < node->mNumMeshes;++a)	{
 
 			register unsigned int ref = node->mMeshes[a];
-			if (0xffffffff != (ref = meshMapping[ref]))	{
+			if (UINT_MAX != (ref = meshMapping[ref]))	{
 				node->mMeshes[out++] = ref;
 			}
 		}
@@ -130,7 +130,7 @@ void FindInvalidDataProcess::Execute( aiScene* pScene)
 				delete pScene->mMeshes[a];
 				AI_DEBUG_INVALIDATE_PTR(pScene->mMeshes[a]);
 
-				meshMapping[a] = 0xffffffff;
+				meshMapping[a] = UINT_MAX;
 				continue;
 			}
 		}

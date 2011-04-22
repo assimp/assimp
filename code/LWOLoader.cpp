@@ -91,7 +91,7 @@ bool LWOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 void LWOImporter::SetupProperties(const Importer* pImp)
 {
 	configSpeedFlag  = ( 0 != pImp->GetPropertyInteger(AI_CONFIG_FAVOUR_SPEED,0) ? true : false);
-	configLayerIndex = pImp->GetPropertyInteger (AI_CONFIG_IMPORT_LWO_ONE_LAYER_ONLY,0xffffffff); 
+	configLayerIndex = pImp->GetPropertyInteger (AI_CONFIG_IMPORT_LWO_ONE_LAYER_ONLY,UINT_MAX); 
 	configLayerName  = pImp->GetPropertyString  (AI_CONFIG_IMPORT_LWO_ONE_LAYER_ONLY,"");
 }
 
@@ -181,7 +181,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		// The newer lightwave format allows the user to configure the
 		// loader that just one layer is used. If this is the case
 		// we need to check now whether the requested layer has been found.
-		if (0xffffffff != configLayerIndex && configLayerIndex > mLayers->size())
+		if (UINT_MAX != configLayerIndex && configLayerIndex > mLayers->size())
 			throw DeadlyImportError("LWO2: The requested layer was not found");
 
 		if (configLayerName.length() && !hasNamedLayer)	{
@@ -200,7 +200,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	apcNodes. reserve(mLayers->size());
 	apcMeshes.reserve(mLayers->size()*std::min(((unsigned int)mSurfaces->size()/2u), 1u));
 
-	unsigned int iDefaultSurface = 0xffffffff; // index of the default surface
+	unsigned int iDefaultSurface = UINT_MAX; // index of the default surface
 	for (LayerList::iterator lit = mLayers->begin(), lend = mLayers->end();lit != lend;++lit)	{
 		LWO::Layer& layer = *lit;
 		if (layer.skip)
@@ -225,10 +225,10 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 				if (idx >= mTags->size())
 				{
 					DefaultLogger::get()->warn("LWO: Invalid face surface index");
-					idx = 0xffffffff;
+					idx = UINT_MAX;
 				}
-				if(0xffffffff == idx || 0xffffffff == (idx = _mMapping[idx]))	{
-					if (0xffffffff == iDefaultSurface)	{
+				if(UINT_MAX == idx || UINT_MAX == (idx = _mMapping[idx]))	{
+					if (UINT_MAX == iDefaultSurface)	{
 						iDefaultSurface = (unsigned int)mSurfaces->size();
 						mSurfaces->push_back(LWO::Surface());
 						LWO::Surface& surf = mSurfaces->back();
@@ -239,7 +239,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 				}
 				pSorted[idx].push_back(i);
 			}
-			if (0xffffffff == iDefaultSurface) {
+			if (UINT_MAX == iDefaultSurface) {
 				pSorted.erase(pSorted.end()-1);
 			}
 			for (unsigned int p = 0,i = 0;i < mSurfaces->size();++i)	{
@@ -268,10 +268,12 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 				unsigned int vVColorIndices[AI_MAX_NUMBER_OF_COLOR_SETS];
 
 #if _DEBUG
-				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_TEXTURECOORDS;++mui )
-					vUVChannelIndices[mui] = 0xffffffff;
-				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_COLOR_SETS;++mui )
-					vVColorIndices[mui] = 0xffffffff;
+				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_TEXTURECOORDS;++mui ) {
+					vUVChannelIndices[mui] = UINT_MAX;
+				}
+				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_COLOR_SETS;++mui ) {
+					vVColorIndices[mui] = UINT_MAX;
+				}
 #endif
 
 				FindUVChannels(_mSurfaces[i],sorted,layer,vUVChannelIndices);
@@ -280,8 +282,9 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 				// allocate storage for UV and CV channels
 				aiVector3D* pvUV[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_TEXTURECOORDS;++mui )	{
-					if (0xffffffff == vUVChannelIndices[mui])
+					if (UINT_MAX == vUVChannelIndices[mui]) {
 						break;
+					}
 					
 					pvUV[mui] = mesh->mTextureCoords[mui] = new aiVector3D[mesh->mNumVertices];
 
@@ -294,7 +297,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		
 				aiColor4D* pvVC[AI_MAX_NUMBER_OF_COLOR_SETS];
 				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_COLOR_SETS;++mui)	{
-					if (0xffffffff == vVColorIndices[mui]) {
+					if (UINT_MAX == vVColorIndices[mui]) {
 						break;
 					}
 					pvVC[mui] = mesh->mColors[mui] = new aiColor4D[mesh->mNumVertices];
@@ -319,8 +322,9 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 
 						// process UV coordinates
 						for (unsigned int w = 0; w < AI_MAX_NUMBER_OF_TEXTURECOORDS;++w)	{
-							if (0xffffffff == vUVChannelIndices[w])
+							if (UINT_MAX == vUVChannelIndices[w]) {
 								break;
+							}
 							aiVector3D*& pp = pvUV[w];
 							const aiVector2D& src = ((aiVector2D*)&layer.mUVChannels[vUVChannelIndices[w]].rawData[0])[idx];
 							pp->x = src.x;
@@ -337,8 +341,9 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 
 						// process vertex colors
 						for (unsigned int w = 0; w < AI_MAX_NUMBER_OF_COLOR_SETS;++w)	{
-							if (0xffffffff == vVColorIndices[w])
+							if (UINT_MAX == vVColorIndices[w]) {
 								break;
+							}
 							*pvVC[w] = ((aiColor4D*)&layer.mVColorChannels[vVColorIndices[w]].rawData[0])[idx];
 
 							// If a RGB color map is explicitly requested delete the
@@ -614,7 +619,7 @@ void LWOImporter::GenerateNodeGraph(std::vector<aiNode*>& apcNodes)
 void LWOImporter::ResolveTags()
 {
 	// --- this function is used for both LWO2 and LWOB
-	mMapping->resize(mTags->size(),0xffffffff);
+	mMapping->resize(mTags->size(), UINT_MAX);
 	for (unsigned int a = 0; a  < mTags->size();++a)	{
 
 		const std::string& c = (*mTags)[a];
@@ -711,7 +716,7 @@ void LWOImporter::LoadLWOPoints(unsigned int length)
 
 		// initialize all point referrers with the default values
 		mCurLayer->mPointReferrers.reserve	( regularSize + (regularSize>>2u) );
-		mCurLayer->mPointReferrers.resize	( regularSize, 0xffffffff );
+		mCurLayer->mPointReferrers.resize	( regularSize, UINT_MAX );
 	}
 	else mCurLayer->mTempPoints.resize( regularSize );
 
@@ -897,7 +902,7 @@ inline void LWOImporter::DoRecursiveVMAPAssignment(VMapEntry* base, unsigned int
 		base->rawData[idx*base->dims+i]= data[i];
 	}
 
-	if (0xffffffff != (i = refList[idx])) {
+	if (UINT_MAX != (i = refList[idx])) {
 		DoRecursiveVMAPAssignment(base,numRead,i,data);
 	}
 }
@@ -905,7 +910,7 @@ inline void LWOImporter::DoRecursiveVMAPAssignment(VMapEntry* base, unsigned int
 // ------------------------------------------------------------------------------------------------
 inline void AddToSingleLinkedList(ReferrerList& refList, unsigned int srcIdx, unsigned int destIdx)
 {
-	if(0xffffffff == refList[srcIdx])	{
+	if(UINT_MAX == refList[srcIdx])	{
 		refList[srcIdx] = destIdx;
 		return;
 	}
@@ -1030,12 +1035,13 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 						if (tmp == srcIdx)
 							break;
 					}
-					while ((tmp = refList[tmp]) != 0xffffffff);
-					if (tmp == 0xffffffff)
+					while ((tmp = refList[tmp]) != UINT_MAX);
+					if (tmp == UINT_MAX) {
 						continue;
+					}
 
 					had = true;
-					refList.resize(refList.size()+1, 0xffffffff);
+					refList.resize(refList.size()+1, UINT_MAX);
 						
 					idx = (unsigned int)pointList.size();
 					src.mIndices[i] = (unsigned int)pointList.size();
@@ -1282,7 +1288,7 @@ void LWOImporter::LoadLWO2File()
 
 				// Continue loading this layer or ignore it? Check the layer index property
 				// NOTE: The first layer is the default layer, so the layer index is one-based now
-				if (0xffffffff != configLayerIndex && configLayerIndex != mLayers->size()-1)	{
+				if (UINT_MAX != configLayerIndex && configLayerIndex != mLayers->size()-1)	{
 					skip = true;
 				}
 				else skip = false;

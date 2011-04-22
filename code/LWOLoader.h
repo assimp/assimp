@@ -227,13 +227,13 @@ private:
 		unsigned int& faces,
 		uint16_t*& cursor, 
 		const uint16_t* const end,
-		unsigned int max = 0xffffffff);
+		unsigned int max = UINT_MAX);
 
 	void CountVertsAndFacesLWOB(unsigned int& verts, 
 		unsigned int& faces,
 		LE_NCONST uint16_t*& cursor, 
 		const uint16_t* const end,
-		unsigned int max = 0xffffffff);
+		unsigned int max = UINT_MAX);
 
 	// -------------------------------------------------------------------
 	/** Read vertices and faces in a LWOB/LWO2 file
@@ -246,7 +246,7 @@ private:
 	void CopyFaceIndicesLWOB(LWO::FaceList::iterator& it,
 		LE_NCONST uint16_t*& cursor, 
 		const uint16_t* const end, 
-		unsigned int max = 0xffffffff);
+		unsigned int max = UINT_MAX);
 
 	// -------------------------------------------------------------------
 	/** Resolve the tag and surface lists that have been loaded.
@@ -376,7 +376,7 @@ protected:
 	TagList* mTags;
 
 	/** Mapping table to convert from tag to surface indices.
-	    0xffffffff indicates that a no corresponding surface is available */
+	    UINT_MAX indicates that a no corresponding surface is available */
 	TagMappingTable* mMapping;
 
 	/** Temporary surface list from the file */

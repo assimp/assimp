@@ -1887,7 +1887,7 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 
 	// Allocate enough storage for the normals
 	sMesh.mNormals.resize(sMesh.mFaces.size()*3,aiVector3D( 0.f, 0.f, 0.f ));
-	unsigned int index, faceIdx = 0xffffffff;
+	unsigned int index, faceIdx = UINT_MAX;
 
 	// FIXME: rewrite this and find out how to interpret the normals
 	// correctly. This is crap.
@@ -1897,7 +1897,7 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 	while (true)	{
 		if ('*' == *filePtr)	{
 			++filePtr;
-			if (faceIdx != 0xffffffff && TokenMatch(filePtr,"MESH_VERTEXNORMAL",17))	{
+			if (faceIdx != UINT_MAX && TokenMatch(filePtr,"MESH_VERTEXNORMAL",17))	{
 				aiVector3D vNormal;
 				ParseLV4MeshFloatTriple(&vNormal.x,index);
 				if (faceIdx >=  sMesh.mFaces.size())

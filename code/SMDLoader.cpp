@@ -86,16 +86,15 @@ void SMDImporter::SetupProperties(const Importer* pImp)
 	// The 
 	// AI_CONFIG_IMPORT_SMD_KEYFRAME option overrides the
 	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
-	configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_SMD_KEYFRAME,0xffffffff);
-	if(0xffffffff == configFrameID)	{
+	configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_SMD_KEYFRAME,-1);
+	if(static_cast<unsigned int>(-1) == configFrameID)	{
 		configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure. 
-void SMDImporter::InternReadFile( 
-	const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
+void SMDImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
@@ -254,7 +253,7 @@ void SMDImporter::CreateOutputMeshes()
 		iFace =  asTriangles.begin();
 		iFace != asTriangles.end();++iFace,++iNum)
 	{
-		if (0xffffffff == (*iFace).iTexture)aaiFaces[(*iFace).iTexture].push_back( 0 );
+		if (UINT_MAX == (*iFace).iTexture)aaiFaces[(*iFace).iTexture].push_back( 0 );
 		else if ((*iFace).iTexture >= aszTextures.size())
 		{
 			DefaultLogger::get()->error("[SMD/VTA] Material index overflow in face");
@@ -354,7 +353,7 @@ void SMDImporter::CreateOutputMeshes()
 				// that the parent of a vertex is 0xffffffff (if the corresponding
 				// entry in the file was unreadable)
 				// ******************************************************************
-				if (fSum < 0.975f && face.avVertices[iVert].iParentNode != 0xffffffff)
+				if (fSum < 0.975f && face.avVertices[iVert].iParentNode != UINT_MAX)
 				{
 					if (face.avVertices[iVert].iParentNode >= asBones.size())
 					{

@@ -71,7 +71,7 @@ struct Face
 /** COB chunk header information */
 struct ChunkInfo
 {
-	enum {NO_SIZE=0xffffffff};
+	enum {NO_SIZE=UINT_MAX};
 
 	ChunkInfo ()
 		:	id        (0)
@@ -218,7 +218,7 @@ struct Material : ChunkInfo
 	};
 
 	Material() : alpha(),exp(),ior(),ka(),ks(1.f),
-		matnum(0xffffffff),
+		matnum(UINT_MAX),
 		shader(FLAT),autofacet(FACETED),
 		autofacet_angle()
 	{}

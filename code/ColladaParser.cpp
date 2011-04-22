@@ -1968,7 +1968,7 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 	// determine number of indices coming per vertex 
 	// find the offset index for all per-vertex channels
 	size_t numOffsets = 1;
-	size_t perVertexOffset = 0xffffffff; // invalid value
+	size_t perVertexOffset = SIZE_MAX; // invalid value
 	BOOST_FOREACH( const InputChannel& channel, pPerIndexChannels)
 	{
 		numOffsets = std::max( numOffsets, channel.mOffset+1);

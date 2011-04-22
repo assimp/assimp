@@ -108,7 +108,7 @@ size_t DefaultIOStream::FileSize() const
 		return 0;
 	}
 	
-	if (0xffffffff == cachedSize) {
+	if (SIZE_MAX == cachedSize) {
 
 		// TODO: Is that really faster if we're already owning a handle to the file?
 #if defined _WIN32 && !defined __GNUC__

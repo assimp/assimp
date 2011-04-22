@@ -227,7 +227,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 		v.bone_id[0] = stream.GetI1(); 
 		v.ref_cnt = stream.GetI1();
 
-		v.bone_id[1] = v.bone_id[2] = v.bone_id[3] = 0xffffffff;
+		v.bone_id[1] = v.bone_id[2] = v.bone_id[3] = UINT_MAX;
 		v.weights[1] = v.weights[2] = v.weights[3] = 0.f;
 		v.weights[0] = 1.f;
 	}
@@ -279,7 +279,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 			t.triangles[i] = stream.GetI2(); 
 		}
 		t.mat = stream.GetI1(); 
-		if (t.mat == 0xffffffff) {
+		if (t.mat == UINT_MAX) {
 			need_default = true;
 		}
 	}
@@ -402,7 +402,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
 		for (unsigned int i = 0; i < groups.size(); ++i) {
 			TempGroup& g = groups[i];
-			if (g.mat == 0xffffffff) {
+			if (g.mat == UINT_MAX) {
 				g.mat = materials.size()-1;
 			}
 		}
@@ -491,7 +491,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
 				const TempVertex& v = vertices[t.indices[i]];
 				for(unsigned int a = 0; a < 4; ++a) {
-					if (v.bone_id[a] != 0xffffffff) {
+					if (v.bone_id[a] != UINT_MAX) {
 						if (v.bone_id[a] >= joints.size()) {
 							throw DeadlyImportError("MS3D: Encountered invalid bone index, file is malformed");
 						}
@@ -533,7 +533,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 					const TempVertex& v = vertices[t.indices[i]];
 					for(unsigned int a = 0; a < 4; ++a) {
 						const unsigned int bone = v.bone_id[a];
-						if(bone==0xffffffff){
+						if(bone==UINT_MAX){
 							continue;
 						}
 

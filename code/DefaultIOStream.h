@@ -110,7 +110,7 @@ private:
 inline DefaultIOStream::DefaultIOStream () : 
 	mFile		(NULL), 
 	mFilename	(""),
-	cachedSize	(0xffffffff)
+	cachedSize	(SIZE_MAX)
 {
 	// empty
 }
@@ -121,7 +121,7 @@ inline DefaultIOStream::DefaultIOStream (FILE* pFile,
 		const std::string &strFilename) :
 	mFile(pFile), 
 	mFilename(strFilename),
-	cachedSize	(0xffffffff)
+	cachedSize	(SIZE_MAX)
 {
 	// empty
 }

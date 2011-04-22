@@ -120,7 +120,7 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, a
 				break;
 			case LWO::Texture::UV:
 				{
-					if( 0xffffffff == (*it).mRealUVIndex )	{
+					if( UINT_MAX == (*it).mRealUVIndex )	{
 						// We have no UV index for this texture, so we can't display it
 						continue;
 					}
@@ -390,7 +390,7 @@ char LWOImporter::FindUVChannels(LWO::TextureList& list,
 			ret = 1;
 		
 			// got it.
-			if ((*it).mRealUVIndex == 0xffffffff || (*it).mRealUVIndex == next)
+			if ((*it).mRealUVIndex == UINT_MAX || (*it).mRealUVIndex == next)
 			{
 				(*it).mRealUVIndex = next;
 			}
@@ -467,7 +467,7 @@ void LWOImporter::FindUVChannels(LWO::Surface& surf,
 		}
 	}
 	if (extra < AI_MAX_NUMBER_OF_TEXTURECOORDS) {
-		out[extra] = 0xffffffff;
+		out[extra] = UINT_MAX;
 	}
 }
 
@@ -515,7 +515,7 @@ void LWOImporter::FindVCChannels(const LWO::Surface& surf, LWO::SortedRep& sorte
 		}
 	}
 	if (next != AI_MAX_NUMBER_OF_COLOR_SETS) {
-		out[next] = 0xffffffff;
+		out[next] = UINT_MAX;
 	}
 }
 

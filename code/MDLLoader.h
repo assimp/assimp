@@ -298,7 +298,7 @@ protected:
 	 * \param iType type of the texture data. No DDS or external
 	 * \param piSkip Receive the number of bytes to skip
 	 * \param pcNew Must point to fully initialized data. Width and 
-	 *        height must be set. If pcNew->pcData is set to 0xffffffff,
+	 *        height must be set. If pcNew->pcData is set to UINT_MAX,
 	 *        piSkip will receive the size of the texture, in bytes, but no
 	 *        color data will be read.
 	 */

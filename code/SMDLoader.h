@@ -69,7 +69,7 @@ namespace SMD	{
 */
 struct Vertex
 {
-	Vertex() : iParentNode(0xffffffff)
+	Vertex() : iParentNode(UINT_MAX)
 	 {}
 
 	//! Vertex position, normal and texture coordinate
@@ -106,7 +106,7 @@ struct Face
 struct Bone
 {
 	//! Default constructor
-	Bone() : iParent(0xffffffff), bIsUsed(false)
+	Bone() : iParent(UINT_MAX), bIsUsed(false)
 	{
 	}
 

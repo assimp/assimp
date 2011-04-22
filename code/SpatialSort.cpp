@@ -310,7 +310,7 @@ void SpatialSort::FindIdenticalPositions( const aiVector3D& pPosition,
 // ------------------------------------------------------------------------------------------------
 unsigned int SpatialSort::GenerateMappingTable(std::vector<unsigned int>& fill,float pRadius) const
 {
-	fill.resize(mPositions.size(),0xffffffff);
+	fill.resize(mPositions.size(),UINT_MAX);
 	float dist, maxDist;
 
 	unsigned int t=0;

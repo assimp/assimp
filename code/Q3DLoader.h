@@ -94,7 +94,7 @@ private:
 		Material()
 			:	diffuse			(0.6f,0.6f,0.6f)
 			,	transparency	(0.f)
-			,	texIdx			(0xffffffff)
+			,	texIdx			(UINT_MAX)
 		{}
 
 		aiString name;

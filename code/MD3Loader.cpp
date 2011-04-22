@@ -431,8 +431,8 @@ void MD3Importer::SetupProperties(const Importer* pImp)
 	// The 
 	// AI_CONFIG_IMPORT_MD3_KEYFRAME option overrides the
 	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
-	configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_MD3_KEYFRAME,0xffffffff);
-	if(0xffffffff == configFrameID) {
+	configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_MD3_KEYFRAME,-1);
+	if(static_cast<unsigned int>(-1) == configFrameID) {
 		configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
 	}
 
@@ -469,7 +469,7 @@ void MD3Importer::ReadSkin(Q3Shader::SkinData& fill) const
 void MD3Importer::ReadShader(Q3Shader::ShaderData& fill) const
 {
 	// Determine Q3 model name from given path
-	std::string::size_type s = path.find_last_of("\\/",path.length()-2);
+	const std::string::size_type s = path.find_last_of("\\/",path.length()-2);
 	const std::string model_file = path.substr(s+1,path.length()-(s+2));
 
 	// If no specific dir or file is given, use our default search behaviour
@@ -481,7 +481,7 @@ void MD3Importer::ReadShader(Q3Shader::ShaderData& fill) const
 	else {
 		// If the given string specifies a file, load this file.
 		// Otherwise it's a directory.
-		std::string::size_type st = configShaderFile.find_last_of('.');
+		const std::string::size_type st = configShaderFile.find_last_of('.');
 		if (st == std::string::npos) {
 			
 			if(!Q3Shader::LoadShader(fill,configShaderFile + model_file + ".shader",mIOHandler)) {

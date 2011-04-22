@@ -243,17 +243,17 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 	ai_assert(NULL != _dest);
 
 	// if _dest points to NULL allocate a new scene. Otherwise clear the old and reuse it
-	if (srcList.empty())
-	{
-		if (*_dest)
-		{
+	if (srcList.empty())	{
+		if (*_dest)	{
 			(*_dest)->~aiScene();
 			SceneCombiner::CopySceneFlat(_dest,master);
 		}
 		else *_dest = master;
 		return;
 	}
-	if (*_dest)(*_dest)->~aiScene();
+	if (*_dest) {
+		(*_dest)->~aiScene();
+	}
 	else *_dest = new aiScene();
 
 	aiScene* dest = *_dest;
@@ -265,20 +265,22 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 	}
 
 	// this helper array specifies which scenes are duplicates of others
-	std::vector<unsigned int> duplicates(src.size(),0xffffffff);
+	std::vector<unsigned int> duplicates(src.size(),UINT_MAX);
 
 	// this helper array is used as lookup table several times
 	std::vector<unsigned int> offset(src.size());
 
 	// Find duplicate scenes
-	for (unsigned int i = 0; i < src.size();++i)
-	{
-		if (duplicates[i] != i && duplicates[i] != 0xffffffff)continue;
+	for (unsigned int i = 0; i < src.size();++i) {
+		if (duplicates[i] != i && duplicates[i] != UINT_MAX) {
+			continue;
+		}
+			
 		duplicates[i] = i;
-		for ( unsigned int a = i+1; a < src.size(); ++a)
-		{
-			if (src[i].scene == src[a].scene)
+		for ( unsigned int a = i+1; a < src.size(); ++a)	{
+			if (src[i].scene == src[a].scene) {
 				duplicates[a] = i;
+			}
 		}
 	}
 

@@ -70,11 +70,11 @@ void ScenePreprocessor::ProcessScene ()
 
 		// Check whether there are meshes with at least one set of uv coordinates ... add a dummy texture for them
 		// meshes without texture coordinates receive a boring gray default material.
-		unsigned int mat0 = 0xffffffff, mat1 = 0xffffffff;
+		unsigned int mat0 = UINT_MAX, mat1 = UINT_MAX;
 		for (unsigned int i = 0; i < scene->mNumMeshes;++i) {
 			if (scene->mMeshes[i]->mTextureCoords[0]) {
 
-				if (mat0 == 0xffffffff) {
+				if (mat0 == UINT_MAX) {
 
 					scene->mMaterials[scene->mNumMaterials] = helper = new MaterialHelper();
 					name.Set("$texture.png");
@@ -88,9 +88,8 @@ void ScenePreprocessor::ProcessScene ()
 				}
 				scene->mMeshes[i]->mMaterialIndex = mat0;
 			}
-			else
-			{
-				if (mat1 == 0xffffffff) {
+			else	{
+				if (mat1 == UINT_MAX) {
 
 					scene->mMaterials[scene->mNumMaterials] = helper = new MaterialHelper();
 					aiColor3D clr(0.6f,0.6f,0.6f);

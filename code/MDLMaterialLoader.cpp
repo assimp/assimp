@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MDLDefaultColorMap.h"
 
 using namespace Assimp;
+static aiTexel* const bad_texel = reinterpret_cast<aiTexel*>(SIZE_MAX);
 
 // ------------------------------------------------------------------------------------------------
 // Find a suitable pallette file or take teh default one
@@ -177,14 +178,14 @@ void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char* szData,
 		return;
 	}
 
-	bool bNoRead = *piSkip == 0xffffffff;
+	const bool bNoRead = *piSkip == UINT_MAX;
 
 	// allocate a new texture object
 	aiTexture* pcNew = new aiTexture();
 	pcNew->mWidth = pcHeader->skinwidth;
 	pcNew->mHeight = pcHeader->skinheight;
 
-	if (bNoRead)pcNew->pcData = (aiTexel*)0xffffffff;
+	if (bNoRead)pcNew->pcData = bad_texel;
 	ParseTextureColorData(szData,iType,piSkip,pcNew);
 
 	// store the texture
@@ -221,9 +222,12 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 	unsigned int* piSkip,
 	aiTexture* pcNew)
 {
+	const bool do_read = bad_texel != pcNew->pcData;
+
 	// allocate storage for the texture image
-	if ((aiTexel*)0xffffffff != pcNew->pcData)
+	if (do_read) {
 		pcNew->pcData = new aiTexel[pcNew->mWidth * pcNew->mHeight];
+	}
 
 	// R5G6B5 format (with or without MIPs)
 	// ****************************************************************
@@ -233,7 +237,7 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 
 		// copy texture data
 		unsigned int i;
-		if ((aiTexel*)0xffffffff != pcNew->pcData) 
+		if (do_read) 
 		{
 			for (i = 0; i < pcNew->mWidth*pcNew->mHeight;++i)
 			{
@@ -264,7 +268,7 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 
 		// copy texture data
 		unsigned int i;
-		if ((aiTexel*)0xffffffff != pcNew->pcData) 
+		if (do_read) 
 		{
 			for (i = 0; i < pcNew->mWidth*pcNew->mHeight;++i)
 			{
@@ -295,7 +299,7 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 
 		// copy texture data
 		unsigned int i;
-		if ((aiTexel*)0xffffffff != pcNew->pcData)
+		if (do_read)
 		{
 			for (i = 0; i < pcNew->mWidth*pcNew->mHeight;++i)
 			{
@@ -326,7 +330,7 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 
 		// copy texture data
 		unsigned int i;
-		if ((aiTexel*)0xffffffff != pcNew->pcData)
+		if (do_read)
 		{
 			for (i = 0; i < pcNew->mWidth*pcNew->mHeight;++i)
 			{
@@ -355,11 +359,11 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 
 		// copy texture data
 		unsigned int i;
-		if ((aiTexel*)0xffffffff != pcNew->pcData) 
+		if (do_read) 
 		{
 
 			const unsigned char* szColorMap;
-			this->SearchPalette(&szColorMap);
+			SearchPalette(&szColorMap);
 
 			for (i = 0; i < pcNew->mWidth*pcNew->mHeight;++i)
 			{
@@ -388,7 +392,7 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char* szData,
 	unsigned int* piSkip)
 {
 	ai_assert(NULL != piSkip);
-	bool bNoRead = *piSkip == 0xffffffff;
+	bool bNoRead = *piSkip == UINT_MAX;
 
 	// allocate a new texture object
 	aiTexture* pcNew = new aiTexture();
@@ -404,12 +408,14 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char* szData,
 	AI_SWAP4(pcNew->mHeight); 
 	szData += sizeof(uint32_t);
 
-	if (bNoRead)pcNew->pcData = (aiTexel*)0xffffffff;
+	if (bNoRead) {
+		pcNew->pcData = bad_texel;
+	}
 
-	// this should not occur - at least the docs say it shouldn't
-	// however, you can easily try out what MED does if you have
+	// this should not occur - at least the docs say it shouldn't.
+	// however, one can easily try out what MED does if you have
 	// a model with a DDS texture and export it to MDL5 ...
-	// yes, you're right. It embedds the DDS texture ... :cry:
+	// yeah, it embedds the DDS file.
 	if (6 == iType)
 	{
 		// this is a compressed texture in DDS format
@@ -418,8 +424,7 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char* szData,
 
 		if (!bNoRead)
 		{
-			// place a hint and let the application know that it's
-			// a DDS file
+			// place a hint and let the application know that this is a DDS file
 			pcNew->mHeight = 0;
 			pcNew->achFormatHint[0] = 'd';
 			pcNew->achFormatHint[1] = 'd';
@@ -433,8 +438,7 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char* szData,
 	else
 	{
 		// parse the color data of the texture
-		ParseTextureColorData(szData,iType,
-			piSkip,pcNew);
+		ParseTextureColorData(szData,iType,piSkip,pcNew);
 	}
 	*piSkip += sizeof(uint32_t) * 2;
 
@@ -565,7 +569,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 			pcNew->mHeight = iHeight;
 
 			unsigned int iSkip = 0;
-			this->ParseTextureColorData(szCurrent,iMasked,&iSkip,pcNew);
+			ParseTextureColorData(szCurrent,iMasked,&iSkip,pcNew);
 
 			// skip length of texture data
 			szCurrent += iSkip;
@@ -576,7 +580,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	// texture instead of material colors ... posssible they have
 	// been converted to MDL7 from other formats, such as MDL5
 	aiColor4D clrTexture;
-	if (pcNew)clrTexture = this->ReplaceTextureWithColor(pcNew);
+	if (pcNew)clrTexture = ReplaceTextureWithColor(pcNew);
 	else clrTexture.r = get_qnan();
 	
 	// check whether a material definition is contained in the skin
@@ -637,9 +641,9 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 
 #undef COLOR_MULITPLY_RGB
 
-		// FIX: Take the opacity from the ambient color
-		// the doc says something else, but it is fact that MED exports the
-		// opacity like this .... ARRRGGHH!
+		// FIX: Take the opacity from the ambient color.
+		// The doc say something else, but it is fact that MED exports the
+		// opacity like this .... oh well.
 		clrTemp.r = pcMatIn->Ambient.a;
 		AI_SWAP4(clrTemp.r);  
 		if (is_not_qnan(clrTexture.r)) {
@@ -670,7 +674,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 		pcNew = NULL;
 	}
 
-	// if an ASCII effect description (HLSL?) is contained in the file,
+	// If an ASCII effect description (HLSL?) is contained in the file,
 	// we can simply ignore it ...
 	if (iType & AI_MDL7_SKINTYPE_MATERIAL_ASCDEF)
 	{
@@ -683,7 +687,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 
 	// If an embedded texture has been loaded setup the corresponding
 	// data structures in the aiScene instance
-	if (pcNew && this->pScene->mNumTextures <= 999)
+	if (pcNew && pScene->mNumTextures <= 999)
 	{
 
 		// place this as diffuse texture
@@ -698,21 +702,22 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 		pcMatOut->AddProperty(&szFile,AI_MATKEY_TEXTURE_DIFFUSE(0));
 
 		// store the texture
-		if (!this->pScene->mNumTextures)
+		if (!pScene->mNumTextures)
 		{
-			this->pScene->mNumTextures = 1;
-			this->pScene->mTextures = new aiTexture*[1];
-			this->pScene->mTextures[0] = pcNew;
+			pScene->mNumTextures = 1;
+			pScene->mTextures = new aiTexture*[1];
+			pScene->mTextures[0] = pcNew;
 		}
 		else
 		{
-			aiTexture** pc = this->pScene->mTextures;
-			this->pScene->mTextures = new aiTexture*[this->pScene->mNumTextures+1];
-			for (unsigned int i = 0; i < this->pScene->mNumTextures;++i)
-				this->pScene->mTextures[i] = pc[i];
+			aiTexture** pc = pScene->mTextures;
+			pScene->mTextures = new aiTexture*[pScene->mNumTextures+1];
+			for (unsigned int i = 0; i < pScene->mNumTextures;++i) {
+				pScene->mTextures[i] = pc[i];
+			}
 
-			this->pScene->mTextures[this->pScene->mNumTextures] = pcNew;
-			this->pScene->mNumTextures++;
+			pScene->mTextures[pScene->mNumTextures] = pcNew;
+			pScene->mNumTextures++;
 			delete[] pc;
 		}
 	}
@@ -730,7 +735,7 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
 	unsigned int iHeight)
 {
 	// get the type of the skin
-	unsigned int iMasked = (unsigned int)(iType & 0xF);
+	const unsigned int iMasked = (unsigned int)(iType & 0xF);
 
 	if (0x6 == iMasked)
 	{
@@ -745,15 +750,15 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
 	{
 		if (iMasked || !iType || (iType && iWidth && iHeight))
 		{
-			// ParseTextureColorData(..., aiTexture::pcData == 0xffffffff) will simply
+			// ParseTextureColorData(..., aiTexture::pcData == bad_texel) will simply
 			// return the size of the color data in bytes in iSkip
 			unsigned int iSkip = 0;
 
 			aiTexture tex;
-			tex.pcData = reinterpret_cast<aiTexel*>(0xffffffff);
+			tex.pcData = bad_texel;
 			tex.mHeight = iHeight;
 			tex.mWidth = iWidth;
-			this->ParseTextureColorData(szCurrent,iMasked,&iSkip,&tex);
+			ParseTextureColorData(szCurrent,iMasked,&iSkip,&tex);
 
 			// FIX: Important, otherwise the destructor will crash
 			tex.pcData = NULL;

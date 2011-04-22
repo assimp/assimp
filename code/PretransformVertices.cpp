@@ -353,7 +353,7 @@ void PretransformVertices::BuildWCSMeshes(std::vector<aiMesh*>& out, aiMesh** in
 	unsigned int numIn, aiNode* node)
 {
 	// NOTE:
-	//  aiMesh::mNumBones store original source mesh, or 0xffffffff if not a copy
+	//  aiMesh::mNumBones store original source mesh, or UINT_MAX if not a copy
 	//  aiMesh::mBones store reference to abs. transform we multiplied with
 
 	// process meshes
@@ -364,7 +364,7 @@ void PretransformVertices::BuildWCSMeshes(std::vector<aiMesh*>& out, aiMesh** in
 		if (!mesh->mBones || *reinterpret_cast<aiMatrix4x4*>(mesh->mBones) == node->mTransformation) {
 			// yes, we can.
 			mesh->mBones = reinterpret_cast<aiBone**> (&node->mTransformation);
-			mesh->mNumBones = 0xffffffff;
+			mesh->mNumBones = UINT_MAX;
 		}
 		else {
 		

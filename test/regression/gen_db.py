@@ -132,7 +132,7 @@ def extract_zip():
     try:
         zipout = zipfile.ZipFile(settings.database_name + ".zip", "r", 0)
         zipout.extractall(path=settings.database_name)
-    except RuntimeError as r:
+    except (RuntimeError,IOError) as r:
         print(r)
         print("failed to extract previous ZIP contents. "\
               "DB is generated from scratch.")

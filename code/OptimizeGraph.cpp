@@ -303,6 +303,11 @@ void OptimizeGraphProcess::Execute( aiScene* pScene)
 
 	ai_assert(nodes.size() == 1);
 
+	if (dummy_root->mNumChildren == 0) {
+		pScene->mRootNode = NULL;
+		throw DeadlyImportError("After optimizing the scene graph, no data remains");
+	}
+
 	if (dummy_root->mNumChildren > 1) {
 		pScene->mRootNode = dummy_root;
 	

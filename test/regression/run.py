@@ -124,8 +124,8 @@ class results:
     def report_results(self):
         """Write results to ../results/run_regression_suite_failures.txt"""
 
-        print("\n" + ('='*60) + "\n" + "SUCCESS: {0}\r\nFAILURE: {1}".format(
-            len(self.success), len(self.failures)) + 
+        print("\n" + ('='*60) + "\n" + "SUCCESS: {0}\nFAILURE: {1}\nPercentage good: {2}".format(
+            len(self.success), len(self.failures), len(self.success)/(len(self.success)+len(self.failures))  ) + 
               "\n" + ('='*60) + "\n")
 
         with open(os.path.join('..', 'results',outfilename_failur), "wt") as f:
@@ -185,15 +185,18 @@ def process_dir(d, outfile_results, zipin, result):
             if r and not failure:
                 result.fail(fullpath, outfile_expect, pppreset, IMPORT_FAILURE, r)
                 continue
-            elif failure:
+            elif failure and not r:
                 result.fail(fullpath, outfile_expect, pppreset, EXPECTED_FAILURE_NOT_MET)
                 continue
             
             with open(outfile_expect, "wb") as s:
                 s.write(input_expected) 
-                
-            with open(outfile_actual, "rb") as s:
-                input_actual = s.read() 
+
+            try:    
+                with open(outfile_actual, "rb") as s:
+                    input_actual = s.read() 
+            except IOError:
+                continue
                 
             if len(input_expected) != len(input_actual):
                 result.fail(fullpath, outfile_expect, pppreset, DATABASE_LENGTH_MISMATCH,

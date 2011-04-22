@@ -92,6 +92,10 @@ def process_dir(d, outfile, file_filter):
                 outfile.flush()
                 if subprocess.call(cmd, stdout=outfile, stderr=outfile, shell=False):
                     print("Failure processing " + fullp)
+
+                    # spit out an empty file to indicate that this failure is expected
+                    with open(outf,'wb') as f:
+                        pass
     return num
                     
 

@@ -60,7 +60,7 @@ exclude_extensions = [".lws",".assbin",".assxml",".txt",".jpeg",".jpg",".png",".
 # The defaults are (validate-data-structure is always enabled, for
 # self-explanatory reasons :-):
 #
-# '-cfull'    :apply all post processing except 'og' (optimize-scenegraph)
+# '-cfull'    :apply all post processing except 'og' and 'ptv' (optimize-scenegraph)
 # '-og -om'   :run optimize-scenegraph in combination with optimize-meshes.
 # '-vds -jiv' :join-identical-vertices alone. This is a hotspot where
 #              floating-point inaccuracies can cause severe damage.

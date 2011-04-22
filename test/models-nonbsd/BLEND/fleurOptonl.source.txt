@@ -1,0 +1,92 @@
+Modelled in Blender, textured in Gimp.
+
+
+Questo modello e' rilasciato sotto Creative Commons Licence, Attribution 2.0
+per maggiori informazioni su questa licenza:
+http://creativecommons.org
+http://creativecommons.org/licenses/by/2.0/it/
+Puoi utilizzarlo liberamente, modificarlo e migliorarlo.
+
+************* Ma attenzione!! *********************
+
+Nel modificare e utilizzare i modelli, ricorda comunque sempre che :
+"il diritto morale all'integrità dell'opera (diritto dell'autore originale) non ti consente di apportare all'opera deformazioni o modificazioni, od ogni altro atto a danno dell'opera stessa, che possano essere di pregiudizio all'onore o alla reputazione dell'autore (la valutazione della lesione dell'onore o della reputazione avviene sulla base di elementi psicologici soggettivi)" 
+(dalle faq di Creative Commons Italia)
+http://www.creativecommons.it/node/165#27
+
+Patti chiari, amicizia lunga.
+In particolare, sara' da me considerata lesione d'onore l'uso e/o l'adattamento di questi modelli per progetti legati a:
+
+	Razzismo e incitamento all'odio.
+	Promozione della guerra.
+	Crudelta' verso gli animali.
+	Propaganda politica e religiosa.
+	Pornografia.
+	Promozione di comportamenti illegali o immorali.
+
+Se lo fate rischiate la denuncia e il risarcimento danni.
+Per qualsiasi chiarimento in proposito potete comunque scrivermi.
+Questo e' un diritto garantito per legge a me come ad ogni altro artista. 
+L'utilizzo della Creative Commons non influisce su questo diritto.
+
+************************************************
+
+This model is released under Creative Commons Licence, Attribution 2.0
+for informations see:
+http://creativecommons.org
+http://creativecommons.org/licenses/by/2.0/
+feel free to use and improve it.
+
+
+*****************But beware!*********************
+
+In most countries, the author of visual art is legally granted to keep Integrity of his
+work, so you are not allowed to do exactely what you want with my models.
+The author (that is me) has the right to prevent distortion, mutilation, or other modification of his work which would be prejudicial to his or her honor or reputation.
+
+Me, i consider to be prejudicial to my honor, the modification and/or the use of my models in projects that are related to:
+ 
+	Racism and hatred instigation.
+	War promotion.
+	Cruelty toward animals.
+	Political an religious propaganda.
+	Pornography.
+	Outlaw and unethical behaviours encouragement.
+
+This right is granted to me, and to every other artist, no matter if Attribution Licence is applied too. Creative Commons Licence leaves moral rights unaffected.
+
+*********************************************************************
+
+
+By Tiziana aka TiZeta.
+http://www.unbruco.it/offcircle/index.html
+unbrucom1@unbruco.it
+tialo@tiscali.it
+
+##################
+
+Note
+
+Questo e' stato il mio secondo modello completo.
+Per questo motivo potrebbe contenere errori e imprecisioni.
+ 
+Al momento, questi sono i difetti che ho notato:
+	
+	- Non e' nell'origine degli assi.
+	- lo scheletro ha il centro spostato di lato
+	- Nel texture sheet c'e' spazio sprecato.
+	
+
+	
+###################
+
+Notes
+
+This was my first complete model, so it probably contains something
+wrong.
+
+At the moment, this is what i noticed:
+	
+	- She's not in the origin of axis
+	- Armature's center is not in armature's center.
+	- Texture sheet contains wasted space.

@@ -642,9 +642,9 @@ void CompareOnTheFlyNodeAnim(comparer_context& comp)	{
 	comp.cmp<uint32_t>("mPreState");
 	comp.cmp<uint32_t>("mPostState");
 
-	comp.cmp_bounds<aiVector3D>("mPositionKeys");
-	comp.cmp_bounds<aiVector3D>("mRotationKeys");
-	comp.cmp_bounds<aiVector3D>("mScalingKeys");
+	comp.cmp_bounds<aiVectorKey>("mPositionKeys");
+	comp.cmp_bounds<aiQuatKey>("mRotationKeys");
+	comp.cmp_bounds<aiVectorKey>("mScalingKeys");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

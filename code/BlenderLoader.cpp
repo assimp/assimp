@@ -790,7 +790,7 @@ void BlenderImporter::ConvertMesh(const Scene& in, const Object* obj, const Mesh
 
 	// collect texture coordinates, old-style (marked as deprecated in current blender sources)
 	if (mesh->tface) {
-		if (mesh->totface > static_cast<int> ( mesh->mtface.size())) {
+		if (mesh->totface > static_cast<int> ( mesh->tface.size())) {
 			ThrowException("Number of faces is larger than the corresponding UV face array (#2)");
 		}
 		for (std::vector<aiMesh*>::iterator it = temp->begin()+old; it != temp->end(); ++it) {

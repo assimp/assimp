@@ -151,10 +151,7 @@ Q3BSPFileImporter::~Q3BSPFileImporter()
 		}
 
 		std::vector<Q3BSP::sQ3BSPFace*> *pCurFaceArray = (*it).second;
-		if ( NULL != pCurFaceArray )
-		{
-			delete pCurFaceArray;
-		}
+		delete pCurFaceArray;
 	}
 	m_MaterialLookupMap.clear();
 }
@@ -163,13 +160,11 @@ Q3BSPFileImporter::~Q3BSPFileImporter()
 //	Returns true, if the loader can read this.
 bool Q3BSPFileImporter::CanRead( const std::string& rFile, IOSystem* pIOHandler, bool checkSig ) const
 {
-	bool isBSPData = false;
-	if ( checkSig )
-	{
-		isBSPData = SimpleExtensionCheck( rFile, Q3BSPExtension .c_str() );
+	if(!checkSig) {
+		return SimpleExtensionCheck( rFile, Q3BSPExtension .c_str() );
 	}
-
-	return isBSPData;
+	// TODO perhaps add keyword based detection
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------

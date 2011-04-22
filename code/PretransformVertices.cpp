@@ -537,40 +537,41 @@ void PretransformVertices::Execute( aiScene* pScene)
 			}
 		}
 
-		// now delete all meshes in the scene and build a new mesh list
-		for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-		{
-			aiMesh* mesh = pScene->mMeshes[i];
-			mesh->mNumBones = 0;
-			mesh->mBones    = NULL;
-
-			// we're reusing the face index arrays. avoid destruction
-			for (unsigned int a = 0; a < mesh->mNumFaces; ++a) {
-				mesh->mFaces[a].mNumIndices = 0;
-				mesh->mFaces[a].mIndices = NULL;
-			}
-
-			delete mesh;
-
-			// Invalidate the contents of the old mesh array. We will most
-			// likely have less output meshes now, so the last entries of 
-			// the mesh array are not overridden. We set them to NULL to 
-			// make sure the developer gets notified when his application
-			// attempts to access these fields ...
-			mesh = NULL;
-		}
-
 		// If no meshes are referenced in the node graph it is possible that we get no output meshes. 
 		if (apcOutMeshes.empty())	{		
-			throw DeadlyImportError("No output meshes: all meshes are orphaned and are not referenced by nodes");
+			throw DeadlyImportError("No output meshes: all meshes are orphaned and are not referenced by any nodes");
 		}
 		else
 		{
+			// now delete all meshes in the scene and build a new mesh list
+			for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+			{
+				aiMesh* mesh = pScene->mMeshes[i];
+				mesh->mNumBones = 0;
+				mesh->mBones    = NULL;
+
+				// we're reusing the face index arrays. avoid destruction
+				for (unsigned int a = 0; a < mesh->mNumFaces; ++a) {
+					mesh->mFaces[a].mNumIndices = 0;
+					mesh->mFaces[a].mIndices = NULL;
+				}
+
+				delete mesh;
+
+				// Invalidate the contents of the old mesh array. We will most
+				// likely have less output meshes now, so the last entries of 
+				// the mesh array are not overridden. We set them to NULL to 
+				// make sure the developer gets notified when his application
+				// attempts to access these fields ...
+				mesh = NULL;
+			}
+
 			// It is impossible that we have more output meshes than 
 			// input meshes, so we can easily reuse the old mesh array
 			pScene->mNumMeshes = (unsigned int)apcOutMeshes.size();
-			for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+			for (unsigned int i = 0; i < pScene->mNumMeshes;++i) {
 				pScene->mMeshes[i] = apcOutMeshes[i];
+			}
 		}
 	}
 

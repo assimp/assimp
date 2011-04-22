@@ -173,6 +173,7 @@ void MD5Importer::LoadFileIntoMemory (IOStream* file)
 
 	ai_assert(NULL != file);
 	fileSize = (unsigned int)file->FileSize();
+	ai_assert(fileSize);
 
 	// allocate storage and copy the contents of the file to a memory buffer
 	pScene = pScene;
@@ -334,8 +335,8 @@ void MD5Importer::LoadMD5MeshFile ()
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
-	if( file.get() == NULL)	{
-		DefaultLogger::get()->warn("Failed to read MD5MESH file: " + pFile);
+	if( file.get() == NULL || !file->FileSize())	{
+		DefaultLogger::get()->warn("Failed to access MD5MESH file: " + pFile);
 		return;
 	}
 	bHadMD5Mesh = true;
@@ -550,7 +551,7 @@ void MD5Importer::LoadMD5AnimFile ()
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
-	if( file.get() == NULL)	{
+	if( !file.get() || !file->FileSize())	{
 		DefaultLogger::get()->warn("Failed to read MD5ANIM file: " + pFile);
 		return;
 	}
@@ -665,7 +666,7 @@ void MD5Importer::LoadMD5CameraFile ()
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
-	if( file.get() == NULL)	{
+	if( !file.get() || !file->FileSize())	{
 		throw DeadlyImportError("Failed to read MD5CAMERA file: " + pFile);
 	}
 	bHadMD5Camera = true;

@@ -420,8 +420,13 @@ uint32_t WriteBinaryMesh(const aiMesh* mesh)
 			for (unsigned int a = 0; a < job;++a) {
 
 				const aiFace& f = mesh->mFaces[processed+a];
-				hash = SuperFastHash((const char*)&f.mNumIndices,sizeof(unsigned int),hash);
-				hash = SuperFastHash((const char*) f.mIndices,f.mNumIndices*sizeof(unsigned int),hash);
+				uint32_t tmp = f.mNumIndices;
+				hash = SuperFastHash(reinterpret_cast<const char*>(&tmp),sizeof tmp,hash);
+				for (unsigned int i = 0; i < f.mNumIndices; ++i) {
+					BOOST_STATIC_ASSERT(AI_MAX_VERTICES <= 0xffffffff);
+					tmp = static_cast<uint32_t>( f.mIndices[i] );
+					hash = SuperFastHash(reinterpret_cast<const char*>(&tmp),sizeof tmp,hash);
+				}
 			}
 			len += Write<unsigned int>(hash);
 		}
@@ -432,12 +437,9 @@ uint32_t WriteBinaryMesh(const aiMesh* mesh)
 		for (unsigned int i = 0; i < mesh->mNumFaces;++i) {
 			const aiFace& f = mesh->mFaces[i];
 
-			if (f.mNumIndices >= (1u<<16)) {
-				printf("The assbin format doesn't support polygons with more than 65536 vertices");
-				return -1;
-			}
-
+			BOOST_STATIC_ASSERT(AI_MAX_FACE_INDICES <= 0xffff);
 			len += Write<uint16_t>(f.mNumIndices);
+
 			for (unsigned int a = 0; a < f.mNumIndices;++a) {
 				if (mesh->mNumVertices < (1u<<16)) {
 					len += Write<uint16_t>(f.mIndices[a]);

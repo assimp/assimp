@@ -108,7 +108,7 @@ inline uint32_t WriteMagic(uint32_t magic)
 // use template specializations rather than regular overloading to be able to 
 // explicitly select the right 'overload' to leave no doubts on what is called,
 // retaining the possibility of letting the compiler select.
-template <typename T> uint32_t Write(const T&) {};
+template <typename T> uint32_t Write(const T&);
 
 // -----------------------------------------------------------------------------------
 // Serialize an aiString
@@ -127,6 +127,11 @@ template <>
 inline uint32_t Write<unsigned int>(const unsigned int& w)
 {
 	const uint32_t t = (uint32_t)w;
+	if (w > t) {
+		// this shouldn't happen, integers in Assimp data structures never exceed 2^32
+		printf("loss of data due to 64 -> 32 bit integer conversion");
+	}
+	
 	fwrite(&t,4,1,out);
 	return 4;
 }
@@ -145,6 +150,7 @@ inline uint32_t Write<uint16_t>(const uint16_t& w)
 template <>
 inline uint32_t Write<float>(const float& f)
 {
+	BOOST_STATIC_ASSERT(sizeof(float)==4);
 	fwrite(&f,4,1,out);
 	return 4;
 }
@@ -154,6 +160,7 @@ inline uint32_t Write<float>(const float& f)
 template <>
 inline uint32_t Write<double>(const double& f)
 {
+	BOOST_STATIC_ASSERT(sizeof(double)==8);
 	fwrite(&f,8,1,out);
 	return 8;
 }
@@ -163,8 +170,44 @@ inline uint32_t Write<double>(const double& f)
 template <>
 inline uint32_t Write<aiVector3D>(const aiVector3D& v)
 {
-	fwrite(&v,12,1,out);
-	return 12;
+	uint32_t t = Write<float>(v.x);
+	t += Write<float>(v.y);
+	t += Write<float>(v.z);
+	return t;
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize a color value
+template <>
+inline uint32_t Write<aiColor4D>(const aiColor4D& v)
+{
+	uint32_t t = Write<float>(v.r);
+	t += Write<float>(v.g);
+	t += Write<float>(v.b);
+	t += Write<float>(v.a);
+	return t;
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize a quaternion
+template <>
+inline uint32_t Write<aiQuaternion>(const aiQuaternion& v)
+{
+	uint32_t t = Write<float>(v.w);
+	t += Write<float>(v.x);
+	t += Write<float>(v.y);
+	t += Write<float>(v.z);
+	return 16;
+}
+
+
+// -----------------------------------------------------------------------------------
+// Serialize a vertex weight
+template <>
+inline uint32_t Write<aiVertexWeight>(const aiVertexWeight& v)
+{
+	uint32_t t = Write<unsigned int>(v.mVertexId);
+	return t+Write<float>(v.mWeight);
 }
 
 // -----------------------------------------------------------------------------------

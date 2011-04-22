@@ -416,7 +416,7 @@ uint32_t WriteBinaryMesh(const aiMesh* mesh)
 		unsigned int processed = 0;
 		for (unsigned int job;job = std::min(mesh->mNumFaces-processed,512u);processed += job) {
 
-			unsigned int hash = 0;
+			uint32_t hash = 0;
 			for (unsigned int a = 0; a < job;++a) {
 
 				const aiFace& f = mesh->mFaces[processed+a];

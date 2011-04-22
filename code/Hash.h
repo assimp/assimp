@@ -42,9 +42,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_HASH_H_INCLUDED
 
 // ------------------------------------------------------------------------------------------------
-// hashing function taken from 
+// Hashing function taken from 
 // http://www.azillionmonkeys.com/qed/hash.html
-// (incremental version of the hashing function)
+// (incremental version)
+//
+// This code is Copyright 2004-2008 by Paul Hsieh. It is used here in the belief that
+// Assimp's license is considered compatible with Pauls's derivative license as specified
+// on his web page.
+//
 // (stdint.h should have been been included here)
 // ------------------------------------------------------------------------------------------------
 #undef get16bits
@@ -59,12 +64,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 // ------------------------------------------------------------------------------------------------
-inline unsigned int SuperFastHash (const char * data, unsigned int len = 0, unsigned int hash = 0) {
-unsigned int tmp;
+inline uint32_t SuperFastHash (const char * data, uint32_t len = 0, uint32_t hash = 0) {
+uint32_t tmp;
 int rem;
 
     if (!data) return 0;
-	if (!len)len = (unsigned int)::strlen(data);
+	if (!len)len = (uint32_t)::strlen(data);
 
     rem = len & 3;
     len >>= 2;

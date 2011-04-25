@@ -76,7 +76,6 @@ void get_bounding_box_for_node (const struct aiNode* nd,
 }
 
 // ----------------------------------------------------------------------------
-
 void get_bounding_box (struct aiVector3D* min, struct aiVector3D* max)
 {
 	struct aiMatrix4x4 trafo;
@@ -88,7 +87,6 @@ void get_bounding_box (struct aiVector3D* min, struct aiVector3D* max)
 }
 
 // ----------------------------------------------------------------------------
-
 void color4_to_float4(const struct aiColor4D *c, float f[4])
 {
 	f[0] = c->r;
@@ -98,7 +96,6 @@ void color4_to_float4(const struct aiColor4D *c, float f[4])
 }
 
 // ----------------------------------------------------------------------------
-
 void set_float4(float f[4], float a, float b, float c, float d)
 {
 	f[0] = a;
@@ -145,10 +142,14 @@ void apply_material(const struct aiMaterial *mtl)
 
 	max = 1;
 	ret1 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS, &shininess, &max);
-	max = 1;
-	ret2 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS_STRENGTH, &strength, &max);
-	if((ret1 == AI_SUCCESS) && (ret2 == AI_SUCCESS))
-		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess * strength);
+	if(ret1 == AI_SUCCESS) {
+    	max = 1;
+    	ret2 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS_STRENGTH, &strength, &max);
+		if(ret2 == AI_SUCCESS)
+			glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess * strength);
+        else
+        	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
+    }
 	else {
 		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0f);
 		set_float4(c, 0.0f, 0.0f, 0.0f, 0.0f);
@@ -164,17 +165,9 @@ void apply_material(const struct aiMaterial *mtl)
 
 	max = 1;
 	if((AI_SUCCESS == aiGetMaterialIntegerArray(mtl, AI_MATKEY_TWOSIDED, &two_sided, &max)) && two_sided)
-		glEnable(GL_CULL_FACE);
-	else 
 		glDisable(GL_CULL_FACE);
-}
-
-// ----------------------------------------------------------------------------
-
-// Can't send color down as a pointer to aiColor4D because AI colors are ABGR.
-void Color4f(const struct aiColor4D *color)
-{
-	glColor4f(color->r, color->g, color->b, color->a);
+	else 
+		glEnable(GL_CULL_FACE);
 }
 
 // ----------------------------------------------------------------------------
@@ -201,12 +194,6 @@ void recursive_render (const struct aiScene *sc, const struct aiNode* nd)
 			glEnable(GL_LIGHTING);
 		}
 
-		if(mesh->mColors[0] != NULL) {
-			glEnable(GL_COLOR_MATERIAL);
-		} else {
-			glDisable(GL_COLOR_MATERIAL);
-		}
-
 		for (t = 0; t < mesh->mNumFaces; ++t) {
 			const struct aiFace* face = &mesh->mFaces[t];
 			GLenum face_mode;
@@ -223,7 +210,7 @@ void recursive_render (const struct aiScene *sc, const struct aiNode* nd)
 			for(i = 0; i < face->mNumIndices; i++) {
 				int index = face->mIndices[i];
 				if(mesh->mColors[0] != NULL)
-					Color4f(&mesh->mColors[0][index]);
+					glColor4fv((GLfloat*)&mesh->mColors[0][index]);
 				if(mesh->mNormals != NULL) 
 					glNormal3fv(&mesh->mNormals[index].x);
 				glVertex3fv(&mesh->mVertices[index].x);
@@ -301,8 +288,8 @@ void display(void)
 int loadasset (const char* path)
 {
 	// we are taking one of the postprocessing presets to avoid
-	// writing 20 single postprocessing flags here.
-	scene = aiImportFile(path,aiProcessPreset_TargetRealtime_Quality);
+	// spelling out 20+ single postprocessing flags here.
+	scene = aiImportFile(path,aiProcessPreset_TargetRealtime_MaxQuality);
 
 	if (scene) {
 		get_bounding_box(&scene_min,&scene_max);
@@ -329,18 +316,20 @@ int main(int argc, char **argv)
 	glutReshapeFunc(reshape);
 
 	// get a handle to the predefined STDOUT log stream and attach
-	// it to the logging system. It will be active for all further
+	// it to the logging system. It remains active for all further
 	// calls to aiImportFile(Ex) and aiApplyPostProcessing.
 	stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT,NULL);
 	aiAttachLogStream(&stream);
 
-	// ... exactly the same, but this stream will now write the
-	// log file to assimp_log.txt
+	// ... same procedure, but this stream now writes the
+	// log messages to assimp_log.txt
 	stream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE,"assimp_log.txt");
 	aiAttachLogStream(&stream);
 
-	// the model name can be specified on the command line. we try to locate
-	// one of the more expressive test models from the repository.
+	// the model name can be specified on the command line. If none
+	// is specified, we try to locate one of the more expressive test 
+	// models from the repository (/models-nonbsd may be missing in 
+	// some distributions so we need a fallback from /models!).
 	if( 0 != loadasset( argc >= 2 ? argv[1] : "../../test/models-nonbsd/X/dwarf.x")) {
 		if( argc != 1 || 0 != loadasset( "../../../../test/models-nonbsd/X/dwarf.x") && 0 != loadasset( "../../test/models/X/Testwuson.X")) { 
 			return -1;

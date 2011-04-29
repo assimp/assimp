@@ -1250,7 +1250,7 @@ void ColladaParser::ReadSamplerProperties( Sampler& out )
 				TestClosing( "wrapU");
 			}
 			else if( IsElement( "wrapV"))	{
-				out.mWrapU = ReadBoolFromTextContent();
+				out.mWrapV = ReadBoolFromTextContent();
 				TestClosing( "wrapV");
 			}
 			else if( IsElement( "mirrorU"))		{
@@ -1258,7 +1258,7 @@ void ColladaParser::ReadSamplerProperties( Sampler& out )
 				TestClosing( "mirrorU");
 			}
 			else if( IsElement( "mirrorV"))	{
-				out.mMirrorU = ReadBoolFromTextContent();
+				out.mMirrorV = ReadBoolFromTextContent();
 				TestClosing( "mirrorV");
 			}
 			else if( IsElement( "repeatU"))	{
@@ -1274,7 +1274,7 @@ void ColladaParser::ReadSamplerProperties( Sampler& out )
 				TestClosing( "offsetU");
 			}
 			else if( IsElement( "offsetV"))	{
-				out.mTransform.mTranslation.x = ReadFloatFromTextContent();
+				out.mTransform.mTranslation.y = ReadFloatFromTextContent();
 				TestClosing( "offsetV");
 			}
 			else if( IsElement( "rotateUV"))	{

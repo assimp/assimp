@@ -751,7 +751,7 @@ void Parser::ParseLV3MapBlock(Texture& map)
 				std::string temp;
 				if(!ParseString(temp,"*MAP_CLASS"))
 					SkipToNextToken();
-				if (temp != "Bitmap")
+				if (temp != "Bitmap" && temp != "Normal Bump")
 				{
 					DefaultLogger::get()->warn("ASE: Skipping unknown map type: " + temp);
 					parsePath = false; 

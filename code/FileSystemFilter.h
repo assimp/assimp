@@ -195,6 +195,9 @@ private:
 	void Cleanup (std::string& in) const
 	{
 		char last = 0;
+		if(in.empty()) {
+			return;
+		}
 
 		// Remove a very common issue when we're parsing file names: spaces at the
 		// beginning of the path. 

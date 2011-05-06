@@ -1942,6 +1942,46 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="icf"
+					>
+					<File
+						RelativePath="..\..\code\IFCLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\IFCLoader.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\IFCReaderGen.cpp"
+						>
+						<FileConfiguration
+							Name="debug|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								AdditionalOptions="/bigobj"
+							/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath="..\..\code\IFCReaderGen.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\STEPFile.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\STEPFileReader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\STEPFileReader.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="postprocessing"

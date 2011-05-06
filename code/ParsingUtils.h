@@ -48,21 +48,54 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StringComparison.h"
 namespace Assimp {
 
+	// NOTE: the functions below are mostly intended as replacement for
+	// std::upper, std::lower, std::isupper, std::islower, std::isspace.
+	// we don't bother of locales. We don't want them. We want reliable
+	// (i.e. identical) results across all locales.
+
+	// The functions below accept any character type, but know only
+	// about ASCII. However, UTF-32 is the only safe ASCII superset to
+	// use since it doesn't have multibyte sequences.
+
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool IsSpace( const char_t in)
+AI_FORCE_INLINE char_t ToLower( char_t in)
+{
+	return (in >= (char_t)'A' && in <= (char_t)'Z') ? (char_t)(in+0x20) : in;
+}
+// ---------------------------------------------------------------------------------
+template <class char_t>
+AI_FORCE_INLINE char_t ToUpper( char_t in)
+{
+	return (in >= (char_t)'a' && in <= (char_t)'z') ? (char_t)(in-0x20) : in;
+}
+// ---------------------------------------------------------------------------------
+template <class char_t>
+AI_FORCE_INLINE bool IsUpper( char_t in)
+{
+	return (in >= (char_t)'A' && in <= (char_t)'Z');
+}
+// ---------------------------------------------------------------------------------
+template <class char_t>
+AI_FORCE_INLINE bool IsLower( char_t in)
+{
+	return (in >= (char_t)'a' && in <= (char_t)'z');
+}
+// ---------------------------------------------------------------------------------
+template <class char_t>
+AI_FORCE_INLINE bool IsSpace( char_t in)
 {
 	return (in == (char_t)' ' || in == (char_t)'\t');
 }
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool IsLineEnd( const char_t in)
+AI_FORCE_INLINE bool IsLineEnd( char_t in)
 {
 	return (in == (char_t)'\r' || in == (char_t)'\n' || in == (char_t)'\0');
 }
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool IsSpaceOrNewLine( const char_t in)
+AI_FORCE_INLINE bool IsSpaceOrNewLine( char_t in)
 {
 	return IsSpace<char_t>(in) || IsLineEnd<char_t>(in);
 }

@@ -314,6 +314,16 @@ SOURCE_GROUP(BLENDER FILES
 	BlenderModifier.cpp
 )
 
+SOURCE_GROUP(IFC FILES
+	IFCLoader.cpp
+	IFCLoader.h
+	IFCReaderGen.cpp
+	IFCReaderGen.h
+	STEPFile.h
+	STEPFileReader.h
+	STEPFileReader.cpp
+)
+
 SOURCE_GROUP( PostProcessing FILES
 	CalcTangentsProcess.cpp
 	CalcTangentsProcess.h
@@ -742,6 +752,13 @@ ADD_LIBRARY( assimp SHARED
 	DeboneProcess.h
 	ColladaExporter.h
 	ColladaExporter.cpp
+	IFCLoader.cpp
+	IFCLoader.h
+	IFCReaderGen.cpp
+	IFCReaderGen.h
+	STEPFile.h
+	STEPFileReader.h
+	STEPFileReader.cpp
 
 	# Necessary to show the headers in the project when using the VC++ generator:
 	BoostWorkaround/boost/math/common_factor_rt.hpp

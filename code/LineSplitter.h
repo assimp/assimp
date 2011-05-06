@@ -189,7 +189,7 @@ public:
 		return &cur;
 	}
 
-	const std::string& operator* () const {
+	std::string operator* () const {
 		return cur;
 	}
 

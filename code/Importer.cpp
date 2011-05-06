@@ -54,8 +54,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * further imports with the same Importer instance could fail/crash/burn ...
  */
 // ------------------------------------------------------------------------------------------------
-#define ASSIMP_CATCH_GLOBAL_EXCEPTIONS
-
+#ifndef ASSIMP_BUILD_DEBUG
+#	define ASSIMP_CATCH_GLOBAL_EXCEPTIONS
+#endif
 
 // ------------------------------------------------------------------------------------------------
 // Internal headers
@@ -183,6 +184,9 @@ using namespace Assimp::Formatter;
 #endif
 #ifndef ASSIMP_BUILD_NO_NDO_IMPORTER
 #	include "NDOLoader.h"
+#endif
+#ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
+#	include "IFCLoader.h"
 #endif
 
 // ------------------------------------------------------------------------------------------------
@@ -431,6 +435,9 @@ Importer::Importer()
 #endif
 #if (!defined ASSIMP_BUILD_NO_NDO_IMPORTER)
 	pimpl->mImporter.push_back( new NDOImporter() );
+#endif
+#if (!defined ASSIMP_BUILD_NO_IFC_IMPORTER)
+	pimpl->mImporter.push_back( new IFCImporter() );
 #endif
 
 	// ----------------------------------------------------------------------------

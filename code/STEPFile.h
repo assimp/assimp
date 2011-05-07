@@ -692,8 +692,9 @@ namespace STEP {
 		typedef typename T::Out OutScalar;
 		typedef ListOf Out;
 
-		BOOST_STATIC_ASSERT(min_cnt <= max_cnt || !max_cnt);
+		
 		ListOf() {
+			BOOST_STATIC_ASSERT(min_cnt <= max_cnt || !max_cnt);
 		}
 
 	};
@@ -915,7 +916,7 @@ namespace STEP {
 			return splitter;
 		}
 
-		void InternInsert(boost::shared_ptr<LazyObject> lz) {
+		void InternInsert(boost::shared_ptr<const LazyObject> lz) {
 			objects[lz->id] = lz;
 			objects_bytype.insert(std::make_pair(lz->type,lz.get()));
 		}

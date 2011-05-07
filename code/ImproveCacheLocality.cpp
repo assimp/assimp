@@ -131,6 +131,10 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
 		return 0.f;
 	}
 
+	if(pMesh->mNumVertices <= configCacheDepth) {
+		return 0.f;
+	}
+
 	float fACMR = 3.f;
 	const aiFace* const pcEnd = pMesh->mFaces+pMesh->mNumFaces;
 

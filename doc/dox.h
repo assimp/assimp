@@ -28,7 +28,8 @@ that it has not been implemented yet and some (most ...) formats lack proper spe
 <b>3D Studio Max ASE</b> ( <i>*.ase</i> ) <br>
 <b>Wavefront Object</b> ( <i>*.obj</i> ) <br>
 <b>Stanford Polygon Library</b> ( <i>*.ply</i> ) <br>
-<b>AutoCAD DXF</b> ( <i>*.dxf</i> ) <sup>2</sup><br>
+<b>AutoCAD DXF</b> ( <i>*.dxf</i> ) <br>
+<b>IFC-STEP</b> ( <i>*.ifc</i> )<br>
 <b>Neutral File Format</b> ( <i>*.nff</i> ) <br>
 <b>Sense8 WorldToolkit</b> ( <i>*.nff</i> ) <br>
 <b>Valve Model</b> ( <i>*.smd,*.vta</i> ) <sup>3</sup> <br>
@@ -794,7 +795,7 @@ set if ASSIMP is able to determine the file format.
 @section General
 
 Or - how to write your own loaders. It's easy. You just need to implement the #Assimp::BaseImporter class,
-which defines a few abstract methods, register your loader, test it carefully, and provide test models for it.
+which defines a few abstract methods, register your loader, test it carefully and provide test models for it.
 
 OK, that sounds too easy :-). The whole procedure for a new loader merely looks like this:
 
@@ -827,7 +828,7 @@ Just copy'n'paste the template from Appendix A and adapt it for your needs.
 with DefaultLogger::get()->[error, warn, debug, info].
 </li>
 <li>
-Make sure the loader compiles against all build configurations on all supported platforms. This includes <i>-noboost</i>! To avoid problems,
+Make sure that your loader compiles against all build configurations on all supported platforms. This includes <i>-noboost</i>! To avoid problems,
 see the boost section on this page for a list of all 'allowed' boost classes (again, this grew historically when we had to accept that boost
 is not THAT widely spread that one could rely on it being available everywhere).
 </li>
@@ -852,7 +853,8 @@ store the properties as a member variable of your importer, they are thread safe
 
 <ul>
 <li>Try to make your parser as flexible as possible. Don't rely on particular layout, whitespace/tab style,
-except if the file format has a strict definition.</li>
+except if the file format has a strict definition, in which case you should always warn about spec violations.
+But the general rule of thumb is <i>be strict in what you write and tolerant in what you accept</i>.</li>
 <li>Call Assimp::BaseImporter::ConvertToUTF8() before you parse anything to convert foreign encodings to UTF-8. 
  That's not necessary for XML importers, which must use the provided IrrXML for reading. </li>
 </ul>
@@ -1575,24 +1577,60 @@ Automatic multi-threading is not currently implemented.
 */
 
 /**
-@page importer_notes Importer Notes
+@page importer_notes Importer Remarks
 
+<hr>
 @section blender Blender
+
+This section provides remarks and implementations notes regarding Assimp's Blender3D importer. 
 @subsection bl_overview Overview
 
-Assimp provides a self-contained reimplementation of Blender's so called SDNA system (http://www.blender.org/development/architecture/notes-on-sdna/). 
+The library provides a self-contained reimplementation of Blender's so called SDNA system (http://www.blender.org/development/architecture/notes-on-sdna/). 
 SDNA allows Blender to be fully backward AND forward compatible and to exchange
 files created on any of the various platforms blender runs on with any other. Quick processing is another design goal - 
-BLEND is a fully-fledged binary monster and Assimp tries to read the most of it. Naturally, if Blender is the only modelling tool 
-in your asset work flow, consider writing a custom exporter from Blender if Assimp's format coverage does not meet your requirements.
+BLEND is a fully-fledged binary monster and the library tries to read the most of it. Naturally, if Blender is the only modelling tool 
+in your asset work flow, consider writing a custom exporter from Blender if Assimps format coverage does not meet your requirements.
 
 @subsection bl_status Current status
 
+The Blender loader does not support animations yet, but is apart from that considered relatively stable and well-tested.
+
 @subsection bl_notes Notes
 
+When filing bugs on the Blender loader, always give the Blender version (or, even better, post the file that has caused the error).
+
+<hr>
+@section ifc IFC
+
+This section provides remarks and implementations notes regarding Assimp's IFC-STEP importer. 
+@subsection ifc_overview Overview
+
+The library provides a partial implementation of the IFC2x3 industry standard for automatized exchange of CAE/architectural 
+data sets (i.e. buildings). See http://en.wikipedia.org/wiki/Industry_Foundation_Classes for more information on the format. We aim 
+at getting as much 3D data out of the files as possible. 
+
+@subsection ifc_status Current status
+
+IFC support is new and considered experimental. Please report any bugs you may encounter.
+
+@subsection ifc_notes Notes
+
+- Only the STEP-based encoding is supported. IFCZIP and IFCXML are not (but IFCZIP can simply be unzipped to get a STEP file out ofit).
+- The importer leaves vertex coordinates untouched, but applies a global scaling to the root transform to
+  convert from whichever unit the IFC file uses to <i>metres</i>.
+- The importer does not currently skip geometric representations for entities which have multiple representations defined - it may happen that there
+is finally more than one mesh describing the same IfcProduct. This should be an unlikely case, however, usually
+if there are multiple representations, only one of them will actually be a solid 3d model.
+- Not supported (but possible relevant for proper display of most files) are: revolved surfaces, binary clipped surfaces,
+  old-style transformations (as for IFC2), polygons with holes, textured surfaces and the various kinds of meta connections
+  provided by IFC: only aggregation, containment and material assignment relationships are resolved by the library and 
+  mapped to the output node graph.
+- The implementation knows only about IFC2X3 and applies this rule set to all models it encounters, regardless of their actual version. 
 
 
+<hr>
 @section ogre Ogre
+This section provides remarks and implementations notes regarding Assimp's OgreXML importer. 
 @subsection overview Overview
 Ogre importer is currently optimized for the Blender Ogre exporter, because thats the only one that i use. You can find the Blender Ogre exporter at: http://www.ogre3d.org/forums/viewtopic.php?f=8&t=45922
 

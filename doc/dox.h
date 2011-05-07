@@ -1626,7 +1626,7 @@ if there are multiple representations, only one of them will actually be a solid
   provided by IFC: only aggregation, containment and material assignment relationships are resolved by the library and 
   mapped to the output node graph.
 - The implementation knows only about IFC2X3 and applies this rule set to all models it encounters, regardless of their actual version. 
-
+- IFC models should be rendered with backface culling turned off.
 
 <hr>
 @section ogre Ogre

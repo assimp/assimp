@@ -649,9 +649,9 @@ void ProcessParametrizedProfile(const IFC::IfcParameterizedProfileDef& def, Temp
 
 		meshout.verts.reserve(meshout.verts.size()+4);
 		meshout.verts.push_back( aiVector3D( x, y, 0.f ));
-		meshout.verts.push_back( aiVector3D( x,-y, 0.f ));
-		meshout.verts.push_back( aiVector3D(-x,-y, 0.f ));
 		meshout.verts.push_back( aiVector3D(-x, y, 0.f ));
+		meshout.verts.push_back( aiVector3D(-x,-y, 0.f ));
+		meshout.verts.push_back( aiVector3D( x,-y, 0.f ));
 		meshout.vertcnt.push_back(4);
 	}
 	else {
@@ -721,11 +721,11 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 		// leave the triangulation of the profile area to the ear cutting 
 		// implementation in aiProcess_Triangulate - for now we just
 		// feed in a possibly huge polygon.
-		for(size_t i = 0; i < size; ++i) {
-			result.verts.push_back(in[i]);
-		}
-		for(size_t i = 0; i < size; ++i) {
+		for(size_t i = size; i--; ) {
 			result.verts.push_back(in[i]+dir);
+		}
+		for(size_t i = 0; i < size; ++i ) {
+			result.verts.push_back(in[i]);
 		}
 		result.vertcnt.push_back(size);
 		result.vertcnt.push_back(size);

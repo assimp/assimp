@@ -91,7 +91,7 @@ public:
 		, le(le)
 	{
 		ai_assert(stream); 
-		_Begin();
+		InternBegin();
 	}
 
 	// ---------------------------------------------------------------------
@@ -100,7 +100,7 @@ public:
 		, le(le)
 	{
 		ai_assert(stream);
-		_Begin();
+		InternBegin();
 	}
 
 	// ---------------------------------------------------------------------
@@ -303,8 +303,13 @@ private:
 	}
 
 	// ---------------------------------------------------------------------
-	void _Begin() {
+	void InternBegin() {
 		if (!stream) {
+			// incase someone wonders: StreamReader is frequently invoked with
+			// no prior validation whether the input stream is valid. Since
+			// no one bothers changing the error message, this message here
+			// is passed down to the caller and 'unable to open file'
+			// simply describes best what happened.
 			throw DeadlyImportError("StreamReader: Unable to open file");
 		}
 
@@ -314,8 +319,10 @@ private:
 		}
 
 		current = buffer = new int8_t[s];
-		stream->Read(current,s,1);
-		end = limit = &buffer[s];
+		const size_t read = stream->Read(current,1,s);
+		// (read < s) can only happen if the stream was opened in text mode, in which case FileSize() is not reliable
+		ai_assert(read <= s);
+		end = limit = &buffer[read];
 	}
 
 private:

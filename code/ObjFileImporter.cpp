@@ -335,14 +335,20 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 		for ( size_t vertexIndex = 0; vertexIndex < pSourceFace->m_pVertices->size(); vertexIndex++ )
 		{
 			const unsigned int vertex = pSourceFace->m_pVertices->at( vertexIndex );
-			ai_assert( vertex < pModel->m_Vertices.size() );
+			if (vertex >= pModel->m_Vertices.size()) {
+				throw DeadlyImportError("OBJ: vertex index out of range");
+			}
+			
 			pMesh->mVertices[ newIndex ] = pModel->m_Vertices[ vertex ];
 			
 			// Copy all normals 
 			if ( !pSourceFace->m_pNormals->empty() )
 			{
 				const unsigned int normal = pSourceFace->m_pNormals->at( vertexIndex );
-				ai_assert( normal < pModel->m_Normals.size() );
+				if (normal >= pModel->m_Normals.size()) {
+					throw DeadlyImportError("OBJ: vertex normal index out of range");
+				}
+
 				pMesh->mNormals[ newIndex ] = pModel->m_Normals[ normal ];
 			}
 			
@@ -401,8 +407,10 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 
 	const unsigned int numMaterials = (unsigned int) pModel->m_MaterialLib.size();
 	pScene->mNumMaterials = 0;
-	if ( pModel->m_MaterialLib.empty() )
+	if ( pModel->m_MaterialLib.empty() ) {
+		DefaultLogger::get()->debug("OBJ: no materials specified");
 		return;
+	}
 	
 	pScene->mMaterials = new aiMaterial*[ numMaterials ];
 	for ( unsigned int matIndex = 0; matIndex < numMaterials; matIndex++ )
@@ -435,7 +443,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 			break;
 		default:
 			sm = aiShadingMode_Gouraud;
-			DefaultLogger::get()->error("OBJ/MTL: Unexpected illumination model (0-2 recognized)");
+			DefaultLogger::get()->error("OBJ: unexpected illumination model (0-2 recognized)");
 		}
 		mat->AddProperty<int>( &sm, 1, AI_MATKEY_SHADING_MODEL);
 

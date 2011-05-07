@@ -388,6 +388,7 @@ void ObjFileParser::getMaterialDesc()
 	{
 		// Not found, use default material
 		m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
+		DefaultLogger::get()->error("OBJ: failed to locate material " + strName + ", skipping");
 	}
 	else
 	{

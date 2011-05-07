@@ -734,8 +734,25 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 	aiMatrix4x4 trafo;
 	ConvertAxisPlacement(trafo, solid.Position,conv);
 
+	aiVector3D vavg;
 	BOOST_FOREACH(aiVector3D& v, result.verts) {
 		v *= trafo;
+		vavg += v;
+	}
+
+	// fixup face orientation.
+	vavg /= static_cast<float>( result.verts.size() );
+
+	size_t c = 0;
+	BOOST_FOREACH(unsigned int cnt, result.vertcnt) {
+		if (cnt>2){
+			const aiVector3D& thisvert = result.verts[c];
+			const aiVector3D normal((thisvert-result.verts[c+1])^(thisvert-result.verts[c+2]));
+			if (normal*(thisvert-vavg) < 0) {
+				std::reverse(result.verts.begin()+c,result.verts.begin()+cnt+c);
+			}
+		}
+		c += cnt;
 	}
 
 	IFCImporter::LogDebug("generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)");
@@ -1188,6 +1205,7 @@ void ProcessSpatialStructures(ConversionData& conv)
 		}
 	}
 
+	
 	for(;range.first != range.second; ++range.first) {
 		const IFC::IfcSpatialStructureElement* const prod = (*range.first).second->ToPtr<IFC::IfcSpatialStructureElement>();
 		if(!prod) {
@@ -1215,6 +1233,8 @@ void ProcessSpatialStructures(ConversionData& conv)
 			}
 		}
 	}
+
+
 	IFCImporter::ThrowException("Failed to determine primary site element");
 }
 

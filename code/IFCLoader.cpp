@@ -224,7 +224,7 @@ void IFCImporter::SetupProperties(const Importer* pImp)
 void IFCImporter::InternReadFile( const std::string& pFile, 
 	aiScene* pScene, IOSystem* pIOHandler)
 {
-	boost::shared_ptr<IOStream> stream(pIOHandler->Open(pFile,"rt"));
+	boost::shared_ptr<IOStream> stream(pIOHandler->Open(pFile));
 	if (!stream) {
 		ThrowException("Could not open file for reading");
 	}

@@ -1943,7 +1943,7 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="icf"
+					Name="ifc"
 					>
 					<File
 						RelativePath="..\..\code\IFCLoader.cpp"

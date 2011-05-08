@@ -287,7 +287,7 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 		conv.materials.clear();
 	}
 
-	// apply world coordinate system (which includes the scaling to convert to metres and a -90 degrees rotation around x)
+	// apply world coordinate system (which includes the scaling to convert to meters and a -90 degrees rotation around x)
 	aiMatrix4x4 scale, rot;
 	aiMatrix4x4::Scaling(aiVector3D(conv.len_scale,conv.len_scale,conv.len_scale),scale);
 	aiMatrix4x4::RotationX(-AI_MATH_HALF_PI_F,rot);

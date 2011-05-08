@@ -431,6 +431,8 @@ namespace STEP {
 	public:
 
 		virtual ~Object() {}
+		Object(const char* classname = "unknown")
+			: classname(classname) {}
 
 	public:
 
@@ -463,11 +465,7 @@ namespace STEP {
 		}
 
 		std::string GetClassName() const {
-			// XXX this relies on unspecified behaviour - we hijack the name() field of std::type_info
-			// known to work as intended for only msvc 8, with gcc 4.5 it produces reasonable, but
-			// not totally unmangled output - we definitely need a traits-based solution here.
-			const char* s = typeid(*this).name(), *s2 = strstr(s,"Ifc");
-			return std::string(s2?s2:s);
+			return classname;
 		}
 
 		void SetID(uint64_t newval) {
@@ -476,6 +474,7 @@ namespace STEP {
 
 	private:
 		uint64_t id;
+		const char* const classname;
 	};
 
 

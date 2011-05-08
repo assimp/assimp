@@ -55,7 +55,7 @@ template_entity_predef_ni = '\ttypedef NotImplemented {entity}; // (not currentl
 template_entity = r"""
 
     // C++ wrapper for {entity}
-    struct {entity} : {parent} ObjectHelper<{entity},{argcnt}> {{
+    struct {entity} : {parent} ObjectHelper<{entity},{argcnt}> {{ {entity}() : Object("{entity}") {{}}
 {fields}
     }};"""
 

@@ -1376,7 +1376,7 @@ namespace IFC {
 
 
     // C++ wrapper for IfcRoot
-    struct IfcRoot :  ObjectHelper<IfcRoot,4> {
+    struct IfcRoot :  ObjectHelper<IfcRoot,4> { IfcRoot() : Object("IfcRoot") {}
 		IfcGloballyUniqueId::Out GlobalId;
 		Lazy< NotImplemented > OwnerHistory;
 		Maybe< IfcLabel::Out > Name;
@@ -1384,144 +1384,144 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcObjectDefinition
-    struct IfcObjectDefinition : IfcRoot, ObjectHelper<IfcObjectDefinition,0> {
+    struct IfcObjectDefinition : IfcRoot, ObjectHelper<IfcObjectDefinition,0> { IfcObjectDefinition() : Object("IfcObjectDefinition") {}
 
     };
 
     // C++ wrapper for IfcTypeObject
-    struct IfcTypeObject : IfcObjectDefinition, ObjectHelper<IfcTypeObject,2> {
+    struct IfcTypeObject : IfcObjectDefinition, ObjectHelper<IfcTypeObject,2> { IfcTypeObject() : Object("IfcTypeObject") {}
 		Maybe< IfcLabel::Out > ApplicableOccurrence;
 		Maybe< ListOf< Lazy< NotImplemented >, 1, 0 > > HasPropertySets;
     };
 
     // C++ wrapper for IfcTypeProduct
-    struct IfcTypeProduct : IfcTypeObject, ObjectHelper<IfcTypeProduct,2> {
+    struct IfcTypeProduct : IfcTypeObject, ObjectHelper<IfcTypeProduct,2> { IfcTypeProduct() : Object("IfcTypeProduct") {}
 		Maybe< ListOf< Lazy< IfcRepresentationMap >, 1, 0 > > RepresentationMaps;
 		Maybe< IfcLabel::Out > Tag;
     };
 
     // C++ wrapper for IfcElementType
-    struct IfcElementType : IfcTypeProduct, ObjectHelper<IfcElementType,1> {
+    struct IfcElementType : IfcTypeProduct, ObjectHelper<IfcElementType,1> { IfcElementType() : Object("IfcElementType") {}
 		Maybe< IfcLabel::Out > ElementType;
     };
 
     // C++ wrapper for IfcFurnishingElementType
-    struct IfcFurnishingElementType : IfcElementType, ObjectHelper<IfcFurnishingElementType,0> {
+    struct IfcFurnishingElementType : IfcElementType, ObjectHelper<IfcFurnishingElementType,0> { IfcFurnishingElementType() : Object("IfcFurnishingElementType") {}
 
     };
 
     // C++ wrapper for IfcFurnitureType
-    struct IfcFurnitureType : IfcFurnishingElementType, ObjectHelper<IfcFurnitureType,1> {
+    struct IfcFurnitureType : IfcFurnishingElementType, ObjectHelper<IfcFurnitureType,1> { IfcFurnitureType() : Object("IfcFurnitureType") {}
 		IfcAssemblyPlaceEnum::Out AssemblyPlace;
     };
 
     // C++ wrapper for IfcObject
-    struct IfcObject : IfcObjectDefinition, ObjectHelper<IfcObject,1> {
+    struct IfcObject : IfcObjectDefinition, ObjectHelper<IfcObject,1> { IfcObject() : Object("IfcObject") {}
 		Maybe< IfcLabel::Out > ObjectType;
     };
 
     // C++ wrapper for IfcProduct
-    struct IfcProduct : IfcObject, ObjectHelper<IfcProduct,2> {
+    struct IfcProduct : IfcObject, ObjectHelper<IfcProduct,2> { IfcProduct() : Object("IfcProduct") {}
 		Maybe< Lazy< IfcObjectPlacement > > ObjectPlacement;
 		Maybe< Lazy< IfcProductRepresentation > > Representation;
     };
 
     // C++ wrapper for IfcGrid
-    struct IfcGrid : IfcProduct, ObjectHelper<IfcGrid,3> {
+    struct IfcGrid : IfcProduct, ObjectHelper<IfcGrid,3> { IfcGrid() : Object("IfcGrid") {}
 		ListOf< Lazy< NotImplemented >, 1, 0 > UAxes;
 		ListOf< Lazy< NotImplemented >, 1, 0 > VAxes;
 		Maybe< ListOf< Lazy< NotImplemented >, 1, 0 > > WAxes;
     };
 
     // C++ wrapper for IfcRepresentationItem
-    struct IfcRepresentationItem :  ObjectHelper<IfcRepresentationItem,0> {
+    struct IfcRepresentationItem :  ObjectHelper<IfcRepresentationItem,0> { IfcRepresentationItem() : Object("IfcRepresentationItem") {}
 
     };
 
     // C++ wrapper for IfcGeometricRepresentationItem
-    struct IfcGeometricRepresentationItem : IfcRepresentationItem, ObjectHelper<IfcGeometricRepresentationItem,0> {
+    struct IfcGeometricRepresentationItem : IfcRepresentationItem, ObjectHelper<IfcGeometricRepresentationItem,0> { IfcGeometricRepresentationItem() : Object("IfcGeometricRepresentationItem") {}
 
     };
 
     // C++ wrapper for IfcOneDirectionRepeatFactor
-    struct IfcOneDirectionRepeatFactor : IfcGeometricRepresentationItem, ObjectHelper<IfcOneDirectionRepeatFactor,1> {
+    struct IfcOneDirectionRepeatFactor : IfcGeometricRepresentationItem, ObjectHelper<IfcOneDirectionRepeatFactor,1> { IfcOneDirectionRepeatFactor() : Object("IfcOneDirectionRepeatFactor") {}
 		Lazy< IfcVector > RepeatFactor;
     };
 
     // C++ wrapper for IfcTwoDirectionRepeatFactor
-    struct IfcTwoDirectionRepeatFactor : IfcOneDirectionRepeatFactor, ObjectHelper<IfcTwoDirectionRepeatFactor,1> {
+    struct IfcTwoDirectionRepeatFactor : IfcOneDirectionRepeatFactor, ObjectHelper<IfcTwoDirectionRepeatFactor,1> { IfcTwoDirectionRepeatFactor() : Object("IfcTwoDirectionRepeatFactor") {}
 		Lazy< IfcVector > SecondRepeatFactor;
     };
 
     // C++ wrapper for IfcElement
-    struct IfcElement : IfcProduct, ObjectHelper<IfcElement,1> {
+    struct IfcElement : IfcProduct, ObjectHelper<IfcElement,1> { IfcElement() : Object("IfcElement") {}
 		Maybe< IfcIdentifier::Out > Tag;
     };
 
     // C++ wrapper for IfcElementComponent
-    struct IfcElementComponent : IfcElement, ObjectHelper<IfcElementComponent,0> {
+    struct IfcElementComponent : IfcElement, ObjectHelper<IfcElementComponent,0> { IfcElementComponent() : Object("IfcElementComponent") {}
 
     };
 
     // C++ wrapper for IfcSpatialStructureElementType
-    struct IfcSpatialStructureElementType : IfcElementType, ObjectHelper<IfcSpatialStructureElementType,0> {
+    struct IfcSpatialStructureElementType : IfcElementType, ObjectHelper<IfcSpatialStructureElementType,0> { IfcSpatialStructureElementType() : Object("IfcSpatialStructureElementType") {}
 
     };
 
     // C++ wrapper for IfcControl
-    struct IfcControl : IfcObject, ObjectHelper<IfcControl,0> {
+    struct IfcControl : IfcObject, ObjectHelper<IfcControl,0> { IfcControl() : Object("IfcControl") {}
 
     };
 
     // C++ wrapper for IfcActionRequest
-    struct IfcActionRequest : IfcControl, ObjectHelper<IfcActionRequest,1> {
+    struct IfcActionRequest : IfcControl, ObjectHelper<IfcActionRequest,1> { IfcActionRequest() : Object("IfcActionRequest") {}
 		IfcIdentifier::Out RequestID;
     };
 
     // C++ wrapper for IfcDistributionElementType
-    struct IfcDistributionElementType : IfcElementType, ObjectHelper<IfcDistributionElementType,0> {
+    struct IfcDistributionElementType : IfcElementType, ObjectHelper<IfcDistributionElementType,0> { IfcDistributionElementType() : Object("IfcDistributionElementType") {}
 
     };
 
     // C++ wrapper for IfcDistributionFlowElementType
-    struct IfcDistributionFlowElementType : IfcDistributionElementType, ObjectHelper<IfcDistributionFlowElementType,0> {
+    struct IfcDistributionFlowElementType : IfcDistributionElementType, ObjectHelper<IfcDistributionFlowElementType,0> { IfcDistributionFlowElementType() : Object("IfcDistributionFlowElementType") {}
 
     };
 
     // C++ wrapper for IfcEnergyConversionDeviceType
-    struct IfcEnergyConversionDeviceType : IfcDistributionFlowElementType, ObjectHelper<IfcEnergyConversionDeviceType,0> {
+    struct IfcEnergyConversionDeviceType : IfcDistributionFlowElementType, ObjectHelper<IfcEnergyConversionDeviceType,0> { IfcEnergyConversionDeviceType() : Object("IfcEnergyConversionDeviceType") {}
 
     };
 
     // C++ wrapper for IfcCooledBeamType
-    struct IfcCooledBeamType : IfcEnergyConversionDeviceType, ObjectHelper<IfcCooledBeamType,1> {
+    struct IfcCooledBeamType : IfcEnergyConversionDeviceType, ObjectHelper<IfcCooledBeamType,1> { IfcCooledBeamType() : Object("IfcCooledBeamType") {}
 		IfcCooledBeamTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcCsgPrimitive3D
-    struct IfcCsgPrimitive3D : IfcGeometricRepresentationItem, ObjectHelper<IfcCsgPrimitive3D,1> {
+    struct IfcCsgPrimitive3D : IfcGeometricRepresentationItem, ObjectHelper<IfcCsgPrimitive3D,1> { IfcCsgPrimitive3D() : Object("IfcCsgPrimitive3D") {}
 		Lazy< IfcAxis2Placement3D > Position;
     };
 
     // C++ wrapper for IfcRectangularPyramid
-    struct IfcRectangularPyramid : IfcCsgPrimitive3D, ObjectHelper<IfcRectangularPyramid,3> {
+    struct IfcRectangularPyramid : IfcCsgPrimitive3D, ObjectHelper<IfcRectangularPyramid,3> { IfcRectangularPyramid() : Object("IfcRectangularPyramid") {}
 		IfcPositiveLengthMeasure::Out XLength;
 		IfcPositiveLengthMeasure::Out YLength;
 		IfcPositiveLengthMeasure::Out Height;
     };
 
     // C++ wrapper for IfcSurface
-    struct IfcSurface : IfcGeometricRepresentationItem, ObjectHelper<IfcSurface,0> {
+    struct IfcSurface : IfcGeometricRepresentationItem, ObjectHelper<IfcSurface,0> { IfcSurface() : Object("IfcSurface") {}
 
     };
 
     // C++ wrapper for IfcBoundedSurface
-    struct IfcBoundedSurface : IfcSurface, ObjectHelper<IfcBoundedSurface,0> {
+    struct IfcBoundedSurface : IfcSurface, ObjectHelper<IfcBoundedSurface,0> { IfcBoundedSurface() : Object("IfcBoundedSurface") {}
 
     };
 
     // C++ wrapper for IfcRectangularTrimmedSurface
-    struct IfcRectangularTrimmedSurface : IfcBoundedSurface, ObjectHelper<IfcRectangularTrimmedSurface,7> {
+    struct IfcRectangularTrimmedSurface : IfcBoundedSurface, ObjectHelper<IfcRectangularTrimmedSurface,7> { IfcRectangularTrimmedSurface() : Object("IfcRectangularTrimmedSurface") {}
 		Lazy< IfcSurface > BasisSurface;
 		IfcParameterValue::Out U1;
 		IfcParameterValue::Out V1;
@@ -1532,44 +1532,44 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcGroup
-    struct IfcGroup : IfcObject, ObjectHelper<IfcGroup,0> {
+    struct IfcGroup : IfcObject, ObjectHelper<IfcGroup,0> { IfcGroup() : Object("IfcGroup") {}
 
     };
 
     // C++ wrapper for IfcRelationship
-    struct IfcRelationship : IfcRoot, ObjectHelper<IfcRelationship,0> {
+    struct IfcRelationship : IfcRoot, ObjectHelper<IfcRelationship,0> { IfcRelationship() : Object("IfcRelationship") {}
 
     };
 
     // C++ wrapper for IfcHalfSpaceSolid
-    struct IfcHalfSpaceSolid : IfcGeometricRepresentationItem, ObjectHelper<IfcHalfSpaceSolid,2> {
+    struct IfcHalfSpaceSolid : IfcGeometricRepresentationItem, ObjectHelper<IfcHalfSpaceSolid,2> { IfcHalfSpaceSolid() : Object("IfcHalfSpaceSolid") {}
 		Lazy< IfcSurface > BaseSurface;
 		BOOLEAN::Out AgreementFlag;
     };
 
     // C++ wrapper for IfcPolygonalBoundedHalfSpace
-    struct IfcPolygonalBoundedHalfSpace : IfcHalfSpaceSolid, ObjectHelper<IfcPolygonalBoundedHalfSpace,2> {
+    struct IfcPolygonalBoundedHalfSpace : IfcHalfSpaceSolid, ObjectHelper<IfcPolygonalBoundedHalfSpace,2> { IfcPolygonalBoundedHalfSpace() : Object("IfcPolygonalBoundedHalfSpace") {}
 		Lazy< IfcAxis2Placement3D > Position;
 		Lazy< IfcBoundedCurve > PolygonalBoundary;
     };
 
     // C++ wrapper for IfcAirToAirHeatRecoveryType
-    struct IfcAirToAirHeatRecoveryType : IfcEnergyConversionDeviceType, ObjectHelper<IfcAirToAirHeatRecoveryType,1> {
+    struct IfcAirToAirHeatRecoveryType : IfcEnergyConversionDeviceType, ObjectHelper<IfcAirToAirHeatRecoveryType,1> { IfcAirToAirHeatRecoveryType() : Object("IfcAirToAirHeatRecoveryType") {}
 		IfcAirToAirHeatRecoveryTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcFlowFittingType
-    struct IfcFlowFittingType : IfcDistributionFlowElementType, ObjectHelper<IfcFlowFittingType,0> {
+    struct IfcFlowFittingType : IfcDistributionFlowElementType, ObjectHelper<IfcFlowFittingType,0> { IfcFlowFittingType() : Object("IfcFlowFittingType") {}
 
     };
 
     // C++ wrapper for IfcPipeFittingType
-    struct IfcPipeFittingType : IfcFlowFittingType, ObjectHelper<IfcPipeFittingType,1> {
+    struct IfcPipeFittingType : IfcFlowFittingType, ObjectHelper<IfcPipeFittingType,1> { IfcPipeFittingType() : Object("IfcPipeFittingType") {}
 		IfcPipeFittingTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcRepresentation
-    struct IfcRepresentation :  ObjectHelper<IfcRepresentation,4> {
+    struct IfcRepresentation :  ObjectHelper<IfcRepresentation,4> { IfcRepresentation() : Object("IfcRepresentation") {}
 		Lazy< IfcRepresentationContext > ContextOfItems;
 		Maybe< IfcLabel::Out > RepresentationIdentifier;
 		Maybe< IfcLabel::Out > RepresentationType;
@@ -1577,121 +1577,121 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcStyleModel
-    struct IfcStyleModel : IfcRepresentation, ObjectHelper<IfcStyleModel,0> {
+    struct IfcStyleModel : IfcRepresentation, ObjectHelper<IfcStyleModel,0> { IfcStyleModel() : Object("IfcStyleModel") {}
 
     };
 
     // C++ wrapper for IfcStyledRepresentation
-    struct IfcStyledRepresentation : IfcStyleModel, ObjectHelper<IfcStyledRepresentation,0> {
+    struct IfcStyledRepresentation : IfcStyleModel, ObjectHelper<IfcStyledRepresentation,0> { IfcStyledRepresentation() : Object("IfcStyledRepresentation") {}
 
     };
 
     // C++ wrapper for IfcBooleanResult
-    struct IfcBooleanResult : IfcGeometricRepresentationItem, ObjectHelper<IfcBooleanResult,3> {
+    struct IfcBooleanResult : IfcGeometricRepresentationItem, ObjectHelper<IfcBooleanResult,3> { IfcBooleanResult() : Object("IfcBooleanResult") {}
 		IfcBooleanOperator::Out Operator;
 		IfcBooleanOperand::Out FirstOperand;
 		IfcBooleanOperand::Out SecondOperand;
     };
 
     // C++ wrapper for IfcFeatureElement
-    struct IfcFeatureElement : IfcElement, ObjectHelper<IfcFeatureElement,0> {
+    struct IfcFeatureElement : IfcElement, ObjectHelper<IfcFeatureElement,0> { IfcFeatureElement() : Object("IfcFeatureElement") {}
 
     };
 
     // C++ wrapper for IfcFeatureElementSubtraction
-    struct IfcFeatureElementSubtraction : IfcFeatureElement, ObjectHelper<IfcFeatureElementSubtraction,0> {
+    struct IfcFeatureElementSubtraction : IfcFeatureElement, ObjectHelper<IfcFeatureElementSubtraction,0> { IfcFeatureElementSubtraction() : Object("IfcFeatureElementSubtraction") {}
 
     };
 
     // C++ wrapper for IfcOpeningElement
-    struct IfcOpeningElement : IfcFeatureElementSubtraction, ObjectHelper<IfcOpeningElement,0> {
+    struct IfcOpeningElement : IfcFeatureElementSubtraction, ObjectHelper<IfcOpeningElement,0> { IfcOpeningElement() : Object("IfcOpeningElement") {}
 
     };
 
     // C++ wrapper for IfcConditionCriterion
-    struct IfcConditionCriterion : IfcControl, ObjectHelper<IfcConditionCriterion,2> {
+    struct IfcConditionCriterion : IfcControl, ObjectHelper<IfcConditionCriterion,2> { IfcConditionCriterion() : Object("IfcConditionCriterion") {}
 		IfcConditionCriterionSelect::Out Criterion;
 		IfcDateTimeSelect::Out CriterionDateTime;
     };
 
     // C++ wrapper for IfcFlowTerminalType
-    struct IfcFlowTerminalType : IfcDistributionFlowElementType, ObjectHelper<IfcFlowTerminalType,0> {
+    struct IfcFlowTerminalType : IfcDistributionFlowElementType, ObjectHelper<IfcFlowTerminalType,0> { IfcFlowTerminalType() : Object("IfcFlowTerminalType") {}
 
     };
 
     // C++ wrapper for IfcFlowControllerType
-    struct IfcFlowControllerType : IfcDistributionFlowElementType, ObjectHelper<IfcFlowControllerType,0> {
+    struct IfcFlowControllerType : IfcDistributionFlowElementType, ObjectHelper<IfcFlowControllerType,0> { IfcFlowControllerType() : Object("IfcFlowControllerType") {}
 
     };
 
     // C++ wrapper for IfcSwitchingDeviceType
-    struct IfcSwitchingDeviceType : IfcFlowControllerType, ObjectHelper<IfcSwitchingDeviceType,1> {
+    struct IfcSwitchingDeviceType : IfcFlowControllerType, ObjectHelper<IfcSwitchingDeviceType,1> { IfcSwitchingDeviceType() : Object("IfcSwitchingDeviceType") {}
 		IfcSwitchingDeviceTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcSystem
-    struct IfcSystem : IfcGroup, ObjectHelper<IfcSystem,0> {
+    struct IfcSystem : IfcGroup, ObjectHelper<IfcSystem,0> { IfcSystem() : Object("IfcSystem") {}
 
     };
 
     // C++ wrapper for IfcElectricalCircuit
-    struct IfcElectricalCircuit : IfcSystem, ObjectHelper<IfcElectricalCircuit,0> {
+    struct IfcElectricalCircuit : IfcSystem, ObjectHelper<IfcElectricalCircuit,0> { IfcElectricalCircuit() : Object("IfcElectricalCircuit") {}
 
     };
 
     // C++ wrapper for IfcUnitaryEquipmentType
-    struct IfcUnitaryEquipmentType : IfcEnergyConversionDeviceType, ObjectHelper<IfcUnitaryEquipmentType,1> {
+    struct IfcUnitaryEquipmentType : IfcEnergyConversionDeviceType, ObjectHelper<IfcUnitaryEquipmentType,1> { IfcUnitaryEquipmentType() : Object("IfcUnitaryEquipmentType") {}
 		IfcUnitaryEquipmentTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcPort
-    struct IfcPort : IfcProduct, ObjectHelper<IfcPort,0> {
+    struct IfcPort : IfcProduct, ObjectHelper<IfcPort,0> { IfcPort() : Object("IfcPort") {}
 
     };
 
     // C++ wrapper for IfcPlacement
-    struct IfcPlacement : IfcGeometricRepresentationItem, ObjectHelper<IfcPlacement,1> {
+    struct IfcPlacement : IfcGeometricRepresentationItem, ObjectHelper<IfcPlacement,1> { IfcPlacement() : Object("IfcPlacement") {}
 		Lazy< IfcCartesianPoint > Location;
     };
 
     // C++ wrapper for IfcProfileDef
-    struct IfcProfileDef :  ObjectHelper<IfcProfileDef,2> {
+    struct IfcProfileDef :  ObjectHelper<IfcProfileDef,2> { IfcProfileDef() : Object("IfcProfileDef") {}
 		IfcProfileTypeEnum::Out ProfileType;
 		Maybe< IfcLabel::Out > ProfileName;
     };
 
     // C++ wrapper for IfcArbitraryClosedProfileDef
-    struct IfcArbitraryClosedProfileDef : IfcProfileDef, ObjectHelper<IfcArbitraryClosedProfileDef,1> {
+    struct IfcArbitraryClosedProfileDef : IfcProfileDef, ObjectHelper<IfcArbitraryClosedProfileDef,1> { IfcArbitraryClosedProfileDef() : Object("IfcArbitraryClosedProfileDef") {}
 		Lazy< IfcCurve > OuterCurve;
     };
 
     // C++ wrapper for IfcCurve
-    struct IfcCurve : IfcGeometricRepresentationItem, ObjectHelper<IfcCurve,0> {
+    struct IfcCurve : IfcGeometricRepresentationItem, ObjectHelper<IfcCurve,0> { IfcCurve() : Object("IfcCurve") {}
 
     };
 
     // C++ wrapper for IfcConic
-    struct IfcConic : IfcCurve, ObjectHelper<IfcConic,1> {
+    struct IfcConic : IfcCurve, ObjectHelper<IfcConic,1> { IfcConic() : Object("IfcConic") {}
 		IfcAxis2Placement::Out Position;
     };
 
     // C++ wrapper for IfcCircle
-    struct IfcCircle : IfcConic, ObjectHelper<IfcCircle,1> {
+    struct IfcCircle : IfcConic, ObjectHelper<IfcCircle,1> { IfcCircle() : Object("IfcCircle") {}
 		IfcPositiveLengthMeasure::Out Radius;
     };
 
     // C++ wrapper for IfcElementarySurface
-    struct IfcElementarySurface : IfcSurface, ObjectHelper<IfcElementarySurface,1> {
+    struct IfcElementarySurface : IfcSurface, ObjectHelper<IfcElementarySurface,1> { IfcElementarySurface() : Object("IfcElementarySurface") {}
 		Lazy< IfcAxis2Placement3D > Position;
     };
 
     // C++ wrapper for IfcPlane
-    struct IfcPlane : IfcElementarySurface, ObjectHelper<IfcPlane,0> {
+    struct IfcPlane : IfcElementarySurface, ObjectHelper<IfcPlane,0> { IfcPlane() : Object("IfcPlane") {}
 
     };
 
     // C++ wrapper for IfcCostSchedule
-    struct IfcCostSchedule : IfcControl, ObjectHelper<IfcCostSchedule,8> {
+    struct IfcCostSchedule : IfcControl, ObjectHelper<IfcCostSchedule,8> { IfcCostSchedule() : Object("IfcCostSchedule") {}
 		Maybe< IfcActorSelect::Out > SubmittedBy;
 		Maybe< IfcActorSelect::Out > PreparedBy;
 		Maybe< IfcDateTimeSelect::Out > SubmittedOn;
@@ -1703,353 +1703,353 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcRightCircularCone
-    struct IfcRightCircularCone : IfcCsgPrimitive3D, ObjectHelper<IfcRightCircularCone,2> {
+    struct IfcRightCircularCone : IfcCsgPrimitive3D, ObjectHelper<IfcRightCircularCone,2> { IfcRightCircularCone() : Object("IfcRightCircularCone") {}
 		IfcPositiveLengthMeasure::Out Height;
 		IfcPositiveLengthMeasure::Out BottomRadius;
     };
 
     // C++ wrapper for IfcElementAssembly
-    struct IfcElementAssembly : IfcElement, ObjectHelper<IfcElementAssembly,2> {
+    struct IfcElementAssembly : IfcElement, ObjectHelper<IfcElementAssembly,2> { IfcElementAssembly() : Object("IfcElementAssembly") {}
 		Maybe< IfcAssemblyPlaceEnum::Out > AssemblyPlace;
 		IfcElementAssemblyTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcBuildingElement
-    struct IfcBuildingElement : IfcElement, ObjectHelper<IfcBuildingElement,0> {
+    struct IfcBuildingElement : IfcElement, ObjectHelper<IfcBuildingElement,0> { IfcBuildingElement() : Object("IfcBuildingElement") {}
 
     };
 
     // C++ wrapper for IfcMember
-    struct IfcMember : IfcBuildingElement, ObjectHelper<IfcMember,0> {
+    struct IfcMember : IfcBuildingElement, ObjectHelper<IfcMember,0> { IfcMember() : Object("IfcMember") {}
 
     };
 
     // C++ wrapper for IfcBuildingElementProxy
-    struct IfcBuildingElementProxy : IfcBuildingElement, ObjectHelper<IfcBuildingElementProxy,1> {
+    struct IfcBuildingElementProxy : IfcBuildingElement, ObjectHelper<IfcBuildingElementProxy,1> { IfcBuildingElementProxy() : Object("IfcBuildingElementProxy") {}
 		Maybe< IfcElementCompositionEnum::Out > CompositionType;
     };
 
     // C++ wrapper for IfcStructuralActivity
-    struct IfcStructuralActivity : IfcProduct, ObjectHelper<IfcStructuralActivity,2> {
+    struct IfcStructuralActivity : IfcProduct, ObjectHelper<IfcStructuralActivity,2> { IfcStructuralActivity() : Object("IfcStructuralActivity") {}
 		Lazy< NotImplemented > AppliedLoad;
 		IfcGlobalOrLocalEnum::Out GlobalOrLocal;
     };
 
     // C++ wrapper for IfcStructuralAction
-    struct IfcStructuralAction : IfcStructuralActivity, ObjectHelper<IfcStructuralAction,2> {
+    struct IfcStructuralAction : IfcStructuralActivity, ObjectHelper<IfcStructuralAction,2> { IfcStructuralAction() : Object("IfcStructuralAction") {}
 		BOOLEAN::Out DestabilizingLoad;
 		Maybe< Lazy< IfcStructuralReaction > > CausedBy;
     };
 
     // C++ wrapper for IfcStructuralPlanarAction
-    struct IfcStructuralPlanarAction : IfcStructuralAction, ObjectHelper<IfcStructuralPlanarAction,1> {
+    struct IfcStructuralPlanarAction : IfcStructuralAction, ObjectHelper<IfcStructuralPlanarAction,1> { IfcStructuralPlanarAction() : Object("IfcStructuralPlanarAction") {}
 		IfcProjectedOrTrueLengthEnum::Out ProjectedOrTrue;
     };
 
     // C++ wrapper for IfcTopologicalRepresentationItem
-    struct IfcTopologicalRepresentationItem : IfcRepresentationItem, ObjectHelper<IfcTopologicalRepresentationItem,0> {
+    struct IfcTopologicalRepresentationItem : IfcRepresentationItem, ObjectHelper<IfcTopologicalRepresentationItem,0> { IfcTopologicalRepresentationItem() : Object("IfcTopologicalRepresentationItem") {}
 
     };
 
     // C++ wrapper for IfcConnectedFaceSet
-    struct IfcConnectedFaceSet : IfcTopologicalRepresentationItem, ObjectHelper<IfcConnectedFaceSet,1> {
+    struct IfcConnectedFaceSet : IfcTopologicalRepresentationItem, ObjectHelper<IfcConnectedFaceSet,1> { IfcConnectedFaceSet() : Object("IfcConnectedFaceSet") {}
 		ListOf< Lazy< IfcFace >, 1, 0 > CfsFaces;
     };
 
     // C++ wrapper for IfcSweptSurface
-    struct IfcSweptSurface : IfcSurface, ObjectHelper<IfcSweptSurface,2> {
+    struct IfcSweptSurface : IfcSurface, ObjectHelper<IfcSweptSurface,2> { IfcSweptSurface() : Object("IfcSweptSurface") {}
 		Lazy< IfcProfileDef > SweptCurve;
 		Lazy< IfcAxis2Placement3D > Position;
     };
 
     // C++ wrapper for IfcSurfaceOfLinearExtrusion
-    struct IfcSurfaceOfLinearExtrusion : IfcSweptSurface, ObjectHelper<IfcSurfaceOfLinearExtrusion,2> {
+    struct IfcSurfaceOfLinearExtrusion : IfcSweptSurface, ObjectHelper<IfcSurfaceOfLinearExtrusion,2> { IfcSurfaceOfLinearExtrusion() : Object("IfcSurfaceOfLinearExtrusion") {}
 		Lazy< IfcDirection > ExtrudedDirection;
 		IfcLengthMeasure::Out Depth;
     };
 
     // C++ wrapper for IfcArbitraryProfileDefWithVoids
-    struct IfcArbitraryProfileDefWithVoids : IfcArbitraryClosedProfileDef, ObjectHelper<IfcArbitraryProfileDefWithVoids,1> {
+    struct IfcArbitraryProfileDefWithVoids : IfcArbitraryClosedProfileDef, ObjectHelper<IfcArbitraryProfileDefWithVoids,1> { IfcArbitraryProfileDefWithVoids() : Object("IfcArbitraryProfileDefWithVoids") {}
 		ListOf< Lazy< IfcCurve >, 1, 0 > InnerCurves;
     };
 
     // C++ wrapper for IfcProcess
-    struct IfcProcess : IfcObject, ObjectHelper<IfcProcess,0> {
+    struct IfcProcess : IfcObject, ObjectHelper<IfcProcess,0> { IfcProcess() : Object("IfcProcess") {}
 
     };
 
     // C++ wrapper for IfcProcedure
-    struct IfcProcedure : IfcProcess, ObjectHelper<IfcProcedure,3> {
+    struct IfcProcedure : IfcProcess, ObjectHelper<IfcProcedure,3> { IfcProcedure() : Object("IfcProcedure") {}
 		IfcIdentifier::Out ProcedureID;
 		IfcProcedureTypeEnum::Out ProcedureType;
 		Maybe< IfcLabel::Out > UserDefinedProcedureType;
     };
 
     // C++ wrapper for IfcVector
-    struct IfcVector : IfcGeometricRepresentationItem, ObjectHelper<IfcVector,2> {
+    struct IfcVector : IfcGeometricRepresentationItem, ObjectHelper<IfcVector,2> { IfcVector() : Object("IfcVector") {}
 		Lazy< IfcDirection > Orientation;
 		IfcLengthMeasure::Out Magnitude;
     };
 
     // C++ wrapper for IfcFaceBound
-    struct IfcFaceBound : IfcTopologicalRepresentationItem, ObjectHelper<IfcFaceBound,2> {
+    struct IfcFaceBound : IfcTopologicalRepresentationItem, ObjectHelper<IfcFaceBound,2> { IfcFaceBound() : Object("IfcFaceBound") {}
 		Lazy< IfcLoop > Bound;
 		BOOLEAN::Out Orientation;
     };
 
     // C++ wrapper for IfcFaceOuterBound
-    struct IfcFaceOuterBound : IfcFaceBound, ObjectHelper<IfcFaceOuterBound,0> {
+    struct IfcFaceOuterBound : IfcFaceBound, ObjectHelper<IfcFaceOuterBound,0> { IfcFaceOuterBound() : Object("IfcFaceOuterBound") {}
 
     };
 
     // C++ wrapper for IfcFeatureElementAddition
-    struct IfcFeatureElementAddition : IfcFeatureElement, ObjectHelper<IfcFeatureElementAddition,0> {
+    struct IfcFeatureElementAddition : IfcFeatureElement, ObjectHelper<IfcFeatureElementAddition,0> { IfcFeatureElementAddition() : Object("IfcFeatureElementAddition") {}
 
     };
 
     // C++ wrapper for IfcNamedUnit
-    struct IfcNamedUnit :  ObjectHelper<IfcNamedUnit,2> {
+    struct IfcNamedUnit :  ObjectHelper<IfcNamedUnit,2> { IfcNamedUnit() : Object("IfcNamedUnit") {}
 		Lazy< NotImplemented > Dimensions;
 		IfcUnitEnum::Out UnitType;
     };
 
     // C++ wrapper for IfcHeatExchangerType
-    struct IfcHeatExchangerType : IfcEnergyConversionDeviceType, ObjectHelper<IfcHeatExchangerType,1> {
+    struct IfcHeatExchangerType : IfcEnergyConversionDeviceType, ObjectHelper<IfcHeatExchangerType,1> { IfcHeatExchangerType() : Object("IfcHeatExchangerType") {}
 		IfcHeatExchangerTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcPresentationStyleAssignment
-    struct IfcPresentationStyleAssignment :  ObjectHelper<IfcPresentationStyleAssignment,1> {
+    struct IfcPresentationStyleAssignment :  ObjectHelper<IfcPresentationStyleAssignment,1> { IfcPresentationStyleAssignment() : Object("IfcPresentationStyleAssignment") {}
 		ListOf< IfcPresentationStyleSelect, 1, 0 >::Out Styles;
     };
 
     // C++ wrapper for IfcFlowTreatmentDeviceType
-    struct IfcFlowTreatmentDeviceType : IfcDistributionFlowElementType, ObjectHelper<IfcFlowTreatmentDeviceType,0> {
+    struct IfcFlowTreatmentDeviceType : IfcDistributionFlowElementType, ObjectHelper<IfcFlowTreatmentDeviceType,0> { IfcFlowTreatmentDeviceType() : Object("IfcFlowTreatmentDeviceType") {}
 
     };
 
     // C++ wrapper for IfcFilterType
-    struct IfcFilterType : IfcFlowTreatmentDeviceType, ObjectHelper<IfcFilterType,1> {
+    struct IfcFilterType : IfcFlowTreatmentDeviceType, ObjectHelper<IfcFilterType,1> { IfcFilterType() : Object("IfcFilterType") {}
 		IfcFilterTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcResource
-    struct IfcResource : IfcObject, ObjectHelper<IfcResource,0> {
+    struct IfcResource : IfcObject, ObjectHelper<IfcResource,0> { IfcResource() : Object("IfcResource") {}
 
     };
 
     // C++ wrapper for IfcEvaporativeCoolerType
-    struct IfcEvaporativeCoolerType : IfcEnergyConversionDeviceType, ObjectHelper<IfcEvaporativeCoolerType,1> {
+    struct IfcEvaporativeCoolerType : IfcEnergyConversionDeviceType, ObjectHelper<IfcEvaporativeCoolerType,1> { IfcEvaporativeCoolerType() : Object("IfcEvaporativeCoolerType") {}
 		IfcEvaporativeCoolerTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcOffsetCurve2D
-    struct IfcOffsetCurve2D : IfcCurve, ObjectHelper<IfcOffsetCurve2D,3> {
+    struct IfcOffsetCurve2D : IfcCurve, ObjectHelper<IfcOffsetCurve2D,3> { IfcOffsetCurve2D() : Object("IfcOffsetCurve2D") {}
 		Lazy< IfcCurve > BasisCurve;
 		IfcLengthMeasure::Out Distance;
 		LOGICAL::Out SelfIntersect;
     };
 
     // C++ wrapper for IfcEdge
-    struct IfcEdge : IfcTopologicalRepresentationItem, ObjectHelper<IfcEdge,2> {
+    struct IfcEdge : IfcTopologicalRepresentationItem, ObjectHelper<IfcEdge,2> { IfcEdge() : Object("IfcEdge") {}
 		Lazy< IfcVertex > EdgeStart;
 		Lazy< IfcVertex > EdgeEnd;
     };
 
     // C++ wrapper for IfcSubedge
-    struct IfcSubedge : IfcEdge, ObjectHelper<IfcSubedge,1> {
+    struct IfcSubedge : IfcEdge, ObjectHelper<IfcSubedge,1> { IfcSubedge() : Object("IfcSubedge") {}
 		Lazy< IfcEdge > ParentEdge;
     };
 
     // C++ wrapper for IfcProxy
-    struct IfcProxy : IfcProduct, ObjectHelper<IfcProxy,2> {
+    struct IfcProxy : IfcProduct, ObjectHelper<IfcProxy,2> { IfcProxy() : Object("IfcProxy") {}
 		IfcObjectTypeEnum::Out ProxyType;
 		Maybe< IfcLabel::Out > Tag;
     };
 
     // C++ wrapper for IfcLine
-    struct IfcLine : IfcCurve, ObjectHelper<IfcLine,2> {
+    struct IfcLine : IfcCurve, ObjectHelper<IfcLine,2> { IfcLine() : Object("IfcLine") {}
 		Lazy< IfcCartesianPoint > Pnt;
 		Lazy< IfcVector > Dir;
     };
 
     // C++ wrapper for IfcColumn
-    struct IfcColumn : IfcBuildingElement, ObjectHelper<IfcColumn,0> {
+    struct IfcColumn : IfcBuildingElement, ObjectHelper<IfcColumn,0> { IfcColumn() : Object("IfcColumn") {}
 
     };
 
     // C++ wrapper for IfcObjectPlacement
-    struct IfcObjectPlacement :  ObjectHelper<IfcObjectPlacement,0> {
+    struct IfcObjectPlacement :  ObjectHelper<IfcObjectPlacement,0> { IfcObjectPlacement() : Object("IfcObjectPlacement") {}
 
     };
 
     // C++ wrapper for IfcGridPlacement
-    struct IfcGridPlacement : IfcObjectPlacement, ObjectHelper<IfcGridPlacement,2> {
+    struct IfcGridPlacement : IfcObjectPlacement, ObjectHelper<IfcGridPlacement,2> { IfcGridPlacement() : Object("IfcGridPlacement") {}
 		Lazy< NotImplemented > PlacementLocation;
 		Maybe< Lazy< NotImplemented > > PlacementRefDirection;
     };
 
     // C++ wrapper for IfcDistributionControlElementType
-    struct IfcDistributionControlElementType : IfcDistributionElementType, ObjectHelper<IfcDistributionControlElementType,0> {
+    struct IfcDistributionControlElementType : IfcDistributionElementType, ObjectHelper<IfcDistributionControlElementType,0> { IfcDistributionControlElementType() : Object("IfcDistributionControlElementType") {}
 
     };
 
     // C++ wrapper for IfcRelConnects
-    struct IfcRelConnects : IfcRelationship, ObjectHelper<IfcRelConnects,0> {
+    struct IfcRelConnects : IfcRelationship, ObjectHelper<IfcRelConnects,0> { IfcRelConnects() : Object("IfcRelConnects") {}
 
     };
 
     // C++ wrapper for IfcAnnotation
-    struct IfcAnnotation : IfcProduct, ObjectHelper<IfcAnnotation,0> {
+    struct IfcAnnotation : IfcProduct, ObjectHelper<IfcAnnotation,0> { IfcAnnotation() : Object("IfcAnnotation") {}
 
     };
 
     // C++ wrapper for IfcPlate
-    struct IfcPlate : IfcBuildingElement, ObjectHelper<IfcPlate,0> {
+    struct IfcPlate : IfcBuildingElement, ObjectHelper<IfcPlate,0> { IfcPlate() : Object("IfcPlate") {}
 
     };
 
     // C++ wrapper for IfcSolidModel
-    struct IfcSolidModel : IfcGeometricRepresentationItem, ObjectHelper<IfcSolidModel,0> {
+    struct IfcSolidModel : IfcGeometricRepresentationItem, ObjectHelper<IfcSolidModel,0> { IfcSolidModel() : Object("IfcSolidModel") {}
 
     };
 
     // C++ wrapper for IfcManifoldSolidBrep
-    struct IfcManifoldSolidBrep : IfcSolidModel, ObjectHelper<IfcManifoldSolidBrep,1> {
+    struct IfcManifoldSolidBrep : IfcSolidModel, ObjectHelper<IfcManifoldSolidBrep,1> { IfcManifoldSolidBrep() : Object("IfcManifoldSolidBrep") {}
 		Lazy< IfcClosedShell > Outer;
     };
 
     // C++ wrapper for IfcFlowStorageDeviceType
-    struct IfcFlowStorageDeviceType : IfcDistributionFlowElementType, ObjectHelper<IfcFlowStorageDeviceType,0> {
+    struct IfcFlowStorageDeviceType : IfcDistributionFlowElementType, ObjectHelper<IfcFlowStorageDeviceType,0> { IfcFlowStorageDeviceType() : Object("IfcFlowStorageDeviceType") {}
 
     };
 
     // C++ wrapper for IfcStructuralItem
-    struct IfcStructuralItem : IfcProduct, ObjectHelper<IfcStructuralItem,0> {
+    struct IfcStructuralItem : IfcProduct, ObjectHelper<IfcStructuralItem,0> { IfcStructuralItem() : Object("IfcStructuralItem") {}
 
     };
 
     // C++ wrapper for IfcStructuralMember
-    struct IfcStructuralMember : IfcStructuralItem, ObjectHelper<IfcStructuralMember,0> {
+    struct IfcStructuralMember : IfcStructuralItem, ObjectHelper<IfcStructuralMember,0> { IfcStructuralMember() : Object("IfcStructuralMember") {}
 
     };
 
     // C++ wrapper for IfcStructuralCurveMember
-    struct IfcStructuralCurveMember : IfcStructuralMember, ObjectHelper<IfcStructuralCurveMember,1> {
+    struct IfcStructuralCurveMember : IfcStructuralMember, ObjectHelper<IfcStructuralCurveMember,1> { IfcStructuralCurveMember() : Object("IfcStructuralCurveMember") {}
 		IfcStructuralCurveTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcStructuralConnection
-    struct IfcStructuralConnection : IfcStructuralItem, ObjectHelper<IfcStructuralConnection,1> {
+    struct IfcStructuralConnection : IfcStructuralItem, ObjectHelper<IfcStructuralConnection,1> { IfcStructuralConnection() : Object("IfcStructuralConnection") {}
 		Maybe< Lazy< NotImplemented > > AppliedCondition;
     };
 
     // C++ wrapper for IfcStructuralSurfaceConnection
-    struct IfcStructuralSurfaceConnection : IfcStructuralConnection, ObjectHelper<IfcStructuralSurfaceConnection,0> {
+    struct IfcStructuralSurfaceConnection : IfcStructuralConnection, ObjectHelper<IfcStructuralSurfaceConnection,0> { IfcStructuralSurfaceConnection() : Object("IfcStructuralSurfaceConnection") {}
 
     };
 
     // C++ wrapper for IfcCoilType
-    struct IfcCoilType : IfcEnergyConversionDeviceType, ObjectHelper<IfcCoilType,1> {
+    struct IfcCoilType : IfcEnergyConversionDeviceType, ObjectHelper<IfcCoilType,1> { IfcCoilType() : Object("IfcCoilType") {}
 		IfcCoilTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcDuctFittingType
-    struct IfcDuctFittingType : IfcFlowFittingType, ObjectHelper<IfcDuctFittingType,1> {
+    struct IfcDuctFittingType : IfcFlowFittingType, ObjectHelper<IfcDuctFittingType,1> { IfcDuctFittingType() : Object("IfcDuctFittingType") {}
 		IfcDuctFittingTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcStyledItem
-    struct IfcStyledItem : IfcRepresentationItem, ObjectHelper<IfcStyledItem,3> {
+    struct IfcStyledItem : IfcRepresentationItem, ObjectHelper<IfcStyledItem,3> { IfcStyledItem() : Object("IfcStyledItem") {}
 		Maybe< Lazy< IfcRepresentationItem > > Item;
 		ListOf< Lazy< IfcPresentationStyleAssignment >, 1, 0 > Styles;
 		Maybe< IfcLabel::Out > Name;
     };
 
     // C++ wrapper for IfcAnnotationOccurrence
-    struct IfcAnnotationOccurrence : IfcStyledItem, ObjectHelper<IfcAnnotationOccurrence,0> {
+    struct IfcAnnotationOccurrence : IfcStyledItem, ObjectHelper<IfcAnnotationOccurrence,0> { IfcAnnotationOccurrence() : Object("IfcAnnotationOccurrence") {}
 
     };
 
     // C++ wrapper for IfcAnnotationCurveOccurrence
-    struct IfcAnnotationCurveOccurrence : IfcAnnotationOccurrence, ObjectHelper<IfcAnnotationCurveOccurrence,0> {
+    struct IfcAnnotationCurveOccurrence : IfcAnnotationOccurrence, ObjectHelper<IfcAnnotationCurveOccurrence,0> { IfcAnnotationCurveOccurrence() : Object("IfcAnnotationCurveOccurrence") {}
 
     };
 
     // C++ wrapper for IfcDimensionCurve
-    struct IfcDimensionCurve : IfcAnnotationCurveOccurrence, ObjectHelper<IfcDimensionCurve,0> {
+    struct IfcDimensionCurve : IfcAnnotationCurveOccurrence, ObjectHelper<IfcDimensionCurve,0> { IfcDimensionCurve() : Object("IfcDimensionCurve") {}
 
     };
 
     // C++ wrapper for IfcBoundedCurve
-    struct IfcBoundedCurve : IfcCurve, ObjectHelper<IfcBoundedCurve,0> {
+    struct IfcBoundedCurve : IfcCurve, ObjectHelper<IfcBoundedCurve,0> { IfcBoundedCurve() : Object("IfcBoundedCurve") {}
 
     };
 
     // C++ wrapper for IfcAxis1Placement
-    struct IfcAxis1Placement : IfcPlacement, ObjectHelper<IfcAxis1Placement,1> {
+    struct IfcAxis1Placement : IfcPlacement, ObjectHelper<IfcAxis1Placement,1> { IfcAxis1Placement() : Object("IfcAxis1Placement") {}
 		Maybe< Lazy< IfcDirection > > Axis;
     };
 
     // C++ wrapper for IfcStructuralPointAction
-    struct IfcStructuralPointAction : IfcStructuralAction, ObjectHelper<IfcStructuralPointAction,0> {
+    struct IfcStructuralPointAction : IfcStructuralAction, ObjectHelper<IfcStructuralPointAction,0> { IfcStructuralPointAction() : Object("IfcStructuralPointAction") {}
 
     };
 
     // C++ wrapper for IfcSpatialStructureElement
-    struct IfcSpatialStructureElement : IfcProduct, ObjectHelper<IfcSpatialStructureElement,2> {
+    struct IfcSpatialStructureElement : IfcProduct, ObjectHelper<IfcSpatialStructureElement,2> { IfcSpatialStructureElement() : Object("IfcSpatialStructureElement") {}
 		Maybe< IfcLabel::Out > LongName;
 		IfcElementCompositionEnum::Out CompositionType;
     };
 
     // C++ wrapper for IfcSpace
-    struct IfcSpace : IfcSpatialStructureElement, ObjectHelper<IfcSpace,2> {
+    struct IfcSpace : IfcSpatialStructureElement, ObjectHelper<IfcSpace,2> { IfcSpace() : Object("IfcSpace") {}
 		IfcInternalOrExternalEnum::Out InteriorOrExteriorSpace;
 		Maybe< IfcLengthMeasure::Out > ElevationWithFlooring;
     };
 
     // C++ wrapper for IfcCoolingTowerType
-    struct IfcCoolingTowerType : IfcEnergyConversionDeviceType, ObjectHelper<IfcCoolingTowerType,1> {
+    struct IfcCoolingTowerType : IfcEnergyConversionDeviceType, ObjectHelper<IfcCoolingTowerType,1> { IfcCoolingTowerType() : Object("IfcCoolingTowerType") {}
 		IfcCoolingTowerTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcFacetedBrepWithVoids
-    struct IfcFacetedBrepWithVoids : IfcManifoldSolidBrep, ObjectHelper<IfcFacetedBrepWithVoids,1> {
+    struct IfcFacetedBrepWithVoids : IfcManifoldSolidBrep, ObjectHelper<IfcFacetedBrepWithVoids,1> { IfcFacetedBrepWithVoids() : Object("IfcFacetedBrepWithVoids") {}
 		ListOf< Lazy< IfcClosedShell >, 1, 0 > Voids;
     };
 
     // C++ wrapper for IfcValveType
-    struct IfcValveType : IfcFlowControllerType, ObjectHelper<IfcValveType,1> {
+    struct IfcValveType : IfcFlowControllerType, ObjectHelper<IfcValveType,1> { IfcValveType() : Object("IfcValveType") {}
 		IfcValveTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcSystemFurnitureElementType
-    struct IfcSystemFurnitureElementType : IfcFurnishingElementType, ObjectHelper<IfcSystemFurnitureElementType,0> {
+    struct IfcSystemFurnitureElementType : IfcFurnishingElementType, ObjectHelper<IfcSystemFurnitureElementType,0> { IfcSystemFurnitureElementType() : Object("IfcSystemFurnitureElementType") {}
 
     };
 
     // C++ wrapper for IfcDiscreteAccessory
-    struct IfcDiscreteAccessory : IfcElementComponent, ObjectHelper<IfcDiscreteAccessory,0> {
+    struct IfcDiscreteAccessory : IfcElementComponent, ObjectHelper<IfcDiscreteAccessory,0> { IfcDiscreteAccessory() : Object("IfcDiscreteAccessory") {}
 
     };
 
     // C++ wrapper for IfcBuildingElementType
-    struct IfcBuildingElementType : IfcElementType, ObjectHelper<IfcBuildingElementType,0> {
+    struct IfcBuildingElementType : IfcElementType, ObjectHelper<IfcBuildingElementType,0> { IfcBuildingElementType() : Object("IfcBuildingElementType") {}
 
     };
 
     // C++ wrapper for IfcRailingType
-    struct IfcRailingType : IfcBuildingElementType, ObjectHelper<IfcRailingType,1> {
+    struct IfcRailingType : IfcBuildingElementType, ObjectHelper<IfcRailingType,1> { IfcRailingType() : Object("IfcRailingType") {}
 		IfcRailingTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcGasTerminalType
-    struct IfcGasTerminalType : IfcFlowTerminalType, ObjectHelper<IfcGasTerminalType,1> {
+    struct IfcGasTerminalType : IfcFlowTerminalType, ObjectHelper<IfcGasTerminalType,1> { IfcGasTerminalType() : Object("IfcGasTerminalType") {}
 		IfcGasTerminalTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcSpaceProgram
-    struct IfcSpaceProgram : IfcControl, ObjectHelper<IfcSpaceProgram,5> {
+    struct IfcSpaceProgram : IfcControl, ObjectHelper<IfcSpaceProgram,5> { IfcSpaceProgram() : Object("IfcSpaceProgram") {}
 		IfcIdentifier::Out SpaceProgramIdentifier;
 		Maybe< IfcAreaMeasure::Out > MaxRequiredArea;
 		Maybe< IfcAreaMeasure::Out > MinRequiredArea;
@@ -2058,47 +2058,47 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcCovering
-    struct IfcCovering : IfcBuildingElement, ObjectHelper<IfcCovering,1> {
+    struct IfcCovering : IfcBuildingElement, ObjectHelper<IfcCovering,1> { IfcCovering() : Object("IfcCovering") {}
 		Maybe< IfcCoveringTypeEnum::Out > PredefinedType;
     };
 
     // C++ wrapper for IfcPresentationStyle
-    struct IfcPresentationStyle :  ObjectHelper<IfcPresentationStyle,1> {
+    struct IfcPresentationStyle :  ObjectHelper<IfcPresentationStyle,1> { IfcPresentationStyle() : Object("IfcPresentationStyle") {}
 		Maybe< IfcLabel::Out > Name;
     };
 
     // C++ wrapper for IfcElectricHeaterType
-    struct IfcElectricHeaterType : IfcFlowTerminalType, ObjectHelper<IfcElectricHeaterType,1> {
+    struct IfcElectricHeaterType : IfcFlowTerminalType, ObjectHelper<IfcElectricHeaterType,1> { IfcElectricHeaterType() : Object("IfcElectricHeaterType") {}
 		IfcElectricHeaterTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcBuildingStorey
-    struct IfcBuildingStorey : IfcSpatialStructureElement, ObjectHelper<IfcBuildingStorey,1> {
+    struct IfcBuildingStorey : IfcSpatialStructureElement, ObjectHelper<IfcBuildingStorey,1> { IfcBuildingStorey() : Object("IfcBuildingStorey") {}
 		Maybe< IfcLengthMeasure::Out > Elevation;
     };
 
     // C++ wrapper for IfcVertex
-    struct IfcVertex : IfcTopologicalRepresentationItem, ObjectHelper<IfcVertex,0> {
+    struct IfcVertex : IfcTopologicalRepresentationItem, ObjectHelper<IfcVertex,0> { IfcVertex() : Object("IfcVertex") {}
 
     };
 
     // C++ wrapper for IfcVertexPoint
-    struct IfcVertexPoint : IfcVertex, ObjectHelper<IfcVertexPoint,1> {
+    struct IfcVertexPoint : IfcVertex, ObjectHelper<IfcVertexPoint,1> { IfcVertexPoint() : Object("IfcVertexPoint") {}
 		Lazy< IfcPoint > VertexGeometry;
     };
 
     // C++ wrapper for IfcFlowInstrumentType
-    struct IfcFlowInstrumentType : IfcDistributionControlElementType, ObjectHelper<IfcFlowInstrumentType,1> {
+    struct IfcFlowInstrumentType : IfcDistributionControlElementType, ObjectHelper<IfcFlowInstrumentType,1> { IfcFlowInstrumentType() : Object("IfcFlowInstrumentType") {}
 		IfcFlowInstrumentTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcParameterizedProfileDef
-    struct IfcParameterizedProfileDef : IfcProfileDef, ObjectHelper<IfcParameterizedProfileDef,1> {
+    struct IfcParameterizedProfileDef : IfcProfileDef, ObjectHelper<IfcParameterizedProfileDef,1> { IfcParameterizedProfileDef() : Object("IfcParameterizedProfileDef") {}
 		Lazy< IfcAxis2Placement2D > Position;
     };
 
     // C++ wrapper for IfcUShapeProfileDef
-    struct IfcUShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcUShapeProfileDef,8> {
+    struct IfcUShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcUShapeProfileDef,8> { IfcUShapeProfileDef() : Object("IfcUShapeProfileDef") {}
 		IfcPositiveLengthMeasure::Out Depth;
 		IfcPositiveLengthMeasure::Out FlangeWidth;
 		IfcPositiveLengthMeasure::Out WebThickness;
@@ -2110,109 +2110,109 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcRamp
-    struct IfcRamp : IfcBuildingElement, ObjectHelper<IfcRamp,1> {
+    struct IfcRamp : IfcBuildingElement, ObjectHelper<IfcRamp,1> { IfcRamp() : Object("IfcRamp") {}
 		IfcRampTypeEnum::Out ShapeType;
     };
 
     // C++ wrapper for IfcCompositeCurve
-    struct IfcCompositeCurve : IfcBoundedCurve, ObjectHelper<IfcCompositeCurve,2> {
+    struct IfcCompositeCurve : IfcBoundedCurve, ObjectHelper<IfcCompositeCurve,2> { IfcCompositeCurve() : Object("IfcCompositeCurve") {}
 		ListOf< Lazy< IfcCompositeCurveSegment >, 1, 0 > Segments;
 		LOGICAL::Out SelfIntersect;
     };
 
     // C++ wrapper for IfcStructuralCurveMemberVarying
-    struct IfcStructuralCurveMemberVarying : IfcStructuralCurveMember, ObjectHelper<IfcStructuralCurveMemberVarying,0> {
+    struct IfcStructuralCurveMemberVarying : IfcStructuralCurveMember, ObjectHelper<IfcStructuralCurveMemberVarying,0> { IfcStructuralCurveMemberVarying() : Object("IfcStructuralCurveMemberVarying") {}
 
     };
 
     // C++ wrapper for IfcRampFlightType
-    struct IfcRampFlightType : IfcBuildingElementType, ObjectHelper<IfcRampFlightType,1> {
+    struct IfcRampFlightType : IfcBuildingElementType, ObjectHelper<IfcRampFlightType,1> { IfcRampFlightType() : Object("IfcRampFlightType") {}
 		IfcRampFlightTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcDraughtingCallout
-    struct IfcDraughtingCallout : IfcGeometricRepresentationItem, ObjectHelper<IfcDraughtingCallout,1> {
+    struct IfcDraughtingCallout : IfcGeometricRepresentationItem, ObjectHelper<IfcDraughtingCallout,1> { IfcDraughtingCallout() : Object("IfcDraughtingCallout") {}
 		ListOf< IfcDraughtingCalloutElement, 1, 0 >::Out Contents;
     };
 
     // C++ wrapper for IfcDimensionCurveDirectedCallout
-    struct IfcDimensionCurveDirectedCallout : IfcDraughtingCallout, ObjectHelper<IfcDimensionCurveDirectedCallout,0> {
+    struct IfcDimensionCurveDirectedCallout : IfcDraughtingCallout, ObjectHelper<IfcDimensionCurveDirectedCallout,0> { IfcDimensionCurveDirectedCallout() : Object("IfcDimensionCurveDirectedCallout") {}
 
     };
 
     // C++ wrapper for IfcRadiusDimension
-    struct IfcRadiusDimension : IfcDimensionCurveDirectedCallout, ObjectHelper<IfcRadiusDimension,0> {
+    struct IfcRadiusDimension : IfcDimensionCurveDirectedCallout, ObjectHelper<IfcRadiusDimension,0> { IfcRadiusDimension() : Object("IfcRadiusDimension") {}
 
     };
 
     // C++ wrapper for IfcEdgeFeature
-    struct IfcEdgeFeature : IfcFeatureElementSubtraction, ObjectHelper<IfcEdgeFeature,1> {
+    struct IfcEdgeFeature : IfcFeatureElementSubtraction, ObjectHelper<IfcEdgeFeature,1> { IfcEdgeFeature() : Object("IfcEdgeFeature") {}
 		Maybe< IfcPositiveLengthMeasure::Out > FeatureLength;
     };
 
     // C++ wrapper for IfcSweptAreaSolid
-    struct IfcSweptAreaSolid : IfcSolidModel, ObjectHelper<IfcSweptAreaSolid,2> {
+    struct IfcSweptAreaSolid : IfcSolidModel, ObjectHelper<IfcSweptAreaSolid,2> { IfcSweptAreaSolid() : Object("IfcSweptAreaSolid") {}
 		Lazy< IfcProfileDef > SweptArea;
 		Lazy< IfcAxis2Placement3D > Position;
     };
 
     // C++ wrapper for IfcExtrudedAreaSolid
-    struct IfcExtrudedAreaSolid : IfcSweptAreaSolid, ObjectHelper<IfcExtrudedAreaSolid,2> {
+    struct IfcExtrudedAreaSolid : IfcSweptAreaSolid, ObjectHelper<IfcExtrudedAreaSolid,2> { IfcExtrudedAreaSolid() : Object("IfcExtrudedAreaSolid") {}
 		Lazy< IfcDirection > ExtrudedDirection;
 		IfcPositiveLengthMeasure::Out Depth;
     };
 
     // C++ wrapper for IfcAnnotationTextOccurrence
-    struct IfcAnnotationTextOccurrence : IfcAnnotationOccurrence, ObjectHelper<IfcAnnotationTextOccurrence,0> {
+    struct IfcAnnotationTextOccurrence : IfcAnnotationOccurrence, ObjectHelper<IfcAnnotationTextOccurrence,0> { IfcAnnotationTextOccurrence() : Object("IfcAnnotationTextOccurrence") {}
 
     };
 
     // C++ wrapper for IfcStair
-    struct IfcStair : IfcBuildingElement, ObjectHelper<IfcStair,1> {
+    struct IfcStair : IfcBuildingElement, ObjectHelper<IfcStair,1> { IfcStair() : Object("IfcStair") {}
 		IfcStairTypeEnum::Out ShapeType;
     };
 
     // C++ wrapper for IfcFillAreaStyleTileSymbolWithStyle
-    struct IfcFillAreaStyleTileSymbolWithStyle : IfcGeometricRepresentationItem, ObjectHelper<IfcFillAreaStyleTileSymbolWithStyle,1> {
+    struct IfcFillAreaStyleTileSymbolWithStyle : IfcGeometricRepresentationItem, ObjectHelper<IfcFillAreaStyleTileSymbolWithStyle,1> { IfcFillAreaStyleTileSymbolWithStyle() : Object("IfcFillAreaStyleTileSymbolWithStyle") {}
 		Lazy< IfcAnnotationSymbolOccurrence > Symbol;
     };
 
     // C++ wrapper for IfcAnnotationSymbolOccurrence
-    struct IfcAnnotationSymbolOccurrence : IfcAnnotationOccurrence, ObjectHelper<IfcAnnotationSymbolOccurrence,0> {
+    struct IfcAnnotationSymbolOccurrence : IfcAnnotationOccurrence, ObjectHelper<IfcAnnotationSymbolOccurrence,0> { IfcAnnotationSymbolOccurrence() : Object("IfcAnnotationSymbolOccurrence") {}
 
     };
 
     // C++ wrapper for IfcTerminatorSymbol
-    struct IfcTerminatorSymbol : IfcAnnotationSymbolOccurrence, ObjectHelper<IfcTerminatorSymbol,1> {
+    struct IfcTerminatorSymbol : IfcAnnotationSymbolOccurrence, ObjectHelper<IfcTerminatorSymbol,1> { IfcTerminatorSymbol() : Object("IfcTerminatorSymbol") {}
 		Lazy< IfcAnnotationCurveOccurrence > AnnotatedCurve;
     };
 
     // C++ wrapper for IfcDimensionCurveTerminator
-    struct IfcDimensionCurveTerminator : IfcTerminatorSymbol, ObjectHelper<IfcDimensionCurveTerminator,1> {
+    struct IfcDimensionCurveTerminator : IfcTerminatorSymbol, ObjectHelper<IfcDimensionCurveTerminator,1> { IfcDimensionCurveTerminator() : Object("IfcDimensionCurveTerminator") {}
 		IfcDimensionExtentUsage::Out Role;
     };
 
     // C++ wrapper for IfcRectangleProfileDef
-    struct IfcRectangleProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcRectangleProfileDef,2> {
+    struct IfcRectangleProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcRectangleProfileDef,2> { IfcRectangleProfileDef() : Object("IfcRectangleProfileDef") {}
 		IfcPositiveLengthMeasure::Out XDim;
 		IfcPositiveLengthMeasure::Out YDim;
     };
 
     // C++ wrapper for IfcRectangleHollowProfileDef
-    struct IfcRectangleHollowProfileDef : IfcRectangleProfileDef, ObjectHelper<IfcRectangleHollowProfileDef,3> {
+    struct IfcRectangleHollowProfileDef : IfcRectangleProfileDef, ObjectHelper<IfcRectangleHollowProfileDef,3> { IfcRectangleHollowProfileDef() : Object("IfcRectangleHollowProfileDef") {}
 		IfcPositiveLengthMeasure::Out WallThickness;
 		Maybe< IfcPositiveLengthMeasure::Out > InnerFilletRadius;
 		Maybe< IfcPositiveLengthMeasure::Out > OuterFilletRadius;
     };
 
     // C++ wrapper for IfcLocalPlacement
-    struct IfcLocalPlacement : IfcObjectPlacement, ObjectHelper<IfcLocalPlacement,2> {
+    struct IfcLocalPlacement : IfcObjectPlacement, ObjectHelper<IfcLocalPlacement,2> { IfcLocalPlacement() : Object("IfcLocalPlacement") {}
 		Maybe< Lazy< IfcObjectPlacement > > PlacementRelTo;
 		IfcAxis2Placement::Out RelativePlacement;
     };
 
     // C++ wrapper for IfcTask
-    struct IfcTask : IfcProcess, ObjectHelper<IfcTask,5> {
+    struct IfcTask : IfcProcess, ObjectHelper<IfcTask,5> { IfcTask() : Object("IfcTask") {}
 		IfcIdentifier::Out TaskId;
 		Maybe< IfcLabel::Out > Status;
 		Maybe< IfcLabel::Out > WorkMethod;
@@ -2221,28 +2221,28 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcAnnotationFillAreaOccurrence
-    struct IfcAnnotationFillAreaOccurrence : IfcAnnotationOccurrence, ObjectHelper<IfcAnnotationFillAreaOccurrence,2> {
+    struct IfcAnnotationFillAreaOccurrence : IfcAnnotationOccurrence, ObjectHelper<IfcAnnotationFillAreaOccurrence,2> { IfcAnnotationFillAreaOccurrence() : Object("IfcAnnotationFillAreaOccurrence") {}
 		Maybe< Lazy< IfcPoint > > FillStyleTarget;
 		Maybe< IfcGlobalOrLocalEnum::Out > GlobalOrLocal;
     };
 
     // C++ wrapper for IfcFace
-    struct IfcFace : IfcTopologicalRepresentationItem, ObjectHelper<IfcFace,1> {
+    struct IfcFace : IfcTopologicalRepresentationItem, ObjectHelper<IfcFace,1> { IfcFace() : Object("IfcFace") {}
 		ListOf< Lazy< IfcFaceBound >, 1, 0 > Bounds;
     };
 
     // C++ wrapper for IfcFlowSegmentType
-    struct IfcFlowSegmentType : IfcDistributionFlowElementType, ObjectHelper<IfcFlowSegmentType,0> {
+    struct IfcFlowSegmentType : IfcDistributionFlowElementType, ObjectHelper<IfcFlowSegmentType,0> { IfcFlowSegmentType() : Object("IfcFlowSegmentType") {}
 
     };
 
     // C++ wrapper for IfcDuctSegmentType
-    struct IfcDuctSegmentType : IfcFlowSegmentType, ObjectHelper<IfcDuctSegmentType,1> {
+    struct IfcDuctSegmentType : IfcFlowSegmentType, ObjectHelper<IfcDuctSegmentType,1> { IfcDuctSegmentType() : Object("IfcDuctSegmentType") {}
 		IfcDuctSegmentTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcConstructionResource
-    struct IfcConstructionResource : IfcResource, ObjectHelper<IfcConstructionResource,4> {
+    struct IfcConstructionResource : IfcResource, ObjectHelper<IfcConstructionResource,4> { IfcConstructionResource() : Object("IfcConstructionResource") {}
 		Maybe< IfcIdentifier::Out > ResourceIdentifier;
 		Maybe< IfcLabel::Out > ResourceGroup;
 		Maybe< IfcResourceConsumptionEnum::Out > ResourceConsumption;
@@ -2250,44 +2250,44 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcConstructionEquipmentResource
-    struct IfcConstructionEquipmentResource : IfcConstructionResource, ObjectHelper<IfcConstructionEquipmentResource,0> {
+    struct IfcConstructionEquipmentResource : IfcConstructionResource, ObjectHelper<IfcConstructionEquipmentResource,0> { IfcConstructionEquipmentResource() : Object("IfcConstructionEquipmentResource") {}
 
     };
 
     // C++ wrapper for IfcSanitaryTerminalType
-    struct IfcSanitaryTerminalType : IfcFlowTerminalType, ObjectHelper<IfcSanitaryTerminalType,1> {
+    struct IfcSanitaryTerminalType : IfcFlowTerminalType, ObjectHelper<IfcSanitaryTerminalType,1> { IfcSanitaryTerminalType() : Object("IfcSanitaryTerminalType") {}
 		IfcSanitaryTerminalTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcCircleProfileDef
-    struct IfcCircleProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcCircleProfileDef,1> {
+    struct IfcCircleProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcCircleProfileDef,1> { IfcCircleProfileDef() : Object("IfcCircleProfileDef") {}
 		IfcPositiveLengthMeasure::Out Radius;
     };
 
     // C++ wrapper for IfcStructuralReaction
-    struct IfcStructuralReaction : IfcStructuralActivity, ObjectHelper<IfcStructuralReaction,0> {
+    struct IfcStructuralReaction : IfcStructuralActivity, ObjectHelper<IfcStructuralReaction,0> { IfcStructuralReaction() : Object("IfcStructuralReaction") {}
 
     };
 
     // C++ wrapper for IfcStructuralPointReaction
-    struct IfcStructuralPointReaction : IfcStructuralReaction, ObjectHelper<IfcStructuralPointReaction,0> {
+    struct IfcStructuralPointReaction : IfcStructuralReaction, ObjectHelper<IfcStructuralPointReaction,0> { IfcStructuralPointReaction() : Object("IfcStructuralPointReaction") {}
 
     };
 
     // C++ wrapper for IfcRailing
-    struct IfcRailing : IfcBuildingElement, ObjectHelper<IfcRailing,1> {
+    struct IfcRailing : IfcBuildingElement, ObjectHelper<IfcRailing,1> { IfcRailing() : Object("IfcRailing") {}
 		Maybe< IfcRailingTypeEnum::Out > PredefinedType;
     };
 
     // C++ wrapper for IfcTextLiteral
-    struct IfcTextLiteral : IfcGeometricRepresentationItem, ObjectHelper<IfcTextLiteral,3> {
+    struct IfcTextLiteral : IfcGeometricRepresentationItem, ObjectHelper<IfcTextLiteral,3> { IfcTextLiteral() : Object("IfcTextLiteral") {}
 		IfcPresentableText::Out Literal;
 		IfcAxis2Placement::Out Placement;
 		IfcTextPath::Out Path;
     };
 
     // C++ wrapper for IfcCartesianTransformationOperator
-    struct IfcCartesianTransformationOperator : IfcGeometricRepresentationItem, ObjectHelper<IfcCartesianTransformationOperator,4> {
+    struct IfcCartesianTransformationOperator : IfcGeometricRepresentationItem, ObjectHelper<IfcCartesianTransformationOperator,4> { IfcCartesianTransformationOperator() : Object("IfcCartesianTransformationOperator") {}
 		Maybe< Lazy< IfcDirection > > Axis1;
 		Maybe< Lazy< IfcDirection > > Axis2;
 		Lazy< IfcCartesianPoint > LocalOrigin;
@@ -2295,53 +2295,53 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcLinearDimension
-    struct IfcLinearDimension : IfcDimensionCurveDirectedCallout, ObjectHelper<IfcLinearDimension,0> {
+    struct IfcLinearDimension : IfcDimensionCurveDirectedCallout, ObjectHelper<IfcLinearDimension,0> { IfcLinearDimension() : Object("IfcLinearDimension") {}
 
     };
 
     // C++ wrapper for IfcDamperType
-    struct IfcDamperType : IfcFlowControllerType, ObjectHelper<IfcDamperType,1> {
+    struct IfcDamperType : IfcFlowControllerType, ObjectHelper<IfcDamperType,1> { IfcDamperType() : Object("IfcDamperType") {}
 		IfcDamperTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcSIUnit
-    struct IfcSIUnit : IfcNamedUnit, ObjectHelper<IfcSIUnit,2> {
+    struct IfcSIUnit : IfcNamedUnit, ObjectHelper<IfcSIUnit,2> { IfcSIUnit() : Object("IfcSIUnit") {}
 		Maybe< IfcSIPrefix::Out > Prefix;
 		IfcSIUnitName::Out Name;
     };
 
     // C++ wrapper for IfcDistributionElement
-    struct IfcDistributionElement : IfcElement, ObjectHelper<IfcDistributionElement,0> {
+    struct IfcDistributionElement : IfcElement, ObjectHelper<IfcDistributionElement,0> { IfcDistributionElement() : Object("IfcDistributionElement") {}
 
     };
 
     // C++ wrapper for IfcDistributionControlElement
-    struct IfcDistributionControlElement : IfcDistributionElement, ObjectHelper<IfcDistributionControlElement,1> {
+    struct IfcDistributionControlElement : IfcDistributionElement, ObjectHelper<IfcDistributionControlElement,1> { IfcDistributionControlElement() : Object("IfcDistributionControlElement") {}
 		Maybe< IfcIdentifier::Out > ControlElementId;
     };
 
     // C++ wrapper for IfcTransformerType
-    struct IfcTransformerType : IfcEnergyConversionDeviceType, ObjectHelper<IfcTransformerType,1> {
+    struct IfcTransformerType : IfcEnergyConversionDeviceType, ObjectHelper<IfcTransformerType,1> { IfcTransformerType() : Object("IfcTransformerType") {}
 		IfcTransformerTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcLaborResource
-    struct IfcLaborResource : IfcConstructionResource, ObjectHelper<IfcLaborResource,1> {
+    struct IfcLaborResource : IfcConstructionResource, ObjectHelper<IfcLaborResource,1> { IfcLaborResource() : Object("IfcLaborResource") {}
 		Maybe< IfcText::Out > SkillSet;
     };
 
     // C++ wrapper for IfcFurnitureStandard
-    struct IfcFurnitureStandard : IfcControl, ObjectHelper<IfcFurnitureStandard,0> {
+    struct IfcFurnitureStandard : IfcControl, ObjectHelper<IfcFurnitureStandard,0> { IfcFurnitureStandard() : Object("IfcFurnitureStandard") {}
 
     };
 
     // C++ wrapper for IfcStairFlightType
-    struct IfcStairFlightType : IfcBuildingElementType, ObjectHelper<IfcStairFlightType,1> {
+    struct IfcStairFlightType : IfcBuildingElementType, ObjectHelper<IfcStairFlightType,1> { IfcStairFlightType() : Object("IfcStairFlightType") {}
 		IfcStairFlightTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcWorkControl
-    struct IfcWorkControl : IfcControl, ObjectHelper<IfcWorkControl,10> {
+    struct IfcWorkControl : IfcControl, ObjectHelper<IfcWorkControl,10> { IfcWorkControl() : Object("IfcWorkControl") {}
 		IfcIdentifier::Out Identifier;
 		IfcDateTimeSelect::Out CreationDate;
 		Maybe< ListOf< Lazy< NotImplemented >, 1, 0 > > Creators;
@@ -2355,33 +2355,33 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcWorkPlan
-    struct IfcWorkPlan : IfcWorkControl, ObjectHelper<IfcWorkPlan,0> {
+    struct IfcWorkPlan : IfcWorkControl, ObjectHelper<IfcWorkPlan,0> { IfcWorkPlan() : Object("IfcWorkPlan") {}
 
     };
 
     // C++ wrapper for IfcCondition
-    struct IfcCondition : IfcGroup, ObjectHelper<IfcCondition,0> {
+    struct IfcCondition : IfcGroup, ObjectHelper<IfcCondition,0> { IfcCondition() : Object("IfcCondition") {}
 
     };
 
     // C++ wrapper for IfcWindow
-    struct IfcWindow : IfcBuildingElement, ObjectHelper<IfcWindow,2> {
+    struct IfcWindow : IfcBuildingElement, ObjectHelper<IfcWindow,2> { IfcWindow() : Object("IfcWindow") {}
 		Maybe< IfcPositiveLengthMeasure::Out > OverallHeight;
 		Maybe< IfcPositiveLengthMeasure::Out > OverallWidth;
     };
 
     // C++ wrapper for IfcProtectiveDeviceType
-    struct IfcProtectiveDeviceType : IfcFlowControllerType, ObjectHelper<IfcProtectiveDeviceType,1> {
+    struct IfcProtectiveDeviceType : IfcFlowControllerType, ObjectHelper<IfcProtectiveDeviceType,1> { IfcProtectiveDeviceType() : Object("IfcProtectiveDeviceType") {}
 		IfcProtectiveDeviceTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcJunctionBoxType
-    struct IfcJunctionBoxType : IfcFlowFittingType, ObjectHelper<IfcJunctionBoxType,1> {
+    struct IfcJunctionBoxType : IfcFlowFittingType, ObjectHelper<IfcJunctionBoxType,1> { IfcJunctionBoxType() : Object("IfcJunctionBoxType") {}
 		IfcJunctionBoxTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcStructuralAnalysisModel
-    struct IfcStructuralAnalysisModel : IfcSystem, ObjectHelper<IfcStructuralAnalysisModel,4> {
+    struct IfcStructuralAnalysisModel : IfcSystem, ObjectHelper<IfcStructuralAnalysisModel,4> { IfcStructuralAnalysisModel() : Object("IfcStructuralAnalysisModel") {}
 		IfcAnalysisModelTypeEnum::Out PredefinedType;
 		Maybe< Lazy< IfcAxis2Placement3D > > OrientationOf2DPlane;
 		Maybe< ListOf< Lazy< IfcStructuralLoadGroup >, 1, 0 > > LoadedBy;
@@ -2389,50 +2389,50 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcAxis2Placement2D
-    struct IfcAxis2Placement2D : IfcPlacement, ObjectHelper<IfcAxis2Placement2D,1> {
+    struct IfcAxis2Placement2D : IfcPlacement, ObjectHelper<IfcAxis2Placement2D,1> { IfcAxis2Placement2D() : Object("IfcAxis2Placement2D") {}
 		Maybe< Lazy< IfcDirection > > RefDirection;
     };
 
     // C++ wrapper for IfcSpaceType
-    struct IfcSpaceType : IfcSpatialStructureElementType, ObjectHelper<IfcSpaceType,1> {
+    struct IfcSpaceType : IfcSpatialStructureElementType, ObjectHelper<IfcSpaceType,1> { IfcSpaceType() : Object("IfcSpaceType") {}
 		IfcSpaceTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcEllipseProfileDef
-    struct IfcEllipseProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcEllipseProfileDef,2> {
+    struct IfcEllipseProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcEllipseProfileDef,2> { IfcEllipseProfileDef() : Object("IfcEllipseProfileDef") {}
 		IfcPositiveLengthMeasure::Out SemiAxis1;
 		IfcPositiveLengthMeasure::Out SemiAxis2;
     };
 
     // C++ wrapper for IfcDistributionFlowElement
-    struct IfcDistributionFlowElement : IfcDistributionElement, ObjectHelper<IfcDistributionFlowElement,0> {
+    struct IfcDistributionFlowElement : IfcDistributionElement, ObjectHelper<IfcDistributionFlowElement,0> { IfcDistributionFlowElement() : Object("IfcDistributionFlowElement") {}
 
     };
 
     // C++ wrapper for IfcFlowMovingDevice
-    struct IfcFlowMovingDevice : IfcDistributionFlowElement, ObjectHelper<IfcFlowMovingDevice,0> {
+    struct IfcFlowMovingDevice : IfcDistributionFlowElement, ObjectHelper<IfcFlowMovingDevice,0> { IfcFlowMovingDevice() : Object("IfcFlowMovingDevice") {}
 
     };
 
     // C++ wrapper for IfcSurfaceStyleWithTextures
-    struct IfcSurfaceStyleWithTextures :  ObjectHelper<IfcSurfaceStyleWithTextures,1> {
+    struct IfcSurfaceStyleWithTextures :  ObjectHelper<IfcSurfaceStyleWithTextures,1> { IfcSurfaceStyleWithTextures() : Object("IfcSurfaceStyleWithTextures") {}
 		ListOf< Lazy< NotImplemented >, 1, 0 > Textures;
     };
 
     // C++ wrapper for IfcGeometricSet
-    struct IfcGeometricSet : IfcGeometricRepresentationItem, ObjectHelper<IfcGeometricSet,1> {
+    struct IfcGeometricSet : IfcGeometricRepresentationItem, ObjectHelper<IfcGeometricSet,1> { IfcGeometricSet() : Object("IfcGeometricSet") {}
 		ListOf< IfcGeometricSetSelect, 1, 0 >::Out Elements;
     };
 
     // C++ wrapper for IfcProjectOrder
-    struct IfcProjectOrder : IfcControl, ObjectHelper<IfcProjectOrder,3> {
+    struct IfcProjectOrder : IfcControl, ObjectHelper<IfcProjectOrder,3> { IfcProjectOrder() : Object("IfcProjectOrder") {}
 		IfcIdentifier::Out ID;
 		IfcProjectOrderTypeEnum::Out PredefinedType;
 		Maybe< IfcLabel::Out > Status;
     };
 
     // C++ wrapper for IfcBSplineCurve
-    struct IfcBSplineCurve : IfcBoundedCurve, ObjectHelper<IfcBSplineCurve,5> {
+    struct IfcBSplineCurve : IfcBoundedCurve, ObjectHelper<IfcBSplineCurve,5> { IfcBSplineCurve() : Object("IfcBSplineCurve") {}
 		INTEGER::Out Degree;
 		ListOf< Lazy< IfcCartesianPoint >, 2, 0 > ControlPointsList;
 		IfcBSplineCurveForm::Out CurveForm;
@@ -2441,28 +2441,28 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcBezierCurve
-    struct IfcBezierCurve : IfcBSplineCurve, ObjectHelper<IfcBezierCurve,0> {
+    struct IfcBezierCurve : IfcBSplineCurve, ObjectHelper<IfcBezierCurve,0> { IfcBezierCurve() : Object("IfcBezierCurve") {}
 
     };
 
     // C++ wrapper for IfcStructuralPointConnection
-    struct IfcStructuralPointConnection : IfcStructuralConnection, ObjectHelper<IfcStructuralPointConnection,0> {
+    struct IfcStructuralPointConnection : IfcStructuralConnection, ObjectHelper<IfcStructuralPointConnection,0> { IfcStructuralPointConnection() : Object("IfcStructuralPointConnection") {}
 
     };
 
     // C++ wrapper for IfcFlowController
-    struct IfcFlowController : IfcDistributionFlowElement, ObjectHelper<IfcFlowController,0> {
+    struct IfcFlowController : IfcDistributionFlowElement, ObjectHelper<IfcFlowController,0> { IfcFlowController() : Object("IfcFlowController") {}
 
     };
 
     // C++ wrapper for IfcElectricDistributionPoint
-    struct IfcElectricDistributionPoint : IfcFlowController, ObjectHelper<IfcElectricDistributionPoint,2> {
+    struct IfcElectricDistributionPoint : IfcFlowController, ObjectHelper<IfcElectricDistributionPoint,2> { IfcElectricDistributionPoint() : Object("IfcElectricDistributionPoint") {}
 		IfcElectricDistributionPointFunctionEnum::Out DistributionPointFunction;
 		Maybe< IfcLabel::Out > UserDefinedFunction;
     };
 
     // C++ wrapper for IfcSite
-    struct IfcSite : IfcSpatialStructureElement, ObjectHelper<IfcSite,5> {
+    struct IfcSite : IfcSpatialStructureElement, ObjectHelper<IfcSite,5> { IfcSite() : Object("IfcSite") {}
 		Maybe< IfcCompoundPlaneAngleMeasure::Out > RefLatitude;
 		Maybe< IfcCompoundPlaneAngleMeasure::Out > RefLongitude;
 		Maybe< IfcLengthMeasure::Out > RefElevation;
@@ -2471,7 +2471,7 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcOffsetCurve3D
-    struct IfcOffsetCurve3D : IfcCurve, ObjectHelper<IfcOffsetCurve3D,4> {
+    struct IfcOffsetCurve3D : IfcCurve, ObjectHelper<IfcOffsetCurve3D,4> { IfcOffsetCurve3D() : Object("IfcOffsetCurve3D") {}
 		Lazy< IfcCurve > BasisCurve;
 		IfcLengthMeasure::Out Distance;
 		LOGICAL::Out SelfIntersect;
@@ -2479,17 +2479,17 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcVirtualElement
-    struct IfcVirtualElement : IfcElement, ObjectHelper<IfcVirtualElement,0> {
+    struct IfcVirtualElement : IfcElement, ObjectHelper<IfcVirtualElement,0> { IfcVirtualElement() : Object("IfcVirtualElement") {}
 
     };
 
     // C++ wrapper for IfcConstructionProductResource
-    struct IfcConstructionProductResource : IfcConstructionResource, ObjectHelper<IfcConstructionProductResource,0> {
+    struct IfcConstructionProductResource : IfcConstructionResource, ObjectHelper<IfcConstructionProductResource,0> { IfcConstructionProductResource() : Object("IfcConstructionProductResource") {}
 
     };
 
     // C++ wrapper for IfcSurfaceCurveSweptAreaSolid
-    struct IfcSurfaceCurveSweptAreaSolid : IfcSweptAreaSolid, ObjectHelper<IfcSurfaceCurveSweptAreaSolid,4> {
+    struct IfcSurfaceCurveSweptAreaSolid : IfcSweptAreaSolid, ObjectHelper<IfcSurfaceCurveSweptAreaSolid,4> { IfcSurfaceCurveSweptAreaSolid() : Object("IfcSurfaceCurveSweptAreaSolid") {}
 		Lazy< IfcCurve > Directrix;
 		IfcParameterValue::Out StartParam;
 		IfcParameterValue::Out EndParam;
@@ -2497,40 +2497,40 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcCartesianTransformationOperator3D
-    struct IfcCartesianTransformationOperator3D : IfcCartesianTransformationOperator, ObjectHelper<IfcCartesianTransformationOperator3D,1> {
+    struct IfcCartesianTransformationOperator3D : IfcCartesianTransformationOperator, ObjectHelper<IfcCartesianTransformationOperator3D,1> { IfcCartesianTransformationOperator3D() : Object("IfcCartesianTransformationOperator3D") {}
 		Maybe< Lazy< IfcDirection > > Axis3;
     };
 
     // C++ wrapper for IfcCartesianTransformationOperator3DnonUniform
-    struct IfcCartesianTransformationOperator3DnonUniform : IfcCartesianTransformationOperator3D, ObjectHelper<IfcCartesianTransformationOperator3DnonUniform,2> {
+    struct IfcCartesianTransformationOperator3DnonUniform : IfcCartesianTransformationOperator3D, ObjectHelper<IfcCartesianTransformationOperator3DnonUniform,2> { IfcCartesianTransformationOperator3DnonUniform() : Object("IfcCartesianTransformationOperator3DnonUniform") {}
 		Maybe< REAL::Out > Scale2;
 		Maybe< REAL::Out > Scale3;
     };
 
     // C++ wrapper for IfcCrewResource
-    struct IfcCrewResource : IfcConstructionResource, ObjectHelper<IfcCrewResource,0> {
+    struct IfcCrewResource : IfcConstructionResource, ObjectHelper<IfcCrewResource,0> { IfcCrewResource() : Object("IfcCrewResource") {}
 
     };
 
     // C++ wrapper for IfcStructuralSurfaceMember
-    struct IfcStructuralSurfaceMember : IfcStructuralMember, ObjectHelper<IfcStructuralSurfaceMember,2> {
+    struct IfcStructuralSurfaceMember : IfcStructuralMember, ObjectHelper<IfcStructuralSurfaceMember,2> { IfcStructuralSurfaceMember() : Object("IfcStructuralSurfaceMember") {}
 		IfcStructuralSurfaceTypeEnum::Out PredefinedType;
 		Maybe< IfcPositiveLengthMeasure::Out > Thickness;
     };
 
     // C++ wrapper for Ifc2DCompositeCurve
-    struct Ifc2DCompositeCurve : IfcCompositeCurve, ObjectHelper<Ifc2DCompositeCurve,0> {
+    struct Ifc2DCompositeCurve : IfcCompositeCurve, ObjectHelper<Ifc2DCompositeCurve,0> { Ifc2DCompositeCurve() : Object("Ifc2DCompositeCurve") {}
 
     };
 
     // C++ wrapper for IfcRepresentationContext
-    struct IfcRepresentationContext :  ObjectHelper<IfcRepresentationContext,2> {
+    struct IfcRepresentationContext :  ObjectHelper<IfcRepresentationContext,2> { IfcRepresentationContext() : Object("IfcRepresentationContext") {}
 		Maybe< IfcLabel::Out > ContextIdentifier;
 		Maybe< IfcLabel::Out > ContextType;
     };
 
     // C++ wrapper for IfcGeometricRepresentationContext
-    struct IfcGeometricRepresentationContext : IfcRepresentationContext, ObjectHelper<IfcGeometricRepresentationContext,4> {
+    struct IfcGeometricRepresentationContext : IfcRepresentationContext, ObjectHelper<IfcGeometricRepresentationContext,4> { IfcGeometricRepresentationContext() : Object("IfcGeometricRepresentationContext") {}
 		IfcDimensionCount::Out CoordinateSpaceDimension;
 		Maybe< REAL::Out > Precision;
 		IfcAxis2Placement::Out WorldCoordinateSystem;
@@ -2538,85 +2538,85 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcFlowTreatmentDevice
-    struct IfcFlowTreatmentDevice : IfcDistributionFlowElement, ObjectHelper<IfcFlowTreatmentDevice,0> {
+    struct IfcFlowTreatmentDevice : IfcDistributionFlowElement, ObjectHelper<IfcFlowTreatmentDevice,0> { IfcFlowTreatmentDevice() : Object("IfcFlowTreatmentDevice") {}
 
     };
 
     // C++ wrapper for IfcRightCircularCylinder
-    struct IfcRightCircularCylinder : IfcCsgPrimitive3D, ObjectHelper<IfcRightCircularCylinder,2> {
+    struct IfcRightCircularCylinder : IfcCsgPrimitive3D, ObjectHelper<IfcRightCircularCylinder,2> { IfcRightCircularCylinder() : Object("IfcRightCircularCylinder") {}
 		IfcPositiveLengthMeasure::Out Height;
 		IfcPositiveLengthMeasure::Out Radius;
     };
 
     // C++ wrapper for IfcWasteTerminalType
-    struct IfcWasteTerminalType : IfcFlowTerminalType, ObjectHelper<IfcWasteTerminalType,1> {
+    struct IfcWasteTerminalType : IfcFlowTerminalType, ObjectHelper<IfcWasteTerminalType,1> { IfcWasteTerminalType() : Object("IfcWasteTerminalType") {}
 		IfcWasteTerminalTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcBuildingElementComponent
-    struct IfcBuildingElementComponent : IfcBuildingElement, ObjectHelper<IfcBuildingElementComponent,0> {
+    struct IfcBuildingElementComponent : IfcBuildingElement, ObjectHelper<IfcBuildingElementComponent,0> { IfcBuildingElementComponent() : Object("IfcBuildingElementComponent") {}
 
     };
 
     // C++ wrapper for IfcBuildingElementPart
-    struct IfcBuildingElementPart : IfcBuildingElementComponent, ObjectHelper<IfcBuildingElementPart,0> {
+    struct IfcBuildingElementPart : IfcBuildingElementComponent, ObjectHelper<IfcBuildingElementPart,0> { IfcBuildingElementPart() : Object("IfcBuildingElementPart") {}
 
     };
 
     // C++ wrapper for IfcWall
-    struct IfcWall : IfcBuildingElement, ObjectHelper<IfcWall,0> {
+    struct IfcWall : IfcBuildingElement, ObjectHelper<IfcWall,0> { IfcWall() : Object("IfcWall") {}
 
     };
 
     // C++ wrapper for IfcWallStandardCase
-    struct IfcWallStandardCase : IfcWall, ObjectHelper<IfcWallStandardCase,0> {
+    struct IfcWallStandardCase : IfcWall, ObjectHelper<IfcWallStandardCase,0> { IfcWallStandardCase() : Object("IfcWallStandardCase") {}
 
     };
 
     // C++ wrapper for IfcPath
-    struct IfcPath : IfcTopologicalRepresentationItem, ObjectHelper<IfcPath,1> {
+    struct IfcPath : IfcTopologicalRepresentationItem, ObjectHelper<IfcPath,1> { IfcPath() : Object("IfcPath") {}
 		ListOf< Lazy< IfcOrientedEdge >, 1, 0 > EdgeList;
     };
 
     // C++ wrapper for IfcDefinedSymbol
-    struct IfcDefinedSymbol : IfcGeometricRepresentationItem, ObjectHelper<IfcDefinedSymbol,2> {
+    struct IfcDefinedSymbol : IfcGeometricRepresentationItem, ObjectHelper<IfcDefinedSymbol,2> { IfcDefinedSymbol() : Object("IfcDefinedSymbol") {}
 		IfcDefinedSymbolSelect::Out Definition;
 		Lazy< IfcCartesianTransformationOperator2D > Target;
     };
 
     // C++ wrapper for IfcStructuralSurfaceMemberVarying
-    struct IfcStructuralSurfaceMemberVarying : IfcStructuralSurfaceMember, ObjectHelper<IfcStructuralSurfaceMemberVarying,2> {
+    struct IfcStructuralSurfaceMemberVarying : IfcStructuralSurfaceMember, ObjectHelper<IfcStructuralSurfaceMemberVarying,2> { IfcStructuralSurfaceMemberVarying() : Object("IfcStructuralSurfaceMemberVarying") {}
 		ListOf< IfcPositiveLengthMeasure, 2, 0 >::Out SubsequentThickness;
 		Lazy< NotImplemented > VaryingThicknessLocation;
     };
 
     // C++ wrapper for IfcPoint
-    struct IfcPoint : IfcGeometricRepresentationItem, ObjectHelper<IfcPoint,0> {
+    struct IfcPoint : IfcGeometricRepresentationItem, ObjectHelper<IfcPoint,0> { IfcPoint() : Object("IfcPoint") {}
 
     };
 
     // C++ wrapper for IfcSurfaceOfRevolution
-    struct IfcSurfaceOfRevolution : IfcSweptSurface, ObjectHelper<IfcSurfaceOfRevolution,1> {
+    struct IfcSurfaceOfRevolution : IfcSweptSurface, ObjectHelper<IfcSurfaceOfRevolution,1> { IfcSurfaceOfRevolution() : Object("IfcSurfaceOfRevolution") {}
 		Lazy< IfcAxis1Placement > AxisPosition;
     };
 
     // C++ wrapper for IfcFlowTerminal
-    struct IfcFlowTerminal : IfcDistributionFlowElement, ObjectHelper<IfcFlowTerminal,0> {
+    struct IfcFlowTerminal : IfcDistributionFlowElement, ObjectHelper<IfcFlowTerminal,0> { IfcFlowTerminal() : Object("IfcFlowTerminal") {}
 
     };
 
     // C++ wrapper for IfcFurnishingElement
-    struct IfcFurnishingElement : IfcElement, ObjectHelper<IfcFurnishingElement,0> {
+    struct IfcFurnishingElement : IfcElement, ObjectHelper<IfcFurnishingElement,0> { IfcFurnishingElement() : Object("IfcFurnishingElement") {}
 
     };
 
     // C++ wrapper for IfcSurfaceStyleShading
-    struct IfcSurfaceStyleShading :  ObjectHelper<IfcSurfaceStyleShading,1> {
+    struct IfcSurfaceStyleShading :  ObjectHelper<IfcSurfaceStyleShading,1> { IfcSurfaceStyleShading() : Object("IfcSurfaceStyleShading") {}
 		Lazy< IfcColourRgb > SurfaceColour;
     };
 
     // C++ wrapper for IfcSurfaceStyleRendering
-    struct IfcSurfaceStyleRendering : IfcSurfaceStyleShading, ObjectHelper<IfcSurfaceStyleRendering,8> {
+    struct IfcSurfaceStyleRendering : IfcSurfaceStyleShading, ObjectHelper<IfcSurfaceStyleRendering,8> { IfcSurfaceStyleRendering() : Object("IfcSurfaceStyleRendering") {}
 		Maybe< IfcNormalisedRatioMeasure::Out > Transparency;
 		Maybe< IfcColourOrFactor::Out > DiffuseColour;
 		Maybe< IfcColourOrFactor::Out > TransmissionColour;
@@ -2628,45 +2628,45 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcCircleHollowProfileDef
-    struct IfcCircleHollowProfileDef : IfcCircleProfileDef, ObjectHelper<IfcCircleHollowProfileDef,1> {
+    struct IfcCircleHollowProfileDef : IfcCircleProfileDef, ObjectHelper<IfcCircleHollowProfileDef,1> { IfcCircleHollowProfileDef() : Object("IfcCircleHollowProfileDef") {}
 		IfcPositiveLengthMeasure::Out WallThickness;
     };
 
     // C++ wrapper for IfcFlowMovingDeviceType
-    struct IfcFlowMovingDeviceType : IfcDistributionFlowElementType, ObjectHelper<IfcFlowMovingDeviceType,0> {
+    struct IfcFlowMovingDeviceType : IfcDistributionFlowElementType, ObjectHelper<IfcFlowMovingDeviceType,0> { IfcFlowMovingDeviceType() : Object("IfcFlowMovingDeviceType") {}
 
     };
 
     // C++ wrapper for IfcFanType
-    struct IfcFanType : IfcFlowMovingDeviceType, ObjectHelper<IfcFanType,1> {
+    struct IfcFanType : IfcFlowMovingDeviceType, ObjectHelper<IfcFanType,1> { IfcFanType() : Object("IfcFanType") {}
 		IfcFanTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcStructuralPlanarActionVarying
-    struct IfcStructuralPlanarActionVarying : IfcStructuralPlanarAction, ObjectHelper<IfcStructuralPlanarActionVarying,2> {
+    struct IfcStructuralPlanarActionVarying : IfcStructuralPlanarAction, ObjectHelper<IfcStructuralPlanarActionVarying,2> { IfcStructuralPlanarActionVarying() : Object("IfcStructuralPlanarActionVarying") {}
 		Lazy< NotImplemented > VaryingAppliedLoadLocation;
 		ListOf< Lazy< NotImplemented >, 2, 0 > SubsequentAppliedLoads;
     };
 
     // C++ wrapper for IfcProductRepresentation
-    struct IfcProductRepresentation :  ObjectHelper<IfcProductRepresentation,3> {
+    struct IfcProductRepresentation :  ObjectHelper<IfcProductRepresentation,3> { IfcProductRepresentation() : Object("IfcProductRepresentation") {}
 		Maybe< IfcLabel::Out > Name;
 		Maybe< IfcText::Out > Description;
 		ListOf< Lazy< IfcRepresentation >, 1, 0 > Representations;
     };
 
     // C++ wrapper for IfcStackTerminalType
-    struct IfcStackTerminalType : IfcFlowTerminalType, ObjectHelper<IfcStackTerminalType,1> {
+    struct IfcStackTerminalType : IfcFlowTerminalType, ObjectHelper<IfcStackTerminalType,1> { IfcStackTerminalType() : Object("IfcStackTerminalType") {}
 		IfcStackTerminalTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcReinforcingElement
-    struct IfcReinforcingElement : IfcBuildingElementComponent, ObjectHelper<IfcReinforcingElement,1> {
+    struct IfcReinforcingElement : IfcBuildingElementComponent, ObjectHelper<IfcReinforcingElement,1> { IfcReinforcingElement() : Object("IfcReinforcingElement") {}
 		Maybe< IfcLabel::Out > SteelGrade;
     };
 
     // C++ wrapper for IfcReinforcingMesh
-    struct IfcReinforcingMesh : IfcReinforcingElement, ObjectHelper<IfcReinforcingMesh,8> {
+    struct IfcReinforcingMesh : IfcReinforcingElement, ObjectHelper<IfcReinforcingMesh,8> { IfcReinforcingMesh() : Object("IfcReinforcingMesh") {}
 		Maybe< IfcPositiveLengthMeasure::Out > MeshLength;
 		Maybe< IfcPositiveLengthMeasure::Out > MeshWidth;
 		IfcPositiveLengthMeasure::Out LongitudinalBarNominalDiameter;
@@ -2678,12 +2678,12 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcOrderAction
-    struct IfcOrderAction : IfcTask, ObjectHelper<IfcOrderAction,1> {
+    struct IfcOrderAction : IfcTask, ObjectHelper<IfcOrderAction,1> { IfcOrderAction() : Object("IfcOrderAction") {}
 		IfcIdentifier::Out ActionID;
     };
 
     // C++ wrapper for IfcLightSource
-    struct IfcLightSource : IfcGeometricRepresentationItem, ObjectHelper<IfcLightSource,4> {
+    struct IfcLightSource : IfcGeometricRepresentationItem, ObjectHelper<IfcLightSource,4> { IfcLightSource() : Object("IfcLightSource") {}
 		Maybe< IfcLabel::Out > Name;
 		Lazy< IfcColourRgb > LightColour;
 		Maybe< IfcNormalisedRatioMeasure::Out > AmbientIntensity;
@@ -2691,43 +2691,43 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcLightSourceDirectional
-    struct IfcLightSourceDirectional : IfcLightSource, ObjectHelper<IfcLightSourceDirectional,1> {
+    struct IfcLightSourceDirectional : IfcLightSource, ObjectHelper<IfcLightSourceDirectional,1> { IfcLightSourceDirectional() : Object("IfcLightSourceDirectional") {}
 		Lazy< IfcDirection > Orientation;
     };
 
     // C++ wrapper for IfcLoop
-    struct IfcLoop : IfcTopologicalRepresentationItem, ObjectHelper<IfcLoop,0> {
+    struct IfcLoop : IfcTopologicalRepresentationItem, ObjectHelper<IfcLoop,0> { IfcLoop() : Object("IfcLoop") {}
 
     };
 
     // C++ wrapper for IfcVertexLoop
-    struct IfcVertexLoop : IfcLoop, ObjectHelper<IfcVertexLoop,1> {
+    struct IfcVertexLoop : IfcLoop, ObjectHelper<IfcVertexLoop,1> { IfcVertexLoop() : Object("IfcVertexLoop") {}
 		Lazy< IfcVertex > LoopVertex;
     };
 
     // C++ wrapper for IfcChamferEdgeFeature
-    struct IfcChamferEdgeFeature : IfcEdgeFeature, ObjectHelper<IfcChamferEdgeFeature,2> {
+    struct IfcChamferEdgeFeature : IfcEdgeFeature, ObjectHelper<IfcChamferEdgeFeature,2> { IfcChamferEdgeFeature() : Object("IfcChamferEdgeFeature") {}
 		Maybe< IfcPositiveLengthMeasure::Out > Width;
 		Maybe< IfcPositiveLengthMeasure::Out > Height;
     };
 
     // C++ wrapper for IfcElementComponentType
-    struct IfcElementComponentType : IfcElementType, ObjectHelper<IfcElementComponentType,0> {
+    struct IfcElementComponentType : IfcElementType, ObjectHelper<IfcElementComponentType,0> { IfcElementComponentType() : Object("IfcElementComponentType") {}
 
     };
 
     // C++ wrapper for IfcFastenerType
-    struct IfcFastenerType : IfcElementComponentType, ObjectHelper<IfcFastenerType,0> {
+    struct IfcFastenerType : IfcElementComponentType, ObjectHelper<IfcFastenerType,0> { IfcFastenerType() : Object("IfcFastenerType") {}
 
     };
 
     // C++ wrapper for IfcMechanicalFastenerType
-    struct IfcMechanicalFastenerType : IfcFastenerType, ObjectHelper<IfcMechanicalFastenerType,0> {
+    struct IfcMechanicalFastenerType : IfcFastenerType, ObjectHelper<IfcMechanicalFastenerType,0> { IfcMechanicalFastenerType() : Object("IfcMechanicalFastenerType") {}
 
     };
 
     // C++ wrapper for IfcScheduleTimeControl
-    struct IfcScheduleTimeControl : IfcControl, ObjectHelper<IfcScheduleTimeControl,18> {
+    struct IfcScheduleTimeControl : IfcControl, ObjectHelper<IfcScheduleTimeControl,18> { IfcScheduleTimeControl() : Object("IfcScheduleTimeControl") {}
 		Maybe< IfcDateTimeSelect::Out > ActualStart;
 		Maybe< IfcDateTimeSelect::Out > EarlyStart;
 		Maybe< IfcDateTimeSelect::Out > LateStart;
@@ -2749,24 +2749,24 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcSurfaceStyle
-    struct IfcSurfaceStyle : IfcPresentationStyle, ObjectHelper<IfcSurfaceStyle,2> {
+    struct IfcSurfaceStyle : IfcPresentationStyle, ObjectHelper<IfcSurfaceStyle,2> { IfcSurfaceStyle() : Object("IfcSurfaceStyle") {}
 		IfcSurfaceSide::Out Side;
 		ListOf< IfcSurfaceStyleElementSelect, 1, 5 >::Out Styles;
     };
 
     // C++ wrapper for IfcOpenShell
-    struct IfcOpenShell : IfcConnectedFaceSet, ObjectHelper<IfcOpenShell,0> {
+    struct IfcOpenShell : IfcConnectedFaceSet, ObjectHelper<IfcOpenShell,0> { IfcOpenShell() : Object("IfcOpenShell") {}
 
     };
 
     // C++ wrapper for IfcSubContractResource
-    struct IfcSubContractResource : IfcConstructionResource, ObjectHelper<IfcSubContractResource,2> {
+    struct IfcSubContractResource : IfcConstructionResource, ObjectHelper<IfcSubContractResource,2> { IfcSubContractResource() : Object("IfcSubContractResource") {}
 		Maybe< IfcActorSelect::Out > SubContractor;
 		Maybe< IfcText::Out > JobDescription;
     };
 
     // C++ wrapper for IfcSweptDiskSolid
-    struct IfcSweptDiskSolid : IfcSolidModel, ObjectHelper<IfcSweptDiskSolid,5> {
+    struct IfcSweptDiskSolid : IfcSolidModel, ObjectHelper<IfcSweptDiskSolid,5> { IfcSweptDiskSolid() : Object("IfcSweptDiskSolid") {}
 		Lazy< IfcCurve > Directrix;
 		IfcPositiveLengthMeasure::Out Radius;
 		Maybe< IfcPositiveLengthMeasure::Out > InnerRadius;
@@ -2775,59 +2775,59 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcTankType
-    struct IfcTankType : IfcFlowStorageDeviceType, ObjectHelper<IfcTankType,1> {
+    struct IfcTankType : IfcFlowStorageDeviceType, ObjectHelper<IfcTankType,1> { IfcTankType() : Object("IfcTankType") {}
 		IfcTankTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcSphere
-    struct IfcSphere : IfcCsgPrimitive3D, ObjectHelper<IfcSphere,1> {
+    struct IfcSphere : IfcCsgPrimitive3D, ObjectHelper<IfcSphere,1> { IfcSphere() : Object("IfcSphere") {}
 		IfcPositiveLengthMeasure::Out Radius;
     };
 
     // C++ wrapper for IfcPolyLoop
-    struct IfcPolyLoop : IfcLoop, ObjectHelper<IfcPolyLoop,1> {
+    struct IfcPolyLoop : IfcLoop, ObjectHelper<IfcPolyLoop,1> { IfcPolyLoop() : Object("IfcPolyLoop") {}
 		ListOf< Lazy< IfcCartesianPoint >, 3, 0 > Polygon;
     };
 
     // C++ wrapper for IfcCableCarrierFittingType
-    struct IfcCableCarrierFittingType : IfcFlowFittingType, ObjectHelper<IfcCableCarrierFittingType,1> {
+    struct IfcCableCarrierFittingType : IfcFlowFittingType, ObjectHelper<IfcCableCarrierFittingType,1> { IfcCableCarrierFittingType() : Object("IfcCableCarrierFittingType") {}
 		IfcCableCarrierFittingTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcHumidifierType
-    struct IfcHumidifierType : IfcEnergyConversionDeviceType, ObjectHelper<IfcHumidifierType,1> {
+    struct IfcHumidifierType : IfcEnergyConversionDeviceType, ObjectHelper<IfcHumidifierType,1> { IfcHumidifierType() : Object("IfcHumidifierType") {}
 		IfcHumidifierTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcPerformanceHistory
-    struct IfcPerformanceHistory : IfcControl, ObjectHelper<IfcPerformanceHistory,1> {
+    struct IfcPerformanceHistory : IfcControl, ObjectHelper<IfcPerformanceHistory,1> { IfcPerformanceHistory() : Object("IfcPerformanceHistory") {}
 		IfcLabel::Out LifeCyclePhase;
     };
 
     // C++ wrapper for IfcShapeModel
-    struct IfcShapeModel : IfcRepresentation, ObjectHelper<IfcShapeModel,0> {
+    struct IfcShapeModel : IfcRepresentation, ObjectHelper<IfcShapeModel,0> { IfcShapeModel() : Object("IfcShapeModel") {}
 
     };
 
     // C++ wrapper for IfcTopologyRepresentation
-    struct IfcTopologyRepresentation : IfcShapeModel, ObjectHelper<IfcTopologyRepresentation,0> {
+    struct IfcTopologyRepresentation : IfcShapeModel, ObjectHelper<IfcTopologyRepresentation,0> { IfcTopologyRepresentation() : Object("IfcTopologyRepresentation") {}
 
     };
 
     // C++ wrapper for IfcBuilding
-    struct IfcBuilding : IfcSpatialStructureElement, ObjectHelper<IfcBuilding,3> {
+    struct IfcBuilding : IfcSpatialStructureElement, ObjectHelper<IfcBuilding,3> { IfcBuilding() : Object("IfcBuilding") {}
 		Maybe< IfcLengthMeasure::Out > ElevationOfRefHeight;
 		Maybe< IfcLengthMeasure::Out > ElevationOfTerrain;
 		Maybe< Lazy< NotImplemented > > BuildingAddress;
     };
 
     // C++ wrapper for IfcRoundedRectangleProfileDef
-    struct IfcRoundedRectangleProfileDef : IfcRectangleProfileDef, ObjectHelper<IfcRoundedRectangleProfileDef,1> {
+    struct IfcRoundedRectangleProfileDef : IfcRectangleProfileDef, ObjectHelper<IfcRoundedRectangleProfileDef,1> { IfcRoundedRectangleProfileDef() : Object("IfcRoundedRectangleProfileDef") {}
 		IfcPositiveLengthMeasure::Out RoundingRadius;
     };
 
     // C++ wrapper for IfcStairFlight
-    struct IfcStairFlight : IfcBuildingElement, ObjectHelper<IfcStairFlight,4> {
+    struct IfcStairFlight : IfcBuildingElement, ObjectHelper<IfcStairFlight,4> { IfcStairFlight() : Object("IfcStairFlight") {}
 		Maybe< INTEGER::Out > NumberOfRiser;
 		Maybe< INTEGER::Out > NumberOfTreads;
 		Maybe< IfcPositiveLengthMeasure::Out > RiserHeight;
@@ -2835,48 +2835,48 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcDistributionChamberElement
-    struct IfcDistributionChamberElement : IfcDistributionFlowElement, ObjectHelper<IfcDistributionChamberElement,0> {
+    struct IfcDistributionChamberElement : IfcDistributionFlowElement, ObjectHelper<IfcDistributionChamberElement,0> { IfcDistributionChamberElement() : Object("IfcDistributionChamberElement") {}
 
     };
 
     // C++ wrapper for IfcShapeRepresentation
-    struct IfcShapeRepresentation : IfcShapeModel, ObjectHelper<IfcShapeRepresentation,0> {
+    struct IfcShapeRepresentation : IfcShapeModel, ObjectHelper<IfcShapeRepresentation,0> { IfcShapeRepresentation() : Object("IfcShapeRepresentation") {}
 
     };
 
     // C++ wrapper for IfcRampFlight
-    struct IfcRampFlight : IfcBuildingElement, ObjectHelper<IfcRampFlight,0> {
+    struct IfcRampFlight : IfcBuildingElement, ObjectHelper<IfcRampFlight,0> { IfcRampFlight() : Object("IfcRampFlight") {}
 
     };
 
     // C++ wrapper for IfcBeamType
-    struct IfcBeamType : IfcBuildingElementType, ObjectHelper<IfcBeamType,1> {
+    struct IfcBeamType : IfcBuildingElementType, ObjectHelper<IfcBeamType,1> { IfcBeamType() : Object("IfcBeamType") {}
 		IfcBeamTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcRelDecomposes
-    struct IfcRelDecomposes : IfcRelationship, ObjectHelper<IfcRelDecomposes,2> {
+    struct IfcRelDecomposes : IfcRelationship, ObjectHelper<IfcRelDecomposes,2> { IfcRelDecomposes() : Object("IfcRelDecomposes") {}
 		Lazy< IfcObjectDefinition > RelatingObject;
 		ListOf< Lazy< IfcObjectDefinition >, 1, 0 > RelatedObjects;
     };
 
     // C++ wrapper for IfcRoof
-    struct IfcRoof : IfcBuildingElement, ObjectHelper<IfcRoof,1> {
+    struct IfcRoof : IfcBuildingElement, ObjectHelper<IfcRoof,1> { IfcRoof() : Object("IfcRoof") {}
 		IfcRoofTypeEnum::Out ShapeType;
     };
 
     // C++ wrapper for IfcFooting
-    struct IfcFooting : IfcBuildingElement, ObjectHelper<IfcFooting,1> {
+    struct IfcFooting : IfcBuildingElement, ObjectHelper<IfcFooting,1> { IfcFooting() : Object("IfcFooting") {}
 		IfcFootingTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcLightSourceAmbient
-    struct IfcLightSourceAmbient : IfcLightSource, ObjectHelper<IfcLightSourceAmbient,0> {
+    struct IfcLightSourceAmbient : IfcLightSource, ObjectHelper<IfcLightSourceAmbient,0> { IfcLightSourceAmbient() : Object("IfcLightSourceAmbient") {}
 
     };
 
     // C++ wrapper for IfcWindowStyle
-    struct IfcWindowStyle : IfcTypeProduct, ObjectHelper<IfcWindowStyle,4> {
+    struct IfcWindowStyle : IfcTypeProduct, ObjectHelper<IfcWindowStyle,4> { IfcWindowStyle() : Object("IfcWindowStyle") {}
 		IfcWindowStyleConstructionEnum::Out ConstructionType;
 		IfcWindowStyleOperationEnum::Out OperationType;
 		BOOLEAN::Out ParameterTakesPrecedence;
@@ -2884,51 +2884,51 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcBuildingElementProxyType
-    struct IfcBuildingElementProxyType : IfcBuildingElementType, ObjectHelper<IfcBuildingElementProxyType,1> {
+    struct IfcBuildingElementProxyType : IfcBuildingElementType, ObjectHelper<IfcBuildingElementProxyType,1> { IfcBuildingElementProxyType() : Object("IfcBuildingElementProxyType") {}
 		IfcBuildingElementProxyTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcAxis2Placement3D
-    struct IfcAxis2Placement3D : IfcPlacement, ObjectHelper<IfcAxis2Placement3D,2> {
+    struct IfcAxis2Placement3D : IfcPlacement, ObjectHelper<IfcAxis2Placement3D,2> { IfcAxis2Placement3D() : Object("IfcAxis2Placement3D") {}
 		Maybe< Lazy< IfcDirection > > Axis;
 		Maybe< Lazy< IfcDirection > > RefDirection;
     };
 
     // C++ wrapper for IfcEdgeCurve
-    struct IfcEdgeCurve : IfcEdge, ObjectHelper<IfcEdgeCurve,2> {
+    struct IfcEdgeCurve : IfcEdge, ObjectHelper<IfcEdgeCurve,2> { IfcEdgeCurve() : Object("IfcEdgeCurve") {}
 		Lazy< IfcCurve > EdgeGeometry;
 		BOOLEAN::Out SameSense;
     };
 
     // C++ wrapper for IfcClosedShell
-    struct IfcClosedShell : IfcConnectedFaceSet, ObjectHelper<IfcClosedShell,0> {
+    struct IfcClosedShell : IfcConnectedFaceSet, ObjectHelper<IfcClosedShell,0> { IfcClosedShell() : Object("IfcClosedShell") {}
 
     };
 
     // C++ wrapper for IfcTendonAnchor
-    struct IfcTendonAnchor : IfcReinforcingElement, ObjectHelper<IfcTendonAnchor,0> {
+    struct IfcTendonAnchor : IfcReinforcingElement, ObjectHelper<IfcTendonAnchor,0> { IfcTendonAnchor() : Object("IfcTendonAnchor") {}
 
     };
 
     // C++ wrapper for IfcCondenserType
-    struct IfcCondenserType : IfcEnergyConversionDeviceType, ObjectHelper<IfcCondenserType,1> {
+    struct IfcCondenserType : IfcEnergyConversionDeviceType, ObjectHelper<IfcCondenserType,1> { IfcCondenserType() : Object("IfcCondenserType") {}
 		IfcCondenserTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcPipeSegmentType
-    struct IfcPipeSegmentType : IfcFlowSegmentType, ObjectHelper<IfcPipeSegmentType,1> {
+    struct IfcPipeSegmentType : IfcFlowSegmentType, ObjectHelper<IfcPipeSegmentType,1> { IfcPipeSegmentType() : Object("IfcPipeSegmentType") {}
 		IfcPipeSegmentTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcPointOnSurface
-    struct IfcPointOnSurface : IfcPoint, ObjectHelper<IfcPointOnSurface,3> {
+    struct IfcPointOnSurface : IfcPoint, ObjectHelper<IfcPointOnSurface,3> { IfcPointOnSurface() : Object("IfcPointOnSurface") {}
 		Lazy< IfcSurface > BasisSurface;
 		IfcParameterValue::Out PointParameterU;
 		IfcParameterValue::Out PointParameterV;
     };
 
     // C++ wrapper for IfcAsset
-    struct IfcAsset : IfcGroup, ObjectHelper<IfcAsset,9> {
+    struct IfcAsset : IfcGroup, ObjectHelper<IfcAsset,9> { IfcAsset() : Object("IfcAsset") {}
 		IfcIdentifier::Out AssetID;
 		Lazy< NotImplemented > OriginalValue;
 		Lazy< NotImplemented > CurrentValue;
@@ -2941,7 +2941,7 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcLightSourcePositional
-    struct IfcLightSourcePositional : IfcLightSource, ObjectHelper<IfcLightSourcePositional,5> {
+    struct IfcLightSourcePositional : IfcLightSource, ObjectHelper<IfcLightSourcePositional,5> { IfcLightSourcePositional() : Object("IfcLightSourcePositional") {}
 		Lazy< IfcCartesianPoint > Position;
 		IfcPositiveLengthMeasure::Out Radius;
 		IfcReal::Out ConstantAttenuation;
@@ -2950,24 +2950,24 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcProjectionCurve
-    struct IfcProjectionCurve : IfcAnnotationCurveOccurrence, ObjectHelper<IfcProjectionCurve,0> {
+    struct IfcProjectionCurve : IfcAnnotationCurveOccurrence, ObjectHelper<IfcProjectionCurve,0> { IfcProjectionCurve() : Object("IfcProjectionCurve") {}
 
     };
 
     // C++ wrapper for IfcFillAreaStyleTiles
-    struct IfcFillAreaStyleTiles : IfcGeometricRepresentationItem, ObjectHelper<IfcFillAreaStyleTiles,3> {
+    struct IfcFillAreaStyleTiles : IfcGeometricRepresentationItem, ObjectHelper<IfcFillAreaStyleTiles,3> { IfcFillAreaStyleTiles() : Object("IfcFillAreaStyleTiles") {}
 		Lazy< IfcOneDirectionRepeatFactor > TilingPattern;
 		ListOf< IfcFillAreaStyleTileShapeSelect, 1, 0 >::Out Tiles;
 		IfcPositiveRatioMeasure::Out TilingScale;
     };
 
     // C++ wrapper for IfcElectricMotorType
-    struct IfcElectricMotorType : IfcEnergyConversionDeviceType, ObjectHelper<IfcElectricMotorType,1> {
+    struct IfcElectricMotorType : IfcEnergyConversionDeviceType, ObjectHelper<IfcElectricMotorType,1> { IfcElectricMotorType() : Object("IfcElectricMotorType") {}
 		IfcElectricMotorTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcTendon
-    struct IfcTendon : IfcReinforcingElement, ObjectHelper<IfcTendon,8> {
+    struct IfcTendon : IfcReinforcingElement, ObjectHelper<IfcTendon,8> { IfcTendon() : Object("IfcTendon") {}
 		IfcTendonTypeEnum::Out PredefinedType;
 		IfcPositiveLengthMeasure::Out NominalDiameter;
 		IfcAreaMeasure::Out CrossSectionArea;
@@ -2979,85 +2979,85 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcDistributionChamberElementType
-    struct IfcDistributionChamberElementType : IfcDistributionFlowElementType, ObjectHelper<IfcDistributionChamberElementType,1> {
+    struct IfcDistributionChamberElementType : IfcDistributionFlowElementType, ObjectHelper<IfcDistributionChamberElementType,1> { IfcDistributionChamberElementType() : Object("IfcDistributionChamberElementType") {}
 		IfcDistributionChamberElementTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcMemberType
-    struct IfcMemberType : IfcBuildingElementType, ObjectHelper<IfcMemberType,1> {
+    struct IfcMemberType : IfcBuildingElementType, ObjectHelper<IfcMemberType,1> { IfcMemberType() : Object("IfcMemberType") {}
 		IfcMemberTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcStructuralLinearAction
-    struct IfcStructuralLinearAction : IfcStructuralAction, ObjectHelper<IfcStructuralLinearAction,1> {
+    struct IfcStructuralLinearAction : IfcStructuralAction, ObjectHelper<IfcStructuralLinearAction,1> { IfcStructuralLinearAction() : Object("IfcStructuralLinearAction") {}
 		IfcProjectedOrTrueLengthEnum::Out ProjectedOrTrue;
     };
 
     // C++ wrapper for IfcStructuralLinearActionVarying
-    struct IfcStructuralLinearActionVarying : IfcStructuralLinearAction, ObjectHelper<IfcStructuralLinearActionVarying,2> {
+    struct IfcStructuralLinearActionVarying : IfcStructuralLinearAction, ObjectHelper<IfcStructuralLinearActionVarying,2> { IfcStructuralLinearActionVarying() : Object("IfcStructuralLinearActionVarying") {}
 		Lazy< NotImplemented > VaryingAppliedLoadLocation;
 		ListOf< Lazy< NotImplemented >, 1, 0 > SubsequentAppliedLoads;
     };
 
     // C++ wrapper for IfcProductDefinitionShape
-    struct IfcProductDefinitionShape : IfcProductRepresentation, ObjectHelper<IfcProductDefinitionShape,0> {
+    struct IfcProductDefinitionShape : IfcProductRepresentation, ObjectHelper<IfcProductDefinitionShape,0> { IfcProductDefinitionShape() : Object("IfcProductDefinitionShape") {}
 
     };
 
     // C++ wrapper for IfcFastener
-    struct IfcFastener : IfcElementComponent, ObjectHelper<IfcFastener,0> {
+    struct IfcFastener : IfcElementComponent, ObjectHelper<IfcFastener,0> { IfcFastener() : Object("IfcFastener") {}
 
     };
 
     // C++ wrapper for IfcMechanicalFastener
-    struct IfcMechanicalFastener : IfcFastener, ObjectHelper<IfcMechanicalFastener,2> {
+    struct IfcMechanicalFastener : IfcFastener, ObjectHelper<IfcMechanicalFastener,2> { IfcMechanicalFastener() : Object("IfcMechanicalFastener") {}
 		Maybe< IfcPositiveLengthMeasure::Out > NominalDiameter;
 		Maybe< IfcPositiveLengthMeasure::Out > NominalLength;
     };
 
     // C++ wrapper for IfcEvaporatorType
-    struct IfcEvaporatorType : IfcEnergyConversionDeviceType, ObjectHelper<IfcEvaporatorType,1> {
+    struct IfcEvaporatorType : IfcEnergyConversionDeviceType, ObjectHelper<IfcEvaporatorType,1> { IfcEvaporatorType() : Object("IfcEvaporatorType") {}
 		IfcEvaporatorTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcDiscreteAccessoryType
-    struct IfcDiscreteAccessoryType : IfcElementComponentType, ObjectHelper<IfcDiscreteAccessoryType,0> {
+    struct IfcDiscreteAccessoryType : IfcElementComponentType, ObjectHelper<IfcDiscreteAccessoryType,0> { IfcDiscreteAccessoryType() : Object("IfcDiscreteAccessoryType") {}
 
     };
 
     // C++ wrapper for IfcStructuralCurveConnection
-    struct IfcStructuralCurveConnection : IfcStructuralConnection, ObjectHelper<IfcStructuralCurveConnection,0> {
+    struct IfcStructuralCurveConnection : IfcStructuralConnection, ObjectHelper<IfcStructuralCurveConnection,0> { IfcStructuralCurveConnection() : Object("IfcStructuralCurveConnection") {}
 
     };
 
     // C++ wrapper for IfcProjectionElement
-    struct IfcProjectionElement : IfcFeatureElementAddition, ObjectHelper<IfcProjectionElement,0> {
+    struct IfcProjectionElement : IfcFeatureElementAddition, ObjectHelper<IfcProjectionElement,0> { IfcProjectionElement() : Object("IfcProjectionElement") {}
 
     };
 
     // C++ wrapper for IfcCoveringType
-    struct IfcCoveringType : IfcBuildingElementType, ObjectHelper<IfcCoveringType,1> {
+    struct IfcCoveringType : IfcBuildingElementType, ObjectHelper<IfcCoveringType,1> { IfcCoveringType() : Object("IfcCoveringType") {}
 		IfcCoveringTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcPumpType
-    struct IfcPumpType : IfcFlowMovingDeviceType, ObjectHelper<IfcPumpType,1> {
+    struct IfcPumpType : IfcFlowMovingDeviceType, ObjectHelper<IfcPumpType,1> { IfcPumpType() : Object("IfcPumpType") {}
 		IfcPumpTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcPile
-    struct IfcPile : IfcBuildingElement, ObjectHelper<IfcPile,2> {
+    struct IfcPile : IfcBuildingElement, ObjectHelper<IfcPile,2> { IfcPile() : Object("IfcPile") {}
 		IfcPileTypeEnum::Out PredefinedType;
 		Maybe< IfcPileConstructionEnum::Out > ConstructionType;
     };
 
     // C++ wrapper for IfcUnitAssignment
-    struct IfcUnitAssignment :  ObjectHelper<IfcUnitAssignment,1> {
+    struct IfcUnitAssignment :  ObjectHelper<IfcUnitAssignment,1> { IfcUnitAssignment() : Object("IfcUnitAssignment") {}
 		ListOf< IfcUnit, 1, 0 >::Out Units;
     };
 
     // C++ wrapper for IfcBoundingBox
-    struct IfcBoundingBox : IfcGeometricRepresentationItem, ObjectHelper<IfcBoundingBox,4> {
+    struct IfcBoundingBox : IfcGeometricRepresentationItem, ObjectHelper<IfcBoundingBox,4> { IfcBoundingBox() : Object("IfcBoundingBox") {}
 		Lazy< IfcCartesianPoint > Corner;
 		IfcPositiveLengthMeasure::Out XDim;
 		IfcPositiveLengthMeasure::Out YDim;
@@ -3065,28 +3065,28 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcShellBasedSurfaceModel
-    struct IfcShellBasedSurfaceModel : IfcGeometricRepresentationItem, ObjectHelper<IfcShellBasedSurfaceModel,1> {
+    struct IfcShellBasedSurfaceModel : IfcGeometricRepresentationItem, ObjectHelper<IfcShellBasedSurfaceModel,1> { IfcShellBasedSurfaceModel() : Object("IfcShellBasedSurfaceModel") {}
 		ListOf< IfcShell, 1, 0 >::Out SbsmBoundary;
     };
 
     // C++ wrapper for IfcFacetedBrep
-    struct IfcFacetedBrep : IfcManifoldSolidBrep, ObjectHelper<IfcFacetedBrep,0> {
+    struct IfcFacetedBrep : IfcManifoldSolidBrep, ObjectHelper<IfcFacetedBrep,0> { IfcFacetedBrep() : Object("IfcFacetedBrep") {}
 
     };
 
     // C++ wrapper for IfcTextLiteralWithExtent
-    struct IfcTextLiteralWithExtent : IfcTextLiteral, ObjectHelper<IfcTextLiteralWithExtent,2> {
+    struct IfcTextLiteralWithExtent : IfcTextLiteral, ObjectHelper<IfcTextLiteralWithExtent,2> { IfcTextLiteralWithExtent() : Object("IfcTextLiteralWithExtent") {}
 		Lazy< IfcPlanarExtent > Extent;
 		IfcBoxAlignment::Out BoxAlignment;
     };
 
     // C++ wrapper for IfcElectricApplianceType
-    struct IfcElectricApplianceType : IfcFlowTerminalType, ObjectHelper<IfcElectricApplianceType,1> {
+    struct IfcElectricApplianceType : IfcFlowTerminalType, ObjectHelper<IfcElectricApplianceType,1> { IfcElectricApplianceType() : Object("IfcElectricApplianceType") {}
 		IfcElectricApplianceTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcTrapeziumProfileDef
-    struct IfcTrapeziumProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcTrapeziumProfileDef,4> {
+    struct IfcTrapeziumProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcTrapeziumProfileDef,4> { IfcTrapeziumProfileDef() : Object("IfcTrapeziumProfileDef") {}
 		IfcPositiveLengthMeasure::Out BottomXDim;
 		IfcPositiveLengthMeasure::Out TopXDim;
 		IfcPositiveLengthMeasure::Out YDim;
@@ -3094,18 +3094,18 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcRelContainedInSpatialStructure
-    struct IfcRelContainedInSpatialStructure : IfcRelConnects, ObjectHelper<IfcRelContainedInSpatialStructure,2> {
+    struct IfcRelContainedInSpatialStructure : IfcRelConnects, ObjectHelper<IfcRelContainedInSpatialStructure,2> { IfcRelContainedInSpatialStructure() : Object("IfcRelContainedInSpatialStructure") {}
 		ListOf< Lazy< IfcProduct >, 1, 0 > RelatedElements;
 		Lazy< IfcSpatialStructureElement > RelatingStructure;
     };
 
     // C++ wrapper for IfcEdgeLoop
-    struct IfcEdgeLoop : IfcLoop, ObjectHelper<IfcEdgeLoop,1> {
+    struct IfcEdgeLoop : IfcLoop, ObjectHelper<IfcEdgeLoop,1> { IfcEdgeLoop() : Object("IfcEdgeLoop") {}
 		ListOf< Lazy< IfcOrientedEdge >, 1, 0 > EdgeList;
     };
 
     // C++ wrapper for IfcProject
-    struct IfcProject : IfcObject, ObjectHelper<IfcProject,4> {
+    struct IfcProject : IfcObject, ObjectHelper<IfcProject,4> { IfcProject() : Object("IfcProject") {}
 		Maybe< IfcLabel::Out > LongName;
 		Maybe< IfcLabel::Out > Phase;
 		ListOf< Lazy< IfcRepresentationContext >, 1, 0 > RepresentationContexts;
@@ -3113,24 +3113,24 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcCartesianPoint
-    struct IfcCartesianPoint : IfcPoint, ObjectHelper<IfcCartesianPoint,1> {
+    struct IfcCartesianPoint : IfcPoint, ObjectHelper<IfcCartesianPoint,1> { IfcCartesianPoint() : Object("IfcCartesianPoint") {}
 		ListOf< IfcLengthMeasure, 1, 3 >::Out Coordinates;
     };
 
     // C++ wrapper for IfcCurveBoundedPlane
-    struct IfcCurveBoundedPlane : IfcBoundedSurface, ObjectHelper<IfcCurveBoundedPlane,3> {
+    struct IfcCurveBoundedPlane : IfcBoundedSurface, ObjectHelper<IfcCurveBoundedPlane,3> { IfcCurveBoundedPlane() : Object("IfcCurveBoundedPlane") {}
 		Lazy< IfcPlane > BasisSurface;
 		Lazy< IfcCurve > OuterBoundary;
 		ListOf< Lazy< IfcCurve >, 0, 0 > InnerBoundaries;
     };
 
     // C++ wrapper for IfcWallType
-    struct IfcWallType : IfcBuildingElementType, ObjectHelper<IfcWallType,1> {
+    struct IfcWallType : IfcBuildingElementType, ObjectHelper<IfcWallType,1> { IfcWallType() : Object("IfcWallType") {}
 		IfcWallTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcFillAreaStyleHatching
-    struct IfcFillAreaStyleHatching : IfcGeometricRepresentationItem, ObjectHelper<IfcFillAreaStyleHatching,5> {
+    struct IfcFillAreaStyleHatching : IfcGeometricRepresentationItem, ObjectHelper<IfcFillAreaStyleHatching,5> { IfcFillAreaStyleHatching() : Object("IfcFillAreaStyleHatching") {}
 		Lazy< NotImplemented > HatchLineAppearance;
 		IfcHatchLineDistanceSelect::Out StartOfNextHatchLine;
 		Maybe< Lazy< IfcCartesianPoint > > PointOfReferenceHatchLine;
@@ -3139,17 +3139,17 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcEquipmentStandard
-    struct IfcEquipmentStandard : IfcControl, ObjectHelper<IfcEquipmentStandard,0> {
+    struct IfcEquipmentStandard : IfcControl, ObjectHelper<IfcEquipmentStandard,0> { IfcEquipmentStandard() : Object("IfcEquipmentStandard") {}
 
     };
 
     // C++ wrapper for IfcDiameterDimension
-    struct IfcDiameterDimension : IfcDimensionCurveDirectedCallout, ObjectHelper<IfcDiameterDimension,0> {
+    struct IfcDiameterDimension : IfcDimensionCurveDirectedCallout, ObjectHelper<IfcDiameterDimension,0> { IfcDiameterDimension() : Object("IfcDiameterDimension") {}
 
     };
 
     // C++ wrapper for IfcStructuralLoadGroup
-    struct IfcStructuralLoadGroup : IfcGroup, ObjectHelper<IfcStructuralLoadGroup,5> {
+    struct IfcStructuralLoadGroup : IfcGroup, ObjectHelper<IfcStructuralLoadGroup,5> { IfcStructuralLoadGroup() : Object("IfcStructuralLoadGroup") {}
 		IfcLoadGroupTypeEnum::Out PredefinedType;
 		IfcActionTypeEnum::Out ActionType;
 		IfcActionSourceTypeEnum::Out ActionSource;
@@ -3158,35 +3158,35 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcConstructionMaterialResource
-    struct IfcConstructionMaterialResource : IfcConstructionResource, ObjectHelper<IfcConstructionMaterialResource,2> {
+    struct IfcConstructionMaterialResource : IfcConstructionResource, ObjectHelper<IfcConstructionMaterialResource,2> { IfcConstructionMaterialResource() : Object("IfcConstructionMaterialResource") {}
 		Maybe< ListOf< IfcActorSelect, 1, 0 >::Out > Suppliers;
 		Maybe< IfcRatioMeasure::Out > UsageRatio;
     };
 
     // C++ wrapper for IfcRelAggregates
-    struct IfcRelAggregates : IfcRelDecomposes, ObjectHelper<IfcRelAggregates,0> {
+    struct IfcRelAggregates : IfcRelDecomposes, ObjectHelper<IfcRelAggregates,0> { IfcRelAggregates() : Object("IfcRelAggregates") {}
 
     };
 
     // C++ wrapper for IfcBoilerType
-    struct IfcBoilerType : IfcEnergyConversionDeviceType, ObjectHelper<IfcBoilerType,1> {
+    struct IfcBoilerType : IfcEnergyConversionDeviceType, ObjectHelper<IfcBoilerType,1> { IfcBoilerType() : Object("IfcBoilerType") {}
 		IfcBoilerTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcColourSpecification
-    struct IfcColourSpecification :  ObjectHelper<IfcColourSpecification,1> {
+    struct IfcColourSpecification :  ObjectHelper<IfcColourSpecification,1> { IfcColourSpecification() : Object("IfcColourSpecification") {}
 		Maybe< IfcLabel::Out > Name;
     };
 
     // C++ wrapper for IfcColourRgb
-    struct IfcColourRgb : IfcColourSpecification, ObjectHelper<IfcColourRgb,3> {
+    struct IfcColourRgb : IfcColourSpecification, ObjectHelper<IfcColourRgb,3> { IfcColourRgb() : Object("IfcColourRgb") {}
 		IfcNormalisedRatioMeasure::Out Red;
 		IfcNormalisedRatioMeasure::Out Green;
 		IfcNormalisedRatioMeasure::Out Blue;
     };
 
     // C++ wrapper for IfcDoorStyle
-    struct IfcDoorStyle : IfcTypeProduct, ObjectHelper<IfcDoorStyle,4> {
+    struct IfcDoorStyle : IfcTypeProduct, ObjectHelper<IfcDoorStyle,4> { IfcDoorStyle() : Object("IfcDoorStyle") {}
 		IfcDoorStyleOperationEnum::Out OperationType;
 		IfcDoorStyleConstructionEnum::Out ConstructionType;
 		BOOLEAN::Out ParameterTakesPrecedence;
@@ -3194,12 +3194,12 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcDuctSilencerType
-    struct IfcDuctSilencerType : IfcFlowTreatmentDeviceType, ObjectHelper<IfcDuctSilencerType,1> {
+    struct IfcDuctSilencerType : IfcFlowTreatmentDeviceType, ObjectHelper<IfcDuctSilencerType,1> { IfcDuctSilencerType() : Object("IfcDuctSilencerType") {}
 		IfcDuctSilencerTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcLightSourceGoniometric
-    struct IfcLightSourceGoniometric : IfcLightSource, ObjectHelper<IfcLightSourceGoniometric,6> {
+    struct IfcLightSourceGoniometric : IfcLightSource, ObjectHelper<IfcLightSourceGoniometric,6> { IfcLightSourceGoniometric() : Object("IfcLightSourceGoniometric") {}
 		Lazy< IfcAxis2Placement3D > Position;
 		Maybe< Lazy< IfcColourRgb > > ColourAppearance;
 		IfcThermodynamicTemperatureMeasure::Out ColourTemperature;
@@ -3209,27 +3209,27 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcActuatorType
-    struct IfcActuatorType : IfcDistributionControlElementType, ObjectHelper<IfcActuatorType,1> {
+    struct IfcActuatorType : IfcDistributionControlElementType, ObjectHelper<IfcActuatorType,1> { IfcActuatorType() : Object("IfcActuatorType") {}
 		IfcActuatorTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcSensorType
-    struct IfcSensorType : IfcDistributionControlElementType, ObjectHelper<IfcSensorType,1> {
+    struct IfcSensorType : IfcDistributionControlElementType, ObjectHelper<IfcSensorType,1> { IfcSensorType() : Object("IfcSensorType") {}
 		IfcSensorTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcAirTerminalBoxType
-    struct IfcAirTerminalBoxType : IfcFlowControllerType, ObjectHelper<IfcAirTerminalBoxType,1> {
+    struct IfcAirTerminalBoxType : IfcFlowControllerType, ObjectHelper<IfcAirTerminalBoxType,1> { IfcAirTerminalBoxType() : Object("IfcAirTerminalBoxType") {}
 		IfcAirTerminalBoxTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcAnnotationSurfaceOccurrence
-    struct IfcAnnotationSurfaceOccurrence : IfcAnnotationOccurrence, ObjectHelper<IfcAnnotationSurfaceOccurrence,0> {
+    struct IfcAnnotationSurfaceOccurrence : IfcAnnotationOccurrence, ObjectHelper<IfcAnnotationSurfaceOccurrence,0> { IfcAnnotationSurfaceOccurrence() : Object("IfcAnnotationSurfaceOccurrence") {}
 
     };
 
     // C++ wrapper for IfcZShapeProfileDef
-    struct IfcZShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcZShapeProfileDef,6> {
+    struct IfcZShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcZShapeProfileDef,6> { IfcZShapeProfileDef() : Object("IfcZShapeProfileDef") {}
 		IfcPositiveLengthMeasure::Out Depth;
 		IfcPositiveLengthMeasure::Out FlangeWidth;
 		IfcPositiveLengthMeasure::Out WebThickness;
@@ -3239,44 +3239,44 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcRationalBezierCurve
-    struct IfcRationalBezierCurve : IfcBezierCurve, ObjectHelper<IfcRationalBezierCurve,1> {
+    struct IfcRationalBezierCurve : IfcBezierCurve, ObjectHelper<IfcRationalBezierCurve,1> { IfcRationalBezierCurve() : Object("IfcRationalBezierCurve") {}
 		ListOf< REAL, 2, 0 >::Out WeightsData;
     };
 
     // C++ wrapper for IfcCartesianTransformationOperator2D
-    struct IfcCartesianTransformationOperator2D : IfcCartesianTransformationOperator, ObjectHelper<IfcCartesianTransformationOperator2D,0> {
+    struct IfcCartesianTransformationOperator2D : IfcCartesianTransformationOperator, ObjectHelper<IfcCartesianTransformationOperator2D,0> { IfcCartesianTransformationOperator2D() : Object("IfcCartesianTransformationOperator2D") {}
 
     };
 
     // C++ wrapper for IfcCartesianTransformationOperator2DnonUniform
-    struct IfcCartesianTransformationOperator2DnonUniform : IfcCartesianTransformationOperator2D, ObjectHelper<IfcCartesianTransformationOperator2DnonUniform,1> {
+    struct IfcCartesianTransformationOperator2DnonUniform : IfcCartesianTransformationOperator2D, ObjectHelper<IfcCartesianTransformationOperator2DnonUniform,1> { IfcCartesianTransformationOperator2DnonUniform() : Object("IfcCartesianTransformationOperator2DnonUniform") {}
 		Maybe< REAL::Out > Scale2;
     };
 
     // C++ wrapper for IfcMove
-    struct IfcMove : IfcTask, ObjectHelper<IfcMove,3> {
+    struct IfcMove : IfcTask, ObjectHelper<IfcMove,3> { IfcMove() : Object("IfcMove") {}
 		Lazy< IfcSpatialStructureElement > MoveFrom;
 		Lazy< IfcSpatialStructureElement > MoveTo;
 		Maybe< ListOf< IfcText, 1, 0 >::Out > PunchList;
     };
 
     // C++ wrapper for IfcCableCarrierSegmentType
-    struct IfcCableCarrierSegmentType : IfcFlowSegmentType, ObjectHelper<IfcCableCarrierSegmentType,1> {
+    struct IfcCableCarrierSegmentType : IfcFlowSegmentType, ObjectHelper<IfcCableCarrierSegmentType,1> { IfcCableCarrierSegmentType() : Object("IfcCableCarrierSegmentType") {}
 		IfcCableCarrierSegmentTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcElectricalElement
-    struct IfcElectricalElement : IfcElement, ObjectHelper<IfcElectricalElement,0> {
+    struct IfcElectricalElement : IfcElement, ObjectHelper<IfcElectricalElement,0> { IfcElectricalElement() : Object("IfcElectricalElement") {}
 
     };
 
     // C++ wrapper for IfcChillerType
-    struct IfcChillerType : IfcEnergyConversionDeviceType, ObjectHelper<IfcChillerType,1> {
+    struct IfcChillerType : IfcEnergyConversionDeviceType, ObjectHelper<IfcChillerType,1> { IfcChillerType() : Object("IfcChillerType") {}
 		IfcChillerTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcReinforcingBar
-    struct IfcReinforcingBar : IfcReinforcingElement, ObjectHelper<IfcReinforcingBar,5> {
+    struct IfcReinforcingBar : IfcReinforcingElement, ObjectHelper<IfcReinforcingBar,5> { IfcReinforcingBar() : Object("IfcReinforcingBar") {}
 		IfcPositiveLengthMeasure::Out NominalDiameter;
 		IfcAreaMeasure::Out CrossSectionArea;
 		Maybe< IfcPositiveLengthMeasure::Out > BarLength;
@@ -3285,7 +3285,7 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcCShapeProfileDef
-    struct IfcCShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcCShapeProfileDef,6> {
+    struct IfcCShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcCShapeProfileDef,6> { IfcCShapeProfileDef() : Object("IfcCShapeProfileDef") {}
 		IfcPositiveLengthMeasure::Out Depth;
 		IfcPositiveLengthMeasure::Out Width;
 		IfcPositiveLengthMeasure::Out WallThickness;
@@ -3295,73 +3295,73 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcPermit
-    struct IfcPermit : IfcControl, ObjectHelper<IfcPermit,1> {
+    struct IfcPermit : IfcControl, ObjectHelper<IfcPermit,1> { IfcPermit() : Object("IfcPermit") {}
 		IfcIdentifier::Out PermitID;
     };
 
     // C++ wrapper for IfcSlabType
-    struct IfcSlabType : IfcBuildingElementType, ObjectHelper<IfcSlabType,1> {
+    struct IfcSlabType : IfcBuildingElementType, ObjectHelper<IfcSlabType,1> { IfcSlabType() : Object("IfcSlabType") {}
 		IfcSlabTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcLampType
-    struct IfcLampType : IfcFlowTerminalType, ObjectHelper<IfcLampType,1> {
+    struct IfcLampType : IfcFlowTerminalType, ObjectHelper<IfcLampType,1> { IfcLampType() : Object("IfcLampType") {}
 		IfcLampTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcPlanarExtent
-    struct IfcPlanarExtent : IfcGeometricRepresentationItem, ObjectHelper<IfcPlanarExtent,2> {
+    struct IfcPlanarExtent : IfcGeometricRepresentationItem, ObjectHelper<IfcPlanarExtent,2> { IfcPlanarExtent() : Object("IfcPlanarExtent") {}
 		IfcLengthMeasure::Out SizeInX;
 		IfcLengthMeasure::Out SizeInY;
     };
 
     // C++ wrapper for IfcAlarmType
-    struct IfcAlarmType : IfcDistributionControlElementType, ObjectHelper<IfcAlarmType,1> {
+    struct IfcAlarmType : IfcDistributionControlElementType, ObjectHelper<IfcAlarmType,1> { IfcAlarmType() : Object("IfcAlarmType") {}
 		IfcAlarmTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcElectricFlowStorageDeviceType
-    struct IfcElectricFlowStorageDeviceType : IfcFlowStorageDeviceType, ObjectHelper<IfcElectricFlowStorageDeviceType,1> {
+    struct IfcElectricFlowStorageDeviceType : IfcFlowStorageDeviceType, ObjectHelper<IfcElectricFlowStorageDeviceType,1> { IfcElectricFlowStorageDeviceType() : Object("IfcElectricFlowStorageDeviceType") {}
 		IfcElectricFlowStorageDeviceTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcEquipmentElement
-    struct IfcEquipmentElement : IfcElement, ObjectHelper<IfcEquipmentElement,0> {
+    struct IfcEquipmentElement : IfcElement, ObjectHelper<IfcEquipmentElement,0> { IfcEquipmentElement() : Object("IfcEquipmentElement") {}
 
     };
 
     // C++ wrapper for IfcLightFixtureType
-    struct IfcLightFixtureType : IfcFlowTerminalType, ObjectHelper<IfcLightFixtureType,1> {
+    struct IfcLightFixtureType : IfcFlowTerminalType, ObjectHelper<IfcLightFixtureType,1> { IfcLightFixtureType() : Object("IfcLightFixtureType") {}
 		IfcLightFixtureTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcCurtainWall
-    struct IfcCurtainWall : IfcBuildingElement, ObjectHelper<IfcCurtainWall,0> {
+    struct IfcCurtainWall : IfcBuildingElement, ObjectHelper<IfcCurtainWall,0> { IfcCurtainWall() : Object("IfcCurtainWall") {}
 
     };
 
     // C++ wrapper for IfcSlab
-    struct IfcSlab : IfcBuildingElement, ObjectHelper<IfcSlab,1> {
+    struct IfcSlab : IfcBuildingElement, ObjectHelper<IfcSlab,1> { IfcSlab() : Object("IfcSlab") {}
 		Maybe< IfcSlabTypeEnum::Out > PredefinedType;
     };
 
     // C++ wrapper for IfcCurtainWallType
-    struct IfcCurtainWallType : IfcBuildingElementType, ObjectHelper<IfcCurtainWallType,1> {
+    struct IfcCurtainWallType : IfcBuildingElementType, ObjectHelper<IfcCurtainWallType,1> { IfcCurtainWallType() : Object("IfcCurtainWallType") {}
 		IfcCurtainWallTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcOutletType
-    struct IfcOutletType : IfcFlowTerminalType, ObjectHelper<IfcOutletType,1> {
+    struct IfcOutletType : IfcFlowTerminalType, ObjectHelper<IfcOutletType,1> { IfcOutletType() : Object("IfcOutletType") {}
 		IfcOutletTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcCompressorType
-    struct IfcCompressorType : IfcFlowMovingDeviceType, ObjectHelper<IfcCompressorType,1> {
+    struct IfcCompressorType : IfcFlowMovingDeviceType, ObjectHelper<IfcCompressorType,1> { IfcCompressorType() : Object("IfcCompressorType") {}
 		IfcCompressorTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcCraneRailAShapeProfileDef
-    struct IfcCraneRailAShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcCraneRailAShapeProfileDef,12> {
+    struct IfcCraneRailAShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcCraneRailAShapeProfileDef,12> { IfcCraneRailAShapeProfileDef() : Object("IfcCraneRailAShapeProfileDef") {}
 		IfcPositiveLengthMeasure::Out OverallHeight;
 		IfcPositiveLengthMeasure::Out BaseWidth2;
 		Maybe< IfcPositiveLengthMeasure::Out > Radius;
@@ -3377,85 +3377,85 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcFlowSegment
-    struct IfcFlowSegment : IfcDistributionFlowElement, ObjectHelper<IfcFlowSegment,0> {
+    struct IfcFlowSegment : IfcDistributionFlowElement, ObjectHelper<IfcFlowSegment,0> { IfcFlowSegment() : Object("IfcFlowSegment") {}
 
     };
 
     // C++ wrapper for IfcSectionedSpine
-    struct IfcSectionedSpine : IfcGeometricRepresentationItem, ObjectHelper<IfcSectionedSpine,3> {
+    struct IfcSectionedSpine : IfcGeometricRepresentationItem, ObjectHelper<IfcSectionedSpine,3> { IfcSectionedSpine() : Object("IfcSectionedSpine") {}
 		Lazy< IfcCompositeCurve > SpineCurve;
 		ListOf< Lazy< IfcProfileDef >, 2, 0 > CrossSections;
 		ListOf< Lazy< IfcAxis2Placement3D >, 2, 0 > CrossSectionPositions;
     };
 
     // C++ wrapper for IfcElectricTimeControlType
-    struct IfcElectricTimeControlType : IfcFlowControllerType, ObjectHelper<IfcElectricTimeControlType,1> {
+    struct IfcElectricTimeControlType : IfcFlowControllerType, ObjectHelper<IfcElectricTimeControlType,1> { IfcElectricTimeControlType() : Object("IfcElectricTimeControlType") {}
 		IfcElectricTimeControlTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcFaceSurface
-    struct IfcFaceSurface : IfcFace, ObjectHelper<IfcFaceSurface,2> {
+    struct IfcFaceSurface : IfcFace, ObjectHelper<IfcFaceSurface,2> { IfcFaceSurface() : Object("IfcFaceSurface") {}
 		Lazy< IfcSurface > FaceSurface;
 		BOOLEAN::Out SameSense;
     };
 
     // C++ wrapper for IfcMotorConnectionType
-    struct IfcMotorConnectionType : IfcEnergyConversionDeviceType, ObjectHelper<IfcMotorConnectionType,1> {
+    struct IfcMotorConnectionType : IfcEnergyConversionDeviceType, ObjectHelper<IfcMotorConnectionType,1> { IfcMotorConnectionType() : Object("IfcMotorConnectionType") {}
 		IfcMotorConnectionTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcFlowFitting
-    struct IfcFlowFitting : IfcDistributionFlowElement, ObjectHelper<IfcFlowFitting,0> {
+    struct IfcFlowFitting : IfcDistributionFlowElement, ObjectHelper<IfcFlowFitting,0> { IfcFlowFitting() : Object("IfcFlowFitting") {}
 
     };
 
     // C++ wrapper for IfcPointOnCurve
-    struct IfcPointOnCurve : IfcPoint, ObjectHelper<IfcPointOnCurve,2> {
+    struct IfcPointOnCurve : IfcPoint, ObjectHelper<IfcPointOnCurve,2> { IfcPointOnCurve() : Object("IfcPointOnCurve") {}
 		Lazy< IfcCurve > BasisCurve;
 		IfcParameterValue::Out PointParameter;
     };
 
     // C++ wrapper for IfcTransportElementType
-    struct IfcTransportElementType : IfcElementType, ObjectHelper<IfcTransportElementType,1> {
+    struct IfcTransportElementType : IfcElementType, ObjectHelper<IfcTransportElementType,1> { IfcTransportElementType() : Object("IfcTransportElementType") {}
 		IfcTransportElementTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcCableSegmentType
-    struct IfcCableSegmentType : IfcFlowSegmentType, ObjectHelper<IfcCableSegmentType,1> {
+    struct IfcCableSegmentType : IfcFlowSegmentType, ObjectHelper<IfcCableSegmentType,1> { IfcCableSegmentType() : Object("IfcCableSegmentType") {}
 		IfcCableSegmentTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcAnnotationSurface
-    struct IfcAnnotationSurface : IfcGeometricRepresentationItem, ObjectHelper<IfcAnnotationSurface,2> {
+    struct IfcAnnotationSurface : IfcGeometricRepresentationItem, ObjectHelper<IfcAnnotationSurface,2> { IfcAnnotationSurface() : Object("IfcAnnotationSurface") {}
 		Lazy< IfcGeometricRepresentationItem > Item;
 		Maybe< Lazy< NotImplemented > > TextureCoordinates;
     };
 
     // C++ wrapper for IfcCompositeCurveSegment
-    struct IfcCompositeCurveSegment : IfcGeometricRepresentationItem, ObjectHelper<IfcCompositeCurveSegment,3> {
+    struct IfcCompositeCurveSegment : IfcGeometricRepresentationItem, ObjectHelper<IfcCompositeCurveSegment,3> { IfcCompositeCurveSegment() : Object("IfcCompositeCurveSegment") {}
 		IfcTransitionCode::Out Transition;
 		BOOLEAN::Out SameSense;
 		Lazy< IfcCurve > ParentCurve;
     };
 
     // C++ wrapper for IfcServiceLife
-    struct IfcServiceLife : IfcControl, ObjectHelper<IfcServiceLife,2> {
+    struct IfcServiceLife : IfcControl, ObjectHelper<IfcServiceLife,2> { IfcServiceLife() : Object("IfcServiceLife") {}
 		IfcServiceLifeTypeEnum::Out ServiceLifeType;
 		IfcTimeMeasure::Out ServiceLifeDuration;
     };
 
     // C++ wrapper for IfcPlateType
-    struct IfcPlateType : IfcBuildingElementType, ObjectHelper<IfcPlateType,1> {
+    struct IfcPlateType : IfcBuildingElementType, ObjectHelper<IfcPlateType,1> { IfcPlateType() : Object("IfcPlateType") {}
 		IfcPlateTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcVibrationIsolatorType
-    struct IfcVibrationIsolatorType : IfcDiscreteAccessoryType, ObjectHelper<IfcVibrationIsolatorType,1> {
+    struct IfcVibrationIsolatorType : IfcDiscreteAccessoryType, ObjectHelper<IfcVibrationIsolatorType,1> { IfcVibrationIsolatorType() : Object("IfcVibrationIsolatorType") {}
 		IfcVibrationIsolatorTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcTrimmedCurve
-    struct IfcTrimmedCurve : IfcBoundedCurve, ObjectHelper<IfcTrimmedCurve,5> {
+    struct IfcTrimmedCurve : IfcBoundedCurve, ObjectHelper<IfcTrimmedCurve,5> { IfcTrimmedCurve() : Object("IfcTrimmedCurve") {}
 		Lazy< IfcCurve > BasisCurve;
 		ListOf< IfcTrimmingSelect, 1, 2 >::Out Trim1;
 		ListOf< IfcTrimmingSelect, 1, 2 >::Out Trim2;
@@ -3464,68 +3464,68 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcMappedItem
-    struct IfcMappedItem : IfcRepresentationItem, ObjectHelper<IfcMappedItem,2> {
+    struct IfcMappedItem : IfcRepresentationItem, ObjectHelper<IfcMappedItem,2> { IfcMappedItem() : Object("IfcMappedItem") {}
 		Lazy< IfcRepresentationMap > MappingSource;
 		Lazy< IfcCartesianTransformationOperator > MappingTarget;
     };
 
     // C++ wrapper for IfcDirection
-    struct IfcDirection : IfcGeometricRepresentationItem, ObjectHelper<IfcDirection,1> {
+    struct IfcDirection : IfcGeometricRepresentationItem, ObjectHelper<IfcDirection,1> { IfcDirection() : Object("IfcDirection") {}
 		ListOf< REAL, 2, 3 >::Out DirectionRatios;
     };
 
     // C++ wrapper for IfcBlock
-    struct IfcBlock : IfcCsgPrimitive3D, ObjectHelper<IfcBlock,3> {
+    struct IfcBlock : IfcCsgPrimitive3D, ObjectHelper<IfcBlock,3> { IfcBlock() : Object("IfcBlock") {}
 		IfcPositiveLengthMeasure::Out XLength;
 		IfcPositiveLengthMeasure::Out YLength;
 		IfcPositiveLengthMeasure::Out ZLength;
     };
 
     // C++ wrapper for IfcProjectOrderRecord
-    struct IfcProjectOrderRecord : IfcControl, ObjectHelper<IfcProjectOrderRecord,2> {
+    struct IfcProjectOrderRecord : IfcControl, ObjectHelper<IfcProjectOrderRecord,2> { IfcProjectOrderRecord() : Object("IfcProjectOrderRecord") {}
 		ListOf< Lazy< NotImplemented >, 1, 0 > Records;
 		IfcProjectOrderRecordTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcFlowMeterType
-    struct IfcFlowMeterType : IfcFlowControllerType, ObjectHelper<IfcFlowMeterType,1> {
+    struct IfcFlowMeterType : IfcFlowControllerType, ObjectHelper<IfcFlowMeterType,1> { IfcFlowMeterType() : Object("IfcFlowMeterType") {}
 		IfcFlowMeterTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcControllerType
-    struct IfcControllerType : IfcDistributionControlElementType, ObjectHelper<IfcControllerType,1> {
+    struct IfcControllerType : IfcDistributionControlElementType, ObjectHelper<IfcControllerType,1> { IfcControllerType() : Object("IfcControllerType") {}
 		IfcControllerTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcBeam
-    struct IfcBeam : IfcBuildingElement, ObjectHelper<IfcBeam,0> {
+    struct IfcBeam : IfcBuildingElement, ObjectHelper<IfcBeam,0> { IfcBeam() : Object("IfcBeam") {}
 
     };
 
     // C++ wrapper for IfcArbitraryOpenProfileDef
-    struct IfcArbitraryOpenProfileDef : IfcProfileDef, ObjectHelper<IfcArbitraryOpenProfileDef,1> {
+    struct IfcArbitraryOpenProfileDef : IfcProfileDef, ObjectHelper<IfcArbitraryOpenProfileDef,1> { IfcArbitraryOpenProfileDef() : Object("IfcArbitraryOpenProfileDef") {}
 		Lazy< IfcBoundedCurve > Curve;
     };
 
     // C++ wrapper for IfcCenterLineProfileDef
-    struct IfcCenterLineProfileDef : IfcArbitraryOpenProfileDef, ObjectHelper<IfcCenterLineProfileDef,1> {
+    struct IfcCenterLineProfileDef : IfcArbitraryOpenProfileDef, ObjectHelper<IfcCenterLineProfileDef,1> { IfcCenterLineProfileDef() : Object("IfcCenterLineProfileDef") {}
 		IfcPositiveLengthMeasure::Out Thickness;
     };
 
     // C++ wrapper for IfcTimeSeriesSchedule
-    struct IfcTimeSeriesSchedule : IfcControl, ObjectHelper<IfcTimeSeriesSchedule,3> {
+    struct IfcTimeSeriesSchedule : IfcControl, ObjectHelper<IfcTimeSeriesSchedule,3> { IfcTimeSeriesSchedule() : Object("IfcTimeSeriesSchedule") {}
 		Maybe< ListOf< IfcDateTimeSelect, 1, 0 >::Out > ApplicableDates;
 		IfcTimeSeriesScheduleTypeEnum::Out TimeSeriesScheduleType;
 		Lazy< NotImplemented > TimeSeries;
     };
 
     // C++ wrapper for IfcRoundedEdgeFeature
-    struct IfcRoundedEdgeFeature : IfcEdgeFeature, ObjectHelper<IfcRoundedEdgeFeature,1> {
+    struct IfcRoundedEdgeFeature : IfcEdgeFeature, ObjectHelper<IfcRoundedEdgeFeature,1> { IfcRoundedEdgeFeature() : Object("IfcRoundedEdgeFeature") {}
 		Maybe< IfcPositiveLengthMeasure::Out > Radius;
     };
 
     // C++ wrapper for IfcIShapeProfileDef
-    struct IfcIShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcIShapeProfileDef,5> {
+    struct IfcIShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcIShapeProfileDef,5> { IfcIShapeProfileDef() : Object("IfcIShapeProfileDef") {}
 		IfcPositiveLengthMeasure::Out OverallWidth;
 		IfcPositiveLengthMeasure::Out OverallDepth;
 		IfcPositiveLengthMeasure::Out WebThickness;
@@ -3534,50 +3534,50 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcSpaceHeaterType
-    struct IfcSpaceHeaterType : IfcEnergyConversionDeviceType, ObjectHelper<IfcSpaceHeaterType,1> {
+    struct IfcSpaceHeaterType : IfcEnergyConversionDeviceType, ObjectHelper<IfcSpaceHeaterType,1> { IfcSpaceHeaterType() : Object("IfcSpaceHeaterType") {}
 		IfcSpaceHeaterTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcFlowStorageDevice
-    struct IfcFlowStorageDevice : IfcDistributionFlowElement, ObjectHelper<IfcFlowStorageDevice,0> {
+    struct IfcFlowStorageDevice : IfcDistributionFlowElement, ObjectHelper<IfcFlowStorageDevice,0> { IfcFlowStorageDevice() : Object("IfcFlowStorageDevice") {}
 
     };
 
     // C++ wrapper for IfcRevolvedAreaSolid
-    struct IfcRevolvedAreaSolid : IfcSweptAreaSolid, ObjectHelper<IfcRevolvedAreaSolid,2> {
+    struct IfcRevolvedAreaSolid : IfcSweptAreaSolid, ObjectHelper<IfcRevolvedAreaSolid,2> { IfcRevolvedAreaSolid() : Object("IfcRevolvedAreaSolid") {}
 		Lazy< IfcAxis1Placement > Axis;
 		IfcPlaneAngleMeasure::Out Angle;
     };
 
     // C++ wrapper for IfcDoor
-    struct IfcDoor : IfcBuildingElement, ObjectHelper<IfcDoor,2> {
+    struct IfcDoor : IfcBuildingElement, ObjectHelper<IfcDoor,2> { IfcDoor() : Object("IfcDoor") {}
 		Maybe< IfcPositiveLengthMeasure::Out > OverallHeight;
 		Maybe< IfcPositiveLengthMeasure::Out > OverallWidth;
     };
 
     // C++ wrapper for IfcEllipse
-    struct IfcEllipse : IfcConic, ObjectHelper<IfcEllipse,2> {
+    struct IfcEllipse : IfcConic, ObjectHelper<IfcEllipse,2> { IfcEllipse() : Object("IfcEllipse") {}
 		IfcPositiveLengthMeasure::Out SemiAxis1;
 		IfcPositiveLengthMeasure::Out SemiAxis2;
     };
 
     // C++ wrapper for IfcTubeBundleType
-    struct IfcTubeBundleType : IfcEnergyConversionDeviceType, ObjectHelper<IfcTubeBundleType,1> {
+    struct IfcTubeBundleType : IfcEnergyConversionDeviceType, ObjectHelper<IfcTubeBundleType,1> { IfcTubeBundleType() : Object("IfcTubeBundleType") {}
 		IfcTubeBundleTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcAngularDimension
-    struct IfcAngularDimension : IfcDimensionCurveDirectedCallout, ObjectHelper<IfcAngularDimension,0> {
+    struct IfcAngularDimension : IfcDimensionCurveDirectedCallout, ObjectHelper<IfcAngularDimension,0> { IfcAngularDimension() : Object("IfcAngularDimension") {}
 
     };
 
     // C++ wrapper for IfcFaceBasedSurfaceModel
-    struct IfcFaceBasedSurfaceModel : IfcGeometricRepresentationItem, ObjectHelper<IfcFaceBasedSurfaceModel,1> {
+    struct IfcFaceBasedSurfaceModel : IfcGeometricRepresentationItem, ObjectHelper<IfcFaceBasedSurfaceModel,1> { IfcFaceBasedSurfaceModel() : Object("IfcFaceBasedSurfaceModel") {}
 		ListOf< Lazy< IfcConnectedFaceSet >, 1, 0 > FbsmFaces;
     };
 
     // C++ wrapper for IfcCraneRailFShapeProfileDef
-    struct IfcCraneRailFShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcCraneRailFShapeProfileDef,9> {
+    struct IfcCraneRailFShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcCraneRailFShapeProfileDef,9> { IfcCraneRailFShapeProfileDef() : Object("IfcCraneRailFShapeProfileDef") {}
 		IfcPositiveLengthMeasure::Out OverallHeight;
 		IfcPositiveLengthMeasure::Out HeadWidth;
 		Maybe< IfcPositiveLengthMeasure::Out > Radius;
@@ -3590,12 +3590,12 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcColumnType
-    struct IfcColumnType : IfcBuildingElementType, ObjectHelper<IfcColumnType,1> {
+    struct IfcColumnType : IfcBuildingElementType, ObjectHelper<IfcColumnType,1> { IfcColumnType() : Object("IfcColumnType") {}
 		IfcColumnTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcTShapeProfileDef
-    struct IfcTShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcTShapeProfileDef,10> {
+    struct IfcTShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcTShapeProfileDef,10> { IfcTShapeProfileDef() : Object("IfcTShapeProfileDef") {}
 		IfcPositiveLengthMeasure::Out Depth;
 		IfcPositiveLengthMeasure::Out FlangeWidth;
 		IfcPositiveLengthMeasure::Out WebThickness;
@@ -3609,29 +3609,29 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcEnergyConversionDevice
-    struct IfcEnergyConversionDevice : IfcDistributionFlowElement, ObjectHelper<IfcEnergyConversionDevice,0> {
+    struct IfcEnergyConversionDevice : IfcDistributionFlowElement, ObjectHelper<IfcEnergyConversionDevice,0> { IfcEnergyConversionDevice() : Object("IfcEnergyConversionDevice") {}
 
     };
 
     // C++ wrapper for IfcWorkSchedule
-    struct IfcWorkSchedule : IfcWorkControl, ObjectHelper<IfcWorkSchedule,0> {
+    struct IfcWorkSchedule : IfcWorkControl, ObjectHelper<IfcWorkSchedule,0> { IfcWorkSchedule() : Object("IfcWorkSchedule") {}
 
     };
 
     // C++ wrapper for IfcZone
-    struct IfcZone : IfcGroup, ObjectHelper<IfcZone,0> {
+    struct IfcZone : IfcGroup, ObjectHelper<IfcZone,0> { IfcZone() : Object("IfcZone") {}
 
     };
 
     // C++ wrapper for IfcTransportElement
-    struct IfcTransportElement : IfcElement, ObjectHelper<IfcTransportElement,3> {
+    struct IfcTransportElement : IfcElement, ObjectHelper<IfcTransportElement,3> { IfcTransportElement() : Object("IfcTransportElement") {}
 		Maybe< IfcTransportElementTypeEnum::Out > OperationType;
 		Maybe< IfcMassMeasure::Out > CapacityByWeight;
 		Maybe< IfcCountMeasure::Out > CapacityByNumber;
     };
 
     // C++ wrapper for IfcGeometricRepresentationSubContext
-    struct IfcGeometricRepresentationSubContext : IfcGeometricRepresentationContext, ObjectHelper<IfcGeometricRepresentationSubContext,4> {
+    struct IfcGeometricRepresentationSubContext : IfcGeometricRepresentationContext, ObjectHelper<IfcGeometricRepresentationSubContext,4> { IfcGeometricRepresentationSubContext() : Object("IfcGeometricRepresentationSubContext") {}
 		Lazy< IfcGeometricRepresentationContext > ParentContext;
 		Maybe< IfcPositiveRatioMeasure::Out > TargetScale;
 		IfcGeometricProjectionEnum::Out TargetView;
@@ -3639,7 +3639,7 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcLShapeProfileDef
-    struct IfcLShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcLShapeProfileDef,8> {
+    struct IfcLShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcLShapeProfileDef,8> { IfcLShapeProfileDef() : Object("IfcLShapeProfileDef") {}
 		IfcPositiveLengthMeasure::Out Depth;
 		Maybe< IfcPositiveLengthMeasure::Out > Width;
 		IfcPositiveLengthMeasure::Out Thickness;
@@ -3651,33 +3651,33 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcGeometricCurveSet
-    struct IfcGeometricCurveSet : IfcGeometricSet, ObjectHelper<IfcGeometricCurveSet,0> {
+    struct IfcGeometricCurveSet : IfcGeometricSet, ObjectHelper<IfcGeometricCurveSet,0> { IfcGeometricCurveSet() : Object("IfcGeometricCurveSet") {}
 
     };
 
     // C++ wrapper for IfcActor
-    struct IfcActor : IfcObject, ObjectHelper<IfcActor,1> {
+    struct IfcActor : IfcObject, ObjectHelper<IfcActor,1> { IfcActor() : Object("IfcActor") {}
 		IfcActorSelect::Out TheActor;
     };
 
     // C++ wrapper for IfcOccupant
-    struct IfcOccupant : IfcActor, ObjectHelper<IfcOccupant,1> {
+    struct IfcOccupant : IfcActor, ObjectHelper<IfcOccupant,1> { IfcOccupant() : Object("IfcOccupant") {}
 		IfcOccupantTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcBooleanClippingResult
-    struct IfcBooleanClippingResult : IfcBooleanResult, ObjectHelper<IfcBooleanClippingResult,0> {
+    struct IfcBooleanClippingResult : IfcBooleanResult, ObjectHelper<IfcBooleanClippingResult,0> { IfcBooleanClippingResult() : Object("IfcBooleanClippingResult") {}
 
     };
 
     // C++ wrapper for IfcAnnotationFillArea
-    struct IfcAnnotationFillArea : IfcGeometricRepresentationItem, ObjectHelper<IfcAnnotationFillArea,2> {
+    struct IfcAnnotationFillArea : IfcGeometricRepresentationItem, ObjectHelper<IfcAnnotationFillArea,2> { IfcAnnotationFillArea() : Object("IfcAnnotationFillArea") {}
 		Lazy< IfcCurve > OuterBoundary;
 		Maybe< ListOf< Lazy< IfcCurve >, 1, 0 > > InnerBoundaries;
     };
 
     // C++ wrapper for IfcLightSourceSpot
-    struct IfcLightSourceSpot : IfcLightSourcePositional, ObjectHelper<IfcLightSourceSpot,4> {
+    struct IfcLightSourceSpot : IfcLightSourcePositional, ObjectHelper<IfcLightSourceSpot,4> { IfcLightSourceSpot() : Object("IfcLightSourceSpot") {}
 		Lazy< IfcDirection > Orientation;
 		Maybe< IfcReal::Out > ConcentrationExponent;
 		IfcPositivePlaneAngleMeasure::Out SpreadAngle;
@@ -3685,17 +3685,17 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcFireSuppressionTerminalType
-    struct IfcFireSuppressionTerminalType : IfcFlowTerminalType, ObjectHelper<IfcFireSuppressionTerminalType,1> {
+    struct IfcFireSuppressionTerminalType : IfcFlowTerminalType, ObjectHelper<IfcFireSuppressionTerminalType,1> { IfcFireSuppressionTerminalType() : Object("IfcFireSuppressionTerminalType") {}
 		IfcFireSuppressionTerminalTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcElectricGeneratorType
-    struct IfcElectricGeneratorType : IfcEnergyConversionDeviceType, ObjectHelper<IfcElectricGeneratorType,1> {
+    struct IfcElectricGeneratorType : IfcEnergyConversionDeviceType, ObjectHelper<IfcElectricGeneratorType,1> { IfcElectricGeneratorType() : Object("IfcElectricGeneratorType") {}
 		IfcElectricGeneratorTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcInventory
-    struct IfcInventory : IfcGroup, ObjectHelper<IfcInventory,6> {
+    struct IfcInventory : IfcGroup, ObjectHelper<IfcInventory,6> { IfcInventory() : Object("IfcInventory") {}
 		IfcInventoryTypeEnum::Out InventoryType;
 		IfcActorSelect::Out Jurisdiction;
 		ListOf< Lazy< NotImplemented >, 1, 0 > ResponsiblePersons;
@@ -3705,65 +3705,65 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcPolyline
-    struct IfcPolyline : IfcBoundedCurve, ObjectHelper<IfcPolyline,1> {
+    struct IfcPolyline : IfcBoundedCurve, ObjectHelper<IfcPolyline,1> { IfcPolyline() : Object("IfcPolyline") {}
 		ListOf< Lazy< IfcCartesianPoint >, 2, 0 > Points;
     };
 
     // C++ wrapper for IfcBoxedHalfSpace
-    struct IfcBoxedHalfSpace : IfcHalfSpaceSolid, ObjectHelper<IfcBoxedHalfSpace,1> {
+    struct IfcBoxedHalfSpace : IfcHalfSpaceSolid, ObjectHelper<IfcBoxedHalfSpace,1> { IfcBoxedHalfSpace() : Object("IfcBoxedHalfSpace") {}
 		Lazy< IfcBoundingBox > Enclosure;
     };
 
     // C++ wrapper for IfcAirTerminalType
-    struct IfcAirTerminalType : IfcFlowTerminalType, ObjectHelper<IfcAirTerminalType,1> {
+    struct IfcAirTerminalType : IfcFlowTerminalType, ObjectHelper<IfcAirTerminalType,1> { IfcAirTerminalType() : Object("IfcAirTerminalType") {}
 		IfcAirTerminalTypeEnum::Out PredefinedType;
     };
 
     // C++ wrapper for IfcDistributionPort
-    struct IfcDistributionPort : IfcPort, ObjectHelper<IfcDistributionPort,1> {
+    struct IfcDistributionPort : IfcPort, ObjectHelper<IfcDistributionPort,1> { IfcDistributionPort() : Object("IfcDistributionPort") {}
 		Maybe< IfcFlowDirectionEnum::Out > FlowDirection;
     };
 
     // C++ wrapper for IfcCostItem
-    struct IfcCostItem : IfcControl, ObjectHelper<IfcCostItem,0> {
+    struct IfcCostItem : IfcControl, ObjectHelper<IfcCostItem,0> { IfcCostItem() : Object("IfcCostItem") {}
 
     };
 
     // C++ wrapper for IfcStructuredDimensionCallout
-    struct IfcStructuredDimensionCallout : IfcDraughtingCallout, ObjectHelper<IfcStructuredDimensionCallout,0> {
+    struct IfcStructuredDimensionCallout : IfcDraughtingCallout, ObjectHelper<IfcStructuredDimensionCallout,0> { IfcStructuredDimensionCallout() : Object("IfcStructuredDimensionCallout") {}
 
     };
 
     // C++ wrapper for IfcStructuralResultGroup
-    struct IfcStructuralResultGroup : IfcGroup, ObjectHelper<IfcStructuralResultGroup,3> {
+    struct IfcStructuralResultGroup : IfcGroup, ObjectHelper<IfcStructuralResultGroup,3> { IfcStructuralResultGroup() : Object("IfcStructuralResultGroup") {}
 		IfcAnalysisTheoryTypeEnum::Out TheoryType;
 		Maybe< Lazy< IfcStructuralLoadGroup > > ResultForLoadGroup;
 		BOOLEAN::Out IsLinear;
     };
 
     // C++ wrapper for IfcOrientedEdge
-    struct IfcOrientedEdge : IfcEdge, ObjectHelper<IfcOrientedEdge,2> {
+    struct IfcOrientedEdge : IfcEdge, ObjectHelper<IfcOrientedEdge,2> { IfcOrientedEdge() : Object("IfcOrientedEdge") {}
 		Lazy< IfcEdge > EdgeElement;
 		BOOLEAN::Out Orientation;
     };
 
     // C++ wrapper for IfcCsgSolid
-    struct IfcCsgSolid : IfcSolidModel, ObjectHelper<IfcCsgSolid,1> {
+    struct IfcCsgSolid : IfcSolidModel, ObjectHelper<IfcCsgSolid,1> { IfcCsgSolid() : Object("IfcCsgSolid") {}
 		IfcCsgSelect::Out TreeRootExpression;
     };
 
     // C++ wrapper for IfcPlanarBox
-    struct IfcPlanarBox : IfcPlanarExtent, ObjectHelper<IfcPlanarBox,1> {
+    struct IfcPlanarBox : IfcPlanarExtent, ObjectHelper<IfcPlanarBox,1> { IfcPlanarBox() : Object("IfcPlanarBox") {}
 		IfcAxis2Placement::Out Placement;
     };
 
     // C++ wrapper for IfcMaterialDefinitionRepresentation
-    struct IfcMaterialDefinitionRepresentation : IfcProductRepresentation, ObjectHelper<IfcMaterialDefinitionRepresentation,1> {
+    struct IfcMaterialDefinitionRepresentation : IfcProductRepresentation, ObjectHelper<IfcMaterialDefinitionRepresentation,1> { IfcMaterialDefinitionRepresentation() : Object("IfcMaterialDefinitionRepresentation") {}
 		Lazy< NotImplemented > RepresentedMaterial;
     };
 
     // C++ wrapper for IfcAsymmetricIShapeProfileDef
-    struct IfcAsymmetricIShapeProfileDef : IfcIShapeProfileDef, ObjectHelper<IfcAsymmetricIShapeProfileDef,4> {
+    struct IfcAsymmetricIShapeProfileDef : IfcIShapeProfileDef, ObjectHelper<IfcAsymmetricIShapeProfileDef,4> { IfcAsymmetricIShapeProfileDef() : Object("IfcAsymmetricIShapeProfileDef") {}
 		IfcPositiveLengthMeasure::Out TopFlangeWidth;
 		Maybe< IfcPositiveLengthMeasure::Out > TopFlangeThickness;
 		Maybe< IfcPositiveLengthMeasure::Out > TopFlangeFilletRadius;
@@ -3771,7 +3771,7 @@ namespace IFC {
     };
 
     // C++ wrapper for IfcRepresentationMap
-    struct IfcRepresentationMap :  ObjectHelper<IfcRepresentationMap,2> {
+    struct IfcRepresentationMap :  ObjectHelper<IfcRepresentationMap,2> { IfcRepresentationMap() : Object("IfcRepresentationMap") {}
 		IfcAxis2Placement::Out MappingOrigin;
 		Lazy< IfcRepresentation > MappedRepresentation;
     };

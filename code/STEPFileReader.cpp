@@ -63,7 +63,7 @@ static inline std::string &ltrim(std::string &s) {
 
 // trim from end
 static inline std::string &rtrim(std::string &s) {
-	s.erase(std::find_if(s.rbegin(), s.rend(), std::not1( std::ptr_fun(Assimp::IsSpace<char>))).base());
+	s.erase(std::find_if(s.rbegin(), s.rend(), std::not1( std::ptr_fun(Assimp::IsSpace<char>))).base(),s.end());
 	return s;
 }
 // trim from both ends

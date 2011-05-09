@@ -155,7 +155,7 @@ void DeboneProcess::Execute( aiScene* pScene)
 			}
 			else	{
 				// Mesh is kept unchanged - store it's new place in the mesh array
-				mSubMeshIndices[a].push_back(std::pair<unsigned int,aiNode*>(meshes.size(),0));
+				mSubMeshIndices[a].push_back(std::pair<unsigned int,aiNode*>(meshes.size(),(aiNode*)0));
 				meshes.push_back(srcMesh);
 			}
 		}	
@@ -343,7 +343,7 @@ void DeboneProcess::SplitMesh( const aiMesh* pMesh, std::vector< std::pair< aiMe
 		}
 
 		aiMesh *baseMesh = MakeSubmesh(pMesh,subFaces,0);
-		std::pair<aiMesh*,const aiBone*> push_pair(baseMesh,0);
+		std::pair<aiMesh*,const aiBone*> push_pair(baseMesh,(const aiBone*)0);
 
 		poNewMeshes.push_back(push_pair);
 	}

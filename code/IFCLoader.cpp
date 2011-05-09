@@ -50,13 +50,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IFCReaderGen.h"
 
 #include "StreamReader.h"
-#include "TinyFormatter.h"
 #include "MemoryIOWrapper.h"
+#include "ProcessHelper.h"
+
+#include <boost/tuple/tuple.hpp>
 
 using namespace Assimp;
 using namespace Assimp::Formatter;
-
 namespace EXPRESS = STEP::EXPRESS;
+
+const std::string LogFunctions<IFCImporter>::log_prefix = "IFC: ";
 
 
 /* DO NOT REMOVE this comment block. The genentitylist.sh script
@@ -564,9 +567,9 @@ void ConvertTransformOperator(aiMatrix4x4& out, const IFC::IfcCartesianTransform
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessPolyloop(const IFC::IfcPolyLoop& loop, TempMesh& meshout, ConversionData& conv)
+bool ProcessPolyloop(const IFC::IfcPolyLoop& loop, TempMesh& meshout, ConversionData& conv)
 {
-	unsigned int cnt = 0;
+	size_t cnt = 0;
 	BOOST_FOREACH(const IFC::IfcCartesianPoint& c, loop.Polygon) {
 		aiVector3D tmp;
 		ConvertCartesianPoint(tmp,c);
@@ -574,17 +577,34 @@ void ProcessPolyloop(const IFC::IfcPolyLoop& loop, TempMesh& meshout, Conversion
 		meshout.verts.push_back(tmp);
 		++cnt;
 	}
-	meshout.vertcnt.push_back(cnt);
+	// zero- or one- vertex polyloops simply ignored
+	if (cnt >= 1) { 
+		meshout.vertcnt.push_back(cnt);
+		return true;
+	}
+	
+	if (cnt==1) {
+		meshout.vertcnt.pop_back();
+	}
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessConnectedFaceSet(const IFC::IfcConnectedFaceSet& fset, TempMesh& meshout, ConversionData& conv)
+void ProcessConnectedFaceSet(const IFC::IfcConnectedFaceSet& fset, TempMesh& result, ConversionData& conv)
 {
 	BOOST_FOREACH(const IFC::IfcFace& face, fset.CfsFaces) {
+		TempMesh meshout;
+
+		size_t ob = face.Bounds.size(), cnt = 0;
 		BOOST_FOREACH(const IFC::IfcFaceBound& bound, face.Bounds) {
 			
-			if(const IFC::IfcPolyLoop* polyloop = bound.Bound->ToPtr<IFC::IfcPolyLoop>()) {
-				ProcessPolyloop(*polyloop, meshout, conv);
+			if(const IFC::IfcPolyLoop* const polyloop = bound.Bound->ToPtr<IFC::IfcPolyLoop>()) {
+				if(ProcessPolyloop(*polyloop, meshout, conv)) {
+					if(bound.ToPtr<IFC::IfcFaceOuterBound>()) {
+						ob = cnt;
+					}
+					++cnt;
+				}
 			}
 			else {
 				IFCImporter::LogWarn("skipping unknown IfcFaceBound entity, type is " + bound.Bound->GetClassName());
@@ -592,14 +612,140 @@ void ProcessConnectedFaceSet(const IFC::IfcConnectedFaceSet& fset, TempMesh& mes
 			}
 
 			if(!IsTrue(bound.Orientation)) {
-				unsigned int cnt = 0;
+				size_t c = 0;
 				BOOST_FOREACH(unsigned int& i, meshout.vertcnt) {
+					std::reverse(meshout.verts.begin() + cnt,meshout.verts.begin() + cnt + c);
+					cnt += c;
+				}
+			}
+			
+		}
+
+		result.vertcnt.reserve(meshout.vertcnt.size()+result.vertcnt.size());
+		if (meshout.vertcnt.size() <= 1) {
+			result.verts.reserve(meshout.verts.size()+result.verts.size());
+
+			std::copy(meshout.verts.begin(),meshout.verts.end(),std::back_inserter(result.verts));
+			std::copy(meshout.vertcnt.begin(),meshout.vertcnt.end(),std::back_inserter(result.vertcnt));
+			continue;
+		}
+
+		IFCImporter::LogDebug("fixing polygon with holes for triangulation via ear-cutting");
+
+		// each hole results in two extra vertices
+		result.verts.reserve(meshout.verts.size()+cnt*2+result.verts.size());
+
+		// handle polygons with holes. our built in triangulation won't handle them as is, but
+		// the ear cutting algorithm is solid enough to deal with them if we join the inner
+		// holes with the outer boundaries by dummy connections.
+		size_t outer_polygon_start = 0;
+		
+		// see if one of the polygons is a IfcFaceOuterBound - treats this as the outer boundary.
+		// sadly we can't rely on it, the docs say 'At most one of the bounds shall be of the type IfcFaceOuterBound' 
+		std::vector<unsigned int>::iterator outer_polygon = meshout.vertcnt.end(), begin=meshout.vertcnt.begin(),  iit;
+		if (ob < face.Bounds.size()) {
+			outer_polygon = begin + ob;
+			outer_polygon_start = std::accumulate(begin,outer_polygon,0);
+		}
+		else {
+			float area_outer_polygon = 1e-10f;
+
+			// find the polygon with the largest area, it must be the outer bound. 
+			size_t max_vcount = 0;
+			for(iit = begin; iit != meshout.vertcnt.end(); ++iit) {
+				ai_assert(*iit);
+				max_vcount = std::max(max_vcount,static_cast<size_t>(*iit));
+			}
+			std::vector<float> temp((max_vcount+2)*4);
+			size_t vidx = 0;
+			for(iit = begin; iit != meshout.vertcnt.end(); vidx += *iit++) {
+
+				for(size_t vofs = 0, cnt = 0; vofs < *iit; ++vofs) {
+					const aiVector3D& v = meshout.verts[vidx+vofs];
+					temp[cnt++] = v.x;
+					temp[cnt++] = v.y;
+					temp[cnt++] = v.z;
+#ifdef _DEBUG
+					temp[cnt] = std::numeric_limits<float>::quiet_NaN();
+#endif
+					++cnt;
+				}
 				
-					std::reverse(meshout.verts.begin() + cnt,meshout.verts.begin() + cnt + i);
-					cnt += i;
+				aiVector3D nor;
+				NewellNormal<4,4,4>(nor,*iit,&temp[0],&temp[1],&temp[2]);
+				const float area = nor.SquareLength();
+
+				if (area > area_outer_polygon) {
+					area_outer_polygon = area;
+					outer_polygon = iit;
+					outer_polygon_start = vidx;
 				}
 			}
 		}
+
+		ai_assert(outer_polygon != meshout.vertcnt.end());	
+
+		typedef boost::tuple<unsigned int, unsigned int, unsigned int> InsertionPoint;
+		std::vector< InsertionPoint > insertions(*outer_polygon,boost::make_tuple(0u,0u,0u));
+
+		// iterate through all other polyloops and find points in the outer polyloop that are close
+		size_t vidx = 0;
+		for(iit = begin; iit != meshout.vertcnt.end(); vidx += *iit++) {
+			if (iit == outer_polygon) {
+				continue;
+			}
+
+			size_t best_ofs,best_outer;
+			float best_dist = 1e10;
+			for(size_t vofs = 0; vofs < *iit; ++vofs) {
+				const aiVector3D& v = meshout.verts[vidx+vofs];
+
+				for(size_t outer = 0; outer < *outer_polygon; ++outer) {
+					if (insertions[outer].get<0>()) {
+						continue;
+					}
+					const aiVector3D& o = meshout.verts[outer_polygon_start+outer];
+					const float d = (o-v).SquareLength();
+										
+					if (d < best_dist) {
+						best_dist = d;
+						best_ofs = vofs;
+						best_outer = outer;
+					}
+				}		
+			}
+		
+			// we will later insert a hidden connection line right after the closest point in the outer polygon
+			insertions[best_outer] = boost::make_tuple(*iit,vidx,best_ofs);
+		}
+
+		// now that we collected all vertex connections to be added, build the output polygon
+		cnt = *outer_polygon;
+		for(size_t outer = 0; outer < *outer_polygon; ++outer) {
+			const aiVector3D& o = meshout.verts[outer_polygon_start+outer];
+			result.verts.push_back(o);
+
+			const InsertionPoint& ins = insertions[outer];
+			if (!ins.get<0>()) {
+				continue;
+			}
+
+			for(size_t i = ins.get<2>(); i < ins.get<0>(); ++i) {
+				result.verts.push_back(meshout.verts[ins.get<1>() + i]);
+			}
+			for(size_t i = 0; i < ins.get<2>(); ++i) {
+				result.verts.push_back(meshout.verts[ins.get<1>() + i]);
+			}
+
+			// we need the first vertex of the inner polygon twice as we return to the
+			// outer loop through the very same connection through which we got there.
+			result.verts.push_back(meshout.verts[ins.get<1>() + ins.get<2>()]);
+
+			// also append a copy of the initial insertion point to be able to continue the outer polygon
+			result.verts.push_back(o);
+			cnt += ins.get<0>()+2;
+		}
+		result.vertcnt.push_back(cnt);
 	}
 }
 
@@ -1262,31 +1408,6 @@ void MakeTreeRelative(ConversionData& conv)
 
 } // !anon
 
-// ------------------------------------------------------------------------------------------------
-/*static*/ void IFCImporter::ThrowException(const std::string& msg)
-{
-	throw DeadlyImportError("IFC: "+msg);
-}
-
-// ------------------------------------------------------------------------------------------------
-/*static*/ void IFCImporter::LogWarn(const Formatter::format& message)	{
-	DefaultLogger::get()->warn(std::string("IFC: ")+=message);
-}
-
-// ------------------------------------------------------------------------------------------------
-/*static*/ void IFCImporter::LogError(const Formatter::format& message)	{
-	DefaultLogger::get()->error(std::string("IFC: ")+=message);
-}
-
-// ------------------------------------------------------------------------------------------------
-/*static*/ void IFCImporter::LogInfo(const Formatter::format& message)	{
-	DefaultLogger::get()->info(std::string("IFC: ")+=message);
-}
-
-// ------------------------------------------------------------------------------------------------
-/*static*/ void IFCImporter::LogDebug(const Formatter::format& message)	{
-	DefaultLogger::get()->debug(std::string("IFC: ")+=message);
-}
 
 
 #endif

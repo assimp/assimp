@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_BLEND_LOADER_H
 
 #include "BaseImporter.h"
+#include "LogAux.h"
+
 namespace Assimp	{
 	
 	// TinyFormatter.h
@@ -116,7 +118,7 @@ struct aiLoaderDesc
  *  call it is outsourced to BlenderDNA.cpp/BlenderDNA.h. This class only performs the
  *  conversion from intermediate format to aiScene. */
 // -------------------------------------------------------------------------------------------
-class BlenderImporter : public BaseImporter
+class BlenderImporter : public BaseImporter, public LogFunctions<BlenderImporter>
 {
 	friend class Importer;
 
@@ -240,16 +242,6 @@ private: // static stuff, mostly logging and error reporting.
 		const char* type
 	);
 
-	// -------------------------------------------------------------------
-	/** Prepend 'BLEND: ' and throw msg.*/
-	static void ThrowException(const std::string& msg);
-
-	// -------------------------------------------------------------------
-	/** @defgroup blog Prepend 'BLEND: ' and write @c message to log.*/
-	static void LogWarn  (const Formatter::format& message); //! @ingroup blog
-	static void LogError (const Formatter::format& message); //! @ingroup blog
-	static void LogInfo  (const Formatter::format& message); //! @ingroup blog
-	static void LogDebug (const Formatter::format& message); //! @ingroup blog
 
 private:
 

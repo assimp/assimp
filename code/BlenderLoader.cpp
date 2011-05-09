@@ -52,7 +52,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderModifier.h"
 
 #include "StreamReader.h"
-#include "TinyFormatter.h"
 #include "MemoryIOWrapper.h"
 
 // zlib is needed for compressed blend files 
@@ -68,7 +67,7 @@ using namespace Assimp;
 using namespace Assimp::Blender;
 using namespace Assimp::Formatter;
 
-
+const std::string LogFunctions<BlenderImporter>::log_prefix = "BLEND: ";
 static const aiLoaderDesc blenderDesc = {
 	"Blender 3D Importer \nhttp://www.blender3d.org",
 	"Assimp Team",
@@ -976,30 +975,5 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
 	return node.dismiss();
 }
 
-// ------------------------------------------------------------------------------------------------
-/*static*/ void BlenderImporter::ThrowException(const std::string& msg)
-{
-	throw DeadlyImportError("BLEND: "+msg);
-}
-
-// ------------------------------------------------------------------------------------------------
-/*static*/ void BlenderImporter::LogWarn(const Formatter::format& message)	{
-	DefaultLogger::get()->warn(std::string("BLEND: ")+=message);
-}
-
-// ------------------------------------------------------------------------------------------------
-/*static*/ void BlenderImporter::LogError(const Formatter::format& message)	{
-	DefaultLogger::get()->error(std::string("BLEND: ")+=message);
-}
-
-// ------------------------------------------------------------------------------------------------
-/*static*/ void BlenderImporter::LogInfo(const Formatter::format& message)	{
-	DefaultLogger::get()->info(std::string("BLEND: ")+=message);
-}
-
-// ------------------------------------------------------------------------------------------------
-/*static*/ void BlenderImporter::LogDebug(const Formatter::format& message)	{
-	DefaultLogger::get()->debug(std::string("BLEND: ")+=message);
-}
 
 #endif

@@ -2407,6 +2407,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\LogAux.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\MakeVerboseFormat.cpp"
 					>
 					<FileConfiguration

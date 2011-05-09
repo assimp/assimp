@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_IFC_LOADER_H
 
 #include "BaseImporter.h"
+#include "LogAux.h"
+
 namespace Assimp	{
 	
 	// TinyFormatter.h
@@ -65,7 +67,7 @@ namespace Assimp	{
  See http://en.wikipedia.org/wiki/Industry_Foundation_Classes
 */
 // -------------------------------------------------------------------------------------------
-class IFCImporter : public BaseImporter
+class IFCImporter : public BaseImporter, public LogFunctions<IFCImporter>
 {
 	friend class Importer;
 
@@ -117,20 +119,8 @@ public:
 		bool skipSpaceRepresentations;
 		bool skipCurveRepresentations;
 	};
-
-public:
 	
-	// -------------------------------------------------------------------
-	/** Prepend 'IFC: ' and throw msg.*/
-	static void ThrowException(const std::string& msg);
-
-	// -------------------------------------------------------------------
-	/** @defgroup blog Prepend 'IFC: ' and write @c message to log.*/
-	static void LogWarn  (const Formatter::format& message); //! @ingroup blog
-	static void LogError (const Formatter::format& message); //! @ingroup blog
-	static void LogInfo  (const Formatter::format& message); //! @ingroup blog
-	static void LogDebug (const Formatter::format& message); //! @ingroup blog
-
+	
 private:
 
 	Settings settings;

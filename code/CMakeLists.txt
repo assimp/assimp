@@ -128,6 +128,7 @@ SOURCE_GROUP( Common FILES
 	LineSplitter.h
 	TinyFormatter.h
 	Profiler.h
+	LogAux.h
 )
 
 SOURCE_GROUP( 3DS FILES
@@ -746,6 +747,7 @@ ADD_LIBRARY( assimp SHARED
 	BlenderModifier.h
 	BlenderModifier.cpp
 	Profiler.h
+	LogAux.h
 	NDOLoader.cpp
 	NDOLoader.h
 	DeboneProcess.cpp

@@ -451,29 +451,6 @@ SOURCE_GROUP( ConvertUTF FILES
 	../contrib/ConvertUTF/ConvertUTF.c
 )
 
-SOURCE_GROUP( zlib FILES
-	../contrib/zlib/adler32.c
-	../contrib/zlib/compress.c
-	../contrib/zlib/crc32.c
-	../contrib/zlib/crc32.h
-	../contrib/zlib/deflate.c
-	../contrib/zlib/deflate.h
-	../contrib/zlib/inffast.c
-	../contrib/zlib/inffast.h
-	../contrib/zlib/inffixed.h
-	../contrib/zlib/inflate.c
-	../contrib/zlib/inflate.h
-	../contrib/zlib/inftrees.c
-	../contrib/zlib/inftrees.h
-	../contrib/zlib/trees.c
-	../contrib/zlib/trees.h
-	../contrib/zlib/zconf.h
-	../contrib/zlib/zconf.in.h
-	../contrib/zlib/zlib.h
-	../contrib/zlib/zutil.c
-	../contrib/zlib/zutil.h
-)
-
 SOURCE_GROUP( unzip FILES
 	../contrib/unzip/crypt.h
 	../contrib/unzip/ioapi.c
@@ -481,6 +458,13 @@ SOURCE_GROUP( unzip FILES
 	../contrib/unzip/unzip.c
 	../contrib/unzip/unzip.h
 )
+
+ADD_DEFINITIONS( -DASSIMP_BUILD_DLL_EXPORT )
+
+if ( MSVC80 OR MSVC90 OR MSVC10 )
+	ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
+	ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
+endif ( MSVC80 OR MSVC90 OR MSVC10 )
 
 ADD_LIBRARY( assimp SHARED
 	3DSConverter.cpp
@@ -699,26 +683,6 @@ ADD_LIBRARY( assimp SHARED
 	../contrib/irrXML/irrTypes.h
 	../contrib/irrXML/irrXML.cpp
 	../contrib/irrXML/irrXML.h
-	../contrib/zlib/adler32.c
-	../contrib/zlib/compress.c
-	../contrib/zlib/crc32.c
-	../contrib/zlib/crc32.h
-	../contrib/zlib/deflate.c
-	../contrib/zlib/deflate.h
-	../contrib/zlib/inffast.c
-	../contrib/zlib/inffast.h
-	../contrib/zlib/inffixed.h
-	../contrib/zlib/inflate.c
-	../contrib/zlib/inflate.h
-	../contrib/zlib/inftrees.c
-	../contrib/zlib/inftrees.h
-	../contrib/zlib/trees.c
-	../contrib/zlib/trees.h
-	../contrib/zlib/zconf.h
-	../contrib/zlib/zconf.in.h
-	../contrib/zlib/zlib.h
-	../contrib/zlib/zutil.c
-	../contrib/zlib/zutil.h
 	../contrib/ConvertUTF/ConvertUTF.c
 	../contrib/unzip/crypt.h
 	../contrib/unzip/ioapi.c
@@ -776,18 +740,12 @@ ADD_LIBRARY( assimp SHARED
 	${COMPILER_HEADERS}
 )
 
-ADD_DEFINITIONS( -DASSIMP_BUILD_DLL_EXPORT )
-
-if ( MSVC80 OR MSVC90 OR MSVC10 )
-	ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
-	ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
-endif ( MSVC80 OR MSVC90 OR MSVC10 )
-
+TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES})
 SET_TARGET_PROPERTIES( assimp PROPERTIES
 	VERSION ${LIBRARY_VERSION}
 	SOVERSION ${LIBRARY_SOVERSION}
 )
 
-INSTALL( TARGETS assimp DESTINATION ${LIB_INSTALL_DIR} )
-INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${INCLUDE_INSTALL_DIR}/assimp )
-INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${INCLUDE_INSTALL_DIR}/assimp/Compiler )
+INSTALL( TARGETS assimp DESTINATION ${LIB_INSTALL_DIR} COMPONENT libassimp${ASSIMP_VERSION_MAJOR})
+INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${INCLUDE_INSTALL_DIR}/assimp COMPONENT assimp-dev)
+INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${INCLUDE_INSTALL_DIR}/assimp/Compiler COMPONENT assimp-dev)

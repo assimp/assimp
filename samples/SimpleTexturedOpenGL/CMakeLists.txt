@@ -36,5 +36,5 @@ SET_TARGET_PROPERTIES( assimp_simpletexturedogl PROPERTIES
 )
 
 INSTALL( TARGETS assimp_simpletexturedogl
-	DESTINATION "${BIN_INSTALL_DIR}"
+	DESTINATION "${BIN_INSTALL_DIR}" COMPONENT assimp-dev
 ) 

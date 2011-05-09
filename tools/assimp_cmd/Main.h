@@ -64,7 +64,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <../code/AssimpPCH.h> /* to get stdint.h */
+#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
+#include <zlib.h>
+#else
 #include <../contrib/zlib/zlib.h>
+#endif
+
 
 #ifndef SIZE_MAX
 #	define SIZE_MAX (std::numeric_limits<size_t>::max())

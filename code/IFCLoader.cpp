@@ -59,7 +59,7 @@ using namespace Assimp;
 using namespace Assimp::Formatter;
 namespace EXPRESS = STEP::EXPRESS;
 
-const std::string LogFunctions<IFCImporter>::log_prefix = "IFC: ";
+template<> const std::string LogFunctions<IFCImporter>::log_prefix = "IFC: ";
 
 
 /* DO NOT REMOVE this comment block. The genentitylist.sh script

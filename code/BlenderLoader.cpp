@@ -67,7 +67,7 @@ using namespace Assimp;
 using namespace Assimp::Blender;
 using namespace Assimp::Formatter;
 
-const std::string LogFunctions<BlenderImporter>::log_prefix = "BLEND: ";
+template<> const std::string LogFunctions<BlenderImporter>::log_prefix = "BLEND: ";
 static const aiLoaderDesc blenderDesc = {
 	"Blender 3D Importer \nhttp://www.blender3d.org",
 	"Assimp Team",

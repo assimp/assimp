@@ -218,7 +218,7 @@ void IFCImporter::GetExtensionList(std::set<std::string>& app)
 void IFCImporter::SetupProperties(const Importer* pImp)
 {
 	settings.skipSpaceRepresentations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_SKIP_SPACE_REPRESENTATIONS,true);
-	settings.skipCurveRepresentations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_SKIP_CURVE_REPRESENTATIONS,false);
+	settings.skipCurveRepresentations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_SKIP_CURVE_REPRESENTATIONS,true);
 }
 
 
@@ -770,7 +770,7 @@ void ProcessClosedProfile(const IFC::IfcArbitraryClosedProfileDef& def, TempMesh
 		}
 	}
 	else {
-		IFCImporter::LogWarn("skipping unknown IfcArbitraryClosedProfileDef entity, type is " + def.GetClassName());
+		IFCImporter::LogWarn("skipping unknown IfcCurve entity, type is " + def.OuterCurve->GetClassName());
 		return;
 	}
 }
@@ -782,7 +782,7 @@ void ProcessOpenProfile(const IFC::IfcArbitraryOpenProfileDef& def, TempMesh& me
 		ProcessPolyLine(*poly,meshout,conv);
 	}
 	else {
-		IFCImporter::LogWarn("skipping unknown IfcArbitraryClosedProfileDef entity, type is " + def.GetClassName());
+		IFCImporter::LogWarn("skipping unknown IfcBoundedCurve entity, type is " + def.Curve->GetClassName());
 		return;
 	}
 }
@@ -1046,7 +1046,7 @@ unsigned int ProcessMaterials(const IFC::IfcRepresentationItem& item, Conversion
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessTopologicalItem(const IFC::IfcTopologicalRepresentationItem& topo, std::vector<unsigned int>& mesh_indices, ConversionData& conv)
+bool ProcessTopologicalItem(const IFC::IfcTopologicalRepresentationItem& topo, std::vector<unsigned int>& mesh_indices, ConversionData& conv)
 {
 	TempMesh meshtmp;
 	if(const IFC::IfcConnectedFaceSet* fset = topo.ToPtr<IFC::IfcConnectedFaceSet>()) {
@@ -1054,7 +1054,7 @@ void ProcessTopologicalItem(const IFC::IfcTopologicalRepresentationItem& topo, s
 	}
 	else {
 		IFCImporter::LogWarn("skipping unknown IfcTopologicalRepresentationItem entity, type is " + topo.GetClassName());
-		return;
+		return false;
 	}
 
 	aiMesh* const mesh = meshtmp.ToMesh();
@@ -1062,11 +1062,13 @@ void ProcessTopologicalItem(const IFC::IfcTopologicalRepresentationItem& topo, s
 		mesh->mMaterialIndex = ProcessMaterials(topo,conv);
 		mesh_indices.push_back(conv.meshes.size());
 		conv.meshes.push_back(mesh);
+		return true;
 	}
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessGeometricItem(const IFC::IfcGeometricRepresentationItem& geo, std::vector<unsigned int>& mesh_indices, ConversionData& conv)
+bool ProcessGeometricItem(const IFC::IfcGeometricRepresentationItem& geo, std::vector<unsigned int>& mesh_indices, ConversionData& conv)
 {
 	TempMesh meshtmp;
 	if(const IFC::IfcShellBasedSurfaceModel* shellmod = geo.ToPtr<IFC::IfcShellBasedSurfaceModel>()) {
@@ -1092,9 +1094,13 @@ void ProcessGeometricItem(const IFC::IfcGeometricRepresentationItem& geo, std::v
 	else if(const IFC::IfcBooleanResult* boolean = geo.ToPtr<IFC::IfcBooleanResult>()) {
 		ProcessBoolean(*boolean,meshtmp,conv);
 	}
+	else if(const IFC::IfcBoundingBox* bb = geo.ToPtr<IFC::IfcBoundingBox>()) {
+		// silently skip over bounding boxes
+		return false; 
+	}
 	else {
 		IFCImporter::LogWarn("skipping unknown IfcGeometricRepresentationItem entity, type is " + geo.GetClassName());
-		return;
+		return false;
 	}
 
 	aiMesh* const mesh = meshtmp.ToMesh();
@@ -1103,7 +1109,9 @@ void ProcessGeometricItem(const IFC::IfcGeometricRepresentationItem& geo, std::v
 		mesh->mMaterialIndex = ProcessMaterials(geo,conv);
 		mesh_indices.push_back(conv.meshes.size());
 		conv.meshes.push_back(mesh);
+		return true;
 	}
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1145,25 +1153,26 @@ void PopulateMeshCache(const IFC::IfcRepresentationItem& item, const std::vector
 // ------------------------------------------------------------------------------------------------
 bool ProcessRepresentationItem(const IFC::IfcRepresentationItem& item, std::vector<unsigned int>& mesh_indices, ConversionData& conv)
 {
-	// XXX should we make a choice? handle only one of them?
 	if(const IFC::IfcTopologicalRepresentationItem* const topo = item.ToPtr<IFC::IfcTopologicalRepresentationItem>()) {
 		if (!TryQueryMeshCache(item,mesh_indices,conv)) {
-			ProcessTopologicalItem(*topo,mesh_indices,conv);
-			PopulateMeshCache(item,mesh_indices,conv);
+			if(ProcessTopologicalItem(*topo,mesh_indices,conv)) {
+				PopulateMeshCache(item,mesh_indices,conv);
+			}
+			else return false;
 		}
-		
+		return true;
 	}
 	else if(const IFC::IfcGeometricRepresentationItem* const geo = item.ToPtr<IFC::IfcGeometricRepresentationItem>()) {
 		if (!TryQueryMeshCache(item,mesh_indices,conv)) {
-			ProcessGeometricItem(*geo,mesh_indices,conv);	
-			PopulateMeshCache(item,mesh_indices,conv);
+			if(ProcessGeometricItem(*geo,mesh_indices,conv)) {
+				PopulateMeshCache(item,mesh_indices,conv);
+				
+			} 
+			else return false;
 		}
+		return true;
 	}
-	else {
-		return false;
-	}
-
-	return true;
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1236,7 +1245,7 @@ void ProcessProductRepresentation(const IFC::IfcProduct& el, aiNode* nd, std::ve
 
 	if(conv.settings.skipSpaceRepresentations) {
 		if(const IFC::IfcSpace* const space = el.ToPtr<IFC::IfcSpace>()) {
-			IFCImporter::LogWarn("skipping space representation due to importer settings");
+			IFCImporter::LogWarn("skipping IfcSpace entity due to importer settings");
 			return;
 		}
 	}
@@ -1246,16 +1255,14 @@ void ProcessProductRepresentation(const IFC::IfcProduct& el, aiNode* nd, std::ve
 	BOOST_FOREACH(const IFC::IfcRepresentation& repr, el.Representation.Get()->Representations) {
 		if (conv.settings.skipCurveRepresentations && repr.RepresentationType && repr.RepresentationType.Get() == "Curve2D") {
 			IFCImporter::LogWarn("skipping Curve2D representation item due to importer settings");
-			return;
+			continue;
 		}
 		BOOST_FOREACH(const IFC::IfcRepresentationItem& item, repr.Items) {
-			if(!ProcessRepresentationItem(item,meshes,conv)) {
-				if(const IFC::IfcMappedItem* const geo = item.ToPtr<IFC::IfcMappedItem>()) {
-					ProcessMappedItem(*geo,nd,subnodes,conv);			
-				}
-				else {
-					IFCImporter::LogWarn("skipping unknown IfcRepresentationItem entity, type is " + item.GetClassName());
-				}
+			if(const IFC::IfcMappedItem* const geo = item.ToPtr<IFC::IfcMappedItem>()) {
+				ProcessMappedItem(*geo,nd,subnodes,conv);		
+			}
+			else {
+				ProcessRepresentationItem(item,meshes,conv);
 			}
 		}
 	}

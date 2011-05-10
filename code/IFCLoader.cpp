@@ -1097,16 +1097,116 @@ void ProcessSweptAreaSolid(const IFC::IfcSweptAreaSolid& swept, TempMesh& meshou
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessBoolean(const IFC::IfcBooleanResult& boolean, TempMesh& meshout, ConversionData& conv)
+enum Intersect {
+	Intersect_No,
+	Intersect_LiesOnPlane,
+	Intersect_Yes
+};
+
+// ------------------------------------------------------------------------------------------------
+Intersect IntersectSegmentPlane(const aiVector3D& p,const aiVector3D& n, const aiVector3D& e0, const aiVector3D& e1, aiVector3D& out) 
+{
+	const aiVector3D pdelta = e0 - p, seg = e1-e0;
+	const float dotOne = n*seg, dotTwo = -(n*pdelta);
+
+	if (fabs(dotOne) < 1e-6) {
+		return fabs(dotTwo) < 1e-6f ? Intersect_LiesOnPlane : Intersect_No;
+	}
+
+	const float t = dotTwo/dotOne;
+	// t must be in [0..1] if the intersection point is within the given segment
+	if (t > 1.f || t < 0.f) {
+		return Intersect_No;
+	}
+	out = e0+t*seg;
+	return Intersect_Yes;
+}
+
+// ------------------------------------------------------------------------------------------------
+void ProcessBoolean(const IFC::IfcBooleanResult& boolean, TempMesh& result, ConversionData& conv)
 {
 	if(const IFC::IfcBooleanClippingResult* const clip = boolean.ToPtr<IFC::IfcBooleanClippingResult>()) {
+		if(clip->Operator != "DIFFERENCE") {
+			IFCImporter::LogWarn("encountered unsupported boolean operator: " + (std::string)clip->Operator);
+			return;
+		}
+
+		TempMesh meshout;
+		const IFC::IfcHalfSpaceSolid* const hs = clip->SecondOperand->ResolveSelectPtr<IFC::IfcHalfSpaceSolid>(conv.db);
+		if(!hs) {
+			IFCImporter::LogError("expected IfcHalfSpaceSolid as second clipping operand");
+			return;
+		}
+
+		const IFC::IfcPlane* const plane = hs->BaseSurface->ToPtr<IFC::IfcPlane>();
+		if(!plane) {
+			IFCImporter::LogError("expected IfcPlane as base surface for the IfcHalfSpaceSolid");
+			return;
+		}
+		
 		if(const IFC::IfcBooleanResult* const op0 = clip->FirstOperand->ResolveSelectPtr<IFC::IfcBooleanResult>(conv.db)) {
 			ProcessBoolean(*op0,meshout,conv);
 		}
 		else if (const IFC::IfcSweptAreaSolid* const swept = clip->FirstOperand->ResolveSelectPtr<IFC::IfcSweptAreaSolid>(conv.db)) {
 			ProcessSweptAreaSolid(*swept,meshout,conv);
-			// XXX
 		}
+		else {
+			IFCImporter::LogError("expected IfcSweptAreaSolid or IfcBooleanResult as first clipping operand");
+			return;
+		}
+
+		// extract plane base position vector and normal vector
+		aiVector3D p,n(0.f,0.f,1.f);
+		if (plane->Position->Axis) {
+			ConvertDirection(n,plane->Position->Axis.Get());
+		}
+		ConvertCartesianPoint(p,plane->Position->Location);
+
+		if(!IsTrue(hs->AgreementFlag)) {
+			n *= -1.f;
+		}
+
+		// clip the current contents of `meshout` against the plane we obtained from the second operand
+		const std::vector<aiVector3D>& in = meshout.verts;
+		std::vector<aiVector3D>& outvert = result.verts;
+		std::vector<unsigned int>::const_iterator outer_polygon = meshout.vertcnt.end(), begin=meshout.vertcnt.begin(),  iit;
+		
+		unsigned int vidx = 0;
+		for(iit = begin; iit != meshout.vertcnt.end(); vidx += *iit++) {
+
+			unsigned int newcount = 0;
+			for(unsigned int i = 0; i < *iit; ++i) {
+				const aiVector3D& e0 = in[vidx+i], e1 = in[vidx+(i+1)%*iit];
+
+				// does the next segment intersect the plane?
+				aiVector3D isectpos;
+				const Intersect isect = IntersectSegmentPlane(p,n,e0,e1,isectpos);
+				if (isect == Intersect_No || isect == Intersect_LiesOnPlane) {
+					if ( (e0-p).Normalize()*n > 0 ) {
+						outvert.push_back(e0);
+						++newcount;
+					}
+				}
+				else if (isect == Intersect_Yes) {
+					if ( (e0-p).Normalize()*n > 0 ) {
+						// e0 is on the right side, so keep it
+						outvert.push_back(e0);
+						outvert.push_back(isectpos);
+						newcount += 2;
+					}
+					else {
+						// e0 is on the wrong side, so drop it and keep e1 instead
+						outvert.push_back(isectpos);
+						++newcount;
+					}
+				}
+			}	
+
+			if(newcount) {
+				result.vertcnt.push_back(newcount);
+			}
+		}
+		IFCImporter::LogDebug("generating CSG geometry by plane clipping (IfcBooleanClippingResult)");
 	}
 	else {
 		IFCImporter::LogWarn("skipping unknown IfcBooleanResult entity, type is " + boolean.GetClassName());

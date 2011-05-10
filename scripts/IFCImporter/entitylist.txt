@@ -8,6 +8,8 @@
 # code generator. Also, the names of all used entities need to be present 
 # in the source code for this to work.
 
+IfcPlane
+IfcHalfSpaceSolid
 IfcAxis1Placement
 IfcMeasureWithUnit
 IfcConversionBasedUnit

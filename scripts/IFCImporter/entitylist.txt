@@ -8,6 +8,11 @@
 # code generator. Also, the names of all used entities need to be present 
 # in the source code for this to work.
 
+IfcAxis1Placement
+IfcMeasureWithUnit
+IfcConversionBasedUnit
+IfcRevolvedAreaSolid
+IfcCircleHollowProfileDef
 IfcRepresentationMap
 IfcProductRepresentation
 IfcUnitAssignment

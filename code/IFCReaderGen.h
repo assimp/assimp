@@ -841,7 +841,7 @@ namespace IFC {
 	struct IfcFaceOuterBound;
 	struct IfcFeatureElementAddition;
 	struct IfcNamedUnit;
-	typedef NotImplemented IfcConversionBasedUnit; // (not currently used by Assimp)
+	struct IfcConversionBasedUnit;
 	typedef NotImplemented IfcStructuralLoadSingleForce; // (not currently used by Assimp)
 	struct IfcHeatExchangerType;
 	struct IfcPresentationStyleAssignment;
@@ -977,7 +977,7 @@ namespace IFC {
 	struct IfcDamperType;
 	struct IfcSIUnit;
 	typedef NotImplemented IfcSurfaceStyleLighting; // (not currently used by Assimp)
-	typedef NotImplemented IfcMeasureWithUnit; // (not currently used by Assimp)
+	struct IfcMeasureWithUnit;
 	typedef NotImplemented IfcMaterialLayerSet; // (not currently used by Assimp)
 	struct IfcDistributionElement;
 	struct IfcDistributionControlElement;
@@ -1813,6 +1813,12 @@ namespace IFC {
 		IfcUnitEnum::Out UnitType;
     };
 
+    // C++ wrapper for IfcConversionBasedUnit
+    struct IfcConversionBasedUnit : IfcNamedUnit, ObjectHelper<IfcConversionBasedUnit,2> { IfcConversionBasedUnit() : Object("IfcConversionBasedUnit") {}
+		IfcLabel::Out Name;
+		Lazy< IfcMeasureWithUnit > ConversionFactor;
+    };
+
     // C++ wrapper for IfcHeatExchangerType
     struct IfcHeatExchangerType : IfcEnergyConversionDeviceType, ObjectHelper<IfcHeatExchangerType,1> { IfcHeatExchangerType() : Object("IfcHeatExchangerType") {}
 		IfcHeatExchangerTypeEnum::Out PredefinedType;
@@ -2246,7 +2252,7 @@ namespace IFC {
 		Maybe< IfcIdentifier::Out > ResourceIdentifier;
 		Maybe< IfcLabel::Out > ResourceGroup;
 		Maybe< IfcResourceConsumptionEnum::Out > ResourceConsumption;
-		Maybe< Lazy< NotImplemented > > BaseQuantity;
+		Maybe< Lazy< IfcMeasureWithUnit > > BaseQuantity;
     };
 
     // C++ wrapper for IfcConstructionEquipmentResource
@@ -2308,6 +2314,12 @@ namespace IFC {
     struct IfcSIUnit : IfcNamedUnit, ObjectHelper<IfcSIUnit,2> { IfcSIUnit() : Object("IfcSIUnit") {}
 		Maybe< IfcSIPrefix::Out > Prefix;
 		IfcSIUnitName::Out Name;
+    };
+
+    // C++ wrapper for IfcMeasureWithUnit
+    struct IfcMeasureWithUnit :  ObjectHelper<IfcMeasureWithUnit,2> { IfcMeasureWithUnit() : Object("IfcMeasureWithUnit") {}
+		IfcValue::Out ValueComponent;
+		IfcUnit::Out UnitComponent;
     };
 
     // C++ wrapper for IfcDistributionElement
@@ -3866,6 +3878,7 @@ namespace STEP {
 	DECL_CONV_STUB(IfcFaceOuterBound);
 	DECL_CONV_STUB(IfcFeatureElementAddition);
 	DECL_CONV_STUB(IfcNamedUnit);
+	DECL_CONV_STUB(IfcConversionBasedUnit);
 	DECL_CONV_STUB(IfcHeatExchangerType);
 	DECL_CONV_STUB(IfcPresentationStyleAssignment);
 	DECL_CONV_STUB(IfcFlowTreatmentDeviceType);
@@ -3957,6 +3970,7 @@ namespace STEP {
 	DECL_CONV_STUB(IfcLinearDimension);
 	DECL_CONV_STUB(IfcDamperType);
 	DECL_CONV_STUB(IfcSIUnit);
+	DECL_CONV_STUB(IfcMeasureWithUnit);
 	DECL_CONV_STUB(IfcDistributionElement);
 	DECL_CONV_STUB(IfcDistributionControlElement);
 	DECL_CONV_STUB(IfcTransformerType);

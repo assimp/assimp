@@ -93,6 +93,7 @@ struct ConversionData
 {
 	ConversionData(const STEP::DB& db, const IFC::IfcProject& proj, aiScene* out,const IFCImporter::Settings& settings)
 		: len_scale(1.0)
+		, angle_scale(1.0)
 		, db(db)
 		, proj(proj)
 		, out(out)
@@ -104,7 +105,8 @@ struct ConversionData
 		std::for_each(materials.begin(),materials.end(),delete_fun<aiMaterial>());
 	}
 
-	float len_scale;
+	float len_scale, angle_scale;
+	bool plane_angle_in_radians;
 
 	const STEP::DB& db;
 	const IFC::IfcProject& proj;
@@ -172,6 +174,7 @@ void ProcessSpatialStructures(ConversionData& conv);
 aiNode* ProcessSpatialStructure(aiNode* parent, const IFC::IfcProduct& el ,ConversionData& conv);
 void ProcessProductRepresentation(const IFC::IfcProduct& el, aiNode* nd, ConversionData& conv);
 void MakeTreeRelative(ConversionData& conv);
+void ConvertUnit(const EXPRESS::DataType* dt,ConversionData& conv);
 
 } // anon
 
@@ -369,25 +372,61 @@ float ConvertSIPrefix(const std::string& prefix)
 }
 
 // ------------------------------------------------------------------------------------------------
-void SetUnits(ConversionData& conv)
+void ConvertUnit(const IFC::IfcNamedUnit& unit,ConversionData& conv)
 {
-	// see if we can determine the coordinate space used to express
-	for(size_t i = 0; i <  conv.proj.UnitsInContext->Units.size(); ++i ) {
-		try {
-			const EXPRESS::ENTITY& e = conv.proj.UnitsInContext->Units[i]->To<IFC::ENTITY>();
-			const IFC::IfcSIUnit& si = conv.db.MustGetObject(e).To<IFC::IfcSIUnit>(); 
+	if(const IFC::IfcSIUnit* const si = unit.ToPtr<IFC::IfcSIUnit>()) {
 
-			if(si.UnitType == "LENGTHUNIT" && si.Prefix) {
-				conv.len_scale = ConvertSIPrefix(si.Prefix);
-				IFCImporter::LogDebug("got units used for lengths");
+		if(si->UnitType == "LENGTHUNIT") { 
+			conv.len_scale = si->Prefix ? ConvertSIPrefix(si->Prefix) : 1.f;
+			IFCImporter::LogDebug("got units used for lengths");
+		}
+		if(si->UnitType == "PLANEANGLEUNIT") { 
+			if (si->Name != "RADIAN") {
+				IFCImporter::LogWarn("expected base unit for angles to be radian");
 			}
 		}
-		catch(std::bad_cast&) {
-			// not SI unit, not implemented
-			continue;
+	}
+	else if(const IFC::IfcConversionBasedUnit* const convu = unit.ToPtr<IFC::IfcConversionBasedUnit>()) {
+
+		if(convu->UnitType == "PLANEANGLEUNIT") { 
+			try {
+				conv.angle_scale = convu->ConversionFactor->ValueComponent->To<EXPRESS::REAL>();
+				ConvertUnit(convu->ConversionFactor->UnitComponent,conv);
+				IFCImporter::LogDebug("got units used for angles");
+			}
+			catch(std::bad_cast&) {
+				IFCImporter::LogError("skipping unknown IfcConversionBasedUnit.ValueComponent entry - expected REAL");
+			}
 		}
 	}
+}
 
+// ------------------------------------------------------------------------------------------------
+void ConvertUnit(const EXPRESS::DataType* dt,ConversionData& conv)
+{
+	try {
+		const EXPRESS::ENTITY& e = dt->To<IFC::ENTITY>();
+
+		const IFC::IfcNamedUnit& unit = e.ResolveSelect<IFC::IfcNamedUnit>(conv.db);
+		if(unit.UnitType != "LENGTHUNIT" && unit.UnitType != "PLANEANGLEUNIT") {
+			return;
+		}
+
+		ConvertUnit(unit,conv);
+	}
+	catch(std::bad_cast&) {
+		// not entity, somehow
+		IFCImporter::LogError("skipping unknown IfcUnit entry - expected entity");
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void SetUnits(ConversionData& conv)
+{
+	// see if we can determine the coordinate space used to express. 
+	for(size_t i = 0; i <  conv.proj.UnitsInContext->Units.size(); ++i ) {
+		ConvertUnit(conv.proj.UnitsInContext->Units[i],conv);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -500,6 +539,18 @@ void ConvertAxisPlacement(aiMatrix4x4& out, const IFC::IfcAxis2Placement2D& in, 
 
 	aiMatrix4x4::Translation(loc,out);
 	AssignMatrixAxes(out,x,y,aiVector3D(0.f,0.f,1.f));
+}
+
+// ------------------------------------------------------------------------------------------------
+void ConvertAxisPlacement(aiVector3D& axis, aiVector3D& pos, const IFC::IfcAxis1Placement& in, ConversionData& conv)
+{
+	ConvertCartesianPoint(pos,in.Location);
+	if (in.Axis) {
+		ConvertDirection(axis,in.Axis.Get());
+	}
+	else {
+		axis = aiVector3D(0.f,0.f,1.f);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -790,7 +841,7 @@ void ProcessOpenProfile(const IFC::IfcArbitraryOpenProfileDef& def, TempMesh& me
 // ------------------------------------------------------------------------------------------------
 void ProcessParametrizedProfile(const IFC::IfcParameterizedProfileDef& def, TempMesh& meshout, ConversionData& conv)
 {
-	if(const IFC::IfcRectangleProfileDef* cprofile = def.ToPtr<IFC::IfcRectangleProfileDef>()) {
+	if(const IFC::IfcRectangleProfileDef* const cprofile = def.ToPtr<IFC::IfcRectangleProfileDef>()) {
 		const float x = cprofile->XDim*0.5f, y = cprofile->YDim*0.5f;
 
 		meshout.verts.reserve(meshout.verts.size()+4);
@@ -799,6 +850,22 @@ void ProcessParametrizedProfile(const IFC::IfcParameterizedProfileDef& def, Temp
 		meshout.verts.push_back( aiVector3D(-x,-y, 0.f ));
 		meshout.verts.push_back( aiVector3D( x,-y, 0.f ));
 		meshout.vertcnt.push_back(4);
+	}
+	else if( const IFC::IfcCircleProfileDef* const circle = def.ToPtr<IFC::IfcCircleProfileDef>()) {
+		if( const IFC::IfcCircleHollowProfileDef* const hollow = def.ToPtr<IFC::IfcCircleHollowProfileDef>()) {
+			// TODO
+		}
+		const size_t segments = 32;
+		const float delta = AI_MATH_TWO_PI_F/segments, radius = circle->Radius;
+
+		meshout.verts.reserve(segments);
+
+		float angle = 0.f;
+		for(size_t i = 0; i < segments; ++i, angle += delta) {
+			meshout.verts.push_back( aiVector3D( cos(angle)*radius, sin(angle)*radius, 0.f ));
+		}
+	
+		meshout.vertcnt.push_back(segments);
 	}
 	else {
 		IFCImporter::LogWarn("skipping unknown IfcParameterizedProfileDef entity, type is " + def.GetClassName());
@@ -814,24 +881,145 @@ void ProcessParametrizedProfile(const IFC::IfcParameterizedProfileDef& def, Temp
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& result, ConversionData& conv)
+bool ProcessProfile(const IFC::IfcProfileDef& prof, TempMesh& meshout, ConversionData& conv) 
 {
-	TempMesh meshout;
-	if(const IFC::IfcArbitraryClosedProfileDef* cprofile = solid.SweptArea->ToPtr<IFC::IfcArbitraryClosedProfileDef>()) {
+	if(const IFC::IfcArbitraryClosedProfileDef* const cprofile = prof.ToPtr<IFC::IfcArbitraryClosedProfileDef>()) {
 		ProcessClosedProfile(*cprofile,meshout,conv);
 	}
-	else if(const IFC::IfcArbitraryOpenProfileDef* copen = solid.SweptArea->ToPtr<IFC::IfcArbitraryOpenProfileDef>()) {
+	else if(const IFC::IfcArbitraryOpenProfileDef* const copen = prof.ToPtr<IFC::IfcArbitraryOpenProfileDef>()) {
 		ProcessOpenProfile(*copen,meshout,conv);
 	}
-	else if(const IFC::IfcParameterizedProfileDef* cparam = solid.SweptArea->ToPtr<IFC::IfcParameterizedProfileDef>()) {
+	else if(const IFC::IfcParameterizedProfileDef* const cparam = prof.ToPtr<IFC::IfcParameterizedProfileDef>()) {
 		ProcessParametrizedProfile(*cparam,meshout,conv);
 	}
 	else {
-		IFCImporter::LogWarn("skipping unknown IfcProfileDef entity, type is " + solid.SweptArea->GetClassName());
+		IFCImporter::LogWarn("skipping unknown IfcProfileDef entity, type is " + prof.GetClassName());
+		return false;
+	}
+	return true;
+}
+
+// ------------------------------------------------------------------------------------------------
+void FixupFaceOrientation(TempMesh& result)
+{
+	aiVector3D vavg;
+	BOOST_FOREACH(aiVector3D& v, result.verts) {
+		vavg += v;
+	}
+
+	// fixup face orientation.
+	vavg /= static_cast<float>( result.verts.size() );
+
+	size_t c = 0;
+	BOOST_FOREACH(unsigned int cnt, result.vertcnt) {
+		if (cnt>2){
+			const aiVector3D& thisvert = result.verts[c];
+			const aiVector3D normal((thisvert-result.verts[c+1])^(thisvert-result.verts[c+2]));
+			if (normal*(thisvert-vavg) < 0) {
+				std::reverse(result.verts.begin()+c,result.verts.begin()+cnt+c);
+			}
+		}
+		c += cnt;
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void ProcessRevolvedAreaSolid(const IFC::IfcRevolvedAreaSolid& solid, TempMesh& result, ConversionData& conv)
+{
+	TempMesh meshout;
+
+	// first read the profile description
+	if(!ProcessProfile(*solid.SweptArea,meshout,conv) || meshout.verts.size()<=1) {
 		return;
 	}
 
-	if(meshout.verts.size()<=1) {
+	aiVector3D axis, pos;
+	ConvertAxisPlacement(axis,pos,solid.Axis,conv);
+
+	aiMatrix4x4 tb0,tb1;
+	aiMatrix4x4::Translation(pos,tb0);
+	aiMatrix4x4::Translation(-pos,tb1);
+
+	const std::vector<aiVector3D>& in = meshout.verts;
+	const size_t size=in.size();
+	
+	bool has_area = solid.SweptArea->ProfileType == "AREA" && size>2;
+	const float max_angle = solid.Angle*conv.angle_scale;
+	if(fabs(max_angle) < 1e-3) {
+		if(has_area) {
+			result = meshout;
+		}
+		return;
+	}
+
+	const unsigned int cnt_segments = std::max(2u,static_cast<unsigned int>(16 * fabs(max_angle)/AI_MATH_HALF_PI_F));
+	const float delta = max_angle/cnt_segments;
+
+	has_area = has_area && fabs(max_angle) < AI_MATH_TWO_PI_F*0.99;
+	
+	result.verts.reserve(size*((cnt_segments+1)*4+(has_area?2:0)));
+	result.vertcnt.reserve(size*cnt_segments+2);
+
+	aiMatrix4x4 rot;
+	rot = tb0 * aiMatrix4x4::Rotation(delta,axis,rot) * tb1;
+
+	size_t base = 0;
+	std::vector<aiVector3D>& out = result.verts;
+
+	// dummy data to simplify later processing
+	for(size_t i = 0; i < size; ++i) {
+		out.insert(out.end(),4,in[i]);
+	}
+
+	for(unsigned int seg = 0; seg < cnt_segments; ++seg) {
+		for(size_t i = 0; i < size; ++i) {
+			const size_t next = (i+1)%size;
+
+			result.vertcnt.push_back(4);
+			const aiVector3D& base_0 = out[base+i*4+3],base_1 = out[base+next*4+3];
+
+			out.push_back(base_0);
+			out.push_back(base_1);
+			out.push_back(rot*base_1);
+			out.push_back(rot*base_0);
+		}
+		base += size*4;
+	}
+
+	out.erase(out.begin(),out.begin()+size*4);
+
+	if(has_area) {
+		// leave the triangulation of the profile area to the ear cutting 
+		// implementation in aiProcess_Triangulate - for now we just
+		// feed in two huge polygons.
+		base -= size*8;
+		for(size_t i = size; i--; ) {
+			out.push_back(out[base+i*4+3]);
+		}
+		for(size_t i = 0; i < size; ++i ) {
+			out.push_back(out[i*4]);
+		}
+		result.vertcnt.push_back(size);
+		result.vertcnt.push_back(size);
+	}
+
+	aiMatrix4x4 trafo;
+	ConvertAxisPlacement(trafo, solid.Position,conv);
+	BOOST_FOREACH(aiVector3D& v, out) {
+		v *= trafo;
+	}
+
+	FixupFaceOrientation(result);
+	IFCImporter::LogDebug("generate mesh procedurally by radial extrusion (IfcRevolvedAreaSolid)");
+}
+
+// ------------------------------------------------------------------------------------------------
+void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& result, ConversionData& conv)
+{
+	TempMesh meshout;
+	
+	// first read the profile description
+	if(!ProcessProfile(*solid.SweptArea,meshout,conv) || meshout.verts.size()<=1) {
 		return;
 	}
 
@@ -848,6 +1036,12 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 	const size_t size=in.size();
 
 	const bool has_area = solid.SweptArea->ProfileType == "AREA" && size>2;
+	if(solid.Depth < 1e-3) {
+		if(has_area) {
+			meshout = result;
+		}
+		return;
+	}
 
 	result.verts.reserve(size*(has_area?4:2));
 	result.vertcnt.reserve(meshout.vertcnt.size()+2);
@@ -866,7 +1060,7 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 	if(has_area) {
 		// leave the triangulation of the profile area to the ear cutting 
 		// implementation in aiProcess_Triangulate - for now we just
-		// feed in a possibly huge polygon.
+		// feed in two huge polygons.
 		for(size_t i = size; i--; ) {
 			result.verts.push_back(in[i]+dir);
 		}
@@ -880,35 +1074,22 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 	aiMatrix4x4 trafo;
 	ConvertAxisPlacement(trafo, solid.Position,conv);
 
-	aiVector3D vavg;
 	BOOST_FOREACH(aiVector3D& v, result.verts) {
 		v *= trafo;
-		vavg += v;
 	}
 
-	// fixup face orientation.
-	vavg /= static_cast<float>( result.verts.size() );
-
-	size_t c = 0;
-	BOOST_FOREACH(unsigned int cnt, result.vertcnt) {
-		if (cnt>2){
-			const aiVector3D& thisvert = result.verts[c];
-			const aiVector3D normal((thisvert-result.verts[c+1])^(thisvert-result.verts[c+2]));
-			if (normal*(thisvert-vavg) < 0) {
-				std::reverse(result.verts.begin()+c,result.verts.begin()+cnt+c);
-			}
-		}
-		c += cnt;
-	}
-
+	FixupFaceOrientation(result);
 	IFCImporter::LogDebug("generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)");
 }
 
 // ------------------------------------------------------------------------------------------------
 void ProcessSweptAreaSolid(const IFC::IfcSweptAreaSolid& swept, TempMesh& meshout, ConversionData& conv)
 {
-	if(const IFC::IfcExtrudedAreaSolid* solid = swept.ToPtr<IFC::IfcExtrudedAreaSolid>()) {
+	if(const IFC::IfcExtrudedAreaSolid* const solid = swept.ToPtr<IFC::IfcExtrudedAreaSolid>()) {
 		ProcessExtrudedAreaSolid(*solid,meshout,conv);
+	}
+	else if(const IFC::IfcRevolvedAreaSolid* const rev = swept.ToPtr<IFC::IfcRevolvedAreaSolid>()) {
+		ProcessRevolvedAreaSolid(*rev,meshout,conv);
 	}
 	else {
 		IFCImporter::LogWarn("skipping unknown IfcSweptAreaSolid entity, type is " + swept.GetClassName());
@@ -923,7 +1104,7 @@ void ProcessBoolean(const IFC::IfcBooleanResult& boolean, TempMesh& meshout, Con
 			ProcessBoolean(*op0,meshout,conv);
 		}
 		else if (const IFC::IfcSweptAreaSolid* const swept = clip->FirstOperand->ResolveSelectPtr<IFC::IfcSweptAreaSolid>(conv.db)) {
-			//ProcessSweptAreaSolid(*swept,meshout,conv);
+			ProcessSweptAreaSolid(*swept,meshout,conv);
 			// XXX
 		}
 	}
@@ -1081,7 +1262,6 @@ bool ProcessGeometricItem(const IFC::IfcGeometricRepresentationItem& geo, std::v
 			}
 			catch(std::bad_cast&) {
 				IFCImporter::LogWarn("unexpected type error, IfcShell ought to inherit from IfcConnectedFaceSet");
-				continue;
 			}
 		}
 	}
@@ -1090,6 +1270,11 @@ bool ProcessGeometricItem(const IFC::IfcGeometricRepresentationItem& geo, std::v
 	}
 	else if(const IFC::IfcManifoldSolidBrep* brep = geo.ToPtr<IFC::IfcManifoldSolidBrep>()) {
 		ProcessConnectedFaceSet(brep->Outer,meshtmp,conv);
+	}
+	else if(const IFC::IfcFaceBasedSurfaceModel* surf = geo.ToPtr<IFC::IfcFaceBasedSurfaceModel>()) {
+		BOOST_FOREACH(const IFC::IfcConnectedFaceSet& fc, surf->FbsmFaces) {
+			ProcessConnectedFaceSet(fc,meshtmp,conv);
+		}
 	}
 	else if(const IFC::IfcBooleanResult* boolean = geo.ToPtr<IFC::IfcBooleanResult>()) {
 		ProcessBoolean(*boolean,meshtmp,conv);
@@ -1214,7 +1399,7 @@ void ProcessMappedItem(const IFC::IfcMappedItem& mapped, aiNode* nd_src, std::ve
 	const IFC::IfcRepresentation& repr = mapped.MappingSource->MappedRepresentation;
 	BOOST_FOREACH(const IFC::IfcRepresentationItem& item, repr.Items) {
 		if(!ProcessRepresentationItem(item,meshes,conv)) {
-			IFCImporter::LogWarn("skipping unknown IfcMappedItem entity, type is " + item.GetClassName());
+			IFCImporter::LogWarn("skipping unknown mapped entity, type is " + item.GetClassName());
 		}
 	}
 	AssignAddedMeshes(meshes,nd.get(),conv);

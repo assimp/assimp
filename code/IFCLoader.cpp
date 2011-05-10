@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MemoryIOWrapper.h"
 #include "ProcessHelper.h"
 
+#include <iterator>
 #include <boost/tuple/tuple.hpp>
 
 using namespace Assimp;

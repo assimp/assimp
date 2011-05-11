@@ -658,9 +658,9 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pMode
 			size_t readSize = pTextureStream->Read( pData, sizeof( unsigned char ), pTexture->mWidth );
 			ai_assert( readSize == pTexture->mWidth );
 			pTexture->pcData = reinterpret_cast<aiTexel*>( pData );
-			pTexture->achFormatHint[ 0 ] = 'j';
-			pTexture->achFormatHint[ 1 ] = 'p';
-			pTexture->achFormatHint[ 2 ] = 'g';
+			pTexture->achFormatHint[ 0 ] = ext[ 0 ];
+			pTexture->achFormatHint[ 1 ] = ext[ 1 ];
+			pTexture->achFormatHint[ 2 ] = ext[ 2 ];
 			pTexture->achFormatHint[ 2 ] = '\0';
 			res = true;
 
@@ -731,6 +731,13 @@ bool Q3BSPFileImporter::importLightmap( const Q3BSP::Q3BSPModel *pModel, aiScene
 	pMatHelper->AddProperty( &name,AI_MATKEY_TEXTURE_LIGHTMAP( 1 ) );
 	mTextures.push_back( pTexture );
 
+	return true;
+}
+
+// ------------------------------------------------------------------------------------------------
+//	Imports the entities.
+bool Q3BSPFileImporter::importEntities( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene )
+{
 	return true;
 }
 

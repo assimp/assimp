@@ -8,6 +8,12 @@
 # code generator. Also, the names of all used entities need to be present 
 # in the source code for this to work.
 
+IfcCartesianTransformationOperator3DnonUniform
+IfcFeatureElementSubtraction
+IfcRelVoidsElement
+IfcOpeningElement
+# IfcRelFillsElement
+IfcPolygonalBoundedHalfSpace
 IfcPlane
 IfcHalfSpaceSolid
 IfcAxis1Placement

@@ -994,7 +994,7 @@ namespace IFC {
 	typedef NotImplemented IfcRelDefinesByProperties; // (not currently used by Assimp)
 	struct IfcCondition;
 	typedef NotImplemented IfcGridAxis; // (not currently used by Assimp)
-	typedef NotImplemented IfcRelVoidsElement; // (not currently used by Assimp)
+	struct IfcRelVoidsElement;
 	struct IfcWindow;
 	typedef NotImplemented IfcRelFlowControlElements; // (not currently used by Assimp)
 	typedef NotImplemented IfcRelConnectsPortToElement; // (not currently used by Assimp)
@@ -2374,6 +2374,12 @@ namespace IFC {
     // C++ wrapper for IfcCondition
     struct IfcCondition : IfcGroup, ObjectHelper<IfcCondition,0> { IfcCondition() : Object("IfcCondition") {}
 
+    };
+
+    // C++ wrapper for IfcRelVoidsElement
+    struct IfcRelVoidsElement : IfcRelConnects, ObjectHelper<IfcRelVoidsElement,2> { IfcRelVoidsElement() : Object("IfcRelVoidsElement") {}
+		Lazy< IfcElement > RelatingBuildingElement;
+		Lazy< IfcFeatureElementSubtraction > RelatedOpeningElement;
     };
 
     // C++ wrapper for IfcWindow
@@ -3980,6 +3986,7 @@ namespace STEP {
 	DECL_CONV_STUB(IfcWorkControl);
 	DECL_CONV_STUB(IfcWorkPlan);
 	DECL_CONV_STUB(IfcCondition);
+	DECL_CONV_STUB(IfcRelVoidsElement);
 	DECL_CONV_STUB(IfcWindow);
 	DECL_CONV_STUB(IfcProtectiveDeviceType);
 	DECL_CONV_STUB(IfcJunctionBoxType);

@@ -2519,6 +2519,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\PolyTools.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\Profiler.h"
 					>
 				</File>

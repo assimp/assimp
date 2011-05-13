@@ -45,16 +45,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 
+#include <iterator>
+#include <boost/tuple/tuple.hpp>
+
+
 #include "IFCLoader.h"
 #include "STEPFileReader.h"
 #include "IFCReaderGen.h"
 
+
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
 #include "ProcessHelper.h"
+#include "PolyTools.h"
 
-#include <iterator>
-#include <boost/tuple/tuple.hpp>
 
 using namespace Assimp;
 using namespace Assimp::Formatter;
@@ -88,8 +92,32 @@ struct delete_fun
 	}
 };
 
+// ------------------------------------------------------------------------------------------------
+// Temporary representation of an opening in a wall or a floor
+// ------------------------------------------------------------------------------------------------
+struct TempMesh;
+struct TempOpening 
+{
+	const IFC::IfcExtrudedAreaSolid* solid;
+	aiVector3D extrusionDir;
+	boost::shared_ptr<TempMesh> profileMesh;
 
-	// intermediate data dump during conversion
+	// ------------------------------------------------------------------------------
+	TempOpening(const IFC::IfcExtrudedAreaSolid* solid,aiVector3D extrusionDir,boost::shared_ptr<TempMesh> profileMesh)
+		: solid(solid)
+		, extrusionDir(extrusionDir)
+		, profileMesh(profileMesh)
+	{
+	}
+
+	// ------------------------------------------------------------------------------
+	void Transform(const aiMatrix4x4& mat); // defined later since TempMesh is not complete yet
+};
+
+
+// ------------------------------------------------------------------------------------------------
+// Intermediate data storage during conversion. Keeps everything and a bit more.
+// ------------------------------------------------------------------------------------------------
 struct ConversionData 
 {
 	ConversionData(const STEP::DB& db, const IFC::IfcProject& proj, aiScene* out,const IFCImporter::Settings& settings)
@@ -99,6 +127,8 @@ struct ConversionData
 		, proj(proj)
 		, out(out)
 		, settings(settings)
+		, apply_openings()
+		, collect_openings()
 	{}
 
 	~ConversionData() {
@@ -121,15 +151,26 @@ struct ConversionData
 	MeshCache cached_meshes;
 
 	const IFCImporter::Settings& settings;
+
+	// Intermediate arrays used to resolve openings in walls: only one of them
+	// can be given at a time. apply_openings if present if the current element
+	// is a wall and needs its openings to be poured into its geometry while
+	// collect_openings is present only if the current element is an 
+	// IfcOpeningElement, for which all the geometry needs to be preserved
+	// for later processing by a parent, which is a wall. 
+	std::vector<TempOpening>* apply_openings;
+	std::vector<TempOpening>* collect_openings;
 };
 
-	// helper used during mesh construction
+// ------------------------------------------------------------------------------------------------
+// Helper used during mesh construction. Aids at creating aiMesh'es out of relatively few polygons.
+// ------------------------------------------------------------------------------------------------
 struct TempMesh
 {
 	std::vector<aiVector3D> verts;
 	std::vector<unsigned int> vertcnt;
-	std::vector<unsigned int> mat_idx;
 
+	// ------------------------------------------------------------------------------
 	aiMesh* ToMesh() {
 		ai_assert(verts.size() == std::accumulate(vertcnt.begin(),vertcnt.end(),0));
 
@@ -158,12 +199,39 @@ struct TempMesh
 			}
 		}
 
-		// XXX materials
-		mesh->mMaterialIndex = UINT_MAX;
 		return mesh.release();
 	}
+
+	// ------------------------------------------------------------------------------
+	void Clear() {
+		verts.clear();
+		vertcnt.clear();
+	}
+
+	// ------------------------------------------------------------------------------
+	void Transform(const aiMatrix4x4& mat) {
+		BOOST_FOREACH(aiVector3D& v, verts) {
+			v *= mat;
+		}
+	}
+
+	// ------------------------------------------------------------------------------
+	aiVector3D Center() {
+		return std::accumulate(verts.begin(),verts.end(),aiVector3D(0.f,0.f,0.f)) / static_cast<float>(verts.size());
+	}
+
+
 };
 
+
+// ------------------------------------------------------------------------------
+void TempOpening::Transform(const aiMatrix4x4& mat) 
+{
+	if(profileMesh) {
+		profileMesh->Transform(mat);
+	}
+	extrusionDir *= aiMatrix3x3(mat);
+}
 
 
 // forward declarations
@@ -176,6 +244,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IFC::IfcProduct& el ,Conve
 void ProcessProductRepresentation(const IFC::IfcProduct& el, aiNode* nd, ConversionData& conv);
 void MakeTreeRelative(ConversionData& conv);
 void ConvertUnit(const EXPRESS::DataType* dt,ConversionData& conv);
+void ProcessSweptAreaSolid(const IFC::IfcSweptAreaSolid& swept, TempMesh& meshout, ConversionData& conv);
 
 } // anon
 
@@ -271,6 +340,10 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 	ProcessSpatialStructures(conv);
 	MakeTreeRelative(conv);
 
+	// NOTE - this is a stress test for the importer, but it works only
+	// in a build with no entities disabled. See 
+	//     scripts/IFCImporter/CPPGenerator.py
+	// for more information.
 #ifdef ASSIMP_IFC_TEST
 	db->EvaluateAll();
 #endif
@@ -506,7 +579,7 @@ void ConvertAxisPlacement(aiMatrix4x4& out, const IFC::IfcAxis2Placement3D& in, 
 	aiVector3D loc;
 	ConvertCartesianPoint(loc,in.Location);
 
-	aiVector3D z(0.f,0.f,1.f),r(0.f,1.f,0.f),x;
+	aiVector3D z(0.f,0.f,1.f),r(1.f,0.f,0.f),x;
 
 	if (in.Axis) { 
 		ConvertDirection(z,*in.Axis.Get());
@@ -531,7 +604,7 @@ void ConvertAxisPlacement(aiMatrix4x4& out, const IFC::IfcAxis2Placement2D& in, 
 	aiVector3D loc;
 	ConvertCartesianPoint(loc,in.Location);
 
-	aiVector3D x(1.f,0.f,1.f);
+	aiVector3D x(1.f,0.f,0.f);
 	if (in.RefDirection) {
 		ConvertDirection(x,*in.RefDirection.Get());
 	}
@@ -610,10 +683,20 @@ void ConvertTransformOperator(aiMatrix4x4& out, const IFC::IfcCartesianTransform
 	aiMatrix4x4::Translation(loc,locm);	
 	AssignMatrixAxes(out,x,y,z);
 
-	const float sc = op.Scale?op.Scale.Get():1.f;
+	
+	aiVector3D vscale;
+	if (const IFC::IfcCartesianTransformationOperator3DnonUniform* nuni = op.ToPtr<IFC::IfcCartesianTransformationOperator3DnonUniform>()) {
+		vscale.x = nuni->Scale?op.Scale.Get():1.f;
+		vscale.y = nuni->Scale2?nuni->Scale2.Get():1.f;
+		vscale.z = nuni->Scale3?nuni->Scale3.Get():1.f;
+	}
+	else {
+		const float sc = op.Scale?op.Scale.Get():1.f;
+		vscale = aiVector3D(sc,sc,sc);
+	}
 
 	aiMatrix4x4 s;
-	aiMatrix4x4::Scaling(aiVector3D(sc,sc,sc),s);
+	aiMatrix4x4::Scaling(vscale,s);
 
 	out = locm * out * s;
 }
@@ -642,12 +725,160 @@ bool ProcessPolyloop(const IFC::IfcPolyLoop& loop, TempMesh& meshout, Conversion
 }
 
 // ------------------------------------------------------------------------------------------------
+void MergePolygonBoundaries(TempMesh& result, const TempMesh& meshout, size_t master_bounds = -1) 
+{
+	// standard case - only one boundary, just copy it to the result vector
+	result.vertcnt.reserve(meshout.vertcnt.size()+result.vertcnt.size());
+	if (meshout.vertcnt.size() <= 1) {
+		result.verts.reserve(meshout.verts.size()+result.verts.size());
+
+		std::copy(meshout.verts.begin(),meshout.verts.end(),std::back_inserter(result.verts));
+		std::copy(meshout.vertcnt.begin(),meshout.vertcnt.end(),std::back_inserter(result.vertcnt));
+		return;
+	}
+
+	// handle polygons with holes. Our built in triangulation won't handle them as is, but
+	// the ear cutting algorithm is solid enough to deal with them if we join the inner
+	// holes with the outer boundaries by dummy connections.
+	IFCImporter::LogDebug("fixing polygon with holes for triangulation via ear-cutting");
+
+	// each hole results in two extra vertices
+	result.verts.reserve(meshout.verts.size()+meshout.vertcnt.size()*2+result.verts.size());
+	size_t outer_polygon_start = 0;
+
+	// compute proper normals for all polygons
+	size_t max_vcount = 0;
+	std::vector<unsigned int>::const_iterator outer_polygon = meshout.vertcnt.end(), begin=meshout.vertcnt.begin(),  iit;
+	for(iit = begin; iit != meshout.vertcnt.end(); ++iit) {
+		ai_assert(*iit);
+		max_vcount = std::max(max_vcount,static_cast<size_t>(*iit));
+	}
+
+	std::vector<float> temp((max_vcount+2)*4);
+	std::vector<aiVector3D> normals;
+	normals.reserve( meshout.vertcnt.size() );
+
+	size_t vidx = 0;
+	for(iit = begin; iit != meshout.vertcnt.end(); vidx += *iit++) {
+		for(size_t vofs = 0, cnt = 0; vofs < *iit; ++vofs) {
+			const aiVector3D& v = meshout.verts[vidx+vofs];
+			temp[cnt++] = v.x;
+			temp[cnt++] = v.y;
+			temp[cnt++] = v.z;
+#ifdef _DEBUG
+			temp[cnt] = std::numeric_limits<float>::quiet_NaN();
+#endif
+			++cnt;
+		}
+
+		normals.push_back(aiVector3D());
+		NewellNormal<4,4,4>(normals.back(),*iit,&temp[0],&temp[1],&temp[2]);
+	}
+
+	// see if one of the polygons is a IfcFaceOuterBound - treats this as the outer boundary.
+	// sadly we can't rely on it, the docs say 'At most one of the bounds shall be of the type IfcFaceOuterBound' 
+	if (master_bounds != -1) {
+		outer_polygon = begin + master_bounds;
+		outer_polygon_start = std::accumulate(begin,outer_polygon,0);
+		BOOST_FOREACH(aiVector3D& n, normals) {
+			n.Normalize();
+		}
+	}
+	else {
+		float area_outer_polygon = 1e-10f;
+		size_t vidx = 0;
+		for(iit = begin; iit != meshout.vertcnt.end(); vidx += *iit++) {
+			// find the polygon with the largest area, it must be the outer bound. 
+			aiVector3D& n = normals[std::distance(begin,iit)];
+			const float area = n.Length();
+			if (area > area_outer_polygon) {
+				area_outer_polygon = area;
+				outer_polygon = iit;
+				outer_polygon_start = vidx;
+			}
+
+			n /= area;
+		}
+	}
+
+	ai_assert(outer_polygon != meshout.vertcnt.end());	
+
+	typedef boost::tuple<std::vector<unsigned int>::const_iterator, unsigned int, unsigned int> InsertionPoint;
+	std::vector< std::vector<InsertionPoint> > insertions(*outer_polygon, std::vector<InsertionPoint>());
+
+	// iterate through all other polyloops and find points in the outer polyloop that are close
+	vidx = 0;
+	for(iit = begin; iit != meshout.vertcnt.end(); vidx += *iit++) {
+		if (iit == outer_polygon) {
+			continue;
+		}
+
+		size_t best_ofs,best_outer = *outer_polygon;
+		float best_dist = 1e10;
+		for(size_t vofs = 0; vofs < *iit; ++vofs) {
+			const aiVector3D& v = meshout.verts[vidx+vofs];
+
+			for(size_t outer = 0; outer < *outer_polygon; ++outer) {
+				const aiVector3D& o = meshout.verts[outer_polygon_start+outer];
+				const float d = (o-v).SquareLength();
+
+				if (d < best_dist) {
+					best_dist = d;
+					best_ofs = vofs;
+					best_outer = outer;
+				}
+			}		
+		}
+
+		ai_assert(best_outer != *outer_polygon);
+
+		// we will later insert a hidden connection line right after the closest point in the outer polygon
+		insertions[best_outer].push_back(boost::make_tuple(iit,vidx,best_ofs));
+	}
+
+	// now that we collected all vertex connections to be added, build the output polygon
+	size_t cnt = *outer_polygon;
+	for(size_t outer = 0; outer < *outer_polygon; ++outer) {
+		const aiVector3D& o = meshout.verts[outer_polygon_start+outer];
+		result.verts.push_back(o);
+
+		const std::vector<InsertionPoint>& insvec = insertions[outer];
+		BOOST_FOREACH(const InsertionPoint& ins,insvec) {
+			if (!(*ins.get<0>())) {
+				continue;
+			}
+
+			for(size_t i = ins.get<2>(); i < *ins.get<0>(); ++i) {
+				result.verts.push_back(meshout.verts[ins.get<1>() + i]);
+			}
+
+			// we need the first vertex of the inner polygon twice as we return to the
+			// outer loop through the very same connection through which we got there.
+			for(size_t i = 0; i <= ins.get<2>(); ++i) {
+				result.verts.push_back(meshout.verts[ins.get<1>() + i]);
+			}
+
+			// reverse face winding if the normal of the sub-polygon points in the
+			// same direction as the normal of the outer polygonal boundary
+			if (normals[std::distance(begin,ins.get<0>())] * normals[std::distance(begin,outer_polygon)] > 0) {
+				std::reverse(result.verts.rbegin(),result.verts.rbegin()+*ins.get<0>()+1);
+			}
+
+			// also append a copy of the initial insertion point to be able to continue the outer polygon
+			result.verts.push_back(o);
+			cnt += *ins.get<0>()+2;
+		}
+	}
+	result.vertcnt.push_back(cnt);
+}
+
+// ------------------------------------------------------------------------------------------------
 void ProcessConnectedFaceSet(const IFC::IfcConnectedFaceSet& fset, TempMesh& result, ConversionData& conv)
 {
 	BOOST_FOREACH(const IFC::IfcFace& face, fset.CfsFaces) {
 		TempMesh meshout;
 
-		size_t ob = face.Bounds.size(), cnt = 0;
+		size_t ob = -1, cnt = 0;
 		BOOST_FOREACH(const IFC::IfcFaceBound& bound, face.Bounds) {
 			
 			if(const IFC::IfcPolyLoop* const polyloop = bound.Bound->ToPtr<IFC::IfcPolyLoop>()) {
@@ -673,131 +904,7 @@ void ProcessConnectedFaceSet(const IFC::IfcConnectedFaceSet& fset, TempMesh& res
 			
 		}
 
-		result.vertcnt.reserve(meshout.vertcnt.size()+result.vertcnt.size());
-		if (meshout.vertcnt.size() <= 1) {
-			result.verts.reserve(meshout.verts.size()+result.verts.size());
-
-			std::copy(meshout.verts.begin(),meshout.verts.end(),std::back_inserter(result.verts));
-			std::copy(meshout.vertcnt.begin(),meshout.vertcnt.end(),std::back_inserter(result.vertcnt));
-			continue;
-		}
-
-		IFCImporter::LogDebug("fixing polygon with holes for triangulation via ear-cutting");
-
-		// each hole results in two extra vertices
-		result.verts.reserve(meshout.verts.size()+cnt*2+result.verts.size());
-
-		// handle polygons with holes. our built in triangulation won't handle them as is, but
-		// the ear cutting algorithm is solid enough to deal with them if we join the inner
-		// holes with the outer boundaries by dummy connections.
-		size_t outer_polygon_start = 0;
-		
-		// see if one of the polygons is a IfcFaceOuterBound - treats this as the outer boundary.
-		// sadly we can't rely on it, the docs say 'At most one of the bounds shall be of the type IfcFaceOuterBound' 
-		std::vector<unsigned int>::iterator outer_polygon = meshout.vertcnt.end(), begin=meshout.vertcnt.begin(),  iit;
-		if (ob < face.Bounds.size()) {
-			outer_polygon = begin + ob;
-			outer_polygon_start = std::accumulate(begin,outer_polygon,0);
-		}
-		else {
-			float area_outer_polygon = 1e-10f;
-
-			// find the polygon with the largest area, it must be the outer bound. 
-			size_t max_vcount = 0;
-			for(iit = begin; iit != meshout.vertcnt.end(); ++iit) {
-				ai_assert(*iit);
-				max_vcount = std::max(max_vcount,static_cast<size_t>(*iit));
-			}
-			std::vector<float> temp((max_vcount+2)*4);
-			size_t vidx = 0;
-			for(iit = begin; iit != meshout.vertcnt.end(); vidx += *iit++) {
-
-				for(size_t vofs = 0, cnt = 0; vofs < *iit; ++vofs) {
-					const aiVector3D& v = meshout.verts[vidx+vofs];
-					temp[cnt++] = v.x;
-					temp[cnt++] = v.y;
-					temp[cnt++] = v.z;
-#ifdef _DEBUG
-					temp[cnt] = std::numeric_limits<float>::quiet_NaN();
-#endif
-					++cnt;
-				}
-				
-				aiVector3D nor;
-				NewellNormal<4,4,4>(nor,*iit,&temp[0],&temp[1],&temp[2]);
-				const float area = nor.SquareLength();
-
-				if (area > area_outer_polygon) {
-					area_outer_polygon = area;
-					outer_polygon = iit;
-					outer_polygon_start = vidx;
-				}
-			}
-		}
-
-		ai_assert(outer_polygon != meshout.vertcnt.end());	
-
-		typedef boost::tuple<unsigned int, unsigned int, unsigned int> InsertionPoint;
-		std::vector< InsertionPoint > insertions(*outer_polygon,boost::make_tuple(0u,0u,0u));
-
-		// iterate through all other polyloops and find points in the outer polyloop that are close
-		size_t vidx = 0;
-		for(iit = begin; iit != meshout.vertcnt.end(); vidx += *iit++) {
-			if (iit == outer_polygon) {
-				continue;
-			}
-
-			size_t best_ofs,best_outer;
-			float best_dist = 1e10;
-			for(size_t vofs = 0; vofs < *iit; ++vofs) {
-				const aiVector3D& v = meshout.verts[vidx+vofs];
-
-				for(size_t outer = 0; outer < *outer_polygon; ++outer) {
-					if (insertions[outer].get<0>()) {
-						continue;
-					}
-					const aiVector3D& o = meshout.verts[outer_polygon_start+outer];
-					const float d = (o-v).SquareLength();
-										
-					if (d < best_dist) {
-						best_dist = d;
-						best_ofs = vofs;
-						best_outer = outer;
-					}
-				}		
-			}
-		
-			// we will later insert a hidden connection line right after the closest point in the outer polygon
-			insertions[best_outer] = boost::make_tuple(*iit,vidx,best_ofs);
-		}
-
-		// now that we collected all vertex connections to be added, build the output polygon
-		cnt = *outer_polygon;
-		for(size_t outer = 0; outer < *outer_polygon; ++outer) {
-			const aiVector3D& o = meshout.verts[outer_polygon_start+outer];
-			result.verts.push_back(o);
-
-			const InsertionPoint& ins = insertions[outer];
-			if (!ins.get<0>()) {
-				continue;
-			}
-
-			for(size_t i = ins.get<2>(); i < ins.get<0>(); ++i) {
-				result.verts.push_back(meshout.verts[ins.get<1>() + i]);
-			}
-			for(size_t i = 0; i < ins.get<2>(); ++i) {
-				result.verts.push_back(meshout.verts[ins.get<1>() + i]);
-			}
-
-			// we need the first vertex of the inner polygon twice as we return to the
-			// outer loop through the very same connection through which we got there.
-			result.verts.push_back(meshout.verts[ins.get<1>() + ins.get<2>()]);
-
-			// also append a copy of the initial insertion point to be able to continue the outer polygon
-			result.verts.push_back(o);
-			cnt += ins.get<0>()+2;
-		}
-		result.vertcnt.push_back(cnt);
+		MergePolygonBoundaries(result,meshout,ob);
 	}
 }
 
@@ -813,30 +920,32 @@ void ProcessPolyLine(const IFC::IfcPolyline& def, TempMesh& meshout, ConversionD
 }
 
 // ------------------------------------------------------------------------------------------------
+bool ProcessCurve(const IFC::IfcCurve& curve,  TempMesh& meshout, ConversionData& conv)
+{
+	if(const IFC::IfcPolyline* poly = curve.ToPtr<IFC::IfcPolyline>()) {
+		ProcessPolyLine(*poly,meshout,conv);
+	}
+	else {
+		IFCImporter::LogWarn("skipping unknown IfcCurve entity, type is " + curve.GetClassName());
+		return false;
+	}
+	return true;
+}
+
+// ------------------------------------------------------------------------------------------------
 void ProcessClosedProfile(const IFC::IfcArbitraryClosedProfileDef& def, TempMesh& meshout, ConversionData& conv)
 {
-	if(const IFC::IfcPolyline* poly = def.OuterCurve->ToPtr<IFC::IfcPolyline>()) {
-		ProcessPolyLine(*poly,meshout,conv);
+	if(ProcessCurve(def.OuterCurve,meshout,conv)) {
 		if(meshout.verts.size()>2 && meshout.verts.front() == meshout.verts.back()) {
 			meshout.verts.pop_back(); // duplicate element, first==last
 		}
-	}
-	else {
-		IFCImporter::LogWarn("skipping unknown IfcCurve entity, type is " + def.OuterCurve->GetClassName());
-		return;
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
 void ProcessOpenProfile(const IFC::IfcArbitraryOpenProfileDef& def, TempMesh& meshout, ConversionData& conv)
 {
-	if(const IFC::IfcPolyline* poly = def.Curve->ToPtr<IFC::IfcPolyline>()) {
-		ProcessPolyLine(*poly,meshout,conv);
-	}
-	else {
-		IFCImporter::LogWarn("skipping unknown IfcBoundedCurve entity, type is " + def.Curve->GetClassName());
-		return;
-	}
+	ProcessCurve(def.Curve,meshout,conv);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -875,10 +984,7 @@ void ProcessParametrizedProfile(const IFC::IfcParameterizedProfileDef& def, Temp
 
 	aiMatrix4x4 trafo;
 	ConvertAxisPlacement(trafo, *def.Position,conv);
-
-	BOOST_FOREACH(aiVector3D& v, meshout.verts) {
-		v *= trafo;
-	}
+	meshout.Transform(trafo);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -908,7 +1014,7 @@ void FixupFaceOrientation(TempMesh& result)
 		vavg += v;
 	}
 
-	// fixup face orientation.
+	// fix face orientation - try at least.
 	vavg /= static_cast<float>( result.verts.size() );
 
 	size_t c = 0;
@@ -1006,13 +1112,74 @@ void ProcessRevolvedAreaSolid(const IFC::IfcRevolvedAreaSolid& solid, TempMesh& 
 
 	aiMatrix4x4 trafo;
 	ConvertAxisPlacement(trafo, solid.Position,conv);
-	BOOST_FOREACH(aiVector3D& v, out) {
-		v *= trafo;
-	}
+	
+	result.Transform(trafo);
 
 	FixupFaceOrientation(result);
 	IFCImporter::LogDebug("generate mesh procedurally by radial extrusion (IfcRevolvedAreaSolid)");
 }
+
+// ------------------------------------------------------------------------------------------------
+bool TryAddOpening(const std::vector<TempOpening>& openings,const std::vector<aiVector3D>& nors, TempMesh& curmesh)
+{
+	std::vector<aiVector3D>& out = curmesh.verts;
+
+	const size_t s = out.size();
+
+	const aiVector3D any_point = out[s-3];
+	const aiVector3D nor = ((out[s-2]-any_point)^(out[s-1]-any_point)).Normalize();
+	
+	bool got_openings = false;
+
+	size_t c = 0;
+	BOOST_FOREACH(const TempOpening& t,openings) {
+		const aiVector3D& outernor = nors[c++];
+		const float dot = nor * outernor;
+		if (fabs(dot)<0.98) {
+			continue;
+		}
+
+		const aiVector3D diff = t.extrusionDir; 
+		const std::vector<aiVector3D>& va = t.profileMesh->verts;
+		if(va.size() <= 2) {
+			continue;	
+		}
+
+		const float dd = t.extrusionDir*nor;
+		IFCImporter::LogDebug("apply an IfcOpeningElement linked via IfcRelVoidsElement to this polygon");
+
+		got_openings = true;
+		if ( fabs((any_point-va[0]).Normalize()*nor) > 1e-3f)  {
+			for(size_t i = 0; i < va.size(); ++i) {
+				out.push_back(va[i]+diff);
+			}
+		}
+		else {
+			for(size_t i = 0; i < va.size(); ++i) {
+				out.push_back(va[i]);
+			}
+		}
+
+		curmesh.vertcnt.push_back(va.size());
+
+		TempMesh res;
+		MergePolygonBoundaries(res,curmesh,0);
+		curmesh = res;
+	}
+	return got_openings;
+}
+
+// ------------------------------------------------------------------------------------------------
+struct DistanceSorter {
+
+	DistanceSorter(const aiVector3D& base) : base(base) {}
+
+	bool operator () (const TempOpening& a, const TempOpening& b) const {
+		return (a.profileMesh->Center()-base).SquareLength() < (b.profileMesh->Center()-base).SquareLength();
+	}
+
+	aiVector3D base;
+};
 
 // ------------------------------------------------------------------------------------------------
 void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& result, ConversionData& conv)
@@ -1033,7 +1200,7 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 	// the underlying profile, extrude along the given axis, forming new
 	// triangles.
 	
-	const std::vector<aiVector3D>& in = meshout.verts;
+	std::vector<aiVector3D>& in = meshout.verts;
 	const size_t size=in.size();
 
 	const bool has_area = solid.SweptArea->ProfileType == "AREA" && size>2;
@@ -1047,36 +1214,117 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 	result.verts.reserve(size*(has_area?4:2));
 	result.vertcnt.reserve(meshout.vertcnt.size()+2);
 
+	// transform to target space
+	aiMatrix4x4 trafo;
+	ConvertAxisPlacement(trafo, solid.Position,conv);
+	BOOST_FOREACH(aiVector3D& v,in) {
+		v *= trafo;
+	}
+
+	
+	aiVector3D min = in[0];
+	dir *= aiMatrix3x3(trafo);
+
+	float cy = 0.f;
+
+	// recompute the normal vectors for all openings
+	std::vector<aiVector3D> nors;
+	if (conv.apply_openings) {
+		// it is essential to apply the openings in the correct spatial order. The direction
+		// doesn't matter, but we would screw up if we started with e.g. a door in between
+		// two windows.
+		std::sort(conv.apply_openings->begin(),conv.apply_openings->end(),DistanceSorter(min));
+		nors.reserve(conv.apply_openings->size());
+
+		//std::reverse(conv.apply_openings->begin(),conv.apply_openings->end());
+		BOOST_FOREACH(TempOpening& t,*conv.apply_openings) {
+			TempMesh& bounds = *t.profileMesh.get();
+			//bounds.Transform(trafo);
+		
+			if (bounds.verts.size() <= 2) {
+				nors.push_back(aiVector3D());
+				continue;
+			}
+			nors.push_back(((bounds.verts[2]-bounds.verts[0])^(bounds.verts[1]-bounds.verts[0]) ).Normalize());
+			cy += nors.back().y;
+		}
+
+	}
+
+	bool rev = cy<0.f;
+
+	// XXX disable all openings for now
+	conv.apply_openings = NULL;
+
+	TempMesh temp;
+	TempMesh& curmesh = conv.apply_openings ? temp : result;
+	std::vector<aiVector3D>& out = curmesh.verts;
+ 
+	size_t sides_with_openings = 0;
 	for(size_t i = 0; i < size; ++i) {
 		const size_t next = (i+1)%size;
 
-		result.vertcnt.push_back(4);
+		curmesh.vertcnt.push_back(4);
+		
+		out.push_back(in[i]);
+		out.push_back(in[i]+dir);
+		out.push_back(in[next]+dir);
+		out.push_back(in[next]);
 
-		result.verts.push_back(in[i]);
-		result.verts.push_back(in[next]);
-		result.verts.push_back(in[next]+dir);
-		result.verts.push_back(in[i]+dir);
+		if(conv.apply_openings) {
+			if(TryAddOpening(*conv.apply_openings,nors,curmesh)) {
+				++sides_with_openings;
+			}
+			
+			MergePolygonBoundaries(result,temp,0);
+			temp.Clear();
+		}
 	}
-
+	
+	size_t sides_with_v_openings = 0;
 	if(has_area) {
 		// leave the triangulation of the profile area to the ear cutting 
 		// implementation in aiProcess_Triangulate - for now we just
 		// feed in two huge polygons.
-		for(size_t i = size; i--; ) {
-			result.verts.push_back(in[i]+dir);
+		for(size_t n = 0; n < 2; ++n) {
+			for(size_t i = size; i--; ) {
+				out.push_back(in[i]+(n?dir:aiVector3D()));
+			}
+
+			curmesh.vertcnt.push_back(size);
+			if(conv.apply_openings) {
+				if(TryAddOpening(*conv.apply_openings,nors,curmesh)) {
+					++sides_with_v_openings;
+				}
+
+				MergePolygonBoundaries(result,temp,0);
+				temp.Clear();
+			}
 		}
-		for(size_t i = 0; i < size; ++i ) {
-			result.verts.push_back(in[i]);
-		}
-		result.vertcnt.push_back(size);
-		result.vertcnt.push_back(size);
 	}
 
-	aiMatrix4x4 trafo;
-	ConvertAxisPlacement(trafo, solid.Position,conv);
+	// add connection geometry to close the 'holes' for the openings
+	if(conv.apply_openings) {
+		BOOST_FOREACH(const TempOpening& t,*conv.apply_openings) {
+			const std::vector<aiVector3D>& in = t.profileMesh->verts;
+			std::vector<aiVector3D>& out = result.verts; 
 
-	BOOST_FOREACH(aiVector3D& v, result.verts) {
-		v *= trafo;
+			const aiVector3D dir = t.extrusionDir;
+			for(size_t i = 0, size = in.size(); i < size; ++i) {
+				const size_t next = (i+1)%size;
+
+				result.vertcnt.push_back(4);
+
+				out.push_back(in[i]);
+				out.push_back(in[i]+dir);
+				out.push_back(in[next]+dir);
+				out.push_back(in[next]-dir);
+			}
+		}
+	}
+
+	if(conv.apply_openings && (sides_with_openings != 2 && sides_with_openings || sides_with_v_openings != 2 && sides_with_v_openings)) {
+		IFCImporter::LogWarn("failed to resolve all openings, presumably their topology is not supported by Assimp");
 	}
 
 	FixupFaceOrientation(result);
@@ -1087,6 +1335,22 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 void ProcessSweptAreaSolid(const IFC::IfcSweptAreaSolid& swept, TempMesh& meshout, ConversionData& conv)
 {
 	if(const IFC::IfcExtrudedAreaSolid* const solid = swept.ToPtr<IFC::IfcExtrudedAreaSolid>()) {
+		// Do we just collect openings for a parent element (i.e. a wall)? 
+		// In this case we don't extrude the surface yet, just keep the profile and transform it correctly
+		if(conv.collect_openings) {
+			boost::shared_ptr<TempMesh> meshtmp(new TempMesh());
+			ProcessProfile(swept.SweptArea,*meshtmp,conv);
+
+			aiMatrix4x4 m;
+			ConvertAxisPlacement(m,solid->Position,conv);
+			meshtmp->Transform(m);
+
+			aiVector3D dir;
+			ConvertDirection(dir,solid->ExtrudedDirection);
+			conv.collect_openings->push_back(TempOpening(solid, aiMatrix3x3(m) * (dir*solid->Depth),meshtmp));
+			return;
+		}
+
 		ProcessExtrudedAreaSolid(*solid,meshout,conv);
 	}
 	else if(const IFC::IfcRevolvedAreaSolid* const rev = swept.ToPtr<IFC::IfcRevolvedAreaSolid>()) {
@@ -1123,6 +1387,7 @@ Intersect IntersectSegmentPlane(const aiVector3D& p,const aiVector3D& n, const a
 	return Intersect_Yes;
 }
 
+
 // ------------------------------------------------------------------------------------------------
 void ProcessBoolean(const IFC::IfcBooleanResult& boolean, TempMesh& result, ConversionData& conv)
 {
@@ -1144,7 +1409,7 @@ void ProcessBoolean(const IFC::IfcBooleanResult& boolean, TempMesh& result, Conv
 			IFCImporter::LogError("expected IfcPlane as base surface for the IfcHalfSpaceSolid");
 			return;
 		}
-		
+
 		if(const IFC::IfcBooleanResult* const op0 = clip->FirstOperand->ResolveSelectPtr<IFC::IfcBooleanResult>(conv.db)) {
 			ProcessBoolean(*op0,meshout,conv);
 		}
@@ -1170,10 +1435,10 @@ void ProcessBoolean(const IFC::IfcBooleanResult& boolean, TempMesh& result, Conv
 		// clip the current contents of `meshout` against the plane we obtained from the second operand
 		const std::vector<aiVector3D>& in = meshout.verts;
 		std::vector<aiVector3D>& outvert = result.verts;
-		std::vector<unsigned int>::const_iterator outer_polygon = meshout.vertcnt.end(), begin=meshout.vertcnt.begin(),  iit;
+		std::vector<unsigned int>::const_iterator begin=meshout.vertcnt.begin(), end=meshout.vertcnt.end(), iit;
 		
 		unsigned int vidx = 0;
-		for(iit = begin; iit != meshout.vertcnt.end(); vidx += *iit++) {
+		for(iit = begin; iit != end; vidx += *iit++) {
 
 			unsigned int newcount = 0;
 			for(unsigned int i = 0; i < *iit; ++i) {
@@ -1231,18 +1496,81 @@ int ConvertShadingMode(const std::string& name)
 }
 
 // ------------------------------------------------------------------------------------------------
-unsigned int ProcessMaterials(const IFC::IfcRepresentationItem& item, ConversionData& conv)
+void FillMaterial(MaterialHelper* mat,const IFC::IfcSurfaceStyle* surf,ConversionData& conv) 
 {
 	aiString name;
-	aiColor4D col;
+	name.Set((surf->Name? surf->Name.Get() : "IfcSurfaceStyle_Unnamed"));
+	mat->AddProperty(&name,AI_MATKEY_NAME);
 
+	// now see which kinds of surface information are present
+	BOOST_FOREACH(const IFC::IfcSurfaceStyleElementSelect* sel2, surf->Styles) {
+		if (const IFC::IfcSurfaceStyleShading* shade = sel2->ResolveSelectPtr<IFC::IfcSurfaceStyleShading>(conv.db)) {
+			aiColor4D col_base,col;
+
+			ConvertColor(col_base, shade->SurfaceColour);
+			mat->AddProperty(&col_base,1, AI_MATKEY_COLOR_DIFFUSE);
+
+			if (const IFC::IfcSurfaceStyleRendering* ren = shade->ToPtr<IFC::IfcSurfaceStyleRendering>()) {
+
+				if (ren->Transparency) {
+					const float t = 1.f-ren->Transparency.Get();
+					mat->AddProperty(&t,1, AI_MATKEY_OPACITY);
+				}
+
+				if (ren->DiffuseColour) {
+					ConvertColor(col, ren->DiffuseColour.Get(),conv,&col_base);
+					mat->AddProperty(&col,1, AI_MATKEY_COLOR_DIFFUSE);
+				}
+
+				if (ren->SpecularColour) {
+					ConvertColor(col, ren->SpecularColour.Get(),conv,&col_base);
+					mat->AddProperty(&col,1, AI_MATKEY_COLOR_SPECULAR);
+				}
+
+				if (ren->TransmissionColour) {
+					ConvertColor(col, ren->TransmissionColour.Get(),conv,&col_base);
+					mat->AddProperty(&col,1, AI_MATKEY_COLOR_TRANSPARENT);
+				}
+
+				if (ren->ReflectionColour) {
+					ConvertColor(col, ren->ReflectionColour.Get(),conv,&col_base);
+					mat->AddProperty(&col,1, AI_MATKEY_COLOR_REFLECTIVE);
+				}
+
+				const int shading = (ren->SpecularHighlight && ren->SpecularColour)?ConvertShadingMode(ren->ReflectanceMethod):aiShadingMode_Gouraud;
+				mat->AddProperty(&shading,1, AI_MATKEY_SHADING_MODEL);
+
+				if (ren->SpecularHighlight) {
+					if(const EXPRESS::REAL* rt = ren->SpecularHighlight.Get()->ToPtr<EXPRESS::REAL>()) {
+						// at this point we don't distinguish between the two distinct ways of
+						// specifying highlight intensities. leave this to the user.
+						const float e = *rt;
+						mat->AddProperty(&e,1,AI_MATKEY_SHININESS);
+					}
+					else {
+						IFCImporter::LogWarn("unexpected type error, SpecularHighlight should be a REAL");
+					}
+				}
+			}
+		}
+		else if (const IFC::IfcSurfaceStyleWithTextures* tex = sel2->ResolveSelectPtr<IFC::IfcSurfaceStyleWithTextures>(conv.db)) {
+			// XXX
+		}
+	}
+
+}
+
+// ------------------------------------------------------------------------------------------------
+unsigned int ProcessMaterials(const IFC::IfcRepresentationItem& item, ConversionData& conv)
+{
 	if (conv.materials.empty()) {
+		aiString name;
 		std::auto_ptr<MaterialHelper> mat(new MaterialHelper());
 
 		name.Set("<IFCDefault>");
 		mat->AddProperty(&name,AI_MATKEY_NAME);
 
-		col = aiColor4D(0.6f,0.6f,0.6f,1.0f);
+		aiColor4D col = aiColor4D(0.6f,0.6f,0.6f,1.0f);
 		mat->AddProperty(&col,1, AI_MATKEY_COLOR_DIFFUSE);
 
 		conv.materials.push_back(mat.release());
@@ -1254,7 +1582,7 @@ unsigned int ProcessMaterials(const IFC::IfcRepresentationItem& item, Conversion
 			BOOST_FOREACH(const IFC::IfcPresentationStyleAssignment& as, styled->Styles) {
 				BOOST_FOREACH(const IFC::IfcPresentationStyleSelect* sel, as.Styles) {
 			
-					if (const IFC::IfcSurfaceStyle* surf =  sel->ResolveSelectPtr<IFC::IfcSurfaceStyle>(conv.db)) {
+					if (const IFC::IfcSurfaceStyle* const surf =  sel->ResolveSelectPtr<IFC::IfcSurfaceStyle>(conv.db)) {
 						const std::string side = static_cast<std::string>(surf->Side);
 						if (side != "BOTH") {
 							IFCImporter::LogWarn("ignoring surface side marker on IFC::IfcSurfaceStyle: " + side);
@@ -1262,61 +1590,8 @@ unsigned int ProcessMaterials(const IFC::IfcRepresentationItem& item, Conversion
 
 						std::auto_ptr<MaterialHelper> mat(new MaterialHelper());
 
-						name.Set((surf->Name? surf->Name.Get() : "IfcSurfaceStyle_Unnamed"));
-						mat->AddProperty(&name,AI_MATKEY_NAME);
-
-						// now see which kinds of surface information are present
-						BOOST_FOREACH(const IFC::IfcSurfaceStyleElementSelect* sel2, surf->Styles) {
-
-							if (const IFC::IfcSurfaceStyleShading* shade = sel2->ResolveSelectPtr<IFC::IfcSurfaceStyleShading>(conv.db)) {
-								aiColor4D col_base;
-
-								ConvertColor(col_base, shade->SurfaceColour);
-								mat->AddProperty(&col,1, AI_MATKEY_COLOR_DIFFUSE);
-
-								if (const IFC::IfcSurfaceStyleRendering* ren = shade->ToPtr<IFC::IfcSurfaceStyleRendering>()) {
-									
-									if (ren->DiffuseColour) {
-										ConvertColor(col, ren->DiffuseColour.Get(),conv,&col_base);
-										mat->AddProperty(&col,1, AI_MATKEY_COLOR_DIFFUSE);
-									}
-
-									if (ren->SpecularColour) {
-										ConvertColor(col, ren->SpecularColour.Get(),conv,&col_base);
-										mat->AddProperty(&col,1, AI_MATKEY_COLOR_SPECULAR);
-									}
-
-									if (ren->TransmissionColour) {
-										ConvertColor(col, ren->TransmissionColour.Get(),conv,&col_base);
-										mat->AddProperty(&col,1, AI_MATKEY_COLOR_TRANSPARENT);
-									}
-
-									if (ren->ReflectionColour) {
-										ConvertColor(col, ren->ReflectionColour.Get(),conv,&col_base);
-										mat->AddProperty(&col,1, AI_MATKEY_COLOR_REFLECTIVE);
-									}
-
-									const int shading = (ren->SpecularHighlight && ren->SpecularColour)?ConvertShadingMode(ren->ReflectanceMethod):aiShadingMode_Gouraud;
-									mat->AddProperty(&shading,1, AI_MATKEY_SHADING_MODEL);
-
-									if (ren->SpecularHighlight) {
-										if(const EXPRESS::REAL* rt = ren->SpecularHighlight.Get()->ToPtr<EXPRESS::REAL>()) {
-											// at this point we don't distinguish between the two distinct ways of
-											// specifying highlight intensities. leave this to the user.
-											const float e = *rt;
-											mat->AddProperty(&e,1,AI_MATKEY_SHININESS);
-										}
-										else {
-											IFCImporter::LogWarn("unexpected type error, SpecularHighlight should be a REAL");
-										}
-									}
-								}
-							}
-							else if (const IFC::IfcSurfaceStyleWithTextures* tex = sel2->ResolveSelectPtr<IFC::IfcSurfaceStyleWithTextures>(conv.db)) {
-								// XXX
-							}
-						}
-
+						FillMaterial(mat.get(),surf,conv);
+						
 						conv.materials.push_back(mat.release());
 						return conv.materials.size()-1;
 					}
@@ -1442,7 +1717,9 @@ bool ProcessRepresentationItem(const IFC::IfcRepresentationItem& item, std::vect
 	if(const IFC::IfcTopologicalRepresentationItem* const topo = item.ToPtr<IFC::IfcTopologicalRepresentationItem>()) {
 		if (!TryQueryMeshCache(item,mesh_indices,conv)) {
 			if(ProcessTopologicalItem(*topo,mesh_indices,conv)) {
-				PopulateMeshCache(item,mesh_indices,conv);
+				if(mesh_indices.size()) {
+					PopulateMeshCache(item,mesh_indices,conv);
+				}
 			}
 			else return false;
 		}
@@ -1451,8 +1728,9 @@ bool ProcessRepresentationItem(const IFC::IfcRepresentationItem& item, std::vect
 	else if(const IFC::IfcGeometricRepresentationItem* const geo = item.ToPtr<IFC::IfcGeometricRepresentationItem>()) {
 		if (!TryQueryMeshCache(item,mesh_indices,conv)) {
 			if(ProcessGeometricItem(*geo,mesh_indices,conv)) {
-				PopulateMeshCache(item,mesh_indices,conv);
-				
+				if(mesh_indices.size()) {
+					PopulateMeshCache(item,mesh_indices,conv);
+				}
 			} 
 			else return false;
 		}
@@ -1493,9 +1771,10 @@ void ProcessMappedItem(const IFC::IfcMappedItem& mapped, aiNode* nd_src, std::ve
 {
 	// insert a custom node here, the cartesian transform operator is simply a conventional transformation matrix
 	std::auto_ptr<aiNode> nd(new aiNode());
-	nd->mName.Set("MappedItem");
+	nd->mName.Set("IfcMappedItem");
 	
 	std::vector<unsigned int> meshes;
+	const size_t old_openings = conv.collect_openings ? conv.collect_openings->size() : 0;
 
 	const IFC::IfcRepresentation& repr = mapped.MappingSource->MappedRepresentation;
 	BOOST_FOREACH(const IFC::IfcRepresentationItem& item, repr.Items) {
@@ -1515,10 +1794,25 @@ void ProcessMappedItem(const IFC::IfcMappedItem& mapped, aiNode* nd_src, std::ve
 	aiMatrix4x4 minv = msrc;
 	minv.Inverse();
 
-	//aiMatrix4x4 correct;
-	//GetAbsTransform(correct,nd_src,conv);
+	minv = m*msrc;
+	if (conv.collect_openings) {
+		// if this pass serves us only to collect opening geometry,
+		// make sure we transform the TempMesh's which we need to
+		// preserve as well.
+		if(const size_t diff = conv.collect_openings->size() - old_openings) {
+			for(size_t i = 0; i < diff; ++i) {
+				(*conv.collect_openings)[old_openings+i].Transform(minv);
+			}
+		}
+	}
 
-	nd->mTransformation = nd_src->mTransformation * minv * m * msrc;
+	if (conv.apply_openings) {
+		BOOST_FOREACH(TempOpening& open,*conv.apply_openings){
+			open.Transform(minv);
+		}
+	}
+
+	nd->mTransformation =  nd_src->mTransformation * minv;
 	subnodes_src.push_back(nd.release());
 }
 
@@ -1557,7 +1851,7 @@ void ProcessProductRepresentation(const IFC::IfcProduct& el, aiNode* nd, std::ve
 }
 
 // ------------------------------------------------------------------------------------------------
-aiNode* ProcessSpatialStructure(aiNode* parent, const IFC::IfcProduct& el, ConversionData& conv)
+aiNode* ProcessSpatialStructure(aiNode* parent, const IFC::IfcProduct& el, ConversionData& conv, std::vector<TempOpening>* collect_openings = NULL)
 {
 	const STEP::DB::RefMap& refs = conv.db.GetRefs();
 
@@ -1570,46 +1864,100 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IFC::IfcProduct& el, Conve
 		ResolveObjectPlacement(nd->mTransformation,el.ObjectPlacement.Get(),conv);
 	}
 
+	std::vector<TempOpening> openings;
+
+	aiMatrix4x4 myInv;
+	bool didinv = false;
+
 	// convert everything contained directly within this structure,
 	// this may result in more nodes.
 	std::vector< aiNode* > subnodes;
 	try {
-
-		ProcessProductRepresentation(el,nd.get(),subnodes,conv);
-
 		// locate aggregates and 'contained-in-here'-elements of this spatial structure and add them in recursively
+		// on our way, collect openings in *this* element
 		STEP::DB::RefMapRange range = refs.equal_range(el.GetID());
 
-		for(STEP::DB::RefMapRange range2=range;range2.first != range.second; ++range2.first) {
-			if(const IFC::IfcRelContainedInSpatialStructure* const cont = conv.db.GetObject((*range2.first).second)->
-				ToPtr<IFC::IfcRelContainedInSpatialStructure>()) {
-				
+		for(STEP::DB::RefMapRange range2 = range; range2.first != range.second; ++range2.first) {
+			const STEP::LazyObject& obj = conv.db.MustGetObject((*range2.first).second);
+
+			// handle regularly-contained elements
+			if(const IFC::IfcRelContainedInSpatialStructure* const cont = obj->ToPtr<IFC::IfcRelContainedInSpatialStructure>()) {
 				BOOST_FOREACH(const IFC::IfcProduct& pro, cont->RelatedElements) {		
-					subnodes.push_back( ProcessSpatialStructure(nd.get(),pro,conv) );
+					if(const IFC::IfcOpeningElement* const open = pro.ToPtr<IFC::IfcOpeningElement>()) {
+						// IfcOpeningElement is handled below. Sadly we can't use it here as is:
+						// The docs say that opening elements are USUALLY attached to building storeys
+						// but we want them for the building elements to which they belong to.
+						continue;
+					}
+					
+					subnodes.push_back( ProcessSpatialStructure(nd.get(),pro,conv,NULL) );
 				}
-				break;
+			}
+			// handle openings, which we collect in a list rather than adding them to the node graph
+			else if(const IFC::IfcRelVoidsElement* const fills = obj->ToPtr<IFC::IfcRelVoidsElement>()) {
+				if(fills->RelatingBuildingElement->GetID() == el.GetID()) {
+					const IFC::IfcFeatureElementSubtraction& open = fills->RelatedOpeningElement;
+
+					// move opening elements to a separate node since they are semantically different than elements that are just 'contained'
+					std::auto_ptr<aiNode> nd_aggr(new aiNode());
+					nd_aggr->mName.Set("$RelVoidsElement");
+					nd_aggr->mParent = nd.get();
+
+					nd_aggr->mTransformation = nd->mTransformation;
+
+					nd_aggr->mNumChildren = 1;
+					nd_aggr->mChildren = new aiNode*[1]();
+
+					std::vector<TempOpening> openings_local;
+					nd_aggr->mChildren[0] = ProcessSpatialStructure( nd_aggr.get(),open, conv,&openings_local);
+					
+
+					if(openings_local.size()) {
+						if (!didinv) {
+							myInv = aiMatrix4x4(nd->mTransformation ).Inverse();
+							didinv = true;
+						}
+
+						// we need all openings to be in the local space of *this* node, so transform them
+						BOOST_FOREACH(TempOpening& op,openings_local) {
+							op.Transform( myInv*nd_aggr->mChildren[0]->mTransformation);
+							openings.push_back(op);
+						}
+					}
+
+					subnodes.push_back( nd_aggr.release() );
+				}
 			}
 		}
 
 		for(;range.first != range.second; ++range.first) {
 			if(const IFC::IfcRelAggregates* const aggr = conv.db.GetObject((*range.first).second)->ToPtr<IFC::IfcRelAggregates>()) {
 
-				// move aggregate elements to a separate node since they are semantically different than elements that are merely 'contained'
+				// move aggregate elements to a separate node since they are semantically different than elements that are just 'contained'
 				std::auto_ptr<aiNode> nd_aggr(new aiNode());
-				nd_aggr->mName.Set("$Aggregates");
+				nd_aggr->mName.Set("$RelAggregates");
 				nd_aggr->mParent = nd.get();
+
+				nd_aggr->mTransformation = nd->mTransformation;
 
 				nd_aggr->mChildren = new aiNode*[aggr->RelatedObjects.size()]();
 				BOOST_FOREACH(const IFC::IfcObjectDefinition& def, aggr->RelatedObjects) {
 					if(const IFC::IfcProduct* const prod = def.ToPtr<IFC::IfcProduct>()) {
-						nd_aggr->mChildren[nd_aggr->mNumChildren++] = ProcessSpatialStructure(nd_aggr.get(),*prod,conv);
+						nd_aggr->mChildren[nd_aggr->mNumChildren++] = ProcessSpatialStructure(nd_aggr.get(),*prod,conv,NULL);
 					}
 				}
 			
 				subnodes.push_back( nd_aggr.release() );
-				break;
 			}
 		}
+
+		conv.collect_openings = collect_openings;
+		if(!conv.collect_openings) {
+			conv.apply_openings = &openings;
+		}
+		ProcessProductRepresentation(el,nd.get(),subnodes,conv);
+
+		conv.apply_openings = conv.collect_openings = NULL;
 
 		if (subnodes.size()) {
 			nd->mChildren = new aiNode*[subnodes.size()]();
@@ -1661,10 +2009,10 @@ void ProcessSpatialStructures(ConversionData& conv)
 				BOOST_FOREACH(const IFC::IfcObjectDefinition& def, aggr->RelatedObjects) {
 					// comparing pointer values is not sufficient, we would need to cast them to the same type first
 					// as there is multiple inheritance in the game.
-					if (def.GlobalId == prod->GlobalId) { 
+					if (def.GetID() == prod->GetID()) { 
 						IFCImporter::LogDebug("selecting this spatial structure as root structure");
 						// got it, this is the primary site.
-						conv.out->mRootNode = ProcessSpatialStructure(NULL,*prod,conv);
+						conv.out->mRootNode = ProcessSpatialStructure(NULL,*prod,conv,NULL);
 						return;
 					}
 				}

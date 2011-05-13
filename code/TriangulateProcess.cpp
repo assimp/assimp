@@ -48,9 +48,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  Self-intersecting or non-planar polygons are not rejected, but
  *  they're probably not triangulated correctly.
  *
+ * DEBUG SWITCHES - do not enable any of them in release builds:
+ *
  * AI_BUILD_TRIANGULATE_COLOR_FACE_WINDING
  *   - generates vertex colors to represent the face winding order.
  *     the first vertex of a polygon becomes red, the last blue.
+ * AI_BUILD_TRIANGULATE_DEBUG_POLYS
+ *   - dump all polygons and their triangulation sequences to
+ *     a file
  */
 
 #include "AssimpPCH.h"
@@ -58,8 +63,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_TRIANGULATE_PROCESS
 #include "TriangulateProcess.h"
 #include "ProcessHelper.h"
+#include "PolyTools.h"
 
 //#define AI_BUILD_TRIANGULATE_COLOR_FACE_WINDING
+//#define AI_BUILD_TRIANGULATE_DEBUG_POLYS
+
+#define POLY_GRID_Y 40
+#define POLY_GRID_X 70
+#define POLY_GRID_XPAD 20
+#define POLY_OUTPUT_FILE "assimp_polygons_debug.txt"
+
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
@@ -99,34 +112,6 @@ void TriangulateProcess::Execute( aiScene* pScene)
 	else     DefaultLogger::get()->debug("TriangulateProcess finished. There was nothing to be done.");
 }
 
-// ------------------------------------------------------------------------------------------------
-// Test whether a point p2 is on the left side of the line formed by p0-p1 
-inline bool OnLeftSideOfLine(const aiVector2D& p0, const aiVector2D& p1,const aiVector2D& p2)
-{
-	return ( (p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (p1.y - p0.y) ) > 0;
-}
-
-// ------------------------------------------------------------------------------------------------
-// Test whether a point is inside a given triangle in R2
-inline bool PointInTriangle2D(const aiVector2D& p0, const aiVector2D& p1,const aiVector2D& p2, const aiVector2D& pp)
-{
-	// Point in triangle test using baryzentric coordinates
-	const aiVector2D v0 = p1 - p0;
-	const aiVector2D v1 = p2 - p0;
-	const aiVector2D v2 = pp - p0;
-
-	float dot00 = v0 * v0;
-	float dot01 = v0 * v1;
-	float dot02 = v0 * v2;
-	float dot11 = v1 * v1;
-	float dot12 = v1 * v2;
-
-	const float invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
-	dot11 = (dot11 * dot02 - dot01 * dot12) * invDenom;
-	dot00 = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-	return (dot11 > 0) && (dot00 > 0) && (dot11 + dot00 < 1);
-}
 
 // ------------------------------------------------------------------------------------------------
 // Triangulates the given mesh.
@@ -150,17 +135,18 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 		return false;
 	}
 
-	// the output mesh will contain triangles, but no polys anymore
-	pMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
-	pMesh->mPrimitiveTypes &= ~aiPrimitiveType_POLYGON;
-
 	// Find out how many output faces we'll get
 	unsigned int numOut = 0, max_out = 0;
+	bool get_normals = true;
 	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)	{
 		aiFace& face = pMesh->mFaces[a];
-		if( face.mNumIndices <= 3)
+		if (face.mNumIndices <= 4) {
+			get_normals = false;
+		}
+		if( face.mNumIndices <= 3) {
 			numOut++;
 
+		}	
 		else {
 			numOut += face.mNumIndices-2;
 			max_out = std::max(max_out,face.mNumIndices);
@@ -171,12 +157,21 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 	assert(numOut != pMesh->mNumFaces);
 
 	aiVector3D* nor_out = NULL;
-	if (!pMesh->mNormals && pMesh->mPrimitiveTypes == aiPrimitiveType_POLYGON) {
-		nor_out = pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
+
+	// if we don't have normals yet, but expect them to be a cheap side
+	// product of triangulation anyway, allocate storage for them.
+	if (!pMesh->mNormals && get_normals) {
+		// XXX need a mechanism to inform the GenVertexNormals process to treat these normals as preprocessed per-face normals
+	//	nor_out = pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
 	}
 
-	aiFace* out = new aiFace[numOut], *curOut = out;
-	std::vector<aiVector3D> temp_verts(max_out+2); /* temporary storage for vertices */
+	// the output mesh will contain triangles, but no polys anymore
+	pMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+	pMesh->mPrimitiveTypes &= ~aiPrimitiveType_POLYGON;
+
+	aiFace* out = new aiFace[numOut](), *curOut = out;
+	std::vector<aiVector3D> temp_verts3d(max_out+2); /* temporary storage for vertices */
+	std::vector<aiVector2D> temp_verts(max_out+2);
 
 	// Apply vertex colors to represent the face winding?
 #ifdef AI_BUILD_TRIANGULATE_COLOR_FACE_WINDING
@@ -186,6 +181,11 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 		new(pMesh->mColors[0]) aiColor4D[pMesh->mNumVertices];
 
 	aiColor4D* clr = pMesh->mColors[0];
+#endif
+
+	
+#ifdef AI_BUILD_TRIANGULATE_DEBUG_POLYS
+	FILE* fout = fopen(POLY_OUTPUT_FILE,"a");
 #endif
 
 	// use boost::scoped_array to avoid slow std::vector<bool> specialiations
@@ -205,12 +205,17 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 		}
 #endif
 
+		aiFace* const last_face = curOut; 
+
 		// if it's a simple point,line or triangle: just copy it
 		if( face.mNumIndices <= 3)
 		{
 			aiFace& nface = *curOut++;
 			nface.mNumIndices = face.mNumIndices;
 			nface.mIndices    = face.mIndices;
+
+			face.mIndices = NULL;
+			continue;
 		} 
 		// quadrilaterals can't have ears. trifanning will always work
 		else if ( face.mNumIndices == 4) {
@@ -225,6 +230,9 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 			sface.mIndices[0] = face.mIndices[0];
 			sface.mIndices[1] = face.mIndices[2];
 			sface.mIndices[2] = face.mIndices[3];
+
+			face.mIndices = NULL;
+			continue;
 		}
 		else
 		{
@@ -241,12 +249,12 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 			// Collect all vertices of of the polygon.
 			aiVector3D* verts = pMesh->mVertices;
 			for (tmp = 0; tmp < max; ++tmp) {
-				temp_verts[tmp] = verts[idx[tmp]];
+				temp_verts3d[tmp] = verts[idx[tmp]];
 			}
 
 			// Get newell normal of the polygon. Store it for future use if it's a polygon-only mesh
 			aiVector3D n;
-			NewellNormal<3,3,3>(n,max,&temp_verts.front().x,&temp_verts.front().y,&temp_verts.front().z);
+			NewellNormal<3,3,3>(n,max,&temp_verts3d.front().x,&temp_verts3d.front().y,&temp_verts3d.front().z);
 			if (nor_out) {
 				 for (tmp = 0; tmp < max; ++tmp)
 					 nor_out[idx[tmp]] = n;
@@ -281,6 +289,35 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 				done[tmp] = false;	
 			}
 
+			
+#ifdef AI_BUILD_TRIANGULATE_DEBUG_POLYS
+			// plot the plane onto which we mapped the polygon to a 2D ASCII pic
+			aiVector2D bmin,bmax;
+			ArrayBounds(&temp_verts[0],max,bmin,bmax);
+
+			char grid[POLY_GRID_Y][POLY_GRID_X+POLY_GRID_XPAD];
+			std::fill_n((char*)grid,POLY_GRID_Y*(POLY_GRID_X+POLY_GRID_XPAD),' ');
+
+			for (size_t i =0; i < max; ++i) {
+				const aiVector2D& v = (temp_verts[i] - bmin) / (bmax-bmin);
+				const size_t x = static_cast<size_t>(v.x*(POLY_GRID_X-1)), y = static_cast<size_t>(v.y*(POLY_GRID_Y-1));
+				char* loc = grid[y]+x;
+				if (grid[y][x] != ' ') {
+					for(;*loc != ' '; ++loc);
+					*loc++ = '_';
+				}
+				*(loc+sprintf(loc,"%i",i)) = ' ';
+			}
+			
+
+			for(size_t y = 0; y < POLY_GRID_Y; ++y) {
+				grid[y][POLY_GRID_X+POLY_GRID_XPAD-1] = '\0';
+				fprintf(fout,"%s\n",grid[y]);
+			}
+
+			fprintf(fout,"\ntriangulation sequence: ");
+#endif
+
 			//
 			// FIXME: currently this is the slow O(kn) variant with a worst case
 			// complexity of O(n^2) (I think). Can be done in O(n).
@@ -297,12 +334,12 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 							break;
 						}
 					}
-					const aiVector2D* pnt1 = (const aiVector2D*)&temp_verts[ear], 
-						*pnt0 = (const aiVector2D*)&temp_verts[prev], 
-						*pnt2 = (const aiVector2D*)&temp_verts[next];
+					const aiVector2D* pnt1 = &temp_verts[ear], 
+						*pnt0 = &temp_verts[prev], 
+						*pnt2 = &temp_verts[next];
 			
 					// Must be a convex point. Assuming ccw winding, it must be on the right of the line between p-1 and p+1.
-					if (OnLeftSideOfLine (*pnt0,*pnt2,*pnt1)) {
+					if (OnLeftSideOfLine2D(*pnt0,*pnt2,*pnt1)) {
 						continue;
 					}
 
@@ -310,7 +347,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 					for ( tmp = 0; tmp < max; ++tmp) {
 
 						// We need to compare the actual values because it's possible that multiple indexes in 
-						// the polygon are refering to the same position. concave_polygon.obj is a sample
+						// the polygon are referring to the same position. concave_polygon.obj is a sample
 						//
 						// FIXME: Use 'epsiloned' comparisons instead? Due to numeric inaccuracies in
 						// PointInTriangle() I'm guessing that it's actually possible to construct
@@ -324,12 +361,12 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 					if (tmp != max) {
 						continue;
 					}
-							
+	
 					// this vertex is an ear
 					break;
 				}
 				if (num_found == 2) {
-
+					
 					// Due to the 'two ear theorem', every simple polygon with more than three points must
 					// have 2 'ears'. Here's definitely someting wrong ... but we don't give up yet.
 					//
@@ -337,6 +374,13 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 					// Instead we're continuting with the standard trifanning algorithm which we'd
 					// use if we had only convex polygons. That's life.
 					DefaultLogger::get()->error("Failed to triangulate polygon (no ear found). Probably not a simple polygon?");
+					
+
+#ifdef AI_BUILD_TRIANGULATE_DEBUG_POLYS
+					fprintf(fout,"critical error here, no ear found! ");
+#endif
+					num = 0;
+					break;
 
 					curOut -= (max-num); /* undo all previous work */
 					for (tmp = 0; tmp < max-2; ++tmp) {
@@ -346,9 +390,10 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 						if (!nface.mIndices)
 							nface.mIndices = new unsigned int[3];
 
-						nface.mIndices[0] = idx[0];
-						nface.mIndices[1] = idx[tmp+1];
-						nface.mIndices[2] = idx[tmp+2];
+						nface.mIndices[0] = 0;
+						nface.mIndices[1] = tmp+1;
+						nface.mIndices[2] = tmp+2;
+
 					}
 					num = 0;
 					break;
@@ -362,9 +407,9 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 				}
 
 				// setup indices for the new triangle ...
-				nface.mIndices[0] = idx[prev];
-				nface.mIndices[1] = idx[ear];
-				nface.mIndices[2] = idx[next];
+				nface.mIndices[0] = prev;
+				nface.mIndices[1] = ear;
+				nface.mIndices[2] = next;
 
 				// exclude the ear from most further processing
 				done[ear] = true;
@@ -374,20 +419,66 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 				// We have three indices forming the last 'ear' remaining. Collect them.
 				aiFace& nface = *curOut++;
 				nface.mNumIndices = 3;
-				nface.mIndices = face.mIndices;
+				if (!nface.mIndices) {
+					nface.mIndices = new unsigned int[3];
+				}
 
 				for (tmp = 0; done[tmp]; ++tmp);
-				idx[0] = idx[tmp];
+				nface.mIndices[0] = tmp;
 
 				for (++tmp; done[tmp]; ++tmp);
-				idx[1] = idx[tmp];
+				nface.mIndices[1] = tmp;
 
 				for (++tmp; done[tmp]; ++tmp);
-				idx[2] = idx[tmp];
+				nface.mIndices[2] = tmp;
+
 			}
 		}
-		face.mIndices = NULL; /* prevent unintended deletion of our awesome results. would be a pity */
+
+#ifdef AI_BUILD_TRIANGULATE_DEBUG_POLYS
+		
+		for(aiFace* f = last_face; f != curOut; ++f) {
+			unsigned int* i = f->mIndices;
+			fprintf(fout," (%i %i %i)",i[0],i[1],i[2]);
+		}
+
+		fprintf(fout,"\n*********************************************************************\n");
+		fflush(fout);
+		
+#endif
+
+		for(aiFace* f = last_face; f != curOut; ) {
+			unsigned int* i = f->mIndices;
+
+			//  drop dumb 0-area triangles
+			if (fabs(GetArea2D(temp_verts[i[0]],temp_verts[i[1]],temp_verts[i[2]])) < 1e-5f) {
+				DefaultLogger::get()->debug("Dropping triangle with area 0");
+				--curOut;
+
+				delete[] f->mIndices;
+				f->mIndices = NULL;
+
+				for(aiFace* ff = f; ff != curOut; ++ff) {
+					ff->mNumIndices = (ff+1)->mNumIndices;
+					ff->mIndices = (ff+1)->mIndices;
+					(ff+1)->mIndices = NULL;
+				}
+				continue;
+			}
+
+			i[0] = idx[i[0]];
+			i[1] = idx[i[1]];
+			i[2] = idx[i[2]];
+			++f;
+		}
+
+		delete[] face.mIndices;
+		face.mIndices = NULL; 
 	}
+
+#ifdef AI_BUILD_TRIANGULATE_DEBUG_POLYS
+	fclose(fout);
+#endif
 
 	// kill the old faces
 	delete [] pMesh->mFaces;

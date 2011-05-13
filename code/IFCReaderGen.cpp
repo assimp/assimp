@@ -654,7 +654,7 @@ namespace {
 ,		SchemaEntry("ifcreldefinesbyproperties",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("ifccondition",&STEP::ObjectHelper<IfcCondition,0>::Construct )
 ,		SchemaEntry("ifcgridaxis",&STEP::ObjectHelper<NotImplemented,0>::Construct )
-,		SchemaEntry("ifcrelvoidselement",&STEP::ObjectHelper<NotImplemented,0>::Construct )
+,		SchemaEntry("ifcrelvoidselement",&STEP::ObjectHelper<IfcRelVoidsElement,2>::Construct )
 ,		SchemaEntry("ifcwindow",&STEP::ObjectHelper<IfcWindow,2>::Construct )
 ,		SchemaEntry("ifcrelflowcontrolelements",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("ifcrelconnectsporttoelement",&STEP::ObjectHelper<NotImplemented,0>::Construct )
@@ -1329,7 +1329,16 @@ template <> size_t GenericFill<IfcHalfSpaceSolid>(const DB& db, const LIST& para
 template <> size_t GenericFill<IfcPolygonalBoundedHalfSpace>(const DB& db, const LIST& params, IfcPolygonalBoundedHalfSpace* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcHalfSpaceSolid*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
+	if (params.GetSize() < 4) { throw STEP::TypeError("expected 4 arguments to IfcPolygonalBoundedHalfSpace"); }    do { // convert the 'Position' argument
+        const DataType* arg = params[base++];
+        try { GenericConvert( in->Position, *arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcPolygonalBoundedHalfSpace to be a `IfcAxis2Placement3D`")); }
+    } while(0);
+    do { // convert the 'PolygonalBoundary' argument
+        const DataType* arg = params[base++];
+        try { GenericConvert( in->PolygonalBoundary, *arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 3 to IfcPolygonalBoundedHalfSpace to be a `IfcBoundedCurve`")); }
+    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -1427,22 +1436,19 @@ template <> size_t GenericFill<IfcBooleanResult>(const DB& db, const LIST& param
 template <> size_t GenericFill<IfcFeatureElement>(const DB& db, const LIST& params, IfcFeatureElement* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcElement*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
-	return base;
+	if (params.GetSize() < 8) { throw STEP::TypeError("expected 8 arguments to IfcFeatureElement"); }	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcFeatureElementSubtraction>(const DB& db, const LIST& params, IfcFeatureElementSubtraction* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcFeatureElement*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
-	return base;
+	if (params.GetSize() < 8) { throw STEP::TypeError("expected 8 arguments to IfcFeatureElementSubtraction"); }	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcOpeningElement>(const DB& db, const LIST& params, IfcOpeningElement* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcFeatureElementSubtraction*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
-	return base;
+	if (params.GetSize() < 8) { throw STEP::TypeError("expected 8 arguments to IfcOpeningElement"); }	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcConditionCriterion>(const DB& db, const LIST& params, IfcConditionCriterion* in)
@@ -2635,6 +2641,22 @@ template <> size_t GenericFill<IfcCondition>(const DB& db, const LIST& params, I
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
+template <> size_t GenericFill<IfcRelVoidsElement>(const DB& db, const LIST& params, IfcRelVoidsElement* in)
+{
+	size_t base = GenericFill(db,params,static_cast<IfcRelConnects*>(in));
+	if (params.GetSize() < 6) { throw STEP::TypeError("expected 6 arguments to IfcRelVoidsElement"); }    do { // convert the 'RelatingBuildingElement' argument
+        const DataType* arg = params[base++];
+        try { GenericConvert( in->RelatingBuildingElement, *arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 4 to IfcRelVoidsElement to be a `IfcElement`")); }
+    } while(0);
+    do { // convert the 'RelatedOpeningElement' argument
+        const DataType* arg = params[base++];
+        try { GenericConvert( in->RelatedOpeningElement, *arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 5 to IfcRelVoidsElement to be a `IfcFeatureElementSubtraction`")); }
+    } while(0);
+	return base;
+}
+// -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcWindow>(const DB& db, const LIST& params, IfcWindow* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcBuildingElement*>(in));
@@ -2814,7 +2836,18 @@ template <> size_t GenericFill<IfcCartesianTransformationOperator3D>(const DB& d
 template <> size_t GenericFill<IfcCartesianTransformationOperator3DnonUniform>(const DB& db, const LIST& params, IfcCartesianTransformationOperator3DnonUniform* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcCartesianTransformationOperator3D*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
+	if (params.GetSize() < 7) { throw STEP::TypeError("expected 7 arguments to IfcCartesianTransformationOperator3DnonUniform"); }    do { // convert the 'Scale2' argument
+        const DataType* arg = params[base++];
+        if (dynamic_cast<const UNSET*>(&*arg)) break;
+        try { GenericConvert( in->Scale2, *arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 5 to IfcCartesianTransformationOperator3DnonUniform to be a `REAL`")); }
+    } while(0);
+    do { // convert the 'Scale3' argument
+        const DataType* arg = params[base++];
+        if (dynamic_cast<const UNSET*>(&*arg)) break;
+        try { GenericConvert( in->Scale3, *arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 6 to IfcCartesianTransformationOperator3DnonUniform to be a `REAL`")); }
+    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------

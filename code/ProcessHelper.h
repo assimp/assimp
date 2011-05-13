@@ -64,6 +64,16 @@ namespace std {
 		return ::aiVector3D (max(a.x,b.x),max(a.y,b.y),max(a.z,b.z));
 	}
 
+	// std::min for aiVector2D
+	inline ::aiVector2D min (const ::aiVector2D& a, const ::aiVector2D& b)	{
+		return ::aiVector2D (min(a.x,b.x),min(a.y,b.y));
+	}
+
+	// std::max for aiVector2D
+	inline ::aiVector2D max (const ::aiVector2D& a, const ::aiVector2D& b)	{
+		return ::aiVector2D (max(a.x,b.x),max(a.y,b.y));
+	}
+
 	// std::min for aiColor4D
 	inline ::aiColor4D min (const ::aiColor4D& a, const ::aiColor4D& b)	{
 		return ::aiColor4D (min(a.r,b.r),min(a.g,b.g),min(a.b,b.b),min(a.a,b.a));
@@ -126,13 +136,13 @@ struct MinMaxChooser;
 
 template <> struct MinMaxChooser<float> {
 	void operator ()(float& min,float& max) {
-		max = -10e10f;
-		min =  10e10f;
+		max = -1e10f;
+		min =  1e10f;
 }};
 template <> struct MinMaxChooser<double> {
 	void operator ()(double& min,double& max) {
-		max = -10e10;
-		min =  10e10;
+		max = -1e10;
+		min =  1e10;
 }};
 template <> struct MinMaxChooser<unsigned int> {
 	void operator ()(unsigned int& min,unsigned int& max) {
@@ -142,19 +152,24 @@ template <> struct MinMaxChooser<unsigned int> {
 
 template <> struct MinMaxChooser<aiVector3D> {
 	void operator ()(aiVector3D& min,aiVector3D& max) {
-		max = aiVector3D(-10e10f,-10e10f,-10e10f);
-		min = aiVector3D( 10e10f, 10e10f, 10e10f);
+		max = aiVector3D(-1e10f,-1e10f,-1e10f);
+		min = aiVector3D( 1e10f, 1e10f, 1e10f);
 }};
+template <> struct MinMaxChooser<aiVector2D> {
+	void operator ()(aiVector2D& min,aiVector2D& max) {
+		max = aiVector2D(-1e10f,-1e10f);
+		min = aiVector2D( 1e10f, 1e10f);
+	}};
 template <> struct MinMaxChooser<aiColor4D> {
 	void operator ()(aiColor4D& min,aiColor4D& max) {
-		max = aiColor4D(-10e10f,-10e10f,-10e10f,-10e10f);
-		min = aiColor4D( 10e10f, 10e10f, 10e10f, 10e10f);
+		max = aiColor4D(-1e10f,-1e10f,-1e10f,-1e10f);
+		min = aiColor4D( 1e10f, 1e10f, 1e10f, 1e10f);
 }};
 
 template <> struct MinMaxChooser<aiQuaternion> {
 	void operator ()(aiQuaternion& min,aiQuaternion& max) {
-		max = aiQuaternion(-10e10f,-10e10f,-10e10f,-10e10f);
-		min = aiQuaternion( 10e10f, 10e10f, 10e10f, 10e10f);
+		max = aiQuaternion(-1e10f,-1e10f,-1e10f,-1e10f);
+		min = aiQuaternion( 1e10f, 1e10f, 1e10f, 1e10f);
 }};
 
 template <> struct MinMaxChooser<aiVectorKey> {
@@ -190,59 +205,6 @@ inline void ArrayBounds(const T* in, unsigned int size, T& min, T& max)
 		max = std::max(in[i],max);
 	}
 }
-
-
-// -------------------------------------------------------------------------------
-/** @brief Compute the newell normal of a polygon regardless of its shape
- *
- *  @param out Receives the output normal
- *  @param num Number of input vertices
- *  @param x X data source. x[ofs_x*n] is the n'th element. 
- *  @param y Y data source. y[ofs_y*n] is the y'th element 
- *  @param z Z data source. z[ofs_z*n] is the z'th element 
- *
- *  @note The data arrays must have storage for at least num+2 elements. Using
- *  this method is much faster than the 'other' NewellNormal()
- */
-template <int ofs_x, int ofs_y, int ofs_z>
-inline void NewellNormal (aiVector3D& out, int num, float* x, float* y, float* z)
-{
-	// Duplicate the first two vertices at the end
-	x[(num+0)*ofs_x] = x[0]; 
-	x[(num+1)*ofs_x] = x[ofs_x]; 
-
-	y[(num+0)*ofs_y] = y[0]; 
-	y[(num+1)*ofs_y] = y[ofs_y]; 
-
-	z[(num+0)*ofs_z] = z[0]; 
-	z[(num+1)*ofs_z] = z[ofs_z]; 
-
-	float sum_xy = 0.0, sum_yz = 0.0, sum_zx = 0.0;
-
-	float *xptr = x +ofs_x, *xlow = x, *xhigh = x + ofs_x*2;
-	float *yptr = y +ofs_y, *ylow = y, *yhigh = y + ofs_y*2;
-	float *zptr = z +ofs_z, *zlow = z, *zhigh = z + ofs_z*2;
-
-	for (int tmp=0; tmp < num; tmp++) {
-		sum_xy += (*xptr) * ( (*yhigh) - (*ylow) );
-		sum_yz += (*yptr) * ( (*zhigh) - (*zlow) );
-		sum_zx += (*zptr) * ( (*xhigh) - (*xlow) );
-
-		xptr  += ofs_x;
-		xlow  += ofs_x;
-		xhigh += ofs_x;
-
-		yptr  += ofs_y;
-		ylow  += ofs_y;
-		yhigh += ofs_y;
-
-		zptr  += ofs_z;
-		zlow  += ofs_z;
-		zhigh += ofs_z;
-	}
-	out = aiVector3D(sum_yz,sum_zx,sum_xy);
-}
-
 
 
 // -------------------------------------------------------------------------------

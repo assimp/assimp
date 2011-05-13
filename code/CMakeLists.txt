@@ -375,7 +375,8 @@ SOURCE_GROUP( PostProcessing FILES
 	DeboneProcess.cpp
 	DeboneProcess.h
 	ProcessHelper.h
-	ProcessHelper.cp
+	ProcessHelper.cpp
+	PolyTools.h
 )
 
 SOURCE_GROUP( Q3D FILES
@@ -607,6 +608,7 @@ ADD_LIBRARY( assimp SHARED
 	PretransformVertices.h
 	ProcessHelper.h
 	ProcessHelper.cpp
+	PolyTools.h
 	Q3DLoader.cpp
 	Q3DLoader.h
 	Q3BSPFileData.h

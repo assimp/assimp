@@ -734,12 +734,6 @@ bool Q3BSPFileImporter::importLightmap( const Q3BSP::Q3BSPModel *pModel, aiScene
 	return true;
 }
 
-// ------------------------------------------------------------------------------------------------
-//	Imports the entities.
-bool Q3BSPFileImporter::importEntities( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene )
-{
-	return true;
-}
 
 // ------------------------------------------------------------------------------------------------
 //	Will search for a supported extension.

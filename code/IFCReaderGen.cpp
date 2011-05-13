@@ -3695,7 +3695,7 @@ template <> size_t GenericFill<IfcRelContainedInSpatialStructure>(const DB& db, 
 	if (params.GetSize() < 6) { throw STEP::TypeError("expected 6 arguments to IfcRelContainedInSpatialStructure"); }    do { // convert the 'RelatedElements' argument
         const DataType* arg = params[base++];
         try { GenericConvert( in->RelatedElements, *arg, db ); break; } 
-        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 4 to IfcRelContainedInSpatialStructure to be a `SET [1:?] OF IfcProduct`")); }
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 4 to IfcRelContainedInSpatialStructure to be a `SET [0:?] OF IfcProduct`")); }
     } while(0);
     do { // convert the 'RelatingStructure' argument
         const DataType* arg = params[base++];

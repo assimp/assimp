@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file  IFC.cpp
- *  @brief Implementation of the Industry Foundation Classes loader 
+ *  @brief Implementation of the Industry Foundation Classes loader.
  */
 #include "AssimpPCH.h"
 
@@ -220,6 +220,12 @@ struct TempMesh
 		return std::accumulate(verts.begin(),verts.end(),aiVector3D(0.f,0.f,0.f)) / static_cast<float>(verts.size());
 	}
 
+	// ------------------------------------------------------------------------------
+	void Append(const TempMesh& other) {
+
+		verts.insert(verts.end(),other.verts.begin(),other.verts.end());
+		vertcnt.insert(vertcnt.end(),other.vertcnt.begin(),other.vertcnt.end());
+	}
 
 };
 
@@ -292,6 +298,7 @@ void IFCImporter::SetupProperties(const Importer* pImp)
 {
 	settings.skipSpaceRepresentations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_SKIP_SPACE_REPRESENTATIONS,true);
 	settings.skipCurveRepresentations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_SKIP_CURVE_REPRESENTATIONS,true);
+	settings.useCustomTriangulation = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_CUSTOM_TRIANGULATION,true);
 }
 
 
@@ -725,7 +732,8 @@ bool ProcessPolyloop(const IFC::IfcPolyLoop& loop, TempMesh& meshout, Conversion
 }
 
 // ------------------------------------------------------------------------------------------------
-void MergePolygonBoundaries(TempMesh& result, const TempMesh& meshout, size_t master_bounds = -1) 
+// Note: meshout may be modified even though the merged polygon is copied to `result`!
+void MergePolygonBoundaries(TempMesh& result, TempMesh& meshout, size_t master_bounds = -1) 
 {
 	// standard case - only one boundary, just copy it to the result vector
 	result.vertcnt.reserve(meshout.vertcnt.size()+result.vertcnt.size());
@@ -746,9 +754,10 @@ void MergePolygonBoundaries(TempMesh& result, const TempMesh& meshout, size_t ma
 	result.verts.reserve(meshout.verts.size()+meshout.vertcnt.size()*2+result.verts.size());
 	size_t outer_polygon_start = 0;
 
+
 	// compute proper normals for all polygons
 	size_t max_vcount = 0;
-	std::vector<unsigned int>::const_iterator outer_polygon = meshout.vertcnt.end(), begin=meshout.vertcnt.begin(),  iit;
+	std::vector<unsigned int>::iterator outer_polygon = meshout.vertcnt.end(), begin=meshout.vertcnt.begin(), end=outer_polygon,  iit;
 	for(iit = begin; iit != meshout.vertcnt.end(); ++iit) {
 		ai_assert(*iit);
 		max_vcount = std::max(max_vcount,static_cast<size_t>(*iit));
@@ -802,24 +811,77 @@ void MergePolygonBoundaries(TempMesh& result, const TempMesh& meshout, size_t ma
 	}
 
 	ai_assert(outer_polygon != meshout.vertcnt.end());	
+	std::vector<aiVector3D>& in = meshout.verts;
 
-	typedef boost::tuple<std::vector<unsigned int>::const_iterator, unsigned int, unsigned int> InsertionPoint;
+	// see if one or more of the hole has a face that lies directly on an outer bound.
+	// this happens for doors, for example.
+	vidx = 0;
+	for(iit = begin; ; vidx += *iit++) {
+next_loop:
+		if (iit == meshout.vertcnt.end()) {
+			break;
+		}
+		if (iit == outer_polygon) {
+			continue;
+		}
+
+		for(size_t vofs = 0; vofs < *iit; ++vofs) {
+			if (!*iit) {
+				continue;
+			}
+			const size_t next = (vofs+1)%*iit;
+			const aiVector3D& v = in[vidx+vofs], vnext = in[vidx+next],vd = (vnext-v).Normalize();
+
+			for(size_t outer = 0; outer < *outer_polygon; ++outer) {
+				const aiVector3D& o = in[outer_polygon_start+outer], onext = in[outer_polygon_start+(outer+1)%*outer_polygon],od = (onext-o).Normalize();
+
+				if (fabs(vd * od) > 1.f-1e-6f && (onext-v).Normalize() * vd > 1.f-1e-6f && (onext-v)*(o-v) < 0) {
+					IFCImporter::LogDebug("got an inner hole that lies partly on the outer polygonal boundary, merging them to a single contour");
+
+					// in between outer and outer+1 insert all vertices of this loop, then drop the original altogether.
+					std::vector<aiVector3D> tmp(*iit);
+
+					const size_t start = (v-o).SquareLength() > (vnext-o).SquareLength() ? vofs :  next;
+					std::vector<aiVector3D>::iterator inbase = in.begin()+vidx, it = std::copy(inbase+start, inbase+*iit,tmp.begin());
+					std::copy(inbase, inbase+start,it);
+
+					//if(start == next) {
+						std::reverse(tmp.begin(),tmp.end());
+					//}
+
+					in.insert(in.begin()+outer_polygon_start+(outer+1)%*outer_polygon,tmp.begin(),tmp.end());
+					vidx += outer_polygon_start<vidx ? *iit : 0;
+
+					inbase = in.begin()+vidx;
+					in.erase(inbase,inbase+*iit);
+
+					outer_polygon_start -= outer_polygon_start>vidx ? *iit : 0;
+					
+					*outer_polygon += tmp.size();
+					*iit++ = 0;
+					goto next_loop;
+				}
+			}
+		}
+	}
+
+	typedef boost::tuple<std::vector<unsigned int>::iterator, unsigned int, unsigned int> InsertionPoint;
 	std::vector< std::vector<InsertionPoint> > insertions(*outer_polygon, std::vector<InsertionPoint>());
 
 	// iterate through all other polyloops and find points in the outer polyloop that are close
 	vidx = 0;
-	for(iit = begin; iit != meshout.vertcnt.end(); vidx += *iit++) {
-		if (iit == outer_polygon) {
+	for(iit = begin; iit != end; vidx += *iit++) {
+		if (iit == outer_polygon || !*iit) {
 			continue;
 		}
 
 		size_t best_ofs,best_outer = *outer_polygon;
 		float best_dist = 1e10;
 		for(size_t vofs = 0; vofs < *iit; ++vofs) {
-			const aiVector3D& v = meshout.verts[vidx+vofs];
+			const aiVector3D& v = in[vidx+vofs];
 
 			for(size_t outer = 0; outer < *outer_polygon; ++outer) {
-				const aiVector3D& o = meshout.verts[outer_polygon_start+outer];
+				const aiVector3D& o = in[outer_polygon_start+outer];
 				const float d = (o-v).SquareLength();
 
 				if (d < best_dist) {
@@ -844,18 +906,18 @@ void MergePolygonBoundaries(TempMesh& result, const TempMesh& meshout, size_t ma
 
 		const std::vector<InsertionPoint>& insvec = insertions[outer];
 		BOOST_FOREACH(const InsertionPoint& ins,insvec) {
-			if (!(*ins.get<0>())) {
+			if (!*ins.get<0>()) {
 				continue;
 			}
 
 			for(size_t i = ins.get<2>(); i < *ins.get<0>(); ++i) {
-				result.verts.push_back(meshout.verts[ins.get<1>() + i]);
+				result.verts.push_back(in[ins.get<1>() + i]);
 			}
 
 			// we need the first vertex of the inner polygon twice as we return to the
 			// outer loop through the very same connection through which we got there.
 			for(size_t i = 0; i <= ins.get<2>(); ++i) {
-				result.verts.push_back(meshout.verts[ins.get<1>() + i]);
+				result.verts.push_back(in[ins.get<1>() + i]);
 			}
 
 			// reverse face winding if the normal of the sub-polygon points in the
@@ -1119,23 +1181,25 @@ void ProcessRevolvedAreaSolid(const IFC::IfcRevolvedAreaSolid& solid, TempMesh& 
 	IFCImporter::LogDebug("generate mesh procedurally by radial extrusion (IfcRevolvedAreaSolid)");
 }
 
+
 // ------------------------------------------------------------------------------------------------
-bool TryAddOpening(const std::vector<TempOpening>& openings,const std::vector<aiVector3D>& nors, TempMesh& curmesh)
+bool TryAddOpenings(const std::vector<TempOpening>& openings,const std::vector<aiVector3D>& nors, TempMesh& curmesh)
 {
 	std::vector<aiVector3D>& out = curmesh.verts;
 
 	const size_t s = out.size();
 
-	const aiVector3D any_point = out[s-3];
-	const aiVector3D nor = ((out[s-2]-any_point)^(out[s-1]-any_point)).Normalize();
+	const aiVector3D any_point = out[s-4];
+	const aiVector3D nor = ((out[s-3]-any_point)^(out[s-2]-any_point)).Normalize();
 	
 	bool got_openings = false;
+	TempMesh res;
 
 	size_t c = 0;
 	BOOST_FOREACH(const TempOpening& t,openings) {
 		const aiVector3D& outernor = nors[c++];
 		const float dot = nor * outernor;
-		if (fabs(dot)<0.98) {
+		if (fabs(dot)<1.f-1e-6f) {
 			continue;
 		}
 
@@ -1149,20 +1213,17 @@ bool TryAddOpening(const std::vector<TempOpening>& openings,const std::vector<ai
 		IFCImporter::LogDebug("apply an IfcOpeningElement linked via IfcRelVoidsElement to this polygon");
 
 		got_openings = true;
-		if ( fabs((any_point-va[0]).Normalize()*nor) > 1e-3f)  {
-			for(size_t i = 0; i < va.size(); ++i) {
-				out.push_back(va[i]+diff);
-			}
+
+		// project va[i] onto the plane formed by the current polygon [given by (any_point,nor)]
+		for(size_t i = 0; i < va.size(); ++i) {
+			const aiVector3D& v = va[i];
+			out.push_back(v-(nor*(v-any_point))*nor);
 		}
-		else {
-			for(size_t i = 0; i < va.size(); ++i) {
-				out.push_back(va[i]);
-			}
-		}
+		
 
 		curmesh.vertcnt.push_back(va.size());
 
-		TempMesh res;
+		res.Clear();
 		MergePolygonBoundaries(res,curmesh,0);
 		curmesh = res;
 	}
@@ -1180,6 +1241,368 @@ struct DistanceSorter {
 
 	aiVector3D base;
 };
+
+// ------------------------------------------------------------------------------------------------
+struct XYSorter {
+
+	// sort first by X coordinates, then by Y coordinates
+	bool operator () (const aiVector2D&a, const aiVector2D& b) const {
+		if (a.x == b.x) {
+			return a.y < b.y;
+		}
+		return a.x < b.x;
+	}
+};
+
+// ------------------------------------------------------------------------------------------------
+struct ProjectionInfo {
+	unsigned int ac, bc;
+	aiVector3D p,u,v;
+};
+
+typedef std::pair< aiVector2D, aiVector2D > BoundingBox;
+typedef std::map<aiVector2D,size_t,XYSorter> XYSortedField;
+
+// ------------------------------------------------------------------------------------------------
+aiVector2D ProjectPositionVectorOntoPlane(const aiVector3D& x, const ProjectionInfo& proj) 
+{
+	const aiVector3D xx = x-proj.p;
+	return aiVector2D(xx[proj.ac]/proj.u[proj.ac],xx[proj.bc]/proj.v[proj.bc]);
+}
+
+// ------------------------------------------------------------------------------------------------
+void TriangulatePart(const aiVector2D& pmin, const aiVector2D& pmax, XYSortedField& field, const std::vector< BoundingBox >& bbs, 
+	std::vector<aiVector2D>& out)
+{
+	if (!(pmin.x-pmax.x) || !(pmin.y-pmax.y)) {
+		return;
+	}
+
+	float xs = 1e10, xe = 1e10;	
+	bool found = false;
+
+	// Search along the x-axis until we find an opening
+	XYSortedField::iterator start = field.begin();
+	for(; start != field.end(); ++start) {
+		const BoundingBox& bb = bbs[(*start).second];
+		if (bb.second.x > pmin.x && bb.first.x < pmax.x && bb.second.y > pmin.y && bb.first.y < pmax.y) {
+			xs = bb.first.x;
+			xe = bb.second.x;
+			found = true;
+			break;
+		}
+	}
+	xs = std::max(pmin.x,xs);
+	xe = std::min(pmax.x,xe);
+
+	if (!found) {
+		// the rectangle [pmin,pend] is opaque, fill it
+		out.push_back(pmin);
+		out.push_back(aiVector2D(pmin.x,pmax.y));
+		out.push_back(pmax);
+		out.push_back(aiVector2D(pmax.x,pmin.y));
+		return;
+	}
+
+	if (xs - pmin.x) {
+		out.push_back(pmin);
+		out.push_back(aiVector2D(pmin.x,pmax.y));
+		out.push_back(aiVector2D(xs,pmax.y));
+		out.push_back(aiVector2D(xs,pmin.y));
+	}
+
+	// search along the y-axis for all openings that overlap xs and our element
+	float ylast = pmin.y;
+	found = false;
+	for(; start != field.end(); ++start) {
+		const BoundingBox& bb = bbs[(*start).second];
+
+		if (bb.second.y > ylast && bb.first.y < pmax.y) {
+
+			found = true;
+			const float ys = std::max(bb.first.y,pmin.y), ye = std::min(bb.second.y,pmax.y);
+			if (ys - ylast) {
+				// Divide et impera!
+				TriangulatePart( aiVector2D(xs,ylast), aiVector2D(xe,ys) ,field,bbs,out);
+			}
+
+			// the following are the window vertices
+
+			/*wnd.push_back(aiVector2D(xs,ys));
+			wnd.push_back(aiVector2D(xs,ye));
+			wnd.push_back(aiVector2D(xe,ye));
+			wnd.push_back(aiVector2D(xe,ys));*/
+			ylast = ye;
+		}
+
+		if (bb.first.x > xs) {
+			break;
+		}
+	}
+	if (!found) {
+		// the rectangle [pmin,pend] is opaque, fill it
+		out.push_back(aiVector2D(xs,pmin.y));
+		out.push_back(aiVector2D(xs,pmax.y));
+		out.push_back(aiVector2D(xe,pmax.y));
+		out.push_back(aiVector2D(xe,pmin.y));
+		return;
+	}
+	if (ylast < pmax.y) {
+		// Divide et impera!
+		TriangulatePart( aiVector2D(xs,ylast), aiVector2D(xe,pmax.y) ,field,bbs,out);
+	}
+
+	// Divide et impera! - now for the whole rest
+	if (pmax.x-xe) {
+		TriangulatePart(aiVector2D(xe,pmin.y), pmax ,field,bbs,out);
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+enum Intersect {
+	Intersect_No,
+	Intersect_LiesOnPlane,
+	Intersect_Yes
+};
+
+// ------------------------------------------------------------------------------------------------
+Intersect IntersectSegmentPlane(const aiVector3D& p,const aiVector3D& n, const aiVector3D& e0, const aiVector3D& e1, aiVector3D& out) 
+{
+	const aiVector3D pdelta = e0 - p, seg = e1-e0;
+	const float dotOne = n*seg, dotTwo = -(n*pdelta);
+
+	if (fabs(dotOne) < 1e-6) {
+		return fabs(dotTwo) < 1e-6f ? Intersect_LiesOnPlane : Intersect_No;
+	}
+
+	const float t = dotTwo/dotOne;
+	// t must be in [0..1] if the intersection point is within the given segment
+	if (t > 1.f || t < 0.f) {
+		return Intersect_No;
+	}
+	out = e0+t*seg;
+	return Intersect_Yes;
+}
+
+
+
+// ------------------------------------------------------------------------------------------------
+aiVector3D Unproject(const aiVector2D& vproj, const  ProjectionInfo& proj)
+{
+	return vproj.x*proj.u + vproj.y*proj.v + proj.p;
+}
+
+// ------------------------------------------------------------------------------------------------
+void InsertWindowContours(const std::vector< BoundingBox >& bbs,const std::vector< std::vector<aiVector2D> >& contours,const ProjectionInfo& proj, TempMesh& curmesh)
+{
+	ai_assert(contours.size() == bbs.size());
+
+	// fix windows - we need to insert the real, polygonal shapes into the quadratic holes that we have now
+	for(size_t i = 0; i < contours.size();++i) {
+		const BoundingBox& bb = bbs[i];
+		const std::vector<aiVector2D>& contour = contours[i];
+
+		// check if we need to do it at all - many windows just fit perfectly into their quadratic holes,
+		// i.e. their contours *are* already their bounding boxes.
+		if (contour.size() == 4) {
+			std::set<aiVector2D,XYSorter> verts;
+			for(size_t n = 0; n < 4; ++n) {
+				verts.insert(contour[n]);
+			}
+			const std::set<aiVector2D,XYSorter>::const_iterator end = verts.end();
+			if (verts.find(bb.first)!=end && verts.find(bb.second)!=end
+				&& verts.find(aiVector2D(bb.first.x,bb.second.y))!=end 
+				&& verts.find(aiVector2D(bb.second.x,bb.first.y))!=end 
+			) {
+				continue;
+			}
+		}
+
+		const float epsilon = (bb.first-bb.second).Length()/1000.f;
+
+		// walk through all contour points and find those that lie on the BB corner
+		size_t last_hit = -1, very_first_hit = -1;
+		aiVector2D edge;
+		for(size_t n = 0, e=0, size = contour.size();; n=(n+1)%size, ++e) {
+
+			// sanity checking
+			if (e == size*2) {
+				IFCImporter::LogError("encountered unexpected topology while generating window contour");
+				break;
+			}
+
+			const aiVector2D& v = contour[n];
+
+			bool hit = false;
+			if (fabs(v.x-bb.first.x)<epsilon) {
+				edge.x = bb.first.x;
+				hit = true;
+			}
+			else if (fabs(v.x-bb.second.x)<epsilon) {
+				edge.x = bb.second.x;
+				hit = true;
+			}
+
+			if (fabs(v.y-bb.first.y)<epsilon) {
+				edge.y = bb.first.y;
+				hit = true;
+			}
+			else if (fabs(v.y-bb.second.y)<epsilon) {
+				edge.y = bb.second.y;
+				hit = true;
+			}
+
+			if (hit) {
+				if (last_hit != -1) {
+					const size_t old = curmesh.verts.size();
+					size_t cnt = last_hit > n ? size-(last_hit-n) : n-last_hit;
+					for(size_t a = last_hit, e = 0; e <= cnt; a=(a+1)%size, ++e) {
+						curmesh.verts.push_back(Unproject(contour[a],proj));
+					}
+					
+					if (edge != contour[last_hit] && edge != contour[n]) {
+						curmesh.verts.push_back(Unproject(edge,proj));
+					}
+					else if (cnt == 1) {
+						// avoid degenerate polygons (also known as lines or points)
+						curmesh.verts.erase(curmesh.verts.begin()+old,curmesh.verts.end());
+					}
+
+					if (const size_t d = curmesh.verts.size()-old) {
+						curmesh.vertcnt.push_back(d);
+						std::reverse(curmesh.verts.rbegin(),curmesh.verts.rbegin()+d);
+					}
+					if (n == very_first_hit) {
+						break;
+					}
+				}
+				else {
+					very_first_hit = n;
+				}
+				
+				last_hit = n;
+			}
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+bool TryAddOpenings_Triangulate(const std::vector<TempOpening>& openings,const std::vector<aiVector3D>& nors, TempMesh& curmesh)
+{
+	std::vector<aiVector3D>& out = curmesh.verts;
+
+	// Try to derive a solid base plane within the current surface for use as 
+	// working coordinate system. 
+	aiVector3D vmin,vmax;
+	ArrayBounds(&out[0],out.size(),vmin,vmax);
+
+	const size_t s = out.size();
+
+	const aiVector3D any_point = out[s-4];
+	const aiVector3D nor = ((out[s-3]-any_point)^(out[s-2]-any_point)).Normalize();
+
+	const aiVector3D diag = vmax-vmin, diagn = aiVector3D(diag).Normalize();
+	const float ax = fabs(nor.x);    
+	const float ay = fabs(nor.y);   
+	const float az = fabs(nor.z);    
+
+	unsigned int ac = 0, bc = 1; /* no z coord. -> projection to xy */
+	if (ax > ay) {
+		if (ax > az) { /* no x coord. -> projection to yz */
+			ac = 1; bc = 2;
+		}
+	}
+	else if (ay > az) { /* no y coord. -> projection to zy */
+		ac = 2; bc = 0;
+	}
+
+	ProjectionInfo proj;
+	proj.u = proj.v = diag;
+	proj.u[bc]=0;
+	proj.v[ac]=0;
+	proj.ac = ac;
+	proj.bc = bc;
+	proj.p = vmin;
+
+	// project all points into the coordinate system defined by the p+sv*tu plane
+	// and compute bounding boxes for them
+	std::vector< BoundingBox > bbs;
+	XYSortedField field;
+
+	std::vector<aiVector2D> contour_flat;
+	contour_flat.reserve(out.size());
+	BOOST_FOREACH(const aiVector3D& x, out) {
+		contour_flat.push_back(ProjectPositionVectorOntoPlane(x,proj));
+	}
+
+	std::vector< std::vector<aiVector2D> > contours;
+
+	size_t c = 0;
+	BOOST_FOREACH(const TempOpening& t,openings) {
+		const aiVector3D& outernor = nors[c++];
+		const float dot = nor * outernor;
+		if (fabs(dot)<1.f-1e-6f) {
+			continue;
+		}
+
+		const aiVector3D diff = t.extrusionDir; 
+		const std::vector<aiVector3D>& va = t.profileMesh->verts;
+		if(va.size() <= 2) {
+			continue;	
+		}
+
+		aiVector2D vpmin,vpmax;
+		MinMaxChooser<aiVector2D>()(vpmin,vpmax);
+
+		contours.push_back(std::vector<aiVector2D>());
+		std::vector<aiVector2D>& contour = contours.back();
+
+		BOOST_FOREACH(const aiVector3D& x, t.profileMesh->verts) {
+			const aiVector2D& vproj = ProjectPositionVectorOntoPlane(x,proj);
+
+			vpmin = std::min(vpmin,vproj);
+			vpmax = std::max(vpmax,vproj);
+
+			contour.push_back(vproj);
+		}
+
+		
+		if (field.find(vpmin) != field.end()) {
+			IFCImporter::LogWarn("constraint failure during generation of wall openings, results may be faulty");
+		}
+		field[vpmin] = bbs.size();
+		bbs.push_back(BoundingBox(vpmin,vpmax));
+	}
+
+	if (bbs.empty()) {
+		return false;
+	}
+
+
+	std::vector<aiVector2D> outflat;
+	outflat.reserve(openings.size()*4);
+	TriangulatePart(aiVector2D(0.f,0.f),aiVector2D(1.f,1.f),field,bbs,outflat);
+	ai_assert(!(outflat.size() % 4));
+
+	//FixOuterBoundaries(outflat,contour_flat);
+
+	// undo the projection, generate output quads
+	std::vector<aiVector3D> vold;
+	vold.reserve(outflat.size());
+	std::swap(vold,curmesh.verts);
+
+	std::vector<unsigned int> iold;
+	iold.resize(outflat.size()/4,4);
+	std::swap(iold,curmesh.vertcnt);
+
+	BOOST_FOREACH(const aiVector2D& vproj, outflat) {
+		out.push_back(Unproject(vproj,proj));
+	}
+
+	InsertWindowContours(bbs,contours,proj,curmesh);
+	return true;
+}
+
 
 // ------------------------------------------------------------------------------------------------
 void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& result, ConversionData& conv)
@@ -1225,10 +1648,9 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 	aiVector3D min = in[0];
 	dir *= aiMatrix3x3(trafo);
 
-	float cy = 0.f;
-
-	// recompute the normal vectors for all openings
 	std::vector<aiVector3D> nors;
+	
+	// compute the normal vectors for all opening polygons
 	if (conv.apply_openings) {
 		// it is essential to apply the openings in the correct spatial order. The direction
 		// doesn't matter, but we would screw up if we started with e.g. a door in between
@@ -1236,29 +1658,24 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 		std::sort(conv.apply_openings->begin(),conv.apply_openings->end(),DistanceSorter(min));
 		nors.reserve(conv.apply_openings->size());
 
-		//std::reverse(conv.apply_openings->begin(),conv.apply_openings->end());
 		BOOST_FOREACH(TempOpening& t,*conv.apply_openings) {
 			TempMesh& bounds = *t.profileMesh.get();
-			//bounds.Transform(trafo);
 		
 			if (bounds.verts.size() <= 2) {
 				nors.push_back(aiVector3D());
 				continue;
 			}
 			nors.push_back(((bounds.verts[2]-bounds.verts[0])^(bounds.verts[1]-bounds.verts[0]) ).Normalize());
-			cy += nors.back().y;
 		}
-
 	}
-
-	bool rev = cy<0.f;
-
-	// XXX disable all openings for now
-	conv.apply_openings = NULL;
 
 	TempMesh temp;
 	TempMesh& curmesh = conv.apply_openings ? temp : result;
 	std::vector<aiVector3D>& out = curmesh.verts;
+
+	bool (* const gen_openings)(const std::vector<TempOpening>&,const std::vector<aiVector3D>&, TempMesh&) = conv.settings.useCustomTriangulation 
+		? &TryAddOpenings_Triangulate 
+		: &TryAddOpenings;
  
 	size_t sides_with_openings = 0;
 	for(size_t i = 0; i < size; ++i) {
@@ -1272,20 +1689,18 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 		out.push_back(in[next]);
 
 		if(conv.apply_openings) {
-			if(TryAddOpening(*conv.apply_openings,nors,curmesh)) {
+			if(gen_openings(*conv.apply_openings,nors,temp)) {
 				++sides_with_openings;
 			}
 			
-			MergePolygonBoundaries(result,temp,0);
+			result.Append(temp);
 			temp.Clear();
 		}
 	}
 	
 	size_t sides_with_v_openings = 0;
 	if(has_area) {
-		// leave the triangulation of the profile area to the ear cutting 
-		// implementation in aiProcess_Triangulate - for now we just
-		// feed in two huge polygons.
+
 		for(size_t n = 0; n < 2; ++n) {
 			for(size_t i = size; i--; ) {
 				out.push_back(in[i]+(n?dir:aiVector3D()));
@@ -1293,11 +1708,16 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 
 			curmesh.vertcnt.push_back(size);
 			if(conv.apply_openings) {
-				if(TryAddOpening(*conv.apply_openings,nors,curmesh)) {
+				// XXX here we are forced to use the un-triangulated version of TryAddOpening, with
+				// all the problems it causes. The reason is that vertical walls (ehm, floors)
+				// can have an arbitrary outer shape, so the usual approach of projecting
+				// the surface and all openings onto a flat quad and triangulating the quad 
+				// fails.
+				if(TryAddOpenings(*conv.apply_openings,nors,temp)) {
 					++sides_with_v_openings;
 				}
 
-				MergePolygonBoundaries(result,temp,0);
+				result.Append(temp);
 				temp.Clear();
 			}
 		}
@@ -1318,7 +1738,7 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 				out.push_back(in[i]);
 				out.push_back(in[i]+dir);
 				out.push_back(in[next]+dir);
-				out.push_back(in[next]-dir);
+				out.push_back(in[next]);
 			}
 		}
 	}
@@ -1362,31 +1782,15 @@ void ProcessSweptAreaSolid(const IFC::IfcSweptAreaSolid& swept, TempMesh& meshou
 }
 
 // ------------------------------------------------------------------------------------------------
-enum Intersect {
-	Intersect_No,
-	Intersect_LiesOnPlane,
-	Intersect_Yes
+struct FuzzyVectorCompare {
+
+	FuzzyVectorCompare(float epsilon) : epsilon(epsilon) {}
+	bool operator()(const aiVector3D& a, const aiVector3D& b) {
+		return fabs((a-b).SquareLength()) < epsilon;
+	}
+
+	const float epsilon;
 };
-
-// ------------------------------------------------------------------------------------------------
-Intersect IntersectSegmentPlane(const aiVector3D& p,const aiVector3D& n, const aiVector3D& e0, const aiVector3D& e1, aiVector3D& out) 
-{
-	const aiVector3D pdelta = e0 - p, seg = e1-e0;
-	const float dotOne = n*seg, dotTwo = -(n*pdelta);
-
-	if (fabs(dotOne) < 1e-6) {
-		return fabs(dotTwo) < 1e-6f ? Intersect_LiesOnPlane : Intersect_No;
-	}
-
-	const float t = dotTwo/dotOne;
-	// t must be in [0..1] if the intersection point is within the given segment
-	if (t > 1.f || t < 0.f) {
-		return Intersect_No;
-	}
-	out = e0+t*seg;
-	return Intersect_Yes;
-}
-
 
 // ------------------------------------------------------------------------------------------------
 void ProcessBoolean(const IFC::IfcBooleanResult& boolean, TempMesh& result, ConversionData& conv)
@@ -1437,6 +1841,9 @@ void ProcessBoolean(const IFC::IfcBooleanResult& boolean, TempMesh& result, Conv
 		std::vector<aiVector3D>& outvert = result.verts;
 		std::vector<unsigned int>::const_iterator begin=meshout.vertcnt.begin(), end=meshout.vertcnt.end(), iit;
 		
+		outvert.reserve(in.size());
+		result.vertcnt.reserve(meshout.vertcnt.size());
+
 		unsigned int vidx = 0;
 		for(iit = begin; iit != end; vidx += *iit++) {
 
@@ -1455,7 +1862,7 @@ void ProcessBoolean(const IFC::IfcBooleanResult& boolean, TempMesh& result, Conv
 				}
 				else if (isect == Intersect_Yes) {
 					if ( (e0-p).Normalize()*n > 0 ) {
-						// e0 is on the right side, so keep it
+						// e0 is on the right side, so keep it 
 						outvert.push_back(e0);
 						outvert.push_back(isectpos);
 						newcount += 2;
@@ -1468,9 +1875,34 @@ void ProcessBoolean(const IFC::IfcBooleanResult& boolean, TempMesh& result, Conv
 				}
 			}	
 
-			if(newcount) {
+			if (!newcount) {
+				continue;
+			}
+
+			aiVector3D vmin,vmax;
+			ArrayBounds(&*(outvert.end()-newcount),newcount,vmin,vmax);
+
+			// filter our double points - those may happen if a point lies
+			// directly on the intersection line. However, due to float
+			// precision a bitwise comparison is not feasible to detect
+			// this case.
+			const float epsilon = (vmax-vmin).SquareLength() / 1e6f;
+			FuzzyVectorCompare fz(epsilon);
+			
+			std::vector<aiVector3D>::iterator e = std::unique( outvert.end()-newcount, outvert.end(), fz );
+			if (e != outvert.end()) {
+				newcount -= static_cast<unsigned int>(std::distance(e,outvert.end()));
+				outvert.erase(e,outvert.end());
+			}
+			if (fz(*( outvert.end()-newcount),outvert.back())) {
+				outvert.pop_back();
+				--newcount;
+			}
+			if(newcount > 2) {
 				result.vertcnt.push_back(newcount);
 			}
+			else while(newcount-->0)result.verts.pop_back();
+
 		}
 		IFCImporter::LogDebug("generating CSG geometry by plane clipping (IfcBooleanClippingResult)");
 	}

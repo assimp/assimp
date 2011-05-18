@@ -247,7 +247,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 			// also be possible but it's more difficult to implement. 
 
 			// Collect all vertices of of the polygon.
-			aiVector3D* verts = pMesh->mVertices;
+			const aiVector3D* verts = pMesh->mVertices;
 			for (tmp = 0; tmp < max; ++tmp) {
 				temp_verts3d[tmp] = verts[idx[tmp]];
 			}
@@ -298,7 +298,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 			char grid[POLY_GRID_Y][POLY_GRID_X+POLY_GRID_XPAD];
 			std::fill_n((char*)grid,POLY_GRID_Y*(POLY_GRID_X+POLY_GRID_XPAD),' ');
 
-			for (size_t i =0; i < max; ++i) {
+			for (int i =0; i < max; ++i) {
 				const aiVector2D& v = (temp_verts[i] - bmin) / (bmax-bmin);
 				const size_t x = static_cast<size_t>(v.x*(POLY_GRID_X-1)), y = static_cast<size_t>(v.y*(POLY_GRID_Y-1));
 				char* loc = grid[y]+x;
@@ -328,7 +328,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 				for (ear = next;;prev = ear,ear = next) {
 				
 					// break after we looped two times without a positive match
-					for (next=ear+1;done[(next>max-1?next=0:next)];++next);
+					for (next=ear+1;done[(next>=max?next=0:next)];++next);
 					if (next < ear) {
 						if (++num_found == 2) {
 							break;
@@ -353,15 +353,15 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 						// PointInTriangle() I'm guessing that it's actually possible to construct
 						// input data that would cause us to end up with no ears. The problem is,
 						// which epsilon? If we chose a too large value, we'd get wrong results
-						const aiVector2D& vtmp = * ((aiVector2D*) &temp_verts[tmp] ); 
-						if ( vtmp != *pnt1 && vtmp != *pnt2 && vtmp != *pnt0 && PointInTriangle2D(*pnt0,*pnt1,*pnt2,vtmp))
+						const aiVector2D& vtmp = temp_verts[tmp]; 
+						if ( vtmp != *pnt1 && vtmp != *pnt2 && vtmp != *pnt0 && PointInTriangle2D(*pnt0,*pnt1,*pnt2,vtmp)) {
 							break;		
-
+						}
 					}
 					if (tmp != max) {
 						continue;
 					}
-	
+
 					// this vertex is an ear
 					break;
 				}

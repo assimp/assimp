@@ -677,7 +677,7 @@ enum aiComponent
 
 
 // ---------------------------------------------------------------------------
-/** @brief Specfies whether the IFC loader will skip over IfcSpace elements.
+/** @brief Specifies whether the IFC loader skips over IfcSpace elements.
  *
  * IfcSpace elements (and their geometric representations) are used to
  * represent, well, free space in a building storey.<br>
@@ -687,7 +687,7 @@ enum aiComponent
 
 
 // ---------------------------------------------------------------------------
-/** @brief Specfies whether the IFC loader will skip over 
+/** @brief Specifies whether the IFC loader skips over 
  *    shape representations of type 'Curve2D'.
  *
  * A lot of files contain both a faceted mesh representation and a outline
@@ -697,5 +697,19 @@ enum aiComponent
  */
 #define AI_CONFIG_IMPORT_IFC_SKIP_CURVE_REPRESENTATIONS "IMPORT_IFC_SKIP_CURVE_REPRESENTATIONS"
 
+// ---------------------------------------------------------------------------
+/** @brief Specifies whether the IFC loader will use its own, custom triangulation
+ *   algorithm to triangulate wall and floor meshes.
+ *
+ * If this property is set to false, walls will be either triangulated by
+ * #aiProcess_Triangulate or will be passed through as huge polygons with 
+ * faked holes (i.e. holes that are connected with the outer boundary using
+ * a dummy edge). It is highly recommended to set this property to true
+ * if you want triangulated data because #aiProcess_Triangulate is known to
+ * have problems with the kind of polygons that the IFC loader spits out for
+ * complicated meshes.
+ * Property type: Bool. Default value: true.
+ */
+#define AI_CONFIG_IMPORT_IFC_CUSTOM_TRIANGULATION "IMPORT_IFC_CUSTOM_TRIANGULATION"
 
 #endif // !! AI_CONFIG_H_INC

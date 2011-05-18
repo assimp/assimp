@@ -113,11 +113,13 @@ public:
 		Settings()
 			: skipSpaceRepresentations()
 			, skipCurveRepresentations()
+			, useCustomTriangulation()
 		{}
 
 
 		bool skipSpaceRepresentations;
 		bool skipCurveRepresentations;
+		bool useCustomTriangulation;
 	};
 	
 	

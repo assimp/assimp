@@ -52,7 +52,7 @@ namespace Assimp {
 template <typename T>
 inline bool OnLeftSideOfLine2D(const T& p0, const T& p1,const T& p2)
 {
-	return ( (p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (p1.y - p0.y) ) > 0;
+	return GetArea2D(p0,p2,p1) > 0;
 }
 
 // -------------------------------------------------------------------------------
@@ -67,17 +67,17 @@ inline bool PointInTriangle2D(const T& p0, const T& p1,const T& p2, const T& pp)
 	const aiVector2D v1 = p2 - p0;
 	const aiVector2D v2 = pp - p0;
 
-	float dot00 = v0 * v0;
-	float dot01 = v0 * v1;
-	float dot02 = v0 * v2;
-	float dot11 = v1 * v1;
-	float dot12 = v1 * v2;
+	double dot00 = v0 * v0;
+	double dot01 = v0 * v1;
+	double dot02 = v0 * v2;
+	double dot11 = v1 * v1;
+	double dot12 = v1 * v2;
 
-	const float invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+	const double invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
 	dot11 = (dot11 * dot02 - dot01 * dot12) * invDenom;
 	dot00 = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
-	return (dot11 >= 0) && (dot00 >= 0) && (dot11 + dot00 <= 1);
+	return (dot11 > 0) && (dot00 > 0) && (dot11 + dot00 < 1);
 }
 
 
@@ -86,9 +86,9 @@ inline bool PointInTriangle2D(const T& p0, const T& p1,const T& p2, const T& pp)
  *  The function accepts an unconstrained template parameter for use with
  *  both aiVector3D and aiVector2D, but generally ignores the third coordinate.*/
 template <typename T>
-inline float GetArea2D(const T& v1, const T& v2, const T& v3) 
+inline double GetArea2D(const T& v1, const T& v2, const T& v3) 
 {
-	return 0.5f * (v1.x * (v3.y - v2.y) + v2.x * (v1.y - v3.y) + v3.x * (v2.y - v1.y));
+	return 0.5 * (v1.x * ((double)v3.y - v2.y) + v2.x * ((double)v1.y - v3.y) + v3.x * ((double)v2.y - v1.y));
 }
 
 

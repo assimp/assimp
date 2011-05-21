@@ -333,8 +333,13 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 	EXPRESS::ConversionSchema schema;
 	IFC::GetSchema(schema);
 
+	// tell the reader which entity types to track with special care
+	static const char* const types_to_track[] = {
+		"ifcsite", "ifcbuilding", "ifcproject"
+	};
+
 	// feed the IFC schema into the reader and pre-parse all lines
-	STEP::ReadFile(*db, schema);
+	STEP::ReadFile(*db, schema, types_to_track);
 
 	const STEP::LazyObject* proj =  db->GetObject("ifcproject");
 	if (!proj) {
@@ -732,6 +737,116 @@ bool ProcessPolyloop(const IFC::IfcPolyLoop& loop, TempMesh& meshout, Conversion
 }
 
 // ------------------------------------------------------------------------------------------------
+void FixupFaceOrientation(TempMesh& result)
+{
+	aiVector3D vavg;
+	BOOST_FOREACH(aiVector3D& v, result.verts) {
+		vavg += v;
+	}
+
+	// fix face orientation - try at least.
+	vavg /= static_cast<float>( result.verts.size() );
+
+	size_t c = 0;
+	BOOST_FOREACH(unsigned int cnt, result.vertcnt) {
+		if (cnt>2){
+			const aiVector3D& thisvert = result.verts[c];
+			const aiVector3D normal((thisvert-result.verts[c+1])^(thisvert-result.verts[c+2]));
+			if (normal*(thisvert-vavg) < 0) {
+				std::reverse(result.verts.begin()+c,result.verts.begin()+cnt+c);
+			}
+		}
+		c += cnt;
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void RecursiveMergeBoundaries(TempMesh& final_result, const TempMesh& in, const TempMesh& boundary, std::vector<aiVector3D>& normals, const aiVector3D& nor_boundary)
+{
+	ai_assert(in.vertcnt.size() >= 1);
+	ai_assert(boundary.vertcnt.size() == 1);
+	std::vector<unsigned int>::const_iterator end = in.vertcnt.end(), begin=in.vertcnt.begin(), iit, best_iit;
+
+	TempMesh out;
+
+	// iterate through all other bounds and find the one for which the shortest connection
+	// to the outer boundary is actually the shortest possible.
+	size_t vidx = 0, best_vidx_start = 0;
+	size_t best_ofs, best_outer = boundary.verts.size();
+	float best_dist = 1e10;
+	for(std::vector<unsigned int>::const_iterator iit = begin; iit != end; vidx += *iit++) {
+		
+		for(size_t vofs = 0; vofs < *iit; ++vofs) {
+			const aiVector3D& v = in.verts[vidx+vofs];
+
+			for(size_t outer = 0; outer < boundary.verts.size(); ++outer) {
+				const aiVector3D& o = boundary.verts[outer];
+				const float d = (o-v).SquareLength();
+
+				if (d < best_dist) {
+					best_dist = d;
+					best_ofs = vofs;
+					best_outer = outer;
+					best_iit = iit;
+					best_vidx_start = vidx;
+				}
+			}		
+		}
+	}
+
+	ai_assert(best_outer != boundary.verts.size());
+
+	// now that we collected all vertex connections to be added, build the output polygon
+	size_t cnt = boundary.verts.size();
+	for(size_t outer = 0; outer < boundary.verts.size(); ++outer) {
+		const aiVector3D& o = boundary.verts[outer];
+		out.verts.push_back(o);
+
+		if (outer == best_outer) {
+			for(size_t i = best_ofs; i < *best_iit; ++i) {
+				out.verts.push_back(in.verts[best_vidx_start + i]);
+			}
+
+			// we need the first vertex of the inner polygon twice as we return to the
+			// outer loop through the very same connection through which we got there.
+			for(size_t i = 0; i <= best_ofs; ++i) {
+				out.verts.push_back(in.verts[best_vidx_start + i]);
+			}
+
+			// reverse face winding if the normal of the sub-polygon points in the
+			// same direction as the normal of the outer polygonal boundary
+			if (normals[std::distance(begin,best_iit)] * nor_boundary > 0) {
+				std::reverse(out.verts.rbegin(),out.verts.rbegin()+*best_iit+1);
+			}
+
+			// also append a copy of the initial insertion point to be able to continue the outer polygon
+			out.verts.push_back(o);
+			cnt += *best_iit+2;
+		}
+	}
+	out.vertcnt.push_back(cnt);
+
+	if (in.vertcnt.size() > 1) {
+		// Recursively apply the same algorithm if there are more boundaries to merge. The
+		// current implementation is relatively inefficient, though.
+		
+		TempMesh temp;
+		
+		// drop the boundary that we just processed
+		const size_t dist = std::distance(begin, best_iit);
+		TempMesh remaining = in;
+		remaining.vertcnt.erase(remaining.vertcnt.begin() + dist);
+		remaining.verts.erase(remaining.verts.begin()+best_ofs,remaining.verts.begin()+best_ofs+*best_iit);
+
+		normals.erase(normals.begin() + dist);
+		RecursiveMergeBoundaries(temp,remaining,out,normals,nor_boundary);
+
+		final_result.Append(temp);
+	}
+	else final_result.Append(out);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Note: meshout may be modified even though the merged polygon is copied to `result`!
 void MergePolygonBoundaries(TempMesh& result, TempMesh& meshout, size_t master_bounds = -1) 
 {
@@ -754,7 +869,6 @@ void MergePolygonBoundaries(TempMesh& result, TempMesh& meshout, size_t master_b
 	result.verts.reserve(meshout.verts.size()+meshout.vertcnt.size()*2+result.verts.size());
 	size_t outer_polygon_start = 0;
 
-
 	// compute proper normals for all polygons
 	size_t max_vcount = 0;
 	std::vector<unsigned int>::iterator outer_polygon = meshout.vertcnt.end(), begin=meshout.vertcnt.begin(), end=outer_polygon,  iit;
@@ -767,6 +881,8 @@ void MergePolygonBoundaries(TempMesh& result, TempMesh& meshout, size_t master_b
 	std::vector<aiVector3D> normals;
 	normals.reserve( meshout.vertcnt.size() );
 
+	// `NewellNormal()` currently has a relatively strange interface and need to 
+	// re-structure things a bit to meet them.
 	size_t vidx = 0;
 	for(iit = begin; iit != meshout.vertcnt.end(); vidx += *iit++) {
 		for(size_t vofs = 0, cnt = 0; vofs < *iit; ++vofs) {
@@ -784,7 +900,7 @@ void MergePolygonBoundaries(TempMesh& result, TempMesh& meshout, size_t master_b
 		NewellNormal<4,4,4>(normals.back(),*iit,&temp[0],&temp[1],&temp[2]);
 	}
 
-	// see if one of the polygons is a IfcFaceOuterBound - treats this as the outer boundary.
+	// see if one of the polygons is a IfcFaceOuterBound (in which case master_bounds is not `-1`).
 	// sadly we can't rely on it, the docs say 'At most one of the bounds shall be of the type IfcFaceOuterBound' 
 	if (master_bounds != -1) {
 		outer_polygon = begin + master_bounds;
@@ -844,10 +960,7 @@ next_loop:
 					const size_t start = (v-o).SquareLength() > (vnext-o).SquareLength() ? vofs :  next;
 					std::vector<aiVector3D>::iterator inbase = in.begin()+vidx, it = std::copy(inbase+start, inbase+*iit,tmp.begin());
 					std::copy(inbase, inbase+start,it);
-
-					//if(start == next) {
-						std::reverse(tmp.begin(),tmp.end());
-					//}
+					std::reverse(tmp.begin(),tmp.end());
 
 					in.insert(in.begin()+outer_polygon_start+(outer+1)%*outer_polygon,tmp.begin(),tmp.end());
 					vidx += outer_polygon_start<vidx ? *iit : 0;
@@ -865,86 +978,36 @@ next_loop:
 		}
 	}
 
-	typedef boost::tuple<std::vector<unsigned int>::iterator, unsigned int, unsigned int> InsertionPoint;
-	std::vector< std::vector<InsertionPoint> > insertions(*outer_polygon, std::vector<InsertionPoint>());
+	// extract the outer boundary and move it to a separate mesh
+	TempMesh boundary;
+	boundary.vertcnt.resize(1,*outer_polygon);
+	boundary.verts.resize(*outer_polygon);
 
-	// iterate through all other polyloops and find points in the outer polyloop that are close
-	vidx = 0;
-	for(iit = begin; iit != end; vidx += *iit++) {
-		if (iit == outer_polygon || !*iit) {
-			continue;
-		}
+	std::vector<aiVector3D>::iterator b = in.begin()+outer_polygon_start;
+	std::copy(b,b+*outer_polygon,boundary.verts.begin());
+	in.erase(b,b+*outer_polygon);
 
-		size_t best_ofs,best_outer = *outer_polygon;
-		float best_dist = 1e10;
-		for(size_t vofs = 0; vofs < *iit; ++vofs) {
-			const aiVector3D& v = in[vidx+vofs];
+	std::vector<aiVector3D>::iterator norit = normals.begin()+std::distance(meshout.vertcnt.begin(),outer_polygon);
+	const aiVector3D nor_boundary = *norit;
+	normals.erase(norit);
+	meshout.vertcnt.erase(outer_polygon);
 
-			for(size_t outer = 0; outer < *outer_polygon; ++outer) {
-				const aiVector3D& o = in[outer_polygon_start+outer];
-				const float d = (o-v).SquareLength();
-
-				if (d < best_dist) {
-					best_dist = d;
-					best_ofs = vofs;
-					best_outer = outer;
-				}
-			}		
-		}
-
-		ai_assert(best_outer != *outer_polygon);
-
-		// we will later insert a hidden connection line right after the closest point in the outer polygon
-		insertions[best_outer].push_back(boost::make_tuple(iit,vidx,best_ofs));
-	}
-
-	// now that we collected all vertex connections to be added, build the output polygon
-	size_t cnt = *outer_polygon;
-	for(size_t outer = 0; outer < *outer_polygon; ++outer) {
-		const aiVector3D& o = meshout.verts[outer_polygon_start+outer];
-		result.verts.push_back(o);
-
-		const std::vector<InsertionPoint>& insvec = insertions[outer];
-		BOOST_FOREACH(const InsertionPoint& ins,insvec) {
-			if (!*ins.get<0>()) {
-				continue;
-			}
-
-			for(size_t i = ins.get<2>(); i < *ins.get<0>(); ++i) {
-				result.verts.push_back(in[ins.get<1>() + i]);
-			}
-
-			// we need the first vertex of the inner polygon twice as we return to the
-			// outer loop through the very same connection through which we got there.
-			for(size_t i = 0; i <= ins.get<2>(); ++i) {
-				result.verts.push_back(in[ins.get<1>() + i]);
-			}
-
-			// reverse face winding if the normal of the sub-polygon points in the
-			// same direction as the normal of the outer polygonal boundary
-			if (normals[std::distance(begin,ins.get<0>())] * normals[std::distance(begin,outer_polygon)] > 0) {
-				std::reverse(result.verts.rbegin(),result.verts.rbegin()+*ins.get<0>()+1);
-			}
-
-			// also append a copy of the initial insertion point to be able to continue the outer polygon
-			result.verts.push_back(o);
-			cnt += *ins.get<0>()+2;
-		}
-	}
-	result.vertcnt.push_back(cnt);
+	// keep merging the closest inner boundary with the outer boundary until no more boundaries are left
+	RecursiveMergeBoundaries(result,meshout,boundary,normals,nor_boundary);
 }
+
 
 // ------------------------------------------------------------------------------------------------
 void ProcessConnectedFaceSet(const IFC::IfcConnectedFaceSet& fset, TempMesh& result, ConversionData& conv)
 {
 	BOOST_FOREACH(const IFC::IfcFace& face, fset.CfsFaces) {
-		TempMesh meshout;
-
 		size_t ob = -1, cnt = 0;
+		//TempMesh meshout;
 		BOOST_FOREACH(const IFC::IfcFaceBound& bound, face.Bounds) {
 			
+			// XXX implement proper merging for polygonal loops
 			if(const IFC::IfcPolyLoop* const polyloop = bound.Bound->ToPtr<IFC::IfcPolyLoop>()) {
-				if(ProcessPolyloop(*polyloop, meshout, conv)) {
+				if(ProcessPolyloop(*polyloop, result,conv)) {
 					if(bound.ToPtr<IFC::IfcFaceOuterBound>()) {
 						ob = cnt;
 					}
@@ -956,18 +1019,19 @@ void ProcessConnectedFaceSet(const IFC::IfcConnectedFaceSet& fset, TempMesh& res
 				continue;
 			}
 
-			if(!IsTrue(bound.Orientation)) {
+			/*if(!IsTrue(bound.Orientation)) {
 				size_t c = 0;
 				BOOST_FOREACH(unsigned int& i, meshout.vertcnt) {
 					std::reverse(meshout.verts.begin() + cnt,meshout.verts.begin() + cnt + c);
 					cnt += c;
 				}
-			}
-			
+			}*/
+
 		}
 
-		MergePolygonBoundaries(result,meshout,ob);
+		//MergePolygonBoundaries(result,meshout,ob);
 	}
+	FixupFaceOrientation(result);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1066,30 +1130,6 @@ bool ProcessProfile(const IFC::IfcProfileDef& prof, TempMesh& meshout, Conversio
 		return false;
 	}
 	return true;
-}
-
-// ------------------------------------------------------------------------------------------------
-void FixupFaceOrientation(TempMesh& result)
-{
-	aiVector3D vavg;
-	BOOST_FOREACH(aiVector3D& v, result.verts) {
-		vavg += v;
-	}
-
-	// fix face orientation - try at least.
-	vavg /= static_cast<float>( result.verts.size() );
-
-	size_t c = 0;
-	BOOST_FOREACH(unsigned int cnt, result.vertcnt) {
-		if (cnt>2){
-			const aiVector3D& thisvert = result.verts[c];
-			const aiVector3D normal((thisvert-result.verts[c+1])^(thisvert-result.verts[c+2]));
-			if (normal*(thisvert-vavg) < 0) {
-				std::reverse(result.verts.begin()+c,result.verts.begin()+cnt+c);
-			}
-		}
-		c += cnt;
-	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1271,7 +1311,7 @@ aiVector2D ProjectPositionVectorOntoPlane(const aiVector3D& x, const ProjectionI
 }
 
 // ------------------------------------------------------------------------------------------------
-void TriangulatePart(const aiVector2D& pmin, const aiVector2D& pmax, XYSortedField& field, const std::vector< BoundingBox >& bbs, 
+void QuadrifyPart(const aiVector2D& pmin, const aiVector2D& pmax, XYSortedField& field, const std::vector< BoundingBox >& bbs, 
 	std::vector<aiVector2D>& out)
 {
 	if (!(pmin.x-pmax.x) || !(pmin.y-pmax.y)) {
@@ -1323,7 +1363,7 @@ void TriangulatePart(const aiVector2D& pmin, const aiVector2D& pmax, XYSortedFie
 			const float ys = std::max(bb.first.y,pmin.y), ye = std::min(bb.second.y,pmax.y);
 			if (ys - ylast) {
 				// Divide et impera!
-				TriangulatePart( aiVector2D(xs,ylast), aiVector2D(xe,ys) ,field,bbs,out);
+				QuadrifyPart( aiVector2D(xs,ylast), aiVector2D(xe,ys) ,field,bbs,out);
 			}
 
 			// the following are the window vertices
@@ -1349,12 +1389,12 @@ void TriangulatePart(const aiVector2D& pmin, const aiVector2D& pmax, XYSortedFie
 	}
 	if (ylast < pmax.y) {
 		// Divide et impera!
-		TriangulatePart( aiVector2D(xs,ylast), aiVector2D(xe,pmax.y) ,field,bbs,out);
+		QuadrifyPart( aiVector2D(xs,ylast), aiVector2D(xe,pmax.y) ,field,bbs,out);
 	}
 
 	// Divide et impera! - now for the whole rest
 	if (pmax.x-xe) {
-		TriangulatePart(aiVector2D(xe,pmin.y), pmax ,field,bbs,out);
+		QuadrifyPart(aiVector2D(xe,pmin.y), pmax ,field,bbs,out);
 	}
 }
 
@@ -1581,7 +1621,7 @@ bool TryAddOpenings_Triangulate(const std::vector<TempOpening>& openings,const s
 
 	std::vector<aiVector2D> outflat;
 	outflat.reserve(openings.size()*4);
-	TriangulatePart(aiVector2D(0.f,0.f),aiVector2D(1.f,1.f),field,bbs,outflat);
+	QuadrifyPart(aiVector2D(0.f,0.f),aiVector2D(1.f,1.f),field,bbs,outflat);
 	ai_assert(!(outflat.size() % 4));
 
 	//FixOuterBoundaries(outflat,contour_flat);
@@ -1652,12 +1692,14 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 	
 	// compute the normal vectors for all opening polygons
 	if (conv.apply_openings) {
-		// it is essential to apply the openings in the correct spatial order. The direction
-		// doesn't matter, but we would screw up if we started with e.g. a door in between
-		// two windows.
-		std::sort(conv.apply_openings->begin(),conv.apply_openings->end(),DistanceSorter(min));
-		nors.reserve(conv.apply_openings->size());
+		if (!conv.settings.useCustomTriangulation) {
+			// it is essential to apply the openings in the correct spatial order. The direction
+			// doesn't matter, but we would screw up if we started with e.g. a door in between
+			// two windows.
+			std::sort(conv.apply_openings->begin(),conv.apply_openings->end(),DistanceSorter(min));
+		}
 
+		nors.reserve(conv.apply_openings->size());
 		BOOST_FOREACH(TempOpening& t,*conv.apply_openings) {
 			TempMesh& bounds = *t.profileMesh.get();
 		
@@ -2387,8 +2429,9 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IFC::IfcProduct& el, Conve
 		if(!conv.collect_openings) {
 			conv.apply_openings = &openings;
 		}
-		ProcessProductRepresentation(el,nd.get(),subnodes,conv);
 
+
+		ProcessProductRepresentation(el,nd.get(),subnodes,conv);
 		conv.apply_openings = conv.collect_openings = NULL;
 
 		if (subnodes.size()) {
@@ -2414,19 +2457,22 @@ void ProcessSpatialStructures(ConversionData& conv)
 	// process all products in the file. it is reasonable to assume that a
 	// file that is relevant for us contains at least a site or a building.
 	const STEP::DB::ObjectMapByType& map = conv.db.GetObjectsByType();
-	STEP::DB::ObjectMapRange range = map.equal_range("ifcsite");
 
-	if (range.first == map.end()) {
-		range = map.equal_range("ifcbuilding");
-		if (range.first == map.end()) {
-			// no site, no building - try all ids. this will take ages, but it should rarely happen.
-			range = STEP::DB::ObjectMapRange(map.begin(),map.end());
+	ai_assert(map.find("ifcsite") != map.end());
+	const STEP::DB::ObjectSet* range = &map.find("ifcsite")->second;
+
+	if (range->empty()) {
+		ai_assert(map.find("ifcbuilding") != map.end());
+		range = &map.find("ifcbuilding")->second;
+		if (range->empty()) {
+			// no site, no building -  fail;
+			IFCImporter::ThrowException("no root element found (expected IfcBuilding or preferably IfcSite)");
 		}
 	}
 
 	
-	for(;range.first != range.second; ++range.first) {
-		const IFC::IfcSpatialStructureElement* const prod = (*range.first).second->ToPtr<IFC::IfcSpatialStructureElement>();
+	BOOST_FOREACH(const STEP::LazyObject* lz, *range) {
+		const IFC::IfcSpatialStructureElement* const prod = lz->ToPtr<IFC::IfcSpatialStructureElement>();
 		if(!prod) {
 			continue;
 		}
@@ -2454,7 +2500,7 @@ void ProcessSpatialStructures(ConversionData& conv)
 	}
 
 
-	IFCImporter::ThrowException("Failed to determine primary site element");
+	IFCImporter::ThrowException("failed to determine primary site element");
 }
 
 // ------------------------------------------------------------------------------------------------

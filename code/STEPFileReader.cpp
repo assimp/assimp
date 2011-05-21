@@ -161,9 +161,10 @@ STEP::DB* STEP::ReadFileHeader(boost::shared_ptr<IOStream> stream)
 
 
 // ------------------------------------------------------------------------------------------------
-void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme)
+void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,const char* const* arr, size_t len)
 {
 	db.SetSchema(scheme);
+	db.SetTypesToTrack(arr,len);
 
 	const DB::ObjectMap& map = db.GetObjects();
 	LineSplitter& splitter = db.GetSplitter();

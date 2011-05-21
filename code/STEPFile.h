@@ -804,7 +804,7 @@ namespace STEP {
 	class DB
 	{
 		friend DB* ReadFileHeader(boost::shared_ptr<IOStream> stream);
-		friend void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme);
+		friend void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,const char* const* arr, size_t len);
 		friend class LazyObject;
 
 	public:
@@ -812,12 +812,12 @@ namespace STEP {
 		// objects indexed by ID
 		typedef std::map<uint64_t,boost::shared_ptr<const LazyObject> > ObjectMap;
 
-		// objects indexed by their declarative type
-		typedef std::step_unordered_multimap<std::string, const LazyObject* > ObjectMapByType;
-		typedef std::pair<ObjectMapByType::const_iterator,ObjectMapByType::const_iterator> ObjectMapRange;
+		// objects indexed by their declarative type, but only for those that we truly want
+		typedef std::set< const LazyObject*> ObjectSet;
+		typedef std::map<std::string, ObjectSet > ObjectMapByType;
 
 		// references - for each object id the ids of all objects which reference it
-		typedef std::multimap<uint64_t, uint64_t > RefMap;
+		typedef std::step_unordered_multimap<uint64_t, uint64_t > RefMap;
 		typedef std::pair<RefMap::const_iterator,RefMap::const_iterator> RefMapRange;
 
 	private:
@@ -872,8 +872,8 @@ namespace STEP {
 		// get an arbitrary object out of the soup with the only restriction being its type.
 		const LazyObject* GetObject(const std::string& type) const {
 			const ObjectMapByType::const_iterator it = objects_bytype.find(type);
-			if (it != objects_bytype.end()) {
-				return (*it).second;
+			if (it != objects_bytype.end() && (*it).second.size()) {
+				return *(*it).second.begin();
 			}
 			return NULL;
 		}
@@ -919,11 +919,22 @@ namespace STEP {
 
 		void InternInsert(boost::shared_ptr<const LazyObject> lz) {
 			objects[lz->id] = lz;
-			objects_bytype.insert(std::make_pair(lz->type,lz.get()));
+
+			const ObjectMapByType::iterator it = objects_bytype.find( lz->type );
+			if (it != objects_bytype.end()) {
+				(*it).second.insert(lz.get());
+			}
 		}
 
 		void SetSchema(const EXPRESS::ConversionSchema& _schema) {
 			schema = &_schema;
+		}
+
+		
+		void SetTypesToTrack(const char* const* types, size_t N) {
+			for(size_t i = 0; i < N;++i) {
+				objects_bytype[types[i]] = ObjectSet();
+			}
 		}
 
 		HeaderInfo& GetHeader() {

@@ -163,6 +163,18 @@ struct ConversionData
 };
 
 // ------------------------------------------------------------------------------------------------
+struct FuzzyVectorCompare {
+
+	FuzzyVectorCompare(float epsilon) : epsilon(epsilon) {}
+	bool operator()(const aiVector3D& a, const aiVector3D& b) {
+		return fabs((a-b).SquareLength()) < epsilon;
+	}
+
+	const float epsilon;
+};
+
+
+// ------------------------------------------------------------------------------------------------
 // Helper used during mesh construction. Aids at creating aiMesh'es out of relatively few polygons.
 // ------------------------------------------------------------------------------------------------
 struct TempMesh
@@ -189,14 +201,20 @@ struct TempMesh
 		mesh->mNumFaces = static_cast<unsigned int>(vertcnt.size());
 		mesh->mFaces = new aiFace[mesh->mNumFaces];
 
-		for(unsigned int i = 0, acc = 0; i < mesh->mNumFaces; ++i) {
+		for(unsigned int i = 0,n=0, acc = 0; i < mesh->mNumFaces; ++n) {
 			aiFace& f = mesh->mFaces[i];
+			if (!vertcnt[n]) {
+				--mesh->mNumFaces;
+				continue;
+			}
 
-			f.mNumIndices = vertcnt[i];
+			f.mNumIndices = vertcnt[n];
 			f.mIndices = new unsigned int[f.mNumIndices];
 			for(unsigned int a = 0; a < f.mNumIndices; ++a) {
 				f.mIndices[a] = acc++;
 			}
+
+			++i;
 		}
 
 		return mesh.release();
@@ -227,6 +245,66 @@ struct TempMesh
 		vertcnt.insert(vertcnt.end(),other.vertcnt.begin(),other.vertcnt.end());
 	}
 
+	// ------------------------------------------------------------------------------
+	void RemoveAdjacentDuplicates() {
+
+		bool drop = false;
+		std::vector<aiVector3D>::iterator base = verts.begin();
+		BOOST_FOREACH(unsigned int& cnt, vertcnt) {
+			if (cnt < 2){
+				base += cnt;
+				continue;
+			}
+
+			aiVector3D vmin,vmax;
+			ArrayBounds(&*base, cnt ,vmin,vmax);
+
+			const float epsilon = (vmax-vmin).SquareLength() / 1e9f, dotepsilon = 1e-7;
+
+			//// look for vertices that lie directly on the line between their predecessor and their 
+			//// successor and replace them with either of them.
+			//for(size_t i = 0; i < cnt; ++i) {
+			//	aiVector3D& v1 = *(base+i), &v0 = *(base+(i?i-1:cnt-1)), &v2 = *(base+(i+1)%cnt);
+			//	const aiVector3D& d0 = (v1-v0), &d1 = (v2-v1);
+			//	const float l0 = d0.SquareLength(), l1 = d1.SquareLength();
+			//	if (!l0 || !l1) {
+			//		continue;
+			//	}
+
+			//	const float d = (d0/sqrt(l0))*(d1/sqrt(l1));
+			//	if ( d >= 1.f-dotepsilon ) {
+			//		v1 = v0;
+			//	}
+			//	else if ( d0*d1 < -1.f+dotepsilon ) {
+			//		v2 = v1;
+			//		continue;
+			//	}
+			//}
+
+			// drop any identical, adjacent vertices. this pass will collect the dropouts
+			// of the previous pass as a side-effect.
+			FuzzyVectorCompare fz(epsilon);
+			std::vector<aiVector3D>::iterator end = base+cnt, e = std::unique( base, end, fz );
+			if (e != end) {
+				cnt -= static_cast<unsigned int>(std::distance(e, end));
+				verts.erase(e,end);
+				drop  = true;
+			}
+
+			// check front and back vertices for this polygon
+			if (cnt > 1 && fz(*base,*(base+cnt-1))) {
+				verts.erase(base+ --cnt);
+				drop  = true;
+			}
+
+			// removing adjacent duplicates shouldn't erase everything :-)
+			ai_assert(cnt>0);
+			base += cnt;
+		}
+		if(drop) {
+			IFCImporter::LogDebug("removed duplicate vertices");
+		}
+	}
 };
 
 
@@ -724,39 +802,98 @@ bool ProcessPolyloop(const IFC::IfcPolyLoop& loop, TempMesh& meshout, Conversion
 		meshout.verts.push_back(tmp);
 		++cnt;
 	}
+
+	meshout.vertcnt.push_back(cnt);
+
 	// zero- or one- vertex polyloops simply ignored
-	if (cnt >= 1) { 
-		meshout.vertcnt.push_back(cnt);
+	if (meshout.vertcnt.back() > 1) { 
 		return true;
 	}
 	
-	if (cnt==1) {
+	if (meshout.vertcnt.back()==1) {
 		meshout.vertcnt.pop_back();
+		meshout.verts.pop_back();
 	}
 	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
-void FixupFaceOrientation(TempMesh& result)
+void ComputePolygonNormals(const TempMesh& meshout, std::vector<aiVector3D>& normals, bool normalize = true, size_t ofs = 0) 
 {
-	aiVector3D vavg;
-	BOOST_FOREACH(aiVector3D& v, result.verts) {
-		vavg += v;
+	size_t max_vcount = 0;
+	std::vector<unsigned int>::const_iterator begin=meshout.vertcnt.begin()+ofs, end=meshout.vertcnt.end(),  iit;
+	for(iit = begin; iit != end; ++iit) {
+		max_vcount = std::max(max_vcount,static_cast<size_t>(*iit));
 	}
 
-	// fix face orientation - try at least.
-	vavg /= static_cast<float>( result.verts.size() );
+	std::vector<float> temp((max_vcount+2)*4);
+	normals.reserve( normals.size() + meshout.vertcnt.size()-ofs );
 
-	size_t c = 0;
+	// `NewellNormal()` currently has a relatively strange interface and need to 
+	// re-structure things a bit to meet them.
+	size_t vidx = std::accumulate(meshout.vertcnt.begin(),begin,0);
+	for(iit = begin; iit != end; vidx += *iit++) {
+		if (!*iit) {
+			normals.push_back(aiVector3D());
+			continue;
+		}
+		for(size_t vofs = 0, cnt = 0; vofs < *iit; ++vofs) {
+			const aiVector3D& v = meshout.verts[vidx+vofs];
+			temp[cnt++] = v.x;
+			temp[cnt++] = v.y;
+			temp[cnt++] = v.z;
+#ifdef _DEBUG
+			temp[cnt] = std::numeric_limits<float>::quiet_NaN();
+#endif
+			++cnt;
+		}
+
+		normals.push_back(aiVector3D());
+		NewellNormal<4,4,4>(normals.back(),*iit,&temp[0],&temp[1],&temp[2]);
+	}
+
+	if(normalize) {
+		BOOST_FOREACH(aiVector3D& n, normals) {
+			n.Normalize();
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Compute the normal of the last polygon in the given mesh
+aiVector3D ComputePolygonNormal(const TempMesh& inmesh, bool normalize = true) 
+{
+	size_t total = inmesh.vertcnt.back(), vidx = inmesh.verts.size() - total;
+	std::vector<float> temp((total+2)*3);
+	for(size_t vofs = 0, cnt = 0; vofs < total; ++vofs) {
+		const aiVector3D& v = inmesh.verts[vidx+vofs];
+		temp[cnt++] = v.x;
+		temp[cnt++] = v.y;
+		temp[cnt++] = v.z;
+	}
+	aiVector3D nor;
+	NewellNormal<3,3,3>(nor,total,&temp[0],&temp[1],&temp[2]);
+	return normalize ? nor.Normalize() : nor;
+}
+
+// ------------------------------------------------------------------------------------------------
+void FixupFaceOrientation(TempMesh& result)
+{
+	const aiVector3D vavg = result.Center();
+
+	std::vector<aiVector3D> normals;
+	ComputePolygonNormals(result,normals);
+
+	size_t c = 0, ofs = 0;
 	BOOST_FOREACH(unsigned int cnt, result.vertcnt) {
 		if (cnt>2){
 			const aiVector3D& thisvert = result.verts[c];
-			const aiVector3D normal((thisvert-result.verts[c+1])^(thisvert-result.verts[c+2]));
-			if (normal*(thisvert-vavg) < 0) {
+			if (normals[ofs]*(thisvert-vavg) < 0) {
 				std::reverse(result.verts.begin()+c,result.verts.begin()+cnt+c);
 			}
 		}
 		c += cnt;
+		++ofs;
 	}
 }
 
@@ -796,8 +933,11 @@ void RecursiveMergeBoundaries(TempMesh& final_result, const TempMesh& in, const 
 
 	ai_assert(best_outer != boundary.verts.size());
 
+
 	// now that we collected all vertex connections to be added, build the output polygon
-	size_t cnt = boundary.verts.size();
+	const size_t cnt = boundary.verts.size() + *best_iit+2;
+	out.verts.reserve(cnt);
+
 	for(size_t outer = 0; outer < boundary.verts.size(); ++outer) {
 		const aiVector3D& o = boundary.verts[outer];
 		out.verts.push_back(o);
@@ -821,12 +961,12 @@ void RecursiveMergeBoundaries(TempMesh& final_result, const TempMesh& in, const 
 
 			// also append a copy of the initial insertion point to be able to continue the outer polygon
 			out.verts.push_back(o);
-			cnt += *best_iit+2;
 		}
 	}
 	out.vertcnt.push_back(cnt);
+	ai_assert(out.verts.size() == cnt);
 
-	if (in.vertcnt.size() > 1) {
+	if (in.vertcnt.size()-std::count(begin,end,0) > 1) {
 		// Recursively apply the same algorithm if there are more boundaries to merge. The
 		// current implementation is relatively inefficient, though.
 		
@@ -836,7 +976,7 @@ void RecursiveMergeBoundaries(TempMesh& final_result, const TempMesh& in, const 
 		const size_t dist = std::distance(begin, best_iit);
 		TempMesh remaining = in;
 		remaining.vertcnt.erase(remaining.vertcnt.begin() + dist);
-		remaining.verts.erase(remaining.verts.begin()+best_ofs,remaining.verts.begin()+best_ofs+*best_iit);
+		remaining.verts.erase(remaining.verts.begin()+best_vidx_start,remaining.verts.begin()+best_vidx_start+*best_iit);
 
 		normals.erase(normals.begin() + dist);
 		RecursiveMergeBoundaries(temp,remaining,out,normals,nor_boundary);
@@ -847,94 +987,85 @@ void RecursiveMergeBoundaries(TempMesh& final_result, const TempMesh& in, const 
 }
 
 // ------------------------------------------------------------------------------------------------
-// Note: meshout may be modified even though the merged polygon is copied to `result`!
-void MergePolygonBoundaries(TempMesh& result, TempMesh& meshout, size_t master_bounds = -1) 
+void MergePolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t master_bounds = -1) 
 {
 	// standard case - only one boundary, just copy it to the result vector
-	result.vertcnt.reserve(meshout.vertcnt.size()+result.vertcnt.size());
-	if (meshout.vertcnt.size() <= 1) {
-		result.verts.reserve(meshout.verts.size()+result.verts.size());
-
-		std::copy(meshout.verts.begin(),meshout.verts.end(),std::back_inserter(result.verts));
-		std::copy(meshout.vertcnt.begin(),meshout.vertcnt.end(),std::back_inserter(result.vertcnt));
+	if (inmesh.vertcnt.size() <= 1) {
+		result.Append(inmesh);
 		return;
 	}
+
+	result.vertcnt.reserve(inmesh.vertcnt.size()+result.vertcnt.size());
+
+	// XXX get rid of the extra copy if possible
+	TempMesh meshout = inmesh;
 
 	// handle polygons with holes. Our built in triangulation won't handle them as is, but
 	// the ear cutting algorithm is solid enough to deal with them if we join the inner
 	// holes with the outer boundaries by dummy connections.
 	IFCImporter::LogDebug("fixing polygon with holes for triangulation via ear-cutting");
+	std::vector<unsigned int>::iterator outer_polygon = meshout.vertcnt.end(), begin=meshout.vertcnt.begin(), end=outer_polygon,  iit;
 
 	// each hole results in two extra vertices
 	result.verts.reserve(meshout.verts.size()+meshout.vertcnt.size()*2+result.verts.size());
 	size_t outer_polygon_start = 0;
 
-	// compute proper normals for all polygons
-	size_t max_vcount = 0;
-	std::vector<unsigned int>::iterator outer_polygon = meshout.vertcnt.end(), begin=meshout.vertcnt.begin(), end=outer_polygon,  iit;
-	for(iit = begin; iit != meshout.vertcnt.end(); ++iit) {
-		ai_assert(*iit);
-		max_vcount = std::max(max_vcount,static_cast<size_t>(*iit));
-	}
-
-	std::vector<float> temp((max_vcount+2)*4);
+	// do not normalize 'normals', we need the original length for computing the polygon area
 	std::vector<aiVector3D> normals;
-	normals.reserve( meshout.vertcnt.size() );
+	ComputePolygonNormals(meshout,normals,false);
 
-	// `NewellNormal()` currently has a relatively strange interface and need to 
-	// re-structure things a bit to meet them.
-	size_t vidx = 0;
-	for(iit = begin; iit != meshout.vertcnt.end(); vidx += *iit++) {
-		for(size_t vofs = 0, cnt = 0; vofs < *iit; ++vofs) {
-			const aiVector3D& v = meshout.verts[vidx+vofs];
-			temp[cnt++] = v.x;
-			temp[cnt++] = v.y;
-			temp[cnt++] = v.z;
-#ifdef _DEBUG
-			temp[cnt] = std::numeric_limits<float>::quiet_NaN();
-#endif
-			++cnt;
-		}
-
-		normals.push_back(aiVector3D());
-		NewellNormal<4,4,4>(normals.back(),*iit,&temp[0],&temp[1],&temp[2]);
-	}
-
-	// see if one of the polygons is a IfcFaceOuterBound (in which case master_bounds is not `-1`).
+	// see if one of the polygons is a IfcFaceOuterBound (in which case `master_bounds` is its index).
 	// sadly we can't rely on it, the docs say 'At most one of the bounds shall be of the type IfcFaceOuterBound' 
+	float area_outer_polygon = 1e-10f;
 	if (master_bounds != -1) {
 		outer_polygon = begin + master_bounds;
 		outer_polygon_start = std::accumulate(begin,outer_polygon,0);
-		BOOST_FOREACH(aiVector3D& n, normals) {
-			n.Normalize();
-		}
+		area_outer_polygon = normals[master_bounds].SquareLength();
 	}
 	else {
-		float area_outer_polygon = 1e-10f;
 		size_t vidx = 0;
 		for(iit = begin; iit != meshout.vertcnt.end(); vidx += *iit++) {
 			// find the polygon with the largest area, it must be the outer bound. 
 			aiVector3D& n = normals[std::distance(begin,iit)];
-			const float area = n.Length();
+			const float area = n.SquareLength();
 			if (area > area_outer_polygon) {
 				area_outer_polygon = area;
 				outer_polygon = iit;
 				outer_polygon_start = vidx;
 			}
-
-			n /= area;
 		}
 	}
 
 	ai_assert(outer_polygon != meshout.vertcnt.end());	
 	std::vector<aiVector3D>& in = meshout.verts;
 
+	// skip over extremely small boundaries - this is a workaround to fix cases
+	// in which the number of holes is so extremely large that the
+	// triangulation code fails.
+	size_t vidx = 0, removed = 0, index = 0;
+	const float treshold = area_outer_polygon * 0.000001f;
+	for(iit = begin; iit != end ;++index) {
+		const float sqlen = normals[index].SquareLength();
+		if (sqlen < treshold) {
+			std::vector<aiVector3D>::iterator inbase = in.begin()+vidx;
+			in.erase(inbase,inbase+*iit);
+			*iit++ = 0;
+
+			outer_polygon_start -= outer_polygon_start>vidx ? *iit : 0;
+			++removed;
+		}
+		else {
+			normals[index] /= sqrt(sqlen);
+			vidx += *iit++;
+		}
+	}
+
 	// see if one or more of the hole has a face that lies directly on an outer bound.
 	// this happens for doors, for example.
 	vidx = 0;
 	for(iit = begin; ; vidx += *iit++) {
 next_loop:
-		if (iit == meshout.vertcnt.end()) {
+		if (iit == end) {
 			break;
 		}
 		if (iit == outer_polygon) {
@@ -946,10 +1077,10 @@ next_loop:
 				continue;
 			}
 			const size_t next = (vofs+1)%*iit;
-			const aiVector3D& v = in[vidx+vofs], vnext = in[vidx+next],vd = (vnext-v).Normalize();
+			const aiVector3D& v = in[vidx+vofs], &vnext = in[vidx+next],&vd = (vnext-v).Normalize();
 
 			for(size_t outer = 0; outer < *outer_polygon; ++outer) {
-				const aiVector3D& o = in[outer_polygon_start+outer], onext = in[outer_polygon_start+(outer+1)%*outer_polygon],od = (onext-o).Normalize();
+				const aiVector3D& o = in[outer_polygon_start+outer], &onext = in[outer_polygon_start+(outer+1)%*outer_polygon], &od = (onext-o).Normalize();
 
 				if (fabs(vd * od) > 1.f-1e-6f && (onext-v).Normalize() * vd > 1.f-1e-6f && (onext-v)*(o-v) < 0) {
 					IFCImporter::LogDebug("got an inner hole that lies partly on the outer polygonal boundary, merging them to a single contour");
@@ -972,10 +1103,16 @@ next_loop:
 					
 					*outer_polygon += tmp.size();
 					*iit++ = 0;
+					++removed;
 					goto next_loop;
 				}
 			}
 		}
+	}
+
+	if ( meshout.vertcnt.size() - removed <= 1) {
+		result.Append(meshout);
+		return;
 	}
 
 	// extract the outer boundary and move it to a separate mesh
@@ -1002,12 +1139,12 @@ void ProcessConnectedFaceSet(const IFC::IfcConnectedFaceSet& fset, TempMesh& res
 {
 	BOOST_FOREACH(const IFC::IfcFace& face, fset.CfsFaces) {
 		size_t ob = -1, cnt = 0;
-		//TempMesh meshout;
+		TempMesh meshout;
 		BOOST_FOREACH(const IFC::IfcFaceBound& bound, face.Bounds) {
 			
 			// XXX implement proper merging for polygonal loops
 			if(const IFC::IfcPolyLoop* const polyloop = bound.Bound->ToPtr<IFC::IfcPolyLoop>()) {
-				if(ProcessPolyloop(*polyloop, result,conv)) {
+				if(ProcessPolyloop(*polyloop, meshout,conv)) {
 					if(bound.ToPtr<IFC::IfcFaceOuterBound>()) {
 						ob = cnt;
 					}
@@ -1021,17 +1158,15 @@ void ProcessConnectedFaceSet(const IFC::IfcConnectedFaceSet& fset, TempMesh& res
 
 			/*if(!IsTrue(bound.Orientation)) {
 				size_t c = 0;
-				BOOST_FOREACH(unsigned int& i, meshout.vertcnt) {
-					std::reverse(meshout.verts.begin() + cnt,meshout.verts.begin() + cnt + c);
+				BOOST_FOREACH(unsigned int& c, meshout.vertcnt) {
+					std::reverse(result.verts.begin() + cnt,result.verts.begin() + cnt + c);
 					cnt += c;
 				}
 			}*/
 
 		}
-
-		//MergePolygonBoundaries(result,meshout,ob);
+		MergePolygonBoundaries(result,meshout);
 	}
-	FixupFaceOrientation(result);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1043,6 +1178,7 @@ void ProcessPolyLine(const IFC::IfcPolyline& def, TempMesh& meshout, ConversionD
 		ConvertCartesianPoint(t,cp);
 		meshout.verts.push_back(t);
 	}
+	meshout.vertcnt.push_back(meshout.verts.size());
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1061,11 +1197,7 @@ bool ProcessCurve(const IFC::IfcCurve& curve,  TempMesh& meshout, ConversionData
 // ------------------------------------------------------------------------------------------------
 void ProcessClosedProfile(const IFC::IfcArbitraryClosedProfileDef& def, TempMesh& meshout, ConversionData& conv)
 {
-	if(ProcessCurve(def.OuterCurve,meshout,conv)) {
-		if(meshout.verts.size()>2 && meshout.verts.front() == meshout.verts.back()) {
-			meshout.verts.pop_back(); // duplicate element, first==last
-		}
-	}
+	ProcessCurve(def.OuterCurve,meshout,conv);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1127,6 +1259,10 @@ bool ProcessProfile(const IFC::IfcProfileDef& prof, TempMesh& meshout, Conversio
 	}
 	else {
 		IFCImporter::LogWarn("skipping unknown IfcProfileDef entity, type is " + prof.GetClassName());
+		return false;
+	}
+	meshout.RemoveAdjacentDuplicates();
+	if (!meshout.vertcnt.size() || meshout.vertcnt.front() <= 1) {
 		return false;
 	}
 	return true;
@@ -1216,8 +1352,6 @@ void ProcessRevolvedAreaSolid(const IFC::IfcRevolvedAreaSolid& solid, TempMesh& 
 	ConvertAxisPlacement(trafo, solid.Position,conv);
 	
 	result.Transform(trafo);
-
-	FixupFaceOrientation(result);
 	IFCImporter::LogDebug("generate mesh procedurally by radial extrusion (IfcRevolvedAreaSolid)");
 }
 
@@ -1229,8 +1363,8 @@ bool TryAddOpenings(const std::vector<TempOpening>& openings,const std::vector<a
 
 	const size_t s = out.size();
 
-	const aiVector3D any_point = out[s-4];
-	const aiVector3D nor = ((out[s-3]-any_point)^(out[s-2]-any_point)).Normalize();
+	const aiVector3D any_point = out[s-1];
+	const aiVector3D nor = ComputePolygonNormal(curmesh); ;
 	
 	bool got_openings = false;
 	TempMesh res;
@@ -1527,7 +1661,7 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,const std::vecto
 }
 
 // ------------------------------------------------------------------------------------------------
-bool TryAddOpenings_Triangulate(const std::vector<TempOpening>& openings,const std::vector<aiVector3D>& nors, TempMesh& curmesh)
+bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const std::vector<aiVector3D>& nors, TempMesh& curmesh)
 {
 	std::vector<aiVector3D>& out = curmesh.verts;
 
@@ -1716,7 +1850,7 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 	std::vector<aiVector3D>& out = curmesh.verts;
 
 	bool (* const gen_openings)(const std::vector<TempOpening>&,const std::vector<aiVector3D>&, TempMesh&) = conv.settings.useCustomTriangulation 
-		? &TryAddOpenings_Triangulate 
+		? &TryAddOpenings_Quadrulate 
 		: &TryAddOpenings;
  
 	size_t sides_with_openings = 0;
@@ -1749,7 +1883,7 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 			}
 
 			curmesh.vertcnt.push_back(size);
-			if(conv.apply_openings) {
+			if(conv.apply_openings && size > 2) {
 				// XXX here we are forced to use the un-triangulated version of TryAddOpening, with
 				// all the problems it causes. The reason is that vertical walls (ehm, floors)
 				// can have an arbitrary outer shape, so the usual approach of projecting
@@ -1789,7 +1923,6 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 		IFCImporter::LogWarn("failed to resolve all openings, presumably their topology is not supported by Assimp");
 	}
 
-	FixupFaceOrientation(result);
 	IFCImporter::LogDebug("generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)");
 }
 
@@ -1822,17 +1955,6 @@ void ProcessSweptAreaSolid(const IFC::IfcSweptAreaSolid& swept, TempMesh& meshou
 		IFCImporter::LogWarn("skipping unknown IfcSweptAreaSolid entity, type is " + swept.GetClassName());
 	}
 }
-
-// ------------------------------------------------------------------------------------------------
-struct FuzzyVectorCompare {
-
-	FuzzyVectorCompare(float epsilon) : epsilon(epsilon) {}
-	bool operator()(const aiVector3D& a, const aiVector3D& b) {
-		return fabs((a-b).SquareLength()) < epsilon;
-	}
-
-	const float epsilon;
-};
 
 // ------------------------------------------------------------------------------------------------
 void ProcessBoolean(const IFC::IfcBooleanResult& boolean, TempMesh& result, ConversionData& conv)
@@ -2088,6 +2210,9 @@ bool ProcessTopologicalItem(const IFC::IfcTopologicalRepresentationItem& topo, s
 		return false;
 	}
 
+	meshtmp.RemoveAdjacentDuplicates();
+	FixupFaceOrientation(meshtmp);
+
 	aiMesh* const mesh = meshtmp.ToMesh();
 	if(mesh) {
 		mesh->mMaterialIndex = ProcessMaterials(topo,conv);
@@ -2138,8 +2263,10 @@ bool ProcessGeometricItem(const IFC::IfcGeometricRepresentationItem& geo, std::v
 		return false;
 	}
 
-	aiMesh* const mesh = meshtmp.ToMesh();
+	meshtmp.RemoveAdjacentDuplicates();
+	FixupFaceOrientation(meshtmp);
 
+	aiMesh* const mesh = meshtmp.ToMesh();
 	if(mesh) {
 		mesh->mMaterialIndex = ProcessMaterials(geo,conv);
 		mesh_indices.push_back(conv.meshes.size());
@@ -2246,17 +2373,6 @@ void ProcessMappedItem(const IFC::IfcMappedItem& mapped, aiNode* nd_src, std::ve
 	// insert a custom node here, the cartesian transform operator is simply a conventional transformation matrix
 	std::auto_ptr<aiNode> nd(new aiNode());
 	nd->mName.Set("IfcMappedItem");
-	
-	std::vector<unsigned int> meshes;
-	const size_t old_openings = conv.collect_openings ? conv.collect_openings->size() : 0;
-
-	const IFC::IfcRepresentation& repr = mapped.MappingSource->MappedRepresentation;
-	BOOST_FOREACH(const IFC::IfcRepresentationItem& item, repr.Items) {
-		if(!ProcessRepresentationItem(item,meshes,conv)) {
-			IFCImporter::LogWarn("skipping unknown mapped entity, type is " + item.GetClassName());
-		}
-	}
-	AssignAddedMeshes(meshes,nd.get(),conv);
 		
 	// handle the cartesian operator
 	aiMatrix4x4 m;
@@ -2265,28 +2381,39 @@ void ProcessMappedItem(const IFC::IfcMappedItem& mapped, aiNode* nd_src, std::ve
 	aiMatrix4x4 msrc;
 	ConvertAxisPlacement(msrc,*mapped.MappingSource->MappingOrigin,conv);
 
-	aiMatrix4x4 minv = msrc;
-	minv.Inverse();
+	msrc = m*msrc;
 
-	minv = m*msrc;
-	if (conv.collect_openings) {
-		// if this pass serves us only to collect opening geometry,
-		// make sure we transform the TempMesh's which we need to
-		// preserve as well.
-		if(const size_t diff = conv.collect_openings->size() - old_openings) {
-			for(size_t i = 0; i < diff; ++i) {
-				(*conv.collect_openings)[old_openings+i].Transform(minv);
-			}
-		}
-	}
-
+	std::vector<unsigned int> meshes;
+	const size_t old_openings = conv.collect_openings ? conv.collect_openings->size() : 0;
 	if (conv.apply_openings) {
+		aiMatrix4x4 minv = msrc;
+		minv.Inverse();
 		BOOST_FOREACH(TempOpening& open,*conv.apply_openings){
 			open.Transform(minv);
 		}
 	}
 
-	nd->mTransformation =  nd_src->mTransformation * minv;
+	const IFC::IfcRepresentation& repr = mapped.MappingSource->MappedRepresentation;
+	BOOST_FOREACH(const IFC::IfcRepresentationItem& item, repr.Items) {
+		if(!ProcessRepresentationItem(item,meshes,conv)) {
+			IFCImporter::LogWarn("skipping unknown mapped entity, type is " + item.GetClassName());
+		}
+	}
+
+	AssignAddedMeshes(meshes,nd.get(),conv);
+	if (conv.collect_openings) {
+
+		// if this pass serves us only to collect opening geometry,
+		// make sure we transform the TempMesh's which we need to
+		// preserve as well.
+		if(const size_t diff = conv.collect_openings->size() - old_openings) {
+			for(size_t i = 0; i < diff; ++i) {
+				(*conv.collect_openings)[old_openings+i].Transform(msrc);
+			}
+		}
+	}
+
+	nd->mTransformation =  nd_src->mTransformation * msrc;
 	subnodes_src.push_back(nd.release());
 }
 
@@ -2429,7 +2556,6 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IFC::IfcProduct& el, Conve
 		if(!conv.collect_openings) {
 			conv.apply_openings = &openings;
 		}
-
 
 		ProcessProductRepresentation(el,nd.get(),subnodes,conv);
 		conv.apply_openings = conv.collect_openings = NULL;

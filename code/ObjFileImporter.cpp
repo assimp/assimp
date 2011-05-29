@@ -342,7 +342,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 			pMesh->mVertices[ newIndex ] = pModel->m_Vertices[ vertex ];
 			
 			// Copy all normals 
-			if ( !pSourceFace->m_pNormals->empty() )
+			if ( !pSourceFace->m_pNormals->empty() && !pModel->m_Normals.empty())
 			{
 				const unsigned int normal = pSourceFace->m_pNormals->at( vertexIndex );
 				if (normal >= pModel->m_Normals.size()) {

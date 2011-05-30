@@ -445,11 +445,10 @@ STEP::LazyObject::~LazyObject()
 {
 	// make sure the right dtor/operator delete get called
 	if (obj) {
+		delete obj;
 		delete conv_args;
 	}
 	else delete[] args;
-
-	delete obj;
 }
 
 // ------------------------------------------------------------------------------------------------

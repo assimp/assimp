@@ -1047,17 +1047,20 @@ void MergePolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t mas
 	// skip over extremely small boundaries - this is a workaround to fix cases
 	// in which the number of holes is so extremely large that the
 	// triangulation code fails.
+#define IFC_VERTICAL_HOLE_SIZE_TRESHOLD 0.000001f
 	size_t vidx = 0, removed = 0, index = 0;
-	const float treshold = area_outer_polygon * 0.000001f;
+	const float treshold = area_outer_polygon * IFC_VERTICAL_HOLE_SIZE_TRESHOLD;
 	for(iit = begin; iit != end ;++index) {
 		const float sqlen = normals[index].SquareLength();
 		if (sqlen < treshold) {
 			std::vector<aiVector3D>::iterator inbase = in.begin()+vidx;
 			in.erase(inbase,inbase+*iit);
-			*iit++ = 0;
-
+			
 			outer_polygon_start -= outer_polygon_start>vidx ? *iit : 0;
+			*iit++ = 0;
 			++removed;
+
+			IFCImporter::LogDebug("skip small hole below treshold");
 		}
 		else {
 			normals[index] /= sqrt(sqlen);

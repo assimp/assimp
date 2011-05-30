@@ -56,9 +56,9 @@ namespace STEP {
 	// --------------------------------------------------------------------------
 	// 2) read the actual file contents using a user-supplied set of
 	//    conversion functions to interpret the data.
-	void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const* arr, size_t len);
-	template <size_t N> inline void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const (&arr)[N]) {
-		return ReadFile(db,scheme,arr,N);
+	void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const* types_to_track, size_t len, const char* const* inverse_indices_to_track, size_t len2);
+	template <size_t N, size_t N2> inline void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const (&arr)[N], const char* const (&arr2)[N2]) {
+		return ReadFile(db,scheme,arr,N,arr2,N2);
 	}
 	
 

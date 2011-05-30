@@ -416,8 +416,13 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 		"ifcsite", "ifcbuilding", "ifcproject"
 	};
 
+	// tell the reader for which types we need to simulate STEPs reverse indices
+	static const char* const inverse_indices_to_track[] = {
+		"ifcrelcontainedinspatialstructure", "ifcrelaggregates", "ifcrelvoidselement", "ifcstyleditem"
+	};
+
 	// feed the IFC schema into the reader and pre-parse all lines
-	STEP::ReadFile(*db, schema, types_to_track);
+	STEP::ReadFile(*db, schema, types_to_track, inverse_indices_to_track);
 
 	const STEP::LazyObject* proj =  db->GetObject("ifcproject");
 	if (!proj) {
@@ -1901,6 +1906,7 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 
 	// add connection geometry to close the 'holes' for the openings
 	if(conv.apply_openings) {
+		//result.infacing.resize(result.verts.size()+);
 		BOOST_FOREACH(const TempOpening& t,*conv.apply_openings) {
 			const std::vector<aiVector3D>& in = t.profileMesh->verts;
 			std::vector<aiVector3D>& out = result.verts; 

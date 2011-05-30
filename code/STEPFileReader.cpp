@@ -161,10 +161,13 @@ STEP::DB* STEP::ReadFileHeader(boost::shared_ptr<IOStream> stream)
 
 
 // ------------------------------------------------------------------------------------------------
-void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,const char* const* arr, size_t len)
+void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
+	const char* const* types_to_track, size_t len,
+	const char* const* inverse_indices_to_track, size_t len2)
 {
 	db.SetSchema(scheme);
-	db.SetTypesToTrack(arr,len);
+	db.SetTypesToTrack(types_to_track,len);
+	db.SetInverseIndicesToTrack(inverse_indices_to_track,len2);
 
 	const DB::ObjectMap& map = db.GetObjects();
 	LineSplitter& splitter = db.GetSplitter();
@@ -228,7 +231,8 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,const char* c
 	}
 
 	if ( !DefaultLogger::isNullLogger() ){
-		DefaultLogger::get()->debug((Formatter::format(),"STEP: got ",map.size()," object records"));
+		DefaultLogger::get()->debug((Formatter::format(),"STEP: got ",map.size()," object records with ",
+			db.GetRefs().size()," inverse index entries"));
 	}
 }
 
@@ -402,10 +406,12 @@ STEP::LazyObject::LazyObject(DB& db, uint64_t id,uint64_t line,const std::string
 
 	// find any external references and store them in the database.
 	// this helps us emulate STEPs INVERSE fields.
-	for (size_t i = 0; i < conv_args->GetSize(); ++i) {
-		const EXPRESS::DataType* t = conv_args->operator [](i);
-		if (const EXPRESS::ENTITY* e = t->ToPtr<EXPRESS::ENTITY>()) {
-			db.MarkRef(*e,id);
+	if (db.KeepInverseIndicesForType(type)) {
+		for (size_t i = 0; i < conv_args->GetSize(); ++i) {
+			const EXPRESS::DataType* t = conv_args->operator [](i);
+			if (const EXPRESS::ENTITY* e = t->ToPtr<EXPRESS::ENTITY>()) {
+				db.MarkRef(*e,id);
+			}
 		}
 	}
 }

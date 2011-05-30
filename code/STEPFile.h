@@ -371,6 +371,8 @@ namespace STEP {
 				ConvertObjectProc func;
 			};
 
+			typedef std::map<std::string,ConvertObjectProc> ConverterMap;
+
 		public:
 
 			template <size_t N> 
@@ -383,7 +385,7 @@ namespace STEP {
 		public:
 
 			ConvertObjectProc GetConverterProc(const std::string& name) const {
-				std::map<std::string,ConvertObjectProc>::const_iterator it = converters.find(name);
+				ConverterMap::const_iterator it = converters.find(name);
 				return it == converters.end() ? NULL : (*it).second;
 			}
 
@@ -404,7 +406,7 @@ namespace STEP {
 
 		private:
 
-			std::map<std::string,ConvertObjectProc> converters;
+			ConverterMap converters;
 		};
 	}
 
@@ -804,7 +806,11 @@ namespace STEP {
 	class DB
 	{
 		friend DB* ReadFileHeader(boost::shared_ptr<IOStream> stream);
-		friend void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,const char* const* arr, size_t len);
+		friend void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
+			const char* const* types_to_track, size_t len,
+			const char* const* inverse_indices_to_track, size_t len2
+		);
+
 		friend class LazyObject;
 
 	public:
@@ -819,6 +825,10 @@ namespace STEP {
 		// references - for each object id the ids of all objects which reference it
 		typedef std::step_unordered_multimap<uint64_t, uint64_t > RefMap;
 		typedef std::pair<RefMap::const_iterator,RefMap::const_iterator> RefMapRange;
+
+		// list of types for which to keep inverse indices for all references
+		// the respective objects keep.
+		typedef std::set<std::string> InverseWhitelist;
 
 	private:
 
@@ -856,6 +866,11 @@ namespace STEP {
 
 		const RefMap& GetRefs() const {
 			return refs;
+		}
+
+
+		bool KeepInverseIndicesForType(const std::string& type) const {
+			return inv_whitelist.find(type) != inv_whitelist.end();
 		}
 
 
@@ -937,6 +952,12 @@ namespace STEP {
 			}
 		}
 
+		void SetInverseIndicesToTrack( const char* const* types, size_t N ) {
+			for(size_t i = 0; i < N;++i) {
+				inv_whitelist.insert(types[i]);
+			}
+		}
+
 		HeaderInfo& GetHeader() {
 			return header;
 		}
@@ -945,12 +966,15 @@ namespace STEP {
 			refs.insert(std::make_pair(who,by_whom));
 		}
 
+
+
 	private:
 
 		HeaderInfo header;
 		ObjectMap objects;
 		ObjectMapByType objects_bytype;
 		RefMap refs;
+		InverseWhitelist inv_whitelist;
 
 		boost::shared_ptr<StreamReaderLE> reader;
 		LineSplitter splitter;

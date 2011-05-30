@@ -1748,7 +1748,11 @@ template <> size_t GenericFill<IfcNamedUnit>(const DB& db, const LIST& params, I
 	if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to IfcNamedUnit"); }    do { // convert the 'Dimensions' argument
         const DataType* arg = params[base++];
         if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcNamedUnit,2>::aux_is_derived[0]=true; break; }
-        try { GenericConvert( in->Dimensions, *arg, db ); break; } 
+        if (dynamic_cast<const UNSET*>(&*arg)) {
+			// (hack) allow this - I found some Ifc files which violate the spec here
+			break;
+		}
+		try { GenericConvert( in->Dimensions, *arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcNamedUnit to be a `IfcDimensionalExponents`")); }
     } while(0);
     do { // convert the 'UnitType' argument

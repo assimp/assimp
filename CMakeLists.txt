@@ -19,6 +19,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   add_definitions(-fPIC) # this is a very important switch and some libraries seem now to have it....
 endif()
 
+INCLUDE (FindPkgConfig)
 INCLUDE_DIRECTORIES( include )
 
 # If this is an in-source build (CMAKE_SOURCE_DIR == CMAKE_BINARY_DIR),
@@ -71,6 +72,8 @@ SET ( NO_EXPORT OFF CACHE BOOL
 	"Disable Assimp's export functionality." 
 )
 
+# Search for external dependencies, and build them from source if not found
+# Search for zlib
 find_package(ZLIB)
 if( NOT ZLIB_FOUND )
   message(STATUS "compiling zlib from souces")
@@ -82,11 +85,15 @@ if( NOT ZLIB_FOUND )
   set(ZLIB_FOUND 1)
   set(ZLIB_LIBRARIES zlib)
   set(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/zlib)
-else()
+else(NOT ZLIB_FOUND)
   ADD_DEFINITIONS(-DASSIMP_BUILD_NO_OWN_ZLIB)
-endif()
-
+endif(NOT ZLIB_FOUND)
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+
+# Search for unzip
+if (PKG_CONFIG_FOUND)
+	PKG_CHECK_MODULES(UNZIP minizip)
+endif (PKG_CONFIG_FOUND)
 
 IF ( NO_EXPORT )
 	ADD_DEFINITIONS( -DASSIMP_BUILD_NO_EXPORT)

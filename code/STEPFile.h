@@ -328,9 +328,17 @@ namespace STEP {
 		{
 		public:
 
+			~LIST() {
+				BOOST_FOREACH(const DataType* dt, members) {
+					delete dt;
+				}
+			}
+
+		public:
+
 			// access a particular list index, throw std::range_error for wrong indices 
 			const DataType* operator[] (size_t index) const {
-				return members[index].get();
+				return members[index];
 			}
 
 			size_t GetSize() const {
@@ -346,7 +354,8 @@ namespace STEP {
 
 
 		private:
-			typedef std::vector< boost::shared_ptr<const DataType> > MemberList;
+			// no smart pointer type to avoid any overhead
+			typedef std::vector< const DataType* > MemberList;
 			MemberList members;
 		};
 
@@ -392,6 +401,11 @@ namespace STEP {
 
 			bool IsKnownToken(const std::string& name) const {
 				return converters.find(name) != converters.end();
+			}
+
+			const char* GetStaticStringForToken(const std::string& token) const {
+				ConverterMap::const_iterator it = converters.find(token);
+				return it == converters.end() ? NULL : (*it).first.c_str();
 			}
 
 
@@ -579,7 +593,7 @@ namespace STEP {
 		friend class DB;
 	public:
 
-		LazyObject(DB& db, uint64_t id,uint64_t line,const std::string& type,const std::string& args);
+		LazyObject(DB& db, uint64_t id, uint64_t line, const char* type,const char* args);
 		~LazyObject();
 
 	public:
@@ -636,17 +650,24 @@ namespace STEP {
 			return type != atype;
 		}
 
+		uint64_t GetID() const {
+			return id;
+		}
+
 	private:
 
 		void LazyInit() const;
 
 	private:
 
-		const uint64_t id, line;
-		const std::string type;
+		mutable uint64_t id;
+		const char* const type;
 		DB& db;
 
-		const EXPRESS::LIST* conv_args;
+		union {
+			mutable const EXPRESS::LIST* conv_args;
+			mutable const char* args;
+		};
 		mutable Object* obj;
 	};
 
@@ -815,20 +836,23 @@ namespace STEP {
 
 	public:
 
-		// objects indexed by ID
-		typedef std::map<uint64_t,boost::shared_ptr<const LazyObject> > ObjectMap;
+		// objects indexed by ID - this can grow pretty large (i.e some hundred million 
+		// entries), so use raw pointers to avoid *any* overhead.
+		typedef std::map<uint64_t,const LazyObject* > ObjectMap;
 
 		// objects indexed by their declarative type, but only for those that we truly want
 		typedef std::set< const LazyObject*> ObjectSet;
 		typedef std::map<std::string, ObjectSet > ObjectMapByType;
 
+		// list of types for which to keep inverse indices for all references
+		// that the respective objects keep.
+		// the list keeps pointers to strings in static storage
+		typedef std::set<const char*> InverseWhitelist;
+
 		// references - for each object id the ids of all objects which reference it
+		// this is used to simulate STEP inverse indices for selected types.
 		typedef std::step_unordered_multimap<uint64_t, uint64_t > RefMap;
 		typedef std::pair<RefMap::const_iterator,RefMap::const_iterator> RefMapRange;
-
-		// list of types for which to keep inverse indices for all references
-		// the respective objects keep.
-		typedef std::set<std::string> InverseWhitelist;
 
 	private:
 
@@ -837,6 +861,14 @@ namespace STEP {
 			, splitter(*reader,true,true)
 			, evaluated_count()
 		{}
+
+	public:
+
+		~DB() {
+			BOOST_FOREACH(ObjectMap::value_type& o, objects) {
+				delete o.second;
+			}
+		}
 
 	public:
 
@@ -869,7 +901,7 @@ namespace STEP {
 		}
 
 
-		bool KeepInverseIndicesForType(const std::string& type) const {
+		bool KeepInverseIndicesForType(const char* const type) const {
 			return inv_whitelist.find(type) != inv_whitelist.end();
 		}
 
@@ -878,7 +910,7 @@ namespace STEP {
 		const LazyObject* GetObject(uint64_t id) const {
 			const ObjectMap::const_iterator it = objects.find(id);
 			if (it != objects.end()) {
-				return (*it).second.get();
+				return (*it).second;
 			}
 			return NULL;
 		}
@@ -932,12 +964,12 @@ namespace STEP {
 			return splitter;
 		}
 
-		void InternInsert(boost::shared_ptr<const LazyObject> lz) {
-			objects[lz->id] = lz;
+		void InternInsert(const LazyObject* lz) {
+			objects[lz->GetID()] = lz;
 
 			const ObjectMapByType::iterator it = objects_bytype.find( lz->type );
 			if (it != objects_bytype.end()) {
-				(*it).second.insert(lz.get());
+				(*it).second.insert(lz);
 			}
 		}
 
@@ -954,7 +986,9 @@ namespace STEP {
 
 		void SetInverseIndicesToTrack( const char* const* types, size_t N ) {
 			for(size_t i = 0; i < N;++i) {
-				inv_whitelist.insert(types[i]);
+				const char* const sz = schema->GetStaticStringForToken(types[i]);
+				ai_assert(sz);
+				inv_whitelist.insert(sz);
 			}
 		}
 

@@ -220,10 +220,25 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 			DefaultLogger::get()->warn(AddLineNumber((Formatter::format(),"an object with the id #",id," already exists"),line));
 		}
 
-		std::string type = s.substr(n0+1,n1-n0-1);
-		trim(type);
+		std::string::size_type ns = n0;
+		do ++ns; while( IsSpace(s.at(ns)));
+
+		std::string::size_type ne = n1;
+		do --ne; while( IsSpace(s.at(ne)));
+
+		std::string type = s.substr(ns,ne-ns+1);
 		std::transform( type.begin(), type.end(), type.begin(), &Assimp::ToLower<char>  );
-		db.InternInsert(boost::shared_ptr<LazyObject>(new LazyObject(db,id,line,type,s.substr(n1,n2-n1+1))));
+
+		const char* sz = scheme.GetStaticStringForToken(type);
+		if(sz) {
+		
+			const std::string::size_type len = n2-n1+1;
+			char* const copysz = new char[len+1];
+			std::copy(s.c_str()+n1,s.c_str()+n2+1,copysz);
+			copysz[len] = '\0';
+
+			db.InternInsert(new LazyObject(db,id,line,sz,copysz));
+		}
 	}
 
 	if (!splitter) {
@@ -375,7 +390,7 @@ const EXPRESS::LIST* EXPRESS::LIST::Parse(const char*& inout,uint64_t line, cons
 			break;
 		}
 		
-		members.push_back( boost::shared_ptr<const EXPRESS::DataType>(EXPRESS::DataType::Parse(cur,line,schema)));
+		members.push_back( EXPRESS::DataType::Parse(cur,line,schema));
 		SkipSpaces(cur,&cur);
 
 		if (*cur != ',') {
@@ -390,41 +405,52 @@ const EXPRESS::LIST* EXPRESS::LIST::Parse(const char*& inout,uint64_t line, cons
 	return list.release();
 }
 
+
 // ------------------------------------------------------------------------------------------------
-STEP::LazyObject::LazyObject(DB& db, uint64_t id,uint64_t line,const std::string& type,const std::string& args) 
+STEP::LazyObject::LazyObject(DB& db, uint64_t id,uint64_t line, const char* const type,const char* args) 
 	: db(db)
 	, id(id)
-	, line(line)
 	, type(type)
 	, obj()
-	// need to initialize this upfront, otherwise the destructor
-	// will crash if an exception is thrown in the c'tor
-	, conv_args() 
+	, args(args)
 {
-	const char* arg = args.c_str();
-	conv_args = EXPRESS::LIST::Parse(arg,line,&db.GetSchema());
-
 	// find any external references and store them in the database.
 	// this helps us emulate STEPs INVERSE fields.
 	if (db.KeepInverseIndicesForType(type)) {
-		for (size_t i = 0; i < conv_args->GetSize(); ++i) {
-			const EXPRESS::DataType* t = conv_args->operator [](i);
-			if (const EXPRESS::ENTITY* e = t->ToPtr<EXPRESS::ENTITY>()) {
-				db.MarkRef(*e,id);
+		const char* a  = args;
+	
+		// do a quick scan through the argument tuple and watch out for entity references
+		int64_t skip_depth = 0;
+		while(*a) {
+			if (*a == '(') {
+				++skip_depth;
 			}
+			else if (*a == ')') {
+				--skip_depth;
+			}
+
+			if (skip_depth == 1 && *a=='#') {
+				const char* tmp;
+				const int64_t num = static_cast<int64_t>( strtoul10_64(a+1,&tmp) );
+				db.MarkRef(num,id);
+			}
+			++a;
 		}
+
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
 STEP::LazyObject::~LazyObject() 
 {
-	// 'obj' always remains in our possession, so there is 
-	// no need for a smart pointer type.
-	delete obj;
-	delete conv_args;
-}
+	// make sure the right dtor/operator delete get called
+	if (obj) {
+		delete conv_args;
+	}
+	else delete[] args;
 
+	delete obj;
+}
 
 // ------------------------------------------------------------------------------------------------
 void STEP::LazyObject::LazyInit() const
@@ -433,8 +459,12 @@ void STEP::LazyObject::LazyInit() const
 	STEP::ConvertObjectProc proc = schema.GetConverterProc(type);
 
 	if (!proc) {
-		throw STEP::TypeError("unknown object type: " + type,id,line);
+		throw STEP::TypeError("unknown object type: " + std::string(type),id);
 	}
+
+	const char* a  = args, *acopy = a;
+	conv_args = EXPRESS::LIST::Parse(acopy,STEP::SyntaxError::LINE_NOT_SPECIFIED,&db.GetSchema());
+	delete[] a;
 
 	// if the converter fails, it should throw an exception, but it should never return NULL
 	try {
@@ -442,11 +472,15 @@ void STEP::LazyObject::LazyInit() const
 	}
 	catch(const TypeError& t) {
 		// augment line and entity information
-		throw TypeError(t.what(),id,line);
+		throw TypeError(t.what(),id);
 	}
 	++db.evaluated_count;
 	ai_assert(obj);
 
 	// store the original id in the object instance
 	obj->SetID(id);
+
+	//delete conv_args;
+	//conv_args = NULL;
 }
+

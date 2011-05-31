@@ -70,6 +70,7 @@ SET( Boost_SRCS
 	BoostWorkaround/boost/scoped_ptr.hpp
 	BoostWorkaround/boost/shared_array.hpp
 	BoostWorkaround/boost/shared_ptr.hpp
+	BoostWorkaround/boost/make_shared.hpp
 	BoostWorkaround/boost/static_assert.hpp
 	BoostWorkaround/boost/tuple/tuple.hpp
 )

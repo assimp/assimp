@@ -4073,6 +4073,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\code\BoostWorkaround\boost\make_shared.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\code\BoostWorkaround\boost\pointer_cast.hpp"
 					>
 				</File>

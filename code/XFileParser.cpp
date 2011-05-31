@@ -200,10 +200,6 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 			// and advance to the next offset
 			P1 += ofs;
 			est_out += MSZIP_BLOCK; // one decompressed block is 32786 in size
-
-			// this block would continue past the file end, abort
-			if (P1 > End+1)
-				throw DeadlyImportError("X: Unexpected end of file while uncompressing");
 		}
 		
 		// Allocate storage and terminating zero and do the actual uncompressing

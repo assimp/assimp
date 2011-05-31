@@ -43,6 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <boost/noncopyable.hpp>
 #include <bitset>
+#include <memory>
+#include <typeinfo>
 
 //
 #if _MSC_VER >= 1500 || (defined __GNUC___)
@@ -260,6 +262,7 @@ namespace STEP {
 			PrimitiveDataType(const PrimitiveDataType& o) {
 				(*this) = o;
 			}
+
 
 		public:
 

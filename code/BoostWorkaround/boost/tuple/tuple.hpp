@@ -180,7 +180,7 @@ namespace boost	{
 
 		// ... and the const version
 		template <unsigned N>
-		typename const detail::type_getter<T0,0,typename very_long::next_type, N>::type& get () const	{
+		const typename detail::type_getter<T0,0,typename very_long::next_type, N>::type& get () const	{
 			return m.get<N>();
 		}
 
@@ -196,26 +196,24 @@ namespace boost	{
 		}
 
 		// cast to another tuple - all single elements must be convertible
-		template <	typename T0, typename T1,typename T2,
-					typename T3, typename T4>
-
-		operator tuple <T0,T1,T2,T3,T4> () const {
-			tuple <T0,T1,T2,T3,T4> s;
-			s.m = (tuple <T0,T1,T2,T3,T4>::very_long)m;
+		template <typename T0b, typename T1b,typename T2b,typename T3b, typename T4b>
+		operator tuple <T0b,T1b,T2b,T3b,T4b> () const {
+			tuple <T0b,T1b,T2b,T3b,T4b> s;
+			s.m = (typename tuple <T0b,T1b,T2b,T3b,T4b>::very_long)m;
 			return s;
 		}
 	};
 
 	// Another way to access an element ...
 	template <unsigned N,typename T0,typename T1,typename T2,typename T3,typename T4>
-	inline typename tuple<T0,T1,T2,T3,T4>::very_long::type_getter<N>::type& get (
+	inline typename tuple<T0,T1,T2,T3,T4>::very_long::template type_getter<N>::type& get (
 			tuple<T0,T1,T2,T3,T4>& m)	{
 			return m.get<N>();
 		}
 
 	// ... and the const version
 	template <unsigned N,typename T0,typename T1,typename T2,typename T3,typename T4>
-	inline const typename tuple<T0,T1,T2,T3,T4>::very_long::type_getter<N>::type& get (
+	inline const typename tuple<T0,T1,T2,T3,T4>::very_long::template type_getter<N>::type& get (
 			const tuple<T0,T1,T2,T3,T4>& m)	{
 			return m.get<N>();
 		}

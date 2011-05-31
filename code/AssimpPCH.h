@@ -124,7 +124,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/scoped_array.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
-//#include <boost/make_shared.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/format.hpp>
 #include <boost/foreach.hpp>
 #include <boost/static_assert.hpp>

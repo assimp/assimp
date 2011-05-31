@@ -210,7 +210,7 @@ namespace STEP {
 			 *
 			 *  @throw SyntaxError
 			 */
-			static const DataType* Parse(const char*& inout,
+			static boost::shared_ptr<const EXPRESS::DataType> Parse(const char*& inout,
 				uint64_t line							= SyntaxError::LINE_NOT_SPECIFIED,
 				const EXPRESS::ConversionSchema* schema = NULL);
 
@@ -340,7 +340,7 @@ namespace STEP {
 		public:
 
 			/** @see DaraType::Parse */
-			static const LIST* Parse(const char*& inout,
+			static boost::shared_ptr<const EXPRESS::LIST> Parse(const char*& inout,
 				uint64_t line							= SyntaxError::LINE_NOT_SPECIFIED,
 				const EXPRESS::ConversionSchema* schema = NULL);
 
@@ -654,11 +654,8 @@ namespace STEP {
 		mutable uint64_t id;
 		const char* const type;
 		DB& db;
-
-		union {
-			mutable const EXPRESS::LIST* conv_args;
-			mutable const char* args;
-		};
+	
+		mutable const char* args;
 		mutable Object* obj;
 	};
 

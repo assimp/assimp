@@ -327,7 +327,7 @@ void ProcessSpatialStructures(ConversionData& conv);
 aiNode* ProcessSpatialStructure(aiNode* parent, const IFC::IfcProduct& el ,ConversionData& conv);
 void ProcessProductRepresentation(const IFC::IfcProduct& el, aiNode* nd, ConversionData& conv);
 void MakeTreeRelative(ConversionData& conv);
-void ConvertUnit(const EXPRESS::DataType* dt,ConversionData& conv);
+void ConvertUnit(const EXPRESS::DataType& dt,ConversionData& conv);
 void ProcessSweptAreaSolid(const IFC::IfcSweptAreaSolid& swept, TempMesh& meshout, ConversionData& conv);
 
 } // anon
@@ -560,7 +560,7 @@ void ConvertUnit(const IFC::IfcNamedUnit& unit,ConversionData& conv)
 		if(convu->UnitType == "PLANEANGLEUNIT") { 
 			try {
 				conv.angle_scale = convu->ConversionFactor->ValueComponent->To<EXPRESS::REAL>();
-				ConvertUnit(convu->ConversionFactor->UnitComponent,conv);
+				ConvertUnit(*convu->ConversionFactor->UnitComponent,conv);
 				IFCImporter::LogDebug("got units used for angles");
 			}
 			catch(std::bad_cast&) {
@@ -571,10 +571,10 @@ void ConvertUnit(const IFC::IfcNamedUnit& unit,ConversionData& conv)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertUnit(const EXPRESS::DataType* dt,ConversionData& conv)
+void ConvertUnit(const EXPRESS::DataType& dt,ConversionData& conv)
 {
 	try {
-		const EXPRESS::ENTITY& e = dt->To<IFC::ENTITY>();
+		const EXPRESS::ENTITY& e = dt.To<IFC::ENTITY>();
 
 		const IFC::IfcNamedUnit& unit = e.ResolveSelect<IFC::IfcNamedUnit>(conv.db);
 		if(unit.UnitType != "LENGTHUNIT" && unit.UnitType != "PLANEANGLEUNIT") {
@@ -594,7 +594,7 @@ void SetUnits(ConversionData& conv)
 {
 	// see if we can determine the coordinate space used to express. 
 	for(size_t i = 0; i <  conv.proj.UnitsInContext->Units.size(); ++i ) {
-		ConvertUnit(conv.proj.UnitsInContext->Units[i],conv);
+		ConvertUnit(*conv.proj.UnitsInContext->Units[i],conv);
 	}
 }
 
@@ -608,9 +608,9 @@ void ConvertColor(aiColor4D& out, const IFC::IfcColourRgb& in)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertColor(aiColor4D& out, const IFC::IfcColourOrFactor* in,ConversionData& conv,const aiColor4D* base)
+void ConvertColor(aiColor4D& out, const IFC::IfcColourOrFactor& in,ConversionData& conv,const aiColor4D* base)
 {
-	if (const EXPRESS::REAL* const r = in->ToPtr<EXPRESS::REAL>()) {
+	if (const EXPRESS::REAL* const r = in.ToPtr<EXPRESS::REAL>()) {
 		out.r = out.g = out.b = *r;
 		if(base) {
 			out.r *= base->r;
@@ -620,7 +620,7 @@ void ConvertColor(aiColor4D& out, const IFC::IfcColourOrFactor* in,ConversionDat
 		}
 		else out.a = 1.0;
 	}
-	else if (const IFC::IfcColourRgb* const rgb = in->ResolveSelectPtr<IFC::IfcColourRgb>(conv.db)) {
+	else if (const IFC::IfcColourRgb* const rgb = in.ResolveSelectPtr<IFC::IfcColourRgb>(conv.db)) {
 		ConvertColor(out,*rgb);
 	}
 	else {
@@ -2108,7 +2108,7 @@ void FillMaterial(MaterialHelper* mat,const IFC::IfcSurfaceStyle* surf,Conversio
 	mat->AddProperty(&name,AI_MATKEY_NAME);
 
 	// now see which kinds of surface information are present
-	BOOST_FOREACH(const IFC::IfcSurfaceStyleElementSelect* sel2, surf->Styles) {
+	BOOST_FOREACH(boost::shared_ptr< const IFC::IfcSurfaceStyleElementSelect > sel2, surf->Styles) {
 		if (const IFC::IfcSurfaceStyleShading* shade = sel2->ResolveSelectPtr<IFC::IfcSurfaceStyleShading>(conv.db)) {
 			aiColor4D col_base,col;
 
@@ -2123,22 +2123,22 @@ void FillMaterial(MaterialHelper* mat,const IFC::IfcSurfaceStyle* surf,Conversio
 				}
 
 				if (ren->DiffuseColour) {
-					ConvertColor(col, ren->DiffuseColour.Get(),conv,&col_base);
+					ConvertColor(col, *ren->DiffuseColour.Get(),conv,&col_base);
 					mat->AddProperty(&col,1, AI_MATKEY_COLOR_DIFFUSE);
 				}
 
 				if (ren->SpecularColour) {
-					ConvertColor(col, ren->SpecularColour.Get(),conv,&col_base);
+					ConvertColor(col, *ren->SpecularColour.Get(),conv,&col_base);
 					mat->AddProperty(&col,1, AI_MATKEY_COLOR_SPECULAR);
 				}
 
 				if (ren->TransmissionColour) {
-					ConvertColor(col, ren->TransmissionColour.Get(),conv,&col_base);
+					ConvertColor(col, *ren->TransmissionColour.Get(),conv,&col_base);
 					mat->AddProperty(&col,1, AI_MATKEY_COLOR_TRANSPARENT);
 				}
 
 				if (ren->ReflectionColour) {
-					ConvertColor(col, ren->ReflectionColour.Get(),conv,&col_base);
+					ConvertColor(col, *ren->ReflectionColour.Get(),conv,&col_base);
 					mat->AddProperty(&col,1, AI_MATKEY_COLOR_REFLECTIVE);
 				}
 
@@ -2185,7 +2185,7 @@ unsigned int ProcessMaterials(const IFC::IfcRepresentationItem& item, Conversion
 	for(;range.first != range.second; ++range.first) {
 		if(const IFC::IfcStyledItem* const styled = conv.db.GetObject((*range.first).second)->ToPtr<IFC::IfcStyledItem>()) {
 			BOOST_FOREACH(const IFC::IfcPresentationStyleAssignment& as, styled->Styles) {
-				BOOST_FOREACH(const IFC::IfcPresentationStyleSelect* sel, as.Styles) {
+				BOOST_FOREACH(boost::shared_ptr<const IFC::IfcPresentationStyleSelect> sel, as.Styles) {
 			
 					if (const IFC::IfcSurfaceStyle* const surf =  sel->ResolveSelectPtr<IFC::IfcSurfaceStyle>(conv.db)) {
 						const std::string side = static_cast<std::string>(surf->Side);
@@ -2237,7 +2237,7 @@ bool ProcessGeometricItem(const IFC::IfcGeometricRepresentationItem& geo, std::v
 {
 	TempMesh meshtmp;
 	if(const IFC::IfcShellBasedSurfaceModel* shellmod = geo.ToPtr<IFC::IfcShellBasedSurfaceModel>()) {
-		BOOST_FOREACH(const IFC::IfcShell* shell,shellmod->SbsmBoundary) {
+		BOOST_FOREACH(boost::shared_ptr<const IFC::IfcShell> shell,shellmod->SbsmBoundary) {
 			try {
 				const EXPRESS::ENTITY& e = shell->To<IFC::ENTITY>();
 				const IFC::IfcConnectedFaceSet& fs = conv.db.MustGetObject(e).To<IFC::IfcConnectedFaceSet>(); 
@@ -2589,6 +2589,9 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IFC::IfcProduct& el, Conve
 // ------------------------------------------------------------------------------------------------
 void ProcessSpatialStructures(ConversionData& conv)
 {
+	// XXX add support for multiple sites (i.e. IfcSpatialStructureElements with composition == COMPLEX)
+
+
 	// process all products in the file. it is reasonable to assume that a
 	// file that is relevant for us contains at least a site or a building.
 	const STEP::DB::ObjectMapByType& map = conv.db.GetObjectsByType();
@@ -2634,6 +2637,17 @@ void ProcessSpatialStructures(ConversionData& conv)
 		}
 	}
 
+	
+	IFCImporter::LogWarn("failed to determine primary site element, taking the first IfcSite");
+	BOOST_FOREACH(const STEP::LazyObject* lz, *range) {
+		const IFC::IfcSpatialStructureElement* const prod = lz->ToPtr<IFC::IfcSpatialStructureElement>();
+		if(!prod) {
+			continue;
+		}
+
+		conv.out->mRootNode = ProcessSpatialStructure(NULL,*prod,conv,NULL);
+		return;
+	}
 
 	IFCImporter::ThrowException("failed to determine primary site element");
 }

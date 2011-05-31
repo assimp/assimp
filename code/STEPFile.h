@@ -159,7 +159,7 @@ namespace STEP {
 		{
 		public:
 
-			typedef const DataType* Out;
+			typedef boost::shared_ptr<const DataType> Out;
 
 		public:
 
@@ -328,16 +328,8 @@ namespace STEP {
 		{
 		public:
 
-			~LIST() {
-				BOOST_FOREACH(const DataType* dt, members) {
-					delete dt;
-				}
-			}
-
-		public:
-
 			// access a particular list index, throw std::range_error for wrong indices 
-			const DataType* operator[] (size_t index) const {
+			boost::shared_ptr<const DataType> operator[] (size_t index) const {
 				return members[index];
 			}
 
@@ -354,8 +346,7 @@ namespace STEP {
 
 
 		private:
-			// no smart pointer type to avoid any overhead
-			typedef std::vector< const DataType* > MemberList;
+			typedef std::vector< boost::shared_ptr<const DataType> > MemberList;
 			MemberList members;
 		};
 
@@ -735,14 +726,14 @@ namespace STEP {
 		typedef EXPRESS::ENTITY Type;
 	};
 
-	template <> struct PickBaseType<EXPRESS::DataType*>;
+	template <> struct PickBaseType< boost::shared_ptr< const EXPRESS::DataType > >;
 
 	// ------------------------------------------------------------------------------
 	template <typename T>
 	struct InternGenericConvert {
-		void operator()(T& out, const EXPRESS::DataType& in, const STEP::DB& db) {
+		void operator()(T& out, boost::shared_ptr< const EXPRESS::DataType >& in, const STEP::DB& db) {
 			try{
-				out = dynamic_cast< const typename PickBaseType<T>::Type& > ( in );
+				out = dynamic_cast< const typename PickBaseType<T>::Type& > ( *in );
 			}
 			catch(std::bad_cast&) {
 				throw TypeError("type error reading literal field");
@@ -751,15 +742,15 @@ namespace STEP {
 	};
 
 	template <>
-	struct InternGenericConvert<const EXPRESS::DataType*> {
-		void operator()(const EXPRESS::DataType*& out, const EXPRESS::DataType& in, const STEP::DB& db) {
-			out = &in;
+	struct InternGenericConvert< boost::shared_ptr< const EXPRESS::DataType > > {
+		void operator()(boost::shared_ptr< const EXPRESS::DataType >& out, boost::shared_ptr< const EXPRESS::DataType >& in, const STEP::DB& db) {
+			out = in;
 		}
 	};
 
 	template <typename T>
 	struct InternGenericConvert< Maybe<T> > {
-		void operator()(Maybe<T>& out, const EXPRESS::DataType& in, const STEP::DB& db) {
+		void operator()(Maybe<T>& out, boost::shared_ptr< const EXPRESS::DataType >& in, const STEP::DB& db) {
 			GenericConvert((T&)out,in,db);
 			out.flag_valid();
 		}
@@ -767,20 +758,19 @@ namespace STEP {
 
 	template <typename T,uint64_t min_cnt, uint64_t max_cnt>
 	struct InternGenericConvertList {
-		void operator()(ListOf<T, min_cnt, max_cnt>& out, const EXPRESS::DataType& inp_base, const STEP::DB& db) {
+		void operator()(ListOf<T, min_cnt, max_cnt>& out, boost::shared_ptr< const EXPRESS::DataType >& inp_base, const STEP::DB& db) {
 
-			const EXPRESS::LIST* inp = dynamic_cast<const EXPRESS::LIST*>(&inp_base);
+			const EXPRESS::LIST* inp = dynamic_cast<const EXPRESS::LIST*>(inp_base.get());
 			if (!inp) {
 				throw TypeError("type error reading aggregate");
 			}
 
-			// XXX is this really how the EXPRESS notation ([?:3],[1:3]) .. works?
-			// too many is warning, too few is critical error because the user won't validate this
+			// XXX is this really how the EXPRESS notation ([?:3],[1:3]) is intended?
 			if (max_cnt && inp->GetSize() > max_cnt) {
 				DefaultLogger::get()->warn("too many aggregate elements");
 			}
 			else if (inp->GetSize() < min_cnt) {
-				throw TypeError("too few aggregate elements");
+				DefaultLogger::get()->warn("too few aggregate elements");
 			}
 
 			out.reserve(inp->GetSize());
@@ -788,7 +778,7 @@ namespace STEP {
 
 				out.push_back( typename ListOf<T, min_cnt, max_cnt>::OutScalar() );
 				try{
-					GenericConvert(out.back(),*(*inp)[i], db);
+					GenericConvert(out.back(),(*inp)[i], db);
 				}
 				catch(const TypeError& t) {
 					throw TypeError(t.what() +std::string(" of aggregate"));
@@ -799,8 +789,8 @@ namespace STEP {
 
 	template <typename T>
 	struct InternGenericConvert< Lazy<T> > {
-		void operator()(Lazy<T>& out, const EXPRESS::DataType& in_base, const STEP::DB& db) {
-			const EXPRESS::ENTITY* in = dynamic_cast<const EXPRESS::ENTITY*>(&in_base);
+		void operator()(Lazy<T>& out, boost::shared_ptr< const EXPRESS::DataType >& in_base, const STEP::DB& db) {
+			const EXPRESS::ENTITY* in = dynamic_cast<const EXPRESS::ENTITY*>(in_base.get());
 			if (!in) {
 				throw TypeError("type error reading entity");
 			}
@@ -809,12 +799,12 @@ namespace STEP {
 	};
 
 	template <typename T1>
-	inline void GenericConvert(T1& a, const EXPRESS::DataType& b, const STEP::DB& db) {
+	inline void GenericConvert(T1& a, boost::shared_ptr< const EXPRESS::DataType >& b, const STEP::DB& db) {
 		return InternGenericConvert<T1>()(a,b,db);
 	}
 
 	template <typename T1,uint64_t N1, uint64_t N2>
-	inline void GenericConvert(ListOf<T1,N1,N2>& a, const EXPRESS::DataType& b, const STEP::DB& db) {
+	inline void GenericConvert(ListOf<T1,N1,N2>& a, boost::shared_ptr< const EXPRESS::DataType >& b, const STEP::DB& db) {
 		return InternGenericConvertList<T1,N1,N2>()(a,b,db);
 	}
 

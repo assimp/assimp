@@ -136,7 +136,7 @@ STEP::DB* STEP::ReadFileHeader(boost::shared_ptr<IOStream> stream)
 			// two nested lists.
 			const EXPRESS::LIST* list = dynamic_cast<const EXPRESS::LIST*>(schema.get());
 			if (list && list->GetSize()) {
-				list = dynamic_cast<const EXPRESS::LIST*>( (*list)[0] );
+				list = dynamic_cast<const EXPRESS::LIST*>( (*list)[0].get() );
 				if (!list) {
 					throw STEP::SyntaxError("expected FILE_SCHEMA to be a list",line);
 				}
@@ -146,7 +146,7 @@ STEP::DB* STEP::ReadFileHeader(boost::shared_ptr<IOStream> stream)
 					DefaultLogger::get()->warn(AddLineNumber("multiple schemas currently not supported",line));
 				}
 				const EXPRESS::STRING* string;
-				if (!list->GetSize() || !(string=dynamic_cast<const EXPRESS::STRING*>( (*list)[0] ))) {
+				if (!list->GetSize() || !(string=dynamic_cast<const EXPRESS::STRING*>( (*list)[0].get() ))) {
 					throw STEP::SyntaxError("expected FILE_SCHEMA to contain a single string literal",line);
 				}
 				head.fileSchema =  *string;
@@ -390,7 +390,7 @@ const EXPRESS::LIST* EXPRESS::LIST::Parse(const char*& inout,uint64_t line, cons
 			break;
 		}
 		
-		members.push_back( EXPRESS::DataType::Parse(cur,line,schema));
+		members.push_back( boost::shared_ptr<const EXPRESS::DataType> (EXPRESS::DataType::Parse(cur,line,schema)));
 		SkipSpaces(cur,&cur);
 
 		if (*cur != ',') {
@@ -479,7 +479,7 @@ void STEP::LazyObject::LazyInit() const
 	// store the original id in the object instance
 	obj->SetID(id);
 
-	//delete conv_args;
-	//conv_args = NULL;
+	delete conv_args;
+	conv_args = NULL;
 }
 

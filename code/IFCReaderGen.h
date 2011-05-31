@@ -3113,7 +3113,7 @@ namespace IFC {
 
     // C++ wrapper for IfcRelContainedInSpatialStructure
     struct IfcRelContainedInSpatialStructure : IfcRelConnects, ObjectHelper<IfcRelContainedInSpatialStructure,2> { IfcRelContainedInSpatialStructure() : Object("IfcRelContainedInSpatialStructure") {}
-		ListOf< Lazy< IfcProduct >, 0, 0 > RelatedElements;
+		ListOf< Lazy< IfcProduct >, 1, 0 > RelatedElements;
 		Lazy< IfcSpatialStructureElement > RelatingStructure;
     };
 

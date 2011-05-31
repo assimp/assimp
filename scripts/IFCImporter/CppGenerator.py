@@ -79,7 +79,7 @@ template_converter_prologue_a = '\tsize_t base = GenericFill(db,params,static_ca
 template_converter_prologue_b = '\tsize_t base = 0;\n'
 template_converter_check_argcnt = '\tif (params.GetSize() < {max_arg}) {{ throw STEP::TypeError("expected {max_arg} arguments to {name}"); }}'
 template_converter_code_per_field = r"""    do {{ // convert the '{fieldname}' argument
-        const DataType* arg = params[base++];{handle_unset}{convert}
+        boost::shared_ptr<const DataType> arg = params[base++];{handle_unset}{convert}
     }} while(0);
 """
 template_allow_optional = r"""
@@ -87,7 +87,7 @@ template_allow_optional = r"""
 template_allow_derived = r"""
         if (dynamic_cast<const ISDERIVED*>(&*arg)) {{ in->ObjectHelper<Assimp::IFC::{type},{argcnt}>::aux_is_derived[{argnum}]=true; break; }}"""        
 template_convert_single = r"""
-        try {{ GenericConvert( in->{name}, *arg, db ); break; }} 
+        try {{ GenericConvert( in->{name}, arg, db ); break; }} 
         catch (const TypeError& t) {{ throw TypeError(t.what() + std::string(" - expected argument {argnum} to {classname} to be a `{full_type}`")); }}"""
 
 template_converter_ommitted = '// this data structure is not used yet, so there is no code generated to fill its members\n'

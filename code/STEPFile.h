@@ -731,7 +731,7 @@ namespace STEP {
 	// ------------------------------------------------------------------------------
 	template <typename T>
 	struct InternGenericConvert {
-		void operator()(T& out, boost::shared_ptr< const EXPRESS::DataType >& in, const STEP::DB& db) {
+		void operator()(T& out, const boost::shared_ptr< const EXPRESS::DataType >& in, const STEP::DB& db) {
 			try{
 				out = dynamic_cast< const typename PickBaseType<T>::Type& > ( *in );
 			}
@@ -743,14 +743,14 @@ namespace STEP {
 
 	template <>
 	struct InternGenericConvert< boost::shared_ptr< const EXPRESS::DataType > > {
-		void operator()(boost::shared_ptr< const EXPRESS::DataType >& out, boost::shared_ptr< const EXPRESS::DataType >& in, const STEP::DB& db) {
+		void operator()(boost::shared_ptr< const EXPRESS::DataType >& out, const boost::shared_ptr< const EXPRESS::DataType >& in, const STEP::DB& db) {
 			out = in;
 		}
 	};
 
 	template <typename T>
 	struct InternGenericConvert< Maybe<T> > {
-		void operator()(Maybe<T>& out, boost::shared_ptr< const EXPRESS::DataType >& in, const STEP::DB& db) {
+		void operator()(Maybe<T>& out, const boost::shared_ptr< const EXPRESS::DataType >& in, const STEP::DB& db) {
 			GenericConvert((T&)out,in,db);
 			out.flag_valid();
 		}
@@ -758,7 +758,7 @@ namespace STEP {
 
 	template <typename T,uint64_t min_cnt, uint64_t max_cnt>
 	struct InternGenericConvertList {
-		void operator()(ListOf<T, min_cnt, max_cnt>& out, boost::shared_ptr< const EXPRESS::DataType >& inp_base, const STEP::DB& db) {
+		void operator()(ListOf<T, min_cnt, max_cnt>& out, const boost::shared_ptr< const EXPRESS::DataType >& inp_base, const STEP::DB& db) {
 
 			const EXPRESS::LIST* inp = dynamic_cast<const EXPRESS::LIST*>(inp_base.get());
 			if (!inp) {
@@ -789,7 +789,7 @@ namespace STEP {
 
 	template <typename T>
 	struct InternGenericConvert< Lazy<T> > {
-		void operator()(Lazy<T>& out, boost::shared_ptr< const EXPRESS::DataType >& in_base, const STEP::DB& db) {
+		void operator()(Lazy<T>& out, const boost::shared_ptr< const EXPRESS::DataType >& in_base, const STEP::DB& db) {
 			const EXPRESS::ENTITY* in = dynamic_cast<const EXPRESS::ENTITY*>(in_base.get());
 			if (!in) {
 				throw TypeError("type error reading entity");
@@ -799,12 +799,12 @@ namespace STEP {
 	};
 
 	template <typename T1>
-	inline void GenericConvert(T1& a, boost::shared_ptr< const EXPRESS::DataType >& b, const STEP::DB& db) {
+	inline void GenericConvert(T1& a, const boost::shared_ptr< const EXPRESS::DataType >& b, const STEP::DB& db) {
 		return InternGenericConvert<T1>()(a,b,db);
 	}
 
 	template <typename T1,uint64_t N1, uint64_t N2>
-	inline void GenericConvert(ListOf<T1,N1,N2>& a, boost::shared_ptr< const EXPRESS::DataType >& b, const STEP::DB& db) {
+	inline void GenericConvert(ListOf<T1,N1,N2>& a, const boost::shared_ptr< const EXPRESS::DataType >& b, const STEP::DB& db) {
 		return InternGenericConvertList<T1,N1,N2>()(a,b,db);
 	}
 

@@ -76,6 +76,12 @@ typename T::reference deref(auto_any_base const& cur, T&)
     return *auto_any_cast<typename T::iterator>(cur);
 }
 
+template<typename T>
+typename T::const_reference deref(auto_any_base const& cur, const T&)
+{
+    return *auto_any_cast<typename T::iterator>(cur);
+}
+
 } // end foreach_detail
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -147,7 +147,7 @@ public:
 	}
 
 	// pointer access
-	inline operator T*()	{
+	inline operator T*() const {
 		return ptr;
 	}
 

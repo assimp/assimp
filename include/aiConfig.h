@@ -102,6 +102,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Various stuff to fine-tune the behavior of a specific post processing step.
 // ###########################################################################
 
+
 // ---------------------------------------------------------------------------
 /** @brief Maximum bone count per mesh for the SplitbyBoneCount step.
  *
@@ -123,15 +124,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ---------------------------------------------------------------------------
 /** @brief  Specifies the maximum angle that may be between two vertex tangents
- *         that their tangents and bitangents are smoothed.
+ *         that their tangents and bi-tangents are smoothed.
  *
  * This applies to the CalcTangentSpace-Step. The angle is specified
- * in degrees, so 180 is PI. The default value is
- * 45 degrees. The maximum value is 175.
- * Property type: float. 
+ * in degrees. The maximum value is 175.
+ * Property type: float. Default value: 45 degrees
  */
 #define AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE \
 	"PP_CT_MAX_SMOOTHING_ANGLE"
+
+// ---------------------------------------------------------------------------
+/** @brief Source UV channel for tangent space computation.
+ *
+ * The specified channel must exist or an error will be raised. 
+ * Property type: integer. Default value: 0
+ */
+// ---------------------------------------------------------------------------
+#define AI_CONFIG_PP_CT_TEXTURE_CHANNEL_INDEX \
+	"PP_CT_TEXTURE_CHANNEL_INDEX"
 
 // ---------------------------------------------------------------------------
 /** @brief  Specifies the maximum angle that may be between two face normals

@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "CalcTangentsProcess.h"
 #include "ProcessHelper.h"
+#include "TinyFormatter.h"
 
 using namespace Assimp;
 
@@ -77,9 +78,11 @@ bool CalcTangentsProcess::IsActive( unsigned int pFlags) const
 void CalcTangentsProcess::SetupProperties(const Importer* pImp)
 {
 	// get the current value of the property
-	this->configMaxAngle = pImp->GetPropertyFloat(AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE,45.f);
-	this->configMaxAngle = std::max(std::min(this->configMaxAngle,45.0f),0.0f);
-	this->configMaxAngle = AI_DEG_TO_RAD(this->configMaxAngle);
+	configMaxAngle = pImp->GetPropertyFloat(AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE,45.f);
+	configMaxAngle = std::max(std::min(configMaxAngle,45.0f),0.0f);
+	configMaxAngle = AI_DEG_TO_RAD(configMaxAngle);
+
+	configSourceUV = pImp->GetPropertyInteger(AI_CONFIG_PP_CT_TEXTURE_CHANNEL_INDEX,0);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -92,7 +95,7 @@ void CalcTangentsProcess::Execute( aiScene* pScene)
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 		if(ProcessMesh( pScene->mMeshes[a],a))bHas = true;
 
-	if (bHas)DefaultLogger::get()->debug("CalcTangentsProcess finished. Tangents have been calculated");
+	if (bHas)DefaultLogger::get()->info("CalcTangentsProcess finished. Tangents have been calculated");
 	else DefaultLogger::get()->debug("CalcTangentsProcess finished");
 }
 
@@ -117,12 +120,18 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 		return false;
 	}
 
-	// what we can check, though, is if the mesh has normals and texture coord. That's a requirement
-	if( pMesh->mNormals == NULL || pMesh->mTextureCoords[0] == NULL)
+	// what we can check, though, is if the mesh has normals and texture coordinates. That's a requirement
+	if( pMesh->mNormals == NULL)
 	{
-		DefaultLogger::get()->error("Unable to compute tangents: UV0 and normals must be there ");
+		DefaultLogger::get()->error("Failed to compute tangents; need normals");
 		return false;
 	}
+	if( configSourceUV >= AI_MAX_NUMBER_OF_TEXTURECOORDS || !pMesh->mTextureCoords[configSourceUV] )
+	{
+		DefaultLogger::get()->error((Formatter::format("Failed to compute tangents; need UV data in channel"),configSourceUV));
+		return false;
+	}
+	 
 	const float angleEpsilon = 0.9999f;
 
 	std::vector<bool> vertexDone( pMesh->mNumVertices, false);
@@ -134,7 +143,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 
 	const aiVector3D* meshPos = pMesh->mVertices;
 	const aiVector3D* meshNorm = pMesh->mNormals;
-	const aiVector3D* meshTex = pMesh->mTextureCoords[0];
+	const aiVector3D* meshTex = pMesh->mTextureCoords[configSourceUV];
 	aiVector3D* meshTang = pMesh->mTangents;
 	aiVector3D* meshBitang = pMesh->mBitangents;
 	
@@ -222,7 +231,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	}
 	std::vector<unsigned int> verticesFound;
 
-	const float fLimit = cosf(this->configMaxAngle); 
+	const float fLimit = cosf(configMaxAngle); 
 	std::vector<unsigned int> closeVertices;
 
 	// in the second pass we now smooth out all tangents and bitangents at the same local position 

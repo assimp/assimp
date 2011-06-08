@@ -1441,7 +1441,7 @@ void XFileParser::FilterHierarchy( XFile::Node* pNode)
 	// if the node has just a single unnamed child containing a mesh, remove
 	// the anonymous node inbetween. The 3DSMax kwXport plugin seems to produce this
 	// mess in some cases
-	if( pNode->mChildren.size() == 1)
+	if( pNode->mChildren.size() == 1 && pNode->mMeshes.empty() )
 	{
 		XFile::Node* child = pNode->mChildren.front();
 		if( child->mName.length() == 0 && child->mMeshes.size() > 0)
@@ -1450,6 +1450,9 @@ void XFileParser::FilterHierarchy( XFile::Node* pNode)
 			for( unsigned int a = 0; a < child->mMeshes.size(); a++)
 				pNode->mMeshes.push_back( child->mMeshes[a]);
 			child->mMeshes.clear();
+
+			// transfer the transform as well
+			pNode->mTrafoMatrix = pNode->mTrafoMatrix * child->mTrafoMatrix;
 
 			// then kill it
 			delete child;

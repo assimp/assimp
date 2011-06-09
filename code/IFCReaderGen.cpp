@@ -1867,11 +1867,12 @@ template <> size_t GenericFill<IfcColumn>(const DB& db, const LIST& params, IfcC
 // this data structure is not used yet, so there is no code generated to fill its members
 	return base;
 }
+// -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcObjectPlacement>(const DB& /*db*/, const LIST& params, IfcObjectPlacement* /*in*/)
->>>>>>> 320a7a7a7e0422e4d8d9c2a22b74cb48f74b14ce
 {
 	size_t base = 0;
-	if (params.GetSize() < 0) { throw STEP::TypeError("expected 0 arguments to IfcObjectPlacement"); }	return base;
+	if (params.GetSize() < 0) { throw STEP::TypeError("expected 0 arguments to IfcObjectPlacement"); }	
+	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcGridPlacement>(const DB& db, const LIST& params, IfcGridPlacement* in)

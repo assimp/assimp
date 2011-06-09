@@ -259,18 +259,12 @@ struct TempMesh
 			aiVector3D vmin,vmax;
 			ArrayBounds(&*base, cnt ,vmin,vmax);
 
-<<<<<<< HEAD
+
 			const float epsilon = (vmax-vmin).SquareLength() / 1e9f, dotepsilon = 1e-7;
 
 			//// look for vertices that lie directly on the line between their predecessor and their 
 			//// successor and replace them with either of them.
-=======
-			const float epsilon = (vmax-vmin).SquareLength() / 1e9f;
 
-			//// look for vertices that lie directly on the line between their predecessor and their 
-			//// successor and replace them with either of them.
-			//const float dotepsilon = 1e-7;
->>>>>>> 320a7a7a7e0422e4d8d9c2a22b74cb48f74b14ce
 			//for(size_t i = 0; i < cnt; ++i) {
 			//	aiVector3D& v1 = *(base+i), &v0 = *(base+(i?i-1:cnt-1)), &v2 = *(base+(i+1)%cnt);
 			//	const aiVector3D& d0 = (v1-v0), &d1 = (v2-v1);
@@ -1154,28 +1148,20 @@ next_loop:
 void ProcessConnectedFaceSet(const IFC::IfcConnectedFaceSet& fset, TempMesh& result, ConversionData& conv)
 {
 	BOOST_FOREACH(const IFC::IfcFace& face, fset.CfsFaces) {
-<<<<<<< HEAD
-		size_t ob = -1, cnt = 0;
-=======
+
 		// size_t ob = -1, cnt = 0;
->>>>>>> 320a7a7a7e0422e4d8d9c2a22b74cb48f74b14ce
 		TempMesh meshout;
 		BOOST_FOREACH(const IFC::IfcFaceBound& bound, face.Bounds) {
 			
 			// XXX implement proper merging for polygonal loops
 			if(const IFC::IfcPolyLoop* const polyloop = bound.Bound->ToPtr<IFC::IfcPolyLoop>()) {
 				if(ProcessPolyloop(*polyloop, meshout,conv)) {
-<<<<<<< HEAD
-					if(bound.ToPtr<IFC::IfcFaceOuterBound>()) {
-						ob = cnt;
-					}
-					++cnt;
-=======
-					// if(bound.ToPtr<IFC::IfcFaceOuterBound>()) {
-					// 	ob = cnt;
-					// }
-					// ++cnt;
->>>>>>> 320a7a7a7e0422e4d8d9c2a22b74cb48f74b14ce
+
+					//if(bound.ToPtr<IFC::IfcFaceOuterBound>()) {
+					//	ob = cnt;
+					//}
+					//++cnt;
+
 				}
 			}
 			else {
@@ -1654,11 +1640,8 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,const std::vecto
 			}
 
 			if (hit) {
-<<<<<<< HEAD
-				if (last_hit != -1) {
-=======
 				if (last_hit != (size_t)-1) {
->>>>>>> 320a7a7a7e0422e4d8d9c2a22b74cb48f74b14ce
+
 					const size_t old = curmesh.verts.size();
 					size_t cnt = last_hit > n ? size-(last_hit-n) : n-last_hit;
 					for(size_t a = last_hit, e = 0; e <= cnt; a=(a+1)%size, ++e) {
@@ -1750,11 +1733,9 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 			continue;
 		}
 
-<<<<<<< HEAD
-		const aiVector3D diff = t.extrusionDir; 
-=======
+
 		// const aiVector3D diff = t.extrusionDir;
->>>>>>> 320a7a7a7e0422e4d8d9c2a22b74cb48f74b14ce
+
 		const std::vector<aiVector3D>& va = t.profileMesh->verts;
 		if(va.size() <= 2) {
 			continue;	

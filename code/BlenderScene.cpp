@@ -275,6 +275,7 @@ template <> void Structure :: Convert<Material> (
     ReadField<ErrorPolicy_Warn>(dest.specr,"specr",db);
     ReadField<ErrorPolicy_Warn>(dest.specg,"specg",db);
     ReadField<ErrorPolicy_Warn>(dest.specb,"specb",db);
+    ReadField<ErrorPolicy_Igno>(dest.har,"har",db);
     ReadField<ErrorPolicy_Warn>(dest.ambr,"ambr",db);
     ReadField<ErrorPolicy_Warn>(dest.ambg,"ambg",db);
     ReadField<ErrorPolicy_Warn>(dest.ambb,"ambb",db);

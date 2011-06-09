@@ -557,13 +557,19 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 		aiColor3D col(mat->r,mat->g,mat->b);
 		if (mat->r || mat->g || mat->b ) {
 			
-			// Usually, zero diffuse color means no diffuse color at all in the equation - seemingly.
-			// So we ommit this member to express this intent.
+			// Usually, zero diffuse color means no diffuse color at all in the equation.
+			// So we omit this member to express this intent.
 			mout->AddProperty(&col,1,AI_MATKEY_COLOR_DIFFUSE);
 		}
 
 		col = aiColor3D(mat->specr,mat->specg,mat->specb);
 		mout->AddProperty(&col,1,AI_MATKEY_COLOR_SPECULAR);
+
+		// is hardness/shininess set?
+		if( mat->har ) {
+			const float har = mat->har;
+			mout->AddProperty(&har,1,AI_MATKEY_SHININESS);
+		}
 
 		col = aiColor3D(mat->ambr,mat->ambg,mat->ambb);
 		mout->AddProperty(&col,1,AI_MATKEY_COLOR_AMBIENT);

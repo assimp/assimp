@@ -113,7 +113,7 @@ char Q3BSPZipArchive::getOsSeparator() const
 
 // ------------------------------------------------------------------------------------------------
 //	Opens a file, which is part of the archive.
-IOStream *Q3BSPZipArchive::Open( const char* pFile, const char* pMode )
+IOStream *Q3BSPZipArchive::Open( const char* pFile, const char* /*pMode*/ )
 {
 	ai_assert( NULL != pFile );
 

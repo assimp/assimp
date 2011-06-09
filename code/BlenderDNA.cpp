@@ -288,7 +288,7 @@ boost::shared_ptr< ElemBase > DNA :: ConvertBlobToStructure(
 // ------------------------------------------------------------------------------------------------
 DNA::FactoryPair DNA :: GetBlobToStructureConverter(
 	const Structure& structure,
-	const FileDatabase& db
+	const FileDatabase& /*db*/
 ) const 
 {
 	std::map<std::string,  FactoryPair>::const_iterator it = converters.find(structure.name);

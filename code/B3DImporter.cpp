@@ -62,7 +62,7 @@ using namespace std;
 //#define DEBUG_B3D
 
 // ------------------------------------------------------------------------------------------------
-bool B3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const{
+bool B3DImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const{
 
 	size_t pos=pFile.find_last_of( '.' );
 	if( pos==string::npos ) return false;

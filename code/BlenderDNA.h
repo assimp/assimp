@@ -376,7 +376,7 @@ template <>  struct Structure :: _defaultInitializer<ErrorPolicy_Warn> {
 template <> struct Structure :: _defaultInitializer<ErrorPolicy_Fail> {
 
 	template <typename T>
-	void operator ()(T& out,const char* = "") {
+	void operator ()(T& /*out*/,const char* = "") {
 		// obviously, it is crucial that _DefaultInitializer is used 
 		// only from within a catch clause.
 		throw;
@@ -681,7 +681,7 @@ public:
 
 	ObjectCache(const FileDatabase&) {}
 
-	template <typename T> void get(const Structure&, vector<T>&t, const Pointer&) {}
+	template <typename T> void get(const Structure&, vector<T>&, const Pointer&) {}
 	template <typename T> void set(const Structure&, const vector<T>&, const Pointer&) {}
 };
 
@@ -701,9 +701,9 @@ public:
 
 
 	FileDatabase()
-		: next_cache_idx()
-		, _cacheArrays(*this)
+		: _cacheArrays(*this)
 		, _cache(*this)
+		, next_cache_idx()
 	{} 
 
 public:
@@ -727,12 +727,12 @@ public:
 	// arrays of objects are never cached because we can't easily 
 	// ensure their proper destruction.
 	template <typename T>
-	ObjectCache<boost::shared_ptr>& cache(boost::shared_ptr<T>& in) const {
+	ObjectCache<boost::shared_ptr>& cache(boost::shared_ptr<T>& /*in*/) const {
 		return _cache;
 	}
 
 	template <typename T>
-	ObjectCache<vector>& cache(vector<T>& in) const {
+	ObjectCache<vector>& cache(vector<T>& /*in*/) const {
 		return _cacheArrays;
 	}
 

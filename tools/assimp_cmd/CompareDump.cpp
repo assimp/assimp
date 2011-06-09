@@ -605,6 +605,9 @@ void CompareOnTheFlyMaterialProperty(comparer_context& comp)	{
 		case aiPTI_Buffer:
 			comp.cmp<uint8_t>(length,"mData");
 			break;
+
+		default:
+			break;
 	};
 }
 
@@ -759,6 +762,7 @@ void CompareOnTheFlyTexture(comparer_context& comp)	{
 
 	const uint32_t w = comp.cmp<uint32_t>("mWidth");
 	const uint32_t h = comp.cmp<uint32_t>("mHeight");
+	(void)w; (void)h;
 	comp.cmp<char>("achFormatHint[0]");
 	comp.cmp<char>("achFormatHint[1]");
 	comp.cmp<char>("achFormatHint[2]");
@@ -842,7 +846,7 @@ void CheckHeader(comparer_context& comp)
 int Assimp_CompareDump (const char* const* params, unsigned int num)
 {
 	// --help
-	if (num == 1 && !strcmp( params[0], "-h") || !strcmp( params[0], "--help") || !strcmp( params[0], "-?") ) {
+	if ((num == 1 && !strcmp( params[0], "-h")) || !strcmp( params[0], "--help") || !strcmp( params[0], "-?") ) {
 		printf("%s",AICMD_MSG_CMPDUMP_HELP);
 		return 0;
 	}

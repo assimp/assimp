@@ -98,7 +98,7 @@ DXFImporter::~DXFImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool DXFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
+bool DXFImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const
 {
 	return SimpleExtensionCheck(pFile,"dxf");
 }
@@ -381,7 +381,7 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
 
 
 // ------------------------------------------------------------------------------------------------
-void DXFImporter::GenerateMaterials(aiScene* pScene, DXF::FileData& output)
+void DXFImporter::GenerateMaterials(aiScene* pScene, DXF::FileData& /*output*/)
 {
 	// generate an almost-white default material. Reason:
 	// the default vertex color is GREY, so we are
@@ -408,7 +408,7 @@ void DXFImporter::GenerateMaterials(aiScene* pScene, DXF::FileData& output)
 
 
 // ------------------------------------------------------------------------------------------------
-void DXFImporter::GenerateHierarchy(aiScene* pScene, DXF::FileData& output)
+void DXFImporter::GenerateHierarchy(aiScene* pScene, DXF::FileData& /*output*/)
 {
 	// generate the output scene graph, which is just the root node with a single child for each layer.
 	pScene->mRootNode = new aiNode();
@@ -441,7 +441,7 @@ void DXFImporter::SkipSection(DXF::LineReader& reader)
 
 
 // ------------------------------------------------------------------------------------------------
-void DXFImporter::ParseHeader(DXF::LineReader& reader, DXF::FileData& output)
+void DXFImporter::ParseHeader(DXF::LineReader& reader, DXF::FileData& /*output*/)
 {	
 	for( ;!reader.End() && !reader.Is(0,"ENDSEC"); reader++);
 }
@@ -545,7 +545,7 @@ void DXFImporter::ParseEntities(DXF::LineReader& reader, DXF::FileData& output)
 	));
 }
 
-// ------------------------------------------------------------------------------------------------
+
 void DXFImporter::ParseInsertion(DXF::LineReader& reader, DXF::FileData& output)
 {	
 	output.blocks.back().insertions.push_back( DXF::InsertBlock() );
@@ -599,8 +599,6 @@ void DXFImporter::ParseInsertion(DXF::LineReader& reader, DXF::FileData& output)
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output)
 {
-	bool ret = false;
-
 	output.blocks.back().lines.push_back( boost::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() ) );
 	DXF::PolyLine& line = *output.blocks.back().lines.back();
 
@@ -691,7 +689,6 @@ void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output)
 		if (line.flags & DXF_POLYLINE_FLAG_CLOSED) {
 			line.indices.push_back(line.positions.size()-1);
 			line.indices.push_back(0);
-
 			line.counts.push_back(2);
 		}
 	}
@@ -881,7 +878,7 @@ void DXFImporter::Parse3DFace(DXF::LineReader& reader, DXF::FileData& output)
 	}
 	
 	// sanity checks to see if we got something meaningful
-	if (b[1] && !b[0] || !b[2] || !b[3]) {
+	if ((b[1] && !b[0]) || !b[2] || !b[3]) {
 		DefaultLogger::get()->warn("DXF: unexpected vertex setup in 3DFACE/LINE/FACE entity; ignoring");
 		output.blocks.back().lines.pop_back();
 		return;

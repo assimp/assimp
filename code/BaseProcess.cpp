@@ -90,7 +90,7 @@ void BaseProcess::ExecuteOnScene( Importer* pImp)
 }
 
 // ------------------------------------------------------------------------------------------------
-void BaseProcess::SetupProperties(const Importer* pImp)
+void BaseProcess::SetupProperties(const Importer* /*pImp*/)
 {
 	// the default implementation does nothing
 }

@@ -643,7 +643,7 @@ bool ObjFileParser::needsNewMesh( const std::string &rMaterialName )
 	bool newMat = false;
 	int matIdx = getMaterialIndex( rMaterialName );
 	int curMatIdx = m_pModel->m_pCurrentMesh->m_uiMaterialIndex;
-	if ( curMatIdx != ObjFile::Mesh::NoMaterial || curMatIdx != matIdx )
+	if ( curMatIdx != int(ObjFile::Mesh::NoMaterial) || curMatIdx != matIdx )
 	{
 		// New material -> only one material per mesh, so we need to create a new 
 		// material

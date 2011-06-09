@@ -108,7 +108,7 @@ void COBImporter::GetExtensionList(std::set<std::string>& app)
 
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties for the loader
-void COBImporter::SetupProperties(const Importer* pImp)
+void COBImporter::SetupProperties(const Importer* /*pImp*/)
 {
 	// nothing to be done for the moment
 }
@@ -505,7 +505,7 @@ void COBImporter::LogDebug_Ascii(const Formatter::format& message)	{
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::ReadBasicNodeInfo_Ascii(Node& msh, LineSplitter& splitter, const ChunkInfo& nfo)
+void COBImporter::ReadBasicNodeInfo_Ascii(Node& msh, LineSplitter& splitter, const ChunkInfo& /*nfo*/)
 {
 	for(;splitter;++splitter) {
 		if (splitter.match_start("Name")) {
@@ -639,7 +639,7 @@ void COBImporter::ReadUnit_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::ReadChan_Ascii(Scene& out, LineSplitter& splitter, const ChunkInfo& nfo)
+void COBImporter::ReadChan_Ascii(Scene& /*out*/, LineSplitter& splitter, const ChunkInfo& nfo)
 {
 	if(nfo.version > 8) {
 		return UnsupportedChunk_Ascii(splitter,nfo,"Chan");
@@ -850,7 +850,7 @@ void COBImporter::ReadPolH_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::ReadBitM_Ascii(Scene& out, LineSplitter& splitter, const ChunkInfo& nfo)
+void COBImporter::ReadBitM_Ascii(Scene& /*out*/, LineSplitter& splitter, const ChunkInfo& nfo)
 {
 	if(nfo.version > 1) {
 		return UnsupportedChunk_Ascii(splitter,nfo,"BitM");
@@ -886,7 +886,7 @@ void COBImporter::ReadString_Binary(std::string& out, StreamReaderLE& reader)
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::ReadBasicNodeInfo_Binary(Node& msh, StreamReaderLE& reader, const ChunkInfo& nfo)
+void COBImporter::ReadBasicNodeInfo_Binary(Node& msh, StreamReaderLE& reader, const ChunkInfo& /*nfo*/)
 {
 	const unsigned int dupes = reader.GetI2();
 	ReadString_Binary(msh.name,reader);
@@ -1077,7 +1077,7 @@ void COBImporter::ReadPolH_Binary(COB::Scene& out, StreamReaderLE& reader, const
 }
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::ReadBitM_Binary(COB::Scene& out, StreamReaderLE& reader, const ChunkInfo& nfo)
+void COBImporter::ReadBitM_Binary(COB::Scene& /*out*/, StreamReaderLE& reader, const ChunkInfo& nfo)
 {
 	if(nfo.version > 1) {
 		return UnsupportedChunk_Binary(reader,nfo,"BitM");

@@ -241,7 +241,7 @@ void LWSImporter::ReadEnvelope_Old(
 	std::list< LWS::Element >::const_iterator& it, 
 	const std::list< LWS::Element >::const_iterator& end,
 	LWS::NodeDesc& nodes,
-	unsigned int version)
+	unsigned int /*version*/)
 {
 	unsigned int num,sub_num;
 	if (++it == end)goto unexpected_end;

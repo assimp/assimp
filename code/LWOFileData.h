@@ -276,7 +276,7 @@ struct Face : public aiFace
 	{}
 
 	//! Copy construction
-	Face(const Face& f)	{
+	Face(const Face& f) : aiFace() {
 		*this = f;
 	}
 

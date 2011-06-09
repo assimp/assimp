@@ -433,7 +433,7 @@ void Discreet3DSImporter::ConvertMeshes(aiScene* pcOut)
 // ------------------------------------------------------------------------------------------------
 // Add a node to the scenegraph and setup its final transformation
 void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
-	D3DS::Node* pcIn, aiMatrix4x4& absTrafo)
+	D3DS::Node* pcIn, aiMatrix4x4& /*absTrafo*/)
 {
 	std::vector<unsigned int> iArray;
 	iArray.reserve(3);

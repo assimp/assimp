@@ -376,7 +376,7 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat
 
 // ------------------------------------------------------------------------------------------------
 char LWOImporter::FindUVChannels(LWO::TextureList& list,
-	LWO::Layer& layer,LWO::UVChannel& uv, unsigned int next)
+	LWO::Layer& /*layer*/,LWO::UVChannel& uv, unsigned int next)
 {
 	char ret = 0;
 	for (TextureList::iterator it = list.begin(), end = list.end();it != end;++it)	{
@@ -562,7 +562,7 @@ void LWOImporter::LoadLWO2ImageMap(unsigned int size, LWO::Texture& tex )
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::LoadLWO2Procedural(unsigned int size, LWO::Texture& tex )
+void LWOImporter::LoadLWO2Procedural(unsigned int /*size*/, LWO::Texture& tex )
 {
 	// --- not supported at the moment
 	DefaultLogger::get()->error("LWO2: Found procedural texture, this is not supported");
@@ -570,7 +570,7 @@ void LWOImporter::LoadLWO2Procedural(unsigned int size, LWO::Texture& tex )
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::LoadLWO2Gradient(unsigned int size, LWO::Texture& tex  )
+void LWOImporter::LoadLWO2Gradient(unsigned int /*size*/, LWO::Texture& tex  )
 {
 	// --- not supported at the moment
 	DefaultLogger::get()->error("LWO2: Found gradient texture, this is not supported");
@@ -675,7 +675,7 @@ void LWOImporter::LoadLWO2TextureBlock(LE_NCONST IFF::SubChunkHeader* head, unsi
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::LoadLWO2ShaderBlock(LE_NCONST IFF::SubChunkHeader* head, unsigned int size )
+void LWOImporter::LoadLWO2ShaderBlock(LE_NCONST IFF::SubChunkHeader* /*head*/, unsigned int size )
 {
 	LE_NCONST uint8_t* const end = mFileBuffer + size;
 

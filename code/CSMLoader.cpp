@@ -90,7 +90,7 @@ void CSMImporter::GetExtensionList(std::set<std::string>& extensions)
 
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties for the loader
-void CSMImporter::SetupProperties(const Importer* pImp)
+void CSMImporter::SetupProperties(const Importer* /*pImp*/)
 {
 	// nothing to be done for the moment
 }

@@ -407,12 +407,12 @@ boost::shared_ptr<const EXPRESS::LIST> EXPRESS::LIST::Parse(const char*& inout,u
 
 
 // ------------------------------------------------------------------------------------------------
-STEP::LazyObject::LazyObject(DB& db, uint64_t id,uint64_t line, const char* const type,const char* args) 
-	: db(db)
-	, id(id)
+STEP::LazyObject::LazyObject(DB& db, uint64_t id,uint64_t /*line*/, const char* const type,const char* args)
+	: id(id)
 	, type(type)
-	, obj()
+	, db(db)
 	, args(args)
+	, obj()
 {
 	// find any external references and store them in the database.
 	// this helps us emulate STEPs INVERSE fields.

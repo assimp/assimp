@@ -72,7 +72,7 @@ UnrealImporter::~UnrealImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file. 
-bool UnrealImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
+bool UnrealImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const
 {
 	return  SimpleExtensionCheck(pFile,"3d","uc");
 }

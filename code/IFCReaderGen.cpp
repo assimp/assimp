@@ -1045,7 +1045,7 @@ void IFC::GetSchema(EXPRESS::ConversionSchema& out)
 namespace STEP {
 
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<NotImplemented>(const STEP::DB& db, const LIST& params, NotImplemented* in)
+template <> size_t GenericFill<NotImplemented>(const STEP::DB& /*db*/, const LIST& /*params*/, NotImplemented* /*in*/)
 {
 	return 0;
 }
@@ -1166,7 +1166,7 @@ template <> size_t GenericFill<IfcGrid>(const DB& db, const LIST& params, IfcGri
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<IfcRepresentationItem>(const DB& db, const LIST& params, IfcRepresentationItem* in)
+template <> size_t GenericFill<IfcRepresentationItem>(const DB& /*db*/, const LIST& params, IfcRepresentationItem* /*in*/)
 {
 	size_t base = 0;
 	if (params.GetSize() < 0) { throw STEP::TypeError("expected 0 arguments to IfcRepresentationItem"); }	return base;
@@ -1867,8 +1867,8 @@ template <> size_t GenericFill<IfcColumn>(const DB& db, const LIST& params, IfcC
 // this data structure is not used yet, so there is no code generated to fill its members
 	return base;
 }
-// -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<IfcObjectPlacement>(const DB& db, const LIST& params, IfcObjectPlacement* in)
+template <> size_t GenericFill<IfcObjectPlacement>(const DB& /*db*/, const LIST& params, IfcObjectPlacement* /*in*/)
+>>>>>>> 320a7a7a7e0422e4d8d9c2a22b74cb48f74b14ce
 {
 	size_t base = 0;
 	if (params.GetSize() < 0) { throw STEP::TypeError("expected 0 arguments to IfcObjectPlacement"); }	return base;

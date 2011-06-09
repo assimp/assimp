@@ -117,7 +117,7 @@ void Discreet3DSImporter::GetExtensionList(std::set<std::string>& extensions)
 
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties
-void Discreet3DSImporter::SetupProperties(const Importer* pImp)
+void Discreet3DSImporter::SetupProperties(const Importer* /*pImp*/)
 {
 	// nothing to be done for the moment
 }
@@ -1373,6 +1373,7 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D* out,
 		// Skip unknown chunks, hope this won't cause any problems.
 		return ParseColorChunk(out,acceptPercent);
 	};
+	(void)bGamma;
 }
 
 #endif // !! ASSIMP_BUILD_NO_3DS_IMPORTER

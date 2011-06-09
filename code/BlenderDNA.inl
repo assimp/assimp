@@ -348,7 +348,7 @@ void Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const Fil
 }
 
 //--------------------------------------------------------------------------------
-inline void Structure :: ResolvePointer( boost::shared_ptr< FileOffset >& out, const Pointer & ptrval, const FileDatabase& db, const Field& f) const
+inline void Structure :: ResolvePointer( boost::shared_ptr< FileOffset >& out, const Pointer & ptrval, const FileDatabase& db, const Field& /*f*/) const
 {
 	// Currently used exclusively by PackedFile::data to represent
 	// a simple offset into the mapped BLEND file. 
@@ -402,7 +402,7 @@ void Structure :: ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval,
 template <> void Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::shared_ptr<ElemBase>& out, 
 	const Pointer & ptrval, 
 	const FileDatabase& db, 
-	const Field& f
+	const Field& /*f*/
 ) const 
 {
 	// Special case when the data type needs to be determined at runtime.

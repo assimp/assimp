@@ -349,7 +349,7 @@ void ColladaExporter::WriteNode( const aiNode* pNode)
 	// instance every geometry
 	for( size_t a = 0; a < pNode->mNumMeshes; ++a )
 	{
-		const aiMesh* mesh = mScene->mMeshes[pNode->mMeshes[a]];
+		// const aiMesh* mesh = mScene->mMeshes[pNode->mMeshes[a]];
 		mOutput << startstr << "<instance_geometry url=\"#" << GetMeshId( a) << "\">" << endstr;
 		PushTag();
 

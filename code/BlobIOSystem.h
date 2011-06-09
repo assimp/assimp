@@ -56,13 +56,13 @@ class BlobIOStream : public IOStream
 public:
 
 	BlobIOStream(BlobIOSystem* creator, const std::string& file, size_t initial = 4096)
-		: file_size()
-		, cursor()
-		, buffer()
-		, creator(creator)
-		, file(file)
+		: buffer()
 		, cur_size()
+		, file_size()
+		, cursor()
 		, initial(initial)
+		, file(file)
+		, creator(creator)
 	{
 	}
 

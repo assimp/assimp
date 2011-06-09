@@ -121,6 +121,7 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
 
 	unsigned int x = 0,y = 0,mode = 0;
 	float rad  = 6370.f;
+	(void)rad;
 
 
 	aiNode* root = pScene->mRootNode = new aiNode();

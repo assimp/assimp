@@ -234,6 +234,8 @@ const char* TextureTypeToString(aiTextureType in)
 		return "Reflection";
 	case aiTextureType_UNKNOWN:
 		return "Unknown";
+	default:
+		break;
 	}
    
 	ai_assert(false);
@@ -257,6 +259,8 @@ const char* MappingTypeToString(aiTextureMapping in)
 		return "Plane";
 	case aiTextureMapping_OTHER:
 		return "Other";
+	default:
+		break;
 	}
 
 	ai_assert(false);
@@ -401,6 +405,7 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
 			}
 
 			ai_assert(nbParanoia==oMesh->mNumBones);
+			(void)nbParanoia; // remove compiler warning on release build
 		}
 	}					 
 

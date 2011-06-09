@@ -414,7 +414,7 @@ uint32_t WriteBinaryMesh(const aiMesh* mesh)
 	// using Assimp's standard hashing function.
 	if (shortened) {
 		unsigned int processed = 0;
-		for (unsigned int job;job = std::min(mesh->mNumFaces-processed,512u);processed += job) {
+		for (unsigned int job;(job = std::min(mesh->mNumFaces-processed,512u));processed += job) {
 
 			uint32_t hash = 0;
 			for (unsigned int a = 0; a < job;++a) {
@@ -799,7 +799,9 @@ const char* TextureTypeToString(aiTextureType in)
 	case aiTextureType_REFLECTION:
 		return "Reflection";
 	case aiTextureType_UNKNOWN:
-		return "Unknown";   
+		return "Unknown";
+	default:
+		break;
 	}
 	ai_assert(false); 
 	return  "BUG";    
@@ -937,7 +939,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 			else if (!shortened){
 				fprintf(out,"\t\t<Data length=\"%i\"> \n",tex->mWidth*tex->mHeight*4);
 
-				const unsigned int width = (unsigned int)log10((double)std::max(tex->mHeight,tex->mWidth))+1;
+				// const unsigned int width = (unsigned int)log10((double)std::max(tex->mHeight,tex->mWidth))+1;
 				for (unsigned int y = 0; y < tex->mHeight;++y) {
 					for (unsigned int x = 0; x < tex->mWidth;++x) {
 						aiTexel* tx = tex->pcData + y*tex->mWidth+x;
@@ -1094,7 +1096,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 		fprintf(out,"<MeshList num=\"%i\">\n",scene->mNumMeshes);
 		for (unsigned int i = 0; i < scene->mNumMeshes;++i) {
 			aiMesh* mesh = scene->mMeshes[i];
-			const unsigned int width = (unsigned int)log10((double)mesh->mNumVertices)+1;
+			// const unsigned int width = (unsigned int)log10((double)mesh->mNumVertices)+1;
 
 			// mesh header
 			fprintf(out,"\t<Mesh types=\"%s %s %s %s\" material_index=\"%i\">\n",

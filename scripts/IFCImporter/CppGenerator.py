@@ -168,7 +168,9 @@ def gen_converter(entity,schema):
     if entity.name in schema.blacklist_partial:
         return code+template_converter_ommitted+template_converter_epilogue;
         
-    code +=template_converter_check_argcnt.format(max_arg=max_arg,name=entity.name)
+    if max_arg > 0:
+        code +=template_converter_check_argcnt.format(max_arg=max_arg,name=entity.name)
+
     for field in entity.members:
         code += template_converter_code_per_field.format(fieldname=field.name,
             handle_unset=handle_unset_args(field,entity,schema,arg_idx-arg_idx_ofs),

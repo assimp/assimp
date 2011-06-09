@@ -290,7 +290,7 @@ void BVHLoader::ReadNodeChannels( BVHLoader::Node& pNode)
 
 // ------------------------------------------------------------------------------------------------
 // Reads the motion data
-void BVHLoader::ReadMotion( aiScene* pScene)
+void BVHLoader::ReadMotion( aiScene* /*pScene*/)
 {
 	// Read number of frames
 	std::string tokenFrames = GetNextToken();

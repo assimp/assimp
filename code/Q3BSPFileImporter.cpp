@@ -158,7 +158,7 @@ Q3BSPFileImporter::~Q3BSPFileImporter()
 
 // ------------------------------------------------------------------------------------------------
 //	Returns true, if the loader can read this.
-bool Q3BSPFileImporter::CanRead( const std::string& rFile, IOSystem* pIOHandler, bool checkSig ) const
+bool Q3BSPFileImporter::CanRead( const std::string& rFile, IOSystem* /*pIOHandler*/, bool checkSig ) const
 {
 	if(!checkSig) {
 		return SimpleExtensionCheck( rFile, Q3BSPExtension .c_str() );
@@ -176,7 +176,7 @@ void Q3BSPFileImporter::GetExtensionList( std::set<std::string>& extensions )
 
 // ------------------------------------------------------------------------------------------------
 //	Import method.
-void Q3BSPFileImporter::InternReadFile(const std::string &rFile, aiScene* pScene, IOSystem* pIOHandler)
+void Q3BSPFileImporter::InternReadFile(const std::string &rFile, aiScene* pScene, IOSystem* /*pIOHandler*/)
 {
 	Q3BSPZipArchive Archive( rFile );
 	if ( !Archive.isOpen() )
@@ -469,7 +469,6 @@ void Q3BSPFileImporter::createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScen
 	}
 
 	pScene->mMaterials = new aiMaterial*[ m_MaterialLookupMap.size() ];
-	size_t texIdx( 0 );
 	aiString aiMatName;
 	int textureId( -1 ), lightmapId( -1 );
 	for ( FaceMapIt it = m_MaterialLookupMap.begin(); it != m_MaterialLookupMap.end();
@@ -623,7 +622,7 @@ aiFace *Q3BSPFileImporter::getNextFace( aiMesh *pMesh, unsigned int &rFaceIdx )
 // ------------------------------------------------------------------------------------------------
 //	Imports a texture file.
 bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pModel,
-												 Q3BSP::Q3BSPZipArchive *pArchive, aiScene* pScene,
+												 Q3BSP::Q3BSPZipArchive *pArchive, aiScene* /*pScene*/,
 												 Assimp::MaterialHelper *pMatHelper, int textureId )
 {
 	std::vector<std::string> supportedExtensions;
@@ -656,6 +655,7 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pMode
 			pTexture->mWidth = texSize;
 			unsigned char *pData = new unsigned char[ pTexture->mWidth ];
 			size_t readSize = pTextureStream->Read( pData, sizeof( unsigned char ), pTexture->mWidth );
+			(void)readSize;
 			ai_assert( readSize == pTexture->mWidth );
 			pTexture->pcData = reinterpret_cast<aiTexel*>( pData );
 			pTexture->achFormatHint[ 0 ] = ext[ 0 ];

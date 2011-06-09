@@ -14,7 +14,7 @@ namespace boost {
 
 
 #define BOOST_STATIC_ASSERT(eval) \
-{boost::detail::static_assertion_failure<(eval)> assert_dummy;assert_dummy;}
+{boost::detail::static_assertion_failure<(eval)> assert_dummy;(void)assert_dummy;}
 
 #endif
 #endif // !! AI_BOOST_STATIC_ASSERT_INCLUDED

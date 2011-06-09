@@ -126,7 +126,7 @@ public:
 					}
 
 					if (trim) {
-						while (stream.GetRemainingSize() && ((s = stream.GetI1()) == ' ') || s == '\t');
+						while (stream.GetRemainingSize() && ((s = stream.GetI1()) == ' ' || s == '\t'));
 						if (stream.GetRemainingSize()) {
 							stream.IncPtr(-1);
 						}

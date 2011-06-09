@@ -53,7 +53,7 @@ class ASSIMP_API DefaultProgressHandler
 	: public ProgressHandler	{
 
 	
-	virtual bool Update(float percentage) {
+	virtual bool Update(float /*percentage*/) {
 		return false;
 	}
 

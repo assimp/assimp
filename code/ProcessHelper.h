@@ -344,7 +344,7 @@ class DestroySpatialSortProcess : public BaseProcess
 			aiProcess_GenNormals | aiProcess_JoinIdenticalVertices));
 	}
 
-	void Execute( aiScene* pScene)
+	void Execute( aiScene* /*pScene*/)
 	{
 		shared->RemoveProperty(AI_SPP_SPATIAL_SORT);
 	}

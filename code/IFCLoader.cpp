@@ -259,10 +259,18 @@ struct TempMesh
 			aiVector3D vmin,vmax;
 			ArrayBounds(&*base, cnt ,vmin,vmax);
 
+<<<<<<< HEAD
 			const float epsilon = (vmax-vmin).SquareLength() / 1e9f, dotepsilon = 1e-7;
 
 			//// look for vertices that lie directly on the line between their predecessor and their 
 			//// successor and replace them with either of them.
+=======
+			const float epsilon = (vmax-vmin).SquareLength() / 1e9f;
+
+			//// look for vertices that lie directly on the line between their predecessor and their 
+			//// successor and replace them with either of them.
+			//const float dotepsilon = 1e-7;
+>>>>>>> 320a7a7a7e0422e4d8d9c2a22b74cb48f74b14ce
 			//for(size_t i = 0; i < cnt; ++i) {
 			//	aiVector3D& v1 = *(base+i), &v0 = *(base+(i?i-1:cnt-1)), &v2 = *(base+(i+1)%cnt);
 			//	const aiVector3D& d0 = (v1-v0), &d1 = (v2-v1);
@@ -669,7 +677,7 @@ void AssignMatrixAxes(aiMatrix4x4& out, const aiVector3D& x, const aiVector3D& y
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertAxisPlacement(aiMatrix4x4& out, const IFC::IfcAxis2Placement3D& in, ConversionData& conv)
+void ConvertAxisPlacement(aiMatrix4x4& out, const IFC::IfcAxis2Placement3D& in, ConversionData& /*conv*/)
 {
 	aiVector3D loc;
 	ConvertCartesianPoint(loc,in.Location);
@@ -694,7 +702,7 @@ void ConvertAxisPlacement(aiMatrix4x4& out, const IFC::IfcAxis2Placement3D& in, 
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertAxisPlacement(aiMatrix4x4& out, const IFC::IfcAxis2Placement2D& in, ConversionData& conv)
+void ConvertAxisPlacement(aiMatrix4x4& out, const IFC::IfcAxis2Placement2D& in, ConversionData& /*conv*/)
 {
 	aiVector3D loc;
 	ConvertCartesianPoint(loc,in.Location);
@@ -711,7 +719,7 @@ void ConvertAxisPlacement(aiMatrix4x4& out, const IFC::IfcAxis2Placement2D& in, 
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertAxisPlacement(aiVector3D& axis, aiVector3D& pos, const IFC::IfcAxis1Placement& in, ConversionData& conv)
+void ConvertAxisPlacement(aiVector3D& axis, aiVector3D& pos, const IFC::IfcAxis1Placement& in, ConversionData& /*conv*/)
 {
 	ConvertCartesianPoint(pos,in.Location);
 	if (in.Axis) {
@@ -797,7 +805,7 @@ void ConvertTransformOperator(aiMatrix4x4& out, const IFC::IfcCartesianTransform
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessPolyloop(const IFC::IfcPolyLoop& loop, TempMesh& meshout, ConversionData& conv)
+bool ProcessPolyloop(const IFC::IfcPolyLoop& loop, TempMesh& meshout, ConversionData& /*conv*/)
 {
 	size_t cnt = 0;
 	BOOST_FOREACH(const IFC::IfcCartesianPoint& c, loop.Polygon) {
@@ -1022,7 +1030,7 @@ void MergePolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t mas
 	// see if one of the polygons is a IfcFaceOuterBound (in which case `master_bounds` is its index).
 	// sadly we can't rely on it, the docs say 'At most one of the bounds shall be of the type IfcFaceOuterBound' 
 	float area_outer_polygon = 1e-10f;
-	if (master_bounds != -1) {
+	if (master_bounds != (size_t)-1) {
 		outer_polygon = begin + master_bounds;
 		outer_polygon_start = std::accumulate(begin,outer_polygon,0);
 		area_outer_polygon = normals[master_bounds].SquareLength();
@@ -1146,17 +1154,28 @@ next_loop:
 void ProcessConnectedFaceSet(const IFC::IfcConnectedFaceSet& fset, TempMesh& result, ConversionData& conv)
 {
 	BOOST_FOREACH(const IFC::IfcFace& face, fset.CfsFaces) {
+<<<<<<< HEAD
 		size_t ob = -1, cnt = 0;
+=======
+		// size_t ob = -1, cnt = 0;
+>>>>>>> 320a7a7a7e0422e4d8d9c2a22b74cb48f74b14ce
 		TempMesh meshout;
 		BOOST_FOREACH(const IFC::IfcFaceBound& bound, face.Bounds) {
 			
 			// XXX implement proper merging for polygonal loops
 			if(const IFC::IfcPolyLoop* const polyloop = bound.Bound->ToPtr<IFC::IfcPolyLoop>()) {
 				if(ProcessPolyloop(*polyloop, meshout,conv)) {
+<<<<<<< HEAD
 					if(bound.ToPtr<IFC::IfcFaceOuterBound>()) {
 						ob = cnt;
 					}
 					++cnt;
+=======
+					// if(bound.ToPtr<IFC::IfcFaceOuterBound>()) {
+					// 	ob = cnt;
+					// }
+					// ++cnt;
+>>>>>>> 320a7a7a7e0422e4d8d9c2a22b74cb48f74b14ce
 				}
 			}
 			else {
@@ -1178,7 +1197,7 @@ void ProcessConnectedFaceSet(const IFC::IfcConnectedFaceSet& fset, TempMesh& res
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessPolyLine(const IFC::IfcPolyline& def, TempMesh& meshout, ConversionData& conv)
+void ProcessPolyLine(const IFC::IfcPolyline& def, TempMesh& meshout, ConversionData& /*conv*/)
 {
 	// this won't produce a valid mesh, it just spits out a list of vertices
 	aiVector3D t;
@@ -1385,13 +1404,13 @@ bool TryAddOpenings(const std::vector<TempOpening>& openings,const std::vector<a
 			continue;
 		}
 
-		const aiVector3D diff = t.extrusionDir; 
+		// const aiVector3D diff = t.extrusionDir;
 		const std::vector<aiVector3D>& va = t.profileMesh->verts;
 		if(va.size() <= 2) {
 			continue;	
 		}
 
-		const float dd = t.extrusionDir*nor;
+		// const float dd = t.extrusionDir*nor;
 		IFCImporter::LogDebug("apply an IfcOpeningElement linked via IfcRelVoidsElement to this polygon");
 
 		got_openings = true;
@@ -1635,7 +1654,11 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,const std::vecto
 			}
 
 			if (hit) {
+<<<<<<< HEAD
 				if (last_hit != -1) {
+=======
+				if (last_hit != (size_t)-1) {
+>>>>>>> 320a7a7a7e0422e4d8d9c2a22b74cb48f74b14ce
 					const size_t old = curmesh.verts.size();
 					size_t cnt = last_hit > n ? size-(last_hit-n) : n-last_hit;
 					for(size_t a = last_hit, e = 0; e <= cnt; a=(a+1)%size, ++e) {
@@ -1683,7 +1706,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 	const aiVector3D any_point = out[s-4];
 	const aiVector3D nor = ((out[s-3]-any_point)^(out[s-2]-any_point)).Normalize();
 
-	const aiVector3D diag = vmax-vmin, diagn = aiVector3D(diag).Normalize();
+	const aiVector3D diag = vmax-vmin;
 	const float ax = fabs(nor.x);    
 	const float ay = fabs(nor.y);   
 	const float az = fabs(nor.z);    
@@ -1727,7 +1750,11 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 			continue;
 		}
 
+<<<<<<< HEAD
 		const aiVector3D diff = t.extrusionDir; 
+=======
+		// const aiVector3D diff = t.extrusionDir;
+>>>>>>> 320a7a7a7e0422e4d8d9c2a22b74cb48f74b14ce
 		const std::vector<aiVector3D>& va = t.profileMesh->verts;
 		if(va.size() <= 2) {
 			continue;	
@@ -1928,7 +1955,7 @@ void ProcessExtrudedAreaSolid(const IFC::IfcExtrudedAreaSolid& solid, TempMesh& 
 		}
 	}
 
-	if(conv.apply_openings && (sides_with_openings != 2 && sides_with_openings || sides_with_v_openings != 2 && sides_with_v_openings)) {
+	if(conv.apply_openings && ((sides_with_openings != 2 && sides_with_openings) || (sides_with_v_openings != 2 && sides_with_v_openings))) {
 		IFCImporter::LogWarn("failed to resolve all openings, presumably their topology is not supported by Assimp");
 	}
 
@@ -2142,7 +2169,7 @@ void FillMaterial(MaterialHelper* mat,const IFC::IfcSurfaceStyle* surf,Conversio
 					mat->AddProperty(&col,1, AI_MATKEY_COLOR_REFLECTIVE);
 				}
 
-				const int shading = (ren->SpecularHighlight && ren->SpecularColour)?ConvertShadingMode(ren->ReflectanceMethod):aiShadingMode_Gouraud;
+				const int shading = (ren->SpecularHighlight && ren->SpecularColour)?ConvertShadingMode(ren->ReflectanceMethod):static_cast<int>(aiShadingMode_Gouraud);
 				mat->AddProperty(&shading,1, AI_MATKEY_SHADING_MODEL);
 
 				if (ren->SpecularHighlight) {
@@ -2263,7 +2290,7 @@ bool ProcessGeometricItem(const IFC::IfcGeometricRepresentationItem& geo, std::v
 	else if(const IFC::IfcBooleanResult* boolean = geo.ToPtr<IFC::IfcBooleanResult>()) {
 		ProcessBoolean(*boolean,meshtmp,conv);
 	}
-	else if(const IFC::IfcBoundingBox* bb = geo.ToPtr<IFC::IfcBoundingBox>()) {
+	else if(geo.ToPtr<IFC::IfcBoundingBox>()) {
 		// silently skip over bounding boxes
 		return false; 
 	}
@@ -2286,7 +2313,7 @@ bool ProcessGeometricItem(const IFC::IfcGeometricRepresentationItem& geo, std::v
 }
 
 // ------------------------------------------------------------------------------------------------
-void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,ConversionData& conv)
+void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,ConversionData& /*conv*/)
 {
 	if (!mesh_indices.empty()) {
 

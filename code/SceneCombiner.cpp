@@ -747,7 +747,7 @@ void SceneCombiner::MergeBones(aiMesh* out,std::vector<aiMesh*>::const_iterator 
 
 // ------------------------------------------------------------------------------------------------
 // Merge a list of meshes
-void SceneCombiner::MergeMeshes(aiMesh** _out,unsigned int flags,
+void SceneCombiner::MergeMeshes(aiMesh** _out,unsigned int /*flags*/,
 	std::vector<aiMesh*>::const_iterator begin,
 	std::vector<aiMesh*>::const_iterator end)
 {

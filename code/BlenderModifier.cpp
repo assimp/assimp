@@ -178,7 +178,7 @@ bool BlenderModifier_Mirror :: IsActive (const ModifierData& modin)
 
 // ------------------------------------------------------------------------------------------------
 void  BlenderModifier_Mirror :: DoIt(aiNode& out, ConversionData& conv_data,  const ElemBase& orig_modifier, 
-	const Scene& in,
+	const Scene& /*in*/,
 	const Object& orig_object ) 
 {
 	// hijacking the ABI, see the big note in BlenderModifierShowcase::ApplyModifiers()
@@ -271,7 +271,7 @@ bool BlenderModifier_Subdivision :: IsActive (const ModifierData& modin)
 
 // ------------------------------------------------------------------------------------------------
 void  BlenderModifier_Subdivision :: DoIt(aiNode& out, ConversionData& conv_data,  const ElemBase& orig_modifier, 
-	const Scene& in,
+	const Scene& /*in*/,
 	const Object& orig_object ) 
 {
 	// hijacking the ABI, see the big note in BlenderModifierShowcase::ApplyModifiers()

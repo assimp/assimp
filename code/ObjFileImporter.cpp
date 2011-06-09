@@ -175,7 +175,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
 // ------------------------------------------------------------------------------------------------
 //	Creates all nodes of the model
 aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile::Object* pObject, 
-									 unsigned int uiMeshIndex,
+									 unsigned int /*uiMeshIndex*/,
 									 aiNode *pParent, aiScene* pScene, 
 									 std::vector<aiMesh*> &MeshArray )
 {
@@ -499,6 +499,7 @@ void ObjFileImporter::appendChildToParentNode(aiNode *pParent, aiNode *pChild)
 	// Assign parent to child
 	pChild->mParent = pParent;
 	size_t sNumChildren = 0;
+	(void)sNumChildren; // remove warning on release build
 	
 	// If already children was assigned to the parent node, store them in a 
 	std::vector<aiNode*> temp;

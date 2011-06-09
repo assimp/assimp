@@ -64,7 +64,7 @@ public:
 
 	// --------------------
 	/** Check if *this* modifier is active, given a ModifierData& block.*/
-	virtual bool IsActive( const ModifierData& modin) {
+	virtual bool IsActive( const ModifierData& /*modin*/) {
 		return false;
 	}
 
@@ -72,11 +72,11 @@ public:
 	/** Apply the modifier to a given output node. The original data used
 	 *  to construct the node is given as well. Not called unless IsActive()
 	 *  was called and gave positive response. */
-	virtual void DoIt(aiNode& out, 
-		ConversionData& conv_data,  
+	virtual void DoIt(aiNode& /*out*/,
+		ConversionData& /*conv_data*/,
 		const ElemBase& orig_modifier, 
-		const Scene& in, 
-		const Object& orig_object 
+		const Scene& /*in*/,
+		const Object& /*orig_object*/
 	) {
 		DefaultLogger::get()->warn((Formatter::format("This modifier is not supported, skipping: "),orig_modifier.dna_type));
 		return;

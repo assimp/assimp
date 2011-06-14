@@ -351,13 +351,18 @@ SET(BLENDER_SRCS
 	BlenderModifier.h
 	BlenderModifier.cpp
 )
-SOURCE_GROUP( BLENDEr FILES ${BLENDER_SRCS})
+SOURCE_GROUP( BLENDER FILES ${BLENDER_SRCS})
 
 SET(IFC_SRCS
 	IFCLoader.cpp
 	IFCLoader.h
 	IFCReaderGen.cpp
 	IFCReaderGen.h
+	IFCUtil.h
+	IFCUtil.cpp
+	IFCGeometry.cpp
+	IFCMaterial.cpp
+	IFCProfile.cpp
 	STEPFile.h
 	STEPFileReader.h
 	STEPFileReader.cpp

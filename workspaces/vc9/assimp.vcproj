@@ -1948,11 +1948,23 @@
 					Name="ifc"
 					>
 					<File
+						RelativePath="..\..\code\IFCGeometry.cpp"
+						>
+					</File>
+					<File
 						RelativePath="..\..\code\IFCLoader.cpp"
 						>
 					</File>
 					<File
 						RelativePath="..\..\code\IFCLoader.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\IFCMaterial.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\IFCProfile.cpp"
 						>
 					</File>
 					<File
@@ -1969,6 +1981,14 @@
 					</File>
 					<File
 						RelativePath="..\..\code\IFCReaderGen.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\IFCUtil.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\IFCUtil.h"
 						>
 					</File>
 					<File

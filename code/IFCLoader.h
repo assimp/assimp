@@ -114,12 +114,14 @@ public:
 			: skipSpaceRepresentations()
 			, skipCurveRepresentations()
 			, useCustomTriangulation()
+			, skipAnnotations()
 		{}
 
 
 		bool skipSpaceRepresentations;
 		bool skipCurveRepresentations;
 		bool useCustomTriangulation;
+		bool skipAnnotations;
 	};
 	
 	

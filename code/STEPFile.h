@@ -683,6 +683,10 @@ namespace STEP {
 		typedef Lazy Out;
 		Lazy(const LazyObject* obj = NULL) : obj(obj) {
 		}
+
+		operator const T*() const {
+			return obj->ToPtr<T>();
+		}
 		
 		operator const T&() const {
 			return obj->To<T>();

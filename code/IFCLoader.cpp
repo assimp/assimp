@@ -60,8 +60,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 using namespace Assimp::Formatter;
-namespace EXPRESS = STEP::EXPRESS;
-
 using namespace Assimp::IFC;
 
 template<> const std::string LogFunctions<IFCImporter>::log_prefix = "IFC: ";

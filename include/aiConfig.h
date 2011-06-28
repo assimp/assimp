@@ -299,7 +299,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif // !! AI_LMW_MAX_WEIGHTS
 
 // ---------------------------------------------------------------------------
-/** @brief Set the deboning threshold higher to remove more bones
+/** @brief Lower the deboning threshold in order to remove more bones.
  *
  * This is used by the #aiProcess_Debone PostProcess-Step.
  * @note The default value is AI_DEBONE_THRESHOLD

@@ -114,12 +114,6 @@ a particular file format, why not implement it yourself and add it to the librar
 ASSIMP is considerably easy, as the whole postprocessing infrastructure is available and does much of the work for you.
 See the @link extend Extending the library @endlink page for more information.
 
-@section main_viewer The Viewer
-
-The ASSIMP viewer is a standalone Windows/DirectX application that was developed along with the library. It is very useful 
-for quickly examining the contents of a scene file and test the suitability of its contents for realtime rendering. 
-The viewer offers a lot of additional features to view, interact with or export bits of the data. See the
-@link viewer Viewer page @endlink for a detailed description of its capabilities.
 
 
 @section main_support Support & Feedback
@@ -131,6 +125,7 @@ assimp-discussions</a>.
 
 
 */
+
 
 /**
 @page install Installation
@@ -789,200 +784,6 @@ contains the most common file extension of the embedded texture's format. This v
 set if ASSIMP is able to determine the file format.
 */
 
-/**
-@page extend Extending the Library
-
-@section General
-
-Or - how to write your own loaders. It's easy. You just need to implement the #Assimp::BaseImporter class,
-which defines a few abstract methods, register your loader, test it carefully and provide test models for it.
-
-OK, that sounds too easy :-). The whole procedure for a new loader merely looks like this:
-
-<ul>
-<li>Create a header (<tt><i>FormatName</i>Importer.h</tt>) and a unit (<tt><i>FormatName</i>Importer.cpp</tt>) in the <tt>&lt;root&gt;/code/</tt> directory</li>
-<li>Add them to the following workspaces: vc8 and vc9 (the files are in the workspaces directory), CMAKE (code/CMakeLists.txt, create a new
-source group for your importer and put them also to ADD_LIBRARY( assimp SHARED))</li>
-<li>Include <i>AssimpPCH.h</i> - this is the PCH file, and it includes already most Assimp-internal stuff. </li>
-<li>Open Importer.cpp and include your header just below the <i>(include_new_importers_here)</i> line, 
-guarded by a #define 
-@code
-#if (!defined ASSIMP_BUILD_NO_FormatName_IMPORTER)
-	...
-#endif
-@endcode
-Wrap the same guard around your .cpp!</li>
-
-<li>Now advance to the <i>(register_new_importers_here)</i> line in the Importer.cpp and register your importer there - just like all the others do.</li>
-<li>Setup a suitable test environment (i.e. use AssimpView or your own application), make sure to enable 
-the #aiProcess_ValidateDataStructure flag and enable verbose logging. That is, simply call before you import anything:
-@code
-DefaultLogger::create("AssimpLog.txt",Logger::VERBOSE)
-@endcode
-</li>
-<li>
-Implement the Assimp::BaseImporter::CanRead(), Assimp::BaseImporter::InternReadFile() and Assimp::BaseImporter::GetExtensionList(). 
-Just copy'n'paste the template from Appendix A and adapt it for your needs.
-</li>
-<li>For error handling, throw a dynamic allocated ImportErrorException (see Appendix A) for critical errors, and log errors, warnings, infos and debuginfos
-with DefaultLogger::get()->[error, warn, debug, info].
-</li>
-<li>
-Make sure that your loader compiles against all build configurations on all supported platforms. This includes <i>-noboost</i>! To avoid problems,
-see the boost section on this page for a list of all 'allowed' boost classes (again, this grew historically when we had to accept that boost
-is not THAT widely spread that one could rely on it being available everywhere).
-</li>
-<li>
-Provide some _free_ test models in <tt>&lt;root&gt;/test/models/&lt;FormatName&gt;/</tt> and credit their authors.
-Test files for a file format shouldn't be too large (<i>~500 KiB in total</i>), and not too repetive. Try to cover all format features with test data.
-</li>
-<li>
-Done! Please, share your loader that everyone can profit from it!
-</li>
-</ul>
-
-@section properties Properties
-
-You can use properties to chance the behavior of you importer. In order to do so, you have to overide BaseImporter::SetupProperties, and specify
-you custom properties in aiConfig.h. Just have a look to the other AI_CONFIG_IMPORT_* defines and you will understand, how it works.
-
-The properties can be set with Importer::SetProperty***() and can be accessed in your SetupProperties function with Importer::GetProperty***(). You can
-store the properties as a member variable of your importer, they are thread safe.
-
-@section tnote Notes for text importers
-
-<ul>
-<li>Try to make your parser as flexible as possible. Don't rely on particular layout, whitespace/tab style,
-except if the file format has a strict definition, in which case you should always warn about spec violations.
-But the general rule of thumb is <i>be strict in what you write and tolerant in what you accept</i>.</li>
-<li>Call Assimp::BaseImporter::ConvertToUTF8() before you parse anything to convert foreign encodings to UTF-8. 
- That's not necessary for XML importers, which must use the provided IrrXML for reading. </li>
-</ul>
-
-@section bnote Notes for binary importers
-
-<ul>
-<li>
-Take care of endianess issues! Assimp importers mostly support big-endian platforms, which define the <tt>AI_BUILD_BIG_ENDIAN</tt> constant.
-See the next section for a list of utilities to simplify this task.
-</li>
-<li>
-Don't trust the input data! Check all offsets!
-</li>
-</ul>
-
-@section util Utilities
-
-Mixed stuff for internal use by loaders, mostly documented (most of them are already included by <i>AssimpPCH.h</i>):
-<ul>
-<li><b>ByteSwap</b> (<i>ByteSwap.h</i>) - manual byte swapping stuff for binary loaders.</li>
-<li><b>StreamReader</b> (<i>StreamReader.h</i>) - safe, endianess-correct, binary reading.</li>
-<li><b>IrrXML</b> (<i>irrXMLWrapper.h</i>)  - for XML-parsing (SAX.</li>
-<li><b>CommentRemover</b> (<i>RemoveComments.h</i>) - remove single-line and multi-line comments from a text file.</li>
-<li>fast_atof, strtoul10, strtoul16, SkipSpaceAndLineEnd, SkipToNextToken .. large family of low-level 
-parsing functions, mostly declared in <i>fast_atof.h</i>, <i>StringComparison.h</i> and <i>ParsingUtils.h</i> (a collection that grew
-historically, so don't expect perfect organization). </li>
-<li><b>ComputeNormalsWithSmoothingsGroups()</b> (<i>SmoothingGroups.h</i>) - Computes normal vectors from plain old smoothing groups. </li>
-<li><b>SkeletonMeshBuilder</b> (<i>SkeletonMeshBuilder.h</i>) - generate a dummy mesh from a given (animation) skeleton. </li>
-<li><b>StandardShapes</b> (<i>StandardShapes.h</i>) - generate meshes for standard solids, such as platonic primitives, cylinders or spheres. </li>
-<li><b>BatchLoader</b> (<i>BaseImporter.h</i>) - manage imports from external files. Useful for file formats
-which spread their data across multiple files. </li>
-<li><b>SceneCombiner</b> (<i>SceneCombiner.h</i>) - exhaustive toolset to merge multiple scenes. Useful for file formats
-which spread their data across multiple files. </li>
-</ul>
-
-@section mat Filling materials
-
-The required definitions zo set/remove/query keys in #aiMaterial structures are declared in <i>MaterialSystem.h</i>, in a
-#aiMaterial derivate called #Assimp::MaterialHelper. The header is included by AssimpPCH.h, so you don't need to bother.
-
-@code
-MaterialHelper* mat = new MaterialHelper();
-
-const float spec = 16.f;
-mat->AddProperty(&spec, 1, AI_MATKEY_SHININESS);
-
-//set the name of the material:
-NewMaterial->AddProperty(&aiString(MaterialName.c_str()), AI_MATKEY_NAME);//MaterialName is a std::string
-
-//set the first diffuse texture
-NewMaterial->AddProperty(&aiString(Texturename.c_str()), AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));//again, Texturename is a std::string
-@endcode
-
-@section boost Boost
-
-The boost whitelist:
-<ul>
-<li><i>boost.scoped_ptr</i></li>
-<li><i>boost.scoped_array</i></li>
-<li><i>boost.format</i> </li>
-<li><i>boost.random</i> </li>
-<li><i>boost.common_factor</i> </li>
-<li><i>boost.foreach</i> </li>
-<li><i>boost.tuple</i></li>
-</ul>
-
-(if you happen to need something else, i.e. boost::thread, make this an optional feature.
-<tt>ASSIMP_BUILD_BOOST_WORKAROUND</tt> is defined for <i>-noboost</i> builds)
-
-@section appa Appendix A - Template for BaseImporter's abstract methods
-
-@code
-// -------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
-bool xxxxImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, 
-	bool checkSig) const
-{
-	const std::string extension = GetExtension(pFile);
-	if(extension == "xxxx") {
-		return true;
-	}
-	if (!extension.length() || checkSig) {
-		// no extension given, or we're called a second time because no 
-		// suitable loader was found yet. This means, we're trying to open 
-		// the file and look for and hints to identify the file format.
-		// #Assimp::BaseImporter provides some utilities:
-		//
-		// #Assimp::BaseImporter::SearchFileHeaderForToken - for text files.
-		// It reads the first lines of the file and does a substring check
-		// against a given list of 'magic' strings.
-		//
-		// #Assimp::BaseImporter::CheckMagicToken - for binary files. It goes
-		// to a particular offset in the file and and compares the next words 
-		// against a given list of 'magic' tokens.
-
-		// These checks MUST be done (even if !checkSig) if the file extension 
-		// is not exclusive to your format. For example, .xml is very common 
-		// and (co)used by many formats.
-	}
-	return false;
-}
-
-// -------------------------------------------------------------------------------
-// Get list of file extensions handled by this loader
-void xxxxImporter::GetExtensionList(std::set<std::string>& extensions)
-{
-	extensions.insert("xxx");
-}
-
-// -------------------------------------------------------------------------------
-void xxxxImporter::InternReadFile( const std::string& pFile, 
-	aiScene* pScene, IOSystem* pIOHandler)
-{
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
-
-	// Check whether we can read from the file
-	if( file.get() == NULL) {
-		throw DeadlyImportError( "Failed to open xxxx file " + pFile + ".");
-	}
-	
-	// Your task: fill pScene
-	// Throw a ImportErrorException with a meaningful (!) error message if 
-	// something goes wrong.
-}
-
-@endcode
- */
 
 /**
 @page materials Material System
@@ -1447,12 +1248,7 @@ float4 PimpMyPixel (float4 prev)
 
 */
 
-/** 
-@page viewer The Viewer
-Sinn: StandAlone-Test für die Importlib
-Benutzung: was kann er und wie löst man es aus
-Build: alles von CustomBuild + DirectX + MFC?
-*/
+
 
 
 /** 
@@ -1460,17 +1256,21 @@ Build: alles von CustomBuild + DirectX + MFC?
 
 @section perf_overview Overview
 
-This page discusses Assimps general performance and some ways to finetune and profile it. You will see that an
-intelligent choice of postprocessing steps is essential for quick loading.
+This page discusses general performance issues related to ASSIMP.
 
 @section perf_profile Profiling
 
-Assimp has builtin support for basic profiling and reporting. To turn it on, set the <tt>GLOB_MEASURE_TIME</tt>
-configuration switch to <tt>true</tt> (nonzero). Results are dumped to the logfile, so you need to setup
-an appropriate logger implementation with at least one output stream first. See the @link logging Logging Page @endlink
-for the details.
+ASSIMP has built-in support for <i>very</i> basic profiling and time measurement. To turn it on, set the <tt>GLOB_MEASURE_TIME</tt>
+configuration switch to <tt>true</tt> (nonzero). Results are dumped to the log file, so you need to setup
+an appropriate logger implementation with at least one output stream first (see the @link logging Logging Page @endlink
+for the details.). 
 
-A sample report looks like this (some unrelated log messages omitted, grouped entries for clarity):
+Note that these measurements are based on a single run of the importer and each of the post processing steps, so 
+a single result set is far away from being significant in a statistic sense. While precision can be improved
+by running the test multiple times, the low accuracy of the timings may render the results useless
+for smaller files.
+
+A sample report looks like this (some unrelated log messages omitted, entries grouped for clarity):
 
 @verbatim
 Debug, T5488: START `total`
@@ -1534,10 +1334,11 @@ Info,  T5488: Leaving post processing pipeline
 Debug, T5488: END   `total`, dt= 11.269 s
 @endverbatim
 
-So, only one fourth of the total import time was used for the actual model import, while the rest of the
-time was consumed by the #aiProcess_Triangulate, #aiProcess_JoinIdenticalVertices and #aiProcess_ImproveCacheLocality 
-postprocessing steps. It is therefore not a good idea to specify *all* postprocessing flags just because they
-sound so nice.
+In this particular example only one fourth of the total import time was spent on the actual importing, while the rest of the
+time got consumed by the #aiProcess_Triangulate, #aiProcess_JoinIdenticalVertices and #aiProcess_ImproveCacheLocality 
+postprocessing steps. A wise selection of postprocessing steps is therefore essential to getting good performance. 
+Of course this depends on the individual requirements of your application, in many of the typical use cases of ASSIMP performance won't 
+matter (i.e. in an offline content pipeline).
 */
 
 /** 
@@ -1545,68 +1346,82 @@ sound so nice.
 
 @section overview Overview
 
-This page discusses both Assimps scalability in threaded environments, the precautions to be taken in order to
-use it from multiple threads concurrently and finally its own ability to parallelize certain tasks internally.
+This page discusses both ASSIMPs scalability in threaded environments and the precautions to be taken in order to
+use it from multiple threads concurrently.
 
-@section threadsafety Thread-safety / Using Assimp concurrently from several threads
+@section threadsafety Thread-safety / using Assimp concurrently from several threads
 
 The library can be accessed by multiple threads simultaneously, as long as the
 following prerequisites are fulfilled: 
-<ul>
-<li> When using the C++-API make sure you create a new Importer instance for each thread.
-   Constructing instances of Importer is expensive, so it might be a good idea to
-   let every thread maintain its own thread-local instance (use it to 
-   load as many models as you want).</li>
-<li> The C-API is threadsafe as long as AI_C_THREADSAFE is defined. That's the default. </li>
-<li> When supplying custom IO logic, make sure your underyling implementation is thead-safe.</li>
-<li> Custom log streams or logger replacements have to be thread-safe, too.</li>
-</ul>
+
+ - Users of the C++-API should ensure that they use a dedicated #Assimp::Importer instance for each thread. Constructing instances of #Assimp::Importer is expensive, so it might be a good idea to
+   let every thread maintain its own thread-local instance (which can be used to
+   load as many files as necessary).
+ - The C-API is thread safe as long as AI_C_THREADSAFE is defined (default). 
+ - When supplying custom IO logic, one must make sure the underlying implementation is thread-safe.
+ - Custom log streams or logger replacements have to be thread-safe, too.
+
 
 
 
 Multiple concurrent imports may or may not be beneficial, however. For certain file formats in conjunction with 
-little postprocessing IO times tend to be the performance bottleneck, using multiple threads does therefore not 
-help. Intense postprocessing (especially the O(nlogn) steps #aiProcess_JoinIdenticalVertices,
-#aiProcess_GenSmoothNormals and #aiProcess_CalcTangentSpace) together with file formats like X or Collada, 
-which are slow to parse, might scale well with multiple concurrent imports. 
+little or no post processing IO times tend to be the performance bottleneck. Intense post processing together 
+with 'slow' file formats like X or Collada might scale well with multiple concurrent imports.  
 
 
 @section automt Internal threading
 
-Automatic multi-threading is not currently implemented. 
+Internal multi-threading is not currently implemented.
 */
 
 /**
-@page importer_notes Importer Remarks
+@page res Resources
+
+This page lists some useful resources for ASSIMP. Note that, even though the core team has an eye on them, 
+we cannot guarantee the accuracy of third-party information. If in doubt, it's best to ask either on the 
+mailing list or on our forums on SF.net.
+
+ - ASSIMP comes with some sample applications, these can be found in the <i>./samples</i> folder. Don't forget to read the <i>README</i> file.
+ - http://www.drivenbynostalgia.com/files/AssimpOpenGLDemo.rar - OpenGl animation sample using the library's animation import facilities.
+ - http://nolimitsdesigns.com/game-design/open-asset-import-library-animation-loader/ is another utility to
+   simplify animation playback.
+ - http://ogldev.atspace.co.uk/www/tutorial22/tutorial22.html - Tutorial "Loading models using the Open Asset Import Library", out of a series of OpenGl tutorials.
+
+*/
+
+
+/**
+@page importer_notes Remarks on individual importers
 
 <hr>
 @section blender Blender
 
-This section provides remarks and implementations notes regarding Assimp's Blender3D importer. 
+This section contains implementation notes for the Blender3D importer. 
 @subsection bl_overview Overview
 
-The library provides a self-contained reimplementation of Blender's so called SDNA system (http://www.blender.org/development/architecture/notes-on-sdna/). 
-SDNA allows Blender to be fully backward AND forward compatible and to exchange
-files created on any of the various platforms blender runs on with any other. Quick processing is another design goal - 
-BLEND is a fully-fledged binary monster and the library tries to read the most of it. Naturally, if Blender is the only modelling tool 
-in your asset work flow, consider writing a custom exporter from Blender if Assimps format coverage does not meet your requirements.
+ASSIMP provides a self-contained reimplementation of Blender's so called SDNA system (http://www.blender.org/development/architecture/notes-on-sdna/). 
+SDNA allows Blender to be fully backward and forward compatible and to exchange
+files across all platforms. The BLEND format is thus a non-trivial binary monster and the loader tries to read the most of it, 
+naturally limited by the scope of the #aiScene output data structure.
+Consequently, if Blender is the only modeling tool in your asset work flow, consider writing a 
+custom exporter from Blender if ASSIMPs format coverage does not meet the requirements.
 
 @subsection bl_status Current status
 
-The Blender loader does not support animations yet, but is apart from that considered relatively stable and well-tested.
+The Blender loader does not support animations yet, but is apart from that considered relatively stable.
 
 @subsection bl_notes Notes
 
-When filing bugs on the Blender loader, always give the Blender version (or, even better, post the file that has caused the error).
+When filing bugs on the Blender loader, always give the Blender version (or, even better, post the file caused the error).
 
 <hr>
 @section ifc IFC
 
-This section provides remarks and implementations notes regarding Assimp's IFC-STEP importer. 
+This section contains implementation notes on the IFC-STEP importer. 
 @subsection ifc_overview Overview
 
 The library provides a partial implementation of the IFC2x3 industry standard for automatized exchange of CAE/architectural 
-data sets (i.e. buildings). See http://en.wikipedia.org/wiki/Industry_Foundation_Classes for more information on the format. We aim 
+data sets. See http://en.wikipedia.org/wiki/Industry_Foundation_Classes for more information on the format. We aim 
 at getting as much 3D data out of the files as possible. 
 
 @subsection ifc_status Current status
@@ -1615,22 +1430,20 @@ IFC support is new and considered experimental. Please report any bugs you may e
 
 @subsection ifc_notes Notes
 
-- Only the STEP-based encoding is supported. IFCZIP and IFCXML are not (but IFCZIP can simply be unzipped to get a STEP file out ofit).
+- Only the STEP-based encoding is supported. IFCZIP and IFCXML are not (but IFCZIP can simply be unzipped to get a STEP file).
 - The importer leaves vertex coordinates untouched, but applies a global scaling to the root transform to
   convert from whichever unit the IFC file uses to <i>metres</i>.
-- The importer does not currently skip geometric representations for entities which have multiple representations defined - it may happen that there
-is finally more than one mesh describing the same IfcProduct. This should be an unlikely case, however, usually
-if there are multiple representations, only one of them will actually be a solid 3d model.
-- Not supported (but possible relevant for proper display of most files) are: revolved surfaces, binary clipped surfaces,
-  old-style transformations (as for IFC2), polygons with holes, textured surfaces and the various kinds of meta connections
-  provided by IFC: only aggregation, containment and material assignment relationships are resolved by the library and 
-  mapped to the output node graph.
-- The implementation knows only about IFC2X3 and applies this rule set to all models it encounters, regardless of their actual version. 
-- IFC models should be rendered with backface culling turned off.
+- If multiple geometric representations are provided, the choice which one to load is based on how expensive a representation seems 
+ to be in terms of import time. The loader also avoids representation types for which it has known deficits.
+- Not supported are arbitrary binary operations (binary clipping is implemented, though). 
+- Of the various relationship types that IFC knows, only aggregation, containment and material assignment are resolved and mapped to
+  the output graph.
+- The implementation knows only about IFC2X3 and applies this rule set to all models it encounters, 
+  regardless of their actual version. Loading of older or newer files may fail with parsing errors.
 
 <hr>
 @section ogre Ogre
-This section provides remarks and implementations notes regarding Assimp's OgreXML importer. 
+This section contains implementations notes for the OgreXML importer. 
 @subsection overview Overview
 Ogre importer is currently optimized for the Blender Ogre exporter, because thats the only one that i use. You can find the Blender Ogre exporter at: http://www.ogre3d.org/forums/viewtopic.php?f=8&t=45922
 
@@ -1683,3 +1496,199 @@ If you want more properties in custom materials, you can easily expand the ogre 
 - tes everything elaboratly
 - check for non existent animation keys (what happens if a one time not all bones have a key?)
 */
+
+
+/**
+@page extend Extending the Library
+
+@section General
+
+Or - how to write your own loaders. It's easy. You just need to implement the #Assimp::BaseImporter class,
+which defines a few abstract methods, register your loader, test it carefully and provide test models for it.
+
+OK, that sounds too easy :-). The whole procedure for a new loader merely looks like this:
+
+<ul>
+<li>Create a header (<tt><i>FormatName</i>Importer.h</tt>) and a unit (<tt><i>FormatName</i>Importer.cpp</tt>) in the <tt>&lt;root&gt;/code/</tt> directory</li>
+<li>Add them to the following workspaces: vc8 and vc9 (the files are in the workspaces directory), CMAKE (code/CMakeLists.txt, create a new
+source group for your importer and put them also to ADD_LIBRARY( assimp SHARED))</li>
+<li>Include <i>AssimpPCH.h</i> - this is the PCH file, and it includes already most Assimp-internal stuff. </li>
+<li>Open Importer.cpp and include your header just below the <i>(include_new_importers_here)</i> line, 
+guarded by a #define 
+@code
+#if (!defined ASSIMP_BUILD_NO_FormatName_IMPORTER)
+	...
+#endif
+@endcode
+Wrap the same guard around your .cpp!</li>
+
+<li>Now advance to the <i>(register_new_importers_here)</i> line in the Importer.cpp and register your importer there - just like all the others do.</li>
+<li>Setup a suitable test environment (i.e. use AssimpView or your own application), make sure to enable 
+the #aiProcess_ValidateDataStructure flag and enable verbose logging. That is, simply call before you import anything:
+@code
+DefaultLogger::create("AssimpLog.txt",Logger::VERBOSE)
+@endcode
+</li>
+<li>
+Implement the Assimp::BaseImporter::CanRead(), Assimp::BaseImporter::InternReadFile() and Assimp::BaseImporter::GetExtensionList(). 
+Just copy'n'paste the template from Appendix A and adapt it for your needs.
+</li>
+<li>For error handling, throw a dynamic allocated ImportErrorException (see Appendix A) for critical errors, and log errors, warnings, infos and debuginfos
+with DefaultLogger::get()->[error, warn, debug, info].
+</li>
+<li>
+Make sure that your loader compiles against all build configurations on all supported platforms. This includes <i>-noboost</i>! To avoid problems,
+see the boost section on this page for a list of all 'allowed' boost classes (again, this grew historically when we had to accept that boost
+is not THAT widely spread that one could rely on it being available everywhere).
+</li>
+<li>
+Provide some _free_ test models in <tt>&lt;root&gt;/test/models/&lt;FormatName&gt;/</tt> and credit their authors.
+Test files for a file format shouldn't be too large (<i>~500 KiB in total</i>), and not too repetive. Try to cover all format features with test data.
+</li>
+<li>
+Done! Please, share your loader that everyone can profit from it!
+</li>
+</ul>
+
+@section properties Properties
+
+You can use properties to chance the behavior of you importer. In order to do so, you have to overide BaseImporter::SetupProperties, and specify
+you custom properties in aiConfig.h. Just have a look to the other AI_CONFIG_IMPORT_* defines and you will understand, how it works.
+
+The properties can be set with Importer::SetProperty***() and can be accessed in your SetupProperties function with Importer::GetProperty***(). You can
+store the properties as a member variable of your importer, they are thread safe.
+
+@section tnote Notes for text importers
+
+<ul>
+<li>Try to make your parser as flexible as possible. Don't rely on particular layout, whitespace/tab style,
+except if the file format has a strict definition, in which case you should always warn about spec violations.
+But the general rule of thumb is <i>be strict in what you write and tolerant in what you accept</i>.</li>
+<li>Call Assimp::BaseImporter::ConvertToUTF8() before you parse anything to convert foreign encodings to UTF-8. 
+ That's not necessary for XML importers, which must use the provided IrrXML for reading. </li>
+</ul>
+
+@section bnote Notes for binary importers
+
+<ul>
+<li>
+Take care of endianess issues! Assimp importers mostly support big-endian platforms, which define the <tt>AI_BUILD_BIG_ENDIAN</tt> constant.
+See the next section for a list of utilities to simplify this task.
+</li>
+<li>
+Don't trust the input data! Check all offsets!
+</li>
+</ul>
+
+@section util Utilities
+
+Mixed stuff for internal use by loaders, mostly documented (most of them are already included by <i>AssimpPCH.h</i>):
+<ul>
+<li><b>ByteSwap</b> (<i>ByteSwap.h</i>) - manual byte swapping stuff for binary loaders.</li>
+<li><b>StreamReader</b> (<i>StreamReader.h</i>) - safe, endianess-correct, binary reading.</li>
+<li><b>IrrXML</b> (<i>irrXMLWrapper.h</i>)  - for XML-parsing (SAX.</li>
+<li><b>CommentRemover</b> (<i>RemoveComments.h</i>) - remove single-line and multi-line comments from a text file.</li>
+<li>fast_atof, strtoul10, strtoul16, SkipSpaceAndLineEnd, SkipToNextToken .. large family of low-level 
+parsing functions, mostly declared in <i>fast_atof.h</i>, <i>StringComparison.h</i> and <i>ParsingUtils.h</i> (a collection that grew
+historically, so don't expect perfect organization). </li>
+<li><b>ComputeNormalsWithSmoothingsGroups()</b> (<i>SmoothingGroups.h</i>) - Computes normal vectors from plain old smoothing groups. </li>
+<li><b>SkeletonMeshBuilder</b> (<i>SkeletonMeshBuilder.h</i>) - generate a dummy mesh from a given (animation) skeleton. </li>
+<li><b>StandardShapes</b> (<i>StandardShapes.h</i>) - generate meshes for standard solids, such as platonic primitives, cylinders or spheres. </li>
+<li><b>BatchLoader</b> (<i>BaseImporter.h</i>) - manage imports from external files. Useful for file formats
+which spread their data across multiple files. </li>
+<li><b>SceneCombiner</b> (<i>SceneCombiner.h</i>) - exhaustive toolset to merge multiple scenes. Useful for file formats
+which spread their data across multiple files. </li>
+</ul>
+
+@section mat Filling materials
+
+The required definitions zo set/remove/query keys in #aiMaterial structures are declared in <i>MaterialSystem.h</i>, in a
+#aiMaterial derivate called #Assimp::MaterialHelper. The header is included by AssimpPCH.h, so you don't need to bother.
+
+@code
+MaterialHelper* mat = new MaterialHelper();
+
+const float spec = 16.f;
+mat->AddProperty(&spec, 1, AI_MATKEY_SHININESS);
+
+//set the name of the material:
+NewMaterial->AddProperty(&aiString(MaterialName.c_str()), AI_MATKEY_NAME);//MaterialName is a std::string
+
+//set the first diffuse texture
+NewMaterial->AddProperty(&aiString(Texturename.c_str()), AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));//again, Texturename is a std::string
+@endcode
+
+@section boost Boost
+
+The boost whitelist:
+<ul>
+<li><i>boost.scoped_ptr</i></li>
+<li><i>boost.scoped_array</i></li>
+<li><i>boost.format</i> </li>
+<li><i>boost.random</i> </li>
+<li><i>boost.common_factor</i> </li>
+<li><i>boost.foreach</i> </li>
+<li><i>boost.tuple</i></li>
+</ul>
+
+(if you happen to need something else, i.e. boost::thread, make this an optional feature.
+<tt>ASSIMP_BUILD_BOOST_WORKAROUND</tt> is defined for <i>-noboost</i> builds)
+
+@section appa Appendix A - Template for BaseImporter's abstract methods
+
+@code
+// -------------------------------------------------------------------------------
+// Returns whether the class can handle the format of the given file. 
+bool xxxxImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, 
+	bool checkSig) const
+{
+	const std::string extension = GetExtension(pFile);
+	if(extension == "xxxx") {
+		return true;
+	}
+	if (!extension.length() || checkSig) {
+		// no extension given, or we're called a second time because no 
+		// suitable loader was found yet. This means, we're trying to open 
+		// the file and look for and hints to identify the file format.
+		// #Assimp::BaseImporter provides some utilities:
+		//
+		// #Assimp::BaseImporter::SearchFileHeaderForToken - for text files.
+		// It reads the first lines of the file and does a substring check
+		// against a given list of 'magic' strings.
+		//
+		// #Assimp::BaseImporter::CheckMagicToken - for binary files. It goes
+		// to a particular offset in the file and and compares the next words 
+		// against a given list of 'magic' tokens.
+
+		// These checks MUST be done (even if !checkSig) if the file extension 
+		// is not exclusive to your format. For example, .xml is very common 
+		// and (co)used by many formats.
+	}
+	return false;
+}
+
+// -------------------------------------------------------------------------------
+// Get list of file extensions handled by this loader
+void xxxxImporter::GetExtensionList(std::set<std::string>& extensions)
+{
+	extensions.insert("xxx");
+}
+
+// -------------------------------------------------------------------------------
+void xxxxImporter::InternReadFile( const std::string& pFile, 
+	aiScene* pScene, IOSystem* pIOHandler)
+{
+	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
+
+	// Check whether we can read from the file
+	if( file.get() == NULL) {
+		throw DeadlyImportError( "Failed to open xxxx file " + pFile + ".");
+	}
+	
+	// Your task: fill pScene
+	// Throw a ImportErrorException with a meaningful (!) error message if 
+	// something goes wrong.
+}
+
+@endcode
+ */

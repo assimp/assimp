@@ -46,6 +46,10 @@ namespace Assimp {
 
 namespace M3 {
 
+// ------------------------------------------------------------------------------------------------
+// The following data definitions are from http://code.google.com/p/libm3/, many thanks for that 
+// help.
+// ------------------------------------------------------------------------------------------------
 typedef unsigned char uint8;
 typedef char int8;
 typedef unsigned short uint16;

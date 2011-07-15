@@ -630,15 +630,17 @@ void QuadrifyPart(const aiVector2D& pmin, const aiVector2D& pmax, XYSortedField&
 	XYSortedField::iterator start = field.begin();
 	for(; start != field.end(); ++start) {
 		const BoundingBox& bb = bbs[(*start).second];
-		if (bb.second.x > pmin.x && bb.first.x < pmax.x && bb.second.y > pmin.y && bb.first.y < pmax.y) {
+		if(bb.first.x >= pmax.x) {
+			break;
+		} 
+
+		if (bb.second.x > pmin.x && bb.second.y > pmin.y && bb.first.y < pmax.y) {
 			xs = bb.first.x;
 			xe = bb.second.x;
 			found = true;
 			break;
 		}
 	}
-	xs = std::max(pmin.x,xs);
-	xe = std::min(pmax.x,xe);
 
 	if (!found) {
 		// the rectangle [pmin,pend] is opaque, fill it
@@ -649,6 +651,10 @@ void QuadrifyPart(const aiVector2D& pmin, const aiVector2D& pmax, XYSortedField&
 		return;
 	}
 
+	xs = std::max(pmin.x,xs);
+	xe = std::min(pmax.x,xe);
+
+	// see if there's an offset to fill at the top of our quad
 	if (xs - pmin.x) {
 		out.push_back(pmin);
 		out.push_back(aiVector2D(pmin.x,pmax.y));
@@ -656,18 +662,20 @@ void QuadrifyPart(const aiVector2D& pmin, const aiVector2D& pmax, XYSortedField&
 		out.push_back(aiVector2D(xs,pmin.y));
 	}
 
-	// search along the y-axis for all openings that overlap xs and our element
+	// search along the y-axis for all openings that overlap xs and our quad
 	float ylast = pmin.y;
 	found = false;
 	for(; start != field.end(); ++start) {
 		const BoundingBox& bb = bbs[(*start).second];
+		if (bb.first.x > xs || bb.first.y >= pmax.y) {
+			break;
+		}
 
-		if (bb.second.y > ylast && bb.first.y < pmax.y) {
+		if (bb.second.y > ylast) {
 
 			found = true;
 			const float ys = std::max(bb.first.y,pmin.y), ye = std::min(bb.second.y,pmax.y);
 			if (ys - ylast) {
-				// Divide et impera!
 				QuadrifyPart( aiVector2D(xs,ylast), aiVector2D(xe,ys) ,field,bbs,out);
 			}
 
@@ -679,10 +687,6 @@ void QuadrifyPart(const aiVector2D& pmin, const aiVector2D& pmax, XYSortedField&
 			wnd.push_back(aiVector2D(xe,ys));*/
 			ylast = ye;
 		}
-
-		if (bb.first.x > xs) {
-			break;
-		}
 	}
 	if (!found) {
 		// the rectangle [pmin,pend] is opaque, fill it
@@ -693,11 +697,10 @@ void QuadrifyPart(const aiVector2D& pmin, const aiVector2D& pmax, XYSortedField&
 		return;
 	}
 	if (ylast < pmax.y) {
-		// Divide et impera!
 		QuadrifyPart( aiVector2D(xs,ylast), aiVector2D(xe,pmax.y) ,field,bbs,out);
 	}
 
-	// Divide et impera! - now for the whole rest
+	// now for the whole rest
 	if (pmax.x-xe) {
 		QuadrifyPart(aiVector2D(xe,pmin.y), pmax ,field,bbs,out);
 	}

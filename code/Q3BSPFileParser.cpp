@@ -263,8 +263,11 @@ void Q3BSPFileParser::getEntities()
 {
 	int size = m_pModel->m_Lumps[ kEntities ]->iSize;
 	m_pModel->m_EntityData.resize( size );
-	size_t Offset = m_pModel->m_Lumps[ kEntities ]->iOffset;
-	memcpy( &m_pModel->m_EntityData[ 0 ], &m_Data[ Offset ], sizeof( char ) * size );
+	if ( size > 0 ) 
+	{
+		size_t Offset = m_pModel->m_Lumps[ kEntities ]->iOffset;
+		memcpy( &m_pModel->m_EntityData[ 0 ], &m_Data[ Offset ], sizeof( char ) * size );
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

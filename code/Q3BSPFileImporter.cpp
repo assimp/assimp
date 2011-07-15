@@ -161,7 +161,7 @@ Q3BSPFileImporter::~Q3BSPFileImporter()
 bool Q3BSPFileImporter::CanRead( const std::string& rFile, IOSystem* /*pIOHandler*/, bool checkSig ) const
 {
 	if(!checkSig) {
-		return SimpleExtensionCheck( rFile, Q3BSPExtension .c_str() );
+		return SimpleExtensionCheck( rFile, Q3BSPExtension.c_str() );
 	}
 	// TODO perhaps add keyword based detection
 	return false;

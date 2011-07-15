@@ -98,6 +98,7 @@ private:
 	bool importTextureFromArchive( const Q3BSP::Q3BSPModel *pModel, Q3BSP::Q3BSPZipArchive *pArchive, aiScene* pScene, 
 		Assimp::MaterialHelper *pMatHelper, int textureId );
 	bool importLightmap( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, Assimp::MaterialHelper *pMatHelper, int lightmapId );
+	bool importEntities( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene );
 	bool expandFile(  Q3BSP::Q3BSPZipArchive *pArchive, const std::string &rFilename, const std::vector<std::string> &rExtList, 
 		std::string &rFile, std::string &rExt );
 

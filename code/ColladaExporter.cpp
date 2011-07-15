@@ -59,7 +59,7 @@ void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, const aiScene* pS
 	boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
 
 	// XXX maybe use a small wrapper around IOStream that behaves like std::stringstream in order to avoid the extra copy.
-	outfile->Write( iDoTheExportThing.mOutput.str().c_str(),  iDoTheExportThing.mOutput.tellp(),1);
+	outfile->Write( iDoTheExportThing.mOutput.str().c_str(), static_cast<size_t>(iDoTheExportThing.mOutput.tellp()),1);
 }
 
 } // end of namespace Assimp

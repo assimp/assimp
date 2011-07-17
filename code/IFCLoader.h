@@ -107,7 +107,7 @@ private:
 public: 
 
 
-	// loader settings, publicy accessible via their corresponding AI_CONFIG constants
+	// loader settings, publicly accessible via their corresponding AI_CONFIG constants
 	struct Settings 
 	{
 		Settings()
@@ -115,6 +115,7 @@ public:
 			, skipCurveRepresentations()
 			, useCustomTriangulation()
 			, skipAnnotations()
+			, conicSamplingAngle(10.f)
 		{}
 
 
@@ -122,6 +123,7 @@ public:
 		bool skipCurveRepresentations;
 		bool useCustomTriangulation;
 		bool skipAnnotations;
+		float conicSamplingAngle;
 	};
 	
 	

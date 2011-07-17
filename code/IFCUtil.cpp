@@ -296,6 +296,13 @@ void ConvertCartesianPoint(aiVector3D& out, const IfcCartesianPoint& in)
 }
 
 // ------------------------------------------------------------------------------------------------
+void ConvertVector(aiVector3D& out, const IfcVector& in)
+{
+	ConvertDirection(out,in.Orientation);
+	out *= in.Magnitude;
+}
+
+// ------------------------------------------------------------------------------------------------
 void ConvertDirection(aiVector3D& out, const IfcDirection& in)
 {
 	out = aiVector3D();
@@ -304,7 +311,7 @@ void ConvertDirection(aiVector3D& out, const IfcDirection& in)
 	}
 	const float len = out.Length();
 	if (len<1e-6) {
-		IFCImporter::LogWarn("direction vector too small, normalizing would result in a division by zero");
+		IFCImporter::LogWarn("direction vector magnitude too small, normalization would result in a division by zero");
 		return;
 	}
 	out /= len;

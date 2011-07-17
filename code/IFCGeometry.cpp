@@ -49,6 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PolyTools.h"
 #include "ProcessHelper.h"
 
+#include <iterator>
+
 namespace Assimp {
 	namespace IFC {
 
@@ -1139,7 +1141,7 @@ void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout, Co
 // ------------------------------------------------------------------------------------------------
 void ProcessBoolean(const IfcBooleanResult& boolean, TempMesh& result, ConversionData& conv)
 {
-	if(const IfcBooleanClippingResult* const clip = boolean.ToPtr<IfcBooleanClippingResult>()) {
+	if(const IfcBooleanResult* const clip = boolean.ToPtr<IfcBooleanResult>()) {
 		if(clip->Operator != "DIFFERENCE") {
 			IFCImporter::LogWarn("encountered unsupported boolean operator: " + (std::string)clip->Operator);
 			return;

@@ -553,7 +553,7 @@ namespace {
 ,		SchemaEntry("ifcstructuralpointaction",&STEP::ObjectHelper<IfcStructuralPointAction,0>::Construct )
 ,		SchemaEntry("ifcspatialstructureelement",&STEP::ObjectHelper<IfcSpatialStructureElement,2>::Construct )
 ,		SchemaEntry("ifcspace",&STEP::ObjectHelper<IfcSpace,2>::Construct )
-,		SchemaEntry("ifccontextdependentunit",&STEP::ObjectHelper<NotImplemented,0>::Construct )
+,		SchemaEntry("ifccontextdependentunit",&STEP::ObjectHelper<IfcContextDependentUnit,1>::Construct )
 ,		SchemaEntry("ifcvirtualgridintersection",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("ifcrelassociates",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("ifcrelassociatesclassification",&STEP::ObjectHelper<NotImplemented,0>::Construct )
@@ -643,7 +643,7 @@ namespace {
 ,		SchemaEntry("ifcdistributioncontrolelement",&STEP::ObjectHelper<IfcDistributionControlElement,1>::Construct )
 ,		SchemaEntry("ifctransformertype",&STEP::ObjectHelper<IfcTransformerType,1>::Construct )
 ,		SchemaEntry("ifclaborresource",&STEP::ObjectHelper<IfcLaborResource,1>::Construct )
-,		SchemaEntry("ifcderivedprofiledef",&STEP::ObjectHelper<NotImplemented,0>::Construct )
+,		SchemaEntry("ifcderivedprofiledef",&STEP::ObjectHelper<IfcDerivedProfileDef,3>::Construct )
 ,		SchemaEntry("ifcrelconnectsstructuralmember",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("ifcrelconnectswitheccentricity",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("ifcfurniturestandard",&STEP::ObjectHelper<IfcFurnitureStandard,0>::Construct )
@@ -750,7 +750,7 @@ namespace {
 ,		SchemaEntry("ifcsubcontractresource",&STEP::ObjectHelper<IfcSubContractResource,2>::Construct )
 ,		SchemaEntry("ifctimeseriesreferencerelationship",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("ifcsweptdisksolid",&STEP::ObjectHelper<IfcSweptDiskSolid,5>::Construct )
-,		SchemaEntry("ifccompositeprofiledef",&STEP::ObjectHelper<NotImplemented,0>::Construct )
+,		SchemaEntry("ifccompositeprofiledef",&STEP::ObjectHelper<IfcCompositeProfileDef,2>::Construct )
 ,		SchemaEntry("ifcelectricalbaseproperties",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("ifcpredefinedpointmarkersymbol",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("ifctanktype",&STEP::ObjectHelper<IfcTankType,1>::Construct )
@@ -817,7 +817,7 @@ namespace {
 ,		SchemaEntry("ifctextstyletextmodel",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("ifcprojectioncurve",&STEP::ObjectHelper<IfcProjectionCurve,0>::Construct )
 ,		SchemaEntry("ifcfillareastyletiles",&STEP::ObjectHelper<IfcFillAreaStyleTiles,3>::Construct )
-,		SchemaEntry("ifcrelfillselement",&STEP::ObjectHelper<NotImplemented,0>::Construct )
+,		SchemaEntry("ifcrelfillselement",&STEP::ObjectHelper<IfcRelFillsElement,2>::Construct )
 ,		SchemaEntry("ifcelectricmotortype",&STEP::ObjectHelper<IfcElectricMotorType,1>::Construct )
 ,		SchemaEntry("ifctendon",&STEP::ObjectHelper<IfcTendon,8>::Construct )
 ,		SchemaEntry("ifcdistributionchamberelementtype",&STEP::ObjectHelper<IfcDistributionChamberElementType,1>::Construct )
@@ -1045,7 +1045,7 @@ void IFC::GetSchema(EXPRESS::ConversionSchema& out)
 namespace STEP {
 
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<NotImplemented>(const STEP::DB& /*db*/, const LIST& /*params*/, NotImplemented* /*in*/)
+template <> size_t GenericFill<NotImplemented>(const STEP::DB& db, const LIST& params, NotImplemented* in)
 {
 	return 0;
 }
@@ -1166,16 +1166,16 @@ template <> size_t GenericFill<IfcGrid>(const DB& db, const LIST& params, IfcGri
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<IfcRepresentationItem>(const DB& /*db*/, const LIST& params, IfcRepresentationItem* /*in*/)
+template <> size_t GenericFill<IfcRepresentationItem>(const DB& db, const LIST& params, IfcRepresentationItem* in)
 {
 	size_t base = 0;
-	if (params.GetSize() < 0) { throw STEP::TypeError("expected 0 arguments to IfcRepresentationItem"); }	return base;
+	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcGeometricRepresentationItem>(const DB& db, const LIST& params, IfcGeometricRepresentationItem* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcRepresentationItem*>(in));
-	if (params.GetSize() < 0) { throw STEP::TypeError("expected 0 arguments to IfcGeometricRepresentationItem"); }	return base;
+	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcOneDirectionRepeatFactor>(const DB& db, const LIST& params, IfcOneDirectionRepeatFactor* in)
@@ -1278,7 +1278,7 @@ template <> size_t GenericFill<IfcRectangularPyramid>(const DB& db, const LIST& 
 template <> size_t GenericFill<IfcSurface>(const DB& db, const LIST& params, IfcSurface* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcGeometricRepresentationItem*>(in));
-	if (params.GetSize() < 0) { throw STEP::TypeError("expected 0 arguments to IfcSurface"); }	return base;
+	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcBoundedSurface>(const DB& db, const LIST& params, IfcBoundedSurface* in)
@@ -1553,20 +1553,29 @@ template <> size_t GenericFill<IfcArbitraryClosedProfileDef>(const DB& db, const
 template <> size_t GenericFill<IfcCurve>(const DB& db, const LIST& params, IfcCurve* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcGeometricRepresentationItem*>(in));
-	if (params.GetSize() < 0) { throw STEP::TypeError("expected 0 arguments to IfcCurve"); }	return base;
+	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcConic>(const DB& db, const LIST& params, IfcConic* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcCurve*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
+	if (params.GetSize() < 1) { throw STEP::TypeError("expected 1 arguments to IfcConic"); }    do { // convert the 'Position' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcConic,1>::aux_is_derived[0]=true; break; }
+        try { GenericConvert( in->Position, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcConic to be a `IfcAxis2Placement`")); }
+    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcCircle>(const DB& db, const LIST& params, IfcCircle* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcConic*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
+	if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to IfcCircle"); }    do { // convert the 'Radius' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->Radius, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcCircle to be a `IfcPositiveLengthMeasure`")); }
+    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -1653,7 +1662,7 @@ template <> size_t GenericFill<IfcStructuralPlanarAction>(const DB& db, const LI
 template <> size_t GenericFill<IfcTopologicalRepresentationItem>(const DB& db, const LIST& params, IfcTopologicalRepresentationItem* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcRepresentationItem*>(in));
-	if (params.GetSize() < 0) { throw STEP::TypeError("expected 0 arguments to IfcTopologicalRepresentationItem"); }	return base;
+	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcConnectedFaceSet>(const DB& db, const LIST& params, IfcConnectedFaceSet* in)
@@ -1706,7 +1715,16 @@ template <> size_t GenericFill<IfcProcedure>(const DB& db, const LIST& params, I
 template <> size_t GenericFill<IfcVector>(const DB& db, const LIST& params, IfcVector* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcGeometricRepresentationItem*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
+	if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to IfcVector"); }    do { // convert the 'Orientation' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->Orientation, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcVector to be a `IfcDirection`")); }
+    } while(0);
+    do { // convert the 'Magnitude' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->Magnitude, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcVector to be a `IfcLengthMeasure`")); }
+    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -1731,8 +1749,7 @@ template <> size_t GenericFill<IfcFaceBound>(const DB& db, const LIST& params, I
 template <> size_t GenericFill<IfcFaceOuterBound>(const DB& db, const LIST& params, IfcFaceOuterBound* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcFaceBound*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
-	return base;
+	if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to IfcFaceOuterBound"); }	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcFeatureElementAddition>(const DB& db, const LIST& params, IfcFeatureElementAddition* in)
@@ -1748,11 +1765,7 @@ template <> size_t GenericFill<IfcNamedUnit>(const DB& db, const LIST& params, I
 	if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to IfcNamedUnit"); }    do { // convert the 'Dimensions' argument
         boost::shared_ptr<const DataType> arg = params[base++];
         if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcNamedUnit,2>::aux_is_derived[0]=true; break; }
-		if (dynamic_cast<const UNSET*>(&*arg)) {
-			// (hack) allow this - I found some Ifc files which violate the spec here
-			break;
-		}
-		try { GenericConvert( in->Dimensions, arg, db ); break; } 
+        try { GenericConvert( in->Dimensions, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcNamedUnit to be a `IfcDimensionalExponents`")); }
     } while(0);
     do { // convert the 'UnitType' argument
@@ -1857,7 +1870,16 @@ template <> size_t GenericFill<IfcProxy>(const DB& db, const LIST& params, IfcPr
 template <> size_t GenericFill<IfcLine>(const DB& db, const LIST& params, IfcLine* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcCurve*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
+	if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to IfcLine"); }    do { // convert the 'Pnt' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->Pnt, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcLine to be a `IfcCartesianPoint`")); }
+    } while(0);
+    do { // convert the 'Dir' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->Dir, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcLine to be a `IfcVector`")); }
+    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -1868,10 +1890,9 @@ template <> size_t GenericFill<IfcColumn>(const DB& db, const LIST& params, IfcC
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<IfcObjectPlacement>(const DB& /*db*/, const LIST& params, IfcObjectPlacement* /*in*/)
+template <> size_t GenericFill<IfcObjectPlacement>(const DB& db, const LIST& params, IfcObjectPlacement* in)
 {
 	size_t base = 0;
-	if (params.GetSize() < 0) { throw STEP::TypeError("expected 0 arguments to IfcObjectPlacement"); }	
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -1898,8 +1919,7 @@ template <> size_t GenericFill<IfcRelConnects>(const DB& db, const LIST& params,
 template <> size_t GenericFill<IfcAnnotation>(const DB& db, const LIST& params, IfcAnnotation* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcProduct*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
-	return base;
+	if (params.GetSize() < 7) { throw STEP::TypeError("expected 7 arguments to IfcAnnotation"); }	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcPlate>(const DB& db, const LIST& params, IfcPlate* in)
@@ -1912,7 +1932,7 @@ template <> size_t GenericFill<IfcPlate>(const DB& db, const LIST& params, IfcPl
 template <> size_t GenericFill<IfcSolidModel>(const DB& db, const LIST& params, IfcSolidModel* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcGeometricRepresentationItem*>(in));
-	if (params.GetSize() < 0) { throw STEP::TypeError("expected 0 arguments to IfcSolidModel"); }	return base;
+	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcManifoldSolidBrep>(const DB& db, const LIST& params, IfcManifoldSolidBrep* in)
@@ -2033,7 +2053,7 @@ template <> size_t GenericFill<IfcDimensionCurve>(const DB& db, const LIST& para
 template <> size_t GenericFill<IfcBoundedCurve>(const DB& db, const LIST& params, IfcBoundedCurve* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcCurve*>(in));
-	if (params.GetSize() < 0) { throw STEP::TypeError("expected 0 arguments to IfcBoundedCurve"); }	return base;
+	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcAxis1Placement>(const DB& db, const LIST& params, IfcAxis1Placement* in)
@@ -2088,6 +2108,13 @@ template <> size_t GenericFill<IfcSpace>(const DB& db, const LIST& params, IfcSp
         try { GenericConvert( in->ElevationWithFlooring, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 10 to IfcSpace to be a `IfcLengthMeasure`")); }
     } while(0);
+	return base;
+}
+// -----------------------------------------------------------------------------------------------------------
+template <> size_t GenericFill<IfcContextDependentUnit>(const DB& db, const LIST& params, IfcContextDependentUnit* in)
+{
+	size_t base = GenericFill(db,params,static_cast<IfcNamedUnit*>(in));
+// this data structure is not used yet, so there is no code generated to fill its members
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -2238,7 +2265,18 @@ template <> size_t GenericFill<IfcRamp>(const DB& db, const LIST& params, IfcRam
 template <> size_t GenericFill<IfcCompositeCurve>(const DB& db, const LIST& params, IfcCompositeCurve* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcBoundedCurve*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
+	if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to IfcCompositeCurve"); }    do { // convert the 'Segments' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcCompositeCurve,2>::aux_is_derived[0]=true; break; }
+        try { GenericConvert( in->Segments, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcCompositeCurve to be a `LIST [1:?] OF IfcCompositeCurveSegment`")); }
+    } while(0);
+    do { // convert the 'SelfIntersect' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcCompositeCurve,2>::aux_is_derived[1]=true; break; }
+        try { GenericConvert( in->SelfIntersect, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcCompositeCurve to be a `LOGICAL`")); }
+    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -2611,6 +2649,13 @@ template <> size_t GenericFill<IfcLaborResource>(const DB& db, const LIST& param
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
+template <> size_t GenericFill<IfcDerivedProfileDef>(const DB& db, const LIST& params, IfcDerivedProfileDef* in)
+{
+	size_t base = GenericFill(db,params,static_cast<IfcProfileDef*>(in));
+// this data structure is not used yet, so there is no code generated to fill its members
+	return base;
+}
+// -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcFurnitureStandard>(const DB& db, const LIST& params, IfcFurnitureStandard* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcControl*>(in));
@@ -2758,7 +2803,36 @@ template <> size_t GenericFill<IfcProjectOrder>(const DB& db, const LIST& params
 template <> size_t GenericFill<IfcBSplineCurve>(const DB& db, const LIST& params, IfcBSplineCurve* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcBoundedCurve*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
+	if (params.GetSize() < 5) { throw STEP::TypeError("expected 5 arguments to IfcBSplineCurve"); }    do { // convert the 'Degree' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcBSplineCurve,5>::aux_is_derived[0]=true; break; }
+        try { GenericConvert( in->Degree, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcBSplineCurve to be a `INTEGER`")); }
+    } while(0);
+    do { // convert the 'ControlPointsList' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcBSplineCurve,5>::aux_is_derived[1]=true; break; }
+        try { GenericConvert( in->ControlPointsList, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcBSplineCurve to be a `LIST [2:?] OF IfcCartesianPoint`")); }
+    } while(0);
+    do { // convert the 'CurveForm' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcBSplineCurve,5>::aux_is_derived[2]=true; break; }
+        try { GenericConvert( in->CurveForm, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcBSplineCurve to be a `IfcBSplineCurveForm`")); }
+    } while(0);
+    do { // convert the 'ClosedCurve' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcBSplineCurve,5>::aux_is_derived[3]=true; break; }
+        try { GenericConvert( in->ClosedCurve, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 3 to IfcBSplineCurve to be a `LOGICAL`")); }
+    } while(0);
+    do { // convert the 'SelfIntersect' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcBSplineCurve,5>::aux_is_derived[4]=true; break; }
+        try { GenericConvert( in->SelfIntersect, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 4 to IfcBSplineCurve to be a `LOGICAL`")); }
+    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -2793,7 +2867,36 @@ template <> size_t GenericFill<IfcElectricDistributionPoint>(const DB& db, const
 template <> size_t GenericFill<IfcSite>(const DB& db, const LIST& params, IfcSite* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcSpatialStructureElement*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
+	if (params.GetSize() < 14) { throw STEP::TypeError("expected 14 arguments to IfcSite"); }    do { // convert the 'RefLatitude' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const UNSET*>(&*arg)) break;
+        try { GenericConvert( in->RefLatitude, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 9 to IfcSite to be a `IfcCompoundPlaneAngleMeasure`")); }
+    } while(0);
+    do { // convert the 'RefLongitude' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const UNSET*>(&*arg)) break;
+        try { GenericConvert( in->RefLongitude, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 10 to IfcSite to be a `IfcCompoundPlaneAngleMeasure`")); }
+    } while(0);
+    do { // convert the 'RefElevation' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const UNSET*>(&*arg)) break;
+        try { GenericConvert( in->RefElevation, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 11 to IfcSite to be a `IfcLengthMeasure`")); }
+    } while(0);
+    do { // convert the 'LandTitleNumber' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const UNSET*>(&*arg)) break;
+        try { GenericConvert( in->LandTitleNumber, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 12 to IfcSite to be a `IfcLabel`")); }
+    } while(0);
+    do { // convert the 'SiteAddress' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const UNSET*>(&*arg)) break;
+        try { GenericConvert( in->SiteAddress, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 13 to IfcSite to be a `IfcPostalAddress`")); }
+    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -3002,7 +3105,7 @@ template <> size_t GenericFill<IfcStructuralSurfaceMemberVarying>(const DB& db, 
 template <> size_t GenericFill<IfcPoint>(const DB& db, const LIST& params, IfcPoint* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcGeometricRepresentationItem*>(in));
-	if (params.GetSize() < 0) { throw STEP::TypeError("expected 0 arguments to IfcPoint"); }	return base;
+	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcSurfaceOfRevolution>(const DB& db, const LIST& params, IfcSurfaceOfRevolution* in)
@@ -3194,7 +3297,7 @@ template <> size_t GenericFill<IfcLightSourceDirectional>(const DB& db, const LI
 template <> size_t GenericFill<IfcLoop>(const DB& db, const LIST& params, IfcLoop* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcTopologicalRepresentationItem*>(in));
-	if (params.GetSize() < 0) { throw STEP::TypeError("expected 0 arguments to IfcLoop"); }	return base;
+	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcVertexLoop>(const DB& db, const LIST& params, IfcVertexLoop* in)
@@ -3276,6 +3379,13 @@ template <> size_t GenericFill<IfcSweptDiskSolid>(const DB& db, const LIST& para
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
+template <> size_t GenericFill<IfcCompositeProfileDef>(const DB& db, const LIST& params, IfcCompositeProfileDef* in)
+{
+	size_t base = GenericFill(db,params,static_cast<IfcProfileDef*>(in));
+// this data structure is not used yet, so there is no code generated to fill its members
+	return base;
+}
+// -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcTankType>(const DB& db, const LIST& params, IfcTankType* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcFlowStorageDeviceType*>(in));
@@ -3339,7 +3449,24 @@ template <> size_t GenericFill<IfcTopologyRepresentation>(const DB& db, const LI
 template <> size_t GenericFill<IfcBuilding>(const DB& db, const LIST& params, IfcBuilding* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcSpatialStructureElement*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
+	if (params.GetSize() < 12) { throw STEP::TypeError("expected 12 arguments to IfcBuilding"); }    do { // convert the 'ElevationOfRefHeight' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const UNSET*>(&*arg)) break;
+        try { GenericConvert( in->ElevationOfRefHeight, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 9 to IfcBuilding to be a `IfcLengthMeasure`")); }
+    } while(0);
+    do { // convert the 'ElevationOfTerrain' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const UNSET*>(&*arg)) break;
+        try { GenericConvert( in->ElevationOfTerrain, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 10 to IfcBuilding to be a `IfcLengthMeasure`")); }
+    } while(0);
+    do { // convert the 'BuildingAddress' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const UNSET*>(&*arg)) break;
+        try { GenericConvert( in->BuildingAddress, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 11 to IfcBuilding to be a `IfcPostalAddress`")); }
+    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -3525,6 +3652,22 @@ template <> size_t GenericFill<IfcFillAreaStyleTiles>(const DB& db, const LIST& 
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
+template <> size_t GenericFill<IfcRelFillsElement>(const DB& db, const LIST& params, IfcRelFillsElement* in)
+{
+	size_t base = GenericFill(db,params,static_cast<IfcRelConnects*>(in));
+	if (params.GetSize() < 6) { throw STEP::TypeError("expected 6 arguments to IfcRelFillsElement"); }    do { // convert the 'RelatingOpeningElement' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->RelatingOpeningElement, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 4 to IfcRelFillsElement to be a `IfcOpeningElement`")); }
+    } while(0);
+    do { // convert the 'RelatedBuildingElement' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->RelatedBuildingElement, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 5 to IfcRelFillsElement to be a `IfcElement`")); }
+    } while(0);
+	return base;
+}
+// -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcElectricMotorType>(const DB& db, const LIST& params, IfcElectricMotorType* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcEnergyConversionDeviceType*>(in));
@@ -3651,7 +3794,26 @@ template <> size_t GenericFill<IfcUnitAssignment>(const DB& db, const LIST& para
 template <> size_t GenericFill<IfcBoundingBox>(const DB& db, const LIST& params, IfcBoundingBox* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcGeometricRepresentationItem*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
+	if (params.GetSize() < 4) { throw STEP::TypeError("expected 4 arguments to IfcBoundingBox"); }    do { // convert the 'Corner' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->Corner, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcBoundingBox to be a `IfcCartesianPoint`")); }
+    } while(0);
+    do { // convert the 'XDim' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->XDim, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcBoundingBox to be a `IfcPositiveLengthMeasure`")); }
+    } while(0);
+    do { // convert the 'YDim' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->YDim, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcBoundingBox to be a `IfcPositiveLengthMeasure`")); }
+    } while(0);
+    do { // convert the 'ZDim' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->ZDim, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 3 to IfcBoundingBox to be a `IfcPositiveLengthMeasure`")); }
+    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -4142,7 +4304,21 @@ template <> size_t GenericFill<IfcAnnotationSurface>(const DB& db, const LIST& p
 template <> size_t GenericFill<IfcCompositeCurveSegment>(const DB& db, const LIST& params, IfcCompositeCurveSegment* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcGeometricRepresentationItem*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
+	if (params.GetSize() < 3) { throw STEP::TypeError("expected 3 arguments to IfcCompositeCurveSegment"); }    do { // convert the 'Transition' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->Transition, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcCompositeCurveSegment to be a `IfcTransitionCode`")); }
+    } while(0);
+    do { // convert the 'SameSense' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->SameSense, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcCompositeCurveSegment to be a `BOOLEAN`")); }
+    } while(0);
+    do { // convert the 'ParentCurve' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->ParentCurve, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcCompositeCurveSegment to be a `IfcCurve`")); }
+    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -4170,7 +4346,31 @@ template <> size_t GenericFill<IfcVibrationIsolatorType>(const DB& db, const LIS
 template <> size_t GenericFill<IfcTrimmedCurve>(const DB& db, const LIST& params, IfcTrimmedCurve* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcBoundedCurve*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
+	if (params.GetSize() < 5) { throw STEP::TypeError("expected 5 arguments to IfcTrimmedCurve"); }    do { // convert the 'BasisCurve' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->BasisCurve, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcTrimmedCurve to be a `IfcCurve`")); }
+    } while(0);
+    do { // convert the 'Trim1' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->Trim1, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcTrimmedCurve to be a `SET [1:2] OF IfcTrimmingSelect`")); }
+    } while(0);
+    do { // convert the 'Trim2' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->Trim2, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcTrimmedCurve to be a `SET [1:2] OF IfcTrimmingSelect`")); }
+    } while(0);
+    do { // convert the 'SenseAgreement' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->SenseAgreement, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 3 to IfcTrimmedCurve to be a `BOOLEAN`")); }
+    } while(0);
+    do { // convert the 'MasterRepresentation' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->MasterRepresentation, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 4 to IfcTrimmedCurve to be a `IfcTrimmingPreference`")); }
+    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -4327,7 +4527,16 @@ template <> size_t GenericFill<IfcDoor>(const DB& db, const LIST& params, IfcDoo
 template <> size_t GenericFill<IfcEllipse>(const DB& db, const LIST& params, IfcEllipse* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcConic*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
+	if (params.GetSize() < 3) { throw STEP::TypeError("expected 3 arguments to IfcEllipse"); }    do { // convert the 'SemiAxis1' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->SemiAxis1, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcEllipse to be a `IfcPositiveLengthMeasure`")); }
+    } while(0);
+    do { // convert the 'SemiAxis2' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->SemiAxis2, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcEllipse to be a `IfcPositiveLengthMeasure`")); }
+    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -4348,7 +4557,11 @@ template <> size_t GenericFill<IfcAngularDimension>(const DB& db, const LIST& pa
 template <> size_t GenericFill<IfcFaceBasedSurfaceModel>(const DB& db, const LIST& params, IfcFaceBasedSurfaceModel* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcGeometricRepresentationItem*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
+	if (params.GetSize() < 1) { throw STEP::TypeError("expected 1 arguments to IfcFaceBasedSurfaceModel"); }    do { // convert the 'FbsmFaces' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->FbsmFaces, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcFaceBasedSurfaceModel to be a `SET [1:?] OF IfcConnectedFaceSet`")); }
+    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------

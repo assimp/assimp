@@ -714,6 +714,7 @@
 		</Configuration>
 		<Configuration
 			Name="debug-noboost-st|Win32"
+			IntermediateDirectory="H:/obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
 			ConfigurationType="4"
 			InheritedPropertySheets=".\shared\LibShared.vsprops;.\shared\NoBoostShared.vsprops;.\shared\FastSTL.vsprops"
 			>

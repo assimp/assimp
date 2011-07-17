@@ -893,7 +893,7 @@ namespace IFC {
 	struct IfcStructuralPointAction;
 	struct IfcSpatialStructureElement;
 	struct IfcSpace;
-	typedef NotImplemented IfcContextDependentUnit; // (not currently used by Assimp)
+	struct IfcContextDependentUnit;
 	typedef NotImplemented IfcVirtualGridIntersection; // (not currently used by Assimp)
 	typedef NotImplemented IfcRelAssociates; // (not currently used by Assimp)
 	typedef NotImplemented IfcRelAssociatesClassification; // (not currently used by Assimp)
@@ -983,7 +983,7 @@ namespace IFC {
 	struct IfcDistributionControlElement;
 	struct IfcTransformerType;
 	struct IfcLaborResource;
-	typedef NotImplemented IfcDerivedProfileDef; // (not currently used by Assimp)
+	struct IfcDerivedProfileDef;
 	typedef NotImplemented IfcRelConnectsStructuralMember; // (not currently used by Assimp)
 	typedef NotImplemented IfcRelConnectsWithEccentricity; // (not currently used by Assimp)
 	struct IfcFurnitureStandard;
@@ -1090,7 +1090,7 @@ namespace IFC {
 	struct IfcSubContractResource;
 	typedef NotImplemented IfcTimeSeriesReferenceRelationship; // (not currently used by Assimp)
 	struct IfcSweptDiskSolid;
-	typedef NotImplemented IfcCompositeProfileDef; // (not currently used by Assimp)
+	struct IfcCompositeProfileDef;
 	typedef NotImplemented IfcElectricalBaseProperties; // (not currently used by Assimp)
 	typedef NotImplemented IfcPreDefinedPointMarkerSymbol; // (not currently used by Assimp)
 	struct IfcTankType;
@@ -1157,7 +1157,7 @@ namespace IFC {
 	typedef NotImplemented IfcTextStyleTextModel; // (not currently used by Assimp)
 	struct IfcProjectionCurve;
 	struct IfcFillAreaStyleTiles;
-	typedef NotImplemented IfcRelFillsElement; // (not currently used by Assimp)
+	struct IfcRelFillsElement;
 	struct IfcElectricMotorType;
 	struct IfcTendon;
 	struct IfcDistributionChamberElementType;
@@ -2014,6 +2014,11 @@ namespace IFC {
 		Maybe< IfcLengthMeasure::Out > ElevationWithFlooring;
     };
 
+    // C++ wrapper for IfcContextDependentUnit
+    struct IfcContextDependentUnit : IfcNamedUnit, ObjectHelper<IfcContextDependentUnit,1> { IfcContextDependentUnit() : Object("IfcContextDependentUnit") {}
+		IfcLabel::Out Name;
+    };
+
     // C++ wrapper for IfcCoolingTowerType
     struct IfcCoolingTowerType : IfcEnergyConversionDeviceType, ObjectHelper<IfcCoolingTowerType,1> { IfcCoolingTowerType() : Object("IfcCoolingTowerType") {}
 		IfcCoolingTowerTypeEnum::Out PredefinedType;
@@ -2340,6 +2345,13 @@ namespace IFC {
     // C++ wrapper for IfcLaborResource
     struct IfcLaborResource : IfcConstructionResource, ObjectHelper<IfcLaborResource,1> { IfcLaborResource() : Object("IfcLaborResource") {}
 		Maybe< IfcText::Out > SkillSet;
+    };
+
+    // C++ wrapper for IfcDerivedProfileDef
+    struct IfcDerivedProfileDef : IfcProfileDef, ObjectHelper<IfcDerivedProfileDef,3> { IfcDerivedProfileDef() : Object("IfcDerivedProfileDef") {}
+		Lazy< IfcProfileDef > ParentProfile;
+		Lazy< IfcCartesianTransformationOperator2D > Operator;
+		Maybe< IfcLabel::Out > Label;
     };
 
     // C++ wrapper for IfcFurnitureStandard
@@ -2792,6 +2804,12 @@ namespace IFC {
 		IfcParameterValue::Out EndParam;
     };
 
+    // C++ wrapper for IfcCompositeProfileDef
+    struct IfcCompositeProfileDef : IfcProfileDef, ObjectHelper<IfcCompositeProfileDef,2> { IfcCompositeProfileDef() : Object("IfcCompositeProfileDef") {}
+		ListOf< Lazy< IfcProfileDef >, 2, 0 > Profiles;
+		Maybe< IfcLabel::Out > Label;
+    };
+
     // C++ wrapper for IfcTankType
     struct IfcTankType : IfcFlowStorageDeviceType, ObjectHelper<IfcTankType,1> { IfcTankType() : Object("IfcTankType") {}
 		IfcTankTypeEnum::Out PredefinedType;
@@ -2977,6 +2995,12 @@ namespace IFC {
 		Lazy< IfcOneDirectionRepeatFactor > TilingPattern;
 		ListOf< IfcFillAreaStyleTileShapeSelect, 1, 0 >::Out Tiles;
 		IfcPositiveRatioMeasure::Out TilingScale;
+    };
+
+    // C++ wrapper for IfcRelFillsElement
+    struct IfcRelFillsElement : IfcRelConnects, ObjectHelper<IfcRelFillsElement,2> { IfcRelFillsElement() : Object("IfcRelFillsElement") {}
+		Lazy< IfcOpeningElement > RelatingOpeningElement;
+		Lazy< IfcElement > RelatedBuildingElement;
     };
 
     // C++ wrapper for IfcElectricMotorType
@@ -3922,6 +3946,7 @@ namespace STEP {
 	DECL_CONV_STUB(IfcStructuralPointAction);
 	DECL_CONV_STUB(IfcSpatialStructureElement);
 	DECL_CONV_STUB(IfcSpace);
+	DECL_CONV_STUB(IfcContextDependentUnit);
 	DECL_CONV_STUB(IfcCoolingTowerType);
 	DECL_CONV_STUB(IfcFacetedBrepWithVoids);
 	DECL_CONV_STUB(IfcValveType);
@@ -3981,6 +4006,7 @@ namespace STEP {
 	DECL_CONV_STUB(IfcDistributionControlElement);
 	DECL_CONV_STUB(IfcTransformerType);
 	DECL_CONV_STUB(IfcLaborResource);
+	DECL_CONV_STUB(IfcDerivedProfileDef);
 	DECL_CONV_STUB(IfcFurnitureStandard);
 	DECL_CONV_STUB(IfcStairFlightType);
 	DECL_CONV_STUB(IfcWorkControl);
@@ -4054,6 +4080,7 @@ namespace STEP {
 	DECL_CONV_STUB(IfcOpenShell);
 	DECL_CONV_STUB(IfcSubContractResource);
 	DECL_CONV_STUB(IfcSweptDiskSolid);
+	DECL_CONV_STUB(IfcCompositeProfileDef);
 	DECL_CONV_STUB(IfcTankType);
 	DECL_CONV_STUB(IfcSphere);
 	DECL_CONV_STUB(IfcPolyLoop);
@@ -4086,6 +4113,7 @@ namespace STEP {
 	DECL_CONV_STUB(IfcLightSourcePositional);
 	DECL_CONV_STUB(IfcProjectionCurve);
 	DECL_CONV_STUB(IfcFillAreaStyleTiles);
+	DECL_CONV_STUB(IfcRelFillsElement);
 	DECL_CONV_STUB(IfcElectricMotorType);
 	DECL_CONV_STUB(IfcTendon);
 	DECL_CONV_STUB(IfcDistributionChamberElementType);

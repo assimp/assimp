@@ -369,6 +369,7 @@ SET(IFC_SRCS
 	IFCGeometry.cpp
 	IFCMaterial.cpp
 	IFCProfile.cpp
+	IFCCurve.cpp
 	STEPFile.h
 	STEPFileReader.h
 	STEPFileReader.cpp

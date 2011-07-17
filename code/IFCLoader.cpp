@@ -139,6 +139,7 @@ void IFCImporter::SetupProperties(const Importer* pImp)
 	settings.skipCurveRepresentations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_SKIP_CURVE_REPRESENTATIONS,true);
 	settings.useCustomTriangulation = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_CUSTOM_TRIANGULATION,true);
 
+	settings.conicSamplingAngle = 10.f;
 	settings.skipAnnotations = true;
 }
 
@@ -354,7 +355,7 @@ bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector<
 	std::auto_ptr<aiNode> nd(new aiNode());
 	nd->mName.Set("IfcMappedItem");
 		
-	// handle the cartesian operator
+	// handle the Cartesian operator
 	aiMatrix4x4 m;
 	ConvertTransformOperator(m, *mapped.MappingTarget);
 
@@ -378,7 +379,7 @@ bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector<
 	bool got = false;
 	BOOST_FOREACH(const IfcRepresentationItem& item, repr.Items) {
 		if(!ProcessRepresentationItem(item,meshes,conv)) {
-			IFCImporter::LogWarn("skipping unknown mapped entity, type is " + item.GetClassName());
+			IFCImporter::LogWarn("skipping mapped entity of type " + item.GetClassName() + ", no representations could be generated");
 		}
 		else got = true;
 	}

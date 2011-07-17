@@ -65,14 +65,21 @@ void ProcessPolyLine(const IfcPolyline& def, TempMesh& meshout, ConversionData& 
 // ------------------------------------------------------------------------------------------------
 bool ProcessCurve(const IfcCurve& curve,  TempMesh& meshout, ConversionData& conv)
 {
-	if(const IfcPolyline* poly = curve.ToPtr<IfcPolyline>()) {
-		ProcessPolyLine(*poly,meshout,conv);
-	}
-	else {
+	boost::scoped_ptr<const Curve> cv(Curve::Convert(curve,conv));
+	if (!cv) {
 		IFCImporter::LogWarn("skipping unknown IfcCurve entity, type is " + curve.GetClassName());
 		return false;
 	}
-	return true;
+
+	// we must have a bounded curve at this point
+	if (const BoundedCurve* bc = dynamic_cast<const BoundedCurve*>(cv.get())) {
+		bc->SampleDiscrete(meshout);
+		meshout.vertcnt.push_back(meshout.verts.size());
+		return true;
+	}
+
+	IFCImporter::LogError("cannot use unbounded curve as profile");
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------

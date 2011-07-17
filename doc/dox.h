@@ -130,6 +130,7 @@ assimp-discussions</a>.
 /**
 @page install Installation
 
+
 @section install_prebuilt Using the pre-built libraries with Visual C++ 8/9
 
 If you develop at Visual Studio 2005 or 2008, you can simply use the pre-built linker libraries provided in the distribution.
@@ -148,18 +149,16 @@ run and use the application. If the linker complains about some integral functio
 mixed the runtimes. Recheck the project configuration (project properties -&gt; C++ -&gt; Code generation -&gt; Runtime) if you use 
 static runtimes (Multithreaded / Multithreaded Debug) or dynamic runtimes (Multithreaded DLL / Multithreaded Debug DLL).
 Choose the ASSIMP linker lib accordingly. 
-<br>
+<br><br>
 Please don't forget to also read the @ref assimp_stl section on MSVC and the STL.
 
-@section assimp_stl Microsoft Compilers & STL
+@section assimp_stl Microsoft Compilers and the C++ Standard Library 
 
-In VC8 and VC9 Microsoft has introduced some STL debugging features. A good example are improved iterator checks and
-various useful debug checks. Actually they are really helpful for debugging, but they're extremely slow. They're
-so extremely slow that they can make the STL up to 100 times slower (imagine a <i>std::vector<T>::operator[] </i>
-performing 3 or 4 single checks! scary ...).
+In VC8 and VC9 Microsoft introduced some Standard Library debugging features. A good example are improved iterator checks and
+various useful debug checks. The problem is the performance penalty that incurs with those extra checks.
 
-These security enhancements are - thanks MS! - also active in release builds, rendering ASSIMP several times 
-slower. However, it is possible to disable them by defining
+Most of these security enhancements are active in release builds by default, rendering ASSIMP several times 
+slower. However, it is possible to disable them by setting
 
 @code
 _HAS_ITERATOR_DEBUGGING=0
@@ -174,11 +173,11 @@ If you do not, there are two binary incompatible STL versions mangled together a
 Alternatively you can disable the fast STL settings for ASSIMP by removing the 'FastSTL' property sheet from
 the vc project file.
 
-<i>If you're using ASSIMP in a DLL:</i> It's ok. There's no STL used in the DLL interface, so it doesn't care whether
+<i>If you're using ASSIMP in a DLL/SO:</i> It's ok. There's no STL used in the binary DLL/SO interface, so it doesn't care whether
 your application uses the same STL settings or not.
 <br><br>
 Another option is to build against a different STL implementation, for example STlport. There's a special 
-@ref assimp_stlport section which describes how to achieve this.
+@ref assimp_stlport section that has a description how to achieve this.
 
 
 @section install_own Building the library from scratch
@@ -191,12 +190,12 @@ it for yourself. Read the "Getting Started" section of the Boost documentation f
 can use a comfortable installer from <a href="http://www.boost-consulting.com/products/free">
 http://www.boost-consulting.com/products/free</a>. Choose the appropriate version of boost for your runtime of choice.
 
-<b>If you don't want to use boost</b>, you can build against our <i>"Boost-Workaround"</i>. It consists of very small (dummy)
+<b>If you don't want to use boost</b>, you can build against our <i>"Boost-Workaround"</i>. It consists of very small 
 implementations of the various boost utility classes used. However, you'll loose functionality (e.g. threading) by doing this. 
-So, if it is possible to use boost, you should use boost. See the @link use_noboost NoBoost-Section @endlink 
-later on this page for more details.
+So, if you can use boost, you should use boost. Otherwise, See the @link use_noboost NoBoost-Section @endlink 
+later on this page for the details of the workaround.
 
-Once boost is working, you have to set up a project for the ASSIMP library in your favourite IDE. If you use VC2005 or
+Once boost is working, you have to set up a project for the ASSIMP library in your favorite IDE. If you use VC2005 or
 VC2008, you can simply load the solution or project files in the workspaces/ folder, otherwise you have to create a new 
 package and add all the headers and source files from the include/ and code/ directories. Set the temporary output folder
 to obj/, for example, and redirect the output folder to bin/. Then build the library - it should compile and link fine.
@@ -210,15 +209,16 @@ your solution.
 @section use_noboost Building without boost.
 
 The Boost-Workaround consists of dummy replacements for some boost utility templates. Currently there are replacements for
-<ul>
-<li><i>boost.scoped_ptr</i></li>
-<li><i>boost.scoped_array</i></li>
-<li><i>boost.format</i> </li>
-<li><i>boost.random</i> </li>
-<li><i>boost.common_factor</i> </li>
-<li><i>boost.foreach</i> </li>
-<li><i>boost.tuple</i></li>
-</ul>
+
+ - boost.scoped_ptr
+ - boost.scoped_array
+ - boost.format
+ - boost.random
+ - boost.common_factor
+ - boost.foreach
+ - boost.tuple
+ - boost.make_shared
+
 These implementations are very limited and are not intended for use outside ASSIMP. A compiler
 with full support for partial template specializations is required. To enable the workaround, put the following in
 your compiler's list of predefined macros: 
@@ -233,49 +233,29 @@ See the @ref assimp_st section
 for more details.
 
 
-@section assimp_make Build with MAKE
-
-To build Assimp with MAKE, navigate to the <tt>code</tt> directory and run 
-@code
-make
-@endcode
-respectively 
-@code
-make -fmakefile.mingw
-@endcode
-for mingw-make. For a <i>-noboost</i>-Build, append 
-@code
-NOBOOST=1
-@endcode
-
-@section assimp_st Single-threaded build
-
--- currently there is no difference between single-thread and normal builds --
 
 
-@section assimp_dll DLL build
+@section assimp_dll Windows DLL Build
 
 ASSIMP can be built as DLL. You just need to select a -dll config from the list of project
-configs and you're fine. Don't forget to copy the DLL to the directory of your executable :-)
+configs and you're fine.
 
-<b>NOTE:</b> Theoretically ASSIMP-dll can be used with multithreaded (non-dll) runtime libraries, 
-as long as you don't utilize any non-public stuff from the code dir. However, if you happen
-to encounter *very* strange problems try changing the runtime to multithreaded (Debug) DLL.
+<b>NOTE:</b> Theoretically, assimp-dll can be used with multithreaded (non-dll) runtime libraries, 
+as long as you don't utilize any non-public stuff from the code folder. However, if you happen
+to encounter *very* strange problems, try changing the runtime to <i>Multithreaded (Debug) DLL</i>.
 
 @section assimp_stlport Building against STLport
 
-If your compiler's default implementation of the STL is too slow, lacks some features,
-contains bugs or if you just want to tweak ASSIMP's performance a little try a build
-against STLport. STLport is a free, fast and secure STL replacement that works with
-all major compilers and platforms. To get it visit their website at
-<a href="http://www.stlport.org"/><stlport.org></a> and download the latest STLport release.
-Usually you'll just need to run 'configure' + a makefile (see the README for more details).
+STLport is a free, fast and secure STL replacement that works with
+all major compilers and platforms. To get it, download the latest release from
+<a href="http://www.stlport.org"/><stlport.org></a>.
+Usually you'll just need to run 'configure' + a makefile (see their README for more details).
 Don't miss to add <stlport_root>/stlport to your compiler's default include paths - <b>prior</b>
-to the directory where the compiler vendor's STL lies. Do the same for  <stlport_root>/lib and
+to the directory where your compiler vendor's headers lie. Do the same for  <stlport_root>/lib and
 recompile ASSIMP. To ensure you're really building against STLport see aiGetCompileFlags().
 <br>
-Usually building ASSIMP against STLport yields a better overall performance so it might be
-worth a try if the library is too slow for you.
+In our testing, STLport builds tend to be a bit faster than builds against Microsoft's
+C++ Standard Library.
 
 */
 

@@ -1,22 +1,40 @@
-	Open Asset Import Library (Assimp) Readme
-	-----------------------------------------
 
-Here you can find information regarding Open Asset Import Library:
+========================================================================
+Open Asset Import Library (assimp) README
+========================================================================
+
+
+Table of Contents
 
 	1.		Overview
-	1.1		Supported file formats
-	1.2		File structure
-	2.		Build the Asset Import Library
+	 1.1		Supported file formats
+	 1.2		File structure
+	2.		Build the library
 	3. 		Help
 	4.		License
 
 
-
+------------------------------
 1.	Overview
-1.1	Supported file formats
+------------------------------
 
-The Asset Import Library provides a lot of model formats:
+Open Asset Import Library is a Open Source library designed to load various 3d file
+formats and convert them into a shared, in-memory format. It supports more than
+30 file formats. Basically, it is like DevIL for 3D models.
+
+Its short name is 'assimp', which is an unintended joke (the abbreviation is derived 
+from 'Asset Importer'). 
+
+
+----------------
+ 1.1	Supported file formats
+----------------
+
+The library provides importers for a lot of file formats, including:
 	- 3DS
+	- BLEND
+	- Collada
+	- IFC-STEP
 	- ASE
 	- DXF
 	- HMP
@@ -32,48 +50,70 @@ The Asset Import Library provides a lot of model formats:
 	- LWO
 	- OBJ
 	- SMD
-	
-	- Collada
-	
 	- LWO
-	
 	- Ogre XML
 	
-	- partly LWS
 	
-	- .. + many more, see http://assimp.sourceforge.net/main_features_formats.html for a full list.
+ .. plus many more, see 
+http://assimp.sourceforge.net/main_features_formats.html for a more exhaustive list.
 
 
+----------------
 1.2 Repository structure
+----------------
 
-Open Asset Import Library is implemented in C++ and provides a C-interface. The directory structure is:
+Open Asset Import Library is implemented in C++ (but provides both a C and a C++ish interface). 
+The directory structure is:
 
-	/bin			Binaries of the Asset Import Library.
-	/code			Code of the Asset Import Library.
-	/contrib		Third-party-libraries used by the Asset Import Library.
-	/doc			Documentation (doxygen generated and data structure as a xml file)
-	/include		Public headers.
-	/lib			Static library location for Windows.
-	/obj			Object file location for Windows.
-	/port			Ports to other languages. 
+	/bin		Binaries, onyl used on Windows.
+	/code		Source code.
+	/contrib	Third-party-libraries used by the Asset Import Library.
+	/doc		Documentation (doxygen generated and data structure draft)
+	/include	Public headers for you to #include.
+	/lib		Static library location for Windows.
+	/obj		Object file location for Windows.
+	/port		Ports to other languages and scripts therefor. 
 	
-	/test			Unit- and regression tests, model test suite.
-	/tools			Tools (viewer, command line `assimp`).
-	/workspaces		Build enviroments for vc,xcode,...
+	/test		Unit- and regression tests, test suite of models.
+	/tools		Tools (viewer, command line `assimp`).
+	/samples	A small number of samples to illustrate possible use-cases.
+	/workspaces	Build enviroments for vc,xcode,... (deprecated,
+			CMake has superseeded all legacy build options)
 
 
-
-2. Build the Asset Import Library
+------------------------------
+2. Build the library
+------------------------------
 
 Take a look into the INSTALL file.
 
 
-
+------------------------------
 3. Help
+------------------------------
 
-For more help go to http://assimp.sourceforge.net/ (or, for germans, http://www.zfx.info). Or take a look into the doc-folder, which contains the doxygen-generated documentation in HTMl format (CHMs for Windows are as well contained in some distributions and located right here in the root folder).
+For more information go to http://assimp.sourceforge.net/. Or have a look into the ./doc-
+folder, which contains the Doxygen-generated documentation in HTML format (CHMs for
+ Windows are also included in some distributions and should be located right here in
+ the root folder).
+
+If reading the documentation doesn't solve your problems, try our forums at SF.net 
+  Open Discussion: http://sourceforge.net/projects/assimp/forums/forum/817653) 
+  Help: http://sourceforge.net/projects/assimp/forums/forum/817654
+
+or our  mailing list, assimp-discussions 
+  archive: http://sourceforge.net/mailarchive/forum.php?forum_name=assimp-discussions,
+  subscribe: https://lists.sourceforge.net/lists/listinfo/assimp-discussions 
 
 
+------------------------------
 4. License
+------------------------------
 
-The license of the Asset Import Library is based on the BSD-License. It is contained in the LICENSE file.
+The license of the Asset Import Library is based on the modified, 3-clause BSD-License,
+which is a very liberal license. An _informal_ summary of the license is: do whatever 
+you want, but include Assimp's license text with your product - and don't sue us
+if it doesn't work.
+
+For the formal details, see the LICENSE file. 
+

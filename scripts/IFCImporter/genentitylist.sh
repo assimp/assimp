@@ -1,2 +1,3 @@
 #!/bin/sh
-grep -E 'IFC::Ifc([A-Z][a-z]*)+' -o ../../code/IFCLoader.cpp | uniq | sed s/IFC::// > output.txt
+cd ../../code
+grep -E 'Ifc([A-Z][a-z]*)+' -o IFCLoader.cpp IFCGeometry.cpp IFCCurve.cpp IFCProfile.cpp IFCMaterial.cpp | uniq | sed s/.*:// > ../scripts/IFCImporter/output.txt

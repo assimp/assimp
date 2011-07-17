@@ -77,7 +77,18 @@ public:
 public:
 
 	// --------------------------------------------------
-	std::pair<float,float> GetParametricRange() const {
+	bool IsClosed() const {
+		return true;
+	}
+
+	// --------------------------------------------------
+	size_t EstimateSampleCount(float a, float b) const {
+		ai_assert(InRange(a) && InRange(b));
+		return static_cast<size_t>( ceil((b-a) / conv.settings.conicSamplingAngle) );
+	}
+
+	// --------------------------------------------------
+	ParamRange GetParametricRange() const {
 		return std::make_pair(0.f,360.f);
 	}
 
@@ -162,12 +173,39 @@ public:
 public:
 
 	// --------------------------------------------------
+	bool IsClosed() const {
+		return false;
+	}
+
+	// --------------------------------------------------
 	aiVector3D Eval(float u) const {
 		return p + u*v;
 	}
 
 	// --------------------------------------------------
-	std::pair<float,float> GetParametricRange() const {
+	size_t EstimateSampleCount(float a, float b) const {
+		ai_assert(InRange(a) && InRange(b));
+		// two points are always sufficient for a line segment
+		return a==b ? 1 : 2;
+	}
+
+
+	// --------------------------------------------------
+	void SampleDiscrete(TempMesh& out,float a, float b) const
+	{
+		ai_assert(InRange(a) && InRange(b));
+	
+		if (a == b) {
+			out.verts.push_back(Eval(a));
+			return;
+		}
+		out.verts.reserve(out.verts.size()+2);
+		out.verts.push_back(Eval(a));
+		out.verts.push_back(Eval(b));
+	}
+
+	// --------------------------------------------------
+	ParamRange GetParametricRange() const {
 		const float inf = std::numeric_limits<float>::infinity();
 
 		return std::make_pair(-inf,+inf);
@@ -218,7 +256,7 @@ public:
 
 		total = 0.f;
 		BOOST_FOREACH(boost::shared_ptr< const BoundedCurve > curve, curves) {
-			const std::pair<float,float> range = curve->GetParametricRange();
+			const ParamRange range = curve->GetParametricRange();
 			total += range.second-range.first;
 		}
 	}
@@ -233,7 +271,7 @@ public:
 
 		float acc = 0;
 		BOOST_FOREACH(boost::shared_ptr< const BoundedCurve > curve, curves) {
-			const std::pair<float,float> range = curve->GetParametricRange();
+			const ParamRange& range = curve->GetParametricRange();
 			const float delta = range.second-range.first;
 			if (u < acc+delta) {
 				return curve->Eval( (u-acc) + range.first );
@@ -246,22 +284,39 @@ public:
 	}
 
 	// --------------------------------------------------
-	float SuggestNext(float u) const {
+	size_t EstimateSampleCount(float a, float b) const {
+		ai_assert(InRange(a) && InRange(b));
+		size_t cnt = 0;
 
 		float acc = 0;
 		BOOST_FOREACH(boost::shared_ptr< const BoundedCurve > curve, curves) {
-			const std::pair<float,float> range = curve->GetParametricRange();
+			const ParamRange& range = curve->GetParametricRange();
 			const float delta = range.second-range.first;
-			if (u < acc+delta) {
-				return curve->SuggestNext( (u-acc) + range.first ) - range.first + acc;
+			if (a <= acc+delta && b >= acc) {
+				cnt += curve->EstimateSampleCount( std::max(0.f,a-acc) + range.first, std::min(delta,b-acc) + range.first );
 			}
+
 			acc += delta;
 		}
-		return std::numeric_limits<float>::infinity();
+
+		return cnt;
 	}
 
 	// --------------------------------------------------
-	std::pair<float,float> GetParametricRange() const {
+	void SampleDiscrete(TempMesh& out,float a, float b) const
+	{
+		ai_assert(InRange(a) && InRange(b));
+
+		const size_t cnt = EstimateSampleCount(a,b);
+		out.verts.reserve(out.verts.size() + cnt);
+
+		BOOST_FOREACH(boost::shared_ptr< const BoundedCurve > curve, curves) {
+			curve->SampleDiscrete(out);
+		}
+	}
+
+	// --------------------------------------------------
+	ParamRange GetParametricRange() const {
 		return std::make_pair(0.f,total);
 	}
 
@@ -326,48 +381,55 @@ public:
 			}
 		}
 
+		agree_sense = IsTrue(entity.SenseAgreement);
+		if( !agree_sense ) {
+			std::swap(range.first,range.second);
+		}
+
+		// "NOTE In case of a closed curve, it may be necessary to increment t1 or t2
+		// by the parametric length for consistency with the sense flag."
+		if (base->IsClosed()) {
+			if( range.first > range.second ) {
+				range.second += base->GetParametricRangeDelta();
+			}
+		}
+
 		maxval = range.second-range.first;
+		ai_assert(maxval >= 0);
 	}
 
 public:
 
 	// --------------------------------------------------
 	aiVector3D Eval(float p) const {
-		p = std::min(range.second, std::max(range.first+p,range.first));
-		if (!IsTrue(entity.SenseAgreement)) {
-			p = range.second - (p-range.first);
-		}
-		return base->Eval( p );
+		ai_assert(InRange(p));
+		return base->Eval( TrimParam(p) );
 	}
 
 	// --------------------------------------------------
-	float SuggestNext(float u) const {
-		if (u >= maxval) {
-			return std::numeric_limits<float>::infinity();
-		}
-
-		if (const Line* const l = dynamic_cast<const Line*>(base.get())) {
-			// a line is, well, a line .. so two points are always sufficient to represent it
-			return maxval;
-		}
-
-		if (const Conic* const l = dynamic_cast<const Conic*>(base.get())) {
-			// the suitable sampling density for conics is a configuration property
-			return std::min(maxval, static_cast<float>( u + maxval/ceil(maxval/conv.settings.conicSamplingAngle)) );
-		}
-		
-		return BoundedCurve::SuggestNext(u);
+	size_t EstimateSampleCount(float a, float b) const {
+		ai_assert(InRange(a) && InRange(b));
+		return base->EstimateSampleCount(TrimParam(a),TrimParam(b));
 	}
 
 	// --------------------------------------------------
-	std::pair<float,float> GetParametricRange() const {
+	ParamRange GetParametricRange() const {
 		return std::make_pair(0,maxval);
 	}
 
 private:
+
+	// --------------------------------------------------
+	float TrimParam(float f) const {
+		return agree_sense ? f + range.first :  range.second - f;
+	}
+
+
+private:
 	const IfcTrimmedCurve& entity;
-	std::pair<float,float> range;
+	ParamRange range;
 	float maxval;
+	bool agree_sense;
 
 	boost::shared_ptr<const Curve> base;
 };
@@ -399,11 +461,10 @@ public:
 
 	// --------------------------------------------------
 	aiVector3D Eval(float p) const {
-		if (p < 0.f) {
-			return points.front();
-		}
+		ai_assert(InRange(p));
+		
 		const size_t b = static_cast<size_t>(floor(p));  
-		if (b >= points.size()-1) {
+		if (b == points.size()-1) {
 			return points.back();
 		}
 
@@ -412,15 +473,13 @@ public:
 	}
 
 	// --------------------------------------------------
-	float SuggestNext(float u) const {
-		if (u > points.size()-1) {
-			return std::numeric_limits<float>::infinity();
-		}
-		return ::floor(u)+1;
+	size_t EstimateSampleCount(float a, float b) const {
+		ai_assert(InRange(a) && InRange(b));
+		return static_cast<size_t>( ceil(b) - floor(a) );
 	}
 
 	// --------------------------------------------------
-	std::pair<float,float> GetParametricRange() const {
+	ParamRange GetParametricRange() const {
 		return std::make_pair(0.f,static_cast<float>(points.size()-1));
 	}
 
@@ -468,40 +527,62 @@ Curve* Curve :: Convert(const IFC::IfcCurve& curve,ConversionData& conv)
 	return NULL;
 }
 
+#ifdef _DEBUG
 // ------------------------------------------------------------------------------------------------
-float BoundedCurve :: SuggestNext(float u) const
+bool Curve :: InRange(float u) const 
 {
-	// the default behavior is to subdivide each curve into approximately 32 linear segments
-	const unsigned int segments = 32;
-
-	const std::pair<float,float> range = GetParametricRange();
-	const float delta = range.second - range.first, perseg = delta/segments;
-
-	if (u < range.first) {
-		return range.first;
+	const ParamRange range = GetParametricRange();
+	if (IsClosed()) {
+		ai_assert(range.first != std::numeric_limits<float>::infinity() && range.second != std::numeric_limits<float>::infinity());
+		u = range.first + fmod(u-range.first,range.second-range.first);
 	}
+	return u >= range.first && u <= range.second;
+}
+#endif 
 
-	u = u+perseg;
-	if (u > range.second) {
-		return std::numeric_limits<float>::infinity();
+// ------------------------------------------------------------------------------------------------
+float Curve :: GetParametricRangeDelta() const
+{
+	const ParamRange& range = GetParametricRange();
+	return range.second - range.first;
+}
+
+// ------------------------------------------------------------------------------------------------
+size_t Curve :: EstimateSampleCount(float a, float b) const
+{
+	ai_assert(InRange(a) && InRange(b));
+
+	// arbitrary default value, deriving classes should supply better suited values
+	return 16;
+}
+
+// ------------------------------------------------------------------------------------------------
+void Curve :: SampleDiscrete(TempMesh& out,float a, float b) const
+{
+	ai_assert(InRange(a) && InRange(b));
+
+	const size_t cnt = std::max(static_cast<size_t>(0),EstimateSampleCount(a,b));
+	out.verts.reserve( out.verts.size() + cnt );
+
+	float p = a, delta = (b-a)/cnt;
+	for(size_t i = 0; i < cnt; ++i, p += delta) {
+		out.verts.push_back(Eval(p));
 	}
+}
 
-	return u;
+// ------------------------------------------------------------------------------------------------
+bool BoundedCurve :: IsClosed() const
+{
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
 void BoundedCurve :: SampleDiscrete(TempMesh& out) const
 {
-	const std::pair<float,float> range = GetParametricRange();
-	const float inf = std::numeric_limits<float>::infinity();
+	const ParamRange& range = GetParametricRange();
+	ai_assert(range.first != std::numeric_limits<float>::infinity() && range.second != std::numeric_limits<float>::infinity());
 
-	size_t cnt = 0;
-	float u = range.first;
-	do ++cnt; while( (u = SuggestNext(u)) != inf );
-	out.verts.reserve(cnt);
-
-	u = range.first;
-	do out.verts.push_back(Eval(u)); while( (u = SuggestNext(u)) != inf );
+	return SampleDiscrete(out,range.first,range.second);
 }
 
 } // IFC

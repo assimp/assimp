@@ -209,12 +209,32 @@ protected:
 
 public:
 
+	typedef std::pair<float,float> ParamRange;
+
+public:
+
+	// check if a curve is closed 
+	virtual bool IsClosed() const = 0;
+
 	// evaluate the curve at the given parametric position
 	virtual aiVector3D Eval(float p) const = 0;
 
 	// get the range of the curve (both inclusive).
 	// +inf and -inf are valid return values, the curve is not bounded in such a case.
 	virtual std::pair<float,float> GetParametricRange() const = 0;
+	float GetParametricRangeDelta() const;
+
+	// estimate the number of sample points that this curve will require
+	virtual size_t EstimateSampleCount(float start,float end) const;
+
+	// intelligently sample the curve based on the current settings
+	// and append the result to the mesh
+	virtual void SampleDiscrete(TempMesh& out,float start,float end) const;
+
+#ifdef _DEBUG
+	// check if a particular parameter value lies within the well-defined range
+	bool InRange(float) const;
+#endif 
 
 public:
 
@@ -241,18 +261,13 @@ public:
 
 public:
 
-	// given a point on the curve, suggest a suitable next point for
-	// discrete sampling. The returned parameter value should be
-	// based on two considerations:
-	//  a) curve geometry is to be preserved
-	//  b) detail level should be chosen based on importer settings
-	//     and (possibly) importance and dimension of the spatial 
-	//     structure.
-	// return +inf if the suggestion is to stop sampling.
-	virtual float SuggestNext(float u) const;
+	bool IsClosed() const;
 
-	// intelligently sample the curve based on Eval() and SuggestNext()
+public:
+
+	// sample the entire curve
 	void SampleDiscrete(TempMesh& out) const;
+	using Curve::SampleDiscrete;
 };
 
 

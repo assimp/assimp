@@ -225,7 +225,7 @@ private:
 class CompositeCurve : public BoundedCurve 
 {
 
-	// XXX the implementation currently ignores curve transitions
+	typedef std::pair< boost::shared_ptr< BoundedCurve >, bool > CurveEntry;
 
 public:
 
@@ -233,6 +233,7 @@ public:
 	CompositeCurve(const IfcCompositeCurve& entity, ConversionData& conv) 
 		: BoundedCurve(entity,conv)
 		, entity(entity)
+		, total()
 	{
 		curves.reserve(entity.Segments.size());
 		BOOST_FOREACH(const IfcCompositeCurveSegment& curveSegment,entity.Segments) {
@@ -249,18 +250,12 @@ public:
 				IFCImporter::LogDebug("ignoring transition code on composite curve segment, only continuous transitions are supported");
 			}
 
-			curves.push_back(bc);
+			curves.push_back( CurveEntry(bc,IsTrue(curveSegment.SameSense)) );
+			total += bc->GetParametricRangeDelta();
 		}
 
 		if (curves.empty()) {
-			IFCImporter::LogError("empty composite curve");
-			return;
-		}
-
-		total = 0.f;
-		BOOST_FOREACH(boost::shared_ptr< const BoundedCurve > curve, curves) {
-			const ParamRange range = curve->GetParametricRange();
-			total += range.second-range.first;
+			throw CurveError("empty composite curve");
 		}
 	}
 
@@ -273,17 +268,17 @@ public:
 		}
 
 		float acc = 0;
-		BOOST_FOREACH(boost::shared_ptr< const BoundedCurve > curve, curves) {
-			const ParamRange& range = curve->GetParametricRange();
+		BOOST_FOREACH(const CurveEntry& entry, curves) {
+			const ParamRange& range = entry.first->GetParametricRange();
 			const float delta = range.second-range.first;
 			if (u < acc+delta) {
-				return curve->Eval( (u-acc) + range.first );
+				return entry.first->Eval( entry.second ? (u-acc) + range.first : range.second-(u-acc));
 			}
 
 			acc += delta;
 		}
 		// clamp to end
-		return curves.back()->Eval(curves.back()->GetParametricRange().second);
+		return curves.back().first->Eval(curves.back().first->GetParametricRange().second);
 	}
 
 	// --------------------------------------------------
@@ -292,11 +287,12 @@ public:
 		size_t cnt = 0;
 
 		float acc = 0;
-		BOOST_FOREACH(boost::shared_ptr< const BoundedCurve > curve, curves) {
-			const ParamRange& range = curve->GetParametricRange();
+		BOOST_FOREACH(const CurveEntry& entry, curves) {
+			const ParamRange& range = entry.first->GetParametricRange();
 			const float delta = range.second-range.first;
 			if (a <= acc+delta && b >= acc) {
-				cnt += curve->EstimateSampleCount( std::max(0.f,a-acc) + range.first, std::min(delta,b-acc) + range.first );
+				const float at =  std::max(0.f,a-acc), bt = std::min(delta,b-acc);
+				cnt += entry.first->EstimateSampleCount( entry.second ? at + range.first : range.second - bt, entry.second ? bt + range.first : range.second - at );
 			}
 
 			acc += delta;
@@ -313,8 +309,13 @@ public:
 		const size_t cnt = EstimateSampleCount(a,b);
 		out.verts.reserve(out.verts.size() + cnt);
 
-		BOOST_FOREACH(boost::shared_ptr< const BoundedCurve > curve, curves) {
-			curve->SampleDiscrete(out);
+		BOOST_FOREACH(const CurveEntry& entry, curves) {
+			const size_t cnt = out.verts.size();
+			entry.first->SampleDiscrete(out);
+
+			if (!entry.second && cnt != out.verts.size()) {
+				std::reverse(out.verts.begin()+cnt,out.verts.end());
+			}
 		}
 	}
 
@@ -325,7 +326,7 @@ public:
 
 private:
 	const IfcCompositeCurve& entity;
-	std::vector< boost::shared_ptr< const BoundedCurve> > curves;
+	std::vector< CurveEntry > curves;
 
 	float total;
 };
@@ -423,7 +424,7 @@ public:
 
 	// --------------------------------------------------
 	ParamRange GetParametricRange() const {
-		return std::make_pair(0,maxval);
+		return std::make_pair(0.f,maxval);
 	}
 
 private:

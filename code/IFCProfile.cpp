@@ -73,7 +73,13 @@ bool ProcessCurve(const IfcCurve& curve,  TempMesh& meshout, ConversionData& con
 
 	// we must have a bounded curve at this point
 	if (const BoundedCurve* bc = dynamic_cast<const BoundedCurve*>(cv.get())) {
-		bc->SampleDiscrete(meshout);
+		try {
+			bc->SampleDiscrete(meshout);
+		}
+		catch(const  CurveError& cv) {
+			IFCImporter::LogError(cv.s+ " (error occurred while processing curve)");
+			return false;
+		}
 		meshout.vertcnt.push_back(meshout.verts.size());
 		return true;
 	}

@@ -80,11 +80,14 @@ public:
 	bool IsClosed() const {
 		return true;
 	}
-
+	
 	// --------------------------------------------------
 	size_t EstimateSampleCount(float a, float b) const {
 		ai_assert(InRange(a) && InRange(b));
-		return static_cast<size_t>( ceil((b-a) / conv.settings.conicSamplingAngle) );
+
+		a = fmod(a,360.f);
+		b = fmod(b,360.f);
+		return static_cast<size_t>( fabs(ceil(( b-a)) / conv.settings.conicSamplingAngle) );
 	}
 
 	// --------------------------------------------------
@@ -340,6 +343,7 @@ public:
 	TrimmedCurve(const IfcTrimmedCurve& entity, ConversionData& conv) 
 		: BoundedCurve(entity,conv)
 		, entity(entity)
+		, ok()
 	{
 		base = boost::shared_ptr<const Curve>(Curve::Convert(entity.BasisCurve,conv));
 
@@ -350,34 +354,39 @@ public:
 		// two representations they prefer, even though an information invariant
 		// claims that they must be identical if both are present.
 		// oh well.
-		bool ok = false;
+		bool have_param = false, have_point = false;
+		aiVector3D point;
 		BOOST_FOREACH(const Entry sel,entity.Trim1) {
 			if (const EXPRESS::REAL* const r = sel->ToPtr<EXPRESS::REAL>()) {
 				range.first = *r;
-				ok = true;
+				have_param = true;
 				break;
 			}
-		}
-		if (!ok) {
-			IFCImporter::LogError("trimming by curve points not currently supported, skipping first cut point");
-			range.first = base->GetParametricRange().first;
-			if (range.first == std::numeric_limits<float>::infinity()) {
-				range.first = 0;
+			else if (const IfcCartesianPoint* const r = sel->ResolveSelectPtr<IfcCartesianPoint>(conv.db)) {
+				ConvertCartesianPoint(point,*r);
+				have_point = true;
 			}
 		}
-		ok = false;
+		if (!have_param) {
+			if (!have_point || !base->ReverseEval(point,range.first)) {
+				throw CurveError("IfcTrimmedCurve: failed to read first trim parameter, ignoring curve");
+			}
+		}
+		have_param = false, have_point = false;
 		BOOST_FOREACH(const Entry sel,entity.Trim2) {
 			if (const EXPRESS::REAL* const r = sel->ToPtr<EXPRESS::REAL>()) {
 				range.second = *r;
-				ok = true;
+				have_param = true;
 				break;
 			}
+			else if (const IfcCartesianPoint* const r = sel->ResolveSelectPtr<IfcCartesianPoint>(conv.db)) {
+				ConvertCartesianPoint(point,*r);
+				have_point = true;
+			}
 		}
-		if (!ok) {
-			IFCImporter::LogError("trimming by curve points not currently supported, skipping second cut point");
-			range.second = base->GetParametricRange().second;
-			if (range.second == std::numeric_limits<float>::infinity()) {
-				range.second = 0;
+		if (!have_param) {
+			if (!have_point || !base->ReverseEval(point,range.second)) {
+				throw CurveError("IfcTrimmedCurve: failed to read second trim parameter, ignoring curve");
 			}
 		}
 
@@ -430,6 +439,7 @@ private:
 	ParamRange range;
 	float maxval;
 	bool agree_sense;
+	bool ok;
 
 	boost::shared_ptr<const Curve> base;
 };
@@ -554,6 +564,67 @@ size_t Curve :: EstimateSampleCount(float a, float b) const
 
 	// arbitrary default value, deriving classes should supply better suited values
 	return 16;
+}
+
+// ------------------------------------------------------------------------------------------------
+float RecursiveSearch(const Curve* cv, const aiVector3D& val, float a, float b, unsigned int samples, float treshold, unsigned int recurse = 0, unsigned int max_recurse = 15)
+{
+	ai_assert(samples>1);
+
+	const float delta = (b-a)/samples, inf = std::numeric_limits<float>::infinity();
+	float min_point[2] = {a,b}, min_diff[2] = {inf,inf};
+	float runner = a;
+
+	for (unsigned int i = 0; i < samples; ++i, runner += delta) {
+		const float diff = (cv->Eval(runner)-val).SquareLength();
+		if (diff < min_diff[0]) {
+			min_diff[1] = min_diff[0];
+			min_point[1] = min_point[0];
+
+			min_diff[0] = diff;
+			min_point[0] = runner;
+		}
+		else if (diff < min_diff[1]) {
+			min_diff[1] = diff;
+			min_point[1] = runner;
+		}
+	}
+
+	ai_assert(min_diff[0] != inf && min_diff[1] != inf);
+	if ( fabs(a-min_point[0]) < treshold || recurse >= max_recurse) {
+		return min_point[0];
+	}
+
+	// fix for closed curves to take their wrap-over into account
+	if (cv->IsClosed() && fabs(min_point[0]-min_point[1]) > cv->GetParametricRangeDelta()*0.5  ) {
+		const Curve::ParamRange& range = cv->GetParametricRange();
+		const float wrapdiff = (cv->Eval(range.first)-val).SquareLength();
+
+		if (wrapdiff < min_diff[0]) {
+			const float t = min_point[0];
+			min_point[0] = min_point[1] > min_point[0] ? range.first : range.second;
+			 min_point[1] = t;
+		}
+	}
+
+	return RecursiveSearch(cv,val,min_point[0],min_point[1],samples,treshold,recurse+1,max_recurse);
+}
+
+// ------------------------------------------------------------------------------------------------
+bool Curve :: ReverseEval(const aiVector3D& val, float& paramOut) const
+{
+	// note: the following algorithm is not guaranteed to find the 'right' parameter value
+	// in all possible cases, but it will always return at least some value so this function
+	// will never fail in the default implementation.
+
+	// XXX derive treshold from curve topology
+	const float treshold = 1e-4;
+	const unsigned int samples = 16;
+
+	const ParamRange& range = GetParametricRange();
+	paramOut = RecursiveSearch(this,val,range.first,range.second,samples,treshold);
+
+	return true;
 }
 
 // ------------------------------------------------------------------------------------------------

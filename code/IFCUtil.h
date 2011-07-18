@@ -195,6 +195,21 @@ void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,Conver
 // IFCCurve.cpp
 
 // ------------------------------------------------------------------------------------------------
+// Custom exception for use by members of the Curve class
+// ------------------------------------------------------------------------------------------------
+class CurveError 
+{
+public:
+	CurveError(const std::string& s)
+		: s(s)
+	{
+	}
+
+	std::string s;
+};
+
+
+// ------------------------------------------------------------------------------------------------
 // Temporary representation for an arbitrary sub-class of IfcCurve. Used to sample the curves
 // to obtain a list of line segments.
 // ------------------------------------------------------------------------------------------------
@@ -218,6 +233,11 @@ public:
 
 	// evaluate the curve at the given parametric position
 	virtual aiVector3D Eval(float p) const = 0;
+
+	// try to match a point on the curve to a given parameter
+	// for self-intersecting curves, the result is not ambiguous and
+	// it is undefined which parameter is returned. 
+	virtual bool ReverseEval(const aiVector3D& val, float& paramOut) const;
 
 	// get the range of the curve (both inclusive).
 	// +inf and -inf are valid return values, the curve is not bounded in such a case.

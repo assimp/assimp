@@ -88,11 +88,11 @@ typename T::const_reference deref(auto_any_base const& cur, const T&)
 // FOREACH
 
 #define BOOST_FOREACH(item, container)                      \
-	if(boost::foreach_detail::auto_any_base const& b = boost::foreach_detail::begin(container)) {} else       \
-    if(boost::foreach_detail::auto_any_base const& e = boost::foreach_detail::end(container))   {} else       \
-    for(;!boost::foreach_detail::done(b,e,container);  boost::foreach_detail::next(b,container))   \
+	if(boost::foreach_detail::auto_any_base const& foreach_magic_b = boost::foreach_detail::begin(container)) {} else       \
+    if(boost::foreach_detail::auto_any_base const& foreach_magic_e = boost::foreach_detail::end(container))   {} else       \
+    for(;!boost::foreach_detail::done(foreach_magic_b,foreach_magic_e,container);  boost::foreach_detail::next(foreach_magic_b,container))   \
         if (bool ugly_and_unique_break = false) {} else							\
-        for(item = boost::foreach_detail::deref(b,container); !ugly_and_unique_break; ugly_and_unique_break = true)
+        for(item = boost::foreach_detail::deref(foreach_magic_b,container); !ugly_and_unique_break; ugly_and_unique_break = true)
 
 } // end boost
 

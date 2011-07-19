@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
+#ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
 #include "ColladaExporter.h"
 
 using namespace Assimp;
@@ -69,10 +70,13 @@ void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, const aiScene* pS
 // Constructor for a specific scene to export
 ColladaExporter::ColladaExporter( const aiScene* pScene)
 {
+	// make sure that all formatting happens using the standard, C locale and not the user's current locale
+	mOutput.imbue( std::locale("C") );
+
 	mScene = pScene;
 
 	// set up strings
-	endstr = "\n"; // std::endl is too complicated for me to insert here.
+	endstr = "\n"; 
 
 	// start writing
 	WriteFile();
@@ -365,5 +369,6 @@ void ColladaExporter::WriteNode( const aiNode* pNode)
 	mOutput << startstr << "</node>" << endstr;
 }
 
+#endif
 #endif
 

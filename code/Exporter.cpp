@@ -62,6 +62,7 @@ namespace Assimp {
 // ------------------------------------------------------------------------------------------------
 // Exporter worker function prototypes. Should not be necessary to #ifndef them, it's just a prototype
 void ExportSceneCollada(const char*,IOSystem*, const aiScene*);
+void ExportSceneObj(const char*,IOSystem*, const aiScene*);
 void ExportScene3DS(const char*, IOSystem*, const aiScene*) {}
 
 /// Function pointer type of a Export worker function
@@ -93,6 +94,10 @@ ExportFormatEntry gExporters[] =
 {
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
 	ExportFormatEntry( "collada", "COLLADA - Digital Asset Exchange Schema", "dae", &ExportSceneCollada),
+#endif
+
+#ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER
+	ExportFormatEntry( "obj", "Wavefront OBJ format", "obj", &ExportSceneObj),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_3DS_EXPORTER

@@ -4176,6 +4176,18 @@
 					Name="3ds"
 					>
 				</Filter>
+				<Filter
+					Name="obj"
+					>
+					<File
+						RelativePath="..\..\code\ObjExporter.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\ObjExporter.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

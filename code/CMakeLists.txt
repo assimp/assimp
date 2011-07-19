@@ -313,6 +313,9 @@ SET( Obj_SRCS
 	ObjFileParser.cpp
 	ObjFileParser.h
 	ObjTools.h
+	
+	ObjExporter.h
+	ObjExporter.cpp
 )
 SOURCE_GROUP( Obj FILES ${Obj_SRCS})
 

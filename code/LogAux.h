@@ -88,6 +88,9 @@ public:
 		}
 	}
 
+	// https://sourceforge.net/tracker/?func=detail&atid=1067632&aid=3358562&group_id=226462
+#if !defined(__GNUC__) || !defined(__APPLE__) || (__GNUC__ >= 4 && __GNUC_MINOR__ >= 3)
+
 	// ------------------------------------------------------------------------------------------------
 	static void LogWarn  (const char* message) {
 		if (!DefaultLogger::isNullLogger()) {
@@ -115,6 +118,8 @@ public:
 			LogDebug(Formatter::format(message));
 		}
 	}
+
+#endif
 
 private:
 

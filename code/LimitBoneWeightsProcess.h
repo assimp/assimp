@@ -71,14 +71,9 @@ namespace Assimp
 */
 class ASSIMP_API LimitBoneWeightsProcess : public BaseProcess
 {
-	friend class Importer;
-	friend class ::LimitBoneWeightsTest;
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	LimitBoneWeightsProcess();
-
-	/** Destructor, private as well */
 	~LimitBoneWeightsProcess();
 
 public:

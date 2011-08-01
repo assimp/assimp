@@ -68,15 +68,10 @@ namespace Assimp	{
 // -------------------------------------------------------------------------------------------
 class COBImporter : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-
-	/** Constructor to be privately used by Importer */
+public:
 	COBImporter();
-
-	/** Destructor, private as well */
 	~COBImporter();
+
 
 public:
 

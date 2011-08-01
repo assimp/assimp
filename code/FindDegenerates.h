@@ -55,14 +55,9 @@ namespace Assimp	{
 */
 class ASSIMP_API FindDegeneratesProcess : public BaseProcess
 {
-	friend class Importer;
-	friend class ::FindDegeneratesProcessTest; // grant the unit test full access to us
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	FindDegeneratesProcess();
-
-	/** Destructor, private as well */
 	~FindDegeneratesProcess();
 
 public:

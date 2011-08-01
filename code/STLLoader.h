@@ -54,14 +54,10 @@ namespace Assimp	{
 */
 class STLImporter : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	STLImporter();
-
-	/** Destructor, private as well */
 	~STLImporter();
+
 
 public:
 

@@ -61,14 +61,9 @@ namespace Assimp	{
  */
 class ASSIMP_API OptimizeMeshesProcess : public BaseProcess
 {
-	friend class Importer;
-	friend class ::OptimizeMeshesProcessTest;
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	OptimizeMeshesProcess();
-
-	/** Destructor, private as well */
 	~OptimizeMeshesProcess();
 
 

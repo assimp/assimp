@@ -58,14 +58,10 @@ using namespace MDC;
 */
 class MDCImporter : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	MDCImporter();
-
-	/** Destructor, private as well */
 	~MDCImporter();
+
 
 public:
 

@@ -55,14 +55,10 @@ namespace Assimp	{
 */
 class RAWImporter : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	RAWImporter();
-
-	/** Destructor, private as well */
 	~RAWImporter();
+
 
 public:
 

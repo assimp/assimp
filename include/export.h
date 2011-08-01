@@ -136,15 +136,38 @@ struct aiExportDataBlob
 // --------------------------------------------------------------------------------
 /** Exports the given scene to a chosen file format and writes the result file(s) to disk.
 * @param pScene The scene to export. Stays in possession of the caller, is not changed by the function.
+*   The scene is expected to conform to Assimp's Importer output format as specified
+*   in the @link data Data Structures Page @endlink. In short, this means the model data
+*   should use a right-handed coordinate systems, face winding should be counter-clockwise
+*   and the UV coordinate origin is assumed to be in the upper left. If your input data
+*   uses different conventions, have a look at the last parameter.
 * @param pFormatId ID string to specify to which format you want to export to. Use 
 * aiGetExportFormatCount() / aiGetExportFormatDescription() to learn which export formats are available.
 * @param pFileName Output file to write
 * @param pIO custom IO implementation to be used. Use this if you use your own storage methods.
 *   If none is supplied, a default implementation using standard file IO is used. Note that
-*   #aiExportSceneToBlob is provided as convienience function to export to memory buffers.
+*   #aiExportSceneToBlob is provided as convenience function to export to memory buffers.
+* @param pPreprocessing Accepts any choice of the #aiPostProcessing enumerated
+*   flags, but in reality only a subset of them makes sense here. Specifying
+*   'preprocessing' flags is useful if the input scene does not conform to 
+*   Assimp's default conventions as specified in the @link data Data Structures Page @endlink. 
+*   In short, this means the geometry data should use a right-handed coordinate systems, face 
+*   winding should be counter-clockwise and the UV coordinate origin is assumed to be in
+*   the upper left. The #aiProcess_MakeLeftHanded, #aiProcess_FlipUVs and 
+*   #aiProcess_FlipWindingOrder flags are used in the import side to allow users
+*   to have those defaults automatically adapted to their conventions. Specifying those flags
+*   for exporting has the opposite effect, respectively. Some other of the
+*   #aiPostProcessSteps enumerated values may be useful as well, but you'll need
+*   to try out what their effect on the exported file is. Many formats impose
+*   their own restrictions on the structure of the geometry stored therein,
+*   so some preprocessing may have little or no effect at all, or may be
+*   redundant as exporters would apply them anyhow. A good example 
+*   is triangulation - whilst you can enforce it by specifying
+*   the #aiProcess_Triangulate flag, most export formats support only
+*  triangulate data so they would run the step even if it wasn't requested.
 * @return a status code indicating the result of the export
 */
-ASSIMP_API aiReturn aiExportScene( const C_STRUCT aiScene* pScene, const char* pFormatId, const char* pFileName);
+ASSIMP_API aiReturn aiExportScene( const C_STRUCT aiScene* pScene, const char* pFormatId, const char* pFileName,  unsigned int pPreprocessing);
 
 
 // --------------------------------------------------------------------------------
@@ -156,9 +179,10 @@ ASSIMP_API aiReturn aiExportScene( const C_STRUCT aiScene* pScene, const char* p
 * @param pIO custom IO implementation to be used. Use this if you use your own storage methods.
 *   If none is supplied, a default implementation using standard file IO is used. Note that
 *   #aiExportSceneToBlob is provided as convienience function to export to memory buffers.
+* @param pPreprocessing Please see the documentation for #aiExportScene
 * @return a status code indicating the result of the export
 */
-ASSIMP_API aiReturn aiExportSceneEx( const C_STRUCT aiScene* pScene, const char* pFormatId, const char* pFileName, C_STRUCT aiFileIO* pIO );
+ASSIMP_API aiReturn aiExportSceneEx( const C_STRUCT aiScene* pScene, const char* pFormatId, const char* pFileName, C_STRUCT aiFileIO* pIO,  unsigned int pPreprocessing );
 
 // --------------------------------------------------------------------------------
 /** Exports the given scene to a chosen file format. Returns the exported data as a binary blob which
@@ -167,9 +191,10 @@ ASSIMP_API aiReturn aiExportSceneEx( const C_STRUCT aiScene* pScene, const char*
 * @param pScene The scene to export. Stays in possession of the caller, is not changed by the function.
 * @param pFormatId ID string to specify to which format you want to export to. Use 
 * aiGetExportFormatCount() / aiGetExportFormatDescription() to learn which export formats are available.
+* @param pPreprocessing Please see the documentation for #aiExportScene
 * @return the exported data or NULL in case of error
 */
-ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportSceneToBlob( const C_STRUCT aiScene* pScene, const char* pFormatId );
+ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportSceneToBlob( const C_STRUCT aiScene* pScene, const char* pFormatId,  unsigned int pPreprocessing );
 
 
 

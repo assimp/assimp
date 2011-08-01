@@ -65,14 +65,10 @@ namespace Assimp	{
 */
 class DXFImporter : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	DXFImporter();
-
-	/** Destructor, private as well */
 	~DXFImporter();
+
 
 
 public:

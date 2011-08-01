@@ -69,13 +69,10 @@ namespace Assimp	{
  */
 class ASSIMP_API MakeLeftHandedProcess : public BaseProcess
 {
-	friend class Importer;
+	
 
 public:
-	/** Constructor to be privately used by Importer */
 	MakeLeftHandedProcess();
-
-	/** Destructor, private as well */
 	~MakeLeftHandedProcess();
 
 	// -------------------------------------------------------------------

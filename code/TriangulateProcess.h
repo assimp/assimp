@@ -59,14 +59,9 @@ namespace Assimp
  */
 class ASSIMP_API TriangulateProcess : public BaseProcess
 {
-	friend class Importer;
-	friend class ::TriangulateProcessTest; // grant the unit test full access to us
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	TriangulateProcess();
-
-	/** Destructor, private as well */
 	~TriangulateProcess();
 
 public:

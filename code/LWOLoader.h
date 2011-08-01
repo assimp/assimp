@@ -67,15 +67,10 @@ using namespace LWO;
 // ---------------------------------------------------------------------------
 class LWOImporter : public BaseImporter
 {
-	friend class Importer;
-
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	LWOImporter();
-
-	/** Destructor, private as well */
 	~LWOImporter();
+
 
 public:
 

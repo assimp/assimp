@@ -62,14 +62,10 @@ using namespace HMP;
 */
 class HMPImporter : public MDLImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	HMPImporter();
-
-	/** Destructor, private as well */
 	~HMPImporter();
+
 
 public:
 

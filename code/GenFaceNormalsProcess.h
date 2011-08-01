@@ -53,13 +53,9 @@ namespace Assimp
 */
 class ASSIMP_API GenFaceNormalsProcess : public BaseProcess
 {
-	friend class Importer;
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	GenFaceNormalsProcess();
-
-	/** Destructor, private as well */
 	~GenFaceNormalsProcess();
 
 public:

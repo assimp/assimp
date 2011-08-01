@@ -56,17 +56,12 @@ namespace Assimp
 */
 class ASSIMP_API ComputeUVMappingProcess : public BaseProcess
 {
-	friend class Importer;
-	friend class ::ComputeUVMappingTest; // grant the unit test full access to us
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	ComputeUVMappingProcess();
-
-	/** Destructor, private as well */
 	~ComputeUVMappingProcess();
 
 public:
+
 	// -------------------------------------------------------------------
 	/** Returns whether the processing step is present in the given flag field.
 	* @param pFlags The processing flags the importer was called with. A bitwise

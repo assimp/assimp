@@ -211,14 +211,10 @@ bool LoadSkin(SkinData& fill, const std::string& file,IOSystem* io);
 */
 class MD3Importer : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	MD3Importer();
-
-	/** Destructor, private as well */
 	~MD3Importer();
+
 
 public:
 

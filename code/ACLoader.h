@@ -56,14 +56,10 @@ namespace Assimp	{
 */
 class AC3DImporter : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	AC3DImporter();
-
-	/** Destructor, private as well */
 	~AC3DImporter();
+
 
 
 	// Represents an AC3D material

@@ -56,14 +56,9 @@ namespace Assimp	{
  */
 class ASSIMP_API RemoveRedundantMatsProcess : public BaseProcess
 {
-	friend class Importer;
-	friend class ::RemoveRedundantMatsTest; // grant the unit test full access to us
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	RemoveRedundantMatsProcess();
-
-	/** Destructor, private as well */
 	~RemoveRedundantMatsProcess();
 
 public:

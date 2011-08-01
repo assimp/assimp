@@ -54,7 +54,7 @@ namespace Assimp	{
 /** @brief Get a pseudo(!)-hash representing a mesh.
  *
  *  The hash is built from number of vertices, faces, primitive types,
- *  .... but *not* from the real mesh data. It isn't absolutely unique.
+ *  .... but *not* from the real mesh data. The funcction is not a perfect hash.
  *  @param in Input mesh
  *  @return Hash. 
  */
@@ -107,14 +107,9 @@ inline bool CompareArrays(const aiColor4D* first, const aiColor4D* second,
 */
 class ASSIMP_API FindInstancesProcess : public BaseProcess
 {
-	friend class Importer;
-	friend class ::FindInstancesProcessTest; 
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	FindInstancesProcess();
-
-	/** Destructor, private as well */
 	~FindInstancesProcess();
 
 public:

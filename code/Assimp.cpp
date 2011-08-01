@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "GenericProperty.h"
 #include "CInterfaceIOWrapper.h"
+#include "Importer.h"
 
 // ------------------------------------------------------------------------------------------------
 #ifdef AI_C_THREADSAFE

@@ -61,8 +61,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ------------------------------------------------------------------------------------------------
 // Internal headers
 // ------------------------------------------------------------------------------------------------
-#include "BaseImporter.h"
+#include "Importer.h"
 #include "BaseProcess.h"
+
 #include "DefaultIOStream.h"
 #include "DefaultIOSystem.h"
 #include "DefaultProgressHandler.h"
@@ -73,197 +74,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Profiler.h"
 #include "TinyFormatter.h"
 
-using namespace Assimp::Profiling;
-using namespace Assimp::Formatter;
-
-// ------------------------------------------------------------------------------------------------
-// Importers
-// (include_new_importers_here)
-// ------------------------------------------------------------------------------------------------
-#ifndef ASSIMP_BUILD_NO_X_IMPORTER
-#	include "XFileImporter.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
-#	include "3DSLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_MD3_IMPORTER
-#	include "MD3Loader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_MDL_IMPORTER
-#	include "MDLLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_MD2_IMPORTER
-#	include "MD2Loader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_PLY_IMPORTER
-#	include "PlyLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_ASE_IMPORTER
-#	include "ASELoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
-#	include "ObjFileImporter.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_HMP_IMPORTER
-#	include "HMPLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_SMD_IMPORTER
-#	include "SMDLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_MDC_IMPORTER
-#	include "MDCLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_MD5_IMPORTER
-#	include "MD5Loader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_STL_IMPORTER
-#	include "STLLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_LWO_IMPORTER
-#	include "LWOLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_DXF_IMPORTER
-#	include "DXFLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_NFF_IMPORTER
-#	include "NFFLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_RAW_IMPORTER
-#	include "RawLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_OFF_IMPORTER
-#	include "OFFLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_AC_IMPORTER
-#	include "ACLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_BVH_IMPORTER
-#	include "BVHLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_IRRMESH_IMPORTER
-#	include "IRRMeshLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
-#	include "IRRLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_Q3D_IMPORTER
-#	include "Q3DLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_B3D_IMPORTER
-#	include "B3DImporter.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
-#	include "ColladaLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_TERRAGEN_IMPORTER
-#	include "TerragenLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_CSM_IMPORTER
-#	include "CSMLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_3D_IMPORTER
-#	include "UnrealLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_LWS_IMPORTER
-#	include "LWSLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
-#	include "OgreImporter.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_MS3D_IMPORTER
-#	include "MS3DLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_COB_IMPORTER
-#	include "COBLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
-#	include "BlenderLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
-#	include "Q3BSPFileImporter.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_NDO_IMPORTER
-#	include "NDOLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
-#	include "IFCLoader.h"
-#endif
-
-// ------------------------------------------------------------------------------------------------
-// Post processing-Steps
-// ------------------------------------------------------------------------------------------------
-#ifndef ASSIMP_BUILD_NO_CALCTANGENTS_PROCESS
-#	include "CalcTangentsProcess.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_JOINVERTICES_PROCESS
-#	include "JoinVerticesProcess.h"
-#endif
-#if !(defined ASSIMP_BUILD_NO_MAKELEFTHANDED_PROCESS && defined ASSIMP_BUILD_NO_FLIPUVS_PROCESS && defined ASSIMP_BUILD_NO_FLIPWINDINGORDER_PROCESS)
-#	include "ConvertToLHProcess.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_TRIANGULATE_PROCESS
-#	include "TriangulateProcess.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_GENFACENORMALS_PROCESS
-#	include "GenFaceNormalsProcess.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_GENVERTEXNORMALS_PROCESS
-#	include "GenVertexNormalsProcess.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_REMOVEVC_PROCESS
-#	include "RemoveVCProcess.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_SPLITLARGEMESHES_PROCESS
-#	include "SplitLargeMeshes.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_PRETRANSFORMVERTICES_PROCESS
-#	include "PretransformVertices.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_LIMITBONEWEIGHTS_PROCESS
-#	include "LimitBoneWeightsProcess.h"
-#endif
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
 #	include "ValidateDataStructure.h"
 #endif
-#ifndef ASSIMP_BUILD_NO_IMPROVECACHELOCALITY_PROCESS
-#	include "ImproveCacheLocality.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_FIXINFACINGNORMALS_PROCESS
-#	include "FixNormalsStep.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS
-#	include "RemoveRedundantMaterials.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_FINDINVALIDDATA_PROCESS
-#	include "FindInvalidDataProcess.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_FINDDEGENERATES_PROCESS
-#	include "FindDegenerates.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_SORTBYPTYPE_PROCESS
-#	include "SortByPTypeProcess.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_GENUVCOORDS_PROCESS
-#	include "ComputeUVMappingProcess.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_TRANSFORMTEXCOORDS_PROCESS
-#	include "TextureTransform.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_FINDINSTANCES_PROCESS
-#	include "FindInstancesProcess.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_OPTIMIZEMESHES_PROCESS
-#	include "OptimizeMeshes.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_OPTIMIZEGRAPH_PROCESS
-#	include "OptimizeGraph.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_SPLITBYBONECOUNT_PROCESS
-#	include "SplitByBoneCountProcess.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_DEBONE_PROCESS
-#	include "DeboneProcess.h"
-#endif
+
+using namespace Assimp::Profiling;
+using namespace Assimp::Formatter;
+
+namespace Assimp {
+	// ImporterRegistry.cpp
+	void GetImporterInstanceList(std::vector< BaseImporter* >& out);
+	// PostStepRegistry.cpp
+	void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out);
+}
 
 using namespace Assimp;
 using namespace Assimp::Intern;
@@ -326,215 +149,8 @@ Importer::Importer()
 	pimpl->mProgressHandler = new DefaultProgressHandler();
 	pimpl->mIsDefaultProgressHandler = true;
 
-	// ----------------------------------------------------------------------------
-	// Add an instance of each worker class here
-	// (register_new_importers_here)
-	// ----------------------------------------------------------------------------
-	pimpl->mImporter.reserve(64);
-#if (!defined ASSIMP_BUILD_NO_X_IMPORTER)
-	pimpl->mImporter.push_back( new XFileImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_OBJ_IMPORTER)
-	pimpl->mImporter.push_back( new ObjFileImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_3DS_IMPORTER)
-	pimpl->mImporter.push_back( new Discreet3DSImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_MD3_IMPORTER)
-	pimpl->mImporter.push_back( new MD3Importer());
-#endif
-#if (!defined ASSIMP_BUILD_NO_MD2_IMPORTER)
-	pimpl->mImporter.push_back( new MD2Importer());
-#endif
-#if (!defined ASSIMP_BUILD_NO_PLY_IMPORTER)
-	pimpl->mImporter.push_back( new PLYImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_MDL_IMPORTER)
-	pimpl->mImporter.push_back( new MDLImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_ASE_IMPORTER)
-	pimpl->mImporter.push_back( new ASEImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_HMP_IMPORTER)
-	pimpl->mImporter.push_back( new HMPImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_SMD_IMPORTER)
-	pimpl->mImporter.push_back( new SMDImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_MDC_IMPORTER)
-	pimpl->mImporter.push_back( new MDCImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_MD5_IMPORTER)
-	pimpl->mImporter.push_back( new MD5Importer());
-#endif
-#if (!defined ASSIMP_BUILD_NO_STL_IMPORTER)
-	pimpl->mImporter.push_back( new STLImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_LWO_IMPORTER)
-	pimpl->mImporter.push_back( new LWOImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_DXF_IMPORTER)
-	pimpl->mImporter.push_back( new DXFImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_NFF_IMPORTER)
-	pimpl->mImporter.push_back( new NFFImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_RAW_IMPORTER)
-	pimpl->mImporter.push_back( new RAWImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_OFF_IMPORTER)
-	pimpl->mImporter.push_back( new OFFImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_AC_IMPORTER)
-	pimpl->mImporter.push_back( new AC3DImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_BVH_IMPORTER)
-	pimpl->mImporter.push_back( new BVHLoader());
-#endif
-#if (!defined ASSIMP_BUILD_NO_IRRMESH_IMPORTER)
-	pimpl->mImporter.push_back( new IRRMeshImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_IRR_IMPORTER)
-	pimpl->mImporter.push_back( new IRRImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_Q3D_IMPORTER)
-	pimpl->mImporter.push_back( new Q3DImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_B3D_IMPORTER)
-	pimpl->mImporter.push_back( new B3DImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_COLLADA_IMPORTER)
-	pimpl->mImporter.push_back( new ColladaLoader());
-#endif
-#if (!defined ASSIMP_BUILD_NO_TERRAGEN_IMPORTER)
-	pimpl->mImporter.push_back( new TerragenImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_CSM_IMPORTER)
-	pimpl->mImporter.push_back( new CSMImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_3D_IMPORTER)
-	pimpl->mImporter.push_back( new UnrealImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_LWS_IMPORTER)
-	pimpl->mImporter.push_back( new LWSImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_OGRE_IMPORTER)
-	pimpl->mImporter.push_back( new Ogre::OgreImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_MS3D_IMPORTER)
-	pimpl->mImporter.push_back( new MS3DImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_COB_IMPORTER)
-	pimpl->mImporter.push_back( new COBImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_BLEND_IMPORTER)
-	pimpl->mImporter.push_back( new BlenderImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_Q3BSP_IMPORTER)
-	pimpl->mImporter.push_back( new Q3BSPFileImporter() );
-#endif
-#if (!defined ASSIMP_BUILD_NO_NDO_IMPORTER)
-	pimpl->mImporter.push_back( new NDOImporter() );
-#endif
-#if (!defined ASSIMP_BUILD_NO_IFC_IMPORTER)
-	pimpl->mImporter.push_back( new IFCImporter() );
-#endif
-
-	// ----------------------------------------------------------------------------
-	// Add an instance of each post processing step here in the order 
-	// of sequence it is executed. Steps that are added here are not
-	// validated - as RegisterPPStep() does - all dependencies must be given.
-	// ----------------------------------------------------------------------------
-	pimpl->mPostProcessingSteps.reserve(25);
-#if (!defined ASSIMP_BUILD_NO_REMOVEVC_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new RemoveVCProcess());
-#endif
-#if (!defined ASSIMP_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new RemoveRedundantMatsProcess());
-#endif
-#if (!defined ASSIMP_BUILD_NO_FINDINSTANCES_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new FindInstancesProcess());
-#endif
-#if (!defined ASSIMP_BUILD_NO_OPTIMIZEGRAPH_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new OptimizeGraphProcess());
-#endif
-#if (!defined ASSIMP_BUILD_NO_OPTIMIZEMESHES_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new OptimizeMeshesProcess());
-#endif
-#if (!defined ASSIMP_BUILD_NO_FINDDEGENERATES_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new FindDegeneratesProcess());
-#endif
-#ifndef ASSIMP_BUILD_NO_GENUVCOORDS_PROCESS
-	pimpl->mPostProcessingSteps.push_back( new ComputeUVMappingProcess());
-#endif
-#ifndef ASSIMP_BUILD_NO_TRANSFORMTEXCOORDS_PROCESS
-	pimpl->mPostProcessingSteps.push_back( new TextureTransformStep());
-#endif
-#if (!defined ASSIMP_BUILD_NO_PRETRANSFORMVERTICES_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new PretransformVertices());
-#endif
-#if (!defined ASSIMP_BUILD_NO_TRIANGULATE_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new TriangulateProcess());
-#endif
-#if (!defined ASSIMP_BUILD_NO_SORTBYPTYPE_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new SortByPTypeProcess());
-#endif
-#if (!defined ASSIMP_BUILD_NO_FINDINVALIDDATA_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new FindInvalidDataProcess());
-#endif
-#if (!defined ASSIMP_BUILD_NO_FIXINFACINGNORMALS_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new FixInfacingNormalsProcess());
-#endif
-#if (!defined ASSIMP_BUILD_NO_SPLITBYBONECOUNT_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new SplitByBoneCountProcess());
-#endif
-#if (!defined ASSIMP_BUILD_NO_SPLITLARGEMESHES_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new SplitLargeMeshesProcess_Triangle());
-#endif
-#if (!defined ASSIMP_BUILD_NO_GENFACENORMALS_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new GenFaceNormalsProcess());
-#endif
-
-	// .........................................................................
-	// DON'T change the order of these five!
-	pimpl->mPostProcessingSteps.push_back( new ComputeSpatialSortProcess());
-	// .........................................................................
-
-#if (!defined ASSIMP_BUILD_NO_GENVERTEXNORMALS_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new GenVertexNormalsProcess());
-#endif
-#if (!defined ASSIMP_BUILD_NO_CALCTANGENTS_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new CalcTangentsProcess());
-#endif
-#if (!defined ASSIMP_BUILD_NO_JOINVERTICES_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new JoinVerticesProcess());
-#endif
-
-	// .........................................................................
-	pimpl->mPostProcessingSteps.push_back( new DestroySpatialSortProcess());
-	// .........................................................................
-
-#if (!defined ASSIMP_BUILD_NO_SPLITLARGEMESHES_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new SplitLargeMeshesProcess_Vertex());
-#endif
-#if (!defined ASSIMP_BUILD_NO_MAKELEFTHANDED_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new MakeLeftHandedProcess());
-#endif
-#if (!defined ASSIMP_BUILD_NO_FLIPUVS_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new FlipUVsProcess());
-#endif
-#if (!defined ASSIMP_BUILD_NO_FLIPWINDINGORDER_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new FlipWindingOrderProcess());
-#endif
-#if (!defined ASSIMP_BUILD_DEBONE_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new DeboneProcess());
-#endif
-#if (!defined ASSIMP_BUILD_NO_LIMITBONEWEIGHTS_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new LimitBoneWeightsProcess());
-#endif
-#if (!defined ASSIMP_BUILD_NO_IMPROVECACHELOCALITY_PROCESS)
-	pimpl->mPostProcessingSteps.push_back( new ImproveCacheLocalityProcess());
-#endif
+	GetImporterInstanceList(pimpl->mImporter);
+	GetPostProcessingStepInstanceList(pimpl->mPostProcessingSteps);
 
 	// Allocate a SharedPostProcessInfo object and store pointers to it in all post-process steps in the list.
 	pimpl->mPPShared = new SharedPostProcessInfo();
@@ -1178,6 +794,9 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 		}
 #endif // ! DEBUG
 	}
+
+	// update private scene flags
+	ScenePriv(pimpl->mScene)->mPPStepsApplied |= pFlags;
 
 	// clear any data allocated by post-process steps
 	pimpl->mPPShared->Clean();

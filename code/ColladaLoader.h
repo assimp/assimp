@@ -78,14 +78,10 @@ struct ColladaMeshIndex
 */
 class ColladaLoader : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	ColladaLoader();
-
-	/** Destructor, private as well */
 	~ColladaLoader();
+
 
 public:
 	/** Returns whether the class can handle the format of the given file. 

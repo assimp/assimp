@@ -60,14 +60,10 @@ namespace Assimp	{
 */
 class NFFImporter : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	NFFImporter();
-
-	/** Destructor, private as well */
 	~NFFImporter();
+
 
 public:
 

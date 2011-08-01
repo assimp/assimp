@@ -83,15 +83,11 @@ class SplitLargeMeshesProcess_Vertex;
 */
 class ASSIMP_API SplitLargeMeshesProcess_Triangle : public BaseProcess
 {
-	friend class Importer;
 	friend class SplitLargeMeshesProcess_Vertex;
-	friend class ::SplitLargeMeshesTest;
 
-protected:
-	/** Constructor to be privately used by Importer */
+public:
+
 	SplitLargeMeshesProcess_Triangle();
-
-	/** Destructor, private as well */
 	~SplitLargeMeshesProcess_Triangle();
 
 public:
@@ -155,14 +151,9 @@ public:
 */
 class ASSIMP_API SplitLargeMeshesProcess_Vertex : public BaseProcess
 {
-	friend class Importer;
-	friend class ::SplitLargeMeshesTest;
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	SplitLargeMeshesProcess_Vertex();
-
-	/** Destructor, private as well */
 	~SplitLargeMeshesProcess_Vertex();
 
 public:

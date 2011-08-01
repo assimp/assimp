@@ -59,14 +59,10 @@ namespace Assimp	{
  */
 class IRRMeshImporter : public BaseImporter, public IrrlichtBase
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	IRRMeshImporter();
-
-	/** Destructor, private as well */
 	~IRRMeshImporter();
+
 
 public:
 

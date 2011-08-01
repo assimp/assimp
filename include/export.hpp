@@ -134,12 +134,13 @@ public:
 	*   export to. Use 
 	* #GetExportFormatCount / #GetExportFormatDescription to learn which 
 	*   export formats are available.
+	* @param pPreprocessing See the documentation for #Export
 	* @return the exported data or NULL in case of error.
 	* @note If the Exporter instance did already hold a blob from
 	*   a previous call to #ExportToBlob, it will be disposed. 
 	*   Any IO handlers set via #SetIOHandler are ignored here.*/
-	const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const char* pFormatId );
-	inline const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const std::string& pFormatId );
+	const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const char* pFormatId, unsigned int pPreprocessing = 0u );
+	inline const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const std::string& pFormatId, unsigned int pPreprocessing = 0u );
 
 
 	// -------------------------------------------------------------------
@@ -148,9 +149,27 @@ public:
 	 *  about the output data flow of the export process.
 	 * @param pBlob A data blob obtained from a previous call to #aiExportScene. Must not be NULL.
 	 * @param pPath Full target file name. Target must be accessible.
+	 * @param pPreprocessing Accepts any choice of the #aiPostProcessing enumerated
+	 *   flags, but in reality only a subset of them makes sense here. Specifying
+	 *   'preprocessing' flags is useful if the input scene does not conform to 
+	 *   Assimp's default conventions as specified in the @link data Data Structures Page @endlink. 
+	 *   In short, this means the geometry data should use a right-handed coordinate systems, face 
+	 *   winding should be counter-clockwise and the UV coordinate origin is assumed to be in
+	 *   the upper left. The #aiProcess_MakeLeftHanded, #aiProcess_FlipUVs and 
+	 *   #aiProcess_FlipWindingOrder flags are used in the import side to allow users
+	 *   to have those defaults automatically adapted to their conventions. Specifying those flags
+	 *   for exporting has the opposite effect, respectively. Some other of the
+	 *   #aiPostProcessSteps enumerated values may be useful as well, but you'll need
+	 *   to try out what their effect on the exported file is. Many formats impose
+	 *   their own restrictions on the structure of the geometry stored therein,
+	 *   so some preprocessing may have little or no effect at all, or may be
+	 *   redundant as exporters would apply them anyhow. A good example 
+	 *   is triangulation - whilst you can enforce it by specifying
+	 *   the #aiProcess_Triangulate flag, most export formats support only
+	 *  triangulate data so they would run the step even if it wasn't requested.
 	 * @return AI_SUCCESS if everything was fine. */
-	aiReturn Export( const aiScene* pScene, const char* pFormatId, const char* pPath );
-	inline aiReturn Export( const aiScene* pScene, const std::string& pFormatId, const std::string& pPath );
+	aiReturn Export( const aiScene* pScene, const char* pFormatId, const char* pPath, unsigned int pPreprocessing = 0u);
+	inline aiReturn Export( const aiScene* pScene, const std::string& pFormatId, const std::string& pPath,  unsigned int pPreprocessing = 0u);
 
 
 
@@ -192,15 +211,15 @@ protected:
 
 
 // ----------------------------------------------------------------------------------
-inline const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const std::string& pFormatId ) 
+inline const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const std::string& pFormatId,unsigned int pPreprocessing ) 
 {
-	return ExportToBlob(pScene,pFormatId.c_str());
+	return ExportToBlob(pScene,pFormatId.c_str(),pPreprocessing);
 }
 
 // ----------------------------------------------------------------------------------
-inline aiReturn Exporter :: Export( const aiScene* pScene, const std::string& pFormatId, const std::string& pPath )
+inline aiReturn Exporter :: Export( const aiScene* pScene, const std::string& pFormatId, const std::string& pPath, unsigned int pPreprocessing )
 {
-	return Export(pScene,pFormatId.c_str(),pPath.c_str());
+	return Export(pScene,pFormatId.c_str(),pPath.c_str(),pPreprocessing);
 }
 
 } // namespace Assimp

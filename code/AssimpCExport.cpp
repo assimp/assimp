@@ -65,29 +65,29 @@ ASSIMP_API const aiExportFormatDesc* aiGetExportFormatDescription( size_t pIndex
 
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API aiReturn aiExportScene( const aiScene* pScene, const char* pFormatId, const char* pFileName )
+ASSIMP_API aiReturn aiExportScene( const aiScene* pScene, const char* pFormatId, const char* pFileName, unsigned int pPreprocessing )
 {
-	return ::aiExportSceneEx(pScene,pFormatId,pFileName,NULL);
+	return ::aiExportSceneEx(pScene,pFormatId,pFileName,NULL,pPreprocessing);
 }
 
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API aiReturn aiExportSceneEx( const aiScene* pScene, const char* pFormatId, const char* pFileName, aiFileIO* pIO)
+ASSIMP_API aiReturn aiExportSceneEx( const aiScene* pScene, const char* pFormatId, const char* pFileName, aiFileIO* pIO, unsigned int pPreprocessing )
 {
 	Exporter exp;
 
 	if (pIO) {
 		exp.SetIOHandler(new CIOSystemWrapper(pIO));
 	}
-	return exp.Export(pScene,pFormatId,pFileName);
+	return exp.Export(pScene,pFormatId,pFileName,pPreprocessing);
 }
 
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportSceneToBlob( const aiScene* pScene, const char* pFormatId )
+ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportSceneToBlob( const aiScene* pScene, const char* pFormatId, unsigned int pPreprocessing  )
 {
 	Exporter exp;
-	if (!exp.ExportToBlob(pScene,pFormatId)) {
+	if (!exp.ExportToBlob(pScene,pFormatId,pPreprocessing)) {
 		return NULL;
 	}
 	const aiExportDataBlob* blob = exp.GetOrphanedBlob();

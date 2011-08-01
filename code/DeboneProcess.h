@@ -66,14 +66,9 @@ namespace Assimp
 */
 class ASSIMP_API DeboneProcess : public BaseProcess
 {
-	friend class Importer;
-	friend class ::DeboneTest;
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	DeboneProcess();
-
-	/** Destructor, private as well */
 	~DeboneProcess();
 
 public:

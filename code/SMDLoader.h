@@ -172,14 +172,10 @@ struct Bone
 */
 class SMDImporter : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	SMDImporter();
-
-	/** Destructor, private as well */
 	~SMDImporter();
+
 
 public:
 

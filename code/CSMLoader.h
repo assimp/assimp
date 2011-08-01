@@ -56,13 +56,10 @@ namespace Assimp	{
 */
 class CSMImporter : public BaseImporter
 {
-	friend class Importer;
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	CSMImporter();
-
-	/** Destructor, private as well */
 	~CSMImporter();
+
 
 public:
 	// -------------------------------------------------------------------

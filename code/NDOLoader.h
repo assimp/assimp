@@ -53,13 +53,10 @@ namespace Assimp	{
 */
 class NDOImporter : public BaseImporter
 {
-	friend class Importer;
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	NDOImporter();
-
-	/** Destructor, private as well */
 	~NDOImporter();
+
 
 public:
 

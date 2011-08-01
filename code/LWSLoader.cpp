@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "GenericProperty.h"
 #include "SkeletonMeshBuilder.h"
 #include "ConvertToLHProcess.h"
+#include "Importer.h"
 
 using namespace Assimp;
 

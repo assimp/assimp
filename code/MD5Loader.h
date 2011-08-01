@@ -61,14 +61,10 @@ using namespace Assimp::MD5;
 */
 class MD5Importer : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	MD5Importer();
-
-	/** Destructor, private as well */
 	~MD5Importer();
+
 
 public:
 

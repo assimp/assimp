@@ -82,14 +82,10 @@ using namespace MDL;
 */
 class MDLImporter : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	MDLImporter();
-
-	/** Destructor, private as well */
 	~MDLImporter();
+
 
 public:
 

@@ -57,14 +57,9 @@ namespace Assimp	{
 */
 class ASSIMP_API SortByPTypeProcess : public BaseProcess
 {
-	friend class Importer;
-	friend class ::SortByPTypeProcessTest; // grant the unit test full access to us
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	SortByPTypeProcess();
-
-	/** Destructor, private as well */
 	~SortByPTypeProcess();
 
 public:

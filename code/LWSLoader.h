@@ -166,14 +166,10 @@ struct NodeDesc
 */
 class LWSImporter : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	LWSImporter();
-
-	/** Destructor, private as well */
 	~LWSImporter();
+
 
 public:
 

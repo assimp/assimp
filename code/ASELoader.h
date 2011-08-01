@@ -58,14 +58,10 @@ class MaterialHelper;
  *
  */
 class ASEImporter : public BaseImporter	{
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	ASEImporter();
-
-	/** Destructor, private as well */
 	~ASEImporter();
+
 
 public:
 

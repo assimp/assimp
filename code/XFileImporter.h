@@ -66,14 +66,10 @@ struct Node;
  */
 class XFileImporter : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	XFileImporter();
-
-	/** Destructor, private as well */
 	~XFileImporter();
+
 
 public:
 	// -------------------------------------------------------------------

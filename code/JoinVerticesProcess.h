@@ -63,14 +63,9 @@ class JoinVerticesTest;
  */
 class ASSIMP_API JoinVerticesProcess : public BaseProcess
 {
-	friend class Importer;
-	friend class JoinVerticesTest;
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	JoinVerticesProcess();
-
-	/** Destructor, private as well */
 	~JoinVerticesProcess();
 
 public:

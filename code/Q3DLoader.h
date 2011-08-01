@@ -55,14 +55,10 @@ namespace Assimp	{
 */
 class Q3DImporter : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	Q3DImporter();
-
-	/** Destructor, private as well */
 	~Q3DImporter();
+
 
 public:
 

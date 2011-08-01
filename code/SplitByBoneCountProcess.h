@@ -61,13 +61,9 @@ namespace Assimp
 */
 class ASSIMP_API SplitByBoneCountProcess : public BaseProcess
 {
-	friend class Importer;
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	SplitByBoneCountProcess();
-
-	/** Destructor, private as well */
 	~SplitByBoneCountProcess();
 
 public:

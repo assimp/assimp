@@ -95,6 +95,10 @@ SET( Common_SRCS
 	BaseImporter.h
 	BaseProcess.cpp
 	BaseProcess.h
+	Importer.h
+	ScenePrivate.h
+	PostStepRegistry.cpp
+	ImporterRegistry.cpp
 	ByteSwap.h
 	DefaultProgressHandler.h
 	DefaultIOStream.cpp

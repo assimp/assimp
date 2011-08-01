@@ -53,9 +53,8 @@ namespace Assimp	{
 class MS3DImporter 
 	: public BaseImporter
 {
-	friend class Importer;
 
-protected:
+public:
 
 	MS3DImporter();
 	~MS3DImporter();

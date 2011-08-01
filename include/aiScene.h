@@ -327,59 +327,11 @@ struct aiScene
 
 #ifdef __cplusplus
 
-	//! Default constructor
-	aiScene()
-	{
-		// set all members to zero by default
-		mRootNode = NULL;
-		mNumMeshes = 0; mMeshes = NULL;
-		mNumMaterials = 0; mMaterials = NULL;
-		mNumAnimations = 0; mAnimations = NULL;
-		mNumTextures = 0; mTextures = NULL;
-		mNumCameras = 0; mCameras = NULL;
-		mNumLights = 0; mLights = NULL;
-		mFlags = 0;
-	}
+	//! Default constructor - set everything to 0/NULL
+	aiScene();
 
 	//! Destructor
-	~aiScene()
-	{
-		// delete all sub-objects recursively
-		delete mRootNode;
-
-		// To make sure we won't crash if the data is invalid it's
-		// much better to check whether both mNumXXX and mXXX are
-		// valid instead of relying on just one of them.
-		if (mNumMeshes && mMeshes) 
-			for( unsigned int a = 0; a < mNumMeshes; a++)
-				delete mMeshes[a];
-		delete [] mMeshes;
-
-		if (mNumMaterials && mMaterials) 
-			for( unsigned int a = 0; a < mNumMaterials; a++)
-				delete mMaterials[a];
-		delete [] mMaterials;
-
-		if (mNumAnimations && mAnimations) 
-			for( unsigned int a = 0; a < mNumAnimations; a++)
-				delete mAnimations[a];
-		delete [] mAnimations;
-
-		if (mNumTextures && mTextures) 
-			for( unsigned int a = 0; a < mNumTextures; a++)
-				delete mTextures[a];
-		delete [] mTextures;
-
-		if (mNumLights && mLights) 
-			for( unsigned int a = 0; a < mNumLights; a++)
-				delete mLights[a];
-		delete [] mLights;
-
-		if (mNumCameras && mCameras) 
-			for( unsigned int a = 0; a < mNumCameras; a++)
-				delete mCameras[a];
-		delete [] mCameras;
-	}
+	~aiScene();
 
 	//! Check whether the scene contains meshes
 	//! Unless no special scene flags are set this will always be true.
@@ -408,6 +360,15 @@ struct aiScene
 		{ return mAnimations != NULL && mNumAnimations > 0; }
 
 #endif // __cplusplus
+
+
+	// internal scene data, do not touch
+#ifdef __cplusplus
+	void* mPrivate;
+#else
+	char* mPrivate;
+#endif
+
 };
 
 #ifdef __cplusplus

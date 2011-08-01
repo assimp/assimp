@@ -145,6 +145,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StringComparison.h"
 #include "StreamReader.h"
 #include "qnan.h"
+#include "ScenePrivate.h" 
 
 
 // We need those constants, workaround for any platforms where nobody defined them yet

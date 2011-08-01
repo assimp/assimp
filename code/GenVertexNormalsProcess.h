@@ -55,14 +55,9 @@ namespace Assimp {
 */
 class ASSIMP_API GenVertexNormalsProcess : public BaseProcess
 {
-	friend class Importer;
-	friend class ::GenNormalsTest;
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	GenVertexNormalsProcess();
-
-	/** Destructor, private as well */
 	~GenVertexNormalsProcess();
 
 public:

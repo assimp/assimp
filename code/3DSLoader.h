@@ -61,13 +61,9 @@ using namespace D3DS;
  */
 class Discreet3DSImporter : public BaseImporter
 {
-	friend class Importer;
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	Discreet3DSImporter();
-
-	/** Destructor, private as well */
 	~Discreet3DSImporter();
 
 public:

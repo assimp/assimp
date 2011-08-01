@@ -60,14 +60,10 @@ using namespace MD2;
 */
 class MD2Importer : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	MD2Importer();
-
-	/** Destructor, private as well */
 	~MD2Importer();
+
 
 public:
 

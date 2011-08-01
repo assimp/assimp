@@ -69,15 +69,10 @@ namespace Assimp	{
 // -------------------------------------------------------------------------------------------
 class IFCImporter : public BaseImporter, public LogFunctions<IFCImporter>
 {
-	friend class Importer;
-
-protected:
-
-	/** Constructor to be privately used by Importer */
+public:
 	IFCImporter();
-
-	/** Destructor, private as well */
 	~IFCImporter();
+
 
 public:
 

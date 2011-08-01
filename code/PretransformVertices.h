@@ -58,14 +58,9 @@ namespace Assimp	{
 */
 class ASSIMP_API PretransformVertices : public BaseProcess
 {
-	friend class Importer;
-	friend class ::PretransformVerticesTest;
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	PretransformVertices ();
-
-	/** Destructor, private as well */
 	~PretransformVertices ();
 
 public:

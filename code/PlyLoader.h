@@ -61,14 +61,10 @@ using namespace PLY;
 */
 class PLYImporter : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	PLYImporter();
-
-	/** Destructor, private as well */
 	~PLYImporter();
+
 
 public:
 

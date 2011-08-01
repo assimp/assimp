@@ -120,15 +120,10 @@ struct aiLoaderDesc
 // -------------------------------------------------------------------------------------------
 class BlenderImporter : public BaseImporter, public LogFunctions<BlenderImporter>
 {
-	friend class Importer;
-
-protected:
-
-	/** Constructor to be privately used by Importer */
+public:
 	BlenderImporter();
-
-	/** Destructor, private as well */
 	~BlenderImporter();
+
 
 public:
 

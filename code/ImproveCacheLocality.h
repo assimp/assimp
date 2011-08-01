@@ -60,13 +60,9 @@ namespace Assimp
  */
 class ASSIMP_API ImproveCacheLocalityProcess : public BaseProcess
 {
-	friend class Importer;
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	ImproveCacheLocalityProcess();
-
-	/** Destructor, private as well */
 	~ImproveCacheLocalityProcess();
 
 public:

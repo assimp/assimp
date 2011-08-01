@@ -195,6 +195,8 @@ public:
 	TextureTransformStep();
 	~TextureTransformStep();
 
+public:
+
 	// -------------------------------------------------------------------
 	bool IsActive( unsigned int pFlags) const;
 

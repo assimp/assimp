@@ -38,55 +38,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-
-/** @file Defines a post processing step to fix infacing normals */
-#ifndef AI_FIXNORMALSPROCESS_H_INC
-#define AI_FIXNORMALSPROCESS_H_INC
-
-#include "BaseProcess.h"
-
-struct aiMesh;
-
-namespace Assimp
-{
-
-// ---------------------------------------------------------------------------
-/** The FixInfacingNormalsProcess tries to deteermine whether the normal
- * vectors of an object are facing inwards. In this case they will be
- * flipped.
+/** @file Stuff to deal with aiScene::mPrivate
  */
-class ASSIMP_API FixInfacingNormalsProcess : public BaseProcess
-{
-public:
+#ifndef AI_SCENEPRIVATE_H_INCLUDED
+#define AI_SCENEPRIVATE_H_INCLUDED
+
+
+namespace Assimp	{
+
+struct ScenePrivateData {
 	
-	FixInfacingNormalsProcess();
-	~FixInfacingNormalsProcess();
+	ScenePrivateData()
+		: mPPStepsApplied()
+	{}
 
-public:
-	// -------------------------------------------------------------------
-	/** Returns whether the processing step is present in the given flag field.
-	 * @param pFlags The processing flags the importer was called with. A bitwise
-	 *   combination of #aiPostProcessSteps.
-	 * @return true if the process is present in this flag fields, false if not.
-	*/
-	bool IsActive( unsigned int pFlags) const;
-
-	// -------------------------------------------------------------------
-	/** Executes the post processing step on the given imported data.
-	* At the moment a process is not supposed to fail.
-	* @param pScene The imported data to work at.
-	*/
-	void Execute( aiScene* pScene);
-
-protected:
-
-	// -------------------------------------------------------------------
-	/** Executes the step on the given mesh
-	 * @param pMesh The mesh to process.
-	 */
-	bool ProcessMesh( aiMesh* pMesh, unsigned int index);
+	// List of postprocessing steps already applied to the scene.
+	unsigned int mPPStepsApplied;
 };
 
-} // end of namespace Assimp
+// Access private data stored in the scene
+inline ScenePrivateData* ScenePriv(aiScene* in) {
+	return static_cast<ScenePrivateData*>(in->mPrivate);
+}
 
-#endif // AI_FIXNORMALSPROCESS_H_INC
+inline const ScenePrivateData* ScenePriv(const aiScene* in) {
+	return static_cast<const ScenePrivateData*>(in->mPrivate);
+}
+
+}
+
+#endif

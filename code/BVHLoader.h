@@ -61,7 +61,6 @@ namespace Assimp
 */
 class BVHLoader : public BaseImporter
 {
-	friend class Importer;
 
 	/** Possible animation channels for which the motion data holds the values */
 	enum ChannelType
@@ -85,11 +84,9 @@ class BVHLoader : public BaseImporter
 		Node( const aiNode* pNode) : mNode( pNode) { }
 	};
 
-protected:
-	/** Constructor to be privately used by Importer */
-	BVHLoader();
+public:
 
-	/** Destructor, private as well */
+	BVHLoader();
 	~BVHLoader();
 
 public:

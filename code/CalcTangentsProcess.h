@@ -59,13 +59,9 @@ namespace Assimp
  */
 class ASSIMP_API CalcTangentsProcess : public BaseProcess
 {
-	friend class Importer;
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	CalcTangentsProcess();
-
-	/** Destructor, private as well */
 	~CalcTangentsProcess();
 
 public:

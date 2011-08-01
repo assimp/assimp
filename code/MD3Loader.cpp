@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "GenericProperty.h"
 #include "RemoveComments.h"
 #include "ParsingUtils.h"
+#include "Importer.h"
 
 using namespace Assimp;
 

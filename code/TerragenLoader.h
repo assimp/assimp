@@ -69,14 +69,10 @@ namespace Assimp	{
 */
 class TerragenImporter : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	TerragenImporter();
-
-	/** Destructor, private as well */
 	~TerragenImporter();
+
 
 public:
 

@@ -47,6 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "FileSystemFilter.h"
 
+#include "Importer.h"
+
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------

@@ -59,15 +59,9 @@ namespace Assimp	{
 class ASSIMP_API FindInvalidDataProcess 
 	: public BaseProcess
 {
-	friend class Importer;
-	friend class ::FindInvalidDataProcessTest;
+public:
 
-protected:
-
-	/** Constructor to be privately used by Importer */
 	FindInvalidDataProcess();
-
-	/** Destructor, private as well */
 	~FindInvalidDataProcess();
 
 public:

@@ -55,14 +55,10 @@ namespace Assimp	{
 */
 class OFFImporter : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	OFFImporter();
-
-	/** Destructor, private as well */
 	~OFFImporter();
+
 
 public:
 

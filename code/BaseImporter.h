@@ -94,66 +94,7 @@ private:
 	bool mdismiss;
 };
 
-//! @cond never
-// ---------------------------------------------------------------------------
-/** @brief Internal PIMPL implementation for Assimp::Importer
- *
- *  Using this idiom here allows us to drop the dependency from
- *  std::vector and std::map in the public headers. Furthermore we are dropping
- *  any STL interface problems caused by mismatching STL settings. All
- *  size calculation are now done by us, not the app heap. */
-class ASSIMP_API ImporterPimpl 
-{
-public:
 
-	// Data type to store the key hash
-	typedef unsigned int KeyType;
-	
-	// typedefs for our three configuration maps.
-	// We don't need more, so there is no need for a generic solution
-	typedef std::map<KeyType, int> IntPropertyMap;
-	typedef std::map<KeyType, float> FloatPropertyMap;
-	typedef std::map<KeyType, std::string> StringPropertyMap;
-
-public:
-
-	/** IO handler to use for all file accesses. */
-	IOSystem* mIOHandler;
-	bool mIsDefaultHandler;
-
-	/** Progress handler for feedback. */
-	ProgressHandler* mProgressHandler;
-	bool mIsDefaultProgressHandler;
-
-	/** Format-specific importer worker objects - one for each format we can read.*/
-	std::vector<BaseImporter*> mImporter;
-
-	/** Post processing steps we can apply at the imported data. */
-	std::vector<BaseProcess*> mPostProcessingSteps;
-
-	/** The imported data, if ReadFile() was successful, NULL otherwise. */
-	aiScene* mScene;
-
-	/** The error description, if there was one. */
-	std::string mErrorString;
-
-	/** List of integer properties */
-	IntPropertyMap mIntProperties;
-
-	/** List of floating-point properties */
-	FloatPropertyMap mFloatProperties;
-
-	/** List of string properties */
-	StringPropertyMap mStringProperties;
-
-	/** Used for testing - extra verbose mode causes the ValidateDataStructure-Step
-	 *  to be executed before and after every single postprocess step */
-	bool bExtraVerbose;
-
-	/** Used by post-process steps to share data */
-	SharedPostProcessInfo* mPPShared;
-};
-//! @endcond
 
 // ---------------------------------------------------------------------------
 /** FOR IMPORTER PLUGINS ONLY: The BaseImporter defines a common interface 
@@ -169,7 +110,7 @@ class ASSIMP_API BaseImporter
 {
 	friend class Importer;
 
-protected:
+public:
 
 	/** Constructor to be privately used by #Importer */
 	BaseImporter();
@@ -407,92 +348,7 @@ protected:
 	ProgressHandler* progress;
 };
 
-struct BatchData;
 
-// ---------------------------------------------------------------------------
-/** FOR IMPORTER PLUGINS ONLY: A helper class for the pleasure of importers 
- *  which need to load many extern meshes recursively.
- *
- *  The class uses several threads to load these meshes (or at least it
- *  could, this has not yet been implemented at the moment).
- *
- *  @note The class may not be used by more than one thread*/
-class ASSIMP_API BatchLoader 
-{
-	// friend of Importer
-
-public:
-
-	//! @cond never
-	// -------------------------------------------------------------------
-	/** Wraps a full list of configuration properties for an importer.
-	 *  Properties can be set using SetGenericProperty */
-	struct PropertyMap
-	{
-		ImporterPimpl::IntPropertyMap     ints;
-		ImporterPimpl::FloatPropertyMap   floats;
-		ImporterPimpl::StringPropertyMap  strings;
-
-		bool operator == (const PropertyMap& prop) const {
-			// fixme: really isocpp? gcc complains
-			return ints == prop.ints && floats == prop.floats && strings == prop.strings; 
-		}
-
-		bool empty () const {
-			return ints.empty() && floats.empty() && strings.empty();
-		}
-	};
-	//! @endcond
-
-public:
-	
-
-	// -------------------------------------------------------------------
-	/** Construct a batch loader from a given IO system to be used 
-	 *  to acess external files */
-	BatchLoader(IOSystem* pIO);
-	~BatchLoader();
-
-
-	// -------------------------------------------------------------------
-	/** Add a new file to the list of files to be loaded.
-	 *  @param file File to be loaded
-	 *  @param steps Post-processing steps to be executed on the file
-	 *  @param map Optional configuration properties
-	 *  @return 'Load request channel' - an unique ID that can later
-	 *    be used to access the imported file data.
-	 *  @see GetImport */
-	unsigned int AddLoadRequest	(
-		const std::string& file,
-		unsigned int steps = 0, 
-		const PropertyMap* map = NULL
-		);
-
-
-	// -------------------------------------------------------------------
-	/** Get an imported scene.
-	 *  This polls the import from the internal request list.
-	 *  If an import is requested several times, this function
-	 *  can be called several times, too.
-	 *
-	 *  @param which LRWC returned by AddLoadRequest().
-	 *  @return NULL if there is no scene with this file name
-	 *  in the queue of the scene hasn't been loaded yet. */
-	aiScene* GetImport(
-		unsigned int which
-		);
-
-
-	// -------------------------------------------------------------------
-	/** Waits until all scenes have been loaded. This returns
-	 *  immediately if no scenes are queued.*/
-	void LoadAll();
-
-private:
-
-	// No need to have that in the public API ...
-	BatchData* data;
-};
 
 } // end of namespace Assimp
 

@@ -54,14 +54,9 @@ namespace Assimp	{
 */
 class ASSIMP_API RemoveVCProcess : public BaseProcess
 {
-	friend class Importer;
-	friend class ::RemoveVCProcessTest;
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	RemoveVCProcess();
-
-	/** Destructor, private as well */
 	~RemoveVCProcess();
 
 public:

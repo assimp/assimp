@@ -64,13 +64,9 @@ namespace Assimp	{
 // --------------------------------------------------------------------------------------
 class ASSIMP_API ValidateDSProcess : public BaseProcess
 {
-	friend class Importer;
+public:
 
-protected:
-	/** Constructor to be privately used by Importer */
 	ValidateDSProcess();
-
-	/** Destructor, private as well */
 	~ValidateDSProcess();
 
 public:

@@ -145,14 +145,10 @@ inline void DecompressVertex(aiVector3D& v, int32_t in)
 */
 class UnrealImporter : public BaseImporter
 {
-	friend class Importer;
-
-protected:
-	/** Constructor to be privately used by Importer */
+public:
 	UnrealImporter();
-
-	/** Destructor, private as well */
 	~UnrealImporter();
+
 
 public:
 

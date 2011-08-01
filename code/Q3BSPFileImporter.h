@@ -58,11 +58,10 @@ struct sQ3BSPFace;
 /**	Loader to import BSP-levels from a PK3 archive or from a unpacked BSP-level.
  */
 // ------------------------------------------------------------------------------------------------
-class Q3BSPFileImporter : BaseImporter
+class Q3BSPFileImporter : public BaseImporter
 {
-	friend class Importer;
+public:
 
-protected:
 	///	@brief	Default constructor.
 	Q3BSPFileImporter();
 

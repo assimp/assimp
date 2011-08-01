@@ -882,7 +882,7 @@ void SceneCombiner::MergeMeshes(aiMesh** _out,unsigned int /*flags*/,
 
 // ------------------------------------------------------------------------------------------------
 template <typename Type>
-inline void CopyPtrArray (Type**& dest, Type** src, unsigned int num)
+inline void CopyPtrArray (Type**& dest, const Type* const * src, unsigned int num)
 {
 	if (!num)
 	{
@@ -890,8 +890,9 @@ inline void CopyPtrArray (Type**& dest, Type** src, unsigned int num)
 		return;
 	}
 	dest = new Type*[num];
-	for (unsigned int i = 0; i < num;++i)
+	for (unsigned int i = 0; i < num;++i) {
 		SceneCombiner::Copy(&dest[i],src[i]);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -906,7 +907,7 @@ inline void GetArrayCopy (Type*& dest, unsigned int num )
 }
 
 // ------------------------------------------------------------------------------------------------
-void SceneCombiner::CopySceneFlat(aiScene** _dest,aiScene* src)
+void SceneCombiner::CopySceneFlat(aiScene** _dest,const aiScene* src)
 {
 	// reuse the old scene or allocate a new?
 	if (*_dest)(*_dest)->~aiScene();
@@ -916,7 +917,7 @@ void SceneCombiner::CopySceneFlat(aiScene** _dest,aiScene* src)
 }
 
 // ------------------------------------------------------------------------------------------------
-void SceneCombiner::CopyScene(aiScene** _dest,aiScene* src)
+void SceneCombiner::CopyScene(aiScene** _dest,const aiScene* src)
 {
 	ai_assert(NULL != _dest && NULL != src);
 

@@ -60,6 +60,9 @@ Here we implement only the C++ interface (Assimp::Exporter).
 #include "BaseProcess.h" 
 #include "Importer.h" // need this for GetPostProcessingStepInstanceList()
 
+#include "MakeVerboseFormat.h"
+#include "ConvertToLHProcess.h"
+
 namespace Assimp {
 
 // PostStepRegistry.cpp
@@ -69,6 +72,7 @@ void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out);
 // Exporter worker function prototypes. Should not be necessary to #ifndef them, it's just a prototype
 void ExportSceneCollada(const char*,IOSystem*, const aiScene*);
 void ExportSceneObj(const char*,IOSystem*, const aiScene*);
+void ExportSceneSTL(const char*,IOSystem*, const aiScene*);
 void ExportScene3DS(const char*, IOSystem*, const aiScene*) {}
 
 /// Function pointer type of a Export worker function
@@ -110,9 +114,15 @@ ExportFormatEntry gExporters[] =
 	ExportFormatEntry( "obj", "Wavefront OBJ format", "obj", &ExportSceneObj),
 #endif
 
-#ifndef ASSIMP_BUILD_NO_3DS_EXPORTER
-	ExportFormatEntry( "3ds", "Autodesk 3DS (legacy format)", "3ds" , &ExportScene3DS),
+#ifndef ASSIMP_BUILD_NO_STL_EXPORTER
+	ExportFormatEntry( "stl", "Stereolithography", "stl" , &ExportSceneSTL, 
+		aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_PreTransformVertices
+	),
 #endif
+
+//#ifndef ASSIMP_BUILD_NO_3DS_EXPORTER
+//	ExportFormatEntry( "3ds", "Autodesk 3DS (legacy format)", "3ds" , &ExportScene3DS),
+//#endif
 };
 
 
@@ -258,11 +268,60 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 					pp |= (nonIdempotentSteps & priv->mPPStepsApplied);
 				}
 
-				if (pp) {
+				// If the input scene is not in verbose format, but there is at least postprocessing step that relies on it,
+				// we need to run the MakeVerboseFormat step first.
+				if (scenecopy->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) {
+					
+					bool verbosify = false;
 					for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++) {
 						BaseProcess* const p = pimpl->mPostProcessingSteps[a];
 
-						if (p->IsActive(pp)) {
+						if (p->IsActive(pp) && p->RequireVerboseFormat()) {
+							verbosify = true;
+							break;
+						}
+					}
+
+					if (verbosify || (gExporters[i].mEnforcePP & aiProcess_JoinIdenticalVertices)) {
+						DefaultLogger::get()->debug("export: Scene data not in verbose format, applying MakeVerboseFormat step first");
+
+						MakeVerboseFormatProcess proc;
+						proc.Execute(scenecopy.get());
+					}
+				}
+
+				if (pp) {
+					// the three 'conversion' steps need to be executed first because all other steps rely on the standard data layout
+					{
+						FlipWindingOrderProcess step;
+						if (step.IsActive(pp)) {
+							step.Execute(scenecopy.get());
+						}
+					}
+					
+					{
+						FlipUVsProcess step;
+						if (step.IsActive(pp)) {
+							step.Execute(scenecopy.get());
+						}
+					}
+
+					{
+						MakeLeftHandedProcess step;
+						if (step.IsActive(pp)) {
+							step.Execute(scenecopy.get());
+						}
+					}
+
+					// dispatch other processes
+					for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++) {
+						BaseProcess* const p = pimpl->mPostProcessingSteps[a];
+
+						if (p->IsActive(pp) 
+							&& !dynamic_cast<FlipUVsProcess*>(p) 
+							&& !dynamic_cast<FlipWindingOrderProcess*>(p) 
+							&& !dynamic_cast<MakeLeftHandedProcess*>(p)) {
+
 							p->Execute(scenecopy.get());
 						}
 					}

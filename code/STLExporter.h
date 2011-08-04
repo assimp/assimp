@@ -38,11 +38,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file ColladaExporter.h
- * Declares the exporter class to write a scene to a Collada file
+/** @file STLExporter.h
+ * Declares the exporter class to write a scene to a Stereolithography (STL) file
  */
-#ifndef AI_OBJEXPORTER_H_INC
-#define AI_OBJEXPORTER_H_INC
+#ifndef AI_STLEXPORTER_H_INC
+#define AI_STLEXPORTER_H_INC
 
 #include <sstream>
 
@@ -53,65 +53,27 @@ namespace Assimp
 {
 
 // ------------------------------------------------------------------------------------------------
-/** Helper class to export a given scene to an OBJ file. */
+/** Helper class to export a given scene to a STL file. */
 // ------------------------------------------------------------------------------------------------
-class ASSIMP_API ObjExporter
+class ASSIMP_API STLExporter
 {
 public:
 	/// Constructor for a specific scene to export
-	ObjExporter(const char* filename, const aiScene* pScene);
+	STLExporter(const char* filename, const aiScene* pScene);
 
-public:
-
-	std::string GetMaterialLibName();
-	std::string GetMaterialLibFileName();
-	
 public:
 
 	/// public stringstreams to write all output into
-	std::ostringstream mOutput, mOutputMat;
+	std::ostringstream mOutput;
 
 private:
 
-	// intermediate data structures
-	struct FaceVertex 
-	{
-		FaceVertex()
-			: vp(),vn(),vt() 
-		{
-		}
-
-		// one-based, 0 means: 'does not exist'
-		unsigned int vp,vn,vt;
-	};
-
-	struct Face {
-		std::vector<FaceVertex> indices;
-	};
-
-	struct MeshInstance {
-
-		std::string name, matname;
-		std::vector<Face> faces;
-	};
-
-	void WriteHeader(std::ostringstream& out);
-
-	void WriteMaterialFile();
-	void WriteGeometryFile();
-
-	std::string GetMaterialName(unsigned int index);
-
-	void AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat);
-	void AddNode(const aiNode* nd, const aiMatrix4x4& mParent);
+	void WriteMesh(const aiMesh* m);
 
 private:
 
 	const std::string filename;
 	const aiScene* const pScene;
-
-	std::vector<aiVector3D> vp, vn, vt;
-	std::vector<MeshInstance> meshes;
 
 	// this endl() doesn't flush() the stream
 	const std::string endl;

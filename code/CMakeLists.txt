@@ -435,6 +435,8 @@ SET( PostProcessing_SRCS
 	ProcessHelper.h
 	ProcessHelper.cpp
 	PolyTools.h
+	MakeVerboseFormat.cpp
+	MakeVerboseFormat.h
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 
@@ -470,6 +472,8 @@ SOURCE_GROUP( SMD FILES ${SMD_SRCS})
 SET( STL_SRCS
 	STLLoader.cpp
 	STLLoader.h
+	STLExporter.h
+	STLExporter.cpp
 )
 SOURCE_GROUP( STL FILES ${STL_SRCS})
 
@@ -496,8 +500,6 @@ SET( Exporter_SRCS
 SOURCE_GROUP( Exporter FILES ${Exporter_SRCS})
 
 SET( Extra_SRCS
-	MakeVerboseFormat.cpp
-	MakeVerboseFormat.h
 	MD4FileData.h
 )
 SOURCE_GROUP( Extra FILES ${Extra_SRCS})

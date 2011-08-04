@@ -96,3 +96,10 @@ void BaseProcess::SetupProperties(const Importer* /*pImp*/)
 {
 	// the default implementation does nothing
 }
+
+// ------------------------------------------------------------------------------------------------
+bool BaseProcess::RequireVerboseFormat() const
+{
+	return true;
+}
+

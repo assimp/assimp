@@ -63,9 +63,7 @@ namespace Assimp	{
  * useful, too. */
 class ASSIMP_API MakeVerboseFormatProcess : public BaseProcess
 {
-	friend class Importer;
-
-protected:
+public:
 
 	/** Constructor to be privately used by Importer, or by applications
 	which know what they are doing if they modify the aiScene object */

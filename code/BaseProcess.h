@@ -235,6 +235,11 @@ public:
 	virtual bool IsActive( unsigned int pFlags) const = 0;
 
 	// -------------------------------------------------------------------
+	/** Check whether this step expects its input vertex data to be 
+	 *  in verbose format. */
+	virtual bool RequireVerboseFormat() const;
+
+	// -------------------------------------------------------------------
 	/** Executes the post processing step on the given imported data.
 	* The function deletes the scene if the postprocess step fails (
 	* the object pointer will be set to NULL).

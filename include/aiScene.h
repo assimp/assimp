@@ -362,7 +362,7 @@ struct aiScene
 #endif // __cplusplus
 
 
-	// internal scene data, do not touch
+	/**  Internal data, do not touch */
 #ifdef __cplusplus
 	void* mPrivate;
 #else

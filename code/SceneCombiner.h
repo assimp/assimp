@@ -303,7 +303,7 @@ public:
 	 *  @param dest Receives a pointer to the destination scene
 	 *  @param src Source scene - remains unmodified.
 	 */
-	static void CopyScene(aiScene** dest,const aiScene* source);
+	static void CopyScene(aiScene** dest,const aiScene* source,bool allocate = true);
 
 
 	// -------------------------------------------------------------------

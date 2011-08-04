@@ -47,6 +47,7 @@ Assimp C export interface. See Exporter.cpp for some notes.
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #include "CInterfaceIOWrapper.h" 
+#include "SceneCombiner.h"
 
 using namespace Assimp;
 
@@ -63,6 +64,15 @@ ASSIMP_API const aiExportFormatDesc* aiGetExportFormatDescription( size_t pIndex
 	return Exporter().GetExportFormatDescription(pIndex);
 }
 
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API void aiCopyScene(const aiScene* pIn, aiScene** pOut)
+{
+	if (!pOut || !pIn) {
+		return;
+	}
+
+	SceneCombiner::CopyScene(pOut,pIn,false);
+}
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API aiReturn aiExportScene( const aiScene* pScene, const char* pFormatId, const char* pFileName, unsigned int pPreprocessing )
@@ -97,7 +107,7 @@ ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportSceneToBlob( const aiScene* 
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API C_STRUCT void aiReleaseExportData( const aiExportDataBlob* pData )
+ASSIMP_API C_STRUCT void aiReleaseExportBlob( const aiExportDataBlob* pData )
 {
 	delete pData;
 }

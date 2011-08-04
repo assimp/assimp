@@ -145,6 +145,9 @@ public:
 
 	/** Post processing steps we can apply at the imported data. */
 	std::vector< BaseProcess* > mPostProcessingSteps;
+
+	/** Last fatal export error */
+	std::string mError;
 };
 
 #define ASSIMP_NUM_EXPORTERS (sizeof(gExporters)/sizeof(gExporters[0]))
@@ -168,7 +171,7 @@ Exporter :: Exporter()
 // ------------------------------------------------------------------------------------------------
 Exporter :: ~Exporter()
 {
-	delete pimpl;
+	FreeBlob();
 }
 
 
@@ -224,6 +227,8 @@ const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const 
 aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const char* pPath, unsigned int pPreprocessing )
 {
 	ASSIMP_BEGIN_EXCEPTION_REGION();
+
+	pimpl->mError = "";
 	for (size_t i = 0; i < ASSIMP_NUM_EXPORTERS; ++i) {
 		if (!strcmp(gExporters[i].mDescription.id,pFormatId)) {
 
@@ -235,8 +240,24 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 				SceneCombiner::CopyScene(&scenecopy_tmp,pScene);
 
 				std::auto_ptr<aiScene> scenecopy(scenecopy_tmp);
+				const ScenePrivateData* const priv = ScenePriv(pScene);
 
-				const unsigned int pp = (gExporters[i].mEnforcePP | pPreprocessing);
+				// steps that are not idempotent, i.e. we might need to run them again, usually to get back to the
+				// original state before the step was applied first. When checking which steps we don't need
+				// to run, those are excluded.
+				const unsigned int nonIdempotentSteps = aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_MakeLeftHanded;
+
+				// Erase all pp steps that were already applied to this scene
+				unsigned int pp = (gExporters[i].mEnforcePP | pPreprocessing) & ~(priv 
+					? (priv->mPPStepsApplied & ~nonIdempotentSteps)
+					: 0u);
+
+				// If no extra postprocessing was specified, and we obtained this scene from an
+				// Assimp importer, apply the reverse steps automatically.
+				if (!pPreprocessing && priv) {
+					pp |= (nonIdempotentSteps & priv->mPPStepsApplied);
+				}
+
 				if (pp) {
 					for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++) {
 						BaseProcess* const p = pimpl->mPostProcessingSteps[a];
@@ -245,20 +266,42 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 							p->Execute(scenecopy.get());
 						}
 					}
+					ScenePrivateData* const privOut = ScenePriv(scenecopy.get());
+					ai_assert(privOut);
+
+					privOut->mPPStepsApplied |= pp;
 				}
 
 				gExporters[i].mExportFunction(pPath,pimpl->mIOSystem.get(),scenecopy.get());
 			}
 			catch (DeadlyExportError& err) {
-				// XXX what to do with the error message? Maybe introduce extra member to hold it, similar to Assimp.Importer
-				DefaultLogger::get()->error(err.what());
+				pimpl->mError = err.what();
 				return AI_FAILURE;
 			}
 			return AI_SUCCESS;
 		}
 	}
+
+	pimpl->mError = std::string("Found no exporter to handle this file format: ") + pFormatId;
 	ASSIMP_END_EXCEPTION_REGION(aiReturn);
 	return AI_FAILURE;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+const char* Exporter :: GetErrorString() const
+{
+	return pimpl->mError.c_str();
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void Exporter :: FreeBlob( )
+{
+	delete pimpl->blob;
+	pimpl->blob = NULL;
+
+	pimpl->mError = "";
 }
 
 

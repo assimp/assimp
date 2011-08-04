@@ -99,8 +99,7 @@ public:
 	 * to use its default implementation, which uses plain file IO.
 	 *
 	 * @param pIOHandler The IO handler to be used in all file accesses 
-	 *   of the Importer. 
-	 */
+	 *   of the Importer. */
 	void SetIOHandler( IOSystem* pIOHandler);
 
 	// -------------------------------------------------------------------
@@ -109,16 +108,14 @@ public:
 	 * interface is the default IO handler provided by ASSIMP. The default
 	 * handler is active as long the application doesn't supply its own
 	 * custom IO handler via #SetIOHandler().
-	 * @return A valid IOSystem interface, never NULL.
-	 */
+	 * @return A valid IOSystem interface, never NULL. */
 	IOSystem* GetIOHandler() const;
 
 	// -------------------------------------------------------------------
 	/** Checks whether a default IO handler is active 
 	 * A default handler is active as long the application doesn't 
 	 * supply its own custom IO handler via #SetIOHandler().
-	 * @return true by default
-	 */
+	 * @return true by default */
 	bool IsDefaultIOHandler() const;
 
 
@@ -172,6 +169,18 @@ public:
 	inline aiReturn Export( const aiScene* pScene, const std::string& pFormatId, const std::string& pPath,  unsigned int pPreprocessing = 0u);
 
 
+	// -------------------------------------------------------------------
+	/** Returns an error description of an error that occurred in #Export
+	 *    or #ExportToBlob
+	 *
+	 * Returns an empty string if no error occurred.
+	 * @return A description of the last error, an empty string if no 
+	 *   error occurred. The string is never NULL.
+	 *
+	 * @note The returned function remains valid until one of the 
+	 * following methods is called: #Export, #ExportToBlob, #FreeBlob */
+	const char* GetErrorString() const;
+
 
 	// -------------------------------------------------------------------
 	/** Return the blob obtained from the last call to #ExportToBlob */
@@ -181,8 +190,19 @@ public:
 	// -------------------------------------------------------------------
 	/** Orphan the blob from the last call to #ExportToBlob. This means
 	 *  the caller takes ownership and is thus responsible for calling
-	 *  #aiReleaseExportData to free the data again. */
+	 *  the C API function #aiReleaseExportBlob to release it. */
 	const aiExportDataBlob* GetOrphanedBlob() const;
+
+
+	// -------------------------------------------------------------------
+	/** Frees the current blob.
+	 *
+	 *  The function does nothing if no blob has previously been 
+	 *  previously produced via #ExportToBlob. #FreeBlob is called
+	 *  automatically by the destructor. The only reason to call
+	 *  it manually would be to reclain as much storage as possible
+	 *  without giving up the #Exporter instance yet. */
+	void FreeBlob( );
 
 
 	// -------------------------------------------------------------------

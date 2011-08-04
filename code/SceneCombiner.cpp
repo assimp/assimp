@@ -917,11 +917,15 @@ void SceneCombiner::CopySceneFlat(aiScene** _dest,const aiScene* src)
 }
 
 // ------------------------------------------------------------------------------------------------
-void SceneCombiner::CopyScene(aiScene** _dest,const aiScene* src)
+void SceneCombiner::CopyScene(aiScene** _dest,const aiScene* src,bool allocate)
 {
 	ai_assert(NULL != _dest && NULL != src);
 
-	aiScene* dest = *_dest = new aiScene();
+	if (allocate) {
+		*_dest = new aiScene();
+	}
+	aiScene* dest = *_dest; 
+	ai_assert(dest);
 
 	// copy animations
 	dest->mNumAnimations = src->mNumAnimations;
@@ -958,6 +962,9 @@ void SceneCombiner::CopyScene(aiScene** _dest,const aiScene* src)
 
 	// and keep the flags ...
 	dest->mFlags = src->mFlags;
+
+	// source private data might be NULL if the scene is user-allocated (i.e. for use with the export API)
+	ScenePriv(dest)->mPPStepsApplied = ScenePriv(src) ? ScenePriv(src)->mPPStepsApplied : NULL;
 }
 
 // ------------------------------------------------------------------------------------------------

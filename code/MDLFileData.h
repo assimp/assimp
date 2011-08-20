@@ -920,10 +920,10 @@ struct IntSharedData_MDL7
 
 // -------------------------------------------------------------------------------------
 //! Contains input data for GenerateOutputMeshes_3DGS_MDL7
-struct IntSplittedGroupData_MDL7
+struct IntSplitGroupData_MDL7
 {
 	//! Construction from a given shared data set 
-	IntSplittedGroupData_MDL7(IntSharedData_MDL7& _shared,
+	IntSplitGroupData_MDL7(IntSharedData_MDL7& _shared,
 		std::vector<aiMesh*>& _avOutList)
 
 		: shared(_shared), avOutList(_avOutList)
@@ -931,7 +931,7 @@ struct IntSplittedGroupData_MDL7
 	}
 
 	//! Destruction: properly delete all allocated resources
-	~IntSplittedGroupData_MDL7()
+	~IntSplitGroupData_MDL7()
 	{
 		// kill all face lists
 		if(this->aiSplit)

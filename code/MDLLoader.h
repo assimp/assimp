@@ -406,7 +406,7 @@ protected:
 	void SortByMaterials_3DGS_MDL7(
 		const MDL::IntGroupInfo_MDL7& groupInfo,
 		MDL::IntGroupData_MDL7& groupData,
-		MDL::IntSplittedGroupData_MDL7& splitGroupData);
+		MDL::IntSplitGroupData_MDL7& splitGroupData);
 	
 	// -------------------------------------------------------------------
 	/** Read all faces and vertices from a MDL7 group. The function fills
@@ -424,7 +424,7 @@ protected:
 	 */
 	void GenerateOutputMeshes_3DGS_MDL7(
 		MDL::IntGroupData_MDL7& groupData,
-		MDL::IntSplittedGroupData_MDL7& splitGroupData);
+		MDL::IntSplitGroupData_MDL7& splitGroupData);
 
 protected:
 

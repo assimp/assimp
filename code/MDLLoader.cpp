@@ -1193,7 +1193,7 @@ bool MDLImporter::ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7& groupInf
 void MDLImporter::SortByMaterials_3DGS_MDL7(
 	const MDL::IntGroupInfo_MDL7&   groupInfo,
 	MDL::IntGroupData_MDL7&         groupData,
-	MDL::IntSplittedGroupData_MDL7& splitGroupData)
+	MDL::IntSplitGroupData_MDL7& splitGroupData)
 {
 	const unsigned int iNumMaterials = (unsigned int)splitGroupData.shared.pcMats.size();
 	if (!groupData.bNeed2UV)	{
@@ -1438,7 +1438,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 		szCurrent += pcHeader->mainvertex_stc_size * groupInfo.pcGroup->numverts;
 		VALIDATE_FILE_SIZE(szCurrent);
 
-		MDL::IntSplittedGroupData_MDL7 splitGroupData(sharedData,avOutList[iGroup]);
+		MDL::IntSplitGroupData_MDL7 splitGroupData(sharedData,avOutList[iGroup]);
 		MDL::IntGroupData_MDL7 groupData;
 		if (groupInfo.pcGroup->numtris && groupInfo.pcGroup->numverts)
 		{
@@ -1773,7 +1773,7 @@ void MDLImporter::AddAnimationBoneTrafoKey_3DGS_MDL7(unsigned int iTrafo,
 // Construct output meshes
 void MDLImporter::GenerateOutputMeshes_3DGS_MDL7(
 	MDL::IntGroupData_MDL7& groupData,
-	MDL::IntSplittedGroupData_MDL7& splitGroupData)
+	MDL::IntSplitGroupData_MDL7& splitGroupData)
 {
 	const MDL::IntSharedData_MDL7& shared = splitGroupData.shared;
 

@@ -114,7 +114,7 @@ protected:
 		const XFile::Node* pNode);
 
 	// -------------------------------------------------------------------
-	/** Converts all meshes in the given mesh array. Each mesh is splitted 
+	/** Converts all meshes in the given mesh array. Each mesh is split 
 	 * up per material, the indices of the generated meshes are stored in 
 	 * the node structure.
 	 * @param pScene The scene to construct the return data in.

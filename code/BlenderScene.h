@@ -422,7 +422,7 @@ struct SubsurfModifierData : ElemBase  {
 	};
 
 	enum Flags {
-		// some ommitted
+		// some omitted
 		FLAGS_SubsurfUV		=1<<3
 	};
 

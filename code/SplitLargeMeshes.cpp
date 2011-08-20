@@ -84,7 +84,7 @@ void SplitLargeMeshesProcess_Triangle::Execute( aiScene* pScene)
 
 	if (avList.size() != pScene->mNumMeshes)
 	{
-		// it seems something has been splitted. rebuild the mesh list
+		// it seems something has been split. rebuild the mesh list
 		delete[] pScene->mMeshes;
 		pScene->mNumMeshes = (unsigned int)avList.size();
 		pScene->mMeshes = new aiMesh*[avList.size()];
@@ -94,7 +94,7 @@ void SplitLargeMeshesProcess_Triangle::Execute( aiScene* pScene)
 
 		// now we need to update all nodes
 		this->UpdateNode(pScene->mRootNode,avList);
-		DefaultLogger::get()->info("SplitLargeMeshesProcess_Triangle finished. Meshes have been splitted");
+		DefaultLogger::get()->info("SplitLargeMeshesProcess_Triangle finished. Meshes have been split");
 	}
 	else DefaultLogger::get()->debug("SplitLargeMeshesProcess_Triangle finished. There was nothing to do");
 	return;
@@ -227,7 +227,7 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
 				pcMesh->mBones = new aiBone*[pMesh->mNumBones];
 
 				// iterate through all bones of the mesh and find those which
-				// need to be copied to the splitted mesh
+				// need to be copied to the split mesh
 				std::vector<aiVertexWeight> avTempWeights;
 				for (unsigned int p = 0; p < pcMesh->mNumBones;++p)
 				{
@@ -382,7 +382,7 @@ void SplitLargeMeshesProcess_Vertex::Execute( aiScene* pScene)
 
 	if (avList.size() != pScene->mNumMeshes)
 	{
-		// it seems something has been splitted. rebuild the mesh list
+		// it seems something has been split. rebuild the mesh list
 		delete[] pScene->mMeshes;
 		pScene->mNumMeshes = (unsigned int)avList.size();
 		pScene->mMeshes = new aiMesh*[avList.size()];
@@ -392,7 +392,7 @@ void SplitLargeMeshesProcess_Vertex::Execute( aiScene* pScene)
 
 		// now we need to update all nodes
 		SplitLargeMeshesProcess_Triangle::UpdateNode(pScene->mRootNode,avList);
-		DefaultLogger::get()->info("SplitLargeMeshesProcess_Vertex finished. Meshes have been splitted");
+		DefaultLogger::get()->info("SplitLargeMeshesProcess_Vertex finished. Meshes have been split");
 	}
 	else DefaultLogger::get()->debug("SplitLargeMeshesProcess_Vertex finished. There was nothing to do");
 	return;

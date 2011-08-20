@@ -28,7 +28,7 @@ StringTools::Strings
 StringTools::split( const std::string &text, 
                     char separator )
 {
-  Strings splittedText;
+  Strings splitText;
 
   std::string::const_iterator itStart = text.begin();
   while ( !text.empty() )
@@ -36,14 +36,14 @@ StringTools::split( const std::string &text,
     std::string::const_iterator itSeparator = std::find( itStart, 
                                                          text.end(), 
                                                          separator );
-    splittedText.push_back( text.substr( itStart - text.begin(),
+    splitText.push_back( text.substr( itStart - text.begin(),
                                          itSeparator - itStart ) );
     if ( itSeparator == text.end() )
       break;
     itStart = itSeparator +1;
   }
 
-  return splittedText;
+  return splitText;
 }
 
 

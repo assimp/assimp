@@ -153,7 +153,7 @@ The general 'rule' to get from Assimp headers to the serialized layout is:
 
 [[aiNode]]
 
-   - mParent is ommitted
+   - mParent is omitted
 
 [[aiLight]]
 
@@ -162,7 +162,7 @@ The general 'rule' to get from Assimp headers to the serialized layout is:
 
 [[aiMaterial]]
 
-   - mNumAllocated is ommitted, for obvious reasons :-)
+   - mNumAllocated is omitted, for obvious reasons :-)
 
 
  @endverbatim*/

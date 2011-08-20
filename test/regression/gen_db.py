@@ -55,7 +55,7 @@ import utils
 usage = """gen_db [-i=...] [-e=...] [-p] [-n]
 
 (lists of file extensions are comma delimited, i.e. `3ds,lwo,x`)
--i,--include: List of file extensions to update dumps for. If ommitted,
+-i,--include: List of file extensions to update dumps for. If omitted,
          all file extensions are updated except those in `exclude`.
 
 -e,--exclude: Merged with settings.exclude_extensions to produce a

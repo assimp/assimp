@@ -983,7 +983,7 @@ DllPlugInTesterd_dll.exe CppUnitTestPlugInd.dll :Core
   TestListener.
 
 * TestResult (TestResult.h):
-  - That class has been splitted in two: TestResult and TestResultCollector.
+  - That class has been split in two: TestResult and TestResultCollector.
 
   - TestResult manages the TestListener (registration and event dispatch), as
   well as the stop flag indicating if the current test run should be interrupted.
@@ -1077,7 +1077,7 @@ an example of usage.
 
 * Compatibility break:
 
-  TestResult has been splitted in two class. TestResultCollector compatibility
+  TestResult has been split in two class. TestResultCollector compatibility
   breaks refer to the methods that were previously in TestResult.
 
   - TestListener::addError() was removed. addFailure() is used to report

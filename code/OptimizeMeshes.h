@@ -119,7 +119,7 @@ public:
 	/** @brief Specify a maximum size of a single output mesh.
 	 *  
 	 *  If a single input mesh already exceeds this limit, it won't
-	 *  be splitted.
+	 *  be split.
 	 *  @param verts Maximum number of vertices per mesh
 	 *  @param faces Maximum number of faces per mesh
 	 */

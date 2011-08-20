@@ -387,7 +387,7 @@ void COBImporter::ReadAsciiFile(Scene& out, StreamReaderLE* stream)
 	ChunkInfo ci;
 	for(LineSplitter splitter(*stream);splitter;++splitter) {
 
-		// add all chunks to be recognized here. /else ../ ommitted intentionally.
+		// add all chunks to be recognized here. /else ../ omitted intentionally.
 		if (splitter.match_start("PolH ")) {
 			ReadChunkInfo_Ascii(ci,splitter);
 			ReadPolH_Ascii(out,splitter,ci);

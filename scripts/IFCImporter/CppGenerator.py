@@ -90,7 +90,7 @@ template_convert_single = r"""
         try {{ GenericConvert( in->{name}, arg, db ); break; }} 
         catch (const TypeError& t) {{ throw TypeError(t.what() + std::string(" - expected argument {argnum} to {classname} to be a `{full_type}`")); }}"""
 
-template_converter_ommitted = '// this data structure is not used yet, so there is no code generated to fill its members\n'
+template_converter_omitted = '// this data structure is not used yet, so there is no code generated to fill its members\n'
 template_converter_epilogue = '\treturn base;'
 
 import ExpressReader
@@ -166,7 +166,7 @@ def gen_converter(entity,schema):
     
     code = template_converter_prologue_a.format(parent=entity.parent) if entity.parent else template_converter_prologue_b
     if entity.name in schema.blacklist_partial:
-        return code+template_converter_ommitted+template_converter_epilogue;
+        return code+template_converter_omitted+template_converter_epilogue;
         
     if max_arg > 0:
         code +=template_converter_check_argcnt.format(max_arg=max_arg,name=entity.name)

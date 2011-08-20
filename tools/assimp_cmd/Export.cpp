@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const char* AICMD_MSG_EXPORT_HELP_E = 
 "assimp export <model> [<out>] [-f<h>] [common parameters]\n"
-"\t -f<h> Specify the file format. If ommitted, the output format is \n"
+"\t -f<h> Specify the file format. If omitted, the output format is \n"
 "\t\tderived from the file extension of the given output file  \n"
 "\t[See the assimp_cmd docs for a full list of all common parameters]  \n"
 ;

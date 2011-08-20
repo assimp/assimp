@@ -51,7 +51,7 @@ const char* AICMD_MSG_DUMP_HELP_E =
 "assimp extract <model> [<out>] [-t<n>] [-f<fmt>] [-ba] [-s] [common parameters]\n"
 "\t -ba   Writes BMP's with alpha channel\n"
 "\t -t<n> Zero-based index of the texture to be extracted \n"
-"\t -f<f> Specify the file format if <out> is ommitted  \n"
+"\t -f<f> Specify the file format if <out> is omitted  \n"
 "\t[See the assimp_cmd docs for a full list of all common parameters]  \n"
 "\t -cfast    Fast post processing preset, runs just a few important steps \n"
 "\t -cdefault Default post processing: runs all recommended steps\n"

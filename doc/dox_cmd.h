@@ -204,7 +204,7 @@ Required. Relative or absolute path to the input model.
 <p>
 <tt>
 out<br></tt><br>
-Optional. Relative or absolute path to write the output dump to. If it is ommitted,
+Optional. Relative or absolute path to write the output dump to. If it is omitted,
 the dump is written to <tt>&lt;model&gt;-dump.txt</tt>
 </p>
 
@@ -281,7 +281,7 @@ Required. Relative or absolute path to the input model.
 <tt>
 out<br></tt><br>
 Optional. Relative or absolute path to write the output images to. If the file name is
-ommitted the output images are named <tt><model-filename></tt><br>
+omitted the output images are named <tt><model-filename></tt><br>
 The suffix <tt>_img&lt;n&gt;</tt> is appended to the file name if the -s switch is not specified 
 (where <tt>&lt;n&gt;</tt> is the zero-based index of the texture in the model file).<br>
 

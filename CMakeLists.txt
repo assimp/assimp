@@ -17,6 +17,8 @@ set(CPACK_COMPONENTS_ALL assimp-bin libassimp${ASSIMP_VERSION_MAJOR} assimp-dev)
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   add_definitions(-fPIC) # this is a very important switch and some libraries seem now to have it....
+  ## hide all not-exported symbols
+  add_definitions( -fvisibility=hidden )
 endif()
 
 INCLUDE (FindPkgConfig)
@@ -100,8 +102,6 @@ IF ( NO_EXPORT )
 	MESSAGE( STATUS "Build an import-only version of Assimp." )
 ENDIF( NO_EXPORT )
 
-## hide all not-exported symbols
-ADD_DEFINITIONS( -fvisibility=hidden )
 
 ADD_SUBDIRECTORY( code/ )
 SET ( BUILD_ASSIMP_TOOLS ON CACHE BOOL

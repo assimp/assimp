@@ -495,7 +495,7 @@ void ComputeUVMappingProcess::Execute( aiScene* pScene)
 
 					// Update the material property list
 					mapping = aiTextureMapping_UV;
-					((MaterialHelper*)mat)->AddProperty(&idx,1,AI_MATKEY_UVWSRC(prop->mSemantic,prop->mIndex));
+					((aiMaterial*)mat)->AddProperty(&idx,1,AI_MATKEY_UVWSRC(prop->mSemantic,prop->mIndex));
 				}
 			}
 		}

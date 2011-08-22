@@ -414,7 +414,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 		pScene->mMaterials = new aiMaterial*[materials.size()];
 		for (size_t i = 0; i < materials.size(); ++i) {
 
-			MaterialHelper* mo = new MaterialHelper();
+			aiMaterial* mo = new aiMaterial();
 			pScene->mMaterials[pScene->mNumMaterials++] = mo;
 
 			const TempMaterial& mi = materials[i];

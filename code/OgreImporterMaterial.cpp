@@ -71,7 +71,7 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 	const aiScene* const m_CurrentScene=this->m_CurrentScene;//make sure, that we can access but not change the scene
 	(void)m_CurrentScene;
 
-	MaterialHelper *NewMaterial=new MaterialHelper();
+	aiMaterial *NewMaterial=new aiMaterial();
 
 	aiString ts(MaterialName.c_str());
 	NewMaterial->AddProperty(&ts, AI_MATKEY_NAME);

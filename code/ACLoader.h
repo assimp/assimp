@@ -222,7 +222,7 @@ private:
 	 *  @param Scenegraph node for the object */
 	aiNode* ConvertObjectSection(Object& object,
 		std::vector<aiMesh*>& meshes,
-		std::vector<MaterialHelper*>& outMaterials,
+		std::vector<aiMaterial*>& outMaterials,
 		const std::vector<Material>& materials,
 		aiNode* parent = NULL);
 
@@ -233,7 +233,7 @@ private:
 	 *  @param matDest Destination material to be filled */
 	void ConvertMaterial(const Object& object,
 		const Material& matSrc,
-		MaterialHelper& matDest);
+		aiMaterial& matDest);
 
 private:
 

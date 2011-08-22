@@ -207,7 +207,7 @@ void COBImporter::InternReadFile( const std::string& pFile,
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertTexture(boost::shared_ptr< Texture > tex, MaterialHelper* out, aiTextureType type)
+void ConvertTexture(boost::shared_ptr< Texture > tex, aiMaterial* out, aiTextureType type)
 {
 	const aiString path( tex->path );
 	out->AddProperty(&path,AI_MATKEY_TEXTURE(type,0));
@@ -286,7 +286,7 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
 						defmat.reset(min=new Material());
 					}
 
-					MaterialHelper* mat = new MaterialHelper();
+					aiMaterial* mat = new aiMaterial();
 					fill->mMaterials[fill->mNumMaterials++] = mat;
 
 					const aiString s(format("#mat_")<<fill->mNumMeshes<<"_"<<min->matnum);

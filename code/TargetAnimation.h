@@ -54,7 +54,7 @@ namespace Assimp	{
  *  Missing tracks are interpolated. This is a helper class for
  *  TargetAnimationHelper, but it can be freely used for other purposes.
 */
-class ASSIMP_API KeyIterator
+class KeyIterator
 {
 public:
 
@@ -126,7 +126,7 @@ private:
  * channel for the camera/spot light itself and a separate position
  * animation channels specifying the position of the camera/spot light
  * look-at target */
-class ASSIMP_API TargetAnimationHelper
+class TargetAnimationHelper
 {
 public:
 

@@ -143,7 +143,7 @@ void STLImporter::InternReadFile( const std::string& pFile,
 	}
 
 	// create a single default material - everything white, as we have vertex colors
-	MaterialHelper* pcMat = new MaterialHelper();
+	aiMaterial* pcMat = new aiMaterial();
 	aiString s;
 	s.Set(AI_DEFAULT_MATERIAL_NAME);
 	pcMat->AddProperty(&s, AI_MATKEY_NAME);

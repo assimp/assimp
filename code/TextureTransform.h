@@ -72,7 +72,7 @@ struct TTUpdateInfo
 	unsigned int* directShortcut;
 
 	//! Material 
-	MaterialHelper *mat;
+	aiMaterial *mat;
 
 	//! Texture type and index
 	unsigned int semantic, index;
@@ -188,7 +188,7 @@ struct STransformVecInfo : public aiUVTransform
 /** Helper step to compute final UV coordinate sets if there are scalings
  *  or rotations in the original data read from the file.
 */
-class ASSIMP_API TextureTransformStep : public BaseProcess
+class TextureTransformStep : public BaseProcess
 {
 public:
 

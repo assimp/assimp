@@ -253,7 +253,7 @@ aiMesh* SkeletonMeshBuilder::CreateMesh()
 // Creates a dummy material and returns it.
 aiMaterial* SkeletonMeshBuilder::CreateMaterial()
 {
-	Assimp::MaterialHelper* matHelper = new Assimp::MaterialHelper;
+	aiMaterial* matHelper = new aiMaterial;
 
 	// Name
 	aiString matName( std::string( "SkeletonMaterial"));

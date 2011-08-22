@@ -236,7 +236,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 				// Setup a shortcut structure to allow for a fast updating
 				// of the UV index later
 				TTUpdateInfo update;
-				update.mat = (MaterialHelper*) mat;
+				update.mat = (aiMaterial*) mat;
 				update.semantic = prop->mSemantic;
 				update.index = prop->mIndex;
 

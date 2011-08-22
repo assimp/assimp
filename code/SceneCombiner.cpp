@@ -245,7 +245,6 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 	// if _dest points to NULL allocate a new scene. Otherwise clear the old and reuse it
 	if (srcList.empty())	{
 		if (*_dest)	{
-			(*_dest)->~aiScene();
 			SceneCombiner::CopySceneFlat(_dest,master);
 		}
 		else *_dest = master;
@@ -253,6 +252,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 	}
 	if (*_dest) {
 		(*_dest)->~aiScene();
+		new (*_dest) aiScene();
 	}
 	else *_dest = new aiScene();
 
@@ -910,7 +910,10 @@ inline void GetArrayCopy (Type*& dest, unsigned int num )
 void SceneCombiner::CopySceneFlat(aiScene** _dest,const aiScene* src)
 {
 	// reuse the old scene or allocate a new?
-	if (*_dest)(*_dest)->~aiScene();
+	if (*_dest) {
+		(*_dest)->~aiScene();
+		new (*_dest) aiScene();
+	}
 	else *_dest = new aiScene();
 
 	::memcpy(*_dest,src,sizeof(aiScene));
@@ -1008,7 +1011,7 @@ void SceneCombiner::Copy (aiMaterial** _dest, const aiMaterial* src)
 {
 	ai_assert(NULL != _dest && NULL != src);
 
-	MaterialHelper* dest = (MaterialHelper*) ( *_dest = new MaterialHelper() );
+	aiMaterial* dest = (aiMaterial*) ( *_dest = new aiMaterial() );
 	dest->mNumAllocated  =  src->mNumAllocated;
 	dest->mNumProperties =  src->mNumProperties;
 	dest->mProperties    =  new aiMaterialProperty* [dest->mNumAllocated];

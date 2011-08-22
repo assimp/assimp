@@ -1583,10 +1583,10 @@ which spread their data across multiple files. </li>
 @section mat Filling materials
 
 The required definitions zo set/remove/query keys in #aiMaterial structures are declared in <i>MaterialSystem.h</i>, in a
-#aiMaterial derivate called #Assimp::MaterialHelper. The header is included by AssimpPCH.h, so you don't need to bother.
+#aiMaterial derivate called #aiMaterial. The header is included by AssimpPCH.h, so you don't need to bother.
 
 @code
-MaterialHelper* mat = new MaterialHelper();
+aiMaterial* mat = new aiMaterial();
 
 const float spec = 16.f;
 mat->AddProperty(&spec, 1, AI_MATKEY_SHININESS);

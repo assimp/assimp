@@ -158,7 +158,7 @@ void XFileImporter::CreateDataRepresentationFromImport( aiScene* pScene, const X
 	{
 		pScene->mNumMaterials = 1;
 		// create the Material
-		Assimp::MaterialHelper* mat = new Assimp::MaterialHelper;
+		aiMaterial* mat = new aiMaterial;
 		int shadeMode = (int) aiShadingMode_Gouraud;
 		mat->AddProperty<int>( &shadeMode, 1, AI_MATKEY_SHADING_MODEL);
 		// material colours
@@ -567,7 +567,7 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, const std::vector<XFile::
 		if( oldMat.mIsReference)
 			continue;
 
-		Assimp::MaterialHelper* mat = new Assimp::MaterialHelper;
+		aiMaterial* mat = new aiMaterial;
 		aiString name;
 		name.Set( oldMat.mName);
 		mat->AddProperty( &name, AI_MATKEY_NAME);

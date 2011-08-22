@@ -55,7 +55,7 @@ namespace Assimp
  * vectors of an object are facing inwards. In this case they will be
  * flipped.
  */
-class ASSIMP_API FixInfacingNormalsProcess : public BaseProcess
+class FixInfacingNormalsProcess : public BaseProcess
 {
 public:
 	

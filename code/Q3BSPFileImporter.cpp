@@ -481,7 +481,7 @@ void Q3BSPFileImporter::createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScen
 		}
 
 		aiMatName.Set( matName );
-		Assimp::MaterialHelper *pMatHelper = new Assimp::MaterialHelper;
+		aiMaterial *pMatHelper = new aiMaterial;
 		pMatHelper->AddProperty( &aiMatName, AI_MATKEY_NAME );
 
 		extractIds( matName, textureId, lightmapId );
@@ -623,7 +623,7 @@ aiFace *Q3BSPFileImporter::getNextFace( aiMesh *pMesh, unsigned int &rFaceIdx )
 //	Imports a texture file.
 bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pModel,
 												 Q3BSP::Q3BSPZipArchive *pArchive, aiScene* /*pScene*/,
-												 Assimp::MaterialHelper *pMatHelper, int textureId )
+												 aiMaterial *pMatHelper, int textureId )
 {
 	std::vector<std::string> supportedExtensions;
 	supportedExtensions.push_back( ".jpg" );
@@ -690,7 +690,7 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pMode
 // ------------------------------------------------------------------------------------------------
 //	Imports a light map file.
 bool Q3BSPFileImporter::importLightmap( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, 
-									   Assimp::MaterialHelper *pMatHelper, int lightmapId )
+									   aiMaterial *pMatHelper, int lightmapId )
 {
 	if ( NULL == pModel || NULL == pScene || NULL == pMatHelper )
 	{

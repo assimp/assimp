@@ -64,7 +64,7 @@ void ScenePreprocessor::ProcessScene ()
 	// Generate a default material if none was specified
 	if (!scene->mNumMaterials && scene->mNumMeshes)	{
 		scene->mMaterials      = new aiMaterial*[2];
-		MaterialHelper* helper;
+		aiMaterial* helper;
 
 		aiString name;
 
@@ -76,7 +76,7 @@ void ScenePreprocessor::ProcessScene ()
 
 				if (mat0 == UINT_MAX) {
 
-					scene->mMaterials[scene->mNumMaterials] = helper = new MaterialHelper();
+					scene->mMaterials[scene->mNumMaterials] = helper = new aiMaterial();
 					name.Set("$texture.png");
 					helper->AddProperty(&name,AI_MATKEY_TEXTURE_DIFFUSE(0));
 
@@ -91,7 +91,7 @@ void ScenePreprocessor::ProcessScene ()
 			else	{
 				if (mat1 == UINT_MAX) {
 
-					scene->mMaterials[scene->mNumMaterials] = helper = new MaterialHelper();
+					scene->mMaterials[scene->mNumMaterials] = helper = new aiMaterial();
 					aiColor3D clr(0.6f,0.6f,0.6f);
 					helper->AddProperty(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
 

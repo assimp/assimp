@@ -141,7 +141,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Internal utility headers
 #include "BaseImporter.h"
-#include "MaterialSystem.h"
 #include "StringComparison.h"
 #include "StreamReader.h"
 #include "qnan.h"

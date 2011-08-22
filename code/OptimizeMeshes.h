@@ -59,7 +59,7 @@ namespace Assimp	{
  *
  *  @note Instanced meshes are currently not processed.
  */
-class ASSIMP_API OptimizeMeshesProcess : public BaseProcess
+class OptimizeMeshesProcess : public BaseProcess
 {
 public:
 

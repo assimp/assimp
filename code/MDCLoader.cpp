@@ -439,7 +439,7 @@ void MDCImporter::InternReadFile(
 	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
 	for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
 	{
-		MaterialHelper* pcMat = new MaterialHelper();
+		aiMaterial* pcMat = new aiMaterial();
 		pScene->mMaterials[i] = pcMat;
 
 		const std::string& name = aszShaders[i];

@@ -55,7 +55,7 @@ namespace Assimp
 // ------------------------------------------------------------------------------------------------
 /** Helper class to export a given scene to a STL file. */
 // ------------------------------------------------------------------------------------------------
-class ASSIMP_API STLExporter
+class STLExporter
 {
 public:
 	/// Constructor for a specific scene to export

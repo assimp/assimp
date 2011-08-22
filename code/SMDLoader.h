@@ -60,7 +60,7 @@ struct aiNode;
 #include <vector>
 
 namespace Assimp	{
-class MaterialHelper;
+
 
 namespace SMD	{
 

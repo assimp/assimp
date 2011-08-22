@@ -61,15 +61,12 @@ namespace Assimp	{
  * The step has been added because it was required by the viewer, however
  * it has been moved to the main library since others might find it
  * useful, too. */
-class ASSIMP_API MakeVerboseFormatProcess : public BaseProcess
+class ASSIMP_API_WINONLY MakeVerboseFormatProcess : public BaseProcess
 {
 public:
 
-	/** Constructor to be privately used by Importer, or by applications
-	which know what they are doing if they modify the aiScene object */
+	
 	MakeVerboseFormatProcess();
-
-	/** Destructor, private as well */
 	~MakeVerboseFormatProcess();
 
 public:

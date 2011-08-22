@@ -204,7 +204,7 @@ int ConvertMappingMode(const std::string& mode)
 // Parse a material from the XML file
 aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 {
-	MaterialHelper* mat = new MaterialHelper();
+	aiMaterial* mat = new aiMaterial();
 	aiColor4D clr;
 	aiString s;
 

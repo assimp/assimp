@@ -39,10 +39,10 @@ RM = /usr/bin/cmake -E remove -f
 CMAKE_EDIT_COMMAND = /usr/bin/cmake-gui
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /mnt/hgfs/dev/assimp4.svnc
+CMAKE_SOURCE_DIR = /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /mnt/hgfs/dev/assimp4.svnc
+CMAKE_BINARY_DIR = /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -110,14 +110,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /mnt/hgfs/dev/assimp4.svnc && $(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/dev/assimp4.svnc/CMakeFiles /mnt/hgfs/dev/assimp4.svnc/code/CMakeFiles/progress.marks
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f CMakeFiles/Makefile2 code/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/dev/assimp4.svnc/CMakeFiles 0
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc/CMakeFiles /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc/code/CMakeFiles/progress.marks
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f CMakeFiles/Makefile2 code/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f CMakeFiles/Makefile2 code/clean
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f CMakeFiles/Makefile2 code/clean
 .PHONY : clean
 
 # The main clean target
@@ -126,22 +126,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f CMakeFiles/Makefile2 code/preinstall
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f CMakeFiles/Makefile2 code/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f CMakeFiles/Makefile2 code/preinstall
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f CMakeFiles/Makefile2 code/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 code/CMakeFiles/assimp.dir/rule:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f CMakeFiles/Makefile2 code/CMakeFiles/assimp.dir/rule
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f CMakeFiles/Makefile2 code/CMakeFiles/assimp.dir/rule
 .PHONY : code/CMakeFiles/assimp.dir/rule
 
 # Convenience name for target.
@@ -150,7 +150,7 @@ assimp: code/CMakeFiles/assimp.dir/rule
 
 # fast build rule for target.
 assimp/fast:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/build
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/build
 .PHONY : assimp/fast
 
 3DSConverter.o: 3DSConverter.cpp.o
@@ -158,7 +158,7 @@ assimp/fast:
 
 # target to build an object file
 3DSConverter.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/3DSConverter.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/3DSConverter.cpp.o
 .PHONY : 3DSConverter.cpp.o
 
 3DSConverter.i: 3DSConverter.cpp.i
@@ -166,7 +166,7 @@ assimp/fast:
 
 # target to preprocess a source file
 3DSConverter.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/3DSConverter.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/3DSConverter.cpp.i
 .PHONY : 3DSConverter.cpp.i
 
 3DSConverter.s: 3DSConverter.cpp.s
@@ -174,7 +174,7 @@ assimp/fast:
 
 # target to generate assembly for a file
 3DSConverter.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/3DSConverter.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/3DSConverter.cpp.s
 .PHONY : 3DSConverter.cpp.s
 
 3DSLoader.o: 3DSLoader.cpp.o
@@ -182,7 +182,7 @@ assimp/fast:
 
 # target to build an object file
 3DSLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/3DSLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/3DSLoader.cpp.o
 .PHONY : 3DSLoader.cpp.o
 
 3DSLoader.i: 3DSLoader.cpp.i
@@ -190,7 +190,7 @@ assimp/fast:
 
 # target to preprocess a source file
 3DSLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/3DSLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/3DSLoader.cpp.i
 .PHONY : 3DSLoader.cpp.i
 
 3DSLoader.s: 3DSLoader.cpp.s
@@ -198,7 +198,7 @@ assimp/fast:
 
 # target to generate assembly for a file
 3DSLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/3DSLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/3DSLoader.cpp.s
 .PHONY : 3DSLoader.cpp.s
 
 ACLoader.o: ACLoader.cpp.o
@@ -206,7 +206,7 @@ ACLoader.o: ACLoader.cpp.o
 
 # target to build an object file
 ACLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ACLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ACLoader.cpp.o
 .PHONY : ACLoader.cpp.o
 
 ACLoader.i: ACLoader.cpp.i
@@ -214,7 +214,7 @@ ACLoader.i: ACLoader.cpp.i
 
 # target to preprocess a source file
 ACLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ACLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ACLoader.cpp.i
 .PHONY : ACLoader.cpp.i
 
 ACLoader.s: ACLoader.cpp.s
@@ -222,7 +222,7 @@ ACLoader.s: ACLoader.cpp.s
 
 # target to generate assembly for a file
 ACLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ACLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ACLoader.cpp.s
 .PHONY : ACLoader.cpp.s
 
 ASELoader.o: ASELoader.cpp.o
@@ -230,7 +230,7 @@ ASELoader.o: ASELoader.cpp.o
 
 # target to build an object file
 ASELoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ASELoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ASELoader.cpp.o
 .PHONY : ASELoader.cpp.o
 
 ASELoader.i: ASELoader.cpp.i
@@ -238,7 +238,7 @@ ASELoader.i: ASELoader.cpp.i
 
 # target to preprocess a source file
 ASELoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ASELoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ASELoader.cpp.i
 .PHONY : ASELoader.cpp.i
 
 ASELoader.s: ASELoader.cpp.s
@@ -246,7 +246,7 @@ ASELoader.s: ASELoader.cpp.s
 
 # target to generate assembly for a file
 ASELoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ASELoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ASELoader.cpp.s
 .PHONY : ASELoader.cpp.s
 
 ASEParser.o: ASEParser.cpp.o
@@ -254,7 +254,7 @@ ASEParser.o: ASEParser.cpp.o
 
 # target to build an object file
 ASEParser.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ASEParser.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ASEParser.cpp.o
 .PHONY : ASEParser.cpp.o
 
 ASEParser.i: ASEParser.cpp.i
@@ -262,7 +262,7 @@ ASEParser.i: ASEParser.cpp.i
 
 # target to preprocess a source file
 ASEParser.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ASEParser.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ASEParser.cpp.i
 .PHONY : ASEParser.cpp.i
 
 ASEParser.s: ASEParser.cpp.s
@@ -270,7 +270,7 @@ ASEParser.s: ASEParser.cpp.s
 
 # target to generate assembly for a file
 ASEParser.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ASEParser.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ASEParser.cpp.s
 .PHONY : ASEParser.cpp.s
 
 Assimp.o: Assimp.cpp.o
@@ -278,7 +278,7 @@ Assimp.o: Assimp.cpp.o
 
 # target to build an object file
 Assimp.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Assimp.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Assimp.cpp.o
 .PHONY : Assimp.cpp.o
 
 Assimp.i: Assimp.cpp.i
@@ -286,7 +286,7 @@ Assimp.i: Assimp.cpp.i
 
 # target to preprocess a source file
 Assimp.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Assimp.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Assimp.cpp.i
 .PHONY : Assimp.cpp.i
 
 Assimp.s: Assimp.cpp.s
@@ -294,7 +294,7 @@ Assimp.s: Assimp.cpp.s
 
 # target to generate assembly for a file
 Assimp.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Assimp.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Assimp.cpp.s
 .PHONY : Assimp.cpp.s
 
 AssimpCExport.o: AssimpCExport.cpp.o
@@ -302,7 +302,7 @@ AssimpCExport.o: AssimpCExport.cpp.o
 
 # target to build an object file
 AssimpCExport.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/AssimpCExport.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/AssimpCExport.cpp.o
 .PHONY : AssimpCExport.cpp.o
 
 AssimpCExport.i: AssimpCExport.cpp.i
@@ -310,7 +310,7 @@ AssimpCExport.i: AssimpCExport.cpp.i
 
 # target to preprocess a source file
 AssimpCExport.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/AssimpCExport.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/AssimpCExport.cpp.i
 .PHONY : AssimpCExport.cpp.i
 
 AssimpCExport.s: AssimpCExport.cpp.s
@@ -318,7 +318,7 @@ AssimpCExport.s: AssimpCExport.cpp.s
 
 # target to generate assembly for a file
 AssimpCExport.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/AssimpCExport.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/AssimpCExport.cpp.s
 .PHONY : AssimpCExport.cpp.s
 
 AssimpPCH.o: AssimpPCH.cpp.o
@@ -326,7 +326,7 @@ AssimpPCH.o: AssimpPCH.cpp.o
 
 # target to build an object file
 AssimpPCH.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/AssimpPCH.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/AssimpPCH.cpp.o
 .PHONY : AssimpPCH.cpp.o
 
 AssimpPCH.i: AssimpPCH.cpp.i
@@ -334,7 +334,7 @@ AssimpPCH.i: AssimpPCH.cpp.i
 
 # target to preprocess a source file
 AssimpPCH.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/AssimpPCH.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/AssimpPCH.cpp.i
 .PHONY : AssimpPCH.cpp.i
 
 AssimpPCH.s: AssimpPCH.cpp.s
@@ -342,7 +342,7 @@ AssimpPCH.s: AssimpPCH.cpp.s
 
 # target to generate assembly for a file
 AssimpPCH.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/AssimpPCH.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/AssimpPCH.cpp.s
 .PHONY : AssimpPCH.cpp.s
 
 B3DImporter.o: B3DImporter.cpp.o
@@ -350,7 +350,7 @@ B3DImporter.o: B3DImporter.cpp.o
 
 # target to build an object file
 B3DImporter.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/B3DImporter.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/B3DImporter.cpp.o
 .PHONY : B3DImporter.cpp.o
 
 B3DImporter.i: B3DImporter.cpp.i
@@ -358,7 +358,7 @@ B3DImporter.i: B3DImporter.cpp.i
 
 # target to preprocess a source file
 B3DImporter.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/B3DImporter.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/B3DImporter.cpp.i
 .PHONY : B3DImporter.cpp.i
 
 B3DImporter.s: B3DImporter.cpp.s
@@ -366,7 +366,7 @@ B3DImporter.s: B3DImporter.cpp.s
 
 # target to generate assembly for a file
 B3DImporter.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/B3DImporter.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/B3DImporter.cpp.s
 .PHONY : B3DImporter.cpp.s
 
 BVHLoader.o: BVHLoader.cpp.o
@@ -374,7 +374,7 @@ BVHLoader.o: BVHLoader.cpp.o
 
 # target to build an object file
 BVHLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BVHLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BVHLoader.cpp.o
 .PHONY : BVHLoader.cpp.o
 
 BVHLoader.i: BVHLoader.cpp.i
@@ -382,7 +382,7 @@ BVHLoader.i: BVHLoader.cpp.i
 
 # target to preprocess a source file
 BVHLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BVHLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BVHLoader.cpp.i
 .PHONY : BVHLoader.cpp.i
 
 BVHLoader.s: BVHLoader.cpp.s
@@ -390,7 +390,7 @@ BVHLoader.s: BVHLoader.cpp.s
 
 # target to generate assembly for a file
 BVHLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BVHLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BVHLoader.cpp.s
 .PHONY : BVHLoader.cpp.s
 
 BaseImporter.o: BaseImporter.cpp.o
@@ -398,7 +398,7 @@ BaseImporter.o: BaseImporter.cpp.o
 
 # target to build an object file
 BaseImporter.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BaseImporter.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BaseImporter.cpp.o
 .PHONY : BaseImporter.cpp.o
 
 BaseImporter.i: BaseImporter.cpp.i
@@ -406,7 +406,7 @@ BaseImporter.i: BaseImporter.cpp.i
 
 # target to preprocess a source file
 BaseImporter.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BaseImporter.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BaseImporter.cpp.i
 .PHONY : BaseImporter.cpp.i
 
 BaseImporter.s: BaseImporter.cpp.s
@@ -414,7 +414,7 @@ BaseImporter.s: BaseImporter.cpp.s
 
 # target to generate assembly for a file
 BaseImporter.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BaseImporter.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BaseImporter.cpp.s
 .PHONY : BaseImporter.cpp.s
 
 BaseProcess.o: BaseProcess.cpp.o
@@ -422,7 +422,7 @@ BaseProcess.o: BaseProcess.cpp.o
 
 # target to build an object file
 BaseProcess.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BaseProcess.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BaseProcess.cpp.o
 .PHONY : BaseProcess.cpp.o
 
 BaseProcess.i: BaseProcess.cpp.i
@@ -430,7 +430,7 @@ BaseProcess.i: BaseProcess.cpp.i
 
 # target to preprocess a source file
 BaseProcess.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BaseProcess.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BaseProcess.cpp.i
 .PHONY : BaseProcess.cpp.i
 
 BaseProcess.s: BaseProcess.cpp.s
@@ -438,7 +438,7 @@ BaseProcess.s: BaseProcess.cpp.s
 
 # target to generate assembly for a file
 BaseProcess.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BaseProcess.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BaseProcess.cpp.s
 .PHONY : BaseProcess.cpp.s
 
 BlenderDNA.o: BlenderDNA.cpp.o
@@ -446,7 +446,7 @@ BlenderDNA.o: BlenderDNA.cpp.o
 
 # target to build an object file
 BlenderDNA.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderDNA.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderDNA.cpp.o
 .PHONY : BlenderDNA.cpp.o
 
 BlenderDNA.i: BlenderDNA.cpp.i
@@ -454,7 +454,7 @@ BlenderDNA.i: BlenderDNA.cpp.i
 
 # target to preprocess a source file
 BlenderDNA.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderDNA.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderDNA.cpp.i
 .PHONY : BlenderDNA.cpp.i
 
 BlenderDNA.s: BlenderDNA.cpp.s
@@ -462,7 +462,7 @@ BlenderDNA.s: BlenderDNA.cpp.s
 
 # target to generate assembly for a file
 BlenderDNA.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderDNA.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderDNA.cpp.s
 .PHONY : BlenderDNA.cpp.s
 
 BlenderLoader.o: BlenderLoader.cpp.o
@@ -470,7 +470,7 @@ BlenderLoader.o: BlenderLoader.cpp.o
 
 # target to build an object file
 BlenderLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderLoader.cpp.o
 .PHONY : BlenderLoader.cpp.o
 
 BlenderLoader.i: BlenderLoader.cpp.i
@@ -478,7 +478,7 @@ BlenderLoader.i: BlenderLoader.cpp.i
 
 # target to preprocess a source file
 BlenderLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderLoader.cpp.i
 .PHONY : BlenderLoader.cpp.i
 
 BlenderLoader.s: BlenderLoader.cpp.s
@@ -486,7 +486,7 @@ BlenderLoader.s: BlenderLoader.cpp.s
 
 # target to generate assembly for a file
 BlenderLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderLoader.cpp.s
 .PHONY : BlenderLoader.cpp.s
 
 BlenderModifier.o: BlenderModifier.cpp.o
@@ -494,7 +494,7 @@ BlenderModifier.o: BlenderModifier.cpp.o
 
 # target to build an object file
 BlenderModifier.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderModifier.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderModifier.cpp.o
 .PHONY : BlenderModifier.cpp.o
 
 BlenderModifier.i: BlenderModifier.cpp.i
@@ -502,7 +502,7 @@ BlenderModifier.i: BlenderModifier.cpp.i
 
 # target to preprocess a source file
 BlenderModifier.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderModifier.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderModifier.cpp.i
 .PHONY : BlenderModifier.cpp.i
 
 BlenderModifier.s: BlenderModifier.cpp.s
@@ -510,7 +510,7 @@ BlenderModifier.s: BlenderModifier.cpp.s
 
 # target to generate assembly for a file
 BlenderModifier.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderModifier.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderModifier.cpp.s
 .PHONY : BlenderModifier.cpp.s
 
 BlenderScene.o: BlenderScene.cpp.o
@@ -518,7 +518,7 @@ BlenderScene.o: BlenderScene.cpp.o
 
 # target to build an object file
 BlenderScene.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderScene.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderScene.cpp.o
 .PHONY : BlenderScene.cpp.o
 
 BlenderScene.i: BlenderScene.cpp.i
@@ -526,7 +526,7 @@ BlenderScene.i: BlenderScene.cpp.i
 
 # target to preprocess a source file
 BlenderScene.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderScene.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderScene.cpp.i
 .PHONY : BlenderScene.cpp.i
 
 BlenderScene.s: BlenderScene.cpp.s
@@ -534,7 +534,7 @@ BlenderScene.s: BlenderScene.cpp.s
 
 # target to generate assembly for a file
 BlenderScene.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderScene.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/BlenderScene.cpp.s
 .PHONY : BlenderScene.cpp.s
 
 COBLoader.o: COBLoader.cpp.o
@@ -542,7 +542,7 @@ COBLoader.o: COBLoader.cpp.o
 
 # target to build an object file
 COBLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/COBLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/COBLoader.cpp.o
 .PHONY : COBLoader.cpp.o
 
 COBLoader.i: COBLoader.cpp.i
@@ -550,7 +550,7 @@ COBLoader.i: COBLoader.cpp.i
 
 # target to preprocess a source file
 COBLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/COBLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/COBLoader.cpp.i
 .PHONY : COBLoader.cpp.i
 
 COBLoader.s: COBLoader.cpp.s
@@ -558,7 +558,7 @@ COBLoader.s: COBLoader.cpp.s
 
 # target to generate assembly for a file
 COBLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/COBLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/COBLoader.cpp.s
 .PHONY : COBLoader.cpp.s
 
 CSMLoader.o: CSMLoader.cpp.o
@@ -566,7 +566,7 @@ CSMLoader.o: CSMLoader.cpp.o
 
 # target to build an object file
 CSMLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/CSMLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/CSMLoader.cpp.o
 .PHONY : CSMLoader.cpp.o
 
 CSMLoader.i: CSMLoader.cpp.i
@@ -574,7 +574,7 @@ CSMLoader.i: CSMLoader.cpp.i
 
 # target to preprocess a source file
 CSMLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/CSMLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/CSMLoader.cpp.i
 .PHONY : CSMLoader.cpp.i
 
 CSMLoader.s: CSMLoader.cpp.s
@@ -582,7 +582,7 @@ CSMLoader.s: CSMLoader.cpp.s
 
 # target to generate assembly for a file
 CSMLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/CSMLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/CSMLoader.cpp.s
 .PHONY : CSMLoader.cpp.s
 
 CalcTangentsProcess.o: CalcTangentsProcess.cpp.o
@@ -590,7 +590,7 @@ CalcTangentsProcess.o: CalcTangentsProcess.cpp.o
 
 # target to build an object file
 CalcTangentsProcess.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/CalcTangentsProcess.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/CalcTangentsProcess.cpp.o
 .PHONY : CalcTangentsProcess.cpp.o
 
 CalcTangentsProcess.i: CalcTangentsProcess.cpp.i
@@ -598,7 +598,7 @@ CalcTangentsProcess.i: CalcTangentsProcess.cpp.i
 
 # target to preprocess a source file
 CalcTangentsProcess.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/CalcTangentsProcess.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/CalcTangentsProcess.cpp.i
 .PHONY : CalcTangentsProcess.cpp.i
 
 CalcTangentsProcess.s: CalcTangentsProcess.cpp.s
@@ -606,7 +606,7 @@ CalcTangentsProcess.s: CalcTangentsProcess.cpp.s
 
 # target to generate assembly for a file
 CalcTangentsProcess.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/CalcTangentsProcess.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/CalcTangentsProcess.cpp.s
 .PHONY : CalcTangentsProcess.cpp.s
 
 ColladaExporter.o: ColladaExporter.cpp.o
@@ -614,7 +614,7 @@ ColladaExporter.o: ColladaExporter.cpp.o
 
 # target to build an object file
 ColladaExporter.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaExporter.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaExporter.cpp.o
 .PHONY : ColladaExporter.cpp.o
 
 ColladaExporter.i: ColladaExporter.cpp.i
@@ -622,7 +622,7 @@ ColladaExporter.i: ColladaExporter.cpp.i
 
 # target to preprocess a source file
 ColladaExporter.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaExporter.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaExporter.cpp.i
 .PHONY : ColladaExporter.cpp.i
 
 ColladaExporter.s: ColladaExporter.cpp.s
@@ -630,7 +630,7 @@ ColladaExporter.s: ColladaExporter.cpp.s
 
 # target to generate assembly for a file
 ColladaExporter.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaExporter.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaExporter.cpp.s
 .PHONY : ColladaExporter.cpp.s
 
 ColladaLoader.o: ColladaLoader.cpp.o
@@ -638,7 +638,7 @@ ColladaLoader.o: ColladaLoader.cpp.o
 
 # target to build an object file
 ColladaLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaLoader.cpp.o
 .PHONY : ColladaLoader.cpp.o
 
 ColladaLoader.i: ColladaLoader.cpp.i
@@ -646,7 +646,7 @@ ColladaLoader.i: ColladaLoader.cpp.i
 
 # target to preprocess a source file
 ColladaLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaLoader.cpp.i
 .PHONY : ColladaLoader.cpp.i
 
 ColladaLoader.s: ColladaLoader.cpp.s
@@ -654,7 +654,7 @@ ColladaLoader.s: ColladaLoader.cpp.s
 
 # target to generate assembly for a file
 ColladaLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaLoader.cpp.s
 .PHONY : ColladaLoader.cpp.s
 
 ColladaParser.o: ColladaParser.cpp.o
@@ -662,7 +662,7 @@ ColladaParser.o: ColladaParser.cpp.o
 
 # target to build an object file
 ColladaParser.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaParser.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaParser.cpp.o
 .PHONY : ColladaParser.cpp.o
 
 ColladaParser.i: ColladaParser.cpp.i
@@ -670,7 +670,7 @@ ColladaParser.i: ColladaParser.cpp.i
 
 # target to preprocess a source file
 ColladaParser.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaParser.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaParser.cpp.i
 .PHONY : ColladaParser.cpp.i
 
 ColladaParser.s: ColladaParser.cpp.s
@@ -678,7 +678,7 @@ ColladaParser.s: ColladaParser.cpp.s
 
 # target to generate assembly for a file
 ColladaParser.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaParser.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ColladaParser.cpp.s
 .PHONY : ColladaParser.cpp.s
 
 ComputeUVMappingProcess.o: ComputeUVMappingProcess.cpp.o
@@ -686,7 +686,7 @@ ComputeUVMappingProcess.o: ComputeUVMappingProcess.cpp.o
 
 # target to build an object file
 ComputeUVMappingProcess.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ComputeUVMappingProcess.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ComputeUVMappingProcess.cpp.o
 .PHONY : ComputeUVMappingProcess.cpp.o
 
 ComputeUVMappingProcess.i: ComputeUVMappingProcess.cpp.i
@@ -694,7 +694,7 @@ ComputeUVMappingProcess.i: ComputeUVMappingProcess.cpp.i
 
 # target to preprocess a source file
 ComputeUVMappingProcess.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ComputeUVMappingProcess.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ComputeUVMappingProcess.cpp.i
 .PHONY : ComputeUVMappingProcess.cpp.i
 
 ComputeUVMappingProcess.s: ComputeUVMappingProcess.cpp.s
@@ -702,7 +702,7 @@ ComputeUVMappingProcess.s: ComputeUVMappingProcess.cpp.s
 
 # target to generate assembly for a file
 ComputeUVMappingProcess.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ComputeUVMappingProcess.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ComputeUVMappingProcess.cpp.s
 .PHONY : ComputeUVMappingProcess.cpp.s
 
 ConvertToLHProcess.o: ConvertToLHProcess.cpp.o
@@ -710,7 +710,7 @@ ConvertToLHProcess.o: ConvertToLHProcess.cpp.o
 
 # target to build an object file
 ConvertToLHProcess.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ConvertToLHProcess.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ConvertToLHProcess.cpp.o
 .PHONY : ConvertToLHProcess.cpp.o
 
 ConvertToLHProcess.i: ConvertToLHProcess.cpp.i
@@ -718,7 +718,7 @@ ConvertToLHProcess.i: ConvertToLHProcess.cpp.i
 
 # target to preprocess a source file
 ConvertToLHProcess.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ConvertToLHProcess.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ConvertToLHProcess.cpp.i
 .PHONY : ConvertToLHProcess.cpp.i
 
 ConvertToLHProcess.s: ConvertToLHProcess.cpp.s
@@ -726,7 +726,7 @@ ConvertToLHProcess.s: ConvertToLHProcess.cpp.s
 
 # target to generate assembly for a file
 ConvertToLHProcess.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ConvertToLHProcess.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ConvertToLHProcess.cpp.s
 .PHONY : ConvertToLHProcess.cpp.s
 
 DXFLoader.o: DXFLoader.cpp.o
@@ -734,7 +734,7 @@ DXFLoader.o: DXFLoader.cpp.o
 
 # target to build an object file
 DXFLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DXFLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DXFLoader.cpp.o
 .PHONY : DXFLoader.cpp.o
 
 DXFLoader.i: DXFLoader.cpp.i
@@ -742,7 +742,7 @@ DXFLoader.i: DXFLoader.cpp.i
 
 # target to preprocess a source file
 DXFLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DXFLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DXFLoader.cpp.i
 .PHONY : DXFLoader.cpp.i
 
 DXFLoader.s: DXFLoader.cpp.s
@@ -750,7 +750,7 @@ DXFLoader.s: DXFLoader.cpp.s
 
 # target to generate assembly for a file
 DXFLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DXFLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DXFLoader.cpp.s
 .PHONY : DXFLoader.cpp.s
 
 DeboneProcess.o: DeboneProcess.cpp.o
@@ -758,7 +758,7 @@ DeboneProcess.o: DeboneProcess.cpp.o
 
 # target to build an object file
 DeboneProcess.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DeboneProcess.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DeboneProcess.cpp.o
 .PHONY : DeboneProcess.cpp.o
 
 DeboneProcess.i: DeboneProcess.cpp.i
@@ -766,7 +766,7 @@ DeboneProcess.i: DeboneProcess.cpp.i
 
 # target to preprocess a source file
 DeboneProcess.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DeboneProcess.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DeboneProcess.cpp.i
 .PHONY : DeboneProcess.cpp.i
 
 DeboneProcess.s: DeboneProcess.cpp.s
@@ -774,7 +774,7 @@ DeboneProcess.s: DeboneProcess.cpp.s
 
 # target to generate assembly for a file
 DeboneProcess.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DeboneProcess.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DeboneProcess.cpp.s
 .PHONY : DeboneProcess.cpp.s
 
 DefaultIOStream.o: DefaultIOStream.cpp.o
@@ -782,7 +782,7 @@ DefaultIOStream.o: DefaultIOStream.cpp.o
 
 # target to build an object file
 DefaultIOStream.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultIOStream.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultIOStream.cpp.o
 .PHONY : DefaultIOStream.cpp.o
 
 DefaultIOStream.i: DefaultIOStream.cpp.i
@@ -790,7 +790,7 @@ DefaultIOStream.i: DefaultIOStream.cpp.i
 
 # target to preprocess a source file
 DefaultIOStream.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultIOStream.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultIOStream.cpp.i
 .PHONY : DefaultIOStream.cpp.i
 
 DefaultIOStream.s: DefaultIOStream.cpp.s
@@ -798,7 +798,7 @@ DefaultIOStream.s: DefaultIOStream.cpp.s
 
 # target to generate assembly for a file
 DefaultIOStream.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultIOStream.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultIOStream.cpp.s
 .PHONY : DefaultIOStream.cpp.s
 
 DefaultIOSystem.o: DefaultIOSystem.cpp.o
@@ -806,7 +806,7 @@ DefaultIOSystem.o: DefaultIOSystem.cpp.o
 
 # target to build an object file
 DefaultIOSystem.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultIOSystem.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultIOSystem.cpp.o
 .PHONY : DefaultIOSystem.cpp.o
 
 DefaultIOSystem.i: DefaultIOSystem.cpp.i
@@ -814,7 +814,7 @@ DefaultIOSystem.i: DefaultIOSystem.cpp.i
 
 # target to preprocess a source file
 DefaultIOSystem.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultIOSystem.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultIOSystem.cpp.i
 .PHONY : DefaultIOSystem.cpp.i
 
 DefaultIOSystem.s: DefaultIOSystem.cpp.s
@@ -822,7 +822,7 @@ DefaultIOSystem.s: DefaultIOSystem.cpp.s
 
 # target to generate assembly for a file
 DefaultIOSystem.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultIOSystem.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultIOSystem.cpp.s
 .PHONY : DefaultIOSystem.cpp.s
 
 DefaultLogger.o: DefaultLogger.cpp.o
@@ -830,7 +830,7 @@ DefaultLogger.o: DefaultLogger.cpp.o
 
 # target to build an object file
 DefaultLogger.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultLogger.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultLogger.cpp.o
 .PHONY : DefaultLogger.cpp.o
 
 DefaultLogger.i: DefaultLogger.cpp.i
@@ -838,7 +838,7 @@ DefaultLogger.i: DefaultLogger.cpp.i
 
 # target to preprocess a source file
 DefaultLogger.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultLogger.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultLogger.cpp.i
 .PHONY : DefaultLogger.cpp.i
 
 DefaultLogger.s: DefaultLogger.cpp.s
@@ -846,7 +846,7 @@ DefaultLogger.s: DefaultLogger.cpp.s
 
 # target to generate assembly for a file
 DefaultLogger.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultLogger.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/DefaultLogger.cpp.s
 .PHONY : DefaultLogger.cpp.s
 
 Exporter.o: Exporter.cpp.o
@@ -854,7 +854,7 @@ Exporter.o: Exporter.cpp.o
 
 # target to build an object file
 Exporter.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Exporter.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Exporter.cpp.o
 .PHONY : Exporter.cpp.o
 
 Exporter.i: Exporter.cpp.i
@@ -862,7 +862,7 @@ Exporter.i: Exporter.cpp.i
 
 # target to preprocess a source file
 Exporter.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Exporter.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Exporter.cpp.i
 .PHONY : Exporter.cpp.i
 
 Exporter.s: Exporter.cpp.s
@@ -870,7 +870,7 @@ Exporter.s: Exporter.cpp.s
 
 # target to generate assembly for a file
 Exporter.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Exporter.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Exporter.cpp.s
 .PHONY : Exporter.cpp.s
 
 FindDegenerates.o: FindDegenerates.cpp.o
@@ -878,7 +878,7 @@ FindDegenerates.o: FindDegenerates.cpp.o
 
 # target to build an object file
 FindDegenerates.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindDegenerates.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindDegenerates.cpp.o
 .PHONY : FindDegenerates.cpp.o
 
 FindDegenerates.i: FindDegenerates.cpp.i
@@ -886,7 +886,7 @@ FindDegenerates.i: FindDegenerates.cpp.i
 
 # target to preprocess a source file
 FindDegenerates.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindDegenerates.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindDegenerates.cpp.i
 .PHONY : FindDegenerates.cpp.i
 
 FindDegenerates.s: FindDegenerates.cpp.s
@@ -894,7 +894,7 @@ FindDegenerates.s: FindDegenerates.cpp.s
 
 # target to generate assembly for a file
 FindDegenerates.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindDegenerates.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindDegenerates.cpp.s
 .PHONY : FindDegenerates.cpp.s
 
 FindInstancesProcess.o: FindInstancesProcess.cpp.o
@@ -902,7 +902,7 @@ FindInstancesProcess.o: FindInstancesProcess.cpp.o
 
 # target to build an object file
 FindInstancesProcess.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindInstancesProcess.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindInstancesProcess.cpp.o
 .PHONY : FindInstancesProcess.cpp.o
 
 FindInstancesProcess.i: FindInstancesProcess.cpp.i
@@ -910,7 +910,7 @@ FindInstancesProcess.i: FindInstancesProcess.cpp.i
 
 # target to preprocess a source file
 FindInstancesProcess.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindInstancesProcess.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindInstancesProcess.cpp.i
 .PHONY : FindInstancesProcess.cpp.i
 
 FindInstancesProcess.s: FindInstancesProcess.cpp.s
@@ -918,7 +918,7 @@ FindInstancesProcess.s: FindInstancesProcess.cpp.s
 
 # target to generate assembly for a file
 FindInstancesProcess.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindInstancesProcess.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindInstancesProcess.cpp.s
 .PHONY : FindInstancesProcess.cpp.s
 
 FindInvalidDataProcess.o: FindInvalidDataProcess.cpp.o
@@ -926,7 +926,7 @@ FindInvalidDataProcess.o: FindInvalidDataProcess.cpp.o
 
 # target to build an object file
 FindInvalidDataProcess.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindInvalidDataProcess.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindInvalidDataProcess.cpp.o
 .PHONY : FindInvalidDataProcess.cpp.o
 
 FindInvalidDataProcess.i: FindInvalidDataProcess.cpp.i
@@ -934,7 +934,7 @@ FindInvalidDataProcess.i: FindInvalidDataProcess.cpp.i
 
 # target to preprocess a source file
 FindInvalidDataProcess.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindInvalidDataProcess.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindInvalidDataProcess.cpp.i
 .PHONY : FindInvalidDataProcess.cpp.i
 
 FindInvalidDataProcess.s: FindInvalidDataProcess.cpp.s
@@ -942,7 +942,7 @@ FindInvalidDataProcess.s: FindInvalidDataProcess.cpp.s
 
 # target to generate assembly for a file
 FindInvalidDataProcess.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindInvalidDataProcess.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FindInvalidDataProcess.cpp.s
 .PHONY : FindInvalidDataProcess.cpp.s
 
 FixNormalsStep.o: FixNormalsStep.cpp.o
@@ -950,7 +950,7 @@ FixNormalsStep.o: FixNormalsStep.cpp.o
 
 # target to build an object file
 FixNormalsStep.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FixNormalsStep.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FixNormalsStep.cpp.o
 .PHONY : FixNormalsStep.cpp.o
 
 FixNormalsStep.i: FixNormalsStep.cpp.i
@@ -958,7 +958,7 @@ FixNormalsStep.i: FixNormalsStep.cpp.i
 
 # target to preprocess a source file
 FixNormalsStep.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FixNormalsStep.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FixNormalsStep.cpp.i
 .PHONY : FixNormalsStep.cpp.i
 
 FixNormalsStep.s: FixNormalsStep.cpp.s
@@ -966,7 +966,7 @@ FixNormalsStep.s: FixNormalsStep.cpp.s
 
 # target to generate assembly for a file
 FixNormalsStep.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FixNormalsStep.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/FixNormalsStep.cpp.s
 .PHONY : FixNormalsStep.cpp.s
 
 GenFaceNormalsProcess.o: GenFaceNormalsProcess.cpp.o
@@ -974,7 +974,7 @@ GenFaceNormalsProcess.o: GenFaceNormalsProcess.cpp.o
 
 # target to build an object file
 GenFaceNormalsProcess.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/GenFaceNormalsProcess.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/GenFaceNormalsProcess.cpp.o
 .PHONY : GenFaceNormalsProcess.cpp.o
 
 GenFaceNormalsProcess.i: GenFaceNormalsProcess.cpp.i
@@ -982,7 +982,7 @@ GenFaceNormalsProcess.i: GenFaceNormalsProcess.cpp.i
 
 # target to preprocess a source file
 GenFaceNormalsProcess.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/GenFaceNormalsProcess.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/GenFaceNormalsProcess.cpp.i
 .PHONY : GenFaceNormalsProcess.cpp.i
 
 GenFaceNormalsProcess.s: GenFaceNormalsProcess.cpp.s
@@ -990,7 +990,7 @@ GenFaceNormalsProcess.s: GenFaceNormalsProcess.cpp.s
 
 # target to generate assembly for a file
 GenFaceNormalsProcess.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/GenFaceNormalsProcess.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/GenFaceNormalsProcess.cpp.s
 .PHONY : GenFaceNormalsProcess.cpp.s
 
 GenVertexNormalsProcess.o: GenVertexNormalsProcess.cpp.o
@@ -998,7 +998,7 @@ GenVertexNormalsProcess.o: GenVertexNormalsProcess.cpp.o
 
 # target to build an object file
 GenVertexNormalsProcess.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/GenVertexNormalsProcess.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/GenVertexNormalsProcess.cpp.o
 .PHONY : GenVertexNormalsProcess.cpp.o
 
 GenVertexNormalsProcess.i: GenVertexNormalsProcess.cpp.i
@@ -1006,7 +1006,7 @@ GenVertexNormalsProcess.i: GenVertexNormalsProcess.cpp.i
 
 # target to preprocess a source file
 GenVertexNormalsProcess.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/GenVertexNormalsProcess.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/GenVertexNormalsProcess.cpp.i
 .PHONY : GenVertexNormalsProcess.cpp.i
 
 GenVertexNormalsProcess.s: GenVertexNormalsProcess.cpp.s
@@ -1014,7 +1014,7 @@ GenVertexNormalsProcess.s: GenVertexNormalsProcess.cpp.s
 
 # target to generate assembly for a file
 GenVertexNormalsProcess.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/GenVertexNormalsProcess.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/GenVertexNormalsProcess.cpp.s
 .PHONY : GenVertexNormalsProcess.cpp.s
 
 HMPLoader.o: HMPLoader.cpp.o
@@ -1022,7 +1022,7 @@ HMPLoader.o: HMPLoader.cpp.o
 
 # target to build an object file
 HMPLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/HMPLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/HMPLoader.cpp.o
 .PHONY : HMPLoader.cpp.o
 
 HMPLoader.i: HMPLoader.cpp.i
@@ -1030,7 +1030,7 @@ HMPLoader.i: HMPLoader.cpp.i
 
 # target to preprocess a source file
 HMPLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/HMPLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/HMPLoader.cpp.i
 .PHONY : HMPLoader.cpp.i
 
 HMPLoader.s: HMPLoader.cpp.s
@@ -1038,7 +1038,7 @@ HMPLoader.s: HMPLoader.cpp.s
 
 # target to generate assembly for a file
 HMPLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/HMPLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/HMPLoader.cpp.s
 .PHONY : HMPLoader.cpp.s
 
 IFCCurve.o: IFCCurve.cpp.o
@@ -1046,7 +1046,7 @@ IFCCurve.o: IFCCurve.cpp.o
 
 # target to build an object file
 IFCCurve.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCCurve.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCCurve.cpp.o
 .PHONY : IFCCurve.cpp.o
 
 IFCCurve.i: IFCCurve.cpp.i
@@ -1054,7 +1054,7 @@ IFCCurve.i: IFCCurve.cpp.i
 
 # target to preprocess a source file
 IFCCurve.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCCurve.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCCurve.cpp.i
 .PHONY : IFCCurve.cpp.i
 
 IFCCurve.s: IFCCurve.cpp.s
@@ -1062,7 +1062,7 @@ IFCCurve.s: IFCCurve.cpp.s
 
 # target to generate assembly for a file
 IFCCurve.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCCurve.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCCurve.cpp.s
 .PHONY : IFCCurve.cpp.s
 
 IFCGeometry.o: IFCGeometry.cpp.o
@@ -1070,7 +1070,7 @@ IFCGeometry.o: IFCGeometry.cpp.o
 
 # target to build an object file
 IFCGeometry.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCGeometry.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCGeometry.cpp.o
 .PHONY : IFCGeometry.cpp.o
 
 IFCGeometry.i: IFCGeometry.cpp.i
@@ -1078,7 +1078,7 @@ IFCGeometry.i: IFCGeometry.cpp.i
 
 # target to preprocess a source file
 IFCGeometry.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCGeometry.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCGeometry.cpp.i
 .PHONY : IFCGeometry.cpp.i
 
 IFCGeometry.s: IFCGeometry.cpp.s
@@ -1086,7 +1086,7 @@ IFCGeometry.s: IFCGeometry.cpp.s
 
 # target to generate assembly for a file
 IFCGeometry.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCGeometry.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCGeometry.cpp.s
 .PHONY : IFCGeometry.cpp.s
 
 IFCLoader.o: IFCLoader.cpp.o
@@ -1094,7 +1094,7 @@ IFCLoader.o: IFCLoader.cpp.o
 
 # target to build an object file
 IFCLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCLoader.cpp.o
 .PHONY : IFCLoader.cpp.o
 
 IFCLoader.i: IFCLoader.cpp.i
@@ -1102,7 +1102,7 @@ IFCLoader.i: IFCLoader.cpp.i
 
 # target to preprocess a source file
 IFCLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCLoader.cpp.i
 .PHONY : IFCLoader.cpp.i
 
 IFCLoader.s: IFCLoader.cpp.s
@@ -1110,7 +1110,7 @@ IFCLoader.s: IFCLoader.cpp.s
 
 # target to generate assembly for a file
 IFCLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCLoader.cpp.s
 .PHONY : IFCLoader.cpp.s
 
 IFCMaterial.o: IFCMaterial.cpp.o
@@ -1118,7 +1118,7 @@ IFCMaterial.o: IFCMaterial.cpp.o
 
 # target to build an object file
 IFCMaterial.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCMaterial.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCMaterial.cpp.o
 .PHONY : IFCMaterial.cpp.o
 
 IFCMaterial.i: IFCMaterial.cpp.i
@@ -1126,7 +1126,7 @@ IFCMaterial.i: IFCMaterial.cpp.i
 
 # target to preprocess a source file
 IFCMaterial.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCMaterial.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCMaterial.cpp.i
 .PHONY : IFCMaterial.cpp.i
 
 IFCMaterial.s: IFCMaterial.cpp.s
@@ -1134,7 +1134,7 @@ IFCMaterial.s: IFCMaterial.cpp.s
 
 # target to generate assembly for a file
 IFCMaterial.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCMaterial.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCMaterial.cpp.s
 .PHONY : IFCMaterial.cpp.s
 
 IFCProfile.o: IFCProfile.cpp.o
@@ -1142,7 +1142,7 @@ IFCProfile.o: IFCProfile.cpp.o
 
 # target to build an object file
 IFCProfile.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCProfile.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCProfile.cpp.o
 .PHONY : IFCProfile.cpp.o
 
 IFCProfile.i: IFCProfile.cpp.i
@@ -1150,7 +1150,7 @@ IFCProfile.i: IFCProfile.cpp.i
 
 # target to preprocess a source file
 IFCProfile.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCProfile.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCProfile.cpp.i
 .PHONY : IFCProfile.cpp.i
 
 IFCProfile.s: IFCProfile.cpp.s
@@ -1158,7 +1158,7 @@ IFCProfile.s: IFCProfile.cpp.s
 
 # target to generate assembly for a file
 IFCProfile.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCProfile.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCProfile.cpp.s
 .PHONY : IFCProfile.cpp.s
 
 IFCReaderGen.o: IFCReaderGen.cpp.o
@@ -1166,7 +1166,7 @@ IFCReaderGen.o: IFCReaderGen.cpp.o
 
 # target to build an object file
 IFCReaderGen.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCReaderGen.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCReaderGen.cpp.o
 .PHONY : IFCReaderGen.cpp.o
 
 IFCReaderGen.i: IFCReaderGen.cpp.i
@@ -1174,7 +1174,7 @@ IFCReaderGen.i: IFCReaderGen.cpp.i
 
 # target to preprocess a source file
 IFCReaderGen.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCReaderGen.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCReaderGen.cpp.i
 .PHONY : IFCReaderGen.cpp.i
 
 IFCReaderGen.s: IFCReaderGen.cpp.s
@@ -1182,7 +1182,7 @@ IFCReaderGen.s: IFCReaderGen.cpp.s
 
 # target to generate assembly for a file
 IFCReaderGen.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCReaderGen.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCReaderGen.cpp.s
 .PHONY : IFCReaderGen.cpp.s
 
 IFCUtil.o: IFCUtil.cpp.o
@@ -1190,7 +1190,7 @@ IFCUtil.o: IFCUtil.cpp.o
 
 # target to build an object file
 IFCUtil.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCUtil.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCUtil.cpp.o
 .PHONY : IFCUtil.cpp.o
 
 IFCUtil.i: IFCUtil.cpp.i
@@ -1198,7 +1198,7 @@ IFCUtil.i: IFCUtil.cpp.i
 
 # target to preprocess a source file
 IFCUtil.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCUtil.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCUtil.cpp.i
 .PHONY : IFCUtil.cpp.i
 
 IFCUtil.s: IFCUtil.cpp.s
@@ -1206,7 +1206,7 @@ IFCUtil.s: IFCUtil.cpp.s
 
 # target to generate assembly for a file
 IFCUtil.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCUtil.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IFCUtil.cpp.s
 .PHONY : IFCUtil.cpp.s
 
 IRRLoader.o: IRRLoader.cpp.o
@@ -1214,7 +1214,7 @@ IRRLoader.o: IRRLoader.cpp.o
 
 # target to build an object file
 IRRLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRLoader.cpp.o
 .PHONY : IRRLoader.cpp.o
 
 IRRLoader.i: IRRLoader.cpp.i
@@ -1222,7 +1222,7 @@ IRRLoader.i: IRRLoader.cpp.i
 
 # target to preprocess a source file
 IRRLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRLoader.cpp.i
 .PHONY : IRRLoader.cpp.i
 
 IRRLoader.s: IRRLoader.cpp.s
@@ -1230,7 +1230,7 @@ IRRLoader.s: IRRLoader.cpp.s
 
 # target to generate assembly for a file
 IRRLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRLoader.cpp.s
 .PHONY : IRRLoader.cpp.s
 
 IRRMeshLoader.o: IRRMeshLoader.cpp.o
@@ -1238,7 +1238,7 @@ IRRMeshLoader.o: IRRMeshLoader.cpp.o
 
 # target to build an object file
 IRRMeshLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRMeshLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRMeshLoader.cpp.o
 .PHONY : IRRMeshLoader.cpp.o
 
 IRRMeshLoader.i: IRRMeshLoader.cpp.i
@@ -1246,7 +1246,7 @@ IRRMeshLoader.i: IRRMeshLoader.cpp.i
 
 # target to preprocess a source file
 IRRMeshLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRMeshLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRMeshLoader.cpp.i
 .PHONY : IRRMeshLoader.cpp.i
 
 IRRMeshLoader.s: IRRMeshLoader.cpp.s
@@ -1254,7 +1254,7 @@ IRRMeshLoader.s: IRRMeshLoader.cpp.s
 
 # target to generate assembly for a file
 IRRMeshLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRMeshLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRMeshLoader.cpp.s
 .PHONY : IRRMeshLoader.cpp.s
 
 IRRShared.o: IRRShared.cpp.o
@@ -1262,7 +1262,7 @@ IRRShared.o: IRRShared.cpp.o
 
 # target to build an object file
 IRRShared.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRShared.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRShared.cpp.o
 .PHONY : IRRShared.cpp.o
 
 IRRShared.i: IRRShared.cpp.i
@@ -1270,7 +1270,7 @@ IRRShared.i: IRRShared.cpp.i
 
 # target to preprocess a source file
 IRRShared.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRShared.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRShared.cpp.i
 .PHONY : IRRShared.cpp.i
 
 IRRShared.s: IRRShared.cpp.s
@@ -1278,7 +1278,7 @@ IRRShared.s: IRRShared.cpp.s
 
 # target to generate assembly for a file
 IRRShared.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRShared.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/IRRShared.cpp.s
 .PHONY : IRRShared.cpp.s
 
 Importer.o: Importer.cpp.o
@@ -1286,7 +1286,7 @@ Importer.o: Importer.cpp.o
 
 # target to build an object file
 Importer.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Importer.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Importer.cpp.o
 .PHONY : Importer.cpp.o
 
 Importer.i: Importer.cpp.i
@@ -1294,7 +1294,7 @@ Importer.i: Importer.cpp.i
 
 # target to preprocess a source file
 Importer.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Importer.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Importer.cpp.i
 .PHONY : Importer.cpp.i
 
 Importer.s: Importer.cpp.s
@@ -1302,7 +1302,7 @@ Importer.s: Importer.cpp.s
 
 # target to generate assembly for a file
 Importer.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Importer.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Importer.cpp.s
 .PHONY : Importer.cpp.s
 
 ImporterRegistry.o: ImporterRegistry.cpp.o
@@ -1310,7 +1310,7 @@ ImporterRegistry.o: ImporterRegistry.cpp.o
 
 # target to build an object file
 ImporterRegistry.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ImporterRegistry.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ImporterRegistry.cpp.o
 .PHONY : ImporterRegistry.cpp.o
 
 ImporterRegistry.i: ImporterRegistry.cpp.i
@@ -1318,7 +1318,7 @@ ImporterRegistry.i: ImporterRegistry.cpp.i
 
 # target to preprocess a source file
 ImporterRegistry.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ImporterRegistry.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ImporterRegistry.cpp.i
 .PHONY : ImporterRegistry.cpp.i
 
 ImporterRegistry.s: ImporterRegistry.cpp.s
@@ -1326,7 +1326,7 @@ ImporterRegistry.s: ImporterRegistry.cpp.s
 
 # target to generate assembly for a file
 ImporterRegistry.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ImporterRegistry.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ImporterRegistry.cpp.s
 .PHONY : ImporterRegistry.cpp.s
 
 ImproveCacheLocality.o: ImproveCacheLocality.cpp.o
@@ -1334,7 +1334,7 @@ ImproveCacheLocality.o: ImproveCacheLocality.cpp.o
 
 # target to build an object file
 ImproveCacheLocality.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ImproveCacheLocality.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ImproveCacheLocality.cpp.o
 .PHONY : ImproveCacheLocality.cpp.o
 
 ImproveCacheLocality.i: ImproveCacheLocality.cpp.i
@@ -1342,7 +1342,7 @@ ImproveCacheLocality.i: ImproveCacheLocality.cpp.i
 
 # target to preprocess a source file
 ImproveCacheLocality.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ImproveCacheLocality.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ImproveCacheLocality.cpp.i
 .PHONY : ImproveCacheLocality.cpp.i
 
 ImproveCacheLocality.s: ImproveCacheLocality.cpp.s
@@ -1350,7 +1350,7 @@ ImproveCacheLocality.s: ImproveCacheLocality.cpp.s
 
 # target to generate assembly for a file
 ImproveCacheLocality.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ImproveCacheLocality.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ImproveCacheLocality.cpp.s
 .PHONY : ImproveCacheLocality.cpp.s
 
 JoinVerticesProcess.o: JoinVerticesProcess.cpp.o
@@ -1358,7 +1358,7 @@ JoinVerticesProcess.o: JoinVerticesProcess.cpp.o
 
 # target to build an object file
 JoinVerticesProcess.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/JoinVerticesProcess.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/JoinVerticesProcess.cpp.o
 .PHONY : JoinVerticesProcess.cpp.o
 
 JoinVerticesProcess.i: JoinVerticesProcess.cpp.i
@@ -1366,7 +1366,7 @@ JoinVerticesProcess.i: JoinVerticesProcess.cpp.i
 
 # target to preprocess a source file
 JoinVerticesProcess.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/JoinVerticesProcess.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/JoinVerticesProcess.cpp.i
 .PHONY : JoinVerticesProcess.cpp.i
 
 JoinVerticesProcess.s: JoinVerticesProcess.cpp.s
@@ -1374,7 +1374,7 @@ JoinVerticesProcess.s: JoinVerticesProcess.cpp.s
 
 # target to generate assembly for a file
 JoinVerticesProcess.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/JoinVerticesProcess.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/JoinVerticesProcess.cpp.s
 .PHONY : JoinVerticesProcess.cpp.s
 
 LWOAnimation.o: LWOAnimation.cpp.o
@@ -1382,7 +1382,7 @@ LWOAnimation.o: LWOAnimation.cpp.o
 
 # target to build an object file
 LWOAnimation.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOAnimation.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOAnimation.cpp.o
 .PHONY : LWOAnimation.cpp.o
 
 LWOAnimation.i: LWOAnimation.cpp.i
@@ -1390,7 +1390,7 @@ LWOAnimation.i: LWOAnimation.cpp.i
 
 # target to preprocess a source file
 LWOAnimation.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOAnimation.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOAnimation.cpp.i
 .PHONY : LWOAnimation.cpp.i
 
 LWOAnimation.s: LWOAnimation.cpp.s
@@ -1398,7 +1398,7 @@ LWOAnimation.s: LWOAnimation.cpp.s
 
 # target to generate assembly for a file
 LWOAnimation.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOAnimation.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOAnimation.cpp.s
 .PHONY : LWOAnimation.cpp.s
 
 LWOBLoader.o: LWOBLoader.cpp.o
@@ -1406,7 +1406,7 @@ LWOBLoader.o: LWOBLoader.cpp.o
 
 # target to build an object file
 LWOBLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOBLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOBLoader.cpp.o
 .PHONY : LWOBLoader.cpp.o
 
 LWOBLoader.i: LWOBLoader.cpp.i
@@ -1414,7 +1414,7 @@ LWOBLoader.i: LWOBLoader.cpp.i
 
 # target to preprocess a source file
 LWOBLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOBLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOBLoader.cpp.i
 .PHONY : LWOBLoader.cpp.i
 
 LWOBLoader.s: LWOBLoader.cpp.s
@@ -1422,7 +1422,7 @@ LWOBLoader.s: LWOBLoader.cpp.s
 
 # target to generate assembly for a file
 LWOBLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOBLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOBLoader.cpp.s
 .PHONY : LWOBLoader.cpp.s
 
 LWOLoader.o: LWOLoader.cpp.o
@@ -1430,7 +1430,7 @@ LWOLoader.o: LWOLoader.cpp.o
 
 # target to build an object file
 LWOLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOLoader.cpp.o
 .PHONY : LWOLoader.cpp.o
 
 LWOLoader.i: LWOLoader.cpp.i
@@ -1438,7 +1438,7 @@ LWOLoader.i: LWOLoader.cpp.i
 
 # target to preprocess a source file
 LWOLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOLoader.cpp.i
 .PHONY : LWOLoader.cpp.i
 
 LWOLoader.s: LWOLoader.cpp.s
@@ -1446,7 +1446,7 @@ LWOLoader.s: LWOLoader.cpp.s
 
 # target to generate assembly for a file
 LWOLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOLoader.cpp.s
 .PHONY : LWOLoader.cpp.s
 
 LWOMaterial.o: LWOMaterial.cpp.o
@@ -1454,7 +1454,7 @@ LWOMaterial.o: LWOMaterial.cpp.o
 
 # target to build an object file
 LWOMaterial.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOMaterial.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOMaterial.cpp.o
 .PHONY : LWOMaterial.cpp.o
 
 LWOMaterial.i: LWOMaterial.cpp.i
@@ -1462,7 +1462,7 @@ LWOMaterial.i: LWOMaterial.cpp.i
 
 # target to preprocess a source file
 LWOMaterial.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOMaterial.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOMaterial.cpp.i
 .PHONY : LWOMaterial.cpp.i
 
 LWOMaterial.s: LWOMaterial.cpp.s
@@ -1470,7 +1470,7 @@ LWOMaterial.s: LWOMaterial.cpp.s
 
 # target to generate assembly for a file
 LWOMaterial.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOMaterial.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWOMaterial.cpp.s
 .PHONY : LWOMaterial.cpp.s
 
 LWSLoader.o: LWSLoader.cpp.o
@@ -1478,7 +1478,7 @@ LWSLoader.o: LWSLoader.cpp.o
 
 # target to build an object file
 LWSLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWSLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWSLoader.cpp.o
 .PHONY : LWSLoader.cpp.o
 
 LWSLoader.i: LWSLoader.cpp.i
@@ -1486,7 +1486,7 @@ LWSLoader.i: LWSLoader.cpp.i
 
 # target to preprocess a source file
 LWSLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWSLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWSLoader.cpp.i
 .PHONY : LWSLoader.cpp.i
 
 LWSLoader.s: LWSLoader.cpp.s
@@ -1494,7 +1494,7 @@ LWSLoader.s: LWSLoader.cpp.s
 
 # target to generate assembly for a file
 LWSLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWSLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LWSLoader.cpp.s
 .PHONY : LWSLoader.cpp.s
 
 LimitBoneWeightsProcess.o: LimitBoneWeightsProcess.cpp.o
@@ -1502,7 +1502,7 @@ LimitBoneWeightsProcess.o: LimitBoneWeightsProcess.cpp.o
 
 # target to build an object file
 LimitBoneWeightsProcess.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LimitBoneWeightsProcess.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LimitBoneWeightsProcess.cpp.o
 .PHONY : LimitBoneWeightsProcess.cpp.o
 
 LimitBoneWeightsProcess.i: LimitBoneWeightsProcess.cpp.i
@@ -1510,7 +1510,7 @@ LimitBoneWeightsProcess.i: LimitBoneWeightsProcess.cpp.i
 
 # target to preprocess a source file
 LimitBoneWeightsProcess.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LimitBoneWeightsProcess.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LimitBoneWeightsProcess.cpp.i
 .PHONY : LimitBoneWeightsProcess.cpp.i
 
 LimitBoneWeightsProcess.s: LimitBoneWeightsProcess.cpp.s
@@ -1518,7 +1518,7 @@ LimitBoneWeightsProcess.s: LimitBoneWeightsProcess.cpp.s
 
 # target to generate assembly for a file
 LimitBoneWeightsProcess.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LimitBoneWeightsProcess.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/LimitBoneWeightsProcess.cpp.s
 .PHONY : LimitBoneWeightsProcess.cpp.s
 
 M3Importer.o: M3Importer.cpp.o
@@ -1526,7 +1526,7 @@ M3Importer.o: M3Importer.cpp.o
 
 # target to build an object file
 M3Importer.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/M3Importer.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/M3Importer.cpp.o
 .PHONY : M3Importer.cpp.o
 
 M3Importer.i: M3Importer.cpp.i
@@ -1534,7 +1534,7 @@ M3Importer.i: M3Importer.cpp.i
 
 # target to preprocess a source file
 M3Importer.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/M3Importer.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/M3Importer.cpp.i
 .PHONY : M3Importer.cpp.i
 
 M3Importer.s: M3Importer.cpp.s
@@ -1542,7 +1542,7 @@ M3Importer.s: M3Importer.cpp.s
 
 # target to generate assembly for a file
 M3Importer.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/M3Importer.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/M3Importer.cpp.s
 .PHONY : M3Importer.cpp.s
 
 MD2Loader.o: MD2Loader.cpp.o
@@ -1550,7 +1550,7 @@ MD2Loader.o: MD2Loader.cpp.o
 
 # target to build an object file
 MD2Loader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD2Loader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD2Loader.cpp.o
 .PHONY : MD2Loader.cpp.o
 
 MD2Loader.i: MD2Loader.cpp.i
@@ -1558,7 +1558,7 @@ MD2Loader.i: MD2Loader.cpp.i
 
 # target to preprocess a source file
 MD2Loader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD2Loader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD2Loader.cpp.i
 .PHONY : MD2Loader.cpp.i
 
 MD2Loader.s: MD2Loader.cpp.s
@@ -1566,7 +1566,7 @@ MD2Loader.s: MD2Loader.cpp.s
 
 # target to generate assembly for a file
 MD2Loader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD2Loader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD2Loader.cpp.s
 .PHONY : MD2Loader.cpp.s
 
 MD3Loader.o: MD3Loader.cpp.o
@@ -1574,7 +1574,7 @@ MD3Loader.o: MD3Loader.cpp.o
 
 # target to build an object file
 MD3Loader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD3Loader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD3Loader.cpp.o
 .PHONY : MD3Loader.cpp.o
 
 MD3Loader.i: MD3Loader.cpp.i
@@ -1582,7 +1582,7 @@ MD3Loader.i: MD3Loader.cpp.i
 
 # target to preprocess a source file
 MD3Loader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD3Loader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD3Loader.cpp.i
 .PHONY : MD3Loader.cpp.i
 
 MD3Loader.s: MD3Loader.cpp.s
@@ -1590,7 +1590,7 @@ MD3Loader.s: MD3Loader.cpp.s
 
 # target to generate assembly for a file
 MD3Loader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD3Loader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD3Loader.cpp.s
 .PHONY : MD3Loader.cpp.s
 
 MD5Loader.o: MD5Loader.cpp.o
@@ -1598,7 +1598,7 @@ MD5Loader.o: MD5Loader.cpp.o
 
 # target to build an object file
 MD5Loader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD5Loader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD5Loader.cpp.o
 .PHONY : MD5Loader.cpp.o
 
 MD5Loader.i: MD5Loader.cpp.i
@@ -1606,7 +1606,7 @@ MD5Loader.i: MD5Loader.cpp.i
 
 # target to preprocess a source file
 MD5Loader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD5Loader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD5Loader.cpp.i
 .PHONY : MD5Loader.cpp.i
 
 MD5Loader.s: MD5Loader.cpp.s
@@ -1614,7 +1614,7 @@ MD5Loader.s: MD5Loader.cpp.s
 
 # target to generate assembly for a file
 MD5Loader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD5Loader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD5Loader.cpp.s
 .PHONY : MD5Loader.cpp.s
 
 MD5Parser.o: MD5Parser.cpp.o
@@ -1622,7 +1622,7 @@ MD5Parser.o: MD5Parser.cpp.o
 
 # target to build an object file
 MD5Parser.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD5Parser.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD5Parser.cpp.o
 .PHONY : MD5Parser.cpp.o
 
 MD5Parser.i: MD5Parser.cpp.i
@@ -1630,7 +1630,7 @@ MD5Parser.i: MD5Parser.cpp.i
 
 # target to preprocess a source file
 MD5Parser.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD5Parser.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD5Parser.cpp.i
 .PHONY : MD5Parser.cpp.i
 
 MD5Parser.s: MD5Parser.cpp.s
@@ -1638,7 +1638,7 @@ MD5Parser.s: MD5Parser.cpp.s
 
 # target to generate assembly for a file
 MD5Parser.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD5Parser.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MD5Parser.cpp.s
 .PHONY : MD5Parser.cpp.s
 
 MDCLoader.o: MDCLoader.cpp.o
@@ -1646,7 +1646,7 @@ MDCLoader.o: MDCLoader.cpp.o
 
 # target to build an object file
 MDCLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDCLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDCLoader.cpp.o
 .PHONY : MDCLoader.cpp.o
 
 MDCLoader.i: MDCLoader.cpp.i
@@ -1654,7 +1654,7 @@ MDCLoader.i: MDCLoader.cpp.i
 
 # target to preprocess a source file
 MDCLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDCLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDCLoader.cpp.i
 .PHONY : MDCLoader.cpp.i
 
 MDCLoader.s: MDCLoader.cpp.s
@@ -1662,7 +1662,7 @@ MDCLoader.s: MDCLoader.cpp.s
 
 # target to generate assembly for a file
 MDCLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDCLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDCLoader.cpp.s
 .PHONY : MDCLoader.cpp.s
 
 MDLLoader.o: MDLLoader.cpp.o
@@ -1670,7 +1670,7 @@ MDLLoader.o: MDLLoader.cpp.o
 
 # target to build an object file
 MDLLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDLLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDLLoader.cpp.o
 .PHONY : MDLLoader.cpp.o
 
 MDLLoader.i: MDLLoader.cpp.i
@@ -1678,7 +1678,7 @@ MDLLoader.i: MDLLoader.cpp.i
 
 # target to preprocess a source file
 MDLLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDLLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDLLoader.cpp.i
 .PHONY : MDLLoader.cpp.i
 
 MDLLoader.s: MDLLoader.cpp.s
@@ -1686,7 +1686,7 @@ MDLLoader.s: MDLLoader.cpp.s
 
 # target to generate assembly for a file
 MDLLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDLLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDLLoader.cpp.s
 .PHONY : MDLLoader.cpp.s
 
 MDLMaterialLoader.o: MDLMaterialLoader.cpp.o
@@ -1694,7 +1694,7 @@ MDLMaterialLoader.o: MDLMaterialLoader.cpp.o
 
 # target to build an object file
 MDLMaterialLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDLMaterialLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDLMaterialLoader.cpp.o
 .PHONY : MDLMaterialLoader.cpp.o
 
 MDLMaterialLoader.i: MDLMaterialLoader.cpp.i
@@ -1702,7 +1702,7 @@ MDLMaterialLoader.i: MDLMaterialLoader.cpp.i
 
 # target to preprocess a source file
 MDLMaterialLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDLMaterialLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDLMaterialLoader.cpp.i
 .PHONY : MDLMaterialLoader.cpp.i
 
 MDLMaterialLoader.s: MDLMaterialLoader.cpp.s
@@ -1710,7 +1710,7 @@ MDLMaterialLoader.s: MDLMaterialLoader.cpp.s
 
 # target to generate assembly for a file
 MDLMaterialLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDLMaterialLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MDLMaterialLoader.cpp.s
 .PHONY : MDLMaterialLoader.cpp.s
 
 MS3DLoader.o: MS3DLoader.cpp.o
@@ -1718,7 +1718,7 @@ MS3DLoader.o: MS3DLoader.cpp.o
 
 # target to build an object file
 MS3DLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MS3DLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MS3DLoader.cpp.o
 .PHONY : MS3DLoader.cpp.o
 
 MS3DLoader.i: MS3DLoader.cpp.i
@@ -1726,7 +1726,7 @@ MS3DLoader.i: MS3DLoader.cpp.i
 
 # target to preprocess a source file
 MS3DLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MS3DLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MS3DLoader.cpp.i
 .PHONY : MS3DLoader.cpp.i
 
 MS3DLoader.s: MS3DLoader.cpp.s
@@ -1734,7 +1734,7 @@ MS3DLoader.s: MS3DLoader.cpp.s
 
 # target to generate assembly for a file
 MS3DLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MS3DLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MS3DLoader.cpp.s
 .PHONY : MS3DLoader.cpp.s
 
 MakeVerboseFormat.o: MakeVerboseFormat.cpp.o
@@ -1742,7 +1742,7 @@ MakeVerboseFormat.o: MakeVerboseFormat.cpp.o
 
 # target to build an object file
 MakeVerboseFormat.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MakeVerboseFormat.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MakeVerboseFormat.cpp.o
 .PHONY : MakeVerboseFormat.cpp.o
 
 MakeVerboseFormat.i: MakeVerboseFormat.cpp.i
@@ -1750,7 +1750,7 @@ MakeVerboseFormat.i: MakeVerboseFormat.cpp.i
 
 # target to preprocess a source file
 MakeVerboseFormat.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MakeVerboseFormat.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MakeVerboseFormat.cpp.i
 .PHONY : MakeVerboseFormat.cpp.i
 
 MakeVerboseFormat.s: MakeVerboseFormat.cpp.s
@@ -1758,7 +1758,7 @@ MakeVerboseFormat.s: MakeVerboseFormat.cpp.s
 
 # target to generate assembly for a file
 MakeVerboseFormat.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MakeVerboseFormat.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MakeVerboseFormat.cpp.s
 .PHONY : MakeVerboseFormat.cpp.s
 
 MaterialSystem.o: MaterialSystem.cpp.o
@@ -1766,7 +1766,7 @@ MaterialSystem.o: MaterialSystem.cpp.o
 
 # target to build an object file
 MaterialSystem.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MaterialSystem.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MaterialSystem.cpp.o
 .PHONY : MaterialSystem.cpp.o
 
 MaterialSystem.i: MaterialSystem.cpp.i
@@ -1774,7 +1774,7 @@ MaterialSystem.i: MaterialSystem.cpp.i
 
 # target to preprocess a source file
 MaterialSystem.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MaterialSystem.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MaterialSystem.cpp.i
 .PHONY : MaterialSystem.cpp.i
 
 MaterialSystem.s: MaterialSystem.cpp.s
@@ -1782,7 +1782,7 @@ MaterialSystem.s: MaterialSystem.cpp.s
 
 # target to generate assembly for a file
 MaterialSystem.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MaterialSystem.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/MaterialSystem.cpp.s
 .PHONY : MaterialSystem.cpp.s
 
 NDOLoader.o: NDOLoader.cpp.o
@@ -1790,7 +1790,7 @@ NDOLoader.o: NDOLoader.cpp.o
 
 # target to build an object file
 NDOLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/NDOLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/NDOLoader.cpp.o
 .PHONY : NDOLoader.cpp.o
 
 NDOLoader.i: NDOLoader.cpp.i
@@ -1798,7 +1798,7 @@ NDOLoader.i: NDOLoader.cpp.i
 
 # target to preprocess a source file
 NDOLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/NDOLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/NDOLoader.cpp.i
 .PHONY : NDOLoader.cpp.i
 
 NDOLoader.s: NDOLoader.cpp.s
@@ -1806,7 +1806,7 @@ NDOLoader.s: NDOLoader.cpp.s
 
 # target to generate assembly for a file
 NDOLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/NDOLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/NDOLoader.cpp.s
 .PHONY : NDOLoader.cpp.s
 
 NFFLoader.o: NFFLoader.cpp.o
@@ -1814,7 +1814,7 @@ NFFLoader.o: NFFLoader.cpp.o
 
 # target to build an object file
 NFFLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/NFFLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/NFFLoader.cpp.o
 .PHONY : NFFLoader.cpp.o
 
 NFFLoader.i: NFFLoader.cpp.i
@@ -1822,7 +1822,7 @@ NFFLoader.i: NFFLoader.cpp.i
 
 # target to preprocess a source file
 NFFLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/NFFLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/NFFLoader.cpp.i
 .PHONY : NFFLoader.cpp.i
 
 NFFLoader.s: NFFLoader.cpp.s
@@ -1830,7 +1830,7 @@ NFFLoader.s: NFFLoader.cpp.s
 
 # target to generate assembly for a file
 NFFLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/NFFLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/NFFLoader.cpp.s
 .PHONY : NFFLoader.cpp.s
 
 OFFLoader.o: OFFLoader.cpp.o
@@ -1838,7 +1838,7 @@ OFFLoader.o: OFFLoader.cpp.o
 
 # target to build an object file
 OFFLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OFFLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OFFLoader.cpp.o
 .PHONY : OFFLoader.cpp.o
 
 OFFLoader.i: OFFLoader.cpp.i
@@ -1846,7 +1846,7 @@ OFFLoader.i: OFFLoader.cpp.i
 
 # target to preprocess a source file
 OFFLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OFFLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OFFLoader.cpp.i
 .PHONY : OFFLoader.cpp.i
 
 OFFLoader.s: OFFLoader.cpp.s
@@ -1854,7 +1854,7 @@ OFFLoader.s: OFFLoader.cpp.s
 
 # target to generate assembly for a file
 OFFLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OFFLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OFFLoader.cpp.s
 .PHONY : OFFLoader.cpp.s
 
 ObjExporter.o: ObjExporter.cpp.o
@@ -1862,7 +1862,7 @@ ObjExporter.o: ObjExporter.cpp.o
 
 # target to build an object file
 ObjExporter.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjExporter.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjExporter.cpp.o
 .PHONY : ObjExporter.cpp.o
 
 ObjExporter.i: ObjExporter.cpp.i
@@ -1870,7 +1870,7 @@ ObjExporter.i: ObjExporter.cpp.i
 
 # target to preprocess a source file
 ObjExporter.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjExporter.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjExporter.cpp.i
 .PHONY : ObjExporter.cpp.i
 
 ObjExporter.s: ObjExporter.cpp.s
@@ -1878,7 +1878,7 @@ ObjExporter.s: ObjExporter.cpp.s
 
 # target to generate assembly for a file
 ObjExporter.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjExporter.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjExporter.cpp.s
 .PHONY : ObjExporter.cpp.s
 
 ObjFileImporter.o: ObjFileImporter.cpp.o
@@ -1886,7 +1886,7 @@ ObjFileImporter.o: ObjFileImporter.cpp.o
 
 # target to build an object file
 ObjFileImporter.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileImporter.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileImporter.cpp.o
 .PHONY : ObjFileImporter.cpp.o
 
 ObjFileImporter.i: ObjFileImporter.cpp.i
@@ -1894,7 +1894,7 @@ ObjFileImporter.i: ObjFileImporter.cpp.i
 
 # target to preprocess a source file
 ObjFileImporter.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileImporter.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileImporter.cpp.i
 .PHONY : ObjFileImporter.cpp.i
 
 ObjFileImporter.s: ObjFileImporter.cpp.s
@@ -1902,7 +1902,7 @@ ObjFileImporter.s: ObjFileImporter.cpp.s
 
 # target to generate assembly for a file
 ObjFileImporter.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileImporter.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileImporter.cpp.s
 .PHONY : ObjFileImporter.cpp.s
 
 ObjFileMtlImporter.o: ObjFileMtlImporter.cpp.o
@@ -1910,7 +1910,7 @@ ObjFileMtlImporter.o: ObjFileMtlImporter.cpp.o
 
 # target to build an object file
 ObjFileMtlImporter.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileMtlImporter.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileMtlImporter.cpp.o
 .PHONY : ObjFileMtlImporter.cpp.o
 
 ObjFileMtlImporter.i: ObjFileMtlImporter.cpp.i
@@ -1918,7 +1918,7 @@ ObjFileMtlImporter.i: ObjFileMtlImporter.cpp.i
 
 # target to preprocess a source file
 ObjFileMtlImporter.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileMtlImporter.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileMtlImporter.cpp.i
 .PHONY : ObjFileMtlImporter.cpp.i
 
 ObjFileMtlImporter.s: ObjFileMtlImporter.cpp.s
@@ -1926,7 +1926,7 @@ ObjFileMtlImporter.s: ObjFileMtlImporter.cpp.s
 
 # target to generate assembly for a file
 ObjFileMtlImporter.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileMtlImporter.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileMtlImporter.cpp.s
 .PHONY : ObjFileMtlImporter.cpp.s
 
 ObjFileParser.o: ObjFileParser.cpp.o
@@ -1934,7 +1934,7 @@ ObjFileParser.o: ObjFileParser.cpp.o
 
 # target to build an object file
 ObjFileParser.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileParser.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileParser.cpp.o
 .PHONY : ObjFileParser.cpp.o
 
 ObjFileParser.i: ObjFileParser.cpp.i
@@ -1942,7 +1942,7 @@ ObjFileParser.i: ObjFileParser.cpp.i
 
 # target to preprocess a source file
 ObjFileParser.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileParser.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileParser.cpp.i
 .PHONY : ObjFileParser.cpp.i
 
 ObjFileParser.s: ObjFileParser.cpp.s
@@ -1950,7 +1950,7 @@ ObjFileParser.s: ObjFileParser.cpp.s
 
 # target to generate assembly for a file
 ObjFileParser.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileParser.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ObjFileParser.cpp.s
 .PHONY : ObjFileParser.cpp.s
 
 OgreImporter.o: OgreImporter.cpp.o
@@ -1958,7 +1958,7 @@ OgreImporter.o: OgreImporter.cpp.o
 
 # target to build an object file
 OgreImporter.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OgreImporter.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OgreImporter.cpp.o
 .PHONY : OgreImporter.cpp.o
 
 OgreImporter.i: OgreImporter.cpp.i
@@ -1966,7 +1966,7 @@ OgreImporter.i: OgreImporter.cpp.i
 
 # target to preprocess a source file
 OgreImporter.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OgreImporter.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OgreImporter.cpp.i
 .PHONY : OgreImporter.cpp.i
 
 OgreImporter.s: OgreImporter.cpp.s
@@ -1974,7 +1974,7 @@ OgreImporter.s: OgreImporter.cpp.s
 
 # target to generate assembly for a file
 OgreImporter.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OgreImporter.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OgreImporter.cpp.s
 .PHONY : OgreImporter.cpp.s
 
 OgreImporterMaterial.o: OgreImporterMaterial.cpp.o
@@ -1982,7 +1982,7 @@ OgreImporterMaterial.o: OgreImporterMaterial.cpp.o
 
 # target to build an object file
 OgreImporterMaterial.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OgreImporterMaterial.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OgreImporterMaterial.cpp.o
 .PHONY : OgreImporterMaterial.cpp.o
 
 OgreImporterMaterial.i: OgreImporterMaterial.cpp.i
@@ -1990,7 +1990,7 @@ OgreImporterMaterial.i: OgreImporterMaterial.cpp.i
 
 # target to preprocess a source file
 OgreImporterMaterial.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OgreImporterMaterial.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OgreImporterMaterial.cpp.i
 .PHONY : OgreImporterMaterial.cpp.i
 
 OgreImporterMaterial.s: OgreImporterMaterial.cpp.s
@@ -1998,7 +1998,7 @@ OgreImporterMaterial.s: OgreImporterMaterial.cpp.s
 
 # target to generate assembly for a file
 OgreImporterMaterial.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OgreImporterMaterial.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OgreImporterMaterial.cpp.s
 .PHONY : OgreImporterMaterial.cpp.s
 
 OptimizeGraph.o: OptimizeGraph.cpp.o
@@ -2006,7 +2006,7 @@ OptimizeGraph.o: OptimizeGraph.cpp.o
 
 # target to build an object file
 OptimizeGraph.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OptimizeGraph.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OptimizeGraph.cpp.o
 .PHONY : OptimizeGraph.cpp.o
 
 OptimizeGraph.i: OptimizeGraph.cpp.i
@@ -2014,7 +2014,7 @@ OptimizeGraph.i: OptimizeGraph.cpp.i
 
 # target to preprocess a source file
 OptimizeGraph.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OptimizeGraph.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OptimizeGraph.cpp.i
 .PHONY : OptimizeGraph.cpp.i
 
 OptimizeGraph.s: OptimizeGraph.cpp.s
@@ -2022,7 +2022,7 @@ OptimizeGraph.s: OptimizeGraph.cpp.s
 
 # target to generate assembly for a file
 OptimizeGraph.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OptimizeGraph.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OptimizeGraph.cpp.s
 .PHONY : OptimizeGraph.cpp.s
 
 OptimizeMeshes.o: OptimizeMeshes.cpp.o
@@ -2030,7 +2030,7 @@ OptimizeMeshes.o: OptimizeMeshes.cpp.o
 
 # target to build an object file
 OptimizeMeshes.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OptimizeMeshes.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OptimizeMeshes.cpp.o
 .PHONY : OptimizeMeshes.cpp.o
 
 OptimizeMeshes.i: OptimizeMeshes.cpp.i
@@ -2038,7 +2038,7 @@ OptimizeMeshes.i: OptimizeMeshes.cpp.i
 
 # target to preprocess a source file
 OptimizeMeshes.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OptimizeMeshes.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OptimizeMeshes.cpp.i
 .PHONY : OptimizeMeshes.cpp.i
 
 OptimizeMeshes.s: OptimizeMeshes.cpp.s
@@ -2046,7 +2046,7 @@ OptimizeMeshes.s: OptimizeMeshes.cpp.s
 
 # target to generate assembly for a file
 OptimizeMeshes.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OptimizeMeshes.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/OptimizeMeshes.cpp.s
 .PHONY : OptimizeMeshes.cpp.s
 
 PlyLoader.o: PlyLoader.cpp.o
@@ -2054,7 +2054,7 @@ PlyLoader.o: PlyLoader.cpp.o
 
 # target to build an object file
 PlyLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PlyLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PlyLoader.cpp.o
 .PHONY : PlyLoader.cpp.o
 
 PlyLoader.i: PlyLoader.cpp.i
@@ -2062,7 +2062,7 @@ PlyLoader.i: PlyLoader.cpp.i
 
 # target to preprocess a source file
 PlyLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PlyLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PlyLoader.cpp.i
 .PHONY : PlyLoader.cpp.i
 
 PlyLoader.s: PlyLoader.cpp.s
@@ -2070,7 +2070,7 @@ PlyLoader.s: PlyLoader.cpp.s
 
 # target to generate assembly for a file
 PlyLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PlyLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PlyLoader.cpp.s
 .PHONY : PlyLoader.cpp.s
 
 PlyParser.o: PlyParser.cpp.o
@@ -2078,7 +2078,7 @@ PlyParser.o: PlyParser.cpp.o
 
 # target to build an object file
 PlyParser.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PlyParser.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PlyParser.cpp.o
 .PHONY : PlyParser.cpp.o
 
 PlyParser.i: PlyParser.cpp.i
@@ -2086,7 +2086,7 @@ PlyParser.i: PlyParser.cpp.i
 
 # target to preprocess a source file
 PlyParser.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PlyParser.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PlyParser.cpp.i
 .PHONY : PlyParser.cpp.i
 
 PlyParser.s: PlyParser.cpp.s
@@ -2094,7 +2094,7 @@ PlyParser.s: PlyParser.cpp.s
 
 # target to generate assembly for a file
 PlyParser.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PlyParser.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PlyParser.cpp.s
 .PHONY : PlyParser.cpp.s
 
 PostStepRegistry.o: PostStepRegistry.cpp.o
@@ -2102,7 +2102,7 @@ PostStepRegistry.o: PostStepRegistry.cpp.o
 
 # target to build an object file
 PostStepRegistry.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PostStepRegistry.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PostStepRegistry.cpp.o
 .PHONY : PostStepRegistry.cpp.o
 
 PostStepRegistry.i: PostStepRegistry.cpp.i
@@ -2110,7 +2110,7 @@ PostStepRegistry.i: PostStepRegistry.cpp.i
 
 # target to preprocess a source file
 PostStepRegistry.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PostStepRegistry.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PostStepRegistry.cpp.i
 .PHONY : PostStepRegistry.cpp.i
 
 PostStepRegistry.s: PostStepRegistry.cpp.s
@@ -2118,7 +2118,7 @@ PostStepRegistry.s: PostStepRegistry.cpp.s
 
 # target to generate assembly for a file
 PostStepRegistry.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PostStepRegistry.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PostStepRegistry.cpp.s
 .PHONY : PostStepRegistry.cpp.s
 
 PretransformVertices.o: PretransformVertices.cpp.o
@@ -2126,7 +2126,7 @@ PretransformVertices.o: PretransformVertices.cpp.o
 
 # target to build an object file
 PretransformVertices.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PretransformVertices.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PretransformVertices.cpp.o
 .PHONY : PretransformVertices.cpp.o
 
 PretransformVertices.i: PretransformVertices.cpp.i
@@ -2134,7 +2134,7 @@ PretransformVertices.i: PretransformVertices.cpp.i
 
 # target to preprocess a source file
 PretransformVertices.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PretransformVertices.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PretransformVertices.cpp.i
 .PHONY : PretransformVertices.cpp.i
 
 PretransformVertices.s: PretransformVertices.cpp.s
@@ -2142,7 +2142,7 @@ PretransformVertices.s: PretransformVertices.cpp.s
 
 # target to generate assembly for a file
 PretransformVertices.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PretransformVertices.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/PretransformVertices.cpp.s
 .PHONY : PretransformVertices.cpp.s
 
 ProcessHelper.o: ProcessHelper.cpp.o
@@ -2150,7 +2150,7 @@ ProcessHelper.o: ProcessHelper.cpp.o
 
 # target to build an object file
 ProcessHelper.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ProcessHelper.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ProcessHelper.cpp.o
 .PHONY : ProcessHelper.cpp.o
 
 ProcessHelper.i: ProcessHelper.cpp.i
@@ -2158,7 +2158,7 @@ ProcessHelper.i: ProcessHelper.cpp.i
 
 # target to preprocess a source file
 ProcessHelper.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ProcessHelper.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ProcessHelper.cpp.i
 .PHONY : ProcessHelper.cpp.i
 
 ProcessHelper.s: ProcessHelper.cpp.s
@@ -2166,7 +2166,7 @@ ProcessHelper.s: ProcessHelper.cpp.s
 
 # target to generate assembly for a file
 ProcessHelper.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ProcessHelper.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ProcessHelper.cpp.s
 .PHONY : ProcessHelper.cpp.s
 
 Q3BSPFileImporter.o: Q3BSPFileImporter.cpp.o
@@ -2174,7 +2174,7 @@ Q3BSPFileImporter.o: Q3BSPFileImporter.cpp.o
 
 # target to build an object file
 Q3BSPFileImporter.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPFileImporter.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPFileImporter.cpp.o
 .PHONY : Q3BSPFileImporter.cpp.o
 
 Q3BSPFileImporter.i: Q3BSPFileImporter.cpp.i
@@ -2182,7 +2182,7 @@ Q3BSPFileImporter.i: Q3BSPFileImporter.cpp.i
 
 # target to preprocess a source file
 Q3BSPFileImporter.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPFileImporter.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPFileImporter.cpp.i
 .PHONY : Q3BSPFileImporter.cpp.i
 
 Q3BSPFileImporter.s: Q3BSPFileImporter.cpp.s
@@ -2190,7 +2190,7 @@ Q3BSPFileImporter.s: Q3BSPFileImporter.cpp.s
 
 # target to generate assembly for a file
 Q3BSPFileImporter.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPFileImporter.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPFileImporter.cpp.s
 .PHONY : Q3BSPFileImporter.cpp.s
 
 Q3BSPFileParser.o: Q3BSPFileParser.cpp.o
@@ -2198,7 +2198,7 @@ Q3BSPFileParser.o: Q3BSPFileParser.cpp.o
 
 # target to build an object file
 Q3BSPFileParser.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPFileParser.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPFileParser.cpp.o
 .PHONY : Q3BSPFileParser.cpp.o
 
 Q3BSPFileParser.i: Q3BSPFileParser.cpp.i
@@ -2206,7 +2206,7 @@ Q3BSPFileParser.i: Q3BSPFileParser.cpp.i
 
 # target to preprocess a source file
 Q3BSPFileParser.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPFileParser.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPFileParser.cpp.i
 .PHONY : Q3BSPFileParser.cpp.i
 
 Q3BSPFileParser.s: Q3BSPFileParser.cpp.s
@@ -2214,7 +2214,7 @@ Q3BSPFileParser.s: Q3BSPFileParser.cpp.s
 
 # target to generate assembly for a file
 Q3BSPFileParser.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPFileParser.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPFileParser.cpp.s
 .PHONY : Q3BSPFileParser.cpp.s
 
 Q3BSPZipArchive.o: Q3BSPZipArchive.cpp.o
@@ -2222,7 +2222,7 @@ Q3BSPZipArchive.o: Q3BSPZipArchive.cpp.o
 
 # target to build an object file
 Q3BSPZipArchive.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPZipArchive.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPZipArchive.cpp.o
 .PHONY : Q3BSPZipArchive.cpp.o
 
 Q3BSPZipArchive.i: Q3BSPZipArchive.cpp.i
@@ -2230,7 +2230,7 @@ Q3BSPZipArchive.i: Q3BSPZipArchive.cpp.i
 
 # target to preprocess a source file
 Q3BSPZipArchive.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPZipArchive.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPZipArchive.cpp.i
 .PHONY : Q3BSPZipArchive.cpp.i
 
 Q3BSPZipArchive.s: Q3BSPZipArchive.cpp.s
@@ -2238,7 +2238,7 @@ Q3BSPZipArchive.s: Q3BSPZipArchive.cpp.s
 
 # target to generate assembly for a file
 Q3BSPZipArchive.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPZipArchive.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3BSPZipArchive.cpp.s
 .PHONY : Q3BSPZipArchive.cpp.s
 
 Q3DLoader.o: Q3DLoader.cpp.o
@@ -2246,7 +2246,7 @@ Q3DLoader.o: Q3DLoader.cpp.o
 
 # target to build an object file
 Q3DLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3DLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3DLoader.cpp.o
 .PHONY : Q3DLoader.cpp.o
 
 Q3DLoader.i: Q3DLoader.cpp.i
@@ -2254,7 +2254,7 @@ Q3DLoader.i: Q3DLoader.cpp.i
 
 # target to preprocess a source file
 Q3DLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3DLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3DLoader.cpp.i
 .PHONY : Q3DLoader.cpp.i
 
 Q3DLoader.s: Q3DLoader.cpp.s
@@ -2262,7 +2262,7 @@ Q3DLoader.s: Q3DLoader.cpp.s
 
 # target to generate assembly for a file
 Q3DLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3DLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Q3DLoader.cpp.s
 .PHONY : Q3DLoader.cpp.s
 
 RawLoader.o: RawLoader.cpp.o
@@ -2270,7 +2270,7 @@ RawLoader.o: RawLoader.cpp.o
 
 # target to build an object file
 RawLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RawLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RawLoader.cpp.o
 .PHONY : RawLoader.cpp.o
 
 RawLoader.i: RawLoader.cpp.i
@@ -2278,7 +2278,7 @@ RawLoader.i: RawLoader.cpp.i
 
 # target to preprocess a source file
 RawLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RawLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RawLoader.cpp.i
 .PHONY : RawLoader.cpp.i
 
 RawLoader.s: RawLoader.cpp.s
@@ -2286,7 +2286,7 @@ RawLoader.s: RawLoader.cpp.s
 
 # target to generate assembly for a file
 RawLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RawLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RawLoader.cpp.s
 .PHONY : RawLoader.cpp.s
 
 RemoveComments.o: RemoveComments.cpp.o
@@ -2294,7 +2294,7 @@ RemoveComments.o: RemoveComments.cpp.o
 
 # target to build an object file
 RemoveComments.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveComments.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveComments.cpp.o
 .PHONY : RemoveComments.cpp.o
 
 RemoveComments.i: RemoveComments.cpp.i
@@ -2302,7 +2302,7 @@ RemoveComments.i: RemoveComments.cpp.i
 
 # target to preprocess a source file
 RemoveComments.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveComments.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveComments.cpp.i
 .PHONY : RemoveComments.cpp.i
 
 RemoveComments.s: RemoveComments.cpp.s
@@ -2310,7 +2310,7 @@ RemoveComments.s: RemoveComments.cpp.s
 
 # target to generate assembly for a file
 RemoveComments.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveComments.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveComments.cpp.s
 .PHONY : RemoveComments.cpp.s
 
 RemoveRedundantMaterials.o: RemoveRedundantMaterials.cpp.o
@@ -2318,7 +2318,7 @@ RemoveRedundantMaterials.o: RemoveRedundantMaterials.cpp.o
 
 # target to build an object file
 RemoveRedundantMaterials.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveRedundantMaterials.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveRedundantMaterials.cpp.o
 .PHONY : RemoveRedundantMaterials.cpp.o
 
 RemoveRedundantMaterials.i: RemoveRedundantMaterials.cpp.i
@@ -2326,7 +2326,7 @@ RemoveRedundantMaterials.i: RemoveRedundantMaterials.cpp.i
 
 # target to preprocess a source file
 RemoveRedundantMaterials.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveRedundantMaterials.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveRedundantMaterials.cpp.i
 .PHONY : RemoveRedundantMaterials.cpp.i
 
 RemoveRedundantMaterials.s: RemoveRedundantMaterials.cpp.s
@@ -2334,7 +2334,7 @@ RemoveRedundantMaterials.s: RemoveRedundantMaterials.cpp.s
 
 # target to generate assembly for a file
 RemoveRedundantMaterials.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveRedundantMaterials.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveRedundantMaterials.cpp.s
 .PHONY : RemoveRedundantMaterials.cpp.s
 
 RemoveVCProcess.o: RemoveVCProcess.cpp.o
@@ -2342,7 +2342,7 @@ RemoveVCProcess.o: RemoveVCProcess.cpp.o
 
 # target to build an object file
 RemoveVCProcess.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveVCProcess.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveVCProcess.cpp.o
 .PHONY : RemoveVCProcess.cpp.o
 
 RemoveVCProcess.i: RemoveVCProcess.cpp.i
@@ -2350,7 +2350,7 @@ RemoveVCProcess.i: RemoveVCProcess.cpp.i
 
 # target to preprocess a source file
 RemoveVCProcess.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveVCProcess.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveVCProcess.cpp.i
 .PHONY : RemoveVCProcess.cpp.i
 
 RemoveVCProcess.s: RemoveVCProcess.cpp.s
@@ -2358,7 +2358,7 @@ RemoveVCProcess.s: RemoveVCProcess.cpp.s
 
 # target to generate assembly for a file
 RemoveVCProcess.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveVCProcess.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/RemoveVCProcess.cpp.s
 .PHONY : RemoveVCProcess.cpp.s
 
 SGSpatialSort.o: SGSpatialSort.cpp.o
@@ -2366,7 +2366,7 @@ SGSpatialSort.o: SGSpatialSort.cpp.o
 
 # target to build an object file
 SGSpatialSort.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SGSpatialSort.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SGSpatialSort.cpp.o
 .PHONY : SGSpatialSort.cpp.o
 
 SGSpatialSort.i: SGSpatialSort.cpp.i
@@ -2374,7 +2374,7 @@ SGSpatialSort.i: SGSpatialSort.cpp.i
 
 # target to preprocess a source file
 SGSpatialSort.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SGSpatialSort.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SGSpatialSort.cpp.i
 .PHONY : SGSpatialSort.cpp.i
 
 SGSpatialSort.s: SGSpatialSort.cpp.s
@@ -2382,7 +2382,7 @@ SGSpatialSort.s: SGSpatialSort.cpp.s
 
 # target to generate assembly for a file
 SGSpatialSort.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SGSpatialSort.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SGSpatialSort.cpp.s
 .PHONY : SGSpatialSort.cpp.s
 
 SMDLoader.o: SMDLoader.cpp.o
@@ -2390,7 +2390,7 @@ SMDLoader.o: SMDLoader.cpp.o
 
 # target to build an object file
 SMDLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SMDLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SMDLoader.cpp.o
 .PHONY : SMDLoader.cpp.o
 
 SMDLoader.i: SMDLoader.cpp.i
@@ -2398,7 +2398,7 @@ SMDLoader.i: SMDLoader.cpp.i
 
 # target to preprocess a source file
 SMDLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SMDLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SMDLoader.cpp.i
 .PHONY : SMDLoader.cpp.i
 
 SMDLoader.s: SMDLoader.cpp.s
@@ -2406,7 +2406,7 @@ SMDLoader.s: SMDLoader.cpp.s
 
 # target to generate assembly for a file
 SMDLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SMDLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SMDLoader.cpp.s
 .PHONY : SMDLoader.cpp.s
 
 STEPFileReader.o: STEPFileReader.cpp.o
@@ -2414,7 +2414,7 @@ STEPFileReader.o: STEPFileReader.cpp.o
 
 # target to build an object file
 STEPFileReader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/STEPFileReader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/STEPFileReader.cpp.o
 .PHONY : STEPFileReader.cpp.o
 
 STEPFileReader.i: STEPFileReader.cpp.i
@@ -2422,7 +2422,7 @@ STEPFileReader.i: STEPFileReader.cpp.i
 
 # target to preprocess a source file
 STEPFileReader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/STEPFileReader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/STEPFileReader.cpp.i
 .PHONY : STEPFileReader.cpp.i
 
 STEPFileReader.s: STEPFileReader.cpp.s
@@ -2430,15 +2430,39 @@ STEPFileReader.s: STEPFileReader.cpp.s
 
 # target to generate assembly for a file
 STEPFileReader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/STEPFileReader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/STEPFileReader.cpp.s
 .PHONY : STEPFileReader.cpp.s
+
+STLExporter.o: STLExporter.cpp.o
+.PHONY : STLExporter.o
+
+# target to build an object file
+STLExporter.cpp.o:
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/STLExporter.cpp.o
+.PHONY : STLExporter.cpp.o
+
+STLExporter.i: STLExporter.cpp.i
+.PHONY : STLExporter.i
+
+# target to preprocess a source file
+STLExporter.cpp.i:
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/STLExporter.cpp.i
+.PHONY : STLExporter.cpp.i
+
+STLExporter.s: STLExporter.cpp.s
+.PHONY : STLExporter.s
+
+# target to generate assembly for a file
+STLExporter.cpp.s:
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/STLExporter.cpp.s
+.PHONY : STLExporter.cpp.s
 
 STLLoader.o: STLLoader.cpp.o
 .PHONY : STLLoader.o
 
 # target to build an object file
 STLLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/STLLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/STLLoader.cpp.o
 .PHONY : STLLoader.cpp.o
 
 STLLoader.i: STLLoader.cpp.i
@@ -2446,7 +2470,7 @@ STLLoader.i: STLLoader.cpp.i
 
 # target to preprocess a source file
 STLLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/STLLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/STLLoader.cpp.i
 .PHONY : STLLoader.cpp.i
 
 STLLoader.s: STLLoader.cpp.s
@@ -2454,7 +2478,7 @@ STLLoader.s: STLLoader.cpp.s
 
 # target to generate assembly for a file
 STLLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/STLLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/STLLoader.cpp.s
 .PHONY : STLLoader.cpp.s
 
 SceneCombiner.o: SceneCombiner.cpp.o
@@ -2462,7 +2486,7 @@ SceneCombiner.o: SceneCombiner.cpp.o
 
 # target to build an object file
 SceneCombiner.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SceneCombiner.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SceneCombiner.cpp.o
 .PHONY : SceneCombiner.cpp.o
 
 SceneCombiner.i: SceneCombiner.cpp.i
@@ -2470,7 +2494,7 @@ SceneCombiner.i: SceneCombiner.cpp.i
 
 # target to preprocess a source file
 SceneCombiner.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SceneCombiner.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SceneCombiner.cpp.i
 .PHONY : SceneCombiner.cpp.i
 
 SceneCombiner.s: SceneCombiner.cpp.s
@@ -2478,7 +2502,7 @@ SceneCombiner.s: SceneCombiner.cpp.s
 
 # target to generate assembly for a file
 SceneCombiner.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SceneCombiner.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SceneCombiner.cpp.s
 .PHONY : SceneCombiner.cpp.s
 
 ScenePreprocessor.o: ScenePreprocessor.cpp.o
@@ -2486,7 +2510,7 @@ ScenePreprocessor.o: ScenePreprocessor.cpp.o
 
 # target to build an object file
 ScenePreprocessor.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ScenePreprocessor.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ScenePreprocessor.cpp.o
 .PHONY : ScenePreprocessor.cpp.o
 
 ScenePreprocessor.i: ScenePreprocessor.cpp.i
@@ -2494,7 +2518,7 @@ ScenePreprocessor.i: ScenePreprocessor.cpp.i
 
 # target to preprocess a source file
 ScenePreprocessor.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ScenePreprocessor.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ScenePreprocessor.cpp.i
 .PHONY : ScenePreprocessor.cpp.i
 
 ScenePreprocessor.s: ScenePreprocessor.cpp.s
@@ -2502,7 +2526,7 @@ ScenePreprocessor.s: ScenePreprocessor.cpp.s
 
 # target to generate assembly for a file
 ScenePreprocessor.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ScenePreprocessor.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ScenePreprocessor.cpp.s
 .PHONY : ScenePreprocessor.cpp.s
 
 SkeletonMeshBuilder.o: SkeletonMeshBuilder.cpp.o
@@ -2510,7 +2534,7 @@ SkeletonMeshBuilder.o: SkeletonMeshBuilder.cpp.o
 
 # target to build an object file
 SkeletonMeshBuilder.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SkeletonMeshBuilder.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SkeletonMeshBuilder.cpp.o
 .PHONY : SkeletonMeshBuilder.cpp.o
 
 SkeletonMeshBuilder.i: SkeletonMeshBuilder.cpp.i
@@ -2518,7 +2542,7 @@ SkeletonMeshBuilder.i: SkeletonMeshBuilder.cpp.i
 
 # target to preprocess a source file
 SkeletonMeshBuilder.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SkeletonMeshBuilder.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SkeletonMeshBuilder.cpp.i
 .PHONY : SkeletonMeshBuilder.cpp.i
 
 SkeletonMeshBuilder.s: SkeletonMeshBuilder.cpp.s
@@ -2526,7 +2550,7 @@ SkeletonMeshBuilder.s: SkeletonMeshBuilder.cpp.s
 
 # target to generate assembly for a file
 SkeletonMeshBuilder.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SkeletonMeshBuilder.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SkeletonMeshBuilder.cpp.s
 .PHONY : SkeletonMeshBuilder.cpp.s
 
 SortByPTypeProcess.o: SortByPTypeProcess.cpp.o
@@ -2534,7 +2558,7 @@ SortByPTypeProcess.o: SortByPTypeProcess.cpp.o
 
 # target to build an object file
 SortByPTypeProcess.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SortByPTypeProcess.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SortByPTypeProcess.cpp.o
 .PHONY : SortByPTypeProcess.cpp.o
 
 SortByPTypeProcess.i: SortByPTypeProcess.cpp.i
@@ -2542,7 +2566,7 @@ SortByPTypeProcess.i: SortByPTypeProcess.cpp.i
 
 # target to preprocess a source file
 SortByPTypeProcess.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SortByPTypeProcess.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SortByPTypeProcess.cpp.i
 .PHONY : SortByPTypeProcess.cpp.i
 
 SortByPTypeProcess.s: SortByPTypeProcess.cpp.s
@@ -2550,7 +2574,7 @@ SortByPTypeProcess.s: SortByPTypeProcess.cpp.s
 
 # target to generate assembly for a file
 SortByPTypeProcess.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SortByPTypeProcess.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SortByPTypeProcess.cpp.s
 .PHONY : SortByPTypeProcess.cpp.s
 
 SpatialSort.o: SpatialSort.cpp.o
@@ -2558,7 +2582,7 @@ SpatialSort.o: SpatialSort.cpp.o
 
 # target to build an object file
 SpatialSort.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SpatialSort.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SpatialSort.cpp.o
 .PHONY : SpatialSort.cpp.o
 
 SpatialSort.i: SpatialSort.cpp.i
@@ -2566,7 +2590,7 @@ SpatialSort.i: SpatialSort.cpp.i
 
 # target to preprocess a source file
 SpatialSort.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SpatialSort.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SpatialSort.cpp.i
 .PHONY : SpatialSort.cpp.i
 
 SpatialSort.s: SpatialSort.cpp.s
@@ -2574,7 +2598,7 @@ SpatialSort.s: SpatialSort.cpp.s
 
 # target to generate assembly for a file
 SpatialSort.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SpatialSort.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SpatialSort.cpp.s
 .PHONY : SpatialSort.cpp.s
 
 SplitByBoneCountProcess.o: SplitByBoneCountProcess.cpp.o
@@ -2582,7 +2606,7 @@ SplitByBoneCountProcess.o: SplitByBoneCountProcess.cpp.o
 
 # target to build an object file
 SplitByBoneCountProcess.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SplitByBoneCountProcess.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SplitByBoneCountProcess.cpp.o
 .PHONY : SplitByBoneCountProcess.cpp.o
 
 SplitByBoneCountProcess.i: SplitByBoneCountProcess.cpp.i
@@ -2590,7 +2614,7 @@ SplitByBoneCountProcess.i: SplitByBoneCountProcess.cpp.i
 
 # target to preprocess a source file
 SplitByBoneCountProcess.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SplitByBoneCountProcess.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SplitByBoneCountProcess.cpp.i
 .PHONY : SplitByBoneCountProcess.cpp.i
 
 SplitByBoneCountProcess.s: SplitByBoneCountProcess.cpp.s
@@ -2598,7 +2622,7 @@ SplitByBoneCountProcess.s: SplitByBoneCountProcess.cpp.s
 
 # target to generate assembly for a file
 SplitByBoneCountProcess.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SplitByBoneCountProcess.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SplitByBoneCountProcess.cpp.s
 .PHONY : SplitByBoneCountProcess.cpp.s
 
 SplitLargeMeshes.o: SplitLargeMeshes.cpp.o
@@ -2606,7 +2630,7 @@ SplitLargeMeshes.o: SplitLargeMeshes.cpp.o
 
 # target to build an object file
 SplitLargeMeshes.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SplitLargeMeshes.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SplitLargeMeshes.cpp.o
 .PHONY : SplitLargeMeshes.cpp.o
 
 SplitLargeMeshes.i: SplitLargeMeshes.cpp.i
@@ -2614,7 +2638,7 @@ SplitLargeMeshes.i: SplitLargeMeshes.cpp.i
 
 # target to preprocess a source file
 SplitLargeMeshes.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SplitLargeMeshes.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SplitLargeMeshes.cpp.i
 .PHONY : SplitLargeMeshes.cpp.i
 
 SplitLargeMeshes.s: SplitLargeMeshes.cpp.s
@@ -2622,7 +2646,7 @@ SplitLargeMeshes.s: SplitLargeMeshes.cpp.s
 
 # target to generate assembly for a file
 SplitLargeMeshes.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SplitLargeMeshes.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/SplitLargeMeshes.cpp.s
 .PHONY : SplitLargeMeshes.cpp.s
 
 StandardShapes.o: StandardShapes.cpp.o
@@ -2630,7 +2654,7 @@ StandardShapes.o: StandardShapes.cpp.o
 
 # target to build an object file
 StandardShapes.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/StandardShapes.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/StandardShapes.cpp.o
 .PHONY : StandardShapes.cpp.o
 
 StandardShapes.i: StandardShapes.cpp.i
@@ -2638,7 +2662,7 @@ StandardShapes.i: StandardShapes.cpp.i
 
 # target to preprocess a source file
 StandardShapes.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/StandardShapes.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/StandardShapes.cpp.i
 .PHONY : StandardShapes.cpp.i
 
 StandardShapes.s: StandardShapes.cpp.s
@@ -2646,7 +2670,7 @@ StandardShapes.s: StandardShapes.cpp.s
 
 # target to generate assembly for a file
 StandardShapes.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/StandardShapes.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/StandardShapes.cpp.s
 .PHONY : StandardShapes.cpp.s
 
 Subdivision.o: Subdivision.cpp.o
@@ -2654,7 +2678,7 @@ Subdivision.o: Subdivision.cpp.o
 
 # target to build an object file
 Subdivision.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Subdivision.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Subdivision.cpp.o
 .PHONY : Subdivision.cpp.o
 
 Subdivision.i: Subdivision.cpp.i
@@ -2662,7 +2686,7 @@ Subdivision.i: Subdivision.cpp.i
 
 # target to preprocess a source file
 Subdivision.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Subdivision.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Subdivision.cpp.i
 .PHONY : Subdivision.cpp.i
 
 Subdivision.s: Subdivision.cpp.s
@@ -2670,7 +2694,7 @@ Subdivision.s: Subdivision.cpp.s
 
 # target to generate assembly for a file
 Subdivision.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Subdivision.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/Subdivision.cpp.s
 .PHONY : Subdivision.cpp.s
 
 TargetAnimation.o: TargetAnimation.cpp.o
@@ -2678,7 +2702,7 @@ TargetAnimation.o: TargetAnimation.cpp.o
 
 # target to build an object file
 TargetAnimation.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TargetAnimation.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TargetAnimation.cpp.o
 .PHONY : TargetAnimation.cpp.o
 
 TargetAnimation.i: TargetAnimation.cpp.i
@@ -2686,7 +2710,7 @@ TargetAnimation.i: TargetAnimation.cpp.i
 
 # target to preprocess a source file
 TargetAnimation.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TargetAnimation.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TargetAnimation.cpp.i
 .PHONY : TargetAnimation.cpp.i
 
 TargetAnimation.s: TargetAnimation.cpp.s
@@ -2694,7 +2718,7 @@ TargetAnimation.s: TargetAnimation.cpp.s
 
 # target to generate assembly for a file
 TargetAnimation.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TargetAnimation.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TargetAnimation.cpp.s
 .PHONY : TargetAnimation.cpp.s
 
 TerragenLoader.o: TerragenLoader.cpp.o
@@ -2702,7 +2726,7 @@ TerragenLoader.o: TerragenLoader.cpp.o
 
 # target to build an object file
 TerragenLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TerragenLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TerragenLoader.cpp.o
 .PHONY : TerragenLoader.cpp.o
 
 TerragenLoader.i: TerragenLoader.cpp.i
@@ -2710,7 +2734,7 @@ TerragenLoader.i: TerragenLoader.cpp.i
 
 # target to preprocess a source file
 TerragenLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TerragenLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TerragenLoader.cpp.i
 .PHONY : TerragenLoader.cpp.i
 
 TerragenLoader.s: TerragenLoader.cpp.s
@@ -2718,7 +2742,7 @@ TerragenLoader.s: TerragenLoader.cpp.s
 
 # target to generate assembly for a file
 TerragenLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TerragenLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TerragenLoader.cpp.s
 .PHONY : TerragenLoader.cpp.s
 
 TextureTransform.o: TextureTransform.cpp.o
@@ -2726,7 +2750,7 @@ TextureTransform.o: TextureTransform.cpp.o
 
 # target to build an object file
 TextureTransform.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TextureTransform.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TextureTransform.cpp.o
 .PHONY : TextureTransform.cpp.o
 
 TextureTransform.i: TextureTransform.cpp.i
@@ -2734,7 +2758,7 @@ TextureTransform.i: TextureTransform.cpp.i
 
 # target to preprocess a source file
 TextureTransform.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TextureTransform.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TextureTransform.cpp.i
 .PHONY : TextureTransform.cpp.i
 
 TextureTransform.s: TextureTransform.cpp.s
@@ -2742,7 +2766,7 @@ TextureTransform.s: TextureTransform.cpp.s
 
 # target to generate assembly for a file
 TextureTransform.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TextureTransform.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TextureTransform.cpp.s
 .PHONY : TextureTransform.cpp.s
 
 TriangulateProcess.o: TriangulateProcess.cpp.o
@@ -2750,7 +2774,7 @@ TriangulateProcess.o: TriangulateProcess.cpp.o
 
 # target to build an object file
 TriangulateProcess.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TriangulateProcess.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TriangulateProcess.cpp.o
 .PHONY : TriangulateProcess.cpp.o
 
 TriangulateProcess.i: TriangulateProcess.cpp.i
@@ -2758,7 +2782,7 @@ TriangulateProcess.i: TriangulateProcess.cpp.i
 
 # target to preprocess a source file
 TriangulateProcess.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TriangulateProcess.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TriangulateProcess.cpp.i
 .PHONY : TriangulateProcess.cpp.i
 
 TriangulateProcess.s: TriangulateProcess.cpp.s
@@ -2766,7 +2790,7 @@ TriangulateProcess.s: TriangulateProcess.cpp.s
 
 # target to generate assembly for a file
 TriangulateProcess.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TriangulateProcess.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/TriangulateProcess.cpp.s
 .PHONY : TriangulateProcess.cpp.s
 
 UnrealLoader.o: UnrealLoader.cpp.o
@@ -2774,7 +2798,7 @@ UnrealLoader.o: UnrealLoader.cpp.o
 
 # target to build an object file
 UnrealLoader.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/UnrealLoader.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/UnrealLoader.cpp.o
 .PHONY : UnrealLoader.cpp.o
 
 UnrealLoader.i: UnrealLoader.cpp.i
@@ -2782,7 +2806,7 @@ UnrealLoader.i: UnrealLoader.cpp.i
 
 # target to preprocess a source file
 UnrealLoader.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/UnrealLoader.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/UnrealLoader.cpp.i
 .PHONY : UnrealLoader.cpp.i
 
 UnrealLoader.s: UnrealLoader.cpp.s
@@ -2790,7 +2814,7 @@ UnrealLoader.s: UnrealLoader.cpp.s
 
 # target to generate assembly for a file
 UnrealLoader.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/UnrealLoader.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/UnrealLoader.cpp.s
 .PHONY : UnrealLoader.cpp.s
 
 ValidateDataStructure.o: ValidateDataStructure.cpp.o
@@ -2798,7 +2822,7 @@ ValidateDataStructure.o: ValidateDataStructure.cpp.o
 
 # target to build an object file
 ValidateDataStructure.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ValidateDataStructure.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ValidateDataStructure.cpp.o
 .PHONY : ValidateDataStructure.cpp.o
 
 ValidateDataStructure.i: ValidateDataStructure.cpp.i
@@ -2806,7 +2830,7 @@ ValidateDataStructure.i: ValidateDataStructure.cpp.i
 
 # target to preprocess a source file
 ValidateDataStructure.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ValidateDataStructure.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ValidateDataStructure.cpp.i
 .PHONY : ValidateDataStructure.cpp.i
 
 ValidateDataStructure.s: ValidateDataStructure.cpp.s
@@ -2814,7 +2838,7 @@ ValidateDataStructure.s: ValidateDataStructure.cpp.s
 
 # target to generate assembly for a file
 ValidateDataStructure.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ValidateDataStructure.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/ValidateDataStructure.cpp.s
 .PHONY : ValidateDataStructure.cpp.s
 
 VertexTriangleAdjacency.o: VertexTriangleAdjacency.cpp.o
@@ -2822,7 +2846,7 @@ VertexTriangleAdjacency.o: VertexTriangleAdjacency.cpp.o
 
 # target to build an object file
 VertexTriangleAdjacency.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/VertexTriangleAdjacency.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/VertexTriangleAdjacency.cpp.o
 .PHONY : VertexTriangleAdjacency.cpp.o
 
 VertexTriangleAdjacency.i: VertexTriangleAdjacency.cpp.i
@@ -2830,7 +2854,7 @@ VertexTriangleAdjacency.i: VertexTriangleAdjacency.cpp.i
 
 # target to preprocess a source file
 VertexTriangleAdjacency.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/VertexTriangleAdjacency.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/VertexTriangleAdjacency.cpp.i
 .PHONY : VertexTriangleAdjacency.cpp.i
 
 VertexTriangleAdjacency.s: VertexTriangleAdjacency.cpp.s
@@ -2838,7 +2862,7 @@ VertexTriangleAdjacency.s: VertexTriangleAdjacency.cpp.s
 
 # target to generate assembly for a file
 VertexTriangleAdjacency.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/VertexTriangleAdjacency.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/VertexTriangleAdjacency.cpp.s
 .PHONY : VertexTriangleAdjacency.cpp.s
 
 XFileImporter.o: XFileImporter.cpp.o
@@ -2846,7 +2870,7 @@ XFileImporter.o: XFileImporter.cpp.o
 
 # target to build an object file
 XFileImporter.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/XFileImporter.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/XFileImporter.cpp.o
 .PHONY : XFileImporter.cpp.o
 
 XFileImporter.i: XFileImporter.cpp.i
@@ -2854,7 +2878,7 @@ XFileImporter.i: XFileImporter.cpp.i
 
 # target to preprocess a source file
 XFileImporter.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/XFileImporter.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/XFileImporter.cpp.i
 .PHONY : XFileImporter.cpp.i
 
 XFileImporter.s: XFileImporter.cpp.s
@@ -2862,7 +2886,7 @@ XFileImporter.s: XFileImporter.cpp.s
 
 # target to generate assembly for a file
 XFileImporter.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/XFileImporter.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/XFileImporter.cpp.s
 .PHONY : XFileImporter.cpp.s
 
 XFileParser.o: XFileParser.cpp.o
@@ -2870,7 +2894,7 @@ XFileParser.o: XFileParser.cpp.o
 
 # target to build an object file
 XFileParser.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/XFileParser.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/XFileParser.cpp.o
 .PHONY : XFileParser.cpp.o
 
 XFileParser.i: XFileParser.cpp.i
@@ -2878,7 +2902,7 @@ XFileParser.i: XFileParser.cpp.i
 
 # target to preprocess a source file
 XFileParser.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/XFileParser.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/XFileParser.cpp.i
 .PHONY : XFileParser.cpp.i
 
 XFileParser.s: XFileParser.cpp.s
@@ -2886,7 +2910,7 @@ XFileParser.s: XFileParser.cpp.s
 
 # target to generate assembly for a file
 XFileParser.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/XFileParser.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/XFileParser.cpp.s
 .PHONY : XFileParser.cpp.s
 
 __/contrib/ConvertUTF/ConvertUTF.o: __/contrib/ConvertUTF/ConvertUTF.c.o
@@ -2894,7 +2918,7 @@ __/contrib/ConvertUTF/ConvertUTF.o: __/contrib/ConvertUTF/ConvertUTF.c.o
 
 # target to build an object file
 __/contrib/ConvertUTF/ConvertUTF.c.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/ConvertUTF/ConvertUTF.c.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/ConvertUTF/ConvertUTF.c.o
 .PHONY : __/contrib/ConvertUTF/ConvertUTF.c.o
 
 __/contrib/ConvertUTF/ConvertUTF.i: __/contrib/ConvertUTF/ConvertUTF.c.i
@@ -2902,7 +2926,7 @@ __/contrib/ConvertUTF/ConvertUTF.i: __/contrib/ConvertUTF/ConvertUTF.c.i
 
 # target to preprocess a source file
 __/contrib/ConvertUTF/ConvertUTF.c.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/ConvertUTF/ConvertUTF.c.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/ConvertUTF/ConvertUTF.c.i
 .PHONY : __/contrib/ConvertUTF/ConvertUTF.c.i
 
 __/contrib/ConvertUTF/ConvertUTF.s: __/contrib/ConvertUTF/ConvertUTF.c.s
@@ -2910,7 +2934,7 @@ __/contrib/ConvertUTF/ConvertUTF.s: __/contrib/ConvertUTF/ConvertUTF.c.s
 
 # target to generate assembly for a file
 __/contrib/ConvertUTF/ConvertUTF.c.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/ConvertUTF/ConvertUTF.c.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/ConvertUTF/ConvertUTF.c.s
 .PHONY : __/contrib/ConvertUTF/ConvertUTF.c.s
 
 __/contrib/irrXML/irrXML.o: __/contrib/irrXML/irrXML.cpp.o
@@ -2918,7 +2942,7 @@ __/contrib/irrXML/irrXML.o: __/contrib/irrXML/irrXML.cpp.o
 
 # target to build an object file
 __/contrib/irrXML/irrXML.cpp.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/irrXML/irrXML.cpp.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/irrXML/irrXML.cpp.o
 .PHONY : __/contrib/irrXML/irrXML.cpp.o
 
 __/contrib/irrXML/irrXML.i: __/contrib/irrXML/irrXML.cpp.i
@@ -2926,7 +2950,7 @@ __/contrib/irrXML/irrXML.i: __/contrib/irrXML/irrXML.cpp.i
 
 # target to preprocess a source file
 __/contrib/irrXML/irrXML.cpp.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/irrXML/irrXML.cpp.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/irrXML/irrXML.cpp.i
 .PHONY : __/contrib/irrXML/irrXML.cpp.i
 
 __/contrib/irrXML/irrXML.s: __/contrib/irrXML/irrXML.cpp.s
@@ -2934,7 +2958,7 @@ __/contrib/irrXML/irrXML.s: __/contrib/irrXML/irrXML.cpp.s
 
 # target to generate assembly for a file
 __/contrib/irrXML/irrXML.cpp.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/irrXML/irrXML.cpp.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/irrXML/irrXML.cpp.s
 .PHONY : __/contrib/irrXML/irrXML.cpp.s
 
 __/contrib/unzip/ioapi.o: __/contrib/unzip/ioapi.c.o
@@ -2942,7 +2966,7 @@ __/contrib/unzip/ioapi.o: __/contrib/unzip/ioapi.c.o
 
 # target to build an object file
 __/contrib/unzip/ioapi.c.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/unzip/ioapi.c.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/unzip/ioapi.c.o
 .PHONY : __/contrib/unzip/ioapi.c.o
 
 __/contrib/unzip/ioapi.i: __/contrib/unzip/ioapi.c.i
@@ -2950,7 +2974,7 @@ __/contrib/unzip/ioapi.i: __/contrib/unzip/ioapi.c.i
 
 # target to preprocess a source file
 __/contrib/unzip/ioapi.c.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/unzip/ioapi.c.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/unzip/ioapi.c.i
 .PHONY : __/contrib/unzip/ioapi.c.i
 
 __/contrib/unzip/ioapi.s: __/contrib/unzip/ioapi.c.s
@@ -2958,7 +2982,7 @@ __/contrib/unzip/ioapi.s: __/contrib/unzip/ioapi.c.s
 
 # target to generate assembly for a file
 __/contrib/unzip/ioapi.c.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/unzip/ioapi.c.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/unzip/ioapi.c.s
 .PHONY : __/contrib/unzip/ioapi.c.s
 
 __/contrib/unzip/unzip.o: __/contrib/unzip/unzip.c.o
@@ -2966,7 +2990,7 @@ __/contrib/unzip/unzip.o: __/contrib/unzip/unzip.c.o
 
 # target to build an object file
 __/contrib/unzip/unzip.c.o:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/unzip/unzip.c.o
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/unzip/unzip.c.o
 .PHONY : __/contrib/unzip/unzip.c.o
 
 __/contrib/unzip/unzip.i: __/contrib/unzip/unzip.c.i
@@ -2974,7 +2998,7 @@ __/contrib/unzip/unzip.i: __/contrib/unzip/unzip.c.i
 
 # target to preprocess a source file
 __/contrib/unzip/unzip.c.i:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/unzip/unzip.c.i
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/unzip/unzip.c.i
 .PHONY : __/contrib/unzip/unzip.c.i
 
 __/contrib/unzip/unzip.s: __/contrib/unzip/unzip.c.s
@@ -2982,7 +3006,7 @@ __/contrib/unzip/unzip.s: __/contrib/unzip/unzip.c.s
 
 # target to generate assembly for a file
 __/contrib/unzip/unzip.c.s:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/unzip/unzip.c.s
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(MAKE) -f code/CMakeFiles/assimp.dir/build.make code/CMakeFiles/assimp.dir/__/contrib/unzip/unzip.c.s
 .PHONY : __/contrib/unzip/unzip.c.s
 
 # Help Target
@@ -3283,6 +3307,9 @@ help:
 	@echo "... STEPFileReader.o"
 	@echo "... STEPFileReader.i"
 	@echo "... STEPFileReader.s"
+	@echo "... STLExporter.o"
+	@echo "... STLExporter.i"
+	@echo "... STLExporter.s"
 	@echo "... STLLoader.o"
 	@echo "... STLLoader.i"
 	@echo "... STLLoader.s"
@@ -3363,6 +3390,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /mnt/hgfs/dev/assimp4.svnc && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /mnt/hgfs/dev-2/assimp/assimp4-minorfix.svnc && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

@@ -48,7 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "ASELoader.h"
-#include "MaterialSystem.h"
 #include "StringComparison.h"
 #include "SkeletonMeshBuilder.h"
 #include "TargetAnimation.h"
@@ -788,7 +787,7 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh& mesh)	{
 
 // ------------------------------------------------------------------------------------------------
 // Copy a texture from the ASE structs to the output material
-void CopyASETexture(MaterialHelper& mat, ASE::Texture& texture, aiTextureType type)
+void CopyASETexture(aiMaterial& mat, ASE::Texture& texture, aiTextureType type)
 {
 	// Setup the texture name
 	aiString tex;
@@ -810,7 +809,7 @@ void ASEImporter::ConvertMaterial(ASE::Material& mat)
 	// LARGE TODO: Much code her is copied from 3DS ... join them maybe?
 
 	// Allocate the output material
-	mat.pcInstance = new MaterialHelper();
+	mat.pcInstance = new aiMaterial();
 
 	// At first add the base ambient color of the
 	// scene to	the material

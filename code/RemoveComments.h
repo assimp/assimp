@@ -55,7 +55,7 @@ namespace Assimp	{
  *  to those in C or C++ so this code has been moved to a separate
  *  module.
  */
-class ASSIMP_API CommentRemover
+class CommentRemover
 {
 	// class cannot be instanced
 	CommentRemover() {}

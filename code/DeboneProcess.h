@@ -64,7 +64,7 @@ namespace Assimp
 * the bone are split from the mesh. The split off (new) mesh is boneless. At any 
 * point in time, bones without affect upon a given mesh are to be removed.
 */
-class ASSIMP_API DeboneProcess : public BaseProcess
+class DeboneProcess : public BaseProcess
 {
 public:
 

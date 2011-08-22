@@ -52,7 +52,7 @@ struct aiNode;
 #include "PlyParser.h"
 
 namespace Assimp	{
-class MaterialHelper;
+
 
 using namespace PLY;
 
@@ -117,14 +117,14 @@ protected:
 	// -------------------------------------------------------------------
 	/** Extract a material list from the DOM
 	*/
-	void LoadMaterial(std::vector<MaterialHelper*>* pvOut);
+	void LoadMaterial(std::vector<aiMaterial*>* pvOut);
 
 
 	// -------------------------------------------------------------------
 	/** Validate material indices, replace default material identifiers
 	*/
 	void ReplaceDefaultMaterial(std::vector<PLY::Face>* avFaces,
-		std::vector<MaterialHelper*>* avMaterials);
+		std::vector<aiMaterial*>* avMaterials);
 
 
 	// -------------------------------------------------------------------
@@ -135,7 +135,7 @@ protected:
 		const std::vector<aiVector3D>* avNormals,
 		const std::vector<aiColor4D>* avColors,
 		const std::vector<aiVector2D>* avTexCoords,
-		const std::vector<MaterialHelper*>* avMaterials,
+		const std::vector<aiMaterial*>* avMaterials,
 		std::vector<aiMesh*>* avOut);
 
 

@@ -433,7 +433,7 @@ outer:
 
 		// Allocate a mesh and a material
 		aiMesh* mesh = pScene->mMeshes[real] = new aiMesh();
-		MaterialHelper* mat = new MaterialHelper();
+		aiMaterial* mat = new aiMaterial();
 		pScene->mMaterials[real] = mat;
 
 		mesh->mMaterialIndex = real;

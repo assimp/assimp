@@ -100,6 +100,9 @@ IF ( NO_EXPORT )
 	MESSAGE( STATUS "Build an import-only version of Assimp." )
 ENDIF( NO_EXPORT )
 
+## hide all not-exported symbols
+ADD_DEFINITIONS( -fvisibility=hidden )
+
 ADD_SUBDIRECTORY( code/ )
 SET ( BUILD_ASSIMP_TOOLS ON CACHE BOOL
 	"If the supplementary tools for Assimp are built in addition to the library."

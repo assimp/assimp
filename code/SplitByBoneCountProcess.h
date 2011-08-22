@@ -59,7 +59,7 @@ namespace Assimp
  * Applied BEFORE the JoinVertices-Step occurs.
  * Returns NON-UNIQUE vertices, splits by bone count.
 */
-class ASSIMP_API SplitByBoneCountProcess : public BaseProcess
+class SplitByBoneCountProcess : public BaseProcess
 {
 public:
 

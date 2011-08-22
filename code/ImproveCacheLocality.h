@@ -58,7 +58,7 @@ namespace Assimp
  *
  *  @note This step expects triagulated input data.
  */
-class ASSIMP_API ImproveCacheLocalityProcess : public BaseProcess
+class ImproveCacheLocalityProcess : public BaseProcess
 {
 public:
 

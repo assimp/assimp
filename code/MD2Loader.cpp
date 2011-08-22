@@ -44,7 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the MD2 importer class */
 #include "MD2Loader.h"
-#include "MaterialSystem.h"
 #include "ByteSwap.h"
 #include "MD2NormalTable.h" // shouldn't be included by other units
 
@@ -221,7 +220,7 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 	pScene->mRootNode->mMeshes = new unsigned int[1];
 	pScene->mRootNode->mMeshes[0] = 0;
 	pScene->mMaterials = new aiMaterial*[1];
-	pScene->mMaterials[0] = new MaterialHelper();
+	pScene->mMaterials[0] = new aiMaterial();
 	pScene->mNumMeshes = 1;
 	pScene->mMeshes = new aiMesh*[1];
 
@@ -278,7 +277,7 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 	// Not sure whether there are MD2 files without texture coordinates
 	// NOTE: texture coordinates can be there without a texture,
 	// but a texture can't be there without a valid UV channel
-	MaterialHelper* pcHelper = (MaterialHelper*)pScene->mMaterials[0];
+	aiMaterial* pcHelper = (aiMaterial*)pScene->mMaterials[0];
 	const int iMode = (int)aiShadingMode_Gouraud;
 	pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
 

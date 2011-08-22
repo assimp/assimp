@@ -199,7 +199,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 						// map (normal_..., parallax_...)
 						// *********************************************************
 						int idx = 1;
-						MaterialHelper* mat = ( MaterialHelper* ) curMat;
+						aiMaterial* mat = ( aiMaterial* ) curMat;
 
 						if (curMatFlags & AI_IRRMESH_MAT_lightmap){
 							mat->AddProperty(&idx,1,AI_MATKEY_UVWSRC_LIGHTMAP(0));
@@ -440,7 +440,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 				if (curMatFlags & AI_IRRMESH_MAT_trans_vertex_alpha && !useColors)	{
 					// Take the opacity value of the current material
 					// from the common vertex color alpha
-					MaterialHelper* mat = (MaterialHelper*)curMat;
+					aiMaterial* mat = (aiMaterial*)curMat;
 					mat->AddProperty(&curColors[0].a,1,AI_MATKEY_OPACITY);
 				}
 			}}

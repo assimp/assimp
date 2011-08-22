@@ -203,7 +203,7 @@ private:
 
 	// --------------------
 	void ResolveTexture(
-		MaterialHelper* out, 
+		aiMaterial* out, 
 		const Blender::Material* mat, 
 		const Blender::MTex* tex,
 		Blender::ConversionData& conv_data
@@ -211,7 +211,7 @@ private:
 
 	// --------------------
 	void ResolveImage(
-		MaterialHelper* out, 
+		aiMaterial* out, 
 		const Blender::Material* mat, 
 		const Blender::MTex* tex, 
 		const Blender::Image* img,
@@ -219,7 +219,7 @@ private:
 	);
 
 	void AddSentinelTexture(
-		MaterialHelper* out, 
+		aiMaterial* out, 
 		const Blender::Material* mat,
 		const Blender::MTex* tex, 
 		Blender::ConversionData& conv_data

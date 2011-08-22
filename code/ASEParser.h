@@ -76,8 +76,8 @@ struct Material : public D3DS::Material
 	//! Contains all sub materials of this material
 	std::vector<Material> avSubMaterials;
 
-	//! MaterialHelper object
-	MaterialHelper* pcInstance;
+	//! aiMaterial object
+	aiMaterial* pcInstance;
 
 	//! Can we remove this material?
 	bool bNeed;

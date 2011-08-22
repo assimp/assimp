@@ -415,7 +415,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 	pScene->mMaterials = new aiMaterial*[ numMaterials ];
 	for ( unsigned int matIndex = 0; matIndex < numMaterials; matIndex++ )
 	{
-		Assimp::MaterialHelper* mat = new Assimp::MaterialHelper;
+		aiMaterial* mat = new aiMaterial;
 		
 		// Store material name
 		std::map<std::string, ObjFile::Material*>::const_iterator it;

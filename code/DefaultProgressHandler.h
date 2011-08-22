@@ -49,7 +49,7 @@ namespace Assimp	{
 
 // ------------------------------------------------------------------------------------
 /** @brief Internal default implementation of the #ProgressHandler interface. */
-class ASSIMP_API DefaultProgressHandler 
+class DefaultProgressHandler 
 	: public ProgressHandler	{
 
 	

@@ -60,7 +60,7 @@ class Importer;
  *  to provide additional information to other steps. This is primarily
  *  intended for cross-step optimizations.
  */
-class ASSIMP_API SharedPostProcessInfo
+class SharedPostProcessInfo
 {
 public:
 
@@ -211,7 +211,7 @@ private:
  * should be executed. If the function returns true, the class' Execute() 
  * function is called subsequently.
  */
-class ASSIMP_API BaseProcess 
+class ASSIMP_API_WINONLY BaseProcess 
 {
 	friend class Importer;
 

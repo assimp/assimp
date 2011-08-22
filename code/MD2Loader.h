@@ -51,7 +51,7 @@ struct aiNode;
 #include "MD2FileData.h"
 
 namespace Assimp	{
-class MaterialHelper;
+
 
 using namespace MD2;
 

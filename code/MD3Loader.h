@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "MD3FileData.h"
 namespace Assimp	{
-class MaterialHelper;
+
 
 using namespace MD3;
 namespace Q3Shader {
@@ -191,7 +191,7 @@ bool LoadShader(ShaderData& fill, const std::string& file,IOSystem* io);
  *  @param[out] out Material structure to be filled.
  *  @param[in] shader Input shader
  */
-void ConvertShaderToMaterial(MaterialHelper* out, const ShaderDataBlock& shader);
+void ConvertShaderToMaterial(aiMaterial* out, const ShaderDataBlock& shader);
 
 // ---------------------------------------------------------------------------
 /** @brief Load a skin file

@@ -1117,7 +1117,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 
 // ------------------------------------------------------------------------------------------------
 // Add a texture to a material structure
-void ColladaLoader::AddTexture ( Assimp::MaterialHelper& mat, const ColladaParser& pParser,
+void ColladaLoader::AddTexture ( aiMaterial& mat, const ColladaParser& pParser,
 	const Collada::Effect& effect,
 	const Collada::Sampler& sampler,
 	aiTextureType type, unsigned int idx)
@@ -1185,7 +1185,7 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pSce
 	for (std::vector<std::pair<Collada::Effect*, aiMaterial*> >::iterator it = newMats.begin(),
 		end = newMats.end(); it != end; ++it)
 	{
-		MaterialHelper&  mat = (MaterialHelper&)*it->second; 
+		aiMaterial&  mat = (aiMaterial&)*it->second; 
 		Collada::Effect& effect = *it->first;
 
 		// resolve shading mode
@@ -1286,7 +1286,7 @@ void ColladaLoader::BuildMaterials( const ColladaParser& pParser, aiScene* /*pSc
 		const Collada::Effect& effect = effIt->second;
 
 		// create material
-		Assimp::MaterialHelper* mat = new Assimp::MaterialHelper;
+		aiMaterial* mat = new aiMaterial;
 		aiString name( matIt->first);
 		mat->AddProperty(&name,AI_MATKEY_NAME);
 
@@ -1300,7 +1300,7 @@ void ColladaLoader::BuildMaterials( const ColladaParser& pParser, aiScene* /*pSc
 #if 0
 	if( newMats.size() == 0)
 	{
-		Assimp::MaterialHelper* mat = new Assimp::MaterialHelper;
+		aiMaterial* mat = new aiMaterial;
 		aiString name( AI_DEFAULT_MATERIAL_NAME );
 		mat->AddProperty( &name, AI_MATKEY_NAME);
 

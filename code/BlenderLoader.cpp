@@ -398,7 +398,7 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileD
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::ResolveImage(MaterialHelper* out, const Material* mat, const MTex* tex, const Image* img, ConversionData& conv_data)
+void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const MTex* tex, const Image* img, ConversionData& conv_data)
 {
 	(void)mat; (void)tex; (void)conv_data;
 	aiString name;
@@ -443,7 +443,7 @@ void BlenderImporter::ResolveImage(MaterialHelper* out, const Material* mat, con
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::AddSentinelTexture(MaterialHelper* out, const Material* mat, const MTex* tex, ConversionData& conv_data)
+void BlenderImporter::AddSentinelTexture(aiMaterial* out, const Material* mat, const MTex* tex, ConversionData& conv_data)
 {
 	(void)mat; (void)tex; (void)conv_data;
 
@@ -457,7 +457,7 @@ void BlenderImporter::AddSentinelTexture(MaterialHelper* out, const Material* ma
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::ResolveTexture(MaterialHelper* out, const Material* mat, const MTex* tex, ConversionData& conv_data)
+void BlenderImporter::ResolveTexture(aiMaterial* out, const Material* mat, const MTex* tex, ConversionData& conv_data)
 {
 	const Tex* rtex = tex->tex.get();
 	if(!rtex || !rtex->type) {
@@ -545,7 +545,7 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 			conv_data.next_texture[i] = 0 ;
 		}
 	
-		MaterialHelper* mout = new MaterialHelper();
+		aiMaterial* mout = new aiMaterial();
 		conv_data.materials->push_back(mout);
 
 		// set material name

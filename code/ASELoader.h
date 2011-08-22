@@ -51,7 +51,7 @@ struct aiNode;
 #include "ASEParser.h"
 
 namespace Assimp {
-class MaterialHelper;
+
 
 // --------------------------------------------------------------------------------
 /** Importer class for the 3DS ASE ASCII format.
@@ -125,7 +125,7 @@ private:
 
 
 	// -------------------------------------------------------------------
-	/** Convert a material to a MaterialHelper object
+	/** Convert a material to a aiMaterial object
 	 * \param mat Input material
 	 */
 	void ConvertMaterial(ASE::Material& mat);

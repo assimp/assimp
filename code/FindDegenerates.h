@@ -53,7 +53,7 @@ namespace Assimp	{
 // ---------------------------------------------------------------------------
 /** FindDegeneratesProcess: Searches a mesh for degenerated triangles.
 */
-class ASSIMP_API FindDegeneratesProcess : public BaseProcess
+class FindDegeneratesProcess : public BaseProcess
 {
 public:
 

@@ -48,7 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "PlyLoader.h"
-#include "MaterialSystem.h"
 
 using namespace Assimp;
 
@@ -188,7 +187,7 @@ void PLYImporter::InternReadFile( const std::string& pFile,
 	}
 
 	// now load a list of all materials
-	std::vector<MaterialHelper*> avMaterials;
+	std::vector<aiMaterial*> avMaterials;
 	LoadMaterial(&avMaterials);
 
 	// now load a list of all vertex color channels
@@ -241,7 +240,7 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
 	const std::vector<aiVector3D>*			avNormals,
 	const std::vector<aiColor4D>*			avColors,
 	const std::vector<aiVector2D>*			avTexCoords,
-	const std::vector<MaterialHelper*>*		avMaterials,
+	const std::vector<aiMaterial*>*		avMaterials,
 	std::vector<aiMesh*>* avOut)
 {
 	ai_assert(NULL != avFaces);
@@ -327,7 +326,7 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
 // ------------------------------------------------------------------------------------------------
 // Generate a default material if none was specified and apply it to all vanilla faces
 void PLYImporter::ReplaceDefaultMaterial(std::vector<PLY::Face>* avFaces,
-	std::vector<MaterialHelper*>* avMaterials)
+	std::vector<aiMaterial*>* avMaterials)
 {
 	bool bNeedDefaultMat = false;
 
@@ -344,7 +343,7 @@ void PLYImporter::ReplaceDefaultMaterial(std::vector<PLY::Face>* avFaces,
 
 	if (bNeedDefaultMat)	{
 		// generate a default material
-		MaterialHelper* pcHelper = new MaterialHelper();
+		aiMaterial* pcHelper = new aiMaterial();
 
 		// fill in a default material
 		int iMode = (int)aiShadingMode_Gouraud;
@@ -869,7 +868,7 @@ void PLYImporter::GetMaterialColor(const std::vector<PLY::PropertyInstance>& avL
 
 // ------------------------------------------------------------------------------------------------
 // Extract a material from the PLY DOM
-void PLYImporter::LoadMaterial(std::vector<MaterialHelper*>* pvOut)
+void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut)
 {
 	ai_assert(NULL != pvOut);
 
@@ -997,7 +996,7 @@ void PLYImporter::LoadMaterial(std::vector<MaterialHelper*>* pvOut)
 	if (NULL != pcList)	{
 		for (std::vector<ElementInstance>::const_iterator i =  pcList->alInstances.begin();i != pcList->alInstances.end();++i)	{
 			aiColor4D clrOut;
-			MaterialHelper* pcHelper = new MaterialHelper();
+			aiMaterial* pcHelper = new aiMaterial();
 	
 			// build the diffuse material color
 			GetMaterialColor((*i).alProperties,aaiPositions[0],aaiTypes[0],&clrOut);

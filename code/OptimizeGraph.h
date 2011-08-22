@@ -61,7 +61,7 @@ namespace Assimp	{
  *  @see aiProcess_OptimizeGraph for a detailed description of the
  *  algorithm being applied.
  */
-class ASSIMP_API OptimizeGraphProcess : public BaseProcess
+class OptimizeGraphProcess : public BaseProcess
 {
 public:
 

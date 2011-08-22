@@ -61,7 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../../code/AssimpPCH.h" /* HACK */
  
-#include "MaterialSystem.h"   // MaterialHelper clas
+#include "MaterialSystem.h"   // aiMaterial clas
 #include "StringComparison.h" // ASSIMP_stricmp and ASSIMP_strincmp
 
 // in order for std::min and std::max to behave properly

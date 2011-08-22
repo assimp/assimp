@@ -53,7 +53,7 @@ namespace Assimp	{
 /** \brief Helper class to generate vertex buffers for standard geometric
  *  shapes, such as cylinders, cones, boxes, spheres, elipsoids ... .
  */
-class ASSIMP_API StandardShapes
+class StandardShapes
 {
 	// class cannot be instanced
 	StandardShapes() {}

@@ -290,7 +290,7 @@ void RAWImporter::InternReadFile( const std::string& pFile,
 			}
 
 			// generate a material for the mesh
-			MaterialHelper* mat = new MaterialHelper();
+			aiMaterial* mat = new aiMaterial();
 
 			aiColor4D clr(1.0f,1.0f,1.0f,1.0f);
 			if ("%default%" == (*it2).name) // a gray default material

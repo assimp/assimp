@@ -166,7 +166,7 @@ void MakeLeftHandedProcess::ProcessMesh( aiMesh* pMesh)
 // Converts a single material to left handed coordinates. 
 void MakeLeftHandedProcess::ProcessMaterial( aiMaterial* _mat)
 {
-	MaterialHelper* mat = (MaterialHelper*)_mat;
+	aiMaterial* mat = (aiMaterial*)_mat;
 	for (unsigned int a = 0; a < mat->mNumProperties;++a)	{
 		aiMaterialProperty* prop = mat->mProperties[a];
 
@@ -241,7 +241,7 @@ void FlipUVsProcess::Execute( aiScene* pScene)
 // Converts a single material 
 void FlipUVsProcess::ProcessMaterial (aiMaterial* _mat)
 {
-	MaterialHelper* mat = (MaterialHelper*)_mat;
+	aiMaterial* mat = (aiMaterial*)_mat;
 	for (unsigned int a = 0; a < mat->mNumProperties;++a)	{
 		aiMaterialProperty* prop = mat->mProperties[a];
 

@@ -69,7 +69,7 @@ namespace Assimp
 * The other weights on this bone are then renormalized to assure the sum weight
 * to be 1.
 */
-class ASSIMP_API LimitBoneWeightsProcess : public BaseProcess
+class LimitBoneWeightsProcess : public BaseProcess
 {
 public:
 

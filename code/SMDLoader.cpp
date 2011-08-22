@@ -625,7 +625,7 @@ void SMDImporter::CreateOutputMaterials()
 
 	for (unsigned int iMat = 0; iMat < pScene->mNumMaterials;++iMat)
 	{
-		MaterialHelper* pcMat = new MaterialHelper();
+		aiMaterial* pcMat = new aiMaterial();
 		pScene->mMaterials[iMat] = pcMat;
 
 		aiString szName;
@@ -645,7 +645,7 @@ void SMDImporter::CreateOutputMaterials()
 	{
 		pScene->mNumMaterials = 1;
 
-		MaterialHelper* pcHelper = new MaterialHelper();
+		aiMaterial* pcHelper = new aiMaterial();
 		pScene->mMaterials[0] = pcHelper;
 
 		int iMode = (int)aiShadingMode_Gouraud;

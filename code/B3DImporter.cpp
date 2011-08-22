@@ -254,7 +254,7 @@ void B3DImporter::ReadBRUS(){
 		/*int blend=**/ReadInt();
 		int fx=ReadInt();
 
-		MaterialHelper *mat=new MaterialHelper;
+		aiMaterial *mat=new aiMaterial;
 		_materials.push_back( mat );
 		
 		// Name
@@ -641,7 +641,7 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
 
 	//material
 	if( !_materials.size() ){
-		_materials.push_back( new MaterialHelper );
+		_materials.push_back( new aiMaterial );
 	}
 	scene->mNumMaterials=_materials.size();
 	scene->mMaterials=to_array( _materials );

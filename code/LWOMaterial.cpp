@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "LWOLoader.h"
-#include "MaterialSystem.h"
 #include "ByteSwap.h"
 
 using namespace Assimp;
@@ -82,7 +81,7 @@ inline aiTextureMapMode GetMapMode(LWO::Texture::Wrap in)
 }
 
 // ------------------------------------------------------------------------------------------------
-bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, aiTextureType type)
+bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTextureType type)
 {
 	ai_assert(NULL != pcMat);
 
@@ -265,7 +264,7 @@ bool LWOImporter::HandleTextures(MaterialHelper* pcMat, const TextureList& in, a
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat)
+void LWOImporter::ConvertMaterial(const LWO::Surface& surf,aiMaterial* pcMat)
 {
 	// copy the name of the surface
 	aiString st;

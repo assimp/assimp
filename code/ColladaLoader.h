@@ -163,7 +163,7 @@ protected:
 		const Collada::SemanticMappingTable& table);
 
 	/** Add a texture and all of its sampling properties to a material*/
-	void AddTexture ( Assimp::MaterialHelper& mat, const ColladaParser& pParser,
+	void AddTexture ( aiMaterial& mat, const ColladaParser& pParser,
 		const Collada::Effect& effect,
 		const Collada::Sampler& sampler,
 		aiTextureType type, unsigned int idx = 0);

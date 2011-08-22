@@ -54,7 +54,7 @@ namespace Assimp
 /** ComputeUVMappingProcess - converts special mappings, such as spherical,
  *  cylindrical or boxed to proper UV coordinates for rendering.
 */
-class ASSIMP_API ComputeUVMappingProcess : public BaseProcess
+class ComputeUVMappingProcess : public BaseProcess
 {
 public:
 	ComputeUVMappingProcess();

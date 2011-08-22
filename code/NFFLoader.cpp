@@ -1195,7 +1195,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 		}
 
 		// generate a material for the mesh
-		MaterialHelper* pcMat = (MaterialHelper*)(pScene->mMaterials[m] = new MaterialHelper());
+		aiMaterial* pcMat = (aiMaterial*)(pScene->mMaterials[m] = new aiMaterial());
 
 		mesh->mMaterialIndex = m++;
 

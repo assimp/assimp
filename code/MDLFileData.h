@@ -763,7 +763,7 @@ struct IntMaterial_MDL7
 	}
 
 	//! Material instance
-	MaterialHelper* pcMat;
+	aiMaterial* pcMat;
 
 	//! Old material indices
 	unsigned int iOldMatIndices[2];
@@ -909,7 +909,7 @@ struct IntSharedData_MDL7
 	std::vector<bool> abNeedMaterials;
 
 	//! List of all materials
-	std::vector<MaterialHelper*> pcMats;
+	std::vector<aiMaterial*> pcMats;
 
 	//! List of all bones
 	IntBone_MDL7** apcOutBones;

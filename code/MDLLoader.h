@@ -53,7 +53,7 @@ struct aiNode;
 #include "HalfLifeFileData.h"
 
 namespace Assimp	{
-class MaterialHelper;
+
 
 using namespace MDL;
 
@@ -253,7 +253,7 @@ protected:
 	void ParseSkinLump_3DGS_MDL7(
 		const unsigned char* szCurrent,
 		const unsigned char** szCurrentOut,
-		std::vector<MaterialHelper*>& pcMats);
+		std::vector<aiMaterial*>& pcMats);
 
 	// -------------------------------------------------------------------
 	/** Parse a skin lump in a MDL7/HMP7 file with all of its features
@@ -268,7 +268,7 @@ protected:
 	void ParseSkinLump_3DGS_MDL7(
 		const unsigned char* szCurrent,
 		const unsigned char** szCurrentOut,
-		MaterialHelper* pcMatOut,
+		aiMaterial* pcMatOut,
 		unsigned int iType,
 		unsigned int iWidth,
 		unsigned int iHeight);
@@ -309,9 +309,9 @@ protected:
 	 * \param pcMat2 Second input material
 	 * \param pcMatOut Output material instance to be filled. Must be empty
 	 */
-	void JoinSkins_3DGS_MDL7(MaterialHelper* pcMat1,
-		MaterialHelper* pcMat2,
-		MaterialHelper* pcMatOut);
+	void JoinSkins_3DGS_MDL7(aiMaterial* pcMat1,
+		aiMaterial* pcMat2,
+		aiMaterial* pcMatOut);
 
 	// -------------------------------------------------------------------
 	/** Add a bone transformation key to an animation

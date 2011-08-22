@@ -288,7 +288,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 		m_pcCurrentTexture->hTreeItem);
 
 	// change this in the old aiMaterial structure, too
-	Assimp::MaterialHelper* pcMat = (Assimp::MaterialHelper*)
+	aiMaterial* pcMat = (aiMaterial*)
 		g_pcAsset->pcScene->mMaterials[m_pcCurrentTexture->iMatIndex];
  	
 	// update all meshes referencing this material
@@ -364,26 +364,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 			//}
 		}
 	}
-	// now update the material itself
-	aiString szOld;
 
-	aiGetMaterialString(pcMat,AI_MATKEY_TEXTURE(m_pcCurrentTexture->iType,0),&szOld);
-	pcMat->AddProperty(&szString,AI_MATKEY_TEXTURE(m_pcCurrentTexture->iType,0));
-
-#if 0
-	char szBuffer[512];
-	sprintf(szBuffer,"%s%s",szKey,"_old");
-
-	if (AI_SUCCESS != aiGetMaterialString(pcMat, szBuffer, &szOld))
-	{
-		pcMat->AddProperty(&szOld,szBuffer );
-	}
-	else if (szString.length == szOld.length && 
-		0 == ASSIMP_stricmp(szString.data,szOld.data))
-	{
-		pcMat->RemoveProperty(szBuffer);
-	}
-#endif
 	return 1;
 }
 //-------------------------------------------------------------------------------
@@ -1296,7 +1277,7 @@ int CDisplay::HandleTreeViewPopup(WPARAM wParam,LPARAM lParam)
 		}
 
 		// change the material key ...
-		Assimp::MaterialHelper* pcMat = (Assimp::MaterialHelper*)g_pcAsset->pcScene->mMaterials[
+		aiMaterial* pcMat = (aiMaterial*)g_pcAsset->pcScene->mMaterials[
 			this->m_pcCurrentMaterial->iIndex];
 		pcMat->AddProperty<aiColor4D>(&clrOld,1,szMatKey,0,0);
 
@@ -1429,7 +1410,7 @@ int CDisplay::HandleTreeViewPopup2(WPARAM wParam,LPARAM lParam)
 			return 1;
 		}
 
-		Assimp::MaterialHelper* pcMat = (Assimp::MaterialHelper*)g_pcAsset->pcScene->mMaterials[
+		aiMaterial* pcMat = (aiMaterial*)g_pcAsset->pcScene->mMaterials[
 			m_pcCurrentTexture->iMatIndex];
 
 		unsigned int s;

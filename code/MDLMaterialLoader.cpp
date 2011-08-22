@@ -475,7 +475,7 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char* szData,
 void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	const unsigned char* szCurrent,
 	const unsigned char** szCurrentOut,
-	MaterialHelper* pcMatOut,
+	aiMaterial* pcMatOut,
 	unsigned int iType,
 	unsigned int iWidth,
 	unsigned int iHeight)
@@ -791,7 +791,7 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
 void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	const unsigned char* szCurrent,
 	const unsigned char** szCurrentOut,
-	std::vector<MaterialHelper*>& pcMats)
+	std::vector<aiMaterial*>& pcMats)
 {
 	ai_assert(NULL != szCurrent);
 	ai_assert(NULL != szCurrentOut);
@@ -803,7 +803,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	szCurrent += 12;
 
 	// allocate an output material
-	MaterialHelper* pcMatOut = new MaterialHelper();
+	aiMaterial* pcMatOut = new aiMaterial();
 	pcMats.push_back(pcMatOut);
 
 	// skip length of file name

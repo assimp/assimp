@@ -48,7 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "LWOLoader.h"
-#include "MaterialSystem.h"
 #include "StringComparison.h"
 #include "SGSpatialSort.h"
 #include "ByteSwap.h"
@@ -404,7 +403,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	// The RemoveRedundantMaterials step will clean this up later
 	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials = (unsigned int)mSurfaces->size()];
 	for (unsigned int mat = 0; mat < pScene->mNumMaterials;++mat)	{
-		MaterialHelper* pcMat = new MaterialHelper();
+		aiMaterial* pcMat = new aiMaterial();
 		pScene->mMaterials[mat] = pcMat;
 		ConvertMaterial((*mSurfaces)[mat],pcMat);
 	}

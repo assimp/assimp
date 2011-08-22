@@ -81,7 +81,7 @@ class SplitLargeMeshesProcess_Vertex;
  * Applied BEFORE the JoinVertices-Step occurs.
  * Returns NON-UNIQUE vertices, splits by triangle number.
 */
-class ASSIMP_API SplitLargeMeshesProcess_Triangle : public BaseProcess
+class SplitLargeMeshesProcess_Triangle : public BaseProcess
 {
 	friend class SplitLargeMeshesProcess_Vertex;
 
@@ -149,7 +149,7 @@ public:
  * Applied AFTER the JoinVertices-Step occurs.
  * Returns UNIQUE vertices, splits by vertex number.
 */
-class ASSIMP_API SplitLargeMeshesProcess_Vertex : public BaseProcess
+class SplitLargeMeshesProcess_Vertex : public BaseProcess
 {
 public:
 

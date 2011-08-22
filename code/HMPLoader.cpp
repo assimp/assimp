@@ -45,7 +45,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_HMP_IMPORTER
 
 // internal headers
-#include "MaterialSystem.h"
 #include "HMPLoader.h"
 #include "MD2FileData.h"
 
@@ -339,7 +338,7 @@ void HMPImporter::CreateMaterial(const unsigned char* szCurrent,
 	{
 		// generate a default material
 		const int iMode = (int)aiShadingMode_Gouraud;
-		MaterialHelper* pcHelper = new MaterialHelper();
+		aiMaterial* pcHelper = new aiMaterial();
 		pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
 
 		aiColor3D clr;
@@ -447,7 +446,7 @@ void HMPImporter::ReadFirstSkin(unsigned int iNumSkins, const unsigned char* szC
 	uint32_t iHeight = *((uint32_t*)szCursor); szCursor += sizeof(uint32_t);
 
 	// allocate an output material
-	MaterialHelper* pcMat = new MaterialHelper();
+	aiMaterial* pcMat = new aiMaterial();
 
 	// read the skin, this works exactly as for MDL7
 	ParseSkinLump_3DGS_MDL7(szCursor,&szCursor,

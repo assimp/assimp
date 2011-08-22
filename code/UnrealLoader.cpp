@@ -350,7 +350,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 		nd->mMeshes[i] = i;
 
 		// create materials, too
-		MaterialHelper* mat = new MaterialHelper();
+		aiMaterial* mat = new aiMaterial();
 		pScene->mMaterials[i] = mat;
 
 		// all white by default - texture rulez

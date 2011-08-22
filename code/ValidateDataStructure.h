@@ -62,7 +62,7 @@ namespace Assimp	{
 /** Validates the whole ASSIMP scene data structure for correctness.
  *  ImportErrorException is thrown of the scene is corrupt.*/
 // --------------------------------------------------------------------------------------
-class ASSIMP_API ValidateDSProcess : public BaseProcess
+class ValidateDSProcess : public BaseProcess
 {
 public:
 

@@ -387,7 +387,7 @@ void DXFImporter::GenerateMaterials(aiScene* pScene, DXF::FileData& /*output*/)
 	// the default vertex color is GREY, so we are
 	// already at Assimp's usual default color.
 	// generate a default material
-	MaterialHelper* pcMat = new MaterialHelper();
+	aiMaterial* pcMat = new aiMaterial();
 	aiString s;
 	s.Set(AI_DEFAULT_MATERIAL_NAME);
 	pcMat->AddProperty(&s, AI_MATKEY_NAME);

@@ -494,12 +494,12 @@ void MDLImporter::SetupMaterialProperties_3DGS_MDL5_Quake1( )
 
 	// allocate ONE material
 	pScene->mMaterials    = new aiMaterial*[1];
-	pScene->mMaterials[0] = new MaterialHelper();
+	pScene->mMaterials[0] = new aiMaterial();
 	pScene->mNumMaterials = 1;
 
 	// setup the material's properties
 	const int iMode = (int)aiShadingMode_Gouraud;
-	MaterialHelper* const pcHelper = (MaterialHelper*)pScene->mMaterials[0];
+	aiMaterial* const pcHelper = (aiMaterial*)pScene->mMaterials[0];
 	pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
 
 	aiColor4D clr;
@@ -1268,7 +1268,7 @@ void MDLImporter::SortByMaterials_3DGS_MDL7(
 				if (!bFound)	{
 					//  build a new material ...
 					MDL::IntMaterial_MDL7 sHelper;
-					sHelper.pcMat = new MaterialHelper();
+					sHelper.pcMat = new aiMaterial();
 					sHelper.iOldMatIndices[0] = iMatIndex;
 					sHelper.iOldMatIndices[1] = iMatIndex2;
 					JoinSkins_3DGS_MDL7(splitGroupData.shared.pcMats[iMatIndex],
@@ -1394,8 +1394,8 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 		// if we have absolutely no skin loaded we need to generate a default material
 		if (sharedData.pcMats.empty())	{
 			const int iMode = (int)aiShadingMode_Gouraud;
-			sharedData.pcMats.push_back(new MaterialHelper());
-			MaterialHelper* pcHelper = (MaterialHelper*)sharedData.pcMats[0];
+			sharedData.pcMats.push_back(new aiMaterial());
+			aiMaterial* pcHelper = (aiMaterial*)sharedData.pcMats[0];
 			pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
 
 			aiColor3D clr;
@@ -1781,7 +1781,7 @@ void MDLImporter::GenerateOutputMeshes_3DGS_MDL7(
 	const MDL::Header_MDL7* const pcHeader = (const MDL::Header_MDL7*)this->mBuffer;
 	const unsigned int iNumOutBones = pcHeader->bones_num;
 
-	for (std::vector<MaterialHelper*>::size_type i = 0; i < shared.pcMats.size();++i)	{
+	for (std::vector<aiMaterial*>::size_type i = 0; i < shared.pcMats.size();++i)	{
 		if (!splitGroupData.aiSplit[i]->empty())	{
 
 			// allocate the output mesh
@@ -1895,15 +1895,15 @@ void MDLImporter::GenerateOutputMeshes_3DGS_MDL7(
 // ------------------------------------------------------------------------------------------------
 // Join to materials
 void MDLImporter::JoinSkins_3DGS_MDL7(
-	MaterialHelper* pcMat1,
-	MaterialHelper* pcMat2,
-	MaterialHelper* pcMatOut)
+	aiMaterial* pcMat1,
+	aiMaterial* pcMat2,
+	aiMaterial* pcMatOut)
 {
 	ai_assert(NULL != pcMat1 && NULL != pcMat2 && NULL != pcMatOut);
 
 	// first create a full copy of the first skin property set
 	// and assign it to the output material
-	MaterialHelper::CopyPropertyList(pcMatOut,pcMat1);
+	aiMaterial::CopyPropertyList(pcMatOut,pcMat1);
 
 	int iVal = 0;
 	pcMatOut->AddProperty<int>(&iVal,1,AI_MATKEY_UVWSRC_DIFFUSE(0));

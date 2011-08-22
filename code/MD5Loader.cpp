@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_MD5_IMPORTER
 
 // internal headers
-#include "MaterialSystem.h"
 #include "RemoveComments.h"
 #include "MD5Loader.h"
 #include "StringComparison.h"
@@ -507,7 +506,7 @@ void MD5Importer::LoadMD5MeshFile ()
 		}
 
 		// generate a material for the mesh
-		MaterialHelper* mat = new MaterialHelper();
+		aiMaterial* mat = new aiMaterial();
 		pScene->mMaterials[n] = mat;
 
 		// insert the typical doom3 textures:

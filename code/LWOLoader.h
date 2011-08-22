@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "LWOFileData.h"
 #include "BaseImporter.h"
-#include "MaterialSystem.h"
 
 struct aiTexture;
 struct aiNode;
@@ -262,7 +261,7 @@ private:
 	 *  @param in Input texture list
 	 *  @param type Type identifier of the texture list
 	*/
-	bool HandleTextures(MaterialHelper* pcMat, const TextureList& in,
+	bool HandleTextures(aiMaterial* pcMat, const TextureList& in,
 		aiTextureType type);
 
 	// -------------------------------------------------------------------
@@ -273,7 +272,7 @@ private:
 	// -------------------------------------------------------------------
 	/** Convert a LWO surface description to an ASSIMP material
 	*/
-	void ConvertMaterial(const LWO::Surface& surf,MaterialHelper* pcMat);
+	void ConvertMaterial(const LWO::Surface& surf,aiMaterial* pcMat);
 
 	
 	// -------------------------------------------------------------------

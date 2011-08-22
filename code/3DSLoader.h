@@ -52,7 +52,7 @@ struct aiNode;
 #include "3DSHelper.h"
 
 namespace Assimp	{
-class MaterialHelper;
+
 
 using namespace D3DS;
 
@@ -101,7 +101,7 @@ protected:
 	/** Converts a temporary material to the outer representation 
 	 */
 	void ConvertMaterial(D3DS::Material& p_cMat,
-		MaterialHelper& p_pcOut);
+		aiMaterial& p_pcOut);
 
 	// -------------------------------------------------------------------
 	/** Read a chunk

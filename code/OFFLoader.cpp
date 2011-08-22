@@ -198,7 +198,7 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 
 	// generate a default material
 	pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials = 1];
-	MaterialHelper* pcMat = new MaterialHelper();
+	aiMaterial* pcMat = new aiMaterial();
 
 	aiColor4D clr(0.6f,0.6f,0.6f,1.0f);
 	pcMat->AddProperty(&clr,1,AI_MATKEY_COLOR_DIFFUSE);

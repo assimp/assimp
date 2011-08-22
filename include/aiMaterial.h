@@ -663,11 +663,9 @@ struct ASSIMP_API aiMaterial
 
 #ifdef __cplusplus
 
-	 /// NOTE: no initialization, instance Assimp::MaterialHelper instead
-	 aiMaterial() {}
-
 public:
 
+	aiMaterial();
 	~aiMaterial();
 
 	// -------------------------------------------------------------------
@@ -743,6 +741,78 @@ public:
 		float* blend				   = NULL,
 		aiTextureOp* op				= NULL,
 		aiTextureMapMode* mapmode	= NULL) const; 
+
+
+	// Setters
+
+
+	// ------------------------------------------------------------------------------
+	/** @brief Add a property with a given key and type info to the material
+	 *  structure 
+	 *
+	 *  @param pInput Pointer to input data
+	 *  @param pSizeInBytes Size of input data
+	 *  @param pKey Key/Usage of the property (AI_MATKEY_XXX)
+	 *  @param type Set by the AI_MATKEY_XXX macro
+	 *  @param index Set by the AI_MATKEY_XXX macro
+	 *  @param pType Type information hint */
+	aiReturn AddBinaryProperty (const void* pInput,
+		unsigned int pSizeInBytes,
+		const char* pKey,
+		unsigned int type ,
+		unsigned int index ,
+		aiPropertyTypeInfo pType);
+
+	// ------------------------------------------------------------------------------
+	/** @brief Add a string property with a given key and type info to the 
+	 *  material structure 
+	 *
+	 *  @param pInput Input string
+	 *  @param pKey Key/Usage of the property (AI_MATKEY_XXX)
+	 *  @param type Set by the AI_MATKEY_XXX macro
+	 *  @param index Set by the AI_MATKEY_XXX macro */
+	aiReturn AddProperty (const aiString* pInput,
+		const char* pKey,
+		unsigned int type  = 0,
+		unsigned int index = 0);
+
+	// ------------------------------------------------------------------------------
+	/** @brief Add a property with a given key to the material structure 
+	 *  @param pInput Pointer to the input data
+	 *  @param pNumValues Number of values in the array
+	 *  @param pKey Key/Usage of the property (AI_MATKEY_XXX)
+	 *  @param type Set by the AI_MATKEY_XXX macro
+	 *  @param index Set by the AI_MATKEY_XXX macro  */
+	template<class TYPE>
+	aiReturn AddProperty (const TYPE* pInput,
+		unsigned int pNumValues,
+		const char* pKey,
+		unsigned int type  = 0,
+		unsigned int index = 0);
+
+	// ------------------------------------------------------------------------------
+	/** @brief Remove a given key from the list.
+	 *
+	 *  The function fails if the key isn't found
+	 *  @param pKey Key to be deleted */
+	aiReturn RemoveProperty (const char* pKey,
+		unsigned int type  = 0,
+		unsigned int index = 0);
+
+	// ------------------------------------------------------------------------------
+	/** @brief Removes all properties from the material.
+	 *
+	 *  The data array remains allocated so adding new properties is quite fast.  */
+	void Clear();
+
+	// ------------------------------------------------------------------------------
+	/** Copy the property list of a material
+	 *  @param pcDest Destination material
+	 *  @param pcSrc Source material
+	 */
+	static void CopyPropertyList(aiMaterial* pcDest, 
+		const aiMaterial* pcSrc);
+
 
 #endif
 

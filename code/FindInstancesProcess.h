@@ -105,7 +105,7 @@ inline bool CompareArrays(const aiColor4D* first, const aiColor4D* second,
 // ---------------------------------------------------------------------------
 /** @brief A post-processing steps to search for instanced meshes
 */
-class ASSIMP_API FindInstancesProcess : public BaseProcess
+class FindInstancesProcess : public BaseProcess
 {
 public:
 

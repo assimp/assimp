@@ -62,7 +62,7 @@ namespace Assimp	{
  * the resembles the node hierarchy. This is useful for file formats
  * that don't carry any mesh data but only animation data.
  */
-class ASSIMP_API SkeletonMeshBuilder
+class SkeletonMeshBuilder
 {
 public:
 

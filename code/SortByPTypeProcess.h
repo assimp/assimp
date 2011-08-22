@@ -55,7 +55,7 @@ namespace Assimp	{
  *  A mesh with 5 lines, 3 points and 145 triangles would be split in 3 
  * submeshes.
 */
-class ASSIMP_API SortByPTypeProcess : public BaseProcess
+class SortByPTypeProcess : public BaseProcess
 {
 public:
 

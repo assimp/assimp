@@ -250,7 +250,7 @@ bool Q3Shader::LoadSkin(SkinData& fill, const std::string& pFile,IOSystem* io)
 
 // ------------------------------------------------------------------------------------------------
 // Convert Q3Shader to material
-void Q3Shader::ConvertShaderToMaterial(MaterialHelper* out, const ShaderDataBlock& shader)
+void Q3Shader::ConvertShaderToMaterial(aiMaterial* out, const ShaderDataBlock& shader)
 {
 	ai_assert(NULL != out);
 
@@ -877,7 +877,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 			else DefaultLogger::get()->warn("Unable to find shader record for " +without_ext );
 		}
 
-		MaterialHelper* pcHelper = new MaterialHelper();
+		aiMaterial* pcHelper = new aiMaterial();
 
 		const int iMode = (int)aiShadingMode_Gouraud;
 		pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);

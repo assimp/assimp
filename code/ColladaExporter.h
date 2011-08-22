@@ -55,7 +55,7 @@ namespace Assimp
 
 /// Helper class to export a given scene to a Collada file. Just for my personal
 /// comfort when implementing it.
-class ASSIMP_API ColladaExporter
+class ColladaExporter
 {
 public:
 	/// Constructor for a specific scene to export

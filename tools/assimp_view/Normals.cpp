@@ -43,6 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "stdafx.h"
 #include "assimp_view.h"
 
+// note: these are no longer part of the public API, but they are 
+// exported on Windows to keep AssimpView alive.
 #include "GenFaceNormalsProcess.h"
 #include "GenVertexNormalsProcess.h"
 #include "JoinVerticesProcess.h"
@@ -50,45 +52,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MakeVerboseFormat.h"
 
 namespace AssimpView {
-
-
-// NOTE: These classes are necessary since the c'tors of all
-// postprocess steps are protected. Generally they're not 
-// intended to be used directly by applications.
-//
-// However, the viewer is an exception. It does nothing than
-// displaxing the aiScene, so it wouldn't make sense to copy
-// the data to another data structure.
-//
-class MyGenFaceNormalsProcess : public Assimp::GenFaceNormalsProcess
-{
-public:
-	MyGenFaceNormalsProcess() {}
-};
-
-class MyGenVertexNormalsProcess : public Assimp::GenVertexNormalsProcess
-{
-public:
-	MyGenVertexNormalsProcess() {}
-};
-
-class MyMakeVerboseFormatProcess : public Assimp::MakeVerboseFormatProcess
-{
-public:
-	MyMakeVerboseFormatProcess() {}
-};
-
-class MyCalcTangentsProcess : public Assimp::CalcTangentsProcess
-{
-public:
-	MyCalcTangentsProcess() {}
-};
-
-class MyJoinVerticesProcess : public Assimp::JoinVerticesProcess
-{
-public:
-	MyJoinVerticesProcess() {}
-};
 
 
 bool g_bWasFlipped = false;
@@ -131,7 +94,7 @@ void AssetHelper::SetNormalSet(unsigned int iSet)
 {
 	// we need to build an unique set of vertices for this ...
 	{
-		MyMakeVerboseFormatProcess* pcProcess = new MyMakeVerboseFormatProcess();
+		MakeVerboseFormatProcess* pcProcess = new MakeVerboseFormatProcess();
 		pcProcess->Execute(pcScene);
 		delete pcProcess;
 
@@ -152,14 +115,14 @@ void AssetHelper::SetNormalSet(unsigned int iSet)
 	// now we can start to calculate a new set of normals
 	if (HARD == iSet)
 	{
-		MyGenFaceNormalsProcess* pcProcess = new MyGenFaceNormalsProcess();
+		GenFaceNormalsProcess* pcProcess = new GenFaceNormalsProcess();
 		pcProcess->Execute(pcScene);
 		FlipNormalsInt();
 		delete pcProcess;
 	}
 	else if (SMOOTH == iSet)
 	{
-		MyGenVertexNormalsProcess* pcProcess = new MyGenVertexNormalsProcess();
+		GenVertexNormalsProcess* pcProcess = new GenVertexNormalsProcess();
 		pcProcess->SetMaxSmoothAngle((float)AI_DEG_TO_RAD(g_smoothAngle));
 		pcProcess->Execute(pcScene);
 		FlipNormalsInt();
@@ -179,12 +142,12 @@ void AssetHelper::SetNormalSet(unsigned int iSet)
 	}
 
 	// recalculate tangents and bitangents
-	Assimp::BaseProcess* pcProcess = new MyCalcTangentsProcess();
+	Assimp::BaseProcess* pcProcess = new CalcTangentsProcess();
 	pcProcess->Execute(pcScene);
 	delete pcProcess;
 
 	// join the mesh vertices again
-	pcProcess = new MyJoinVerticesProcess();
+	pcProcess = new JoinVerticesProcess();
 	pcProcess->Execute(pcScene);
 	delete pcProcess;
 

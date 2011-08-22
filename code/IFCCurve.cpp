@@ -619,7 +619,7 @@ bool Curve :: ReverseEval(const aiVector3D& val, float& paramOut) const
 	// will never fail in the default implementation.
 
 	// XXX derive treshold from curve topology
-	const float treshold = 1e-4;
+	const float treshold = 1e-4f;
 	const unsigned int samples = 16;
 
 	const ParamRange& range = GetParametricRange();

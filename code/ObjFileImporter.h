@@ -96,7 +96,7 @@ private:
 	
 	//!	\brief	Creates vertices from model.
 	void createVertexArray(const ObjFile::Model* pModel, const ObjFile::Object* pCurrentObject,
-		unsigned int uiMeshIndex, aiMesh* pMesh);
+		unsigned int uiMeshIndex, aiMesh* pMesh,unsigned int uiIdxCount);
 
 	//!	\brief	Object counter helper method.
 	void countObjects(const std::vector<ObjFile::Object*> &rObjects, int &iNumMeshes);

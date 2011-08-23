@@ -64,7 +64,7 @@ struct Face
 	typedef std::vector<unsigned int> IndexArray;
 
 	//!	Primitive type
-	int m_PrimitiveType;
+	aiPrimitiveType m_PrimitiveType;
 	//!	Vertex indices
 	IndexArray *m_pVertices;
 	//!	Normal indices
@@ -80,8 +80,9 @@ struct Face
 	//!	\param	pTexCoords	Pointer to assigned texture indexbuffer
 	Face( std::vector<unsigned int> *pVertices, 
 			std::vector<unsigned int> *pNormals, 
-			std::vector<unsigned int> *pTexCoords) : 
-		m_PrimitiveType( 2 ), 
+			std::vector<unsigned int> *pTexCoords,
+			aiPrimitiveType pt = aiPrimitiveType_POLYGON) : 
+		m_PrimitiveType( pt ), 
 		m_pVertices( pVertices ), 
 		m_pNormals( pNormals ),
 		m_pTexturCoords( pTexCoords ), 
@@ -195,7 +196,7 @@ struct Material
 //!	\brief	Data structure to store a mesh
 struct Mesh
 {
-	static const unsigned int NoMaterial = 999999999;
+	static const unsigned int NoMaterial = ~0u;
 
 	///	Array with pointer to all stored faces
 	std::vector<Face*> m_Faces;

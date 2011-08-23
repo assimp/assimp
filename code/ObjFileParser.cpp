@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjFileMtlImporter.h"
 #include "ObjTools.h"
 #include "ObjFileData.h"
-#include "fast_atof.h"
+#include "ParsingUtils.h"
 #include "../include/aiTypes.h"
 #include "DefaultIOSystem.h"
 
@@ -55,7 +55,6 @@ namespace Assimp
 
 // -------------------------------------------------------------------
 const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME; 
-// fix: changed that to our standard default name
 
 // -------------------------------------------------------------------
 //	Constructor with loaded data and directories.
@@ -82,7 +81,7 @@ ObjFileParser::ObjFileParser(std::vector<char> &Data,const std::string &strModel
 }
 
 // -------------------------------------------------------------------
-//	Destrcutor.
+//	Destructor
 ObjFileParser::~ObjFileParser()
 {
 	delete m_pModel->m_pDefaultMaterial;
@@ -133,9 +132,12 @@ void ObjFileParser::parseFile()
 			}
 			break;
 
-		case 'f': // Parse a face
+		case 'p': // Parse a face, line or point statement
+		case 'l':
+		case 'f':
 			{
-				getFace();
+				getFace(*m_DataIt == 'f' ? aiPrimitiveType_POLYGON : (*m_DataIt == 'l' 
+					? aiPrimitiveType_LINE : aiPrimitiveType_POINT));
 			}
 			break;
 
@@ -255,7 +257,7 @@ void ObjFileParser::getVector2( std::vector<aiVector2D> &point2d_array )
 
 // -------------------------------------------------------------------
 //	Get values for a new face instance
-void ObjFileParser::getFace()
+void ObjFileParser::getFace(aiPrimitiveType type)
 {
 	copyNextLine(m_buffer, BUFFERSIZE);
 	if (m_DataIt == m_DataItEnd)
@@ -272,23 +274,24 @@ void ObjFileParser::getFace()
 	std::vector<unsigned int> *pNormalID = new std::vector<unsigned int>;
 	bool hasNormal = false;
 
-	bool vt = (!m_pModel->m_TextureCoord.empty());
-	bool vn = (!m_pModel->m_Normals.empty());
+	const bool vt = (!m_pModel->m_TextureCoord.empty());
+	const bool vn = (!m_pModel->m_Normals.empty());
 	int iStep = 0, iPos = 0;
 	while (pPtr != pEnd)
 	{
 		iStep = 1;
-		if (*pPtr == '\0')
-			break;
 
-		if (*pPtr=='\r' || *pPtr=='\n')
+		if (IsLineEnd(*pPtr))
 			break;
 
 		if (*pPtr=='/' )
 		{
+			if (type == aiPrimitiveType_POINT) {
+				DefaultLogger::get()->error("Obj: Separator unexpected in point statement");
+			}
 			if (iPos == 0)
 			{
-				//if there are no texturecoordinates in the obj file but normals
+				//if there are no texture coordinates in the file, but normals
 				if (!vt && vn) {
 					iPos = 1;
 					iStep++;
@@ -330,11 +333,16 @@ void ObjFileParser::getFace()
 				}
 			}
 		}
-		for ( int i=0; i<iStep; i++ )
-			++pPtr;
+		pPtr += iStep;
 	}
 
-	ObjFile::Face *face = new ObjFile::Face( pIndices, pNormalID, pTexID );
+	if (pIndices->empty()) {
+		DefaultLogger::get()->error("Obj: Ignoring empty face");
+		m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
+		return;
+	}
+
+	ObjFile::Face *face = new ObjFile::Face( pIndices, pNormalID, pTexID, type );
 	
 	// Set active material, if one set
 	if (NULL != m_pModel->m_pCurrentMaterial) 

@@ -90,7 +90,7 @@ private:
 	///	Stores the following 3d vector.
 	void getVector2(std::vector<aiVector2D> &point2d_array);
 	///	Stores the following face.
-	void getFace();
+	void getFace(aiPrimitiveType type);
 	void getMaterialDesc();
 	///	Gets a comment.
 	void getComment();

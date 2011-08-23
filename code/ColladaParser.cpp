@@ -1879,17 +1879,20 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 			{
 				if( !mReader->isEmptyElement())
 				{
-					// case <polylist> - specifies the number of indices for each polygon
-					const char* content = GetTextContent();
-					vcount.reserve( numPrimitives);
-					for( unsigned int a = 0; a < numPrimitives; a++)
+					if (numPrimitives)	// It is possible to define a mesh without any primitives
 					{
-						if( *content == 0)
-							ThrowException( "Expected more values while reading vcount contents.");
-						// read a number
-						vcount.push_back( (size_t) strtoul10( content, &content));
-						// skip whitespace after it
-						SkipSpacesAndLineEnd( &content);
+						// case <polylist> - specifies the number of indices for each polygon
+						const char* content = GetTextContent();
+						vcount.reserve( numPrimitives);
+						for( unsigned int a = 0; a < numPrimitives; a++)
+						{
+							if( *content == 0)
+								ThrowException( "Expected more values while reading vcount contents.");
+							// read a number
+							vcount.push_back( (size_t) strtoul10( content, &content));
+							// skip whitespace after it
+							SkipSpacesAndLineEnd( &content);
+						}
 					}
 
 					TestClosing( "vcount");
@@ -2002,15 +2005,18 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 	if( expectedPointCount > 0)
 		indices.reserve( expectedPointCount * numOffsets);
 
-	const char* content = GetTextContent();
-	while( *content != 0)
+	if (pNumPrimitives > 0)	// It is possible to not contain any indicies
 	{
-		// read a value. 
-    // Hack: (thom) Some exporters put negative indices sometimes. We just try to carry on anyways.
-    int value = std::max( 0, strtol10( content, &content));
-		indices.push_back( size_t( value));
-		// skip whitespace after it
-		SkipSpacesAndLineEnd( &content);
+		const char* content = GetTextContent();
+		while( *content != 0)
+		{
+			// read a value. 
+			// Hack: (thom) Some exporters put negative indices sometimes. We just try to carry on anyways.
+			int value = std::max( 0, strtol10( content, &content));
+			indices.push_back( size_t( value));
+			// skip whitespace after it
+			SkipSpacesAndLineEnd( &content);
+		}
 	}
 
 	// complain if the index count doesn't fit

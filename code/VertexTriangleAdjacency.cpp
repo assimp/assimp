@@ -65,6 +65,7 @@ VertexTriangleAdjacency::VertexTriangleAdjacency(aiFace *pcFaces,
 			iNumVertices = std::max(iNumVertices,pcFace->mIndices[1]);
 			iNumVertices = std::max(iNumVertices,pcFace->mIndices[2]);
 		}
+		this->iNumVertices = iNumVertices;
 	}
 	unsigned int* pi;
 

@@ -220,15 +220,23 @@ void ObjExporter :: WriteGeometryFile()
 		mOutput << "usemtl " << m.matname << endl;
 
 		BOOST_FOREACH(const Face& f, m.faces) {
-			mOutput << "f ";
+			mOutput << f.kind << ' ';
 			BOOST_FOREACH(const FaceVertex& fv, f.indices) {
-				mOutput << " " << fv.vp << "/";
-				if (fv.vt) {
-					mOutput << fv.vt;
-				}
-				mOutput << "/";
-				if (fv.vn) {
-					mOutput << fv.vn;
+				mOutput << ' ' << fv.vp;
+
+				if (f.kind != 'p') {
+					if (fv.vt || f.kind == 'f') {
+						mOutput << '/';
+					}
+					if (fv.vt) {
+						mOutput << fv.vt;
+					}
+					if (f.kind == 'f') {
+						mOutput << '/';
+						if (fv.vn) {
+							mOutput << fv.vn;
+						}
+					}
 				}
 			}
 
@@ -252,6 +260,16 @@ void ObjExporter :: AddMesh(const aiString& name, const aiMesh* m, const aiMatri
 		const aiFace& f = m->mFaces[i];
 
 		Face& face = mesh.faces[i];
+		switch (f.mNumIndices) {
+			case 1: 
+				face.kind = 'p';
+				break;
+			case 2: 
+				face.kind = 'l';
+				break;
+			default: 
+				face.kind = 'f';
+		}
 		face.indices.resize(f.mNumIndices);
 
 		for(unsigned int a = 0; a < f.mNumIndices; ++a) {

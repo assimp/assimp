@@ -86,6 +86,7 @@ private:
 	};
 
 	struct Face {
+		char kind;
 		std::vector<FaceVertex> indices;
 	};
 

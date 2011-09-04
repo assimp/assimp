@@ -186,7 +186,7 @@ void STLImporter::LoadASCIIFile()
 
 	// try to guess how many vertices we could have
 	// assume we'll need 160 bytes for each face
-	pMesh->mNumVertices = ( pMesh->mNumFaces = fileSize / 160 ) * 3;
+	pMesh->mNumVertices = ( pMesh->mNumFaces = std::max(1u,fileSize / 160u )) * 3;
 	pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
 	pMesh->mNormals  = new aiVector3D[pMesh->mNumVertices];
 	
@@ -207,6 +207,8 @@ void STLImporter::LoadASCIIFile()
 				DefaultLogger::get()->warn("STL: A new facet begins but the old is not yet complete");
 			}
 			if (pMesh->mNumFaces == curFace)	{
+				ai_assert(pMesh->mNumFaces != 0);
+
 				// need to resize the arrays, our size estimate was wrong
 				unsigned int iNeededSize = (unsigned int)(sz-mBuffer) / pMesh->mNumFaces;
 				if (iNeededSize <= 160)iNeededSize >>= 1; // prevent endless looping

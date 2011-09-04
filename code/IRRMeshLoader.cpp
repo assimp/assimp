@@ -118,7 +118,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 	// temporary data - current mesh buffer
 	aiMaterial* curMat	= NULL;
 	aiMesh* curMesh		= NULL;
-	unsigned int curMatFlags;
+	unsigned int curMatFlags = 0;
 
 	std::vector<aiVector3D> curVertices,curNormals,curTangents,curBitangents;
 	std::vector<aiColor4D>  curColors;

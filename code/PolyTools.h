@@ -46,6 +46,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 
 // -------------------------------------------------------------------------------
+/** Compute the signed area of a triangle.
+ *  The function accepts an unconstrained template parameter for use with
+ *  both aiVector3D and aiVector2D, but generally ignores the third coordinate.*/
+template <typename T>
+inline double GetArea2D(const T& v1, const T& v2, const T& v3) 
+{
+	return 0.5 * (v1.x * ((double)v3.y - v2.y) + v2.x * ((double)v1.y - v3.y) + v3.x * ((double)v2.y - v1.y));
+}
+
+// -------------------------------------------------------------------------------
 /** Test if a given point p2 is on the left side of the line formed by p0-p1.
  *  The function accepts an unconstrained template parameter for use with
  *  both aiVector3D and aiVector2D, but generally ignores the third coordinate.*/
@@ -78,17 +88,6 @@ inline bool PointInTriangle2D(const T& p0, const T& p1,const T& p2, const T& pp)
 	dot00 = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
 	return (dot11 > 0) && (dot00 > 0) && (dot11 + dot00 < 1);
-}
-
-
-// -------------------------------------------------------------------------------
-/** Compute the signed area of a triangle.
- *  The function accepts an unconstrained template parameter for use with
- *  both aiVector3D and aiVector2D, but generally ignores the third coordinate.*/
-template <typename T>
-inline double GetArea2D(const T& v1, const T& v2, const T& v3) 
-{
-	return 0.5 * (v1.x * ((double)v3.y - v2.y) + v2.x * ((double)v1.y - v3.y) + v3.x * ((double)v2.y - v1.y));
 }
 
 

@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_Q3BSP_ZIPARCHIVE_H_INC
 #define AI_Q3BSP_ZIPARCHIVE_H_INC
 
-#include "unzip.h"
+#include "../contrib/unzip/unzip.h"
 #include "../include/IOStream.h"
 #include "../include/IOSystem.h"
 #include <string>

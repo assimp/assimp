@@ -1260,7 +1260,7 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pSce
 			AddTexture( mat, pParser, effect, effect.mTexDiffuse, aiTextureType_DIFFUSE);
 
 		if( !effect.mTexBump.mName.empty())
-			AddTexture( mat, pParser, effect, effect.mTexBump, aiTextureType_HEIGHT);
+			AddTexture( mat, pParser, effect, effect.mTexBump, aiTextureType_NORMALS);
 
 		if( !effect.mTexTransparent.mName.empty())
 			AddTexture( mat, pParser, effect, effect.mTexTransparent, aiTextureType_OPACITY);

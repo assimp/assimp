@@ -128,10 +128,12 @@ void HandleCommandLine(char* p_szCommand)
 	if (strlen(sz) < 2)return;
 
 	if (*sz == '\"')
-		{
+  {
 		char* sz2 = strrchr(sz,'\"');
 		if (sz2)*sz2 = 0;
-		}
+    sz++; // skip the starting quote
+	}
+
 	strcpy( g_szFileName, sz );
 	LoadAsset();
 

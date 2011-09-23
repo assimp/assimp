@@ -223,37 +223,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 	//////////////////////////////////////////////////////////////////////////
-	/* ASSIMP_BUILD_XXXX_NNBIT_ARCHITECTURE */
-	//////////////////////////////////////////////////////////////////////////
-#if defined(_MSC_VER)
-	// See http://msdn.microsoft.com/en-us/library/b0084kay.
-#	if defined(_M_IX86)
-#		define ASSIMP_BUILD_X86_32BIT_ARCHITECTURE
-#	elif defined(_M_X64)
-#		define ASSIMP_BUILD_X86_64BIT_ARCHITECTURE
-#	elif defined(_M_IA64)
-#		define ASSIMP_BUILD_IA_64BIT_ARCHITECTURE
-#	else
-#		error unknown architecture
-#	endif
-#elif defined(__GNUC__)
-	// See http://gcc.gnu.org/onlinedocs/cpp/Predefined-Macros.html.
-#	if defined(__x86_32__) || defined(__i386__)
-#		define ASSIMP_BUILD_X86_32BIT_ARCHITECTURE
-#	elif defined(__x86_64__)
-#		define ASSIMP_BUILD_X86_64BIT_ARCHITECTURE
-#	elif defined(__ppc__)
-#		define ASSIMP_BUILD_PPC_32BIT_ARCHITECTURE
-#   elif defined(__arm__)
-#       define ASSIMP_BUILD_ARM_32BIT_ARCHITECTURE
-#	else
-#		error "unknown architecture"
-#	endif
-#else
-#	error unknown compiler
-#endif
-
-	//////////////////////////////////////////////////////////////////////////
 	/* Useful constants */
 	//////////////////////////////////////////////////////////////////////////
 
@@ -271,9 +240,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_DEG_TO_RAD(x) (x*0.0174532925f)
 #define AI_RAD_TO_DEG(x) (x*57.2957795f)
 
-/* Support for big-endian builds on Mac OS X. */
-#if defined(__APPLE__) && defined(__BIG_ENDIAN__)
-#define AI_BUILD_BIG_ENDIAN
+/* Support for big-endian builds */
+#if defined(__BYTE_ORDER__)
+#	if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) 
+#		if !defined(__BIG_ENDIAN__)
+#			define __BIG_ENDIAN__
+#		endif
+#	else /* little endian */
+#		if defined (__BIG_ENDIAN__)
+#			undef __BIG_ENDIAN__
+#		endif
+#	endif
+#endif
+#if defined(__BIG_ENDIAN__)
+#	define AI_BUILD_BIG_ENDIAN
 #endif
 
 #endif // !! INCLUDED_AI_DEFINES_H

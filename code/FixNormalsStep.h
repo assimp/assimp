@@ -51,7 +51,7 @@ namespace Assimp
 {
 
 // ---------------------------------------------------------------------------
-/** The FixInfacingNormalsProcess tries to deteermine whether the normal
+/** The FixInfacingNormalsProcess tries to determine whether the normal
  * vectors of an object are facing inwards. In this case they will be
  * flipped.
  */

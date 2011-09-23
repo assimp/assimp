@@ -96,12 +96,12 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
     DefaultIOSystem io;
     
 	// Read file into memory
-	const std::string mode  = "rb";
+	const std::string mode = "rb";
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, mode));
 	if (NULL == file.get())
 		throw DeadlyImportError( "Failed to open file " + pFile + ".");
 
-	// Get the filesize and vaslidate it, throwing an exception when failes
+	// Get the file-size and validate it, throwing an exception when fails
 	size_t fileSize = file->FileSize();
 	if( fileSize < 16)
 		throw DeadlyImportError( "OBJ-file is too small.");
@@ -189,10 +189,10 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 
 	pNode->mName = pObject->m_strObjName;
 	
+	// If we have a parent node, store it
 	if (pParent != NULL)
 		appendChildToParentNode(pParent, pNode);
 
-	
 	for ( unsigned int i=0; i< pObject->m_Meshes.size(); i++ )
 	{
 		unsigned int meshId = pObject->m_Meshes[ i ];
@@ -358,9 +358,8 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 		for ( size_t vertexIndex = 0, outVertexIndex = 0; vertexIndex < pSourceFace->m_pVertices->size(); vertexIndex++ )
 		{
 			const unsigned int vertex = pSourceFace->m_pVertices->at( vertexIndex );
-			if (vertex >= pModel->m_Vertices.size()) {
-				throw DeadlyImportError("OBJ: vertex index out of range");
-			}
+			if ( vertex >= pModel->m_Vertices.size() ) 
+				throw DeadlyImportError( "OBJ: vertex index out of range" );
 			
 			pMesh->mVertices[ newIndex ] = pModel->m_Vertices[ vertex ];
 			
@@ -368,9 +367,8 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 			if ( !pSourceFace->m_pNormals->empty() && !pModel->m_Normals.empty())
 			{
 				const unsigned int normal = pSourceFace->m_pNormals->at( vertexIndex );
-				if (normal >= pModel->m_Normals.size()) {
+				if ( normal >= pModel->m_Normals.size() )
 					throw DeadlyImportError("OBJ: vertex normal index out of range");
-				}
 
 				pMesh->mNormals[ newIndex ] = pModel->m_Normals[ normal ];
 			}
@@ -384,6 +382,9 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 					ai_assert( tex < pModel->m_TextureCoord.size() );
 					for ( size_t i=0; i < pMesh->GetNumUVChannels(); i++ )
 					{
+						if ( tex >= pModel->m_TextureCoord.size() )
+							throw DeadlyImportError("OBJ: texture coord index out of range");
+
 						aiVector2D coord2d = pModel->m_TextureCoord[ tex ];
 						pMesh->mTextureCoords[ i ][ newIndex ] = aiVector3D( coord2d.x, coord2d.y, 0.0 );
 					}
@@ -395,21 +396,24 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 			// Get destination face
 			aiFace *pDestFace = &pMesh->mFaces[ outIndex ];
 
-			const bool last = vertexIndex == pSourceFace->m_pVertices->size() - 1;
-			if (pSourceFace->m_PrimitiveType != aiPrimitiveType_LINE || !last) {
-				pDestFace->mIndices[ outVertexIndex++ ] = newIndex;
+			const bool last = ( vertexIndex == pSourceFace->m_pVertices->size() - 1 ); 
+			if (pSourceFace->m_PrimitiveType != aiPrimitiveType_LINE || !last) 
+			{
+				pDestFace->mIndices[ outVertexIndex ] = newIndex;
+				outVertexIndex++;
 			}
 
-			if (pSourceFace->m_PrimitiveType == aiPrimitiveType_POINT) {
+			if (pSourceFace->m_PrimitiveType == aiPrimitiveType_POINT) 
+			{
 				outIndex++;
 				outVertexIndex = 0;
 			}
-			else if (pSourceFace->m_PrimitiveType == aiPrimitiveType_LINE) {
+			else if (pSourceFace->m_PrimitiveType == aiPrimitiveType_LINE) 
+			{
 				outVertexIndex = 0;
 
-				if(!last) {
+				if(!last) 
 					outIndex++;
-				}
 
 				if (vertexIndex) {
 					if(!last) {

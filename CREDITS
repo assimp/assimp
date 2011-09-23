@@ -124,3 +124,6 @@ Contributed patches to build assimp debian packages using cmake.
 
 - Mark Page
 Contributed a patch to fix the VertexTriangleAdjacency postprocessing step.
+
+- IOhannes
+Contributed the Debian build fixes ( architecture macro ).

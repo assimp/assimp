@@ -1274,7 +1274,7 @@ int Assimp_Dump (const char* const* params, unsigned int num)
 	const char* fail = "assimp dump: Invalid number of arguments. "
 			"See \'assimp dump --help\'\r\n";
 	if (num < 1) {
-		printf(fail);
+		printf("%s", fail);
 		return 1;
 	}
 
@@ -1286,7 +1286,7 @@ int Assimp_Dump (const char* const* params, unsigned int num)
 
 	// asssimp dump in out [options]
 	if (num < 1) {
-		printf(fail);
+		printf("%s", fail);
 		return 1;
 	}
 

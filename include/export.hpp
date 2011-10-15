@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp	{
 	class ExporterPimpl;
 
+
 // ----------------------------------------------------------------------------------
 /** CPP-API: The Exporter class forms an C++ interface to the export functionality 
  * of the Open Asset Import Library. Note that the export interface is available
@@ -76,6 +77,37 @@ class ASSIMP_API Exporter
 //	: public boost::noncopyable
 //#endif // __cplusplus
 {
+public:
+
+	/** Function pointer type of a Export worker function */
+	typedef void (*fpExportFunc)(const char*,IOSystem*,const aiScene*);
+
+	/** Internal description of an Assimp export format option */
+	struct ExportFormatEntry
+	{
+		/// Public description structure to be returned by aiGetExportFormatDescription()
+		aiExportFormatDesc mDescription;
+
+		// Worker function to do the actual exporting
+		fpExportFunc mExportFunction;
+
+		// Postprocessing steps to be executed PRIOR to invoking mExportFunction
+		unsigned int mEnforcePP;
+
+		// Constructor to fill all entries
+		ExportFormatEntry( const char* pId, const char* pDesc, const char* pExtension, fpExportFunc pFunction, unsigned int pEnforcePP = 0u)
+		{
+			mDescription.id = pId;
+			mDescription.description = pDesc;
+			mDescription.fileExtension = pExtension;
+			mExportFunction = pFunction;
+			mEnforcePP = pEnforcePP;
+		}
+
+		ExportFormatEntry() : mExportFunction(), mEnforcePP() {}
+	};
+
+
 public:
 
 	
@@ -221,6 +253,30 @@ public:
 	 * @return A description of that specific export format. 
 	 *  NULL if pIndex is out of range. */
 	const aiExportFormatDesc* GetExportFormatDescription( size_t pIndex ) const;
+
+
+	// -------------------------------------------------------------------
+	/** Register a custom exporter. Custom export formats are limited to
+	 *    to the current #Exporter instance and do not affect the
+	 *    library globally.
+	 *  @param desc Exporter description.
+	 *  @return aiReturn_SUCCESS if the export format was successfully
+	 *    registered. A common cause that would prevent an exporter
+	 *    from being registered is that its format id is already
+	 *    occupied by another format. */
+	aiReturn RegisterExporter(const ExportFormatEntry& desc);
+
+
+	// -------------------------------------------------------------------
+	/** Remove an export format previously registered with #RegisterExporter
+	 *  from the #Exporter instance (this can also be used to drop
+	 *  builtin exporters because those are implicitly registered
+	 *  using #RegisterExporter).
+	 *  @param id Format id to be unregistered, this refers to the
+	 *    'id' field of #aiExportFormatDesc. 
+	 *  @note Calling this method on a format description not yet registered
+	 *    has no effect.*/
+	void UnregisterExporter(const char* id);
 
 
 protected:

@@ -75,47 +75,20 @@ void ExportSceneObj(const char*,IOSystem*, const aiScene*);
 void ExportSceneSTL(const char*,IOSystem*, const aiScene*);
 void ExportScene3DS(const char*, IOSystem*, const aiScene*) {}
 
-/// Function pointer type of a Export worker function
-typedef void (*fpExportFunc)(const char*,IOSystem*,const aiScene*);
-
-// ------------------------------------------------------------------------------------------------
-/// Internal description of an Assimp export format option
-struct ExportFormatEntry
-{
-	/// Public description structure to be returned by aiGetExportFormatDescription()
-	aiExportFormatDesc mDescription;
-
-	// Worker function to do the actual exporting
-	fpExportFunc mExportFunction;
-
-	// Postprocessing steps to be executed PRIOR to calling mExportFunction
-	unsigned int mEnforcePP;
-
-	// Constructor to fill all entries
-	ExportFormatEntry( const char* pId, const char* pDesc, const char* pExtension, fpExportFunc pFunction, unsigned int pEnforcePP = 0u)
-	{
-		mDescription.id = pId;
-		mDescription.description = pDesc;
-		mDescription.fileExtension = pExtension;
-		mExportFunction = pFunction;
-		mEnforcePP = pEnforcePP;
-	}
-};
-
 // ------------------------------------------------------------------------------------------------
 // global array of all export formats which Assimp supports in its current build
-ExportFormatEntry gExporters[] = 
+Exporter::ExportFormatEntry gExporters[] = 
 {
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
-	ExportFormatEntry( "collada", "COLLADA - Digital Asset Exchange Schema", "dae", &ExportSceneCollada),
+	Exporter::ExportFormatEntry( "collada", "COLLADA - Digital Asset Exchange Schema", "dae", &ExportSceneCollada),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER
-	ExportFormatEntry( "obj", "Wavefront OBJ format", "obj", &ExportSceneObj),
+	Exporter::ExportFormatEntry( "obj", "Wavefront OBJ format", "obj", &ExportSceneObj),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_STL_EXPORTER
-	ExportFormatEntry( "stl", "Stereolithography", "stl" , &ExportSceneSTL, 
+	Exporter::ExportFormatEntry( "stl", "Stereolithography", "stl" , &ExportSceneSTL, 
 		aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_PreTransformVertices
 	),
 #endif
@@ -124,6 +97,8 @@ ExportFormatEntry gExporters[] =
 //	ExportFormatEntry( "3ds", "Autodesk 3DS (legacy format)", "3ds" , &ExportScene3DS),
 //#endif
 };
+
+#define ASSIMP_NUM_EXPORTERS (sizeof(gExporters)/sizeof(gExporters[0]))
 
 
 class ExporterPimpl {
@@ -135,6 +110,10 @@ public:
 		, mIsDefaultIOHandler(true)
 	{
 		GetPostProcessingStepInstanceList(mPostProcessingSteps);
+
+		// grab all builtin exporters
+		mExporters.resize(ASSIMP_NUM_EXPORTERS);
+		std::copy(gExporters,gExporters+ASSIMP_NUM_EXPORTERS,mExporters.begin());
 	}
 
 	~ExporterPimpl() 
@@ -158,9 +137,11 @@ public:
 
 	/** Last fatal export error */
 	std::string mError;
+
+	/** Exporters, this includes those registered using #Assimp::Exporter::RegisterExporter */
+	std::vector<Exporter::ExportFormatEntry> mExporters;
 };
 
-#define ASSIMP_NUM_EXPORTERS (sizeof(gExporters)/sizeof(gExporters[0]))
 
 } // end of namespace Assimp
 
@@ -239,8 +220,9 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 
 	pimpl->mError = "";
-	for (size_t i = 0; i < ASSIMP_NUM_EXPORTERS; ++i) {
-		if (!strcmp(gExporters[i].mDescription.id,pFormatId)) {
+	for (size_t i = 0; i < pimpl->mExporters.size(); ++i) {
+		const Exporter::ExportFormatEntry& exp = pimpl->mExporters[i];
+		if (!strcmp(exp.mDescription.id,pFormatId)) {
 
 			try {
 
@@ -258,7 +240,7 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 				const unsigned int nonIdempotentSteps = aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_MakeLeftHanded;
 
 				// Erase all pp steps that were already applied to this scene
-				unsigned int pp = (gExporters[i].mEnforcePP | pPreprocessing) & ~(priv 
+				unsigned int pp = (exp.mEnforcePP | pPreprocessing) & ~(priv 
 					? (priv->mPPStepsApplied & ~nonIdempotentSteps)
 					: 0u);
 
@@ -282,7 +264,7 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 						}
 					}
 
-					if (verbosify || (gExporters[i].mEnforcePP & aiProcess_JoinIdenticalVertices)) {
+					if (verbosify || (exp.mEnforcePP & aiProcess_JoinIdenticalVertices)) {
 						DefaultLogger::get()->debug("export: Scene data not in verbose format, applying MakeVerboseFormat step first");
 
 						MakeVerboseFormatProcess proc;
@@ -331,7 +313,7 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 					privOut->mPPStepsApplied |= pp;
 				}
 
-				gExporters[i].mExportFunction(pPath,pimpl->mIOSystem.get(),scenecopy.get());
+				exp.mExportFunction(pPath,pimpl->mIOSystem.get(),scenecopy.get());
 			}
 			catch (DeadlyExportError& err) {
 				pimpl->mError = err.what();
@@ -383,18 +365,42 @@ const aiExportDataBlob* Exporter :: GetOrphanedBlob() const
 // ------------------------------------------------------------------------------------------------
 size_t Exporter :: GetExportFormatCount() const 
 {
-	return ASSIMP_NUM_EXPORTERS;
+	return pimpl->mExporters.size();
 }
 
 // ------------------------------------------------------------------------------------------------
 const aiExportFormatDesc* Exporter :: GetExportFormatDescription( size_t pIndex ) const 
 {
-	if (pIndex >= ASSIMP_NUM_EXPORTERS) {
+	if (pIndex >= GetExportFormatCount()) {
 		return NULL;
 	}
 
-	return &gExporters[pIndex].mDescription;
+	return &pimpl->mExporters[pIndex].mDescription;
 }
 
+// ------------------------------------------------------------------------------------------------
+aiReturn Exporter :: RegisterExporter(const ExportFormatEntry& desc)
+{
+	BOOST_FOREACH(const ExportFormatEntry& e, pimpl->mExporters) {
+		if (!strcmp(e.mDescription.id,desc.mDescription.id)) {
+			return aiReturn_FAILURE;
+		}
+	}
+
+	pimpl->mExporters.push_back(desc);
+	return aiReturn_SUCCESS;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void Exporter :: UnregisterExporter(const char* id)
+{
+	for(std::vector<ExportFormatEntry>::iterator it = pimpl->mExporters.begin(); it != pimpl->mExporters.end(); ++it) {
+		if (!strcmp((*it).mDescription.id,id)) {
+			pimpl->mExporters.erase(it);
+			break;
+		}
+	}
+}
 
 #endif // !ASSIMP_BUILD_NO_EXPORT

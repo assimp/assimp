@@ -320,7 +320,7 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 		pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_AMBIENT);
 
 		aiString szName;
-		szName.Set(AI_DEFAULT_TEXTURED_MATERIAL_NAME);
+		szName.Set(AI_DEFAULT_MATERIAL_NAME);
 		pcHelper->AddProperty(&szName,AI_MATKEY_NAME);
 
 		aiString sz;

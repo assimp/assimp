@@ -68,43 +68,21 @@ void ScenePreprocessor::ProcessScene ()
 
 		aiString name;
 
-		// Check whether there are meshes with at least one set of uv coordinates ... add a dummy texture for them
-		// meshes without texture coordinates receive a boring gray default material.
-		unsigned int mat0 = UINT_MAX, mat1 = UINT_MAX;
+		scene->mMaterials[scene->mNumMaterials] = helper = new aiMaterial();
+		aiColor3D clr(0.6f,0.6f,0.6f);
+		helper->AddProperty(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
+
+		// setup the default name to make this material identifyable
+		name.Set(AI_DEFAULT_MATERIAL_NAME);
+		helper->AddProperty(&name,AI_MATKEY_NAME);
+
+		DefaultLogger::get()->debug("ScenePreprocessor: Adding default material \'" AI_DEFAULT_MATERIAL_NAME  "\'");
+
 		for (unsigned int i = 0; i < scene->mNumMeshes;++i) {
-			if (scene->mMeshes[i]->mTextureCoords[0]) {
-
-				if (mat0 == UINT_MAX) {
-
-					scene->mMaterials[scene->mNumMaterials] = helper = new aiMaterial();
-					name.Set("$texture.png");
-					helper->AddProperty(&name,AI_MATKEY_TEXTURE_DIFFUSE(0));
-
-					name.Set(AI_DEFAULT_TEXTURED_MATERIAL_NAME);
-					helper->AddProperty(&name,AI_MATKEY_NAME);
-
-					mat0 = scene->mNumMaterials++;
-					DefaultLogger::get()->debug("ScenePreprocessor: Adding textured material \'" AI_DEFAULT_TEXTURED_MATERIAL_NAME  "\'");
-				}
-				scene->mMeshes[i]->mMaterialIndex = mat0;
-			}
-			else	{
-				if (mat1 == UINT_MAX) {
-
-					scene->mMaterials[scene->mNumMaterials] = helper = new aiMaterial();
-					aiColor3D clr(0.6f,0.6f,0.6f);
-					helper->AddProperty(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
-
-					// setup the default name
-					name.Set(AI_DEFAULT_MATERIAL_NAME);
-					helper->AddProperty(&name,AI_MATKEY_NAME);
-
-					mat1 = scene->mNumMaterials++;
-					DefaultLogger::get()->debug("ScenePreprocessor: Adding grey material \'" AI_DEFAULT_MATERIAL_NAME  "\'");
-				}
-				scene->mMeshes[i]->mMaterialIndex = mat1;
-			}
+			scene->mMeshes[i]->mMaterialIndex = scene->mNumMaterials;
 		}
+
+		scene->mNumMaterials++;
 	}
 }
 

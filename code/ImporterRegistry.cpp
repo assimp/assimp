@@ -160,6 +160,9 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 #	include "IFCLoader.h"
 #endif
+#ifndef ASSIMP_BUILD_NO_M3_IMPORTER
+#   include "M3Importer.h"
+#endif 
 
 namespace Assimp {
 
@@ -278,6 +281,9 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
 #endif
 #if (!defined ASSIMP_BUILD_NO_IFC_IMPORTER)
 	out.push_back( new IFCImporter() );
+#endif
+#if ( !defined ASSIMP_BUILD_NO_M3_IMPORTER )
+	out.push_back( new M3::M3Importer() );
 #endif
 }
 

@@ -278,7 +278,7 @@ void rotate(float x0, float y0, float *x, float *y, float angle)
 
 struct Reference 
 {
-	uint32 nunEntries;	// Code 0x00
+	uint32 nEntries;	// Code 0x00
 	uint32 ref;			// Code 0x04
 };
 
@@ -611,39 +611,39 @@ struct SEQS
 
 struct STC
 {
-	Reference name;	// Code 0x00
-	uint16 s1;	// Code 0x08
-	uint16 s2;	// Code 0x0A
-	uint16 s3;	// Code 0x0C
-	uint16 s4;	// Code 0x0E
-	Reference unk2; // uint32	// Code 0x12
-	Reference unk3; // uint32	// Code 0x1A
-	uint32 d3;	// Code 0x22
-	Reference evt;	// Code 0x24
+	Reference name;		// Code 0x00
+	uint16 s1;			// Code 0x08
+	uint16 s2;			// Code 0x0A
+	uint16 s3;			// Code 0x0C
+	uint16 s4;			// Code 0x0E
+	Reference unk2;		// uint32	// Code 0x12
+	Reference unk3;		// uint32	// Code 0x1A
+	uint32 d3;			// Code 0x22
+	Reference evt;		// Code 0x24
 	Reference unk4[11]; // Seems to be transformation data	// Code 0x2C
-	Reference bnds;	// Code 0x84
+	Reference bnds;		// Code 0x84
 };
 
 struct STS
 {
 	Reference unk1; // uint32	// Code 0x00
 	int32 unk[3];	// Code 0x08
-	int16 s1;	// Code 0x14
-	int16 s2;	// Code 0x16
+	int16 s1;		// Code 0x14
+	int16 s2;		// Code 0x16
 };
 
 struct STG
 {
-	Reference name;	// Code 0x00
+	Reference name;		// Code 0x00
 	Reference stcID;	// Code 0x08
 };
 
 struct SD
 {
 	Reference timeline;	// Code 0x00
-	uint32 flags;	// Code 0x08
-	uint32 length;	// Code 0x0C
-	Reference data;	// Code 0x10
+	uint32 flags;		// Code 0x08
+	uint32 length;		// Code 0x0C
+	Reference data;		// Code 0x10
 };
 
 struct BNDS
@@ -678,25 +678,28 @@ struct QUAT
 /**	Loader to import M3-models.
  */
 // ------------------------------------------------------------------------------------------------
-class M3Importer : BaseImporter
+class M3Importer : public BaseImporter
 {
 	friend class Importer;
 
-protected:
-	///	@brief	Default constructor.
+public:
+	///	@brief	The default constructor.
 	M3Importer();
 
-	///	@brief	Destructor.
+	///	@brief	The destructor.
 	~M3Importer();
 
-public:
 	/// @brief	Returns whether the class can handle the format of the given file. 
 	/// @remark	See BaseImporter::CanRead() for details.
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig ) const;
 
 private:
-	void GetExtensionList(std::set<std::string>& extensions);
+	void GetExtensionList( std::set<std::string>& extensions );
 	void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler );
+	void convertToAssimp( const std::string& pFile, aiScene* pScene, DIV *pViews, Region *pRegions, uint16 *pFaces, 
+		const std::vector<aiVector3D> &vertices, const std::vector<aiVector3D> &normals );
+	void createVertexData( aiMesh *pMesh, const std::vector<aiVector3D> &vertices, const std::vector<aiVector3D> &normals  );
+	aiNode *createNode( aiNode *pParent );
 	template<typename T>
 	T* GetEntries( Reference ref );
 

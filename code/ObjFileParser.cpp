@@ -336,7 +336,8 @@ void ObjFileParser::getFace(aiPrimitiveType type)
 		pPtr += iStep;
 	}
 
-	if (pIndices->empty()) {
+	if ( pIndices->empty() ) 
+	{
 		DefaultLogger::get()->error("Obj: Ignoring empty face");
 		m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 		return;
@@ -350,7 +351,7 @@ void ObjFileParser::getFace(aiPrimitiveType type)
 	else 
 		face->m_pMaterial = m_pModel->m_pDefaultMaterial;
 
-	// Create a default object, if nothing there
+	// Create a default object, if nothing is there
 	if ( NULL == m_pModel->m_pCurrent )
 		createObject( "defaultobject" );
 	
@@ -524,11 +525,11 @@ void ObjFileParser::getGroupName()
 	if ( isEndOfBuffer( m_DataIt, m_DataItEnd ) )
 		return;
 
-	// Store groupname in group library 
+	// Store the group name in the group library 
 	char *pStart = &(*m_DataIt);
 	while ( m_DataIt != m_DataItEnd && !isSeparator(*m_DataIt) )
 		m_DataIt++;
-	std::string strGroupName(pStart, &(*m_DataIt));
+	std::string strGroupName( pStart, &(*m_DataIt) );
 
 	// Change active group, if necessary
 	if ( m_pModel->m_strActiveGroup != strGroupName )

@@ -246,7 +246,7 @@ void CatmullClarkSubdivider::InternSubdivide (
 	SpatialSort spatial;
 
 	// ---------------------------------------------------------------------
-	// 0. Offset table to index all meshes continously , generate a spatially
+	// 0. Offset table to index all meshes continuously, generate a spatially
 	// sorted representation of all vertices in all meshes.
 	// ---------------------------------------------------------------------
 	typedef std::pair<unsigned int,unsigned int> IntPair;

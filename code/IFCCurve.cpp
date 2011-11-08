@@ -568,7 +568,7 @@ size_t Curve :: EstimateSampleCount(float a, float b) const
 }
 
 // ------------------------------------------------------------------------------------------------
-float RecursiveSearch(const Curve* cv, const aiVector3D& val, float a, float b, unsigned int samples, float treshold, unsigned int recurse = 0, unsigned int max_recurse = 15)
+float RecursiveSearch(const Curve* cv, const aiVector3D& val, float a, float b, unsigned int samples, float threshold, unsigned int recurse = 0, unsigned int max_recurse = 15)
 {
 	ai_assert(samples>1);
 
@@ -592,7 +592,7 @@ float RecursiveSearch(const Curve* cv, const aiVector3D& val, float a, float b, 
 	}
 
 	ai_assert(min_diff[0] != inf && min_diff[1] != inf);
-	if ( fabs(a-min_point[0]) < treshold || recurse >= max_recurse) {
+	if ( fabs(a-min_point[0]) < threshold || recurse >= max_recurse) {
 		return min_point[0];
 	}
 
@@ -608,7 +608,7 @@ float RecursiveSearch(const Curve* cv, const aiVector3D& val, float a, float b, 
 		}
 	}
 
-	return RecursiveSearch(cv,val,min_point[0],min_point[1],samples,treshold,recurse+1,max_recurse);
+	return RecursiveSearch(cv,val,min_point[0],min_point[1],samples,threshold,recurse+1,max_recurse);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -618,12 +618,12 @@ bool Curve :: ReverseEval(const aiVector3D& val, float& paramOut) const
 	// in all possible cases, but it will always return at least some value so this function
 	// will never fail in the default implementation.
 
-	// XXX derive treshold from curve topology
-	const float treshold = 1e-4f;
+	// XXX derive threshold from curve topology
+	const float threshold = 1e-4f;
 	const unsigned int samples = 16;
 
 	const ParamRange& range = GetParametricRange();
-	paramOut = RecursiveSearch(this,val,range.first,range.second,samples,treshold);
+	paramOut = RecursiveSearch(this,val,range.first,range.second,samples,threshold);
 
 	return true;
 }

@@ -413,7 +413,7 @@ more information can be found in the <tt>aiPostProcess.h</tt> header.
   <tr>
     <td><tt>-slm</tt></td>
     <td><tt>--split-large-meshes</tt></td>
-	<td>Split large meshes over a specific treshold in smaller sub meshes. The default vertex & face limit is 1000000</td>
+	<td>Split large meshes over a specific threshold in smaller sub meshes. The default vertex & face limit is 1000000</td>
   </tr>
   <tr>
     <td><tt>-lbw</tt></td>

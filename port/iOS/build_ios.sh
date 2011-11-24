@@ -5,7 +5,6 @@
 # BUILD ASSIMP for iOS and iOS Simulator
 #######################
 
-PKG_NAME=bullet-2.78
 BUILD_DIR="./lib/ios"
 
 IOS_BASE_SDK="5.0"
@@ -69,28 +68,34 @@ create_outdir()
 		lib_arm6=`echo $lib_i386 | sed "s/i386/arm6/g"`
 		lib_arm7=`echo $lib_i386 | sed "s/i386/arm7/g"`
 		lib=`echo $lib_i386 | sed "s/i386\///g"`
+		echo 'Creating fat binary...'
 		lipo -arch armv6 $lib_arm6 -arch armv7 $lib_arm7 -arch i386 $lib_i386 -create -output $lib
 	done
+	echo 'Done! You will find the libaries and fat binary library in /lib/ios'
 }
 cd ../../
 
 rm -rf $BUILD_DIR
 mkdir -p $BUILD_DIR/arm6 $BUILD_DIR/arm7 $BUILD_DIR/i386
 
-make clean 2> /dev/null
 setenv_arm6
-make assimp -j8
-cp ./lib/libassimp.a $BUILD_DIR/arm6
+echo 'Building armv6 library'
+make clean
+make assimp -j 8 -l
+cp ./lib/libassimp.a $BUILD_DIR/arm6/
 
-make clean 2> /dev/null
 setenv_arm7
-make assimp -j8
-cp ./lib/libassimp.a $BUILD_DIR/arm7
+echo 'Building armv7 library'
+make clean
+make assimp -j 8 -l
+cp ./lib/libassimp.a $BUILD_DIR/arm7/
 
-make clean 2> /dev/null
+
 setenv_i386
-make assimp -j8
-cp ./lib/libassimp.a $BUILD_DIR/i386
+echo 'Building i386 library'
+make clean
+make assimp -j 8 -l
+cp ./lib/libassimp.a $BUILD_DIR/i386/
 
 rm ./lib/libassimp.a
 

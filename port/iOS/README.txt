@@ -1,0 +1,1 @@
+This folder will contain the iOS build scripts to enable AssImp to be compiled for arm6/7 and i386 as a static library (.a) file for iOS

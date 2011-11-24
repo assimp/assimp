@@ -30,6 +30,7 @@ INCLUDE_DIRECTORIES( include )
 # directory, since that is probably what the user wanted to avoid.
 IF ( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR )
 	SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/lib )
+	SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/lib )
 	SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin )
 ENDIF ( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR )
 
@@ -44,6 +45,11 @@ SET( BIN_INSTALL_DIR "bin" CACHE PATH
 # Generate a pkg-config .pc for the Assimp library.
 CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/assimp.pc.in" "${PROJECT_BINARY_DIR}/assimp.pc" @ONLY )
 INSTALL( FILES "${PROJECT_BINARY_DIR}/assimp.pc" DESTINATION ${LIB_INSTALL_DIR}/pkgconfig/ COMPONENT assimp-dev)
+
+# Allow the user to build a static library
+SET ( BUILD_STATIC_LIB OFF CACHE BOOL
+	"Build a static (.a) version of the library"
+)
 
 # Globally enbale Boost resp. the Boost workaround – it is also needed by the
 # tools which include the Assimp headers.

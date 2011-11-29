@@ -39,7 +39,7 @@ class MaterialSystemTest : public CPPUNIT_NS :: TestFixture
    
 	private:
 
-		MaterialHelper* pcMat;
+		aiMaterial* pcMat;
 };
 
 #endif 

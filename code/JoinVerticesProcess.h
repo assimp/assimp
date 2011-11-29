@@ -82,7 +82,7 @@ public:
 	*/
 	void Execute( aiScene* pScene);
 
-protected:
+public:
 	// -------------------------------------------------------------------
 	/** Unites identical vertices in the given mesh.
 	 * @param pMesh The mesh to process.

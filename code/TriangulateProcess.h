@@ -80,7 +80,7 @@ public:
 	*/
 	void Execute( aiScene* pScene);
 
-protected:
+public:
 	// -------------------------------------------------------------------
 	/** Triangulates the given mesh.
 	 * @param pMesh The mesh to triangulate.

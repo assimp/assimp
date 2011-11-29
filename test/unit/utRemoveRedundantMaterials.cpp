@@ -12,7 +12,7 @@ aiMaterial* getUniqueMaterial1()
 	aiString mTemp;
 	mTemp.Set("UniqueMat1");
 
-	MaterialHelper* pcMat = new MaterialHelper();
+	aiMaterial* pcMat = new aiMaterial();
 	pcMat->AddProperty(&mTemp,AI_MATKEY_NAME);
 	float f = 2.0f;
 	pcMat->AddProperty<float>(&f, 1, AI_MATKEY_BUMPSCALING);
@@ -27,7 +27,7 @@ aiMaterial* getUniqueMaterial2()
 	aiString mTemp;
 	mTemp.Set("Unique Mat2");
 
-	MaterialHelper* pcMat = new MaterialHelper();
+	aiMaterial* pcMat = new aiMaterial();
 	pcMat->AddProperty(&mTemp,AI_MATKEY_NAME);
 	float f = 4.0f;int i = 1;
 	pcMat->AddProperty<float>(&f, 1, AI_MATKEY_BUMPSCALING);
@@ -42,7 +42,7 @@ aiMaterial* getUniqueMaterial3()
 	aiString mTemp;
 	mTemp.Set("Complex material name");
 
-	MaterialHelper* pcMat = new MaterialHelper();
+	aiMaterial* pcMat = new aiMaterial();
 	pcMat->AddProperty(&mTemp,AI_MATKEY_NAME);
 	return pcMat;
 }
@@ -76,14 +76,14 @@ void RemoveRedundantMatsTest :: setUp (void)
 	mTemp.data[0] = 48;
 	mTemp.data[1] = 0;
 
-	MaterialHelper* pcMat;
-	pcScene1->mMaterials[2] = pcMat = new MaterialHelper();
-	MaterialHelper::CopyPropertyList(pcMat,(const MaterialHelper*)pcScene1->mMaterials[0]);
+	aiMaterial* pcMat;
+	pcScene1->mMaterials[2] = pcMat = new aiMaterial();
+	aiMaterial::CopyPropertyList(pcMat,(const aiMaterial*)pcScene1->mMaterials[0]);
 	pcMat->AddProperty(&mTemp,AI_MATKEY_NAME);
 	mTemp.data[0]++;
 
-	pcScene1->mMaterials[3] = pcMat = new MaterialHelper();
-	MaterialHelper::CopyPropertyList(pcMat,(const MaterialHelper*)pcScene1->mMaterials[1]);
+	pcScene1->mMaterials[3] = pcMat = new aiMaterial();
+	aiMaterial::CopyPropertyList(pcMat,(const aiMaterial*)pcScene1->mMaterials[1]);
 	pcMat->AddProperty(&mTemp,AI_MATKEY_NAME);
 	mTemp.data[0]++;
 }

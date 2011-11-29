@@ -36,8 +36,8 @@ void RemoveVCProcessTest :: setUp (void)
 	pScene->mTextures[1] = new aiTexture();
 
 	pScene->mMaterials    = new aiMaterial*[pScene->mNumMaterials = 2];
-	pScene->mMaterials[0] = new MaterialHelper();
-	pScene->mMaterials[1] = new MaterialHelper();
+	pScene->mMaterials[0] = new aiMaterial();
+	pScene->mMaterials[1] = new aiMaterial();
 
 	pScene->mLights    = new aiLight*[pScene->mNumLights = 2];
 	pScene->mLights[0] = new aiLight();
@@ -47,9 +47,9 @@ void RemoveVCProcessTest :: setUp (void)
 	pScene->mCameras[0] = new aiCamera();
 	pScene->mCameras[1] = new aiCamera();
 
-	// COMPILE TEST: MaterialHelper may no add any extra members,
+	// COMPILE TEST: aiMaterial may no add any extra members,
 	// so we don't need a virtual destructor
-	char check[sizeof(MaterialHelper) == sizeof(aiMaterial) ? 10 : -1];
+	char check[sizeof(aiMaterial) == sizeof(aiMaterial) ? 10 : -1];
 	check[0] = 0; 
 }
 

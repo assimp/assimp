@@ -8,7 +8,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION (MaterialSystemTest);
 // ------------------------------------------------------------------------------------------------
 void MaterialSystemTest :: setUp (void)
 {
-	this->pcMat = new MaterialHelper();
+	this->pcMat = new aiMaterial();
 }
 
 // ------------------------------------------------------------------------------------------------

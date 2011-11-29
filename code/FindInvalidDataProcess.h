@@ -78,7 +78,7 @@ public:
 	// Run the step
 	void Execute( aiScene* pScene);
 
-protected:
+public:
 
 	// -------------------------------------------------------------------
 	/** Executes the postprocessing step on the given mesh

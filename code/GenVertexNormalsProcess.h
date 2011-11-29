@@ -91,7 +91,7 @@ public:
 		configMaxAngle =f;
 	}
 
-protected:
+public:
 
 	// -------------------------------------------------------------------
 	/** Computes normals for a specific mesh

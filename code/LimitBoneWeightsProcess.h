@@ -93,7 +93,7 @@ public:
 	*/
 	void SetupProperties(const Importer* pImp);
 
-protected:
+public:
 
 	// -------------------------------------------------------------------
 	/** Limits the bone weight count for all vertices in the given mesh.
@@ -109,7 +109,7 @@ protected:
 	void Execute( aiScene* pScene);
 
 
-protected:
+public:
 
 	// -------------------------------------------------------------------
 	/** Describes a bone weight on a vertex */

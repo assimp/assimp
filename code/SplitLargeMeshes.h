@@ -117,7 +117,7 @@ public:
 	inline unsigned int GetLimit() const
 		{return LIMIT;}
 
-protected:
+public:
 
 	// -------------------------------------------------------------------
 	/** Executes the post processing step on the given imported data.
@@ -181,7 +181,7 @@ public:
 	inline unsigned int GetLimit() const
 		{return LIMIT;}
 
-protected:
+public:
 
 	// -------------------------------------------------------------------
 	/** Executes the post processing step on the given imported data.

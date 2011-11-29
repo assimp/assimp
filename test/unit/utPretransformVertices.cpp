@@ -36,7 +36,7 @@ void PretransformVerticesTest :: setUp (void)
 	// add 5 empty materials
 	scene->mMaterials = new aiMaterial*[scene->mNumMaterials = 5];
 	for (unsigned int i = 0; i < 5;++i)
-		scene->mMaterials[i] = new MaterialHelper();
+		scene->mMaterials[i] = new aiMaterial();
 
 	// add 25 test meshes
 	scene->mMeshes = new aiMesh*[scene->mNumMeshes = 25];

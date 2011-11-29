@@ -1,6 +1,6 @@
 #-*- coding: UTF-8 -*-
 
-from ctypes import POINTER, c_int, c_uint, c_char, c_float, Structure, c_char_p, c_double, c_ubyte
+from ctypes import POINTER, c_int, c_uint, c_char, c_float, Structure, c_char_p, c_double, c_ubyte, c_size_t
 
 
 class Vector2D(Structure):
@@ -51,7 +51,7 @@ class String(Structure):
 
     _fields_ = [
             #Binary length of the string excluding the terminal 0. This is NOT the# logical length of strings containing UTF-8 multibyte sequences! It's# the number of bytes from the beginning of the string to its end.#
-            ("length", c_uint),#String buffer. Size limit is MAXLEN#
+            ("length", c_size_t),#String buffer. Size limit is MAXLEN#
             ("data", c_char*MAXLEN),
         ]
 

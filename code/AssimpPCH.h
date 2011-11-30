@@ -117,6 +117,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <new>
 #include <cstdio>
 #include <limits.h>
+#include <memory>
 
 // Boost headers
 #include <boost/pointer_cast.hpp>

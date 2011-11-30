@@ -4,7 +4,7 @@
 Some fancy helper functions.
 """
 
-import os
+import os, sys
 import ctypes
 from . import structs
 import operator
@@ -19,6 +19,9 @@ additional_dirs, ext_whitelist = [],[]
 if os.name=='posix':
     additional_dirs.append('/usr/local/lib/')
 
+    if sys.platform.lower() == 'darwin':
+        ext_whitelist.append('.dylib')
+    
     # note - this won't catch libassimp.so.N.n, but 
     # currently there's always a symlink called
     # libassimp.so in /usr/local/lib.

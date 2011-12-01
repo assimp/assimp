@@ -1320,6 +1320,9 @@ void LWOImporter::LoadLWO2File()
 				if (mFileBuffer + 2 <= next)
 					layer.mParent = GetU2();
 
+				// Set layer skip parameter
+				layer.skip = skip;
+
 				break;
 			}
 

@@ -81,6 +81,7 @@ struct NodeDesc
 		:	number	(0)
 		,	parent	(0)
 		,	name	("")
+		,	isPivotSet (false)
 		,	lightColor (1.f,1.f,1.f)
 		,	lightIntensity (1.f)
 		,	lightType (0)
@@ -115,6 +116,7 @@ struct NodeDesc
 
 	// position of pivot point
 	aiVector3D pivotPos;
+	bool isPivotSet;
 
 
 

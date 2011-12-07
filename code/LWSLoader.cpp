@@ -782,6 +782,8 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 				c = fast_atof_move(c, (float&) nodes.back().pivotPos.y );
 				SkipSpaces(&c);
 				c = fast_atof_move(c, (float&) nodes.back().pivotPos.z );
+                // Mark pivotPos as set
+                nodes.back().isPivotSet = true;
 			}
 		}
 	}

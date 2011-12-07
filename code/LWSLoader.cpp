@@ -586,11 +586,12 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 			// add node to list
 			LWS::NodeDesc d;
 			d.type = LWS::NodeDesc::OBJECT;
-			d.name = c;
 			if (version >= 4) { // handle LWSC 4 explicit ID
 				d.number = strtoul16(c,&c) & AI_LWS_MASK;
+				SkipSpaces(&c);
 			}
 			else d.number = cur_object++;
+            d.name = c;
 			nodes.push_back(d);
 
 			num_object++;

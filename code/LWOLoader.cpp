@@ -180,8 +180,14 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		// The newer lightwave format allows the user to configure the
 		// loader that just one layer is used. If this is the case
 		// we need to check now whether the requested layer has been found.
-		if (UINT_MAX != configLayerIndex && configLayerIndex > mLayers->size())
-			throw DeadlyImportError("LWO2: The requested layer was not found");
+		if (UINT_MAX != configLayerIndex) {
+			unsigned int layerCount = 0;
+			for(std::list<LWO::Layer>::iterator itLayers=mLayers->begin(); itLayers!=mLayers->end(); itLayers++)
+				if (!itLayers->skip)
+					layerCount++;
+			if (layerCount!=1)
+				throw DeadlyImportError("LWO2: The requested layer was not found");
+		}
 
 		if (configLayerName.length() && !hasNamedLayer)	{
 			throw DeadlyImportError("LWO2: Unable to find the requested layer: " 
@@ -1285,16 +1291,14 @@ void LWOImporter::LoadLWO2File()
 
 				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,LAYR,16);
 
+				// layer index.
+				layer.mIndex = GetU2();
+
 				// Continue loading this layer or ignore it? Check the layer index property
-				// NOTE: The first layer is the default layer, so the layer index is one-based now
-				if (UINT_MAX != configLayerIndex && configLayerIndex != mLayers->size()-1)	{
+				if (UINT_MAX != configLayerIndex && (configLayerIndex-1) != layer.mIndex)	{
 					skip = true;
 				}
 				else skip = false;
-
-				// layer index. that's just for internal parenting, from the scope of a LWS file
-				// all layers are numbered in the oder in which they appear in the file
-				layer.mIndex = GetU2();
 
 				// pivot point
 				mFileBuffer += 2; /* unknown */

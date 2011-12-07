@@ -186,7 +186,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 			for(std::list<LWO::Layer>::iterator itLayers=mLayers->begin(); itLayers!=mLayers->end(); itLayers++)
 				if (!itLayers->skip)
 					layerCount++;
-			if (layerCount!=1)
+			if (layerCount!=2)
 				throw DeadlyImportError("LWO2: The requested layer was not found");
 		}
 

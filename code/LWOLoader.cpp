@@ -142,6 +142,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	mLayers->push_back(Layer());
 	mCurLayer = &mLayers->back();
 	mCurLayer->mName = "<LWODefault>";
+	mCurLayer->mIndex = -1;
 
 	// old lightwave file format (prior to v6)
 	if (AI_LWO_FOURCC_LWOB == fileType)	{
@@ -201,8 +202,8 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 
 	// now process all layers and build meshes and nodes
 	std::vector<aiMesh*> apcMeshes;
-	std::vector<aiNode*> apcNodes;
-	apcNodes. reserve(mLayers->size());
+	std::map<uint16_t, aiNode*> apcNodes;
+
 	apcMeshes.reserve(mLayers->size()*std::min(((unsigned int)mSurfaces->size()/2u), 1u));
 
 	unsigned int iDefaultSurface = UINT_MAX; // index of the default surface
@@ -390,7 +391,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		unsigned int num = apcMeshes.size() - meshStart;
 		if (layer.mName != "<LWODefault>" || num > 0) {
 			aiNode* pcNode = new aiNode();
-			apcNodes.push_back(pcNode);
+			apcNodes[layer.mIndex] = pcNode;
 			pcNode->mName.Set(layer.mName);
 			pcNode->mParent = (aiNode*)&layer;
 			pcNode->mNumMeshes = num;
@@ -526,6 +527,89 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 			}
 		}
 	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void LWOImporter::GenerateNodeGraph(std::map<uint16_t,aiNode*>& apcNodes)
+{
+	// now generate the final nodegraph - generate a root node and attach children
+	aiNode* root = pScene->mRootNode = new aiNode();
+	root->mName.Set("<LWORoot>");
+
+	//Set parent of all children, inserting pivots
+	std::cout << "Set parent of all children" << std::endl;
+	std::map<uint16_t, aiNode*> mapPivot;
+	for (std::map<uint16_t,aiNode*>::iterator itapcNodes = apcNodes.begin(); itapcNodes != apcNodes.end(); ++itapcNodes) {
+
+		//Get the parent index
+		LWO::Layer* nodeLayer = (LWO::Layer*)(itapcNodes->second->mParent);
+		uint16_t parentIndex = nodeLayer->mParent;
+
+		//Create pivot node, store it into the pivot map, and set the parent as the pivot
+		aiNode* pivotNode = new aiNode();
+		pivotNode->mName.Set("Pivot-"+std::string(itapcNodes->second->mName.data));
+		mapPivot[-(itapcNodes->first+2)] = pivotNode;
+		itapcNodes->second->mParent = pivotNode;
+
+		//Look for the parent node to attach the pivot to
+		if (apcNodes.find(parentIndex) != apcNodes.end()) {
+			pivotNode->mParent = apcNodes[parentIndex];
+		} else {
+			//If not, attach to the root node
+			pivotNode->mParent = root;
+		}
+
+		//Set the node and the pivot node transformation
+		itapcNodes->second->mTransformation.a4 = -nodeLayer->mPivot.x;
+		itapcNodes->second->mTransformation.b4 = -nodeLayer->mPivot.y;
+		itapcNodes->second->mTransformation.c4 = -nodeLayer->mPivot.z;
+		pivotNode->mTransformation.a4 = nodeLayer->mPivot.x;
+		pivotNode->mTransformation.b4 = nodeLayer->mPivot.y;
+		pivotNode->mTransformation.c4 = nodeLayer->mPivot.z;
+	}
+
+	//Merge pivot map into node map
+	std::cout << "Merge pivot map into node map" << std::endl;
+	for (std::map<uint16_t, aiNode*>::iterator itMapPivot = mapPivot.begin(); itMapPivot != mapPivot.end(); ++itMapPivot) {
+		apcNodes[itMapPivot->first] = itMapPivot->second;
+	}
+
+	//Set children of all parents
+	apcNodes[-1] = root;
+	for (std::map<uint16_t,aiNode*>::iterator itMapParentNodes = apcNodes.begin(); itMapParentNodes != apcNodes.end(); ++itMapParentNodes) {
+		for (std::map<uint16_t,aiNode*>::iterator itMapChildNodes = apcNodes.begin(); itMapChildNodes != apcNodes.end(); ++itMapChildNodes) {
+			if ((itMapParentNodes->first != itMapChildNodes->first) && (itMapParentNodes->second == itMapChildNodes->second->mParent)) {
+				++(itMapParentNodes->second->mNumChildren);
+			}
+		}
+		if (itMapParentNodes->second->mNumChildren) {
+			itMapParentNodes->second->mChildren = new aiNode* [ itMapParentNodes->second->mNumChildren ];
+			uint16_t p = 0;
+			for (std::map<uint16_t,aiNode*>::iterator itMapChildNodes = apcNodes.begin(); itMapChildNodes != apcNodes.end(); ++itMapChildNodes) {
+				if ((itMapParentNodes->first != itMapChildNodes->first) && (itMapParentNodes->second == itMapChildNodes->second->mParent)) {
+					itMapParentNodes->second->mChildren[p++] = itMapChildNodes->second;
+				}
+			}
+		}
+	}
+
+	if (!pScene->mRootNode->mNumChildren)
+		throw DeadlyImportError("LWO: Unable to build a valid node graph");
+
+	// Remove a single root node with no meshes assigned to it ... 
+	if (1 == pScene->mRootNode->mNumChildren)	{
+		aiNode* pc = pScene->mRootNode->mChildren[0];
+		pc->mParent = pScene->mRootNode->mChildren[0] = NULL;
+		delete pScene->mRootNode;
+		pScene->mRootNode = pc;
+	}
+
+	// convert the whole stuff to RH with CCW winding
+	MakeLeftHandedProcess maker;
+	maker.Execute(pScene);
+
+	FlipWindingOrderProcess flipper;
+	flipper.Execute(pScene);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1231,6 +1315,7 @@ void LWOImporter::LoadLWO2File()
 				// optional: parent of this layer
 				if (mFileBuffer + 2 <= next)
 					layer.mParent = GetU2();
+				else layer.mParent = -1;
 
 				// Set layer skip parameter
 				layer.skip = skip;

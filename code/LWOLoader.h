@@ -303,7 +303,7 @@ private:
 	 *  Unused nodes are deleted.
 	 *  @param apcNodes Flat list of nodes
 	*/
-	void GenerateNodeGraph(std::vector<aiNode*>& apcNodes);
+	void GenerateNodeGraph(std::map<uint16_t,aiNode*>& apcNodes);
 
 	// -------------------------------------------------------------------
 	/** Add children to a node

@@ -295,8 +295,9 @@ void LWSImporter::SetupNodeName(aiNode* nd, LWS::NodeDesc& src)
 			if (s == std::string::npos)
 				s = 0;
 			else ++s;
-
-			nd->mName.length = ::sprintf(nd->mName.data,"%s_(%08X)",src.path.substr(s).c_str(),combined);
+            std::string::size_type t = src.path.substr(s).find_last_of(".");
+			
+			nd->mName.length = ::sprintf(nd->mName.data,"%s_(%08X)",src.path.substr(s).substr(0,t).c_str(),combined);
 			return;
 		}
 	}

@@ -243,14 +243,13 @@ void AnimResolver::ExtractBindPose(aiMatrix4x4& out)
 	if (scale_z) scaling.z = scale_z->keys[0].value;
 
 	// build the final matrix
-	aiMatrix4x4 s,r,t;
-	
-	r.FromEulerAnglesXYZ(angles);
-	//aiMatrix4x4::RotationY(angles.y,r);
-	// fixme: make FromEulerAngles static, too
+	aiMatrix4x4 s,rx,ry,rz,t;
+	aiMatrix4x4::RotationZ(angles.z, rz);
+	aiMatrix4x4::RotationX(angles.y, rx);
+	aiMatrix4x4::RotationY(angles.x, ry);
 	aiMatrix4x4::Translation(translation,t);
 	aiMatrix4x4::Scaling(scaling,s);
-	out = s*r*t;
+	out = t*ry*rx*rz*s;
 }
 
 // ------------------------------------------------------------------------------------------------

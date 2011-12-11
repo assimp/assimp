@@ -142,6 +142,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	mLayers->push_back(Layer());
 	mCurLayer = &mLayers->back();
 	mCurLayer->mName = "<LWODefault>";
+	mCurLayer->mIndex = -1;
 
 	// old lightwave file format (prior to v6)
 	if (AI_LWO_FOURCC_LWOB == fileType)	{
@@ -180,8 +181,14 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		// The newer lightwave format allows the user to configure the
 		// loader that just one layer is used. If this is the case
 		// we need to check now whether the requested layer has been found.
-		if (UINT_MAX != configLayerIndex && configLayerIndex > mLayers->size())
-			throw DeadlyImportError("LWO2: The requested layer was not found");
+		if (UINT_MAX != configLayerIndex) {
+			unsigned int layerCount = 0;
+			for(std::list<LWO::Layer>::iterator itLayers=mLayers->begin(); itLayers!=mLayers->end(); itLayers++)
+				if (!itLayers->skip)
+					layerCount++;
+			if (layerCount!=2)
+				throw DeadlyImportError("LWO2: The requested layer was not found");
+		}
 
 		if (configLayerName.length() && !hasNamedLayer)	{
 			throw DeadlyImportError("LWO2: Unable to find the requested layer: " 
@@ -195,8 +202,8 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 
 	// now process all layers and build meshes and nodes
 	std::vector<aiMesh*> apcMeshes;
-	std::vector<aiNode*> apcNodes;
-	apcNodes. reserve(mLayers->size());
+	std::map<uint16_t, aiNode*> apcNodes;
+
 	apcMeshes.reserve(mLayers->size()*std::min(((unsigned int)mSurfaces->size()/2u), 1u));
 
 	unsigned int iDefaultSurface = UINT_MAX; // index of the default surface
@@ -384,7 +391,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		unsigned int num = apcMeshes.size() - meshStart;
 		if (layer.mName != "<LWODefault>" || num > 0) {
 			aiNode* pcNode = new aiNode();
-			apcNodes.push_back(pcNode);
+			apcNodes[layer.mIndex] = pcNode;
 			pcNode->mName.Set(layer.mName);
 			pcNode->mParent = (aiNode*)&layer;
 			pcNode->mNumMeshes = num;
@@ -523,78 +530,69 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::AddChildren(aiNode* node, uint16_t parent, std::vector<aiNode*>& apcNodes)
-{
-	for (std::vector<aiNode*>::iterator it = apcNodes.begin(); it != apcNodes.end(); ++it)	{
-		if (*it) {
-			LWO::Layer* layer = (LWO::Layer*)(*it)->mParent;
-			if (layer->mParent == parent && layer->mIndex != parent)
-				++node->mNumChildren;
-		}
-	}
-
-	if (node->mNumChildren)	{
-		unsigned int p = 0;
-
-		node->mChildren = new aiNode* [ node->mNumChildren ];
-		for (std::vector<aiNode*>::iterator it = apcNodes.begin(); it != apcNodes.end(); ++it)	{
-			if (*it) {
-				LWO::Layer* layer = (LWO::Layer*)(*it)->mParent;
-				if (layer->mParent == parent && layer->mIndex != parent)	{
-					aiNode* nd = node->mChildren[p++] = *it;
-					nd->mParent = node;
-
-					// fixme: ignore pivot points for the moment
-					//nd->mTransformation.a4 = layer->mPivot.x;
-					//nd->mTransformation.b4 = layer->mPivot.y;
-					//nd->mTransformation.c4 = layer->mPivot.z;
-
-					// recursively add more children
-					(*it) = NULL;
-					AddChildren(nd,layer->mIndex,apcNodes);
-				}
-			}
-		}
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-void LWOImporter::GenerateNodeGraph(std::vector<aiNode*>& apcNodes)
+void LWOImporter::GenerateNodeGraph(std::map<uint16_t,aiNode*>& apcNodes)
 {
 	// now generate the final nodegraph - generate a root node and attach children
 	aiNode* root = pScene->mRootNode = new aiNode();
 	root->mName.Set("<LWORoot>");
-	AddChildren(root,0,apcNodes);
 
-	// check whether we added all layers with meshes assigned to the output graph.
-	// if not, add them to the root node
-	unsigned int extra = 0;
-	for (std::vector<aiNode*>::iterator it = apcNodes.begin(); it != apcNodes.end(); ++it) {
-		if ((*it) && (*it)->mNumMeshes) 
-			++extra;
+	//Set parent of all children, inserting pivots
+	std::cout << "Set parent of all children" << std::endl;
+	std::map<uint16_t, aiNode*> mapPivot;
+	for (std::map<uint16_t,aiNode*>::iterator itapcNodes = apcNodes.begin(); itapcNodes != apcNodes.end(); ++itapcNodes) {
+
+		//Get the parent index
+		LWO::Layer* nodeLayer = (LWO::Layer*)(itapcNodes->second->mParent);
+		uint16_t parentIndex = nodeLayer->mParent;
+
+		//Create pivot node, store it into the pivot map, and set the parent as the pivot
+		aiNode* pivotNode = new aiNode();
+		pivotNode->mName.Set("Pivot-"+std::string(itapcNodes->second->mName.data));
+		mapPivot[-(itapcNodes->first+2)] = pivotNode;
+		itapcNodes->second->mParent = pivotNode;
+
+		//Look for the parent node to attach the pivot to
+		if (apcNodes.find(parentIndex) != apcNodes.end()) {
+			pivotNode->mParent = apcNodes[parentIndex];
+		} else {
+			//If not, attach to the root node
+			pivotNode->mParent = root;
+		}
+
+		//Set the node and the pivot node transformation
+		itapcNodes->second->mTransformation.a4 = -nodeLayer->mPivot.x;
+		itapcNodes->second->mTransformation.b4 = -nodeLayer->mPivot.y;
+		itapcNodes->second->mTransformation.c4 = -nodeLayer->mPivot.z;
+		pivotNode->mTransformation.a4 = nodeLayer->mPivot.x;
+		pivotNode->mTransformation.b4 = nodeLayer->mPivot.y;
+		pivotNode->mTransformation.c4 = nodeLayer->mPivot.z;
 	}
 
-	if (extra)	{
-		const unsigned int newSize = extra + pScene->mRootNode->mNumChildren;
-		aiNode** const apcNewNodes = new aiNode*[newSize];
-		if((extra = root->mNumChildren))
-			::memcpy(apcNewNodes,root->mChildren,extra*sizeof(void*));
+	//Merge pivot map into node map
+	std::cout << "Merge pivot map into node map" << std::endl;
+	for (std::map<uint16_t, aiNode*>::iterator itMapPivot = mapPivot.begin(); itMapPivot != mapPivot.end(); ++itMapPivot) {
+		apcNodes[itMapPivot->first] = itMapPivot->second;
+	}
 
-		aiNode** cc = apcNewNodes+extra;
-		for (std::vector<aiNode*>::iterator it = apcNodes.begin(); it != apcNodes.end(); ++it) {
-			if ((*it) && (*it)->mNumMeshes) {
-				aiNode* nd = *cc++ = *it;
-				nd->mParent = pScene->mRootNode;
-
-				// recursively add more children
-				(*it) = NULL;
-				AddChildren(nd,((LWO::Layer*)nd->mParent)->mIndex,apcNodes);
+	//Set children of all parents
+	apcNodes[-1] = root;
+	for (std::map<uint16_t,aiNode*>::iterator itMapParentNodes = apcNodes.begin(); itMapParentNodes != apcNodes.end(); ++itMapParentNodes) {
+		for (std::map<uint16_t,aiNode*>::iterator itMapChildNodes = apcNodes.begin(); itMapChildNodes != apcNodes.end(); ++itMapChildNodes) {
+			if ((itMapParentNodes->first != itMapChildNodes->first) && (itMapParentNodes->second == itMapChildNodes->second->mParent)) {
+				++(itMapParentNodes->second->mNumChildren);
 			}
 		}
-		delete[] root->mChildren;
-		root->mChildren = apcNewNodes;
-		root->mNumChildren = newSize;
+		if (itMapParentNodes->second->mNumChildren) {
+			itMapParentNodes->second->mChildren = new aiNode* [ itMapParentNodes->second->mNumChildren ];
+			uint16_t p = 0;
+			for (std::map<uint16_t,aiNode*>::iterator itMapChildNodes = apcNodes.begin(); itMapChildNodes != apcNodes.end(); ++itMapChildNodes) {
+				if ((itMapParentNodes->first != itMapChildNodes->first) && (itMapParentNodes->second == itMapChildNodes->second->mParent)) {
+					itMapParentNodes->second->mChildren[p++] = itMapChildNodes->second;
+				}
+			}
+		}
 	}
+
 	if (!pScene->mRootNode->mNumChildren)
 		throw DeadlyImportError("LWO: Unable to build a valid node graph");
 
@@ -1285,16 +1283,14 @@ void LWOImporter::LoadLWO2File()
 
 				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,LAYR,16);
 
+				// layer index.
+				layer.mIndex = GetU2();
+
 				// Continue loading this layer or ignore it? Check the layer index property
-				// NOTE: The first layer is the default layer, so the layer index is one-based now
-				if (UINT_MAX != configLayerIndex && configLayerIndex != mLayers->size()-1)	{
+				if (UINT_MAX != configLayerIndex && (configLayerIndex-1) != layer.mIndex)	{
 					skip = true;
 				}
 				else skip = false;
-
-				// layer index. that's just for internal parenting, from the scope of a LWS file
-				// all layers are numbered in the oder in which they appear in the file
-				layer.mIndex = GetU2();
 
 				// pivot point
 				mFileBuffer += 2; /* unknown */
@@ -1319,6 +1315,7 @@ void LWOImporter::LoadLWO2File()
 				// optional: parent of this layer
 				if (mFileBuffer + 2 <= next)
 					layer.mParent = GetU2();
+				else layer.mParent = -1;
 
 				// Set layer skip parameter
 				layer.skip = skip;

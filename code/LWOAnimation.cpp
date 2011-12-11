@@ -243,14 +243,13 @@ void AnimResolver::ExtractBindPose(aiMatrix4x4& out)
 	if (scale_z) scaling.z = scale_z->keys[0].value;
 
 	// build the final matrix
-	aiMatrix4x4 s,r,t;
-	
-	r.FromEulerAnglesXYZ(angles);
-	//aiMatrix4x4::RotationY(angles.y,r);
-	// fixme: make FromEulerAngles static, too
+	aiMatrix4x4 s,rx,ry,rz,t;
+	aiMatrix4x4::RotationZ(angles.z, rz);
+	aiMatrix4x4::RotationX(angles.y, rx);
+	aiMatrix4x4::RotationY(angles.x, ry);
 	aiMatrix4x4::Translation(translation,t);
 	aiMatrix4x4::Scaling(scaling,s);
-	out = s*r*t;
+	out = t*ry*rx*rz*s;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -567,10 +566,15 @@ void AnimResolver::ExtractAnimChannel(aiNodeAnim** out, unsigned int flags /*= 0
 		anim->mRotationKeys = new aiQuatKey[ anim->mNumRotationKeys = keys.size() ];
 		
 		// convert heading, pitch, bank to quaternion
+		// mValue.x=Heading=Rot(Y), mValue.y=Pitch=Rot(X), mValue.z=Bank=Rot(Z)
+		// Lightwave's rotation order is ZXY
+		aiVector3D X(1.0,0.0,0.0);
+		aiVector3D Y(0.0,1.0,0.0);
+		aiVector3D Z(0.0,0.0,1.0);
 		for (unsigned int i = 0; i < anim->mNumRotationKeys; ++i) {
 			aiQuatKey& qk = anim->mRotationKeys[i];
 			qk.mTime  = keys[i].mTime;
-			qk.mValue = aiQuaternion( -keys[i].mValue.x ,-keys[i].mValue.z ,-keys[i].mValue.y );
+			qk.mValue = aiQuaternion(Y,keys[i].mValue.x)*aiQuaternion(X,keys[i].mValue.y)*aiQuaternion(Z,keys[i].mValue.z);
 		}
 	}
 

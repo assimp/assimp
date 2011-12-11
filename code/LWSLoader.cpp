@@ -295,8 +295,9 @@ void LWSImporter::SetupNodeName(aiNode* nd, LWS::NodeDesc& src)
 			if (s == std::string::npos)
 				s = 0;
 			else ++s;
-
-			nd->mName.length = ::sprintf(nd->mName.data,"%s_(%08X)",src.path.substr(s).c_str(),combined);
+            std::string::size_type t = src.path.substr(s).find_last_of(".");
+			
+			nd->mName.length = ::sprintf(nd->mName.data,"%s_(%08X)",src.path.substr(s).substr(0,t).c_str(),combined);
 			return;
 		}
 	}
@@ -313,18 +314,62 @@ void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<Attachm
 {
 	// Setup a very cryptic name for the node, we want the user to be happy
 	SetupNodeName(nd,src);
+    aiNode* ndAnim = nd;
 
-	// If this is an object from an external file - get the scene and setup proper attachment tags
-	aiScene* obj = NULL;
-	if (src.type == LWS::NodeDesc::OBJECT && src.path.length() ) {
-		obj = batch.GetImport(src.id);
-		if (!obj) {
-			DefaultLogger::get()->error("LWS: Failed to read external file " + src.path);
-		}
-		else {
-			attach.push_back(AttachmentInfo(obj,nd));
-		}
-	}
+	// If the node is an object
+	if (src.type == LWS::NodeDesc::OBJECT) {
+
+		// If the object is from an external file, get it
+		aiScene* obj = NULL;
+        if (src.path.length() ) {
+            obj = batch.GetImport(src.id);
+            if (!obj) {
+                DefaultLogger::get()->error("LWS: Failed to read external file " + src.path);
+            }
+            else {
+                if (obj->mRootNode->mNumChildren == 1) {
+					
+                    //If the pivot is not set for this layer, get it from the external object
+                    if (!src.isPivotSet) {
+                        src.pivotPos.x = +obj->mRootNode->mTransformation.a4;
+                        src.pivotPos.y = +obj->mRootNode->mTransformation.b4;
+                        src.pivotPos.z = -obj->mRootNode->mTransformation.c4; //The sign is the RH to LH back conversion
+                    }
+					
+                    //Remove first node from obj (the old pivot), reset transform of second node (the mesh node)
+                    aiNode* newRootNode = obj->mRootNode->mChildren[0];
+                    free(obj->mRootNode->mChildren);
+                    free(obj->mRootNode);
+                    obj->mRootNode = newRootNode;
+                    obj->mRootNode->mTransformation.a4 = 0.0;
+                    obj->mRootNode->mTransformation.b4 = 0.0;
+                    obj->mRootNode->mTransformation.c4 = 0.0;
+                }
+            }
+        }
+		
+		//Setup the pivot node (also the animation node), the one we received
+        nd->mName = std::string("Pivot:") + nd->mName.data;
+		ndAnim = nd;
+		
+        //Add the attachment node to it
+        nd->mNumChildren = 1;
+        nd->mChildren = new aiNode*[1];
+        nd->mChildren[0] = new aiNode();
+        nd->mChildren[0]->mParent = nd;
+        nd->mChildren[0]->mTransformation.a4 = -src.pivotPos.x;
+        nd->mChildren[0]->mTransformation.b4 = -src.pivotPos.y;
+        nd->mChildren[0]->mTransformation.c4 = -src.pivotPos.z;
+		SetupNodeName(nd->mChildren[0], src);
+		
+		//Update the attachment node
+		nd = nd->mChildren[0];
+		
+        //Push attachment, if the object came from an external file
+        if (obj) {
+            attach.push_back(AttachmentInfo(obj,nd));
+        }
+    }
 
 	// If object is a light source - setup a corresponding ai structure
 	else if (src.type == LWS::NodeDesc::LIGHT) {
@@ -368,7 +413,7 @@ void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<Attachm
 
 	// Get the node transformation from the LWO key
 	LWO::AnimResolver resolver(src.channels,fps);
-	resolver.ExtractBindPose(nd->mTransformation);
+	resolver.ExtractBindPose(ndAnim->mTransformation);
 
 	// .. and construct animation channels
 	aiNodeAnim* anim = NULL;
@@ -377,41 +422,8 @@ void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<Attachm
 		resolver.SetAnimationRange(first,last);
 		resolver.ExtractAnimChannel(&anim,AI_LWO_ANIM_FLAG_SAMPLE_ANIMS|AI_LWO_ANIM_FLAG_START_AT_ZERO);
 		if (anim) {
-			anim->mNodeName = nd->mName;
+			anim->mNodeName = ndAnim->mName;
 			animOut.push_back(anim);
-		}
-	}
-
-	// process pivot point, if any
-	if (src.pivotPos != aiVector3D()) {
-		aiMatrix4x4 tmp;
-		aiMatrix4x4::Translation(-src.pivotPos,tmp);
-
-		if (anim) {
-		
-			// We have an animation channel for this node. Problem: to combine the pivot
-			// point with the node anims, we'd need to interpolate *all* keys, get 
-			// transformation matrices from them, apply the translation and decompose
-			// the resulting matrices again in order to reconstruct the keys. This 
-			// solution here is *much* easier ... we're just inserting an extra node
-			// in the hierarchy.
-			// Maybe the final optimization here will be done during postprocessing.
-
-			aiNode* pivot = new aiNode();
-			pivot->mName.length = sprintf( pivot->mName.data, "$Pivot_%s",nd->mName.data);
-			pivot->mTransformation = tmp;
-
-			pivot->mChildren = new aiNode*[pivot->mNumChildren = 1];
-			pivot->mChildren[0] = nd;
-
-			pivot->mParent = nd->mParent;
-			nd->mParent    = pivot;
-			
-			// swap children and hope the parents wont see a huge difference
-			pivot->mParent->mChildren[pivot->mParent->mNumChildren-1] = pivot;
-		}
-		else {
-			nd->mTransformation = tmp*nd->mTransformation;
 		}
 	}
 
@@ -585,11 +597,12 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 			// add node to list
 			LWS::NodeDesc d;
 			d.type = LWS::NodeDesc::OBJECT;
-			d.name = c;
 			if (version >= 4) { // handle LWSC 4 explicit ID
 				d.number = strtoul16(c,&c) & AI_LWS_MASK;
+				SkipSpaces(&c);
 			}
 			else d.number = cur_object++;
+            d.name = c;
 			nodes.push_back(d);
 
 			num_object++;
@@ -780,6 +793,8 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 				c = fast_atof_move(c, (float&) nodes.back().pivotPos.y );
 				SkipSpaces(&c);
 				c = fast_atof_move(c, (float&) nodes.back().pivotPos.z );
+                // Mark pivotPos as set
+                nodes.back().isPivotSet = true;
 			}
 		}
 	}
@@ -866,7 +881,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 
 	// .. ccw
 	FlipWindingOrderProcess flipper;
-	flipper.Execute(pScene);
+	flipper.Execute(master);
 
 	// OK ... finally build the output graph
 	SceneCombiner::MergeScenes(&pScene,master,attach,

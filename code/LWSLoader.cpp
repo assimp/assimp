@@ -340,7 +340,6 @@ void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<Attachm
                     aiNode* newRootNode = obj->mRootNode->mChildren[0];
 					obj->mRootNode->mChildren[0] = NULL;
 					delete obj->mRootNode;
-
                     obj->mRootNode = newRootNode;
                     obj->mRootNode->mTransformation.a4 = 0.0;
                     obj->mRootNode->mTransformation.b4 = 0.0;

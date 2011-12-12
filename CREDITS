@@ -127,3 +127,7 @@ Contributed a patch to fix the VertexTriangleAdjacency postprocessing step.
 
 - IOhannes
 Contributed the Debian build fixes ( architecture macro ).
+
+- gellule
+Several LWO and LWS fixes (pivoting). 
+

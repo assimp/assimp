@@ -338,8 +338,9 @@ void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<Attachm
 					
                     //Remove first node from obj (the old pivot), reset transform of second node (the mesh node)
                     aiNode* newRootNode = obj->mRootNode->mChildren[0];
-                    free(obj->mRootNode->mChildren);
-                    free(obj->mRootNode);
+					obj->mRootNode->mChildren[0] = NULL;
+					delete obj->mRootNode;
+
                     obj->mRootNode = newRootNode;
                     obj->mRootNode->mTransformation.a4 = 0.0;
                     obj->mRootNode->mTransformation.b4 = 0.0;

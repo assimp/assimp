@@ -217,6 +217,13 @@ inline void aiMatrix4x4::Decompose (aiVector3D& scaling, aiQuaternion& rotation,
 	scaling.y = vRows[1].Length();
 	scaling.z = vRows[2].Length();
 
+	// and the sign of the scaling
+	if (Determinant() < 0) {
+		scaling.x = -scaling.x;
+		scaling.y = -scaling.y;
+		scaling.z = -scaling.z;
+	}
+
 	// and remove all scaling from the matrix
 	if(scaling.x)
 	{

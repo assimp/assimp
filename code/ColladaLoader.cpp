@@ -1084,8 +1084,9 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 
 		for( size_t a = 0; a < resultTrafos.size(); ++a)
 		{
-			const aiMatrix4x4& mat = resultTrafos[a];
+			aiMatrix4x4 mat = resultTrafos[a];
 			double time = double( mat.d4); // remember? time is stored in mat.d4
+      mat.d4 = 1.0f;
 
 			dstAnim->mPositionKeys[a].mTime = time;
 			dstAnim->mRotationKeys[a].mTime = time;

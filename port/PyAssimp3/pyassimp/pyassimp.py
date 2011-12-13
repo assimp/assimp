@@ -119,7 +119,20 @@ class aiTuple:
             
     def __repr__(self):
         return str([x for x in self])
-        
+
+class StringUInt32(ctypes.Structure):
+    """
+    A ctypes structure used for material strings.
+    This is a workaround for a type mismatch for the length field between strings used for materials and elsewhere.
+    """
+    
+    MAXLEN = 1024
+    
+    _fields_ = [
+            ("length", ctypes.c_uint32),
+            ("data", ctypes.c_char*MAXLEN),
+        ]
+
 def _init(self):
     """
     Custom initialize() for C structs, adds safely accessable member functionality.
@@ -253,7 +266,7 @@ def GetMaterialProperties(material):
             value = [x for x in arr]
         elif p.mType == 3: #string can't be an array
             try:
-                value = cast(p.mData, POINTER(structs.String)).contents.data
+                value = cast(p.mData, POINTER(StringUInt32)).contents.data
             except UnicodeDecodeError:
                 print('UnicodeDecodeError reading material property, ignoring.')
                 continue

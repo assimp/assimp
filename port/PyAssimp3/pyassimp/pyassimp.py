@@ -250,10 +250,18 @@ def aiGetMaterialString(material, key):
  
 def GetMaterialProperties(material): 
     """
-    Convenience Function to get the material properties as a dict
-    and values in a python format.
+    Convenience Function to get the material properties.
+    This function returns the following tuple: (name, clr, mat, tex) where:
+    name: is the name of the material
+    clr: is a dictionary of color parameters
+    mat: is a dictionary of material parameters
+    tex: is a triply nested dictionary than can be indexed by index, semantic, and then key:
+            tex[index][semantic][key]
     """
-    result = {}
+    name = ""
+    clr = {}
+    mat = {}
+    tex = {}
     #read all properties
     for p in material.properties:
         #the name
@@ -276,9 +284,21 @@ def GetMaterialProperties(material):
         else:
             value = p.mData[:p.mDataLength]
 
-        result[key] = value
+        #store in the appropriate dict
+        if key == b'?mat.name':
+            name = value
+        elif key[:5] == b'$mat.':
+            mat[key[5:]] = value
+        elif key[:5] == b'$clr.':
+            clr[key[5:]] = value
+        elif key[:5] == b'$tex.':
+            if p.mIndex not in tex:
+                tex[p.mIndex] = {}
+            if p.mSemantic not in tex[p.mIndex]:
+                tex[p.mIndex][p.mSemantic] = {}
+            tex[p.mIndex][p.mSemantic][key[5:]] = value
 
-    return result
+    return (name, clr, mat, tex)
     
     
 def aiDecomposeMatrix(matrix):

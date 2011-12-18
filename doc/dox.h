@@ -697,10 +697,10 @@ c) Recursively iterate over the node hierarchy <br>
 c1) If the node is marked as necessary, copy it into the skeleton and check its children <br>
 c2) If the node is marked as not necessary, skip it and do not iterate over its children. <br>
 
-Reasons: you need all the parent nodes to keep the transformation chain intact. Depending on the
-file format and the modelling package the node hierarchy of the skeleton is either a child
-of the mesh node or a sibling of the mesh node. Therefore b3) stops at both the mesh's node and
-the mesh's node's parent. The node closest to the root node is your skeleton root, from there you
+Reasons: you need all the parent nodes to keep the transformation chain intact. For most  
+file formats and modelling packages the node hierarchy of the skeleton is either a child
+of the mesh node or a sibling of the mesh node but this is by no means a requirement so you shouldn't rely on it. 
+The node closest to the root node is your skeleton root, from there you
 start copying the hierarchy. You can skip every branch without a node being a bone in the mesh - 
 that's why the algorithm skips the whole branch if the node is marked as "not necessary".
 

@@ -89,7 +89,7 @@ int Assimp_Export(const char* const* params, unsigned int num)
 	// 
 	const std::string::size_type s = out.find_last_of('.');
 	if (s != std::string::npos) {
-		outext = out.substr(s+1,in.length()-(s+1));
+		outext = out.substr(s+1);
 		out = out.substr(0,s);
 	}
 

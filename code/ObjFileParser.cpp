@@ -377,6 +377,15 @@ void ObjFileParser::getFace(aiPrimitiveType type)
 //	Get values for a new material description
 void ObjFileParser::getMaterialDesc()
 {
+	// Each material request a new object.
+	// Sometimes the object is already created (see 'o' tag by example), but it is not initialized !
+	// So, we create a new object only if the current on is already initialized !
+	if (m_pModel->m_pCurrent != NULL &&
+		(	m_pModel->m_pCurrent->m_Meshes.size() > 1 ||
+			(m_pModel->m_pCurrent->m_Meshes.size() == 1 && m_pModel->m_Meshes[m_pModel->m_pCurrent->m_Meshes[0]]->m_Faces.size() != 0)	)
+		)
+		m_pModel->m_pCurrent = NULL;
+
 	// Get next data for material data
 	m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
 	if (m_DataIt == m_DataItEnd)

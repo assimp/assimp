@@ -46,11 +46,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp	{
 
+	class Importer;
+
 struct ScenePrivateData {
 	
 	ScenePrivateData()
-		: mPPStepsApplied()
+		: mOrigImporter()
+		, mPPStepsApplied()
 	{}
+
+	// Importer that originally loaded the scene though the C-API
+	// If set, this object is owned by this private data instance.
+	Assimp::Importer* mOrigImporter;
 
 	// List of postprocessing steps already applied to the scene.
 	unsigned int mPPStepsApplied;

@@ -148,15 +148,16 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 	// get current time
 	double fCur = (double)timeGetTime();
 
-	aiSetImportPropertyInteger(AI_CONFIG_IMPORT_TER_MAKE_UVS,1);
-	aiSetImportPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE,g_smoothAngle);
-	aiSetImportPropertyInteger(AI_CONFIG_PP_SBP_REMOVE,nopointslines ? aiPrimitiveType_LINE | aiPrimitiveType_POINT : 0 );
+	aiPropertyStore* props = aiCreatePropertyStore();
+	aiSetImportPropertyInteger(props,AI_CONFIG_IMPORT_TER_MAKE_UVS,1);
+	aiSetImportPropertyFloat(props,AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE,g_smoothAngle);
+	aiSetImportPropertyInteger(props,AI_CONFIG_PP_SBP_REMOVE,nopointslines ? aiPrimitiveType_LINE | aiPrimitiveType_POINT : 0 );
 
-	aiSetImportPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,1);
-	//aiSetImportPropertyInteger(AI_CONFIG_PP_PTV_KEEP_HIERARCHY,1);
+	aiSetImportPropertyInteger(props,AI_CONFIG_GLOB_MEASURE_TIME,1);
+	//aiSetImportPropertyInteger(props,AI_CONFIG_PP_PTV_KEEP_HIERARCHY,1);
 
 	// Call ASSIMPs C-API to load the file
-	g_pcAsset->pcScene = (aiScene*)aiImportFile(g_szFileName,
+	g_pcAsset->pcScene = (aiScene*)aiImportFileExWithProperties(g_szFileName,
 
 		ppsteps | /* configurable pp steps */
 		aiProcess_GenSmoothNormals		   | // generate smooth normal vectors if not existing
@@ -164,7 +165,11 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 		aiProcess_Triangulate			   | // triangulate polygons with more than 3 edges
 		aiProcess_ConvertToLeftHanded	   | // convert everything to D3D left handed space
 		aiProcess_SortByPType              | // make 'clean' meshes which consist of a single typ of primitives
-		0);
+		0,
+		NULL,
+		props);
+
+	aiReleasePropertyStore(props);
 
 	// get the end time of zje operation, calculate delta t
 	double fEnd = (double)timeGetTime();

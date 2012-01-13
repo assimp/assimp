@@ -83,10 +83,6 @@ namespace Assimp	{
 #define AI_PROPERTY_WAS_NOT_EXISTING 0xffffffff
 
 struct aiScene;
-struct aiFileIO;
-extern "C" ASSIMP_API const aiScene* aiImportFileEx( const char*, unsigned int, aiFileIO*);
-extern "C" ASSIMP_API const aiScene* aiImportFileFromMemory( const char*,
-	unsigned int,unsigned int,const char*);
 
 /** @namespace Assimp Assimp's CPP-API and all internal APIs */
 namespace Assimp	{
@@ -116,13 +112,6 @@ namespace Assimp	{
 * threads for loading, each thread should maintain its own Importer instance.
 */
 class ASSIMP_API Importer	{
-
-	// for internal use
-	friend class BaseProcess;
-	friend class BatchLoader;
-	friend const aiScene* ::aiImportFileEx( const char*, unsigned int, aiFileIO*);
-	friend const aiScene* ::aiImportFileFromMemory( const char*,
-		unsigned int,unsigned int,const char*);
 
 public:
 
@@ -578,6 +567,12 @@ public:
 	 * structure in a well-defined manner. This is a debug feature and not
 	 * intended for use in production environments. */
 	void SetExtraVerbose(bool bDo);
+
+
+	// -------------------------------------------------------------------
+	/** Private, do not use. */
+	ImporterPimpl* Pimpl() { return pimpl; };
+	const ImporterPimpl* Pimpl() const { return pimpl; };
 
 protected:
 

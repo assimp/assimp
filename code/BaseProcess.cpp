@@ -67,7 +67,7 @@ BaseProcess::~BaseProcess()
 // ------------------------------------------------------------------------------------------------
 void BaseProcess::ExecuteOnScene( Importer* pImp)
 {
-	ai_assert(NULL != pImp && NULL != pImp->pimpl->mScene);
+	ai_assert(NULL != pImp && NULL != pImp->Pimpl()->mScene);
 
 	progress = pImp->GetProgressHandler();
 	ai_assert(progress);
@@ -77,17 +77,17 @@ void BaseProcess::ExecuteOnScene( Importer* pImp)
 	// catch exceptions thrown inside the PostProcess-Step
 	try
 	{
-		Execute(pImp->pimpl->mScene);
+		Execute(pImp->Pimpl()->mScene);
 
 	} catch( const std::exception& err )	{
 
 		// extract error description
-		pImp->pimpl->mErrorString = err.what();
-		DefaultLogger::get()->error(pImp->pimpl->mErrorString);
+		pImp->Pimpl()->mErrorString = err.what();
+		DefaultLogger::get()->error(pImp->Pimpl()->mErrorString);
 
 		// and kill the partially imported data
-		delete pImp->pimpl->mScene;
-		pImp->pimpl->mScene = NULL;
+		delete pImp->Pimpl()->mScene;
+		pImp->Pimpl()->mScene = NULL;
 	}
 }
 

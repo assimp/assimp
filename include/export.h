@@ -54,7 +54,7 @@ extern "C" {
 #endif
 
 struct aiScene;  // aiScene.h
-
+struct aiFileIO; // aiFileIO.h
 
 // --------------------------------------------------------------------------------
 /** Describes an file format which Assimp can export to. Use #aiGetExportFormatCount() to 
@@ -102,7 +102,8 @@ ASSIMP_API const C_STRUCT aiExportFormatDesc* aiGetExportFormatDescription( size
  *  @param pIn Valid scene to be copied
  *  @param pOut User-allocated scene to be filled. 
  */
-ASSIMP_API void aiCopyScene(const C_STRUCT aiScene* pIn, C_STRUCT aiScene** pOut);
+ASSIMP_API void aiCopyScene(const C_STRUCT aiScene* pIn, 
+	C_STRUCT aiScene** pOut);
 
 // --------------------------------------------------------------------------------
 /** Exports the given scene to a chosen file format and writes the result file(s) to disk.
@@ -138,7 +139,10 @@ ASSIMP_API void aiCopyScene(const C_STRUCT aiScene* pIn, C_STRUCT aiScene** pOut
 *   triangulate data so they would run the step anyway.
 * @return a status code indicating the result of the export
 */
-ASSIMP_API aiReturn aiExportScene( const C_STRUCT aiScene* pScene, const char* pFormatId, const char* pFileName,  unsigned int pPreprocessing);
+ASSIMP_API aiReturn aiExportScene( const C_STRUCT aiScene* pScene, 
+	const char* pFormatId, 
+	const char* pFileName,  
+	unsigned int pPreprocessing);
 
 
 // --------------------------------------------------------------------------------
@@ -149,11 +153,16 @@ ASSIMP_API aiReturn aiExportScene( const C_STRUCT aiScene* pScene, const char* p
 * @param pFileName Output file to write
 * @param pIO custom IO implementation to be used. Use this if you use your own storage methods.
 *   If none is supplied, a default implementation using standard file IO is used. Note that
-*   #aiExportSceneToBlob is provided as convienience function to export to memory buffers.
+*   #aiExportSceneToBlob is provided as convenience function to export to memory buffers.
 * @param pPreprocessing Please see the documentation for #aiExportScene
 * @return a status code indicating the result of the export
+* @note Include <aiFileIO.h> for the definition of #aiFileIO.
 */
-ASSIMP_API aiReturn aiExportSceneEx( const C_STRUCT aiScene* pScene, const char* pFormatId, const char* pFileName, C_STRUCT aiFileIO* pIO,  unsigned int pPreprocessing );
+ASSIMP_API aiReturn aiExportSceneEx( const C_STRUCT aiScene* pScene, 
+	const char* pFormatId, 
+	const char* pFileName, 
+	C_STRUCT aiFileIO* pIO,  
+	unsigned int pPreprocessing );
 
 
 // --------------------------------------------------------------------------------

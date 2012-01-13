@@ -70,6 +70,19 @@ struct aiLogStream
 	char* user;
 };
 
+
+// --------------------------------------------------------------------------------
+/** C-API: Represents an opaque set of settings to be used during importing.
+ *  @see aiCreatePropertyStore
+ *  @see aiReleasePropertyStore
+ *  @see aiImportFileExWithProperties
+ *  @see aiSetPropertyInteger
+ *  @see aiSetPropertyFloat
+ *  @see aiSetPropertyString
+ */
+// --------------------------------------------------------------------------------
+struct aiPropertyStore {};
+
 /** Our own C boolean type */
 typedef int aiBool;
 
@@ -112,7 +125,8 @@ ASSIMP_API const C_STRUCT aiScene* aiImportFile(
  *   a successful import. Provide a bitwise combination of the
  *   #aiPostProcessSteps flags.
  * @param pFS aiFileIO structure. Will be used to open the model file itself
- *   and any other files the loader needs to open.
+ *   and any other files the loader needs to open.  Pass NULL to use the default
+ *   implementation.
  * @return Pointer to the imported data or NULL if the import failed.  
  * @note Include <aiFileIO.h> for the definition of #aiFileIO.
  */
@@ -120,6 +134,18 @@ ASSIMP_API const C_STRUCT aiScene* aiImportFileEx(
 	const char* pFile,
 	unsigned int pFlags,
 	C_STRUCT aiFileIO* pFS);
+
+// --------------------------------------------------------------------------------
+/** Same as #aiImportFileEx, but adds an extra parameter containing importer settings.
+ *
+ * @param pProps #aiPropertyStore instance containing import settings. 
+ * @see aiImportFileEx
+ */
+ASSIMP_API const C_STRUCT aiScene* aiImportFileExWithProperties( 
+	const char* pFile,
+	unsigned int pFlags,
+	C_STRUCT aiFileIO* pFS,
+	const C_STRUCT aiPropertyStore* pProps);
 
 // --------------------------------------------------------------------------------
 /** Reads the given file from a given memory buffer,
@@ -155,6 +181,19 @@ ASSIMP_API const C_STRUCT aiScene* aiImportFileFromMemory(
 	unsigned int pLength,
 	unsigned int pFlags,
 	const char* pHint);
+
+// --------------------------------------------------------------------------------
+/** Same as #aiImportFileFromMemory, but adds an extra parameter containing importer settings.
+ *
+ * @param pProps #aiPropertyStore instance containing import settings. 
+ * @see aiImportFileFromMemory
+ */
+ASSIMP_API const C_STRUCT aiScene* aiImportFileFromMemoryWithProperties( 
+	const char* pBuffer,
+	unsigned int pLength,
+	unsigned int pFlags,
+	const char* pHint,
+	const C_STRUCT aiPropertyStore* pProps);
 
 // --------------------------------------------------------------------------------
 /** Apply post-processing to an already-imported scene.
@@ -283,13 +322,29 @@ ASSIMP_API void aiGetExtensionList(
 	C_STRUCT aiString* szOut);
 
 // --------------------------------------------------------------------------------
-/** Get the storage required by an imported asset
+/** Get the approximated storage required by an imported asset
  * @param pIn Input asset.
  * @param in Data structure to be filled. 
  */
 ASSIMP_API void aiGetMemoryRequirements(
 	const C_STRUCT aiScene* pIn,
 	C_STRUCT aiMemoryInfo* in);
+
+
+
+// --------------------------------------------------------------------------------
+/** Create an empty property store. Property stores are used to collect import
+ *  settings.
+ * @return New property store. Property stores need to be manually destroyed using
+ *   the #aiReleasePropertyStore API function.
+ */
+ASSIMP_API C_STRUCT aiPropertyStore* aiCreatePropertyStore(void);
+
+// --------------------------------------------------------------------------------
+/** Delete a property store.
+ * @param p Property store to be deleted.
+ */
+ASSIMP_API void aiReleasePropertyStore(aiPropertyStore* p);
 
 // --------------------------------------------------------------------------------
 /** Set an integer property. 
@@ -303,6 +358,7 @@ ASSIMP_API void aiGetMemoryRequirements(
  * @param value New value for the property
  */
 ASSIMP_API void aiSetImportPropertyInteger(
+	aiPropertyStore* store,
 	const char* szName, 
 	int value);
 
@@ -318,6 +374,7 @@ ASSIMP_API void aiSetImportPropertyInteger(
  * @param value New value for the property
  */
 ASSIMP_API void aiSetImportPropertyFloat(
+	aiPropertyStore* store,
 	const char* szName,
 	float value);
 
@@ -328,11 +385,13 @@ ASSIMP_API void aiSetImportPropertyFloat(
  *  interface, properties are always shared by all imports. It is not possible to 
  *  specify them per import.
  *
+ * @param property store to modify. Use #aiCreatePropertyStore to obtain a store.
  * @param szName Name of the configuration property to be set. All supported 
  *   public properties are defined in the aiConfig.h header file (#AI_CONFIG_XXX).
  * @param value New value for the property
  */
 ASSIMP_API void aiSetImportPropertyString(
+	aiPropertyStore* store,
 	const char* szName,
 	const C_STRUCT aiString* st);
 

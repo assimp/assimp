@@ -507,9 +507,10 @@ void BatchLoader::LoadAll()
 		pp |= aiProcess_ValidateDataStructure;
 #endif
 		// setup config properties if necessary
-		data->pImporter->pimpl->mFloatProperties  = (*it).map.floats;
-		data->pImporter->pimpl->mIntProperties    = (*it).map.ints;
-		data->pImporter->pimpl->mStringProperties = (*it).map.strings;
+		ImporterPimpl* pimpl = data->pImporter->Pimpl();
+		pimpl->mFloatProperties  = (*it).map.floats;
+		pimpl->mIntProperties    = (*it).map.ints;
+		pimpl->mStringProperties = (*it).map.strings;
 
 		if (!DefaultLogger::isNullLogger())
 		{

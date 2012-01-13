@@ -59,9 +59,8 @@ using namespace Assimp;
 
 namespace Assimp
 {
-
-	/** Stores the importer objects for all active import processes */
-	typedef std::map<const aiScene*, Assimp::Importer*> ImporterMap;
+	// underlying structure for aiPropertyStore
+	typedef BatchLoader::PropertyMap PropertyMap;
 
 	/** Stores the LogStream objects for all active C log streams */
 	struct mpred {
@@ -73,9 +72,6 @@ namespace Assimp
 
 	/** Stores the LogStream objects allocated by #aiGetPredefinedLogStream */
 	typedef std::list<Assimp::LogStream*> PredefLogStreamMap;
-
-	/** Local storage of all active import processes */
-	static ImporterMap gActiveImports;
 
 	/** Local storage of all active log streams */
 	static LogStreamMap gActiveLogStreams;
@@ -90,20 +86,11 @@ namespace Assimp
 	static aiBool gVerboseLogging = false;
 }
 
-/** Configuration properties */
-static ImporterPimpl::IntPropertyMap gIntProperties;
-static ImporterPimpl::FloatPropertyMap gFloatProperties;
-static ImporterPimpl::StringPropertyMap	gStringProperties;
 
 #ifdef AI_C_THREADSAFE
-/** Global mutex to manage the access to the importer map */
-static boost::mutex gMutex;
-
 /** Global mutex to manage the access to the logstream map */
 static boost::mutex gLogStreamMutex;
 #endif
-
-
 
 
 // ------------------------------------------------------------------------------------------------
@@ -147,7 +134,7 @@ private:
 void ReportSceneNotFoundError()
 {
 	DefaultLogger::get()->error("Unable to find the Assimp::Importer for this aiScene. "
-		"Are you playing fools with us? Don't mix cpp and c API. Thanks.");
+		"The C-API does not accept scenes produced by the C++ API and vice versa");
 
 	assert(false);
 }
@@ -160,8 +147,15 @@ const aiScene* aiImportFile( const char* pFile, unsigned int pFlags)
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiScene* aiImportFileEx( const char* pFile, unsigned int pFlags, 
-	aiFileIO* pFS)
+const aiScene* aiImportFileEx( const char* pFile, unsigned int pFlags,  aiFileIO* pFS)
+{
+	return aiImportFileExWithProperties(pFile, pFlags, pFS, NULL);
+}
+
+// ------------------------------------------------------------------------------------------------
+const aiScene* aiImportFileExWithProperties( const char* pFile, unsigned int pFlags, 
+	aiFileIO* pFS,
+	const aiPropertyStore* props)
 {
 	ai_assert(NULL != pFile);
 
@@ -171,18 +165,14 @@ const aiScene* aiImportFileEx( const char* pFile, unsigned int pFlags,
 	// create an Importer for this file
 	Assimp::Importer* imp = new Assimp::Importer();
 
-#ifdef AI_C_THREADSAFE
-	boost::mutex::scoped_lock lock(gMutex);
-#endif
-	// copy the global property lists to the Importer instance
-	imp->pimpl->mIntProperties = gIntProperties;
-	imp->pimpl->mFloatProperties = gFloatProperties;
-	imp->pimpl->mStringProperties = gStringProperties;
-
-#ifdef AI_C_THREADSAFE
-	lock.unlock();
-#endif
-
+	// copy properties
+	if(props) {
+		const PropertyMap* pp = reinterpret_cast<const PropertyMap*>(props);
+		ImporterPimpl* pimpl = imp->Pimpl();
+		pimpl->mIntProperties = pp->ints;
+		pimpl->mFloatProperties = pp->floats;
+		pimpl->mStringProperties = pp->strings;
+	}
 	// setup a custom IO system if necessary
 	if (pFS)	{
 		imp->SetIOHandler( new CIOSystemWrapper (pFS) );
@@ -191,12 +181,10 @@ const aiScene* aiImportFileEx( const char* pFile, unsigned int pFlags,
 	// and have it read the file
 	scene = imp->ReadFile( pFile, pFlags);
 
-	// if succeeded, place it in the collection of active processes
+	// if succeeded, store the importer in the scene and keep it alive
 	if( scene)	{
-#ifdef AI_C_THREADSAFE
-		lock.lock();
-#endif
-		gActiveImports[scene] = imp;
+		ScenePrivateData* priv = const_cast<ScenePrivateData*>( ScenePriv(scene) );
+		priv->mOrigImporter = imp;
 	} 
 	else	{
 		// if failed, extract error code and destroy the import
@@ -216,6 +204,17 @@ const aiScene* aiImportFileFromMemory(
 	unsigned int pFlags,
 	const char* pHint)
 {
+	return aiImportFileFromMemoryWithProperties(pBuffer, pLength, pFlags, pHint, NULL);
+}
+
+// ------------------------------------------------------------------------------------------------
+const aiScene* aiImportFileFromMemoryWithProperties( 
+	const char* pBuffer,
+	unsigned int pLength,
+	unsigned int pFlags,
+	const char* pHint,
+	const aiPropertyStore* props)
+{
 	ai_assert(NULL != pBuffer && 0 != pLength);
 
 	const aiScene* scene = NULL;
@@ -224,27 +223,22 @@ const aiScene* aiImportFileFromMemory(
 	// create an Importer for this file
 	Assimp::Importer* imp = new Assimp::Importer();
 
-#ifdef AI_C_THREADSAFE
-	boost::mutex::scoped_lock lock(gMutex);
-#endif
-	// copy the global property lists to the Importer instance
-	imp->pimpl->mIntProperties = gIntProperties;
-	imp->pimpl->mFloatProperties = gFloatProperties;
-	imp->pimpl->mStringProperties = gStringProperties;
-
-#ifdef AI_C_THREADSAFE
-	lock.unlock();
-#endif
+	// copy properties
+	if(props) {
+		const PropertyMap* pp = reinterpret_cast<const PropertyMap*>(props);
+		ImporterPimpl* pimpl = imp->Pimpl();
+		pimpl->mIntProperties = pp->ints;
+		pimpl->mFloatProperties = pp->floats;
+		pimpl->mStringProperties = pp->strings;
+	}
 
 	// and have it read the file from the memory buffer
 	scene = imp->ReadFileFromMemory( pBuffer, pLength, pFlags,pHint);
 
-	// if succeeded, place it in the collection of active processes
+	// if succeeded, store the importer in the scene and keep it alive
 	if( scene)	{
-#ifdef AI_C_THREADSAFE
-		lock.lock();
-#endif
-		gActiveImports[scene] = imp;
+		 ScenePrivateData* priv = const_cast<ScenePrivateData*>( ScenePriv(scene) );
+		 priv->mOrigImporter = imp;
 	} 
 	else	{
 		// if failed, extract error code and destroy the import
@@ -265,22 +259,17 @@ void aiReleaseImport( const aiScene* pScene)
 	}
 
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-
-#ifdef AI_C_THREADSAFE
-	boost::mutex::scoped_lock lock(gMutex);
-#endif
 	
 	// find the importer associated with this data
-	ImporterMap::iterator it = gActiveImports.find( pScene);
-	// it should be there... else the user is playing fools with us
-	if( it == gActiveImports.end())	{
-		ReportSceneNotFoundError();
-		return;
+	const ScenePrivateData* priv = ScenePriv(pScene);
+	if( !priv || !priv->mOrigImporter)	{
+		delete pScene;
 	}
-
-	// kill the importer, the data dies with it
-	delete it->second;
-	gActiveImports.erase( it);
+	else {
+		// deleting the Importer also deletes the scene
+		delete priv->mOrigImporter;
+	}
+	
 	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
@@ -293,27 +282,17 @@ ASSIMP_API const aiScene* aiApplyPostProcessing(const aiScene* pScene,
 
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 
-#ifdef AI_C_THREADSAFE
-	boost::mutex::scoped_lock lock(gMutex);
-#endif
 	// find the importer associated with this data
-	ImporterMap::iterator it = gActiveImports.find( pScene);
-	// it should be there... else the user is playing fools with us
-	if( it == gActiveImports.end())	{
+	const ScenePrivateData* priv = ScenePriv(pScene);
+	if( !priv || !priv->mOrigImporter)	{
 		ReportSceneNotFoundError();
 		return NULL;
 	}
-#ifdef AI_C_THREADSAFE
-	lock.unlock();
-#endif
-	sc = it->second->ApplyPostProcessing(pFlags);
-#ifdef AI_C_THREADSAFE
-	lock.lock();
-#endif
+
+	sc = priv->mOrigImporter->ApplyPostProcessing(pFlags);
+
 	if (!sc) {
-		// kill the importer, the data dies with it
-		delete it->second;
-		gActiveImports.erase( it);
+		aiReleaseImport(pScene);
 		return NULL;
 	}
 
@@ -435,15 +414,7 @@ aiBool aiIsExtensionSupported(const char* szExtension)
 	aiBool candoit=AI_FALSE;
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 
-#ifdef AI_C_THREADSAFE
-	boost::mutex::scoped_lock lock(gMutex);
-#endif
-
-	if (!gActiveImports.empty())	{
-		return ((*(gActiveImports.begin())).second->IsExtensionSupported( szExtension )) ? AI_TRUE : AI_FALSE;
-	}
-
-	// fixme: no need to create a temporary Importer instance just for that .. 
+	// FIXME: no need to create a temporary Importer instance just for that .. 
 	Assimp::Importer tmp;
 	candoit = tmp.IsExtensionSupported(std::string(szExtension)) ? AI_TRUE : AI_FALSE;
 
@@ -458,15 +429,7 @@ void aiGetExtensionList(aiString* szOut)
 	ai_assert(NULL != szOut);
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 
-#ifdef AI_C_THREADSAFE
-	boost::mutex::scoped_lock lock(gMutex);
-#endif
-
-	if (!gActiveImports.empty()) {
-		(*(gActiveImports.begin())).second->GetExtensionList(*szOut);
-		return;
-	}
-	// fixme: no need to create a temporary Importer instance just for that .. 
+	// FIXME: no need to create a temporary Importer instance just for that .. 
 	Assimp::Importer tmp;
 	tmp.GetExtensionList(*szOut);
 
@@ -479,63 +442,62 @@ void aiGetMemoryRequirements(const C_STRUCT aiScene* pIn,
 	C_STRUCT aiMemoryInfo* in)
 {
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-#ifdef AI_C_THREADSAFE
-	boost::mutex::scoped_lock lock(gMutex);
-#endif
 
 	// find the importer associated with this data
-	ImporterMap::iterator it = gActiveImports.find( pIn);
-	// it should be there... else the user is playing fools with us
-	if( it == gActiveImports.end())	{
+	const ScenePrivateData* priv = ScenePriv(pIn);
+	if( !priv || !priv->mOrigImporter)	{
 		ReportSceneNotFoundError();
 		return;
 	}
-	// get memory statistics
-#ifdef AI_C_THREADSAFE
-	lock.unlock();
-#endif
-	it->second->GetMemoryRequirements(*in);
+
+	return priv->mOrigImporter->GetMemoryRequirements(*in);
 	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------
+ASSIMP_API aiPropertyStore* aiCreatePropertyStore(void)
+{
+	return reinterpret_cast<aiPropertyStore*>( new PropertyMap() );
+}
+
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API void aiReleasePropertyStore(aiPropertyStore* p)
+{
+	delete reinterpret_cast<PropertyMap*>(p);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Importer::SetPropertyInteger
-ASSIMP_API void aiSetImportPropertyInteger(const char* szName, int value)
+ASSIMP_API void aiSetImportPropertyInteger(aiPropertyStore* p, const char* szName, int value)
 {
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-#ifdef AI_C_THREADSAFE
-	boost::mutex::scoped_lock lock(gMutex);
-#endif
-	SetGenericProperty<int>(gIntProperties,szName,value,NULL);
+	PropertyMap* pp = reinterpret_cast<PropertyMap*>(p);
+	SetGenericProperty<int>(pp->ints,szName,value,NULL);
 	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Importer::SetPropertyFloat
-ASSIMP_API void aiSetImportPropertyFloat(const char* szName, float value)
+ASSIMP_API void aiSetImportPropertyFloat(aiPropertyStore* p, const char* szName, float value)
 {
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-#ifdef AI_C_THREADSAFE
-	boost::mutex::scoped_lock lock(gMutex);
-#endif
-	SetGenericProperty<float>(gFloatProperties,szName,value,NULL);
+	PropertyMap* pp = reinterpret_cast<PropertyMap*>(p);
+	SetGenericProperty<float>(pp->floats,szName,value,NULL);
 	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Importer::SetPropertyString
-ASSIMP_API void aiSetImportPropertyString(const char* szName,
+ASSIMP_API void aiSetImportPropertyString(aiPropertyStore* p, const char* szName,
 	const C_STRUCT aiString* st)
 {
 	if (!st) {
 		return;
 	}
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-#ifdef AI_C_THREADSAFE
-	boost::mutex::scoped_lock lock(gMutex);
-#endif
-	SetGenericProperty<std::string>(gStringProperties,szName,
-		std::string( st->data ),NULL);
+	PropertyMap* pp = reinterpret_cast<PropertyMap*>(p);
+	SetGenericProperty<std::string>(pp->strings,szName,std::string(st->C_Str()),NULL);
 	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
@@ -574,16 +536,16 @@ ASSIMP_API void aiTransposeMatrix4(aiMatrix4x4* mat)
 
 // ------------------------------------------------------------------------------------------------
 // Vector transformation
-ASSIMP_API void aiTransformVecByMatrix3(C_STRUCT aiVector3D* vec, 
-	const C_STRUCT aiMatrix3x3* mat)
+ASSIMP_API void aiTransformVecByMatrix3(aiVector3D* vec, 
+	const aiMatrix3x3* mat)
 {
 	ai_assert(NULL != mat && NULL != vec);
 	*vec *= (*mat);
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API void aiTransformVecByMatrix4(C_STRUCT aiVector3D* vec, 
-	const C_STRUCT aiMatrix4x4* mat)
+ASSIMP_API void aiTransformVecByMatrix4(aiVector3D* vec, 
+	const aiMatrix4x4* mat)
 {
 	ai_assert(NULL != mat && NULL != vec);
 	*vec *= (*mat);
@@ -592,8 +554,8 @@ ASSIMP_API void aiTransformVecByMatrix4(C_STRUCT aiVector3D* vec,
 // ------------------------------------------------------------------------------------------------
 // Matrix multiplication
 ASSIMP_API void aiMultiplyMatrix4(
-	C_STRUCT aiMatrix4x4* dst, 
-	const C_STRUCT aiMatrix4x4* src)
+	aiMatrix4x4* dst, 
+	const aiMatrix4x4* src)
 {
 	ai_assert(NULL != dst && NULL != src);
 	*dst = (*dst) * (*src);
@@ -601,8 +563,8 @@ ASSIMP_API void aiMultiplyMatrix4(
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API void aiMultiplyMatrix3(
-	C_STRUCT aiMatrix3x3* dst, 
-	const C_STRUCT aiMatrix3x3* src)
+	aiMatrix3x3* dst, 
+	const aiMatrix3x3* src)
 {
 	ai_assert(NULL != dst && NULL != src);
 	*dst = (*dst) * (*src);
@@ -611,7 +573,7 @@ ASSIMP_API void aiMultiplyMatrix3(
 // ------------------------------------------------------------------------------------------------
 // Matrix identity
 ASSIMP_API void aiIdentityMatrix3(
-	C_STRUCT aiMatrix3x3* mat)
+	aiMatrix3x3* mat)
 {
 	ai_assert(NULL != mat);
 	*mat = aiMatrix3x3();
@@ -619,7 +581,7 @@ ASSIMP_API void aiIdentityMatrix3(
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API void aiIdentityMatrix4(
-	C_STRUCT aiMatrix4x4* mat)
+	aiMatrix4x4* mat)
 {
 	ai_assert(NULL != mat);
 	*mat = aiMatrix4x4();

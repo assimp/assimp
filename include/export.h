@@ -50,7 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "aiTypes.h"
 
 #ifdef __cplusplus
-#include <boost/noncopyable.hpp>
 extern "C" {
 #endif
 
@@ -168,9 +167,6 @@ ASSIMP_API aiReturn aiExportSceneEx( const C_STRUCT aiScene* pScene, const char*
 * #aiExportDataBlob::name for more information.
 */
 struct aiExportDataBlob 
-#ifdef __cplusplus
-	: public boost::noncopyable
-#endif // __cplusplus
 {
 	/// Size of the data in bytes
 	size_t size;
@@ -200,6 +196,11 @@ struct aiExportDataBlob
 	aiExportDataBlob() { size = 0; data = next = NULL; }
 	/// Releases the data
 	~aiExportDataBlob() { delete static_cast<char*>( data ); delete next; }
+
+private:
+	// no copying
+	aiExportDataBlob(const aiExportDataBlob& ) {}
+	aiExportDataBlob& operator= (const aiExportDataBlob& ) {}
 #endif // __cplusplus
 };
 

@@ -468,7 +468,7 @@ struct RateRepresentationPredicate {
 	}
 
 	bool operator() (const IfcRepresentation* a, const IfcRepresentation* b) const {
-		return Rate(a) <= Rate(b);
+		return Rate(a) < Rate(b);
 	}
 };
 

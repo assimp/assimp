@@ -452,8 +452,9 @@ std::string LWSImporter::FindLWOFile(const std::string& in)
 	}
 	else tmp = in;
 
-	if (io->Exists(tmp))
+	if (io->Exists(tmp)) {
 		return in;
+	}
 
 	// file is not accessible for us ... maybe it's packed by 
 	// LightWave's 'Package Scene' command?
@@ -468,8 +469,10 @@ std::string LWSImporter::FindLWOFile(const std::string& in)
 		return test;
 
 	test = ".." + io->getOsSeparator() + test; 
-	if (io->Exists(test))
+	if (io->Exists(test)) {
 		return test;
+	}
+
 
 	// return original path, maybe the IOsystem knows better
 	return tmp;

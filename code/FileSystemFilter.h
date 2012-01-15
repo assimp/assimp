@@ -172,7 +172,7 @@ private:
 	void BuildPath (std::string& in) const
 	{
 		// if we can already access the file, great.
-		if (in.length() < 3 || wrapped->Exists(in.c_str())) {
+		if (in.length() < 3 || wrapped->Exists(in)) {
 			return;
 		}
 
@@ -180,8 +180,25 @@ private:
 		if (in[1] != ':') {
 		
 			// append base path and try 
-			in = base + in;
-			if (wrapped->Exists(in.c_str())) {
+			const std::string tmp = base + in;
+			if (wrapped->Exists(tmp)) {
+				in = tmp;
+				return;
+			}
+		}
+		
+		// Chop of the file name and look in the current directory
+		size_t pos = in.rfind("/");
+		if (std::string::npos == pos) {
+			pos = in.rfind("\\");
+		}
+
+		if (std::string::npos != pos)	{
+			std::string tmp = ".";
+			tmp += wrapped->getOsSeparator();
+			tmp += in.substr(pos+1, in.length()-pos); 
+			if (wrapped->Exists(tmp)) {
+				in = tmp;
 				return;
 			}
 		}

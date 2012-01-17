@@ -748,8 +748,11 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 		return false;
 	}
 
-	curmesh.verts.clear();
-	curmesh.vertcnt.clear();
+	std::vector<aiVector3D> old_verts;
+	std::vector<unsigned int> old_vertcnt;
+
+	old_verts.swap(curmesh.verts);
+	old_vertcnt.swap(curmesh.vertcnt);
 
 
 	// add connection geometry to close the adjacent 'holes' for the openings
@@ -863,6 +866,15 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 #undef to_int64
 #undef from_int64
 #undef from_int64_f
+
+
+	if (!result) {
+		// revert -- it's a shame, but better than nothing
+		curmesh.verts.insert(curmesh.verts.end(),old_verts.begin(), old_verts.end());
+		curmesh.vertcnt.insert(curmesh.vertcnt.end(),old_vertcnt.begin(), old_vertcnt.end());
+
+		IFCImporter::LogError("Ifc: revert, could not generate openings for this wall");
+	}
 
 	return result;
 }

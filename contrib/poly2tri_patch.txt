@@ -1,7 +1,15 @@
 diff -r 5de9623d6a50 poly2tri/common/shapes.h
 --- a/poly2tri/common/shapes.h	Mon Aug 08 22:26:41 2011 -0400
-+++ b/poly2tri/common/shapes.h	Tue Jan 17 02:14:32 2012 +0100
-@@ -136,7 +136,9 @@
++++ b/poly2tri/common/shapes.h	Tue Jan 17 02:36:52 2012 +0100
+@@ -35,6 +35,7 @@
+ 
+ #include <vector>
+ #include <cstddef>
++#include <stdexcept>
+ #include <assert.h>
+ #include <cmath>
+ 
+@@ -136,7 +137,9 @@
          p = &p2;
        } else if (p1.x == p2.x) {
          // Repeat points
@@ -14,7 +22,7 @@ diff -r 5de9623d6a50 poly2tri/common/shapes.h
  
 diff -r 5de9623d6a50 poly2tri/sweep/sweep.cc
 --- a/poly2tri/sweep/sweep.cc	Mon Aug 08 22:26:41 2011 -0400
-+++ b/poly2tri/sweep/sweep.cc	Tue Jan 17 02:14:32 2012 +0100
++++ b/poly2tri/sweep/sweep.cc	Tue Jan 17 02:36:52 2012 +0100
 @@ -113,6 +113,8 @@
    Point* p1 = triangle->PointCCW(point);
    Orientation o1 = Orient2d(eq, *p1, ep);

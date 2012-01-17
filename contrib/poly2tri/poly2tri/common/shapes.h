@@ -35,6 +35,7 @@
 
 #include <vector>
 #include <cstddef>
+#include <stdexcept>
 #include <assert.h>
 #include <cmath>
 

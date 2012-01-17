@@ -522,6 +522,28 @@ SET( ConvertUTF_SRCS
 )
 SOURCE_GROUP( ConvertUTF FILES ${ConvertUTF_SRCS})
 
+SET( Clipper_SRCS 
+	../contrib/clipper/clipper.hpp
+	../contrib/clipper/clipper.cpp
+)
+SOURCE_GROUP( Clipper FILES ${Clipper_SRCS})
+
+
+SET( Poly2Tri_SRCS 
+	../contrib/poly2tri/poly2tri/common/shapes.cc
+	../contrib/poly2tri/poly2tri/common/shapes.h
+	../contrib/poly2tri/poly2tri/common/utils.h
+	../contrib/poly2tri/poly2tri/sweep/advancing_front.h
+	../contrib/poly2tri/poly2tri/sweep/advancing_front.cc
+	../contrib/poly2tri/poly2tri/sweep/cdt.cc
+	../contrib/poly2tri/poly2tri/sweep/cdt.h
+	../contrib/poly2tri/poly2tri/sweep/sweep.cc
+	../contrib/poly2tri/poly2tri/sweep/sweep.h
+	../contrib/poly2tri/poly2tri/sweep/sweep_context.cc
+	../contrib/poly2tri/poly2tri/sweep/sweep_context.h
+)
+SOURCE_GROUP( Poly2Tri FILES ${Poly2Tri_SRCS})
+
 SET( unzip_SRCS
 	../contrib/unzip/crypt.h
 	../contrib/unzip/ioapi.c
@@ -596,6 +618,8 @@ ADD_LIBRARY( assimp STATIC
 	${IrrXML_SRCS}
 	${ConvertUTF_SRCS}
 	${unzip_compile_SRCS}
+	${Poly2Tri_SRCS}
+	${Clipper_SRCS}
 	# Necessary to show the headers in the project when using the VC++ generator:
 	${Boost_SRCS}
 
@@ -654,6 +678,8 @@ ADD_LIBRARY( assimp SHARED
 	${IrrXML_SRCS}
 	${ConvertUTF_SRCS}
 	${unzip_compile_SRCS}
+	${Poly2Tri_SRCS}
+	${Clipper_SRCS}
 	# Necessary to show the headers in the project when using the VC++ generator:
 	${Boost_SRCS}
 

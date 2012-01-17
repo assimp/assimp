@@ -4807,7 +4807,23 @@
 						RelativePath="..\..\contrib\clipper\clipper.cpp"
 						>
 						<FileConfiguration
+							Name="debug|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
 							Name="debug|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="release|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -4823,7 +4839,23 @@
 							/>
 						</FileConfiguration>
 						<FileConfiguration
+							Name="release-dll|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
 							Name="release-dll|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="debug-dll|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -4839,7 +4871,23 @@
 							/>
 						</FileConfiguration>
 						<FileConfiguration
+							Name="release-noboost-st|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
 							Name="release-noboost-st|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="debug-noboost-st|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -4855,7 +4903,23 @@
 							/>
 						</FileConfiguration>
 						<FileConfiguration
+							Name="debug-st|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
 							Name="debug-st|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="release-st|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"

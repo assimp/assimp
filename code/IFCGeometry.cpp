@@ -57,6 +57,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 	namespace IFC {
 
+		using ClipperLib::ulong64;
+		// XXX use full -+ range ...
+		const ClipperLib::long64 max_ulong64 = 1518500249; // clipper.cpp / hiRange var
+
+		//#define to_int64(p)  (static_cast<ulong64>( std::max( 0., std::min( static_cast<double>((p)), 1.) ) * max_ulong64 ))
+#define to_int64(p)  (static_cast<ulong64>(static_cast<double>((p) ) * max_ulong64 ))
+#define from_int64(p) (static_cast<double>((p)) / max_ulong64)
+#define from_int64_f(p) (static_cast<float>(from_int64((p))))
+
 // ------------------------------------------------------------------------------------------------
 bool ProcessPolyloop(const IfcPolyLoop& loop, TempMesh& meshout, ConversionData& /*conv*/)
 {
@@ -637,16 +646,6 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 	// If this happens then the projection must have been wrong.
 	assert(vmax.Length());
 
-	using ClipperLib::ulong64;
-	// XXX use full -+ range ...
-	const ClipperLib::long64 max_ulong64 = 1518500249; // clipper.cpp / hiRange var
-
-//#define to_int64(p)  (static_cast<ulong64>( std::max( 0., std::min( static_cast<double>((p)), 1.) ) * max_ulong64 ))
-#define to_int64(p)  (static_cast<ulong64>(static_cast<double>((p) ) * max_ulong64 ))
-#define from_int64(p) (static_cast<double>((p)) / max_ulong64)
-#define from_int64_f(p) (static_cast<float>(from_int64((p))))
-
-
 	ClipperLib::ExPolygons clipped;
 	ClipperLib::Polygons holes_union;
 
@@ -758,7 +757,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 	// add connection geometry to close the adjacent 'holes' for the openings
 	// this should only be done from one side of the wall or the polygons 
 	// would be emitted twice.
-	if (do_connections) {
+	if (false && do_connections) {
 
 		std::vector<aiVector3D> tmpvec;
 		BOOST_FOREACH(ClipperLib::Polygon& opening, holes_union) {
@@ -863,11 +862,6 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 		result = true;
 	}
 
-#undef to_int64
-#undef from_int64
-#undef from_int64_f
-
-
 	if (!result) {
 		// revert -- it's a shame, but better than nothing
 		curmesh.verts.insert(curmesh.verts.end(),old_verts.begin(), old_verts.end());
@@ -877,6 +871,447 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 	}
 
 	return result;
+}
+
+// ------------------------------------------------------------------------------------------------
+struct DistanceSorter {
+
+	DistanceSorter(const aiVector3D& base) : base(base) {}
+
+	bool operator () (const TempOpening& a, const TempOpening& b) const {
+		return (a.profileMesh->Center()-base).SquareLength() < (b.profileMesh->Center()-base).SquareLength();
+	}
+
+	aiVector3D base;
+};
+
+// ------------------------------------------------------------------------------------------------
+struct XYSorter {
+
+	// sort first by X coordinates, then by Y coordinates
+	bool operator () (const aiVector2D&a, const aiVector2D& b) const {
+		if (a.x == b.x) {
+			return a.y < b.y;
+		}
+		return a.x < b.x;
+	}
+};
+
+typedef std::pair< aiVector2D, aiVector2D > BoundingBox;
+typedef std::map<aiVector2D,size_t,XYSorter> XYSortedField;
+
+
+// ------------------------------------------------------------------------------------------------
+void QuadrifyPart(const aiVector2D& pmin, const aiVector2D& pmax, XYSortedField& field, const std::vector< BoundingBox >& bbs, 
+	std::vector<aiVector2D>& out)
+{
+	if (!(pmin.x-pmax.x) || !(pmin.y-pmax.y)) {
+		return;
+	}
+
+	float xs = 1e10, xe = 1e10;	
+	bool found = false;
+
+	// Search along the x-axis until we find an opening
+	XYSortedField::iterator start = field.begin();
+	for(; start != field.end(); ++start) {
+		const BoundingBox& bb = bbs[(*start).second];
+		if(bb.first.x >= pmax.x) {
+			break;
+		} 
+
+		if (bb.second.x > pmin.x && bb.second.y > pmin.y && bb.first.y < pmax.y) {
+			xs = bb.first.x;
+			xe = bb.second.x;
+			found = true;
+			break;
+		}
+	}
+
+	if (!found) {
+		// the rectangle [pmin,pend] is opaque, fill it
+		out.push_back(pmin);
+		out.push_back(aiVector2D(pmin.x,pmax.y));
+		out.push_back(pmax);
+		out.push_back(aiVector2D(pmax.x,pmin.y));
+		return;
+	}
+
+	xs = std::max(pmin.x,xs);
+	xe = std::min(pmax.x,xe);
+
+	// see if there's an offset to fill at the top of our quad
+	if (xs - pmin.x) {
+		out.push_back(pmin);
+		out.push_back(aiVector2D(pmin.x,pmax.y));
+		out.push_back(aiVector2D(xs,pmax.y));
+		out.push_back(aiVector2D(xs,pmin.y));
+	}
+
+	// search along the y-axis for all openings that overlap xs and our quad
+	float ylast = pmin.y;
+	found = false;
+	for(; start != field.end(); ++start) {
+		const BoundingBox& bb = bbs[(*start).second];
+		if (bb.first.x > xs || bb.first.y >= pmax.y) {
+			break;
+		}
+
+		if (bb.second.y > ylast) {
+
+			found = true;
+			const float ys = std::max(bb.first.y,pmin.y), ye = std::min(bb.second.y,pmax.y);
+			if (ys - ylast) {
+				QuadrifyPart( aiVector2D(xs,ylast), aiVector2D(xe,ys) ,field,bbs,out);
+			}
+
+			// the following are the window vertices
+
+			/*wnd.push_back(aiVector2D(xs,ys));
+			wnd.push_back(aiVector2D(xs,ye));
+			wnd.push_back(aiVector2D(xe,ye));
+			wnd.push_back(aiVector2D(xe,ys));*/
+			ylast = ye;
+		}
+	}
+	if (!found) {
+		// the rectangle [pmin,pend] is opaque, fill it
+		out.push_back(aiVector2D(xs,pmin.y));
+		out.push_back(aiVector2D(xs,pmax.y));
+		out.push_back(aiVector2D(xe,pmax.y));
+		out.push_back(aiVector2D(xe,pmin.y));
+		return;
+	}
+	if (ylast < pmax.y) {
+		QuadrifyPart( aiVector2D(xs,ylast), aiVector2D(xe,pmax.y) ,field,bbs,out);
+	}
+
+	// now for the whole rest
+	if (pmax.x-xe) {
+		QuadrifyPart(aiVector2D(xe,pmin.y), pmax ,field,bbs,out);
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void InsertWindowContours(const std::vector< BoundingBox >& bbs,
+	const std::vector< std::vector<aiVector2D> >& contours,
+	const std::vector<TempOpening>& openings,
+	const std::vector<aiVector3D>& nors, 
+	const aiMatrix3x3& minv,
+	const aiVector2D& scale,
+	const aiVector2D& offset,
+	float coord,
+	TempMesh& curmesh)
+{
+	ai_assert(contours.size() == bbs.size());
+
+	// fix windows - we need to insert the real, polygonal shapes into the quadratic holes that we have now
+	for(size_t i = 0; i < contours.size();++i) {
+		const BoundingBox& bb = bbs[i];
+		const std::vector<aiVector2D>& contour = contours[i];
+
+		// check if we need to do it at all - many windows just fit perfectly into their quadratic holes,
+		// i.e. their contours *are* already their bounding boxes.
+		if (contour.size() == 4) {
+			std::set<aiVector2D,XYSorter> verts;
+			for(size_t n = 0; n < 4; ++n) {
+				verts.insert(contour[n]);
+			}
+			const std::set<aiVector2D,XYSorter>::const_iterator end = verts.end();
+			if (verts.find(bb.first)!=end && verts.find(bb.second)!=end
+				&& verts.find(aiVector2D(bb.first.x,bb.second.y))!=end 
+				&& verts.find(aiVector2D(bb.second.x,bb.first.y))!=end 
+				) {
+					continue;
+			}
+		}
+
+		const float epsilon = (bb.first-bb.second).Length()/1000.f;
+
+		// walk through all contour points and find those that lie on the BB corner
+		size_t last_hit = -1, very_first_hit = -1;
+		aiVector2D edge;
+		for(size_t n = 0, e=0, size = contour.size();; n=(n+1)%size, ++e) {
+
+			// sanity checking
+			if (e == size*2) {
+				IFCImporter::LogError("encountered unexpected topology while generating window contour");
+				break;
+			}
+
+			const aiVector2D& v = contour[n];
+
+			bool hit = false;
+			if (fabs(v.x-bb.first.x)<epsilon) {
+				edge.x = bb.first.x;
+				hit = true;
+			}
+			else if (fabs(v.x-bb.second.x)<epsilon) {
+				edge.x = bb.second.x;
+				hit = true;
+			}
+
+			if (fabs(v.y-bb.first.y)<epsilon) {
+				edge.y = bb.first.y;
+				hit = true;
+			}
+			else if (fabs(v.y-bb.second.y)<epsilon) {
+				edge.y = bb.second.y;
+				hit = true;
+			}
+
+			if (hit) {
+				if (last_hit != (size_t)-1) {
+
+					const size_t old = curmesh.verts.size();
+					size_t cnt = last_hit > n ? size-(last_hit-n) : n-last_hit;
+					for(size_t a = last_hit, e = 0; e <= cnt; a=(a+1)%size, ++e) {
+						const aiVector3D v3 = minv * aiVector3D(offset.x + contour[a].x * scale.x, offset.y + contour[a].y * scale.y,coord);
+						curmesh.verts.push_back(v3);
+					}
+
+					if (edge != contour[last_hit]) {
+
+						aiVector2D corner = edge;
+
+						if (fabs(contour[last_hit].x-bb.first.x)<epsilon) {
+							corner.x = bb.first.x;
+						}
+						else if (fabs(contour[last_hit].x-bb.second.x)<epsilon) {
+							corner.x = bb.second.x;
+						}
+
+						if (fabs(contour[last_hit].y-bb.first.y)<epsilon) {
+							corner.y = bb.first.y;
+						}
+						else if (fabs(contour[last_hit].y-bb.second.y)<epsilon) {
+							corner.y = bb.second.y;
+						}
+
+						const aiVector3D v3 = minv * aiVector3D(offset.x + corner.x * scale.x, offset.y + corner.y * scale.y,coord);
+						curmesh.verts.push_back(v3);
+					}
+					else if (cnt == 1) {
+						// avoid degenerate polygons (also known as lines or points)
+						curmesh.verts.erase(curmesh.verts.begin()+old,curmesh.verts.end());
+					}
+
+					if (const size_t d = curmesh.verts.size()-old) {
+						curmesh.vertcnt.push_back(d);
+						std::reverse(curmesh.verts.rbegin(),curmesh.verts.rbegin()+d);
+					}
+					if (n == very_first_hit) {
+						break;
+					}
+				}
+				else {
+					very_first_hit = n;
+				}
+
+				last_hit = n;
+			}
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const std::vector<aiVector3D>& nors, TempMesh& curmesh)
+{
+	std::vector<aiVector3D>& out = curmesh.verts;
+
+	// Try to derive a solid base plane within the current surface for use as 
+	// working coordinate system. 
+	const aiMatrix3x3& m = DerivePlaneCoordinateSpace(curmesh);
+	const aiMatrix3x3 minv = aiMatrix3x3(m).Inverse();
+	const aiVector3D& nor = aiVector3D(m.c1, m.c2, m.c3);
+
+	float coord = -1;
+
+	std::vector<aiVector2D> contour_flat;
+	contour_flat.reserve(out.size());
+
+	aiVector2D vmin, vmax;
+	MinMaxChooser<aiVector2D>()(vmin, vmax);
+
+	// Move all points into the new coordinate system, collecting min/max verts on the way
+	BOOST_FOREACH(aiVector3D& x, out) {
+		const aiVector3D vv = m * x;
+
+		// keep Z offset in the plane coordinate system. Ignoring precision issues
+		// (which  are present, of course), this should be the same value for
+		// all polygon vertices (assuming the polygon is planar).
+
+
+		// XXX this should be guarded, but we somehow need to pick a suitable
+		// epsilon
+		// if(coord != -1.0f) {
+		//	assert(fabs(coord - vv.z) < 1e-3f);
+		// }
+
+		coord = vv.z;
+		vmin = std::min(aiVector2D(vv.x, vv.y), vmin);
+		vmax = std::max(aiVector2D(vv.x, vv.y), vmax);
+
+		contour_flat.push_back(aiVector2D(vv.x,vv.y));
+	}
+
+	// With the current code in DerivePlaneCoordinateSpace, 
+	// vmin,vmax should always be the 0...1 rectangle (+- numeric inaccuracies) 
+	// but here we won't rely on this.
+
+	vmax -= vmin;
+	BOOST_FOREACH(aiVector2D& vv, contour_flat) {
+		vv.x  = (vv.x - vmin.x) / vmax.x;
+		vv.y  = (vv.y - vmin.y) / vmax.y;
+	}
+
+	// project all points into the coordinate system defined by the p+sv*tu plane
+	// and compute bounding boxes for them
+	std::vector< BoundingBox > bbs;
+	XYSortedField field;
+
+	std::vector< std::vector<aiVector2D> > contours;
+
+	size_t c = 0;
+	BOOST_FOREACH(const TempOpening& t,openings) {
+		const aiVector3D& outernor = nors[c++];
+		const float dot = nor * outernor;
+		if (fabs(dot)<1.f-1e-6f) {
+			continue;
+		}
+
+		const std::vector<aiVector3D>& va = t.profileMesh->verts;
+		if(va.size() <= 2) {
+			continue;	
+		}
+
+		aiVector2D vpmin,vpmax;
+		MinMaxChooser<aiVector2D>()(vpmin,vpmax);
+
+		contours.push_back(std::vector<aiVector2D>());
+		std::vector<aiVector2D>& contour = contours.back();
+
+		BOOST_FOREACH(const aiVector3D& x, t.profileMesh->verts) {
+			const aiVector3D v = m * x;
+			
+			aiVector2D vv(v.x, v.y);
+
+			// rescale
+			vv.x  = (vv.x - vmin.x) / vmax.x;
+			vv.y  = (vv.y - vmin.y) / vmax.y;
+
+			vpmin = std::min(vpmin,vv);
+			vpmax = std::max(vpmax,vv);
+
+			contour.push_back(vv);
+		}
+		
+		if (field.find(vpmin) != field.end()) {
+			IFCImporter::LogWarn("constraint failure during generation of wall openings, results may be faulty");
+		}
+		field[vpmin] = bbs.size();
+		const BoundingBox& bb = BoundingBox(vpmin,vpmax);
+
+		// see if this BB intersects any other, in which case we could not use the Quadrify()
+		// algorithm and would revert to Poly2Tri only.
+		/*BOOST_FOREACH(const BoundingBox& ibb, bbs) {
+			
+			if (ibb.first.x < bb.second.x && ibb.second.x > bb.first.x &&
+				ibb.first.y < bb.second.y && ibb.second.y > bb.second.x) {
+				IFCImporter::LogWarn("cannot use quadrify algorithm to generate wall openings due to "  
+					"bounding box overlaps, using poly2tri fallback");
+				return TryAddOpenings_Poly2Tri(openings, nors, curmesh);
+			}
+		}*/
+
+		bbs.push_back(bb);
+	}
+
+	if (bbs.empty()) {
+		return false;
+	}
+
+	std::vector<aiVector2D> outflat;
+	outflat.reserve(openings.size()*4);
+	QuadrifyPart(aiVector2D(0.f,0.f),aiVector2D(1.f,1.f),field,bbs,outflat);
+	ai_assert(!(outflat.size() % 4));
+
+	std::vector<aiVector3D> vold;
+	std::vector<unsigned int> iold;
+
+	vold.reserve(outflat.size());
+	iold.reserve(outflat.size() / 4);
+
+	// Fix the outer contour using polyclipper
+	try {
+		
+		ClipperLib::Polygon subject;
+		ClipperLib::Clipper clipper;
+		ClipperLib::ExPolygons clipped;
+
+		ClipperLib::Polygon clip;
+		clip.reserve(contour_flat.size());
+		BOOST_FOREACH(const aiVector2D& pip, contour_flat) {
+			clip.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
+		}
+
+		if (!ClipperLib::Orientation(clip)) {
+			std::reverse(clip.begin(), clip.end());
+		}
+
+		// We need to run polyclipper on every single quad -- we can't run it one all
+		// of them at once or it would merge them all together which would undo all
+		// previous steps
+		subject.reserve(4);
+		size_t cnt = 0;
+		BOOST_FOREACH(const aiVector2D& pip, outflat) {
+			subject.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
+			if (!(++cnt % 4)) {
+				if (!ClipperLib::Orientation(subject)) {
+					std::reverse(subject.begin(), subject.end());
+				}
+				
+				clipper.AddPolygon(subject,ClipperLib::ptSubject);
+				clipper.AddPolygon(clip,ClipperLib::ptClip);
+
+				clipper.Execute(ClipperLib::ctIntersection,clipped,ClipperLib::pftNonZero,ClipperLib::pftNonZero);
+
+				BOOST_FOREACH(const ClipperLib::ExPolygon& ex, clipped) {
+					iold.push_back(ex.outer.size());
+					BOOST_FOREACH(const ClipperLib::IntPoint& point, ex.outer) {
+						vold.push_back( minv * aiVector3D(
+							vmin.x + from_int64_f(point.X) * vmax.x, 
+							vmin.y + from_int64_f(point.Y) * vmax.y,
+							coord));
+					}
+				}
+
+				subject.clear();
+				clipped.clear();
+				clipper.Clear();
+			}
+		}
+
+		assert(!(cnt % 4));
+	}
+	catch (const char* sx) {
+		IFCImporter::LogError("Ifc: error during polygon clipping, contour line may be wrong: (Clipper: " 
+			+ std::string(sx) + ")");
+
+		iold.resize(outflat.size()/4,4);
+
+		BOOST_FOREACH(const aiVector2D& vproj, outflat) {
+			const aiVector3D v3 = minv * aiVector3D(vmin.x + vproj.x * vmax.x, vmin.y + vproj.y * vmax.y,coord);
+			vold.push_back(v3);
+		}
+	}
+
+	// undo the projection, generate output quads
+	std::swap(vold,curmesh.verts);
+	std::swap(iold,curmesh.vertcnt);
+
+	InsertWindowContours(bbs,contours,openings, nors,minv,vmax, vmin, coord, curmesh);
+	return true;
 }
 
 
@@ -929,6 +1364,14 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 	// Compute the normal vectors for all opening polygons as a prerequisite
 	// to TryAddOpenings_Poly2Tri()
 	if (openings) {
+
+		if (!conv.settings.useCustomTriangulation) {	         
+			// it is essential to apply the openings in the correct spatial order. The direction	 
+			// doesn't matter, but we would screw up if we started with e.g. a door in between	 
+			// two windows.	 
+			std::sort(conv.apply_openings->begin(),conv.apply_openings->end(),
+				DistanceSorter(min));	 
+		}
 	
 		nors.reserve(conv.apply_openings->size());
 		BOOST_FOREACH(TempOpening& t,*conv.apply_openings) {
@@ -959,7 +1402,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 		out.push_back(in[next]);
 
 		if(openings) {
-			if(TryAddOpenings_Poly2Tri(*conv.apply_openings,nors,temp)) {
+			if(TryAddOpenings_Quadrulate(*conv.apply_openings,nors,temp)) {
 				++sides_with_openings;
 			}
 			
@@ -978,7 +1421,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 
 			curmesh.vertcnt.push_back(size);
 			if(openings && size > 2) {
-				if(TryAddOpenings_Poly2Tri(*conv.apply_openings,nors,temp)) {
+				if(TryAddOpenings_Quadrulate(*conv.apply_openings,nors,temp)) {
 					++sides_with_v_openings;
 				}
 
@@ -1193,20 +1636,20 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 			}
 		}
 	}
-	else if(const IfcConnectedFaceSet* fset = geo.ToPtr<IfcConnectedFaceSet>()) {
+	else  if(const IfcConnectedFaceSet* fset = geo.ToPtr<IfcConnectedFaceSet>()) {
 		ProcessConnectedFaceSet(*fset,meshtmp,conv);
 	}	
-	else if(const IfcSweptAreaSolid* swept = geo.ToPtr<IfcSweptAreaSolid>()) {
+	else  if(const IfcSweptAreaSolid* swept = geo.ToPtr<IfcSweptAreaSolid>()) {
 		ProcessSweptAreaSolid(*swept,meshtmp,conv);
-	}  
+	}   
 	else if(const IfcManifoldSolidBrep* brep = geo.ToPtr<IfcManifoldSolidBrep>()) {
 		ProcessConnectedFaceSet(brep->Outer,meshtmp,conv);
-	}
+	} 
 	else if(const IfcFaceBasedSurfaceModel* surf = geo.ToPtr<IfcFaceBasedSurfaceModel>()) {
 		BOOST_FOREACH(const IfcConnectedFaceSet& fc, surf->FbsmFaces) {
 			ProcessConnectedFaceSet(fc,meshtmp,conv);
 		}
-	} 
+	}  
 	else if(const IfcBooleanResult* boolean = geo.ToPtr<IfcBooleanResult>()) {
 		ProcessBoolean(*boolean,meshtmp,conv);
 	}
@@ -1281,6 +1724,10 @@ bool ProcessRepresentationItem(const IfcRepresentationItem& item, std::vector<un
 	}
 	return true;
 }
+
+#undef to_int64
+#undef from_int64
+#undef from_int64_f
 
 } // ! IFC
 } // ! Assimp

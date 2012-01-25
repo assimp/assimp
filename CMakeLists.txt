@@ -62,8 +62,8 @@ IF ( ENABLE_BOOST_WORKAROUND )
 	MESSAGE( STATUS "Building a non-boost version of Assimp." )
 ELSE ( ENABLE_BOOST_WORKAROUND )
 	SET( Boost_DETAILED_FAILURE_MSG ON )
-	FIND_PACKAGE( Boost 1.35 )
-
+	SET( Boost_ADDITIONAL_VERSIONS "1.47" "1.47.0" "1.48.0" "1.48" )	
+	FIND_PACKAGE( Boost )
 	IF ( NOT Boost_FOUND )
 		MESSAGE( FATAL_ERROR
 			"Boost libraries (http://www.boost.org/) not found. "

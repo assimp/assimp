@@ -26,7 +26,7 @@ Visual Studio 9 support, bugfixes.
 B3D-Loader, Assimp testing
 
 - Jonathan Klein
-Ogre Loader
+Ogre Loader, VC2010 fixes and CMake fixes.
 
 - Sebastian Hempel,
 PyAssimp (first version)

@@ -55,7 +55,7 @@ M3Importer::M3Importer() :
 	m_pHead( NULL ),
 	m_pRefs( NULL )
 {
-
+	// empty
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -263,8 +263,11 @@ void M3Importer::convertToAssimp( const std::string& pFile, aiScene* pScene, DIV
 		pRootNode->mChildren[ i ] = pCurrentNode;
 		
 		// Loop over the faces of the nodes
+//		 = regions[i].ofsIndices; j < (regions[i].ofsIndices + regions[i].nIndices); j +=3)
+
 		unsigned int numFaces = ( pRegions[ i ].ofsIndices + pRegions[ i ].nIndices ) -  pRegions[ i ].ofsIndices;
 		aiMesh *pMesh = new aiMesh;
+		pMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 		MeshArray.push_back( pMesh );
 
 		pMesh->mNumFaces = numFaces;
@@ -316,13 +319,14 @@ void M3Importer::createVertexData( aiMesh *pMesh, const std::vector<aiVector3D> 
 		aiFace *pFace = &( pMesh->mFaces[ currentFace ] );
 		for ( unsigned int currentIdx=0; currentIdx<pFace->mNumIndices; currentIdx++ )
 		{
-			unsigned int idx = pFace->mIndices[ currentIdx ];
+			const unsigned int idx = pFace->mIndices[ currentIdx ];
 			if ( vertices.size() > idx )
 			{
 				pMesh->mVertices[ pos ] = vertices[ idx ];
 				pMesh->mNormals[ pos ] = normals[ idx ];
 
 				pFace->mIndices[ currentIdx ] = pos;
+				pFace->mIndices[ pos ];
 				pos++;
 			}
 		}

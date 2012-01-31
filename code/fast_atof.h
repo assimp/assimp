@@ -215,7 +215,7 @@ inline uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* 
 }
 
 // Number of relevant decimals for floating-point parsing.
-#define AI_FAST_ATOF_RELAVANT_DECIMALS 10
+#define AI_FAST_ATOF_RELAVANT_DECIMALS 15
 
 // ------------------------------------------------------------------------------------
 //! Provides a fast function for converting a string into a float,

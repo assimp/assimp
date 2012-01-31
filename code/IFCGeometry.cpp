@@ -1214,7 +1214,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 
 		// see if this BB intersects any other, in which case we could not use the Quadrify()
 		// algorithm and would revert to Poly2Tri only.
-		/*BOOST_FOREACH(const BoundingBox& ibb, bbs) {
+		BOOST_FOREACH(const BoundingBox& ibb, bbs) {
 			
 			if (ibb.first.x < bb.second.x && ibb.second.x > bb.first.x &&
 				ibb.first.y < bb.second.y && ibb.second.y > bb.second.x) {
@@ -1222,7 +1222,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 					"bounding box overlaps, using poly2tri fallback");
 				return TryAddOpenings_Poly2Tri(openings, nors, curmesh);
 			}
-		}*/
+		}
 
 		bbs.push_back(bb);
 	}

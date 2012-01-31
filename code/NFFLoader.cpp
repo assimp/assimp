@@ -81,7 +81,7 @@ void NFFImporter::GetExtensionList(std::set<std::string>& extensions)
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_FLOAT(f) \
 	SkipSpaces(&sz); \
-	if (!::IsLineEnd(*sz))sz = fast_atof_move(sz, (float&)f); 
+	if (!::IsLineEnd(*sz))sz = fast_atoreal_move<float>(sz, (float&)f); 
 
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_TRIPLE(v) \

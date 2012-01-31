@@ -100,7 +100,7 @@ using namespace Assimp;
 	for (unsigned int i = 0; i < num;++i) \
 	{ \
 		AI_AC_SKIP_TO_NEXT_TOKEN(); \
-		buffer = fast_atof_move(buffer,((float*)out)[i]); \
+		buffer = fast_atoreal_move<float>(buffer,((float*)out)[i]); \
 	}
 
 

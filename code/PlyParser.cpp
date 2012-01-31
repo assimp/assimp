@@ -811,13 +811,13 @@ bool PLY::PropertyInstance::ParseValue(
 
 	case EDT_Float:
 
-		pCur = fast_atof_move(pCur,out->fFloat);
+		pCur = fast_atoreal_move<float>(pCur,out->fFloat);
 		break;
 
 	case EDT_Double:
 
 		float f;
-		pCur = fast_atof_move(pCur,f);
+		pCur = fast_atoreal_move<float>(pCur,f);
 		out->fDouble = (double)f;
 		break;
 

@@ -167,21 +167,21 @@ void IrrlichtBase::ReadVectorProperty  (VectorProperty&  out)
 			const char* ptr = reader->getAttributeValue(i);
 
 			SkipSpaces(&ptr);
-			ptr = fast_atof_move( ptr,(float&)out.value.x );
+			ptr = fast_atoreal_move<float>( ptr,(float&)out.value.x );
 			SkipSpaces(&ptr);
 			if (',' != *ptr)
 			{
 				DefaultLogger::get()->error("IRR(MESH): Expected comma in vector definition");
 			}
 			else SkipSpaces(ptr+1,&ptr);
-			ptr = fast_atof_move( ptr,(float&)out.value.y );
+			ptr = fast_atoreal_move<float>( ptr,(float&)out.value.y );
 			SkipSpaces(&ptr);
 			if (',' != *ptr)
 			{
 				DefaultLogger::get()->error("IRR(MESH): Expected comma in vector definition");
 			}
 			else SkipSpaces(ptr+1,&ptr);
-			ptr = fast_atof_move( ptr,(float&)out.value.z );
+			ptr = fast_atoreal_move<float>( ptr,(float&)out.value.z );
 		}
 	}
 }

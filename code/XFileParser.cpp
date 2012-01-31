@@ -1368,7 +1368,7 @@ float XFileParser::ReadFloat()
 	}
 
 	float result = 0.0f;
-	P = fast_atof_move( P, result);
+	P = fast_atoreal_move<float>( P, result);
 
 	CheckForSeparator();
 

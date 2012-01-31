@@ -222,20 +222,22 @@ inline uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* 
 //! about 6 times faster than atof in win32.
 // If you find any bugs, please send them to me, niko (at) irrlicht3d.org.
 // ------------------------------------------------------------------------------------
-inline const char* fast_atof_move( const char* c, float& out)
+template <typename Real>
+inline const char* fast_atoreal_move( const char* c, Real& out)
 {
-	float f;
+	Real f;
 
 	bool inv = (*c=='-');
-	if (inv || *c=='+')
+	if (inv || *c=='+') {
 		++c;
+	}
 
-	f = (float) strtoul10_64 ( c, &c);
+	f = static_cast<Real>( strtoul10_64 ( c, &c) );
 	if (*c == '.' || (c[0] == ',' && (c[1] >= '0' || c[1] <= '9'))) // allow for commas, too
 	{
 		++c;
 
-		// NOTE: The original implementation is highly unaccurate here. The precision of a single
+		// NOTE: The original implementation is highly inaccurate here. The precision of a single
 		// IEEE 754 float is not high enough, everything behind the 6th digit tends to be more 
 		// inaccurate than it would need to be. Casting to double seems to solve the problem.
 		// strtol_64 is used to prevent integer overflow.
@@ -244,31 +246,35 @@ inline const char* fast_atof_move( const char* c, float& out)
 		// number of digits to be read. AI_FAST_ATOF_RELAVANT_DECIMALS can be a value between
 		// 1 and 15.
 		unsigned int diff = AI_FAST_ATOF_RELAVANT_DECIMALS;
-		double pl = (double) strtoul10_64 ( c, &c, &diff );
+		double pl = static_cast<double>( strtoul10_64 ( c, &c, &diff ));
 
 		pl *= fast_atof_table[diff];
-		f += (float)pl;
+		f += static_cast<Real>( pl );
 	}
 
 	// A major 'E' must be allowed. Necessary for proper reading of some DXF files.
 	// Thanks to Zhao Lei to point out that this if() must be outside the if (*c == '.' ..)
-	if (*c == 'e' || *c == 'E')
-	{
+	if (*c == 'e' || *c == 'E')	{
+
 		++c;
 		bool einv = (*c=='-');
-		if (einv || *c=='+')
+		if (einv || *c=='+') {
 			++c;
+		}
 
-		float exp = (float)strtoul10_64(c, &c);
-		if (einv)
-			exp *= -1.0f;
-
-		f *= pow(10.0f, exp);
+		// The reason float constants are used here is that we've seen cases where compilers
+		// would perform such casts on compile-time constants at runtime, which would be
+		// bad considering how frequently fast_atoreal_move<float> is called in Assimp.
+		Real exp = static_cast<Real>( strtoul10_64(c, &c) );
+		if (einv) {
+			exp *= static_cast<Real>(-1.0f);
+		}
+		f *= pow(static_cast<Real>(10.0f), exp);
 	}
 
-	if (inv)
-		f *= -1.0f;
-	
+	if (inv) {
+		f *= static_cast<Real>(-1.0f);
+	}
 	out = f;
 	return c;
 }
@@ -278,7 +284,7 @@ inline const char* fast_atof_move( const char* c, float& out)
 inline float fast_atof(const char* c)
 {
 	float ret;
-	fast_atof_move(c, ret);
+	fast_atoreal_move<float>(c, ret);
 	return ret;
 }
 
@@ -286,7 +292,7 @@ inline float fast_atof(const char* c)
 inline float fast_atof( const char* c, const char** cout)
 {
 	float ret;
-	*cout = fast_atof_move(c, ret);
+	*cout = fast_atoreal_move<float>(c, ret);
 
 	return ret;
 }
@@ -294,7 +300,32 @@ inline float fast_atof( const char* c, const char** cout)
 inline float fast_atof( const char** inout)
 {
 	float ret;
-	*inout = fast_atof_move(*inout, ret);
+	*inout = fast_atoreal_move<float>(*inout, ret);
+
+	return ret;
+}
+
+
+inline double fast_atod(const char* c)
+{
+	double ret;
+	fast_atoreal_move<double>(c, ret);
+	return ret;
+}
+
+
+inline double fast_atod( const char* c, const char** cout)
+{
+	double ret;
+	*cout = fast_atoreal_move<double>(c, ret);
+
+	return ret;
+}
+
+inline double fast_atod( const char** inout)
+{
+	double ret;
+	*inout = fast_atoreal_move<double>(*inout, ret);
 
 	return ret;
 }

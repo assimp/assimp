@@ -374,7 +374,7 @@ float BVHLoader::GetNextTokenAsFloat()
 	// check if the float is valid by testing if the atof() function consumed every char of the token
 	const char* ctoken = token.c_str();
 	float result = 0.0f;
-	ctoken = fast_atof_move( ctoken, result);
+	ctoken = fast_atoreal_move<float>( ctoken, result);
 
 	if( ctoken != token.c_str() + token.length())
 		ThrowException( boost::str( boost::format( "Expected a floating point number, but found \"%s\".") % token));

@@ -137,7 +137,7 @@ void RAWImporter::InternReadFile( const std::string& pFile,
 			for (num = 0; num < 12;++num)
 			{
 				if(!SkipSpaces(&sz) || !IsNumeric(*sz))break;
-				sz = fast_atof_move(sz,data[num]);
+				sz = fast_atoreal_move<float>(sz,data[num]);
 			}
 			if (num != 12 && num != 9)
 			{

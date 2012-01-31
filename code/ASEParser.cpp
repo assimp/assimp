@@ -1614,7 +1614,7 @@ void Parser::ParseLV4MeshBonesVertices(unsigned int iNumVertices,ASE::Mesh& mesh
 
 					// then parse the vertex weight
 					if (!SkipSpaces(&filePtr))break;
-					filePtr = fast_atof_move(filePtr,pairOut.second);
+					filePtr = fast_atoreal_move<float>(filePtr,pairOut.second);
 
 					// -1 marks unused entries
 					if (-1 != pairOut.first)
@@ -2131,7 +2131,7 @@ void Parser::ParseLV4MeshFloat(float& fOut)
 		return;
 	}
 	// parse the first float
-	filePtr = fast_atof_move(filePtr,fOut);
+	filePtr = fast_atoreal_move<float>(filePtr,fOut);
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshLong(unsigned int& iOut)

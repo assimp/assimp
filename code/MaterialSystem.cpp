@@ -137,7 +137,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
 		const char* cur =  prop->mData+4;
 		ai_assert(prop->mDataLength>=5 && !prop->mData[prop->mDataLength-1]);
 		for (unsigned int a = 0; ;++a) {	
-			cur = fast_atof_move(cur,pOut[a]);
+			cur = fast_atoreal_move<float>(cur,pOut[a]);
 			if(a==iWrite-1) {
 				break;
 			}

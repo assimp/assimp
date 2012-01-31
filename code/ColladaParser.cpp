@@ -500,7 +500,7 @@ void ColladaParser::ReadController( Collada::Controller& pController)
 	      for( unsigned int a = 0; a < 16; a++)
 	      {
 		      // read a number
-          content = fast_atof_move( content, pController.mBindShapeMatrix[a]);
+          content = fast_atoreal_move<float>( content, pController.mBindShapeMatrix[a]);
 		      // skip whitespace after it
 		      SkipSpacesAndLineEnd( &content);
 	      }
@@ -980,13 +980,13 @@ void ColladaParser::ReadLight( Collada::Light& pLight)
 				// text content contains 3 floats
 				const char* content = GetTextContent();
 				  
-				content = fast_atof_move( content, (float&)pLight.mColor.r);
+				content = fast_atoreal_move<float>( content, (float&)pLight.mColor.r);
 				SkipSpacesAndLineEnd( &content);
 				
-				content = fast_atof_move( content, (float&)pLight.mColor.g);
+				content = fast_atoreal_move<float>( content, (float&)pLight.mColor.g);
 				SkipSpacesAndLineEnd( &content);
 
-				content = fast_atof_move( content, (float&)pLight.mColor.b);
+				content = fast_atoreal_move<float>( content, (float&)pLight.mColor.b);
 				SkipSpacesAndLineEnd( &content);
 
 				TestClosing( "color");
@@ -1342,16 +1342,16 @@ void ColladaParser::ReadEffectColor( aiColor4D& pColor, Sampler& pSampler)
 				// text content contains 4 floats
 				const char* content = GetTextContent(); 
 
-				content = fast_atof_move( content, (float&)pColor.r);
+				content = fast_atoreal_move<float>( content, (float&)pColor.r);
 				SkipSpacesAndLineEnd( &content);
 
-				content = fast_atof_move( content, (float&)pColor.g);
+				content = fast_atoreal_move<float>( content, (float&)pColor.g);
 				SkipSpacesAndLineEnd( &content);
 
-				content = fast_atof_move( content, (float&)pColor.b);
+				content = fast_atoreal_move<float>( content, (float&)pColor.b);
 				SkipSpacesAndLineEnd( &content);
 
-				content = fast_atof_move( content, (float&)pColor.a);
+				content = fast_atoreal_move<float>( content, (float&)pColor.a);
 				SkipSpacesAndLineEnd( &content);
 				TestClosing( "color");
 			} 
@@ -1404,7 +1404,7 @@ void ColladaParser::ReadEffectFloat( float& pFloat)
 			{
 				// text content contains a single floats
 				const char* content = GetTextContent();
-				content = fast_atof_move( content, pFloat);
+				content = fast_atoreal_move<float>( content, pFloat);
 				SkipSpacesAndLineEnd( &content);
 
 				TestClosing( "float");
@@ -1681,7 +1681,7 @@ void ColladaParser::ReadDataArray()
 
 				float value;
 				// read a number
-				content = fast_atof_move( content, value);
+				content = fast_atoreal_move<float>( content, value);
 				data.mValues.push_back( value);
 				// skip whitespace after it
 				SkipSpacesAndLineEnd( &content);
@@ -2445,7 +2445,7 @@ void ColladaParser::ReadNodeTransformation( Node* pNode, TransformType pType)
 	for( unsigned int a = 0; a < sNumParameters[pType]; a++)
 	{
 		// read a number
-		content = fast_atof_move( content, tf.f[a]);
+		content = fast_atoreal_move<float>( content, tf.f[a]);
 		// skip whitespace after it
 		SkipSpacesAndLineEnd( &content);
 	}

@@ -344,7 +344,7 @@ boost::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*&
 		if (*cur == '.') {
 			// XXX many STEP files contain extremely accurate data, float's precision may not suffice in many cases
 			float f;
-			inout = fast_atof_move(start,f);
+			inout = fast_atoreal_move<float>(start,f);
 			return boost::make_shared<EXPRESS::REAL>(f);
 		}
 	}

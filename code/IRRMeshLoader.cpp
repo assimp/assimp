@@ -298,24 +298,24 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 					aiVector3D temp;aiColor4D c;
 
 					// Read the vertex position
-					sz = fast_atof_move(sz,(float&)temp.x);
+					sz = fast_atoreal_move<float>(sz,(float&)temp.x);
 					SkipSpaces(&sz);
 
-					sz = fast_atof_move(sz,(float&)temp.y);
+					sz = fast_atoreal_move<float>(sz,(float&)temp.y);
 					SkipSpaces(&sz);
 
-					sz = fast_atof_move(sz,(float&)temp.z);
+					sz = fast_atoreal_move<float>(sz,(float&)temp.z);
 					SkipSpaces(&sz);
 					curVertices.push_back(temp);
 
 					// Read the vertex normals
-					sz = fast_atof_move(sz,(float&)temp.x);
+					sz = fast_atoreal_move<float>(sz,(float&)temp.x);
 					SkipSpaces(&sz);
 
-					sz = fast_atof_move(sz,(float&)temp.y);
+					sz = fast_atoreal_move<float>(sz,(float&)temp.y);
 					SkipSpaces(&sz);
 
-					sz = fast_atof_move(sz,(float&)temp.z);
+					sz = fast_atoreal_move<float>(sz,(float&)temp.z);
 					SkipSpaces(&sz);
 					curNormals.push_back(temp);
 
@@ -331,10 +331,10 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 
 
 					// read the first UV coordinate set
-					sz = fast_atof_move(sz,(float&)temp.x);
+					sz = fast_atoreal_move<float>(sz,(float&)temp.x);
 					SkipSpaces(&sz);
 
-					sz = fast_atof_move(sz,(float&)temp.y);
+					sz = fast_atoreal_move<float>(sz,(float&)temp.y);
 					SkipSpaces(&sz);
 					temp.z = 0.f;
 					temp.y = 1.f - temp.y;  // DX to OGL
@@ -342,35 +342,35 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 
 					// read the (optional) second UV coordinate set
 					if (vertexFormat == 1)	{
-						sz = fast_atof_move(sz,(float&)temp.x);
+						sz = fast_atoreal_move<float>(sz,(float&)temp.x);
 						SkipSpaces(&sz);
 
-						sz = fast_atof_move(sz,(float&)temp.y);
+						sz = fast_atoreal_move<float>(sz,(float&)temp.y);
 						temp.y = 1.f - temp.y; // DX to OGL
 						curUV2s.push_back(temp);
 					}
 					// read optional tangent and bitangent vectors
 					else if (vertexFormat == 2)	{
 						// tangents
-						sz = fast_atof_move(sz,(float&)temp.x);
+						sz = fast_atoreal_move<float>(sz,(float&)temp.x);
 						SkipSpaces(&sz);
 
-						sz = fast_atof_move(sz,(float&)temp.z);
+						sz = fast_atoreal_move<float>(sz,(float&)temp.z);
 						SkipSpaces(&sz);
 
-						sz = fast_atof_move(sz,(float&)temp.y);
+						sz = fast_atoreal_move<float>(sz,(float&)temp.y);
 						SkipSpaces(&sz);
 						temp.y *= -1.0f;
 						curTangents.push_back(temp);
 
 						// bitangents
-						sz = fast_atof_move(sz,(float&)temp.x);
+						sz = fast_atoreal_move<float>(sz,(float&)temp.x);
 						SkipSpaces(&sz);
 
-						sz = fast_atof_move(sz,(float&)temp.z);
+						sz = fast_atoreal_move<float>(sz,(float&)temp.z);
 						SkipSpaces(&sz);
 
-						sz = fast_atof_move(sz,(float&)temp.y);
+						sz = fast_atoreal_move<float>(sz,(float&)temp.y);
 						SkipSpaces(&sz);
 						temp.y *= -1.0f;
 						curBitangents.push_back(temp);

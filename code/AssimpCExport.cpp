@@ -71,7 +71,7 @@ ASSIMP_API void aiCopyScene(const aiScene* pIn, aiScene** pOut)
 		return;
 	}
 
-	SceneCombiner::CopyScene(pOut,pIn,false);
+	SceneCombiner::CopyScene(pOut,pIn,true);
 }
 
 // ------------------------------------------------------------------------------------------------

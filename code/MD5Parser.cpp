@@ -197,11 +197,11 @@ bool MD5Parser::ParseSection(Section& out)
 	if ('(' != *sz++) \
 		MD5Parser::ReportWarning("Unexpected token: ( was expected",(*eit).iLineNumber); \
 	AI_MD5_SKIP_SPACES(); \
-	sz = fast_atof_move(sz,(float&)vec.x); \
+	sz = fast_atoreal_move<float>(sz,(float&)vec.x); \
 	AI_MD5_SKIP_SPACES(); \
-	sz = fast_atof_move(sz,(float&)vec.y); \
+	sz = fast_atoreal_move<float>(sz,(float&)vec.y); \
 	AI_MD5_SKIP_SPACES(); \
-	sz = fast_atof_move(sz,(float&)vec.z); \
+	sz = fast_atoreal_move<float>(sz,(float&)vec.z); \
 	AI_MD5_SKIP_SPACES(); \
 	if (')' != *sz++) \
 		MD5Parser::ReportWarning("Unexpected token: ) was expected",(*eit).iLineNumber);
@@ -295,9 +295,9 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 					if ('(' != *sz++)
 						MD5Parser::ReportWarning("Unexpected token: ( was expected",(*eit).iLineNumber);
 					AI_MD5_SKIP_SPACES();
-					sz = fast_atof_move(sz,(float&)vert.mUV.x);
+					sz = fast_atoreal_move<float>(sz,(float&)vert.mUV.x);
 					AI_MD5_SKIP_SPACES();
-					sz = fast_atof_move(sz,(float&)vert.mUV.y);
+					sz = fast_atoreal_move<float>(sz,(float&)vert.mUV.y);
 					AI_MD5_SKIP_SPACES();
 					if (')' != *sz++)
 						MD5Parser::ReportWarning("Unexpected token: ) was expected",(*eit).iLineNumber);
@@ -333,7 +333,7 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 					WeightDesc& weight = desc.mWeights[idx];	
 					weight.mBone = strtoul10(sz,&sz);
 					AI_MD5_SKIP_SPACES();
-					sz = fast_atof_move(sz,weight.mWeight);
+					sz = fast_atoreal_move<float>(sz,weight.mWeight);
 					AI_MD5_READ_TRIPLE(weight.vOffsetPosition);
 				}
 			}
@@ -406,7 +406,7 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 			for (ElementList::const_iterator eit = (*iter).mElements.begin(), eitEnd = (*iter).mElements.end(); eit != eitEnd; ++eit){
 				const char* sz = (*eit).szStart;
 				while (SkipSpacesAndLineEnd(&sz))	{
-					float f;sz = fast_atof_move(sz,f);
+					float f;sz = fast_atoreal_move<float>(sz,f);
 					desc.mValues.push_back(f);
 				}
 			}
@@ -427,7 +427,7 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 			mAnimatedBones.reserve( strtoul10((*iter).mGlobalValue.c_str()));
 		}
 		else if((*iter).mName == "frameRate")	{
-			fast_atof_move((*iter).mGlobalValue.c_str(),fFrameRate);
+			fast_atoreal_move<float>((*iter).mGlobalValue.c_str(),fFrameRate);
 		}
 	}
 	DefaultLogger::get()->debug("MD5AnimParser end");

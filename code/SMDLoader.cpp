@@ -1018,7 +1018,7 @@ bool SMDImporter::ParseFloat(const char* szCurrent,
 	if(!SkipSpaces(&szCurrent))
 		return false;
 
-	*szCurrentOut = fast_atof_move(szCurrent,out);
+	*szCurrentOut = fast_atoreal_move<float>(szCurrent,out);
 	return true;
 }
 

@@ -281,8 +281,8 @@ namespace STEP {
 		};
 
 		typedef PrimitiveDataType<int64_t>			INTEGER; 
-		typedef PrimitiveDataType<double>			REAL; 
-		typedef PrimitiveDataType<double>			NUMBER; 
+		typedef PrimitiveDataType<float>			REAL; 
+		typedef PrimitiveDataType<float>			NUMBER; 
 		typedef PrimitiveDataType<std::string>		STRING; 
 		
 

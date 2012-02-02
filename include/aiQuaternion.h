@@ -44,54 +44,56 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_QUATERNION_H_INC
 #define AI_QUATERNION_H_INC
 
-#include <math.h>
-#include "aiTypes.h"
-
 #ifdef __cplusplus
-extern "C" {
-#endif
+
+template <typename TReal> class aiVector3t;
+template <typename TReal> class aiMatrix3x3t;
 
 // ---------------------------------------------------------------------------
 /** Represents a quaternion in a 4D vector. */
-struct aiQuaternion
+template <typename TReal>
+class aiQuaterniont
 {
-#ifdef __cplusplus
-	aiQuaternion() : w(0.0f), x(0.0f), y(0.0f), z(0.0f) {}
-	aiQuaternion(float _w, float _x, float _y, float _z) : w(_w), x(_x), y(_y), z(_z) {}
+public:
+	aiQuaterniont() : w(), x(), y(), z() {}
+	aiQuaterniont(TReal w, TReal x, TReal y, TReal z) 
+		: w(w), x(x), y(y), z(z) {}
 
 	/** Construct from rotation matrix. Result is undefined if the matrix is not orthonormal. */
-	aiQuaternion( const aiMatrix3x3& pRotMatrix);
+	aiQuaterniont( const aiMatrix3x3t<TReal>& pRotMatrix);
 
 	/** Construct from euler angles */
-	aiQuaternion( float rotx, float roty, float rotz);
+	aiQuaterniont( TReal rotx, TReal roty, TReal rotz);
 
 	/** Construct from an axis-angle pair */
-	aiQuaternion( aiVector3D axis, float angle);
+	aiQuaterniont( aiVector3t<TReal> axis, TReal angle);
 
 	/** Construct from a normalized quaternion stored in a vec3 */
-	aiQuaternion( aiVector3D normalized);
+	aiQuaterniont( aiVector3t<TReal> normalized);
 
 	/** Returns a matrix representation of the quaternion */
-	aiMatrix3x3 GetMatrix() const;
+	aiMatrix3x3t<TReal> GetMatrix() const;
 
+public:
 
-	bool operator== (const aiQuaternion& o) const
-		{return x == o.x && y == o.y && z == o.z && w == o.w;}
+	bool operator== (const aiQuaterniont& o) const;
+	bool operator!= (const aiQuaterniont& o) const;
 
-	bool operator!= (const aiQuaternion& o) const
-		{return !(*this == o);}
+public:
 
 	/** Normalize the quaternion */
-	aiQuaternion& Normalize();
+	aiQuaterniont& Normalize();
 
 	/** Compute quaternion conjugate */
-	aiQuaternion& Conjugate ();
+	aiQuaterniont& Conjugate ();
 
 	/** Rotate a point by this quaternion */
-	aiVector3D Rotate (const aiVector3D& in);
+	aiVector3t<TReal> Rotate (const aiVector3t<TReal>& in);
 
 	/** Multiply two quaternions */
-	aiQuaternion operator* (const aiQuaternion& two) const;
+	aiQuaterniont operator* (const aiQuaterniont& two) const;
+
+public:
 
 	/** Performs a spherical interpolation between two quaternions and writes the result into the third.
 	 * @param pOut Target object to received the interpolated rotation.
@@ -99,214 +101,24 @@ struct aiQuaternion
 	 * @param pEnd End rotation, factor == 1.
 	 * @param pFactor Interpolation factor between 0 and 1. Values outside of this range yield undefined results.
 	 */
-	static void Interpolate( aiQuaternion& pOut, const aiQuaternion& pStart, const aiQuaternion& pEnd, float pFactor);
+	static void Interpolate( aiQuaterniont& pOut, const aiQuaterniont& pStart, 
+		const aiQuaterniont& pEnd, TReal pFactor);
 
-#endif // __cplusplus
+public:
 
 	//! w,x,y,z components of the quaternion
-	float w, x, y, z;	
+	TReal w, x, y, z;	
 } ;
 
+typedef aiQuaterniont<float> aiQuaternion;
 
-#ifdef __cplusplus
+#else
 
-// ---------------------------------------------------------------------------
-// Constructs a quaternion from a rotation matrix
-inline aiQuaternion::aiQuaternion( const aiMatrix3x3 &pRotMatrix)
-{
-	float t = 1 + pRotMatrix.a1 + pRotMatrix.b2 + pRotMatrix.c3;
+struct aiQuaternion {
+	float w, x, y, z;	
+};
 
-	// large enough
-	if( t > 0.001f)
-	{
-		float s = sqrt( t) * 2.0f;
-		x = (pRotMatrix.c2 - pRotMatrix.b3) / s;
-		y = (pRotMatrix.a3 - pRotMatrix.c1) / s;
-		z = (pRotMatrix.b1 - pRotMatrix.a2) / s;
-		w = 0.25f * s;
-	} // else we have to check several cases
-	else if( pRotMatrix.a1 > pRotMatrix.b2 && pRotMatrix.a1 > pRotMatrix.c3 )  
-	{	
-    // Column 0: 
-		float s = sqrt( 1.0f + pRotMatrix.a1 - pRotMatrix.b2 - pRotMatrix.c3) * 2.0f;
-		x = 0.25f * s;
-		y = (pRotMatrix.b1 + pRotMatrix.a2) / s;
-		z = (pRotMatrix.a3 + pRotMatrix.c1) / s;
-		w = (pRotMatrix.c2 - pRotMatrix.b3) / s;
-	} 
-	else if( pRotMatrix.b2 > pRotMatrix.c3) 
-	{ 
-    // Column 1: 
-		float s = sqrt( 1.0f + pRotMatrix.b2 - pRotMatrix.a1 - pRotMatrix.c3) * 2.0f;
-		x = (pRotMatrix.b1 + pRotMatrix.a2) / s;
-		y = 0.25f * s;
-		z = (pRotMatrix.c2 + pRotMatrix.b3) / s;
-		w = (pRotMatrix.a3 - pRotMatrix.c1) / s;
-	} else 
-	{ 
-    // Column 2:
-		float s = sqrt( 1.0f + pRotMatrix.c3 - pRotMatrix.a1 - pRotMatrix.b2) * 2.0f;
-		x = (pRotMatrix.a3 + pRotMatrix.c1) / s;
-		y = (pRotMatrix.c2 + pRotMatrix.b3) / s;
-		z = 0.25f * s;
-		w = (pRotMatrix.b1 - pRotMatrix.a2) / s;
-	}
-}
+#endif
 
-// ---------------------------------------------------------------------------
-// Construction from euler angles
-inline aiQuaternion::aiQuaternion( float fPitch, float fYaw, float fRoll )
-{
-	const float fSinPitch(sin(fPitch*0.5F));
-	const float fCosPitch(cos(fPitch*0.5F));
-	const float fSinYaw(sin(fYaw*0.5F));
-	const float fCosYaw(cos(fYaw*0.5F));
-	const float fSinRoll(sin(fRoll*0.5F));
-	const float fCosRoll(cos(fRoll*0.5F));
-	const float fCosPitchCosYaw(fCosPitch*fCosYaw);
-	const float fSinPitchSinYaw(fSinPitch*fSinYaw);
-	x = fSinRoll * fCosPitchCosYaw     - fCosRoll * fSinPitchSinYaw;
-	y = fCosRoll * fSinPitch * fCosYaw + fSinRoll * fCosPitch * fSinYaw;
-	z = fCosRoll * fCosPitch * fSinYaw - fSinRoll * fSinPitch * fCosYaw;
-	w = fCosRoll * fCosPitchCosYaw     + fSinRoll * fSinPitchSinYaw;
-}
-
-// ---------------------------------------------------------------------------
-// Returns a matrix representation of the quaternion
-inline aiMatrix3x3 aiQuaternion::GetMatrix() const
-{
-	aiMatrix3x3 resMatrix;
-	resMatrix.a1 = 1.0f - 2.0f * (y * y + z * z);
-	resMatrix.a2 = 2.0f * (x * y - z * w);
-	resMatrix.a3 = 2.0f * (x * z + y * w);
-	resMatrix.b1 = 2.0f * (x * y + z * w);
-	resMatrix.b2 = 1.0f - 2.0f * (x * x + z * z);
-	resMatrix.b3 = 2.0f * (y * z - x * w);
-	resMatrix.c1 = 2.0f * (x * z - y * w);
-	resMatrix.c2 = 2.0f * (y * z + x * w);
-	resMatrix.c3 = 1.0f - 2.0f * (x * x + y * y);
-
-	return resMatrix;
-}
-
-// ---------------------------------------------------------------------------
-// Construction from an axis-angle pair
-inline aiQuaternion::aiQuaternion( aiVector3D axis, float angle)
-{
-	axis.Normalize();
-
-	const float sin_a = sin( angle / 2 );
-    const float cos_a = cos( angle / 2 );
-    x    = axis.x * sin_a;
-    y    = axis.y * sin_a;
-    z    = axis.z * sin_a;
-    w    = cos_a;
-}
-// ---------------------------------------------------------------------------
-// Construction from am existing, normalized quaternion
-inline aiQuaternion::aiQuaternion( aiVector3D normalized)
-{
-	x = normalized.x;
-	y = normalized.y;
-	z = normalized.z;
-
-	const float t = 1.0f - (x*x) - (y*y) - (z*z);
-
-	if (t < 0.0f)
-		w = 0.0f;
-	else w = sqrt (t);
-}
-
-// ---------------------------------------------------------------------------
-// Performs a spherical interpolation between two quaternions 
-// Implementation adopted from the gmtl project. All others I found on the net fail in some cases.
-// Congrats, gmtl!
-inline void aiQuaternion::Interpolate( aiQuaternion& pOut, const aiQuaternion& pStart, const aiQuaternion& pEnd, float pFactor)
-{
-  // calc cosine theta
-  float cosom = pStart.x * pEnd.x + pStart.y * pEnd.y + pStart.z * pEnd.z + pStart.w * pEnd.w;
-
-  // adjust signs (if necessary)
-  aiQuaternion end = pEnd;
-  if( cosom < 0.0f)
-  {
-    cosom = -cosom;
-    end.x = -end.x;   // Reverse all signs
-    end.y = -end.y;
-    end.z = -end.z;
-    end.w = -end.w;
-  } 
-
-  // Calculate coefficients
-  float sclp, sclq;
-  if( (1.0f - cosom) > 0.0001f) // 0.0001 -> some epsillon
-  {
-    // Standard case (slerp)
-    float omega, sinom;
-    omega = acos( cosom); // extract theta from dot product's cos theta
-    sinom = sin( omega);
-    sclp  = sin( (1.0f - pFactor) * omega) / sinom;
-    sclq  = sin( pFactor * omega) / sinom;
-  } else
-  {
-    // Very close, do linear interp (because it's faster)
-    sclp = 1.0f - pFactor;
-    sclq = pFactor;
-  }
-
-  pOut.x = sclp * pStart.x + sclq * end.x;
-  pOut.y = sclp * pStart.y + sclq * end.y;
-  pOut.z = sclp * pStart.z + sclq * end.z;
-  pOut.w = sclp * pStart.w + sclq * end.w;
-}
-
-// ---------------------------------------------------------------------------
-inline aiQuaternion& aiQuaternion::Normalize()
-{
-	// compute the magnitude and divide through it
-	const float mag = sqrt(x*x + y*y + z*z + w*w);
-	if (mag)
-	{
-		const float invMag = 1.0f/mag;
-		x *= invMag;
-		y *= invMag;
-		z *= invMag;
-		w *= invMag;
-	}
-	return *this;
-}
-
-// ---------------------------------------------------------------------------
-inline aiQuaternion aiQuaternion::operator* (const aiQuaternion& t) const
-{
-	return aiQuaternion(w*t.w - x*t.x - y*t.y - z*t.z,
-		w*t.x + x*t.w + y*t.z - z*t.y,
-		w*t.y + y*t.w + z*t.x - x*t.z,
-		w*t.z + z*t.w + x*t.y - y*t.x);
-}
-
-// ---------------------------------------------------------------------------
-inline aiQuaternion& aiQuaternion::Conjugate ()
-{
-	x = -x;
-	y = -y;
-	z = -z;
-	return *this;
-}
-
-// ---------------------------------------------------------------------------
-inline aiVector3D aiQuaternion::Rotate (const aiVector3D& v)
-{
-	aiQuaternion q2(0.f,v.x,v.y,v.z), q = *this, qinv = q;
-	q.Conjugate();
-
-	q = q*q2*qinv;
-	return aiVector3D(q.x,q.y,q.z);
-
-}
-
-} // end extern "C"
-
-#endif // __cplusplus
 
 #endif // AI_QUATERNION_H_INC

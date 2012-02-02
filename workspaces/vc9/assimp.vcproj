@@ -1249,6 +1249,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\include\aiQuaternion.inl"
+					>
+				</File>
+				<File
 					RelativePath="..\..\include\aiScene.h"
 					>
 				</File>
@@ -1262,6 +1266,10 @@
 				</File>
 				<File
 					RelativePath="..\..\include\aiVector2D.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\aiVector2D.inl"
 					>
 				</File>
 				<File

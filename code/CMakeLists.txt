@@ -36,10 +36,12 @@ SET( PUBLIC_HEADERS
 	${HEADER_PATH}/aiMesh.h
 	${HEADER_PATH}/aiPostProcess.h
 	${HEADER_PATH}/aiQuaternion.h
+	${HEADER_PATH}/aiQuaternion.inl
 	${HEADER_PATH}/aiScene.h
 	${HEADER_PATH}/aiTexture.h
 	${HEADER_PATH}/aiTypes.h
 	${HEADER_PATH}/aiVector2D.h
+	${HEADER_PATH}/aiVector2D.inl
 	${HEADER_PATH}/aiVector3D.h
 	${HEADER_PATH}/aiVector3D.inl
 	${HEADER_PATH}/aiVersion.h

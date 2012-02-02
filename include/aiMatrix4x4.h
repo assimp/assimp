@@ -44,81 +44,71 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MATRIX4X4_H_INC
 #define AI_MATRIX4X4_H_INC
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct aiMatrix3x3;
-struct aiQuaternion;
-
 #include "./Compiler/pushpack1.h"
+
+#ifdef __cplusplus
+
+template<typename TReal> class aiMatrix3x3t;
+template<typename TReal> class aiQuaterniont;
 
 // ---------------------------------------------------------------------------
 /** @brief Represents a row-major 4x4 matrix, use this for homogeneous
  *   coordinates.
  *
- *  There's much confusion about matrix layouts (colum vs. row order). 
- *  This is *always* a row-major matrix. Even with the
- *  aiProcess_ConvertToLeftHanded flag.
+ *  There's much confusion about matrix layouts (column vs. row order). 
+ *  This is *always* a row-major matrix. Not even with the
+ *  #aiProcess_ConvertToLeftHanded flag, which absolutely does not affect
+ *  matrix order - it just affects the handedness of the coordinate system
+ *  defined thereby.
  */
-struct aiMatrix4x4
+template<typename TReal>
+class aiMatrix4x4t
 {
-#ifdef __cplusplus
+public:
+	
+	/** set to identity */
+	aiMatrix4x4t ();
 
-		// default c'tor, init to zero
-	aiMatrix4x4 () :	
-		a1(1.0f), a2(0.0f), a3(0.0f), a4(0.0f), 
-		b1(0.0f), b2(1.0f), b3(0.0f), b4(0.0f), 
-		c1(0.0f), c2(0.0f), c3(1.0f), c4(0.0f),
-		d1(0.0f), d2(0.0f), d3(0.0f), d4(1.0f)
-	{}
-
-		// from single values
-	aiMatrix4x4 (	float _a1, float _a2, float _a3, float _a4,
-					float _b1, float _b2, float _b3, float _b4,
-					float _c1, float _c2, float _c3, float _c4,
-					float _d1, float _d2, float _d3, float _d4) :	
-		a1(_a1), a2(_a2), a3(_a3), a4(_a4),  
-		b1(_b1), b2(_b2), b3(_b3), b4(_b4), 
-		c1(_c1), c2(_c2), c3(_c3), c4(_c4),
-		d1(_d1), d2(_d2), d3(_d3), d4(_d4)
-	{}
+	/** construction from single values */
+	aiMatrix4x4t (	TReal _a1, TReal _a2, TReal _a3, TReal _a4,
+					TReal _b1, TReal _b2, TReal _b3, TReal _b4,
+					TReal _c1, TReal _c2, TReal _c3, TReal _c4,
+					TReal _d1, TReal _d2, TReal _d3, TReal _d4);
 
 
-	// -------------------------------------------------------------------
-	/** @brief Constructor from 3x3 matrix. 
-	 *  The remaining elements are set to identity.
-	 */
-	explicit aiMatrix4x4( const aiMatrix3x3& m);
+	/** construction from 3x3 matrix, remaining elements are set to identity */
+	explicit aiMatrix4x4t( const aiMatrix3x3t<TReal>& m);
 
 public:
 
 	// array access operators
-	float* operator[]       (unsigned int p_iIndex);
-	const float* operator[] (unsigned int p_iIndex) const;
+	TReal* operator[]       (unsigned int p_iIndex);
+	const TReal* operator[] (unsigned int p_iIndex) const;
 
 	// comparison operators
-	bool operator== (const aiMatrix4x4 m) const;
-	bool operator!= (const aiMatrix4x4 m) const;
+	bool operator== (const aiMatrix4x4t m) const;
+	bool operator!= (const aiMatrix4x4t m) const;
 
-	// Matrix multiplication. Not commutative.
-	aiMatrix4x4& operator *= (const aiMatrix4x4& m);
-	aiMatrix4x4  operator *  (const aiMatrix4x4& m) const;
+	// matrix multiplication. 
+	aiMatrix4x4t& operator *= (const aiMatrix4x4t& m);
+	aiMatrix4x4t  operator *  (const aiMatrix4x4t& m) const;
+
+	template <typename TOther>
+	operator aiMatrix4x4t<TOther> () const;
 
 public:
 
 	// -------------------------------------------------------------------
-	/** @brief Transpose the matrix
-	 */
-	aiMatrix4x4& Transpose();
+	/** @brief Transpose the matrix */
+	aiMatrix4x4t& Transpose();
 
 	// -------------------------------------------------------------------
 	/** @brief Invert the matrix.
 	 *  If the matrix is not invertible all elements are set to qnan.
-	 *  Beware, use (f != f) to check whether a float f is qnan.
+	 *  Beware, use (f != f) to check whether a TReal f is qnan.
 	 */
-	aiMatrix4x4& Inverse();
-	float Determinant() const;
+	aiMatrix4x4t& Inverse();
+	TReal Determinant() const;
 
 
 	// -------------------------------------------------------------------
@@ -134,8 +124,8 @@ public:
 	 *   quaternion 
 	 *  @param position Receives the output position for the x,y,z axes
 	 */
-	void Decompose (aiVector3D& scaling, aiQuaternion& rotation,
-		aiVector3D& position) const;
+	void Decompose (aiVector3t<TReal>& scaling, aiQuaterniont<TReal>& rotation,
+		aiVector3t<TReal>& position) const;
 
 	// -------------------------------------------------------------------
 	/** @brief Decompose a trafo matrix with no scaling into its 
@@ -144,8 +134,8 @@ public:
 	 *    quaternion 
 	 *  @param position Receives the output position for the x,y,z axes
 	 */
-	void DecomposeNoScaling (aiQuaternion& rotation,
-		aiVector3D& position) const;
+	void DecomposeNoScaling (aiQuaterniont<TReal>& rotation,
+		aiVector3t<TReal>& position) const;
 
 
 	// -------------------------------------------------------------------
@@ -154,8 +144,8 @@ public:
 	 *  @param y Rotation angle for the y-axis, in radians
 	 *  @param z Rotation angle for the z-axis, in radians
 	 */
-	aiMatrix4x4& FromEulerAnglesXYZ(float x, float y, float z);
-	aiMatrix4x4& FromEulerAnglesXYZ(const aiVector3D& blubb);
+	aiMatrix4x4t& FromEulerAnglesXYZ(TReal x, TReal y, TReal z);
+	aiMatrix4x4t& FromEulerAnglesXYZ(const aiVector3t<TReal>& blubb);
 
 public:
 	// -------------------------------------------------------------------
@@ -164,7 +154,7 @@ public:
 	 *  @param out Receives the output matrix
 	 *  @return Reference to the output matrix
 	 */
-	static aiMatrix4x4& RotationX(float a, aiMatrix4x4& out);
+	static aiMatrix4x4t& RotationX(TReal a, aiMatrix4x4t& out);
 
 	// -------------------------------------------------------------------
 	/** @brief Returns a rotation matrix for a rotation around the y axis
@@ -172,7 +162,7 @@ public:
 	 *  @param out Receives the output matrix
 	 *  @return Reference to the output matrix
 	 */
-	static aiMatrix4x4& RotationY(float a, aiMatrix4x4& out);
+	static aiMatrix4x4t& RotationY(TReal a, aiMatrix4x4t& out);
 
 	// -------------------------------------------------------------------
 	/** @brief Returns a rotation matrix for a rotation around the z axis
@@ -180,7 +170,7 @@ public:
 	 *  @param out Receives the output matrix
 	 *  @return Reference to the output matrix
 	 */
-	static aiMatrix4x4& RotationZ(float a, aiMatrix4x4& out);
+	static aiMatrix4x4t& RotationZ(TReal a, aiMatrix4x4t& out);
 
 	// -------------------------------------------------------------------
 	/** Returns a rotation matrix for a rotation around an arbitrary axis.
@@ -189,8 +179,8 @@ public:
 	 *  @param out Receives the output matrix
 	 *  @return Reference to the output matrix
 	 */
-	static aiMatrix4x4& Rotation(float a, const aiVector3D& axis, 
-		aiMatrix4x4& out);
+	static aiMatrix4x4t& Rotation(TReal a, const aiVector3t<TReal>& axis, 
+		aiMatrix4x4t& out);
 
 	// -------------------------------------------------------------------
 	/** @brief Returns a translation matrix 
@@ -198,7 +188,7 @@ public:
 	 *  @param out Receives the output matrix
 	 *  @return Reference to the output matrix
 	 */
-	static aiMatrix4x4& Translation( const aiVector3D& v, aiMatrix4x4& out);
+	static aiMatrix4x4t& Translation( const aiVector3t<TReal>& v, aiMatrix4x4t& out);
 
 	// -------------------------------------------------------------------
 	/** @brief Returns a scaling matrix 
@@ -206,7 +196,7 @@ public:
 	 *  @param out Receives the output matrix
 	 *  @return Reference to the output matrix
 	 */
-	static aiMatrix4x4& Scaling( const aiVector3D& v, aiMatrix4x4& out);
+	static aiMatrix4x4t& Scaling( const aiVector3t<TReal>& v, aiMatrix4x4t& out);
 
 	// -------------------------------------------------------------------
 	/** @brief A function for creating a rotation matrix that rotates a
@@ -217,24 +207,32 @@ public:
 	 *          "Efficiently Building a Matrix to Rotate One Vector to Another"
 	 *          Journal of Graphics Tools, 4(4):1-4, 1999
 	 */
-	static aiMatrix4x4& FromToMatrix(const aiVector3D& from, 
-		const aiVector3D& to, aiMatrix4x4& out);
+	static aiMatrix4x4t& FromToMatrix(const aiVector3t<TReal>& from, 
+		const aiVector3t<TReal>& to, aiMatrix4x4t& out);
 
-#endif // __cplusplus
+public:
 
+	TReal a1, a2, a3, a4;
+	TReal b1, b2, b3, b4;
+	TReal c1, c2, c3, c4;
+	TReal d1, d2, d3, d4;
+
+} PACK_STRUCT; 
+
+typedef aiMatrix4x4t<float> aiMatrix4x4;
+
+#else
+
+struct aiMatrix4x4 {
 	float a1, a2, a3, a4;
 	float b1, b2, b3, b4;
 	float c1, c2, c3, c4;
 	float d1, d2, d3, d4;
-
-} PACK_STRUCT; // !class aiMatrix4x4
-
-
-#include "./Compiler/poppack1.h"
-
-#ifdef __cplusplus
-} // end extern "C"
+};
 
 
 #endif // __cplusplus
+
+#include "./Compiler/poppack1.h"
+
 #endif // AI_MATRIX4X4_H_INC

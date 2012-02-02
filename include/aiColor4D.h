@@ -44,51 +44,60 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_COLOR4D_H_INC
 #define AI_COLOR4D_H_INC
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "./Compiler/pushpack1.h"
+
+#ifdef __cplusplus
+
 // ----------------------------------------------------------------------------------
 /** Represents a color in Red-Green-Blue space including an 
 *   alpha component. Color values range from 0 to 1. */
 // ----------------------------------------------------------------------------------
-struct aiColor4D
+template <typename TReal>
+class aiColor4t
 {
-#ifdef __cplusplus
-	aiColor4D () : r(0.0f), g(0.0f), b(0.0f), a(0.0f) {}
-	aiColor4D (float _r, float _g, float _b, float _a) 
+public:
+	aiColor4t () : r(), g(), b(), a() {}
+	aiColor4t (TReal _r, TReal _g, TReal _b, TReal _a) 
 		: r(_r), g(_g), b(_b), a(_a) {}
-	aiColor4D (float _r) : r(_r), g(_r), b(_r), a(_r) {}
-	aiColor4D (const aiColor4D& o) 
+	aiColor4t (TReal _r) : r(_r), g(_r), b(_r), a(_r) {}
+	aiColor4t (const aiColor4t& o) 
 		: r(o.r), g(o.g), b(o.b), a(o.a) {}
 
+public:
 	// combined operators
-	const aiColor4D& operator += (const aiColor4D& o);
-	const aiColor4D& operator -= (const aiColor4D& o);
-	const aiColor4D& operator *= (float f);
-	const aiColor4D& operator /= (float f);
+	const aiColor4t& operator += (const aiColor4t& o);
+	const aiColor4t& operator -= (const aiColor4t& o);
+	const aiColor4t& operator *= (TReal f);
+	const aiColor4t& operator /= (TReal f);
 
+public:
 	// comparison
-	bool operator == (const aiColor4D& other) const;
-	bool operator != (const aiColor4D& other) const;
+	bool operator == (const aiColor4t& other) const;
+	bool operator != (const aiColor4t& other) const;
 
 	// color tuple access, rgba order
-	inline float operator[](unsigned int i) const;
-	inline float& operator[](unsigned int i);
+	inline TReal operator[](unsigned int i) const;
+	inline TReal& operator[](unsigned int i);
 
 	/** check whether a color is (close to) black */
 	inline bool IsBlack() const;
 
-#endif // !__cplusplus
+public:
 
 	// Red, green, blue and alpha color values 
-	float r, g, b, a;
+	TReal r, g, b, a;
 } PACK_STRUCT;  // !struct aiColor4D
 
-#include "./Compiler/poppack1.h"
-#ifdef __cplusplus
-} // end extern "C"
+typedef aiColor4t<float> aiColor4D;
+
+#else
+
+struct aiColor4D {
+	float r, g, b, a;
+} PACK_STRUCT;
 
 #endif // __cplusplus
+
+#include "./Compiler/poppack1.h"
+
 #endif // AI_VECTOR3D_H_INC

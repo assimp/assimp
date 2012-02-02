@@ -489,9 +489,11 @@ struct aiMemoryInfo
 }
 #endif //!  __cplusplus
 
-// Include implementations
+// Include implementation files
+#include "aiVector2D.inl"
 #include "aiVector3D.inl"
 #include "aiColor4D.inl"
+#include "aiQuaternion.inl"
 #include "aiMatrix3x3.inl"
 #include "aiMatrix4x4.inl"
 #endif 

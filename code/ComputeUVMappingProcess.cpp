@@ -337,7 +337,7 @@ void ComputeUVMappingProcess::ComputePlaneMapping(aiMesh* mesh,const aiVector3D&
 
 		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
 			const aiVector3D& pos = mesh->mVertices[pnt];
-			out[pnt].Set((pos.z - min.z) / diffu,(pos.y - min.y) / diffv);
+			out[pnt].Set((pos.z - min.z) / diffu,(pos.y - min.y) / diffv,0.f);
 		}
 	}
 	else if (axis * base_axis_y >= angle_epsilon)	{
@@ -347,7 +347,7 @@ void ComputeUVMappingProcess::ComputePlaneMapping(aiMesh* mesh,const aiVector3D&
 
 		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
 			const aiVector3D& pos = mesh->mVertices[pnt];
-			out[pnt].Set((pos.x - min.x) / diffu,(pos.z - min.z) / diffv);
+			out[pnt].Set((pos.x - min.x) / diffu,(pos.z - min.z) / diffv,0.f);
 		}
 	}
 	else if (axis * base_axis_z >= angle_epsilon)	{
@@ -357,7 +357,7 @@ void ComputeUVMappingProcess::ComputePlaneMapping(aiMesh* mesh,const aiVector3D&
 
 		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
 			const aiVector3D& pos = mesh->mVertices[pnt];
-			out[pnt].Set((pos.y - min.y) / diffu,(pos.x - min.x) / diffv);
+			out[pnt].Set((pos.y - min.y) / diffu,(pos.x - min.x) / diffv,0.f);
 		}
 	}
 	// slower code path in case the mapping axis is not one of the coordinate system axes
@@ -372,7 +372,7 @@ void ComputeUVMappingProcess::ComputePlaneMapping(aiMesh* mesh,const aiVector3D&
 		// again the same, except we're applying a transformation now
 		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
 			const aiVector3D pos = mTrafo * mesh->mVertices[pnt];
-			out[pnt].Set((pos.x - min.x) / diffu,(pos.z - min.z) / diffv);
+			out[pnt].Set((pos.x - min.x) / diffu,(pos.z - min.z) / diffv,0.f);
 		}
 	}
 

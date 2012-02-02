@@ -132,18 +132,21 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 		if (face.mNumIndices < 3)
 		{
 			// either a point or a line -> no normal vector
-			for (unsigned int i = 0;i < face.mNumIndices;++i)
-				pMesh->mNormals[face.mIndices[i]] = qnan;
+			for (unsigned int i = 0;i < face.mNumIndices;++i) {
+				pMesh->mNormals[face.mIndices[i]] = aiVector3D(qnan);
+			}
+
 			continue;
 		}
 
-		aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
-		aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
-		aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices-1]];
-		aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).Normalize();
+		const aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
+		const aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
+		const aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices-1]];
+		const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).Normalize();
 
-		for (unsigned int i = 0;i < face.mNumIndices;++i)
+		for (unsigned int i = 0;i < face.mNumIndices;++i) {
 			pMesh->mNormals[face.mIndices[i]] = vNor;
+		}
 	}
 
 	// Set up a SpatialSort to quickly find all vertices close to a given position
@@ -175,7 +178,9 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 		// to optimize the whole algorithm a little bit ...
 		std::vector<bool> abHad(pMesh->mNumVertices,false);
 		for (unsigned int i = 0; i < pMesh->mNumVertices;++i)	{
-			if (abHad[i])continue;
+			if (abHad[i]) {
+				continue;
+			}
 
 			// Get all vertices that share this one ...
 			vertexFinder->FindPositions( pMesh->mVertices[i], posEpsilon, verticesFound);

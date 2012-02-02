@@ -46,44 +46,48 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <math.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include "./Compiler/pushpack1.h"
 
-struct aiMatrix3x3;
-struct aiMatrix4x4;
+#ifdef __cplusplus
+
+template<typename TReal> class aiMatrix3x3t;
+template<typename TReal> class aiMatrix4x4t;
 
 // ---------------------------------------------------------------------------
 /** Represents a three-dimensional vector. */
-struct aiVector3D
+template <typename TReal>
+class aiVector3t 
 {
-#ifdef __cplusplus
-	aiVector3D () : x(0.0f), y(0.0f), z(0.0f) {}
-	aiVector3D (float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
-	aiVector3D (float _xyz) : x(_xyz), y(_xyz), z(_xyz) {}
-	aiVector3D (const aiVector3D& o) : x(o.x), y(o.y), z(o.z) {}
+public:
+
+	aiVector3t () : x(), y(), z() {}
+	aiVector3t (TReal _x, TReal _y, TReal _z) : x(_x), y(_y), z(_z) {}
+	explicit aiVector3t (TReal _xyz) : x(_xyz), y(_xyz), z(_xyz) {}
+	aiVector3t (const aiVector3t& o) : x(o.x), y(o.y), z(o.z) {}
 
 public:
 
 	// combined operators
-	const aiVector3D& operator += (const aiVector3D& o);
-	const aiVector3D& operator -= (const aiVector3D& o);
-	const aiVector3D& operator *= (float f);
-	const aiVector3D& operator /= (float f);
+	const aiVector3t& operator += (const aiVector3t& o);
+	const aiVector3t& operator -= (const aiVector3t& o);
+	const aiVector3t& operator *= (TReal f);
+	const aiVector3t& operator /= (TReal f);
 
 	// transform vector by matrix
-	aiVector3D& operator *= (const aiMatrix3x3& mat);
-	aiVector3D& operator *= (const aiMatrix4x4& mat);
+	aiVector3t& operator *= (const aiMatrix3x3t<TReal>& mat);
+	aiVector3t& operator *= (const aiMatrix4x4t<TReal>& mat);
 
 	// access a single element
-	float operator[](unsigned int i) const;
-	float& operator[](unsigned int i);
+	TReal operator[](unsigned int i) const;
+	TReal& operator[](unsigned int i);
 
 	// comparison
-	bool operator== (const aiVector3D& other) const;
-	bool operator!= (const aiVector3D& other) const;
+	bool operator== (const aiVector3t& other) const;
+	bool operator!= (const aiVector3t& other) const;
+
+	template <typename TOther>
+	operator aiVector3t<TOther> () const;
 
 public:
 
@@ -91,37 +95,47 @@ public:
 	 *  @param pX X component
 	 *  @param pY Y component
 	 *  @param pZ Z component  */
-	void Set( float pX, float pY, float pZ = 0.f);
+	void Set( TReal pX, TReal pY, TReal pZ);
 
 	/** @brief Get the squared length of the vector
 	 *  @return Square length */
-	float SquareLength() const;
+	TReal SquareLength() const;
 
 
 	/** @brief Get the length of the vector
 	 *  @return length */
-	float Length() const;
+	TReal Length() const;
 
 
 	/** @brief Normalize the vector */
-	aiVector3D& Normalize();
+	aiVector3t& Normalize();
 
 	
 	/** @brief Componentwise multiplication of two vectors
 	 *  
 	 *  Note that vec*vec yields the dot product.
 	 *  @param o Second factor */
-	const aiVector3D SymMul(const aiVector3D& o);
+	const aiVector3t SymMul(const aiVector3t& o);
+
+	TReal x, y, z;	
+} PACK_STRUCT;
+
+
+typedef aiVector3t<float> aiVector3D;
+
+#else
+
+struct aiVector3D {
+
+	float x,y,y;
+} PACK_STRUCT;
 
 #endif // __cplusplus
-
-	float x, y, z;	
-} PACK_STRUCT;
 
 #include "./Compiler/poppack1.h"
 
 #ifdef __cplusplus
-} // end extern "C"
+
 
 
 #endif // __cplusplus

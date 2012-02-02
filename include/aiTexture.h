@@ -168,7 +168,6 @@ struct aiTexture
 	//! @return true if the given string matches the format hint
 	bool CheckFormat(const char* s) const
 	{
-		ai_assert(s && !mHeight);
 		return (0 == ::strncmp(achFormatHint,s,3));
 	}
 

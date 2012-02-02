@@ -120,7 +120,7 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
 		if (face.mNumIndices < 3)	{
 			// either a point or a line -> no well-defined normal vector
 			for (unsigned int i = 0;i < face.mNumIndices;++i) {
-				pMesh->mNormals[face.mIndices[i]] = qnan;
+				pMesh->mNormals[face.mIndices[i]] = aiVector3D(qnan);
 			}
 			continue;
 		}
@@ -128,7 +128,7 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
 		const aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
 		const aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
 		const aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices-1]];
-		aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).Normalize();
+		const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).Normalize();
 
 		for (unsigned int i = 0;i < face.mNumIndices;++i) {
 			pMesh->mNormals[face.mIndices[i]] = vNor;

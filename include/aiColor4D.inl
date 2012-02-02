@@ -40,99 +40,124 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file  aiColor4D.inl
- *  @brief Inline implementation of aiColor4D operators
+ *  @brief Inline implementation of aiColor4t<TReal> operators
  */
 #ifndef AI_COLOR4D_INL_INC
 #define AI_COLOR4D_INL_INC
 
-#include "aiColor4D.h"
 #ifdef __cplusplus
+#include "aiColor4D.h"
 
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE const aiColor4D& aiColor4D::operator += (const aiColor4D& o) {
-	r += o.r; g += o.g; b += o.b; a += o.a; return *this; 
+template <typename TReal>
+AI_FORCE_INLINE const aiColor4t<TReal>& aiColor4t<TReal>::operator += (const aiColor4t<TReal>& o) {
+	r += o.r; g += o.g; b += o.b; a += o.a; 
+	return *this; 
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE const aiColor4D& aiColor4D::operator -= (const aiColor4D& o) {
-	r -= o.r; g -= o.g; b -= o.b; a -= o.a; return *this;
+template <typename TReal>
+AI_FORCE_INLINE const aiColor4t<TReal>& aiColor4t<TReal>::operator -= (const aiColor4t<TReal>& o) {
+	r -= o.r; g -= o.g; b -= o.b; a -= o.a; 
+	return *this;
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE const aiColor4D& aiColor4D::operator *= (float f) {
-	r *= f; g *= f; b *= f; a *= f; return *this; 
+template <typename TReal>
+AI_FORCE_INLINE const aiColor4t<TReal>& aiColor4t<TReal>::operator *= (TReal f) {
+	r *= f; g *= f; b *= f; a *= f; 
+	return *this; 
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE const aiColor4D& aiColor4D::operator /= (float f) {
-	r /= f; g /= f; b /= f; a /= f; return *this; 
+template <typename TReal>
+AI_FORCE_INLINE const aiColor4t<TReal>& aiColor4t<TReal>::operator /= (TReal f) {
+	r /= f; g /= f; b /= f; a /= f; 
+	return *this; 
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE float aiColor4D::operator[](unsigned int i) const {
+template <typename TReal>
+AI_FORCE_INLINE TReal aiColor4t<TReal>::operator[](unsigned int i) const {
 	return *(&r + i);
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE float& aiColor4D::operator[](unsigned int i) {
+template <typename TReal>
+AI_FORCE_INLINE TReal& aiColor4t<TReal>::operator[](unsigned int i) {
 	return *(&r + i);
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE bool aiColor4D::operator== (const aiColor4D& other) const {
+template <typename TReal>
+AI_FORCE_INLINE bool aiColor4t<TReal>::operator== (const aiColor4t<TReal>& other) const {
 	return r == other.r && g == other.g && b == other.b && a == other.a;
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE bool aiColor4D::operator!= (const aiColor4D& other) const {
+template <typename TReal>
+AI_FORCE_INLINE bool aiColor4t<TReal>::operator!= (const aiColor4t<TReal>& other) const {
 	return r != other.r || g != other.g || b != other.b || a != other.a;
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE aiColor4D operator + (const aiColor4D& v1, const aiColor4D& v2)	{
-	return aiColor4D( v1.r + v2.r, v1.g + v2.g, v1.b + v2.b, v1.a + v2.a);
+template <typename TReal>
+AI_FORCE_INLINE aiColor4t<TReal> operator + (const aiColor4t<TReal>& v1, const aiColor4t<TReal>& v2)	{
+	return aiColor4t<TReal>( v1.r + v2.r, v1.g + v2.g, v1.b + v2.b, v1.a + v2.a);
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE aiColor4D operator - (const aiColor4D& v1, const aiColor4D& v2)	{
-	return aiColor4D( v1.r - v2.r, v1.g - v2.g, v1.b - v2.b, v1.a - v2.a);
+template <typename TReal>
+AI_FORCE_INLINE aiColor4t<TReal> operator - (const aiColor4t<TReal>& v1, const aiColor4t<TReal>& v2)	{
+	return aiColor4t<TReal>( v1.r - v2.r, v1.g - v2.g, v1.b - v2.b, v1.a - v2.a);
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE aiColor4D operator * (const aiColor4D& v1, const aiColor4D& v2)	{
-	return aiColor4D( v1.r * v2.r, v1.g * v2.g, v1.b * v2.b, v1.a * v2.a);
+template <typename TReal>
+AI_FORCE_INLINE aiColor4t<TReal> operator * (const aiColor4t<TReal>& v1, const aiColor4t<TReal>& v2)	{
+	return aiColor4t<TReal>( v1.r * v2.r, v1.g * v2.g, v1.b * v2.b, v1.a * v2.a);
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE aiColor4D operator / (const aiColor4D& v1, const aiColor4D& v2)	{
-	return aiColor4D( v1.r / v2.r, v1.g / v2.g, v1.b / v2.b, v1.a / v2.a);
+template <typename TReal>
+AI_FORCE_INLINE aiColor4t<TReal> operator / (const aiColor4t<TReal>& v1, const aiColor4t<TReal>& v2)	{
+	return aiColor4t<TReal>( v1.r / v2.r, v1.g / v2.g, v1.b / v2.b, v1.a / v2.a);
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE aiColor4D operator * ( float f, const aiColor4D& v)	{
-	return aiColor4D( f*v.r, f*v.g, f*v.b, f*v.a);
+template <typename TReal>
+AI_FORCE_INLINE aiColor4t<TReal> operator * ( TReal f, const aiColor4t<TReal>& v)	{
+	return aiColor4t<TReal>( f*v.r, f*v.g, f*v.b, f*v.a);
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE  aiColor4D operator * ( const aiColor4D& v, float f)	{
-	return aiColor4D( f*v.r, f*v.g, f*v.b, f*v.a);
+template <typename TReal>
+AI_FORCE_INLINE  aiColor4t<TReal> operator * ( const aiColor4t<TReal>& v, TReal f)	{
+	return aiColor4t<TReal>( f*v.r, f*v.g, f*v.b, f*v.a);
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE  aiColor4D operator / ( const aiColor4D& v, float f)	{
+template <typename TReal>
+AI_FORCE_INLINE  aiColor4t<TReal> operator / ( const aiColor4t<TReal>& v, TReal f)	{
 	return v * (1/f);
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE  aiColor4D operator / ( float f,const aiColor4D& v)	{
-	return aiColor4D(f,f,f,f)/v;
+template <typename TReal>
+AI_FORCE_INLINE  aiColor4t<TReal> operator / ( TReal f,const aiColor4t<TReal>& v)	{
+	return aiColor4t<TReal>(f,f,f,f)/v;
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE  aiColor4D operator + ( const aiColor4D& v, float f)	{
-	return aiColor4D( f+v.r, f+v.g, f+v.b, f+v.a);
+template <typename TReal>
+AI_FORCE_INLINE  aiColor4t<TReal> operator + ( const aiColor4t<TReal>& v, TReal f)	{
+	return aiColor4t<TReal>( f+v.r, f+v.g, f+v.b, f+v.a);
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE  aiColor4D operator - ( const aiColor4D& v, float f)	{
-	return aiColor4D( v.r-f, v.g-f, v.b-f, v.a-f);
+template <typename TReal>
+AI_FORCE_INLINE  aiColor4t<TReal> operator - ( const aiColor4t<TReal>& v, TReal f)	{
+	return aiColor4t<TReal>( v.r-f, v.g-f, v.b-f, v.a-f);
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE  aiColor4D operator + ( float f, const aiColor4D& v)	{
-	return aiColor4D( f+v.r, f+v.g, f+v.b, f+v.a);
+template <typename TReal>
+AI_FORCE_INLINE  aiColor4t<TReal> operator + ( TReal f, const aiColor4t<TReal>& v)	{
+	return aiColor4t<TReal>( f+v.r, f+v.g, f+v.b, f+v.a);
 }
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE  aiColor4D operator - ( float f, const aiColor4D& v)	{
-	return aiColor4D( f-v.r, f-v.g, f-v.b, f-v.a);
+template <typename TReal>
+AI_FORCE_INLINE  aiColor4t<TReal> operator - ( TReal f, const aiColor4t<TReal>& v)	{
+	return aiColor4t<TReal>( f-v.r, f-v.g, f-v.b, f-v.a);
 }
 
 // ------------------------------------------------------------------------------------------------
-inline bool aiColor4D :: IsBlack() const	{
+template <typename TReal>
+inline bool aiColor4t<TReal> :: IsBlack() const	{
 	// The alpha component doesn't care here. black is black.
-	static const float epsilon = 10e-3f;
+	static const TReal epsilon = 10e-3f;
 	return fabs( r ) < epsilon && fabs( g ) < epsilon && fabs( b ) < epsilon;
 }
 

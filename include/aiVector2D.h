@@ -38,7 +38,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-/** @file aiVector2D.h
+/** @file aiVector2t.h
  *  @brief 2D vector structure, including operators when compiling in C++
  */
 #ifndef AI_VECTOR2D_H_INC
@@ -46,142 +46,62 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <math.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "./Compiler/pushpack1.h"
 
 // ----------------------------------------------------------------------------------
 /** Represents a two-dimensional vector. 
  */
-struct aiVector2D
-{
+
 #ifdef __cplusplus
-	aiVector2D () : x(0.0f), y(0.0f) {}
-	aiVector2D (float _x, float _y) : x(_x), y(_y) {}
-	aiVector2D (float _xyz) : x(_xyz), y(_xyz) {}
-	aiVector2D (const aiVector2D& o) : x(o.x), y(o.y) {}
+template <typename TReal>
+class aiVector2t
+{
+public:
 
-	void Set( float pX, float pY) { 
-		x = pX; y = pY;
-	}
-	
-	float SquareLength() const {
-		return x*x + y*y; 
-	}
-	
-	float Length() const {
-		return ::sqrt( SquareLength());
-	}
+	aiVector2t () : x(), y() {}
+	aiVector2t (TReal _x, TReal _y) : x(_x), y(_y) {}
+	explicit aiVector2t (TReal _xyz) : x(_xyz), y(_xyz) {}
+	aiVector2t (const aiVector2t& o) : x(o.x), y(o.y) {}
 
-	aiVector2D& Normalize() { 
-		*this /= Length(); return *this;
-	}
+public:
 
-	const aiVector2D& operator += (const aiVector2D& o) {
-		x += o.x; y += o.y;  return *this; 
-	}
-	const aiVector2D& operator -= (const aiVector2D& o) {
-		x -= o.x; y -= o.y;  return *this; 
-	}
-	const aiVector2D& operator *= (float f) { 
-		x *= f; y *= f;  return *this; 
-	}
-	const aiVector2D& operator /= (float f) {
-		x /= f; y /= f;  return *this; 
-	}
+	void Set( TReal pX, TReal pY);
+	TReal SquareLength() const ;
+	TReal Length() const ;
+	aiVector2t& Normalize();
 
-	float operator[](unsigned int i) const {
-		return *(&x + i);
-	}
+public:
 
-	float& operator[](unsigned int i) {
-		return *(&x + i);
-	}
+	const aiVector2t& operator += (const aiVector2t& o);
+	const aiVector2t& operator -= (const aiVector2t& o);
+	const aiVector2t& operator *= (TReal f);
+	const aiVector2t& operator /= (TReal f);
 
-	bool operator== (const aiVector2D& other) const {
-		return x == other.x && y == other.y;
-	}
+	TReal operator[](unsigned int i) const;
+	TReal& operator[](unsigned int i);
 
-	bool operator!= (const aiVector2D& other) const {
-		return x != other.x || y != other.y;
-	}
+	bool operator== (const aiVector2t& other) const;
+	bool operator!= (const aiVector2t& other) const;
 
-	aiVector2D& operator= (float f)	{
-		x = y = f;return *this;
-	}
+	aiVector2t& operator= (TReal f);
+	const aiVector2t SymMul(const aiVector2t& o);
 
-	const aiVector2D SymMul(const aiVector2D& o) {
-		return aiVector2D(x*o.x,y*o.y);
-	}
+	template <typename TOther>
+	operator aiVector2t<TOther> () const;
+
+	TReal x, y;	
+} PACK_STRUCT;
+
+typedef aiVector2t<float> aiVector2D;
+
+#else
+
+struct aiVector2t {
+	TReal x,y;
+};
 
 #endif // __cplusplus
-
-	float x, y;	
-} PACK_STRUCT;
 
 #include "./Compiler/poppack1.h"
 
-#ifdef __cplusplus
-} // end extern "C"
-
-// ----------------------------------------------------------------------------------
-// symmetric addition
-inline aiVector2D operator + (const aiVector2D& v1, const aiVector2D& v2)
-{
-	return aiVector2D( v1.x + v2.x, v1.y + v2.y);
-}
-
-// ----------------------------------------------------------------------------------
-// symmetric subtraction
-inline aiVector2D operator - (const aiVector2D& v1, const aiVector2D& v2)
-{
-	return aiVector2D( v1.x - v2.x, v1.y - v2.y);
-}
-
-// ----------------------------------------------------------------------------------
-// scalar product
-inline float operator * (const aiVector2D& v1, const aiVector2D& v2)
-{
-	return v1.x*v2.x + v1.y*v2.y;
-}
-
-// ----------------------------------------------------------------------------------
-// scalar multiplication
-inline aiVector2D operator * ( float f, const aiVector2D& v)
-{
-	return aiVector2D( f*v.x, f*v.y);
-}
-
-// ----------------------------------------------------------------------------------
-// and the other way around
-inline aiVector2D operator * ( const aiVector2D& v, float f)
-{
-	return aiVector2D( f*v.x, f*v.y);
-}
-
-// ----------------------------------------------------------------------------------
-// scalar division
-inline aiVector2D operator / ( const aiVector2D& v, float f)
-{
-	
-	return v * (1/f);
-}
-
-// ----------------------------------------------------------------------------------
-// vector division
-inline aiVector2D operator / ( const aiVector2D& v, const aiVector2D& v2)
-{
-	return aiVector2D(v.x / v2.x,v.y / v2.y);
-}
-
-// ----------------------------------------------------------------------------------
-// vector inversion
-inline aiVector2D operator - ( const aiVector2D& v)
-{
-	return aiVector2D( -v.x, -v.y);
-}
-
-#endif // __cplusplus
 #endif // AI_VECTOR2D_H_INC

@@ -1,19 +1,61 @@
+/*
+---------------------------------------------------------------------------
+Open Asset Import Library (ASSIMP)
+---------------------------------------------------------------------------
+
+Copyright (c) 2006-2010, ASSIMP Development Team
+
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the following 
+conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the ASSIMP team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the ASSIMP Development Team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------------
+*/
+
 /** @file aiMatrix3x3.inl
  *  @brief Inline implementation of the 3x3 matrix operators
  */
 #ifndef AI_MATRIX3x3_INL_INC
 #define AI_MATRIX3x3_INL_INC
 
+#ifdef __cplusplus
 #include "aiMatrix3x3.h"
 
-#ifdef __cplusplus
 #include "aiMatrix4x4.h"
 #include <algorithm>
 #include <limits>
 
 // ------------------------------------------------------------------------------------------------
 // Construction from a 4x4 matrix. The remaining parts of the matrix are ignored.
-inline aiMatrix3x3::aiMatrix3x3( const aiMatrix4x4& pMatrix)
+template <typename TReal>
+inline aiMatrix3x3t<TReal>::aiMatrix3x3t( const aiMatrix4x4t<TReal>& pMatrix)
 {
 	a1 = pMatrix.a1; a2 = pMatrix.a2; a3 = pMatrix.a3;
 	b1 = pMatrix.b1; b2 = pMatrix.b2; b3 = pMatrix.b3;
@@ -21,9 +63,10 @@ inline aiMatrix3x3::aiMatrix3x3( const aiMatrix4x4& pMatrix)
 }
 
 // ------------------------------------------------------------------------------------------------
-inline aiMatrix3x3& aiMatrix3x3::operator *= (const aiMatrix3x3& m)
+template <typename TReal>
+inline aiMatrix3x3t<TReal>& aiMatrix3x3t<TReal>::operator *= (const aiMatrix3x3t<TReal>& m)
 {
-	*this = aiMatrix3x3(m.a1 * a1 + m.b1 * a2 + m.c1 * a3,
+	*this = aiMatrix3x3t<TReal>(m.a1 * a1 + m.b1 * a2 + m.c1 * a3,
 		m.a2 * a1 + m.b2 * a2 + m.c2 * a3,
 		m.a3 * a1 + m.b3 * a2 + m.c3 * a3,
 		m.a1 * b1 + m.b1 * b2 + m.c1 * b3,
@@ -36,27 +79,41 @@ inline aiMatrix3x3& aiMatrix3x3::operator *= (const aiMatrix3x3& m)
 }
 
 // ------------------------------------------------------------------------------------------------
-inline aiMatrix3x3 aiMatrix3x3::operator* (const aiMatrix3x3& m) const
+template <typename TReal>
+template <typename TOther>
+aiMatrix3x3t<TReal>::operator aiMatrix3x3t<TOther> () const
 {
-	aiMatrix3x3 temp( *this);
+	return aiMatrix3x3t<TOther>(static_cast<TOther>(a1),static_cast<TOther>(a2),static_cast<TOther>(a3),
+		static_cast<TOther>(b1),static_cast<TOther>(b2),static_cast<TOther>(b3),
+		static_cast<TOther>(c1),static_cast<TOther>(c2),static_cast<TOther>(c3));
+}
+
+// ------------------------------------------------------------------------------------------------
+template <typename TReal>
+inline aiMatrix3x3t<TReal> aiMatrix3x3t<TReal>::operator* (const aiMatrix3x3t<TReal>& m) const
+{
+	aiMatrix3x3t<TReal> temp( *this);
 	temp *= m;
 	return temp;
 }
 
 // ------------------------------------------------------------------------------------------------
-inline float* aiMatrix3x3::operator[] (unsigned int p_iIndex)
+template <typename TReal>
+inline TReal* aiMatrix3x3t<TReal>::operator[] (unsigned int p_iIndex)
 {
 	return &this->a1 + p_iIndex * 3;
 }
 
 // ------------------------------------------------------------------------------------------------
-inline const float* aiMatrix3x3::operator[] (unsigned int p_iIndex) const
+template <typename TReal>
+inline const TReal* aiMatrix3x3t<TReal>::operator[] (unsigned int p_iIndex) const
 {
 	return &this->a1 + p_iIndex * 3;
 }
 
 // ------------------------------------------------------------------------------------------------
-inline bool aiMatrix3x3::operator== (const aiMatrix4x4 m) const
+template <typename TReal>
+inline bool aiMatrix3x3t<TReal>::operator== (const aiMatrix4x4t<TReal> m) const
 {
 	return a1 == m.a1 && a2 == m.a2 && a3 == m.a3 &&
 		   b1 == m.b1 && b2 == m.b2 && b3 == m.b3 &&
@@ -64,46 +121,51 @@ inline bool aiMatrix3x3::operator== (const aiMatrix4x4 m) const
 }
 
 // ------------------------------------------------------------------------------------------------
-inline bool aiMatrix3x3::operator!= (const aiMatrix4x4 m) const
+template <typename TReal>
+inline bool aiMatrix3x3t<TReal>::operator!= (const aiMatrix4x4t<TReal> m) const
 {
 	return !(*this == m);
 }
 
 // ------------------------------------------------------------------------------------------------
-inline aiMatrix3x3& aiMatrix3x3::Transpose()
+template <typename TReal>
+inline aiMatrix3x3t<TReal>& aiMatrix3x3t<TReal>::Transpose()
 {
-	// (float&) don't remove, GCC complains cause of packed fields
-	std::swap( (float&)a2, (float&)b1);
-	std::swap( (float&)a3, (float&)c1);
-	std::swap( (float&)b3, (float&)c2);
+	// (TReal&) don't remove, GCC complains cause of packed fields
+	std::swap( (TReal&)a2, (TReal&)b1);
+	std::swap( (TReal&)a3, (TReal&)c1);
+	std::swap( (TReal&)b3, (TReal&)c2);
 	return *this;
 }
 
 // ----------------------------------------------------------------------------------------
-inline float aiMatrix3x3::Determinant() const
+template <typename TReal>
+inline TReal aiMatrix3x3t<TReal>::Determinant() const
 {
 	return a1*b2*c3 - a1*b3*c2 + a2*b3*c1 - a2*b1*c3 + a3*b1*c2 - a3*b2*c1;
 }
 
 // ----------------------------------------------------------------------------------------
-inline aiMatrix3x3& aiMatrix3x3::Inverse()
+template <typename TReal>
+inline aiMatrix3x3t<TReal>& aiMatrix3x3t<TReal>::Inverse()
 {
 	// Compute the reciprocal determinant
-	float det = Determinant();
-	if(det == 0.0f) 
+	TReal det = Determinant();
+	if(det == static_cast<TReal>(0.0)) 
 	{
 		// Matrix not invertible. Setting all elements to nan is not really
-		// correct in a mathematical sense but it is easy to debug for the
-		// programmer.
-		const float nan = std::numeric_limits<float>::quiet_NaN();
-		*this = aiMatrix3x3( nan,nan,nan,nan,nan,nan,nan,nan,nan);
+		// correct in a mathematical sense; but at least qnans are easy to 
+		// spot. XXX we might throw an exception instead, which would
+		// be even much better to spot :/.
+		const TReal nan = std::numeric_limits<TReal>::quiet_NaN();
+		*this = aiMatrix3x3t<TReal>( nan,nan,nan,nan,nan,nan,nan,nan,nan);
 
 		return *this;
 	}
 
-	float invdet = 1.0f / det;
+	TReal invdet = static_cast<TReal>(1.0) / det;
 
-	aiMatrix3x3 res;
+	aiMatrix3x3t<TReal> res;
 	res.a1 = invdet  * (b2 * c3 - b3 * c2);
 	res.a2 = -invdet * (a2 * c3 - a3 * c2);
 	res.a3 = invdet  * (a2 * b3 - a3 * b2);
@@ -119,7 +181,8 @@ inline aiMatrix3x3& aiMatrix3x3::Inverse()
 }
 
 // ------------------------------------------------------------------------------------------------
-inline aiMatrix3x3& aiMatrix3x3::RotationZ(float a, aiMatrix3x3& out)
+template <typename TReal>
+inline aiMatrix3x3t<TReal>& aiMatrix3x3t<TReal>::RotationZ(TReal a, aiMatrix3x3t<TReal>& out)
 {
 	out.a1 = out.b2 = ::cos(a);
 	out.b1 = ::sin(a);
@@ -133,10 +196,11 @@ inline aiMatrix3x3& aiMatrix3x3::RotationZ(float a, aiMatrix3x3& out)
 
 // ------------------------------------------------------------------------------------------------
 // Returns a rotation matrix for a rotation around an arbitrary axis.
-inline aiMatrix3x3& aiMatrix3x3::Rotation( float a, const aiVector3D& axis, aiMatrix3x3& out)
+template <typename TReal>
+inline aiMatrix3x3t<TReal>& aiMatrix3x3t<TReal>::Rotation( TReal a, const aiVector3t<TReal>& axis, aiMatrix3x3t<TReal>& out)
 {
-  float c = cos( a), s = sin( a), t = 1 - c;
-  float x = axis.x, y = axis.y, z = axis.z;
+  TReal c = cos( a), s = sin( a), t = 1 - c;
+  TReal x = axis.x, y = axis.y, z = axis.z;
 
   // Many thanks to MathWorld and Wikipedia
   out.a1 = t*x*x + c;   out.a2 = t*x*y - s*z; out.a3 = t*x*z + s*y;
@@ -147,9 +211,10 @@ inline aiMatrix3x3& aiMatrix3x3::Rotation( float a, const aiVector3D& axis, aiMa
 }
 
 // ------------------------------------------------------------------------------------------------
-inline aiMatrix3x3& aiMatrix3x3::Translation( const aiVector2D& v, aiMatrix3x3& out)
+template <typename TReal>
+inline aiMatrix3x3t<TReal>& aiMatrix3x3t<TReal>::Translation( const aiVector2t<TReal>& v, aiMatrix3x3t<TReal>& out)
 {
-	out = aiMatrix3x3();
+	out = aiMatrix3x3t<TReal>();
 	out.a3 = v.x;
 	out.b3 = v.y;
 	return out;
@@ -165,13 +230,14 @@ inline aiMatrix3x3& aiMatrix3x3::Translation( const aiVector2D& v, aiMatrix3x3& 
  *          Journal of Graphics Tools, 4(4):1-4, 1999
  */
 // ----------------------------------------------------------------------------------------
-inline aiMatrix3x3& aiMatrix3x3::FromToMatrix(const aiVector3D& from, 
-	const aiVector3D& to, aiMatrix3x3& mtx)
+template <typename TReal>
+inline aiMatrix3x3t<TReal>& aiMatrix3x3t<TReal>::FromToMatrix(const aiVector3t<TReal>& from, 
+	const aiVector3t<TReal>& to, aiMatrix3x3t<TReal>& mtx)
 {
-	const float e = from * to;
-	const float f = (e < 0)? -e:e;
+	const TReal e = from * to;
+	const TReal f = (e < 0)? -e:e;
 
-	if (f > 1.0 - 0.00001f)     /* "from" and "to"-vector almost parallel */
+	if (f > static_cast<TReal>(1.0) - static_cast<TReal>(0.00001))     /* "from" and "to"-vector almost parallel */
 	{
 		aiVector3D u,v;     /* temporary storage vectors */
 		aiVector3D x;       /* vector most nearly orthogonal to "from" */
@@ -184,31 +250,31 @@ inline aiMatrix3x3& aiMatrix3x3::FromToMatrix(const aiVector3D& from,
 		{
 			if (x.x < x.z)
 			{
-				x.x = 1.0; x.y = x.z = 0.0;
+				x.x = static_cast<TReal>(1.0); x.y = x.z = static_cast<TReal>(0.0);
 			}
 			else
 			{
-				x.z = 1.0; x.y = x.z = 0.0;
+				x.z = static_cast<TReal>(1.0); x.y = x.z = static_cast<TReal>(0.0);
 			}
 		}
 		else
 		{
 			if (x.y < x.z)
 			{
-				x.y = 1.0; x.x = x.z = 0.0;
+				x.y = static_cast<TReal>(1.0); x.x = x.z = static_cast<TReal>(0.0);
 			}
 			else
 			{
-				x.z = 1.0; x.x = x.y = 0.0;
+				x.z = static_cast<TReal>(1.0); x.x = x.y = static_cast<TReal>(0.0);
 			}
 		}
 
 		u.x = x.x - from.x; u.y = x.y - from.y; u.z = x.z - from.z;
 		v.x = x.x - to.x;   v.y = x.y - to.y;   v.z = x.z - to.z;
 
-		const float c1 = 2.0f / (u * u);
-		const float c2 = 2.0f / (v * v);
-		const float c3 = c1 * c2  * (u * v);
+		const TReal c1 = static_cast<TReal>(2.0) / (u * u);
+		const TReal c2 = static_cast<TReal>(2.0) / (v * v);
+		const TReal c3 = c1 * c2  * (u * v);
 
 		for (unsigned int i = 0; i < 3; i++) 
 		{
@@ -217,19 +283,19 @@ inline aiMatrix3x3& aiMatrix3x3::FromToMatrix(const aiVector3D& from,
 				mtx[i][j] =  - c1 * u[i] * u[j] - c2 * v[i] * v[j]
 					+ c3 * v[i] * u[j];
 			}
-			mtx[i][i] += 1.0;
+			mtx[i][i] += static_cast<TReal>(1.0);
 		}
 	}
 	else  /* the most common case, unless "from"="to", or "from"=-"to" */
 	{
 		const aiVector3D v = from ^ to;
 		/* ... use this hand optimized version (9 mults less) */
-		const float h = 1.0f/(1.0f + e);      /* optimization by Gottfried Chen */
-		const float hvx = h * v.x;
-		const float hvz = h * v.z;
-		const float hvxy = hvx * v.y;
-		const float hvxz = hvx * v.z;
-		const float hvyz = hvz * v.y;
+		const TReal h = static_cast<TReal>(1.0)/(static_cast<TReal>(1.0) + e);      /* optimization by Gottfried Chen */
+		const TReal hvx = h * v.x;
+		const TReal hvz = h * v.z;
+		const TReal hvxy = hvx * v.y;
+		const TReal hvxz = hvx * v.z;
+		const TReal hvyz = hvz * v.y;
 		mtx[0][0] = e + hvx * v.x;
 		mtx[0][1] = hvxy - v.z;
 		mtx[0][2] = hvxz + v.y;

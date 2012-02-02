@@ -127,7 +127,7 @@ typedef aiVector3t<float> aiVector3D;
 
 struct aiVector3D {
 
-	float x,y,y;
+	float x,y,z;
 } PACK_STRUCT;
 
 #endif // __cplusplus

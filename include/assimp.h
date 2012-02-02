@@ -81,7 +81,7 @@ struct aiLogStream
  *  @see aiSetPropertyString
  */
 // --------------------------------------------------------------------------------
-struct aiPropertyStore {};
+struct aiPropertyStore { char sentinel; };
 
 /** Our own C boolean type */
 typedef int aiBool;
@@ -344,7 +344,7 @@ ASSIMP_API C_STRUCT aiPropertyStore* aiCreatePropertyStore(void);
 /** Delete a property store.
  * @param p Property store to be deleted.
  */
-ASSIMP_API void aiReleasePropertyStore(aiPropertyStore* p);
+ASSIMP_API void aiReleasePropertyStore(C_STRUCT aiPropertyStore* p);
 
 // --------------------------------------------------------------------------------
 /** Set an integer property. 
@@ -358,7 +358,7 @@ ASSIMP_API void aiReleasePropertyStore(aiPropertyStore* p);
  * @param value New value for the property
  */
 ASSIMP_API void aiSetImportPropertyInteger(
-	aiPropertyStore* store,
+	C_STRUCT aiPropertyStore* store,
 	const char* szName, 
 	int value);
 
@@ -374,7 +374,7 @@ ASSIMP_API void aiSetImportPropertyInteger(
  * @param value New value for the property
  */
 ASSIMP_API void aiSetImportPropertyFloat(
-	aiPropertyStore* store,
+	C_STRUCT aiPropertyStore* store,
 	const char* szName,
 	float value);
 
@@ -391,7 +391,7 @@ ASSIMP_API void aiSetImportPropertyFloat(
  * @param value New value for the property
  */
 ASSIMP_API void aiSetImportPropertyString(
-	aiPropertyStore* store,
+	C_STRUCT aiPropertyStore* store,
 	const char* szName,
 	const C_STRUCT aiString* st);
 

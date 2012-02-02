@@ -96,8 +96,8 @@ typedef aiVector2t<float> aiVector2D;
 
 #else
 
-struct aiVector2t {
-	TReal x,y;
+struct aiVector2D {
+	float x,y;
 };
 
 #endif // __cplusplus

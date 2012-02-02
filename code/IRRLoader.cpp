@@ -457,7 +457,7 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
 					key.mTime = i * tdelta;
 
 					const float t = (float) ( in.speed * key.mTime );
-					key.mValue = in.circleCenter  + in.circleRadius * ((vecU*::cos(t)) + (vecV*::sin(t)));
+					key.mValue = in.circleCenter  + in.circleRadius * ((vecU*::cosf(t)) + (vecV*::sinf(t)));
 				}
 
 				// This animation is repeated and repeated ...

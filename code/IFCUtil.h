@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace IFC {
 
-	typedef float IfcFloat;
+	typedef double IfcFloat;
 
 	// IfcFloat-precision math data types
 	typedef aiVector2t<IfcFloat> IfcVector2;

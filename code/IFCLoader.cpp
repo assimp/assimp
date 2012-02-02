@@ -325,7 +325,10 @@ void SetCoordinateSpace(ConversionData& conv)
 void ResolveObjectPlacement(aiMatrix4x4& m, const IfcObjectPlacement& place, ConversionData& conv)
 {
 	if (const IfcLocalPlacement* const local = place.ToPtr<IfcLocalPlacement>()){
-		ConvertAxisPlacement(m, *local->RelativePlacement, conv);
+		IfcMatrix4 tmp;
+		ConvertAxisPlacement(tmp, *local->RelativePlacement, conv);
+
+		m = static_cast<aiMatrix4x4>(tmp);
 
 		if (local->PlacementRelTo) {
 			aiMatrix4x4 tmp;

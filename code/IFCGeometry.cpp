@@ -61,17 +61,17 @@ namespace Assimp {
 		// XXX use full -+ range ...
 		const ClipperLib::long64 max_ulong64 = 1518500249; // clipper.cpp / hiRange var
 
-		//#define to_int64(p)  (static_cast<ulong64>( std::max( 0., std::min( static_cast<double>((p)), 1.) ) * max_ulong64 ))
-#define to_int64(p)  (static_cast<ulong64>(static_cast<double>((p) ) * max_ulong64 ))
-#define from_int64(p) (static_cast<double>((p)) / max_ulong64)
-#define from_int64_f(p) (static_cast<float>(from_int64((p))))
+		//#define to_int64(p)  (static_cast<ulong64>( std::max( 0., std::min( static_cast<IfcFloat>((p)), 1.) ) * max_ulong64 ))
+#define to_int64(p)  (static_cast<ulong64>(static_cast<IfcFloat>((p) ) * max_ulong64 ))
+#define from_int64(p) (static_cast<IfcFloat>((p)) / max_ulong64)
+#define from_int64_f(p) (static_cast<IfcFloat>(from_int64((p))))
 
 // ------------------------------------------------------------------------------------------------
 bool ProcessPolyloop(const IfcPolyLoop& loop, TempMesh& meshout, ConversionData& /*conv*/)
 {
 	size_t cnt = 0;
 	BOOST_FOREACH(const IfcCartesianPoint& c, loop.Polygon) {
-		aiVector3D tmp;
+		IfcVector3 tmp;
 		ConvertCartesianPoint(tmp,c);
 
 		meshout.verts.push_back(tmp);
@@ -93,7 +93,7 @@ bool ProcessPolyloop(const IfcPolyLoop& loop, TempMesh& meshout, ConversionData&
 }
 
 // ------------------------------------------------------------------------------------------------
-void ComputePolygonNormals(const TempMesh& meshout, std::vector<aiVector3D>& normals, bool normalize = true, size_t ofs = 0) 
+void ComputePolygonNormals(const TempMesh& meshout, std::vector<IfcVector3>& normals, bool normalize = true, size_t ofs = 0) 
 {
 	size_t max_vcount = 0;
 	std::vector<unsigned int>::const_iterator begin=meshout.vertcnt.begin()+ofs, end=meshout.vertcnt.end(),  iit;
@@ -101,7 +101,7 @@ void ComputePolygonNormals(const TempMesh& meshout, std::vector<aiVector3D>& nor
 		max_vcount = std::max(max_vcount,static_cast<size_t>(*iit));
 	}
 
-	std::vector<float> temp((max_vcount+2)*4);
+	std::vector<IfcFloat> temp((max_vcount+2)*4);
 	normals.reserve( normals.size() + meshout.vertcnt.size()-ofs );
 
 	// `NewellNormal()` currently has a relatively strange interface and need to 
@@ -109,26 +109,26 @@ void ComputePolygonNormals(const TempMesh& meshout, std::vector<aiVector3D>& nor
 	size_t vidx = std::accumulate(meshout.vertcnt.begin(),begin,0);
 	for(iit = begin; iit != end; vidx += *iit++) {
 		if (!*iit) {
-			normals.push_back(aiVector3D());
+			normals.push_back(IfcVector3());
 			continue;
 		}
 		for(size_t vofs = 0, cnt = 0; vofs < *iit; ++vofs) {
-			const aiVector3D& v = meshout.verts[vidx+vofs];
+			const IfcVector3& v = meshout.verts[vidx+vofs];
 			temp[cnt++] = v.x;
 			temp[cnt++] = v.y;
 			temp[cnt++] = v.z;
 #ifdef _DEBUG
-			temp[cnt] = std::numeric_limits<float>::quiet_NaN();
+			temp[cnt] = std::numeric_limits<IfcFloat>::quiet_NaN();
 #endif
 			++cnt;
 		}
 
-		normals.push_back(aiVector3D());
+		normals.push_back(IfcVector3());
 		NewellNormal<4,4,4>(normals.back(),*iit,&temp[0],&temp[1],&temp[2]);
 	}
 
 	if(normalize) {
-		BOOST_FOREACH(aiVector3D& n, normals) {
+		BOOST_FOREACH(IfcVector3& n, normals) {
 			n.Normalize();
 		}
 	}
@@ -136,17 +136,17 @@ void ComputePolygonNormals(const TempMesh& meshout, std::vector<aiVector3D>& nor
 
 // ------------------------------------------------------------------------------------------------
 // Compute the normal of the last polygon in the given mesh
-aiVector3D ComputePolygonNormal(const TempMesh& inmesh, bool normalize = true) 
+IfcVector3 ComputePolygonNormal(const TempMesh& inmesh, bool normalize = true) 
 {
 	size_t total = inmesh.vertcnt.back(), vidx = inmesh.verts.size() - total;
-	std::vector<float> temp((total+2)*3);
+	std::vector<IfcFloat> temp((total+2)*3);
 	for(size_t vofs = 0, cnt = 0; vofs < total; ++vofs) {
-		const aiVector3D& v = inmesh.verts[vidx+vofs];
+		const IfcVector3& v = inmesh.verts[vidx+vofs];
 		temp[cnt++] = v.x;
 		temp[cnt++] = v.y;
 		temp[cnt++] = v.z;
 	}
-	aiVector3D nor;
+	IfcVector3 nor;
 	NewellNormal<3,3,3>(nor,total,&temp[0],&temp[1],&temp[2]);
 	return normalize ? nor.Normalize() : nor;
 }
@@ -154,15 +154,15 @@ aiVector3D ComputePolygonNormal(const TempMesh& inmesh, bool normalize = true)
 // ------------------------------------------------------------------------------------------------
 void FixupFaceOrientation(TempMesh& result)
 {
-	const aiVector3D vavg = result.Center();
+	const IfcVector3 vavg = result.Center();
 
-	std::vector<aiVector3D> normals;
+	std::vector<IfcVector3> normals;
 	ComputePolygonNormals(result,normals);
 
 	size_t c = 0, ofs = 0;
 	BOOST_FOREACH(unsigned int cnt, result.vertcnt) {
 		if (cnt>2){
-			const aiVector3D& thisvert = result.verts[c];
+			const IfcVector3& thisvert = result.verts[c];
 			if (normals[ofs]*(thisvert-vavg) < 0) {
 				std::reverse(result.verts.begin()+c,result.verts.begin()+cnt+c);
 			}
@@ -173,7 +173,7 @@ void FixupFaceOrientation(TempMesh& result)
 }
 
 // ------------------------------------------------------------------------------------------------
-void RecursiveMergeBoundaries(TempMesh& final_result, const TempMesh& in, const TempMesh& boundary, std::vector<aiVector3D>& normals, const aiVector3D& nor_boundary)
+void RecursiveMergeBoundaries(TempMesh& final_result, const TempMesh& in, const TempMesh& boundary, std::vector<IfcVector3>& normals, const IfcVector3& nor_boundary)
 {
 	ai_assert(in.vertcnt.size() >= 1);
 	ai_assert(boundary.vertcnt.size() == 1);
@@ -185,15 +185,15 @@ void RecursiveMergeBoundaries(TempMesh& final_result, const TempMesh& in, const 
 	// to the outer boundary is actually the shortest possible.
 	size_t vidx = 0, best_vidx_start = 0;
 	size_t best_ofs, best_outer = boundary.verts.size();
-	float best_dist = 1e10;
+	IfcFloat best_dist = 1e10;
 	for(std::vector<unsigned int>::const_iterator iit = begin; iit != end; vidx += *iit++) {
 		
 		for(size_t vofs = 0; vofs < *iit; ++vofs) {
-			const aiVector3D& v = in.verts[vidx+vofs];
+			const IfcVector3& v = in.verts[vidx+vofs];
 
 			for(size_t outer = 0; outer < boundary.verts.size(); ++outer) {
-				const aiVector3D& o = boundary.verts[outer];
-				const float d = (o-v).SquareLength();
+				const IfcVector3& o = boundary.verts[outer];
+				const IfcFloat d = (o-v).SquareLength();
 
 				if (d < best_dist) {
 					best_dist = d;
@@ -214,7 +214,7 @@ void RecursiveMergeBoundaries(TempMesh& final_result, const TempMesh& in, const 
 	out.verts.reserve(cnt);
 
 	for(size_t outer = 0; outer < boundary.verts.size(); ++outer) {
-		const aiVector3D& o = boundary.verts[outer];
+		const IfcVector3& o = boundary.verts[outer];
 		out.verts.push_back(o);
 
 		if (outer == best_outer) {
@@ -286,12 +286,12 @@ void MergePolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t mas
 	size_t outer_polygon_start = 0;
 
 	// do not normalize 'normals', we need the original length for computing the polygon area
-	std::vector<aiVector3D> normals;
+	std::vector<IfcVector3> normals;
 	ComputePolygonNormals(meshout,normals,false);
 
 	// see if one of the polygons is a IfcFaceOuterBound (in which case `master_bounds` is its index).
 	// sadly we can't rely on it, the docs say 'At most one of the bounds shall be of the type IfcFaceOuterBound' 
-	float area_outer_polygon = 1e-10f;
+	IfcFloat area_outer_polygon = 1e-10f;
 	if (master_bounds != (size_t)-1) {
 		outer_polygon = begin + master_bounds;
 		outer_polygon_start = std::accumulate(begin,outer_polygon,0);
@@ -301,8 +301,8 @@ void MergePolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t mas
 		size_t vidx = 0;
 		for(iit = begin; iit != meshout.vertcnt.end(); vidx += *iit++) {
 			// find the polygon with the largest area, it must be the outer bound. 
-			aiVector3D& n = normals[std::distance(begin,iit)];
-			const float area = n.SquareLength();
+			IfcVector3& n = normals[std::distance(begin,iit)];
+			const IfcFloat area = n.SquareLength();
 			if (area > area_outer_polygon) {
 				area_outer_polygon = area;
 				outer_polygon = iit;
@@ -312,18 +312,18 @@ void MergePolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t mas
 	}
 
 	ai_assert(outer_polygon != meshout.vertcnt.end());	
-	std::vector<aiVector3D>& in = meshout.verts;
+	std::vector<IfcVector3>& in = meshout.verts;
 
 	// skip over extremely small boundaries - this is a workaround to fix cases
 	// in which the number of holes is so extremely large that the
 	// triangulation code fails.
 #define IFC_VERTICAL_HOLE_SIZE_THRESHOLD 0.000001f
 	size_t vidx = 0, removed = 0, index = 0;
-	const float threshold = area_outer_polygon * IFC_VERTICAL_HOLE_SIZE_THRESHOLD;
+	const IfcFloat threshold = area_outer_polygon * IFC_VERTICAL_HOLE_SIZE_THRESHOLD;
 	for(iit = begin; iit != end ;++index) {
-		const float sqlen = normals[index].SquareLength();
+		const IfcFloat sqlen = normals[index].SquareLength();
 		if (sqlen < threshold) {
-			std::vector<aiVector3D>::iterator inbase = in.begin()+vidx;
+			std::vector<IfcVector3>::iterator inbase = in.begin()+vidx;
 			in.erase(inbase,inbase+*iit);
 			
 			outer_polygon_start -= outer_polygon_start>vidx ? *iit : 0;
@@ -355,19 +355,19 @@ next_loop:
 				continue;
 			}
 			const size_t next = (vofs+1)%*iit;
-			const aiVector3D& v = in[vidx+vofs], &vnext = in[vidx+next],&vd = (vnext-v).Normalize();
+			const IfcVector3& v = in[vidx+vofs], &vnext = in[vidx+next],&vd = (vnext-v).Normalize();
 
 			for(size_t outer = 0; outer < *outer_polygon; ++outer) {
-				const aiVector3D& o = in[outer_polygon_start+outer], &onext = in[outer_polygon_start+(outer+1)%*outer_polygon], &od = (onext-o).Normalize();
+				const IfcVector3& o = in[outer_polygon_start+outer], &onext = in[outer_polygon_start+(outer+1)%*outer_polygon], &od = (onext-o).Normalize();
 
 				if (fabs(vd * od) > 1.f-1e-6f && (onext-v).Normalize() * vd > 1.f-1e-6f && (onext-v)*(o-v) < 0) {
 					IFCImporter::LogDebug("got an inner hole that lies partly on the outer polygonal boundary, merging them to a single contour");
 
 					// in between outer and outer+1 insert all vertices of this loop, then drop the original altogether.
-					std::vector<aiVector3D> tmp(*iit);
+					std::vector<IfcVector3> tmp(*iit);
 
 					const size_t start = (v-o).SquareLength() > (vnext-o).SquareLength() ? vofs :  next;
-					std::vector<aiVector3D>::iterator inbase = in.begin()+vidx, it = std::copy(inbase+start, inbase+*iit,tmp.begin());
+					std::vector<IfcVector3>::iterator inbase = in.begin()+vidx, it = std::copy(inbase+start, inbase+*iit,tmp.begin());
 					std::copy(inbase, inbase+start,it);
 					std::reverse(tmp.begin(),tmp.end());
 
@@ -398,12 +398,12 @@ next_loop:
 	boundary.vertcnt.resize(1,*outer_polygon);
 	boundary.verts.resize(*outer_polygon);
 
-	std::vector<aiVector3D>::iterator b = in.begin()+outer_polygon_start;
+	std::vector<IfcVector3>::iterator b = in.begin()+outer_polygon_start;
 	std::copy(b,b+*outer_polygon,boundary.verts.begin());
 	in.erase(b,b+*outer_polygon);
 
-	std::vector<aiVector3D>::iterator norit = normals.begin()+std::distance(meshout.vertcnt.begin(),outer_polygon);
-	const aiVector3D nor_boundary = *norit;
+	std::vector<IfcVector3>::iterator norit = normals.begin()+std::distance(meshout.vertcnt.begin(),outer_polygon);
+	const IfcVector3 nor_boundary = *norit;
 	normals.erase(norit);
 	meshout.vertcnt.erase(outer_polygon);
 
@@ -463,18 +463,18 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
 		return;
 	}
 
-	aiVector3D axis, pos;
+	IfcVector3 axis, pos;
 	ConvertAxisPlacement(axis,pos,solid.Axis);
 
-	aiMatrix4x4 tb0,tb1;
-	aiMatrix4x4::Translation(pos,tb0);
-	aiMatrix4x4::Translation(-pos,tb1);
+	IfcMatrix4 tb0,tb1;
+	IfcMatrix4::Translation(pos,tb0);
+	IfcMatrix4::Translation(-pos,tb1);
 
-	const std::vector<aiVector3D>& in = meshout.verts;
+	const std::vector<IfcVector3>& in = meshout.verts;
 	const size_t size=in.size();
 	
 	bool has_area = solid.SweptArea->ProfileType == "AREA" && size>2;
-	const float max_angle = solid.Angle*conv.angle_scale;
+	const IfcFloat max_angle = solid.Angle*conv.angle_scale;
 	if(fabs(max_angle) < 1e-3) {
 		if(has_area) {
 			result = meshout;
@@ -483,18 +483,18 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
 	}
 
 	const unsigned int cnt_segments = std::max(2u,static_cast<unsigned int>(16 * fabs(max_angle)/AI_MATH_HALF_PI_F));
-	const float delta = max_angle/cnt_segments;
+	const IfcFloat delta = max_angle/cnt_segments;
 
 	has_area = has_area && fabs(max_angle) < AI_MATH_TWO_PI_F*0.99;
 	
 	result.verts.reserve(size*((cnt_segments+1)*4+(has_area?2:0)));
 	result.vertcnt.reserve(size*cnt_segments+2);
 
-	aiMatrix4x4 rot;
-	rot = tb0 * aiMatrix4x4::Rotation(delta,axis,rot) * tb1;
+	IfcMatrix4 rot;
+	rot = tb0 * IfcMatrix4::Rotation(delta,axis,rot) * tb1;
 
 	size_t base = 0;
-	std::vector<aiVector3D>& out = result.verts;
+	std::vector<IfcVector3>& out = result.verts;
 
 	// dummy data to simplify later processing
 	for(size_t i = 0; i < size; ++i) {
@@ -506,7 +506,7 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
 			const size_t next = (i+1)%size;
 
 			result.vertcnt.push_back(4);
-			const aiVector3D& base_0 = out[base+i*4+3],base_1 = out[base+next*4+3];
+			const IfcVector3& base_0 = out[base+i*4+3],base_1 = out[base+next*4+3];
 
 			out.push_back(base_0);
 			out.push_back(base_1);
@@ -533,7 +533,7 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
 		result.vertcnt.push_back(size);
 	}
 
-	aiMatrix4x4 trafo;
+	IfcMatrix4 trafo;
 	ConvertAxisPlacement(trafo, solid.Position);
 	
 	result.Transform(trafo);
@@ -541,16 +541,16 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
 }
 
 // ------------------------------------------------------------------------------------------------
-aiMatrix3x3 DerivePlaneCoordinateSpace(const TempMesh& curmesh) {
+IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh) {
 
-	const std::vector<aiVector3D>& out = curmesh.verts;
-	aiMatrix3x3 m;
+	const std::vector<IfcVector3>& out = curmesh.verts;
+	IfcMatrix3 m;
 
 	const size_t s = out.size();
 	assert(curmesh.vertcnt.size() == 1 && curmesh.vertcnt.back() == s);
 
-	const aiVector3D any_point = out[s-1];
-	aiVector3D nor; 
+	const IfcVector3 any_point = out[s-1];
+	IfcVector3 nor; 
 
 	// The input polygon is arbitrarily shaped, so we might need some tries
 	// until we find a suitable normal (and it does not even need to be
@@ -571,11 +571,11 @@ out:
 
 	nor.Normalize();
 
-	aiVector3D r = (out[i]-any_point);
+	IfcVector3 r = (out[i]-any_point);
 	r.Normalize();
 
 	// reconstruct orthonormal basis
-	aiVector3D u = r ^ nor;
+	IfcVector3 u = r ^ nor;
 	u.Normalize();
 
 	m.a1 = r.x;
@@ -594,29 +594,29 @@ out:
 }
 
 // ------------------------------------------------------------------------------------------------
-bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std::vector<aiVector3D>& nors, TempMesh& curmesh)
+bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std::vector<IfcVector3>& nors, TempMesh& curmesh)
 {
-	std::vector<aiVector3D>& out = curmesh.verts;
+	std::vector<IfcVector3>& out = curmesh.verts;
 
 	bool result = false;
 
 	// Try to derive a solid base plane within the current surface for use as 
 	// working coordinate system. 
-	const aiMatrix3x3& m = DerivePlaneCoordinateSpace(curmesh);
-	const aiMatrix3x3 minv = aiMatrix3x3(m).Inverse();
-	const aiVector3D& nor = aiVector3D(m.c1, m.c2, m.c3);
+	const IfcMatrix3& m = DerivePlaneCoordinateSpace(curmesh);
+	const IfcMatrix3 minv = IfcMatrix3(m).Inverse();
+	const IfcVector3& nor = IfcVector3(m.c1, m.c2, m.c3);
 
-	float coord = -1;
+	IfcFloat coord = -1;
 
-	std::vector<aiVector2D> contour_flat;
+	std::vector<IfcVector2> contour_flat;
 	contour_flat.reserve(out.size());
 
-	aiVector2D vmin, vmax;
-	MinMaxChooser<aiVector2D>()(vmin, vmax);
+	IfcVector2 vmin, vmax;
+	MinMaxChooser<IfcVector2>()(vmin, vmax);
 	
 	// Move all points into the new coordinate system, collecting min/max verts on the way
-	BOOST_FOREACH(aiVector3D& x, out) {
-		const aiVector3D vv = m * x;
+	BOOST_FOREACH(IfcVector3& x, out) {
+		const IfcVector3 vv = m * x;
 
 		// keep Z offset in the plane coordinate system. Ignoring precision issues
 		// (which  are present, of course), this should be the same value for
@@ -631,10 +631,10 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 
 		coord = vv.z;
 
-		vmin = std::min(aiVector2D(vv.x, vv.y), vmin);
-		vmax = std::max(aiVector2D(vv.x, vv.y), vmax);
+		vmin = std::min(IfcVector2(vv.x, vv.y), vmin);
+		vmax = std::max(IfcVector2(vv.x, vv.y), vmax);
 
-		contour_flat.push_back(aiVector2D(vv.x,vv.y));
+		contour_flat.push_back(IfcVector2(vv.x,vv.y));
 	}
 		
 	// With the current code in DerivePlaneCoordinateSpace, 
@@ -650,7 +650,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 	ClipperLib::Polygons holes_union;
 
 
-	aiVector3D wall_extrusion;
+	IfcVector3 wall_extrusion;
 	bool do_connections = false, first = true;
 
 	try {
@@ -659,21 +659,21 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 		size_t c = 0;
 
 		BOOST_FOREACH(const TempOpening& t,openings) {
-			const aiVector3D& outernor = nors[c++];
-			const float dot = nor * outernor;
+			const IfcVector3& outernor = nors[c++];
+			const IfcFloat dot = nor * outernor;
 			if (fabs(dot)<1.f-1e-6f) {
 				continue;
 			}
 
-			const std::vector<aiVector3D>& va = t.profileMesh->verts;
+			const std::vector<IfcVector3>& va = t.profileMesh->verts;
 			if(va.size() <= 2) {
 				continue;	
 			}
 		
-			std::vector<aiVector2D> contour;
+			std::vector<IfcVector2> contour;
 
-			BOOST_FOREACH(const aiVector3D& xx, t.profileMesh->verts) {
-				aiVector3D vv = m *  xx, vv_extr = m * (xx + t.extrusionDir);
+			BOOST_FOREACH(const IfcVector3& xx, t.profileMesh->verts) {
+				IfcVector3 vv = m *  xx, vv_extr = m * (xx + t.extrusionDir);
 				
 				const bool is_extruded_side = fabs(vv.z - coord) > fabs(vv_extr.z - coord);
 				if (first) {
@@ -689,11 +689,11 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 
 				// XXX should not be necessary - but it is. Why? For precision reasons?
 				vv = is_extruded_side ? vv_extr : vv;
-				contour.push_back(aiVector2D(vv.x,vv.y));
+				contour.push_back(IfcVector2(vv.x,vv.y));
 			}
 
 			ClipperLib::Polygon hole;
-			BOOST_FOREACH(aiVector2D& pip, contour) {
+			BOOST_FOREACH(IfcVector2& pip, contour) {
 				pip.x  = (pip.x - vmin.x) / vmax.x;
 				pip.y  = (pip.y - vmin.y) / vmax.y;
 
@@ -720,7 +720,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 		// to obtain the final polygon to feed into the triangulator.
 		{
 			ClipperLib::Polygon poly;
-			BOOST_FOREACH(aiVector2D& pip, contour_flat) {
+			BOOST_FOREACH(IfcVector2& pip, contour_flat) {
 				pip.x  = (pip.x - vmin.x) / vmax.x;
 				pip.y  = (pip.y - vmin.y) / vmax.y;
 
@@ -747,7 +747,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 		return false;
 	}
 
-	std::vector<aiVector3D> old_verts;
+	std::vector<IfcVector3> old_verts;
 	std::vector<unsigned int> old_vertcnt;
 
 	old_verts.swap(curmesh.verts);
@@ -759,7 +759,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 	// would be emitted twice.
 	if (false && do_connections) {
 
-		std::vector<aiVector3D> tmpvec;
+		std::vector<IfcVector3> tmpvec;
 		BOOST_FOREACH(ClipperLib::Polygon& opening, holes_union) {
 
 			assert(ClipperLib::Orientation(opening));
@@ -768,7 +768,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 
 			BOOST_FOREACH(ClipperLib::IntPoint& point, opening) {
 
-				tmpvec.push_back( minv * aiVector3D(
+				tmpvec.push_back( minv * IfcVector3(
 					vmin.x + from_int64_f(point.X) * vmax.x, 
 					vmin.y + from_int64_f(point.Y) * vmax.y,
 					coord));
@@ -779,8 +779,8 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 
 				curmesh.vertcnt.push_back(4);
 
-				const aiVector3D& in_world = tmpvec[i];
-				const aiVector3D& next_world = tmpvec[next];
+				const IfcVector3& in_world = tmpvec[i];
+				const IfcVector3& next_world = tmpvec[next];
 
 				// Assumptions: no 'partial' openings, wall thickness roughly the same across the wall
 				curmesh.verts.push_back(in_world);
@@ -846,13 +846,13 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 		BOOST_FOREACH(p2t::Triangle* tri, tris) {
 			for(int i = 0; i < 3; ++i) {
 
-				const aiVector2D& v = aiVector2D( 
-					static_cast<float>( tri->GetPoint(i)->x ), 
-					static_cast<float>( tri->GetPoint(i)->y )
+				const IfcVector2& v = IfcVector2( 
+					static_cast<IfcFloat>( tri->GetPoint(i)->x ), 
+					static_cast<IfcFloat>( tri->GetPoint(i)->y )
 				);
 
 				assert(v.x <= 1.0 && v.x >= 0.0 && v.y <= 1.0 && v.y >= 0.0);
-				const aiVector3D v3 = minv * aiVector3D(vmin.x + v.x * vmax.x, vmin.y + v.y * vmax.y,coord) ; 
+				const IfcVector3 v3 = minv * IfcVector3(vmin.x + v.x * vmax.x, vmin.y + v.y * vmax.y,coord) ; 
 
 				curmesh.verts.push_back(v3);
 			}
@@ -876,20 +876,20 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 // ------------------------------------------------------------------------------------------------
 struct DistanceSorter {
 
-	DistanceSorter(const aiVector3D& base) : base(base) {}
+	DistanceSorter(const IfcVector3& base) : base(base) {}
 
 	bool operator () (const TempOpening& a, const TempOpening& b) const {
 		return (a.profileMesh->Center()-base).SquareLength() < (b.profileMesh->Center()-base).SquareLength();
 	}
 
-	aiVector3D base;
+	IfcVector3 base;
 };
 
 // ------------------------------------------------------------------------------------------------
 struct XYSorter {
 
 	// sort first by X coordinates, then by Y coordinates
-	bool operator () (const aiVector2D&a, const aiVector2D& b) const {
+	bool operator () (const IfcVector2&a, const IfcVector2& b) const {
 		if (a.x == b.x) {
 			return a.y < b.y;
 		}
@@ -897,19 +897,19 @@ struct XYSorter {
 	}
 };
 
-typedef std::pair< aiVector2D, aiVector2D > BoundingBox;
-typedef std::map<aiVector2D,size_t,XYSorter> XYSortedField;
+typedef std::pair< IfcVector2, IfcVector2 > BoundingBox;
+typedef std::map<IfcVector2,size_t,XYSorter> XYSortedField;
 
 
 // ------------------------------------------------------------------------------------------------
-void QuadrifyPart(const aiVector2D& pmin, const aiVector2D& pmax, XYSortedField& field, const std::vector< BoundingBox >& bbs, 
-	std::vector<aiVector2D>& out)
+void QuadrifyPart(const IfcVector2& pmin, const IfcVector2& pmax, XYSortedField& field, const std::vector< BoundingBox >& bbs, 
+	std::vector<IfcVector2>& out)
 {
 	if (!(pmin.x-pmax.x) || !(pmin.y-pmax.y)) {
 		return;
 	}
 
-	float xs = 1e10, xe = 1e10;	
+	IfcFloat xs = 1e10, xe = 1e10;	
 	bool found = false;
 
 	// Search along the x-axis until we find an opening
@@ -931,9 +931,9 @@ void QuadrifyPart(const aiVector2D& pmin, const aiVector2D& pmax, XYSortedField&
 	if (!found) {
 		// the rectangle [pmin,pend] is opaque, fill it
 		out.push_back(pmin);
-		out.push_back(aiVector2D(pmin.x,pmax.y));
+		out.push_back(IfcVector2(pmin.x,pmax.y));
 		out.push_back(pmax);
-		out.push_back(aiVector2D(pmax.x,pmin.y));
+		out.push_back(IfcVector2(pmax.x,pmin.y));
 		return;
 	}
 
@@ -943,13 +943,13 @@ void QuadrifyPart(const aiVector2D& pmin, const aiVector2D& pmax, XYSortedField&
 	// see if there's an offset to fill at the top of our quad
 	if (xs - pmin.x) {
 		out.push_back(pmin);
-		out.push_back(aiVector2D(pmin.x,pmax.y));
-		out.push_back(aiVector2D(xs,pmax.y));
-		out.push_back(aiVector2D(xs,pmin.y));
+		out.push_back(IfcVector2(pmin.x,pmax.y));
+		out.push_back(IfcVector2(xs,pmax.y));
+		out.push_back(IfcVector2(xs,pmin.y));
 	}
 
 	// search along the y-axis for all openings that overlap xs and our quad
-	float ylast = pmin.y;
+	IfcFloat ylast = pmin.y;
 	found = false;
 	for(; start != field.end(); ++start) {
 		const BoundingBox& bb = bbs[(*start).second];
@@ -960,47 +960,47 @@ void QuadrifyPart(const aiVector2D& pmin, const aiVector2D& pmax, XYSortedField&
 		if (bb.second.y > ylast) {
 
 			found = true;
-			const float ys = std::max(bb.first.y,pmin.y), ye = std::min(bb.second.y,pmax.y);
+			const IfcFloat ys = std::max(bb.first.y,pmin.y), ye = std::min(bb.second.y,pmax.y);
 			if (ys - ylast) {
-				QuadrifyPart( aiVector2D(xs,ylast), aiVector2D(xe,ys) ,field,bbs,out);
+				QuadrifyPart( IfcVector2(xs,ylast), IfcVector2(xe,ys) ,field,bbs,out);
 			}
 
 			// the following are the window vertices
 
-			/*wnd.push_back(aiVector2D(xs,ys));
-			wnd.push_back(aiVector2D(xs,ye));
-			wnd.push_back(aiVector2D(xe,ye));
-			wnd.push_back(aiVector2D(xe,ys));*/
+			/*wnd.push_back(IfcVector2(xs,ys));
+			wnd.push_back(IfcVector2(xs,ye));
+			wnd.push_back(IfcVector2(xe,ye));
+			wnd.push_back(IfcVector2(xe,ys));*/
 			ylast = ye;
 		}
 	}
 	if (!found) {
 		// the rectangle [pmin,pend] is opaque, fill it
-		out.push_back(aiVector2D(xs,pmin.y));
-		out.push_back(aiVector2D(xs,pmax.y));
-		out.push_back(aiVector2D(xe,pmax.y));
-		out.push_back(aiVector2D(xe,pmin.y));
+		out.push_back(IfcVector2(xs,pmin.y));
+		out.push_back(IfcVector2(xs,pmax.y));
+		out.push_back(IfcVector2(xe,pmax.y));
+		out.push_back(IfcVector2(xe,pmin.y));
 		return;
 	}
 	if (ylast < pmax.y) {
-		QuadrifyPart( aiVector2D(xs,ylast), aiVector2D(xe,pmax.y) ,field,bbs,out);
+		QuadrifyPart( IfcVector2(xs,ylast), IfcVector2(xe,pmax.y) ,field,bbs,out);
 	}
 
 	// now for the whole rest
 	if (pmax.x-xe) {
-		QuadrifyPart(aiVector2D(xe,pmin.y), pmax ,field,bbs,out);
+		QuadrifyPart(IfcVector2(xe,pmin.y), pmax ,field,bbs,out);
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
 void InsertWindowContours(const std::vector< BoundingBox >& bbs,
-	const std::vector< std::vector<aiVector2D> >& contours,
+	const std::vector< std::vector<IfcVector2> >& contours,
 	const std::vector<TempOpening>& openings,
-	const std::vector<aiVector3D>& nors, 
-	const aiMatrix3x3& minv,
-	const aiVector2D& scale,
-	const aiVector2D& offset,
-	float coord,
+	const std::vector<IfcVector3>& nors, 
+	const IfcMatrix3& minv,
+	const IfcVector2& scale,
+	const IfcVector2& offset,
+	IfcFloat coord,
 	TempMesh& curmesh)
 {
 	ai_assert(contours.size() == bbs.size());
@@ -1008,29 +1008,29 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 	// fix windows - we need to insert the real, polygonal shapes into the quadratic holes that we have now
 	for(size_t i = 0; i < contours.size();++i) {
 		const BoundingBox& bb = bbs[i];
-		const std::vector<aiVector2D>& contour = contours[i];
+		const std::vector<IfcVector2>& contour = contours[i];
 
 		// check if we need to do it at all - many windows just fit perfectly into their quadratic holes,
 		// i.e. their contours *are* already their bounding boxes.
 		if (contour.size() == 4) {
-			std::set<aiVector2D,XYSorter> verts;
+			std::set<IfcVector2,XYSorter> verts;
 			for(size_t n = 0; n < 4; ++n) {
 				verts.insert(contour[n]);
 			}
-			const std::set<aiVector2D,XYSorter>::const_iterator end = verts.end();
+			const std::set<IfcVector2,XYSorter>::const_iterator end = verts.end();
 			if (verts.find(bb.first)!=end && verts.find(bb.second)!=end
-				&& verts.find(aiVector2D(bb.first.x,bb.second.y))!=end 
-				&& verts.find(aiVector2D(bb.second.x,bb.first.y))!=end 
+				&& verts.find(IfcVector2(bb.first.x,bb.second.y))!=end 
+				&& verts.find(IfcVector2(bb.second.x,bb.first.y))!=end 
 				) {
 					continue;
 			}
 		}
 
-		const float epsilon = (bb.first-bb.second).Length()/1000.f;
+		const IfcFloat epsilon = (bb.first-bb.second).Length()/1000.f;
 
 		// walk through all contour points and find those that lie on the BB corner
 		size_t last_hit = -1, very_first_hit = -1;
-		aiVector2D edge;
+		IfcVector2 edge;
 		for(size_t n = 0, e=0, size = contour.size();; n=(n+1)%size, ++e) {
 
 			// sanity checking
@@ -1039,7 +1039,7 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 				break;
 			}
 
-			const aiVector2D& v = contour[n];
+			const IfcVector2& v = contour[n];
 
 			bool hit = false;
 			if (fabs(v.x-bb.first.x)<epsilon) {
@@ -1066,13 +1066,13 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 					const size_t old = curmesh.verts.size();
 					size_t cnt = last_hit > n ? size-(last_hit-n) : n-last_hit;
 					for(size_t a = last_hit, e = 0; e <= cnt; a=(a+1)%size, ++e) {
-						const aiVector3D v3 = minv * aiVector3D(offset.x + contour[a].x * scale.x, offset.y + contour[a].y * scale.y,coord);
+						const IfcVector3 v3 = minv * IfcVector3(offset.x + contour[a].x * scale.x, offset.y + contour[a].y * scale.y,coord);
 						curmesh.verts.push_back(v3);
 					}
 
 					if (edge != contour[last_hit]) {
 
-						aiVector2D corner = edge;
+						IfcVector2 corner = edge;
 
 						if (fabs(contour[last_hit].x-bb.first.x)<epsilon) {
 							corner.x = bb.first.x;
@@ -1088,7 +1088,7 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 							corner.y = bb.second.y;
 						}
 
-						const aiVector3D v3 = minv * aiVector3D(offset.x + corner.x * scale.x, offset.y + corner.y * scale.y,coord);
+						const IfcVector3 v3 = minv * IfcVector3(offset.x + corner.x * scale.x, offset.y + corner.y * scale.y,coord);
 						curmesh.verts.push_back(v3);
 					}
 					else if (cnt == 1) {
@@ -1115,27 +1115,27 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 }
 
 // ------------------------------------------------------------------------------------------------
-bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const std::vector<aiVector3D>& nors, TempMesh& curmesh)
+bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const std::vector<IfcVector3>& nors, TempMesh& curmesh)
 {
-	std::vector<aiVector3D>& out = curmesh.verts;
+	std::vector<IfcVector3>& out = curmesh.verts;
 
 	// Try to derive a solid base plane within the current surface for use as 
 	// working coordinate system. 
-	const aiMatrix3x3& m = DerivePlaneCoordinateSpace(curmesh);
-	const aiMatrix3x3 minv = aiMatrix3x3(m).Inverse();
-	const aiVector3D& nor = aiVector3D(m.c1, m.c2, m.c3);
+	const IfcMatrix3& m = DerivePlaneCoordinateSpace(curmesh);
+	const IfcMatrix3 minv = IfcMatrix3(m).Inverse();
+	const IfcVector3& nor = IfcVector3(m.c1, m.c2, m.c3);
 
-	float coord = -1;
+	IfcFloat coord = -1;
 
-	std::vector<aiVector2D> contour_flat;
+	std::vector<IfcVector2> contour_flat;
 	contour_flat.reserve(out.size());
 
-	aiVector2D vmin, vmax;
-	MinMaxChooser<aiVector2D>()(vmin, vmax);
+	IfcVector2 vmin, vmax;
+	MinMaxChooser<IfcVector2>()(vmin, vmax);
 
 	// Move all points into the new coordinate system, collecting min/max verts on the way
-	BOOST_FOREACH(aiVector3D& x, out) {
-		const aiVector3D vv = m * x;
+	BOOST_FOREACH(IfcVector3& x, out) {
+		const IfcVector3 vv = m * x;
 
 		// keep Z offset in the plane coordinate system. Ignoring precision issues
 		// (which  are present, of course), this should be the same value for
@@ -1149,10 +1149,10 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 		// }
 
 		coord = vv.z;
-		vmin = std::min(aiVector2D(vv.x, vv.y), vmin);
-		vmax = std::max(aiVector2D(vv.x, vv.y), vmax);
+		vmin = std::min(IfcVector2(vv.x, vv.y), vmin);
+		vmax = std::max(IfcVector2(vv.x, vv.y), vmax);
 
-		contour_flat.push_back(aiVector2D(vv.x,vv.y));
+		contour_flat.push_back(IfcVector2(vv.x,vv.y));
 	}
 
 	// With the current code in DerivePlaneCoordinateSpace, 
@@ -1160,7 +1160,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 	// but here we won't rely on this.
 
 	vmax -= vmin;
-	BOOST_FOREACH(aiVector2D& vv, contour_flat) {
+	BOOST_FOREACH(IfcVector2& vv, contour_flat) {
 		vv.x  = (vv.x - vmin.x) / vmax.x;
 		vv.y  = (vv.y - vmin.y) / vmax.y;
 	}
@@ -1170,31 +1170,31 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 	std::vector< BoundingBox > bbs;
 	XYSortedField field;
 
-	std::vector< std::vector<aiVector2D> > contours;
+	std::vector< std::vector<IfcVector2> > contours;
 
 	size_t c = 0;
 	BOOST_FOREACH(const TempOpening& t,openings) {
-		const aiVector3D& outernor = nors[c++];
-		const float dot = nor * outernor;
+		const IfcVector3& outernor = nors[c++];
+		const IfcFloat dot = nor * outernor;
 		if (fabs(dot)<1.f-1e-6f) {
 			continue;
 		}
 
-		const std::vector<aiVector3D>& va = t.profileMesh->verts;
+		const std::vector<IfcVector3>& va = t.profileMesh->verts;
 		if(va.size() <= 2) {
 			continue;	
 		}
 
-		aiVector2D vpmin,vpmax;
-		MinMaxChooser<aiVector2D>()(vpmin,vpmax);
+		IfcVector2 vpmin,vpmax;
+		MinMaxChooser<IfcVector2>()(vpmin,vpmax);
 
-		contours.push_back(std::vector<aiVector2D>());
-		std::vector<aiVector2D>& contour = contours.back();
+		contours.push_back(std::vector<IfcVector2>());
+		std::vector<IfcVector2>& contour = contours.back();
 
-		BOOST_FOREACH(const aiVector3D& x, t.profileMesh->verts) {
-			const aiVector3D v = m * x;
+		BOOST_FOREACH(const IfcVector3& x, t.profileMesh->verts) {
+			const IfcVector3 v = m * x;
 			
-			aiVector2D vv(v.x, v.y);
+			IfcVector2 vv(v.x, v.y);
 
 			// rescale
 			vv.x  = (vv.x - vmin.x) / vmax.x;
@@ -1231,12 +1231,12 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 		return false;
 	}
 
-	std::vector<aiVector2D> outflat;
+	std::vector<IfcVector2> outflat;
 	outflat.reserve(openings.size()*4);
-	QuadrifyPart(aiVector2D(0.f,0.f),aiVector2D(1.f,1.f),field,bbs,outflat);
+	QuadrifyPart(IfcVector2(0.f,0.f),IfcVector2(1.f,1.f),field,bbs,outflat);
 	ai_assert(!(outflat.size() % 4));
 
-	std::vector<aiVector3D> vold;
+	std::vector<IfcVector3> vold;
 	std::vector<unsigned int> iold;
 
 	vold.reserve(outflat.size());
@@ -1251,7 +1251,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 
 		ClipperLib::Polygon clip;
 		clip.reserve(contour_flat.size());
-		BOOST_FOREACH(const aiVector2D& pip, contour_flat) {
+		BOOST_FOREACH(const IfcVector2& pip, contour_flat) {
 			clip.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
 		}
 
@@ -1264,7 +1264,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 		// previous steps
 		subject.reserve(4);
 		size_t cnt = 0;
-		BOOST_FOREACH(const aiVector2D& pip, outflat) {
+		BOOST_FOREACH(const IfcVector2& pip, outflat) {
 			subject.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
 			if (!(++cnt % 4)) {
 				if (!ClipperLib::Orientation(subject)) {
@@ -1279,7 +1279,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 				BOOST_FOREACH(const ClipperLib::ExPolygon& ex, clipped) {
 					iold.push_back(ex.outer.size());
 					BOOST_FOREACH(const ClipperLib::IntPoint& point, ex.outer) {
-						vold.push_back( minv * aiVector3D(
+						vold.push_back( minv * IfcVector3(
 							vmin.x + from_int64_f(point.X) * vmax.x, 
 							vmin.y + from_int64_f(point.Y) * vmax.y,
 							coord));
@@ -1300,8 +1300,8 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 
 		iold.resize(outflat.size()/4,4);
 
-		BOOST_FOREACH(const aiVector2D& vproj, outflat) {
-			const aiVector3D v3 = minv * aiVector3D(vmin.x + vproj.x * vmax.x, vmin.y + vproj.y * vmax.y,coord);
+		BOOST_FOREACH(const IfcVector2& vproj, outflat) {
+			const IfcVector3 v3 = minv * IfcVector3(vmin.x + vproj.x * vmax.x, vmin.y + vproj.y * vmax.y,coord);
 			vold.push_back(v3);
 		}
 	}
@@ -1325,7 +1325,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 		return;
 	}
 
-	aiVector3D dir;
+	IfcVector3 dir;
 	ConvertDirection(dir,solid.ExtrudedDirection);
 
 	dir *= solid.Depth;
@@ -1334,7 +1334,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 	// the underlying profile, extrude along the given axis, forming new
 	// triangles.
 	
-	std::vector<aiVector3D>& in = meshout.verts;
+	std::vector<IfcVector3>& in = meshout.verts;
 	const size_t size=in.size();
 
 	const bool has_area = solid.SweptArea->ProfileType == "AREA" && size>2;
@@ -1349,16 +1349,16 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 	result.vertcnt.reserve(meshout.vertcnt.size()+2);
 
 	// First step: transform all vertices into the target coordinate space
-	aiMatrix4x4 trafo;
+	IfcMatrix4 trafo;
 	ConvertAxisPlacement(trafo, solid.Position);
-	BOOST_FOREACH(aiVector3D& v,in) {
+	BOOST_FOREACH(IfcVector3& v,in) {
 		v *= trafo;
 	}
 	
-	aiVector3D min = in[0];
-	dir *= aiMatrix3x3(trafo);
+	IfcVector3 min = in[0];
+	dir *= IfcMatrix3(trafo);
 
-	std::vector<aiVector3D> nors;
+	std::vector<IfcVector3> nors;
 	const bool openings = !!conv.apply_openings && conv.apply_openings->size();
 	
 	// Compute the normal vectors for all opening polygons as a prerequisite
@@ -1378,7 +1378,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 			TempMesh& bounds = *t.profileMesh.get();
 		
 			if (bounds.verts.size() <= 2) {
-				nors.push_back(aiVector3D());
+				nors.push_back(IfcVector3());
 				continue;
 			}
 			nors.push_back(((bounds.verts[2]-bounds.verts[0])^(bounds.verts[1]-bounds.verts[0]) ).Normalize());
@@ -1388,7 +1388,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 
 	TempMesh temp;
 	TempMesh& curmesh = openings ? temp : result;
-	std::vector<aiVector3D>& out = curmesh.verts;
+	std::vector<IfcVector3>& out = curmesh.verts;
  
 	size_t sides_with_openings = 0;
 	for(size_t i = 0; i < size; ++i) {
@@ -1416,7 +1416,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 
 		for(size_t n = 0; n < 2; ++n) {
 			for(size_t i = size; i--; ) {
-				out.push_back(in[i]+(n?dir:aiVector3D()));
+				out.push_back(in[i]+(n?dir:IfcVector3()));
 			}
 
 			curmesh.vertcnt.push_back(size);
@@ -1451,13 +1451,13 @@ void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout, Co
 			boost::shared_ptr<TempMesh> meshtmp(new TempMesh());
 			ProcessProfile(swept.SweptArea,*meshtmp,conv);
 
-			aiMatrix4x4 m;
+			IfcMatrix4 m;
 			ConvertAxisPlacement(m,solid->Position);
 			meshtmp->Transform(m);
 
-			aiVector3D dir;
+			IfcVector3 dir;
 			ConvertDirection(dir,solid->ExtrudedDirection);
-			conv.collect_openings->push_back(TempOpening(solid, aiMatrix3x3(m) * (dir*solid->Depth),meshtmp));
+			conv.collect_openings->push_back(TempOpening(solid, IfcMatrix3(m) * (dir*solid->Depth),meshtmp));
 			return;
 		}
 
@@ -1480,16 +1480,16 @@ enum Intersect {
 };
 
 // ------------------------------------------------------------------------------------------------
-Intersect IntersectSegmentPlane(const aiVector3D& p,const aiVector3D& n, const aiVector3D& e0, const aiVector3D& e1, aiVector3D& out) 
+Intersect IntersectSegmentPlane(const IfcVector3& p,const IfcVector3& n, const IfcVector3& e0, const IfcVector3& e1, IfcVector3& out) 
 {
-	const aiVector3D pdelta = e0 - p, seg = e1-e0;
-	const float dotOne = n*seg, dotTwo = -(n*pdelta);
+	const IfcVector3 pdelta = e0 - p, seg = e1-e0;
+	const IfcFloat dotOne = n*seg, dotTwo = -(n*pdelta);
 
 	if (fabs(dotOne) < 1e-6) {
 		return fabs(dotTwo) < 1e-6f ? Intersect_LiesOnPlane : Intersect_No;
 	}
 
-	const float t = dotTwo/dotOne;
+	const IfcFloat t = dotTwo/dotOne;
 	// t must be in [0..1] if the intersection point is within the given segment
 	if (t > 1.f || t < 0.f) {
 		return Intersect_No;
@@ -1532,7 +1532,7 @@ void ProcessBoolean(const IfcBooleanResult& boolean, TempMesh& result, Conversio
 		}
 
 		// extract plane base position vector and normal vector
-		aiVector3D p,n(0.f,0.f,1.f);
+		IfcVector3 p,n(0.f,0.f,1.f);
 		if (plane->Position->Axis) {
 			ConvertDirection(n,plane->Position->Axis.Get());
 		}
@@ -1543,8 +1543,8 @@ void ProcessBoolean(const IfcBooleanResult& boolean, TempMesh& result, Conversio
 		}
 
 		// clip the current contents of `meshout` against the plane we obtained from the second operand
-		const std::vector<aiVector3D>& in = meshout.verts;
-		std::vector<aiVector3D>& outvert = result.verts;
+		const std::vector<IfcVector3>& in = meshout.verts;
+		std::vector<IfcVector3>& outvert = result.verts;
 		std::vector<unsigned int>::const_iterator begin=meshout.vertcnt.begin(), end=meshout.vertcnt.end(), iit;
 
 		outvert.reserve(in.size());
@@ -1555,10 +1555,10 @@ void ProcessBoolean(const IfcBooleanResult& boolean, TempMesh& result, Conversio
 
 			unsigned int newcount = 0;
 			for(unsigned int i = 0; i < *iit; ++i) {
-				const aiVector3D& e0 = in[vidx+i], e1 = in[vidx+(i+1)%*iit];
+				const IfcVector3& e0 = in[vidx+i], e1 = in[vidx+(i+1)%*iit];
 
 				// does the next segment intersect the plane?
-				aiVector3D isectpos;
+				IfcVector3 isectpos;
 				const Intersect isect = IntersectSegmentPlane(p,n,e0,e1,isectpos);
 				if (isect == Intersect_No || isect == Intersect_LiesOnPlane) {
 					if ( (e0-p).Normalize()*n > 0 ) {
@@ -1585,17 +1585,17 @@ void ProcessBoolean(const IfcBooleanResult& boolean, TempMesh& result, Conversio
 				continue;
 			}
 
-			aiVector3D vmin,vmax;
+			IfcVector3 vmin,vmax;
 			ArrayBounds(&*(outvert.end()-newcount),newcount,vmin,vmax);
 
-			// filter our double points - those may happen if a point lies
-			// directly on the intersection line. However, due to float
+			// filter our IfcFloat points - those may happen if a point lies
+			// directly on the intersection line. However, due to IfcFloat
 			// precision a bitwise comparison is not feasible to detect
 			// this case.
-			const float epsilon = (vmax-vmin).SquareLength() / 1e6f;
+			const IfcFloat epsilon = (vmax-vmin).SquareLength() / 1e6f;
 			FuzzyVectorCompare fz(epsilon);
 
-			std::vector<aiVector3D>::iterator e = std::unique( outvert.end()-newcount, outvert.end(), fz );
+			std::vector<IfcVector3>::iterator e = std::unique( outvert.end()-newcount, outvert.end(), fz );
 			if (e != outvert.end()) {
 				newcount -= static_cast<unsigned int>(std::distance(e,outvert.end()));
 				outvert.erase(e,outvert.end());

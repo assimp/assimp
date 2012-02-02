@@ -54,7 +54,7 @@ namespace Assimp {
 void ProcessPolyLine(const IfcPolyline& def, TempMesh& meshout, ConversionData& /*conv*/)
 {
 	// this won't produce a valid mesh, it just spits out a list of vertices
-	aiVector3D t;
+	IfcVector3 t;
 	BOOST_FOREACH(const IfcCartesianPoint& cp, def.Points) {
 		ConvertCartesianPoint(t,cp);
 		meshout.verts.push_back(t);
@@ -104,13 +104,13 @@ void ProcessOpenProfile(const IfcArbitraryOpenProfileDef& def, TempMesh& meshout
 void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh& meshout, ConversionData& conv)
 {
 	if(const IfcRectangleProfileDef* const cprofile = def.ToPtr<IfcRectangleProfileDef>()) {
-		const float x = cprofile->XDim*0.5f, y = cprofile->YDim*0.5f;
+		const IfcFloat x = cprofile->XDim*0.5f, y = cprofile->YDim*0.5f;
 
 		meshout.verts.reserve(meshout.verts.size()+4);
-		meshout.verts.push_back( aiVector3D( x, y, 0.f ));
-		meshout.verts.push_back( aiVector3D(-x, y, 0.f ));
-		meshout.verts.push_back( aiVector3D(-x,-y, 0.f ));
-		meshout.verts.push_back( aiVector3D( x,-y, 0.f ));
+		meshout.verts.push_back( IfcVector3( x, y, 0.f ));
+		meshout.verts.push_back( IfcVector3(-x, y, 0.f ));
+		meshout.verts.push_back( IfcVector3(-x,-y, 0.f ));
+		meshout.verts.push_back( IfcVector3( x,-y, 0.f ));
 		meshout.vertcnt.push_back(4);
 	}
 	else if( const IfcCircleProfileDef* const circle = def.ToPtr<IfcCircleProfileDef>()) {
@@ -118,13 +118,13 @@ void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh&
 			// TODO
 		}
 		const size_t segments = 32;
-		const float delta = AI_MATH_TWO_PI_F/segments, radius = circle->Radius;
+		const IfcFloat delta = AI_MATH_TWO_PI_F/segments, radius = circle->Radius;
 
 		meshout.verts.reserve(segments);
 
-		float angle = 0.f;
+		IfcFloat angle = 0.f;
 		for(size_t i = 0; i < segments; ++i, angle += delta) {
-			meshout.verts.push_back( aiVector3D( cos(angle)*radius, sin(angle)*radius, 0.f ));
+			meshout.verts.push_back( IfcVector3( cos(angle)*radius, sin(angle)*radius, 0.f ));
 		}
 
 		meshout.vertcnt.push_back(segments);
@@ -134,7 +134,7 @@ void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh&
 		return;
 	}
 
-	aiMatrix4x4 trafo;
+	IfcMatrix4 trafo;
 	ConvertAxisPlacement(trafo, *def.Position);
 	meshout.Transform(trafo);
 }

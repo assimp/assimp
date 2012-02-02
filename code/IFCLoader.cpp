@@ -228,7 +228,7 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 
 	// apply world coordinate system (which includes the scaling to convert to meters and a -90 degrees rotation around x)
 	aiMatrix4x4 scale, rot;
-	aiMatrix4x4::Scaling(aiVector3D(conv.len_scale,conv.len_scale,conv.len_scale),scale);
+	aiMatrix4x4::Scaling(static_cast<aiVector3D>(IfcVector3(conv.len_scale)),scale);
 	aiMatrix4x4::RotationX(-AI_MATH_HALF_PI_F,rot);
 
 	pScene->mRootNode->mTransformation = rot * scale * conv.wcs * pScene->mRootNode->mTransformation;
@@ -356,10 +356,10 @@ bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector<
 	nd->mName.Set("IfcMappedItem");
 		
 	// handle the Cartesian operator
-	aiMatrix4x4 m;
+	IfcMatrix4 m;
 	ConvertTransformOperator(m, *mapped.MappingTarget);
 
-	aiMatrix4x4 msrc;
+	IfcMatrix4 msrc;
 	ConvertAxisPlacement(msrc,*mapped.MappingSource->MappingOrigin,conv);
 
 	msrc = m*msrc;
@@ -367,7 +367,7 @@ bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector<
 	std::vector<unsigned int> meshes;
 	const size_t old_openings = conv.collect_openings ? conv.collect_openings->size() : 0;
 	if (conv.apply_openings) {
-		aiMatrix4x4 minv = msrc;
+		IfcMatrix4 minv = msrc;
 		minv.Inverse();
 		BOOST_FOREACH(TempOpening& open,*conv.apply_openings){
 			open.Transform(minv);
@@ -401,7 +401,7 @@ bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector<
 		}
 	}
 
-	nd->mTransformation =  nd_src->mTransformation * msrc;
+	nd->mTransformation =  nd_src->mTransformation * static_cast<aiMatrix4x4>( msrc );
 	subnodes_src.push_back(nd.release());
 
 	return true;
@@ -543,7 +543,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 
 	std::vector<TempOpening> openings;
 
-	aiMatrix4x4 myInv;
+	IfcMatrix4 myInv;
 	bool didinv = false;
 
 	// convert everything contained directly within this structure,
@@ -733,7 +733,7 @@ void ProcessSpatialStructures(ConversionData& conv)
 void MakeTreeRelative(aiNode* start, const aiMatrix4x4& combined)
 {
 	// combined is the parent's absolute transformation matrix
-	aiMatrix4x4 old = start->mTransformation;
+	const aiMatrix4x4 old = start->mTransformation;
 
 	if (!combined.IsIdentity()) {
 		start->mTransformation = aiMatrix4x4(combined).Inverse() * start->mTransformation;
@@ -748,7 +748,7 @@ void MakeTreeRelative(aiNode* start, const aiMatrix4x4& combined)
 // ------------------------------------------------------------------------------------------------
 void MakeTreeRelative(ConversionData& conv)
 {
-	MakeTreeRelative(conv.out->mRootNode,aiMatrix4x4());
+	MakeTreeRelative(conv.out->mRootNode,IfcMatrix4());
 }
 
 } // !anon

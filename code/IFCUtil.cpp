@@ -52,12 +52,12 @@ namespace Assimp {
 	namespace IFC {
 
 // ------------------------------------------------------------------------------------------------
-void TempOpening::Transform(const aiMatrix4x4& mat) 
+void TempOpening::Transform(const IfcMatrix4& mat) 
 {
 	if(profileMesh) {
 		profileMesh->Transform(mat);
 	}
-	extrusionDir *= aiMatrix3x3(mat);
+	extrusionDir *= IfcMatrix3(mat);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -107,17 +107,17 @@ void TempMesh::Clear()
 }
 
 // ------------------------------------------------------------------------------------------------
-void TempMesh::Transform(const aiMatrix4x4& mat) 
+void TempMesh::Transform(const IfcMatrix4& mat) 
 {
-	BOOST_FOREACH(aiVector3D& v, verts) {
+	BOOST_FOREACH(IfcVector3& v, verts) {
 		v *= mat;
 	}
 }
 
 // ------------------------------------------------------------------------------
-aiVector3D TempMesh::Center() const
+IfcVector3 TempMesh::Center() const
 {
-	return std::accumulate(verts.begin(),verts.end(),aiVector3D(0.f,0.f,0.f)) / static_cast<float>(verts.size());
+	return std::accumulate(verts.begin(),verts.end(),IfcVector3()) / static_cast<IfcFloat>(verts.size());
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -132,32 +132,32 @@ void TempMesh::RemoveAdjacentDuplicates()
 {
 
 	bool drop = false;
-	std::vector<aiVector3D>::iterator base = verts.begin();
+	std::vector<IfcVector3>::iterator base = verts.begin();
 	BOOST_FOREACH(unsigned int& cnt, vertcnt) {
 		if (cnt < 2){
 			base += cnt;
 			continue;
 		}
 
-		aiVector3D vmin,vmax;
+		IfcVector3 vmin,vmax;
 		ArrayBounds(&*base, cnt ,vmin,vmax);
 
 
-		const float epsilon = (vmax-vmin).SquareLength() / 1e9f;
-		//const float dotepsilon = 1e-9;
+		const IfcFloat epsilon = (vmax-vmin).SquareLength() / static_cast<IfcFloat>(1e9);
+		//const IfcFloat dotepsilon = 1e-9;
 
 		//// look for vertices that lie directly on the line between their predecessor and their 
 		//// successor and replace them with either of them.
 
 		//for(size_t i = 0; i < cnt; ++i) {
-		//	aiVector3D& v1 = *(base+i), &v0 = *(base+(i?i-1:cnt-1)), &v2 = *(base+(i+1)%cnt);
-		//	const aiVector3D& d0 = (v1-v0), &d1 = (v2-v1);
-		//	const float l0 = d0.SquareLength(), l1 = d1.SquareLength();
+		//	IfcVector3& v1 = *(base+i), &v0 = *(base+(i?i-1:cnt-1)), &v2 = *(base+(i+1)%cnt);
+		//	const IfcVector3& d0 = (v1-v0), &d1 = (v2-v1);
+		//	const IfcFloat l0 = d0.SquareLength(), l1 = d1.SquareLength();
 		//	if (!l0 || !l1) {
 		//		continue;
 		//	}
 
-		//	const float d = (d0/sqrt(l0))*(d1/sqrt(l1));
+		//	const IfcFloat d = (d0/sqrt(l0))*(d1/sqrt(l1));
 
 		//	if ( d >= 1.f-dotepsilon ) {
 		//		v1 = v0;
@@ -171,7 +171,7 @@ void TempMesh::RemoveAdjacentDuplicates()
 		// drop any identical, adjacent vertices. this pass will collect the dropouts
 		// of the previous pass as a side-effect.
 		FuzzyVectorCompare fz(epsilon);
-		std::vector<aiVector3D>::iterator end = base+cnt, e = std::unique( base, end, fz );
+		std::vector<IfcVector3>::iterator end = base+cnt, e = std::unique( base, end, fz );
 		if (e != end) {
 			cnt -= static_cast<unsigned int>(std::distance(e, end));
 			verts.erase(e,end);
@@ -200,7 +200,7 @@ bool IsTrue(const EXPRESS::BOOLEAN& in)
 }
 
 // ------------------------------------------------------------------------------------------------
-float ConvertSIPrefix(const std::string& prefix)
+IfcFloat ConvertSIPrefix(const std::string& prefix)
 {
 	if (prefix == "EXA") {
 		return 1e18f;
@@ -257,7 +257,7 @@ float ConvertSIPrefix(const std::string& prefix)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertColor(aiColor4D& out, const IfcColourRgb& in)
+void ConvertColor(IfcColor4& out, const IfcColourRgb& in)
 {
 	out.r = in.Red;
 	out.g = in.Green;
@@ -266,7 +266,7 @@ void ConvertColor(aiColor4D& out, const IfcColourRgb& in)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertColor(aiColor4D& out, const IfcColourOrFactor& in,ConversionData& conv,const aiColor4D* base)
+void ConvertColor(IfcColor4& out, const IfcColourOrFactor& in,ConversionData& conv,const IfcColor4* base)
 {
 	if (const EXPRESS::REAL* const r = in.ToPtr<EXPRESS::REAL>()) {
 		out.r = out.g = out.b = *r;
@@ -287,29 +287,29 @@ void ConvertColor(aiColor4D& out, const IfcColourOrFactor& in,ConversionData& co
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertCartesianPoint(aiVector3D& out, const IfcCartesianPoint& in)
+void ConvertCartesianPoint(IfcVector3& out, const IfcCartesianPoint& in)
 {
-	out = aiVector3D();
+	out = IfcVector3();
 	for(size_t i = 0; i < in.Coordinates.size(); ++i) {
 		out[i] = in.Coordinates[i];
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertVector(aiVector3D& out, const IfcVector& in)
+void ConvertVector(IfcVector3& out, const IfcVector& in)
 {
 	ConvertDirection(out,in.Orientation);
 	out *= in.Magnitude;
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertDirection(aiVector3D& out, const IfcDirection& in)
+void ConvertDirection(IfcVector3& out, const IfcDirection& in)
 {
-	out = aiVector3D();
+	out = IfcVector3();
 	for(size_t i = 0; i < in.DirectionRatios.size(); ++i) {
 		out[i] = in.DirectionRatios[i];
 	}
-	const float len = out.Length();
+	const IfcFloat len = out.Length();
 	if (len<1e-6) {
 		IFCImporter::LogWarn("direction vector magnitude too small, normalization would result in a division by zero");
 		return;
@@ -318,7 +318,7 @@ void ConvertDirection(aiVector3D& out, const IfcDirection& in)
 }
 
 // ------------------------------------------------------------------------------------------------
-void AssignMatrixAxes(aiMatrix4x4& out, const aiVector3D& x, const aiVector3D& y, const aiVector3D& z)
+void AssignMatrixAxes(IfcMatrix4& out, const IfcVector3& x, const IfcVector3& y, const IfcVector3& z)
 {
 	out.a1 = x.x;
 	out.b1 = x.y;
@@ -334,12 +334,12 @@ void AssignMatrixAxes(aiMatrix4x4& out, const aiVector3D& x, const aiVector3D& y
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertAxisPlacement(aiMatrix4x4& out, const IfcAxis2Placement3D& in)
+void ConvertAxisPlacement(IfcMatrix4& out, const IfcAxis2Placement3D& in)
 {
-	aiVector3D loc;
+	IfcVector3 loc;
 	ConvertCartesianPoint(loc,in.Location);
 
-	aiVector3D z(0.f,0.f,1.f),r(1.f,0.f,0.f),x;
+	IfcVector3 z(0.f,0.f,1.f),r(1.f,0.f,0.f),x;
 
 	if (in.Axis) { 
 		ConvertDirection(z,*in.Axis.Get());
@@ -348,47 +348,47 @@ void ConvertAxisPlacement(aiMatrix4x4& out, const IfcAxis2Placement3D& in)
 		ConvertDirection(r,*in.RefDirection.Get());
 	}
 
-	aiVector3D v = r.Normalize();
-	aiVector3D tmpx = z * (v*z);
+	IfcVector3 v = r.Normalize();
+	IfcVector3 tmpx = z * (v*z);
 
 	x = (v-tmpx).Normalize();
-	aiVector3D y = (z^x);
+	IfcVector3 y = (z^x);
 
-	aiMatrix4x4::Translation(loc,out);
+	IfcMatrix4::Translation(loc,out);
 	AssignMatrixAxes(out,x,y,z);
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertAxisPlacement(aiMatrix4x4& out, const IfcAxis2Placement2D& in)
+void ConvertAxisPlacement(IfcMatrix4& out, const IfcAxis2Placement2D& in)
 {
-	aiVector3D loc;
+	IfcVector3 loc;
 	ConvertCartesianPoint(loc,in.Location);
 
-	aiVector3D x(1.f,0.f,0.f);
+	IfcVector3 x(1.f,0.f,0.f);
 	if (in.RefDirection) {
 		ConvertDirection(x,*in.RefDirection.Get());
 	}
 
-	const aiVector3D y = aiVector3D(x.y,-x.x,0.f);
+	const IfcVector3 y = IfcVector3(x.y,-x.x,0.f);
 
-	aiMatrix4x4::Translation(loc,out);
-	AssignMatrixAxes(out,x,y,aiVector3D(0.f,0.f,1.f));
+	IfcMatrix4::Translation(loc,out);
+	AssignMatrixAxes(out,x,y,IfcVector3(0.f,0.f,1.f));
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertAxisPlacement(aiVector3D& axis, aiVector3D& pos, const IfcAxis1Placement& in)
+void ConvertAxisPlacement(IfcVector3& axis, IfcVector3& pos, const IfcAxis1Placement& in)
 {
 	ConvertCartesianPoint(pos,in.Location);
 	if (in.Axis) {
 		ConvertDirection(axis,in.Axis.Get());
 	}
 	else {
-		axis = aiVector3D(0.f,0.f,1.f);
+		axis = IfcVector3(0.f,0.f,1.f);
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertAxisPlacement(aiMatrix4x4& out, const IfcAxis2Placement& in, ConversionData& conv)
+void ConvertAxisPlacement(IfcMatrix4& out, const IfcAxis2Placement& in, ConversionData& conv)
 {
 	if(const IfcAxis2Placement3D* pl3 = in.ResolveSelectPtr<IfcAxis2Placement3D>(conv.db)) {
 		ConvertAxisPlacement(out,*pl3);
@@ -402,12 +402,12 @@ void ConvertAxisPlacement(aiMatrix4x4& out, const IfcAxis2Placement& in, Convers
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertTransformOperator(aiMatrix4x4& out, const IfcCartesianTransformationOperator& op)
+void ConvertTransformOperator(IfcMatrix4& out, const IfcCartesianTransformationOperator& op)
 {
-	aiVector3D loc;
+	IfcVector3 loc;
 	ConvertCartesianPoint(loc,op.LocalOrigin);
 
-	aiVector3D x(1.f,0.f,0.f),y(0.f,1.f,0.f),z(0.f,0.f,1.f);
+	IfcVector3 x(1.f,0.f,0.f),y(0.f,1.f,0.f),z(0.f,0.f,1.f);
 	if (op.Axis1) {
 		ConvertDirection(x,*op.Axis1.Get());
 	}
@@ -420,24 +420,24 @@ void ConvertTransformOperator(aiMatrix4x4& out, const IfcCartesianTransformation
 		}
 	}
 
-	aiMatrix4x4 locm;
-	aiMatrix4x4::Translation(loc,locm);	
+	IfcMatrix4 locm;
+	IfcMatrix4::Translation(loc,locm);	
 	AssignMatrixAxes(out,x,y,z);
 
 
-	aiVector3D vscale;
+	IfcVector3 vscale;
 	if (const IfcCartesianTransformationOperator3DnonUniform* nuni = op.ToPtr<IfcCartesianTransformationOperator3DnonUniform>()) {
 		vscale.x = nuni->Scale?op.Scale.Get():1.f;
 		vscale.y = nuni->Scale2?nuni->Scale2.Get():1.f;
 		vscale.z = nuni->Scale3?nuni->Scale3.Get():1.f;
 	}
 	else {
-		const float sc = op.Scale?op.Scale.Get():1.f;
-		vscale = aiVector3D(sc,sc,sc);
+		const IfcFloat sc = op.Scale?op.Scale.Get():1.f;
+		vscale = IfcVector3(sc,sc,sc);
 	}
 
-	aiMatrix4x4 s;
-	aiMatrix4x4::Scaling(vscale,s);
+	IfcMatrix4 s;
+	IfcMatrix4::Scaling(vscale,s);
 
 	out = locm * out * s;
 }

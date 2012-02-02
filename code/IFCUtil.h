@@ -51,6 +51,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace IFC {
 
+	typedef float IfcFloat;
+
+	// IfcFloat-precision math data types
+	typedef aiVector2t<IfcFloat> IfcVector2;
+	typedef aiVector3t<IfcFloat> IfcVector3;
+	typedef aiMatrix4x4t<IfcFloat> IfcMatrix4;
+	typedef aiMatrix3x3t<IfcFloat> IfcMatrix3;
+	typedef aiColor4t<IfcFloat> IfcColor4; 
+
+
 // helper for std::for_each to delete all heap-allocated items in a container
 template<typename T>
 struct delete_fun
@@ -67,11 +77,11 @@ struct TempMesh;
 struct TempOpening 
 {
 	const IFC::IfcExtrudedAreaSolid* solid;
-	aiVector3D extrusionDir;
+	IfcVector3 extrusionDir;
 	boost::shared_ptr<TempMesh> profileMesh;
 
 	// ------------------------------------------------------------------------------
-	TempOpening(const IFC::IfcExtrudedAreaSolid* solid,aiVector3D extrusionDir,boost::shared_ptr<TempMesh> profileMesh)
+	TempOpening(const IFC::IfcExtrudedAreaSolid* solid,IfcVector3 extrusionDir,boost::shared_ptr<TempMesh> profileMesh)
 		: solid(solid)
 		, extrusionDir(extrusionDir)
 		, profileMesh(profileMesh)
@@ -79,7 +89,7 @@ struct TempOpening
 	}
 
 	// ------------------------------------------------------------------------------
-	void Transform(const aiMatrix4x4& mat); // defined later since TempMesh is not complete yet
+	void Transform(const IfcMatrix4& mat); // defined later since TempMesh is not complete yet
 };
 
 
@@ -104,14 +114,14 @@ struct ConversionData
 		std::for_each(materials.begin(),materials.end(),delete_fun<aiMaterial>());
 	}
 
-	float len_scale, angle_scale;
+	IfcFloat len_scale, angle_scale;
 	bool plane_angle_in_radians;
 
 	const STEP::DB& db;
 	const IFC::IfcProject& proj;
 	aiScene* out;
 
-	aiMatrix4x4 wcs;
+	IfcMatrix4 wcs;
 	std::vector<aiMesh*> meshes;
 	std::vector<aiMaterial*> materials;
 
@@ -135,12 +145,12 @@ struct ConversionData
 // ------------------------------------------------------------------------------------------------
 struct FuzzyVectorCompare {
 
-	FuzzyVectorCompare(float epsilon) : epsilon(epsilon) {}
-	bool operator()(const aiVector3D& a, const aiVector3D& b) {
+	FuzzyVectorCompare(IfcFloat epsilon) : epsilon(epsilon) {}
+	bool operator()(const IfcVector3& a, const IfcVector3& b) {
 		return fabs((a-b).SquareLength()) < epsilon;
 	}
 
-	const float epsilon;
+	const IfcFloat epsilon;
 };
 
 
@@ -149,14 +159,14 @@ struct FuzzyVectorCompare {
 // ------------------------------------------------------------------------------------------------
 struct TempMesh
 {
-	std::vector<aiVector3D> verts;
+	std::vector<IfcVector3> verts;
 	std::vector<unsigned int> vertcnt;
 
 	// utilities
 	aiMesh* ToMesh();
 	void Clear();
-	void Transform(const aiMatrix4x4& mat);
-	aiVector3D Center() const;
+	void Transform(const IfcMatrix4& mat);
+	IfcVector3 Center() const;
 	void Append(const TempMesh& other);
 	void RemoveAdjacentDuplicates();
 };
@@ -166,19 +176,19 @@ struct TempMesh
 
 
 // conversion routines for common IFC entities, implemented in IFCUtil.cpp
-void ConvertColor(aiColor4D& out, const IfcColourRgb& in);
-void ConvertColor(aiColor4D& out, const IfcColourOrFactor& in,ConversionData& conv,const aiColor4D* base);
-void ConvertCartesianPoint(aiVector3D& out, const IfcCartesianPoint& in);
-void ConvertDirection(aiVector3D& out, const IfcDirection& in);
-void ConvertVector(aiVector3D& out, const IfcVector& in);
-void AssignMatrixAxes(aiMatrix4x4& out, const aiVector3D& x, const aiVector3D& y, const aiVector3D& z);
-void ConvertAxisPlacement(aiMatrix4x4& out, const IfcAxis2Placement3D& in);
-void ConvertAxisPlacement(aiMatrix4x4& out, const IfcAxis2Placement2D& in);
-void ConvertAxisPlacement(aiVector3D& axis, aiVector3D& pos, const IFC::IfcAxis1Placement& in);
-void ConvertAxisPlacement(aiMatrix4x4& out, const IfcAxis2Placement& in, ConversionData& conv);
-void ConvertTransformOperator(aiMatrix4x4& out, const IfcCartesianTransformationOperator& op);
+void ConvertColor(IfcColor4& out, const IfcColourRgb& in);
+void ConvertColor(IfcColor4& out, const IfcColourOrFactor& in,ConversionData& conv,const IfcColor4* base);
+void ConvertCartesianPoint(IfcVector3& out, const IfcCartesianPoint& in);
+void ConvertDirection(IfcVector3& out, const IfcDirection& in);
+void ConvertVector(IfcVector3& out, const IfcVector& in);
+void AssignMatrixAxes(IfcMatrix4& out, const IfcVector3& x, const IfcVector3& y, const IfcVector3& z);
+void ConvertAxisPlacement(IfcMatrix4& out, const IfcAxis2Placement3D& in);
+void ConvertAxisPlacement(IfcMatrix4& out, const IfcAxis2Placement2D& in);
+void ConvertAxisPlacement(IfcVector3& axis, IfcVector3& pos, const IFC::IfcAxis1Placement& in);
+void ConvertAxisPlacement(IfcMatrix4& out, const IfcAxis2Placement& in, ConversionData& conv);
+void ConvertTransformOperator(IfcMatrix4& out, const IfcCartesianTransformationOperator& op);
 bool IsTrue(const EXPRESS::BOOLEAN& in);
-float ConvertSIPrefix(const std::string& prefix);
+IfcFloat ConvertSIPrefix(const std::string& prefix);
 
 
 // IFCProfile.cpp
@@ -224,7 +234,7 @@ protected:
 
 public:
 
-	typedef std::pair<float,float> ParamRange;
+	typedef std::pair<IfcFloat, IfcFloat> ParamRange;
 
 public:
 
@@ -232,28 +242,28 @@ public:
 	virtual bool IsClosed() const = 0;
 
 	// evaluate the curve at the given parametric position
-	virtual aiVector3D Eval(float p) const = 0;
+	virtual IfcVector3 Eval(IfcFloat p) const = 0;
 
 	// try to match a point on the curve to a given parameter
 	// for self-intersecting curves, the result is not ambiguous and
 	// it is undefined which parameter is returned. 
-	virtual bool ReverseEval(const aiVector3D& val, float& paramOut) const;
+	virtual bool ReverseEval(const IfcVector3& val, IfcFloat& paramOut) const;
 
 	// get the range of the curve (both inclusive).
 	// +inf and -inf are valid return values, the curve is not bounded in such a case.
-	virtual std::pair<float,float> GetParametricRange() const = 0;
-	float GetParametricRangeDelta() const;
+	virtual std::pair<IfcFloat,IfcFloat> GetParametricRange() const = 0;
+	IfcFloat GetParametricRangeDelta() const;
 
 	// estimate the number of sample points that this curve will require
-	virtual size_t EstimateSampleCount(float start,float end) const;
+	virtual size_t EstimateSampleCount(IfcFloat start,IfcFloat end) const;
 
 	// intelligently sample the curve based on the current settings
 	// and append the result to the mesh
-	virtual void SampleDiscrete(TempMesh& out,float start,float end) const;
+	virtual void SampleDiscrete(TempMesh& out,IfcFloat start,IfcFloat end) const;
 
 #ifdef _DEBUG
 	// check if a particular parameter value lies within the well-defined range
-	bool InRange(float) const;
+	bool InRange(IfcFloat) const;
 #endif 
 
 public:

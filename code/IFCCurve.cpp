@@ -64,14 +64,14 @@ public:
 	Conic(const IfcConic& entity, ConversionData& conv) 
 		: Curve(entity,conv)
 	{
-		aiMatrix4x4 trafo;
+		IfcMatrix4 trafo;
 		ConvertAxisPlacement(trafo,*entity.Position,conv);
 
 		// for convenience, extract the matrix rows
-		location = aiVector3D(trafo.a4,trafo.b4,trafo.c4);
-		p[0] = aiVector3D(trafo.a1,trafo.b1,trafo.c1);
-		p[1] = aiVector3D(trafo.a2,trafo.b2,trafo.c2);
-		p[2] = aiVector3D(trafo.a3,trafo.b3,trafo.c3);
+		location = IfcVector3(trafo.a4,trafo.b4,trafo.c4);
+		p[0] = IfcVector3(trafo.a1,trafo.b1,trafo.c1);
+		p[1] = IfcVector3(trafo.a2,trafo.b2,trafo.c2);
+		p[2] = IfcVector3(trafo.a3,trafo.b3,trafo.c3);
 	}
 
 public:
@@ -82,21 +82,21 @@ public:
 	}
 	
 	// --------------------------------------------------
-	size_t EstimateSampleCount(float a, float b) const {
+	size_t EstimateSampleCount(IfcFloat a, IfcFloat b) const {
 		ai_assert(InRange(a) && InRange(b));
 
-		a = fmod(a,360.f);
-		b = fmod(b,360.f);
-		return static_cast<size_t>( fabs(ceil(( b-a)) / conv.settings.conicSamplingAngle) );
+		a = fmod(a,static_cast<IfcFloat>( 360. ));
+		b = fmod(b,static_cast<IfcFloat>( 360. ));
+		return static_cast<size_t>( abs(ceil(( b-a)) / conv.settings.conicSamplingAngle) );
 	}
 
 	// --------------------------------------------------
 	ParamRange GetParametricRange() const {
-		return std::make_pair(0.f,360.f);
+		return std::make_pair(static_cast<IfcFloat>( 0. ), static_cast<IfcFloat>( 360. ));
 	}
 
 protected:
-	aiVector3D location, p[3];
+	IfcVector3 location, p[3];
 };
 
 
@@ -118,7 +118,7 @@ public:
 public:
 
 	// --------------------------------------------------
-	aiVector3D Eval(float u) const {
+	IfcVector3 Eval(IfcFloat u) const {
 		u = -conv.angle_scale * u;
 		return location + entity.Radius*(::cos(u)*p[0] + ::sin(u)*p[1]);
 	}
@@ -146,7 +146,7 @@ public:
 public:
 
 	// --------------------------------------------------
-	aiVector3D Eval(float u) const {
+	IfcVector3 Eval(IfcFloat u) const {
 		u = -conv.angle_scale * u;
 		return location + entity.SemiAxis1*::cos(u)*p[0] + entity.SemiAxis2*::sin(u)*p[1];
 	}
@@ -181,12 +181,12 @@ public:
 	}
 
 	// --------------------------------------------------
-	aiVector3D Eval(float u) const {
+	IfcVector3 Eval(IfcFloat u) const {
 		return p + u*v;
 	}
 
 	// --------------------------------------------------
-	size_t EstimateSampleCount(float a, float b) const {
+	size_t EstimateSampleCount(IfcFloat a, IfcFloat b) const {
 		ai_assert(InRange(a) && InRange(b));
 		// two points are always sufficient for a line segment
 		return a==b ? 1 : 2;
@@ -194,7 +194,7 @@ public:
 
 
 	// --------------------------------------------------
-	void SampleDiscrete(TempMesh& out,float a, float b) const
+	void SampleDiscrete(TempMesh& out,IfcFloat a, IfcFloat b) const
 	{
 		ai_assert(InRange(a) && InRange(b));
 	
@@ -209,14 +209,14 @@ public:
 
 	// --------------------------------------------------
 	ParamRange GetParametricRange() const {
-		const float inf = std::numeric_limits<float>::infinity();
+		const IfcFloat inf = std::numeric_limits<IfcFloat>::infinity();
 
 		return std::make_pair(-inf,+inf);
 	}
 
 private:
 	const IfcLine& entity;
-	aiVector3D p,v;
+	IfcVector3 p,v;
 };
 
 // --------------------------------------------------------------------------------
@@ -262,15 +262,15 @@ public:
 public:
 
 	// --------------------------------------------------
-	aiVector3D Eval(float u) const {
+	IfcVector3 Eval(IfcFloat u) const {
 		if (curves.empty()) {
-			return aiVector3D();
+			return IfcVector3();
 		}
 
-		float acc = 0;
+		IfcFloat acc = 0;
 		BOOST_FOREACH(const CurveEntry& entry, curves) {
 			const ParamRange& range = entry.first->GetParametricRange();
-			const float delta = range.second-range.first;
+			const IfcFloat delta = range.second-range.first;
 			if (u < acc+delta) {
 				return entry.first->Eval( entry.second ? (u-acc) + range.first : range.second-(u-acc));
 			}
@@ -282,16 +282,16 @@ public:
 	}
 
 	// --------------------------------------------------
-	size_t EstimateSampleCount(float a, float b) const {
+	size_t EstimateSampleCount(IfcFloat a, IfcFloat b) const {
 		ai_assert(InRange(a) && InRange(b));
 		size_t cnt = 0;
 
-		float acc = 0;
+		IfcFloat acc = 0;
 		BOOST_FOREACH(const CurveEntry& entry, curves) {
 			const ParamRange& range = entry.first->GetParametricRange();
-			const float delta = range.second-range.first;
+			const IfcFloat delta = range.second-range.first;
 			if (a <= acc+delta && b >= acc) {
-				const float at =  std::max(0.f,a-acc), bt = std::min(delta,b-acc);
+				const IfcFloat at =  std::max(static_cast<IfcFloat>( 0. ),a-acc), bt = std::min(delta,b-acc);
 				cnt += entry.first->EstimateSampleCount( entry.second ? at + range.first : range.second - bt, entry.second ? bt + range.first : range.second - at );
 			}
 
@@ -302,7 +302,7 @@ public:
 	}
 
 	// --------------------------------------------------
-	void SampleDiscrete(TempMesh& out,float a, float b) const
+	void SampleDiscrete(TempMesh& out,IfcFloat a, IfcFloat b) const
 	{
 		ai_assert(InRange(a) && InRange(b));
 
@@ -321,14 +321,14 @@ public:
 
 	// --------------------------------------------------
 	ParamRange GetParametricRange() const {
-		return std::make_pair(0.f,total);
+		return std::make_pair(static_cast<IfcFloat>( 0. ),total);
 	}
 
 private:
 	const IfcCompositeCurve& entity;
 	std::vector< CurveEntry > curves;
 
-	float total;
+	IfcFloat total;
 };
 
 
@@ -356,7 +356,7 @@ public:
 		// claims that they must be identical if both are present.
 		// oh well.
 		bool have_param = false, have_point = false;
-		aiVector3D point;
+		IfcVector3 point;
 		BOOST_FOREACH(const Entry sel,entity.Trim1) {
 			if (const EXPRESS::REAL* const r = sel->ToPtr<EXPRESS::REAL>()) {
 				range.first = *r;
@@ -411,26 +411,26 @@ public:
 public:
 
 	// --------------------------------------------------
-	aiVector3D Eval(float p) const {
+	IfcVector3 Eval(IfcFloat p) const {
 		ai_assert(InRange(p));
 		return base->Eval( TrimParam(p) );
 	}
 
 	// --------------------------------------------------
-	size_t EstimateSampleCount(float a, float b) const {
+	size_t EstimateSampleCount(IfcFloat a, IfcFloat b) const {
 		ai_assert(InRange(a) && InRange(b));
 		return base->EstimateSampleCount(TrimParam(a),TrimParam(b));
 	}
 
 	// --------------------------------------------------
 	ParamRange GetParametricRange() const {
-		return std::make_pair(0.f,maxval);
+		return std::make_pair(static_cast<IfcFloat>( 0. ),maxval);
 	}
 
 private:
 
 	// --------------------------------------------------
-	float TrimParam(float f) const {
+	IfcFloat TrimParam(IfcFloat f) const {
 		return agree_sense ? f + range.first :  range.second - f;
 	}
 
@@ -438,7 +438,7 @@ private:
 private:
 	const IfcTrimmedCurve& entity;
 	ParamRange range;
-	float maxval;
+	IfcFloat maxval;
 	bool agree_sense;
 	bool ok;
 
@@ -461,7 +461,7 @@ public:
 	{
 		points.reserve(entity.Points.size());
 
-		aiVector3D t;
+		IfcVector3 t;
 		BOOST_FOREACH(const IfcCartesianPoint& cp, entity.Points) {
 			ConvertCartesianPoint(t,cp);
 			points.push_back(t);
@@ -471,7 +471,7 @@ public:
 public:
 
 	// --------------------------------------------------
-	aiVector3D Eval(float p) const {
+	IfcVector3 Eval(IfcFloat p) const {
 		ai_assert(InRange(p));
 		
 		const size_t b = static_cast<size_t>(floor(p));  
@@ -479,24 +479,24 @@ public:
 			return points.back();
 		}
 
-		const float d = p-static_cast<float>(b);
-		return points[b+1] * d + points[b] * (1.f-d);
+		const IfcFloat d = p-static_cast<IfcFloat>(b);
+		return points[b+1] * d + points[b] * (static_cast<IfcFloat>( 1. )-d);
 	}
 
 	// --------------------------------------------------
-	size_t EstimateSampleCount(float a, float b) const {
+	size_t EstimateSampleCount(IfcFloat a, IfcFloat b) const {
 		ai_assert(InRange(a) && InRange(b));
 		return static_cast<size_t>( ceil(b) - floor(a) );
 	}
 
 	// --------------------------------------------------
 	ParamRange GetParametricRange() const {
-		return std::make_pair(0.f,static_cast<float>(points.size()-1));
+		return std::make_pair(static_cast<IfcFloat>( 0. ),static_cast<IfcFloat>(points.size()-1));
 	}
 
 private:
 	const IfcPolyline& entity;
-	std::vector<aiVector3D> points;
+	std::vector<IfcVector3> points;
 };
 
 
@@ -540,11 +540,11 @@ Curve* Curve :: Convert(const IFC::IfcCurve& curve,ConversionData& conv)
 
 #ifdef _DEBUG
 // ------------------------------------------------------------------------------------------------
-bool Curve :: InRange(float u) const 
+bool Curve :: InRange(IfcFloat u) const 
 {
 	const ParamRange range = GetParametricRange();
 	if (IsClosed()) {
-		ai_assert(range.first != std::numeric_limits<float>::infinity() && range.second != std::numeric_limits<float>::infinity());
+		ai_assert(range.first != std::numeric_limits<IfcFloat>::infinity() && range.second != std::numeric_limits<IfcFloat>::infinity());
 		u = range.first + fmod(u-range.first,range.second-range.first);
 	}
 	return u >= range.first && u <= range.second;
@@ -552,14 +552,14 @@ bool Curve :: InRange(float u) const
 #endif 
 
 // ------------------------------------------------------------------------------------------------
-float Curve :: GetParametricRangeDelta() const
+IfcFloat Curve :: GetParametricRangeDelta() const
 {
 	const ParamRange& range = GetParametricRange();
 	return range.second - range.first;
 }
 
 // ------------------------------------------------------------------------------------------------
-size_t Curve :: EstimateSampleCount(float a, float b) const
+size_t Curve :: EstimateSampleCount(IfcFloat a, IfcFloat b) const
 {
 	ai_assert(InRange(a) && InRange(b));
 
@@ -568,16 +568,16 @@ size_t Curve :: EstimateSampleCount(float a, float b) const
 }
 
 // ------------------------------------------------------------------------------------------------
-float RecursiveSearch(const Curve* cv, const aiVector3D& val, float a, float b, unsigned int samples, float threshold, unsigned int recurse = 0, unsigned int max_recurse = 15)
+IfcFloat RecursiveSearch(const Curve* cv, const IfcVector3& val, IfcFloat a, IfcFloat b, unsigned int samples, IfcFloat threshold, unsigned int recurse = 0, unsigned int max_recurse = 15)
 {
 	ai_assert(samples>1);
 
-	const float delta = (b-a)/samples, inf = std::numeric_limits<float>::infinity();
-	float min_point[2] = {a,b}, min_diff[2] = {inf,inf};
-	float runner = a;
+	const IfcFloat delta = (b-a)/samples, inf = std::numeric_limits<IfcFloat>::infinity();
+	IfcFloat min_point[2] = {a,b}, min_diff[2] = {inf,inf};
+	IfcFloat runner = a;
 
 	for (unsigned int i = 0; i < samples; ++i, runner += delta) {
-		const float diff = (cv->Eval(runner)-val).SquareLength();
+		const IfcFloat diff = (cv->Eval(runner)-val).SquareLength();
 		if (diff < min_diff[0]) {
 			min_diff[1] = min_diff[0];
 			min_point[1] = min_point[0];
@@ -599,10 +599,10 @@ float RecursiveSearch(const Curve* cv, const aiVector3D& val, float a, float b, 
 	// fix for closed curves to take their wrap-over into account
 	if (cv->IsClosed() && fabs(min_point[0]-min_point[1]) > cv->GetParametricRangeDelta()*0.5  ) {
 		const Curve::ParamRange& range = cv->GetParametricRange();
-		const float wrapdiff = (cv->Eval(range.first)-val).SquareLength();
+		const IfcFloat wrapdiff = (cv->Eval(range.first)-val).SquareLength();
 
 		if (wrapdiff < min_diff[0]) {
-			const float t = min_point[0];
+			const IfcFloat t = min_point[0];
 			min_point[0] = min_point[1] > min_point[0] ? range.first : range.second;
 			 min_point[1] = t;
 		}
@@ -612,14 +612,14 @@ float RecursiveSearch(const Curve* cv, const aiVector3D& val, float a, float b, 
 }
 
 // ------------------------------------------------------------------------------------------------
-bool Curve :: ReverseEval(const aiVector3D& val, float& paramOut) const
+bool Curve :: ReverseEval(const IfcVector3& val, IfcFloat& paramOut) const
 {
 	// note: the following algorithm is not guaranteed to find the 'right' parameter value
 	// in all possible cases, but it will always return at least some value so this function
 	// will never fail in the default implementation.
 
 	// XXX derive threshold from curve topology
-	const float threshold = 1e-4f;
+	const IfcFloat threshold = 1e-4f;
 	const unsigned int samples = 16;
 
 	const ParamRange& range = GetParametricRange();
@@ -629,14 +629,14 @@ bool Curve :: ReverseEval(const aiVector3D& val, float& paramOut) const
 }
 
 // ------------------------------------------------------------------------------------------------
-void Curve :: SampleDiscrete(TempMesh& out,float a, float b) const
+void Curve :: SampleDiscrete(TempMesh& out,IfcFloat a, IfcFloat b) const
 {
 	ai_assert(InRange(a) && InRange(b));
 
 	const size_t cnt = std::max(static_cast<size_t>(0),EstimateSampleCount(a,b));
 	out.verts.reserve( out.verts.size() + cnt );
 
-	float p = a, delta = (b-a)/cnt;
+	IfcFloat p = a, delta = (b-a)/cnt;
 	for(size_t i = 0; i < cnt; ++i, p += delta) {
 		out.verts.push_back(Eval(p));
 	}
@@ -652,7 +652,7 @@ bool BoundedCurve :: IsClosed() const
 void BoundedCurve :: SampleDiscrete(TempMesh& out) const
 {
 	const ParamRange& range = GetParametricRange();
-	ai_assert(range.first != std::numeric_limits<float>::infinity() && range.second != std::numeric_limits<float>::infinity());
+	ai_assert(range.first != std::numeric_limits<IfcFloat>::infinity() && range.second != std::numeric_limits<IfcFloat>::infinity());
 
 	return SampleDiscrete(out,range.first,range.second);
 }

@@ -76,7 +76,7 @@ void FillMaterial(aiMaterial* mat,const IFC::IfcSurfaceStyle* surf,ConversionDat
 	// now see which kinds of surface information are present
 	BOOST_FOREACH(boost::shared_ptr< const IFC::IfcSurfaceStyleElementSelect > sel2, surf->Styles) {
 		if (const IFC::IfcSurfaceStyleShading* shade = sel2->ResolveSelectPtr<IFC::IfcSurfaceStyleShading>(conv.db)) {
-			aiColor4D col_base,col;
+			IfcColor4 col_base,col;
 
 			ConvertColor(col_base, shade->SurfaceColour);
 			mat->AddProperty(&col_base,1, AI_MATKEY_COLOR_DIFFUSE);
@@ -84,7 +84,7 @@ void FillMaterial(aiMaterial* mat,const IFC::IfcSurfaceStyle* surf,ConversionDat
 			if (const IFC::IfcSurfaceStyleRendering* ren = shade->ToPtr<IFC::IfcSurfaceStyleRendering>()) {
 
 				if (ren->Transparency) {
-					const float t = 1.f-ren->Transparency.Get();
+					const IfcFloat t = 1.f-ren->Transparency.Get();
 					mat->AddProperty(&t,1, AI_MATKEY_OPACITY);
 				}
 
@@ -115,7 +115,7 @@ void FillMaterial(aiMaterial* mat,const IFC::IfcSurfaceStyle* surf,ConversionDat
 					if(const EXPRESS::REAL* rt = ren->SpecularHighlight.Get()->ToPtr<EXPRESS::REAL>()) {
 						// at this point we don't distinguish between the two distinct ways of
 						// specifying highlight intensities. leave this to the user.
-						const float e = *rt;
+						const IfcFloat e = *rt;
 						mat->AddProperty(&e,1,AI_MATKEY_SHININESS);
 					}
 					else {
@@ -141,7 +141,7 @@ unsigned int ProcessMaterials(const IFC::IfcRepresentationItem& item, Conversion
 		name.Set("<IFCDefault>");
 		mat->AddProperty(&name,AI_MATKEY_NAME);
 
-		aiColor4D col = aiColor4D(0.6f,0.6f,0.6f,1.0f);
+		IfcColor4 col = IfcColor4(0.6f,0.6f,0.6f,1.0f);
 		mat->AddProperty(&col,1, AI_MATKEY_COLOR_DIFFUSE);
 
 		conv.materials.push_back(mat.release());

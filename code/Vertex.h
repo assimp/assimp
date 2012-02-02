@@ -37,9 +37,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-/** @file Defines a helper class to represent an interleaved vertex */
+/** @file Defines a helper class to represent an interleaved vertex
+  along with arithmetic operations to support vertex operations
+  such as subdivision, smoothing etc.
+  
+  While the code is kept as general as possible, arithmetic operations
+  that are not currently well-defined (and would cause compile errors
+  due to missing operators in the math library), are commented.
+  */
 #ifndef AI_VERTEX_H_INC
 #define AI_VERTEX_H_INC
+
+
 namespace Assimp	{
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -81,15 +90,15 @@ class Vertex
 	friend Vertex operator + (const Vertex&,const Vertex&);
 	friend Vertex operator - (const Vertex&,const Vertex&);
 
-	friend Vertex operator + (const Vertex&,float);
-	friend Vertex operator - (const Vertex&,float);
+//	friend Vertex operator + (const Vertex&,float);
+//	friend Vertex operator - (const Vertex&,float);
 	friend Vertex operator * (const Vertex&,float);
 	friend Vertex operator / (const Vertex&,float);
 
-	friend Vertex operator + (float, const Vertex&);
-	friend Vertex operator - (float, const Vertex&);
+//	friend Vertex operator + (float, const Vertex&);
+//	friend Vertex operator - (float, const Vertex&);
 	friend Vertex operator * (float, const Vertex&);
-	friend Vertex operator / (float, const Vertex&);
+//	friend Vertex operator / (float, const Vertex&);
 
 public:
 
@@ -132,7 +141,7 @@ public:
 	}
 
 
-
+/*
 	Vertex& operator += (float v) {
 		*this = *this+v;
 		return *this;
@@ -142,7 +151,7 @@ public:
 		*this = *this-v;
 		return *this;
 	}
-
+*/
 	Vertex& operator *= (float v) {
 		*this = *this*v;
 		return *this;
@@ -263,7 +272,9 @@ AI_FORCE_INLINE Vertex operator - (const Vertex& v0,const Vertex& v1) {
 	return Vertex::BinaryOp<std::minus>(v0,v1);
 }
 
+
 // ------------------------------------------------------------------------------------------------
+/*
 AI_FORCE_INLINE Vertex operator + (const Vertex& v0,float f) {
 	return Vertex::BinaryOp<Intern::plus>(v0,f);
 }
@@ -272,15 +283,18 @@ AI_FORCE_INLINE Vertex operator - (const Vertex& v0,float f) {
 	return Vertex::BinaryOp<Intern::minus>(v0,f);
 }
 
+*/
+
 AI_FORCE_INLINE Vertex operator * (const Vertex& v0,float f) {
 	return Vertex::BinaryOp<Intern::multiplies>(v0,f);
 }
 
 AI_FORCE_INLINE Vertex operator / (const Vertex& v0,float f) {
-	return Vertex::BinaryOp<Intern::divides>(v0,f);
+	return Vertex::BinaryOp<Intern::multiplies>(v0,1.f/f);
 }
 
 // ------------------------------------------------------------------------------------------------
+/*
 AI_FORCE_INLINE Vertex operator + (float f,const Vertex& v0) {
 	return Vertex::BinaryOp<Intern::plus>(f,v0);
 }
@@ -288,14 +302,17 @@ AI_FORCE_INLINE Vertex operator + (float f,const Vertex& v0) {
 AI_FORCE_INLINE Vertex operator - (float f,const Vertex& v0) {
 	return Vertex::BinaryOp<Intern::minus>(f,v0);
 }
+*/
 
 AI_FORCE_INLINE Vertex operator * (float f,const Vertex& v0) {
 	return Vertex::BinaryOp<Intern::multiplies>(f,v0);
 }
 
+/*
 AI_FORCE_INLINE Vertex operator / (float f,const Vertex& v0) {
 	return Vertex::BinaryOp<Intern::divides>(f,v0);
 }
+*/
 
 }
 #endif

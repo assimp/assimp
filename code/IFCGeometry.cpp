@@ -1457,7 +1457,7 @@ void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout, Co
 
 			IfcVector3 dir;
 			ConvertDirection(dir,solid->ExtrudedDirection);
-			conv.collect_openings->push_back(TempOpening(solid, IfcMatrix3(m) * (dir*solid->Depth),meshtmp));
+			conv.collect_openings->push_back(TempOpening(solid, IfcMatrix3(m) * (dir*static_cast<IfcFloat>(solid->Depth)),meshtmp));
 			return;
 		}
 

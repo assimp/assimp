@@ -120,7 +120,8 @@ public:
 	// --------------------------------------------------
 	IfcVector3 Eval(IfcFloat u) const {
 		u = -conv.angle_scale * u;
-		return location + entity.Radius*(static_cast<IfcFloat>(::cos(u))*p[0] + static_cast<IfcFloat>(::sin(u))*p[1]);
+		return location + static_cast<IfcFloat>(entity.Radius)*(static_cast<IfcFloat>(::cos(u))*p[0] + 
+			static_cast<IfcFloat>(::sin(u))*p[1]);
 	}
 
 private:
@@ -148,7 +149,8 @@ public:
 	// --------------------------------------------------
 	IfcVector3 Eval(IfcFloat u) const {
 		u = -conv.angle_scale * u;
-		return location + entity.SemiAxis1*static_cast<IfcFloat>(::cos(u))*p[0] + entity.SemiAxis2*static_cast<IfcFloat>(::sin(u))*p[1];
+		return location + static_cast<IfcFloat>(entity.SemiAxis1)*static_cast<IfcFloat>(::cos(u))*p[0] +
+			static_cast<IfcFloat>(entity.SemiAxis2)*static_cast<IfcFloat>(::sin(u))*p[1];
 	}
 
 private:

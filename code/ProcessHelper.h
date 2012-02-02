@@ -55,44 +55,55 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace std {
 
 	// std::min for aiVector3D
-	inline ::aiVector3D min (const ::aiVector3D& a, const ::aiVector3D& b)	{
-		return ::aiVector3D (min(a.x,b.x),min(a.y,b.y),min(a.z,b.z));
+	template <typename TReal>
+	inline ::aiVector3t<TReal> min (const ::aiVector3t<TReal>& a, const ::aiVector3t<TReal>& b)	{
+		return ::aiVector3t<TReal> (min(a.x,b.x),min(a.y,b.y),min(a.z,b.z));
 	}
 
-	// std::max for aiVector3D
-	inline ::aiVector3D max (const ::aiVector3D& a, const ::aiVector3D& b)	{
-		return ::aiVector3D (max(a.x,b.x),max(a.y,b.y),max(a.z,b.z));
+	// std::max for aiVector3t<TReal>
+	template <typename TReal>
+	inline ::aiVector3t<TReal> max (const ::aiVector3t<TReal>& a, const ::aiVector3t<TReal>& b)	{
+		return ::aiVector3t<TReal> (max(a.x,b.x),max(a.y,b.y),max(a.z,b.z));
 	}
 
-	// std::min for aiVector2D
-	inline ::aiVector2D min (const ::aiVector2D& a, const ::aiVector2D& b)	{
-		return ::aiVector2D (min(a.x,b.x),min(a.y,b.y));
+	// std::min for aiVector2t<TReal>
+	template <typename TReal>
+	inline ::aiVector2t<TReal> min (const ::aiVector2t<TReal>& a, const ::aiVector2t<TReal>& b)	{
+		return ::aiVector2t<TReal> (min(a.x,b.x),min(a.y,b.y));
 	}
 
-	// std::max for aiVector2D
-	inline ::aiVector2D max (const ::aiVector2D& a, const ::aiVector2D& b)	{
-		return ::aiVector2D (max(a.x,b.x),max(a.y,b.y));
+	// std::max for aiVector2t<TReal>
+	template <typename TReal>
+	inline ::aiVector2t<TReal> max (const ::aiVector2t<TReal>& a, const ::aiVector2t<TReal>& b)	{
+		return ::aiVector2t<TReal> (max(a.x,b.x),max(a.y,b.y));
 	}
 
 	// std::min for aiColor4D
-	inline ::aiColor4D min (const ::aiColor4D& a, const ::aiColor4D& b)	{
-		return ::aiColor4D (min(a.r,b.r),min(a.g,b.g),min(a.b,b.b),min(a.a,b.a));
+	template <typename TReal>
+	inline ::aiColor4t<TReal> min (const ::aiColor4t<TReal>& a, const ::aiColor4t<TReal>& b)	{
+		return ::aiColor4t<TReal> (min(a.r,b.r),min(a.g,b.g),min(a.b,b.b),min(a.a,b.a));
 	}
 
 	// std::max for aiColor4D
-	inline ::aiColor4D max (const ::aiColor4D& a, const ::aiColor4D& b)	{
-		return ::aiColor4D (max(a.r,b.r),max(a.g,b.g),max(a.b,b.b),max(a.a,b.a));
+	template <typename TReal>
+	inline ::aiColor4t<TReal> max (const ::aiColor4t<TReal>& a, const ::aiColor4t<TReal>& b)	{
+		return ::aiColor4t<TReal> (max(a.r,b.r),max(a.g,b.g),max(a.b,b.b),max(a.a,b.a));
 	}
 
-	// std::min for aiQuaternion
-	inline ::aiQuaternion min (const ::aiQuaternion& a, const ::aiQuaternion& b)	{
-		return ::aiQuaternion (min(a.w,b.w),min(a.x,b.x),min(a.y,b.y),min(a.z,b.z));
+
+	// std::min for aiQuaterniont<TReal>
+	template <typename TReal>
+	inline ::aiQuaterniont<TReal> min (const ::aiQuaterniont<TReal>& a, const ::aiQuaterniont<TReal>& b)	{
+		return ::aiQuaterniont<TReal> (min(a.w,b.w),min(a.x,b.x),min(a.y,b.y),min(a.z,b.z));
 	}
 
-	// std::max for aiQuaternion
-	inline ::aiQuaternion max (const ::aiQuaternion& a, const ::aiQuaternion& b)	{
-		return ::aiQuaternion (max(a.w,b.w),max(a.x,b.x),max(a.y,b.y),max(a.z,b.z));
+	// std::max for aiQuaterniont<TReal>
+	template <typename TReal>
+	inline ::aiQuaterniont<TReal> max (const ::aiQuaterniont<TReal>& a, const ::aiQuaterniont<TReal>& b)	{
+		return ::aiQuaterniont<TReal> (max(a.w,b.w),max(a.x,b.x),max(a.y,b.y),max(a.z,b.z));
 	}
+
+
 
 	// std::min for aiVectorKey
 	inline ::aiVectorKey min (const ::aiVectorKey& a, const ::aiVectorKey& b)	{
@@ -150,26 +161,26 @@ template <> struct MinMaxChooser<unsigned int> {
 		min = (1u<<(sizeof(unsigned int)*8-1));
 }};
 
-template <> struct MinMaxChooser<aiVector3D> {
-	void operator ()(aiVector3D& min,aiVector3D& max) {
-		max = aiVector3D(-1e10f,-1e10f,-1e10f);
-		min = aiVector3D( 1e10f, 1e10f, 1e10f);
+template <typename T> struct MinMaxChooser< aiVector3t<T> > {
+	void operator ()(aiVector3t<T>& min,aiVector3t<T>& max) {
+		max = aiVector3t<T>(-1e10f,-1e10f,-1e10f);
+		min = aiVector3t<T>( 1e10f, 1e10f, 1e10f);
 }};
-template <> struct MinMaxChooser<aiVector2D> {
-	void operator ()(aiVector2D& min,aiVector2D& max) {
-		max = aiVector2D(-1e10f,-1e10f);
-		min = aiVector2D( 1e10f, 1e10f);
+template <typename T> struct MinMaxChooser< aiVector2t<T> > {
+	void operator ()(aiVector2t<T>& min,aiVector2t<T>& max) {
+		max = aiVector2t<T>(-1e10f,-1e10f);
+		min = aiVector2t<T>( 1e10f, 1e10f);
 	}};
-template <> struct MinMaxChooser<aiColor4D> {
-	void operator ()(aiColor4D& min,aiColor4D& max) {
-		max = aiColor4D(-1e10f,-1e10f,-1e10f,-1e10f);
-		min = aiColor4D( 1e10f, 1e10f, 1e10f, 1e10f);
+template <typename T> struct MinMaxChooser< aiColor4t<T> > {
+	void operator ()(aiColor4t<T>& min,aiColor4t<T>& max) {
+		max = aiColor4t<T>(-1e10f,-1e10f,-1e10f,-1e10f);
+		min = aiColor4t<T>( 1e10f, 1e10f, 1e10f, 1e10f);
 }};
 
-template <> struct MinMaxChooser<aiQuaternion> {
-	void operator ()(aiQuaternion& min,aiQuaternion& max) {
-		max = aiQuaternion(-1e10f,-1e10f,-1e10f,-1e10f);
-		min = aiQuaternion( 1e10f, 1e10f, 1e10f, 1e10f);
+template <typename T> struct MinMaxChooser< aiQuaterniont<T> > {
+	void operator ()(aiQuaterniont<T>& min,aiQuaterniont<T>& max) {
+		max = aiQuaterniont<T>(-1e10f,-1e10f,-1e10f,-1e10f);
+		min = aiQuaterniont<T>( 1e10f, 1e10f, 1e10f, 1e10f);
 }};
 
 template <> struct MinMaxChooser<aiVectorKey> {

@@ -178,8 +178,8 @@ inline bool IsCCW(T* in, size_t npoints) {
  *  @note The data arrays must have storage for at least num+2 elements. Using
  *  this method is much faster than the 'other' NewellNormal()
  */
-template <int ofs_x, int ofs_y, int ofs_z>
-inline void NewellNormal (aiVector3D& out, int num, float* x, float* y, float* z)
+template <int ofs_x, int ofs_y, int ofs_z, typename TReal>
+inline void NewellNormal (aiVector3t<TReal>& out, int num, TReal* x, TReal* y, TReal* z)
 {
 	// Duplicate the first two vertices at the end
 	x[(num+0)*ofs_x] = x[0]; 
@@ -191,11 +191,11 @@ inline void NewellNormal (aiVector3D& out, int num, float* x, float* y, float* z
 	z[(num+0)*ofs_z] = z[0]; 
 	z[(num+1)*ofs_z] = z[ofs_z]; 
 
-	float sum_xy = 0.0, sum_yz = 0.0, sum_zx = 0.0;
+	TReal sum_xy = 0.0, sum_yz = 0.0, sum_zx = 0.0;
 
-	float *xptr = x +ofs_x, *xlow = x, *xhigh = x + ofs_x*2;
-	float *yptr = y +ofs_y, *ylow = y, *yhigh = y + ofs_y*2;
-	float *zptr = z +ofs_z, *zlow = z, *zhigh = z + ofs_z*2;
+	TReal *xptr = x +ofs_x, *xlow = x, *xhigh = x + ofs_x*2;
+	TReal *yptr = y +ofs_y, *ylow = y, *yhigh = y + ofs_y*2;
+	TReal *zptr = z +ofs_z, *zlow = z, *zhigh = z + ofs_z*2;
 
 	for (int tmp=0; tmp < num; tmp++) {
 		sum_xy += (*xptr) * ( (*yhigh) - (*ylow) );
@@ -214,7 +214,7 @@ inline void NewellNormal (aiVector3D& out, int num, float* x, float* y, float* z
 		zlow  += ofs_z;
 		zhigh += ofs_z;
 	}
-	out = aiVector3D(sum_yz,sum_zx,sum_xy);
+	out = aiVector3t<TReal>(sum_yz,sum_zx,sum_xy);
 }
 
 } // ! Assimp

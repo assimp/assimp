@@ -257,24 +257,24 @@ IfcFloat ConvertSIPrefix(const std::string& prefix)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertColor(IfcColor4& out, const IfcColourRgb& in)
+void ConvertColor(aiColor4D& out, const IfcColourRgb& in)
 {
-	out.r = in.Red;
-	out.g = in.Green;
-	out.b = in.Blue;
-	out.a = 1.f;
+	out.r = static_cast<float>( in.Red );
+	out.g = static_cast<float>( in.Green );
+	out.b = static_cast<float>( in.Blue );
+	out.a = static_cast<float>( 1.f );
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertColor(IfcColor4& out, const IfcColourOrFactor& in,ConversionData& conv,const IfcColor4* base)
+void ConvertColor(aiColor4D& out, const IfcColourOrFactor& in,ConversionData& conv,const aiColor4D* base)
 {
 	if (const EXPRESS::REAL* const r = in.ToPtr<EXPRESS::REAL>()) {
 		out.r = out.g = out.b = *r;
 		if(base) {
-			out.r *= base->r;
-			out.g *= base->g;
-			out.b *= base->b;
-			out.a = base->a;
+			out.r *= static_cast<float>( base->r );
+			out.g *= static_cast<float>( base->g );
+			out.b *= static_cast<float>( base->b );
+			out.a = static_cast<float>( base->a );
 		}
 		else out.a = 1.0;
 	}

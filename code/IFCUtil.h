@@ -176,8 +176,8 @@ struct TempMesh
 
 
 // conversion routines for common IFC entities, implemented in IFCUtil.cpp
-void ConvertColor(IfcColor4& out, const IfcColourRgb& in);
-void ConvertColor(IfcColor4& out, const IfcColourOrFactor& in,ConversionData& conv,const IfcColor4* base);
+void ConvertColor(aiColor4D& out, const IfcColourRgb& in);
+void ConvertColor(aiColor4D& out, const IfcColourOrFactor& in,ConversionData& conv,const aiColor4D* base);
 void ConvertCartesianPoint(IfcVector3& out, const IfcCartesianPoint& in);
 void ConvertDirection(IfcVector3& out, const IfcDirection& in);
 void ConvertVector(IfcVector3& out, const IfcVector& in);

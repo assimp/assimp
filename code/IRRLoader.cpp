@@ -546,7 +546,7 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
 					t2 = (h1 * p1 + p2 * h2 + t1 * h3 + h4 * t2);
 
 					// build a simple translation matrix from it
-					key.mValue = t2.x;
+					key.mValue = t2;
 					key.mTime  = (double) i;
 				}
 			}

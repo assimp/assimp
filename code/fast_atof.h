@@ -257,7 +257,7 @@ inline const char* fast_atoreal_move( const char* c, Real& out)
 	if (*c == 'e' || *c == 'E')	{
 
 		++c;
-		bool einv = (*c=='-');
+		const bool einv = (*c=='-');
 		if (einv || *c=='+') {
 			++c;
 		}
@@ -267,13 +267,13 @@ inline const char* fast_atoreal_move( const char* c, Real& out)
 		// bad considering how frequently fast_atoreal_move<float> is called in Assimp.
 		Real exp = static_cast<Real>( strtoul10_64(c, &c) );
 		if (einv) {
-			exp *= static_cast<Real>(-1.0f);
+			exp = -exp;
 		}
 		f *= pow(static_cast<Real>(10.0f), exp);
 	}
 
 	if (inv) {
-		f *= static_cast<Real>(-1.0f);
+		f = -f;
 	}
 	out = f;
 	return c;

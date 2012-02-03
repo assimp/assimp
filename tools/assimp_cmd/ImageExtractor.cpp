@@ -59,7 +59,7 @@ const char* AICMD_MSG_DUMP_HELP_E =
 ;
 
 #define AI_EXTRACT_WRITE_BMP_ALPHA 0x1
-#include "Compiler/pushpack1.h"
+#include <assimp/Compiler/pushpack1.h>
 
 // -----------------------------------------------------------------------------------
 // Data structure for the first header of a BMP
@@ -114,7 +114,7 @@ struct TGA_HEADER
 } PACK_STRUCT;
 
 
-#include "Compiler/poppack1.h"
+#include <assimp/Compiler/poppack1.h>
 
 // -----------------------------------------------------------------------------------
 // Save a texture as bitmap

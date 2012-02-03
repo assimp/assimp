@@ -53,14 +53,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <time.h>
 #include <limits>
 
-#include <aiPostProcess.h>
-#include <aiVersion.h>
-#include <aiScene.h>
-#include <assimp.hpp>
-#include <DefaultLogger.h>
+#include <assimp/aiPostProcess.h>
+#include <assimp/aiVersion.h>
+#include <assimp/aiScene.h>
+#include <assimp/assimp.hpp>
+#include <assimp/DefaultLogger.h>
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
-#	include <export.hpp>
+#	include <assimp/export.hpp>
 #endif
 
 #include <../code/AssimpPCH.h> /* to get stdint.h */

@@ -48,21 +48,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "resource.h"
 
 // Include ASSIMP headers (XXX: do we really need all of them?)
-#include "assimp.h"
-#include "assimp.hpp"
-#include "aiAssert.h"
-#include "aiFileIO.h"
-#include "aiPostProcess.h"
-#include "aiScene.h"
-#include "IOSystem.h"
-#include "IOStream.h"
-#include "LogStream.h"
-#include "DefaultLogger.h"
+#include <assimp/assimp.h>
+#include <assimp/assimp.hpp>
+#include <assimp/aiAssert.h>
+#include <assimp/aiFileIO.h>
+#include <assimp/aiPostProcess.h>
+#include <assimp/aiScene.h>
+#include <assimp/IOSystem.h>
+#include <assimp/IOStream.h>
+#include <assimp/LogStream.h>
+#include <assimp/DefaultLogger.h>
 
 #include "../../code/AssimpPCH.h" /* HACK */
  
-#include "MaterialSystem.h"   // aiMaterial clas
-#include "StringComparison.h" // ASSIMP_stricmp and ASSIMP_strincmp
+#include "../../code/MaterialSystem.h"   // aiMaterial class
+#include "../../code/StringComparison.h" // ASSIMP_stricmp and ASSIMP_strincmp
 
 // in order for std::min and std::max to behave properly
 #ifdef min 

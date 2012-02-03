@@ -31,7 +31,7 @@ ASSIMP_API unsigned int aiGetVersionMinor ()	{
 // ------------------------------------------------------------------------------------------------
 // Get Assimp major version
 ASSIMP_API unsigned int aiGetVersionMajor ()	{
-	return 2;
+	return 3;
 }
 
 // ------------------------------------------------------------------------------------------------

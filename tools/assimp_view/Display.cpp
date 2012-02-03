@@ -884,12 +884,12 @@ int CDisplay::OnSetupNormalView()
 	}
 
 	// now ... change the meaning of the statistics fields back
-	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMVERTS),"Verts:");
+	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMVERTS),"Vertices:");
 	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMNODES),"Nodes:");
 	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMFACES),"Faces:");
-	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMSHADERS),"Shd:");
-	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMMATS),"Mats:");
-	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMMESHES),"Mesh:");
+	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMSHADERS),"Shaders:");
+	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMMATS),"Materials:");
+	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMMESHES),"Meshes:");
 	SetWindowText(GetDlgItem(g_hDlg,IDC_LOADTIME),"Time:");
 
 	FillDefaultStatistics();
@@ -911,12 +911,12 @@ int CDisplay::OnSetupNodeView(NodeInfo* pcNew)
 	ai_assert(NULL != pcNew);
 
 	if (m_pcCurrentNode == pcNew)return 2;
-	
+
 	// now ... change the meaning of the statistics fields back
-	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMVERTS),"Verts:");
+	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMVERTS),"Vertices:");
 	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMFACES),"Faces:");
-	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMMATS),"Mats:");
-	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMMESHES),"Mesh:");
+	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMMATS),"Materials:");
+	SetWindowText(GetDlgItem(g_hDlg,IDC_NUMMESHES),"Meshes:");
 
 	ShowWindow(GetDlgItem(g_hDlg,IDC_NUMNODES),SW_HIDE);
 	ShowWindow(GetDlgItem(g_hDlg,IDC_ENODEWND),SW_HIDE);

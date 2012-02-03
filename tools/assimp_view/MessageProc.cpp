@@ -1493,7 +1493,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 					}
 					else if (!g_pcAsset)
 					{
-						r = g = b = 150;szText = "-";
+						r = g = b = 150;szText = "";
 					}
 					else
 					{
@@ -1526,7 +1526,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 					}
 					else if (!g_pcAsset)
 					{
-						r = g = b = 150;szText = "-";
+						r = g = b = 150;szText = "";
 					}
 					else
 					{
@@ -1551,11 +1551,11 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 						CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
 					{
 						r = g = b = 0;
-						szText = "-";
+						szText = "";
 					}
 					else if (!g_pcAsset)
 					{
-						r = g = b = 150;szText = "-";
+						r = g = b = 150;szText = "";
 					}
 					else
 					{
@@ -2561,6 +2561,16 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 							? BST_UNCHECKED : BST_CHECKED);
 
 						ToggleCulling();
+						break;
+
+					case 'T':
+					case 't':
+
+						CheckDlgButton(g_hDlg,IDC_NOAB,
+							IsDlgButtonChecked(g_hDlg,IDC_NOAB) == BST_CHECKED
+							? BST_UNCHECKED : BST_CHECKED);
+
+						ToggleTransparency();
 						break;
 					}
 				}

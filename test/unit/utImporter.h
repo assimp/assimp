@@ -4,7 +4,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <assimp.hpp>
+#include <Importer.hpp>
 #include <BaseImporter.h>
 
 using namespace std;

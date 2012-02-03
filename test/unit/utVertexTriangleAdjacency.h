@@ -4,8 +4,8 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "aiTypes.h"
-#include "aiMesh.h"
+#include "types.h"
+#include "mesh.h"
 #include <VertexTriangleAdjacency.h>
 
 

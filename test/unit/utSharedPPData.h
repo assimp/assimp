@@ -4,8 +4,8 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <aiTypes.h>
-#include <aiScene.h>
+#include <types.h>
+#include <scene.h>
 #include <BaseProcess.h>
 
 

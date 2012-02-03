@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_FILESYSTEMFILTER_H_INC
 #define AI_FILESYSTEMFILTER_H_INC
 
-#include "../include/assimp/IOSystem.h"
+#include "../include/assimp/IOSystem.hpp"
 #include "fast_atof.h"
 #include "ParsingUtils.h"
 namespace Assimp	{

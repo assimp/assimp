@@ -18,44 +18,44 @@ SET( COMPILER_HEADERS
 SOURCE_GROUP( Compiler FILES ${COMPILER_HEADERS})
 
 SET( PUBLIC_HEADERS
-	${HEADER_PATH}/aiAnim.h
-	${HEADER_PATH}/aiAssert.h
-	${HEADER_PATH}/aiCamera.h
-	${HEADER_PATH}/aiColor4D.h
-	${HEADER_PATH}/aiColor4D.inl
-	${HEADER_PATH}/aiConfig.h
-	${HEADER_PATH}/aiDefines.h
-	${HEADER_PATH}/aiFileIO.h
-	${HEADER_PATH}/aiLight.h
-	${HEADER_PATH}/aiMaterial.h
-	${HEADER_PATH}/aiMaterial.inl
-	${HEADER_PATH}/aiMatrix3x3.h
-	${HEADER_PATH}/aiMatrix3x3.inl
-	${HEADER_PATH}/aiMatrix4x4.h
-	${HEADER_PATH}/aiMatrix4x4.inl
-	${HEADER_PATH}/aiMesh.h
-	${HEADER_PATH}/aiPostProcess.h
-	${HEADER_PATH}/aiQuaternion.h
-	${HEADER_PATH}/aiQuaternion.inl
-	${HEADER_PATH}/aiScene.h
-	${HEADER_PATH}/aiTexture.h
-	${HEADER_PATH}/aiTypes.h
-	${HEADER_PATH}/aiVector2D.h
-	${HEADER_PATH}/aiVector2D.inl
-	${HEADER_PATH}/aiVector3D.h
-	${HEADER_PATH}/aiVector3D.inl
-	${HEADER_PATH}/aiVersion.h
-	${HEADER_PATH}/assimp.h
-	${HEADER_PATH}/assimp.hpp
-	${HEADER_PATH}/DefaultLogger.h
-	${HEADER_PATH}/ProgressHandler.h
-	${HEADER_PATH}/IOStream.h
-	${HEADER_PATH}/IOSystem.h
-	${HEADER_PATH}/Logger.h
-	${HEADER_PATH}/LogStream.h
-	${HEADER_PATH}/NullLogger.h
-	${HEADER_PATH}/export.h
-	${HEADER_PATH}/export.hpp
+	${HEADER_PATH}/anim.h
+	${HEADER_PATH}/assert.h
+	${HEADER_PATH}/camera.h
+	${HEADER_PATH}/color4.h
+	${HEADER_PATH}/color4.inl
+	${HEADER_PATH}/config.h
+	${HEADER_PATH}/defs.h
+	${HEADER_PATH}/cfileio.h
+	${HEADER_PATH}/light.h
+	${HEADER_PATH}/material.h
+	${HEADER_PATH}/material.inl
+	${HEADER_PATH}/matrix3x3.h
+	${HEADER_PATH}/matrix3x3.inl
+	${HEADER_PATH}/matrix4x4.h
+	${HEADER_PATH}/matrix4x4.inl
+	${HEADER_PATH}/mesh.h
+	${HEADER_PATH}/postprocess.h
+	${HEADER_PATH}/quaternion.h
+	${HEADER_PATH}/quaternion.inl
+	${HEADER_PATH}/scene.h
+	${HEADER_PATH}/texture.h
+	${HEADER_PATH}/types.h
+	${HEADER_PATH}/vector2.h
+	${HEADER_PATH}/vector2.inl
+	${HEADER_PATH}/vector3.h
+	${HEADER_PATH}/vector3.inl
+	${HEADER_PATH}/version.h
+	${HEADER_PATH}/cimport.h
+	${HEADER_PATH}/Importer.hpp
+	${HEADER_PATH}/DefaultLogger.hpp
+	${HEADER_PATH}/ProgressHandler.hpp
+	${HEADER_PATH}/IOStream.hpp
+	${HEADER_PATH}/IOSystem.hpp
+	${HEADER_PATH}/Logger.hpp
+	${HEADER_PATH}/LogStream.hpp
+	${HEADER_PATH}/NullLogger.hpp
+	${HEADER_PATH}/cexport.h
+	${HEADER_PATH}/Exporter.hpp
 )
 
 SET( Core_SRCS
@@ -79,11 +79,11 @@ SET( Boost_SRCS
 SOURCE_GROUP(Boost FILES ${Boost_SRCS})
 
 SET( Logging_SRCS
-	${HEADER_PATH}/DefaultLogger.h
-	${HEADER_PATH}/IOStream.h
-	${HEADER_PATH}/LogStream.h
-	${HEADER_PATH}/Logger.h
-	${HEADER_PATH}/NullLogger.h
+	${HEADER_PATH}/DefaultLogger.hpp
+	${HEADER_PATH}/IOStream.hpp
+	${HEADER_PATH}/LogStream.hpp
+	${HEADER_PATH}/Logger.hpp
+	${HEADER_PATH}/NullLogger.hpp
 	Win32DebugLogStream.h
 	DefaultLogger.cpp
 	FileLogStream.h

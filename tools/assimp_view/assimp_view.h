@@ -48,16 +48,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "resource.h"
 
 // Include ASSIMP headers (XXX: do we really need all of them?)
-#include <assimp/assimp.h>
-#include <assimp/assimp.hpp>
-#include <assimp/aiAssert.h>
-#include <assimp/aiFileIO.h>
-#include <assimp/aiPostProcess.h>
-#include <assimp/aiScene.h>
-#include <assimp/IOSystem.h>
-#include <assimp/IOStream.h>
-#include <assimp/LogStream.h>
-#include <assimp/DefaultLogger.h>
+#include <assimp/cimport.h>
+#include <assimp/Importer.hpp>
+#include <assimp/assert.h>
+#include <assimp/cfileio.h>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/IOStream.hpp>
+#include <assimp/LogStream.hpp>
+#include <assimp/DefaultLogger.hpp>
 
 #include "../../code/AssimpPCH.h" /* HACK */
  

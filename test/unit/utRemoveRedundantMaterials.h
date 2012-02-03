@@ -4,9 +4,9 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <aiTypes.h>
-#include <aiMesh.h>
-#include <aiScene.h>
+#include <types.h>
+#include <mesh.h>
+#include <scene.h>
 #include <RemoveRedundantMaterials.h>
 #include <MaterialSystem.h>
 

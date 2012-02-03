@@ -50,9 +50,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <sstream>
 
-#include "../include/assimp/aiTypes.h"
-#include "../include/assimp/aiMesh.h"
-#include "../include/assimp/aiAnim.h"
+#include "../include/assimp/types.h"
+#include "../include/assimp/mesh.h"
+#include "../include/assimp/anim.h"
 
 #include "./../include/assimp/Compiler/pushpack1.h"
 

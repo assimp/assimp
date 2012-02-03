@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_DEFAULTIOSTREAM_H_INC
 
 #include <stdio.h>
-#include "../include/assimp/IOStream.h"
+#include "../include/assimp/IOStream.hpp"
 
 namespace Assimp	{
 

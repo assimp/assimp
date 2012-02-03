@@ -3,8 +3,8 @@
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
-#include <export.h>
-#include <export.hpp>
+#include <cexport.h>
+#include <Exporter.hpp>
 
 using namespace Assimp;
 

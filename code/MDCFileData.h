@@ -49,9 +49,9 @@ http://themdcfile.planetwolfenstein.gamespy.com/MDC_File_Format.pdf
 #ifndef AI_MDCFILEHELPER_H_INC
 #define AI_MDCFILEHELPER_H_INC
 
-#include "../include/assimp/aiTypes.h"
-#include "../include/assimp/aiMesh.h"
-#include "../include/assimp/aiAnim.h"
+#include "../include/assimp/types.h"
+#include "../include/assimp/mesh.h"
+#include "../include/assimp/anim.h"
 
 #include "./../include/assimp/Compiler/pushpack1.h"
 

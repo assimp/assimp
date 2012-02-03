@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "AssimpPCH.h"
-#include "../include/assimp/aiScene.h"
+#include "../include/assimp/scene.h"
 #include "SkeletonMeshBuilder.h"
 
 using namespace Assimp;

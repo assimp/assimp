@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_DAE_IMPORTER
 
-#include "../include/assimp/aiAnim.h"
+#include "../include/assimp/anim.h"
 #include "ColladaLoader.h"
 #include "ColladaParser.h"
 

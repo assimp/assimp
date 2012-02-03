@@ -38,13 +38,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file ProgressHandler.h
+/** @file ProgressHandler.hpp
  *  @brief Abstract base class 'ProgressHandler'.
  */
 #ifndef INCLUDED_AI_DEFAULTPROGRESSHANDLER_H
 #define INCLUDED_AI_DEFAULTPROGRESSHANDLER_H
 
-#include "../include/assimp/ProgressHandler.h"
+#include "../include/assimp/ProgressHandler.hpp"
 namespace Assimp	{
 
 // ------------------------------------------------------------------------------------

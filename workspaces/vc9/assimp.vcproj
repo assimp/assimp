@@ -1105,59 +1105,51 @@
 				Name="Compiler"
 				>
 				<File
-					RelativePath="..\..\include\Compiler\poppack1.h"
+					RelativePath="..\..\include\assimp\Compiler\poppack1.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\code\pstdint.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Compiler\pushpack1.h"
+					RelativePath="..\..\include\assimp\Compiler\pushpack1.h"
 					>
 				</File>
 			</Filter>
 			<Filter
-				Name="Cpp"
+				Name="C++"
 				>
 				<File
-					RelativePath="..\..\include\aiAssert.h"
+					RelativePath="..\..\include\assimp\DefaultLogger.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\assimp.hpp"
+					RelativePath="..\..\include\assimp\Exporter.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\DefaultLogger.h"
+					RelativePath="..\..\include\assimp\Importer.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\export.hpp"
+					RelativePath="..\..\include\assimp\IOStream.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOStream.h"
+					RelativePath="..\..\include\assimp\IOSystem.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOSystem.h"
+					RelativePath="..\..\include\assimp\Logger.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\Logger.h"
+					RelativePath="..\..\include\assimp\LogStream.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\LogStream.h"
+					RelativePath="..\..\include\assimp\NullLogger.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\NullLogger.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\ProgressHandler.h"
+					RelativePath="..\..\include\assimp\ProgressHandler.hpp"
 					>
 				</File>
 			</Filter>
@@ -1165,19 +1157,15 @@
 				Name="C"
 				>
 				<File
-					RelativePath="..\..\include\aiFileIO.h"
+					RelativePath="..\..\include\assimp\cexport.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiVersion.h"
+					RelativePath="..\..\include\assimp\cfileio.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\assimp.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\export.h"
+					RelativePath="..\..\include\assimp\cimport.h"
 					>
 				</File>
 			</Filter>
@@ -1185,99 +1173,107 @@
 				Name="Common"
 				>
 				<File
-					RelativePath="..\..\include\aiAnim.h"
+					RelativePath="..\..\include\assimp\anim.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiCamera.h"
+					RelativePath="..\..\include\assimp\assert.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiColor4D.h"
+					RelativePath="..\..\include\assimp\camera.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiColor4D.inl"
+					RelativePath="..\..\include\assimp\color4.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiConfig.h"
+					RelativePath="..\..\include\assimp\color4.inl"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiDefines.h"
+					RelativePath="..\..\include\assimp\config.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiLight.h"
+					RelativePath="..\..\include\assimp\defs.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiMaterial.h"
+					RelativePath="..\..\include\assimp\light.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiMaterial.inl"
+					RelativePath="..\..\include\assimp\material.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiMatrix3x3.h"
+					RelativePath="..\..\include\assimp\material.inl"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiMatrix3x3.inl"
+					RelativePath="..\..\include\assimp\matrix3x3.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiMatrix4x4.h"
+					RelativePath="..\..\include\assimp\matrix3x3.inl"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiMatrix4x4.inl"
+					RelativePath="..\..\include\assimp\matrix4x4.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiMesh.h"
+					RelativePath="..\..\include\assimp\matrix4x4.inl"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiPostProcess.h"
+					RelativePath="..\..\include\assimp\mesh.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiQuaternion.h"
+					RelativePath="..\..\include\assimp\postprocess.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiQuaternion.inl"
+					RelativePath="..\..\include\assimp\quaternion.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiScene.h"
+					RelativePath="..\..\include\assimp\quaternion.inl"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiTexture.h"
+					RelativePath="..\..\include\assimp\scene.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiTypes.h"
+					RelativePath="..\..\include\assimp\texture.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiVector2D.h"
+					RelativePath="..\..\include\assimp\types.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiVector2D.inl"
+					RelativePath="..\..\include\assimp\vector2.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiVector3D.h"
+					RelativePath="..\..\include\assimp\vector2.inl"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\aiVector3D.inl"
+					RelativePath="..\..\include\assimp\vector3.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\assimp\vector3.inl"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\assimp\version.h"
 					>
 				</File>
 			</Filter>

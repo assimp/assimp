@@ -4,7 +4,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <aiScene.h>
+#include <scene.h>
 #include <PretransformVertices.h>
 
 

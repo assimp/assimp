@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_VALIDATEPROCESS_H_INC
 #define AI_VALIDATEPROCESS_H_INC
 
-#include "../include/assimp/aiTypes.h"
+#include "../include/assimp/types.h"
 #include "BaseProcess.h"
 
 struct aiBone;

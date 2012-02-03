@@ -51,7 +51,7 @@ void FindInvalidDataProcessTest :: testStepNegativeResult (void)
 	::memset(pcMesh->mNormals,0,pcMesh->mNumVertices*sizeof(aiVector3D));
 	::memset(pcMesh->mBitangents,0,pcMesh->mNumVertices*sizeof(aiVector3D));
 
-	pcMesh->mTextureCoords[2][455] = std::numeric_limits<float>::quiet_NaN();
+	pcMesh->mTextureCoords[2][455] = aiVector3D( std::numeric_limits<float>::quiet_NaN() );
 	
 	piProcess->ProcessMesh(pcMesh);
 

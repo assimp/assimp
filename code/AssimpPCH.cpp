@@ -5,13 +5,13 @@
 #include "./../include/aiVersion.h"
 
 // --------------------------------------------------------------------------------
-// Legal information string - dont't remove from image!
+// Legal information string - dont't remove this.
 static const char* LEGAL_INFORMATION =
 
 "Open Asset Import Library (Assimp).\n"
 "A free C/C++ library to import various 3D file formats into applications\n\n"
 
-"(c) 2008-2010, ASSIMP Development Team\n"
+"(c) 2008-2010, assimp team\n"
 "License under the terms and conditions of the 3-clause BSD license\n"
 "http://assimp.sourceforge.net\n"
 ;

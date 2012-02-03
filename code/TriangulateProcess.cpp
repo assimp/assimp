@@ -1,9 +1,9 @@
 /*
 ---------------------------------------------------------------------------
-Open Asset Import Library (ASSIMP)
+Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2009, ASSIMP Development Team
+Copyright (c) 2006-2012, assimp team
 
 All rights reserved.
 
@@ -20,10 +20,10 @@ conditions are met:
   following disclaimer in the documentation and/or other
   materials provided with the distribution.
 
-* Neither the name of the ASSIMP team, nor the names of its
+* Neither the name of the assimp team, nor the names of its
   contributors may be used to endorse or promote products
   derived from this software without specific prior
-  written permission of the ASSIMP Development Team.
+  written permission of the assimp team.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
@@ -217,7 +217,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 			face.mIndices = NULL;
 			continue;
 		} 
-		// quadrilaterals can't have ears. trifanning will always work
+		// optimized code for quadrilaterals
 		else if ( face.mNumIndices == 4) {
 			aiFace& nface = *curOut++;
 			nface.mNumIndices = 3;
@@ -239,12 +239,11 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 			// A polygon with more than 3 vertices can be either concave or convex.
 			// Usually everything we're getting is convex and we could easily
 			// triangulate by trifanning. However, LightWave is probably the only
-			// modeller to make extensive use of highly concave monster polygons ...
-			// so we need to apply the full 'ear cutting' algorithm.
+			// modeling suite to make extensive use of highly concave, monster polygons ...
+			// so we need to apply the full 'ear cutting' algorithm to get it right.
 
 			// RERQUIREMENT: polygon is expected to be simple and *nearly* planar.
-			// We project it onto a plane to get 2d data. Working in R3 would
-			// also be possible but it's more difficult to implement. 
+			// We project it onto a plane to get a 2d triangle.
 
 			// Collect all vertices of of the polygon.
 			const aiVector3D* verts = pMesh->mVertices;

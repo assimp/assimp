@@ -38,16 +38,16 @@ void JoinVerticesTest :: setUp (void)
 
 	// generate extra members - set them to zero to make sure they're identical
 	pcMesh->mTextureCoords[0] = new aiVector3D[900];
-	for (unsigned int i = 0; i < 900;++i)pcMesh->mTextureCoords[0][i] = 0.f; 
+	for (unsigned int i = 0; i < 900;++i)pcMesh->mTextureCoords[0][i] = aiVector3D( 0.f ); 
 
 	pcMesh->mNormals = new aiVector3D[900];
-	for (unsigned int i = 0; i < 900;++i)pcMesh->mNormals[i] = 0.f; 
+	for (unsigned int i = 0; i < 900;++i)pcMesh->mNormals[i] = aiVector3D( 0.f ); 
 
 	pcMesh->mTangents = new aiVector3D[900];
-	for (unsigned int i = 0; i < 900;++i)pcMesh->mTangents[i] = 0.f; 
+	for (unsigned int i = 0; i < 900;++i)pcMesh->mTangents[i] = aiVector3D( 0.f ); 
 
 	pcMesh->mBitangents = new aiVector3D[900];
-	for (unsigned int i = 0; i < 900;++i)pcMesh->mBitangents[i] = 0.f; 
+	for (unsigned int i = 0; i < 900;++i)pcMesh->mBitangents[i] = aiVector3D( 0.f ); 
 }
 
 // ------------------------------------------------------------------------------------------------

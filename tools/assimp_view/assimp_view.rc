@@ -215,7 +215,7 @@ BEGIN
     BEGIN
         BLOCK "040704b0"
         BEGIN
-            VALUE "CompanyName", "ASSIMP Development Team"
+            VALUE "CompanyName", "assimp team"
             VALUE "FileDescription", "ASSIMP Viewer Application"
             VALUE "FileVersion", "1, 1, SVNRevision, 0"
             VALUE "InternalName", "assimp_view"

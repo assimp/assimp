@@ -48,7 +48,7 @@ BEGIN
         BLOCK "040704b0"
         BEGIN
             VALUE "Comments", "Licensed under a 3-clause BSD license"
-            VALUE "CompanyName", "ASSIMP Development Team"
+            VALUE "CompanyName", "assimp team"
             VALUE "FileDescription", "Open Asset Import Library"
             VALUE "FileVersion", 1,1,SVNRevision,0
             VALUE "InternalName", "assimp "

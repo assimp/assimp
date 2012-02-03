@@ -1,9 +1,9 @@
 /*
 ---------------------------------------------------------------------------
-Open Asset Import Library (ASSIMP)
+Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2011, ASSIMP Development Team
+Copyright (c) 2006-2011, assimp team
 
 All rights reserved.
 
@@ -20,10 +20,10 @@ copyright notice, this list of conditions and the
 following disclaimer in the documentation and/or other
 materials provided with the distribution.
 
-* Neither the name of the ASSIMP team, nor the names of its
+* Neither the name of the assimp team, nor the names of its
 contributors may be used to endorse or promote products
 derived from this software without specific prior
-written permission of the ASSIMP Development Team.
+written permission of the assimp team.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
@@ -100,7 +100,7 @@ ASSIMP_API const C_STRUCT aiExportFormatDesc* aiGetExportFormatDescription( size
  *  export them again. Since the scene returned by the various importer functions
  *  is const, a modifyable copy is needed.
  *  @param pIn Valid scene to be copied
- *  @param pOut User-allocated scene to be filled. 
+ *  @param pOut Receives a modifyable copy of the scene.
  */
 ASSIMP_API void aiCopyScene(const C_STRUCT aiScene* pIn, 
 	C_STRUCT aiScene** pOut);

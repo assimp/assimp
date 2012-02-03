@@ -557,7 +557,7 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh) {
 	size_t base = s-curmesh.vertcnt.back(), t = base, i, j;
 	for (i = base; i < s-1; ++i) {
 		for (j = i+1; j < s; ++j) {
-			nor = ((out[i]-any_point)^(out[j]-any_point));
+			nor = -((out[i]-any_point)^(out[j]-any_point));
 			if(fabs(nor.Length()) > 1e-8f) {
 				goto out;
 			}
@@ -704,6 +704,12 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 			//	assert(ClipperLib::Orientation(hole));
 			}
 
+			/*ClipperLib::Polygons pol_temp(1), pol_temp2(1);
+			pol_temp[0] = hole;
+
+			ClipperLib::OffsetPolygons(pol_temp,pol_temp2,5.0);
+			hole = pol_temp2[0];*/
+
 			clipper_holes.AddPolygon(hole,ClipperLib::ptSubject);
 		}
 
@@ -726,13 +732,6 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 				poly.push_back(ClipperLib::IntPoint( to_int64(pip.x), to_int64(pip.y) ));
 			}
 
-			/*
-			ClipperLib::Polygons pol_temp(1), pol_temp2(1);
-			pol_temp[0] = poly;
-
-			ClipperLib::OffsetPolygons(pol_temp,pol_temp2,0.0);
-			poly = pol_temp2[0];
-*/
 			if (ClipperLib::Orientation(poly)) {
 				std::reverse(poly.begin(), poly.end());
 			}
@@ -1032,7 +1031,8 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 			}
 		}
 
-		const IfcFloat epsilon = (bb.first-bb.second).Length()/1000.f;
+		const IfcFloat diag = (bb.first-bb.second).Length();
+		const IfcFloat epsilon = diag/1000.f;
 
 		// walk through all contour points and find those that lie on the BB corner
 		size_t last_hit = -1, very_first_hit = -1;
@@ -1072,6 +1072,15 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 					const size_t old = curmesh.verts.size();
 					size_t cnt = last_hit > n ? size-(last_hit-n) : n-last_hit;
 					for(size_t a = last_hit, e = 0; e <= cnt; a=(a+1)%size, ++e) {
+						// hack: this is to fix cases where opening contours are self-intersecting.
+						// Clipper doesn't produce such polygons, but as soon as we're back in
+						// our brave new floating-point world, very small distances are consumed
+						// by the maximum available precision, leading to self-intersecting
+						// polygons. This fix makes concave windows fail even worse, but
+						// anyway, fail is fail.
+						if ((contour[a] - edge).SquareLength() > diag*diag*0.7) {
+							continue;
+						}
 						const IfcVector3 v3 = minv * IfcVector3(offset.x + contour[a].x * scale.x, offset.y + contour[a].y * scale.y,coord);
 						curmesh.verts.push_back(v3);
 					}
@@ -1130,6 +1139,10 @@ void MergeContours (const std::vector<IfcVector2>& a, const std::vector<IfcVecto
 		clip.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
 	}
 
+	if (ClipperLib::Orientation(clip)) {
+		std::reverse(clip.begin(), clip.end());
+	}
+
 	clipper.AddPolygon(clip, ClipperLib::ptSubject);
 	clip.clear();
 
@@ -1137,8 +1150,12 @@ void MergeContours (const std::vector<IfcVector2>& a, const std::vector<IfcVecto
 		clip.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
 	}
 
+	if (ClipperLib::Orientation(clip)) {
+		std::reverse(clip.begin(), clip.end());
+	}
+
 	clipper.AddPolygon(clip, ClipperLib::ptSubject);
-	clipper.Execute(ClipperLib::ctUnion, out);
+	clipper.Execute(ClipperLib::ctUnion, out,ClipperLib::pftNonZero,ClipperLib::pftNonZero);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1195,8 +1212,6 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 	// project all points into the coordinate system defined by the p+sv*tu plane
 	// and compute bounding boxes for them
 	std::vector< BoundingBox > bbs;
-	XYSortedField field;
-
 	std::vector< std::vector<IfcVector2> > contours;
 
 	size_t c = 0;
@@ -1231,10 +1246,6 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 
 			contour.push_back(vv);
 		}
-		
-		if (field.find(vpmin) != field.end()) {
-			IFCImporter::LogWarn("constraint failure during generation of wall openings, results may be faulty");
-		}
 	
 		BoundingBox bb = BoundingBox(vpmin,vpmax);
 
@@ -1259,9 +1270,12 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 						"bounding box overlaps, using poly2tri fallback");
 					return TryAddOpenings_Poly2Tri(openings, nors, curmesh);
 				}
+				else if (poly.size() == 0) {
+					IFCImporter::LogWarn("ignoring duplicate opening");
+					contour.clear();
+					break;
+				}
 				else {
-					ai_assert(poly.size());
-
 					IFCImporter::LogDebug("merging oberlapping openings, this should not happen");
 
 					contour.clear();
@@ -1270,27 +1284,32 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 					}
 
 					bb.first = std::min(bb.first, ibb.first);
-					bb.second = std::min(bb.second, ibb.second);
+					bb.second = std::max(bb.second, ibb.second);
 
 					contours.erase(contours.begin() + std::distance(bbs.begin(),it));
 					it = bbs.erase(it);
-					if (it == bbs.end()) {
-						break;
-					}
 					continue;
 				}
 			}
 			++it;
 		}
 
-		contours.push_back(contour);
-
-		field[bb.first] = bbs.size();
-		bbs.push_back(bb);
+		if(contour.size()) {
+			contours.push_back(contour);
+			bbs.push_back(bb);
+		}
 	}
 
 	if (bbs.empty()) {
 		return false;
+	}
+
+	XYSortedField field;
+	for (std::vector<BoundingBox>::iterator it = bbs.begin(); it != bbs.end(); ++it) {
+		if (field.find((*it).first) != field.end()) {
+			IFCImporter::LogWarn("constraint failure during generation of wall openings, results may be faulty");
+		}
+		field[(*it).first] = std::distance(bbs.begin(),it);
 	}
 
 	std::vector<IfcVector2> outflat;
@@ -1712,7 +1731,7 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 			ProcessConnectedFaceSet(fc,meshtmp,conv);
 		}
 	}  
-	else if(const IfcBooleanResult* boolean = geo.ToPtr<IfcBooleanResult>()) {
+	else  if(const IfcBooleanResult* boolean = geo.ToPtr<IfcBooleanResult>()) {
 		ProcessBoolean(*boolean,meshtmp,conv);
 	}
 	else if(geo.ToPtr<IfcBoundingBox>()) {

@@ -41,7 +41,7 @@
 namespace p2t {
 
 const double PI_3div4 = 3 * M_PI / 4;
-const double EPSILON = 1e-12;
+const double EPSILON = 1e-15;
 
 enum Orientation { CW, CCW, COLLINEAR };
 

@@ -187,7 +187,7 @@ QHP_SECT_FILTER_ATTRS  =
 QHG_LOCATION           = 
 DISABLE_INDEX          = NO
 ENUM_VALUES_PER_LINE   = 4
-GENERATE_TREEVIEW      = NO
+GENERATE_TREEVIEW      = YES 
 TREEVIEW_WIDTH         = 250
 FORMULA_FONTSIZE       = 10
 #---------------------------------------------------------------------------

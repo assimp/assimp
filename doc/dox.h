@@ -3,21 +3,21 @@
  */
 
 /**
-@mainpage ASSIMP - Open Asset Import Library
+@mainpage assimp - Open Asset Import Library
 
 <img src="dragonsplash.png"></img>
 
 @section intro Introduction
 
-ASSIMP is a library to load and process geometric scenes from various data formats. It is tailored at typical game 
+assimp is a library to load and process geometric scenes from various data formats. It is tailored at typical game 
 scenarios by supporting a node hierarchy, static or skinned meshes, materials, bone animations and potential texture data.
 The library is *not* designed for speed, it is primarily useful for importing assets from various sources once and 
-storing it in a engine-specific format for easy and fast every-day-loading. ASSIMP is also able to apply various post
+storing it in a engine-specific format for easy and fast every-day-loading. assimp is also able to apply various post
 processing steps to the imported data such as conversion to indexed meshes, calculation of normals or tangents/bitangents
 or conversion from right-handed to left-handed coordinate systems.
 
-ASSIMP currently supports the following file formats (note that some loaders lack some features of their formats because 
-some file formats contain data not supported by ASSIMP, some stuff would require so much conversion work
+assimp currently supports the following file formats (note that some loaders lack some features of their formats because 
+some file formats contain data not supported by assimp, some stuff would require so much conversion work
 that it has not been implemented yet and some (most ...) formats lack proper specifications):
 <hr>
 <br><tt>
@@ -67,11 +67,11 @@ http://assimp.sourceforge.net/main_features_formats.html
 
 <sup>1</sup>: Experimental loaders<br>
 <sup>2</sup>: Indicates very limited support - many of the format's features don't map to Assimp's data structures.<br>
-<sup>3</sup>: These formats support animations, but ASSIMP doesn't yet support them (or they're buggy)<br>
+<sup>3</sup>: These formats support animations, but assimp doesn't yet support them (or they're buggy)<br>
 <br>
 <hr>
 
-ASSIMP is independent of the Operating System by nature, providing a C++ interface for easy integration 
+assimp is independent of the Operating System by nature, providing a C++ interface for easy integration 
 with game engines and a C interface to allow bindings to other programming languages. At the moment the library runs 
 on any little-endian platform including X86/Windows/Linux/Mac and X64/Windows/Linux/Mac. Special attention 
 was paid to keep the library as free as possible from dependencies. 
@@ -79,7 +79,7 @@ was paid to keep the library as free as possible from dependencies.
 Big endian systems such as PPC-Macs or PPC-Linux systems are not officially supported at the moment. However, most 
 formats handle the required endian conversion correctly, so large parts of the library should work.
 
-The ASSIMP linker library and viewer application are provided under the BSD 3-clause license. This basically means
+The assimp linker library and viewer application are provided under the BSD 3-clause license. This basically means
 that you are free to use it in open- or closed-source projects, for commercial or non-commercial purposes as you like
 as long as you retain the license informations and take own responsibility for what you do with it. For details see
 the LICENSE file.
@@ -89,9 +89,9 @@ but not all of them are *open-source*. If there's an accompagning '<file>\source
 
 @section main_install Installation
 
-ASSIMP can be used in two ways: linking against the pre-built libraries or building the library on your own. The former 
-option is the easiest, but the ASSIMP distribution contains pre-built libraries only for Visual C++ 2005 and 2008. For other
-compilers you'll have to build ASSIMP for yourself. Which is hopefully as hassle-free as the other way, but needs a bit 
+assimp can be used in two ways: linking against the pre-built libraries or building the library on your own. The former 
+option is the easiest, but the assimp distribution contains pre-built libraries only for Visual C++ 2005 and 2008. For other
+compilers you'll have to build assimp for yourself. Which is hopefully as hassle-free as the other way, but needs a bit 
 more work. Both ways are described at the @link install Installation page. @endlink
 
 @section main_usage Usage
@@ -111,7 +111,7 @@ point from where you can access all the various data types that a scene/model fi
 
 There are many 3d file formats in the world, and we're happy to support as many as possible. If you need support for
 a particular file format, why not implement it yourself and add it to the library? Writing importer plugins for
-ASSIMP is considerably easy, as the whole postprocessing infrastructure is available and does much of the work for you.
+assimp is considerably easy, as the whole postprocessing infrastructure is available and does much of the work for you.
 See the @link extend Extending the library @endlink page for more information.
 
 
@@ -134,12 +134,12 @@ assimp-discussions</a>.
 @section install_prebuilt Using the pre-built libraries with Visual C++ 8/9
 
 If you develop at Visual Studio 2005 or 2008, you can simply use the pre-built linker libraries provided in the distribution.
-Extract all files to a place of your choice. A directory called "ASSIMP" will be created there. Add the ASSIMP/include path
+Extract all files to a place of your choice. A directory called "assimp" will be created there. Add the assimp/include path
 to your include paths (Menu-&gt;Extras-&gt;Options-&gt;Projects and Solutions-&gt;VC++ Directories-&gt;Include files)
-and the ASSIMP/lib/&lt;Compiler&gt; path to your linker paths (Menu-&gt;Extras-&gt;Options-&gt;Projects and Solutions-&gt;VC++ Directories-&gt;Library files).
+and the assimp/lib/&lt;Compiler&gt; path to your linker paths (Menu-&gt;Extras-&gt;Options-&gt;Projects and Solutions-&gt;VC++ Directories-&gt;Library files).
 This is neccessary only once to setup all paths inside you IDE.
 
-To use the library in your C++ project you have to include either &lt;assimp.hpp&gt; or &lt;assimp.h&gt; plus some others starting with &lt;aiTypes.h&gt;.
+To use the library in your C++ project you have to include either &lt;assimp/Importer.hpp&gt; or &lt;assimp/cimport.h&gt; plus some others starting with &lt;types.h&gt;.
 If you set up your IDE correctly the compiler should be able to find the files. Then you have to add the linker library to your
 project dependencies. Link to <assimp_root>/lib/<config-name>/assimp.lib. config-name is one of the predefined
 project configs. For static linking, use release/debug. See the sections below on this page for more information on the
@@ -148,7 +148,7 @@ If done correctly you should now be able to compile, link,
 run and use the application. If the linker complains about some integral functions being defined twice you propably have
 mixed the runtimes. Recheck the project configuration (project properties -&gt; C++ -&gt; Code generation -&gt; Runtime) if you use 
 static runtimes (Multithreaded / Multithreaded Debug) or dynamic runtimes (Multithreaded DLL / Multithreaded Debug DLL).
-Choose the ASSIMP linker lib accordingly. 
+Choose the assimp linker lib accordingly. 
 <br><br>
 Please don't forget to also read the @ref assimp_stl section on MSVC and the STL.
 
@@ -157,7 +157,7 @@ Please don't forget to also read the @ref assimp_stl section on MSVC and the STL
 In VC8 and VC9 Microsoft introduced some Standard Library debugging features. A good example are improved iterator checks and
 various useful debug checks. The problem is the performance penalty that incurs with those extra checks.
 
-Most of these security enhancements are active in release builds by default, rendering ASSIMP several times 
+Most of these security enhancements are active in release builds by default, rendering assimp several times 
 slower. However, it is possible to disable them by setting
 
 @code
@@ -166,14 +166,14 @@ _SECURE_SCL=0
 @endcode
 
 in the preprocessor options (or alternatively in the source code, just before the STL is included for the first time).
-<b>ASSIMP's vc8 and vc9 configs enable these flags by default</b>.
+<b>assimp's vc8 and vc9 configs enable these flags by default</b>.
 
-<i>If you're linking statically against ASSIMP:</i> Make sure your applications uses the same STl settings! 
+<i>If you're linking statically against assimp:</i> Make sure your applications uses the same STl settings! 
 If you do not, there are two binary incompatible STL versions mangled together and you'll crash. 
-Alternatively you can disable the fast STL settings for ASSIMP by removing the 'FastSTL' property sheet from
+Alternatively you can disable the fast STL settings for assimp by removing the 'FastSTL' property sheet from
 the vc project file.
 
-<i>If you're using ASSIMP in a DLL/SO:</i> It's ok. There's no STL used in the binary DLL/SO interface, so it doesn't care whether
+<i>If you're using assimp in a DLL/SO:</i> It's ok. There's no STL used in the binary DLL/SO interface, so it doesn't care whether
 your application uses the same STL settings or not.
 <br><br>
 Another option is to build against a different STL implementation, for example STlport. There's a special 
@@ -195,14 +195,14 @@ implementations of the various boost utility classes used. However, you'll loose
 So, if you can use boost, you should use boost. Otherwise, See the @link use_noboost NoBoost-Section @endlink 
 later on this page for the details of the workaround.
 
-Once boost is working, you have to set up a project for the ASSIMP library in your favorite IDE. If you use VC2005 or
+Once boost is working, you have to set up a project for the assimp library in your favorite IDE. If you use VC2005 or
 VC2008, you can simply load the solution or project files in the workspaces/ folder, otherwise you have to create a new 
 package and add all the headers and source files from the include/ and code/ directories. Set the temporary output folder
 to obj/, for example, and redirect the output folder to bin/. Then build the library - it should compile and link fine.
 
 The last step is to integrate the library into your project. This is basically the same task as described in the 
 "Using the pre-built libraries" section above: add the include/ and bin/ directories to your IDE's paths so that the compiler can find
-the library files. Alternatively you can simply add the ASSIMP project to your project's overall solution and build it inside
+the library files. Alternatively you can simply add the assimp project to your project's overall solution and build it inside
 your solution.
 
 
@@ -219,7 +219,7 @@ The Boost-Workaround consists of dummy replacements for some boost utility templ
  - boost.tuple
  - boost.make_shared
 
-These implementations are very limited and are not intended for use outside ASSIMP. A compiler
+These implementations are very limited and are not intended for use outside assimp. A compiler
 with full support for partial template specializations is required. To enable the workaround, put the following in
 your compiler's list of predefined macros: 
 @code
@@ -228,7 +228,7 @@ your compiler's list of predefined macros:
 <br>
 If you're working with the provided solutions for Visual Studio use the <i>-noboost</i> build configs. <br>
 
-<b>ASSIMP_BUILD_BOOST_WORKAROUND</b> implies <b>ASSIMP_BUILD_SINGLETHREADED</b>. <br>
+<b>assimp_BUILD_BOOST_WORKAROUND</b> implies <b>assimp_BUILD_SINGLETHREADED</b>. <br>
 See the @ref assimp_st section
 for more details.
 
@@ -237,7 +237,7 @@ for more details.
 
 @section assimp_dll Windows DLL Build
 
-ASSIMP can be built as DLL. You just need to select a -dll config from the list of project
+assimp can be built as DLL. You just need to select a -dll config from the list of project
 configs and you're fine.
 
 <b>NOTE:</b> Theoretically, assimp-dll can be used with multithreaded (non-dll) runtime libraries, 
@@ -252,7 +252,7 @@ all major compilers and platforms. To get it, download the latest release from
 Usually you'll just need to run 'configure' + a makefile (see their README for more details).
 Don't miss to add <stlport_root>/stlport to your compiler's default include paths - <b>prior</b>
 to the directory where your compiler vendor's headers lie. Do the same for  <stlport_root>/lib and
-recompile ASSIMP. To ensure you're really building against STLport see aiGetCompileFlags().
+recompile assimp. To ensure you're really building against STLport see aiGetCompileFlags().
 <br>
 In our testing, STLport builds tend to be a bit faster than builds against Microsoft's
 C++ Standard Library.
@@ -265,7 +265,7 @@ C++ Standard Library.
 
 @section access_cpp Access by C++ class interface
 
-The ASSIMP library can be accessed by both a class or flat function interface. The C++ class
+The assimp library can be accessed by both a class or flat function interface. The C++ class
 interface is the preferred way of interaction: you create an instance of class Assimp::Importer, 
 maybe adjust some settings of it and then call Assimp::Importer::ReadFile(). The class will
 read the files and process its data, handing back the imported data as a pointer to an aiScene 
@@ -276,9 +276,9 @@ results and then simply let it go out of scope.
 
 C++ example:
 @code
-#include <assimp.hpp>      // C++ importer interface
-#include <aiScene.h>       // Output data structure
-#include <aiPostProcess.h> // Post processing flags
+#include <assimp/Importer.hpp>      // C++ importer interface
+#include <assimp/scene.h>           // Output data structure
+#include <assimp/postprocess.h>     // Post processing flags
 
 bool DoTheImportThing( const std::string& pFile)
 {
@@ -309,7 +309,7 @@ bool DoTheImportThing( const std::string& pFile)
 }
 @endcode
 
-What exactly is read from the files and how you interpret it is described at the @ref data page. @endlink The post processing steps that the ASSIMP library can apply to the
+What exactly is read from the files and how you interpret it is described at the @ref data page. @endlink The post processing steps that the assimp library can apply to the
 imported data are listed at #aiPostProcessSteps. See the @ref pp Post proccessing page for more details.
 
 Note that the aiScene data structure returned is declared 'const'. Yes, you can get rid of 
@@ -327,9 +327,9 @@ imported scene to clean up all resources associated with the import.
 
 C example:
 @code
-#include <assimp.h>        // Plain-C interface
-#include <aiScene.h>       // Output data structure
-#include <aiPostProcess.h> // Post processing flags
+#include <assimp/cimport.h>        // Plain-C interface
+#include <assimp/scene.h>          // Output data structure
+#include <assimp/postprocess.h>    // Post processing flags
 
 bool DoTheImportThing( const char* pFile)
 {
@@ -360,18 +360,18 @@ bool DoTheImportThing( const char* pFile)
 
 @section custom_io Using custom IO logic with the C++ class interface
 
-The ASSIMP library needs to access files internally. This of course applies to the file you want
+The assimp library needs to access files internally. This of course applies to the file you want
 to read, but also to additional files in the same folder for certain file formats. By default,
 standard C/C++ IO logic is used to access these files. If your application works in a special
 environment where custom logic is needed to access the specified files, you have to supply 
 custom implementations of IOStream and IOSystem. A shortened example might look like this:
 
 @code
-#include <IOStream.h>
-#include <IOSystem.h>
+#include <assimp/IOStream.hpp>
+#include <assimp/IOSystem.hpp>
 
 // My own implementation of IOStream
-class MyIOStream : public ASSIMP::IOStream
+class MyIOStream : public Assimp::IOStream
 {
   friend class MyIOSystem;
 
@@ -390,7 +390,7 @@ public:
 };
 
 // Fisher Price - My First Filesystem
-class MyIOSystem : public ASSIMP::IOSystem
+class MyIOSystem : public Assimp::IOSystem
 {
   MyIOSystem() { ... }
   ~MyIOSystem() { ... }
@@ -436,17 +436,17 @@ The C interface also provides a way to override the file system. Control is not 
 surely enough for almost any purpose. The process is simple:
 
 <ul>
-<li> Include aiFileIO.h
+<li> Include cfileio.h
 <li> Fill an aiFileIO structure with custom file system callbacks (they're self-explanatory as they work similar to the CRT's fXXX functions)
-<li> .. and pass it as last parameter to #aiImportFileEx
+<li> .. and pass it as parameter to #aiImportFileEx
 </ul>
 
 @section  logging Logging 
 
-The ASSIMP library provides an easy mechanism to log messages. For instance if you want to check the state of your 
+The assimp library provides an easy mechanism to log messages. For instance if you want to check the state of your 
 import and you just want to see, after which preprocessing step the import-process was aborted you can take a look 
 into the log. 
-Per default the ASSIMP-library provides a default log implementation, where you can log your user specific message
+Per default the assimp-library provides a default log implementation, where you can log your user specific message
 by calling it as a singleton with the requested logging-type. To see how this works take a look to this:
 
 @code
@@ -465,7 +465,7 @@ DefaultLogger::kill();
 At first you have to create the default-logger-instance (create). Now you are ready to rock and can log a 
 little bit around. After that you should kill it to release the singleton instance.
 
-If you want to integrate the ASSIMP-log into your own GUI it my be helpful to have a mechanism writing
+If you want to integrate the assimp-log into your own GUI it my be helpful to have a mechanism writing
 the logs into your own log windows. The logger interface provides this by implementing an interface called LogStream.
 You can attach and detach this log stream to the default-logger instance or any implementation derived from Logger. 
 Just derivate your own logger from the abstract base class LogStream and overwrite the write-method:
@@ -539,10 +539,10 @@ kind kind of logging might decrease import performance.
 /** 
 @page data Data Structures
 
-The ASSIMP library returns the imported data in a collection of structures. aiScene forms the root
+The assimp library returns the imported data in a collection of structures. aiScene forms the root
 of the data, from here you gain access to all the nodes, meshes, materials, animations or textures
 that were read from the imported file. The aiScene is returned from a successful call to 
-ASSIMP::Importer::ReadFile(), aiImportFile() or aiImportFileEx() - see the @link usage Usage page @endlink
+assimp::Importer::ReadFile(), aiImportFile() or aiImportFileEx() - see the @link usage Usage page @endlink
 for further information on how to use the library.
 
 By default, all 3D data is provided in a right-handed coordinate system such as OpenGL uses. In
@@ -663,7 +663,7 @@ by the contents of the imported file: by default there are only those data chann
 that were also found in the file. The only channels guarenteed to be always present are aiMesh::mVertices
 and aiMesh::mFaces. You can test for the presence of other data by testing the pointers against NULL
 or use the helper functions provided by aiMesh. You may also specify several post processing flags 
-at Importer::ReadFile() to let ASSIMP calculate or recalculate additional data channels for you.
+at Importer::ReadFile() to let assimp calculate or recalculate additional data channels for you.
 
 At the moment, a single aiMesh may contain a set of triangles and polygons. A single vertex does always
 have a position. In addition it may have one normal, one tangent and bitangent, zero to AI_MAX_NUMBER_OF_TEXTURECOORDS
@@ -761,7 +761,7 @@ decoders (such as libjpeg, libpng, D3DX, DevIL) are required to load theses text
 aiTexture::mWidth specifies the size of the texture data in bytes, aiTexture::pcData is
 a pointer to the raw image data and aiTexture::achFormatHint is either zeroed or
 contains the most common file extension of the embedded texture's format. This value is only
-set if ASSIMP is able to determine the file format.
+set if assimp is able to determine the file format.
 */
 
 
@@ -774,7 +774,7 @@ All materials are stored in an array of aiMaterial inside the aiScene.
 Each aiMesh refers to one 
 material by its index in the array. Due to the vastly diverging definitions and usages of material
 parameters there is no hard definition of a material structure. Instead a material is defined by
-a set of properties accessible by their names. Have a look at aiMaterial.h to see what types of 
+a set of properties accessible by their names. Have a look at assimp/material.h to see what types of 
 properties are defined. In this file there are also various functions defined to test for the
 presence of certain properties in a material and retrieve their values.
 
@@ -1072,7 +1072,7 @@ aiGetMaterialColor(mat,AI_MATKEY_COLOR_DIFFUSE,&color);
 @section uvwsrc How to map UV channels to textures (MATKEY_UVWSRC)
 
 The MATKEY_UVWSRC property is only present if the source format doesn't specify an explicit mapping from
-textures to UV channels. Many formats don't do this and ASSIMP is not aware of a perfect rule either.
+textures to UV channels. Many formats don't do this and assimp is not aware of a perfect rule either.
 
 Your handling of UV channels needs to be flexible therefore. Our recommendation is to use logic like this
 to handle most cases properly:
@@ -1236,11 +1236,11 @@ float4 PimpMyPixel (float4 prev)
 
 @section perf_overview Overview
 
-This page discusses general performance issues related to ASSIMP.
+This page discusses general performance issues related to assimp.
 
 @section perf_profile Profiling
 
-ASSIMP has built-in support for <i>very</i> basic profiling and time measurement. To turn it on, set the <tt>GLOB_MEASURE_TIME</tt>
+assimp has built-in support for <i>very</i> basic profiling and time measurement. To turn it on, set the <tt>GLOB_MEASURE_TIME</tt>
 configuration switch to <tt>true</tt> (nonzero). Results are dumped to the log file, so you need to setup
 an appropriate logger implementation with at least one output stream first (see the @link logging Logging Page @endlink
 for the details.). 
@@ -1317,7 +1317,7 @@ Debug, T5488: END   `total`, dt= 11.269 s
 In this particular example only one fourth of the total import time was spent on the actual importing, while the rest of the
 time got consumed by the #aiProcess_Triangulate, #aiProcess_JoinIdenticalVertices and #aiProcess_ImproveCacheLocality 
 postprocessing steps. A wise selection of postprocessing steps is therefore essential to getting good performance. 
-Of course this depends on the individual requirements of your application, in many of the typical use cases of ASSIMP performance won't 
+Of course this depends on the individual requirements of your application, in many of the typical use cases of assimp performance won't 
 matter (i.e. in an offline content pipeline).
 */
 
@@ -1326,7 +1326,7 @@ matter (i.e. in an offline content pipeline).
 
 @section overview Overview
 
-This page discusses both ASSIMPs scalability in threaded environments and the precautions to be taken in order to
+This page discusses both assimps scalability in threaded environments and the precautions to be taken in order to
 use it from multiple threads concurrently.
 
 @section threadsafety Thread-safety / using Assimp concurrently from several threads
@@ -1337,7 +1337,7 @@ following prerequisites are fulfilled:
  - Users of the C++-API should ensure that they use a dedicated #Assimp::Importer instance for each thread. Constructing instances of #Assimp::Importer is expensive, so it might be a good idea to
    let every thread maintain its own thread-local instance (which can be used to
    load as many files as necessary).
- - The C-API is thread safe as long as AI_C_THREADSAFE is defined (default). 
+ - The C-API is thread safe.
  - When supplying custom IO logic, one must make sure the underlying implementation is thread-safe.
  - Custom log streams or logger replacements have to be thread-safe, too.
 
@@ -1357,11 +1357,11 @@ Internal multi-threading is not currently implemented.
 /**
 @page res Resources
 
-This page lists some useful resources for ASSIMP. Note that, even though the core team has an eye on them, 
+This page lists some useful resources for assimp. Note that, even though the core team has an eye on them, 
 we cannot guarantee the accuracy of third-party information. If in doubt, it's best to ask either on the 
 mailing list or on our forums on SF.net.
 
- - ASSIMP comes with some sample applications, these can be found in the <i>./samples</i> folder. Don't forget to read the <i>README</i> file.
+ - assimp comes with some sample applications, these can be found in the <i>./samples</i> folder. Don't forget to read the <i>README</i> file.
  - http://www.drivenbynostalgia.com/files/AssimpOpenGLDemo.rar - OpenGl animation sample using the library's animation import facilities.
  - http://nolimitsdesigns.com/game-design/open-asset-import-library-animation-loader/ is another utility to
    simplify animation playback.
@@ -1371,7 +1371,7 @@ mailing list or on our forums on SF.net.
 
 
 /**
-@page importer_notes Remarks on individual importers
+@page importer_notes Importer Notes
 
 <hr>
 @section blender Blender
@@ -1379,12 +1379,12 @@ mailing list or on our forums on SF.net.
 This section contains implementation notes for the Blender3D importer. 
 @subsection bl_overview Overview
 
-ASSIMP provides a self-contained reimplementation of Blender's so called SDNA system (http://www.blender.org/development/architecture/notes-on-sdna/). 
+assimp provides a self-contained reimplementation of Blender's so called SDNA system (http://www.blender.org/development/architecture/notes-on-sdna/). 
 SDNA allows Blender to be fully backward and forward compatible and to exchange
 files across all platforms. The BLEND format is thus a non-trivial binary monster and the loader tries to read the most of it, 
 naturally limited by the scope of the #aiScene output data structure.
 Consequently, if Blender is the only modeling tool in your asset work flow, consider writing a 
-custom exporter from Blender if ASSIMPs format coverage does not meet the requirements.
+custom exporter from Blender if assimps format coverage does not meet the requirements.
 
 @subsection bl_status Current status
 
@@ -1496,7 +1496,7 @@ source group for your importer and put them also to ADD_LIBRARY( assimp SHARED))
 <li>Open Importer.cpp and include your header just below the <i>(include_new_importers_here)</i> line, 
 guarded by a #define 
 @code
-#if (!defined ASSIMP_BUILD_NO_FormatName_IMPORTER)
+#if (!defined assimp_BUILD_NO_FormatName_IMPORTER)
 	...
 #endif
 @endcode
@@ -1533,7 +1533,7 @@ Done! Please, share your loader that everyone can profit from it!
 @section properties Properties
 
 You can use properties to chance the behavior of you importer. In order to do so, you have to overide BaseImporter::SetupProperties, and specify
-you custom properties in aiConfig.h. Just have a look to the other AI_CONFIG_IMPORT_* defines and you will understand, how it works.
+you custom properties in config.h. Just have a look to the other AI_CONFIG_IMPORT_* defines and you will understand, how it works.
 
 The properties can be set with Importer::SetProperty***() and can be accessed in your SetupProperties function with Importer::GetProperty***(). You can
 store the properties as a member variable of your importer, they are thread safe.
@@ -1612,7 +1612,7 @@ The boost whitelist:
 </ul>
 
 (if you happen to need something else, i.e. boost::thread, make this an optional feature.
-<tt>ASSIMP_BUILD_BOOST_WORKAROUND</tt> is defined for <i>-noboost</i> builds)
+<tt>assimp_BUILD_BOOST_WORKAROUND</tt> is defined for <i>-noboost</i> builds)
 
 @section appa Appendix A - Template for BaseImporter's abstract methods
 

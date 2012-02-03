@@ -216,7 +216,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
 			face.mIndices = NULL;
 			continue;
-		} 
+		} /* does not handle concave quads
 		// optimized code for quadrilaterals
 		else if ( face.mNumIndices == 4) {
 			aiFace& nface = *curOut++;
@@ -233,7 +233,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
 			face.mIndices = NULL;
 			continue;
-		}
+		} */
 		else
 		{
 			// A polygon with more than 3 vertices can be either concave or convex.

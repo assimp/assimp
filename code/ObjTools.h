@@ -146,7 +146,8 @@ inline char_t skipLine( char_t it, char_t end, unsigned int &uiLine )
 	return it;
 }
 
-/**	@brief	Get a name, must be separated with a blank.
+/**	@brief	Get a name from the current line. Preserve space in the middle,
+ *    but trim it at the end.
  *	@param	it		set to current position
  *	@param	end		set to end of scratch buffer for readout
  *	@param	name	Separated name
@@ -161,8 +162,14 @@ inline char_t getName( char_t it, char_t end, std::string &name )
 		return end;
 	
 	char *pStart = &( *it );
-	while ( !isEndOfBuffer( it, end ) && !isSeparator( *it ) )
+	while ( !isEndOfBuffer( it, end ) && !isNewLine( *it ) ) {
 		++it;
+	}
+
+	while(isEndOfBuffer( it, end ) || isNewLine( *it ) || isSeparator(*it)) {
+		--it;
+	}
+	++it;
 
 	// Get name
 	std::string strName( pStart, &(*it) );

@@ -1,0 +1,99 @@
+# Max2Mtl Version 4.0 Mar 10th, 2001
+#
+newmtl Material name with many, many spaces 
+Ka  0.2 0.2 0.2
+Kd  0.2 0.2 0.2
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+#
+newmtl Door
+Ka  0.8 0.6 0.4
+Kd  0.8 0.6 0.4
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+#
+newmtl Floor
+Ka  0.9 0.9 0.7
+Kd  0.9 0.9 0.7
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+#
+newmtl Rafter
+Ka  0.8 0.5 0.2
+Kd  0.8 0.5 0.2
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+#
+newmtl Ridging
+Ka  0.4 0.3 0.3
+Kd  0.4 0.3 0.3
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+#
+newmtl Sill
+Ka  0.2 0.2 0.2
+Kd  0.2 0.2 0.2
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+#
+newmtl Site
+Ka  0.5 0.7 0.4
+Kd  0.5 0.7 0.4
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+#
+newmtl Roof
+Ka  0.9 0.9 0.6
+Kd  0.9 0.9 0.6
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+#
+newmtl Terraindæk
+Ka  0.4 0.3 0.3
+Kd  0.4 0.3 0.3
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+#
+newmtl Wall-inner
+Ka  0.8 0.7 0.5
+Kd  0.8 0.7 0.5
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+#
+newmtl Wall-out
+Ka  0.5 0.0 0.0
+Kd  0.5 0.0 0.0
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+#
+newmtl Windows
+Ka  0.6 0.7 0.8
+Kd  0.6 0.7 0.8
+Ks  0.9 0.9 0.9
+d  0.5
+Ns  0.0
+illum 2
+#
+# EOF

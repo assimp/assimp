@@ -49,9 +49,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <list>
 
 // public ASSIMP headers
-#include "../include/aiTypes.h"
-#include "../include/aiMesh.h"
-#include "../include/aiAnim.h"
+#include "../include/assimp/aiTypes.h"
+#include "../include/assimp/aiMesh.h"
+#include "../include/assimp/aiAnim.h"
 
 // for some helper routines like IsSpace()
 #include "ParsingUtils.h"

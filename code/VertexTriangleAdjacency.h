@@ -43,8 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_VTADJACENCY_H_INC
 
 #include "BaseProcess.h"
-#include "../include/aiTypes.h"
-#include "../include/aiAssert.h"
+#include "../include/assimp/aiTypes.h"
+#include "../include/assimp/aiAssert.h"
 
 struct aiMesh;
 namespace Assimp	{

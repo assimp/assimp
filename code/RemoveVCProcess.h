@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_REMOVEVCPROCESS_H_INCLUDED
 
 #include "BaseProcess.h"
-#include "../include/aiMesh.h"
+#include "../include/assimp/aiMesh.h"
 
 class RemoveVCProcessTest;
 namespace Assimp	{

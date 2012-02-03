@@ -46,10 +46,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
-#include "../include/aiTypes.h"
-#include "../include/aiQuaternion.h"
-#include "../include/aiMesh.h"
-#include "../include/aiAnim.h"
+#include "../include/assimp/aiTypes.h"
+#include "../include/assimp/aiQuaternion.h"
+#include "../include/assimp/aiMesh.h"
+#include "../include/assimp/aiAnim.h"
 
 namespace Assimp
 {

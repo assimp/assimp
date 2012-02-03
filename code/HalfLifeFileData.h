@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MDLFILEHELPER2_H_INC
 #define AI_MDLFILEHELPER2_H_INC
 
-#include "./../include/Compiler/pushpack1.h"
+#include "./../include/assimp/Compiler/pushpack1.h"
 
 #include "MDLFileData.h"
 
@@ -142,7 +142,7 @@ struct Header_HL2
 	int32_t			transitionindex;
 } PACK_STRUCT;
 
-#include "./../include/Compiler/poppack1.h"
+#include "./../include/assimp/Compiler/poppack1.h"
 
 }
 } // end namespaces

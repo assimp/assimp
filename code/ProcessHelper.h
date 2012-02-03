@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_PROCESS_HELPER_H_INCLUDED
 #define AI_PROCESS_HELPER_H_INCLUDED
 
-#include "../include/aiPostProcess.h"
+#include "../include/assimp/aiPostProcess.h"
 
 #include "SpatialSort.h"
 #include "BaseProcess.h"

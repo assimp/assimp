@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(ASSIMP_BUILD_NO_EXPORT) && !defined(ASSIMP_BUILD_NO_STL_EXPORTER)
 
 #include "STLExporter.h"
-#include "../include/aiVersion.h"
+#include "../include/assimp/aiVersion.h"
 
 using namespace Assimp;
 namespace Assimp	{

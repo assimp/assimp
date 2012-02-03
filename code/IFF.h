@@ -12,7 +12,7 @@
 namespace Assimp	{
 namespace IFF		{
 
-#include "./../include/Compiler/pushpack1.h"
+#include "./../include/assimp/Compiler/pushpack1.h"
 
 /////////////////////////////////////////////////////////////////////////////////
 //! Describes an IFF chunk header
@@ -39,7 +39,7 @@ struct SubChunkHeader
 	uint16_t length;
 } PACK_STRUCT;
 
-#include "./../include/Compiler/poppack1.h"
+#include "./../include/assimp/Compiler/poppack1.h"
 
 
 #define AI_IFF_FOURCC(a,b,c,d) ((uint32_t) (((uint8_t)a << 24u) | \

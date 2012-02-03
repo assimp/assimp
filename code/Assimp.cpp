@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "AssimpPCH.h"
-#include "../include/assimp.h"
+#include "../include/assimp/assimp.h"
 
 #include "GenericProperty.h"
 #include "CInterfaceIOWrapper.h"

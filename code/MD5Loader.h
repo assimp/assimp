@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "MD5Parser.h"
 
-#include "../include/aiTypes.h"
+#include "../include/assimp/aiTypes.h"
 
 namespace Assimp	{
 

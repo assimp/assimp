@@ -45,9 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_HMPLOADER_H_INCLUDED
 
 // public ASSIMP headers
-#include "../include/aiTypes.h"
-#include "../include/aiTexture.h"
-#include "../include/aiMaterial.h"
+#include "../include/assimp/aiTypes.h"
+#include "../include/assimp/aiTexture.h"
+#include "../include/assimp/aiMaterial.h"
 
 // internal headers
 #include "BaseImporter.h"

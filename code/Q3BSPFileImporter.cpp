@@ -53,8 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include "../contrib/zlib/zlib.h"
 #endif
 
-#include "../include/aiTypes.h"
-#include "../include/aiMesh.h"
+#include "../include/assimp/aiTypes.h"
+#include "../include/assimp/aiMesh.h"
 #include <vector>
 
 namespace Assimp

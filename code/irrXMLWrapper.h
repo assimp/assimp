@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // some long includes ....
 #include "./../contrib/irrXML/irrXML.h"
-#include "./../include/IOStream.h"
+#include "./../include/assimp/IOStream.h"
 namespace Assimp	{
 
 // ---------------------------------------------------------------------------------

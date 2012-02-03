@@ -46,8 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include "BaseProcess.h"
 
-#include "../include/aiMesh.h"
-#include "../include/aiScene.h"
+#include "../include/assimp/aiMesh.h"
+#include "../include/assimp/aiScene.h"
 
 class SplitLargeMeshesTest;
 namespace Assimp

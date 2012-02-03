@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_CIOSYSTEM_H_INCLUDED
 #define AI_CIOSYSTEM_H_INCLUDED
 
-#include "../include/aiFileIO.h"
+#include "../include/assimp/aiFileIO.h"
 
 namespace Assimp	{
 	

@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * using exactly the same settings in aiDefines.h. Settings in AssimpPCH.h may differ,
  * they won't affect the public API.
  */
-#include "../include/aiDefines.h"
+#include "../include/assimp/aiDefines.h"
 
 // Include our stdint.h replacement header for MSVC, take the global header for gcc/mingw
 #if defined( _MSC_VER) && (_MSC_VER < 1600)
@@ -132,13 +132,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/lexical_cast.hpp>
 
 // Public ASSIMP headers
-#include "../include/DefaultLogger.h"
-#include "../include/IOStream.h"
-#include "../include/IOSystem.h"
-#include "../include/aiScene.h"
-#include "../include/aiPostProcess.h"
-#include "../include/assimp.hpp"
-#include "../include/export.hpp"
+#include "../include/assimp/DefaultLogger.h"
+#include "../include/assimp/IOStream.h"
+#include "../include/assimp/IOSystem.h"
+#include "../include/assimp/aiScene.h"
+#include "../include/assimp/aiPostProcess.h"
+#include "../include/assimp/assimp.hpp"
+#include "../include/assimp/export.hpp"
 
 // Internal utility headers
 #include "BaseImporter.h"

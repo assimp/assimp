@@ -43,8 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BYTESWAP_H_INC
 #define AI_BYTESWAP_H_INC
 
-#include "../include/aiAssert.h"
-#include "../include/aiTypes.h"
+#include "../include/assimp/aiAssert.h"
+#include "../include/assimp/aiTypes.h"
 
 #if _MSC_VER >= 1400 
 #include <stdlib.h>

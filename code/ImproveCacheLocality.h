@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_IMPROVECACHELOCALITY_H_INC
 
 #include "BaseProcess.h"
-#include "../include/aiTypes.h"
+#include "../include/assimp/aiTypes.h"
 
 struct aiMesh;
 

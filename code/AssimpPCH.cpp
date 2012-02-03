@@ -2,7 +2,7 @@
 // Actually just a dummy, used by the compiler to build the precompiled header.
 
 #include "AssimpPCH.h"
-#include "./../include/aiVersion.h"
+#include "./../include/assimp/aiVersion.h"
 
 // --------------------------------------------------------------------------------
 // Legal information string - dont't remove this.

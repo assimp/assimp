@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_DEFAULTPROGRESSHANDLER_H
 #define INCLUDED_AI_DEFAULTPROGRESSHANDLER_H
 
-#include "../include/ProgressHandler.h"
+#include "../include/assimp/ProgressHandler.h"
 namespace Assimp	{
 
 // ------------------------------------------------------------------------------------

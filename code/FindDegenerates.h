@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_FINDDEGENERATESPROCESS_H_INC
 
 #include "BaseProcess.h"
-#include "../include/aiMesh.h"
+#include "../include/assimp/aiMesh.h"
 
 class FindDegeneratesProcessTest;
 namespace Assimp	{

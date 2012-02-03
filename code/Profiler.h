@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "boost/timer.hpp"
 
-#include "../include/DefaultLogger.h"
+#include "../include/assimp/DefaultLogger.h"
 #include "TinyFormatter.h"
 
 namespace Assimp {

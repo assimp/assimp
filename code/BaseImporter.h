@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <map>
 #include <vector>
-#include "./../include/aiTypes.h"
+#include "./../include/assimp/aiTypes.h"
 
 struct aiScene;
 

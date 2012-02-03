@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjTools.h"
 #include "ObjFileData.h"
 #include "ParsingUtils.h"
-#include "../include/aiTypes.h"
+#include "../include/assimp/aiTypes.h"
 #include "DefaultIOSystem.h"
 
 namespace Assimp	

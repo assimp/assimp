@@ -43,8 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 #include <map>
-#include "../include/aiTypes.h"
-#include "../include/aiMesh.h"
+#include "../include/assimp/aiTypes.h"
+#include "../include/assimp/aiMesh.h"
 
 namespace Assimp
 {

@@ -8,7 +8,7 @@ SET( LIBRARY_SOVERSION "2" )
 # 3) Add libassimp using the file lists (eliminates duplication of file names between
 #    source groups and library command)
 #
-SET( HEADER_PATH ../include )
+SET( HEADER_PATH ../include/assimp )
 
 SET( COMPILER_HEADERS
 	${HEADER_PATH}/Compiler/pushpack1.h

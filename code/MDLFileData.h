@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MDLFILEHELPER_H_INC
 #define AI_MDLFILEHELPER_H_INC
 
-#include "./../include/Compiler/pushpack1.h"
+#include "./../include/assimp/Compiler/pushpack1.h"
 
 namespace Assimp	{
 namespace MDL	{
@@ -724,7 +724,7 @@ struct GroupFrame
 	SimpleFrame *frames; 
 } PACK_STRUCT;
 
-#include "./../include/Compiler/poppack1.h"
+#include "./../include/assimp/Compiler/poppack1.h"
 
 // -------------------------------------------------------------------------------------
 /** \struct IntFace_MDL7

@@ -1,5 +1,5 @@
 body, table, div, p, dl {
-	font-family: Lucida Grande, Verdana, Geneva, Arial, sans-serif;
+	font-family: Verdana, Geneva, Arial, sans-serif;
 	font-size: 12px;
 }
 
@@ -7,16 +7,18 @@ body, table, div, p, dl {
 
 h1 {
 	text-align: center;
-	font-size: 150%;
+	font-size: 160%;
 	color: black;
 }
 
 h2 {
-	font-size: 120%;
+	font-size: 140%;
+	font-weight: bold;
 }
 
 h3 {
-	font-size: 100%;
+	font-size: 120%;
+	font-weight: bold;
 }
 
 /* @end */
@@ -126,9 +128,10 @@ div.groupText {
 
 body {
 	background: white;
-	color: #333333;
+	color: #252525;
 	margin-right: 20px;
 	margin-left: 20px;
+	margin: 20px;
 }
 
 td.indexkey {

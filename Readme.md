@@ -1,5 +1,5 @@
 Open Asset Import Library (_assimp_) 
-========================================================================
+========
 
 
     Table of contents
@@ -14,8 +14,7 @@ Open Asset Import Library (_assimp_)
 
 
 
-1. Overview
-=============
+### 1. Overview ###
 
 
 Open Asset Import Library is a Open Source library designed to load various 3d file formats and convert them into a shared, in-memory format. It supports more than 30 file formats. It also supports exporting files to a few selected file formats.
@@ -25,8 +24,7 @@ Its short name is _assimp_, which is an unintended joke (the abbreviation is der
 __Note__: this `README` refers to the file structure used by release packages, which differs in some points from the development trunk.
 
 
-1.1 Supported file formats
--------------
+#### 1.1 Supported file formats ####
 
 The library provides importers for a lot of file formats, including:
 
@@ -66,8 +64,8 @@ See [the full list here](http://assimp.sourceforge.net/main_features_formats.htm
 
 
 
-1.2 Repository structure
--------------
+#### 1.2 Repository structure ####
+
 
 Open Asset Import Library is implemented in C++ (but provides both a C and a 
 C++ish interface). The directory structure is:
@@ -89,15 +87,15 @@ C++ish interface). The directory structure is:
 
 
 
-2. Build the library
-=============
+### 2. Build the library ###
+
 
 Take a look into the `INSTALL` file. Or fire up CMake with the usual steps.
 
 
 
-3. Where to get help
-=============
+### 3. Where to get help ###
+
 
 For more information, visit [our website](http://assimp.sourceforge.net/). Or check out the `./doc`- folder, which contains the official documentation in HTML format.
 (CHMs for Windows are included in some release packages and should be located right here in the root folder).
@@ -114,15 +112,14 @@ For development stuff, there is also a mailing list, _assimp-discussions_
 
 
 
-4. License
-=============
+### 4. License ###
 
 The license of the Asset Import Library is based on the modified, __3-clause BSD__-License, which is a very liberal license. An _informal_ summary is: do whatever you want, but include Assimp's license text with your product - and don't sue us if our code doesn't work.
 
 Note that, unlike LGPLed code, you may link statically to Assimp.
 For the formal details, see the `LICENSE` file. 
 
-------------------------------
+
 ------------------------------
 
 (This repository is a mirror of the SVN repository located [here](https://assimp.svn.sourceforge.net/svnroot/assimp). Thanks to [klickverbot](https://github.com/klickverbot) for setting this up!)

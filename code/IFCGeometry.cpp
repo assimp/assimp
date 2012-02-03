@@ -64,7 +64,6 @@ namespace Assimp {
 		//#define to_int64(p)  (static_cast<ulong64>( std::max( 0., std::min( static_cast<IfcFloat>((p)), 1.) ) * max_ulong64 ))
 #define to_int64(p)  (static_cast<ulong64>(static_cast<IfcFloat>((p) ) * max_ulong64 ))
 #define from_int64(p) (static_cast<IfcFloat>((p)) / max_ulong64)
-#define from_int64_f(p) (static_cast<IfcFloat>(from_int64((p))))
 
 // ------------------------------------------------------------------------------------------------
 bool ProcessPolyloop(const IfcPolyLoop& loop, TempMesh& meshout, ConversionData& /*conv*/)
@@ -727,6 +726,13 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 				poly.push_back(ClipperLib::IntPoint( to_int64(pip.x), to_int64(pip.y) ));
 			}
 
+			/*
+			ClipperLib::Polygons pol_temp(1), pol_temp2(1);
+			pol_temp[0] = poly;
+
+			ClipperLib::OffsetPolygons(pol_temp,pol_temp2,0.0);
+			poly = pol_temp2[0];
+*/
 			if (ClipperLib::Orientation(poly)) {
 				std::reverse(poly.begin(), poly.end());
 			}
@@ -769,8 +775,8 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 			BOOST_FOREACH(ClipperLib::IntPoint& point, opening) {
 
 				tmpvec.push_back( minv * IfcVector3(
-					vmin.x + from_int64_f(point.X) * vmax.x, 
-					vmin.y + from_int64_f(point.Y) * vmax.y,
+					vmin.x + from_int64(point.X) * vmax.x, 
+					vmin.y + from_int64(point.Y) * vmax.y,
 					coord));
 			}
 
@@ -1115,6 +1121,27 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 }
 
 // ------------------------------------------------------------------------------------------------
+void MergeContours (const std::vector<IfcVector2>& a, const std::vector<IfcVector2>& b, ClipperLib::ExPolygons& out) 
+{
+	ClipperLib::Clipper clipper;
+	ClipperLib::Polygon clip;
+
+	BOOST_FOREACH(const IfcVector2& pip, a) {
+		clip.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
+	}
+
+	clipper.AddPolygon(clip, ClipperLib::ptSubject);
+	clip.clear();
+
+	BOOST_FOREACH(const IfcVector2& pip, b) {
+		clip.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
+	}
+
+	clipper.AddPolygon(clip, ClipperLib::ptSubject);
+	clipper.Execute(ClipperLib::ctUnion, out);
+}
+
+// ------------------------------------------------------------------------------------------------
 bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const std::vector<IfcVector3>& nors, TempMesh& curmesh)
 {
 	std::vector<IfcVector3>& out = curmesh.verts;
@@ -1188,8 +1215,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 		IfcVector2 vpmin,vpmax;
 		MinMaxChooser<IfcVector2>()(vpmin,vpmax);
 
-		contours.push_back(std::vector<IfcVector2>());
-		std::vector<IfcVector2>& contour = contours.back();
+		std::vector<IfcVector2> contour;
 
 		BOOST_FOREACH(const IfcVector3& x, t.profileMesh->verts) {
 			const IfcVector3 v = m * x;
@@ -1209,21 +1235,57 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 		if (field.find(vpmin) != field.end()) {
 			IFCImporter::LogWarn("constraint failure during generation of wall openings, results may be faulty");
 		}
-		field[vpmin] = bbs.size();
-		const BoundingBox& bb = BoundingBox(vpmin,vpmax);
+	
+		BoundingBox bb = BoundingBox(vpmin,vpmax);
 
 		// see if this BB intersects any other, in which case we could not use the Quadrify()
 		// algorithm and would revert to Poly2Tri only.
-		BOOST_FOREACH(const BoundingBox& ibb, bbs) {
-			
+		for (std::vector<BoundingBox>::iterator it = bbs.begin(); it != bbs.end();) {
+			const BoundingBox& ibb = *it;
+
 			if (ibb.first.x < bb.second.x && ibb.second.x > bb.first.x &&
 				ibb.first.y < bb.second.y && ibb.second.y > bb.second.x) {
-				IFCImporter::LogWarn("cannot use quadrify algorithm to generate wall openings due to "  
-					"bounding box overlaps, using poly2tri fallback");
-				return TryAddOpenings_Poly2Tri(openings, nors, curmesh);
+
+				// take these two contours and try to merge them. If they overlap (which 
+				// should not happen, but in fact happens-in-the-real-world [tm] ),
+				// resume using a single contour and a single bounding box.
+				const std::vector<IfcVector2>& other = contours[std::distance(bbs.begin(),it)];
+
+				ClipperLib::ExPolygons poly;
+				MergeContours(contour, other, poly);
+
+				if (poly.size() > 1) {
+					IFCImporter::LogWarn("cannot use quadrify algorithm to generate wall openings due to "  
+						"bounding box overlaps, using poly2tri fallback");
+					return TryAddOpenings_Poly2Tri(openings, nors, curmesh);
+				}
+				else {
+					ai_assert(poly.size());
+
+					IFCImporter::LogDebug("merging oberlapping openings, this should not happen");
+
+					contour.clear();
+					BOOST_FOREACH(const ClipperLib::IntPoint& point, poly[0].outer) {
+						contour.push_back( IfcVector2( from_int64(point.X), from_int64(point.Y)));
+					}
+
+					bb.first = std::min(bb.first, ibb.first);
+					bb.second = std::min(bb.second, ibb.second);
+
+					contours.erase(contours.begin() + std::distance(bbs.begin(),it));
+					it = bbs.erase(it);
+					if (it == bbs.end()) {
+						break;
+					}
+					continue;
+				}
 			}
+			++it;
 		}
 
+		contours.push_back(contour);
+
+		field[bb.first] = bbs.size();
 		bbs.push_back(bb);
 	}
 
@@ -1280,8 +1342,8 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 					iold.push_back(ex.outer.size());
 					BOOST_FOREACH(const ClipperLib::IntPoint& point, ex.outer) {
 						vold.push_back( minv * IfcVector3(
-							vmin.x + from_int64_f(point.X) * vmax.x, 
-							vmin.y + from_int64_f(point.Y) * vmax.y,
+							vmin.x + from_int64(point.X) * vmax.x, 
+							vmin.y + from_int64(point.Y) * vmax.y,
 							coord));
 					}
 				}

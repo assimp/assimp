@@ -619,7 +619,9 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 
 		// build a temporary array of pointers to the start of each vertex's weights
 		typedef std::vector< std::pair<size_t, size_t> > IndexPairVector;
-		std::vector<IndexPairVector::const_iterator> weightStartPerVertex( pSrcController->mWeightCounts.size());
+		std::vector<IndexPairVector::const_iterator> weightStartPerVertex;
+		weightStartPerVertex.resize(pSrcController->mWeightCounts.size(),pSrcController->mWeights.end());
+
 		IndexPairVector::const_iterator pit = pSrcController->mWeights.begin();
 		for( size_t a = 0; a < pSrcController->mWeightCounts.size(); ++a)
 		{

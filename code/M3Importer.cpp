@@ -53,7 +53,8 @@ static const std::string M3Extension = "m3";
 //	Constructor.
 M3Importer::M3Importer() :
 	m_pHead( NULL ),
-	m_pRefs( NULL )
+	m_pRefs( NULL ),
+	m_Buffer()
 {
 	// empty
 }
@@ -70,8 +71,9 @@ M3Importer::~M3Importer()
 //	Check for readable file format.
 bool M3Importer::CanRead( const std::string &rFile, IOSystem* /*pIOHandler*/, bool checkSig ) const
 {
-	if ( !checkSig )
+	if ( !checkSig ) {
 		return SimpleExtensionCheck( rFile, M3Extension.c_str() );
+	}
 
 	return true;
 }
@@ -79,28 +81,32 @@ bool M3Importer::CanRead( const std::string &rFile, IOSystem* /*pIOHandler*/, bo
 // ------------------------------------------------------------------------------------------------
 void M3Importer::GetExtensionList(std::set<std::string>& extensions)
 {
-	extensions.insert("m3");
+	extensions.insert( "m3" );
 }
 
 // ------------------------------------------------------------------------------------------------
 void M3Importer::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler )
 {
+	ai_assert( !pFile.empty() );
+
 	const std::string mode = "rb";
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, mode ) );
-	if ( NULL == file.get() )
+	if ( NULL == file.get() ) {
 		throw DeadlyImportError( "Failed to open file " + pFile + ".");
+	}
 
 	// Get the file-size and validate it, throwing an exception when it fails
-	size_t filesize = file->FileSize();
-	if( filesize  < 1 )
+	const size_t filesize = file->FileSize();
+	if( filesize  < 1 ) {
 		throw DeadlyImportError( "M3-file is too small.");
+	}
 
 	m_Buffer.resize( filesize );
 	size_t readsize = file->Read( &m_Buffer[ 0 ], sizeof( unsigned char ), filesize );
 	ai_assert( readsize == filesize );
 
-	m_pHead = (MD33*)( &m_Buffer[ 0 ] );
-	m_pRefs = (ReferenceEntry*)( &m_Buffer[ 0 ] + m_pHead->ofsRefs );
+	m_pHead = reinterpret_cast<MD33*>( &m_Buffer[ 0 ] );
+	m_pRefs = reinterpret_cast<ReferenceEntry*>( &m_Buffer[ 0 ] + m_pHead->ofsRefs );
 
 	MODL20* pMODL20( NULL );
 	MODL23* pMODL23( NULL );
@@ -116,21 +122,17 @@ void M3Importer::InternReadFile( const std::string& pFile, aiScene* pScene, IOSy
 	uint32 nFaces = 0;
 
 	bool ok = true;
-	switch( m_pRefs[ m_pHead->MODL.ref ].type )
-	{
+	switch( m_pRefs[ m_pHead->MODL.ref ].type )	{
 	case 20:
 		pMODL20 = GetEntries<MODL20>( m_pHead->MODL );
-		if ( ( pMODL20->flags & 0x20000) != 0 ) // Has vertices
-		{
-			if( (pMODL20->flags & 0x40000) != 0 ) // Has extra 4 byte
-			{
+		if ( ( pMODL20->flags & 0x20000) != 0 ) { // Has vertices
+			if( (pMODL20->flags & 0x40000) != 0 ) { // Has extra 4 byte
 				pVerts1 = GetEntries<VertexExt>( pMODL20->vertexData );
 				nVertices = pMODL20->vertexData.nEntries/sizeof(VertexExt);
 			}
-			else
-			{
-				pVerts2 = GetEntries<Vertex>(pMODL20->vertexData);
-				nVertices = pMODL20->vertexData.nEntries/sizeof(Vertex);
+			else {
+				pVerts2 = GetEntries<Vertex>( pMODL20->vertexData );
+				nVertices = pMODL20->vertexData.nEntries / sizeof( Vertex );
 			}
 		}
 		pViews = GetEntries<DIV>( pMODL20->views );
@@ -138,17 +140,14 @@ void M3Importer::InternReadFile( const std::string& pFile, aiScene* pScene, IOSy
 
 	case 23:
 		pMODL23 = GetEntries<MODL23>(m_pHead->MODL );
-		if( (pMODL23->flags & 0x20000) != 0 ) // Has vertices
-		{
-			if( (pMODL23->flags & 0x40000) != 0 ) // Has extra 4 byte
-			{
-				pVerts1 = GetEntries<VertexExt>(pMODL23->vertexData);
-				nVertices = pMODL23->vertexData.nEntries/sizeof(VertexExt);
+		if( (pMODL23->flags & 0x20000) != 0 ) { // Has vertices
+			if( (pMODL23->flags & 0x40000) != 0 ) { // Has extra 4 byte
+				pVerts1 = GetEntries<VertexExt>( pMODL23->vertexData );
+				nVertices = pMODL23->vertexData.nEntries/sizeof( VertexExt );
 			}
-			else
-			{
-				pVerts2 = GetEntries<Vertex>(pMODL23->vertexData);
-				nVertices = pMODL23->vertexData.nEntries/sizeof(Vertex);
+			else {
+				pVerts2 = GetEntries<Vertex>( pMODL23->vertexData );
+				nVertices = pMODL23->vertexData.nEntries/sizeof( Vertex );
 			}
 		}
 		pViews = GetEntries<DIV>( pMODL23->views );
@@ -156,7 +155,7 @@ void M3Importer::InternReadFile( const std::string& pFile, aiScene* pScene, IOSy
 
 	default:
 		ok = false;
-		return;
+		break;
 	}
 
 	// Get all region data
@@ -167,25 +166,43 @@ void M3Importer::InternReadFile( const std::string& pFile, aiScene* pScene, IOSy
 	nFaces = pViews->faces.nEntries;
 
 	// Everything ok, if not throw an exception
-	if ( !ok )
+	if ( !ok ) {
 		throw DeadlyImportError( "Failed to open file " + pFile + ".");
+	}
 
 	// Convert the vertices
 	std::vector<aiVector3D> vertices;
 	vertices.resize( nVertices );
 	unsigned int offset = 0;
-	for ( unsigned int i = 0; i < nVertices; i++ )
-	{
-		if ( pVerts1 )
-		{
-			vertices[ offset ].Set( pVerts1[i].pos.x, pVerts1[i].pos.y, pVerts1[i].pos.z );
-			offset++;
+	for ( unsigned int i = 0; i < nVertices; i++ ) {
+		if ( pVerts1 ) {
+			vertices[ offset ].Set( pVerts1[ i ].pos.x, pVerts1[ i ].pos.y, pVerts1[ i ].pos.z );
+			++offset;
 		}
 
-		if ( pVerts2 )
-		{
+		if ( pVerts2 ) {
 			vertices[ offset ].Set( pVerts2[ i ].pos.x, pVerts2[ i ].pos.y, pVerts2[ i ].pos.z );
-			offset++;
+			++offset;
+		}
+	}
+
+	// Write UV coords
+	offset = 0;
+	std::vector<aiVector3D> uvCoords;
+	uvCoords.resize( nVertices );
+	for( unsigned int i = 0; i < nVertices; ++i ) {
+		if( pVerts1 ) {
+			float u = (float) pVerts1[i].uv[0] / 2048;
+			float v = (float) pVerts1[i].uv[1] / 2048;
+			uvCoords[ offset ].Set( u, v, 0.0f );
+			++offset;
+		}
+
+		if( pVerts2 ) {
+			float u = (float) pVerts2[i].uv[0] / 2048;
+			float v = (float) pVerts2[i].uv[1] / 2048;
+			uvCoords[ offset ].Set( u, v, 0.0f );
+			++offset;
 		}
 	}
 
@@ -194,39 +211,35 @@ void M3Importer::InternReadFile( const std::string& pFile, aiScene* pScene, IOSy
 	normals.resize( nVertices );
 	float w = 0.0f;
 	Vec3D norm;
-	for( unsigned int i = 0; i < nVertices; i++ )
-	{
+	offset = 0;
+	for( unsigned int i = 0; i < nVertices; i++ ) {
 		w = 0.0f;
-		if( pVerts1 )
-		{
+		if( pVerts1 ) {
 			norm.x = (float) 2*pVerts1[ i ].normal[ 0 ]/255.0f - 1;
 			norm.y = (float) 2*pVerts1[ i ].normal[ 1 ]/255.0f - 1;
 			norm.z = (float) 2*pVerts1[ i ].normal[ 2 ]/255.0f - 1;
 			w = (float) pVerts1[ i ].normal[ 3 ]/255.0f;
 		}
 
-		if( pVerts2 )
-		{
+		if( pVerts2 ) {
 			norm.x = (float) 2*pVerts2[ i ].normal[ 0 ]/255.0f - 1;
 			norm.y = (float) 2*pVerts2[ i ].normal[ 1 ]/255.0f - 1;
 			norm.z = (float) 2*pVerts2[ i ].normal[ 2 ]/255.0f - 1;
-
 			w = (float) pVerts2[ i ].normal[ 3 ] / 255.0f;
 		}
 
-		if ( w )
-		{
+		if ( w ) {
 			const float invW = 1.0f / w;
 			norm.x = norm.x * invW;
 			norm.y = norm.y * invW;
 			norm.z = norm.z * invW;
+			normals[ offset ].Set( norm.x, norm.y, norm.z );
+			++offset;
 		}
-
-		normals[ i ].Set( norm.x, norm.y, norm.z );
 	}
 
 	// Convert the data into the assimp specific data structures
-	convertToAssimp( pFile, pScene, pViews, regions, faces, vertices, normals );
+	convertToAssimp( pFile, pScene, pViews, regions, faces, vertices, uvCoords, normals );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -234,6 +247,7 @@ void M3Importer::InternReadFile( const std::string& pFile, aiScene* pScene, IOSy
 void M3Importer::convertToAssimp( const std::string& pFile, aiScene* pScene, DIV *pViews, 
 								 Region *pRegions, uint16 *pFaces, 
 								 const std::vector<aiVector3D> &vertices,
+								 const std::vector<aiVector3D> &uvCoords,
 								 const std::vector<aiVector3D> &normals )
 {
 	std::vector<aiMesh*> MeshArray;
@@ -242,7 +256,6 @@ void M3Importer::convertToAssimp( const std::string& pFile, aiScene* pScene, DIV
 	pScene->mRootNode = createNode( NULL );
 	
 	// Set the name of the scene
-	ai_assert( !pFile.empty() );
 	pScene->mRootNode->mName.Set( pFile );
 
 	aiNode *pRootNode = pScene->mRootNode;
@@ -250,11 +263,11 @@ void M3Importer::convertToAssimp( const std::string& pFile, aiScene* pScene, DIV
 
 	// Lets create the nodes
 	pRootNode->mNumChildren = pViews->regions.nEntries;
-	if ( pRootNode->mNumChildren > 0 )
+	if ( pRootNode->mNumChildren > 0 ) {
 		pRootNode->mChildren = new aiNode*[ pRootNode->mNumChildren ];
+	}
 
-	for ( unsigned int i=0; i<pViews->regions.nEntries; ++i )
-	{
+	for ( unsigned int i=0; i<pViews->regions.nEntries; ++i ) {
 		// Create a new node
 		pCurrentNode = createNode( pRootNode );
 		std::stringstream stream;
@@ -263,8 +276,6 @@ void M3Importer::convertToAssimp( const std::string& pFile, aiScene* pScene, DIV
 		pRootNode->mChildren[ i ] = pCurrentNode;
 		
 		// Loop over the faces of the nodes
-//		 = regions[i].ofsIndices; j < (regions[i].ofsIndices + regions[i].nIndices); j +=3)
-
 		unsigned int numFaces = ( pRegions[ i ].ofsIndices + pRegions[ i ].nIndices ) -  pRegions[ i ].ofsIndices;
 		aiMesh *pMesh = new aiMesh;
 		pMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
@@ -274,21 +285,24 @@ void M3Importer::convertToAssimp( const std::string& pFile, aiScene* pScene, DIV
 		pMesh->mFaces = new aiFace[ pMesh->mNumFaces ];
 		aiFace *pCurrentFace = NULL;
 		unsigned int faceIdx = 0;
-		for ( unsigned int j = pRegions[ i ].ofsIndices; j < ( pRegions[ i ].ofsIndices + pRegions[ i ].nIndices ); j += 3 )
-		{
+		for ( unsigned int j = pRegions[ i ].ofsIndices; j < ( pRegions[ i ].ofsIndices + pRegions[ i ].nIndices ); j += 3 ) {
 			pCurrentFace = &( pMesh->mFaces[ faceIdx ] );
 			faceIdx++;
 			pCurrentFace->mNumIndices = 3;
 			pCurrentFace->mIndices = new unsigned int[ 3 ];
-			pCurrentFace->mIndices[ 0 ] = pFaces[ j ]+1;
-			pCurrentFace->mIndices[ 1 ] = pFaces[ j+1 ] + 1;
-			pCurrentFace->mIndices[ 2 ] = pFaces[ j+2 ] + 1;
+			pCurrentFace->mIndices[ 0 ] = pFaces[ j   ];
+			pCurrentFace->mIndices[ 1 ] = pFaces[ j+1 ];
+			pCurrentFace->mIndices[ 2 ] = pFaces[ j+2 ];
 		}
+/*		fprintf_s(f, "f %d/%d/%d %d/%d/%d %d/%d/%d\n", faces[j]+1, faces[j]+1, faces[j]+1,
+			faces[j+1]+1, faces[j+1]+1, faces[j+1]+1,
+			faces[j+2]+1, faces[j+2]+1, faces[j+2]+1);*/
 
 		// Now we can create the vertex data itself
 		pCurrentNode->mNumMeshes = 1;
 		pCurrentNode->mMeshes = new unsigned int[ 1 ];
-		pCurrentNode->mMeshes[ 0 ] = MeshArray.size() - 1;
+		const unsigned int meshIdx = MeshArray.size() - 1;
+		pCurrentNode->mMeshes[ 0 ] = meshIdx;
 		createVertexData( pMesh, vertices, normals );
 	}
 
@@ -296,8 +310,7 @@ void M3Importer::convertToAssimp( const std::string& pFile, aiScene* pScene, DIV
 	pScene->mNumMeshes = MeshArray.size();
 	pScene->mMeshes = new aiMesh*[ MeshArray.size() ];
 	unsigned int pos = 0;
-	for ( std::vector<aiMesh*>::iterator it = MeshArray.begin(); it != MeshArray.end(); ++it )
-	{
+	for ( std::vector<aiMesh*>::iterator it = MeshArray.begin(); it != MeshArray.end(); ++it ) {
 		pScene->mMeshes[ pos ] = *it;
 		pos++;
 	}
@@ -314,19 +327,14 @@ void M3Importer::createVertexData( aiMesh *pMesh, const std::vector<aiVector3D> 
 	pMesh->mVertices = new aiVector3D[ pMesh->mNumVertices ];
 	pMesh->mNormals = new aiVector3D[ pMesh->mNumVertices ];
 	unsigned int pos = 0;
-	for ( unsigned int currentFace = 0; currentFace < pMesh->mNumFaces; currentFace++ )
-	{
+	for ( unsigned int currentFace = 0; currentFace < pMesh->mNumFaces; currentFace++ )	{
 		aiFace *pFace = &( pMesh->mFaces[ currentFace ] );
-		for ( unsigned int currentIdx=0; currentIdx<pFace->mNumIndices; currentIdx++ )
-		{
+		for ( unsigned int currentIdx=0; currentIdx<pFace->mNumIndices; currentIdx++ ) {
 			const unsigned int idx = pFace->mIndices[ currentIdx ];
-			if ( vertices.size() > idx )
-			{
+			if ( vertices.size() > idx ) {
 				pMesh->mVertices[ pos ] = vertices[ idx ];
 				pMesh->mNormals[ pos ] = normals[ idx ];
-
 				pFace->mIndices[ currentIdx ] = pos;
-				pFace->mIndices[ pos ];
 				pos++;
 			}
 		}

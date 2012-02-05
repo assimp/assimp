@@ -582,8 +582,12 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 	if(joints.size()) {
 #ifndef ASSIMP_BUILD_MS3D_ONE_NODE_PER_MESH
 		rt->mChildren = new aiNode*[1]();
-#endif
+		rt->mNumChildren = 1;
+
+		aiNode* jt = rt->mChildren[0] = new aiNode();
+#else
 		aiNode* jt = rt->mChildren[pScene->mNumMeshes] = new aiNode();
+#endif
 		jt->mParent = rt;
 		CollectChildJoints(joints,jt);
 		jt->mName.Set("<MS3DJointRoot>");

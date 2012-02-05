@@ -64,6 +64,7 @@ public:
 	FileSystemFilter(const std::string& file, IOSystem* old)
 		: wrapped  (old)
 		, src_file (file)
+		, sep(wrapped->getOsSeparator())
 	{
 		ai_assert(NULL != wrapped);
 
@@ -85,8 +86,9 @@ public:
 			base = ".";
 			base += getOsSeparator();
 		}
-		else if ((s = *(base.end()-1)) != '\\' && s != '/')
+		else if ((s = *(base.end()-1)) != '\\' && s != '/') {
 			base += getOsSeparator();
+		}
 
 		DefaultLogger::get()->info("Import root directory is \'" + base + "\'");
 	}
@@ -116,7 +118,7 @@ public:
 	/** Returns the directory separator. */
 	char getOsSeparator() const
 	{
-		return wrapped->getOsSeparator();
+		return sep;
 	}
 
 	// -------------------------------------------------------------------
@@ -140,7 +142,9 @@ public:
 				// Finally, look for typical issues with paths
 				// and try to correct them. This is our last
 				// resort.
+				tmp = pFile;
 				Cleanup(tmp);
+				BuildPath(tmp);
 				s = wrapped->Open(tmp,pMode);
 			}
 		}
@@ -163,8 +167,6 @@ public:
 	}
 
 private:
-	IOSystem* wrapped;
-	std::string src_file, base;
 
 	// -------------------------------------------------------------------
 	/** Build a valid path from a given relative or absolute path.
@@ -187,23 +189,46 @@ private:
 			}
 		}
 		
-		// Chop of the file name and look in the current directory
-		size_t pos = in.rfind("/");
+		// Chop of the file name and look in the model directory, if
+		// this fails try all sub paths of the given path, i.e.
+		// if the given path is foo/bar/something.lwo, try
+		// <base>/something.lwo
+		// <base>/bar/something.lwo
+		// <base>/foo/bar/something.lwo
+		std::string::size_type pos = in.rfind('/');
 		if (std::string::npos == pos) {
-			pos = in.rfind("\\");
+			pos = in.rfind('\\');
 		}
 
 		if (std::string::npos != pos)	{
-			std::string tmp = ".";
-			tmp += wrapped->getOsSeparator();
-			tmp += in.substr(pos+1, in.length()-pos); 
-			if (wrapped->Exists(tmp)) {
-				in = tmp;
-				return;
+			std::string tmp;
+			std::string::size_type last_dirsep = std::string::npos;
+
+			while(true) {
+				tmp = base;
+				tmp += sep;
+
+				std::string::size_type dirsep = in.rfind('/', last_dirsep);
+				if (std::string::npos == dirsep) {
+					dirsep = in.rfind('\\', last_dirsep);
+				}
+
+				if (std::string::npos == dirsep) {
+					// we did try this already.
+					break;
+				}
+
+				last_dirsep = dirsep;
+
+				tmp += in.substr(dirsep+1, in.length()-pos); 
+				if (wrapped->Exists(tmp)) {
+					in = tmp;
+					return;
+				}
 			}
 		}
 
-		// hopefully the underyling file system has another few tricks to access this file ...
+		// hopefully the underlying file system has another few tricks to access this file ...
 	}
 
 	// -------------------------------------------------------------------
@@ -220,8 +245,9 @@ private:
 		// beginning of the path. 
 		std::string::iterator it = in.begin();
 		while (IsSpaceOrNewLine( *it ))++it;
-		if (it != in.begin())
+		if (it != in.begin()) {
 			in.erase(in.begin(),it+1);
+		}
 
 		const char sep = getOsSeparator();
 		for (it = in.begin(); it != in.end(); ++it) {
@@ -260,6 +286,11 @@ private:
 			last = *it;
 		}
 	}
+
+private:
+	IOSystem* wrapped;
+	std::string src_file, base;
+	char sep;
 };
 
 } //!ns Assimp

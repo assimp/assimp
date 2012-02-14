@@ -94,6 +94,7 @@ void ColladaExporter::WriteFile()
 
 	WriteHeader();
 
+  WriteMaterials();
 	WriteGeometryLibrary();
 
 	WriteSceneLibrary();
@@ -125,6 +126,155 @@ void ColladaExporter::WriteHeader()
 	mOutput << startstr << "<up_axis>Y_UP</up_axis>" << endstr;
 	PopTag();
 	mOutput << startstr << "</asset>" << endstr;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reads a single surface entry from the given material keys
+void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial* pSrcMat, aiTextureType pTexture, const char* pKey, size_t pType, size_t pIndex)
+{
+  if( pSrcMat->GetTextureCount( pTexture) > 0 )
+  {
+    aiString texfile;
+    unsigned int uvChannel = 0;
+    pSrcMat->GetTexture( pTexture, 0, &texfile, nullptr, &uvChannel);
+    poSurface.texture = texfile.C_Str();
+    poSurface.channel = uvChannel;
+  } else
+  {
+    if( pKey )
+      pSrcMat->Get( pKey, pType, pIndex, poSurface.color);
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Writes an image entry for the given surface
+void ColladaExporter::WriteImageEntry( const Surface& pSurface, const std::string& pNameAdd)
+{
+  if( !pSurface.texture.empty() )
+  {
+    mOutput << startstr << "<image id=\"" << pNameAdd << "\" name=\"" << pNameAdd << "\">" << endstr;
+    PushTag(); 
+    mOutput << startstr << "<init_from>" << pSurface.texture << "</init_from>" << endstr;
+    PopTag();
+    mOutput << startstr << "</image>" << endstr;
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Writes a color-or-texture entry into an effect definition
+void ColladaExporter::WriteTextureColorEntry( const Surface& pSurface, const std::string& pTypeName, const std::string& pImageName)
+{
+  mOutput << startstr << "<" << pTypeName << ">" << endstr;
+  PushTag();
+  if( pSurface.texture.empty() )
+  {
+    mOutput << startstr << "<color sid=\"" << pTypeName << "\">" << pSurface.color.r << "   " << pSurface.color.g << "   " << pSurface.color.b << "   " << pSurface.color.a << "</color>" << endstr;
+  } else
+  {
+    mOutput << startstr << "<texture texture=\"" << pImageName << "\" texcoord=\"CHANNEL" << pSurface.channel << "\" />" << endstr;
+  }
+  PopTag();
+  mOutput << startstr << "</" << pTypeName << ">" << endstr;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Writes the material setup
+void ColladaExporter::WriteMaterials()
+{
+  materials.resize( mScene->mNumMaterials);
+
+  /// collect all materials from the scene
+  for( size_t a = 0; a < mScene->mNumMaterials; ++a )
+  {
+    const aiMaterial* mat = mScene->mMaterials[a];
+
+    aiString name;
+    if( mat->Get( AI_MATKEY_NAME, name) != aiReturn_SUCCESS )
+      name = "mat";
+    materials[a].name = boost::lexical_cast<std::string> (a) + name.C_Str();
+
+    ReadMaterialSurface( materials[a].ambient, mat, aiTextureType_AMBIENT, AI_MATKEY_COLOR_AMBIENT);
+    ReadMaterialSurface( materials[a].diffuse, mat, aiTextureType_DIFFUSE, AI_MATKEY_COLOR_DIFFUSE);
+    ReadMaterialSurface( materials[a].specular, mat, aiTextureType_SPECULAR, AI_MATKEY_COLOR_SPECULAR);
+    ReadMaterialSurface( materials[a].emissive, mat, aiTextureType_EMISSIVE, AI_MATKEY_COLOR_EMISSIVE);
+    ReadMaterialSurface( materials[a].reflective, mat, aiTextureType_REFLECTION, AI_MATKEY_COLOR_REFLECTIVE);
+    ReadMaterialSurface( materials[a].normal, mat, aiTextureType_NORMALS, nullptr, 0, 0);
+
+    mat->Get( AI_MATKEY_SHININESS, materials[a].shininess);
+  }
+
+  // output textures if present
+  mOutput << startstr << "<library_images>" << endstr; 
+  PushTag();
+  for( auto it = materials.cbegin(); it != materials.cend(); ++it )
+  { 
+    const Material& mat = *it;
+    WriteImageEntry( mat.ambient, mat.name + "_ambient_image");
+    WriteImageEntry( mat.diffuse, mat.name + "_diffuse_image");
+    WriteImageEntry( mat.specular, mat.name + "_specular_image");
+    WriteImageEntry( mat.emissive, mat.name + "_emissive_image");
+    WriteImageEntry( mat.reflective, mat.name + "_reflective_image");
+    WriteImageEntry( mat.normal, mat.name + "_normal_image");
+  }
+  PopTag();
+  mOutput << startstr << "</library_images>" << endstr;
+
+  // output effects - those are the actual carriers of information
+  mOutput << startstr << "<library_effects>" << endstr;
+  PushTag();
+  for( auto it = materials.cbegin(); it != materials.cend(); ++it )
+  {
+    const Material& mat = *it;
+    // this is so ridiculous it must be right
+    mOutput << startstr << "<effect id=\"" << mat.name << "-fx\" name=\"" << mat.name << "\">" << endstr;
+    PushTag();
+    mOutput << startstr << "<profile_COMMON>" << endstr;
+    PushTag();
+    mOutput << startstr << "<technique sid=\"standard\">" << endstr;
+    PushTag();
+    mOutput << startstr << "<phong>" << endstr;
+    PushTag();
+
+    WriteTextureColorEntry( mat.ambient, "ambient", mat.name + "_ambient_image");
+    WriteTextureColorEntry( mat.diffuse, "diffuse", mat.name + "_diffuse_image");
+    WriteTextureColorEntry( mat.specular, "specular", mat.name + "_specular_image");
+    WriteTextureColorEntry( mat.emissive, "emission", mat.name + "_emissive_image");
+    WriteTextureColorEntry( mat.reflective, "reflective", mat.name + "_reflective_image");
+    if( !mat.normal.texture.empty() )
+      WriteTextureColorEntry( mat.normal, "bump", mat.name + "_normal_image");
+
+    mOutput << startstr << "<shininess>" << endstr;
+    PushTag();
+    mOutput << startstr << "<float sid=\"shininess\">" << mat.shininess << "</float>" << endstr;
+    PopTag();
+    mOutput << startstr << "</shininess>" << endstr;
+
+    PopTag();
+    mOutput << startstr << "</phong>" << endstr;
+    PopTag();
+    mOutput << startstr << "</technique>" << endstr;
+    PopTag();
+    mOutput << startstr << "</profile_COMMON>" << endstr;
+    PopTag();
+    mOutput << startstr << "</effect>" << endstr;
+  }
+  PopTag();
+  mOutput << startstr << "</library_effects>" << endstr;
+
+  // write materials - they're just effect references
+  mOutput << startstr << "<library_materials>" << endstr;
+  PushTag();
+  for( auto it = materials.cbegin(); it != materials.cend(); ++it )
+  {
+    const Material& mat = *it;
+    mOutput << startstr << "<material id=\"" << mat.name << "\" name=\"" << mat.name << "\">" << endstr;
+    PushTag();
+    mOutput << startstr << "<instance_effect url=\"#" << mat.name << "-fx\"/>" << endstr;
+    PopTag();
+    mOutput << startstr << "</material>" << endstr;
+  }
+  PopTag();
+  mOutput << startstr << "</library_materials>" << endstr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -199,7 +349,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 	mOutput << startstr << "</vertices>" << endstr;
 
 	// write face setup
-	mOutput << startstr << "<polylist count=\"" << mesh->mNumFaces << "\" material=\"tellme\">" << endstr;
+	mOutput << startstr << "<polylist count=\"" << mesh->mNumFaces << "\" material=\"theresonlyone\">" << endstr;
 	PushTag();
 	mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstr << "-vertices\" />" << endstr;
 	
@@ -356,8 +506,16 @@ void ColladaExporter::WriteNode( const aiNode* pNode)
 		// const aiMesh* mesh = mScene->mMeshes[pNode->mMeshes[a]];
 		mOutput << startstr << "<instance_geometry url=\"#" << GetMeshId( pNode->mMeshes[a]) << "\">" << endstr;
 		PushTag();
-
+    mOutput << startstr << "<bind_material>" << endstr;
+    PushTag();
+    mOutput << startstr << "<technique_common>" << endstr;
+    PushTag();
+    mOutput << startstr << "<instance_material symbol=\"theresonlyone\" target=\"" << materials[mScene->mMeshes[pNode->mMeshes[a]]->mMaterialIndex].name << "\" />" << endstr;
 		PopTag();
+    mOutput << startstr << "</technique_common>" << endstr;
+    PopTag();
+    mOutput << startstr << "</bind_material>" << endstr;
+    PopTag();
 		mOutput << startstr << "</instance_geometry>" << endstr;
 	}
 

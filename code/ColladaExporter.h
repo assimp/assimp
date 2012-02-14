@@ -68,6 +68,9 @@ protected:
 	/// Writes the asset header
 	void WriteHeader();
 
+  /// Writes the material setup
+  void WriteMaterials();
+
 	/// Writes the geometry library
 	void WriteGeometryLibrary();
 
@@ -105,6 +108,36 @@ protected:
 	std::string startstr;
 	/// current line end string for simple stream insertion
 	std::string endstr;
+
+  // pair of color and texture - texture precedences color
+  struct Surface 
+  { 
+    aiColor4D color; 
+    std::string texture; 
+    size_t channel; 
+    Surface() { channel = 0; }
+  };
+
+  // summarize a material in an convinient way. 
+  struct Material
+  {
+    std::string name;
+    Surface ambient, diffuse, specular, emissive, reflective, normal;
+    float shininess; /// specular exponent
+
+    Material() { shininess = 16.0f; }
+  };
+
+  std::vector<Material> materials;
+
+protected:
+  /// Dammit C++ - y u no compile two-pass? No I have to add all methods below the struct definitions
+  /// Reads a single surface entry from the given material keys
+  void ReadMaterialSurface( Surface& poSurface, const aiMaterial* pSrcMat, aiTextureType pTexture, const char* pKey, size_t pType, size_t pIndex);
+  /// Writes an image entry for the given surface
+  void WriteImageEntry( const Surface& pSurface, const std::string& pNameAdd);
+  /// Writes a color-or-texture entry into an effect definition
+  void WriteTextureColorEntry( const Surface& pSurface, const std::string& pTypeName, const std::string& pImageName);
 };
 
 }

@@ -54,7 +54,13 @@ private:
 
 	// default constructor
 	CMaterialManager() 
-		:	m_iShaderCount (0) {}
+		:	m_iShaderCount (0), sDefaultTexture() {}
+
+	~CMaterialManager() {
+		if (sDefaultTexture) {
+			sDefaultTexture->Release();
+		}
+	}
 
 public:
 
@@ -182,7 +188,7 @@ private:
 	// each time a shader isn't found in cache and needs to be created
 	//
 	unsigned int m_iShaderCount;
-
+	IDirect3DTexture9* sDefaultTexture;
 
 };
 

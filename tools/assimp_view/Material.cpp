@@ -107,6 +107,11 @@ int CMaterialManager::UpdateSpecularMaterials()
 //-------------------------------------------------------------------------------
 int CMaterialManager::SetDefaultTexture(IDirect3DTexture9** p_ppiOut)
 {
+	if  (sDefaultTexture) {
+		sDefaultTexture->AddRef();
+		*p_ppiOut = sDefaultTexture;
+		return 1;
+	}
 	if(FAILED(g_piDevice->CreateTexture(
 		256,
 		256,
@@ -121,8 +126,11 @@ int CMaterialManager::SetDefaultTexture(IDirect3DTexture9** p_ppiOut)
 			D3DCOLOR_ARGB(0xFF,0xFF,0,0));
 
 		*p_ppiOut = NULL;
+		return 0;
 	}
 	D3DXFillTexture(*p_ppiOut,&FillFunc,NULL);
+	sDefaultTexture = *p_ppiOut;
+	sDefaultTexture->AddRef();
 
 	// {9785DA94-1D96-426b-B3CB-BADC36347F5E}
 	static const GUID guidPrivateData = 

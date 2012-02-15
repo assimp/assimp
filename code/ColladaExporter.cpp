@@ -136,7 +136,7 @@ void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial*
   {
     aiString texfile;
     unsigned int uvChannel = 0;
-    pSrcMat->GetTexture( pTexture, 0, &texfile, nullptr, &uvChannel);
+    pSrcMat->GetTexture( pTexture, 0, &texfile, NULL, &uvChannel);
     poSurface.texture = texfile.C_Str();
     poSurface.channel = uvChannel;
   } else
@@ -198,7 +198,7 @@ void ColladaExporter::WriteMaterials()
     ReadMaterialSurface( materials[a].specular, mat, aiTextureType_SPECULAR, AI_MATKEY_COLOR_SPECULAR);
     ReadMaterialSurface( materials[a].emissive, mat, aiTextureType_EMISSIVE, AI_MATKEY_COLOR_EMISSIVE);
     ReadMaterialSurface( materials[a].reflective, mat, aiTextureType_REFLECTION, AI_MATKEY_COLOR_REFLECTIVE);
-    ReadMaterialSurface( materials[a].normal, mat, aiTextureType_NORMALS, nullptr, 0, 0);
+    ReadMaterialSurface( materials[a].normal, mat, aiTextureType_NORMALS, NULL, 0, 0);
 
     mat->Get( AI_MATKEY_SHININESS, materials[a].shininess);
   }
@@ -206,7 +206,7 @@ void ColladaExporter::WriteMaterials()
   // output textures if present
   mOutput << startstr << "<library_images>" << endstr; 
   PushTag();
-  for( auto it = materials.cbegin(); it != materials.cend(); ++it )
+  for( std::vector<Material>::const_iterator it = materials.begin(); it != materials.end(); ++it )
   { 
     const Material& mat = *it;
     WriteImageEntry( mat.ambient, mat.name + "_ambient_image");
@@ -222,7 +222,7 @@ void ColladaExporter::WriteMaterials()
   // output effects - those are the actual carriers of information
   mOutput << startstr << "<library_effects>" << endstr;
   PushTag();
-  for( auto it = materials.cbegin(); it != materials.cend(); ++it )
+  for( std::vector<Material>::const_iterator it = materials.begin(); it != materials.end(); ++it )
   {
     const Material& mat = *it;
     // this is so ridiculous it must be right
@@ -264,7 +264,7 @@ void ColladaExporter::WriteMaterials()
   // write materials - they're just effect references
   mOutput << startstr << "<library_materials>" << endstr;
   PushTag();
-  for( auto it = materials.cbegin(); it != materials.cend(); ++it )
+  for( std::vector<Material>::const_iterator it = materials.begin(); it != materials.end(); ++it )
   {
     const Material& mat = *it;
     mOutput << startstr << "<material id=\"" << mat.name << "\" name=\"" << mat.name << "\">" << endstr;

@@ -337,6 +337,8 @@ SET( Ply_SRCS
 	PlyLoader.h
 	PlyParser.cpp
 	PlyParser.h
+	PlyExporter.cpp
+	PlyExporter.h
 )
 SOURCE_GROUP( Ply FILES ${Ply_SRCS})
 

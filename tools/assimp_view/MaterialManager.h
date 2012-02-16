@@ -60,6 +60,7 @@ private:
 		if (sDefaultTexture) {
 			sDefaultTexture->Release();
 		}
+		Reset();
 	}
 
 public:
@@ -145,6 +146,10 @@ public:
 	inline void Reset()
 	{
 		this->m_iShaderCount = 0;
+		for (TextureCache::iterator it = sCachedTextures.begin(); it != sCachedTextures.end(); ++it) {
+			(*it).second->Release();
+		}
+		sCachedTextures.clear();
 	}
 
 private:
@@ -190,6 +195,8 @@ private:
 	unsigned int m_iShaderCount;
 	IDirect3DTexture9* sDefaultTexture;
 
+	typedef std::map<std::string,IDirect3DTexture9*> TextureCache;
+	TextureCache sCachedTextures;
 };
 
 #endif //!! include guard

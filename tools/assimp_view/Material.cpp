@@ -330,6 +330,14 @@ int CMaterialManager::LoadTexture(IDirect3DTexture9** p_ppiOut,aiString* szPath)
 
 	*p_ppiOut = NULL;
 
+	const std::string s = szPath->data;
+	TextureCache::iterator ff;
+	if ((ff = sCachedTextures.find(s)) != sCachedTextures.end()) {
+		*p_ppiOut = (*ff).second;
+		(*p_ppiOut)->AddRef();
+		return 1;
+	}
+
 	// first get a valid path to the texture
 	if( 5 == FindValidPath(szPath))
 	{
@@ -398,6 +406,8 @@ int CMaterialManager::LoadTexture(IDirect3DTexture9** p_ppiOut,aiString* szPath)
 				(*p_ppiOut)->UnlockRect(0);
 				(*p_ppiOut)->GenerateMipSubLevels();
 			}
+			sCachedTextures[s] = *p_ppiOut;
+			(*p_ppiOut)->AddRef();
 			return 1;
 		}
 		else
@@ -435,6 +445,9 @@ int CMaterialManager::LoadTexture(IDirect3DTexture9** p_ppiOut,aiString* szPath)
 
 		this->SetDefaultTexture(p_ppiOut);
 	}
+	sCachedTextures[s] = *p_ppiOut;
+	(*p_ppiOut)->AddRef();
+
 	return 1;
 }
 //-------------------------------------------------------------------------------

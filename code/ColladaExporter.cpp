@@ -298,6 +298,9 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 	const aiMesh* mesh = mScene->mMeshes[pIndex];
 	std::string idstr = GetMeshId( pIndex);
 
+  if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
+    return;
+
 	// opening tag
 	mOutput << startstr << "<geometry id=\"" << idstr << "\" name=\"" << idstr << "_name\" >" << endstr;
 	PushTag();
@@ -503,14 +506,18 @@ void ColladaExporter::WriteNode( const aiNode* pNode)
 	// instance every geometry
 	for( size_t a = 0; a < pNode->mNumMeshes; ++a )
 	{
-		// const aiMesh* mesh = mScene->mMeshes[pNode->mMeshes[a]];
+		const aiMesh* mesh = mScene->mMeshes[pNode->mMeshes[a]];
+    // do not instanciate mesh if empty. I wonder how this could happen
+    if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
+      continue;
+
 		mOutput << startstr << "<instance_geometry url=\"#" << GetMeshId( pNode->mMeshes[a]) << "\">" << endstr;
 		PushTag();
     mOutput << startstr << "<bind_material>" << endstr;
     PushTag();
     mOutput << startstr << "<technique_common>" << endstr;
     PushTag();
-    mOutput << startstr << "<instance_material symbol=\"theresonlyone\" target=\"" << materials[mScene->mMeshes[pNode->mMeshes[a]]->mMaterialIndex].name << "\" />" << endstr;
+    mOutput << startstr << "<instance_material symbol=\"theresonlyone\" target=\"#" << materials[mesh->mMaterialIndex].name << "\" />" << endstr;
 		PopTag();
     mOutput << startstr << "</technique_common>" << endstr;
     PopTag();

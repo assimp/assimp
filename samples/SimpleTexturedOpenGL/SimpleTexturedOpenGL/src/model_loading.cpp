@@ -29,11 +29,11 @@
 
 
 // assimp include files. These three are usually needed.
-#include "assimp.hpp"	//OO version Header!
-#include "aiPostProcess.h"
-#include "aiScene.h"
-#include "DefaultLogger.h"
-#include "LogStream.h"
+#include "assimp/Importer.hpp"	//OO version Header!
+#include "assimp/PostProcess.h"
+#include "assimp/Scene.h"
+#include "assimp/DefaultLogger.hpp"
+#include "assimp/LogStream.hpp"
 
 
 // currently these are hardcoded
@@ -69,7 +69,7 @@ GLfloat LightPosition[]= { 0.0f, 0.0f, 15.0f, 1.0f };
 // the global Assimp scene object
 const aiScene* scene = NULL;
 GLuint scene_list = 0;
-struct aiVector3D scene_min, scene_max, scene_center;
+aiVector3D scene_min, scene_max, scene_center;
 
 // images / texture
 std::map<std::string, GLuint*> textureIdMap;	// map image filenames to textureIds
@@ -311,7 +311,7 @@ int InitGL()					 // All Setup For OpenGL goes here
 
 
 // Can't send color down as a pointer to aiColor4D because AI colors are ABGR.
-void Color4f(const struct aiColor4D *color)
+void Color4f(const aiColor4D *color)
 {
 	glColor4f(color->r, color->g, color->b, color->a);
 }
@@ -324,7 +324,7 @@ void set_float4(float f[4], float a, float b, float c, float d)
 	f[3] = d;
 }
 
-void color4_to_float4(const struct aiColor4D *c, float f[4])
+void color4_to_float4(const aiColor4D *c, float f[4])
 {
 	f[0] = c->r;
 	f[1] = c->g;
@@ -332,16 +332,16 @@ void color4_to_float4(const struct aiColor4D *c, float f[4])
 	f[3] = c->a;
 }
 
-void apply_material(const struct aiMaterial *mtl)
+void apply_material(const aiMaterial *mtl)
 {
 	float c[4];
 
 	GLenum fill_mode;
 	int ret1, ret2;
-	struct aiColor4D diffuse;
-	struct aiColor4D specular;
-	struct aiColor4D ambient;
-	struct aiColor4D emission;
+	aiColor4D diffuse;
+	aiColor4D specular;
+	aiColor4D ambient;
+	aiColor4D emission;
 	float shininess, strength;
 	int two_sided;
 	int wireframe;
@@ -408,7 +408,7 @@ void recursive_render (const struct aiScene *sc, const struct aiNode* nd, float 
 {
 	unsigned int i;
 	unsigned int n=0, t;
-	struct aiMatrix4x4 m = nd->mTransformation;
+	aiMatrix4x4 m = nd->mTransformation;
 
 	m.Scaling(aiVector3D(scale, scale, scale), m);
 

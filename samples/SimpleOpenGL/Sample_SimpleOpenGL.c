@@ -13,9 +13,9 @@
 #include "GL/glut.h"
 
 // assimp include files. These three are usually needed.
-#include "assimp.h"
-#include "aiPostProcess.h"
-#include "aiScene.h"
+#include "assimp/cimport.h"
+#include "assimp/PostProcess.h"
+#include "assimp/Scene.h"
 
 // the global Assimp scene object
 const struct aiScene* scene = NULL;

@@ -2,6 +2,7 @@
 include_directories (
 	${Assimp_SOURCE_DIR}/include
 	${Assimp_SOURCE_DIR}/code
+	${DX9_INCLUDE_PATH}
 )
 
 # Make sure the linker can find the Hello library once it is built.

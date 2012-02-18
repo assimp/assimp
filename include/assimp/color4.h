@@ -100,4 +100,4 @@ struct aiColor4D {
 
 #include "./Compiler/poppack1.h"
 
-#endif // AI_VECTOR3D_H_INC
+#endif // AI_COLOR4D_H_INC

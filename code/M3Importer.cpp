@@ -75,7 +75,7 @@ bool M3Importer::CanRead( const std::string &rFile, IOSystem* /*pIOHandler*/, bo
 		return SimpleExtensionCheck( rFile, M3Extension.c_str() );
 	}
 
-	return true;
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -278,8 +278,8 @@ void M3Importer::convertToAssimp( const std::string& pFile, aiScene* pScene, DIV
 		// Loop over the faces of the nodes
 		unsigned int numFaces = ( pRegions[ i ].ofsIndices + pRegions[ i ].nIndices ) -  pRegions[ i ].ofsIndices;
 		aiMesh *pMesh = new aiMesh;
-		pMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 		MeshArray.push_back( pMesh );
+		//pMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
 		pMesh->mNumFaces = numFaces;
 		pMesh->mFaces = new aiFace[ pMesh->mNumFaces ];

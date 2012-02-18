@@ -122,7 +122,9 @@ void ColladaExporter::WriteHeader()
 	mOutput << startstr << "<authoring_tool>Assimp Collada Exporter</authoring_tool>" << endstr;
 	PopTag();
 	mOutput << startstr << "</contributor>" << endstr;
-	mOutput << startstr << "<unit meter=\"1.0\" name=\"meter\" />" << endstr;
+  mOutput << startstr << "<created>2000-01-01T23:59:59</created>" << endstr;
+  mOutput << startstr << "<modified>2000-01-01T23:59:59</modified>" << endstr;
+	mOutput << startstr << "<unit name=\"centimeter\" meter=\"0.01\" />" << endstr;
 	mOutput << startstr << "<up_axis>Y_UP</up_axis>" << endstr;
 	PopTag();
 	mOutput << startstr << "</asset>" << endstr;
@@ -152,7 +154,7 @@ void ColladaExporter::WriteImageEntry( const Surface& pSurface, const std::strin
 {
   if( !pSurface.texture.empty() )
   {
-    mOutput << startstr << "<image id=\"" << pNameAdd << "\" name=\"" << pNameAdd << "\">" << endstr;
+    mOutput << startstr << "<image id=\"" << pNameAdd << "\">" << endstr;
     PushTag(); 
     mOutput << startstr << "<init_from>" << pSurface.texture << "</init_from>" << endstr;
     PopTag();
@@ -178,6 +180,35 @@ void ColladaExporter::WriteTextureColorEntry( const Surface& pSurface, const std
 }
 
 // ------------------------------------------------------------------------------------------------
+// Writes the two parameters necessary for referencing a texture in an effect entry
+void ColladaExporter::WriteTextureParamEntry( const Surface& pSurface, const std::string& pTypeName, const std::string& pMatName)
+{
+  // if surface is a texture, write out the sampler and the surface parameters necessary to reference the texture
+  if( !pSurface.texture.empty() )
+  {
+    mOutput << startstr << "<newparam sid=\"" << pMatName << "-" << pTypeName << "-surface\">" << endstr;
+    PushTag();
+    mOutput << startstr << "<surface type=\"2D\">" << endstr;
+    PushTag();
+    mOutput << startstr << "<init_from>" << pMatName << "-" << pTypeName << "-image</init_from>" << endstr;
+    PopTag();
+    mOutput << startstr << "</surface>" << endstr;
+    PopTag();
+    mOutput << startstr << "</newparam>" << endstr;
+
+    mOutput << startstr << "<newparam sid=\"" << pMatName << "-" << pTypeName << "-sampler\">" << endstr;
+    PushTag();
+    mOutput << startstr << "<sampler2D>" << endstr;
+    PushTag();
+    mOutput << startstr << "<source>" << pMatName << "-" << pTypeName << "-surface</source>" << endstr;
+    PopTag();
+    mOutput << startstr << "</sampler2D>" << endstr;
+    PopTag();
+    mOutput << startstr << "</newparam>" << endstr;
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
 // Writes the material setup
 void ColladaExporter::WriteMaterials()
 {
@@ -191,7 +222,10 @@ void ColladaExporter::WriteMaterials()
     aiString name;
     if( mat->Get( AI_MATKEY_NAME, name) != aiReturn_SUCCESS )
       name = "mat";
-    materials[a].name = boost::lexical_cast<std::string> (a) + name.C_Str();
+    materials[a].name = std::string( "m") + boost::lexical_cast<std::string> (a) + name.C_Str();
+    size_t pos; 
+    while( (pos = materials[a].name.find( '#')) != std::string::npos )
+      materials[a].name[pos] = 'x';
 
     ReadMaterialSurface( materials[a].ambient, mat, aiTextureType_AMBIENT, AI_MATKEY_COLOR_AMBIENT);
     ReadMaterialSurface( materials[a].diffuse, mat, aiTextureType_DIFFUSE, AI_MATKEY_COLOR_DIFFUSE);
@@ -209,12 +243,12 @@ void ColladaExporter::WriteMaterials()
   for( std::vector<Material>::const_iterator it = materials.begin(); it != materials.end(); ++it )
   { 
     const Material& mat = *it;
-    WriteImageEntry( mat.ambient, mat.name + "_ambient_image");
-    WriteImageEntry( mat.diffuse, mat.name + "_diffuse_image");
-    WriteImageEntry( mat.specular, mat.name + "_specular_image");
-    WriteImageEntry( mat.emissive, mat.name + "_emissive_image");
-    WriteImageEntry( mat.reflective, mat.name + "_reflective_image");
-    WriteImageEntry( mat.normal, mat.name + "_normal_image");
+    WriteImageEntry( mat.ambient, mat.name + "-ambient-image");
+    WriteImageEntry( mat.diffuse, mat.name + "-diffuse-image");
+    WriteImageEntry( mat.specular, mat.name + "-specular-image");
+    WriteImageEntry( mat.emissive, mat.name + "-emissive-image");
+    WriteImageEntry( mat.reflective, mat.name + "-reflective-image");
+    WriteImageEntry( mat.normal, mat.name + "-normal-image");
   }
   PopTag();
   mOutput << startstr << "</library_images>" << endstr;
@@ -230,24 +264,36 @@ void ColladaExporter::WriteMaterials()
     PushTag();
     mOutput << startstr << "<profile_COMMON>" << endstr;
     PushTag();
+
+    // write sampler- and surface params for the texture entries
+    WriteTextureParamEntry( mat.emissive, "emissive", mat.name);
+    WriteTextureParamEntry( mat.ambient, "ambient", mat.name);
+    WriteTextureParamEntry( mat.diffuse, "diffuse", mat.name);
+    WriteTextureParamEntry( mat.specular, "specular", mat.name);
+    WriteTextureParamEntry( mat.reflective, "reflective", mat.name);
+
     mOutput << startstr << "<technique sid=\"standard\">" << endstr;
     PushTag();
     mOutput << startstr << "<phong>" << endstr;
     PushTag();
 
-    WriteTextureColorEntry( mat.ambient, "ambient", mat.name + "_ambient_image");
-    WriteTextureColorEntry( mat.diffuse, "diffuse", mat.name + "_diffuse_image");
-    WriteTextureColorEntry( mat.specular, "specular", mat.name + "_specular_image");
-    WriteTextureColorEntry( mat.emissive, "emission", mat.name + "_emissive_image");
-    WriteTextureColorEntry( mat.reflective, "reflective", mat.name + "_reflective_image");
-    if( !mat.normal.texture.empty() )
-      WriteTextureColorEntry( mat.normal, "bump", mat.name + "_normal_image");
+    WriteTextureColorEntry( mat.emissive, "emission", mat.name + "-emissive-sampler");
+    WriteTextureColorEntry( mat.ambient, "ambient", mat.name + "-ambient-sampler");
+    WriteTextureColorEntry( mat.diffuse, "diffuse", mat.name + "-diffuse-sampler");
+    WriteTextureColorEntry( mat.specular, "specular", mat.name + "-specular-sampler");
 
     mOutput << startstr << "<shininess>" << endstr;
     PushTag();
     mOutput << startstr << "<float sid=\"shininess\">" << mat.shininess << "</float>" << endstr;
     PopTag();
     mOutput << startstr << "</shininess>" << endstr;
+
+    WriteTextureColorEntry( mat.reflective, "reflective", mat.name + "-reflective-sampler");
+
+// deactivated because the Collada spec PHONG model does not allow other textures.
+//    if( !mat.normal.texture.empty() )
+//      WriteTextureColorEntry( mat.normal, "bump", mat.name + "-normal-sampler");
+
 
     PopTag();
     mOutput << startstr << "</phong>" << endstr;
@@ -340,12 +386,12 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 	for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
 	{
 		if( mesh->HasTextureCoords( a) )
-			mOutput << startstr << "<input semantic=\"TEXCOORD\" source=\"#" << idstr << "-tex" << a << "\" set=\"" << a << "\" />" << endstr;
+			mOutput << startstr << "<input semantic=\"TEXCOORD\" source=\"#" << idstr << "-tex" << a << "\" " /*<< "set=\"" << a << "\"" */ << " />" << endstr;
 	}
 	for( size_t a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; ++a )
 	{
 		if( mesh->HasVertexColors( a) )
-			mOutput << startstr << "<input semantic=\"COLOR\" source=\"#" << idstr << "-color" << a << "\" set=\"" << a << "\" />" << endstr;
+			mOutput << startstr << "<input semantic=\"COLOR\" source=\"#" << idstr << "-color" << a << "\" " /*<< set=\"" << a << "\"" */ << " />" << endstr;
 	}
 	
 	PopTag();

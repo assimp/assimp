@@ -136,6 +136,8 @@ protected:
   void ReadMaterialSurface( Surface& poSurface, const aiMaterial* pSrcMat, aiTextureType pTexture, const char* pKey, size_t pType, size_t pIndex);
   /// Writes an image entry for the given surface
   void WriteImageEntry( const Surface& pSurface, const std::string& pNameAdd);
+  /// Writes the two parameters necessary for referencing a texture in an effect entry
+  void WriteTextureParamEntry( const Surface& pSurface, const std::string& pTypeName, const std::string& pMatName);
   /// Writes a color-or-texture entry into an effect definition
   void WriteTextureColorEntry( const Surface& pSurface, const std::string& pTypeName, const std::string& pImageName);
 };

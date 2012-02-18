@@ -72,7 +72,9 @@ IF( WIN32 )
 		PATHS 
 			"C:/Programme/Microsoft Platform SDK for Windows Server 2003 R2/Lib" 	
 		DOC "Path to psdk"
-	) 
+	)
+	ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
+	ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
 ENDIF( WIN32 )
 
 # Link the executable to the Hello library.

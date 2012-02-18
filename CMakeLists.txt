@@ -42,6 +42,8 @@ SET( INCLUDE_INSTALL_DIR "include" CACHE PATH
 SET( BIN_INSTALL_DIR "bin" CACHE PATH
 	"Path the tool executables are installed to." )
 
+SET(DEBUG_POSTFIX "D" CACHE STRING "Debug Postfitx for lib, samples and tools")
+
 # Generate a pkg-config .pc for the Assimp library.
 CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/assimp.pc.in" "${PROJECT_BINARY_DIR}/assimp.pc" @ONLY )
 INSTALL( FILES "${PROJECT_BINARY_DIR}/assimp.pc" DESTINATION ${LIB_INSTALL_DIR}/pkgconfig/ COMPONENT assimp-dev)

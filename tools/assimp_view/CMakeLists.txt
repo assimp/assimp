@@ -41,6 +41,8 @@ add_executable(  assimp_viewer WIN32
 	txi.bmp
 )
 
+SET_PROPERTY(TARGET assimp_viewer PROPERTY DEBUG_POSTFIX ${DEBUG_POSTFIX})
+
 IF( WIN32 )
 	SET( PSDK_PATH "C:/Program Files/Microsoft Platform SDK/Bin" )
 	SET( PSDK_INC "C:/Program Files/Microsoft Platform SDK/Include" )
@@ -76,3 +78,6 @@ ENDIF( WIN32 )
 # Link the executable to the Hello library.
 target_link_libraries ( assimp_viewer assimp ${DX9_LIBRARIES} comctl32.lib Winmm.lib  ) 
 
+INSTALL( TARGETS assimp_viewer
+	DESTINATION "${BIN_INSTALL_DIR}" COMPONENT assimp-dev
+) 

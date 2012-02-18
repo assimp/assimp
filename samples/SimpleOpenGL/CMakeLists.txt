@@ -14,6 +14,8 @@ ADD_EXECUTABLE( assimp_simpleogl
 	Sample_SimpleOpenGL.c
 )
 
+SET_PROPERTY(TARGET assimp_simpleogl PROPERTY DEBUG_POSTFIX ${DEBUG_POSTFIX})
+
 TARGET_LINK_LIBRARIES( assimp_simpleogl assimp )
 SET_TARGET_PROPERTIES( assimp_simpleogl PROPERTIES
 	OUTPUT_NAME assimp_simpleogl

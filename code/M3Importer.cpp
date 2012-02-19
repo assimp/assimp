@@ -81,7 +81,7 @@ bool M3Importer::CanRead( const std::string &rFile, IOSystem* /*pIOHandler*/, bo
 // ------------------------------------------------------------------------------------------------
 void M3Importer::GetExtensionList(std::set<std::string>& extensions)
 {
-	extensions.insert( "m3" );
+	extensions.insert( M3Extension );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -157,6 +157,11 @@ void M3Importer::InternReadFile( const std::string& pFile, aiScene* pScene, IOSy
 		ok = false;
 		break;
 	}
+	
+	// Everything ok, if not throw an exception
+	if ( !ok ) {
+		throw DeadlyImportError( "Failed to open file " + pFile + ".");
+	}
 
 	// Get all region data
 	regions = GetEntries<Region>( pViews->regions );
@@ -164,11 +169,6 @@ void M3Importer::InternReadFile( const std::string& pFile, aiScene* pScene, IOSy
 	// Get the face data
 	faces = GetEntries<uint16>( pViews->faces );
 	nFaces = pViews->faces.nEntries;
-
-	// Everything ok, if not throw an exception
-	if ( !ok ) {
-		throw DeadlyImportError( "Failed to open file " + pFile + ".");
-	}
 
 	// Convert the vertices
 	std::vector<aiVector3D> vertices;
@@ -186,21 +186,21 @@ void M3Importer::InternReadFile( const std::string& pFile, aiScene* pScene, IOSy
 		}
 	}
 
-	// Write UV coords
+	// Write the UV coordinates
 	offset = 0;
 	std::vector<aiVector3D> uvCoords;
 	uvCoords.resize( nVertices );
 	for( unsigned int i = 0; i < nVertices; ++i ) {
 		if( pVerts1 ) {
-			float u = (float) pVerts1[i].uv[0] / 2048;
-			float v = (float) pVerts1[i].uv[1] / 2048;
+			float u = (float) pVerts1[ i ].uv[ 0 ] / 2048;
+			float v = (float) pVerts1[ i ].uv[ 1 ] / 2048;
 			uvCoords[ offset ].Set( u, v, 0.0f );
 			++offset;
 		}
 
 		if( pVerts2 ) {
-			float u = (float) pVerts2[i].uv[0] / 2048;
-			float v = (float) pVerts2[i].uv[1] / 2048;
+			float u = (float) pVerts2[ i ].uv[ 0 ] / 2048;
+			float v = (float) pVerts2[ i ].uv[ 1 ] / 2048;
 			uvCoords[ offset ].Set( u, v, 0.0f );
 			++offset;
 		}
@@ -267,7 +267,7 @@ void M3Importer::convertToAssimp( const std::string& pFile, aiScene* pScene, DIV
 		pRootNode->mChildren = new aiNode*[ pRootNode->mNumChildren ];
 	}
 
-	for ( unsigned int i=0; i<pViews->regions.nEntries; ++i ) {
+	for ( unsigned int i=0; i<pRootNode->mNumChildren; ++i ) {
 		// Create a new node
 		pCurrentNode = createNode( pRootNode );
 		std::stringstream stream;
@@ -276,10 +276,10 @@ void M3Importer::convertToAssimp( const std::string& pFile, aiScene* pScene, DIV
 		pRootNode->mChildren[ i ] = pCurrentNode;
 		
 		// Loop over the faces of the nodes
-		unsigned int numFaces = ( pRegions[ i ].ofsIndices + pRegions[ i ].nIndices ) -  pRegions[ i ].ofsIndices;
+		unsigned int numFaces = ( ( pRegions[ i ].ofsIndices + pRegions[ i ].nIndices ) -  pRegions[ i ].ofsIndices ) / 3;
 		aiMesh *pMesh = new aiMesh;
 		MeshArray.push_back( pMesh );
-		//pMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
+		pMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
 		pMesh->mNumFaces = numFaces;
 		pMesh->mFaces = new aiFace[ pMesh->mNumFaces ];
@@ -303,7 +303,7 @@ void M3Importer::convertToAssimp( const std::string& pFile, aiScene* pScene, DIV
 		pCurrentNode->mMeshes = new unsigned int[ 1 ];
 		const unsigned int meshIdx = MeshArray.size() - 1;
 		pCurrentNode->mMeshes[ 0 ] = meshIdx;
-		createVertexData( pMesh, vertices, normals );
+		createVertexData( pMesh, vertices, uvCoords, normals );
 	}
 
 	// Copy the meshes into the scene
@@ -319,12 +319,14 @@ void M3Importer::convertToAssimp( const std::string& pFile, aiScene* pScene, DIV
 // ------------------------------------------------------------------------------------------------
 //
 void M3Importer::createVertexData( aiMesh *pMesh, const std::vector<aiVector3D> &vertices,
+								  const std::vector<aiVector3D> &uvCoords,
 								  const std::vector<aiVector3D> &normals )
 {
 	unsigned int numIndices = 0;
 
 	pMesh->mNumVertices = pMesh->mNumFaces * 3;
 	pMesh->mVertices = new aiVector3D[ pMesh->mNumVertices ];
+//	pMesh->mNumUVComponents 
 	pMesh->mNormals = new aiVector3D[ pMesh->mNumVertices ];
 	unsigned int pos = 0;
 	for ( unsigned int currentFace = 0; currentFace < pMesh->mNumFaces; currentFace++ )	{

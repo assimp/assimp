@@ -698,7 +698,8 @@ private:
 	void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler );
 	void convertToAssimp( const std::string& pFile, aiScene* pScene, DIV *pViews, Region *pRegions, uint16 *pFaces, 
 		const std::vector<aiVector3D> &vertices, const std::vector<aiVector3D> &uvCoords, const std::vector<aiVector3D> &normals );
-	void createVertexData( aiMesh *pMesh, const std::vector<aiVector3D> &vertices, const std::vector<aiVector3D> &normals  );
+	void createVertexData( aiMesh *pMesh, const std::vector<aiVector3D> &vertices, const std::vector<aiVector3D> &uvCoords,
+		const std::vector<aiVector3D> &normals  );
 	aiNode *createNode( aiNode *pParent );
 	template<typename T>
 	T* GetEntries( Reference ref );

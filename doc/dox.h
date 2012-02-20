@@ -1457,9 +1457,10 @@ try to find the appendant material and skeleton file.
 The skeleton file must have the same name as the mesh file, e.g. fish.mesh.xml and fish.skeleton.xml.
 
 @subsection material Materials
-The material file can have the same name as the mesh file, or you can use
-Importer::Importer::SetPropertyString(AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE, "materiafile.material") to specify
-the name of the material file. This is especially usefull if multiply materials a stored in a single file.
+The material file can have the same name as the mesh file (if the file is model.mesh or model.mesh.xml the
+loader will try to load model.material),
+or you can use Importer::Importer::SetPropertyString(AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE, "materiafile.material")
+to specify the name of the material file. This is especially usefull if multiply materials a stored in a single file.
 The importer will first try to load the material with the same name as the mesh and only if this can't be open try
 to load the alternate material file. The default material filename is "Scene.material".
 
@@ -1468,6 +1469,7 @@ should read the custom material sektion in the Ogre Blender exporter Help File, 
 can find in scripts/OgreImpoter/Assimp.tlp in the assimp source. If you don't set all values, don't worry, they will be ignored during import.
 
 If you want more properties in custom materials, you can easily expand the ogre material loader, it will be just a few lines for each property.
+Just look in OgreImporterMaterial.cpp
 
 @subsection todo Todo
 - Load colors in custom materials

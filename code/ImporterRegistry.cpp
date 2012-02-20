@@ -140,7 +140,7 @@ corresponding preprocessor flag to selectively disable formats.
 #	include "LWSLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
-#	include "OgreImporter.h"
+#	include "OgreImporter.hpp"
 #endif
 #ifndef ASSIMP_BUILD_NO_MS3D_IMPORTER
 #	include "MS3DLoader.h"

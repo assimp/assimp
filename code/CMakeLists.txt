@@ -326,7 +326,8 @@ SET( Obj_SRCS
 SOURCE_GROUP( Obj FILES ${Obj_SRCS})
 
 SET( Ogre_SRCS
-	OgreImporter.h
+	OgreImporter.hpp
+	OgreXmlHelper.hpp
 	OgreImporter.cpp
 	OgreImporterMaterial.cpp
 )

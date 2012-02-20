@@ -54,7 +54,7 @@ using namespace std;
 
 #include "TinyFormatter.h"
 
-#include "OgreImporter.h"
+#include "OgreImporter.hpp"
 #include "irrXMLWrapper.h"
 
 
@@ -78,7 +78,6 @@ bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandle
 		return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
 	}
 }
-
 
 
 void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Assimp::IOSystem *pIOHandler)
@@ -198,7 +197,6 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 }
 
 
-
 void OgreImporter::GetExtensionList(std::set<std::string>& extensions)
 {
 	extensions.insert("mesh.xml");
@@ -209,6 +207,7 @@ void OgreImporter::SetupProperties(const Importer* pImp)
 {
 	m_MaterialLibFilename=pImp->GetPropertyString(AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE, "Scene.material");
 }
+
 
 void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 {
@@ -242,63 +241,28 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 		{	
 			//some info logging:
 			unsigned int NumVertices=GetAttribute<int>(Reader, "vertexcount");
-			ostringstream ss; ss<<"VertexCount: "<<NumVertices;
+			ostringstream ss; ss<<"VertexCount: " << NumVertices;
 			DefaultLogger::get()->debug(ss.str());
 			
 			//General Informations about vertices
 			XmlRead(Reader);
-			if(!(Reader->getNodeName()==string("vertexbuffer")))
+			while(Reader->getNodeName()==string("vertexbuffer"))
 			{
-				throw DeadlyImportError("vertexbuffer node is not first in geometry node!");
+				ReadVertexBuffer(theSubMesh, Reader, NumVertices);
 			}
-			theSubMesh.HasPositions=GetAttribute<bool>(Reader, "positions");
-			theSubMesh.HasNormals=GetAttribute<bool>(Reader, "normals");
-			if(!Reader->getAttributeValue("texture_coords"))//we can have 1 or 0 uv channels, and if the mesh has no uvs, it also doesn't have the attribute
-				theSubMesh.NumUvs=0;
-			else
-				theSubMesh.NumUvs=GetAttribute<int>(Reader, "texture_coords");
-			if(theSubMesh.NumUvs>1)
-				throw DeadlyImportError("too many texcoords (just 1 supported!)");
 
-			//read all the vertices:
-			XmlRead(Reader);
-			while(Reader->getNodeName()==string("vertex"))
-			{
-				//read all vertex attributes:
+			//some error checking on the loaded data
+			if(!theSubMesh.HasPositions)
+				throw DeadlyImportError("No positions could be loaded!");
 
-				//Position
-				if(theSubMesh.HasPositions)
-				{
-					XmlRead(Reader);
-					aiVector3D NewPos;
-					NewPos.x=GetAttribute<float>(Reader, "x");
-					NewPos.y=GetAttribute<float>(Reader, "y");
-					NewPos.z=GetAttribute<float>(Reader, "z");
-					theSubMesh.Positions.push_back(NewPos);
-				}
-				
-				//Normal
-				if(theSubMesh.HasNormals)
-				{
-					XmlRead(Reader);
-					aiVector3D NewNormal;
-					NewNormal.x=GetAttribute<float>(Reader, "x");
-					NewNormal.y=GetAttribute<float>(Reader, "y");
-					NewNormal.z=GetAttribute<float>(Reader, "z");
-					theSubMesh.Normals.push_back(NewNormal);
-				}
+			if(theSubMesh.HasNormals && theSubMesh.Normals.size() != NumVertices)
+				throw DeadlyImportError("Wrong Number of Normals loaded!");
 
-				//Uv:
-				if(1==theSubMesh.NumUvs)
-				{
-					XmlRead(Reader);
-					aiVector3D NewUv;
-					NewUv.x=GetAttribute<float>(Reader, "u");
-					NewUv.y=GetAttribute<float>(Reader, "v")*(-1)+1;//flip the uv vertikal, blender exports them so!
-					theSubMesh.Uvs.push_back(NewUv);
-				}
-				XmlRead(Reader);
-			}
+			if(theSubMesh.HasTangents && theSubMesh.Tangents.size() != NumVertices)
+				throw DeadlyImportError("Wrong Number of Tangents loaded!");
+
+			if(theSubMesh.NumUvs==1 && theSubMesh.Uvs.size() != NumVertices)
+				throw DeadlyImportError("Wrong Number of Uvs loaded!");
 
 		}//end of "geometry
 
@@ -324,7 +288,8 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 	DefaultLogger::get()->debug((Formatter::format(),
 		"Positionen: ",theSubMesh.Positions.size(),
 		" Normale: ",theSubMesh.Normals.size(),
-		" TexCoords: ",theSubMesh.Uvs.size()
+		" TexCoords: ",theSubMesh.Uvs.size(),
+		" Tantents: ",theSubMesh.Tangents.size()
 	));							
 	DefaultLogger::get()->warn(Reader->getNodeName());
 
@@ -335,6 +300,7 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 	unsigned int UniqueVertexCount=theSubMesh.FaceList.size()*3;//*3 because each face consists of 3 vertexes, because we only support triangles^^
 	vector<aiVector3D> UniquePositions(UniqueVertexCount);
 	vector<aiVector3D> UniqueNormals(UniqueVertexCount);
+	vector<aiVector3D> UniqueTangents(UniqueVertexCount);
 	vector<aiVector3D> UniqueUvs(UniqueVertexCount);
 	vector< vector<Weight> > UniqueWeights((theSubMesh.Weights.size() ? UniqueVertexCount : 0));
 
@@ -349,9 +315,19 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 		UniquePositions[3*i+1]=theSubMesh.Positions[Vertex2];
 		UniquePositions[3*i+2]=theSubMesh.Positions[Vertex3];
 
-		UniqueNormals[3*i+0]=theSubMesh.Normals[Vertex1];
-		UniqueNormals[3*i+1]=theSubMesh.Normals[Vertex2];
-		UniqueNormals[3*i+2]=theSubMesh.Normals[Vertex3];
+		if(theSubMesh.HasNormals)
+		{
+			UniqueNormals[3*i+0]=theSubMesh.Normals[Vertex1];
+			UniqueNormals[3*i+1]=theSubMesh.Normals[Vertex2];
+			UniqueNormals[3*i+2]=theSubMesh.Normals[Vertex3];
+		}
+
+		if(theSubMesh.HasTangents)
+		{
+			UniqueTangents[3*i+0]=theSubMesh.Tangents[Vertex1];
+			UniqueTangents[3*i+1]=theSubMesh.Tangents[Vertex2];
+			UniqueTangents[3*i+2]=theSubMesh.Tangents[Vertex3];
+		}
 
 		if(1==theSubMesh.NumUvs)
 		{
@@ -360,7 +336,8 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 			UniqueUvs[3*i+2]=theSubMesh.Uvs[Vertex3];
 		}
 
-		if (theSubMesh.Weights.size()) {
+		if(theSubMesh.Weights.size())
+		{
 			UniqueWeights[3*i+0]=theSubMesh.Weights[Vertex1];
 			UniqueWeights[3*i+1]=theSubMesh.Weights[Vertex2];
 			UniqueWeights[3*i+2]=theSubMesh.Weights[Vertex3];
@@ -374,9 +351,11 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 	//_________________________________________________________________________________________
 
 	//now we have the unique datas, but want them in the SubMesh, so we swap all the containers:
+	//if we don't have one of them, we just swap empty containers, so everything is ok
 	theSubMesh.FaceList.swap(UniqueFaceList);
 	theSubMesh.Positions.swap(UniquePositions);
 	theSubMesh.Normals.swap(UniqueNormals);
+	theSubMesh.Tangents.swap(UniqueTangents);
 	theSubMesh.Uvs.swap(UniqueUvs);
 	theSubMesh.Weights.swap(UniqueWeights);
 
@@ -405,6 +384,119 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 }
 
 
+void OgreImporter::ReadVertexBuffer(SubMesh &theSubMesh, XmlReader *Reader, unsigned int NumVertices)
+{
+	DefaultLogger::get()->debug("new Vertex Buffer");
+
+	bool ReadPositions=false;
+	bool ReadNormals=false;
+	bool ReadTangents=false;
+	bool ReadUvs=false;
+
+	//-------------------- check, what we need to read: --------------------------------
+	if(Reader->getAttributeValue("positions") && GetAttribute<bool>(Reader, "positions"))
+	{
+		ReadPositions=theSubMesh.HasPositions=true;
+		theSubMesh.Positions.reserve(NumVertices);
+		DefaultLogger::get()->debug("reading positions");
+	}
+	if(Reader->getAttributeValue("normals") && GetAttribute<bool>(Reader, "normals"))
+	{
+		ReadNormals=theSubMesh.HasNormals=true;
+		theSubMesh.Normals.reserve(NumVertices);
+		DefaultLogger::get()->debug("reading positions");
+	}
+	if(Reader->getAttributeValue("tangents") && GetAttribute<bool>(Reader, "tangents"))
+	{
+		ReadTangents=theSubMesh.HasTangents=true;
+		theSubMesh.Tangents.reserve(NumVertices);
+		DefaultLogger::get()->debug("reading positions");
+	}
+
+
+	//we can have 1 or 0 uv channels, and if the mesh has no uvs, it also doesn't have the attribute
+	if(!Reader->getAttributeValue("texture_coords"))
+		theSubMesh.NumUvs=0;
+	else
+	{
+		ReadUvs=theSubMesh.NumUvs=GetAttribute<int>(Reader, "texture_coords");
+		theSubMesh.Uvs.reserve(NumVertices);
+		DefaultLogger::get()->debug("reading texture coords");
+	}
+	if(theSubMesh.NumUvs>1)
+		DefaultLogger::get()->warn("too many texcoords (just 1 supported!), no texcoords will be loaded!");
+	//___________________________________________________________________
+
+
+	//check if we will load anything
+	if(!(ReadPositions || ReadNormals || ReadTangents || ReadUvs))
+		DefaultLogger::get()->warn("vertexbuffer seams to be empty!");
+	
+
+	//read all the vertices:
+	XmlRead(Reader);
+
+	/*it might happen, that we have more than one attribute per vertex (they are not splitted to different buffers)
+	so the break condition is a bit tricky (well, IrrXML just sucks :( )*/
+	while(Reader->getNodeName()==string("vertex")
+		||Reader->getNodeName()==string("position")
+		||Reader->getNodeName()==string("normal")
+		||Reader->getNodeName()==string("tangent")
+		||Reader->getNodeName()==string("texcoord"))
+	{
+		if(Reader->getNodeName()==string("vertex"))
+			XmlRead(Reader);//Read an attribute tag
+
+		//Position
+		if(ReadPositions && Reader->getNodeName()==string("position"))
+		{
+			aiVector3D NewPos;
+			NewPos.x=GetAttribute<float>(Reader, "x");
+			NewPos.y=GetAttribute<float>(Reader, "y");
+			NewPos.z=GetAttribute<float>(Reader, "z");
+			theSubMesh.Positions.push_back(NewPos);
+		}
+				
+		//Normal
+		else if(ReadNormals && Reader->getNodeName()==string("normal"))
+		{
+			aiVector3D NewNormal;
+			NewNormal.x=GetAttribute<float>(Reader, "x");
+			NewNormal.y=GetAttribute<float>(Reader, "y");
+			NewNormal.z=GetAttribute<float>(Reader, "z");
+			theSubMesh.Normals.push_back(NewNormal);
+		}
+				
+		//Tangent
+		else if(ReadTangents && Reader->getNodeName()==string("tangent"))
+		{
+			aiVector3D NewTangent;
+			NewTangent.x=GetAttribute<float>(Reader, "x");
+			NewTangent.y=GetAttribute<float>(Reader, "y");
+			NewTangent.z=GetAttribute<float>(Reader, "z");
+			theSubMesh.Tangents.push_back(NewTangent);
+		}
+
+		//Uv:
+		else if(ReadUvs && Reader->getNodeName()==string("texcoord"))
+		{
+			aiVector3D NewUv;
+			NewUv.x=GetAttribute<float>(Reader, "u");
+			NewUv.y=GetAttribute<float>(Reader, "v")*(-1)+1;//flip the uv vertikal, blender exports them so!
+			theSubMesh.Uvs.push_back(NewUv);
+		}
+
+		//Attribute could not be read
+		else
+		{
+			DefaultLogger::get()->warn(string("Attribute was not read: ")+Reader->getNodeName());
+		}
+
+		XmlRead(Reader);//Read the Vertex tag
+	}
+}
+
+
 aiMesh* OgreImporter::CreateAssimpSubMesh(const SubMesh& theSubMesh, const vector<Bone>& Bones) const
 {
 	const aiScene* const m_CurrentScene=this->m_CurrentScene;//make sure, that we can access but not change the scene
@@ -418,8 +510,18 @@ aiMesh* OgreImporter::CreateAssimpSubMesh(const SubMesh& theSubMesh, const vecto
 	NewAiMesh->mNumVertices=theSubMesh.Positions.size();
 
 	//Normals
-	NewAiMesh->mNormals=new aiVector3D[theSubMesh.Normals.size()];
-	memcpy(NewAiMesh->mNormals, &theSubMesh.Normals[0], theSubMesh.Normals.size()*sizeof(aiVector3D));
+	if(theSubMesh.HasNormals)
+	{
+		NewAiMesh->mNormals=new aiVector3D[theSubMesh.Normals.size()];
+		memcpy(NewAiMesh->mNormals, &theSubMesh.Normals[0], theSubMesh.Normals.size()*sizeof(aiVector3D));
+	}
+
+	//Tangents
+	if(theSubMesh.HasTangents)
+	{
+		NewAiMesh->mTangents=new aiVector3D[theSubMesh.Tangents.size()];
+		memcpy(NewAiMesh->mTangents, &theSubMesh.Tangents[0], theSubMesh.Tangents.size()*sizeof(aiVector3D));
+	}
 
 	//Uvs
 	if(0!=theSubMesh.NumUvs)
@@ -816,12 +918,8 @@ void OgreImporter::PutAnimationsInScene(const std::vector<Bone> &Bones, const st
 }
 
 
-
-aiNode* OgreImporter::CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &Bones, aiNode* ParentNode) const
+aiNode* OgreImporter::CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &Bones, aiNode* ParentNode)
 {
-	const aiScene* const m_CurrentScene=this->m_CurrentScene;//make sure, that we can access but not change the scene
-	(void)m_CurrentScene;
-
 	//----Create the node for this bone and set its values-----
 	aiNode* NewNode=new aiNode(Bones[BoneId].Name);
 	NewNode->mParent=ParentNode;

@@ -55,7 +55,7 @@ using namespace std;
 //#include "boost/foreach.hpp"
 //using namespace boost;
 
-#include "OgreImporter.h"
+#include "OgreImporter.hpp"
 #include "irrXMLWrapper.h"
 #include "TinyFormatter.h"
 
@@ -71,10 +71,6 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 	const aiScene* const m_CurrentScene=this->m_CurrentScene;//make sure, that we can access but not change the scene
 	(void)m_CurrentScene;
 
-	aiMaterial *NewMaterial=new aiMaterial();
-
-	aiString ts(MaterialName.c_str());
-	NewMaterial->AddProperty(&ts, AI_MATKEY_NAME);
 	/*For bettetr understanding of the material parser, here is a material example file:
 
 	material Sarg
@@ -100,9 +96,39 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 
 	*/
 
+	/*and here is another one:
 
-	const string MaterialFileName=m_CurrentFilename.substr(0, m_CurrentFilename.find('.'))+".material";
-	DefaultLogger::get()->info("Trying to load " +MaterialFileName);
+	import * from abstract_base_passes_depth.material
+	import * from abstract_base.material
+	import * from mat_shadow_caster.material
+	import * from mat_character_singlepass.material
+
+	material hero/hair/caster : mat_shadow_caster_skin_areject
+	{
+	  set $diffuse_map "hero_hair_alpha_c.dds"
+	}
+	
+	material hero/hair_alpha : mat_char_cns_singlepass_areject_4weights
+	{
+	  set $diffuse_map  "hero_hair_alpha_c.dds"
+	  set $specular_map "hero_hair_alpha_s.dds"
+	  set $normal_map   "hero_hair_alpha_n.dds"
+	  set $light_map    "black_lightmap.dds"
+  
+	  set $shadow_caster_material "hero/hair/caster"
+	}
+	*/
+
+
+	//the filename typically ends with .mesh or .mesh.xml
+	const string MaterialFileName=m_CurrentFilename.substr(0, m_CurrentFilename.rfind(".mesh"))+".material";
+	DefaultLogger::get()->info("Trying to load " + MaterialFileName);
+	
+
+	aiMaterial *NewMaterial=new aiMaterial();
+
+	aiString ts(MaterialName.c_str());
+	NewMaterial->AddProperty(&ts, AI_MATKEY_NAME);
 
 	//Read the file into memory and put it in a stringstream
 	stringstream ss;
@@ -110,11 +136,17 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 		IOStream* MatFilePtr=m_CurrentIOHandler->Open(MaterialFileName);
 		if(NULL==MatFilePtr)
 		{
-			MatFilePtr=m_CurrentIOHandler->Open(m_MaterialLibFilename);
+			//try the default mat Library
 			if(NULL==MatFilePtr)
 			{
-				DefaultLogger::get()->error(m_MaterialLibFilename+" and "+MaterialFileName + " could not be opened, Material will not be loaded!");
-				return NewMaterial;
+				
+				MatFilePtr=m_CurrentIOHandler->Open(m_MaterialLibFilename);
+				if(NULL==MatFilePtr)
+				{
+					DefaultLogger::get()->error(m_MaterialLibFilename+" and "+MaterialFileName + " could not be opened, Material will not be loaded!");
+					delete NewMaterial;
+					return NULL;
+				}
 			}
 		}
 		boost::scoped_ptr<IOStream> MaterialFile(MatFilePtr);
@@ -135,7 +167,10 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 			ss >> Line;
 			if(Line==MaterialName)//Load the next material
 			{
+				string RestOfLine;
+				getline(ss, RestOfLine);//ignore the rest of the line
 				ss >> Line;
+
 				if(Line!="{")
 					throw DeadlyImportError("empty material!");
 
@@ -145,71 +180,8 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 					ss >> Line;
 					if(Line=="technique")
 					{
-						ss >> Line;
-						if(Line!="{")
-							throw DeadlyImportError("empty technique!");
-						while(Line!="}")//read until the end of the technique
-						{
-							ss >> Line;
-							if(Line=="pass")
-							{
-								ss >> Line;
-								if(Line!="{")
-									throw DeadlyImportError("empty pass!");
-								while(Line!="}")//read until the end of the pass
-								{
-									ss >> Line;
-									if(Line=="ambient")
-									{
-										float r,g,b;
-										ss >> r >> g >> b;
-										const aiColor3D Color(r,g,b);
-										NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_AMBIENT);
-									}
-									else if(Line=="diffuse")
-									{
-										float r,g,b;
-										ss >> r >> g >> b;
-										const aiColor3D Color(r,g,b);
-										NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_DIFFUSE);
-									}
-									else if(Line=="specular")
-									{
-										float r,g,b;
-										ss >> r >> g >> b;
-										const aiColor3D Color(r,g,b);
-										NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_SPECULAR);
-									}
-									else if(Line=="emmisive")
-									{
-										float r,g,b;
-										ss >> r >> g >> b;
-										const aiColor3D Color(r,g,b);
-										NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_EMISSIVE);
-									}
-									else if(Line=="texture_unit")
-									{
-										ss >> Line;
-										if(Line!="{")
-											throw DeadlyImportError("empty texture unit!");
-										while(Line!="}")//read until the end of the texture_unit
-										{
-											ss >> Line;
-											if(Line=="texture")
-											{
-												ss >> Line;
-												aiString ts(Line.c_str());
-												NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
-											}
-										}//end of texture unit
-									}
-								}
-							}
-						}//end of technique
-
-						
+						ReadTechnique(ss, NewMaterial);
 					}
-
 
 					DefaultLogger::get()->info(Line);
 					//read informations from a custom material:
@@ -237,6 +209,54 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 							aiString ts(Line.c_str());
 							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_NORMALS, 0));
 						}
+						
+						if(Line=="$shininess_strength")
+						{
+							ss >> Line;
+							float Shininess=fast_atof(Line.c_str());
+							NewMaterial->AddProperty(&Shininess, 1, AI_MATKEY_SHININESS_STRENGTH);
+						}
+
+						if(Line=="$shininess_exponent")
+						{
+							ss >> Line;
+							float Shininess=fast_atof(Line.c_str());
+							NewMaterial->AddProperty(&Shininess, 1, AI_MATKEY_SHININESS);
+						}
+
+						//Properties from Venetica:
+						if(Line=="$diffuse_map")
+						{
+							ss >> Line;
+							if(Line[0]=='"')// "file" -> file
+								Line=Line.substr(1, Line.size()-2);
+							aiString ts(Line.c_str());
+							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+						}
+						if(Line=="$specular_map")
+						{
+							ss >> Line;
+							if(Line[0]=='"')// "file" -> file
+								Line=Line.substr(1, Line.size()-2);
+							aiString ts(Line.c_str());
+							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_SHININESS, 0));
+						}
+						if(Line=="$normal_map")
+						{
+							ss >> Line;
+							if(Line[0]=='"')// "file" -> file
+								Line=Line.substr(1, Line.size()-2);
+							aiString ts(Line.c_str());
+							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_NORMALS, 0));
+						}
+						if(Line=="$light_map")
+						{
+							ss >> Line;
+							if(Line[0]=='"')// "file" -> file
+								Line=Line.substr(1, Line.size()-2);
+							aiString ts(Line.c_str());
+							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_LIGHTMAP, 0));
+						}
 					}					
 				}//end of material
 			}
@@ -248,6 +268,71 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 	return NewMaterial;
 }
 
+void OgreImporter::ReadTechnique(stringstream &ss, aiMaterial* NewMaterial)
+{
+	string Line;
+	ss >> Line;
+	if(Line!="{")
+		throw DeadlyImportError("empty technique!");
+	while(Line!="}")//read until the end of the technique
+	{
+		ss >> Line;
+		if(Line=="pass")
+		{
+			ss >> Line;
+			if(Line!="{")
+				throw DeadlyImportError("empty pass!");
+			while(Line!="}")//read until the end of the pass
+			{
+				ss >> Line;
+				if(Line=="ambient")
+				{
+					float r,g,b;
+					ss >> r >> g >> b;
+					const aiColor3D Color(r,g,b);
+					NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_AMBIENT);
+				}
+				else if(Line=="diffuse")
+				{
+					float r,g,b;
+					ss >> r >> g >> b;
+					const aiColor3D Color(r,g,b);
+					NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_DIFFUSE);
+				}
+				else if(Line=="specular")
+				{
+					float r,g,b;
+					ss >> r >> g >> b;
+					const aiColor3D Color(r,g,b);
+					NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_SPECULAR);
+				}
+				else if(Line=="emmisive")
+				{
+					float r,g,b;
+					ss >> r >> g >> b;
+					const aiColor3D Color(r,g,b);
+					NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_EMISSIVE);
+				}
+				else if(Line=="texture_unit")
+				{
+					ss >> Line;
+					if(Line!="{")
+						throw DeadlyImportError("empty texture unit!");
+					while(Line!="}")//read until the end of the texture_unit
+					{
+						ss >> Line;
+						if(Line=="texture")
+						{
+							ss >> Line;
+							aiString ts(Line.c_str());
+							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+						}
+					}//end of texture unit
+				}
+			}
+		}
+	}//end of technique
+}
 
 
 }//namespace Ogre

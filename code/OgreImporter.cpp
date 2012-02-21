@@ -524,12 +524,16 @@ aiMesh* OgreImporter::CreateAssimpSubMesh(const SubMesh& theSubMesh, const vecto
 		memcpy(NewAiMesh->mNormals, &theSubMesh.Normals[0], theSubMesh.Normals.size()*sizeof(aiVector3D));
 	}
 
+
+	//until we have support for bitangents, no tangents will be written
+	/*
 	//Tangents
 	if(theSubMesh.HasTangents)
 	{
 		NewAiMesh->mTangents=new aiVector3D[theSubMesh.Tangents.size()];
 		memcpy(NewAiMesh->mTangents, &theSubMesh.Tangents[0], theSubMesh.Tangents.size()*sizeof(aiVector3D));
 	}
+	*/
 
 	//Uvs
 	if(0!=theSubMesh.NumUvs)
@@ -775,6 +779,8 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 					while(true)
 					{
 						XmlRead(SkeletonFile);
+
+						//If any property doesn't show up, it will keep its initialization value
 
 						//Position:
 						if(string("translate")==SkeletonFile->getNodeName())

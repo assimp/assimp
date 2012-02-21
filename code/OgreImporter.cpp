@@ -424,7 +424,10 @@ void OgreImporter::ReadVertexBuffer(SubMesh &theSubMesh, XmlReader *Reader, unsi
 		DefaultLogger::get()->debug("reading texture coords");
 	}
 	if(theSubMesh.NumUvs>1)
-		DefaultLogger::get()->warn("too many texcoords (just 1 supported!), no texcoords will be loaded!");
+	{
+		DefaultLogger::get()->warn("too many texcoords (just 1 supported!), just the first texcoords will be loaded!");
+		theSubMesh.NumUvs=1;
+	}
 	//___________________________________________________________________
 
 
@@ -484,6 +487,11 @@ void OgreImporter::ReadVertexBuffer(SubMesh &theSubMesh, XmlReader *Reader, unsi
 			NewUv.x=GetAttribute<float>(Reader, "u");
 			NewUv.y=GetAttribute<float>(Reader, "v")*(-1)+1;//flip the uv vertikal, blender exports them so!
 			theSubMesh.Uvs.push_back(NewUv);
+
+			//skip all the following texcoords:
+			while(Reader->getNodeName()==string("texcoord"))
+				XmlRead(Reader);
+			continue;//don't read another line at the end of the loop
 		}
 
 		//Attribute could not be read
@@ -762,35 +770,46 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 					Keyframe NewKeyframe;
 					NewKeyframe.Time=GetAttribute<float>(SkeletonFile, "time");
 
-					//Position:
-					XmlRead(SkeletonFile);
-					if(string("translate")!=SkeletonFile->getNodeName())
-						throw DeadlyImportError("translate node not first in keyframe");
-					NewKeyframe.Position.x=GetAttribute<float>(SkeletonFile, "x");
-					NewKeyframe.Position.y=GetAttribute<float>(SkeletonFile, "y");
-					NewKeyframe.Position.z=GetAttribute<float>(SkeletonFile, "z");
+					//loop over the attributes:
+					
+					while(true)
+					{
+						XmlRead(SkeletonFile);
 
-					//Rotation:
-					XmlRead(SkeletonFile);
-					if(string("rotate")!=SkeletonFile->getNodeName())
-						throw DeadlyImportError("rotate is not second node in keyframe");
-					float RotationAngle=GetAttribute<float>(SkeletonFile, "angle");
-					aiVector3D RotationAxis;
-					XmlRead(SkeletonFile);
-					if(string("axis")!=SkeletonFile->getNodeName())
-						throw DeadlyImportError("No axis for keyframe rotation!");
-					RotationAxis.x=GetAttribute<float>(SkeletonFile, "x");
-					RotationAxis.y=GetAttribute<float>(SkeletonFile, "y");
-					RotationAxis.z=GetAttribute<float>(SkeletonFile, "z");
-					NewKeyframe.Rotation=aiQuaternion(RotationAxis, RotationAngle);
+						//Position:
+						if(string("translate")==SkeletonFile->getNodeName())
+						{
+							NewKeyframe.Position.x=GetAttribute<float>(SkeletonFile, "x");
+							NewKeyframe.Position.y=GetAttribute<float>(SkeletonFile, "y");
+							NewKeyframe.Position.z=GetAttribute<float>(SkeletonFile, "z");
+						}
 
-					//Scaling:
-					XmlRead(SkeletonFile);
-					if(string("scale")!=SkeletonFile->getNodeName())
-						throw DeadlyImportError("no scalling key in keyframe!");
-					NewKeyframe.Scaling.x=GetAttribute<float>(SkeletonFile, "x");
-					NewKeyframe.Scaling.y=GetAttribute<float>(SkeletonFile, "y");
-					NewKeyframe.Scaling.z=GetAttribute<float>(SkeletonFile, "z");
+						//Rotation:
+						else if(string("rotate")!=SkeletonFile->getNodeName())
+						{
+							float RotationAngle=GetAttribute<float>(SkeletonFile, "angle");
+							aiVector3D RotationAxis;
+							XmlRead(SkeletonFile);
+							if(string("axis")!=SkeletonFile->getNodeName())
+								throw DeadlyImportError("No axis for keyframe rotation!");
+							RotationAxis.x=GetAttribute<float>(SkeletonFile, "x");
+							RotationAxis.y=GetAttribute<float>(SkeletonFile, "y");
+							RotationAxis.z=GetAttribute<float>(SkeletonFile, "z");
+							NewKeyframe.Rotation=aiQuaternion(RotationAxis, RotationAngle);
+						}
+
+						//Scaling:
+						else if(string("scale")==SkeletonFile->getNodeName())
+						{
+							NewKeyframe.Scaling.x=GetAttribute<float>(SkeletonFile, "x");
+							NewKeyframe.Scaling.y=GetAttribute<float>(SkeletonFile, "y");
+							NewKeyframe.Scaling.z=GetAttribute<float>(SkeletonFile, "z");
+						}
+
+						//we suppose, that we read all attributes and this is a new keyframe or the end of the animation
+						else
+							break;
+					}
 
 
 					NewTrack.Keyframes.push_back(NewKeyframe);

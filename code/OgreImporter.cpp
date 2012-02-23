@@ -419,7 +419,7 @@ void OgreImporter::ReadVertexBuffer(SubMesh &theSubMesh, XmlReader *Reader, unsi
 		theSubMesh.NumUvs=0;
 	else
 	{
-		ReadUvs=theSubMesh.NumUvs=GetAttribute<int>(Reader, "texture_coords");
+		ReadUvs=!!(theSubMesh.NumUvs=GetAttribute<int>(Reader, "texture_coords"));
 		theSubMesh.Uvs.reserve(NumVertices);
 		DefaultLogger::get()->debug("reading texture coords");
 	}

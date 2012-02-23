@@ -267,7 +267,10 @@ void aiReleaseImport( const aiScene* pScene)
 	}
 	else {
 		// deleting the Importer also deletes the scene
-		delete priv->mOrigImporter;
+		// Note: the reason that this is not written as 'delete priv->mOrigImporter'
+		// is a suspected bug in gcc 4.4+ (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=52339)
+		Importer* importer = priv->mOrigImporter;
+		delete importer;
 	}
 	
 	ASSIMP_END_EXCEPTION_REGION(void);

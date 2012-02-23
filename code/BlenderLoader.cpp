@@ -295,7 +295,11 @@ void BlenderImporter::ExtractScene(Scene& out, const FileDatabase& file)
 
 	// we need a scene somewhere to start with. 
 	for_each(const FileBlockHead& bl,file.entries) {
-		if (bl.id == "SC") {
+
+		// Fix: using the DNA index is more reliable to locate scenes
+		//if (bl.id == "SC") {
+
+		if (bl.dna_index == (*it).second) {
 			block = &bl;
 			break;
 		}

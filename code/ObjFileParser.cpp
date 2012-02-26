@@ -84,8 +84,8 @@ ObjFileParser::ObjFileParser(std::vector<char> &Data,const std::string &strModel
 //	Destructor
 ObjFileParser::~ObjFileParser()
 {
-	delete m_pModel->m_pDefaultMaterial;
-	m_pModel->m_pDefaultMaterial = NULL;
+	/*delete m_pModel->m_pDefaultMaterial;
+	m_pModel->m_pDefaultMaterial = NULL;*/
 
 	delete m_pModel;
 	m_pModel = NULL;

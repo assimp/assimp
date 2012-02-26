@@ -274,7 +274,6 @@ struct Model
 	//!	Material map
 	std::map<std::string, Material*> m_MaterialMap;
 
-
 	//!	\brief	Default constructor
 	Model() :
 		m_ModelName(""),
@@ -292,28 +291,26 @@ struct Model
 	{
 		// Clear all stored object instances
 		for (std::vector<Object*>::iterator it = m_Objects.begin();
-			it != m_Objects.end(); ++it)
-		{
+			it != m_Objects.end(); ++it) {
 			delete *it;
 		}
 		m_Objects.clear();
 		
 		// Clear all stored mesh instances
 		for (std::vector<Mesh*>::iterator it = m_Meshes.begin();
-			it != m_Meshes.end(); ++it)
-		{
+			it != m_Meshes.end(); ++it) {
 			delete *it;
 		}
-
 		m_Meshes.clear();
 
-		for(GroupMapIt it = m_Groups.begin();
-			it != m_Groups.end(); ++it)
-		{
+		for(GroupMapIt it = m_Groups.begin(); it != m_Groups.end(); ++it) {
 			delete it->second;
 		}
-		
 		m_Groups.clear();
+
+		for ( std::map<std::string, Material*>::iterator it = m_MaterialMap.begin(); it != m_MaterialMap.end(); ++it ) {
+			delete it->second;
+		}
 	}
 };
 

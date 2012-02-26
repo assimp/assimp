@@ -477,9 +477,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 	
 	pScene->mMaterials = new aiMaterial*[ numMaterials ];
 	for ( unsigned int matIndex = 0; matIndex < numMaterials; matIndex++ )
-	{
-		aiMaterial* mat = new aiMaterial;
-		
+	{		
 		// Store material name
 		std::map<std::string, ObjFile::Material*>::const_iterator it;
 		it = pModel->m_MaterialMap.find( pModel->m_MaterialLib[ matIndex ] );
@@ -488,6 +486,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 		if ( pModel->m_MaterialMap.end() == it )
 			continue;
 
+		aiMaterial* mat = new aiMaterial;
 		ObjFile::Material *pCurrentMaterial = (*it).second;
 		mat->AddProperty( &pCurrentMaterial->MaterialName, AI_MATKEY_NAME );
 
@@ -508,6 +507,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 			sm = aiShadingMode_Gouraud;
 			DefaultLogger::get()->error("OBJ: unexpected illumination model (0-2 recognized)");
 		}
+	
 		mat->AddProperty<int>( &sm, 1, AI_MATKEY_SHADING_MODEL);
 
 		// multiplying the specular exponent with 2 seems to yield better results

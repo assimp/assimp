@@ -268,6 +268,7 @@ void M3Importer::convertToAssimp( const std::string& pFile, aiScene* pScene, DIV
 	}
 
 	for ( unsigned int i=0; i<pRootNode->mNumChildren; ++i ) {
+		//pRegions[ i ].
 		// Create a new node
 		pCurrentNode = createNode( pRootNode );
 		std::stringstream stream;
@@ -294,10 +295,6 @@ void M3Importer::convertToAssimp( const std::string& pFile, aiScene* pScene, DIV
 			pCurrentFace->mIndices[ 1 ] = pFaces[ j+1 ];
 			pCurrentFace->mIndices[ 2 ] = pFaces[ j+2 ];
 		}
-/*		fprintf_s(f, "f %d/%d/%d %d/%d/%d %d/%d/%d\n", faces[j]+1, faces[j]+1, faces[j]+1,
-			faces[j+1]+1, faces[j+1]+1, faces[j+1]+1,
-			faces[j+2]+1, faces[j+2]+1, faces[j+2]+1);*/
-
 		// Now we can create the vertex data itself
 		pCurrentNode->mNumMeshes = 1;
 		pCurrentNode->mMeshes = new unsigned int[ 1 ];
@@ -312,7 +309,7 @@ void M3Importer::convertToAssimp( const std::string& pFile, aiScene* pScene, DIV
 	unsigned int pos = 0;
 	for ( std::vector<aiMesh*>::iterator it = MeshArray.begin(); it != MeshArray.end(); ++it ) {
 		pScene->mMeshes[ pos ] = *it;
-		pos++;
+		++pos;
 	}
 }
 
@@ -326,7 +323,8 @@ void M3Importer::createVertexData( aiMesh *pMesh, const std::vector<aiVector3D> 
 
 	pMesh->mNumVertices = pMesh->mNumFaces * 3;
 	pMesh->mVertices = new aiVector3D[ pMesh->mNumVertices ];
-//	pMesh->mNumUVComponents 
+	pMesh->mNumUVComponents[ 0 ] = 2;
+	pMesh->mTextureCoords[ 0 ] = new aiVector3D[ pMesh->mNumVertices ];
 	pMesh->mNormals = new aiVector3D[ pMesh->mNumVertices ];
 	unsigned int pos = 0;
 	for ( unsigned int currentFace = 0; currentFace < pMesh->mNumFaces; currentFace++ )	{
@@ -336,6 +334,8 @@ void M3Importer::createVertexData( aiMesh *pMesh, const std::vector<aiVector3D> 
 			if ( vertices.size() > idx ) {
 				pMesh->mVertices[ pos ] = vertices[ idx ];
 				pMesh->mNormals[ pos ] = normals[ idx ];
+				pMesh->mTextureCoords[ 0 ]->x = uvCoords[ idx ].x;
+				pMesh->mTextureCoords[ 0 ]->y = uvCoords[ idx ].y;
 				pFace->mIndices[ currentIdx ] = pos;
 				pos++;
 			}

@@ -215,6 +215,7 @@ void ColladaExporter::WriteMaterials()
   materials.resize( mScene->mNumMaterials);
 
   /// collect all materials from the scene
+  size_t numTextures = 0;
   for( size_t a = 0; a < mScene->mNumMaterials; ++a )
   {
     const aiMaterial* mat = mScene->mMaterials[a];
@@ -228,99 +229,111 @@ void ColladaExporter::WriteMaterials()
       materials[a].name[pos] = 'x';
 
     ReadMaterialSurface( materials[a].ambient, mat, aiTextureType_AMBIENT, AI_MATKEY_COLOR_AMBIENT);
+    if( !materials[a].ambient.texture.empty() ) numTextures++;
     ReadMaterialSurface( materials[a].diffuse, mat, aiTextureType_DIFFUSE, AI_MATKEY_COLOR_DIFFUSE);
+    if( !materials[a].diffuse.texture.empty() ) numTextures++;
     ReadMaterialSurface( materials[a].specular, mat, aiTextureType_SPECULAR, AI_MATKEY_COLOR_SPECULAR);
+    if( !materials[a].specular.texture.empty() ) numTextures++;
     ReadMaterialSurface( materials[a].emissive, mat, aiTextureType_EMISSIVE, AI_MATKEY_COLOR_EMISSIVE);
+    if( !materials[a].emissive.texture.empty() ) numTextures++;
     ReadMaterialSurface( materials[a].reflective, mat, aiTextureType_REFLECTION, AI_MATKEY_COLOR_REFLECTIVE);
+    if( !materials[a].reflective.texture.empty() ) numTextures++;
     ReadMaterialSurface( materials[a].normal, mat, aiTextureType_NORMALS, NULL, 0, 0);
+    if( !materials[a].normal.texture.empty() ) numTextures++;
 
     mat->Get( AI_MATKEY_SHININESS, materials[a].shininess);
   }
 
   // output textures if present
-  mOutput << startstr << "<library_images>" << endstr; 
-  PushTag();
-  for( std::vector<Material>::const_iterator it = materials.begin(); it != materials.end(); ++it )
-  { 
-    const Material& mat = *it;
-    WriteImageEntry( mat.ambient, mat.name + "-ambient-image");
-    WriteImageEntry( mat.diffuse, mat.name + "-diffuse-image");
-    WriteImageEntry( mat.specular, mat.name + "-specular-image");
-    WriteImageEntry( mat.emissive, mat.name + "-emissive-image");
-    WriteImageEntry( mat.reflective, mat.name + "-reflective-image");
-    WriteImageEntry( mat.normal, mat.name + "-normal-image");
+  if( numTextures > 0 )
+  {
+    mOutput << startstr << "<library_images>" << endstr; 
+    PushTag();
+    for( std::vector<Material>::const_iterator it = materials.begin(); it != materials.end(); ++it )
+    { 
+      const Material& mat = *it;
+      WriteImageEntry( mat.ambient, mat.name + "-ambient-image");
+      WriteImageEntry( mat.diffuse, mat.name + "-diffuse-image");
+      WriteImageEntry( mat.specular, mat.name + "-specular-image");
+      WriteImageEntry( mat.emissive, mat.name + "-emissive-image");
+      WriteImageEntry( mat.reflective, mat.name + "-reflective-image");
+      WriteImageEntry( mat.normal, mat.name + "-normal-image");
+    }
+    PopTag();
+    mOutput << startstr << "</library_images>" << endstr;
   }
-  PopTag();
-  mOutput << startstr << "</library_images>" << endstr;
 
   // output effects - those are the actual carriers of information
-  mOutput << startstr << "<library_effects>" << endstr;
-  PushTag();
-  for( std::vector<Material>::const_iterator it = materials.begin(); it != materials.end(); ++it )
+  if( !materials.empty() )
   {
-    const Material& mat = *it;
-    // this is so ridiculous it must be right
-    mOutput << startstr << "<effect id=\"" << mat.name << "-fx\" name=\"" << mat.name << "\">" << endstr;
+    mOutput << startstr << "<library_effects>" << endstr;
     PushTag();
-    mOutput << startstr << "<profile_COMMON>" << endstr;
+    for( std::vector<Material>::const_iterator it = materials.begin(); it != materials.end(); ++it )
+    {
+      const Material& mat = *it;
+      // this is so ridiculous it must be right
+      mOutput << startstr << "<effect id=\"" << mat.name << "-fx\" name=\"" << mat.name << "\">" << endstr;
+      PushTag();
+      mOutput << startstr << "<profile_COMMON>" << endstr;
+      PushTag();
+
+      // write sampler- and surface params for the texture entries
+      WriteTextureParamEntry( mat.emissive, "emissive", mat.name);
+      WriteTextureParamEntry( mat.ambient, "ambient", mat.name);
+      WriteTextureParamEntry( mat.diffuse, "diffuse", mat.name);
+      WriteTextureParamEntry( mat.specular, "specular", mat.name);
+      WriteTextureParamEntry( mat.reflective, "reflective", mat.name);
+
+      mOutput << startstr << "<technique sid=\"standard\">" << endstr;
+      PushTag();
+      mOutput << startstr << "<phong>" << endstr;
+      PushTag();
+
+      WriteTextureColorEntry( mat.emissive, "emission", mat.name + "-emissive-sampler");
+      WriteTextureColorEntry( mat.ambient, "ambient", mat.name + "-ambient-sampler");
+      WriteTextureColorEntry( mat.diffuse, "diffuse", mat.name + "-diffuse-sampler");
+      WriteTextureColorEntry( mat.specular, "specular", mat.name + "-specular-sampler");
+
+      mOutput << startstr << "<shininess>" << endstr;
+      PushTag();
+      mOutput << startstr << "<float sid=\"shininess\">" << mat.shininess << "</float>" << endstr;
+      PopTag();
+      mOutput << startstr << "</shininess>" << endstr;
+
+      WriteTextureColorEntry( mat.reflective, "reflective", mat.name + "-reflective-sampler");
+
+  // deactivated because the Collada spec PHONG model does not allow other textures.
+  //    if( !mat.normal.texture.empty() )
+  //      WriteTextureColorEntry( mat.normal, "bump", mat.name + "-normal-sampler");
+
+
+      PopTag();
+      mOutput << startstr << "</phong>" << endstr;
+      PopTag();
+      mOutput << startstr << "</technique>" << endstr;
+      PopTag();
+      mOutput << startstr << "</profile_COMMON>" << endstr;
+      PopTag();
+      mOutput << startstr << "</effect>" << endstr;
+    }
+    PopTag();
+    mOutput << startstr << "</library_effects>" << endstr;
+
+    // write materials - they're just effect references
+    mOutput << startstr << "<library_materials>" << endstr;
     PushTag();
-
-    // write sampler- and surface params for the texture entries
-    WriteTextureParamEntry( mat.emissive, "emissive", mat.name);
-    WriteTextureParamEntry( mat.ambient, "ambient", mat.name);
-    WriteTextureParamEntry( mat.diffuse, "diffuse", mat.name);
-    WriteTextureParamEntry( mat.specular, "specular", mat.name);
-    WriteTextureParamEntry( mat.reflective, "reflective", mat.name);
-
-    mOutput << startstr << "<technique sid=\"standard\">" << endstr;
-    PushTag();
-    mOutput << startstr << "<phong>" << endstr;
-    PushTag();
-
-    WriteTextureColorEntry( mat.emissive, "emission", mat.name + "-emissive-sampler");
-    WriteTextureColorEntry( mat.ambient, "ambient", mat.name + "-ambient-sampler");
-    WriteTextureColorEntry( mat.diffuse, "diffuse", mat.name + "-diffuse-sampler");
-    WriteTextureColorEntry( mat.specular, "specular", mat.name + "-specular-sampler");
-
-    mOutput << startstr << "<shininess>" << endstr;
-    PushTag();
-    mOutput << startstr << "<float sid=\"shininess\">" << mat.shininess << "</float>" << endstr;
+    for( std::vector<Material>::const_iterator it = materials.begin(); it != materials.end(); ++it )
+    {
+      const Material& mat = *it;
+      mOutput << startstr << "<material id=\"" << mat.name << "\" name=\"" << mat.name << "\">" << endstr;
+      PushTag();
+      mOutput << startstr << "<instance_effect url=\"#" << mat.name << "-fx\"/>" << endstr;
+      PopTag();
+      mOutput << startstr << "</material>" << endstr;
+    }
     PopTag();
-    mOutput << startstr << "</shininess>" << endstr;
-
-    WriteTextureColorEntry( mat.reflective, "reflective", mat.name + "-reflective-sampler");
-
-// deactivated because the Collada spec PHONG model does not allow other textures.
-//    if( !mat.normal.texture.empty() )
-//      WriteTextureColorEntry( mat.normal, "bump", mat.name + "-normal-sampler");
-
-
-    PopTag();
-    mOutput << startstr << "</phong>" << endstr;
-    PopTag();
-    mOutput << startstr << "</technique>" << endstr;
-    PopTag();
-    mOutput << startstr << "</profile_COMMON>" << endstr;
-    PopTag();
-    mOutput << startstr << "</effect>" << endstr;
+    mOutput << startstr << "</library_materials>" << endstr;
   }
-  PopTag();
-  mOutput << startstr << "</library_effects>" << endstr;
-
-  // write materials - they're just effect references
-  mOutput << startstr << "<library_materials>" << endstr;
-  PushTag();
-  for( std::vector<Material>::const_iterator it = materials.begin(); it != materials.end(); ++it )
-  {
-    const Material& mat = *it;
-    mOutput << startstr << "<material id=\"" << mat.name << "\" name=\"" << mat.name << "\">" << endstr;
-    PushTag();
-    mOutput << startstr << "<instance_effect url=\"#" << mat.name << "-fx\"/>" << endstr;
-    PopTag();
-    mOutput << startstr << "</material>" << endstr;
-  }
-  PopTag();
-  mOutput << startstr << "</library_materials>" << endstr;
 }
 
 // ------------------------------------------------------------------------------------------------

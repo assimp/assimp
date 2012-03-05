@@ -227,6 +227,10 @@ void ColladaExporter::WriteMaterials()
     size_t pos; 
     while( (pos = materials[a].name.find( '#')) != std::string::npos )
       materials[a].name[pos] = 'x';
+    while( (pos = materials[a].name.find( ' ')) != std::string::npos )
+      materials[a].name[pos] = '_';
+    while( (pos = materials[a].name.find( '"')) != std::string::npos )
+      materials[a].name[pos] = '_';
 
     ReadMaterialSurface( materials[a].ambient, mat, aiTextureType_AMBIENT, AI_MATKEY_COLOR_AMBIENT);
     if( !materials[a].ambient.texture.empty() ) numTextures++;

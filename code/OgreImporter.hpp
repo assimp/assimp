@@ -12,13 +12,33 @@ namespace Ogre
 
 
 //Forward declarations:
-struct SubMesh;
 struct Face;
 struct Weight;
 struct Bone;
 struct Animation;
 struct Track;
 struct Keyframe;
+
+///A submesh from Ogre
+struct SubMesh
+{	
+	std::string Name;
+	std::string MaterialName;
+	std::vector<Face> FaceList;
+
+	std::vector<aiVector3D> Positions; bool HasPositions;
+	std::vector<aiVector3D> Normals; bool HasNormals;
+	std::vector<aiVector3D> Tangents; bool HasTangents;
+	std::vector<aiVector3D> Uvs; unsigned int NumUvs;//nearly always 2d, but assimp has always 3d texcoords
+
+	std::vector< std::vector<Weight> > Weights;//a list of bones for each vertex
+	int MaterialIndex;///< The Index in the Assimp Materialarray from the material witch is attached to this submesh
+	unsigned int BonesUsed;//the highest index of a bone from a bone weight, this is needed to create the assimp bone structur (converting from Vertex-Bones to Bone-Vertices)
+
+	SubMesh(): HasPositions(false), HasNormals(false), HasTangents(false),
+		NumUvs(0), MaterialIndex(-1), BonesUsed(0) {}//initialize everything
+};
+
 
 ///The Main Ogre Importer Class
 class OgreImporter : public BaseImporter
@@ -59,26 +79,7 @@ private:
 	std::string m_MaterialLibFilename;
 	IOSystem* m_CurrentIOHandler;
 	aiScene *m_CurrentScene;
-};
-
-///A submesh from Ogre
-struct SubMesh
-{	
-	std::string Name;
-	std::string MaterialName;
-	std::vector<Face> FaceList;
-
-	std::vector<aiVector3D> Positions; bool HasPositions;
-	std::vector<aiVector3D> Normals; bool HasNormals;
-	std::vector<aiVector3D> Tangents; bool HasTangents;
-	std::vector<aiVector3D> Uvs; unsigned int NumUvs;//nearly always 2d, but assimp has always 3d texcoords
-
-	std::vector< std::vector<Weight> > Weights;//a list of bones for each vertex
-	int MaterialIndex;///< The Index in the Assimp Materialarray from the material witch is attached to this submesh
-	unsigned int BonesUsed;//the highest index of a bone from a bone weight, this is needed to create the assimp bone structur (converting from Vertex-Bones to Bone-Vertices)
-
-	SubMesh(): HasPositions(false), HasNormals(false), HasTangents(false),
-		NumUvs(0), MaterialIndex(-1), BonesUsed(0) {}//initialize everything
+	SubMesh m_SharedGeometry;///< we will just use the vertexbuffers of the submesh
 };
 
 ///For the moment just triangles, no other polygon types!

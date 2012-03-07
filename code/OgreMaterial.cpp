@@ -172,7 +172,10 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 				ss >> Line;
 
 				if(Line!="{")
-					throw DeadlyImportError("empty material!");
+				{
+					DefaultLogger::get()->warn("empyt material!");
+					return NULL;
+				}
 
 				while(Line!="}")//read until the end of the material
 				{
@@ -273,7 +276,10 @@ void OgreImporter::ReadTechnique(stringstream &ss, aiMaterial* NewMaterial)
 	string Line;
 	ss >> Line;
 	if(Line!="{")
-		throw DeadlyImportError("empty technique!");
+	{
+		DefaultLogger::get()->warn("empty technique!");
+		return;
+	}
 	while(Line!="}")//read until the end of the technique
 	{
 		ss >> Line;
@@ -281,7 +287,10 @@ void OgreImporter::ReadTechnique(stringstream &ss, aiMaterial* NewMaterial)
 		{
 			ss >> Line;
 			if(Line!="{")
-				throw DeadlyImportError("empty pass!");
+			{
+				DefaultLogger::get()->warn("empty pass!");
+				return;
+			}
 			while(Line!="}")//read until the end of the pass
 			{
 				ss >> Line;

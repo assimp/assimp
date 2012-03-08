@@ -156,7 +156,17 @@ void ColladaExporter::WriteImageEntry( const Surface& pSurface, const std::strin
   {
     mOutput << startstr << "<image id=\"" << pNameAdd << "\">" << endstr;
     PushTag(); 
-    mOutput << startstr << "<init_from>" << pSurface.texture << "</init_from>" << endstr;
+    mOutput << startstr << "<init_from>";
+    if( pSurface.texture.find( "file://") == std::string::npos )
+      mOutput << "file://";
+    for( std::string::const_iterator it = std::begin( pSurface.texture); it != std::end( pSurface.texture); ++it )
+    {
+      if( isalnum( *it) || *it == '_' || *it == '.' || *it == '/' || *it == '\\' )
+        mOutput << *it;
+      else
+        mOutput << '%' << std::hex << size_t( (unsigned char) *it) << std::dec;
+    }
+    mOutput << "</init_from>" << endstr;
     PopTag();
     mOutput << startstr << "</image>" << endstr;
   }
@@ -224,13 +234,9 @@ void ColladaExporter::WriteMaterials()
     if( mat->Get( AI_MATKEY_NAME, name) != aiReturn_SUCCESS )
       name = "mat";
     materials[a].name = std::string( "m") + boost::lexical_cast<std::string> (a) + name.C_Str();
-    size_t pos; 
-    while( (pos = materials[a].name.find( '#')) != std::string::npos )
-      materials[a].name[pos] = 'x';
-    while( (pos = materials[a].name.find( ' ')) != std::string::npos )
-      materials[a].name[pos] = '_';
-    while( (pos = materials[a].name.find( '"')) != std::string::npos )
-      materials[a].name[pos] = '_';
+    for( std::string::iterator it = materials[a].name.begin(); it != materials[a].name.end(); ++it )
+      if( !isalnum( *it) )
+        *it = '_';
 
     ReadMaterialSurface( materials[a].ambient, mat, aiTextureType_AMBIENT, AI_MATKEY_COLOR_AMBIENT);
     if( !materials[a].ambient.texture.empty() ) numTextures++;

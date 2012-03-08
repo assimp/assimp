@@ -1398,6 +1398,24 @@ void ColladaLoader::ConvertPath (aiString& ss)
 		memmove(ss.data,ss.data+7,ss.length);
 		ss.data[ss.length] = '\0';
 	}
+
+  // find and convert all %xyz special chars
+  char* out = ss.data;
+  for( const char* it = ss.data; it != ss.data + ss.length; /**/ )
+  {
+    if( *it == '%' )
+    {
+      size_t nbr = strtoul16( ++it, &it);
+      *out++ = nbr;
+    } else
+    {
+      *out++ = *it++;
+    }
+  }
+
+  // adjust length and terminator of the shortened string
+  *out = 0;
+  ss.length = (ptrdiff_t) (out - ss.data);
 }
 
 // ------------------------------------------------------------------------------------------------

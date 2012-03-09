@@ -282,6 +282,9 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 
 void OgreImporter::ReadTechnique(stringstream &ss, aiMaterial* NewMaterial)
 {
+	string RestOfLine;
+	getline(ss, RestOfLine);//ignore the rest of the line
+
 	string Line;
 	ss >> Line;
 	if(Line!="{")
@@ -294,6 +297,8 @@ void OgreImporter::ReadTechnique(stringstream &ss, aiMaterial* NewMaterial)
 		ss >> Line;
 		if(Line=="pass")
 		{
+			getline(ss, RestOfLine);//ignore the rest of the line
+
 			ss >> Line;
 			if(Line!="{")
 			{

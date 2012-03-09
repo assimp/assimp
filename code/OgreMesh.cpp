@@ -163,6 +163,14 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 	  we just use a reference to a submodel instead of our submodel itself*/
 
 	SubMesh& VertexSource= bSharedData ? m_SharedGeometry : theSubMesh;
+	if(bSharedData)//copy vertexinformations to our mesh:
+	{
+		theSubMesh.HasPositions=m_SharedGeometry.HasPositions;
+		theSubMesh.HasNormals=m_SharedGeometry.HasNormals;
+		theSubMesh.HasTangents=m_SharedGeometry.HasTangents;
+		theSubMesh.NumUvs=m_SharedGeometry.NumUvs;
+	}
+
 
 	if(VertexSource.NumUvs > 0)
 	{

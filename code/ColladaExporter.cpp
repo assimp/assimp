@@ -157,9 +157,7 @@ void ColladaExporter::WriteImageEntry( const Surface& pSurface, const std::strin
     mOutput << startstr << "<image id=\"" << pNameAdd << "\">" << endstr;
     PushTag(); 
     mOutput << startstr << "<init_from>";
-    if( pSurface.texture.find( "file://") == std::string::npos )
-      mOutput << "file://";
-    for( std::string::const_iterator it = std::begin( pSurface.texture); it != std::end( pSurface.texture); ++it )
+    for( std::string::const_iterator it = pSurface.texture.begin(); it != pSurface.texture.end(); ++it )
     {
       if( isalnum( *it) || *it == '_' || *it == '.' || *it == '/' || *it == '\\' )
         mOutput << *it;

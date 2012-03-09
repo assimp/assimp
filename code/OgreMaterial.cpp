@@ -119,33 +119,36 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 	}
 	*/
 
-
-	//the filename typically ends with .mesh or .mesh.xml
-	const string MaterialFileName=m_CurrentFilename.substr(0, m_CurrentFilename.rfind(".mesh"))+".material";
-	DefaultLogger::get()->info("Trying to load " + MaterialFileName);
-	
-
-	aiMaterial *NewMaterial=new aiMaterial();
-
-	aiString ts(MaterialName.c_str());
-	NewMaterial->AddProperty(&ts, AI_MATKEY_NAME);
-
 	//Read the file into memory and put it in a stringstream
 	stringstream ss;
 	{// after this block, the temporarly loaded data will be released
-		IOStream* MatFilePtr=m_CurrentIOHandler->Open(MaterialFileName);
+
+		/*
+		We have 3 guesses for the Material filename:
+		- the Material Name
+		- the Name of the mesh file
+		- the DefaultMaterialLib (which you can set before importing)
+		*/
+		
+		IOStream* MatFilePtr=m_CurrentIOHandler->Open(MaterialName+".material");
 		if(NULL==MatFilePtr)
 		{
-			//try the default mat Library
+			//the filename typically ends with .mesh or .mesh.xml
+			const string MaterialFileName=m_CurrentFilename.substr(0, m_CurrentFilename.rfind(".mesh"))+".material";
+
+			IOStream* MatFilePtr=m_CurrentIOHandler->Open(MaterialFileName);
 			if(NULL==MatFilePtr)
 			{
-				
-				MatFilePtr=m_CurrentIOHandler->Open(m_MaterialLibFilename);
+				//try the default mat Library
 				if(NULL==MatFilePtr)
 				{
-					DefaultLogger::get()->error(m_MaterialLibFilename+" and "+MaterialFileName + " could not be opened, Material will not be loaded!");
-					delete NewMaterial;
-					return NULL;
+				
+					MatFilePtr=m_CurrentIOHandler->Open(m_MaterialLibFilename);
+					if(NULL==MatFilePtr)
+					{
+						DefaultLogger::get()->error(m_MaterialLibFilename+" and "+MaterialFileName + " could not be opened, Material will not be loaded!");
+						return NULL;
+					}
 				}
 			}
 		}
@@ -156,6 +159,12 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 
 		ss << &FileData[0];
 	}
+
+	//create the material
+	aiMaterial *NewMaterial=new aiMaterial();
+
+	aiString ts(MaterialName.c_str());
+	NewMaterial->AddProperty(&ts, AI_MATKEY_NAME);
 
 	string Line;
 	ss >> Line;

@@ -338,6 +338,7 @@ void OgreImporter::ReadTechnique(stringstream &ss, aiMaterial* NewMaterial)
 				}
 				else if(Line=="texture_unit")
 				{
+					getline(ss, RestOfLine);//ignore the rest of the line
 					ss >> Line;
 					if(Line!="{")
 						throw DeadlyImportError("empty texture unit!");

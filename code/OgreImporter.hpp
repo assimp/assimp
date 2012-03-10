@@ -127,7 +127,6 @@ struct Bone
 	{return Name==std::string(rval.data); }
 
 	void CalculateBoneToWorldSpaceMatrix(std::vector<Bone>& Bones);
-	
 };
 
 

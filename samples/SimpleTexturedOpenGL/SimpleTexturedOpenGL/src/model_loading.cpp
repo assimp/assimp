@@ -17,9 +17,9 @@
 
 #include <windows.h>
 #include <stdio.h>
-#include <gl\GL.h>
-#include <gl\GLU.h>
-#include <IL\il.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <IL/il.h>
 
 #include <fstream>
 
@@ -30,8 +30,8 @@
 
 // assimp include files. These three are usually needed.
 #include "assimp/Importer.hpp"	//OO version Header!
-#include "assimp/PostProcess.h"
-#include "assimp/Scene.h"
+#include "assimp/postprocess.h"
+#include "assimp/scene.h"
 #include "assimp/DefaultLogger.hpp"
 #include "assimp/LogStream.hpp"
 

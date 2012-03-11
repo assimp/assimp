@@ -1812,11 +1812,23 @@
 						>
 					</File>
 					<File
-						RelativePath="..\..\code\OgreImporterMaterial.cpp"
+						RelativePath="..\..\code\OgreMaterial.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\OgreMesh.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\OgreSkeleton.cpp"
 						>
 					</File>
 					<File
 						RelativePath="..\..\code\OgreXmlHelper.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\OgreXmlHelper.hpp"
 						>
 					</File>
 				</Filter>

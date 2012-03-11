@@ -213,12 +213,12 @@ private:
 					dirsep = in.rfind('\\', last_dirsep);
 				}
 
-				if (std::string::npos == dirsep) {
+				if (std::string::npos == dirsep || dirsep == 0) {
 					// we did try this already.
 					break;
 				}
 
-				last_dirsep = dirsep;
+				last_dirsep = dirsep-1;
 
 				tmp += in.substr(dirsep+1, in.length()-pos); 
 				if (wrapped->Exists(tmp)) {

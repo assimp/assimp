@@ -55,8 +55,8 @@ class Camera
 			:
 
 			vPos(0.0f,0.0f,-10.0f),
-			vLookAt(0.0f,0.0f,1.0f),
 			vUp(0.0f,1.0f,0.0f),
+			vLookAt(0.0f,0.0f,1.0f),
 			vRight(0.0f,1.0f,0.0f)
 			{
 

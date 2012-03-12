@@ -139,19 +139,20 @@ class AssetHelper
 					: 
 					piVB				(NULL),
 					piIB				(NULL),
-					piEffect			(NULL),
 					piVBNormals			(NULL),
+					piEffect			(NULL),
+					bSharedFX           (false),
 					piDiffuseTexture	(NULL),
 					piSpecularTexture	(NULL),
 					piAmbientTexture	(NULL),
-					piNormalTexture		(NULL),
 					piEmissiveTexture	(NULL),
+					piNormalTexture		(NULL),
 					piOpacityTexture	(NULL),
 					piShininessTexture	(NULL),
 					piLightmapTexture	(NULL),
-					pvOriginalNormals	(NULL),
-					bSharedFX(false),
-					twosided (false){}
+					twosided            (false),
+					pvOriginalNormals	(NULL)
+                {}
 
 				~MeshHelper ()
 					{

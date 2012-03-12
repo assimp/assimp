@@ -287,10 +287,6 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 	TreeView_SetItem(GetDlgItem(g_hDlg,IDC_TREE1),
 		m_pcCurrentTexture->hTreeItem);
 
-	// change this in the old aiMaterial structure, too
-	aiMaterial* pcMat = (aiMaterial*)
-		g_pcAsset->pcScene->mMaterials[m_pcCurrentTexture->iMatIndex];
- 	
 	// update all meshes referencing this material
 	for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
 	{

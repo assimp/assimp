@@ -177,7 +177,6 @@ int LoadGLTextures(const aiScene* scene)
 	/* Before calling ilInit() version should be checked. */
 	if (ilGetInteger(IL_VERSION_NUM) < IL_VERSION)
 	{
-		ILint test = ilGetInteger(IL_VERSION_NUM);
 		/// wrong DevIL version ///
 		std::string err_msg = "Wrong DevIL version. Old devil.dll in system32/SysWow64?";
 		char* cErr_msg = (char *) err_msg.c_str();

@@ -1423,6 +1423,8 @@ IFC support is new and considered experimental. Please report any bugs you may e
 
 <hr>
 @section ogre Ogre
+*ATTENTION*: The Ogre-Loader is currently under development, many things have changed after this documentation was written, but they are not final enough to rewrite the documentation. So things may have changed by now!
+
 This section contains implementations notes for the OgreXML importer. 
 @subsection overview Overview
 Ogre importer is currently optimized for the Blender Ogre exporter, because thats the only one that i use. You can find the Blender Ogre exporter at: http://www.ogre3d.org/forums/viewtopic.php?f=8&t=45922

@@ -136,7 +136,7 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 			//the filename typically ends with .mesh or .mesh.xml
 			const string MaterialFileName=m_CurrentFilename.substr(0, m_CurrentFilename.rfind(".mesh"))+".material";
 
-			IOStream* MatFilePtr=m_CurrentIOHandler->Open(MaterialFileName);
+			MatFilePtr=m_CurrentIOHandler->Open(MaterialFileName);
 			if(NULL==MatFilePtr)
 			{
 				//try the default mat Library

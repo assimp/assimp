@@ -1183,7 +1183,7 @@ int CDisplay::HandleTreeViewPopup(WPARAM wParam,LPARAM lParam)
 {
 	// get the current selected material
 	std::vector<Info> apclrOut;
-	const char* szMatKey;
+	const char* szMatKey = "";
 
 	switch (LOWORD(wParam))
 	{
@@ -1251,7 +1251,7 @@ int CDisplay::HandleTreeViewPopup(WPARAM wParam,LPARAM lParam)
 		clr.lpCustColors = g_aclCustomColors;
 		clr.lpfnHook = NULL;
 		clr.lpTemplateName = NULL;
-		clr.lCustData = NULL;
+		clr.lCustData = 0;
 
 		ChooseColor(&clr);
 

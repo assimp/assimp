@@ -522,7 +522,7 @@ void DisplayColorDialog(D3DCOLOR* pclrResult)
 	clr.lpCustColors = g_aclCustomColors;
 	clr.lpfnHook = NULL;
 	clr.lpTemplateName = NULL;
-	clr.lCustData = NULL;
+	clr.lCustData = 0;
 
 	ChooseColor(&clr);
 
@@ -549,7 +549,7 @@ void DisplayColorDialog(D3DXVECTOR4* pclrResult)
 	clr.lpCustColors = g_aclCustomColors;
 	clr.lpfnHook = NULL;
 	clr.lpTemplateName = NULL;
-	clr.lCustData = NULL;
+	clr.lCustData = 0;
 
 	ChooseColor(&clr);
 

@@ -128,12 +128,15 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 				unsigned int VertexId=GetAttribute<int>(Reader, "vertexindex");
 				NewWeight.BoneId=GetAttribute<int>(Reader, "boneindex");
 				NewWeight.Value=GetAttribute<float>(Reader, "weight");
-				theSubMesh.BonesUsed=max(theSubMesh.BonesUsed, NewWeight.BoneId+1);//calculate the number of bones used (this is the highest id +1 becuase bone ids start at 0)
+				//calculate the number of bones used (this is the highest id +1 becuase bone ids start at 0)
+				theSubMesh.BonesUsed=max(theSubMesh.BonesUsed, NewWeight.BoneId+1);
+				
 				
 				theSubMesh.Weights[VertexId].push_back(NewWeight);
 
 				//Once i had this line, and than i got only every second boneassignment,
-				//but my first test models had even boneassignment counts, so i thougt, everything would work. And yes, i HATE irrXML!!!
+				//but my first test models had even boneassignment counts, so i thougt, everything would work.
+				//And yes, i HATE irrXML!!!
 				//XmlRead(Reader);
 			}
 

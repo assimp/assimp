@@ -233,7 +233,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 						}
 
 						//Rotation:
-						else if(string("rotate")!=SkeletonFile->getNodeName())
+						else if(string("rotate")==SkeletonFile->getNodeName())
 						{
 							float RotationAngle=GetAttribute<float>(SkeletonFile, "angle");
 							aiVector3D RotationAxis;
@@ -243,6 +243,15 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 							RotationAxis.x=GetAttribute<float>(SkeletonFile, "x");
 							RotationAxis.y=GetAttribute<float>(SkeletonFile, "y");
 							RotationAxis.z=GetAttribute<float>(SkeletonFile, "z");
+
+							if(0==RotationAxis.x==RotationAxis.y==RotationAxis.z)//we have an invalid rotation axis
+							{
+								RotationAxis.x=1.0f;
+								if(0!=RotationAngle)//if we don't rotate at all, the axis does not matter
+								{
+									DefaultLogger::get()->warn("Invalid Rotation Axis in Keyframe!");
+								}
+							}
 							NewKeyframe.Rotation=aiQuaternion(RotationAxis, RotationAngle);
 						}
 
@@ -261,7 +270,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 
 
 					NewTrack.Keyframes.push_back(NewKeyframe);
-					XmlRead(SkeletonFile);
+					//XmlRead(SkeletonFile);
 				}
 
 
@@ -329,9 +338,9 @@ void OgreImporter::PutAnimationsInScene(const std::vector<Bone> &Bones, const st
 				//we need this, to acces the bones default pose, which we need to make keys absolute
 				vector<Bone>::const_iterator CurBone=find(Bones.begin(), Bones.end(), NewNodeAnim->mNodeName);
 				aiMatrix4x4 t0, t1;
-				aiMatrix4x4 DefBonePose=//The default bone pose doesnt have a scaling value
-								  aiMatrix4x4::Rotation(CurBone->RotationAngle, CurBone->RotationAxis, t0)
-								* aiMatrix4x4::Translation(CurBone->Position, t1);
+				aiMatrix4x4 DefBonePose=aiMatrix4x4::Translation(CurBone->Position, t1)
+									  *	aiMatrix4x4::Rotation(CurBone->RotationAngle, CurBone->RotationAxis, t0);
+				
 
 				//Create the keyframe arrays...
 				unsigned int KeyframeCount=Animations[i].Tracks[j].Keyframes.size();
@@ -347,10 +356,10 @@ void OgreImporter::PutAnimationsInScene(const std::vector<Bone> &Bones, const st
 				{
 					aiMatrix4x4 t2, t3;
 
-				//Create a matrix to transfrom a vector from the bones default pose to the bone bones in this animation key
-				aiMatrix4x4 PoseToKey=aiMatrix4x4::Scaling(Animations[i].Tracks[j].Keyframes[k].Scaling, t2)	//scale
-								* aiMatrix4x4(Animations[i].Tracks[j].Keyframes[k].Rotation.GetMatrix())		//rot
-								* aiMatrix4x4::Translation(Animations[i].Tracks[j].Keyframes[k].Position, t3);	//pos
+					//Create a matrix to transfrom a vector from the bones default pose to the bone bones in this animation key
+					aiMatrix4x4 PoseToKey=aiMatrix4x4::Scaling(Animations[i].Tracks[j].Keyframes[k].Scaling, t2)	//scale
+									* aiMatrix4x4(Animations[i].Tracks[j].Keyframes[k].Rotation.GetMatrix())		//rot
+									* aiMatrix4x4::Translation(Animations[i].Tracks[j].Keyframes[k].Position, t3);	//pos
 									
 
 					//calculate the complete transformation from world space to bone space
@@ -392,11 +401,10 @@ aiNode* OgreImporter::CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &
 	NewNode->mParent=ParentNode;
 
 	aiMatrix4x4 t0,t1;
-	//create a matrix from the transformation values of the ogre bone
-	NewNode->mTransformation=aiMatrix4x4::Rotation(Bones[BoneId].RotationAngle, Bones[BoneId].RotationAxis, t1)
-							*	aiMatrix4x4::Translation(Bones[BoneId].Position, t0)
-
-							;
+	NewNode->mTransformation=
+		aiMatrix4x4::Translation(Bones[BoneId].Position, t0)
+		*aiMatrix4x4::Rotation(Bones[BoneId].RotationAngle, Bones[BoneId].RotationAxis, t1)
+	;
 	//__________________________________________________________
 
 
@@ -419,16 +427,16 @@ void Bone::CalculateBoneToWorldSpaceMatrix(vector<Bone> &Bones)
 	//Calculate the matrix for this bone:
 
 	aiMatrix4x4 t0,t1;
-	aiMatrix4x4 Transf=aiMatrix4x4::Translation(-Position, t0)
-						* aiMatrix4x4::Rotation(-RotationAngle, RotationAxis, t1)
-						;
+	aiMatrix4x4 Transf=	aiMatrix4x4::Rotation(-RotationAngle, RotationAxis, t1)
+					*	aiMatrix4x4::Translation(-Position, t0);
+
 	if(-1==ParentId)
 	{
 		BoneToWorldSpace=Transf;
 	}
 	else
 	{
-		BoneToWorldSpace=Transf*Bones[ParentId].BoneToWorldSpace;
+		BoneToWorldSpace=Bones[ParentId].BoneToWorldSpace*Transf;
 	}
 
 	//and recursivly for all children:

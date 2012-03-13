@@ -159,6 +159,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	{
 		string SkeletonFile=GetAttribute<string>(MeshFile, "name");
 		LoadSkeleton(SkeletonFile, Bones, Animations);
+		XmlRead(MeshFile);
 	}
 	else
 	{
@@ -166,6 +167,23 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 		DefaultLogger::get()->warn(MeshFile->getNodeName());
 	}
 	//__________________________________________________________________
+
+
+	//now there might be boneassignments for the shared geometry:
+	if(MeshFile->getNodeName()==string("boneassignments"))
+	{
+		ReadBoneWeights(m_SharedGeometry, MeshFile);
+	}
+
+
+	//----------------- Process Meshs -----------------------
+	BOOST_FOREACH(boost::shared_ptr<SubMesh> theSubMesh, SubMeshes)
+	{
+		ProcessSubMesh(*theSubMesh, m_SharedGeometry);
+	}
+	//_______________________________________________________
+
+
 
 	
 	//----------------- Now fill the Assimp scene ---------------------------

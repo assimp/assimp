@@ -22,6 +22,8 @@ struct Keyframe;
 ///A submesh from Ogre
 struct SubMesh
 {	
+	bool SharedData;
+
 	std::string Name;
 	std::string MaterialName;
 	std::vector<Face> FaceList;
@@ -35,7 +37,7 @@ struct SubMesh
 	int MaterialIndex;///< The Index in the Assimp Materialarray from the material witch is attached to this submesh
 	unsigned int BonesUsed;//the highest index of a bone from a bone weight, this is needed to create the assimp bone structur (converting from Vertex-Bones to Bone-Vertices)
 
-	SubMesh(): HasPositions(false), HasNormals(false), HasTangents(false),
+	SubMesh(): SharedData(false), HasPositions(false), HasNormals(false), HasTangents(false),
 		NumUvs(0), MaterialIndex(-1), BonesUsed(0) {}//initialize everything
 };
 
@@ -50,29 +52,44 @@ public:
 	virtual void SetupProperties(const Importer* pImp);
 private:
 
+
+	//-------------------------------- OgreMesh.cpp -------------------------------
 	/// Helper Functions to read parts of the XML File
 	void ReadSubMesh(SubMesh& theSubMesh, XmlReader* Reader);//the submesh reference is the result value
 
 	/// Reads a single Vertexbuffer and writes its data in the Submesh
 	static void ReadVertexBuffer(SubMesh &theSubMesh, XmlReader *Reader, unsigned int NumVertices);
 
-	/// writes the results in Bones and Animations, Filename is not const, because its call-by-value and the function will change it!
+	/// Reads bone weights are stores them into the given submesh
+	static void ReadBoneWeights(SubMesh &theSubMesh, XmlReader *Reader);
+
+	/// After Loading a SubMehs some work needs to be done (make all Vertexes unique, normalize weights)
+	static void OgreImporter::ProcessSubMesh(SubMesh &theSubMesh, SubMesh &theSharedGeometry);
+
+	/// Uses the bone data to convert a SubMesh into a aiMesh which will be created and returned
+	aiMesh* CreateAssimpSubMesh(const SubMesh &theSubMesh, const std::vector<Bone>& Bones) const;
+	
+
+	//-------------------------------- OgreSkeleton.cpp -------------------------------
+	/// Writes the results in Bones and Animations, Filename is not const, because its call-by-value and the function will change it!
 	void LoadSkeleton(std::string FileName, std::vector<Bone> &Bones, std::vector<Animation> &Animations) const;
 
-	/// converts the animations in aiAnimations and puts them into the scene
+	/// Converts the animations in aiAnimations and puts them into the scene
 	void PutAnimationsInScene(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations);
 
-	/// uses the bone data to convert a SubMesh into a aiMesh which will be created and returned
-	aiMesh* CreateAssimpSubMesh(const SubMesh &theSubMesh, const std::vector<Bone>& Bones) const;
-
-	//creates the aiskeleton in current scene
+	/// Creates the aiskeleton in current scene
 	void CreateAssimpSkeleton(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations);
 
+	/// Recursivly creates a filled aiNode from a given root bone
+	static aiNode* CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &Bones, aiNode* ParentNode);
+	
+
+	//-------------------------------- OgreMaterial.cpp -------------------------------
 	aiMaterial* LoadMaterial(const std::string MaterialName) const;
 	static void ReadTechnique(std::stringstream &ss, aiMaterial* NewMaterial);
 	
-	///Recursivly creates a filled aiNode from a given root bone
-	static aiNode* CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &Bones, aiNode* ParentNode);
+
+
 
 	//Now we don't have to give theses parameters to all functions
 	std::string m_CurrentFilename;
@@ -126,6 +143,7 @@ struct Bone
 	bool operator==(const aiString& rval) const
 	{return Name==std::string(rval.data); }
 
+	// implemented in OgreSkeleton.cpp
 	void CalculateBoneToWorldSpaceMatrix(std::vector<Bone>& Bones);
 };
 

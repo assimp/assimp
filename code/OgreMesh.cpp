@@ -55,10 +55,8 @@ namespace Ogre
 
 void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 {
-	//see, if we use shared vertices
-	bool bSharedData=false;
 	if(Reader->getAttributeValue("usesharedvertices"))
-		bSharedData=GetAttribute<bool>(Reader, "usesharedvertices");
+		theSubMesh.SharedData=GetAttribute<bool>(Reader, "usesharedvertices");
 
 	XmlRead(Reader);
 	//TODO: maybe we have alsways just 1 faces and 1 geometry and always in this order. this loop will only work correct, when the order
@@ -119,28 +117,10 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 		}//end of "geometry
 
 
-		else if(string(Reader->getNodeName())=="boneassignments")
+		else if(Reader->getNodeName()==string("boneassignments"))
 		{
-			theSubMesh.Weights.resize(theSubMesh.Positions.size());
-			while(XmlRead(Reader) && Reader->getNodeName()==string("vertexboneassignment"))
-			{
-				Weight NewWeight;
-				unsigned int VertexId=GetAttribute<int>(Reader, "vertexindex");
-				NewWeight.BoneId=GetAttribute<int>(Reader, "boneindex");
-				NewWeight.Value=GetAttribute<float>(Reader, "weight");
-				//calculate the number of bones used (this is the highest id +1 becuase bone ids start at 0)
-				theSubMesh.BonesUsed=max(theSubMesh.BonesUsed, NewWeight.BoneId+1);
-				
-				
-				theSubMesh.Weights[VertexId].push_back(NewWeight);
-
-				//Once i had this line, and than i got only every second boneassignment,
-				//but my first test models had even boneassignment counts, so i thougt, everything would work.
-				//And yes, i HATE irrXML!!!
-				//XmlRead(Reader);
-			}
-
-		}//end of boneassignments
+			ReadBoneWeights(theSubMesh, Reader);
+		}
 	}
 	DefaultLogger::get()->debug((Formatter::format(),
 		"Positionen: ",theSubMesh.Positions.size(),
@@ -149,115 +129,6 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 		" Tantents: ",theSubMesh.Tangents.size()
 	));							
 	DefaultLogger::get()->warn(Reader->getNodeName());
-
-
-
-	//---------------Make all Vertexes unique: (this is required by assimp)-----------------------
-	vector<Face> UniqueFaceList(theSubMesh.FaceList.size());
-	unsigned int UniqueVertexCount=theSubMesh.FaceList.size()*3;//*3 because each face consists of 3 vertexes, because we only support triangles^^
-	vector<aiVector3D> UniquePositions(UniqueVertexCount);
-	vector<aiVector3D> UniqueNormals(UniqueVertexCount);
-	vector<aiVector3D> UniqueTangents(UniqueVertexCount);
-	vector<aiVector3D> UniqueUvs(UniqueVertexCount);
-	vector< vector<Weight> > UniqueWeights((theSubMesh.Weights.size() ? UniqueVertexCount : 0));
-
-	//Support for shared data:
-	/*We can use this loop to copy vertex informations from the shared data pool. In order to do so
-	  we just use a reference to a submodel instead of our submodel itself*/
-
-	SubMesh& VertexSource= bSharedData ? m_SharedGeometry : theSubMesh;
-	if(bSharedData)//copy vertexinformations to our mesh:
-	{
-		theSubMesh.HasPositions=m_SharedGeometry.HasPositions;
-		theSubMesh.HasNormals=m_SharedGeometry.HasNormals;
-		theSubMesh.HasTangents=m_SharedGeometry.HasTangents;
-		theSubMesh.NumUvs=m_SharedGeometry.NumUvs;
-	}
-
-
-	if(VertexSource.NumUvs > 0)
-	{
-		DefaultLogger::get()->error("Not all Uvs will be made unique!");
-	}
-
-	for(unsigned int i=0; i<theSubMesh.FaceList.size(); ++i)
-	{
-		//We precalculate the index vlaues her, because we need them in all vertex attributes
-		unsigned int Vertex1=theSubMesh.FaceList[i].VertexIndices[0];
-		unsigned int Vertex2=theSubMesh.FaceList[i].VertexIndices[1];
-		unsigned int Vertex3=theSubMesh.FaceList[i].VertexIndices[2];
-
-		UniquePositions[3*i+0]=VertexSource.Positions[Vertex1];
-		UniquePositions[3*i+1]=VertexSource.Positions[Vertex2];
-		UniquePositions[3*i+2]=VertexSource.Positions[Vertex3];
-
-		if(VertexSource.HasNormals)
-		{
-			UniqueNormals[3*i+0]=VertexSource.Normals[Vertex1];
-			UniqueNormals[3*i+1]=VertexSource.Normals[Vertex2];
-			UniqueNormals[3*i+2]=VertexSource.Normals[Vertex3];
-		}
-
-		if(VertexSource.HasTangents)
-		{
-			UniqueTangents[3*i+0]=VertexSource.Tangents[Vertex1];
-			UniqueTangents[3*i+1]=VertexSource.Tangents[Vertex2];
-			UniqueTangents[3*i+2]=VertexSource.Tangents[Vertex3];
-		}
-
-		if(VertexSource.NumUvs > 0)
-		{
-			UniqueUvs[3*i+0]=VertexSource.Uvs[Vertex1];
-			UniqueUvs[3*i+1]=VertexSource.Uvs[Vertex2];
-			UniqueUvs[3*i+2]=VertexSource.Uvs[Vertex3];
-		}
-
-		if(VertexSource.Weights.size())
-		{
-			//I don't think, that bone assinements can be shared, but who knows?
-			UniqueWeights[3*i+0]=VertexSource.Weights[Vertex1];
-			UniqueWeights[3*i+1]=VertexSource.Weights[Vertex2];
-			UniqueWeights[3*i+2]=VertexSource.Weights[Vertex3];
-		}
-
-		//The indexvalues a just continuous numbers (0, 1, 2, 3, 4, 5, 6...)
-		UniqueFaceList[i].VertexIndices[0]=3*i+0;
-		UniqueFaceList[i].VertexIndices[1]=3*i+1;
-		UniqueFaceList[i].VertexIndices[2]=3*i+2;
-	}
-	//_________________________________________________________________________________________
-
-	//now we have the unique datas, but want them in the SubMesh, so we swap all the containers:
-	//if we don't have one of them, we just swap empty containers, so everything is ok
-	theSubMesh.FaceList.swap(UniqueFaceList);
-	theSubMesh.Positions.swap(UniquePositions);
-	theSubMesh.Normals.swap(UniqueNormals);
-	theSubMesh.Tangents.swap(UniqueTangents);
-	theSubMesh.Uvs.swap(UniqueUvs);
-	theSubMesh.Weights.swap(UniqueWeights);
-
-	//------------- normalize weights -----------------------------
-	//The Blender exporter doesn't care about whether the sum of all boneweights for a single vertex equals 1 or not,
-	//so we have to make this sure:
-	for(unsigned int VertexId=0; VertexId<theSubMesh.Weights.size(); ++VertexId)//iterate over all vertices
-	{
-		float WeightSum=0.0f;
-		for(unsigned int BoneId=0; BoneId<theSubMesh.Weights[VertexId].size(); ++BoneId)//iterate over all bones
-		{
-			WeightSum+=theSubMesh.Weights[VertexId][BoneId].Value;
-		}
-		
-		//check if the sum is too far away from 1
-		if(WeightSum<1.0f-0.05f || WeightSum>1.0f+0.05f)
-		{
-			//normalize all weights:
-			for(unsigned int BoneId=0; BoneId<theSubMesh.Weights[VertexId].size(); ++BoneId)//iterate over all bones
-			{
-				theSubMesh.Weights[VertexId][BoneId].Value/=WeightSum;
-			}
-		}
-	}
-	//_________________________________________________________
 }
 
 
@@ -380,6 +251,138 @@ void OgreImporter::ReadVertexBuffer(SubMesh &theSubMesh, XmlReader *Reader, unsi
 		XmlRead(Reader);//Read the Vertex tag
 	}
 }
+
+
+void OgreImporter::ReadBoneWeights(SubMesh &theSubMesh, XmlReader *Reader)
+{
+	theSubMesh.Weights.resize(theSubMesh.Positions.size());
+	while(XmlRead(Reader) && Reader->getNodeName()==string("vertexboneassignment"))
+	{
+		Weight NewWeight;
+		unsigned int VertexId=GetAttribute<int>(Reader, "vertexindex");
+		NewWeight.BoneId=GetAttribute<int>(Reader, "boneindex");
+		NewWeight.Value=GetAttribute<float>(Reader, "weight");
+		//calculate the number of bones used (this is the highest id +1 becuase bone ids start at 0)
+		theSubMesh.BonesUsed=max(theSubMesh.BonesUsed, NewWeight.BoneId+1);
+
+		theSubMesh.Weights[VertexId].push_back(NewWeight);
+	}
+}
+
+
+
+void OgreImporter::ProcessSubMesh(SubMesh &theSubMesh, SubMesh &theSharedGeometry)
+{
+	//---------------Make all Vertexes unique: (this is required by assimp)-----------------------
+	vector<Face> UniqueFaceList(theSubMesh.FaceList.size());
+	unsigned int UniqueVertexCount=theSubMesh.FaceList.size()*3;//*3 because each face consists of 3 vertexes, because we only support triangles^^
+	vector<aiVector3D> UniquePositions(UniqueVertexCount);
+	vector<aiVector3D> UniqueNormals(UniqueVertexCount);
+	vector<aiVector3D> UniqueTangents(UniqueVertexCount);
+	vector<aiVector3D> UniqueUvs(UniqueVertexCount);
+	vector< vector<Weight> > UniqueWeights(UniqueVertexCount);
+
+	//Support for shared data:
+	/*We can use this loop to copy vertex informations from the shared data pool. In order to do so
+	  we just use a reference to a submodel instead of our submodel itself*/
+
+	SubMesh& VertexSource= theSubMesh.SharedData ? theSharedGeometry : theSubMesh;
+	if(theSubMesh.SharedData)//copy vertexinformations to our mesh:
+	{
+		theSubMesh.HasPositions=theSharedGeometry.HasPositions;
+		theSubMesh.HasNormals=theSharedGeometry.HasNormals;
+		theSubMesh.HasTangents=theSharedGeometry.HasTangents;
+		theSubMesh.NumUvs=theSharedGeometry.NumUvs;
+		theSubMesh.BonesUsed=theSharedGeometry.BonesUsed;
+	}
+
+
+	if(VertexSource.NumUvs > 0)
+	{
+		DefaultLogger::get()->error("Not all Uvs will be made unique!");
+	}
+
+	for(unsigned int i=0; i<theSubMesh.FaceList.size(); ++i)
+	{
+		//We precalculate the index vlaues her, because we need them in all vertex attributes
+		unsigned int Vertex1=theSubMesh.FaceList[i].VertexIndices[0];
+		unsigned int Vertex2=theSubMesh.FaceList[i].VertexIndices[1];
+		unsigned int Vertex3=theSubMesh.FaceList[i].VertexIndices[2];
+
+		UniquePositions[3*i+0]=VertexSource.Positions[Vertex1];
+		UniquePositions[3*i+1]=VertexSource.Positions[Vertex2];
+		UniquePositions[3*i+2]=VertexSource.Positions[Vertex3];
+
+		if(VertexSource.HasNormals)
+		{
+			UniqueNormals[3*i+0]=VertexSource.Normals[Vertex1];
+			UniqueNormals[3*i+1]=VertexSource.Normals[Vertex2];
+			UniqueNormals[3*i+2]=VertexSource.Normals[Vertex3];
+		}
+
+		if(VertexSource.HasTangents)
+		{
+			UniqueTangents[3*i+0]=VertexSource.Tangents[Vertex1];
+			UniqueTangents[3*i+1]=VertexSource.Tangents[Vertex2];
+			UniqueTangents[3*i+2]=VertexSource.Tangents[Vertex3];
+		}
+
+		if(VertexSource.NumUvs > 0)
+		{
+			UniqueUvs[3*i+0]=VertexSource.Uvs[Vertex1];
+			UniqueUvs[3*i+1]=VertexSource.Uvs[Vertex2];
+			UniqueUvs[3*i+2]=VertexSource.Uvs[Vertex3];
+		}
+
+		if(VertexSource.Weights.size() > 0)
+		{
+			UniqueWeights[3*i+0]=VertexSource.Weights[Vertex1];
+			UniqueWeights[3*i+1]=VertexSource.Weights[Vertex2];
+			UniqueWeights[3*i+2]=VertexSource.Weights[Vertex3];
+		}
+
+		//The indexvalues a just continuous numbers (0, 1, 2, 3, 4, 5, 6...)
+		UniqueFaceList[i].VertexIndices[0]=3*i+0;
+		UniqueFaceList[i].VertexIndices[1]=3*i+1;
+		UniqueFaceList[i].VertexIndices[2]=3*i+2;
+	}
+	//_________________________________________________________________________________________
+
+	//now we have the unique datas, but want them in the SubMesh, so we swap all the containers:
+	//if we don't have one of them, we just swap empty containers, so everything is ok
+	theSubMesh.FaceList.swap(UniqueFaceList);
+	theSubMesh.Positions.swap(UniquePositions);
+	theSubMesh.Normals.swap(UniqueNormals);
+	theSubMesh.Tangents.swap(UniqueTangents);
+	theSubMesh.Uvs.swap(UniqueUvs);
+	theSubMesh.Weights.swap(UniqueWeights);
+
+
+
+	//------------- normalize weights -----------------------------
+	//The Blender exporter doesn't care about whether the sum of all boneweights for a single vertex equals 1 or not,
+	//so we have to make this sure:
+	for(unsigned int VertexId=0; VertexId<theSubMesh.Weights.size(); ++VertexId)//iterate over all vertices
+	{
+		float WeightSum=0.0f;
+		for(unsigned int BoneId=0; BoneId<theSubMesh.Weights[VertexId].size(); ++BoneId)//iterate over all bones
+		{
+			WeightSum+=theSubMesh.Weights[VertexId][BoneId].Value;
+		}
+		
+		//check if the sum is too far away from 1
+		if(WeightSum<1.0f-0.05f || WeightSum>1.0f+0.05f)
+		{
+			//normalize all weights:
+			for(unsigned int BoneId=0; BoneId<theSubMesh.Weights[VertexId].size(); ++BoneId)//iterate over all bones
+			{
+				theSubMesh.Weights[VertexId][BoneId].Value/=WeightSum;
+			}
+		}
+	}
+	//_________________________________________________________
+}
+
 
 
 

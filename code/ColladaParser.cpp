@@ -1026,6 +1026,14 @@ void ColladaParser::ReadLight( Collada::Light& pLight)
 				pLight.mIntensity = ReadFloatFromTextContent();
 				TestClosing("intensity");
 			}
+			else if (IsElement("falloff")) {
+				pLight.mOuterAngle = ReadFloatFromTextContent();
+				TestClosing("falloff");
+			}
+			else if (IsElement("hotspot_beam")) {
+				pLight.mFalloffAngle = ReadFloatFromTextContent();
+				TestClosing("hotspot_beam");
+			}
 		}
 		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
 			if( strcmp( mReader->getNodeName(), "light") == 0)

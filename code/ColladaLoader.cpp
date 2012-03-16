@@ -1242,7 +1242,7 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pSce
 
 		// transparency, a very hard one. seemingly not all files are following the
 		// specification here .. but we can trick.
-		if (effect.mTransparency > 0.f && effect.mTransparency < 1.f) {
+		if (effect.mTransparency >= 0.f && effect.mTransparency < 1.f) {
 			effect.mTransparency = 1.f- effect.mTransparency;
 			mat.AddProperty( &effect.mTransparency, 1, AI_MATKEY_OPACITY );
 			mat.AddProperty( &effect.mTransparent, 1, AI_MATKEY_COLOR_TRANSPARENT );

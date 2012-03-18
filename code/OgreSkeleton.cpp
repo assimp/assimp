@@ -175,7 +175,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 
 
 	//--------- Calculate the WorldToBoneSpace Matrix recursivly for all bones: ------------------
-	BOOST_FOREACH(Bone theBone, Bones)
+	BOOST_FOREACH(Bone &theBone, Bones)
 	{
 		if(-1==theBone.ParentId) //the bone is a root bone
 		{
@@ -294,14 +294,13 @@ void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const st
 
 
 	//Createt the assimp bone hierarchy
-	DefaultLogger::get()->debug("Root Bones");
 	vector<aiNode*> RootBoneNodes;
 	BOOST_FOREACH(Bone theBone, Bones)
 	{
 		if(-1==theBone.ParentId) //the bone is a root bone
 		{
-			DefaultLogger::get()->debug(theBone.Name);
-			RootBoneNodes.push_back(CreateAiNodeFromBone(theBone.Id, Bones, m_CurrentScene->mRootNode));//which will recursily add all other nodes
+			//which will recursily add all other nodes
+			RootBoneNodes.push_back(CreateAiNodeFromBone(theBone.Id, Bones, m_CurrentScene->mRootNode));
 		}
 	}
 	
@@ -335,21 +334,21 @@ void OgreImporter::PutAnimationsInScene(const std::vector<Bone> &Bones, const st
 				aiNodeAnim* NewNodeAnim=new aiNodeAnim();
 				NewNodeAnim->mNodeName=Animations[i].Tracks[j].BoneName;
 
-				//we need this, to acces the bones default pose, which we need to make keys absolute
+				//we need this, to acces the bones default pose, which we need to make keys absolute to the default bone pose
 				vector<Bone>::const_iterator CurBone=find(Bones.begin(), Bones.end(), NewNodeAnim->mNodeName);
 				aiMatrix4x4 t0, t1;
 				aiMatrix4x4 DefBonePose=aiMatrix4x4::Translation(CurBone->Position, t1)
-									  *	aiMatrix4x4::Rotation(CurBone->RotationAngle, CurBone->RotationAxis, t0);
+									 *	aiMatrix4x4::Rotation(CurBone->RotationAngle, CurBone->RotationAxis, t0);
 				
 
 				//Create the keyframe arrays...
 				unsigned int KeyframeCount=Animations[i].Tracks[j].Keyframes.size();
 				NewNodeAnim->mNumPositionKeys=KeyframeCount;
-				NewNodeAnim->mPositionKeys=new aiVectorKey[KeyframeCount];
 				NewNodeAnim->mNumRotationKeys=KeyframeCount;
+				NewNodeAnim->mNumScalingKeys =KeyframeCount;
+				NewNodeAnim->mPositionKeys=new aiVectorKey[KeyframeCount];
 				NewNodeAnim->mRotationKeys=new aiQuatKey[KeyframeCount];
-				NewNodeAnim->mNumScalingKeys=KeyframeCount;
-				NewNodeAnim->mScalingKeys=new aiVectorKey[KeyframeCount];
+				NewNodeAnim->mScalingKeys =new aiVectorKey[KeyframeCount];
 				
 				//...and fill them
 				for(unsigned int k=0; k<KeyframeCount; ++k)
@@ -357,9 +356,10 @@ void OgreImporter::PutAnimationsInScene(const std::vector<Bone> &Bones, const st
 					aiMatrix4x4 t2, t3;
 
 					//Create a matrix to transfrom a vector from the bones default pose to the bone bones in this animation key
-					aiMatrix4x4 PoseToKey=aiMatrix4x4::Scaling(Animations[i].Tracks[j].Keyframes[k].Scaling, t2)	//scale
+					aiMatrix4x4 PoseToKey=
+									  aiMatrix4x4::Translation(Animations[i].Tracks[j].Keyframes[k].Position, t3)	//pos
 									* aiMatrix4x4(Animations[i].Tracks[j].Keyframes[k].Rotation.GetMatrix())		//rot
-									* aiMatrix4x4::Translation(Animations[i].Tracks[j].Keyframes[k].Position, t3);	//pos
+									* aiMatrix4x4::Scaling(Animations[i].Tracks[j].Keyframes[k].Scaling, t2);	//scale
 									
 
 					//calculate the complete transformation from world space to bone space
@@ -371,14 +371,15 @@ void OgreImporter::PutAnimationsInScene(const std::vector<Bone> &Bones, const st
 
 					CompleteTransform.Decompose(Scale, Rot, Pos);
 
+					double Time=Animations[i].Tracks[j].Keyframes[k].Time;
 
-					NewNodeAnim->mPositionKeys[k].mTime=Animations[i].Tracks[j].Keyframes[k].Time;
+					NewNodeAnim->mPositionKeys[k].mTime=Time;
 					NewNodeAnim->mPositionKeys[k].mValue=Pos;
 					
-					NewNodeAnim->mRotationKeys[k].mTime=Animations[i].Tracks[j].Keyframes[k].Time;
+					NewNodeAnim->mRotationKeys[k].mTime=Time;
 					NewNodeAnim->mRotationKeys[k].mValue=Rot;
 
-					NewNodeAnim->mScalingKeys[k].mTime=Animations[i].Tracks[j].Keyframes[k].Time;
+					NewNodeAnim->mScalingKeys[k].mTime=Time;
 					NewNodeAnim->mScalingKeys[k].mValue=Scale;
 				}
 				
@@ -436,8 +437,9 @@ void Bone::CalculateBoneToWorldSpaceMatrix(vector<Bone> &Bones)
 	}
 	else
 	{
-		BoneToWorldSpace=Bones[ParentId].BoneToWorldSpace*Transf;
+		BoneToWorldSpace=Transf*Bones[ParentId].BoneToWorldSpace;
 	}
+	
 
 	//and recursivly for all children:
 	BOOST_FOREACH(int theChildren, Children)

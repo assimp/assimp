@@ -64,7 +64,7 @@ private:
 	static void ReadBoneWeights(SubMesh &theSubMesh, XmlReader *Reader);
 
 	/// After Loading a SubMehs some work needs to be done (make all Vertexes unique, normalize weights)
-	static void OgreImporter::ProcessSubMesh(SubMesh &theSubMesh, SubMesh &theSharedGeometry);
+	static void ProcessSubMesh(SubMesh &theSubMesh, SubMesh &theSharedGeometry);
 
 	/// Uses the bone data to convert a SubMesh into a aiMesh which will be created and returned
 	aiMesh* CreateAssimpSubMesh(const SubMesh &theSubMesh, const std::vector<Bone>& Bones) const;

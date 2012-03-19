@@ -1406,7 +1406,7 @@ void ColladaLoader::ConvertPath (aiString& ss)
     if( *it == '%' )
     {
       size_t nbr = strtoul16( ++it, &it);
-      *out++ = nbr;
+      *out++ = (char)(nbr & 0xFF);
     } else
     {
       *out++ = *it++;

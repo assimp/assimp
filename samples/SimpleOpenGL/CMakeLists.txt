@@ -1,13 +1,26 @@
+FIND_PACKAGE(OpenGL)
+FIND_PACKAGE(GLUT)
+
+IF ( NOT GLUT_FOUND )
+	IF ( MSVC )
+		SET ( GLUT_FOUND 1 )
+		SET ( GLUT_INCLUDE_DIR ${Assimp_SOURCE_DIR}/samples/glut/ )
+		SET ( GLUT_LIBRARIES ${Assimp_SOURCE_DIR}/samples/glut/glut32.lib )
+	ELSE ( MSVC )
+		MESSAGE( WARNING "Please install glut." )
+	ENDIF ( MSVC )
+ENDIF ( NOT GLUT_FOUND )
+
 INCLUDE_DIRECTORIES(
 	${Assimp_SOURCE_DIR}/include
 	${Assimp_SOURCE_DIR}/code
-	${Assimp_SOURCE_DIR}/samples/glut/
+	${OPENGL_INCLUDE_DIR}
+	${GLUT_INCLUDE_DIR}
 )
 
 LINK_DIRECTORIES( 
 	${Assimp_BINARY_DIR} 
 	${Assimp_BINARY_DIR}/lib 
-	${Assimp_SOURCE_DIR}/samples/glut/
 )
 
 ADD_EXECUTABLE( assimp_simpleogl
@@ -16,7 +29,7 @@ ADD_EXECUTABLE( assimp_simpleogl
 
 SET_PROPERTY(TARGET assimp_simpleogl PROPERTY DEBUG_POSTFIX ${DEBUG_POSTFIX})
 
-TARGET_LINK_LIBRARIES( assimp_simpleogl assimp )
+TARGET_LINK_LIBRARIES( assimp_simpleogl assimp ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} )
 SET_TARGET_PROPERTIES( assimp_simpleogl PROPERTIES
 	OUTPUT_NAME assimp_simpleogl
 )

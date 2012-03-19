@@ -10,12 +10,14 @@
 // have this configuration built.
 // ----------------------------------------------------------------------------
 
-#include "GL/glut.h"
+#include <stdlib.h>
+
+#include <GL/glut.h>
 
 // assimp include files. These three are usually needed.
-#include "assimp/cimport.h"
-#include "assimp/PostProcess.h"
-#include "assimp/Scene.h"
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 // the global Assimp scene object
 const struct aiScene* scene = NULL;
@@ -118,7 +120,7 @@ void apply_material(const struct aiMaterial *mtl)
 	float shininess, strength;
 	int two_sided;
 	int wireframe;
-	int max;
+	unsigned int max;
 
 	set_float4(c, 0.8f, 0.8f, 0.8f, 1.0f);
 	if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &diffuse))
@@ -173,7 +175,7 @@ void apply_material(const struct aiMaterial *mtl)
 // ----------------------------------------------------------------------------
 void recursive_render (const struct aiScene *sc, const struct aiNode* nd)
 {
-	int i;
+	unsigned int i;
 	unsigned int n = 0, t;
 	struct aiMatrix4x4 m = nd->mTransformation;
 
@@ -331,7 +333,7 @@ int main(int argc, char **argv)
 	// models from the repository (/models-nonbsd may be missing in 
 	// some distributions so we need a fallback from /models!).
 	if( 0 != loadasset( argc >= 2 ? argv[1] : "../../test/models-nonbsd/X/dwarf.x")) {
-		if( argc != 1 || 0 != loadasset( "../../../../test/models-nonbsd/X/dwarf.x") && 0 != loadasset( "../../test/models/X/Testwuson.X")) { 
+		if( argc != 1 || (0 != loadasset( "../../../../test/models-nonbsd/X/dwarf.x") && 0 != loadasset( "../../test/models/X/Testwuson.X"))) { 
 			return -1;
 		}
 	}

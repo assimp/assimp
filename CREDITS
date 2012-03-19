@@ -131,3 +131,5 @@ Contributed the Debian build fixes ( architecture macro ).
 - gellule
 Several LWO and LWS fixes (pivoting). 
 
+- Marcel Metz
+GCC/Linux fixes for the SimpleOpenGL sample.

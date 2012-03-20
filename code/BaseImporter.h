@@ -271,8 +271,8 @@ public: // static utilities
 		const std::string&	file,
 		const char** tokens, 
 		unsigned int numTokens,
-		unsigned int searchBytes = 200);
-
+		unsigned int searchBytes = 200,
+		bool tokensSol = false);
 
 	// -------------------------------------------------------------------
 	/** @brief Check whether a file has a specific file extension

@@ -110,7 +110,8 @@ void BaseImporter::SetupProperties(const Importer* /*pImp*/)
 	const std::string&	pFile,
 	const char**		tokens, 
 	unsigned int		numTokens,
-	unsigned int		searchBytes /* = 200 */)
+	unsigned int		searchBytes /* = 200 */,
+	bool				tokensSol /* false */)
 {
 	ai_assert(NULL != tokens && 0 != numTokens && 0 != searchBytes);
 	if (!pIOHandler)
@@ -142,7 +143,13 @@ void BaseImporter::SetupProperties(const Importer* /*pImp*/)
 		for (unsigned int i = 0; i < numTokens;++i)	{
 			ai_assert(NULL != tokens[i]);
 
-			if (::strstr(buffer,tokens[i]))	{
+
+			const char* r = strstr(buffer,tokens[i]);
+			if (!r) 
+				continue;
+			// We got a match, either we don't care where it is, or it happens to
+			// be in the beginning of the file / line
+			if (!tokensSol || r == buffer || r[-1] == '\r' || r[-1] == '\n') {
 				DefaultLogger::get()->debug(std::string("Found positive match for header keyword: ") + tokens[i]);
 				return true;
 			}

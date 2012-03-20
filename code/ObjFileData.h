@@ -58,7 +58,7 @@ struct Material;
 
 // ------------------------------------------------------------------------------------------------
 //!	\struct	Face
-//!	\brief	Datastructure for a simple obj-face, descripes discredisation and materials
+//!	\brief	Data structure for a simple obj-face, describes discredit,l.ation and materials
 struct Face
 {
 	typedef std::vector<unsigned int> IndexArray;
@@ -96,8 +96,10 @@ struct Face
 	{	
 		delete m_pVertices;
 		m_pVertices = NULL;
+
 		delete m_pNormals;
 		m_pNormals = NULL;
+
 		delete m_pTexturCoords;
 		m_pTexturCoords = NULL;
 	}
@@ -162,7 +164,7 @@ struct Material
 	aiColor3D ambient;
 	//!	Diffuse color
 	aiColor3D diffuse;
-	//!	Speculao color
+	//!	Specular color
 	aiColor3D specular;
 	//!	Alpha value
 	float alpha;
@@ -228,7 +230,6 @@ struct Mesh
 		{
 			delete *it;
 		}
-
 	}
 };
 
@@ -259,7 +260,7 @@ struct Model
 	std::vector<aiVector3D> m_Vertices;
 	//!	vector with all generated normals
 	std::vector<aiVector3D> m_Normals;
-	//!	Groupmap
+	//!	Group map
 	GroupMap m_Groups;
 	//!	Group to face id assignment
 	std::vector<unsigned int> *m_pGroupFaceIDs;
@@ -309,7 +310,7 @@ struct Model
 		m_Groups.clear();
 
 		for ( std::map<std::string, Material*>::iterator it = m_MaterialMap.begin(); it != m_MaterialMap.end(); ++it ) {
-			delete it->second;
+//			delete it->second;
 		}
 	}
 };

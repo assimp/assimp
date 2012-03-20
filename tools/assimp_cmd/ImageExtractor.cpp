@@ -183,7 +183,8 @@ int SaveAsTGA (FILE* file, const aiTexel* data, unsigned int width, unsigned int
 		return 1;
 	}
 
-	TGA_HEADER head = {0};
+	TGA_HEADER head;
+	memset(&head, 0, sizeof(head));
 	head.bits   = 32;
 	head.height = (uint16_t)height;
 	head.width  = (uint16_t)width;

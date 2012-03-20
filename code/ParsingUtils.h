@@ -167,7 +167,8 @@ AI_FORCE_INLINE bool IsNumeric( char_t in)
 	return ( in >= '0' && in <= '9' ) || '-' == in || '+' == in;
 }
 // ---------------------------------------------------------------------------------
-AI_FORCE_INLINE bool TokenMatch(char*& in, const char* token, unsigned int len)
+template <class char_t>
+AI_FORCE_INLINE bool TokenMatch(char_t*& in, const char* token, unsigned int len)
 {
 	if (!::strncmp(token,in,len) && IsSpaceOrNewLine(in[len]))
 	{
@@ -190,11 +191,6 @@ AI_FORCE_INLINE bool TokenMatchI(const char*& in, const char* token, unsigned in
 		return true;
 	}
 	return false;
-}
-// ---------------------------------------------------------------------------------
-AI_FORCE_INLINE bool TokenMatch(const char*& in, const char* token, unsigned int len)
-{
-	return TokenMatch(const_cast<char*&>(in), token, len);
 }
 // ---------------------------------------------------------------------------------
 AI_FORCE_INLINE void SkipToken(const char*& in)

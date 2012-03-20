@@ -525,7 +525,7 @@ void BatchLoader::LoadAll()
 			DefaultLogger::get()->info("File: " + (*it).file);
 		}
 		data->pImporter->ReadFile((*it).file,pp);
-		(*it).scene = const_cast<aiScene*>(data->pImporter->GetOrphanedScene());
+		(*it).scene = data->pImporter->GetOrphanedScene();
 		(*it).loaded = true;
 
 		DefaultLogger::get()->info("%%% END EXTERNAL FILE %%%");

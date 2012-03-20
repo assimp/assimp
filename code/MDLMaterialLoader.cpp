@@ -63,9 +63,9 @@ void MDLImporter::SearchPalette(const unsigned char** pszColorMap)
 	{
 		if (pcStream->FileSize() >= 768)
 		{
-			szColorMap = new unsigned char[256*3];
-			pcStream->Read(const_cast<unsigned char*>(szColorMap),256*3,1);
-
+			unsigned char* colorMap = new unsigned char[256*3];
+			szColorMap = colorMap;
+			pcStream->Read(colorMap,256*3,1);
 			DefaultLogger::get()->info("Found valid colormap.lmp in directory. "
 				"It will be used to decode embedded textures in palletized formats.");
 		}

@@ -155,7 +155,7 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 	}
 
 	boost::scoped_ptr<STEP::DB> db(STEP::ReadFileHeader(stream));
-	const STEP::HeaderInfo& head = const_cast<const STEP::DB&>(*db).GetHeader();
+	const STEP::HeaderInfo& head = static_cast<const STEP::DB&>(*db).GetHeader();
 
 	if(!head.fileSchema.size() || head.fileSchema.substr(0,3) != "IFC") {
 		ThrowException("Unrecognized file schema: " + head.fileSchema);

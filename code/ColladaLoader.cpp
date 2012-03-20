@@ -230,13 +230,13 @@ void ColladaLoader::ResolveNodeInstances( const ColladaParser& pParser, const Co
 	{
 		// find the corresponding node in the library
 		const ColladaParser::NodeLibrary::const_iterator itt = pParser.mNodeLibrary.find((*it).mNode);
-		Collada::Node* nd = itt == pParser.mNodeLibrary.end() ? NULL : (*itt).second;
+		const Collada::Node* nd = itt == pParser.mNodeLibrary.end() ? NULL : (*itt).second;
 
 		// FIX for http://sourceforge.net/tracker/?func=detail&aid=3054873&group_id=226462&atid=1067632
 		// need to check for both name and ID to catch all. To avoid breaking valid files,
 		// the workaround is only enabled when the first attempt to resolve the node has failed.
 		if (!nd) {
-			nd = const_cast<Collada::Node*>(FindNode(pParser.mRootNode,(*it).mNode));
+			nd = FindNode(pParser.mRootNode,(*it).mNode);
 		}
 		if (!nd) 
 			DefaultLogger::get()->error("Collada: Unable to resolve reference to instanced node " + (*it).mNode);

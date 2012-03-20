@@ -233,7 +233,7 @@ inline const char* fast_atoreal_move( const char* c, Real& out)
 	}
 
 	f = static_cast<Real>( strtoul10_64 ( c, &c) );
-	if (*c == '.' || (c[0] == ',' && (c[1] >= '0' || c[1] <= '9'))) // allow for commas, too
+	if (*c == '.' || (c[0] == ',' && c[1] >= '0' && c[1] <= '9')) // allow for commas, too
 	{
 		++c;
 

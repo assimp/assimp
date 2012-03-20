@@ -114,10 +114,9 @@ public:
 
 	// ...................................................................
 	bool Exists( const char* pFile) const {
-		CIOSystemWrapper* pip = const_cast<CIOSystemWrapper*>(this);
-		IOStream* p = pip->Open(pFile);
+		aiFile* p = mFileSystem->OpenProc(mFileSystem,pFile,"rb");		
 		if (p){
-			pip->Close(p);
+			mFileSystem->CloseProc(mFileSystem,p);
 			return true;
 		}
 		return false;

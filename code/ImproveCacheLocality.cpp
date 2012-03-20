@@ -202,7 +202,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
 	std::vector<bool> abEmitted(pMesh->mNumFaces,false);
 
 	// dead-end vertex index stack
-	std::stack<unsigned int> sDeadEndVStack;
+	std::stack<unsigned int, std::vector<unsigned int> > sDeadEndVStack;
 
 	// create a copy of the piNumTriPtr buffer
 	unsigned int* const piNumTriPtr = adj.mLiveTriangles;

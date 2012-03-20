@@ -220,20 +220,21 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
 		throw DeadlyImportError("DXF: no data blocks loaded");
 	}
 
+	DXF::Block* entities = 0;
+	
 	// index blocks by name
 	DXF::BlockMap blocks_by_name;
-	BOOST_FOREACH (const DXF::Block& bl, output.blocks) {
+	BOOST_FOREACH (DXF::Block& bl, output.blocks) {
 		blocks_by_name[bl.name] = &bl;
+		if ( !entities && bl.name == AI_DXF_ENTITIES_MAGIC_BLOCK ) {
+			entities = &bl;
+		}
 	}
 
-	const DXF::BlockMap::iterator bit = blocks_by_name.find(AI_DXF_ENTITIES_MAGIC_BLOCK);
-	if (bit == blocks_by_name.end()) {
+	if (!entities) {
 		throw DeadlyImportError("DXF: no ENTITIES data block loaded");
 	}
 
-	// ENTITIES is currently the only block that needs to be modified,
-	// this is the reason that blocks_by_name stores const by default.
-	DXF::Block& entities = const_cast<DXF::Block&>( *(*bit).second );
 	typedef std::map<std::string, unsigned int> LayerMap;
 
 	LayerMap layers;
@@ -241,10 +242,10 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
 
 	// now expand all block references in the primary ENTITIES block
 	// XXX this involves heavy memory copying, consider a faster solution for future versions.
-	ExpandBlockReferences(entities,blocks_by_name);
+	ExpandBlockReferences(*entities,blocks_by_name);
 
 	unsigned int cur = 0;
-	BOOST_FOREACH (boost::shared_ptr<const DXF::PolyLine> pl, entities.lines) {
+	BOOST_FOREACH (boost::shared_ptr<const DXF::PolyLine> pl, entities->lines) {
 		if (pl->positions.size()) {
 
 			std::map<std::string, unsigned int>::iterator it = layers.find(pl->layer);

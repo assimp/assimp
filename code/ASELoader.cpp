@@ -1152,7 +1152,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 
 		// copy vertex bones
 		if (!mesh.mBones.empty() && !mesh.mBoneVertices.empty())	{
-			std::vector<aiVertexWeight>* avBonesOut = new std::vector<aiVertexWeight>[mesh.mBones.size()];
+			std::vector<std::vector<aiVertexWeight> > avBonesOut( mesh.mBones.size() );
 
 			// find all vertex weights for this bone
 			unsigned int quak = 0;
@@ -1188,9 +1188,6 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 					++pcBone;
 				}
 			}
-
-			// delete allocated storage
-			delete[] avBonesOut;
 		}
 	}
 }

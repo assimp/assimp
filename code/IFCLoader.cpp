@@ -57,13 +57,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
 
+namespace Assimp {
+	template<> const std::string LogFunctions<IFCImporter>::log_prefix = "IFC: ";
+}
 
 using namespace Assimp;
 using namespace Assimp::Formatter;
 using namespace Assimp::IFC;
-
-template<> const std::string LogFunctions<IFCImporter>::log_prefix = "IFC: ";
-
 
 /* DO NOT REMOVE this comment block. The genentitylist.sh script
  * just looks for names adhering to the IfcSomething naming scheme

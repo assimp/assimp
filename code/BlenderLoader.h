@@ -95,7 +95,7 @@ enum aiLoaderFlags
 
 	aiLoaderFlags_Experimental = 0x10,
 	aiLoaderFlags_Testing = 0x20,
-	aiLoaderFlags_Production = 0x40,
+	aiLoaderFlags_Production = 0x40
 };
 
 struct aiLoaderDesc 

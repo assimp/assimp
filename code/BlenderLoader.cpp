@@ -63,11 +63,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	endif
 #endif
 
+namespace Assimp {
+	template<> const std::string LogFunctions<BlenderImporter>::log_prefix = "BLEND: ";
+}
+
 using namespace Assimp;
 using namespace Assimp::Blender;
 using namespace Assimp::Formatter;
 
-template<> const std::string LogFunctions<BlenderImporter>::log_prefix = "BLEND: ";
 static const aiLoaderDesc blenderDesc = {
 	"Blender 3D Importer \nhttp://www.blender3d.org",
 	"Assimp Team",

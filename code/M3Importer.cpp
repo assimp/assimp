@@ -119,7 +119,6 @@ void M3Importer::InternReadFile( const std::string& pFile, aiScene* pScene, IOSy
 	uint16* faces( NULL );
 
 	uint32 nVertices = 0;
-	uint32 nFaces = 0;
 
 	bool ok = true;
 	switch( m_pRefs[ m_pHead->MODL.ref ].type )	{
@@ -168,7 +167,6 @@ void M3Importer::InternReadFile( const std::string& pFile, aiScene* pScene, IOSy
 	
 	// Get the face data
 	faces = GetEntries<uint16>( pViews->faces );
-	nFaces = pViews->faces.nEntries;
 
 	// Convert the vertices
 	std::vector<aiVector3D> vertices;
@@ -319,8 +317,6 @@ void M3Importer::createVertexData( aiMesh *pMesh, const std::vector<aiVector3D> 
 								  const std::vector<aiVector3D> &uvCoords,
 								  const std::vector<aiVector3D> &normals )
 {
-	unsigned int numIndices = 0;
-
 	pMesh->mNumVertices = pMesh->mNumFaces * 3;
 	pMesh->mVertices = new aiVector3D[ pMesh->mNumVertices ];
 	pMesh->mNumUVComponents[ 0 ] = 2;

@@ -104,7 +104,9 @@ inline bool IsCCW(T* in, size_t npoints) {
 	double convex_turn;
 	double convex_sum = 0;
 
-	for (int i = 0; i < npoints - 2; i++) {
+	ai_assert(npoints >= 3);
+
+	for (size_t i = 0; i < npoints - 2; i++) {		
 		aa = ((in[i+2].x - in[i].x) * (in[i+2].x - in[i].x)) +
 			((-in[i+2].y + in[i].y) * (-in[i+2].y + in[i].y));
 

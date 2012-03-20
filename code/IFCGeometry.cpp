@@ -554,7 +554,7 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh) {
 	// The input polygon is arbitrarily shaped, so we might need some tries
 	// until we find a suitable normal (and it does not even need to be
 	// right in all cases, Newell's algorithm would be the correct one ... ).
-	size_t base = s-curmesh.vertcnt.back(), t = base, i, j;
+	size_t base = s-curmesh.vertcnt.back(), i, j;
 	for (i = base; i < s-1; ++i) {
 		for (j = i+1; j < s; ++j) {
 			nor = -((out[i]-any_point)^(out[j]-any_point));

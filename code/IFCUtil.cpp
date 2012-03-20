@@ -63,7 +63,7 @@ void TempOpening::Transform(const IfcMatrix4& mat)
 // ------------------------------------------------------------------------------------------------
 aiMesh* TempMesh::ToMesh() 
 {
-	ai_assert(verts.size() == std::accumulate(vertcnt.begin(),vertcnt.end(),0));
+	ai_assert(verts.size() == std::accumulate(vertcnt.begin(),vertcnt.end(),size_t(0)));
 
 	if (verts.empty()) {
 		return NULL;

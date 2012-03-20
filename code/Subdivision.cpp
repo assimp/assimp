@@ -52,15 +52,15 @@ void mydummy() {}
 // ------------------------------------------------------------------------------------------------
 /** Subdivider stub class to implement the Catmull-Clarke subdivision algorithm. The 
  *  implementation is basing on recursive refinement. Directly evaluating the result is also
- *  possibel and much quicker, but it depends on lengthy matrix lookup tables. */
+ *  possible and much quicker, but it depends on lengthy matrix lookup tables. */
 // ------------------------------------------------------------------------------------------------
 class CatmullClarkSubdivider : public Subdivider
 {
 
 public:
 
-	void Subdivide (const aiMesh* mesh, aiMesh*& out, unsigned int num, bool discard_input);
-	void Subdivide (const aiMesh* const * smesh, size_t nmesh,
+	void Subdivide (aiMesh* mesh, aiMesh*& out, unsigned int num, bool discard_input);
+	void Subdivide (aiMesh** smesh, size_t nmesh,
 		aiMesh** out, unsigned int num, bool discard_input);
 
 	// ---------------------------------------------------------------------------
@@ -123,7 +123,7 @@ Subdivider* Subdivider::Create (Algorithm algo)
 // ------------------------------------------------------------------------------------------------
 // Call the Catmull Clark subdivision algorithm for one mesh
 void  CatmullClarkSubdivider::Subdivide (
-	const aiMesh* mesh, 
+	aiMesh* mesh, 
 	aiMesh*& out,
 	unsigned int num,
 	bool discard_input
@@ -136,7 +136,7 @@ void  CatmullClarkSubdivider::Subdivide (
 // ------------------------------------------------------------------------------------------------
 // Call the Catmull Clark subdivision algorithm for multiple meshes
 void CatmullClarkSubdivider::Subdivide (
-	const aiMesh* const * smesh, 
+	aiMesh** smesh, 
 	size_t nmesh,
 	aiMesh** out, 
 	unsigned int num,
@@ -152,8 +152,8 @@ void CatmullClarkSubdivider::Subdivide (
 		// No subdivision at all. Need to copy all the meshes .. argh.
 		if (discard_input) {
 			for (size_t s = 0; s < nmesh; ++s) {
-				out[s] = const_cast<aiMesh*>( smesh[s] );
-				const_cast<aiMesh*&>( smesh[s] ) = NULL;
+				out[s] = smesh[s];
+				smesh[s] = NULL;
 			}
 		}
 		else {
@@ -164,7 +164,7 @@ void CatmullClarkSubdivider::Subdivide (
 		return;
 	}
 
-	std::vector<const aiMesh*> inmeshes;
+	std::vector<aiMesh*> inmeshes;
 	std::vector<aiMesh*> outmeshes;
 	std::vector<unsigned int> maptbl;
 
@@ -176,14 +176,14 @@ void CatmullClarkSubdivider::Subdivide (
 	// number of edge cases the subdivider is forced to deal with. Line and 
 	// point meshes are simply passed through.
 	for (size_t s = 0; s < nmesh; ++s) {
-		const aiMesh* i = smesh[s];
+		aiMesh* i = smesh[s];
 		// FIX - mPrimitiveTypes might not yet be initialized
 		if (i->mPrimitiveTypes && (i->mPrimitiveTypes & (aiPrimitiveType_LINE|aiPrimitiveType_POINT))==i->mPrimitiveTypes) {
 			DefaultLogger::get()->debug("Catmull-Clark Subdivider: Skipping pure line/point mesh");
 
 			if (discard_input) {
-				out[s] = const_cast<aiMesh*>( i );
-				const_cast<aiMesh*&>( smesh[s] ) = NULL;
+				out[s] = i;
+				smesh[s] = NULL;
 			}
 			else {
 				SceneCombiner::Copy(out+s,i);

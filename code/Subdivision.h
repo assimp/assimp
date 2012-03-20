@@ -82,7 +82,7 @@ public:
 	 *    improve performance because it allows the optimization
 	 *    to reuse the existing mesh for intermediate results.
 	 *  @pre out!=mesh*/
-	virtual void Subdivide (const aiMesh* mesh, 
+	virtual void Subdivide ( aiMesh* mesh, 
 		aiMesh*& out, unsigned int num,
 		bool discard_input = false) = 0;
 
@@ -108,7 +108,7 @@ public:
 	 *  @param num Number of subdivisions to perform.
 	 *  @pre nmesh != 0, smesh and out may not overlap*/
 	virtual void Subdivide (
-		const aiMesh* const * smesh, 
+		aiMesh** smesh, 
 		size_t nmesh,
 		aiMesh** out, 
 		unsigned int num,

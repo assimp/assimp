@@ -846,7 +846,7 @@ struct IntGroupInfo_MDL7
 	BE_NCONST MDL::TexCoord_MDL7*	pcGroupUVs;		
 
 	//! Points to the beginning of the triangle section
-	BE_NCONST MDL::Triangle_MDL7*	pcGroupTris;		
+	MDL::Triangle_MDL7*	pcGroupTris;		
 
 	//! Points to the beginning of the vertex section
 	BE_NCONST MDL::Vertex_MDL7*		pcGroupVerts;

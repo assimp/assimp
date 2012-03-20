@@ -204,7 +204,7 @@ struct aiExportDataBlob
 	/// Default constructor
 	aiExportDataBlob() { size = 0; data = next = NULL; }
 	/// Releases the data
-	~aiExportDataBlob() { delete static_cast<char*>( data ); delete next; }
+	~aiExportDataBlob() { delete [] static_cast<unsigned char*>( data ); delete next; }
 
 private:
 	// no copying

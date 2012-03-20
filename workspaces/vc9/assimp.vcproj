@@ -2036,6 +2036,18 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="xgl"
+					>
+					<File
+						RelativePath="..\..\code\XGLLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\XGLLoader.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="postprocessing"

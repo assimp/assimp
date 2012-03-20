@@ -163,6 +163,9 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_M3_IMPORTER
 #   include "M3Importer.h"
 #endif 
+#ifndef ASSIMP_BUILD_NO_XGL_IMPORTER
+#   include "XGLLoader.h"
+#endif 
 
 namespace Assimp {
 
@@ -284,6 +287,9 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
 #endif
 #if ( !defined ASSIMP_BUILD_NO_M3_IMPORTER )
 	out.push_back( new M3::M3Importer() );
+#endif
+#if ( !defined ASSIMP_BUILD_NO_XGL_IMPORTER )
+	out.push_back( new XGLImporter() );
 #endif
 }
 

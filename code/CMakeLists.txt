@@ -390,6 +390,13 @@ SET(IFC_SRCS
 )
 SOURCE_GROUP( IFC FILES ${IFC_SRCS})
 
+SET( XGL_SRCS
+	XGLLoader.cpp
+	XGLLoader.h
+)
+SOURCE_GROUP( XGL FILES ${XGL_SRCS})
+
+
 SET( PostProcessing_SRCS
 	CalcTangentsProcess.cpp
 	CalcTangentsProcess.h
@@ -627,6 +634,7 @@ ADD_LIBRARY( assimp STATIC
 	${BLENDER_SRCS}
 	${NDO_SRCS}
 	${IFC_SRCS}
+	${XGL_SRCS}
 	
 	# Third-party libraries
 	${IrrXML_SRCS}
@@ -687,6 +695,7 @@ ADD_LIBRARY( assimp SHARED
 	${BLENDER_SRCS}
 	${NDO_SRCS}
 	${IFC_SRCS}
+	${XGL_SRCS}
 	
 	# Third-party libraries
 	${IrrXML_SRCS}

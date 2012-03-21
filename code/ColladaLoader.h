@@ -153,7 +153,7 @@ protected:
 	void CreateAnimation( aiScene* pScene, const ColladaParser& pParser, const Collada::Animation* pSrcAnim, const std::string& pName);
 	
 	/** Constructs materials from the collada material definitions */
-	void BuildMaterials( const ColladaParser& pParser, aiScene* pScene);
+	void BuildMaterials( ColladaParser& pParser, aiScene* pScene);
 
 	/** Fill materials from the collada material definitions */
 	void FillMaterials( const ColladaParser& pParser, aiScene* pScene);

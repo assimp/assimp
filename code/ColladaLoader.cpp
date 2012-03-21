@@ -1275,7 +1275,7 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pSce
 
 // ------------------------------------------------------------------------------------------------
 // Constructs materials from the collada material definitions
-void ColladaLoader::BuildMaterials( const ColladaParser& pParser, aiScene* /*pScene*/)
+void ColladaLoader::BuildMaterials( ColladaParser& pParser, aiScene* /*pScene*/)
 {
 	newMats.reserve(pParser.mMaterialLibrary.size());
 
@@ -1283,10 +1283,10 @@ void ColladaLoader::BuildMaterials( const ColladaParser& pParser, aiScene* /*pSc
 	{
 		const Collada::Material& material = matIt->second;
 		// a material is only a reference to an effect
-		ColladaParser::EffectLibrary::const_iterator effIt = pParser.mEffectLibrary.find( material.mEffect);
+		ColladaParser::EffectLibrary::iterator effIt = pParser.mEffectLibrary.find( material.mEffect);
 		if( effIt == pParser.mEffectLibrary.end())
 			continue;
-		const Collada::Effect& effect = effIt->second;
+		Collada::Effect& effect = effIt->second;
 
 		// create material
 		aiMaterial* mat = new aiMaterial;
@@ -1295,7 +1295,7 @@ void ColladaLoader::BuildMaterials( const ColladaParser& pParser, aiScene* /*pSc
 
 		// store the material
 		mMaterialIndexByName[matIt->first] = newMats.size();
-		newMats.push_back( std::pair<Collada::Effect*, aiMaterial*>(const_cast<Collada::Effect*>(&effect),mat) );
+		newMats.push_back( std::pair<Collada::Effect*, aiMaterial*>( &effect,mat) );
 	}
 	// ScenePreprocessor generates a default material automatically if none is there.
 	// All further code here in this loader works well without a valid material so

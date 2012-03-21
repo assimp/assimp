@@ -5,6 +5,13 @@
 #include "OgreXmlHelper.hpp"
 #include "irrXMLWrapper.h"
 
+/// Ogre Importer TODO
+/*	- Read Vertex Colors
+	- Read multiple TexCoords
+*/
+
+
+
 namespace Assimp
 {
 namespace Ogre

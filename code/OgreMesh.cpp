@@ -193,7 +193,8 @@ void OgreImporter::ReadVertexBuffer(SubMesh &theSubMesh, XmlReader *Reader, unsi
 		||Reader->getNodeName()==string("position")
 		||Reader->getNodeName()==string("normal")
 		||Reader->getNodeName()==string("tangent")
-		||Reader->getNodeName()==string("texcoord"))
+		||Reader->getNodeName()==string("texcoord")
+		||Reader->getNodeName()==string("colour_diffuse"))
 	{
 		if(Reader->getNodeName()==string("vertex"))
 			XmlRead(Reader);//Read an attribute tag
@@ -240,6 +241,13 @@ void OgreImporter::ReadVertexBuffer(SubMesh &theSubMesh, XmlReader *Reader, unsi
 			while(Reader->getNodeName()==string("texcoord"))
 				XmlRead(Reader);
 			continue;//don't read another line at the end of the loop
+		}
+
+		//Color:
+		//TODO: actually save this data!
+		else if(Reader->getNodeName()==string("colour_diffuse"))
+		{
+			//do nothing, because we not yet support them
 		}
 
 		//Attribute could not be read

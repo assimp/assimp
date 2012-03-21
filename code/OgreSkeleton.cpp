@@ -244,7 +244,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 							RotationAxis.y=GetAttribute<float>(SkeletonFile, "y");
 							RotationAxis.z=GetAttribute<float>(SkeletonFile, "z");
 
-							if(0==RotationAxis.x==RotationAxis.y==RotationAxis.z)//we have an invalid rotation axis
+							if(0==RotationAxis.x && 0==RotationAxis.y && 0==RotationAxis.z)//we have an invalid rotation axis
 							{
 								RotationAxis.x=1.0f;
 								if(0!=RotationAngle)//if we don't rotate at all, the axis does not matter

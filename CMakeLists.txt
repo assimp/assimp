@@ -137,11 +137,20 @@ SET ( BUILD_ASSIMP_TOOLS ON CACHE BOOL
 IF ( BUILD_ASSIMP_TOOLS )
 	IF ( WIN32 )
 		ADD_SUBDIRECTORY( tools/assimp_view/ )
-		ADD_SUBDIRECTORY( samples/SimpleTexturedOpenGL/ )
 	ENDIF ( WIN32 )
 	ADD_SUBDIRECTORY( tools/assimp_cmd/ )
-	ADD_SUBDIRECTORY( samples/SimpleOpenGL/ )
 ENDIF ( BUILD_ASSIMP_TOOLS )
+
+SET ( BUILD_ASSIMP_SAMPLES ON CACHE BOOL
+	"If the official samples are built as well (needs Glut)."
+)
+
+IF ( BUILD_ASSIMP_SAMPLES)
+	IF ( WIN32 )
+		ADD_SUBDIRECTORY( samples/SimpleTexturedOpenGL/ )
+	ENDIF ( WIN32 )
+	ADD_SUBDIRECTORY( samples/SimpleOpenGL/ )
+ENDIF ( BUILD_ASSIMP_SAMPLES )
 
 SET ( BUILD_TESTS OFF CACHE BOOL
 	"If the test suite for Assimp is built in addition to the library."

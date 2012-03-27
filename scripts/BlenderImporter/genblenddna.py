@@ -67,6 +67,13 @@ template <> void Structure :: Convert<{a}> (
 Structure_Convert_ptrdecl = """
     ReadFieldPtr<{policy}>({destcast}dest.{name_canonical},"{name_dna}",db);"""
 
+Structure_Convert_rawptrdecl = """
+    {{
+        boost::shared_ptr<{type}> {name_canonical};
+        ReadFieldPtr<{policy}>({destcast}{name_canonical},"{name_dna}",db);
+        dest.{name_canonical} = {name_canonical}.get();
+    }}"""
+
 Structure_Convert_arraydecl = """
     ReadFieldArray<{policy}>({destcast}dest.{name_canonical},"{name_dna}",db);"""
 
@@ -103,11 +110,12 @@ def main():
     getstruct = re.compile(r"struct\s+(\w+?)\s*(:\s*ElemBase)?\s*\{(.*?)^\}\s*;",flags)
     getsmartx = re.compile(r"(std\s*::\s*)?(vector)\s*<\s*(boost\s*::\s*)?shared_(ptr)\s*<\s*(\w+)\s*>\s*>\s*",flags)
     getsmartp = re.compile(r"(boost\s*::\s*)?shared_(ptr)\s*<\s*(\w+)\s*>\s*",flags)
+    getrawp   = re.compile(r"(\w+)\s*\*\s*",flags)
     getsmarta = re.compile(r"(std\s*::\s*)?(vector)\s*<\s*(\w+)\s*>\s*",flags)
     getpolicy = re.compile(r"\s*(WARN|FAIL|IGNO)",flags)
     stripenum = re.compile(r"enum\s+(\w+)\s*{.*?\}\s*;",flags)
 
-    assert getsmartx and getsmartp and getsmarta and getpolicy and stripenum
+    assert getsmartx and getsmartp and getsmarta and getrawp and getpolicy and stripenum
     
     enums = set()
     #re.sub(stripcoms," ",input)
@@ -146,14 +154,20 @@ def main():
                 policy = py.groups()[0]
                 line = re.sub(getpolicy,"",line)
 
-            ty = re.match(getsmartx,line) or re.match(getsmartp,line)  or re.match(getsmarta,line) 
+            ty = re.match(getsmartx,line) or re.match(getsmartp,line)  or\
+                re.match(getsmarta,line) or re.match(getrawp,line)
+
             if ty is None:
                 ty = line.split(None,1)[0]
             else:
-                if ty.groups()[1] == "ptr":
+                if len(ty.groups()) == 1:
+                    ty = ty.groups()[-1] + "$" 
+                elif ty.groups()[1] == "ptr":
                     ty = ty.groups()[2] + "*"
                 elif ty.groups()[1] == "vector":
                     ty = ty.groups()[-1] + ("*" if len(ty.groups()) == 3 else "**")
+                else:
+                    assert False
 
             #print(line)
             sp = line.split(',')
@@ -190,7 +204,9 @@ def main():
             splits = name.split("[",1)
             name_canonical = splits[0]
             #array_part = "" if len(splits)==1 else "["+splits[1]
-            ptr_decl = "*"*type.count("*")
+            is_raw_ptr = not not type.count("$")
+            ptr_decl = "*"*(type.count("*") + (1 if is_raw_ptr else 0))
+            
             name_dna = ptr_decl+name_canonical #+array_part
 
             #required  = "false"
@@ -198,8 +214,11 @@ def main():
             destcast = "(int&)" if type in enums else ""
 
             # POINTER
-            if ptr_decl:
-               s += Structure_Convert_ptrdecl.format(**locals())
+            if is_raw_ptr:
+                type = type.replace('$','')
+                s += Structure_Convert_rawptrdecl.format(**locals())
+            elif ptr_decl:
+                s += Structure_Convert_ptrdecl.format(**locals())
             # ARRAY MEMBER
             elif name.count('[')==1:
                 s += Structure_Convert_arraydecl.format(**locals())

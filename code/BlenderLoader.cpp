@@ -881,7 +881,7 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
 	std::deque<const Object*> children;
 	for(std::set<const Object*>::iterator it = conv_data.objects.begin(); it != conv_data.objects.end() ;) {
 		const Object* object = *it;
-		if (object->parent.get() == obj) {
+		if (object->parent == obj) {
 			children.push_back(object);
 
 			conv_data.objects.erase(it++);

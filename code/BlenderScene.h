@@ -71,9 +71,10 @@ namespace Assimp	{
 //
 // * Pointers to other structures or primitive types are allowed.
 //   No references or double pointers or arrays of pointers.
-//   A pointer to a T is written as boost::shared_ptr, while a
+//   A pointer to a T is normally written as boost::shared_ptr, while a
 //   pointer to an array of elements is written as boost::
-//   shared_array.
+//   shared_array. To avoid cyclic pointers, use raw pointers in
+//   one direction.
 //
 // * Arrays can have maximally two-dimensions. Any non-pointer
 //   type can form them.
@@ -477,7 +478,7 @@ struct Object : ElemBase  {
 	float parentinv[4][4] WARN;
 	char parsubstr[32] WARN;
 	
-	boost::shared_ptr<Object> parent WARN;
+	Object* parent WARN;
 	boost::shared_ptr<Object> track WARN;
 
 	boost::shared_ptr<Object> proxy,proxy_from,proxy_group WARN;
@@ -490,7 +491,7 @@ struct Object : ElemBase  {
 
 // -------------------------------------------------------------------------------
 struct Base : ElemBase {
-	boost::shared_ptr<Base> prev WARN;
+	Base* prev WARN;
 	boost::shared_ptr<Base> next WARN;
 	boost::shared_ptr<Object> object WARN;
 };

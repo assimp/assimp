@@ -1695,10 +1695,10 @@ void ColladaParser::ReadDataArray()
 				SkipSpacesAndLineEnd( &content);
 			}
 		}
-	}
 
-	// test for closing tag
-	TestClosing( elmName.c_str());
+    // test for closing tag
+    TestClosing( elmName.c_str());
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -2705,11 +2705,11 @@ const char* ColladaParser::TestTextContent()
 {
 	// present node should be the beginning of an element
 	if( mReader->getNodeType() != irr::io::EXN_ELEMENT || mReader->isEmptyElement())
-		ThrowException( "Expected opening element");
+		return NULL;
 
 	// read contents of the element
-	if( !mReader->read())
-		ThrowException( "Unexpected end of file while reading n element.");
+	if( !mReader->read() )
+		return NULL;
 	if( mReader->getNodeType() != irr::io::EXN_TEXT)
 		return NULL;
 

@@ -1399,6 +1399,15 @@ void ColladaLoader::ConvertPath (aiString& ss)
 		ss.data[ss.length] = '\0';
 	}
 
+  // Maxon Cinema Collada Export writes "file:///C:\andsoon" with three slashes... 
+  // I need to filter it without destroying linux paths starting with "/somewhere"
+  if( ss.data[0] == '/' && isalpha( ss.data[1]) && ss.data[2] == ':' )
+  {
+    ss.length--;
+    memmove( ss.data, ss.data+1, ss.length);
+    ss.data[ss.length] = 0;
+  }
+
   // find and convert all %xyz special chars
   char* out = ss.data;
   for( const char* it = ss.data; it != ss.data + ss.length; /**/ )

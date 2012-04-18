@@ -76,7 +76,7 @@ static const aiImporterDesc blenderDesc = {
 	"",
 	"",
 	"",
-	aiImporterFlags_SupportBinaryFlavour | aiImporterFlags_Experimental,
+	aiImporterFlags_SupportBinaryFlavour,
 	0,
 	0,
 	2,

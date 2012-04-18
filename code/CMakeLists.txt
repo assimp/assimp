@@ -46,6 +46,7 @@ SET( PUBLIC_HEADERS
 	${HEADER_PATH}/vector3.inl
 	${HEADER_PATH}/version.h
 	${HEADER_PATH}/cimport.h
+	${HEADER_PATH}/importerdesc.h
 	${HEADER_PATH}/Importer.hpp
 	${HEADER_PATH}/DefaultLogger.hpp
 	${HEADER_PATH}/ProgressHandler.hpp

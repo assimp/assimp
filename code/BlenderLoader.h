@@ -85,32 +85,6 @@ namespace Assimp	{
 		class BlenderModifier;
 	}
 
-enum aiLoaderFlags 
-{
-	aiLoaderFlags_SupportAsciiFlavour = 0x1,
-	aiLoaderFlags_SupportBinaryFlavour = 0x2,
-	aiLoaderFlags_SupportCompressedFlavour = 0x4,
-
-	aiLoaderFlags_LimitedSupport = 0x8,
-
-	aiLoaderFlags_Experimental = 0x10,
-	aiLoaderFlags_Testing = 0x20,
-	aiLoaderFlags_Production = 0x40
-};
-
-struct aiLoaderDesc 
-{
-	const char* mName;
-	const char* mAuthor;
-	const char* mMaintainer;
-	const char* mComments;
-	unsigned int mFlags;
-
-	unsigned int mMinMajor;
-	unsigned int mMinMinor;
-	unsigned int mMaxMajor;
-	unsigned int mMaxMinor;
-};
 
 
 // -------------------------------------------------------------------------------------------
@@ -136,7 +110,7 @@ public:
 protected:
 
 	// --------------------
-	const aiLoaderDesc& GetInfo () const;
+	const aiImporterDesc* GetInfo () const;
 
 	// --------------------
 	void GetExtensionList(std::set<std::string>& app);

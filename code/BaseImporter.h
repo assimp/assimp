@@ -190,7 +190,15 @@ public:
 protected:
 
 	// -------------------------------------------------------------------
-	/** Called by Importer::GetExtensionList() for each loaded importer.
+	/** Called by #Importer::GetImporterInfo to get a description of 
+	 *  some loader features. Importer need not provide this structure,
+	 *  but it is highly recommended. */
+	virtual const aiImporterDesc* GetInfo() {
+		return NULL;
+	}
+
+	// -------------------------------------------------------------------
+	/** Called by #Importer::GetExtensionList for each loaded importer.
 	 *  Implementations are expected to insert() all file extensions
 	 *  handled by them into the extension set. A loader capable of
 	 *  reading certain files with the extension BLA would place the

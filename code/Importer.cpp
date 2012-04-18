@@ -818,12 +818,44 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 // Helper function to check whether an extension is supported by ASSIMP
 bool Importer::IsExtensionSupported(const char* szExtension) const
 {
-	return NULL != FindLoader(szExtension);
+	return NULL != GetImporter(szExtension);
+}
+
+// ------------------------------------------------------------------------------------------------
+size_t Importer::GetImporterCount() const
+{
+	return pimpl->mImporter.size();
+}
+
+// ------------------------------------------------------------------------------------------------
+const aiImporterDesc* Importer::GetImporterInfo(size_t index) const
+{
+	if (index >= pimpl->mImporter.size()) {
+		return NULL;
+	}
+	return pimpl->mImporter[index]->GetInfo();
+}
+
+
+// ------------------------------------------------------------------------------------------------
+BaseImporter* Importer::GetImporter (size_t index) const
+{
+	if (index >= pimpl->mImporter.size()) {
+		return NULL;
+	}
+	return pimpl->mImporter[index];
 }
 
 // ------------------------------------------------------------------------------------------------
 // Find a loader plugin for a given file extension
-BaseImporter* Importer::FindLoader (const char* szExtension) const
+BaseImporter* Importer::GetImporter (const char* szExtension) const
+{
+	return GetImporter(GetImporterIndex(szExtension));
+}
+
+// ------------------------------------------------------------------------------------------------
+// Find a loader plugin for a given file extension
+size_t Importer::GetImporterIndex (const char* szExtension) const
 {
 	ai_assert(szExtension);
 	ASSIMP_BEGIN_EXCEPTION_REGION();
@@ -844,12 +876,12 @@ BaseImporter* Importer::FindLoader (const char* szExtension) const
 		(*i)->GetExtensionList(str);
 		for (std::set<std::string>::const_iterator it = str.begin(); it != str.end(); ++it) {
 			if (ext == *it) {
-				return (*i);
+				return std::distance(static_cast< std::vector<BaseImporter*>::const_iterator >(pimpl->mImporter.begin()), i);
 			}
 		}
 	}
-	ASSIMP_END_EXCEPTION_REGION(BaseImporter*);
-	return NULL;
+	ASSIMP_END_EXCEPTION_REGION(size_t);
+	return static_cast<size_t>(-1);
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -118,7 +118,11 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 	do {
 		if (!*ext || *ext == ' ') {
 			extensions.insert(std::string(last,ext-last));
-			last = ext+1;
+			ai_assert(ext-last > 0);
+			last = ext;
+			while(*last == ' ') {
+				++last;
+			}
 		}
 	}
 	while(*ext++);

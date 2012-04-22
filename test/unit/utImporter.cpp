@@ -56,6 +56,21 @@ CPPUNIT_TEST_SUITE_REGISTRATION (ImporterTest);
 #define AIUT_DEF_ERROR_TEXT "sorry, this is a test"
 
 
+static const aiImporterDesc desc = {
+	"UNIT TEST - IMPORTER",
+	"",
+	"",
+	"",
+	0,
+	0,
+	0,
+	0,
+	0,
+	"apple mac linux windows" 
+};
+
+
+
 bool TestPlugin :: CanRead( const std::string& pFile, 
 	IOSystem* pIOHandler, bool test) const
 {
@@ -70,12 +85,9 @@ bool TestPlugin :: CanRead( const std::string& pFile,
 		extension == ".linux" || extension == ".windows" );
 }
 
-void TestPlugin :: GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* TestPlugin :: GetInfo() const
 {
-	extensions.insert("apple");
-	extensions.insert("mac");
-	extensions.insert("linux");
-	extensions.insert("windows");
+	return & desc;
 }
 
 void TestPlugin :: InternReadFile( const std::string& pFile, 
@@ -147,7 +159,7 @@ void ImporterTest :: testPluginInterface (void)
 	CPPUNIT_ASSERT(pImp->IsExtensionSupported(".3ds"));
 	CPPUNIT_ASSERT(!pImp->IsExtensionSupported("."));
 
-	TestPlugin* p = (TestPlugin*) pImp->FindLoader(".windows");
+	TestPlugin* p = (TestPlugin*) pImp->GetImporter(".windows");
 	CPPUNIT_ASSERT(NULL != p);
 
 	try {

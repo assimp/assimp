@@ -7,9 +7,9 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <mesh.h>
-#include <scene.h>
-#include <Importer.hpp>
+#include <assimp/mesh.h>
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
 #include <ScenePreprocessor.h>
 
 using namespace std;

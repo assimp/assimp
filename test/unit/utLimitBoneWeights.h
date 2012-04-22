@@ -4,7 +4,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <scene.h>
+#include <assimp/scene.h>
 #include <LimitBoneWeightsProcess.h>
 
 

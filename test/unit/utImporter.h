@@ -4,7 +4,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <Importer.hpp>
+#include <assimp/Importer.hpp>
 #include <BaseImporter.h>
 
 using namespace std;
@@ -52,7 +52,7 @@ public:
 		IOSystem* pIOHandler, bool test) const;
 
 	// overriden
-	void GetExtensionList(std::set<std::string>& extensions);
+	const aiImporterDesc* GetInfo () const;
 
 	// overriden
 	void InternReadFile( const std::string& pFile, 

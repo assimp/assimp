@@ -4,8 +4,8 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "types.h"
-#include "mesh.h"
+#include "assimp/types.h"
+#include "assimp/mesh.h"
 #include <VertexTriangleAdjacency.h>
 
 

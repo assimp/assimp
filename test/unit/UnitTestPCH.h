@@ -6,7 +6,7 @@
 
 // We need to be sure to have the same STL settings as Assimp
 #include <AssimpPCH.h>
-#include "cimport.h"
+#include <assimp/cimport.h>
 
 // CPPUNIT
 #include <cppunit/TestFixture.h>

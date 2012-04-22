@@ -4,9 +4,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <types.h>
-#include <mesh.h>
-#include <scene.h>
+#include <assimp/scene.h>
 #include <MaterialSystem.h>
 
 

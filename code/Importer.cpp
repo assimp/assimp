@@ -865,7 +865,7 @@ size_t Importer::GetImporterIndex (const char* szExtension) const
 
 	std::string ext(szExtension);
 	if (ext.empty()) {
-		return NULL;
+		return static_cast<size_t>(-1);
 	}
 	std::transform(ext.begin(),ext.end(), ext.begin(), tolower);
 

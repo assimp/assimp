@@ -91,7 +91,7 @@ void MakeFileAssociations()
 	do
 	{
 		char buf[256];
-		assert(sz[0] == '*');
+		ai_assert(sz[0] == '*');
 		sprintf(buf,"Software\\Classes\\%s",sz+1);
 
 		RegCreateKeyEx(HKEY_CURRENT_USER,buf,NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
@@ -1035,7 +1035,7 @@ void DoExport(size_t formatId)
 
 	Exporter exp;
 	const aiExportFormatDesc* const e = exp.GetExportFormatDescription(formatId);
-	assert(e);
+	ai_assert(e);
 
 	char szFileName[MAX_PATH*2];
 	DWORD dwTemp;

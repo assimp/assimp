@@ -113,8 +113,8 @@ public:
 		, expect(expect)
 		, cnt_chunks(0)
 	{
-		assert(actual);
-		assert(expect);
+		ai_assert(actual);
+		ai_assert(expect);
 
 		fseek(actual,0,SEEK_END);
 		lengths.push(std::make_pair(static_cast<uint32_t>(ftell(actual)),0));
@@ -142,7 +142,7 @@ public:
 
 	/* leave current scope */
 	void pop_elem() {
-		assert(history.size());
+		ai_assert(history.size());
 		history.pop_back();
 	}
 
@@ -155,19 +155,19 @@ public:
 
 	/* pop the chunk length stack */
 	void pop_length() {
-		assert(lengths.size());
+		ai_assert(lengths.size());
 		lengths.pop();
 	}
 
 	/* access the current chunk length */
 	uint32_t get_latest_chunk_length() {
-		assert(lengths.size());
+		ai_assert(lengths.size());
 		return lengths.top().first;
 	}
 
 	/* access the current chunk start offset */
 	uint32_t get_latest_chunk_start() {
-		assert(lengths.size());
+		ai_assert(lengths.size());
 		return lengths.top().second;
 	}
 

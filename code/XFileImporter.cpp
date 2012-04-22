@@ -355,7 +355,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 			}
 
 			// there should be as much new vertices as we calculated before
-			assert( newIndex == numVertices);
+			ai_assert( newIndex == numVertices);
 
 			// convert all bones of the source mesh which influence vertices in this newly created mesh
 			const std::vector<XFile::Bone>& bones = sourceMesh->mBones;

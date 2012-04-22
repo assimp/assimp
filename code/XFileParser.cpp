@@ -1240,7 +1240,7 @@ void XFileParser::ReadUntilEndOfLine()
 // ------------------------------------------------------------------------------------------------
 unsigned short XFileParser::ReadBinWord()
 {
-	assert(End - P >= 2);
+	ai_assert(End - P >= 2);
 	const unsigned char* q = (const unsigned char*) P;
 	unsigned short tmp = q[0] | (q[1] << 8);
 	P += 2;
@@ -1250,7 +1250,7 @@ unsigned short XFileParser::ReadBinWord()
 // ------------------------------------------------------------------------------------------------
 unsigned int XFileParser::ReadBinDWord()
 {
-	assert(End - P >= 4);
+	ai_assert(End - P >= 4);
 	const unsigned char* q = (const unsigned char*) P;
 	unsigned int tmp = q[0] | (q[1] << 8) | (q[2] << 16) | (q[3] << 24);
 	P += 4;

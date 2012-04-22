@@ -505,7 +505,7 @@ int CreateAssetData()
 				nidx = 2;break;
 			case aiPrimitiveType_TRIANGLE:
 				nidx = 3;break;
-			default: assert(false);
+			default: ai_assert(false);
 		};
 
 		// check whether we can use 16 bit indices

@@ -689,7 +689,7 @@ void WriteBinaryDump(const aiScene* scene, FILE* _out, const char* src, const ch
 	// == 435 bytes
 
 	// ==== total header size: 512 bytes
-	assert(ftell(out)==ASSBIN_HEADER_LENGTH);
+	ai_assert(ftell(out)==ASSBIN_HEADER_LENGTH);
 
 	// Up to here the data is uncompressed. For compressed files, the rest
 	// is compressed using standard DEFLATE from zlib.

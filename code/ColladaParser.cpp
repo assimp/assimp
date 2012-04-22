@@ -2115,7 +2115,7 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 		for( size_t b = 0; b < numPoints; b++)
 		{
 			// read all indices for this vertex. Yes, in a hacky local array
-			assert( numOffsets < 20 && perVertexOffset < 20);
+			ai_assert( numOffsets < 20 && perVertexOffset < 20);
 			size_t vindex[20];
 			for( size_t offsets = 0; offsets < numOffsets; ++offsets)
 				vindex[offsets] = *idx++;
@@ -2313,7 +2313,7 @@ void ColladaParser::ReadSceneNode( Node* pNode)
 					child->mName = mReader->getAttributeValue( attrName);
 
 				// TODO: (thom) support SIDs
-				// assert( TestAttribute( "sid") == -1);
+				// ai_assert( TestAttribute( "sid") == -1);
 
 				if (pNode) 
 				{
@@ -2781,7 +2781,7 @@ aiMatrix4x4 ColladaParser::CalculateResultTransform( const std::vector<Transform
 				break;
 			}
 			default: 
-				assert( false);
+				ai_assert( false);
 				break;
 		}
 	}

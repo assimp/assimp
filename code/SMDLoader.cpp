@@ -53,6 +53,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+static const aiImporterDesc desc = {
+	"Valve SMD Importer",
+	"",
+	"",
+	"",
+	aiImporterFlags_SupportTextFlavour,
+	0,
+	0,
+	0,
+	0,
+	"smd vta" 
+};
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 SMDImporter::SMDImporter()
@@ -73,10 +86,9 @@ bool SMDImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, b
 
 // ------------------------------------------------------------------------------------------------
 // Get a list of all supported file extensions
-void SMDImporter::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* SMDImporter::GetInfo () const
 {
-	extensions.insert("smd");
-	extensions.insert("vta");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

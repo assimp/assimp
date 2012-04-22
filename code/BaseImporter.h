@@ -187,26 +187,22 @@ public:
 		const Importer* pImp
 		);
 
-protected:
-
+	
 	// -------------------------------------------------------------------
 	/** Called by #Importer::GetImporterInfo to get a description of 
-	 *  some loader features. Importer need not provide this structure,
-	 *  but it is highly recommended. */
-	virtual const aiImporterDesc* GetInfo() {
-		return NULL;
-	}
+	 *  some loader features. Importers must provide this information. */
+	virtual const aiImporterDesc* GetInfo() const = 0;
+
+
 
 	// -------------------------------------------------------------------
 	/** Called by #Importer::GetExtensionList for each loaded importer.
-	 *  Implementations are expected to insert() all file extensions
-	 *  handled by them into the extension set. A loader capable of
-	 *  reading certain files with the extension BLA would place the
-	 *  string bla (lower-case!) in the output set.
-	 * @param extensions Output set. */
-	virtual void GetExtensionList(
-		std::set<std::string>& extensions
-		) = 0;
+	 *  Take the extension list contained in the structure returned by
+	 *  #GetInfo and insert all file extensions into the given set.
+	 *  @param extension set to collect file extensions in*/
+	void GetExtensionList(std::set<std::string>& extensions);
+
+protected:
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. The 

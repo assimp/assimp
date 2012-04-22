@@ -89,10 +89,10 @@ public:
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
 
 protected:
-	/** Called by Importer::GetExtensionList() for each loaded importer.
-	 * See BaseImporter::GetExtensionList() for details
+	/** Return importer meta information.
+	 * See #BaseImporter::GetInfo for the details
 	 */
-	void GetExtensionList( std::set<std::string>& extensions);
+	const aiImporterDesc* GetInfo () const;
 
 	/** Imports the given file into the given scene structure. 
 	 * See BaseImporter::InternReadFile() for details

@@ -72,6 +72,20 @@ static const float units[] = {
 	1.f/1609.344f
 };	
 
+static const aiImporterDesc desc = {
+	"TrueSpace Object Importer",
+	"",
+	"",
+	"little-endian files only",
+	aiImporterFlags_SupportTextFlavour | aiImporterFlags_SupportBinaryFlavour,
+	0,
+	0,
+	0,
+	0,
+	"cob scn"
+};
+
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 COBImporter::COBImporter()
@@ -99,11 +113,10 @@ bool COBImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 }
 
 // ------------------------------------------------------------------------------------------------
-// List all extensions handled by this loader
-void COBImporter::GetExtensionList(std::set<std::string>& app)
+// Loader meta information
+const aiImporterDesc* COBImporter::GetInfo () const
 {
-	app.insert("cob");
-	app.insert("scn");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

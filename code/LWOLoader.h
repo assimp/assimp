@@ -91,14 +91,8 @@ public:
 protected:
 
 	// -------------------------------------------------------------------
-	/** Called by Importer::GetExtensionList() for each loaded importer.
-	 * See BaseImporter::GetExtensionList() for details
-	 */
-	void GetExtensionList(std::set<std::string>& extensions)
-	{
-		extensions.insert("lxo");
-		extensions.insert("lwo");
-	}
+	// Get list of supported extensions
+	const aiImporterDesc* GetInfo () const;
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 

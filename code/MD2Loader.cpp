@@ -56,6 +56,19 @@ using namespace Assimp::MD2;
 #	define ARRAYSIZE(_array) (int(sizeof(_array) / sizeof(_array[0])))
 #endif 
 
+static const aiImporterDesc desc = {
+	"Quake II Mesh Importer",
+	"",
+	"",
+	"",
+	aiImporterFlags_SupportBinaryFlavour,
+	0,
+	0,
+	0,
+	0,
+	"md2" 
+};
+
 // ------------------------------------------------------------------------------------------------
 // Helper function to lookup a normal in Quake 2's precalculated table
 void MD2::LookupNormalIndex(uint8_t iNormalIndex,aiVector3D& vOut)
@@ -98,9 +111,9 @@ bool MD2Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 
 // ------------------------------------------------------------------------------------------------
 // Get a list of all extensions supported by this loader
-void MD2Importer::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* MD2Importer::GetInfo () const
 {
-	extensions.insert("md2");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

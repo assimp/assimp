@@ -80,7 +80,7 @@ protected:
 	// -------------------------------------------------------------------
 	/**
 	 */
-	void GetExtensionList(std::set<std::string>& extensions);
+	const aiImporterDesc* GetInfo () const;
 
 	// -------------------------------------------------------------------
 	/** 

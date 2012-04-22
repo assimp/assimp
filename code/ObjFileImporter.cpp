@@ -47,6 +47,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjFileParser.h"
 #include "ObjFileData.h"
 
+static const aiImporterDesc desc = {
+	"Wavefront Object Importer",
+	"",
+	"",
+	"surfaces not supported",
+	aiImporterFlags_SupportTextFlavour,
+	0,
+	0,
+	0,
+	0,
+	"obj"
+};
+
+
 namespace Assimp	{
 
 using namespace std;
@@ -87,6 +101,12 @@ bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem*  pIOHandler ,
 		static const char *pTokens[] = { "mtllib", "usemtl", "v ", "vt ", "vn ", "o ", "g ", "s ", "f " };
 		return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens, 9 );
 	}
+}
+
+// ------------------------------------------------------------------------------------------------
+const aiImporterDesc* ObjFileImporter::GetInfo () const
+{
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

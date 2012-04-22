@@ -79,6 +79,19 @@ struct free_it
 
 template<> const std::string LogFunctions<XGLImporter>::log_prefix = "XGL: ";
 
+static const aiImporterDesc desc = {
+	"XGL Importer",
+	"",
+	"",
+	"",
+	aiImporterFlags_SupportTextFlavour,
+	0,
+	0,
+	0,
+	0,
+	"xgl zgl" 
+};
+
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -115,10 +128,9 @@ bool XGLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 
 // ------------------------------------------------------------------------------------------------
 // Get a list of all file extensions which are handled by this class
-void XGLImporter::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* XGLImporter::GetInfo () const
 {
-	extensions.insert("xgl");
-	extensions.insert("zgl");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

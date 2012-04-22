@@ -50,6 +50,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 #define for_each BOOST_FOREACH
 
+static const aiImporterDesc desc = {
+	"Nendo Mesh Importer",
+	"",
+	"",
+	"http://www.izware.com/nendo/index.htm",
+	aiImporterFlags_SupportBinaryFlavour,
+	0,
+	0,
+	0,
+	0,
+	"ndo" 
+};
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 NDOImporter::NDOImporter()
@@ -79,9 +92,9 @@ bool NDOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 
 // ------------------------------------------------------------------------------------------------
 // Build a string of all file extensions supported
-void NDOImporter::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* NDOImporter::GetInfo () const
 {
-	extensions.insert("ndo");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

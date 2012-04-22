@@ -78,7 +78,7 @@ private:
 	typedef std::map<std::string, std::vector<Q3BSP::sQ3BSPFace*>* >::iterator FaceMapIt;
 	typedef std::map<std::string, std::vector<Q3BSP::sQ3BSPFace*>*>::const_iterator FaceMapConstIt;
 
-	void GetExtensionList(std::set<std::string>& extensions);
+	const aiImporterDesc* GetInfo () const;
 	void InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
 	void separateMapName( const std::string &rImportName, std::string &rArchiveName, std::string &rMapName );
 	bool findFirstMapInArchive( Q3BSP::Q3BSPZipArchive &rArchive, std::string &rMapName );

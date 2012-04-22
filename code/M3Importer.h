@@ -694,7 +694,7 @@ public:
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig ) const;
 
 private:
-	void GetExtensionList( std::set<std::string>& extensions );
+	const aiImporterDesc* GetInfo () const;
 	void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler );
 	void convertToAssimp( const std::string& pFile, aiScene* pScene, DIV *pViews, Region *pRegions, uint16 *pFaces, 
 		const std::vector<aiVector3D> &vertices, const std::vector<aiVector3D> &uvCoords, const std::vector<aiVector3D> &normals );

@@ -51,6 +51,19 @@ using namespace Assimp;
 using namespace irr;
 using namespace irr::io;
 
+static const aiImporterDesc desc = {
+	"Irrlicht Mesh Reader",
+	"",
+	"",
+	"http://irrlicht.sourceforge.net/",
+	aiImporterFlags_SupportTextFlavour,
+	0,
+	0,
+	0,
+	0,
+	"xml irrmesh" 
+};
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 IRRMeshImporter::IRRMeshImporter()
@@ -88,10 +101,9 @@ bool IRRMeshImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, b
 
 // ------------------------------------------------------------------------------------------------
 // Get a list of all file extensions which are handled by this class
-void IRRMeshImporter::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* IRRMeshImporter::GetInfo () const
 {
-	extensions.insert("xml");
-	extensions.insert("irrmesh");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

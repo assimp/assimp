@@ -94,14 +94,10 @@ public:
 	 * See BaseImporter::CanRead() for details.	*/
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool cs) const;
 
+	const aiImporterDesc* GetInfo () const;
+
 protected:
-	/** Called by Importer::GetExtensionList() for each loaded importer.
-	 * See BaseImporter::GetExtensionList() for details
-	 */
-	void GetExtensionList(std::set<std::string>& extensions)
-	{
-		extensions.insert("bvh");
-	}
+
 
 	/** Imports the given file into the given scene structure. 
 	 * See BaseImporter::InternReadFile() for details

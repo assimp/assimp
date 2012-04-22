@@ -61,6 +61,18 @@ using namespace Assimp;
 using namespace irr;
 using namespace irr::io;
 
+static const aiImporterDesc desc = {
+	"Irrlicht Scene Reader",
+	"",
+	"",
+	"http://irrlicht.sourceforge.net/",
+	aiImporterFlags_SupportTextFlavour,
+	0,
+	0,
+	0,
+	0,
+	"irr xml" 
+};
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -98,10 +110,9 @@ bool IRRImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 }
 
 // ------------------------------------------------------------------------------------------------
-void IRRImporter::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* IRRImporter::GetInfo () const
 {
-	extensions.insert("irr");
-	extensions.insert("xml");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

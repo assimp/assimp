@@ -183,9 +183,9 @@ public:
 protected:
 
 	// -------------------------------------------------------------------
-	/** Called by Importer::GetExtensionList() for each loaded importer.
-	 * See BaseImporter::GetExtensionList() for details */
-	void GetExtensionList(std::set<std::string>& extensions);
+	/** Return importer meta information.
+	 * See #BaseImporter::GetInfo for the details */
+	const aiImporterDesc* GetInfo () const;
 
 	// -------------------------------------------------------------------
 	/** Imports the given file into the given scene structure. 

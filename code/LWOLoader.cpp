@@ -56,6 +56,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+static const aiImporterDesc desc = {
+	"LightWave/Modo Object Importer",
+	"",
+	"",
+	"http://www.newtek.com/lightwave.html\nhttp://www.luxology.com/modo/",
+	aiImporterFlags_SupportTextFlavour,
+	0,
+	0,
+	0,
+	0,
+	"lwo lxo"
+};
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 LWOImporter::LWOImporter()
@@ -71,8 +84,9 @@ LWOImporter::~LWOImporter()
 bool LWOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	const std::string extension = GetExtension(pFile);
-	if (extension == "lwo" || extension == "lxo")
+	if (extension == "lwo" || extension == "lxo") {
 		return true;
+	}
 
 	// if check for extension is not enough, check for the magic tokens 
 	if (!extension.length() || checkSig) {
@@ -92,6 +106,13 @@ void LWOImporter::SetupProperties(const Importer* pImp)
 	configSpeedFlag  = ( 0 != pImp->GetPropertyInteger(AI_CONFIG_FAVOUR_SPEED,0) ? true : false);
 	configLayerIndex = pImp->GetPropertyInteger (AI_CONFIG_IMPORT_LWO_ONE_LAYER_ONLY,UINT_MAX); 
 	configLayerName  = pImp->GetPropertyString  (AI_CONFIG_IMPORT_LWO_ONE_LAYER_ONLY,"");
+}
+
+// ------------------------------------------------------------------------------------------------
+// Get list of file extensions
+const aiImporterDesc* LWOImporter::GetInfo () const
+{
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

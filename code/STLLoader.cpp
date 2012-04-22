@@ -51,6 +51,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+static const aiImporterDesc desc = {
+	"Stereolithography (STL) Importer",
+	"",
+	"",
+	"",
+	aiImporterFlags_SupportTextFlavour | aiImporterFlags_SupportBinaryFlavour,
+	0,
+	0,
+	0,
+	0,
+	"stl" 
+};
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -80,9 +92,9 @@ bool STLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 }
 
 // ------------------------------------------------------------------------------------------------
-void STLImporter::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* STLImporter::GetInfo () const
 {
-	extensions.insert("stl");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

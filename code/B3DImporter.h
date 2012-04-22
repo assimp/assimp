@@ -60,7 +60,7 @@ public:
 
 protected:
 
-	virtual void GetExtensionList(std::set<std::string>& extensions);
+	virtual const aiImporterDesc* GetInfo () const;
 	virtual void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
 
 private:

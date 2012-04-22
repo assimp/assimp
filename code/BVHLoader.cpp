@@ -49,6 +49,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+static const aiImporterDesc desc = {
+	"BVH Importer (MoCap)",
+	"",
+	"",
+	"",
+	aiImporterFlags_SupportTextFlavour,
+	0,
+	0,
+	0,
+	0,
+	"bvh"
+};
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 BVHLoader::BVHLoader()
@@ -74,6 +87,13 @@ bool BVHLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool cs
 		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
 	}
 	return false;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Loader meta information
+const aiImporterDesc* BVHLoader::GetInfo () const
+{
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

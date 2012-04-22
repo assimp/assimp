@@ -54,6 +54,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+static const aiImporterDesc desc = {
+	"AC3D Importer",
+	"",
+	"",
+	"",
+	aiImporterFlags_SupportTextFlavour,
+	0,
+	0,
+	0,
+	0,
+	"ac acc ac3d"
+};
 
 // ------------------------------------------------------------------------------------------------
 // skip to the next token
@@ -136,12 +148,10 @@ bool AC3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool
 }
 
 // ------------------------------------------------------------------------------------------------
-// Get list of file extensions handled by this loader
-void AC3DImporter::GetExtensionList(std::set<std::string>& extensions)
+// Loader meta information
+const aiImporterDesc* AC3DImporter::GetInfo () const
 {
-	extensions.insert("ac");
-	extensions.insert("acc");
-	extensions.insert("ac3d");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

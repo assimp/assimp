@@ -61,6 +61,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+static const aiImporterDesc desc = {
+	"Quake III Mesh Importer",
+	"",
+	"",
+	"",
+	aiImporterFlags_SupportBinaryFlavour,
+	0,
+	0,
+	0,
+	0,
+	"md3" 
+};
+
 // ------------------------------------------------------------------------------------------------
 // Convert a Q3 shader blend function to the appropriate enum value
 Q3Shader::BlendFunc StringToBlendFunc(const std::string& m)
@@ -420,9 +433,9 @@ void MD3Importer::ValidateSurfaceHeaderOffsets(const MD3::Surface* pcSurf)
 }
 
 // ------------------------------------------------------------------------------------------------
-void MD3Importer::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* MD3Importer::GetInfo () const
 {
-	extensions.insert("md3");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -48,6 +48,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+static const aiImporterDesc desc = {
+	"Terragen Heightmap Importer",
+	"",
+	"",
+	"http://www.planetside.co.uk/",
+	aiImporterFlags_SupportBinaryFlavour,
+	0,
+	0,
+	0,
+	0,
+	"ter" 
+};
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 TerragenImporter::TerragenImporter()
@@ -83,9 +96,9 @@ bool TerragenImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, 
 
 // ------------------------------------------------------------------------------------------------
 // Build a string of all file extensions supported
-void TerragenImporter::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* TerragenImporter::GetInfo () const
 {
-	extensions.insert("ter");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

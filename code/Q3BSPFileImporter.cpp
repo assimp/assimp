@@ -57,12 +57,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/mesh.h"
 #include <vector>
 
+
+static const aiImporterDesc desc = {
+	"Quake III BSP Importer",
+	"",
+	"",
+	"",
+	aiImporterFlags_SupportBinaryFlavour,
+	0,
+	0,
+	0,
+	0,
+	"pk3"
+};
+
 namespace Assimp
 {
 
 using namespace Q3BSP;
-
-static const std::string Q3BSPExtension = "pk3";
 
 // ------------------------------------------------------------------------------------------------
 //	Local function to create a material key name.
@@ -161,7 +173,7 @@ Q3BSPFileImporter::~Q3BSPFileImporter()
 bool Q3BSPFileImporter::CanRead( const std::string& rFile, IOSystem* /*pIOHandler*/, bool checkSig ) const
 {
 	if(!checkSig) {
-		return SimpleExtensionCheck( rFile, Q3BSPExtension.c_str() );
+		return SimpleExtensionCheck( rFile, "pk3" );
 	}
 	// TODO perhaps add keyword based detection
 	return false;
@@ -169,9 +181,9 @@ bool Q3BSPFileImporter::CanRead( const std::string& rFile, IOSystem* /*pIOHandle
 
 // ------------------------------------------------------------------------------------------------
 //	Adds extensions.
-void Q3BSPFileImporter::GetExtensionList( std::set<std::string>& extensions )
+const aiImporterDesc* Q3BSPFileImporter::GetInfo () const
 {
-	extensions.insert( Q3BSPExtension  );
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

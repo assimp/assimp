@@ -52,6 +52,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StreamReader.h"
 using namespace Assimp;
 
+static const aiImporterDesc desc = {
+	"Milkshape 3D Importer",
+	"",
+	"",
+	"http://chumbalum.swissquake.ch/",
+	aiImporterFlags_SupportBinaryFlavour,
+	0,
+	0,
+	0,
+	0,
+	"ms3d" 
+};
+
 // ASSIMP_BUILD_MS3D_ONE_NODE_PER_MESH
 //   (enable old code path, which generates extra nodes per mesh while
 //    the newer code uses aiMesh::mName to express the name of the
@@ -89,9 +102,9 @@ bool MS3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool
 }
 
 // ------------------------------------------------------------------------------------------------
-void MS3DImporter::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* MS3DImporter::GetInfo () const
 {
-	extensions.insert("ms3d");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

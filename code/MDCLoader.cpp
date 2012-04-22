@@ -52,6 +52,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace Assimp::MDC;
 
+static const aiImporterDesc desc = {
+	"Return To Castle Wolfenstein Mesh Importer",
+	"",
+	"",
+	"",
+	aiImporterFlags_SupportBinaryFlavour,
+	0,
+	0,
+	0,
+	0,
+	"mdc" 
+};
 
 // ------------------------------------------------------------------------------------------------
 void MDC::BuildVertex(const Frame& frame,
@@ -103,9 +115,9 @@ bool MDCImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 }
 
 // ------------------------------------------------------------------------------------------------
-void MDCImporter::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* MDCImporter::GetInfo () const
 {
-	extensions.insert("mdc");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

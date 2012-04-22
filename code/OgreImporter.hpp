@@ -55,7 +55,7 @@ class OgreImporter : public BaseImporter
 public:
 	virtual bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
 	virtual void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
-	virtual void GetExtensionList(std::set<std::string>& extensions);
+	virtual const aiImporterDesc* GetInfo () const;
 	virtual void SetupProperties(const Importer* pImp);
 private:
 

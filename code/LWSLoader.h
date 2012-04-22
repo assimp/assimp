@@ -184,7 +184,7 @@ protected:
 
 	// -------------------------------------------------------------------
 	// Get list of supported extensions
-	void GetExtensionList(std::set<std::string>& extensions);
+	const aiImporterDesc* GetInfo () const;
 
 	// -------------------------------------------------------------------
 	// Import file into given scene data structure

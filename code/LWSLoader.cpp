@@ -57,6 +57,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+static const aiImporterDesc desc = {
+	"LightWave Scene Importer",
+	"",
+	"",
+	"http://www.newtek.com/lightwave.html=",
+	aiImporterFlags_SupportTextFlavour,
+	0,
+	0,
+	0,
+	0,
+	"lws mot" 
+};
+
 // ------------------------------------------------------------------------------------------------
 // Recursive parsing of LWS files
 void LWS::Element::Parse (const char*& buffer)
@@ -141,10 +154,9 @@ bool LWSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler,bool c
 
 // ------------------------------------------------------------------------------------------------
 // Get list of file extensions
-void LWSImporter::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* LWSImporter::GetInfo () const
 {
-	extensions.insert("lws");
-	extensions.insert("mot");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

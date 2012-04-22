@@ -58,6 +58,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace Assimp::ASE;
 
+static const aiImporterDesc desc = {
+	"ASE Importer",
+	"",
+	"",
+	"Similar to 3DS but text-encoded",
+	aiImporterFlags_SupportTextFlavour,
+	0,
+	0,
+	0,
+	0,
+	"ase ask" 
+};
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ASEImporter::ASEImporter()
@@ -86,10 +99,10 @@ bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 }
 
 // ------------------------------------------------------------------------------------------------
-void ASEImporter::GetExtensionList(std::set<std::string>& extensions)
+// Loader meta information
+const aiImporterDesc* ASEImporter::GetInfo () const
 {
-	extensions.insert("ase");
-	extensions.insert("ask");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

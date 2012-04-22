@@ -51,6 +51,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+static const aiImporterDesc desc = {
+	"Stanford Polygon Library (PLY) Importer",
+	"",
+	"",
+	"",
+	aiImporterFlags_SupportBinaryFlavour | aiImporterFlags_SupportTextFlavour,
+	0,
+	0,
+	0,
+	0,
+	"ply" 
+};
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 PLYImporter::PLYImporter()
@@ -79,9 +92,9 @@ bool PLYImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 }
 
 // ------------------------------------------------------------------------------------------------
-void PLYImporter::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* PLYImporter::GetInfo () const
 {
-	extensions.insert("ply");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

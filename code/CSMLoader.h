@@ -69,7 +69,7 @@ public:
 protected:
 
 	// -------------------------------------------------------------------
-	void GetExtensionList(std::set<std::string>& extensions);
+	const aiImporterDesc* GetInfo () const;
 
 	// -------------------------------------------------------------------
 	void SetupProperties(const Importer* pImp);

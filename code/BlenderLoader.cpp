@@ -75,12 +75,13 @@ static const aiImporterDesc blenderDesc = {
 	"Blender 3D Importer \nhttp://www.blender3d.org",
 	"",
 	"",
-	"",
+	"No animation support yet",
 	aiImporterFlags_SupportBinaryFlavour,
 	0,
 	0,
 	2,
-	50
+	50,
+	"blend"
 };
 
 

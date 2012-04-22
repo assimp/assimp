@@ -54,6 +54,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace std;
 
+static const aiImporterDesc desc = {
+	"BlitzBasic 3D Importer",
+	"",
+	"",
+	"http://www.blitzbasic.com/",
+	aiImporterFlags_SupportBinaryFlavour,
+	0,
+	0,
+	0,
+	0,
+	"b3d" 
+};
+
 // (fixme, Aramis) quick workaround to get rid of all those signed to unsigned warnings
 #ifdef _MSC_VER 
 #	pragma warning (disable: 4018)
@@ -74,8 +87,10 @@ bool B3DImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, b
 }
 
 // ------------------------------------------------------------------------------------------------
-void B3DImporter::GetExtensionList( std::set<std::string>& extensions ){
-	extensions.insert("b3d");
+// Loader meta information
+const aiImporterDesc* B3DImporter::GetInfo () const
+{
+	return &desc;
 }
 
 #ifdef DEBUG_B3D

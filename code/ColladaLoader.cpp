@@ -56,6 +56,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+static const aiImporterDesc desc = {
+	"Collada Importer",
+	"",
+	"",
+	"http://collada.org",
+	aiImporterFlags_SupportTextFlavour,
+	1,
+	3,
+	1,
+	5,
+	"dae" 
+};
+
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader()
@@ -91,9 +105,9 @@ bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, boo
 
 // ------------------------------------------------------------------------------------------------
 // Get file extension list
-void ColladaLoader::GetExtensionList( std::set<std::string>& extensions )
+const aiImporterDesc* ColladaLoader::GetInfo () const
 {
-	extensions.insert("dae");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

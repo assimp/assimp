@@ -165,9 +165,9 @@ protected:
 	// -------------------------------------------------------------------
 	/** @brief Called by Importer::GetExtensionList() 
 	 *
-	 * See BaseImporter::GetExtensionList() for details
+	 * See #BaseImporter::GetInfo for the details
 	 */
-	void GetExtensionList(std::set<std::string>& extensions);
+	const aiImporterDesc* GetInfo () const;
 
 
 	// -------------------------------------------------------------------

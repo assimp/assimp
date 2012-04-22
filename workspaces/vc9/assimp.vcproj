@@ -1812,7 +1812,7 @@
 						>
 					</File>
 					<File
-						RelativePath="..\..\code\OgreImporter.h"
+						RelativePath="..\..\code\OgreImporter.hpp"
 						>
 					</File>
 					<File

@@ -86,6 +86,20 @@ static aiColor4D g_aclrDxfIndexColors[] =
 #define AI_DXF_NUM_INDEX_COLORS (sizeof(g_aclrDxfIndexColors)/sizeof(g_aclrDxfIndexColors[0]))
 #define AI_DXF_ENTITIES_MAGIC_BLOCK "$ASSIMP_ENTITIES_MAGIC"
 
+
+static const aiImporterDesc desc = {
+	"Drawing Interchange Format (DXF) Importer",
+	"",
+	"",
+	"",
+	aiImporterFlags_SupportTextFlavour | aiImporterFlags_LimitedSupport,
+	0,
+	0,
+	0,
+	0,
+	"dxf" 
+};
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 DXFImporter::DXFImporter()
@@ -105,9 +119,9 @@ bool DXFImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, b
 
 // ------------------------------------------------------------------------------------------------
 // Get a list of all supported file extensions
-void DXFImporter::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* DXFImporter::GetInfo () const
 {
-	extensions.insert("dxf");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

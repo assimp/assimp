@@ -78,7 +78,7 @@ public:
 private:
 
 	//! \brief	Appends the supported extention.
-	void GetExtensionList(std::set<std::string>& extensions);
+	const aiImporterDesc* GetInfo () const;
 
 	//!	\brief	File import implementation.
 	void InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
@@ -118,13 +118,6 @@ private:
 	//!	Absolute pathname of model in filesystem
 	std::string m_strAbsPath;
 };
-
-// ------------------------------------------------------------------------------------------------
-//	
-inline void ObjFileImporter::GetExtensionList(std::set<std::string>& extensions)
-{
-	extensions.insert("obj");
-}
 
 // ------------------------------------------------------------------------------------------------
 

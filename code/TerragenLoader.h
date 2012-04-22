@@ -83,7 +83,7 @@ public:
 protected:
 
 	// -------------------------------------------------------------------
-	void GetExtensionList(std::set<std::string>& extensions);
+	const aiImporterDesc* GetInfo () const;
 
 	// -------------------------------------------------------------------
 	void InternReadFile( const std::string& pFile, aiScene* pScene, 

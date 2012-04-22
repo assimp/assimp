@@ -52,6 +52,19 @@ using namespace std;
 #include "TinyFormatter.h"
 #include "irrXMLWrapper.h"
 
+static const aiImporterDesc desc = {
+	"Ogre XML Mesh Importer",
+	"",
+	"",
+	"",
+	aiImporterFlags_SupportTextFlavour,
+	0,
+	0,
+	0,
+	0,
+	"mesh.xml"
+};
+
 namespace Assimp
 {
 namespace Ogre
@@ -222,9 +235,9 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 }
 
 
-void OgreImporter::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* OgreImporter::GetInfo () const
 {
-	extensions.insert("mesh.xml");
+	return &desc;
 }
 
 

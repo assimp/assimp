@@ -54,6 +54,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+static const aiImporterDesc desc = {
+	"Quake Mesh / 3D GameStudio Mesh Importer",
+	"",
+	"",
+	"",
+	aiImporterFlags_SupportBinaryFlavour,
+	0,
+	0,
+	7,
+	0,
+	"mdl"
+};
+
 // ------------------------------------------------------------------------------------------------
 // Ugly stuff ... nevermind
 #define _AI_MDL7_ACCESS(_data, _index, _limit, _type)				\
@@ -116,9 +129,9 @@ void MDLImporter::SetupProperties(const Importer* pImp)
 
 // ------------------------------------------------------------------------------------------------
 // Get a list of all supported extensions
-void MDLImporter::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* MDLImporter::GetInfo () const
 {
-	extensions.insert( "mdl" );
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

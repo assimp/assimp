@@ -93,6 +93,20 @@ void ConvertUnit(const EXPRESS::DataType& dt,ConversionData& conv);
 
 } // anon
 
+static const aiImporterDesc desc = {
+	"Industry Foundation Classes (IFC) Importer",
+	"",
+	"",
+	"",
+	aiImporterFlags_SupportBinaryFlavour,
+	0,
+	0,
+	0,
+	0,
+	"ifc" 
+};
+
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 IFCImporter::IFCImporter()
@@ -125,9 +139,9 @@ bool IFCImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 
 // ------------------------------------------------------------------------------------------------
 // List all extensions handled by this loader
-void IFCImporter::GetExtensionList(std::set<std::string>& app) 
+const aiImporterDesc* IFCImporter::GetInfo () const
 {
-	app.insert("ifc");
+	return &desc;
 }
 
 

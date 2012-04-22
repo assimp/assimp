@@ -52,6 +52,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "3DSLoader.h"
 
 using namespace Assimp;
+
+static const aiImporterDesc desc = {
+	"Discreet 3DS Importer",
+	"",
+	"",
+	"Limited animation support",
+	aiImporterFlags_SupportBinaryFlavour,
+	0,
+	0,
+	0,
+	0,
+	"3ds prj" 
+};
+
 		
 // ------------------------------------------------------------------------------------------------
 // Begins a new parsing block
@@ -108,11 +122,10 @@ bool Discreet3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandle
 }
 
 // ------------------------------------------------------------------------------------------------
-// Get list of all extension supported by this loader
-void Discreet3DSImporter::GetExtensionList(std::set<std::string>& extensions)
+// Loader registry entry
+const aiImporterDesc* Discreet3DSImporter::GetInfo () const
 {
-	extensions.insert("3ds");
-	extensions.insert("prj");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

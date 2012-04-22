@@ -53,6 +53,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+static const aiImporterDesc desc = {
+	"Quick3D Importer",
+	"",
+	"",
+	"http://www.quick3d.com/",
+	aiImporterFlags_SupportBinaryFlavour,
+	0,
+	0,
+	0,
+	0,
+	"q3o q3s" 
+};
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 Q3DImporter::Q3DImporter()
@@ -81,10 +94,9 @@ bool Q3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 }
 
 // ------------------------------------------------------------------------------------------------
-void Q3DImporter::GetExtensionList(std::set<std::string>& extensions)
+const aiImporterDesc* Q3DImporter::GetInfo () const
 {
-	extensions.insert("q3o");
-	extensions.insert("q3s");
+	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------

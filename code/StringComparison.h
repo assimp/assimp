@@ -50,6 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_STRING_WORKERS_H
 #define INCLUDED_AI_STRING_WORKERS_H
 
+#include "../include/assimp/ai_assert.h"
+
 namespace Assimp	{
 
 // -------------------------------------------------------------------------------

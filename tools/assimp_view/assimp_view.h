@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Include ASSIMP headers (XXX: do we really need all of them?)
 #include <assimp/cimport.h>
 #include <assimp/Importer.hpp>
-#include <assimp/assert.h>
+#include <assimp/ai_assert.h>
 #include <assimp/cfileio.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>

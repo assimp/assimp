@@ -1173,11 +1173,11 @@
 				Name="Common"
 				>
 				<File
-					RelativePath="..\..\include\assimp\anim.h"
+					RelativePath="..\..\include\assimp\ai_assert.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\assimp\assert.h"
+					RelativePath="..\..\include\assimp\anim.h"
 					>
 				</File>
 				<File

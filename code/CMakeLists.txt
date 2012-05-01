@@ -588,128 +588,74 @@ else (UNZIP_FOUND)
 	SET (unzip_compile_SRCS ${unzip_SRCS})
 endif (UNZIP_FOUND)
 
+SET( assim_src
+	# Assimp Files
+	${Core_SRCS}
+	${Common_SRCS}
+	${Logging_SRCS}
+	${Exporter_SRCS}
+	${PostProcessing_SRCS}
+
+	# Model Support
+	${3DS_SRCS}
+	${AC_SRCS}
+	${ASE_SRCS}
+	${B3D_SRCS}
+	${BVH_SRCS}
+	${Collada_SRCS}
+	${DXF_SRCS}
+	${CSM_SRCS}
+	${HMP_SRCS}
+	${Irr_SRCS}
+	${LWO_SRCS}
+	${LWS_SRCS}
+	${M3_SRCS}
+	${MD2_SRCS}
+	${MD3_SRCS}
+	${MD5_SRCS}
+	${MDC_SRCS}
+	${MDL_SRCS}
+	${MaterialSystem_SRCS}
+	${NFF_SRCS}
+	${OFFFormat_SRCS}
+	${Obj_SRCS}
+	${Ogre_SRCS}
+	${Ply_SRCS}
+	${Q3D_SRCS}
+	${Q3BSP_SRCS}
+	${Raw_SRCS}
+	${SMD_SRCS}
+	${STL_SRCS}
+	${Unreal_SRCS}
+	${XFile_SRCS}
+	${Extra_SRCS}
+	${MS3D_SRCS}
+	${COB_SRCS}
+	${BLENDER_SRCS}
+	${NDO_SRCS}
+	${IFC_SRCS}
+	${XGL_SRCS}
+	
+	# Third-party libraries
+	${IrrXML_SRCS}
+	${ConvertUTF_SRCS}
+	${unzip_compile_SRCS}
+	${Poly2Tri_SRCS}
+	${Clipper_SRCS}
+	# Necessary to show the headers in the project when using the VC++ generator:
+	${Boost_SRCS}
+
+	${PUBLIC_HEADERS}
+	${COMPILER_HEADERS}
+)
 IF ( BUILD_STATIC_LIB )
-ADD_LIBRARY( assimp STATIC
-	# Assimp Files
-	${Core_SRCS}
-	${Common_SRCS}
-	${Logging_SRCS}
-	${Exporter_SRCS}
-	${PostProcessing_SRCS}
-
-	# Model Support
-	${3DS_SRCS}
-	${AC_SRCS}
-	${ASE_SRCS}
-	${B3D_SRCS}
-	${BVH_SRCS}
-	${Collada_SRCS}
-	${DXF_SRCS}
-	${CSM_SRCS}
-	${HMP_SRCS}
-	${Irr_SRCS}
-	${LWO_SRCS}
-	${LWS_SRCS}
-	${M3_SRCS}
-	${MD2_SRCS}
-	${MD3_SRCS}
-	${MD5_SRCS}
-	${MDC_SRCS}
-	${MDL_SRCS}
-	${MaterialSystem_SRCS}
-	${NFF_SRCS}
-	${OFFFormat_SRCS}
-	${Obj_SRCS}
-	${Ogre_SRCS}
-	${Ply_SRCS}
-	${Q3D_SRCS}
-	${Q3BSP_SRCS}
-	${Raw_SRCS}
-	${SMD_SRCS}
-	${STL_SRCS}
-	${Unreal_SRCS}
-	${XFile_SRCS}
-	${Extra_SRCS}
-	${MS3D_SRCS}
-	${COB_SRCS}
-	${BLENDER_SRCS}
-	${NDO_SRCS}
-	${IFC_SRCS}
-	${XGL_SRCS}
-	
-	# Third-party libraries
-	${IrrXML_SRCS}
-	${ConvertUTF_SRCS}
-	${unzip_compile_SRCS}
-	${Poly2Tri_SRCS}
-	${Clipper_SRCS}
-	# Necessary to show the headers in the project when using the VC++ generator:
-	${Boost_SRCS}
-
-	${PUBLIC_HEADERS}
-	${COMPILER_HEADERS}
-)
+	ADD_LIBRARY( assimp STATIC
+		${assim_src}
+	)
 ELSE ( BUILD_STATIC_LIB )
-ADD_LIBRARY( assimp SHARED
-	# Assimp Files
-	${Core_SRCS}
-	${Common_SRCS}
-	${Logging_SRCS}
-	${Exporter_SRCS}
-	${PostProcessing_SRCS}
-
-	# Model Support
-	${3DS_SRCS}
-	${AC_SRCS}
-	${ASE_SRCS}
-	${B3D_SRCS}
-	${BVH_SRCS}
-	${Collada_SRCS}
-	${DXF_SRCS}
-	${CSM_SRCS}
-	${HMP_SRCS}
-	${Irr_SRCS}
-	${LWO_SRCS}
-	${LWS_SRCS}
-	${M3_SRCS}
-	${MD2_SRCS}
-	${MD3_SRCS}
-	${MD5_SRCS}
-	${MDC_SRCS}
-	${MDL_SRCS}
-	${MaterialSystem_SRCS}
-	${NFF_SRCS}
-	${OFFFormat_SRCS}
-	${Obj_SRCS}
-	${Ogre_SRCS}
-	${Ply_SRCS}
-	${Q3D_SRCS}
-	${Q3BSP_SRCS}
-	${Raw_SRCS}
-	${SMD_SRCS}
-	${STL_SRCS}
-	${Unreal_SRCS}
-	${XFile_SRCS}
-	${Extra_SRCS}
-	${MS3D_SRCS}
-	${COB_SRCS}
-	${BLENDER_SRCS}
-	${NDO_SRCS}
-	${IFC_SRCS}
-	${XGL_SRCS}
-	
-	# Third-party libraries
-	${IrrXML_SRCS}
-	${ConvertUTF_SRCS}
-	${unzip_compile_SRCS}
-	${Poly2Tri_SRCS}
-	${Clipper_SRCS}
-	# Necessary to show the headers in the project when using the VC++ generator:
-	${Boost_SRCS}
-
-	${PUBLIC_HEADERS}
-	${COMPILER_HEADERS}
-)
+	ADD_LIBRARY( assimp SHARED
+		${assim_src}
+	)
 ENDIF ( BUILD_STATIC_LIB )
 
 SET_PROPERTY(TARGET assimp PROPERTY DEBUG_POSTFIX ${DEBUG_POSTFIX})

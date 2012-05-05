@@ -1647,6 +1647,7 @@ void ColladaParser::ReadDataArray()
 {
 	std::string elmName = mReader->getNodeName();
 	bool isStringArray = (elmName == "IDREF_array" || elmName == "Name_array");
+  bool isEmptyElement = mReader->isEmptyElement();
 
 	// read attributes
 	int indexID = GetAttribute( "id");
@@ -1654,13 +1655,15 @@ void ColladaParser::ReadDataArray()
 	int indexCount = GetAttribute( "count");
 	unsigned int count = (unsigned int) mReader->getAttributeValueAsInt( indexCount);
 	const char* content = TestTextContent();
-	if (content) { // some exporters write empty data arrays, silently skip over them
 
-		// read values and store inside an array in the data library
-		mDataLibrary[id] = Data();
-		Data& data = mDataLibrary[id];
-		data.mIsStringArray = isStringArray;
+  // read values and store inside an array in the data library
+  mDataLibrary[id] = Data();
+  Data& data = mDataLibrary[id];
+  data.mIsStringArray = isStringArray;
 
+  // some exporters write empty data arrays, but we need to conserve them anyways because others might reference them
+  if (content) 
+  { 
 		if( isStringArray)
 		{
 			data.mStrings.reserve( count);
@@ -1695,10 +1698,11 @@ void ColladaParser::ReadDataArray()
 				SkipSpacesAndLineEnd( &content);
 			}
 		}
-
-    // test for closing tag
-    TestClosing( elmName.c_str());
 	}
+
+  // test for closing tag
+  if( !isEmptyElement )
+    TestClosing( elmName.c_str());
 }
 
 // ------------------------------------------------------------------------------------------------

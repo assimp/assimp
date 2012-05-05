@@ -926,7 +926,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 			const Collada::AnimationChannel& srcChannel = *cit;
 			Collada::ChannelEntry entry;
 
-			// we except the animation target to be of type "nodeName/transformID.subElement". Ignore all others
+			// we expect the animation target to be of type "nodeName/transformID.subElement". Ignore all others
 			// find the slash that separates the node name - there should be only one
 			std::string::size_type slashPos = srcChannel.mTarget.find( '/');
 			if( slashPos == std::string::npos)
@@ -995,122 +995,134 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 			if( e.mTimeAccessor->mCount != e.mValueAccessor->mCount)
 				throw DeadlyImportError( boost::str( boost::format( "Time count / value count mismatch in animation channel \"%s\".") % e.mChannel->mTarget));
 
-			// find bounding times
-			startTime = std::min( startTime, ReadFloat( *e.mTimeAccessor, *e.mTimeData, 0, 0));
-			endTime = std::max( endTime, ReadFloat( *e.mTimeAccessor, *e.mTimeData, e.mTimeAccessor->mCount-1, 0));
+      if( e.mTimeAccessor->mCount > 0 )
+      {
+			  // find bounding times
+			  startTime = std::min( startTime, ReadFloat( *e.mTimeAccessor, *e.mTimeData, 0, 0));
+  			endTime = std::max( endTime, ReadFloat( *e.mTimeAccessor, *e.mTimeData, e.mTimeAccessor->mCount-1, 0));
+      }
 		}
 
-		// create a local transformation chain of the node's transforms
-		std::vector<Collada::Transform> transforms = srcNode->mTransforms;
+    std::vector<aiMatrix4x4> resultTrafos;
+    if( !entries.empty() && entries.front().mTimeAccessor->mCount > 0 )
+    {
+		  // create a local transformation chain of the node's transforms
+		  std::vector<Collada::Transform> transforms = srcNode->mTransforms;
 
-		// now for every unique point in time, find or interpolate the key values for that time
-		// and apply them to the transform chain. Then the node's present transformation can be calculated.
-		float time = startTime;
-		std::vector<aiMatrix4x4> resultTrafos;
-		while( 1)
-		{
-			for( std::vector<Collada::ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
-			{
-				Collada::ChannelEntry& e = *it;
+		  // now for every unique point in time, find or interpolate the key values for that time
+		  // and apply them to the transform chain. Then the node's present transformation can be calculated.
+		  float time = startTime;
+		  while( 1)
+		  {
+			  for( std::vector<Collada::ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
+			  {
+				  Collada::ChannelEntry& e = *it;
 
-				// find the keyframe behind the current point in time
-				size_t pos = 0;
-				float postTime = 0.f;
-				while( 1)
-				{
-					if( pos >= e.mTimeAccessor->mCount)
-						break;
-					postTime = ReadFloat( *e.mTimeAccessor, *e.mTimeData, pos, 0);
-					if( postTime >= time)
-						break;
-					++pos;
-				}
+				  // find the keyframe behind the current point in time
+				  size_t pos = 0;
+				  float postTime = 0.f;
+				  while( 1)
+				  {
+					  if( pos >= e.mTimeAccessor->mCount)
+						  break;
+					  postTime = ReadFloat( *e.mTimeAccessor, *e.mTimeData, pos, 0);
+					  if( postTime >= time)
+						  break;
+					  ++pos;
+				  }
 
-				pos = std::min( pos, e.mTimeAccessor->mCount-1);
+				  pos = std::min( pos, e.mTimeAccessor->mCount-1);
 
-				// read values from there
-				float temp[16];
-				for( size_t c = 0; c < e.mValueAccessor->mSize; ++c)
-					temp[c] = ReadFloat( *e.mValueAccessor, *e.mValueData, pos, c);
+				  // read values from there
+				  float temp[16];
+				  for( size_t c = 0; c < e.mValueAccessor->mSize; ++c)
+					  temp[c] = ReadFloat( *e.mValueAccessor, *e.mValueData, pos, c);
 
-				// if not exactly at the key time, interpolate with previous value set
-				if( postTime > time && pos > 0)
-				{
-					float preTime = ReadFloat( *e.mTimeAccessor, *e.mTimeData, pos-1, 0);
-					float factor = (time - postTime) / (preTime - postTime);
+				  // if not exactly at the key time, interpolate with previous value set
+				  if( postTime > time && pos > 0)
+				  {
+					  float preTime = ReadFloat( *e.mTimeAccessor, *e.mTimeData, pos-1, 0);
+					  float factor = (time - postTime) / (preTime - postTime);
 
-					for( size_t c = 0; c < e.mValueAccessor->mSize; ++c)
-					{
-						float v = ReadFloat( *e.mValueAccessor, *e.mValueData, pos-1, c);
-						temp[c] += (v - temp[c]) * factor;
-					}
-				}
+					  for( size_t c = 0; c < e.mValueAccessor->mSize; ++c)
+					  {
+						  float v = ReadFloat( *e.mValueAccessor, *e.mValueData, pos-1, c);
+						  temp[c] += (v - temp[c]) * factor;
+					  }
+				  }
 
-				// Apply values to current transformation
-				std::copy( temp, temp + e.mValueAccessor->mSize, transforms[e.mTransformIndex].f + e.mSubElement);
-			}
+				  // Apply values to current transformation
+				  std::copy( temp, temp + e.mValueAccessor->mSize, transforms[e.mTransformIndex].f + e.mSubElement);
+			  }
 
-			// Calculate resulting transformation
-			aiMatrix4x4 mat = pParser.CalculateResultTransform( transforms);
+			  // Calculate resulting transformation
+			  aiMatrix4x4 mat = pParser.CalculateResultTransform( transforms);
 
-			// out of lazyness: we store the time in matrix.d4
-			mat.d4 = time;
-			resultTrafos.push_back( mat);
+			  // out of lazyness: we store the time in matrix.d4
+			  mat.d4 = time;
+			  resultTrafos.push_back( mat);
 
-			// find next point in time to evaluate. That's the closest frame larger than the current in any channel
-			float nextTime = 1e20f;
-			for( std::vector<Collada::ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
-			{
-				Collada::ChannelEntry& e = *it;
+			  // find next point in time to evaluate. That's the closest frame larger than the current in any channel
+			  float nextTime = 1e20f;
+			  for( std::vector<Collada::ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
+			  {
+				  Collada::ChannelEntry& e = *it;
 
-				// find the next time value larger than the current
-				size_t pos = 0;
-				while( pos < e.mTimeAccessor->mCount)
-				{
-					float t = ReadFloat( *e.mTimeAccessor, *e.mTimeData, pos, 0);
-					if( t > time)
-					{
-						nextTime = std::min( nextTime, t);
-						break;
-					}
-					++pos;
-				}
-			}
+				  // find the next time value larger than the current
+				  size_t pos = 0;
+				  while( pos < e.mTimeAccessor->mCount)
+				  {
+					  float t = ReadFloat( *e.mTimeAccessor, *e.mTimeData, pos, 0);
+					  if( t > time)
+					  {
+						  nextTime = std::min( nextTime, t);
+						  break;
+					  }
+					  ++pos;
+				  }
+			  }
 
-			// no more keys on any channel after the current time -> we're done
-			if( nextTime > 1e19)
-				break;
+			  // no more keys on any channel after the current time -> we're done
+			  if( nextTime > 1e19)
+				  break;
 
-			// else construct next keyframe at this following time point
-			time = nextTime;
-		}
+			  // else construct next keyframe at this following time point
+			  time = nextTime;
+		  }
+    }
 
-		// there should be some keyframes
-		ai_assert( resultTrafos.size() > 0);
+		// there should be some keyframes, but we aren't that fixated on valid input data
+//		ai_assert( resultTrafos.size() > 0);
 
 		// build an animation channel for the given node out of these trafo keys
-		aiNodeAnim* dstAnim = new aiNodeAnim;
-		dstAnim->mNodeName = nodeName;
-		dstAnim->mNumPositionKeys = resultTrafos.size();
-		dstAnim->mNumRotationKeys= resultTrafos.size();
-		dstAnim->mNumScalingKeys = resultTrafos.size();
-		dstAnim->mPositionKeys = new aiVectorKey[resultTrafos.size()];
-		dstAnim->mRotationKeys = new aiQuatKey[resultTrafos.size()];
-		dstAnim->mScalingKeys = new aiVectorKey[resultTrafos.size()];
+    if( !resultTrafos.empty() )
+    {
+		  aiNodeAnim* dstAnim = new aiNodeAnim;
+		  dstAnim->mNodeName = nodeName;
+		  dstAnim->mNumPositionKeys = resultTrafos.size();
+		  dstAnim->mNumRotationKeys= resultTrafos.size();
+		  dstAnim->mNumScalingKeys = resultTrafos.size();
+		  dstAnim->mPositionKeys = new aiVectorKey[resultTrafos.size()];
+		  dstAnim->mRotationKeys = new aiQuatKey[resultTrafos.size()];
+		  dstAnim->mScalingKeys = new aiVectorKey[resultTrafos.size()];
 
-		for( size_t a = 0; a < resultTrafos.size(); ++a)
-		{
-			aiMatrix4x4 mat = resultTrafos[a];
-			double time = double( mat.d4); // remember? time is stored in mat.d4
-      mat.d4 = 1.0f;
+		  for( size_t a = 0; a < resultTrafos.size(); ++a)
+		  {
+			  aiMatrix4x4 mat = resultTrafos[a];
+			  double time = double( mat.d4); // remember? time is stored in mat.d4
+        mat.d4 = 1.0f;
 
-			dstAnim->mPositionKeys[a].mTime = time;
-			dstAnim->mRotationKeys[a].mTime = time;
-			dstAnim->mScalingKeys[a].mTime = time;
-			mat.Decompose( dstAnim->mScalingKeys[a].mValue, dstAnim->mRotationKeys[a].mValue, dstAnim->mPositionKeys[a].mValue);
-		}
+			  dstAnim->mPositionKeys[a].mTime = time;
+			  dstAnim->mRotationKeys[a].mTime = time;
+			  dstAnim->mScalingKeys[a].mTime = time;
+			  mat.Decompose( dstAnim->mScalingKeys[a].mValue, dstAnim->mRotationKeys[a].mValue, dstAnim->mPositionKeys[a].mValue);
+		  }
 
-		anims.push_back( dstAnim);
+		  anims.push_back( dstAnim);
+    } else
+    {
+      DefaultLogger::get()->warn( "Collada loader: found empty animation channel, ignored. Please check your exporter.");
+    }
 	}
 
 	if( !anims.empty())

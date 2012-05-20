@@ -295,7 +295,12 @@ private:
 			throw DeadlyImportError("End of file or stream limit was reached");
 		}
 
+#ifdef __arm__
+		T f;
+		memcpy (&f, current, sizeof(T));
+#else
 		T f = *((const T*)current);
+#endif	
 		Intern :: Getter<SwapEndianess,T,RuntimeSwitch>() (&f,le);
 
 		current += sizeof(T);

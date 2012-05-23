@@ -29,6 +29,15 @@ template<> inline int GetAttribute<int>(XmlReader* Reader, std::string Name)
 		throw DeadlyImportError(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
 }
 
+template<> inline unsigned int GetAttribute<unsigned int>(XmlReader* Reader, std::string Name)
+{
+	const char* Value=Reader->getAttributeValue(Name.c_str());
+	if(Value)
+		return static_cast<unsigned int>(atoi(Value));//yes, ugly, but pfff
+	else
+		throw DeadlyImportError(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
+}
+
 template<> inline float GetAttribute<float>(XmlReader* Reader, std::string Name)
 {
 	const char* Value=Reader->getAttributeValue(Name.c_str());

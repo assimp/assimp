@@ -282,6 +282,9 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 
 void OgreImporter::ReadTechnique(stringstream &ss, aiMaterial* NewMaterial)
 {
+	unsigned int CurrentTextureId=0;
+
+
 	string RestOfLine;
 	getline(ss, RestOfLine);//ignore the rest of the line
 
@@ -349,11 +352,33 @@ void OgreImporter::ReadTechnique(stringstream &ss, aiMaterial* NewMaterial)
 						{
 							ss >> Line;
 							aiString ts(Line.c_str());
-							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, CurrentTextureId));
 						}
+						else if(Line=="tex_coord_set")
+						{
+							int UvSet;
+							ss >> UvSet;
+							NewMaterial->AddProperty(&UvSet, 1, AI_MATKEY_UVWSRC(0, CurrentTextureId));
+						}
+						else if(Line=="colour_op")
+						{
+							ss >> Line;
+							if("replace"==Line)//I don't think, assimp has something for this...
+							{
+							}
+							else if("modulate"==Line)
+							{
+								//TODO: set value
+								//NewMaterial->AddProperty(aiTextureOp_Multiply)
+							}
+						}
+						
 					}//end of texture unit
+					Line="";//clear the } that would end the outer loop
+					CurrentTextureId++;//new Id for the next texture
 				}
 			}
+			Line="";//clear the } that would end the outer loop
 		}
 	}//end of technique
 }

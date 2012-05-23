@@ -111,8 +111,11 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 			if(theSubMesh.HasTangents && theSubMesh.Tangents.size() != NumVertices)
 				throw DeadlyImportError("Wrong Number of Tangents loaded!");
 
-			if(theSubMesh.NumUvs==1 && theSubMesh.Uvs.size() != NumVertices)
-				throw DeadlyImportError("Wrong Number of Uvs loaded!");
+			for(unsigned int i=0; i<theSubMesh.Uvs.size(); ++i)
+			{
+				if(theSubMesh.Uvs[i].size() != NumVertices)
+					throw DeadlyImportError("Wrong Number of Uvs loaded!");
+			}
 
 		}//end of "geometry
 
@@ -139,7 +142,7 @@ void OgreImporter::ReadVertexBuffer(SubMesh &theSubMesh, XmlReader *Reader, unsi
 	bool ReadPositions=false;
 	bool ReadNormals=false;
 	bool ReadTangents=false;
-	bool ReadUvs=false;
+	unsigned int NumUvs=0;
 
 	//-------------------- check, what we need to read: --------------------------------
 	if(Reader->getAttributeValue("positions") && GetAttribute<bool>(Reader, "positions"))
@@ -161,26 +164,18 @@ void OgreImporter::ReadVertexBuffer(SubMesh &theSubMesh, XmlReader *Reader, unsi
 		DefaultLogger::get()->debug("reading tangents");
 	}
 
-
-	//we can have 1 or 0 uv channels, and if the mesh has no uvs, it also doesn't have the attribute
-	if(!Reader->getAttributeValue("texture_coords"))
-		theSubMesh.NumUvs=0;
-	else
+	if(Reader->getAttributeValue("texture_coords"))
 	{
-		ReadUvs=!!(theSubMesh.NumUvs=GetAttribute<int>(Reader, "texture_coords"));
-		theSubMesh.Uvs.reserve(NumVertices);
+		NumUvs=GetAttribute<unsigned int>(Reader, "texture_coords");
+		theSubMesh.Uvs.resize(NumUvs);
+		for(unsigned int i=0; i<theSubMesh.Uvs.size(); ++i) theSubMesh.Uvs[i].reserve(NumVertices);
 		DefaultLogger::get()->debug("reading texture coords");
-	}
-	if(theSubMesh.NumUvs>1)
-	{
-		DefaultLogger::get()->warn("too many texcoords (just 1 supported!), just the first texcoords will be loaded!");
-		theSubMesh.NumUvs=1;
 	}
 	//___________________________________________________________________
 
 
 	//check if we will load anything
-	if(!(ReadPositions || ReadNormals || ReadTangents || ReadUvs))
+	if(!( ReadPositions || ReadNormals || ReadTangents || (NumUvs>0) ))
 		DefaultLogger::get()->warn("vertexbuffer seams to be empty!");
 	
 
@@ -230,17 +225,21 @@ void OgreImporter::ReadVertexBuffer(SubMesh &theSubMesh, XmlReader *Reader, unsi
 		}
 
 		//Uv:
-		else if(ReadUvs && Reader->getNodeName()==string("texcoord"))
+		else if(NumUvs>0 && Reader->getNodeName()==string("texcoord"))
 		{
-			aiVector3D NewUv;
-			NewUv.x=GetAttribute<float>(Reader, "u");
-			NewUv.y=GetAttribute<float>(Reader, "v")*(-1)+1;//flip the uv vertikal, blender exports them so!
-			theSubMesh.Uvs.push_back(NewUv);
-
-			//skip all the following texcoords:
-			while(Reader->getNodeName()==string("texcoord"))
+			for(unsigned int i=0; i<NumUvs; ++i)
+			{
+				if(Reader->getNodeName()!=string("texcoord"))
+				{
+					DefaultLogger::get()->warn(string("Not enough UVs in Vertex: ")+Reader->getNodeName());
+				}
+				aiVector3D NewUv;
+				NewUv.x=GetAttribute<float>(Reader, "u");
+				NewUv.y=GetAttribute<float>(Reader, "v")*(-1)+1;//flip the uv vertikal, blender exports them so!
+				theSubMesh.Uvs[i].push_back(NewUv);
 				XmlRead(Reader);
-			continue;//don't read another line at the end of the loop
+			}
+			continue;//because we already read the next node...
 		}
 
 		//Color:
@@ -284,11 +283,19 @@ void OgreImporter::ProcessSubMesh(SubMesh &theSubMesh, SubMesh &theSharedGeometr
 	//---------------Make all Vertexes unique: (this is required by assimp)-----------------------
 	vector<Face> UniqueFaceList(theSubMesh.FaceList.size());
 	unsigned int UniqueVertexCount=theSubMesh.FaceList.size()*3;//*3 because each face consists of 3 vertexes, because we only support triangles^^
+
 	vector<aiVector3D> UniquePositions(UniqueVertexCount);
+
 	vector<aiVector3D> UniqueNormals(UniqueVertexCount);
+
 	vector<aiVector3D> UniqueTangents(UniqueVertexCount);
-	vector<aiVector3D> UniqueUvs(UniqueVertexCount);
+
 	vector< vector<Weight> > UniqueWeights(UniqueVertexCount);
+
+	vector< vector<aiVector3D> > UniqueUvs(theSubMesh.Uvs.size());
+	for(unsigned int i=0; i<UniqueUvs.size(); ++i)	UniqueUvs[i].resize(UniqueVertexCount);
+
+
 
 	//Support for shared data:
 	/*We can use this loop to copy vertex informations from the shared data pool. In order to do so
@@ -300,14 +307,11 @@ void OgreImporter::ProcessSubMesh(SubMesh &theSubMesh, SubMesh &theSharedGeometr
 		theSubMesh.HasPositions=theSharedGeometry.HasPositions;
 		theSubMesh.HasNormals=theSharedGeometry.HasNormals;
 		theSubMesh.HasTangents=theSharedGeometry.HasTangents;
-		theSubMesh.NumUvs=theSharedGeometry.NumUvs;
+
 		theSubMesh.BonesUsed=theSharedGeometry.BonesUsed;
-	}
 
-
-	if(VertexSource.NumUvs > 0)
-	{
-		DefaultLogger::get()->error("Not all Uvs will be made unique!");
+		UniqueUvs.resize(theSharedGeometry.Uvs.size());
+		for(unsigned int i=0; i<UniqueUvs.size(); ++i)	UniqueUvs[i].resize(UniqueVertexCount);
 	}
 
 	for(unsigned int i=0; i<theSubMesh.FaceList.size(); ++i)
@@ -335,11 +339,14 @@ void OgreImporter::ProcessSubMesh(SubMesh &theSubMesh, SubMesh &theSharedGeometr
 			UniqueTangents[3*i+2]=VertexSource.Tangents[Vertex3];
 		}
 
-		if(VertexSource.NumUvs > 0)
+		if(UniqueUvs.size()>0)
 		{
-			UniqueUvs[3*i+0]=VertexSource.Uvs[Vertex1];
-			UniqueUvs[3*i+1]=VertexSource.Uvs[Vertex2];
-			UniqueUvs[3*i+2]=VertexSource.Uvs[Vertex3];
+			for(unsigned int j=0; j<UniqueUvs.size(); ++j)
+			{
+				UniqueUvs[j][3*i+0]=VertexSource.Uvs[j][Vertex1];
+				UniqueUvs[j][3*i+1]=VertexSource.Uvs[j][Vertex2];
+				UniqueUvs[j][3*i+2]=VertexSource.Uvs[j][Vertex3];
+			}
 		}
 
 		if(VertexSource.Weights.size() > 0)
@@ -425,11 +432,14 @@ aiMesh* OgreImporter::CreateAssimpSubMesh(const SubMesh& theSubMesh, const vecto
 	*/
 
 	//Uvs
-	if(0!=theSubMesh.NumUvs)
+	if(theSubMesh.Uvs.size()>0)
 	{
-		NewAiMesh->mNumUVComponents[0]=2;
-		NewAiMesh->mTextureCoords[0]= new aiVector3D[theSubMesh.Uvs.size()];
-		memcpy(NewAiMesh->mTextureCoords[0], &theSubMesh.Uvs[0], theSubMesh.Uvs.size()*sizeof(aiVector3D));
+		for(unsigned int i=0; i<theSubMesh.Uvs.size(); ++i)
+		{
+			NewAiMesh->mNumUVComponents[i]=2;
+			NewAiMesh->mTextureCoords[i]=new aiVector3D[theSubMesh.Uvs[i].size()];
+			memcpy(NewAiMesh->mTextureCoords[i], &(theSubMesh.Uvs[i][0]), theSubMesh.Uvs[i].size()*sizeof(aiVector3D));
+		}
 	}
 
 

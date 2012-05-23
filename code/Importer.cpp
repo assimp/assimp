@@ -804,7 +804,8 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 	}
 
 	// update private scene flags
-	ScenePriv(pimpl->mScene)->mPPStepsApplied |= pFlags;
+  if( pimpl->mScene )
+  	ScenePriv(pimpl->mScene)->mPPStepsApplied |= pFlags;
 
 	// clear any data allocated by post-process steps
 	pimpl->mPPShared->Clean();

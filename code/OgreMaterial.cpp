@@ -276,9 +276,12 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 	return NewMaterial;
 }
 
-void OgreImporter::ReadTechnique(stringstream &ss, aiMaterial* NewMaterial)
+void OgreImporter::ReadTechnique(stringstream &ss, aiMaterial* NewMaterial) const
 {
-	unsigned int CurrentTextureId=0;
+	unsigned int CurrentDiffuseTextureId=0;
+	unsigned int CurrentSpecularTextureId=0;
+	unsigned int CurrentNormalTextureId=0;
+	unsigned int CurrentLightTextureId=0;
 
 
 	string RestOfLine;
@@ -338,6 +341,11 @@ void OgreImporter::ReadTechnique(stringstream &ss, aiMaterial* NewMaterial)
 				else if(Line=="texture_unit")
 				{
 					getline(ss, RestOfLine);//ignore the rest of the line
+
+					std::string TextureName;
+					int TextureType=-1;
+					int UvSet=0;
+
 					ss >> Line;
 					if(Line!="{")
 						throw DeadlyImportError("empty texture unit!");
@@ -347,17 +355,39 @@ void OgreImporter::ReadTechnique(stringstream &ss, aiMaterial* NewMaterial)
 						if(Line=="texture")
 						{
 							ss >> Line;
-							aiString ts(Line.c_str());
-							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, CurrentTextureId));
+							TextureName=Line;
+
+							if(m_TextureTypeFromFilename)
+							{
+								if(Line.find("_n.")!=string::npos)// Normalmap
+								{
+									TextureType=aiTextureType_NORMALS;
+								}
+								else if(Line.find("_s.")!=string::npos)// Specularmap
+								{
+									TextureType=aiTextureType_SPECULAR;
+								}
+								else if(Line.find("_l.")!=string::npos)// Lightmap
+								{
+									TextureType=aiTextureType_LIGHTMAP;
+								}
+								else// colormap
+								{
+									TextureType=aiTextureType_DIFFUSE;
+								}
+							}
+							else
+							{
+								TextureType=aiTextureType_DIFFUSE;
+							}
 						}
 						else if(Line=="tex_coord_set")
 						{
-							int UvSet;
 							ss >> UvSet;
-							NewMaterial->AddProperty(&UvSet, 1, AI_MATKEY_UVWSRC(0, CurrentTextureId));
 						}
-						else if(Line=="colour_op")
+						else if(Line=="colour_op")//TODO implement this
 						{
+							/*
 							ss >> Line;
 							if("replace"==Line)//I don't think, assimp has something for this...
 							{
@@ -367,11 +397,41 @@ void OgreImporter::ReadTechnique(stringstream &ss, aiMaterial* NewMaterial)
 								//TODO: set value
 								//NewMaterial->AddProperty(aiTextureOp_Multiply)
 							}
+							*/
 						}
 						
 					}//end of texture unit
 					Line="";//clear the } that would end the outer loop
-					CurrentTextureId++;//new Id for the next texture
+
+					//give the texture to assimp:
+					
+					aiString ts(TextureName.c_str());
+					switch(TextureType)
+					{
+					case aiTextureType_DIFFUSE:
+						NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, CurrentDiffuseTextureId));
+						NewMaterial->AddProperty(&UvSet, 1, AI_MATKEY_UVWSRC(0, CurrentDiffuseTextureId));
+						CurrentDiffuseTextureId++;
+						break;
+					case aiTextureType_NORMALS:
+						NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_NORMALS, CurrentNormalTextureId));
+						NewMaterial->AddProperty(&UvSet, 1, AI_MATKEY_UVWSRC(0, CurrentNormalTextureId));
+						CurrentNormalTextureId++;
+						break;
+					case aiTextureType_SPECULAR:
+						NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_SPECULAR, CurrentSpecularTextureId));
+						NewMaterial->AddProperty(&UvSet, 1, AI_MATKEY_UVWSRC(0, CurrentSpecularTextureId));
+						CurrentSpecularTextureId++;
+						break;
+					case aiTextureType_LIGHTMAP:
+						NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_LIGHTMAP, CurrentLightTextureId));
+						NewMaterial->AddProperty(&UvSet, 1, AI_MATKEY_UVWSRC(0, CurrentLightTextureId));
+						CurrentLightTextureId++;
+						break;
+					default:
+						DefaultLogger::get()->warn("Invalid Texture Type!");
+						break;
+					}
 				}
 			}
 			Line="";//clear the } that would end the outer loop

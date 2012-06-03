@@ -687,6 +687,19 @@ enum aiComponent
 
 
 // ---------------------------------------------------------------------------
+/** @brief Ogre Importer detect the texture usage from its filename
+ *
+ * Normally, a texture is loaded as a colormap, if no target is specified in the
+ * materialfile. Is this switch is enabled, texture names ending with _n, _l, _s
+ * are used as normalmaps, lightmaps or specularmaps. 
+ * <br>
+ * Property type: Bool. Default value: false.
+ */
+#define AI_CONFIG_IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME "IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME"
+
+
+
+// ---------------------------------------------------------------------------
 /** @brief Specifies whether the IFC loader skips over IfcSpace elements.
  *
  * IfcSpace elements (and their geometric representations) are used to

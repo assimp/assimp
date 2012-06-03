@@ -1473,6 +1473,20 @@ can find in scripts/OgreImpoter/Assimp.tlp in the assimp source. If you don't se
 If you want more properties in custom materials, you can easily expand the ogre material loader, it will be just a few lines for each property.
 Just look in OgreImporterMaterial.cpp
 
+@subsection Importer Properties
+-	IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME: Normally, a texture is loaded as a colormap, if no
+	target is specified in the
+	materialfile. Is this switch is enabled, texture names ending with _n, _l, _s
+	are used as normalmaps, lightmaps or specularmaps. 
+	<br>
+	Property type: Bool. Default value: false.
+-	IMPORT_OGRE_MATERIAL_FILE: Ogre Meshes contain only the MaterialName, not the MaterialFile.
+	If there 
+	is no material file with the same name as the material, Ogre Importer will 
+	try to load this file and search the material in it.
+	<br>
+	Property type: String. Default value: guessed.
+
 @subsection todo Todo
 - Load colors in custom materials
 - extend custom and normal material loading

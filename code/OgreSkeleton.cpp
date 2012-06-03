@@ -169,7 +169,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 		Bones[ChildId].ParentId=ParentId;
 		Bones[ParentId].Children.push_back(ChildId);
 
-		XmlRead(SkeletonFile);//i once forget this line, which led to an endless loop, did i mentioned, that irrxml sucks??
+		XmlRead(SkeletonFile);//I once forget this line, which led to an endless loop, did i mentioned, that irrxml sucks??
 	}
 	//_____________________________________________________________________________
 
@@ -218,7 +218,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 
 					//loop over the attributes:
 					
-					while(true)
+					while(true) //will quit, if a Node is not a animationkey
 					{
 						XmlRead(SkeletonFile);
 
@@ -268,11 +268,8 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 							break;
 					}
 
-
 					NewTrack.Keyframes.push_back(NewKeyframe);
-					//XmlRead(SkeletonFile);
 				}
-
 
 				NewAnimation.Tracks.push_back(NewTrack);
 			}
@@ -295,7 +292,7 @@ void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const st
 
 	//Createt the assimp bone hierarchy
 	vector<aiNode*> RootBoneNodes;
-	BOOST_FOREACH(Bone theBone, Bones)
+	BOOST_FOREACH(const Bone &theBone, Bones)
 	{
 		if(-1==theBone.ParentId) //the bone is a root bone
 		{
@@ -304,7 +301,8 @@ void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const st
 		}
 	}
 	
-	if (RootBoneNodes.size()) {
+	if(RootBoneNodes.size() > 0)
+	{
 		m_CurrentScene->mRootNode->mNumChildren=RootBoneNodes.size();	
 		m_CurrentScene->mRootNode->mChildren=new aiNode*[RootBoneNodes.size()];
 		memcpy(m_CurrentScene->mRootNode->mChildren, &RootBoneNodes[0], sizeof(aiNode*)*RootBoneNodes.size());
@@ -359,7 +357,7 @@ void OgreImporter::PutAnimationsInScene(const std::vector<Bone> &Bones, const st
 					aiMatrix4x4 PoseToKey=
 									  aiMatrix4x4::Translation(Animations[i].Tracks[j].Keyframes[k].Position, t3)	//pos
 									* aiMatrix4x4(Animations[i].Tracks[j].Keyframes[k].Rotation.GetMatrix())		//rot
-									* aiMatrix4x4::Scaling(Animations[i].Tracks[j].Keyframes[k].Scaling, t2);	//scale
+									* aiMatrix4x4::Scaling(Animations[i].Tracks[j].Keyframes[k].Scaling, t2);		//scale
 									
 
 					//calculate the complete transformation from world space to bone space

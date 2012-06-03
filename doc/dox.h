@@ -1427,11 +1427,11 @@ IFC support is new and considered experimental. Please report any bugs you may e
 
 This section contains implementations notes for the OgreXML importer. 
 @subsection overview Overview
-Ogre importer is currently optimized for the Blender Ogre exporter, because thats the only one that i use. You can find the Blender Ogre exporter at: http://www.ogre3d.org/forums/viewtopic.php?f=8&t=45922
+Ogre importer is currently optimized for the Blender Ogre exporter, because thats the only one that I use. You can find the Blender Ogre exporter at: http://www.ogre3d.org/forums/viewtopic.php?f=8&t=45922
 
 @subsection what What will be loaded?
 
-Mesh: Faces, Positions, Normals and one Uv pair. The Materialname will be used to load the material.
+Mesh: Faces, Positions, Normals and all TexCoords. The Materialname will be used to load the material.
 
 Material: The right material in the file will be searched, the importer should work with materials who
 have 1 technique and 1 pass in this technique. From there, the texturename (for 1 color- and 1 normalmap) and the
@@ -1477,7 +1477,7 @@ Just look in OgreImporterMaterial.cpp
 - Load colors in custom materials
 - extend custom and normal material loading
 - fix bone hierarchy bug
-- tes everything elaboratly
+- test everything elaboratly
 - check for non existent animation keys (what happens if a one time not all bones have a key?)
 */
 

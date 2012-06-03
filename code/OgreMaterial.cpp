@@ -51,10 +51,6 @@ to make it shorter easier to maintain.
 #include <sstream>
 using namespace std;
 
-//#include "boost/format.hpp"
-//#include "boost/foreach.hpp"
-//using namespace boost;
-
 #include "OgreImporter.hpp"
 #include "irrXMLWrapper.h"
 #include "TinyFormatter.h"

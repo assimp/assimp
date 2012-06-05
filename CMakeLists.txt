@@ -4,16 +4,17 @@ PROJECT( Assimp )
 # Define here the needed parameters
 set (ASSIMP_VERSION_MAJOR 2)
 set (ASSIMP_VERSION_MINOR 0)
-set (ASSIMP_VERSION_PATCH 0)
+set (ASSIMP_VERSION_PATCH 1251) # subversion revision?
 set (ASSIMP_VERSION ${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}.${ASSIMP_VERSION_PATCH})
 set (ASSIMP_SOVERSION ${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR})
-SET ( PROJECT_VERSION "${ASSIMP_SOVERSION}" )
+SET ( PROJECT_VERSION "${ASSIMP_VERSION}" )
 
 set(PACKAGE_VERSION "0" CACHE STRING "the package-specific version used for uploading the sources")
 
 option(OPT_BUILD_PACKAGES "Set to ON to generate CPack configuration files and packaging targets" OFF)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules")
-set(CPACK_COMPONENTS_ALL assimp-bin libassimp${ASSIMP_VERSION_MAJOR} assimp-dev)
+set(LIBASSIMP_COMPONENT libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MAJOR}-r1251)
+set(CPACK_COMPONENTS_ALL assimp-bin ${LIBASSIMP_COMPONENT} assimp-dev)
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   add_definitions(-fPIC) # this is a very important switch and some libraries seem now to have it....
@@ -47,6 +48,15 @@ SET(DEBUG_POSTFIX "D" CACHE STRING "Debug Postfitx for lib, samples and tools")
 # Generate a pkg-config .pc for the Assimp library.
 CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/assimp.pc.in" "${PROJECT_BINARY_DIR}/assimp.pc" @ONLY )
 INSTALL( FILES "${PROJECT_BINARY_DIR}/assimp.pc" DESTINATION ${LIB_INSTALL_DIR}/pkgconfig/ COMPONENT assimp-dev)
+
+# cmake configuration files
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/assimp-config.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake" @ONLY IMMEDIATE)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/assimp-config-version.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/assimp-config-version.cmake" @ONLY IMMEDIATE)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake" "${CMAKE_CURRENT_BINARY_DIR}/assimp-config-version.cmake" DESTINATION "${LIB_INSTALL_DIR}/cmake/assimp-${ASSIMP_SOVERSION}" COMPONENT assimp-dev)
+
+# add make uninstall capability
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules/cmake_uninstall.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
+add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
 # Allow the user to build a static library
 SET ( BUILD_STATIC_LIB OFF CACHE BOOL
@@ -169,7 +179,7 @@ if(CMAKE_CPACK_COMMAND AND UNIX AND OPT_BUILD_PACKAGES)
   set(CPACK_PACKAGE_CONTACT "" CACHE STRING "Package maintainer and PGP signer.")
   set(CPACK_PACKAGE_VENDOR "http://assimp.sourceforge.net/")
   set(CPACK_PACKAGE_DISPLAY_NAME "Assimp ${ASSIMP_VERSION}.${ASSIMP_VERSION_MINOR}")
-  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY " - Open Asset Import Library")
+  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY " - Open Asset Import Library r1252")
   set(CPACK_PACKAGE_VERSION ${ASSIMP_VERSION}.${PACKAGE_VERSION})
   set(CPACK_PACKAGE_VERSION_MAJOR ${ASSIMP_VERSION_MAJOR})
   set(CPACK_PACKAGE_VERSION_MINOR ${ASSIMP_VERSION_MINOR})
@@ -180,9 +190,9 @@ if(CMAKE_CPACK_COMMAND AND UNIX AND OPT_BUILD_PACKAGES)
 
   set(CPACK_COMPONENT_ASSIMP-BIN_DISPLAY_NAME "tools")
   set(CPACK_COMPONENT_ASSIMP-DEV_DISPLAY_NAME "common headers and installs")
-  set(CPACK_COMPONENT_LIBASSIMP${ASSIMP_VERSION_MAJOR}_DISPLAY_NAME "libraries")
-  set(CPACK_COMPONENT_ASSIMP-BIN_DEPENDS libassimp${ASSIMP_VERSION_MAJOR})
-  set(CPACK_COMPONENT_ASSIMP-DEV_DEPENDS libassimp${ASSIMP_VERSION_MAJOR})
+  set(CPACK_COMPONENT_${LIBASSIMP_COMPONENT}_DISPLAY_NAME "libraries")
+  set(CPACK_COMPONENT_ASSIMP-BIN_DEPENDS ${LIBASSIMP_COMPONENT})
+  set(CPACK_COMPONENT_ASSIMP-DEV_DEPENDS ${LIBASSIMP_COMPONENT})
   set(CPACK_DEBIAN_BUILD_DEPENDS debhelper cmake libboost-dev libboost-thread-dev libboost-math-dev zlib1g-dev pkg-config)
 
   # debian
@@ -200,7 +210,7 @@ if(CMAKE_CPACK_COMMAND AND UNIX AND OPT_BUILD_PACKAGES)
   set(CPACK_DEBIAN_DISTRIBUTION_NAME ${_lsb_distribution} CACHE STRING "Name of the distrubiton")
   string(TOLOWER ${CPACK_DEBIAN_DISTRIBUTION_NAME} CPACK_DEBIAN_DISTRIBUTION_NAME)
   if( ${CPACK_DEBIAN_DISTRIBUTION_NAME} STREQUAL "ubuntu" )
-    set(CPACK_DEBIAN_DISTRIBUTION_RELEASES karmic lucid maverick natty CACHE STRING "Release code-names of the distrubiton release")
+    set(CPACK_DEBIAN_DISTRIBUTION_RELEASES lucid maverick natty oneiric precise CACHE STRING "Release code-names of the distrubiton release")
   endif()
   set(DPUT_HOST "" CACHE STRING "PPA repository to upload the debian sources")
   include(CPack)

@@ -659,7 +659,7 @@ SET_PROPERTY(TARGET assimp PROPERTY DEBUG_POSTFIX ${DEBUG_POSTFIX})
 TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES})
 SET_TARGET_PROPERTIES( assimp PROPERTIES
 	VERSION ${ASSIMP_VERSION}
-	SOVERSION ${ASSIMP_VERSION} # use full version 
+	SOVERSION ${ASSIMP_SOVERSION} # use full version 
 )
 # Build against external unzip, or add ../contrib/unzip so
 # assimp can #include "unzip.h"

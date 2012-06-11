@@ -6,14 +6,14 @@ set (ASSIMP_VERSION_MAJOR 2)
 set (ASSIMP_VERSION_MINOR 0)
 set (ASSIMP_VERSION_PATCH 1251) # subversion revision?
 set (ASSIMP_VERSION ${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}.${ASSIMP_VERSION_PATCH})
-set (ASSIMP_SOVERSION ${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR})
+set (ASSIMP_SOVERSION 1251)
 SET ( PROJECT_VERSION "${ASSIMP_VERSION}" )
 
 set(PACKAGE_VERSION "0" CACHE STRING "the package-specific version used for uploading the sources")
 
 option(OPT_BUILD_PACKAGES "Set to ON to generate CPack configuration files and packaging targets" OFF)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules")
-set(LIBASSIMP_COMPONENT libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MAJOR}-r1251)
+set(LIBASSIMP_COMPONENT libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MAJOR}-r1256)
 set(CPACK_COMPONENTS_ALL assimp-bin ${LIBASSIMP_COMPONENT} assimp-dev)
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
@@ -52,7 +52,7 @@ INSTALL( FILES "${PROJECT_BINARY_DIR}/assimp.pc" DESTINATION ${LIB_INSTALL_DIR}/
 # cmake configuration files
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/assimp-config.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake" @ONLY IMMEDIATE)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/assimp-config-version.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/assimp-config-version.cmake" @ONLY IMMEDIATE)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake" "${CMAKE_CURRENT_BINARY_DIR}/assimp-config-version.cmake" DESTINATION "${LIB_INSTALL_DIR}/cmake/assimp-${ASSIMP_SOVERSION}" COMPONENT assimp-dev)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake" "${CMAKE_CURRENT_BINARY_DIR}/assimp-config-version.cmake" DESTINATION "${LIB_INSTALL_DIR}/cmake/assimp-${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}" COMPONENT assimp-dev)
 
 # add make uninstall capability
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules/cmake_uninstall.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)

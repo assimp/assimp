@@ -1,0 +1,4 @@
+Good IFC test cases
+===================
+
+http://www.iai.fzk.de/www-extern/index.php?id=1135

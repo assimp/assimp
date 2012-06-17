@@ -318,20 +318,28 @@ boost::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*&
 	else if (*cur == '\'' ) {
 		// string literal
 		const char* start = ++cur;
-		for(;*cur != '\'';++cur) {
-			if (*cur == '\0') {
+
+		for(;*cur != '\'';++cur)	{
+			if (*cur == '\0')	{
 				throw STEP::SyntaxError("string literal not closed",line);
 			}
 		}
-		if (cur[1]=='\'') {
-			for(cur+=2;*cur != '\'';++cur) {
-				if (*cur == '\0') {
-					throw STEP::SyntaxError("string literal not closed",line);
+
+		if (cur[1] == '\'')	{
+			// Vesanen: more than 2 escaped ' in one literal!
+			do	{
+				for(cur += 2;*cur != '\'';++cur)	{
+					if (*cur == '\0')	{
+						throw STEP::SyntaxError("string literal not closed",line);
+					}
 				}
 			}
+			while(cur[1] == '\'');
 		}
-		inout = cur+1;
-		return boost::make_shared<EXPRESS::STRING>(std::string(start, static_cast<size_t>(cur-start) ));
+
+		inout = cur + 1;
+
+		return boost::make_shared<EXPRESS::STRING>(std::string(start, static_cast<size_t>(cur - start)));
 	}
 	else if (*cur == '\"' ) {
 		throw STEP::SyntaxError("binary data not supported yet",line);

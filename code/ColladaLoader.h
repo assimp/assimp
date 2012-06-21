@@ -94,6 +94,8 @@ protected:
 	 */
 	const aiImporterDesc* GetInfo () const;
 
+	void SetupProperties(const Importer* pImp);
+
 	/** Imports the given file into the given scene structure. 
 	 * See BaseImporter::InternReadFile() for details
 	 */
@@ -230,6 +232,8 @@ protected:
 
 	/** Accumulated animations for the target scene */
 	std::vector<aiAnimation*> mAnims;
+
+	bool noSkeletonMesh;
 };
 
 } // end of namespace Assimp

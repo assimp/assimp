@@ -74,6 +74,7 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ASEImporter::ASEImporter()
+: noSkeletonMesh()
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -111,6 +112,8 @@ void ASEImporter::SetupProperties(const Importer* pImp)
 {
 	configRecomputeNormals = (pImp->GetPropertyInteger(
 		AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS,1) ? true : false);
+
+	noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES,0) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -244,7 +247,9 @@ void ASEImporter::InternReadFile( const std::string& pFile,
 	// ------------------------------------------------------------------
 	if (!pScene->mNumMeshes)	{
 		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
-		SkeletonMeshBuilder skeleton(pScene);
+		if (!noSkeletonMesh) {
+			SkeletonMeshBuilder skeleton(pScene);
+		}
 	}
 }
 // ------------------------------------------------------------------------------------------------

@@ -197,6 +197,7 @@ protected:
 	/** Config options: Recompute the normals in every case - WA
 	    for 3DS Max broken ASE normal export */
 	bool configRecomputeNormals;
+	bool noSkeletonMesh;
 };
 
 } // end of namespace Assimp

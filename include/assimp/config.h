@@ -77,6 +77,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_CONFIG_GLOB_MEASURE_TIME  \
 	"GLOB_MEASURE_TIME"
 
+
+// ---------------------------------------------------------------------------
+/** @brief Global setting to disable generation of skeleton dummy meshes
+ *
+ * Skeleton dummy meshes are generated as a visualization aid in cases which
+ * the input data contains no geometry, but only animation data.
+ * Property data type: bool. Default value: false
+ */
+// ---------------------------------------------------------------------------
+#define AI_CONFIG_IMPORT_NO_SKELETON_MESHES \
+	"IMPORT_NO_SKELETON_MESHES"
+
+
+
 # if 0 // not implemented yet
 // ---------------------------------------------------------------------------
 /** @brief Set Assimp's multithreading policy.
@@ -157,6 +171,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #define AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE \
 	"PP_GSN_MAX_SMOOTHING_ANGLE"
+
 
 // ---------------------------------------------------------------------------
 /** @brief Sets the colormap (= palette) to be used to decode embedded
@@ -697,9 +712,6 @@ enum aiComponent
  */
 #define AI_CONFIG_IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME "IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME"
 
-
-
-// ---------------------------------------------------------------------------
 /** @brief Specifies whether the IFC loader skips over IfcSpace elements.
  *
  * IfcSpace elements (and their geometric representations) are used to

@@ -65,6 +65,7 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 BVHLoader::BVHLoader()
+: noSkeletonMesh()
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -87,6 +88,12 @@ bool BVHLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool cs
 		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
 	}
 	return false;
+}
+
+// ------------------------------------------------------------------------------------------------
+void BVHLoader::SetupProperties(const Importer* pImp)
+{
+	noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES,0) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -119,8 +126,10 @@ void BVHLoader::InternReadFile( const std::string& pFile, aiScene* pScene, IOSys
 	mLine = 1;
 	ReadStructure( pScene);
 
-	// build a dummy mesh for the skeleton so that we see something at least
-	SkeletonMeshBuilder meshBuilder( pScene);
+	if (!noSkeletonMesh) {
+		// build a dummy mesh for the skeleton so that we see something at least
+		SkeletonMeshBuilder meshBuilder( pScene);
+	}
 
 	// construct an animation from all the motion data we read
 	CreateAnimation( pScene);

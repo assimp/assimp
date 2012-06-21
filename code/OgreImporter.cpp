@@ -244,6 +244,7 @@ const aiImporterDesc* OgreImporter::GetInfo () const
 void OgreImporter::SetupProperties(const Importer* pImp)
 {
 	m_MaterialLibFilename=pImp->GetPropertyString(AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE, "Scene.material");
+	m_TextureTypeFromFilename=pImp->GetPropertyBool(AI_CONFIG_IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME, false);
 }
 
 

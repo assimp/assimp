@@ -222,15 +222,21 @@ inline char_t getFloat( char_t it, char_t end, float &value )
 	return it;
 }
 
+/**	@brief	Will perform a simple tokenize.
+ *	@param	str			String to tokenize.
+ *	@param	tokens		Array with tokens, will be empty if no token was found.
+ *	@param	delimiters	Delimiter for tokenize.
+ *	@return	Number of found token.
+ */
 template<class string_type>
 unsigned int tokenize( const string_type& str, std::vector<string_type>& tokens, 
-						 const string_type& delimiters )
+						 const string_type& delimiters ) 
 {
 	// Skip delimiters at beginning.
-	string_type::size_type lastPos = str.find_first_not_of( delimiters, 0 );
+	typename string_type::size_type lastPos = str.find_first_not_of( delimiters, 0 );
 
 	// Find first "non-delimiter".
-	string_type::size_type pos = str.find_first_of( delimiters, lastPos );
+	typename string_type::size_type pos = str.find_first_of( delimiters, lastPos );
 	while ( string_type::npos != pos || string_type::npos != lastPos )
 	{
 		// Found a token, add it to the vector.

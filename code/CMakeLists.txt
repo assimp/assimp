@@ -1,7 +1,3 @@
-SET( LIBRARY_VERSION "2.0.0" )
-SET( LIBRARY_SOVERSION "2" )
-
-#
 # Listing and grouping of all the source files.
 # 1) Set the file lists for each component
 # 2) Create a Source Group for each component, for IDE project orginization
@@ -662,8 +658,8 @@ SET_PROPERTY(TARGET assimp PROPERTY DEBUG_POSTFIX ${DEBUG_POSTFIX})
 
 TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES})
 SET_TARGET_PROPERTIES( assimp PROPERTIES
-	VERSION ${LIBRARY_VERSION}
-	SOVERSION ${LIBRARY_SOVERSION}
+	VERSION ${ASSIMP_VERSION}
+	SOVERSION ${ASSIMP_SOVERSION} # use full version 
 )
 # Build against external unzip, or add ../contrib/unzip so
 # assimp can #include "unzip.h"
@@ -674,6 +670,6 @@ else (UNZIP_FOUND)
 	INCLUDE_DIRECTORIES("../contrib/unzip")
 endif (UNZIP_FOUND)
 
-INSTALL( TARGETS assimp DESTINATION ${LIB_INSTALL_DIR} COMPONENT libassimp${ASSIMP_VERSION_MAJOR})
+INSTALL( TARGETS assimp DESTINATION ${LIB_INSTALL_DIR} COMPONENT ${LIBASSIMP_COMPONENT})
 INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${INCLUDE_INSTALL_DIR}/assimp COMPONENT assimp-dev)
 INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${INCLUDE_INSTALL_DIR}/assimp/Compiler COMPONENT assimp-dev)

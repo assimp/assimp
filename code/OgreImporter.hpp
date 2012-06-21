@@ -93,7 +93,7 @@ private:
 
 	//-------------------------------- OgreMaterial.cpp -------------------------------
 	aiMaterial* LoadMaterial(const std::string MaterialName) const;
-	static void ReadTechnique(std::stringstream &ss, aiMaterial* NewMaterial);
+	void ReadTechnique(std::stringstream &ss, aiMaterial* NewMaterial) const;
 	
 
 
@@ -101,6 +101,7 @@ private:
 	//Now we don't have to give theses parameters to all functions
 	std::string m_CurrentFilename;
 	std::string m_MaterialLibFilename;
+	bool m_TextureTypeFromFilename;
 	IOSystem* m_CurrentIOHandler;
 	aiScene *m_CurrentScene;
 	SubMesh m_SharedGeometry;///< we will just use the vertexbuffers of the submesh

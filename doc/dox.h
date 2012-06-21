@@ -1427,11 +1427,11 @@ IFC support is new and considered experimental. Please report any bugs you may e
 
 This section contains implementations notes for the OgreXML importer. 
 @subsection overview Overview
-Ogre importer is currently optimized for the Blender Ogre exporter, because thats the only one that i use. You can find the Blender Ogre exporter at: http://www.ogre3d.org/forums/viewtopic.php?f=8&t=45922
+Ogre importer is currently optimized for the Blender Ogre exporter, because thats the only one that I use. You can find the Blender Ogre exporter at: http://www.ogre3d.org/forums/viewtopic.php?f=8&t=45922
 
 @subsection what What will be loaded?
 
-Mesh: Faces, Positions, Normals and one Uv pair. The Materialname will be used to load the material.
+Mesh: Faces, Positions, Normals and all TexCoords. The Materialname will be used to load the material.
 
 Material: The right material in the file will be searched, the importer should work with materials who
 have 1 technique and 1 pass in this technique. From there, the texturename (for 1 color- and 1 normalmap) and the
@@ -1473,11 +1473,25 @@ can find in scripts/OgreImpoter/Assimp.tlp in the assimp source. If you don't se
 If you want more properties in custom materials, you can easily expand the ogre material loader, it will be just a few lines for each property.
 Just look in OgreImporterMaterial.cpp
 
+@subsection Importer Properties
+-	IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME: Normally, a texture is loaded as a colormap, if no
+	target is specified in the
+	materialfile. Is this switch is enabled, texture names ending with _n, _l, _s
+	are used as normalmaps, lightmaps or specularmaps. 
+	<br>
+	Property type: Bool. Default value: false.
+-	IMPORT_OGRE_MATERIAL_FILE: Ogre Meshes contain only the MaterialName, not the MaterialFile.
+	If there 
+	is no material file with the same name as the material, Ogre Importer will 
+	try to load this file and search the material in it.
+	<br>
+	Property type: String. Default value: guessed.
+
 @subsection todo Todo
 - Load colors in custom materials
 - extend custom and normal material loading
 - fix bone hierarchy bug
-- tes everything elaboratly
+- test everything elaboratly
 - check for non existent animation keys (what happens if a one time not all bones have a key?)
 */
 

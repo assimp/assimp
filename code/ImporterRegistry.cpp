@@ -166,6 +166,9 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_XGL_IMPORTER
 #   include "XGLLoader.h"
 #endif 
+#ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
+#   include "FBXImporter.h"
+#endif 
 
 namespace Assimp {
 
@@ -290,6 +293,9 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
 #endif
 #if ( !defined ASSIMP_BUILD_NO_XGL_IMPORTER )
 	out.push_back( new XGLImporter() );
+#endif
+#if ( !defined ASSIMP_BUILD_NO_FBX_IMPORTER )
+	out.push_back( new FBXImporter() );
 #endif
 }
 

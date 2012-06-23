@@ -394,6 +394,18 @@ SET( XGL_SRCS
 SOURCE_GROUP( XGL FILES ${XGL_SRCS})
 
 
+SET(FBX_SRCS
+	FBXImporter.cpp
+	FBXCompileConfig.h
+	FBXImporter.h
+	FBXParser.cpp
+	FBXParser.h
+	FBXTokenizer.cpp
+	FBXTokenizer.h
+)
+SOURCE_GROUP( FBX FILES ${FBX_SRCS})
+
+
 SET( PostProcessing_SRCS
 	CalcTangentsProcess.cpp
 	CalcTangentsProcess.h
@@ -631,6 +643,7 @@ SET( assim_src
 	${NDO_SRCS}
 	${IFC_SRCS}
 	${XGL_SRCS}
+	${FBX_SRCS}
 	
 	# Third-party libraries
 	${IrrXML_SRCS}

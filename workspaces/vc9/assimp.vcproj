@@ -2083,6 +2083,14 @@
 						RelativePath="..\..\code\FBXTokenizer.h"
 						>
 					</File>
+					<File
+						RelativePath="..\..\code\FBXUtil.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\FBXUtil.h"
+						>
+					</File>
 				</Filter>
 			</Filter>
 			<Filter

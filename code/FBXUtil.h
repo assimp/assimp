@@ -38,93 +38,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file  FBXTokenizer.h
- *  @brief FBX lexer
+/** @file  FBXUtil.h
+ *  @brief FBX utility functions for internal use
  */
-#ifndef INCLUDED_AI_FBX_TOKENIZER_H
-#define INCLUDED_AI_FBX_TOKENIZER_H
+#ifndef INCLUDED_AI_FBX_UTIL_H
+#define INCLUDED_AI_FBX_UTIL_H
 
-#include <boost/shared_ptr.hpp>
-
+#include <string>
 #include "FBXCompileConfig.h"
 
 namespace Assimp {
 namespace FBX {
+namespace Util {
 
-/** Rough classification for text FBX tokens used for constructing the
- *  basic scope hierarchy. */
-enum TokenType
-{
-	// {
-	TokenType_OPEN_BRACKET = 0,
+/** Format log/error messages using a given line location in the source file.
+ *
+ *  @param prefix Message prefix to be preprended to the location info.
+ *  @param text Message text
+ *  @param line Line index, 1-based
+ *  @param column Colum index, 1-based 
+ *  @return A string of the following format: {prefix} (line {line}, col {column}) {text}*/
+std::string AddLineAndColumn(const std::string& prefix, const std::string& text, unsigned int line, unsigned int column);
 	
-	// }
-	TokenType_CLOSE_BRACKET,
+}
+}
+}
 
-	// '"blablubb"', '2', '*14' - very general token class,
-	// further processing happens at a later stage.
-	TokenType_DATA,
-
-	// ,
-	TokenType_COMMA,
-
-	// blubb:
-	TokenType_KEY
-};
-
-
-/** Represents a single token in a FBX file. Tokens are
- *  classified by the #TokenType enumerated types.
- *
- *  Offers iterator protocol. Tokens are immutable. */
-class Token 
-{
-
-public:
-
-	Token(const char* sbegin, const char* send, TokenType type, unsigned int line, unsigned int column);
-	~Token();
-
-public:
-
-	const char* begin() const {
-		return sbegin;
-	}
-
-	const char* end() const {
-		return send;
-	}
-
-	TokenType Type() const {
-		return type;
-	}
-
-private:
-
-	const char* const sbegin;
-	const char* const send;
-	const TokenType type;
-
-	const unsigned int line, column;
-};
-
-
-typedef boost::shared_ptr<Token> TokenPtr;
-typedef std::vector< boost::shared_ptr<Token> > TokenList;
-
-
-/** Main FBX tokenizer function. Transform input buffer into a list of preprocessed tokens.
- *
- *  Skips over comments and generates line and column numbers.
- *
- * @param output_tokens Receives a list of all tokens in the input data.
- * @param input_buffer Textual input buffer to be processed, 0-terminated.
- * @throw DeadlyImportError if something goes wrong */
-void Tokenize(TokenList& output_tokens, const char* input);
-
-
-} // ! FBX
-} // ! Assimp
-
-#endif // ! INCLUDED_AI_FBX_PARSER_H
-
+#endif // ! INCLUDED_AI_FBX_UTIL_H

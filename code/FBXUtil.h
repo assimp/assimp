@@ -51,6 +51,17 @@ namespace Assimp {
 namespace FBX {
 namespace Util {
 
+
+/** helper for std::for_each to delete all heap-allocated items in a container */
+template<typename T>
+struct delete_fun
+{
+	void operator()(T* del) {
+		delete del;
+	}
+};
+
+
 /** Format log/error messages using a given line location in the source file.
  *
  *  @param prefix Message prefix to be preprended to the location info.

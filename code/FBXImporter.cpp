@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FBXTokenizer.h"
 #include "FBXParser.h"
+#include "FBXUtil.h"
 
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
@@ -148,11 +149,17 @@ void FBXImporter::InternReadFile( const std::string& pFile,
 	// broadphase tokenizing pass in which we identify the core
 	// syntax elements of FBX (brackets, commas, key:value mappings)
 	TokenList tokens;
-	Tokenize(tokens,begin);
+	try {
+		Tokenize(tokens,begin);
 
-	// use this information to construct a very rudimentary 
-	// parse-tree representing the FBX scope structure
-	Parser parser(tokens);
+		// use this information to construct a very rudimentary 
+		// parse-tree representing the FBX scope structure
+		Parser parser(tokens);
+	}
+	catch(...) {
+		std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());
+		throw;
+	}
 }
 
 #endif // !ASSIMP_BUILD_NO_FBX_IMPORTER

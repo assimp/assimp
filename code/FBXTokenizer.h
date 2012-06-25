@@ -99,6 +99,11 @@ public:
 		return type;
 	}
 
+#ifdef DEBUG
+	// copy of the token to show up in debugger
+	const std::string contents;
+#endif
+
 private:
 
 	const char* const sbegin;
@@ -108,9 +113,12 @@ private:
 	const unsigned int line, column;
 };
 
+// note: shared_ptr eats up too much storage, unique_ptr is C++11,
+// so have to use manual memory management for now.
+typedef Token* TokenPtr;
+typedef std::vector< TokenPtr > TokenList;
 
-typedef boost::shared_ptr<Token> TokenPtr;
-typedef std::vector< boost::shared_ptr<Token> > TokenList;
+#define new_Token new Token
 
 
 /** Main FBX tokenizer function. Transform input buffer into a list of preprocessed tokens.

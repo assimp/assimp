@@ -62,10 +62,12 @@ namespace FBX {
 	class Parser;
 	class Element;
 
-	// should actually use 0x's unique_ptr for some of those
-	typedef std::vector< boost::shared_ptr<Scope> > ScopeList;
-	typedef std::fbx_unordered_multimap< std::string, boost::shared_ptr<Element> > ElementMap;
+	// XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
+	typedef std::vector< Scope* > ScopeList;
+	typedef std::fbx_unordered_multimap< std::string, Element* > ElementMap;
 
+#	define new_Scope new Scope
+#	define new_Element new Element
 
 
 /** FBX data entity that consists of a key:value tuple.
@@ -100,7 +102,7 @@ private:
 
 	std::string key;
 	TokenList tokens;
-	boost::shared_ptr<Scope> compound;
+	boost::scoped_ptr<Scope> compound;
 };
 
 
@@ -121,7 +123,7 @@ class Scope
 
 public:
 
-	Scope(Parser& parser);
+	Scope(Parser& parser, bool topLevel = false);
 	~Scope();
 
 public:
@@ -138,7 +140,7 @@ private:
 
 /** FBX parsing class, takes a list of input tokens and generates a hierarchy
  *  of nested #Scope instances, representing the fbx DOM.*/
-class Parser : public LogFunctions<Parser>
+class Parser 
 {
 public:
 	
@@ -156,13 +158,16 @@ private:
 	friend class Scope;
 	friend class Element;
 
-	TokenPtr GetNextToken();
-	TokenPtr PeekNextToken();
+	TokenPtr AdvanceToNextToken();
+
+	TokenPtr LastToken() const;
+	TokenPtr CurrentToken() const;
 
 private:
 
 	const TokenList& tokens;
 	
+	TokenPtr last, current;
 	TokenList::const_iterator cursor;
 	boost::scoped_ptr<Scope> root;
 };

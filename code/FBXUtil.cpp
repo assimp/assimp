@@ -44,6 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssimpPCH.h"
 
 #include "FBXUtil.h"
+#include "FBXTokenizer.h"
+
 #include "TinyFormatter.h"
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
@@ -53,9 +55,44 @@ namespace FBX {
 namespace Util {
 
 // ------------------------------------------------------------------------------------------------
+const char* TokenTypeString(TokenType t)
+{
+	switch(t) {
+		case TokenType_OPEN_BRACKET:
+			return "TOK_OPEN_BRACKET";
+	
+		case TokenType_CLOSE_BRACKET:
+			return "TOK_CLOSE_BRACKET";
+
+		case TokenType_DATA:
+			return "TOK_DATA";
+
+		case TokenType_COMMA:
+			return "TOK_COMMA";
+
+		case TokenType_KEY:
+			return "TOK_KEY";
+	}
+
+	ai_assert(false);
+	return "";
+}
+	
+
+// ------------------------------------------------------------------------------------------------
 std::string AddLineAndColumn(const std::string& prefix, const std::string& text, unsigned int line, unsigned int column)
 {
 	return static_cast<std::string>( (Formatter::format(),prefix,"(line ",line,", col ",column,") ",text) );
+}
+
+// ------------------------------------------------------------------------------------------------
+std::string AddTokenText(const std::string& prefix, const std::string& text, const Token* tok)
+{
+	return static_cast<std::string>( (Formatter::format(),prefix,
+		"(",TokenTypeString(tok->Type()),
+		"line ",tok->Line(),
+		", col ",tok->Column(),") ",
+		text) );
 }
 
 } // !Util

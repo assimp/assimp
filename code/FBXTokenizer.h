@@ -87,6 +87,12 @@ public:
 
 public:
 
+	std::string StringContents() const {
+		return std::string(begin(),end());
+	}
+
+public:
+
 	const char* begin() const {
 		return sbegin;
 	}
@@ -99,7 +105,22 @@ public:
 		return type;
 	}
 
+	unsigned int Line() const {
+		return line;
+	}
+
+	unsigned int Column() const {
+		return column;
+	}
+
 private:
+
+#ifdef DEBUG
+	// full string copy for the sole purpose that it nicely appears
+	// in msvc's debugger window.
+	const std::string contents;
+#endif
+
 
 	const char* const sbegin;
 	const char* const send;
@@ -108,9 +129,11 @@ private:
 	const unsigned int line, column;
 };
 
+// XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
+typedef const Token* TokenPtr;
+typedef std::vector< TokenPtr > TokenList;
 
-typedef boost::shared_ptr<Token> TokenPtr;
-typedef std::vector< boost::shared_ptr<Token> > TokenList;
+#define new_Token new Token
 
 
 /** Main FBX tokenizer function. Transform input buffer into a list of preprocessed tokens.

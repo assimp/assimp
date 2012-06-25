@@ -60,6 +60,9 @@ Token::Token(const char* sbegin, const char* send, TokenType type, unsigned int 
 	, type(type)
 	, line(line)
 	, column(column)
+#ifdef DEBUG
+	, contents(sbegin, static_cast<size_t>(send-sbegin))
+#endif
 {
 	ai_assert(sbegin);
 	ai_assert(send);
@@ -74,23 +77,45 @@ Token::~Token()
 
 namespace {
 
+// ------------------------------------------------------------------------------------------------
+// signal tokenization error, this is always unrecoverable. Throws DeadlyImportError.
+void TokenizeError(const std::string& message, unsigned int line, unsigned int column)
+{
+	throw DeadlyImportError(Util::AddLineAndColumn("FBX-Tokenize",message,line,column));
+}
+
+
 // process a potential data token up to 'cur', adding it to 'output_tokens'. 
 // ------------------------------------------------------------------------------------------------
 void ProcessDataToken( TokenList& output_tokens, const char*& start, const char*& end,
 					  unsigned int line, 
 					  unsigned int column, 
-					  TokenType type = TokenType_DATA)
+					  TokenType type = TokenType_DATA,
+					  bool must_have_token = false)
 {
-	if (start != end) {
-		// tokens should have no whitespace in them and [start,end] should
+	if (start && end) {
+		// sanity check:
+		// tokens should have no whitespace outside quoted text and [start,end] should
 		// properly delimit the valid range.
-		for (const char* c = start; c != end; ++c) {
-			if (IsSpaceOrNewLine(*c)) {
-				throw DeadlyImportError(Util::AddLineAndColumn("FBX-Tokenize","unexpected whitespace in token",line,column));
+		bool in_double_quotes = false;
+		for (const char* c = start; c != end + 1; ++c) {
+			if (*c == '\"') {
+				in_double_quotes = !in_double_quotes;
+			}
+
+			if (!in_double_quotes && IsSpaceOrNewLine(*c)) {
+				TokenizeError("unexpected whitespace in token", line, column);
 			}
 		}
 
-		output_tokens.push_back(boost::make_shared<Token>(start,end,type,line,column));
+		if (in_double_quotes) {
+			TokenizeError("non-terminated double quotes", line, column);
+		}
+
+		output_tokens.push_back(new_Token(start,end + 1,type,line,column));
+	}
+	else if (must_have_token) {
+		TokenizeError("unexpected character, expected data token", line, column);
 	}
 
 	start = end = NULL;
@@ -109,6 +134,7 @@ void Tokenize(TokenList& output_tokens, const char* input)
 
 	bool comment = false;
 	bool in_double_quotes = false;
+	bool pending_data_token = false;
 	
 	const char* token_begin = NULL, *token_end = NULL;
 	for (const char* cur = input;*cur;++cur,++column) {
@@ -119,8 +145,6 @@ void Tokenize(TokenList& output_tokens, const char* input)
 
 			column = 0;
 			++line;
-
-			continue;
 		}
 
 		if(comment) {
@@ -131,9 +155,9 @@ void Tokenize(TokenList& output_tokens, const char* input)
 			if (c == '\"') {
 				in_double_quotes = false;
 				token_end = cur;
-				if (!token_begin) {
-					token_begin = cur;
-				}
+
+				ProcessDataToken(output_tokens,token_begin,token_end,line,column);
+				pending_data_token = false;
 			}
 			continue;
 		}
@@ -141,6 +165,10 @@ void Tokenize(TokenList& output_tokens, const char* input)
 		switch(c)
 		{
 		case '\"':
+			if (token_begin) {
+				TokenizeError("unexpected double-quote", line, column);
+			}
+			token_begin = cur;
 			in_double_quotes = true;
 			continue;
 
@@ -151,29 +179,57 @@ void Tokenize(TokenList& output_tokens, const char* input)
 
 		case '{':
 			ProcessDataToken(output_tokens,token_begin,token_end, line, column);
-			output_tokens.push_back(boost::make_shared<Token>(cur,cur+1,TokenType_OPEN_BRACKET,line,column));
-			break;
+			output_tokens.push_back(new_Token(cur,cur+1,TokenType_OPEN_BRACKET,line,column));
+			continue;
 
 		case '}':
 			ProcessDataToken(output_tokens,token_begin,token_end,line,column);
-			output_tokens.push_back(boost::make_shared<Token>(cur,cur+1,TokenType_CLOSE_BRACKET,line,column));
-			break;
+			output_tokens.push_back(new_Token(cur,cur+1,TokenType_CLOSE_BRACKET,line,column));
+			continue;
 		
 		case ',':
-			ProcessDataToken(output_tokens,token_begin,token_end,line,column);
-			output_tokens.push_back(boost::make_shared<Token>(cur,cur+1,TokenType_COMMA,line,column));
-			break;
+			if (pending_data_token) {
+				ProcessDataToken(output_tokens,token_begin,token_end,line,column,TokenType_DATA,true);
+			}
+			output_tokens.push_back(new_Token(cur,cur+1,TokenType_COMMA,line,column));
+			continue;
 
 		case ':':
-			ProcessDataToken(output_tokens,token_begin,token_end,line,column, TokenType_KEY);
-			break;
+			if (pending_data_token) {
+				ProcessDataToken(output_tokens,token_begin,token_end,line,column,TokenType_KEY,true);
+			}
+			else {
+				TokenizeError("unexpected colon", line, column);
+			}
+			continue;
 		}
 		
-		if (!IsSpaceOrNewLine(c)) {
+		if (IsSpaceOrNewLine(c)) {
+
+			if (token_begin) {
+				// peek ahead and check if the next token is a colon in which
+				// case this counts as KEY token.
+				TokenType type = TokenType_DATA;
+				for (const char* peek = cur;  *peek && IsSpaceOrNewLine(*peek); ++peek) {
+					if (*peek == ':') {
+						type = TokenType_KEY;
+						cur = peek;
+						break;
+					}
+				}
+
+				ProcessDataToken(output_tokens,token_begin,token_end,line,column,type);
+			}
+
+			pending_data_token = false;
+		}
+		else {
 			token_end = cur;
 			if (!token_begin) {
 				token_begin = cur;
 			}
+
+			pending_data_token = true;
 		}
 	}
 }

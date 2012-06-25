@@ -1484,6 +1484,14 @@
 							CompileAs="1"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="debug-noboost-st|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 			</Filter>
 		</Filter>

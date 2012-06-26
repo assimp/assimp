@@ -568,6 +568,11 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 			// Usually, zero diffuse color means no diffuse color at all in the equation.
 			// So we omit this member to express this intent.
 			mout->AddProperty(&col,1,AI_MATKEY_COLOR_DIFFUSE);
+
+			if (mat->emit) {
+				aiColor3D emit_col(mat->emit * mat->r, mat->emit * mat->g, mat->emit * mat->b) ;
+				mout->AddProperty(&emit_col, 1, AI_MATKEY_COLOR_EMISSIVE) ;
+			}
 		}
 
 		col = aiColor3D(mat->specr,mat->specg,mat->specb);

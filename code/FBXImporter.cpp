@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXTokenizer.h"
 #include "FBXParser.h"
 #include "FBXUtil.h"
+#include "FBXDocument.h"
 
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
@@ -155,6 +156,9 @@ void FBXImporter::InternReadFile( const std::string& pFile,
 		// use this information to construct a very rudimentary 
 		// parse-tree representing the FBX scope structure
 		Parser parser(tokens);
+
+		// take the raw parse-tree and convert it to a FBX DOM
+		Document doc(parser);
 	}
 	catch(...) {
 		std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());

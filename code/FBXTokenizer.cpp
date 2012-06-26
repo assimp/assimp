@@ -69,6 +69,9 @@ Token::Token(const char* sbegin, const char* send, TokenType type, unsigned int 
 {
 	ai_assert(sbegin);
 	ai_assert(send);
+
+	// tokens must be of non-zero length
+	ai_assert(static_cast<size_t>(send-sbegin) > 0);
 }
 
 

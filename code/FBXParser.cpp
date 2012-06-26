@@ -49,6 +49,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXParser.h"
 #include "FBXUtil.h"
 
+#include "ParsingUtils.h"
+#include "fast_atof.h"
+
 using namespace Assimp;
 using namespace Assimp::FBX;
 
@@ -63,8 +66,12 @@ void ParseError(const std::string& message, TokenPtr token)
 
 }
 
+namespace Assimp {
+namespace FBX {
+
 // ------------------------------------------------------------------------------------------------
-Element::Element(Parser& parser)
+Element::Element(TokenPtr key_token, Parser& parser)
+: key_token(key_token)
 {
 	TokenPtr n = NULL;
 	do {
@@ -108,7 +115,7 @@ Element::Element(Parser& parser)
 // ------------------------------------------------------------------------------------------------
 Element::~Element()
 {
-	std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());
+	 // no need to delete tokens, they are owned by the parser
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -133,7 +140,7 @@ Scope::Scope(Parser& parser,bool topLevel)
 		}
 
 		const std::string& str = n->StringContents();
-		elements.insert(ElementMap::value_type(str,new_Element(parser)));
+		elements.insert(ElementMap::value_type(str,new_Element(n,parser)));
 
 		// Element() should stop at the next Key token (or right after a Close token)
 		n = parser.CurrentToken();
@@ -199,6 +206,139 @@ TokenPtr Parser::LastToken() const
 	return last;
 }
 
+
+// ------------------------------------------------------------------------------------------------
+uint64_t ParseTokenAsID(const Token& t, const char*& err_out)
+{
+	err_out = NULL;
+
+	if (t.Type() != TokenType_DATA) {
+		err_out = "expected TOK_DATA token";
+		return 0L;
+	}
+
+	// XXX: should use size_t here
+	unsigned int length = static_cast<unsigned int>(t.end() - t.begin());
+	ai_assert(length > 0);
+
+	const char* out;
+	const uint64_t id = strtoul10_64(t.begin(),&out,&length);
+	if (out != t.end()) {
+		err_out = "failed to parse ID";
+		return 0L;
+	}
+
+	return id;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+uint64_t ParseTokenAsDim(const Token& t, const char*& err_out)
+{
+	// same as ID parsing, except there is a trailing asterisk
+	err_out = NULL;
+
+	if (t.Type() != TokenType_DATA) {
+		err_out = "expected TOK_DATA token";
+		return 0L;
+	}
+
+	if(*t.begin() != '*') {
+		err_out = "expected asterisk before array dimension";
+		return 0L;
+	}
+
+	// XXX: should use size_t here
+	unsigned int length = static_cast<unsigned int>(t.end() - t.begin());
+	if(length == 0) {
+		err_out = "expected valid integer number after asterisk";
+		return 0L;
+	}
+
+	const char* out;
+	const uint64_t id = strtoul10_64(t.begin() + 1,&out,&length);
+	if (out != t.end()) {
+		err_out = "failed to parse ID";
+		return 0L;
+	}
+
+	return id;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+float ParseTokenAsFloat(const Token& t, const char*& err_out)
+{
+	err_out = NULL;
+
+	if (t.Type() != TokenType_DATA) {
+		err_out = "expected TOK_DATA token";
+		return 0.0f;
+	}
+
+	const char* inout = t.begin();
+
+	float f;
+	fast_atof(&inout);
+	if (inout != t.end()) {
+		err_out = "failed to parse floating point number";
+		return 0.0f;
+	}
+
+	return f;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+int ParseTokenAsInt(const Token& t, const char*& err_out)
+{
+	err_out = NULL;
+
+	if (t.Type() != TokenType_DATA) {
+		err_out = "expected TOK_DATA token";
+		return 0;
+	}
+
+	ai_assert(static_cast<size_t>(t.end() - t.begin()) > 0);
+
+	const char* out;
+	const int intval = strtol10(t.begin(),&out);
+	if (out != t.end()) {
+		err_out = "failed to parse ID";
+		return 0;
+	}
+
+	return intval;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+std::string ParseTokenAsString(const Token& t, const char*& err_out)
+{
+	err_out = NULL;
+
+	if (t.Type() != TokenType_DATA) {
+		err_out = "expected TOK_DATA token";
+		return "";
+	}
+
+	const size_t length = static_cast<size_t>(t.end() - t.begin());
+	if(length < 2) {
+		err_out = "token is too short to hold a string";
+		return "";
+	}
+
+	const char* s = t.begin(), *e = t.end() - 1;
+	if (*s != '\"' || *e != '\*') {
+		err_out = "expected double quoted string";
+		return "";
+	}
+
+	return std::string(s+1,length-2);
+}
+
+} // !FBX
+} // !Assimp
 
 #endif
 

@@ -85,10 +85,18 @@ class Element
 {
 public:
 
-	Element(Parser& parser);
+	Element(TokenPtr key_token, Parser& parser);
 	~Element();
 
 public:
+
+	const Scope* Compound() const {
+		return compound.get();
+	}
+
+	TokenPtr KeyToken() const {
+		return key_token;
+	}
 
 	const TokenList& Tokens() const {
 		return tokens;
@@ -96,6 +104,7 @@ public:
 
 private:
 
+	TokenPtr key_token;
 	TokenList tokens;
 	boost::scoped_ptr<Scope> compound;
 };
@@ -123,6 +132,11 @@ public:
 
 public:
 
+	const Element* operator[] (const std::string& index) const {
+		ElementMap::const_iterator it = elements.find(index);
+		return it == elements.end() ? NULL : (*it).second;
+	}
+
 	const ElementMap& Elements() const	{
 		return elements;
 	}
@@ -139,6 +153,8 @@ class Parser
 {
 public:
 	
+	/** Parse given a token list. Does not take ownership of the tokens -
+	 *  the objects must persist during the entire parser lifetime */
 	Parser (const TokenList& tokens);
 	~Parser();
 
@@ -167,6 +183,14 @@ private:
 	boost::scoped_ptr<Scope> root;
 };
 
+
+/* token parsing - this happens when building the DOM out of the parse-tree*/
+uint64_t ParseTokenAsID(const Token& t, const char*& err_out);
+uint64_t ParseTokenAsDim(const Token& t, const char*& err_out);
+
+float ParseTokenAsFloat(const Token& t, const char*& err_out);
+int ParseTokenAsInt(const Token& t, const char*& err_out);
+std::string ParseTokenAsString(const Token& t, const char*& err_out);
 
 } // ! FBX
 } // ! Assimp

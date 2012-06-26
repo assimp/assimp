@@ -90,16 +90,19 @@ Element::Element(Parser& parser)
 		if (n->Type() == TokenType_OPEN_BRACKET) {
 			compound.reset(new Scope(parser));
 
-			// compound scopes must appear at the end of an element, so TOK_CLOSE_BRACKET should be next
+			// current token should be a TOK_CLOSE_BRACKET
 			n = parser.CurrentToken();
 			ai_assert(n);
 
 			if (n->Type() != TokenType_CLOSE_BRACKET) {
 				ParseError("expected closing bracket",n);
 			}
+
+			parser.AdvanceToNextToken();
+			return;
 		}
 	}
-	while(n->Type() != TokenType_KEY);
+	while(n->Type() != TokenType_KEY && n->Type() != TokenType_CLOSE_BRACKET);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -107,7 +110,7 @@ Element::~Element()
 {
 	std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());
 }
-
+#include <Windows.h>
 // ------------------------------------------------------------------------------------------------
 Scope::Scope(Parser& parser,bool topLevel)
 {
@@ -123,14 +126,16 @@ Scope::Scope(Parser& parser,bool topLevel)
 		ParseError("unexpected end of file",NULL);
 	}
 
-	do {
+	// note: empty scopes are allowed
+	while(n->Type() != TokenType_CLOSE_BRACKET)	{
 		if (n->Type() != TokenType_KEY) {
 			ParseError("unexpected token, expected TOK_KEY",n);
 		}
 
-		elements.insert(ElementMap::value_type(n->StringContents(),new_Element(parser)));
+		const std::string& str = n->StringContents();
+		elements.insert(ElementMap::value_type(str,new_Element(parser)));
 
-		// Element() should stop at the next Key (or Close) token
+		// Element() should stop at the next Key token (or right after a Close token)
 		n = parser.CurrentToken();
 		if(n == NULL) {
 			if (topLevel) {
@@ -139,7 +144,6 @@ Scope::Scope(Parser& parser,bool topLevel)
 			ParseError("unexpected end of file",parser.LastToken());
 		}
 	}
-	while(n->Type() != TokenType_CLOSE_BRACKET);
 }
 
 // ------------------------------------------------------------------------------------------------

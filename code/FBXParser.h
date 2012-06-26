@@ -90,17 +90,12 @@ public:
 
 public:
 
-	const std::string& Key() const {
-		return key;
-	}
-
 	const TokenList& Tokens() const {
 		return tokens;
 	}
 
 private:
 
-	std::string key;
 	TokenList tokens;
 	boost::scoped_ptr<Scope> compound;
 };

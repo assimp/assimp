@@ -1690,3 +1690,12 @@ void xxxxImporter::InternReadFile( const std::string& pFile,
 
 @endcode
  */
+
+ 
+ /**
+ @page AnimationOverview Animation Overview
+ \section Transformations
+ This diagram shows how you can calculate your transformationmatrices for an animated character:
+ <img src="AnimationOverview.png" />
+ 
+ **/

@@ -130,8 +130,7 @@ void OgreImporter::ReadSubMesh(SubMesh &theSubMesh, XmlReader *Reader)
 		" Normale: ",theSubMesh.Normals.size(),
 		" TexCoords: ",theSubMesh.Uvs.size(),
 		" Tantents: ",theSubMesh.Tangents.size()
-	));							
-	DefaultLogger::get()->warn(Reader->getNodeName());
+	));
 }
 
 

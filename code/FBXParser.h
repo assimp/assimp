@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <map>
 #include <string>
+#include <utility>
 
 #include <boost/shared_ptr.hpp>
 
@@ -65,6 +66,8 @@ namespace FBX {
 	// XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
 	typedef std::vector< Scope* > ScopeList;
 	typedef std::fbx_unordered_multimap< std::string, Element* > ElementMap;
+
+	typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> ElementCollection;
 
 #	define new_Scope new Scope
 #	define new_Element new Element
@@ -85,7 +88,7 @@ class Element
 {
 public:
 
-	Element(TokenPtr key_token, Parser& parser);
+	Element(const Token& key_token, Parser& parser);
 	~Element();
 
 public:
@@ -94,7 +97,7 @@ public:
 		return compound.get();
 	}
 
-	TokenPtr KeyToken() const {
+	const Token& KeyToken() const {
 		return key_token;
 	}
 
@@ -104,7 +107,7 @@ public:
 
 private:
 
-	TokenPtr key_token;
+	const Token& key_token;
 	TokenList tokens;
 	boost::scoped_ptr<Scope> compound;
 };
@@ -135,6 +138,10 @@ public:
 	const Element* operator[] (const std::string& index) const {
 		ElementMap::const_iterator it = elements.find(index);
 		return it == elements.end() ? NULL : (*it).second;
+	}
+
+	ElementCollection GetCollection(const std::string& index) const {
+		return elements.equal_range(index);
 	}
 
 	const ElementMap& Elements() const	{

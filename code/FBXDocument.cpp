@@ -56,10 +56,22 @@ namespace {
 
 	// ------------------------------------------------------------------------------------------------
 	// signal DOM construction error, this is always unrecoverable. Throws DeadlyImportError.
-	void DOMError(const std::string& message, Element* element = NULL)
+	void DOMError(const std::string& message, const Element* element = NULL)
 	{
-		throw DeadlyImportError(element ? Util::AddTokenText("FBX-DOM",message,element->KeyToken()) : ("FBX-DOM " + message));
+		throw DeadlyImportError(element ? Util::AddTokenText("FBX-DOM",message,&element->KeyToken()) : ("FBX-DOM " + message));
 	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	// extract a required element from a scope, abort if the element cannot be found
+	const Element& GetFixedElementFromScope(const Scope& sc, const std::string& index, const Element* element = NULL) {
+		const Element* el = sc[index];
+		if(!el) {
+			DOMError("did not find required element \"" + index + "\"",element);
+		}
+		return *el;
+	}
+
 }
 
 namespace Assimp {
@@ -85,13 +97,48 @@ const Object* LazyObject::Get()
 		return object.get();
 	}
 
-	// XXX
-	return NULL;
+	const Token& key = element.KeyToken();
+	const TokenList& tokens = element.Tokens();
+
+	if(tokens.size() < 3) {
+		DOMError("expected at least 3 tokens: id, name and class tag",&element);
+	}
+
+	const char* err;
+	const std::string name = ParseTokenAsString(*tokens[1],err);
+	if (err) {
+		DOMError(err,&element);
+	} 
+
+	const std::string classtag = ParseTokenAsString(*tokens[2],err);
+	if (err) {
+		DOMError(err,&element);
+	} 
+
+	// this needs to be relatively fast since we do it a lot,
+	// so avoid constructing strings all the time. strcmp()
+	// may scan beyond the bounds of the token, but the 
+	// next character is always a colon so false positives
+	// are not possible.
+	const char* obtype = key.begin();
+	if (!strcmp(obtype,"Geometry")) {
+
+		if (!strcmp(classtag.c_str(),"Mesh")) {
+			object = new MeshGeometry(element,name);
+		}
+	}
+
+	if (!object.get()) {
+		DOMError("failed to convert element to DOM object, class: " + classtag + ", name: " + name,&element);
+	}
+
+	return object.get();
 }
 
 // ------------------------------------------------------------------------------------------------
-Object::Object(const Element& element)
+Object::Object(const Element& element, const std::string& name)
 : element(element)
+, name(name)
 {
 
 }
@@ -103,8 +150,8 @@ Object::~Object()
 }
 
 // ------------------------------------------------------------------------------------------------
-Geometry::Geometry(const Element& element)
-: Object(element)
+Geometry::Geometry(const Element& element, const std::string& name)
+: Object(element,name)
 {
 
 }
@@ -116,10 +163,23 @@ Geometry::~Geometry()
 }
 
 // ------------------------------------------------------------------------------------------------
-MeshGeometry::MeshGeometry(const Element& element)
-: Geometry(element)
+MeshGeometry::MeshGeometry(const Element& element, const std::string& name)
+: Geometry(element,name)
 {
+	const Scope* sc = element.Compound();
+	if (!sc) {
+		DOMError("failed to read Geometry object (class: Mesh), no data scope found");
+	}
 
+	// must have Mesh elements:
+	const Element& Vertices = GetFixedElementFromScope(*sc,"Vertices",&element);
+	const Element& PolygonVertexIndex = GetFixedElementFromScope(*sc,"PolygonVertexIndex",&element);
+
+	// optional Mesh elements:
+	const ElementCollection& Layer = sc->GetCollection("Layer");
+	const ElementCollection& LayerElementMaterial = sc->GetCollection("LayerElementMaterial");
+	const ElementCollection& LayerElementUV = sc->GetCollection("LayerElementUV");
+	const ElementCollection& LayerElementNormal = sc->GetCollection("LayerElementNormal");
 }
 
 // ------------------------------------------------------------------------------------------------

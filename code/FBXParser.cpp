@@ -70,7 +70,7 @@ namespace Assimp {
 namespace FBX {
 
 // ------------------------------------------------------------------------------------------------
-Element::Element(TokenPtr key_token, Parser& parser)
+Element::Element(const Token& key_token, Parser& parser)
 : key_token(key_token)
 {
 	TokenPtr n = NULL;
@@ -140,7 +140,7 @@ Scope::Scope(Parser& parser,bool topLevel)
 		}
 
 		const std::string& str = n->StringContents();
-		elements.insert(ElementMap::value_type(str,new_Element(n,parser)));
+		elements.insert(ElementMap::value_type(str,new_Element(*n,parser)));
 
 		// Element() should stop at the next Key token (or right after a Close token)
 		n = parser.CurrentToken();

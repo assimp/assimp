@@ -88,13 +88,14 @@ class Object
 {
 public:
 
-	Object(const Element& element);
+	Object(const Element& element, const std::string& name);
 	~Object();
 
 public:
 
 protected:
 	const Element& element;
+	const std::string name;
 };
 
 
@@ -103,7 +104,7 @@ class Geometry : public Object
 {
 public:
 
-	Geometry(const Element& element);
+	Geometry(const Element& element, const std::string& name);
 	~Geometry();
 };
 
@@ -114,7 +115,7 @@ class MeshGeometry : public Geometry
 
 public:
 
-	MeshGeometry(const Element& element);
+	MeshGeometry(const Element& element, const std::string& name);
 	~MeshGeometry();
 
 public:

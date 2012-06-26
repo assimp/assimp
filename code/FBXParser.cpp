@@ -233,33 +233,33 @@ uint64_t ParseTokenAsID(const Token& t, const char*& err_out)
 
 
 // ------------------------------------------------------------------------------------------------
-uint64_t ParseTokenAsDim(const Token& t, const char*& err_out)
+size_t ParseTokenAsDim(const Token& t, const char*& err_out)
 {
 	// same as ID parsing, except there is a trailing asterisk
 	err_out = NULL;
 
 	if (t.Type() != TokenType_DATA) {
 		err_out = "expected TOK_DATA token";
-		return 0L;
+		return 0;
 	}
 
 	if(*t.begin() != '*') {
 		err_out = "expected asterisk before array dimension";
-		return 0L;
+		return 0;
 	}
 
 	// XXX: should use size_t here
 	unsigned int length = static_cast<unsigned int>(t.end() - t.begin());
 	if(length == 0) {
 		err_out = "expected valid integer number after asterisk";
-		return 0L;
+		return 0;
 	}
 
 	const char* out;
-	const uint64_t id = strtoul10_64(t.begin() + 1,&out,&length);
+	const size_t id = static_cast<size_t>(strtoul10_64(t.begin() + 1,&out,&length));
 	if (out != t.end()) {
 		err_out = "failed to parse ID";
-		return 0L;
+		return 0;
 	}
 
 	return id;

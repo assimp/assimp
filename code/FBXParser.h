@@ -193,7 +193,7 @@ private:
 
 /* token parsing - this happens when building the DOM out of the parse-tree*/
 uint64_t ParseTokenAsID(const Token& t, const char*& err_out);
-uint64_t ParseTokenAsDim(const Token& t, const char*& err_out);
+size_t ParseTokenAsDim(const Token& t, const char*& err_out);
 
 float ParseTokenAsFloat(const Token& t, const char*& err_out);
 int ParseTokenAsInt(const Token& t, const char*& err_out);

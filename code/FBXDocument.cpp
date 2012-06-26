@@ -64,12 +64,95 @@ namespace {
 
 	// ------------------------------------------------------------------------------------------------
 	// extract a required element from a scope, abort if the element cannot be found
-	const Element& GetFixedElementFromScope(const Scope& sc, const std::string& index, const Element* element = NULL) {
+	const Element& GetFixedElementFromScope(const Scope& sc, const std::string& index, const Element* element = NULL) 
+	{
 		const Element* el = sc[index];
 		if(!el) {
 			DOMError("did not find required element \"" + index + "\"",element);
 		}
 		return *el;
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	// read an array of float3 tuples
+	void ReadVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
+	{
+		out.clear();
+		const TokenList& tok = el.Tokens();
+
+		const char* err;
+		const size_t dim = ParseTokenAsDim(*tok[0],err);
+		if(err) {
+			DOMError(err,&el);
+		}
+
+		// may throw bad_alloc if the input is rubbish, but this need
+		// not to be prevented - importing would fail but we wouldn't
+		// crash since assimp handles this case properly.
+		out.reserve(dim);
+
+		const Scope* const scope = el.Compound();
+		if(!scope) {
+			DOMError("expected vector3 data",&el);
+		}
+
+		const Element& a = GetFixedElementFromScope(*scope,"a",&el);
+		if (a.Tokens().size() % 3 != 0) {
+			DOMError("number of floats is not a multiple of three",&el);
+		}
+		for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
+			aiVector3D v;
+			v.x = ParseTokenAsFloat(**it++,err);
+			if(err) {
+				DOMError(err,&el);
+			}
+
+			v.y = ParseTokenAsFloat(**it++,err);
+			if(err) {
+				DOMError(err,&el);
+			}
+
+			v.z = ParseTokenAsFloat(**it++,err);
+			if(err) {
+				DOMError(err,&el);
+			}
+
+			out.push_back(v);
+		}
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	// read an array of ints
+	void ReadIntDataArray(std::vector<int>& out, const Element& el)
+	{
+		out.clear();
+		const TokenList& tok = el.Tokens();
+
+		const char* err;
+		const size_t dim = ParseTokenAsDim(*tok[0],err);
+		if(err) {
+			DOMError(err,&el);
+		}
+
+		// see notes in ReadVectorDataArray()
+		out.reserve(dim);
+
+		const Scope* const scope = el.Compound();
+		if(!scope) {
+			DOMError("expected int data block",&el);
+		}
+
+		const Element& a = GetFixedElementFromScope(*scope,"a",&el);
+		for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
+			const int ival = ParseTokenAsInt(**it++,err);
+			if(err) {
+				DOMError(err,&el);
+			}
+
+			out.push_back(ival);
+		}
 	}
 
 }
@@ -180,6 +263,11 @@ MeshGeometry::MeshGeometry(const Element& element, const std::string& name)
 	const ElementCollection& LayerElementMaterial = sc->GetCollection("LayerElementMaterial");
 	const ElementCollection& LayerElementUV = sc->GetCollection("LayerElementUV");
 	const ElementCollection& LayerElementNormal = sc->GetCollection("LayerElementNormal");
+
+	ReadVectorDataArray(vertices,Vertices);
+
+	std::vector<int> tempFaces;
+	ReadIntDataArray(tempFaces,PolygonVertexIndex);
 }
 
 // ------------------------------------------------------------------------------------------------

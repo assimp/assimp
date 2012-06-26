@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXParser.h"
 #include "FBXDocument.h"
 #include "FBXUtil.h"
+#include "FBXImporter.h"
 
 namespace {
 
@@ -268,6 +269,29 @@ MeshGeometry::MeshGeometry(const Element& element, const std::string& name)
 
 	std::vector<int> tempFaces;
 	ReadIntDataArray(tempFaces,PolygonVertexIndex);
+
+	// ignore all but the first layer, but warn about any further layers 
+	for (ElementMap::const_iterator it = Layer.first; it != Layer.second; ++it) {
+		const TokenList& tokens = (*it).second->Tokens();
+
+		const char* err;
+		const int index = ParseTokenAsInt(*tokens[0], err);
+		if(err) {
+			DOMError(err,&element);
+		}
+
+		if(index == 0) {
+			const Scope* const layer = (*it).second->Compound();
+			if (layer) {
+				DOMError("expected layer scope",&element);
+			}
+
+			// XXX read layer data
+		}
+		else {
+			FBXImporter::LogWarn("ignoring additional geometry layers");
+		}
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

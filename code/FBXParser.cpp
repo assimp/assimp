@@ -110,7 +110,7 @@ Element::~Element()
 {
 	std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());
 }
-#include <Windows.h>
+
 // ------------------------------------------------------------------------------------------------
 Scope::Scope(Parser& parser,bool topLevel)
 {

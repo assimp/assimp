@@ -50,151 +50,53 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXUtil.h"
 #include "FBXImporter.h"
 
-namespace {
-
-	using namespace Assimp;
-	using namespace Assimp::FBX;
-
-	// ------------------------------------------------------------------------------------------------
-	// signal DOM construction error, this is always unrecoverable. Throws DeadlyImportError.
-	void DOMError(const std::string& message, const Token& token)
-	{
-		throw DeadlyImportError(Util::AddTokenText("FBX-DOM",message,&token));
-	}
-
-	// ------------------------------------------------------------------------------------------------
-	void DOMError(const std::string& message, const Element* element = NULL)
-	{
-		if(element) {
-			DOMError(message,element->KeyToken());
-		}
-		throw DeadlyImportError("FBX-DOM " + message);
-	}
-
-
-	// ------------------------------------------------------------------------------------------------
-	// extract a required element from a scope, abort if the element cannot be found
-	const Element& GetRequiredElement(const Scope& sc, const std::string& index, const Element* element = NULL) 
-	{
-		const Element* el = sc[index];
-		if(!el) {
-			DOMError("did not find required element \"" + index + "\"",element);
-		}
-		return *el;
-	}
-
-
-	// ------------------------------------------------------------------------------------------------
-	// extract required compound scope
-	const Scope& GetRequiredScope(const Element& el)
-	{
-		const Scope* const s = el.Compound();
-		if(!s) {
-			DOMError("expected compound scope",&el);
-		}
-
-		return *s;
-	}
-
-
-	// ------------------------------------------------------------------------------------------------
-	// get token at a particular index
-	const Token& GetRequiredToken(const Element& el, unsigned int index)
-	{
-		const TokenList& t = el.Tokens();
-		if(t.size() > index) {
-			DOMError(Formatter::format( "missing token at index " ) << index,&el);
-		}
-
-		return *t[index];
-	}
-
-
-	// ------------------------------------------------------------------------------------------------
-	// read an array of float3 tuples
-	void ReadVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
-	{
-		out.clear();
-		const TokenList& tok = el.Tokens();
-
-		const char* err;
-		const size_t dim = ParseTokenAsDim(*tok[0],err);
-		if(err) {
-			DOMError(err,&el);
-		}
-
-		// may throw bad_alloc if the input is rubbish, but this need
-		// not to be prevented - importing would fail but we wouldn't
-		// crash since assimp handles this case properly.
-		out.reserve(dim);
-
-		const Scope* const scope = el.Compound();
-		if(!scope) {
-			DOMError("expected vector3 data",&el);
-		}
-
-		const Element& a = GetRequiredElement(*scope,"a",&el);
-		if (a.Tokens().size() % 3 != 0) {
-			DOMError("number of floats is not a multiple of three",&el);
-		}
-		for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
-			aiVector3D v;
-			v.x = ParseTokenAsFloat(**it++,err);
-			if(err) {
-				DOMError(err,&el);
-			}
-
-			v.y = ParseTokenAsFloat(**it++,err);
-			if(err) {
-				DOMError(err,&el);
-			}
-
-			v.z = ParseTokenAsFloat(**it++,err);
-			if(err) {
-				DOMError(err,&el);
-			}
-
-			out.push_back(v);
-		}
-	}
-
-
-	// ------------------------------------------------------------------------------------------------
-	// read an array of ints
-	void ReadIntDataArray(std::vector<int>& out, const Element& el)
-	{
-		out.clear();
-		const TokenList& tok = el.Tokens();
-
-		const char* err;
-		const size_t dim = ParseTokenAsDim(*tok[0],err);
-		if(err) {
-			DOMError(err,&el);
-		}
-
-		// see notes in ReadVectorDataArray()
-		out.reserve(dim);
-
-		const Scope* const scope = el.Compound();
-		if(!scope) {
-			DOMError("expected int data block",&el);
-		}
-
-		const Element& a = GetRequiredElement(*scope,"a",&el);
-		for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
-			const int ival = ParseTokenAsInt(**it++,err);
-			if(err) {
-				DOMError(err,&el);
-			}
-
-			out.push_back(ival);
-		}
-	}
-
-}
-
 namespace Assimp {
 namespace FBX {
+
+namespace {
+
+// ------------------------------------------------------------------------------------------------
+// signal DOM construction error, this is always unrecoverable. Throws DeadlyImportError.
+void DOMError(const std::string& message, const Token& token)
+{
+	throw DeadlyImportError(Util::AddTokenText("FBX-DOM",message,&token));
+}
+
+// ------------------------------------------------------------------------------------------------
+void DOMError(const std::string& message, const Element* element = NULL)
+{
+	if(element) {
+		DOMError(message,element->KeyToken());
+	}
+	throw DeadlyImportError("FBX-DOM " + message);
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// extract required compound scope
+const Scope& GetRequiredScope(const Element& el)
+{
+	const Scope* const s = el.Compound();
+	if(!s) {
+		DOMError("expected compound scope",&el);
+	}
+
+	return *s;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// get token at a particular index
+const Token& GetRequiredToken(const Element& el, unsigned int index)
+{
+	const TokenList& t = el.Tokens();
+	if(t.size() > index) {
+		DOMError(Formatter::format( "missing token at index " ) << index,&el);
+	}
+
+	return *t[index];
+}
+
 
 // ------------------------------------------------------------------------------------------------
 // wrapper around ParseTokenAsID() with DOMError handling
@@ -259,6 +161,97 @@ std::string ParseTokenAsString(const Token& t)
 	}
 	return i;
 }
+
+// ------------------------------------------------------------------------------------------------
+// extract a required element from a scope, abort if the element cannot be found
+const Element& GetRequiredElement(const Scope& sc, const std::string& index, const Element* element = NULL) 
+{
+	const Element* el = sc[index];
+	if(!el) {
+		DOMError("did not find required element \"" + index + "\"",element);
+	}
+	return *el;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// read an array of float3 tuples
+void ReadVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
+{
+	out.clear();
+	const TokenList& tok = el.Tokens();
+	const size_t dim = ParseTokenAsDim(*tok[0]);
+
+	// may throw bad_alloc if the input is rubbish, but this need
+	// not to be prevented - importing would fail but we wouldn't
+	// crash since assimp handles this case properly.
+	out.reserve(dim);
+
+	const Scope& scope = GetRequiredScope(el);
+	const Element& a = GetRequiredElement(scope,"a",&el);
+
+	if (a.Tokens().size() % 3 != 0) {
+		DOMError("number of floats is not a multiple of three (3)",&el);
+	}
+	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
+		aiVector3D v;
+		v.x = ParseTokenAsFloat(**it++);
+		v.y = ParseTokenAsFloat(**it++);
+		v.z = ParseTokenAsFloat(**it++);
+
+		out.push_back(v);
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// read an array of float2 tuples
+void ReadVectorDataArray(std::vector<aiVector2D>& out, const Element& el)
+{
+	out.clear();
+	const TokenList& tok = el.Tokens();
+	const size_t dim = ParseTokenAsDim(*tok[0]);
+
+	// see notes in ReadVectorDataArray() above
+	out.reserve(dim);
+
+	const Scope& scope = GetRequiredScope(el);
+	const Element& a = GetRequiredElement(scope,"a",&el);
+
+	if (a.Tokens().size() % 2 != 0) {
+		DOMError("number of floats is not a multiple of two (2)",&el);
+	}
+	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
+		aiVector2D v;
+		v.x = ParseTokenAsFloat(**it++);
+		v.y = ParseTokenAsFloat(**it++);
+
+		out.push_back(v);
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// read an array of ints
+void ReadIntDataArray(std::vector<int>& out, const Element& el)
+{
+	out.clear();
+	const TokenList& tok = el.Tokens();
+	const size_t dim = ParseTokenAsDim(*tok[0]);
+
+	// see notes in ReadVectorDataArray()
+	out.reserve(dim);
+
+	const Scope& scope = GetRequiredScope(el);
+	const Element& a = GetRequiredElement(scope,"a",&el);
+
+	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
+		const int ival = ParseTokenAsInt(**it++);
+		out.push_back(ival);
+	}
+}
+} // end anon.
+
 
 // ------------------------------------------------------------------------------------------------
 LazyObject::LazyObject(const Element& element)
@@ -364,10 +357,48 @@ MeshGeometry::MeshGeometry(const Element& element, const std::string& name)
 	const ElementCollection& LayerElementUV = sc->GetCollection("LayerElementUV");
 	const ElementCollection& LayerElementNormal = sc->GetCollection("LayerElementNormal");
 
-	ReadVectorDataArray(vertices,Vertices);
+	std::vector<aiVector3D> tempVerts;
+	ReadVectorDataArray(tempVerts,Vertices);
 
 	std::vector<int> tempFaces;
 	ReadIntDataArray(tempFaces,PolygonVertexIndex);
+
+	vertices.reserve(tempFaces.size());
+	faces.reserve(tempFaces.size() / 3);
+
+	mapping_offsets.resize(tempVerts.size());
+	mapping_counts.resize(tempVerts.size(),0);
+	mappings.resize(tempFaces.size());
+
+	// generate output vertices, computing an adjacency table to
+	// preserve the mapping from fbx indices to *this* indexing.
+	unsigned int count = 0;
+	BOOST_FOREACH(int index, tempFaces) {
+		const int absi = index < 0 ? -index : index;
+		vertices.push_back(tempVerts[absi]);
+		++count;
+
+		++mapping_counts[absi];
+
+		if (index < 0) {
+			faces.push_back(count);
+			count = 0;
+		}
+	}
+
+	unsigned int cursor = 0;
+	for (size_t i = 0, e = tempVerts.size(); i < e; ++i) {
+		mapping_offsets[i] = cursor;
+		cursor += mapping_counts[i];
+
+		mapping_counts[i] = 0;
+	}
+
+	cursor = 0;
+	BOOST_FOREACH(int index, tempFaces) {
+		const int absi = index < 0 ? -index : index;
+		mappings[mapping_offsets[absi] + mapping_counts[absi]++] = cursor;
+	}
 
 	// ignore all but the first layer, but warn about any further layers 
 	for (ElementMap::const_iterator it = Layer.first; it != Layer.second; ++it) {
@@ -427,8 +458,13 @@ void MeshGeometry::ReadLayerElement(const Scope& layerElement)
 // ------------------------------------------------------------------------------------------------
 void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scope& source)
 {
-	const std::string& MappingInformationType = ParseTokenAsString(GetRequiredToken(GetRequiredElement(source,"MappingInformationType"),0));
-	const std::string& ReferenceInformationType = ParseTokenAsString(GetRequiredToken(GetRequiredElement(source,"ReferenceInformationType"),0));
+	const std::string& MappingInformationType = ParseTokenAsString(GetRequiredToken(
+		GetRequiredElement(source,"MappingInformationType"),0)
+	);
+
+	const std::string& ReferenceInformationType = ParseTokenAsString(GetRequiredToken(
+		GetRequiredElement(source,"ReferenceInformationType"),0)
+	);
 	
 	if (type == "LayerElementUV") {
 		if(index >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
@@ -438,14 +474,88 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
 			return;
 		}
 
-		const std::vector<aiVector2D>& uv = uvs[index];
+		std::vector<aiVector2D>& uv_out = uvs[index];
+		uv_out.resize(vertices.size());
+
+		std::vector<aiVector2D> tempUV;
+		ReadVectorDataArray(tempUV,GetRequiredElement(source,"UV"));
+
+		if (MappingInformationType == "ByVertice" && ReferenceInformationType == "Direct") {	
+			for (size_t i = 0, e = tempUV.size(); i < e; ++i) {
+
+				const unsigned int istart = mapping_offsets[i], iend = istart + mapping_counts[i];
+				for (unsigned int j = istart; j < iend; ++j) {
+					uv_out[mappings[j]] = tempUV[i];
+				}
+			}
+		}
+		else if (MappingInformationType == "ByVertice" && ReferenceInformationType == "IndexToDirect") {	
+
+			std::vector<int> uvIndices;
+			ReadIntDataArray(uvIndices,GetRequiredElement(source,"UVIndex"));
+
+			for (size_t i = 0, e = uvIndices.size(); i < e; ++i) {
+
+				const unsigned int istart = mapping_offsets[i], iend = istart + mapping_counts[i];
+				for (unsigned int j = istart; j < iend; ++j) {
+					uv_out[mappings[j]] = tempUV[uvIndices[i]];
+				}
+			}
+		}
+		else {
+			FBXImporter::LogError(Formatter::format("ignoring normals, unrecognized access type: ") 
+				<< MappingInformationType << "," << ReferenceInformationType);
+		}
 	}
 	else if (type == "LayerElementMaterial") {
 		
+		materials.resize(vertices.size());
+
+		std::vector<int> tempMaterials;
+		ReadIntDataArray(tempMaterials,GetRequiredElement(source,"Materials"));
+
+		if (MappingInformationType == "AllSame") {
+			// easy - same material for all faces
+			materials.assign(vertices.size(),tempMaterials[0]);
+		}
+		else {
+			FBXImporter::LogError(Formatter::format("ignoring material assignments, unrecognized access type: ") 
+				<< MappingInformationType << "," << ReferenceInformationType);
+		}
 	}
 	else if (type == "LayerElementNormal") {
 
+		std::vector<aiVector3D> tempNormals;
 		ReadVectorDataArray(normals,GetRequiredElement(source,"Normals"));
+
+		normals.resize(vertices.size());
+
+		if (MappingInformationType == "ByVertice" && ReferenceInformationType == "Direct") {	
+			
+			for (size_t i = 0, e = tempNormals.size(); i < e; ++i) {
+
+				const unsigned int istart = mapping_offsets[i], iend = istart + mapping_counts[i];
+				for (unsigned int j = istart; j < iend; ++j) {
+					normals[mappings[j]] = tempNormals[i];
+				}
+			}
+		}
+		else if (MappingInformationType == "ByVertice" && ReferenceInformationType == "IndexToDirect") {	
+
+			std::vector<int> normalIndices;
+			ReadIntDataArray(normalIndices,GetRequiredElement(source,"NormalsIndex"));
+			for (size_t i = 0, e = normalIndices.size(); i < e; ++i) {
+
+				const unsigned int istart = mapping_offsets[i], iend = istart + mapping_counts[i];
+				for (unsigned int j = istart; j < iend; ++j) {
+					normals[mappings[j]] = tempNormals[normalIndices[i]];
+				}
+			}
+		}
+		else {
+			FBXImporter::LogError(Formatter::format("ignoring normals, unrecognized access type: ") 
+				<< MappingInformationType << "," << ReferenceInformationType);
+		}
 	}
 }
 

@@ -182,6 +182,10 @@ private:
 	std::vector<aiVector3D> normals;
 	std::vector<aiVector2D> uvs[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 	std::vector<aiColor4D> colors[AI_MAX_NUMBER_OF_COLOR_SETS];
+
+	std::vector<unsigned int> mapping_counts;
+	std::vector<unsigned int> mapping_offsets;
+	std::vector<unsigned int> mappings;
 };
 
 	// XXX again, unique_ptr would be useful. shared_ptr is too

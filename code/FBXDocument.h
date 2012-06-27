@@ -146,8 +146,8 @@ public:
 
 	/** Get a UV coordinate slot, returns an empty array if
 	 *  the requested slot does not exist. */
-	const std::vector<aiVector3D>& GetTextureCoords(unsigned int index) const {
-		static const std::vector<aiVector3D> empty;
+	const std::vector<aiVector2D>& GetTextureCoords(unsigned int index) const {
+		static const std::vector<aiVector2D> empty;
 		return index >= AI_MAX_NUMBER_OF_TEXTURECOORDS ? empty : uvs[index];
 	}
 
@@ -168,13 +168,19 @@ public:
 
 private:
 
+	void ReadLayer(const Scope& layer);
+	void ReadLayerElement(const Scope& layerElement);
+	void ReadVertexData(const std::string& type, int index, const Scope& source);
+
+private:
+
 	// cached data arrays
 	std::vector<unsigned int> materials;
 	std::vector<aiVector3D> vertices;
 	std::vector<unsigned int> faces;
 	std::vector<aiVector3D> tangents;
 	std::vector<aiVector3D> normals;
-	std::vector<aiVector3D> uvs[AI_MAX_NUMBER_OF_TEXTURECOORDS];
+	std::vector<aiVector2D> uvs[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 	std::vector<aiColor4D> colors[AI_MAX_NUMBER_OF_COLOR_SETS];
 };
 

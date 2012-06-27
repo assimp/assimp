@@ -57,9 +57,18 @@ namespace {
 
 	// ------------------------------------------------------------------------------------------------
 	// signal DOM construction error, this is always unrecoverable. Throws DeadlyImportError.
+	void DOMError(const std::string& message, const Token& token)
+	{
+		throw DeadlyImportError(Util::AddTokenText("FBX-DOM",message,&token));
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	void DOMError(const std::string& message, const Element* element = NULL)
 	{
-		throw DeadlyImportError(element ? Util::AddTokenText("FBX-DOM",message,&element->KeyToken()) : ("FBX-DOM " + message));
+		if(element) {
+			DOMError(message,element->KeyToken());
+		}
+		throw DeadlyImportError("FBX-DOM " + message);
 	}
 
 
@@ -77,11 +86,11 @@ namespace {
 
 	// ------------------------------------------------------------------------------------------------
 	// extract required compound scope
-	const Scope& GetRequiredScope(const Element& el, const Element* element = NULL)
+	const Scope& GetRequiredScope(const Element& el)
 	{
 		const Scope* const s = el.Compound();
 		if(!s) {
-			DOMError("expected compound scope",element);
+			DOMError("expected compound scope",&el);
 		}
 
 		return *s;
@@ -90,11 +99,11 @@ namespace {
 
 	// ------------------------------------------------------------------------------------------------
 	// get token at a particular index
-	const Token& GetRequiredToken(const Element& el, unsigned int index, const Element* element = NULL)
+	const Token& GetRequiredToken(const Element& el, unsigned int index)
 	{
 		const TokenList& t = el.Tokens();
 		if(t.size() > index) {
-			DOMError(Formatter::format( "missing token at index " ) << index,element);
+			DOMError(Formatter::format( "missing token at index " ) << index,&el);
 		}
 
 		return *t[index];
@@ -189,12 +198,12 @@ namespace FBX {
 
 // ------------------------------------------------------------------------------------------------
 // wrapper around ParseTokenAsID() with DOMError handling
-uint64_t ParseTokenAsID(const Token& t, const Element* element = NULL) 
+uint64_t ParseTokenAsID(const Token& t) 
 {
 	const char* err;
 	const uint64_t i = ParseTokenAsID(t,err);
 	if(err) {
-		DOMError(err,element);
+		DOMError(err,t);
 	}
 	return i;
 }
@@ -202,12 +211,12 @@ uint64_t ParseTokenAsID(const Token& t, const Element* element = NULL)
 
 // ------------------------------------------------------------------------------------------------
 // wrapper around ParseTokenAsDim() with DOMError handling
-size_t ParseTokenAsDim(const Token& t, const Element* element = NULL)
+size_t ParseTokenAsDim(const Token& t)
 {
 	const char* err;
 	const size_t i = ParseTokenAsDim(t,err);
 	if(err) {
-		DOMError(err,element);
+		DOMError(err,t);
 	}
 	return i;
 }
@@ -215,12 +224,12 @@ size_t ParseTokenAsDim(const Token& t, const Element* element = NULL)
 
 // ------------------------------------------------------------------------------------------------
 // wrapper around ParseTokenAsFloat() with DOMError handling
-float ParseTokenAsFloat(const Token& t, const Element* element = NULL)
+float ParseTokenAsFloat(const Token& t)
 {
 	const char* err;
 	const float i = ParseTokenAsFloat(t,err);
 	if(err) {
-		DOMError(err,element);
+		DOMError(err,t);
 	}
 	return i;
 }
@@ -228,12 +237,12 @@ float ParseTokenAsFloat(const Token& t, const Element* element = NULL)
 
 // ------------------------------------------------------------------------------------------------
 // wrapper around ParseTokenAsInt() with DOMError handling
-int ParseTokenAsInt(const Token& t, const Element* element = NULL)
+int ParseTokenAsInt(const Token& t)
 {
 	const char* err;
 	const int i = ParseTokenAsInt(t,err);
 	if(err) {
-		DOMError(err,element);
+		DOMError(err,t);
 	}
 	return i;
 }
@@ -241,12 +250,12 @@ int ParseTokenAsInt(const Token& t, const Element* element = NULL)
 
 // ------------------------------------------------------------------------------------------------
 // wrapper around ParseTokenAsString() with DOMError handling
-std::string ParseTokenAsString(const Token& t, const Element* element = NULL)
+std::string ParseTokenAsString(const Token& t)
 {
 	const char* err;
 	const std::string& i = ParseTokenAsString(t,err);
 	if(err) {
-		DOMError(err,element);
+		DOMError(err,t);
 	}
 	return i;
 }
@@ -371,24 +380,72 @@ MeshGeometry::MeshGeometry(const Element& element, const std::string& name)
 		}
 
 		if(index == 0) {
-			const Scope& layer = GetRequiredScope(*(*it).second,&element);
-
-			const ElementCollection& LayerElement = sc->GetCollection("LayerElement");
-			for (ElementMap::const_iterator eit = LayerElement.first; eit != LayerElement.second; ++eit) {
-				const Scope& elayer = GetRequiredScope(*(*eit).second,&element);
-
-				const Element& Type = GetRequiredElement(elayer,"Type",&element);
-				const Element& TypedIndex = GetRequiredElement(elayer,"TypedIndex",&element);
-
-				const std::string& type = ParseTokenAsString(GetRequiredToken(Type,0),&Type);
-				const std::string& typedIndex = ParseTokenAsString(GetRequiredToken(TypedIndex,0),&Type);
-
-
-			}
+			const Scope& layer = GetRequiredScope(*(*it).second);
+			ReadLayer(layer);
 		}
 		else {
 			FBXImporter::LogWarn("ignoring additional geometry layers");
 		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void MeshGeometry::ReadLayer(const Scope& layer)
+{
+	const ElementCollection& LayerElement = layer.GetCollection("LayerElement");
+	for (ElementMap::const_iterator eit = LayerElement.first; eit != LayerElement.second; ++eit) {
+		const Scope& elayer = GetRequiredScope(*(*eit).second);
+
+		ReadLayerElement(elayer);
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void MeshGeometry::ReadLayerElement(const Scope& layerElement)
+{
+	const Element& Type = GetRequiredElement(layerElement,"Type");
+	const Element& TypedIndex = GetRequiredElement(layerElement,"TypedIndex");
+
+	const std::string& type = ParseTokenAsString(GetRequiredToken(Type,0));
+	const int typedIndex = ParseTokenAsInt(GetRequiredToken(TypedIndex,0));
+
+	const Scope& top = GetRequiredScope(element);
+	const ElementCollection candidates = top.GetCollection(type);
+
+	for (ElementMap::const_iterator it = candidates.first; it != candidates.second; ++it) {
+		const int index = ParseTokenAsInt(GetRequiredToken(*(*it).second,0));
+		if(index == typedIndex) {
+			ReadVertexData(type,typedIndex,GetRequiredScope(*(*it).second));
+			return;
+		}
+	}
+
+	FBXImporter::LogError(Formatter::format("failed to resolve vertex layer element: ") 
+		<< type << ", index: " << typedIndex);
+}
+
+// ------------------------------------------------------------------------------------------------
+void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scope& source)
+{
+	const std::string& MappingInformationType = ParseTokenAsString(GetRequiredToken(GetRequiredElement(source,"MappingInformationType"),0));
+	const std::string& ReferenceInformationType = ParseTokenAsString(GetRequiredToken(GetRequiredElement(source,"ReferenceInformationType"),0));
+	
+	if (type == "LayerElementUV") {
+		if(index >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
+			FBXImporter::LogError(Formatter::format("ignoring UV layer, maximum UV number exceeded: ") 
+				<< index << " (limit is " << AI_MAX_NUMBER_OF_TEXTURECOORDS << ")" );
+
+			return;
+		}
+
+		const std::vector<aiVector2D>& uv = uvs[index];
+	}
+	else if (type == "LayerElementMaterial") {
+		
+	}
+	else if (type == "LayerElementNormal") {
+
+		ReadVectorDataArray(normals,GetRequiredElement(source,"Normals"));
 	}
 }
 

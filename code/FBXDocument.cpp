@@ -90,7 +90,7 @@ const Scope& GetRequiredScope(const Element& el)
 const Token& GetRequiredToken(const Element& el, unsigned int index)
 {
 	const TokenList& t = el.Tokens();
-	if(t.size() > index) {
+	if(index >= t.size()) {
 		DOMError(Formatter::format( "missing token at index " ) << index,&el);
 	}
 
@@ -292,12 +292,9 @@ const Object* LazyObject::Get()
 	} 
 
 	// this needs to be relatively fast since we do it a lot,
-	// so avoid constructing strings all the time. strcmp()
-	// may scan beyond the bounds of the token, but the 
-	// next character is always a colon so false positives
-	// are not possible.
+	// so avoid constructing strings all the time.
 	const char* obtype = key.begin();
-	if (!strcmp(obtype,"Geometry")) {
+	if (!strncmp(obtype,"Geometry",static_cast<size_t>(key.end()-key.begin()))) {
 
 		if (!strcmp(classtag.c_str(),"Mesh")) {
 			object = new MeshGeometry(element,name);
@@ -305,7 +302,7 @@ const Object* LazyObject::Get()
 	}
 
 	if (!object.get()) {
-		DOMError("failed to convert element to DOM object, class: " + classtag + ", name: " + name,&element);
+		//DOMError("failed to convert element to DOM object, class: " + classtag + ", name: " + name,&element);
 	}
 
 	return object.get();
@@ -370,11 +367,17 @@ MeshGeometry::MeshGeometry(const Element& element, const std::string& name)
 	mapping_counts.resize(tempVerts.size(),0);
 	mappings.resize(tempFaces.size());
 
+	const size_t vertex_count = tempVerts.size();
+
 	// generate output vertices, computing an adjacency table to
 	// preserve the mapping from fbx indices to *this* indexing.
 	unsigned int count = 0;
 	BOOST_FOREACH(int index, tempFaces) {
-		const int absi = index < 0 ? -index : index;
+		const int absi = index < 0 ? (-index - 1) : index;
+		if(static_cast<size_t>(absi) >= vertex_count) {
+			DOMError("polygon vertex index out of range",&PolygonVertexIndex);
+		}
+
 		vertices.push_back(tempVerts[absi]);
 		++count;
 
@@ -396,7 +399,7 @@ MeshGeometry::MeshGeometry(const Element& element, const std::string& name)
 
 	cursor = 0;
 	BOOST_FOREACH(int index, tempFaces) {
-		const int absi = index < 0 ? -index : index;
+		const int absi = index < 0 ? (-index - 1) : index;
 		mappings[mapping_offsets[absi] + mapping_counts[absi]++] = cursor;
 	}
 
@@ -475,12 +478,15 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
 		}
 
 		std::vector<aiVector2D>& uv_out = uvs[index];
-		uv_out.resize(vertices.size());
 
 		std::vector<aiVector2D> tempUV;
 		ReadVectorDataArray(tempUV,GetRequiredElement(source,"UV"));
 
+		// handle permutations of Mapping and Reference type - it would be nice to
+		// deal with this more elegantly and with less redundancy, but right
+		// now it seems unavoidable.
 		if (MappingInformationType == "ByVertice" && ReferenceInformationType == "Direct") {	
+			uv_out.resize(vertices.size());
 			for (size_t i = 0, e = tempUV.size(); i < e; ++i) {
 
 				const unsigned int istart = mapping_offsets[i], iend = istart + mapping_counts[i];
@@ -490,6 +496,7 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
 			}
 		}
 		else if (MappingInformationType == "ByVertice" && ReferenceInformationType == "IndexToDirect") {	
+			uv_out.resize(vertices.size());
 
 			std::vector<int> uvIndices;
 			ReadIntDataArray(uvIndices,GetRequiredElement(source,"UVIndex"));
@@ -498,8 +505,39 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
 
 				const unsigned int istart = mapping_offsets[i], iend = istart + mapping_counts[i];
 				for (unsigned int j = istart; j < iend; ++j) {
+					if(static_cast<size_t>(uvIndices[i]) >= tempUV.size()) {
+						DOMError("UV index out of range",&GetRequiredElement(source,"UVIndex"));
+					}
 					uv_out[mappings[j]] = tempUV[uvIndices[i]];
 				}
+			}
+		}
+		else if (MappingInformationType == "ByPolygonVertex" && ReferenceInformationType == "Direct") {	
+			if (tempUV.size() != vertices.size()) {
+				FBXImporter::LogError("size of input UV array unexpected for ByPolygonVertex mapping");
+				return;
+			}
+
+			uv_out.swap(tempUV);
+		}
+		else if (MappingInformationType == "ByPolygonVertex" && ReferenceInformationType == "IndexToDirect") {	
+			uv_out.resize(vertices.size());
+
+			std::vector<int> uvIndices;
+			ReadIntDataArray(uvIndices,GetRequiredElement(source,"UVIndex"));
+			
+			if (uvIndices.size() != vertices.size()) {
+				FBXImporter::LogError("size of input UV array unexpected for ByPolygonVertex mapping");
+				return;
+			}
+
+			unsigned int next = 0;
+			BOOST_FOREACH(int i, uvIndices) {
+				if(static_cast<size_t>(i) >= tempUV.size()) {
+					DOMError("UV index out of range",&GetRequiredElement(source,"UVIndex"));
+				}
+
+				uv_out[next++] = tempUV[i];
 			}
 		}
 		else {
@@ -594,6 +632,8 @@ Document::Document(const Parser& parser)
 		}
 
 		objects[id] = new LazyObject(*el.second);
+		// DEBUG - evaluate all objects
+		const Object* o = objects[id]->Get();
 	}
 }
 

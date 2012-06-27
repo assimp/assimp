@@ -223,7 +223,7 @@ uint64_t ParseTokenAsID(const Token& t, const char*& err_out)
 
 	const char* out;
 	const uint64_t id = strtoul10_64(t.begin(),&out,&length);
-	if (out != t.end()) {
+	if (out > t.end()) {
 		err_out = "failed to parse ID";
 		return 0L;
 	}
@@ -257,7 +257,7 @@ size_t ParseTokenAsDim(const Token& t, const char*& err_out)
 
 	const char* out;
 	const size_t id = static_cast<size_t>(strtoul10_64(t.begin() + 1,&out,&length));
-	if (out != t.end()) {
+	if (out > t.end()) {
 		err_out = "failed to parse ID";
 		return 0;
 	}
@@ -278,14 +278,16 @@ float ParseTokenAsFloat(const Token& t, const char*& err_out)
 
 	const char* inout = t.begin();
 
-	float f;
-	fast_atof(&inout);
-	if (inout != t.end()) {
-		err_out = "failed to parse floating point number";
-		return 0.0f;
-	}
+	// need to copy the input string to a temporary buffer
+	// first - next in the fbx token stream comes ',', 
+	// which fast_atof could interpret as decimal point.
+#define MAX_FLOAT_LENGTH 31
+	char temp[MAX_FLOAT_LENGTH + 1];
+	const size_t length = static_cast<size_t>(t.end()-t.begin());
+	std::copy(t.begin(),t.end(),temp);
+	temp[std::min(static_cast<size_t>(MAX_FLOAT_LENGTH),length)] = '\0';
 
-	return f;
+	return fast_atof(temp);
 }
 
 
@@ -329,7 +331,7 @@ std::string ParseTokenAsString(const Token& t, const char*& err_out)
 	}
 
 	const char* s = t.begin(), *e = t.end() - 1;
-	if (*s != '\"' || *e != '\*') {
+	if (*s != '\"' || *e != '\"') {
 		err_out = "expected double quoted string";
 		return "";
 	}

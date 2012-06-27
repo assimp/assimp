@@ -65,13 +65,39 @@ namespace {
 
 	// ------------------------------------------------------------------------------------------------
 	// extract a required element from a scope, abort if the element cannot be found
-	const Element& GetFixedElementFromScope(const Scope& sc, const std::string& index, const Element* element = NULL) 
+	const Element& GetRequiredElement(const Scope& sc, const std::string& index, const Element* element = NULL) 
 	{
 		const Element* el = sc[index];
 		if(!el) {
 			DOMError("did not find required element \"" + index + "\"",element);
 		}
 		return *el;
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	// extract required compound scope
+	const Scope& GetRequiredScope(const Element& el, const Element* element = NULL)
+	{
+		const Scope* const s = el.Compound();
+		if(!s) {
+			DOMError("expected compound scope",element);
+		}
+
+		return *s;
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	// get token at a particular index
+	const Token& GetRequiredToken(const Element& el, unsigned int index, const Element* element = NULL)
+	{
+		const TokenList& t = el.Tokens();
+		if(t.size() > index) {
+			DOMError(Formatter::format( "missing token at index " ) << index,element);
+		}
+
+		return *t[index];
 	}
 
 
@@ -98,7 +124,7 @@ namespace {
 			DOMError("expected vector3 data",&el);
 		}
 
-		const Element& a = GetFixedElementFromScope(*scope,"a",&el);
+		const Element& a = GetRequiredElement(*scope,"a",&el);
 		if (a.Tokens().size() % 3 != 0) {
 			DOMError("number of floats is not a multiple of three",&el);
 		}
@@ -145,7 +171,7 @@ namespace {
 			DOMError("expected int data block",&el);
 		}
 
-		const Element& a = GetFixedElementFromScope(*scope,"a",&el);
+		const Element& a = GetRequiredElement(*scope,"a",&el);
 		for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
 			const int ival = ParseTokenAsInt(**it++,err);
 			if(err) {
@@ -160,6 +186,70 @@ namespace {
 
 namespace Assimp {
 namespace FBX {
+
+// ------------------------------------------------------------------------------------------------
+// wrapper around ParseTokenAsID() with DOMError handling
+uint64_t ParseTokenAsID(const Token& t, const Element* element = NULL) 
+{
+	const char* err;
+	const uint64_t i = ParseTokenAsID(t,err);
+	if(err) {
+		DOMError(err,element);
+	}
+	return i;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// wrapper around ParseTokenAsDim() with DOMError handling
+size_t ParseTokenAsDim(const Token& t, const Element* element = NULL)
+{
+	const char* err;
+	const size_t i = ParseTokenAsDim(t,err);
+	if(err) {
+		DOMError(err,element);
+	}
+	return i;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// wrapper around ParseTokenAsFloat() with DOMError handling
+float ParseTokenAsFloat(const Token& t, const Element* element = NULL)
+{
+	const char* err;
+	const float i = ParseTokenAsFloat(t,err);
+	if(err) {
+		DOMError(err,element);
+	}
+	return i;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// wrapper around ParseTokenAsInt() with DOMError handling
+int ParseTokenAsInt(const Token& t, const Element* element = NULL)
+{
+	const char* err;
+	const int i = ParseTokenAsInt(t,err);
+	if(err) {
+		DOMError(err,element);
+	}
+	return i;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// wrapper around ParseTokenAsString() with DOMError handling
+std::string ParseTokenAsString(const Token& t, const Element* element = NULL)
+{
+	const char* err;
+	const std::string& i = ParseTokenAsString(t,err);
+	if(err) {
+		DOMError(err,element);
+	}
+	return i;
+}
 
 // ------------------------------------------------------------------------------------------------
 LazyObject::LazyObject(const Element& element)
@@ -256,8 +346,8 @@ MeshGeometry::MeshGeometry(const Element& element, const std::string& name)
 	}
 
 	// must have Mesh elements:
-	const Element& Vertices = GetFixedElementFromScope(*sc,"Vertices",&element);
-	const Element& PolygonVertexIndex = GetFixedElementFromScope(*sc,"PolygonVertexIndex",&element);
+	const Element& Vertices = GetRequiredElement(*sc,"Vertices",&element);
+	const Element& PolygonVertexIndex = GetRequiredElement(*sc,"PolygonVertexIndex",&element);
 
 	// optional Mesh elements:
 	const ElementCollection& Layer = sc->GetCollection("Layer");
@@ -281,12 +371,20 @@ MeshGeometry::MeshGeometry(const Element& element, const std::string& name)
 		}
 
 		if(index == 0) {
-			const Scope* const layer = (*it).second->Compound();
-			if (layer) {
-				DOMError("expected layer scope",&element);
-			}
+			const Scope& layer = GetRequiredScope(*(*it).second,&element);
 
-			// XXX read layer data
+			const ElementCollection& LayerElement = sc->GetCollection("LayerElement");
+			for (ElementMap::const_iterator eit = LayerElement.first; eit != LayerElement.second; ++eit) {
+				const Scope& elayer = GetRequiredScope(*(*eit).second,&element);
+
+				const Element& Type = GetRequiredElement(elayer,"Type",&element);
+				const Element& TypedIndex = GetRequiredElement(elayer,"TypedIndex",&element);
+
+				const std::string& type = ParseTokenAsString(GetRequiredToken(Type,0),&Type);
+				const std::string& typedIndex = ParseTokenAsString(GetRequiredToken(TypedIndex,0),&Type);
+
+
+			}
 		}
 		else {
 			FBXImporter::LogWarn("ignoring additional geometry layers");

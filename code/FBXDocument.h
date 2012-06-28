@@ -198,6 +198,10 @@ private:
 		const std::string& MappingInformationType,
 		const std::string& ReferenceInformationType);
 
+	void ReadVertexDataMaterials(std::vector<unsigned int>& materials_out, const Scope& source, 
+		const std::string& MappingInformationType,
+		const std::string& ReferenceInformationType);
+
 private:
 
 	// cached data arrays

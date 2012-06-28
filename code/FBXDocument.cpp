@@ -262,7 +262,7 @@ void ReadVectorDataArray(std::vector<aiVector2D>& out, const Element& el)
 
 // ------------------------------------------------------------------------------------------------
 // read an array of ints
-void ReadIntDataArray(std::vector<int>& out, const Element& el)
+void ReadVectorDataArray(std::vector<int>& out, const Element& el)
 {
 	out.clear();
 	const TokenList& tok = el.Tokens();
@@ -277,6 +277,30 @@ void ReadIntDataArray(std::vector<int>& out, const Element& el)
 	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
 		const int ival = ParseTokenAsInt(**it++);
 		out.push_back(ival);
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// read an array of uints
+void ReadVectorDataArray(std::vector<unsigned int>& out, const Element& el)
+{
+	out.clear();
+	const TokenList& tok = el.Tokens();
+	const size_t dim = ParseTokenAsDim(*tok[0]);
+
+	// see notes in ReadVectorDataArray()
+	out.reserve(dim);
+
+	const Scope& scope = GetRequiredScope(el);
+	const Element& a = GetRequiredElement(scope,"a",&el);
+
+	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
+		const int ival = ParseTokenAsInt(**it++);
+		if(ival < 0) {
+			DOMError("encountered negative integer index");
+		}
+		out.push_back(static_cast<unsigned int>(ival));
 	}
 }
 } // end anon.
@@ -387,7 +411,7 @@ MeshGeometry::MeshGeometry(const Element& element, const std::string& name)
 	ReadVectorDataArray(tempVerts,Vertices);
 
 	std::vector<int> tempFaces;
-	ReadIntDataArray(tempFaces,PolygonVertexIndex);
+	ReadVectorDataArray(tempFaces,PolygonVertexIndex);
 
 	vertices.reserve(tempFaces.size());
 	faces.reserve(tempFaces.size() / 3);
@@ -515,32 +539,34 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
 			return;
 		}
 
-		ReadVertexDataUV(uvs[index],source,MappingInformationType,ReferenceInformationType);
+		ReadVertexDataUV(uvs[index],source,
+			MappingInformationType,
+			ReferenceInformationType
+		);
 	}
 	else if (type == "LayerElementMaterial") {
-		
-		materials.resize(vertices.size());
-
-		std::vector<int> tempMaterials;
-		ReadIntDataArray(tempMaterials,GetRequiredElement(source,"Materials"));
-
-		if (MappingInformationType == "AllSame") {
-			// easy - same material for all faces
-			materials.assign(vertices.size(),tempMaterials[0]);
-		}
-		else {
-			FBXImporter::LogError(Formatter::format("ignoring material assignments, unrecognized access type: ") 
-				<< MappingInformationType << "," << ReferenceInformationType);
-		}
+		ReadVertexDataMaterials(materials,source,
+			MappingInformationType,
+			ReferenceInformationType
+		);
 	}
 	else if (type == "LayerElementNormal") {
-		ReadVertexDataNormals(normals,source,MappingInformationType,ReferenceInformationType);
+		ReadVertexDataNormals(normals,source,
+			MappingInformationType,
+			ReferenceInformationType
+		);
 	}
 	else if (type == "LayerElementTangent") {
-		ReadVertexDataTangents(tangents,source,MappingInformationType,ReferenceInformationType);
+		ReadVertexDataTangents(tangents,source,
+			MappingInformationType,
+			ReferenceInformationType
+		);
 	}
 	else if (type == "LayerElementBinormal") {
-		ReadVertexDataBinormals(binormals,source,MappingInformationType,ReferenceInformationType);
+		ReadVertexDataBinormals(binormals,source,
+			MappingInformationType,
+			ReferenceInformationType
+		);
 	}
 	else if (type == "LayerElementColor") {
 		if(index >= AI_MAX_NUMBER_OF_COLOR_SETS) {
@@ -549,7 +575,10 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
 			return;
 		}
 
-		ReadVertexDataColors(colors[index],source,MappingInformationType,ReferenceInformationType);
+		ReadVertexDataColors(colors[index],source,
+			MappingInformationType,
+			ReferenceInformationType
+		);
 	}
 }
 
@@ -588,7 +617,7 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 		data_out.resize(vertex_count);
 
 		std::vector<int> uvIndices;
-		ReadIntDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
+		ReadVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
 
 		for (size_t i = 0, e = uvIndices.size(); i < e; ++i) {
 
@@ -603,7 +632,9 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 	}
 	else if (MappingInformationType == "ByPolygonVertex" && ReferenceInformationType == "Direct") {	
 		if (tempUV.size() != vertex_count) {
-			FBXImporter::LogError("length of input data unexpected for ByPolygonVertex mapping");
+			FBXImporter::LogError(Formatter::format("length of input data unexpected for ByPolygon mapping: ") 
+				<< tempUV.size() << ", expected " << vertex_count
+			);
 			return;
 		}
 
@@ -613,7 +644,7 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 		data_out.resize(vertex_count);
 
 		std::vector<int> uvIndices;
-		ReadIntDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
+		ReadVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
 
 		if (uvIndices.size() != vertex_count) {
 			FBXImporter::LogError("length of input data unexpected for ByPolygonVertex mapping");
@@ -630,7 +661,7 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 		}
 	}
 	else {
-		FBXImporter::LogError(Formatter::format("ignoring vertex data channel, unrecognized access type: ") 
+		FBXImporter::LogError(Formatter::format("ignoring vertex data channel, access type not implemented: ") 
 			<< MappingInformationType << "," << ReferenceInformationType);
 	}
 }
@@ -707,6 +738,48 @@ void MeshGeometry::ReadVertexDataBinormals(std::vector<aiVector3D>& binormals_ou
 		mapping_counts,
 		mapping_offsets,
 		mappings);
+}
+
+// ------------------------------------------------------------------------------------------------
+void MeshGeometry::ReadVertexDataMaterials(std::vector<unsigned int>& materials_out, const Scope& source, 
+	const std::string& MappingInformationType,
+	const std::string& ReferenceInformationType)
+{
+	const size_t face_count = faces.size();
+	ai_assert(face_count);
+
+	// materials are handled separately. First of all, they are assigned per-face
+	// and not per polyvert. Secondly, ReferenceInformationType=IndexToDirect
+	// has a slightly different meaning for materials.
+	ReadVectorDataArray(materials_out,GetRequiredElement(source,"Materials"));
+
+	if (MappingInformationType == "AllSame") {
+		// easy - same material for all faces
+		if (materials_out.empty()) {
+			FBXImporter::LogError(Formatter::format("expected material index, ignoring"));
+			return;
+		}
+		else if (materials_out.size() > 1) {
+			FBXImporter::LogWarn(Formatter::format("expected only a single material index, ignoring all except the first one"));
+			materials_out.clear();
+		}
+ 
+		materials.assign(vertices.size(),materials_out[0]);
+	}
+	else if (MappingInformationType == "ByPolygon" && ReferenceInformationType == "IndexToDirect") {
+		materials.resize(face_count);
+
+		if(materials_out.size() != face_count) {
+			FBXImporter::LogError(Formatter::format("length of input data unexpected for ByPolygon mapping: ") 
+				<< materials_out.size() << ", expected " << face_count
+			);
+			return;
+		}
+	}
+	else {
+		FBXImporter::LogError(Formatter::format("ignoring material assignments, access type not implemented: ") 
+			<< MappingInformationType << "," << ReferenceInformationType);
+	}
 }
 
 

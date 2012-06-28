@@ -89,7 +89,116 @@ private:
 	// MeshGeometry -> aiMesh
 	void ConvertMesh(const MeshGeometry& mesh)
 	{
-		
+		const std::vector<aiVector3D>& vertices = mesh.GetVertices();
+		const std::vector<unsigned int>& faces = mesh.GetFaceIndexCounts();
+		if(vertices.empty() || faces.empty()) {
+			return;
+		}
+
+		aiMesh* out_mesh = new aiMesh();
+		meshes.push_back(out_mesh);
+
+		// copy vertices
+		out_mesh->mNumVertices = static_cast<size_t>(vertices.size());
+		out_mesh->mVertices = new aiVector3D[vertices.size()];
+		std::copy(vertices.begin(),vertices.end(),out_mesh->mVertices);
+
+		// generate dummy faces
+		out_mesh->mNumFaces = static_cast<size_t>(faces.size());
+		aiFace* fac = out_mesh->mFaces = new aiFace[faces.size()]();
+
+		unsigned int cursor = 0;
+		BOOST_FOREACH(unsigned int pcount, faces) {
+			aiFace& f = *fac++;
+			f.mNumIndices = pcount;
+			f.mIndices = new unsigned int[pcount];
+			switch(pcount) 
+			{
+				case 1:
+					out_mesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
+					break;
+				case 2:
+					out_mesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
+					break;
+				case 3:
+					out_mesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+					break;
+				default:
+					out_mesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
+					break;
+			}
+			for (unsigned int i = 0; i < pcount; ++i) {
+				f.mIndices[i] = cursor++;
+			}
+		}
+
+		// copy normals
+		const std::vector<aiVector3D>& normals = mesh.GetVertices();
+		if(normals.size()) {
+			ai_assert(normals.size() == vertices.size());
+
+			out_mesh->mNormals = new aiVector3D[vertices.size()];
+			std::copy(normals.begin(),normals.end(),out_mesh->mNormals);
+		}
+
+		// copy tangents - assimp requires both tangents and bitangents (binormals)
+		// to be present, or neither of them. Compute binormals from normals
+		// and tangents if needed.
+		const std::vector<aiVector3D>& tangents = mesh.GetTangents();
+		const std::vector<aiVector3D>* binormals = &mesh.GetBinormals();
+
+		if(tangents.size()) {
+			std::vector<aiVector3D> tempBinormals;
+			if (!binormals->size()) {
+				if (normals.size()) {
+					tempBinormals.resize(normals.size());
+					for (unsigned int i = 0; i < tangents.size(); ++i) {
+						tempBinormals[i] = normals[i] ^ tangents[i];
+					}
+
+					binormals = &tempBinormals;
+				}
+				else {
+					binormals = NULL;	
+				}
+			}
+
+			if(binormals) {
+				ai_assert(tangents.size() == vertices.size() && binormals->size() == vertices.size());
+
+				out_mesh->mTangents = new aiVector3D[vertices.size()];
+				std::copy(tangents.begin(),tangents.end(),out_mesh->mTangents);
+
+				out_mesh->mBitangents = new aiVector3D[vertices.size()];
+				std::copy(binormals->begin(),binormals->end(),out_mesh->mBitangents);
+			}
+		}
+
+		// copy texture coords
+		for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+			const std::vector<aiVector2D>& uvs = mesh.GetTextureCoords(i);
+			if(uvs.empty()) {
+				break;
+			}
+
+			aiVector3D* out_uv = out_mesh->mTextureCoords[i] = new aiVector3D[vertices.size()];
+			BOOST_FOREACH(const aiVector2D& v, uvs) {
+				*out_uv++ = aiVector3D(v.x,v.y,0.0f);
+			}
+
+			out_mesh->mNumUVComponents[i] = 2;
+		}
+
+		// copy vertex colors
+		for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS; ++i) {
+			const std::vector<aiColor4D>& colors = mesh.GetVertexColors(i);
+			if(colors.empty()) {
+				break;
+			}
+
+			out_mesh->mColors[i] = new aiColor4D[vertices.size()];
+			std::copy(colors.begin(),colors.end(),out_mesh->mColors[i]);
+		}
 	}
 
 

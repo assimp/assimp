@@ -457,10 +457,11 @@ MeshGeometry::MeshGeometry(const Element& element, const std::string& name, cons
 		const int absi = index < 0 ? (-index - 1) : index;
 		mappings[mapping_offsets[absi] + mapping_counts[absi]++] = cursor;
 	}
-
-	if(settings.readAllLayers)
-
-	// ignore all but the first layer, but warn about any further layers 
+	
+	// if settings.readAllLayers is true:
+	//  * read all layers, try to load as many vertex channels as possible
+	// if settings.readAllLayers is false:
+	//  * read only the layer with index 0, but warn about any further layers 
 	for (ElementMap::const_iterator it = Layer.first; it != Layer.second; ++it) {
 		const TokenList& tokens = (*it).second->Tokens();
 
@@ -470,7 +471,7 @@ MeshGeometry::MeshGeometry(const Element& element, const std::string& name, cons
 			DOMError(err,&element);
 		}
 
-		if(index == 0) {
+		if(settings.readAllLayers || index == 0) {
 			const Scope& layer = GetRequiredScope(*(*it).second);
 			ReadLayer(layer);
 		}
@@ -549,24 +550,44 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
 		);
 	}
 	else if (type == "LayerElementMaterial") {
+		if (materials.size() > 0) {
+			FBXImporter::LogError("ignoring additional material layer");
+			return;
+		}
+
 		ReadVertexDataMaterials(materials,source,
 			MappingInformationType,
 			ReferenceInformationType
 		);
 	}
 	else if (type == "LayerElementNormal") {
+		if (normals.size() > 0) {
+			FBXImporter::LogError("ignoring additional normal layer");
+			return;
+		}
+
 		ReadVertexDataNormals(normals,source,
 			MappingInformationType,
 			ReferenceInformationType
 		);
 	}
 	else if (type == "LayerElementTangent") {
+		if (tangents.size() > 0) {
+			FBXImporter::LogError("ignoring additional tangent layer");
+			return;
+		}
+
 		ReadVertexDataTangents(tangents,source,
 			MappingInformationType,
 			ReferenceInformationType
 		);
 	}
 	else if (type == "LayerElementBinormal") {
+		if (binormals.size() > 0) {
+			FBXImporter::LogError("ignoring additional binormal layer");
+			return;
+		}
+
 		ReadVertexDataBinormals(binormals,source,
 			MappingInformationType,
 			ReferenceInformationType

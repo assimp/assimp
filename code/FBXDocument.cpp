@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocument.h"
 #include "FBXUtil.h"
 #include "FBXImporter.h"
+#include "FBXImportSettings.h"
 
 namespace Assimp {
 namespace FBX {
@@ -307,8 +308,9 @@ void ReadVectorDataArray(std::vector<unsigned int>& out, const Element& el)
 
 
 // ------------------------------------------------------------------------------------------------
-LazyObject::LazyObject(const Element& element)
-: element(element)
+LazyObject::LazyObject(const Element& element, const ImportSettings& settings)
+: settings(settings)
+, element(element)
 {
 
 }
@@ -350,7 +352,7 @@ const Object* LazyObject::Get()
 	if (!strncmp(obtype,"Geometry",static_cast<size_t>(key.end()-key.begin()))) {
 
 		if (!strcmp(classtag.c_str(),"Mesh")) {
-			object = new MeshGeometry(element,name);
+			object = new MeshGeometry(element,name,settings);
 		}
 	}
 
@@ -389,7 +391,7 @@ Geometry::~Geometry()
 }
 
 // ------------------------------------------------------------------------------------------------
-MeshGeometry::MeshGeometry(const Element& element, const std::string& name)
+MeshGeometry::MeshGeometry(const Element& element, const std::string& name, const ImportSettings& settings)
 : Geometry(element,name)
 {
 	const Scope* sc = element.Compound();
@@ -455,6 +457,8 @@ MeshGeometry::MeshGeometry(const Element& element, const std::string& name)
 		const int absi = index < 0 ? (-index - 1) : index;
 		mappings[mapping_offsets[absi] + mapping_counts[absi]++] = cursor;
 	}
+
+	if(settings.readAllLayers)
 
 	// ignore all but the first layer, but warn about any further layers 
 	for (ElementMap::const_iterator it = Layer.first; it != Layer.second; ++it) {
@@ -784,8 +788,9 @@ void MeshGeometry::ReadVertexDataMaterials(std::vector<unsigned int>& materials_
 
 
 // ------------------------------------------------------------------------------------------------
-Document::Document(const Parser& parser)
+Document::Document(const Parser& parser, const ImportSettings& settings)
 : parser(parser)
+, settings(settings)
 {
 
 	const Scope& sc = parser.GetRootScope();
@@ -811,7 +816,7 @@ Document::Document(const Parser& parser)
 			DOMError(err,el.second);
 		}
 
-		objects[id] = new LazyObject(*el.second);
+		objects[id] = new LazyObject(*el.second, settings);
 		// DEBUG - evaluate all objects
 		const Object* o = objects[id]->Get();
 	}

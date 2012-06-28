@@ -2076,6 +2076,10 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\code\FBXImportSettings.h"
+						>
+					</File>
+					<File
 						RelativePath="..\..\code\FBXParser.cpp"
 						>
 					</File>

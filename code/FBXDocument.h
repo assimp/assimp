@@ -53,6 +53,7 @@ namespace FBX {
 
 	class Parser;
 	class Object;
+	struct ImportSettings;
 
 
 /** Represents a delay-parsed FBX objects. Many objects in the scene
@@ -62,7 +63,7 @@ class LazyObject
 {
 public:
 
-	LazyObject(const Element& element);
+	LazyObject(const Element& element, const ImportSettings& settings);
 	~LazyObject();
 
 public:
@@ -77,6 +78,7 @@ public:
 
 private:
 
+	const ImportSettings& settings;
 	const Element& element;
 	boost::scoped_ptr<const Object> object;
 };
@@ -115,7 +117,7 @@ class MeshGeometry : public Geometry
 
 public:
 
-	MeshGeometry(const Element& element, const std::string& name);
+	MeshGeometry(const Element& element, const std::string& name, const ImportSettings& settings);
 	~MeshGeometry();
 
 public:
@@ -232,7 +234,7 @@ class Document
 {
 public:
 
-	Document(const Parser& parser);
+	Document(const Parser& parser, const ImportSettings& settings);
 	~Document();
 
 public:
@@ -241,7 +243,13 @@ public:
 		return objects;
 	}
 
+	const ImportSettings& Settings() const {
+		return settings;
+	}
+
 private:
+
+	const ImportSettings& settings;
 
 	ObjectMap objects;
 	const Parser& parser;

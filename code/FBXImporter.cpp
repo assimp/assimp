@@ -158,7 +158,7 @@ void FBXImporter::InternReadFile( const std::string& pFile,
 		Parser parser(tokens);
 
 		// take the raw parse-tree and convert it to a FBX DOM
-		Document doc(parser);
+		Document doc(parser,settings);
 	}
 	catch(...) {
 		std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());

@@ -91,7 +91,7 @@ class Object
 public:
 
 	Object(const Element& element, const std::string& name);
-	~Object();
+	virtual ~Object();
 
 public:
 

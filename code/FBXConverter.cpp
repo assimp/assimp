@@ -64,7 +64,29 @@ public:
 		: out(out) 
 		, doc(doc)
 	{
-		ConvertRootNode();
+		//ConvertRootNode();
+
+		// hack to process all meshes
+		BOOST_FOREACH(const ObjectMap::value_type& v,doc.Objects()) {
+
+			const Object* ob = v.second->Get();
+			if(!ob) {
+				continue;
+			}
+			const MeshGeometry* geo = dynamic_cast<const MeshGeometry*>(ob);
+			if(geo) {
+				ConvertMesh(*geo);
+			}
+		}
+
+		// dummy root node
+		out->mRootNode = new aiNode();
+		out->mRootNode->mNumMeshes = static_cast<unsigned int>(meshes.size());
+		out->mRootNode->mMeshes = new unsigned int[meshes.size()];
+		for(unsigned int i = 0; i < out->mRootNode->mNumMeshes; ++i) {
+			out->mRootNode->mMeshes[i] = i;
+		}
+
 		TransferDataToScene();
 	}
 

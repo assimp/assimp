@@ -205,6 +205,35 @@ void ReadVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
 
 
 // ------------------------------------------------------------------------------------------------
+// read an array of color4 tuples
+void ReadVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
+{
+	out.clear();
+	const TokenList& tok = el.Tokens();
+	const size_t dim = ParseTokenAsDim(*tok[0]);
+
+	//  see notes in ReadVectorDataArray() above
+	out.reserve(dim);
+
+	const Scope& scope = GetRequiredScope(el);
+	const Element& a = GetRequiredElement(scope,"a",&el);
+
+	if (a.Tokens().size() % 4 != 0) {
+		DOMError("number of floats is not a multiple of four (4)",&el);
+	}
+	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
+		aiColor4D v;
+		v.r = ParseTokenAsFloat(**it++);
+		v.g = ParseTokenAsFloat(**it++);
+		v.b = ParseTokenAsFloat(**it++);
+		v.a = ParseTokenAsFloat(**it++);
+
+		out.push_back(v);
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
 // read an array of float2 tuples
 void ReadVectorDataArray(std::vector<aiVector2D>& out, const Element& el)
 {
@@ -481,9 +510,8 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
 	
 	if (type == "LayerElementUV") {
 		if(index >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
-			FBXImporter::LogError(Formatter::format("ignoring UV layer, maximum UV number exceeded: ") 
+			FBXImporter::LogError(Formatter::format("ignoring UV layer, maximum number of UV channels exceeded: ") 
 				<< index << " (limit is " << AI_MAX_NUMBER_OF_TEXTURECOORDS << ")" );
-
 			return;
 		}
 
@@ -507,6 +535,21 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
 	}
 	else if (type == "LayerElementNormal") {
 		ReadVertexDataNormals(normals,source,MappingInformationType,ReferenceInformationType);
+	}
+	else if (type == "LayerElementTangent") {
+		ReadVertexDataTangents(tangents,source,MappingInformationType,ReferenceInformationType);
+	}
+	else if (type == "LayerElementBinormal") {
+		ReadVertexDataBinormals(binormals,source,MappingInformationType,ReferenceInformationType);
+	}
+	else if (type == "LayerElementColor") {
+		if(index >= AI_MAX_NUMBER_OF_COLOR_SETS) {
+			FBXImporter::LogError(Formatter::format("ignoring vertex color layer, maximum number of color sets exceeded: ") 
+				<< index << " (limit is " << AI_MAX_NUMBER_OF_COLOR_SETS << ")" );
+			return;
+		}
+
+		ReadVertexDataColors(colors[index],source,MappingInformationType,ReferenceInformationType);
 	}
 }
 
@@ -615,6 +658,51 @@ void MeshGeometry::ReadVertexDataUV(std::vector<aiVector2D>& uv_out, const Scope
 	ResolveVertexDataArray(uv_out,source,MappingInformationType,ReferenceInformationType,
 		"UV",
 		"UVIndex",
+		vertices.size(),
+		mapping_counts,
+		mapping_offsets,
+		mappings);
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void MeshGeometry::ReadVertexDataColors(std::vector<aiColor4D>& colors_out, const Scope& source, 
+	const std::string& MappingInformationType,
+	const std::string& ReferenceInformationType)
+{
+	ResolveVertexDataArray(colors_out,source,MappingInformationType,ReferenceInformationType,
+		"Color",
+		"ColorIndex",
+		vertices.size(),
+		mapping_counts,
+		mapping_offsets,
+		mappings);
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void MeshGeometry::ReadVertexDataTangents(std::vector<aiVector3D>& tangents_out, const Scope& source, 
+	const std::string& MappingInformationType,
+	const std::string& ReferenceInformationType)
+{
+	ResolveVertexDataArray(tangents_out,source,MappingInformationType,ReferenceInformationType,
+		"Tangent",
+		"TangentIndex",
+		vertices.size(),
+		mapping_counts,
+		mapping_offsets,
+		mappings);
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void MeshGeometry::ReadVertexDataBinormals(std::vector<aiVector3D>& binormals_out, const Scope& source, 
+	const std::string& MappingInformationType,
+	const std::string& ReferenceInformationType)
+{
+	ResolveVertexDataArray(binormals_out,source,MappingInformationType,ReferenceInformationType,
+		"Binormal",
+		"BinormalIndex",
 		vertices.size(),
 		mapping_counts,
 		mapping_offsets,

@@ -136,6 +136,12 @@ public:
 	const std::vector<aiVector3D>& GetTangents() const {
 		return tangents;
 	}
+
+	/** Get a list of all vertex binormals or an empty array
+	 *  if no binormals are specified */
+	const std::vector<aiVector3D>& GetBinormals() const {
+		return binormals;
+	}
 	
 	/** Return list of faces - each entry denotes a face and specifies
 	 *  how many vertices it has. Vertices are taken from the 
@@ -180,6 +186,18 @@ private:
 		const std::string& MappingInformationType,
 		const std::string& ReferenceInformationType);
 
+	void ReadVertexDataColors(std::vector<aiColor4D>& colors_out, const Scope& source, 
+		const std::string& MappingInformationType,
+		const std::string& ReferenceInformationType);
+
+	void ReadVertexDataTangents(std::vector<aiVector3D>& tangents_out, const Scope& source, 
+		const std::string& MappingInformationType,
+		const std::string& ReferenceInformationType);
+
+	void ReadVertexDataBinormals(std::vector<aiVector3D>& binormals_out, const Scope& source, 
+		const std::string& MappingInformationType,
+		const std::string& ReferenceInformationType);
+
 private:
 
 	// cached data arrays
@@ -187,6 +205,7 @@ private:
 	std::vector<aiVector3D> vertices;
 	std::vector<unsigned int> faces;
 	std::vector<aiVector3D> tangents;
+	std::vector<aiVector3D> binormals;
 	std::vector<aiVector3D> normals;
 	std::vector<aiVector2D> uvs[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 	std::vector<aiColor4D> colors[AI_MAX_NUMBER_OF_COLOR_SETS];

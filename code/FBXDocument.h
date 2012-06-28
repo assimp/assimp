@@ -172,6 +172,14 @@ private:
 	void ReadLayerElement(const Scope& layerElement);
 	void ReadVertexData(const std::string& type, int index, const Scope& source);
 
+	void ReadVertexDataUV(std::vector<aiVector2D>& uv_out, const Scope& source, 
+		const std::string& MappingInformationType,
+		const std::string& ReferenceInformationType);
+
+	void ReadVertexDataNormals(std::vector<aiVector3D>& normals_out, const Scope& source, 
+		const std::string& MappingInformationType,
+		const std::string& ReferenceInformationType);
+
 private:
 
 	// cached data arrays

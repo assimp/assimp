@@ -423,6 +423,14 @@ MeshGeometry::MeshGeometry(const Element& element, const std::string& name)
 	}
 }
 
+
+// ------------------------------------------------------------------------------------------------
+MeshGeometry::~MeshGeometry()
+{
+
+}
+
+
 // ------------------------------------------------------------------------------------------------
 void MeshGeometry::ReadLayer(const Scope& layer)
 {
@@ -433,6 +441,7 @@ void MeshGeometry::ReadLayer(const Scope& layer)
 		ReadLayerElement(elayer);
 	}
 }
+
 
 // ------------------------------------------------------------------------------------------------
 void MeshGeometry::ReadLayerElement(const Scope& layerElement)
@@ -458,6 +467,7 @@ void MeshGeometry::ReadLayerElement(const Scope& layerElement)
 		<< type << ", index: " << typedIndex);
 }
 
+
 // ------------------------------------------------------------------------------------------------
 void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scope& source)
 {
@@ -477,73 +487,7 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
 			return;
 		}
 
-		std::vector<aiVector2D>& uv_out = uvs[index];
-
-		std::vector<aiVector2D> tempUV;
-		ReadVectorDataArray(tempUV,GetRequiredElement(source,"UV"));
-
-		// handle permutations of Mapping and Reference type - it would be nice to
-		// deal with this more elegantly and with less redundancy, but right
-		// now it seems unavoidable.
-		if (MappingInformationType == "ByVertice" && ReferenceInformationType == "Direct") {	
-			uv_out.resize(vertices.size());
-			for (size_t i = 0, e = tempUV.size(); i < e; ++i) {
-
-				const unsigned int istart = mapping_offsets[i], iend = istart + mapping_counts[i];
-				for (unsigned int j = istart; j < iend; ++j) {
-					uv_out[mappings[j]] = tempUV[i];
-				}
-			}
-		}
-		else if (MappingInformationType == "ByVertice" && ReferenceInformationType == "IndexToDirect") {	
-			uv_out.resize(vertices.size());
-
-			std::vector<int> uvIndices;
-			ReadIntDataArray(uvIndices,GetRequiredElement(source,"UVIndex"));
-
-			for (size_t i = 0, e = uvIndices.size(); i < e; ++i) {
-
-				const unsigned int istart = mapping_offsets[i], iend = istart + mapping_counts[i];
-				for (unsigned int j = istart; j < iend; ++j) {
-					if(static_cast<size_t>(uvIndices[i]) >= tempUV.size()) {
-						DOMError("UV index out of range",&GetRequiredElement(source,"UVIndex"));
-					}
-					uv_out[mappings[j]] = tempUV[uvIndices[i]];
-				}
-			}
-		}
-		else if (MappingInformationType == "ByPolygonVertex" && ReferenceInformationType == "Direct") {	
-			if (tempUV.size() != vertices.size()) {
-				FBXImporter::LogError("size of input UV array unexpected for ByPolygonVertex mapping");
-				return;
-			}
-
-			uv_out.swap(tempUV);
-		}
-		else if (MappingInformationType == "ByPolygonVertex" && ReferenceInformationType == "IndexToDirect") {	
-			uv_out.resize(vertices.size());
-
-			std::vector<int> uvIndices;
-			ReadIntDataArray(uvIndices,GetRequiredElement(source,"UVIndex"));
-			
-			if (uvIndices.size() != vertices.size()) {
-				FBXImporter::LogError("size of input UV array unexpected for ByPolygonVertex mapping");
-				return;
-			}
-
-			unsigned int next = 0;
-			BOOST_FOREACH(int i, uvIndices) {
-				if(static_cast<size_t>(i) >= tempUV.size()) {
-					DOMError("UV index out of range",&GetRequiredElement(source,"UVIndex"));
-				}
-
-				uv_out[next++] = tempUV[i];
-			}
-		}
-		else {
-			FBXImporter::LogError(Formatter::format("ignoring normals, unrecognized access type: ") 
-				<< MappingInformationType << "," << ReferenceInformationType);
-		}
+		ReadVertexDataUV(uvs[index],source,MappingInformationType,ReferenceInformationType);
 	}
 	else if (type == "LayerElementMaterial") {
 		
@@ -562,46 +506,121 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
 		}
 	}
 	else if (type == "LayerElementNormal") {
-
-		std::vector<aiVector3D> tempNormals;
-		ReadVectorDataArray(normals,GetRequiredElement(source,"Normals"));
-
-		normals.resize(vertices.size());
-
-		if (MappingInformationType == "ByVertice" && ReferenceInformationType == "Direct") {	
-			
-			for (size_t i = 0, e = tempNormals.size(); i < e; ++i) {
-
-				const unsigned int istart = mapping_offsets[i], iend = istart + mapping_counts[i];
-				for (unsigned int j = istart; j < iend; ++j) {
-					normals[mappings[j]] = tempNormals[i];
-				}
-			}
-		}
-		else if (MappingInformationType == "ByVertice" && ReferenceInformationType == "IndexToDirect") {	
-
-			std::vector<int> normalIndices;
-			ReadIntDataArray(normalIndices,GetRequiredElement(source,"NormalsIndex"));
-			for (size_t i = 0, e = normalIndices.size(); i < e; ++i) {
-
-				const unsigned int istart = mapping_offsets[i], iend = istart + mapping_counts[i];
-				for (unsigned int j = istart; j < iend; ++j) {
-					normals[mappings[j]] = tempNormals[normalIndices[i]];
-				}
-			}
-		}
-		else {
-			FBXImporter::LogError(Formatter::format("ignoring normals, unrecognized access type: ") 
-				<< MappingInformationType << "," << ReferenceInformationType);
-		}
+		ReadVertexDataNormals(normals,source,MappingInformationType,ReferenceInformationType);
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
-MeshGeometry::~MeshGeometry()
+// Lengthy utility function to read and resolve a FBX vertex data array - that is, the
+// output is in polygon vertex order. This logic is used for reading normals, UVs, colors,
+// tangents ..
+template <typename T>
+void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source, 
+	const std::string& MappingInformationType,
+	const std::string& ReferenceInformationType,
+	const char* dataElementName,
+	const char* indexDataElementName,
+	size_t vertex_count,
+	const std::vector<unsigned int>& mapping_counts,
+	const std::vector<unsigned int>& mapping_offsets,
+	const std::vector<unsigned int>& mappings)
 {
+	std::vector<T> tempUV;
+	ReadVectorDataArray(tempUV,GetRequiredElement(source,dataElementName));
 
+	// handle permutations of Mapping and Reference type - it would be nice to
+	// deal with this more elegantly and with less redundancy, but right
+	// now it seems unavoidable.
+	if (MappingInformationType == "ByVertice" && ReferenceInformationType == "Direct") {	
+		data_out.resize(vertex_count);
+		for (size_t i = 0, e = tempUV.size(); i < e; ++i) {
+
+			const unsigned int istart = mapping_offsets[i], iend = istart + mapping_counts[i];
+			for (unsigned int j = istart; j < iend; ++j) {
+				data_out[mappings[j]] = tempUV[i];
+			}
+		}
+	}
+	else if (MappingInformationType == "ByVertice" && ReferenceInformationType == "IndexToDirect") {	
+		data_out.resize(vertex_count);
+
+		std::vector<int> uvIndices;
+		ReadIntDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
+
+		for (size_t i = 0, e = uvIndices.size(); i < e; ++i) {
+
+			const unsigned int istart = mapping_offsets[i], iend = istart + mapping_counts[i];
+			for (unsigned int j = istart; j < iend; ++j) {
+				if(static_cast<size_t>(uvIndices[i]) >= tempUV.size()) {
+					DOMError("index out of range",&GetRequiredElement(source,indexDataElementName));
+				}
+				data_out[mappings[j]] = tempUV[uvIndices[i]];
+			}
+		}
+	}
+	else if (MappingInformationType == "ByPolygonVertex" && ReferenceInformationType == "Direct") {	
+		if (tempUV.size() != vertex_count) {
+			FBXImporter::LogError("length of input data unexpected for ByPolygonVertex mapping");
+			return;
+		}
+
+		data_out.swap(tempUV);
+	}
+	else if (MappingInformationType == "ByPolygonVertex" && ReferenceInformationType == "IndexToDirect") {	
+		data_out.resize(vertex_count);
+
+		std::vector<int> uvIndices;
+		ReadIntDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
+
+		if (uvIndices.size() != vertex_count) {
+			FBXImporter::LogError("length of input data unexpected for ByPolygonVertex mapping");
+			return;
+		}
+
+		unsigned int next = 0;
+		BOOST_FOREACH(int i, uvIndices) {
+			if(static_cast<size_t>(i) >= tempUV.size()) {
+				DOMError("index out of range",&GetRequiredElement(source,indexDataElementName));
+			}
+
+			data_out[next++] = tempUV[i];
+		}
+	}
+	else {
+		FBXImporter::LogError(Formatter::format("ignoring vertex data channel, unrecognized access type: ") 
+			<< MappingInformationType << "," << ReferenceInformationType);
+	}
 }
+
+// ------------------------------------------------------------------------------------------------
+void MeshGeometry::ReadVertexDataNormals(std::vector<aiVector3D>& normals_out, const Scope& source, 
+	const std::string& MappingInformationType,
+	const std::string& ReferenceInformationType)
+{
+	ResolveVertexDataArray(normals_out,source,MappingInformationType,ReferenceInformationType,
+		"Normals",
+		"NormalsIndex",
+		vertices.size(),
+		mapping_counts,
+		mapping_offsets,
+		mappings);
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void MeshGeometry::ReadVertexDataUV(std::vector<aiVector2D>& uv_out, const Scope& source, 
+	const std::string& MappingInformationType,
+	const std::string& ReferenceInformationType)
+{
+	ResolveVertexDataArray(uv_out,source,MappingInformationType,ReferenceInformationType,
+		"UV",
+		"UVIndex",
+		vertices.size(),
+		mapping_counts,
+		mapping_offsets,
+		mappings);
+}
+
 
 // ------------------------------------------------------------------------------------------------
 Document::Document(const Parser& parser)

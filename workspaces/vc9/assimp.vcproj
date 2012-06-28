@@ -2060,6 +2060,14 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\code\FBXConverter.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\FBXConverter.h"
+						>
+					</File>
+					<File
 						RelativePath="..\..\code\FBXDocument.cpp"
 						>
 					</File>

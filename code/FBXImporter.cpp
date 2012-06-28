@@ -45,9 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
+#include <exception>
 #include <iterator>
 #include <boost/tuple/tuple.hpp>
-
 
 #include "FBXImporter.h"
 
@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXParser.h"
 #include "FBXUtil.h"
 #include "FBXDocument.h"
+#include "FBXConverter.h"
 
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
@@ -159,8 +160,11 @@ void FBXImporter::InternReadFile( const std::string& pFile,
 
 		// take the raw parse-tree and convert it to a FBX DOM
 		Document doc(parser,settings);
+
+		// convert the FBX DOM to aiScene
+		ConvertToAssimpScene(pScene,doc);
 	}
-	catch(...) {
+	catch(std::exception&) {
 		std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());
 		throw;
 	}

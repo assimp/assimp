@@ -412,8 +412,18 @@ MeshGeometry::MeshGeometry(const Element& element, const std::string& name, cons
 	std::vector<aiVector3D> tempVerts;
 	ReadVectorDataArray(tempVerts,Vertices);
 
+	if(tempVerts.empty()) {
+		FBXImporter::LogWarn("encountered mesh with no vertices");
+		return;
+	}
+
 	std::vector<int> tempFaces;
 	ReadVectorDataArray(tempFaces,PolygonVertexIndex);
+
+	if(tempFaces.empty()) {
+		FBXImporter::LogWarn("encountered mesh with no faces");
+		return;
+	}
 
 	vertices.reserve(tempFaces.size());
 	faces.reserve(tempFaces.size() / 3);

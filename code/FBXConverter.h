@@ -38,66 +38,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file  FBXUtil.cpp
- *  @brief Implementation of internal FBX utility functions
+/** @file  FBXDConverter.h
+ *  @brief FBX DOM to aiScene conversion
  */
-#include "AssimpPCH.h"
-
-#include "FBXUtil.h"
-#include "FBXTokenizer.h"
-
-#include "TinyFormatter.h"
-
-#ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
+#ifndef INCLUDED_AI_FBX_CONVERTER_H
+#define INCLUDED_AI_FBX_CONVERTER_H
 
 namespace Assimp {
 namespace FBX {
-namespace Util {
 
-// ------------------------------------------------------------------------------------------------
-const char* TokenTypeString(TokenType t)
-{
-	switch(t) {
-		case TokenType_OPEN_BRACKET:
-			return "TOK_OPEN_BRACKET";
-	
-		case TokenType_CLOSE_BRACKET:
-			return "TOK_CLOSE_BRACKET";
+	class Document;
 
-		case TokenType_DATA:
-			return "TOK_DATA";
 
-		case TokenType_COMMA:
-			return "TOK_COMMA";
+/** Convert a FBX #Document to #aiScene
+ *  @param out Empty scene to be populated
+ *  @param doc Parsed FBX document */
+void ConvertToAssimpScene(aiScene* out, const Document& doc);
 
-		case TokenType_KEY:
-			return "TOK_KEY";
-	}
 
-	ai_assert(false);
-	return "";
 }
-	
-
-// ------------------------------------------------------------------------------------------------
-std::string AddLineAndColumn(const std::string& prefix, const std::string& text, unsigned int line, unsigned int column)
-{
-	return static_cast<std::string>( (Formatter::format(),prefix,"(line ",line,", col ",column,") ",text) );
 }
 
-// ------------------------------------------------------------------------------------------------
-std::string AddTokenText(const std::string& prefix, const std::string& text, const Token* tok)
-{
-	return static_cast<std::string>( (Formatter::format(),prefix,
-		"(",TokenTypeString(tok->Type()),
-		"line ",tok->Line(),
-		", col ",tok->Column(),") ",
-		text) );
-}
-
-} // !Util
-} // !FBX
-} // !Assimp
 
 #endif
-

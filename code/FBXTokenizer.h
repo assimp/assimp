@@ -87,6 +87,12 @@ public:
 
 public:
 
+	std::string StringContents() const {
+		return std::string(begin(),end());
+	}
+
+public:
+
 	const char* begin() const {
 		return sbegin;
 	}
@@ -99,12 +105,22 @@ public:
 		return type;
 	}
 
+	unsigned int Line() const {
+		return line;
+	}
+
+	unsigned int Column() const {
+		return column;
+	}
+
+private:
+
 #ifdef DEBUG
-	// copy of the token to show up in debugger
+	// full string copy for the sole purpose that it nicely appears
+	// in msvc's debugger window.
 	const std::string contents;
 #endif
 
-private:
 
 	const char* const sbegin;
 	const char* const send;
@@ -113,9 +129,8 @@ private:
 	const unsigned int line, column;
 };
 
-// note: shared_ptr eats up too much storage, unique_ptr is C++11,
-// so have to use manual memory management for now.
-typedef Token* TokenPtr;
+// XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
+typedef const Token* TokenPtr;
 typedef std::vector< TokenPtr > TokenList;
 
 #define new_Token new Token

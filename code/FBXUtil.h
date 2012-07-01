@@ -49,6 +49,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 namespace FBX {
+
+	class Token;
+	enum TokenType;
+
 namespace Util {
 
 
@@ -56,10 +60,13 @@ namespace Util {
 template<typename T>
 struct delete_fun
 {
-	void operator()(T* del) {
+	void operator()(const volatile T* del) {
 		delete del;
 	}
 };
+
+/** Get a string representation for a #TokenType. */
+const char* TokenTypeString(TokenType t);
 
 
 /** Format log/error messages using a given line location in the source file.
@@ -71,6 +78,15 @@ struct delete_fun
  *  @return A string of the following format: {prefix} (line {line}, col {column}) {text}*/
 std::string AddLineAndColumn(const std::string& prefix, const std::string& text, unsigned int line, unsigned int column);
 	
+
+/** Format log/error messages using a given cursor token.
+ *
+ *  @param prefix Message prefix to be preprended to the location info.
+ *  @param text Message text
+ *  @param tok Token where parsing/processing stopped
+ *  @return A string of the following format: {prefix} ({token-type}, line {line}, col {column}) {text}*/
+std::string AddTokenText(const std::string& prefix, const std::string& text, const Token* tok);
+
 }
 }
 }

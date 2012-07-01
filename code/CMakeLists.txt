@@ -402,6 +402,13 @@ SET(FBX_SRCS
 	FBXParser.h
 	FBXTokenizer.cpp
 	FBXTokenizer.h
+	FBXImportSettings.h
+	FBXConverter.h
+	FBXConverter.cpp
+	FBXUtil.h
+	FBXUtil.cpp
+	FBXDocument.h
+	FBXDocument.cpp
 )
 SOURCE_GROUP( FBX FILES ${FBX_SRCS})
 

@@ -45,6 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
+// tab width for logging columns
+#define ASSIMP_FBX_TAB_WIDTH 4
+
 #include "ParsingUtils.h"
 
 #include "FBXTokenizer.h"
@@ -66,6 +69,9 @@ Token::Token(const char* sbegin, const char* send, TokenType type, unsigned int 
 {
 	ai_assert(sbegin);
 	ai_assert(send);
+
+	// tokens must be of non-zero length
+	ai_assert(static_cast<size_t>(send-sbegin) > 0);
 }
 
 
@@ -137,7 +143,7 @@ void Tokenize(TokenList& output_tokens, const char* input)
 	bool pending_data_token = false;
 	
 	const char* token_begin = NULL, *token_end = NULL;
-	for (const char* cur = input;*cur;++cur,++column) {
+	for (const char* cur = input;*cur;column += (*cur == '\t' ? ASSIMP_FBX_TAB_WIDTH : 1), ++cur) {
 		const char c = *cur;
 
 		if (IsLineEnd(c)) {

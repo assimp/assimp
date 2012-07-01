@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <map>
 #include <string>
+#include <utility>
 
 #include <boost/shared_ptr.hpp>
 
@@ -62,10 +63,14 @@ namespace FBX {
 	class Parser;
 	class Element;
 
-	// should actually use 0x's unique_ptr for some of those
-	typedef std::vector< boost::shared_ptr<Scope> > ScopeList;
-	typedef std::fbx_unordered_multimap< std::string, boost::shared_ptr<Element> > ElementMap;
+	// XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
+	typedef std::vector< Scope* > ScopeList;
+	typedef std::fbx_unordered_multimap< std::string, Element* > ElementMap;
 
+	typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> ElementCollection;
+
+#	define new_Scope new Scope
+#	define new_Element new Element
 
 
 /** FBX data entity that consists of a key:value tuple.
@@ -83,13 +88,17 @@ class Element
 {
 public:
 
-	Element(Parser& parser);
+	Element(const Token& key_token, Parser& parser);
 	~Element();
 
 public:
 
-	const std::string& Key() const {
-		return key;
+	const Scope* Compound() const {
+		return compound.get();
+	}
+
+	const Token& KeyToken() const {
+		return key_token;
 	}
 
 	const TokenList& Tokens() const {
@@ -98,9 +107,9 @@ public:
 
 private:
 
-	std::string key;
+	const Token& key_token;
 	TokenList tokens;
-	boost::shared_ptr<Scope> compound;
+	boost::scoped_ptr<Scope> compound;
 };
 
 
@@ -121,10 +130,19 @@ class Scope
 
 public:
 
-	Scope(Parser& parser);
+	Scope(Parser& parser, bool topLevel = false);
 	~Scope();
 
 public:
+
+	const Element* operator[] (const std::string& index) const {
+		ElementMap::const_iterator it = elements.find(index);
+		return it == elements.end() ? NULL : (*it).second;
+	}
+
+	ElementCollection GetCollection(const std::string& index) const {
+		return elements.equal_range(index);
+	}
 
 	const ElementMap& Elements() const	{
 		return elements;
@@ -138,10 +156,12 @@ private:
 
 /** FBX parsing class, takes a list of input tokens and generates a hierarchy
  *  of nested #Scope instances, representing the fbx DOM.*/
-class Parser : public LogFunctions<Parser>
+class Parser 
 {
 public:
 	
+	/** Parse given a token list. Does not take ownership of the tokens -
+	 *  the objects must persist during the entire parser lifetime */
 	Parser (const TokenList& tokens);
 	~Parser();
 
@@ -156,17 +176,28 @@ private:
 	friend class Scope;
 	friend class Element;
 
-	TokenPtr GetNextToken();
-	TokenPtr PeekNextToken();
+	TokenPtr AdvanceToNextToken();
+
+	TokenPtr LastToken() const;
+	TokenPtr CurrentToken() const;
 
 private:
 
 	const TokenList& tokens;
 	
+	TokenPtr last, current;
 	TokenList::const_iterator cursor;
 	boost::scoped_ptr<Scope> root;
 };
 
+
+/* token parsing - this happens when building the DOM out of the parse-tree*/
+uint64_t ParseTokenAsID(const Token& t, const char*& err_out);
+size_t ParseTokenAsDim(const Token& t, const char*& err_out);
+
+float ParseTokenAsFloat(const Token& t, const char*& err_out);
+int ParseTokenAsInt(const Token& t, const char*& err_out);
+std::string ParseTokenAsString(const Token& t, const char*& err_out);
 
 } // ! FBX
 } // ! Assimp

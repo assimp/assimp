@@ -47,6 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "LogAux.h"
 
+#include "FBXImportSettings.h"
+
 namespace Assimp	{
 	
 	// TinyFormatter.h
@@ -93,23 +95,10 @@ protected:
 
 private:
 
-
-public: 
-
-
-	// loader settings, publicly accessible via their corresponding AI_CONFIG constants
-	struct Settings 
-	{
-		Settings()
-		
-		{}
-
-	};
-	
 	
 private:
 
-	Settings settings;
+	FBX::ImportSettings settings;
 
 }; // !class FBXImporter
 

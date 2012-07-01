@@ -38,64 +38,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file  FBXUtil.cpp
- *  @brief Implementation of internal FBX utility functions
+/** @file  FBXImportSettings.h
+ *  @brief FBX importer runtime configuration
  */
-#include "AssimpPCH.h"
-
-#include "FBXUtil.h"
-#include "FBXTokenizer.h"
-
-#include "TinyFormatter.h"
-
-#ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
+#ifndef INCLUDED_AI_FBX_IMPORTSETTINGS_H
+#define INCLUDED_AI_FBX_IMPORTSETTINGS_H
 
 namespace Assimp {
 namespace FBX {
-namespace Util {
 
-// ------------------------------------------------------------------------------------------------
-const char* TokenTypeString(TokenType t)
+/** FBX import settings, parts of which are publicly accessible via their corresponding AI_CONFIG constants */
+struct ImportSettings 
 {
-	switch(t) {
-		case TokenType_OPEN_BRACKET:
-			return "TOK_OPEN_BRACKET";
-	
-		case TokenType_CLOSE_BRACKET:
-			return "TOK_CLOSE_BRACKET";
+	ImportSettings()
+		: readAllLayers(true)
+	{}
 
-		case TokenType_DATA:
-			return "TOK_DATA";
+	/** specifies whether all geometry layers are read and scanned for
+	  * usable data channels. The FBX spec indicates that many readers
+	  * will only read the first channel and that this is in some way
+	  * the recommended way- in reality, however, it happens a lot that 
+	  * vertex data is spread among multiple layers. The default
+	  * value for this option is true.*/
+	bool readAllLayers;
+};
 
-		case TokenType_COMMA:
-			return "TOK_COMMA";
 
-		case TokenType_KEY:
-			return "TOK_KEY";
-	}
-
-	ai_assert(false);
-	return "";
-}
-	
-
-// ------------------------------------------------------------------------------------------------
-std::string AddLineAndColumn(const std::string& prefix, const std::string& text, unsigned int line, unsigned int column)
-{
-	return static_cast<std::string>( (Formatter::format(),prefix,"(line ",line,", col ",column,") ",text) );
-}
-
-// ------------------------------------------------------------------------------------------------
-std::string AddTokenText(const std::string& prefix, const std::string& text, const Token* tok)
-{
-	return static_cast<std::string>( (Formatter::format(),prefix,
-		"(",TokenTypeString(tok->Type()),
-		"line ",tok->Line(),
-		", col ",tok->Column(),") ",
-		text) );
-}
-
-} // !Util
 } // !FBX
 } // !Assimp
 

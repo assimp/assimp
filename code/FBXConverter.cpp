@@ -38,8 +38,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file  FBXDocument.cpp
- *  @brief Implementation of the FBX DOM classes
+/** @file  FBXConverter.cpp
+ *  @brief Implementation of the FBX DOM -> aiScene converter
  */
 #include "AssimpPCH.h"
 

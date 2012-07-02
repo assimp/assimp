@@ -109,12 +109,12 @@ class PropertyTable
 {
 public:
 
-	PropertyTable(const Element& element, PropertyTable* templateProps);
+	PropertyTable(const Element& element, const PropertyTable* templateProps);
 	~PropertyTable();
 
 public:
 
-	const Property* Get(const std::string& name);
+	const Property* Get(const std::string& name) const;
 
 	const Element& GetElement() const {
 		return element;
@@ -127,8 +127,8 @@ public:
 private:
 
 	LazyPropertyMap lazyProps;
-	PropertyMap props;
-	PropertyTable* const templateProps;
+	mutable PropertyMap props;
+	const PropertyTable* const templateProps;
 	const Element& element;
 };
 

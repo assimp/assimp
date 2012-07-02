@@ -120,7 +120,7 @@ std::string PeekPropertyName(const Element& element)
 } //! anon
 
 // ------------------------------------------------------------------------------------------------
-PropertyTable::PropertyTable(const Element& element, PropertyTable* templateProps)
+PropertyTable::PropertyTable(const Element& element, const PropertyTable* templateProps)
 : element(element)
 , templateProps(templateProps)
 {
@@ -156,7 +156,7 @@ PropertyTable::~PropertyTable()
 }
 
 // ------------------------------------------------------------------------------------------------
-const Property* PropertyTable::Get(const std::string& name)
+const Property* PropertyTable::Get(const std::string& name) const
 {
 	PropertyMap::const_iterator it = props.find(name);
 	if (it == props.end()) {

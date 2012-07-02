@@ -75,7 +75,7 @@ public:
 
 	template <typename T>
 	const T* As() const {
-		return dynamic_cast<const T*>(t);
+		return dynamic_cast<const T*>(this);
 	}
 };
 
@@ -141,7 +141,7 @@ private:
 template <typename T>
 inline T PropertyGet(const PropertyTable& in, const std::string& name, 
 	const T& defaultValue, 
-	bool ignoreTemplate /*= false*/)
+	bool ignoreTemplate = false)
 {
 	const Property* const prop = PropertyGet(in,name);
 	if(!prop) {
@@ -151,10 +151,33 @@ inline T PropertyGet(const PropertyTable& in, const std::string& name,
 	// strong typing, no need to be lenient 
 	const TypedProperty<T>* const tprop = prop->As< TypedProperty<T> >();
 	if(!tprop) {
-		// XXX print type name
-		DOMError("unexpected data type: property " + name,in.GetElement());
+		return defaultValue;
 	}
 
+	return tprop->Value();
+}
+
+
+// ------------------------------------------------------------------------------------------------
+template <typename T>
+inline T PropertyGet(const PropertyTable& in, const std::string& name, 
+	bool& result, 
+	bool ignoreTemplate = false)
+{
+	const Property* const prop = in.Get(name);
+	if(!prop) {
+		result = false;
+		return T();
+	}
+
+	// strong typing, no need to be lenient 
+	const TypedProperty<T>* const tprop = prop->As< TypedProperty<T> >();
+	if(!tprop) {
+		result = false;
+		return T();
+	}
+
+	result = true;
 	return tprop->Value();
 }
 

@@ -98,6 +98,14 @@ public:
 
 public:
 
+	const Element& SourceElement() const {
+		return element;
+	}
+
+	const std::string& Name() const {
+		return name;
+	}
+
 protected:
 	const Element& element;
 	const std::string name;
@@ -122,8 +130,9 @@ public:
 		return multilayer;
 	}
 
-	const PropertyTable* Props() const {
-		return props;
+	const PropertyTable& Props() const {
+		ai_assert(props.get());
+		return *props.get();
 	}
 
 private:

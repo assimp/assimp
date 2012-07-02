@@ -49,9 +49,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXConverter.h"
 #include "FBXDocument.h"
 #include "FBXUtil.h"
+#include "FBXProperties.h"
 
 namespace Assimp {
 namespace FBX {
+
+	using namespace Util;
+
 namespace {
 
 /** Dummy class to encapsulate the conversion process */
@@ -94,6 +98,7 @@ public:
 	~Converter()
 	{
 		std::for_each(meshes.begin(),meshes.end(),Util::delete_fun<aiMesh>());
+		std::for_each(materials.begin(),materials.end(),Util::delete_fun<aiMaterial>());
 	}
 
 
@@ -225,6 +230,87 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
+	// Material -> aiMaterial
+	void ConvertMaterial(const Material& material)
+	{
+		const PropertyTable& props = material.Props();
+
+		// generate empty output material
+		aiMaterial* out_mat = new aiMaterial();
+		materials.push_back(out_mat);
+
+		aiString str;
+
+		// set material name
+		str.Set(material.Name());
+		out_mat->AddProperty(&str,AI_MATKEY_NAME);
+
+		SetShadingPropertiesCommon(out_mat,props);
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void SetShadingPropertiesCommon(aiMaterial* out_mat, const PropertyTable& props)
+	{
+		// set shading properties. There are various, redundant ways in which FBX materials
+		// specify their shading settings (depending on shading models, prop
+		// template etc.). No idea which one is right in a particular context. 
+		// Just try to make sense of it - there's no spec to verify this against, 
+		// so why should we.
+		bool ok;
+		const aiVector3D& Diffuse = PropertyGet<aiVector3D>(props,"Diffuse",ok);
+		if(ok) {
+			out_mat->AddProperty(&Diffuse,1,AI_MATKEY_COLOR_DIFFUSE);
+		}
+		else {
+			aiVector3D DiffuseColor = PropertyGet<aiVector3D>(props,"DiffuseColor",ok);
+			if(ok) {
+				float DiffuseFactor = PropertyGet<float>(props,"DiffuseFactor",ok);
+				if(ok) {
+					DiffuseColor *= DiffuseFactor;
+				}
+
+				out_mat->AddProperty(&DiffuseColor,1,AI_MATKEY_COLOR_DIFFUSE);
+			}
+		}
+
+		const aiVector3D& Emissive = PropertyGet<aiVector3D>(props,"Emissive",ok);
+		if(ok) {
+			out_mat->AddProperty(&Emissive,1,AI_MATKEY_COLOR_EMISSIVE);
+		}
+
+		const aiVector3D& Ambient = PropertyGet<aiVector3D>(props,"Ambient",ok);
+		if(ok) {
+			out_mat->AddProperty(&Ambient,1,AI_MATKEY_COLOR_AMBIENT);
+		}
+
+		const aiVector3D& Specular = PropertyGet<aiVector3D>(props,"Specular",ok);
+		if(ok) {
+			out_mat->AddProperty(&Specular,1,AI_MATKEY_COLOR_SPECULAR);
+		}
+
+		const float Opacity = PropertyGet<float>(props,"Opacity",ok);
+		if(ok) {
+			out_mat->AddProperty(&Opacity,1,AI_MATKEY_OPACITY);
+		}
+
+		const float Reflectivity = PropertyGet<float>(props,"Reflectivity",ok);
+		if(ok) {
+			out_mat->AddProperty(&Reflectivity,1,AI_MATKEY_REFLECTIVITY);
+		}
+
+		const float Shininess = PropertyGet<float>(props,"Shininess",ok);
+		if(ok) {
+			out_mat->AddProperty(&Shininess,1,AI_MATKEY_SHININESS_STRENGTH);
+		}
+
+		const float ShininessExponent = PropertyGet<float>(props,"ShininessExponent",ok);
+		if(ok) {
+			out_mat->AddProperty(&ShininessExponent,1,AI_MATKEY_SHININESS);
+		}
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
 	// copy generated meshes, animations, lights, cameras and textures to the output scene
 	void TransferDataToScene()
 	{
@@ -237,12 +323,19 @@ private:
 		out->mNumMeshes = static_cast<unsigned int>(meshes.size());
 
 		std::swap_ranges(meshes.begin(),meshes.end(),out->mMeshes);
+
+
+		out->mMaterials = new aiMaterial*[meshes.size()]();
+		out->mNumMaterials = static_cast<unsigned int>(materials.size());
+
+		std::swap_ranges(materials.begin(),materials.end(),out->mMaterials);
 	}
 
 
 private:
 
 	std::vector<aiMesh*> meshes;
+	std::vector<aiMaterial*> materials;
 
 	aiScene* const out;
 	const FBX::Document& doc;

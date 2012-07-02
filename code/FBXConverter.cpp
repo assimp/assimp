@@ -248,6 +248,33 @@ private:
 		SetShadingPropertiesCommon(out_mat,props);
 	}
 
+
+	// ------------------------------------------------------------------------------------------------
+	aiColor3D GetColorPropertyFromMaterial(const PropertyTable& props,const std::string& baseName, bool& result)
+	{
+		result = true;
+
+		bool ok;
+		const aiVector3D& Diffuse = PropertyGet<aiVector3D>(props,baseName,ok);
+		if(ok) {
+			return aiColor3D(Diffuse.x,Diffuse.y,Diffuse.z);
+		}
+		else {
+			aiVector3D DiffuseColor = PropertyGet<aiVector3D>(props,baseName + "Color",ok);
+			if(ok) {
+				float DiffuseFactor = PropertyGet<float>(props,baseName + "Factor",ok);
+				if(ok) {
+					DiffuseColor *= DiffuseFactor;
+				}
+
+				return aiColor3D(DiffuseColor.x,DiffuseColor.y,DiffuseColor.z);
+			}
+		}
+		result = false;
+		return aiColor3D(0.0f,0.0f,0.0f);
+	}
+
+
 	// ------------------------------------------------------------------------------------------------
 	void SetShadingPropertiesCommon(aiMaterial* out_mat, const PropertyTable& props)
 	{
@@ -257,33 +284,22 @@ private:
 		// Just try to make sense of it - there's no spec to verify this against, 
 		// so why should we.
 		bool ok;
-		const aiVector3D& Diffuse = PropertyGet<aiVector3D>(props,"Diffuse",ok);
+		const aiColor3D& Diffuse = GetColorPropertyFromMaterial(props,"Diffuse",ok);
 		if(ok) {
-			out_mat->AddProperty(&Diffuse,1,AI_MATKEY_COLOR_DIFFUSE);
-		}
-		else {
-			aiVector3D DiffuseColor = PropertyGet<aiVector3D>(props,"DiffuseColor",ok);
-			if(ok) {
-				float DiffuseFactor = PropertyGet<float>(props,"DiffuseFactor",ok);
-				if(ok) {
-					DiffuseColor *= DiffuseFactor;
-				}
-
-				out_mat->AddProperty(&DiffuseColor,1,AI_MATKEY_COLOR_DIFFUSE);
-			}
+			out_mat->AddProperty(&Diffuse,1,AI_MATKEY_COLOR_EMISSIVE);
 		}
 
-		const aiVector3D& Emissive = PropertyGet<aiVector3D>(props,"Emissive",ok);
+		const aiColor3D& Emissive = GetColorPropertyFromMaterial(props,"Emissive",ok);
 		if(ok) {
 			out_mat->AddProperty(&Emissive,1,AI_MATKEY_COLOR_EMISSIVE);
 		}
 
-		const aiVector3D& Ambient = PropertyGet<aiVector3D>(props,"Ambient",ok);
+		const aiColor3D& Ambient = GetColorPropertyFromMaterial(props,"Ambient",ok);
 		if(ok) {
 			out_mat->AddProperty(&Ambient,1,AI_MATKEY_COLOR_AMBIENT);
 		}
 
-		const aiVector3D& Specular = PropertyGet<aiVector3D>(props,"Specular",ok);
+		const aiColor3D& Specular = GetColorPropertyFromMaterial(props,"Specular",ok);
 		if(ok) {
 			out_mat->AddProperty(&Specular,1,AI_MATKEY_COLOR_SPECULAR);
 		}
@@ -325,10 +341,12 @@ private:
 		std::swap_ranges(meshes.begin(),meshes.end(),out->mMeshes);
 
 
-		out->mMaterials = new aiMaterial*[meshes.size()]();
-		out->mNumMaterials = static_cast<unsigned int>(materials.size());
+		if(materials.size()) {
+			out->mMaterials = new aiMaterial*[materials.size()]();
+			out->mNumMaterials = static_cast<unsigned int>(materials.size());
 
-		std::swap_ranges(materials.begin(),materials.end(),out->mMaterials);
+			std::swap_ranges(materials.begin(),materials.end(),out->mMaterials);
+		}
 	}
 
 

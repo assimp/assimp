@@ -405,7 +405,7 @@ void MeshGeometry::ReadVertexDataColors(std::vector<aiColor4D>& colors_out, cons
 	const std::string& ReferenceInformationType)
 {
 	ResolveVertexDataArray(colors_out,source,MappingInformationType,ReferenceInformationType,
-		"Color",
+		"Colors",
 		"ColorIndex",
 		vertices.size(),
 		mapping_counts,

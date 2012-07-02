@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXImporter.h"
 #include "FBXImportSettings.h"
 #include "FBXDocumentUtil.h"
+#include "FBXProperties.h"
 
 namespace Assimp {
 namespace FBX {
@@ -419,15 +420,34 @@ Document::Document(const Parser& parser, const ImportSettings& settings)
 : parser(parser)
 , settings(settings)
 {
+	ReadPropertyTemplates();
+	ReadObjects();
+}
 
+// ------------------------------------------------------------------------------------------------
+Document::~Document()
+{
+	BOOST_FOREACH(ObjectMap::value_type& v, objects) {
+		delete v.second;
+	}
+
+	BOOST_FOREACH(PropertyTemplateMap::value_type& v, templates) {
+		delete v.second;
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void Document::ReadObjects()
+{
+	// read ID objects from "Objects" section
 	const Scope& sc = parser.GetRootScope();
 	const Element* const eobjects = sc["Objects"];
 	if(!eobjects || !eobjects->Compound()) {
 		DOMError("no Objects dictionary found");
 	}
 
-	const Scope* const sobjects = eobjects->Compound();
-	BOOST_FOREACH(const ElementMap::value_type& el, sobjects->Elements()) {
+	const Scope& sobjects = *eobjects->Compound();
+	BOOST_FOREACH(const ElementMap::value_type& el, sobjects.Elements()) {
 		
 		// extract ID 
 		const TokenList& tok = el.second->Tokens();
@@ -450,9 +470,58 @@ Document::Document(const Parser& parser, const ImportSettings& settings)
 }
 
 // ------------------------------------------------------------------------------------------------
-Document::~Document()
+void Document::ReadPropertyTemplates()
 {
-	
+	const Scope& sc = parser.GetRootScope();
+	// read property templates from "Definitions" section
+	const Element* const edefs = sc["Definitions"];
+	if(!edefs || !edefs->Compound()) {
+		DOMWarning("no Definitions dictionary found");
+		return;
+	}
+
+	const Scope& sdefs = *edefs->Compound();
+	const ElementCollection otypes = sdefs.GetCollection("ObjectType");
+	for(ElementMap::const_iterator it = otypes.first; it != otypes.second; ++it) {
+		const Element& el = *(*it).second;
+		const Scope* sc = el.Compound();
+		if(!sc) {
+			DOMWarning("expected nested scope in ObjectType, ignoring",&el);
+			continue;
+		}
+
+		const TokenList& tok = el.Tokens();
+		if(tok.empty()) {
+			DOMWarning("expected name for ObjectType element, ignoring",&el);
+			continue;
+		}
+
+		const std::string& oname = ParseTokenAsString(*tok[0]);
+
+		const ElementCollection templs = sc->GetCollection("PropertyTemplate");
+		for(ElementMap::const_iterator it = templs.first; it != templs.second; ++it) {
+			const Element& el = *(*it).second;
+			const Scope* sc = el.Compound();
+			if(!sc) {
+				DOMWarning("expected nested scope in PropertyTemplate, ignoring",&el);
+				continue;
+			}
+
+			const TokenList& tok = el.Tokens();
+			if(tok.empty()) {
+				DOMWarning("expected name for PropertyTemplate element, ignoring",&el);
+				continue;
+			}
+
+			const std::string& pname = ParseTokenAsString(*tok[0]);
+
+			const Element* Properties70 = (*sc)["Properties70"];
+			if(Properties70) {
+				PropertyTable* const props = new PropertyTable(*Properties70,NULL);
+				templates[oname+"."+pname] = props;
+			}
+		}
+	}
 }
 
 } // !FBX

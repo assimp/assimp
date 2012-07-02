@@ -55,6 +55,8 @@ namespace FBX {
 	class Object;
 	struct ImportSettings;
 
+	class PropertyTable;
+
 
 /** Represents a delay-parsed FBX objects. Many objects in the scene
  *  are not needed by assimp, so it makes no sense to parse them
@@ -227,7 +229,7 @@ private:
 	// up to many thousands of objects (most of which we never use),
 	// so the memory overhead for them should be kept at a minimum.
 	typedef std::map<uint64_t, LazyObject*> ObjectMap; 
-
+	typedef std::fbx_unordered_map<std::string, PropertyTable*> PropertyTemplateMap;
 
 /** DOM root for a FBX file */
 class Document 
@@ -239,6 +241,10 @@ public:
 
 public:
 
+	const PropertyTemplateMap& Templates() const {
+		return templates;
+	}
+
 	const ObjectMap& Objects() const {
 		return objects;
 	}
@@ -249,10 +255,17 @@ public:
 
 private:
 
+	void ReadObjects();
+	void ReadPropertyTemplates();
+
+private:
+
 	const ImportSettings& settings;
 
 	ObjectMap objects;
 	const Parser& parser;
+
+	PropertyTemplateMap templates;
 };
 
 }

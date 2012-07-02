@@ -144,6 +144,9 @@ PropertyTable::PropertyTable(const Element& element, PropertyTable* templateProp
 // ------------------------------------------------------------------------------------------------
 PropertyTable::~PropertyTable()
 {
+	BOOST_FOREACH(PropertyMap::value_type& v, props) {
+		delete v.second;
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

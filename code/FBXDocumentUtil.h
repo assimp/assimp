@@ -48,8 +48,13 @@ namespace Assimp {
 namespace FBX {
 namespace Util {
 
+// does not return
 void DOMError(const std::string& message, const Token& token);
 void DOMError(const std::string& message, const Element* element = NULL);
+
+// does return
+void DOMWarning(const std::string& message, const Token& token);
+void DOMWarning(const std::string& message, const Element* element = NULL);
 
 // extract required compound scope
 const Scope& GetRequiredScope(const Element& el);

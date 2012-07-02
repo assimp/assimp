@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file  FBXMeshGeometry.cpp
- *  @brief FBX::MeshGeometry implementation
+ *  @brief Assimp::FBX::MeshGeometry implementation
  */
 #include "AssimpPCH.h"
 

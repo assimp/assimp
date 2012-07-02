@@ -2092,6 +2092,10 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\code\FBXMaterial.cpp"
+						>
+					</File>
+					<File
 						RelativePath="..\..\code\FBXMeshGeometry.cpp"
 						>
 					</File>
@@ -2101,6 +2105,14 @@
 					</File>
 					<File
 						RelativePath="..\..\code\FBXParser.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\FBXProperties.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\FBXProperties.h"
 						>
 					</File>
 					<File

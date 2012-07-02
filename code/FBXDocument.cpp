@@ -74,6 +74,28 @@ void DOMError(const std::string& message, const Element* element /*= NULL*/)
 
 
 // ------------------------------------------------------------------------------------------------
+// print warning, do return
+void DOMWarning(const std::string& message, const Token& token)
+{
+	if(DefaultLogger::get()) {
+		DefaultLogger::get()->warn(Util::AddTokenText("FBX-DOM",message,&token));
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void DOMWarning(const std::string& message, const Element* element /*= NULL*/)
+{
+	if(element) {
+		DOMWarning(message,element->KeyToken());
+		return;
+	}
+	if(DefaultLogger::get()) {
+		DefaultLogger::get()->warn("FBX-DOM: " + message);
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
 // extract required compound scope
 const Scope& GetRequiredScope(const Element& el)
 {

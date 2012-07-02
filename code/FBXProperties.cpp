@@ -85,15 +85,21 @@ Property* ReadTypedProperty(const Element& element)
 	else if (!strcmp(cs,"bool")) {
 		return new TypedProperty<bool>(ParseTokenAsInt(*tok[4]) != 0);
 	}
-	else if (!strcmp(cs,"int")) {
+	else if (!strcmp(cs,"int") || !strcmp(cs,"enum")) {
 		return new TypedProperty<int>(ParseTokenAsInt(*tok[4]));
 	}
-	else if (!strcmp(cs,"Vector3D")) {
+	else if (!strcmp(cs,"ULongLong")) {
+		return new TypedProperty<uint64_t>(ParseTokenAsID(*tok[4]));
+	}
+	else if (!strcmp(cs,"Vector3D") || !strcmp(cs,"ColorRGB") || !strcmp(cs,"Vector") || !strcmp(cs,"Color")) {
 		return new TypedProperty<aiVector3D>(aiVector3D(
 			ParseTokenAsFloat(*tok[4]),
 			ParseTokenAsFloat(*tok[5]),
 			ParseTokenAsFloat(*tok[6]))
 		);
+	}
+	else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"KTime")) {
+		return new TypedProperty<float>(ParseTokenAsFloat(*tok[4]));
 	}
 	return NULL;
 }

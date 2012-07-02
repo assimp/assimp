@@ -50,13 +50,75 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXImporter.h"
 #include "FBXImportSettings.h"
 #include "FBXDocumentUtil.h"
+#include "FBXProperties.h"
 
 namespace Assimp {
 namespace FBX {
 
 	using namespace Util;
 
+// ------------------------------------------------------------------------------------------------
+Material::Material(const Element& element, const Document& doc, const std::string& name)
+: Object(element,name)
+{
+	const Scope& sc = GetRequiredScope(element);
+	
+	const Element* const ShadingModel = sc["ShadingModel"];
+	const Element* const MultiLayer = sc["MultiLayer"];
+	const Element* const Properties70 = sc["Properties70"];
 
+	if(MultiLayer) {
+		multilayer = !!ParseTokenAsInt(GetRequiredToken(*MultiLayer,0));
+	}
+
+	if(ShadingModel) {
+		shading = ParseTokenAsString(GetRequiredToken(*ShadingModel,0));
+	}
+	else {
+		DOMWarning("shading mode not specified, assuming phong",&element);
+		shading = "phong";
+	}
+
+	std::string templateName;
+
+	const char* const sh = shading.c_str();
+	if(!strcmp(sh,"phong")) {
+		templateName = "Material.FbxSurfacePhong";
+	}
+	else if(!strcmp(sh,"lambert")) {
+		templateName = "Material.FbxSurfaceLambert";
+	}
+	else {
+		DOMWarning("shading mode not recognized: " + shading,&element);
+	}
+
+	boost::shared_ptr<const PropertyTable> templateProps = boost::shared_ptr<const PropertyTable>(NULL);
+	if(templateName.length()) {
+		PropertyTemplateMap::const_iterator it = doc.Templates().find(templateName); 
+		if(it != doc.Templates().end()) {
+			templateProps = (*it).second;
+		}
+	}
+
+	if(!Properties70) {
+		DOMWarning("material property table (Properties70) not found",&element);
+		if(templateProps) {
+			props = templateProps;
+		}
+		else {
+			props = boost::make_shared<const PropertyTable>();
+		}
+	}
+	else {
+		props = boost::make_shared<const PropertyTable>(*Properties70,templateProps);
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+Material::~Material()
+{
+}
 
 } //!FBX
 } //!Assimp

@@ -56,6 +56,7 @@ namespace FBX {
 	struct ImportSettings;
 
 	class PropertyTable;
+	class Document;
 
 
 /** Represents a delay-parsed FBX objects. Many objects in the scene
@@ -65,7 +66,7 @@ class LazyObject
 {
 public:
 
-	LazyObject(const Element& element, const ImportSettings& settings);
+	LazyObject(const Element& element, const Document& doc);
 	~LazyObject();
 
 public:
@@ -80,7 +81,7 @@ public:
 
 private:
 
-	const ImportSettings& settings;
+	const Document& doc;
 	const Element& element;
 	boost::scoped_ptr<const Object> object;
 };
@@ -100,6 +101,36 @@ public:
 protected:
 	const Element& element;
 	const std::string name;
+};
+
+
+/** DOM class for generic FBX materials */
+class Material : public Object
+{
+public:
+
+	Material(const Element& element, const Document& doc, const std::string& name);
+	~Material();
+
+public:
+
+	const std::string& GetShadingModel() const {
+		return shading;
+	}
+
+	bool IsMultilayer() const {
+		return multilayer;
+	}
+
+	const PropertyTable* Props() const {
+		return props;
+	}
+
+private:
+
+	std::string shading;
+	bool multilayer;
+	boost::shared_ptr<const PropertyTable> props;
 };
 
 
@@ -229,7 +260,7 @@ private:
 	// up to many thousands of objects (most of which we never use),
 	// so the memory overhead for them should be kept at a minimum.
 	typedef std::map<uint64_t, LazyObject*> ObjectMap; 
-	typedef std::fbx_unordered_map<std::string, PropertyTable*> PropertyTemplateMap;
+	typedef std::fbx_unordered_map<std::string, boost::shared_ptr<const PropertyTable> > PropertyTemplateMap;
 
 /** DOM root for a FBX file */
 class Document 

@@ -109,14 +109,18 @@ class PropertyTable
 {
 public:
 
-	PropertyTable(const Element& element, const PropertyTable* templateProps);
+	// in-memory property table with no source element
+	PropertyTable();
+	
+	PropertyTable(const Element& element, boost::shared_ptr<const PropertyTable> templateProps);
 	~PropertyTable();
 
 public:
 
 	const Property* Get(const std::string& name) const;
 
-	const Element& GetElement() const {
+	// PropertyTable's need not be coupled with FBX elements so this can be NULL
+	const Element* GetElement() const {
 		return element;
 	}
 
@@ -128,8 +132,8 @@ private:
 
 	LazyPropertyMap lazyProps;
 	mutable PropertyMap props;
-	const PropertyTable* const templateProps;
-	const Element& element;
+	const boost::shared_ptr<const PropertyTable> templateProps;
+	const Element* const element;
 };
 
 

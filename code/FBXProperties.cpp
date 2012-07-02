@@ -119,9 +119,17 @@ std::string PeekPropertyName(const Element& element)
 
 } //! anon
 
+
 // ------------------------------------------------------------------------------------------------
-PropertyTable::PropertyTable(const Element& element, const PropertyTable* templateProps)
-: element(element)
+PropertyTable::PropertyTable()
+: element()
+, templateProps()
+{
+}
+
+// ------------------------------------------------------------------------------------------------
+PropertyTable::PropertyTable(const Element& element, boost::shared_ptr<const PropertyTable> templateProps)
+: element(&element)
 , templateProps(templateProps)
 {
 	const Scope& scope = GetRequiredScope(element);

@@ -332,8 +332,8 @@ void ReadVectorDataArray(std::vector<unsigned int>& out, const Element& el)
 using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
-LazyObject::LazyObject(const Element& element, const ImportSettings& settings)
-: settings(settings)
+LazyObject::LazyObject(const Element& element, const Document& doc)
+: doc(doc)
 , element(element)
 {
 
@@ -370,14 +370,17 @@ const Object* LazyObject::Get()
 		DOMError(err,&element);
 	} 
 
-	// this needs to be relatively fast since we do it a lot,
+	// this needs to be relatively fast since it happens a lot,
 	// so avoid constructing strings all the time.
 	const char* obtype = key.begin();
-	if (!strncmp(obtype,"Geometry",static_cast<size_t>(key.end()-key.begin()))) {
-
+	const size_t length = static_cast<size_t>(key.end()-key.begin());
+	if (!strncmp(obtype,"Geometry",length)) {
 		if (!strcmp(classtag.c_str(),"Mesh")) {
-			object.reset(new MeshGeometry(element,name,settings));
+			object.reset(new MeshGeometry(element,name,doc.Settings()));
 		}
+	}
+	else if (!strncmp(obtype,"Material",length)) {
+		object.reset(new Material(element,doc,name));
 	}
 
 	if (!object.get()) {
@@ -430,10 +433,6 @@ Document::~Document()
 	BOOST_FOREACH(ObjectMap::value_type& v, objects) {
 		delete v.second;
 	}
-
-	BOOST_FOREACH(PropertyTemplateMap::value_type& v, templates) {
-		delete v.second;
-	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -463,7 +462,7 @@ void Document::ReadObjects()
 			DOMError(err,el.second);
 		}
 
-		objects[id] = new LazyObject(*el.second, settings);
+		objects[id] = new LazyObject(*el.second, *this);
 		// DEBUG - evaluate all objects
 		const Object* o = objects[id]->Get();
 	}
@@ -517,7 +516,10 @@ void Document::ReadPropertyTemplates()
 
 			const Element* Properties70 = (*sc)["Properties70"];
 			if(Properties70) {
-				PropertyTable* const props = new PropertyTable(*Properties70,NULL);
+				boost::shared_ptr<const PropertyTable> props = boost::make_shared<const PropertyTable>(
+					*Properties70,boost::shared_ptr<const PropertyTable>(NULL)
+				);
+
 				templates[oname+"."+pname] = props;
 			}
 		}

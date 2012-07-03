@@ -184,7 +184,7 @@ private:
 };
 
 
-typedef std::fbx_unordered_map<std::string,Texture*> TextureMap;
+typedef std::fbx_unordered_map<std::string, const Texture*> TextureMap;
 
 
 /** DOM class for generic FBX materials */

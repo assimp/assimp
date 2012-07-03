@@ -94,7 +94,33 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
 	props = GetPropertyTable(doc,templateName,element,sc);
 
 	// resolve texture links
-	doc.GetConnectionsByDestinationSequenced(ID());
+	const std::vector<const Connection*> conns = doc.GetConnectionsByDestinationSequenced(ID());
+	BOOST_FOREACH(const Connection* con, conns) {
+
+		// texture link to properties, not objects
+		if (!con->PropertyName().length()) {
+			continue;
+		}
+
+		const Object* const ob = con->SourceObject();
+		if(!ob) {
+			DOMWarning("failed to read source object for texture link, ignoring",&element);
+			continue;
+		}
+
+		const Texture* const tex = dynamic_cast<const Texture*>(ob);
+		if(!tex) {
+			DOMWarning("source object for texture link is not a texture, ignoring",&element);
+			continue;
+		}
+
+		const std::string& prop = con->PropertyName();
+		if (textures.find(prop) != textures.end()) {
+			DOMWarning("duplicate texture link: " + prop,&element);
+		}
+
+		textures[prop] = tex;
+	}
 }
 
 

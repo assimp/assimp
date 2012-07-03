@@ -327,6 +327,35 @@ void ReadVectorDataArray(std::vector<unsigned int>& out, const Element& el)
 		out.push_back(static_cast<unsigned int>(ival));
 	}
 }
+
+
+// ------------------------------------------------------------------------------------------------
+// fetch a property table and the corresponding property template 
+boost::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc, 
+	const std::string& templateName, 
+	const Element &element, 
+	const Scope& sc)
+{
+	const Element* const Properties70 = sc["Properties70"];
+	boost::shared_ptr<const PropertyTable> templateProps = boost::shared_ptr<const PropertyTable>(NULL);
+	if(templateName.length()) {
+		PropertyTemplateMap::const_iterator it = doc.Templates().find(templateName); 
+		if(it != doc.Templates().end()) {
+			templateProps = (*it).second;
+		}
+	}
+
+	if(!Properties70) {
+		DOMWarning("material property table (Properties70) not found",&element);
+		if(templateProps) {
+			return templateProps;
+		}
+		else {
+			return boost::make_shared<const PropertyTable>();
+		}
+	}
+	return boost::make_shared<const PropertyTable>(*Properties70,templateProps);
+}
 } // !Util
 
 using namespace Util;

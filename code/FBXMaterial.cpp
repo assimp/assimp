@@ -65,7 +65,6 @@ Material::Material(const Element& element, const Document& doc, const std::strin
 	
 	const Element* const ShadingModel = sc["ShadingModel"];
 	const Element* const MultiLayer = sc["MultiLayer"];
-	const Element* const Properties70 = sc["Properties70"];
 
 	if(MultiLayer) {
 		multilayer = !!ParseTokenAsInt(GetRequiredToken(*MultiLayer,0));
@@ -92,26 +91,7 @@ Material::Material(const Element& element, const Document& doc, const std::strin
 		DOMWarning("shading mode not recognized: " + shading,&element);
 	}
 
-	boost::shared_ptr<const PropertyTable> templateProps = boost::shared_ptr<const PropertyTable>(NULL);
-	if(templateName.length()) {
-		PropertyTemplateMap::const_iterator it = doc.Templates().find(templateName); 
-		if(it != doc.Templates().end()) {
-			templateProps = (*it).second;
-		}
-	}
-
-	if(!Properties70) {
-		DOMWarning("material property table (Properties70) not found",&element);
-		if(templateProps) {
-			props = templateProps;
-		}
-		else {
-			props = boost::make_shared<const PropertyTable>();
-		}
-	}
-	else {
-		props = boost::make_shared<const PropertyTable>(*Properties70,templateProps);
-	}
+	props = GetPropertyTable(doc,templateName,element,sc);
 }
 
 

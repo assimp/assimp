@@ -91,6 +91,14 @@ void ReadVectorDataArray(std::vector<int>& out, const Element& el);
 // read an array of uints
 void ReadVectorDataArray(std::vector<unsigned int>& out, const Element& el);
 
+
+
+// fetch a property table and the corresponding property template 
+boost::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc, 
+	const std::string& templateName, 
+	const Element &element, 
+	const Scope& sc);
+
 } //!Util
 } //!FBX
 } //!Assimp

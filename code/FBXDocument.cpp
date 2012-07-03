@@ -363,9 +363,10 @@ boost::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc,
 using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
-LazyObject::LazyObject(const Element& element, const Document& doc)
+LazyObject::LazyObject(uint64_t id, const Element& element, const Document& doc)
 : doc(doc)
 , element(element)
+, id(id)
 {
 
 }
@@ -401,17 +402,22 @@ const Object* LazyObject::Get()
 		DOMError(err,&element);
 	} 
 
+	// XXX prevent recursive calls
+
 	// this needs to be relatively fast since it happens a lot,
 	// so avoid constructing strings all the time.
 	const char* obtype = key.begin();
 	const size_t length = static_cast<size_t>(key.end()-key.begin());
 	if (!strncmp(obtype,"Geometry",length)) {
 		if (!strcmp(classtag.c_str(),"Mesh")) {
-			object.reset(new MeshGeometry(element,name,doc.Settings()));
+			object.reset(new MeshGeometry(id,element,name,doc.Settings()));
 		}
 	}
 	else if (!strncmp(obtype,"Material",length)) {
-		object.reset(new Material(element,doc,name));
+		object.reset(new Material(id,element,doc,name));
+	}
+	else if (!strncmp(obtype,"Texture",length)) {
+		object.reset(new Texture(id,element,doc,name));
 	}
 
 	if (!object.get()) {
@@ -422,9 +428,10 @@ const Object* LazyObject::Get()
 }
 
 // ------------------------------------------------------------------------------------------------
-Object::Object(const Element& element, const std::string& name)
+Object::Object(uint64_t id, const Element& element, const std::string& name)
 : element(element)
 , name(name)
+, id(id)
 {
 
 }
@@ -437,8 +444,8 @@ Object::~Object()
 
 
 // ------------------------------------------------------------------------------------------------
-Geometry::Geometry(const Element& element, const std::string& name)
-: Object(element,name)
+Geometry::Geometry(uint64_t id, const Element& element, const std::string& name)
+: Object(id, element,name)
 {
 
 }
@@ -498,7 +505,7 @@ void Document::ReadObjects()
 			DOMError(err,el.second);
 		}
 
-		objects[id] = new LazyObject(*el.second, *this);
+		objects[id] = new LazyObject(id, *el.second, *this);
 		// DEBUG - evaluate all objects
 		const Object* o = objects[id]->Get();
 	}

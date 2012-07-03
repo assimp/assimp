@@ -66,7 +66,7 @@ class LazyObject
 {
 public:
 
-	LazyObject(const Element& element, const Document& doc);
+	LazyObject(uint64_t id, const Element& element, const Document& doc);
 	~LazyObject();
 
 public:
@@ -79,11 +79,17 @@ public:
 		return ob ? dynamic_cast<T*>(ob) : NULL;
 	}
 
+	uint64_t ID() const {
+		return id;
+	}
+
 private:
 
 	const Document& doc;
 	const Element& element;
 	boost::scoped_ptr<const Object> object;
+
+	const uint64_t id;
 };
 
 
@@ -93,7 +99,7 @@ class Object
 {
 public:
 
-	Object(const Element& element, const std::string& name);
+	Object(uint64_t id, const Element& element, const std::string& name);
 	virtual ~Object();
 
 public:
@@ -106,9 +112,14 @@ public:
 		return name;
 	}
 
+	uint64_t ID() const {
+		return id;
+	}
+
 protected:
 	const Element& element;
 	const std::string name;
+	const uint64_t id;
 };
 
 
@@ -119,7 +130,7 @@ class Texture : public Object
 {
 public:
 
-	Texture(const Element& element, const Document& doc, const std::string& name);
+	Texture(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 	~Texture();
 
 public:
@@ -181,7 +192,7 @@ class Material : public Object
 {
 public:
 
-	Material(const Element& element, const Document& doc, const std::string& name);
+	Material(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 	~Material();
 
 public:
@@ -218,7 +229,7 @@ class Geometry : public Object
 {
 public:
 
-	Geometry(const Element& element, const std::string& name);
+	Geometry(uint64_t id, const Element& element, const std::string& name);
 	~Geometry();
 };
 
@@ -229,7 +240,7 @@ class MeshGeometry : public Geometry
 
 public:
 
-	MeshGeometry(const Element& element, const std::string& name, const ImportSettings& settings);
+	MeshGeometry(uint64_t id, const Element& element, const std::string& name, const ImportSettings& settings);
 	~MeshGeometry();
 
 public:

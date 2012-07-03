@@ -58,8 +58,8 @@ namespace FBX {
 	using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
-MeshGeometry::MeshGeometry(const Element& element, const std::string& name, const ImportSettings& settings)
-: Geometry(element,name)
+MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::string& name, const ImportSettings& settings)
+: Geometry(id, element,name)
 {
 	const Scope* sc = element.Compound();
 	if (!sc) {

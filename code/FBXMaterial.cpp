@@ -58,8 +58,8 @@ namespace FBX {
 	using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
-Material::Material(const Element& element, const Document& doc, const std::string& name)
-: Object(element,name)
+Material::Material(uint64_t id, const Element& element, const Document& doc, const std::string& name)
+: Object(id,element,name)
 {
 	const Scope& sc = GetRequiredScope(element);
 	
@@ -92,6 +92,9 @@ Material::Material(const Element& element, const Document& doc, const std::strin
 	}
 
 	props = GetPropertyTable(doc,templateName,element,sc);
+
+	// resolve texture links
+	doc.GetConnectionsByDestinationSequenced(ID());
 }
 
 
@@ -102,8 +105,8 @@ Material::~Material()
 
 
 // ------------------------------------------------------------------------------------------------
-Texture::Texture(const Element& element, const Document& doc, const std::string& name)
-: Object(element,name)
+Texture::Texture(uint64_t id, const Element& element, const Document& doc, const std::string& name)
+: Object(id,element,name)
 , uvScaling(1.0f,1.0f)
 {
 	const Scope& sc = GetRequiredScope(element);

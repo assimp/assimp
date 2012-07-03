@@ -112,6 +112,70 @@ protected:
 };
 
 
+
+
+/** DOM class for generic FBX textures */
+class Texture : public Object
+{
+public:
+
+	Texture(const Element& element, const Document& doc, const std::string& name);
+	~Texture();
+
+public:
+
+	const std::string& Type() const {
+		return type;
+	}
+
+	const std::string& FileName() const {
+		return fileName;
+	}
+
+	const std::string& RelativeFilename() const {
+		return relativeFileName;
+	}
+
+	const std::string& AlphaSource() const {
+		return alphaSource;
+	}
+
+	const aiVector2D& UVTranslation() const {
+		return uvTrans;
+	}
+
+	const aiVector2D& UVScaling() const {
+		return uvScaling;
+	}
+
+	const PropertyTable& Props() const {
+		ai_assert(props.get());
+		return *props.get();
+	}
+
+	// return a 4-tuple 
+	const unsigned int* Crop() const {
+		return crop;
+	}
+
+private:
+
+	aiVector2D uvTrans;
+	aiVector2D uvScaling;
+
+	std::string type;
+	std::string relativeFileName;
+	std::string fileName;
+	std::string alphaSource;
+	boost::shared_ptr<const PropertyTable> props;
+
+	unsigned int crop[4];
+};
+
+
+typedef std::fbx_unordered_map<std::string,Texture*> TextureMap;
+
+
 /** DOM class for generic FBX materials */
 class Material : public Object
 {
@@ -135,11 +199,17 @@ public:
 		return *props.get();
 	}
 
+	const TextureMap& Textures() const {
+		return textures;
+	}
+
 private:
 
 	std::string shading;
 	bool multilayer;
 	boost::shared_ptr<const PropertyTable> props;
+
+	TextureMap textures;
 };
 
 

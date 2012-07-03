@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file  FBXMaterial.cpp
- *  @brief Assimp::FBX::Material implementation
+ *  @brief Assimp::FBX::Material and Assimp::FBX::Texture implementation
  */
 #include "AssimpPCH.h"
 
@@ -98,6 +98,70 @@ Material::Material(const Element& element, const Document& doc, const std::strin
 // ------------------------------------------------------------------------------------------------
 Material::~Material()
 {
+}
+
+// ------------------------------------------------------------------------------------------------
+Texture::Texture(const Element& element, const Document& doc, const std::string& name)
+: Object(element,name)
+, uvScaling(1.0f,1.0f)
+{
+	const Scope& sc = GetRequiredScope(element);
+
+	const Element* const Type = sc["Type"];
+	const Element* const FileName = sc["FileName"];
+	const Element* const RelativeFilename = sc["RelativeFilename"];
+	const Element* const ModelUVTranslation = sc["ModelUVTranslation"];
+	const Element* const ModelUVScaling = sc["ModelUVScaling"];
+	const Element* const Texture_Alpha_Source = sc["Texture_Alpha_Source"];
+	const Element* const Cropping = sc["Cropping"];
+
+	if(Type) {
+		type = ParseTokenAsString(GetRequiredToken(*Type,0));
+	}
+
+	if(FileName) {
+		fileName = ParseTokenAsString(GetRequiredToken(*FileName,0));
+	}
+
+	if(RelativeFilename) {
+		relativeFileName = ParseTokenAsString(GetRequiredToken(*RelativeFilename,0));
+	}
+
+	if(ModelUVTranslation) {
+		uvTrans = aiVector2D(ParseTokenAsFloat(GetRequiredToken(*ModelUVTranslation,0)),
+			ParseTokenAsFloat(GetRequiredToken(*ModelUVTranslation,1))
+		);
+	}
+
+	if(ModelUVScaling) {
+		uvScaling = aiVector2D(ParseTokenAsFloat(GetRequiredToken(*ModelUVScaling,0)),
+			ParseTokenAsFloat(GetRequiredToken(*ModelUVScaling,1))
+		);
+	}
+
+	if(Cropping) {
+		crop[0] = ParseTokenAsInt(GetRequiredToken(*Cropping,0));
+		crop[1] = ParseTokenAsInt(GetRequiredToken(*Cropping,1));
+		crop[2] = ParseTokenAsInt(GetRequiredToken(*Cropping,2));
+		crop[3] = ParseTokenAsInt(GetRequiredToken(*Cropping,3));
+	}
+	else {
+		// vc8 doesn't support the crop() syntax in initialization lists
+		// (and vc9 WARNS about the new (i.e. compliant) behaviour).
+		crop[0] = crop[1] = crop[2] = crop[3] = 0;
+	}
+
+	if(Texture_Alpha_Source) {
+		alphaSource = ParseTokenAsString(GetRequiredToken(*Texture_Alpha_Source,0));
+	}
+
+	props = GetPropertyTable(doc,"Texture.FbxFileTexture",element,sc);
+}
+
+
+Texture::~Texture()
+{
+
 }
 
 } //!FBX

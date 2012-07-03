@@ -282,6 +282,13 @@ public:
 		return index >= AI_MAX_NUMBER_OF_TEXTURECOORDS ? empty : uvs[index];
 	}
 
+
+	/** Get a UV coordinate slot, returns an empty array if
+	 *  the requested slot does not exist. */
+	std::string GetTextureCoordChannelName(unsigned int index) const {
+		return index >= AI_MAX_NUMBER_OF_TEXTURECOORDS ? "" : uvNames[index];
+	}
+
 	/** Get a vertex color coordinate slot, returns an empty array if
 	 *  the requested slot does not exist. */
 	const std::vector<aiColor4D>& GetVertexColors(unsigned int index) const {
@@ -336,6 +343,8 @@ private:
 	std::vector<aiVector3D> tangents;
 	std::vector<aiVector3D> binormals;
 	std::vector<aiVector3D> normals;
+
+	std::string uvNames[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 	std::vector<aiVector2D> uvs[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 	std::vector<aiColor4D> colors[AI_MAX_NUMBER_OF_COLOR_SETS];
 

@@ -221,6 +221,12 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
 			return;
 		}
 
+		const Element* Name = source["Name"];
+		uvNames[index] = "";
+		if(Name) {
+			uvNames[index] = ParseTokenAsString(GetRequiredToken(*Name,0));
+		}
+
 		ReadVertexDataUV(uvs[index],source,
 			MappingInformationType,
 			ReferenceInformationType

@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocument.h"
 #include "FBXUtil.h"
 #include "FBXProperties.h"
+#include "FBXImporter.h"
 
 namespace Assimp {
 namespace FBX {
@@ -124,6 +125,8 @@ private:
 
 		aiMesh* out_mesh = new aiMesh();
 		meshes.push_back(out_mesh);
+
+		sourceMeshes.push_back(&mesh);
 
 		// copy vertices
 		out_mesh->mNumVertices = static_cast<size_t>(vertices.size());
@@ -245,8 +248,113 @@ private:
 		str.Set(material.Name());
 		out_mat->AddProperty(&str,AI_MATKEY_NAME);
 
+		// shading stuff and colors
 		SetShadingPropertiesCommon(out_mat,props);
+	
+		// texture assignments
+		SetTextureProperties(out_mat,material.Textures());
 	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void TrySetTextureProperties(aiMaterial* out_mat, const TextureMap& textures, const std::string& propName, aiTextureType target)
+	{
+		TextureMap::const_iterator it = textures.find(propName);
+		if(it == textures.end()) {
+			return;
+		}
+
+		const Texture* const tex = (*it).second;
+		
+		aiString path;
+		path.Set(tex->RelativeFilename());
+
+		out_mat->AddProperty(&path,_AI_MATKEY_TEXTURE_BASE,target,0);
+
+		aiUVTransform uvTrafo;
+		// XXX handle all kinds of UV transformations
+		uvTrafo.mScaling = tex->UVScaling();
+		uvTrafo.mTranslation = tex->UVTranslation();
+		out_mat->AddProperty(&uvTrafo,1,_AI_MATKEY_UVTRANSFORM_BASE,target,0);
+
+		const PropertyTable& props = tex->Props();
+
+		int uvIndex = 0;
+
+		bool ok;
+		const std::string& uvSet = PropertyGet<std::string>(props,"UVSet",ok);
+		if(ok) {
+			// "default" is the name which usually appears in the FbxFileTexture template
+			if(uvSet != "default" && uvSet.length()) {
+				// this is a bit awkward - we need to find a mesh that uses this
+				// material and scan its UV channels for the given UV name because
+				// assimp references UV channels by index, not by name.
+
+				// XXX: the case that UV channels may appear in different orders
+				// in meshes is unhandled. A possible solution would be to sort
+				// the UV channels alphabetically, but this would have the side
+				// effect that the primary (first) UV channel would sometimes
+				// be moved, causing trouble when users read only the first
+				// UV channel and ignore UV channel assignments altogether.
+
+				const unsigned int matIndex = std::distance(materials.begin(), 
+					std::find(materials.begin(),materials.end(),out_mat)
+				);
+
+				uvIndex = -1;
+				BOOST_FOREACH(const MeshGeometry* mesh,sourceMeshes) {
+					ai_assert(mesh);
+
+					const std::vector<unsigned int>& mats = mesh->GetMaterialIndices();
+					if(std::find(mats.begin(),mats.end(),matIndex) == mats.end()) {
+						continue;
+					}
+
+					int index = -1;
+					for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+						if(mesh->GetTextureCoords(i).empty()) {
+							break;
+						}
+						const std::string& name = mesh->GetTextureCoordChannelName(i);
+						if(name == uvSet) {
+							index = static_cast<int>(i);
+							break;
+						}
+					}
+					if(index == -1) {
+						FBXImporter::LogWarn("did not found UV channel named " + uvSet + " in a mesh using this material");
+						continue;
+					}
+
+					if(uvIndex == -1) {
+						uvIndex = index;
+					}
+					else {
+						FBXImporter::LogWarn("the UV channel named " + uvSet + 
+							" appears at different positions in meshes, results will be wrong");
+					}
+				}
+			}
+		}
+
+		out_mat->AddProperty(&uvIndex,1,_AI_MATKEY_UVWSRC_BASE,target,0);
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void SetTextureProperties(aiMaterial* out_mat, const TextureMap& textures)
+	{
+		TrySetTextureProperties(out_mat, textures, "DiffuseColor", aiTextureType_DIFFUSE);
+		TrySetTextureProperties(out_mat, textures, "AmbientColor", aiTextureType_AMBIENT);
+		TrySetTextureProperties(out_mat, textures, "EmissiveColor", aiTextureType_EMISSIVE);
+		TrySetTextureProperties(out_mat, textures, "SpecularColor", aiTextureType_SPECULAR);
+		TrySetTextureProperties(out_mat, textures, "TransparentColor", aiTextureType_OPACITY);
+		TrySetTextureProperties(out_mat, textures, "ReflectionColor", aiTextureType_REFLECTION);
+		TrySetTextureProperties(out_mat, textures, "DisplacementColor", aiTextureType_DISPLACEMENT);
+		TrySetTextureProperties(out_mat, textures, "NormalMap", aiTextureType_NORMALS);
+		TrySetTextureProperties(out_mat, textures, "Bump", aiTextureType_HEIGHT);
+	}
+
 
 
 	// ------------------------------------------------------------------------------------------------
@@ -354,6 +462,8 @@ private:
 
 	std::vector<aiMesh*> meshes;
 	std::vector<aiMaterial*> materials;
+
+	std::vector<const MeshGeometry*> sourceMeshes;
 
 	aiScene* const out;
 	const FBX::Document& doc;

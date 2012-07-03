@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
+#include <functional>
+
 #include "FBXParser.h"
 #include "FBXDocument.h"
 #include "FBXUtil.h"
@@ -612,6 +614,42 @@ LazyObject* Document::GetObject(uint64_t id) const
 	return it == objects.end() ? NULL : (*it).second;
 }
 
+// ------------------------------------------------------------------------------------------------
+std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source) const
+{
+	std::vector<const Connection*> temp;
+
+	const std::pair<ConnectionMap::const_iterator,ConnectionMap::const_iterator> range = 
+		ConnectionsBySource().equal_range(source);
+
+	temp.reserve(std::distance(range.first,range.second));
+	for (ConnectionMap::const_iterator it = range.first; it != range.second; ++it) {
+		temp.push_back((*it).second);
+	}
+
+	std::sort(temp.begin(), temp.end(), std::mem_fun(&Connection::CompareTo));
+
+	return temp; // NRVO should handle this
+}
+
+
+// ------------------------------------------------------------------------------------------------
+std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest) const
+{
+	std::vector<const Connection*> temp;
+
+	const std::pair<ConnectionMap::const_iterator,ConnectionMap::const_iterator> range = 
+		ConnectionsByDestination().equal_range(dest);
+
+	temp.reserve(std::distance(range.first,range.second));
+	for (ConnectionMap::const_iterator it = range.first; it != range.second; ++it) {
+		temp.push_back((*it).second);
+	}
+
+	std::sort(temp.begin(), temp.end(), std::mem_fun(&Connection::CompareTo));
+
+	return temp; // NRVO should handle this
+}
 
 // ------------------------------------------------------------------------------------------------
 Connection::Connection(uint64_t insertionOrder,  uint64_t src, uint64_t dest, const std::string& prop, const Document& doc)

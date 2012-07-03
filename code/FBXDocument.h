@@ -358,6 +358,17 @@ public:
 		return insertionOrder;
 	}
 
+	int CompareTo(const Connection* c) const {
+		// note: can't subtract because this would overflow uint64_t
+		if(InsertionOrder() > c->InsertionOrder()) {
+			return 1;
+		}
+		else if(InsertionOrder() < c->InsertionOrder()) {
+			return -1;
+		}
+		return 0;
+	}
+
 public:
 
 	uint64_t insertionOrder;
@@ -378,6 +389,7 @@ public:
 
 
 	typedef std::multimap<uint64_t, const Connection*> ConnectionMap;
+
 
 /** DOM root for a FBX file */
 class Document 
@@ -410,6 +422,9 @@ public:
 	const ConnectionMap& ConnectionsByDestination() const {
 		return dest_connections;
 	}
+
+	std::vector<const Connection*> GetConnectionsBySourceSequenced(uint64_t source) const;
+	std::vector<const Connection*> GetConnectionsByDestinationSequenced(uint64_t dest) const;
 
 private:
 

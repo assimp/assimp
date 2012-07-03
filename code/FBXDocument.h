@@ -392,7 +392,7 @@ public:
 public:
 
 	uint64_t insertionOrder;
-	const std::string& prop;
+	const std::string prop;
 
 	uint64_t src, dest;
 	const Document& doc;

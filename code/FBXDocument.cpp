@@ -464,6 +464,10 @@ Document::Document(const Parser& parser, const ImportSettings& settings)
 , settings(settings)
 {
 	ReadPropertyTemplates();
+
+	// this order is important, connections need parsed objects to check
+	// whether connections are ok or not. Objects may not be evaluated yet,
+	// though, since this may require valid connections.
 	ReadObjects();
 	ReadConnections();
 }
@@ -506,8 +510,6 @@ void Document::ReadObjects()
 		}
 
 		objects[id] = new LazyObject(id, *el.second, *this);
-		// DEBUG - evaluate all objects
-		const Object* o = objects[id]->Get();
 	}
 }
 

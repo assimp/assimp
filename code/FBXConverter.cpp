@@ -57,7 +57,8 @@ namespace FBX {
 
 	using namespace Util;
 
-namespace {
+	// XXX vc9's debugger won't step into anonymous namespaces
+//namespace {
 
 /** Dummy class to encapsulate the conversion process */
 class Converter
@@ -81,6 +82,20 @@ public:
 			const MeshGeometry* geo = dynamic_cast<const MeshGeometry*>(ob);
 			if(geo) {
 				ConvertMesh(*geo);
+			}
+		}
+
+		// hack to process all materials
+		BOOST_FOREACH(const ObjectMap::value_type& v,doc.Objects()) {
+
+			const Object* ob = v.second->Get();
+			if(!ob) {
+				continue;
+			}
+
+			const Material* mat = dynamic_cast<const Material*>(ob);
+			if(mat) {
+				ConvertMaterial(*mat);
 			}
 		}
 
@@ -469,7 +484,7 @@ private:
 	const FBX::Document& doc;
 };
 
-} // !anon
+//} // !anon
 
 // ------------------------------------------------------------------------------------------------
 void ConvertToAssimpScene(aiScene* out, const Document& doc)

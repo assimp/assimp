@@ -333,6 +333,41 @@ private:
 	std::vector<unsigned int> mappings;
 };
 
+
+/** Represents a link between two FBX objects. */
+class Connection
+{
+public:
+
+	Connection(uint64_t insertionOrder,  uint64_t src, uint64_t dest, const std::string& prop, const Document& doc);
+	~Connection();
+
+	// note: a connection ensures that the source and dest objects exist, but
+	// not that they have DOM representations, so the return value of one of
+	// these functions can still be NULL.
+	const Object* SourceObject() const;
+	const Object* DestinationObject() const;
+
+	// return the name of the property the connection is attached to.
+	// this is an empty string for object to object (OO) connections.
+	const std::string& PropertyName() const {
+		return prop;
+	}
+
+	uint64_t InsertionOrder() const {
+		return insertionOrder;
+	}
+
+public:
+
+	uint64_t insertionOrder;
+	const std::string& prop;
+
+	uint64_t src, dest;
+	const Document& doc;
+};
+
+
 	// XXX again, unique_ptr would be useful. shared_ptr is too
 	// bloated since the objects have a well-defined single owner
 	// during their entire lifetime (Document). FBX files have
@@ -340,6 +375,9 @@ private:
 	// so the memory overhead for them should be kept at a minimum.
 	typedef std::map<uint64_t, LazyObject*> ObjectMap; 
 	typedef std::fbx_unordered_map<std::string, boost::shared_ptr<const PropertyTable> > PropertyTemplateMap;
+
+
+	typedef std::multimap<uint64_t, const Connection*> ConnectionMap;
 
 /** DOM root for a FBX file */
 class Document 
@@ -350,6 +388,8 @@ public:
 	~Document();
 
 public:
+
+	LazyObject* GetObject(uint64_t id) const;
 
 	const PropertyTemplateMap& Templates() const {
 		return templates;
@@ -363,10 +403,19 @@ public:
 		return settings;
 	}
 
+	const ConnectionMap& ConnectionsBySource() const {
+		return src_connections;
+	}
+
+	const ConnectionMap& ConnectionsByDestination() const {
+		return dest_connections;
+	}
+
 private:
 
 	void ReadObjects();
 	void ReadPropertyTemplates();
+	void ReadConnections();
 
 private:
 
@@ -376,6 +425,8 @@ private:
 	const Parser& parser;
 
 	PropertyTemplateMap templates;
+	ConnectionMap src_connections;
+	ConnectionMap dest_connections;
 };
 
 }

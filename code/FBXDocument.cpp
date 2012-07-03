@@ -433,12 +433,14 @@ Object::~Object()
 
 }
 
+
 // ------------------------------------------------------------------------------------------------
 Geometry::Geometry(const Element& element, const std::string& name)
 : Object(element,name)
 {
 
 }
+
 
 // ------------------------------------------------------------------------------------------------
 Geometry::~Geometry()
@@ -454,7 +456,9 @@ Document::Document(const Parser& parser, const ImportSettings& settings)
 {
 	ReadPropertyTemplates();
 	ReadObjects();
+	ReadConnections();
 }
+
 
 // ------------------------------------------------------------------------------------------------
 Document::~Document()
@@ -463,6 +467,7 @@ Document::~Document()
 		delete v.second;
 	}
 }
+
 
 // ------------------------------------------------------------------------------------------------
 void Document::ReadObjects()
@@ -496,6 +501,7 @@ void Document::ReadObjects()
 		const Object* o = objects[id]->Get();
 	}
 }
+
 
 // ------------------------------------------------------------------------------------------------
 void Document::ReadPropertyTemplates()
@@ -553,6 +559,94 @@ void Document::ReadPropertyTemplates()
 			}
 		}
 	}
+}
+
+
+
+// ------------------------------------------------------------------------------------------------
+void Document::ReadConnections()
+{
+	const Scope& sc = parser.GetRootScope();
+	// read property templates from "Definitions" section
+	const Element* const econns = sc["Connections"];
+	if(!econns || !econns->Compound()) {
+		DOMError("no Connections dictionary found");
+	}
+
+	uint64_t insertionOrder = 0l;
+
+	const Scope& sconns = *econns->Compound();
+	const ElementCollection conns = sconns.GetCollection("C");
+	for(ElementMap::const_iterator it = conns.first; it != conns.second; ++it) {
+		const Element& el = *(*it).second;
+		const std::string& type = ParseTokenAsString(GetRequiredToken(el,0));
+		const uint64_t src = ParseTokenAsID(GetRequiredToken(el,1));
+		const uint64_t dest = ParseTokenAsID(GetRequiredToken(el,2));
+
+		// OO = object-object connection
+		// OP = object-property connection, in which case the destination property follows the object ID
+		const std::string& prop = (type == "OP" ? ParseTokenAsString(GetRequiredToken(el,3)) : "");
+
+		if(objects.find(src) == objects.end()) {
+			DOMWarning("source object for connection does not exist",&el);
+			continue;
+		}
+
+		if(objects.find(dest) == objects.end()) {
+			DOMWarning("destination object for connection does not exist",&el);
+			continue;
+		}
+
+		// add new connection
+		const Connection* const c = new Connection(insertionOrder++,src,dest,prop,*this);
+		src_connections.insert(ConnectionMap::value_type(src,c));  
+		dest_connections.insert(ConnectionMap::value_type(dest,c));  
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+LazyObject* Document::GetObject(uint64_t id) const
+{
+	ObjectMap::const_iterator it = objects.find(id);
+	return it == objects.end() ? NULL : (*it).second;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+Connection::Connection(uint64_t insertionOrder,  uint64_t src, uint64_t dest, const std::string& prop, const Document& doc)
+: insertionOrder(insertionOrder)
+, src(src)
+, dest(dest)
+, prop(prop)
+, doc(doc)
+{
+	ai_assert(doc.Objects().find(src) != doc.Objects().end());
+	ai_assert(doc.Objects().find(dest) != doc.Objects().end());
+}
+
+
+// ------------------------------------------------------------------------------------------------
+Connection::~Connection()
+{
+
+}
+
+
+// ------------------------------------------------------------------------------------------------
+const Object* Connection::SourceObject() const
+{
+	LazyObject* const lazy = doc.GetObject(src);
+	ai_assert(lazy);
+	return lazy->Get();
+}
+
+// ------------------------------------------------------------------------------------------------
+const Object* Connection::DestinationObject() const
+{
+	LazyObject* const lazy = doc.GetObject(dest);
+	ai_assert(lazy);
+	return lazy->Get();
 }
 
 } // !FBX

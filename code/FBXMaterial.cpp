@@ -100,6 +100,7 @@ Material::~Material()
 {
 }
 
+
 // ------------------------------------------------------------------------------------------------
 Texture::Texture(const Element& element, const Document& doc, const std::string& name)
 : Object(element,name)

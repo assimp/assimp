@@ -70,20 +70,7 @@ public:
 		: out(out) 
 		, doc(doc)
 	{
-		//ConvertRootNode();
-
-		// hack to process all meshes
-		BOOST_FOREACH(const ObjectMap::value_type& v,doc.Objects()) {
-
-			const Object* ob = v.second->Get();
-			if(!ob) {
-				continue;
-			}
-			const MeshGeometry* geo = dynamic_cast<const MeshGeometry*>(ob);
-			if(geo) {
-				ConvertMesh(*geo);
-			}
-		}
+		ConvertRootNode();
 
 		if(doc.Settings().readAllMaterials) {
 			// unfortunately this means we have to evaluate all objects
@@ -129,24 +116,112 @@ private:
 	// find scene root and trigger recursive scene conversion
 	void ConvertRootNode() 
 	{
+		out->mRootNode = new aiNode();
+		out->mRootNode->mName.Set("Model::RootNode");
 
+		// root has ID 0
+		ConvertNodes(0L, *out->mRootNode);
 	}
 
 
 	// ------------------------------------------------------------------------------------------------
-	// MeshGeometry -> aiMesh
-	void ConvertMesh(const MeshGeometry& mesh)
+	// collect and assign child nodes
+	void ConvertNodes(uint64_t id, aiNode& parent)
 	{
+		const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(id);
+
+		std::vector<aiNode*> nodes;
+		nodes.reserve(conns.size());
+
+		BOOST_FOREACH(const Connection* con, conns) {
+
+			// ignore object-property links
+			if(con->PropertyName().length()) {
+				continue;
+			}
+
+			const Object* const object = con->SourceObject();
+			if(!object) {
+				FBXImporter::LogWarn("failed to convert source object for node link");
+				continue;
+			}
+
+			const Model* const model = dynamic_cast<const Model*>(object);
+
+		
+			if(model) {
+				aiNode* nd = new aiNode();
+				nd->mName.Set(model->Name());
+				nd->mParent = &parent;
+
+				// XXX handle transformation
+
+				ConvertModel(*model, *nd);
+			}
+		}
+
+		if(nodes.size()) {
+			parent.mChildren = new aiNode*[nodes.size()]();
+			parent.mNumChildren = static_cast<unsigned int>(nodes.size());
+
+			std::swap_ranges(nodes.begin(),nodes.end(),parent.mChildren);
+		}
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void ConvertModel(const Model& model, aiNode& nd)
+	{
+		const std::vector<const Geometry*>& geos = model.GetGeometry();
+
+		std::vector<unsigned int> meshes;
+		meshes.reserve(geos.size());
+
+		BOOST_FOREACH(const Geometry* geo, geos) {
+
+			const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*>(geo);
+			if(mesh) {
+				const unsigned int index = ConvertMesh(*mesh, model);
+				if(index == 0) {
+					continue;
+				}
+
+				meshes.push_back(index-1);
+			}
+			else {
+				FBXImporter::LogWarn("ignoring unrecognized geometry: " + geo->Name());
+			}
+		}
+
+		if(meshes.size()) {
+			nd.mMeshes = new unsigned int[meshes.size()]();
+			nd.mNumMeshes = static_cast<unsigned int>(meshes.size());
+
+			std::swap_ranges(meshes.begin(),meshes.end(),nd.mMeshes);
+		}
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	// MeshGeometry -> aiMesh, return mesh index + 1 or 0 if the conversion failed
+	unsigned int ConvertMesh(const MeshGeometry& mesh, const Model& model)
+	{
+		MeshMap::const_iterator it = meshes_converted.find(&mesh);
+		if (it != meshes_converted.end()) {
+			return (*it).second + 1;
+		}
+
 		const std::vector<aiVector3D>& vertices = mesh.GetVertices();
 		const std::vector<unsigned int>& faces = mesh.GetFaceIndexCounts();
 		if(vertices.empty() || faces.empty()) {
-			return;
+			FBXImporter::LogWarn("ignoring empty geometry: " + mesh.Name());
+			return 0;
 		}
 
 		aiMesh* out_mesh = new aiMesh();
 		meshes.push_back(out_mesh);
 
-		sourceMeshes.push_back(&mesh);
+		meshes_converted[&mesh] = static_cast<unsigned int>(meshes.size()-1);
 
 		// copy vertices
 		out_mesh->mNumVertices = static_cast<size_t>(vertices.size());
@@ -251,22 +326,32 @@ private:
 		}
 
 		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
-		ConvertMaterialForMesh(out_mesh,mesh,mindices.size() ? mindices[0] : 9);
+		ConvertMaterialForMesh(out_mesh,model,mesh,mindices.size() ? mindices[0] : 0);
+		
+		return static_cast<unsigned int>(meshes.size());
 	}
 
 
 	// ------------------------------------------------------------------------------------------------
-	void ConvertMaterialForMesh(aiMesh* out, const MeshGeometry& geo, unsigned int materialIndex)
+	void ConvertMaterialForMesh(aiMesh* out, const Model& model, const MeshGeometry& geo, unsigned int materialIndex)
 	{
 		// locate source materials for this mesh
-		const std::vector<const Material*>& mats = geo.GetMaterials();
+		const std::vector<const Material*>& mats = model.GetMaterials();
 		if (materialIndex >= mats.size()) {
 			FBXImporter::LogError("material index out of bounds, ignoring");
 			out->mMaterialIndex = GetDefaultMaterial();
 			return;
 		}
 
-		out->mMaterialIndex = ConvertMaterial(*mats[materialIndex]);		
+		const Material* const mat = mats[materialIndex];
+		MaterialMap::const_iterator it = materials_converted.find(mat);
+		if (it != materials_converted.end()) {
+			out->mMaterialIndex = (*it).second;
+			return;
+		}
+
+		out->mMaterialIndex = ConvertMaterial(*mat);	
+		materials_converted[mat] = out->mMaterialIndex;
 	}
 
 
@@ -301,8 +386,9 @@ private:
 
 		// generate empty output material
 		aiMaterial* out_mat = new aiMaterial();
+		materials_converted[&material] = static_cast<unsigned int>(materials.size());
+
 		materials.push_back(out_mat);
-		materials_converted.insert(&material);
 
 		aiString str;
 
@@ -366,8 +452,11 @@ private:
 				);
 
 				uvIndex = -1;
-				BOOST_FOREACH(const MeshGeometry* mesh,sourceMeshes) {
-					ai_assert(mesh);
+				BOOST_FOREACH(const MeshMap::value_type& v,meshes_converted) {
+					const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*> (v.first);
+					if(!mesh) {
+						continue;
+					}
 
 					const std::vector<unsigned int>& mats = mesh->GetMaterialIndices();
 					if(std::find(mats.begin(),mats.end(),matIndex) == mats.end()) {
@@ -386,7 +475,7 @@ private:
 						}
 					}
 					if(index == -1) {
-						FBXImporter::LogWarn("did not found UV channel named " + uvSet + " in a mesh using this material");
+						FBXImporter::LogWarn("did not find UV channel named " + uvSet + " in a mesh using this material");
 						continue;
 					}
 
@@ -397,6 +486,11 @@ private:
 						FBXImporter::LogWarn("the UV channel named " + uvSet + 
 							" appears at different positions in meshes, results will be wrong");
 					}
+				}
+
+				if(uvIndex == -1) {
+					FBXImporter::LogWarn("failed to resolve UV channel " + uvSet + ", using first UV channel");
+					uvIndex = 0;
 				}
 			}
 		}
@@ -530,9 +624,11 @@ private:
 	std::vector<aiMesh*> meshes;
 	std::vector<aiMaterial*> materials;
 
-	std::set<const Material*> materials_converted;
+	typedef std::map<const Material*, unsigned int> MaterialMap;
+	MaterialMap materials_converted;
 
-	std::vector<const MeshGeometry*> sourceMeshes;
+	typedef std::map<const Geometry*, unsigned int> MeshMap;
+	MeshMap meshes_converted;
 
 	aiScene* const out;
 	const FBX::Document& doc;

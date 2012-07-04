@@ -156,8 +156,6 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
 			FBXImporter::LogWarn("ignoring additional geometry layers");
 		}
 	}
-
-	ResolveMaterialLinks(element,doc);
 }
 
 
@@ -167,36 +165,6 @@ MeshGeometry::~MeshGeometry()
 
 }
 
-
-// ------------------------------------------------------------------------------------------------
-void MeshGeometry::ResolveMaterialLinks(const Element& element, const Document& doc)
-{
-	// resolve material
-	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
-
-	materials_resolved.reserve(conns.size());
-	BOOST_FOREACH(const Connection* con, conns) {
-
-		// material links should be Object-Object connections
-		if (con->PropertyName().length()) {
-			continue;
-		}
-
-		const Object* const ob = con->SourceObject();
-		if(!ob) {
-			DOMWarning("failed to read source object for material link, ignoring",&element);
-			continue;
-		}
-
-		const Material* const mat = dynamic_cast<const Material*>(ob);
-		if(!mat) {
-			DOMWarning("source object for material link is not a material, ignoring",&element);
-			continue;
-		}
-
-		materials_resolved.push_back(mat);
-	}
-}
 
 
 // ------------------------------------------------------------------------------------------------

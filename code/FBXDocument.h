@@ -57,6 +57,8 @@ namespace FBX {
 
 	class PropertyTable;
 	class Document;
+	class Material;
+	class Geometry;
 
 
 /** Represents a delay-parsed FBX objects. Many objects in the scene
@@ -122,6 +124,54 @@ protected:
 	const uint64_t id;
 };
 
+
+/** DOM base class for FBX models */
+class Model : public Object
+{
+public:
+
+	Model(uint64_t id, const Element& element, const Document& doc, const std::string& name);
+	~Model();
+
+public:
+
+	const std::string& Shading() const {
+		return shading;
+	}
+
+	const std::string& Culling() const {
+		return culling;
+	}
+
+	const PropertyTable& Props() const {
+		ai_assert(props.get());
+		return *props.get();
+	}
+
+	/** Get material links */
+	const std::vector<const Material*>& GetMaterials() const {
+		return materials;
+	}
+
+
+	/** Get geometry links */
+	const std::vector<const Geometry*>& GetGeometry() const {
+		return geometry;
+	}
+
+private:
+
+	void ResolveLinks(const Element& element, const Document& doc);
+
+private:
+
+	std::vector<const Material*> materials;
+	std::vector<const Geometry*> geometry;
+
+	std::string shading;
+	std::string culling;
+	boost::shared_ptr<const PropertyTable> props;
+};
 
 
 
@@ -302,16 +352,10 @@ public:
 		return materials;
 	}
 
-	/** Get per-face-vertex material assignments */
-	const std::vector<const Material*>& GetMaterials() const {
-		return materials_resolved;
-	}
-
 public:
 
 private:
 
-	void ResolveMaterialLinks(const Element& element, const Document& doc);
 	void ReadLayer(const Scope& layer);
 	void ReadLayerElement(const Scope& layerElement);
 	void ReadVertexData(const std::string& type, int index, const Scope& source);
@@ -341,8 +385,6 @@ private:
 		const std::string& ReferenceInformationType);
 
 private:
-
-	std::vector<const Material*> materials_resolved;
 
 	// cached data arrays
 	std::vector<unsigned int> materials;

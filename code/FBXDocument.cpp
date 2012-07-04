@@ -413,6 +413,9 @@ const Object* LazyObject::Get()
 			object.reset(new MeshGeometry(id,element,name,doc));
 		}
 	}
+	else if (!strncmp(obtype,"Model",length)) {
+		object.reset(new Model(id,element,doc,name));
+	}
 	else if (!strncmp(obtype,"Material",length)) {
 		object.reset(new Material(id,element,doc,name));
 	}
@@ -603,7 +606,8 @@ void Document::ReadConnections()
 			continue;
 		}
 
-		if(objects.find(dest) == objects.end()) {
+		// dest may be 0 (root node)
+		if(dest && objects.find(dest) == objects.end()) {
 			DOMWarning("destination object for connection does not exist",&el);
 			continue;
 		}
@@ -669,7 +673,8 @@ Connection::Connection(uint64_t insertionOrder,  uint64_t src, uint64_t dest, co
 , doc(doc)
 {
 	ai_assert(doc.Objects().find(src) != doc.Objects().end());
-	ai_assert(doc.Objects().find(dest) != doc.Objects().end());
+	// dest may be 0 (root node)
+	ai_assert(!dest || doc.Objects().find(dest) != doc.Objects().end());
 }
 
 

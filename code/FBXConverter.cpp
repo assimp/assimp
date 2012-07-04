@@ -157,6 +157,7 @@ private:
 				// XXX handle transformation
 
 				ConvertModel(*model, *nd);
+				ConvertNodes(model->ID(), *nd);
 			}
 		}
 

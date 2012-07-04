@@ -339,7 +339,9 @@ boost::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc,
 	const Scope& sc)
 {
 	const Element* const Properties70 = sc["Properties70"];
-	boost::shared_ptr<const PropertyTable> templateProps = boost::shared_ptr<const PropertyTable>(NULL);
+	boost::shared_ptr<const PropertyTable> templateProps = boost::shared_ptr<const PropertyTable>(
+		static_cast<const PropertyTable*>(NULL));
+
 	if(templateName.length()) {
 		PropertyTemplateMap::const_iterator it = doc.Templates().find(templateName); 
 		if(it != doc.Templates().end()) {
@@ -566,7 +568,7 @@ void Document::ReadPropertyTemplates()
 			const Element* Properties70 = (*sc)["Properties70"];
 			if(Properties70) {
 				boost::shared_ptr<const PropertyTable> props = boost::make_shared<const PropertyTable>(
-					*Properties70,boost::shared_ptr<const PropertyTable>(NULL)
+					*Properties70,boost::shared_ptr<const PropertyTable>(static_cast<const PropertyTable*>(NULL))
 				);
 
 				templates[oname+"."+pname] = props;

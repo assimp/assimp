@@ -125,7 +125,7 @@ public:
 	}
 
 	const PropertyTable* TemplateProps() const {
-		return templateProps;
+		return templateProps.get();
 	}
 
 private:

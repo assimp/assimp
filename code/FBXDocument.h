@@ -240,7 +240,7 @@ class MeshGeometry : public Geometry
 
 public:
 
-	MeshGeometry(uint64_t id, const Element& element, const std::string& name, const ImportSettings& settings);
+	MeshGeometry(uint64_t id, const Element& element, const std::string& name, const Document& doc);
 	~MeshGeometry();
 
 public:
@@ -302,10 +302,16 @@ public:
 		return materials;
 	}
 
+	/** Get per-face-vertex material assignments */
+	const std::vector<const Material*>& GetMaterials() const {
+		return materials_resolved;
+	}
+
 public:
 
 private:
 
+	void ResolveMaterialLinks(const Element& element, const Document& doc);
 	void ReadLayer(const Scope& layer);
 	void ReadLayerElement(const Scope& layerElement);
 	void ReadVertexData(const std::string& type, int index, const Scope& source);
@@ -335,6 +341,8 @@ private:
 		const std::string& ReferenceInformationType);
 
 private:
+
+	std::vector<const Material*> materials_resolved;
 
 	// cached data arrays
 	std::vector<unsigned int> materials;

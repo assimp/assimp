@@ -85,17 +85,22 @@ public:
 			}
 		}
 
-		// hack to process all materials
-		BOOST_FOREACH(const ObjectMap::value_type& v,doc.Objects()) {
+		if(doc.Settings().readAllMaterials) {
+			// unfortunately this means we have to evaluate all objects
+			BOOST_FOREACH(const ObjectMap::value_type& v,doc.Objects()) {
 
-			const Object* ob = v.second->Get();
-			if(!ob) {
-				continue;
-			}
+				const Object* ob = v.second->Get();
+				if(!ob) {
+					continue;
+				}
 
-			const Material* mat = dynamic_cast<const Material*>(ob);
-			if(mat) {
-				ConvertMaterial(*mat);
+				const Material* mat = dynamic_cast<const Material*>(ob);
+				if(mat) {
+
+					if (materials_converted.find(mat) == materials_converted.end()) {
+						ConvertMaterial(*mat);
+					}
+				}
 			}
 		}
 
@@ -244,18 +249,60 @@ private:
 			out_mesh->mColors[i] = new aiColor4D[vertices.size()];
 			std::copy(colors.begin(),colors.end(),out_mesh->mColors[i]);
 		}
+
+		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
+		ConvertMaterialForMesh(out_mesh,mesh,mindices.size() ? mindices[0] : 9);
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void ConvertMaterialForMesh(aiMesh* out, const MeshGeometry& geo, unsigned int materialIndex)
+	{
+		// locate source materials for this mesh
+		const std::vector<const Material*>& mats = geo.GetMaterials();
+		if (materialIndex >= mats.size()) {
+			FBXImporter::LogError("material index out of bounds, ignoring");
+			out->mMaterialIndex = GetDefaultMaterial();
+			return;
+		}
+
+		out->mMaterialIndex = ConvertMaterial(*mats[materialIndex]);		
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	unsigned int GetDefaultMaterial()
+	{
+		if (defaultMaterialIndex) {
+			return defaultMaterialIndex - 1; 
+		}
+
+		aiMaterial* out_mat = new aiMaterial();
+		materials.push_back(out_mat);
+
+		const aiColor3D diffuse = aiColor3D(0.8f,0.8f,0.8f);
+		out_mat->AddProperty(&diffuse,1,AI_MATKEY_COLOR_DIFFUSE);
+
+		aiString s;
+		s.Set(AI_DEFAULT_MATERIAL_NAME);
+
+		out_mat->AddProperty(&s,AI_MATKEY_NAME);
+
+		defaultMaterialIndex = static_cast<unsigned int>(materials.size());
+		return defaultMaterialIndex - 1;
 	}
 
 
 	// ------------------------------------------------------------------------------------------------
 	// Material -> aiMaterial
-	void ConvertMaterial(const Material& material)
+	unsigned int ConvertMaterial(const Material& material)
 	{
 		const PropertyTable& props = material.Props();
 
 		// generate empty output material
 		aiMaterial* out_mat = new aiMaterial();
 		materials.push_back(out_mat);
+		materials_converted.insert(&material);
 
 		aiString str;
 
@@ -268,6 +315,8 @@ private:
 	
 		// texture assignments
 		SetTextureProperties(out_mat,material.Textures());
+
+		return static_cast<unsigned int>(materials.size() - 1);
 	}
 
 
@@ -475,8 +524,13 @@ private:
 
 private:
 
+	// 0: not assigned yet, others: index is value - 1
+	unsigned int defaultMaterialIndex;
+
 	std::vector<aiMesh*> meshes;
 	std::vector<aiMaterial*> materials;
+
+	std::set<const Material*> materials_converted;
 
 	std::vector<const MeshGeometry*> sourceMeshes;
 

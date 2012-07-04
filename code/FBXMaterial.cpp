@@ -94,7 +94,7 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
 	props = GetPropertyTable(doc,templateName,element,sc);
 
 	// resolve texture links
-	const std::vector<const Connection*> conns = doc.GetConnectionsByDestinationSequenced(ID());
+	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
 	BOOST_FOREACH(const Connection* con, conns) {
 
 		// texture link to properties, not objects

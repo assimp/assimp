@@ -52,6 +52,7 @@ struct ImportSettings
 {
 	ImportSettings()
 		: readAllLayers(true)
+		, readAllMaterials()
 	{}
 
 	/** specifies whether all geometry layers are read and scanned for
@@ -61,6 +62,12 @@ struct ImportSettings
 	  * vertex data is spread among multiple layers. The default
 	  * value for this option is true.*/
 	bool readAllLayers;
+
+	/** specifies whether all materials are read, or only those that
+	 *  are referenced by at least one mesh. Reading all materials
+	 *  may make FBX reading a lot slower since all objects
+	 *  need to be processed .*/
+	bool readAllMaterials;
 };
 
 

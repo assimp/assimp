@@ -410,7 +410,7 @@ const Object* LazyObject::Get()
 	const size_t length = static_cast<size_t>(key.end()-key.begin());
 	if (!strncmp(obtype,"Geometry",length)) {
 		if (!strcmp(classtag.c_str(),"Mesh")) {
-			object.reset(new MeshGeometry(id,element,name,doc.Settings()));
+			object.reset(new MeshGeometry(id,element,name,doc));
 		}
 	}
 	else if (!strncmp(obtype,"Material",length)) {

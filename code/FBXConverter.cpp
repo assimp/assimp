@@ -259,7 +259,7 @@ private:
 		}
 
 		// copy normals
-		const std::vector<aiVector3D>& normals = mesh.GetVertices();
+		const std::vector<aiVector3D>& normals = mesh.GetNormals();
 		if(normals.size()) {
 			ai_assert(normals.size() == vertices.size());
 

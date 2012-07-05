@@ -91,7 +91,14 @@ Property* ReadTypedProperty(const Element& element)
 	else if (!strcmp(cs,"ULongLong")) {
 		return new TypedProperty<uint64_t>(ParseTokenAsID(*tok[4]));
 	}
-	else if (!strcmp(cs,"Vector3D") || !strcmp(cs,"ColorRGB") || !strcmp(cs,"Vector") || !strcmp(cs,"Color")) {
+	else if (!strcmp(cs,"Vector3D") || 
+		!strcmp(cs,"ColorRGB") || 
+		!strcmp(cs,"Vector") || 
+		!strcmp(cs,"Color") || 
+		!strcmp(cs,"Lcl Translation") || 
+		!strcmp(cs,"Lcl Rotation") || 
+		!strcmp(cs,"Lcl Scaling")
+		) {
 		return new TypedProperty<aiVector3D>(aiVector3D(
 			ParseTokenAsFloat(*tok[4]),
 			ParseTokenAsFloat(*tok[5]),
@@ -187,7 +194,6 @@ const Property* PropertyTable::Get(const std::string& name) const
 		}
 	}
 	
-	ai_assert((*it).second);
 	return (*it).second;
 }
 

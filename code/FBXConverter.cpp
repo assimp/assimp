@@ -154,7 +154,7 @@ private:
 				nd->mName.Set(model->Name());
 				nd->mParent = &parent;
 
-				// XXX handle transformation
+				ConvertTransformation(*model,*nd);
 
 				ConvertModel(*model, *nd);
 				ConvertNodes(model->ID(), *nd);
@@ -167,6 +167,46 @@ private:
 
 			std::swap_ranges(nodes.begin(),nodes.end(),parent.mChildren);
 		}
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void ConvertTransformation(const Model& model, aiNode& nd)
+	{
+		const PropertyTable& props = model.Props();
+
+		bool ok;
+		
+		aiVector3D Translation = PropertyGet<aiVector3D>(props,"Lcl Translation",ok);
+		if(!ok) {
+			Translation = aiVector3D(0.0f,0.0f,0.0f);
+		}
+
+		aiVector3D Scaling = PropertyGet<aiVector3D>(props,"Lcl Scaling",ok);
+		if(!ok) {
+			Scaling = aiVector3D(1.0f,1.0f,1.0f);
+		}
+
+		// XXX euler angles, radians, xyz order?
+		aiVector3D Rotation = PropertyGet<aiVector3D>(props,"Lcl Rotation",ok);
+		if(!ok) {
+			Rotation = aiVector3D(0.0f,0.0f,0.0f);
+		}
+
+		aiMatrix4x4 temp;
+		nd.mTransformation = aiMatrix4x4::Scaling(Scaling,temp);
+		if(fabs(Rotation.x) > 1e-6f) {
+			nd.mTransformation *= aiMatrix4x4::RotationX(Rotation.x,temp);
+		}
+		if(fabs(Rotation.y) > 1e-6f) {
+			nd.mTransformation *= aiMatrix4x4::RotationY(Rotation.y,temp);
+		}
+		if(fabs(Rotation.z) > 1e-6f) {
+			nd.mTransformation *= aiMatrix4x4::RotationZ(Rotation.z,temp);
+		}
+		nd.mTransformation.a4 = Translation.x;
+		nd.mTransformation.b4 = Translation.y;
+		nd.mTransformation.c4 = Translation.z;
 	}
 
 

@@ -74,6 +74,7 @@ Model::Model(uint64_t id, const Element& element, const Document& doc, const std
 		culling = ParseTokenAsString(GetRequiredToken(*Culling,0));
 	}
 
+	props = GetPropertyTable(doc,"Model.FbxNode",element,sc);
 	ResolveLinks(element,doc);
 }
 

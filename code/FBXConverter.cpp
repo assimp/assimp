@@ -553,7 +553,7 @@ private:
 		bool ok;
 		const aiColor3D& Diffuse = GetColorPropertyFromMaterial(props,"Diffuse",ok);
 		if(ok) {
-			out_mat->AddProperty(&Diffuse,1,AI_MATKEY_COLOR_EMISSIVE);
+			out_mat->AddProperty(&Diffuse,1,AI_MATKEY_COLOR_DIFFUSE);
 		}
 
 		const aiColor3D& Emissive = GetColorPropertyFromMaterial(props,"Emissive",ok);

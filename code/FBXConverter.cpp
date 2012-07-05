@@ -182,12 +182,12 @@ private:
 
 			const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*>(geo);
 			if(mesh) {
-				const unsigned int index = ConvertMesh(*mesh, model);
-				if(index == 0) {
-					continue;
-				}
+				std::vector<unsigned int>& indices = ConvertMesh(*mesh, model);
 
-				meshes.push_back(index-1);
+				// mesh indices are shifted by 1 and 0 entries are failed conversions -
+				// XXX maybe log how many conversions went wrong?
+				std::remove(indices.begin(),indices.end(),0);
+				std::transform(indices.begin(),indices.end(),std::back_inserter(meshes), std::bind2nd(std::minus<unsigned int>(),1) );
 			}
 			else {
 				FBXImporter::LogWarn("ignoring unrecognized geometry: " + geo->Name());
@@ -205,18 +205,21 @@ private:
 
 	// ------------------------------------------------------------------------------------------------
 	// MeshGeometry -> aiMesh, return mesh index + 1 or 0 if the conversion failed
-	unsigned int ConvertMesh(const MeshGeometry& mesh, const Model& model)
+	std::vector<unsigned int> ConvertMesh(const MeshGeometry& mesh, const Model& model)
 	{
+		std::vector<unsigned int> temp; 
+
 		MeshMap::const_iterator it = meshes_converted.find(&mesh);
 		if (it != meshes_converted.end()) {
-			return (*it).second + 1;
+			temp.push_back((*it).second + 1);
+			return temp;
 		}
 
 		const std::vector<aiVector3D>& vertices = mesh.GetVertices();
 		const std::vector<unsigned int>& faces = mesh.GetFaceIndexCounts();
 		if(vertices.empty() || faces.empty()) {
 			FBXImporter::LogWarn("ignoring empty geometry: " + mesh.Name());
-			return 0;
+			return temp;
 		}
 
 		aiMesh* out_mesh = new aiMesh();
@@ -224,13 +227,37 @@ private:
 
 		meshes_converted[&mesh] = static_cast<unsigned int>(meshes.size()-1);
 
+		// one material per mesh maps easily to aiMesh. Multiple material 
+		// meshes need to be split.
+		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
+		if (!mindices.empty()) {
+			const unsigned int base = mindices[0];
+			BOOST_FOREACH(unsigned int index, mindices) {
+				if(index != base) {
+					return ConvertMeshMultiMaterial(out_mesh, mesh, model);
+				}
+			}
+		}
+
+		// faster codepath, just copy the data
+		temp.push_back(ConvertMeshSingleMaterial(out_mesh, mesh, model));
+		return temp;
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	unsigned int ConvertMeshSingleMaterial(aiMesh* out_mesh, const MeshGeometry& mesh, const Model& model)	
+	{
+		const std::vector<aiVector3D>& vertices = mesh.GetVertices();
+		const std::vector<unsigned int>& faces = mesh.GetFaceIndexCounts();
+
 		// copy vertices
-		out_mesh->mNumVertices = static_cast<size_t>(vertices.size());
+		out_mesh->mNumVertices = static_cast<unsigned int>(vertices.size());
 		out_mesh->mVertices = new aiVector3D[vertices.size()];
 		std::copy(vertices.begin(),vertices.end(),out_mesh->mVertices);
 
 		// generate dummy faces
-		out_mesh->mNumFaces = static_cast<size_t>(faces.size());
+		out_mesh->mNumFaces = static_cast<unsigned int>(faces.size());
 		aiFace* fac = out_mesh->mFaces = new aiFace[faces.size()]();
 
 		unsigned int cursor = 0;
@@ -240,18 +267,18 @@ private:
 			f.mIndices = new unsigned int[pcount];
 			switch(pcount) 
 			{
-				case 1:
-					out_mesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
-					break;
-				case 2:
-					out_mesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
-					break;
-				case 3:
-					out_mesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
-					break;
-				default:
-					out_mesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
-					break;
+			case 1:
+				out_mesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
+				break;
+			case 2:
+				out_mesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
+				break;
+			case 3:
+				out_mesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+				break;
+			default:
+				out_mesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
+				break;
 			}
 			for (unsigned int i = 0; i < pcount; ++i) {
 				f.mIndices[i] = cursor++;
@@ -328,7 +355,183 @@ private:
 
 		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
 		ConvertMaterialForMesh(out_mesh,model,mesh,mindices.size() ? mindices[0] : 0);
-		
+
+		return static_cast<unsigned int>(meshes.size());
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	std::vector<unsigned int> ConvertMeshMultiMaterial(aiMesh* out_mesh, const MeshGeometry& mesh, const Model& model)	
+	{
+		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
+		ai_assert(mindices.size());
+	
+		std::set<unsigned int> had;
+		std::vector<unsigned int> indices;
+
+		BOOST_FOREACH(unsigned int index, mindices) {
+			if(had.find(index) != had.end()) {
+
+				indices.push_back(ConvertMeshMultiMaterial(out_mesh, mesh, model, index));
+				had.insert(index);
+			}
+		}
+
+		return indices;
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	unsigned int ConvertMeshMultiMaterial(aiMesh* out_mesh, const MeshGeometry& mesh, const Model& model, unsigned int index)	
+	{
+		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
+		ai_assert(mindices.size());
+
+		const std::vector<aiVector3D>& vertices = mesh.GetVertices();
+		const std::vector<unsigned int>& faces = mesh.GetFaceIndexCounts();
+
+		unsigned int count_faces = 0;
+		unsigned int count_vertices = 0;
+
+		// count faces
+		for(std::vector<unsigned int>::const_iterator it = mindices.begin(), 
+			end = mindices.end(), itf = faces.begin(); it != end; ++it, ++itf) 
+		{	
+			if ((*it) != index) {
+				continue;
+			}
+			++count_faces;
+			count_vertices += *itf;
+		}
+
+		ai_assert(count_faces);
+
+
+		// allocate output data arrays, but don't fill them yet
+		out_mesh->mNumVertices = count_vertices;
+		out_mesh->mVertices = new aiVector3D[count_vertices];
+
+		out_mesh->mNumFaces = count_faces;
+		aiFace* fac = out_mesh->mFaces = new aiFace[count_faces]();
+
+
+		// allocate normals
+		const std::vector<aiVector3D>& normals = mesh.GetNormals();
+		if(normals.size()) {
+			ai_assert(normals.size() == vertices.size());
+			out_mesh->mNormals = new aiVector3D[vertices.size()];
+		}
+
+		// allocate tangents, binormals. 
+		const std::vector<aiVector3D>& tangents = mesh.GetTangents();
+		const std::vector<aiVector3D>* binormals = &mesh.GetBinormals();
+
+		if(tangents.size()) {
+			std::vector<aiVector3D> tempBinormals;
+			if (!binormals->size()) {
+				if (normals.size()) {
+					// XXX this computes the binormals for the entire mesh, not only 
+					// the part for which we need them.
+					tempBinormals.resize(normals.size());
+					for (unsigned int i = 0; i < tangents.size(); ++i) {
+						tempBinormals[i] = normals[i] ^ tangents[i];
+					}
+
+					binormals = &tempBinormals;
+				}
+				else {
+					binormals = NULL;	
+				}
+			}
+
+			if(binormals) {
+				ai_assert(tangents.size() == vertices.size() && binormals->size() == vertices.size());
+
+				out_mesh->mTangents = new aiVector3D[vertices.size()];
+				out_mesh->mBitangents = new aiVector3D[vertices.size()];
+			}
+		}
+
+		// allocate texture coords
+		unsigned int num_uvs = 0;
+		for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i, ++num_uvs) {
+			const std::vector<aiVector2D>& uvs = mesh.GetTextureCoords(i);
+			if(uvs.empty()) {
+				break;
+			}
+
+			out_mesh->mTextureCoords[i] = new aiVector3D[vertices.size()];
+			out_mesh->mNumUVComponents[i] = 2;
+		}
+
+		// allocate vertex colors
+		unsigned int num_vcs = 0;
+		for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS; ++i, ++num_vcs) {
+			const std::vector<aiColor4D>& colors = mesh.GetVertexColors(i);
+			if(colors.empty()) {
+				break;
+			}
+
+			out_mesh->mColors[i] = new aiColor4D[vertices.size()];
+		}
+
+		unsigned int cursor = 0, in_cursor = 0;
+
+		for(std::vector<unsigned int>::const_iterator it = mindices.begin(), 
+			end = mindices.end(), itf = faces.begin(); it != end; ++it, ++itf) 
+		{	
+			const unsigned int pcount = *itf;
+			if ((*it) != index) {
+				in_cursor += pcount;
+				continue;
+			}
+
+			aiFace& f = *fac++;
+
+			f.mNumIndices = pcount;
+			f.mIndices = new unsigned int[pcount];
+			switch(pcount) 
+			{
+			case 1:
+				out_mesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
+				break;
+			case 2:
+				out_mesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
+				break;
+			case 3:
+				out_mesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+				break;
+			default:
+				out_mesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
+				break;
+			}
+			for (unsigned int i = 0; i < pcount; ++i, ++cursor, ++in_cursor) {
+				f.mIndices[i] = cursor;
+
+				out_mesh->mVertices[cursor] = vertices[in_cursor];
+
+				if(out_mesh->mNormals) {
+					out_mesh->mNormals[cursor] = normals[in_cursor];
+				}
+
+				if(out_mesh->mTangents) {
+					out_mesh->mTangents[cursor] = tangents[in_cursor];
+					out_mesh->mBitangents[cursor] = (*binormals)[in_cursor];
+				}
+
+				for (unsigned int i = 0; i < num_uvs; ++i) {
+					const std::vector<aiVector2D>& uvs = mesh.GetTextureCoords(i);
+					out_mesh->mTextureCoords[i][cursor] = aiVector3D(uvs[in_cursor].x,uvs[in_cursor].y, 0.0f);
+				}
+
+				for (unsigned int i = 0; i < num_vcs; ++i) {
+					const std::vector<aiColor4D>& cols = mesh.GetVertexColors(i);
+					out_mesh->mColors[i][cursor] = cols[in_cursor];
+				}
+			}
+		}
+	
+		ConvertMaterialForMesh(out_mesh,model,mesh,index);
 		return static_cast<unsigned int>(meshes.size());
 	}
 

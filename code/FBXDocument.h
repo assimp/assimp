@@ -439,6 +439,10 @@ public:
 		return 0;
 	}
 
+	bool Compare(const Connection* c) const {
+		return InsertionOrder() < c->InsertionOrder();
+	}
+
 public:
 
 	uint64_t insertionOrder;

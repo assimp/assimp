@@ -354,7 +354,13 @@ private:
 		}
 
 		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
-		ConvertMaterialForMesh(out_mesh,model,mesh,mindices.size() ? mindices[0] : 0);
+		if(mindices.empty()) {
+			FBXImporter::LogError("no material assigned to mesh, setting default material");
+			out_mesh->mMaterialIndex = GetDefaultMaterial();
+		}
+		else {
+			ConvertMaterialForMesh(out_mesh,model,mesh,mindices[0]);
+		}
 
 		return static_cast<unsigned int>(meshes.size());
 	}
@@ -542,7 +548,7 @@ private:
 		// locate source materials for this mesh
 		const std::vector<const Material*>& mats = model.GetMaterials();
 		if (materialIndex >= mats.size()) {
-			FBXImporter::LogError("material index out of bounds, ignoring");
+			FBXImporter::LogError("material index out of bounds, setting default material");
 			out->mMaterialIndex = GetDefaultMaterial();
 			return;
 		}

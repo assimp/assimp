@@ -91,14 +91,6 @@ public:
 			}
 		}
 
-		// dummy root node
-		out->mRootNode = new aiNode();
-		out->mRootNode->mNumMeshes = static_cast<unsigned int>(meshes.size());
-		out->mRootNode->mMeshes = new unsigned int[meshes.size()];
-		for(unsigned int i = 0; i < out->mRootNode->mNumMeshes; ++i) {
-			out->mRootNode->mMeshes[i] = i;
-		}
-
 		TransferDataToScene();
 	}
 
@@ -151,6 +143,8 @@ private:
 		
 			if(model) {
 				aiNode* nd = new aiNode();
+				nodes.push_back(nd);
+
 				nd->mName.Set(model->Name());
 				nd->mParent = &parent;
 

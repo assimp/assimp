@@ -145,7 +145,13 @@ private:
 				aiNode* nd = new aiNode();
 				nodes.push_back(nd);
 
-				nd->mName.Set(model->Name());
+				// strip Model:: prefix
+				std::string name = model->Name();
+				if(name.substr(0,7) == "Model::") {
+					name = name.substr(7);
+				}
+
+				nd->mName.Set(name);
 				nd->mParent = &parent;
 
 				ConvertTransformation(*model,*nd);
@@ -639,9 +645,18 @@ private:
 
 		aiString str;
 
-		// set material name
-		str.Set(material.Name());
-		out_mat->AddProperty(&str,AI_MATKEY_NAME);
+		// stip Material:: prefix
+		std::string name = material.Name();
+		if(name.substr(0,10) == "Material::") {
+			name = name.substr(10);
+		}
+
+		// set material name if not empty - this could happen
+		// and there should be no key for it in this case.
+		if(name.length()) {
+			str.Set(name);
+			out_mat->AddProperty(&str,AI_MATKEY_NAME);
+		}
 
 		// shading stuff and colors
 		SetShadingPropertiesCommon(out_mat,props);

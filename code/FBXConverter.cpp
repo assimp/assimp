@@ -262,11 +262,6 @@ private:
 			return temp;
 		}
 
-		aiMesh* out_mesh = new aiMesh();
-		meshes.push_back(out_mesh);
-
-		meshes_converted[&mesh] = static_cast<unsigned int>(meshes.size()-1);
-
 		// one material per mesh maps easily to aiMesh. Multiple material 
 		// meshes need to be split.
 		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
@@ -274,20 +269,24 @@ private:
 			const unsigned int base = mindices[0];
 			BOOST_FOREACH(unsigned int index, mindices) {
 				if(index != base) {
-					return ConvertMeshMultiMaterial(out_mesh, mesh, model);
+					return ConvertMeshMultiMaterial(mesh, model);
 				}
 			}
 		}
 
 		// faster codepath, just copy the data
-		temp.push_back(ConvertMeshSingleMaterial(out_mesh, mesh, model));
+		temp.push_back(ConvertMeshSingleMaterial(mesh, model));
 		return temp;
 	}
 
 
 	// ------------------------------------------------------------------------------------------------
-	unsigned int ConvertMeshSingleMaterial(aiMesh* out_mesh, const MeshGeometry& mesh, const Model& model)	
+	unsigned int ConvertMeshSingleMaterial(const MeshGeometry& mesh, const Model& model)	
 	{
+		aiMesh* const out_mesh = new aiMesh();
+		meshes.push_back(out_mesh);
+		meshes_converted[&mesh] = static_cast<unsigned int>(meshes.size()-1);
+
 		const std::vector<aiVector3D>& vertices = mesh.GetVertices();
 		const std::vector<unsigned int>& faces = mesh.GetFaceIndexCounts();
 
@@ -407,7 +406,7 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	std::vector<unsigned int> ConvertMeshMultiMaterial(aiMesh* out_mesh, const MeshGeometry& mesh, const Model& model)	
+	std::vector<unsigned int> ConvertMeshMultiMaterial(const MeshGeometry& mesh, const Model& model)	
 	{
 		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
 		ai_assert(mindices.size());
@@ -418,7 +417,7 @@ private:
 		BOOST_FOREACH(unsigned int index, mindices) {
 			if(had.find(index) != had.end()) {
 
-				indices.push_back(ConvertMeshMultiMaterial(out_mesh, mesh, model, index));
+				indices.push_back(ConvertMeshMultiMaterial(mesh, model, index));
 				had.insert(index);
 			}
 		}
@@ -428,8 +427,12 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	unsigned int ConvertMeshMultiMaterial(aiMesh* out_mesh, const MeshGeometry& mesh, const Model& model, unsigned int index)	
+	unsigned int ConvertMeshMultiMaterial(const MeshGeometry& mesh, const Model& model, unsigned int index)	
 	{
+		aiMesh* const out_mesh = new aiMesh();
+		meshes.push_back(out_mesh);
+		meshes_converted[&mesh] = static_cast<unsigned int>(meshes.size()-1);
+
 		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
 		ai_assert(mindices.size());
 

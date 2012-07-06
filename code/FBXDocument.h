@@ -477,6 +477,20 @@ public:
 
 	LazyObject* GetObject(uint64_t id) const;
 
+
+	unsigned int FBXVersion() const {
+		return fbxVersion;
+	}
+
+	const std::string& Creator() const {
+		return creator;
+	}
+
+	// elements (in this order): Uear, Month, Day, Hour, Second, Millisecond
+	const unsigned int* CreationTimeStamp() const {
+		return creationTimeStamp;
+	}
+
 	const PropertyTemplateMap& Templates() const {
 		return templates;
 	}
@@ -502,6 +516,7 @@ public:
 
 private:
 
+	void ReadHeader();
 	void ReadObjects();
 	void ReadPropertyTemplates();
 	void ReadConnections();
@@ -516,6 +531,11 @@ private:
 	PropertyTemplateMap templates;
 	ConnectionMap src_connections;
 	ConnectionMap dest_connections;
+
+	unsigned int fbxVersion;
+	std::string creator;
+	unsigned int creationTimeStamp[7];
+
 };
 
 }

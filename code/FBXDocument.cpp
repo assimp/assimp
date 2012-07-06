@@ -468,6 +468,12 @@ Document::Document(const Parser& parser, const ImportSettings& settings)
 : parser(parser)
 , settings(settings)
 {
+	// cannot use array default initialization syntax because vc8 fails on it
+	for (unsigned int i = 0; i < 7; ++i) {
+		creationTimeStamp[i] = 0;
+	}
+
+	ReadHeader();
 	ReadPropertyTemplates();
 
 	// this order is important, connections need parsed objects to check
@@ -483,6 +489,38 @@ Document::~Document()
 {
 	BOOST_FOREACH(ObjectMap::value_type& v, objects) {
 		delete v.second;
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void Document::ReadHeader()
+{
+	// read ID objects from "Objects" section
+	const Scope& sc = parser.GetRootScope();
+	const Element* const ehead = sc["FBXHeaderExtension"];
+	if(!ehead || !ehead->Compound()) {
+		DOMError("no FBXHeaderExtension dictionary found");
+	}
+
+	const Scope& shead = *ehead->Compound();
+	fbxVersion = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(shead,"FBXVersion",ehead),0));
+
+	const Element* const ecreator = shead["Creator"];
+	if(ecreator) {
+		creator = ParseTokenAsString(GetRequiredToken(*ecreator,0));
+	}
+
+	const Element* const etimestamp = shead["CreationTimeStamp"];
+	if(etimestamp && etimestamp->Compound()) {
+		const Scope& stimestamp = *etimestamp->Compound();
+		creationTimeStamp[0] = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(stimestamp,"Year"),0));
+		creationTimeStamp[1] = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(stimestamp,"Month"),0));
+		creationTimeStamp[2] = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(stimestamp,"Day"),0));
+		creationTimeStamp[3] = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(stimestamp,"Hour"),0));
+		creationTimeStamp[4] = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(stimestamp,"Minute"),0));
+		creationTimeStamp[5] = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(stimestamp,"Second"),0));
+		creationTimeStamp[6] = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(stimestamp,"Millisecond"),0));
 	}
 }
 

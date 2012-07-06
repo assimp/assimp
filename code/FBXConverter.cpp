@@ -109,7 +109,7 @@ private:
 	void ConvertRootNode() 
 	{
 		out->mRootNode = new aiNode();
-		out->mRootNode->mName.Set("Model::RootNode");
+		out->mRootNode->mName.Set("RootNode");
 
 		// root has ID 0
 		ConvertNodes(0L, *out->mRootNode);
@@ -223,11 +223,7 @@ private:
 			const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*>(geo);
 			if(mesh) {
 				std::vector<unsigned int>& indices = ConvertMesh(*mesh, model);
-
-				// mesh indices are shifted by 1 and 0 entries are failed conversions -
-				// XXX maybe log how many conversions went wrong?
-				std::remove(indices.begin(),indices.end(),0);
-				std::transform(indices.begin(),indices.end(),std::back_inserter(meshes), std::bind2nd(std::minus<unsigned int>(),1) );
+				std::copy(indices.begin(),indices.end(),std::back_inserter(meshes) );
 			}
 			else {
 				FBXImporter::LogWarn("ignoring unrecognized geometry: " + geo->Name());
@@ -251,7 +247,7 @@ private:
 
 		MeshMap::const_iterator it = meshes_converted.find(&mesh);
 		if (it != meshes_converted.end()) {
-			temp.push_back((*it).second + 1);
+			std::copy((*it).second.begin(),(*it).second.end(),std::back_inserter(temp));
 			return temp;
 		}
 
@@ -281,11 +277,31 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	unsigned int ConvertMeshSingleMaterial(const MeshGeometry& mesh, const Model& model)	
+	aiMesh* SetupEmptyMesh(const MeshGeometry& mesh, unsigned int material_index)
 	{
 		aiMesh* const out_mesh = new aiMesh();
 		meshes.push_back(out_mesh);
-		meshes_converted[&mesh] = static_cast<unsigned int>(meshes.size()-1);
+		meshes_converted[&mesh].push_back(static_cast<unsigned int>(meshes.size()-1));
+
+		// set name
+		std::string name = mesh.Name();
+		if (name.substr(0,10) == "Geometry::") {
+			name = name.substr(10);
+		}
+
+		if(name.length()) {
+			out_mesh->mName.Set(name);
+		}
+
+		return out_mesh;
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	unsigned int ConvertMeshSingleMaterial(const MeshGeometry& mesh, const Model& model)	
+	{
+		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
+		aiMesh* const out_mesh = SetupEmptyMesh(mesh,mindices.size() ? mindices[0] : static_cast<unsigned int>(-1)); 
 
 		const std::vector<aiVector3D>& vertices = mesh.GetVertices();
 		const std::vector<unsigned int>& faces = mesh.GetFaceIndexCounts();
@@ -392,7 +408,6 @@ private:
 			std::copy(colors.begin(),colors.end(),out_mesh->mColors[i]);
 		}
 
-		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
 		if(mindices.empty()) {
 			FBXImporter::LogError("no material assigned to mesh, setting default material");
 			out_mesh->mMaterialIndex = GetDefaultMaterial();
@@ -401,7 +416,7 @@ private:
 			ConvertMaterialForMesh(out_mesh,model,mesh,mindices[0]);
 		}
 
-		return static_cast<unsigned int>(meshes.size());
+		return static_cast<unsigned int>(meshes.size() - 1);
 	}
 
 
@@ -429,13 +444,9 @@ private:
 	// ------------------------------------------------------------------------------------------------
 	unsigned int ConvertMeshMultiMaterial(const MeshGeometry& mesh, const Model& model, unsigned int index)	
 	{
-		aiMesh* const out_mesh = new aiMesh();
-		meshes.push_back(out_mesh);
-		meshes_converted[&mesh] = static_cast<unsigned int>(meshes.size()-1);
+		aiMesh* const out_mesh = SetupEmptyMesh(mesh, index);
 
 		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
-		ai_assert(mindices.size());
-
 		const std::vector<aiVector3D>& vertices = mesh.GetVertices();
 		const std::vector<unsigned int>& faces = mesh.GetFaceIndexCounts();
 
@@ -581,7 +592,7 @@ private:
 		}
 	
 		ConvertMaterialForMesh(out_mesh,model,mesh,index);
-		return static_cast<unsigned int>(meshes.size());
+		return static_cast<unsigned int>(meshes.size() - 1);
 	}
 
 
@@ -889,7 +900,8 @@ private:
 	typedef std::map<const Material*, unsigned int> MaterialMap;
 	MaterialMap materials_converted;
 
-	typedef std::map<const Geometry*, unsigned int> MeshMap;
+
+	typedef std::map<const Geometry*, std::vector<unsigned int> > MeshMap;
 	MeshMap meshes_converted;
 
 	aiScene* const out;

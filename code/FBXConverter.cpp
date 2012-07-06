@@ -409,7 +409,7 @@ private:
 		std::vector<unsigned int> indices;
 
 		BOOST_FOREACH(unsigned int index, mindices) {
-			if(had.find(index) != had.end()) {
+			if(had.find(index) == had.end()) {
 
 				indices.push_back(ConvertMeshMultiMaterial(mesh, model, index));
 				had.insert(index);

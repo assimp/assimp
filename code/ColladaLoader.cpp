@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the Collada loader */
 
 #include "AssimpPCH.h"
-#ifndef ASSIMP_BUILD_NO_DAE_IMPORTER
+#ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
 
 #include "../include/assimp/anim.h"
 #include "ColladaLoader.h"

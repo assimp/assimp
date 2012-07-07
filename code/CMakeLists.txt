@@ -409,6 +409,11 @@ SET(FBX_SRCS
 	FBXUtil.cpp
 	FBXDocument.h
 	FBXDocument.cpp
+	FBXProperties.h
+	FBXProperties.cpp
+	FBXMeshGeometry.cpp
+	FBXMaterial.cpp
+	FBXModel.cpp
 )
 SOURCE_GROUP( FBX FILES ${FBX_SRCS})
 

@@ -143,7 +143,7 @@ inline T PropertyGet(const PropertyTable& in, const std::string& name,
 	const T& defaultValue, 
 	bool ignoreTemplate = false)
 {
-	const Property* const prop = PropertyGet(in,name);
+	const Property* const prop = in.Get(name);
 	if(!prop) {
 		return defaultValue;
 	}

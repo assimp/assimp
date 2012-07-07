@@ -46,12 +46,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 #include "FBXCompileConfig.h"
+#include "FBXTokenizer.h"
 
 namespace Assimp {
 namespace FBX {
 
-	class Token;
-	enum TokenType;
 
 namespace Util {
 

@@ -222,7 +222,7 @@ private:
 
 			const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*>(geo);
 			if(mesh) {
-				std::vector<unsigned int>& indices = ConvertMesh(*mesh, model);
+				const std::vector<unsigned int>& indices = ConvertMesh(*mesh, model);
 				std::copy(indices.begin(),indices.end(),std::back_inserter(meshes) );
 			}
 			else {

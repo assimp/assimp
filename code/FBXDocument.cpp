@@ -465,8 +465,8 @@ Geometry::~Geometry()
 
 // ------------------------------------------------------------------------------------------------
 Document::Document(const Parser& parser, const ImportSettings& settings)
-: parser(parser)
-, settings(settings)
+: settings(settings)
+, parser(parser)
 {
 	// cannot use array default initialization syntax because vc8 fails on it
 	for (unsigned int i = 0; i < 7; ++i) {
@@ -707,9 +707,9 @@ std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(ui
 // ------------------------------------------------------------------------------------------------
 Connection::Connection(uint64_t insertionOrder,  uint64_t src, uint64_t dest, const std::string& prop, const Document& doc)
 : insertionOrder(insertionOrder)
+, prop(prop)
 , src(src)
 , dest(dest)
-, prop(prop)
 , doc(doc)
 {
 	ai_assert(doc.Objects().find(src) != doc.Objects().end());

@@ -129,15 +129,15 @@ std::string PeekPropertyName(const Element& element)
 
 // ------------------------------------------------------------------------------------------------
 PropertyTable::PropertyTable()
-: element()
-, templateProps()
+: templateProps()
+, element()
 {
 }
 
 // ------------------------------------------------------------------------------------------------
 PropertyTable::PropertyTable(const Element& element, boost::shared_ptr<const PropertyTable> templateProps)
-: element(&element)
-, templateProps(templateProps)
+: templateProps(templateProps)
+, element(&element)
 {
 	const Scope& scope = GetRequiredScope(element);
 	BOOST_FOREACH(const ElementMap::value_type& v, scope.Elements()) {

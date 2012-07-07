@@ -72,9 +72,6 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
 
 	// optional Mesh elements:
 	const ElementCollection& Layer = sc->GetCollection("Layer");
-	const ElementCollection& LayerElementMaterial = sc->GetCollection("LayerElementMaterial");
-	const ElementCollection& LayerElementUV = sc->GetCollection("LayerElementUV");
-	const ElementCollection& LayerElementNormal = sc->GetCollection("LayerElementNormal");
 
 	std::vector<aiVector3D> tempVerts;
 	ReadVectorDataArray(tempVerts,Vertices);

@@ -410,7 +410,9 @@ void recursive_render (const struct aiScene *sc, const struct aiNode* nd, float 
 	unsigned int n=0, t;
 	aiMatrix4x4 m = nd->mTransformation;
 
-	m.Scaling(aiVector3D(scale, scale, scale), m);
+	aiMatrix4x4 m2;
+	aiMatrix4x4::Scaling(aiVector3D(scale, scale, scale), m2);
+	m = m * m2;
 
 	// update transform
 	m.Transpose();

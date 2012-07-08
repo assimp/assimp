@@ -113,8 +113,7 @@ void M3Importer::InternReadFile( const std::string& pFile, aiScene* pScene, IOSy
 	}
 
 	m_Buffer.resize( filesize );
-	size_t readsize = file->Read( &m_Buffer[ 0 ], sizeof( unsigned char ), filesize );
-	ai_assert( readsize == filesize );
+	file->Read( &m_Buffer[ 0 ], sizeof( unsigned char ), filesize );
 
 	m_pHead = reinterpret_cast<MD33*>( &m_Buffer[ 0 ] );
 	m_pRefs = reinterpret_cast<ReferenceEntry*>( &m_Buffer[ 0 ] + m_pHead->ofsRefs );

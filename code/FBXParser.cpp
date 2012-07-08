@@ -165,9 +165,9 @@ Scope::~Scope()
 // ------------------------------------------------------------------------------------------------
 Parser::Parser (const TokenList& tokens)
 : tokens(tokens)
-, cursor(tokens.begin())
-, current()
 , last()
+, current()
+, cursor(tokens.begin())
 {
 	root.reset(new Scope(*this,true));
 }
@@ -276,7 +276,6 @@ float ParseTokenAsFloat(const Token& t, const char*& err_out)
 		return 0.0f;
 	}
 
-	const char* inout = t.begin();
 
 	// need to copy the input string to a temporary buffer
 	// first - next in the fbx token stream comes ',', 

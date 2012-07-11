@@ -451,7 +451,6 @@ void ProcessConnectedFaceSet(const IfcConnectedFaceSet& fset, TempMesh& result, 
 
 
 
-
 // ------------------------------------------------------------------------------------------------
 void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& result, ConversionData& conv)
 {
@@ -537,6 +536,109 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
 	
 	result.Transform(trafo);
 	IFCImporter::LogDebug("generate mesh procedurally by radial extrusion (IfcRevolvedAreaSolid)");
+}
+
+
+
+// ------------------------------------------------------------------------------------------------
+void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, ConversionData& conv)
+{
+	const Curve* const curve = Curve::Convert(*solid.Directrix, conv);
+	if(!curve) {
+		IFCImporter::LogError("failed to convert Directrix curve (IfcSweptDiskSolid)");
+		return;
+	}
+
+	const std::vector<IfcVector3>& in = result.verts;
+	const size_t size=in.size();
+
+	const unsigned int cnt_segments = 16;
+	const IfcFloat deltaAngle = AI_MATH_TWO_PI/cnt_segments;
+
+	const size_t samples = curve->EstimateSampleCount(solid.StartParam,solid.EndParam);
+
+	result.verts.reserve(cnt_segments * samples * 4);
+	result.vertcnt.reserve((cnt_segments - 1) * samples);
+
+	// XXX while EstimateSampleCount() works well for non-composite curves, it
+	// fails badly for composite curves that require non-uniform sampling
+	// for good results.
+	IfcFloat p = solid.StartParam, delta = (solid.EndParam-solid.StartParam)/ (samples - 1);
+
+	
+	IfcVector3 current = curve->Eval(p);
+	IfcVector3 previous = current;
+	IfcVector3 next;
+
+	IfcVector3 startvec;
+	startvec.x = 1.0f;
+	startvec.y = 1.0f;
+	startvec.z = 1.0f;
+
+	std::vector<IfcVector3> points;
+	points.reserve(cnt_segments * samples);
+
+	p += delta;
+
+	// generate circles at the sweep positions
+	for(size_t i = 0; i < samples; ++i, p += delta) {
+
+		next = curve->Eval(p);
+
+		// get a direction vector reflecting the approximate curvature (i.e. tangent)
+		IfcVector3 d = (current-previous) + (next-previous);
+	
+		d.Normalize();
+
+		// figure out an arbitrary point q so that (p-q) * d = 0,
+		// try to maximize ||(p-q)|| * ||(p_last-q_last)|| 
+		IfcVector3 q;
+		if (abs(d.x) > 1e-6) {
+			q.y = startvec.y;
+			q.z = startvec.z;
+			q.x = -(d.y * q.y + d.z * q.z) / d.x;
+		}
+		else if (abs(d.y) > 1e-6) {
+			q.x = startvec.x;
+			q.z = startvec.z;
+			q.y = -(d.x * q.x + d.z * q.z) / d.y;
+		}
+		else { // if (abs(d.z) > 1e-6) 
+			q.y = startvec.y;
+			q.x = startvec.x;
+			q.z = -(d.y * q.y + d.x * q.x) / d.z;
+		}
+
+		startvec = q;
+		q *= solid.Radius / q.Length();
+
+		// generate a rotation matrix to rotate q around d
+		IfcMatrix4 rot;
+		IfcMatrix4::Rotation(deltaAngle,d,rot);
+
+		for (unsigned int seg = 0; seg < cnt_segments; ++seg, q *= rot ) {
+			points.push_back(q + current);	
+		}
+
+		previous = current;
+		current = next;
+	}
+
+	// make quads
+	for(size_t i = 0; i < samples - 1; ++i) {
+
+		for (unsigned int seg = 0; seg < cnt_segments - 1; ++seg) {
+
+			result.verts.push_back(points[ i * cnt_segments + seg]);
+			result.verts.push_back(points[ i * cnt_segments + seg + 1]);
+			result.verts.push_back(points[ (i+1) * cnt_segments + seg + 1]);
+			result.verts.push_back(points[ (i+1) * cnt_segments + seg]);
+
+			result.vertcnt.push_back(4);
+		}
+	}
+
+	IFCImporter::LogDebug("generate mesh procedurally by sweeping a disk along a curve (IfcSweptDiskSolid)");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1722,6 +1824,9 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 	}	
 	else  if(const IfcSweptAreaSolid* swept = geo.ToPtr<IfcSweptAreaSolid>()) {
 		ProcessSweptAreaSolid(*swept,meshtmp,conv);
+	}   
+	else  if(const IfcSweptDiskSolid* disk = geo.ToPtr<IfcSweptDiskSolid>()) {
+		ProcessSweptDiskSolid(*disk,meshtmp,conv);
 	}   
 	else if(const IfcManifoldSolidBrep* brep = geo.ToPtr<IfcManifoldSolidBrep>()) {
 		ProcessConnectedFaceSet(brep->Outer,meshtmp,conv);

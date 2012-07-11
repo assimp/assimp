@@ -425,6 +425,12 @@ public:
 	}
 
 	// --------------------------------------------------
+	void SampleDiscrete(TempMesh& out,IfcFloat a,IfcFloat b) const {
+		ai_assert(InRange(a) && InRange(b));
+		return base->SampleDiscrete(out,TrimParam(a),TrimParam(b));
+	}
+
+	// --------------------------------------------------
 	ParamRange GetParametricRange() const {
 		return std::make_pair(static_cast<IfcFloat>( 0. ),maxval);
 	}

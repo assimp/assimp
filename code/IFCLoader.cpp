@@ -154,7 +154,7 @@ void IFCImporter::SetupProperties(const Importer* pImp)
 	settings.skipCurveRepresentations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_SKIP_CURVE_REPRESENTATIONS,true);
 	settings.useCustomTriangulation = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_CUSTOM_TRIANGULATION,true);
 
-	settings.conicSamplingAngle = 10.f;
+	settings.conicSamplingAngle = 5.f;
 	settings.skipAnnotations = true;
 }
 

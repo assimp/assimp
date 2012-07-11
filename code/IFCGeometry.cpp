@@ -560,13 +560,19 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
 	result.verts.reserve(cnt_segments * samples * 4);
 	result.vertcnt.reserve((cnt_segments - 1) * samples);
 
-	// XXX while EstimateSampleCount() works well for non-composite curves, it
-	// fails badly for composite curves that require non-uniform sampling
-	// for good results.
-	IfcFloat p = solid.StartParam, delta = (solid.EndParam-solid.StartParam)/ (samples - 1);
+	std::vector<IfcVector3> points;
+	points.reserve(cnt_segments * samples);
 
-	
-	IfcVector3 current = curve->Eval(p);
+	TempMesh temp;
+	curve->SampleDiscrete(temp,solid.StartParam,solid.EndParam);
+	const std::vector<IfcVector3>& curve_points = temp.verts;
+
+	if(curve_points.empty()) {
+		IFCImporter::LogWarn("curve evaluation yielded no points (IfcSweptDiskSolid)");
+		return;
+	}
+
+	IfcVector3 current = curve_points[0];
 	IfcVector3 previous = current;
 	IfcVector3 next;
 
@@ -575,15 +581,12 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
 	startvec.y = 1.0f;
 	startvec.z = 1.0f;
 
-	std::vector<IfcVector3> points;
-	points.reserve(cnt_segments * samples);
-
-	p += delta;
-
 	// generate circles at the sweep positions
-	for(size_t i = 0; i < samples; ++i, p += delta) {
+	for(size_t i = 0; i < samples; ++i) {
 
-		next = curve->Eval(p);
+		if(i != samples - 1) {
+			next = curve_points[i + 1];
+		}
 
 		// get a direction vector reflecting the approximate curvature (i.e. tangent)
 		IfcVector3 d = (current-previous) + (next-previous);

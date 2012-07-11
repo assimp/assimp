@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iterator>
 #include <boost/tuple/tuple.hpp>
 
+#include "../contrib/unzip/unzip.h"
 
 #include "IFCLoader.h"
 #include "STEPFileReader.h"
@@ -103,7 +104,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"ifc" 
+	"ifc ifczip" 
 };
 
 
@@ -123,7 +124,7 @@ IFCImporter::~IFCImporter()
 bool IFCImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	const std::string& extension = GetExtension(pFile);
-	if (extension == "ifc") {
+	if (extension == "ifc" || extension == "ifczip") {
 		return true;
 	}
 
@@ -166,6 +167,53 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 	boost::shared_ptr<IOStream> stream(pIOHandler->Open(pFile));
 	if (!stream) {
 		ThrowException("Could not open file for reading");
+	}
+
+	// if this is a ifczip file, decompress its contents first
+	if(GetExtension(pFile) == "ifczip") {
+		unzFile zip = unzOpen( pFile.c_str() );
+		if(zip == NULL) {
+			ThrowException("Could not open ifczip file for reading, unzip failed");
+		}
+
+		// chop 'zip' postfix
+		std::string fileName = pFile.substr(0,pFile.length() - 3);
+
+		std::string::size_type s = pFile.find_last_of('\\');
+		if(s == std::string::npos) {
+			s = pFile.find_last_of('/');
+		}
+		if(s != std::string::npos) {
+			fileName = fileName.substr(s+1);
+		}
+
+		// search file (same name as the IFCZIP except for the file extension) and place file pointer there
+		if ( unzLocateFile( zip, fileName.c_str(), 0 ) == UNZ_OK )
+		{
+			// get file size, etc.
+			unz_file_info fileInfo;
+			unzGetCurrentFileInfo( zip , &fileInfo, 0, 0, 0, 0, 0, 0 );
+
+			uint8_t* buff = new uint8_t[fileInfo.uncompressed_size];
+
+			LogInfo("Decompressing IFCZIP file");
+
+			unzOpenCurrentFile( zip  );
+			const int ret = unzReadCurrentFile( zip, buff, fileInfo.uncompressed_size);
+			size_t filesize = fileInfo.uncompressed_size;
+			if ( ret < 0 || size_t(ret) != filesize )
+			{
+				delete[] buff;
+				ThrowException("Failed to decompress IFC ZIP file");
+			}
+			unzCloseCurrentFile( zip );
+			stream.reset(new MemoryIOStream(buff,fileInfo.uncompressed_size,true));
+		}
+		else {
+			ThrowException("Found no IFC file member in IFCZIP file");
+		}
+
+		unzClose(zip);
 	}
 
 	boost::scoped_ptr<STEP::DB> db(STEP::ReadFileHeader(stream));

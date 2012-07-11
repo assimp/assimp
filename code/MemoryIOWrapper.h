@@ -53,12 +53,20 @@ class MemoryIOStream : public IOStream
 {
 	//friend class MemoryIOSystem;
 public:
-	MemoryIOStream (const uint8_t* buff, size_t len) 
-		: buffer (buff), length(len), pos((size_t)0) {
+	MemoryIOStream (const uint8_t* buff, size_t len, bool own = false) 
+		: buffer (buff)
+		, length(len)
+		, pos((size_t)0)
+		, own(own) 
+	{
 	}
 
 public:
+
 	~MemoryIOStream ()	{
+		if(own) {
+			delete[] buffer;
+		}
 	}
 
 	// -------------------------------------------------------------------
@@ -124,6 +132,7 @@ public:
 private:
 	const uint8_t* buffer;
 	size_t length,pos;
+	bool own;
 };
 
 // ---------------------------------------------------------------------------

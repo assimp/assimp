@@ -6,5 +6,5 @@ includedir=@CMAKE_INSTALL_PREFIX@/@INCLUDE_INSTALL_DIR@/assimp
 Name: @CMAKE_PROJECT_NAME@
 Description: Import various well-known 3D model formats in an uniform manner.
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} -lassimp
+Libs: -L${libdir} -lassimp@ASSIMP_LIBRARY_SUFFIX@
 Cflags: -I${includedir} 

@@ -26,9 +26,9 @@ if( MSVC )
   else()
     set(MSVC_PREFIX "vc100")
   endif()
-  set(ASSIMP_LIBRARY_SUFFIX "-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library" FORCE)
+  set(ASSIMP_LIBRARY_SUFFIX "@ASSIMP_LIBRARY_SUFFIX@-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library" FORCE)
 else()
-  set(ASSIMP_LIBRARY_SUFFIX )
+  set(ASSIMP_LIBRARY_SUFFIX "@ASSIMP_LIBRARY_SUFFIX@" CACHE STRING "the suffix for the openrave libraries" FORCE)
 endif()
 
 set( ASSIMP_CXX_FLAGS ) # dynamically linked library
@@ -39,7 +39,7 @@ endif()
 set( ASSIMP_LINK_FLAGS "" )
 set( ASSIMP_LIBRARY_DIRS "${ASSIMP_ROOT_DIR}/@LIB_INSTALL_DIR@")
 set( ASSIMP_INCLUDE_DIRS "${ASSIMP_ROOT_DIR}/@INCLUDE_INSTALL_DIR@")
-set( ASSIMP_LIBRARIES assimp)
+set( ASSIMP_LIBRARIES assimp${ASSIMP_LIBRARY_SUFFIX})
 
 # the boost version assimp was compiled with
 set( ASSIMP_Boost_VERSION "@Boost_MAJOR_VERSION@.@Boost_MINOR_VERSION@")

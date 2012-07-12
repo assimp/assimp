@@ -100,7 +100,7 @@ struct ConversionData
 {
 	ConversionData(const STEP::DB& db, const IFC::IfcProject& proj, aiScene* out,const IFCImporter::Settings& settings)
 		: len_scale(1.0)
-		, angle_scale(1.0)
+		, angle_scale(-1.0)
 		, db(db)
 		, proj(proj)
 		, out(out)

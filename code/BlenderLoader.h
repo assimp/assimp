@@ -145,7 +145,8 @@ private:
 	// --------------------
 	aiNode* ConvertNode(const Blender::Scene& in, 
 		const Blender::Object* obj, 
-		Blender::ConversionData& conv_info
+		Blender::ConversionData& conv_info,
+		const aiMatrix4x4& parentTransform
 	); 
 
 	// --------------------

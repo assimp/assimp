@@ -360,7 +360,7 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileD
 	root->mNumChildren = static_cast<unsigned int>(no_parents.size());
 	root->mChildren = new aiNode*[root->mNumChildren]();
 	for (unsigned int i = 0; i < root->mNumChildren; ++i) {
-		root->mChildren[i] = ConvertNode(in, no_parents[i], conv);	
+		root->mChildren[i] = ConvertNode(in, no_parents[i], conv, aiMatrix4x4());	
 		root->mChildren[i]->mParent = root;
 	}
 
@@ -882,7 +882,7 @@ aiLight* BlenderImporter::ConvertLight(const Scene& /*in*/, const Object* /*obj*
 }
 
 // ------------------------------------------------------------------------------------------------
-aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, ConversionData& conv_data) 
+aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, ConversionData& conv_data, const aiMatrix4x4& parentTransform)
 {
 	std::deque<const Object*> children;
 	for(std::set<const Object*>::iterator it = conv_data.objects.begin(); it != conv_data.objects.end() ;) {
@@ -966,16 +966,12 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
 
 	for(unsigned int x = 0; x < 4; ++x) {
 		for(unsigned int y = 0; y < 4; ++y) {
-			node->mTransformation[y][x] = obj->parentinv[x][y];
+			node->mTransformation[y][x] = obj->obmat[x][y];
 		}
 	}
 
-	aiMatrix4x4 m;
-	for(unsigned int x = 0; x < 4; ++x) {
-		for(unsigned int y = 0; y < 4; ++y) {
-			m[y][x] = obj->obmat[x][y];
-		}
-	}
+	aiMatrix4x4 m = parentTransform;
+	m = m.Inverse();
 
 	node->mTransformation = m*node->mTransformation;
 	
@@ -983,7 +979,7 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
 		node->mNumChildren = static_cast<unsigned int>(children.size());
 		aiNode** nd = node->mChildren = new aiNode*[node->mNumChildren]();
 		for_each (const Object* nobj,children) {
-			*nd = ConvertNode(in,nobj,conv_data);
+			*nd = ConvertNode(in,nobj,conv_data,node->mTransformation * parentTransform);
 			(*nd++)->mParent = node;
 		}
 	}

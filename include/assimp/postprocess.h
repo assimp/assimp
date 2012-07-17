@@ -620,7 +620,6 @@ enum aiPostProcessSteps
 	aiProcess_FindInstances                  |  \
 	aiProcess_ValidateDataStructure          |  \
 	aiProcess_OptimizeMeshes                 |  \
-	aiProcess_Debone						 |  \
 	0 )
 
 

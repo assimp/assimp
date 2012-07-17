@@ -172,6 +172,10 @@ inline char_t getName( char_t it, char_t end, std::string &name )
 	++it;
 
 	// Get name
+	// if there is no name, and the previous char is a separator, come back to start
+	while (&(*it) < pStart) {
+		++it;
+	}
 	std::string strName( pStart, &(*it) );
 	if ( strName.empty() )
 		return it;

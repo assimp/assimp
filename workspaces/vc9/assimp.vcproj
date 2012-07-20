@@ -2056,6 +2056,10 @@
 					Name="fbx"
 					>
 					<File
+						RelativePath="..\..\code\FBXAnimation.cpp"
+						>
+					</File>
+					<File
 						RelativePath="..\..\code\FBXCompileConfig.h"
 						>
 					</File>

@@ -308,6 +308,27 @@ void ReadVectorDataArray(std::vector<int>& out, const Element& el)
 
 
 // ------------------------------------------------------------------------------------------------
+// read an array of floats
+void ReadVectorDataArray(std::vector<float>& out, const Element& el)
+{
+	out.clear();
+	const TokenList& tok = el.Tokens();
+	const size_t dim = ParseTokenAsDim(*tok[0]);
+
+	// see notes in ReadVectorDataArray()
+	out.reserve(dim);
+
+	const Scope& scope = GetRequiredScope(el);
+	const Element& a = GetRequiredElement(scope,"a",&el);
+
+	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
+		const float ival = ParseTokenAsFloat(**it++);
+		out.push_back(ival);
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
 // read an array of uints
 void ReadVectorDataArray(std::vector<unsigned int>& out, const Element& el)
 {
@@ -423,6 +444,18 @@ const Object* LazyObject::Get()
 	}
 	else if (!strncmp(obtype,"Texture",length)) {
 		object.reset(new Texture(id,element,doc,name));
+	}
+	else if (!strncmp(obtype,"AnimationStack",length)) {
+		object.reset(new AnimationStack(id,element,name,doc));
+	}
+	else if (!strncmp(obtype,"AnimationLayer",length)) {
+		object.reset(new AnimationLayer(id,element,name,doc));
+	}
+	else if (!strncmp(obtype,"AnimationCurveNode",length)) {
+		object.reset(new AnimationCurveNode(id,element,name,doc));
+	}
+	else if (!strncmp(obtype,"AnimationCurve",length)) {
+		object.reset(new AnimationCurve(id,element,name,doc));
 	}
 
 	if (!object.get()) {
@@ -553,6 +586,11 @@ void Document::ReadObjects()
 		}
 
 		objects[id] = new LazyObject(id, *el.second, *this);
+
+		// grab all animation stacks upfront since there is no listing of them
+		if(el.first == "AnimationStack") {
+			animationStacks.push_back(id);
+		}
 	}
 }
 
@@ -659,6 +697,26 @@ void Document::ReadConnections()
 	}
 }
 
+// ------------------------------------------------------------------------------------------------
+const std::vector<const AnimationStack*>& Document::AnimationStacks() const
+{
+	if (animationStacksResolved.empty() && animationStacks.size()) {
+		return animationStacksResolved;
+	}
+
+	animationStacksResolved.reserve(animationStacks.size());
+	BOOST_FOREACH(uint64_t id, animationStacks) {
+		LazyObject* const lazy = GetObject(id);
+		const AnimationStack* stack;
+		if(!lazy || !(stack = lazy->Get<AnimationStack>())) {
+			DOMWarning("failed to read AnimationStack object");
+			continue;
+		}
+		animationStacksResolved.push_back(stack);
+	}
+
+	return animationStacksResolved;
+}
 
 // ------------------------------------------------------------------------------------------------
 LazyObject* Document::GetObject(uint64_t id) const

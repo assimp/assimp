@@ -76,9 +76,9 @@ public:
 	const Object* Get();
 
 	template <typename T> 
-	T* Get() {
+	const T* Get() {
 		const Object* const ob = Get();
-		return ob ? dynamic_cast<T*>(ob) : NULL;
+		return ob ? dynamic_cast<const T*>(ob) : NULL;
 	}
 
 	uint64_t ID() const {
@@ -125,7 +125,7 @@ protected:
 };
 
 
-/** DOM base class for FBX models */
+/** DOM base class for FBX models (even though its semantics are more "node" than "model" */
 class Model : public Object
 {
 public:
@@ -404,6 +404,144 @@ private:
 };
 
 
+
+/** Represents a FBX animation curve (i.e. a 1-dimensional set of keyframes and values therefor) */
+class AnimationCurve : public Object
+{
+public:
+
+	AnimationCurve(uint64_t id, const Element& element, const std::string& name, const Document& doc);
+	~AnimationCurve();
+
+public:
+
+	/** get list of keyframe positions (time).
+	 *  Invariant: |GetKeys()| > 0 */
+	const std::vector<float>& GetKeys() const {
+		return keys;
+	}
+
+
+	/** get list of keyframe values. 
+	  * Invariant: |GetKeys()| == |GetValues()| && |GetKeys()| > 0*/
+	const std::vector<float>& GetValues() const {
+		return values;
+	}
+
+
+	const std::vector<float>& GetAttributes() const {
+		return attributes;
+	}
+
+	unsigned int GetFlags() const {
+		return flags;
+	}
+
+private:
+
+	std::vector<float> keys;
+	std::vector<float> values;
+	std::vector<float> attributes;
+	unsigned int flags;
+};
+
+// property-name -> animation curve
+typedef std::map<std::string, const AnimationCurve*> AnimationCurveMap;
+
+
+/** Represents a FBX animation curve (i.e. a mapping from single animation curves to nodes) */
+class AnimationCurveNode : public Object
+{
+public:
+
+	AnimationCurveNode(uint64_t id, const Element& element, const std::string& name, const Document& doc);
+	~AnimationCurveNode();
+
+public:
+
+	const PropertyTable& Props() const {
+		ai_assert(props.get());
+		return *props.get();
+	}
+
+
+	const AnimationCurveMap Curves() const {
+		return curves;
+	}
+
+
+	const Model* TargetNode() const {
+		return target;
+	}
+
+private:
+
+	const Model* target;
+	boost::shared_ptr<const PropertyTable> props;
+	AnimationCurveMap curves;
+};
+
+typedef std::vector<const AnimationCurveNode*> AnimationCurveNodeList;
+
+
+/** Represents a FBX animation layer (i.e. a list of node animations) */
+class AnimationLayer : public Object
+{
+public:
+
+	AnimationLayer(uint64_t id, const Element& element, const std::string& name, const Document& doc);
+	~AnimationLayer();
+
+public:
+
+	const PropertyTable& Props() const {
+		ai_assert(props.get());
+		return *props.get();
+	}
+
+	const AnimationCurveNodeList& Nodes() const {
+		return nodes;
+	}
+
+private:
+
+	boost::shared_ptr<const PropertyTable> props;
+	AnimationCurveNodeList nodes;
+};
+
+
+typedef std::vector<const AnimationLayer*> AnimationLayerList;
+
+
+/** Represents a FBX animation stack (i.e. a list of animation layers) */
+class AnimationStack : public Object
+{
+public:
+
+	AnimationStack(uint64_t id, const Element& element, const std::string& name, const Document& doc);
+	~AnimationStack();
+
+public:
+
+	const PropertyTable& Props() const {
+		ai_assert(props.get());
+		return *props.get();
+	}
+
+
+	const AnimationLayerList& Layers() const {
+		return layers;
+	}
+
+private:
+
+	boost::shared_ptr<const PropertyTable> props;
+	AnimationLayerList layers;
+};
+
+
+
+
 /** Represents a link between two FBX objects. */
 class Connection
 {
@@ -514,6 +652,8 @@ public:
 	std::vector<const Connection*> GetConnectionsBySourceSequenced(uint64_t source) const;
 	std::vector<const Connection*> GetConnectionsByDestinationSequenced(uint64_t dest) const;
 
+	const std::vector<const AnimationStack*>& AnimationStacks() const;
+
 private:
 
 	void ReadHeader();
@@ -536,6 +676,8 @@ private:
 	std::string creator;
 	unsigned int creationTimeStamp[7];
 
+	std::vector<uint64_t> animationStacks;
+	mutable std::vector<const AnimationStack*> animationStacksResolved;
 };
 
 }

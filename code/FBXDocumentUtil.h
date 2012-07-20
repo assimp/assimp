@@ -88,6 +88,9 @@ void ReadVectorDataArray(std::vector<aiVector2D>& out, const Element& el);
 // read an array of ints
 void ReadVectorDataArray(std::vector<int>& out, const Element& el);
 
+// read an array of floats
+void ReadVectorDataArray(std::vector<float>& out, const Element& el);
+
 // read an array of uints
 void ReadVectorDataArray(std::vector<unsigned int>& out, const Element& el);
 

@@ -414,6 +414,7 @@ SET(FBX_SRCS
 	FBXMeshGeometry.cpp
 	FBXMaterial.cpp
 	FBXModel.cpp
+	FBXAnimation.cpp
 )
 SOURCE_GROUP( FBX FILES ${FBX_SRCS})
 

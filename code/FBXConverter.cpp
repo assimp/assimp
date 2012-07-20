@@ -261,7 +261,7 @@ private:
 		// one material per mesh maps easily to aiMesh. Multiple material 
 		// meshes need to be split.
 		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
-		if (!mindices.empty()) {
+		if (doc.Settings().readMaterials && !mindices.empty()) {
 			const unsigned int base = mindices[0];
 			BOOST_FOREACH(unsigned int index, mindices) {
 				if(index != base) {
@@ -408,7 +408,7 @@ private:
 			std::copy(colors.begin(),colors.end(),out_mesh->mColors[i]);
 		}
 
-		if(mindices.empty()) {
+		if(!doc.Settings().readMaterials || mindices.empty()) {
 			FBXImporter::LogError("no material assigned to mesh, setting default material");
 			out_mesh->mMaterialIndex = GetDefaultMaterial();
 		}

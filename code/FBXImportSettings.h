@@ -53,6 +53,10 @@ struct ImportSettings
 	ImportSettings()
 		: readAllLayers(true)
 		, readAllMaterials()
+		, readMaterials(true)
+		, readCameras(true)
+		, readLights(true)
+		, readAnimations(true)
 	{}
 
 	/** specifies whether all geometry layers are read and scanned for
@@ -66,8 +70,24 @@ struct ImportSettings
 	/** specifies whether all materials are read, or only those that
 	 *  are referenced by at least one mesh. Reading all materials
 	 *  may make FBX reading a lot slower since all objects
-	 *  need to be processed .*/
+	 *  need to be processed .
+	 *  This bit is ignored unless readMaterials=true*/
 	bool readAllMaterials;
+
+
+	/** import materials (true) or skip them and assign a default 
+	 *  material. The default value is true.*/
+	bool readMaterials;
+
+	/** import cameras? Default value is true.*/
+	bool readCameras;
+
+	/** import light sources? Default value is true.*/
+	bool readLights;
+
+	/** import animations (i.e. animation curves, the node
+	 *  skeleton is always imported)? Default value is true. */
+	bool readAnimations;
 };
 
 

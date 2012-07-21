@@ -936,6 +936,9 @@ private:
 		// generate node animations
 		std::vector<aiNodeAnim*> node_anims;
 
+		double min_time = 1e10;
+		double max_time = -1e10;
+
 		try {
 
 			NodeMap node_property_map;
@@ -987,7 +990,8 @@ private:
 				// which requires all of rotation, scaling and translation
 				// to be set.
 				if(hasScale) {
-					ConvertScaleKeys(na, (*itScale).second, layer_map);
+					ConvertScaleKeys(na, (*itScale).second, layer_map, 
+						max_time, min_time);
 				}
 				else {
 					na->mScalingKeys = new aiVectorKey[1];
@@ -998,7 +1002,8 @@ private:
 				}
 
 				if(hasRotation) {
-					ConvertRotationKeys(na, (*itRotation).second, layer_map);
+					ConvertRotationKeys(na, (*itRotation).second, layer_map, 
+						max_time, min_time);
 				}
 				else {
 					na->mRotationKeys = new aiQuatKey[1];
@@ -1011,7 +1016,8 @@ private:
 				}
 
 				if(hasTranslation) {
-					ConvertTranslationKeys(na, (*itTranslation).second, layer_map);
+					ConvertTranslationKeys(na, (*itTranslation).second, layer_map, 
+						max_time, min_time);
 				}
 				else {
 					na->mPositionKeys = new aiVectorKey[1];
@@ -1033,6 +1039,11 @@ private:
 
 			std::swap_ranges(node_anims.begin(),node_anims.end(),anim->mChannels);
 		}
+
+		// for some mysterious reason, mDuration is simply the maximum key -- the
+		// validator always assumes animations to start at zero.
+		anim->mDuration = max_time /*- min_time */;
+		anim->mTicksPerSecond = 1000.0;
 	}
 
 	// key (time), value, mapto (component index)
@@ -1131,7 +1142,10 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	void InterpolateKeys(aiVectorKey* valOut,const KeyTimeList& keys, const KeyFrameListList& inputs, const bool geom = false)
+	void InterpolateKeys(aiVectorKey* valOut,const KeyTimeList& keys, const KeyFrameListList& inputs, const bool geom, 
+		double& maxTime,
+		double& minTime)
+
 	{
 		ai_assert(keys.size());
 		ai_assert(valOut);
@@ -1178,7 +1192,12 @@ private:
 				}
 			}
 
-			valOut->mTime = static_cast<double>(time);
+			// magic value to convert fbx times to milliseconds
+			valOut->mTime = static_cast<double>(time) / 46186158;
+
+			minTime = std::min(minTime, valOut->mTime);
+			maxTime = std::max(maxTime, valOut->mTime);
+
 			valOut->mValue.x = result[0];
 			valOut->mValue.y = result[1];
 			valOut->mValue.z = result[2];
@@ -1189,13 +1208,15 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	void InterpolateKeys(aiQuatKey* valOut,const KeyTimeList& keys, const KeyFrameListList& inputs, const bool geom = false)
+	void InterpolateKeys(aiQuatKey* valOut,const KeyTimeList& keys, const KeyFrameListList& inputs, const bool geom,
+		double& maxTime,
+		double& minTime)
 	{
 		ai_assert(keys.size());
 		ai_assert(valOut);
 
 		boost::scoped_array<aiVectorKey> temp(new aiVectorKey[keys.size()]);
-		InterpolateKeys(temp.get(),keys,inputs,geom);
+		InterpolateKeys(temp.get(),keys,inputs,geom,maxTime, minTime);
 
 		for (size_t i = 0, c = keys.size(); i < c; ++i) {
 
@@ -1225,7 +1246,9 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	void ConvertScaleKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& layers)
+	void ConvertScaleKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& layers,
+		double& maxTime,
+		double& minTime)
 	{
 		ai_assert(nodes.size());
 
@@ -1238,12 +1261,14 @@ private:
 
 		na->mNumScalingKeys = static_cast<unsigned int>(keys.size());
 		na->mScalingKeys = new aiVectorKey[keys.size()];
-		InterpolateKeys(na->mScalingKeys, keys, inputs, true);
+		InterpolateKeys(na->mScalingKeys, keys, inputs, true, maxTime, minTime);
 	}
 
 
 	// ------------------------------------------------------------------------------------------------
-	void ConvertTranslationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& layers)
+	void ConvertTranslationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& layers,
+		double& maxTime,
+		double& minTime)
 	{
 		ai_assert(nodes.size());
 
@@ -1253,12 +1278,14 @@ private:
 
 		na->mNumPositionKeys = static_cast<unsigned int>(keys.size());
 		na->mPositionKeys = new aiVectorKey[keys.size()];
-		InterpolateKeys(na->mPositionKeys, keys, inputs, false);
+		InterpolateKeys(na->mPositionKeys, keys, inputs, false, maxTime, minTime);
 	}
 
 
 	// ------------------------------------------------------------------------------------------------
-	void ConvertRotationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& layers)
+	void ConvertRotationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& layers, 
+		double& maxTime,
+		double& minTime)
 	{
 		ai_assert(nodes.size());
 
@@ -1268,7 +1295,7 @@ private:
 
 		na->mNumRotationKeys = static_cast<unsigned int>(keys.size());
 		na->mRotationKeys = new aiQuatKey[keys.size()];
-		InterpolateKeys(na->mRotationKeys, keys, inputs, false);
+		InterpolateKeys(na->mRotationKeys, keys, inputs, false, maxTime, minTime);
 	}
 
 

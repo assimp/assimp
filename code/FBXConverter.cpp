@@ -942,6 +942,9 @@ private:
 			BOOST_FOREACH(const NodeMap::value_type& kv, node_map) {
 				node_property_map.clear();
 
+				ai_assert(kv.second.size());
+
+				const AnimationCurveNode* curve_node;
 				BOOST_FOREACH(const AnimationCurveNode* node, kv.second) {
 					ai_assert(node);
 
@@ -950,6 +953,7 @@ private:
 						continue;
 					}
 
+					curve_node = node;
 					if (node->Curves().empty()) {
 						FBXImporter::LogWarn("no animation curves assigned to AnimationCurveNode");
 						continue;
@@ -957,6 +961,8 @@ private:
 
 					node_property_map[node->TargetProperty()].push_back(node);
 				}
+
+				ai_assert(curve_node);
 
 				const NodeMap::const_iterator itScale = node_property_map.find("Lcl Scaling");
 				const NodeMap::const_iterator itRotation = node_property_map.find("Lcl Rotation");
@@ -974,16 +980,45 @@ private:
 				aiNodeAnim* const na = new aiNodeAnim();
 				node_anims.push_back(na);
 
+				const PropertyTable& props = curve_node->TargetNode()->Props();
+
+				// if a particular transformation is not given, grab it from
+				// the corresponding node to meet the semantics of aiNodeAnim,
+				// which requires all of rotation, scaling and translation
+				// to be set.
 				if(hasScale) {
 					ConvertScaleKeys(na, (*itScale).second, layer_map);
+				}
+				else {
+					na->mScalingKeys = new aiVectorKey[1];
+					na->mNumScalingKeys = 1;
+
+					na->mScalingKeys[0].mTime = 0.;
+					na->mScalingKeys[0].mValue = PropertyGet(props,"Lcl Scaling",aiVector3D(1.f,1.f,1.f));
 				}
 
 				if(hasRotation) {
 					ConvertRotationKeys(na, (*itRotation).second, layer_map);
 				}
+				else {
+					na->mRotationKeys = new aiQuatKey[1];
+					na->mNumRotationKeys = 1;
+
+					na->mRotationKeys[0].mTime = 0.;
+					na->mRotationKeys[0].mValue = EulerToQuaternion(
+						PropertyGet(props,"Lcl Rotation",aiVector3D(0.f,0.f,0.f))
+					);
+				}
 
 				if(hasTranslation) {
 					ConvertTranslationKeys(na, (*itTranslation).second, layer_map);
+				}
+				else {
+					na->mPositionKeys = new aiVectorKey[1];
+					na->mNumPositionKeys = 1;
+
+					na->mPositionKeys[0].mTime = 0.;
+					na->mPositionKeys[0].mValue = PropertyGet(props,"Lcl Translation",aiVector3D(0.f,0.f,0.f));
 				}
 			}
 		}
@@ -1163,23 +1198,29 @@ private:
 		InterpolateKeys(temp.get(),keys,inputs,geom);
 
 		for (size_t i = 0, c = keys.size(); i < c; ++i) {
-			
-			const aiVector3D rot = temp[i].mValue;
-
-			aiMatrix4x4 m, mtemp;
-			if(fabs(rot.x) > 1e-6f) {
-				m *= aiMatrix4x4::RotationX(rot.x,mtemp);
-			}
-			if(fabs(rot.y) > 1e-6f) {
-				m *= aiMatrix4x4::RotationY(rot.y,mtemp);
-			}
-			if(fabs(rot.z) > 1e-6f) {
-				m *= aiMatrix4x4::RotationZ(rot.z,mtemp);
-			}
 
 			valOut[i].mTime = temp[i].mTime;
-			valOut[i].mValue = aiQuaternion(aiMatrix3x3(m));
+			valOut[i].mValue = EulerToQuaternion(temp[i].mValue); 
 		}
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	// euler xyz -> quat
+	aiQuaternion EulerToQuaternion(const aiVector3D& rot) 
+	{
+		aiMatrix4x4 m, mtemp;
+		if(fabs(rot.x) > 1e-6f) {
+			m *= aiMatrix4x4::RotationX(rot.x,mtemp);
+		}
+		if(fabs(rot.y) > 1e-6f) {
+			m *= aiMatrix4x4::RotationY(rot.y,mtemp);
+		}
+		if(fabs(rot.z) > 1e-6f) {
+			m *= aiMatrix4x4::RotationZ(rot.z,mtemp);
+		}
+
+		return aiQuaternion(aiMatrix3x3(m));
 	}
 
 

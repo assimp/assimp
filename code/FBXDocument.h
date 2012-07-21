@@ -85,6 +85,10 @@ public:
 		return id;
 	}
 
+	bool IsBeingConstructed() const {
+		return being_constructed;
+	}
+
 private:
 
 	const Document& doc;
@@ -92,6 +96,7 @@ private:
 	boost::scoped_ptr<const Object> object;
 
 	const uint64_t id;
+	bool being_constructed;
 };
 
 
@@ -469,11 +474,12 @@ public:
 		return curves;
 	}
 
-
+	/** Model instance the curve is assigned to, this is always non-NULL */
 	const Model* TargetNode() const {
 		return target;
 	}
 
+	/** Property of TargetNode() that is being animated*/
 	const std::string& TargetProperty() const {
 		return prop;
 	}
@@ -562,8 +568,13 @@ public:
 	const Object* SourceObject() const;
 	const Object* DestinationObject() const;
 
-	// return the name of the property the connection is attached to.
-	// this is an empty string for object to object (OO) connections.
+	// these, however, are always guaranteed to be valid
+	LazyObject& LazySourceObject() const;
+	LazyObject& LazyDestinationObject() const;
+
+
+	/** return the name of the property the connection is attached to.
+	  * this is an empty string for object to object (OO) connections. */
 	const std::string& PropertyName() const {
 		return prop;
 	}

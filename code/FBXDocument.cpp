@@ -390,6 +390,7 @@ LazyObject::LazyObject(uint64_t id, const Element& element, const Document& doc)
 : doc(doc)
 , element(element)
 , id(id)
+, being_constructed()
 {
 
 }
@@ -425,7 +426,8 @@ const Object* LazyObject::Get()
 		DOMError(err,&element);
 	} 
 
-	// XXX prevent recursive calls
+	// prevent recursive calls
+	being_constructed = true;
 
 	// this needs to be relatively fast since it happens a lot,
 	// so avoid constructing strings all the time.
@@ -462,6 +464,7 @@ const Object* LazyObject::Get()
 		//DOMError("failed to convert element to DOM object, class: " + classtag + ", name: " + name,&element);
 	}
 
+	being_constructed = false;
 	return object.get();
 }
 
@@ -697,6 +700,7 @@ void Document::ReadConnections()
 	}
 }
 
+
 // ------------------------------------------------------------------------------------------------
 const std::vector<const AnimationStack*>& Document::AnimationStacks() const
 {
@@ -718,12 +722,14 @@ const std::vector<const AnimationStack*>& Document::AnimationStacks() const
 	return animationStacksResolved;
 }
 
+
 // ------------------------------------------------------------------------------------------------
 LazyObject* Document::GetObject(uint64_t id) const
 {
 	ObjectMap::const_iterator it = objects.find(id);
 	return it == objects.end() ? NULL : (*it).second;
 }
+
 
 // ------------------------------------------------------------------------------------------------
 std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source) const
@@ -762,6 +768,7 @@ std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(ui
 	return temp; // NRVO should handle this
 }
 
+
 // ------------------------------------------------------------------------------------------------
 Connection::Connection(uint64_t insertionOrder,  uint64_t src, uint64_t dest, const std::string& prop, const Document& doc)
 : insertionOrder(insertionOrder)
@@ -784,12 +791,31 @@ Connection::~Connection()
 
 
 // ------------------------------------------------------------------------------------------------
+LazyObject& Connection::LazySourceObject() const
+{
+	LazyObject* const lazy = doc.GetObject(src);
+	ai_assert(lazy);
+	return *lazy;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+LazyObject& Connection::LazyDestinationObject() const
+{
+	LazyObject* const lazy = doc.GetObject(dest);
+	ai_assert(lazy);
+	return *lazy;
+}
+
+
+// ------------------------------------------------------------------------------------------------
 const Object* Connection::SourceObject() const
 {
 	LazyObject* const lazy = doc.GetObject(src);
 	ai_assert(lazy);
 	return lazy->Get();
 }
+
 
 // ------------------------------------------------------------------------------------------------
 const Object* Connection::DestinationObject() const

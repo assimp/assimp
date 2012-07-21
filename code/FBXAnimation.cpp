@@ -98,6 +98,7 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
 : Object(id, element, name)
 , target()
 {
+	{
 	// resolve attached animation curves
 	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
 
@@ -119,9 +120,49 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
 			DOMWarning("source object for ->AnimationCurveNode link is not an AnimationCurve",&element);
 			continue;
 		}
+		
+		curves[con->PropertyName()] = anim;
+	}
+
+	}{
+
+	// find target node
+	const std::vector<const Connection*>& conns = doc.GetConnectionsBySourceSequenced(ID());
+
+	BOOST_FOREACH(const Connection* con, conns) {
+
+		// link should go for a property
+		if (con->PropertyName().length()) {
+			continue;
+		}
+
+		// note: the implicit rule in all DOM classes is to always resolve
+		// from destination to source (since the FBX object hierarchy is,
+		// with very few exceptions, a DAG, this avoids cycles). Since
+		// it goes the other way round, we have to cope with the case
+		// that the destination is not fully constructed yet.
+		LazyObject& lob = con->LazyDestinationObject();
+		if(lob.IsBeingConstructed()) {
+			continue;
+		}
+
+		const Object* ob = lob.Get();
+		if(!ob) {
+			DOMWarning("failed to read destination object for AnimationCurveNode->Model link, ignoring",&element);
+			continue;
+		}
+
+		target = dynamic_cast<const Model*>(ob);
+		if(!target) {
+			continue;
+		}
 
 		prop = con->PropertyName();
-		curves[prop] = anim;
+		break;
+	}
+	}
+	if(!target) {
+		DOMError("failed to resolve target model for animation node",&element);
 	}
 }
 

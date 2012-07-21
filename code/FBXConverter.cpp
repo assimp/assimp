@@ -1052,7 +1052,6 @@ private:
 
 	
 
-
 	// ------------------------------------------------------------------------------------------------
 	KeyFrameListList GetKeyframeList(const std::vector<const AnimationCurveNode*>& nodes)
 	{

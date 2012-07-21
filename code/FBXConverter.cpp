@@ -73,7 +73,7 @@ public:
 		, doc(doc)
 	{
 		ConvertRootNode();
-		//ConvertAnimations();
+		ConvertAnimations();
 
 		if(doc.Settings().readAllMaterials) {
 			// unfortunately this means we have to evaluate all objects
@@ -1040,8 +1040,17 @@ private:
 	// ------------------------------------------------------------------------------------------------
 	std::vector<float> GetKeyTimeList(const KeyFrameListList& inputs)
 	{
-		// XXX reserve some space upfront
+		// reserve some space upfront - it is likely that the keyframe lists
+		// have matching time values, so max(of all keyframe lists) should 
+		// be a good estimate.
 		std::vector<float> keys;
+		
+		size_t estimate = 0;
+		BOOST_FOREACH(const KeyFrameList& kfl, inputs) {
+			estimate = std::max(estimate, kfl.get<0>()->size());
+		}
+
+		keys.reserve(estimate);
 
 		std::vector<unsigned int> next_pos;
 		next_pos.resize(inputs.size(),0);

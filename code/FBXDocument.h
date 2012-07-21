@@ -89,6 +89,14 @@ public:
 		return being_constructed;
 	}
 
+	const Element& GetElement() const {
+		return element;
+	}
+
+	const Document& GetDocument() const {
+		return doc;
+	}
+
 private:
 
 	const Document& doc;
@@ -669,7 +677,15 @@ public:
 	std::vector<const Connection*> GetConnectionsBySourceSequenced(uint64_t source) const;
 	std::vector<const Connection*> GetConnectionsByDestinationSequenced(uint64_t dest) const;
 
+	std::vector<const Connection*> GetConnectionsBySourceSequenced(uint64_t source, const char* const* classnames, size_t count) const;
+	std::vector<const Connection*> GetConnectionsByDestinationSequenced(uint64_t dest, const char* const* classnames, size_t count) const;
+
 	const std::vector<const AnimationStack*>& AnimationStacks() const;
+
+private:
+
+	std::vector<const Connection*> GetConnectionsSequenced(uint64_t id, const ConnectionMap&) const;
+	std::vector<const Connection*> GetConnectionsSequenced(uint64_t id, const ConnectionMap&, const char* const* classnames, size_t count) const;
 
 private:
 

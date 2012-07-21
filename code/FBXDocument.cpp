@@ -734,14 +734,15 @@ LazyObject* Document::GetObject(uint64_t id) const
 	return it == objects.end() ? NULL : (*it).second;
 }
 
+#define MAX_CLASSNAMES 6
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source) const
+std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, const ConnectionMap& conns) const
 {
 	std::vector<const Connection*> temp;
 
 	const std::pair<ConnectionMap::const_iterator,ConnectionMap::const_iterator> range = 
-		ConnectionsBySource().equal_range(source);
+		conns.equal_range(id);
 
 	temp.reserve(std::distance(range.first,range.second));
 	for (ConnectionMap::const_iterator it = range.first; it != range.second; ++it) {
@@ -755,21 +756,73 @@ std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_
 
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest) const
+std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, const ConnectionMap& conns, const char* const* classnames, size_t count) const
 {
+	ai_assert(classnames);
+	ai_assert(count != 0 && count <= MAX_CLASSNAMES);
+
+	size_t lenghts[MAX_CLASSNAMES];
+
+	const size_t c = count;
+	for (size_t i = 0; i < c; ++i) {
+		lenghts[i] = strlen(classnames[i]);
+	}
+
 	std::vector<const Connection*> temp;
 
 	const std::pair<ConnectionMap::const_iterator,ConnectionMap::const_iterator> range = 
-		ConnectionsByDestination().equal_range(dest);
+		conns.equal_range(id);
 
 	temp.reserve(std::distance(range.first,range.second));
 	for (ConnectionMap::const_iterator it = range.first; it != range.second; ++it) {
+		const Token& key = (*it).second->LazyDestinationObject().GetElement().KeyToken();
+		const char* obtype = key.begin();
+
+		for (size_t i = 0; i < c; ++i) {
+			ai_assert(classnames[i]);
+			if(!strncmp(classnames[i],obtype,lenghts[i])) {
+				obtype = NULL;
+				break;
+			}
+		}
+
+		if(obtype) {
+			continue;
+		}
+
 		temp.push_back((*it).second);
 	}
 
 	std::sort(temp.begin(), temp.end(), std::mem_fun(&Connection::Compare));
-
 	return temp; // NRVO should handle this
+}
+
+
+// ------------------------------------------------------------------------------------------------
+std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source) const
+{
+	return GetConnectionsSequenced(source, ConnectionsBySource());
+}
+
+
+// ------------------------------------------------------------------------------------------------
+std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source, const char* const* classnames, size_t count) const
+{
+	return GetConnectionsSequenced(source, ConnectionsBySource(),classnames, count);
+}
+
+
+// ------------------------------------------------------------------------------------------------
+std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest) const
+{
+	return GetConnectionsSequenced(dest, ConnectionsByDestination());
+}
+
+
+// ------------------------------------------------------------------------------------------------
+std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest, const char* const* classnames, size_t count) const
+{
+	return GetConnectionsSequenced(dest, ConnectionsByDestination(),classnames, count);
 }
 
 

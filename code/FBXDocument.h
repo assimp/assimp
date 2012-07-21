@@ -474,11 +474,17 @@ public:
 		return target;
 	}
 
+	const std::string& TargetProperty() const {
+		return prop;
+	}
+
 private:
 
 	const Model* target;
 	boost::shared_ptr<const PropertyTable> props;
 	AnimationCurveMap curves;
+
+	std::string prop;
 };
 
 typedef std::vector<const AnimationCurveNode*> AnimationCurveNodeList;

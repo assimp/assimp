@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
+#include <boost/tuple/tuple.hpp>
+
 #include "FBXParser.h"
 #include "FBXConverter.h"
 #include "FBXDocument.h"
@@ -71,6 +73,7 @@ public:
 		, doc(doc)
 	{
 		ConvertRootNode();
+		//ConvertAnimations();
 
 		if(doc.Settings().readAllMaterials) {
 			// unfortunately this means we have to evaluate all objects
@@ -866,6 +869,346 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
+	// convert animation data to aiAnimation et al
+	void ConvertAnimations() 
+	{
+		const std::vector<const AnimationStack*>& animations = doc.AnimationStacks();
+		BOOST_FOREACH(const AnimationStack* stack, animations) {
+			ConvertAnimationStack(*stack);
+		}
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	std::string FixNodeName(const std::string& name)
+	{
+		// XXX handle prefix
+		return name;
+	}
+
+
+	typedef std::map<const AnimationCurveNode*, const AnimationLayer*> LayerMap;
+
+
+	// ------------------------------------------------------------------------------------------------
+	void ConvertAnimationStack(const AnimationStack& st)
+	{
+		aiAnimation* const anim = new aiAnimation();
+		animations.push_back(anim);
+
+		// strip AnimationStack:: prefix
+		std::string name = st.Name();
+		if(name.substr(0,16) == "AnimationStack::") {
+			name = name.substr(16);
+		}
+
+		anim->mName.Set(name);
+		const AnimationLayerList& layers = st.Layers();
+		
+		// need to find all nodes for which we need to generate node animations -
+		// it may happen that we need to merge multiple layers, though.
+		// XXX: better use multi_map ..
+		typedef std::map<std::string, std::vector<const AnimationCurveNode*> > NodeMap;
+		NodeMap node_map;
+
+		// reverse mapping from curves to layers, much faster than querying 
+		// the FBX DOM for it.
+		LayerMap layer_map;
+		
+		BOOST_FOREACH(const AnimationLayer* layer, layers) {
+			ai_assert(layer);
+
+			const AnimationCurveNodeList& nodes = layer->Nodes();
+			BOOST_FOREACH(const AnimationCurveNode* node, nodes) {
+				ai_assert(node);
+
+				const Model* model = node->TargetNode();
+				ai_assert(model);
+
+				const std::string& name = FixNodeName(model->Name());
+				node_map[name].push_back(node);
+
+				layer_map[node] = layer;
+			}
+		}
+
+		// generate node animations
+		std::vector<aiNodeAnim*> node_anims;
+
+		try {
+
+			NodeMap node_property_map;
+			BOOST_FOREACH(const NodeMap::value_type& kv, node_map) {
+				node_property_map.clear();
+
+				BOOST_FOREACH(const AnimationCurveNode* node, kv.second) {
+					ai_assert(node);
+
+					if (node->TargetProperty().empty()) {
+						FBXImporter::LogWarn("target property for animation curve not set");
+						continue;
+					}
+
+					node_property_map[node->TargetProperty()].push_back(node);
+				}
+
+				const NodeMap::const_iterator itScale = node_property_map.find("Lcl Scaling");
+				const NodeMap::const_iterator itRotation = node_property_map.find("Lcl Rotation");
+				const NodeMap::const_iterator itTranslation = node_property_map.find("Lcl Translation");
+
+				const bool hasScale = !!(*itScale).second.size();
+				const bool hasRotation = !!(*itRotation).second.size();
+				const bool hasTranslation = !!(*itTranslation).second.size();
+
+				if (!hasScale && !hasRotation && !hasTranslation) {
+					FBXImporter::LogWarn("ignoring node animation, did not find transformation key frames");
+					continue;
+				}
+
+				aiNodeAnim* const na = new aiNodeAnim();
+				node_anims.push_back(na);
+
+				if(hasScale) {
+					ConvertScaleKeys(na, (*itScale).second, layer_map);
+				}
+
+				if(hasRotation) {
+					ConvertRotationKeys(na, (*itRotation).second, layer_map);
+				}
+
+				if(hasTranslation) {
+					ConvertTranslationKeys(na, (*itTranslation).second, layer_map);
+				}
+			}
+		}
+		catch(std::exception&) {
+			std::for_each(node_anims.begin(), node_anims.end(), Util::delete_fun<aiNodeAnim>());
+		}
+
+		if(node_anims.size()) {
+			anim->mChannels = new aiNodeAnim*[node_anims.size()]();
+			anim->mNumChannels = static_cast<unsigned int>(node_anims.size());
+
+			std::swap_ranges(node_anims.begin(),node_anims.end(),anim->mChannels);
+		}
+	}
+
+	// key (time), value, mapto (component index)
+	typedef boost::tuple< std::vector<float>*, std::vector<float>*, unsigned int > KeyFrameList;
+	typedef std::vector<KeyFrameList> KeyFrameListList;
+
+	typedef std::vector<float> KeyTimeList;
+
+
+	// ------------------------------------------------------------------------------------------------
+	KeyFrameListList GetKeyframeList(const std::vector<const AnimationCurveNode*>& nodes)
+	{
+		KeyFrameListList inputs;
+		inputs.reserve(nodes.size()*3);
+
+		BOOST_FOREACH(const AnimationCurveNode* node, nodes) {
+			ai_assert(node);
+
+			const AnimationCurveMap& curves = node->Curves();
+			BOOST_FOREACH(const AnimationCurveMap::value_type& kv, curves) {
+
+				unsigned int mapto;
+				if (kv.first == "d|X") {
+					mapto = 0;
+				}
+				else if (kv.first == "d|Y") {
+					mapto = 1;
+				}
+				else if (kv.first == "d|Z") {
+					mapto = 2;
+				}
+				else {
+					FBXImporter::LogWarn("ignoring scale animation curve, did not recognize target component");
+					continue;
+				}
+
+				const AnimationCurve* const curve = kv.second;
+				ai_assert(curve->GetKeys().size() == curve->GetValues().size() && curve->GetKeys().size());
+
+				inputs.push_back(boost::make_tuple(&curve->GetKeys(), &curve->GetValues(), mapto));
+			}
+		}
+		return inputs; // pray for NRVO :-)
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	std::vector<float> GetKeyTimeList(const KeyFrameListList& inputs)
+	{
+		// XXX reserve some space upfront
+		std::vector<float> keys;
+
+		std::vector<unsigned int> next_pos;
+		next_pos.resize(inputs.size(),0);
+
+		const size_t count = inputs.size();
+		while(true) {
+
+			float min_tick = 1e10f;
+			for (size_t i = 0; i < count; ++i) {
+				const KeyFrameList& kfl = inputs[i];
+
+				if (kfl.get<0>()->size() > next_pos[i] && kfl.get<0>()->at(next_pos[i]) < min_tick) {
+					min_tick = kfl.get<0>()->at(next_pos[i]);
+				}
+			}
+
+			if (min_tick > 1e9f) {
+				break;
+			}
+			keys.push_back(min_tick);
+
+			for (size_t i = 0; i < count; ++i) {
+				const KeyFrameList& kfl = inputs[i];
+
+				const float time_epsilon = 1e-4f;
+				while(kfl.get<0>()->size() > next_pos[i] && fabs(kfl.get<0>()->at(next_pos[i]) - min_tick) < time_epsilon) {
+					++next_pos[i];
+				}
+			}
+		}	
+
+		return keys;
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void InterpolateKeys(aiVectorKey* valOut,const KeyTimeList& keys, const KeyFrameListList& inputs, const bool geom = false)
+	{
+		ai_assert(keys.size());
+		ai_assert(valOut);
+
+		std::vector<unsigned int> next_pos;
+		const size_t count = inputs.size();
+
+		next_pos.resize(inputs.size(),0);
+
+		BOOST_FOREACH(float time, keys) {
+			float result[3] = {0.0f, 0.0f, 0.0f};
+			if(geom) {
+				result[0] = result[1] = result[2] = 1.0f;
+			}
+
+			for (size_t i = 0; i < count; ++i) {
+				const KeyFrameList& kfl = inputs[i];
+
+				const float time_epsilon = 1e-4f;
+				if (kfl.get<0>()->size() > next_pos[i] && fabs(kfl.get<0>()->at(next_pos[i]) - time) < time_epsilon) {
+					++next_pos[i]; 
+				}
+
+				// use lerp for interpolation
+				const float valueA = kfl.get<1>()->at(next_pos[i]>0 ? next_pos[i]-1 : 0);
+				const float valueB = kfl.get<1>()->at(next_pos[i]);
+
+				const float timeA = kfl.get<0>()->at(next_pos[i]>0 ? next_pos[i]-1 : 0);
+				const float timeB = kfl.get<0>()->at(next_pos[i]);
+
+				const float factor = (time - timeA) / (timeB - timeA);
+				const float interpValue = valueA + (valueB - valueA) * factor;
+
+				if(geom) {
+					result[kfl.get<2>()] *= interpValue;
+				}
+				else {
+					result[kfl.get<2>()] += interpValue;
+				}
+			}
+
+			valOut->mTime = time;
+			valOut->mValue.x = result[0];
+			valOut->mValue.y = result[1];
+			valOut->mValue.z = result[2];
+			
+			++valOut;
+		}
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void InterpolateKeys(aiQuatKey* valOut,const KeyTimeList& keys, const KeyFrameListList& inputs, const bool geom = false)
+	{
+		ai_assert(keys.size());
+		ai_assert(valOut);
+
+		boost::scoped_array<aiVectorKey> temp(new aiVectorKey[keys.size()]);
+		InterpolateKeys(temp.get(),keys,inputs,geom);
+
+		for (size_t i = 0, c = keys.size(); i < c; ++i) {
+			
+			const aiVector3D rot = temp[i].mValue;
+
+			aiMatrix4x4 m, mtemp;
+			if(fabs(rot.x) > 1e-6f) {
+				m *= aiMatrix4x4::RotationX(rot.x,mtemp);
+			}
+			if(fabs(rot.y) > 1e-6f) {
+				m *= aiMatrix4x4::RotationY(rot.y,mtemp);
+			}
+			if(fabs(rot.z) > 1e-6f) {
+				m *= aiMatrix4x4::RotationZ(rot.z,mtemp);
+			}
+
+			valOut[i].mTime = temp[i].mTime;
+			valOut[i].mValue = aiQuaternion(aiMatrix3x3(m));
+		}
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void ConvertScaleKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& layers)
+	{
+		ai_assert(nodes.size());
+
+		// XXX for now, assume scale should be blended geometrically (i.e. two
+		// layers should be multiplied with each other). There is a FBX 
+		// property in the layer to specify the behaviour, though.
+
+		const KeyFrameListList& inputs = GetKeyframeList(nodes);
+		const KeyTimeList& keys = GetKeyTimeList(inputs);
+
+		na->mNumScalingKeys = static_cast<unsigned int>(keys.size());
+		na->mScalingKeys = new aiVectorKey[keys.size()];
+		InterpolateKeys(na->mScalingKeys, keys, inputs, true);
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void ConvertTranslationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& layers)
+	{
+		ai_assert(nodes.size());
+
+		// XXX see notes in ConvertScaleKeys()
+		const KeyFrameListList& inputs = GetKeyframeList(nodes);
+		const KeyTimeList& keys = GetKeyTimeList(inputs);
+
+		na->mNumPositionKeys = static_cast<unsigned int>(keys.size());
+		na->mPositionKeys = new aiVectorKey[keys.size()];
+		InterpolateKeys(na->mPositionKeys, keys, inputs, false);
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void ConvertRotationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& layers)
+	{
+		ai_assert(nodes.size());
+
+		// XXX see notes in ConvertScaleKeys()
+		const std::vector< KeyFrameList >& inputs = GetKeyframeList(nodes);
+		const std::vector<float>& keys = GetKeyTimeList(inputs);
+
+		na->mNumRotationKeys = static_cast<unsigned int>(keys.size());
+		na->mRotationKeys = new aiQuatKey[keys.size()];
+		InterpolateKeys(na->mRotationKeys, keys, inputs, false);
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
 	// copy generated meshes, animations, lights, cameras and textures to the output scene
 	void TransferDataToScene()
 	{
@@ -886,6 +1229,13 @@ private:
 
 			std::swap_ranges(materials.begin(),materials.end(),out->mMaterials);
 		}
+
+		if(animations.size()) {
+			out->mAnimations = new aiAnimation*[animations.size()]();
+			out->mNumAnimations = static_cast<unsigned int>(animations.size());
+
+			std::swap_ranges(animations.begin(),animations.end(),out->mAnimations);
+		}
 	}
 
 
@@ -896,6 +1246,7 @@ private:
 
 	std::vector<aiMesh*> meshes;
 	std::vector<aiMaterial*> materials;
+	std::vector<aiAnimation*> animations;
 
 	typedef std::map<const Material*, unsigned int> MaterialMap;
 	MaterialMap materials_converted;

@@ -96,6 +96,7 @@ AnimationCurve::~AnimationCurve()
 // ------------------------------------------------------------------------------------------------
 AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, const std::string& name, const Document& doc)
 : Object(id, element, name)
+, target()
 {
 	// resolve attached animation curves
 	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
@@ -118,7 +119,9 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
 			DOMWarning("source object for ->AnimationCurveNode link is not an AnimationCurve",&element);
 			continue;
 		}
-		curves[con->PropertyName()] = anim;
+
+		prop = con->PropertyName();
+		curves[prop] = anim;
 	}
 }
 

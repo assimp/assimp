@@ -404,6 +404,10 @@ LazyObject::~LazyObject()
 // ------------------------------------------------------------------------------------------------
 const Object* LazyObject::Get()
 {
+	if(being_constructed) {
+		return NULL;
+	}
+
 	if (object.get()) {
 		return object.get();
 	}

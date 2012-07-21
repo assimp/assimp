@@ -81,7 +81,7 @@ AnimationCurve::AnimationCurve(uint64_t id, const Element& element, const std::s
 
 	const Element* KeyAttrFlags = sc["KeyAttrFlags"];
 	if(KeyAttrFlags) {
-		flags = ParseTokenAsInt(GetRequiredToken(*KeyAttrFlags,0));
+		ReadVectorDataArray(flags, *KeyAttrFlags);
 	}
 }
 
@@ -98,6 +98,9 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
 : Object(id, element, name)
 , target()
 {
+	const Scope& sc = GetRequiredScope(element);
+	props = GetPropertyTable(doc,"AnimationCurveNode.FbxAnimCurveNode",element,sc);
+
 	{
 	// resolve attached animation curves
 	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"AnimationCurve");

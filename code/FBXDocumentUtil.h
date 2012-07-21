@@ -94,6 +94,9 @@ void ReadVectorDataArray(std::vector<float>& out, const Element& el);
 // read an array of uints
 void ReadVectorDataArray(std::vector<unsigned int>& out, const Element& el);
 
+// read an array of uint64_t's
+void ReadVectorDataArray(std::vector<uint64_t>& out, const Element& el);
+
 
 
 // fetch a property table and the corresponding property template 

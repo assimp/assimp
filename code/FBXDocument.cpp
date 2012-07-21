@@ -199,6 +199,8 @@ const Element& GetRequiredElement(const Scope& sc, const std::string& index, con
 	return *el;
 }
 
+// XXX: tacke code duplication in the various ReadVectorDataArray() overloads below.
+// could use a type traits based solution.
 
 // ------------------------------------------------------------------------------------------------
 // read an array of float3 tuples
@@ -353,6 +355,28 @@ void ReadVectorDataArray(std::vector<unsigned int>& out, const Element& el)
 
 
 // ------------------------------------------------------------------------------------------------
+// read an array of uint64_ts
+void ReadVectorDataArray(std::vector<uint64_t>& out, const Element& el)
+{
+	out.clear();
+	const TokenList& tok = el.Tokens();
+	const size_t dim = ParseTokenAsDim(*tok[0]);
+
+	// see notes in ReadVectorDataArray()
+	out.reserve(dim);
+
+	const Scope& scope = GetRequiredScope(el);
+	const Element& a = GetRequiredElement(scope,"a",&el);
+
+	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
+		const uint64_t ival = ParseTokenAsID(**it++);
+		
+		out.push_back(ival);
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
 // fetch a property table and the corresponding property template 
 boost::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc, 
 	const std::string& templateName, 
@@ -459,12 +483,12 @@ const Object* LazyObject::Get(bool dieOnError)
 			object.reset(new AnimationLayer(id,element,name,doc));
 		}
 		// note: order matters for these two
-		else if (!strncmp(obtype,"AnimationCurveNode",length)) {
-			object.reset(new AnimationCurveNode(id,element,name,doc));
-		}	
 		else if (!strncmp(obtype,"AnimationCurve",length)) {
 			object.reset(new AnimationCurve(id,element,name,doc));
 		}
+		else if (!strncmp(obtype,"AnimationCurveNode",length)) {
+			object.reset(new AnimationCurveNode(id,element,name,doc));
+		}	
 	}
 	catch(std::exception& ex) {
 		flags &= ~BEING_CONSTRUCTED;
@@ -801,7 +825,7 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bo
 
 		for (size_t i = 0; i < c; ++i) {
 			ai_assert(classnames[i]);
-			if(!strncmp(classnames[i],obtype,lenghts[i])) {
+			if(std::distance(key.begin(),key.end()) == lenghts[i] && !strncmp(classnames[i],obtype,lenghts[i])) {
 				obtype = NULL;
 				break;
 			}

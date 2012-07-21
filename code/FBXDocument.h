@@ -426,7 +426,8 @@ private:
 	std::vector<unsigned int> mappings;
 };
 
-
+typedef std::vector<uint64_t> KeyTimeList;
+typedef std::vector<float> KeyValueList;
 
 /** Represents a FBX animation curve (i.e. a 1-dimensional set of keyframes and values therefor) */
 class AnimationCurve : public Object
@@ -440,14 +441,14 @@ public:
 
 	/** get list of keyframe positions (time).
 	 *  Invariant: |GetKeys()| > 0 */
-	const std::vector<float>& GetKeys() const {
+	const KeyTimeList& GetKeys() const {
 		return keys;
 	}
 
 
 	/** get list of keyframe values. 
 	  * Invariant: |GetKeys()| == |GetValues()| && |GetKeys()| > 0*/
-	const std::vector<float>& GetValues() const {
+	const KeyValueList& GetValues() const {
 		return values;
 	}
 
@@ -456,16 +457,16 @@ public:
 		return attributes;
 	}
 
-	unsigned int GetFlags() const {
+	const std::vector<unsigned int>& GetFlags() const {
 		return flags;
 	}
 
 private:
 
-	std::vector<float> keys;
-	std::vector<float> values;
+	KeyTimeList keys;
+	KeyValueList values;
 	std::vector<float> attributes;
-	unsigned int flags;
+	std::vector<unsigned int> flags;
 };
 
 // property-name -> animation curve

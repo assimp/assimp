@@ -950,6 +950,11 @@ private:
 						continue;
 					}
 
+					if (node->Curves().empty()) {
+						FBXImporter::LogWarn("no animation curves assigned to AnimationCurveNode");
+						continue;
+					}
+
 					node_property_map[node->TargetProperty()].push_back(node);
 				}
 
@@ -957,9 +962,9 @@ private:
 				const NodeMap::const_iterator itRotation = node_property_map.find("Lcl Rotation");
 				const NodeMap::const_iterator itTranslation = node_property_map.find("Lcl Translation");
 
-				const bool hasScale = !!(*itScale).second.size();
-				const bool hasRotation = !!(*itRotation).second.size();
-				const bool hasTranslation = !!(*itTranslation).second.size();
+				const bool hasScale = itScale != node_property_map.end();
+				const bool hasRotation = itRotation != node_property_map.end();
+				const bool hasTranslation = itTranslation != node_property_map.end();
 
 				if (!hasScale && !hasRotation && !hasTranslation) {
 					FBXImporter::LogWarn("ignoring node animation, did not find transformation key frames");
@@ -996,10 +1001,10 @@ private:
 	}
 
 	// key (time), value, mapto (component index)
-	typedef boost::tuple< std::vector<float>*, std::vector<float>*, unsigned int > KeyFrameList;
+	typedef boost::tuple< KeyTimeList*, KeyValueList*, unsigned int > KeyFrameList;
 	typedef std::vector<KeyFrameList> KeyFrameListList;
 
-	typedef std::vector<float> KeyTimeList;
+	
 
 
 	// ------------------------------------------------------------------------------------------------
@@ -1040,14 +1045,14 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	std::vector<float> GetKeyTimeList(const KeyFrameListList& inputs)
+	KeyTimeList GetKeyTimeList(const KeyFrameListList& inputs)
 	{
 		ai_assert(inputs.size());
 
 		// reserve some space upfront - it is likely that the keyframe lists
 		// have matching time values, so max(of all keyframe lists) should 
 		// be a good estimate.
-		std::vector<float> keys;
+		KeyTimeList keys;
 		
 		size_t estimate = 0;
 		BOOST_FOREACH(const KeyFrameList& kfl, inputs) {
@@ -1062,7 +1067,7 @@ private:
 		const size_t count = inputs.size();
 		while(true) {
 
-			float min_tick = 1e10f;
+			uint64_t min_tick = std::numeric_limits<uint64_t>::max();
 			for (size_t i = 0; i < count; ++i) {
 				const KeyFrameList& kfl = inputs[i];
 
@@ -1071,7 +1076,7 @@ private:
 				}
 			}
 
-			if (min_tick > 1e9f) {
+			if (min_tick == std::numeric_limits<uint64_t>::max()) {
 				break;
 			}
 			keys.push_back(min_tick);
@@ -1079,8 +1084,8 @@ private:
 			for (size_t i = 0; i < count; ++i) {
 				const KeyFrameList& kfl = inputs[i];
 
-				const float time_epsilon = 1e-4f;
-				while(kfl.get<0>()->size() > next_pos[i] && fabs(kfl.get<0>()->at(next_pos[i]) - min_tick) < time_epsilon) {
+
+				while(kfl.get<0>()->size() > next_pos[i] && kfl.get<0>()->at(next_pos[i]) == min_tick) {
 					++next_pos[i];
 				}
 			}
@@ -1101,7 +1106,7 @@ private:
 
 		next_pos.resize(inputs.size(),0);
 
-		BOOST_FOREACH(float time, keys) {
+		BOOST_FOREACH(KeyTimeList::value_type time, keys) {
 			float result[3] = {0.0f, 0.0f, 0.0f};
 			if(geom) {
 				result[0] = result[1] = result[2] = 1.0f;
@@ -1110,20 +1115,25 @@ private:
 			for (size_t i = 0; i < count; ++i) {
 				const KeyFrameList& kfl = inputs[i];
 
-				const float time_epsilon = 1e-4f;
-				if (kfl.get<0>()->size() > next_pos[i] && fabs(kfl.get<0>()->at(next_pos[i]) - time) < time_epsilon) {
+				const size_t ksize = kfl.get<0>()->size();
+				if (ksize > next_pos[i] && kfl.get<0>()->at(next_pos[i]) == time) {
 					++next_pos[i]; 
 				}
 
+				const size_t id0 = next_pos[i]>0 ? next_pos[i]-1 : 0;
+				const size_t id1 = next_pos[i]==ksize ? ksize-1 : next_pos[i];
+
 				// use lerp for interpolation
-				const float valueA = kfl.get<1>()->at(next_pos[i]>0 ? next_pos[i]-1 : 0);
-				const float valueB = kfl.get<1>()->at(next_pos[i]);
+				const KeyValueList::value_type valueA = kfl.get<1>()->at(id0);
+				const KeyValueList::value_type valueB = kfl.get<1>()->at(id1);
 
-				const float timeA = kfl.get<0>()->at(next_pos[i]>0 ? next_pos[i]-1 : 0);
-				const float timeB = kfl.get<0>()->at(next_pos[i]);
+				const KeyTimeList::value_type timeA = kfl.get<0>()->at(id0);
+				const KeyTimeList::value_type timeB = kfl.get<0>()->at(id1);
 
-				const float factor = (time - timeA) / (timeB - timeA);
-				const float interpValue = valueA + (valueB - valueA) * factor;
+				// do the actual interpolation in double-precision arithmetics
+				// because it is a bit sensitive to rounding errors.
+				const double factor = timeB == timeA ? 0. : static_cast<double>((time - timeA) / (timeB - timeA));
+				const float interpValue = static_cast<float>(valueA + (valueB - valueA) * factor);
 
 				if(geom) {
 					result[kfl.get<2>()] *= interpValue;
@@ -1133,7 +1143,7 @@ private:
 				}
 			}
 
-			valOut->mTime = time;
+			valOut->mTime = static_cast<double>(time);
 			valOut->mValue.x = result[0];
 			valOut->mValue.y = result[1];
 			valOut->mValue.z = result[2];
@@ -1213,7 +1223,7 @@ private:
 
 		// XXX see notes in ConvertScaleKeys()
 		const std::vector< KeyFrameList >& inputs = GetKeyframeList(nodes);
-		const std::vector<float>& keys = GetKeyTimeList(inputs);
+		const KeyTimeList& keys = GetKeyTimeList(inputs);
 
 		na->mNumRotationKeys = static_cast<unsigned int>(keys.size());
 		na->mRotationKeys = new aiQuatKey[keys.size()];

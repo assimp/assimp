@@ -102,6 +102,7 @@ public:
 	{
 		std::for_each(meshes.begin(),meshes.end(),Util::delete_fun<aiMesh>());
 		std::for_each(materials.begin(),materials.end(),Util::delete_fun<aiMaterial>());
+		std::for_each(animations.begin(),animations.end(),Util::delete_fun<aiAnimation>());
 	}
 
 
@@ -123,7 +124,7 @@ private:
 	// collect and assign child nodes
 	void ConvertNodes(uint64_t id, aiNode& parent)
 	{
-		const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(id);
+		const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(id, "Model");
 
 		std::vector<aiNode*> nodes;
 		nodes.reserve(conns.size());
@@ -983,6 +984,7 @@ private:
 		}
 		catch(std::exception&) {
 			std::for_each(node_anims.begin(), node_anims.end(), Util::delete_fun<aiNodeAnim>());
+			throw;
 		}
 
 		if(node_anims.size()) {
@@ -1040,6 +1042,8 @@ private:
 	// ------------------------------------------------------------------------------------------------
 	std::vector<float> GetKeyTimeList(const KeyFrameListList& inputs)
 	{
+		ai_assert(inputs.size());
+
 		// reserve some space upfront - it is likely that the keyframe lists
 		// have matching time values, so max(of all keyframe lists) should 
 		// be a good estimate.

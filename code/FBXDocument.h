@@ -73,11 +73,11 @@ public:
 
 public:
 
-	const Object* Get();
+	const Object* Get(bool dieOnError = false);
 
 	template <typename T> 
-	const T* Get() {
-		const Object* const ob = Get();
+	const T* Get(bool dieOnError = false) {
+		const Object* const ob = Get(dieOnError);
 		return ob ? dynamic_cast<const T*>(ob) : NULL;
 	}
 
@@ -86,7 +86,11 @@ public:
 	}
 
 	bool IsBeingConstructed() const {
-		return being_constructed;
+		return (flags & BEING_CONSTRUCTED) != 0;
+	}
+
+	bool FailedToConstruct() const {
+		return (flags & FAILED_TO_CONSTRUCT) != 0;
 	}
 
 	const Element& GetElement() const {
@@ -104,7 +108,13 @@ private:
 	boost::scoped_ptr<const Object> object;
 
 	const uint64_t id;
-	bool being_constructed;
+
+	enum Flags {
+		BEING_CONSTRUCTED = 0x1,
+		FAILED_TO_CONSTRUCT = 0x2
+	};
+
+	unsigned int flags;
 };
 
 
@@ -674,8 +684,17 @@ public:
 		return dest_connections;
 	}
 
+	// note: the implicit rule in all DOM classes is to always resolve
+	// from destination to source (since the FBX object hierarchy is,
+	// with very few exceptions, a DAG, this avoids cycles). In all
+	// cases that may involve back-facing edges in the object graph,
+	// use LazyObject::IsBeingConstructed() to check.
+
 	std::vector<const Connection*> GetConnectionsBySourceSequenced(uint64_t source) const;
 	std::vector<const Connection*> GetConnectionsByDestinationSequenced(uint64_t dest) const;
+
+	std::vector<const Connection*> GetConnectionsBySourceSequenced(uint64_t source, const char* classname) const;
+	std::vector<const Connection*> GetConnectionsByDestinationSequenced(uint64_t dest, const char* classname) const;
 
 	std::vector<const Connection*> GetConnectionsBySourceSequenced(uint64_t source, const char* const* classnames, size_t count) const;
 	std::vector<const Connection*> GetConnectionsByDestinationSequenced(uint64_t dest, const char* const* classnames, size_t count) const;
@@ -685,7 +704,7 @@ public:
 private:
 
 	std::vector<const Connection*> GetConnectionsSequenced(uint64_t id, const ConnectionMap&) const;
-	std::vector<const Connection*> GetConnectionsSequenced(uint64_t id, const ConnectionMap&, const char* const* classnames, size_t count) const;
+	std::vector<const Connection*> GetConnectionsSequenced(uint64_t id, bool is_src, const ConnectionMap&, const char* const* classnames, size_t count) const;
 
 private:
 

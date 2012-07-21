@@ -100,12 +100,12 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
 {
 	{
 	// resolve attached animation curves
-	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
+	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"AnimationCurve");
 
 	BOOST_FOREACH(const Connection* con, conns) {
 
 		// link should go for a property
-		if (con->PropertyName().length()) {
+		if (!con->PropertyName().length()) {
 			continue;
 		}
 
@@ -127,26 +127,16 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
 	}{
 
 	// find target node
-	const std::vector<const Connection*>& conns = doc.GetConnectionsBySourceSequenced(ID());
+	const std::vector<const Connection*>& conns = doc.GetConnectionsBySourceSequenced(ID(),"Model");
 
 	BOOST_FOREACH(const Connection* con, conns) {
 
 		// link should go for a property
-		if (con->PropertyName().length()) {
+		if (!con->PropertyName().length()) {
 			continue;
 		}
 
-		// note: the implicit rule in all DOM classes is to always resolve
-		// from destination to source (since the FBX object hierarchy is,
-		// with very few exceptions, a DAG, this avoids cycles). Since
-		// it goes the other way round, we have to cope with the case
-		// that the destination is not fully constructed yet.
-		LazyObject& lob = con->LazyDestinationObject();
-		if(lob.IsBeingConstructed()) {
-			continue;
-		}
-
-		const Object* ob = lob.Get();
+		const Object* ob = con->DestinationObject();
 		if(!ob) {
 			DOMWarning("failed to read destination object for AnimationCurveNode->Model link, ignoring",&element);
 			continue;
@@ -182,7 +172,7 @@ AnimationLayer::AnimationLayer(uint64_t id, const Element& element, const std::s
 	props = GetPropertyTable(doc,"AnimationLayer.FbxAnimLayer",element,sc);
 
 	// resolve attached animation nodes
-	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
+	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"AnimationCurveNode");
 	nodes.reserve(conns.size());
 
 	BOOST_FOREACH(const Connection* con, conns) {
@@ -222,7 +212,7 @@ AnimationStack::AnimationStack(uint64_t id, const Element& element, const std::s
 	props = GetPropertyTable(doc,"AnimationStack.FbxAnimStack",element,sc);
 
 	// resolve attached animation layers
-	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
+	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"AnimationLayer");
 	layers.reserve(conns.size());
 
 	BOOST_FOREACH(const Connection* con, conns) {

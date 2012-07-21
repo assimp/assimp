@@ -390,7 +390,7 @@ LazyObject::LazyObject(uint64_t id, const Element& element, const Document& doc)
 : doc(doc)
 , element(element)
 , id(id)
-, being_constructed()
+, flags()
 {
 
 }
@@ -402,9 +402,9 @@ LazyObject::~LazyObject()
 }
 
 // ------------------------------------------------------------------------------------------------
-const Object* LazyObject::Get()
+const Object* LazyObject::Get(bool dieOnError)
 {
-	if(being_constructed) {
+	if(IsBeingConstructed() || FailedToConstruct()) {
 		return NULL;
 	}
 
@@ -431,44 +431,61 @@ const Object* LazyObject::Get()
 	} 
 
 	// prevent recursive calls
-	being_constructed = true;
+	flags |= BEING_CONSTRUCTED;
 
-	// this needs to be relatively fast since it happens a lot,
-	// so avoid constructing strings all the time.
-	const char* obtype = key.begin();
-	const size_t length = static_cast<size_t>(key.end()-key.begin());
-	if (!strncmp(obtype,"Geometry",length)) {
-		if (!strcmp(classtag.c_str(),"Mesh")) {
-			object.reset(new MeshGeometry(id,element,name,doc));
+	try {
+		// this needs to be relatively fast since it happens a lot,
+		// so avoid constructing strings all the time.
+		const char* obtype = key.begin();
+		const size_t length = static_cast<size_t>(key.end()-key.begin());
+		if (!strncmp(obtype,"Geometry",length)) {
+			if (!strcmp(classtag.c_str(),"Mesh")) {
+				object.reset(new MeshGeometry(id,element,name,doc));
+			}
+		}
+		else if (!strncmp(obtype,"Model",length)) {
+			object.reset(new Model(id,element,doc,name));
+		}
+		else if (!strncmp(obtype,"Material",length)) {
+			object.reset(new Material(id,element,doc,name));
+		}
+		else if (!strncmp(obtype,"Texture",length)) {
+			object.reset(new Texture(id,element,doc,name));
+		}
+		else if (!strncmp(obtype,"AnimationStack",length)) {
+			object.reset(new AnimationStack(id,element,name,doc));
+		}
+		else if (!strncmp(obtype,"AnimationLayer",length)) {
+			object.reset(new AnimationLayer(id,element,name,doc));
+		}
+		// note: order matters for these two
+		else if (!strncmp(obtype,"AnimationCurveNode",length)) {
+			object.reset(new AnimationCurveNode(id,element,name,doc));
+		}	
+		else if (!strncmp(obtype,"AnimationCurve",length)) {
+			object.reset(new AnimationCurve(id,element,name,doc));
 		}
 	}
-	else if (!strncmp(obtype,"Model",length)) {
-		object.reset(new Model(id,element,doc,name));
-	}
-	else if (!strncmp(obtype,"Material",length)) {
-		object.reset(new Material(id,element,doc,name));
-	}
-	else if (!strncmp(obtype,"Texture",length)) {
-		object.reset(new Texture(id,element,doc,name));
-	}
-	else if (!strncmp(obtype,"AnimationStack",length)) {
-		object.reset(new AnimationStack(id,element,name,doc));
-	}
-	else if (!strncmp(obtype,"AnimationLayer",length)) {
-		object.reset(new AnimationLayer(id,element,name,doc));
-	}
-	else if (!strncmp(obtype,"AnimationCurveNode",length)) {
-		object.reset(new AnimationCurveNode(id,element,name,doc));
-	}
-	else if (!strncmp(obtype,"AnimationCurve",length)) {
-		object.reset(new AnimationCurve(id,element,name,doc));
+	catch(std::exception& ex) {
+		flags &= ~BEING_CONSTRUCTED;
+		flags |= FAILED_TO_CONSTRUCT;
+
+		//if(dieOnError) {
+			throw;
+		//}
+
+		// note: the error message is already formatted, so raw logging is ok
+		if(!DefaultLogger::isNullLogger()) {
+			DefaultLogger::get()->error(ex.what());
+		}
+		return NULL;
 	}
 
 	if (!object.get()) {
 		//DOMError("failed to convert element to DOM object, class: " + classtag + ", name: " + name,&element);
 	}
 
-	being_constructed = false;
+	flags &= ~BEING_CONSTRUCTED;
 	return object.get();
 }
 
@@ -756,7 +773,7 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, co
 
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, const ConnectionMap& conns, const char* const* classnames, size_t count) const
+std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bool is_src, const ConnectionMap& conns, const char* const* classnames, size_t count) const
 {
 	ai_assert(classnames);
 	ai_assert(count != 0 && count <= MAX_CLASSNAMES);
@@ -775,7 +792,11 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, co
 
 	temp.reserve(std::distance(range.first,range.second));
 	for (ConnectionMap::const_iterator it = range.first; it != range.second; ++it) {
-		const Token& key = (*it).second->LazyDestinationObject().GetElement().KeyToken();
+		const Token& key = (is_src 
+			? (*it).second->LazyDestinationObject()
+			: (*it).second->LazySourceObject()
+		).GetElement().KeyToken();
+
 		const char* obtype = key.begin();
 
 		for (size_t i = 0; i < c; ++i) {
@@ -805,10 +826,28 @@ std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_
 }
 
 
+
+// ------------------------------------------------------------------------------------------------
+std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t dest, const char* classname) const
+{
+	const char* arr[] = {classname};
+	return GetConnectionsBySourceSequenced(dest, arr,1);
+}
+
+
+
 // ------------------------------------------------------------------------------------------------
 std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source, const char* const* classnames, size_t count) const
 {
-	return GetConnectionsSequenced(source, ConnectionsBySource(),classnames, count);
+	return GetConnectionsSequenced(source, true, ConnectionsBySource(),classnames, count);
+}
+
+
+// ------------------------------------------------------------------------------------------------
+std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest, const char* classname) const
+{
+	const char* arr[] = {classname};
+	return GetConnectionsByDestinationSequenced(dest, arr,1);
 }
 
 
@@ -822,7 +861,7 @@ std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(ui
 // ------------------------------------------------------------------------------------------------
 std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest, const char* const* classnames, size_t count) const
 {
-	return GetConnectionsSequenced(dest, ConnectionsByDestination(),classnames, count);
+	return GetConnectionsSequenced(dest, false, ConnectionsByDestination(),classnames, count);
 }
 
 

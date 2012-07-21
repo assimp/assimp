@@ -494,9 +494,9 @@ const Object* LazyObject::Get(bool dieOnError)
 		flags &= ~BEING_CONSTRUCTED;
 		flags |= FAILED_TO_CONSTRUCT;
 
-		//if(dieOnError) {
+		if(dieOnError || doc.Settings().strictMode) {
 			throw;
-		//}
+		}
 
 		// note: the error message is already formatted, so raw logging is ok
 		if(!DefaultLogger::isNullLogger()) {
@@ -586,6 +586,13 @@ void Document::ReadHeader()
 
 	const Scope& shead = *ehead->Compound();
 	fbxVersion = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(shead,"FBXVersion",ehead),0));
+
+	if(Settings().strictMode) {
+		if(fbxVersion < 7200 || fbxVersion > 7300) {
+			DOMError("unsupported format version, supported are only FBX 2012 and FBX 2013"\
+				" in ASCII format (turn off strict mode to try anyhow) ");
+		}
+	}
 
 	const Element* const ecreator = shead["Creator"];
 	if(ecreator) {

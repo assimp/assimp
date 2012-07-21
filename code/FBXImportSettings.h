@@ -57,7 +57,17 @@ struct ImportSettings
 		, readCameras(true)
 		, readLights(true)
 		, readAnimations(true)
+		, strictMode(true)
 	{}
+ 
+
+	/** enable strict mode:
+	 *   - only accept fbx 2012, 2013 files
+	 *   - on the slightest error, give up.
+	 *
+	 *  Basically, strict mode means that the fbx file will actually
+	 *  be validated. Strict mode is off by default. */
+	bool strictMode;
 
 	/** specifies whether all geometry layers are read and scanned for
 	  * usable data channels. The FBX spec indicates that many readers

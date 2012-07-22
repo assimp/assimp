@@ -149,13 +149,7 @@ private:
 				aiNode* nd = new aiNode();
 				nodes.push_back(nd);
 
-				// strip Model:: prefix
-				std::string name = model->Name();
-				if(name.substr(0,7) == "Model::") {
-					name = name.substr(7);
-				}
-
-				nd->mName.Set(name);
+				nd->mName.Set(FixNodeName(model->Name()));
 				nd->mParent = &parent;
 
 				ConvertTransformation(*model,*nd);
@@ -880,10 +874,37 @@ private:
 	}
 
 
+	// name -> prefix_stripped?
+	typedef std::map<std::string, bool> NodeNameMap;
+	NodeNameMap node_names;
+
 	// ------------------------------------------------------------------------------------------------
 	std::string FixNodeName(const std::string& name)
 	{
-		// XXX handle prefix
+		// strip Model:: prefix, avoiding ambiguities (i.e. don't strip if 
+		// this causes ambiguities, well possible between empty identifiers,
+		// such as "Model::" and ""). Make sure the behaviour is consistent
+		// across multiple calls to FixNodeName().
+		if(name.substr(0,7) == "Model::") {
+			std::string temp = name.substr(7);
+
+			const NodeNameMap::const_iterator it = node_names.find(temp);
+			if (it != node_names.end()) {
+				if (!(*it).second) {
+					return FixNodeName(name + "_");
+				}
+			}
+			node_names[temp] = true;
+			return temp;
+		}
+
+		const NodeNameMap::const_iterator it = node_names.find(name);
+		if (it != node_names.end()) {
+			if ((*it).second) {
+				return FixNodeName(name + "_");
+			}
+		}
+		node_names[name] = false;
 		return name;
 	}
 
